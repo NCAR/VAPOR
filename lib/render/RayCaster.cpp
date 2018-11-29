@@ -4,6 +4,9 @@
 #include <fstream>
 #include <sstream>
 
+#include <vapor/MatrixManager.h>
+#include <vapor/GLManager.h>
+
 //
 // OpenGL debug output
 // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDebugMessageInsert.xhtml
@@ -428,12 +431,9 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params
 
 int RayCaster::_initializeGL()
 {
-#ifdef Darwin
-    return 0;
-#endif
     // Enable debug output
-    glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageCallback(MessageCallback, 0);
+    // glEnable              ( GL_DEBUG_OUTPUT );
+    // glDebugMessageCallback( MessageCallback, 0 );
 
     _loadShaders();
 
@@ -444,10 +444,7 @@ int RayCaster::_initializeGL()
 
 int RayCaster::_paintGL(bool fast)
 {
-#ifdef Darwin
-    return 0;
-#endif
-
+    const MatrixManager *mm = Renderer::_glManager->matrixManager;
     // Visualizer dimensions would change if window is resized
     GLint newViewport[4];
     glGetIntegerv(GL_VIEWPORT, newViewport);
@@ -559,45 +556,45 @@ int RayCaster::_paintGL(bool fast)
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
     /* Collect ModelView matrix */
-    GLfloat ModelView[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);
+    // GLfloat ModelView[16];
+    // glGetFloatv( GL_MODELVIEW_MATRIX,  ModelView );
+    glm::mat4 ModelView = mm->GetModelViewMatrix();
 
     // 1st pass: render back facing polygons to texture0 of the framebuffer
     _drawVolumeFaces(1, castingMode, false);
 
     /* Detect if we're inside the volume */
-    GLfloat InversedMV[16];
-    bool    success = _mesa_invert_matrix_general(InversedMV, ModelView);
-    if (!success) {
-        MyBase::SetErrMsg("ModelView matrix is a singular matrix; "
-                          "the behavior becomes undefined!");
-    }
+    glm::mat4           InversedMV = glm::inverse(ModelView);
     std::vector<double> cameraUser(4, 1.0);    // camera position in user coordinates
-    cameraUser[0] = InversedMV[12];
-    cameraUser[1] = InversedMV[13];
-    cameraUser[2] = InversedMV[14];
+    // cameraUser[0]         = InversedMV[ 12 ];
+    // cameraUser[1]         = InversedMV[ 13 ];
+    // cameraUser[2]         = InversedMV[ 14 ];
+    cameraUser[0] = InversedMV[3][0];
+    cameraUser[1] = InversedMV[3][1];
+    cameraUser[2] = InversedMV[3][2];
     std::vector<size_t> cameraCellIndices;    // camera position in which cell?
     StructuredGrid *    grid = _userCoordinates.GetCurrentGrid(params, _dataMgr);
     bool                insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
 
     if (insideACell) {
-        GLfloat MVP[16], InversedMVP[16];
-        _getMVPMatrix(MVP);
-        _mesa_invert_matrix_general(InversedMVP, MVP);
+        // GLfloat MVP[16],    InversedMVP[16];
+        //_getMVPMatrix( MVP );
+        //_mesa_invert_matrix_general( InversedMVP, MVP );
+        glm::mat4 MVP = mm->GetModelViewProjectionMatrix();
+        glm::mat4 InversedMVP = glm::inverse(MVP);
 
-        float topLeftNDC[4] = {-1.0f, 1.0f, -0.9999f, 1.0f};
-        float bottomLeftNDC[4] = {-1.0f, -1.0f, -0.9999f, 1.0f};
-        float topRightNDC[4] = {1.0f, 1.0f, -0.9999f, 1.0f};
-        float bottomRightNDC[4] = {1.0f, -1.0f, -0.9999f, 1.0f};
-        float near[16];
-        _matMultiVec(InversedMVP, topLeftNDC, near);
-        _matMultiVec(InversedMVP, bottomLeftNDC, near + 4);
-        _matMultiVec(InversedMVP, topRightNDC, near + 8);
-        _matMultiVec(InversedMVP, bottomRightNDC, near + 12);
+        glm::vec4 topLeftNDC(-1.0f, 1.0f, -0.9999f, 1.0f);
+        glm::vec4 bottomLeftNDC(-1.0f, -1.0f, -0.9999f, 1.0f);
+        glm::vec4 topRightNDC(1.0f, 1.0f, -0.9999f, 1.0f);
+        glm::vec4 bottomRightNDC(1.0f, -1.0f, -0.9999f, 1.0f);
+        glm::vec4 near[4];
+        near[0] = InversedMVP * topLeftNDC;
+        near[1] = InversedMVP * bottomLeftNDC;
+        near[2] = InversedMVP * topRightNDC;
+        near[3] = InversedMVP * bottomRightNDC;
         for (int i = 0; i < 4; i++) {
-            _userCoordinates.nearCoords[i * 3] = near[i * 4] / near[i * 4 + 3];
-            _userCoordinates.nearCoords[i * 3 + 1] = near[i * 4 + 1] / near[i * 4 + 3];
-            _userCoordinates.nearCoords[i * 3 + 2] = near[i * 4 + 2] / near[i * 4 + 3];
+            glm::vec3 nearCoords = glm::vec3(near[i] / near[i].w);
+            std::memcpy(&_userCoordinates.nearCoords[i * 3], glm::value_ptr(nearCoords), sizeof(nearCoords));
         }
     }
 
@@ -736,18 +733,20 @@ void RayCaster::_initializeFramebufferTextures()
     glBindTexture(GL_TEXTURE_3D, 0);
 }
 
-void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACell, const GLfloat *InversedMV, bool fast)
+void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACell, const glm::mat4 &InversedMV, bool fast)
 {
-    GLfloat modelview[16], projection[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);      // This is from OpenGL 2...
-    glGetFloatv(GL_PROJECTION_MATRIX, projection);    // This is from OpenGL 2...
+    // GLfloat modelview[16], projection[16];
+    // glGetFloatv( GL_MODELVIEW_MATRIX,  modelview );     // This is from OpenGL 2...
+    // glGetFloatv( GL_PROJECTION_MATRIX, projection );    // This is from OpenGL 2...
+    glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
+    glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
     if (whichPass == 1) {
         glUseProgram(_1stPassShaderId);
         GLint uniformLocation = glGetUniformLocation(_1stPassShaderId, "MV");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, modelview);
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview));
         uniformLocation = glGetUniformLocation(_1stPassShaderId, "Projection");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, projection);
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
@@ -760,9 +759,9 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
     } else if (whichPass == 2) {
         glUseProgram(_2ndPassShaderId);
         GLint uniformLocation = glGetUniformLocation(_1stPassShaderId, "MV");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, modelview);
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview));
         uniformLocation = glGetUniformLocation(_1stPassShaderId, "Projection");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, projection);
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -805,21 +804,23 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
     glUseProgram(0);
 }
 
-void RayCaster::_load3rdPassUniforms(long castingMode, const GLfloat *inversedMV, bool fast) const
+void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversedMV, bool fast) const
 {
-    GLfloat modelview[16], projection[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);      // This is from OpenGL 2...
-    glGetFloatv(GL_PROJECTION_MATRIX, projection);    // This is from OpenGL 2...
+    // GLfloat modelview[16], projection[16];
+    // glGetFloatv( GL_MODELVIEW_MATRIX,  modelview );     // This is from OpenGL 2...
+    // glGetFloatv( GL_PROJECTION_MATRIX, projection );    // This is from OpenGL 2...
+    glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
+    glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
     glUseProgram(_3rdPassShaderId);
     GLint uniformLocation = glGetUniformLocation(_3rdPassShaderId, "MV");
-    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, modelview);
+    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview));
 
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "Projection");
-    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, projection);
+    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "inversedMV");
-    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, inversedMV);
+    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(inversedMV));
 
     float dataRanges[4] = {_userCoordinates.valueRange[0], _userCoordinates.valueRange[1], _colorMapRange[0], _colorMapRange[1]};
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "dataRanges");
@@ -859,13 +860,12 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const GLfloat *inversedMV
     glUniform1iv(uniformLocation, (GLsizei)3, flags);
 
     // Calculate the step size
-    float boxMin[4] = {boxExtents[0], boxExtents[1], boxExtents[2], 1.0f};
-    float boxMax[4] = {boxExtents[3], boxExtents[4], boxExtents[5], 1.0f};
-    float boxminEye[4], boxmaxEye[4];
-    _matMultiVec(modelview, boxMin, boxminEye);
-    _matMultiVec(modelview, boxMax, boxmaxEye);
-    float span[3] = {boxmaxEye[0] - boxminEye[0], boxmaxEye[1] - boxminEye[1], boxmaxEye[2] - boxminEye[2]};
-    float stepSize1D;
+    glm::vec4 boxMin(boxExtents[0], boxExtents[1], boxExtents[2], 1.0f);
+    glm::vec4 boxMax(boxExtents[3], boxExtents[4], boxExtents[5], 1.0f);
+    glm::vec4 boxminEye = modelview * boxMin;
+    glm::vec4 boxmaxEye = modelview * boxMax;
+    float     span[3] = {boxmaxEye[0] - boxminEye[0], boxmaxEye[1] - boxminEye[1], boxmaxEye[2] - boxminEye[2]};
+    float     stepSize1D;
     if (_userCoordinates.dims[3] < 50)    // Make sure at least 100 steps
         stepSize1D = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / 100.0f;
     else
@@ -1275,33 +1275,38 @@ GLuint RayCaster::_compileShaders(const char *vertex_file_path, const char *frag
     return ProgramID;
 }
 
-void RayCaster::_getMVPMatrix(GLfloat *MVP) const
+#if 0
+void RayCaster::_getMVPMatrix( GLfloat* MVP ) const
 {
     GLfloat ModelView[16];
     GLfloat Projection[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);      // This is from OpenGL 2...
-    glGetFloatv(GL_PROJECTION_MATRIX, Projection);    // This is from OpenGL 2...
+    glGetFloatv( GL_MODELVIEW_MATRIX,  ModelView );     // This is from OpenGL 2...
+    glGetFloatv( GL_PROJECTION_MATRIX, Projection );    // This is from OpenGL 2...
 
     // MVP = Projection * ModelView
     GLfloat tmp;
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++) {
+    for( int i = 0; i < 4; i++ )
+        for( int j = 0; j < 4; j++ )
+        {
             tmp = 0.0f;
-            for (int idx = 0; idx < 4; idx++) tmp += ModelView[i * 4 + idx] * Projection[idx * 4 + j];
-            // Because all matrices are colume-major, this is the correct order.
-            MVP[i * 4 + j] = tmp;
+            for( int idx = 0; idx < 4; idx++ )
+                tmp += ModelView[i * 4 + idx] * Projection[idx * 4 + j];
+                // Because all matrices are colume-major, this is the correct order.
+            MVP[i*4+j] = tmp;
         }
 }
 
-void RayCaster::_matMultiVec(const GLfloat *mat, const GLfloat *in, GLfloat *out) const
+void RayCaster::_matMultiVec( const GLfloat* mat,  const GLfloat* in,
+                                    GLfloat* out ) const
 {
-#define MAT(m, r, c) (m)[(c)*4 + (r)]
-    out[0] = MAT(mat, 0, 0) * in[0] + MAT(mat, 0, 1) * in[1] + MAT(mat, 0, 2) * in[2] + MAT(mat, 0, 3) * in[3];
-    out[1] = MAT(mat, 1, 0) * in[0] + MAT(mat, 1, 1) * in[1] + MAT(mat, 1, 2) * in[2] + MAT(mat, 1, 3) * in[3];
-    out[2] = MAT(mat, 2, 0) * in[0] + MAT(mat, 2, 1) * in[1] + MAT(mat, 2, 2) * in[2] + MAT(mat, 2, 3) * in[3];
-    out[3] = MAT(mat, 3, 0) * in[0] + MAT(mat, 3, 1) * in[1] + MAT(mat, 3, 2) * in[2] + MAT(mat, 3, 3) * in[3];
-#undef MAT
+    #define MAT(m, r, c) (m)[(c)*4 + (r)]
+    out[0] = MAT(mat,0,0)*in[0] + MAT(mat,0,1)*in[1] + MAT(mat,0,2)*in[2] + MAT(mat,0,3)*in[3];
+    out[1] = MAT(mat,1,0)*in[0] + MAT(mat,1,1)*in[1] + MAT(mat,1,2)*in[2] + MAT(mat,1,3)*in[3];
+    out[2] = MAT(mat,2,0)*in[0] + MAT(mat,2,1)*in[1] + MAT(mat,2,2)*in[2] + MAT(mat,2,3)*in[3];
+    out[3] = MAT(mat,3,0)*in[0] + MAT(mat,3,1)*in[1] + MAT(mat,3,2)*in[2] + MAT(mat,3,3)*in[3];
+    #undef MAT
 }
+#endif
 
 double RayCaster::_getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const { return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0); }
 
@@ -1324,168 +1329,140 @@ double RayCaster::_getElapsedSeconds(const struct timeval *begin, const struct t
  * with partial pivoting followed by back/substitution with the loops manually
  * unrolled.
  */
-bool RayCaster::_mesa_invert_matrix_general(GLfloat out[16], const GLfloat in[16])
+#if 0
+bool RayCaster::_mesa_invert_matrix_general( GLfloat out[16], const GLfloat in[16] )
 {
-/**
- * References an element of 4x4 matrix.
- * Calculate the linear storage index of the element and references it.
- */
-#define MAT(m, r, c) (m)[(c)*4 + (r)]
-/**
- * Swaps the values of two floating point variables.
- */
-#define SWAP_ROWS(a, b)    \
-    {                      \
-        GLfloat *_tmp = a; \
-        (a) = (b);         \
-        (b) = _tmp;        \
-    }
+    /**
+     * References an element of 4x4 matrix.
+     * Calculate the linear storage index of the element and references it. 
+     */
+    #define MAT(m, r, c) (m)[(c)*4 + (r)]
+    /**
+     * Swaps the values of two floating point variables.
+     */
+    #define SWAP_ROWS(a, b)    \
+        {                      \
+            GLfloat *_tmp = a; \
+            (a) = (b);         \
+            (b) = _tmp;        \
+        }
 
     const GLfloat *m = in;
-    GLfloat        wtmp[4][8];
-    GLfloat        m0, m1, m2, m3, s;
-    GLfloat *      r0, *r1, *r2, *r3;
+    GLfloat wtmp[4][8];
+    GLfloat m0, m1, m2, m3, s;
+    GLfloat *r0, *r1, *r2, *r3;
 
     r0 = wtmp[0], r1 = wtmp[1], r2 = wtmp[2], r3 = wtmp[3];
 
-    r0[0] = MAT(m, 0, 0), r0[1] = MAT(m, 0, 1), r0[2] = MAT(m, 0, 2), r0[3] = MAT(m, 0, 3), r0[4] = 1.0, r0[5] = r0[6] = r0[7] = 0.0,
+    r0[0] = MAT(m,0,0), r0[1] = MAT(m,0,1),
+    r0[2] = MAT(m,0,2), r0[3] = MAT(m,0,3),
+    r0[4] = 1.0, r0[5] = r0[6] = r0[7] = 0.0,
 
-    r1[0] = MAT(m, 1, 0), r1[1] = MAT(m, 1, 1), r1[2] = MAT(m, 1, 2), r1[3] = MAT(m, 1, 3), r1[5] = 1.0, r1[4] = r1[6] = r1[7] = 0.0,
+    r1[0] = MAT(m,1,0), r1[1] = MAT(m,1,1),
+    r1[2] = MAT(m,1,2), r1[3] = MAT(m,1,3),
+    r1[5] = 1.0, r1[4] = r1[6] = r1[7] = 0.0,
 
-    r2[0] = MAT(m, 2, 0), r2[1] = MAT(m, 2, 1), r2[2] = MAT(m, 2, 2), r2[3] = MAT(m, 2, 3), r2[6] = 1.0, r2[4] = r2[5] = r2[7] = 0.0,
+    r2[0] = MAT(m,2,0), r2[1] = MAT(m,2,1),
+    r2[2] = MAT(m,2,2), r2[3] = MAT(m,2,3),
+    r2[6] = 1.0, r2[4] = r2[5] = r2[7] = 0.0,
 
-    r3[0] = MAT(m, 3, 0), r3[1] = MAT(m, 3, 1), r3[2] = MAT(m, 3, 2), r3[3] = MAT(m, 3, 3), r3[7] = 1.0, r3[4] = r3[5] = r3[6] = 0.0;
+    r3[0] = MAT(m,3,0), r3[1] = MAT(m,3,1),
+    r3[2] = MAT(m,3,2), r3[3] = MAT(m,3,3),
+    r3[7] = 1.0, r3[4] = r3[5] = r3[6] = 0.0;
 
     /* choose pivot - or die */
-    if (fabsf(r3[0]) > fabsf(r2[0])) SWAP_ROWS(r3, r2);
-    if (fabsf(r2[0]) > fabsf(r1[0])) SWAP_ROWS(r2, r1);
-    if (fabsf(r1[0]) > fabsf(r0[0])) SWAP_ROWS(r1, r0);
-    if (0.0F == r0[0]) return false;
+    if (fabsf(r3[0])>fabsf(r2[0])) SWAP_ROWS(r3, r2);
+    if (fabsf(r2[0])>fabsf(r1[0])) SWAP_ROWS(r2, r1);
+    if (fabsf(r1[0])>fabsf(r0[0])) SWAP_ROWS(r1, r0);
+    if (0.0F == r0[0])  
+        return false;
 
     /* eliminate first variable     */
-    m1 = r1[0] / r0[0];
-    m2 = r2[0] / r0[0];
-    m3 = r3[0] / r0[0];
-    s = r0[1];
-    r1[1] -= m1 * s;
-    r2[1] -= m2 * s;
-    r3[1] -= m3 * s;
-    s = r0[2];
-    r1[2] -= m1 * s;
-    r2[2] -= m2 * s;
-    r3[2] -= m3 * s;
-    s = r0[3];
-    r1[3] -= m1 * s;
-    r2[3] -= m2 * s;
-    r3[3] -= m3 * s;
+    m1 = r1[0]/r0[0]; m2 = r2[0]/r0[0]; m3 = r3[0]/r0[0];
+    s = r0[1]; r1[1] -= m1 * s; r2[1] -= m2 * s; r3[1] -= m3 * s;
+    s = r0[2]; r1[2] -= m1 * s; r2[2] -= m2 * s; r3[2] -= m3 * s;
+    s = r0[3]; r1[3] -= m1 * s; r2[3] -= m2 * s; r3[3] -= m3 * s;
     s = r0[4];
-    if (s != 0.0F) {
-        r1[4] -= m1 * s;
-        r2[4] -= m2 * s;
-        r3[4] -= m3 * s;
-    }
+    if (s != 0.0F) { r1[4] -= m1 * s; r2[4] -= m2 * s; r3[4] -= m3 * s; }
     s = r0[5];
-    if (s != 0.0F) {
-        r1[5] -= m1 * s;
-        r2[5] -= m2 * s;
-        r3[5] -= m3 * s;
-    }
+    if (s != 0.0F) { r1[5] -= m1 * s; r2[5] -= m2 * s; r3[5] -= m3 * s; }
     s = r0[6];
-    if (s != 0.0F) {
-        r1[6] -= m1 * s;
-        r2[6] -= m2 * s;
-        r3[6] -= m3 * s;
-    }
+    if (s != 0.0F) { r1[6] -= m1 * s; r2[6] -= m2 * s; r3[6] -= m3 * s; }
     s = r0[7];
-    if (s != 0.0F) {
-        r1[7] -= m1 * s;
-        r2[7] -= m2 * s;
-        r3[7] -= m3 * s;
-    }
+    if (s != 0.0F) { r1[7] -= m1 * s; r2[7] -= m2 * s; r3[7] -= m3 * s; }
 
     /* choose pivot - or die */
-    if (fabsf(r3[1]) > fabsf(r2[1])) SWAP_ROWS(r3, r2);
-    if (fabsf(r2[1]) > fabsf(r1[1])) SWAP_ROWS(r2, r1);
-    if (0.0F == r1[1]) return false;
+    if (fabsf(r3[1])>fabsf(r2[1])) SWAP_ROWS(r3, r2);
+    if (fabsf(r2[1])>fabsf(r1[1])) SWAP_ROWS(r2, r1);
+    if (0.0F == r1[1])  
+        return false;
 
     /* eliminate second variable */
-    m2 = r2[1] / r1[1];
-    m3 = r3[1] / r1[1];
-    r2[2] -= m2 * r1[2];
-    r3[2] -= m3 * r1[2];
-    r2[3] -= m2 * r1[3];
-    r3[3] -= m3 * r1[3];
-    s = r1[4];
-    if (0.0F != s) {
-        r2[4] -= m2 * s;
-        r3[4] -= m3 * s;
-    }
-    s = r1[5];
-    if (0.0F != s) {
-        r2[5] -= m2 * s;
-        r3[5] -= m3 * s;
-    }
-    s = r1[6];
-    if (0.0F != s) {
-        r2[6] -= m2 * s;
-        r3[6] -= m3 * s;
-    }
-    s = r1[7];
-    if (0.0F != s) {
-        r2[7] -= m2 * s;
-        r3[7] -= m3 * s;
-    }
+    m2 = r2[1]/r1[1]; m3 = r3[1]/r1[1];
+    r2[2] -= m2 * r1[2]; r3[2] -= m3 * r1[2];
+    r2[3] -= m2 * r1[3]; r3[3] -= m3 * r1[3];
+    s = r1[4]; if (0.0F != s) { r2[4] -= m2 * s; r3[4] -= m3 * s; }
+    s = r1[5]; if (0.0F != s) { r2[5] -= m2 * s; r3[5] -= m3 * s; }
+    s = r1[6]; if (0.0F != s) { r2[6] -= m2 * s; r3[6] -= m3 * s; }
+    s = r1[7]; if (0.0F != s) { r2[7] -= m2 * s; r3[7] -= m3 * s; }
 
     /* choose pivot - or die */
-    if (fabsf(r3[2]) > fabsf(r2[2])) SWAP_ROWS(r3, r2);
-    if (0.0F == r2[2]) return false;
+    if (fabsf(r3[2])>fabsf(r2[2])) SWAP_ROWS(r3, r2);
+    if (0.0F == r2[2])  
+        return false;
 
     /* eliminate third variable */
-    m3 = r3[2] / r2[2];
-    r3[3] -= m3 * r2[3], r3[4] -= m3 * r2[4], r3[5] -= m3 * r2[5], r3[6] -= m3 * r2[6], r3[7] -= m3 * r2[7];
+    m3 = r3[2]/r2[2];
+    r3[3] -= m3 * r2[3], r3[4] -= m3 * r2[4],
+    r3[5] -= m3 * r2[5], r3[6] -= m3 * r2[6],
+    r3[7] -= m3 * r2[7];
 
     /* last check */
-    if (0.0F == r3[3]) return false;
+    if (0.0F == r3[3]) 
+        return false;
 
-    s = 1.0F / r3[3]; /* now back substitute row 3 */
-    r3[4] *= s;
-    r3[5] *= s;
-    r3[6] *= s;
-    r3[7] *= s;
+    s = 1.0F/r3[3];             /* now back substitute row 3 */
+    r3[4] *= s; r3[5] *= s; r3[6] *= s; r3[7] *= s;
 
-    m2 = r2[3]; /* now back substitute row 2 */
-    s = 1.0F / r2[2];
-    r2[4] = s * (r2[4] - r3[4] * m2), r2[5] = s * (r2[5] - r3[5] * m2), r2[6] = s * (r2[6] - r3[6] * m2), r2[7] = s * (r2[7] - r3[7] * m2);
+    m2 = r2[3];                 /* now back substitute row 2 */
+    s  = 1.0F/r2[2];
+    r2[4] = s * (r2[4] - r3[4] * m2), r2[5] = s * (r2[5] - r3[5] * m2),
+    r2[6] = s * (r2[6] - r3[6] * m2), r2[7] = s * (r2[7] - r3[7] * m2);
     m1 = r1[3];
-    r1[4] -= r3[4] * m1, r1[5] -= r3[5] * m1, r1[6] -= r3[6] * m1, r1[7] -= r3[7] * m1;
+    r1[4] -= r3[4] * m1, r1[5] -= r3[5] * m1,
+    r1[6] -= r3[6] * m1, r1[7] -= r3[7] * m1;
     m0 = r0[3];
-    r0[4] -= r3[4] * m0, r0[5] -= r3[5] * m0, r0[6] -= r3[6] * m0, r0[7] -= r3[7] * m0;
+    r0[4] -= r3[4] * m0, r0[5] -= r3[5] * m0,
+    r0[6] -= r3[6] * m0, r0[7] -= r3[7] * m0;
 
-    m1 = r1[2]; /* now back substitute row 1 */
-    s = 1.0F / r1[1];
-    r1[4] = s * (r1[4] - r2[4] * m1), r1[5] = s * (r1[5] - r2[5] * m1), r1[6] = s * (r1[6] - r2[6] * m1), r1[7] = s * (r1[7] - r2[7] * m1);
+    m1 = r1[2];                 /* now back substitute row 1 */
+    s  = 1.0F/r1[1];
+    r1[4] = s * (r1[4] - r2[4] * m1), r1[5] = s * (r1[5] - r2[5] * m1),
+    r1[6] = s * (r1[6] - r2[6] * m1), r1[7] = s * (r1[7] - r2[7] * m1);
     m0 = r0[2];
-    r0[4] -= r2[4] * m0, r0[5] -= r2[5] * m0, r0[6] -= r2[6] * m0, r0[7] -= r2[7] * m0;
+    r0[4] -= r2[4] * m0, r0[5] -= r2[5] * m0,
+    r0[6] -= r2[6] * m0, r0[7] -= r2[7] * m0;
 
-    m0 = r0[1]; /* now back substitute row 0 */
-    s = 1.0F / r0[0];
-    r0[4] = s * (r0[4] - r1[4] * m0), r0[5] = s * (r0[5] - r1[5] * m0), r0[6] = s * (r0[6] - r1[6] * m0), r0[7] = s * (r0[7] - r1[7] * m0);
+    m0 = r0[1];                 /* now back substitute row 0 */
+    s  = 1.0F/r0[0];
+    r0[4] = s * (r0[4] - r1[4] * m0), r0[5] = s * (r0[5] - r1[5] * m0),
+    r0[6] = s * (r0[6] - r1[6] * m0), r0[7] = s * (r0[7] - r1[7] * m0);
 
-    MAT(out, 0, 0) = r0[4];
-    MAT(out, 0, 1) = r0[5], MAT(out, 0, 2) = r0[6];
-    MAT(out, 0, 3) = r0[7], MAT(out, 1, 0) = r1[4];
-    MAT(out, 1, 1) = r1[5], MAT(out, 1, 2) = r1[6];
-    MAT(out, 1, 3) = r1[7], MAT(out, 2, 0) = r2[4];
-    MAT(out, 2, 1) = r2[5], MAT(out, 2, 2) = r2[6];
-    MAT(out, 2, 3) = r2[7], MAT(out, 3, 0) = r3[4];
-    MAT(out, 3, 1) = r3[5], MAT(out, 3, 2) = r3[6];
-    MAT(out, 3, 3) = r3[7];
+    MAT(out,0,0) = r0[4]; MAT(out,0,1) = r0[5],
+    MAT(out,0,2) = r0[6]; MAT(out,0,3) = r0[7],
+    MAT(out,1,0) = r1[4]; MAT(out,1,1) = r1[5],
+    MAT(out,1,2) = r1[6]; MAT(out,1,3) = r1[7],
+    MAT(out,2,0) = r2[4]; MAT(out,2,1) = r2[5],
+    MAT(out,2,2) = r2[6]; MAT(out,2,3) = r2[7],
+    MAT(out,3,0) = r3[4]; MAT(out,3,1) = r3[5],
+    MAT(out,3,2) = r3[6]; MAT(out,3,3) = r3[7];
 
-#undef SWAP_ROWS
-#undef MAT
+    #undef SWAP_ROWS
+    #undef MAT
 
     return true;
 }
+#endif
 
 /**
  * Transpose a GLfloat matrix.
