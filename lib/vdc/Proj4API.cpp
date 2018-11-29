@@ -275,3 +275,10 @@ void Proj4API::Clamp(double *x, double *y, size_t n, int offset) const
         if (y[i * offset] > maxy) y[i * offset] = maxy;
     }
 }
+
+bool Proj4API::IsCylindrical() const
+{
+    string proj4String = GetDstStr();
+
+    return ((proj4String.find("+proj=eqc") != std::string::npos) || (proj4String.find("+proj=merc") != std::string::npos));
+}
