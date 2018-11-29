@@ -19,6 +19,8 @@
 #include <vapor/Grid.h>
 #include <vapor/utils.h>
 
+#include <glm/glm.hpp>
+
 namespace VAPoR {
 
 class RENDER_API RayCaster : public Renderer {
@@ -145,11 +147,11 @@ class RENDER_API RayCaster : public Renderer {
     void _drawVolumeFaces(int whichPass,
                           long whichCastingMode,
                           bool insideACell = false,
-                          const GLfloat *inversedMV = nullptr,
+                          const glm::mat4 &inversedMV = glm::mat4(0.0f),
                           bool fast = false);
 
     void _load3rdPassUniforms(long castingMode,
-                              const GLfloat *inversedMV,
+                              const glm::mat4 &inversedMV,
                               bool fast) const;
 
     virtual void _3rdPassSpecialHandling(bool fast, long castingMode);
