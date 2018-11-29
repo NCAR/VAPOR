@@ -431,11 +431,12 @@ float StretchedGrid::GetValueLinear(const std::vector<double> &coords) const
     assert(j < dims[1] - 1);
     if (dims.size() > 2) assert(k < dims[2] - 1);
 
-    float v0 = AccessIJK(i, j, k) * xwgt[0] + AccessIJK(i + 1, j, k) * xwgt[1] + AccessIJK(i + 1, j + 1, k) * ywgt[0] + AccessIJK(i, j + 1, k) * ywgt[1];
+    float v0 = ((AccessIJK(i, j, k) * xwgt[0] + AccessIJK(i + 1, j, k) * xwgt[1]) * ywgt[0]) + ((AccessIJK(i, j + 1, k) * xwgt[0] + AccessIJK(i + 1, j + 1, k) * xwgt[1]) * ywgt[1]);
 
     if (GetGeometryDim() == 2) return (v0);
 
-    float v1 = AccessIJK(i, j, k + 1) * xwgt[0] + AccessIJK(i + 1, j, k + 1) * xwgt[1] + AccessIJK(i + 1, j + 1, k + 1) * ywgt[0] + AccessIJK(i, j + 1, k + 1) * ywgt[1];
+    k++;
+    float v1 = ((AccessIJK(i, j, k) * xwgt[0] + AccessIJK(i + 1, j, k) * xwgt[1]) * ywgt[0]) + ((AccessIJK(i, j + 1, k) * xwgt[0] + AccessIJK(i + 1, j + 1, k) * xwgt[1]) * ywgt[1]);
 
     // Linearly interpolate along Z axis
     //

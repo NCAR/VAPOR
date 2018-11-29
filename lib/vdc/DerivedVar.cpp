@@ -566,6 +566,42 @@ int DerivedCoordVar_PCSFromLatLon::CloseVariable(int fd)
     delete f;
     return (0);
 }
+int DerivedCoordVar_PCSFromLatLon::_readRegionHelperCylindrical(DC::FileTable::FileObject *f, const vector<size_t> &min, const vector<size_t> &max, float *region)
+{
+    assert(min.size() == 1);
+    assert(min.size() == max.size());
+
+    size_t ts = f->GetTS();
+    string varname = f->GetVarname();
+    int    lod = f->GetLOD();
+
+    size_t nElements = max[0] - min[0] + 1;
+    float *buf = new float[nElements];
+    for (int i = 0; i < nElements; i++) { buf[i] = 0.0; }
+
+    string geoCoordVar;
+    if (_lonFlag) {
+        geoCoordVar = _lonName;
+    } else {
+        geoCoordVar = _latName;
+    }
+
+    int rc = _getVar(_dc, ts, geoCoordVar, -1, lod, min, max, region);
+    if (rc < 0) {
+        delete[] buf;
+        return (rc);
+    }
+
+    if (_lonFlag) {
+        rc = _proj4API.Transform(region, buf, nElements);
+    } else {
+        rc = _proj4API.Transform(buf, region, nElements);
+    }
+
+    delete[] buf;
+
+    return (rc);
+}
 
 int DerivedCoordVar_PCSFromLatLon::_readRegionHelper1D(DC::FileTable::FileObject *f, const vector<size_t> &min, const vector<size_t> &max, float *region)
 {
@@ -674,10 +710,20 @@ int DerivedCoordVar_PCSFromLatLon::ReadRegion(int fd, const vector<size_t> &min,
         SetErrMsg("Invalid file descriptor: %d", fd);
         return (-1);
     }
-    if (_make2DFlag) {
-        return (_readRegionHelper1D(f, min, max, region));
+
+    if (min.size() == 1) {
+        // Lat and Lon are 1D variables
+        //
+        return (_readRegionHelperCylindrical(f, min, max, region));
     } else {
-        return (_readRegionHelper2D(f, min, max, region));
+        if (_make2DFlag) {
+            // Lat and Lon are 1D variables but projections to PCS
+            // result in X and Y coordinate variables that are 2D
+            //
+            return (_readRegionHelper1D(f, min, max, region));
+        } else {
+            return (_readRegionHelper2D(f, min, max, region));
+        }
     }
 }
 
@@ -712,13 +758,25 @@ int DerivedCoordVar_PCSFromLatLon::_setupVar()
         return (-1);
     }
 
+    bool cylProj = _proj4API.IsCylindrical();
+
     vector<string> dimNames;
     if (lonVar.GetDimNames().size() == 1 && !_uGridFlag) {
-        dimNames.push_back(lonVar.GetDimNames()[0]);
-        dimNames.push_back(latVar.GetDimNames()[0]);
-        _dimLens.push_back(lonDims[0]);
-        _dimLens.push_back(latDims[0]);
-        _make2DFlag = true;
+        if (cylProj) {
+            if (_lonFlag) {
+                dimNames.push_back(lonVar.GetDimNames()[0]);
+                _dimLens.push_back(lonDims[0]);
+            } else {
+                dimNames.push_back(latVar.GetDimNames()[0]);
+                _dimLens.push_back(latDims[0]);
+            }
+        } else {
+            dimNames.push_back(lonVar.GetDimNames()[0]);
+            dimNames.push_back(latVar.GetDimNames()[0]);
+            _dimLens.push_back(lonDims[0]);
+            _dimLens.push_back(latDims[0]);
+            _make2DFlag = true;
+        }
     } else if (lonVar.GetDimNames().size() == 2 && !_uGridFlag) {
         if (lonDims[0] != latDims[0] && lonDims[1] != latDims[1]) {
             SetErrMsg("Incompatible dimensions ");

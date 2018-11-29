@@ -10,6 +10,7 @@
 #include <vapor/OptionParser.h>
 #include <vapor/DataMgr.h>
 #include <vapor/FileUtils.h>
+#include <vapor/utils.h>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -27,6 +28,7 @@ struct {
     string                  ftype;
     std::vector<double>     minu;
     std::vector<double>     maxu;
+    OptionParser::Boolean_T dump;
     OptionParser::Boolean_T tgetvalue;
     OptionParser::Boolean_T nogeoxform;
     OptionParser::Boolean_T novertxform;
@@ -56,6 +58,7 @@ OptionParser::OptDescRec_T set_opts[] = {{"nts", 1, "1", "Number of timesteps to
                                           "specifying domain max extents in user coordinates (X1:Y1:Z1)"},
                                          {"verbose", 0, "", "Verobse output"},
                                          {"tgetvalue", 0, "", "Apply Grid:;GetValue test"},
+                                         {"dump", 0, "", "Dump variable coordinates and data"},
                                          {"nogeoxform", 0, "", "Do not apply geographic transform (projection to PCS"},
                                          {"novertxform", 0, "", "Do not apply to convert pressure, etc. to meters"},
                                          {"help", 0, "", "Print this message and exit"},
@@ -76,6 +79,7 @@ OptionParser::Option_T get_options[] = {{"nts", Wasp::CvtToInt, &opt.nts, sizeof
                                         {"minu", Wasp::CvtToDoubleVec, &opt.minu, sizeof(opt.minu)},
                                         {"maxu", Wasp::CvtToDoubleVec, &opt.maxu, sizeof(opt.maxu)},
                                         {"verbose", Wasp::CvtToBoolean, &opt.verbose, sizeof(opt.verbose)},
+                                        {"dump", Wasp::CvtToBoolean, &opt.dump, sizeof(opt.dump)},
                                         {"tgetvalue", Wasp::CvtToBoolean, &opt.tgetvalue, sizeof(opt.tgetvalue)},
                                         {"nogeoxform", Wasp::CvtToBoolean, &opt.nogeoxform, sizeof(opt.nogeoxform)},
                                         {"novertxform", Wasp::CvtToBoolean, &opt.novertxform, sizeof(opt.novertxform)},
@@ -136,17 +140,21 @@ void test_node_iterator(const Grid *g, vector<double> minu, vector<double> maxu)
     Grid::ConstNodeIterator itr;
     Grid::ConstNodeIterator enditr = g->ConstNodeEnd();
 
+    float t0 = GetTime();
     itr = g->ConstNodeBegin(minu, maxu);
 
     size_t count = 0;
     for (; itr != enditr; ++itr) { count++; }
     cout << "count: " << count << endl;
+    cout << "time: " << GetTime() - t0 << endl;
     cout << endl;
 }
 
-void test_get_value(const Grid *g)
+void test_get_value(Grid *g)
 {
     cout << "Get Value Test ----->" << endl;
+
+    g->SetInterpolationOrder(1);
 
     Grid::ConstIterator itr = g->cbegin();
     Grid::ConstIterator enditr = g->cend();
@@ -156,6 +164,7 @@ void test_get_value(const Grid *g)
 
     const float epsilon = 0.000001;
 
+    float  t0 = GetTime();
     size_t ecount = 0;
     for (; itr != enditr; ++itr, ++c_itr) {
         float v0 = *itr;
@@ -167,19 +176,41 @@ void test_get_value(const Grid *g)
                 if (abs(v1) > epsilon) {
                     ecount++;
                     v1 = g->GetValue(*c_itr);
-                    cout << "poop1\n";
                 }
             } else {
                 if (abs((v1 - v0) / v0) > epsilon) {
                     ecount++;
                     v1 = g->GetValue(*c_itr);
-                    cout << "poop2\n";
                 }
             }
         }
     }
     cout << "error count: " << ecount << endl;
+    cout << "time: " << GetTime() - t0 << endl;
     cout << endl;
+}
+
+void dump(const Grid *g)
+{
+    vector<size_t> dims = g->GetDimensions();
+    vector<size_t> min(dims.size(), 0);
+    vector<size_t> max;
+    for (int i = 0; i < dims.size(); i++) { max.push_back(dims[i] - 1); }
+
+    vector<size_t> index = min;
+    vector<double> coord;
+
+    while (index != max) {
+        g->GetUserCoordinates(index, coord);
+        float v = g->AccessIndex(index);
+
+        for (int i = 0; i < dims.size(); i++) { cout << coord[i] << " "; }
+        cout << v << endl;
+
+        if (index[0] == max[0]) { cout << endl; }
+
+        index = IncrementCoords(min, max, index);
+    }
 }
 
 void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts)
@@ -220,6 +251,8 @@ void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts)
 
     if (!g) { exit(1); }
 
+    if (opt.dump) { dump(g); }
+
     if (fp) {
         Grid::Iterator itr;
         Grid::Iterator enditr = g->end();
@@ -231,14 +264,10 @@ void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts)
         fclose(fp);
     }
 
+    g->GetUserExtents(minu, maxu);
     test_node_iterator(g, minu, maxu);
 
     if (opt.tgetvalue) { test_get_value(g); }
-
-    //			float r[2];
-    //			g->GetRange(r);
-
-    //			cout << "Data Range : [" << r[0] << ", " << r[1] << "]" << endl;
 
     vector<double> rvec;
     datamgr.GetDataRange(ts, vname, opt.level, opt.lod, rvec);

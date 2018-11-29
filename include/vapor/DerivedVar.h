@@ -185,6 +185,7 @@ private:
 
     int _setupVar();
 
+    int _readRegionHelperCylindrical(DC::FileTable::FileObject *f, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
     int _readRegionHelper1D(DC::FileTable::FileObject *f, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
     int _readRegionHelper2D(DC::FileTable::FileObject *f, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
 };
