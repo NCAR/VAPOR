@@ -54,24 +54,16 @@ private:
     int  _resetBoxCache();
     int  _resetDataCache();
     void _initTextures();
-    int  _saveTextureData0();
-    int  _saveTextureData1();
-    int  _saveTextureData2();
+    int  _saveTextureData();
 
     double _newWaySeconds;
     double _newWayInlineSeconds;
     double _oldWaySeconds;
 
-    void _getSampleCoordinates(std::vector<double> &coords, int i, int j) const;
-
     std::vector<double> _calculateDeltas() const;
-
-    inline void _getInlineJSampleCoordinates(std::vector<double> &coords, const std::vector<double> deltas, const int j) const;
 
     void _getJSampleCoordinates(std::vector<double> &coords, const std::vector<double> deltas, const int j) const;
 
-    inline void _getInlineISampleCoordinates(std::vector<double> &coords, const std::vector<double> deltas, const int i) const;
-    // inline void _getISampleCoordinates(
     void _getISampleCoordinates(std::vector<double> &coords, const std::vector<double> deltas, const int i) const;
 
     int _getConstantAxis() const;

@@ -16,7 +16,7 @@ using namespace VAPoR;
 #define XZ 1
 #define YZ 2
 
-#define MAX_DEFAULT_SAMPLERATE 400
+#define MIN_DEFAULT_SAMPLERATE 200
 
 const string SliceParams::_sampleRateTag = "SampleRate";
 
@@ -70,11 +70,11 @@ int SliceParams::GetDefaultSampleRate() const
 {
     string         varName = GetVariableName();
     int            refLevel = GetRefinementLevel();
-    vector<size_t> dimsAtLevel, bsAtLevel;
-    _dataMgr->GetDimLensAtLevel(varName, refLevel, dimsAtLevel, bsAtLevel);
+    vector<size_t> dimsAtLevel;
+    _dataMgr->GetDimLensAtLevel(varName, refLevel, dimsAtLevel);
     int sampleRate = *max_element(dimsAtLevel.begin(), dimsAtLevel.end());
 
-    if (sampleRate > MAX_DEFAULT_SAMPLERATE) sampleRate = MAX_DEFAULT_SAMPLERATE;
+    if (sampleRate < MIN_DEFAULT_SAMPLERATE) sampleRate = MIN_DEFAULT_SAMPLERATE;
 
     return sampleRate;
 }
@@ -90,7 +90,7 @@ bool SliceParams::usingVariable(const std::string &varname)
 
 int SliceParams::GetSampleRate() const
 {
-    int rate = (int)GetValueDouble(_sampleRateTag, 50);
+    int rate = (int)GetValueDouble(_sampleRateTag, MIN_DEFAULT_SAMPLERATE);
     return rate;
 }
 

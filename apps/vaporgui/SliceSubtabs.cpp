@@ -1,7 +1,11 @@
 #include "SliceSubtabs.h"
 
-#define MIN_SAMPLES 1
-#define MAX_SAMPLES 8000
+#define MIN_SAMPLES         1
+#define MAX_SAMPLES         2000
+#define MIN_QUALITY         1
+#define MAX_QUALITY         10
+#define DEFAULT_QUALITY     1
+#define SAMPLES_PER_QUALITY 200
 
 #define X  0
 #define Y  1
@@ -30,8 +34,11 @@ void SliceVariablesSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *par
 
 void SliceVariablesSubtab::_setDefaultSampleRate()
 {
-    int rate = _params->GetDefaultSampleRate();
-    _params->SetSampleRate(rate);
+    int defaultRate = _params->GetDefaultSampleRate();
+    int quality = defaultRate / SAMPLES_PER_QUALITY;
+    if (quality < 1) quality = 1;
+    int adjustedRate = quality * SAMPLES_PER_QUALITY;
+    _params->SetSampleRate(adjustedRate);
 }
 
 SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget *parent)
@@ -41,20 +48,20 @@ SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget *parent)
 
     _TFWidget->mappingFrame->SetIsSlicing(true);
 
-    _sampleRateWidget->SetLabel(QString::fromAscii("Sample rate"));
+    _sampleRateWidget->SetLabel(QString::fromAscii("Quality"));
     _sampleRateWidget->SetIntType(true);
-    _sampleRateWidget->SetExtents(MIN_SAMPLES, MAX_SAMPLES);
+    _sampleRateWidget->SetExtents(MIN_QUALITY, MAX_QUALITY);
 
-    connect(_sampleRateWidget, SIGNAL(valueChanged(int)), this, SLOT(_sampleRateChanged(int)));
+    connect(_sampleRateWidget, SIGNAL(valueChanged(int)), this, SLOT(_qualityChanged(int)));
 
     _params = NULL;
 }
 
-void SliceAppearanceSubtab::_sampleRateChanged(int rate)
+void SliceAppearanceSubtab::_qualityChanged(int quality)
 {
-    _params->SetSampleRate(rate);
+    int sampleRate = quality * SAMPLES_PER_QUALITY;
+    _params->SetSampleRate(sampleRate);
     _TFWidget->SetAutoUpdateParamChanged(true);
-    //_TFWidget->mappingFrame->RefreshHistogram(true);
 }
 
 void SliceAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
@@ -68,10 +75,8 @@ void SliceAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *pa
     _params->GetBox()->GetExtents(minExt, maxExt);
 
     int sampleRate = _params->GetSampleRate();
-    _sampleRateWidget->SetValue(sampleRate);
-
-    //_TFWidget->mappingFrame->RefreshHistogram(true);
-    //_TFWidget->RefreshHistogram();
+    int quality = sampleRate / SAMPLES_PER_QUALITY;
+    _sampleRateWidget->SetValue(quality);
 }
 
 SliceGeometrySubtab::SliceGeometrySubtab(QWidget *parent)
