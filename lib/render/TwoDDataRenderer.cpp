@@ -26,10 +26,10 @@
 #include <vapor/Proj4API.h>
 #include <vapor/CFuncs.h>
 #include <vapor/utils.h>
-#include <vapor/ShaderMgr.h>
 #include <vapor/DataMgrUtils.h>
 #include <vapor/TwoDDataRenderer.h>
 #include <vapor/TwoDDataParams.h>
+#include "vapor/GLManager.h"
 
 using namespace VAPoR;
 
@@ -59,8 +59,8 @@ const bool GridAligned = true;
 
 // Texture units. Only use data texture if GridAligned is false
 //
-const int dataTexUnit = 0;     // GL_TEXTURE0
-const int colormapTexUnit = 1; // GL_TEXTURE1
+// const int dataTexUnit = 0; // GL_TEXTURE0
+// const int colormapTexUnit = 1;          // GL_TEXTURE1
 
 // Return name of GLSL shader instance to use
 //
@@ -133,7 +133,6 @@ TwoDDataRenderer::TwoDDataRenderer(
     _nindices = 0;
     _colormap = NULL;
     _colormapsize = 0;
-    _vertexDataAttr = -1;
 
     _cMapTexID = 0;
 
@@ -159,38 +158,6 @@ TwoDDataRenderer::~TwoDDataRenderer() {
 }
 
 int TwoDDataRenderer::_initializeGL() {
-
-#ifndef NOSHADER
-    if (!_shaderMgr) {
-        SetErrMsg("Programmable shading not available");
-        return (-1);
-    }
-
-    int rc;
-
-    // First shader is used when 'GridAligned' is false
-    //
-    if (!_shaderMgr->EffectExists(EffectName)) {
-        rc = _shaderMgr->DefineEffect(EffectBaseName, "", EffectName);
-        if (rc < 0)
-            return (-1);
-    }
-
-    // Second shader is used when 'GridAligned' is true
-    //
-    if (!_shaderMgr->EffectExists(EffectNameAttr)) {
-        rc = _shaderMgr->DefineEffect(
-            EffectBaseName, "USE_VERTEX_ATTR;", EffectNameAttr);
-        if (rc < 0)
-            return (-1);
-    }
-
-    rc = (int)_shaderMgr->AttributeLocation(EffectNameAttr, VertexDataAttr);
-    if (rc < 0)
-        return (-1);
-    _vertexDataAttr = rc;
-
-#endif
 
     glGenTextures(1, &_cMapTexID);
 
@@ -226,37 +193,24 @@ int TwoDDataRenderer::_paintGL(bool fast) {
 
     string effect = getEffectInstance(GridAligned);
 
-    rc = _shaderMgr->EnableEffect(effect);
-    if (rc < 0)
-        return (-1);
-
     // 2D Data LIGHT parameters hard coded
     //
-    _shaderMgr->UploadEffectData(effect, "lightingEnabled", (int)false);
-    _shaderMgr->UploadEffectData(effect, "kd", (float)0.6);
-    _shaderMgr->UploadEffectData(effect, "ka", (float)0.3);
-    _shaderMgr->UploadEffectData(effect, "ks", (float)0.1);
-    _shaderMgr->UploadEffectData(effect, "expS", (float)16.0);
-    _shaderMgr->UploadEffectData(
-        effect, "lightDirection", (float)0.0, (float)0.0, (float)1.0);
-
-    _shaderMgr->UploadEffectData(effect, "minLUTValue", (float)crange[0]);
-    _shaderMgr->UploadEffectData(effect, "maxLUTValue", (float)crange[1]);
-
-    _shaderMgr->UploadEffectData(effect, "colormap", colormapTexUnit);
-
-    // If data aren't grid aligned we sample the data values with a
-    // texture.
-    //
-    if (!GridAligned) {
-        _shaderMgr->UploadEffectData(effect, "dataTexture", dataTexUnit);
-    }
+    // _shaderMgr->UploadEffectData(effect, "lightingEnabled", (int) false);
+    // _shaderMgr->UploadEffectData(effect, "kd", (float) 0.6);
+    // _shaderMgr->UploadEffectData(effect, "ka", (float) 0.3);
+    // _shaderMgr->UploadEffectData(effect, "ks", (float) 0.1);
+    // _shaderMgr->UploadEffectData(effect, "expS", (float) 16.0);
+    // _shaderMgr->UploadEffectData( effect, "lightDirection", (float) 0.0, (float) 0.0, (float) 1.0);
 
 #endif
 
-    glActiveTexture(GL_TEXTURE1);
+    ShaderProgram *s = _glManager->shaderManager->GetShader("2DData");
+    s->Bind();
+    s->SetUniform("minLUTValue", (float)crange[0]);
+    s->SetUniform("maxLUTValue", (float)crange[1]);
+
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, _cMapTexID);
-    glEnable(GL_TEXTURE_1D);
 
     // Really only need to reload colormap texture if it changes
     //
@@ -268,11 +222,6 @@ int TwoDDataRenderer::_paintGL(bool fast) {
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, 0);
-    glDisable(GL_TEXTURE_1D);
-
-#ifndef NOSHADER
-    _shaderMgr->DisableEffect();
-#endif
 
     return (rc);
 }
@@ -393,6 +342,7 @@ bool TwoDDataRenderer::_gridStateDirty() const {
     rParams->GetBox()->GetExtents(minExts, maxExts);
 
     _grid_state_c current_state(
+        _dataMgr->GetNumRefLevels(rParams->GetVariableName()),
         rParams->GetRefinementLevel(),
         rParams->GetCompressionLevel(),
         rParams->GetHeightVariableName(),
@@ -418,6 +368,7 @@ void TwoDDataRenderer::_gridStateSet() {
     string meshName;
 
     _grid_state = _grid_state_c(
+        _dataMgr->GetNumRefLevels(rParams->GetVariableName()),
         rParams->GetRefinementLevel(),
         rParams->GetCompressionLevel(),
         rParams->GetHeightVariableName(),
