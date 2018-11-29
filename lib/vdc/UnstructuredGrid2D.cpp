@@ -52,6 +52,49 @@ UnstructuredGrid2D::UnstructuredGrid2D(
 
 }
 
+vector <size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const {
+	if (dim == 0) {
+		return(_xug.GetDimensions());
+	}
+	else if (dim == 1) {
+		return(_yug.GetDimensions());
+	}
+	else if (dim == 2) {
+		if (GetGeometryDim() == 3) {
+			return(_zug.GetDimensions());
+		}
+		else {
+			return(vector <size_t> (1,1));
+		}
+	}
+		else {
+		return(vector <size_t> (1,1));
+	}
+}
+
+float UnstructuredGrid2D::GetUserCoordinate(
+	std::vector <size_t> &index, size_t dim
+) const {
+
+	if (dim == 0) {
+		return(_xug.AccessIndex(index));
+	}
+	else if (dim == 1) {
+		return(_yug.AccessIndex(index));
+	}
+	else if (dim == 2) {
+		if (GetGeometryDim() == 3) {
+			return(_zug.AccessIndex(index));
+		}
+		else {
+			return(0.0);
+		}
+	}
+	else {
+		return(0.0);
+	}
+}
+
 size_t UnstructuredGrid2D::GetGeometryDim() const {
 	return(_zug.GetDimensions().size() == 0 ? 2 : 3);
 }
@@ -198,7 +241,7 @@ bool UnstructuredGrid2D::GetIndicesCell(
 		cindices.push_back(my_index);
 		for (int i=0; i<nlambda; i++) {
 			lambdav.push_back(lambda[i]);
-			nodes.push_back(vector <size_t> (my_nodes[i]));
+			nodes.push_back(vector <size_t> (1, my_nodes[i]));
 		}
 	}
 	
@@ -306,6 +349,11 @@ UnstructuredGrid2D::ConstCoordItrU2D::ConstCoordItrU2D(
 		_xCoordItr = ug->_xug.cbegin();
 		_yCoordItr = ug->_yug.cbegin();
 		_zCoordItr = ug->_zug.cbegin();
+		_coords[0] = *_xCoordItr;
+		_coords[1] = *_yCoordItr;
+		if (_ncoords >= 3) {
+			_coords[2] = *_zCoordItr;
+		}
 	}
 	else {
 		_xCoordItr = ug->_xug.cend();
@@ -469,7 +517,7 @@ bool UnstructuredGrid2D::_insideFace(
 
 		verts[i*2+0] = _xug.AccessIJK(vertex, 0, 0);
 		verts[i*2+1] = _yug.AccessIJK(vertex, 0, 0);
-		node_indices.push_back(*ptr);
+		node_indices.push_back(*ptr + offset);
 		ptr++;
 		nlambda++;
 	}

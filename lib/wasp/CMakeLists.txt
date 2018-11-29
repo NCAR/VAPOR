@@ -32,7 +32,7 @@ set (HEADERS
 
 add_library (wasp SHARED ${SRC} ${HEADERS})
 
-target_link_libraries (wasp common netcdf)
+target_link_libraries (wasp PUBLIC common ${NETCDF})
 
 add_definitions (-DWASP_EXPORTS)
 
