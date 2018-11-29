@@ -88,6 +88,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The Slice Renderer samples data along a plane.The rate at which points are sampled is controlledby the Quality parameter, which has a range from1 to 10. Each level of quality increases the samplerate along the plane by a factor of 200, with amaximum of 2000. I.e. a quality of 2 will have400x400 uniform samples along the plane. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="currentIndex">
         <number>0</number>
        </property>
@@ -99,7 +102,7 @@
          </sizepolicy>
         </property>
         <attribute name="title">
-         <string>Sample Rate</string>
+         <string>Quality Adjustment</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <property name="spacing">
