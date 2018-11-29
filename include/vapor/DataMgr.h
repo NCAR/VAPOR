@@ -166,13 +166,6 @@ public:
 	return(_dc->GetDimension(dimname, dimension));
  }
 
- virtual int GetDimLensAtLevel(
-	string varname, int level, 
-	std::vector <size_t> &dims_at_level,
-	std::vector <size_t> &bs_at_level
- ) const; 
-
-
  //! \copydoc DC::GetMeshNames()
  //
  std::vector <string> GetMeshNames() const {
@@ -1200,11 +1193,11 @@ UnstructuredGrid2D *_make_grid_unstructured2d(
 
  // Hide public DC::GetDimLensAtLevel by making it private
  //
- //virtual int GetDimLensAtLevel(
-//	string varname, int level, 
-//	std::vector <size_t> &dims_at_level,
-//	std::vector <size_t> &bs_at_level
-// ) const; 
+ virtual int GetDimLensAtLevel(
+	string varname, int level, 
+    std::vector <size_t> &dims_at_level,
+	std::vector <size_t> &bs_at_level
+ ) const; 
 
 
 };
