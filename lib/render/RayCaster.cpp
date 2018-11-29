@@ -418,14 +418,8 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params
 
 int RayCaster::_initializeGL()
 {
-    // Enable debug output
-    // glEnable              ( GL_DEBUG_OUTPUT );
-    // glDebugMessageCallback( MessageCallback, 0 );
-
     _loadShaders();
-
     _initializeFramebufferTextures();
-
     return 0;
 }
 
@@ -542,9 +536,6 @@ int RayCaster::_paintGL(bool fast)
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
-    /* Collect ModelView matrix */
-    // GLfloat ModelView[16];
-    // glGetFloatv( GL_MODELVIEW_MATRIX,  ModelView );
     glm::mat4 ModelView = mm->GetModelViewMatrix();
 
     // 1st pass: render back facing polygons to texture0 of the framebuffer
@@ -553,9 +544,6 @@ int RayCaster::_paintGL(bool fast)
     /* Detect if we're inside the volume */
     glm::mat4           InversedMV = glm::inverse(ModelView);
     std::vector<double> cameraUser(4, 1.0);    // camera position in user coordinates
-    // cameraUser[0]         = InversedMV[ 12 ];
-    // cameraUser[1]         = InversedMV[ 13 ];
-    // cameraUser[2]         = InversedMV[ 14 ];
     cameraUser[0] = InversedMV[3][0];
     cameraUser[1] = InversedMV[3][1];
     cameraUser[2] = InversedMV[3][2];
@@ -564,12 +552,8 @@ int RayCaster::_paintGL(bool fast)
     bool                insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
 
     if (insideACell) {
-        // GLfloat MVP[16],    InversedMVP[16];
-        //_getMVPMatrix( MVP );
-        //_mesa_invert_matrix_general( InversedMVP, MVP );
         glm::mat4 MVP = mm->GetModelViewProjectionMatrix();
         glm::mat4 InversedMVP = glm::inverse(MVP);
-
         glm::vec4 topLeftNDC(-1.0f, 1.0f, -0.9999f, 1.0f);
         glm::vec4 bottomLeftNDC(-1.0f, -1.0f, -0.9999f, 1.0f);
         glm::vec4 topRightNDC(1.0f, 1.0f, -0.9999f, 1.0f);
@@ -580,8 +564,8 @@ int RayCaster::_paintGL(bool fast)
         near[2] = InversedMVP * topRightNDC;
         near[3] = InversedMVP * bottomRightNDC;
         for (int i = 0; i < 4; i++) {
-            glm::vec3 nearCoords = glm::vec3(near[i] / near[i].w);
-            std::memcpy(&_userCoordinates.nearCoords[i * 3], glm::value_ptr(nearCoords), sizeof(nearCoords));
+            near[i] /= near[i].w;
+            std::memcpy(_userCoordinates.nearCoords + i * 3, glm::value_ptr(near[i]), sizeof(float) * 3);
         }
     }
 
@@ -657,7 +641,7 @@ void RayCaster::_initializeFramebufferTextures()
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthBufferId);
 
     /* Set "_backFaceTextureId" as colour attachement #0,
-       and "_frontFaceTextureId" as attachement #1 */
+       and "_frontFaceTextureId" as attachement #1       */
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _backFaceTextureId, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, _frontFaceTextureId, 0);
     glDrawBuffers(2, _drawBuffers);
@@ -722,9 +706,6 @@ void RayCaster::_initializeFramebufferTextures()
 
 void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACell, const glm::mat4 &InversedMV, bool fast)
 {
-    // GLfloat modelview[16], projection[16];
-    // glGetFloatv( GL_MODELVIEW_MATRIX,  modelview );     // This is from OpenGL 2...
-    // glGetFloatv( GL_PROJECTION_MATRIX, projection );    // This is from OpenGL 2...
     glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
     glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
@@ -793,9 +774,6 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
 
 void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversedMV, bool fast) const
 {
-    // GLfloat modelview[16], projection[16];
-    // glGetFloatv( GL_MODELVIEW_MATRIX,  modelview );     // This is from OpenGL 2...
-    // glGetFloatv( GL_PROJECTION_MATRIX, projection );    // This is from OpenGL 2...
     glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
     glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
