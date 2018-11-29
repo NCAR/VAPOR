@@ -31,36 +31,32 @@
 #include <vapor/ViewpointParams.h>
 #include <vapor/DataStatus.h>
 #include <vapor/errorcodes.h>
-#include <vapor/GetAppPath.h>
 #include <vapor/ControlExecutive.h>
+#include "vapor/GLManager.h"
 #include "vapor/debug.h"
 
 using namespace VAPoR;
 
+#pragma pack(push, 4)
+struct WireFrameRenderer::VertexData {
+    float x, y, z;
+    float r, g, b, a;
+};
+#pragma pack(pop)
+
 static RendererRegistrar<WireFrameRenderer> registrar(WireFrameRenderer::GetClassType(), WireFrameParams::GetClassType());
 
-namespace {
-
-// Product of elements in a vector
-//
-size_t vproduct(vector<size_t> a)
-{
-    size_t ntotal = 1;
-
-    for (int i = 0; i < a.size(); i++) ntotal *= a[i];
-    return (ntotal);
-}
-
-};    // namespace
-
 WireFrameRenderer::WireFrameRenderer(const ParamsMgr *pm, string winName, string dataSetName, string instName, DataMgr *dataMgr)
-: Renderer(pm, winName, dataSetName, WireFrameParams::GetClassType(), WireFrameRenderer::GetClassType(), instName, dataMgr), _drawList(0)
+: Renderer(pm, winName, dataSetName, WireFrameParams::GetClassType(), WireFrameRenderer::GetClassType(), instName, dataMgr), _VAO(0), _VBO(0), _EBO(0)
 {
 }
 
 WireFrameRenderer::~WireFrameRenderer()
 {
-    if (_drawList) glDeleteLists(_drawList, 3);
+    if (_VAO) glDeleteVertexArrays(1, &_VAO);
+    if (_VBO) glDeleteBuffers(1, &_VBO);
+    if (_EBO) glDeleteBuffers(1, &_EBO);
+    _VAO = _VBO = _EBO = 0;
 }
 
 void WireFrameRenderer::_saveCacheParams()
@@ -110,35 +106,36 @@ bool WireFrameRenderer::_isCacheDirty() const
     return false;
 }
 
-void WireFrameRenderer::_drawCell(const vector<vector<size_t>> &nodes, const vector<size_t> &dims, bool layered) const
+void WireFrameRenderer::_drawCell(vector<VertexData> &vertices, vector<unsigned int> &indices, const float *verts, const float *colors, int n, bool layered)
 {
-    GLuint *indices1 = new GLuint[nodes.size()];
-    for (int i = 0; i < nodes.size(); i++) { indices1[i] = Wasp::LinearizeCoords(nodes[i], dims); }
+    int baseIndex = vertices.size();
+    for (int i = 0; i < n; i++) { vertices.push_back({verts[3 * i], verts[3 * i + 1], verts[3 * i + 2], colors[4 * i], colors[4 * i + 1], colors[4 * i + 2], colors[4 * i + 3]}); }
 
-    int count = layered ? nodes.size() / 2 : nodes.size();
-    glDrawElements(GL_LINE_LOOP, count, GL_UNSIGNED_INT, indices1);
-
-    if (!layered) {
-        delete[] indices1;
-        return;
+    int count = layered ? n / 2 : n;
+    for (int i = 0; i < count; i++) {
+        // indices[i] = i;
+        indices.push_back(baseIndex + i);
+        indices.push_back(baseIndex + ((i + 1) % count));
     }
+
+    if (!layered) return;
 
     // if layered the coordinates are ordered bottom face first, then top face
     //
-
-    glDrawElements(GL_LINE_LOOP, count, GL_UNSIGNED_INT, indices1 + count);
+    for (int i = 0; i < count; i++) {
+        // indices[i] = i + count;
+        indices.push_back(baseIndex + i + count);
+        indices.push_back(baseIndex + ((i + 1) % count) + count);
+    }
 
     // Now draw edges between top and bottom face
     //
-    GLuint *indices2 = new GLuint[nodes.size()];
     for (int i = 0; i < count; i++) {
-        indices2[2 * i + 0] = indices1[i];
-        indices2[2 * i + 1] = indices1[i + count];
+        // indices[2*i+0] = i;
+        // indices[2*i+1] = i + count;
+        indices.push_back(baseIndex + i);
+        indices.push_back(baseIndex + i + count);
     }
-    glDrawElements(GL_LINES, 2 * count, GL_UNSIGNED_INT, indices2);
-
-    delete[] indices1;
-    delete[] indices2;
 }
 
 int WireFrameRenderer::_buildCache()
@@ -160,116 +157,76 @@ int WireFrameRenderer::_buildCache()
         }
     }
 
-    glNewList(_drawList, GL_COMPILE);
+    vector<VertexData>   vertices;
+    vector<unsigned int> indices;
 
-    // Set up coordinate and color buffers
-    //
     double mv = grid->GetMissingValue();
 
-    size_t nVertsTotal = vproduct(grid->GetDimensions());
+#if 0    // VAPOR_3_1_0
+    
+    // Performance of the bounding box version of the Cell iterator
+    // is too slow. So we render the entire grid and use clipping planes
+    // to restrict the displayed region
+    //
+    Grid::ConstCellIterator it = grid->ConstCellBegin(
+                                                      _cacheParams.boxMin, _cacheParams.boxMax
+                                                      );
+#else
+    Grid::ConstCellIterator it = grid->ConstCellBegin();
+#endif
 
-    float *coordsArray = new float[nVertsTotal * 3];
-    float *colorsArray = new float[nVertsTotal * 4];
+    size_t nverts = grid->GetMaxVertexPerCell();
+    bool   layered = grid->GetTopologyDim() == 3;
 
-    Grid::ConstIterator itr = grid->cbegin();
-    Grid::ConstIterator end_itr = grid->cend();
+    float *                 coordsArray = new float[nverts * 3];
+    float *                 colorsArray = new float[nverts * 4];
+    Grid::ConstCellIterator end = grid->ConstCellEnd();
 
-    Grid::ConstCoordItr coord_itr = grid->ConstCoordBegin();
-    Grid::ConstCoordItr end_coord_itr = grid->ConstCoordEnd();
+    float defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
+    for (; it != end; ++it) {
+        vector<vector<size_t>> nodes;
+        grid->GetCellNodes(*it, nodes);
 
-    float  defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
-    size_t index = 0;
-    for (; itr != end_itr && coord_itr != end_coord_itr; ++itr, ++coord_itr, ++index) {
-        const vector<double> &coord = *coord_itr;
+        for (int i = 0; i < nodes.size(); i++) {
+            vector<double> coord;
+            grid->GetUserCoordinates(nodes[i], coord);
 
-        coordsArray[3 * index + 0] = coord[0];
-        coordsArray[3 * index + 1] = coord[1];
+            coordsArray[3 * i + 0] = coord[0];
+            coordsArray[3 * i + 1] = coord[1];
 
-        if (coord.size() == 3) {
-            coordsArray[3 * index + 2] = coord[2];
-        } else if (heightGrid) {
-            coordsArray[3 * index + 2] = heightGrid->GetValue(*coord_itr);
-        } else {
-            coordsArray[3 * index + 2] = defaultZ;
+            if (coord.size() == 3) {
+                coordsArray[3 * i + 2] = coord[2];
+            } else if (heightGrid) {
+                coordsArray[3 * i + 2] = heightGrid->AccessIndex(nodes[i]);
+            } else {
+                coordsArray[3 * i + 2] = defaultZ;
+            }
+
+            float dataValue = grid->AccessIndex(nodes[i]);
+            if (dataValue == mv) {
+                colorsArray[4 * i + 0] = 0.0;
+                colorsArray[4 * i + 1] = 0.0;
+                colorsArray[4 * i + 2] = 0.0;
+                colorsArray[4 * i + 3] = 0.0;
+            } else if (_cacheParams.useSingleColor) {
+                colorsArray[4 * i + 0] = _cacheParams.constantColor[0];
+                colorsArray[4 * i + 1] = _cacheParams.constantColor[1];
+                colorsArray[4 * i + 2] = _cacheParams.constantColor[2];
+                colorsArray[4 * i + 3] = _cacheParams.constantOpacity;
+            } else {
+                size_t n = _cacheParams.tf_lut.size() >> 2;
+                int    index = (dataValue - _cacheParams.tf_minmax[0]) / (_cacheParams.tf_minmax[1] - _cacheParams.tf_minmax[0]) * (n - 1);
+                if (index < 0) { index = 0; }
+                if (index >= n) { index = n - 1; }
+                colorsArray[4 * i + 0] = _cacheParams.tf_lut[4 * index + 0];
+                colorsArray[4 * i + 1] = _cacheParams.tf_lut[4 * index + 1];
+                colorsArray[4 * i + 2] = _cacheParams.tf_lut[4 * index + 2];
+                colorsArray[4 * i + 3] = _cacheParams.tf_lut[4 * index + 3];
+            }
         }
 
-        float dataValue = *itr;
-        if (dataValue == mv) {
-            colorsArray[4 * index + 0] = 0.0;
-            colorsArray[4 * index + 1] = 0.0;
-            colorsArray[4 * index + 2] = 0.0;
-            colorsArray[4 * index + 3] = 0.0;
-        } else if (_cacheParams.useSingleColor) {
-            colorsArray[4 * index + 0] = _cacheParams.constantColor[0];
-            colorsArray[4 * index + 1] = _cacheParams.constantColor[1];
-            colorsArray[4 * index + 2] = _cacheParams.constantColor[2];
-            colorsArray[4 * index + 3] = _cacheParams.constantOpacity;
-        } else {
-            size_t n = _cacheParams.tf_lut.size() >> 2;
-            int    lut = (dataValue - _cacheParams.tf_minmax[0]) / (_cacheParams.tf_minmax[1] - _cacheParams.tf_minmax[0]) * (n - 1);
-            if (lut < 0) { lut = 0; }
-            if (lut >= n) { lut = n - 1; }
-            colorsArray[4 * index + 0] = _cacheParams.tf_lut[4 * lut + 0];
-            colorsArray[4 * index + 1] = _cacheParams.tf_lut[4 * lut + 1];
-            colorsArray[4 * index + 2] = _cacheParams.tf_lut[4 * lut + 2];
-            colorsArray[4 * index + 3] = _cacheParams.tf_lut[4 * lut + 3];
-        }
+        _drawCell(vertices, indices, coordsArray, colorsArray, nodes.size(), layered);
     }
-
-    if (grid->GetTopologyDim() == 3) {
-        EnableClipToBox(0.001);
-    } else {
-        EnableClipToBox2DXY(0.001);
-    }
-
-    glVertexPointer(3, GL_FLOAT, 0, coordsArray);
-    glColorPointer(4, GL_FLOAT, 0, colorsArray);
-
-    glEndList();
-
-    // Now draw the individual cells. Note: each shared cell edge
-    // gets drawn twice. Oops
-    //
-    bool layered = grid->GetTopologyDim() == 3;
-
-    // Create slow and fast draw lists with connectivity information
-    //
-
-    // Slow drawing display list
-    //
-    glNewList(_drawList + 1, GL_COMPILE);
-
-    Grid::ConstCellIterator cell_itr = grid->ConstCellBegin();
-    Grid::ConstCellIterator end_cell_itr = grid->ConstCellEnd();
-
-    for (; cell_itr != end_cell_itr; ++cell_itr) {
-        vector<vector<size_t>> nodes;
-        grid->GetCellNodes(*cell_itr, nodes);
-
-        _drawCell(nodes, grid->GetDimensions(), layered);
-    }
-    DisableClippingPlanes();
-
-    glEndList();
-
-    // Fast drawing display list
-    //
-    glNewList(_drawList + 2, GL_COMPILE);
-
-    cell_itr = grid->ConstCellBegin();
-    end_cell_itr = grid->ConstCellEnd();
-
-    size_t count = 0;
-    for (; cell_itr != end_cell_itr; ++cell_itr) {
-        vector<vector<size_t>> nodes;
-        grid->GetCellNodes(*cell_itr, nodes);
-
-        if (count % 99 == 0) { _drawCell(nodes, grid->GetDimensions(), layered); }
-        count++;
-    }
-    DisableClippingPlanes();
-
-    glEndList();
 
     delete[] coordsArray;
     delete[] colorsArray;
@@ -277,43 +234,51 @@ int WireFrameRenderer::_buildCache()
     if (grid) delete grid;
     if (heightGrid) delete heightGrid;
 
+    _nIndices = indices.size();
+    glBindVertexArray(_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexData), vertices.data(), GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_DYNAMIC_DRAW);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     return 0;
 }
 
 int WireFrameRenderer::_paintGL(bool fast)
 {
     int rc = 0;
-    if (_isCacheDirty()) {
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_COLOR_ARRAY);
+    if (_isCacheDirty()) rc = _buildCache();
 
-        rc = _buildCache();
+    SmartShaderProgram shader = _glManager->shaderManager->GetSmartShader("Wireframe");
+    if (!shader.IsValid()) return -1;
 
-        glDisableClientState(GL_VERTEX_ARRAY);
-        glDisableClientState(GL_NORMAL_ARRAY);
-    }
+    EnableClipToBox(_glManager->shaderManager->GetShader("Wireframe"));
+    shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
+    glBindVertexArray(_VAO);
 
-    glCallList(_drawList);
+    glLineWidth(1);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+    glDrawElements(GL_LINES, _nIndices, GL_UNSIGNED_INT, 0);
 
-    if (!fast) {
-        glCallList(_drawList + 1);
-    } else {
-        // Fast draw display list
-        //
-        glCallList(_drawList + 2);
-    }
+    DisableClippingPlanes();
+    glBindVertexArray(0);
 
     return rc;
 }
 
 int WireFrameRenderer::_initializeGL()
 {
-    // Three drawing list: one for vertex coordinates, one for vertex
-    // connectivity during "slow" drawing, and one for vertex connectivity
-    // during fast drawing
-    //
-    _drawList = glGenLists(3);
-    assert(_drawList != 0);
-
+    glGenVertexArrays(1, &_VAO);
+    glBindVertexArray(_VAO);
+    glGenBuffers(1, &_VBO);
+    glGenBuffers(1, &_EBO);
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), NULL);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void *)offsetof(struct VertexData, r));
+    glEnableVertexAttribArray(1);
+    glBindVertexArray(0);
     return 0;
 }

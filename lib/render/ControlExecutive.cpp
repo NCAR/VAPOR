@@ -8,10 +8,9 @@
 #include <sstream>
 #include <string>
 
-#include <vapor/GetAppPath.h>
 #include <vapor/ParamsMgr.h>
-#include <vapor/ShaderMgr.h>
 #include <vapor/ControlExecutive.h>
+#include <vapor/CalcEngineMgr.h>
 
 using namespace VAPoR;
 using namespace std;
@@ -20,7 +19,7 @@ ControlExec::ControlExec(vector<string> appParamsNames, vector<string> appRender
 {
     _paramsMgr = new ParamsMgr(appParamsNames, appRenderParamNames);
     _dataStatus = new DataStatus(cacheSizeMB, nThreads);
-    _shaderMgrs.clear();
+    _calcEngineMgr = new CalcEngineMgr(_dataStatus, _paramsMgr);
     _visualizers.clear();
 }
 
@@ -65,12 +64,6 @@ int ControlExec::NewVisualizer(string winName)
 
 void ControlExec::RemoveVisualizer(string winName)
 {
-    map<string, ShaderMgr *>::iterator itr = _shaderMgrs.find(winName);
-    if (itr != _shaderMgrs.end()) {
-        delete itr->second;
-        _shaderMgrs.erase(itr);
-    }
-
     std::map<string, Visualizer *>::iterator itr2 = _visualizers.find(winName);
     if (itr2 != _visualizers.end()) {
         delete itr2->second;
@@ -78,7 +71,7 @@ void ControlExec::RemoveVisualizer(string winName)
     }
 }
 
-int ControlExec::InitializeViz(string winName)
+int ControlExec::InitializeViz(string winName, GLManager *glManager)
 {
     Visualizer *v = getVisualizer(winName);
     if (!v) {
@@ -86,26 +79,7 @@ int ControlExec::InitializeViz(string winName)
         return -1;
     }
 
-    // initialization of ShaderMgr. Do we really need more than
-    // one ShaderMgr (one for each window?)
-    //
-    vector<string> paths;
-    paths.push_back("shaders");
-
-    ShaderMgr *shaderMgr = new ShaderMgr();
-
-    string shaderPath = GetAppPath("VAPOR", "share", paths);
-    shaderMgr->SetShaderSourceDir(shaderPath);
-    int rc = shaderMgr->LoadShaders();
-    if (rc < 0) {
-        SetErrMsg("Failed to initialize GLSL shaders in dir %s", shaderPath.c_str());
-        printf("%s\n", GetErrMsg());
-        delete shaderMgr;
-        return (-1);
-    }
-    _shaderMgrs[winName] = shaderMgr;
-
-    if (v->initializeGL(shaderMgr) < 0) {
+    if (v->initializeGL(glManager) < 0) {
         SetErrMsg("InitializeGL failure");
         return -1;
     }
@@ -645,3 +619,26 @@ int ControlExec::ClearText()
 
     return 0;
 }
+
+int ControlExec::AddFunction(string scriptType, string dataSetName, string scriptName, string script, const vector<string> &inputVarNames, const vector<string> &outputVarNames,
+                             const vector<string> &outputVarMeshes, bool coordFlag)
+{
+    return (_calcEngineMgr->AddFunction(scriptType, dataSetName, scriptName, script, inputVarNames, outputVarNames, outputVarMeshes, coordFlag));
+}
+
+void ControlExec::RemoveFunction(string scriptType, string dataSetName, string scriptName) { return (_calcEngineMgr->RemoveFunction(scriptType, dataSetName, scriptName)); }
+
+bool ControlExec::GetFunction(string scriptType, string dataSetName, string scriptName, string &script, vector<string> &inputVarNames, vector<string> &outputVarNames, vector<string> &outputVarMeshes,
+                              bool &coordFlag) const
+{
+    script.clear();
+    inputVarNames.clear();
+    outputVarNames.clear();
+    outputVarMeshes.clear();
+
+    return (_calcEngineMgr->GetFunctionScript(scriptType, dataSetName, scriptName, script, inputVarNames, outputVarNames, outputVarMeshes, coordFlag));
+}
+
+string ControlExec::GetFunctionStdout(string scriptType, string dataSetName, string scriptName) const { return (_calcEngineMgr->GetFunctionStdout(scriptType, dataSetName, scriptName)); }
+
+std::vector<string> ControlExec::GetFunctionNames(string scriptType, string dataSetName) const { return (_calcEngineMgr->GetFunctionNames(scriptType, dataSetName)); }

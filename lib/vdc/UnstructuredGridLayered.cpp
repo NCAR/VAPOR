@@ -25,8 +25,8 @@ UnstructuredGridLayered::UnstructuredGridLayered(const std::vector<size_t> &vert
                                                  size_t maxVertexPerFace, size_t maxFacePerVertex, const UnstructuredGridCoordless &xug, const UnstructuredGridCoordless &yug,
                                                  const UnstructuredGridCoordless &zug, const KDTreeRG *kdtree)
 : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, 3, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex),
-  _ug2d(vector<size_t>{vertexDims[0]}, vector<size_t>{faceDims[0]}, edgeDims.size() ? vector<size_t>{edgeDims[0]} : vector<size_t>(), vector<size_t>{bs[0]}, blks, vertexOnFace, faceOnVertex,
-        faceOnFace, location, maxVertexPerFace, maxFacePerVertex, xug, yug, UnstructuredGridCoordless(), kdtree),
+  _ug2d(vector<size_t>{vertexDims[0]}, vector<size_t>{faceDims[0]}, edgeDims.size() ? vector<size_t>{edgeDims[0]} : vector<size_t>(), vector<size_t>{bs[0]}, vector<float *>(), vertexOnFace,
+        faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, xug, yug, UnstructuredGridCoordless(), kdtree),
   _zug(zug)
 {
     assert(xug.GetDimensions().size() == 1);
@@ -34,6 +34,33 @@ UnstructuredGridLayered::UnstructuredGridLayered(const std::vector<size_t> &vert
     assert(zug.GetDimensions().size() == 2);
 
     assert(location == NODE);
+}
+
+vector<size_t> UnstructuredGridLayered::GetCoordDimensions(size_t dim) const
+{
+    if (dim == 0) {
+        return (_ug2d.GetCoordDimensions(dim));
+    } else if (dim == 1) {
+        return (_ug2d.GetCoordDimensions(dim));
+    } else if (dim == 2) {
+        return (_zug.GetDimensions());
+    } else {
+        return (vector<size_t>(1, 1));
+    }
+}
+
+float UnstructuredGridLayered::GetUserCoordinate(std::vector<size_t> &index, size_t dim) const
+{
+    if (dim == 0) {
+        return (_ug2d.GetUserCoordinate(index, dim));
+    } else if (dim == 1) {
+        return (_ug2d.GetUserCoordinate(index, dim));
+    } else if (dim == 2) {
+        ClampIndex(vector<size_t>(1, GetDimensions()[2]), index);
+        return (_zug.AccessIndex(index));
+    } else {
+        return (0.0);
+    }
 }
 
 size_t UnstructuredGridLayered::GetGeometryDim() const { return (3); }
@@ -158,7 +185,7 @@ bool UnstructuredGridLayered::_insideGrid(const std::vector<double> &coords, std
     size_t nz = GetDimensions()[1];
     for (int kk = 0; kk < nz; kk++) {
         float z = 0.0;
-        for (int i = 0; i < lambda.size(); i++) { z += _zug.AccessIJK(nodes2D[i]) * lambda[i]; }
+        for (int i = 0; i < lambda.size(); i++) { z += _zug.AccessIJK(nodes2D[i], kk) * lambda[i]; }
 
         zcoords.push_back(z);
     }
@@ -271,6 +298,9 @@ UnstructuredGridLayered::ConstCoordItrULayered::ConstCoordItrULayered(const Unst
         _itr2D = ug->_ug2d.ConstCoordBegin();
         _zCoordItr = ug->_zug.cbegin();
         _index2D = 0;
+        _coords[0] = (*_itr2D)[0];
+        _coords[1] = (*_itr2D)[1];
+        _coords[2] = *_zCoordItr;
     } else {
         _itr2D = ug->_ug2d.ConstCoordEnd();
         _zCoordItr = ug->_zug.cend();

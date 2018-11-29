@@ -33,6 +33,10 @@ public:
     UnstructuredGridLayered() = default;
     virtual ~UnstructuredGridLayered() = default;
 
+    virtual std::vector<size_t> GetCoordDimensions(size_t dim) const override;
+
+    virtual float GetUserCoordinate(std::vector<size_t> &index, size_t dim) const override;
+
     virtual size_t GetGeometryDim() const override;
 
     static std::string GetClassType() { return ("UnstructuredLayered"); }
@@ -55,6 +59,20 @@ public:
     float GetValueNearestNeighbor(const std::vector<double> &coords) const override;
 
     float GetValueLinear(const std::vector<double> &coords) const override;
+
+    virtual void SetNodeOffset(long offset) override
+    {
+        _ug2d.SetNodeOffset(offset);
+        _zug.SetNodeOffset(offset);
+        UnstructuredGrid::SetNodeOffset(offset);
+    }
+
+    virtual void SetCellOffset(long offset) override
+    {
+        _ug2d.SetCellOffset(offset);
+        _zug.SetCellOffset(offset);
+        UnstructuredGrid::SetCellOffset(offset);
+    }
 
     /////////////////////////////////////////////////////////////////////////////
     //

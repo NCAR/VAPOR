@@ -43,9 +43,13 @@
 #ifndef _glutil_h_
 #define _glutil_h_
 
+#ifdef __APPLE__
+    #define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED
+#endif
+
 #include <GL/glew.h>
 #ifdef Darwin
-    #include <OpenGL/gl.h>
+    #include <OpenGL/gl3.h>
 #else
     #include <GL/gl.h>
 #endif
@@ -53,6 +57,20 @@
 #include <vector>
 #include <string>
 #include <vapor/common.h>
+
+#ifndef NDEBUG
+    #ifdef Darwin
+        #define GL_LEGACY(x) \
+            {                \
+            }
+    #else
+        #define GL_LEGACY(x) x
+    #endif
+    #define GL_ERR_BREAK() assert(!printOpenGLError())
+#else
+    #define GL_LEGACY(x)
+    #define GL_ERR_BREAK()
+#endif
 
 /* These vector and quaternion macros complement similar
  * routines.

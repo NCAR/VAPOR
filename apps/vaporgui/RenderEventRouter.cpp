@@ -22,7 +22,7 @@
 #endif
 
 #include <QFileDialog>
-#include <vapor/GetAppPath.h>
+#include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
 #include "ErrorReporter.h"
 #include "MappingFrame.h"
@@ -68,10 +68,7 @@ string RenderEventRouter::GetSmallIconImagePath() const
     string imageName = _getSmallIconImagePath();
     if (imageName.empty()) return (imageName);
 
-    vector<string> path;
-    path.push_back("images");
-    path.push_back(imageName);
-    return (GetAppPath("VAPOR", "share", path));
+    return (GetSharePath("images/" + imageName));
 }
 
 string RenderEventRouter::GetIconImagePath() const
@@ -79,10 +76,7 @@ string RenderEventRouter::GetIconImagePath() const
     string imageName = _getIconImagePath();
     if (imageName.empty()) return (imageName);
 
-    vector<string> path;
-    path.push_back("images");
-    path.push_back(imageName);
-    return (GetAppPath("VAPOR", "share", path));
+    return (GetSharePath("images/" + imageName));
 }
 
 void RenderEventRouter::setEditorDirty()

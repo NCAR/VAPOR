@@ -8,6 +8,7 @@
 #include <vapor/CFuncs.h>
 #include <vapor/OptionParser.h>
 #include <vapor/ViewpointParams.h>
+#include <vapor/FileUtils.h>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -62,7 +63,7 @@ int main(int argc, char **argv)
     OptionParser op;
     string       s;
 
-    ProgName = Basename(argv[0]);
+    ProgName = FileUtils::LegacyBasename(argv[0]);
 
     MyBase::SetErrMsgFilePtr(stderr);
 

@@ -23,6 +23,7 @@
 #include <vapor/GeoImageTMS.h>
 #include <vapor/ImageRenderer.h>
 #include <vapor/ImageParams.h>
+#include <vapor/FileUtils.h>
 
 using namespace VAPoR;
 
@@ -362,11 +363,11 @@ int ImageRenderer::_reinit(string path, vector<double> times)
 
         // Construct path to TMS tile directory
         //
-        if (IsAbsPath(tiledir)) {
+        if (FileUtils::IsPathAbsolute(tiledir)) {
             path = tiledir;
         } else {
-            string dir = Dirname(path);
-            path = Catpath("", dir, tiledir);
+            string dir = FileUtils::Dirname(path);
+            path = dir + FileUtils::Separator + tiledir;
         }
         tms_flag = true;
     }

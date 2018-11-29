@@ -58,6 +58,9 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
         _maxExt.push_back(0.f);
     }
 
+    _varRange.resize(2);
+    std::fill(_varRange.begin(), _varRange.end(), 0.f);
+
     connectWidgets();
 }
 
@@ -374,6 +377,14 @@ void TFWidget::checkForExternalChangesToHisto()
         _timeStep = newTimestep;
         _somethingChanged = true;
     }
+
+    std::vector<double> newRange(2, 0.f);
+    _dataMgr->GetDataRange(_timeStep, _varName, _refLevel, _cLevel, newRange);
+    if ((newRange[0] != _varRange[0]) || (newRange[1] != _varRange[1])) {
+        _varRange = newRange;
+        _somethingChanged = true;
+    }
+
     if (_somethingChanged) {
         if (autoUpdateHisto())
             refreshHistogram();

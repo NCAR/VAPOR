@@ -8,6 +8,7 @@
 #include <vapor/CFuncs.h>
 #include <vapor/VDCNetCDF.h>
 #include <vapor/DCCF.h>
+#include <vapor/FileUtils.h>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -149,7 +150,7 @@ int main(int argc, char **argv)
     //
     // Parse command line arguments
     //
-    ProgName = Basename(argv[0]);
+    ProgName = FileUtils::LegacyBasename(argv[0]);
 
     if (op.AppendOptions(set_opts) < 0) { return (1); }
 
@@ -181,7 +182,7 @@ int main(int argc, char **argv)
                           vdc.GetDataDir(master).c_str());
         return (1);
     }
-    if (FileExists(master) && !opt.force) {
+    if (FileUtils::Exists(master) && !opt.force) {
         MyBase::SetErrMsg("\"%s\" already exists and -force option not used.", master.c_str());
         exit(1);
     }

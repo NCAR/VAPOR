@@ -517,6 +517,8 @@ void qmatrix(const float *q, GLfloat *m)
     m[14] = 0;
     m[15] = 1;
 }
+#warning This function results in row major matrix. OpenGL uses column major\
+	as well as the rest of the matrix operations
 void qmatrix(const double *q, GLdouble *m)
 {
     /* Build a rotation matrix, given a quaternion rotation.
@@ -1234,12 +1236,8 @@ bool oglStatusOK(vector<int> &status)
 string oglGetErrMsg(vector<int> status)
 {
     string msg;
-    for (int i = 0; i < status.size(); i++) {
-        char *s = (char *)gluErrorString((GLenum)status[i]);
-        msg += (string)s;
-        msg += "\n";
-    }
-    return (msg);
+    for (int i = 0; i < status.size(); i++) msg += "Error #" + std::to_string(status[i]) + "\n";
+    return msg;
 }
 
 int printOglError(const char *file, int line, const char *msg)
@@ -1260,7 +1258,7 @@ int printOglError(const char *file, int line, const char *msg)
             Wasp::MyBase::SetErrMsg("glError: %s\n", msg);
             msg = NULL;
         }
-        Wasp::MyBase::SetErrMsg("glError: %s\n         %s : %d", gluErrorString(glErr), file, line);
+        Wasp::MyBase::SetErrMsg("glError: %i\n\t%s : %d", glErr, file, line);
 
         retCode = -1;
 

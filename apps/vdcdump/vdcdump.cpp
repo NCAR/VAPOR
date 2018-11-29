@@ -8,6 +8,7 @@
 #include <vapor/CFuncs.h>
 #include <vapor/OptionParser.h>
 #include <vapor/VDCNetCDF.h>
+#include <vapor/FileUtils.h>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -327,7 +328,7 @@ struct GlobalData : public Variable {
 int main(int argc, char **argv)
 {
     OptionParser op;
-    const char * progName = Basename(argv[0]);
+    const char * progName = FileUtils::LegacyBasename(argv[0]);
     MyBase::SetErrMsgFilePtr(stderr);
 
     if (op.AppendOptions(set_opts) < 0) {

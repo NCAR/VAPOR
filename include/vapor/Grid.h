@@ -83,6 +83,34 @@ public:
     //!
     const std::vector<size_t> &GetDimensions() const { return (_dims); }
 
+    //! Return the dimensions of the specified coordinate variable
+    //!
+    //! \param[in] dim An integer between 0 and the return value
+    //! of GetGeometryDim() - 1, indicating which
+    //! coordinate dimensions are to be returned.
+    //!
+    //! if \p dim is greater than or equal to GetGeometryDim() - 1
+    //! a vector of length one with its single component equal to
+    //! one is returned.
+    //!
+    virtual std::vector<size_t> GetCoordDimensions(size_t dim) const = 0;
+
+    //! Return the user coordinate for the specified dimension
+    //!
+    //! This method returns a user coordinate for the axis specified
+    //! by \p dim at the logical index given by \p index. If either \p dim
+    //! or \p index are outside of the range of possible values zero is returned
+    //!
+    //! \param[in] index Logical index into coordinate array. The dimensionality
+    //! and range of component values are given by GetCoordDimensions(). The
+    //! starting value for each component of \p index is zero.
+    //!
+    //! \param[in] dim An integer between 0 and the return value
+    //! of GetGeometryDim() - 1, indicating which
+    //! coordinate dimensions are to be returned.
+    //!
+    virtual float GetUserCoordinate(std::vector<size_t> &index, size_t dim) const = 0;
+
     virtual std::string GetType() const = 0;
 
     //! Get geometric dimension of cells
@@ -462,25 +490,9 @@ public:
     //! \param[in,out] indices An array index vector
     //! \sa GetNodeDimensions()
     //
-    virtual void ClampIndex(std::vector<size_t> &indices) const
-    {
-        const std::vector<size_t> &dims = GetNodeDimensions();
-        while (indices.size() > dims.size()) { indices.pop_back(); }
-        assert(indices.size() == dims.size());
-        for (int i = 0; i < indices.size(); i++) {
-            if (indices[i] >= dims[i]) { indices[i] = dims[i] - 1; }
-        }
-    }
+    virtual void ClampIndex(std::vector<size_t> &indices) const { ClampIndex(GetNodeDimensions(), indices); }
 
-    virtual void ClampCellIndex(std::vector<size_t> &indices) const
-    {
-        const std::vector<size_t> &dims = GetCellDimensions();
-        while (indices.size() > dims.size()) { indices.pop_back(); }
-        assert(indices.size() == dims.size());
-        for (int i = 0; i < indices.size(); i++) {
-            if (indices[i] >= dims[i]) { indices[i] = dims[i] - 1; }
-        }
-    }
+    virtual void ClampCellIndex(std::vector<size_t> &indices) const { ClampIndex(GetCellDimensions(), indices); }
 
     //! Set periodic boundaries
     //!
@@ -520,14 +532,39 @@ public:
     //! Return the smallest node ID. The default is zero
     //
     virtual long GetNodeOffset() const { return (_nodeIDOffset); }
-    void         SetNodeOffset(long offset) { _nodeIDOffset = offset; }
+    virtual void SetNodeOffset(long offset) { _nodeIDOffset = offset; }
 
     //! Get the linear offset to the cell IDs
     //!
     //! Return the smallest Cell ID. The default is zero
     //
     virtual long GetCellOffset() const { return (_cellIDOffset); }
-    void         SetCellOffset(long offset) { _cellIDOffset = offset; }
+    virtual void SetCellOffset(long offset) { _cellIDOffset = offset; }
+
+    //! Return the absolute minimum grid coordinate
+    //!
+    //! This method returns the absolute minimum grid coordinate. If
+    //! the Grid contains a subregion extracted from a larger mesh this
+    //! absolute minimum grid coordinate gives the offset of the first
+    //! gridpoint in this grid relative to the larger mesh.
+    //!
+    //! \note The value of returned is not used within the Grid class
+    //! and any value can be stored here using SetMinAbs().
+    //!
+    virtual std::vector<size_t> GetMinAbs() const { return (_minAbs); }
+
+    //! Set the absolute minimum grid coordinate
+    //!
+    //! \param[in] minAbs Must have same dimensionality as constructors \p dims
+    //! parameter. Otherwise may contain any value, but is intended to contain
+    //! the offset to the first grid point in the mesh. The default is the
+    //! zero vector
+    //
+    virtual void SetMinAbs(const std::vector<size_t> &minAbs)
+    {
+        assert(minAbs.size() == GetDimensions().size());
+        _minAbs = _minAbs;
+    }
 
     VDF_API friend std::ostream &operator<<(std::ostream &o, const Grid &g);
 
@@ -854,14 +891,18 @@ public:
         ForwardIterator<T> &operator=(ForwardIterator<T> rhs);
         ForwardIterator<T> &operator=(ForwardIterator<T> &rhs) = delete;
 
-        bool operator==(const ForwardIterator<T> &rhs) const { return (_index == rhs._index && _rg == rhs._rg); }
+        bool operator==(const ForwardIterator<T> &rhs) const { return (_index == rhs._index); }
         bool operator!=(const ForwardIterator<T> &rhs) { return (!(*this == rhs)); }
 
         const ConstCoordItr &GetCoordItr() { return (_coordItr); }
 
         friend void swap(Grid::ForwardIterator<T> &a, Grid::ForwardIterator<T> &b)
         {
-            std::swap(a._rg, b._rg);
+            std::swap(a._ndims, b._ndims);
+            std::swap(a._blks, b._blks);
+            std::swap(a._dims3d, b._dims3d);
+            std::swap(a._bdims3d, b._bdims3d);
+            std::swap(a._bs3d, b._bs3d);
             std::swap(a._coordItr, b._coordItr);
             std::swap(a._index, b._index);
             std::swap(a._end_index, b._end_index);
@@ -871,13 +912,17 @@ public:
         }
 
     private:
-        T *                 _rg;
-        ConstCoordItr       _coordItr;
-        std::vector<size_t> _index;        // current index into grid
-        std::vector<size_t> _end_index;    // Last valid index
-        size_t              _xb;           // x index within a block
-        float *             _itr;
-        InsideBox           _pred;
+        size_t               _ndims;
+        std::vector<float *> _blks;
+        std::vector<size_t>  _dims3d;
+        std::vector<size_t>  _bdims3d;
+        std::vector<size_t>  _bs3d;
+        ConstCoordItr        _coordItr;
+        std::vector<size_t>  _index;        // current index into grid
+        std::vector<size_t>  _end_index;    // Last valid index
+        size_t               _xb;           // x index within a block
+        float *              _itr;
+        InsideBox            _pred;
     };
 
     typedef Grid::ForwardIterator<Grid>       Iterator;
@@ -903,12 +948,22 @@ protected:
 
     float *AccessIndex(const std::vector<float *> &blks, const std::vector<size_t> &indices) const;
 
+    virtual void ClampIndex(const std::vector<size_t> &dims, std::vector<size_t> &indices) const
+    {
+        while (indices.size() > dims.size()) { indices.pop_back(); }
+        while (indices.size() < dims.size()) { indices.push_back(0); }
+        for (int i = 0; i < indices.size(); i++) {
+            if (indices[i] >= dims[i]) { indices[i] = dims[i] - 1; }
+        }
+    }
+
 private:
     std::vector<size_t>  _dims;     // dimensions of grid arrays
     std::vector<size_t>  _bs;       // dimensions of each block
     std::vector<size_t>  _bdims;    // dimensions (specified in blocks) of ROI
     std::vector<float *> _blks;
     std::vector<bool>    _periodic;    // periodicity of boundaries
+    std::vector<size_t>  _minAbs;      // Offset to start of grid
     size_t               _topologyDimension;
     float                _missingValue;
     bool                 _hasMissing;
