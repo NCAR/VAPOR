@@ -3,7 +3,6 @@ set (SRC
 	ControlExecutive.cpp
 	HelloRenderer.cpp
 	Renderer.cpp
-	ShaderMgr.cpp
 	ShaderProgram.cpp
 	TwoDDataRenderer.cpp
 	TwoDRenderer.cpp
@@ -18,13 +17,28 @@ set (SRC
 	Visualizer.cpp
 	AnnotationRenderer.cpp
 	jfilewrite.cpp
-	textRenderer.cpp
 	RayCaster.cpp
 	DVRenderer.cpp
 	IsoSurfaceRenderer.cpp
 	ControlExecutive.cpp
 	ContourRenderer.cpp
 	MyPython.cpp
+	MatrixManager.cpp
+	Shader.cpp
+	LegacyGL.cpp
+	ShaderManager.cpp
+	GLManager.cpp
+	FontManager.cpp
+	Font.cpp
+	TextLabel.cpp
+	PyEngine.cpp
+	CalcEngineMgr.cpp
+	GeoTIFWriter.cpp
+	ImageWriter.cpp
+	JPGWriter.cpp
+	PNGWriter.cpp
+	TIFWriter.cpp
+	Proj4StringParser.cpp
 )
 
 set (HEADERS
@@ -32,7 +46,6 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/ControlExecutive.h
 	${PROJECT_SOURCE_DIR}/include/vapor/HelloRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Renderer.h
-	${PROJECT_SOURCE_DIR}/include/vapor/ShaderMgr.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ShaderProgram.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TwoDDataRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TwoDRenderer.h
@@ -45,16 +58,36 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/GeoImageGeoTiff.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ImageRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Visualizer.h
-	${PROJECT_SOURCE_DIR}/include/vapor/AnnotationsRenderer.h
-	${PROJECT_SOURCE_DIR}/include/vapor/textRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/AnnotationRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ControlExecutive.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ContourRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/MyPython.h
+	${PROJECT_SOURCE_DIR}/include/vapor/MatrixManager.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Shader.h
+	${PROJECT_SOURCE_DIR}/include/vapor/LegacyGL.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ShaderManager.h
+	${PROJECT_SOURCE_DIR}/include/vapor/GLManager.h
+	${PROJECT_SOURCE_DIR}/include/vapor/FontManager.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Font.h
+	${PROJECT_SOURCE_DIR}/include/vapor/IResourceManager.h
+	${PROJECT_SOURCE_DIR}/include/vapor/TextLabel.h
+	${PROJECT_SOURCE_DIR}/include/vapor/RayCaster.h
+	${PROJECT_SOURCE_DIR}/include/vapor/DVRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/IsoSurfaceRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/PyEngine.h
+	${PROJECT_SOURCE_DIR}/include/vapor/CalcEngineMgr.h
+	${PROJECT_SOURCE_DIR}/include/vapor/GeoTIFWriter.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ImageWriter.h
+	${PROJECT_SOURCE_DIR}/include/vapor/JPGWriter.h
+	${PROJECT_SOURCE_DIR}/include/vapor/PNGWriter.h
+	${PROJECT_SOURCE_DIR}/include/vapor/TIFWriter.h
+	${PROJECT_SOURCE_DIR}/include/vapor/jpegapi.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Proj4StringParser.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})
 
-target_link_libraries (render PUBLIC common vdc params ftgl freetype geotiff jpeg tiff python${PYTHONVERSION})
+target_link_libraries (render PUBLIC common vdc params ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} python${PYTHONVERSION})
 
 add_definitions (-DRENDER_EXPORTS)
 
