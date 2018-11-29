@@ -233,6 +233,10 @@ class VDF_API DerivedCoordVar_PCSFromLatLon : public DerivedCoordVar {
 
     int _setupVar();
 
+    int _readRegionHelperCylindrical(
+        DC::FileTable::FileObject *f,
+        const std::vector<size_t> &min, const std::vector<size_t> &max,
+        float *region);
     int _readRegionHelper1D(
         DC::FileTable::FileObject *f,
         const std::vector<size_t> &min, const std::vector<size_t> &max,
