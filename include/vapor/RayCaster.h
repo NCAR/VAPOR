@@ -150,25 +150,7 @@ protected:
     //
     GLuint _compileShaders(const char *vertex_file_path, const char *fragment_file_path);
 
-    //
-    // Get current Model View Projection matrix that can be passed to shaders
-    //   Note: MVP should be a memory space of 16 GLfloats that is already allocated.
-    //         The MVP matrix is stored in a colume-major fashion.
-    void _getMVPMatrix(GLfloat *MVP) const;
-
     double _getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const;
-
-    //
-    // Helper matrix manipulation functions
-    //
-    bool _mesa_invert_matrix_general(GLfloat out[16], const GLfloat in[16]);
-    void _mesa_transposef(GLfloat to[16], const GLfloat from[16]);
-    void _printMatrix(const GLfloat m[16]);
-
-    //
-    // Multiply a 4-value vector by a 4x4 matrix.
-    //
-    void _matMultiVec(const GLfloat *matrix, const GLfloat *vecIn, GLfloat *vecOut) const;
 
 };    // End of class RayCaster
 
