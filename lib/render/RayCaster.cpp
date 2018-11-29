@@ -4,6 +4,9 @@
 #include <fstream>
 #include <sstream>
 
+#include <vapor/MatrixManager.h>
+#include <vapor/GLManager.h>
+
 //
 // OpenGL debug output
 // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDebugMessageInsert.xhtml
@@ -528,12 +531,9 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
 
 int RayCaster::_initializeGL()
 {
-#ifdef Darwin
-    return 0;
-#endif
     // Enable debug output
-    glEnable              ( GL_DEBUG_OUTPUT );
-    glDebugMessageCallback( MessageCallback, 0 );
+    //glEnable              ( GL_DEBUG_OUTPUT );
+    //glDebugMessageCallback( MessageCallback, 0 );
 
     _loadShaders();
 
@@ -544,10 +544,7 @@ int RayCaster::_initializeGL()
 
 int RayCaster::_paintGL( bool fast ) 
 {
-#ifdef Darwin
-    return 0;
-#endif
-
+    const MatrixManager* mm = Renderer::_glManager->matrixManager;
     // Visualizer dimensions would change if window is resized
     GLint newViewport[4];
     glGetIntegerv( GL_VIEWPORT, newViewport );
@@ -679,48 +676,48 @@ int RayCaster::_paintGL( bool fast )
     glViewport( 0, 0, _currentViewport[2], _currentViewport[3] );
 
     /* Collect ModelView matrix */
-    GLfloat ModelView[16];
-    glGetFloatv( GL_MODELVIEW_MATRIX,  ModelView );
+    //GLfloat ModelView[16];
+    //glGetFloatv( GL_MODELVIEW_MATRIX,  ModelView );
+    glm::mat4 ModelView = mm->GetModelViewMatrix();
+    
 
     // 1st pass: render back facing polygons to texture0 of the framebuffer
     _drawVolumeFaces( 1, castingMode, false ); 
 
     /* Detect if we're inside the volume */
-    GLfloat InversedMV[16];
-    bool success = _mesa_invert_matrix_general( InversedMV, ModelView );
-    if( !success )
-    {
-        MyBase::SetErrMsg("ModelView matrix is a singular matrix; "
-                          "the behavior becomes undefined!" );
-    }
+    glm::mat4 InversedMV = glm::inverse( ModelView );
     std::vector<double> cameraUser( 4, 1.0 );   // camera position in user coordinates
-    cameraUser[0]         = InversedMV[ 12 ];
-    cameraUser[1]         = InversedMV[ 13 ];
-    cameraUser[2]         = InversedMV[ 14 ];
+    //cameraUser[0]         = InversedMV[ 12 ];
+    //cameraUser[1]         = InversedMV[ 13 ];
+    //cameraUser[2]         = InversedMV[ 14 ];
+    cameraUser[0]         = InversedMV[3][0];
+    cameraUser[1]         = InversedMV[3][1];
+    cameraUser[2]         = InversedMV[3][2];
     std::vector<size_t> cameraCellIndices;      // camera position in which cell?
     StructuredGrid*  grid = _userCoordinates.GetCurrentGrid( params, _dataMgr );
     bool insideACell      =  grid->GetIndicesCell( cameraUser, cameraCellIndices ); 
 
     if( insideACell )
     {
-        GLfloat MVP[16],    InversedMVP[16];
-        _getMVPMatrix( MVP );
-        _mesa_invert_matrix_general( InversedMVP, MVP );
+        //GLfloat MVP[16],    InversedMVP[16];
+        //_getMVPMatrix( MVP );
+        //_mesa_invert_matrix_general( InversedMVP, MVP );
+        glm::mat4 MVP = mm->GetModelViewProjectionMatrix();
+        glm::mat4 InversedMVP = glm::inverse( MVP );
 
-        float topLeftNDC[4]     = {-1.0f,  1.0f, -0.9999f, 1.0f};
-        float bottomLeftNDC[4]  = {-1.0f, -1.0f, -0.9999f, 1.0f};
-        float topRightNDC[4]    = { 1.0f,  1.0f, -0.9999f, 1.0f};
-        float bottomRightNDC[4] = { 1.0f, -1.0f, -0.9999f, 1.0f};
-        float near[16];
-        _matMultiVec( InversedMVP, topLeftNDC,     near     );
-        _matMultiVec( InversedMVP, bottomLeftNDC,  near + 4 );
-        _matMultiVec( InversedMVP, topRightNDC,    near + 8 );
-        _matMultiVec( InversedMVP, bottomRightNDC, near + 12);
+        glm::vec4 topLeftNDC(    -1.0f,  1.0f, -0.9999f, 1.0f );
+        glm::vec4 bottomLeftNDC( -1.0f, -1.0f, -0.9999f, 1.0f );
+        glm::vec4 topRightNDC(    1.0f,  1.0f, -0.9999f, 1.0f );
+        glm::vec4 bottomRightNDC( 1.0f, -1.0f, -0.9999f, 1.0f );
+        glm::vec4 near[4];
+        near[0] = InversedMVP * topLeftNDC;
+        near[1] = InversedMVP * bottomLeftNDC;
+        near[2] = InversedMVP * topRightNDC;
+        near[3] = InversedMVP * bottomRightNDC;
         for( int i = 0; i < 4; i++ )
         {
-            _userCoordinates.nearCoords[ i*3   ] = near[ i*4   ] / near[ i*4+3 ];
-            _userCoordinates.nearCoords[ i*3+1 ] = near[ i*4+1 ] / near[ i*4+3 ];
-            _userCoordinates.nearCoords[ i*3+2 ] = near[ i*4+2 ] / near[ i*4+3 ];
+            glm::vec3 nearCoords = glm::vec3(near[i]/near[i].w);
+            std::memcpy(&_userCoordinates.nearCoords[i*3], glm::value_ptr(nearCoords), sizeof(nearCoords));
         }
     }
 
@@ -864,23 +861,25 @@ void RayCaster::_initializeFramebufferTextures()
     glBindTexture(GL_TEXTURE_3D, 0);
 }
 
-void RayCaster::_drawVolumeFaces( int            whichPass, 
-                                  long           castingMode,
-                                  bool           insideACell,
-                                  const GLfloat* InversedMV,
-                                  bool           fast )
+void RayCaster::_drawVolumeFaces( int              whichPass, 
+                                  long             castingMode,
+                                  bool             insideACell,
+                                  const glm::mat4& InversedMV,
+                                  bool             fast )
 {
-    GLfloat modelview[16], projection[16];
-    glGetFloatv( GL_MODELVIEW_MATRIX,  modelview );     // This is from OpenGL 2...
-    glGetFloatv( GL_PROJECTION_MATRIX, projection );    // This is from OpenGL 2...
+    //GLfloat modelview[16], projection[16];
+    //glGetFloatv( GL_MODELVIEW_MATRIX,  modelview );     // This is from OpenGL 2...
+    //glGetFloatv( GL_PROJECTION_MATRIX, projection );    // This is from OpenGL 2...
+    glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
+    glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
     if( whichPass == 1 )
     {
         glUseProgram( _1stPassShaderId );
         GLint uniformLocation = glGetUniformLocation( _1stPassShaderId, "MV" );
-        glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, modelview );
+        glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview) );
         uniformLocation = glGetUniformLocation( _1stPassShaderId, "Projection" );
-        glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, projection );
+        glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, glm::value_ptr(projection) );
 
         glEnable( GL_CULL_FACE );
         glCullFace( GL_FRONT );
@@ -895,9 +894,9 @@ void RayCaster::_drawVolumeFaces( int            whichPass,
     {
         glUseProgram( _2ndPassShaderId );
         GLint uniformLocation = glGetUniformLocation( _1stPassShaderId, "MV" );
-        glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, modelview );
+        glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview) );
         uniformLocation = glGetUniformLocation( _1stPassShaderId, "Projection" );
-        glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, projection );
+        glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, glm::value_ptr(projection) );
 
         glEnable( GL_CULL_FACE );
         glCullFace( GL_BACK );
@@ -943,23 +942,25 @@ void RayCaster::_drawVolumeFaces( int            whichPass,
     glUseProgram( 0 );
 }
 
-void RayCaster::_load3rdPassUniforms( long             castingMode,
-                                      const GLfloat*   inversedMV,
-                                      bool             fast ) const
+void RayCaster::_load3rdPassUniforms( long               castingMode,
+                                      const glm::mat4&   inversedMV,
+                                      bool               fast ) const
 {
-    GLfloat modelview[16], projection[16];
-    glGetFloatv( GL_MODELVIEW_MATRIX,  modelview );     // This is from OpenGL 2...
-    glGetFloatv( GL_PROJECTION_MATRIX, projection );    // This is from OpenGL 2...
+    //GLfloat modelview[16], projection[16];
+    //glGetFloatv( GL_MODELVIEW_MATRIX,  modelview );     // This is from OpenGL 2...
+    //glGetFloatv( GL_PROJECTION_MATRIX, projection );    // This is from OpenGL 2...
+    glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
+    glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
     glUseProgram( _3rdPassShaderId );
     GLint uniformLocation = glGetUniformLocation( _3rdPassShaderId, "MV" );
-    glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, modelview );
+    glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview) );
 
     uniformLocation = glGetUniformLocation( _3rdPassShaderId, "Projection" );
-    glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, projection );
+    glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, glm::value_ptr(projection) );
 
     uniformLocation = glGetUniformLocation( _3rdPassShaderId, "inversedMV" );
-    glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, inversedMV );
+    glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, glm::value_ptr(inversedMV) );
 
     float dataRanges[4] = { _userCoordinates.valueRange[0], 
                             _userCoordinates.valueRange[1], 
@@ -1006,11 +1007,10 @@ void RayCaster::_load3rdPassUniforms( long             castingMode,
     glUniform1iv( uniformLocation, (GLsizei)3, flags );
 
     // Calculate the step size
-    float boxMin[4] = {boxExtents[0], boxExtents[1], boxExtents[2], 1.0f};
-    float boxMax[4] = {boxExtents[3], boxExtents[4], boxExtents[5], 1.0f};
-    float boxminEye[4], boxmaxEye[4];
-    _matMultiVec( modelview, boxMin, boxminEye );
-    _matMultiVec( modelview, boxMax, boxmaxEye );
+    glm::vec4 boxMin( boxExtents[0], boxExtents[1], boxExtents[2], 1.0f );
+    glm::vec4 boxMax( boxExtents[3], boxExtents[4], boxExtents[5], 1.0f );
+    glm::vec4 boxminEye = modelview * boxMin;
+    glm::vec4 boxmaxEye = modelview * boxMax;
     float span[3] = {boxmaxEye[0] - boxminEye[0], 
                      boxmaxEye[1] - boxminEye[1], 
                      boxmaxEye[2] - boxminEye[2]};
@@ -1482,6 +1482,7 @@ GLuint RayCaster::_compileShaders(const char* vertex_file_path,
     return ProgramID;
 }
     
+#if 0
 void RayCaster::_getMVPMatrix( GLfloat* MVP ) const
 {
     GLfloat ModelView[16];
@@ -1512,6 +1513,7 @@ void RayCaster::_matMultiVec( const GLfloat* mat,  const GLfloat* in,
     out[3] = MAT(mat,3,0)*in[0] + MAT(mat,3,1)*in[1] + MAT(mat,3,2)*in[2] + MAT(mat,3,3)*in[3];
     #undef MAT
 }
+#endif
 
 double RayCaster::_getElapsedSeconds( const struct timeval* begin, 
                                       const struct timeval* end ) const
@@ -1538,6 +1540,7 @@ double RayCaster::_getElapsedSeconds( const struct timeval* begin,
  * with partial pivoting followed by back/substitution with the loops manually
  * unrolled.
  */
+#if 0
 bool RayCaster::_mesa_invert_matrix_general( GLfloat out[16], const GLfloat in[16] )
 {
     /**
@@ -1665,6 +1668,7 @@ bool RayCaster::_mesa_invert_matrix_general( GLfloat out[16], const GLfloat in[1
 
     return true;
 }
+#endif
 
 /**
  * Transpose a GLfloat matrix.
