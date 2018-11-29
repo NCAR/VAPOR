@@ -160,6 +160,14 @@ class PARAMS_API ViewpointParams : public ParamsBase {
 
     void SetFOV(float v);
     double GetFOV() const;
+    void SetOrthoProjectionSize(float f);
+    double GetOrthoProjectionSize() const;
+
+    enum ProjectionType { Perspective,
+                          Orthographic,
+                          MapOrthographic };
+    void SetProjectionType(ProjectionType type);
+    ProjectionType GetProjectionType() const;
 
     //! Method to get stretch factors
     vector<double> GetStretchFactors() const;
@@ -300,6 +308,8 @@ class PARAMS_API ViewpointParams : public ParamsBase {
     static const string m_windowSizeTag;
     static const string m_stretchFactorsTag;
     static const string m_fieldOfView;
+    static const string _orthoProjectionSizeTag;
+    static const string _projectionTypeTag;
 
     //defaults:
     static double _defaultLightDirection[3][4];

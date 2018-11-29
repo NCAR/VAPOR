@@ -37,7 +37,8 @@ class Trackball;
 
 namespace VAPoR {
 class ControlExec;
-};
+struct GLManager;
+}; // namespace VAPoR
 
 //! \class VizWin
 //! \ingroup Public_GUI
@@ -61,6 +62,7 @@ class VizWin : public QGLWidget {
 
   public:
     VizWin(
+        const QGLFormat &format,
         QWidget *parent, const QString &name,
         string winName, VAPoR::ControlExec *ce, Trackball *trackBall);
     ~VizWin();
@@ -84,10 +86,6 @@ class VizWin : public QGLWidget {
     //
     void HasFocus(const string &winName);
 
-    // Sent when window starts navigation
-    //
-    void StartNavigation(const string &winName);
-
     // Sent when window ends navigation
     //
     void EndNavigation(const string &winName);
@@ -96,8 +94,6 @@ class VizWin : public QGLWidget {
     virtual void setFocus();
 
   private:
-    VizWin() {}
-
     void updateManip(bool initialize = false);
 
     //Event handling
@@ -128,6 +124,7 @@ class VizWin : public QGLWidget {
 
     string _winName;
     VAPoR::ControlExec *_controlExec;
+    VAPoR::GLManager *_glManager;
     double _strHandleMid[3];
 
     bool _mouseClicked; //Indicates mouse has been clicked but not move

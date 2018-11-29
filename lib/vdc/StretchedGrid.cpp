@@ -50,6 +50,42 @@ size_t StretchedGrid::GetGeometryDim() const {
     return (_zcoords.size() == 0 ? 2 : 3);
 }
 
+vector<size_t> StretchedGrid::GetCoordDimensions(size_t dim) const {
+    if (dim == 0) {
+        return (vector<size_t>(1, GetDimensions()[0]));
+    } else if (dim == 1) {
+        return (vector<size_t>(1, GetDimensions()[1]));
+    } else if (dim == 2) {
+        if (GetDimensions().size() == 3) {
+            return (vector<size_t>(1, GetDimensions()[2]));
+        } else {
+            return (vector<size_t>(1, 1));
+        }
+    } else {
+        return (vector<size_t>(1, 1));
+    }
+}
+
+float StretchedGrid::GetUserCoordinate(
+    vector<size_t> &index, size_t dim) const {
+    if (dim == 0) {
+        ClampIndex(vector<size_t>(1, GetDimensions()[0]), index);
+        return (_xcoords[index[0]]);
+    } else if (dim == 1) {
+        ClampIndex(vector<size_t>(1, GetDimensions()[1]), index);
+        return (_ycoords[index[0]]);
+    } else if (dim == 2) {
+        if (GetDimensions().size() == 3) {
+            ClampIndex(vector<size_t>(1, GetDimensions()[2]), index);
+            return (_zcoords[index[0]]);
+        } else {
+            return (0.0);
+        }
+    } else {
+        return (0.0);
+    }
+}
+
 void StretchedGrid::GetBoundingBox(
     const std::vector<size_t> &min, const std::vector<size_t> &max,
     std::vector<double> &minu, std::vector<double> &maxu) const {
@@ -447,18 +483,17 @@ float StretchedGrid::GetValueLinear(
     if (dims.size() > 2)
         assert(k < dims[2] - 1);
 
-    float v0 = AccessIJK(i, j, k) * xwgt[0] +
-               AccessIJK(i + 1, j, k) * xwgt[1] +
-               AccessIJK(i + 1, j + 1, k) * ywgt[0] +
-               AccessIJK(i, j + 1, k) * ywgt[1];
+    float v0 =
+        ((AccessIJK(i, j, k) * xwgt[0] + AccessIJK(i + 1, j, k) * xwgt[1]) * ywgt[0]) +
+        ((AccessIJK(i, j + 1, k) * xwgt[0] + AccessIJK(i + 1, j + 1, k) * xwgt[1]) * ywgt[1]);
 
     if (GetGeometryDim() == 2)
         return (v0);
 
-    float v1 = AccessIJK(i, j, k + 1) * xwgt[0] +
-               AccessIJK(i + 1, j, k + 1) * xwgt[1] +
-               AccessIJK(i + 1, j + 1, k + 1) * ywgt[0] +
-               AccessIJK(i, j + 1, k + 1) * ywgt[1];
+    k++;
+    float v1 =
+        ((AccessIJK(i, j, k) * xwgt[0] + AccessIJK(i + 1, j, k) * xwgt[1]) * ywgt[0]) +
+        ((AccessIJK(i, j + 1, k) * xwgt[0] + AccessIJK(i + 1, j + 1, k) * xwgt[1]) * ywgt[1]);
 
     // Linearly interpolate along Z axis
     //

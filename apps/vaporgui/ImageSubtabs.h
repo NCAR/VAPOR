@@ -6,7 +6,7 @@
 #include "ui_ImageGeometryGUI.h"
 #include "RangeCombos.h"
 #include "vapor/ImageParams.h"
-#include "vapor/GetAppPath.h"
+#include "vapor/ResourcePath.h"
 #include <QFileDialog>
 #include "Flags.h"
 
@@ -27,7 +27,7 @@ class ImageVariablesSubtab : public QWidget, public Ui_ImageVariablesGUI {
         setupUi(this);
         _variablesWidget->Reinit(
             (VariableFlags)(HEIGHT),
-            (DimFlags)(TWOD));
+            (DimFlags)(TWODXY));
     }
 
     void Update(VAPoR::DataMgr *dataMgr,
@@ -96,9 +96,7 @@ class ImageAppearanceSubtab : public QWidget, public Ui_ImageAppearanceGUI {
     }
 
     void SelectImage() {
-        std::vector<std::string> paths;
-        paths.push_back("images");
-        std::string installedImagePath = Wasp::GetAppPath("VAPOR", "share", paths);
+        std::string installedImagePath = Wasp::GetSharePath("images");
         QString fileName = QFileDialog::getOpenFileName(this,
                                                         tr("Specify installed image to load"),
                                                         QString::fromStdString(installedImagePath),
@@ -127,7 +125,7 @@ class ImageGeometrySubtab : public QWidget, public Ui_ImageGeometryGUI {
     ImageGeometrySubtab(QWidget *parent) {
         setupUi(this);
         _geometryWidget->Reinit(
-            (DimFlags)TWOD,
+            (DimFlags)TWODXY,
             (GeometryFlags)MINMAX,
             (VariableFlags)SCALAR);
     }

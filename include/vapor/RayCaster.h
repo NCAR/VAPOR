@@ -14,12 +14,10 @@
 
 #include <vapor/Visualizer.h>
 #include <vapor/RayCasterParams.h>
-#include <vapor/ShaderMgr.h>
 #include <vapor/DataMgr.h>
 #include <vapor/DataMgrUtils.h>
 #include <vapor/Grid.h>
 #include <vapor/utils.h>
-#include <vapor/GetAppPath.h>
 
 namespace VAPoR {
 
