@@ -57,8 +57,10 @@ class RENDER_API WireFrameRenderer : public Renderer {
     virtual int _paintGL(bool fast);
 
   private:
-    GLuint _drawList;
+    GLuint _VAO, _VBO, _EBO;
+    unsigned int _nIndices;
 
+    struct VertexData;
     struct {
         string varName;
         string heightVarName;
@@ -77,11 +79,13 @@ class RENDER_API WireFrameRenderer : public Renderer {
     int _buildCache();
     bool _isCacheDirty() const;
     void _saveCacheParams();
-
     void _drawCell(
-        const vector<vector<size_t>> &nodes,
-        const vector<size_t> &dims,
-        bool layered) const;
+        vector<VertexData> &vertices,
+        vector<unsigned int> &indices,
+        const float *verts,
+        const float *colors,
+        int n,
+        bool layered);
 };
 }; // namespace VAPoR
 
