@@ -137,29 +137,6 @@ RayCaster::~RayCaster()
         glDeleteBuffers( 1, &_zCoordsBufferId );
         _zCoordsBufferId = 0;
     }
-
-    // delete shader programs
-    if( _1stPassShaderId )
-    {
-        glDeleteProgram( _1stPassShaderId );
-        _1stPassShaderId = 0;
-    }
-    if( _2ndPassShaderId )
-    {
-        glDeleteProgram( _2ndPassShaderId );
-        _2ndPassShaderId = 0;
-    }
-    if( _3rdPassMode1ShaderId )
-    {
-        glDeleteProgram( _3rdPassMode1ShaderId );
-        _3rdPassMode1ShaderId = 0;
-    }
-    if( _3rdPassMode2ShaderId )
-    {
-        glDeleteProgram( _3rdPassMode2ShaderId );
-        _3rdPassMode2ShaderId = 0;
-    }
-    _3rdPassShaderId = 0;
 }
 
 // Constructor
@@ -650,7 +627,7 @@ int RayCaster::_paintGL( bool fast )
     _drawVolumeFaces( 1, castingMode, false ); 
 
     /* Detect if we're inside the volume */
-    glm::mat4 InversedMV = glm::inverse( ModelView );
+    glm::mat4 InversedMV  = glm::inverse( ModelView );
     std::vector<double> cameraUser( 4, 1.0 );   // camera position in user coordinates
     cameraUser[0]         = InversedMV[3][0];
     cameraUser[1]         = InversedMV[3][1];
@@ -661,7 +638,7 @@ int RayCaster::_paintGL( bool fast )
 
     if( insideACell )
     {
-        glm::mat4 MVP = mm->GetModelViewProjectionMatrix();
+        glm::mat4 MVP         = mm->GetModelViewProjectionMatrix();
         glm::mat4 InversedMVP = glm::inverse( MVP );
         glm::vec4 topLeftNDC    ( -1.0f,  1.0f, -0.9999f, 1.0f );
         glm::vec4 bottomLeftNDC ( -1.0f, -1.0f, -0.9999f, 1.0f );
@@ -676,7 +653,7 @@ int RayCaster::_paintGL( bool fast )
         {
             near[i] /= near[i].w;
             std::memcpy( _userCoordinates.nearCoords + i * 3, 
-                         glm::value_ptr(near[i]), sizeof(float) * 3 );
+                         glm::value_ptr(near[i]), 3 * sizeof(float) );
         }
     }
 
@@ -686,6 +663,7 @@ int RayCaster::_paintGL( bool fast )
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
     glViewport( 0, 0, _currentViewport[2], _currentViewport[3] );
 
+    // 3rd pass, perform ray casting
     if(  castingMode == 1 )
         _3rdPassShaderId = _3rdPassMode1ShaderId;
     else if( castingMode == 2 )
@@ -695,8 +673,6 @@ int RayCaster::_paintGL( bool fast )
         MyBase::SetErrMsg( "RayCasting Mode not supported!" ); 
         return 1;
     }
-
-    // 3rd pass, perform ray casting
     _drawVolumeFaces( 3, castingMode, insideACell, InversedMV, fast );  
         
     delete grid;
@@ -826,7 +802,7 @@ void RayCaster::_drawVolumeFaces( int              whichPass,
                                   const glm::mat4& InversedMV,
                                   bool             fast )
 {
-    glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
+    glm::mat4 modelview  = _glManager->matrixManager->GetModelViewMatrix();
     glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
     if( whichPass == 1 )
@@ -902,7 +878,7 @@ void RayCaster::_load3rdPassUniforms( long               castingMode,
                                       const glm::mat4&   inversedMV,
                                       bool               fast ) const
 {
-    glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
+    glm::mat4 modelview  = _glManager->matrixManager->GetModelViewMatrix();
     glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
     glUseProgram( _3rdPassShaderId );
