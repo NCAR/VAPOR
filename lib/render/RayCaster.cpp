@@ -120,25 +120,6 @@ RayCaster::~RayCaster() {
         glDeleteBuffers(1, &_zCoordsBufferId);
         _zCoordsBufferId = 0;
     }
-
-    // delete shader programs
-    if (_1stPassShaderId) {
-        glDeleteProgram(_1stPassShaderId);
-        _1stPassShaderId = 0;
-    }
-    if (_2ndPassShaderId) {
-        glDeleteProgram(_2ndPassShaderId);
-        _2ndPassShaderId = 0;
-    }
-    if (_3rdPassMode1ShaderId) {
-        glDeleteProgram(_3rdPassMode1ShaderId);
-        _3rdPassMode1ShaderId = 0;
-    }
-    if (_3rdPassMode2ShaderId) {
-        glDeleteProgram(_3rdPassMode2ShaderId);
-        _3rdPassMode2ShaderId = 0;
-    }
-    _3rdPassShaderId = 0;
 }
 
 // Constructor
@@ -602,7 +583,7 @@ int RayCaster::_paintGL(bool fast) {
         for (int i = 0; i < 4; i++) {
             near[i] /= near[i].w;
             std::memcpy(_userCoordinates.nearCoords + i * 3,
-                        glm::value_ptr(near[i]), sizeof(float) * 3);
+                        glm::value_ptr(near[i]), 3 * sizeof(float));
         }
     }
 
@@ -612,6 +593,7 @@ int RayCaster::_paintGL(bool fast) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
+    // 3rd pass, perform ray casting
     if (castingMode == 1)
         _3rdPassShaderId = _3rdPassMode1ShaderId;
     else if (castingMode == 2)
@@ -620,8 +602,6 @@ int RayCaster::_paintGL(bool fast) {
         MyBase::SetErrMsg("RayCasting Mode not supported!");
         return 1;
     }
-
-    // 3rd pass, perform ray casting
     _drawVolumeFaces(3, castingMode, insideACell, InversedMV, fast);
 
     delete grid;
