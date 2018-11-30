@@ -1,11 +1,8 @@
 #include "vapor/DVRenderer.h"
-#include "vapor/ResourcePath.h"
-#include "vapor/ShaderManager.h"
-#include "vapor/ShaderProgram.h"
-#include "vapor/GLManager.h"
 
 #include <chrono>
 #include <ctime>
+
 
 using namespace VAPoR;
 
