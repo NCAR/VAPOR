@@ -6,6 +6,7 @@
 
 using namespace VAPoR;
 
+
 // Constructor
 RayCaster::RayCaster( const ParamsMgr*    pm,
                       std::string&        winName,
@@ -979,9 +980,9 @@ void RayCaster::_load3rdPassUniforms( long               castingMode,
     uniformLocation = glGetUniformLocation( _3rdPassShaderId, "colorMapTexture" );
     glUniform1i( uniformLocation, textureUnit );
 
-    if( _userCoordinates.missingValueMask == nullptr )
+    if( _userCoordinates.missingValueMask != nullptr )
     {
-        textureUnit = 4;
+        textureUnit++;
         glActiveTexture(  GL_TEXTURE0 + textureUnit );
         glBindTexture(    GL_TEXTURE_3D, _missingValueTextureId );
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "missingValueMaskTexture" );
@@ -990,13 +991,13 @@ void RayCaster::_load3rdPassUniforms( long               castingMode,
 
     if( castingMode == 2 )
     {
-        textureUnit = 5;
+        textureUnit++;
         glActiveTexture(  GL_TEXTURE0 + textureUnit );
         glBindTexture(    GL_TEXTURE_BUFFER, _xyCoordsTextureId );
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "xyCoordsTexture" );
         glUniform1i(      uniformLocation, textureUnit );
 
-        textureUnit = 6;
+        textureUnit++;
         glActiveTexture(  GL_TEXTURE0 + textureUnit );
         glBindTexture(    GL_TEXTURE_BUFFER, _zCoordsTextureId );
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "zCoordsTexture" );
