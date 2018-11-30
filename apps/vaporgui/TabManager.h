@@ -185,6 +185,8 @@ private slots:
 	emit Proj4StringChanged(proj4String);
  }
 
+ void _projectionTypeChanged(int);
+
  void _setAnimationOnOff(bool onOff) {
 	emit AnimationOnOffSignal(onOff);
  }

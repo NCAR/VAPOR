@@ -23,7 +23,7 @@ public:
 		setupUi(this);
 		_variablesWidget->Reinit(
 			(VariableFlags)(SCALAR | HEIGHT),
-			(DimFlags)(TWOD)
+			(DimFlags)(TWODXY)
 		);
 	}
 
@@ -63,7 +63,7 @@ public:
 	TwoDGeometrySubtab(QWidget* parent) {
 		setupUi(this);
 		_geometryWidget->Reinit(
-			(DimFlags)TWOD,
+			(DimFlags)TWODXY,
 			(GeometryFlags)MINMAX,
 			(VariableFlags)SCALAR);
 	}

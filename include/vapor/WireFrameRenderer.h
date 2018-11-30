@@ -33,63 +33,65 @@ class RENDER_API WireFrameRenderer : public Renderer
 {
 public:
 
- //! Constructor, must invoke Renderer constructor
- //! \param[in] Visualizer* pointer to the visualizer where this will draw
- //! \param[in] RenderParams* pointer to the ArrowParams describing 
- //! this renderer
- WireFrameRenderer(  const ParamsMgr*    pm, 
-                      string        winName,     
-                      string        dataSetName, 
-                      string        instName,                 
-                      DataMgr*      dataMgr );
+	//! Constructor, must invoke Renderer constructor
+	//! \param[in] Visualizer* pointer to the visualizer where this will draw
+	//! \param[in] RenderParams* pointer to the ArrowParams describing 
+	//! this renderer
+	WireFrameRenderer(  const ParamsMgr*    pm, 
+			string        winName,     
+			string        dataSetName, 
+			string        instName,                 
+			DataMgr*      dataMgr );
 
- static string GetClassType() {
- 	return("WireFrame");
- }
+	static string GetClassType() {
+		return("WireFrame");
+	}
 
- //! Destructor
- //
- virtual ~WireFrameRenderer();
+	//! Destructor
+	//
+	virtual ~WireFrameRenderer();
 
 
 protected:
 
 
- //! \copydoc Renderer::_initializeGL()
- virtual int _initializeGL();
+	//! \copydoc Renderer::_initializeGL()
+	virtual int _initializeGL();
 
- //! \copydoc Renderer::_paintGL()
- virtual int _paintGL(bool fast);
+	//! \copydoc Renderer::_paintGL()
+	virtual int _paintGL(bool fast);
 
 private:
+	GLuint _VAO, _VBO, _EBO;
+    unsigned int _nIndices;
 
- GLuint _drawList;
+	struct VertexData;
+	struct {
+		string varName;
+		string heightVarName;
+		size_t ts;
+		int level;
+		int lod;
+		bool useSingleColor;
+		std::vector <float> constantColor;
+		float constantOpacity;
+		std::vector<float> tf_lut;
+		std::vector<double> tf_minmax;
+		std::vector<double> boxMin, boxMax;
 
- struct {
-  string varName;
-  string heightVarName;
-  size_t ts;
-  int level;
-  int lod;
-  bool useSingleColor;
-  std::vector <float> constantColor;
-  float constantOpacity;
-  std::vector<float> tf_lut;
-  std::vector<double> tf_minmax;
-  std::vector<double> boxMin, boxMax;
-  
- } _cacheParams;
+	} _cacheParams;
 
- int  _buildCache();
- bool _isCacheDirty() const;
- void _saveCacheParams();
-
- void _drawCell(
-	const vector <vector<size_t> > &nodes,
-	const vector <size_t> &dims,
-	bool layered
- ) const;
-
+	int  _buildCache();
+	bool _isCacheDirty() const;
+	void _saveCacheParams();
+	void _drawCell(
+            vector<VertexData> &vertices,
+            vector<unsigned int> &indices,
+			const float *verts,
+			const float *colors,
+			int n,
+			bool layered
+			);
 
 };
 };

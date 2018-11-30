@@ -53,7 +53,6 @@
  * routines.
  */
 
-
 /* The Trackball package gives that nice 3D rotation interface.
  * A TrackBall class is needed for each rotated scene.
  */
@@ -61,7 +60,7 @@ class Trackball {
 public:
 	Trackball();
 	Trackball(float scale[3]);
-	void	TrackballSetMatrix ();
+    void	TrackballSetMatrix ();
 	void	TrackballFlip (int axis);
 	void	TrackballSpin ();
 	void	TrackballStopSpinning ();
@@ -112,6 +111,8 @@ public:
 	void SetScale(const double scale[3]) {
 		_scale[0] = scale[0]; _scale[1] = scale[1]; _scale[2] = scale[2];
 	}
+    
+    double GetOrthoSize() const;
 
 	const double *GetModelViewMatrix() {
 		return(_modelViewMatrix);
