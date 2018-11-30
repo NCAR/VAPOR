@@ -30,7 +30,8 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
     _textureWidth = 200;
     _textureHeight = 200;
 
-    _vertexCoords.clear();
+    _vertexCoords = {0.0f, 0.0f, 0.f, 1.0f, 0.0f, 0.f, 0.0f, 1.0f, 0.f, 1.0f, 0.0f, 0.f, 1.0f, 1.0f, 0.f, 0.0f, 1.0f, 0.f};
+
     _texCoords = {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f};
 
     _cacheParams.domainMin.resize(3, 0.f);
@@ -50,6 +51,7 @@ SliceRenderer::~SliceRenderer()
 
     glDeleteTextures(1, &_colorMapTextureID);
     glDeleteTextures(1, &_dataValueTextureID);
+    glDeleteTextures(1, &_missingValueTextureID);
 }
 
 int SliceRenderer::_initializeGL()
@@ -201,28 +203,84 @@ std::vector<double> SliceRenderer::_calculateDeltas() const
     return deltas;
 }
 
-void SliceRenderer::_getJSampleCoordinates(std::vector<double> &coords, const std::vector<double> deltas, const int j) const
+void SliceRenderer::_populateDataXY(float *dataValues, float *missingValues, Grid *grid) const
 {
-    if (_cacheParams.orientation == XY) {
-        coords[Y] = _cacheParams.domainMin[Y] + deltas[Y] * j + deltas[Y] / 2.f;
-        coords[Z] = _cacheParams.boxMin[Z];
-    } else if (_cacheParams.orientation == XZ) {
-        coords[Y] = _cacheParams.boxMin[Y];
-        coords[Z] = _cacheParams.domainMin[Z] + deltas[Z] * j + deltas[Z] / 2.f;
-    } else {    // Z corresponds to j, the slower axis
-        coords[X] = _cacheParams.boxMin[X];
-        coords[Z] = _cacheParams.domainMin[Z] + deltas[Z] * j + deltas[Z] / 2.f;
+    std::vector<double> deltas = _calculateDeltas();
+    float               varValue, missingValue;
+    std::vector<double> coords(3, 0.0);
+    coords[X] = _cacheParams.domainMin[X] + deltas[X] / 2.f;
+    coords[Y] = _cacheParams.domainMin[Y] + deltas[Y] / 2.f;
+    coords[Z] = _cacheParams.boxMin[Z];
+
+    int index = 0;
+    for (int j = 0; j < _textureHeight; j++) {
+        coords[X] = _cacheParams.domainMin[X];
+
+        for (int i = 0; i < _textureWidth; i++) {
+            varValue = grid->GetValue(coords);
+            missingValue = grid->GetMissingValue();
+            if (varValue == missingValue) missingValues[index] = 1.f;
+
+            dataValues[index] = varValue;
+
+            index++;
+            coords[X] += deltas[X];
+        }
+        coords[Y] += deltas[Y];
     }
 }
 
-void SliceRenderer::_getISampleCoordinates(std::vector<double> &coords, const std::vector<double> deltas, const int i) const
+void SliceRenderer::_populateDataXZ(float *dataValues, float *missingValues, Grid *grid) const
 {
-    if (_cacheParams.orientation == XY) {
-        coords[X] = _cacheParams.domainMin[X] + deltas[X] * i + deltas[X] / 2.f;
-    } else if (_cacheParams.orientation == XZ) {
-        coords[X] = _cacheParams.domainMin[X] + deltas[X] * i + deltas[X] / 2.f;
-    } else {    // Y corresponds to i, the faster axis
-        coords[Y] = _cacheParams.domainMin[Y] + deltas[Y] * i + deltas[Y] / 2.f;
+    std::vector<double> deltas = _calculateDeltas();
+    float               varValue, missingValue;
+    std::vector<double> coords(3, 0.0);
+    coords[X] = _cacheParams.domainMin[X];
+    coords[Y] = _cacheParams.boxMin[Y];
+    coords[Z] = _cacheParams.domainMin[Z];
+
+    int index = 0;
+    for (int j = 0; j < _textureHeight; j++) {
+        coords[X] = _cacheParams.domainMin[X];
+
+        for (int i = 0; i < _textureWidth; i++) {
+            varValue = grid->GetValue(coords);
+            missingValue = grid->GetMissingValue();
+            if (varValue == missingValue) missingValues[index] = 1.f;
+
+            dataValues[index] = varValue;
+
+            index++;
+            coords[X] += deltas[X];
+        }
+        coords[Z] += deltas[Z];
+    }
+}
+
+void SliceRenderer::_populateDataYZ(float *dataValues, float *missingValues, Grid *grid) const
+{
+    std::vector<double> deltas = _calculateDeltas();
+    float               varValue, missingValue;
+    std::vector<double> coords(3, 0.0);
+    coords[X] = _cacheParams.boxMin[X];
+    coords[Y] = _cacheParams.domainMin[Y];
+    coords[Z] = _cacheParams.domainMin[Z];
+
+    int index = 0;
+    for (int j = 0; j < _textureHeight; j++) {
+        coords[Y] = _cacheParams.domainMin[Y];
+
+        for (int i = 0; i < _textureWidth; i++) {
+            varValue = grid->GetValue(coords);
+            missingValue = grid->GetMissingValue();
+            if (varValue == missingValue) missingValues[index] = 1.f;
+
+            dataValues[index] = varValue;
+
+            index++;
+            coords[Y] += deltas[Y];
+        }
+        coords[Z] += deltas[Z];
     }
 }
 
@@ -242,30 +300,32 @@ int SliceRenderer::_saveTextureData()
 
     _setVertexPositions();
 
-    float *             dataValues = new float[_textureWidth * _textureHeight];
-    float               varValue, missingValue;
-    std::vector<double> coords(3, 0.0);
+    int    textureSize = _textureWidth * _textureHeight;
+    float *dataValues = new float[textureSize];
+    float *missingValues = new float[textureSize];
+    for (int i = 0; i < textureSize; i++) missingValues[i] = 0.f;
 
-    std::vector<double> deltas = _calculateDeltas();
-    for (int j = 0; j < _textureHeight; j++) {
-        _getJSampleCoordinates(coords, deltas, j);
+    if (_cacheParams.orientation == XY)
+        _populateDataXY(dataValues, missingValues, grid);
+    else if (_cacheParams.orientation == XZ)
+        _populateDataXZ(dataValues, missingValues, grid);
+    else if (_cacheParams.orientation == YZ)
+        _populateDataYZ(dataValues, missingValues, grid);
+    else
+        assert(0);
 
-        for (int i = 0; i < _textureWidth; i++) {
-            _getISampleCoordinates(coords, deltas, i);
+    _createDataTexture(dataValues);
+    _createMissingTexture(missingValues);
 
-            int index = (j * _textureWidth + i);
+    delete[] dataValues;
+    delete grid;
+    grid = nullptr;
 
-            varValue = grid->GetValue(coords);
-            missingValue = grid->GetMissingValue();
-            if (varValue == missingValue) {
-                dataValues[index] = NAN;
-                continue;
-            }
+    return rc;
+}
 
-            dataValues[index] = varValue;
-        }
-    }
-
+void SliceRenderer::_createDataTexture(float *dataValues)
+{
     glDeleteTextures(1, &_dataValueTextureID);
     glGenTextures(1, &_dataValueTextureID);
     glActiveTexture(GL_TEXTURE1);
@@ -276,12 +336,20 @@ int SliceRenderer::_saveTextureData()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _textureWidth, _textureHeight, 0, GL_RED, GL_FLOAT, dataValues);
+}
 
-    delete[] dataValues;
-    delete grid;
-    grid = nullptr;
+void SliceRenderer::_createMissingTexture(float *missingValues)
+{
+    glDeleteTextures(1, &_missingValueTextureID);
+    glGenTextures(1, &_missingValueTextureID);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, _missingValueTextureID);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    return rc;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, _textureWidth, _textureHeight, 0, GL_RED, GL_FLOAT, missingValues);
 }
 
 bool SliceRenderer::_isDataCacheDirty() const
@@ -357,14 +425,16 @@ int SliceRenderer::_paintGL(bool fast)
     }
 
     _configureShader();
-
-    if (printOpenGLError() != 0) { return -1; }
+    if (printOpenGLError() != 0) return -1;
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureID);
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, _dataValueTextureID);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, _missingValueTextureID);
 
     glBindVertexArray(_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -399,6 +469,10 @@ void SliceRenderer::_configureShader()
     GLint dataValuesLocation;
     dataValuesLocation = s->GetUniformLocation("dataValues");
     glUniform1i(dataValuesLocation, 1);
+
+    GLint missingValuesLocation;
+    missingValuesLocation = s->GetUniformLocation("missingValues");
+    glUniform1i(missingValuesLocation, 2);
 }
 
 void SliceRenderer::_initializeState()
@@ -413,16 +487,20 @@ void SliceRenderer::_initializeState()
 
 void SliceRenderer::_resetState()
 {
-    ShaderProgram *s = _glManager->shaderManager->GetShader("Slice");
-    s->UnBind();
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_1D, 0);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_1D, 0);
+
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    ShaderProgram *s = _glManager->shaderManager->GetShader("Slice");
+    s->UnBind();
 
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
@@ -434,9 +512,9 @@ void SliceRenderer::_setVertexPositions()
     std::vector<double> min = _cacheParams.boxMin;
     std::vector<double> max = _cacheParams.boxMax;
     int                 orientation = _cacheParams.orientation;
-    if (orientation == XY) {
+    if (orientation == XY)
         _setXYVertexPositions(min, max);
-    } else if (orientation == XZ)
+    else if (orientation == XZ)
         _setXZVertexPositions(min, max);
     else if (orientation == YZ)
         _setYZVertexPositions(min, max);
