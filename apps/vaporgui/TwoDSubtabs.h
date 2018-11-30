@@ -23,7 +23,7 @@ class TwoDVariablesSubtab : public QWidget, public Ui_TwoDVariablesGUI {
         setupUi(this);
         _variablesWidget->Reinit(
             (VariableFlags)(SCALAR | HEIGHT),
-            (DimFlags)(TWOD));
+            (DimFlags)(TWODXY));
     }
 
     void Update(
@@ -60,7 +60,7 @@ class TwoDGeometrySubtab : public QWidget, public Ui_TwoDGeometryGUI {
     TwoDGeometrySubtab(QWidget *parent) {
         setupUi(this);
         _geometryWidget->Reinit(
-            (DimFlags)TWOD,
+            (DimFlags)TWODXY,
             (GeometryFlags)MINMAX,
             (VariableFlags)SCALAR);
     }

@@ -39,6 +39,11 @@
 #include "ErrorReporter.h"
 #include "images/vapor-icon-32.xpm"
 #include "VizWin.h"
+#include "Core3_2_context.h"
+#include <glm/gtc/type_ptr.hpp>
+#include "vapor/GLManager.h"
+#include "vapor/LegacyGL.h"
+#include "vapor/FileUtils.h"
 
 using namespace VAPoR;
 
@@ -48,14 +53,18 @@ using namespace VAPoR;
  *
  */
 VizWin::VizWin(
+    const QGLFormat &format,
     QWidget *parent, const QString &name,
-    string winName, ControlExec *ce, Trackball *trackBall) : QGLWidget(parent) {
+    string winName, ControlExec *ce, Trackball *trackBall) : QGLWidget(new Core3_2_context(format), parent) {
     _trackBall = trackBall;
 
     setAttribute(Qt::WA_DeleteOnClose);
     _winName = winName;
     setWindowIcon(QPixmap(vapor_icon___));
     _controlExec = ce;
+
+    _glManager = nullptr;
+    _manip = nullptr;
 
     setAutoBufferSwap(false);
     _mouseClicked = false;
@@ -65,16 +74,14 @@ VizWin::VizWin(
     _openGLInitFlag = false;
 
     setMouseTracking(false); // Only track mouse when button clicked/held
-
-    _manip = new TranslateStretchManip();
-    bool initialize = true;
-    updateManip(initialize);
 }
 
 /*
  *  Destroys the object and frees any allocated resources
  */
 VizWin::~VizWin() {
+    this->makeCurrent();
+    delete _glManager;
 }
 
 void VizWin::closeEvent(QCloseEvent *e) {
@@ -184,6 +191,7 @@ void VizWin::_setUpProjMatrix() {
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
+    MatrixManager *mm = _glManager->matrixManager;
 
     double m[16];
     vParams->GetModelViewMatrix(m);
@@ -203,25 +211,33 @@ void VizWin::_setUpProjMatrix() {
     size_t width, height;
     vParams->GetWindowSize(width, height);
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
+    mm->MatrixModeProjection();
+    mm->LoadIdentity();
 
     GLfloat w = (float)width / (float)height;
 
-    double fov = vParams->GetFOV();
-    gluPerspective(fov, w, nearDist, farDist);
+    if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) {
+        float s = _trackBall->GetOrthoSize();
+        mm->Ortho(-s * w, s * w, -s, s, nearDist, farDist);
+    } else {
+        double fov = vParams->GetFOV();
+        mm->Perspective(fov, w, nearDist, farDist);
+    }
 
     double pMatrix[16];
-    glGetDoublev(GL_PROJECTION_MATRIX, pMatrix);
+    mm->GetDoublev(MatrixManager::Mode::Projection, pMatrix);
 
     bool enabled = _controlExec->GetSaveStateEnabled();
     _controlExec->SetSaveStateEnabled(false);
 
     vParams->SetProjectionMatrix(pMatrix);
 
+    if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic)
+        vParams->SetOrthoProjectionSize(_trackBall->GetOrthoSize());
+
     _controlExec->SetSaveStateEnabled(enabled);
 
-    glMatrixMode(GL_MODELVIEW);
+    mm->MatrixModeModelView();
 }
 
 void VizWin::_setUpModelViewMatrix() {
@@ -233,7 +249,7 @@ void VizWin::_setUpModelViewMatrix() {
 
     double m[16];
     vParams->GetModelViewMatrix(m);
-    glLoadMatrixd(m);
+    _glManager->matrixManager->LoadMatrixd(m);
 }
 
 // React to a user-change in window size/position (or possibly max/min)
@@ -279,12 +295,17 @@ void VizWin::resizeGL(int width, int height) {
 }
 
 void VizWin::initializeGL() {
+    _glManager = new GLManager;
+    _manip = new TranslateStretchManip(_glManager);
+    bool initialize = true;
+    updateManip(initialize);
 
     printOpenGLErrorMsg("GLVizWindowInitializeEvent");
-    int rc = _controlExec->InitializeViz(_winName);
+    int rc = _controlExec->InitializeViz(_winName, _glManager);
     if (rc < 0) {
         MSG_ERR("Failure to initialize Visualizer");
     }
+    _glManager->legacy->Initialize();
     printOpenGLErrorMsg("GLVizWindowInitializeEvent");
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
@@ -327,19 +348,21 @@ void VizWin::_mousePressEventNavigate(QMouseEvent *e) {
     // Set trackball from current ViewpointParams matrix;
     //
     _trackBall->setFromFrame(posvec, dirvec, upvec, center, true);
-    _trackBall->TrackballSetMatrix(); // needed?
+    // _trackBall->TrackballSetMatrix();	// needed?
+
+    int trackballButtonNumber = _buttonNum;
+    if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic && _buttonNum == 1)
+        trackballButtonNumber = 2;
 
     // Let trackball handle mouse events for navigation
     //
     _trackBall->MouseOnTrackball(
-        0, _buttonNum, e->x(), e->y(), width(), height());
+        0, trackballButtonNumber, e->x(), e->y(), width(), height());
 
     // Create a state saving group.
     // Only save camera parameters after user release mouse
     //
     paramsMgr->BeginSaveStateGroup("Navigate scene");
-
-    emit StartNavigation(_winName);
 }
 
 // If the user presses the mouse on the active viz window,
@@ -458,6 +481,10 @@ void VizWin::_mouseMoveEventNavigate(QMouseEvent *e) {
     if (!_navigateFlag)
         return;
 
+    // if (_getCurrentMouseMode() == MouseModeParams::GetGeoRefModeName() && _buttonNum == 1)
+    // return;
+
+    // _buttonNum is ignored in MouseOnTrackball here
     _trackBall->MouseOnTrackball(
         1, _buttonNum, e->x(), e->y(), width(), height());
 
@@ -471,7 +498,6 @@ void VizWin::_mouseMoveEventNavigate(QMouseEvent *e) {
     //
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
     vParams->SetModelViewMatrix(m);
-
     Render(true);
 }
 
@@ -563,12 +589,12 @@ void VizWin::Render(bool fast) {
 
     // Set up projection and modelview matrices
     //
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
+    _glManager->matrixManager->MatrixModeProjection();
+    _glManager->matrixManager->PushMatrix();
     _setUpProjMatrix();
 
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
+    _glManager->matrixManager->MatrixModeModelView();
+    _glManager->matrixManager->PushMatrix();
     _setUpModelViewMatrix();
 
     int rc = _controlExec->Paint(_winName, fast);
@@ -578,6 +604,12 @@ void VizWin::Render(bool fast) {
 
     if (_getCurrentMouseMode() == MouseModeParams::GetRegionModeName()) {
         updateManip();
+    } else if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) {
+        _glManager->PixelCoordinateSystemPush();
+        _glManager->matrixManager->Translate(10, 10, 0);
+        glDisable(GL_DEPTH_TEST);
+        _glManager->fontManager->GetFont("arimo", 22)->DrawText("Geo Referenced Mode");
+        _glManager->PixelCoordinateSystemPop();
     }
 
     swapBuffers();
@@ -587,10 +619,10 @@ void VizWin::Render(bool fast) {
         MSG_ERR("OpenGL error");
     }
 
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
+    _glManager->matrixManager->MatrixModeProjection();
+    _glManager->matrixManager->PopMatrix();
+    _glManager->matrixManager->MatrixModeModelView();
+    _glManager->matrixManager->PopMatrix();
 }
 
 VAPoR::RenderParams *VizWin::_getRenderParams() {
@@ -745,5 +777,7 @@ void VizWin::updateManip(bool initialize) {
         maxExts, rpTransform, dmTransform,
         constrain);
 
-    _manip->Render();
+    if (!initialize)
+        _manip->Render();
+    GL_ERR_BREAK();
 }
