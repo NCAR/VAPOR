@@ -28,8 +28,8 @@ uniform mat4 inversedMV;
 //
 // Derive helper variables
 //
-const float EPSILON    = 5e-6f;
-const float ULP        = 1e-7f;
+const float ULP        = 1.2e-7f;
+const float ULP10      = 1.2e-6f;
 bool  fast             = flags[0];          // fast rendering mode
 bool  lighting         = fast ? false : flags[1];   // no lighting in fast mode
 bool  hasMissingValue  = flags[2];          // has missing values or not
@@ -142,7 +142,7 @@ void main(void)
     vec3 startEye       = texture( frontFaceTexture, fragTexture ).xyz;
     vec3 rayDirEye      = stopEye - startEye;
     float rayDirLength  = length( rayDirEye );
-    if( rayDirLength    < ULP )
+    if( rayDirLength    < ULP10 )
         discard;
 
     float nStepsf       = rayDirLength  / stepSize1D;
@@ -178,13 +178,13 @@ void main(void)
             if( (isoValues[j] - step1Value) * (isoValues[j] - step2Value) < 0.0 )
             {
                 vec4 backColor  = texture( colorMapTexture, translatedIsoValues[j] );
-                if( lighting && backColor.a > 0.01 )
+                if( lighting && backColor.a > 0.001 )
                 {
                     float weight         = (isoValues[j] - step1Value) / (step2Value - step1Value);
                     vec3 isoTexture      = step1Texture + weight * (step2Texture - step1Texture);
                     vec3 isoEye          = step1Eye + weight * (step2Eye - step1Eye);
                     vec3 gradientModel   = CalculateGradient( isoTexture );
-                    if( length( gradientModel ) > EPSILON ) // Only apply if big enough gradient
+                    if( length( gradientModel ) > ULP10 ) // Only apply if big enough gradient
                     {
                         vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0 )).xyz;
                              gradientEye = normalize( gradientEye );
