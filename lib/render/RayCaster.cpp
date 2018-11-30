@@ -1,20 +1,8 @@
-#include <vapor/glutil.h>
-#include <vapor/RayCaster.h>
+#include "vapor/glutil.h"
+#include "vapor/RayCaster.h"
 #include <iostream>
+#include <fstream>
 #include <sstream>
-
-//
-// OpenGL debug output
-// https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDebugMessageInsert.xhtml
-//
-void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
-{
-    if (severity != GL_DEBUG_SEVERITY_NOTIFICATION) {
-        char buffer[2048];
-        sprintf(buffer, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n", (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
-        MyBase::SetErrMsg(buffer);
-    }
-}
 
 using namespace VAPoR;
 
@@ -122,25 +110,6 @@ RayCaster::~RayCaster()
         glDeleteBuffers(1, &_zCoordsBufferId);
         _zCoordsBufferId = 0;
     }
-
-    // delete shader programs
-    if (_1stPassShaderId) {
-        glDeleteProgram(_1stPassShaderId);
-        _1stPassShaderId = 0;
-    }
-    if (_2ndPassShaderId) {
-        glDeleteProgram(_2ndPassShaderId);
-        _2ndPassShaderId = 0;
-    }
-    if (_3rdPassMode1ShaderId) {
-        glDeleteProgram(_3rdPassMode1ShaderId);
-        _3rdPassMode1ShaderId = 0;
-    }
-    if (_3rdPassMode2ShaderId) {
-        glDeleteProgram(_3rdPassMode2ShaderId);
-        _3rdPassMode2ShaderId = 0;
-    }
-    _3rdPassShaderId = 0;
 }
 
 // Constructor
@@ -404,30 +373,21 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params
     if (!zCoords)    // Test if allocation successful for 3D buffers.
         return false;
 
-    StructuredGrid *grid = this->GetCurrentGrid(params, dataMgr);
-
-    /* for normalizing coordinate use */
-    std::vector<double> minExtents, maxExtents;
-    grid->GetUserExtents(minExtents, maxExtents);
-    float extent1o[3];
-    for (int i = 0; i < 3; i++) extent1o[i] = 1.0f / (maxExtents[i] - minExtents[i]);
-
-    // Normalize XY coordinate from frontFace buffer
+    // Gather the XY coordinate from frontFace buffer
     size_t xyIdx = 0, xyzIdx = 0;
     for (size_t y = 0; y < dims[1]; y++)
         for (size_t x = 0; x < dims[0]; x++) {
-            /* normalize the coordinate values to range from 0 to 1 */
-            xyCoords[xyIdx++] = (frontFace[xyzIdx++] - minExtents[0]) * extent1o[0];
-            xyCoords[xyIdx++] = (frontFace[xyzIdx++] - minExtents[1]) * extent1o[1];
+            xyCoords[xyIdx++] = frontFace[xyzIdx++];
+            xyCoords[xyIdx++] = frontFace[xyzIdx++];
             xyzIdx++;
         }
 
-    // Retrieve and normalize Z coordinates from grid
+    // Gather the Z coordinates from grid
+    StructuredGrid *              grid = this->GetCurrentGrid(params, dataMgr);
     StructuredGrid::ConstCoordItr coordItr = grid->ConstCoordBegin();
     size_t                        numOfVertices = dims[0] * dims[1] * dims[2];
     for (xyzIdx = 0; xyzIdx < numOfVertices; xyzIdx++) {
-        /* normalize the coordinate values to range from 0 to 1 */
-        zCoords[xyzIdx] = (float((*coordItr)[2]) - minExtents[2]) * extent1o[2];
+        zCoords[xyzIdx] = float((*coordItr)[2]);
         ++coordItr;
     }
 
@@ -436,26 +396,14 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params
 
 int RayCaster::_initializeGL()
 {
-#ifdef Darwin
-    return 0;
-#endif
-    // Enable debug output
-    glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageCallback(MessageCallback, 0);
-
     _loadShaders();
-
     _initializeFramebufferTextures();
-
     return 0;
 }
 
 int RayCaster::_paintGL(bool fast)
 {
-#ifdef Darwin
-    return 0;
-#endif
-
+    const MatrixManager *mm = Renderer::_glManager->matrixManager;
     // Visualizer dimensions would change if window is resized
     GLint newViewport[4];
     glGetIntegerv(GL_VIEWPORT, newViewport);
@@ -566,46 +514,36 @@ int RayCaster::_paintGL(bool fast)
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
-    /* Collect ModelView matrix */
-    GLfloat ModelView[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);
+    glm::mat4 ModelView = mm->GetModelViewMatrix();
 
     // 1st pass: render back facing polygons to texture0 of the framebuffer
     _drawVolumeFaces(1, castingMode, false);
 
     /* Detect if we're inside the volume */
-    GLfloat InversedMV[16];
-    bool    success = _mesa_invert_matrix_general(InversedMV, ModelView);
-    if (!success) {
-        MyBase::SetErrMsg("ModelView matrix is a singular matrix; "
-                          "the behavior becomes undefined!");
-    }
+    glm::mat4           InversedMV = glm::inverse(ModelView);
     std::vector<double> cameraUser(4, 1.0);    // camera position in user coordinates
-    cameraUser[0] = InversedMV[12];
-    cameraUser[1] = InversedMV[13];
-    cameraUser[2] = InversedMV[14];
+    cameraUser[0] = InversedMV[3][0];
+    cameraUser[1] = InversedMV[3][1];
+    cameraUser[2] = InversedMV[3][2];
     std::vector<size_t> cameraCellIndices;    // camera position in which cell?
     StructuredGrid *    grid = _userCoordinates.GetCurrentGrid(params, _dataMgr);
     bool                insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
 
     if (insideACell) {
-        GLfloat MVP[16], InversedMVP[16];
-        _getMVPMatrix(MVP);
-        _mesa_invert_matrix_general(InversedMVP, MVP);
-
-        float topLeftNDC[4] = {-1.0f, 1.0f, -0.9999f, 1.0f};
-        float bottomLeftNDC[4] = {-1.0f, -1.0f, -0.9999f, 1.0f};
-        float topRightNDC[4] = {1.0f, 1.0f, -0.9999f, 1.0f};
-        float bottomRightNDC[4] = {1.0f, -1.0f, -0.9999f, 1.0f};
-        float near[16];
-        _matMultiVec(InversedMVP, topLeftNDC, near);
-        _matMultiVec(InversedMVP, bottomLeftNDC, near + 4);
-        _matMultiVec(InversedMVP, topRightNDC, near + 8);
-        _matMultiVec(InversedMVP, bottomRightNDC, near + 12);
+        glm::mat4 MVP = mm->GetModelViewProjectionMatrix();
+        glm::mat4 InversedMVP = glm::inverse(MVP);
+        glm::vec4 topLeftNDC(-1.0f, 1.0f, -0.9999f, 1.0f);
+        glm::vec4 bottomLeftNDC(-1.0f, -1.0f, -0.9999f, 1.0f);
+        glm::vec4 topRightNDC(1.0f, 1.0f, -0.9999f, 1.0f);
+        glm::vec4 bottomRightNDC(1.0f, -1.0f, -0.9999f, 1.0f);
+        glm::vec4 near[4];
+        near[0] = InversedMVP * topLeftNDC;
+        near[1] = InversedMVP * bottomLeftNDC;
+        near[2] = InversedMVP * topRightNDC;
+        near[3] = InversedMVP * bottomRightNDC;
         for (int i = 0; i < 4; i++) {
-            _userCoordinates.nearCoords[i * 3] = near[i * 4] / near[i * 4 + 3];
-            _userCoordinates.nearCoords[i * 3 + 1] = near[i * 4 + 1] / near[i * 4 + 3];
-            _userCoordinates.nearCoords[i * 3 + 2] = near[i * 4 + 2] / near[i * 4 + 3];
+            near[i] /= near[i].w;
+            std::memcpy(_userCoordinates.nearCoords + i * 3, glm::value_ptr(near[i]), 3 * sizeof(float));
         }
     }
 
@@ -615,6 +553,7 @@ int RayCaster::_paintGL(bool fast)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
+    // 3rd pass, perform ray casting
     if (castingMode == 1)
         _3rdPassShaderId = _3rdPassMode1ShaderId;
     else if (castingMode == 2)
@@ -623,8 +562,6 @@ int RayCaster::_paintGL(bool fast)
         MyBase::SetErrMsg("RayCasting Mode not supported!");
         return 1;
     }
-
-    // 3rd pass, perform ray casting
     _drawVolumeFaces(3, castingMode, insideACell, InversedMV, fast);
 
     delete grid;
@@ -681,7 +618,7 @@ void RayCaster::_initializeFramebufferTextures()
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthBufferId);
 
     /* Set "_backFaceTextureId" as colour attachement #0,
-       and "_frontFaceTextureId" as attachement #1 */
+       and "_frontFaceTextureId" as attachement #1       */
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _backFaceTextureId, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, _frontFaceTextureId, 0);
     glDrawBuffers(2, _drawBuffers);
@@ -744,18 +681,17 @@ void RayCaster::_initializeFramebufferTextures()
     glBindTexture(GL_TEXTURE_3D, 0);
 }
 
-void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACell, const GLfloat *InversedMV, bool fast)
+void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACell, const glm::mat4 &InversedMV, bool fast)
 {
-    GLfloat modelview[16], projection[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);      // This is from OpenGL 2...
-    glGetFloatv(GL_PROJECTION_MATRIX, projection);    // This is from OpenGL 2...
+    glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
+    glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
     if (whichPass == 1) {
         glUseProgram(_1stPassShaderId);
         GLint uniformLocation = glGetUniformLocation(_1stPassShaderId, "MV");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, modelview);
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview));
         uniformLocation = glGetUniformLocation(_1stPassShaderId, "Projection");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, projection);
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
@@ -768,9 +704,9 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
     } else if (whichPass == 2) {
         glUseProgram(_2ndPassShaderId);
         GLint uniformLocation = glGetUniformLocation(_1stPassShaderId, "MV");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, modelview);
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview));
         uniformLocation = glGetUniformLocation(_1stPassShaderId, "Projection");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, projection);
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -813,21 +749,20 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
     glUseProgram(0);
 }
 
-void RayCaster::_load3rdPassUniforms(long castingMode, const GLfloat *inversedMV, bool fast) const
+void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversedMV, bool fast) const
 {
-    GLfloat modelview[16], projection[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);      // This is from OpenGL 2...
-    glGetFloatv(GL_PROJECTION_MATRIX, projection);    // This is from OpenGL 2...
+    glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
+    glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
     glUseProgram(_3rdPassShaderId);
     GLint uniformLocation = glGetUniformLocation(_3rdPassShaderId, "MV");
-    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, modelview);
+    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview));
 
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "Projection");
-    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, projection);
+    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "inversedMV");
-    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, inversedMV);
+    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(inversedMV));
 
     float dataRanges[4] = {_userCoordinates.valueRange[0], _userCoordinates.valueRange[1], _colorMapRange[0], _colorMapRange[1]};
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "dataRanges");
@@ -867,13 +802,12 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const GLfloat *inversedMV
     glUniform1iv(uniformLocation, (GLsizei)3, flags);
 
     // Calculate the step size
-    float boxMin[4] = {boxExtents[0], boxExtents[1], boxExtents[2], 1.0f};
-    float boxMax[4] = {boxExtents[3], boxExtents[4], boxExtents[5], 1.0f};
-    float boxminEye[4], boxmaxEye[4];
-    _matMultiVec(modelview, boxMin, boxminEye);
-    _matMultiVec(modelview, boxMax, boxmaxEye);
-    float span[3] = {boxmaxEye[0] - boxminEye[0], boxmaxEye[1] - boxminEye[1], boxmaxEye[2] - boxminEye[2]};
-    float stepSize1D;
+    glm::vec4 boxMin(boxExtents[0], boxExtents[1], boxExtents[2], 1.0f);
+    glm::vec4 boxMax(boxExtents[3], boxExtents[4], boxExtents[5], 1.0f);
+    glm::vec4 boxminEye = modelview * boxMin;
+    glm::vec4 boxmaxEye = modelview * boxMax;
+    float     span[3] = {boxmaxEye[0] - boxminEye[0], boxmaxEye[1] - boxminEye[1], boxmaxEye[2] - boxminEye[2]};
+    float     stepSize1D;
     if (_userCoordinates.dims[3] < 50)    // Make sure at least 100 steps
         stepSize1D = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / 100.0f;
     else
@@ -1195,333 +1129,4 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-GLuint RayCaster::_compileShaders(const char *vertex_file_path, const char *fragment_file_path)
-{
-    // Create the shaders
-    GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-    GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-
-    // Read the Vertex Shader code from the file
-    std::string   VertexShaderCode;
-    std::ifstream VertexShaderStream(vertex_file_path, std::ios::in);
-    if (VertexShaderStream.is_open()) {
-        std::stringstream sstr;
-        sstr << VertexShaderStream.rdbuf();
-        VertexShaderCode = sstr.str();
-        VertexShaderStream.close();
-    } else {
-        printf("Impossible to open %s. Are you in the right directory ?\n", vertex_file_path);
-        getchar();
-        return 0;
-    }
-
-    // Read the Fragment Shader code from the file
-    std::string   FragmentShaderCode;
-    std::ifstream FragmentShaderStream(fragment_file_path, std::ios::in);
-    if (FragmentShaderStream.is_open()) {
-        std::stringstream sstr;
-        sstr << FragmentShaderStream.rdbuf();
-        FragmentShaderCode = sstr.str();
-        FragmentShaderStream.close();
-    }
-
-    GLint Result = GL_FALSE;
-    int   InfoLogLength;
-
-    // Compile Vertex Shader
-    printf("Compiling shader : %s\n", vertex_file_path);
-    char const *VertexSourcePointer = VertexShaderCode.c_str();
-    glShaderSource(VertexShaderID, 1, &VertexSourcePointer, nullptr);
-    glCompileShader(VertexShaderID);
-
-    // Check Vertex Shader
-    glGetShaderiv(VertexShaderID, GL_COMPILE_STATUS, &Result);
-    glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-    if (InfoLogLength > 0) {
-        std::vector<char> VertexShaderErrorMessage(InfoLogLength + 1);
-        glGetShaderInfoLog(VertexShaderID, InfoLogLength, nullptr, &VertexShaderErrorMessage[0]);
-        printf("%s\n", &VertexShaderErrorMessage[0]);
-    }
-
-    // Compile Fragment Shader
-    printf("Compiling shader : %s\n", fragment_file_path);
-    char const *FragmentSourcePointer = FragmentShaderCode.c_str();
-    glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer, nullptr);
-    glCompileShader(FragmentShaderID);
-
-    // Check Fragment Shader
-    glGetShaderiv(FragmentShaderID, GL_COMPILE_STATUS, &Result);
-    glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-    if (InfoLogLength > 0) {
-        std::vector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
-        glGetShaderInfoLog(FragmentShaderID, InfoLogLength, nullptr, &FragmentShaderErrorMessage[0]);
-        printf("%s\n", &FragmentShaderErrorMessage[0]);
-    }
-
-    // Link the program
-    printf("Linking program\n");
-    GLuint ProgramID = glCreateProgram();
-    glAttachShader(ProgramID, VertexShaderID);
-    glAttachShader(ProgramID, FragmentShaderID);
-    glLinkProgram(ProgramID);
-
-    // Check the program
-    glGetProgramiv(ProgramID, GL_LINK_STATUS, &Result);
-    glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-    if (InfoLogLength > 0) {
-        std::vector<char> ProgramErrorMessage(InfoLogLength + 1);
-        glGetProgramInfoLog(ProgramID, InfoLogLength, nullptr, &ProgramErrorMessage[0]);
-        printf("%s\n", &ProgramErrorMessage[0]);
-    }
-
-    glDetachShader(ProgramID, VertexShaderID);
-    glDetachShader(ProgramID, FragmentShaderID);
-
-    glDeleteShader(VertexShaderID);
-    glDeleteShader(FragmentShaderID);
-
-    return ProgramID;
-}
-
-void RayCaster::_getMVPMatrix(GLfloat *MVP) const
-{
-    GLfloat ModelView[16];
-    GLfloat Projection[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, ModelView);      // This is from OpenGL 2...
-    glGetFloatv(GL_PROJECTION_MATRIX, Projection);    // This is from OpenGL 2...
-
-    // MVP = Projection * ModelView
-    GLfloat tmp;
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++) {
-            tmp = 0.0f;
-            for (int idx = 0; idx < 4; idx++) tmp += ModelView[i * 4 + idx] * Projection[idx * 4 + j];
-            // Because all matrices are colume-major, this is the correct order.
-            MVP[i * 4 + j] = tmp;
-        }
-}
-
-void RayCaster::_matMultiVec(const GLfloat *mat, const GLfloat *in, GLfloat *out) const
-{
-#define MAT(m, r, c) (m)[(c)*4 + (r)]
-    out[0] = MAT(mat, 0, 0) * in[0] + MAT(mat, 0, 1) * in[1] + MAT(mat, 0, 2) * in[2] + MAT(mat, 0, 3) * in[3];
-    out[1] = MAT(mat, 1, 0) * in[0] + MAT(mat, 1, 1) * in[1] + MAT(mat, 1, 2) * in[2] + MAT(mat, 1, 3) * in[3];
-    out[2] = MAT(mat, 2, 0) * in[0] + MAT(mat, 2, 1) * in[1] + MAT(mat, 2, 2) * in[2] + MAT(mat, 2, 3) * in[3];
-    out[3] = MAT(mat, 3, 0) * in[0] + MAT(mat, 3, 1) * in[1] + MAT(mat, 3, 2) * in[2] + MAT(mat, 3, 3) * in[3];
-#undef MAT
-}
-
 double RayCaster::_getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const { return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0); }
-
-//===================================================================
-// The following invert and transpose functions are from mesa 17.3.9:
-// https://mesa.freedesktop.org/archive/mesa-17.3.9.tar.xz
-//===================================================================
-/**
- * Compute inverse of 4x4 transformation matrix.
- *
- * \param in pointer to a memory space which represents a 4x4 colume-major matrix.
- * \param out pointer to a memory space which will hold the inverse matrix
- *
- * \return true for success, false for failure (\p singular matrix).
- *
- * \author
- * Code contributed by Jacques Leroy jle@star.be
- *
- * Calculates the inverse matrix by performing the gaussian matrix reduction
- * with partial pivoting followed by back/substitution with the loops manually
- * unrolled.
- */
-bool RayCaster::_mesa_invert_matrix_general(GLfloat out[16], const GLfloat in[16])
-{
-/**
- * References an element of 4x4 matrix.
- * Calculate the linear storage index of the element and references it.
- */
-#define MAT(m, r, c) (m)[(c)*4 + (r)]
-/**
- * Swaps the values of two floating point variables.
- */
-#define SWAP_ROWS(a, b)    \
-    {                      \
-        GLfloat *_tmp = a; \
-        (a) = (b);         \
-        (b) = _tmp;        \
-    }
-
-    const GLfloat *m = in;
-    GLfloat        wtmp[4][8];
-    GLfloat        m0, m1, m2, m3, s;
-    GLfloat *      r0, *r1, *r2, *r3;
-
-    r0 = wtmp[0], r1 = wtmp[1], r2 = wtmp[2], r3 = wtmp[3];
-
-    r0[0] = MAT(m, 0, 0), r0[1] = MAT(m, 0, 1), r0[2] = MAT(m, 0, 2), r0[3] = MAT(m, 0, 3), r0[4] = 1.0, r0[5] = r0[6] = r0[7] = 0.0,
-
-    r1[0] = MAT(m, 1, 0), r1[1] = MAT(m, 1, 1), r1[2] = MAT(m, 1, 2), r1[3] = MAT(m, 1, 3), r1[5] = 1.0, r1[4] = r1[6] = r1[7] = 0.0,
-
-    r2[0] = MAT(m, 2, 0), r2[1] = MAT(m, 2, 1), r2[2] = MAT(m, 2, 2), r2[3] = MAT(m, 2, 3), r2[6] = 1.0, r2[4] = r2[5] = r2[7] = 0.0,
-
-    r3[0] = MAT(m, 3, 0), r3[1] = MAT(m, 3, 1), r3[2] = MAT(m, 3, 2), r3[3] = MAT(m, 3, 3), r3[7] = 1.0, r3[4] = r3[5] = r3[6] = 0.0;
-
-    /* choose pivot - or die */
-    if (fabsf(r3[0]) > fabsf(r2[0])) SWAP_ROWS(r3, r2);
-    if (fabsf(r2[0]) > fabsf(r1[0])) SWAP_ROWS(r2, r1);
-    if (fabsf(r1[0]) > fabsf(r0[0])) SWAP_ROWS(r1, r0);
-    if (0.0F == r0[0]) return false;
-
-    /* eliminate first variable     */
-    m1 = r1[0] / r0[0];
-    m2 = r2[0] / r0[0];
-    m3 = r3[0] / r0[0];
-    s = r0[1];
-    r1[1] -= m1 * s;
-    r2[1] -= m2 * s;
-    r3[1] -= m3 * s;
-    s = r0[2];
-    r1[2] -= m1 * s;
-    r2[2] -= m2 * s;
-    r3[2] -= m3 * s;
-    s = r0[3];
-    r1[3] -= m1 * s;
-    r2[3] -= m2 * s;
-    r3[3] -= m3 * s;
-    s = r0[4];
-    if (s != 0.0F) {
-        r1[4] -= m1 * s;
-        r2[4] -= m2 * s;
-        r3[4] -= m3 * s;
-    }
-    s = r0[5];
-    if (s != 0.0F) {
-        r1[5] -= m1 * s;
-        r2[5] -= m2 * s;
-        r3[5] -= m3 * s;
-    }
-    s = r0[6];
-    if (s != 0.0F) {
-        r1[6] -= m1 * s;
-        r2[6] -= m2 * s;
-        r3[6] -= m3 * s;
-    }
-    s = r0[7];
-    if (s != 0.0F) {
-        r1[7] -= m1 * s;
-        r2[7] -= m2 * s;
-        r3[7] -= m3 * s;
-    }
-
-    /* choose pivot - or die */
-    if (fabsf(r3[1]) > fabsf(r2[1])) SWAP_ROWS(r3, r2);
-    if (fabsf(r2[1]) > fabsf(r1[1])) SWAP_ROWS(r2, r1);
-    if (0.0F == r1[1]) return false;
-
-    /* eliminate second variable */
-    m2 = r2[1] / r1[1];
-    m3 = r3[1] / r1[1];
-    r2[2] -= m2 * r1[2];
-    r3[2] -= m3 * r1[2];
-    r2[3] -= m2 * r1[3];
-    r3[3] -= m3 * r1[3];
-    s = r1[4];
-    if (0.0F != s) {
-        r2[4] -= m2 * s;
-        r3[4] -= m3 * s;
-    }
-    s = r1[5];
-    if (0.0F != s) {
-        r2[5] -= m2 * s;
-        r3[5] -= m3 * s;
-    }
-    s = r1[6];
-    if (0.0F != s) {
-        r2[6] -= m2 * s;
-        r3[6] -= m3 * s;
-    }
-    s = r1[7];
-    if (0.0F != s) {
-        r2[7] -= m2 * s;
-        r3[7] -= m3 * s;
-    }
-
-    /* choose pivot - or die */
-    if (fabsf(r3[2]) > fabsf(r2[2])) SWAP_ROWS(r3, r2);
-    if (0.0F == r2[2]) return false;
-
-    /* eliminate third variable */
-    m3 = r3[2] / r2[2];
-    r3[3] -= m3 * r2[3], r3[4] -= m3 * r2[4], r3[5] -= m3 * r2[5], r3[6] -= m3 * r2[6], r3[7] -= m3 * r2[7];
-
-    /* last check */
-    if (0.0F == r3[3]) return false;
-
-    s = 1.0F / r3[3]; /* now back substitute row 3 */
-    r3[4] *= s;
-    r3[5] *= s;
-    r3[6] *= s;
-    r3[7] *= s;
-
-    m2 = r2[3]; /* now back substitute row 2 */
-    s = 1.0F / r2[2];
-    r2[4] = s * (r2[4] - r3[4] * m2), r2[5] = s * (r2[5] - r3[5] * m2), r2[6] = s * (r2[6] - r3[6] * m2), r2[7] = s * (r2[7] - r3[7] * m2);
-    m1 = r1[3];
-    r1[4] -= r3[4] * m1, r1[5] -= r3[5] * m1, r1[6] -= r3[6] * m1, r1[7] -= r3[7] * m1;
-    m0 = r0[3];
-    r0[4] -= r3[4] * m0, r0[5] -= r3[5] * m0, r0[6] -= r3[6] * m0, r0[7] -= r3[7] * m0;
-
-    m1 = r1[2]; /* now back substitute row 1 */
-    s = 1.0F / r1[1];
-    r1[4] = s * (r1[4] - r2[4] * m1), r1[5] = s * (r1[5] - r2[5] * m1), r1[6] = s * (r1[6] - r2[6] * m1), r1[7] = s * (r1[7] - r2[7] * m1);
-    m0 = r0[2];
-    r0[4] -= r2[4] * m0, r0[5] -= r2[5] * m0, r0[6] -= r2[6] * m0, r0[7] -= r2[7] * m0;
-
-    m0 = r0[1]; /* now back substitute row 0 */
-    s = 1.0F / r0[0];
-    r0[4] = s * (r0[4] - r1[4] * m0), r0[5] = s * (r0[5] - r1[5] * m0), r0[6] = s * (r0[6] - r1[6] * m0), r0[7] = s * (r0[7] - r1[7] * m0);
-
-    MAT(out, 0, 0) = r0[4];
-    MAT(out, 0, 1) = r0[5], MAT(out, 0, 2) = r0[6];
-    MAT(out, 0, 3) = r0[7], MAT(out, 1, 0) = r1[4];
-    MAT(out, 1, 1) = r1[5], MAT(out, 1, 2) = r1[6];
-    MAT(out, 1, 3) = r1[7], MAT(out, 2, 0) = r2[4];
-    MAT(out, 2, 1) = r2[5], MAT(out, 2, 2) = r2[6];
-    MAT(out, 2, 3) = r2[7], MAT(out, 3, 0) = r3[4];
-    MAT(out, 3, 1) = r3[5], MAT(out, 3, 2) = r3[6];
-    MAT(out, 3, 3) = r3[7];
-
-#undef SWAP_ROWS
-#undef MAT
-
-    return true;
-}
-
-/**
- * Transpose a GLfloat matrix.
- *
- * \param to destination array.
- * \param from source array.
- */
-void RayCaster::_mesa_transposef(GLfloat to[16], const GLfloat from[16])
-{
-    to[0] = from[0];
-    to[1] = from[4];
-    to[2] = from[8];
-    to[3] = from[12];
-    to[4] = from[1];
-    to[5] = from[5];
-    to[6] = from[9];
-    to[7] = from[13];
-    to[8] = from[2];
-    to[9] = from[6];
-    to[10] = from[10];
-    to[11] = from[14];
-    to[12] = from[3];
-    to[13] = from[7];
-    to[14] = from[11];
-    to[15] = from[15];
-}
-
-void RayCaster::_printMatrix(const GLfloat m[16])
-{
-    for (int i = 0; i < 4; i++) printf("\t%f %f %f %f\n", m[i], m[4 + i], m[8 + i], m[12 + i]);
-}

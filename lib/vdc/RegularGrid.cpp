@@ -43,6 +43,43 @@ RegularGrid::RegularGrid(const vector<size_t> &dims, const vector<size_t> &bs, c
 
 size_t RegularGrid::GetGeometryDim() const { return (_minu.size()); }
 
+vector<size_t> RegularGrid::GetCoordDimensions(size_t dim) const
+{
+    if (dim == 0) {
+        return (vector<size_t>(1, GetDimensions()[0]));
+    } else if (dim == 1) {
+        return (vector<size_t>(1, GetDimensions()[1]));
+    } else if (dim == 2) {
+        if (GetDimensions().size() == 3) {
+            return (vector<size_t>(1, GetDimensions()[2]));
+        } else {
+            return (vector<size_t>(1, 1));
+        }
+    } else {
+        return (vector<size_t>(1, 1));
+    }
+}
+
+float RegularGrid::GetUserCoordinate(vector<size_t> &index, size_t dim) const
+{
+    if (dim == 0) {
+        ClampIndex(vector<size_t>(1, GetDimensions()[0]), index);
+        return (index[0] * _delta[0] + _minu[0]);
+    } else if (dim == 1) {
+        ClampIndex(vector<size_t>(1, GetDimensions()[1]), index);
+        return (index[0] * _delta[1] + _minu[1]);
+    } else if (dim == 2) {
+        if (GetDimensions().size() == 3) {
+            ClampIndex(vector<size_t>(1, GetDimensions()[2]), index);
+            return (index[0] * _delta[2] + _minu[2]);
+        } else {
+            return (0.0);
+        }
+    } else {
+        return (0.0);
+    }
+}
+
 float RegularGrid::GetValueNearestNeighbor(const std::vector<double> &coords) const
 {
     std::vector<double> cCoords = coords;

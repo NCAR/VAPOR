@@ -79,6 +79,42 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     _curvilinearGrid(xrg, yrg, RegularGrid(), vector<double>(), kdtree);
 }
 
+vector<size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const
+{
+    if (dim == 0) {
+        return (_xrg.GetDimensions());
+    } else if (dim == 1) {
+        return (_yrg.GetDimensions());
+    } else if (dim == 2) {
+        if (_terrainFollowing) {
+            return (_zrg.GetDimensions());
+        } else {
+            return (vector<size_t>(1, _zcoords.size()));
+        }
+    } else {
+        return (vector<size_t>(1, 1));
+    }
+}
+
+float CurvilinearGrid::GetUserCoordinate(std::vector<size_t> &index, size_t dim) const
+{
+    float v;
+    if (dim == 0) {
+        return (_xrg.AccessIndex(index));
+    } else if (dim == 1) {
+        return (_yrg.AccessIndex(index));
+    } else if (dim == 2) {
+        if (_terrainFollowing) {
+            return (_zrg.AccessIndex(index));
+        } else {
+            ClampIndex(vector<size_t>(1, _zcoords.size()), index);
+            return (_zcoords[index[0]]);
+        }
+    } else {
+        return (0.0);
+    }
+}
+
 void CurvilinearGrid::GetBoundingBox(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<double> &minu, std::vector<double> &maxu) const
 {
     vector<size_t> cMin = min;

@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include <proj_api.h>
-#include <vapor/GetAppPath.h>
+#include <vapor/ResourcePath.h>
 #include <vapor/Proj4API.h>
 
 using namespace VAPoR;
@@ -12,9 +12,7 @@ Proj4API::Proj4API()
     _pjSrc = NULL;
     _pjDst = NULL;
 
-    vector<string> paths;
-    paths.push_back("proj");
-    string path = GetAppPath("VAPOR", "share", paths).c_str();
+    string path = GetSharePath("proj");
     if (!path.empty()) {
 #ifdef WIN32
         path = "PROJ_LIB=" + path;
@@ -276,4 +274,11 @@ void Proj4API::Clamp(double *x, double *y, size_t n, int offset) const
         if (x[i * offset] > maxx) x[i * offset] = maxx;
         if (y[i * offset] > maxy) y[i * offset] = maxy;
     }
+}
+
+bool Proj4API::IsCylindrical() const
+{
+    string proj4String = GetDstStr();
+
+    return ((proj4String.find("+proj=eqc") != std::string::npos) || (proj4String.find("+proj=merc") != std::string::npos));
 }

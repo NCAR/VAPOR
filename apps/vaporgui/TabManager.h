@@ -154,6 +154,8 @@ protected slots:
 private slots:
     void _setProj4String(string proj4String) { emit Proj4StringChanged(proj4String); }
 
+    void _projectionTypeChanged(int);
+
     void _setAnimationOnOff(bool onOff) { emit AnimationOnOffSignal(onOff); }
 
     void _setAnimationDraw() { emit AnimationDrawSignal(); }

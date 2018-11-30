@@ -107,6 +107,8 @@ public:
         _scale[2] = scale[2];
     }
 
+    double GetOrthoSize() const;
+
     const double *GetModelViewMatrix() { return (_modelViewMatrix); }
 
 private:

@@ -20,7 +20,8 @@
 #define GUISTATEPARAMS_H
 
 #include <vapor/ParamsBase.h>
-#include "MouseModeParams.h"
+
+class MouseModeParams;
 
 class GUIStateParams : public VAPoR::ParamsBase {
 public:

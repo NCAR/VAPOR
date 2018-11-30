@@ -102,6 +102,7 @@ private:
 
     std::vector<double> _minExt;
     std::vector<double> _maxExt;
+    std::vector<double> _varRange;
     int                 _cLevel;
     int                 _refLevel;
     int                 _timeStep;

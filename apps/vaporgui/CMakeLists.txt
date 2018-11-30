@@ -20,6 +20,7 @@ set (SRCS
 	TwoDDataEventRouter.cpp
 	WireFrameEventRouter.cpp
 	RangeController.cpp
+    PythonVariables.cpp
 	Statistics.cpp
 	Plot.cpp
 	helloSubtabs.cpp
@@ -69,6 +70,7 @@ set (SRCS
 	WireFrameSubtabs.h
 	Statistics.h
 	Plot.h
+    PythonVariables.h
 	BarbSubtabs.h
 	ColorbarWidget.h
 	OrientationAngles.h
@@ -88,6 +90,48 @@ set (SRCS
 	Histo.h
 	EventRouter.h
 	GLWidget.h
+	VizWin.h
+	Core3_2_context.h
+	TrackBall.h
+	Manip.h
+	NavigationEventRouter.h
+	AnimationEventRouter.h
+	AnimationParams.h
+	AnnotationEventRouter.h
+	BannerGUI.h
+	BarbEventRouter.h
+	BarbEventRouter.h
+	Combo.h
+	ContourEventRouter.h
+	ControlPointEditor.h
+	CopyRegionWidget.h
+	DomainWidget.h
+	FileOperationChecker.h
+	GLColorbarWidget.h
+	GUIStateParams.h
+	GeometryWidget.h
+	ImageEventRouter.h
+	ImageEventRouter.h
+	ImageFrame.h
+	ImageFrame.h
+	IsoSurfaceEventRouter.h
+	MappingFrame.h
+	MouseModeParams.h
+	PlotParams.h
+    PythonVariablesParams.h
+	QIntValidatorWithFixup.h
+	RangeCombos.h
+	RangeController.h
+	RenderEventRouter.h
+	RenderHolder.h
+	SettingsEventRouter.h
+	SettingsParams.h
+	StatisticsParams.h
+	TFWidget.h
+	TabManager.h
+	VariablesWidget.h
+	VizSelectCombo.h
+	WireFrameEventRouter.h
 )
 
 set (UIS 
@@ -134,6 +178,7 @@ set (UIS
 	statsWindow.ui
 	plotWindow.ui
 	firstTimeUser.ui
+    PythonVariablesGUI.ui
 	TFWidgetGUI.ui
 	GeometryWidgetGUI.ui
 	ColorbarWidgetGUI.ui
@@ -148,6 +193,8 @@ set (UIS
 	QSinglePoint.ui
 )
 
+source_group (UIs FILES ${UIS})
+
 find_package(Qt4 REQUIRED)
 set (CMAKE_AUTOUIC ON) # This needs to appear before adding sources to work properly
 set (CMAKE_AUTOMOC ON)
@@ -155,13 +202,14 @@ set (CMAKE_AUTORCC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if (APPLE)
+	set (SRCS ${SRCS} core_profile_attributes.mm)
 	set (MACOSX_BUNDLE_ICON_FILE VAPOR.icns)
 	set (MACOSX_BUNDLE_ICON_FILE_PATH ${CMAKE_SOURCE_DIR}/share/images/VAPOR.icns)
 	set_source_files_properties(${MACOSX_BUNDLE_ICON_FILE_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 	add_executable (vapor MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE_PATH} ${SRCS} ${UIS})
 	set (INSTALL_BIN_DIR ".")
 elseif (WIN32)
-	set (WINDOWS_ICON_PATH "${CMAKE_SOURCE_DIR}/Images/vapor-win-icon.ico")
+	set (WINDOWS_ICON_PATH "${CMAKE_SOURCE_DIR}/share/images/vapor-win-icon.ico")
 	configure_file (vapor.rc.in ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
 	add_executable (vapor WIN32 ${SRCS} ${UIS} ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
 else ()
@@ -172,14 +220,14 @@ endif()
 target_link_libraries (vapor common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL python${PYTHONVERSION})
 
 if (APPLE)
-	target_link_libraries (vapor "-framework CoreServices")
+	find_library (CORESERVICES CoreServices)
+	find_library (FOUNDATION Foundation)
+	find_library (COCOA Cocoa)
+	# target_link_libraries (vapor "-framework CoreServices")
+	target_link_libraries (vapor ${CORESERVICES} ${FOUNDATION} ${COCOA})
 elseif (UNIX AND NOT APPLE)
 	target_link_libraries (vapor quadmath)
 endif ()
-
-add_definitions (-DPYTHONVERSION="${PYTHONVERSION}")
-add_definitions (-DPYTHONDIR="${PYTHONDIR}")
-# add_definitions (-DPARAMS_EXPORTS)
 
 install (
 	TARGETS vapor

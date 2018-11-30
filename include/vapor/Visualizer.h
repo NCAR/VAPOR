@@ -31,8 +31,6 @@
 
 namespace VAPoR {
 
-class ShaderMgr;
-
 //! \class Visualizer
 //! \ingroup Public_Render
 //! \brief A class for performing OpenGL rendering in VAPOR GUI Window
@@ -63,8 +61,8 @@ public:
     AnnotationParams *getActiveAnnotationParams() const;
 
     //! Method to initialize GL rendering.  Must be called from a GL context.
-    //! \param[in] sm A pointer to a ShaderMgr
-    int initializeGL(ShaderMgr *sm);
+    //! \param[in] glManager A pointer to a GLManager
+    int initializeGL(GLManager *glManager);
 
     //! Set/clear a flag indicating that the trackball has changed the viewpoint.
     //! all the OpenGL rendering is performed in the paintEvent method.  It must be invoked from
@@ -85,36 +83,6 @@ public:
     //! Identify the visualizer index associated with this visualizer
     //! \retval visualizer index;
     string getWindowName() const { return m_winName; }
-
-    //! Reset the trackball, creating a new trackball in default state for this visualizer
-
-    //! Project a 3D point (in user coord system) to window coords.
-    //! Return true if in front of camera.  Used by pointIsOnQuad, as well as in building Axis labels.
-    //! \param[in] userCoords[3] coordinates of point
-    //! \param[out] winCoords[2] window coordinates of projection
-    //! \return true if point is in front of camera.
-    bool projectPointToWin(double userCoords[3], double winCoords[2]);
-
-    //! Determine if a point is over (and not inside) a box, specified by 8 3-D coords.
-    //! the first four corners are the counter-clockwise (from outside) vertices of one face,
-    //! the last four are the corresponding back vertices, clockwise from outside
-    //! Returns index of face (0..5), or -1 if not on Box
-    //! \param[in] corners Eight 3D coordinates of box corners in required order
-    //! \param[in] pickPt test point coordinates
-    //! \return faceIndex (0..5), or -1 if not on Box
-    int pointIsOnBox(double corners[8][3], double pickPt[2]);
-
-    //! Determine a vector associated with a pixel, pointing from the
-    //! camera, through the pixel into the scene to a manip handle.  Uses OpenGL screencoords.
-    //! I.e. y = 0 at bottom.  Returns false on failure.  Used during mouse Events.
-    //! \param[in] winCoords  pixel coordinates (converted to double)
-    //! \param[in] strCameraPos  current camera position in stretched world coordinates.
-    //! \param[out] dirVec resulting vector, from camera to handle
-    //! \param[in] strHandleMid is middle of handle in stretched coordinates.
-    //! \return true if successful
-    bool pixelToVector(double winCoords[2], const vector<double> StrCameraPos, double dirVec[3], double strHandleMid[3]);
-
-    // void draw3DCursor(const double position[3]);
 
     //! Determine the renderer in the renderer list associated with a specific index
     //! \param[in] index
@@ -230,7 +198,7 @@ private:
     //! Will turn off the captureEnabled switch.
     //! \param[in] filename
     //! \return zero if successful
-    int captureImage(string filename);
+    int captureImage(const std::string &path);
 
 #ifdef VAPOR3_0_0_ALPHA
     //! Render the current active manip, if we are not in navigation mode
@@ -243,17 +211,6 @@ private:
     int paintSetup(int timeStep);
 
     bool fbSetup();
-
-    //! Test if the screen projection of a 3D quad encloses a point on the screen.
-    //! The 4 corners of the quad must be specified in counter-clockwise order
-    //! as viewed from the outside (pickable side) of the quad.
-    //! \param[in] cor1 First corner
-    //! \param[in] cor1 Second corner
-    //! \param[in] cor1 Third corner
-    //! \param[in] cor1 Fourth corner
-    //! \param[in] pickPt test point
-    //! \return true if pickPt is inside quad.
-    bool pointIsOnQuad(double cor1[3], double cor2[3], double cor3[3], double cor4[3], double pickPt[2]);
 
     //! Renderers can be added early or late, using a "render Order" parameter.
     //! The order is between 0 and 10; lower order gets rendered first.
@@ -307,7 +264,7 @@ private:
     const ParamsMgr *   m_paramsMgr;
     const DataStatus *  m_dataStatus;
     string              m_winName;
-    ShaderMgr *         m_shaderMgr;
+    GLManager *         _glManager;
     AnnotationRenderer *m_vizFeatures;
     bool                m_viewpointDirty;
 

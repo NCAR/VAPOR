@@ -27,7 +27,10 @@
     #include <tiff/tiffio.h>
 #else
     #include <tiffio.h>
+    #include <xtiffio.h>
 #endif
+
+#include "geotiffio.h"
 
 #ifdef WIN32
     #pragma warning(disable : 4996)
@@ -40,11 +43,12 @@
 #include <vapor/DataStatus.h>
 #include <vapor/Visualizer.h>
 
-#include <vapor/jpegapi.h>
 #include <vapor/common.h>
-#include <vapor/ShaderMgr.h>
+#include "vapor/GLManager.h"
+#include "vapor/LegacyGL.h"
 
-#include "imagewriter.hpp"
+#include "vapor/ImageWriter.h"
+#include "vapor/GeoTIFWriter.h"
 
 using namespace VAPoR;
 bool Visualizer::_regionShareFlag = true;
@@ -63,7 +67,7 @@ Visualizer::Visualizer(const ParamsMgr *pm, const DataStatus *dataStatus, string
     m_paramsMgr = pm;
     m_dataStatus = dataStatus;
     m_winName = winName;
-    m_shaderMgr = NULL;
+    _glManager = nullptr;
     m_vizFeatures = new AnnotationRenderer(pm, dataStatus, winName);
     m_viewpointDirty = true;
 
@@ -162,54 +166,30 @@ void Visualizer::applyTransforms(int i)
     translations = t->GetTranslations();
     origin = t->GetOrigin();
 
-    //  Box was returning extents of 0 and 1????
-    //
-    //	RegionParams* rParams = getActiveRegionParams();
-    //	Box* box = rParams->GetBox();
-    //	box->GetExtents(minExts, maxExts);
+    MatrixManager *mm = _glManager->matrixManager;
 
-#ifdef VAPOR3_0_0_ALPHA
-    vector<double> minExts, maxExts;
-    DataMgr *      dMgr = m_dataStatus->GetDataMgr(datasetName);
-    dMgr->GetVariableExtents(0, "U", 3, minExts, maxExts);
+    mm->MatrixModeModelView();
+    mm->PushMatrix();
 
-    float xCenter = (minExts[0] + maxExts[0]) / 2.f;
-    float yCenter = (minExts[1] + maxExts[1]) / 2.f;
-    float zCenter = (minExts[2] + maxExts[2]) / 2.f;
-#endif
+    mm->Translate(origin[0], origin[1], origin[2]);
+    mm->Scale(scales[0], scales[1], scales[2]);
+    mm->Rotate(rotations[0], 1, 0, 0);
+    mm->Rotate(rotations[1], 0, 1, 0);
+    mm->Rotate(rotations[2], 0, 0, 1);
+    mm->Translate(-origin[0], -origin[1], -origin[2]);
 
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-
-#ifdef VAPOR3_0_0_ALPHA
-    glTranslatef(xCenter, yCenter, zCenter);
-    glRotatef(rotations[0], 1, 0, 0);
-    glRotatef(rotations[1], 0, 1, 0);
-    glRotatef(rotations[2], 0, 0, 1);
-#endif
-
-    glTranslatef(origin[0], origin[1], origin[2]);
-    glScalef(scales[0], scales[1], scales[2]);
-    glRotatef(rotations[0], 1, 0, 0);
-    glRotatef(rotations[1], 0, 1, 0);
-    glRotatef(rotations[2], 0, 0, 1);
-    glTranslatef(-origin[0], -origin[1], -origin[2]);
-
-    glTranslatef(translations[0], translations[1], translations[2]);
-
-#ifdef VAPOR3_0_0_ALPHA
-    glTranslatef(-xCenter, -yCenter, -zCenter);
-#endif
+    mm->Translate(translations[0], translations[1], translations[2]);
 }
 
 int Visualizer::paintEvent(bool fast)
 {
     MyBase::SetDiagMsg("Visualizer::paintGL()");
+    GL_ERR_BREAK();
 
     // Do not proceed if there is no DataMgr
     if (!m_dataStatus->GetDataMgrNames().size()) return (0);
 
-    if (!fbSetup()) return (0);
+    if (!fbSetup()) return 0;
 
     // Set up the OpenGL environment
     int timeStep = getCurrentTimestep();
@@ -223,12 +203,6 @@ int Visualizer::paintEvent(bool fast)
 
     if (timeStep != _previousTimeStep) { _previousTimeStep = timeStep; }
 
-    if (m_vizFeatures) {
-        // Draw the domain frame and other in-scene features
-        //
-        m_vizFeatures->InScenePaint(timeStep);
-    }
-
     // Prepare for Renderers
     // Make the depth buffer writable
     glDepthMask(GL_TRUE);
@@ -240,77 +214,74 @@ int Visualizer::paintEvent(bool fast)
 
     // Render the current active manip, if there is one
 
-#ifdef VAPOR3_0_0_ALPHA
-    // Render all of the current text objects
-    TextObject::renderAllText(timeStep, this);
-#endif
     // Now we are ready for all the different renderers to proceed.
     // Sort them;  If they are opaque, they go first.  If not opaque, they
     // are sorted back-to-front.  Note: This only works if all the geometry of a renderer is ordered by
     // a simple depth test.
-
     int rc = 0;
     // Now go through all the active renderers, provided the error has not been set
     for (int i = 0; i < _renderer.size(); i++) {
         // If a renderer is not initialized, or if its bypass flag is set, then don't render.
         // Otherwise push and pop the GL matrix stack, and all attribs
-#ifdef VAPOR3_0_0_ALPHA
-        if (_renderer[i]->isInitialized() && !(_renderer[i]->doAlwaysBypass(timeStep)))
-#endif
-        {
-            // Push or reset state
-            glMatrixMode(GL_TEXTURE);
-            glPushMatrix();
-            glMatrixMode(GL_MODELVIEW);
-            glPushMatrix();
-            glPushAttrib(GL_ALL_ATTRIB_BITS);
+        // Push or reset state
+        _glManager->matrixManager->MatrixModeModelView();
+        _glManager->matrixManager->PushMatrix();
 
-            if (!_renderer[i]->IsGLInitialized()) {
-                int myrc = _renderer[i]->initializeGL(m_shaderMgr);
-                if (myrc < 0) rc = -1;
-            }
-
-            if (_renderer[i]->IsGLInitialized()) {
-                applyTransforms(i);
-                int myrc = _renderer[i]->paintGL(fast);
-                glPopMatrix();
-                if (myrc < 0) rc = -1;
-            }
-#ifdef VAPOR3_0_0_ALPHA
-            if (rc) { _renderer[i]->setBypass(timeStep); }
-#endif
-            glPopAttrib();
-            glMatrixMode(GL_MODELVIEW);
-            glPopMatrix();
-            glMatrixMode(GL_TEXTURE);
-            glPopMatrix();
-            int myrc = printOpenGLErrorMsg(_renderer[i]->GetMyName().c_str());
+        if (!_renderer[i]->IsGLInitialized()) {
+            int myrc = _renderer[i]->initializeGL(_glManager);
+            GL_ERR_BREAK();
             if (myrc < 0) rc = -1;
         }
+
+        if (_renderer[i]->IsGLInitialized()) {
+            applyTransforms(i);
+            int myrc = _renderer[i]->paintGL(fast);
+            GL_ERR_BREAK();
+            if (myrc < 0) { rc = -1; }
+            _glManager->matrixManager->PopMatrix();
+            if (myrc < 0) { rc = -1; }
+        }
+        _glManager->matrixManager->MatrixModeModelView();
+        _glManager->matrixManager->PopMatrix();
+        int myrc = printOpenGLErrorMsg(_renderer[i]->GetMyName().c_str());
+        if (myrc < 0) { rc = -1; }
     }
+
+    if (m_vizFeatures) {
+        // Draw the domain frame and other in-scene features
+        m_vizFeatures->InScenePaint(timeStep);
+        GL_ERR_BREAK();
+    }
+
+    // _glManager->ShowDepthBuffer();
 
     // Go back to MODELVIEW for any other matrix stuff
     // By default the matrix is expected to be MODELVIEW
-    glMatrixMode(GL_MODELVIEW);
+    _glManager->matrixManager->MatrixModeModelView();
 
     // Draw any features that are overlaid on scene
 
     if (m_vizFeatures) m_vizFeatures->DrawText();
+    GL_ERR_BREAK();
     renderColorbars(timeStep);
-#ifdef VAPOR3_0_0_ALPHA
-    if (m_vizFeatures) m_vizFeatures->OverlayPaint(timeStep);
-#endif
+    GL_ERR_BREAK();
 
     // Perform final touch-up on the final images, before capturing or displaying them.
     glFlush();
 
+    int captureImageSuccess = 0;
     if (_imageCaptureEnabled) {
-        captureImage(_captureImageFile);
+        captureImageSuccess = captureImage(_captureImageFile);
     } else if (_animationCaptureEnabled) {
-        captureImage(_captureImageFile);
+        captureImageSuccess = captureImage(_captureImageFile);
         incrementPath(_captureImageFile);
     }
-    glDisable(GL_NORMALIZE);
+    if (captureImageSuccess < 0) {
+        SetErrMsg("Failed to save image");
+        return -1;
+    }
+
+    GL_ERR_BREAK();
     if (printOpenGLError()) return -1;
     return rc;
 }
@@ -348,63 +319,41 @@ bool Visualizer::fbSetup()
 
 int Visualizer::paintSetup(int timeStep)
 {
+    assert(!printOpenGLError());
     ViewpointParams *vpParams = getActiveViewpointParams();
 
     double m[16];
     vpParams->GetProjectionMatrix(m);
-    glMatrixMode(GL_PROJECTION);
-    glLoadMatrixd(m);
+    _glManager->matrixManager->MatrixModeProjection();
+    _glManager->matrixManager->LoadMatrixd(m);
+    assert(!printOpenGLError());
 
     vpParams->GetModelViewMatrix(m);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixd(m);
+    _glManager->matrixManager->MatrixModeModelView();
+    _glManager->matrixManager->LoadMatrixd(m);
+    assert(!printOpenGLError());
 
     // Improve polygon antialiasing
     glEnable(GL_MULTISAMPLE);
-
-    // automatically renormalize normals (especially needed for flow rendering)
-    glEnable(GL_NORMALIZE);
+    assert(!printOpenGLError());
 
     // Lights are positioned relative to the view direction, do this before the modelView matrix is set
-    if (placeLights()) { return -1; }
+    if (placeLights()) return -1;
 
-#ifdef VAPOR3_0_0_ALPHA
-    double center[3];
-    m_trackBall->GetCenter(center);
-    vector<double> stretch = vpParams->GetStretchFactors();
-
-    glTranslated(center[0], center[1], center[2]);
-    glScaled(stretch[0], stretch[1], stretch[2]);
-    glTranslated(-center[0], -center[1], -center[2]);
-#endif
-
-#ifdef VAPOR3_0_0_ALPHA
-    // Save the GL matrix in the viewpoint params, for when the mouse is moving.
-    // Don't put this event in the command queue.
-    if (_tBallChanged) {
-        vpParams->SetSaveState(false);
-        saveGLMatrix(timeStep, vpParams);
-        vpParams->SetSaveState(true);
-    }
-    // Reset the flags
-    _tBallChanged = false;
-#endif
-
-#ifdef VAPOR3_0_0_ALPHA
-    vpParams->VPSetChanged(false);
-#endif
     return 0;
 }
 //
 //  Set up the OpenGL rendering state, and define display list
 //
 
-int Visualizer::initializeGL(ShaderMgr *shaderMgr)
+int Visualizer::initializeGL(GLManager *glManager)
 {
-    m_shaderMgr = shaderMgr;
-    m_vizFeatures->InitializeGL(shaderMgr);
+    _glManager = glManager;
+    m_vizFeatures->InitializeGL(glManager);
 
+    // glewExperimental = GL_TRUE;
     GLenum err = glewInit();
+    assert(GLManager::CheckError());
     if (GLEW_OK != err) {
         MyBase::SetErrMsg("Error: Unable to initialize GLEW");
         return -1;
@@ -442,105 +391,6 @@ int Visualizer::initializeGL(ShaderMgr *shaderMgr)
     if (setUpViewport(_width, _height) < 0) return -1;
 #endif
     return 0;
-}
-
-// projectPointToWin returns true if point is in front of camera
-// resulting screen coords returned in 2nd argument.  Note that
-// OpenGL coords are 0 at bottom of window!
-//
-bool Visualizer::projectPointToWin(double cubeCoords[3], double winCoords[2])
-{
-    double   depth;
-    GLdouble wCoords[2];
-    GLdouble cbCoords[3];
-    for (int i = 0; i < 3; i++) cbCoords[i] = (double)cubeCoords[i];
-
-    const ViewpointParams *vpParams = getActiveViewpointParams();
-    double                 mvMatrix[16];
-    double                 pMatrix[16];
-    vpParams->GetModelViewMatrix(mvMatrix);
-    vpParams->GetProjectionMatrix(pMatrix);
-
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-
-    bool success = (0 != gluProject(cbCoords[0], cbCoords[1], cbCoords[2], mvMatrix, pMatrix, viewport, wCoords, (wCoords + 1), (GLdouble *)(&depth)));
-    if (!success) return false;
-    winCoords[0] = wCoords[0];
-    winCoords[1] = wCoords[1];
-    return (depth > 0.0);
-}
-
-// Convert a screen coord to a vector, representing the displacedment
-// from the camera associated with the screen coords.  Note screen coords
-// are OpenGL style.  strHandleMid is in stretched coordinates.
-//
-bool Visualizer::pixelToVector(double winCoords[2], const vector<double> camPosStr, double dirVec[3], double strHandleMid[3])
-{
-    const ViewpointParams *vpParams = getActiveViewpointParams();
-
-    GLdouble pt[3];
-    // Project handleMid to find its z screen coordinate:
-    GLdouble screenx, screeny, screenz;
-    double   mvMatrix[16];
-    double   pMatrix[16];
-    vpParams->GetModelViewMatrix(mvMatrix);
-    vpParams->GetProjectionMatrix(pMatrix);
-
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-
-    gluProject(strHandleMid[0], strHandleMid[1], strHandleMid[2], mvMatrix, pMatrix, viewport, &screenx, &screeny, &screenz);
-    // Obtain the coords of a point in view:
-    bool success = (0 != gluUnProject((GLdouble)winCoords[0], (GLdouble)winCoords[1], screenz, mvMatrix, pMatrix, viewport, pt, pt + 1, pt + 2));
-    if (success) {
-        // transform position to world coords not needed, but need to unstretch(?)
-        vector<double> stretch = vpParams->GetStretchFactors();
-
-        // Subtract camera coords to get a direction vector:
-        vsub(pt, camPosStr, dirVec);
-        // unstretch the difference:
-        for (int i = 0; i < 3; i++) dirVec[i] = dirVec[i] / stretch[i];
-    }
-    return success;
-}
-// Test if the screen projection of a 3D quad encloses a point on the screen.
-// The 4 corners of the quad must be specified in counter-clockwise order
-// as viewed from the outside (pickable side) of the quad.
-// Window coords are as in OpenGL (0 at bottom of window)
-//
-bool Visualizer::pointIsOnQuad(double cor1[3], double cor2[3], double cor3[3], double cor4[3], double pickPt[2])
-{
-    double winCoord1[2];
-    double winCoord2[2];
-    double winCoord3[2];
-    double winCoord4[2];
-    if (!projectPointToWin(cor1, winCoord1)) return false;
-    if (!projectPointToWin(cor2, winCoord2)) return false;
-    if (pointOnRight(winCoord1, winCoord2, pickPt)) return false;
-    if (!projectPointToWin(cor3, winCoord3)) return false;
-    if (pointOnRight(winCoord2, winCoord3, pickPt)) return false;
-    if (!projectPointToWin(cor4, winCoord4)) return false;
-    if (pointOnRight(winCoord3, winCoord4, pickPt)) return false;
-    if (pointOnRight(winCoord4, winCoord1, pickPt)) return false;
-    return true;
-}
-// Test whether the pickPt is over (and outside) the box (as specified by 8 points)
-int Visualizer::pointIsOnBox(double corners[8][3], double pickPt[2])
-{
-    // front (-Z)
-    if (pointIsOnQuad(corners[0], corners[1], corners[3], corners[2], pickPt)) return 2;
-    // back (+Z)
-    if (pointIsOnQuad(corners[4], corners[6], corners[7], corners[5], pickPt)) return 3;
-    // right (+X)
-    if (pointIsOnQuad(corners[1], corners[5], corners[7], corners[3], pickPt)) return 5;
-    // left (-X)
-    if (pointIsOnQuad(corners[0], corners[2], corners[6], corners[4], pickPt)) return 0;
-    // top (+Y)
-    if (pointIsOnQuad(corners[2], corners[3], corners[7], corners[6], pickPt)) return 4;
-    // bottom (-Y)
-    if (pointIsOnQuad(corners[0], corners[4], corners[5], corners[1], pickPt)) return 1;
-    return -1;
 }
 
 void Visualizer::moveRendererToFront(const Renderer *ren)
@@ -665,6 +515,7 @@ int Visualizer::placeLights()
     const ViewpointParams *vpParams = getActiveViewpointParams();
     size_t                 nLights = vpParams->getNumLights();
     if (nLights > 3) nLights = 3;
+    LegacyGL *lgl = _glManager->legacy;
 
     float lightDirs[3][4];
     for (int j = 0; j < nLights; j++) {
@@ -679,49 +530,47 @@ int Visualizer::placeLights()
         ambColor[0] = ambColor[1] = ambColor[2] = 0.f;
         specColor[3] = ambColor[3] = lmodel_ambient[3] = 1.f;
 
-        glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, vpParams->getExponent());
+        // TODO GL
+        GL_LEGACY(glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, vpParams->getExponent()));
         lmodel_ambient[0] = lmodel_ambient[1] = lmodel_ambient[2] = vpParams->getAmbientCoeff();
         // All the geometry will get a white specular color:
-        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specColor);
-        glLightfv(GL_LIGHT0, GL_POSITION, lightDirs[0]);
+        GL_LEGACY(glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specColor));
+        GL_LEGACY(glLightfv(GL_LIGHT0, GL_POSITION, lightDirs[0]));
+        lgl->LightDirectionfv(lightDirs[0]);
 
         specLight[0] = specLight[1] = specLight[2] = vpParams->getSpecularCoeff(0);
 
         diffLight[0] = diffLight[1] = diffLight[2] = vpParams->getDiffuseCoeff(0);
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, diffLight);
-        glLightfv(GL_LIGHT0, GL_SPECULAR, specLight);
-        glLightfv(GL_LIGHT0, GL_AMBIENT, ambColor);
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+        GL_LEGACY(glLightfv(GL_LIGHT0, GL_DIFFUSE, diffLight));
+        GL_LEGACY(glLightfv(GL_LIGHT0, GL_SPECULAR, specLight));
+        GL_LEGACY(glLightfv(GL_LIGHT0, GL_AMBIENT, ambColor));
+        GL_LEGACY(glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient));
         // Following has unpleasant effects on flow line lighting
         // glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
-        glEnable(GL_LIGHT0);
-        if (printOpenGLError()) return -1;
+        GL_LEGACY(glEnable(GL_LIGHT0));
+        if (printOpenGLError()) { return -1; }
         if (nLights > 1) {
             if (printOpenGLError()) return -1;
-            glLightfv(GL_LIGHT1, GL_POSITION, lightDirs[1]);
+            GL_LEGACY(glLightfv(GL_LIGHT1, GL_POSITION, lightDirs[1]));
             specLight[0] = specLight[1] = specLight[2] = vpParams->getSpecularCoeff(1);
             diffLight[0] = diffLight[1] = diffLight[2] = vpParams->getDiffuseCoeff(1);
-            glLightfv(GL_LIGHT1, GL_DIFFUSE, diffLight);
-            glLightfv(GL_LIGHT1, GL_SPECULAR, specLight);
-            glLightfv(GL_LIGHT1, GL_AMBIENT, ambColor);
-            glEnable(GL_LIGHT1);
+            GL_LEGACY(glLightfv(GL_LIGHT1, GL_DIFFUSE, diffLight));
+            GL_LEGACY(glLightfv(GL_LIGHT1, GL_SPECULAR, specLight));
+            GL_LEGACY(glLightfv(GL_LIGHT1, GL_AMBIENT, ambColor));
+            GL_LEGACY(glEnable(GL_LIGHT1));
 
         } else {
-            glDisable(GL_LIGHT1);
+            GL_LEGACY(glDisable(GL_LIGHT1));
             if (printOpenGLError()) return -1;
         }
         if (nLights > 2) {
-            glLightfv(GL_LIGHT2, GL_POSITION, lightDirs[2]);
-            specLight[0] = specLight[1] = specLight[2] = vpParams->getSpecularCoeff(2);
-            diffLight[0] = diffLight[1] = diffLight[2] = vpParams->getDiffuseCoeff(2);
-            glLightfv(GL_LIGHT2, GL_DIFFUSE, diffLight);
-            glLightfv(GL_LIGHT2, GL_SPECULAR, specLight);
-            glLightfv(GL_LIGHT2, GL_AMBIENT, ambColor);
-            glEnable(GL_LIGHT2);
+            GL_LEGACY(glLightfv(GL_LIGHT2, GL_POSITION, lightDirs[2]); specLight[0] = specLight[1] = specLight[2] = vpParams->getSpecularCoeff(2);
+                      diffLight[0] = diffLight[1] = diffLight[2] = vpParams->getDiffuseCoeff(2); glLightfv(GL_LIGHT2, GL_DIFFUSE, diffLight); glLightfv(GL_LIGHT2, GL_SPECULAR, specLight);
+                      glLightfv(GL_LIGHT2, GL_AMBIENT, ambColor); glEnable(GL_LIGHT2););
             if (printOpenGLError()) return -1;
         } else {
-            glDisable(GL_LIGHT2);
+            GL_LEGACY(glDisable(GL_LIGHT2));
         }
     }
     if (printOpenGLError()) return -1;
@@ -808,96 +657,57 @@ RegionParams *Visualizer::getActiveRegionParams() const { return m_paramsMgr->Ge
 
 AnnotationParams *Visualizer::getActiveAnnotationParams() const { return m_paramsMgr->GetAnnotationParams(m_winName); }
 
-#ifdef VAPOR3_0_0_ALPHA
-void Visualizer::resetTrackball()
+int Visualizer::captureImage(const std::string &path)
 {
-    if (m_trackBall) delete m_trackBall;
-    m_trackBall = new Trackball();
-}
-#endif
-
-int Visualizer::captureImage(string filename)
-{
-    ViewpointParams *vpParams = getActiveViewpointParams();
-
-    size_t width, height;
-    vpParams->GetWindowSize(width, height);
-
     // Turn off the single capture flag
     _imageCaptureEnabled = false;
-    string suffix = filename.substr(filename.length() - 4, 4);    // it assumes fixed length of all suffix...
 
-    FILE *jpegFile = NULL;
-    TIFF *tiffFile = NULL;
-    if (suffix == ".tif" || suffix == "tiff") {
-        tiffFile = TIFFOpen((const char *)filename.c_str(), "wb");
-        if (!tiffFile) {
-            SetErrMsg("Image Capture Error: Error opening output Tiff file: %s", (const char *)filename.c_str());
-            return -1;
-        }
-    } else if (suffix == ".jpg" || suffix == "jpeg") {
-        jpegFile = fopen((const char *)filename.c_str(), "wb");
-        if (!jpegFile) {
-            SetErrMsg("Image Capture Error: Error opening output Jpeg file: %s", (const char *)filename.c_str());
-            return -1;
-        }
-    } else    // write png files
-    {
-        // The Write_PNG() function handles fopen et al. by itself.
-        // Here we assume the filename is absolutely valid.
-    }
-    // Get the image buffer
-    unsigned char *buf = new unsigned char[3 * width * height];
-    // Use openGL to fill the buffer:
-    if (!getPixelData(buf)) {
-        SetErrMsg("Image Capture Error; error obtaining GL data");
-        delete[] buf;
-        return -1;
-    }
+    ViewpointParams *vpParams = getActiveViewpointParams();
+    size_t           width, height;
+    vpParams->GetWindowSize(width, height);
 
-    // Now call the Jpeg or tiff library to compress and write the file
-    //
-    if (suffix == ".tif" || suffix == "tiff")    // capture the tiff file, one scanline at a time
-    {
-        uint32 imagelength = (uint32)width;
-        uint32 imagewidth = (uint32)height;
-        assert(tiffFile);
-        TIFFSetField(tiffFile, TIFFTAG_IMAGELENGTH, imagelength);
-        TIFFSetField(tiffFile, TIFFTAG_IMAGEWIDTH, imagewidth);
-        TIFFSetField(tiffFile, TIFFTAG_PLANARCONFIG, 1);
-        TIFFSetField(tiffFile, TIFFTAG_SAMPLESPERPIXEL, 3);
-        TIFFSetField(tiffFile, TIFFTAG_ROWSPERSTRIP, 8);
-        TIFFSetField(tiffFile, TIFFTAG_BITSPERSAMPLE, 8);
-        TIFFSetField(tiffFile, TIFFTAG_PHOTOMETRIC, 2);
-        for (int row = 0; row < imagelength; row++) {
-            int rc = TIFFWriteScanline(tiffFile, buf + row * 3 * imagewidth, row);
-            if (rc != 1) {
-                SetErrMsg("Image Capture Error; Error writing tiff file %s", (const char *)filename.c_str());
-                break;
-            }
-        }
-        TIFFClose(tiffFile);
-    } else if (suffix == ".jpg" || suffix == "jpeg") {
-        int quality = 95;
-        int rc = write_JPEG_file(jpegFile, width, height, buf, quality);
-        fclose(jpegFile);
-        if (rc) {
-            SetErrMsg("Image Capture Error; Error writing jpeg file %s", (const char *)filename.c_str());
-            delete[] buf;
-            return -1;
-        }
-    } else    // PNG
-    {
-        int rc = Write_PNG(filename.c_str(), width, height, buf);
-        if (rc) {
-            SetErrMsg("Image Capture Error; Error writing PNG file %s", (const char *)filename.c_str());
-            delete[] buf;
-            return -1;
-        }
+    bool geoTiffOutput = vpParams->GetProjectionType() == ViewpointParams::MapOrthographic && (FileUtils::Extension(path) == "tif" || FileUtils::Extension(path) == "tiff");
+
+    ImageWriter *  writer = nullptr;
+    unsigned char *framebuffer = nullptr;
+    int            writeReturn = -1;
+
+    framebuffer = new unsigned char[3 * width * height];
+    if (!getPixelData(framebuffer))
+        ;    // goto captureImageEnd;
+
+    if (geoTiffOutput)
+        writer = new GeoTIFWriter(path);
+    else
+        writer = ImageWriter::CreateImageWriterForFile(path);
+    if (writer == nullptr) goto captureImageEnd;
+
+    if (geoTiffOutput) {
+        string projString = m_dataStatus->GetDataMgr(m_dataStatus->GetDataMgrNames()[0])->GetMapProjection();
+
+        double m[16];
+        vpParams->GetModelViewMatrix(m);
+        double posvec[3], upvec[3], dirvec[3];
+        vpParams->ReconstructCamera(m, posvec, upvec, dirvec);
+
+        float s = vpParams->GetOrthoProjectionSize();
+        float x = posvec[0];
+        float y = posvec[1];
+        float aspect = width / (float)height;
+
+        GeoTIFWriter *geo = (GeoTIFWriter *)writer;
+        geo->SetTiePoint(x, y, width / 2.f, height / 2.f);
+        geo->SetPixelScale(s * aspect * 2 / (float)width, s * 2 / (float)height);
+        if (geo->ConfigureFromProj4(projString) < 0) goto captureImageEnd;
     }
 
-    delete[] buf;
-    return 0;
+    writeReturn = writer->Write(framebuffer, width, height);
+
+captureImageEnd:
+    if (writer) delete writer;
+    if (framebuffer) delete[] framebuffer;
+
+    return writeReturn;
 }
 
 // Produce an array based on current contents of the (back) buffer
@@ -912,24 +722,16 @@ bool Visualizer::getPixelData(unsigned char *data) const
     while (glGetError() != GL_NO_ERROR)
         ;
 
-    // if (front)
-    //
-    // glReadBuffer(GL_FRONT);
-    //
-    // else
-    //  {
     glReadBuffer(GL_BACK);
-    //  }
     glDisable(GL_SCISSOR_TEST);
-
-    // Turn off texturing in case it is on - some drivers have a problem
-    // getting / setting pixels with texturing enabled.
-    glDisable(GL_TEXTURE_2D);
 
     // Calling pack alignment ensures that we can grab the any size window
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
-    if (glGetError() != GL_NO_ERROR) return false;
+    if (glGetError() != GL_NO_ERROR) {
+        SetErrMsg("Error obtaining GL framebuffer data");
+        return false;
+    }
     // Unfortunately gl reads these in the reverse order that jpeg expects, so
     // Now we need to swap top and bottom!
     unsigned char val;
@@ -946,52 +748,50 @@ bool Visualizer::getPixelData(unsigned char *data) const
 
 void Visualizer::renderColorbars(int timeStep)
 {
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
+    MatrixManager *mm = _glManager->matrixManager;
+    mm->MatrixModeModelView();
+    mm->PushMatrix();
+    mm->LoadIdentity();
+    mm->MatrixModeProjection();
+    mm->PushMatrix();
+    mm->LoadIdentity();
     for (int i = 0; i < _renderer.size(); i++) {
         // If a renderer is not initialized, or if its bypass flag is set, then don't render.
         // Otherwise push and pop the GL matrix stack, and all attribs
-#ifdef VAPOR3_0_0_ALPHA
-        if (_renderer[i]->isInitialized() && !(_renderer[i]->doAlwaysBypass(timeStep))) {
-#endif
-            _renderer[i]->renderColorbar();
-        }
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();
+        _renderer[i]->renderColorbar();
     }
+    mm->MatrixModeProjection();
+    mm->PopMatrix();
+    mm->MatrixModeModelView();
+    mm->PopMatrix();
+}
 
-    void Visualizer::incrementPath(string & s)
-    {
-        // truncate the last 4 characters (remove .tif or .jpg)
-        string s1 = s.substr(0, s.length() - 4);
-        string s_end = s.substr(s.length() - 4);
-        if (s_end == "jpeg") {
-            s1 = s.substr(0, s.length() - 5);
-            s_end = s.substr(s.length() - 5);
-        }
-        // Find digits (before .tif or .jpg)
-        size_t lastpos = s1.find_last_not_of("0123456789");
-        assert(lastpos < s1.length());
-        string s2 = s1.substr(lastpos + 1);
-        int    val = stol(s2);
-        // Convert val+1 to a string, with leading zeroes, of same length as s2.
-        // Except, if val+1 has more digits than s2, increase it.
-        int numDigits = 1 + (int)log10((float)(val + 1));
-        int len = s2.length();
-        if (len < numDigits) len = numDigits;
-        if (len > 9) len = 9;
-        char format[5] = {"%04d"};
-        char result[100];
-        char c = '0' + len;
-        format[2] = c;
-        sprintf(result, format, val + 1);
-        string sval = string(result);
-        string newbody = s.substr(0, lastpos + 1);
-        s = newbody + sval + s_end;
+void Visualizer::incrementPath(string &s)
+{
+    // truncate the last 4 characters (remove .tif or .jpg)
+    string s1 = s.substr(0, s.length() - 4);
+    string s_end = s.substr(s.length() - 4);
+    if (s_end == "jpeg") {
+        s1 = s.substr(0, s.length() - 5);
+        s_end = s.substr(s.length() - 5);
     }
+    // Find digits (before .tif or .jpg)
+    size_t lastpos = s1.find_last_not_of("0123456789");
+    assert(lastpos < s1.length());
+    string s2 = s1.substr(lastpos + 1);
+    int    val = stol(s2);
+    // Convert val+1 to a string, with leading zeroes, of same length as s2.
+    // Except, if val+1 has more digits than s2, increase it.
+    int numDigits = 1 + (int)log10((float)(val + 1));
+    int len = s2.length();
+    if (len < numDigits) len = numDigits;
+    if (len > 9) len = 9;
+    char format[5] = {"%04d"};
+    char result[100];
+    char c = '0' + len;
+    format[2] = c;
+    sprintf(result, format, val + 1);
+    string sval = string(result);
+    string newbody = s.substr(0, lastpos + 1);
+    s = newbody + sval + s_end;
+}

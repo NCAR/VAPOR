@@ -7,6 +7,7 @@
 #include "vapor/VDCNetCDF.h"
 #include "vapor/CFuncs.h"
 #include "vapor/Version.h"
+#include "vapor/FileUtils.h"
 
 using namespace VAPoR;
 using namespace Wasp;
@@ -112,6 +113,14 @@ size_t gcd(size_t n1, size_t n2)
 
 size_t lcm(size_t n1, size_t n2) { return ((n1 * n2) / gcd(n1, n2)); }
 
+bool isblocked(vector<size_t> bs)
+{
+    for (int i = 0; i < bs.size(); i++) {
+        if (bs[i] != 1) return (true);
+    }
+    return (false);
+}
+
 };    // namespace
 
 VDCNetCDF::VDCNetCDF(int nthreads, size_t master_threshold, size_t variable_threshold) : VDC()
@@ -147,6 +156,8 @@ int VDCNetCDF::GetHyperSliceInfo(string varname, int level, std::vector<size_t> 
     if (rc < 0) return (-1);
 
     if (dims_at_level.size() == 0) return (0);
+
+    if (!isblocked(bs_at_level)) { return (DC::GetHyperSliceInfo(varname, level, hslice_dims, nslice)); }
 
     hslice_dims = dims_at_level;
 
@@ -467,7 +478,7 @@ int VDCNetCDF::OpenVariableWrite(size_t ts, string varname, int lod)
     } else {
         wasp = new WASP(_nthreads);
         string dir;
-        dir = Dirname(path);
+        dir = FileUtils::Dirname(path);
         rc = MkDirHier(dir);
         if (rc < 0) return (-1);
 
@@ -576,8 +587,8 @@ template<class T> int VDCNetCDF::_writeTemplate(int fd, const T *data)
     string varname = o->GetVarname();
     int    level = o->GetLevel();
 
-    vector<size_t> dims, bs;
-    int            rc = GetDimLensAtLevel(varname, level, dims, bs);
+    vector<size_t> dims, dummy;
+    int            rc = GetDimLensAtLevel(varname, level, dims, dummy);
     if (rc < 0) return (rc);
 
     bool time_varying = VDC::IsTimeVarying(varname);
@@ -615,9 +626,9 @@ template<class T> int VDCNetCDF::_writeSliceTemplate(int fd, const T *slice)
     int    level = o->GetLevel();
 
     vector<size_t> dims_at_level;
-    vector<size_t> bs_at_level;
+    vector<size_t> dummy;
 
-    int rc = GetDimLensAtLevel(varname, level, dims_at_level, bs_at_level);
+    int rc = GetDimLensAtLevel(varname, level, dims_at_level, dummy);
     if (rc < 0) return (rc);
 
     vector<size_t> hslice_dims;

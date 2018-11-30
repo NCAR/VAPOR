@@ -10,6 +10,7 @@
 #include <vapor/DCWRF.h>
 #include <vapor/DCCF.h>
 #include <vapor/DCMPAS.h>
+#include <vapor/FileUtils.h>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -128,7 +129,7 @@ int main(int argc, char **argv)
     //
     // Parse command line arguments
     //
-    ProgName = Basename(argv[0]);
+    ProgName = FileUtils::LegacyBasename(argv[0]);
 
     if (op.AppendOptions(set_opts) < 0) { exit(1); }
 

@@ -1,5 +1,4 @@
 #include "vapor/IsoSurfaceRenderer.h"
-#include "vapor/GetAppPath.h"
 
 using namespace VAPoR;
 
@@ -15,23 +14,14 @@ IsoSurfaceRenderer::IsoSurfaceRenderer(const ParamsMgr *pm, std::string &winName
 
 void IsoSurfaceRenderer::_loadShaders()
 {
-    std::vector<std::string> extraPath;
-    extraPath.push_back("shaders");
-    extraPath.push_back("main");
-    std::string shaderPath = Wasp::GetAppPath("VAPOR", "share", extraPath);
-    std::string VShader1stPass = shaderPath + "/IsoSurface1stPass.vgl";
-    std::string FShader1stPass = shaderPath + "/IsoSurface1stPass.fgl";
-    std::string VShader2ndPass = shaderPath + "/IsoSurface2ndPass.vgl";
-    std::string FShader2ndPass = shaderPath + "/IsoSurface2ndPass.fgl";
-    std::string VShader3rdPassMode1 = shaderPath + "/IsoSurface3rdPassMode1.vgl";
-    std::string FShader3rdPassMode1 = shaderPath + "/IsoSurface3rdPassMode1.fgl";
-    std::string VShader3rdPassMode2 = shaderPath + "/IsoSurface3rdPassMode2.vgl";
-    std::string FShader3rdPassMode2 = shaderPath + "/IsoSurface3rdPassMode2.fgl";
-
-    _1stPassShaderId = _compileShaders(VShader1stPass.data(), FShader1stPass.data());
-    _2ndPassShaderId = _compileShaders(VShader2ndPass.data(), FShader2ndPass.data());
-    _3rdPassMode1ShaderId = _compileShaders(VShader3rdPassMode1.data(), FShader3rdPassMode1.data());
-    _3rdPassMode2ShaderId = _compileShaders(VShader3rdPassMode2.data(), FShader3rdPassMode2.data());
+    ShaderProgram *shader = _glManager->shaderManager->GetShader("IsoSurface1stPass");
+    _1stPassShaderId = shader->GetID();
+    shader = _glManager->shaderManager->GetShader("IsoSurface2ndPass");
+    _2ndPassShaderId = shader->GetID();
+    shader = _glManager->shaderManager->GetShader("IsoSurface3rdPassMode1");
+    _3rdPassMode1ShaderId = shader->GetID();
+    shader = _glManager->shaderManager->GetShader("IsoSurface3rdPassMode2");
+    _3rdPassMode2ShaderId = shader->GetID();
 }
 
 void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast, long castingMode)

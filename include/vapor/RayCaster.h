@@ -12,14 +12,15 @@
     #include <GL/glu.h>
 #endif
 
-#include <vapor/Visualizer.h>
-#include <vapor/RayCasterParams.h>
-#include <vapor/ShaderMgr.h>
-#include <vapor/DataMgr.h>
-#include <vapor/DataMgrUtils.h>
-#include <vapor/Grid.h>
-#include <vapor/utils.h>
-#include <vapor/GetAppPath.h>
+#include "vapor/Visualizer.h"
+#include "vapor/RayCasterParams.h"
+#include "vapor/DataMgr.h"
+#include "vapor/DataMgrUtils.h"
+#include "vapor/Grid.h"
+#include "vapor/utils.h"
+#include "vapor/GLManager.h"
+
+#include <glm/glm.hpp>
 
 namespace VAPoR {
 
@@ -134,9 +135,9 @@ protected:
     //
     void _renderTriangleStrips(int whichPass, long castingMode) const;
 
-    void _drawVolumeFaces(int whichPass, long whichCastingMode, bool insideACell = false, const GLfloat *inversedMV = nullptr, bool fast = false);
+    void _drawVolumeFaces(int whichPass, long whichCastingMode, bool insideACell = false, const glm::mat4 &inversedMV = glm::mat4(0.0f), bool fast = false);
 
-    void _load3rdPassUniforms(long castingMode, const GLfloat *inversedMV, bool fast) const;
+    void _load3rdPassUniforms(long castingMode, const glm::mat4 &inversedMV, bool fast) const;
 
     virtual void _3rdPassSpecialHandling(bool fast, long castingMode);
 
@@ -150,25 +151,7 @@ protected:
     //
     GLuint _compileShaders(const char *vertex_file_path, const char *fragment_file_path);
 
-    //
-    // Get current Model View Projection matrix that can be passed to shaders
-    //   Note: MVP should be a memory space of 16 GLfloats that is already allocated.
-    //         The MVP matrix is stored in a colume-major fashion.
-    void _getMVPMatrix(GLfloat *MVP) const;
-
     double _getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const;
-
-    //
-    // Helper matrix manipulation functions
-    //
-    bool _mesa_invert_matrix_general(GLfloat out[16], const GLfloat in[16]);
-    void _mesa_transposef(GLfloat to[16], const GLfloat from[16]);
-    void _printMatrix(const GLfloat m[16]);
-
-    //
-    // Multiply a 4-value vector by a 4x4 matrix.
-    //
-    void _matMultiVec(const GLfloat *matrix, const GLfloat *vecIn, GLfloat *vecOut) const;
 
 };    // End of class RayCaster
 

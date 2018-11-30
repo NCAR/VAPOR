@@ -117,6 +117,8 @@ void NavigationEventRouter::hookUpTab()
     connect(shininessEdit, SIGNAL(returnPressed()), this, SLOT(setLightChanged()));
     connect(ambientEdit, SIGNAL(returnPressed()), this, SLOT(setLightChanged()));
     connect(stereoSeparationEdit, SIGNAL(returnPressed()), this, SLOT(notImplemented()));
+
+    connect(_projectionCombo, SIGNAL(activated(const QString &)), this, SLOT(projectionComboBoxChanged(const QString &)));
 }
 
 void NavigationEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
@@ -465,6 +467,18 @@ void NavigationEventRouter::projCheckboxChanged()
 
     params->SetProjectionString(proj);
     emit Proj4StringChanged(proj);
+}
+
+void NavigationEventRouter::projectionComboBoxChanged(const QString &s)
+{
+    ViewpointParams *               vpParams = _getActiveParams();
+    ViewpointParams::ProjectionType type;
+
+    if (s == "Perspective") type = ViewpointParams::Perspective;
+    if (s == "Map Orthographic") type = ViewpointParams::MapOrthographic;
+
+    vpParams->SetProjectionType(type);
+    emit ProjectionTypeChanged(type);
 }
 
 // Insert values from params into tab panel
