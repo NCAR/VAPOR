@@ -116,13 +116,14 @@ void RenderParams::_initBox() {
 
 	if (! _dataMgr->VariableExists(0,varname, 0, 0)) return;
 
+	bool prev = EnableErrMsg(false);	// no error handling
 	rc = _dataMgr->GetVariableExtents(0, varname, 0, minExt, maxExt);
+	if (rc<0) {
+		minExt = {0.0, 0.0, 0.0};
+		maxExt = {1.0, 1.0, 1.0};
+	}
+	EnableErrMsg(prev);
 	
-	// Crap. No error handling from constructor. Need Initialization()
-	// method.
-	//
-	assert (rc >=0);
-
 	assert(
 		minExt.size()==maxExt.size() && 
 		(minExt.size()==2 || minExt.size()==3)
@@ -365,8 +366,12 @@ MapperFunction* RenderParams::GetMapperFunc(string varname) {
 	if (_dataMgr->VariableExists(ts,varname, level, lod)) {
 
 		vector <double> range;
+		bool prev = EnableErrMsg(false);	// no error handling
 		int rc = _dataMgr->GetDataRange(ts,varname, level,lod,range);
-		assert(rc >= 0);
+		if (rc<0) {
+			range = {0.0, 1.0};
+		}
+		EnableErrMsg(prev);	
 		tf.setMinMaxMapValue(range[0], range[1]);
 	}
 

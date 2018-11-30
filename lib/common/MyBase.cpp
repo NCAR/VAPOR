@@ -104,13 +104,17 @@ void	MyBase::_SetErrMsg(
 	// Loop until we've successfully buffered the error message, growing
 	// the message buffer as needed
 	//
+	va_list argscopy;
 	while (! done) {
+		
+		va_copy(argscopy, args);
 #ifdef WIN32
-		rc = _vsnprintf(*msgbuf, *msgbufsz, format, args);
+		rc = _vsnprintf(*msgbuf, *msgbufsz, format, argscopy);
 
 #else
-		rc = vsnprintf(*msgbuf, *msgbufsz, format, args);
+		rc = vsnprintf(*msgbuf, *msgbufsz, format, argscopy);
 #endif
+		va_end(argscopy);
 
 		if (rc < (*msgbufsz-1)) {
 			done = 1;

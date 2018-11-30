@@ -26,7 +26,7 @@
 #include <unistd.h>
 #endif
 
-#include <vapor/GetAppPath.h>
+#include <vapor/ResourcePath.h>
 #include <vapor/MyPython.h>
 
 
@@ -77,16 +77,14 @@ int MyPython::Initialize() {
 
 		// Set pythonhome to the vapor installation (based on VAPOR_HOME)
 		//
-		vector<string> pths;
 
 		// On windows use VAPOR_HOME/lib/python2.7; VAPOR_HOME works 
 		// on Linux and Mac
 		//
 #ifdef _WINDOWS
-		pths.push_back("python27");
-		m_pyHome = GetAppPath("VAPOR","", pths, true);
+        m_pyHome = GetResourcePath("python27");
 #else
-		m_pyHome = GetAppPath("VAPOR","home", pths, true);
+        m_pyHome = GetResourcePath("");
 #endif
 	}
 
@@ -124,6 +122,8 @@ int MyPython::Initialize() {
 	init_signals();
 #endif
 
+    // This is dependent on the environmental variable PYTHONHOME which is
+    // set in vaporgui/main.cpp
 	Py_Initialize();
 
 #ifdef	VAPOR3_0_0
@@ -161,6 +161,28 @@ int MyPython::Initialize() {
 		return(-1);
 	}
 
+	std::string stdOut =
+	"try:\n"
+	"	import sys, os\n"
+	"except: \n"
+	"	print >> sys.stderr, \'Failed to import sys\'\n"
+	"	raise\n"
+	"class CatchOut:\n"
+	"	def __init__(self):\n"
+	"		self.value = ''\n"
+	"	def write(self, txt):\n"
+	"		self.value += txt\n"
+	"catchOut = CatchOut()\n"
+	"sys.stdout = catchOut\n";
+
+	// Catch stdout from Python to a string.
+	//
+	rc = PyRun_SimpleString(stdOut.c_str());
+	if (rc<0) {
+		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
+		return(-1);
+	}
+
 	// Import matplotlib
 	//
 	std::string importMPL =
@@ -177,9 +199,8 @@ int MyPython::Initialize() {
 
 	// Add vapor modules to search path
 	//
-    std::vector<std::string> dummy;
-    std::string path = Wasp::GetAppPath("VAPOR","share", dummy);
-    path = "sys.path.append('" + path + "/python')\n";
+    std::string path = Wasp::GetSharePath("python");
+    path = "sys.path.append('" + path + "')\n";
     rc = PyRun_SimpleString( path.c_str() );
 	if (rc<0) {
 		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
@@ -212,7 +233,42 @@ string MyPython::PyErr() {
 	}
 
 	PyObject *output = PyObject_GetAttrString(catcher,"value");
-	return(PyString_AsString(output));
+	char *s = PyString_AsString(output);
+
+	// Erase the string
+	//
+	PyObject *eStr = PyString_FromString("");
+	int rc = PyObject_SetAttrString(catcher, "value", eStr);
+    Py_DECREF(eStr);
+
+	return(s ? string(s) : string());
+}
+
+// Fetch an error message genereated by Python API.
+//
+string MyPython::PyOut() {
+
+	PyObject *pMain = PyImport_AddModule("__main__");
+
+	PyObject *catcher = NULL;
+	if (pMain && PyObject_HasAttrString(pMain,"catchOut")) {
+		catcher = PyObject_GetAttrString(pMain,"catchOut");
+	}
+
+	if (! catcher) {
+		return("");
+	}
+
+	PyObject *output = PyObject_GetAttrString(catcher,"value");
+	char *s = PyString_AsString(output);
+
+	// Erase the string
+	//
+	PyObject *eStr = PyString_FromString("");
+	int rc = PyObject_SetAttrString(catcher, "value", eStr);
+    Py_DECREF(eStr);
+
+	return(s ? string(s) : string());
 }
 
 PyObject *MyPython::CreatePyFunc(

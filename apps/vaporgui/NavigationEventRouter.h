@@ -71,6 +71,7 @@ public:
 
 signals:
  void Proj4StringChanged(string proj4String);
+ void ProjectionTypeChanged(int);
 
 protected:
 	virtual void _confirmText() {};
@@ -121,6 +122,7 @@ private slots:
 	void setLightChanged();
 	void notImplemented();
 	void projCheckboxChanged();
+    void projectionComboBoxChanged(const QString &);
 
 };
 
