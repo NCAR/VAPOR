@@ -1,8 +1,5 @@
 #include "vapor/IsoSurfaceRenderer.h"
 
-#include <chrono>
-#include <ctime>
-
 using namespace VAPoR;
 
 //
@@ -25,9 +22,6 @@ void IsoSurfaceRenderer::_loadShaders()
     _3rdPassMode1ShaderId = shader->GetID();
     shader = _glManager->shaderManager->GetShader("IsoSurface3rdPassMode2");
     _3rdPassMode2ShaderId = shader->GetID();
-
-    auto timenow = chrono::system_clock::to_time_t(chrono::system_clock::now());
-    std::cout << std::endl << "Shaders compiled at: " << ctime(&timenow) << std::endl;
 }
 
 void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast, long castingMode)
