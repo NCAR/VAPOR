@@ -435,7 +435,7 @@ int RayCaster::_paintGL(bool fast)
     }
     long castingMode = params->GetCastingMode();
 
-    /* Gather user coordinates */
+    // If there an update event
     if (!_userCoordinates.IsMetadataUpToDate(params, _dataMgr)) {
         if (!_userCoordinates.UpdateFaceAndData(params, _dataMgr)) {
             MyBase::SetErrMsg("Memory allocation failed!");
@@ -455,7 +455,7 @@ int RayCaster::_paintGL(bool fast)
         // If there is missing value, upload the mask to texture. Otherwise, leave it empty.
         if (_userCoordinates.missingValueMask)    // Has missing value!
         {
-            glActiveTexture(GL_TEXTURE3);
+            glActiveTexture(GL_TEXTURE4);
             // Adjust alignment for GL_R8UI format. Stupid OpenGL parameter.
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
             glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
@@ -599,7 +599,7 @@ void RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     /* Generate front-facing texture */
-    textureUnit++;    // == 1;
+    textureUnit = 1;
     glGenTextures(1, &_frontFaceTextureId);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
@@ -633,7 +633,7 @@ void RayCaster::_initializeFramebufferTextures()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     /* Generate and configure 3D texture: _volumeTextureId */
-    textureUnit++;    // == 2;
+    textureUnit = 2;
     glGenTextures(1, &_volumeTextureId);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
@@ -646,7 +646,7 @@ void RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     /* Generate and configure 1D texture: _colorMapTextureId */
-    textureUnit++;    // == 3;
+    textureUnit = 3;
     glGenTextures(1, &_colorMapTextureId);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
@@ -657,7 +657,7 @@ void RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
     /* Generate and configure 3D texture: _missingValueTextureId */
-    textureUnit++;    // == 4;
+    textureUnit = 4;
     glGenTextures(1, &_missingValueTextureId);
     glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
@@ -842,7 +842,7 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     glUniform1i(uniformLocation, textureUnit);
 
     if (_userCoordinates.missingValueMask != nullptr) {
-        textureUnit++;
+        textureUnit = 4;
         glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
@@ -850,13 +850,13 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     }
 
     if (castingMode == 2) {
-        textureUnit++;
+        textureUnit = 5;
         glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "xyCoordsTexture");
         glUniform1i(uniformLocation, textureUnit);
 
-        textureUnit++;
+        textureUnit = 6;
         glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_BUFFER, _zCoordsTextureId);
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "zCoordsTexture");
