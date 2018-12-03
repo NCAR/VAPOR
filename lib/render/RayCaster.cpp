@@ -542,6 +542,7 @@ int RayCaster::_paintGL(bool fast)
 
     // 1st pass: render back facing polygons to texture0 of the framebuffer
     _drawVolumeFaces(1, castingMode, false);
+    glCheckError();
 
     /* Detect if we're inside the volume */
     glm::mat4           InversedMV = glm::inverse(ModelView);
@@ -573,6 +574,7 @@ int RayCaster::_paintGL(bool fast)
 
     // 2nd pass, render front facing polygons
     _drawVolumeFaces(2, castingMode, insideACell);
+    glCheckError();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
@@ -587,6 +589,7 @@ int RayCaster::_paintGL(bool fast)
         return 1;
     }
     _drawVolumeFaces(3, castingMode, insideACell, InversedMV, fast);
+    glCheckError();
 
     delete grid;
 
@@ -743,7 +746,9 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
     } else                                      // 3rd pass
     {
         _load3rdPassUniforms(castingMode, InversedMV, fast);
+        glCheckError();
         _3rdPassSpecialHandling(fast, castingMode);
+        glCheckError();
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -763,6 +768,7 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
     } else    // could be all 3 passes
     {
         _renderTriangleStrips(whichPass, castingMode);
+        glCheckError();
     }
 
     glDisable(GL_CULL_FACE);
@@ -952,7 +958,9 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
             glVertexAttribIPointer(1, 4, GL_INT, 0, (void *)0);
         }
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int), indexBuffer, GL_STREAM_READ);
+        glCheckError();
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
+        glCheckError();
     }
 
     //
