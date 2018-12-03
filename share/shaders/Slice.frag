@@ -2,7 +2,7 @@
 
 uniform sampler1D colormap;
 uniform sampler2D dataValues;
-uniform sampler2D missingValues;
+//uniform sampler2D missingValues;
 
 uniform float minLUTValue;
 uniform float maxLUTValue;
@@ -15,7 +15,8 @@ void main(void)
 {
 	if (minLUTValue >= maxLUTValue) discard;
 
-    float missing = texture(missingValues, fTexCoord).r;
+    //float missing = texture(missingValues, fTexCoord).r;
+    float missing = texture(dataValues, fTexCoord).g;
     if (missing != 0.f) discard; 
 
     float value = texture(dataValues, fTexCoord).r;
