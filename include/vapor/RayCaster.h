@@ -96,10 +96,13 @@ protected:
         int UpdateFaceAndData(const RayCasterParams *params, DataMgr *dataMgr);
         //
         // Update pointers: xyCoords and zCoords
-        //   Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
-        //         UpdateFaceAndData() needs to be called priori to UpdateCurviCoords().
+        // |-- Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
+        // |         UpdateFaceAndData() needs to be called priori to UpdateCurviCoords().
+        // |-- It returns 0 upon success, and non-zero upon errors:
+        //     |--  1 == Failed to get a StructuredGrid
+        //     |-- -1 == Failed to allocate memory for the Z-coords
         //
-        bool UpdateCurviCoords(const RayCasterParams *params, DataMgr *dataMgr);
+        int UpdateCurviCoords(const RayCasterParams *params, DataMgr *dataMgr);
     };    // end of struct UserCoordinates
 
     UserCoordinates    _userCoordinates;
