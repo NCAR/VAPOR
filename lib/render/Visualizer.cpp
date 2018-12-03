@@ -27,7 +27,10 @@
     #include <tiff/tiffio.h>
 #else
     #include <tiffio.h>
+    #include <xtiffio.h>
 #endif
+
+#include "geotiffio.h"
 
 #ifdef WIN32
     #pragma warning(disable : 4996)
@@ -40,12 +43,12 @@
 #include <vapor/DataStatus.h>
 #include <vapor/Visualizer.h>
 
-#include <vapor/jpegapi.h>
 #include <vapor/common.h>
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
 
-#include "imagewriter.hpp"
+#include "vapor/ImageWriter.h"
+#include "vapor/GeoTIFWriter.h"
 
 using namespace VAPoR;
 bool Visualizer::_regionShareFlag = true;
@@ -195,10 +198,7 @@ int Visualizer::paintEvent(bool fast)
         return -1;
     }
 
-    if (paintSetup(timeStep)) {
-        assert(0);    // TODO Delete
-        return -1;
-    }
+    if (paintSetup(timeStep)) return -1;
     // make sure to capture whenever the time step or frame index changes (once we implement capture!)
 
     if (timeStep != _previousTimeStep) { _previousTimeStep = timeStep; }
@@ -269,12 +269,18 @@ int Visualizer::paintEvent(bool fast)
     // Perform final touch-up on the final images, before capturing or displaying them.
     glFlush();
 
+    int captureImageSuccess = 0;
     if (_imageCaptureEnabled) {
-        captureImage(_captureImageFile);
+        captureImageSuccess = captureImage(_captureImageFile);
     } else if (_animationCaptureEnabled) {
-        captureImage(_captureImageFile);
+        captureImageSuccess = captureImage(_captureImageFile);
         incrementPath(_captureImageFile);
     }
+    if (captureImageSuccess < 0) {
+        SetErrMsg("Failed to save image");
+        return -1;
+    }
+
     GL_ERR_BREAK();
     if (printOpenGLError()) return -1;
     return rc;
@@ -505,10 +511,7 @@ Renderer *Visualizer::getRenderer(string type, string instance) const
 
 int Visualizer::placeLights()
 {
-    if (printOpenGLError()) {
-        assert(0);    // TODO Delete
-        return -1;
-    }
+    if (printOpenGLError()) return -1;
     const ViewpointParams *vpParams = getActiveViewpointParams();
     size_t                 nLights = vpParams->getNumLights();
     if (nLights > 3) nLights = 3;
@@ -546,10 +549,7 @@ int Visualizer::placeLights()
         // glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
         GL_LEGACY(glEnable(GL_LIGHT0));
-        if (printOpenGLError()) {
-            assert(0);    // TODO Delete
-            return -1;
-        }
+        if (printOpenGLError()) { return -1; }
         if (nLights > 1) {
             if (printOpenGLError()) return -1;
             GL_LEGACY(glLightfv(GL_LIGHT1, GL_POSITION, lightDirs[1]));
@@ -562,27 +562,18 @@ int Visualizer::placeLights()
 
         } else {
             GL_LEGACY(glDisable(GL_LIGHT1));
-            if (printOpenGLError()) {
-                assert(0);    // TODO Delete
-                return -1;
-            }
+            if (printOpenGLError()) return -1;
         }
         if (nLights > 2) {
             GL_LEGACY(glLightfv(GL_LIGHT2, GL_POSITION, lightDirs[2]); specLight[0] = specLight[1] = specLight[2] = vpParams->getSpecularCoeff(2);
                       diffLight[0] = diffLight[1] = diffLight[2] = vpParams->getDiffuseCoeff(2); glLightfv(GL_LIGHT2, GL_DIFFUSE, diffLight); glLightfv(GL_LIGHT2, GL_SPECULAR, specLight);
                       glLightfv(GL_LIGHT2, GL_AMBIENT, ambColor); glEnable(GL_LIGHT2););
-            if (printOpenGLError()) {
-                assert(0);    // TODO Delete
-                return -1;
-            }
+            if (printOpenGLError()) return -1;
         } else {
             GL_LEGACY(glDisable(GL_LIGHT2));
         }
     }
-    if (printOpenGLError()) {
-        assert(0);    // TODO Delete
-        return -1;
-    }
+    if (printOpenGLError()) return -1;
     return 0;
 }
 
@@ -666,96 +657,57 @@ RegionParams *Visualizer::getActiveRegionParams() const { return m_paramsMgr->Ge
 
 AnnotationParams *Visualizer::getActiveAnnotationParams() const { return m_paramsMgr->GetAnnotationParams(m_winName); }
 
-#ifdef VAPOR3_0_0_ALPHA
-void Visualizer::resetTrackball()
+int Visualizer::captureImage(const std::string &path)
 {
-    if (m_trackBall) delete m_trackBall;
-    m_trackBall = new Trackball();
-}
-#endif
-
-int Visualizer::captureImage(string filename)
-{
-    ViewpointParams *vpParams = getActiveViewpointParams();
-
-    size_t width, height;
-    vpParams->GetWindowSize(width, height);
-
     // Turn off the single capture flag
     _imageCaptureEnabled = false;
-    string suffix = filename.substr(filename.length() - 4, 4);    // it assumes fixed length of all suffix...
 
-    FILE *jpegFile = NULL;
-    TIFF *tiffFile = NULL;
-    if (suffix == ".tif" || suffix == "tiff") {
-        tiffFile = TIFFOpen((const char *)filename.c_str(), "wb");
-        if (!tiffFile) {
-            SetErrMsg("Image Capture Error: Error opening output Tiff file: %s", (const char *)filename.c_str());
-            return -1;
-        }
-    } else if (suffix == ".jpg" || suffix == "jpeg") {
-        jpegFile = fopen((const char *)filename.c_str(), "wb");
-        if (!jpegFile) {
-            SetErrMsg("Image Capture Error: Error opening output Jpeg file: %s", (const char *)filename.c_str());
-            return -1;
-        }
-    } else    // write png files
-    {
-        // The Write_PNG() function handles fopen et al. by itself.
-        // Here we assume the filename is absolutely valid.
-    }
-    // Get the image buffer
-    unsigned char *buf = new unsigned char[3 * width * height];
-    // Use openGL to fill the buffer:
-    if (!getPixelData(buf)) {
-        SetErrMsg("Image Capture Error; error obtaining GL data");
-        delete[] buf;
-        return -1;
-    }
+    ViewpointParams *vpParams = getActiveViewpointParams();
+    size_t           width, height;
+    vpParams->GetWindowSize(width, height);
 
-    // Now call the Jpeg or tiff library to compress and write the file
-    //
-    if (suffix == ".tif" || suffix == "tiff")    // capture the tiff file, one scanline at a time
-    {
-        uint32 imagelength = (uint32)width;
-        uint32 imagewidth = (uint32)height;
-        assert(tiffFile);
-        TIFFSetField(tiffFile, TIFFTAG_IMAGELENGTH, imagelength);
-        TIFFSetField(tiffFile, TIFFTAG_IMAGEWIDTH, imagewidth);
-        TIFFSetField(tiffFile, TIFFTAG_PLANARCONFIG, 1);
-        TIFFSetField(tiffFile, TIFFTAG_SAMPLESPERPIXEL, 3);
-        TIFFSetField(tiffFile, TIFFTAG_ROWSPERSTRIP, 8);
-        TIFFSetField(tiffFile, TIFFTAG_BITSPERSAMPLE, 8);
-        TIFFSetField(tiffFile, TIFFTAG_PHOTOMETRIC, 2);
-        for (int row = 0; row < imagelength; row++) {
-            int rc = TIFFWriteScanline(tiffFile, buf + row * 3 * imagewidth, row);
-            if (rc != 1) {
-                SetErrMsg("Image Capture Error; Error writing tiff file %s", (const char *)filename.c_str());
-                break;
-            }
-        }
-        TIFFClose(tiffFile);
-    } else if (suffix == ".jpg" || suffix == "jpeg") {
-        int quality = 95;
-        int rc = write_JPEG_file(jpegFile, width, height, buf, quality);
-        fclose(jpegFile);
-        if (rc) {
-            SetErrMsg("Image Capture Error; Error writing jpeg file %s", (const char *)filename.c_str());
-            delete[] buf;
-            return -1;
-        }
-    } else    // PNG
-    {
-        int rc = Write_PNG(filename.c_str(), width, height, buf);
-        if (rc) {
-            SetErrMsg("Image Capture Error; Error writing PNG file %s", (const char *)filename.c_str());
-            delete[] buf;
-            return -1;
-        }
+    bool geoTiffOutput = vpParams->GetProjectionType() == ViewpointParams::MapOrthographic && (FileUtils::Extension(path) == "tif" || FileUtils::Extension(path) == "tiff");
+
+    ImageWriter *  writer = nullptr;
+    unsigned char *framebuffer = nullptr;
+    int            writeReturn = -1;
+
+    framebuffer = new unsigned char[3 * width * height];
+    if (!getPixelData(framebuffer))
+        ;    // goto captureImageEnd;
+
+    if (geoTiffOutput)
+        writer = new GeoTIFWriter(path);
+    else
+        writer = ImageWriter::CreateImageWriterForFile(path);
+    if (writer == nullptr) goto captureImageEnd;
+
+    if (geoTiffOutput) {
+        string projString = m_dataStatus->GetDataMgr(m_dataStatus->GetDataMgrNames()[0])->GetMapProjection();
+
+        double m[16];
+        vpParams->GetModelViewMatrix(m);
+        double posvec[3], upvec[3], dirvec[3];
+        vpParams->ReconstructCamera(m, posvec, upvec, dirvec);
+
+        float s = vpParams->GetOrthoProjectionSize();
+        float x = posvec[0];
+        float y = posvec[1];
+        float aspect = width / (float)height;
+
+        GeoTIFWriter *geo = (GeoTIFWriter *)writer;
+        geo->SetTiePoint(x, y, width / 2.f, height / 2.f);
+        geo->SetPixelScale(s * aspect * 2 / (float)width, s * 2 / (float)height);
+        if (geo->ConfigureFromProj4(projString) < 0) goto captureImageEnd;
     }
 
-    delete[] buf;
-    return 0;
+    writeReturn = writer->Write(framebuffer, width, height);
+
+captureImageEnd:
+    if (writer) delete writer;
+    if (framebuffer) delete[] framebuffer;
+
+    return writeReturn;
 }
 
 // Produce an array based on current contents of the (back) buffer
@@ -776,7 +728,10 @@ bool Visualizer::getPixelData(unsigned char *data) const
     // Calling pack alignment ensures that we can grab the any size window
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
-    if (glGetError() != GL_NO_ERROR) return false;
+    if (glGetError() != GL_NO_ERROR) {
+        SetErrMsg("Error obtaining GL framebuffer data");
+        return false;
+    }
     // Unfortunately gl reads these in the reverse order that jpeg expects, so
     // Now we need to swap top and bottom!
     unsigned char val;

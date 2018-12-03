@@ -8,12 +8,14 @@
 #include <cassert>
 #include <sys/stat.h>
 #include "vapor/CMakeConfig.h"
+#include "vapor/FileUtils.h"
 #ifdef Darwin
     #include <CoreFoundation/CFBundle.h>
     #include <CoreFoundation/CFString.h>
     #include <CoreServices/CoreServices.h>
 #endif
 #include <vapor/MyBase.h>
+#define INCLUDE_DEPRECATED_GET_APP_PATH
 #include "vapor/GetAppPath.h"
 #ifdef WIN32
     #pragma warning(disable : 4996)

@@ -82,6 +82,23 @@ COMMON_API size_t LinearizeCoords(const std::vector<size_t> &coords, const std::
 //! address specified by \p coords
 COMMON_API size_t LinearizeCoords(const std::vector<size_t> &coords, const std::vector<size_t> &min, const std::vector<size_t> &max);
 
+//! Increment a coordinate vector by one
+//!
+//! Increments \p counter by one within the range of \p min
+//! to \p max. Overflow is possible, resulting in wraparound
+//
+COMMON_API std::vector<size_t> IncrementCoords(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<size_t> counter);
+
+//! Return the dimesions of a subregion
+//!
+//! return the dimensions of a subregion enclosed by \p min and \p max
+//
+COMMON_API std::vector<size_t> Dims(const std::vector<size_t> &min, const std::vector<size_t> &max);
+
+//! Return the scalar product of the elements of a vector
+//!
+COMMON_API size_t VProduct(const std::vector<size_t> &a);
+
 //! Vectorize a coordinate offset. Inverse of VectorizeLinearize
 //!
 COMMON_API std::vector<size_t> VectorizeCoords(size_t offset, const std::vector<size_t> &min, const std::vector<size_t> &max);

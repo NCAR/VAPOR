@@ -42,6 +42,7 @@ Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const
     _interpolationOrder = 0;
     _nodeIDOffset = 0;
     _cellIDOffset = 0;
+    _minAbs = vector<size_t>(_dims.size(), 0);
 
     //
     // Shallow  copy blocks
@@ -76,7 +77,6 @@ float *Grid::AccessIndex(const std::vector<float *> &blks, const std::vector<siz
     vector<size_t> dims = GetDimensions();
     size_t         ndim = dims.size();
     for (int i = 0; i < ndim; i++) {
-        if (cIndices[i] >= dims[i]) { return (NULL); }
         bs[i] = _bs[i];
         bdims[i] = _bdims[i];
     }

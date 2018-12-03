@@ -514,7 +514,7 @@ void GridHelper::_makeGridHelper(const DC::DataVar &var, const vector<size_t> &r
     vector<bool> has_periodic = var.GetPeriodic();
     vector<bool> periodic;
     for (int i = 0; i < dims.size(); i++) {
-        if (has_periodic[i] && roi_dims[i] == dims[i]) {
+        if (i < has_periodic.size() && has_periodic[i] && roi_dims[i] == dims[i]) {
             periodic.push_back(true);
         } else {
             periodic.push_back(false);

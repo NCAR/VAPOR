@@ -56,8 +56,6 @@ public:
     glm::vec2 ProjectToScreen(const glm::vec3 &v) const;
 
 #ifndef NDEBUG
-    void        Test();
-    void        TestUpload();
     int         GetGLMatrixMode();
     const char *GetGLMatrixModeStr();
     int         GetGLModelViewStackDepth();

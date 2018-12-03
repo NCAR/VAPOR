@@ -517,6 +517,8 @@ void qmatrix(const float *q, GLfloat *m)
     m[14] = 0;
     m[15] = 1;
 }
+#warning This function results in row major matrix. OpenGL uses column major\
+	as well as the rest of the matrix operations
 void qmatrix(const double *q, GLdouble *m)
 {
     /* Build a rotation matrix, given a quaternion rotation.

@@ -62,6 +62,10 @@ public:
     void                      SetUniform(int location, const glm::vec4 &value) const;
     void                      SetUniform(int location, const glm::mat4 &value) const;
 
+    template<typename T> void SetUniformArray(const std::string &name, int count, const T *values) const;
+    void                      SetUniformArray(int location, int count, const float *values) const;
+    void                      SetUniformArray(int location, int count, const glm::vec4 *values) const;
+
     std::string        GetLog() const;
     void               PrintUniforms() const;
     static const char *GLTypeToString(const unsigned int type);

@@ -113,6 +113,13 @@ public:
     //
     void Clamp(double *x, double *y, size_t n, int offset) const;
 
+    //! Return true if the destination projection is cylindrical
+    //!
+    //! Returns true if the destination projection string is either
+    //! cylindrical "eqc", or mercator "merc"
+    //
+    bool IsCylindrical() const;
+
 private:
     void *_pjSrc;
     void *_pjDst;

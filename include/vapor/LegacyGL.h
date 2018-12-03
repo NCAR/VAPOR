@@ -3,14 +3,6 @@
 #include <vector>
 #include "vapor/ShaderProgram.h"
 
-/*
-#ifdef GL_CURRENT_BIT
-#define LGL_CURRENT_BIT GL_CURRENT_BIT
-#else
-#define LGL_CURRENT_BIT 1
-#endif
- */
-
 #ifdef GL_QUADS
     #define LGL_QUADS GL_QUADS
 #else

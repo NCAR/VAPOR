@@ -28,7 +28,7 @@
 
 #include <vapor/DataStatus.h>
 #include <vapor/AnnotationRenderer.h>
-#include <vapor/GetAppPath.h>
+#include <vapor/ResourcePath.h>
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
 #include "vapor/TextLabel.h"
@@ -49,10 +49,7 @@ AnnotationRenderer::AnnotationRenderer(const ParamsMgr *pm, const DataStatus *da
     _currentTimestep = 0;
 
     _fontName = "arimo";
-    vector<string> fpath;
-    fpath.push_back("fonts");
-    _fontFile = GetAppPath("VAPOR", "share", fpath);
-    _fontFile = _fontFile + "//" + _fontName + ".ttf";
+    _fontFile = GetSharePath("fonts/" + _fontName + ".ttf");
 }
 
 //----------------------------------------------------------------------------
@@ -257,14 +254,14 @@ void AnnotationRenderer::applyTransform(Transform *t)
     assert(scale.size() == 3);
     assert(origin.size() == 3);
 
-    _glManager->matrixManager->Translate(origin[0], origin[1], origin[2]);       // glTranslatef(origin[0], origin[1], origin[2]);
-    _glManager->matrixManager->Scale(scale[0], scale[1], scale[2]);              // glScalef(scale[0], scale[1], scale[2]);
-    _glManager->matrixManager->Rotate(rotate[0], 1, 0, 0);                       // glRotatef(rotate[0], 1, 0, 0);
-    _glManager->matrixManager->Rotate(rotate[1], 0, 1, 0);                       // glRotatef(rotate[1], 0, 1, 0);
-    _glManager->matrixManager->Rotate(rotate[2], 0, 0, 1);                       // glRotatef(rotate[2], 0, 0, 1);
-    _glManager->matrixManager->Translate(-origin[0], -origin[1], -origin[2]);    // glTranslatef(-origin[0], -origin[1], -origin[2]);
+    _glManager->matrixManager->Translate(origin[0], origin[1], origin[2]);
+    _glManager->matrixManager->Scale(scale[0], scale[1], scale[2]);
+    _glManager->matrixManager->Rotate(rotate[0], 1, 0, 0);
+    _glManager->matrixManager->Rotate(rotate[1], 0, 1, 0);
+    _glManager->matrixManager->Rotate(rotate[2], 0, 0, 1);
+    _glManager->matrixManager->Translate(-origin[0], -origin[1], -origin[2]);
 
-    _glManager->matrixManager->Translate(translate[0], translate[1], translate[2]);    // glTranslatef(translate[0], translate[1], translate[2]);
+    _glManager->matrixManager->Translate(translate[0], translate[1], translate[2]);
 }
 
 void AnnotationRenderer::InScenePaint(size_t ts)
@@ -274,10 +271,8 @@ void AnnotationRenderer::InScenePaint(size_t ts)
 
     _currentTimestep = ts;
 
-    // Push or reset state
     mm->MatrixModeModelView();
     mm->PushMatrix();
-    // glPushAttrib(GL_ALL_ATTRIB_BITS); // TODO GL
 
     vector<string>   winNames = m_paramsMgr->GetVisualizerNames();
     ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
@@ -324,9 +319,6 @@ void AnnotationRenderer::scaleNormalizedCoordinatesToWorld(std::vector<double> &
 void AnnotationRenderer::drawAxisTics(AxisAnnotation *aa)
 {
     if (aa == NULL) aa = getCurrentAxisAnnotation();
-
-    // Preserve the current GL color state
-    // glPushAttrib(GL_CURRENT_BIT); // TODO GL
 
     vector<double> origin = aa->GetAxisOrigin();
     vector<double> minTic = aa->GetMinTics();
@@ -431,8 +423,6 @@ void AnnotationRenderer::_drawAxes(std::vector<double> min, std::vector<double> 
 {
     LegacyGL *lgl = _glManager->legacy;
 
-    // glPushAttrib(GL_CURRENT_BIT);	// TODO GL
-    GL_LEGACY(glDisable(GL_LIGHTING));
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     lgl->Color4f(color[0], color[1], color[2], color[3]);
     GL_LEGACY(glLineWidth(width));
@@ -446,13 +436,10 @@ void AnnotationRenderer::_drawAxes(std::vector<double> min, std::vector<double> 
     lgl->Vertex3f(origin[0], origin[1], max[2]);
     lgl->End();
     glDisable(GL_LINE_SMOOTH);
-    // glEnable(GL_LIGHTING);
-    // glPopAttrib(); // TODO GL
 }
 
 void AnnotationRenderer::_drawTic(double startPosn[], double endPosn[], double width, std::vector<double> color)
 {
-    // glPushAttrib(GL_CURRENT_BIT); // TODO GL
     LegacyGL *lgl = _glManager->legacy;
     lgl->Color4f(color[0], color[1], color[2], color[3]);
     glLineWidth(width);
@@ -462,7 +449,6 @@ void AnnotationRenderer::_drawTic(double startPosn[], double endPosn[], double w
     lgl->Vertex3dv(endPosn);
     lgl->End();
     glDisable(GL_LINE_SMOOTH);
-    // glPopAttrib(); // TODO GL
 }
 
 void AnnotationRenderer::convertPointToLon(double &xCoord)
@@ -549,23 +535,6 @@ void AnnotationRenderer::renderText(double text, double coord[], AxisAnnotation 
     label.ForegroundColor = glm::vec4(axisColor[0], axisColor[1], axisColor[2], axisColor[3]);
     label.BackgroundColor = glm::vec4(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
     label.DrawText(glm::vec3(coord[0], coord[1], coord[2]), textString);
-
-    /*
-    if (_textObject!=NULL) {
-        delete _textObject;
-        _textObject = NULL;
-    }
-    _textObject = new TextObject();
-    _textObject->Initialize(
-        _fontFile, textString, fontSize,
-        axisColor, txtBackground, vpParams, TextObject::BILLBOARD,
-        TextObject::CENTERTOP
-    );
-
-    _textObject->drawMe(coord);
-
-    return;
-     */
 }
 
 void AnnotationRenderer::drawAxisArrows(vector<double> minExts, vector<double> maxExts)
@@ -575,9 +544,6 @@ void AnnotationRenderer::drawAxisArrows(vector<double> minExts, vector<double> m
         minExts.push_back(0.0);
         maxExts.push_back(0.0);
     }
-
-    // Preserve the current GL color state
-    // glPushAttrib(GL_CURRENT_BIT); // TODO GL
 
     float origin[3];
     float maxLen = -1.f;
