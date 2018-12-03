@@ -68,6 +68,10 @@ class RENDER_API MyPython : public Wasp::MyBase {
     //
     string PyErr();
 
+    //! Return stdout message as a string
+    //
+    string PyOut();
+
     //! Create a python function object from a script
     //!
     //! This method create a python function, named by \p funcName,
