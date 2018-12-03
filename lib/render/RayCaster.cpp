@@ -338,7 +338,10 @@ bool RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params
 
     // Save the data field values and missing values
     size_t numOfVertices = dims[0] * dims[1] * dims[2];
-    if (dataField) delete[] dataField;
+    if (dataField) {
+        delete[] dataField;
+        dataField = nullptr;
+    }
     dataField = new float[numOfVertices];
     if (!dataField)    // Test if allocation successful for 3D buffers.
     {
@@ -435,12 +438,10 @@ int RayCaster::_paintGL(bool fast)
         glActiveTexture(GL_TEXTURE0 + _backFaceTexOffset);
         glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
-        glCheckError();
 
         glActiveTexture(GL_TEXTURE0 + _frontFaceTexOffset);
         glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
-        glCheckError();
 
         glBindRenderbuffer(GL_RENDERBUFFER, _depthBufferId);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _currentViewport[2], _currentViewport[3]);
@@ -471,10 +472,18 @@ int RayCaster::_paintGL(bool fast)
         // Also attach the new data to 3D textures
         glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
         glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
+#ifdef Darwin
+        //
+        // Intel driver on MacOS seems to not able to correctly update the texture content
+        //   when the texture is moderately big. This workaround of loading a dummy texture
+        //   to force it to update this texture seems to resolve the issue.
+        //
+        float dummyVolume[8] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume);
+#endif
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED, GL_FLOAT, _userCoordinates.dataField);
-        glCheckError();
 
-        // Now we have to attach a missing value mask texture, because
+        // Now we HAVE TO attach a missing value mask texture, because
         //   Intel driver on Mac doesn't like leaving the texture empty...
         unsigned char dummyMask[8] = {0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u};
         glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
