@@ -117,8 +117,8 @@ namespace VAPoR {
         GLuint         _dataValueTextureID;
         GLuint         _missingValueTextureID;
 
-        std::vector<double>     _vertexCoords;
-        std::vector<float>      _texCoords;
+        std::vector<double> _vertexCoords;
+        std::vector<float>  _texCoords;
 
         GLuint _VAO;
         GLuint _vertexVBO;
