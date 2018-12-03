@@ -15,29 +15,48 @@ class ParamsMgr;
 class DataMgr;
 }    // namespace VAPoR
 
+//
+// class DVRVariablesSubtab
+//
 class DVRVariablesSubtab : public QWidget, public Ui_DVRVariablesGUI {
     Q_OBJECT
 
 public:
     DVRVariablesSubtab(QWidget *parent)
     {
+        _dvrParams = nullptr;
         setupUi(this);
         _variablesWidget->Reinit((VariableFlags)(SCALAR), (DimFlags)(THREED));
     }
 
-    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _variablesWidget->Update(dataMgr, paramsMgr, rParams); }
+    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *params)
+    {
+        _dvrParams = dynamic_cast<VAPoR::DVRParams *>(params);
+        assert(_dvrParams);
+        _castingModeComboBox->setCurrentIndex(_dvrParams->GetCastingMode() - 1);
+        _variablesWidget->Update(dataMgr, paramsMgr, params);
+    }
+
+private slots:
+    void on__castingModeComboBox_currentIndexChanged(int idx) { _dvrParams->SetCastingMode((long)idx + 1); }
+
+private:
+    VAPoR::DVRParams *_dvrParams;
 };
 
+//
+// class DVRAppearanceSubtab
+//
 class DVRAppearanceSubtab : public QWidget, public Ui_DVRAppearanceGUI {
     Q_OBJECT
 
 public:
     DVRAppearanceSubtab(QWidget *parent)
     {
+        _dvrParams = nullptr;
+
         setupUi(this);
         _TFWidget->Reinit((TFFlags)(0));
-
-        _dvrParams = nullptr;
 
         _ambientWidget->SetLabel(QString::fromAscii("Ambient   "));
         _ambientWidget->SetDecimals(2);
@@ -125,9 +144,11 @@ private slots:
 
 private:
     VAPoR::DVRParams *_dvrParams;
+};
 
-};    // End class DVRAppearanceSubtab
-
+//
+// class DVRGeometrySubtab
+//
 class DVRGeometrySubtab : public QWidget, public Ui_DVRGeometryGUI {
     Q_OBJECT
 
@@ -146,6 +167,9 @@ public:
     }
 };
 
+//
+// class DVRAnnotationSubtab
+//
 class DVRAnnotationSubtab : public QWidget, public Ui_DVRAnnotationGUI {
 public:
     DVRAnnotationSubtab(QWidget *parent) { setupUi(this); }

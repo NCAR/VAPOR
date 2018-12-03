@@ -1,5 +1,4 @@
 #include "vapor/IsoSurfaceRenderer.h"
-#include "vapor/ResourcePath.h"
 
 using namespace VAPoR;
 
@@ -15,42 +14,27 @@ IsoSurfaceRenderer::IsoSurfaceRenderer(const ParamsMgr *pm, std::string &winName
 
 void IsoSurfaceRenderer::_loadShaders()
 {
-#warning This needs to use the ShaderManager
-    std::vector<std::string> extraPath;
-    std::string              shaderPath = Wasp::GetSharePath("shaders/main");
-    std::string              VShader1stPass = shaderPath + "/IsoSurface1stPass.vgl";
-    std::string              FShader1stPass = shaderPath + "/IsoSurface1stPass.fgl";
-    std::string              VShader2ndPass = shaderPath + "/IsoSurface2ndPass.vgl";
-    std::string              FShader2ndPass = shaderPath + "/IsoSurface2ndPass.fgl";
-    std::string              VShader3rdPass = shaderPath + "/IsoSurface3rdPass.vgl";
-    std::string              FShader3rdPass = shaderPath + "/IsoSurface3rdPass.fgl";
-
-    _1stPassShaderId = _compileShaders(VShader1stPass.data(), FShader1stPass.data());
-    _2ndPassShaderId = _compileShaders(VShader2ndPass.data(), FShader2ndPass.data());
-    _3rdPassShaderId = _compileShaders(VShader3rdPass.data(), FShader3rdPass.data());
+    ShaderProgram *shader = _glManager->shaderManager->GetShader("IsoSurface1stPass");
+    _1stPassShaderId = shader->GetID();
+    shader = _glManager->shaderManager->GetShader("IsoSurface2ndPass");
+    _2ndPassShaderId = shader->GetID();
+    shader = _glManager->shaderManager->GetShader("IsoSurface3rdPassMode1");
+    _3rdPassMode1ShaderId = shader->GetID();
+    shader = _glManager->shaderManager->GetShader("IsoSurface3rdPassMode2");
+    _3rdPassMode2ShaderId = shader->GetID();
 }
 
-void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast)
+void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast, long castingMode)
 {
     IsoSurfaceParams *  params = dynamic_cast<IsoSurfaceParams *>(GetActiveParams());
-    bool                lighting = params->GetLighting();
     std::vector<double> isoValues = params->GetIsoValues();
     std::vector<bool>   isoFlags = params->GetEnabledIsoValueFlags();
 
-    // Special handling for IsoSurface #1:
-    //   honor GUI lighting selection even in fast rendering mode.
-    glUniform1i(glGetUniformLocation(_3rdPassShaderId, "lighting"), int(lighting));
-    if (lighting) {
-        std::vector<double> coeffsD = params->GetLightingCoeffs();
-        float               coeffsF[4] = {(float)coeffsD[0], (float)coeffsD[1], (float)coeffsD[2], (float)coeffsD[3]};
-        glUniform1fv(glGetUniformLocation(_3rdPassShaderId, "lightingCoeffs"), (GLsizei)4, coeffsF);
-    }
-
-    // Special handling for IsoSurface #2:
-    //   pass in *normalized* iso values.
+    // Special handling for IsoSurface: pass in *normalized* iso values.
     std::vector<float> validValues;
-    for (int i = 0; i < isoFlags.size(); i++)
+    for (int i = 0; i < isoFlags.size(); i++) {
         if (isoFlags[i]) validValues.push_back((float(isoValues[i]) - _userCoordinates.valueRange[0]) / (_userCoordinates.valueRange[1] - _userCoordinates.valueRange[0]));
+    }
     int numOfIsoValues = (int)validValues.size();
 
     glUniform1i(glGetUniformLocation(_3rdPassShaderId, "numOfIsoValues"), numOfIsoValues);
