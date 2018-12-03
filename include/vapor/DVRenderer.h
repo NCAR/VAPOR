@@ -23,7 +23,6 @@ public:
 
 protected:
     void _loadShaders();
-    void _3rdPassSpecialHandling( bool );
 };
 
 };
