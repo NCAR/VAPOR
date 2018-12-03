@@ -59,7 +59,6 @@ RayCaster::RayCaster( const ParamsMgr*    pm,
     _xyCoordsTextureId           = 0;
     _zCoordsTextureId            = 0;
     _frameBufferId               = 0;
-    _depthBufferId               = 0;
 
     _vertexArrayId               = 0;
     _vertexBufferId              = 0;
@@ -128,11 +127,6 @@ RayCaster::~RayCaster()
     {
         glDeleteFramebuffers( 1, &_frameBufferId );
         _frameBufferId = 0;
-    }
-    if( _depthBufferId )
-    {
-        glDeleteRenderbuffers( 1, &_depthBufferId );
-        _depthBufferId = 0;
     }
 
     // delete vertex arrays
@@ -565,10 +559,6 @@ int RayCaster::_paintGL( bool fast )
         glBindTexture(GL_TEXTURE_2D,   _frontFaceTextureId); 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
                      0, GL_RGBA, GL_FLOAT, nullptr);
-
-        glBindRenderbuffer(    GL_RENDERBUFFER, _depthBufferId );
-        glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 
-                               _currentViewport[2], _currentViewport[3] );
     }
 
     glBindVertexArray( _vertexArrayId );
@@ -801,13 +791,6 @@ void RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     
-    /* Depth buffer */
-    glGenRenderbuffers( 1, &_depthBufferId );
-    glBindRenderbuffer( GL_RENDERBUFFER, _depthBufferId );
-    glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 
-                           _currentViewport[2], _currentViewport[3] );
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthBufferId);
-
     /* Set "_backFaceTextureId" as colour attachement #0, 
        and "_frontFaceTextureId" as attachement #1       */
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _backFaceTextureId, 0);
