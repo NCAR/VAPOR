@@ -67,7 +67,6 @@ SliceRenderer::SliceRenderer(
     _texCoordVBO           = 0;
     _colorMapTextureID     = 0;
     _dataValueTextureID    = 0;
-    _missingValueTextureID = 0;
 
     _cacheParams.domainMin.resize(3, 0.f);
     _cacheParams.domainMax.resize(3, 1.f);
@@ -102,11 +101,6 @@ SliceRenderer::~SliceRenderer() {
     if (_dataValueTextureID != 0) {
         glDeleteTextures(1, &_dataValueTextureID);
         _dataValueTextureID = 0;
-    }
-
-    if (_missingValueTextureID != 0) {
-        glDeleteTextures(1, &_missingValueTextureID);
-        _missingValueTextureID = 0;
     }
 }
 
@@ -301,7 +295,6 @@ std::vector<double> SliceRenderer::_calculateDeltas(
 
 void SliceRenderer::_populateDataXY(
     float* dataValues,
-    float* missingValues,
     Grid* grid
 ) const {
     std::vector<double> deltas = _calculateDeltas();
@@ -319,11 +312,13 @@ void SliceRenderer::_populateDataXY(
             varValue = grid->GetValue(coords);
             missingValue = grid->GetMissingValue();
             if (varValue == missingValue) 
-                missingValues[index] = 1.f;
-                
+                dataValues[index+1] = 1.f;
+            else
+                dataValues[index+1] = 0.f;               
+ 
             dataValues[index]   = varValue;
 
-            index ++;
+            index += 2;
             coords[X] += deltas[X];
         }
         coords[Y] += deltas[Y];
@@ -332,7 +327,6 @@ void SliceRenderer::_populateDataXY(
     
 void SliceRenderer::_populateDataXZ(
     float* dataValues,
-    float* missingValues,
     Grid* grid
 ) const {
     std::vector<double> deltas = _calculateDeltas();
@@ -350,11 +344,13 @@ void SliceRenderer::_populateDataXZ(
             varValue = grid->GetValue(coords);
             missingValue = grid->GetMissingValue();
             if (varValue == missingValue) 
-                missingValues[index] = 1.f;
+                dataValues[index+1] = 1.f;
+            else
+                dataValues[index+1] = 0.f;               
             
             dataValues[index]   = varValue;
 
-            index ++;
+            index += 2;
             coords[X] += deltas[X];
         }
         coords[Z] += deltas[Z];
@@ -363,7 +359,6 @@ void SliceRenderer::_populateDataXZ(
     
 void SliceRenderer::_populateDataYZ(
     float* dataValues,
-    float* missingValues,
     Grid* grid
 ) const {
     std::vector<double> deltas = _calculateDeltas();
@@ -381,11 +376,13 @@ void SliceRenderer::_populateDataYZ(
             varValue = grid->GetValue(coords);
             missingValue = grid->GetMissingValue();
             if (varValue == missingValue) 
-                missingValues[index] = 1.f;
+                dataValues[index+1] = 1.f;
+            else
+                dataValues[index+1] = 0.f;               
             
             dataValues[index]   = varValue;
 
-            index ++;
+            index += 2;
             coords[Y] += deltas[Y];
         }
         coords[Z] += deltas[Z];
@@ -416,23 +413,19 @@ int SliceRenderer::_saveTextureData() {
 
     _setVertexPositions();
 
-    int textureSize = _textureWidth * _textureHeight;
+    int textureSize = 2 * _textureWidth * _textureHeight;
     float* dataValues    = new float[textureSize];
-    float* missingValues = new float[textureSize];
-    for (int i=0; i<textureSize; i++)
-        missingValues[i] = 0.f;
 
     if      (_cacheParams.orientation == XY) 
-        _populateDataXY(dataValues, missingValues, grid);
+        _populateDataXY(dataValues, grid);
     else if (_cacheParams.orientation == XZ) 
-        _populateDataXZ(dataValues, missingValues, grid);
+        _populateDataXZ(dataValues, grid);
     else if (_cacheParams.orientation == YZ) 
-        _populateDataYZ(dataValues, missingValues, grid);
+        _populateDataYZ(dataValues, grid);
     else    
         assert(0);
 
     _createDataTexture(dataValues);
-    _createMissingTexture(missingValues);
 
     delete [] dataValues;
     delete grid;
@@ -454,36 +447,13 @@ void SliceRenderer::_createDataTexture(float* dataValues) {
     glTexImage2D(
         GL_TEXTURE_2D, 
         0, 
-        GL_R32F, 
+        GL_RG32F, 
         _textureWidth,
         _textureHeight,
         0, 
-        GL_RED, 
+        GL_RG, 
         GL_FLOAT, 
         dataValues
-    );
-}
-
-void SliceRenderer::_createMissingTexture(float* missingValues) {
-    glDeleteTextures(1, &_missingValueTextureID);
-    glGenTextures(1, &_missingValueTextureID);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, _missingValueTextureID);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glTexImage2D(
-        GL_TEXTURE_2D, 
-        0, 
-        GL_R32F, 
-        _textureWidth,
-        _textureHeight,
-        0, 
-        GL_RED, 
-        GL_FLOAT, 
-        missingValues
     );
 }
 
@@ -576,9 +546,6 @@ int SliceRenderer::_paintGL(bool fast) {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, _dataValueTextureID);
 
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, _missingValueTextureID);
-
     glBindVertexArray(_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     
@@ -613,10 +580,6 @@ void SliceRenderer::_configureShader() {
     GLint dataValuesLocation;
     dataValuesLocation = s->GetUniformLocation("dataValues");
     glUniform1i(dataValuesLocation, 1);
-
-    GLint missingValuesLocation;
-    missingValuesLocation = s->GetUniformLocation("missingValues");
-    glUniform1i(missingValuesLocation, 2);
 }
 
 void SliceRenderer::_initializeState() {
