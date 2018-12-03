@@ -56,6 +56,13 @@ SliceRenderer::SliceRenderer(
         1.0f, 1.0f,
         0.0f, 1.0f};
 
+    _VAO = 0;
+    _vertexVBO = 0;
+    _texCoordVBO = 0;
+    _colorMapTextureID = 0;
+    _dataValueTextureID = 0;
+    _missingValueTextureID = 0;
+
     _cacheParams.domainMin.resize(3, 0.f);
     _cacheParams.domainMax.resize(3, 1.f);
 
@@ -66,13 +73,35 @@ SliceRenderer::SliceRenderer(
 }
 
 SliceRenderer::~SliceRenderer() {
-    glDeleteVertexArrays(1, &_VAO);
-    glDeleteBuffers(1, &_vertexVBO);
-    glDeleteBuffers(1, &_texCoordVBO);
+    if (_VAO != 0) {
+        glDeleteVertexArrays(1, &_VAO);
+        _VAO = 0;
+    }
 
-    glDeleteTextures(1, &_colorMapTextureID);
-    glDeleteTextures(1, &_dataValueTextureID);
-    glDeleteTextures(1, &_missingValueTextureID);
+    if (_vertexVBO != 0) {
+        glDeleteBuffers(1, &_vertexVBO);
+        _vertexVBO = 0;
+    }
+
+    if (_texCoordVBO != 0) {
+        glDeleteBuffers(1, &_texCoordVBO);
+        _texCoordVBO = 0;
+    }
+
+    if (_colorMapTextureID != 0) {
+        glDeleteTextures(1, &_colorMapTextureID);
+        _colorMapTextureID = 0;
+    }
+
+    if (_dataValueTextureID != 0) {
+        glDeleteTextures(1, &_dataValueTextureID);
+        _dataValueTextureID = 0;
+    }
+
+    if (_missingValueTextureID != 0) {
+        glDeleteTextures(1, &_missingValueTextureID);
+        _missingValueTextureID = 0;
+    }
 }
 
 int SliceRenderer::_initializeGL() {
@@ -99,7 +128,7 @@ void SliceRenderer::_initTexCoordVBO() {
     glBufferData(
         GL_ARRAY_BUFFER,
         sizeof(float) * sizeof(_texCoords),
-        &_texCoords[0],
+        _texCoords.data(),
         GL_STATIC_DRAW);
 }
 
@@ -112,7 +141,7 @@ void SliceRenderer::_initVertexVBO() {
     glBufferData(
         GL_ARRAY_BUFFER,
         6 * 3 * sizeof(double),
-        &_vertexCoords[0],
+        _vertexCoords.data(),
         GL_STATIC_DRAW);
 }
 
@@ -506,22 +535,28 @@ int SliceRenderer::_paintGL(bool fast) {
 
     if (_isDataCacheDirty()) {
         rc = _resetDataCache();
-        if (rc < 0)
+        if (rc < 0) {
+            _resetState();
             return rc; // error message already set by _resetDataCache()
+        }
     } else {
         if (_isColormapCacheDirty())
             _resetColormapCache();
 
         if (_isBoxCacheDirty()) {
             rc = _resetBoxCache();
-            if (rc < 0)
+            if (rc < 0) {
+                _resetState();
                 return rc; // error message already set by _resetBoxCache()
+            }
         }
     }
 
     _configureShader();
-    if (printOpenGLError() != 0)
+    if (printOpenGLError() != 0) {
+        _resetState();
         return -1;
+    }
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureID);
@@ -618,7 +653,7 @@ void SliceRenderer::_setVertexPositions() {
         GL_ARRAY_BUFFER,
         0,
         6 * 3 * sizeof(double),
-        &_vertexCoords[0]);
+        _vertexCoords.data());
 }
 
 void SliceRenderer::_setXYVertexPositions(
