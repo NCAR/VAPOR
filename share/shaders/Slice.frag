@@ -2,7 +2,6 @@
 
 uniform sampler1D colormap;
 uniform sampler2D dataValues;
-//uniform sampler2D missingValues;
 
 uniform float minLUTValue;
 uniform float maxLUTValue;
@@ -15,7 +14,6 @@ void main(void)
 {
 	if (minLUTValue >= maxLUTValue) discard;
 
-    //float missing = texture(missingValues, fTexCoord).r;
     float missing = texture(dataValues, fTexCoord).g;
     if (missing != 0.f) discard; 
 
@@ -24,7 +22,6 @@ void main(void)
 
     float normalized = (value - minLUTValue) / (maxLUTValue - minLUTValue);
 
-    //fragColor = texture(colormap, fTexCoord.x);
     vec4  color = texture(colormap, normalized);
     fragColor = vec4(color.rgb, color.a*constantOpacity);
 }
