@@ -5,11 +5,8 @@ layout(location = 0) in vec3 vertexPosition;
 
 uniform mat4 MVP;
 
-out vec4 positionClip;   // vertex position in the clip space
-
 void main(void)
 {
     vec4 positionModel = vec4( vertexPosition, 1.0f );
-    positionClip       = MVP * positionModel;
-    gl_Position        = positionClip;
+    gl_Position        = MVP * positionModel;
 }
