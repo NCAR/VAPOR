@@ -626,7 +626,9 @@ void MappingFrame::fitViewToDataRange() {
 // Force a redraw in the vizualization window.
 //----------------------------------------------------------------------------
 void MappingFrame::updateMap() {
-    _colorbarWidget->setDirty();
+    if (_colorbarWidget) {
+        _colorbarWidget->setDirty();
+    }
     emit mappingChanged();
 }
 
