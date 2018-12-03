@@ -6,6 +6,26 @@
 
 using namespace VAPoR;
 
+GLenum glCheckError_(const char *file, int line)
+{
+    GLenum errorCode;
+    while ((errorCode = glGetError()) != GL_NO_ERROR) {
+        std::string error;
+        switch (errorCode) {
+        case GL_INVALID_ENUM: error = "INVALID_ENUM"; break;
+        case GL_INVALID_VALUE: error = "INVALID_VALUE"; break;
+        case GL_INVALID_OPERATION: error = "INVALID_OPERATION"; break;
+        case GL_STACK_OVERFLOW: error = "STACK_OVERFLOW"; break;
+        case GL_STACK_UNDERFLOW: error = "STACK_UNDERFLOW"; break;
+        case GL_OUT_OF_MEMORY: error = "OUT_OF_MEMORY"; break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
+        }
+        std::cout << error << " | " << file << " (" << line << ")" << std::endl;
+    }
+    return errorCode;
+}
+#define glCheckError() glCheckError_(__FILE__, __LINE__)
+
 // Constructor
 RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string paramsType, std::string classType, std::string &instName, DataMgr *dataMgr)
 : Renderer(pm, winName, dataSetName, paramsType, classType, instName, dataMgr)
@@ -416,10 +436,12 @@ int RayCaster::_paintGL(bool fast)
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
+        glCheckError();
 
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
+        glCheckError();
 
         glBindRenderbuffer(GL_RENDERBUFFER, _depthBufferId);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _currentViewport[2], _currentViewport[3]);
@@ -451,6 +473,7 @@ int RayCaster::_paintGL(bool fast)
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED, GL_FLOAT, _userCoordinates.dataField);
+        glCheckError();
 
         // If there is missing value, upload the mask to texture. Otherwise, leave it empty.
         if (_userCoordinates.missingValueMask)    // Has missing value!
@@ -462,6 +485,7 @@ int RayCaster::_paintGL(bool fast)
             glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE,
                          _userCoordinates.missingValueMask);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 4);    // Restore default alignment.
+            glCheckError();
         }
 
         // If using cell traverse ray casting, we need to upload user coordinates
@@ -841,7 +865,7 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "colorMapTexture");
     glUniform1i(uniformLocation, textureUnit);
 
-    if (_userCoordinates.missingValueMask != nullptr) {
+    if (_userCoordinates.missingValueMask) {
         textureUnit = 4;
         glActiveTexture(GL_TEXTURE0 + textureUnit);
         glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
