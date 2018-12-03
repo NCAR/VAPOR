@@ -111,6 +111,8 @@ public:
 	void SetScale(const double scale[3]) {
 		_scale[0] = scale[0]; _scale[1] = scale[1]; _scale[2] = scale[2];
 	}
+    
+    double GetOrthoSize() const;
 
 	const double *GetModelViewMatrix() {
 		return(_modelViewMatrix);
