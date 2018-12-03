@@ -254,19 +254,19 @@ int RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params,
     }
 }
 
-bool RayCaster::UserCoordinates::IsMetadataUpToDate(const RayCasterParams *params,
-                                                    DataMgr *dataMgr) const {
+int RayCaster::UserCoordinates::IsMetadataUpToDate(const RayCasterParams *params,
+                                                   DataMgr *dataMgr) const {
     if ((myCurrentTimeStep != params->GetCurrentTimestep()) ||
         (myVariableName != params->GetVariableName()) ||
         (myRefinementLevel != params->GetRefinementLevel()) ||
         (myCompressionLevel != params->GetCompressionLevel())) {
-        return false;
+        return 1;
     }
 
     // compare grid boundaries and dimensions
     StructuredGrid *grid = nullptr;
     if (this->GetCurrentGrid(params, dataMgr, &grid) != 0) {
-        // TODO: return an integer
+        return -1;
     }
     std::vector<double> extMin, extMax;
     grid->GetUserExtents(extMin, extMax);
@@ -276,13 +276,13 @@ bool RayCaster::UserCoordinates::IsMetadataUpToDate(const RayCasterParams *param
             (boxMax[i] != (float)extMax[i]) ||
             (dims[i] != gridDims[i])) {
             delete grid;
-            return false;
+            return 1;
         }
     }
 
     // now we know it's up to date!
     delete grid;
-    return true;
+    return 0;
 }
 
 bool RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
@@ -515,18 +515,23 @@ int RayCaster::_paintGL(bool fast) {
     if (!params) {
         MyBase::SetErrMsg("Not receiving RayCaster parameters; "
                           "the behavior becomes undefined!");
+        return 1;
     }
     long castingMode = params->GetCastingMode();
 
     // If there is an update event
-    if (!_userCoordinates.IsMetadataUpToDate(params, _dataMgr)) {
+    int upToDate = _userCoordinates.IsMetadataUpToDate(params, _dataMgr);
+    if (upToDate < 0) {
+        MyBase::SetErrMsg("Error occured during updating meta data!");
+        return 1;
+    } else if (upToDate > 0) {
         if (!_userCoordinates.UpdateFaceAndData(params, _dataMgr)) {
-            MyBase::SetErrMsg("Memory allocation failed!");
+            MyBase::SetErrMsg("Error occured during updating face and volume data!");
             return 1;
         }
 
         if (castingMode == 2 && !_userCoordinates.UpdateCurviCoords(params, _dataMgr)) {
-            MyBase::SetErrMsg("Memory allocation failed!");
+            MyBase::SetErrMsg("Error occured during updating curvilinear coordinates!");
             return 1;
         }
 
