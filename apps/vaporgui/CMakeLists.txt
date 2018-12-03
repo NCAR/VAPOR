@@ -20,6 +20,7 @@ set (SRCS
 	TwoDDataEventRouter.cpp
 	WireFrameEventRouter.cpp
 	RangeController.cpp
+    PythonVariables.cpp
 	Statistics.cpp
 	Plot.cpp
 	helloSubtabs.cpp
@@ -69,6 +70,7 @@ set (SRCS
 	WireFrameSubtabs.h
 	Statistics.h
 	Plot.h
+    PythonVariables.h
 	BarbSubtabs.h
 	ColorbarWidget.h
 	OrientationAngles.h
@@ -116,6 +118,7 @@ set (SRCS
 	MappingFrame.h
 	MouseModeParams.h
 	PlotParams.h
+    PythonVariablesParams.h
 	QIntValidatorWithFixup.h
 	RangeCombos.h
 	RangeController.h
@@ -175,6 +178,7 @@ set (UIS
 	statsWindow.ui
 	plotWindow.ui
 	firstTimeUser.ui
+    PythonVariablesGUI.ui
 	TFWidgetGUI.ui
 	GeometryWidgetGUI.ui
 	ColorbarWidgetGUI.ui
@@ -205,7 +209,7 @@ if (APPLE)
 	add_executable (vapor MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE_PATH} ${SRCS} ${UIS})
 	set (INSTALL_BIN_DIR ".")
 elseif (WIN32)
-	set (WINDOWS_ICON_PATH "${CMAKE_SOURCE_DIR}/Images/vapor-win-icon.ico")
+	set (WINDOWS_ICON_PATH "${CMAKE_SOURCE_DIR}/share/images/vapor-win-icon.ico")
 	configure_file (vapor.rc.in ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
 	add_executable (vapor WIN32 ${SRCS} ${UIS} ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
 else ()
@@ -224,10 +228,6 @@ if (APPLE)
 elseif (UNIX AND NOT APPLE)
 	target_link_libraries (vapor quadmath)
 endif ()
-
-add_definitions (-DPYTHONVERSION="${PYTHONVERSION}")
-add_definitions (-DPYTHONDIR="${PYTHONDIR}")
-# add_definitions (-DPARAMS_EXPORTS)
 
 install (
 	TARGETS vapor

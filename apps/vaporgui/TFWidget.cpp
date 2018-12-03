@@ -72,6 +72,9 @@ TFWidget::TFWidget(QWidget* parent)
 		_maxExt.push_back(0.f);
 	}
 
+    _varRange.resize(2);
+    std::fill(_varRange.begin(), _varRange.end(), 0.f);
+
 	connectWidgets();
 }
 

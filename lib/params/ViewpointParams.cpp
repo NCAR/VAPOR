@@ -59,6 +59,8 @@ const string ViewpointParams::_numLightsTag = "NumLights";
 const string ViewpointParams::m_windowSizeTag = "WindowSize";
 const string ViewpointParams::m_stretchFactorsTag = "StretchFactors";
 const string ViewpointParams::m_fieldOfView = "FieldOfView";
+const string ViewpointParams::_orthoProjectionSizeTag = "OrthoProjectionSize";
+const string ViewpointParams::_projectionTypeTag = "ProjectionType";
 
 
 
@@ -312,6 +314,25 @@ double ViewpointParams::GetFOV() const {
 	if (v<5) v=5;
 	if (v>90) v=90;
 	return(v);
+}
+
+void ViewpointParams::SetOrthoProjectionSize(float f) {
+    SetValueDouble(_orthoProjectionSizeTag, "Set orthographic projection size", f);
+}
+
+double ViewpointParams::GetOrthoProjectionSize() const {
+    double defaultv = 1.0;
+    double v = GetValueDouble(_orthoProjectionSizeTag, defaultv);
+    return v;
+}
+
+void ViewpointParams::SetProjectionType(ViewpointParams::ProjectionType type) {
+    SetValueLong(_projectionTypeTag, "Set projection type", type);
+}
+
+ViewpointParams::ProjectionType ViewpointParams::GetProjectionType() const {
+    const long defaultV = Perspective;
+    return (ViewpointParams::ProjectionType)GetValueLong(_projectionTypeTag, defaultV);
 }
 
 vector<double> ViewpointParams::GetStretchFactors() const {
