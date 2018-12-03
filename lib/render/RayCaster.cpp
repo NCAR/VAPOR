@@ -127,11 +127,11 @@ RayCaster::~RayCaster() {
 
     // delete buffers
     if (_frameBufferId) {
-        glDeleteBuffers(1, &_frameBufferId);
+        glDeleteFramebuffers(1, &_frameBufferId);
         _frameBufferId = 0;
     }
     if (_depthBufferId) {
-        glDeleteBuffers(1, &_depthBufferId);
+        glDeleteRenderbuffers(1, &_depthBufferId);
         _depthBufferId = 0;
     }
 
@@ -232,9 +232,9 @@ RayCaster::UserCoordinates::~UserCoordinates() {
     }
 }
 
-StructuredGrid *
-RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params,
-                                           DataMgr *dataMgr) const {
+int RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params,
+                                               DataMgr *dataMgr,
+                                               StructuredGrid **gridpp) const {
     std::vector<double> extMin, extMax;
     params->GetBox()->GetExtents(extMin, extMax);
     StructuredGrid *grid = dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(
@@ -247,8 +247,11 @@ RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params,
     if (grid == nullptr) {
         MyBase::SetErrMsg("UserCoordinates::GetCurrentGrid() isn't on a StructuredGrid; "
                           "the behavior is undefined in this case.");
+        return 1;
+    } else {
+        *gridpp = grid;
+        return 0;
     }
-    return grid;
 }
 
 bool RayCaster::UserCoordinates::IsMetadataUpToDate(const RayCasterParams *params,
@@ -261,7 +264,10 @@ bool RayCaster::UserCoordinates::IsMetadataUpToDate(const RayCasterParams *param
     }
 
     // compare grid boundaries and dimensions
-    StructuredGrid *grid = this->GetCurrentGrid(params, dataMgr);
+    StructuredGrid *grid = nullptr;
+    if (this->GetCurrentGrid(params, dataMgr, &grid) != 0) {
+        // TODO: return an integer
+    }
     std::vector<double> extMin, extMax;
     grid->GetUserExtents(extMin, extMax);
     std::vector<size_t> gridDims = grid->GetDimensions();
@@ -287,7 +293,10 @@ bool RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params
     myCompressionLevel = params->GetCompressionLevel();
 
     /* update member variables */
-    StructuredGrid *grid = this->GetCurrentGrid(params, dataMgr);
+    StructuredGrid *grid = nullptr;
+    if (this->GetCurrentGrid(params, dataMgr, &grid) != 0) {
+        // TODO: return an integer
+    }
     std::vector<double> extMin, extMax;
     grid->GetUserExtents(extMin, extMax);
     for (int i = 0; i < 3; i++) {
@@ -455,7 +464,10 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params
         }
 
     // Gather the Z coordinates from grid
-    StructuredGrid *grid = this->GetCurrentGrid(params, dataMgr);
+    StructuredGrid *grid = nullptr;
+    if (this->GetCurrentGrid(params, dataMgr, &grid) != 0) {
+        // TODO: return an integer
+    }
     StructuredGrid::ConstCoordItr coordItr = grid->ConstCoordBegin();
     size_t numOfVertices = dims[0] * dims[1] * dims[2];
     for (xyzIdx = 0; xyzIdx < numOfVertices; xyzIdx++) {
@@ -617,7 +629,10 @@ int RayCaster::_paintGL(bool fast) {
     cameraUser[1] = InversedMV[3][1];
     cameraUser[2] = InversedMV[3][2];
     std::vector<size_t> cameraCellIndices; // camera position in which cell?
-    StructuredGrid *grid = _userCoordinates.GetCurrentGrid(params, _dataMgr);
+    StructuredGrid *grid = nullptr;
+    if (_userCoordinates.GetCurrentGrid(params, _dataMgr, &grid) != 0) {
+        // TODO: return an integer
+    }
     bool insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
 
     if (insideACell) {
