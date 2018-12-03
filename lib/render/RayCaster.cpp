@@ -28,7 +28,8 @@ GLenum glCheckError_(const char *file, int line)
 
 // Constructor
 RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string paramsType, std::string classType, std::string &instName, DataMgr *dataMgr)
-: Renderer(pm, winName, dataSetName, paramsType, classType, instName, dataMgr)
+: Renderer(pm, winName, dataSetName, paramsType, classType, instName, dataMgr), _backFaceTexOffset(0), _frontFaceTexOffset(1), _volumeTexOffset(2), _colorMapTexOffset(3), _missingValueTexOffset(4),
+  _xyCoordsTexOffset(5), _zCoordsTexOffset(6)
 {
     _backFaceTextureId = 0;
     _frontFaceTextureId = 0;
@@ -363,10 +364,10 @@ bool RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params
             dataValue = float(*valItr);
             if (dataValue == missingValue) {
                 dataField[i] = 0.0f;
-                missingValueMask[i] = 127;
+                missingValueMask[i] = 127u;
             } else {
                 dataField[i] = (dataValue - valueRange[0]) * valueRange1o;
-                missingValueMask[i] = 0;
+                missingValueMask[i] = 0u;
             }
             ++valItr;
         }
@@ -431,14 +432,12 @@ int RayCaster::_paintGL(bool fast)
         std::memcpy(_currentViewport, newViewport, 4 * sizeof(GLint));
 
         // Re-size 2D textures
-        //   It turns out I don't need to delete the current storage and re-allocate
-        //   new storage, as glTexImage2D cleans things up.
-        glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE0 + _backFaceTexOffset);
         glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
         glCheckError();
 
-        glActiveTexture(GL_TEXTURE1);
+        glActiveTexture(GL_TEXTURE0 + _frontFaceTexOffset);
         glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
         glCheckError();
@@ -470,23 +469,23 @@ int RayCaster::_paintGL(bool fast)
         }
 
         // Also attach the new data to 3D textures
-        glActiveTexture(GL_TEXTURE2);
+        glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
         glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED, GL_FLOAT, _userCoordinates.dataField);
         glCheckError();
 
-        // If there is missing value, upload the mask to texture. Otherwise, leave it empty.
-        if (_userCoordinates.missingValueMask)    // Has missing value!
-        {
-            glActiveTexture(GL_TEXTURE4);
-            // Adjust alignment for GL_R8UI format. Stupid OpenGL parameter.
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
+        // Now we have to attach a missing value mask texture, because
+        //   Intel driver on Mac doesn't like leaving the texture empty...
+        unsigned char dummyMask[8] = {0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u};
+        glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);    // Alignment adjustment. Stupid.
+        glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
+        if (_userCoordinates.missingValueMask)    // There is missing value.
             glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE,
                          _userCoordinates.missingValueMask);
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 4);    // Restore default alignment.
-            glCheckError();
-        }
+        else
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, 2, 2, 2, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, dummyMask);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);    // Restore default alignment.
 
         // If using cell traverse ray casting, we need to upload user coordinates
         if (castingMode == 2) {
@@ -496,14 +495,14 @@ int RayCaster::_paintGL(bool fast)
             glBindBuffer(GL_TEXTURE_BUFFER, _xyCoordsBufferId);
             glBufferData(GL_TEXTURE_BUFFER, 2 * sizeof(float) * dims[0] * dims[1], _userCoordinates.xyCoords, GL_STATIC_READ);
             // Pass data to the buffer texture: _xyCoordsTextureId
-            glActiveTexture(GL_TEXTURE5);
+            glActiveTexture(GL_TEXTURE0 + _xyCoordsTexOffset);
             glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
             glTexBuffer(GL_TEXTURE_BUFFER, GL_RG32F, _xyCoordsBufferId);
 
             // Repeat for the next buffer texture: _zCoordsBufferId
             glBindBuffer(GL_TEXTURE_BUFFER, _zCoordsBufferId);
             glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * dims[0] * dims[1] * dims[2], _userCoordinates.zCoords, GL_STATIC_READ);
-            glActiveTexture(GL_TEXTURE6);
+            glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
             glBindTexture(GL_TEXTURE_BUFFER, _zCoordsTextureId);
             glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, _zCoordsBufferId);
 
@@ -530,7 +529,7 @@ int RayCaster::_paintGL(bool fast)
         _colorMapRange[1] = float(range[1]);
     }
 
-    glActiveTexture(GL_TEXTURE4);
+    glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _colorMap.size() / 4, 0, GL_RGBA, GL_FLOAT, _colorMap.data());
     glBindTexture(GL_TEXTURE_1D, 0);
@@ -613,9 +612,8 @@ void RayCaster::_initializeFramebufferTextures()
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
 
     /* Generate back-facing texture */
-    GLuint textureUnit = 0;
     glGenTextures(1, &_backFaceTextureId);
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _backFaceTexOffset);
     glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
 
@@ -626,9 +624,8 @@ void RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     /* Generate front-facing texture */
-    textureUnit = 1;
     glGenTextures(1, &_frontFaceTextureId);
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _frontFaceTexOffset);
     glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
 
@@ -660,9 +657,8 @@ void RayCaster::_initializeFramebufferTextures()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     /* Generate and configure 3D texture: _volumeTextureId */
-    textureUnit = 2;
     glGenTextures(1, &_volumeTextureId);
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
     glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
 
     /* Configure _volumeTextureId */
@@ -673,9 +669,8 @@ void RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     /* Generate and configure 1D texture: _colorMapTextureId */
-    textureUnit = 3;
     glGenTextures(1, &_colorMapTextureId);
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
 
     /* Configure _colorMapTextureId */
@@ -684,9 +679,8 @@ void RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
     /* Generate and configure 3D texture: _missingValueTextureId */
-    textureUnit = 4;
     glGenTextures(1, &_missingValueTextureId);
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
     glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
 
     /* Configure _missingValueTextureId */
@@ -827,7 +821,7 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     }
 
     // Pack in fast mode, lighting, and missing value booleans together
-    int flags[3] = {int(fast), int(lighting), int(_userCoordinates.missingValueMask == nullptr)};
+    int flags[3] = {int(fast), int(lighting), int(_userCoordinates.missingValueMask != nullptr)};
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "flags");
     glUniform1iv(uniformLocation, (GLsizei)3, flags);
 
@@ -847,50 +841,41 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     glUniform1f(uniformLocation, stepSize1D);
 
     // Pass in textures
-    GLuint textureUnit = 0;
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _backFaceTexOffset);
     glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "backFaceTexture");
-    glUniform1i(uniformLocation, textureUnit);
+    glUniform1i(uniformLocation, _backFaceTexOffset);
 
-    textureUnit = 1;
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _frontFaceTexOffset);
     glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "frontFaceTexture");
-    glUniform1i(uniformLocation, textureUnit);
+    glUniform1i(uniformLocation, _frontFaceTexOffset);
 
-    textureUnit = 2;
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
     glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeTexture");
-    glUniform1i(uniformLocation, textureUnit);
+    glUniform1i(uniformLocation, _volumeTexOffset);
 
-    textureUnit = 3;
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "colorMapTexture");
-    glUniform1i(uniformLocation, textureUnit);
+    glUniform1i(uniformLocation, _colorMapTexOffset);
 
-    if (_userCoordinates.missingValueMask) {
-        textureUnit = 4;
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
-        glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
-        glUniform1i(uniformLocation, textureUnit);
-    }
+    glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
+    glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
+    glUniform1i(uniformLocation, _missingValueTexOffset);
 
     if (castingMode == 2) {
-        textureUnit = 5;
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        glActiveTexture(GL_TEXTURE0 + _xyCoordsTexOffset);
         glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "xyCoordsTexture");
-        glUniform1i(uniformLocation, textureUnit);
+        glUniform1i(uniformLocation, _xyCoordsTexOffset);
 
-        textureUnit = 6;
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
         glBindTexture(GL_TEXTURE_BUFFER, _zCoordsTextureId);
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "zCoordsTexture");
-        glUniform1i(uniformLocation, textureUnit);
+        glUniform1i(uniformLocation, _zCoordsTexOffset);
     }
 }
 

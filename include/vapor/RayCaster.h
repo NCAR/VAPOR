@@ -98,13 +98,20 @@ protected:
 
     // OpenGL stuff
     // textures
-    GLuint _backFaceTextureId;        // GL_TEXTURE0
-    GLuint _frontFaceTextureId;       // GL_TEXTURE1
-    GLuint _volumeTextureId;          // GL_TEXTURE2
-    GLuint _missingValueTextureId;    // GL_TEXTURE3
-    GLuint _colorMapTextureId;        // GL_TEXTURE4
-    GLuint _xyCoordsTextureId;        // GL_TEXTURE5
-    GLuint _zCoordsTextureId;         // GL_TEXTURE6
+    GLuint       _backFaceTextureId;
+    GLuint       _frontFaceTextureId;
+    GLuint       _volumeTextureId;
+    GLuint       _missingValueTextureId;
+    GLuint       _colorMapTextureId;
+    GLuint       _xyCoordsTextureId;
+    GLuint       _zCoordsTextureId;
+    const GLuint _backFaceTexOffset;
+    const GLuint _frontFaceTexOffset;
+    const GLuint _volumeTexOffset;
+    const GLuint _colorMapTexOffset;
+    const GLuint _missingValueTexOffset;
+    const GLuint _xyCoordsTexOffset;
+    const GLuint _zCoordsTexOffset;
 
     // buffers
     GLuint _frameBufferId;
