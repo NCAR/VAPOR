@@ -128,7 +128,6 @@ protected:
 
     // buffers
     GLuint _frameBufferId;
-    GLuint _depthBufferId;
     GLuint _xyCoordsBufferId;
     GLuint _zCoordsBufferId;
     GLenum _drawBuffers[2];    // Draw buffers for the 1st and 2nd pass
