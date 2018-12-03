@@ -243,7 +243,7 @@ int RayCaster::UserCoordinates::IsMetadataUpToDate(const RayCasterParams *params
     return 0;
 }
 
-bool RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params, DataMgr *dataMgr)
+int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params, DataMgr *dataMgr)
 {
     myCurrentTimeStep = params->GetCurrentTimestep();
     myVariableName = params->GetVariableName();
@@ -253,7 +253,8 @@ bool RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params
     /* update member variables */
     StructuredGrid *grid = nullptr;
     if (this->GetCurrentGrid(params, dataMgr, &grid) != 0) {
-        // TODO: return an integer
+        MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
+        return 1;
     }
     std::vector<double> extMin, extMax;
     grid->GetUserExtents(extMin, extMax);
@@ -352,8 +353,9 @@ bool RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params
     dataField = new float[numOfVertices];
     if (!dataField)    // Test if allocation successful for 3D buffers.
     {
+        MyBase::SetErrMsg("Failed to allocate memory");
         delete grid;
-        return false;
+        return -1;
     }
     if (missingValueMask) {
         delete[] missingValueMask;
@@ -366,8 +368,9 @@ bool RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params
         float missingValue = grid->GetMissingValue();
         missingValueMask = new unsigned char[numOfVertices];
         if (!missingValueMask) {
+            MyBase::SetErrMsg("Failed to allocate memory");
             delete grid;
-            return false;
+            return -1;
         }
         float dataValue;
         for (size_t i = 0; i < numOfVertices; i++) {
@@ -390,7 +393,7 @@ bool RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params
     }
 
     delete grid;
-    return true;
+    return 0;
 }
 
 bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params, DataMgr *dataMgr)
@@ -474,7 +477,8 @@ int RayCaster::_paintGL(bool fast)
         MyBase::SetErrMsg("Error occured during updating meta data!");
         return 1;
     } else if (upToDate > 0) {
-        if (!_userCoordinates.UpdateFaceAndData(params, _dataMgr)) {
+        int success = _userCoordinates.UpdateFaceAndData(params, _dataMgr);
+        if (success != 0) {
             MyBase::SetErrMsg("Error occured during updating face and volume data!");
             return 1;
         }

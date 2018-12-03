@@ -88,10 +88,12 @@ protected:
         //
         int IsMetadataUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const;
         //
-        // Update meta data, as well as pointers:
-        //   6 faces + dataField + missingValueMask
+        // Update meta data, as well as pointers: 6 faces + dataField + missingValueMask
+        //   It returns 0 upon success, and non-zero upon errors:
+        //     1 == Failed to get a StructuredGrid
+        //    -1 == Failed to allocate memory for the 3D variable or missing value mask
         //
-        bool UpdateFaceAndData(const RayCasterParams *params, DataMgr *dataMgr);
+        int UpdateFaceAndData(const RayCasterParams *params, DataMgr *dataMgr);
         //
         // Update pointers: xyCoords and zCoords
         //   Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
