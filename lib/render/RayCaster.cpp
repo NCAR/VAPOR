@@ -457,7 +457,7 @@ int RayCaster::_paintGL(bool fast)
     }
     long castingMode = params->GetCastingMode();
 
-    // If there an update event
+    // If there is an update event
     if (!_userCoordinates.IsMetadataUpToDate(params, _dataMgr)) {
         if (!_userCoordinates.UpdateFaceAndData(params, _dataMgr)) {
             MyBase::SetErrMsg("Memory allocation failed!");
