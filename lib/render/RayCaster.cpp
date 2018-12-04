@@ -432,15 +432,20 @@ int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params,
 
 int RayCaster::_initializeGL()
 {
-    if (_loadShaders() != 0) return 1;
-    if (_initializeFramebufferTextures() != 0) return 1;
+    if (_initializeFramebufferTextures() != 0) return -1;
 
     return 0;    // Success
 }
 
 int RayCaster::_paintGL(bool fast)
 {
+    // Reload shaders in case they're changed
+    if (_loadShaders() != 0) {
+        MyBase::SetErrMsg("Failed to load shaders");
+        return -1;
+    }
     const MatrixManager *mm = Renderer::_glManager->matrixManager;
+
     // Visualizer dimensions would change if window is resized
     GLint newViewport[4];
     glGetIntegerv(GL_VIEWPORT, newViewport);
@@ -896,6 +901,8 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "zCoordsTexture");
         glUniform1i(uniformLocation, _zCoordsTexOffset);
     }
+
+    glUseProgram(0);
 }
 
 void RayCaster::_3rdPassSpecialHandling(bool fast, long castingMode)
