@@ -152,8 +152,6 @@ public:
 
     void updateMapperFunction(VAPoR::MapperFunction *mapper);
 
-    void SetIsSlicing(bool isSlicing) { _isSlicing = isSlicing; }
-
 signals:
 
     //! Signal that is invoked when user starts to modify the transfer function.
@@ -197,11 +195,6 @@ private:
     void    updateHistogram();
     string  getActiveRendererName() const;
     void    populateHistogram();
-    void    populateVolumetricHistogram(VAPoR::Grid *grid, std::vector<double> minExt, std::vector<double> maxExt);
-    void    populateSlicingHistogram(VAPoR::Grid *grid, std::vector<double> minExt, std::vector<double> maxExt);
-    void    _getSampleCoordinates(std::vector<double> &coords, std::vector<double> minExts, std::vector<double> maxExts, int i, int j, int orientation, int sampleRate) const;
-
-    bool _isSlicing;
 
 protected slots:
     void setEditMode(bool);
