@@ -368,11 +368,11 @@ public:
 );
 	
  void _initBox();
-
 protected:
- DataMgr *_dataMgr;
+	DataMgr *_dataMgr;
 	
 private:
+
  void _init();
  int _maxDim;
  ParamsContainer *_TFs; 
