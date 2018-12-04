@@ -96,10 +96,9 @@ void SliceRenderer::_initVAO()
 
 void SliceRenderer::_initTexCoordVBO()
 {
-    if (_texCoordVBO != 0) {
-        glDeleteBuffers(1, &_texCoordVBO);
-        glGenBuffers(1, &_texCoordVBO);
-    }
+    if (_texCoordVBO != 0) glDeleteBuffers(1, &_texCoordVBO);
+
+    glGenBuffers(1, &_texCoordVBO);
     glBindBuffer(GL_ARRAY_BUFFER, _texCoordVBO);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(1);
@@ -108,10 +107,9 @@ void SliceRenderer::_initTexCoordVBO()
 
 void SliceRenderer::_initVertexVBO()
 {
-    if (_vertexVBO != 0) {
-        glDeleteBuffers(1, &_vertexVBO);
-        glGenBuffers(1, &_vertexVBO);
-    }
+    if (_vertexVBO != 0) glDeleteBuffers(1, &_vertexVBO);
+
+    glGenBuffers(1, &_vertexVBO);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
     glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(0);
@@ -158,10 +156,9 @@ void SliceRenderer::_resetColormapCache()
     tf->makeLut(_cacheParams.tf_lut);
     _cacheParams.tf_minMax = tf->getMinMaxMapValue();
 
-    if (_colorMapTextureID != 0) {
-        glDeleteTextures(1, &_colorMapTextureID);
-        glGenTextures(1, &_colorMapTextureID);
-    }
+    if (_colorMapTextureID != 0) glDeleteTextures(1, &_colorMapTextureID);
+
+    glGenTextures(1, &_colorMapTextureID);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureID);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -361,10 +358,9 @@ int SliceRenderer::_saveTextureData()
 
 void SliceRenderer::_createDataTexture(float *dataValues)
 {
-    if (_dataValueTextureID != 0) {
-        glDeleteTextures(1, &_dataValueTextureID);
-        glGenTextures(1, &_dataValueTextureID);
-    }
+    if (_dataValueTextureID != 0) glDeleteTextures(1, &_dataValueTextureID);
+
+    glGenTextures(1, &_dataValueTextureID);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, _dataValueTextureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
