@@ -41,7 +41,7 @@ TFWidget::TFWidget(QWidget* parent)
 
 	setupUi(this);
 
-	_somethingChanged = false;
+	_autoUpdateParamChanged = false;
 	_autoUpdateHisto = false;
 	_discreteColormap = false;
 
@@ -93,6 +93,12 @@ void TFWidget::Reinit(TFFlags flags) {
 		showConstColorWidgets();
 	else
 		collapseConstColorWidgets();
+
+    if (_flags & NOAUTOUPDATE) 
+        autoUpdateHistoFrame->setEnabled(false);
+    else
+        autoUpdateHistoFrame->setEnabled(true);
+
 	adjustSize();
 }
 
@@ -338,7 +344,7 @@ void TFWidget::Update(DataMgr *dataMgr,
 	string newName = getCurrentVarName();
 	if (_varName != newName) {
 		_varName = newName;
-		refreshHistogram();
+		RefreshHistogram();
 	}
 }
 
@@ -347,13 +353,13 @@ void TFWidget::checkForExternalChangesToHisto() {
 	int newCLevel = _rParams->GetCompressionLevel();
 	if (_cLevel != newCLevel) {
 		_cLevel = _rParams->GetCompressionLevel();
-		_somethingChanged= true;
+		_autoUpdateParamChanged= true;
 	}
 
 	int newRefLevel = _rParams->GetRefinementLevel();
 	if (_refLevel != newRefLevel) {
 		_refLevel = newRefLevel;
-		_somethingChanged = true;
+		_autoUpdateParamChanged = true;
 	}
 
 	std::vector<double> minExt, maxExt;
@@ -361,29 +367,29 @@ void TFWidget::checkForExternalChangesToHisto() {
 	box->GetExtents(minExt, maxExt);
 	for (int i=0; i<minExt.size(); i++) {
 		if (minExt[i] != _minExt[i]) {
-			_somethingChanged = true;
+			_autoUpdateParamChanged = true;
 			_minExt[i] = minExt[i];
 		}
 		if (maxExt[i] != _maxExt[i]) {
-			_somethingChanged = true;
+			_autoUpdateParamChanged = true;
 			_maxExt[i] = maxExt[i];
 		}
 	}
 
 	double min = _minCombo->GetValue();
 	double max = _maxCombo->GetValue();
-	MapperFunction *tf = getCurrentMapperFunction();
-	double newMin = tf->getMinMapValue();
-	double newMax = tf->getMaxMapValue();
+	MapperFunction *mf = getCurrentMapperFunction();
+	double newMin = mf->getMinMapValue();
+	double newMax = mf->getMaxMapValue();
 	if (min != newMin)
-		_somethingChanged = true;
+		_autoUpdateParamChanged = true;
 	if (max != newMax)
-		_somethingChanged = true;
+		_autoUpdateParamChanged = true;
 
 	int newTimestep = _rParams->GetCurrentTimestep();
 	if (_timeStep != newTimestep) {
 		_timeStep = newTimestep;
-		_somethingChanged = true;
+		_autoUpdateParamChanged = true;
 	}
 
     std::vector<double> newRange(2, 0.f);
@@ -391,18 +397,18 @@ void TFWidget::checkForExternalChangesToHisto() {
     if ((newRange[0] != _varRange[0]) ||
         (newRange[1] != _varRange[1])) {
         _varRange = newRange;
-        _somethingChanged = true;
+        _autoUpdateParamChanged = true;
     }
     
 
-	if (_somethingChanged) {
+	if (_autoUpdateParamChanged) {
 		if (autoUpdateHisto())
-			refreshHistogram();
+			RefreshHistogram();
 		else
 			updateHistoButton->setEnabled(true);
 	}
 
-	_somethingChanged = false;
+	_autoUpdateParamChanged = false;
 }
 
 void TFWidget::updateConstColorWidgets() {
@@ -472,9 +478,9 @@ void TFWidget::emitTFChange() {
 void TFWidget::opacitySliderChanged(int value)
 {
 	string varName = _rParams->GetVariableName();
-	MapperFunction *tf = _rParams->GetMapperFunc(varName);
-	assert(tf);
-	tf->setOpacityScale(value/100.f);
+	MapperFunction *mf = _rParams->GetMapperFunc(varName);
+	assert(mf);
+	mf->setOpacityScale(value/100.f);
 	emit emitChange();
 }
 
@@ -486,18 +492,23 @@ void TFWidget::setRange() {
 }
 
 void TFWidget::setRange(double min, double max) {
-	_somethingChanged = true;
+	_autoUpdateParamChanged = true;
 
-	MapperFunction* tf = getCurrentMapperFunction();
+	MapperFunction* mf = getCurrentMapperFunction();
 
-	tf->setMinMapValue(min);
-	tf->setMaxMapValue(max);
+	mf->setMinMapValue(min);
+	mf->setMaxMapValue(max);
 
 	updateHisto();
 	emit emitChange();
 }
 
-void TFWidget::refreshHistogram() {
+void TFWidget::SetAutoUpdateParamChanged(bool changed) {
+    _autoUpdateParamChanged = changed;
+}
+
+void TFWidget::RefreshHistogram() {
+	std::vector<double> minExt, maxExt;
 	MapperFunction *mf = getCurrentMapperFunction();
 	mappingFrame->updateMapperFunction(mf);
 	bool force = true;
@@ -509,7 +520,7 @@ void TFWidget::refreshHistogram() {
 void TFWidget::updateHisto() {
 	bool buttonRequest = sender() == updateHistoButton ? true : false;
 	if (autoUpdateHisto() || buttonRequest) {
-		refreshHistogram();
+		RefreshHistogram();
 	}
 	else {
 		mappingFrame->fitToView();

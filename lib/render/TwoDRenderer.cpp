@@ -141,6 +141,7 @@ int TwoDRenderer::_paintGL(bool) {
 //
 void TwoDRenderer::_openGLInit() {
 	if (! _gridAligned) {
+        glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, _textureID);
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
@@ -221,7 +222,7 @@ void TwoDRenderer::_renderMeshUnAligned() {
 	_openGLRestore();
 }
 
-void TwoDRenderer::_renderMeshAligned() {
+void TwoDRenderer::_renderMeshAligned() {   
     RenderParams *myParams = (RenderParams *) GetActiveParams();
     float opacity = myParams->GetConstantOpacity();
     

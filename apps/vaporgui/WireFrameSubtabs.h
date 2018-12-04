@@ -23,7 +23,7 @@ public:
 		setupUi(this);
 		_variablesWidget->Reinit(
 			(VariableFlags)(SCALAR | HEIGHT),
-			(DimFlags)(THREED | TWODXY)
+			(DimFlags)(THREED | TWOD)
 		);
 	}
 
@@ -64,7 +64,6 @@ public:
 		setupUi(this);
 		_geometryWidget->Reinit(
 			(DimFlags)THREED,
-			(GeometryFlags)MINMAX,
 			(VariableFlags)SCALAR
 		);
 	}
