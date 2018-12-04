@@ -467,8 +467,7 @@ int RayCaster::_paintGL(bool fast)
 
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
     if (!params) {
-        MyBase::SetErrMsg("Not receiving RayCaster parameters; "
-                          "the behavior becomes undefined!");
+        MyBase::SetErrMsg("Error occured during retrieving RayCaster parameters!");
         return 1;
     }
     long castingMode = params->GetCastingMode();
@@ -497,7 +496,7 @@ int RayCaster::_paintGL(bool fast)
         //
         // Intel driver on MacOS seems to not able to correctly update the texture content
         //   when the texture is moderately big. This workaround of loading a dummy texture
-        //   to force it to update seems to resolve the issue.
+        //   to force it to update seems to resolve this issue.
         //
         float dummyVolume[8] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume);
