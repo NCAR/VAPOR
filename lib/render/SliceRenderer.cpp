@@ -102,7 +102,7 @@ void SliceRenderer::_initTexCoordVBO()
     glBindBuffer(GL_ARRAY_BUFFER, _texCoordVBO);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
     glEnableVertexAttribArray(1);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * sizeof(_texCoords), _texCoords.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * _texCoords.size(), _texCoords.data(), GL_STATIC_DRAW);
 }
 
 void SliceRenderer::_initVertexVBO()
@@ -215,7 +215,9 @@ void SliceRenderer::_resetTextureCoordinates()
     _texCoords = {texMinX, texMinY, texMaxX, texMinY, texMinX, texMaxY, texMaxX, texMinY, texMaxX, texMaxY, texMinX, texMaxY};
 
     glBindBuffer(GL_ARRAY_BUFFER, _texCoordVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * sizeof(_texCoords), &_texCoords[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * _texCoords.size(),
+                    _texCoords.data()    //&_texCoords[0]
+    );
 }
 
 std::vector<double> SliceRenderer::_calculateDeltas() const
