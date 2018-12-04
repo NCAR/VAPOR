@@ -6,6 +6,7 @@
 
 using namespace VAPoR;
 
+/*
 GLenum glCheckError_(const char *file, int line)
 {
     GLenum errorCode;
@@ -27,6 +28,8 @@ GLenum glCheckError_(const char *file, int line)
     return errorCode;
 }
 #define glCheckError() glCheckError_(__FILE__, __LINE__)
+*/
+void glCheckError() { }
 
 // Constructor
 RayCaster::RayCaster( const ParamsMgr*    pm,
@@ -908,6 +911,7 @@ void RayCaster::_drawVolumeFaces( int              whichPass,
     }
     else    // 3rd pass
     { 
+        glUseProgram( _3rdPassShaderId );
         _load3rdPassUniforms( castingMode, InversedMV, fast );
         _3rdPassSpecialHandling( fast, castingMode );
 
@@ -917,9 +921,9 @@ void RayCaster::_drawVolumeFaces( int              whichPass,
         glDepthMask( GL_TRUE );
     }
 
-    if( insideACell )   // only when 1st or 2nd pass
+    if( insideACell )   // Only enters this section when 1st or 2nd pass
     {
-        glEnableVertexAttribArray( 0 );             // attribute 0 is vertex coordinates
+        glEnableVertexAttribArray( 0 );  // attribute 0 is vertex coordinates
         glBindBuffer( GL_ARRAY_BUFFER, _vertexBufferId );
         glBufferData( GL_ARRAY_BUFFER,              12 * sizeof(GLfloat), 
                       _userCoordinates.nearCoords,  GL_STREAM_DRAW );
@@ -947,7 +951,6 @@ void RayCaster::_load3rdPassUniforms( long               castingMode,
     glm::mat4 modelview  = _glManager->matrixManager->GetModelViewMatrix();
     glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
-    glUseProgram( _3rdPassShaderId );
     GLint uniformLocation = glGetUniformLocation( _3rdPassShaderId, "MV" );
     glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview) );
 
@@ -1058,8 +1061,6 @@ void RayCaster::_load3rdPassUniforms( long               castingMode,
         uniformLocation = glGetUniformLocation( _3rdPassShaderId, "zCoordsTexture" );
         glUniform1i(      uniformLocation,   _zCoordsTexOffset );
     }
-
-    glUseProgram( 0 );
 }
     
 void RayCaster::_3rdPassSpecialHandling( bool fast, long castingMode )
