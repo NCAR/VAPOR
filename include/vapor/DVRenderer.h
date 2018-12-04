@@ -22,7 +22,7 @@ public:
     }
 
 protected:
-    void _loadShaders();
+    int  _loadShaders();
 };
 
 };
