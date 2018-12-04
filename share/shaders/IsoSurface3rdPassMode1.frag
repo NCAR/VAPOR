@@ -1,7 +1,6 @@
 #version 410 core
 
 in  vec4  gl_FragCoord;
-out float gl_FragDepth;
 layout(location = 0) out vec4 color;
 
 uniform sampler2D  backFaceTexture;
