@@ -123,7 +123,7 @@ void SliceRenderer::_initTexCoordVBO() {
     glEnableVertexAttribArray(1);
     glBufferData(
         GL_ARRAY_BUFFER,
-        sizeof(float) * sizeof(_texCoords),
+        sizeof(float) * _texCoords.size(),
         _texCoords.data(),
         GL_STATIC_DRAW);
 }
@@ -269,8 +269,9 @@ void SliceRenderer::_resetTextureCoordinates() {
     glBufferSubData(
         GL_ARRAY_BUFFER,
         0,
-        sizeof(float) * sizeof(_texCoords),
-        &_texCoords[0]);
+        sizeof(float) * _texCoords.size(),
+        _texCoords.data() //&_texCoords[0]
+    );
 }
 
 std::vector<double> SliceRenderer::_calculateDeltas() const {
