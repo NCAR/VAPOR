@@ -24,6 +24,7 @@ uniform int   numOfIsoValues;    // how many iso values are valid in isoValues a
 uniform float isoValues[4];      // currently set there are at most 4 iso values.
 
 uniform mat4 MV;
+uniform mat4 Projection;
 uniform mat4 inversedMV;
 
 //
@@ -131,6 +132,8 @@ vec3 CalculateGradient( const in vec3 tc )
 
 void main(void)
 {
+    gl_FragDepth        = 1.0;
+    color               = vec4( 0.0 );
     vec3  lightDirEye   = vec3(0.0, 0.0, 1.0); 
     float translatedIsoValues[4];
     for( int i = 0; i < numOfIsoValues; i++ )
@@ -144,12 +147,7 @@ void main(void)
     vec3 rayDirEye      = stopEye - startEye;
     float rayDirLength  = length( rayDirEye );
     if( rayDirLength    < ULP10 )
-    {
-        color = vec4( 0.0 );
-        gl_FragDepth = 1.0;
-
         discard;
-    }
 
     float nStepsf       = rayDirLength  / stepSize1D;
     vec3  stepSize3D    = rayDirEye     / nStepsf;
@@ -158,7 +156,6 @@ void main(void)
     vec3  step1Model    = (inversedMV * vec4(step1Eye, 1.0)).xyz;
     vec3  step1Texture  = (step1Model - boxMin) / boxSpan;
     float step1Value    = texture( volumeTexture, step1Texture ).r;
-    color               = vec4( 0.0 );
 
     // let's do a ray casting! 
     int nSteps = int(nStepsf) + 1;
@@ -183,12 +180,14 @@ void main(void)
         {
             if( (isoValues[j] - step1Value) * (isoValues[j] - step2Value) < 0.0 )
             {
-                vec4 backColor  = texture( colorMapTexture, translatedIsoValues[j] );
+                vec4  backColor = texture( colorMapTexture, translatedIsoValues[j] );
+                float weight    = (isoValues[j] - step1Value) / (step2Value - step1Value);
+                vec3  isoEye    = step1Eye + weight * (step2Eye - step1Eye);
+
+                // Apply lighting
                 if( lighting && backColor.a > 0.001 )
                 {
-                    float weight         = (isoValues[j] - step1Value) / (step2Value - step1Value);
                     vec3 isoTexture      = step1Texture + weight * (step2Texture - step1Texture);
-                    vec3 isoEye          = step1Eye + weight * (step2Eye - step1Eye);
                     vec3 gradientModel   = CalculateGradient( isoTexture );
                     if( length( gradientModel ) > ULP10 ) // Only apply if big enough gradient
                     {
@@ -202,10 +201,17 @@ void main(void)
                         backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse*diffuseCoeff) + 
                                            specular * specularCoeff;
                     }
-                }   // End lighting
+                }
 
                 color.rgb += (1.0 - color.a) * backColor.a * backColor.rgb;
                 color.a   += (1.0 - color.a) * backColor.a;
+
+                // Apply depth
+                //   Follow transforms explained in http://www.songho.ca/opengl/gl_transform.html
+                vec4  isoClip =  Projection * vec4( isoEye, 1.0 );
+                vec3  isoNdc  =  isoClip.xyz / isoClip.w;
+                gl_FragDepth  =  gl_DepthRange.diff * 0.5 * isoNdc.z +
+                                (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
             }
         }
 
@@ -214,7 +220,6 @@ void main(void)
         step1Value   = step2Value;
     }   // Finish ray casting
 
-    gl_FragDepth = 0.9; //gl_FragCoord.z;
 
 }   // End main()
 
