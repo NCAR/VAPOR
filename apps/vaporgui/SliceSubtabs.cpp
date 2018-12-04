@@ -46,8 +46,6 @@ SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget *parent)
     setupUi(this);
     _TFWidget->Reinit((TFFlags)(0));
 
-    _TFWidget->mappingFrame->SetIsSlicing(true);
-
     _sampleRateWidget->SetLabel(QString::fromAscii("Quality"));
     _sampleRateWidget->SetIntType(true);
     _sampleRateWidget->SetExtents(MIN_QUALITY, MAX_QUALITY);

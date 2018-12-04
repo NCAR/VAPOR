@@ -32,7 +32,6 @@
 #include <vapor/MapperFunction.h>
 #include <vapor/OpacityMap.h>
 #include <vapor/ContourParams.h>
-#include <vapor/SliceParams.h>
 #include "OpacityWidget.h"
 #include "DomainWidget.h"
 #include "GLColorbarWidget.h"
@@ -48,11 +47,6 @@
 #ifndef MIN
     #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
-
-#define numHistoBins 256
-#define X            0
-#define Y            1
-#define Z            2
 
 using namespace VAPoR;
 using namespace std;
@@ -171,6 +165,7 @@ void MappingFrame::RefreshHistogram(bool force)
     _histogram = _histogramMap[rendererName];
 
     if (!force && skipRefreshHistogram()) return;
+
     string var;
     var = _rParams->GetColorMapVariableName();
     MapperFunction *mf = _rParams->GetMapperFunc(var);
@@ -180,12 +175,11 @@ void MappingFrame::RefreshHistogram(bool force)
     size_t ts = _rParams->GetCurrentTimestep();
 
     if (_histogram) delete _histogram;
-    _histogram = new Histo(numHistoBins, minRange, maxRange, var, ts);
+    _histogram = new Histo(256, minRange, maxRange, var, ts);
 
     populateHistogram();
 
     _histogramMap[rendererName] = _histogram;
-    paintGL();
 }
 
 void MappingFrame::populateHistogram()
@@ -206,70 +200,6 @@ void MappingFrame::populateHistogram()
         return;
     }
 
-    if (_isSlicing)
-        populateSlicingHistogram(grid, minExts, maxExts);
-    else
-        populateVolumetricHistogram(grid, minExts, maxExts);
-}
-
-void MappingFrame::populateSlicingHistogram(Grid *grid, std::vector<double> minExts, std::vector<double> maxExts)
-{
-    std::vector<double> textureMin, textureMax;
-
-    SliceParams *sp = dynamic_cast<SliceParams *>(_rParams);
-    if (sp == NULL) {
-        MSG_ERR("Could not attain SliceParams for Histogram");
-        return;
-    }
-    int sampleRate, orientation;
-    sampleRate = sp->GetSampleRate();
-    orientation = sp->GetBox()->GetOrientation();
-
-    float               varValue, missingValue;
-    std::vector<double> coords(3, 0.0);
-    for (int j = 0; j < sampleRate; j++) {
-        for (int i = 0; i < sampleRate; i++) {
-            _getSampleCoordinates(coords, minExts, maxExts, i, j, orientation, sampleRate);
-
-            varValue = grid->GetValue(coords);
-            missingValue = grid->GetMissingValue();
-            if (varValue == missingValue) continue;
-
-            _histogram->addToBin(varValue);
-        }
-    }
-    /*    SliceParams* sParams = dynamic_cast<SliceParams*>(_rParams);
-    std::vector<double> cachedValues = sParams->GetCachedValues();
-
-    for (int i=0; i<cachedValues.size(); i++) {
-        _histogram->addToBin(cachedValues[i]);
-    }
-*/
-}
-
-void MappingFrame::_getSampleCoordinates(std::vector<double> &coords, std::vector<double> minExts, std::vector<double> maxExts, int i, int j, int orientation, int sampleRate) const
-{
-    double dx = (maxExts[X] - minExts[X]) / (1 + sampleRate);
-    double dy = (maxExts[Y] - minExts[Y]) / (1 + sampleRate);
-    double dz = (maxExts[Z] - minExts[Z]) / (1 + sampleRate);
-
-    if (orientation == XY) {
-        coords[X] = minExts[X] + dx * i + dx / 2.f;
-        coords[Y] = minExts[Y] + dy * j + dy / 2.f;
-        coords[Z] = minExts[Z];
-    } else if (orientation == XZ) {
-        coords[X] = minExts[X] + dx * i + dx / 2.f;
-        coords[Y] = minExts[Y];
-        coords[Z] = minExts[Z] + dz * j + dz / 2.f;
-    } else {    // Y corresponds to i, the faster axis; Z to j, the slower axis
-        coords[Z] = minExts[Z] + dz * j + dz / 2.f;
-        coords[Y] = minExts[Y] + dy * i + dy / 2.f;
-        coords[X] = minExts[X];
-    }
-}
-
-void MappingFrame::populateVolumetricHistogram(Grid *grid, std::vector<double> minExts, std::vector<double> maxExts)
-{
     float          v;
     Grid::Iterator itr;
     Grid::Iterator enditr = grid->end();
@@ -404,7 +334,7 @@ void MappingFrame::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *
 
     if (_initialized == false) {
         _initialized = true;
-        RefreshHistogram(true);
+        RefreshHistogram();
     }
 
     _minValue = getMinEditBound();
