@@ -41,18 +41,11 @@ public:
     void SetLighting( bool );
     std::vector<double> GetLightingCoeffs() const;
     void SetLightingCoeffs( const std::vector<double>& coeffs );
-    //
-    // Different ray casting methods: 1 == fixed step casting
-    //                                2 == prism intersection casting
-    //
-    long GetCastingMode() const;
-    void SetCastingMode( long );
 
 protected:
 
     static const std::string _lightingTag;
     static const std::string _lightingCoeffsTag;
-    static const std::string _castingModeTag;
 };
 
 }
