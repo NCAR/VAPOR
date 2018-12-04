@@ -4,9 +4,7 @@ ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
 
-    _TFWidget->Reinit((TFFlags)(CONSTANT));
-    _TFWidget->mappingFrame->setIsolineSliders(true);
-    _TFWidget->mappingFrame->setOpacityMapping(false);
+    _TFWidget->Reinit((TFFlags)(CONSTANT_COLOR | ISOLINES));
 
     _lineWidthCombo = new Combo(lineWidthEdit, lineWidthSlider);
     _countCombo = new Combo(contourCountEdit, contourCountSlider, true);

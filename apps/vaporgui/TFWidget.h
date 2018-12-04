@@ -59,43 +59,77 @@ public:
 
     void fileLoadTF(string varname, const char *path, bool savePath);
 
-    void loadTF(string varname);
+    // void loadTF(string varname);
 
-    void  getRange(float range[2], float values[2]);
+    void  getVariableRange(float range[2], float values[2], bool secondaryVariable);
     float getOpacity();
 
 private slots:
-    void fileSaveTF();
-    void setRange();
-    void setRange(double min, double max);
-    void updateHisto();
-    void refreshHistogram();
-    void autoUpdateHistoChecked(int state);
-    void colorInterpChanged(int index);
     void loadTF();
+    void fileSaveTF();
+
+    //	void updateMainHisto();
+    void refreshMainHisto();
+    void refreshSecondaryHisto();
+
+    void autoUpdateMainHistoChecked(int state);
+    void autoUpdateSecondaryHistoChecked(int state);
+
+    //	void refreshHistograms();
+    void setColorInterpolation(int index);
     void emitTFChange();
     void opacitySliderChanged(int value);
+
     void setSingleColor();
     void setUsingSingleColor(int checkState);
     void setUseWhitespace(int state);
 
+    void setRange();
+    void setRange(double min, double max);
+    void setSecondaryRange();
+    void setSecondaryMinRange(double min);
+    void setSecondaryMaxRange(double max);
+
 private:
-    void                   collapseConstColorWidgets();
-    void                   showConstColorWidgets();
-    void                   showWhitespaceFrame();
-    void                   hideWhitespaceFrame();
-    string                 getVariableName();
-    void                   connectWidgets();
-    void                   updateSliders();
-    void                   updateAutoUpdateHistoCheckbox();
-    void                   updateColorInterpolation();
-    void                   updateMappingFrame();
-    void                   enableTFWidget(bool state);
-    void                   updateConstColorWidgets();
-    void                   checkForExternalChangesToHisto();
-    bool                   autoUpdateHisto();
-    string                 getCurrentVarName();
-    VAPoR::MapperFunction *getCurrentMapperFunction();
+    void refreshMainHistoIfNecessary();
+    void refreshSecondaryHistoIfNecessary();
+
+    void configureConstantColorControls();
+    void configureSecondaryTransferFunction();
+    void connectWidgets();
+
+    void updateColorInterpolation();
+    void updateConstColor();
+
+    void updateMainAutoUpdateHistoCheckboxes();
+    void updateMainMappingFrame(bool refresh);
+    void updateMainSliders();
+
+    void updateSecondaryAutoUpdateHistoCheckbox();
+    void updateSecondaryMappingFrame(bool refresh);
+    void updateSecondarySliders();
+
+    //	void refreshIfMainVarChanged();
+    bool mainVariableChanged();
+    bool secondaryVariableChanged();
+    void refreshIfSecondaryVarChanged();
+
+    void enableTFWidget(bool state);
+
+    void enableUpdateButtonsIfNeeded();
+    void checkForVariableChanges();
+    void checkForBoxChanges();
+    void checkForCompressionChanges();
+    void checkForMainMapperRangeChanges();
+    void checkForSecondaryMapperRangeChanges();
+    void checkForTimestepChanges();
+
+    bool                   getAutoUpdateMainHisto();
+    bool                   getAutoUpdateSecondaryHisto();
+    VAPoR::MapperFunction *getMainMapperFunction();
+    VAPoR::MapperFunction *getSecondaryMapperFunction();
+
+    string getTFVariableName(bool mainTF);
 
     int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
     int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);
@@ -106,10 +140,14 @@ private:
     int                 _cLevel;
     int                 _refLevel;
     int                 _timeStep;
-    string              _varName;
-    bool                _somethingChanged;
+    string              _mainVarName;
+    string              _secondaryVarName;
+    bool                _externalChangeHappened;
+    bool                _mainHistoRangeChanged;
+    bool                _secondaryHistoRangeChanged;
+    bool                _mainHistoNeedsRefresh;
+    bool                _secondaryHistoNeedsRefresh;
 
-    bool  _autoUpdateHisto;
     bool  _discreteColormap;
     bool  _textChanged;
     float _myRGB[3];

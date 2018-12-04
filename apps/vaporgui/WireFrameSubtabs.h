@@ -34,7 +34,7 @@ public:
     WireFrameAppearanceSubtab(QWidget *parent)
     {
         setupUi(this);
-        _TFWidget->Reinit((TFFlags)(CONSTANT));
+        _TFWidget->Reinit((TFFlags)(CONSTANT_COLOR));
     }
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _TFWidget->Update(dataMgr, paramsMgr, rParams); }
