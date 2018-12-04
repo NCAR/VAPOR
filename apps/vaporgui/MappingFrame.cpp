@@ -96,7 +96,6 @@ MappingFrame::MappingFrame(QWidget *parent)
   _button(Qt::LeftButton), _minX(-0.035), _maxX(1.035), _minY(-0.35), _maxY(1.3), _minValue(0.0), _maxValue(1.0), _colorbarHeight(16), _domainBarHeight(16), _domainLabelHeight(10),
   _domainHeight(_domainBarHeight + _domainLabelHeight + 3), _axisRegionHeight(20), _opacityGap(4), _bottomGap(10), _dataMgr(NULL), _rParams(NULL), _mousePressFlag(false), _initialized(false)
 {
-    cout << "MappingFrame::MappingFrame()" << endl;
     initWidgets();
     initConnections();
     setMouseTracking(true);
@@ -107,7 +106,6 @@ MappingFrame::MappingFrame(QWidget *parent)
 //----------------------------------------------------------------------------
 MappingFrame::~MappingFrame()
 {
-    cout << "MappingFrame::~MappingFrame()" << endl;
     for (int i = 0; i < _isolineSliders.size(); i++) delete _isolineSliders[i];
     makeCurrent();
 
@@ -956,7 +954,6 @@ void MappingFrame::paintGL()
 //----------------------------------------------------------------------------
 void MappingFrame::initializeGL()
 {
-    cout << "MappingFrame::initializeGL()" << endl;
     MyBase::SetDiagMsg("MappingFrame::initializeGL()");
     printOpenGLErrorMsg("MappingFrame");
     setAutoBufferSwap(false);
