@@ -25,6 +25,14 @@
 #include "vapor/DataMgrUtils.h"
 #include "GeometryWidget.h"
 
+#define X 0
+#define Y 1
+#define Z 2
+
+#define XY 0
+#define XZ 1
+#define YZ 2
+
 using namespace VAPoR;
 
 template<typename Out> void split(const std::string &s, char delim, Out result)
@@ -50,114 +58,160 @@ GeometryWidget::GeometryWidget(QWidget *parent) : QWidget(parent), Ui_GeometryWi
     _dataMgr = NULL;
     _rParams = NULL;
 
-    _spXCombo = new Combo(xEdit, xSlider);
-    _spYCombo = new Combo(yEdit, ySlider);
-    _spZCombo = new Combo(zEdit, zSlider);
-
-    _minXCombo = new Combo(minXEdit, minXSlider);
-    _maxXCombo = new Combo(maxXEdit, maxXSlider);
+    _minXCombo = new Combo(_minXEdit, _minXSlider);
+    _maxXCombo = new Combo(_maxXEdit, _maxXSlider);
     _xRangeCombo = new RangeCombo(_minXCombo, _maxXCombo);
 
-    _minYCombo = new Combo(minYEdit, minYSlider);
-    _maxYCombo = new Combo(maxYEdit, maxYSlider);
+    _minYCombo = new Combo(_minYEdit, _minYSlider);
+    _maxYCombo = new Combo(_maxYEdit, _maxYSlider);
     _yRangeCombo = new RangeCombo(_minYCombo, _maxYCombo);
 
-    _minZCombo = new Combo(minZEdit, minZSlider);
-    _maxZCombo = new Combo(maxZEdit, maxZSlider);
+    _minZCombo = new Combo(_minZEdit, _minZSlider);
+    _maxZCombo = new Combo(_maxZEdit, _maxZSlider);
     _zRangeCombo = new RangeCombo(_minZCombo, _maxZCombo);
+
+    _xSinglePoint->SetLabel("Location");
+    _ySinglePoint->SetLabel("Location");
+    _zSinglePoint->SetLabel("Location");
+
+    connect(_xSinglePoint, SIGNAL(valueChanged(double)), this, SLOT(setPoint(double)));
+    connect(_ySinglePoint, SIGNAL(valueChanged(double)), this, SLOT(setPoint(double)));
+    connect(_zSinglePoint, SIGNAL(valueChanged(double)), this, SLOT(setPoint(double)));
+
+    _orientationTab->hide();
 
     connectWidgets();
 }
 
-void GeometryWidget::hideSinglePointTabHeader() { singlePointTab->setStyleSheet("QTabBar::tab { height: 0px }"); }
-
-void GeometryWidget::adjustLayoutToSinglePoint()
+void GeometryWidget::showOrientationOptions()
 {
-    return;
-    QSizePolicy::Policy minimum = QSizePolicy::Minimum;
-    QSizePolicy::Policy ignored = QSizePolicy::Ignored;
-
-    singlePointPage->setSizePolicy(minimum, minimum);
-    singlePointTab->setSizePolicy(minimum, minimum);
-
-    minMaxPage->setSizePolicy(ignored, ignored);
-    minMaxTab->setSizePolicy(ignored, ignored);
-
-    centerSizePage->setSizePolicy(ignored, ignored);
-    centerSizeTab->setSizePolicy(ignored, ignored);
-
-    stackedSliderWidget->adjustSize();
-    adjustSize();
+    _orientationTab->show();
+    _xPointFrame->show();
+    _yPointFrame->show();
+    _zPointFrame->show();
 }
 
-void GeometryWidget::adjustLayoutToMinMax()
+void GeometryWidget::hideOrientationOptions()
 {
-    return;
-    QSizePolicy::Policy minimum = QSizePolicy::Minimum;
-    QSizePolicy::Policy ignored = QSizePolicy::Ignored;
+    _orientationTab->hide();
+    _xPointFrame->hide();
+    _yPointFrame->hide();
+    _zPointFrame->hide();
+}
 
-    singlePointPage->setSizePolicy(ignored, ignored);
-    singlePointTab->setSizePolicy(ignored, ignored);
+void GeometryWidget::adjustPlanarOrientation(int plane)
+{
+    if (plane == XY)
+        adjustLayoutToPlanarXY();
+    else if (plane == XZ)
+        adjustLayoutToPlanarXZ();
+    else if (plane == YZ)
+        adjustLayoutToPlanarYZ();
+}
 
-    minMaxPage->setSizePolicy(minimum, minimum);
-    minMaxTab->setSizePolicy(minimum, minimum);
+void GeometryWidget::adjustLayoutToPlanarXY()
+{
+    _xMinMaxFrame->show();
+    _yMinMaxFrame->show();
+    _zMinMaxFrame->hide();
 
-    centerSizePage->setSizePolicy(ignored, ignored);
-    centerSizeTab->setSizePolicy(ignored, ignored);
+    _xPointFrame->hide();
+    _yPointFrame->hide();
+    _zPointFrame->show();
 
-    stackedSliderWidget->adjustSize();
-    adjustSize();
+    if (!_rParams) return;
+    std::vector<double> minExt(3, 0);
+    std::vector<double> maxExt(3, 1);
+    getFullExtents(minExt, maxExt);
+    double average = (minExt[Z] + maxExt[Z]) / 2.f;
+    _zSinglePoint->SetValue(average);
+
+    minExt[Z] = average;
+    maxExt[Z] = average;
+    Box *box = _rParams->GetBox();
+    box->SetExtents(minExt, maxExt);
+}
+
+void GeometryWidget::adjustLayoutToPlanarXZ()
+{
+    _xMinMaxFrame->show();
+    _yMinMaxFrame->hide();
+    _zMinMaxFrame->show();
+
+    _xPointFrame->hide();
+    _yPointFrame->show();
+    _zPointFrame->hide();
+
+    if (!_rParams) return;
+    std::vector<double> minExt(3, 0);
+    std::vector<double> maxExt(3, 1);
+    getFullExtents(minExt, maxExt);
+    // box->GetExtents(minExt, maxExt);
+    double average = (minExt[Y] + maxExt[Y]) / 2.f;
+    _ySinglePoint->SetValue(average);
+
+    minExt[Y] = average;
+    maxExt[Y] = average;
+    Box *box = _rParams->GetBox();
+    box->SetExtents(minExt, maxExt);
+}
+
+void GeometryWidget::adjustLayoutToPlanarYZ()
+{
+    _xMinMaxFrame->hide();
+    _yMinMaxFrame->show();
+    _zMinMaxFrame->show();
+
+    _xPointFrame->show();
+    _yPointFrame->hide();
+    _zPointFrame->hide();
+
+    if (!_rParams) return;
+    std::vector<double> minExt(3, 0);
+    std::vector<double> maxExt(3, 1);
+    getFullExtents(minExt, maxExt);
+    // box->GetExtents(minExt, maxExt);
+    double average = (minExt[X] + maxExt[X]) / 2.f;
+    _xSinglePoint->SetValue(average);
+
+    minExt[X] = average;
+    maxExt[X] = average;
+    Box *box = _rParams->GetBox();
+    box->SetExtents(minExt, maxExt);
 }
 
 void GeometryWidget::adjustLayoutTo2D()
 {
-    zMinMaxFrame->hide();
-    zMinMaxFrame->resize(0, 0);
-    minMaxContainerWidget->adjustSize();
-    minMaxTab->adjustSize();
+    _zFrame->hide();
+    //_minMaxContainerWidget->adjustSize();
+    //_minMaxTab->adjustSize();
 
-    stackedSliderWidget->adjustSize();
     adjustSize();
 }
 
-void GeometryWidget::Reinit(DimFlags dimFlags, GeometryFlags geometryFlags, VariableFlags varFlags)
+void GeometryWidget::Reinit(DimFlags dimFlags, VariableFlags varFlags, GeometryFlags geometryFlags)
 {
     _dimFlags = dimFlags;
     _geometryFlags = geometryFlags;
     _varFlags = varFlags;
 
-    if (_dimFlags & TWODXY) {
+    if (_dimFlags & TWOD) {
         adjustLayoutTo2D();
     } else if (_dimFlags & THREED) {
-        zMinMaxFrame->show();
+        _zFrame->show();
     }
 
-    if (_geometryFlags & MINMAX) {
-        adjustLayoutToMinMax();
-        stackedSliderWidget->setCurrentIndex(0);
-    } else if (_geometryFlags & SINGLEPOINT) {
-        adjustLayoutToSinglePoint();
-        stackedSliderWidget->setCurrentIndex(1);
-    }
+    if (_geometryFlags & PLANAR) {
+        showOrientationOptions();
+        adjustPlanarOrientation(XY);
+    } else
+        hideOrientationOptions();
 
-    stackedSliderWidget->adjustSize();
-    minMaxTab->adjustSize();
+    _minMaxTab->adjustSize();
 }
 
 GeometryWidget::~GeometryWidget()
 {
-    if (_spXCombo) {
-        delete _spXCombo;
-        _spXCombo = NULL;
-    }
-    if (_spYCombo) {
-        delete _spYCombo;
-        _spYCombo = NULL;
-    }
-    if (_spZCombo) {
-        delete _spZCombo;
-        _spZCombo = NULL;
-    }
     if (_minXCombo) {
         delete _minXCombo;
         _minXCombo = NULL;
@@ -204,20 +258,23 @@ void GeometryWidget::updateRangeLabels(std::vector<double> minExt, std::vector<d
 
     if (minExt.size() < 1) return;
     QString xTitle = QString("X Min: ") + QString::number(minExt[0], 'g', 3) + QString("	Max: ") + QString::number(maxExt[0], 'g', 3);
-    xMinMaxLabel->setText(xTitle);
+    _xMinMaxLabel->setText(xTitle);
 
     if (minExt.size() < 2) return;
     QString yTitle = QString("Y Min: ") + QString::number(minExt[1], 'g', 3) + QString("	Max: ") + QString::number(maxExt[1], 'g', 3);
-    yMinMaxLabel->setText(yTitle);
+    _yMinMaxLabel->setText(yTitle);
 
     if (minExt.size() < 3) {
-        Reinit((DimFlags)TWODXY, _geometryFlags, _varFlags);
-        zMinMaxLabel->setText(QString("Z Coordinates aren't available for 2D variables!"));
+        if (_dimFlags & THREED) {
+            Reinit((DimFlags)TWOD, _varFlags, _geometryFlags);
+            QString text = "Z Coordinates aren't available for 2D variables!";
+            _zMinMaxLabel->setText(QString(text));
+        }
     } else {
-        Reinit((DimFlags)THREED, _geometryFlags, _varFlags);
+        if (!(_dimFlags & THREED)) { Reinit((DimFlags)THREED, _varFlags, _geometryFlags); }
 
         QString zTitle = QString("Z Min: ") + QString::number(minExt[2], 'g', 3) + QString("	Max: ") + QString::number(maxExt[2], 'g', 3);
-        zMinMaxLabel->setText(zTitle);
+        _zMinMaxLabel->setText(zTitle);
     }
 }
 
@@ -285,9 +342,9 @@ void GeometryWidget::updateBoxCombos(std::vector<double> &minFullExt, std::vecto
     std::vector<double> minExt, maxExt;
     box->GetExtents(minExt, maxExt);
 
-    // Verify that the user extents comply with the domain extents
+    // Force the user extents to be within the domain extents
     //
-    size_t extSize = box->IsPlanar() ? 2 : 3;
+    int extSize = minExt.size();    // extSize = box->IsPlanar() ? 2 : 3;
     for (int i = 0; i < extSize; i++) {
         if (minExt[i] < minFullExt[i]) minExt[i] = minFullExt[i];
         if (maxExt[i] > maxFullExt[i]) maxExt[i] = maxFullExt[i];
@@ -295,15 +352,19 @@ void GeometryWidget::updateBoxCombos(std::vector<double> &minFullExt, std::vecto
 
     // Update RangeCombos
     //
-    _xRangeCombo->Update(minFullExt[0], maxFullExt[0], minExt[0], maxExt[0]);
-    _yRangeCombo->Update(minFullExt[1], maxFullExt[1], minExt[1], maxExt[1]);
-    if (!box->IsPlanar()) { _zRangeCombo->Update(minFullExt[2], maxFullExt[2], minExt[2], maxExt[2]); }
+    _xRangeCombo->Update(minFullExt[X], maxFullExt[X], minExt[X], maxExt[X]);
+    _xSinglePoint->SetExtents(minFullExt[X], maxFullExt[X]);
+    _xSinglePoint->SetValue((minExt[X] + maxExt[X]) / 2.f);
 
-    // Update single-point combos
-    //
-    _spXCombo->Update(minFullExt[0], maxFullExt[0], minExt[0]);
-    _spYCombo->Update(minFullExt[1], maxFullExt[1], minExt[1]);
-    if (!box->IsPlanar()) { _spZCombo->Update(minFullExt[2], maxFullExt[2], minExt[2]); }
+    _yRangeCombo->Update(minFullExt[Y], maxFullExt[Y], minExt[Y], maxExt[Y]);
+    _ySinglePoint->SetExtents(minFullExt[Y], maxFullExt[Y]);
+    _ySinglePoint->SetValue((minExt[Y] + maxExt[Y]) / 2.f);
+
+    if (extSize > 2) {
+        _zRangeCombo->Update(minFullExt[Z], maxFullExt[Z], minExt[Z], maxExt[Z]);
+        _zSinglePoint->SetExtents(minFullExt[Z], maxFullExt[Z]);
+        _zSinglePoint->SetValue((minExt[Z] + maxExt[Z]) / 2.f);
+    }
 }
 
 void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams *rParams)
@@ -319,7 +380,21 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
     // Get current domain extents
     //
     std::vector<double> minFullExt, maxFullExt;
+    getFullExtents(minFullExt, maxFullExt);
 
+    updateRangeLabels(minFullExt, maxFullExt);
+    updateBoxCombos(minFullExt, maxFullExt);
+
+    if (_geometryFlags & PLANAR) {
+        int orientation = _rParams->GetBox()->GetOrientation();
+        _planeComboBox->setCurrentIndex(orientation);
+    }
+
+    adjustSize();
+}
+
+void GeometryWidget::getFullExtents(std::vector<double> &minFullExt, std::vector<double> &maxFullExt)
+{
     if (_varFlags & AUXILIARY)    // for Statistics
     {
         if (!getAuxiliaryExtents(minFullExt, maxFullExt)) return;
@@ -328,52 +403,34 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
     } else {    // for single variable renderers (most cases)
         if (!getVariableExtents(minFullExt, maxFullExt)) return;
     }
-
-    updateRangeLabels(minFullExt, maxFullExt);
-    updateBoxCombos(minFullExt, maxFullExt);
-    adjustSize();
 }
 
 void GeometryWidget::connectWidgets()
 {
-    connect(_spXCombo, SIGNAL(valueChanged(double)), this, SLOT(setPoint(double)));
-    connect(_spYCombo, SIGNAL(valueChanged(double)), this, SLOT(setPoint(double)));
-    connect(_spZCombo, SIGNAL(valueChanged(double)), this, SLOT(setPoint(double)));
     connect(_xRangeCombo, SIGNAL(valueChanged(double, double)), this, SLOT(setRange(double, double)));
     connect(_yRangeCombo, SIGNAL(valueChanged(double, double)), this, SLOT(setRange(double, double)));
     connect(_zRangeCombo, SIGNAL(valueChanged(double, double)), this, SLOT(setRange(double, double)));
+    connect(_planeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(adjustPlanarOrientation(int)));
 }
 
-void GeometryWidget::setPoint(double point)
-{
-    size_t dimension;
-    if (QObject::sender() == _spXCombo)
-        dimension = 0;
-    else if (QObject::sender() == _spYCombo)
-        dimension = 1;
-    else
-        dimension = 2;
-
-    setRange(point, point, dimension);
-}
+void GeometryWidget::setPoint(double point) { setRange(point, point); }
 
 void GeometryWidget::setRange(double min, double max, int dimension)
 {
+    QObject *sender = QObject::sender();
     if (dimension == -1) {
-        if (QObject::sender() == _xRangeCombo)
-            dimension = 0;
-        else if (QObject::sender() == _yRangeCombo)
-            dimension = 1;
+        if (sender == _xRangeCombo || sender == _xSinglePoint)
+            dimension = X;
+        else if (sender == _yRangeCombo || sender == _ySinglePoint)
+            dimension = Y;
         else
-            dimension = 2;
+            dimension = Z;
     }
 
     std::vector<double> minExt, maxExt;
     Box *               box = _rParams->GetBox();
-    box->GetExtents(minExt, maxExt);
 
-    // Apply the extents that changed into minExt and maxExt
-    //
+    box->GetExtents(minExt, maxExt);
     minExt[dimension] = min;
     maxExt[dimension] = max;
     box->SetExtents(minExt, maxExt);

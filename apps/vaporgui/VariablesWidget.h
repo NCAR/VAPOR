@@ -67,6 +67,9 @@ protected slots:
     //! Respond to selecting the z component variable of field
     void setZVarName(const QString &);
 
+    //! Respond to the selection of XY, XZ, or YZ plane orientation
+    void set2DOrientation(const QString &);
+
     //! Respond to selecting the x component variable of seed dist field
     void setXDistVarName(const QString &);
 
