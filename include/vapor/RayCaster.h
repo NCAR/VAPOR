@@ -38,7 +38,8 @@ protected:
 
     // Makes RayCaster an abstract class that cannot be instantiated,
     //   and it's up to the subclasses to decide which shader to load.
-    virtual void _loadShaders() = 0;
+    //   It returns 0 upon success, and non-zero upon errors.
+    virtual int _loadShaders() = 0;
 
     struct UserCoordinates {
         //              Y

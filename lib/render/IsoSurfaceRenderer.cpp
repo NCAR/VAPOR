@@ -12,16 +12,27 @@ IsoSurfaceRenderer::IsoSurfaceRenderer(const ParamsMgr *pm, std::string &winName
 {
 }
 
-void IsoSurfaceRenderer::_loadShaders()
+int IsoSurfaceRenderer::_loadShaders()
 {
-    ShaderProgram *shader = _glManager->shaderManager->GetShader("IsoSurface1stPass");
-    _1stPassShaderId = shader->GetID();
-    shader = _glManager->shaderManager->GetShader("IsoSurface2ndPass");
-    _2ndPassShaderId = shader->GetID();
-    shader = _glManager->shaderManager->GetShader("IsoSurface3rdPassMode1");
-    _3rdPassMode1ShaderId = shader->GetID();
-    shader = _glManager->shaderManager->GetShader("IsoSurface3rdPassMode2");
-    _3rdPassMode2ShaderId = shader->GetID();
+    ShaderProgram *shader = nullptr;
+    if (shader = _glManager->shaderManager->GetShader("IsoSurface1stPass"))
+        _1stPassShaderId = shader->GetID();
+    else
+        return 1;
+    if (shader = _glManager->shaderManager->GetShader("IsoSurface2ndPass"))
+        _2ndPassShaderId = shader->GetID();
+    else
+        return 1;
+    if (shader = _glManager->shaderManager->GetShader("IsoSurface3rdPassMode1"))
+        _3rdPassMode1ShaderId = shader->GetID();
+    else
+        return 1;
+    if (shader = _glManager->shaderManager->GetShader("IsoSurface3rdPassMode2"))
+        _3rdPassMode2ShaderId = shader->GetID();
+    else
+        return 1;
+
+    return 0;    // Success
 }
 
 void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast, long castingMode)
