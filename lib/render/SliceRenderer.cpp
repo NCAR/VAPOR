@@ -610,7 +610,7 @@ void SliceRenderer::_resetState() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     
     ShaderProgram* s = _glManager->shaderManager->GetShader("Slice");
-    s->UnBind();
+    ShaderProgram::UnBind();
     
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
