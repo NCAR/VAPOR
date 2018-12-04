@@ -131,7 +131,7 @@ void SliceRenderer::_initTexCoordVBO() {
         GL_ARRAY_BUFFER,
         sizeof(float)*_texCoords.size(),
         _texCoords.data(),
-        GL_STATIC_DRAW
+        GL_DYNAMIC_DRAW
     );
 }
 
@@ -455,7 +455,7 @@ void SliceRenderer::_createDataTexture(float* dataValues) {
     glTexImage2D(
         GL_TEXTURE_2D, 
         0, 
-        GL_RG32F, 
+        GL_RG16F, 
         _textureWidth,
         _textureHeight,
         0, 
