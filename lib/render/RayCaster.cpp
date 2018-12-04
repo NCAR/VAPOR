@@ -828,7 +828,7 @@ void RayCaster::_drawVolumeFaces(int whichPass,
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         glEnable(GL_DEPTH_TEST);
-        glDepthMask(GL_FALSE);
+        glDepthMask(GL_TRUE);
     }
 
     if (insideACell) // only when 1st or 2nd pass
@@ -849,7 +849,6 @@ void RayCaster::_drawVolumeFaces(int whichPass,
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glClearDepth(1.0);
-    glDepthMask(GL_TRUE);
 
     glUseProgram(0);
 }
