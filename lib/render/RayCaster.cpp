@@ -6,38 +6,30 @@
 
 using namespace VAPoR;
 
-GLenum glCheckError_(const char *file, int line) {
+/*
+GLenum glCheckError_(const char *file, int line)
+{
     GLenum errorCode;
-    while ((errorCode = glGetError()) != GL_NO_ERROR) {
+    while ((errorCode = glGetError()) != GL_NO_ERROR)
+    {
         std::string error;
-        switch (errorCode) {
-        case GL_INVALID_ENUM:
-            error = "INVALID_ENUM";
-            break;
-        case GL_INVALID_VALUE:
-            error = "INVALID_VALUE";
-            break;
-        case GL_INVALID_OPERATION:
-            error = "INVALID_OPERATION";
-            break;
-        case GL_STACK_OVERFLOW:
-            error = "STACK_OVERFLOW";
-            break;
-        case GL_STACK_UNDERFLOW:
-            error = "STACK_UNDERFLOW";
-            break;
-        case GL_OUT_OF_MEMORY:
-            error = "OUT_OF_MEMORY";
-            break;
-        case GL_INVALID_FRAMEBUFFER_OPERATION:
-            error = "INVALID_FRAMEBUFFER_OPERATION";
-            break;
+        switch (errorCode)
+        {
+            case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
+            case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
+            case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
+            case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
+            case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
+            case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
+            case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
         }
         std::cout << error << " | " << file << " (" << line << ")" << std::endl;
     }
     return errorCode;
 }
 #define glCheckError() glCheckError_(__FILE__, __LINE__)
+*/
+void glCheckError() {}
 
 // Constructor
 RayCaster::RayCaster(const ParamsMgr *pm,
@@ -831,6 +823,7 @@ void RayCaster::_drawVolumeFaces(int whichPass,
         glClearBufferfv(GL_COLOR, 1, black); // clear GL_COLOR_ATTACHMENT1
     } else                                   // 3rd pass
     {
+        glUseProgram(_3rdPassShaderId);
         _load3rdPassUniforms(castingMode, InversedMV, fast);
         _3rdPassSpecialHandling(fast, castingMode);
 
@@ -840,7 +833,7 @@ void RayCaster::_drawVolumeFaces(int whichPass,
         glDepthMask(GL_TRUE);
     }
 
-    if (insideACell) // only when 1st or 2nd pass
+    if (insideACell) // Only enters this section when 1st or 2nd pass
     {
         glEnableVertexAttribArray(0); // attribute 0 is vertex coordinates
         glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
@@ -868,7 +861,6 @@ void RayCaster::_load3rdPassUniforms(long castingMode,
     glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
     glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
-    glUseProgram(_3rdPassShaderId);
     GLint uniformLocation = glGetUniformLocation(_3rdPassShaderId, "MV");
     glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview));
 
@@ -977,8 +969,6 @@ void RayCaster::_load3rdPassUniforms(long castingMode,
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "zCoordsTexture");
         glUniform1i(uniformLocation, _zCoordsTexOffset);
     }
-
-    glUseProgram(0);
 }
 
 void RayCaster::_3rdPassSpecialHandling(bool fast, long castingMode) {
