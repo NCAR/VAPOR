@@ -84,6 +84,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/TIFWriter.h
 	${PROJECT_SOURCE_DIR}/include/vapor/jpegapi.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Proj4StringParser.h
+	${PROJECT_SOURCE_DIR}/include/vapor/SliceRenderer.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})
