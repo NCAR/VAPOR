@@ -143,6 +143,7 @@ MappingFrame::MappingFrame(QWidget* parent)
 	_mousePressFlag(false),
 	_initialized(false)
 {
+    cout << "MappingFrame::MappingFrame()" << endl;
   initWidgets();
   initConnections();
   setMouseTracking(true);
@@ -153,6 +154,7 @@ MappingFrame::MappingFrame(QWidget* parent)
 //----------------------------------------------------------------------------
 MappingFrame::~MappingFrame()
 {
+    cout << "MappingFrame::~MappingFrame()" << endl;
 	for (int i = 0; i<_isolineSliders.size(); i++) delete _isolineSliders[i];
   makeCurrent();
 
@@ -1039,7 +1041,7 @@ void MappingFrame::paintGL() {
   // select points
   //
 
-  //_variableName = _rParams->GetColorMapVariableName();
+  _variableName = _rParams->GetColorMapVariableName();
   if (_variableName != "" ){
 		//allow for 4 pixels per character in name:
 		int wx = (width() - _variableName.size()*8)/2;
@@ -1118,7 +1120,7 @@ void MappingFrame::paintGL() {
 //----------------------------------------------------------------------------
 void MappingFrame::initializeGL()
 {
- 
+    cout << "MappingFrame::initializeGL()" << endl; 
   MyBase::SetDiagMsg("MappingFrame::initializeGL()");
   printOpenGLErrorMsg("MappingFrame");
   setAutoBufferSwap(false);
@@ -1127,6 +1129,7 @@ void MappingFrame::initializeGL()
   //
   // Initialize the histogram texture
   //
+  glActiveTexture(GL_TEXTURE0);
   glGenTextures(1, &_texid);
   glBindTexture(GL_TEXTURE_2D, _texid);
 
