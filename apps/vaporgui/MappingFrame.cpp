@@ -32,6 +32,7 @@
 #include <vapor/MapperFunction.h>
 #include <vapor/OpacityMap.h>
 #include <vapor/ContourParams.h>
+#include <vapor/IsoSurfaceParams.h>
 #include "OpacityWidget.h"
 #include "DomainWidget.h"
 #include "GLColorbarWidget.h"
@@ -193,11 +194,10 @@ bool MappingFrame::skipRefreshHistogram() const {
         skip = false;
     }
 
-    string varName = _rParams->GetColorMapVariableName();
-    if (varName != _histogram->getVarnameOfUpdate()) {
+    //string varName = _rParams->GetColorMapVariableName();
+    if (_variableName != _histogram->getVarnameOfUpdate()) {
         skip = false;
     }
-
     return skip;
 }
 
@@ -211,16 +211,11 @@ string MappingFrame::getActiveRendererName() const {
     return activeRenderInst;
 }
 
-void MappingFrame::RefreshHistogram(bool force) {
+void MappingFrame::RefreshHistogram() {
     string rendererName = getActiveRendererName();
     _histogram = _histogramMap[rendererName];
 
-    if (!force && skipRefreshHistogram())
-        return;
-
-    string var;
-    var = _rParams->GetColorMapVariableName();
-    MapperFunction *mf = _rParams->GetMapperFunc(var);
+    MapperFunction *mf = _rParams->GetMapperFunc(_variableName);
 
     float minRange = mf->getMinMapValue();
     float maxRange = mf->getMaxMapValue();
@@ -228,7 +223,8 @@ void MappingFrame::RefreshHistogram(bool force) {
 
     if (_histogram)
         delete _histogram;
-    _histogram = new Histo(256, minRange, maxRange, var, ts);
+
+    _histogram = new Histo(256, minRange, maxRange, _variableName, ts);
 
     populateHistogram();
 
@@ -236,7 +232,7 @@ void MappingFrame::RefreshHistogram(bool force) {
 }
 
 void MappingFrame::populateHistogram() {
-    string var = _rParams->GetColorMapVariableName();
+    //string var = _rParams->GetColorMapVariableName();
     size_t ts = _rParams->GetCurrentTimestep();
     int refLevel = _rParams->GetRefinementLevel();
     int lod = _rParams->GetCompressionLevel();
@@ -247,7 +243,7 @@ void MappingFrame::populateHistogram() {
     Grid *grid;
 
     int rc = DataMgrUtils::GetGrids(
-        _dataMgr, ts, var, minExts, maxExts, true,
+        _dataMgr, ts, _variableName, minExts, maxExts, true,
         &refLevel, &lod, &grid);
     if (rc < 0) {
         MSG_ERR("Couldn't get data for Histogram");
@@ -359,15 +355,6 @@ void MappingFrame::setColorMapping(bool flag) {
 }
 
 //----------------------------------------------------------------------------
-// Set the variable name
-//----------------------------------------------------------------------------
-void MappingFrame::setVariableName(std::string name) {
-    _variableName = name;
-    if (_variableName.size() > 45)
-        _variableName.resize(45);
-}
-
-//----------------------------------------------------------------------------
 // Synchronize the frame with the underlying params
 //----------------------------------------------------------------------------
 //void MappingFrame::updateTab()
@@ -382,22 +369,32 @@ void MappingFrame::Update(DataMgr *dataMgr,
     _rParams = rParams;
     _paramsMgr = paramsMgr;
 
-    string varname;
-    varname = _rParams->GetColorMapVariableName();
+    //string varname;
 
-    if (varname.empty())
+    string variableName;
+    if (_colorMappingEnabled)
+        variableName = _rParams->GetColorMapVariableName();
+    else
+        variableName = _rParams->GetVariableName();
+
+    if (variableName.empty())
         return;
 
     MapperFunction *mapper;
-    mapper = _rParams->GetMapperFunc(varname);
+    mapper = _rParams->GetMapperFunc(_variableName);
     assert(mapper);
 
     updateMapperFunction(mapper);
 
     deselectWidgets();
 
-    if (_initialized == false) {
+    // We always refresh the histogram if either
+    // 1) We are uninitialized
+    // 2) The variable changed
+    if ((_initialized == false) ||
+        (variableName != _variableName)) {
         _initialized = true;
+        _variableName = variableName;
         RefreshHistogram();
     }
 
@@ -409,7 +406,27 @@ void MappingFrame::Update(DataMgr *dataMgr,
         //	   _isoSlider->setIsoValue(xDataToWorld(_isoVal));
     } else if (_isolineSlidersEnabled) {
         //Synchronize sliders with isovalues
-        vector<double> isovals = ((ContourParams *)rParams)->GetContourValues(varname);
+        vector<double> isovals;
+        ContourParams *cp;
+        IsoSurfaceParams *ip;
+
+        // This should probably be rethought
+        // Maybe we need an IsoParams base class?
+        cp = dynamic_cast<ContourParams *>(rParams);
+        if (cp == NULL) {
+            ip = dynamic_cast<IsoSurfaceParams *>(rParams);
+            assert(ip);
+            isovals = ip->GetIsoValues();
+            //std::vector<bool>enabled = ip->GetEnabledIsoValueFlags();
+            //int size = enabled.size();
+            //for (int i=size-1; i>=0; i--) {
+            //    if (!enabled[i])
+            //        isovals.erase(isovals.begin()+i);
+            //}
+        } else {
+            isovals = cp->GetContourValues(_variableName);
+        }
+
         setIsolineSliders(isovals);
 
         int size = isovals.size();
@@ -418,8 +435,9 @@ void MappingFrame::Update(DataMgr *dataMgr,
         _contourRangeSlider->setDomain(start, end);
     }
 
-    _domainSlider->setDomain(xDataToWorld(getMinDomainBound()),
-                             xDataToWorld(getMaxDomainBound()));
+    _domainSlider->setDomain(
+        xDataToWorld(getMinDomainBound()),
+        xDataToWorld(getMaxDomainBound()));
 
     _updateTexture = true;
 }
@@ -583,7 +601,7 @@ void MappingFrame::setEditMode(bool flag) {
 //----------------------------------------------------------------------------
 // Fit the mapping space to the current domain.
 //----------------------------------------------------------------------------
-void MappingFrame::fitToView() {
+void MappingFrame::fitViewToDataRange() {
     //Make sure it's current active params:
 
     emit startChange("Mapping window fit-to-view");
@@ -594,7 +612,10 @@ void MappingFrame::fitToView() {
     setMinEditBound(_minValue);
     setMaxEditBound(_maxValue);
 
-    _domainSlider->setDomain(xDataToWorld(_minValue), xDataToWorld(_maxValue));
+    _domainSlider->setDomain(
+        xDataToWorld(_minValue),
+        xDataToWorld(_maxValue));
+
     if (_colorbarWidget)
         _colorbarWidget->setDirty();
 
@@ -605,7 +626,9 @@ void MappingFrame::fitToView() {
 // Force a redraw in the vizualization window.
 //----------------------------------------------------------------------------
 void MappingFrame::updateMap() {
-    _colorbarWidget->setDirty();
+    if (_colorbarWidget) {
+        _colorbarWidget->setDirty();
+    }
     emit mappingChanged();
 }
 
@@ -836,15 +859,15 @@ void MappingFrame::resizeGL(int width, int height) {
 // Draw the frame's contents
 //----------------------------------------------------------------------------
 void MappingFrame::paintGL() {
-
     // On Mac Qt invokes paintGL when frame frame buffer isn't ready :-(
     //
     if (!FrameBufferReady()) {
         return;
     }
 
-    if (!_mapper)
+    if (!_mapper) {
         return;
+    }
 
     resize();
 
@@ -1021,7 +1044,6 @@ void MappingFrame::paintGL() {
 // Set up the OpenGL rendering state
 //----------------------------------------------------------------------------
 void MappingFrame::initializeGL() {
-
     MyBase::SetDiagMsg("MappingFrame::initializeGL()");
     printOpenGLErrorMsg("MappingFrame");
     setAutoBufferSwap(false);
@@ -1030,6 +1052,7 @@ void MappingFrame::initializeGL() {
     //
     // Initialize the histogram texture
     //
+    glActiveTexture(GL_TEXTURE0);
     glGenTextures(1, &_texid);
     glBindTexture(GL_TEXTURE_2D, _texid);
 
@@ -1157,10 +1180,6 @@ int MappingFrame::drawDomainSlider() {
 
     int rc = _domainSlider->paintGL();
 
-    if (_isolineSlidersEnabled) {
-        rc = _contourRangeSlider->paintGL();
-    }
-
     glPopName();
     return rc;
 }
@@ -1180,14 +1199,22 @@ int MappingFrame::drawIsoSlider() {
 // Draw all the isoline sliders
 //----------------------------------------------------------------------------
 int MappingFrame::drawIsolineSliders() {
-    for (int i = 0; i < _isolineSliders.size(); i++) {
-        int sliderName = (int)(ISO_WIDGET) + i + 1;
-        glPushName(sliderName);
+    //std::vector<bool> enabledIsoValues(true, _isolineSliders.size());
+    std::vector<bool> enabledIsoValues(_isolineSliders.size(), true);
+    IsoSurfaceParams *ip = dynamic_cast<IsoSurfaceParams *>(_rParams);
+    if (ip != NULL) {
+        enabledIsoValues = ip->GetEnabledIsoValueFlags();
+    }
 
-        int rc = _isolineSliders[i]->paintGL();
-        glPopName();
-        if (rc < 0)
-            return rc;
+    for (int i = 0; i < _isolineSliders.size(); i++) {
+        if (enabledIsoValues[i] == true) {
+            int sliderName = (int)(ISO_WIDGET) + i + 1;
+            glPushName(sliderName);
+            int rc = _isolineSliders[i]->paintGL();
+            glPopName();
+            if (rc < 0)
+                return rc;
+        }
     }
     return 0;
 }
@@ -1499,7 +1526,7 @@ void MappingFrame::select(int hits, GLuint *selectionBuffer, Qt::KeyboardModifie
     } else if ((int)selectionBuffer[hitOffset + 3] > (int)ISO_WIDGET) //must have selected one of the isoline widgets
     {
         deselectWidgets();
-        return;
+        //return;
         int selectedIndex = (int)selectionBuffer[hitOffset + 3] - (int)ISO_WIDGET - 1;
         _lastSelected = _isolineSliders[selectedIndex];
         _lastSelectedIndex = selectedIndex;
@@ -1698,8 +1725,9 @@ void MappingFrame::mousePressEvent(QMouseEvent *event) {
                 } else {
                     emit startChange("Opacity map edit");
                 }
-            } else
+            } else {
                 emit startChange("Domain slider move");
+            }
         }
 
     } else if (!_editMode && (_button == Qt::LeftButton))
@@ -2062,24 +2090,6 @@ float MappingFrame::getOpacityData(float value) {
 }
 
 //----------------------------------------------------------------------------
-// Return the histogram
-//----------------------------------------------------------------------------
-Histo *MappingFrame::getHistogram() {
-    //string varname;
-    //varname = _rParams->GetColorMapVariableName();
-    //MapperFunction* mapFunc = _rParams->GetMapperFunc(varname);
-    //assert(mapFunc);
-
-    //if (skipRefreshHistogram(mapFunc)) {
-    if (skipRefreshHistogram()) {
-        RefreshHistogram();
-    }
-
-    string rendererName = _rParams->GetName();
-    return _histogramMap[rendererName];
-}
-
-//----------------------------------------------------------------------------
 // Add a new opacity widget
 //----------------------------------------------------------------------------
 void MappingFrame::addOpacityWidget(QAction *act) {
@@ -2281,14 +2291,14 @@ void MappingFrame::setDomain() {
     float max = xWorldToData(_domainSlider->maxValue());
 
     if (_mapper) {
-        if (_opacityMappingEnabled || _colorMappingEnabled) {
+        //if (_opacityMappingEnabled || _colorMappingEnabled) {
 
-            emit startChange("Mapping window boundary change");
+        emit startChange("Mapping window boundary change");
 
-            _mapper->setMinMaxMapValue(min, max);
+        _mapper->setMinMaxMapValue(min, max);
 
-            emit endChange();
-        }
+        emit endChange();
+        //}
 
         updateGL();
     } else {
@@ -2320,7 +2330,6 @@ void MappingFrame::setIsoSlider() {
 // Deal with isoline slider movement
 //----------------------------------------------------------------------------
 void MappingFrame::setIsolineSlider(int index) {
-#ifdef VAPOR3_0_0_ALPHA
     if (!_mapper)
         return;
     IsoSlider *iSlider = _isolineSliders[index];
@@ -2328,15 +2337,25 @@ void MappingFrame::setIsolineSlider(int index) {
     float max = xWorldToData(iSlider->maxValue());
 
     emit startChange("Slide Isoline value slider");
-    IsolineParams *iParams = (IsolineParams *)GetActiveParams();
-    vector<double> isovals = iParams->GetIsovalues();
+    IsoSurfaceParams *iParams = dynamic_cast<IsoSurfaceParams *>(_rParams);
+
+    // If _rParams is not an IsoSurfaceParams, then it's a ContourParams.
+    // Therefore, we ignore the user's change to the isoline, an force a
+    // redrawing of the MappingFrame through calls to Update() and updateGL().
+    // I wish there were a cleaner way to do this, with fewer dynamic casts.
+    if (iParams == NULL) {
+        Update(_dataMgr, _paramsMgr, _rParams);
+        updateGL();
+        return;
+    }
+
+    vector<double> isovals = iParams->GetIsoValues();
     isovals[index] = (0.5 * (max + min));
-    iParams->SetIsovalues(isovals);
+    iParams->SetIsoValues(isovals);
 
     emit endChange();
 
     updateGL();
-#endif
 }
 
 void MappingFrame::setIsolineSliders(const vector<double> &sliderVals) {
@@ -2358,7 +2377,7 @@ void MappingFrame::setIsolineSliders(const vector<double> &sliderVals) {
 }
 
 void MappingFrame::updateHisto() {
-    fitToView();
+    fitViewToDataRange();
     updateMap();
 }
 

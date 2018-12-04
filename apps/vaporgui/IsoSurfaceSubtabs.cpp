@@ -2,7 +2,10 @@
 
 IsoSurfaceAppearanceSubtab::IsoSurfaceAppearanceSubtab(QWidget *parent) {
     setupUi(this);
-    _TFWidget->Reinit((TFFlags)(CONSTANT));
+    _TFWidget->Reinit((TFFlags)(
+        CONSTANT_COLOR |
+        COLORMAP_VAR_IS_IN_TF2 |
+        ISOLINES));
 
     _params = nullptr;
 
