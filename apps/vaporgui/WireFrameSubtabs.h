@@ -41,7 +41,7 @@ class WireFrameAppearanceSubtab : public QWidget, public Ui_WireFrameAppearanceG
   public:
     WireFrameAppearanceSubtab(QWidget *parent) {
         setupUi(this);
-        _TFWidget->Reinit((TFFlags)(CONSTANT));
+        _TFWidget->Reinit((TFFlags)(CONSTANT_COLOR));
     }
 
     void Update(

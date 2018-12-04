@@ -102,7 +102,7 @@ class MappingFrame : public QGLWidget {
     MappingFrame(QWidget *parent);
     virtual ~MappingFrame();
 
-    void RefreshHistogram(bool force = false);
+    void RefreshHistogram();
 
     //! Enable or disable the color mapping in the Transfer Function.
     //! Should be specified in the RenderEventRouter constructor
@@ -135,9 +135,6 @@ class MappingFrame : public QGLWidget {
     void Update(VAPoR::DataMgr *dataMgr = NULL,
                 VAPoR::ParamsMgr *paramsMgr = NULL,
                 VAPoR::RenderParams *rParams = NULL);
-
-    //! Specify the variable associated with the MappingFrame.  Invoked in RenderEventRouter::setEditorDirty()
-    void setVariableName(std::string name);
 
     //! Identify the current mapperFunction associated with the MappingFrame.
     //! Needed by various GLWidgets embedded in the MappingFrame
@@ -187,7 +184,7 @@ class MappingFrame : public QGLWidget {
 
   public slots:
     void updateHisto();
-    void fitToView();
+    void fitViewToDataRange();
     void updateMap();
 
   private:
@@ -288,7 +285,10 @@ class MappingFrame : public QGLWidget {
     virtual float getMaxDomainBound();
 
     virtual float getOpacityData(float val);
+
+#ifdef DEAD
     virtual Histo *getHistogram();
+#endif
 
   protected slots:
 
