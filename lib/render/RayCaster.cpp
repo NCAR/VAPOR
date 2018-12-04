@@ -432,9 +432,10 @@ int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params,
 
 int RayCaster::_initializeGL()
 {
-    _loadShaders();
-    _initializeFramebufferTextures();
-    return 0;
+    if (_loadShaders() != 0) return 1;
+    if (_initializeFramebufferTextures() != 0) return 1;
+
+    return 0;    // Success
 }
 
 int RayCaster::_paintGL(bool fast)
@@ -624,7 +625,7 @@ int RayCaster::_paintGL(bool fast)
     return 0;
 }
 
-void RayCaster::_initializeFramebufferTextures()
+int RayCaster::_initializeFramebufferTextures()
 {
     /* Create Vertex Array Object (VAO) */
     glGenVertexArrays(1, &_vertexArrayId);
@@ -670,6 +671,7 @@ void RayCaster::_initializeFramebufferTextures()
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         MyBase::SetErrMsg("_openGLInitialization(): Framebuffer failed; "
                           "the behavior is then undefined.");
+        return -1;
     }
 
     /* Bind the default frame buffer */
@@ -719,6 +721,8 @@ void RayCaster::_initializeFramebufferTextures()
     glBindTexture(GL_TEXTURE_1D, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindTexture(GL_TEXTURE_3D, 0);
+
+    return 0;
 }
 
 void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACell, const glm::mat4 &InversedMV, bool fast)

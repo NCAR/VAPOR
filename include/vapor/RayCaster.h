@@ -161,8 +161,9 @@ protected:
 
     //
     // Initialization for 1) framebuffers and 2) textures
+    //   It returns 0 upon success, and non-zero upon errors.
     //
-    void _initializeFramebufferTextures();
+    int _initializeFramebufferTextures();
 
     //
     // Simple shader compilation
