@@ -1,6 +1,7 @@
 #version 410 core
 
-in vec4 gl_FragCoord;
+in  vec4  gl_FragCoord;
+out float gl_FragDepth;
 layout(location = 0) out vec4 color;
 
 uniform sampler2D  backFaceTexture;
@@ -143,7 +144,12 @@ void main(void)
     vec3 rayDirEye      = stopEye - startEye;
     float rayDirLength  = length( rayDirEye );
     if( rayDirLength    < ULP10 )
+    {
+        color = vec4( 0.0 );
+        gl_FragDepth = 1.0;
+
         discard;
+    }
 
     float nStepsf       = rayDirLength  / stepSize1D;
     vec3  stepSize3D    = rayDirEye     / nStepsf;
@@ -207,6 +213,8 @@ void main(void)
         step1Texture = step2Texture;
         step1Value   = step2Value;
     }   // Finish ray casting
+
+    gl_FragDepth = 0.9; //gl_FragCoord.z;
 
 }   // End main()
 
