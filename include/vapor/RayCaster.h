@@ -165,11 +165,6 @@ protected:
     //
     int _initializeFramebufferTextures();
 
-    //
-    // Simple shader compilation
-    //
-    GLuint _compileShaders(const char *vertex_file_path, const char *fragment_file_path);
-
     double _getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const;
 
 };    // End of class RayCaster
