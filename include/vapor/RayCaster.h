@@ -77,19 +77,32 @@ protected:
         /* Member functions */
         UserCoordinates();
         ~UserCoordinates();
-        StructuredGrid *GetCurrentGrid(const RayCasterParams *params, DataMgr *dataMgr) const;
-        bool            IsMetadataUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const;
         //
-        // Update meta data, as well as pointers:
-        //   6 faces + dataField + missingValueMask
+        // It returns 0 upon success, and non-zero upon errors.
         //
-        bool UpdateFaceAndData(const RayCasterParams *params, DataMgr *dataMgr);
+        int GetCurrentGrid(const RayCasterParams *params, DataMgr *dataMgr, StructuredGrid **gridpp) const;
+        //
+        // Return value: 0 == IS up to date
+        //               1 == NOT up to date, but no error
+        //              -1 == Error occured
+        //
+        int IsMetadataUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const;
+        //
+        // Update meta data, as well as pointers: 6 faces + dataField + missingValueMask
+        //   It returns 0 upon success, and non-zero upon errors:
+        //     1 == Failed to get a StructuredGrid
+        //    -1 == Failed to allocate memory for the 3D variable or missing value mask
+        //
+        int UpdateFaceAndData(const RayCasterParams *params, DataMgr *dataMgr);
         //
         // Update pointers: xyCoords and zCoords
-        //   Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
-        //         UpdateFaceAndData() needs to be called priori to UpdateCurviCoords().
+        // |-- Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
+        // |         UpdateFaceAndData() needs to be called priori to UpdateCurviCoords().
+        // |-- It returns 0 upon success, and non-zero upon errors:
+        //     |--  1 == Failed to get a StructuredGrid
+        //     |-- -1 == Failed to allocate memory for the Z-coords
         //
-        bool UpdateCurviCoords(const RayCasterParams *params, DataMgr *dataMgr);
+        int UpdateCurviCoords(const RayCasterParams *params, DataMgr *dataMgr);
     };    // end of struct UserCoordinates
 
     UserCoordinates    _userCoordinates;
@@ -98,17 +111,23 @@ protected:
 
     // OpenGL stuff
     // textures
-    GLuint _backFaceTextureId;        // GL_TEXTURE0
-    GLuint _frontFaceTextureId;       // GL_TEXTURE1
-    GLuint _volumeTextureId;          // GL_TEXTURE2
-    GLuint _missingValueTextureId;    // GL_TEXTURE3
-    GLuint _colorMapTextureId;        // GL_TEXTURE4
-    GLuint _xyCoordsTextureId;        // GL_TEXTURE5
-    GLuint _zCoordsTextureId;         // GL_TEXTURE6
+    GLuint       _backFaceTextureId;
+    GLuint       _frontFaceTextureId;
+    GLuint       _volumeTextureId;
+    GLuint       _missingValueTextureId;
+    GLuint       _colorMapTextureId;
+    GLuint       _xyCoordsTextureId;
+    GLuint       _zCoordsTextureId;
+    const GLuint _backFaceTexOffset;
+    const GLuint _frontFaceTexOffset;
+    const GLuint _volumeTexOffset;
+    const GLuint _colorMapTexOffset;
+    const GLuint _missingValueTexOffset;
+    const GLuint _xyCoordsTexOffset;
+    const GLuint _zCoordsTexOffset;
 
     // buffers
     GLuint _frameBufferId;
-    GLuint _depthBufferId;
     GLuint _xyCoordsBufferId;
     GLuint _zCoordsBufferId;
     GLenum _drawBuffers[2];    // Draw buffers for the 1st and 2nd pass
@@ -125,9 +144,7 @@ protected:
     GLuint _3rdPassShaderId;
     GLuint _3rdPassMode1ShaderId;
     GLuint _3rdPassMode2ShaderId;
-
-    // current viewport in use
-    GLint _currentViewport[4];
+    GLint  _currentViewport[4];    // current viewport in use
 
     //
     // Render the volume surface using triangle strips

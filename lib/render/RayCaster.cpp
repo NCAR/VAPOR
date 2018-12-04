@@ -6,9 +6,30 @@
 
 using namespace VAPoR;
 
+GLenum glCheckError_(const char *file, int line)
+{
+    GLenum errorCode;
+    while ((errorCode = glGetError()) != GL_NO_ERROR) {
+        std::string error;
+        switch (errorCode) {
+        case GL_INVALID_ENUM: error = "INVALID_ENUM"; break;
+        case GL_INVALID_VALUE: error = "INVALID_VALUE"; break;
+        case GL_INVALID_OPERATION: error = "INVALID_OPERATION"; break;
+        case GL_STACK_OVERFLOW: error = "STACK_OVERFLOW"; break;
+        case GL_STACK_UNDERFLOW: error = "STACK_UNDERFLOW"; break;
+        case GL_OUT_OF_MEMORY: error = "OUT_OF_MEMORY"; break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
+        }
+        std::cout << error << " | " << file << " (" << line << ")" << std::endl;
+    }
+    return errorCode;
+}
+#define glCheckError() glCheckError_(__FILE__, __LINE__)
+
 // Constructor
 RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string paramsType, std::string classType, std::string &instName, DataMgr *dataMgr)
-: Renderer(pm, winName, dataSetName, paramsType, classType, instName, dataMgr)
+: Renderer(pm, winName, dataSetName, paramsType, classType, instName, dataMgr), _backFaceTexOffset(0), _frontFaceTexOffset(1), _volumeTexOffset(2), _colorMapTexOffset(3), _missingValueTexOffset(4),
+  _xyCoordsTexOffset(5), _zCoordsTexOffset(6)
 {
     _backFaceTextureId = 0;
     _frontFaceTextureId = 0;
@@ -18,7 +39,6 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
     _xyCoordsTextureId = 0;
     _zCoordsTextureId = 0;
     _frameBufferId = 0;
-    _depthBufferId = 0;
 
     _vertexArrayId = 0;
     _vertexBufferId = 0;
@@ -77,12 +97,8 @@ RayCaster::~RayCaster()
 
     // delete buffers
     if (_frameBufferId) {
-        glDeleteBuffers(1, &_frameBufferId);
+        glDeleteFramebuffers(1, &_frameBufferId);
         _frameBufferId = 0;
-    }
-    if (_depthBufferId) {
-        glDeleteBuffers(1, &_depthBufferId);
-        _depthBufferId = 0;
     }
 
     // delete vertex arrays
@@ -182,7 +198,7 @@ RayCaster::UserCoordinates::~UserCoordinates()
     }
 }
 
-StructuredGrid *RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params, DataMgr *dataMgr) const
+int RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params, DataMgr *dataMgr, StructuredGrid **gridpp) const
 {
     std::vector<double> extMin, extMax;
     params->GetBox()->GetExtents(extMin, extMax);
@@ -190,35 +206,39 @@ StructuredGrid *RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams
     if (grid == nullptr) {
         MyBase::SetErrMsg("UserCoordinates::GetCurrentGrid() isn't on a StructuredGrid; "
                           "the behavior is undefined in this case.");
+        return 1;
+    } else {
+        *gridpp = grid;
+        return 0;
     }
-    return grid;
 }
 
-bool RayCaster::UserCoordinates::IsMetadataUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const
+int RayCaster::UserCoordinates::IsMetadataUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const
 {
     if ((myCurrentTimeStep != params->GetCurrentTimestep()) || (myVariableName != params->GetVariableName()) || (myRefinementLevel != params->GetRefinementLevel())
         || (myCompressionLevel != params->GetCompressionLevel())) {
-        return false;
+        return 1;
     }
 
     // compare grid boundaries and dimensions
-    StructuredGrid *    grid = this->GetCurrentGrid(params, dataMgr);
+    StructuredGrid *grid = nullptr;
+    if (this->GetCurrentGrid(params, dataMgr, &grid) != 0) { return -1; }
     std::vector<double> extMin, extMax;
     grid->GetUserExtents(extMin, extMax);
     std::vector<size_t> gridDims = grid->GetDimensions();
     for (int i = 0; i < 3; i++) {
         if ((boxMin[i] != (float)extMin[i]) || (boxMax[i] != (float)extMax[i]) || (dims[i] != gridDims[i])) {
             delete grid;
-            return false;
+            return 1;
         }
     }
 
     // now we know it's up to date!
     delete grid;
-    return true;
+    return 0;
 }
 
-bool RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params, DataMgr *dataMgr)
+int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params, DataMgr *dataMgr)
 {
     myCurrentTimeStep = params->GetCurrentTimestep();
     myVariableName = params->GetVariableName();
@@ -226,7 +246,11 @@ bool RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params
     myCompressionLevel = params->GetCompressionLevel();
 
     /* update member variables */
-    StructuredGrid *    grid = this->GetCurrentGrid(params, dataMgr);
+    StructuredGrid *grid = nullptr;
+    if (this->GetCurrentGrid(params, dataMgr, &grid) != 0) {
+        MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
+        return 1;
+    }
     std::vector<double> extMin, extMax;
     grid->GetUserExtents(extMin, extMax);
     for (int i = 0; i < 3; i++) {
@@ -317,12 +341,16 @@ bool RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params
 
     // Save the data field values and missing values
     size_t numOfVertices = dims[0] * dims[1] * dims[2];
-    if (dataField) delete[] dataField;
+    if (dataField) {
+        delete[] dataField;
+        dataField = nullptr;
+    }
     dataField = new float[numOfVertices];
     if (!dataField)    // Test if allocation successful for 3D buffers.
     {
+        MyBase::SetErrMsg("Failed to allocate memory");
         delete grid;
-        return false;
+        return -1;
     }
     if (missingValueMask) {
         delete[] missingValueMask;
@@ -335,18 +363,19 @@ bool RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params
         float missingValue = grid->GetMissingValue();
         missingValueMask = new unsigned char[numOfVertices];
         if (!missingValueMask) {
+            MyBase::SetErrMsg("Failed to allocate memory");
             delete grid;
-            return false;
+            return -1;
         }
         float dataValue;
         for (size_t i = 0; i < numOfVertices; i++) {
             dataValue = float(*valItr);
             if (dataValue == missingValue) {
                 dataField[i] = 0.0f;
-                missingValueMask[i] = 127;
+                missingValueMask[i] = 127u;
             } else {
                 dataField[i] = (dataValue - valueRange[0]) * valueRange1o;
-                missingValueMask[i] = 0;
+                missingValueMask[i] = 0u;
             }
             ++valItr;
         }
@@ -359,10 +388,10 @@ bool RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params
     }
 
     delete grid;
-    return true;
+    return 0;
 }
 
-bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params, DataMgr *dataMgr)
+int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params, DataMgr *dataMgr)
 {
     assert(params->GetCastingMode() == 2);
 
@@ -371,7 +400,10 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params
     if (zCoords) delete[] zCoords;
     zCoords = new float[dims[0] * dims[1] * dims[2]];
     if (!zCoords)    // Test if allocation successful for 3D buffers.
-        return false;
+    {
+        MyBase::SetErrMsg("Failed to allocate memory");
+        return -1;
+    }
 
     // Gather the XY coordinate from frontFace buffer
     size_t xyIdx = 0, xyzIdx = 0;
@@ -383,7 +415,11 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params
         }
 
     // Gather the Z coordinates from grid
-    StructuredGrid *              grid = this->GetCurrentGrid(params, dataMgr);
+    StructuredGrid *grid = nullptr;
+    if (this->GetCurrentGrid(params, dataMgr, &grid) != 0) {
+        MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
+        return 1;
+    }
     StructuredGrid::ConstCoordItr coordItr = grid->ConstCoordBegin();
     size_t                        numOfVertices = dims[0] * dims[1] * dims[2];
     for (xyzIdx = 0; xyzIdx < numOfVertices; xyzIdx++) {
@@ -391,7 +427,7 @@ bool RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params
         ++coordItr;
     }
 
-    return true;
+    return 0;
 }
 
 int RayCaster::_initializeGL()
@@ -411,18 +447,13 @@ int RayCaster::_paintGL(bool fast)
         std::memcpy(_currentViewport, newViewport, 4 * sizeof(GLint));
 
         // Re-size 2D textures
-        //   It turns out I don't need to delete the current storage and re-allocate
-        //   new storage, as glTexImage2D cleans things up.
-        glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE0 + _backFaceTexOffset);
         glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
 
-        glActiveTexture(GL_TEXTURE1);
+        glActiveTexture(GL_TEXTURE0 + _frontFaceTexOffset);
         glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
-
-        glBindRenderbuffer(GL_RENDERBUFFER, _depthBufferId);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _currentViewport[2], _currentViewport[3]);
     }
 
     glBindVertexArray(_vertexArrayId);
@@ -432,37 +463,53 @@ int RayCaster::_paintGL(bool fast)
     if (!params) {
         MyBase::SetErrMsg("Not receiving RayCaster parameters; "
                           "the behavior becomes undefined!");
+        return 1;
     }
     long castingMode = params->GetCastingMode();
 
-    /* Gather user coordinates */
-    if (!_userCoordinates.IsMetadataUpToDate(params, _dataMgr)) {
-        if (!_userCoordinates.UpdateFaceAndData(params, _dataMgr)) {
-            MyBase::SetErrMsg("Memory allocation failed!");
+    // If there is an update event
+    int upToDate = _userCoordinates.IsMetadataUpToDate(params, _dataMgr);
+    if (upToDate < 0) {
+        MyBase::SetErrMsg("Error occured during updating meta data!");
+        return 1;
+    } else if (upToDate > 0) {
+        int success = _userCoordinates.UpdateFaceAndData(params, _dataMgr);
+        if (success != 0) {
+            MyBase::SetErrMsg("Error occured during updating face and volume data!");
             return 1;
         }
 
-        if (castingMode == 2 && !_userCoordinates.UpdateCurviCoords(params, _dataMgr)) {
-            MyBase::SetErrMsg("Memory allocation failed!");
+        if (castingMode == 2 && _userCoordinates.UpdateCurviCoords(params, _dataMgr) != 0) {
+            MyBase::SetErrMsg("Error occured during updating curvilinear coordinates!");
             return 1;
         }
 
         // Also attach the new data to 3D textures
-        glActiveTexture(GL_TEXTURE2);
+        glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
         glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
+#ifdef Darwin
+        //
+        // Intel driver on MacOS seems to not able to correctly update the texture content
+        //   when the texture is moderately big. This workaround of loading a dummy texture
+        //   to force it to update seems to resolve the issue.
+        //
+        float dummyVolume[8] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume);
+#endif
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED, GL_FLOAT, _userCoordinates.dataField);
 
-        // If there is missing value, upload the mask to texture. Otherwise, leave it empty.
-        if (_userCoordinates.missingValueMask)    // Has missing value!
-        {
-            glActiveTexture(GL_TEXTURE3);
-            // Adjust alignment for GL_R8UI format. Stupid OpenGL parameter.
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
+        // Now we HAVE TO attach a missing value mask texture, because
+        //   Intel driver on Mac doesn't like leaving the texture empty...
+        unsigned char dummyMask[8] = {0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u};
+        glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);    // Alignment adjustment. Stupid.
+        glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
+        if (_userCoordinates.missingValueMask)    // There is missing value.
             glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE,
                          _userCoordinates.missingValueMask);
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 4);    // Restore default alignment.
-        }
+        else
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, 2, 2, 2, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, dummyMask);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);    // Restore default alignment.
 
         // If using cell traverse ray casting, we need to upload user coordinates
         if (castingMode == 2) {
@@ -472,14 +519,14 @@ int RayCaster::_paintGL(bool fast)
             glBindBuffer(GL_TEXTURE_BUFFER, _xyCoordsBufferId);
             glBufferData(GL_TEXTURE_BUFFER, 2 * sizeof(float) * dims[0] * dims[1], _userCoordinates.xyCoords, GL_STATIC_READ);
             // Pass data to the buffer texture: _xyCoordsTextureId
-            glActiveTexture(GL_TEXTURE5);
+            glActiveTexture(GL_TEXTURE0 + _xyCoordsTexOffset);
             glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
             glTexBuffer(GL_TEXTURE_BUFFER, GL_RG32F, _xyCoordsBufferId);
 
             // Repeat for the next buffer texture: _zCoordsBufferId
             glBindBuffer(GL_TEXTURE_BUFFER, _zCoordsBufferId);
             glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * dims[0] * dims[1] * dims[2], _userCoordinates.zCoords, GL_STATIC_READ);
-            glActiveTexture(GL_TEXTURE6);
+            glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
             glBindTexture(GL_TEXTURE_BUFFER, _zCoordsTextureId);
             glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, _zCoordsBufferId);
 
@@ -506,7 +553,7 @@ int RayCaster::_paintGL(bool fast)
         _colorMapRange[1] = float(range[1]);
     }
 
-    glActiveTexture(GL_TEXTURE4);
+    glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _colorMap.size() / 4, 0, GL_RGBA, GL_FLOAT, _colorMap.data());
     glBindTexture(GL_TEXTURE_1D, 0);
@@ -526,8 +573,12 @@ int RayCaster::_paintGL(bool fast)
     cameraUser[1] = InversedMV[3][1];
     cameraUser[2] = InversedMV[3][2];
     std::vector<size_t> cameraCellIndices;    // camera position in which cell?
-    StructuredGrid *    grid = _userCoordinates.GetCurrentGrid(params, _dataMgr);
-    bool                insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
+    StructuredGrid *    grid = nullptr;
+    if (_userCoordinates.GetCurrentGrid(params, _dataMgr, &grid) != 0) {
+        MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
+        return 1;
+    }
+    bool insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
 
     if (insideACell) {
         glm::mat4 MVP = mm->GetModelViewProjectionMatrix();
@@ -560,7 +611,7 @@ int RayCaster::_paintGL(bool fast)
         _3rdPassShaderId = _3rdPassMode2ShaderId;
     else {
         MyBase::SetErrMsg("RayCasting Mode not supported!");
-        return 1;
+        return 2;
     }
     _drawVolumeFaces(3, castingMode, insideACell, InversedMV, fast);
 
@@ -586,9 +637,8 @@ void RayCaster::_initializeFramebufferTextures()
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
 
     /* Generate back-facing texture */
-    GLuint textureUnit = 0;
     glGenTextures(1, &_backFaceTextureId);
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _backFaceTexOffset);
     glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
 
@@ -599,9 +649,8 @@ void RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     /* Generate front-facing texture */
-    textureUnit++;    // == 1;
     glGenTextures(1, &_frontFaceTextureId);
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _frontFaceTexOffset);
     glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
 
@@ -610,12 +659,6 @@ void RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    /* Depth buffer */
-    glGenRenderbuffers(1, &_depthBufferId);
-    glBindRenderbuffer(GL_RENDERBUFFER, _depthBufferId);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _currentViewport[2], _currentViewport[3]);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthBufferId);
 
     /* Set "_backFaceTextureId" as colour attachement #0,
        and "_frontFaceTextureId" as attachement #1       */
@@ -633,9 +676,8 @@ void RayCaster::_initializeFramebufferTextures()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     /* Generate and configure 3D texture: _volumeTextureId */
-    textureUnit++;    // == 2;
     glGenTextures(1, &_volumeTextureId);
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
     glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
 
     /* Configure _volumeTextureId */
@@ -646,9 +688,8 @@ void RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     /* Generate and configure 1D texture: _colorMapTextureId */
-    textureUnit++;    // == 3;
     glGenTextures(1, &_colorMapTextureId);
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
 
     /* Configure _colorMapTextureId */
@@ -657,9 +698,8 @@ void RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
     /* Generate and configure 3D texture: _missingValueTextureId */
-    textureUnit++;    // == 4;
     glGenTextures(1, &_missingValueTextureId);
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
     glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
 
     /* Configure _missingValueTextureId */
@@ -724,7 +764,7 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         glEnable(GL_DEPTH_TEST);
-        glDepthMask(GL_FALSE);
+        glDepthMask(GL_TRUE);
     }
 
     if (insideACell)    // only when 1st or 2nd pass
@@ -744,7 +784,6 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glClearDepth(1.0);
-    glDepthMask(GL_TRUE);
 
     glUseProgram(0);
 }
@@ -797,7 +836,7 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     }
 
     // Pack in fast mode, lighting, and missing value booleans together
-    int flags[3] = {int(fast), int(lighting), int(_userCoordinates.missingValueMask == nullptr)};
+    int flags[3] = {int(fast), int(lighting), int(_userCoordinates.missingValueMask != nullptr)};
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "flags");
     glUniform1iv(uniformLocation, (GLsizei)3, flags);
 
@@ -811,56 +850,47 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     if (_userCoordinates.dims[3] < 50)    // Make sure at least 100 steps
         stepSize1D = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / 100.0f;
     else
-        stepSize1D = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / float(_userCoordinates.dims[3] * 2);
+        stepSize1D = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / float(_userCoordinates.dims[3] * 4);
     if (fast) stepSize1D *= 4.0;    // Quadruple step size when fast rendering
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "stepSize1D");
     glUniform1f(uniformLocation, stepSize1D);
 
     // Pass in textures
-    GLuint textureUnit = 0;
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _backFaceTexOffset);
     glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "backFaceTexture");
-    glUniform1i(uniformLocation, textureUnit);
+    glUniform1i(uniformLocation, _backFaceTexOffset);
 
-    textureUnit = 1;
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _frontFaceTexOffset);
     glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "frontFaceTexture");
-    glUniform1i(uniformLocation, textureUnit);
+    glUniform1i(uniformLocation, _frontFaceTexOffset);
 
-    textureUnit = 2;
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
     glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeTexture");
-    glUniform1i(uniformLocation, textureUnit);
+    glUniform1i(uniformLocation, _volumeTexOffset);
 
-    textureUnit = 3;
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "colorMapTexture");
-    glUniform1i(uniformLocation, textureUnit);
+    glUniform1i(uniformLocation, _colorMapTexOffset);
 
-    if (_userCoordinates.missingValueMask == nullptr) {
-        textureUnit = 4;
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
-        glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
-        glUniform1i(uniformLocation, textureUnit);
-    }
+    glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
+    glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
+    glUniform1i(uniformLocation, _missingValueTexOffset);
 
     if (castingMode == 2) {
-        textureUnit = 5;
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        glActiveTexture(GL_TEXTURE0 + _xyCoordsTexOffset);
         glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "xyCoordsTexture");
-        glUniform1i(uniformLocation, textureUnit);
+        glUniform1i(uniformLocation, _xyCoordsTexOffset);
 
-        textureUnit = 6;
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
         glBindTexture(GL_TEXTURE_BUFFER, _zCoordsTextureId);
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "zCoordsTexture");
-        glUniform1i(uniformLocation, textureUnit);
+        glUniform1i(uniformLocation, _zCoordsTexOffset);
     }
 }
 
