@@ -436,7 +436,7 @@ void SliceRenderer::_createDataTexture(float *dataValues) {
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
-        GL_RG16F,
+        GL_RG32F,
         _textureWidth,
         _textureHeight,
         0,
