@@ -546,7 +546,7 @@ int RayCaster::_initializeGL()
     {
         MyBase::SetErrMsg("Failed to Create Framebuffer and Textures!");
         return -1;
-    {
+    }
 
     return 0;   // Success
 }
