@@ -1,6 +1,6 @@
 #version 410 core
 
-in  vec4  gl_FragCoord;
+in vec4 gl_FragCoord;
 layout(location = 0) out vec4 color;
 
 uniform sampler2D  backFaceTexture;
@@ -157,13 +157,14 @@ void main(void)
     float step1Value    = texture( volumeTexture, step1Texture ).r;
 
     // let's do a ray casting! 
-    int nSteps = int(nStepsf) + 1;
-    for( int i = 1; i <= nSteps; i++ )
+    int nSteps = int(nStepsf) + 2;
+    int stepi;
+    for( stepi = 1; stepi < nSteps; stepi++ )
     {
         if( color.a > 0.999 )  // You can still see through with 0.99...
             break;
 
-        vec3 step2Eye     = startEye + stepSize3D * float( i );
+        vec3 step2Eye     = startEye + stepSize3D * float( stepi );
         vec3 step2Model   = (inversedMV * vec4(step2Eye, 1.0)).xyz;
         vec3 step2Texture = (step2Model - boxMin) / boxSpan;
         float step2Value  = texture( volumeTexture, step2Texture ).r;
@@ -207,7 +208,7 @@ void main(void)
 
                 // Apply depth
                 //   Follow transforms explained in http://www.songho.ca/opengl/gl_transform.html
-                vec4  isoClip =  Projection * vec4( isoEye, 1.0 );
+                vec4  isoClip =  Projection  * vec4( isoEye, 1.0 );
                 vec3  isoNdc  =  isoClip.xyz / isoClip.w;
                 gl_FragDepth  =  gl_DepthRange.diff * 0.5 * isoNdc.z +
                                 (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
@@ -219,6 +220,15 @@ void main(void)
         step1Value   = step2Value;
     }   // Finish ray casting
 
+#if 0
+    if( stepi == nSteps )   // Apply depth of the back face
+    {
+        vec4 stopClip =  Projection   * vec4( stopEye, 1.0 );
+        vec3 stopNdc  =  stopClip.xyz / stopClip.w;
+        gl_FragDepth  =  gl_DepthRange.diff * 0.5 * stopNdc.z + 
+                        (gl_DepthRange.near + gl_DepthRange.far) * 0.5; 
+    }
+#endif
 
 }   // End main()
 
