@@ -1,15 +1,15 @@
-#ifndef TWODDATAEVENTROUTER_H
-#define TWODDATAEVENTROUTER_H
+#ifndef SLICEEVENTROUTER_H
+#define SLICEEVENTROUTER_H
 
 
 #include <qobject.h>
 #include <vapor/MyBase.h>
 #include "GL/glew.h"
-#include "vapor/TwoDDataRenderer.h"
-#include "vapor/TwoDDataParams.h"
+#include "vapor/SliceRenderer.h"
+#include "vapor/SliceParams.h"
 #include "RenderEventRouter.h"
 #include "VariablesWidget.h"
-#include "TwoDSubtabs.h"
+#include "SliceSubtabs.h"
 
 QT_USE_NAMESPACE
 
@@ -17,29 +17,29 @@ namespace VAPoR {
 	class ControlExec;
 }
 
-class GLTwoDDataImageWindow;
+class GLSliceImageWindow;
 
 //!
-//! \class TwoDDataEventRouter
+//! \class SliceEventRouter
 //! \ingroup Public_GUI
-//! \brief An EventRouter subclass that handles the TwoD tab in the GUI
+//! \brief An EventRouter subclass that handles the Slice tab in the GUI
 //! \author Scott Pearse 
 //! \version 3.0
 //! \date  April 2016
 
-//!	The TwoDDataEventRouter class manages the TwoD gui.  There are three sub-tabs,
+//!	The SliceEventRouter class manages the Slice gui.  There are three sub-tabs,
 //! for variables, geometry, and appearance. 
 
-class TwoDDataEventRouter : public QTabWidget,  public RenderEventRouter {
+class SliceEventRouter : public QTabWidget,  public RenderEventRouter {
 
 Q_OBJECT
 
 public: 
 
- TwoDDataEventRouter(
+ SliceEventRouter(
 	QWidget *parent, VAPoR::ControlExec *ce
  );
- ~TwoDDataEventRouter();
+ ~SliceEventRouter();
 
  void GetWebHelp(
 	vector <pair <string, string> > &help
@@ -47,7 +47,7 @@ public:
 
  //
  static string GetClassType() {
-	 return(VAPoR::TwoDDataRenderer::GetClassType());
+	 return(VAPoR::SliceRenderer::GetClassType());
  }
  string GetType() const {return GetClassType(); }
 
@@ -57,15 +57,15 @@ protected:
  virtual string _getDescription() const;
                       
  virtual string _getSmallIconImagePath() const {
-	return("TwoDData_small.png");
+	return("Slice_small.png");
  }   
  virtual string _getIconImagePath() const {
-	return("TwoDData.png");
+	return("Slice.png");
  }
 
 private:
 
- TwoDDataEventRouter() {} 
+ SliceEventRouter() {} 
 
 
  //! Override default wheel behavior on the tab.  This has the effect of 
@@ -75,16 +75,18 @@ private:
   void wheelEvent(QWheelEvent*) {}
 
  //! VariablesWidget is used as Variables tab
- TwoDVariablesSubtab *_variables;
- TwoDGeometrySubtab* _geometry;
- GLTwoDDataImageWindow* _glTwoDDataImageWindow;
- TwoDAppearanceSubtab* _appearance;
- TwoDAnnotationSubtab* _annotation;
+ SliceVariablesSubtab *_variables;
+ SliceGeometrySubtab* _geometry;
+ GLSliceImageWindow* _glSliceImageWindow;
+ SliceAppearanceSubtab* _appearance;
+ SliceAnnotationSubtab* _annotation;
 
 #ifdef VAPOR3_0_0_ALPHA
- 	TwoDDataImageGUI *_image;
+ 	SliceImageGUI *_image;
 #endif
 
 };
 
-#endif //TWODDATAEVENTROUTER_H 
+#endif //SLICEEVENTROUTER_H 
+
+
