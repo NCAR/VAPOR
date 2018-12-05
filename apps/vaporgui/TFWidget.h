@@ -56,33 +56,32 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void Update(
         VAPoR::DataMgr *dataMgr,
         VAPoR::ParamsMgr *paramsMgr,
-        VAPoR::RenderParams *rParams);
+        VAPoR::RenderParams *rParams,
+        bool internalUpdate = false);
 
     void fileLoadTF(
         string varname,
         const char *path,
         bool savePath);
 
-    //void loadTF(string varname);
-
     void getVariableRange(
         float range[2],
         float values[2],
         bool secondaryVariable);
     float getOpacity();
+    void RefreshHistogram();
+    void SetAutoUpdateParamChanged(bool changed);
 
   private slots:
     void loadTF();
     void fileSaveTF();
 
-    //	void updateMainHisto();
     void refreshMainHisto();
     void refreshSecondaryHisto();
 
     void autoUpdateMainHistoChecked(int state);
     void autoUpdateSecondaryHistoChecked(int state);
 
-    //	void refreshHistograms();
     void setColorInterpolation(int index);
     void emitTFChange();
     void opacitySliderChanged(int value);
@@ -116,7 +115,6 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void updateSecondaryMappingFrame(bool refresh);
     void updateSecondarySliders();
 
-    //	void refreshIfMainVarChanged();
     bool mainVariableChanged();
     bool secondaryVariableChanged();
     void refreshIfSecondaryVarChanged();

@@ -152,7 +152,6 @@ class DVRGeometrySubtab : public QWidget, public Ui_DVRGeometryGUI {
     DVRGeometrySubtab(QWidget *parent) {
         setupUi(this);
         _geometryWidget->Reinit((DimFlags)THREED,
-                                (GeometryFlags)MINMAX,
                                 (VariableFlags)SCALAR);
     }
 

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>386</width>
-    <height>636</height>
+    <height>709</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -30,6 +30,9 @@
     <number>0</number>
    </property>
    <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
@@ -526,21 +529,26 @@ available from the right mouse button.</string>
          <property name="toolTip">
           <string>Click to build a new histogram based on the current region settings, animation timestep, and transfer function bounds</string>
          </property>
-         <property name="whatsThis">
-          <string>Click the Histo button to refresh the
-histogram that is displayed in the transfer
-function edit window.  The data that is 
-histogrammed is determined by the 
-current variable, the refinement level,
-the current time step, the probe extents
-and rotation, and the TF data bounds.
-Use the right mouse menu in the 
-transfer function window to choose
-how the histogram is scaled.</string>
-         </property>
          <property name="text">
           <string>Update Histogram</string>
          </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+         </layout>
         </widget>
        </item>
        <item>
@@ -883,7 +891,16 @@ how the histogram is scaled.</string>
           <property name="spacing">
            <number>5</number>
           </property>
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item>
@@ -988,6 +1005,9 @@ how the histogram is scaled.</string>
         <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Maximum</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -1268,7 +1288,16 @@ available from the right mouse button.</string>
           <property name="spacing">
            <number>0</number>
           </property>
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item>
@@ -1314,7 +1343,16 @@ available from the right mouse button.</string>
           <property name="spacing">
            <number>0</number>
           </property>
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item>
@@ -1714,6 +1752,9 @@ how the histogram is scaled.</string>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::MinimumExpanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
