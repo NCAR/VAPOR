@@ -537,20 +537,31 @@ int  RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
 
 int RayCaster::_initializeGL()
 {
-    if( _initializeFramebufferTextures() != 0 )
+    if( _loadShaders() != 0 )
+    {
+        MyBase::SetErrMsg("Failed to load shaders!");
         return -1;
+    }
+    if( _initializeFramebufferTextures() != 0 )
+    {
+        MyBase::SetErrMsg("Failed to Create Framebuffer and Textures!");
+        return -1;
+    {
 
     return 0;   // Success
 }
 
 int RayCaster::_paintGL( bool fast ) 
 {
-    // Reload shaders in case they're changed
+#ifdef DEBUG
+    // Reload shaders in case they're changed during shader development.
+    //   Will incur huge performance panelties on parallel filesystems.
     if( _loadShaders() != 0 )
     {
         MyBase::SetErrMsg("Failed to load shaders");
         return -1;
     }
+#endif
     const MatrixManager* mm = Renderer::_glManager->matrixManager;
 
     // Visualizer dimensions would change if window is resized
