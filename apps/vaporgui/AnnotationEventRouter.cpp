@@ -215,7 +215,7 @@ void AnnotationEventRouter::copyRegionFromRenderer()
 	copyBox->GetExtents(minExtents, maxExtents);
 
 	AxisAnnotation* aa = _getCurrentAxisAnnotation();
-	if (copyBox->IsPlanar()) {
+	if (minExtents.size() < 3) { // copyBox->IsPlanar()
 		std::vector<double>currentMin = aa->GetMinTics();
 		std::vector<double>currentMax = aa->GetMaxTics();
 		scaleNormalizedCoordsToWorld(currentMin);

@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>427</width>
-    <height>289</height>
+    <height>328</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+   <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -36,7 +36,7 @@
     <number>0</number>
    </property>
    <property name="topMargin">
-    <number>0</number>
+    <number>16</number>
    </property>
    <property name="rightMargin">
     <number>0</number>
@@ -47,7 +47,7 @@
    <item>
     <widget class="QTabWidget" name="variableSelectionWidget">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -184,6 +184,100 @@
         </widget>
        </item>
        <item>
+        <widget class="QFrame" name="orientationFrame">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>4</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>4</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Orientation</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>178</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QComboBox" name="orientationCombo">
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>150</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>XY Plane</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>XZ Plane</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>YZ Plane</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QFrame" name="singleVariableFrame">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
@@ -252,7 +346,7 @@
             </property>
             <property name="maximumSize">
              <size>
-              <width>75</width>
+              <width>150</width>
               <height>16777215</height>
              </size>
             </property>
@@ -302,7 +396,7 @@
            <number>0</number>
           </property>
           <property name="leftMargin">
-           <number>0</number>
+           <number>4</number>
           </property>
           <property name="topMargin">
            <number>0</number>
@@ -439,7 +533,7 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>75</width>
+                 <width>150</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -531,7 +625,7 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>75</width>
+                 <width>150</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -626,7 +720,7 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>75</width>
+                 <width>150</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -904,7 +998,7 @@
             </property>
             <property name="maximumSize">
              <size>
-              <width>75</width>
+              <width>150</width>
               <height>16777215</height>
              </size>
             </property>
@@ -984,7 +1078,7 @@
             </property>
             <property name="maximumSize">
              <size>
-              <width>75</width>
+              <width>150</width>
               <height>16777215</height>
              </size>
             </property>
@@ -1013,7 +1107,7 @@
    <item>
     <widget class="FidelityWidget" name="_fidelityWidget" native="true">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -1031,13 +1125,10 @@
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::Minimum</enum>
-     </property>
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>0</height>
+       <height>120</height>
       </size>
      </property>
     </spacer>
