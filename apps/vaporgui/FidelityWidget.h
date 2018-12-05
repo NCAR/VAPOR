@@ -41,6 +41,9 @@ class FidelityWidget : public QWidget, public Ui_FidelityWidgetGUI {
         VAPoR::ParamsMgr *paramsMgr,
         VAPoR::RenderParams *rParams);
 
+    QButtonGroup *GetFidelityButtons();
+    std::vector<int> GetFidelityLodIdx() const;
+
     std::string GetCurrentLodString() const;
     std::string GetCurrentMultiresString() const;
 

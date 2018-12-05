@@ -159,8 +159,7 @@ void ContourAppearanceSubtab::SetContourSpacing(double spacing) {
 ContourGeometrySubtab::ContourGeometrySubtab(QWidget *parent) {
     setupUi(this);
     _geometryWidget->Reinit(
-        (DimFlags)TWODXY,
-        (GeometryFlags)MINMAX,
+        (DimFlags)TWOD,
         (VariableFlags)SCALAR);
 
     _orientationAngles->hide();
