@@ -1017,7 +1017,7 @@ void RayCaster::_load3rdPassUniforms( long               castingMode,
         stepSize1D = std::sqrt( span[0]*span[0] + span[1]*span[1] + span[2]*span[2] ) / 100.0f;
     else
         stepSize1D = std::sqrt( span[0]*span[0] + span[1]*span[1] + span[2]*span[2] ) / 
-                     float( _userCoordinates.dims[3] * 4 );
+                     float( _userCoordinates.dims[3] * 2 ); // Use Nyquist frequency by default
     if( fast )
         stepSize1D *= 4.0;      // Quadruple step size when fast rendering
     uniformLocation = glGetUniformLocation( _3rdPassShaderId, "stepSize1D" );
