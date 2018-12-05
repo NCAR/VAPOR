@@ -82,7 +82,6 @@ public:
     {
         setupUi(this);
         _geometryWidget->Reinit( (DimFlags)THREED,
-                                (GeometryFlags)MINMAX,
                                 (VariableFlags)SCALAR);
     }
     

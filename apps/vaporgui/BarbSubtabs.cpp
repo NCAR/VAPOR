@@ -18,7 +18,7 @@ BarbVariablesSubtab::BarbVariablesSubtab(QWidget* parent) {
 	setupUi(this);
 	_variablesWidget->Reinit(
 		(VariableFlags)(VECTOR | HEIGHT | COLOR),
-		(DimFlags)(TWODXY | THREED)
+		(DimFlags)(TWOD | THREED)
 	);
 }
 
@@ -37,8 +37,7 @@ void BarbVariablesSubtab::Initialize(VAPoR::BarbParams* bParams,
 BarbGeometrySubtab::BarbGeometrySubtab(QWidget* parent) {
 	setupUi(this);
 	_geometryWidget->Reinit(
-		(DimFlags)(VECTOR | TWODXY),
-		(GeometryFlags)(MINMAX),
+		(DimFlags)(VECTOR | THREED),
 		(VariableFlags)(VECTOR)
 	);
 }

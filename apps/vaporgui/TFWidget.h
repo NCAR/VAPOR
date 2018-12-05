@@ -66,27 +66,25 @@ public:
 		bool savePath
 	);
 
-	//void loadTF(string varname);
-
 	void getVariableRange(
 		float range[2], 
 		float values[2], 
 		bool secondaryVariable
 	);
 	float getOpacity();
+	void RefreshHistogram();
+    void SetAutoUpdateParamChanged(bool changed);
 
 private slots:
 	void loadTF();
 	void fileSaveTF();
 	
-//	void updateMainHisto();
 	void refreshMainHisto();
 	void refreshSecondaryHisto();
 
 	void autoUpdateMainHistoChecked(int state);
 	void autoUpdateSecondaryHistoChecked(int state);
 
-//	void refreshHistograms();
 	void setColorInterpolation(int index);
 	void emitTFChange();
 	void opacitySliderChanged(int value);
@@ -120,7 +118,6 @@ private:
 	void updateSecondaryMappingFrame(bool refresh);
 	void updateSecondarySliders();
 	
-//	void refreshIfMainVarChanged();
 	bool mainVariableChanged();
 	bool secondaryVariableChanged();
 	void refreshIfSecondaryVarChanged();
