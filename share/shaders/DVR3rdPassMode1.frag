@@ -20,6 +20,7 @@ uniform bool  flags[3];
 uniform float lightingCoeffs[4];
 
 uniform mat4 MV;
+uniform mat4 Projection;
 uniform mat4 inversedMV;
 
 // 
@@ -129,6 +130,8 @@ vec3 CalculateGradient( const in vec3 tc )
 
 void main(void)
 {
+    gl_FragDepth        = 1.0;
+    color               = vec4( 0.0 );
     vec3  lightDirEye   = vec3(0.0, 0.0, 1.0); 
 
     // Calculate texture coordinates of this fragment
@@ -146,11 +149,7 @@ void main(void)
 
     vec3  startModel    = (inversedMV * vec4(startEye, 1.0)).xyz;
     vec3  startTexture  = (startModel - boxMin) / boxSpan;
-    if( ShouldSkip( startTexture, startModel ) )
-    {
-        color = vec4( 0.0 );
-    }
-    else
+    if( !ShouldSkip( startTexture, startModel ) )
     {
         float step1Value   = texture( volumeTexture, startTexture ).r;
               color        = texture( colorMapTexture, TranslateValue(step1Value) );
@@ -158,13 +157,15 @@ void main(void)
     }
 
     // let's do a ray casting! 
-    int nSteps = int(nStepsf) + 1;
-    for( int i = 1; i <= nSteps; i++ )
+    vec3 step2Eye = startEye;
+    int  nSteps   = int(nStepsf) + 2;
+    int  stepi;
+    for( stepi = 1; stepi < nSteps; stepi++ )
     {
         if( color.a > 0.999 )  // You can still see something with 0.99...
             break;
 
-        vec3 step2Eye     = startEye + stepSize3D * float( i );
+             step2Eye     = startEye + stepSize3D * float( stepi );
         vec3 step2Model   = (inversedMV * vec4(step2Eye, 1.0)).xyz;
         vec3 step2Texture = (step2Model - boxMin) / boxSpan;
         if( ShouldSkip( step2Texture, step2Model ) )
@@ -173,7 +174,8 @@ void main(void)
         float step2Value   = texture( volumeTexture, step2Texture ).r;
         vec4  backColor    = texture( colorMapTexture, TranslateValue(step2Value) );
         
-        if( lighting && backColor.a > 0.001 )    // Only calculate lighting when opaque enough
+        // Apply lighting
+        if( lighting && backColor.a > 0.001 )
         {
             vec3 gradientModel = CalculateGradient( step2Texture );
             if( length( gradientModel ) > ULP10 )
@@ -192,8 +194,16 @@ void main(void)
         // Color compositing
         color.rgb += (1.0 - color.a) * backColor.a * backColor.rgb;
         color.a   += (1.0 - color.a) * backColor.a;
+    }
 
-    }   // End ray casting
+    // Apply depth if sufficient opaqueness
+    if( color.a > 0.7 )
+    {
+        vec4 step2Clip =  Projection    * vec4( step2Eye, 1.0 );
+        vec3 step2Ndc  =  step2Clip.xyz / step2Clip.w;
+        gl_FragDepth   =  gl_DepthRange.diff * 0.5 * step2Ndc.z +
+                         (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
+    }
 
 }       // End main()
 
