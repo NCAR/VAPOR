@@ -66,7 +66,7 @@ public:
     IsoSurfaceGeometrySubtab(QWidget *parent)
     {
         setupUi(this);
-        _geometryWidget->Reinit((DimFlags)THREED, (GeometryFlags)MINMAX, (VariableFlags)SCALAR);
+        _geometryWidget->Reinit((DimFlags)THREED, (VariableFlags)SCALAR);
     }
 
     void Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams)

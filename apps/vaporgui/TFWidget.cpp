@@ -354,7 +354,7 @@ void TFWidget::updateMainMappingFrame(bool refresh = false)
     _mappingFrame->updateMapperFunction(mf);
     _mappingFrame->Update(_dataMgr, _paramsMgr, _rParams);
 
-    if (getAutoUpdateMainHisto()) _mappingFrame->RefreshHistogram();
+    if (getAutoUpdateMainHisto()) { _mappingFrame->RefreshHistogram(); }
 
     _mappingFrame->fitViewToDataRange();
 }
@@ -381,7 +381,7 @@ void TFWidget::refreshIfSecondaryVarChanged()
     }
 }
 
-void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rParams)
+void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rParams, bool internalUpdate)
 {
     assert(paramsMgr);
     assert(dataMgr);
@@ -423,14 +423,16 @@ void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rPar
     updateMainSliders();
     updateSecondarySliders();
 
-    if (_mainHistoNeedsRefresh) {
-        _mainHistoNeedsRefresh = false;
-        refreshMainHisto();
-    }
+    if (!internalUpdate) {
+        if (_mainHistoNeedsRefresh) {
+            _mainHistoNeedsRefresh = false;
+            refreshMainHisto();
+        }
 
-    if (_secondaryHistoNeedsRefresh) {
-        _secondaryHistoNeedsRefresh = false;
-        refreshSecondaryHisto();
+        if (_secondaryHistoNeedsRefresh) {
+            _secondaryHistoNeedsRefresh = false;
+            refreshSecondaryHisto();
+        }
     }
 }
 
@@ -464,7 +466,7 @@ void TFWidget::refreshMainHisto()
 
     refreshSecondaryHistoIfNecessary();
 
-    Update(_dataMgr, _paramsMgr, _rParams);
+    Update(_dataMgr, _paramsMgr, _rParams, true);
     _updateMainHistoButton->setEnabled(false);
 }
 
@@ -485,7 +487,7 @@ void TFWidget::refreshSecondaryHisto()
     _secondaryMappingFrame->RefreshHistogram();
     refreshMainHistoIfNecessary();
 
-    Update(_dataMgr, _paramsMgr, _rParams);
+    Update(_dataMgr, _paramsMgr, _rParams, true);
     _updateSecondaryHistoButton->setEnabled(false);
 }
 
@@ -524,10 +526,7 @@ void TFWidget::checkForBoxChanges()
             _externalChangeHappened = true;
             _minExt[i] = minExt[i];
         }
-        if (maxExt[i] != _maxExt[i]) {
-            _externalChangeHappened = true;
-            _maxExt[i] = maxExt[i];
-        }
+        if (maxExt[i] != _maxExt[i]) { _externalChangeHappened = true; }
     }
 }
 
@@ -688,7 +687,6 @@ void TFWidget::emitTFChange() { emit emitChange(); }
 
 void TFWidget::opacitySliderChanged(int value)
 {
-    // string varName = _rParams->GetVariableName();
     bool mainTF = true;
     if (COLORMAP_VAR_IS_IN_TF2) mainTF = false;
     string          varName = getTFVariableName(mainTF);

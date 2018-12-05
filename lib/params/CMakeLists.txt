@@ -25,6 +25,7 @@ set (SRC
 	IsoSurfaceParams.cpp
 	AxisAnnotation.cpp
 	WireFrameParams.cpp
+    SliceParams.cpp
 	DatasetsParams.cpp
 )
 

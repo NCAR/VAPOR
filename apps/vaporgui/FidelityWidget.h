@@ -35,6 +35,9 @@ public:
 
     virtual void Update(const VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
+    QButtonGroup *   GetFidelityButtons();
+    std::vector<int> GetFidelityLodIdx() const;
+
     std::string GetCurrentLodString() const;
     std::string GetCurrentMultiresString() const;
 
