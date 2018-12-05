@@ -144,7 +144,7 @@ void main(void)
     if( rayDirLength    < ULP10 )
         discard;
 
-    float nStepsf       = rayDirLength / stepSize1D;
+    float nStepsf       = rayDirLength / (stepSize1D * 0.5); // Double # of steps
     vec3  stepSize3D    = rayDirEye    / nStepsf;
 
     vec3  startModel    = (inversedMV * vec4(startEye, 1.0)).xyz;
