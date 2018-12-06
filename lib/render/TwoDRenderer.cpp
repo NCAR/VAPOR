@@ -230,7 +230,7 @@ void TwoDRenderer::_renderMeshAligned()
         //
         glBindVertexArray(_VAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * _meshWidth * sizeof(float), _indices, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * _meshWidth * sizeof(GLuint), _indices, GL_DYNAMIC_DRAW);
         for (int j = 0; j < _meshHeight - 1; j++) {
             glBindBuffer(GL_ARRAY_BUFFER, _VBO);
             glBufferData(GL_ARRAY_BUFFER, _meshWidth * 6 * sizeof(float), &_verts[j * _meshWidth * 3], GL_STREAM_DRAW);
@@ -238,23 +238,46 @@ void TwoDRenderer::_renderMeshAligned()
             glBufferData(GL_ARRAY_BUFFER, _meshWidth * 4 * sizeof(float), &data[j * _meshWidth * 2], GL_STREAM_DRAW);
             glDrawElements(GL_TRIANGLE_STRIP, 2 * _meshWidth, GL_UNSIGNED_INT, 0);
         }
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
     } else {
         assert(_meshWidth >= 3);
         assert(_meshHeight == 1);
-
         assert((_nindices % 3) == 0);
 
+        // TODO Temp
+        int nVerts = 0;
+        for (int i = 0; i < _nindices; i++)
+            if (_indices[i] > nVerts) nVerts = _indices[i];
+        nVerts++;
+
+        GL_ERR_BREAK();
+        glBindVertexArray(_VAO);
+        GL_ERR_BREAK();
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, _nindices * sizeof(GLuint), _indices, GL_DYNAMIC_DRAW);
+        GL_ERR_BREAK();
+        glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+        glBufferData(GL_ARRAY_BUFFER, nVerts, _verts, GL_STREAM_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, _dataVBO);
+        glBufferData(GL_ARRAY_BUFFER, nVerts, data, GL_STREAM_DRAW);
+        GL_ERR_BREAK();
+        glDrawElements(GL_TRIANGLE_STRIP, 6, GL_UNSIGNED_INT, 0);
+
+#if 0
         glVertexPointer(3, GL_FLOAT, 0, _verts);
         glVertexAttribPointer(
-            /*attrindx*/ 0, 2, GL_FLOAT, false, 0, data);
+                              /*attrindx*/ 0,  2,  GL_FLOAT,  false,  0, data
+                              );
         // TODO GL
         glNormalPointer(GL_FLOAT, 0, _normals);
-
-        glDrawElements(GL_TRIANGLES, _nindices, GL_UNSIGNED_INT, _indices);
+        
+        glDrawElements(
+                       GL_TRIANGLES, _nindices, GL_UNSIGNED_INT, _indices
+                       );
+#endif
     }
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     _openGLRestore();
 }
