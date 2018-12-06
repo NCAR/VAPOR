@@ -100,7 +100,7 @@ int TwoDRenderer::_paintGL(bool) {
     // normals)
     //
     int rc = GetMesh(
-        _dataMgr, &_verts, &_normals, _meshWidth, _meshHeight,
+        _dataMgr, &_verts, &_normals, _nverts, _meshWidth, _meshHeight,
         &_indices, _nindices, _structuredMesh);
     if (rc < 0) {
         return (-1);
