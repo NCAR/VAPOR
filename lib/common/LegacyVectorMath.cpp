@@ -1,78 +1,27 @@
-//************************************************************************
-//									*
-//		     Copyright (C)  2004				*
-//     University Corporation for Atmospheric Research			*
-//		     All Rights Reserved				*
-//									*
-//************************************************************************/
-//
-//	File:		glutil.cpp
-//
-//	Adaptor:		Alan Norton
-//			National Center for Atmospheric Research
-//			PO 3000, Boulder, Colorado
-//
-//	Date:		July 2004
-//
-//	Description:  Methods to facilitate use of trackball navigation,
-//		adapted from Ken Purcell's code to work in QT window
-//
-// Copyright (C) 1992  AHPCRC, Univeristy of Minnesota
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program in a file named 'Copying'; if not, write to
-// the Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139.
-//
+#define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
+#include <vapor/LegacyVectorMath.h>
+#include <assert.h>
+#include <float.h>
+#include <string>
 
-// Original Author:
-//	Ken Chin-Purcell (ken@ahpcrc.umn.edu)
-//	Army High Performance Computing Research Center (AHPCRC)
-//	Univeristy of Minnesota
-//
-
-#include <cassert>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <vector>
-#include <cmath>
-#include <iostream>
-#include <cfloat>
-#include <vapor/MyBase.h>
-#include <vapor/errorcodes.h>
-#include <vapor/glutil.h>
-
-#include <GL/glew.h>
-
-//#include "util.h"
+using std::string;
+using std::vector;
 
 /* The Identity matrix is useful for intializing transformations.
  */
 namespace {
 
-GLfloat idmatrix[16] = {
+float idmatrix[16] = {
     1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
 };
-GLdouble idmatrixd[16] = {
+double idmatrixd[16] = {
     1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
 };
 
 };    // namespace
 
-/* Most of the 'v' routines are in the form vsomething(src1, src2, dst),
- * dst can be one of the source vectors.
- */
 namespace VAPoR {
+
 void vscale(float *v, float s)
 {
     /* Scale the vector v in all directions by s.
@@ -164,7 +113,7 @@ void vreflect(const float *in, const float *mirror, float *out)
     vadd(temp, out, out);
 }
 
-void vtransform(const float *v, GLfloat mat[12], float *vt)
+void vtransform(const float *v, float mat[12], float *vt)
 {
     /* Vector transform in software...
      */
@@ -175,7 +124,7 @@ void vtransform(const float *v, GLfloat mat[12], float *vt)
     t[2] = v[0] * mat[8] + v[1] * mat[9] + v[2] * mat[10] + mat[11];
     vcopy(t, vt);
 }
-void vtransform(const float *v, GLfloat mat[12], double *vt)
+void vtransform(const float *v, float mat[12], double *vt)
 {
     /* Vector transform in software...
      */
@@ -186,7 +135,7 @@ void vtransform(const float *v, GLfloat mat[12], double *vt)
     t[2] = v[0] * mat[8] + v[1] * mat[9] + v[2] * mat[10] + mat[11];
     vcopy(t, vt);
 }
-void vtransform(const double *v, GLfloat mat[12], double *vt)
+void vtransform(const double *v, float mat[12], double *vt)
 {
     /* Vector transform in software...
      */
@@ -198,7 +147,7 @@ void vtransform(const double *v, GLfloat mat[12], double *vt)
     vcopy(t, vt);
 }
 
-void vtransform(const double *v, GLdouble mat[12], double *vt)
+void vtransform(const double *v, double mat[12], double *vt)
 {
     /* Vector transform in software...
      */
@@ -209,7 +158,7 @@ void vtransform(const double *v, GLdouble mat[12], double *vt)
     t[2] = v[0] * mat[8] + v[1] * mat[9] + v[2] * mat[10] + mat[11];
     vcopy(t, vt);
 }
-void vtransform4(const float *v, GLfloat *mat, float *vt)
+void vtransform4(const float *v, float *mat, float *vt)
 {
     /* Homogeneous coordinates.
      */
@@ -254,7 +203,7 @@ bool pointOnRight(double *pt1, double *pt2, const double *testPt)
     return (test < 0.f);
 }
 
-void mcopy(GLfloat *m1, GLfloat *m2)
+void mcopy(float *m1, float *m2)
 {
     /* Copy a 4x4 matrix
      */
@@ -271,19 +220,19 @@ void mcopy(double *m1, double *m2)
     for (row = 0; row < 16; row++) m2[row] = m1[row];
 }
 
-void mmult(GLfloat *m1, GLfloat *m2, GLfloat *prod)
+void mmult(float *m1, float *m2, float *prod)
 {
     /* Multiply two 4x4 matricies
      */
-    int     row, col;
-    GLfloat temp[16];
+    int   row, col;
+    float temp[16];
 
     /*for(row = 0 ; row < 4 ; row++)
-       for(col = 0 ; col < 4 ; col++)
-        temp[row + col*4] = (m1[row]   * m2[col*4] +
-                m1[row+4]  * m2[1+col*4] +
-                m1[row+8]  * m2[2+col*4] +
-                m1[row+12] * m2[3+col*4]);*/
+      for(col = 0 ; col < 4 ; col++)
+      temp[row + col*4] = (m1[row]   * m2[col*4] +
+      m1[row+4]  * m2[1+col*4] +
+      m1[row+8]  * m2[2+col*4] +
+      m1[row+12] * m2[3+col*4]);*/
     /*
      * Use OpenGL style matrix mult -- Wes.
      */
@@ -291,12 +240,12 @@ void mmult(GLfloat *m1, GLfloat *m2, GLfloat *prod)
         for (col = 0; col < 4; col++) temp[row * 4 + col] = (m1[row * 4] * m2[col] + m1[1 + row * 4] * m2[col + 4] + m1[2 + row * 4] * m2[col + 8] + m1[3 + row * 4] * m2[col + 12]);
     mcopy(temp, prod);
 }
-void mmult(GLdouble *m1, GLdouble *m2, GLdouble *prod)
+void mmult(double *m1, double *m2, double *prod)
 {
     /* Multiply two 4x4 matricies
      */
-    int      row, col;
-    GLdouble temp[16];
+    int    row, col;
+    double temp[16];
 
     /*
      * Use OpenGL style matrix mult -- Wes.
@@ -308,7 +257,7 @@ void mmult(GLdouble *m1, GLdouble *m2, GLdouble *prod)
 
 // 4x4 matrix inversion.  Fixed (AN 4/07) so that it doesn't try to divide by very small
 // pivot elements.  Returns 0 if not invertible
-int minvert(const GLfloat *mat, GLfloat *result)
+int minvert(const float *mat, float *result)
 {
     // Invert a 4x4 matrix
 
@@ -362,7 +311,7 @@ int minvert(const GLfloat *mat, GLfloat *result)
         for (j = 0; j < 4; j++) result[i + 4 * j] = m[i + 4][j];
     return 0;
 }
-int minvert(const GLdouble *mat, GLdouble *result)
+int minvert(const double *mat, double *result)
 {
     // Invert a 4x4 matrix
 
@@ -493,7 +442,7 @@ void qmult(const double *q1, const double *q2, double *dest)
     //	qnormal(dest);
     //}
 }
-void qmatrix(const float *q, GLfloat *m)
+void qmatrix(const float *q, float *m)
 {
     /* Build a rotation matrix, given a quaternion rotation.
      */
@@ -519,7 +468,7 @@ void qmatrix(const float *q, GLfloat *m)
 }
 #warning This function results in row major matrix. OpenGL uses column major\
 	as well as the rest of the matrix operations
-void qmatrix(const double *q, GLdouble *m)
+void qmatrix(const double *q, double *m)
 {
     /* Build a rotation matrix, given a quaternion rotation.
      */
@@ -545,7 +494,7 @@ void qmatrix(const double *q, GLdouble *m)
 }
 /*  Convert a 4x4 rotation matrix to a quaternion.  q[3] is real part!
     Code adapted from
-    http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion
+http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion
 */
 #define M_EPSILON 0.00000001
 void rotmatrix2q(float *m, float *q)
@@ -749,75 +698,6 @@ float ScalePoint(long pt, long origin, long size)
     return 2 * x - 1;
 }
 
-void ViewMatrix(GLfloat *m)
-{
-    /* Return the total view matrix, including any
-     * projection transformation.
-     */
-
-    GLfloat mp[16], mv[16];
-    glGetFloatv(GL_PROJECTION_MATRIX, mp);
-    glGetFloatv(GL_MODELVIEW_MATRIX, mv);
-    mmult(mv, mp, m);
-}
-
-int ViewAxis(int *direction)
-{
-    /* Return the major axis the viewer is looking down.
-     * 'direction' indicates which direction down the axis.
-     */
-    GLfloat view[16];
-    int     axis;
-
-    ViewMatrix(view);
-
-    /* The trick is to look down the z column for the largest value.
-     * The total view matrix seems to be left hand coordinate
-     */
-
-    /*if (fabs((double) view[9]) > fabs((double) view[8]))*/
-    if (fabs((double)view[6]) > fabs((double)view[2]))
-        axis = 1;
-    else
-        axis = 0;
-    /*if (fabs((double) view[10]) > fabs((double) view[axis+8]))*/
-    if (fabs((double)view[10]) > fabs((double)view[2 + axis * 4])) axis = 2;
-
-    if (direction) *direction = view[2 + axis * 4] > 0 ? -1 : 1;
-    /**direction = view[axis+8] > 0 ? -1 : 1;*/
-
-    return axis;
-}
-
-void StereoPerspective(int fovy, float aspect, float neardist, float fardist, float converge, float eye)
-{
-    /* The first four arguements act like the perspective command
-     * of the gl.  converge is the plane of the screen, and eye
-     * is the eye distance from the centerline.
-     *
-     * Sample values: 320, ???, 0.1, 10.0, 3.0, 0.12
-     */
-    float left, right, top, bottom;
-    float gltan;
-    GLint mm;
-    glGetIntegerv(GL_MATRIX_MODE, &mm);
-
-    glMatrixMode(GL_PROJECTION);
-
-    gltan = tan((double)(fovy / 2.0 / 10.0 * (M_PI / 180.0)));
-    top = gltan * neardist;
-    bottom = -top;
-
-    gltan = tan((double)(fovy * aspect / 2.0 / 10.0 * M_PI / 180.0));
-    left = -gltan * neardist - eye / converge * neardist;
-    right = gltan * neardist - eye / converge * neardist;
-
-    glLoadIdentity();
-    glFrustum(left, right, bottom, top, neardist, fardist);
-    glTranslatef(-eye, 0.0, 0.0);
-
-    glMatrixMode(mm);
-}
 /* Make a translation matrix from a vector:
  */
 void makeTransMatrix(float *trans, float *mtrx)
@@ -889,7 +769,7 @@ void makeModelviewMatrix(float *vpos, float *vdir, float *upvec, float *mtrx)
     // calculate "right" vector:
     vcross(vdir, upvec, right);
     // Construct matrix:
-    GLfloat minv[16];
+    float minv[16];
     // Fill in bottom row:
     minv[3] = 0.f;
     minv[7] = 0.f;
@@ -1018,7 +898,7 @@ void makeModelviewMatrixD(const std::vector<double> &vpos, const std::vector<dou
     int rc = minvert(minv, mtrx);
     assert(rc >= 0);    // Only catch this in debug mode
 }
-void matrix4x4_vec3_mult(const GLfloat m[16], const GLfloat a[4], GLfloat b[4])
+void matrix4x4_vec3_mult(const float m[16], const float a[4], float b[4])
 {
     b[0] = m[0] * a[0] + m[4] * a[1] + m[8] * a[2] + m[12] * a[3];
     b[1] = m[1] * a[0] + m[5] * a[1] + m[9] * a[2] + m[13] * a[3];
@@ -1050,12 +930,12 @@ void matrix4x4_vec3_mult(const GLfloat m[16], const GLfloat a[4], GLfloat b[4])
  *         det A
  */
 
-int matrix4x4_inverse(const GLfloat *in, GLfloat *out)
+int matrix4x4_inverse(const float *in, float *out)
 {
     int    i, j;
     double det;
-    double det4x4(const GLfloat m[16]);
-    void   adjoint(const GLfloat *in, GLfloat *out);
+    double det4x4(const float m[16]);
+    void   adjoint(const float *in, float *out);
 
     /* calculate the adjoint matrix */
 
@@ -1099,7 +979,7 @@ int matrix4x4_inverse(const GLfloat *in, GLfloat *out)
  *                     ij
  */
 
-void adjoint(const GLfloat *in, GLfloat *out)
+void adjoint(const float *in, float *out)
 {
     double a1, a2, a3, a4, b1, b2, b3, b4;
     double c1, c2, c3, c4, d1, d2, d3, d4;
@@ -1155,7 +1035,7 @@ void adjoint(const GLfloat *in, GLfloat *out)
  *
  * calculate the determinant of a 4x4 matrix.
  */
-double det4x4(const GLfloat m[16])
+double det4x4(const float m[16])
 {
     double ans;
     double a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4;
@@ -1223,72 +1103,6 @@ double det2x2(double a, double b, double c, double d)
     return ans;
 }
 
-bool oglStatusOK(vector<int> &status)
-{
-    GLenum glErr;
-
-    while ((glErr = glGetError()) != GL_NO_ERROR) { status.push_back((int)glErr); }
-    if (status.size()) return (false);
-
-    return (true);
-}
-
-string oglGetErrMsg(vector<int> status)
-{
-    string msg;
-    for (int i = 0; i < status.size(); i++) msg += "Error #" + std::to_string(status[i]) + "\n";
-    return msg;
-}
-
-int printOglError(const char *file, int line, const char *msg)
-{
-    //
-    // Returns -1 if an OpenGL error occurred, 0 otherwise.
-    //
-    GLenum glErr;
-    int    retCode = 0;
-
-    glErr = glGetError();
-
-    while (glErr != GL_NO_ERROR) {
-#ifdef DEBUG
-        std::cout << "glError: " << gluErrorString(glErr) << std::endl << "         " << file << " : " << line << std::endl;
-#endif
-        if (msg) {
-            Wasp::MyBase::SetErrMsg("glError: %s\n", msg);
-            msg = NULL;
-        }
-        Wasp::MyBase::SetErrMsg("glError: %i\n\t%s : %d", glErr, file, line);
-
-        retCode = -1;
-
-        glErr = glGetError();
-    }
-
-    return retCode;
-}
-
-bool FrameBufferReady()
-{
-    GLuint fbstatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (fbstatus != GL_FRAMEBUFFER_COMPLETE) { return (false); }
-
-    // Not sure if this is necessary
-    //
-    vector<int> errcodes;
-    bool        status = oglStatusOK(errcodes);
-
-    if (status) return true;
-
-    // If error, check for invalid frame buffer
-    //
-    for (int i = 0; i < errcodes.size(); i++) {
-        if (errcodes[i] == GL_INVALID_FRAMEBUFFER_OPERATION) return false;
-    }
-
-    return (true);
-}
-
 /*
  * Return true, if n is a power of 2.
  */
@@ -1331,6 +1145,7 @@ void mmultt33(const double *m1Trans, const double *m2, double *result)
         for (int col = 0; col < 3; col++) { result[row * 3 + col] = (m1Trans[row] * m2[col] + m1Trans[3 + row] * m2[col + 3] + m1Trans[6 + row] * m2[col + 6]); }
     }
 }
+
 // Determine a rotation matrix from (theta, phi, psi) (radians), that is,
 // find the rotation matrix that first rotates in (x,y) by psi, then takes the vector (0,0,1)
 // to the vector with direction (theta,phi) by rotating by phi in the (x,z) plane and then
@@ -1813,4 +1628,5 @@ void computeGradientData(int dim[3], int numChan, unsigned char *volume, unsigne
 }
 
 #endif
+
 };    // namespace VAPoR
