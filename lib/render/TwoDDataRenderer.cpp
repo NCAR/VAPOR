@@ -134,6 +134,7 @@ TwoDDataRenderer::TwoDDataRenderer(
 	_vertsWidth = 0;
 	_vertsHeight = 0;
 	_nindices = 0;
+	_nverts = 0;
 	_colormap = NULL;
 	_colormapsize = 0;
 
@@ -259,6 +260,7 @@ const GLvoid *TwoDDataRenderer::GetTexture(  DataMgr *dataMgr,
 int TwoDDataRenderer::GetMesh( DataMgr *dataMgr,
                                 GLfloat **verts,
                                 GLfloat **normals,
+								GLsizei &nverts,
                                 GLsizei &width,
                                 GLsizei &height,
                                 GLuint **indices, 
@@ -269,6 +271,7 @@ int TwoDDataRenderer::GetMesh( DataMgr *dataMgr,
 	width = 0;
 	height = 0;
 	nindices = 0;
+	nverts = 0;
 
 
 	// See if already in cache
@@ -278,6 +281,7 @@ int TwoDDataRenderer::GetMesh( DataMgr *dataMgr,
 		height = _vertsHeight;
 		*verts = (GLfloat *) _sb_verts.GetBuf();
 		*normals = (GLfloat *) _sb_normals.GetBuf();
+		nverts = _nverts;
 
 		nindices = _nindices;
 		*indices = (GLuint *) _sb_indices.GetBuf();
@@ -331,6 +335,7 @@ int TwoDDataRenderer::GetMesh( DataMgr *dataMgr,
 
 	*verts = (GLfloat *) _sb_verts.GetBuf();
 	*normals = (GLfloat *) _sb_normals.GetBuf();
+	nverts = _nverts;
 	*indices = (GLuint *) _sb_indices.GetBuf();
 
 	width = _vertsWidth;
@@ -446,9 +451,9 @@ int TwoDDataRenderer::_getMeshStructured(
 
 	// (Re)allocate space for verts
 	//
-	size_t vertsSize = _vertsWidth * _vertsHeight * 3;
-	_sb_verts.Alloc(vertsSize * sizeof(GLfloat));
-	_sb_normals.Alloc(vertsSize * sizeof(GLfloat));
+	_nverts = _vertsWidth * _vertsHeight;
+	_sb_verts.Alloc(_nverts * 3 * sizeof(GLfloat));
+	_sb_normals.Alloc(_nverts * 3 * sizeof(GLfloat));
 	_sb_indices.Alloc(2 * _vertsWidth * sizeof(GLuint));
 	
 	int rc;
@@ -510,9 +515,9 @@ int TwoDDataRenderer::_getMeshUnStructured(
 
 	// (Re)allocate space for verts
 	//
-	size_t vertsSize = _vertsWidth * 3;
-	_sb_verts.Alloc(vertsSize * sizeof(GLfloat));
-	_sb_normals.Alloc(vertsSize * sizeof(GLfloat));
+	_nverts = _vertsWidth;
+	_sb_verts.Alloc(_nverts * 3 * sizeof(GLfloat));
+	_sb_normals.Alloc(_nverts * 3 * sizeof(GLfloat));
 	_sb_indices.Alloc(_nindices * sizeof(GLuint));
 	
 	return (_getMeshUnStructuredHelper(dataMgr, g, defaultZ));
