@@ -66,3 +66,4 @@ void IsoSurfaceParams::SetEnabledIsoValueFlags( const std::vector<bool>& enabled
         in.resize(   expectedSize, false );
     SetValueLongVec( _enabledIsoValuesTag, "Iso Surface Enabled Flags", in );
 }
+
