@@ -92,7 +92,7 @@ int TwoDRenderer::_paintGL(bool)
     // Get the proxy geometry used to render the 2D surface (vertices and
     // normals)
     //
-    int rc = GetMesh(_dataMgr, &_verts, &_normals, _meshWidth, _meshHeight, &_indices, _nindices, _structuredMesh);
+    int rc = GetMesh(_dataMgr, &_verts, &_normals, _nverts, _meshWidth, _meshHeight, &_indices, _nindices, _structuredMesh);
     if (rc < 0) { return (-1); }
 
     EnableClipToBox(_glManager->shaderManager->GetShader("2DData"));    // TODO GL
