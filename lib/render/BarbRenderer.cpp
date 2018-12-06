@@ -532,15 +532,10 @@ void BarbRenderer::_setUpLightingAndColor()
     if (nLights == 0) {
         lgl->DisableLighting();
     } else {
-        LEGACY_TODO(glShadeModel(GL_SMOOTH));
-        LEGACY_TODO(glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, fcolor));
-        LEGACY_TODO(glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, vpParams->getExponent()));
         // All the geometry will get a white specular color:
         float specColor[4];
         specColor[0] = specColor[1] = specColor[2] = 0.8f;
         specColor[3] = 1.f;
-        LEGACY_TODO(glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specColor));
-        LEGACY_TODO(glEnable(GL_COLOR_MATERIAL));
         lgl->EnableLighting();
     }
     lgl->Color3fv(fcolor);

@@ -9,8 +9,6 @@
     #define LGL_QUADS 105999
 #endif
 
-#define LEGACY_TODO(x) printf("TODO %s\n", #x)
-
 namespace VAPoR {
 
 struct GLManager;
