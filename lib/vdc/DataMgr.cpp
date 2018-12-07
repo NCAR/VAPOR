@@ -1728,8 +1728,8 @@ int DataMgr::_get_unblocked_region_from_fs(size_t ts, string varname, int level,
 }
 
 template<typename T>
-int DataMgr::_get_blocked_region_from_fs(size_t ts, string varname, int level, int lod, const vector<size_t> &file_bs, const vector<size_t> &grid_dims, const vector<size_t> &grid_bs,
-                                         const vector<size_t> &grid_min, const vector<size_t> &grid_max, T *blks)
+int DataMgr::_get_blocked_region_from_fs(size_t ts, string varname, int level, int lod, const vector<size_t> &file_bs, const vector<size_t> &file_dims, const vector<size_t> &grid_dims,
+                                         const vector<size_t> &grid_bs, const vector<size_t> &grid_min, const vector<size_t> &grid_max, T *blks)
 {
     // Map requested region voxel coordinates to disk block coordinates
     //
@@ -1740,25 +1740,38 @@ int DataMgr::_get_blocked_region_from_fs(size_t ts, string varname, int level, i
     int fd = _openVariableRead(ts, varname, level, lod);
     if (fd < 0) return (fd);
 
-    T *file_block = NULL;
+    std::vector<size_t> bmin = file_bmin;
+    std::vector<size_t> bmax = file_bmax;
 
-    file_block = new T[VProduct(file_bs)];
+    // For 3D data read 2D slabs one at a time. This just reduces
+    // memory requirements for the temporary buffer we need
+    //
+    size_t nreads = 1;
+    if (bmin.size() == 3 && bmax[2] > bmin[2]) {
+        bmax[2] = bmin[2];
+        nreads = bmax[2] - bmin[2] + 1;
+    }
 
-    std::vector<size_t> bcoord = file_bmin;
-    for (size_t i = 0; i < VProduct(Dims(file_bmin, file_bmax)); i++) {
-        vector<size_t> min, max;
+    vector<size_t> file_min, file_max;
+    map_blk_to_vox(file_bs, bmin, bmax, file_min, file_max);
+    T *file_block = new T[VProduct(Dims(file_min, file_max))];
 
-        map_blk_to_vox(file_bs, bcoord, bcoord, min, max);
+    for (size_t i = 0; i < nreads; i++) {
+        map_blk_to_vox(file_bs, file_dims, bmin, bmax, file_min, file_max);
 
-        int rc = _readRegionBlock(fd, min, max, file_block);
+        int rc = _readRegion(fd, file_min, file_max, file_block);
         if (rc < 0) {
             delete[] file_block;
             return (-1);
         }
 
-        copy_block(file_block, blks, min, max, grid_bs, grid_min, grid_max);
+        copy_block(file_block, blks, file_min, file_max, grid_bs, grid_min, grid_max);
 
-        bcoord = IncrementCoords(file_bmin, file_bmax, bcoord);
+        // Increment along slowest axis (2)
+        // This is a no-op if less than 3 dimensions
+        //
+        bmin = IncrementCoords(file_bmin, file_bmax, bmin, 2);
+        bmax = IncrementCoords(file_bmin, file_bmax, bmax, 2);
     }
 
     (void)_closeVariable(fd);
@@ -1775,8 +1788,8 @@ T *DataMgr::_get_region_from_fs(size_t ts, string varname, int level, int lod, c
     T *blks = (T *)_alloc_region(ts, varname, level, lod, grid_bmin, grid_bmax, grid_bs, sizeof(T), lock, false);
     if (!blks) return (NULL);
 
-    vector<size_t> dummy, file_bs;
-    int            rc = GetDimLensAtLevel(varname, level, dummy, file_bs);
+    vector<size_t> file_dims, file_bs;
+    int            rc = GetDimLensAtLevel(varname, level, file_dims, file_bs);
     assert(rc >= 0);
 
     // Get voxel coordinates of requested region, clamped to grid
@@ -1793,7 +1806,7 @@ T *DataMgr::_get_region_from_fs(size_t ts, string varname, int level, int lod, c
     if (!is_blocked(file_bs) || level < -nlevels) {
         rc = _get_unblocked_region_from_fs(ts, varname, level, lod, grid_dims, grid_bs, grid_min, grid_max, blks);
     } else {
-        rc = _get_blocked_region_from_fs(ts, varname, level, lod, file_bs, grid_dims, grid_bs, grid_min, grid_max, blks);
+        rc = _get_blocked_region_from_fs(ts, varname, level, lod, file_bs, file_dims, grid_dims, grid_bs, grid_min, grid_max, blks);
     }
     if (rc < 0) {
         _free_region(ts, varname, level, lod, grid_bmin, grid_bmax, true);

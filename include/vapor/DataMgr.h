@@ -793,8 +793,8 @@ private:
                                       const vector<size_t> &grid_max, T *blks);
 
     template<typename T>
-    int _get_blocked_region_from_fs(size_t ts, string varname, int level, int lod, const vector<size_t> &file_bs, const vector<size_t> &grid_dims, const vector<size_t> &grid_bs,
-                                    const vector<size_t> &grid_min, const vector<size_t> &grid_max, T *blks);
+    int _get_blocked_region_from_fs(size_t ts, string varname, int level, int lod, const vector<size_t> &file_bs, const vector<size_t> &file_dims, const vector<size_t> &grid_dims,
+                                    const vector<size_t> &grid_bs, const vector<size_t> &grid_min, const vector<size_t> &grid_max, T *blks);
 
     template<typename T>
     T *_get_region_from_fs(size_t ts, string varname, int level, int lod, const std::vector<size_t> &grid_dims, const std::vector<size_t> &grid_bs, const std::vector<size_t> &grid_bmin,
