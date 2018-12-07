@@ -83,12 +83,15 @@ void RayCasterParams::SetCastingMode( long mode )
         SetValueLong( _castingModeTag, "Which ray casting mode", 1 );
 }
 
-double RayCasterParams::GetSampleMultiplier() const
+long RayCasterParams::GetSampleMultiplier() const
 {
-    return GetValueDouble( _sampleMultiplierTag, 1.0 );
+    return GetValueLong( _sampleMultiplierTag, 0 );
 }
 
-void RayCasterParams::SetSampleRateMultiplier( double val )
+void RayCasterParams::SetSampleRateMultiplier( long val )
 {
-    SetValueDouble( _sampleMultiplierTag, "How to adjust the sample rate", val );
+    if( val >= 0 && val < 7 )
+        SetValueLong( _sampleMultiplierTag, "How to adjust the sample rate", val );
+    else
+        SetValueLong( _sampleMultiplierTag, "How to adjust the sample rate", 0 );
 }
