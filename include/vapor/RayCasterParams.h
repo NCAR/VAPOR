@@ -45,14 +45,17 @@ public:
     // Different ray casting methods: 1 == fixed step casting
     //                                2 == prism intersection casting
     //
-    long GetCastingMode() const;
-    void SetCastingMode( long );
+    long   GetCastingMode() const;
+    void   SetCastingMode( long );
+    long   GetSampleRateMultiplier() const; // ComboBox index is held here. Need to translate
+    void   SetSampleRateMultiplier( long ); //   to real multipliers in RayCaster.cpp
 
 protected:
 
     static const std::string _lightingTag;
     static const std::string _lightingCoeffsTag;
     static const std::string _castingModeTag;
+    static const std::string _sampleMultiplierTag;
 };
 
 }
