@@ -5,6 +5,7 @@ using namespace VAPoR;
 const std::string RayCasterParams::_lightingTag = "LightingTag";
 const std::string RayCasterParams::_lightingCoeffsTag = "LightingCoeffTag";
 const std::string RayCasterParams::_castingModeTag = "CastingModeTag";
+const std::string RayCasterParams::_sampleMultiplierTag = "SampleMultiplierTag";
 
 RayCasterParams::RayCasterParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave, std::string classType) : RenderParams(dataManager, stateSave, classType, 3 /* max dim */)
 {
@@ -51,4 +52,14 @@ void RayCasterParams::SetCastingMode(long mode)
         SetValueLong(_castingModeTag, "Which ray casting mode", mode);
     else    // put a default mode
         SetValueLong(_castingModeTag, "Which ray casting mode", 1);
+}
+
+long RayCasterParams::GetSampleRateMultiplier() const { return GetValueLong(_sampleMultiplierTag, 0); }
+
+void RayCasterParams::SetSampleRateMultiplier(long val)
+{
+    if (val >= 0 && val < 7)
+        SetValueLong(_sampleMultiplierTag, "How to adjust the sample rate", val);
+    else
+        SetValueLong(_sampleMultiplierTag, "How to adjust the sample rate", 0);
 }
