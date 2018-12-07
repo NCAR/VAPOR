@@ -225,6 +225,8 @@ void MappingFrame::CopyHistogram(
     string rendererName = getActiveRendererName();
     _histogramMap[rendererName] = _histogram;
 
+    fitViewToDataRange();
+
     _initialized = true;
 }
 
@@ -355,8 +357,6 @@ void MappingFrame::populateIteratingHistogram() {
 		MSG_ERR("Couldn't get data for Histogram");
         return;
     }
-
-    cout << "grid==nullptr " << (grid==nullptr) << endl;
 
     grid->SetInterpolationOrder(1);
 
@@ -520,13 +520,11 @@ bool MappingFrame::Update(DataMgr *dataMgr,
 	// 2) The variable changed
     // 3) Update was issued through a button request
     // 4) Auto-update is turned on
-    cout << "button " << buttonPress << endl;
 	if ( _initialized == false           ||
 		 variableName != _variableName   ||
          buttonPress                     ||
          mapper->GetAutoUpdateHisto()
     ) {
-        cout << "got in " << endl;
 		_initialized = true;
 		_variableName = variableName;
 		RefreshHistogram();
