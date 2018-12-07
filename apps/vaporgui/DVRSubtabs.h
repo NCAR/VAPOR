@@ -33,12 +33,20 @@ public:
     {
         _dvrParams = dynamic_cast<VAPoR::DVRParams *>(params);
         assert(_dvrParams);
-        _castingModeComboBox->setCurrentIndex(_dvrParams->GetCastingMode() - 1);
+        long mode = _dvrParams->GetCastingMode();
+        _castingModeComboBox->setCurrentIndex(mode - 1);
         _variablesWidget->Update(dataMgr, paramsMgr, params);
+        if (mode == 1) {
+            _sampleRateComboBox->setEnabled(true);
+            _sampleRateComboBox->setCurrentIndex(_dvrParams->GetSampleMultiplier());
+        } else {
+            _sampleRateComboBox->setEnabled(false);
+        }
     }
 
 private slots:
     void on__castingModeComboBox_currentIndexChanged(int idx) { _dvrParams->SetCastingMode((long)idx + 1); }
+    void on__sampleRateComboBox_currentIndexChanged(int idx) { _dvrParams->SetSampleRateMultiplier(long(idx)); }
 
 private:
     VAPoR::DVRParams *_dvrParams;
