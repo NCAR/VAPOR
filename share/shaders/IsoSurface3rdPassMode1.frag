@@ -9,8 +9,7 @@ uniform sampler3D  volumeTexture;
 uniform usampler3D missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D  colorMapTexture;
 
-uniform vec2  dataRanges[2];
-uniform vec3  boxExtents[2];
+uniform vec3  someVec3[3];
 uniform ivec3 volumeDims;        // number of vertices of this volumeTexture
 uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
@@ -31,13 +30,12 @@ uniform mat4 inversedMV;
 //
 const float ULP        = 1.2e-7f;
 const float ULP10      = 1.2e-6f;
-bool  fast             = flags[0];          // fast rendering mode
-bool  lighting         = fast ? false : flags[1];   // no lighting in fast mode
-bool  hasMissingValue  = flags[2];          // has missing values or not
-vec2  valueRange       = dataRanges[0];     // min and max values of this variable
-vec2  colorMapRange    = dataRanges[1];     // min and max values on this color map
-vec3  boxMin           = boxExtents[0];     // min coordinates of the bounding box of this volume
-vec3  boxMax           = boxExtents[1];     // max coordinates of the bounding box of this volume
+bool  fast             = flags[0];
+bool  lighting         = flags[1];
+bool  hasMissingValue  = flags[2];
+vec3  boxMin           = someVec3[0];       // min coordinates of the bounding box of this volume
+vec3  boxMax           = someVec3[1];       // max coordinates of the bounding box of this volume
+vec3  colorMapRange    = someVec3[2];       // min and max and diff values on this color map
 float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
@@ -45,21 +43,6 @@ float specularExp      = lightingCoeffs[3];
 vec3  volumeDimsf      = vec3( volumeDims );
 vec3  boxSpan          = boxMax - boxMin;
 mat4  transposedInverseMV = transpose(inversedMV);
-
-//
-// Input:  normalized value w.r.t. valueRange.
-// Output: normalized value w.r.t. colorMapRange.
-//
-float TranslateValue( in float value )
-{
-    if( colorMapRange.x != colorMapRange.y )
-    {
-        float orig = value * (valueRange.y - valueRange.x) + valueRange.x;
-        return (orig - colorMapRange.x) / (colorMapRange.y - colorMapRange.x);
-    }
-    else
-        return value;
-}
 
 //
 // Input:  Location to be evaluated in texture coordinates.
@@ -134,9 +117,6 @@ void main(void)
     gl_FragDepth        = 1.0;
     color               = vec4( 0.0 );
     vec3  lightDirEye   = vec3(0.0, 0.0, 1.0); 
-    float translatedIsoValues[4];
-    for( int i = 0; i < numOfIsoValues; i++ )
-        translatedIsoValues[i] = TranslateValue(isoValues[i]);
 
     // Get texture coordinates of this fragment
     vec2 fragTexture    = gl_FragCoord.xy / vec2( viewportDims );
@@ -170,9 +150,9 @@ void main(void)
         float step2Value  = texture( volumeTexture, step2Texture ).r;
         if( ShouldSkip( step2Texture, step2Model ) )
         {
-            step1Eye     = step2Eye;
-            step1Texture = step2Texture;
-            step1Value   = step2Value;
+            step1Eye      = step2Eye;
+            step1Texture  = step2Texture;
+            step1Value    = step2Value;
             continue;
         }
 
@@ -180,7 +160,8 @@ void main(void)
         {
             if( (isoValues[j] - step1Value) * (isoValues[j] - step2Value) < 0.0 )
             {
-                vec4  backColor = texture( colorMapTexture, translatedIsoValues[j] );
+                float valTrans  = (isoValues[j] - colorMapRange.x) / colorMapRange.z;
+                vec4  backColor = texture( colorMapTexture, valTrans );
                 float weight    = (isoValues[j] - step1Value) / (step2Value - step1Value);
                 vec3  isoEye    = step1Eye + weight * (step2Eye - step1Eye);
 
@@ -189,7 +170,7 @@ void main(void)
                 {
                     vec3 isoTexture      = step1Texture + weight * (step2Texture - step1Texture);
                     vec3 gradientModel   = CalculateGradient( isoTexture );
-                    if( length( gradientModel ) > ULP10 ) // Only apply if big enough gradient
+                    if( length( gradientModel ) > ULP10 ) // Only apply lighting if big enough gradient
                     {
                         vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0 )).xyz;
                              gradientEye = normalize( gradientEye );
@@ -206,12 +187,15 @@ void main(void)
                 color.rgb += (1.0 - color.a) * backColor.a * backColor.rgb;
                 color.a   += (1.0 - color.a) * backColor.a;
 
-                // Apply depth
+                // Apply depth if opaque enough
                 //   Follow transforms explained in http://www.songho.ca/opengl/gl_transform.html
-                vec4  isoClip =  Projection  * vec4( isoEye, 1.0 );
-                vec3  isoNdc  =  isoClip.xyz / isoClip.w;
-                gl_FragDepth  =  gl_DepthRange.diff * 0.5 * isoNdc.z +
-                                (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
+                if( color.a > 0.7 )
+                {
+                    vec4  isoClip =  Projection  * vec4( isoEye, 1.0 );
+                    vec3  isoNdc  =  isoClip.xyz / isoClip.w;
+                    gl_FragDepth  =  gl_DepthRange.diff * 0.5 * isoNdc.z +
+                                    (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
+                }
             }
         }
 
@@ -219,16 +203,6 @@ void main(void)
         step1Texture = step2Texture;
         step1Value   = step2Value;
     }   // Finish ray casting
-
-#if 0
-    if( stepi == nSteps )   // Apply depth of the back face
-    {
-        vec4 stopClip =  Projection   * vec4( stopEye, 1.0 );
-        vec3 stopNdc  =  stopClip.xyz / stopClip.w;
-        gl_FragDepth  =  gl_DepthRange.diff * 0.5 * stopNdc.z + 
-                        (gl_DepthRange.near + gl_DepthRange.far) * 0.5; 
-    }
-#endif
 
 }   // End main()
 

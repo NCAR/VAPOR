@@ -9,8 +9,7 @@ uniform sampler3D  volumeTexture;
 uniform usampler3D missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D  colorMapTexture;
 
-uniform vec2  dataRanges[2];
-uniform vec3  boxExtents[2];
+uniform vec3  someVec3[3];
 uniform ivec3 volumeDims;        // number of vertices of this volumeTexture
 uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
@@ -28,37 +27,19 @@ uniform mat4 inversedMV;
 //
 const float ULP        = 1.2e-7f;
 const float ULP10      = 1.2e-6f;
-bool  fast             = flags[0];          // fast rendering mode
+bool  fast             = flags[0];                  // fast rendering mode
 bool  lighting         = fast ? false : flags[1];   // no lighting in fast mode
-bool  hasMissingValue  = flags[2];          // has missing values or not
+bool  hasMissingValue  = flags[2];                  // has missing values or not
 float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
-// min, max, and range values of this variable. 
-vec3  valueRange       = vec3(dataRanges[0], dataRanges[0].y - dataRanges[0].x); 
-// min, max, and range values on this color map
-vec3  colorMapRange    = vec3(dataRanges[1], dataRanges[1].y - dataRanges[1].x); 
-vec3  boxMin           = boxExtents[0];     // min coordinates of the bounding box of this volume
-vec3  boxMax           = boxExtents[1];     // max coordinates of the bounding box of this volume
+vec3  boxMin           = someVec3[0];       // min coordinates of the bounding box of this volume
+vec3  boxMax           = someVec3[1];       // max coordinates of the bounding box of this volume
+vec3  colorMapRange    = someVec3[2];
 vec3  volumeDimsf      = vec3( volumeDims );
 vec3  boxSpan          = boxMax - boxMin;
 mat4  transposedInverseMV = transpose(inversedMV);
-
-//
-// Input:  normalized value w.r.t. valueRange.
-// Output: normalized value w.r.t. colorMapRange.
-//
-float TranslateValue( const in float value )
-{
-    if( colorMapRange.x != colorMapRange.y )
-    {
-        float orig = value * valueRange.z + valueRange.x;
-        return (orig - colorMapRange.x) / colorMapRange.z;
-    }
-    else
-        return value;
-}
 
 //
 // Input:  Location to be evaluated in texture coordinates and model coordinates.
@@ -152,7 +133,8 @@ void main(void)
     if( !ShouldSkip( startTexture, startModel ) )
     {
         float step1Value   = texture( volumeTexture, startTexture ).r;
-              color        = texture( colorMapTexture, TranslateValue(step1Value) );
+        float valTranslate = (step1Value - colorMapRange.x) / colorMapRange.z;
+              color        = texture( colorMapTexture, valTranslate );
               color.rgb   *= color.a;
     }
 
@@ -172,7 +154,8 @@ void main(void)
             continue;
 
         float step2Value   = texture( volumeTexture, step2Texture ).r;
-        vec4  backColor    = texture( colorMapTexture, TranslateValue(step2Value) );
+        float valTranslate = (step2Value - colorMapRange.x) / colorMapRange.z;
+        vec4  backColor    = texture( colorMapTexture, valTranslate );
         
         // Apply lighting
         if( lighting && backColor.a > 0.001 )
