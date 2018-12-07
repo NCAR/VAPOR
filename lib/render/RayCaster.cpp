@@ -874,7 +874,6 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     case 5: multiplier = 0.125f; break;
     default: multiplier = 1.0f; break;
     }
-    std::cout << multiplier << std::endl;
     glm::vec4 boxmin(cboxMin[0], cboxMin[1], cboxMin[2], 1.0f);
     glm::vec4 boxmax(cboxMax[0], cboxMax[1], cboxMax[2], 1.0f);
     glm::vec4 boxminEye = modelview * boxmin;
