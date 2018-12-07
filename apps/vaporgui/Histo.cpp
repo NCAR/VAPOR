@@ -38,12 +38,19 @@ Histo::Histo(int numberBins, float mnData, float mxData, string var, int ts)
 Histo::Histo(const Histo *histo)
 {
     _numBins = histo->_numBins;
+
     _minData = histo->_minData;
     _maxData = histo->_maxData;
     if (_maxData < _minData) _maxData = _minData;
     _range = _maxData - _minData;
+
     _binArray = new long[_numBins];
-    reset(histo->_numBins);
+    for (int i = 0; i < _numBins; i++) _binArray[i] = histo->_binArray[i];
+
+    _numBelow = histo->_numBelow;
+    _numAbove = histo->_numAbove;
+
+    _maxBinSize = histo->_maxBinSize;
 
     _varnameOfUpdate = histo->_varnameOfUpdate;
     _timestepOfUpdate = histo->_timestepOfUpdate;
