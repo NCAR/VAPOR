@@ -211,11 +211,6 @@
             </item>
             <item>
              <property name="text">
-              <string>8</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
               <string>1 / 2</string>
              </property>
             </item>

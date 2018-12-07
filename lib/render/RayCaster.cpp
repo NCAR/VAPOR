@@ -1020,19 +1020,19 @@ void RayCaster::_load3rdPassUniforms( long               castingMode,
         case 0  :   multiplier = 1.0f;   break;     // These values need to be in sync with
         case 1  :   multiplier = 2.0f;   break;     //   the multiplier values in the GUI.
         case 2  :   multiplier = 4.0f;   break;
-        case 3  :   multiplier = 8.0f;   break;
-        case 4  :   multiplier = 0.5f;   break;
-        case 5  :   multiplier = 0.25f;  break;
-        case 6  :   multiplier = 0.125f; break;
+        case 3  :   multiplier = 0.5f;   break;
+        case 4  :   multiplier = 0.25f;  break;
+        case 5  :   multiplier = 0.125f; break;
         default :   multiplier = 1.0f;   break;
     }
+std::cout << multiplier << std::endl;
     glm::vec4 boxmin( cboxMin[0], cboxMin[1], cboxMin[2], 1.0f );
     glm::vec4 boxmax( cboxMax[0], cboxMax[1], cboxMax[2], 1.0f );
     glm::vec4 boxminEye = modelview * boxmin;
     glm::vec4 boxmaxEye = modelview * boxmax;
-    float span[3] = {boxmaxEye[0] - boxminEye[0], 
-                     boxmaxEye[1] - boxminEye[1], 
-                     boxmaxEye[2] - boxminEye[2]};
+    float span[3]   = {boxmaxEye[0] - boxminEye[0], 
+                       boxmaxEye[1] - boxminEye[1], 
+                       boxmaxEye[2] - boxminEye[2]};
     float stepSize1D;
     if( _userCoordinates.dims[3] < 50 )     // Make sure at least 100 steps
         stepSize1D  = std::sqrt( span[0]*span[0] + span[1]*span[1] + span[2]*span[2] ) / 100.0f;
