@@ -26,7 +26,7 @@
 class Histo {
 public:
     Histo(int numberBins, float mnData, float mxData, string var, int ts);
-
+    Histo(const Histo *histo);
 #ifdef VAPOR3_0_0_ALPHA
     // Special constructor for unsigned char data:
     //

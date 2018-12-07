@@ -88,6 +88,9 @@ private slots:
     void setSecondaryMinRange(double min);
     void setSecondaryMaxRange(double max);
 
+    void updateMainMappingFrame();
+    void updateSecondaryMappingFrame();
+
 private:
     void refreshMainHistoIfNecessary();
     void refreshSecondaryHistoIfNecessary();
@@ -96,20 +99,18 @@ private:
     void configureSecondaryTransferFunction();
     void connectWidgets();
 
+    void updateQTWidgets();
     void updateColorInterpolation();
     void updateConstColor();
-
     void updateMainAutoUpdateHistoCheckboxes();
-    void updateMainMappingFrame(bool refresh);
+    //	void updateMainMappingFrame(bool refresh);
     void updateMainSliders();
-
     void updateSecondaryAutoUpdateHistoCheckbox();
-    void updateSecondaryMappingFrame(bool refresh);
+    //	void updateSecondaryMappingFrame(bool refresh);
     void updateSecondarySliders();
 
     bool mainVariableChanged();
     bool secondaryVariableChanged();
-    void refreshIfSecondaryVarChanged();
 
     void enableTFWidget(bool state);
 

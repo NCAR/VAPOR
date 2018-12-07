@@ -90,6 +90,10 @@ public:
     MappingFrame(QWidget *parent);
     virtual ~MappingFrame();
 
+    void CopyHistogram(VAPoR::ParamsMgr *paramsMgr, string variableName, Histo *histo);
+
+    Histo *GetHistogram();
+
     void RefreshHistogram();
 
     //! Enable or disable the color mapping in the Transfer Function.
@@ -120,7 +124,7 @@ public:
     //! Update the display of the Transfer Function or IsoControl based on the current RenderParams that
     //! contains the MapperFunction being used.  This should be invoked in RenderEventRouter::updateTab()
     // void updateTab();
-    void Update(VAPoR::DataMgr *dataMgr = NULL, VAPoR::ParamsMgr *paramsMgr = NULL, VAPoR::RenderParams *rParams = NULL);
+    bool Update(VAPoR::DataMgr *dataMgr = NULL, VAPoR::ParamsMgr *paramsMgr = NULL, VAPoR::RenderParams *rParams = NULL, bool buttonPress = false);
 
     //! Identify the current mapperFunction associated with the MappingFrame.
     //! Needed by various GLWidgets embedded in the MappingFrame
@@ -174,7 +178,6 @@ signals:
     void updateParams();
 
 public slots:
-    void updateHisto();
     void fitViewToDataRange();
     void updateMap();
 
@@ -192,7 +195,6 @@ private:
     float   xVariable(const QPoint &pos);
     float   yVariable(const QPoint &pos);
     bool    canBind();
-    bool    skipRefreshHistogram() const;
     void    updateHistogram();
     string  getActiveRendererName() const;
     void    getGridAndExtents(VAPoR::Grid **grid, std::vector<double> minExts, std::vector<double> maxExts) const;

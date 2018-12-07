@@ -222,7 +222,6 @@ void TFWidget::getVariableRange(float range[2], float values[2], bool secondaryV
     else {
         bool mainTF = true;
         varName = getTFVariableName(mainTF);
-        // varName = _rParams->GetVariableName();
     }
     if (varName.empty() || varName == "Constant") return;
 
@@ -348,37 +347,46 @@ void TFWidget::updateSecondarySliders()
     _secondaryMaxSliderEdit->SetExtents(range[0], range[1]);
 }
 
-void TFWidget::updateMainMappingFrame(bool refresh = false)
+void TFWidget::updateMainMappingFrame()
 {
-    MapperFunction *mf = getMainMapperFunction();
-    _mappingFrame->updateMapperFunction(mf);
-    _mappingFrame->Update(_dataMgr, _paramsMgr, _rParams);
+    bool buttonPress = sender() == _updateMainHistoButton ? true : false;
 
-    if (getAutoUpdateMainHisto()) { _mappingFrame->RefreshHistogram(); }
+    MapperFunction *mainMF = getMainMapperFunction();
+    MapperFunction *secondaryMF = getSecondaryMapperFunction();
+    // if (mainMF == secondaryMF) {
+    //    Histo* mainHisto = _mappingFrame->GetHistogram();
+    //    _secondaryMappingFrame->CopyHistogram(_paramsMgr, mainHisto);
+    //}
 
-    _mappingFrame->fitViewToDataRange();
+    bool histogramRecalculated = _mappingFrame->Update(_dataMgr, _paramsMgr, _rParams, buttonPress);
+
+    if (histogramRecalculated)
+        _updateMainHistoButton->setEnabled(false);
+    else
+        _updateMainHistoButton->setEnabled(true);
 }
 
-void TFWidget::updateSecondaryMappingFrame(bool refresh = false)
+void TFWidget::updateSecondaryMappingFrame()
 {
-    MapperFunction *mf = getSecondaryMapperFunction();
-    _secondaryMappingFrame->updateMapperFunction(mf);
-    _secondaryMappingFrame->Update(_dataMgr, _paramsMgr, _rParams);
+    bool buttonPress = sender() == _updateMainHistoButton ? true : false;
 
-    if (getAutoUpdateSecondaryHisto()) _secondaryMappingFrame->RefreshHistogram();
-
-    _secondaryMappingFrame->fitViewToDataRange();
-}
-
-void TFWidget::refreshIfSecondaryVarChanged()
-{
-    // If the variable in the MappingFrame chages, we force a refresh
-    string newName = _rParams->GetColorMapVariableName();
-    if (getAutoUpdateSecondaryHisto() || _secondaryVarName != newName) {
-        _secondaryVarName = newName;
-        bool refresh = true;
-        updateSecondaryMappingFrame(refresh);
+    MapperFunction *mainMF = getMainMapperFunction();
+    MapperFunction *secondaryMF = getSecondaryMapperFunction();
+    if (mainMF == secondaryMF) {
+        Histo *mainHisto = _mappingFrame->GetHistogram();
+        bool   mainTF = true;
+        string varName = getTFVariableName(mainTF);
+        _secondaryMappingFrame->CopyHistogram(_paramsMgr, varName, mainHisto);
     }
+
+    bool histogramRecalculated = _secondaryMappingFrame->Update(_dataMgr, _paramsMgr, _rParams, buttonPress);
+
+    if (mainMF == secondaryMF) _mappingFrame->fitViewToDataRange();
+
+    if (histogramRecalculated)
+        _updateSecondaryHistoButton->setEnabled(false);
+    else
+        _updateSecondaryHistoButton->setEnabled(true);
 }
 
 void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rParams, bool internalUpdate)
@@ -393,7 +401,6 @@ void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rPar
 
     bool   mainTF = true;
     string varname = getTFVariableName(mainTF);
-    // if (_rParams->GetVariableName() == "") {
     if (varname == "") {
         setEnabled(false);
         return;
@@ -404,41 +411,22 @@ void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rPar
     updateMainMappingFrame();    // set mapper func to that of current variable, refresh _rParams etc
     updateSecondaryMappingFrame();
 
-    if (mainVariableChanged()) {
-        refreshMainHisto();
-        _mappingFrame->fitViewToDataRange();
-    }
+    updateQTWidgets();
+}
 
-    if (secondaryVariableChanged()) {
-        refreshSecondaryHisto();
-        _secondaryMappingFrame->fitViewToDataRange();
-    }
-
+void TFWidget::updateQTWidgets()
+{
     enableUpdateButtonsIfNeeded();
-
     updateColorInterpolation();
     updateConstColor();
     updateMainAutoUpdateHistoCheckboxes();
     updateSecondaryAutoUpdateHistoCheckbox();
     updateMainSliders();
     updateSecondarySliders();
-
-    if (!internalUpdate) {
-        if (_mainHistoNeedsRefresh) {
-            _mainHistoNeedsRefresh = false;
-            refreshMainHisto();
-        }
-
-        if (_secondaryHistoNeedsRefresh) {
-            _secondaryHistoNeedsRefresh = false;
-            refreshSecondaryHisto();
-        }
-    }
 }
 
 bool TFWidget::mainVariableChanged()
 {
-    // string newName = _rParams->GetVariableName();
     bool   mainTF = true;
     string newName = getTFVariableName(mainTF);
     if (_mainVarName != newName) {
@@ -450,7 +438,6 @@ bool TFWidget::mainVariableChanged()
 
 bool TFWidget::secondaryVariableChanged()
 {
-    // string newName = _rParams->GetVariableName();
     bool   mainTF = false;
     string newName = getTFVariableName(mainTF);
     if (_secondaryVarName != newName) {
@@ -462,12 +449,14 @@ bool TFWidget::secondaryVariableChanged()
 
 void TFWidget::refreshMainHisto()
 {
+    return;
     _mappingFrame->RefreshHistogram();
 
     refreshSecondaryHistoIfNecessary();
 
     Update(_dataMgr, _paramsMgr, _rParams, true);
     _updateMainHistoButton->setEnabled(false);
+    _mainHistoNeedsRefresh = false;
 }
 
 void TFWidget::refreshSecondaryHistoIfNecessary()
@@ -484,11 +473,13 @@ void TFWidget::refreshSecondaryHistoIfNecessary()
 
 void TFWidget::refreshSecondaryHisto()
 {
+    return;
     _secondaryMappingFrame->RefreshHistogram();
     refreshMainHistoIfNecessary();
 
     Update(_dataMgr, _paramsMgr, _rParams, true);
     _updateSecondaryHistoButton->setEnabled(false);
+    _secondaryHistoNeedsRefresh = false;
 }
 
 void TFWidget::refreshMainHistoIfNecessary()
@@ -655,7 +646,7 @@ void TFWidget::enableTFWidget(bool state)
 void TFWidget::connectWidgets()
 {
     connect(_rangeCombo, SIGNAL(valueChanged(double, double)), this, SLOT(setRange(double, double)));
-    connect(_updateMainHistoButton, SIGNAL(pressed()), this, SLOT(refreshMainHisto()));
+    connect(_updateMainHistoButton, SIGNAL(pressed()), this, SLOT(updateMainMappingFrame()));
     connect(_autoUpdateMainHistoCheckbox, SIGNAL(stateChanged(int)), this, SLOT(autoUpdateMainHistoChecked(int)));
     connect(_colorInterpCombo, SIGNAL(activated(int)), this, SLOT(setColorInterpolation(int)));
     connect(_whitespaceCheckbox, SIGNAL(stateChanged(int)), this, SLOT(setUseWhitespace(int)));
@@ -663,8 +654,6 @@ void TFWidget::connectWidgets()
     connect(_saveButton, SIGNAL(pressed()), this, SLOT(fileSaveTF()));
     connect(_mappingFrame, SIGNAL(updateParams()), this, SLOT(setRange()));
     connect(_mappingFrame, SIGNAL(endChange()), this, SLOT(setRange()));
-    //	connect(_mappingFrame, SIGNAL(endChange()),
-    //		this, SLOT(emitTFChange()));
     connect(_opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacitySliderChanged(int)));
     connect(_colorSelectButton, SIGNAL(pressed()), this, SLOT(setSingleColor()));
     connect(_useConstColorCheckbox, SIGNAL(stateChanged(int)), this, SLOT(setUsingSingleColor(int)));
@@ -673,7 +662,7 @@ void TFWidget::connectWidgets()
     //
     connect(_secondaryMappingFrame, SIGNAL(endChange()), this, SLOT(setSecondaryRange()));
     connect(_secondaryOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacitySliderChanged(int)));
-    connect(_updateSecondaryHistoButton, SIGNAL(pressed()), this, SLOT(refreshSecondaryHisto()));
+    connect(_updateSecondaryHistoButton, SIGNAL(pressed()), this, SLOT(updateSecondaryMappingFrame()));
     connect(_autoUpdateSecondaryHistoCheckbox, SIGNAL(stateChanged(int)), this, SLOT(autoUpdateSecondaryHistoChecked(int)));
     connect(_secondaryVarInterpCombo, SIGNAL(activated(int)), this, SLOT(setColorInterpolation(int)));
     connect(_secondaryWhitespaceCheckbox, SIGNAL(stateChanged(int)), this, SLOT(setUseWhitespace(int)));
