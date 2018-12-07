@@ -66,7 +66,6 @@ protected:
         float *xyCoords;                 // X-Y coordinate values
         float *zCoords;                  // Z coordinate values
 
-        float   valueRange[2];           // min and max values of the volume
         size_t  dims[4];                 // num. of samples along each axis. 
                                          // !! Note: the last element is the diagnal length !!
         float   boxMin[3], boxMax[3];    // bounding box of the current volume
@@ -123,7 +122,7 @@ protected:
 
     UserCoordinates     _userCoordinates;
     std::vector<float>  _colorMap;
-    float               _colorMapRange[2];
+    float               _colorMapRange[3];  // min, max, and diff values.
 
     // OpenGL stuff
     // textures
