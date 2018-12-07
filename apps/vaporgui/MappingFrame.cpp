@@ -198,22 +198,6 @@ MappingFrame::~MappingFrame()
   _axisTextPos.clear();
 }
 
-bool MappingFrame::skipRefreshHistogram() const {
-	bool skip = true;
-	if (_histogram==NULL) return false;
-
-	size_t ts = _rParams->GetCurrentTimestep();	
-	if (ts != _histogram->getTimestepOfUpdate()) {
-		skip = false;
-	}
-
-	//string varName = _rParams->GetColorMapVariableName();
-	if (_variableName != _histogram->getVarnameOfUpdate()) {
-		skip = false;
-	}
-	return skip;
-}
-
 string MappingFrame::getActiveRendererName() const {
     GUIStateParams *p = 
 	(GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
@@ -225,8 +209,36 @@ string MappingFrame::getActiveRendererName() const {
 	return activeRenderInst;
 }
 
+void MappingFrame::CopyHistogram(
+    ParamsMgr* paramsMgr,
+    string variableName,
+    Histo* histo
+) {
+    _paramsMgr = paramsMgr;
+    _variableName = variableName;
+
+    if (_histogram)
+        delete _histogram;
+
+    _histogram = new Histo(histo);
+
+    string rendererName = getActiveRendererName();
+    _histogramMap[rendererName] = _histogram;
+
+    _initialized = true;
+}
+
+Histo* MappingFrame::GetHistogram() {
+    return _histogram;
+}
+
 void MappingFrame::RefreshHistogram() 
 {
+	MapperFunction *mapper;
+	mapper = _rParams->GetMapperFunc(_variableName);
+	assert(mapper);
+	updateMapperFunction(mapper);
+
     string rendererName = getActiveRendererName();
     _histogram = _histogramMap[rendererName];
 
@@ -267,9 +279,8 @@ void MappingFrame::getGridAndExtents(
 		_dataMgr, ts, _variableName, minExts, maxExts, true,
 		&refLevel, &lod, grid
 	);
-	if (rc < 0) {
+	if (rc < 0)
 		MSG_ERR("Couldn't get data for Histogram");
-	}
 }
 
 void MappingFrame::populateHistogram() {
@@ -282,7 +293,12 @@ void MappingFrame::populateHistogram() {
 void MappingFrame::populateSamplingHistogram() {
     Grid* grid = nullptr;
     std::vector<double> minExts, maxExts;
+    
     getGridAndExtents(&grid, minExts, maxExts);
+    if (grid==nullptr) {
+		MSG_ERR("Couldn't get data for Histogram");
+        return;
+    }
     grid->SetInterpolationOrder(1);
 
     std::vector<double> deltas = calculateDeltas(minExts, maxExts);
@@ -334,6 +350,14 @@ void MappingFrame::populateIteratingHistogram() {
     Grid* grid = nullptr;
     std::vector<double> minExts, maxExts;
     getGridAndExtents(&grid, minExts, maxExts);
+    
+    if (grid==nullptr) {
+		MSG_ERR("Couldn't get data for Histogram");
+        return;
+    }
+
+    cout << "grid==nullptr " << (grid==nullptr) << endl;
+
     grid->SetInterpolationOrder(1);
 
 	float v;
@@ -459,11 +483,13 @@ void MappingFrame::setColorMapping(bool flag)
 //----------------------------------------------------------------------------
 // Synchronize the frame with the underlying params
 //----------------------------------------------------------------------------
-//void MappingFrame::updateTab()
-void MappingFrame::Update(DataMgr *dataMgr,
+bool MappingFrame::Update(DataMgr *dataMgr,
 						ParamsMgr *paramsMgr,
-						RenderParams *rParams)
-{
+						RenderParams *rParams,
+                        bool buttonPress
+) {
+    bool histogramRecalculated = false;
+
 	assert(dataMgr);
 	assert(paramsMgr);
 	assert(rParams);
@@ -472,15 +498,14 @@ void MappingFrame::Update(DataMgr *dataMgr,
 	_rParams = rParams;
 	_paramsMgr = paramsMgr;
 
-	//string varname;
-
 	string variableName;
     if (_colorMappingEnabled)
 	    variableName = _rParams->GetColorMapVariableName();
     else
         variableName = _rParams->GetVariableName();
 
-	if (variableName.empty()) return;
+	if (variableName.empty()) 
+        return histogramRecalculated;
 
 	MapperFunction *mapper;
 	mapper = _rParams->GetMapperFunc(_variableName);
@@ -493,11 +518,19 @@ void MappingFrame::Update(DataMgr *dataMgr,
 	// We always refresh the histogram if either
 	// 1) We are uninitialized
 	// 2) The variable changed
-	if ((_initialized == false) ||
-		(variableName != _variableName)) {
+    // 3) Update was issued through a button request
+    // 4) Auto-update is turned on
+    cout << "button " << buttonPress << endl;
+	if ( _initialized == false           ||
+		 variableName != _variableName   ||
+         buttonPress                     ||
+         mapper->GetAutoUpdateHisto()
+    ) {
+        cout << "got in " << endl;
 		_initialized = true;
 		_variableName = variableName;
 		RefreshHistogram();
+        histogramRecalculated = true;
 	}
 
 	_minValue = getMinEditBound();
@@ -544,7 +577,11 @@ void MappingFrame::Update(DataMgr *dataMgr,
 		xDataToWorld(getMaxDomainBound())
 	);
 
+    fitViewToDataRange();
+
 	_updateTexture = true;
+
+    return histogramRecalculated;
 }
 
 //----------------------------------------------------------------------------
@@ -2679,11 +2716,6 @@ void MappingFrame::setIsolineSliders(const vector<double>& sliderVals){
 	for (int i = 0; i< _isolineSliders.size(); i++){
 		_isolineSliders[i]->setIsoValue(xDataToWorld(sliderVals[i]));
 	}
-}
-
-void MappingFrame::updateHisto() {
-	fitViewToDataRange();
-	updateMap();
 }
 
 void MappingFrame::setNavigateMode(bool mode){

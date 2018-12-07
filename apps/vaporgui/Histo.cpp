@@ -42,6 +42,22 @@ Histo::Histo(
 	_timestepOfUpdate = ts;
 }
 
+Histo::Histo(
+    const Histo* histo
+){
+    _numBins = histo->_numBins;
+    _minData = histo->_minData;
+    _maxData = histo->_maxData;
+    if( _maxData < _minData )
+        _maxData = _minData;
+    _range = _maxData - _minData;
+    _binArray = new long[_numBins];
+    reset(histo->_numBins);
+
+    _varnameOfUpdate = histo->_varnameOfUpdate;
+    _timestepOfUpdate = histo->_timestepOfUpdate;
+}
+
 #ifdef	VAPOR3_0_0_ALPHA
 Histo::Histo(const StructuredGrid *rg, const double exts[6], const float range[2]) {
 	_binArray = new int[256];
