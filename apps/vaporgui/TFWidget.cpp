@@ -195,7 +195,6 @@ void TFWidget::fileSaveTF()
     // Force the name to end with .tf3
     if (!s.endsWith(".tf3")) { s += ".tf3"; }
 
-    // string varname = _rParams->GetVariableName();
     bool mainTF = true;
     if (_flags & COLORMAP_VAR_IS_IN_TF2) mainTF = false;
     string varname = getTFVariableName(mainTF);
@@ -216,7 +215,6 @@ void TFWidget::getVariableRange(float range[2], float values[2], bool secondaryV
     range[0] = range[1] = 0.0;
     values[0] = values[1] = 0.0;
     string varName;
-    // if (colorVar == true)
     if (secondaryVariable)
         varName = _rParams->GetColorMapVariableName();
     else {
@@ -249,7 +247,6 @@ void TFWidget::getVariableRange(float range[2], float values[2], bool secondaryV
 
 float TFWidget::getOpacity()
 {
-    // string varName = _rParams->GetVariableName();
     bool mainTF = true;
     if (_flags & COLORMAP_VAR_IS_IN_TF2) mainTF = false;
     string varName = getTFVariableName(mainTF);
@@ -353,10 +350,6 @@ void TFWidget::updateMainMappingFrame()
 
     MapperFunction *mainMF = getMainMapperFunction();
     MapperFunction *secondaryMF = getSecondaryMapperFunction();
-    // if (mainMF == secondaryMF) {
-    //    Histo* mainHisto = _mappingFrame->GetHistogram();
-    //    _secondaryMappingFrame->CopyHistogram(_paramsMgr, mainHisto);
-    //}
 
     bool histogramRecalculated = _mappingFrame->Update(_dataMgr, _paramsMgr, _rParams, buttonPress);
 
@@ -368,11 +361,10 @@ void TFWidget::updateMainMappingFrame()
 
 void TFWidget::updateSecondaryMappingFrame()
 {
-    bool buttonPress = sender() == _updateMainHistoButton ? true : false;
+    bool buttonPress = sender() == _updateSecondaryHistoButton ? true : false;
 
-    MapperFunction *mainMF = getMainMapperFunction();
-    MapperFunction *secondaryMF = getSecondaryMapperFunction();
-    if (mainMF == secondaryMF) {
+    Histo *secondaryHisto = _secondaryMappingFrame->GetHistogram();
+    if (secondaryHisto == nullptr) {
         Histo *mainHisto = _mappingFrame->GetHistogram();
         bool   mainTF = true;
         string varName = getTFVariableName(mainTF);
@@ -381,6 +373,8 @@ void TFWidget::updateSecondaryMappingFrame()
 
     bool histogramRecalculated = _secondaryMappingFrame->Update(_dataMgr, _paramsMgr, _rParams, buttonPress);
 
+    MapperFunction *mainMF = getMainMapperFunction();
+    MapperFunction *secondaryMF = getSecondaryMapperFunction();
     if (mainMF == secondaryMF) _mappingFrame->fitViewToDataRange();
 
     if (histogramRecalculated)
