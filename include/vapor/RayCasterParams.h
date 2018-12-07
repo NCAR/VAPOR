@@ -42,11 +42,14 @@ class PARAMS_API RayCasterParams : public RenderParams {
     //
     long GetCastingMode() const;
     void SetCastingMode(long);
+    double GetSampleMultiplier() const;
+    void SetSampleRateMultiplier(double);
 
   protected:
     static const std::string _lightingTag;
     static const std::string _lightingCoeffsTag;
     static const std::string _castingModeTag;
+    static const std::string _sampleMultiplierTag;
 };
 
 } // namespace VAPoR
