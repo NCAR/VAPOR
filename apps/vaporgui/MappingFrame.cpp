@@ -49,6 +49,16 @@
     #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
 
+#define X 0
+#define Y 0
+#define Z 0
+
+#define XY 0
+#define XZ 1
+#define YZ 2
+
+#define SAMPLE_RATE 100
+
 using namespace VAPoR;
 using namespace std;
 
@@ -88,13 +98,14 @@ void oglPopState()
 // Constructor
 //----------------------------------------------------------------------------
 MappingFrame::MappingFrame(QWidget *parent)
-: QGLWidget(parent), _NUM_BINS(256), _mapper(NULL), _histogram(NULL), _opacityMappingEnabled(false), _colorMappingEnabled(false), _isoSliderEnabled(false), _isolineSlidersEnabled(false),
-  _lastSelectedIndex(-1), navigateButton(NULL), _editButton(NULL), _variableName(""), _domainSlider(new DomainWidget(this)), _contourRangeSlider(new ContourRangeSlider(this)),
-  _isoSlider(new IsoSlider(this)), _colorbarWidget(new GLColorbarWidget(this, NULL)), _lastSelected(NULL), _texid(0), _texture(NULL), _updateTexture(true), _histogramScale(LINEAR), _contextMenu(NULL),
-  _addOpacityWidgetSubMenu(NULL), _histogramScalingSubMenu(NULL), _compTypeSubMenu(NULL), _widgetEnabledSubMenu(NULL), _deleteOpacityWidgetAction(NULL), _addColorControlPointAction(NULL),
-  _addOpacityControlPointAction(NULL), _deleteControlPointAction(NULL), _lastx(0), _lasty(0), _editMode(true), _clickedPos(0, 0), _minValueStart(0.0), _maxValueStart(1.0), _isoVal(0.0),
-  _button(Qt::LeftButton), _minX(-0.035), _maxX(1.035), _minY(-0.35), _maxY(1.3), _minValue(0.0), _maxValue(1.0), _colorbarHeight(16), _domainBarHeight(16), _domainLabelHeight(10),
-  _domainHeight(_domainBarHeight + _domainLabelHeight + 3), _axisRegionHeight(20), _opacityGap(4), _bottomGap(10), _dataMgr(NULL), _rParams(NULL), _mousePressFlag(false), _initialized(false)
+: QGLWidget(parent), _NUM_BINS(256), _mapper(NULL), _histogram(NULL), _isSampling(false), _opacityMappingEnabled(false), _colorMappingEnabled(false), _isoSliderEnabled(false),
+  _isolineSlidersEnabled(false), _lastSelectedIndex(-1), navigateButton(NULL), _editButton(NULL), _variableName(""), _domainSlider(new DomainWidget(this)),
+  _contourRangeSlider(new ContourRangeSlider(this)), _isoSlider(new IsoSlider(this)), _colorbarWidget(new GLColorbarWidget(this, NULL)), _lastSelected(NULL), _texid(0), _texture(NULL),
+  _updateTexture(true), _histogramScale(LINEAR), _contextMenu(NULL), _addOpacityWidgetSubMenu(NULL), _histogramScalingSubMenu(NULL), _compTypeSubMenu(NULL), _widgetEnabledSubMenu(NULL),
+  _deleteOpacityWidgetAction(NULL), _addColorControlPointAction(NULL), _addOpacityControlPointAction(NULL), _deleteControlPointAction(NULL), _lastx(0), _lasty(0), _editMode(true), _clickedPos(0, 0),
+  _minValueStart(0.0), _maxValueStart(1.0), _isoVal(0.0), _button(Qt::LeftButton), _minX(-0.035), _maxX(1.035), _minY(-0.35), _maxY(1.3), _minValue(0.0), _maxValue(1.0), _colorbarHeight(16),
+  _domainBarHeight(16), _domainLabelHeight(10), _domainHeight(_domainBarHeight + _domainLabelHeight + 3), _axisRegionHeight(20), _opacityGap(4), _bottomGap(10), _dataMgr(NULL), _rParams(NULL),
+  _mousePressFlag(false), _initialized(false)
 {
     initWidgets();
     initConnections();
@@ -179,23 +190,82 @@ void MappingFrame::RefreshHistogram()
     _histogramMap[rendererName] = _histogram;
 }
 
-void MappingFrame::populateHistogram()
+void MappingFrame::SetIsSampling(bool isSampling) { _isSampling = isSampling; }
+
+void MappingFrame::getGridAndExtents(VAPoR::Grid **grid, std::vector<double> minExts, std::vector<double> maxExts) const
 {
-    // string var = _rParams->GetColorMapVariableName();
     size_t ts = _rParams->GetCurrentTimestep();
     int    refLevel = _rParams->GetRefinementLevel();
     int    lod = _rParams->GetCompressionLevel();
 
-    vector<double> minExts, maxExts;
     _rParams->GetBox()->GetExtents(minExts, maxExts);
 
-    Grid *grid;
+    int rc = DataMgrUtils::GetGrids(_dataMgr, ts, _variableName, minExts, maxExts, true, &refLevel, &lod, grid);
+    if (rc < 0) { MSG_ERR("Couldn't get data for Histogram"); }
+}
 
-    int rc = DataMgrUtils::GetGrids(_dataMgr, ts, _variableName, minExts, maxExts, true, &refLevel, &lod, &grid);
-    if (rc < 0) {
-        MSG_ERR("Couldn't get data for Histogram");
-        return;
+void MappingFrame::populateHistogram()
+{
+    if (_isSampling)
+        populateSamplingHistogram();
+    else
+        populateIteratingHistogram();
+}
+
+void MappingFrame::populateSamplingHistogram()
+{
+    Grid *              grid = nullptr;
+    std::vector<double> minExts, maxExts;
+    getGridAndExtents(&grid, minExts, maxExts);
+    grid->SetInterpolationOrder(1);
+
+    std::vector<double> deltas = calculateDeltas(minExts, maxExts);
+    float               varValue, missingValue;
+    std::vector<double> coords(3, 0.0);
+    coords[X] = minExts[X];
+    coords[Y] = minExts[Y];
+    coords[Z] = minExts[Z];
+
+    int iSamples = deltas[X] * SAMPLE_RATE;
+    int jSamples = deltas[Y] * SAMPLE_RATE;
+    int kSamples = deltas[Z] * SAMPLE_RATE;
+
+    for (int k = 0; k < kSamples; k++) {
+        for (int j = 0; j < jSamples; j++) {
+            coords[X] = minExts[X];
+
+            for (int i = 0; i < iSamples; i++) {
+                varValue = grid->GetValue(coords);
+                missingValue = grid->GetMissingValue();
+                if (varValue != missingValue) _histogram->addToBin(varValue);
+
+                coords[X] += deltas[X];
+            }
+            coords[Y] += deltas[Y];
+        }
+        coords[Z] += deltas[Z];
     }
+
+    delete grid;
+    grid = nullptr;
+}
+
+std::vector<double> MappingFrame::calculateDeltas(std::vector<double> minExts, std::vector<double> maxExts) const
+{
+    double dx = (minExts[X] - maxExts[X]) / (1 + SAMPLE_RATE);
+    double dy = (minExts[Y] - maxExts[Y]) / (1 + SAMPLE_RATE);
+    double dz = (minExts[Z] - maxExts[Z]) / (1 + SAMPLE_RATE);
+
+    std::vector<double> deltas = {dx, dy, dz};
+    return deltas;
+}
+
+void MappingFrame::populateIteratingHistogram()
+{
+    Grid *              grid = nullptr;
+    std::vector<double> minExts, maxExts;
+    getGridAndExtents(&grid, minExts, maxExts);
+    grid->SetInterpolationOrder(1);
 
     float          v;
     Grid::Iterator itr;
