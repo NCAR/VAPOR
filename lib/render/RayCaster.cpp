@@ -863,7 +863,18 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "flags");
     glUniform1iv(uniformLocation, (GLsizei)3, flags);
 
-    // Calculate the step size
+    // Calculate the step size with sample rate multiplier taken into account.
+    float multiplier;
+    switch (params->GetSampleRateMultiplier()) {
+    case 0: multiplier = 1.0f; break;    // These values need to be in sync with
+    case 1: multiplier = 2.0f; break;    //   the multiplier values in the GUI.
+    case 2: multiplier = 4.0f; break;
+    case 3: multiplier = 8.0f; break;
+    case 4: multiplier = 0.5f; break;
+    case 5: multiplier = 0.25f; break;
+    case 6: multiplier = 0.125f; break;
+    default: multiplier = 1.0f; break;
+    }
     glm::vec4 boxmin(cboxMin[0], cboxMin[1], cboxMin[2], 1.0f);
     glm::vec4 boxmax(cboxMax[0], cboxMax[1], cboxMax[2], 1.0f);
     glm::vec4 boxminEye = modelview * boxmin;
@@ -874,7 +885,8 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
         stepSize1D = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / 100.0f;
     else
         stepSize1D = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / float(_userCoordinates.dims[3] * 2);    // Use Nyquist frequency by default
-    if (fast) stepSize1D *= 8.0;                                                                                                    // Increase step size, thus fewer steps, when fast rendering
+    stepSize1D /= multiplier;
+    if (fast) stepSize1D *= 8.0;    // Increase step size, thus fewer steps, when fast rendering
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "stepSize1D");
     glUniform1f(uniformLocation, stepSize1D);
 

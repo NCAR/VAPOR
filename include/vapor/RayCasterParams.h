@@ -37,8 +37,8 @@ public:
     //
     long GetCastingMode() const;
     void SetCastingMode(long);
-    long GetSampleMultiplier() const;      // ComboBox index is held here. Need to translate
-    void SetSampleRateMultiplier(long);    //   to real multipliers in RayCaster.cpp
+    long GetSampleRateMultiplier() const;    // ComboBox index is held here. Need to translate
+    void SetSampleRateMultiplier(long);      //   to real multipliers in RayCaster.cpp
 
 protected:
     static const std::string _lightingTag;
