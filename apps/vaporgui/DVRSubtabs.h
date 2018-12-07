@@ -44,7 +44,7 @@ public:
         if( mode == 1 )
         {
             _sampleRateComboBox->setEnabled( true );
-            _sampleRateComboBox->setCurrentIndex( _dvrParams->GetSampleMultiplier() );
+            _sampleRateComboBox->setCurrentIndex( _dvrParams->GetSampleRateMultiplier() );
         }
         else 
         {
