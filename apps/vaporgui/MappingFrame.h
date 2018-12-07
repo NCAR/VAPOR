@@ -167,6 +167,11 @@ public:
 
   void updateMapperFunction(VAPoR::MapperFunction *mapper);
 
+  // Set the histogram populator to be for a sampling renderer, which cannot
+  // iterate across values.  It must sample them instead.
+  void SetIsSampling(bool isSampling);
+
+
 signals:
 
    //! Signal that is invoked when user starts to modify the transfer function.
@@ -209,7 +214,21 @@ private:
   bool skipRefreshHistogram() const;
   void updateHistogram();
   string getActiveRendererName() const;
+  void getGridAndExtents(
+    VAPoR::Grid** grid,
+    std::vector<double> minExts,
+    std::vector<double> maxExts
+  ) const;
   void populateHistogram();
+  void populateSamplingHistogram();
+  //void populateSamplingHistogramXY();
+  //void populateSamplingHistogramXZ();
+  //void populateSamplingHistogramYZ();
+  void populateIteratingHistogram();
+  std::vector<double> calculateDeltas(
+    std::vector<double> minExts,
+    std::vector<double> maxExts
+  ) const;
   
 protected slots:
   void setEditMode(bool);
@@ -324,6 +343,7 @@ private:
   Histo          *_histogram;
   map<string, Histo*> _histogramMap;
 
+  bool            _isSampling;
   bool            _opacityMappingEnabled;
   bool            _colorMappingEnabled;
   bool			  _isoSliderEnabled;
