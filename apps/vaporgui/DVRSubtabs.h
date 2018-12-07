@@ -38,7 +38,7 @@ class DVRVariablesSubtab : public QWidget, public Ui_DVRVariablesGUI {
         _variablesWidget->Update(dataMgr, paramsMgr, params);
         if (mode == 1) {
             _sampleRateComboBox->setEnabled(true);
-            _sampleRateComboBox->setCurrentIndex(_dvrParams->GetSampleMultiplier());
+            _sampleRateComboBox->setCurrentIndex(_dvrParams->GetSampleRateMultiplier());
         } else {
             _sampleRateComboBox->setEnabled(false);
         }
