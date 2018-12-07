@@ -40,6 +40,7 @@ set (SRC
 	PNGWriter.cpp
 	TIFWriter.cpp
 	Proj4StringParser.cpp
+	glutil.cpp
 )
 
 set (HEADERS
@@ -85,11 +86,17 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/jpegapi.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Proj4StringParser.h
 	${PROJECT_SOURCE_DIR}/include/vapor/SliceRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/glutil.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})
 
-target_link_libraries (render PUBLIC common vdc params ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} python${PYTHONVERSION})
+target_link_libraries (render PUBLIC common vdc params ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} python${PYTHONVERSION} ${GLEW} ${OPENGL_LIBRARIES})
+
+if (UNIX AND NOT APPLE)
+	target_link_libraries (vdc PUBLIC GLU)
+endif ()
+
 
 add_definitions (-DRENDER_EXPORTS)
 
