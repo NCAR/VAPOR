@@ -17,7 +17,6 @@
 #ifdef WIN32
     #include <float.h>
 #endif
-
 using namespace Wasp;
 using namespace VAPoR;
 
