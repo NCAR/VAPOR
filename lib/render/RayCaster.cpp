@@ -268,7 +268,6 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
     dims[2] = gridDims[2];
     float df[3] = {float(dims[0]), float(dims[1]), float(dims[2])};
     dims[3] = size_t(std::sqrt(df[0] * df[0] + df[1] * df[1] + df[2] * df[2])) + 1;
-    grid->GetRange(valueRange);
 
     double buf[3];
 
@@ -361,8 +360,8 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
         delete[] missingValueMask;
         missingValueMask = nullptr;
     }
+
     StructuredGrid::ConstIterator valItr = grid->cbegin();    // Iterator for data field values
-    float                         valueRange1o = 1.0f / (valueRange[1] - valueRange[0]);
 
     if (grid->HasMissingData()) {
         float missingValue = grid->GetMissingValue();
@@ -379,7 +378,7 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
                 dataField[i] = 0.0f;
                 missingValueMask[i] = 127u;
             } else {
-                dataField[i] = (dataValue - valueRange[0]) * valueRange1o;
+                dataField[i] = dataValue;
                 missingValueMask[i] = 0u;
             }
             ++valItr;
@@ -387,7 +386,7 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
     } else    // No missing value!
     {
         for (size_t i = 0; i < numOfVertices; i++) {
-            dataField[i] = (float(*valItr) - valueRange[0]) * valueRange1o;
+            dataField[i] = float(*valItr);
             ++valItr;
         }
     }
@@ -566,11 +565,13 @@ int RayCaster::_paintGL(bool fast)
         for (int i = 0; i < 8; i++) _colorMap[i] = singleColor[i % 4];
         _colorMapRange[0] = 0.0f;
         _colorMapRange[1] = 0.0f;
+        _colorMapRange[2] = 1e-5f;
     } else {
         params->GetMapperFunc()->makeLut(_colorMap);
         std::vector<double> range = params->GetMapperFunc()->getMinMaxMapValue();
         _colorMapRange[0] = float(range[0]);
         _colorMapRange[1] = float(range[1]);
+        _colorMapRange[2] = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ? (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f;
     }
 
     glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
@@ -826,15 +827,14 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "inversedMV");
     glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(inversedMV));
 
-    float dataRanges[4] = {_userCoordinates.valueRange[0], _userCoordinates.valueRange[1], _colorMapRange[0], _colorMapRange[1]};
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "dataRanges");
-    glUniform2fv(uniformLocation, 2, dataRanges);
-
-    float boxExtents[6];
-    std::memcpy(boxExtents, _userCoordinates.boxMin, sizeof(float) * 3);
-    std::memcpy(boxExtents + 3, _userCoordinates.boxMax, sizeof(float) * 3);
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "boxExtents");
-    glUniform3fv(uniformLocation, 2, boxExtents);
+    float        someVec3[9];
+    const float *cboxMin = _userCoordinates.boxMin;
+    const float *cboxMax = _userCoordinates.boxMax;
+    std::memcpy(someVec3, cboxMin, sizeof(float) * 3);
+    std::memcpy(someVec3 + 3, cboxMax, sizeof(float) * 3);
+    std::memcpy(someVec3 + 6, _colorMapRange, sizeof(float) * 3);
+    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "someVec3");
+    glUniform3fv(uniformLocation, 3, someVec3);
 
     int volumeDims[3] = {int(_userCoordinates.dims[0]), int(_userCoordinates.dims[1]), int(_userCoordinates.dims[2])};
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeDims");
@@ -864,10 +864,10 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     glUniform1iv(uniformLocation, (GLsizei)3, flags);
 
     // Calculate the step size
-    glm::vec4 boxMin(boxExtents[0], boxExtents[1], boxExtents[2], 1.0f);
-    glm::vec4 boxMax(boxExtents[3], boxExtents[4], boxExtents[5], 1.0f);
-    glm::vec4 boxminEye = modelview * boxMin;
-    glm::vec4 boxmaxEye = modelview * boxMax;
+    glm::vec4 boxmin(cboxMin[0], cboxMin[1], cboxMin[2], 1.0f);
+    glm::vec4 boxmax(cboxMax[0], cboxMax[1], cboxMax[2], 1.0f);
+    glm::vec4 boxminEye = modelview * boxmin;
+    glm::vec4 boxmaxEye = modelview * boxmax;
     float     span[3] = {boxmaxEye[0] - boxminEye[0], boxmaxEye[1] - boxminEye[1], boxmaxEye[2] - boxminEye[2]};
     float     stepSize1D;
     if (_userCoordinates.dims[3] < 50)    // Make sure at least 100 steps
