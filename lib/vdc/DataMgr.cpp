@@ -17,6 +17,7 @@
 #ifdef WIN32
     #include <float.h>
 #endif
+
 using namespace Wasp;
 using namespace VAPoR;
 
@@ -1373,26 +1374,16 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<
     range.resize(2, 0.0);
     Grid::ConstIterator itr = sg->cbegin();
     Grid::ConstIterator enditr = sg->cend();
-    if (sg->HasMissingData()) {
-        float mv = sg->GetMissingValue();
-        while (float(*itr) == mv) ++itr;
-        range[0] = range[1] = *itr;
-        ++itr;
-        while (itr != enditr) {
-            if (float(*itr) != mv) {
-                range[0] = *itr < range[0] ? *itr : range[0];
-                range[1] = *itr > range[1] ? *itr : range[1];
-            }
-            ++itr;
-        }
-    } else {
-        range[0] = range[1] = *itr;
-        ++itr;
-        while (itr != enditr) {
+    float               mv = sg->GetMissingValue();
+    while (float(*itr) == mv) ++itr;
+    range[0] = range[1] = *itr;
+    ++itr;
+    while (itr != enditr) {
+        if (float(*itr) != mv) {
             range[0] = *itr < range[0] ? *itr : range[0];
             range[1] = *itr > range[1] ? *itr : range[1];
-            ++itr;
         }
+        ++itr;
     }
     delete sg;
 
