@@ -94,7 +94,7 @@ add_library (render SHARED ${SRC} ${HEADERS})
 target_link_libraries (render PUBLIC common vdc params ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} python${PYTHONVERSION} ${GLEW} ${OPENGL_LIBRARIES})
 
 if (UNIX AND NOT APPLE)
-	target_link_libraries (vdc PUBLIC GLU)
+	target_link_libraries (render PUBLIC GLU)
 endif ()
 
 
