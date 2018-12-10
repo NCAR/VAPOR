@@ -60,10 +60,8 @@ protected:
         float *        xyCoords;                // X-Y coordinate values
         float *        zCoords;                 // Z coordinate values
 
-        size_t dims[4];                // num. of samples along each axis.
-                                       // !! Note: the last element is the diagnal length !!
-        float boxMin[3], boxMax[3];    // bounding box of the current volume
-                                       // !! NOTE boxMin and boxMax most likely differ from extents from  params !!
+        size_t dims[4];    // num. of samples along each axis.
+                           // !! Note: the last element is the diagnal length !!
 
         //             0---------2
         //              |       |
@@ -77,6 +75,7 @@ protected:
         size_t      myCurrentTimeStep;
         std::string myVariableName;
         int         myRefinementLevel, myCompressionLevel;
+        float       myBoxMin[3], myBoxMax[3];    // Retrieved from params, instead of grid.
 
         /* Member functions */
         UserCoordinates();
