@@ -697,9 +697,9 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
         glClearBufferfv(GL_COLOR, 0, black);    // clear GL_COLOR_ATTACHMENT0
     } else if (whichPass == 2) {
         glUseProgram(_2ndPassShaderId);
-        GLint uniformLocation = glGetUniformLocation(_1stPassShaderId, "MV");
+        GLint uniformLocation = glGetUniformLocation(_2ndPassShaderId, "MV");
         glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview));
-        uniformLocation = glGetUniformLocation(_1stPassShaderId, "Projection");
+        uniformLocation = glGetUniformLocation(_2ndPassShaderId, "Projection");
         glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
         glEnable(GL_CULL_FACE);
