@@ -983,7 +983,10 @@ void MappingFrame::paintGL()
     // select points
     //
 
-    _variableName = _rParams->GetColorMapVariableName();
+    if (_colorMappingEnabled)
+        _variableName = _rParams->GetColorMapVariableName();
+    else
+        _variableName = _rParams->GetVariableName();
     if (_variableName != "") {
         // allow for 4 pixels per character in name:
         int wx = (width() - _variableName.size() * 8) / 2;

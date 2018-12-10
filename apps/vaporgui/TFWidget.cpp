@@ -340,10 +340,10 @@ void TFWidget::updateSecondarySliders()
 {
     float range[2], values[2];
     getVariableRange(range, values, true);
-    _secondaryMinSliderEdit->SetValue(values[0]);
     _secondaryMinSliderEdit->SetExtents(range[0], range[1]);
-    _secondaryMaxSliderEdit->SetValue(values[1]);
+    _secondaryMinSliderEdit->SetValue(values[0]);
     _secondaryMaxSliderEdit->SetExtents(range[0], range[1]);
+    _secondaryMaxSliderEdit->SetValue(values[1]);
 }
 
 void TFWidget::updateMainMappingFrame()
@@ -355,10 +355,16 @@ void TFWidget::updateMainMappingFrame()
 
     bool histogramRecalculated = _mappingFrame->Update(_dataMgr, _paramsMgr, _rParams, buttonPress);
 
-    if (histogramRecalculated)
+    if (histogramRecalculated) {
         _updateMainHistoButton->setEnabled(false);
-    else
-        _updateMainHistoButton->setEnabled(true);
+        _externalChangeHappened = false;
+    } else {
+        checkForCompressionChanges();
+        checkForBoxChanges();
+        checkForMainMapperRangeChanges();
+        checkForTimestepChanges();
+        if (_externalChangeHappened || _mainHistoRangeChanged) _updateMainHistoButton->setEnabled(true);
+    }
 }
 
 void TFWidget::updateSecondaryMappingFrame()
@@ -379,10 +385,16 @@ void TFWidget::updateSecondaryMappingFrame()
     MapperFunction *secondaryMF = getSecondaryMapperFunction();
     if (mainMF == secondaryMF) _mappingFrame->fitViewToDataRange();
 
-    if (histogramRecalculated)
+    if (histogramRecalculated) {
         _updateSecondaryHistoButton->setEnabled(false);
-    else
-        _updateSecondaryHistoButton->setEnabled(true);
+        _externalChangeHappened = false;
+    } else {
+        checkForCompressionChanges();
+        checkForBoxChanges();
+        checkForSecondaryMapperRangeChanges();
+        checkForTimestepChanges();
+        if (_externalChangeHappened || _secondaryHistoRangeChanged) _updateSecondaryHistoButton->setEnabled(true);
+    }
 }
 
 void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rParams, bool internalUpdate)
@@ -448,14 +460,14 @@ void TFWidget::refreshMainHisto()
     return;
     _mappingFrame->RefreshHistogram();
 
-    refreshSecondaryHistoIfNecessary();
+    refreshSecondaryDuplicateHistogram();
 
     Update(_dataMgr, _paramsMgr, _rParams, true);
     _updateMainHistoButton->setEnabled(false);
     _mainHistoNeedsRefresh = false;
 }
 
-void TFWidget::refreshSecondaryHistoIfNecessary()
+void TFWidget::refreshSecondaryDuplicateHistogram()
 {
     if (_flags & COLORMAP_VAR_IS_IN_TF2) {
         MapperFunction *mainMF = getMainMapperFunction();
@@ -471,14 +483,14 @@ void TFWidget::refreshSecondaryHisto()
 {
     return;
     _secondaryMappingFrame->RefreshHistogram();
-    refreshMainHistoIfNecessary();
+    refreshMainDuplicateHistogram();
 
     Update(_dataMgr, _paramsMgr, _rParams, true);
     _updateSecondaryHistoButton->setEnabled(false);
     _secondaryHistoNeedsRefresh = false;
 }
 
-void TFWidget::refreshMainHistoIfNecessary()
+void TFWidget::refreshMainDuplicateHistogram()
 {
     MapperFunction *mainMF = getMainMapperFunction();
     MapperFunction *secondaryMF = getSecondaryMapperFunction();
@@ -513,7 +525,10 @@ void TFWidget::checkForBoxChanges()
             _externalChangeHappened = true;
             _minExt[i] = minExt[i];
         }
-        if (maxExt[i] != _maxExt[i]) { _externalChangeHappened = true; }
+        if (maxExt[i] != _maxExt[i]) {
+            _externalChangeHappened = true;
+            _maxExt[i] = maxExt[i];
+        }
     }
 }
 
@@ -570,8 +585,9 @@ void TFWidget::enableUpdateButtonsIfNeeded()
         MapperFunction *mf = getMainMapperFunction();
         if (mf->GetAutoUpdateHisto())
             _mainHistoNeedsRefresh = true;
-        else
+        else {
             _updateMainHistoButton->setEnabled(true);
+        }
     }
     _mainHistoRangeChanged = false;
 
