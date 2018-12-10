@@ -100,8 +100,8 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void updateSecondaryMappingFrame();
 
   private:
-    void refreshMainHistoIfNecessary();
-    void refreshSecondaryHistoIfNecessary();
+    void refreshMainDuplicateHistogram();
+    void refreshSecondaryDuplicateHistogram();
 
     void configureConstantColorControls();
     void configureSecondaryTransferFunction();
