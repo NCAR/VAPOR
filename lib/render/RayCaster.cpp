@@ -473,21 +473,7 @@ int RayCaster::_paintGL(bool fast)
 #endif
     const MatrixManager *mm = Renderer::_glManager->matrixManager;
 
-    // Visualizer dimensions would change if window is resized
-    GLint newViewport[4];
-    glGetIntegerv(GL_VIEWPORT, newViewport);
-    if (std::memcmp(newViewport, _currentViewport, 4 * sizeof(GLint)) != 0) {
-        std::memcpy(_currentViewport, newViewport, 4 * sizeof(GLint));
-
-        // Re-size 2D textures
-        glActiveTexture(GL_TEXTURE0 + _backFaceTexOffset);
-        glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
-
-        glActiveTexture(GL_TEXTURE0 + _frontFaceTexOffset);
-        glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
-    }
+    _updateViewportWhenNecessary();
 
     glBindVertexArray(_vertexArrayId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
@@ -524,76 +510,12 @@ int RayCaster::_paintGL(bool fast)
             return JUSTERROR;
         }
 
-        // Also attach the new data to 3D textures
-        glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
-        glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
-#ifdef Darwin
-        //
-        // Intel driver on MacOS seems to not able to correctly update the texture content
-        //   when the texture is moderately big. This workaround of loading a dummy texture
-        //   to force it to update seems to resolve this issue.
-        //
-        float dummyVolume[8] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume);
-#endif
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED, GL_FLOAT, _userCoordinates.dataField);
-
-        // Now we HAVE TO attach a missing value mask texture, because
-        //   Intel driver on Mac doesn't like leaving the texture empty...
-        unsigned char dummyMask[8] = {0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u};
-        glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);    // Alignment adjustment. Stupid.
-        glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
-        if (_userCoordinates.missingValueMask)    // There is missing value.
-            glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE,
-                         _userCoordinates.missingValueMask);
-        else
-            glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, 2, 2, 2, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, dummyMask);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);    // Restore default alignment.
-
-        // If using cell traverse ray casting, we need to upload user coordinates
-        if (castingMode == 2) {
-            const size_t *dims = _userCoordinates.dims;
-
-            // Fill data to buffer object _xyCoordsBufferId
-            glBindBuffer(GL_TEXTURE_BUFFER, _xyCoordsBufferId);
-            glBufferData(GL_TEXTURE_BUFFER, 2 * sizeof(float) * dims[0] * dims[1], _userCoordinates.xyCoords, GL_STATIC_READ);
-            // Pass data to the buffer texture: _xyCoordsTextureId
-            glActiveTexture(GL_TEXTURE0 + _xyCoordsTexOffset);
-            glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
-            glTexBuffer(GL_TEXTURE_BUFFER, GL_RG32F, _xyCoordsBufferId);
-
-            // Repeat for the next buffer texture: _zCoordsBufferId
-            glBindBuffer(GL_TEXTURE_BUFFER, _zCoordsBufferId);
-            glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * dims[0] * dims[1] * dims[2], _userCoordinates.zCoords, GL_STATIC_READ);
-            glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
-            glBindTexture(GL_TEXTURE_BUFFER, _zCoordsTextureId);
-            glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, _zCoordsBufferId);
-
-            glBindBuffer(GL_TEXTURE_BUFFER, 0);
-            glBindTexture(GL_TEXTURE_BUFFER, 0);
-        }
+        _updateDataTextures(castingMode);
 
         glBindTexture(GL_TEXTURE_3D, 0);
     }
 
-    /* Gather the color map */
-    if (params->UseSingleColor()) {
-        float singleColor[4];
-        params->GetConstantColor(singleColor);
-        singleColor[3] = 1.0f;    // 1.0 in alpha channel
-        _colorMap.resize(8);      // _colorMap will have 2 RGBA values
-        for (int i = 0; i < 8; i++) _colorMap[i] = singleColor[i % 4];
-        _colorMapRange[0] = 0.0f;
-        _colorMapRange[1] = 0.0f;
-        _colorMapRange[2] = 1e-5f;
-    } else {
-        params->GetMapperFunc()->makeLut(_colorMap);
-        std::vector<double> range = params->GetMapperFunc()->getMinMaxMapValue();
-        _colorMapRange[0] = float(range[0]);
-        _colorMapRange[1] = float(range[1]);
-        _colorMapRange[2] = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ? (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f;
-    }
+    _updateColormap(params);
 
     glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
@@ -623,24 +545,7 @@ int RayCaster::_paintGL(bool fast)
         return GRIDERROR;
     }
     bool insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
-
-    if (insideACell) {
-        glm::mat4 MVP = mm->GetModelViewProjectionMatrix();
-        glm::mat4 InversedMVP = glm::inverse(MVP);
-        glm::vec4 topLeftNDC(-1.0f, 1.0f, -0.9999f, 1.0f);
-        glm::vec4 bottomLeftNDC(-1.0f, -1.0f, -0.9999f, 1.0f);
-        glm::vec4 topRightNDC(1.0f, 1.0f, -0.9999f, 1.0f);
-        glm::vec4 bottomRightNDC(1.0f, -1.0f, -0.9999f, 1.0f);
-        glm::vec4 near[4];
-        near[0] = InversedMVP * topLeftNDC;
-        near[1] = InversedMVP * bottomLeftNDC;
-        near[2] = InversedMVP * topRightNDC;
-        near[3] = InversedMVP * bottomRightNDC;
-        for (int i = 0; i < 4; i++) {
-            near[i] /= near[i].w;
-            std::memcpy(_userCoordinates.nearCoords + i * 3, glm::value_ptr(near[i]), 3 * sizeof(float));
-        }
-    }
+    if (insideACell) { _updateNearClippingPlane(); }
 
     // 2nd pass, render front facing polygons
     _drawVolumeFaces(2, castingMode, insideACell);
@@ -1221,3 +1126,111 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
 }
 
 double RayCaster::_getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const { return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0); }
+
+void RayCaster::_updateViewportWhenNecessary()
+{
+    GLint newViewport[4];
+    glGetIntegerv(GL_VIEWPORT, newViewport);
+    if (std::memcmp(newViewport, _currentViewport, 4 * sizeof(GLint)) != 0) {
+        std::memcpy(_currentViewport, newViewport, 4 * sizeof(GLint));
+
+        // Re-size 2D textures
+        glActiveTexture(GL_TEXTURE0 + _backFaceTexOffset);
+        glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
+
+        glActiveTexture(GL_TEXTURE0 + _frontFaceTexOffset);
+        glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
+    }
+}
+
+void RayCaster::_updateColormap(RayCasterParams *params)
+{
+    if (params->UseSingleColor()) {
+        float singleColor[4];
+        params->GetConstantColor(singleColor);
+        singleColor[3] = 1.0f;    // 1.0 in alpha channel
+        _colorMap.resize(8);      // _colorMap will have 2 RGBA values
+        for (int i = 0; i < 8; i++) _colorMap[i] = singleColor[i % 4];
+        _colorMapRange[0] = 0.0f;
+        _colorMapRange[1] = 0.0f;
+        _colorMapRange[2] = 1e-5f;
+    } else {
+        params->GetMapperFunc()->makeLut(_colorMap);
+        std::vector<double> range = params->GetMapperFunc()->getMinMaxMapValue();
+        _colorMapRange[0] = float(range[0]);
+        _colorMapRange[1] = float(range[1]);
+        _colorMapRange[2] = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ? (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f;
+    }
+}
+
+void RayCaster::_updateDataTextures(int castingMode)
+{
+    glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
+    glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
+#ifdef Darwin
+    //
+    // Intel driver on MacOS seems to not able to correctly update the texture content
+    //   when the texture is moderately big. This workaround of loading a dummy texture
+    //   to force it to update seems to resolve this issue.
+    //
+    float dummyVolume[8] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume);
+#endif
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED, GL_FLOAT, _userCoordinates.dataField);
+
+    // Now we HAVE TO attach a missing value mask texture, because
+    //   Intel driver on Mac doesn't like leaving the texture empty...
+    unsigned char dummyMask[8] = {0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u};
+    glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);    // Alignment adjustment. Stupid.
+    glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
+    if (_userCoordinates.missingValueMask)    // There is missing value.
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, _userCoordinates.missingValueMask);
+    else
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, 2, 2, 2, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, dummyMask);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);    // Restore default alignment.
+
+    // If using cell traverse ray casting, we need to upload user coordinates
+    if (castingMode == 2) {
+        const size_t *dims = _userCoordinates.dims;
+
+        // Fill data to buffer object _xyCoordsBufferId
+        glBindBuffer(GL_TEXTURE_BUFFER, _xyCoordsBufferId);
+        glBufferData(GL_TEXTURE_BUFFER, 2 * sizeof(float) * dims[0] * dims[1], _userCoordinates.xyCoords, GL_STATIC_READ);
+        // Pass data to the buffer texture: _xyCoordsTextureId
+        glActiveTexture(GL_TEXTURE0 + _xyCoordsTexOffset);
+        glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
+        glTexBuffer(GL_TEXTURE_BUFFER, GL_RG32F, _xyCoordsBufferId);
+
+        // Repeat for the next buffer texture: _zCoordsBufferId
+        glBindBuffer(GL_TEXTURE_BUFFER, _zCoordsBufferId);
+        glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * dims[0] * dims[1] * dims[2], _userCoordinates.zCoords, GL_STATIC_READ);
+        glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
+        glBindTexture(GL_TEXTURE_BUFFER, _zCoordsTextureId);
+        glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, _zCoordsBufferId);
+
+        glBindBuffer(GL_TEXTURE_BUFFER, 0);
+        glBindTexture(GL_TEXTURE_BUFFER, 0);
+    }
+}
+
+void RayCaster::_updateNearClippingPlane()
+{
+    glm::mat4 MVP = Renderer::_glManager->matrixManager->GetModelViewProjectionMatrix();
+    glm::mat4 InversedMVP = glm::inverse(MVP);
+    glm::vec4 topLeftNDC(-1.0f, 1.0f, -0.9999f, 1.0f);
+    glm::vec4 bottomLeftNDC(-1.0f, -1.0f, -0.9999f, 1.0f);
+    glm::vec4 topRightNDC(1.0f, 1.0f, -0.9999f, 1.0f);
+    glm::vec4 bottomRightNDC(1.0f, -1.0f, -0.9999f, 1.0f);
+    glm::vec4 near[4];
+    near[0] = InversedMVP * topLeftNDC;
+    near[1] = InversedMVP * bottomLeftNDC;
+    near[2] = InversedMVP * topRightNDC;
+    near[3] = InversedMVP * bottomRightNDC;
+    for (int i = 0; i < 4; i++) {
+        near[i] /= near[i].w;
+        std::memcpy(_userCoordinates.nearCoords + i * 3, glm::value_ptr(near[i]), 3 * sizeof(float));
+    }
+}
