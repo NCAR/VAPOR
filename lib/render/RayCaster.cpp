@@ -4,6 +4,10 @@
 #include <fstream>
 #include <sstream>
 
+#define OUTOFDATE 1
+#define GRIDERROR -1
+#define GLERROR -2
+
 using namespace VAPoR;
 
 /*
@@ -247,13 +251,13 @@ int RayCaster::UserCoordinates::IsMetadataUpToDate(const RayCasterParams *params
         (myVariableName != params->GetVariableName()) ||
         (myRefinementLevel != params->GetRefinementLevel()) ||
         (myCompressionLevel != params->GetCompressionLevel())) {
-        return 1;
+        return OUTOFDATE;
     }
 
     // compare grid boundaries and dimensions
     StructuredGrid *grid = nullptr;
     if (this->GetCurrentGrid(params, dataMgr, &grid) != 0) {
-        return -1;
+        return GRIDERROR;
     }
     std::vector<double> extMin, extMax;
     grid->GetUserExtents(extMin, extMax);
@@ -263,7 +267,7 @@ int RayCaster::UserCoordinates::IsMetadataUpToDate(const RayCasterParams *params
             (boxMax[i] != (float)extMax[i]) ||
             (dims[i] != gridDims[i])) {
             delete grid;
-            return 1;
+            return OUTOFDATE;
         }
     }
 
@@ -528,7 +532,7 @@ int RayCaster::_paintGL(bool fast) {
     if (upToDate < 0) {
         MyBase::SetErrMsg("Error occured during updating meta data!");
         return 1;
-    } else if (upToDate > 0) {
+    } else if (upToDate == OUTOFDATE) {
         int success = _userCoordinates.UpdateFaceAndData(params, _dataMgr);
         if (success != 0) {
             MyBase::SetErrMsg("Error occured during updating face and volume data!");
