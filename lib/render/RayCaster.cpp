@@ -82,12 +82,10 @@ RayCaster::RayCaster(const ParamsMgr *pm,
     _3rdPassMode1ShaderId = 0;
     _3rdPassMode2ShaderId = 0;
 
-    _drawBuffers[0] = GL_COLOR_ATTACHMENT0;
-    _drawBuffers[1] = GL_COLOR_ATTACHMENT1;
+    _drawBuffers[0] = 0;
+    _drawBuffers[1] = 0;
 
-    /* Get viewport dimensions */
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+    GLint viewport[4] = {0, 0, 0, 0};
     std::memcpy(_currentViewport, viewport, 4 * sizeof(GLint));
 }
 
@@ -483,6 +481,11 @@ int RayCaster::_initializeGL() {
         MyBase::SetErrMsg("Failed to load shaders!");
         return GLERROR;
     }
+
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    std::memcpy(_currentViewport, viewport, 4 * sizeof(GLint));
+
     if (_initializeFramebufferTextures() != 0) {
         MyBase::SetErrMsg("Failed to Create Framebuffer and Textures!");
         return GLERROR;
@@ -740,6 +743,8 @@ int RayCaster::_initializeFramebufferTextures() {
        and "_frontFaceTextureId" as attachement #1       */
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _backFaceTextureId, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, _frontFaceTextureId, 0);
+    _drawBuffers[0] = GL_COLOR_ATTACHMENT0;
+    _drawBuffers[1] = GL_COLOR_ATTACHMENT1;
     glDrawBuffers(2, _drawBuffers);
 
     /* Check if framebuffer is complete */
