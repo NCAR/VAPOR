@@ -26,7 +26,6 @@
 #include <algorithm>
 
 #include <vapor/ViewpointParams.h>
-#include <vapor/glutil.h>
 
 double VAPoR::ViewpointParams::_defaultLightDirection[3][4] = {{0.f, 0.f, 1.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {1.f, 0.f, 0.f, 0.f}};
 
