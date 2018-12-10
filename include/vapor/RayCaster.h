@@ -41,7 +41,11 @@ protected:
     //   It returns 0 upon success, and non-zero upon errors.
     virtual int _loadShaders() = 0;
 
-    struct UserCoordinates {
+    class UserCoordinates {
+        // Note: class UserCoordinates lives completely inside of class RayCaster,
+        //   and is solely used by class RayCaster. Thus for simplicity, it has all
+        //   of its member variables and methods public.
+    public:
         //              Y
         //              |   Z (coming out the screen)
         //              |  /
