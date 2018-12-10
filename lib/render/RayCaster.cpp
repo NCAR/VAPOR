@@ -4,6 +4,13 @@
 #include <fstream>
 #include <sstream>
 
+#define OUTOFDATE    1
+#define GRIDERROR   -1
+#define JUSTERROR   -2
+#define PARAMSERROR -3
+#define MEMERROR    -4
+#define GLERROR     -5
+
 using namespace VAPoR;
 
 /*
@@ -76,12 +83,10 @@ RayCaster::RayCaster( const ParamsMgr*    pm,
     _3rdPassMode1ShaderId        = 0;
     _3rdPassMode2ShaderId        = 0;
 
-    _drawBuffers[0]              = GL_COLOR_ATTACHMENT0;
-    _drawBuffers[1]              = GL_COLOR_ATTACHMENT1;
+    _drawBuffers[0]              = 0;
+    _drawBuffers[1]              = 0;
 
-    /* Get viewport dimensions */
-    GLint viewport[4];
-    glGetIntegerv( GL_VIEWPORT, viewport );
+    GLint viewport[4]            = {0, 0, 0, 0};
     std::memcpy( _currentViewport, viewport, 4 * sizeof(GLint) );
 }
 
@@ -180,8 +185,8 @@ RayCaster::UserCoordinates::UserCoordinates()
     missingValueMask = nullptr;
     for( int i = 0; i < 3; i++ )
     {
-        boxMin[i] = 0;
-        boxMax[i] = 0;
+        myBoxMin[i] = 0;
+        myBoxMax[i] = 0;
     }
     for( int i = 0; i < 4; i++ )
     {
@@ -267,7 +272,7 @@ RayCaster::UserCoordinates::GetCurrentGrid( const RayCasterParams* params,
     {
         MyBase::SetErrMsg("UserCoordinates::GetCurrentGrid() isn't on a StructuredGrid; "
                           "the behavior is undefined in this case.");
-        return 1;
+        return GRIDERROR;
     }
     else
     {
@@ -276,63 +281,63 @@ RayCaster::UserCoordinates::GetCurrentGrid( const RayCasterParams* params,
     }
 }
 
-int  RayCaster::UserCoordinates::IsMetadataUpToDate( const RayCasterParams* params,  
-                                                           DataMgr*         dataMgr ) const
+int  RayCaster::UserCoordinates::checkMetadataUpToDate( const RayCasterParams* params,  
+                                                              DataMgr*         dataMgr ) const
 {
     if( ( myCurrentTimeStep  != params->GetCurrentTimestep()  )  ||
         ( myVariableName     != params->GetVariableName()     )  ||
         ( myRefinementLevel  != params->GetRefinementLevel()  )  ||
         ( myCompressionLevel != params->GetCompressionLevel() )     )
     {
-        return 1;
+        return OUTOFDATE;
     }
 
-    // compare grid boundaries and dimensions
-    StructuredGrid* grid  = nullptr;
-    if( this->GetCurrentGrid( params, dataMgr, &grid ) != 0 )
+    // compare volume extents
+    std::vector<double>           extMin, extMax;
+    params->GetBox()->GetExtents( extMin, extMax );
+    if( extMin.size() != 3 || extMax.size() != 3 )
     {
-        return -1;
+        MyBase::SetErrMsg("RayCaster has to operate on 3D volumes");
+        return JUSTERROR;
     }
-    std::vector<double>   extMin, extMax;
-    grid->GetUserExtents( extMin, extMax );
-    std::vector<size_t> gridDims = grid->GetDimensions();
+
+
     for( int i = 0; i < 3; i++ )
     {
-        if( ( boxMin[i] != (float)extMin[i] ) || 
-            ( boxMax[i] != (float)extMax[i] ) ||
-            ( dims[i]   != gridDims[i]      )   )
-        {
-            delete grid;
-            return 1;
-        }
+        if( ( myBoxMin[i] != (float)extMin[i] ) || ( myBoxMax[i] != (float)extMax[i] ) )
+            return OUTOFDATE;
     }
 
     // now we know it's up to date!
-    delete grid;
     return 0;
 }
         
 int  RayCaster::UserCoordinates::UpdateFaceAndData( const RayCasterParams* params,
                                                           DataMgr*         dataMgr )
 {
+    std::vector<double>           extMin, extMax;
+    params->GetBox()->GetExtents( extMin, extMax );
+    if( extMin.size() != 3 || extMax.size() != 3 )
+    {
+        return JUSTERROR;
+    }
+    for( int i = 0; i < 3; i++ )
+    {
+        myBoxMin[i] = (float)extMin[i];
+        myBoxMax[i] = (float)extMax[i];
+    }
     myCurrentTimeStep  = params->GetCurrentTimestep();
     myVariableName     = params->GetVariableName();
     myRefinementLevel  = params->GetRefinementLevel();
     myCompressionLevel = params->GetCompressionLevel();
+
 
     /* update member variables */
     StructuredGrid*       grid = nullptr;
     if( this->GetCurrentGrid( params, dataMgr, &grid ) != 0 )
     {
         MyBase::SetErrMsg( "Failed to retrieve a StructuredGrid" );
-        return 1;
-    }
-    std::vector<double>   extMin, extMax;
-    grid->GetUserExtents( extMin, extMax );
-    for( int i = 0; i < 3; i++ )
-    {
-        boxMin[i] = (float)extMin[i];
-        boxMax[i] = (float)extMax[i];
+        return GRIDERROR;
     }
     std::vector<size_t> gridDims = grid->GetDimensions();
     dims[0]     = gridDims[0];
@@ -340,7 +345,6 @@ int  RayCaster::UserCoordinates::UpdateFaceAndData( const RayCasterParams* param
     dims[2]     = gridDims[2];
     float df[3] = { float(dims[0]), float(dims[1]), float(dims[2]) };
     dims[3]     = size_t( std::sqrt(df[0] * df[0] + df[1] * df[1] + df[2] * df[2]) ) + 1;
-
     double buf[3];
 
     // Save front face user coordinates ( z == dims[2] - 1 )
@@ -434,12 +438,12 @@ int  RayCaster::UserCoordinates::UpdateFaceAndData( const RayCasterParams* param
         delete[] dataField;
         dataField = nullptr;
     }
-    dataField = new float[ numOfVertices ];
-    if( !dataField )    // Test if allocation successful for 3D buffers.
+    try{   dataField = new float[ numOfVertices ]; }
+    catch( const std::bad_alloc& e )
     {
-        MyBase::SetErrMsg( "Failed to allocate memory" );
+        MyBase::SetErrMsg( e.what() );
         delete grid;
-        return -1;
+        return MEMERROR;
     }
     if( missingValueMask )
     {
@@ -452,12 +456,12 @@ int  RayCaster::UserCoordinates::UpdateFaceAndData( const RayCasterParams* param
     if( grid->HasMissingData() )
     {
         float missingValue = grid->GetMissingValue();
-        missingValueMask   = new unsigned char[ numOfVertices ];
-        if( !missingValueMask )
+        try{   missingValueMask   = new unsigned char[ numOfVertices ]; }
+        catch( const std::bad_alloc& e )
         {
-            MyBase::SetErrMsg( "Failed to allocate memory" );
+            MyBase::SetErrMsg( e.what() );
             delete grid;
-            return -1;
+            return MEMERROR;
         }
         float dataValue;
         for( size_t i = 0; i < numOfVertices; i++ )
@@ -499,11 +503,11 @@ int  RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
     xyCoords = new float[ dims[0] * dims[1] * 2 ];
     if( zCoords )
         delete[] zCoords;
-    zCoords  = new float[ dims[0] * dims[1] * dims[2] ];
-    if( !zCoords )  // Test if allocation successful for 3D buffers. 
+    try{   zCoords  = new float[ dims[0] * dims[1] * dims[2] ]; }
+    catch( const std::bad_alloc& e )
     {
-        MyBase::SetErrMsg("Failed to allocate memory");
-        return -1;
+        MyBase::SetErrMsg( e.what() );
+        return MEMERROR;
     }
 
     // Gather the XY coordinate from frontFace buffer
@@ -521,7 +525,7 @@ int  RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
     if( this->GetCurrentGrid( params, dataMgr, &grid ) != 0 )
     {
         MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
-        return 1;
+        return GRIDERROR;
     }
     StructuredGrid::ConstCoordItr coordItr   = grid->ConstCoordBegin();
     size_t numOfVertices = dims[0] * dims[1] * dims[2];
@@ -539,12 +543,17 @@ int RayCaster::_initializeGL()
     if( _loadShaders() != 0 )
     {
         MyBase::SetErrMsg("Failed to load shaders!");
-        return -1;
+        return GLERROR;
     }
+
+    GLint viewport[4];
+    glGetIntegerv( GL_VIEWPORT, viewport );
+    std::memcpy( _currentViewport, viewport, 4 * sizeof(GLint) );
+
     if( _initializeFramebufferTextures() != 0 )
     {
         MyBase::SetErrMsg("Failed to Create Framebuffer and Textures!");
-        return -1;
+        return GLERROR;
     }
 
     return 0;   // Success
@@ -552,35 +561,20 @@ int RayCaster::_initializeGL()
 
 int RayCaster::_paintGL( bool fast ) 
 {
-#ifdef DEBUG
+#ifndef NDEBUG
     // Reload shaders in case they're changed during shader development.
     //   Will incur huge performance panelties on parallel filesystems.
     if( _loadShaders() != 0 )
     {
         MyBase::SetErrMsg("Failed to load shaders");
-        return -1;
+        glBindVertexArray( 0 );
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+        return GLERROR;
     }
 #endif
     const MatrixManager* mm = Renderer::_glManager->matrixManager;
 
-    // Visualizer dimensions would change if window is resized
-    GLint newViewport[4];
-    glGetIntegerv( GL_VIEWPORT, newViewport );
-    if( std::memcmp( newViewport, _currentViewport, 4 * sizeof(GLint)) != 0 )
-    {
-        std::memcpy( _currentViewport, newViewport, 4 * sizeof(GLint) );
-
-        // Re-size 2D textures
-        glActiveTexture( GL_TEXTURE0 + _backFaceTexOffset );
-        glBindTexture(GL_TEXTURE_2D,   _backFaceTextureId); 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
-                     0, GL_RGBA, GL_FLOAT, nullptr);
-
-        glActiveTexture( GL_TEXTURE0 + _frontFaceTexOffset );
-        glBindTexture(GL_TEXTURE_2D,   _frontFaceTextureId); 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
-                     0, GL_RGBA, GL_FLOAT, nullptr);
-    }
+    _updateViewportWhenNecessary();
 
     glBindVertexArray( _vertexArrayId );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, _indexBufferId );
@@ -589,115 +583,46 @@ int RayCaster::_paintGL( bool fast )
     if( !params )
     {
         MyBase::SetErrMsg("Error occured during retrieving RayCaster parameters!");
-        return 1;
+        glBindVertexArray( 0 );
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+        return PARAMSERROR;
     }
     long castingMode = params->GetCastingMode();
 
     // If there is an update event
-    int upToDate = _userCoordinates.IsMetadataUpToDate( params, _dataMgr );
+    int upToDate = _userCoordinates.checkMetadataUpToDate( params, _dataMgr );
     if( upToDate < 0 )
     {
         MyBase::SetErrMsg("Error occured during updating meta data!");
-        return 1;
+        glBindVertexArray( 0 );
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+        return JUSTERROR;
     }
-    else if (upToDate > 0 )
+    else if (upToDate == OUTOFDATE )
     {
         int success  = _userCoordinates.UpdateFaceAndData( params, _dataMgr );
         if( success != 0 )
         {
             MyBase::SetErrMsg( "Error occured during updating face and volume data!" );
-            return 1;
+            glBindVertexArray( 0 );
+            glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+            return JUSTERROR;
         }
         
         if( castingMode == 2 && _userCoordinates.UpdateCurviCoords( params, _dataMgr ) != 0 )
         {
             MyBase::SetErrMsg( "Error occured during updating curvilinear coordinates!" );
-            return 1;
+            glBindVertexArray( 0 );
+            glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+            return JUSTERROR;
         }
 
-        // Also attach the new data to 3D textures
-        glActiveTexture( GL_TEXTURE0 + _volumeTexOffset );
-        glBindTexture( GL_TEXTURE_3D,  _volumeTextureId );
-#ifdef Darwin
-        //
-        // Intel driver on MacOS seems to not able to correctly update the texture content
-        //   when the texture is moderately big. This workaround of loading a dummy texture
-        //   to force it to update seems to resolve this issue.
-        //
-        float dummyVolume[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-        glTexImage3D( GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume );
-#endif
-        glTexImage3D(  GL_TEXTURE_3D, 0, GL_R32F,    _userCoordinates.dims[0], 
-                       _userCoordinates.dims[1],     _userCoordinates.dims[2], 
-                       0, GL_RED, GL_FLOAT,          _userCoordinates.dataField );
-
-        // Now we HAVE TO attach a missing value mask texture, because
-        //   Intel driver on Mac doesn't like leaving the texture empty...
-        unsigned char dummyMask[8] = { 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u };
-        glActiveTexture( GL_TEXTURE0 + _missingValueTexOffset );
-        glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );  // Alignment adjustment. Stupid.
-        glBindTexture( GL_TEXTURE_3D,  _missingValueTextureId );
-        if( _userCoordinates.missingValueMask )   // There is missing value.
-            glTexImage3D(  GL_TEXTURE_3D, 0, GL_R8UI,   _userCoordinates.dims[0],
-                           _userCoordinates.dims[1],    _userCoordinates.dims[2],
-                           0,                           GL_RED_INTEGER,
-                           GL_UNSIGNED_BYTE,            _userCoordinates.missingValueMask );
-        else
-            glTexImage3D( GL_TEXTURE_3D, 0, GL_R8UI, 2, 2, 2, 0, 
-                          GL_RED_INTEGER, GL_UNSIGNED_BYTE, dummyMask );
-        glPixelStorei( GL_UNPACK_ALIGNMENT, 4 );    // Restore default alignment.
-
-        // If using cell traverse ray casting, we need to upload user coordinates
-        if( castingMode == 2 )
-        {
-            const size_t* dims = _userCoordinates.dims;
-
-            // Fill data to buffer object _xyCoordsBufferId
-            glBindBuffer(    GL_TEXTURE_BUFFER,     _xyCoordsBufferId );
-            glBufferData(    GL_TEXTURE_BUFFER,     2 * sizeof(float) * dims[0] * dims[1],
-                             _userCoordinates.xyCoords, GL_STATIC_READ );
-            // Pass data to the buffer texture: _xyCoordsTextureId
-            glActiveTexture( GL_TEXTURE0      +     _xyCoordsTexOffset );
-            glBindTexture(   GL_TEXTURE_BUFFER,     _xyCoordsTextureId );
-            glTexBuffer(     GL_TEXTURE_BUFFER,     GL_RG32F,   _xyCoordsBufferId );
-
-            // Repeat for the next buffer texture: _zCoordsBufferId
-            glBindBuffer(    GL_TEXTURE_BUFFER,     _zCoordsBufferId );
-            glBufferData(    GL_TEXTURE_BUFFER,     sizeof(float) * dims[0] * dims[1] * dims[2],
-                             _userCoordinates.zCoords, GL_STATIC_READ );
-            glActiveTexture( GL_TEXTURE0      +     _zCoordsTexOffset );
-            glBindTexture(   GL_TEXTURE_BUFFER,     _zCoordsTextureId );
-            glTexBuffer(     GL_TEXTURE_BUFFER,     GL_R32F,    _zCoordsBufferId );
-
-            glBindBuffer(    GL_TEXTURE_BUFFER, 0 );
-            glBindTexture(   GL_TEXTURE_BUFFER, 0 );
-        }
+        _updateDataTextures( castingMode );
 
         glBindTexture( GL_TEXTURE_3D, 0 );
     }
 
-    /* Gather the color map */
-    if( params->UseSingleColor() )
-    {
-        float singleColor[4];
-        params->GetConstantColor( singleColor );
-        singleColor[3]            = 1.0f;      // 1.0 in alpha channel
-        _colorMap.resize( 8 );                 // _colorMap will have 2 RGBA values
-        for( int i = 0; i < 8; i++ )
-            _colorMap [i]         = singleColor[ i % 4 ];
-        _colorMapRange[0]         = 0.0f;
-        _colorMapRange[1]         = 0.0f;
-        _colorMapRange[2]         = 1e-5f;
-    }
-    else
-    {
-        params->GetMapperFunc()->makeLut( _colorMap );
-        std::vector<double> range = params->GetMapperFunc()->getMinMaxMapValue();
-        _colorMapRange[0]         = float(range[0]);
-        _colorMapRange[1]         = float(range[1]);
-        _colorMapRange[2]         = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ?
-                                    (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f ;
-    }
+    _updateColormap( params );
 
     glActiveTexture( GL_TEXTURE0 + _colorMapTexOffset );
     glBindTexture( GL_TEXTURE_1D,  _colorMapTextureId );
@@ -724,29 +649,14 @@ int RayCaster::_paintGL( bool fast )
     if( _userCoordinates.GetCurrentGrid( params, _dataMgr, &grid ) != 0 )
     {
         MyBase::SetErrMsg( "Failed to retrieve a StructuredGrid" );
-        return 1;
+        glBindVertexArray( 0 );
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+        return GRIDERROR;
     }
     bool insideACell      =  grid->GetIndicesCell( cameraUser, cameraCellIndices ); 
-
     if( insideACell )
     {
-        glm::mat4 MVP         = mm->GetModelViewProjectionMatrix();
-        glm::mat4 InversedMVP = glm::inverse( MVP );
-        glm::vec4 topLeftNDC    ( -1.0f,  1.0f, -0.9999f, 1.0f );
-        glm::vec4 bottomLeftNDC ( -1.0f, -1.0f, -0.9999f, 1.0f );
-        glm::vec4 topRightNDC   ( 1.0f,  1.0f, -0.9999f, 1.0f );
-        glm::vec4 bottomRightNDC( 1.0f, -1.0f, -0.9999f, 1.0f );
-        glm::vec4 near[4];
-        near[0] = InversedMVP * topLeftNDC;
-        near[1] = InversedMVP * bottomLeftNDC;
-        near[2] = InversedMVP * topRightNDC;
-        near[3] = InversedMVP * bottomRightNDC;
-        for( int i = 0; i < 4; i++ )
-        {
-            near[i] /= near[i].w;
-            std::memcpy( _userCoordinates.nearCoords + i * 3, 
-                         glm::value_ptr(near[i]), 3 * sizeof(float) );
-        }
+        _updateNearClippingPlane();
     }
 
     // 2nd pass, render front facing polygons
@@ -763,7 +673,9 @@ int RayCaster::_paintGL( bool fast )
     else
     {
         MyBase::SetErrMsg( "RayCasting Mode not supported!" ); 
-        return 2;
+        glBindVertexArray( 0 );
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+        return JUSTERROR;
     }
     _drawVolumeFaces( 3, castingMode, insideACell, InversedMV, fast );  
         
@@ -818,6 +730,8 @@ int RayCaster::_initializeFramebufferTextures()
        and "_frontFaceTextureId" as attachement #1       */
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _backFaceTextureId, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, _frontFaceTextureId, 0);
+    _drawBuffers[0]  =                   GL_COLOR_ATTACHMENT0;
+    _drawBuffers[1]  =                   GL_COLOR_ATTACHMENT1;
     glDrawBuffers(2, _drawBuffers );
 
     /* Check if framebuffer is complete */
@@ -825,7 +739,7 @@ int RayCaster::_initializeFramebufferTextures()
     {
         MyBase::SetErrMsg("_openGLInitialization(): Framebuffer failed; "
                           "the behavior is then undefined." ); 
-        return -1;
+        return GLERROR;
     }
 
     /* Bind the default frame buffer */
@@ -908,9 +822,9 @@ void RayCaster::_drawVolumeFaces( int              whichPass,
     else if( whichPass == 2 )
     {
         glUseProgram( _2ndPassShaderId );
-        GLint uniformLocation = glGetUniformLocation( _1stPassShaderId, "MV" );
+        GLint uniformLocation = glGetUniformLocation( _2ndPassShaderId, "MV" );
         glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview) );
-        uniformLocation = glGetUniformLocation( _1stPassShaderId, "Projection" );
+        uniformLocation = glGetUniformLocation( _2ndPassShaderId, "Projection" );
         glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, glm::value_ptr(projection) );
 
         glEnable( GL_CULL_FACE );
@@ -974,8 +888,8 @@ void RayCaster::_load3rdPassUniforms( long               castingMode,
     glUniformMatrix4fv( uniformLocation, 1, GL_FALSE, glm::value_ptr(inversedMV) );
 
     float someVec3[9];
-    const float* cboxMin  = _userCoordinates.boxMin;
-    const float* cboxMax  = _userCoordinates.boxMax;
+    const float* cboxMin  = _userCoordinates.myBoxMin;
+    const float* cboxMax  = _userCoordinates.myBoxMax;
     std::memcpy( someVec3,     cboxMin,         sizeof(float) * 3 );
     std::memcpy( someVec3 + 3, cboxMax,         sizeof(float) * 3 );
     std::memcpy( someVec3 + 6, _colorMapRange,  sizeof(float) * 3 );
@@ -1150,11 +1064,11 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
                 attrib1Buffer[ attribIdx + 3 ] = 0;
             }
             glBufferData( GL_ARRAY_BUFFER,      bx * by * 4 * sizeof(int),
-                          attrib1Buffer,        GL_STREAM_READ );
+                          attrib1Buffer,        GL_STREAM_DRAW );
             glVertexAttribIPointer( 1, 4,       GL_INT, 0, (void*)0 );
         }
         glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int), 
-                      indexBuffer,              GL_STREAM_READ );
+                      indexBuffer,              GL_STREAM_DRAW );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
@@ -1196,11 +1110,11 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
                 attrib1Buffer[ attribIdx + 3 ] = 1;
             }
             glBufferData( GL_ARRAY_BUFFER,      bx * by * 4 * sizeof(int),
-                          attrib1Buffer,        GL_STREAM_READ );
+                          attrib1Buffer,        GL_STREAM_DRAW );
             glVertexAttribIPointer( 1, 4,       GL_INT, 0, (void*)0 );
         }
         glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                      indexBuffer,              GL_STREAM_READ );
+                      indexBuffer,              GL_STREAM_DRAW );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
@@ -1242,11 +1156,11 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
                 attrib1Buffer[ attribIdx + 3 ] = 2;
             }
             glBufferData( GL_ARRAY_BUFFER,      bx * bz * 4 * sizeof(int),
-                          attrib1Buffer,        GL_STREAM_READ );
+                          attrib1Buffer,        GL_STREAM_DRAW );
             glVertexAttribIPointer( 1, 4,       GL_INT, 0, (void*)0 );
         }
         glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                      indexBuffer,              GL_STREAM_READ );
+                      indexBuffer,              GL_STREAM_DRAW );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
@@ -1288,11 +1202,11 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
                 attrib1Buffer[ attribIdx + 3 ] = 3;
             }
             glBufferData( GL_ARRAY_BUFFER,      bx * bz * 4 * sizeof(int),
-                          attrib1Buffer,        GL_STREAM_READ );
+                          attrib1Buffer,        GL_STREAM_DRAW );
             glVertexAttribIPointer( 1, 4,       GL_INT, 0, (void*)0 );
         }
         glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                      indexBuffer,              GL_STREAM_READ );
+                      indexBuffer,              GL_STREAM_DRAW );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
@@ -1339,11 +1253,11 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
                 attrib1Buffer[ attribIdx + 3 ] = 4;
             }
             glBufferData( GL_ARRAY_BUFFER,      by * bz * 4 * sizeof(int),
-                          attrib1Buffer,        GL_STREAM_READ );
+                          attrib1Buffer,        GL_STREAM_DRAW );
             glVertexAttribIPointer( 1, 4,       GL_INT, 0, (void*)0 );
         }
         glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                      indexBuffer,              GL_STREAM_READ );
+                      indexBuffer,              GL_STREAM_DRAW );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
@@ -1385,11 +1299,11 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
                 attrib1Buffer[ attribIdx + 3 ] = 5;
             }
             glBufferData( GL_ARRAY_BUFFER,      by * bz * 4 * sizeof(int),
-                          attrib1Buffer,        GL_STREAM_READ );
+                          attrib1Buffer,        GL_STREAM_DRAW );
             glVertexAttribIPointer( 1, 4,       GL_INT, 0, (void*)0 );
         }
         glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                      indexBuffer,              GL_STREAM_READ );
+                      indexBuffer,              GL_STREAM_DRAW );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
@@ -1407,4 +1321,132 @@ double RayCaster::_getElapsedSeconds( const struct timeval* begin,
                                       const struct timeval* end ) const
 {
     return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec)/1000000.0);
+}
+
+void RayCaster::_updateViewportWhenNecessary()
+{
+    GLint newViewport[4];
+    glGetIntegerv( GL_VIEWPORT, newViewport );
+    if( std::memcmp( newViewport, _currentViewport, 4 * sizeof(GLint)) != 0 )
+    {
+        std::memcpy( _currentViewport, newViewport, 4 * sizeof(GLint) );
+
+        // Re-size 2D textures
+        glActiveTexture( GL_TEXTURE0 + _backFaceTexOffset );
+        glBindTexture(GL_TEXTURE_2D,   _backFaceTextureId); 
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
+                     0, GL_RGBA, GL_FLOAT, nullptr);
+
+        glActiveTexture( GL_TEXTURE0 + _frontFaceTexOffset );
+        glBindTexture(GL_TEXTURE_2D,   _frontFaceTextureId); 
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
+                     0, GL_RGBA, GL_FLOAT, nullptr);
+    }
+}
+    
+void RayCaster::_updateColormap( RayCasterParams* params )
+{
+    if( params->UseSingleColor() )
+    {
+        float singleColor[4];
+        params->GetConstantColor( singleColor );
+        singleColor[3]            = 1.0f;      // 1.0 in alpha channel
+        _colorMap.resize( 8 );                 // _colorMap will have 2 RGBA values
+        for( int i = 0; i < 8; i++ )
+            _colorMap [i]         = singleColor[ i % 4 ];
+        _colorMapRange[0]         = 0.0f;
+        _colorMapRange[1]         = 0.0f;
+        _colorMapRange[2]         = 1e-5f;
+    }
+    else
+    {
+        params->GetMapperFunc()->makeLut( _colorMap );
+        std::vector<double> range = params->GetMapperFunc()->getMinMaxMapValue();
+        _colorMapRange[0]         = float(range[0]);
+        _colorMapRange[1]         = float(range[1]);
+        _colorMapRange[2]         = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ?
+                                    (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f ;
+    }
+}
+    
+void RayCaster::_updateDataTextures( int castingMode )
+{
+    glActiveTexture( GL_TEXTURE0 + _volumeTexOffset );
+    glBindTexture( GL_TEXTURE_3D,  _volumeTextureId );
+#ifdef Darwin
+    //
+    // Intel driver on MacOS seems to not able to correctly update the texture content
+    //   when the texture is moderately big. This workaround of loading a dummy texture
+    //   to force it to update seems to resolve this issue.
+    //
+    float dummyVolume[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+    glTexImage3D( GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume );
+#endif
+    glTexImage3D(  GL_TEXTURE_3D, 0, GL_R32F,    _userCoordinates.dims[0], 
+                   _userCoordinates.dims[1],     _userCoordinates.dims[2], 
+                   0, GL_RED, GL_FLOAT,          _userCoordinates.dataField );
+
+    // Now we HAVE TO attach a missing value mask texture, because
+    //   Intel driver on Mac doesn't like leaving the texture empty...
+    unsigned char dummyMask[8] = { 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u };
+    glActiveTexture( GL_TEXTURE0 + _missingValueTexOffset );
+    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );  // Alignment adjustment. Stupid.
+    glBindTexture( GL_TEXTURE_3D,  _missingValueTextureId );
+    if( _userCoordinates.missingValueMask )   // There is missing value.
+        glTexImage3D(  GL_TEXTURE_3D, 0, GL_R8UI,   _userCoordinates.dims[0],
+                       _userCoordinates.dims[1],    _userCoordinates.dims[2],
+                       0,                           GL_RED_INTEGER,
+                       GL_UNSIGNED_BYTE,            _userCoordinates.missingValueMask );
+    else
+        glTexImage3D( GL_TEXTURE_3D, 0, GL_R8UI, 2, 2, 2, 0, 
+                      GL_RED_INTEGER, GL_UNSIGNED_BYTE, dummyMask );
+    glPixelStorei( GL_UNPACK_ALIGNMENT, 4 );    // Restore default alignment.
+
+    // If using cell traverse ray casting, we need to upload user coordinates
+    if( castingMode == 2 )
+    {
+        const size_t* dims = _userCoordinates.dims;
+
+        // Fill data to buffer object _xyCoordsBufferId
+        glBindBuffer(    GL_TEXTURE_BUFFER,     _xyCoordsBufferId );
+        glBufferData(    GL_TEXTURE_BUFFER,     2 * sizeof(float) * dims[0] * dims[1],
+                         _userCoordinates.xyCoords, GL_STATIC_READ );
+        // Pass data to the buffer texture: _xyCoordsTextureId
+        glActiveTexture( GL_TEXTURE0      +     _xyCoordsTexOffset );
+        glBindTexture(   GL_TEXTURE_BUFFER,     _xyCoordsTextureId );
+        glTexBuffer(     GL_TEXTURE_BUFFER,     GL_RG32F,   _xyCoordsBufferId );
+
+        // Repeat for the next buffer texture: _zCoordsBufferId
+        glBindBuffer(    GL_TEXTURE_BUFFER,     _zCoordsBufferId );
+        glBufferData(    GL_TEXTURE_BUFFER,     sizeof(float) * dims[0] * dims[1] * dims[2],
+                         _userCoordinates.zCoords, GL_STATIC_READ );
+        glActiveTexture( GL_TEXTURE0      +     _zCoordsTexOffset );
+        glBindTexture(   GL_TEXTURE_BUFFER,     _zCoordsTextureId );
+        glTexBuffer(     GL_TEXTURE_BUFFER,     GL_R32F,    _zCoordsBufferId );
+
+        glBindBuffer(    GL_TEXTURE_BUFFER, 0 );
+        glBindTexture(   GL_TEXTURE_BUFFER, 0 );
+    }
+
+}
+    
+void RayCaster::_updateNearClippingPlane( )
+{
+    glm::mat4 MVP         = Renderer::_glManager->matrixManager->GetModelViewProjectionMatrix();
+    glm::mat4 InversedMVP = glm::inverse( MVP );
+    glm::vec4 topLeftNDC    ( -1.0f,  1.0f, -0.9999f, 1.0f );
+    glm::vec4 bottomLeftNDC ( -1.0f, -1.0f, -0.9999f, 1.0f );
+    glm::vec4 topRightNDC   ( 1.0f,  1.0f, -0.9999f, 1.0f );
+    glm::vec4 bottomRightNDC( 1.0f, -1.0f, -0.9999f, 1.0f );
+    glm::vec4 near[4];
+    near[0] = InversedMVP * topLeftNDC;
+    near[1] = InversedMVP * bottomLeftNDC;
+    near[2] = InversedMVP * topRightNDC;
+    near[3] = InversedMVP * bottomRightNDC;
+    for( int i = 0; i < 4; i++ )
+    {
+        near[i] /= near[i].w;
+        std::memcpy( _userCoordinates.nearCoords + i * 3, 
+                     glm::value_ptr(near[i]), 3 * sizeof(float) );
+    }
 }
