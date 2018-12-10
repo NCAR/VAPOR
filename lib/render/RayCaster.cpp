@@ -561,7 +561,7 @@ int RayCaster::_initializeGL()
 
 int RayCaster::_paintGL( bool fast ) 
 {
-#ifdef DEBUG
+#ifndef NDEBUG
     // Reload shaders in case they're changed during shader development.
     //   Will incur huge performance panelties on parallel filesystems.
     if( _loadShaders() != 0 )
