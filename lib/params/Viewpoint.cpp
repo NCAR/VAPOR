@@ -25,7 +25,8 @@
 #include <iostream>
 
 #include <vapor/Viewpoint.h>
-#include <vapor/glutil.h>
+#define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
+#include <vapor/LegacyVectorMath.h>
 
 using namespace VAPoR;
 using namespace Wasp;

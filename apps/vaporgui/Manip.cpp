@@ -25,6 +25,8 @@
 #include "Manip.h"
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
+#define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
+#include <vapor/LegacyVectorMath.h>
 
 using namespace VAPoR;
 
