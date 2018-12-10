@@ -466,6 +466,8 @@ int RayCaster::_paintGL(bool fast)
     //   Will incur huge performance panelties on parallel filesystems.
     if (_loadShaders() != 0) {
         MyBase::SetErrMsg("Failed to load shaders");
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return GLERROR;
     }
 #endif
@@ -493,6 +495,8 @@ int RayCaster::_paintGL(bool fast)
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
     if (!params) {
         MyBase::SetErrMsg("Error occured during retrieving RayCaster parameters!");
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return PARAMSERROR;
     }
     long castingMode = params->GetCastingMode();
@@ -501,16 +505,22 @@ int RayCaster::_paintGL(bool fast)
     int upToDate = _userCoordinates.IsMetadataUpToDate(params, _dataMgr);
     if (upToDate < 0) {
         MyBase::SetErrMsg("Error occured during updating meta data!");
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return JUSTERROR;
     } else if (upToDate == OUTOFDATE) {
         int success = _userCoordinates.UpdateFaceAndData(params, _dataMgr);
         if (success != 0) {
             MyBase::SetErrMsg("Error occured during updating face and volume data!");
+            glBindVertexArray(0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
             return JUSTERROR;
         }
 
         if (castingMode == 2 && _userCoordinates.UpdateCurviCoords(params, _dataMgr) != 0) {
             MyBase::SetErrMsg("Error occured during updating curvilinear coordinates!");
+            glBindVertexArray(0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
             return JUSTERROR;
         }
 
@@ -608,6 +618,8 @@ int RayCaster::_paintGL(bool fast)
     StructuredGrid *    grid = nullptr;
     if (_userCoordinates.GetCurrentGrid(params, _dataMgr, &grid) != 0) {
         MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return GRIDERROR;
     }
     bool insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
@@ -643,6 +655,8 @@ int RayCaster::_paintGL(bool fast)
         _3rdPassShaderId = _3rdPassMode2ShaderId;
     else {
         MyBase::SetErrMsg("RayCasting Mode not supported!");
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return JUSTERROR;
     }
     _drawVolumeFaces(3, castingMode, insideACell, InversedMV, fast);
