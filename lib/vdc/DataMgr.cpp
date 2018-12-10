@@ -1606,26 +1606,20 @@ int DataMgr::GetDataRange(
     //
     // Have to calculate range
     //
-
-    range.clear();
-    range.push_back(0.0);
-    range.push_back(0.0);
-    bool first = true;
-    float mv = sg->GetMissingValue();
-    Grid::ConstIterator itr;
+    range.resize(2, 0.0);
+    Grid::ConstIterator itr = sg->cbegin();
     Grid::ConstIterator enditr = sg->cend();
-    for (itr = sg->cbegin(); itr != enditr; ++itr) {
-        float v = *itr;
-        if (v != mv) {
-            if (first) {
-                range[0] = range[1] = v;
-                first = false;
-            }
-            if (v < range[0])
-                range[0] = v;
-            if (v > range[1])
-                range[1] = v;
+    float mv = sg->GetMissingValue();
+    while (float(*itr) == mv)
+        ++itr;
+    range[0] = range[1] = *itr;
+    ++itr;
+    while (itr != enditr) {
+        if (float(*itr) != mv) {
+            range[0] = *itr < range[0] ? *itr : range[0];
+            range[1] = *itr > range[1] ? *itr : range[1];
         }
+        ++itr;
     }
     delete sg;
 
