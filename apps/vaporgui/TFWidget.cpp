@@ -118,6 +118,8 @@ void TFWidget::Reinit(TFFlags flags)
     else
         _mappingFrame->setIsolineSliders(false);
 
+    if (_flags & SAMPLING) _mappingFrame->SetIsSampling(true);
+
     configureSecondaryTransferFunction();
     configureConstantColorControls();
 
@@ -405,10 +407,10 @@ void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rPar
     updateMainMappingFrame();    // set mapper func to that of current variable, refresh _rParams etc
     updateSecondaryMappingFrame();
 
-    updateQTWidgets();
+    updateQtWidgets();
 }
 
-void TFWidget::updateQTWidgets()
+void TFWidget::updateQtWidgets()
 {
     enableUpdateButtonsIfNeeded();
     updateColorInterpolation();

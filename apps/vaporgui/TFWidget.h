@@ -99,7 +99,7 @@ private:
     void configureSecondaryTransferFunction();
     void connectWidgets();
 
-    void updateQTWidgets();
+    void updateQtWidgets();
     void updateColorInterpolation();
     void updateConstColor();
     void updateMainAutoUpdateHistoCheckboxes();
