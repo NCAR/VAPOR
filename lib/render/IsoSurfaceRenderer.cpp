@@ -1,5 +1,7 @@
 #include "vapor/IsoSurfaceRenderer.h"
 
+#define GLERROR -5
+
 using namespace VAPoR;
 
 //
@@ -18,19 +20,22 @@ int IsoSurfaceRenderer::_loadShaders()
     if ((shader = _glManager->shaderManager->GetShader("IsoSurface1stPass")))
         _1stPassShaderId = shader->GetID();
     else
-        return 1;
+        return GLERROR;
+
     if ((shader = _glManager->shaderManager->GetShader("IsoSurface2ndPass")))
         _2ndPassShaderId = shader->GetID();
     else
-        return 1;
+        return GLERROR;
+
     if ((shader = _glManager->shaderManager->GetShader("IsoSurface3rdPassMode1")))
         _3rdPassMode1ShaderId = shader->GetID();
     else
-        return 1;
+        return GLERROR;
+
     if ((shader = _glManager->shaderManager->GetShader("IsoSurface3rdPassMode2")))
         _3rdPassMode2ShaderId = shader->GetID();
     else
-        return 1;
+        return GLERROR;
 
     return 0;    // Success
 }

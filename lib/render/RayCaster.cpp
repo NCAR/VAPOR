@@ -4,9 +4,12 @@
 #include <fstream>
 #include <sstream>
 
-#define OUTOFDATE 1
-#define GRIDERROR -1
-#define GLERROR   -2
+#define OUTOFDATE   1
+#define GRIDERROR   -1
+#define JUSTERROR   -2
+#define PARAMSERROR -3
+#define MEMERROR    -4
+#define GLERROR     -5
 
 using namespace VAPoR;
 
@@ -215,7 +218,7 @@ int RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params, Da
     if (grid == nullptr) {
         MyBase::SetErrMsg("UserCoordinates::GetCurrentGrid() isn't on a StructuredGrid; "
                           "the behavior is undefined in this case.");
-        return 1;
+        return GRIDERROR;
     } else {
         *gridpp = grid;
         return 0;
@@ -258,7 +261,7 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
     StructuredGrid *grid = nullptr;
     if (this->GetCurrentGrid(params, dataMgr, &grid) != 0) {
         MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
-        return 1;
+        return GRIDERROR;
     }
     std::vector<double> extMin, extMax;
     grid->GetUserExtents(extMin, extMax);
@@ -358,7 +361,7 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
     {
         MyBase::SetErrMsg("Failed to allocate memory");
         delete grid;
-        return -1;
+        return MEMERROR;
     }
     if (missingValueMask) {
         delete[] missingValueMask;
@@ -373,7 +376,7 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
         if (!missingValueMask) {
             MyBase::SetErrMsg("Failed to allocate memory");
             delete grid;
-            return -1;
+            return MEMERROR;
         }
         float dataValue;
         for (size_t i = 0; i < numOfVertices; i++) {
@@ -410,7 +413,7 @@ int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params,
     if (!zCoords)    // Test if allocation successful for 3D buffers.
     {
         MyBase::SetErrMsg("Failed to allocate memory");
-        return -1;
+        return MEMERROR;
     }
 
     // Gather the XY coordinate from frontFace buffer
@@ -426,7 +429,7 @@ int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params,
     StructuredGrid *grid = nullptr;
     if (this->GetCurrentGrid(params, dataMgr, &grid) != 0) {
         MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
-        return 1;
+        return GRIDERROR;
     }
     StructuredGrid::ConstCoordItr coordItr = grid->ConstCoordBegin();
     size_t                        numOfVertices = dims[0] * dims[1] * dims[2];
@@ -442,11 +445,11 @@ int RayCaster::_initializeGL()
 {
     if (_loadShaders() != 0) {
         MyBase::SetErrMsg("Failed to load shaders!");
-        return -1;
+        return GLERROR;
     }
     if (_initializeFramebufferTextures() != 0) {
         MyBase::SetErrMsg("Failed to Create Framebuffer and Textures!");
-        return -1;
+        return GLERROR;
     }
 
     return 0;    // Success
@@ -459,7 +462,7 @@ int RayCaster::_paintGL(bool fast)
     //   Will incur huge performance panelties on parallel filesystems.
     if (_loadShaders() != 0) {
         MyBase::SetErrMsg("Failed to load shaders");
-        return -1;
+        return GLERROR;
     }
 #endif
     const MatrixManager *mm = Renderer::_glManager->matrixManager;
@@ -486,7 +489,7 @@ int RayCaster::_paintGL(bool fast)
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
     if (!params) {
         MyBase::SetErrMsg("Error occured during retrieving RayCaster parameters!");
-        return 1;
+        return PARAMSERROR;
     }
     long castingMode = params->GetCastingMode();
 
@@ -494,17 +497,17 @@ int RayCaster::_paintGL(bool fast)
     int upToDate = _userCoordinates.IsMetadataUpToDate(params, _dataMgr);
     if (upToDate < 0) {
         MyBase::SetErrMsg("Error occured during updating meta data!");
-        return 1;
+        return JUSTERROR;
     } else if (upToDate == OUTOFDATE) {
         int success = _userCoordinates.UpdateFaceAndData(params, _dataMgr);
         if (success != 0) {
             MyBase::SetErrMsg("Error occured during updating face and volume data!");
-            return 1;
+            return JUSTERROR;
         }
 
         if (castingMode == 2 && _userCoordinates.UpdateCurviCoords(params, _dataMgr) != 0) {
             MyBase::SetErrMsg("Error occured during updating curvilinear coordinates!");
-            return 1;
+            return JUSTERROR;
         }
 
         // Also attach the new data to 3D textures
@@ -601,7 +604,7 @@ int RayCaster::_paintGL(bool fast)
     StructuredGrid *    grid = nullptr;
     if (_userCoordinates.GetCurrentGrid(params, _dataMgr, &grid) != 0) {
         MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
-        return 1;
+        return GRIDERROR;
     }
     bool insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
 
@@ -636,7 +639,7 @@ int RayCaster::_paintGL(bool fast)
         _3rdPassShaderId = _3rdPassMode2ShaderId;
     else {
         MyBase::SetErrMsg("RayCasting Mode not supported!");
-        return 2;
+        return JUSTERROR;
     }
     _drawVolumeFaces(3, castingMode, insideACell, InversedMV, fast);
 
@@ -695,7 +698,7 @@ int RayCaster::_initializeFramebufferTextures()
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         MyBase::SetErrMsg("_openGLInitialization(): Framebuffer failed; "
                           "the behavior is then undefined.");
-        return -1;
+        return GLERROR;
     }
 
     /* Bind the default frame buffer */
