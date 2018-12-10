@@ -1069,11 +1069,11 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
                 attrib1Buffer[attribIdx + 3] = 0;
             }
             glBufferData(GL_ARRAY_BUFFER, bx * by * 4 * sizeof(int),
-                         attrib1Buffer, GL_STREAM_READ);
+                         attrib1Buffer, GL_STREAM_DRAW);
             glVertexAttribIPointer(1, 4, GL_INT, 0, (void *)0);
         }
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int),
-                     indexBuffer, GL_STREAM_READ);
+                     indexBuffer, GL_STREAM_DRAW);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
@@ -1111,11 +1111,11 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
                 attrib1Buffer[attribIdx + 3] = 1;
             }
             glBufferData(GL_ARRAY_BUFFER, bx * by * 4 * sizeof(int),
-                         attrib1Buffer, GL_STREAM_READ);
+                         attrib1Buffer, GL_STREAM_DRAW);
             glVertexAttribIPointer(1, 4, GL_INT, 0, (void *)0);
         }
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int),
-                     indexBuffer, GL_STREAM_READ);
+                     indexBuffer, GL_STREAM_DRAW);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
@@ -1152,11 +1152,11 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
                 attrib1Buffer[attribIdx + 3] = 2;
             }
             glBufferData(GL_ARRAY_BUFFER, bx * bz * 4 * sizeof(int),
-                         attrib1Buffer, GL_STREAM_READ);
+                         attrib1Buffer, GL_STREAM_DRAW);
             glVertexAttribIPointer(1, 4, GL_INT, 0, (void *)0);
         }
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int),
-                     indexBuffer, GL_STREAM_READ);
+                     indexBuffer, GL_STREAM_DRAW);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
@@ -1193,11 +1193,11 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
                 attrib1Buffer[attribIdx + 3] = 3;
             }
             glBufferData(GL_ARRAY_BUFFER, bx * bz * 4 * sizeof(int),
-                         attrib1Buffer, GL_STREAM_READ);
+                         attrib1Buffer, GL_STREAM_DRAW);
             glVertexAttribIPointer(1, 4, GL_INT, 0, (void *)0);
         }
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int),
-                     indexBuffer, GL_STREAM_READ);
+                     indexBuffer, GL_STREAM_DRAW);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
@@ -1239,11 +1239,11 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
                 attrib1Buffer[attribIdx + 3] = 4;
             }
             glBufferData(GL_ARRAY_BUFFER, by * bz * 4 * sizeof(int),
-                         attrib1Buffer, GL_STREAM_READ);
+                         attrib1Buffer, GL_STREAM_DRAW);
             glVertexAttribIPointer(1, 4, GL_INT, 0, (void *)0);
         }
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int),
-                     indexBuffer, GL_STREAM_READ);
+                     indexBuffer, GL_STREAM_DRAW);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
@@ -1280,11 +1280,11 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
                 attrib1Buffer[attribIdx + 3] = 5;
             }
             glBufferData(GL_ARRAY_BUFFER, by * bz * 4 * sizeof(int),
-                         attrib1Buffer, GL_STREAM_READ);
+                         attrib1Buffer, GL_STREAM_DRAW);
             glVertexAttribIPointer(1, 4, GL_INT, 0, (void *)0);
         }
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int),
-                     indexBuffer, GL_STREAM_READ);
+                     indexBuffer, GL_STREAM_DRAW);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
