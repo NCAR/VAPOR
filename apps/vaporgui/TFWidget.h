@@ -107,7 +107,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void configureSecondaryTransferFunction();
     void connectWidgets();
 
-    void updateQTWidgets();
+    void updateQtWidgets();
     void updateColorInterpolation();
     void updateConstColor();
     void updateMainAutoUpdateHistoCheckboxes();
