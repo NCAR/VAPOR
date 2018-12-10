@@ -104,8 +104,8 @@ private slots:
 	void updateSecondaryMappingFrame();
 
 private:
-	void refreshMainHistoIfNecessary();
-	void refreshSecondaryHistoIfNecessary();
+	void refreshMainDuplicateHistogram();
+	void refreshSecondaryDuplicateHistogram();
 
 	void configureConstantColorControls();
 	void configureSecondaryTransferFunction();
