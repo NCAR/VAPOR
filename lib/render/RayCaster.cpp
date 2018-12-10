@@ -439,10 +439,10 @@ int  RayCaster::UserCoordinates::UpdateFaceAndData( const RayCasterParams* param
         delete[] dataField;
         dataField = nullptr;
     }
-    dataField = new float[ numOfVertices ];
-    if( !dataField )    // Test if allocation successful for 3D buffers.
+    try{   dataField = new float[ numOfVertices ]; }
+    catch( const std::bad_alloc& e )
     {
-        MyBase::SetErrMsg( "Failed to allocate memory" );
+        MyBase::SetErrMsg( e.what() );
         delete grid;
         return MEMERROR;
     }
@@ -457,10 +457,10 @@ int  RayCaster::UserCoordinates::UpdateFaceAndData( const RayCasterParams* param
     if( grid->HasMissingData() )
     {
         float missingValue = grid->GetMissingValue();
-        missingValueMask   = new unsigned char[ numOfVertices ];
-        if( !missingValueMask )
+        try{   missingValueMask   = new unsigned char[ numOfVertices ]; }
+        catch( const std::bad_alloc& e )
         {
-            MyBase::SetErrMsg( "Failed to allocate memory" );
+            MyBase::SetErrMsg( e.what() );
             delete grid;
             return MEMERROR;
         }
@@ -504,10 +504,10 @@ int  RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
     xyCoords = new float[ dims[0] * dims[1] * 2 ];
     if( zCoords )
         delete[] zCoords;
-    zCoords  = new float[ dims[0] * dims[1] * dims[2] ];
-    if( !zCoords )  // Test if allocation successful for 3D buffers. 
+    try{   zCoords  = new float[ dims[0] * dims[1] * dims[2] ]; }
+    catch( const std::bad_alloc& e )
     {
-        MyBase::SetErrMsg("Failed to allocate memory");
+        MyBase::SetErrMsg( e.what() );
         return MEMERROR;
     }
 
