@@ -140,6 +140,7 @@ private:
     int                 _timeStep;
     string              _mainVarName;
     string              _secondaryVarName;
+    bool                _initialized;
     bool                _externalChangeHappened;
     bool                _mainHistoRangeChanged;
     bool                _secondaryHistoRangeChanged;

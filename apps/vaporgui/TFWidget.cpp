@@ -40,6 +40,7 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
 {
     setupUi(this);
 
+    _initialized = false;
     _externalChangeHappened = false;
     _mainHistoRangeChanged = false;
     _secondaryHistoRangeChanged = false;
@@ -344,14 +345,14 @@ void TFWidget::updateSecondarySliders()
     _secondaryMinSliderEdit->SetValue(values[0]);
     _secondaryMaxSliderEdit->SetExtents(range[0], range[1]);
     _secondaryMaxSliderEdit->SetValue(values[1]);
+
+    _secondaryMinLabel->setText(QString::number(range[0]));
+    _secondaryMaxLabel->setText(QString::number(range[1]));
 }
 
 void TFWidget::updateMainMappingFrame()
 {
     bool buttonPress = sender() == _updateMainHistoButton ? true : false;
-
-    MapperFunction *mainMF = getMainMapperFunction();
-    MapperFunction *secondaryMF = getSecondaryMapperFunction();
 
     bool histogramRecalculated = _mappingFrame->Update(_dataMgr, _paramsMgr, _rParams, buttonPress);
 
@@ -363,7 +364,10 @@ void TFWidget::updateMainMappingFrame()
         checkForBoxChanges();
         checkForMainMapperRangeChanges();
         checkForTimestepChanges();
-        if (_externalChangeHappened || _mainHistoRangeChanged) _updateMainHistoButton->setEnabled(true);
+        if (_externalChangeHappened || _mainHistoRangeChanged) {
+            cout << "set to true" << endl;
+            _updateMainHistoButton->setEnabled(true);
+        }
     }
 }
 
@@ -583,10 +587,13 @@ void TFWidget::enableUpdateButtonsIfNeeded()
 
     if (_externalChangeHappened || _mainHistoRangeChanged) {
         MapperFunction *mf = getMainMapperFunction();
-        if (mf->GetAutoUpdateHisto())
+        if (mf->GetAutoUpdateHisto()) {
             _mainHistoNeedsRefresh = true;
-        else {
+            _initialized = true;
+        } else if (_initialized) {
             _updateMainHistoButton->setEnabled(true);
+        } else {
+            _updateMainHistoButton->setEnabled(false);
         }
     }
     _mainHistoRangeChanged = false;
@@ -597,10 +604,15 @@ void TFWidget::enableUpdateButtonsIfNeeded()
 
         if (_externalChangeHappened || _secondaryHistoRangeChanged) {
             MapperFunction *mf = getSecondaryMapperFunction();
-            if (mf->GetAutoUpdateHisto())
+            if (mf->GetAutoUpdateHisto()) {
                 _secondaryHistoNeedsRefresh = true;
-            else
+                _initialized = true;
+            } else if (_initialized) {
                 _updateSecondaryHistoButton->setEnabled(true);
+            } else {
+                _updateSecondaryHistoButton->setEnabled(false);
+                _initialized = true;
+            }
         }
         _secondaryHistoRangeChanged = false;
     }
