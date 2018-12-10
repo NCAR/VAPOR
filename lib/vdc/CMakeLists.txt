@@ -31,7 +31,6 @@ set (SRC
 	kdtree.c
 	VDC_c.cpp
 	DCUtils.cpp
-	glutil.cpp
 )
 
 set (HEADERS
@@ -64,16 +63,11 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/DerivedVar.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DerivedVarMgr.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DCUtils.h
-	${PROJECT_SOURCE_DIR}/include/vapor/glutil.h
 )
 
 add_library (vdc SHARED ${SRC} ${HEADERS})
 
-target_link_libraries (vdc PUBLIC common wasp ${UDUNITS2} ${PROJ} ${GLEW} ${OPENGL_LIBRARIES})
-
-if (UNIX AND NOT APPLE)
-	target_link_libraries (vdc PUBLIC GLU)
-endif ()
+target_link_libraries (vdc PUBLIC common wasp ${UDUNITS2} ${PROJ})
 
 add_definitions (-DVDF_EXPORTS)
 
