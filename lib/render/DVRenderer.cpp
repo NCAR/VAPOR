@@ -1,5 +1,7 @@
 #include "vapor/DVRenderer.h"
 
+#define GLERROR -5
+
 using namespace VAPoR;
 
 //
@@ -18,19 +20,22 @@ int DVRenderer::_loadShaders()
     if ((shader = _glManager->shaderManager->GetShader("DVR1stPass")))
         _1stPassShaderId = shader->GetID();
     else
-        return 1;
+        return GLERROR;
+
     if ((shader = _glManager->shaderManager->GetShader("DVR2ndPass")))
         _2ndPassShaderId = shader->GetID();
     else
-        return 1;
+        return GLERROR;
+
     if ((shader = _glManager->shaderManager->GetShader("DVR3rdPassMode1")))
         _3rdPassMode1ShaderId = shader->GetID();
     else
-        return 1;
+        return GLERROR;
+
     if ((shader = _glManager->shaderManager->GetShader("DVR3rdPassMode2")))
         _3rdPassMode2ShaderId = shader->GetID();
     else
-        return 1;
+        return GLERROR;
 
     return 0;    // Success
 }

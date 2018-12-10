@@ -41,7 +41,11 @@ protected:
     //   It returns 0 upon success, and non-zero upon errors.
     virtual int _loadShaders() = 0;
 
-    struct UserCoordinates {
+    class UserCoordinates {
+        // Note: class UserCoordinates lives completely inside of class RayCaster,
+        //   and is solely used by class RayCaster. Thus for simplicity, it has all
+        //   of its member variables and methods public.
+    public:
         //              Y
         //              |   Z (coming out the screen)
         //              |  /
@@ -56,10 +60,8 @@ protected:
         float *        xyCoords;                // X-Y coordinate values
         float *        zCoords;                 // Z coordinate values
 
-        size_t dims[4];                // num. of samples along each axis.
-                                       // !! Note: the last element is the diagnal length !!
-        float boxMin[3], boxMax[3];    // bounding box of the current volume
-                                       // !! NOTE boxMin and boxMax most likely differ from extents from  params !!
+        size_t dims[4];    // num. of samples along each axis.
+                           // !! Note: the last element is the diagnal length !!
 
         //             0---------2
         //              |       |
@@ -73,6 +75,7 @@ protected:
         size_t      myCurrentTimeStep;
         std::string myVariableName;
         int         myRefinementLevel, myCompressionLevel;
+        float       myBoxMin[3], myBoxMax[3];    // Retrieved from params, instead of grid.
 
         /* Member functions */
         UserCoordinates();
@@ -86,7 +89,7 @@ protected:
         //               1 == NOT up to date, but no error
         //              -1 == Error occured
         //
-        int IsMetadataUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const;
+        int checkMetadataUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const;
         //
         // Update meta data, as well as pointers: 6 faces + dataField + missingValueMask
         //   It returns 0 upon success, and non-zero upon errors:
@@ -165,6 +168,11 @@ protected:
     int _initializeFramebufferTextures();
 
     double _getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const;
+
+    void _updateViewportWhenNecessary();
+    void _updateColormap(RayCasterParams *params);
+    void _updateDataTextures(int castingMode);
+    void _updateNearClippingPlane();
 
 };    // End of class RayCaster
 
