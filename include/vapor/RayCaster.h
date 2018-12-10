@@ -187,6 +187,11 @@ protected:
 
     double _getElapsedSeconds( const struct timeval* begin, const struct timeval* end ) const;
 
+    void _updateViewportWhenNecessary();
+    void _updateColormap( RayCasterParams* params );
+    void _updateDataTextures( int castingMode );
+    void _updateNearClippingPlane( );
+
 };  // End of class RayCaster
 
 };  // End of namespace VAPoR
