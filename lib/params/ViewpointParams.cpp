@@ -26,7 +26,6 @@
 #include <algorithm>
 
 #include <vapor/ViewpointParams.h>
-#include <vapor/glutil.h>
 
 
 
