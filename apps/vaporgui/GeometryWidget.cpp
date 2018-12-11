@@ -443,7 +443,7 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
         _planeComboBox->setCurrentIndex(orientation);
     }
 
-    adjustSize();
+    //adjustSize();
 }
 
 void GeometryWidget::getFullExtents(
