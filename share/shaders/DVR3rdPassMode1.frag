@@ -9,7 +9,6 @@ uniform sampler3D  volumeTexture;
 uniform usampler3D missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D  colorMapTexture;
 
-uniform vec3  someVec3[3];
 uniform ivec3 volumeDims;        // number of vertices of this volumeTexture
 uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
@@ -34,9 +33,9 @@ float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
-vec3  boxMin           = someVec3[0];       // min coordinates of the bounding box of this volume
-vec3  boxMax           = someVec3[1];       // max coordinates of the bounding box of this volume
-vec3  colorMapRange    = someVec3[2];
+uniform vec3  boxMin;       // min coordinates of the bounding box of this volume
+uniform vec3  boxMax;       // max coordinates of the bounding box of this volume
+uniform vec3  colorMapRange;
 vec3  volumeDimsf      = vec3( volumeDims );
 vec3  boxSpan          = boxMax - boxMin;
 mat4  transposedInverseMV = transpose(inversedMV);
