@@ -214,6 +214,15 @@ int Visualizer::paintEvent(bool fast)
 
     // Render the current active manip, if there is one
 
+    for (int i = 0; i < _renderer.size(); i++) {
+        Renderer *r = _renderer[i];
+        if (r->IsFlaggedForDeletion()) {
+            RemoveRenderer(r);
+            delete r;
+            i--;
+        }
+    }
+
     // Now we are ready for all the different renderers to proceed.
     // Sort them;  If they are opaque, they go first.  If not opaque, they
     // are sorted back-to-front.  Note: This only works if all the geometry of a renderer is ordered by

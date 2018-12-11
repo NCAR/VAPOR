@@ -70,9 +70,15 @@ RendererBase::RendererBase(const ParamsMgr *pm, string winName, string dataSetNa
 
     _glManager = nullptr;
     _glInitialized = false;
+    _flaggedForDeletion = false;
 }
 // Destructor
 RendererBase::~RendererBase() {}
+
+void RendererBase::FlagForDeletion() { _flaggedForDeletion = true; }
+
+bool RendererBase::IsFlaggedForDeletion() const { return _flaggedForDeletion; }
+
 // Destructor
 Renderer::~Renderer()
 {

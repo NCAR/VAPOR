@@ -94,10 +94,17 @@ protected:
     //! It will be called from an OpenGL rendering context.
     virtual int _initializeGL() = 0;
 
+public:
+    //! Renderers need to be deleted during the draw loop
+    //! to ensure the correct OpenGL context is bound
+    void FlagForDeletion();
+    bool IsFlaggedForDeletion() const;
+
     RendererBase() {}
 
 private:
     bool _glInitialized;
+    bool _flaggedForDeletion;
 };
 
 //! \class Renderer
