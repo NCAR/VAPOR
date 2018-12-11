@@ -66,28 +66,38 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
 
 void TFWidget::collapseConstColorWidgets()
 {
-    useConstColorFrame->hide();
-    constColorFrame->hide();
-    adjustSize();
+    if (!useConstColorFrame->isHidden()) {
+        assert(!constColorFrame->isHidden());
+        useConstColorFrame->hide();
+        constColorFrame->hide();
+        adjustSize();
+    }
 }
 
 void TFWidget::showConstColorWidgets()
 {
-    useConstColorFrame->show();
-    constColorFrame->show();
-    adjustSize();
+    if (useConstColorFrame->isHidden()) {
+        assert(constColorFrame->isHidden());
+        useConstColorFrame->show();
+        constColorFrame->show();
+        adjustSize();
+    }
 }
 
 void TFWidget::hideWhitespaceFrame()
 {
-    whitespaceFrame->hide();
-    adjustSize();
+    if (!whitespaceFrame->isHidden()) {
+        whitespaceFrame->hide();
+        adjustSize();
+    }
 }
 
 void TFWidget::showWhitespaceFrame()
 {
-    whitespaceFrame->show();
-    adjustSize();
+    if (whitespaceFrame->isHidden()) {
+        whitespaceFrame->show();
+        adjustSize();
+    }
 }
 
 void TFWidget::Reinit(TFFlags flags)

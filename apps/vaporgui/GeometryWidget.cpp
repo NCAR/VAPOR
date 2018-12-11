@@ -390,7 +390,7 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
         _planeComboBox->setCurrentIndex(orientation);
     }
 
-    adjustSize();
+    // adjustSize();
 }
 
 void GeometryWidget::getFullExtents(std::vector<double> &minFullExt, std::vector<double> &maxFullExt)
