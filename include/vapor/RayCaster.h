@@ -41,6 +41,8 @@ protected:
     //   It returns 0 upon success, and non-zero upon errors.
     virtual int _loadShaders() = 0;
 
+    enum CastingMode { FixedStep = 1, CellTraversal = 2 };
+
     class UserCoordinates {
         // Note: class UserCoordinates lives completely inside of class RayCaster,
         //   and is solely used by class RayCaster. Thus for simplicity, it has all
