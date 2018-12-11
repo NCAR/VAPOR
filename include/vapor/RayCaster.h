@@ -155,7 +155,8 @@ protected:
     ShaderProgram *_3rdPassShader;
     ShaderProgram *_3rdPassMode1Shader;
     ShaderProgram *_3rdPassMode2Shader;
-    GLint          _currentViewport[4];    // current viewport in use
+
+    GLint _currentViewport[4];    // current viewport in use
 
     //
     // Render the volume surface using triangle strips
