@@ -47,8 +47,8 @@ int ShaderProgram::Link() {
 }
 
 void ShaderProgram::Bind() {
-    assert(_linked && WasLinkingSuccessful());
-    glUseProgram(_id);
+    if (WasLinkingSuccessful())
+        glUseProgram(_id);
 }
 
 bool ShaderProgram::IsBound() const {
