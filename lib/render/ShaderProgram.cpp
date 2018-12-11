@@ -6,6 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace VAPoR;
+using std::vector;
 
 ShaderProgram::Policy ShaderProgram::UniformNotFoundPolicy = ShaderProgram::Policy::Relaxed;
 
@@ -113,6 +114,9 @@ template bool ShaderProgram::SetUniform<glm::vec2>(const std::string &name, cons
 template bool ShaderProgram::SetUniform<glm::vec3>(const std::string &name, const glm::vec3 &value) const;
 template bool ShaderProgram::SetUniform<glm::vec4>(const std::string &name, const glm::vec4 &value) const;
 template bool ShaderProgram::SetUniform<glm::mat4>(const std::string &name, const glm::mat4 &value) const;
+template bool ShaderProgram::SetUniform<glm::ivec2>(const std::string &name, const glm::ivec2 &value) const;
+template bool ShaderProgram::SetUniform<glm::ivec3>(const std::string &name, const glm::ivec3 &value) const;
+template bool ShaderProgram::SetUniform<vector<float>>(const std::string &name, const vector<float> &value) const;
 
 void ShaderProgram::SetUniform(int location, const int &value) const { glUniform1i(location, value); }
 void ShaderProgram::SetUniform(int location, const float &value) const { glUniform1f(location, value); }
@@ -120,12 +124,19 @@ void ShaderProgram::SetUniform(int location, const glm::vec2 &value) const { glU
 void ShaderProgram::SetUniform(int location, const glm::vec3 &value) const { glUniform3fv(location, 1, glm::value_ptr(value)); }
 void ShaderProgram::SetUniform(int location, const glm::vec4 &value) const { glUniform4fv(location, 1, glm::value_ptr(value)); }
 void ShaderProgram::SetUniform(int location, const glm::mat4 &value) const { glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value)); }
+void ShaderProgram::SetUniform(int location, const glm::ivec2 &value) const { glUniform2iv(location, 1, glm::value_ptr(value)); }
+void ShaderProgram::SetUniform(int location, const glm::ivec3 &value) const { glUniform3iv(location, 1, glm::value_ptr(value)); }
+void ShaderProgram::SetUniform(int location, const vector<float> &value) const { glUniform1fv(location, value.size(), value.data()); }
 
 template<typename T> void ShaderProgram::SetUniformArray(const std::string &name, int count, const T *values) const { SetUniformArray(GetUniformLocation(name), count, values); }
+template void             ShaderProgram::SetUniformArray<int>(const std::string &name, int count, const int *values) const;
 template void             ShaderProgram::SetUniformArray<float>(const std::string &name, int count, const float *values) const;
+template void             ShaderProgram::SetUniformArray<glm::vec3>(const std::string &name, int count, const glm::vec3 *values) const;
 template void             ShaderProgram::SetUniformArray<glm::vec4>(const std::string &name, int count, const glm::vec4 *values) const;
 
+void ShaderProgram::SetUniformArray(int location, int count, const int *values) const { glUniform1iv(location, count, values); }
 void ShaderProgram::SetUniformArray(int location, int count, const float *values) const { glUniform1fv(location, count, values); }
+void ShaderProgram::SetUniformArray(int location, int count, const glm::vec3 *values) const { glUniform3fv(location, count, (float *)values); }
 void ShaderProgram::SetUniformArray(int location, int count, const glm::vec4 *values) const { glUniform4fv(location, count, (float *)values); }
 
 std::string ShaderProgram::GetLog() const

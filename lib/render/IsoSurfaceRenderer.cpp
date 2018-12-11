@@ -18,22 +18,22 @@ int IsoSurfaceRenderer::_loadShaders()
 {
     ShaderProgram *shader = nullptr;
     if ((shader = _glManager->shaderManager->GetShader("IsoSurface1stPass")))
-        _1stPassShaderId = shader->GetID();
+        _1stPassShader = shader;
     else
         return GLERROR;
 
     if ((shader = _glManager->shaderManager->GetShader("IsoSurface2ndPass")))
-        _2ndPassShaderId = shader->GetID();
+        _2ndPassShader = shader;
     else
         return GLERROR;
 
     if ((shader = _glManager->shaderManager->GetShader("IsoSurface3rdPassMode1")))
-        _3rdPassMode1ShaderId = shader->GetID();
+        _3rdPassMode1Shader = shader;
     else
         return GLERROR;
 
     if ((shader = _glManager->shaderManager->GetShader("IsoSurface3rdPassMode2")))
-        _3rdPassMode2ShaderId = shader->GetID();
+        _3rdPassMode2Shader = shader;
     else
         return GLERROR;
 
@@ -54,6 +54,9 @@ void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast, long castingMode)
     int numOfIsoValues = (int)validValues.size();
     for (int i = numOfIsoValues; i < 4; i++) validValues.push_back(0.0f);
 
-    glUniform1i(glGetUniformLocation(_3rdPassShaderId, "numOfIsoValues"), numOfIsoValues);
-    glUniform1fv(glGetUniformLocation(_3rdPassShaderId, "isoValues"), 4, validValues.data());
+    // glUniform1i(  glGetUniformLocation( _3rdPassShaderId, "numOfIsoValues" ), numOfIsoValues );
+    // glUniform1fv( glGetUniformLocation( _3rdPassShaderId, "isoValues" ), 4,   validValues.data() );
+
+    _3rdPassShader->SetUniform("numOfIsoValues", numOfIsoValues);
+    _3rdPassShader->SetUniformArray("isoValues", 4, validValues.data());
 }
