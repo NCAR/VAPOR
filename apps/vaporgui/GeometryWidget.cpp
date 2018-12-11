@@ -389,8 +389,6 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
         int orientation = _rParams->GetBox()->GetOrientation();
         _planeComboBox->setCurrentIndex(orientation);
     }
-
-    // adjustSize();
 }
 
 void GeometryWidget::getFullExtents(std::vector<double> &minFullExt, std::vector<double> &maxFullExt)
