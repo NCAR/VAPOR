@@ -892,7 +892,7 @@ public:
         ForwardIterator<T> &operator=(ForwardIterator<T> &rhs) = delete;
 
         bool operator==(const ForwardIterator<T> &rhs) const { return (_index == rhs._index); }
-        bool operator!=(const ForwardIterator<T> &rhs) { return (!(*this == rhs)); }
+        bool operator!=(const ForwardIterator<T> &rhs) { return (_index != rhs._index); }
 
         const ConstCoordItr &GetCoordItr() { return (_coordItr); }
 
