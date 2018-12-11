@@ -223,7 +223,7 @@ int RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params, Da
     }
 }
 
-bool RayCaster::UserCoordinates::isMetadataUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const
+bool RayCaster::UserCoordinates::IsMetadataUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const
 {
     if ((myCurrentTimeStep != params->GetCurrentTimestep()) || (myVariableName != params->GetVariableName()) || (myRefinementLevel != params->GetRefinementLevel())
         || (myCompressionLevel != params->GetCompressionLevel())) {
@@ -247,7 +247,7 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
 {
     std::vector<double> extMin, extMax;
     params->GetBox()->GetExtents(extMin, extMax);
-    if (extMin.size() != 3 || extMax.size() != 3) { return JUSTERROR; }
+    assert(extMin.size() == 3 || extMax.size() == 3);
     for (int i = 0; i < 3; i++) {
         myBoxMin[i] = (float)extMin[i];
         myBoxMax[i] = (float)extMax[i];
@@ -269,79 +269,36 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
     dims[2] = gridDims[2];
     float df[3] = {float(dims[0]), float(dims[1]), float(dims[2])};
     dims[3] = size_t(std::sqrt(df[0] * df[0] + df[1] * df[1] + df[2] * df[2])) + 1;
-    double buf[3];
 
     // Save front face user coordinates ( z == dims[2] - 1 )
     if (frontFace) delete[] frontFace;
     frontFace = new float[dims[0] * dims[1] * 3];
-    size_t idx = 0;
-    for (size_t y = 0; y < dims[1]; y++)
-        for (size_t x = 0; x < dims[0]; x++) {
-            grid->GetUserCoordinates(x, y, dims[2] - 1, buf[0], buf[1], buf[2]);
-            frontFace[idx++] = (float)buf[0];
-            frontFace[idx++] = (float)buf[1];
-            frontFace[idx++] = (float)buf[2];
-        }
+    this->FillCoordsXYPlane(grid, dims[2] - 1, frontFace);
 
     // Save back face user coordinates ( z == 0 )
     if (backFace) delete[] backFace;
     backFace = new float[dims[0] * dims[1] * 3];
-    idx = 0;
-    for (size_t y = 0; y < dims[1]; y++)
-        for (size_t x = 0; x < dims[0]; x++) {
-            grid->GetUserCoordinates(x, y, 0, buf[0], buf[1], buf[2]);
-            backFace[idx++] = (float)buf[0];
-            backFace[idx++] = (float)buf[1];
-            backFace[idx++] = (float)buf[2];
-        }
+    this->FillCoordsXYPlane(grid, 0, backFace);
 
     // Save right face user coordinates ( x == dims[0] - 1 )
     if (rightFace) delete[] rightFace;
     rightFace = new float[dims[1] * dims[2] * 3];
-    idx = 0;
-    for (size_t z = 0; z < dims[2]; z++)
-        for (size_t y = 0; y < dims[1]; y++) {
-            grid->GetUserCoordinates(dims[0] - 1, y, z, buf[0], buf[1], buf[2]);
-            rightFace[idx++] = (float)buf[0];
-            rightFace[idx++] = (float)buf[1];
-            rightFace[idx++] = (float)buf[2];
-        }
+    this->FillCoordsYZPlane(grid, dims[0] - 1, rightFace);
 
     // Save left face user coordinates ( x == 0 )
     if (leftFace) delete[] leftFace;
     leftFace = new float[dims[1] * dims[2] * 3];
-    idx = 0;
-    for (size_t z = 0; z < dims[2]; z++)
-        for (size_t y = 0; y < dims[1]; y++) {
-            grid->GetUserCoordinates(0, y, z, buf[0], buf[1], buf[2]);
-            leftFace[idx++] = (float)buf[0];
-            leftFace[idx++] = (float)buf[1];
-            leftFace[idx++] = (float)buf[2];
-        }
+    this->FillCoordsYZPlane(grid, 0, leftFace);
 
     // Save top face user coordinates ( y == dims[1] - 1 )
     if (topFace) delete[] topFace;
     topFace = new float[dims[0] * dims[2] * 3];
-    idx = 0;
-    for (size_t z = 0; z < dims[2]; z++)
-        for (size_t x = 0; x < dims[0]; x++) {
-            grid->GetUserCoordinates(x, dims[1] - 1, z, buf[0], buf[1], buf[2]);
-            topFace[idx++] = (float)buf[0];
-            topFace[idx++] = (float)buf[1];
-            topFace[idx++] = (float)buf[2];
-        }
+    this->FillCoordsXZPlane(grid, dims[1] - 1, topFace);
 
     // Save bottom face user coordinates ( y == 0 )
     if (bottomFace) delete[] bottomFace;
     bottomFace = new float[dims[0] * dims[2] * 3];
-    idx = 0;
-    for (size_t z = 0; z < dims[2]; z++)
-        for (size_t x = 0; x < dims[0]; x++) {
-            grid->GetUserCoordinates(x, 0, z, buf[0], buf[1], buf[2]);
-            bottomFace[idx++] = (float)buf[0];
-            bottomFace[idx++] = (float)buf[1];
-            bottomFace[idx++] = (float)buf[2];
-        }
+    this->FillCoordsXZPlane(grid, 0, bottomFace);
 
     // Save the data field values and missing values
     size_t numOfVertices = dims[0] * dims[1] * dims[2];
@@ -394,6 +351,45 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
 
     delete grid;
     return 0;
+}
+
+void RayCaster::UserCoordinates::FillCoordsXYPlane(const StructuredGrid *grid, size_t planeIdx, float *coords)
+{
+    size_t idx = 0;
+    double buf[3];
+    for (size_t y = 0; y < dims[1]; y++)
+        for (size_t x = 0; x < dims[0]; x++) {
+            grid->GetUserCoordinates(x, y, planeIdx, buf[0], buf[1], buf[2]);
+            coords[idx++] = (float)buf[0];
+            coords[idx++] = (float)buf[1];
+            coords[idx++] = (float)buf[2];
+        }
+}
+
+void RayCaster::UserCoordinates::FillCoordsYZPlane(const StructuredGrid *grid, size_t planeIdx, float *coords)
+{
+    size_t idx = 0;
+    double buf[3];
+    for (size_t z = 0; z < dims[2]; z++)
+        for (size_t y = 0; y < dims[1]; y++) {
+            grid->GetUserCoordinates(planeIdx, y, z, buf[0], buf[1], buf[2]);
+            coords[idx++] = (float)buf[0];
+            coords[idx++] = (float)buf[1];
+            coords[idx++] = (float)buf[2];
+        }
+}
+
+void RayCaster::UserCoordinates::FillCoordsXZPlane(const StructuredGrid *grid, size_t planeIdx, float *coords)
+{
+    size_t idx = 0;
+    double buf[3];
+    for (size_t z = 0; z < dims[2]; z++)
+        for (size_t x = 0; x < dims[0]; x++) {
+            grid->GetUserCoordinates(x, planeIdx, z, buf[0], buf[1], buf[2]);
+            coords[idx++] = (float)buf[0];
+            coords[idx++] = (float)buf[1];
+            coords[idx++] = (float)buf[2];
+        }
 }
 
 int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params, DataMgr *dataMgr)
@@ -483,7 +479,7 @@ int RayCaster::_paintGL(bool fast)
     long castingMode = params->GetCastingMode();
 
     // If there is an update event
-    if (!_userCoordinates.isMetadataUpToDate(params, _dataMgr)) {
+    if (!_userCoordinates.IsMetadataUpToDate(params, _dataMgr)) {
         int success = _userCoordinates.UpdateFaceAndData(params, _dataMgr);
         if (success != 0) {
             MyBase::SetErrMsg("Error occured during updating face and volume data!");

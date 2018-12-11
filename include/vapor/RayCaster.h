@@ -82,19 +82,29 @@ protected:
         /* Member functions */
         UserCoordinates();
         ~UserCoordinates();
+
         //
         // It returns 0 upon success, and non-zero upon errors.
         //
         int GetCurrentGrid(const RayCasterParams *params, DataMgr *dataMgr, StructuredGrid **gridpp) const;
 
-        bool isMetadataUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const;
+        bool IsMetadataUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const;
         //
         // Update meta data, as well as pointers: 6 faces + dataField + missingValueMask
         //   It returns 0 upon success, and non-zero upon errors:
         //     1 == Failed to get a StructuredGrid
         //    -1 == Failed to allocate memory for the 3D variable or missing value mask
         //
-        int UpdateFaceAndData(const RayCasterParams *params, DataMgr *dataMgr);
+        int  UpdateFaceAndData(const RayCasterParams *params, DataMgr *dataMgr);
+        void FillCoordsXYPlane(const StructuredGrid *grid,        // Input
+                               size_t                planeIdx,    // Input: which plane to retrieve
+                               float *               coords);                    // Output buffer allocated by caller
+        void FillCoordsYZPlane(const StructuredGrid *grid,        // Input
+                               size_t                planeIdx,    // Input
+                               float *               coords);                    // Output
+        void FillCoordsXZPlane(const StructuredGrid *grid,        // Input
+                               size_t                planeIdx,    // Input
+                               float *               coords);                    // Output
         //
         // Update pointers: xyCoords and zCoords
         // |-- Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
