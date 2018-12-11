@@ -238,6 +238,10 @@ void TFWidget::getVariableRange(float range[2], float values[2], bool secondaryV
         MSG_ERR("Error loading variable");
         return;
     }
+    cout << "_dataMgr->GetDataRange()   " << endl;
+    cout << "   " << rangev[0] << endl;
+    cout << "   " << rangev[1] << endl;
+
     assert(rangev.size() == 2);
 
     range[0] = rangev[0];
