@@ -14,19 +14,9 @@ IsoSurfaceRenderer::IsoSurfaceRenderer(const ParamsMgr *pm, std::string &winName
 {
 }
 
-int IsoSurfaceRenderer::_loadShaders()
+int IsoSurfaceRenderer::_load3rdPassShaders()
 {
     ShaderProgram *shader = nullptr;
-    if ((shader = _glManager->shaderManager->GetShader("IsoSurface1stPass")))
-        _1stPassShader = shader;
-    else
-        return GLERROR;
-
-    if ((shader = _glManager->shaderManager->GetShader("IsoSurface2ndPass")))
-        _2ndPassShader = shader;
-    else
-        return GLERROR;
-
     if ((shader = _glManager->shaderManager->GetShader("IsoSurface3rdPassMode1")))
         _3rdPassMode1Shader = shader;
     else
@@ -53,9 +43,6 @@ void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast, long castingMode)
     }
     int numOfIsoValues = (int)validValues.size();
     for (int i = numOfIsoValues; i < 4; i++) validValues.push_back(0.0f);
-
-    // glUniform1i(  glGetUniformLocation( _3rdPassShaderId, "numOfIsoValues" ), numOfIsoValues );
-    // glUniform1fv( glGetUniformLocation( _3rdPassShaderId, "isoValues" ), 4,   validValues.data() );
 
     _3rdPassShader->SetUniform("numOfIsoValues", numOfIsoValues);
     _3rdPassShader->SetUniformArray("isoValues", 4, validValues.data());

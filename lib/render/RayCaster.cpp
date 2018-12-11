@@ -433,7 +433,18 @@ int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params,
 
 int RayCaster::_initializeGL()
 {
-    if (_loadShaders() != 0) {
+    ShaderProgram *shader = nullptr;
+    if ((shader = _glManager->shaderManager->GetShader("RayCaster1stPass")))
+        _1stPassShader = shader;
+    else
+        return GLERROR;
+
+    if ((shader = _glManager->shaderManager->GetShader("RayCaster2ndPass")))
+        _2ndPassShader = shader;
+    else
+        return GLERROR;
+
+    if (_load3rdPassShaders() != 0) {
         MyBase::SetErrMsg("Failed to load shaders!");
         return GLERROR;
     }
@@ -455,7 +466,7 @@ int RayCaster::_paintGL(bool fast)
 #ifndef NDEBUG
     // Reload shaders in case they're changed during shader development.
     //   Will incur huge performance panelties on parallel filesystems.
-    if (_loadShaders() != 0) {
+    if (_load3rdPassShaders() != 0) {
         MyBase::SetErrMsg("Failed to load shaders");
         glBindVertexArray(0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

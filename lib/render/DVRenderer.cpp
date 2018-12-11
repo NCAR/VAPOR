@@ -14,19 +14,9 @@ DVRenderer::DVRenderer(const ParamsMgr *pm, std::string &winName, std::string &d
 {
 }
 
-int DVRenderer::_loadShaders()
+int DVRenderer::_load3rdPassShaders()
 {
     ShaderProgram *shader = nullptr;
-    if ((shader = _glManager->shaderManager->GetShader("DVR1stPass")))
-        _1stPassShader = shader;
-    else
-        return GLERROR;
-
-    if ((shader = _glManager->shaderManager->GetShader("DVR2ndPass")))
-        _2ndPassShader = shader;
-    else
-        return GLERROR;
-
     if ((shader = _glManager->shaderManager->GetShader("DVR3rdPassMode1")))
         _3rdPassMode1Shader = shader;
     else

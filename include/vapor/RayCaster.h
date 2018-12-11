@@ -39,7 +39,7 @@ protected:
     // Makes RayCaster an abstract class that cannot be instantiated,
     //   and it's up to the subclasses to decide which shader to load.
     //   It returns 0 upon success, and non-zero upon errors.
-    virtual int _loadShaders() = 0;
+    virtual int _load3rdPassShaders() = 0;
 
     enum CastingMode { FixedStep = 1, CellTraversal = 2 };
 
