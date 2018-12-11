@@ -526,7 +526,7 @@ int RayCaster::_paintGL(bool fast) {
             return JUSTERROR;
         }
 
-        if (castingMode == 2 && _userCoordinates.UpdateCurviCoords(params, _dataMgr) != 0) {
+        if (castingMode == CellTraversal && _userCoordinates.UpdateCurviCoords(params, _dataMgr) != 0) {
             MyBase::SetErrMsg("Error occured during updating curvilinear coordinates!");
             glBindVertexArray(0);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -580,9 +580,9 @@ int RayCaster::_paintGL(bool fast) {
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
     // 3rd pass, perform ray casting
-    if (castingMode == 1)
+    if (castingMode == FixedStep)
         _3rdPassShaderId = _3rdPassMode1ShaderId;
-    else if (castingMode == 2)
+    else if (castingMode == CellTraversal)
         _3rdPassShaderId = _3rdPassMode2ShaderId;
     else {
         MyBase::SetErrMsg("RayCasting Mode not supported!");
@@ -900,7 +900,7 @@ void RayCaster::_load3rdPassUniforms(long castingMode,
     uniformLocation = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
     glUniform1i(uniformLocation, _missingValueTexOffset);
 
-    if (castingMode == 2) {
+    if (castingMode == CellTraversal) {
         glActiveTexture(GL_TEXTURE0 + _xyCoordsTexOffset);
         glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
         uniformLocation = glGetUniformLocation(_3rdPassShaderId, "xyCoordsTexture");
@@ -931,7 +931,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
 
     bool attrib1 = false;
     int *attrib1Buffer = nullptr;
-    if (castingMode == 2 && whichPass == 3) {
+    if (castingMode == CellTraversal && whichPass == 3) {
         attrib1 = true;
         unsigned int big1 = bx > by ? bx : by;
         unsigned int small = bx < by ? bx : by;
@@ -1278,7 +1278,7 @@ void RayCaster::_updateDataTextures(int castingMode) {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // Restore default alignment.
 
     // If using cell traverse ray casting, we need to upload user coordinates
-    if (castingMode == 2) {
+    if (castingMode == CellTraversal) {
         const size_t *dims = _userCoordinates.dims;
 
         // Fill data to buffer object _xyCoordsBufferId
