@@ -742,17 +742,15 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     shader->SetUniform("Projection", projection);
     shader->SetUniform("inversedMV", inversedMV);
 
-    float        someVec3[9];
     const float *cboxMin = _userCoordinates.myBoxMin;
     const float *cboxMax = _userCoordinates.myBoxMax;
-    std::memcpy(someVec3, cboxMin, sizeof(float) * 3);
-    std::memcpy(someVec3 + 3, cboxMax, sizeof(float) * 3);
-    std::memcpy(someVec3 + 6, _colorMapRange, sizeof(float) * 3);
-    shader->SetUniformArray("someVec3", 3, (glm::vec3 *)someVec3);
+    shader->SetUniform("boxMin", (glm::vec3 &)*cboxMin);
+    shader->SetUniform("boxMax", (glm::vec3 &)*cboxMax);
+    shader->SetUniform("colorMapRange", (glm::vec3 &)*_colorMapRange);
 
-    int volumeDims[3] = {int(_userCoordinates.dims[0]), int(_userCoordinates.dims[1]), int(_userCoordinates.dims[2])};
-    shader->SetUniform("volumeDims", (glm::ivec3 &)volumeDims);
-    shader->SetUniform("viewportDims", (glm::ivec2 &)*(_currentViewport + 2));
+    glm::ivec3 volumeDims(int(_userCoordinates.dims[0]), int(_userCoordinates.dims[1]), int(_userCoordinates.dims[2]));
+    shader->SetUniform("volumeDims", volumeDims);
+    shader->SetUniform("viewportDims", glm::ivec2(_currentViewport[2], _currentViewport[3]));
 
     float planes[24];    // 6 planes, each with 4 elements
     Renderer::GetClippingPlanes(planes);
