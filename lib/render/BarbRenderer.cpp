@@ -47,6 +47,8 @@
 #include <vapor/MyBase.h>
 #include <vapor/errorcodes.h>
 #include <vapor/DataMgr.h>
+#define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
+#include <vapor/LegacyVectorMath.h>
 #include "vapor/LegacyGL.h"
 #include "vapor/GLManager.h"
 #include <glm/gtc/type_ptr.hpp>
