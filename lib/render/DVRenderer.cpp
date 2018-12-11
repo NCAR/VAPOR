@@ -18,22 +18,22 @@ int DVRenderer::_loadShaders()
 {
     ShaderProgram *shader = nullptr;
     if ((shader = _glManager->shaderManager->GetShader("DVR1stPass")))
-        _1stPassShaderId = shader->GetID();
+        _1stPassShader = shader;
     else
         return GLERROR;
 
     if ((shader = _glManager->shaderManager->GetShader("DVR2ndPass")))
-        _2ndPassShaderId = shader->GetID();
+        _2ndPassShader = shader;
     else
         return GLERROR;
 
     if ((shader = _glManager->shaderManager->GetShader("DVR3rdPassMode1")))
-        _3rdPassMode1ShaderId = shader->GetID();
+        _3rdPassMode1Shader = shader;
     else
         return GLERROR;
 
     if ((shader = _glManager->shaderManager->GetShader("DVR3rdPassMode2")))
-        _3rdPassMode2ShaderId = shader->GetID();
+        _3rdPassMode2Shader = shader;
     else
         return GLERROR;
 
