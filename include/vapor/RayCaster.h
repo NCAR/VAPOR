@@ -169,6 +169,7 @@ class RENDER_API RayCaster : public Renderer {
     ShaderProgram *_3rdPassShader;
     ShaderProgram *_3rdPassMode1Shader;
     ShaderProgram *_3rdPassMode2Shader;
+
     GLint _currentViewport[4]; // current viewport in use
 
     //
