@@ -147,13 +147,13 @@ protected:
     GLuint              _colorMapTextureId;
     GLuint              _xyCoordsTextureId;
     GLuint              _zCoordsTextureId;
-    const  GLint       _backFaceTexOffset;
-    const  GLint       _frontFaceTexOffset;
-    const  GLint       _volumeTexOffset;
-    const  GLint       _colorMapTexOffset;
-    const  GLint       _missingValueTexOffset;
-    const  GLint       _xyCoordsTexOffset;
-    const  GLint       _zCoordsTexOffset;
+    const  GLint        _backFaceTexOffset;
+    const  GLint        _frontFaceTexOffset;
+    const  GLint        _volumeTexOffset;
+    const  GLint        _colorMapTexOffset;
+    const  GLint        _missingValueTexOffset;
+    const  GLint        _xyCoordsTexOffset;
+    const  GLint        _zCoordsTexOffset;
 
     // buffers
     GLuint              _frameBufferId;
@@ -173,6 +173,7 @@ protected:
     ShaderProgram*      _3rdPassShader;
     ShaderProgram*      _3rdPassMode1Shader;
     ShaderProgram*      _3rdPassMode2Shader;
+
     GLint               _currentViewport[4]; // current viewport in use
 
     //
