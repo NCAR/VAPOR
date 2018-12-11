@@ -84,10 +84,12 @@ COMMON_API size_t LinearizeCoords(const std::vector<size_t> &coords, const std::
 
 //! Increment a coordinate vector by one
 //!
-//! Increments \p counter by one within the range of \p min
-//! to \p max. Overflow is possible, resulting in wraparound
+//! Increments \p counter along the dimension \p dim by one within the
+//! range of \p min
+//! to \p max. Overflow is possible, resulting in wraparound and setting
+//! \p counter back to \p min
 //
-COMMON_API std::vector<size_t> IncrementCoords(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<size_t> counter);
+COMMON_API std::vector<size_t> IncrementCoords(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<size_t> counter, int dim = 0);
 
 //! Return the dimesions of a subregion
 //!
