@@ -59,11 +59,11 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
     _xyCoordsBufferId = 0;
     _zCoordsBufferId = 0;
 
-    _1stPassShaderId = 0;
-    _2ndPassShaderId = 0;
-    _3rdPassShaderId = 0;
-    _3rdPassMode1ShaderId = 0;
-    _3rdPassMode2ShaderId = 0;
+    _1stPassShader = nullptr;
+    _2ndPassShader = nullptr;
+    _3rdPassShader = nullptr;
+    _3rdPassMode1Shader = nullptr;
+    _3rdPassMode2Shader = nullptr;
 
     _drawBuffers[0] = 0;
     _drawBuffers[1] = 0;
@@ -544,9 +544,9 @@ int RayCaster::_paintGL(bool fast)
 
     // 3rd pass, perform ray casting
     if (castingMode == 1)
-        _3rdPassShaderId = _3rdPassMode1ShaderId;
+        _3rdPassShader = _3rdPassMode1Shader;
     else if (castingMode == 2)
-        _3rdPassShaderId = _3rdPassMode2ShaderId;
+        _3rdPassShader = _3rdPassMode2Shader;
     else {
         MyBase::SetErrMsg("RayCasting Mode not supported!");
         glBindVertexArray(0);
@@ -672,11 +672,9 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
     glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
     if (whichPass == 1) {
-        glUseProgram(_1stPassShaderId);
-        GLint uniformLocation = glGetUniformLocation(_1stPassShaderId, "MV");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview));
-        uniformLocation = glGetUniformLocation(_1stPassShaderId, "Projection");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
+        _1stPassShader->Bind();
+        _1stPassShader->SetUniform("MV", modelview);
+        _1stPassShader->SetUniform("Projection", projection);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
@@ -687,11 +685,9 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 0, black);    // clear GL_COLOR_ATTACHMENT0
     } else if (whichPass == 2) {
-        glUseProgram(_2ndPassShaderId);
-        GLint uniformLocation = glGetUniformLocation(_2ndPassShaderId, "MV");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview));
-        uniformLocation = glGetUniformLocation(_2ndPassShaderId, "Projection");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
+        _2ndPassShader->Bind();
+        _2ndPassShader->SetUniform("MV", modelview);
+        _2ndPassShader->SetUniform("Projection", projection);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -703,7 +699,7 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
         glClearBufferfv(GL_COLOR, 1, black);    // clear GL_COLOR_ATTACHMENT1
     } else                                      // 3rd pass
     {
-        glUseProgram(_3rdPassShaderId);
+        _3rdPassShader->Bind();
         _load3rdPassUniforms(castingMode, InversedMV, fast);
         _3rdPassSpecialHandling(fast, castingMode);
 
@@ -736,17 +732,15 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
 
 void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversedMV, bool fast) const
 {
+    ShaderProgram *shader = _3rdPassShader;
+    shader->Bind();
+
     glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
     glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
-    GLint uniformLocation = glGetUniformLocation(_3rdPassShaderId, "MV");
-    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview));
-
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "Projection");
-    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
-
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "inversedMV");
-    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(inversedMV));
+    shader->SetUniform("MV", modelview);
+    shader->SetUniform("Projection", projection);
+    shader->SetUniform("inversedMV", inversedMV);
 
     float        someVec3[9];
     const float *cboxMin = _userCoordinates.myBoxMin;
@@ -754,20 +748,15 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     std::memcpy(someVec3, cboxMin, sizeof(float) * 3);
     std::memcpy(someVec3 + 3, cboxMax, sizeof(float) * 3);
     std::memcpy(someVec3 + 6, _colorMapRange, sizeof(float) * 3);
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "someVec3");
-    glUniform3fv(uniformLocation, 3, someVec3);
+    shader->SetUniformArray("someVec3", 3, (glm::vec3 *)someVec3);
 
     int volumeDims[3] = {int(_userCoordinates.dims[0]), int(_userCoordinates.dims[1]), int(_userCoordinates.dims[2])};
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeDims");
-    glUniform3iv(uniformLocation, 1, volumeDims);
-
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "viewportDims");
-    glUniform2iv(uniformLocation, 1, _currentViewport + 2);
+    shader->SetUniform("volumeDims", (glm::ivec3 &)volumeDims);
+    shader->SetUniform("viewportDims", (glm::ivec2 &)*(_currentViewport + 2));
 
     float planes[24];    // 6 planes, each with 4 elements
     Renderer::GetClippingPlanes(planes);
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "clipPlanes");
-    glUniform4fv(uniformLocation, 6, planes);
+    shader->SetUniformArray("clipPlanes", 6, (glm::vec4 *)planes);
 
     // Get light settings from params.
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
@@ -775,14 +764,12 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     if (lighting) {
         std::vector<double> coeffsD = params->GetLightingCoeffs();
         float               coeffsF[4] = {float(coeffsD[0]), float(coeffsD[1]), float(coeffsD[2]), float(coeffsD[3])};
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lightingCoeffs");
-        glUniform1fv(uniformLocation, (GLsizei)4, coeffsF);
+        shader->SetUniformArray("lightingCoeffs", 4, coeffsF);
     }
 
     // Pack in fast mode, lighting, and missing value booleans together
     int flags[3] = {int(fast), int(lighting), int(_userCoordinates.missingValueMask != nullptr)};
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "flags");
-    glUniform1iv(uniformLocation, (GLsizei)3, flags);
+    shader->SetUniformArray("flags", 3, flags);
 
     // Calculate the step size with sample rate multiplier taken into account.
     float multiplier;
@@ -807,45 +794,37 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
         stepSize1D = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / float(_userCoordinates.dims[3] * 2);    // Use Nyquist frequency by default
     stepSize1D /= multiplier;
     if (fast) stepSize1D *= 8.0;    // Increase step size, thus fewer steps, when fast rendering
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "stepSize1D");
-    glUniform1f(uniformLocation, stepSize1D);
+    shader->SetUniform("stepSize1D", stepSize1D);
 
     // Pass in textures
     glActiveTexture(GL_TEXTURE0 + _backFaceTexOffset);
     glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "backFaceTexture");
-    glUniform1i(uniformLocation, _backFaceTexOffset);
+    shader->SetUniform("backFaceTexture", _backFaceTexOffset);
 
     glActiveTexture(GL_TEXTURE0 + _frontFaceTexOffset);
     glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "frontFaceTexture");
-    glUniform1i(uniformLocation, _frontFaceTexOffset);
+    shader->SetUniform("frontFaceTexture", _frontFaceTexOffset);
 
     glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
     glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeTexture");
-    glUniform1i(uniformLocation, _volumeTexOffset);
+    shader->SetUniform("volumeTexture", _volumeTexOffset);
 
     glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "colorMapTexture");
-    glUniform1i(uniformLocation, _colorMapTexOffset);
+    shader->SetUniform("colorMapTexture", _colorMapTexOffset);
 
     glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
     glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
-    glUniform1i(uniformLocation, _missingValueTexOffset);
+    shader->SetUniform("missingValueMaskTexture", _missingValueTexOffset);
 
     if (castingMode == 2) {
         glActiveTexture(GL_TEXTURE0 + _xyCoordsTexOffset);
         glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "xyCoordsTexture");
-        glUniform1i(uniformLocation, _xyCoordsTexOffset);
+        shader->SetUniform("xyCoordsTexture", _xyCoordsTexOffset);
 
         glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
         glBindTexture(GL_TEXTURE_BUFFER, _zCoordsTextureId);
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "zCoordsTexture");
-        glUniform1i(uniformLocation, _zCoordsTexOffset);
+        shader->SetUniform("zCoordsTexture", _zCoordsTexOffset);
     }
 }
 
