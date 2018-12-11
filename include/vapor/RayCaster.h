@@ -181,6 +181,7 @@ protected:
     void _updateColormap(RayCasterParams *params);
     void _updateDataTextures(int castingMode);
     void _updateNearClippingPlane();
+    void _enableVertexAttribute(const float *buf, size_t length, bool attrib1Enabled) const;
 
 };    // End of class RayCaster
 
