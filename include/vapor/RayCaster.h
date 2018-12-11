@@ -96,13 +96,9 @@ protected:
         int GetCurrentGrid( const RayCasterParams* params,
                                   DataMgr*         dataMgr,
                                   StructuredGrid** gridpp ) const;
-        //
-        // Return value: 0 == IS up to date
-        //               1 == NOT up to date, but no error
-        //              -1 == Error occured
-        //
-        int checkMetadataUpToDate(   const RayCasterParams* params,
-                                           DataMgr*         dataMgr ) const;
+
+        bool isMetadataUpToDate(   const RayCasterParams* params,
+                                         DataMgr*         dataMgr ) const;
         //
         // Update meta data, as well as pointers: 6 faces + dataField + missingValueMask
         //   It returns 0 upon success, and non-zero upon errors:
