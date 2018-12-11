@@ -999,7 +999,7 @@ class VDF_API Grid {
             return (_index == rhs._index);
         }
         bool operator!=(const ForwardIterator<T> &rhs) {
-            return (!(*this == rhs));
+            return (_index != rhs._index);
         }
 
         const ConstCoordItr &GetCoordItr() {
