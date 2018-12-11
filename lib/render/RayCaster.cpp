@@ -728,9 +728,6 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
 
 void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversedMV, bool fast) const
 {
-    ShaderProgram *shader = _3rdPassShader;
-    shader->Bind();
-
     glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
     glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
