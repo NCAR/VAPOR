@@ -132,13 +132,13 @@ protected:
     GLuint              _colorMapTextureId;
     GLuint              _xyCoordsTextureId;
     GLuint              _zCoordsTextureId;
-    const  GLuint       _backFaceTexOffset;
-    const  GLuint       _frontFaceTexOffset;
-    const  GLuint       _volumeTexOffset;
-    const  GLuint       _colorMapTexOffset;
-    const  GLuint       _missingValueTexOffset;
-    const  GLuint       _xyCoordsTexOffset;
-    const  GLuint       _zCoordsTexOffset;
+    const  GLint       _backFaceTexOffset;
+    const  GLint       _frontFaceTexOffset;
+    const  GLint       _volumeTexOffset;
+    const  GLint       _colorMapTexOffset;
+    const  GLint       _missingValueTexOffset;
+    const  GLint       _xyCoordsTexOffset;
+    const  GLint       _zCoordsTexOffset;
 
     // buffers
     GLuint              _frameBufferId;
@@ -153,11 +153,11 @@ protected:
     GLuint              _vertexAttribId;    // Attribute of vertices: (i, j k) logical indices.
 
     // shaders
-    GLuint              _1stPassShaderId;
-    GLuint              _2ndPassShaderId;
-    GLuint              _3rdPassShaderId;
-    GLuint              _3rdPassMode1ShaderId;
-    GLuint              _3rdPassMode2ShaderId;
+    ShaderProgram*      _1stPassShader;
+    ShaderProgram*      _2ndPassShader;
+    ShaderProgram*      _3rdPassShader;
+    ShaderProgram*      _3rdPassMode1Shader;
+    ShaderProgram*      _3rdPassMode2Shader;
     GLint               _currentViewport[4]; // current viewport in use
 
     //
