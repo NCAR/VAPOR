@@ -223,27 +223,24 @@ int RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params, Da
     }
 }
 
-int RayCaster::UserCoordinates::checkMetadataUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const
+bool RayCaster::UserCoordinates::isMetadataUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const
 {
     if ((myCurrentTimeStep != params->GetCurrentTimestep()) || (myVariableName != params->GetVariableName()) || (myRefinementLevel != params->GetRefinementLevel())
         || (myCompressionLevel != params->GetCompressionLevel())) {
-        return OUTOFDATE;
+        return false;
     }
 
     // compare volume extents
     std::vector<double> extMin, extMax;
     params->GetBox()->GetExtents(extMin, extMax);
-    if (extMin.size() != 3 || extMax.size() != 3) {
-        MyBase::SetErrMsg("RayCaster has to operate on 3D volumes");
-        return JUSTERROR;
-    }
+    assert(extMin.size() == 3 && extMax.size() == 3);
 
     for (int i = 0; i < 3; i++) {
-        if ((myBoxMin[i] != (float)extMin[i]) || (myBoxMax[i] != (float)extMax[i])) return OUTOFDATE;
+        if ((myBoxMin[i] != (float)extMin[i]) || (myBoxMax[i] != (float)extMax[i])) return false;
     }
 
     // now we know it's up to date!
-    return 0;
+    return true;
 }
 
 int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params, DataMgr *dataMgr)
@@ -486,13 +483,7 @@ int RayCaster::_paintGL(bool fast)
     long castingMode = params->GetCastingMode();
 
     // If there is an update event
-    int upToDate = _userCoordinates.checkMetadataUpToDate(params, _dataMgr);
-    if (upToDate < 0) {
-        MyBase::SetErrMsg("Error occured during updating meta data!");
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        return JUSTERROR;
-    } else if (upToDate == OUTOFDATE) {
+    if (!_userCoordinates.isMetadataUpToDate(params, _dataMgr)) {
         int success = _userCoordinates.UpdateFaceAndData(params, _dataMgr);
         if (success != 0) {
             MyBase::SetErrMsg("Error occured during updating face and volume data!");
