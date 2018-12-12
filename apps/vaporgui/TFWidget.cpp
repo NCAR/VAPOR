@@ -794,8 +794,10 @@ void TFWidget::setColorInterpolation(int index)
         mf->setColorInterpType(TFInterpolator::diverging);
     } else if (index == 1) {
         mf->setColorInterpType(TFInterpolator::discrete);
+        mf->setHistogramFastMode(true);
     } else if (index == 2) {
         mf->setColorInterpType(TFInterpolator::linear);
+        mf->setHistogramFastMode(false);
     }
 }
 
