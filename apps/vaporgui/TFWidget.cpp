@@ -45,8 +45,6 @@ TFWidget::TFWidget(QWidget *parent)
     _externalChangeHappened = false;
     _mainHistoRangeChanged = false;
     _secondaryHistoRangeChanged = false;
-    _mainHistoNeedsRefresh = false;
-    _secondaryHistoNeedsRefresh = false;
     _discreteColormap = false;
     _mainVarName = "";
     _secondaryVarName = "";
@@ -256,9 +254,6 @@ void TFWidget::getVariableRange(
         MSG_ERR("Error loading variable");
         return;
     }
-    cout << "_dataMgr->GetDataRange()   " << endl;
-    cout << "   " << rangev[0] << endl;
-    cout << "   " << rangev[1] << endl;
 
     assert(rangev.size() == 2);
 
@@ -369,6 +364,8 @@ void TFWidget::updateSecondarySliders() {
 
 void TFWidget::updateMainMappingFrame() {
     bool buttonPress = sender() == _updateMainHistoButton ? true : false;
+    if (!buttonPress)
+        buttonPress = getAutoUpdateMainHisto();
 
     bool histogramRecalculated = _mappingFrame->Update(
         _dataMgr,
@@ -379,13 +376,13 @@ void TFWidget::updateMainMappingFrame() {
     if (histogramRecalculated) {
         _updateMainHistoButton->setEnabled(false);
         _externalChangeHappened = false;
+        _initialized = true;
     } else {
         checkForCompressionChanges();
         checkForBoxChanges();
         checkForMainMapperRangeChanges();
         checkForTimestepChanges();
         if (_externalChangeHappened || _mainHistoRangeChanged) {
-            cout << "set to true" << endl;
             _updateMainHistoButton->setEnabled(true);
         }
     }
@@ -448,10 +445,9 @@ void TFWidget::Update(DataMgr *dataMgr,
         setEnabled(true);
     }
 
+    updateQtWidgets();
     updateMainMappingFrame(); // set mapper func to that of current variable, refresh _rParams etc
     updateSecondaryMappingFrame();
-
-    updateQtWidgets();
 }
 
 void TFWidget::updateQtWidgets() {
@@ -484,17 +480,6 @@ bool TFWidget::secondaryVariableChanged() {
         return false;
 }
 
-void TFWidget::refreshMainHisto() {
-    return;
-    _mappingFrame->RefreshHistogram();
-
-    refreshSecondaryDuplicateHistogram();
-
-    Update(_dataMgr, _paramsMgr, _rParams, true);
-    _updateMainHistoButton->setEnabled(false);
-    _mainHistoNeedsRefresh = false;
-}
-
 void TFWidget::refreshSecondaryDuplicateHistogram() {
     if (_flags & COLORMAP_VAR_IS_IN_TF2) {
         MapperFunction *mainMF = getMainMapperFunction();
@@ -504,16 +489,6 @@ void TFWidget::refreshSecondaryDuplicateHistogram() {
             _updateSecondaryHistoButton->setEnabled(false);
         }
     }
-}
-
-void TFWidget::refreshSecondaryHisto() {
-    return;
-    _secondaryMappingFrame->RefreshHistogram();
-    refreshMainDuplicateHistogram();
-
-    Update(_dataMgr, _paramsMgr, _rParams, true);
-    _updateSecondaryHistoButton->setEnabled(false);
-    _secondaryHistoNeedsRefresh = false;
 }
 
 void TFWidget::refreshMainDuplicateHistogram() {
@@ -564,8 +539,6 @@ void TFWidget::checkForMainMapperRangeChanges() {
     double newMin = mf->getMinMapValue();
     double newMax = mf->getMaxMapValue();
 
-    cout << min << " " << max << " " << newMin << " " << newMax << endl;
-
     if (min != newMin)
         _mainHistoRangeChanged = true;
     if (max != newMax)
@@ -611,7 +584,6 @@ void TFWidget::enableUpdateButtonsIfNeeded() {
     if (_externalChangeHappened || _mainHistoRangeChanged) {
         MapperFunction *mf = getMainMapperFunction();
         if (mf->GetAutoUpdateHisto()) {
-            _mainHistoNeedsRefresh = true;
             _initialized = true;
         } else if (_initialized) {
             _updateMainHistoButton->setEnabled(true);
@@ -782,9 +754,6 @@ void TFWidget::setRange(double min, double max) {
     mf->setMinMapValue(min);
     mf->setMaxMapValue(max);
 
-    if (getAutoUpdateMainHisto() == true)
-        refreshMainHisto();
-
     _paramsMgr->EndSaveStateGroup();
 
     emit emitChange();
@@ -813,9 +782,6 @@ void TFWidget::autoUpdateMainHistoChecked(int state) {
 
     MapperFunction *mf = getMainMapperFunction();
     mf->SetAutoUpdateHisto(bstate);
-
-    if (bstate == true)
-        refreshMainHisto();
 }
 
 void TFWidget::autoUpdateSecondaryHistoChecked(int state) {
@@ -827,10 +793,6 @@ void TFWidget::autoUpdateSecondaryHistoChecked(int state) {
 
     MapperFunction *mf = getSecondaryMapperFunction();
     mf->SetAutoUpdateHisto(bstate);
-
-    if (bstate == true) {
-        refreshSecondaryHisto();
-    }
 }
 
 void TFWidget::setSingleColor() {
@@ -941,11 +903,9 @@ bool TFWidget::getAutoUpdateSecondaryHisto() {
 }
 
 MapperFunction *TFWidget::getMainMapperFunction() {
-    //string varname = _rParams->GetVariableName();
     bool mainTF = true;
     string varname = getTFVariableName(mainTF);
     MapperFunction *mf = _rParams->GetMapperFunc(varname);
-    cout << "GetMapperFunc " << varname << endl;
     assert(mf);
     return mf;
 }
