@@ -59,7 +59,8 @@ RayCaster::RayCaster(const ParamsMgr *pm,
       _colorMapTexOffset(3),
       _missingValueTexOffset(4),
       _xyCoordsTexOffset(5),
-      _zCoordsTexOffset(6) {
+      _zCoordsTexOffset(6),
+      _depthTexOffset(7) {
     _backFaceTextureId = 0;
     _frontFaceTextureId = 0;
     _volumeTextureId = 0;
@@ -67,6 +68,7 @@ RayCaster::RayCaster(const ParamsMgr *pm,
     _colorMapTextureId = 0;
     _xyCoordsTextureId = 0;
     _zCoordsTextureId = 0;
+    _depthTextureId = 0;
     _frameBufferId = 0;
 
     _vertexArrayId = 0;
@@ -119,6 +121,10 @@ RayCaster::~RayCaster() {
     if (_zCoordsTextureId) {
         glDeleteTextures(1, &_zCoordsTextureId);
         _zCoordsTextureId = 0;
+    }
+    if (_depthTextureId) {
+        glDeleteTextures(1, &_depthTextureId);
+        _depthTextureId = 0;
     }
 
     // delete buffers
@@ -496,6 +502,9 @@ int RayCaster::_paintGL(bool fast) {
 
     _updateViewportWhenNecessary();
 
+    glBindTexture(GL_TEXTURE_2D, _depthTextureId);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, _currentViewport[0], _currentViewport[1], _currentViewport[2], _currentViewport[3], 0);
+
     glBindVertexArray(_vertexArrayId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
 
@@ -693,6 +702,15 @@ int RayCaster::_initializeFramebufferTextures() {
     glGenBuffers(1, &_xyCoordsBufferId);
     glGenBuffers(1, &_zCoordsBufferId);
 
+    /* Generate and configure depth texture */
+    glGenTextures(1, &_depthTextureId);
+    glActiveTexture(GL_TEXTURE0 + _depthTexOffset);
+    glBindTexture(GL_TEXTURE_2D, _depthTextureId);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     /* Bind the default textures */
     glBindTexture(GL_TEXTURE_1D, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -884,6 +902,10 @@ void RayCaster::_load3rdPassUniforms(long castingMode,
         glBindTexture(GL_TEXTURE_BUFFER, _zCoordsTextureId);
         shader->SetUniform("zCoordsTexture", _zCoordsTexOffset);
     }
+
+    glActiveTexture(GL_TEXTURE0 + _depthTexOffset);
+    glBindTexture(GL_TEXTURE_2D, _depthTextureId);
+    shader->SetUniform("depthTexture", _depthTexOffset);
 }
 
 void RayCaster::_3rdPassSpecialHandling(bool fast, long castingMode) {
