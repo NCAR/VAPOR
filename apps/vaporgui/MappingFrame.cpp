@@ -313,26 +313,19 @@ void MappingFrame::populateIteratingHistogram()
 
     grid->SetInterpolationOrder(1);
 
-    float          v;
-    Grid::Iterator itr;
-    Grid::Iterator enditr = grid->end();
+    float               v;
+    Grid::ConstIterator itr = grid->cbegin();
+    Grid::ConstIterator enditr = grid->cend();
 
     if (_mapper->getHistogramFastMode()) {
         int increment = 1.f / FAST_MODE_FACTOR;
-        cout << "fast " << increment << endl;
-        // itr = grid->begin(minExts, maxExts);
-        // int size = itr.size();
-        // int samples = size/increment;
-        // for (int i=0; i<samples; i++) {
-        // for (itr=grid->begin(minExts, maxExts); itr!=enditr; itr+=increment){
-        for (itr = grid->begin(minExts, maxExts); itr != enditr; itr += increment) {
+        for (; itr != enditr;) {
             v = *itr;
-            if (v == grid->GetMissingValue()) continue;
-            _histogram->addToBin(v);
+            if (v != grid->GetMissingValue()) _histogram->addToBin(v);
+            itr += increment;
         }
     } else {
-        cout << "slow" << endl;
-        for (itr = grid->begin(minExts, maxExts); itr != enditr; ++itr) {
+        for (; itr != enditr; ++itr) {
             v = *itr;
             if (v == grid->GetMissingValue()) continue;
             _histogram->addToBin(v);
