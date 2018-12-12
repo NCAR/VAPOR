@@ -8,6 +8,7 @@ uniform sampler2D  frontFaceTexture;
 uniform sampler3D  volumeTexture;
 uniform usampler3D missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D  colorMapTexture;
+uniform sampler2D  depthTexture;
 
 uniform vec2  valueRange;        // min and max values of this variable
 uniform vec2  colorMapRange;     // min and max values on this color map
