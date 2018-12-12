@@ -291,7 +291,7 @@ void test_operator_pg_iterator(const StructuredGrid *sg)
 
     double t0 = Wasp::GetTime();
 
-    const size_t stride = 300;
+    const size_t stride = 10;
 
     Grid::ConstIterator itr = sg->cbegin();
     Grid::ConstIterator enditr = sg->cend();

@@ -893,8 +893,8 @@ public:
         ForwardIterator<T> &operator=(ForwardIterator<T> rhs);
         ForwardIterator<T> &operator=(ForwardIterator<T> &rhs) = delete;
 
-        bool operator==(const ForwardIterator<T> &rhs) const { return (_index == rhs._index); }
-        bool operator!=(const ForwardIterator<T> &rhs) { return (_index != rhs._index); }
+        bool operator==(const ForwardIterator<T> &rhs) const { return (_indexL == rhs._indexL); }
+        bool operator!=(const ForwardIterator<T> &rhs) { return (_indexL != rhs._indexL); }
 
         const ConstCoordItr &GetCoordItr() { return (_coordItr); }
 
@@ -905,9 +905,11 @@ public:
             std::swap(a._dims3d, b._dims3d);
             std::swap(a._bdims3d, b._bdims3d);
             std::swap(a._bs3d, b._bs3d);
+            std::swap(a._blocksize, b._blocksize);
             std::swap(a._coordItr, b._coordItr);
             std::swap(a._index, b._index);
-            std::swap(a._end_index, b._end_index);
+            std::swap(a._indexL, b._indexL);
+            std::swap(a._end_indexL, b._end_indexL);
             std::swap(a._xb, b._xb);
             std::swap(a._itr, b._itr);
             std::swap(a._pred, b._pred);
@@ -919,10 +921,12 @@ public:
         std::vector<size_t>  _dims3d;
         std::vector<size_t>  _bdims3d;
         std::vector<size_t>  _bs3d;
+        size_t               _blocksize;
         ConstCoordItr        _coordItr;
-        std::vector<size_t>  _index;        // current index into grid
-        std::vector<size_t>  _end_index;    // Last valid index
-        size_t               _xb;           // x index within a block
+        std::vector<size_t>  _index;         // current index into grid
+        size_t               _indexL;        // current index into grid
+        size_t               _end_indexL;    // Last valid index
+        size_t               _xb;            // x index within a block
         float *              _itr;
         InsideBox            _pred;
     };
