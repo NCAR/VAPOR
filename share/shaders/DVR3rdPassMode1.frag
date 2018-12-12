@@ -187,5 +187,5 @@ void main(void)
                          (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
     }
 
-}       // End main()
+}
 
