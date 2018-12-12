@@ -47,13 +47,8 @@ size_t Wasp::LinearizeCoords(
 ) {
 	assert (coords.size() == dims.size());
 	
-	// Use static variables to avoid cost of allocator, which is
-	// signficant 
-	//
-	static vector <size_t> min;
-	static vector <size_t> max;
-	min.resize(dims.size());
-	max.resize(dims.size());
+	vector <size_t> min(dims.size());
+	vector <size_t> max(dims.size());
 
 	for (int i=0; i<dims.size(); i++) {
 		min[i] = 0;
@@ -70,11 +65,7 @@ vector <size_t> Wasp::VectorizeCoords(
 ) {
 	assert (min.size() == max.size());
 
-	// Use static variables to avoid cost of allocator, which is
-	// signficant 
-	//
-	static vector <size_t> coords;
-	coords.resize(min.size());
+	vector <size_t> coords(min.size());
 
 	size_t factor = 1;
 	for (int i=0; i<coords.size(); i++) {
@@ -93,14 +84,8 @@ vector <size_t> Wasp::VectorizeCoords(
 	const vector <size_t> &dims
 ) {
 	
-	// Use static variables to avoid cost of allocator, which is
-	// signficant 
-	//
-	static vector <size_t> min;
-	static vector <size_t> max;
-
-	max.resize(dims.size());
-	min.resize(dims.size());
+	vector <size_t> min(dims.size());
+	vector <size_t> max(dims.size());
 	for (int i=0; i<dims.size(); i++) {
 		min[i] = 0;
 		max[i] = dims[i]-1;
