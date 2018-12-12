@@ -185,8 +185,8 @@ RayCaster::UserCoordinates::UserCoordinates()
     missingValueMask = nullptr;
     for( int i = 0; i < 3; i++ )
     {
-        myBoxMin[i] = 0;
-        myBoxMax[i] = 0;
+        myGridMin[i] = 0;
+        myGridMax[i] = 0;
     }
     for( int i = 0; i < 4; i++ )
     {
@@ -261,12 +261,12 @@ RayCaster::UserCoordinates::GetCurrentGrid( const RayCasterParams* params,
 {
     std::vector<double>           extMin, extMax;
     params->GetBox()->GetExtents( extMin, extMax );
-    StructuredGrid* grid = dynamic_cast<StructuredGrid*>( dataMgr->GetVariable(  
-                                                          myCurrentTimeStep,
-                                                          myVariableName,
-                                                          myRefinementLevel,
-                                                          myCompressionLevel,
-                                                          extMin,              
+    StructuredGrid* grid = dynamic_cast<StructuredGrid*>( dataMgr->GetVariable(
+                                                          params ->GetCurrentTimestep(),
+                                                          params ->GetVariableName(),
+                                                          params ->GetRefinementLevel(),
+                                                          params ->GetCompressionLevel(),
+                                                          extMin,
                                                           extMax ) );
     if( grid == nullptr )
     {
@@ -281,7 +281,8 @@ RayCaster::UserCoordinates::GetCurrentGrid( const RayCasterParams* params,
     }
 }
 
-bool RayCaster::UserCoordinates::IsMetadataUpToDate( const RayCasterParams* params,  
+bool RayCaster::UserCoordinates::IsMetadataUpToDate( const RayCasterParams* params,
+                                                     const StructuredGrid*  grid,
                                                            DataMgr*         dataMgr ) const
 {
     if( ( myCurrentTimeStep  != params->GetCurrentTimestep()  )  ||
@@ -292,14 +293,13 @@ bool RayCaster::UserCoordinates::IsMetadataUpToDate( const RayCasterParams* para
         return false;
     }
 
-    // compare volume extents
-    std::vector<double>           extMin, extMax;
-    params->GetBox()->GetExtents( extMin, extMax );
-    assert( extMin.size() == 3 && extMax.size() == 3 );
-
+    // compare grid extents
+    std::vector<double>   newMin, newMax;
+    grid->GetUserExtents( newMin, newMax );
+    assert( newMin.size() == 3 || newMax.size() == 3 );
     for( int i = 0; i < 3; i++ )
     {
-        if( ( myBoxMin[i] != (float)extMin[i] ) || ( myBoxMax[i] != (float)extMax[i] ) )
+        if( ( myGridMin[i] != (float)newMin[i] ) || ( myGridMax[i] != (float)newMax[i] ) )
             return false;
     }
 
@@ -308,29 +308,24 @@ bool RayCaster::UserCoordinates::IsMetadataUpToDate( const RayCasterParams* para
 }
         
 int  RayCaster::UserCoordinates::UpdateFaceAndData( const RayCasterParams* params,
+                                                    const StructuredGrid*  grid, 
                                                           DataMgr*         dataMgr )
 {
-    std::vector<double>           extMin, extMax;
-    params->GetBox()->GetExtents( extMin, extMax );
-    assert( extMin.size() == 3 || extMax.size() == 3 );
+    /* Update meta data */
+    std::vector<double>   newMin, newMax;
+    grid->GetUserExtents( newMin, newMax );
+    assert( newMin.size() == 3 || newMax.size() == 3 );
     for( int i = 0; i < 3; i++ )
     {
-        myBoxMin[i] = (float)extMin[i];
-        myBoxMax[i] = (float)extMax[i];
+        myGridMin[i] = (float)newMin[i];
+        myGridMax[i] = (float)newMax[i];
     }
     myCurrentTimeStep  = params->GetCurrentTimestep();
     myVariableName     = params->GetVariableName();
     myRefinementLevel  = params->GetRefinementLevel();
     myCompressionLevel = params->GetCompressionLevel();
 
-
-    /* update member variables */
-    StructuredGrid*       grid = nullptr;
-    if( this->GetCurrentGrid( params, dataMgr, &grid ) != 0 )
-    {
-        MyBase::SetErrMsg( "Failed to retrieve a StructuredGrid" );
-        return GRIDERROR;
-    }
+    /* Update member variables */
     std::vector<size_t> gridDims = grid->GetDimensions();
     dims[0]     = gridDims[0];
     dims[1]     = gridDims[1];
@@ -385,7 +380,6 @@ int  RayCaster::UserCoordinates::UpdateFaceAndData( const RayCasterParams* param
     catch( const std::bad_alloc& e )
     {
         MyBase::SetErrMsg( e.what() );
-        delete grid;
         return MEMERROR;
     }
     if( missingValueMask )
@@ -403,7 +397,6 @@ int  RayCaster::UserCoordinates::UpdateFaceAndData( const RayCasterParams* param
         catch( const std::bad_alloc& e )
         {
             MyBase::SetErrMsg( e.what() );
-            delete grid;
             return MEMERROR;
         }
         float dataValue;
@@ -432,7 +425,6 @@ int  RayCaster::UserCoordinates::UpdateFaceAndData( const RayCasterParams* param
         }
     }
 
-    delete grid;
     return 0;
 }
 
@@ -485,10 +477,9 @@ void RayCaster::UserCoordinates::FillCoordsXZPlane( const  StructuredGrid* grid,
 }
 
 int  RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* params,
+                                                    const StructuredGrid*  grid, 
                                                           DataMgr*         dataMgr )
 {
-    assert( params->GetCastingMode() == 2 );
-
     if( xyCoords )
         delete[] xyCoords;
     xyCoords = new float[ dims[0] * dims[1] * 2 ];
@@ -512,12 +503,6 @@ int  RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
         }
 
     // Gather the Z coordinates from grid
-    StructuredGrid* grid = nullptr;
-    if( this->GetCurrentGrid( params, dataMgr, &grid ) != 0 )
-    {
-        MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
-        return GRIDERROR;
-    }
     StructuredGrid::ConstCoordItr coordItr   = grid->ConstCoordBegin();
     size_t numOfVertices = dims[0] * dims[1] * dims[2];
     for( xyzIdx = 0; xyzIdx < numOfVertices; xyzIdx++ )
@@ -525,7 +510,6 @@ int  RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
         zCoords[xyzIdx] = float((*coordItr)[2]);
         ++coordItr;
     }
-	delete grid;
 
     return 0;
 }
@@ -578,6 +562,7 @@ int RayCaster::_paintGL( bool fast )
     glBindVertexArray( _vertexArrayId );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, _indexBufferId );
 
+    // Collect params and grid that will be used repeatedly
     RayCasterParams* params = dynamic_cast<RayCasterParams*>( GetActiveParams() );
     if( !params )
     {
@@ -586,25 +571,36 @@ int RayCaster::_paintGL( bool fast )
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
         return PARAMSERROR;
     }
-    long castingMode = params->GetCastingMode();
+    StructuredGrid*  grid = nullptr;
+    if( _userCoordinates.GetCurrentGrid( params, _dataMgr, &grid ) != 0 )
+    {
+        MyBase::SetErrMsg( "Failed to retrieve a StructuredGrid" );
+        glBindVertexArray( 0 );
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+        return GRIDERROR;
+    }
 
     // If there is an update event
-    if( !_userCoordinates.IsMetadataUpToDate( params, _dataMgr ) )
+    long castingMode      = params->GetCastingMode();
+    if( !_userCoordinates.IsMetadataUpToDate( params, grid, _dataMgr ) )
     {
-        int success  = _userCoordinates.UpdateFaceAndData( params, _dataMgr );
+        int success  = _userCoordinates.UpdateFaceAndData( params, grid, _dataMgr );
         if( success != 0 )
         {
             MyBase::SetErrMsg( "Error occured during updating face and volume data!" );
             glBindVertexArray( 0 );
             glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+            delete grid;
             return JUSTERROR;
         }
         
-        if( castingMode == CellTraversal && _userCoordinates.UpdateCurviCoords( params, _dataMgr ) != 0 )
+        if( castingMode == CellTraversal && 
+            _userCoordinates.UpdateCurviCoords( params, grid, _dataMgr ) != 0 )
         {
             MyBase::SetErrMsg( "Error occured during updating curvilinear coordinates!" );
             glBindVertexArray( 0 );
             glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+            delete grid;
             return JUSTERROR;
         }
 
@@ -636,14 +632,6 @@ int RayCaster::_paintGL( bool fast )
     cameraUser[1]         = InversedMV[3][1];
     cameraUser[2]         = InversedMV[3][2];
     std::vector<size_t> cameraCellIndices;      // camera position in which cell?
-    StructuredGrid*  grid = nullptr;
-    if( _userCoordinates.GetCurrentGrid( params, _dataMgr, &grid ) != 0 )
-    {
-        MyBase::SetErrMsg( "Failed to retrieve a StructuredGrid" );
-        glBindVertexArray( 0 );
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-        return GRIDERROR;
-    }
     bool insideACell      =  grid->GetIndicesCell( cameraUser, cameraCellIndices ); 
     if( insideACell )
     {
@@ -666,15 +654,16 @@ int RayCaster::_paintGL( bool fast )
         MyBase::SetErrMsg( "RayCasting Mode not supported!" ); 
         glBindVertexArray( 0 );
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+        delete grid;
         return JUSTERROR;
     }
     _drawVolumeFaces( 3, castingMode, insideACell, InversedMV, fast );
         
-    delete grid;
-
     // Restore default VAO settings! 
     glBindVertexArray( 0 );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+
+    delete grid;
 
     return 0;
 }
@@ -871,10 +860,10 @@ void RayCaster::_load3rdPassUniforms( long               castingMode,
     shader->SetUniform("Projection", projection);
     shader->SetUniform("inversedMV", inversedMV);
 
-    const float* cboxMin  = _userCoordinates.myBoxMin;
-    const float* cboxMax  = _userCoordinates.myBoxMax;
-    shader->SetUniform("boxMin", (glm::vec3&)*cboxMin);
-    shader->SetUniform("boxMax", (glm::vec3&)*cboxMax);
+    const float* cboxMin  = _userCoordinates.myGridMin;
+    const float* cboxMax  = _userCoordinates.myGridMax;
+    shader->SetUniform("boxMin",        (glm::vec3&)*cboxMin);
+    shader->SetUniform("boxMax",        (glm::vec3&)*cboxMax);
     shader->SetUniform("colorMapRange", (glm::vec3&)*_colorMapRange);
 
     glm::ivec3 volumeDims(int(_userCoordinates.dims[0]),

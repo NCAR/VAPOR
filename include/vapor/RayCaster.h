@@ -90,7 +90,8 @@ protected:
         size_t      myCurrentTimeStep;
         std::string myVariableName;
         int         myRefinementLevel, myCompressionLevel;
-        float       myBoxMin[3], myBoxMax[3];   // Retrieved from params, instead of grid.
+        float       myGridMin[3], myGridMax[3];   // Keeps the min and max of the current grid.
+                                                  // !!NOT!! the value retrieved from params.
 
         /* Member functions */
         UserCoordinates();    
@@ -103,15 +104,15 @@ protected:
                                   DataMgr*         dataMgr,
                                   StructuredGrid** gridpp ) const;
 
-        bool IsMetadataUpToDate(   const RayCasterParams* params,
-                                         DataMgr*         dataMgr ) const;
+        bool IsMetadataUpToDate(  const RayCasterParams* params, 
+                                  const StructuredGrid*  grid, 
+                                        DataMgr*         dataMgr ) const;
         //
         // Update meta data, as well as pointers: 6 faces + dataField + missingValueMask
         //   It returns 0 upon success, and non-zero upon errors:
-        //     1 == Failed to get a StructuredGrid
-        //    -1 == Failed to allocate memory for the 3D variable or missing value mask
         // 
         int UpdateFaceAndData(    const RayCasterParams* params,
+                                  const StructuredGrid*  grid, 
                                         DataMgr*         dataMgr );
         void FillCoordsXYPlane( const   StructuredGrid*  grid,  // Input 
                                 size_t  planeIdx,               // Input: which plane to retrieve
@@ -127,10 +128,9 @@ protected:
         // |-- Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
         // |         UpdateFaceAndData() needs to be called priori to UpdateCurviCoords().
         // |-- It returns 0 upon success, and non-zero upon errors:
-        //     |--  1 == Failed to get a StructuredGrid
-        //     |-- -1 == Failed to allocate memory for the Z-coords
         //
         int UpdateCurviCoords(    const RayCasterParams* params,
+                                  const StructuredGrid*  grid, 
                                         DataMgr*         dataMgr );
     };  // end of struct UserCoordinates 
 

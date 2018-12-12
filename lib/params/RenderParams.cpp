@@ -367,7 +367,7 @@ MapperFunction* RenderParams::GetMapperFunc(string varname) {
 
 		vector <double> range;
 		bool prev = EnableErrMsg(false);	// no error handling
-		int rc = _dataMgr->GetDataRange(ts,varname, level,lod,range);
+		int rc = _dataMgr->GetDataRange(ts,varname, level,lod,1,range);
 		if (rc<0) {
 			range = {0.0, 1.0};
 		}
