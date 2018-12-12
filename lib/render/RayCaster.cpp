@@ -525,6 +525,7 @@ int  RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
         zCoords[xyzIdx] = float((*coordItr)[2]);
         ++coordItr;
     }
+	delete grid;
 
     return 0;
 }
