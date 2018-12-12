@@ -1,6 +1,6 @@
 #version 410 core
 
-in vec4 positionClip;   // vertex position in the clip space
+in vec4 gl_FragCoord;
 layout(location = 0) out vec4 color;
 
 uniform sampler2D  backFaceTexture;
@@ -9,12 +9,13 @@ uniform sampler3D  volumeTexture;
 uniform usampler3D missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D  colorMapTexture;
 
-uniform vec2 valueRange;        // min and max values of this variable
-uniform vec2 colorMapRange;     // min and max values on this color map
-uniform vec3 boxMin;            // min coordinates of the bounding box of this volume
-uniform vec3 boxMax;            // max coordinates of the bounding box of this volume
-uniform vec3 volumeDimensions;  // number of vertices of this volumeTexture
-uniform vec4 clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
+uniform vec2  valueRange;        // min and max values of this variable
+uniform vec2  colorMapRange;     // min and max values on this color map
+uniform vec3  boxMin;            // min coordinates of the bounding box of this volume
+uniform vec3  boxMax;            // max coordinates of the bounding box of this volume
+uniform ivec3 volumeDims;        // number of vertices of this volumeTexture
+uniform ivec2 viewportDims;      // width and height of this viewport
+uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
 
 uniform float stepSize1D;       // ray casting step size
 uniform bool  lighting;         // apply lighting or not
@@ -27,11 +28,15 @@ uniform float isoValues[4];     // currently say there are at most 4 iso values.
 uniform mat4 transposedInverseMV;   // transpose(inverse(ModelView))
 uniform mat4 ModelView;
 
-const float EPSILON = 5e-6f;
-float ambientCoeff  = lightingCoeffs[0];
-float diffuseCoeff  = lightingCoeffs[1];
-float specularCoeff = lightingCoeffs[2];
-float specularExp   = lightingCoeffs[3];
+//
+// Derive helper variables
+//
+const float EPSILON    = 5e-6f;
+float ambientCoeff     = lightingCoeffs[0];
+float diffuseCoeff     = lightingCoeffs[1];
+float specularCoeff    = lightingCoeffs[2];
+float specularExp      = lightingCoeffs[3];
+vec3  volumeDimsf      = vec3( volumeDims );
 
 //
 // Input:  normalized value w.r.t. valueRange.
@@ -62,7 +67,7 @@ bool ShouldSkip( in vec3 tc )
     vec4 positionModel  = vec4( (boxMin + tc * (boxMax - boxMin)), 1.0f );
     for( int i = 0; i < 6; i++ )
     {
-        if( dot(positionModel, clipPlanes[i]) < -EPSILON )
+        if( dot(positionModel, clipPlanes[i]) < 0.0f )
             return true;
     }
 
@@ -75,8 +80,8 @@ bool ShouldSkip( in vec3 tc )
 //
 vec3 CalculateGradient(in vec3 tc)
 {
-    vec3 h0 = vec3(-0.5f ) / volumeDimensions;
-    vec3 h1 = vec3( 0.5f ) / volumeDimensions;
+    vec3 h0 = vec3(-0.5f ) / volumeDimsf;
+    vec3 h1 = vec3( 0.5f ) / volumeDimsf;
     vec3 h  = vec3( 1.0f );
 
     if ((tc.x + h0.x) < 0.0f) {
@@ -121,12 +126,10 @@ void main(void)
     vec3  lightDirEye   = vec3(0.0f, 0.0f, 1.0f); 
 
     // Get UV coordinates of this frament
-    if( positionClip.w == 0.0f )
-        discard;
-    vec2 positionUV     = ((positionClip.xy / positionClip.w) + 1.0f) / 2.0f;
+    vec2 fragTexture    = gl_FragCoord.xy / vec2( viewportDims );
 
-    vec3 stopTexture    = texture( backFaceTexture,  positionUV ).xyz;
-    vec3 startTexture   = texture( frontFaceTexture, positionUV ).xyz;
+    vec3 stopTexture    = texture( backFaceTexture,  fragTexture ).xyz;
+    vec3 startTexture   = texture( frontFaceTexture, fragTexture ).xyz;
     vec3 rayDirTexture  = stopTexture - startTexture;
     float rayDirLength  = length( rayDirTexture );
     if( rayDirLength < EPSILON )
