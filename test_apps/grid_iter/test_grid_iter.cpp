@@ -257,7 +257,10 @@ void init_grid(StructuredGrid *sg)
 
     for (size_t k = 0; k < kmax; k++) {
         for (size_t j = 0; j < jmax; j++) {
-            for (size_t i = 0; i < imax; i++) { sg->SetValueIJK(i, j, k, (float)k + 1); }
+            for (size_t i = 0; i < imax; i++) {
+                //		sg->SetValueIJK(i,j,k, (float) k+1);
+                sg->SetValueIJK(i, j, k, (float)i);
+            }
         }
     }
 }
@@ -272,15 +275,55 @@ void test_iterator(const StructuredGrid *sg)
     Grid::ConstIterator enditr = sg->cend();
     double              accum = 0.0;
     size_t              count = 0;
-    //    for (itr = sg->cbegin(opt.roimin, opt.roimax); itr!=->cend(); ++itr)
-    for (itr = sg->cbegin(opt.roimin, opt.roimax); itr != enditr; ++itr) {
+    //    for (itr = sg->cbegin(opt.roimin, opt.roimax); itr!=enditr; ++itr) {
+    for (itr = sg->cbegin(); itr != enditr; ++itr) {
         accum += *itr;
         count++;
-        //		const vector <double> &coord = *(itr.GetCoordItr());
-        //		cout << coord[0] << " " << coord[1] << " " << coord[2] << endl;
     }
     cout << "Iteration time : " << Wasp::GetTime() - t0 << endl;
     cout << "Sum and count: " << accum << " " << count << endl;
+    cout << endl;
+}
+
+void test_operator_pg_iterator(const StructuredGrid *sg)
+{
+    cout << "Operator += Test ----->" << endl;
+
+    double t0 = Wasp::GetTime();
+
+    const size_t stride = 10;
+
+    Grid::ConstIterator itr = sg->cbegin();
+    Grid::ConstIterator enditr = sg->cend();
+    double              accum1 = 0.0;
+    size_t              count1 = 0;
+    size_t              index = 0;
+    for (; itr != enditr; ++itr) {
+        if ((index % stride) == 0) {
+            accum1 += *itr;
+            count1++;
+        }
+        index++;
+    }
+    double t1 = Wasp::GetTime();
+
+    cout << "Iteration time (inc by 1) : " << t1 - t0 << endl;
+    cout << "Sum and count: " << accum1 << " " << count1 << endl;
+
+    double t2 = Wasp::GetTime();
+    itr = sg->cbegin();
+    enditr = sg->cend();
+    double accum2 = 0.0;
+    size_t count2 = 0;
+    for (; itr != enditr;) {
+        accum2 += *itr;
+        count2++;
+        itr += stride;
+    }
+    double t3 = Wasp::GetTime();
+
+    cout << "Iteration time (+=) : " << t3 - t2 << endl;
+    cout << "Sum and count: " << accum2 << " " << count2 << endl;
     cout << endl;
 }
 
@@ -376,11 +419,7 @@ void test_coord_iterator(const StructuredGrid *sg)
     Grid::ConstCoordItr itr;
     Grid::ConstCoordItr enditr = sg->ConstCoordEnd();
     size_t              count = 0;
-    //    for (itr = sg->cbegin(opt.roimin, opt.roimax); itr!=->cend(); ++itr)
-    for (itr = sg->ConstCoordBegin(); itr != enditr; ++itr) {
-        const vector<double> &coord = *itr;
-        count++;
-    }
+    for (itr = sg->ConstCoordBegin(); itr != enditr; ++itr) { count++; }
     cout << "Iteration time : " << Wasp::GetTime() - t0 << endl;
     cout << "count: " << count << endl;
     cout << endl;
@@ -504,7 +543,7 @@ int main(int argc, char **argv)
 
     test_iterator(sg);
 
-    //	test_cell_iterator(sg);
+    test_operator_pg_iterator(sg);
 
     test_node_iterator(sg);
 

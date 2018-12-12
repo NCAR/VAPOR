@@ -1345,9 +1345,10 @@ int DataMgr::GetVariableExtents(size_t ts, string varname, int level, vector<dou
     return (0);
 }
 
-int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<double> &range)
+int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, size_t stride, vector<double> &range)
 {
     SetDiagMsg("DataMgr::GetDataRange(%d,%s)", ts, varname.c_str());
+
     range.clear();
 
     int rc = _level_correction(varname, level);
@@ -1358,7 +1359,11 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<
 
     // See if we've already cache'd it.
     //
-    string key = "VariableRange";
+    ostringstream oss;
+    oss << "VariableRange";
+    if (stride > 1) { oss << stride; }
+    string key = oss.str();
+
     if (_varInfoCache.Get(ts, varname, level, lod, key, range)) {
         assert(range.size() == 2);
         return (0);
@@ -1370,19 +1375,37 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<
     //
     // Have to calculate range
     //
-    range.resize(2, 0.0);
+
+    range.clear();
+    range.push_back(0.0);
+    range.push_back(0.0);
+    float               mv = sg->GetMissingValue();
     Grid::ConstIterator itr = sg->cbegin();
     Grid::ConstIterator enditr = sg->cend();
-    float               mv = sg->GetMissingValue();
-    while (float(*itr) == mv) ++itr;
-    range[0] = range[1] = *itr;
-    ++itr;
-    while (itr != enditr) {
-        if (float(*itr) != mv) {
-            range[0] = *itr < range[0] ? *itr : range[0];
-            range[1] = *itr > range[1] ? *itr : range[1];
-        }
+
+    while (*itr == mv) ++itr;
+    if (itr != enditr) {
+        range[0] = range[1] = *itr;
         ++itr;
+    }
+
+    if (stride > 1) {
+        for (; itr != enditr;) {
+            float v = *itr;
+            if (v != mv) {
+                if (v < range[0]) range[0] = v;
+                if (v > range[1]) range[1] = v;
+            }
+            itr += stride;
+        }
+    } else {
+        for (; itr != enditr; ++itr) {
+            float v = *itr;
+            if (v != mv) {
+                if (v < range[0]) range[0] = v;
+                if (v > range[1]) range[1] = v;
+            }
+        }
     }
     delete sg;
 
@@ -1743,8 +1766,8 @@ int DataMgr::_get_blocked_region_from_fs(size_t ts, string varname, int level, i
     //
     size_t nreads = 1;
     if (bmin.size() == 3 && bmax[2] > bmin[2]) {
-        bmax[2] = bmin[2];
         nreads = bmax[2] - bmin[2] + 1;
+        bmax[2] = bmin[2];
     }
 
     vector<size_t> file_min, file_max;
