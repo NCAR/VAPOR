@@ -47,10 +47,12 @@ size_t Wasp::LinearizeCoords(
 ) {
 	assert (coords.size() == dims.size());
 	
-	vector <size_t> min, max;
+	vector <size_t> min(dims.size());
+	vector <size_t> max(dims.size());
+
 	for (int i=0; i<dims.size(); i++) {
-		min.push_back(0);
-		max.push_back(dims[i]-1);
+		min[i] = 0;
+		max[i] = dims[i]-1;
 	}
 
 	return(Wasp::LinearizeCoords(coords, min, max));
@@ -63,9 +65,7 @@ vector <size_t> Wasp::VectorizeCoords(
 ) {
 	assert (min.size() == max.size());
 
-	vector <size_t> coords;
-
-	coords.resize(min.size());
+	vector <size_t> coords(min.size());
 
 	size_t factor = 1;
 	for (int i=0; i<coords.size(); i++) {
@@ -84,10 +84,11 @@ vector <size_t> Wasp::VectorizeCoords(
 	const vector <size_t> &dims
 ) {
 	
-	vector <size_t> min, max;
+	vector <size_t> min(dims.size());
+	vector <size_t> max(dims.size());
 	for (int i=0; i<dims.size(); i++) {
-		min.push_back(0);
-		max.push_back(dims[i]-1);
+		min[i] = 0;
+		max[i] = dims[i]-1;
 	}
 
 	return(Wasp::VectorizeCoords(offset, min, max));
@@ -96,12 +97,13 @@ vector <size_t> Wasp::VectorizeCoords(
 vector <size_t> Wasp::IncrementCoords(
 	const vector <size_t> &min,
 	const vector <size_t> &max,
-	vector <size_t> counter
+	vector <size_t> counter,
+	int dim
 ) {
 	assert(min.size() == max.size());
 	assert(min.size() == counter.size());
 
-	for (int i=0; i<counter.size(); i++) {
+	for (int i=dim; i<counter.size(); i++) {
 		if (counter[i] < (max[i])) {
 			counter[i] += 1;
 			break;
