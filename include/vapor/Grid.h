@@ -673,6 +673,10 @@ public:
 	}
 	return(true);
   }
+
+  size_t Size() const {
+	return(_min.size());
+  }
  
  private:
   std::vector <double> _min;
