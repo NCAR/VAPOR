@@ -19,7 +19,7 @@ class RENDER_API DVRenderer : public RayCaster {
     }
 
   protected:
-    int _loadShaders();
+    int _load3rdPassShaders();
 };
 
 }; // namespace VAPoR
