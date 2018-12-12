@@ -607,7 +607,8 @@ template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator+=
 
     assert(offset >= 0);
 
-    vector<size_t> maxIndex(_dims3d.size());
+    static vector<size_t> maxIndex;
+    maxIndex.resize(_dims3d.size());
     for (int i = 0; i < _dims3d.size(); i++) maxIndex[i] = _dims3d[i] - 1;
 
     long maxIndexL = Wasp::LinearizeCoords(maxIndex, _dims3d);
