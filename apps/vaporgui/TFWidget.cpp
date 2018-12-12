@@ -46,6 +46,8 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
 
     _myRGB[0] = _myRGB[1] = _myRGB[2] = 1.f;
 
+    _loadTFDialog = new LoadTFDialog(this);
+
     _minCombo = new Combo(minRangeEdit, minRangeSlider);
     _maxCombo = new Combo(maxRangeEdit, maxRangeSlider);
     _rangeCombo = new RangeCombo(_minCombo, _maxCombo);
@@ -110,15 +112,19 @@ TFWidget::~TFWidget()
 {
     if (_minCombo) {
         delete _minCombo;
-        _minCombo = NULL;
+        _minCombo = nullptr;
     }
     if (_maxCombo) {
         delete _maxCombo;
-        _maxCombo = NULL;
+        _maxCombo = nullptr;
     }
     if (_rangeCombo) {
         delete _rangeCombo;
-        _rangeCombo = NULL;
+        _rangeCombo = nullptr;
+    }
+    if (_loadTFDialog) {
+        delete _loadTFDialog;
+        _loadTFDialog = nullptr;
     }
 }
 
@@ -595,4 +601,251 @@ MapperFunction *TFWidget::getCurrentMapperFunction()
     MapperFunction *tf = _rParams->GetMapperFunc(varname);
     assert(tf);
     return tf;
+}
+
+TFWidget::LoadTFDialog::LoadTFDialog(QWidget *parent) : QDialog(parent)
+{
+    // topRight(parent);
+    // topMiddle(parent);
+    // topLeft(parent);
+    topMiddleWithTabWidgets(parent);
+}
+
+TFWidget::LoadTFDialog::~LoadTFDialog()
+{
+    if (_fileDialog) {
+        delete _fileDialog;
+        _fileDialog = nullptr;
+    }
+    if (_checkboxFrame) {
+        delete _checkboxFrame;
+        _checkboxFrame = nullptr;
+    }
+    if (_fileDialogFrame) {
+        delete _fileDialogFrame;
+        _fileDialogFrame = nullptr;
+    }
+    if (_mainLayout) {
+        delete _mainLayout;
+        _mainLayout = nullptr;
+    }
+    if (_checkboxLayout) {
+        delete _checkboxLayout;
+        _checkboxLayout = nullptr;
+    }
+    if (_opacityCheckboxLayout) {
+        delete _opacityCheckboxLayout;
+        _opacityCheckboxLayout = nullptr;
+    }
+    if (_dataBoundsCheckboxLayout) {
+        delete _dataBoundsCheckboxLayout;
+        _dataBoundsCheckboxLayout = nullptr;
+    }
+    if (_loadOptionLayout) {
+        delete _loadOptionLayout;
+        _loadOptionLayout = nullptr;
+    }
+    if (_fileDialogLayout) {
+        delete _fileDialogLayout;
+        _fileDialogLayout = nullptr;
+    }
+    if (_optionLabel) {
+        delete _optionLabel;
+        _optionLabel = nullptr;
+    }
+    if (_fileDialogContainer) {
+        delete _fileDialogContainer;
+        _fileDialogContainer = nullptr;
+    }
+    if (_loadOptionContainer) {
+        delete _loadOptionContainer;
+        _loadOptionContainer = nullptr;
+    }
+    if (_hSpacer) {
+        delete _hSpacer;
+        _hSpacer = nullptr;
+    }
+    if (_loadOpacityMapCheckbox) {
+        delete _loadOpacityMapCheckbox;
+        _loadOpacityMapCheckbox = nullptr;
+    }
+    if (_loadDataBoundsCheckbox) {
+        delete _loadDataBoundsCheckbox;
+        _loadDataBoundsCheckbox = nullptr;
+    }
+}
+
+void TFWidget::LoadTFDialog::topMiddleWithTabWidgets(QWidget *parent)
+{
+    _loadOpacityMapCheckbox = new QCheckBox(this);
+    _loadOpacityMapCheckbox->setLayoutDirection(Qt::RightToLeft);
+    _loadOpacityMapCheckbox->setText("Load opacity map from file\t");
+
+    _loadDataBoundsCheckbox = new QCheckBox(this);
+    _loadDataBoundsCheckbox->setLayoutDirection(Qt::RightToLeft);
+    _loadDataBoundsCheckbox->setText("Load data bounds from file\t");
+
+    _hSpacer = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    _checkboxLayout = new QHBoxLayout;
+    _checkboxLayout->addSpacerItem(_hSpacer);
+    _checkboxLayout->addWidget(_loadOpacityMapCheckbox);
+    _checkboxLayout->addSpacerItem(_hSpacer);
+    _checkboxLayout->addWidget(_loadDataBoundsCheckbox);
+    _checkboxLayout->addSpacerItem(_hSpacer);
+    _checkboxLayout->setContentsMargins(0, 0, 0, 0);
+    _checkboxFrame = new QFrame;
+    _checkboxFrame->setLayout(_checkboxLayout);
+    _loadOptionContainer = new QTabWidget(this);
+    _loadOptionContainer->addTab(_checkboxFrame, "Load File Options");
+
+    _fileDialog = new QFileDialog(this);
+    _fileDialog->setWindowFlags(_fileDialog->windowFlags() & ~Qt::Dialog);
+    _fileDialogLayout = new QVBoxLayout;
+    _fileDialogLayout->addWidget(_fileDialog);
+    _fileDialogLayout->setContentsMargins(0, 0, 0, 0);
+    _fileDialogFrame = new QFrame;
+    _fileDialogFrame->setLayout(_fileDialogLayout);
+    _fileDialogContainer = new QTabWidget(this);
+    _fileDialogContainer->addTab(_fileDialogFrame, "Select .tf3 File");
+
+    _mainLayout = new QVBoxLayout;
+    _mainLayout->addWidget(_loadOptionContainer);
+    _mainLayout->addWidget(_fileDialogContainer);
+    _mainLayout->addStretch(0);
+    _mainLayout->addStretch(1);
+
+    setLayout(_mainLayout);
+    adjustSize();
+    show();
+}
+
+void TFWidget::LoadTFDialog::topRight(QWidget *parent)
+{
+    _fileDialog = new QFileDialog(this);
+    _fileDialog->setWindowFlags(_fileDialog->windowFlags() & ~Qt::Dialog);
+
+    _loadOpacityMapCheckbox = new QCheckBox(this);
+    _loadOpacityMapCheckbox->setLayoutDirection(Qt::RightToLeft);
+    _loadOpacityMapCheckbox->setText("Load opacity map from file\t");
+
+    _loadDataBoundsCheckbox = new QCheckBox(this);
+    _loadDataBoundsCheckbox->setLayoutDirection(Qt::RightToLeft);
+    _loadDataBoundsCheckbox->setText("Load data bounds from file\t");
+
+    int left;
+    int right;
+    int top;
+    int bottom;
+
+    _mainLayout = new QVBoxLayout;
+
+    _hSpacer = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    _opacityCheckboxLayout = new QHBoxLayout;
+    _opacityCheckboxLayout->addSpacerItem(_hSpacer);
+    _opacityCheckboxLayout->addWidget(_loadOpacityMapCheckbox);
+
+    _dataBoundsCheckboxLayout = new QHBoxLayout;
+    _dataBoundsCheckboxLayout->addSpacerItem(_hSpacer);
+    _dataBoundsCheckboxLayout->addWidget(_loadDataBoundsCheckbox);
+
+    _optionLabel = new QLabel("Load options:");
+
+    _mainLayout->addWidget(_optionLabel);
+    _mainLayout->addLayout(_opacityCheckboxLayout);
+    _mainLayout->addLayout(_dataBoundsCheckboxLayout);
+    _mainLayout->addWidget(_fileDialog);
+
+    _fileDialog->layout()->getContentsMargins(&left, &top, &right, &bottom);
+    _mainLayout->setContentsMargins(left, top, right * 2, bottom);
+
+    setLayout(_mainLayout);
+    show();
+}
+
+void TFWidget::LoadTFDialog::topMiddle(QWidget *parent)
+{
+    _fileDialog = new QFileDialog(this);
+    _fileDialog->setWindowFlags(_fileDialog->windowFlags() & ~Qt::Dialog);
+
+    _loadOpacityMapCheckbox = new QCheckBox(this);
+    _loadOpacityMapCheckbox->setLayoutDirection(Qt::RightToLeft);
+    _loadOpacityMapCheckbox->setText("Load opacity map from file\t");
+
+    _loadDataBoundsCheckbox = new QCheckBox(this);
+    _loadDataBoundsCheckbox->setLayoutDirection(Qt::RightToLeft);
+    _loadDataBoundsCheckbox->setText("Load data bounds from file\t");
+
+    int left;
+    int right;
+    int top;
+    int bottom;
+
+    _mainLayout = new QVBoxLayout;
+
+    _hSpacer = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    _checkboxLayout = new QHBoxLayout;
+    _checkboxLayout->addSpacerItem(_hSpacer);
+    _checkboxLayout->addWidget(_loadOpacityMapCheckbox);
+    _checkboxLayout->addSpacerItem(_hSpacer);
+    _checkboxLayout->addWidget(_loadDataBoundsCheckbox);
+    _checkboxLayout->addSpacerItem(_hSpacer);
+
+    _optionLabel = new QLabel("Load options:");
+
+    _mainLayout->addWidget(_optionLabel);
+    _mainLayout->addLayout(_checkboxLayout);
+    _mainLayout->addWidget(_fileDialog);
+
+    _fileDialog->layout()->getContentsMargins(&left, &top, &right, &bottom);
+    _mainLayout->setContentsMargins(left, top, right * 2, bottom);
+
+    setLayout(_mainLayout);
+    show();
+}
+
+void TFWidget::LoadTFDialog::topLeft(QWidget *parent)
+{
+    _fileDialog = new QFileDialog(this);
+    _fileDialog->setWindowFlags(_fileDialog->windowFlags() & ~Qt::Dialog);
+
+    _loadOpacityMapCheckbox = new QCheckBox(this);
+    _loadOpacityMapCheckbox->setLayoutDirection(Qt::RightToLeft);
+    _loadOpacityMapCheckbox->setText("Load opacity map from file");
+
+    _loadDataBoundsCheckbox = new QCheckBox(this);
+    _loadDataBoundsCheckbox->setLayoutDirection(Qt::RightToLeft);
+    _loadDataBoundsCheckbox->setText("Load data bounds from file");
+
+    int left;
+    int right;
+    int top;
+    int bottom;
+
+    _mainLayout = new QVBoxLayout;
+
+    _hSpacer = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    _opacityCheckboxLayout = new QHBoxLayout;
+    _opacityCheckboxLayout->addWidget(_loadOpacityMapCheckbox);
+    _opacityCheckboxLayout->addSpacerItem(_hSpacer);
+
+    _dataBoundsCheckboxLayout = new QHBoxLayout;
+    _dataBoundsCheckboxLayout->addWidget(_loadDataBoundsCheckbox);
+    _dataBoundsCheckboxLayout->addSpacerItem(_hSpacer);
+
+    _optionLabel = new QLabel("Load options:");
+
+    _mainLayout->addWidget(_optionLabel);
+    _mainLayout->addLayout(_opacityCheckboxLayout);
+    _mainLayout->addLayout(_dataBoundsCheckboxLayout);
+    _mainLayout->addWidget(_fileDialog);
+
+    _fileDialog->layout()->getContentsMargins(&left, &top, &right, &bottom);
+    _mainLayout->setContentsMargins(left, top, right * 2, bottom);
+
+    setLayout(_mainLayout);
+    show();
 }
