@@ -80,9 +80,6 @@ private slots:
 	void loadTF();
 	void fileSaveTF();
 	
-	void refreshMainHisto();
-	void refreshSecondaryHisto();
-
 	void autoUpdateMainHistoChecked(int state);
 	void autoUpdateSecondaryHistoChecked(int state);
 
@@ -104,21 +101,19 @@ private slots:
 	void updateSecondaryMappingFrame();
 
 private:
-	void refreshMainHistoIfNecessary();
-	void refreshSecondaryHistoIfNecessary();
+	void refreshMainDuplicateHistogram();
+	void refreshSecondaryDuplicateHistogram();
 
 	void configureConstantColorControls();
 	void configureSecondaryTransferFunction();
 	void connectWidgets();
 
-    void updateQTWidgets(); 
+    void updateQtWidgets(); 
 	void updateColorInterpolation();
 	void updateConstColor();
 	void updateMainAutoUpdateHistoCheckboxes();
-//	void updateMainMappingFrame(bool refresh);
 	void updateMainSliders();
 	void updateSecondaryAutoUpdateHistoCheckbox();
-//	void updateSecondaryMappingFrame(bool refresh);
 	void updateSecondarySliders();
 	
 	bool mainVariableChanged();
@@ -152,6 +147,7 @@ private:
 	int _timeStep;
 	string _mainVarName;
 	string _secondaryVarName;
+    bool _initialized;
 	bool _externalChangeHappened;
 	bool _mainHistoRangeChanged;
 	bool _secondaryHistoRangeChanged;

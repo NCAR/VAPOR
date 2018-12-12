@@ -34,7 +34,12 @@ void RegularGrid::_SetExtents(
 
 	vector <size_t> dims = GetDimensions();
 	for (int i=0; i<_minu.size(); i++) {
-		_delta.push_back((_maxu[i] - _minu[i])/(double) (dims[i] - 1));
+		if (dims[i] > 1) {
+			_delta.push_back((_maxu[i] - _minu[i])/(double) (dims[i] - 1));
+		}
+		else {
+			_delta.push_back(0.0);
+		}
 	}
 }
 
@@ -502,8 +507,8 @@ void RegularGrid::ConstCoordItrRG::next(const long &offset) {
 
     if (! _index.size()) return;
 
-    vector <size_t> maxIndex; ;
-	for (int i=0; i<_dims.size(); i++) maxIndex.push_back(_dims[i]-1);
+    static vector <size_t> maxIndex(_dims.size());;
+	for (int i=0; i<_dims.size(); i++) maxIndex[i] = _dims[i]-1;
 
     long maxIndexL = Wasp::LinearizeCoords(maxIndex, _dims);
     long newIndexL = Wasp::LinearizeCoords(_index, _dims) + offset;
@@ -519,7 +524,7 @@ void RegularGrid::ConstCoordItrRG::next(const long &offset) {
     _index = Wasp::VectorizeCoords(newIndexL, _dims);
 
 	for (int i=0; i<_dims.size(); i++) {
-		_coords[i] = i * _delta[i] + _minu[i];
+		_coords[i] = _index[i] * _delta[i] + _minu[i];
 	}
 
 }
