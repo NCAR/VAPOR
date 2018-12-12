@@ -3,7 +3,7 @@
 IsoSurfaceAppearanceSubtab::IsoSurfaceAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
-    _TFWidget->Reinit((TFFlags)(CONSTANT));
+    _TFWidget->Reinit((TFFlags)(CONSTANT_COLOR | COLORMAP_VAR_IS_IN_TF2 | ISOLINES));
 
     _params = nullptr;
 
@@ -65,12 +65,9 @@ void IsoSurfaceAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMg
     _shininessWidget->SetValue(coeffs[3]);
 
     // Get the value range
-    float               valueRange[2];
-    std::vector<double> extMin, extMax;
-    params->GetBox()->GetExtents(extMin, extMax);
-    VAPoR::Grid *grid = dataMgr->GetVariable(params->GetCurrentTimestep(), params->GetVariableName(), params->GetRefinementLevel(), params->GetCompressionLevel(), extMin, extMax);
-    grid->GetRange(valueRange);
-    delete grid;
+    std::vector<double> valueRanged;
+    dataMgr->GetDataRange(params->GetCurrentTimestep(), params->GetVariableName(), params->GetRefinementLevel(), params->GetCompressionLevel(), 1, valueRanged);
+    float valueRange[2] = {float(valueRanged[0]), float(valueRanged[1])};
 
     // Retrieve Iso Values
     std::vector<bool>   enableFlags = _params->GetEnabledIsoValueFlags();

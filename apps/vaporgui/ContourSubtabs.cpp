@@ -4,9 +4,7 @@ ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
 
-    _TFWidget->Reinit((TFFlags)(CONSTANT));
-    _TFWidget->mappingFrame->setIsolineSliders(true);
-    _TFWidget->mappingFrame->setOpacityMapping(false);
+    _TFWidget->Reinit((TFFlags)(CONSTANT_COLOR | ISOLINES));
 
     _lineWidthCombo = new Combo(lineWidthEdit, lineWidthSlider);
     _countCombo = new Combo(contourCountEdit, contourCountSlider, true);
@@ -119,7 +117,7 @@ void ContourAppearanceSubtab::GetContourBounds(double &min, double &max)
     int            lod = _cParams->GetCompressionLevel();
     vector<double> minMax(2, 0);
 
-    _dataMgr->GetDataRange(ts, varname, level, lod, minMax);
+    _dataMgr->GetDataRange(ts, varname, level, lod, 1, minMax);
     min = minMax[0];
     max = minMax[1];
 }

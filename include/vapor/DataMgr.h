@@ -420,7 +420,20 @@ public:
     //!
     int GetVariableExtents(size_t ts, string varname, int level, std::vector<double> &min, std::vector<double> &max);
 
-    int GetDataRange(size_t ts, string varname, int level, int lod, std::vector<double> &range);
+    //! Compute the min and max value of a variable
+    //!
+    //! This method finds the minimum and maximum value of a variable
+    //!
+    //! \param[in] stride Stride between successive grid points. If set to
+    //! one every grid point the variable is sampled on will be used to compute
+    //! the range. If greater than one specifies stride between successive
+    //! grid points used in calculation.
+    //!
+    //! \param[out] range A two element vector containing the minimum and maximum
+    //! value, respectively, for the variable \p varname at the specified
+    //! time step, lod, etc.
+    //
+    int GetDataRange(size_t ts, string varname, int level, int lod, size_t stride, std::vector<double> &range);
 
     //! \copydoc DC::GetDimLensAtLevel()
     //!
@@ -793,8 +806,8 @@ private:
                                       const vector<size_t> &grid_max, T *blks);
 
     template<typename T>
-    int _get_blocked_region_from_fs(size_t ts, string varname, int level, int lod, const vector<size_t> &file_bs, const vector<size_t> &grid_dims, const vector<size_t> &grid_bs,
-                                    const vector<size_t> &grid_min, const vector<size_t> &grid_max, T *blks);
+    int _get_blocked_region_from_fs(size_t ts, string varname, int level, int lod, const vector<size_t> &file_bs, const vector<size_t> &file_dims, const vector<size_t> &grid_dims,
+                                    const vector<size_t> &grid_bs, const vector<size_t> &grid_min, const vector<size_t> &grid_max, T *blks);
 
     template<typename T>
     T *_get_region_from_fs(size_t ts, string varname, int level, int lod, const std::vector<size_t> &grid_dims, const std::vector<size_t> &grid_bs, const std::vector<size_t> &grid_bmin,

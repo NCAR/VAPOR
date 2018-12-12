@@ -61,9 +61,14 @@ public:
     void                      SetUniform(int location, const glm::vec3 &value) const;
     void                      SetUniform(int location, const glm::vec4 &value) const;
     void                      SetUniform(int location, const glm::mat4 &value) const;
+    void                      SetUniform(int location, const glm::ivec2 &value) const;
+    void                      SetUniform(int location, const glm::ivec3 &value) const;
+    void                      SetUniform(int location, const std::vector<float> &value) const;
 
     template<typename T> void SetUniformArray(const std::string &name, int count, const T *values) const;
+    void                      SetUniformArray(int location, int count, const int *values) const;
     void                      SetUniformArray(int location, int count, const float *values) const;
+    void                      SetUniformArray(int location, int count, const glm::vec3 *values) const;
     void                      SetUniformArray(int location, int count, const glm::vec4 *values) const;
 
     std::string        GetLog() const;
