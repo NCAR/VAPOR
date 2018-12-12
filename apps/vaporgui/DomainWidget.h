@@ -43,7 +43,6 @@ class DomainWidget : public GLWidget {
     float maxValue() const { return _maxValue; } // world-coordinates
 
     virtual void setDomain(float minv, float maxv) {
-        //cout << "setDomain " << minv << " " << maxv << endl;
         _minValue = minv;
         _maxValue = maxv;
     }

@@ -299,7 +299,8 @@ IsoSlider::IsoSlider(QWidget *parent, float min, float max) : DomainWidget(paren
     _maxValue = 0.53;
     _minY = -.10;
     _maxY = 0.06;
-    _lineWidth = 0.02;
+    //_lineWidth = 0.02;
+    _lineWidth = 0.04;
 }
 
 //----------------------------------------------------------------------------
@@ -322,7 +323,6 @@ int IsoSlider::paintGL() {
     glPushMatrix();
     glPushName(VERTLINE);
     {
-
         glColor3f(1., 1., 1.);
 
         glBegin(GL_QUADS);
