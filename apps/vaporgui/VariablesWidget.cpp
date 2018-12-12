@@ -122,14 +122,7 @@ void VariablesWidget::Reinit(
 	}
 
     // If the renderer is only 3D, hide the 2D orientation selector
-//    if (!(_dimFlags & TWOD))
-        orientationFrame->hide();
-/*    if (!(_dimFlags & TWODXY) &&
-        !(_dimFlags & TWODXZ) && 
-        !(_dimFlags & TWODYZ)) {
-        orientationFrame->hide();
-    }
-*/
+    orientationFrame->hide();
 
 	variableSelectionWidget->adjustSize();
 
