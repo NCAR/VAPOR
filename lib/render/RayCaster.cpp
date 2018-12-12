@@ -867,11 +867,20 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
     for (unsigned int y = 0; y < by - 1; y++)    // Looping over every TriangleStrip
     {
         idx = 0;
+        // This loop controls rendering order of the triangle strip. It
+        // provides the indices for each vertex in a strip. Strips are
+        // created one row at a time.
+        //
         for (unsigned int x = 0; x < bx; x++)    // Filling indices for vertices of this TriangleStrip
         {
             indexBuffer[idx++] = (y + 1) * bx + x;
             indexBuffer[idx++] = y * bx + x;
         }
+
+        // In cell-traverse ray casting mode we need a cell index for the
+        // two triangles forming the face of a cell. Use the OpenGL "provoking"
+        // vertex to provide this information.
+        //
         if (attrib1Enabled)    // Also specify attrib1 values
         {
             for (unsigned int x = 0; x < bx; x++)    // Fill attrib1 value for each vertex
