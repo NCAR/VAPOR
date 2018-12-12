@@ -185,6 +185,8 @@ void TFWidget::fileLoadTF(
     vector<double> defaultRange;
     _dataMgr->GetDataRange(0, varname, 0, 0, 1, defaultRange);
 
+    cout << "defaultRange " << defaultRange[0] << " " << defaultRange[1] << endl;
+
 	int rc = tf->LoadFromFile(s.toStdString(), defaultRange);
 	if (rc<0) {
 		MSG_ERR("Error loading transfer function");
@@ -766,7 +768,7 @@ void TFWidget::setRange(double min, double max) {
 	if (max < range[0])
 		max = range[0];
 
-    if (min != values[0] ||
+    if (min != values[0] || 
         max != values[1] ) {
         _mainHistoRangeChanged = true;
     }
