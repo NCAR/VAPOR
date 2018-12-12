@@ -59,11 +59,11 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
     _xyCoordsBufferId = 0;
     _zCoordsBufferId = 0;
 
-    _1stPassShaderId = 0;
-    _2ndPassShaderId = 0;
-    _3rdPassShaderId = 0;
-    _3rdPassMode1ShaderId = 0;
-    _3rdPassMode2ShaderId = 0;
+    _1stPassShader = nullptr;
+    _2ndPassShader = nullptr;
+    _3rdPassShader = nullptr;
+    _3rdPassMode1Shader = nullptr;
+    _3rdPassMode2Shader = nullptr;
 
     _drawBuffers[0] = 0;
     _drawBuffers[1] = 0;
@@ -152,8 +152,8 @@ RayCaster::UserCoordinates::UserCoordinates()
     zCoords = nullptr;
     missingValueMask = nullptr;
     for (int i = 0; i < 3; i++) {
-        myBoxMin[i] = 0;
-        myBoxMax[i] = 0;
+        myGridMin[i] = 0;
+        myGridMax[i] = 0;
     }
     for (int i = 0; i < 4; i++) { dims[i] = 0; }
 
@@ -212,7 +212,8 @@ int RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params, Da
 {
     std::vector<double> extMin, extMax;
     params->GetBox()->GetExtents(extMin, extMax);
-    StructuredGrid *grid = dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(myCurrentTimeStep, myVariableName, myRefinementLevel, myCompressionLevel, extMin, extMax));
+    StructuredGrid *grid =
+        dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(params->GetCurrentTimestep(), params->GetVariableName(), params->GetRefinementLevel(), params->GetCompressionLevel(), extMin, extMax));
     if (grid == nullptr) {
         MyBase::SetErrMsg("UserCoordinates::GetCurrentGrid() isn't on a StructuredGrid; "
                           "the behavior is undefined in this case.");
@@ -223,125 +224,77 @@ int RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params, Da
     }
 }
 
-bool RayCaster::UserCoordinates::isMetadataUpToDate(const RayCasterParams *params, DataMgr *dataMgr) const
+bool RayCaster::UserCoordinates::IsMetadataUpToDate(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr) const
 {
     if ((myCurrentTimeStep != params->GetCurrentTimestep()) || (myVariableName != params->GetVariableName()) || (myRefinementLevel != params->GetRefinementLevel())
         || (myCompressionLevel != params->GetCompressionLevel())) {
         return false;
     }
 
-    // compare volume extents
-    std::vector<double> extMin, extMax;
-    params->GetBox()->GetExtents(extMin, extMax);
-    assert(extMin.size() == 3 && extMax.size() == 3);
-
+    // compare grid extents
+    std::vector<double> newMin, newMax;
+    grid->GetUserExtents(newMin, newMax);
+    assert(newMin.size() == 3 || newMax.size() == 3);
     for (int i = 0; i < 3; i++) {
-        if ((myBoxMin[i] != (float)extMin[i]) || (myBoxMax[i] != (float)extMax[i])) return false;
+        if ((myGridMin[i] != (float)newMin[i]) || (myGridMax[i] != (float)newMax[i])) return false;
     }
 
     // now we know it's up to date!
     return true;
 }
 
-int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params, DataMgr *dataMgr)
+int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr)
 {
-    std::vector<double> extMin, extMax;
-    params->GetBox()->GetExtents(extMin, extMax);
-    if (extMin.size() != 3 || extMax.size() != 3) { return JUSTERROR; }
+    /* Update meta data */
+    std::vector<double> newMin, newMax;
+    grid->GetUserExtents(newMin, newMax);
+    assert(newMin.size() == 3 || newMax.size() == 3);
     for (int i = 0; i < 3; i++) {
-        myBoxMin[i] = (float)extMin[i];
-        myBoxMax[i] = (float)extMax[i];
+        myGridMin[i] = (float)newMin[i];
+        myGridMax[i] = (float)newMax[i];
     }
     myCurrentTimeStep = params->GetCurrentTimestep();
     myVariableName = params->GetVariableName();
     myRefinementLevel = params->GetRefinementLevel();
     myCompressionLevel = params->GetCompressionLevel();
 
-    /* update member variables */
-    StructuredGrid *grid = nullptr;
-    if (this->GetCurrentGrid(params, dataMgr, &grid) != 0) {
-        MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
-        return GRIDERROR;
-    }
+    /* Update member variables */
     std::vector<size_t> gridDims = grid->GetDimensions();
     dims[0] = gridDims[0];
     dims[1] = gridDims[1];
     dims[2] = gridDims[2];
     float df[3] = {float(dims[0]), float(dims[1]), float(dims[2])};
     dims[3] = size_t(std::sqrt(df[0] * df[0] + df[1] * df[1] + df[2] * df[2])) + 1;
-    double buf[3];
 
     // Save front face user coordinates ( z == dims[2] - 1 )
     if (frontFace) delete[] frontFace;
     frontFace = new float[dims[0] * dims[1] * 3];
-    size_t idx = 0;
-    for (size_t y = 0; y < dims[1]; y++)
-        for (size_t x = 0; x < dims[0]; x++) {
-            grid->GetUserCoordinates(x, y, dims[2] - 1, buf[0], buf[1], buf[2]);
-            frontFace[idx++] = (float)buf[0];
-            frontFace[idx++] = (float)buf[1];
-            frontFace[idx++] = (float)buf[2];
-        }
+    this->FillCoordsXYPlane(grid, dims[2] - 1, frontFace);
 
     // Save back face user coordinates ( z == 0 )
     if (backFace) delete[] backFace;
     backFace = new float[dims[0] * dims[1] * 3];
-    idx = 0;
-    for (size_t y = 0; y < dims[1]; y++)
-        for (size_t x = 0; x < dims[0]; x++) {
-            grid->GetUserCoordinates(x, y, 0, buf[0], buf[1], buf[2]);
-            backFace[idx++] = (float)buf[0];
-            backFace[idx++] = (float)buf[1];
-            backFace[idx++] = (float)buf[2];
-        }
+    this->FillCoordsXYPlane(grid, 0, backFace);
 
     // Save right face user coordinates ( x == dims[0] - 1 )
     if (rightFace) delete[] rightFace;
     rightFace = new float[dims[1] * dims[2] * 3];
-    idx = 0;
-    for (size_t z = 0; z < dims[2]; z++)
-        for (size_t y = 0; y < dims[1]; y++) {
-            grid->GetUserCoordinates(dims[0] - 1, y, z, buf[0], buf[1], buf[2]);
-            rightFace[idx++] = (float)buf[0];
-            rightFace[idx++] = (float)buf[1];
-            rightFace[idx++] = (float)buf[2];
-        }
+    this->FillCoordsYZPlane(grid, dims[0] - 1, rightFace);
 
     // Save left face user coordinates ( x == 0 )
     if (leftFace) delete[] leftFace;
     leftFace = new float[dims[1] * dims[2] * 3];
-    idx = 0;
-    for (size_t z = 0; z < dims[2]; z++)
-        for (size_t y = 0; y < dims[1]; y++) {
-            grid->GetUserCoordinates(0, y, z, buf[0], buf[1], buf[2]);
-            leftFace[idx++] = (float)buf[0];
-            leftFace[idx++] = (float)buf[1];
-            leftFace[idx++] = (float)buf[2];
-        }
+    this->FillCoordsYZPlane(grid, 0, leftFace);
 
     // Save top face user coordinates ( y == dims[1] - 1 )
     if (topFace) delete[] topFace;
     topFace = new float[dims[0] * dims[2] * 3];
-    idx = 0;
-    for (size_t z = 0; z < dims[2]; z++)
-        for (size_t x = 0; x < dims[0]; x++) {
-            grid->GetUserCoordinates(x, dims[1] - 1, z, buf[0], buf[1], buf[2]);
-            topFace[idx++] = (float)buf[0];
-            topFace[idx++] = (float)buf[1];
-            topFace[idx++] = (float)buf[2];
-        }
+    this->FillCoordsXZPlane(grid, dims[1] - 1, topFace);
 
     // Save bottom face user coordinates ( y == 0 )
     if (bottomFace) delete[] bottomFace;
     bottomFace = new float[dims[0] * dims[2] * 3];
-    idx = 0;
-    for (size_t z = 0; z < dims[2]; z++)
-        for (size_t x = 0; x < dims[0]; x++) {
-            grid->GetUserCoordinates(x, 0, z, buf[0], buf[1], buf[2]);
-            bottomFace[idx++] = (float)buf[0];
-            bottomFace[idx++] = (float)buf[1];
-            bottomFace[idx++] = (float)buf[2];
-        }
+    this->FillCoordsXZPlane(grid, 0, bottomFace);
 
     // Save the data field values and missing values
     size_t numOfVertices = dims[0] * dims[1] * dims[2];
@@ -353,7 +306,6 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
         dataField = new float[numOfVertices];
     } catch (const std::bad_alloc &e) {
         MyBase::SetErrMsg(e.what());
-        delete grid;
         return MEMERROR;
     }
     if (missingValueMask) {
@@ -369,7 +321,6 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
             missingValueMask = new unsigned char[numOfVertices];
         } catch (const std::bad_alloc &e) {
             MyBase::SetErrMsg(e.what());
-            delete grid;
             return MEMERROR;
         }
         float dataValue;
@@ -392,14 +343,50 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
         }
     }
 
-    delete grid;
     return 0;
 }
 
-int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params, DataMgr *dataMgr)
+void RayCaster::UserCoordinates::FillCoordsXYPlane(const StructuredGrid *grid, size_t planeIdx, float *coords)
 {
-    assert(params->GetCastingMode() == 2);
+    size_t idx = 0;
+    double buf[3];
+    for (size_t y = 0; y < dims[1]; y++)
+        for (size_t x = 0; x < dims[0]; x++) {
+            grid->GetUserCoordinates(x, y, planeIdx, buf[0], buf[1], buf[2]);
+            coords[idx++] = (float)buf[0];
+            coords[idx++] = (float)buf[1];
+            coords[idx++] = (float)buf[2];
+        }
+}
 
+void RayCaster::UserCoordinates::FillCoordsYZPlane(const StructuredGrid *grid, size_t planeIdx, float *coords)
+{
+    size_t idx = 0;
+    double buf[3];
+    for (size_t z = 0; z < dims[2]; z++)
+        for (size_t y = 0; y < dims[1]; y++) {
+            grid->GetUserCoordinates(planeIdx, y, z, buf[0], buf[1], buf[2]);
+            coords[idx++] = (float)buf[0];
+            coords[idx++] = (float)buf[1];
+            coords[idx++] = (float)buf[2];
+        }
+}
+
+void RayCaster::UserCoordinates::FillCoordsXZPlane(const StructuredGrid *grid, size_t planeIdx, float *coords)
+{
+    size_t idx = 0;
+    double buf[3];
+    for (size_t z = 0; z < dims[2]; z++)
+        for (size_t x = 0; x < dims[0]; x++) {
+            grid->GetUserCoordinates(x, planeIdx, z, buf[0], buf[1], buf[2]);
+            coords[idx++] = (float)buf[0];
+            coords[idx++] = (float)buf[1];
+            coords[idx++] = (float)buf[2];
+        }
+}
+
+int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr)
+{
     if (xyCoords) delete[] xyCoords;
     xyCoords = new float[dims[0] * dims[1] * 2];
     if (zCoords) delete[] zCoords;
@@ -420,11 +407,6 @@ int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params,
         }
 
     // Gather the Z coordinates from grid
-    StructuredGrid *grid = nullptr;
-    if (this->GetCurrentGrid(params, dataMgr, &grid) != 0) {
-        MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
-        return GRIDERROR;
-    }
     StructuredGrid::ConstCoordItr coordItr = grid->ConstCoordBegin();
     size_t                        numOfVertices = dims[0] * dims[1] * dims[2];
     for (xyzIdx = 0; xyzIdx < numOfVertices; xyzIdx++) {
@@ -437,7 +419,18 @@ int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params,
 
 int RayCaster::_initializeGL()
 {
-    if (_loadShaders() != 0) {
+    ShaderProgram *shader = nullptr;
+    if ((shader = _glManager->shaderManager->GetShader("RayCaster1stPass")))
+        _1stPassShader = shader;
+    else
+        return GLERROR;
+
+    if ((shader = _glManager->shaderManager->GetShader("RayCaster2ndPass")))
+        _2ndPassShader = shader;
+    else
+        return GLERROR;
+
+    if (_load3rdPassShaders() != 0) {
         MyBase::SetErrMsg("Failed to load shaders!");
         return GLERROR;
     }
@@ -456,16 +449,12 @@ int RayCaster::_initializeGL()
 
 int RayCaster::_paintGL(bool fast)
 {
-#ifndef NDEBUG
-    // Reload shaders in case they're changed during shader development.
-    //   Will incur huge performance panelties on parallel filesystems.
-    if (_loadShaders() != 0) {
+    if (_load3rdPassShaders() != 0) {
         MyBase::SetErrMsg("Failed to load shaders");
         glBindVertexArray(0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return GLERROR;
     }
-#endif
     const MatrixManager *mm = Renderer::_glManager->matrixManager;
 
     _updateViewportWhenNecessary();
@@ -473,6 +462,7 @@ int RayCaster::_paintGL(bool fast)
     glBindVertexArray(_vertexArrayId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
 
+    // Collect params and grid that will be used repeatedly
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
     if (!params) {
         MyBase::SetErrMsg("Error occured during retrieving RayCaster parameters!");
@@ -480,22 +470,31 @@ int RayCaster::_paintGL(bool fast)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return PARAMSERROR;
     }
-    long castingMode = params->GetCastingMode();
+    StructuredGrid *grid = nullptr;
+    if (_userCoordinates.GetCurrentGrid(params, _dataMgr, &grid) != 0) {
+        MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        return GRIDERROR;
+    }
 
     // If there is an update event
-    if (!_userCoordinates.isMetadataUpToDate(params, _dataMgr)) {
-        int success = _userCoordinates.UpdateFaceAndData(params, _dataMgr);
+    long castingMode = params->GetCastingMode();
+    if (!_userCoordinates.IsMetadataUpToDate(params, grid, _dataMgr)) {
+        int success = _userCoordinates.UpdateFaceAndData(params, grid, _dataMgr);
         if (success != 0) {
             MyBase::SetErrMsg("Error occured during updating face and volume data!");
             glBindVertexArray(0);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            delete grid;
             return JUSTERROR;
         }
 
-        if (castingMode == 2 && _userCoordinates.UpdateCurviCoords(params, _dataMgr) != 0) {
+        if (castingMode == CellTraversal && _userCoordinates.UpdateCurviCoords(params, grid, _dataMgr) != 0) {
             MyBase::SetErrMsg("Error occured during updating curvilinear coordinates!");
             glBindVertexArray(0);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            delete grid;
             return JUSTERROR;
         }
 
@@ -526,14 +525,7 @@ int RayCaster::_paintGL(bool fast)
     cameraUser[1] = InversedMV[3][1];
     cameraUser[2] = InversedMV[3][2];
     std::vector<size_t> cameraCellIndices;    // camera position in which cell?
-    StructuredGrid *    grid = nullptr;
-    if (_userCoordinates.GetCurrentGrid(params, _dataMgr, &grid) != 0) {
-        MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        return GRIDERROR;
-    }
-    bool insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
+    bool                insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
     if (insideACell) { _updateNearClippingPlane(); }
 
     // 2nd pass, render front facing polygons
@@ -543,23 +535,24 @@ int RayCaster::_paintGL(bool fast)
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
     // 3rd pass, perform ray casting
-    if (castingMode == 1)
-        _3rdPassShaderId = _3rdPassMode1ShaderId;
-    else if (castingMode == 2)
-        _3rdPassShaderId = _3rdPassMode2ShaderId;
+    if (castingMode == FixedStep)
+        _3rdPassShader = _3rdPassMode1Shader;
+    else if (castingMode == CellTraversal)
+        _3rdPassShader = _3rdPassMode2Shader;
     else {
         MyBase::SetErrMsg("RayCasting Mode not supported!");
         glBindVertexArray(0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        delete grid;
         return JUSTERROR;
     }
     _drawVolumeFaces(3, castingMode, insideACell, InversedMV, fast);
 
-    delete grid;
-
     // Restore default VAO settings!
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    delete grid;
 
     return 0;
 }
@@ -672,11 +665,9 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
     glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
     if (whichPass == 1) {
-        glUseProgram(_1stPassShaderId);
-        GLint uniformLocation = glGetUniformLocation(_1stPassShaderId, "MV");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview));
-        uniformLocation = glGetUniformLocation(_1stPassShaderId, "Projection");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
+        _1stPassShader->Bind();
+        _1stPassShader->SetUniform("MV", modelview);
+        _1stPassShader->SetUniform("Projection", projection);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
@@ -687,11 +678,9 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 0, black);    // clear GL_COLOR_ATTACHMENT0
     } else if (whichPass == 2) {
-        glUseProgram(_2ndPassShaderId);
-        GLint uniformLocation = glGetUniformLocation(_2ndPassShaderId, "MV");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview));
-        uniformLocation = glGetUniformLocation(_2ndPassShaderId, "Projection");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
+        _2ndPassShader->Bind();
+        _2ndPassShader->SetUniform("MV", modelview);
+        _2ndPassShader->SetUniform("Projection", projection);
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -703,7 +692,7 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
         glClearBufferfv(GL_COLOR, 1, black);    // clear GL_COLOR_ATTACHMENT1
     } else                                      // 3rd pass
     {
-        glUseProgram(_3rdPassShaderId);
+        _3rdPassShader->Bind();
         _load3rdPassUniforms(castingMode, InversedMV, fast);
         _3rdPassSpecialHandling(fast, castingMode);
 
@@ -736,38 +725,28 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
 
 void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversedMV, bool fast) const
 {
+    ShaderProgram *shader = _3rdPassShader;
+
     glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
     glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
-    GLint uniformLocation = glGetUniformLocation(_3rdPassShaderId, "MV");
-    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(modelview));
+    shader->SetUniform("MV", modelview);
+    shader->SetUniform("Projection", projection);
+    shader->SetUniform("inversedMV", inversedMV);
 
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "Projection");
-    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(projection));
+    const float *cboxMin = _userCoordinates.myGridMin;
+    const float *cboxMax = _userCoordinates.myGridMax;
+    shader->SetUniform("boxMin", (glm::vec3 &)*cboxMin);
+    shader->SetUniform("boxMax", (glm::vec3 &)*cboxMax);
+    shader->SetUniform("colorMapRange", (glm::vec3 &)*_colorMapRange);
 
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "inversedMV");
-    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(inversedMV));
-
-    float        someVec3[9];
-    const float *cboxMin = _userCoordinates.myBoxMin;
-    const float *cboxMax = _userCoordinates.myBoxMax;
-    std::memcpy(someVec3, cboxMin, sizeof(float) * 3);
-    std::memcpy(someVec3 + 3, cboxMax, sizeof(float) * 3);
-    std::memcpy(someVec3 + 6, _colorMapRange, sizeof(float) * 3);
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "someVec3");
-    glUniform3fv(uniformLocation, 3, someVec3);
-
-    int volumeDims[3] = {int(_userCoordinates.dims[0]), int(_userCoordinates.dims[1]), int(_userCoordinates.dims[2])};
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeDims");
-    glUniform3iv(uniformLocation, 1, volumeDims);
-
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "viewportDims");
-    glUniform2iv(uniformLocation, 1, _currentViewport + 2);
+    glm::ivec3 volumeDims(int(_userCoordinates.dims[0]), int(_userCoordinates.dims[1]), int(_userCoordinates.dims[2]));
+    shader->SetUniform("volumeDims", volumeDims);
+    shader->SetUniform("viewportDims", glm::ivec2(_currentViewport[2], _currentViewport[3]));
 
     float planes[24];    // 6 planes, each with 4 elements
     Renderer::GetClippingPlanes(planes);
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "clipPlanes");
-    glUniform4fv(uniformLocation, 6, planes);
+    shader->SetUniformArray("clipPlanes", 6, (glm::vec4 *)planes);
 
     // Get light settings from params.
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
@@ -775,14 +754,12 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     if (lighting) {
         std::vector<double> coeffsD = params->GetLightingCoeffs();
         float               coeffsF[4] = {float(coeffsD[0]), float(coeffsD[1]), float(coeffsD[2]), float(coeffsD[3])};
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "lightingCoeffs");
-        glUniform1fv(uniformLocation, (GLsizei)4, coeffsF);
+        shader->SetUniformArray("lightingCoeffs", 4, coeffsF);
     }
 
     // Pack in fast mode, lighting, and missing value booleans together
     int flags[3] = {int(fast), int(lighting), int(_userCoordinates.missingValueMask != nullptr)};
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "flags");
-    glUniform1iv(uniformLocation, (GLsizei)3, flags);
+    shader->SetUniformArray("flags", 3, flags);
 
     // Calculate the step size with sample rate multiplier taken into account.
     float multiplier;
@@ -807,45 +784,37 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
         stepSize1D = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / float(_userCoordinates.dims[3] * 2);    // Use Nyquist frequency by default
     stepSize1D /= multiplier;
     if (fast) stepSize1D *= 8.0;    // Increase step size, thus fewer steps, when fast rendering
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "stepSize1D");
-    glUniform1f(uniformLocation, stepSize1D);
+    shader->SetUniform("stepSize1D", stepSize1D);
 
     // Pass in textures
     glActiveTexture(GL_TEXTURE0 + _backFaceTexOffset);
     glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "backFaceTexture");
-    glUniform1i(uniformLocation, _backFaceTexOffset);
+    shader->SetUniform("backFaceTexture", _backFaceTexOffset);
 
     glActiveTexture(GL_TEXTURE0 + _frontFaceTexOffset);
     glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "frontFaceTexture");
-    glUniform1i(uniformLocation, _frontFaceTexOffset);
+    shader->SetUniform("frontFaceTexture", _frontFaceTexOffset);
 
     glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
     glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "volumeTexture");
-    glUniform1i(uniformLocation, _volumeTexOffset);
+    shader->SetUniform("volumeTexture", _volumeTexOffset);
 
     glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "colorMapTexture");
-    glUniform1i(uniformLocation, _colorMapTexOffset);
+    shader->SetUniform("colorMapTexture", _colorMapTexOffset);
 
     glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
     glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
-    uniformLocation = glGetUniformLocation(_3rdPassShaderId, "missingValueMaskTexture");
-    glUniform1i(uniformLocation, _missingValueTexOffset);
+    shader->SetUniform("missingValueMaskTexture", _missingValueTexOffset);
 
-    if (castingMode == 2) {
+    if (castingMode == CellTraversal) {
         glActiveTexture(GL_TEXTURE0 + _xyCoordsTexOffset);
         glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "xyCoordsTexture");
-        glUniform1i(uniformLocation, _xyCoordsTexOffset);
+        shader->SetUniform("xyCoordsTexture", _xyCoordsTexOffset);
 
         glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
         glBindTexture(GL_TEXTURE_BUFFER, _zCoordsTextureId);
-        uniformLocation = glGetUniformLocation(_3rdPassShaderId, "zCoordsTexture");
-        glUniform1i(uniformLocation, _zCoordsTexOffset);
+        shader->SetUniform("zCoordsTexture", _zCoordsTexOffset);
     }
 }
 
@@ -867,37 +836,41 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
     size_t        numOfVertices = bx * 2;
     unsigned int *indexBuffer = new unsigned int[numOfVertices];
 
-    bool attrib1 = false;
+    bool attrib1Enabled = false;    // Attribute to hold provoking index of each triangle.
     int *attrib1Buffer = nullptr;
-    if (castingMode == 2 && whichPass == 3) {
-        attrib1 = true;
+    if (castingMode == CellTraversal && whichPass == 3) {
+        attrib1Enabled = true;
         unsigned int big1 = bx > by ? bx : by;
         unsigned int small = bx < by ? bx : by;
         unsigned int big2 = bz > small ? bz : small;
-        attrib1Buffer = new int[big1 * big2 * 4];    // enough length for all faces
+        attrib1Buffer = new int[big1 * big2 * 4];    // Enough length for all faces
     }
 
     //
     // Render front face:
     //
-    glEnableVertexAttribArray(0);    // attribute 0 is vertex coordinates
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
-    glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float), _userCoordinates.frontFace, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-    if (attrib1)    // specify shader input: vertexLogicalIdx
-    {
-        glEnableVertexAttribArray(1);    // attribute 1 is the logical indices
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-    }
-    for (unsigned int y = 0; y < by - 1; y++)    // strip by strip
+    _enableVertexAttribute(_userCoordinates.frontFace, bx * by * 3, attrib1Enabled);
+    for (unsigned int y = 0; y < by - 1; y++)    // Looping over every TriangleStrip
     {
         idx = 0;
-        for (unsigned int x = 0; x < bx; x++) {
+        // This loop controls rendering order of the triangle strip. It
+        // provides the indices for each vertex in a strip. Strips are
+        // created one row at a time.
+        //
+        for (unsigned int x = 0; x < bx; x++)    // Filling indices for vertices of this TriangleStrip
+        {
             indexBuffer[idx++] = (y + 1) * bx + x;
             indexBuffer[idx++] = y * bx + x;
         }
-        if (attrib1) {
-            for (unsigned int x = 0; x < bx; x++) {
+
+        // In cell-traverse ray casting mode we need a cell index for the
+        // two triangles forming the face of a cell. Use the OpenGL "provoking"
+        // vertex to provide this information.
+        //
+        if (attrib1Enabled)    // Also specify attrib1 values
+        {
+            for (unsigned int x = 0; x < bx; x++)    // Fill attrib1 value for each vertex
+            {
                 unsigned int attribIdx = ((y + 1) * bx + x) * 4;
                 attrib1Buffer[attribIdx] = int(x) - 1;
                 attrib1Buffer[attribIdx + 1] = int(y);
@@ -919,14 +892,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
     //
     // Render back face:
     //
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
-    glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float), _userCoordinates.backFace, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-    if (attrib1) {
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-    }
+    _enableVertexAttribute(_userCoordinates.backFace, bx * by * 3, attrib1Enabled);
     for (unsigned int y = 0; y < by - 1; y++)    // strip by strip
     {
         idx = 0;
@@ -934,7 +900,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
             indexBuffer[idx++] = y * bx + x;
             indexBuffer[idx++] = (y + 1) * bx + x;
         }
-        if (attrib1) {
+        if (attrib1Enabled) {
             for (unsigned int x = 0; x < bx; x++) {
                 unsigned int attribIdx = (y * bx + x) * 4;
                 attrib1Buffer[attribIdx] = int(x) - 1;
@@ -957,21 +923,14 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
     //
     // Render top face:
     //
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
-    glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float), _userCoordinates.topFace, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-    if (attrib1) {
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-    }
+    _enableVertexAttribute(_userCoordinates.topFace, bx * bz * 3, attrib1Enabled);
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
         for (unsigned int x = 0; x < bx; x++) {
             indexBuffer[idx++] = z * bx + x;
             indexBuffer[idx++] = (z + 1) * bx + x;
         }
-        if (attrib1) {
+        if (attrib1Enabled) {
             for (unsigned int x = 0; x < bx; x++) {
                 unsigned int attribIdx = (z * bx + x) * 4;
                 attrib1Buffer[attribIdx] = int(x) - 1;
@@ -994,21 +953,14 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
     //
     // Render bottom face:
     //
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
-    glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float), _userCoordinates.bottomFace, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-    if (attrib1) {
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-    }
+    _enableVertexAttribute(_userCoordinates.bottomFace, bx * bz * 3, attrib1Enabled);
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
         for (unsigned int x = 0; x < bx; x++) {
             indexBuffer[idx++] = (z + 1) * bx + x;
             indexBuffer[idx++] = z * bx + x;
         }
-        if (attrib1) {
+        if (attrib1Enabled) {
             for (unsigned int x = 0; x < bx; x++) {
                 unsigned int attribIdx = ((z + 1) * bx + x) * 4;
                 attrib1Buffer[attribIdx] = int(x) - 1;
@@ -1036,21 +988,14 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
     //
     // Render right face:
     //
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
-    glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float), _userCoordinates.rightFace, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-    if (attrib1) {
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-    }
+    _enableVertexAttribute(_userCoordinates.rightFace, by * bz * 3, attrib1Enabled);
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
         for (unsigned int y = 0; y < by; y++) {
             indexBuffer[idx++] = (z + 1) * by + y;
             indexBuffer[idx++] = z * by + y;
         }
-        if (attrib1) {
+        if (attrib1Enabled) {
             for (unsigned int y = 0; y < by; y++) {
                 unsigned int attribIdx = ((z + 1) * by + y) * 4;
                 attrib1Buffer[attribIdx] = int(bx) - 2;
@@ -1073,21 +1018,14 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
     //
     // Render left face
     //
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
-    glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float), _userCoordinates.leftFace, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-    if (attrib1) {
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-    }
+    _enableVertexAttribute(_userCoordinates.leftFace, by * bz * 3, attrib1Enabled);
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
         for (unsigned int y = 0; y < by; y++) {
             indexBuffer[idx++] = z * by + y;
             indexBuffer[idx++] = (z + 1) * by + y;
         }
-        if (attrib1) {
+        if (attrib1Enabled) {
             for (unsigned int y = 0; y < by; y++) {
                 unsigned int attribIdx = (z * by + y) * 4;
                 attrib1Buffer[attribIdx] = 0;
@@ -1107,11 +1045,23 @@ void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
     }
 
-    if (attrib1) delete[] attrib1Buffer;
+    if (attrib1Enabled) delete[] attrib1Buffer;
     delete[] indexBuffer;
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void RayCaster::_enableVertexAttribute(const float *buf, size_t length, bool attrib1Enabled) const
+{
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
+    glBufferData(GL_ARRAY_BUFFER, length * sizeof(float), buf, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    if (attrib1Enabled) {
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
+    }
 }
 
 double RayCaster::_getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const { return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0); }
@@ -1182,7 +1132,7 @@ void RayCaster::_updateDataTextures(int castingMode)
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);    // Restore default alignment.
 
     // If using cell traverse ray casting, we need to upload user coordinates
-    if (castingMode == 2) {
+    if (castingMode == CellTraversal) {
         const size_t *dims = _userCoordinates.dims;
 
         // Fill data to buffer object _xyCoordsBufferId

@@ -13,8 +13,8 @@ public:
     static std::string GetClassType() { return ("IsoSurface"); }
 
 protected:
-    int  _loadShaders();
-    void _3rdPassSpecialHandling(bool, long);
+    int  _load3rdPassShaders();
+    void _3rdPassSpecialHandling(bool fast, long castMode);
 };
 
 };    // namespace VAPoR

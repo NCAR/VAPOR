@@ -9,10 +9,12 @@ uniform sampler3D  volumeTexture;
 uniform usampler3D missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D  colorMapTexture;
 
-uniform vec3  someVec3[3];
 uniform ivec3 volumeDims;        // number of vertices of this volumeTexture
 uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
+uniform vec3  boxMin;            // min coordinates of the bounding box of this volume
+uniform vec3  boxMax;            // max coordinates of the bounding box of this volume
+uniform vec3  colorMapRange;     // min and max and diff values on this color map
 
 uniform float stepSize1D;        // ray casting step size
 uniform bool  flags[3];
@@ -33,9 +35,6 @@ const float ULP10      = 1.2e-6f;
 bool  fast             = flags[0];
 bool  lighting         = flags[1];
 bool  hasMissingValue  = flags[2];
-vec3  boxMin           = someVec3[0];       // min coordinates of the bounding box of this volume
-vec3  boxMax           = someVec3[1];       // max coordinates of the bounding box of this volume
-vec3  colorMapRange    = someVec3[2];       // min and max and diff values on this color map
 float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
