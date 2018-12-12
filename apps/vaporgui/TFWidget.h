@@ -68,9 +68,6 @@ private slots:
     void loadTF();
     void fileSaveTF();
 
-    void refreshMainHisto();
-    void refreshSecondaryHisto();
-
     void autoUpdateMainHistoChecked(int state);
     void autoUpdateSecondaryHistoChecked(int state);
 
@@ -103,10 +100,8 @@ private:
     void updateColorInterpolation();
     void updateConstColor();
     void updateMainAutoUpdateHistoCheckboxes();
-    //	void updateMainMappingFrame(bool refresh);
     void updateMainSliders();
     void updateSecondaryAutoUpdateHistoCheckbox();
-    //	void updateSecondaryMappingFrame(bool refresh);
     void updateSecondarySliders();
 
     bool mainVariableChanged();
