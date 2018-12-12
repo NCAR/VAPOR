@@ -170,7 +170,12 @@ int MapperFunction::LoadFromFile(string path, vector<double> defaultDataBounds)
     XmlNode *       parent = this->GetNode()->GetParent();
     MapperFunction *newTF = new MapperFunction(_ssave, node);
 
-    if (newTF->getMinMapValue() == 0 && newTF->getMaxMapValue() == 0) { newTF->setMinMaxMapValue(defaultDataBounds[0], defaultDataBounds[1]); }
+    double newMin = newTF->getMinMapValue();
+    double newMax = newTF->getMaxMapValue();
+
+    if ((newMin < defaultDataBounds[0]) || (newMin > defaultDataBounds[1])) { newMin = defaultDataBounds[0]; }
+    if ((newMax < defaultDataBounds[0]) || (newMax > defaultDataBounds[1])) { newMax = defaultDataBounds[1]; }
+    newTF->setMinMaxMapValue(newMin, newMax);
 
     // Assign (copy) new TF to this object
     //

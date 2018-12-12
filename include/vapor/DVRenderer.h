@@ -13,8 +13,7 @@ public:
     static std::string GetClassType() { return ("VolumeRenderer"); }
 
 protected:
-    void _loadShaders();
-    void _3rdPassSpecialHandling(bool);
+    int _load3rdPassShaders();
 };
 
 };    // namespace VAPoR
