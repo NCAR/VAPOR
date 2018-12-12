@@ -22,8 +22,7 @@ public:
     }
 
 protected:
-    void _loadShaders();
-    void _3rdPassSpecialHandling( bool );
+    int  _load3rdPassShaders();
 };
 
 };
