@@ -41,6 +41,8 @@
 #include "Histo.h"
 #include "MappingFrame.h"
 
+#include <vapor/CFuncs.h>
+
 #ifndef MAX
 #define MAX(a,b)        ((a) > (b) ? (a) : (b))
 #endif
@@ -286,10 +288,13 @@ void MappingFrame::getGridAndExtents(
 }
 
 void MappingFrame::populateHistogram() {
-    if (_isSampling)
+	double t0 = Wasp::GetTime();
+    if (_isSampling) {
         populateSamplingHistogram();
-    else	
+	}
+    else	 {
         populateIteratingHistogram();
+	}
 }
 
 void MappingFrame::populateSamplingHistogram() {
