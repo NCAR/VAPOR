@@ -76,9 +76,6 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void loadTF();
     void fileSaveTF();
 
-    void refreshMainHisto();
-    void refreshSecondaryHisto();
-
     void autoUpdateMainHistoChecked(int state);
     void autoUpdateSecondaryHistoChecked(int state);
 
@@ -100,21 +97,19 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void updateSecondaryMappingFrame();
 
   private:
-    void refreshMainHistoIfNecessary();
-    void refreshSecondaryHistoIfNecessary();
+    void refreshMainDuplicateHistogram();
+    void refreshSecondaryDuplicateHistogram();
 
     void configureConstantColorControls();
     void configureSecondaryTransferFunction();
     void connectWidgets();
 
-    void updateQTWidgets();
+    void updateQtWidgets();
     void updateColorInterpolation();
     void updateConstColor();
     void updateMainAutoUpdateHistoCheckboxes();
-    //	void updateMainMappingFrame(bool refresh);
     void updateMainSliders();
     void updateSecondaryAutoUpdateHistoCheckbox();
-    //	void updateSecondaryMappingFrame(bool refresh);
     void updateSecondarySliders();
 
     bool mainVariableChanged();
@@ -148,6 +143,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     int _timeStep;
     string _mainVarName;
     string _secondaryVarName;
+    bool _initialized;
     bool _externalChangeHappened;
     bool _mainHistoRangeChanged;
     bool _secondaryHistoRangeChanged;
