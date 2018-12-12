@@ -434,6 +434,8 @@ void TFWidget::Update(DataMgr *dataMgr,
 					RenderParams *rParams,
                     bool internalUpdate) {
 
+    cout << "hidden? " << isHidden() << endl;
+
 	assert(paramsMgr);
 	assert(dataMgr);
 	assert(rParams);
