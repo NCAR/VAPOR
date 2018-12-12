@@ -25,7 +25,6 @@
 
 #include <iostream>
 #include <vapor/Transform.h>
-#include <vapor/glutil.h>
 
 using namespace VAPoR;
 using namespace Wasp;
