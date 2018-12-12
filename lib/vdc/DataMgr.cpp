@@ -1345,7 +1345,7 @@ int DataMgr::GetVariableExtents(size_t ts, string varname, int level, vector<dou
     return (0);
 }
 
-int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<double> &range)
+int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, size_t stride, vector<double> &range)
 {
     SetDiagMsg("DataMgr::GetDataRange(%d,%s)", ts, varname.c_str());
 
@@ -1359,7 +1359,11 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<
 
     // See if we've already cache'd it.
     //
-    string key = "VariableRange";
+    ostringstream oss;
+    oss << "VariableRange";
+    if (stride > 1) { oss << stride; }
+    string key = oss.str();
+
     if (_varInfoCache.Get(ts, varname, level, lod, key, range)) {
         assert(range.size() == 2);
         return (0);
@@ -1385,11 +1389,22 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<
         ++itr;
     }
 
-    for (; itr != enditr; ++itr) {
-        float v = *itr;
-        if (v != mv) {
-            if (v < range[0]) range[0] = v;
-            if (v > range[1]) range[1] = v;
+    if (stride > 1) {
+        for (; itr != enditr;) {
+            float v = *itr;
+            if (v != mv) {
+                if (v < range[0]) range[0] = v;
+                if (v > range[1]) range[1] = v;
+            }
+            itr += stride;
+        }
+    } else {
+        for (; itr != enditr; ++itr) {
+            float v = *itr;
+            if (v != mv) {
+                if (v < range[0]) range[0] = v;
+                if (v > range[1]) range[1] = v;
+            }
         }
     }
     delete sg;
@@ -1398,6 +1413,7 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<
 
     return (0);
 }
+
 int DataMgr::GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
 {
     assert(_dc);
