@@ -81,12 +81,12 @@ void TFWidget::configureConstantColorControls()
     if (_flags & CONSTANT_COLOR) {
         _useConstColorFrame->show();
         _constColorFrame->show();
+        adjustSize();
     } else {
         _useConstColorFrame->hide();
         _constColorFrame->hide();
+        adjustSize();
     }
-
-    adjustSize();
 }
 
 void TFWidget::configureSecondaryTransferFunction()
@@ -98,6 +98,7 @@ void TFWidget::configureSecondaryTransferFunction()
         _whitespaceFrame->hide();
         _colorInterpolationFrame->hide();
         _loadSaveFrame->hide();
+        adjustSize();
     } else {
         _tabWidget->removeTab(1);
         _whitespaceFrame->show();
@@ -105,6 +106,7 @@ void TFWidget::configureSecondaryTransferFunction()
         _useConstColorFrame->show();
         _constColorFrame->show();
         _loadSaveFrame->show();
+        adjustSize();
     }
 }
 
@@ -284,13 +286,22 @@ void TFWidget::updateColorInterpolation()
     colorInterpCombo->blockSignals(true);
     if (t == TFInterpolator::diverging) {
         colorInterpCombo->setCurrentIndex(0);
-        whitespaceFrame->show();
+        if (whitespaceFrame->isHidden()) {
+            whitespaceFrame->show();
+            adjustSize();
+        }
     } else if (t == TFInterpolator::discrete) {
         colorInterpCombo->setCurrentIndex(1);
-        whitespaceFrame->hide();
+        if (!whitespaceFrame->isHidden()) {
+            whitespaceFrame->hide();
+            adjustSize();
+        }
     } else {
         colorInterpCombo->setCurrentIndex(2);
-        whitespaceFrame->hide();
+        if (!whitespaceFrame->isHidden()) {
+            whitespaceFrame->hide();
+            adjustSize();
+        }
     }
     colorInterpCombo->blockSignals(false);
 
@@ -300,8 +311,6 @@ void TFWidget::updateColorInterpolation()
     } else {
         whitespaceCheckbox->setCheckState(Qt::Unchecked);
     }
-
-    adjustSize();
 }
 
 void TFWidget::updateMainAutoUpdateHistoCheckboxes()
