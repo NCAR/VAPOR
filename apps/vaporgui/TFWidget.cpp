@@ -700,7 +700,7 @@ void TFWidget::setRange(double min, double max)
     if (max > range[1]) max = range[1];
     if (max < range[0]) max = range[0];
 
-    if (min != values[0] && max != values[1]) {
+    if (min != values[0] || max != values[1]) {
         _mainHistoRangeChanged = true;
     } else
         return;
