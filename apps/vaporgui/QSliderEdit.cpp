@@ -24,7 +24,11 @@ QSliderEdit::~QSliderEdit()
 
 void QSliderEdit::SetLabel(const QString &text) { _ui->myLabel->setText(text); }
 
-void QSliderEdit::SetExtents(double min, double max) { _combo->Update(min, max, min); }
+void QSliderEdit::SetExtents(double min, double max)
+{
+    double value = GetCurrentValue();
+    _combo->Update(min, max, value);
+}
 
 void QSliderEdit::SetDecimals(int dec) { _combo->SetPrecision(dec); }
 
