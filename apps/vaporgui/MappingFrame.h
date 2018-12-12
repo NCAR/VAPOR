@@ -102,7 +102,14 @@ class MappingFrame : public QGLWidget {
     MappingFrame(QWidget *parent);
     virtual ~MappingFrame();
 
-    void RefreshHistogram(bool force = false);
+    void CopyHistogram(
+        VAPoR::ParamsMgr *paramsMgr,
+        string variableName,
+        Histo *histo);
+
+    Histo *GetHistogram();
+
+    void RefreshHistogram();
 
     //! Enable or disable the color mapping in the Transfer Function.
     //! Should be specified in the RenderEventRouter constructor
@@ -132,12 +139,10 @@ class MappingFrame : public QGLWidget {
     //! Update the display of the Transfer Function or IsoControl based on the current RenderParams that
     //! contains the MapperFunction being used.  This should be invoked in RenderEventRouter::updateTab()
     //void updateTab();
-    void Update(VAPoR::DataMgr *dataMgr = NULL,
+    bool Update(VAPoR::DataMgr *dataMgr = NULL,
                 VAPoR::ParamsMgr *paramsMgr = NULL,
-                VAPoR::RenderParams *rParams = NULL);
-
-    //! Specify the variable associated with the MappingFrame.  Invoked in RenderEventRouter::setEditorDirty()
-    void setVariableName(std::string name);
+                VAPoR::RenderParams *rParams = NULL,
+                bool buttonPress = false);
 
     //! Identify the current mapperFunction associated with the MappingFrame.
     //! Needed by various GLWidgets embedded in the MappingFrame
@@ -165,6 +170,10 @@ class MappingFrame : public QGLWidget {
 
     void updateMapperFunction(VAPoR::MapperFunction *mapper);
 
+    // Set the histogram populator to be for a sampling renderer, which cannot
+    // iterate across values.  It must sample them instead.
+    void SetIsSampling(bool isSampling);
+
   signals:
 
     //! Signal that is invoked when user starts to modify the transfer function.
@@ -186,8 +195,7 @@ class MappingFrame : public QGLWidget {
     void updateParams();
 
   public slots:
-    void updateHisto();
-    void fitToView();
+    void fitViewToDataRange();
     void updateMap();
 
   private:
@@ -204,10 +212,21 @@ class MappingFrame : public QGLWidget {
     float xVariable(const QPoint &pos);
     float yVariable(const QPoint &pos);
     bool canBind();
-    bool skipRefreshHistogram() const;
     void updateHistogram();
     string getActiveRendererName() const;
+    void getGridAndExtents(
+        VAPoR::Grid **grid,
+        std::vector<double> minExts,
+        std::vector<double> maxExts) const;
     void populateHistogram();
+    void populateSamplingHistogram();
+    //void populateSamplingHistogramXY();
+    //void populateSamplingHistogramXZ();
+    //void populateSamplingHistogramYZ();
+    void populateIteratingHistogram();
+    std::vector<double> calculateDeltas(
+        std::vector<double> minExts,
+        std::vector<double> maxExts) const;
 
   protected slots:
     void setEditMode(bool);
@@ -288,7 +307,10 @@ class MappingFrame : public QGLWidget {
     virtual float getMaxDomainBound();
 
     virtual float getOpacityData(float val);
+
+#ifdef DEAD
     virtual Histo *getHistogram();
+#endif
 
   protected slots:
 
@@ -315,6 +337,7 @@ class MappingFrame : public QGLWidget {
     Histo *_histogram;
     map<string, Histo *> _histogramMap;
 
+    bool _isSampling;
     bool _opacityMappingEnabled;
     bool _colorMappingEnabled;
     bool _isoSliderEnabled;
