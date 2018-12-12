@@ -383,7 +383,6 @@ void TFWidget::updateMainMappingFrame() {
         checkForMainMapperRangeChanges();
         checkForTimestepChanges();
         if (_externalChangeHappened || _mainHistoRangeChanged) {
-            cout << "A" << endl;
             _updateMainHistoButton->setEnabled(true);
         }
     }
@@ -587,7 +586,6 @@ void TFWidget::enableUpdateButtonsIfNeeded() {
         if (mf->GetAutoUpdateHisto()) {
             _initialized = true;
         } else if (_initialized) {
-            cout << _externalChangeHappened << " " << _mainHistoRangeChanged << endl;
             _updateMainHistoButton->setEnabled(true);
         } else {
             _updateMainHistoButton->setEnabled(false);
