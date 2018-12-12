@@ -136,6 +136,14 @@ public:
 	return(getMinMaxMapValue()[1]);
  };
 
+ bool getHistogramFastMode() {
+    return (bool)GetValueDouble(_histogramFastModeTag, 0.f);
+ }
+
+ void setHistogramFastMode(bool onOff) {
+    double d = (double)onOff;
+    SetValueDouble(_histogramFastModeTag, "Set histogram fast mode", d);
+ }
 
  //! Set both minimum and maximum mapping (histo) values
  //! \param[in] val1 minimum value
@@ -331,6 +339,7 @@ private:
  static const string _opacityMapTag;
  static const string _autoUpdateHistoTag;
  static const string _secondaryVarMapperTag;
+ static const string _histogramFastModeTag;
 
  //
  // Size of lookup table.  Always 1<<8 currently!

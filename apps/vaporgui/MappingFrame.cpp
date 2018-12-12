@@ -58,6 +58,7 @@
 #define YZ 2
 
 #define SAMPLE_RATE 100
+#define FAST_MODE_FACTOR .25
 
 using namespace VAPoR;
 using namespace std;
@@ -256,7 +257,14 @@ void MappingFrame::RefreshHistogram()
 
     _histogram = new Histo(256, minRange, maxRange, _variableName, ts);
 
+std::clock_t start;
+double duration;
+start = std::clock();
+
     populateHistogram();
+
+duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+std::cout<<"printf: "<< duration <<'\n';
     
     _histogramMap[rendererName] = _histogram;
 }
@@ -316,6 +324,12 @@ void MappingFrame::populateSamplingHistogram() {
     int jSamples = SAMPLE_RATE;
     int kSamples = SAMPLE_RATE;
 
+    if (_mapper->getHistogramFastMode()) {
+        iSamples *= FAST_MODE_FACTOR;
+        jSamples *= FAST_MODE_FACTOR;
+        kSamples *= FAST_MODE_FACTOR;
+    }
+
     if (deltas[X] == 0)
         iSamples = 0;
     if (deltas[Y] == 0)
@@ -371,11 +385,31 @@ void MappingFrame::populateIteratingHistogram() {
 	float v;
 	Grid::Iterator itr;
 	Grid::Iterator enditr = grid->end();
-	for (itr=grid->begin(minExts, maxExts); itr!=enditr; ++itr){
-		v = *itr;
-		if (v==grid->GetMissingValue()) continue;
-		_histogram->addToBin(v);
-	}
+
+
+    if (_mapper->getHistogramFastMode()) {
+        int increment = 1.f/FAST_MODE_FACTOR;
+        cout << "fast " << increment << endl;
+        //itr = grid->begin(minExts, maxExts);
+        //int size = itr.size();
+        //int samples = size/increment;
+        //for (int i=0; i<samples; i++) {
+	    //for (itr=grid->begin(minExts, maxExts); itr!=enditr; itr+=increment){
+	    for (itr=grid->begin(minExts, maxExts); itr!=enditr; itr+=increment){
+		    v = *itr;
+		    if (v==grid->GetMissingValue()) continue;
+		        _histogram->addToBin(v);
+        }
+    }
+    else {
+        cout << "slow" << endl;
+	    for (itr=grid->begin(minExts, maxExts); itr!=enditr; ++itr){
+		    v = *itr;
+		    if (v==grid->GetMissingValue()) continue;
+		    _histogram->addToBin(v);
+	    }
+    }
+
 	delete grid;
 }
 
