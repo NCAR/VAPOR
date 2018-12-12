@@ -30,7 +30,13 @@ void RegularGrid::_SetExtents(const vector<double> &minu, const vector<double> &
     _maxu = maxu;
 
     vector<size_t> dims = GetDimensions();
-    for (int i = 0; i < _minu.size(); i++) { _delta.push_back((_maxu[i] - _minu[i]) / (double)(dims[i] - 1)); }
+    for (int i = 0; i < _minu.size(); i++) {
+        if (dims[i] > 1) {
+            _delta.push_back((_maxu[i] - _minu[i]) / (double)(dims[i] - 1));
+        } else {
+            _delta.push_back(0.0);
+        }
+    }
 }
 
 RegularGrid::RegularGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const vector<double> &minu, const vector<double> &maxu) : StructuredGrid(dims, bs, blks)
@@ -403,9 +409,9 @@ void RegularGrid::ConstCoordItrRG::next(const long &offset)
 {
     if (!_index.size()) return;
 
-    vector<size_t> maxIndex;
+    static vector<size_t> maxIndex(_dims.size());
     ;
-    for (int i = 0; i < _dims.size(); i++) maxIndex.push_back(_dims[i] - 1);
+    for (int i = 0; i < _dims.size(); i++) maxIndex[i] = _dims[i] - 1;
 
     long maxIndexL = Wasp::LinearizeCoords(maxIndex, _dims);
     long newIndexL = Wasp::LinearizeCoords(_index, _dims) + offset;
@@ -418,7 +424,7 @@ void RegularGrid::ConstCoordItrRG::next(const long &offset)
 
     _index = Wasp::VectorizeCoords(newIndexL, _dims);
 
-    for (int i = 0; i < _dims.size(); i++) { _coords[i] = i * _delta[i] + _minu[i]; }
+    for (int i = 0; i < _dims.size(); i++) { _coords[i] = _index[i] * _delta[i] + _minu[i]; }
 }
 
 namespace VAPoR {

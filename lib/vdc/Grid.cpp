@@ -550,7 +550,7 @@ template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator++
         _xb++;
         _itr++;
         _index[0]++;
-        ++_coordItr;
+        if (_pred.Size()) ++_coordItr;
 
         if (_xb < _bs3d[0] && _index[0] < _dims3d[0]) {
             if (_pred(*_coordItr)) { return (*this); }
@@ -605,73 +605,32 @@ template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator+=
 {
     if (!_blks.size()) return (*this);
 
-    vector<size_t> maxIndex;
-    for (int i = 0; i < _dims3d.size(); i++) maxIndex.push_back(_dims3d[i] - 1);
+    assert(offset >= 0);
+
+    vector<size_t> maxIndex(_dims3d.size());
+    for (int i = 0; i < _dims3d.size(); i++) maxIndex[i] = _dims3d[i] - 1;
 
     long maxIndexL = Wasp::LinearizeCoords(maxIndex, _dims3d);
-    long newIndexL = Wasp::LinearizeCoords(_index, _dims3d) + offset;
-    if (newIndexL < 0) { newIndexL = 0; }
-    if (newIndexL > maxIndexL) {
-        _index = _end_index;
-        return (*this);
-    }
+    long newIndexL = Wasp::LinearizeCoords(_index, _dims3d);
 
-    _index = Wasp::VectorizeCoords(newIndexL, _dims3d);
+    do {
+        newIndexL += offset;
 
-    size_t xb = 0;
-    size_t yb = 0;
-    size_t zb = 0;
-    size_t x = 0;
-    size_t y = 0;
-    size_t z = 0;
-
-    _xb = xb = _index[0] / _bs3d[0];
-    yb = _index[1] / _bs3d[1];
-    zb = _index[2] / _bs3d[2];
-
-    x = _index[0] % _bs3d[0];
-    y = _index[1] % _bs3d[1];
-    z = _index[2] % _bs3d[2];
-
-    float *blk = _blks[zb * _bdims3d[0] * _bdims3d[1] + yb * _bdims3d[0] + xb];
-    _itr = &blk[z * _bs3d[0] * _bs3d[1] + y * _bs3d[0] + x];
-
-    _coordItr += offset;
-
-    while (_index != _end_index && !_pred(*_coordItr)) {
-        _xb++;
-        _itr++;
-        _index[0]++;
-        ++_coordItr;
-
-        if (_xb < _bs3d[0] && _index[0] < _dims3d[0]) {
-            if (_pred(*_coordItr)) { return (*this); }
-
-            continue;
+        if (newIndexL > maxIndexL) {
+            _index = _end_index;
+            return (*this);
         }
 
-        _xb = 0;
-        if (_index[0] >= _dims3d[0]) {
-            if (_index == _end_index) {
-                return (*this);    // last element
-            }
-            _index[0] = _xb = 0;
-            _index[1]++;
-        }
+        _index = Wasp::VectorizeCoords(newIndexL, _dims3d);
 
-        if (_index[1] >= _dims3d[1]) {
-            if (_index == _end_index) {
-                return (*this);    // last element
-            }
-            _index[1] = 0;
-            _index[2]++;
-        }
+        size_t xb = 0;
+        size_t yb = 0;
+        size_t zb = 0;
+        size_t x = 0;
+        size_t y = 0;
+        size_t z = 0;
 
-        if (_index == _end_index) {
-            return (*this);    // last element
-        }
-
-        xb = _index[0] / _bs3d[0];
+        _xb = xb = _index[0] / _bs3d[0];
         yb = _index[1] / _bs3d[1];
         zb = _index[2] / _bs3d[2];
 
@@ -681,7 +640,9 @@ template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator+=
 
         float *blk = _blks[zb * _bdims3d[0] * _bdims3d[1] + yb * _bdims3d[0] + xb];
         _itr = &blk[z * _bs3d[0] * _bs3d[1] + y * _bs3d[0] + x];
-    }
+
+        if (_pred.Size()) _coordItr += offset;
+    } while (_index != _end_index && !_pred(*_coordItr));
 
     return (*this);
 }
