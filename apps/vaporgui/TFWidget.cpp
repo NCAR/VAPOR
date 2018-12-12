@@ -184,6 +184,8 @@ void TFWidget::fileLoadTF(
     vector<double> defaultRange;
     _dataMgr->GetDataRange(0, varname, 0, 0, 1, defaultRange);
 
+    cout << "defaultRange " << defaultRange[0] << " " << defaultRange[1] << endl;
+
     int rc = tf->LoadFromFile(s.toStdString(), defaultRange);
     if (rc < 0) {
         MSG_ERR("Error loading transfer function");
