@@ -212,14 +212,7 @@ int Visualizer::paintEvent(bool fast)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    for (int i = 0; i < _renderer.size(); i++) {
-        Renderer *r = _renderer[i];
-        if (r->IsFlaggedForDeletion()) {
-            RemoveRenderer(r);
-            delete r;
-            i--;
-        }
-    }
+    // Render the current active manip, if there is one
 
     // Now we are ready for all the different renderers to proceed.
     // Sort them;  If they are opaque, they go first.  If not opaque, they
