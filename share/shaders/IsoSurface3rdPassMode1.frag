@@ -131,7 +131,9 @@ void main(void)
     float nStepsf       = rayDirLength  / stepSize1D;
     vec3  stepSize3D    = rayDirEye     / nStepsf;
 
-    vec3  step1Eye      = startEye;
+    // Shift the starting point (step1Eye) inside of the volume for 1/100 of a step size
+    //   to prevent potential boundary artifacts.
+    vec3  step1Eye      = startEye + 0.01 * stepSize3D;
     vec3  step1Model    = (inversedMV * vec4(step1Eye, 1.0)).xyz;
     vec3  step1Texture  = (step1Model - boxMin) / boxSpan;
     float step1Value    = texture( volumeTexture, step1Texture ).r;

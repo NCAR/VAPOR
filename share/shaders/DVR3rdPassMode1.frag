@@ -128,7 +128,10 @@ void main(void)
     float nStepsf       = rayDirLength / (stepSize1D * 0.5); // Double # of steps
     vec3  stepSize3D    = rayDirEye    / nStepsf;
 
-    vec3  startModel    = (inversedMV * vec4(startEye, 1.0)).xyz;
+    // Now we need to query the color at the starting point.
+    //   However, to prevent unpleasant boundary artifacts, we shift the starting point
+    //   into the volume for 1/100 of a step size.
+    vec3  startModel    = (inversedMV * vec4(startEye + 0.01 * stepSize3D, 1.0)).xyz;
     vec3  startTexture  = (startModel - boxMin) / boxSpan;
     if( !ShouldSkip( startTexture, startModel ) )
     {
