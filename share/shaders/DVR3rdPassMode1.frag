@@ -142,7 +142,7 @@ void main(void)
     }
 
     // let's do a ray casting! 
-    vec3 step2Eye = startEye;
+    vec3 step2Eye = startEye     + 0.01 * stepSize3D;
     int  nSteps   = int(nStepsf) + 2;
     int  stepi;
     for( stepi = 1; stepi < nSteps; stepi++ )
