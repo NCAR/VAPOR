@@ -424,6 +424,7 @@ int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params,
 
 int RayCaster::_initializeGL()
 {
+    // Load 1st and 2nd pass shaders
     ShaderProgram *shader = nullptr;
     if ((shader = _glManager->shaderManager->GetShader("RayCaster1stPass")))
         _1stPassShader = shader;
@@ -435,15 +436,18 @@ int RayCaster::_initializeGL()
     else
         return GLERROR;
 
+    // Load 3rd pass shaders
     if (_load3rdPassShaders() != 0) {
         MyBase::SetErrMsg("Failed to load shaders!");
         return GLERROR;
     }
 
+    // Get the current viewport
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     std::memcpy(_currentViewport, viewport, 4 * sizeof(GLint));
 
+    // Create any textures, framebuffers, etc.
     if (_initializeFramebufferTextures() != 0) {
         MyBase::SetErrMsg("Failed to Create Framebuffer and Textures!");
         return GLERROR;
