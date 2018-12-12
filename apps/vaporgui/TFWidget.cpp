@@ -365,7 +365,10 @@ void TFWidget::updateMainMappingFrame()
         checkForBoxChanges();
         checkForMainMapperRangeChanges();
         checkForTimestepChanges();
-        if (_externalChangeHappened || _mainHistoRangeChanged) { _updateMainHistoButton->setEnabled(true); }
+        if (_externalChangeHappened || _mainHistoRangeChanged) {
+            cout << "A" << endl;
+            _updateMainHistoButton->setEnabled(true);
+        }
     }
 }
 
@@ -564,6 +567,7 @@ void TFWidget::enableUpdateButtonsIfNeeded()
         if (mf->GetAutoUpdateHisto()) {
             _initialized = true;
         } else if (_initialized) {
+            cout << _externalChangeHappened << " " << _mainHistoRangeChanged << endl;
             _updateMainHistoButton->setEnabled(true);
         } else {
             _updateMainHistoButton->setEnabled(false);
@@ -692,8 +696,6 @@ void TFWidget::setRange()
 
 void TFWidget::setRange(double min, double max)
 {
-    _mainHistoRangeChanged = true;
-
     float values[2];
     float range[2];
     getVariableRange(range, values);
@@ -701,6 +703,11 @@ void TFWidget::setRange(double min, double max)
     if (min > range[1]) min = range[1];
     if (max > range[1]) max = range[1];
     if (max < range[0]) max = range[0];
+
+    if (min != values[0] && max != values[1]) {
+        _mainHistoRangeChanged = true;
+    } else
+        return;
 
     MapperFunction *mf = getMainMapperFunction();
 
