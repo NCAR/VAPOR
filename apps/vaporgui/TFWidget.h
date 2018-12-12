@@ -1,6 +1,7 @@
 #ifndef TFWIDGET_H
 #define TFWIDGET_H
 
+#include <QFileDialog>
 #include "ui_TFWidgetGUI.h"
 #include "EventRouter.h"
 #include "RangeCombos.h"
@@ -82,6 +83,9 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void setUseWhitespace(int state);
 
   private:
+    class LoadTFDialog;
+    LoadTFDialog *_loadTFDialog;
+
     void collapseConstColorWidgets();
     void showConstColorWidgets();
     void showWhitespaceFrame();
@@ -139,6 +143,36 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
 
   signals:
     void emitChange();
+};
+
+class TFWidget::LoadTFDialog : public QDialog {
+    Q_OBJECT
+
+  public:
+    LoadTFDialog(QWidget *parent = 0);
+    ~LoadTFDialog();
+
+  private:
+    void topRight(QWidget *parent);
+    void topMiddle(QWidget *parent);
+    void topLeft(QWidget *parent);
+    void topMiddleWithTabWidgets(QWidget *parent);
+
+    QFileDialog *_fileDialog;
+    QFrame *_checkboxFrame;
+    QFrame *_fileDialogFrame;
+    QVBoxLayout *_mainLayout;
+    QHBoxLayout *_checkboxLayout;
+    QHBoxLayout *_opacityCheckboxLayout;
+    QHBoxLayout *_dataBoundsCheckboxLayout;
+    QVBoxLayout *_loadOptionLayout;
+    QVBoxLayout *_fileDialogLayout;
+    QLabel *_optionLabel;
+    QTabWidget *_fileDialogContainer;
+    QTabWidget *_loadOptionContainer;
+    QSpacerItem *_hSpacer;
+    QCheckBox *_loadOpacityMapCheckbox;
+    QCheckBox *_loadDataBoundsCheckbox;
 };
 
 #endif //TFWIDGET_H
