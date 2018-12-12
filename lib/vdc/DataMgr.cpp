@@ -1743,8 +1743,8 @@ int DataMgr::_get_blocked_region_from_fs(size_t ts, string varname, int level, i
     //
     size_t nreads = 1;
     if (bmin.size() == 3 && bmax[2] > bmin[2]) {
-        bmax[2] = bmin[2];
         nreads = bmax[2] - bmin[2] + 1;
+        bmax[2] = bmin[2];
     }
 
     vector<size_t> file_min, file_max;
