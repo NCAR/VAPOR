@@ -45,7 +45,12 @@ class RENDER_API RayCaster : public Renderer {
     // Makes RayCaster an abstract class that cannot be instantiated,
     //   and it's up to the subclasses to decide which shader to load.
     //   It returns 0 upon success, and non-zero upon errors.
-    virtual int _loadShaders() = 0;
+    virtual int _load3rdPassShaders() = 0;
+
+    enum CastingMode {
+        FixedStep = 1,
+        CellTraversal = 2
+    };
 
     class UserCoordinates {
         // Note: class UserCoordinates lives completely inside of class RayCaster,
@@ -81,11 +86,13 @@ class RENDER_API RayCaster : public Renderer {
         size_t myCurrentTimeStep;
         std::string myVariableName;
         int myRefinementLevel, myCompressionLevel;
-        float myBoxMin[3], myBoxMax[3]; // Retrieved from params, instead of grid.
+        float myGridMin[3], myGridMax[3]; // Keeps the min and max of the current grid.
+                                          // !!NOT!! the value retrieved from params.
 
         /* Member functions */
         UserCoordinates();
         ~UserCoordinates();
+
         //
         // It returns 0 upon success, and non-zero upon errors.
         //
@@ -93,25 +100,33 @@ class RENDER_API RayCaster : public Renderer {
                            DataMgr *dataMgr,
                            StructuredGrid **gridpp) const;
 
-        bool isMetadataUpToDate(const RayCasterParams *params,
+        bool IsMetadataUpToDate(const RayCasterParams *params,
+                                const StructuredGrid *grid,
                                 DataMgr *dataMgr) const;
         //
         // Update meta data, as well as pointers: 6 faces + dataField + missingValueMask
         //   It returns 0 upon success, and non-zero upon errors:
-        //     1 == Failed to get a StructuredGrid
-        //    -1 == Failed to allocate memory for the 3D variable or missing value mask
         //
         int UpdateFaceAndData(const RayCasterParams *params,
+                              const StructuredGrid *grid,
                               DataMgr *dataMgr);
+        void FillCoordsXYPlane(const StructuredGrid *grid, // Input
+                               size_t planeIdx,            // Input: which plane to retrieve
+                               float *coords);             // Output buffer allocated by caller
+        void FillCoordsYZPlane(const StructuredGrid *grid, // Input
+                               size_t planeIdx,            // Input
+                               float *coords);             // Output
+        void FillCoordsXZPlane(const StructuredGrid *grid, // Input
+                               size_t planeIdx,            // Input
+                               float *coords);             // Output
         //
         // Update pointers: xyCoords and zCoords
         // |-- Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
         // |         UpdateFaceAndData() needs to be called priori to UpdateCurviCoords().
         // |-- It returns 0 upon success, and non-zero upon errors:
-        //     |--  1 == Failed to get a StructuredGrid
-        //     |-- -1 == Failed to allocate memory for the Z-coords
         //
         int UpdateCurviCoords(const RayCasterParams *params,
+                              const StructuredGrid *grid,
                               DataMgr *dataMgr);
     }; // end of struct UserCoordinates
 
@@ -128,13 +143,13 @@ class RENDER_API RayCaster : public Renderer {
     GLuint _colorMapTextureId;
     GLuint _xyCoordsTextureId;
     GLuint _zCoordsTextureId;
-    const GLuint _backFaceTexOffset;
-    const GLuint _frontFaceTexOffset;
-    const GLuint _volumeTexOffset;
-    const GLuint _colorMapTexOffset;
-    const GLuint _missingValueTexOffset;
-    const GLuint _xyCoordsTexOffset;
-    const GLuint _zCoordsTexOffset;
+    const GLint _backFaceTexOffset;
+    const GLint _frontFaceTexOffset;
+    const GLint _volumeTexOffset;
+    const GLint _colorMapTexOffset;
+    const GLint _missingValueTexOffset;
+    const GLint _xyCoordsTexOffset;
+    const GLint _zCoordsTexOffset;
 
     // buffers
     GLuint _frameBufferId;
@@ -149,11 +164,12 @@ class RENDER_API RayCaster : public Renderer {
     GLuint _vertexAttribId; // Attribute of vertices: (i, j k) logical indices.
 
     // shaders
-    GLuint _1stPassShaderId;
-    GLuint _2ndPassShaderId;
-    GLuint _3rdPassShaderId;
-    GLuint _3rdPassMode1ShaderId;
-    GLuint _3rdPassMode2ShaderId;
+    ShaderProgram *_1stPassShader;
+    ShaderProgram *_2ndPassShader;
+    ShaderProgram *_3rdPassShader;
+    ShaderProgram *_3rdPassMode1Shader;
+    ShaderProgram *_3rdPassMode2Shader;
+
     GLint _currentViewport[4]; // current viewport in use
 
     //
@@ -186,6 +202,7 @@ class RENDER_API RayCaster : public Renderer {
     void _updateColormap(RayCasterParams *params);
     void _updateDataTextures(int castingMode);
     void _updateNearClippingPlane();
+    void _enableVertexAttribute(const float *buf, size_t length, bool attrib1Enabled) const;
 
 }; // End of class RayCaster
 
