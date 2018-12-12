@@ -464,16 +464,12 @@ int RayCaster::_initializeGL()
 
 int RayCaster::_paintGL(bool fast)
 {
-#ifndef NDEBUG
-    // Reload shaders in case they're changed during shader development.
-    //   Will incur huge performance panelties on parallel filesystems.
     if (_load3rdPassShaders() != 0) {
         MyBase::SetErrMsg("Failed to load shaders");
         glBindVertexArray(0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return GLERROR;
     }
-#endif
     const MatrixManager *mm = Renderer::_glManager->matrixManager;
 
     _updateViewportWhenNecessary();
