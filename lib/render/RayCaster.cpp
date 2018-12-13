@@ -797,15 +797,6 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     case 5: multiplier = 0.125f; break;
     default: multiplier = 1.0f; break;
     }
-    /*
-    glm::vec4 boxmin( cboxMin[0], cboxMin[1], cboxMin[2], 1.0f );
-    glm::vec4 boxmax( cboxMax[0], cboxMax[1], cboxMax[2], 1.0f );
-    glm::vec4 boxminEye = modelview * boxmin;
-    glm::vec4 boxmaxEye = modelview * boxmax;
-    float span[3]   = {boxmaxEye[0] - boxminEye[0],
-                       boxmaxEye[1] - boxminEye[1],
-                       boxmaxEye[2] - boxminEye[2]};
-    */
     float span[3] = {cboxMax[0] - cboxMin[0], cboxMax[1] - cboxMin[1], cboxMax[2] - cboxMin[2]};
     float stepSize1D;
     if (_userCoordinates.dims[3] < 50)    // Make sure at least 100 steps
