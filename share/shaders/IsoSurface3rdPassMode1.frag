@@ -198,13 +198,14 @@ void main(void)
                 vec3  isoNdc  =  isoClip.xyz / isoClip.w;
                 gl_FragDepth  =  gl_DepthRange.diff * 0.5 * isoNdc.z +
                                 (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
-            }
-        }
+
+            } // Finish rendering one iso-surface.
+        }     // Finish testing all iso-values.
 
         step1Model   = step2Model;
         step1Texture = step2Texture;
         step1Value   = step2Value;
     }   // Finish ray casting
 
-}   // End main()
+}
 
