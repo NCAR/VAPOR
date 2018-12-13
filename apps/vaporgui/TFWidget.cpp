@@ -32,6 +32,9 @@
 #include "TFWidget.h"
 #include "ErrorReporter.h"
 
+#define RANGE_PADDING .05
+#define DATA_RANGE_STRIDE 10
+
 using namespace VAPoR;
 
 string TFWidget::_nDimsTag = "ActiveDimension";
@@ -183,7 +186,18 @@ void TFWidget::fileLoadTF(
 	assert(tf);
     
     vector<double> defaultRange;
-    _dataMgr->GetDataRange(0, varname, 0, 0, 1, defaultRange);
+
+    int timestep = 0;
+    int level = 0;
+    int lod = 0;
+    _dataMgr->GetDataRange(
+        timestep,
+        varname, 
+        level,
+        lod, 
+        DATA_RANGE_STRIDE, 
+        defaultRange
+    );
 
     cout << "defaultRange " << defaultRange[0] << " " << defaultRange[1] << endl;
 
@@ -252,7 +266,14 @@ void TFWidget::getVariableRange(
 	if (! _dataMgr->VariableExists(ts, varName, ref, cmp)) return;
 
 	vector <double> rangev;
-	int rc = _dataMgr->GetDataRange(ts, varName, ref, cmp, 1, rangev);
+	int rc = _dataMgr->GetDataRange(
+        ts, 
+        varName, 
+        ref, 
+        cmp, 
+        DATA_RANGE_STRIDE, 
+        rangev
+    );
     if (rc<0) {
         MSG_ERR("Error loading variable");
 		return;
@@ -260,8 +281,8 @@ void TFWidget::getVariableRange(
 	
     assert(rangev.size() == 2);
 
-	range[0] = rangev[0];
-	range[1] = rangev[1];
+	range[0] = rangev[0] - rangev[0]*RANGE_PADDING;
+	range[1] = rangev[1] + rangev[1]*RANGE_PADDING;
 
 	MapperFunction* tf = _rParams->GetMapperFunc(varName);
 	values[0] = tf->getMinMapValue();
@@ -387,9 +408,12 @@ void TFWidget::updateMainMappingFrame() {
                                     _paramsMgr, 
                                     _rParams, 
                                     buttonPress);
-    
+   
+    cout << "updateMainMappingFrame" << endl;
+ 
     if (histogramRecalculated) {
 	    _updateMainHistoButton->setEnabled(false);
+        _mappingFrame->SetHistoNeedsUpdate(false);
         _externalChangeHappened = false;
         _initialized = true;
     }
@@ -399,7 +423,9 @@ void TFWidget::updateMainMappingFrame() {
         checkForMainMapperRangeChanges();
         checkForTimestepChanges();
 	    if (_externalChangeHappened || _mainHistoRangeChanged) {
+            cout << "A" << endl;
 	        _updateMainHistoButton->setEnabled(true);
+            _mappingFrame->SetHistoNeedsUpdate(true);
         }
     }
 }
@@ -428,6 +454,7 @@ void TFWidget::updateSecondaryMappingFrame() {
     
     if (histogramRecalculated) {
 	    _updateSecondaryHistoButton->setEnabled(false);
+        _secondaryMappingFrame->SetHistoNeedsUpdate(false);
         _externalChangeHappened = false;
     }
     else  {
@@ -437,6 +464,7 @@ void TFWidget::updateSecondaryMappingFrame() {
         checkForTimestepChanges();
 	    if (_externalChangeHappened || _secondaryHistoRangeChanged)
 	        _updateSecondaryHistoButton->setEnabled(true);
+            _secondaryMappingFrame->SetHistoNeedsUpdate(true);
     }
 }
 
@@ -507,6 +535,7 @@ void TFWidget::refreshSecondaryDuplicateHistogram() {
 		if (mainMF == secondaryMF) {
 			_secondaryMappingFrame->RefreshHistogram();
 			_updateSecondaryHistoButton->setEnabled(false);
+            _secondaryMappingFrame->SetHistoNeedsUpdate(false);
 		}
 	}
 }
@@ -517,6 +546,7 @@ void TFWidget::refreshMainDuplicateHistogram() {
 	if (mainMF == secondaryMF) {
 		_mappingFrame->RefreshHistogram();
 		_updateMainHistoButton->setEnabled(false);
+        _mappingFrame->SetHistoNeedsUpdate(false);
 	}
 }
 
@@ -607,10 +637,13 @@ void TFWidget::enableUpdateButtonsIfNeeded() {
             _initialized = true;
         }
 		else if (_initialized) {
+            cout << "B" << endl;
 			_updateMainHistoButton->setEnabled(true);
+            _mappingFrame->SetHistoNeedsUpdate(true);
         }
         else {
 			_updateMainHistoButton->setEnabled(false);
+            _mappingFrame->SetHistoNeedsUpdate(false);
         }
 	}
 	_mainHistoRangeChanged = false;
@@ -627,9 +660,11 @@ void TFWidget::enableUpdateButtonsIfNeeded() {
             }
 			else if (_initialized) {
 				_updateSecondaryHistoButton->setEnabled(true);
+                _secondaryMappingFrame->SetHistoNeedsUpdate(true);
             }
             else { 
 				_updateSecondaryHistoButton->setEnabled(false);
+                _secondaryMappingFrame->SetHistoNeedsUpdate(false);
                 _initialized = true;
             }
 		}
