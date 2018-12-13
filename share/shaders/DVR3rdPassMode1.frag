@@ -111,12 +111,21 @@ vec3 CalculateGradient( const in vec3 tc )
 
 void main(void)
 {
-    gl_FragDepth        = 1.0;
     color               = vec4( 0.0 );
     vec3  lightDirEye   = vec3(0.0, 0.0, 1.0); 
 
     // Calculate texture coordinates of this fragment
-    vec2 fragTexture    = gl_FragCoord.xy / vec2( viewportDims );
+    vec2  fragTexture   = gl_FragCoord.xy / vec2( viewportDims );
+/*
+    float alreadyDepth  = texture( depthTexture,  fragTexture ).x;
+    if( alreadyDepth < 1.0 )
+    {
+        color = vec4( 0.5 );
+        gl_FragDepth = 0.1;
+    }
+    else
+        color = vec4( 1.0 );
+*/
 
     vec3 stopEye        = texture( backFaceTexture,  fragTexture ).xyz;
     vec3 startEye       = texture( frontFaceTexture, fragTexture ).xyz;
@@ -125,7 +134,7 @@ void main(void)
     if( rayDirLength    < ULP10 )
         discard;
 
-    float nStepsf       = rayDirLength / (stepSize1D * 0.5); // Double # of steps
+    float nStepsf       = rayDirLength / stepSize1D;
     vec3  stepSize3D    = rayDirEye    / nStepsf;
 
     // Now we need to query the color at the starting point.
@@ -182,14 +191,29 @@ void main(void)
         color.a   += (1.0 - color.a) * backColor.a;
     }
 
-    // Apply depth if sufficient opaqueness
+    vec3  shouldStopEye = stopEye - 0.01 * stepSize3D;
+    float shouldStopLen = length( shouldStopEye - startEye );
+    float step2Len      = length( step2Eye      - startEye );
+    vec3  calcDepthLoc;
+    if( step2Len < shouldStopLen )
+        calcDepthLoc = step2Eye;
+    else
+        calcDepthLoc = shouldStopEye;
+
+    vec4 calcDepthClip =  Projection    * vec4( calcDepthLoc, 1.0 );
+    vec3 calcDepthNdc  =  calcDepthClip.xyz / calcDepthClip.w;
+    gl_FragDepth   =  gl_DepthRange.diff * 0.5 * calcDepthNdc.z +
+                     (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
+    /*
     if( color.a > 0.7 )
     {
-        vec4 step2Clip =  Projection    * vec4( step2Eye, 1.0 );
-        vec3 step2Ndc  =  step2Clip.xyz / step2Clip.w;
-        gl_FragDepth   =  gl_DepthRange.diff * 0.5 * step2Ndc.z +
-                         (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
+    vec4 step2Clip =  Projection    * vec4( step2Eye, 1.0 );
+    vec3 step2Ndc  =  step2Clip.xyz / step2Clip.w;
+    gl_FragDepth   =  gl_DepthRange.diff * 0.5 * step2Ndc.z +
+                     (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
     }
-
+    else
+        gl_FragDepth = 1.0;
+    */
 }
 
