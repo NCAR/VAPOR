@@ -105,6 +105,7 @@ MappingFrame::MappingFrame(QWidget* parent)
     _mapper(NULL),
     _histogram(NULL),
     _isSampling(false),
+    _histoNeedsUpdate(false),
     _opacityMappingEnabled(false),
     _colorMappingEnabled(false),
 	_isoSliderEnabled(false),
@@ -277,6 +278,12 @@ void MappingFrame::SetIsSampling(
     _isSampling= isSampling;
 }
 
+void MappingFrame::SetHistoNeedsUpdate(
+    bool needsUpdate
+) {
+    _histoNeedsUpdate = needsUpdate;
+}
+
 void MappingFrame::getGridAndExtents(
     VAPoR::Grid** grid,
     std::vector<double> &minExts,
@@ -298,15 +305,16 @@ void MappingFrame::getGridAndExtents(
 
 void MappingFrame::populateHistogram() {
 	double t0 = Wasp::GetTime();
+    bool fastMode = _mapper->getHistogramFastMode();
     if (_isSampling) {
-        populateSamplingHistogram();
+        populateSamplingHistogram( fastMode );
 	}
     else	 {
-        populateIteratingHistogram();
+        populateIteratingHistogram( fastMode );
 	}
 }
 
-void MappingFrame::populateSamplingHistogram() {
+void MappingFrame::populateSamplingHistogram( bool fastMode ) {
     Grid* grid = nullptr;
     std::vector<double> minExts(3, 0.f);
     std::vector<double> maxExts(3, 0.f);
@@ -329,7 +337,7 @@ void MappingFrame::populateSamplingHistogram() {
     int jSamples = SAMPLE_RATE;
     int kSamples = SAMPLE_RATE;
 
-    if (_mapper->getHistogramFastMode()) {
+    if ( fastMode ) {
         iSamples *= FAST_MODE_FACTOR;
         jSamples *= FAST_MODE_FACTOR;
         kSamples *= FAST_MODE_FACTOR;
@@ -375,7 +383,7 @@ std::vector<double> MappingFrame::calculateDeltas(
     return deltas;
 }
 
-void MappingFrame::populateIteratingHistogram() {
+void MappingFrame::populateIteratingHistogram( bool fastMode ) {
     Grid* grid = nullptr;
     std::vector<double> minExts, maxExts;
     getGridAndExtents(&grid, minExts, maxExts);
@@ -392,7 +400,7 @@ void MappingFrame::populateIteratingHistogram() {
 	Grid::ConstIterator enditr = grid->cend();
 
 
-    if (_mapper->getHistogramFastMode()) {
+    if ( fastMode ) {
         int increment = 1.f/FAST_MODE_FACTOR;
 	    for ( ; itr!=enditr ; ) {  
 		    v = *itr;
@@ -1326,8 +1334,10 @@ int MappingFrame::drawHistogram() {
       updateTexture();
     }
 	
-    
-    glColor3f(0.0, 0.784, 0.784);
+    if (_histoNeedsUpdate)
+        glColor3f(0.0, 0.784, 0.784);
+    else
+        glColor3f(0.65, 0.65, 0.65);
 
 	glBegin(GL_QUADS);
     {
