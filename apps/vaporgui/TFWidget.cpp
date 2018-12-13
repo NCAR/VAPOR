@@ -32,8 +32,8 @@
 #include "TFWidget.h"
 #include "ErrorReporter.h"
 
-#define RANGE_PADDING     .05
-#define DATA_RANGE_STRIDE 4    // 10
+#define RANGE_PADDING    .05
+#define FAST_MODE_FACTOR 4
 
 bool DATAMGRFAST = false;
 
@@ -186,27 +186,7 @@ void TFWidget::fileLoadTF(string varname, const char *startPath, bool savePath)
     int timestep = 0;
     int level = 0;
     int lod = 0;
-    int stride = DATAMGRFAST ? DATA_RANGE_STRIDE : 1;
-    _dataMgr->GetDataRange(timestep, varname, level, lod, 1,
-                           // stride,
-                           defaultRange);
-    cout << "stride 1 " << defaultRange[0] << " " << defaultRange[1] << endl;
-
-    _dataMgr->GetDataRange(timestep, varname, level, lod, 2,
-                           // stride,
-                           defaultRange);
-    cout << "stride 2 " << defaultRange[0] << " " << defaultRange[1] << endl;
-
-    _dataMgr->GetDataRange(timestep, varname, level, lod, 4, defaultRange);
-    cout << "stride 4 " << defaultRange[0] << " " << defaultRange[1] << endl;
-
-    _dataMgr->GetDataRange(timestep, varname, level, lod, 8, defaultRange);
-    cout << "stride 8 " << defaultRange[0] << " " << defaultRange[1] << endl;
-
-    _dataMgr->GetDataRange(timestep, varname, level, lod, stride,
-                           // DATA_RANGE_STRIDE,
-                           defaultRange);
-    cout << "stride 1 " << defaultRange[0] << " " << defaultRange[1] << endl;
+    _dataMgr->GetDataRange(timestep, varname, level, lod, FAST_MODE_FACTOR, defaultRange);
 
     int rc = tf->LoadFromFile(s.toStdString(), defaultRange);
     if (rc < 0) { MSG_ERR("Error loading transfer function"); }
@@ -263,32 +243,7 @@ void TFWidget::getVariableRange(float range[2], float values[2], bool secondaryV
     if (!_dataMgr->VariableExists(ts, varName, ref, cmp)) return;
 
     vector<double> rangev;
-    int            stride = DATAMGRFAST ? DATA_RANGE_STRIDE : 1;
-    /*int rc = _dataMgr->GetDataRange(
-        ts,
-        varName,
-        ref,
-        cmp,
-        stride,
-        //DATA_RANGE_STRIDE,
-        rangev
-    );*/
-
-    cout << endl << "DataMgr::GetDataRange()" << endl;
-    int rc = _dataMgr->GetDataRange(ts, varName, ref, cmp, 1, rangev);
-    cout << "stride 1 " << rangev[0] << " " << rangev[1] << endl;
-
-    _dataMgr->GetDataRange(ts, varName, ref, cmp, 2, rangev);
-    cout << "stride 2 " << rangev[0] << " " << rangev[1] << endl;
-
-    _dataMgr->GetDataRange(ts, varName, ref, cmp, 4, rangev);
-    cout << "stride 4 " << rangev[0] << " " << rangev[1] << endl;
-
-    _dataMgr->GetDataRange(ts, varName, ref, cmp, 8, rangev);
-    cout << "stride 8 " << rangev[0] << " " << rangev[1] << endl;
-
-    _dataMgr->GetDataRange(ts, varName, ref, cmp, 16, rangev);
-    cout << "stride 16 " << rangev[0] << " " << rangev[1] << endl;
+    int            rc = _dataMgr->GetDataRange(ts, varName, ref, cmp, FAST_MODE_FACTOR, rangev);
 
     if (rc < 0) {
         MSG_ERR("Error loading variable");
@@ -297,10 +252,8 @@ void TFWidget::getVariableRange(float range[2], float values[2], bool secondaryV
 
     assert(rangev.size() == 2);
 
-    // range[0] = rangev[0] - rangev[0]*RANGE_PADDING;
-    // range[1] = rangev[1] + rangev[1]*RANGE_PADDING;
-    range[0] = rangev[0];
-    range[1] = rangev[1];
+    range[0] = rangev[0] - rangev[0] * RANGE_PADDING;
+    range[1] = rangev[1] + rangev[1] * RANGE_PADDING;
 
     MapperFunction *tf = _rParams->GetMapperFunc(varName);
     values[0] = tf->getMinMapValue();
@@ -874,18 +827,6 @@ void TFWidget::setColorInterpolation(int index)
         mf->setColorInterpType(TFInterpolator::discrete);
     } else if (index == 2) {
         mf->setColorInterpType(TFInterpolator::linear);
-    } else if (index == 3) {
-        mf->setHistogramFastMode(true);
-        cout << "histo fast" << endl;
-    } else if (index == 4) {
-        mf->setHistogramFastMode(false);
-        cout << "histo slow" << endl;
-    } else if (index == 5) {
-        DATAMGRFAST = true;
-        cout << "dataMgr fast" << endl;
-    } else if (index == 6) {
-        DATAMGRFAST = false;
-        cout << "dataMgr slow" << endl;
     }
 }
 

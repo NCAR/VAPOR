@@ -60,7 +60,8 @@
 #define YZ 2
 
 #define SAMPLE_RATE      100
-#define FAST_MODE_FACTOR 2
+#define FAST_MODE_FACTOR 4
+#define TIME_ME          = false
 
 using namespace VAPoR;
 using namespace std;
@@ -199,14 +200,18 @@ void MappingFrame::RefreshHistogram()
 
     _histogram = new Histo(256, minRange, maxRange, _variableName, ts);
 
+#ifdef TIME_ME
     std::clock_t start;
     double       duration;
     start = std::clock();
+#endif
 
     populateHistogram();
 
+#ifdef TIME_ME
     duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
     std::cout << "Refresh Histogram Time: " << duration << '\n';
+#endif
 
     _histogramMap[rendererName] = _histogram;
 }
@@ -345,6 +350,7 @@ void MappingFrame::updateMapperFunction(MapperFunction *mapper)
     deleteOpacityWidgets();
 
     _mapper = mapper;
+    _mapper->setHistogramFastMode(true);
 
     if (_opacityMappingEnabled) {
         //
