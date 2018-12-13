@@ -26,7 +26,7 @@ uniform float isoValues[4];      // currently set there are at most 4 iso values
 
 uniform mat4 MV;
 uniform mat4 Projection;
-uniform mat4 inversedMV;
+uniform mat4 transposedInverseMV;
 
 //
 // Derive helper variables
@@ -42,7 +42,6 @@ float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
 vec3  volumeDimsf      = vec3( volumeDims );
 vec3  boxSpan          = boxMax - boxMin;
-mat4  transposedInverseMV = transpose(inversedMV);
 
 //
 // Input:  Location to be evaluated in texture coordinates.
@@ -114,27 +113,32 @@ vec3 CalculateGradient( const in vec3 tc )
 
 void main(void)
 {
-    gl_FragDepth        = 1.0;
     color               = vec4( 0.0 );
     vec3  lightDirEye   = vec3(0.0, 0.0, 1.0); 
 
     // Get texture coordinates of this fragment
     vec2 fragTexture    = gl_FragCoord.xy / vec2( viewportDims );
 
-    vec3 stopEye        = texture( backFaceTexture,  fragTexture ).xyz;
-    vec3 startEye       = texture( frontFaceTexture, fragTexture ).xyz;
-    vec3 rayDirEye      = stopEye - startEye;
-    float rayDirLength  = length( rayDirEye );
+    vec3 stopModel      = texture( backFaceTexture,  fragTexture ).xyz;
+    vec3 startModel     = texture( frontFaceTexture, fragTexture ).xyz;
+    vec3 rayDirModel    = stopModel - startModel;
+    float rayDirLength  = length( rayDirModel );
     if( rayDirLength    < ULP10 )
         discard;
 
     float nStepsf       = rayDirLength  / stepSize1D;
-    vec3  stepSize3D    = rayDirEye     / nStepsf;
+    vec3  stepSize3D    = rayDirModel   / nStepsf;
 
-    // Shift the starting point (step1Eye) inside of the volume for 1/100 of a step size
+    // Set depth value at the backface minus 1/100 of a step size,
+    //   so it's always inside of the volume.
+    vec4  depthClip     =  Projection  * MV * vec4( stopModel - 0.01 * stepSize3D, 1.0 );
+    vec3  depthNdc      =  depthClip.xyz  /   depthClip.w;
+    gl_FragDepth        =  gl_DepthRange.diff * 0.5 * depthNdc.z +
+                          (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
+
+    // Shift the starting point (step1) inside of the volume for 1/100 of a step size
     //   to prevent potential boundary artifacts.
-    vec3  step1Eye      = startEye + 0.01 * stepSize3D;
-    vec3  step1Model    = (inversedMV * vec4(step1Eye, 1.0)).xyz;
+    vec3  step1Model    = startModel + 0.01 * stepSize3D;
     vec3  step1Texture  = (step1Model - boxMin) / boxSpan;
     float step1Value    = texture( volumeTexture, step1Texture ).r;
 
@@ -146,13 +150,12 @@ void main(void)
         if( color.a > 0.999 )  // You can still see through with 0.99...
             break;
 
-        vec3 step2Eye     = startEye + stepSize3D * float( stepi );
-        vec3 step2Model   = (inversedMV * vec4(step2Eye, 1.0)).xyz;
+        vec3 step2Model   = startModel  + stepSize3D * float( stepi );
         vec3 step2Texture = (step2Model - boxMin) / boxSpan;
         float step2Value  = texture( volumeTexture, step2Texture ).r;
         if( ShouldSkip( step2Texture, step2Model ) )
         {
-            step1Eye      = step2Eye;
+            step1Model    = step2Model;
             step1Texture  = step2Texture;
             step1Value    = step2Value;
             continue;
@@ -165,9 +168,9 @@ void main(void)
                 float valTrans  = (isoValues[j] - colorMapRange.x) / colorMapRange.z;
                 vec4  backColor = texture( colorMapTexture, valTrans );
                 float weight    = (isoValues[j] - step1Value) / (step2Value - step1Value);
-                vec3  isoEye    = step1Eye + weight * (step2Eye - step1Eye);
+                vec3  isoModel  = step1Model + weight * (step2Model - step1Model);
 
-                // Apply lighting
+                // Apply lighting (in eye space)
                 if( lighting && backColor.a > 0.001 )
                 {
                     vec3 isoTexture      = step1Texture + weight * (step2Texture - step1Texture);
@@ -177,10 +180,10 @@ void main(void)
                         vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0 )).xyz;
                              gradientEye = normalize( gradientEye );
                         float diffuse    = abs( dot(lightDirEye, gradientEye) );
+                        vec3 isoEye      = (MV * vec4( isoModel, 1.0 )).xyz;
                         vec3 viewDirEye  = normalize( -isoEye );
                         vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
-                        float specular   = pow( max(0.0, dot( reflectionEye, viewDirEye )), 
-                                                specularExp ); 
+                        float specular   = pow( max(0.0, dot( reflectionEye, viewDirEye )), specularExp ); 
                         backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse*diffuseCoeff) + 
                                            specular * specularCoeff;
                     }
@@ -189,19 +192,16 @@ void main(void)
                 color.rgb += (1.0 - color.a) * backColor.a * backColor.rgb;
                 color.a   += (1.0 - color.a) * backColor.a;
 
-                // Apply depth if opaque enough
+                // Apply depth no matter opacity
                 //   Follow transforms explained in http://www.songho.ca/opengl/gl_transform.html
-                if( color.a > 0.7 )
-                {
-                    vec4  isoClip =  Projection  * vec4( isoEye, 1.0 );
-                    vec3  isoNdc  =  isoClip.xyz / isoClip.w;
-                    gl_FragDepth  =  gl_DepthRange.diff * 0.5 * isoNdc.z +
-                                    (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
-                }
+                vec4  isoClip =  Projection  * MV * vec4( isoModel, 1.0 );
+                vec3  isoNdc  =  isoClip.xyz / isoClip.w;
+                gl_FragDepth  =  gl_DepthRange.diff * 0.5 * isoNdc.z +
+                                (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
             }
         }
 
-        step1Eye     = step2Eye;
+        step1Model   = step2Model;
         step1Texture = step2Texture;
         step1Value   = step2Value;
     }   // Finish ray casting
