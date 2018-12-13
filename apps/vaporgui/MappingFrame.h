@@ -174,6 +174,8 @@ class MappingFrame : public QGLWidget {
     // iterate across values.  It must sample them instead.
     void SetIsSampling(bool isSampling);
 
+    void SetHistoNeedsUpdate(bool needsUpdate);
+
   signals:
 
     //! Signal that is invoked when user starts to modify the transfer function.
@@ -219,11 +221,8 @@ class MappingFrame : public QGLWidget {
         std::vector<double> &minExts,
         std::vector<double> &maxExts) const;
     void populateHistogram();
-    void populateSamplingHistogram();
-    //void populateSamplingHistogramXY();
-    //void populateSamplingHistogramXZ();
-    //void populateSamplingHistogramYZ();
-    void populateIteratingHistogram();
+    void populateSamplingHistogram(bool fastMode);
+    void populateIteratingHistogram(bool fastMode);
     std::vector<double> calculateDeltas(
         std::vector<double> minExts,
         std::vector<double> maxExts) const;
@@ -338,6 +337,7 @@ class MappingFrame : public QGLWidget {
     map<string, Histo *> _histogramMap;
 
     bool _isSampling;
+    bool _histoNeedsUpdate;
     bool _opacityMappingEnabled;
     bool _colorMappingEnabled;
     bool _isoSliderEnabled;
