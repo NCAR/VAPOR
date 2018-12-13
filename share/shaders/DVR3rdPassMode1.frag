@@ -23,7 +23,7 @@ uniform float lightingCoeffs[4];
 
 uniform mat4 MV;
 uniform mat4 Projection;
-uniform mat4 inversedMV;
+uniform mat4 transposedInverseMV;
 
 // 
 // Derive helper variables
@@ -39,7 +39,6 @@ float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
 vec3  volumeDimsf      = vec3( volumeDims );
 vec3  boxSpan          = boxMax - boxMin;
-mat4  transposedInverseMV = transpose(inversedMV);
 
 //
 // Input:  Location to be evaluated in texture coordinates and model coordinates.
