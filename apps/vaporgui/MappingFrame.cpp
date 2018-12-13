@@ -298,7 +298,6 @@ void MappingFrame::getGridAndExtents(
 }
 
 void MappingFrame::populateHistogram() {
-    double t0 = Wasp::GetTime();
     bool fastMode = _mapper->getHistogramFastMode();
     if (_isSampling) {
         populateSamplingHistogram(fastMode);
