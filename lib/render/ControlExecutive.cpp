@@ -291,9 +291,10 @@ void ControlExec::_removeRendererHelper(
 	Renderer *ren = v->getRenderer(renderType, renderName);
 	if (! ren) return;
 
-	v->RemoveRenderer(ren);
-
-	delete ren;
+	// v->RemoveRenderer(ren);
+	// delete ren;
+    
+    ren->FlagForDeletion();
 
 	if (removeFromParamsFlag) {
 		_paramsMgr->RemoveRenderParamsInstance(
