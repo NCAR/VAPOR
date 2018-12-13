@@ -101,8 +101,8 @@ void oglPopState()
 // Constructor
 //----------------------------------------------------------------------------
 MappingFrame::MappingFrame(QWidget *parent)
-: QGLWidget(parent), _NUM_BINS(256), _mapper(NULL), _histogram(NULL), _isSampling(false), _opacityMappingEnabled(false), _colorMappingEnabled(false), _isoSliderEnabled(false),
-  _isolineSlidersEnabled(false), _lastSelectedIndex(-1), navigateButton(NULL), _editButton(NULL), _variableName(""), _domainSlider(new DomainWidget(this)),
+: QGLWidget(parent), _NUM_BINS(256), _mapper(NULL), _histogram(NULL), _isSampling(false), _histoNeedsUpdate(false), _opacityMappingEnabled(false), _colorMappingEnabled(false),
+  _isoSliderEnabled(false), _isolineSlidersEnabled(false), _lastSelectedIndex(-1), navigateButton(NULL), _editButton(NULL), _variableName(""), _domainSlider(new DomainWidget(this)),
   _contourRangeSlider(new ContourRangeSlider(this)), _isoSlider(new IsoSlider(this)), _colorbarWidget(new GLColorbarWidget(this, NULL)), _lastSelected(NULL), _texid(0), _texture(NULL),
   _updateTexture(true), _histogramScale(LINEAR), _contextMenu(NULL), _addOpacityWidgetSubMenu(NULL), _histogramScalingSubMenu(NULL), _compTypeSubMenu(NULL), _widgetEnabledSubMenu(NULL),
   _deleteOpacityWidgetAction(NULL), _addColorControlPointAction(NULL), _addOpacityControlPointAction(NULL), _deleteControlPointAction(NULL), _lastx(0), _lasty(0), _editMode(true), _clickedPos(0, 0),
@@ -214,6 +214,8 @@ void MappingFrame::RefreshHistogram()
 
 void MappingFrame::SetIsSampling(bool isSampling) { _isSampling = isSampling; }
 
+void MappingFrame::SetHistoNeedsUpdate(bool needsUpdate) { _histoNeedsUpdate = needsUpdate; }
+
 void MappingFrame::getGridAndExtents(VAPoR::Grid **grid, std::vector<double> &minExts, std::vector<double> &maxExts) const
 {
     size_t ts = _rParams->GetCurrentTimestep();
@@ -229,14 +231,15 @@ void MappingFrame::getGridAndExtents(VAPoR::Grid **grid, std::vector<double> &mi
 void MappingFrame::populateHistogram()
 {
     double t0 = Wasp::GetTime();
+    bool   fastMode = _mapper->getHistogramFastMode();
     if (_isSampling) {
-        populateSamplingHistogram();
+        populateSamplingHistogram(fastMode);
     } else {
-        populateIteratingHistogram();
+        populateIteratingHistogram(fastMode);
     }
 }
 
-void MappingFrame::populateSamplingHistogram()
+void MappingFrame::populateSamplingHistogram(bool fastMode)
 {
     Grid *              grid = nullptr;
     std::vector<double> minExts(3, 0.f);
@@ -260,7 +263,7 @@ void MappingFrame::populateSamplingHistogram()
     int jSamples = SAMPLE_RATE;
     int kSamples = SAMPLE_RATE;
 
-    if (_mapper->getHistogramFastMode()) {
+    if (fastMode) {
         iSamples *= FAST_MODE_FACTOR;
         jSamples *= FAST_MODE_FACTOR;
         kSamples *= FAST_MODE_FACTOR;
@@ -300,7 +303,7 @@ std::vector<double> MappingFrame::calculateDeltas(std::vector<double> minExts, s
     return deltas;
 }
 
-void MappingFrame::populateIteratingHistogram()
+void MappingFrame::populateIteratingHistogram(bool fastMode)
 {
     Grid *              grid = nullptr;
     std::vector<double> minExts, maxExts;
@@ -317,7 +320,7 @@ void MappingFrame::populateIteratingHistogram()
     Grid::ConstIterator itr = grid->cbegin();
     Grid::ConstIterator enditr = grid->cend();
 
-    if (_mapper->getHistogramFastMode()) {
+    if (fastMode) {
         int increment = 1.f / FAST_MODE_FACTOR;
         for (; itr != enditr;) {
             v = *itr;
@@ -1133,7 +1136,10 @@ int MappingFrame::drawHistogram()
 
     if (_updateTexture) { updateTexture(); }
 
-    glColor3f(0.0, 0.784, 0.784);
+    if (_histoNeedsUpdate)
+        glColor3f(0.0, 0.784, 0.784);
+    else
+        glColor3f(0.65, 0.65, 0.65);
 
     glBegin(GL_QUADS);
     {
