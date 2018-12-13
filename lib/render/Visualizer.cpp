@@ -212,12 +212,11 @@ int Visualizer::paintEvent(bool fast)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    for (int i = 0; i < _renderer.size(); i++) {
-        Renderer *r = _renderer[i];
-        if (r->IsFlaggedForDeletion()) {
-            RemoveRenderer(r);
-            delete r;
-            i--;
+    auto rendererPointersCopy = _renderer;
+    for (auto it = rendererPointersCopy.begin(); it != rendererPointersCopy.end(); ++it) {
+        if ((*it)->IsFlaggedForDeletion()) {
+            RemoveRenderer(*it);
+            delete *it;
         }
     }
 
