@@ -174,6 +174,7 @@ int ControlExec::ActivateRender(string winName, string dataSetName, string rende
 
     rp->SetEnabled(on);
     v->moveRendererToFront(ren);
+    v->moveVolumeRenderersToFront();
 
     _paramsMgr->EndSaveStateGroup();
 
