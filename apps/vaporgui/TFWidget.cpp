@@ -33,7 +33,9 @@
 #include "ErrorReporter.h"
 
 #define RANGE_PADDING .05
-#define DATA_RANGE_STRIDE 10
+#define DATA_RANGE_STRIDE 4 //10
+
+bool DATAMGRFAST = false;
 
 using namespace VAPoR;
 
@@ -189,15 +191,54 @@ void TFWidget::fileLoadTF(
     int timestep = 0;
     int level = 0;
     int lod = 0;
+    int stride = DATAMGRFAST ? DATA_RANGE_STRIDE : 1;
     _dataMgr->GetDataRange(
         timestep,
         varname,
         level,
         lod,
-        DATA_RANGE_STRIDE,
+        1,
+        //stride,
         defaultRange);
+    cout << "stride 1 " << defaultRange[0] << " " << defaultRange[1] << endl;
 
-    cout << "defaultRange " << defaultRange[0] << " " << defaultRange[1] << endl;
+    _dataMgr->GetDataRange(
+        timestep,
+        varname,
+        level,
+        lod,
+        2,
+        //stride,
+        defaultRange);
+    cout << "stride 2 " << defaultRange[0] << " " << defaultRange[1] << endl;
+
+    _dataMgr->GetDataRange(
+        timestep,
+        varname,
+        level,
+        lod,
+        4,
+        defaultRange);
+    cout << "stride 4 " << defaultRange[0] << " " << defaultRange[1] << endl;
+
+    _dataMgr->GetDataRange(
+        timestep,
+        varname,
+        level,
+        lod,
+        8,
+        defaultRange);
+    cout << "stride 8 " << defaultRange[0] << " " << defaultRange[1] << endl;
+
+    _dataMgr->GetDataRange(
+        timestep,
+        varname,
+        level,
+        lod,
+        stride,
+        //DATA_RANGE_STRIDE,
+        defaultRange);
+    cout << "stride 1 " << defaultRange[0] << " " << defaultRange[1] << endl;
 
     int rc = tf->LoadFromFile(s.toStdString(), defaultRange);
     if (rc < 0) {
@@ -245,9 +286,9 @@ void TFWidget::getVariableRange(
     float range[2],
     float values[2],
     bool secondaryVariable = false) {
-
     range[0] = range[1] = 0.0;
     values[0] = values[1] = 0.0;
+
     string varName;
     if (secondaryVariable)
         varName = _rParams->GetColorMapVariableName();
@@ -266,13 +307,64 @@ void TFWidget::getVariableRange(
         return;
 
     vector<double> rangev;
+    int stride = DATAMGRFAST ? DATA_RANGE_STRIDE : 1;
+    /*int rc = _dataMgr->GetDataRange(
+        ts, 
+        varName, 
+        ref, 
+        cmp,
+        stride, 
+        //DATA_RANGE_STRIDE, 
+        rangev
+    );*/
+
+    cout << endl
+         << "DataMgr::GetDataRange()" << endl;
     int rc = _dataMgr->GetDataRange(
         ts,
         varName,
         ref,
         cmp,
-        DATA_RANGE_STRIDE,
+        1,
         rangev);
+    cout << "stride 1 " << rangev[0] << " " << rangev[1] << endl;
+
+    _dataMgr->GetDataRange(
+        ts,
+        varName,
+        ref,
+        cmp,
+        2,
+        rangev);
+    cout << "stride 2 " << rangev[0] << " " << rangev[1] << endl;
+
+    _dataMgr->GetDataRange(
+        ts,
+        varName,
+        ref,
+        cmp,
+        4,
+        rangev);
+    cout << "stride 4 " << rangev[0] << " " << rangev[1] << endl;
+
+    _dataMgr->GetDataRange(
+        ts,
+        varName,
+        ref,
+        cmp,
+        8,
+        rangev);
+    cout << "stride 8 " << rangev[0] << " " << rangev[1] << endl;
+
+    _dataMgr->GetDataRange(
+        ts,
+        varName,
+        ref,
+        cmp,
+        16,
+        rangev);
+    cout << "stride 16 " << rangev[0] << " " << rangev[1] << endl;
+
     if (rc < 0) {
         MSG_ERR("Error loading variable");
         return;
@@ -280,8 +372,10 @@ void TFWidget::getVariableRange(
 
     assert(rangev.size() == 2);
 
-    range[0] = rangev[0] - rangev[0] * RANGE_PADDING;
-    range[1] = rangev[1] + rangev[1] * RANGE_PADDING;
+    //range[0] = rangev[0] - rangev[0]*RANGE_PADDING;
+    //range[1] = rangev[1] + rangev[1]*RANGE_PADDING;
+    range[0] = rangev[0];
+    range[1] = rangev[1];
 
     MapperFunction *tf = _rParams->GetMapperFunc(varName);
     values[0] = tf->getMinMapValue();
@@ -403,8 +497,6 @@ void TFWidget::updateMainMappingFrame() {
         _rParams,
         buttonPress);
 
-    cout << "updateMainMappingFrame" << endl;
-
     if (histogramRecalculated) {
         _updateMainHistoButton->setEnabled(false);
         _mappingFrame->SetHistoNeedsUpdate(false);
@@ -416,7 +508,6 @@ void TFWidget::updateMainMappingFrame() {
         checkForMainMapperRangeChanges();
         checkForTimestepChanges();
         if (_externalChangeHappened || _mainHistoRangeChanged) {
-            cout << "A" << endl;
             _updateMainHistoButton->setEnabled(true);
             _mappingFrame->SetHistoNeedsUpdate(true);
         }
@@ -464,8 +555,6 @@ void TFWidget::Update(DataMgr *dataMgr,
                       ParamsMgr *paramsMgr,
                       RenderParams *rParams,
                       bool internalUpdate) {
-
-    cout << "hidden? " << isHidden() << endl;
 
     assert(paramsMgr);
     assert(dataMgr);
@@ -580,12 +669,12 @@ void TFWidget::checkForMainMapperRangeChanges() {
     double newMin = mf->getMinMapValue();
     double newMax = mf->getMaxMapValue();
 
-    if (min != newMin)
+    if (min != newMin) {
         _mainHistoRangeChanged = true;
-    if (max != newMax)
+    }
+    if (max != newMax) {
         _mainHistoRangeChanged = true;
-    if (_mainHistoRangeChanged)
-        _mainHistoRangeChanged = true;
+    }
 }
 
 void TFWidget::checkForSecondaryMapperRangeChanges() {
@@ -627,7 +716,6 @@ void TFWidget::enableUpdateButtonsIfNeeded() {
         if (mf->GetAutoUpdateHisto()) {
             _initialized = true;
         } else if (_initialized) {
-            cout << "B" << endl;
             _updateMainHistoButton->setEnabled(true);
             _mappingFrame->SetHistoNeedsUpdate(true);
         } else {
@@ -883,10 +971,20 @@ void TFWidget::setColorInterpolation(int index) {
         mf->setColorInterpType(TFInterpolator::diverging);
     } else if (index == 1) {
         mf->setColorInterpType(TFInterpolator::discrete);
-        mf->setHistogramFastMode(true);
     } else if (index == 2) {
         mf->setColorInterpType(TFInterpolator::linear);
+    } else if (index == 3) {
+        mf->setHistogramFastMode(true);
+        cout << "histo fast" << endl;
+    } else if (index == 4) {
         mf->setHistogramFastMode(false);
+        cout << "histo slow" << endl;
+    } else if (index == 5) {
+        DATAMGRFAST = true;
+        cout << "dataMgr fast" << endl;
+    } else if (index == 6) {
+        DATAMGRFAST = false;
+        cout << "dataMgr slow" << endl;
     }
 }
 
