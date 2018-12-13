@@ -139,19 +139,18 @@ void main(void)
     // Now we need to query the color at the starting point.
     //   However, to prevent unpleasant boundary artifacts, we shift the starting point
     //   into the volume for 1/100 of a step size.
-    //   The variable is represented with an underscore suffix.
-    vec3  startModel_   = startModel  + 0.01 * stepSize3D;
-    vec3  startTexture  = (startModel_ - boxMin) / boxSpan;
-    if( !ShouldSkip( startTexture, startModel_ ) )
+    vec3  step1Model    = startModel  + 0.01 * stepSize3D;
+    vec3  step1Texture  = (step1Model - boxMin) / boxSpan;
+    if( !ShouldSkip( step1Texture, step1Model ) )
     {
-        float step1Value   = texture( volumeTexture, startTexture ).r;
+        float step1Value   = texture( volumeTexture, step1Texture ).r;
         float valTranslate = (step1Value - colorMapRange.x) / colorMapRange.z;
               color        = texture( colorMapTexture, valTranslate );
               color.rgb   *= color.a;
     }
 
     // let's do a ray casting! 
-    vec3 step2Model        = startModel_;
+    vec3 step2Model        = step1Model;
     int  nSteps            = int(nStepsf) + 2;
     int  stepi;
     for( stepi = 1; stepi < nSteps; stepi++ )
@@ -159,7 +158,7 @@ void main(void)
         if( color.a > 0.999 )  // You can still see something with 0.99...
             break;
 
-        step2Model         = startModel_ + stepSize3D * float( stepi );
+        step2Model         = startModel  + stepSize3D * float( stepi );
         vec3 step2Texture  = (step2Model - boxMin) / boxSpan;
         if( ShouldSkip( step2Texture, step2Model ) )
             continue;
