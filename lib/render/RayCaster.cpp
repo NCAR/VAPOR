@@ -507,7 +507,8 @@ int RayCaster::_paintGL(bool fast) {
     _updateViewportWhenNecessary();
 
     glBindTexture(GL_TEXTURE_2D, _depthTextureId);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, _currentViewport[0], _currentViewport[1], _currentViewport[2], _currentViewport[3], 0);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, _currentViewport[0],
+                     _currentViewport[1], _currentViewport[2], _currentViewport[3], 0);
 
     glBindVertexArray(_vertexArrayId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
@@ -744,6 +745,7 @@ void RayCaster::_drawVolumeFaces(int whichPass,
         glDepthFunc(GL_GEQUAL);
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 0, black); // clear GL_COLOR_ATTACHMENT0
+        glDisable(GL_BLEND);
     } else if (whichPass == 2) {
         _2ndPassShader->Bind();
         _2ndPassShader->SetUniform("MV", modelview);
@@ -757,7 +759,8 @@ void RayCaster::_drawVolumeFaces(int whichPass,
         glDepthFunc(GL_LEQUAL);
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 1, black); // clear GL_COLOR_ATTACHMENT1
-    } else                                   // 3rd pass
+        glDisable(GL_BLEND);
+    } else // 3rd pass
     {
         _3rdPassShader->Bind();
         _load3rdPassUniforms(castingMode, InversedMV, fast);
@@ -767,6 +770,9 @@ void RayCaster::_drawVolumeFaces(int whichPass,
         glCullFace(GL_BACK);
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     if (insideACell) // Only enters this section when 1st or 2nd pass
@@ -786,7 +792,6 @@ void RayCaster::_drawVolumeFaces(int whichPass,
 
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
-    glClearDepth(1.0);
 
     glUseProgram(0);
 }
