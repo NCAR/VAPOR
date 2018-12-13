@@ -234,8 +234,7 @@ void MappingFrame::getGridAndExtents(VAPoR::Grid **grid, std::vector<double> &mi
 
 void MappingFrame::populateHistogram()
 {
-    double t0 = Wasp::GetTime();
-    bool   fastMode = _mapper->getHistogramFastMode();
+    bool fastMode = _mapper->getHistogramFastMode();
     if (_isSampling) {
         populateSamplingHistogram(fastMode);
     } else {
