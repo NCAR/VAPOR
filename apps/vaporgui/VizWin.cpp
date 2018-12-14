@@ -477,6 +477,7 @@ void VizWin::_mouseMoveEventManip(QMouseEvent *e) {
 
     (void)_manip->MouseEvent(
         _buttonNum, screenCoords, _strHandleMid);
+    Render(true);
 }
 
 void VizWin::_mouseMoveEventNavigate(QMouseEvent *e) {
