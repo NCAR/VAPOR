@@ -139,7 +139,7 @@ void main(void)
 
     float nStepsf       = rayDirLength  / stepSize1D;
     vec3  stepSize3D    = rayDirModel   / nStepsf;
-    int   nSteps        = int(nStepsf) + 2;
+    int   nSteps        = int(nStepsf) + 1;
 
     // Set depth value at the backface minus 1/100 of a step size,
     //   so it's always inside of the volume.
@@ -152,7 +152,7 @@ void main(void)
     float step1Value    = texture( volumeTexture, step1Texture ).r;
 
     // let's do a ray casting! 
-    for( int stepi = 1; stepi < nSteps; stepi++ )
+    for( int stepi = 1; stepi <= nSteps; stepi++ )
     {
         if( color.a > 0.999 )  // You can still see through with 0.99...
             break;
@@ -200,7 +200,6 @@ void main(void)
                 color.a   += (1.0 - color.a) * backColor.a;
 
                 // Apply depth no matter opacity
-                //   Follow transforms explained in http://www.songho.ca/opengl/gl_transform.html
                 gl_FragDepth  =  CalculateDepth( isoModel );
 
             } // Finish rendering one iso-surface.
