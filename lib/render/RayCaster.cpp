@@ -59,7 +59,8 @@ RayCaster::RayCaster(const ParamsMgr *pm,
       _colorMapTexOffset(3),
       _missingValueTexOffset(4),
       _xyCoordsTexOffset(5),
-      _zCoordsTexOffset(6) {
+      _zCoordsTexOffset(6),
+      _depthTexOffset(7) {
     _backFaceTextureId = 0;
     _frontFaceTextureId = 0;
     _volumeTextureId = 0;
@@ -67,6 +68,7 @@ RayCaster::RayCaster(const ParamsMgr *pm,
     _colorMapTextureId = 0;
     _xyCoordsTextureId = 0;
     _zCoordsTextureId = 0;
+    _depthTextureId = 0;
     _frameBufferId = 0;
 
     _vertexArrayId = 0;
@@ -119,6 +121,10 @@ RayCaster::~RayCaster() {
     if (_zCoordsTextureId) {
         glDeleteTextures(1, &_zCoordsTextureId);
         _zCoordsTextureId = 0;
+    }
+    if (_depthTextureId) {
+        glDeleteTextures(1, &_depthTextureId);
+        _depthTextureId = 0;
     }
 
     // delete buffers
@@ -457,6 +463,7 @@ int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params,
 }
 
 int RayCaster::_initializeGL() {
+    // Load 1st and 2nd pass shaders
     ShaderProgram *shader = nullptr;
     if ((shader = _glManager->shaderManager->GetShader("RayCaster1stPass")))
         _1stPassShader = shader;
@@ -468,15 +475,18 @@ int RayCaster::_initializeGL() {
     else
         return GLERROR;
 
+    // Load 3rd pass shaders
     if (_load3rdPassShaders() != 0) {
         MyBase::SetErrMsg("Failed to load shaders!");
         return GLERROR;
     }
 
+    // Get the current viewport
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     std::memcpy(_currentViewport, viewport, 4 * sizeof(GLint));
 
+    // Create any textures, framebuffers, etc.
     if (_initializeFramebufferTextures() != 0) {
         MyBase::SetErrMsg("Failed to Create Framebuffer and Textures!");
         return GLERROR;
@@ -495,6 +505,11 @@ int RayCaster::_paintGL(bool fast) {
     const MatrixManager *mm = Renderer::_glManager->matrixManager;
 
     _updateViewportWhenNecessary();
+
+    // Collect existing depth value of the scene
+    glBindTexture(GL_TEXTURE_2D, _depthTextureId);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, _currentViewport[0],
+                     _currentViewport[1], _currentViewport[2], _currentViewport[3], 0);
 
     glBindVertexArray(_vertexArrayId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
@@ -557,7 +572,7 @@ int RayCaster::_paintGL(bool fast) {
     // 1st pass: render back facing polygons to texture0 of the framebuffer
     _drawVolumeFaces(1, castingMode, false);
 
-    /* Detect if we're inside the volume */
+    // Detect if we're inside the volume
     glm::mat4 InversedMV = glm::inverse(ModelView);
     std::vector<double> cameraUser(4, 1.0); // camera position in user coordinates
     cameraUser[0] = InversedMV[3][0];
@@ -693,6 +708,15 @@ int RayCaster::_initializeFramebufferTextures() {
     glGenBuffers(1, &_xyCoordsBufferId);
     glGenBuffers(1, &_zCoordsBufferId);
 
+    /* Generate and configure depth texture */
+    glGenTextures(1, &_depthTextureId);
+    glActiveTexture(GL_TEXTURE0 + _depthTexOffset);
+    glBindTexture(GL_TEXTURE_2D, _depthTextureId);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     /* Bind the default textures */
     glBindTexture(GL_TEXTURE_1D, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -722,6 +746,7 @@ void RayCaster::_drawVolumeFaces(int whichPass,
         glDepthFunc(GL_GEQUAL);
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 0, black); // clear GL_COLOR_ATTACHMENT0
+        glDisable(GL_BLEND);
     } else if (whichPass == 2) {
         _2ndPassShader->Bind();
         _2ndPassShader->SetUniform("MV", modelview);
@@ -735,7 +760,8 @@ void RayCaster::_drawVolumeFaces(int whichPass,
         glDepthFunc(GL_LEQUAL);
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 1, black); // clear GL_COLOR_ATTACHMENT1
-    } else                                   // 3rd pass
+        glDisable(GL_BLEND);
+    } else // 3rd pass
     {
         _3rdPassShader->Bind();
         _load3rdPassUniforms(castingMode, InversedMV, fast);
@@ -745,6 +771,9 @@ void RayCaster::_drawVolumeFaces(int whichPass,
         glCullFace(GL_BACK);
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     if (insideACell) // Only enters this section when 1st or 2nd pass
@@ -764,7 +793,6 @@ void RayCaster::_drawVolumeFaces(int whichPass,
 
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
-    glClearDepth(1.0);
 
     glUseProgram(0);
 }
@@ -779,7 +807,7 @@ void RayCaster::_load3rdPassUniforms(long castingMode,
 
     shader->SetUniform("MV", modelview);
     shader->SetUniform("Projection", projection);
-    shader->SetUniform("inversedMV", inversedMV);
+    shader->SetUniform("transposedInverseMV", glm::transpose(inversedMV));
 
     const float *cboxMin = _userCoordinates.myGridMin;
     const float *cboxMax = _userCoordinates.myGridMax;
@@ -836,13 +864,9 @@ void RayCaster::_load3rdPassUniforms(long castingMode,
         multiplier = 1.0f;
         break;
     }
-    glm::vec4 boxmin(cboxMin[0], cboxMin[1], cboxMin[2], 1.0f);
-    glm::vec4 boxmax(cboxMax[0], cboxMax[1], cboxMax[2], 1.0f);
-    glm::vec4 boxminEye = modelview * boxmin;
-    glm::vec4 boxmaxEye = modelview * boxmax;
-    float span[3] = {boxmaxEye[0] - boxminEye[0],
-                     boxmaxEye[1] - boxminEye[1],
-                     boxmaxEye[2] - boxminEye[2]};
+    float span[3] = {cboxMax[0] - cboxMin[0],
+                     cboxMax[1] - cboxMin[1],
+                     cboxMax[2] - cboxMin[2]};
     float stepSize1D;
     if (_userCoordinates.dims[3] < 50) // Make sure at least 100 steps
         stepSize1D = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / 100.0f;
