@@ -201,8 +201,8 @@ private:
     string              getActiveRendererName() const;
     void                getGridAndExtents(VAPoR::Grid **grid, std::vector<double> &minExts, std::vector<double> &maxExts) const;
     void                populateHistogram();
-    void                populateSamplingHistogram(int stride = 1);
-    void                populateIteratingHistogram(int stride = 1);
+    void                populateSamplingHistogram();
+    void                populateIteratingHistogram();
     void                setHistogramStride(int stride);
     std::vector<double> calculateDeltas(std::vector<double> minExts, std::vector<double> maxExts) const;
 
