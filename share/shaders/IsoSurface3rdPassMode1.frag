@@ -110,6 +110,17 @@ vec3 CalculateGradient( const in vec3 tc )
     return (a1 - a0 / h);
 }
 
+//
+// Input:  a position in the model space
+// Return: depth value at that position.
+//
+float CalculateDepth( const in vec3 pModel )
+{
+    vec4    pClip =  Projection  * MV * vec4( pModel, 1.0 );
+    vec3    pNdc  =  pClip.xyz   / pClip.w;
+    return (gl_DepthRange.diff * 0.5 * pNdc.z + (gl_DepthRange.near + gl_DepthRange.far) * 0.5);
+}
+
 
 void main(void)
 {
@@ -128,13 +139,11 @@ void main(void)
 
     float nStepsf       = rayDirLength  / stepSize1D;
     vec3  stepSize3D    = rayDirModel   / nStepsf;
+    int   nSteps        = int(nStepsf) + 2;
 
     // Set depth value at the backface minus 1/100 of a step size,
     //   so it's always inside of the volume.
-    vec4  depthClip     =  Projection  * MV * vec4( stopModel - 0.01 * stepSize3D, 1.0 );
-    vec3  depthNdc      =  depthClip.xyz  /   depthClip.w;
-    gl_FragDepth        =  gl_DepthRange.diff * 0.5 * depthNdc.z +
-                          (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
+    gl_FragDepth        =  CalculateDepth( stopModel - 0.01 * stepSize3D );
 
     // Shift the starting point (step1) inside of the volume for 1/100 of a step size
     //   to prevent potential boundary artifacts.
@@ -143,9 +152,7 @@ void main(void)
     float step1Value    = texture( volumeTexture, step1Texture ).r;
 
     // let's do a ray casting! 
-    int nSteps = int(nStepsf) + 2;
-    int stepi;
-    for( stepi = 1; stepi < nSteps; stepi++ )
+    for( int stepi = 1; stepi < nSteps; stepi++ )
     {
         if( color.a > 0.999 )  // You can still see through with 0.99...
             break;
@@ -194,10 +201,7 @@ void main(void)
 
                 // Apply depth no matter opacity
                 //   Follow transforms explained in http://www.songho.ca/opengl/gl_transform.html
-                vec4  isoClip =  Projection  * MV * vec4( isoModel, 1.0 );
-                vec3  isoNdc  =  isoClip.xyz / isoClip.w;
-                gl_FragDepth  =  gl_DepthRange.diff * 0.5 * isoNdc.z +
-                                (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
+                gl_FragDepth  =  CalculateDepth( isoModel );
 
             } // Finish rendering one iso-surface.
         }     // Finish testing all iso-values.
