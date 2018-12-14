@@ -837,10 +837,6 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
         glBindTexture(GL_TEXTURE_BUFFER, _zCoordsTextureId);
         shader->SetUniform("zCoordsTexture", _zCoordsTexOffset);
     }
-
-    glActiveTexture(GL_TEXTURE0 + _depthTexOffset);
-    glBindTexture(GL_TEXTURE_2D, _depthTextureId);
-    shader->SetUniform("depthTexture", _depthTexOffset);
 }
 
 void RayCaster::_3rdPassSpecialHandling(bool fast, long castingMode)
