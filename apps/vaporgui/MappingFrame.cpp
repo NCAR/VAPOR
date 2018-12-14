@@ -60,7 +60,7 @@
 #define YZ 2
 
 #define SAMPLE_RATE 100
-#define FAST_MODE_FACTOR 4 
+#define DEFAULT_STRIDE 4 
 #define TIME_ME = false
 
 using namespace VAPoR;
@@ -308,16 +308,15 @@ void MappingFrame::getGridAndExtents(
 }
 
 void MappingFrame::populateHistogram() {
-    int stride = _mapper->getHistogramStride();
     if (_isSampling) {
-        populateSamplingHistogram( stride );
+        populateSamplingHistogram();
 	}
     else	 {
-        populateIteratingHistogram( stride );
+        populateIteratingHistogram();
 	}
 }
 
-void MappingFrame::populateSamplingHistogram( int stride ) {
+void MappingFrame::populateSamplingHistogram() {
     Grid* grid = nullptr;
     std::vector<double> minExts(3, 0.f);
     std::vector<double> maxExts(3, 0.f);
@@ -336,15 +335,9 @@ void MappingFrame::populateSamplingHistogram( int stride ) {
     coords[Y] = minExts[Y];
     coords[Z] = minExts[Z];
 
-    int iSamples = SAMPLE_RATE;
-    int jSamples = SAMPLE_RATE;
-    int kSamples = SAMPLE_RATE;
-
-    if (stride > 1) {
-        iSamples /= stride;
-        jSamples /= stride;
-        kSamples /= stride;
-    }
+    int iSamples = SAMPLE_RATE / DEFAULT_STRIDE;
+    int jSamples = SAMPLE_RATE / DEFAULT_STRIDE;
+    int kSamples = SAMPLE_RATE / DEFAULT_STRIDE;
 
     if (deltas[X] == 0)
         iSamples = 0;
@@ -386,7 +379,7 @@ std::vector<double> MappingFrame::calculateDeltas(
     return deltas;
 }
 
-void MappingFrame::populateIteratingHistogram( int stride ) {
+void MappingFrame::populateIteratingHistogram() {
     Grid* grid = nullptr;
     std::vector<double> minExts, maxExts;
     getGridAndExtents(&grid, minExts, maxExts);
@@ -403,21 +396,21 @@ void MappingFrame::populateIteratingHistogram( int stride ) {
 	Grid::ConstIterator enditr = grid->cend();
 
 
-    if ( stride > 1 ) {
+    //if ( stride > 1 ) {
 	    for ( ; itr!=enditr ; ) {  
 		    v = *itr;
 		    if (v != grid->GetMissingValue()) 
 		        _histogram->addToBin(v);
-            itr += stride;
+            itr += DEFAULT_STRIDE;
         }
-    }
-    else {
+    //}
+    /*else {
 	    for ( ; itr!=enditr ; ++itr) {
 		    v = *itr;
 		    if (v==grid->GetMissingValue()) continue;
 		    _histogram->addToBin(v);
 	    }
-    }
+    }*/
 
 	delete grid;
 }
