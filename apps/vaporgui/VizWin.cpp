@@ -437,6 +437,7 @@ void VizWin::_mouseMoveEventManip(QMouseEvent *e)
     std::vector<double> screenCoords = _getScreenCoords(e);
 
     (void)_manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid);
+    Render(true);
 }
 
 void VizWin::_mouseMoveEventNavigate(QMouseEvent *e)
