@@ -142,15 +142,13 @@ void main(void)
 
     // Set depth value at the backface minus 1/10 of a step size,
     //   so it's always inside of the volume.
-    // Note on this 1/10 magic number: when DVR and Slice renderer are enabled
-    //   at the same time, and the slice is placed at a boundary,
-    //   1/10 is the smallest values that brings DVR inside of the slice.
-    gl_FragDepth        =  CalculateDepth( stopModel - 0.1 * stepSize3D );
+    gl_FragDepth        =  CalculateDepth( stopModel - 0.01 * stepSize3D );
 
     // If something else on the scene results in a shallower depth, we need to 
     //    compare depth at every step.
     bool  shallow    = false;
-    float otherDepth = texture( depthTexture, fragTexture ).x;
+    // Retrieve depth of other objects on the scene, minus a tiny value to avoid equal depth.
+    float otherDepth = texture( depthTexture, fragTexture ).x - ULP10;
     if(   otherDepth < gl_FragDepth )
           shallow    = true;
 
@@ -180,7 +178,7 @@ void main(void)
 
         step2Model         = startModel  + stepSize3D * float( stepi );
 
-        if( shallow && ( CalculateDepth(step2Model) >= otherDepth ) )
+        if( shallow && ( CalculateDepth(step2Model) > otherDepth ) )
         { 
             earlyTerm      = true;
             break;
