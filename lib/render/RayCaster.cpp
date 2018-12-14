@@ -1153,7 +1153,11 @@ void RayCaster::_enableVertexAttribute(const float *buf,
 
 double RayCaster::_getElapsedSeconds(const struct timeval *begin,
                                      const struct timeval *end) const {
+#ifdef WIN32
+    return 1;
+#else
     return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0);
+#endif
 }
 
 void RayCaster::_updateViewportWhenNecessary() {
