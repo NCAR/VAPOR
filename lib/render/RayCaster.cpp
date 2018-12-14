@@ -468,6 +468,7 @@ int RayCaster::_paintGL(bool fast)
 
     _updateViewportWhenNecessary();
 
+    // Collect existing depth value of the scene
     glBindTexture(GL_TEXTURE_2D, _depthTextureId);
     glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, _currentViewport[0], _currentViewport[1], _currentViewport[2], _currentViewport[3], 0);
 
@@ -530,7 +531,7 @@ int RayCaster::_paintGL(bool fast)
     // 1st pass: render back facing polygons to texture0 of the framebuffer
     _drawVolumeFaces(1, castingMode, false);
 
-    /* Detect if we're inside the volume */
+    // Detect if we're inside the volume
     glm::mat4           InversedMV = glm::inverse(ModelView);
     std::vector<double> cameraUser(4, 1.0);    // camera position in user coordinates
     cameraUser[0] = InversedMV[3][0];
