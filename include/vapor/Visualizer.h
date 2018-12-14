@@ -113,6 +113,7 @@ public:
     //! Move the renderer to the front of the render queue
     //! \param[out] Renderer instance that is moved to front
     void moveRendererToFront(const Renderer *ren);
+    void moveVolumeRenderersToFront();
 
     //! Remove a specific renderer from the renderer queue
     //! \param[in] r renderer will be removed

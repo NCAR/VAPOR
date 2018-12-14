@@ -49,6 +49,7 @@
 
 #include "vapor/ImageWriter.h"
 #include "vapor/GeoTIFWriter.h"
+#include <vapor/DVRenderer.h>
 
 using namespace VAPoR;
 bool Visualizer::_regionShareFlag = true;
@@ -419,6 +420,19 @@ void Visualizer::moveRendererToFront(const Renderer *ren)
     }
     _renderer[_renderer.size() - 1] = save;
     _renderOrder[_renderer.size() - 1] = saveOrder;
+}
+
+void Visualizer::moveVolumeRenderersToFront()
+{
+    Renderer *firstRendererMoved = nullptr;
+    auto      rendererPointersCopy = _renderer;
+    for (auto it = rendererPointersCopy.rbegin(); it != rendererPointersCopy.rend(); ++it) {
+        if (*it == firstRendererMoved) break;
+        if ((*it)->GetMyType() == DVRenderer::GetClassType()) {
+            moveRendererToFront(*it);
+            if (firstRendererMoved == nullptr) firstRendererMoved = *it;
+        }
+    }
 }
 
 /*
