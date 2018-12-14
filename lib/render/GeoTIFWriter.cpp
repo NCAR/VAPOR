@@ -1,7 +1,13 @@
 #include "vapor/GeoTIFWriter.h"
 #include "vapor/Proj4StringParser.h"
 #include <cassert>
+
+#ifdef WIN32
+#include <geotiff/geo_normalize.h>
+#include <geotiff/xtiffio.h>
+#else
 #include <geo_normalize.h>
+#endif
 
 using namespace VAPoR;
 
