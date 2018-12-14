@@ -5,6 +5,8 @@
 #include <vapor/MyBase.h>
 
 #ifdef WIN32
+#include <Windows.h>
+#include <shlwapi.h>
 #else
 #include <libgen.h>
 #endif
