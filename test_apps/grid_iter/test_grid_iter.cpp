@@ -532,6 +532,56 @@ void test_getvalue(StructuredGrid *sg)
     cout << endl;
 }
 
+void test_roi_iterator()
+{
+    cout << "ROI Test ----->" << endl;
+
+    vector<size_t>  dims = {128, 128, 128};
+    vector<size_t>  bs = {64, 64, 64};
+    vector<float *> blks = alloc_blocks(bs, dims);
+
+    vector<double> minu = {0.0, 0.0, 0.0};
+    vector<double> maxu = {(double)dims[0] - 1, (double)dims[1] - 1, (double)dims[2] - 1};
+
+    RegularGrid *rg = new RegularGrid(dims, bs, blks, minu, maxu);
+
+    vector<double> delta;
+    vector<double> roiminu, roimaxu;
+    for (int i = 0; i < minu.size(); i++) {
+        delta.push_back(maxu[i] - minu[i] / (dims[i] - 1));
+        roiminu.push_back(minu[i] + (delta[i] / 0.5));
+        roimaxu.push_back(maxu[i] - (delta[i] / 0.5));
+    }
+
+    size_t idx = 0;
+    for (size_t k = 1; k < dims[2] - 1; k++) {
+        for (size_t j = 1; j < dims[1] - 1; j++) {
+            for (size_t i = 1; i < dims[0] - 1; i++) {
+                rg->SetValueIJK(i, j, k, (float)idx);
+                idx++;
+            }
+        }
+    }
+
+    Grid::ConstIterator itr = rg->cbegin(roiminu, roimaxu);
+    Grid::ConstIterator enditr = rg->cend();
+    idx = 0;
+    size_t         v = 0;
+    vector<size_t> index;
+    bool           pass = true;
+    for (; itr != enditr; ++itr) {
+        v = (size_t)*itr;
+
+        if (idx != v) {
+            pass = false;
+            cerr << "FAIL test_roi_iterator : " << v << "not equal " << idx << endl;
+        }
+    }
+
+    if (pass) { cout << "ROI test passed" << endl; }
+    cout << endl;
+}
+
 int main(int argc, char **argv)
 {
     OptionParser op;
@@ -590,6 +640,8 @@ int main(int argc, char **argv)
     cout << "Grid Extents: " << endl;
     for (int i = 0; i < minu.size(); i++) { cout << "\t" << minu[i] << " " << maxu[i] << endl; }
     cout << endl;
+
+    test_roi_iterator();
 
     test_iterator(sg);
 
