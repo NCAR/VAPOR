@@ -286,9 +286,10 @@ void MapperFunction::makeLut(float *clut) const
 //----------------------------------------------------------------------------
 void MapperFunction::makeLut(std::vector<float> &clut) const
 {
-    float cluta[4 * _numEntries];
+    float *cluta = new float[4 * _numEntries];
     makeLut(cluta);
     clut.assign(cluta, cluta + 4 * _numEntries);
+    delete[] cluta;
 }
 
 //! Set both minimum and maximum mapping (histo) values
