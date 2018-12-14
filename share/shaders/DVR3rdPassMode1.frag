@@ -136,26 +136,26 @@ void main(void)
 
     float nStepsf       = rayDirLength / stepSize1D;
     vec3  stepSize3D    = rayDirModel  / nStepsf;
-    int   nSteps        = int(nStepsf) + 2;
+    // nStepsf is the perfect # of steps.
+    //   Casting it to integer requires a +1 to cover all volume space.
+    int   nSteps        = int(nStepsf) + 1;     
 
     // Set depth value at the backface minus 1/100 of a step size,
     //   so it's always inside of the volume.
     gl_FragDepth        =  CalculateDepth( stopModel - 0.01 * stepSize3D );
 
-    // If something else on the scene results in a smaller depth, we need to 
-    //    re-calculate the ray ending position
-    float othersDepth   = texture( depthTexture, fragTexture ).x;
-    //if(   othersDepth   < gl_FragDepth )
-    //{
-
-
-    //}
+    // If something else on the scene results in a shallower depth, we need to 
+    //    compare depth at every step.
+    bool  shallow    = false;
+    float otherDepth = texture( depthTexture, fragTexture ).x;
+    if(   otherDepth < gl_FragDepth )
+          shallow    = true;
 
     // Now we need to query the color at the starting point.
     //   However, to prevent unpleasant boundary artifacts, we shift the starting point
     //   into the volume for 1/100 of a step size.
-    vec3  step1Model    = startModel  + 0.01 * stepSize3D;
-    vec3  step1Texture  = (step1Model - boxMin) / boxSpan;
+    vec3  step1Model       = startModel  + 0.01 * stepSize3D;
+    vec3  step1Texture     = (step1Model - boxMin) / boxSpan;
     if( !ShouldSkip( step1Texture, step1Model ) )
     {
         float step1Value   = texture( volumeTexture, step1Texture ).r;
@@ -166,12 +166,23 @@ void main(void)
 
     // let's do a ray casting! 
     vec3 step2Model        = step1Model;
-    for( int stepi = 1; stepi < nSteps; stepi++ )
+    bool earlyTerm         = false;         // loop early terminated 
+    for( int stepi = 1; stepi <= nSteps; stepi++ )  // notice that stepi starts from 1.
     {
         if( color.a > 0.999 )  // You can still see something with 0.99...
+        { 
+            earlyTerm      = true;
             break;
+        }
 
         step2Model         = startModel  + stepSize3D * float( stepi );
+
+        if( shallow && ( CalculateDepth(step2Model) >= otherDepth ) )
+        { 
+            earlyTerm      = true;
+            break;
+        }
+
         vec3 step2Texture  = (step2Model - boxMin) / boxSpan;
         if( ShouldSkip( step2Texture, step2Model ) )
             continue;
@@ -203,14 +214,14 @@ void main(void)
         // Color compositing
         color.rgb += (1.0 - color.a) * backColor.a * backColor.rgb;
         color.a   += (1.0 - color.a) * backColor.a;
+
+        step1Model = step2Model;
     }
 
-    // If sufficient opacity, set a closer depth value
-    if( color.a > 0.7 )
-    {
-        float newDepth =  CalculateDepth( step2Model );
-        gl_FragDepth   =  min( newDepth, gl_FragDepth );
-    }
+    // If loop terminated early, we set depth value at step1 position. Otherwise, this fragment 
+    //    will have the depth value at the back of this volume, which is already set.
+    if( earlyTerm )
+        gl_FragDepth   = CalculateDepth( step1Model );
 
 }
 
