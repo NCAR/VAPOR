@@ -203,6 +203,7 @@ int ControlExec::ActivateRender(
 
 	rp->SetEnabled(on);
 	v->moveRendererToFront(ren);
+    v->moveVolumeRenderersToFront();
 
 	_paramsMgr->EndSaveStateGroup();
 
