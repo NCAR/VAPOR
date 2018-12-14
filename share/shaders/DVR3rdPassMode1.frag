@@ -125,7 +125,7 @@ void main(void)
     vec3  lightDirEye   = vec3(0.0, 0.0, 1.0); 
 
     // Calculate texture coordinates of this fragment
-    vec2  fragTexture   = gl_FragCoord.xy / vec2( viewportDims );
+    vec2 fragTexture    = gl_FragCoord.xy / vec2( viewportDims );
 
     vec3 stopModel      = texture( backFaceTexture,  fragTexture ).xyz;
     vec3 startModel     = texture( frontFaceTexture, fragTexture ).xyz;
@@ -140,9 +140,12 @@ void main(void)
     //   Casting it to integer requires a +1 to cover all volume space.
     int   nSteps        = int(nStepsf) + 1;     
 
-    // Set depth value at the backface minus 1/100 of a step size,
+    // Set depth value at the backface minus 1/10 of a step size,
     //   so it's always inside of the volume.
-    gl_FragDepth        =  CalculateDepth( stopModel - 0.01 * stepSize3D );
+    // Note on this 1/10 magic number: when DVR and Slice renderer are enabled
+    //   at the same time, and the slice is placed at a boundary,
+    //   1/10 is the smallest values that brings DVR inside of the slice.
+    gl_FragDepth        =  CalculateDepth( stopModel - 0.1 * stepSize3D );
 
     // If something else on the scene results in a shallower depth, we need to 
     //    compare depth at every step.
