@@ -147,6 +147,7 @@ protected:
     GLuint              _colorMapTextureId;
     GLuint              _xyCoordsTextureId;
     GLuint              _zCoordsTextureId;
+    GLuint              _depthTextureId;
     const  GLint        _backFaceTexOffset;
     const  GLint        _frontFaceTexOffset;
     const  GLint        _volumeTexOffset;
@@ -154,6 +155,7 @@ protected:
     const  GLint        _missingValueTexOffset;
     const  GLint        _xyCoordsTexOffset;
     const  GLint        _zCoordsTexOffset;
+    const  GLint        _depthTexOffset;
 
     // buffers
     GLuint              _frameBufferId;
