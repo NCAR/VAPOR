@@ -17,7 +17,7 @@ namespace VAPoR {
 //! variable on the DataMgr class. The Python script may operate on 
 //! input variables managed by the DataMgr
 //
-class VDF_API PyEngine : public Wasp::MyBase {
+class RENDER_API PyEngine : public Wasp::MyBase {
 
 public:
 
@@ -193,7 +193,7 @@ private:
 
 	
 
- class VDF_API DerivedPythonVar : public DerivedDataVar {
+ class RENDER_API DerivedPythonVar : public DerivedDataVar {
  public:
 
  DerivedPythonVar(
