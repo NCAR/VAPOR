@@ -6,7 +6,6 @@
 
 #ifdef WIN32
     #include <Windows.h>
-    #include <shlwapi.h>
 #else
     #include <libgen.h>
 #endif
@@ -96,7 +95,9 @@ long FileUtils::GetFileModifiedTime(const string &path)
 bool FileUtils::IsPathAbsolute(const std::string &path)
 {
 #ifdef WIN32
-    return !PathIsRelative((LPCTSTR)path.c_str());
+    char dir[_MAX_DIR];
+    _splitpath_s(path.c_str(), NULL, 0, dir, _MAX_DIR, NULL, 0, NULL, 0);
+    return dir[0] == '/' || dir[0] == '\\';
 #else
     return path[0] == '/';
 #endif
