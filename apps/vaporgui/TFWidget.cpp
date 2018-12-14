@@ -33,7 +33,7 @@
 #include "ErrorReporter.h"
 
 #define RANGE_PADDING .05
-#define DEFAULT_STRIDE 4
+#define DEFAULT_STRIDE 16
 
 bool DATAMGRFAST = false;
 
@@ -53,7 +53,6 @@ TFWidget::TFWidget(QWidget *parent)
     _discreteColormap = false;
     _mainVarName = "";
     _secondaryVarName = "";
-    _getDataRangeStride = 1;
 
     _myRGB[0] = _myRGB[1] = _myRGB[2] = 1.f;
 
@@ -197,7 +196,7 @@ void TFWidget::fileLoadTF(
         varname,
         level,
         lod,
-        _getDataRangeStride,
+        DEFAULT_STRIDE,
         defaultRange);
 
     int rc = tf->LoadFromFile(s.toStdString(), defaultRange);
@@ -272,7 +271,7 @@ void TFWidget::getVariableRange(
         varName,
         ref,
         cmp,
-        _getDataRangeStride,
+        DEFAULT_STRIDE,
         rangev);
 
     if (rc < 0) {
@@ -282,8 +281,8 @@ void TFWidget::getVariableRange(
 
     assert(rangev.size() == 2);
 
-    range[0] = rangev[0] - rangev[0] * RANGE_PADDING;
-    range[1] = rangev[1] + rangev[1] * RANGE_PADDING;
+    range[0] = rangev[0];
+    range[1] = rangev[1];
 
     MapperFunction *tf = _rParams->GetMapperFunc(varName);
     values[0] = tf->getMinMapValue();
@@ -374,7 +373,6 @@ void TFWidget::updateSecondaryAutoUpdateHistoCheckbox() {
 void TFWidget::updateMainSliders() {
     float range[2], values[2];
     getVariableRange(range, values);
-    cout << "udpatingSliders " << _getDataRangeStride << " " << range[0] << " " << range[1] << endl;
 
     _rangeCombo->Update(range[0], range[1], values[0], values[1]);
     _opacitySlider->setValue(getOpacity() * 100);
@@ -396,19 +394,11 @@ void TFWidget::updateSecondarySliders() {
 }
 
 void TFWidget::updateMainMappingFrame() {
-    /*bool buttonPress = sender() == _updateMainHistoButton ? true : false;
-    if (!buttonPress)
-        buttonPress = getAutoUpdateMainHisto();*/
     bool buttonPress = false;
     if (sender() == _updateMainHistoButton ||
         getAutoUpdateMainHisto()) {
         buttonPress = true;
-        _getDataRangeStride = 1;
-    } else
-        _getDataRangeStride = DEFAULT_STRIDE;
-
-    MapperFunction *mainMF = getMainMapperFunction();
-    mainMF->setHistogramStride(_getDataRangeStride);
+    }
 
     bool histogramRecalculated = _mappingFrame->Update(
         _dataMgr,
@@ -495,8 +485,6 @@ void TFWidget::Update(DataMgr *dataMgr,
     updateQtWidgets();
     updateMainMappingFrame(); // set mapper func to that of current variable, refresh _rParams etc
     updateSecondaryMappingFrame();
-
-    _getDataRangeStride = 4;
 }
 
 void TFWidget::updateQtWidgets() {

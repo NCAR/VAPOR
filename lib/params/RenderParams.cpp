@@ -27,6 +27,8 @@
 #include <vapor/RenderParams.h>
 #include <vapor/DataMgr.h>
 
+#define DEFAULT_STRIDE 16
+
 using namespace VAPoR;
 
 const string RenderParams::_EnabledTag = "Enabled";
@@ -357,7 +359,13 @@ MapperFunction *RenderParams::GetMapperFunc(string varname) {
 
         vector<double> range;
         bool prev = EnableErrMsg(false); // no error handling
-        int rc = _dataMgr->GetDataRange(ts, varname, level, lod, 1, range);
+        int rc = _dataMgr->GetDataRange(
+            ts,
+            varname,
+            level,
+            lod,
+            DEFAULT_STRIDE,
+            range);
         if (rc < 0) {
             range = {0.0, 1.0};
         }
