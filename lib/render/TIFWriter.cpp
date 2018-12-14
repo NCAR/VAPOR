@@ -1,4 +1,7 @@
 #include "vapor/TIFWriter.h"
+#ifdef WIN32
+#include <tiff/xtiffio.h>
+#endif
 
 using namespace VAPoR;
 
