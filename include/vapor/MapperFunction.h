@@ -122,13 +122,9 @@ public:
     //! \return Maximum mapping value
     float getMaxMapValue() const { return (getMinMaxMapValue()[1]); };
 
-    bool getHistogramFastMode() { return (bool)GetValueDouble(_histogramFastModeTag, 0.f); }
+    int getHistogramStride() { return GetValueDouble(_histogramStrideTag, 1.f); }
 
-    void setHistogramFastMode(bool onOff)
-    {
-        double d = (double)onOff;
-        SetValueDouble(_histogramFastModeTag, "Set histogram fast mode", d);
-    }
+    void setHistogramStride(int stride) { SetValueDouble(_histogramStrideTag, "Set histogram calculation stride", (double)stride); }
 
     //! Set both minimum and maximum mapping (histo) values
     //! \param[in] val1 minimum value
@@ -283,7 +279,7 @@ private:
     static const string _opacityMapTag;
     static const string _autoUpdateHistoTag;
     static const string _secondaryVarMapperTag;
-    static const string _histogramFastModeTag;
+    static const string _histogramStrideTag;
 
     //
     // Size of lookup table.  Always 1<<8 currently!

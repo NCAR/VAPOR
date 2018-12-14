@@ -133,6 +133,7 @@ private:
     int                 _cLevel;
     int                 _refLevel;
     int                 _timeStep;
+    int                 _getDataRangeStride;
     string              _mainVarName;
     string              _secondaryVarName;
     bool                _initialized;

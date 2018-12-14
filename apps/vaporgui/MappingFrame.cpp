@@ -234,15 +234,15 @@ void MappingFrame::getGridAndExtents(VAPoR::Grid **grid, std::vector<double> &mi
 
 void MappingFrame::populateHistogram()
 {
-    bool fastMode = _mapper->getHistogramFastMode();
+    int stride = _mapper->getHistogramStride();
     if (_isSampling) {
-        populateSamplingHistogram(fastMode);
+        populateSamplingHistogram(stride);
     } else {
-        populateIteratingHistogram(fastMode);
+        populateIteratingHistogram(stride);
     }
 }
 
-void MappingFrame::populateSamplingHistogram(bool fastMode)
+void MappingFrame::populateSamplingHistogram(int stride)
 {
     Grid *              grid = nullptr;
     std::vector<double> minExts(3, 0.f);
@@ -266,10 +266,10 @@ void MappingFrame::populateSamplingHistogram(bool fastMode)
     int jSamples = SAMPLE_RATE;
     int kSamples = SAMPLE_RATE;
 
-    if (fastMode) {
-        iSamples /= FAST_MODE_FACTOR;
-        jSamples /= FAST_MODE_FACTOR;
-        kSamples /= FAST_MODE_FACTOR;
+    if (stride > 1) {
+        iSamples /= stride;
+        jSamples /= stride;
+        kSamples /= stride;
     }
 
     if (deltas[X] == 0) iSamples = 0;
@@ -306,7 +306,7 @@ std::vector<double> MappingFrame::calculateDeltas(std::vector<double> minExts, s
     return deltas;
 }
 
-void MappingFrame::populateIteratingHistogram(bool fastMode)
+void MappingFrame::populateIteratingHistogram(int stride)
 {
     Grid *              grid = nullptr;
     std::vector<double> minExts, maxExts;
@@ -323,11 +323,11 @@ void MappingFrame::populateIteratingHistogram(bool fastMode)
     Grid::ConstIterator itr = grid->cbegin();
     Grid::ConstIterator enditr = grid->cend();
 
-    if (fastMode) {
+    if (stride > 1) {
         for (; itr != enditr;) {
             v = *itr;
             if (v != grid->GetMissingValue()) _histogram->addToBin(v);
-            itr += FAST_MODE_FACTOR;
+            itr += stride;
         }
     } else {
         for (; itr != enditr; ++itr) {
@@ -349,7 +349,6 @@ void MappingFrame::updateMapperFunction(MapperFunction *mapper)
     deleteOpacityWidgets();
 
     _mapper = mapper;
-    _mapper->setHistogramFastMode(true);
 
     if (_opacityMappingEnabled) {
         //
