@@ -460,8 +460,7 @@ void SettingsParams::_init()
     string images = GetSharePath("images");
     SetDefaultImageDir(string(images));
 
-#warning TODO GetAppPath
-    string python = GetSharePath("python");
+    string python = GetPythonDir();
     SetDefaultPythonDir(string(python));
 }
 
