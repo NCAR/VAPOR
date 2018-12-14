@@ -51,6 +51,7 @@
 
 #include "vapor/ImageWriter.h"
 #include "vapor/GeoTIFWriter.h"
+#include <vapor/DVRenderer.h>
 
 
 using namespace VAPoR;
@@ -230,8 +231,14 @@ int Visualizer::paintEvent(bool fast)
 	//Prepare for alpha values:
 	glEnable (GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	//Render the current active manip, if there is one
+    
+    auto rendererPointersCopy = _renderer;
+    for (auto it = rendererPointersCopy.begin(); it != rendererPointersCopy.end(); ++it) {
+        if ((*it)->IsFlaggedForDeletion()) {
+            RemoveRenderer(*it);
+            delete *it;
+        }
+    }
 
 	//Now we are ready for all the different renderers to proceed.
 	//Sort them;  If they are opaque, they go first.  If not opaque, they
@@ -464,6 +471,21 @@ void Visualizer::moveRendererToFront(const Renderer* ren)
 	}
 	_renderer[_renderer.size() - 1] = save;
 	_renderOrder[_renderer.size() - 1] = saveOrder;
+}
+
+void Visualizer::moveVolumeRenderersToFront()
+{
+    Renderer *firstRendererMoved = nullptr;
+    auto rendererPointersCopy = _renderer;
+    for (auto it = rendererPointersCopy.rbegin(); it != rendererPointersCopy.rend(); ++it) {
+        if (*it == firstRendererMoved)
+            break;
+        if ((*it)->GetMyType() == DVRenderer::GetClassType()) {
+            moveRendererToFront(*it);
+            if (firstRendererMoved == nullptr)
+                firstRendererMoved = *it;
+        }
+    }
 }
 
 /*

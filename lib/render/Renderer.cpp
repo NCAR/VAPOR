@@ -75,6 +75,7 @@ RendererBase::RendererBase(
 
     _glManager = nullptr;
 	_glInitialized = false;
+    _flaggedForDeletion = false;
 
 
 }
@@ -83,6 +84,17 @@ RendererBase::~RendererBase()
 {
    
 }
+
+void RendererBase::FlagForDeletion()
+{
+    _flaggedForDeletion = true;
+}
+
+bool RendererBase::IsFlaggedForDeletion() const
+{
+    return _flaggedForDeletion;
+}
+
 // Destructor
 Renderer::~Renderer()
 {
