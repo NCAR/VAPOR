@@ -270,9 +270,10 @@ void ControlExec::_removeRendererHelper(
     if (!ren)
         return;
 
-    v->RemoveRenderer(ren);
+    // v->RemoveRenderer(ren);
+    // delete ren;
 
-    delete ren;
+    ren->FlagForDeletion();
 
     if (removeFromParamsFlag) {
         _paramsMgr->RemoveRenderParamsInstance(
