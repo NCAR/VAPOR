@@ -13,7 +13,7 @@ class ParamsMgr;
 //! \brief A class for managing CalcEngine class instances
 //! \author John Clyne
 //
-class VDF_API CalcEngineMgr : public Wasp::MyBase {
+class RENDER_API CalcEngineMgr : public Wasp::MyBase {
 
   public:
     //! Constructor for CalcEngineMgr class
