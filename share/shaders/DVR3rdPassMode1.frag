@@ -107,6 +107,17 @@ vec3 CalculateGradient( const in vec3 tc )
     return (a1 - a0 / h);
 }
 
+//
+// Input:  a position in the model space
+// Return: depth value at that position.
+//
+float CalculateDepth( const in vec3 pModel )
+{
+    vec4    pClip =  Projection  * MV * vec4( pModel, 1.0 );
+    vec3    pNdc  =  pClip.xyz   / pClip.w;
+    return (gl_DepthRange.diff * 0.5 * pNdc.z + (gl_DepthRange.near + gl_DepthRange.far) * 0.5);
+}
+
 
 void main(void)
 {
@@ -125,13 +136,20 @@ void main(void)
 
     float nStepsf       = rayDirLength / stepSize1D;
     vec3  stepSize3D    = rayDirModel  / nStepsf;
+    int   nSteps        = int(nStepsf) + 2;
 
     // Set depth value at the backface minus 1/100 of a step size,
     //   so it's always inside of the volume.
-    vec4  depthClip     =  Projection  * MV * vec4( stopModel - 0.01 * stepSize3D, 1.0 );
-    vec3  depthNdc      =  depthClip.xyz  /   depthClip.w;
-    gl_FragDepth        =  gl_DepthRange.diff * 0.5 * depthNdc.z +
-                          (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
+    gl_FragDepth        =  CalculateDepth( stopModel - 0.01 * stepSize3D );
+
+    // If something else on the scene results in a smaller depth, we need to 
+    //    re-calculate the ray ending position
+    float othersDepth   = texture( depthTexture, fragTexture ).x;
+    //if(   othersDepth   < gl_FragDepth )
+    //{
+
+
+    //}
 
     // Now we need to query the color at the starting point.
     //   However, to prevent unpleasant boundary artifacts, we shift the starting point
@@ -148,9 +166,7 @@ void main(void)
 
     // let's do a ray casting! 
     vec3 step2Model        = step1Model;
-    int  nSteps            = int(nStepsf) + 2;
-    int  stepi;
-    for( stepi = 1; stepi < nSteps; stepi++ )
+    for( int stepi = 1; stepi < nSteps; stepi++ )
     {
         if( color.a > 0.999 )  // You can still see something with 0.99...
             break;
@@ -192,10 +208,7 @@ void main(void)
     // If sufficient opacity, set a closer depth value
     if( color.a > 0.7 )
     {
-        vec4 step2Clip =  Projection * MV    * vec4( step2Model, 1.0 );
-        vec3 step2Ndc  =  step2Clip.xyz / step2Clip.w;
-        float newDepth =  gl_DepthRange.diff * 0.5 * step2Ndc.z +
-                         (gl_DepthRange.near + gl_DepthRange.far) * 0.5;
+        float newDepth =  CalculateDepth( step2Model );
         gl_FragDepth   =  min( newDepth, gl_FragDepth );
     }
 
