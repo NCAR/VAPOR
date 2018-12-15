@@ -616,11 +616,13 @@ void VizWin::Render(bool fast) {
 		updateManip();
 	}
     else if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic) {
+#ifndef WIN32
         _glManager->PixelCoordinateSystemPush();
         _glManager->matrixManager->Translate(10, 10, 0);
         glDisable(GL_DEPTH_TEST);
         _glManager->fontManager->GetFont("arimo", 22)->DrawText("Geo Referenced Mode");
         _glManager->PixelCoordinateSystemPop();
+#endif
     }
 	
 	swapBuffers();
