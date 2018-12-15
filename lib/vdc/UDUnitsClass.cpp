@@ -3,7 +3,7 @@
 #include <iterator>
 #include <algorithm>
 #include <cassert>
-#ifdef _WINDOWS
+#ifdef WIN32
     #include "vapor/udunits2.h"
 #else
     #include <udunits2.h>

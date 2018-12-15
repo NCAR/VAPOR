@@ -22,7 +22,7 @@
 #include <csetjmp>
 #include <csignal>
 
-#ifndef _WINDOWS
+#ifndef WIN32
     #include <unistd.h>
 #endif
 
