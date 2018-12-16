@@ -2,7 +2,9 @@
 #define RAYCASTER_H
 
 #include <GL/glew.h>
+#ifndef WIN32
 #include <sys/time.h>
+#endif
 
 #ifdef Darwin
 #include <OpenGL/gl.h>
