@@ -37,8 +37,13 @@ endif()
 
 # compiler warning flags
 if (NOT WIN32)
-  SET( CMAKE_CXX_FLAGS "-Wall -Wno-sign-compare -Wno-overloaded-virtual")
-  SET( CMAKE_C_FLAGS   "-Wall -Wno-sign-compare")
+  SET (CMAKE_CXX_FLAGS "-Wall -Wno-sign-compare -Wno-overloaded-virtual")
+  SET (CMAKE_C_FLAGS   "-Wall -Wno-sign-compare")
+else ()
+  # Enable multithread compiling on Visual Studio
+  # This feature is glitchy so you may need to re-run
+  SET (CMAKE_CXX_FLAGS "/MP")
+  SET (CMAKE_C_FLAGS   "/MP")
 endif()
 
 option (BUILD_VDC "Build VDC library and utilities" ON)
