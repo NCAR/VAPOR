@@ -1,7 +1,11 @@
 #pragma once
 
 #include "vapor/TIFWriter.h"
+#ifdef WIN32
+#include <geotiff/geotiffio.h>
+#else
 #include <geotiffio.h>
+#endif
 
 namespace VAPoR {
 class RENDER_API GeoTIFWriter : public TIFWriter {

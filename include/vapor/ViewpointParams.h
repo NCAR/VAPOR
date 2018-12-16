@@ -201,7 +201,7 @@ class PARAMS_API ViewpointParams : public ParamsBase {
     }
     void SetModelViewMatrix(const std::vector<double> mvec) {
         assert(mvec.size() == 16);
-        double m[mvec.size()];
+        double m[16];
         for (int i = 0; i < mvec.size(); i++)
             m[i] = mvec[i];
         getCurrentViewpoint()->SetModelViewMatrix(m);

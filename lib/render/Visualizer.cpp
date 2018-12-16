@@ -30,8 +30,6 @@
 #include <xtiffio.h>
 #endif
 
-#include "geotiffio.h"
-
 #ifdef WIN32
 #pragma warning(disable : 4996)
 #endif
