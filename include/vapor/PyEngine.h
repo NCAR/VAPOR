@@ -17,7 +17,7 @@ namespace VAPoR {
 //! variable on the DataMgr class. The Python script may operate on
 //! input variables managed by the DataMgr
 //
-class VDF_API PyEngine : public Wasp::MyBase {
+class RENDER_API PyEngine : public Wasp::MyBase {
 public:
     //! Constructor for PyEngine class
     //!
@@ -166,7 +166,7 @@ public:
                          vector<vector<size_t>> outputVarDims, vector<float *> outputVarArrays);
 
 private:
-    class VDF_API DerivedPythonVar : public DerivedDataVar {
+    class RENDER_API DerivedPythonVar : public DerivedDataVar {
     public:
         DerivedPythonVar(string varName, string units, DC::XType type, string mesh, string time_coord_var, bool hasMissing, std::vector<string> inNames, string script, DataMgr *dataMgr,
                          bool coordFlag);

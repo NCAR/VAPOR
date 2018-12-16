@@ -46,7 +46,7 @@ struct GLManager;
 //! Manip class is a pure virtual class that supports
 //! manipulators in the VAPOR Visualizer scene
 //!
-class RENDER_API Manip {
+class Manip {
 public:
     Manip(GLManager *glManager) : _glManager(glManager){};
     virtual ~Manip() {}
@@ -144,7 +144,7 @@ protected:
 //! This subclass handles translation and stretching manip.  Works
 //! with ArrowParams (rake).
 //! When you slide a handle with the right mouse it stretches the region
-class RENDER_API TranslateStretchManip : public Manip {
+class TranslateStretchManip : public Manip {
 public:
     TranslateStretchManip(GLManager *glManager);
     virtual ~TranslateStretchManip() {}
