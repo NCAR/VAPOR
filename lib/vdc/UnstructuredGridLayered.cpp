@@ -117,7 +117,6 @@ void UnstructuredGridLayered::GetUserCoordinates(const std::vector<size_t> &indi
     vector<size_t> cIndices = indices;
     ClampIndex(cIndices);
 
-    assert(cIndices.size() == 1);
     coords.clear();
 
     vector<size_t> indices2d = {cIndices[0]};
