@@ -11,26 +11,28 @@ uniform usampler3D      missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D       colorMapTexture;
 uniform samplerBuffer   xyCoordsTexture;
 uniform samplerBuffer   zCoordsTexture;
-uniform sampler2D  depthTexture;
+uniform sampler2D       depthTexture;
 
-uniform vec2  dataRanges[2];
-uniform vec3  boxExtents[2];
-uniform ivec3 volumeDims;        // number of vertices in this volume
+uniform ivec3 volumeDims;        // number of vertices in each direction of this volume
 uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
+uniform vec3  boxMin;
+uniform vec3  boxMax;
+uniform vec3  colorMapRange;
 
 uniform float stepSize1D;        // ray casting step size
 uniform bool  flags[3];
 uniform float lightingCoeffs[4]; // lighting parameters
 
 uniform mat4  MV;
-uniform mat4  inversedMV;
+uniform mat4  Projection;
+uniform mat4  transposedInverseMV;
 
 //
 // Derive helper variables
 //
-const float EPSILON    = 5e-6f;
 const float ULP        = 1.2e-7f;           // 2^-23 == 1.192e-7
+const float ULP10      = 1.2e-6f;
 bool  fast             = flags[0];          // fast rendering mode
 bool  lighting         = fast ? false : flags[1];   // no lighting in fast mode
 bool  hasMissingValue  = flags[2];          // has missing values or not
@@ -38,15 +40,8 @@ float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
-// min, max, and range values of this variable. 
-vec3  valueRange       = vec3(dataRanges[0], dataRanges[0].y - dataRanges[0].x); 
-// min, max, and range values on this color map
-vec3  colorMapRange    = vec3(dataRanges[1], dataRanges[1].y - dataRanges[1].x); 
-vec3  boxMin           = boxExtents[0];     // min coordinates of the bounding box of this volume
-vec3  boxMax           = boxExtents[1];     // max coordinates of the bounding box of this volume
 vec3  volumeDimsf      = vec3( volumeDims );
 vec3  boxSpan          = boxMax - boxMin;
-mat4  transposedInverseMV = transpose(inversedMV);
 
 struct WoopPrecalculation
 {
@@ -80,79 +75,6 @@ void InitializeWoopPre( const in vec3 dir )
     woopPre.Sz = 1.0             / dir[woopPre.kz];
 }
 
-// 
-// Woop ray-triangle intersection algorithm.
-// Note: woopPre must be initialized by InitializeWoopPre() before invoking this function.
-//
-bool  WoopIntersection( const in vec3 orig, const in vec3 dir,
-                        const in vec3 v0,   const in vec3 v1,   const in vec3 v2,
-                        out float outT,  out float outU,  out float outV,  out float outW )
-{
-    vec3 A   = v0 - orig;
-    vec3 B   = v1 - orig;
-    vec3 C   = v2 - orig;
-
-    float Ax = fma( -woopPre.Sx, A[ woopPre.kz ], A[ woopPre.kx ] );
-    float Ay = fma( -woopPre.Sy, A[ woopPre.kz ], A[ woopPre.ky ] );
-    float Bx = fma( -woopPre.Sx, B[ woopPre.kz ], B[ woopPre.kx ] );
-    float By = fma( -woopPre.Sy, B[ woopPre.kz ], B[ woopPre.ky ] );
-    float Cx = fma( -woopPre.Sx, C[ woopPre.kz ], C[ woopPre.kx ] );
-    float Cy = fma( -woopPre.Sy, C[ woopPre.kz ], C[ woopPre.ky ] );
-
-    float U  = fma( Cx, By, -Cy * Bx );
-    float V  = fma( Ax, Cy, -Ay * Cx );
-    float W  = fma( Bx, Ay, -By * Ax );
-
-    /* Fall back to double precision
-    if( U == 0.0 || V == 0.0 || W == 0.0 )
-    {
-        double CxBy = double(Cx)  * double(By);
-        double CyBx = double(Cy)  * double(Bx);
-        U           = float( CxBy - CyBx );
-        double AxCy = double(Ax)  * double(Cy);
-        double AyCx = double(Ay)  * double(Cx);
-        V           = float( AxCy - AyCx );
-        double BxAy = double(Bx)  * double(Ay);
-        double ByAx = double(By)  * double(Ax);
-        W           = float( BxAy - ByAx );
-    }*/
-
-    // Edge test
-    if( (U < -ULP || V < -ULP || W < -ULP) && (U > ULP || V > ULP || W > ULP) )
-        return false;
-
-    // Parallel test
-    float det = U + V + W;
-    if( abs(det) < ULP )
-        return false;
-
-    float Az = woopPre.Sz * A[ woopPre.kz ];
-    float Bz = woopPre.Sz * B[ woopPre.kz ];
-    float Cz = woopPre.Sz * C[ woopPre.kz ];
-    float T  = fma( U, Az, fma( V, Bz, W * Cz ) );
-    outT     = T / det;
-    outU     = U / det;
-    outV     = V / det;
-    outW     = W / det;
-
-    return true;
-}
-
-//
-// Input:  normalized value w.r.t. valueRange.
-// Output: normalized value w.r.t. colorMapRange.
-//
-float TranslateValue( const in float value )
-{
-    if( colorMapRange.x != colorMapRange.y )
-    {   
-        float orig = value * valueRange.z + valueRange.x;
-        return (orig - colorMapRange.x) / colorMapRange.z;
-    }   
-    else
-        return value;
-}
-
 //
 // Input:  logical index of a vertex
 // Output: user coordinates in the eye space
@@ -163,8 +85,7 @@ vec3 GetCoordinates( const in ivec3 index )
     int zOffset  = index.z * (volumeDims.x * volumeDims.y) + xyOffset;
     vec4 xyC     = texelFetch( xyCoordsTexture, xyOffset );
     vec4 zC      = texelFetch( zCoordsTexture,  zOffset );
-    vec4 eyeC    = MV * vec4( xyC.xy, zC.x, 1.0 );
-    return eyeC.xyz;
+    return vec3( xyC.xy, zC.x );
 }
 
 //
@@ -234,6 +155,76 @@ vec3 CalculateGradient( const in vec3 tc)
     return (a1-a0 / h);
 }
 
+// 
+// Woop ray-triangle intersection algorithm.
+// Note: woopPre must be initialized by InitializeWoopPre() before invoking this function.
+//
+int   WoopIntersection( const in vec3 orig, const in vec3 dir,
+                        const in vec3 v0,   const in vec3 v1,   const in vec3 v2,
+                        out float outT,  out float outU,  out float outV,  out float outW )
+{
+    vec3 A   = v0 - orig;
+    vec3 B   = v1 - orig;
+    vec3 C   = v2 - orig;
+
+    float Ax = fma( -woopPre.Sx, A[ woopPre.kz ], A[ woopPre.kx ] );
+    float Ay = fma( -woopPre.Sy, A[ woopPre.kz ], A[ woopPre.ky ] );
+    float Bx = fma( -woopPre.Sx, B[ woopPre.kz ], B[ woopPre.kx ] );
+    float By = fma( -woopPre.Sy, B[ woopPre.kz ], B[ woopPre.ky ] );
+    float Cx = fma( -woopPre.Sx, C[ woopPre.kz ], C[ woopPre.kx ] );
+    float Cy = fma( -woopPre.Sy, C[ woopPre.kz ], C[ woopPre.ky ] );
+
+    float U  = fma( Cx, By, -Cy * Bx );
+    float V  = fma( Ax, Cy, -Ay * Cx );
+    float W  = fma( Bx, Ay, -By * Ax );
+
+    /* Fall back to double precision.
+       This is probably not necessary when the subsequent edge test compares with ULP.
+    if( U == 0.0 || V == 0.0 || W == 0.0 )
+    {
+        double CxBy = double(Cx)  * double(By);
+        double CyBx = double(Cy)  * double(Bx);
+        U           = float( CxBy - CyBx );
+        double AxCy = double(Ax)  * double(Cy);
+        double AyCx = double(Ay)  * double(Cx);
+        V           = float( AxCy - AyCx );
+        double BxAy = double(Bx)  * double(Ay);
+        double ByAx = double(By)  * double(Ax);
+        W           = float( BxAy - ByAx );
+    }*/
+
+    // Edge test
+    if( (U < -ULP || V < -ULP || W < -ULP) && (U > ULP || V > ULP || W > ULP) )
+        return 1;
+
+    // Parallel test
+    float det = U + V + W;
+    if( abs(det) < ULP )
+        return 10;
+
+    float det1o = 1.0 / det;
+    float Az = woopPre.Sz * A[ woopPre.kz ];
+    float Bz = woopPre.Sz * B[ woopPre.kz ];
+    float Cz = woopPre.Sz * C[ woopPre.kz ];
+    float T  = fma( U, Az, fma( V, Bz, W * Cz ) );
+    outT     = T * det1o;
+    outU     = U * det1o;
+    outV     = V * det1o;
+    outW     = W * det1o;
+
+    return 0;
+}
+
+//
+// Input:  a position in the model space
+// Return: depth value at that position.
+//
+float CalculateDepth( const in vec3 pModel )
+{
+    vec4    pClip =  Projection  * MV * vec4( pModel, 1.0 );
+    vec3    pNdc  =  pClip.xyz   / pClip.w;
+    return (gl_DepthRange.diff * 0.5 * pNdc.z + (gl_DepthRange.near + gl_DepthRange.far) * 0.5);
+}
 
 void  FindCellIndices(  const in ivec4 cellIdx,     // Input:  cell index
                         out ivec3 cubeVertIdx[8],   // Output: indices of 8 vertices
@@ -285,7 +276,7 @@ void  FindCellIndices(  const in ivec4 cellIdx,     // Input:  cell index
 //
 //   Test if the ray comes into the specified cell from the specified face.
 // 
-bool InputTest( const in ivec4 cellIdx, const in vec3 rayOrig, const in vec3 rayDir )
+int InputTest( const in ivec4 cellIdx, const in vec3 rayOrig, const in vec3 rayDir )
 {
     ivec3 cubeVertIdx[8], triangles[12];
     vec3  cubeVertCoord[8];
@@ -293,17 +284,20 @@ bool InputTest( const in ivec4 cellIdx, const in vec3 rayOrig, const in vec3 ray
     int tri1 = cellIdx.w * 2;
     int tri2 = cellIdx.w * 2 + 1;
     float t, u, v, w;
-    bool intersect1 = WoopIntersection( rayOrig, rayDir,
+    int  intersect1 = WoopIntersection( rayOrig, rayDir,
                                         cubeVertCoord[ triangles[tri1][0] ],
                                         cubeVertCoord[ triangles[tri1][1] ],
                                         cubeVertCoord[ triangles[tri1][2] ],
                                         t, u, v, w                        );
-    bool intersect2 = WoopIntersection( rayOrig, rayDir,
+    int  intersect2 = WoopIntersection( rayOrig, rayDir,
                                         cubeVertCoord[ triangles[tri2][0] ],
                                         cubeVertCoord[ triangles[tri2][1] ],
                                         cubeVertCoord[ triangles[tri2][2] ],
                                         t, u, v, w                        );
-    return (intersect1 || intersect2);
+    if( intersect1 == 0 || intersect2 == 0 )
+        return 0;
+    else
+        return (intersect1 + intersect2 );
 }
 
 int  FindNextCell( const in ivec4 step1CellIdx, const in vec3 rayOrig, const in vec3 rayDir,
@@ -314,7 +308,7 @@ int  FindNextCell( const in ivec4 step1CellIdx, const in vec3 rayOrig, const in 
     FindCellIndices( step1CellIdx, cubeVertIdx, cubeVertCoord, triangles );
 
     // Test intersection with 12 triangles
-    bool  intersect[12];
+    int   intersect[12];
     float tArr[12],    uArr[12],   vArr[12],    wArr[12];
     for( int i = 0; i < 12; i++ )
     {
@@ -342,7 +336,7 @@ int  FindNextCell( const in ivec4 step1CellIdx, const in vec3 rayOrig, const in 
     
     int numInterceptFace = 0;
     for( int i = 0; i < 6; i++ )
-        if( i != step1CellIdx.w && (intersect[2*i] || intersect[2*i+1]) )     
+        if( i != step1CellIdx.w && (intersect[2*i] == 0 || intersect[2*i+1] == 0) )     
             numInterceptFace++;
     //int i = step1CellIdx.w;
     //if( intersect[2*i] || intersect[2*i+1] )            numInterceptFace++;
@@ -491,44 +485,37 @@ bool CellOutsideBound( const in ivec3 cellIdx )
 
 void main(void)
 {
+    color               = vec4( 0.0 );
     vec3  lightDirEye   = vec3(0.0, 0.0, 1.0); 
 
     // Get texture coordinates of this frament
     vec2 fragTexture    = gl_FragCoord.xy / vec2( viewportDims );
 
-    vec3 stopEye        = texture( backFaceTexture,  fragTexture ).xyz;
-    vec3 startEye       = texture( frontFaceTexture, fragTexture ).xyz;
-    vec3 rayDirEye      = stopEye - startEye;
-    float rayDirLength  = length( rayDirEye );
+    vec3 stopModel        = texture( backFaceTexture,  fragTexture ).xyz;
+    vec3 startModel       = texture( frontFaceTexture, fragTexture ).xyz;
+    vec3 rayDirModel      = stopModel - startModel;
+    float rayDirLength  = length( rayDirModel );
     if(   rayDirLength  < ULP )
         discard;
-    InitializeWoopPre( rayDirEye );
+    // Initialize Woop constants right after defining the ray direction
+    InitializeWoopPre( rayDirModel );
 
     ivec4 step1CellIdx  = provokingVertexIdx;
     ivec4 step2CellIdx  = ivec4( 0 );
     float step1T, step2T;
 
-    color = vec4(0.0);
-    bool inFace = InputTest( step1CellIdx, startEye, rayDirEye );
-    if( !inFace )
+    int inFace = InputTest( step1CellIdx, startModel - 0.1 * rayDirModel, rayDirModel );
+    if( inFace > 0 )
     {
-        color = vec4( 0.9, 0.2, 0.2, 1.0 );    // red
-        int intersect = FindNextCell( step1CellIdx, startEye, rayDirEye, 
-                                      step2CellIdx, step2T );
-        if( intersect == 1 ) color.g = 0.9;             // yellow
-        else if( intersect == 2 ) color.b = 0.9;        // purple
-        else if( intersect > 2 ) color = vec4( 0.9 );
+        if( inFace < 10 )
+            color = vec4( 0.9, 0.2, 0.2, 1.0 );    // red
+        else
+            color = vec4( 0.2, 0.9, 0.2, 1.0 );    // green
     }
-
-
-    /* What's the color of Cell 1 
-    int intersect = FindNextCell( step1CellIdx, startEye, rayDirEye, 
+    else
+    {/*
+    int intersect = FindNextCell( step1CellIdx, startModel - 0.1 * rayDirModel, rayDirModel, 
                                   step2CellIdx, step2T );
-    vec3  step1CellCenterTexture = vec3( step1CellIdx.xyz + 1 ) / volumeDimsf;
-    float step1Value    = texture( volumeTexture, step1CellCenterTexture ).r;
-          color         = texture( colorMapTexture, TranslateValue( step1Value ) );
-          color.rgb    *= color.a;
-
      if( intersect == 0 ) 
          color = vec4( 0.9, 0.2, 0.2, 1.0 );    // red
      else if( intersect == 2 ) 
@@ -538,6 +525,7 @@ void main(void)
      else if( intersect > 3 )
          color = vec4( 0.9, 0.9, 0.9, 1.0 );    // white
     */
+    }
 
 #if 0
     // Ray starts from an edge... Need to do something... 

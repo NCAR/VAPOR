@@ -596,8 +596,21 @@ int RayCaster::_paintGL( bool fast )
         return GRIDERROR;
     }
 
+    long castingMode     =  params->GetCastingMode();
+    if(  castingMode     == FixedStep )
+        _3rdPassShader   = _3rdPassMode1Shader;
+    else if( castingMode == CellTraversal )
+        _3rdPassShader   = _3rdPassMode2Shader;
+    else
+    {
+        MyBase::SetErrMsg( "RayCasting Mode not supported!" ); 
+        glBindVertexArray( 0 );
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+        delete grid;
+        return JUSTERROR;
+    }
+
     // If there is an update event
-    long castingMode      = params->GetCastingMode();
     if( !_userCoordinates.IsMetadataUpToDate( params, grid, _dataMgr ) )
     {
         int success  = _userCoordinates.UpdateFaceAndData( params, grid, _dataMgr );
@@ -661,18 +674,6 @@ int RayCaster::_paintGL( bool fast )
     glViewport( 0, 0, _currentViewport[2], _currentViewport[3] );
 
     // 3rd pass, perform ray casting
-    if(  castingMode == FixedStep )
-        _3rdPassShader = _3rdPassMode1Shader;
-    else if( castingMode == CellTraversal )
-        _3rdPassShader = _3rdPassMode2Shader;
-    else
-    {
-        MyBase::SetErrMsg( "RayCasting Mode not supported!" ); 
-        glBindVertexArray( 0 );
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-        delete grid;
-        return JUSTERROR;
-    }
     _drawVolumeFaces( 3, castingMode, insideACell, InversedMV, fast );
         
     // Restore default VAO settings! 
@@ -1015,20 +1016,20 @@ void RayCaster::_renderTriangleStrips( int whichPass, long castingMode ) const
     for( unsigned int y = 0; y < by - 1; y++ )   // Looping over every TriangleStrip
     {
         idx = 0;
-		// This loop controls rendering order of the triangle strip. It 
-		// provides the indices for each vertex in a strip. Strips are
-		// created one row at a time.
-		//
+        // This loop controls rendering order of the triangle strip. It 
+        // provides the indices for each vertex in a strip. Strips are
+        // created one row at a time.
+        //
         for( unsigned int x = 0; x < bx; x++ )   // Filling indices for vertices of this TriangleStrip
         {
             indexBuffer[ idx++ ] = (y + 1) * bx + x;
             indexBuffer[ idx++ ] = y * bx + x;
         }
 
-		// In cell-traverse ray casting mode we need a cell index for the
-		// two triangles forming the face of a cell. Use the OpenGL "provoking"
-		// vertex to provide this information.
-		//
+        // In cell-traverse ray casting mode we need a cell index for the
+        // two triangles forming the face of a cell. Use the OpenGL "provoking"
+        // vertex to provide this information.
+        //
         if( attrib1Enabled )                     // Also specify attrib1 values
         {
             for( unsigned int x = 0; x < bx; x++ )  // Fill attrib1 value for each vertex
