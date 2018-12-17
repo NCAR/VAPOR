@@ -174,6 +174,7 @@ int ControlExec::ActivateRender(string winName, string dataSetName, string rende
 
     rp->SetEnabled(on);
     v->moveRendererToFront(ren);
+    v->moveVolumeRenderersToFront();
 
     _paramsMgr->EndSaveStateGroup();
 
@@ -246,9 +247,10 @@ void ControlExec::_removeRendererHelper(string winName, string dataSetName, stri
     Renderer *ren = v->getRenderer(renderType, renderName);
     if (!ren) return;
 
-    v->RemoveRenderer(ren);
+    // v->RemoveRenderer(ren);
+    // delete ren;
 
-    delete ren;
+    ren->FlagForDeletion();
 
     if (removeFromParamsFlag) { _paramsMgr->RemoveRenderParamsInstance(winName, dataSetName, paramsType, renderName); }
 }

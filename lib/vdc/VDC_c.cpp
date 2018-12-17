@@ -6,6 +6,11 @@
 #include "vapor/VDC_c.h"
 #include "vapor/MyBase.h"
 
+// __attribute__ not valid in VisualC++
+#ifdef WIN32
+    #define __attribute__(x)
+#endif
+
 // #define VDC_DEBUG
 // #define VDC_DEBUG_CPP_RUN
 // #define VDC_DEBUG_RUN

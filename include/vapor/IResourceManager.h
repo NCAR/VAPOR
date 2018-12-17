@@ -6,6 +6,14 @@
 #include "vapor/MyBase.h"
 #include "vapor/FileUtils.h"
 
+#ifdef WIN32
+    #ifdef RENDER_EXPORTS
+        #define IRESOURCEMANAGER_IMPLEMENT
+    #endif
+#else
+    #define IRESOURCEMANAGER_IMPLEMENT
+#endif
+
 namespace VAPoR {
 
 template<typename K, typename T> class RENDER_API IResourceManager : public Wasp::MyBase {
@@ -23,6 +31,7 @@ public:
     void        DeleteResource(const K &key);
 };
 
+#ifdef IRESOURCEMANAGER_IMPLEMENT
 template<typename K, typename T> IResourceManager<K, T>::~IResourceManager()
 {
     for (auto it = _map.begin(); it != _map.end(); ++it) delete it->second;
@@ -66,5 +75,6 @@ template<typename K, typename T> void IResourceManager<K, T>::DeleteResource(con
     delete _map[key];
     _map.erase(key);
 }
+#endif
 
 }    // namespace VAPoR

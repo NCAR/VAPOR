@@ -11,6 +11,7 @@
 #include <vapor/RegularGrid.h>
 #include <vapor/LayeredGrid.h>
 #include <vapor/CurvilinearGrid.h>
+#include <vapor/StretchedGrid.h>
 #include <vapor/KDTreeRG.h>
 #include <vapor/FileUtils.h>
 
@@ -53,7 +54,7 @@ OptionParser::OptDescRec_T set_opts[] = {{"bs", 1, "64:64:64",
                                           "of booleans specifying boundary periodicity"},
                                          {"type", 1, "regular",
                                           "Grid type. One of (regular, "
-                                          "layered, curvlinear"},
+                                          "layered, curvlinear, stretched"},
                                          {"debug", 0, "", "Print diagnostics"},
                                          {"help", 0, "", "Print this message and exit"},
                                          {NULL}};
@@ -115,6 +116,29 @@ VAPoR::RegularGrid *make_regular_grid()
     vector<float *> blks = alloc_blocks(opt.bs, opt.dims);
 
     RegularGrid *rg = new RegularGrid(opt.dims, opt.bs, blks, opt.minu, opt.maxu);
+
+    return (rg);
+}
+
+VAPoR::StretchedGrid *make_stretched_grid()
+{
+    assert(opt.bs.size() == opt.minu.size());
+    assert(opt.bs.size() == opt.maxu.size());
+    assert(opt.bs.size() == opt.dims.size());
+    assert(opt.bs.size() == opt.periodic.size());
+
+    vector<float *> blks = alloc_blocks(opt.bs, opt.dims);
+
+    vector<double>           xcoords, ycoords, zcoords;
+    vector<vector<double> *> coords = {&xcoords, &ycoords, &zcoords};
+    double                   delta;
+
+    for (int i = 0; i < opt.minu.size(); i++) {
+        delta = opt.dims[i] == 1 ? 0.0 : (opt.maxu[i] - opt.minu[i]) / (opt.dims[i] - 1);
+        for (int j = 0; i < opt.dims[j]; j++) { coords[i]->push_back(opt.minu[j] + j * delta); }
+    }
+
+    StretchedGrid *rg = new StretchedGrid(opt.dims, opt.bs, blks, xcoords, ycoords, zcoords);
 
     return (rg);
 }
@@ -255,11 +279,12 @@ void init_grid(StructuredGrid *sg)
     size_t jmax = opt.dims.size() >= 1 ? opt.dims[1] : 1;
     size_t imax = opt.dims.size() >= 1 ? opt.dims[0] : 1;
 
+    size_t idx = 0;
     for (size_t k = 0; k < kmax; k++) {
         for (size_t j = 0; j < jmax; j++) {
             for (size_t i = 0; i < imax; i++) {
-                //		sg->SetValueIJK(i,j,k, (float) k+1);
-                sg->SetValueIJK(i, j, k, (float)i);
+                sg->SetValueIJK(i, j, k, (float)idx);
+                idx++;
             }
         }
     }
@@ -291,16 +316,16 @@ void test_operator_pg_iterator(const StructuredGrid *sg)
 
     double t0 = Wasp::GetTime();
 
-    const size_t stride = 10;
+    const size_t stride = 8;
 
-    Grid::ConstIterator itr = sg->cbegin();
-    Grid::ConstIterator enditr = sg->cend();
+    Grid::ConstIterator itr1 = sg->cbegin();
+    Grid::ConstIterator enditr1 = sg->cend();
     double              accum1 = 0.0;
     size_t              count1 = 0;
     size_t              index = 0;
-    for (; itr != enditr; ++itr) {
+    for (; itr1 != enditr1; ++itr1) {
         if ((index % stride) == 0) {
-            accum1 += *itr;
+            accum1 += *itr1;
             count1++;
         }
         index++;
@@ -310,20 +335,42 @@ void test_operator_pg_iterator(const StructuredGrid *sg)
     cout << "Iteration time (inc by 1) : " << t1 - t0 << endl;
     cout << "Sum and count: " << accum1 << " " << count1 << endl;
 
-    double t2 = Wasp::GetTime();
-    itr = sg->cbegin();
-    enditr = sg->cend();
-    double accum2 = 0.0;
-    size_t count2 = 0;
-    for (; itr != enditr;) {
-        accum2 += *itr;
+    double              t2 = Wasp::GetTime();
+    Grid::ConstIterator itr2 = sg->cbegin();
+    Grid::ConstIterator enditr2 = sg->cend();
+    double              accum2 = 0.0;
+    size_t              count2 = 0;
+    for (; itr2 != enditr2;) {
+        accum2 += *itr2;
         count2++;
-        itr += stride;
+        itr2 += stride;
     }
     double t3 = Wasp::GetTime();
 
     cout << "Iteration time (+=) : " << t3 - t2 << endl;
     cout << "Sum and count: " << accum2 << " " << count2 << endl;
+
+    itr1 = sg->cbegin();
+    enditr1 = sg->cend();
+    itr2 = sg->cbegin();
+    enditr2 = sg->cend();
+    index = 0;
+    bool mismatch = false;
+    for (; itr1 != enditr1 && itr2 != enditr2; ++itr1) {
+        if ((index % stride) == 0) {
+            if (*itr1 != *itr2) {
+                mismatch = true;
+                break;
+            }
+            itr2 += stride;
+        }
+        index++;
+    }
+    if (!mismatch) {
+        cout << "operator+= operator++ match" << endl;
+    } else {
+        cout << "FAIL : operator+= operator++ mismatch" << endl;
+    }
     cout << endl;
 }
 
@@ -485,6 +532,56 @@ void test_getvalue(StructuredGrid *sg)
     cout << endl;
 }
 
+void test_roi_iterator()
+{
+    cout << "ROI Test ----->" << endl;
+
+    vector<size_t>  dims = {128, 128, 128};
+    vector<size_t>  bs = {64, 64, 64};
+    vector<float *> blks = alloc_blocks(bs, dims);
+
+    vector<double> minu = {0.0, 0.0, 0.0};
+    vector<double> maxu = {(double)dims[0] - 1, (double)dims[1] - 1, (double)dims[2] - 1};
+
+    RegularGrid *rg = new RegularGrid(dims, bs, blks, minu, maxu);
+
+    vector<double> delta;
+    vector<double> roiminu, roimaxu;
+    for (int i = 0; i < minu.size(); i++) {
+        delta.push_back(maxu[i] - minu[i] / (dims[i] - 1));
+        roiminu.push_back(minu[i] + (delta[i] / 0.5));
+        roimaxu.push_back(maxu[i] - (delta[i] / 0.5));
+    }
+
+    size_t idx = 0;
+    for (size_t k = 1; k < dims[2] - 1; k++) {
+        for (size_t j = 1; j < dims[1] - 1; j++) {
+            for (size_t i = 1; i < dims[0] - 1; i++) {
+                rg->SetValueIJK(i, j, k, (float)idx);
+                idx++;
+            }
+        }
+    }
+
+    Grid::ConstIterator itr = rg->cbegin(roiminu, roimaxu);
+    Grid::ConstIterator enditr = rg->cend();
+    idx = 0;
+    size_t         v = 0;
+    vector<size_t> index;
+    bool           pass = true;
+    for (; itr != enditr; ++itr) {
+        v = (size_t)*itr;
+
+        if (idx != v) {
+            pass = false;
+            cerr << "FAIL test_roi_iterator : " << v << "not equal " << idx << endl;
+        }
+    }
+
+    if (pass) { cout << "ROI test passed" << endl; }
+    cout << endl;
+}
+
 int main(int argc, char **argv)
 {
     OptionParser op;
@@ -524,6 +621,9 @@ int main(int argc, char **argv)
     } else if (opt.type == "curvilinear_terrain") {
         cout << "Curvilinear terrain grid" << endl;
         sg = make_curvilinear_terrain_grid();
+    } else if (opt.type == "stretched") {
+        cout << "Stretched grid" << endl;
+        sg = make_stretched_grid();
     } else {
         cout << "Regular grid" << endl;
         sg = make_regular_grid();
@@ -540,6 +640,8 @@ int main(int argc, char **argv)
     cout << "Grid Extents: " << endl;
     for (int i = 0; i < minu.size(); i++) { cout << "\t" << minu[i] << " " << maxu[i] << endl; }
     cout << endl;
+
+    test_roi_iterator();
 
     test_iterator(sg);
 

@@ -5,6 +5,7 @@
 #include <vapor/MyBase.h>
 
 #ifdef WIN32
+    #include <Windows.h>
 #else
     #include <libgen.h>
 #endif
@@ -40,8 +41,10 @@ string FileUtils::ReadFileToString(const string &path)
 std::string FileUtils::Basename(const std::string &path)
 {
 #ifdef WIN32
-    #error TODO
-    return 0;
+    char fileName[_MAX_FNAME];
+    char extension[_MAX_EXT];
+    _splitpath_s(path.c_str(), NULL, 0, NULL, 0, fileName, _MAX_FNAME, extension, _MAX_EXT);
+    return string(fileName) + string(extension);
 #else
     char * copy = strdup(path.c_str());
     string ret(basename(copy));
@@ -53,8 +56,10 @@ std::string FileUtils::Basename(const std::string &path)
 std::string FileUtils::Dirname(const std::string &path)
 {
 #ifdef WIN32
-    #error TODO
-    return path;
+    char drive[_MAX_DRIVE];
+    char dir[_MAX_DIR];
+    _splitpath_s(path.c_str(), drive, _MAX_DRIVE, dir, _MAX_DIR, NULL, 0, NULL, 0);
+    return string(drive) + string(dir);
 #else
     char * copy = strdup(path.c_str());
     string ret(dirname(copy));
@@ -90,7 +95,9 @@ long FileUtils::GetFileModifiedTime(const string &path)
 bool FileUtils::IsPathAbsolute(const std::string &path)
 {
 #ifdef WIN32
-    return !PathIsRelative((LPCTSTR)path.c_str());
+    char dir[_MAX_DIR];
+    _splitpath_s(path.c_str(), NULL, 0, dir, _MAX_DIR, NULL, 0, NULL, 0);
+    return dir[0] == '/' || dir[0] == '\\';
 #else
     return path[0] == '/';
 #endif

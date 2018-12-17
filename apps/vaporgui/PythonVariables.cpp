@@ -312,7 +312,7 @@ void PythonVariables::_reset()
 
 void PythonVariables::_openScript()
 {
-    int rc = _openAndDeleteDialog->Update(OpenAndDeleteDialog::OPEN, _controlExec);
+    int rc = _openAndDeleteDialog->Update(OpenAndDeleteDialog::_OPEN, _controlExec);
 
     if (rc < 0) return;
 
@@ -381,7 +381,7 @@ void PythonVariables::_openScript()
 
 void PythonVariables::_deleteScript()
 {
-    int rc = _openAndDeleteDialog->Update(OpenAndDeleteDialog::DELETE, _controlExec);
+    int rc = _openAndDeleteDialog->Update(OpenAndDeleteDialog::_DELETE, _controlExec);
 
     if (rc < 0) return;
 
@@ -1111,10 +1111,10 @@ int OpenAndDeleteDialog::Update(int type, VAPoR::ControlExec *controlExec)
     _controlExec = controlExec;
 
     string errMsg;
-    if (type == OPEN) {
+    if (type == _OPEN) {
         setWindowTitle("Open saved script");
         errMsg = "There are no scripts to open in this session";
-    } else if (type == DELETE) {
+    } else if (type == _DELETE) {
         setWindowTitle("Delete saved script");
         errMsg = "There are no scripts to delete in this session";
     }
