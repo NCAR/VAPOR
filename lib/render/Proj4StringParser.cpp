@@ -1,5 +1,9 @@
 #include "vapor/Proj4StringParser.h"
+#ifdef WIN32
+#include <geotiff/geotiffio.h>
+#else
 #include <geotiffio.h>
+#endif
 
 using namespace VAPoR;
 using std::map;

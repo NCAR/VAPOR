@@ -11,6 +11,7 @@ uniform usampler3D      missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D       colorMapTexture;
 uniform samplerBuffer   xyCoordsTexture;
 uniform samplerBuffer   zCoordsTexture;
+uniform sampler2D  depthTexture;
 
 uniform vec2  dataRanges[2];
 uniform vec3  boxExtents[2];
