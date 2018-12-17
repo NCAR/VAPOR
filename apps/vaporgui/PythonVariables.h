@@ -177,7 +177,10 @@ class OpenAndDeleteDialog : public QDialog {
     Q_OBJECT
 
 public:
-    enum { OPEN = 0, DELETE = 1 };
+    enum {
+        _OPEN = 0,
+        _DELETE = 1    // DELETE is a reserved keyword on Windows
+    };
 
     OpenAndDeleteDialog(QWidget *parent = 0);
     ~OpenAndDeleteDialog(){};
