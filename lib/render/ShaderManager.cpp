@@ -15,7 +15,9 @@ using std::vector;
 
 #ifdef NDEBUG
 #if SHADER_AUTORELOAD
+#ifndef WIN32
 #warning Disabling shader autoreloading
+#endif
 #undef SHADER_AUTORELOAD
 #endif
 #endif

@@ -7,7 +7,7 @@ namespace VAPoR {
 
 struct GLManager;
 
-class FontManager : public IResourceManager<std::pair<std::string, unsigned int>, Font> {
+class RENDER_API FontManager : public IResourceManager<std::pair<std::string, unsigned int>, Font> {
     GLManager *_glManager;
     FT_Library _library;
 
