@@ -23,6 +23,7 @@ public:
 
 protected:
     int  _load3rdPassShaders();
+    void _3rdPassSpecialHandling( bool fast, long castMode );
 };
 
 };
