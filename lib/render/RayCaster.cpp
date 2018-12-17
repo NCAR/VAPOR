@@ -204,6 +204,7 @@ RayCaster::UserCoordinates::UserCoordinates()
     myVariableName     = "";
     myRefinementLevel  = -1;
     myCompressionLevel = -1;
+    myCastingMode      =  1;
 }
 
 // Destructor
@@ -295,6 +296,7 @@ bool RayCaster::UserCoordinates::IsMetadataUpToDate( const RayCasterParams* para
     if( ( myCurrentTimeStep  != params->GetCurrentTimestep()  )  ||
         ( myVariableName     != params->GetVariableName()     )  ||
         ( myRefinementLevel  != params->GetRefinementLevel()  )  ||
+        ( myCastingMode      != params->GetCastingMode()      )  ||
         ( myCompressionLevel != params->GetCompressionLevel() )     )
     {
         return false;
@@ -331,6 +333,7 @@ int  RayCaster::UserCoordinates::UpdateFaceAndData( const RayCasterParams* param
     myVariableName     = params->GetVariableName();
     myRefinementLevel  = params->GetRefinementLevel();
     myCompressionLevel = params->GetCompressionLevel();
+    myCastingMode      = params->GetCastingMode();
 
     /* Update member variables */
     std::vector<size_t> gridDims = grid->GetDimensions();
@@ -596,6 +599,7 @@ int RayCaster::_paintGL( bool fast )
         return GRIDERROR;
     }
 
+    // Use the correct shader for 3rd pass rendering
     long castingMode     =  params->GetCastingMode();
     if(  castingMode     == FixedStep )
         _3rdPassShader   = _3rdPassMode1Shader;
@@ -1364,12 +1368,12 @@ void RayCaster::_updateDataTextures( int castingMode )
         glBindBuffer(    GL_TEXTURE_BUFFER,     _xyCoordsBufferId );
         glBufferData(    GL_TEXTURE_BUFFER,     2 * sizeof(float) * dims[0] * dims[1],
                          _userCoordinates.xyCoords, GL_STATIC_READ );
-        // Pass data to the buffer texture: _xyCoordsTextureId
+        // Pass data to the buffer texture
         glActiveTexture( GL_TEXTURE0      +     _xyCoordsTexOffset );
         glBindTexture(   GL_TEXTURE_BUFFER,     _xyCoordsTextureId );
         glTexBuffer(     GL_TEXTURE_BUFFER,     GL_RG32F,   _xyCoordsBufferId );
 
-        // Repeat for the next buffer texture: _zCoordsBufferId
+        // Repeat for the next buffer texture
         glBindBuffer(    GL_TEXTURE_BUFFER,     _zCoordsBufferId );
         glBufferData(    GL_TEXTURE_BUFFER,     sizeof(float) * dims[0] * dims[1] * dims[2],
                          _userCoordinates.zCoords, GL_STATIC_READ );
@@ -1380,7 +1384,6 @@ void RayCaster::_updateDataTextures( int castingMode )
         glBindBuffer(    GL_TEXTURE_BUFFER, 0 );
         glBindTexture(   GL_TEXTURE_BUFFER, 0 );
     }
-
 }
     
 void RayCaster::_updateNearClippingPlane( )
