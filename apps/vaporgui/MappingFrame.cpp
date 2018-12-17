@@ -304,20 +304,11 @@ void MappingFrame::populateIteratingHistogram()
     Grid::ConstIterator itr = grid->cbegin();
     Grid::ConstIterator enditr = grid->cend();
 
-    // if ( stride > 1 ) {
     for (; itr != enditr;) {
         v = *itr;
         if (v != grid->GetMissingValue()) _histogram->addToBin(v);
         itr += DEFAULT_STRIDE;
     }
-    //}
-    /*else {
-        for ( ; itr!=enditr ; ++itr) {
-            v = *itr;
-            if (v==grid->GetMissingValue()) continue;
-            _histogram->addToBin(v);
-        }
-    }*/
 
     delete grid;
 }

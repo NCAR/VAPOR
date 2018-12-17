@@ -32,7 +32,6 @@
 #include "TFWidget.h"
 #include "ErrorReporter.h"
 
-#define RANGE_PADDING  .05
 #define DEFAULT_STRIDE 16
 
 bool DATAMGRFAST = false;
