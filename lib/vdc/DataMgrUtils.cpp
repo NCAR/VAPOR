@@ -199,7 +199,7 @@ int DataMgrUtils::GetGrids(
 	return 0;	
 }
 
-template int DataMgrUtils::GetGrids<size_t>(
+template VDF_API int DataMgrUtils::GetGrids<size_t>(
 	DataMgr *dataMgr,
 	size_t ts, const vector<string>& varnames, 
 	const vector <size_t> &minExtsReq, const vector <size_t> &maxExtsReq,
@@ -207,7 +207,7 @@ template int DataMgrUtils::GetGrids<size_t>(
 	int* refLevel, int* lod, vector <Grid*> &grids
 );
 
-template int DataMgrUtils::GetGrids<double>(
+template VDF_API int DataMgrUtils::GetGrids<double>(
 	DataMgr *dataMgr,
 	size_t ts, const vector<string>& varnames, 
 	const vector <double> &minExtsReq, const vector <double> &maxExtsReq,
