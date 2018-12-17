@@ -61,7 +61,6 @@
 
 #define SAMPLE_RATE    100
 #define DEFAULT_STRIDE 4
-#define TIME_ME        = false
 
 using namespace VAPoR;
 using namespace std;
@@ -200,18 +199,7 @@ void MappingFrame::RefreshHistogram()
 
     _histogram = new Histo(256, minRange, maxRange, _variableName, ts);
 
-#ifdef TIME_ME
-    std::clock_t start;
-    double       duration;
-    start = std::clock();
-#endif
-
     populateHistogram();
-
-#ifdef TIME_ME
-    duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
-    std::cout << "Refresh Histogram Time: " << duration << '\n';
-#endif
 
     _histogramMap[rendererName] = _histogram;
 }

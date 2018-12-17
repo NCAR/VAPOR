@@ -250,10 +250,6 @@ void TabManager::_setActive(string activeViz, string renderClass, string renderI
 
 void TabManager::_newRenderer(string activeViz, string renderClass, string renderInst)
 {
-    std::clock_t start;
-    double       duration;
-    start = std::clock();
-
     if (renderClass.empty() || renderInst.empty()) {
         HideRenderWidgets();
         return;
@@ -282,9 +278,6 @@ void TabManager::_newRenderer(string activeViz, string renderClass, string rende
     w->setEnabled(true);
 
     er->updateTab();
-
-    duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
-    std::cout << "_newRenderer() Time: " << duration << '\n';
 }
 
 vector<string> TabManager::GetInstalledTabNames(bool renderOnly) const
