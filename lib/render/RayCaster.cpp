@@ -491,8 +491,20 @@ int RayCaster::_paintGL(bool fast)
         return GRIDERROR;
     }
 
-    // If there is an update event
     long castingMode = params->GetCastingMode();
+    if (castingMode == FixedStep)
+        _3rdPassShader = _3rdPassMode1Shader;
+    else if (castingMode == CellTraversal)
+        _3rdPassShader = _3rdPassMode2Shader;
+    else {
+        MyBase::SetErrMsg("RayCasting Mode not supported!");
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        delete grid;
+        return JUSTERROR;
+    }
+
+    // If there is an update event
     if (!_userCoordinates.IsMetadataUpToDate(params, grid, _dataMgr)) {
         int success = _userCoordinates.UpdateFaceAndData(params, grid, _dataMgr);
         if (success != 0) {
@@ -548,17 +560,6 @@ int RayCaster::_paintGL(bool fast)
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
     // 3rd pass, perform ray casting
-    if (castingMode == FixedStep)
-        _3rdPassShader = _3rdPassMode1Shader;
-    else if (castingMode == CellTraversal)
-        _3rdPassShader = _3rdPassMode2Shader;
-    else {
-        MyBase::SetErrMsg("RayCasting Mode not supported!");
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        delete grid;
-        return JUSTERROR;
-    }
     _drawVolumeFaces(3, castingMode, insideACell, InversedMV, fast);
 
     // Restore default VAO settings!
