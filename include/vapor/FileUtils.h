@@ -14,7 +14,7 @@ enum class FileType {
     Does_Not_Exist
 };
 
-extern const std::string Separator;
+extern COMMON_API const std::string Separator;
 
 COMMON_API std::string ReadFileToString(const std::string &path);
 COMMON_API std::string Basename(const std::string &path);

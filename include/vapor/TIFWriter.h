@@ -1,7 +1,11 @@
 #pragma once
 
 #include "vapor/ImageWriter.h"
+#ifdef WIN32
+#include <tiff/tiffio.h>
+#else
 #include <xtiffio.h>
+#endif
 
 namespace VAPoR {
 class RENDER_API TIFWriter : public ImageWriter {
