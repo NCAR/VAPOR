@@ -2284,7 +2284,7 @@ class VDF_API DC : public Wasp::MyBase {
     //!
     std::vector<string> GetTimeCoordVarNames() const;
 
-    class FileTable {
+    class VDF_API FileTable {
       public:
         FileTable();
         virtual ~FileTable();

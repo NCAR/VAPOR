@@ -41,6 +41,8 @@
 #include "Histo.h"
 #include "MappingFrame.h"
 
+#include <vapor/CFuncs.h>
+
 #ifndef MAX
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #endif
@@ -50,8 +52,8 @@
 #endif
 
 #define X 0
-#define Y 0
-#define Z 0
+#define Y 1
+#define Z 2
 
 #define XY 0
 #define XZ 1
@@ -261,8 +263,8 @@ void MappingFrame::SetIsSampling(
 
 void MappingFrame::getGridAndExtents(
     VAPoR::Grid **grid,
-    std::vector<double> minExts,
-    std::vector<double> maxExts) const {
+    std::vector<double> &minExts,
+    std::vector<double> &maxExts) const {
     size_t ts = _rParams->GetCurrentTimestep();
     int refLevel = _rParams->GetRefinementLevel();
     int lod = _rParams->GetCompressionLevel();
@@ -277,15 +279,18 @@ void MappingFrame::getGridAndExtents(
 }
 
 void MappingFrame::populateHistogram() {
-    if (_isSampling)
+    double t0 = Wasp::GetTime();
+    if (_isSampling) {
         populateSamplingHistogram();
-    else
+    } else {
         populateIteratingHistogram();
+    }
 }
 
 void MappingFrame::populateSamplingHistogram() {
     Grid *grid = nullptr;
-    std::vector<double> minExts, maxExts;
+    std::vector<double> minExts(3, 0.f);
+    std::vector<double> maxExts(3, 0.f);
 
     getGridAndExtents(&grid, minExts, maxExts);
     if (grid == nullptr) {
@@ -301,21 +306,27 @@ void MappingFrame::populateSamplingHistogram() {
     coords[Y] = minExts[Y];
     coords[Z] = minExts[Z];
 
-    int iSamples = deltas[X] * SAMPLE_RATE;
-    int jSamples = deltas[Y] * SAMPLE_RATE;
-    int kSamples = deltas[Z] * SAMPLE_RATE;
+    int iSamples = SAMPLE_RATE;
+    int jSamples = SAMPLE_RATE;
+    int kSamples = SAMPLE_RATE;
 
-    for (int k = 0; k < kSamples; k++) {
+    if (deltas[X] == 0)
+        iSamples = 0;
+    if (deltas[Y] == 0)
+        jSamples = 0;
+    if (deltas[Z] == 0)
+        kSamples = 0;
 
-        for (int j = 0; j < jSamples; j++) {
+    for (int k = 0; k <= kSamples; k++) {
+        coords[Y] = minExts[Y];
+        for (int j = 0; j <= jSamples; j++) {
             coords[X] = minExts[X];
 
-            for (int i = 0; i < iSamples; i++) {
+            for (int i = 0; i <= iSamples; i++) {
                 varValue = grid->GetValue(coords);
                 missingValue = grid->GetMissingValue();
                 if (varValue != missingValue)
                     _histogram->addToBin(varValue);
-
                 coords[X] += deltas[X];
             }
             coords[Y] += deltas[Y];
@@ -330,9 +341,9 @@ void MappingFrame::populateSamplingHistogram() {
 std::vector<double> MappingFrame::calculateDeltas(
     std::vector<double> minExts,
     std::vector<double> maxExts) const {
-    double dx = (minExts[X] - maxExts[X]) / (1 + SAMPLE_RATE);
-    double dy = (minExts[Y] - maxExts[Y]) / (1 + SAMPLE_RATE);
-    double dz = (minExts[Z] - maxExts[Z]) / (1 + SAMPLE_RATE);
+    double dx = (maxExts[X] - minExts[X]) / (1 + SAMPLE_RATE);
+    double dy = (maxExts[Y] - minExts[Y]) / (1 + SAMPLE_RATE);
+    double dz = (maxExts[Z] - minExts[Z]) / (1 + SAMPLE_RATE);
 
     std::vector<double> deltas = {dx, dy, dz};
     return deltas;
@@ -477,8 +488,10 @@ bool MappingFrame::Update(DataMgr *dataMgr,
     else
         variableName = _rParams->GetVariableName();
 
-    if (variableName.empty())
-        return histogramRecalculated;
+    if (variableName.empty()) {
+        histogramRecalculated = true;
+        //return histogramRecalcultaed;
+    }
 
     MapperFunction *mapper;
     mapper = _rParams->GetMapperFunc(_variableName);
@@ -729,6 +742,7 @@ void MappingFrame::fitViewToDataRange() {
         _colorbarWidget->setDirty();
 
     updateGL();
+    update();
 }
 
 //----------------------------------------------------------------------------
@@ -1076,7 +1090,10 @@ void MappingFrame::paintGL() {
     // select points
     //
 
-    _variableName = _rParams->GetColorMapVariableName();
+    if (_colorMappingEnabled)
+        _variableName = _rParams->GetColorMapVariableName();
+    else
+        _variableName = _rParams->GetVariableName();
     if (_variableName != "") {
         //allow for 4 pixels per character in name:
         int wx = (width() - _variableName.size() * 8) / 2;
