@@ -55,6 +55,7 @@
 #include <vapor/ControlExecutive.h>
 #include <vapor/ResourcePath.h>
 #include <vapor/CFuncs.h>
+#include <vapor/FileUtils.h>
 
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
@@ -850,7 +851,15 @@ void MainForm::sessionOpenHelper(string fileName)
     GUIStateParams *newP = GetStateParams();
     dataSetNames = newP->GetOpenDataSetNames();
 
-    for (int i = 0; i < dataSetNames.size(); i++) { newP->RemoveOpenDateSet(dataSetNames[i]); }
+    for (int i = 0; i < dataSetNames.size(); i++) {
+        string         name = dataSetNames[i];
+        vector<string> paths = newP->GetOpenDataSetPaths(name);
+        if (std::all_of(paths.begin(), paths.end(), [](string path) { return FileUtils::Exists(path); })) {
+            loadDataHelper(paths, "", "", newP->GetOpenDataSetFormat(name), true, false);
+        } else {
+            newP->RemoveOpenDateSet(name);
+        }
+    }
 
     _vizWinMgr->Restart();
     _tabMgr->Restart();
@@ -1063,7 +1072,7 @@ bool MainForm::openDataHelper(string dataSetName, string format, const vector<st
     return (true);
 }
 
-void MainForm::loadDataHelper(const vector<string> &files, string prompt, string filter, string format, bool multi)
+void MainForm::loadDataHelper(const vector<string> &files, string prompt, string filter, string format, bool multi, bool promptToReplaceExistingDataset)
 {
     vector<string> myFiles = files;
 
@@ -1092,7 +1101,7 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
 
     // Generate data set name
     //
-    string dataSetName = _getDataSetName(myFiles[0]);
+    string dataSetName = _getDataSetName(myFiles[0], promptToReplaceExistingDataset);
     if (dataSetName.empty()) return;
 
     vector<string> options = {"-project_to_pcs", "-vertical_xform"};
@@ -2035,19 +2044,19 @@ void MainForm::endAnimCapture()
     _captureSingleJpegCaptureAction->setEnabled(true);
 }
 
-string MainForm::_getDataSetName(string file)
+string MainForm::_getDataSetName(string file, bool promptToReplaceExistingDataset)
 {
     vector<string> names = _controlExec->GetDataNames();
-    if (names.empty()) { return (makename(file)); }
+    if (names.empty() || !promptToReplaceExistingDataset) { return (makename(file)); }
 
-    string newSession = "New session";
+    string newSession = "New Dataset";
 
     QStringList items;
     items << tr(newSession.c_str());
     for (int i = 0; i < names.size(); i++) { items << tr(names[i].c_str()); }
 
     bool    ok;
-    QString item = QInputDialog::getItem(this, tr("QInputDialog::getItem()"), tr("Load data into session:"), items, 0, false, &ok);
+    QString item = QInputDialog::getItem(this, tr("Load Data"), tr("Load as new dataset or replace existing"), items, 0, false, &ok);
     if (!ok || item.isEmpty()) return ("");
 
     string dataSetName = item.toStdString();
