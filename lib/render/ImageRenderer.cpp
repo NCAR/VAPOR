@@ -89,6 +89,8 @@ ImageRenderer::ImageRenderer(const ParamsMgr *pm, string winName, string dataSet
     _cacheBoxExtentsTex.clear();
     _vertsWidth = 0;
     _vertsHeight = 0;
+    _nindices = 0;
+    _nverts = 0;
 }
 
 ImageRenderer::~ImageRenderer()
@@ -121,11 +123,12 @@ const GLvoid *ImageRenderer::GetTexture(DataMgr *dataMgr, GLsizei &width, GLsize
     return (texture);
 }
 
-int ImageRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals, GLsizei &width, GLsizei &height, GLuint **indices, GLsizei &nindices, bool &structuredMesh)
+int ImageRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals, GLsizei &nverts, GLsizei &width, GLsizei &height, GLuint **indices, GLsizei &nindices, bool &structuredMesh)
 {
     width = 0;
     height = 0;
     nindices = 0;
+    nverts = 0;
     structuredMesh = true;
 
     // See if already in cache
@@ -135,9 +138,10 @@ int ImageRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals,
         height = _vertsHeight;
         *verts = (GLfloat *)_sb_verts.GetBuf();
         *normals = (GLfloat *)_sb_normals.GetBuf();
+        nverts = _nverts;
 
-        nindices = 2 * width;
         *indices = (GLuint *)_sb_indices.GetBuf();
+        nindices = _nindices;
         return (0);
     }
     _gridStateClear();
@@ -193,6 +197,9 @@ int ImageRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals,
 
     width = _vertsWidth;
     height = _vertsHeight;
+
+    nindices = _nindices;
+    nverts = _nverts;
 
     return (0);
 }
@@ -467,10 +474,12 @@ int ImageRenderer::_getMeshDisplaced(DataMgr *dataMgr, GLsizei width, GLsizei he
 
     // (Re)allocate space for verts
     //
-    size_t vertsSize = width * height * 3;
-    _sb_verts.Alloc(vertsSize * sizeof(GLfloat));
-    _sb_normals.Alloc(vertsSize * sizeof(GLfloat));
-    _sb_indices.Alloc(2 * width * sizeof(GLuint));
+    _nverts = width * height * 3;
+    _sb_verts.Alloc(_nverts * 3 * sizeof(GLfloat));
+    _sb_normals.Alloc(_nverts * 3 * sizeof(GLfloat));
+
+    _nindices = 2 * width;
+    _sb_indices.Alloc(_nindices * sizeof(GLuint));
 
     int rc;
     if (myParams->GetIsGeoRef()) {
@@ -612,10 +621,12 @@ int ImageRenderer::_getMeshPlane(const vector<double> &minBox, const vector<doub
     ImageParams *myParams = (ImageParams *)GetActiveParams();
     int          orient = myParams->GetOrientation();
 
-    size_t   vertsSize = 2 * 2 * 3;
-    GLfloat *verts = (float *)_sb_verts.Alloc(vertsSize * sizeof(*verts));
-    _sb_normals.Alloc(vertsSize * sizeof(GLfloat));
-    _sb_indices.Alloc(2 * 2 * sizeof(GLuint));
+    _nverts = 2 * 2;
+    GLfloat *verts = (float *)_sb_verts.Alloc(_nverts * 3 * sizeof(*verts));
+    _sb_normals.Alloc(_nverts * 3 * sizeof(GLfloat));
+
+    _nindices = 2 * 2;
+    _sb_indices.Alloc(_nindices * sizeof(GLuint));
 
     if (orient == 2) {    // X-Y
         verts[0] = minBox[0];
