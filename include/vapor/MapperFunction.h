@@ -137,14 +137,14 @@ public:
  };
 
  int getHistogramStride() {
-    return GetValueDouble(_histogramStrideTag, 1.f);
+    return GetValueLong(_histogramStrideTag, 1);
  }
 
  void setHistogramStride(int stride) {
-    SetValueDouble(
+    SetValueLong(
         _histogramStrideTag, 
         "Set histogram calculation stride", 
-        (double)stride
+        stride
     );
  }
 

@@ -380,12 +380,13 @@ void MappingFrame::populateIteratingHistogram() {
     grid->SetInterpolationOrder(1);
 
 	float v;
+    float missingValue = grid->GetMissingValue();
 	Grid::ConstIterator itr = grid->cbegin();
 	Grid::ConstIterator enditr = grid->cend();
 
-    for ( ; itr!=enditr ; ) {  
+    for ( ; itr!=enditr ; ) {
         v = *itr;
-        if (v != grid->GetMissingValue()) 
+        if (v != missingValue)
             _histogram->addToBin(v);
         itr += DEFAULT_STRIDE;
     }
