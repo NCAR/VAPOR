@@ -63,8 +63,6 @@ public:
     bool isContainer() const { return true; }
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams, bool internalUpdate = false);
 
-    void fileLoadTF(string varname, const char *path, bool savePath);
-
     void  getVariableRange(float range[2], float values[2], bool secondaryVariable);
     float getOpacity();
     void  RefreshHistogram();
@@ -72,10 +70,8 @@ public:
 
 private slots:
     void loadTF();
-    void fileSaveTF();
-
-    void refreshMainHisto();
-    void refreshSecondaryHisto();
+    void saveTF();
+    bool selectedTFFileOk(string fileName);
 
     void autoUpdateMainHistoChecked(int state);
     void autoUpdateSecondaryHistoChecked(int state);
@@ -98,25 +94,22 @@ private slots:
     void updateSecondaryMappingFrame();
 
 private:
-    // class LoadTFDialog;
     TFWidget_::LoadTFDialog *_loadTFDialog;
 
-    void refreshMainHistoIfNecessary();
-    void refreshSecondaryHistoIfNecessary();
+    void refreshMainDuplicateHistogram();
+    void refreshSecondaryDuplicateHistogram();
 
     void configureConstantColorControls();
     void configureSecondaryTransferFunction();
 
     void connectWidgets();
 
-    void updateQTWidgets();
+    void updateQtWidgets();
     void updateColorInterpolation();
     void updateConstColor();
     void updateMainAutoUpdateHistoCheckboxes();
-    //	void updateMainMappingFrame(bool refresh);
     void updateMainSliders();
     void updateSecondaryAutoUpdateHistoCheckbox();
-    //	void updateSecondaryMappingFrame(bool refresh);
     void updateSecondarySliders();
 
     bool mainVariableChanged();
@@ -150,6 +143,7 @@ private:
     int                 _timeStep;
     string              _mainVarName;
     string              _secondaryVarName;
+    bool                _initialized;
     bool                _externalChangeHappened;
     bool                _mainHistoRangeChanged;
     bool                _secondaryHistoRangeChanged;
@@ -191,13 +185,19 @@ class TFWidget_::LoadTFDialog : public QDialog {
 public:
     LoadTFDialog(QWidget *parent = 0);
     ~LoadTFDialog();
+    bool   GetLoadTF3OpacityMap() const;
+    bool   GetLoadTF3DataRange() const;
+    string GetSelectedFile() const;
 
 private slots:
     void accept();
     void reject();
+    void setLoadOpacity();
+    void setLoadBounds();
 
 private:
     void configureLayout();
+    void connectWidgets();
 
     CustomFileDialog *_fileDialog;
     QFrame *          _checkboxFrame;
@@ -215,8 +215,9 @@ private:
     QCheckBox *       _loadOpacityMapCheckbox;
     QCheckBox *       _loadDataBoundsCheckbox;
 
-    bool _loadOpacityMap;
-    bool _loadDataBounds;
+    bool   _loadOpacityMap;
+    bool   _loadDataBounds;
+    string _selectedFile;
 };
 
 class TFWidget_::CustomFileDialog : public QFileDialog {

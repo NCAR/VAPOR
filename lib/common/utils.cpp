@@ -44,10 +44,12 @@ size_t Wasp::LinearizeCoords(const vector<size_t> &coords, const vector<size_t> 
 {
     assert(coords.size() == dims.size());
 
-    vector<size_t> min, max;
+    vector<size_t> min(dims.size());
+    vector<size_t> max(dims.size());
+
     for (int i = 0; i < dims.size(); i++) {
-        min.push_back(0);
-        max.push_back(dims[i] - 1);
+        min[i] = 0;
+        max[i] = dims[i] - 1;
     }
 
     return (Wasp::LinearizeCoords(coords, min, max));
@@ -57,9 +59,7 @@ vector<size_t> Wasp::VectorizeCoords(size_t offset, const vector<size_t> &min, c
 {
     assert(min.size() == max.size());
 
-    vector<size_t> coords;
-
-    coords.resize(min.size());
+    vector<size_t> coords(min.size());
 
     size_t factor = 1;
     for (int i = 0; i < coords.size(); i++) {
@@ -75,10 +75,11 @@ vector<size_t> Wasp::VectorizeCoords(size_t offset, const vector<size_t> &min, c
 
 vector<size_t> Wasp::VectorizeCoords(size_t offset, const vector<size_t> &dims)
 {
-    vector<size_t> min, max;
+    vector<size_t> min(dims.size());
+    vector<size_t> max(dims.size());
     for (int i = 0; i < dims.size(); i++) {
-        min.push_back(0);
-        max.push_back(dims[i] - 1);
+        min[i] = 0;
+        max[i] = dims[i] - 1;
     }
 
     return (Wasp::VectorizeCoords(offset, min, max));

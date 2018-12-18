@@ -480,15 +480,18 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(T *rg, bool begin, c
         _bdims3d.push_back(1);
         _bs3d.push_back(1);
     }
+    _blocksize = Wasp::VProduct(_bs3d);
 
     _index = vector<size_t>(3, 0);
-    _end_index = vector<size_t>(3, 0);
+    _indexL = 0;
+
+    _end_indexL = 0;
 
     if (_ndims < 1) return;
 
-    _end_index[_ndims - 1] = _dims3d[_ndims - 1];
+    _end_indexL = Wasp::VProduct(_dims3d);
     if (!begin || !_blks.size()) {
-        _index = _end_index;
+        _indexL = _end_indexL;
         return;
     }
 
@@ -506,9 +509,11 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator(ForwardIterator<T> &
     _dims3d = rhs._dims3d;
     _bdims3d = rhs._bdims3d;
     _bs3d = rhs._bs3d;
+    _blocksize = rhs._blocksize;
     _coordItr = std::move(rhs._coordItr);
     _index = rhs._index;
-    _end_index = rhs._end_index;
+    _indexL = rhs._indexL;
+    _end_indexL = rhs._end_indexL;
     _xb = rhs._xb;
     _itr = rhs._itr;
     rhs._itr = nullptr;
@@ -522,9 +527,11 @@ template<class T> Grid::ForwardIterator<T>::ForwardIterator()
     _dims3d = {1, 1, 1};
     _bdims3d = {1, 1, 1};
     _bs3d = {1, 1, 1};
+    _blocksize = 1;
     //_coordItr = xx;
     _index.clear();
-    _end_index.clear();
+    _indexL = 0;
+    _end_indexL = 0;
     _xb = 0;
     _itr = nullptr;
     //_pred = xx;
@@ -550,7 +557,8 @@ template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator++
         _xb++;
         _itr++;
         _index[0]++;
-        ++_coordItr;
+        _indexL++;
+        if (_pred.Size()) ++_coordItr;
 
         if (_xb < _bs3d[0] && _index[0] < _dims3d[0]) {
             if (_pred(*_coordItr)) { return (*this); }
@@ -560,7 +568,7 @@ template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator++
 
         _xb = 0;
         if (_index[0] >= _dims3d[0]) {
-            if (_index == _end_index) {
+            if (_indexL == _end_indexL) {
                 return (*this);    // last element
             }
             _index[0] = _xb = 0;
@@ -568,14 +576,14 @@ template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator++
         }
 
         if (_index[1] >= _dims3d[1]) {
-            if (_index == _end_index) {
+            if (_indexL == _end_indexL) {
                 return (*this);    // last element
             }
             _index[1] = 0;
             _index[2]++;
         }
 
-        if (_index == _end_index) {
+        if (_indexL == _end_indexL) {
             return (*this);    // last element
         }
 
@@ -589,7 +597,7 @@ template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator++
         float *blk = _blks[zb * _bdims3d[0] * _bdims3d[1] + yb * _bdims3d[0] + xb];
         _itr = &blk[z * _bs3d[0] * _bs3d[1] + y * _bs3d[0] + x];
 
-    } while (_index != _end_index && !_pred(*_coordItr));
+    } while (_indexL != _end_indexL && !_pred(*_coordItr));
 
     return (*this);
 }
@@ -603,85 +611,54 @@ template<class T> Grid::ForwardIterator<T> Grid::ForwardIterator<T>::operator++(
 
 template<class T> Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::operator+=(const long int &offset)
 {
+    assert(offset >= 0);
+
     if (!_blks.size()) return (*this);
 
-    vector<size_t> maxIndex;
-    for (int i = 0; i < _dims3d.size(); i++) maxIndex.push_back(_dims3d[i] - 1);
+    do {
+        _xb += offset;
+        _index[0] += offset;
+        _indexL += offset;
 
-    long maxIndexL = Wasp::LinearizeCoords(maxIndex, _dims3d);
-    long newIndexL = Wasp::LinearizeCoords(_index, _dims3d) + offset;
-    if (newIndexL < 0) { newIndexL = 0; }
-    if (newIndexL > maxIndexL) {
-        _index = _end_index;
-        return (*this);
-    }
-
-    _index = Wasp::VectorizeCoords(newIndexL, _dims3d);
-
-    size_t xb = 0;
-    size_t yb = 0;
-    size_t zb = 0;
-    size_t x = 0;
-    size_t y = 0;
-    size_t z = 0;
-
-    _xb = xb = _index[0] / _bs3d[0];
-    yb = _index[1] / _bs3d[1];
-    zb = _index[2] / _bs3d[2];
-
-    x = _index[0] % _bs3d[0];
-    y = _index[1] % _bs3d[1];
-    z = _index[2] % _bs3d[2];
-
-    float *blk = _blks[zb * _bdims3d[0] * _bdims3d[1] + yb * _bdims3d[0] + xb];
-    _itr = &blk[z * _bs3d[0] * _bs3d[1] + y * _bs3d[0] + x];
-
-    _coordItr += offset;
-
-    while (_index != _end_index && !_pred(*_coordItr)) {
-        _xb++;
-        _itr++;
-        _index[0]++;
-        ++_coordItr;
+        if (_pred.Size()) _coordItr += offset;
 
         if (_xb < _bs3d[0] && _index[0] < _dims3d[0]) {
+            _itr += offset;
+
             if (_pred(*_coordItr)) { return (*this); }
 
             continue;
         }
 
-        _xb = 0;
-        if (_index[0] >= _dims3d[0]) {
-            if (_index == _end_index) {
-                return (*this);    // last element
-            }
-            _index[0] = _xb = 0;
-            _index[1]++;
+        // Check for overflow
+        //
+        if (_indexL >= _end_indexL) {
+            _indexL = _end_indexL;
+            return (*this);
         }
+
+        if (_index[0] >= _dims3d[0]) {
+            _index[0] = _index[0] % _dims3d[0];
+            _index[1] = _indexL / _dims3d[0];
+        }
+        _xb = _index[0] % _bs3d[0];
 
         if (_index[1] >= _dims3d[1]) {
-            if (_index == _end_index) {
-                return (*this);    // last element
-            }
-            _index[1] = 0;
-            _index[2]++;
+            _index[1] = _index[1] % _dims3d[1];
+            _index[2] = _indexL / (_dims3d[0] * _dims3d[1]);
         }
 
-        if (_index == _end_index) {
-            return (*this);    // last element
-        }
-
-        xb = _index[0] / _bs3d[0];
-        yb = _index[1] / _bs3d[1];
-        zb = _index[2] / _bs3d[2];
-
-        x = _index[0] % _bs3d[0];
-        y = _index[1] % _bs3d[1];
-        z = _index[2] % _bs3d[2];
+        size_t x = _index[0] % _bs3d[0];
+        size_t xb = _index[0] / _bs3d[0];
+        size_t y = _index[1] % _bs3d[1];
+        size_t yb = _index[1] / _bs3d[1];
+        size_t z = _index[2] % _bs3d[2];
+        size_t zb = _index[2] / _bs3d[2];
 
         float *blk = _blks[zb * _bdims3d[0] * _bdims3d[1] + yb * _bdims3d[0] + xb];
         _itr = &blk[z * _bs3d[0] * _bs3d[1] + y * _bs3d[0] + x];
-    }
+
+    } while (_indexL != _end_indexL && !_pred(*_coordItr));
 
     return (*this);
 }

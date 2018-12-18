@@ -24,7 +24,7 @@ namespace VAPoR {
 //! \author Stanislaw Jaroszynski
 //! \date   August, 2018
 
-class MatrixManager {
+class RENDER_API MatrixManager {
 public:
     enum class Mode { ModelView, Projection };
 

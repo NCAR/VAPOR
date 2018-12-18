@@ -173,11 +173,11 @@ int DataMgrUtils::GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &va
     return 0;
 }
 
-template int DataMgrUtils::GetGrids<size_t>(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const vector<size_t> &minExtsReq, const vector<size_t> &maxExtsReq, bool useLowerAccuracy,
-                                            int *refLevel, int *lod, vector<Grid *> &grids);
+template VDF_API int DataMgrUtils::GetGrids<size_t>(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const vector<size_t> &minExtsReq, const vector<size_t> &maxExtsReq,
+                                                    bool useLowerAccuracy, int *refLevel, int *lod, vector<Grid *> &grids);
 
-template int DataMgrUtils::GetGrids<double>(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const vector<double> &minExtsReq, const vector<double> &maxExtsReq, bool useLowerAccuracy,
-                                            int *refLevel, int *lod, vector<Grid *> &grids);
+template VDF_API int DataMgrUtils::GetGrids<double>(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const vector<double> &minExtsReq, const vector<double> &maxExtsReq,
+                                                    bool useLowerAccuracy, int *refLevel, int *lod, vector<Grid *> &grids);
 
 int DataMgrUtils::GetGrids(DataMgr *dataMgr, size_t ts, string varname, const vector<double> &minExtsReq, const vector<double> &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod,
                            Grid **gridptr)
