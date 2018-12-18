@@ -66,6 +66,7 @@ protected:
  int GetMesh(  DataMgr *dataMgr,
                 GLfloat **verts,
                 GLfloat **normals,
+                GLsizei &nverts,
                 GLsizei &width,
                 GLsizei &height,
                 GLuint **indices,
@@ -197,6 +198,7 @@ private:
  GLsizei _vertsWidth;
  GLsizei _vertsHeight;
  GLsizei _nindices;
+ GLsizei _nverts;
 
  GLuint _cMapTexID;
  GLfloat *_colormap;
