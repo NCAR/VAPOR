@@ -131,14 +131,14 @@ class PARAMS_API MapperFunction : public ParamsBase {
     };
 
     int getHistogramStride() {
-        return GetValueDouble(_histogramStrideTag, 1.f);
+        return GetValueLong(_histogramStrideTag, 1);
     }
 
     void setHistogramStride(int stride) {
-        SetValueDouble(
+        SetValueLong(
             _histogramStrideTag,
             "Set histogram calculation stride",
-            (double)stride);
+            stride);
     }
 
     //! Set both minimum and maximum mapping (histo) values
