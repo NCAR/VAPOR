@@ -44,6 +44,7 @@ protected:
  int GetMesh( DataMgr  *dataMgr,
                GLfloat   **verts,
                GLfloat   **normals,
+               GLsizei &nverts,
                GLsizei   &width,
                GLsizei &height,
                GLuint **indices,
@@ -83,6 +84,8 @@ private:
  SmartBuf _sb_indices;
  GLsizei _vertsWidth;
  GLsizei _vertsHeight;
+ GLsizei _nindices;
+ GLsizei _nverts;
 
 
  unsigned char *_getTexture(DataMgr* dataMgr); 
