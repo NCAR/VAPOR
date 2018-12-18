@@ -242,7 +242,6 @@ void TwoDRenderer::_renderMeshAligned()
         assert(_meshWidth >= 3);
         assert(_meshHeight == 1);
         assert((_nindices % 3) == 0);
-        assert(_nverts % 3 == 0);
 
         glBindVertexArray(_VAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
