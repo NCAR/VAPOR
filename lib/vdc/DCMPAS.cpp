@@ -851,7 +851,7 @@ int DCMPAS::_readRegionEdgeVariable(
     MPASFileObject *w,
 	const vector <size_t> &min, const vector <size_t> &max, float *region
 ) {
-	assert(min.size() == 1);
+	assert(min.size() == 1 || min.size() == 2);
 	assert(min.size() == max.size());
 
 	vector <size_t> dims = _ncdfc->GetDims(edgesOnVertexVarName);
@@ -886,9 +886,12 @@ int DCMPAS::_readRegionEdgeVariable(
 		return(-1);
 	}
 
+	size_t j0 = min.size() == 2 ? min[0] : 0;
+	size_t j1 = max.size() == 2 ? max[0] : 0;
+
 
 	float wgt = 1.0 / (float) vertexDegree;
-	for (size_t j=min[1]; j<=max[1]; j++) {
+	for (size_t j=j0; j<=j1; j++) {
 	for (size_t i=min[0], ii=0; i<= max[0]; i++, ii++) {
 
 		size_t vidx0 = edgesOnVertex[i*vertexDegree + 0] - 1;
