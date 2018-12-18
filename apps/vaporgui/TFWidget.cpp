@@ -185,7 +185,10 @@ void TFWidget::loadTF()
     }
 
     bool loadTF3Opacity = _loadTFDialog->GetLoadTF3OpacityMap();
-    if (!loadTF3Opacity) tf->setOpaque();
+    if (!loadTF3Opacity) {
+        tf->setOpaque();
+        tf->setOpacityScale(1.f);
+    }
 
     _paramsMgr->EndSaveStateGroup();
 
