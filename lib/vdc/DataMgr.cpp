@@ -3107,7 +3107,11 @@ int DataMgr::_find_bounding_grid(
     vector<size_t> bmin, bmax;
     ok = blkexts.Intersect(min, max, bmin, bmax);
     if (!ok) {
-        return (0); // No intersection
+        for (int i = 0; i < dims_at_level.size(); i++) {
+            min_ui.push_back(0);
+            max_ui.push_back(dims_at_level[i] - 1);
+        }
+        return (0);
     }
 
     // Finally, map from block to voxel coordinates
