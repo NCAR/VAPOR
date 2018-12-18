@@ -1006,50 +1006,25 @@ void LoadTFDialog::connectWidgets()
 
     connect(_fileDialog, SIGNAL(okClicked()), this, SLOT(accept()));
     connect(_fileDialog, SIGNAL(cancelClicked()), this, SLOT(reject()));
-    // connect(_fileDialog, SIGNAL(rejected()),
-    //    this, SLOT(reject()));
 }
 
-void LoadTFDialog::setLoadOpacity()
-{
-    _loadOpacityMap = _loadOpacityMapCheckbox->isChecked();
-    cout << "loadOpacityMap " << _loadOpacityMap << endl;
-}
+void LoadTFDialog::setLoadOpacity() { _loadOpacityMap = _loadOpacityMapCheckbox->isChecked(); }
 
-void LoadTFDialog::setLoadBounds()
-{
-    _loadDataBounds = _loadDataBoundsCheckbox->isChecked();
-    cout << "loadDataBounds " << _loadDataBounds << endl;
-}
+void LoadTFDialog::setLoadBounds() { _loadDataBounds = _loadDataBoundsCheckbox->isChecked(); }
 
 void LoadTFDialog::accept()
 {
     _loadOpacityMap = _loadOpacityMapCheckbox->isChecked();
     _loadDataBounds = _loadDataBoundsCheckbox->isChecked();
-    cout << "loadOpacityMap " << _loadOpacityMap << endl;
-    cout << "loadDabaBounds " << _loadDataBounds << endl;
     QStringList selectedFiles = _fileDialog->selectedFiles();
     if (selectedFiles.size() > 0) _selectedFile = selectedFiles[0].toStdString();
-    cout << "selectedFile   " << _selectedFile << endl;
     done(ACCEPT);
 }
 
-void LoadTFDialog::reject()
-{
-    cout << "rejected" << endl;
-    done(CANCEL);
-}
+void LoadTFDialog::reject() { done(CANCEL); }
 
 CustomFileDialog::CustomFileDialog(QWidget *parent) : QFileDialog(parent) {}
 
-void CustomFileDialog::done(int result)
-{
-    cout << "CustomFileDialog::done(" << result << ")" << endl;
-    emit cancelClicked();
-}
+void CustomFileDialog::done(int result) { emit cancelClicked(); }
 
-void CustomFileDialog::accept()
-{
-    cout << "CustomFileDialog::accept()" << endl;
-    emit okClicked();    // cancelClicked();
-}
+void CustomFileDialog::accept() { emit okClicked(); }
