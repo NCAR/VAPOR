@@ -38,6 +38,8 @@ using namespace VAPoR;
 using namespace TFWidget_;
 
 #define GET_DATARANGE_STRIDE 16
+#define CANCEL -1
+#define ACCEPT 0
 
 string TFWidget::_nDimsTag = "ActiveDimension";
 
@@ -157,7 +159,9 @@ void TFWidget::loadTF() {
     if (varname.empty())
         return;
 
-    _loadTFDialog->exec();
+    int rc = _loadTFDialog->exec();
+    if (rc == CANCEL)
+        return; // cancel event
 
     string fileName = _loadTFDialog->GetSelectedFile();
     if (!selectedTFFileOk(fileName))
@@ -170,14 +174,16 @@ void TFWidget::loadTF() {
     MapperFunction *tf = _rParams->GetMapperFunc(varname);
     assert(tf);
 
-    vector<double> dataRange = {0.f, 1.f};
-    int rc = tf->LoadFromFile(fileName, dataRange);
+    _paramsMgr->BeginSaveStateGroup("Loading Transfer Function from file");
+
+    rc = tf->LoadFromFile(fileName);
     if (rc < 0) {
         MSG_ERR("Error loading transfer function");
     }
 
     bool loadTF3DataRange = _loadTFDialog->GetLoadTF3DataRange();
     if (!loadTF3DataRange) {
+        std::vector<double> dataRange;
         _dataMgr->GetDataRange(
             _timeStep,
             varname,
@@ -189,12 +195,10 @@ void TFWidget::loadTF() {
     }
 
     bool loadTF3Opacity = _loadTFDialog->GetLoadTF3OpacityMap();
-    if (!loadTF3Opacity) {
-        int numPoints = tf->getNumOpacityMaps();
-        cout << "numPoints " << numPoints << endl;
-    }
+    if (!loadTF3Opacity)
+        tf->setOpaque();
 
-    cout << "defaultRange " << dataRange[0] << " " << dataRange[1] << endl;
+    _paramsMgr->EndSaveStateGroup();
 
     Update(_dataMgr, _paramsMgr, _rParams);
 }
@@ -1077,12 +1081,12 @@ void LoadTFDialog::accept() {
     if (selectedFiles.size() > 0)
         _selectedFile = selectedFiles[0].toStdString();
     cout << "selectedFile   " << _selectedFile << endl;
-    done(0);
+    done(ACCEPT);
 }
 
 void LoadTFDialog::reject() {
     cout << "rejected" << endl;
-    done(0);
+    done(CANCEL);
 }
 
 CustomFileDialog::CustomFileDialog(QWidget *parent) : QFileDialog(parent) {}
