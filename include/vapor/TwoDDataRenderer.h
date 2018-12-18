@@ -63,6 +63,7 @@ class RENDER_API TwoDDataRenderer : public TwoDRenderer {
     int GetMesh(DataMgr *dataMgr,
                 GLfloat **verts,
                 GLfloat **normals,
+                GLsizei &nverts,
                 GLsizei &width,
                 GLsizei &height,
                 GLuint **indices,
@@ -184,6 +185,7 @@ class RENDER_API TwoDDataRenderer : public TwoDRenderer {
     GLsizei _vertsWidth;
     GLsizei _vertsHeight;
     GLsizei _nindices;
+    GLsizei _nverts;
 
     GLuint _cMapTexID;
     GLfloat *_colormap;
