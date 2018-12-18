@@ -34,8 +34,6 @@
 
 #define DEFAULT_STRIDE 16
 
-bool DATAMGRFAST = false;
-
 using namespace VAPoR;
 
 string TFWidget::_nDimsTag = "ActiveDimension";

@@ -122,9 +122,9 @@ public:
     //! \return Maximum mapping value
     float getMaxMapValue() const { return (getMinMaxMapValue()[1]); };
 
-    int getHistogramStride() { return GetValueDouble(_histogramStrideTag, 1.f); }
+    int getHistogramStride() { return GetValueLong(_histogramStrideTag, 1); }
 
-    void setHistogramStride(int stride) { SetValueDouble(_histogramStrideTag, "Set histogram calculation stride", (double)stride); }
+    void setHistogramStride(int stride) { SetValueLong(_histogramStrideTag, "Set histogram calculation stride", stride); }
 
     //! Set both minimum and maximum mapping (histo) values
     //! \param[in] val1 minimum value
