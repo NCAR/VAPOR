@@ -332,7 +332,7 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
         }
         float dataValue;
         for (size_t i = 0; i < numOfVertices; i++) {
-            dataValue = float(*valItr);
+            dataValue = *valItr;
             if (dataValue == missingValue) {
                 dataField[i] = 0.0f;
                 missingValueMask[i] = 127u;
@@ -345,7 +345,7 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
     } else    // No missing value!
     {
         for (size_t i = 0; i < numOfVertices; i++) {
-            dataField[i] = float(*valItr);
+            dataField[i] = *valItr;
             ++valItr;
         }
     }
