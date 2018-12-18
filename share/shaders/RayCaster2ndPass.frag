@@ -2,9 +2,9 @@
 
 layout(location = 1) out vec4 color;
 
-in vec4 vEye;
+in vec4 vModel;
 
 void main(void)
 {
-    color = vEye;
+    color = vModel;
 }

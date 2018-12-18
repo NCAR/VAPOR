@@ -15,7 +15,7 @@ class LegacyGL;
 //!
 //! \author Stanislaw Jaroszynski
 
-struct GLManager {
+struct RENDER_API GLManager {
     ShaderManager *shaderManager;
     FontManager *fontManager;
     MatrixManager *matrixManager;
