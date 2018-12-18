@@ -1271,6 +1271,12 @@ void MainForm::loadDataHelper(
         return;
 
     vector<string> options = {"-project_to_pcs", "-vertical_xform"};
+
+    if (!p->GetProjectionString().empty()) {
+        options.push_back("-proj4");
+        options.push_back(p->GetProjectionString());
+    }
+
     bool status = openDataHelper(dataSetName, format, myFiles, options);
     if (!status)
         return;
