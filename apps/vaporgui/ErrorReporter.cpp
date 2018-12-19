@@ -95,8 +95,8 @@ void _myBaseDiagCallback(const char *msg) {
 #define ErrorReporterPopup_OK_BUTTON_TEXT "Ok"
 #define ErrorReporterPopup_SAVE_BUTTON_TEXT "Save Log"
 
-ErrorReporterPopup::ErrorReporterPopup(QWidget *parent, int id)
-    : QMessageBox(parent), dead(false) {
+ErrorReporterPopup::ErrorReporterPopup(QWidget *parent, int id, bool fatal)
+    : QMessageBox(parent), dead(false), fatal(fatal) {
     addButton(ErrorReporterPopup_OK_BUTTON_TEXT, QMessageBox::AcceptRole);
     addButton(ErrorReporterPopup_SAVE_BUTTON_TEXT, QMessageBox::ApplyRole);
     setText("An error has occured");
@@ -122,6 +122,8 @@ void ErrorReporterPopup::doAction(QAbstractButton *button) {
     } else {
         printf("Unknown ErrorReporterPopup button pressed: [%s]\n", button->text().toStdString().c_str());
     }
+    if (fatal)
+        exit(1);
 }
 
 void ErrorReporterPopup::setLogText(std::string text) {
@@ -147,7 +149,7 @@ void ErrorReporter::Report(string msg, Type severity, string details) {
     }
 
     static int i = 0;
-    ErrorReporterPopup *box = new ErrorReporterPopup(e->_parent, i++);
+    ErrorReporterPopup *box = new ErrorReporterPopup(e->_parent, i++, severity == Fatal);
     e->_boxes.push_back(box);
     box->setInformativeText(msg.c_str());
 
@@ -169,6 +171,7 @@ void ErrorReporter::Report(string msg, Type severity, string details) {
     case Warning:
         box->setIcon(QMessageBox::Warning);
         break;
+    case Fatal:
     case Error:
         box->setIcon(QMessageBox::Critical);
         break;
