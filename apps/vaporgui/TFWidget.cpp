@@ -173,6 +173,8 @@ void TFWidget::loadTF() {
 
     MapperFunction *tf = _rParams->GetMapperFunc(varname);
     assert(tf);
+    float cachedMin = tf->getMinMapValue();
+    float cachedMax = tf->getMaxMapValue();
 
     _paramsMgr->BeginSaveStateGroup("Loading Transfer Function from file");
 
@@ -182,17 +184,8 @@ void TFWidget::loadTF() {
     }
 
     bool loadTF3DataRange = _loadTFDialog->GetLoadTF3DataRange();
-    if (!loadTF3DataRange) {
-        std::vector<double> dataRange;
-        _dataMgr->GetDataRange(
-            _timeStep,
-            varname,
-            _cLevel,
-            _refLevel,
-            GET_DATARANGE_STRIDE,
-            dataRange);
-        tf->setMinMaxMapValue(dataRange[0], dataRange[1]);
-    }
+    if (!loadTF3DataRange)
+        tf->setMinMaxMapValue(cachedMin, cachedMax);
 
     bool loadTF3Opacity = _loadTFDialog->GetLoadTF3OpacityMap();
     if (!loadTF3Opacity) {
