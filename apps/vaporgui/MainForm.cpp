@@ -1128,7 +1128,7 @@ void MainForm::loadData(string fileName)
     vector<string> files;
     if (!fileName.empty()) { files.push_back(fileName); }
 
-    loadDataHelper(files, "Choose the Master data File to load", "Vapor VDC files (*.*)", "vdc", false);
+    loadDataHelper(files, "Choose the Master data File to load", "Vapor VDC files (*.nc)", "vdc", false);
 }
 
 void MainForm::closeData(string fileName)
