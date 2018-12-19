@@ -469,6 +469,7 @@ int RayCaster::_paintGL(bool fast)
     const MatrixManager *mm = Renderer::_glManager->matrixManager;
 
     _updateViewportWhenNecessary();
+    glDisable(GL_POLYGON_SMOOTH);
 
     // Collect existing depth value of the scene
     glBindTexture(GL_TEXTURE_2D, _depthTextureId);
