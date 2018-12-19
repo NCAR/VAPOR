@@ -103,6 +103,7 @@ MappingFrame::MappingFrame(QWidget *parent)
       _mapper(NULL),
       _histogram(NULL),
       _isSampling(false),
+      _stride(1),
       _histoNeedsUpdate(false),
       _opacityMappingEnabled(false),
       _colorMappingEnabled(false),
@@ -267,6 +268,10 @@ void MappingFrame::SetHistoNeedsUpdate(
     _histoNeedsUpdate = needsUpdate;
 }
 
+void MappingFrame::SetStride(int stride) {
+    _stride = stride;
+}
+
 void MappingFrame::getGridAndExtents(
     VAPoR::Grid **grid,
     std::vector<double> &minExts,
@@ -311,14 +316,9 @@ void MappingFrame::populateSamplingHistogram() {
     coords[Y] = minExts[Y];
     coords[Z] = minExts[Z];
 
-    MapperFunction *mapper;
-    mapper = _rParams->GetMapperFunc(_variableName);
-    assert(mapper);
-    int stride = mapper->getHistogramStride();
-
-    int iSamples = SAMPLE_RATE / stride;
-    int jSamples = SAMPLE_RATE / stride;
-    int kSamples = SAMPLE_RATE / stride;
+    int iSamples = SAMPLE_RATE / _stride;
+    int jSamples = SAMPLE_RATE / _stride;
+    int kSamples = SAMPLE_RATE / _stride;
 
     if (deltas[X] == 0)
         iSamples = 0;
@@ -371,11 +371,6 @@ void MappingFrame::populateIteratingHistogram() {
 
     grid->SetInterpolationOrder(1);
 
-    MapperFunction *mapper;
-    mapper = _rParams->GetMapperFunc(_variableName);
-    assert(mapper);
-    int stride = mapper->getHistogramStride();
-
     float v;
     float missingValue = grid->GetMissingValue();
     Grid::ConstIterator itr = grid->cbegin();
@@ -385,7 +380,7 @@ void MappingFrame::populateIteratingHistogram() {
         v = *itr;
         if (v != missingValue)
             _histogram->addToBin(v);
-        itr += stride;
+        itr += _stride;
     }
     delete grid;
 }
