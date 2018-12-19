@@ -350,8 +350,8 @@ MainForm::MainForm(
     //
     // 1. No files
     // 2. Session file
-    // 3. Session file + data file(s)
-    // 4. Data file(s)
+    // 3. Session file + VDC file
+    // 4. V
     //
     if (files.size() && files[0].endsWith(".vs3")) {
         sessionOpen(files[0]);
@@ -360,14 +360,9 @@ MainForm::MainForm(
         sessionNew();
     }
 
-    if (files.size()) {
-
-        // Assume VAPOR VDC file. Need to deal with import cases!
-        //
-        if (files[0].endsWith(".nc")) {
-            loadData(files[0].toStdString());
-            _stateChangeCB();
-        }
+    if (files.size() && files[0].endsWith(".nc")) {
+        loadData(files[0].toStdString());
+        _stateChangeCB();
     }
     app->installEventFilter(this);
 
@@ -1053,13 +1048,14 @@ void MainForm::sessionOpen(QString qfileName) {
     }
 
     string fileName = qfileName.toStdString();
+    _sessionNewFlag = false;
     sessionOpenHelper(fileName);
 
     GUIStateParams *p = GetStateParams();
     p->SetCurrentSessionFile(fileName);
 
     _stateChangeFlag = false;
-    _sessionNewFlag = false;
+    _stateChangeCB();
 }
 
 void MainForm::_fileSaveHelper(string path) {
