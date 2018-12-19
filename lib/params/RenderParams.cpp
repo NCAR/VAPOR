@@ -49,6 +49,8 @@ const string RenderParams::_transferFunctionsTag = "MapperFunctions";
 const string RenderParams::_stretchFactorsTag = "StretchFactors";
 const string RenderParams::_currentTimestepTag = "CurrentTimestep";
 
+#define REQUIRED_SAMPLE_SIZE 1000000
+
 namespace {
 vector<string> string_replace(vector<string> v, string olds, string news)
 {
@@ -136,6 +138,7 @@ RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, const
 {
     _dataMgr = dataMgr;
     _maxDim = maxdim;
+    _stride = 1;
 
     // Initialize DataMgr dependent parameters
     //
@@ -168,6 +171,7 @@ RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNo
 {
     _dataMgr = dataMgr;
     _maxDim = maxdim;
+    _stride = 1;
 
     // Reconcile DataMgr dependent parameters
     //
@@ -298,6 +302,21 @@ void RenderParams::SetColorbarPbase(ColorbarPbase *pb)
     _Colorbar->SetParent(this);
 }
 
+void RenderParams::_calculateStride(string varName)
+{
+    std::vector<size_t> dimsAtLevel;
+    int                 ref = GetRefinementLevel();
+
+    // Yikes.  Error reporting is turned off, so ignore the return code
+    _dataMgr->GetDimLensAtLevel(varName, ref, dimsAtLevel);
+
+    int size = 1;
+    for (int i = 0; i < dimsAtLevel.size(); i++) size *= dimsAtLevel[i];
+
+    _stride = 1;
+    if (size > REQUIRED_SAMPLE_SIZE) _stride = size / REQUIRED_SAMPLE_SIZE;
+}
+
 MapperFunction *RenderParams::GetMapperFunc(string varname)
 {
     // This way we always return a valid MapperFunction
@@ -314,15 +333,15 @@ MapperFunction *RenderParams::GetMapperFunc(string varname)
 
     MapperFunction tf(_ssave);
 
+    _calculateStride(varname);
+
     size_t ts = 0;
     int    level = 0;
     int    lod = 0;
     if (_dataMgr->VariableExists(ts, varname, level, lod)) {
         vector<double> range;
         bool           prev = EnableErrMsg(false);    // no error handling
-        int            stride = tf.getHistogramStride();
-        cout << "I am getting a stirde off ... " << stride << endl;
-        int rc = _dataMgr->GetDataRange(ts, varname, level, lod, stride, range);
+        int            rc = _dataMgr->GetDataRange(ts, varname, level, lod, _stride, range);
         if (rc < 0) { range = {0.0, 1.0}; }
         EnableErrMsg(prev);
         tf.setMinMaxMapValue(range[0], range[1]);
