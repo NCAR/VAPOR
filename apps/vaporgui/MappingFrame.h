@@ -182,6 +182,8 @@ public:
 
   void SetHistoNeedsUpdate(bool needsUpdate);
 
+  void SetStride(int stride);
+
 signals:
 
    //! Signal that is invoked when user starts to modify the transfer function.
@@ -235,6 +237,7 @@ private:
     std::vector<double> minExts,
     std::vector<double> maxExts
   ) const;
+  int _stride;
   
 protected slots:
   void setEditMode(bool);
