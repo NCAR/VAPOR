@@ -43,6 +43,28 @@ float specularExp      = lightingCoeffs[3];
 vec3  volumeDimsf      = vec3( volumeDims );
 vec3  boxSpan          = boxMax - boxMin;
 
+//
+// Code for faces and edges
+//
+const int FaceFront    = 0;
+const int FaceBack     = 1;
+const int FaceTop      = 2;
+const int FaceBottom   = 3;
+const int FaceLeft     = 4;
+const int FaceRight    = 5;
+const int Edge01       = (1 + 1) * 10 + 3;
+const int Edge45       = (1 + 1) * 10 + 2;
+const int Edge04       = (1 + 1) * 10 + 5;
+const int Edge15       = (1 + 1) * 10 + 4;
+const int Edge23       = (0 + 1) * 10 + 3;
+const int Edge67       = (0 + 1) * 10 + 2;
+const int Edge37       = (0 + 1) * 10 + 5;
+const int Edge26       = (0 + 1) * 10 + 4;
+const int Edge12       = (3 + 1) * 10 + 4;
+const int Edge03       = (3 + 1) * 10 + 5;
+const int Edge56       = (2 + 1) * 10 + 4;
+const int Edge47       = (2 + 1) * 10 + 5;
+
 struct WoopPrecalculation
 {
     int   kx, ky, kz;
@@ -273,35 +295,64 @@ void  FindCellIndices(  const in ivec4 cellIdx,     // Input:  cell index
     triangles[11] =  ivec3( 3, 0, 7 );
 }
 
-//
-//   Test if the ray comes into the specified cell from the specified face.
-// 
+bool CellOutsideBound( const in ivec3 cellIdx )
+{
+    if( cellIdx.x < 0 || cellIdx.x > volumeDims.x - 2 || 
+        cellIdx.y < 0 || cellIdx.y > volumeDims.y - 2 ||
+        cellIdx.z < 0 || cellIdx.z > volumeDims.z - 2   )
+        return true;
+    else
+        return false;
+}
+
 int InputTest( const in ivec4 cellIdx, const in vec3 rayOrig, const in vec3 rayDir )
 {
+    if( CellOutsideBound( cellIdx.xyz ) )
+        return -2;
+
     ivec3 cubeVertIdx[8], triangles[12];
     vec3  cubeVertCoord[8];
     FindCellIndices( cellIdx, cubeVertIdx, cubeVertCoord, triangles );
     int tri1 = cellIdx.w * 2;
     int tri2 = cellIdx.w * 2 + 1;
+    int intersect[12];
     float t, u, v, w;
-    int  intersect1 = WoopIntersection( rayOrig, rayDir,
+
+    // First test the two indicated incoming triangles.
+    // If either reports a hit, this test succeeds.
+    intersect[tri1] = WoopIntersection( rayOrig, rayDir,
                                         cubeVertCoord[ triangles[tri1][0] ],
                                         cubeVertCoord[ triangles[tri1][1] ],
                                         cubeVertCoord[ triangles[tri1][2] ],
                                         t, u, v, w                        );
-    int  intersect2 = WoopIntersection( rayOrig, rayDir,
+    intersect[tri2] = WoopIntersection( rayOrig, rayDir,
                                         cubeVertCoord[ triangles[tri2][0] ],
                                         cubeVertCoord[ triangles[tri2][1] ],
                                         cubeVertCoord[ triangles[tri2][2] ],
                                         t, u, v, w                        );
-    if( intersect1 == 0 || intersect2 == 0 )
+    if( intersect[tri1] == 0 || intersect[tri2] == 0 )
         return 0;
-    else
-        return (intersect1 + intersect2 );
+
+    // Second we test exit triangles. 
+    // If the ray exits this cell, the test also succeeds
+    for( int i = 0; i < 12; i++ )
+        if( i != tri1 && i != tri2 )
+        {
+            intersect[i] = WoopIntersection( rayOrig, rayDir,
+                                             cubeVertCoord[ triangles[i][0] ],
+                                             cubeVertCoord[ triangles[i][1] ],
+                                             cubeVertCoord[ triangles[i][2] ],
+                                             t, u, v, w                        );
+            if( intersect[i] == 0 )
+                return 0;
+        }
+
+    // Now we know this ray carries a wrong index!
+    return -1;
 }
 
-int  FindNextCell( const in ivec4 step1CellIdx, const in vec3 rayOrig, const in vec3 rayDir,
-                   out ivec4 step2CellIdx,      out float step2T )
+int  FindNextCell( const in ivec4 step1CellIdx, const in vec3 rayOrig,  const in vec3 rayDir,
+                   out ivec4 step2CellIdx,      out float step2T,       in bool checkInFace )
 {
     ivec3 cubeVertIdx[8], triangles[12];
     vec3  cubeVertCoord[8];
@@ -333,13 +384,18 @@ int  FindNextCell( const in ivec4 step1CellIdx, const in vec3 rayOrig, const in 
         inFace[0] = step1CellIdx.w / 10 - 1;
         inFace[1] = step1CellIdx.w % 10;
     }
+
+    // Check if the ray hits the supposed incoming faces
+    if( checkInFace )
+    {
+        if( intersect[inFace[0]] != 0 && intersect[inFace[1]] != 0 )
+            return -1;
+    }
     
     int numInterceptFace = 0;
     for( int i = 0; i < 6; i++ )
-        if( i != step1CellIdx.w && (intersect[2*i] == 0 || intersect[2*i+1] == 0) )     
+        if( i != inFace[0] && i != inFace[1] && (intersect[2*i] == 0 || intersect[2*i+1] == 0) )     
             numInterceptFace++;
-    //int i = step1CellIdx.w;
-    //if( intersect[2*i] || intersect[2*i+1] )            numInterceptFace++;
     return numInterceptFace;
 
 #if 0
@@ -472,16 +528,6 @@ int  FindNextCell( const in ivec4 step1CellIdx, const in vec3 rayOrig, const in 
 }
 
 
-bool CellOutsideBound( const in ivec3 cellIdx )
-{
-    if( cellIdx.x < 0 || cellIdx.x > volumeDims.x - 2 || 
-        cellIdx.y < 0 || cellIdx.y > volumeDims.y - 2 ||
-        cellIdx.z < 0 || cellIdx.z > volumeDims.z - 2   )
-        return true;
-    else
-        return false;
-}
-
 
 void main(void)
 {
@@ -503,117 +549,87 @@ void main(void)
     ivec4 step1CellIdx  = provokingVertexIdx;
     ivec4 step2CellIdx  = ivec4( 0 );
     float step1T, step2T;
+    vec3  step1Model    = startModel - 0.01 * rayDirModel;
 
-    int inFace = InputTest( step1CellIdx, startModel - 0.1 * rayDirModel, rayDirModel );
-    if( inFace > 0 )
+    // Correct starting cell index when necessary
+    if( InputTest( step1CellIdx, step1Model, rayDirModel ) != 0 )
     {
-        if( inFace < 10 )
-            color = vec4( 0.9, 0.2, 0.2, 1.0 );    // red
-        else
-            color = vec4( 0.2, 0.9, 0.2, 1.0 );    // green
-    }
-    else
-    {/*
-    int intersect = FindNextCell( step1CellIdx, startModel - 0.1 * rayDirModel, rayDirModel, 
-                                  step2CellIdx, step2T );
-     if( intersect == 0 ) 
-         color = vec4( 0.9, 0.2, 0.2, 1.0 );    // red
-     else if( intersect == 2 ) 
-         color = vec4( 0.2, 0.9, 0.2, 1.0 );    // green
-     else if( intersect == 3 )
-         color = vec4( 0.99, 0.99, 0.1, 1.0 );    // yellow
-     else if( intersect > 3 )
-         color = vec4( 0.9, 0.9, 0.9, 1.0 );    // white
-    */
+        ivec4 badCell  = step1CellIdx;
+        ivec4 goodCell = step1CellIdx;
+        ivec4 left, right, top, bottom;
+        switch( badCell.w / 2 )
+        {
+            case 0:     // front or back face
+                left    = ivec4( badCell.x - 1, badCell.yzw );
+                if( InputTest(   left, step1Model, rayDirModel ) == 0 )
+                    { goodCell = left;  break; }
+
+                right   = ivec4( badCell.x + 1, badCell.yzw );
+                if( InputTest(   right, step1Model, rayDirModel ) == 0 )
+                    { goodCell = right; break; }
+
+                top     = ivec4( badCell.x, badCell.y + 1, badCell.zw );
+                if( InputTest(   top, step1Model, rayDirModel ) == 0 )
+                    { goodCell = top; break; }
+
+                bottom  = ivec4( badCell.x, badCell.y - 1, badCell.zw );
+                if( InputTest(   bottom, step1Model, rayDirModel ) == 0 )
+                    { goodCell = bottom; break; }
+
+                break;
+
+            case 1:     // top or bottom face
+                left    = ivec4( badCell.x - 1, badCell.yzw );
+                if( InputTest(   left, step1Model, rayDirModel ) == 0 )
+                    { goodCell = left; break; }
+
+                right   = ivec4( badCell.x + 1, badCell.yzw );
+                if( InputTest(   right, step1Model, rayDirModel ) == 0 )
+                    { goodCell = right; break; }
+
+                top     = ivec4( badCell.xy, badCell.z - 1, badCell.w );
+                if( InputTest(   top, step1Model, rayDirModel ) == 0 ) 
+                    { goodCell = top; break; }
+
+                bottom  = ivec4( badCell.xy, badCell.z + 1, badCell.w );
+                if( InputTest(   bottom, step1Model, rayDirModel ) == 0 )
+                    { goodCell = bottom; break; }
+
+                break;
+
+            case 2:     // left or right face
+                left    = ivec4( badCell.xy, badCell.z - 1, badCell.w );
+                if( InputTest(   left, step1Model, rayDirModel ) == 0 )
+                    { goodCell = left; break; }
+
+                right   = ivec4( badCell.xy, badCell.z + 1, badCell.w );
+                if( InputTest(   right, step1Model, rayDirModel ) == 0 )
+                    { goodCell = right; break; }
+
+                top     = ivec4( badCell.x, badCell.y + 1, badCell.zw );
+                if( InputTest(   top, step1Model, rayDirModel ) == 0 )
+                    { goodCell = top; break; }
+
+                bottom  = ivec4( badCell.x, badCell.y - 1, badCell.zw );
+                if( InputTest(   bottom, step1Model, rayDirModel ) == 0 )
+                    { goodCell = bottom; break; }
+
+                break;
+        }
+        step1CellIdx = goodCell;
     }
 
-#if 0
-    // Ray starts from an edge... Need to do something... 
-    float biggestT1  = 0.0, biggestT2 = 0.0;
-    const float zero = 3e-4;
-    if( step2T < zero )
+    // Cell traverse -- 1st cell
+    int numOfIntersect = FindNextCell( step1CellIdx, step1Model, rayDirModel, step2CellIdx, step2T, false );
+    switch( numOfIntersect )
     {
-        // try to distinguish the two cubes.
-        ivec3 cubeVertIdx1[8],   cubeVertIdx2[8], triangles1[12], triangles2[12];
-        vec3  cubeVertCoord1[8], cubeVertCoord2[8];
-        FindCellIndices( step1CellIdx, cubeVertIdx1, cubeVertCoord1, triangles1 );
-        FindCellIndices( step2CellIdx, cubeVertIdx2, cubeVertCoord2, triangles2 );
-        bool  intersect1[12],    intersect2[12];
-        float tArr1[12], tArr2[12], uArr1[12], uArr2[12], vArr1[12], vArr2[12];
-        for( int i = 0; i < 12; i++ )
-        {
-            intersect1[i] = RayTriangleIntersect( startTexture, rayDirTexture,
-                                                  cubeVertCoord1[ triangles1[i][0] ],
-                                                  cubeVertCoord1[ triangles1[i][1] ],
-                                                  cubeVertCoord1[ triangles1[i][2] ],
-                                                  tArr1[i], uArr1[i], vArr1[i]     );
-            intersect2[i] = RayTriangleIntersect( startTexture, rayDirTexture,
-                                                  cubeVertCoord2[ triangles2[i][0] ],
-                                                  cubeVertCoord2[ triangles2[i][1] ],
-                                                  cubeVertCoord2[ triangles2[i][2] ],
-                                                  tArr2[i], uArr2[i], vArr2[i]     );
-        }
-        for( int i = 0; i < 12; i++ )
-        {
-            if( intersect1[i] && tArr1[i] > biggestT1 )
-                biggestT1 = tArr1[i]; 
-            if( intersect2[i] && tArr2[i] > biggestT2 ) 
-                biggestT2 = tArr2[i]; 
-        }
-
-        //   In the following case, re-assign cell 2 as cell 1, and then do one step of traverse.
-        //    
-        //   | Cell   |  Cell  |
-        //   |  2  \  |   1    |
-        //   |      \ |        |
-        //   |       \|        |
-        //   ---------\---------
-        if( biggestT1 < biggestT2 )
-        {
-            int inFace0 = min( step1CellIdx.w, step2CellIdx.w );
-            int inFace1 = max( step1CellIdx.w, step2CellIdx.w );
-            int inEdge  = (inFace0 + 1) * 10 + inFace1;
-            step1CellIdx  = step2CellIdx;
-            step1CellIdx.w = inEdge;
-            intersect   = FindNextCell( step1CellIdx, startTexture, rayDirTexture, 
-                                        0.0, step2CellIdx, step2T, u, v );
-        }
-        //   In the following case, manipulate step1CellIdx.w, and then re-do one step of traverse.
-        //    
-        //   | Cell   | Cell   |
-        //   |  2     | 1 /    |
-        //   |        |  /     |
-        //   |        | /      |
-        //   ---------|/--------
-        else if( biggestT1 > biggestT2 )
-        {
-            // Find the adjacent face of step2CellIdx.w in cell 1
-            int adjacentW = -1;
-            switch( step2CellIdx.w )
-            {
-                case 0: 
-                    adjacentW = 1;  break;
-                case 1: 
-                    adjacentW = 0;  break;
-                case 2: 
-                    adjacentW = 3;  break;
-                case 3: 
-                    adjacentW = 2;  break;
-                case 4: 
-                    adjacentW = 5;  break;
-                case 5: 
-                    adjacentW = 4;  break;
-                    
-            }
-            int inFace0 = min( step1CellIdx.w, adjacentW );
-            int inFace1 = max( step1CellIdx.w, adjacentW );
-            int inEdge  = (inFace0 + 1) * 10 + inFace1;
-            step1CellIdx.w = inEdge;
-            intersect   = FindNextCell( step1CellIdx, startTexture, rayDirTexture, 
-                                        0.0, step2CellIdx, step2T, u, v );
-        }
+        case 0:  color = vec4( 0.9, 0.2, 0.2, 1.0 ); break;  // red
+        case 1:  color = vec4( 0.2, 0.2, 0.2, 0.2 ); break;  // almost black
+        case 2:  color = vec4( 0.2, 0.9, 0.2, 1.0 ); break;  // green
+        case 3:  color = vec4( 0.2, 0.2, 0.9, 1.0 ); break;  // blue
+        default: color = vec4( 1.0 ); break;    // white
     }
-#endif
+    
 
 
 #if 0
