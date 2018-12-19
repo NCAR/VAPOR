@@ -374,7 +374,9 @@ protected:
 private:
 
  void _init();
+ void _calculateStride(string varName);
  int _maxDim;
+ int _stride;
  ParamsContainer *_TFs; 
  Box *_Box;
  ColorbarPbase *_Colorbar;
