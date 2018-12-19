@@ -32,7 +32,7 @@
 #include "TFWidget.h"
 #include "ErrorReporter.h"
 
-#define DEFAULT_STRIDE 16
+#define REQUIRED_SAMPLE_SIZE 64000
 
 using namespace VAPoR;
 
@@ -67,6 +67,7 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
     _cLevel = 0;
     _refLevel = 0;
     _timeStep = 0;
+    _stride = 1;
     for (int i = 0; i < 3; i++) {
         _minExt.push_back(0.f);
         _maxExt.push_back(0.f);
@@ -183,7 +184,7 @@ void TFWidget::fileLoadTF(string varname, const char *startPath, bool savePath)
     int timestep = 0;
     int level = 0;
     int lod = 0;
-    _dataMgr->GetDataRange(timestep, varname, level, lod, DEFAULT_STRIDE, defaultRange);
+    _dataMgr->GetDataRange(timestep, varname, level, lod, _stride, defaultRange);
 
     int rc = tf->LoadFromFile(s.toStdString(), defaultRange);
     if (rc < 0) { MSG_ERR("Error loading transfer function"); }
@@ -240,7 +241,7 @@ void TFWidget::getVariableRange(float range[2], float values[2], bool secondaryV
     if (!_dataMgr->VariableExists(ts, varName, ref, cmp)) return;
 
     vector<double> rangev;
-    int            rc = _dataMgr->GetDataRange(ts, varName, ref, cmp, DEFAULT_STRIDE, rangev);
+    int            rc = _dataMgr->GetDataRange(ts, varName, ref, cmp, _stride, rangev);
 
     if (rc < 0) {
         MSG_ERR("Error loading variable");
@@ -255,6 +256,24 @@ void TFWidget::getVariableRange(float range[2], float values[2], bool secondaryV
     MapperFunction *tf = _rParams->GetMapperFunc(varName);
     values[0] = tf->getMinMapValue();
     values[1] = tf->getMaxMapValue();
+}
+
+void TFWidget::calculateStride(string varName)
+{
+    std::vector<size_t> dimsAtLevel;
+    int                 ref = _rParams->GetRefinementLevel();
+    int                 rc = _dataMgr->GetDimLensAtLevel(varName, ref, dimsAtLevel);
+    assert(rc >= 0);
+
+    int size = 1;
+    for (int i = 0; i < dimsAtLevel.size(); i++) size *= dimsAtLevel[i];
+
+    _stride = size / REQUIRED_SAMPLE_SIZE;
+    assert(_stride > 0);
+
+    MapperFunction *mf = _rParams->GetMapperFunc(varName);
+    assert(mf);
+    mf->setHistogramStride(_stride);
 }
 
 float TFWidget::getOpacity()
@@ -375,6 +394,7 @@ void TFWidget::updateMainMappingFrame()
 
     if (histogramRecalculated) {
         _updateMainHistoButton->setEnabled(false);
+        cout << "A" << endl;
         _mappingFrame->SetHistoNeedsUpdate(false);
         _externalChangeHappened = false;
         _initialized = true;
@@ -385,6 +405,7 @@ void TFWidget::updateMainMappingFrame()
         checkForTimestepChanges();
         if (_externalChangeHappened || _mainHistoRangeChanged) {
             _updateMainHistoButton->setEnabled(true);
+            cout << "B" << endl;
             _mappingFrame->SetHistoNeedsUpdate(true);
         }
     }
@@ -417,8 +438,10 @@ void TFWidget::updateSecondaryMappingFrame()
         checkForBoxChanges();
         checkForSecondaryMapperRangeChanges();
         checkForTimestepChanges();
-        if (_externalChangeHappened || _secondaryHistoRangeChanged) _updateSecondaryHistoButton->setEnabled(true);
-        _secondaryMappingFrame->SetHistoNeedsUpdate(true);
+        if (_externalChangeHappened || _secondaryHistoRangeChanged) {
+            _updateSecondaryHistoButton->setEnabled(true);
+            _secondaryMappingFrame->SetHistoNeedsUpdate(true);
+        }
     }
 }
 
@@ -441,6 +464,7 @@ void TFWidget::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rPar
         setEnabled(true);
     }
 
+    calculateStride(varname);
     updateQtWidgets();
     updateMainMappingFrame();    // set mapper func to that of current variable, refresh _rParams etc
     updateSecondaryMappingFrame();
@@ -547,6 +571,7 @@ void TFWidget::checkForMainMapperRangeChanges()
 
     if (min != newMin) { _mainHistoRangeChanged = true; }
     if (max != newMax) { _mainHistoRangeChanged = true; }
+    cout << min << " " << newMin << " " << max << " " << newMax << endl;
 }
 
 void TFWidget::checkForSecondaryMapperRangeChanges()
@@ -589,6 +614,7 @@ void TFWidget::enableUpdateButtonsIfNeeded()
             _initialized = true;
         } else if (_initialized) {
             _updateMainHistoButton->setEnabled(true);
+            cout << "C" << endl;
             _mappingFrame->SetHistoNeedsUpdate(true);
         } else {
             _updateMainHistoButton->setEnabled(false);

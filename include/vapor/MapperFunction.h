@@ -124,7 +124,11 @@ public:
 
     int getHistogramStride() { return GetValueLong(_histogramStrideTag, 1); }
 
-    void setHistogramStride(int stride) { SetValueLong(_histogramStrideTag, "Set histogram calculation stride", stride); }
+    void setHistogramStride(int stride)
+    {
+        cout << "setting stride to " << stride << endl;
+        SetValueLong(_histogramStrideTag, "Set histogram calculation stride", stride);
+    }
 
     //! Set both minimum and maximum mapping (histo) values
     //! \param[in] val1 minimum value

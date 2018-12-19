@@ -96,6 +96,7 @@ private:
     void configureSecondaryTransferFunction();
     void connectWidgets();
 
+    void calculateStride(string varName);
     void updateQtWidgets();
     void updateColorInterpolation();
     void updateConstColor();
@@ -133,6 +134,7 @@ private:
     int                 _cLevel;
     int                 _refLevel;
     int                 _timeStep;
+    int                 _stride;
     string              _mainVarName;
     string              _secondaryVarName;
     bool                _initialized;
