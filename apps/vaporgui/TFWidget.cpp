@@ -177,7 +177,12 @@ void TFWidget::loadTF() {
 	assert(tf);
     float cachedMin = tf->getMinMapValue();
     float cachedMax = tf->getMaxMapValue();
-  
+    int numOpacityMaps = tf->getNumOpacityMaps();
+    std::vector<std::vector<double>> controlPoints;
+    for (int i=0; i<numOpacityMaps; i++) {
+        controlPoints.push_back(tf->GetOpacityMap(i)->GetControlPoints());
+    }
+
 	_paramsMgr->BeginSaveStateGroup("Loading Transfer Function from file");
  
 	rc = tf->LoadFromFile(fileName);
@@ -186,13 +191,14 @@ void TFWidget::loadTF() {
 	}
 
     bool loadTF3DataRange = _loadTFDialog->GetLoadTF3DataRange();
-    if ( !loadTF3DataRange )
+    if ( loadTF3DataRange == false )
         tf->setMinMaxMapValue(cachedMin, cachedMax);
 
     bool loadTF3Opacity = _loadTFDialog->GetLoadTF3OpacityMap();
-    if ( !loadTF3Opacity ) {
-        tf->setOpaque();
-        tf->setOpacityScale(1.f);
+    if ( loadTF3Opacity == false ) {
+        for (int i=0; i<numOpacityMaps; i++) {
+            tf->GetOpacityMap(i)->SetControlPoints(controlPoints[i]);
+        }
     }
     
 	_paramsMgr->EndSaveStateGroup();
