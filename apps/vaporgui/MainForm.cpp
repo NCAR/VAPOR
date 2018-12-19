@@ -1065,7 +1065,13 @@ void MainForm::sessionOpen(QString qfileName) {
 void MainForm::_fileSaveHelper(string path) {
     if (path.empty()) {
         SettingsParams *sP = GetSettingsParams();
-        string dir = sP->GetSessionDir();
+        GUIStateParams *guiStateParams = GetStateParams();
+
+        string dir;
+        if (not guiStateParams->GetCurrentSessionFile().empty())
+            dir = FileUtils::Dirname(guiStateParams->GetCurrentSessionFile());
+        else
+            dir = sP->GetSessionDir();
 
         QFileDialog fileDialog(this, "Save VAPOR session file",
                                QString::fromStdString(dir),
