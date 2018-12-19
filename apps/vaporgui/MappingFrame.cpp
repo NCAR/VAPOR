@@ -60,7 +60,6 @@
 #define YZ 2
 
 #define SAMPLE_RATE 100
-#define DEFAULT_STRIDE 4
 
 using namespace VAPoR;
 using namespace std;
@@ -312,9 +311,14 @@ void MappingFrame::populateSamplingHistogram() {
     coords[Y] = minExts[Y];
     coords[Z] = minExts[Z];
 
-    int iSamples = SAMPLE_RATE / DEFAULT_STRIDE;
-    int jSamples = SAMPLE_RATE / DEFAULT_STRIDE;
-    int kSamples = SAMPLE_RATE / DEFAULT_STRIDE;
+    MapperFunction *mapper;
+    mapper = _rParams->GetMapperFunc(_variableName);
+    assert(mapper);
+    int stride = mapper->getHistogramStride();
+
+    int iSamples = SAMPLE_RATE / stride;
+    int jSamples = SAMPLE_RATE / stride;
+    int kSamples = SAMPLE_RATE / stride;
 
     if (deltas[X] == 0)
         iSamples = 0;
@@ -367,6 +371,11 @@ void MappingFrame::populateIteratingHistogram() {
 
     grid->SetInterpolationOrder(1);
 
+    MapperFunction *mapper;
+    mapper = _rParams->GetMapperFunc(_variableName);
+    assert(mapper);
+    int stride = mapper->getHistogramStride();
+
     float v;
     float missingValue = grid->GetMissingValue();
     Grid::ConstIterator itr = grid->cbegin();
@@ -376,9 +385,8 @@ void MappingFrame::populateIteratingHistogram() {
         v = *itr;
         if (v != missingValue)
             _histogram->addToBin(v);
-        itr += DEFAULT_STRIDE;
+        itr += stride;
     }
-
     delete grid;
 }
 

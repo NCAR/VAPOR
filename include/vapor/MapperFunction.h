@@ -135,6 +135,7 @@ class PARAMS_API MapperFunction : public ParamsBase {
     }
 
     void setHistogramStride(int stride) {
+        cout << "setting stride to " << stride << endl;
         SetValueLong(
             _histogramStrideTag,
             "Set histogram calculation stride",
