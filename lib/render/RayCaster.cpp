@@ -162,6 +162,7 @@ RayCaster::UserCoordinates::UserCoordinates()
     }
     for (int i = 0; i < 4; i++) { dims[i] = 0; }
 
+    baseStepSize = 0.0f;
     myCurrentTimeStep = 0;
     myVariableName = "";
     myRefinementLevel = -1;
@@ -270,8 +271,6 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
     dims[0] = gridDims[0];
     dims[1] = gridDims[1];
     dims[2] = gridDims[2];
-    float df[3] = {float(dims[0]), float(dims[1]), float(dims[2])};
-    dims[3] = size_t(std::sqrt(df[0] * df[0] + df[1] * df[1] + df[2] * df[2])) + 1;
 
     // Save front face user coordinates ( z == dims[2] - 1 )
     if (frontFace) delete[] frontFace;
@@ -350,6 +349,9 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
         }
     }
 
+    // Calculate the base step size
+    this->FindBaseStepSize(FixedStep);
+
     return 0;
 }
 
@@ -421,7 +423,26 @@ int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params,
         ++coordItr;
     }
 
+    // Calculate the base step size
+    this->FindBaseStepSize(CellTraversal);
+
     return 0;
+}
+
+void RayCaster::UserCoordinates::FindBaseStepSize(CastingMode mode)
+{
+    if (mode == FixedStep) {
+        float df[3] = {float(dims[0]), float(dims[1]), float(dims[2])};
+        float numCells = std::sqrt(df[0] * df[0] + df[1] * df[1] + df[2] * df[2]);
+        float span[3] = {myGridMax[0] - myGridMin[0], myGridMax[1] - myGridMin[1], myGridMax[2] - myGridMin[2]};
+        if (numCells < 50.0f)    // Make sure at least 100 steps
+            baseStepSize = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / 100.0f;
+        else {    // Use Nyquist frequency
+            baseStepSize = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / (numCells * 2.0);
+        }
+    } else    // mode == CellTraversal
+    {
+    }
 }
 
 int RayCaster::_initializeGL()
@@ -803,14 +824,8 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     case 5: multiplier = 0.125f; break;
     default: multiplier = 1.0f; break;
     }
-    float span[3] = {cboxMax[0] - cboxMin[0], cboxMax[1] - cboxMin[1], cboxMax[2] - cboxMin[2]};
-    float stepSize1D;
-    if (_userCoordinates.dims[3] < 50)    // Make sure at least 100 steps
-        stepSize1D = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / 100.0f;
-    else
-        stepSize1D = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / float(_userCoordinates.dims[3] * 2);    // Use Nyquist frequency by default
-    stepSize1D /= multiplier;
-    if (fast) stepSize1D *= 8.0;    // Increase step size, thus fewer steps, when fast rendering
+    float stepSize1D = _userCoordinates.baseStepSize / multiplier;
+    if (fast) stepSize1D *= 8.0f;    //  Increase step size, thus fewer steps, when fast rendering
     shader->SetUniform("stepSize1D", stepSize1D);
 
     // Pass in textures
