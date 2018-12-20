@@ -384,6 +384,9 @@ int Visualizer::paintSetup(int timeStep){
 
 int Visualizer::initializeGL(GLManager *glManager)
 {
+    if (!glManager->IsCurrentOpenGLVersionSupported())
+        return -1;
+    
     _glManager = glManager;
 	m_vizFeatures->InitializeGL(glManager);
 
