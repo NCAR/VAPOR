@@ -140,17 +140,22 @@ void TFWidget::Reinit(TFFlags flags)
 
 TFWidget::~TFWidget()
 {
-    if (_minCombo) {
+    if (_minCombo != nullptr) {
         delete _minCombo;
         _minCombo = nullptr;
     }
-    if (_maxCombo) {
+    if (_maxCombo != nullptr) {
         delete _maxCombo;
         _maxCombo = nullptr;
     }
-    if (_rangeCombo) {
+    if (_rangeCombo != nullptr) {
         delete _rangeCombo;
         _rangeCombo = nullptr;
+    }
+
+    if (_loadTFDialog != nullptr) {
+        delete _loadTFDialog;
+        _loadTFDialog = nullptr;
     }
 }
 
@@ -942,12 +947,77 @@ LoadTFDialog::LoadTFDialog(QWidget *parent) : QDialog(parent)
     _loadDataBounds = false;
     _selectedFile = "";
 
+    initializeLayout();
     configureLayout();
 
     connectWidgets();
 }
 
-LoadTFDialog::~LoadTFDialog() {}
+LoadTFDialog::~LoadTFDialog()
+{
+    cout << "mainLayout             " << _mainLayout << endl;
+    cout << "loadOptionTab    " << _loadOptionTab << endl;
+    cout << "checkboxFrame          " << _checkboxFrame << endl;
+    cout << "checkboxLayout         " << _checkboxLayout << endl;
+    cout << "loadOpacityMapCheckbox " << _loadOpacityMapCheckbox << endl;
+    cout << "loadDataBoundsCheckbox " << _loadDataBoundsCheckbox << endl;
+    cout << "hSpacer                " << _hSpacer << endl;
+    cout << "fileDialogTab          " << _fileDialogTab << endl;
+    cout << "fileDialogFrame        " << _fileDialogFrame << endl;
+    cout << "fileDialog             " << _fileDialog << endl;
+    cout << "fileDialogLayout       " << _fileDialogLayout << endl;
+
+    /*if (_loadOptionTab != nullptr) {
+        delete _loadOptionTab;
+        _loadOptionTab = nullptr;
+    }*/
+
+    /*if (_fileDialogTab != nullptr) {
+        delete _fileDialogTab;
+        _fileDialogTab = nullptr;
+    }*/
+
+    // if (_hSpacer != nullptr) {
+    //    delete _hSpacer;
+    //    _hSpacer= nullptr;
+    //}
+
+    /*if (_checkboxLayout != nullptr) {
+        delete _checkboxLayout;
+        _checkboxLayout = nullptr;
+    }
+    if (_checkboxFrame != nullptr) {
+        delete _checkboxFrame;
+        _checkboxFrame = nullptr;
+    }
+    if (_checkboxFrame != nullptr) {
+        delete _checkboxFrame;
+        _checkboxFrame = nullptr;
+    }
+    if (_fileDialogLayout != nullptr) {
+        delete _fileDialogLayout;
+        _fileDialogLayout = nullptr;
+    }
+    if (_fileDialogFrame != nullptr) {
+        delete _fileDialogFrame;
+        _fileDialogFrame = nullptr;
+    }
+    if (_mainLayout!= nullptr) {
+        delete _mainLayout;
+        _mainLayout = nullptr;
+    }*/
+    cout << "mainLayout             " << _mainLayout << endl;
+    cout << "loadOptionTab          " << _loadOptionTab << endl;
+    cout << "checkboxFrame          " << _checkboxFrame << endl;
+    cout << "checkboxLayout         " << _checkboxLayout << endl;
+    cout << "loadOpacityMapCheckbox " << _loadOpacityMapCheckbox << endl;
+    cout << "loadDataBoundsCheckbox " << _loadDataBoundsCheckbox << endl;
+    cout << "hSpacer                " << _hSpacer << endl;
+    cout << "fileDialogTab          " << _fileDialogTab << endl;
+    cout << "fileDialogFrame        " << _fileDialogFrame << endl;
+    cout << "fileDialog             " << _fileDialog << endl;
+    cout << "fileDialogLayout       " << _fileDialogLayout << endl;
+}
 
 bool LoadTFDialog::GetLoadTF3OpacityMap() const { return _loadOpacityMap; }
 
@@ -955,48 +1025,67 @@ bool LoadTFDialog::GetLoadTF3DataRange() const { return _loadDataBounds; }
 
 string LoadTFDialog::GetSelectedFile() const { return _selectedFile; }
 
+void LoadTFDialog::initializeLayout()
+{
+    _mainLayout = new QVBoxLayout;
+
+    _loadOptionTab = new QTabWidget;
+    _checkboxFrame = new QFrame;
+    _checkboxLayout = new QHBoxLayout;
+    _loadOpacityMapCheckbox = new QCheckBox;
+    _loadDataBoundsCheckbox = new QCheckBox;
+    _hSpacer = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    _fileDialogTab = new QTabWidget;
+    _fileDialogFrame = new QFrame;
+    _fileDialog = new CustomFileDialog(this);
+    _fileDialogLayout = new QVBoxLayout;
+    /*_mainLayout = new QVBoxLayout(this);
+
+    _loadOptionTab = new QTabWidget(this);
+    _checkboxFrame = new QFrame(_loadOptionTab);
+    _checkboxLayout = new QHBoxLayout(_checkboxFrame);
+    _loadOpacityMapCheckbox = new QCheckBox(_checkboxFrame);
+    _loadDataBoundsCheckbox = new QCheckBox(_checkboxFrame);
+    _hSpacer = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    _fileDialogTab = new QTabWidget(this);
+    _fileDialogFrame = new QFrame(_fileDialogTab);
+    _fileDialog = new CustomFileDialog(_fileDialogFrame);
+    _fileDialogLayout = new QVBoxLayout(_fileDialogFrame);*/
+}
+
 void LoadTFDialog::configureLayout()
 {
-    _loadOpacityMapCheckbox = new QCheckBox(this);
     _loadOpacityMapCheckbox->setLayoutDirection(Qt::RightToLeft);
     _loadOpacityMapCheckbox->setText("Load opacity map from file\t");
 
-    _loadDataBoundsCheckbox = new QCheckBox(this);
     _loadDataBoundsCheckbox->setLayoutDirection(Qt::RightToLeft);
     _loadDataBoundsCheckbox->setText("Load data bounds from file\t");
 
-    _hSpacer = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-    _checkboxLayout = new QHBoxLayout;
     _checkboxLayout->addSpacerItem(_hSpacer);
     _checkboxLayout->addWidget(_loadOpacityMapCheckbox);
     _checkboxLayout->addSpacerItem(_hSpacer);
     _checkboxLayout->addWidget(_loadDataBoundsCheckbox);
     _checkboxLayout->addSpacerItem(_hSpacer);
     _checkboxLayout->setContentsMargins(0, 0, 0, 0);
-    _checkboxFrame = new QFrame;
     _checkboxFrame->setLayout(_checkboxLayout);
-    _loadOptionContainer = new QTabWidget(this);
-    _loadOptionContainer->addTab(_checkboxFrame, "Options");
 
-    _fileDialog = new CustomFileDialog(this);
+    _loadOptionTab->addTab(_checkboxFrame, "Options");
+
     _fileDialog->setWindowFlags(_fileDialog->windowFlags() & ~Qt::Dialog);
     QString directory = QString::fromStdString(Wasp::GetSharePath(string("palettes")));
     _fileDialog->setDirectory(directory);
     _fileDialog->setNameFilter("*.tf3");
-    _fileDialogLayout = new QVBoxLayout;
     _fileDialogLayout->addWidget(_fileDialog);
     _fileDialogLayout->setContentsMargins(0, 0, 0, 0);
-    _fileDialogFrame = new QFrame;
     _fileDialogFrame->setLayout(_fileDialogLayout);
-    _fileDialogContainer = new QTabWidget(this);
-    _fileDialogContainer->addTab(_fileDialogFrame, "Select .tf3 File");
+    _fileDialogTab->addTab(_fileDialogFrame, "Select .tf3 File");
 
-    _mainLayout = new QVBoxLayout;
-    _mainLayout->addWidget(_loadOptionContainer);
-    _mainLayout->addWidget(_fileDialogContainer);
-    _mainLayout->addStretch(0);
-    _mainLayout->addStretch(1);
+    //_mainLayout->addWidget(_loadOptionTab, 0);
+    _mainLayout->addWidget(_fileDialogTab, 1);
+    //_mainLayout->addStretch(0);
+    //_mainLayout->addStretch(1);
 
     setLayout(_mainLayout);
     adjustSize();
