@@ -126,7 +126,11 @@ void NewRendererDialog::_buttonChecked()
     _selectedRenderer = _rendererNames[index];
 }
 
-void NewRendererDialog::_buttonDoubleClicked() { this->accept(); }
+void NewRendererDialog::_buttonDoubleClicked()
+{
+    _buttonChecked();
+    this->accept();
+}
 
 void NewRendererDialog::_uncheckAllButtons()
 {
