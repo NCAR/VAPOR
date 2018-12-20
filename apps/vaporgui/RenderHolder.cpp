@@ -176,6 +176,7 @@ RenderHolder::RenderHolder(
 	_vaporTable->Reinit((VaporTable::ValidatorFlags)(0),
 		(VaporTable::MutabilityFlags)(0),
 		(VaporTable::HighlightFlags)(VaporTable::ROWS));
+    _vaporTable->ShowToolTips(true);
 	_currentRow = 0;
 
 	_widgetNames = widgetNames;
