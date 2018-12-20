@@ -76,9 +76,9 @@ protected:
         unsigned char* missingValueMask; // 0 == is missing value; non-zero == not missing value
         float *xyCoords;                 // X-Y coordinate values
         float *zCoords;                  // Z coordinate values
+        float baseStepSize;
 
-        size_t  dims[4];                 // num. of samples along each axis. 
-                                         // !! Note: the last element is the diagnal length !!
+        size_t  dims[3];                 // num. of samples along each axis. 
 
         //             0---------2
         //              |       |
@@ -117,6 +117,16 @@ protected:
         int UpdateFaceAndData(    const RayCasterParams* params,
                                   const StructuredGrid*  grid, 
                                         DataMgr*         dataMgr );
+        //
+        // Update pointers: xyCoords and zCoords
+        // |-- Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
+        // |         UpdateFaceAndData() needs to be called priori to UpdateCurviCoords().
+        // |-- It returns 0 upon success, and non-zero upon errors:
+        //
+        int UpdateCurviCoords(    const RayCasterParams* params,
+                                  const StructuredGrid*  grid, 
+                                        DataMgr*         dataMgr );
+
         void FillCoordsXYPlane( const   StructuredGrid*  grid,  // Input 
                                 size_t  planeIdx,               // Input: which plane to retrieve
                                 float*  coords );               // Output buffer allocated by caller
@@ -127,14 +137,11 @@ protected:
                                 size_t  planeIdx,               // Input
                                 float*  coords );               // Output 
         //
-        // Update pointers: xyCoords and zCoords
-        // |-- Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
-        // |         UpdateFaceAndData() needs to be called priori to UpdateCurviCoords().
-        // |-- It returns 0 upon success, and non-zero upon errors:
+        // This function is supposed to be called at the end of either 
+        // UpdateFaceAndData() or UpdateCurviCoords() .
         //
-        int UpdateCurviCoords(    const RayCasterParams* params,
-                                  const StructuredGrid*  grid, 
-                                        DataMgr*         dataMgr );
+        void FindBaseStepSize( CastingMode mode );
+
     };  // end of struct UserCoordinates 
 
     UserCoordinates     _userCoordinates;
@@ -187,11 +194,11 @@ protected:
     //
     void _renderTriangleStrips(int whichPass, long castingMode ) const;
 
-    void _drawVolumeFaces( int              whichPass, 
-                           long             whichCastingMode,
-                           bool             insideACell = false,
-                           const glm::mat4& inversedMV  = glm::mat4(0.0f),
-                           bool             fast        = false );
+    void _drawVolumeFaces(     int                whichPass, 
+                               long               whichCastingMode,
+                               bool               insideACell = false,
+                               const glm::mat4&   inversedMV  = glm::mat4(0.0f),
+                               bool               fast        = false );
 
     void _load3rdPassUniforms( long               castingMode,
                                const glm::mat4&   inversedMV,
@@ -205,13 +212,13 @@ protected:
     //
     int  _initializeFramebufferTextures();
 
-    double _getElapsedSeconds( const struct timeval* begin, const struct timeval* end ) const;
-
     void _updateViewportWhenNecessary();
     void _updateColormap( RayCasterParams* params );
     void _updateDataTextures( int castingMode );
     void _updateNearClippingPlane( );
     void _enableVertexAttribute( const float* buf, size_t length, bool attrib1Enabled ) const;
+
+    double _getElapsedSeconds( const struct timeval* begin, const struct timeval* end ) const;
 
 };  // End of class RayCaster
 
