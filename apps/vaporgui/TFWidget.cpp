@@ -29,10 +29,17 @@
 #include "RenderEventRouter.h"
 #include "vapor/RenderParams.h"
 #include "vapor/TwoDDataParams.h"
+#include "vapor/ResourcePath.h"
 #include "TFWidget.h"
 #include "ErrorReporter.h"
+#include "FileOperationChecker.h"
 
 using namespace VAPoR;
+using namespace TFWidget_;
+
+#define GET_DATARANGE_STRIDE 16
+#define CANCEL               -1
+#define ACCEPT               0
 
 string TFWidget::_nDimsTag = "ActiveDimension";
 
@@ -49,6 +56,8 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
     _secondaryVarName = "";
 
     _myRGB[0] = _myRGB[1] = _myRGB[2] = 1.f;
+
+    _loadTFDialog = new LoadTFDialog(this);
 
     _minCombo = new Combo(_minRangeEdit, _minRangeSlider);
     _maxCombo = new Combo(_maxRangeEdit, _maxRangeSlider);
@@ -131,17 +140,22 @@ void TFWidget::Reinit(TFFlags flags)
 
 TFWidget::~TFWidget()
 {
-    if (_minCombo) {
+    if (_minCombo != nullptr) {
         delete _minCombo;
-        _minCombo = NULL;
+        _minCombo = nullptr;
     }
-    if (_maxCombo) {
+    if (_maxCombo != nullptr) {
         delete _maxCombo;
-        _maxCombo = NULL;
+        _maxCombo = nullptr;
     }
-    if (_rangeCombo) {
+    if (_rangeCombo != nullptr) {
         delete _rangeCombo;
-        _rangeCombo = NULL;
+        _rangeCombo = nullptr;
+    }
+
+    if (_loadTFDialog != nullptr) {
+        delete _loadTFDialog;
+        _loadTFDialog = nullptr;
     }
 }
 
@@ -150,44 +164,62 @@ void TFWidget::loadTF()
     string varname = _rParams->GetColorMapVariableName();
     if (varname.empty()) return;
 
+    int rc = _loadTFDialog->exec();
+    if (rc == CANCEL) return;    // cancel event
+
+    string fileName = _loadTFDialog->GetSelectedFile();
+    if (!selectedTFFileOk(fileName)) return;
+
     SettingsParams *sP;
     sP = (SettingsParams *)_paramsMgr->GetParams(SettingsParams::GetClassType());
-    string path = sP->GetTFDir();
-
-    fileLoadTF(varname, path.c_str(), true);
-}
-
-void TFWidget::fileLoadTF(string varname, const char *startPath, bool savePath)
-{
-    QString s = QFileDialog::getOpenFileName(0, "Choose a transfer function file to open", startPath, "Vapor 3 Transfer Functions (*.tf3)");
-
-    // Null string indicates nothing selected
-    if (s.length() == 0)
-        return;
-    else {
-        SettingsParams *sP;
-        sP = (SettingsParams *)_paramsMgr->GetParams(SettingsParams::GetClassType());
-        sP->SetTFDir(s.toStdString());
-    }
-
-    // Force name to end with .tf3
-    if (!s.endsWith(".tf3")) { s += ".tf3"; }
+    sP->SetTFDir(fileName);
 
     MapperFunction *tf = _rParams->GetMapperFunc(varname);
     assert(tf);
+    float                            cachedMin = tf->getMinMapValue();
+    float                            cachedMax = tf->getMaxMapValue();
+    int                              numOpacityMaps = tf->getNumOpacityMaps();
+    std::vector<std::vector<double>> controlPoints;
+    for (int i = 0; i < numOpacityMaps; i++) { controlPoints.push_back(tf->GetOpacityMap(i)->GetControlPoints()); }
 
-    vector<double> defaultRange;
-    _dataMgr->GetDataRange(0, varname, 0, 0, 1, defaultRange);
+    _paramsMgr->BeginSaveStateGroup("Loading Transfer Function from file");
 
-    cout << "defaultRange " << defaultRange[0] << " " << defaultRange[1] << endl;
+    rc = tf->LoadFromFile(fileName);
+    if (rc < 0) {
+        MSG_ERR("Error loading transfer function");
+    } else {
+        bool loadTF3DataRange = _loadTFDialog->GetLoadTF3DataRange();
+        if (loadTF3DataRange == false) tf->setMinMaxMapValue(cachedMin, cachedMax);
 
-    int rc = tf->LoadFromFile(s.toStdString(), defaultRange);
-    if (rc < 0) { MSG_ERR("Error loading transfer function"); }
+        bool loadTF3Opacity = _loadTFDialog->GetLoadTF3OpacityMap();
+        if (loadTF3Opacity == false) {
+            for (int i = 0; i < numOpacityMaps; i++) { tf->GetOpacityMap(i)->SetControlPoints(controlPoints[i]); }
+        }
+    }
+
+    _paramsMgr->EndSaveStateGroup();
 
     Update(_dataMgr, _paramsMgr, _rParams);
 }
 
-void TFWidget::fileSaveTF()
+bool TFWidget::selectedTFFileOk(string fileName)
+{
+    QString qFileName = QString::fromStdString(fileName);
+    if (!FileOperationChecker::FileGoodToRead(qFileName)) {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        return false;
+    }
+
+    QString qSuffix = "tf3";
+    if (!FileOperationChecker::FileHasCorrectSuffix(qFileName, qSuffix)) {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        return false;
+    }
+
+    return true;
+}
+
+void TFWidget::saveTF()
 {
     // Launch a file save dialog, open resulting file
     GUIStateParams *p;
@@ -659,7 +691,7 @@ void TFWidget::connectWidgets()
     connect(_colorInterpCombo, SIGNAL(activated(int)), this, SLOT(setColorInterpolation(int)));
     connect(_whitespaceCheckbox, SIGNAL(stateChanged(int)), this, SLOT(setUseWhitespace(int)));
     connect(_loadButton, SIGNAL(pressed()), this, SLOT(loadTF()));
-    connect(_saveButton, SIGNAL(pressed()), this, SLOT(fileSaveTF()));
+    connect(_saveButton, SIGNAL(pressed()), this, SLOT(saveTF()));
     connect(_mappingFrame, SIGNAL(updateParams()), this, SLOT(setRange()));
     connect(_mappingFrame, SIGNAL(endChange()), this, SLOT(setRange()));
     connect(_opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacitySliderChanged(int)));
@@ -677,7 +709,7 @@ void TFWidget::connectWidgets()
     connect(_secondaryMinSliderEdit, SIGNAL(valueChanged(double)), this, SLOT(setSecondaryMinRange(double)));
     connect(_secondaryMaxSliderEdit, SIGNAL(valueChanged(double)), this, SLOT(setSecondaryMaxRange(double)));
     connect(_secondaryLoadButton, SIGNAL(pressed()), this, SLOT(loadTF()));
-    connect(_secondarySaveButton, SIGNAL(pressed()), this, SLOT(fileSaveTF()));
+    connect(_secondarySaveButton, SIGNAL(pressed()), this, SLOT(saveTF()));
 }
 
 void TFWidget::emitTFChange() { emit emitChange(); }
@@ -908,3 +940,123 @@ string TFWidget::getTFVariableName(bool mainTF = true)
 
     return varname;
 }
+
+LoadTFDialog::LoadTFDialog(QWidget *parent) : QDialog(parent)
+{
+    setModal(true);
+
+    _loadOpacityMap = false;
+    _loadDataBounds = false;
+    _selectedFile = "";
+
+    initializeLayout();
+    configureLayout();
+
+    connectWidgets();
+}
+
+LoadTFDialog::~LoadTFDialog() {}
+
+bool LoadTFDialog::GetLoadTF3OpacityMap() const { return _loadOpacityMap; }
+
+bool LoadTFDialog::GetLoadTF3DataRange() const { return _loadDataBounds; }
+
+string LoadTFDialog::GetSelectedFile() const { return _selectedFile; }
+
+void LoadTFDialog::initializeLayout()
+{
+    _mainLayout = new QVBoxLayout;
+
+    _loadOptionTab = new QTabWidget;
+    _checkboxFrame = new QFrame;
+    _checkboxLayout = new QHBoxLayout;
+    _loadOpacityMapCheckbox = new QCheckBox;
+    _loadDataBoundsCheckbox = new QCheckBox;
+    _optionSpacer1 = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+    _optionSpacer2 = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+    _optionSpacer3 = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    _fileDialogTab = new QTabWidget;
+    _fileDialogFrame = new QFrame;
+    _fileDialog = new CustomFileDialog(this);
+    _fileDialogLayout = new QVBoxLayout;
+    /*_mainLayout = new QVBoxLayout(this);
+
+    _loadOptionTab = new QTabWidget(this);
+    _checkboxFrame = new QFrame(_loadOptionTab);
+    _checkboxLayout = new QHBoxLayout(_checkboxFrame);
+    _loadOpacityMapCheckbox = new QCheckBox(_checkboxFrame);
+    _loadDataBoundsCheckbox = new QCheckBox(_checkboxFrame);
+    _hSpacer = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    _fileDialogTab = new QTabWidget(this);
+    _fileDialogFrame = new QFrame(_fileDialogTab);
+    _fileDialog = new CustomFileDialog(_fileDialogFrame);
+    _fileDialogLayout = new QVBoxLayout(_fileDialogFrame);*/
+}
+
+void LoadTFDialog::configureLayout()
+{
+    _loadOpacityMapCheckbox->setLayoutDirection(Qt::RightToLeft);
+    _loadOpacityMapCheckbox->setText("Load opacity map from file\t");
+
+    _loadDataBoundsCheckbox->setLayoutDirection(Qt::RightToLeft);
+    _loadDataBoundsCheckbox->setText("Load data bounds from file\t");
+
+    _checkboxLayout->addSpacerItem(_optionSpacer1);
+    _checkboxLayout->addWidget(_loadOpacityMapCheckbox, 0);
+    _checkboxLayout->addSpacerItem(_optionSpacer2);
+    _checkboxLayout->addWidget(_loadDataBoundsCheckbox, 0);
+    _checkboxLayout->addSpacerItem(_optionSpacer3);
+    _checkboxLayout->setContentsMargins(0, 0, 0, 0);
+    _checkboxFrame->setLayout(_checkboxLayout);
+
+    _loadOptionTab->addTab(_checkboxFrame, "Options");
+
+    _fileDialog->setWindowFlags(_fileDialog->windowFlags() & ~Qt::Dialog);
+    QString directory = QString::fromStdString(Wasp::GetSharePath(string("palettes")));
+    _fileDialog->setDirectory(directory);
+    _fileDialog->setNameFilter("*.tf3");
+    _fileDialogLayout->addWidget(_fileDialog);
+    _fileDialogLayout->setContentsMargins(0, 0, 0, 0);
+    _fileDialogFrame->setLayout(_fileDialogLayout);
+    _fileDialogTab->addTab(_fileDialogFrame, "Select .tf3 File");
+
+    _mainLayout->addWidget(_loadOptionTab, 0);
+    _mainLayout->addWidget(_fileDialogTab, 1);
+    //_mainLayout->addStretch(0);
+    //_mainLayout->addStretch(1);
+
+    setLayout(_mainLayout);
+    adjustSize();
+}
+
+void LoadTFDialog::connectWidgets()
+{
+    connect(_loadOpacityMapCheckbox, SIGNAL(stateChanged(int)), this, SLOT(setLoadOpacity()));
+    connect(_loadDataBoundsCheckbox, SIGNAL(stateChanged(int)), this, SLOT(setLoadBounds()));
+
+    connect(_fileDialog, SIGNAL(okClicked()), this, SLOT(accept()));
+    connect(_fileDialog, SIGNAL(cancelClicked()), this, SLOT(reject()));
+}
+
+void LoadTFDialog::setLoadOpacity() { _loadOpacityMap = _loadOpacityMapCheckbox->isChecked(); }
+
+void LoadTFDialog::setLoadBounds() { _loadDataBounds = _loadDataBoundsCheckbox->isChecked(); }
+
+void LoadTFDialog::accept()
+{
+    _loadOpacityMap = _loadOpacityMapCheckbox->isChecked();
+    _loadDataBounds = _loadDataBoundsCheckbox->isChecked();
+    QStringList selectedFiles = _fileDialog->selectedFiles();
+    if (selectedFiles.size() > 0) _selectedFile = selectedFiles[0].toStdString();
+    done(ACCEPT);
+}
+
+void LoadTFDialog::reject() { done(CANCEL); }
+
+CustomFileDialog::CustomFileDialog(QWidget *parent) : QFileDialog(parent) {}
+
+void CustomFileDialog::done(int result) { emit cancelClicked(); }
+
+void CustomFileDialog::accept() { emit okClicked(); }
