@@ -205,21 +205,18 @@ class TFWidget_::LoadTFDialog : public QDialog {
         void setLoadBounds();
 
     private:
+        void initializeLayout();
         void configureLayout();
         void connectWidgets();
 
-        CustomFileDialog*        _fileDialog;
+        CustomFileDialog*   _fileDialog;
         QFrame*             _checkboxFrame;
         QFrame*             _fileDialogFrame;
         QVBoxLayout*        _mainLayout;
         QHBoxLayout*        _checkboxLayout;
-        QHBoxLayout*        _opacityCheckboxLayout;
-        QHBoxLayout*        _dataBoundsCheckboxLayout;
-        QVBoxLayout*        _loadOptionLayout;
         QVBoxLayout*        _fileDialogLayout;
-        QLabel*             _optionLabel;
-        QTabWidget*         _fileDialogContainer;
-        QTabWidget*         _loadOptionContainer;
+        QTabWidget*         _fileDialogTab;
+        QTabWidget*         _loadOptionTab;
         QSpacerItem*        _hSpacer;
         QCheckBox*          _loadOpacityMapCheckbox;
         QCheckBox*          _loadDataBoundsCheckbox;
