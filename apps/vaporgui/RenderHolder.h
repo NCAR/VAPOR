@@ -22,11 +22,7 @@ class ParamsMgr;
 class QPushButtonWithDoubleClick : public QPushButton {
     Q_OBJECT
     using QPushButton::QPushButton;
-    void mouseDoubleClickEvent(QMouseEvent *e)
-    {
-        cout << "button " << this << endl;
-        emit doubleClicked();
-    }
+    void mouseDoubleClickEvent(QMouseEvent *e) { emit doubleClicked(); }
 
 signals:
     void doubleClicked();
