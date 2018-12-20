@@ -250,9 +250,9 @@ void MappingFrame::populateSamplingHistogram()
     coords[Y] = minExts[Y];
     coords[Z] = minExts[Z];
 
-    int iSamples = SAMPLE_RATE / _stride;
-    int jSamples = SAMPLE_RATE / _stride;
-    int kSamples = SAMPLE_RATE / _stride;
+    int iSamples = SAMPLE_RATE;
+    int jSamples = SAMPLE_RATE;
+    int kSamples = SAMPLE_RATE;
 
     if (deltas[X] == 0) iSamples = 0;
     if (deltas[Y] == 0) jSamples = 0;
