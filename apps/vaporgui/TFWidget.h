@@ -213,7 +213,9 @@ class TFWidget_::LoadTFDialog : public QDialog {
     QVBoxLayout *_fileDialogLayout;
     QTabWidget *_fileDialogTab;
     QTabWidget *_loadOptionTab;
-    QSpacerItem *_hSpacer;
+    QSpacerItem *_optionSpacer1;
+    QSpacerItem *_optionSpacer2;
+    QSpacerItem *_optionSpacer3;
     QCheckBox *_loadOpacityMapCheckbox;
     QCheckBox *_loadDataBoundsCheckbox;
 
