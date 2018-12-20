@@ -31,7 +31,7 @@ public:
     static std::string GetClassType() { return ("Image"); }
 
 protected:
-    int GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals, GLsizei &width, GLsizei &height, GLuint **indices, GLsizei &nindices, bool &structuredMesh);
+    int GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **normals, GLsizei &nverts, GLsizei &width, GLsizei &height, GLuint **indices, GLsizei &nindices, bool &structuredMesh);
 
     const GLvoid *GetTexture(DataMgr *dataMgr, GLsizei &width, GLsizei &height, GLint &internalFormat, GLenum &format, GLenum &type, size_t &texelSize, bool &gridAligned);
 
@@ -58,6 +58,8 @@ private:
     SmartBuf       _sb_indices;
     GLsizei        _vertsWidth;
     GLsizei        _vertsHeight;
+    GLsizei        _nindices;
+    GLsizei        _nverts;
 
     unsigned char *_getTexture(DataMgr *dataMgr);
 

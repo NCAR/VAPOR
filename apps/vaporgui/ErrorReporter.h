@@ -43,7 +43,7 @@ class ErrorReporterPopup : public QMessageBox {
     Q_OBJECT;
 
 public:
-    ErrorReporterPopup(QWidget *parent, int id);
+    ErrorReporterPopup(QWidget *parent, int id, bool fatal = false);
     void setLogText(std::string text);
     bool isDead() const { return dead; };
 
@@ -51,7 +51,7 @@ private slots:
     void doAction(QAbstractButton *button);
 
 private:
-    bool        dead;
+    bool        dead, fatal;
     std::string _logText;
 };
 
@@ -73,10 +73,12 @@ private:
 
 #define MSG_DIAG(M) (ErrorReporter::GetInstance()->Report(M, ErrorReporter::Diagnostic))
 
+#define MSG_FATAL(M) (ErrorReporter::GetInstance()->Report(M, ErrorReporter::Fatal))
+
 class ErrorReporter {
 public:
     ErrorReporter(QWidget *parent);
-    enum Type { Diagnostic = 0, Info = 1, Warning = 2, Error = 3 };
+    enum Type { Diagnostic = 0, Info = 1, Warning = 2, Error = 3, Fatal = 4 };
 
     struct Message {
         Type        type;
