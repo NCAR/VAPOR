@@ -79,6 +79,7 @@ protected:
         size_t      myCurrentTimeStep;
         std::string myVariableName;
         int         myRefinementLevel, myCompressionLevel;
+        int         myCastingMode;
         float       myGridMin[3], myGridMax[3];    // Keeps the min and max of the current grid.
                                                    // !!NOT!! the value retrieved from params.
 
