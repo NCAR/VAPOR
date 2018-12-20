@@ -185,14 +185,16 @@ void TFWidget::loadTF()
     _paramsMgr->BeginSaveStateGroup("Loading Transfer Function from file");
 
     rc = tf->LoadFromFile(fileName);
-    if (rc < 0) { MSG_ERR("Error loading transfer function"); }
+    if (rc < 0) {
+        MSG_ERR("Error loading transfer function");
+    } else {
+        bool loadTF3DataRange = _loadTFDialog->GetLoadTF3DataRange();
+        if (loadTF3DataRange == false) tf->setMinMaxMapValue(cachedMin, cachedMax);
 
-    bool loadTF3DataRange = _loadTFDialog->GetLoadTF3DataRange();
-    if (loadTF3DataRange == false) tf->setMinMaxMapValue(cachedMin, cachedMax);
-
-    bool loadTF3Opacity = _loadTFDialog->GetLoadTF3OpacityMap();
-    if (loadTF3Opacity == false) {
-        for (int i = 0; i < numOpacityMaps; i++) { tf->GetOpacityMap(i)->SetControlPoints(controlPoints[i]); }
+        bool loadTF3Opacity = _loadTFDialog->GetLoadTF3OpacityMap();
+        if (loadTF3Opacity == false) {
+            for (int i = 0; i < numOpacityMaps; i++) { tf->GetOpacityMap(i)->SetControlPoints(controlPoints[i]); }
+        }
     }
 
     _paramsMgr->EndSaveStateGroup();
