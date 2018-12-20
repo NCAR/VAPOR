@@ -135,10 +135,10 @@ int Renderer::paintGL(bool fast)
     _glManager->matrixManager->PushMatrix();
 
     _glManager->matrixManager->Translate(origin[0], origin[1], origin[2]);
-    _glManager->matrixManager->Scale(scale[0], scale[1], scale[2]);
     _glManager->matrixManager->Rotate(rotate[0], 1, 0, 0);
     _glManager->matrixManager->Rotate(rotate[1], 0, 1, 0);
     _glManager->matrixManager->Rotate(rotate[2], 0, 0, 1);
+    _glManager->matrixManager->Scale(scale[0], scale[1], scale[2]);
     _glManager->matrixManager->Translate(-origin[0], -origin[1], -origin[2]);
 
     _glManager->matrixManager->Translate(translate[0], translate[1], translate[2]);
