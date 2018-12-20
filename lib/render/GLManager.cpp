@@ -43,6 +43,18 @@ void GLManager::PixelCoordinateSystemPop()
     mm->MatrixModeModelView();
 }
 
+bool GLManager::IsCurrentOpenGLVersionSupported()
+{
+    int major, minor;
+    glGetIntegerv(GL_MAJOR_VERSION, &major);
+    glGetIntegerv(GL_MINOR_VERSION, &minor);
+
+    if (major > 4 || (major == 4 && minor >= 1)) return true;
+
+    Wasp::MyBase::SetErrMsg("OpenGL Version \"%s\" is too low and is not supported", glGetString(GL_VERSION));
+    return false;
+}
+
 bool GLManager::CheckError()
 {
     int err = glGetError();
