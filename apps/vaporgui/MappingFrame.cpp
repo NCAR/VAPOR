@@ -99,11 +99,11 @@ void oglPopState() {
 //----------------------------------------------------------------------------
 MappingFrame::MappingFrame(QWidget *parent)
     : QGLWidget(parent),
+      _stride(1),
       _NUM_BINS(256),
       _mapper(NULL),
       _histogram(NULL),
       _isSampling(false),
-      _stride(1),
       _histoNeedsUpdate(false),
       _opacityMappingEnabled(false),
       _colorMappingEnabled(false),
@@ -317,8 +317,8 @@ void MappingFrame::populateSamplingHistogram() {
     double yStartPoint = minExts[Y] + deltas[Y] / 2.f;
     double zStartPoint = minExts[Z] + deltas[Z] / 2.f;
 
-    coords[X] = xStartPoint
-        coords[Y] = yStartPoint;
+    coords[X] = xStartPoint;
+    coords[Y] = yStartPoint;
     coords[Z] = zStartPoint;
 
     int iSamples = SAMPLE_RATE;
