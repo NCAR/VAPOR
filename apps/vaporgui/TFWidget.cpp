@@ -296,7 +296,7 @@ void TFWidget::calculateStride(string varName)
     int                 rc = _dataMgr->GetDimLensAtLevel(varName, ref, dimsAtLevel);
     assert(rc >= 0);
 
-    int size = 1;
+    long size = 1;
     for (int i = 0; i < dimsAtLevel.size(); i++) size *= dimsAtLevel[i];
 
     _stride = 1;

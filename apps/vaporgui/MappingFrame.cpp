@@ -59,7 +59,7 @@
 #define XZ 1
 #define YZ 2
 
-#define SAMPLE_RATE 100
+#define SAMPLE_RATE 30
 
 using namespace VAPoR;
 using namespace std;
@@ -207,7 +207,11 @@ void MappingFrame::SetIsSampling(bool isSampling) { _isSampling = isSampling; }
 
 void MappingFrame::SetHistoNeedsUpdate(bool needsUpdate) { _histoNeedsUpdate = needsUpdate; }
 
-void MappingFrame::SetStride(int stride) { _stride = stride; }
+void MappingFrame::SetStride(int stride)
+{
+    cout << "Stride " << stride << endl;
+    _stride = stride;
+}
 
 void MappingFrame::getGridAndExtents(VAPoR::Grid **grid, std::vector<double> &minExts, std::vector<double> &maxExts) const
 {
