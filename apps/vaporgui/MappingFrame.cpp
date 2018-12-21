@@ -288,6 +288,9 @@ void MappingFrame::populateSamplingHistogram()
     grid = nullptr;
 }
 
+// Note: Since we offset the start of our samples by delta/2, each
+// delta is computed as the domain extents divided by exactly
+// the number of samples being taken.
 std::vector<double> MappingFrame::calculateDeltas(std::vector<double> minExts, std::vector<double> maxExts) const
 {
     double dx = (maxExts[X] - minExts[X]) / SAMPLE_RATE;
