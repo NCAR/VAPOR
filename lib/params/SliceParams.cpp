@@ -98,6 +98,7 @@ int SliceParams::GetSampleRate() const {
 }
 
 void SliceParams::SetSampleRate(int rate) {
+    cout << "setting sample rate to " << rate << endl;
     SetValueDouble(_sampleRateTag, "Set sample rate", (double)rate);
 }
 
