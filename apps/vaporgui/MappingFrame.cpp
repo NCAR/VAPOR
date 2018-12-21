@@ -246,24 +246,29 @@ void MappingFrame::populateSamplingHistogram()
     std::vector<double> deltas = calculateDeltas(minExts, maxExts);
     float               varValue, missingValue;
     std::vector<double> coords(3, 0.0);
-    coords[X] = minExts[X];
-    coords[Y] = minExts[Y];
-    coords[Z] = minExts[Z];
+
+    double xStartPoint = minExts[X] + deltas[X] / 2.f;
+    double yStartPoint = minExts[Y] + deltas[Y] / 2.f;
+    double zStartPoint = minExts[Z] + deltas[Z] / 2.f;
+
+    coords[X] = xStartPoint coords[Y] = yStartPoint;
+    coords[Z] = zStartPoint;
 
     int iSamples = SAMPLE_RATE;
     int jSamples = SAMPLE_RATE;
     int kSamples = SAMPLE_RATE;
 
-    if (deltas[X] == 0) iSamples = 0;
-    if (deltas[Y] == 0) jSamples = 0;
-    if (deltas[Z] == 0) kSamples = 0;
+    if (deltas[X] == 0) iSamples = 1;
+    if (deltas[Y] == 0) jSamples = 1;
+    if (deltas[Z] == 0) kSamples = 1;
 
-    for (int k = 0; k <= kSamples; k++) {
-        coords[Y] = minExts[Y];
-        for (int j = 0; j <= jSamples; j++) {
-            coords[X] = minExts[X];
+    for (int k = 0; k < kSamples; k++) {
+        coords[Y] = yStartPoint;
 
-            for (int i = 0; i <= iSamples; i++) {
+        for (int j = 0; j < jSamples; j++) {
+            coords[X] = xStartPoint;
+
+            for (int i = 0; i < iSamples; i++) {
                 varValue = grid->GetValue(coords);
                 missingValue = grid->GetMissingValue();
                 if (varValue != missingValue) _histogram->addToBin(varValue);
