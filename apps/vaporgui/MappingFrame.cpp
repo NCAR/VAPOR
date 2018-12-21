@@ -269,7 +269,6 @@ void MappingFrame::SetHistoNeedsUpdate(
 }
 
 void MappingFrame::SetStride(int stride) {
-    cout << "Stride " << stride << endl;
     _stride = stride;
 }
 
