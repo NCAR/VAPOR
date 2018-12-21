@@ -59,7 +59,7 @@
 #define XZ 1
 #define YZ 2
 
-#define SAMPLE_RATE 100
+#define SAMPLE_RATE 30
 
 using namespace VAPoR;
 using namespace std;
@@ -269,6 +269,7 @@ void MappingFrame::SetHistoNeedsUpdate(
 }
 
 void MappingFrame::SetStride(int stride) {
+    cout << "Stride " << stride << endl;
     _stride = stride;
 }
 
