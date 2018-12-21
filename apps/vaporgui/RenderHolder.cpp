@@ -134,6 +134,7 @@ void NewRendererDialog::_buttonChecked() {
 }
 
 void NewRendererDialog::_buttonDoubleClicked() {
+    _buttonChecked();
     this->accept();
 }
 
