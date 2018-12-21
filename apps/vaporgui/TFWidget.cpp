@@ -300,7 +300,7 @@ void TFWidget::calculateStride(string varName)
     for (int i = 0; i < dimsAtLevel.size(); i++) size *= dimsAtLevel[i];
 
     _stride = 1;
-    if (size > REQUIRED_SAMPLE_SIZE) _stride = size / REQUIRED_SAMPLE_SIZE;
+    if (size > REQUIRED_SAMPLE_SIZE) _stride = 1 + size / REQUIRED_SAMPLE_SIZE;
 
     _mappingFrame->SetStride(_stride);
 }
