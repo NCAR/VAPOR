@@ -126,7 +126,11 @@ void NewRendererDialog::_buttonChecked()
     _selectedRenderer = _rendererNames[index];
 }
 
-void NewRendererDialog::_buttonDoubleClicked() { this->accept(); }
+void NewRendererDialog::_buttonDoubleClicked()
+{
+    _buttonChecked();
+    this->accept();
+}
 
 void NewRendererDialog::_uncheckAllButtons()
 {
@@ -155,6 +159,7 @@ RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce, const vector<QWidge
     _newRendererDialog = new NewRendererDialog(this, widgetNames, descriptions, iconPaths, smallIconPaths);
     _vaporTable = new VaporTable(tableWidget, false, true);
     _vaporTable->Reinit((VaporTable::ValidatorFlags)(0), (VaporTable::MutabilityFlags)(0), (VaporTable::HighlightFlags)(VaporTable::ROWS));
+    _vaporTable->ShowToolTips(true);
     _currentRow = 0;
 
     _widgetNames = widgetNames;

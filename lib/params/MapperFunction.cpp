@@ -153,7 +153,7 @@ MapperFunction::~MapperFunction()
 //----------------------------------------------------------------------------
 // Create a mapper function by parsing a file.
 //----------------------------------------------------------------------------
-int MapperFunction::LoadFromFile(string path, vector<double> defaultDataBounds)
+int MapperFunction::LoadFromFile(string path)
 {
     XmlParser xmlparser;
 
@@ -172,10 +172,6 @@ int MapperFunction::LoadFromFile(string path, vector<double> defaultDataBounds)
 
     double newMin = newTF->getMinMapValue();
     double newMax = newTF->getMaxMapValue();
-
-    if ((newMin < defaultDataBounds[0]) || (newMin > defaultDataBounds[1])) { newMin = defaultDataBounds[0]; }
-    if ((newMax < defaultDataBounds[0]) || (newMax > defaultDataBounds[1])) { newMax = defaultDataBounds[1]; }
-    newTF->setMinMaxMapValue(newMin, newMax);
 
     // Assign (copy) new TF to this object
     //

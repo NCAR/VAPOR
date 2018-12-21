@@ -4,14 +4,14 @@
   0 
 </OpacityComposition>
 <DataBounds Type="Double">
-  0 0 
+  -1 1 
 </DataBounds>
 <OpacityScale Type="Double">
   1 
 </OpacityScale>
 <ColorMapParams>
 <DataBounds Type="Double">
- -1 0
+ -1 1 
 </DataBounds>
 <ColorInterpolationType Type="Long">
   4 
@@ -24,7 +24,7 @@
 <OpacityMap_0>
 <OpacityMapParams>Type="ParamsBase" >
 <DataBounds Type="Double">
- -1 0
+ -1 1
 </DataBounds>
 <Enabled Type="Long">
   1 
