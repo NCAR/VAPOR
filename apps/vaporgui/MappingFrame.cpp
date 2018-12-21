@@ -207,11 +207,7 @@ void MappingFrame::SetIsSampling(bool isSampling) { _isSampling = isSampling; }
 
 void MappingFrame::SetHistoNeedsUpdate(bool needsUpdate) { _histoNeedsUpdate = needsUpdate; }
 
-void MappingFrame::SetStride(int stride)
-{
-    cout << "Stride " << stride << endl;
-    _stride = stride;
-}
+void MappingFrame::SetStride(int stride) { _stride = stride; }
 
 void MappingFrame::getGridAndExtents(VAPoR::Grid **grid, std::vector<double> &minExts, std::vector<double> &maxExts) const
 {
