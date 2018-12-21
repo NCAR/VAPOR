@@ -100,7 +100,7 @@ void oglPopState()
 // Constructor
 //----------------------------------------------------------------------------
 MappingFrame::MappingFrame(QWidget *parent)
-: QGLWidget(parent), _NUM_BINS(256), _mapper(NULL), _histogram(NULL), _isSampling(false), _stride(1), _histoNeedsUpdate(false), _opacityMappingEnabled(false), _colorMappingEnabled(false),
+: QGLWidget(parent), _stride(1), _NUM_BINS(256), _mapper(NULL), _histogram(NULL), _isSampling(false), _histoNeedsUpdate(false), _opacityMappingEnabled(false), _colorMappingEnabled(false),
   _isoSliderEnabled(false), _isolineSlidersEnabled(false), _lastSelectedIndex(-1), navigateButton(NULL), _editButton(NULL), _variableName(""), _domainSlider(new DomainWidget(this)),
   _contourRangeSlider(new ContourRangeSlider(this)), _isoSlider(new IsoSlider(this)), _colorbarWidget(new GLColorbarWidget(this, NULL)), _lastSelected(NULL), _texid(0), _texture(NULL),
   _updateTexture(true), _histogramScale(LINEAR), _contextMenu(NULL), _addOpacityWidgetSubMenu(NULL), _histogramScalingSubMenu(NULL), _compTypeSubMenu(NULL), _widgetEnabledSubMenu(NULL),
@@ -251,7 +251,8 @@ void MappingFrame::populateSamplingHistogram()
     double yStartPoint = minExts[Y] + deltas[Y] / 2.f;
     double zStartPoint = minExts[Z] + deltas[Z] / 2.f;
 
-    coords[X] = xStartPoint coords[Y] = yStartPoint;
+    coords[X] = xStartPoint;
+    coords[Y] = yStartPoint;
     coords[Z] = zStartPoint;
 
     int iSamples = SAMPLE_RATE;
