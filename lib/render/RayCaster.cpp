@@ -438,10 +438,53 @@ void RayCaster::UserCoordinates::FindBaseStepSize(CastingMode mode)
         if (numCells < 50.0f)    // Make sure at least 100 steps
             baseStepSize = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / 100.0f;
         else {    // Use Nyquist frequency
-            baseStepSize = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / (numCells * 2.0);
+            baseStepSize = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / (numCells * 2.0f);
         }
     } else    // mode == CellTraversal
     {
+        float dist, smallest, diffx, diffy, diffz;
+        diffx = xyCoords[2] - xyCoords[0];
+        diffy = xyCoords[3] - xyCoords[1];
+        smallest = diffx * diffx + diffy * diffy;
+        size_t idx1, idx2, x, y, z;
+
+        // Find the smallest edge among the XY plane
+        for (y = 0; y < dims[1]; y++)
+            for (x = 0; x < dims[0]; x++) {
+                // First test edge between vertex (x, y) and (x+1, y)
+                if (x < dims[0] - 1) {
+                    idx1 = (y * dims[0] + x) * 2;
+                    idx2 = (y * dims[0] + x + 1) * 2;
+                    diffx = xyCoords[idx2] - xyCoords[idx1];
+                    diffy = xyCoords[idx2 + 1] - xyCoords[idx1 + 1];
+                    dist = diffx * diffx + diffy * diffy;
+                    smallest = smallest < dist ? smallest : dist;
+                }
+
+                // Second test edge between vertex (x, y) and (x, y+1)
+                if (y < dims[1] - 1) {
+                    idx2 = ((y + 1) * dims[0] + x) * 2;
+                    diffx = xyCoords[idx2] - xyCoords[idx1];
+                    diffy = xyCoords[idx2 + 1] - xyCoords[idx1 + 1];
+                    dist = diffx * diffx + diffy * diffy;
+                    smallest = smallest < dist ? smallest : dist;
+                }
+            }
+
+        // Find the smallest edge among the Z edges
+        size_t planeSize = dims[0] * dims[1];
+        for (z = 0; z < dims[2] - 1; z++)
+            for (y = 0; y < dims[1]; y++)
+                for (x = 0; x < dims[0]; x++) {
+                    // Test edge between vertex (x, y, z) and (x, y, z+1)
+                    idx1 = z * planeSize + y * dims[0] + x;
+                    idx2 = (z + 1) * planeSize + y * dims[0] + x;
+                    diffz = zCoords[idx2] - zCoords[idx1];
+                    dist = diffz * diffz;
+                    smallest = smallest < dist ? smallest : dist;
+                }
+
+        baseStepSize = std::sqrt(smallest);
     }
 }
 
@@ -814,18 +857,22 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     shader->SetUniformArray("flags", 3, flags);
 
     // Calculate the step size with sample rate multiplier taken into account.
-    float multiplier;
-    switch (params->GetSampleRateMultiplier()) {
-    case 0: multiplier = 1.0f; break;    // These values need to be in sync with
-    case 1: multiplier = 2.0f; break;    //   the multiplier values in the GUI.
-    case 2: multiplier = 4.0f; break;
-    case 3: multiplier = 0.5f; break;
-    case 4: multiplier = 0.25f; break;
-    case 5: multiplier = 0.125f; break;
-    default: multiplier = 1.0f; break;
-    }
-    float stepSize1D = _userCoordinates.baseStepSize / multiplier;
-    if (fast) stepSize1D *= 8.0f;    //  Increase step size, thus fewer steps, when fast rendering
+    float stepSize1D;
+    if (castingMode == FixedStep) {
+        float multiplier;
+        switch (params->GetSampleRateMultiplier()) {
+        case 0: multiplier = 1.0f; break;    // These values need to be in sync with
+        case 1: multiplier = 2.0f; break;    //   the multiplier values in the GUI.
+        case 2: multiplier = 4.0f; break;
+        case 3: multiplier = 0.5f; break;
+        case 4: multiplier = 0.25f; break;
+        case 5: multiplier = 0.125f; break;
+        default: multiplier = 1.0f; break;
+        }
+        stepSize1D = _userCoordinates.baseStepSize / multiplier;
+        if (fast) stepSize1D *= 8.0f;    //  Increase step size, thus fewer steps, when fast rendering
+    } else
+        stepSize1D = _userCoordinates.baseStepSize * 0.99;
     shader->SetUniform("stepSize1D", stepSize1D);
 
     // Pass in textures
