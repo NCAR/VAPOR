@@ -106,8 +106,7 @@ namespace VAPoR {
         );
         
         bool           _initialized;
-        int            _textureWidth;
-        int            _textureHeight;
+        int            _textureSideSize;
 
         GLuint         _colorMapTextureID;
         GLuint         _dataValueTextureID;
