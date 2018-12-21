@@ -290,9 +290,9 @@ void MappingFrame::populateSamplingHistogram()
 
 std::vector<double> MappingFrame::calculateDeltas(std::vector<double> minExts, std::vector<double> maxExts) const
 {
-    double dx = (maxExts[X] - minExts[X]) / (1 + SAMPLE_RATE);
-    double dy = (maxExts[Y] - minExts[Y]) / (1 + SAMPLE_RATE);
-    double dz = (maxExts[Z] - minExts[Z]) / (1 + SAMPLE_RATE);
+    double dx = (maxExts[X] - minExts[X]) / SAMPLE_RATE;
+    double dy = (maxExts[Y] - minExts[Y]) / SAMPLE_RATE;
+    double dz = (maxExts[Z] - minExts[Z]) / SAMPLE_RATE;
 
     std::vector<double> deltas = {dx, dy, dz};
     return deltas;
