@@ -93,6 +93,9 @@ public:
 
  void StretchToColumn(int column);
 
+ void ShowToolTips(bool showOrHide);
+ bool GetShowToolTips() const;
+
 public slots:
  void emitValueChanged();
  void emitReturnPressed();
@@ -139,6 +142,7 @@ private:
  bool _lastColIsCheckboxes;
  bool _checkboxesEnabled;
  bool _autoResizeHeight;
+ bool _showToolTips;
  QTableWidget *_table;
 
  MutabilityFlags _mutabilityFlags;
