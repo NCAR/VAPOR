@@ -470,7 +470,7 @@ int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params,
     return 0;
 }
 
-void RayCaster::UserCoordinates::FindBaseStepSize(CastingMode mode) {
+void RayCaster::UserCoordinates::FindBaseStepSize(int mode) {
     if (mode == FixedStep) {
         float df[3] = {float(dims[0]), float(dims[1]), float(dims[2])};
         float numCells = std::sqrt(df[0] * df[0] + df[1] * df[1] + df[2] * df[2]);
@@ -601,7 +601,7 @@ int RayCaster::_paintGL(bool fast) {
     }
 
     // Use the correct shader for 3rd pass rendering
-    long castingMode = params->GetCastingMode();
+    int castingMode = int(params->GetCastingMode());
     if (castingMode == FixedStep)
         _3rdPassShader = _3rdPassMode1Shader;
     else if (castingMode == CellTraversal)
@@ -798,7 +798,7 @@ int RayCaster::_initializeFramebufferTextures() {
 }
 
 void RayCaster::_drawVolumeFaces(int whichPass,
-                                 long castingMode,
+                                 int castingMode,
                                  bool insideACell,
                                  const glm::mat4 &InversedMV,
                                  bool fast) {
@@ -869,7 +869,7 @@ void RayCaster::_drawVolumeFaces(int whichPass,
     glUseProgram(0);
 }
 
-void RayCaster::_load3rdPassUniforms(long castingMode,
+void RayCaster::_load3rdPassUniforms(int castingMode,
                                      const glm::mat4 &inversedMV,
                                      bool fast) const {
     ShaderProgram *shader = _3rdPassShader;
@@ -977,12 +977,12 @@ void RayCaster::_load3rdPassUniforms(long castingMode,
     }
 }
 
-void RayCaster::_3rdPassSpecialHandling(bool fast, long castingMode) {
+void RayCaster::_3rdPassSpecialHandling(bool fast, int castingMode) {
     // Left empty intentially.
     // Derived classes feel free to put stuff here.
 }
 
-void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const {
+void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
     /* Give bx, by, bz type of "unsigned int" for indexBuffer */
     unsigned int bx = (unsigned int)_userCoordinates.dims[0];
     unsigned int by = (unsigned int)_userCoordinates.dims[1];
