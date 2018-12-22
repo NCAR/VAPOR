@@ -14,7 +14,7 @@ public:
 
 protected:
     int  _load3rdPassShaders();
-    void _3rdPassSpecialHandling(bool fast, long castMode);
+    void _3rdPassSpecialHandling(bool fast, int castMode);
 };
 
 };    // namespace VAPoR
