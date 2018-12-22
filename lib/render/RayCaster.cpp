@@ -942,7 +942,7 @@ void RayCaster::_load3rdPassUniforms(int castingMode,
         if (fast)
             stepSize1D *= 8.0f; //  Increase step size, thus fewer steps, when fast rendering
     } else
-        stepSize1D = _userCoordinates.baseStepSize * 0.99;
+        stepSize1D = _userCoordinates.baseStepSize * 0.9f;
     shader->SetUniform("stepSize1D", stepSize1D);
 
     // Pass in textures
