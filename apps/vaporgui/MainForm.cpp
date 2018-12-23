@@ -56,6 +56,7 @@
 #include <vapor/ResourcePath.h>
 #include <vapor/CFuncs.h>
 #include <vapor/FileUtils.h>
+#include <vapor/utils.h>
 
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
@@ -904,6 +905,21 @@ void MainForm::sessionOpen(QString qfileName)
     p->SetCurrentSessionFile(fileName);
 
     _stateChangeFlag = false;
+
+    GUIStateParams *state = GetStateParams();
+    vector<string>  openDataSetNames = state->GetOpenDataSetNames();
+    string          vizWin = state->GetActiveVizName();
+    string          activeRendererType;
+    string          activeRendererName;
+    string          activeDataSetName;
+    state->GetActiveRenderer(vizWin, activeRendererType, activeRendererName);
+    _controlExec->RenderLookup(activeRendererName, vizWin, activeDataSetName, activeRendererType);
+
+    if (Wasp::contains(openDataSetNames, activeDataSetName))
+        _tabMgr->SetActiveRenderer(vizWin, activeRendererType, activeRendererName);
+    else
+        _tabMgr->HideRenderWidgets();
+
     _stateChangeCB();
 }
 

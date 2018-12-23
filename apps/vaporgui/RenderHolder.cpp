@@ -549,7 +549,10 @@ void RenderHolder::Update()
 
     _vaporTable->Update(numRows, 4, tableValues, rowHeader, colHeader);
     int row = _getRow(activeRenderInst);
-    if (row >= 0) _vaporTable->SetActiveRow(row);
+    if (row >= 0)
+        _vaporTable->SetActiveRow(row);
+    else
+        p->SetActiveRenderer(activeViz, "", "");
 
     _updateDupCombo();
 
