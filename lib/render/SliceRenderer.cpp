@@ -131,10 +131,8 @@ int SliceRenderer::_resetDataCache()
 
     _textureWidth = _cacheParams.textureSampleRate;
     _textureHeight = _cacheParams.textureSampleRate;
-    cout << "retrieved rate " << _textureWidth << endl;
     if (_textureWidth > MAX_TEXTURE_SIZE) _textureWidth = MAX_TEXTURE_SIZE;
     if (_textureHeight > MAX_TEXTURE_SIZE) _textureHeight = MAX_TEXTURE_SIZE;
-    cout << "corrected rate " << _textureWidth << endl;
 
     _resetBoxCache();
     _resetColormapCache();
