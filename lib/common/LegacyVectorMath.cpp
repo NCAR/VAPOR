@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <float.h>
 #include <string>
+#include <cmath>
 
 using std::string;
 using std::vector;
@@ -298,8 +299,8 @@ int minvert(const float *mat, float *result) {
         float maxval = 0.f;
         int pivot = -1;
         for (int rw = i; rw < 4; rw++) {
-            if (fabs(m[i][rw]) > maxval) {
-                maxval = fabs(m[i][rw]);
+            if (std::abs(m[i][rw]) > maxval) {
+                maxval = std::abs(m[i][rw]);
                 pivot = rw;
             }
         }
@@ -355,8 +356,8 @@ int minvert(const double *mat, double *result) {
         double maxval = 0.f;
         int pivot = -1;
         for (int rw = i; rw < 4; rw++) {
-            if (abs(m[i][rw]) > maxval) {
-                maxval = abs(m[i][rw]);
+            if (std::abs(m[i][rw]) > maxval) {
+                maxval = std::abs(m[i][rw]);
                 pivot = rw;
             }
         }
@@ -975,7 +976,7 @@ int matrix4x4_inverse(
 
     det = det4x4(in);
 
-    if (fabs(det) < SMALL_NUMBER) {
+    if (std::abs(det) < SMALL_NUMBER) {
         //	Singular matrix, no inverse!
         return (-1);
     }
@@ -1281,7 +1282,7 @@ void getRotAngles(double *theta, double *phi, double *psi, const double *matrix)
     mmultt33(tMatrix1, matrix, tMatrix2);
     //Now the resulting matrix is a rotation by psi
     //Cos psi and sin psi are in the first column:
-    if (abs(tMatrix2[0]) > 1.f) {
+    if (std::abs(tMatrix2[0]) > 1.f) {
         if (tMatrix2[0] > 0.f)
             tMatrix2[0] = 1.f;
         else
