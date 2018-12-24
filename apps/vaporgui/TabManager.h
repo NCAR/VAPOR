@@ -76,6 +76,8 @@ class TabManager : public QTabWidget {
   public:
     TabManager(QWidget *, VAPoR::ControlExec *ce);
 
+    void SetActiveRenderer(string activeViz, string renderClass, string renderInst);
+
     //! In order to display the parameters for the selected renderer,
     //! QWidget::show() is invoked for the selected EventRouter, and
     //! QWidget::hide() is invoked for all other renderer EventRouters.
