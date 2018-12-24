@@ -180,6 +180,9 @@ public:
   // iterate across values.  It must sample them instead.
   void SetIsSampling(bool isSampling);
 
+  void SetHistoNeedsUpdate(bool needsUpdate);
+
+  void SetStride(int stride);
 
 signals:
 
@@ -228,14 +231,13 @@ private:
   ) const;
   void populateHistogram();
   void populateSamplingHistogram();
-  //void populateSamplingHistogramXY();
-  //void populateSamplingHistogramXZ();
-  //void populateSamplingHistogramYZ();
   void populateIteratingHistogram();
+  void setHistogramStride( int stride );
   std::vector<double> calculateDeltas(
     std::vector<double> minExts,
     std::vector<double> maxExts
   ) const;
+  int _stride;
   
 protected slots:
   void setEditMode(bool);
@@ -351,6 +353,7 @@ private:
   map<string, Histo*> _histogramMap;
 
   bool            _isSampling;
+  bool            _histoNeedsUpdate;
   bool            _opacityMappingEnabled;
   bool            _colorMappingEnabled;
   bool			  _isoSliderEnabled;
