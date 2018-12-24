@@ -303,7 +303,8 @@ private:
 
  void loadDataHelper(
 	const std::vector <string> &files, string prompt, 
-	string filter, string format, bool multi
+                     string filter, string format, bool multi,
+                     bool promptToReplaceExistingDataset = true
  );
  void _createCaptureMenu();
  void _createToolsMenu();
@@ -327,7 +328,7 @@ private:
 
  void _fileSaveHelper(string path);
 
- string _getDataSetName(string file);
+ string _getDataSetName(string file, bool promptToReplaceExistingDataset = true);
 
 private slots:   
  void sessionOpen(QString qfileName="");
