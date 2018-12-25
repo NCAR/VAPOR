@@ -44,7 +44,7 @@ vec3  volumeDimsf      = vec3( volumeDims );
 vec3  boxSpan          = boxMax - boxMin;
 
 //
-// Code for faces and edges
+// Code for faces 
 //
 const int FaceFront    = 0;
 const int FaceBack     = 1;
@@ -52,6 +52,20 @@ const int FaceTop      = 2;
 const int FaceBottom   = 3;
 const int FaceRight    = 4;
 const int FaceLeft     = 5;
+
+// 
+// Code for triangles:
+// Each triangle is represented as (v0, v1, v2)
+// Triangle vertices are ordered such that (v1-v0)x(v2-v0) faces inside.
+//
+const int triangles[36] = int[36](
+                          7, 6, 3,  2, 3, 6,    // two triangles of the front face
+                          0, 1, 4,  5, 4, 1,    // two triangles of the back face
+                          4, 5, 7,  6, 7, 5,    // two triangles of the top face
+                          3, 2, 0,  1, 0, 2,    // two triangles of the bottom face
+                          5, 1, 6,  2, 6, 1,    // two triangles of the right face
+                          4, 7, 0,  3, 0, 7 );  // two triangles of the left face
+
 
 //
 // Input:  logical index of a vertex
@@ -177,26 +191,10 @@ bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
     for( int i = 0; i < 8; i++ )
         cubeVertCoord[i] = GetCoordinates( cubeVertIdx[i] );
 
-    // Each triangle is represented as (v0, v1, v2)
-    // Triangle vertices are ordered such that (v1-v0)x(v2-v0) faces inside.
-    ivec3 triangles[12];
-    triangles[0]  =  ivec3( 7, 6, 3 );  // front face,  w == 0
-    triangles[1]  =  ivec3( 2, 3, 6 );
-    triangles[2]  =  ivec3( 0, 1, 4 );  // back face,   w == 1
-    triangles[3]  =  ivec3( 5, 4, 1 );
-    triangles[4]  =  ivec3( 4, 5, 7 );  // top face,    w == 2
-    triangles[5]  =  ivec3( 6, 7, 5 );
-    triangles[6]  =  ivec3( 3, 2, 0 );  // bottom face, w == 3
-    triangles[7]  =  ivec3( 1, 0, 2 );
-    triangles[8]  =  ivec3( 5, 1, 6 );  // right face,  w == 4
-    triangles[9]  =  ivec3( 2, 6, 1 );
-    triangles[10] =  ivec3( 4, 7, 0 );  // left face,   w == 5
-    triangles[11] =  ivec3( 3, 0, 7 );
-
-    float prd[12],  z = 0.0;
+    float prd[12],  z = -ULP;
     for( int i = 0; i < 12; i++ )
     {
-        ivec3 tri   = triangles[i];
+        ivec3 tri   = ivec3( triangles[i*3], triangles[i*3+1], triangles[i*3+2] );
         vec3 posv0  = pos                     - cubeVertCoord[ tri[0] ];
         vec3 v1v0   = cubeVertCoord[ tri[1] ] - cubeVertCoord[ tri[0] ];
         vec3 v2v0   = cubeVertCoord[ tri[2] ] - cubeVertCoord[ tri[0] ];
@@ -332,7 +330,7 @@ void main(void)
     
     // Give color to step 1
     vec3 step1Tex = CalculateCellCenterTex( step1CellIdx );
-    // if( !ShouldSkip( step1Tex, step1Model ) )
+    if( !ShouldSkip( step1Tex, step1Model ) )
     {   
         float step1Value   = texture( volumeTexture, step1Tex ).r;
         float valTranslate = (step1Value - colorMapRange.x) / colorMapRange.z;
@@ -361,18 +359,9 @@ void main(void)
         }
 
         vec3 step2Tex      = CalculateCellCenterTex( step2CellIdx );
-    
-        //if( ShouldSkip( step2Tex, step2Model ) )
-        //    continue;
-
         float step2Value   = texture( volumeTexture, step2Tex ).r;
         float valTranslate = (step2Value - colorMapRange.x) / colorMapRange.z;
         vec4  backColor    = texture( colorMapTexture, valTranslate );
-
-        if( lighting && backColor.a > 0.001 )
-        {}
-
-        // Color compositing
         color.rgb += (1.0 - color.a) * backColor.a * backColor.rgb;
         color.a   += (1.0 - color.a) * backColor.a;
 
@@ -381,6 +370,7 @@ void main(void)
     }
 
     if( earlyTerm == 2 && !CellOnBound( step1CellIdx ) )
-        color.r = 0.9;
+        color = vec4( 0.9, 0.2, 0.2, 1.0);
+
 }
 
