@@ -37,7 +37,7 @@ float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
-vec3  volumeDimsf      = vec3( volumeDims );
+vec3  volumeDims1o     = 1.0 / vec3( volumeDims );
 vec3  boxSpan          = boxMax - boxMin;
 
 //
@@ -67,8 +67,8 @@ bool ShouldSkip( const in vec3 tc, const in vec3 mc )
 //
 vec3 CalculateGradient( const in vec3 tc )
 {
-    vec3 h0 = vec3(-0.5 ) / volumeDimsf;
-    vec3 h1 = vec3( 0.5 ) / volumeDimsf;
+    vec3 h0 = vec3(-0.5 ) * volumeDims1o;
+    vec3 h1 = vec3( 0.5 ) * volumeDims1o;
     vec3 h  = vec3( 1.0 );
 
     if ((tc.x + h0.x) < 0.0) {
