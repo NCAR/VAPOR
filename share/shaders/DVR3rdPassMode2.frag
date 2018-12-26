@@ -200,20 +200,18 @@ bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
         cubeVertCoord[i].z  = zC.x;
     }
 
-    float prd[12],  z = -ULP;
     for( int i = 0; i < 12; i++ )
     {
         ivec3 tri   = ivec3( triangles[i*3], triangles[i*3+1], triangles[i*3+2] );
         vec3 posv0  = pos                     - cubeVertCoord[ tri[0] ];
         vec3 v1v0   = cubeVertCoord[ tri[1] ] - cubeVertCoord[ tri[0] ];
         vec3 v2v0   = cubeVertCoord[ tri[2] ] - cubeVertCoord[ tri[0] ];
-        vec3 inward = cross( v1v0, v2v0 );
-        prd[i]      = dot( posv0, inward );
+        vec3 inward = cross( v1v0, v2v0 );  // vector pointing inside of the cell
+        if( dot( posv0, inward ) < -ULP )   // pos tests to be outside of the cell
+            return false;
     }
     
-    return ( prd[0] > z && prd[1] > z && prd[2]  > z && prd[3]  > z &&
-             prd[4] > z && prd[5] > z && prd[6]  > z && prd[7]  > z &&
-             prd[8] > z && prd[9] > z && prd[10] > z && prd[11] > z   );
+    return true;
 }
 
 bool CellOutsideBound( const in ivec3 cellIdx )
