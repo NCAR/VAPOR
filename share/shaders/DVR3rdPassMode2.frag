@@ -189,16 +189,7 @@ bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
 
     vec3 cubeVertCoord[8];
     for( int i = 0; i < 8; i++ )
-        //cubeVertCoord[i] = GetCoordinates( cubeVertIdx[i] );
-    {   // Equivalent to the function call above; avoiding it in hope to improve performance
-        ivec3 index  = cubeVertIdx[i];
-        int xyOffset = index.y *  volumeDims.x + index.x;
-        int zOffset  = index.z * (volumeDims.x * volumeDims.y) + xyOffset;
-        vec4 xyC     = texelFetch( xyCoordsTexture, xyOffset );
-        vec4 zC      = texelFetch( zCoordsTexture,  zOffset );
-        cubeVertCoord[i].xy = xyC.xy;
-        cubeVertCoord[i].z  = zC.x;
-    }
+        cubeVertCoord[i] = GetCoordinates( cubeVertIdx[i] );
 
     for( int i = 0; i < 12; i++ )
     {
@@ -280,6 +271,7 @@ bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3
 
     return false;
 }
+
 
 vec3 CalculateCellCenterTex( const ivec3 cellIdx )
 {
