@@ -234,7 +234,7 @@ bool CellOutsideBound( const in ivec3 cellIdx )
         return false;
 }
 
-bool CellOnBound( const in ivec3 cellIdx )
+bool CellOnBoundary( const in ivec3 cellIdx )
 {
     if( cellIdx.x == 0 || cellIdx.x == volumeDims.x - 2 || 
         cellIdx.y == 0 || cellIdx.y == volumeDims.y - 2 ||
@@ -291,6 +291,116 @@ bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3
     return false;
 }
 
+
+bool SmartLocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, 
+                          const in vec3  previousPos,    out ivec3 nextCellIdx )
+{
+    vec3  cubeVertCoord[8];
+    FillCellVertCoordinates( currentCellIdx, cubeVertCoord );
+    vec3  rayDir = pos - previousPos;
+    float vfit[8], fit[27];  // fitness value for 8 vertices and 27 cells.
+    for(  int i = 0; i < 8; i++ )
+        vfit[i] = dot( rayDir, cubeVertCoord[i] - previousPos );
+
+    ivec3 c  = currentCellIdx;
+    ivec3 group[27];
+
+    // First cell in this group is the current cell itself.
+    group[0]  = c;
+    float vfitSum = 0.0;
+    for( int i = 0; i < 8; i++ )    
+        vfitSum += vfit[i];
+    fit  [0]  = vfitSum / 8.0;
+    
+    // Next 6 cells are adjacent to the current cell by face
+    group[1]  = ivec3( c.x - 1, c.yz );                     // left
+    group[2]  = ivec3( c.x + 1, c.yz );                     // right
+    group[3]  = ivec3( c.x,     c.y - 1, c.z );             //bottom
+    group[4]  = ivec3( c.x,     c.y + 1, c.z );             // top
+    group[5]  = ivec3( c.xy,             c.z - 1 );         // back
+    group[6]  = ivec3( c.xy,             c.z + 1 );         // front
+    fit  [1]  = (vfit[0] + vfit[3] + vfit[4] + vfit[7]) * 0.25;
+    fit  [2]  = (vfit[1] + vfit[2] + vfit[5] + vfit[6]) * 0.25;
+    fit  [3]  = (vfit[0] + vfit[1] + vfit[2] + vfit[3]) * 0.25;
+    fit  [4]  = (vfit[4] + vfit[5] + vfit[6] + vfit[7]) * 0.25;
+    fit  [5]  = (vfit[0] + vfit[1] + vfit[4] + vfit[5]) * 0.25;
+    fit  [6]  = (vfit[2] + vfit[3] + vfit[6] + vfit[7]) * 0.25;
+
+    // Next 12 cells are adjacent to the current one by edge
+    group[7]  = ivec3( c.x,     c.y + 1, c.z + 1 ); // top-front
+    group[8]  = ivec3( c.x - 1, c.y + 1, c.z     ); // top-left
+    group[9]  = ivec3( c.x    , c.y + 1, c.z - 1 ); // top-back
+    group[10] = ivec3( c.x + 1, c.y + 1, c.z     ); // top-right
+    group[11] = ivec3( c.x,     c.y - 1, c.z + 1 ); // bottom-front
+    group[12] = ivec3( c.x - 1, c.y - 1, c.z     ); // bottom-left
+    group[13] = ivec3( c.x,     c.y - 1, c.z - 1 ); // bottom-back
+    group[14] = ivec3( c.x + 1, c.y - 1, c.z     ); // bottom-right
+    group[15] = ivec3( c.x - 1, c.y,     c.z + 1 ); // front-left
+    group[16] = ivec3( c.x - 1, c.y,     c.z - 1 ); // left-back
+    group[17] = ivec3( c.x + 1, c.y,     c.z - 1 ); // back-right
+    group[18] = ivec3( c.x + 1, c.y,     c.z + 1 ); // right-front
+    fit  [7]  = (vfit[6] + vfit[7]) * 0.5;
+    fit  [8]  = (vfit[4] + vfit[7]) * 0.5;
+    fit  [9]  = (vfit[4] + vfit[5]) * 0.5;
+    fit  [10] = (vfit[5] + vfit[6]) * 0.5;
+    fit  [11] = (vfit[2] + vfit[3]) * 0.5;
+    fit  [12] = (vfit[0] + vfit[3]) * 0.5;
+    fit  [13] = (vfit[0] + vfit[1]) * 0.5;
+    fit  [14] = (vfit[1] + vfit[2]) * 0.5;
+    fit  [15] = (vfit[3] + vfit[7]) * 0.5;
+    fit  [16] = (vfit[0] + vfit[4]) * 0.5;
+    fit  [17] = (vfit[1] + vfit[5]) * 0.5;
+    fit  [18] = (vfit[2] + vfit[6]) * 0.5;
+
+    // Next 8 cells are adjacent to the current one by corner
+    group[19] = ivec3( c.x - 1, c.y + 1, c.z + 1 ); // corner 7
+    group[20] = ivec3( c.x - 1, c.y + 1, c.z - 1 ); // corner 4
+    group[21] = ivec3( c.x + 1, c.y + 1, c.z - 1 ); // corner 5
+    group[22] = ivec3( c.x + 1, c.y + 1, c.z + 1 ); // corner 6
+    group[23] = ivec3( c.x - 1, c.y - 1, c.z + 1 ); // corner 3
+    group[24] = ivec3( c.x - 1, c.y - 1, c.z - 1 ); // corner 0
+    group[25] = ivec3( c.x + 1, c.y - 1, c.z - 1 ); // corner 1
+    group[26] = ivec3( c.x + 1, c.y - 1, c.z + 1 ); // corner 2
+    fit  [19] = vfit[7];
+    fit  [20] = vfit[4];
+    fit  [21] = vfit[5];
+    fit  [22] = vfit[6];
+    fit  [23] = vfit[3];
+    fit  [24] = vfit[0];
+    fit  [25] = vfit[1];
+    fit  [26] = vfit[2];
+
+    int sortedIdx[27];
+    for( int i = 0; i < 27; i++ )
+        sortedIdx[i] = i;
+
+    // Bubble sort
+    for( int i = 0; i < 26; i++ )
+        for( int j = i + 1; j < 27; j++ )
+        {
+            if( fit[j] > fit[i] )
+            {
+                int   tmpI   = sortedIdx[i];
+                sortedIdx[i] = sortedIdx[j];
+                sortedIdx[j] = tmpI;
+                float tmpF   = fit[i];
+                fit[i]       = fit[j];
+                fit[j]       = tmpF;
+            }
+        }
+
+    for( int i = 0; i < 27; i++ )
+    {
+        int realIdx = sortedIdx[i];
+        if( !CellOutsideBound( group[realIdx] ) && PosInsideOfCell( group[realIdx], pos ) )
+        {
+            nextCellIdx = group[realIdx];
+            return true;
+        }
+    }
+
+    return false;
+}
 
 vec3 CalculateCellCenterTex( const ivec3 cellIdx )
 {
@@ -371,6 +481,7 @@ void main(void)
         step2Model         = startModel + stepSize3D * float( stepi );
     
         if( !LocateNextCell(  step1CellIdx, step2Model, step2CellIdx ) )
+        //if( !SmartLocateNextCell(  step1CellIdx, step2Model, step1Model, step2CellIdx ) )
         {
             earlyTerm      = 2;
             break;
@@ -383,11 +494,12 @@ void main(void)
         color.rgb += (1.0 - color.a) * backColor.a * backColor.rgb;
         color.a   += (1.0 - color.a) * backColor.a;
 
-        // keep up cell index as well
+        // keep up step 1 values as well
         step1CellIdx = step2CellIdx;
+        step1Model   = step2Model;
     }
 
-    if( earlyTerm == 2 && !CellOnBound( step1CellIdx ) )
+    if( earlyTerm == 2 && !CellOnBoundary( step1CellIdx ) )
         color = vec4( 0.9, 0.2, 0.2, 1.0);
 
 }
