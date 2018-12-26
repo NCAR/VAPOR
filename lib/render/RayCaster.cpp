@@ -717,14 +717,6 @@ int RayCaster::_paintGL( bool fast )
         glBindTexture( GL_TEXTURE_3D, 0 );
     }
 
-    _updateColormap( params );
-
-    glActiveTexture( GL_TEXTURE0 + _colorMapTexOffset );
-    glBindTexture( GL_TEXTURE_1D,  _colorMapTextureId );
-    glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA32F,     _colorMap.size()/4,
-                   0, GL_RGBA,       GL_FLOAT,       _colorMap.data() );
-    glBindTexture( GL_TEXTURE_1D, 0 );
-
     glBindFramebuffer( GL_FRAMEBUFFER, _frameBufferId );
     glViewport( 0, 0, _currentViewport[2], _currentViewport[3] );
 
@@ -748,6 +740,14 @@ int RayCaster::_paintGL( bool fast )
 
     // 2nd pass, render front facing polygons
     _drawVolumeFaces( 2, castingMode, insideACell );    
+
+    // Collect the color map for the 3rd pass rendering, which is the actual ray casting.
+    _updateColormap( params );
+    glActiveTexture( GL_TEXTURE0 + _colorMapTexOffset );
+    glBindTexture( GL_TEXTURE_1D,  _colorMapTextureId );
+    glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA32F,     _colorMap.size()/4,
+                   0, GL_RGBA,       GL_FLOAT,       _colorMap.data() );
+    glBindTexture( GL_TEXTURE_1D, 0 );
 
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
     glViewport( 0, 0, _currentViewport[2], _currentViewport[3] );
@@ -1350,7 +1350,7 @@ double RayCaster::_getElapsedSeconds( const struct timeval* begin,
                                       const struct timeval* end ) const
 {
 #ifdef WIN32
-	return 1;
+	return 0.0;
 #else
     return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec)/1000000.0);
 #endif
@@ -1394,6 +1394,7 @@ void RayCaster::_updateColormap( RayCasterParams* params )
     else
     {
         params->GetMapperFunc()->makeLut( _colorMap );
+        assert( _colorMap.size()  % 4 == 0 );
         std::vector<double> range = params->GetMapperFunc()->getMinMaxMapValue();
         _colorMapRange[0]         = float(range[0]);
         _colorMapRange[1]         = float(range[1]);
