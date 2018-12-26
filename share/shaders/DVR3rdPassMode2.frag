@@ -40,7 +40,7 @@ float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
-vec3  volumeDimsf      = vec3( volumeDims );
+vec3  volumeDims1o     = 1.0 / vec3( volumeDims );
 vec3  boxSpan          = boxMax - boxMin;
 
 //
@@ -107,8 +107,8 @@ bool ShouldSkip( const in vec3 tc, const in vec3 mc )
 //
 vec3 CalculateGradient( const in vec3 tc)
 {
-    vec3 h0 = vec3(-0.5 ) / volumeDimsf;
-    vec3 h1 = vec3( 0.5 ) / volumeDimsf;
+    vec3 h0 = vec3(-0.5 ) * volumeDims1o;
+    vec3 h1 = vec3( 0.5 ) * volumeDims1o;
     vec3 h  = vec3( 1.0 );
 
     if ((tc.x + h0.x) < 0.0) {
@@ -189,7 +189,16 @@ bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
 
     vec3 cubeVertCoord[8];
     for( int i = 0; i < 8; i++ )
-        cubeVertCoord[i] = GetCoordinates( cubeVertIdx[i] );
+        //cubeVertCoord[i] = GetCoordinates( cubeVertIdx[i] );
+    {   // Equivalent to the function call above; avoiding it in hope to improve performance
+        ivec3 index  = cubeVertIdx[i];
+        int xyOffset = index.y *  volumeDims.x + index.x;
+        int zOffset  = index.z * (volumeDims.x * volumeDims.y) + xyOffset;
+        vec4 xyC     = texelFetch( xyCoordsTexture, xyOffset );
+        vec4 zC      = texelFetch( zCoordsTexture,  zOffset );
+        cubeVertCoord[i].xy = xyC.xy;
+        cubeVertCoord[i].z  = zC.x;
+    }
 
     float prd[12],  z = -ULP;
     for( int i = 0; i < 12; i++ )
@@ -288,9 +297,9 @@ vec3 CalculateCellCenterTex( const ivec3 cellIdx )
         vertCoord[i] = GetCoordinates( vertIdx[i] );
         
     vec3 centerModel;
-    centerModel.x = (vertCoord[1].x + vertCoord[0].x) / 2.0;
-    centerModel.y = (vertCoord[3].y + vertCoord[0].y) / 2.0;
-    centerModel.z = (vertCoord[2].z + vertCoord[0].z) / 2.0;
+    centerModel.x = (vertCoord[1].x + vertCoord[0].x) * 0.5;
+    centerModel.y = (vertCoord[3].y + vertCoord[0].y) * 0.5;
+    centerModel.z = (vertCoord[2].z + vertCoord[0].z) * 0.5;
 
     return (centerModel - boxMin) / boxSpan;
 }
