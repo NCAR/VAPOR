@@ -80,6 +80,51 @@ vec3 GetCoordinates( const in ivec3 index )
     return vec3( xyC.xy, zC.x );
 }
 
+// 
+// Input:  logical index of a cell
+// Output: user coordinates of its 8 indices
+//
+void FillCellVertCoordinates( const in ivec3 cellIdx, out vec3 coord[8] )
+{
+    //          Y
+    //        4 __________________5
+    //         /|               /|
+    //        / |              / |
+    //       /  |             /  |
+    //     7/___|___________6/   |
+    //      |   |           |    |
+    //      |   |           |    |
+    //      |   |___________|____|  X
+    //      |   /0          |   /1
+    //      |  /            |  /
+    //      | /             | /
+    //     3|/______________|/    
+    //                     2
+    //     Z
+    ivec3 cubeVertIdx[8];
+    ivec3 v0       = cellIdx;
+    cubeVertIdx[0] = v0;
+    cubeVertIdx[1] = ivec3(v0.x + 1, v0.y    , v0.z     );
+    cubeVertIdx[2] = ivec3(v0.x + 1, v0.y    , v0.z + 1 );
+    cubeVertIdx[3] = ivec3(v0.x    , v0.y    , v0.z + 1 );
+    cubeVertIdx[4] = ivec3(v0.x    , v0.y + 1, v0.z     );
+    cubeVertIdx[5] = ivec3(v0.x + 1, v0.y + 1, v0.z     );
+    cubeVertIdx[6] = ivec3(v0.x + 1, v0.y + 1, v0.z + 1 );
+    cubeVertIdx[7] = ivec3(v0.x    , v0.y + 1, v0.z + 1 );
+
+    vec3 cubeVertCoord[8];
+    for( int i = 0; i < 8; i++ )
+    {
+        ivec3 index  = cubeVertIdx[i];
+        int xyOffset = index.y *  volumeDims.x + index.x;
+        int zOffset  = index.z * (volumeDims.x * volumeDims.y) + xyOffset;
+        vec4 xyC     = texelFetch( xyCoordsTexture, xyOffset );
+        vec4 zC      = texelFetch( zCoordsTexture,  zOffset );
+        coord[i].xy  = xyC.xy;
+        coord[i].z   = zC.x;
+    }
+}
+
 //
 // Input:  Location to be evaluated in texture coordinates and model coordinates.
 // Output: If this location should be skipped.
@@ -159,37 +204,11 @@ float CalculateDepth( const in vec3 pModel )
     return (gl_DepthRange.diff * 0.5 * pNdc.z + (gl_DepthRange.near + gl_DepthRange.far) * 0.5);
 }
 
+
 bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
 {
-    //          Y
-    //        4 __________________5
-    //         /|               /|
-    //        / |              / |
-    //       /  |             /  |
-    //     7/___|___________6/   |
-    //      |   |           |    |
-    //      |   |           |    |
-    //      |   |___________|____|  X
-    //      |   /0          |   /1
-    //      |  /            |  /
-    //      | /             | /
-    //     3|/______________|/    
-    //                     2
-    //     Z
-    ivec3 cubeVertIdx[8];
-    ivec3 v0       = cellIdx;
-    cubeVertIdx[0] = v0;
-    cubeVertIdx[1] = ivec3(v0.x + 1, v0.y    , v0.z     );
-    cubeVertIdx[2] = ivec3(v0.x + 1, v0.y    , v0.z + 1 );
-    cubeVertIdx[3] = ivec3(v0.x    , v0.y    , v0.z + 1 );
-    cubeVertIdx[4] = ivec3(v0.x    , v0.y + 1, v0.z     );
-    cubeVertIdx[5] = ivec3(v0.x + 1, v0.y + 1, v0.z     );
-    cubeVertIdx[6] = ivec3(v0.x + 1, v0.y + 1, v0.z + 1 );
-    cubeVertIdx[7] = ivec3(v0.x    , v0.y + 1, v0.z + 1 );
-
     vec3 cubeVertCoord[8];
-    for( int i = 0; i < 8; i++ )
-        cubeVertCoord[i] = GetCoordinates( cubeVertIdx[i] );
+    FillCellVertCoordinates( cellIdx, cubeVertCoord );
 
     for( int i = 0; i < 12; i++ )
     {
