@@ -524,12 +524,37 @@ int RayCaster::_initializeGL()
 
 int RayCaster::_paintGL(bool fast)
 {
+    // Collect params and grid that will be used repeatedly
+    RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
+    if (!params) {
+        MyBase::SetErrMsg("Error occured during retrieving RayCaster parameters!");
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        return PARAMSERROR;
+    }
+    // Do not perform any fast rendering in cell traverse mode
+    int castingMode = int(params->GetCastingMode());
+    if (castingMode == CellTraversal && fast) return 0;
+
+    StructuredGrid *grid = nullptr;
+    if (_userCoordinates.GetCurrentGrid(params, _dataMgr, &grid) != 0) {
+        MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        return GRIDERROR;
+    }
+
+#ifndef NDEBUG
+    // Do NOT try to reload shaders in Release mode due to
+    //   large latencies on parallel filesystems
     if (_load3rdPassShaders() != 0) {
         MyBase::SetErrMsg("Failed to load shaders");
         glBindVertexArray(0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return GLERROR;
     }
+#endif
+
     const MatrixManager *mm = Renderer::_glManager->matrixManager;
 
     _updateViewportWhenNecessary();
@@ -542,24 +567,7 @@ int RayCaster::_paintGL(bool fast)
     glBindVertexArray(_vertexArrayId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
 
-    // Collect params and grid that will be used repeatedly
-    RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
-    if (!params) {
-        MyBase::SetErrMsg("Error occured during retrieving RayCaster parameters!");
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        return PARAMSERROR;
-    }
-    StructuredGrid *grid = nullptr;
-    if (_userCoordinates.GetCurrentGrid(params, _dataMgr, &grid) != 0) {
-        MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        return GRIDERROR;
-    }
-
     // Use the correct shader for 3rd pass rendering
-    int castingMode = int(params->GetCastingMode());
     if (castingMode == FixedStep)
         _3rdPassShader = _3rdPassMode1Shader;
     else if (castingMode == CellTraversal)
@@ -627,8 +635,14 @@ int RayCaster::_paintGL(bool fast)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
+    glFinish();
+    struct timeval start, finish;
+    gettimeofday(&start, NULL);
     // 3rd pass, perform ray casting
     _drawVolumeFaces(3, castingMode, insideACell, InversedMV, fast);
+    glFinish();
+    gettimeofday(&finish, NULL);
+    std::cout << _getElapsedSeconds(&start, &finish) << std::endl;
 
     // Restore default VAO settings!
     glBindVertexArray(0);
