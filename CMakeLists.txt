@@ -6,8 +6,11 @@ include (buildutils/GetGitRevisionDescription.cmake)
 
 set (CMAKE_CXX_STANDARD 11)
 
-# set(CMAKE_VERBOSE_MAKEFILE on)
-set (CMAKE_BUILD_TYPE Debug)
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
+endif()
 set (CMAKE_OSX_DEPLOYMENT_TARGET 10.9)
 
 set (VERSION_MAJOR 3)
