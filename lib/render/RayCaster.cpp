@@ -181,8 +181,6 @@ RayCaster::UserCoordinates::UserCoordinates() {
     for (int i = 0; i < 3; i++) {
         myGridMin[i] = 0;
         myGridMax[i] = 0;
-    }
-    for (int i = 0; i < 4; i++) {
         dims[i] = 0;
     }
 
@@ -512,6 +510,7 @@ void RayCaster::UserCoordinates::FindBaseStepSize(int mode) {
 
                 // Second test edge between vertex (x, y) and (x, y+1)
                 if (y < dims[1] - 1) {
+                    idx1 = (y * dims[0] + x) * 2;
                     idx2 = ((y + 1) * dims[0] + x) * 2;
                     diffx = xyCoords[idx2] - xyCoords[idx1];
                     diffy = xyCoords[idx2 + 1] - xyCoords[idx1 + 1];
