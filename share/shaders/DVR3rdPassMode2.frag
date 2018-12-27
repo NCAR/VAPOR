@@ -26,7 +26,7 @@ uniform float lightingCoeffs[4]; // lighting parameters
 
 uniform mat4  MV;
 uniform mat4  Projection;
-uniform mat4  transposedInverseMV;
+//uniform mat4  transposedInverseMV;
 
 //
 // Derive helper variables
@@ -100,7 +100,7 @@ void FillCellVertCoordinates( const in ivec3 cellIdx, out vec3 coord[8] )
     for( int i = 0; i < 8; i++ )
     {
         ivec3 index  = cubeVertIdx[i];
-        vec4 xyC     = texelFetch( xyCoordsTexture, index.y *  volumeDims.x + index.x );
+        vec4 xyC     = texelFetch( xyCoordsTexture, index.y * volumeDims.x + index.x );
         vec4 zC      = texelFetch( zCoordsTexture,  index, 0 );
         coord[i].xy  = xyC.xy;
         coord[i].z   = zC.x;
