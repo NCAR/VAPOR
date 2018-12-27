@@ -142,17 +142,15 @@ protected:
     const GLint _volumeTexOffset;
     const GLint _colorMapTexOffset;
     const GLint _missingValueTexOffset;
-    const GLint _xyCoordsTexOffset;
     const GLint _zCoordsTexOffset;
+    const GLint _xyCoordsTexOffset;
     const GLint _depthTexOffset;
 
-    // buffers
+    // buffers and vertex arrays
     GLuint _frameBufferId;
     GLuint _xyCoordsBufferId;
-    GLuint _zCoordsBufferId;
     GLenum _drawBuffers[2];    // Draw buffers for the 1st and 2nd pass
 
-    // vertex arrays
     GLuint _vertexArrayId;
     GLuint _vertexBufferId;    // Keeps user coordinates of 6 faces.
     GLuint _indexBufferId;     // Auxiliary indices for efficiently drawing triangle strips.

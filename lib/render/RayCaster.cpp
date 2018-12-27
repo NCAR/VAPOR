@@ -13,43 +13,41 @@
 
 using namespace VAPoR;
 
-/*
 GLenum glCheckError_(const char *file, int line)
 {
     GLenum errorCode;
-    while ((errorCode = glGetError()) != GL_NO_ERROR)
-    {
+    while ((errorCode = glGetError()) != GL_NO_ERROR) {
         std::string error;
-        switch (errorCode)
-        {
-            case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
-            case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
-            case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
-            case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
-            case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
-            case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
-            case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
+        switch (errorCode) {
+        case GL_INVALID_ENUM: error = "INVALID_ENUM"; break;
+        case GL_INVALID_VALUE: error = "INVALID_VALUE"; break;
+        case GL_INVALID_OPERATION: error = "INVALID_OPERATION"; break;
+        case GL_STACK_OVERFLOW: error = "STACK_OVERFLOW"; break;
+        case GL_STACK_UNDERFLOW: error = "STACK_UNDERFLOW"; break;
+        case GL_OUT_OF_MEMORY: error = "OUT_OF_MEMORY"; break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
         }
         std::cout << error << " | " << file << " (" << line << ")" << std::endl;
     }
     return errorCode;
 }
 #define glCheckError() glCheckError_(__FILE__, __LINE__)
+/*
+void glCheckError() { }
 */
-void glCheckError() {}
 
 // Constructor
 RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string paramsType, std::string classType, std::string &instName, DataMgr *dataMgr)
 : Renderer(pm, winName, dataSetName, paramsType, classType, instName, dataMgr), _backFaceTexOffset(0), _frontFaceTexOffset(1), _volumeTexOffset(2), _colorMapTexOffset(3), _missingValueTexOffset(4),
-  _xyCoordsTexOffset(5), _zCoordsTexOffset(6), _depthTexOffset(7)
+  _zCoordsTexOffset(5), _xyCoordsTexOffset(6), _depthTexOffset(7)
 {
     _backFaceTextureId = 0;
     _frontFaceTextureId = 0;
     _volumeTextureId = 0;
     _missingValueTextureId = 0;
     _colorMapTextureId = 0;
-    _xyCoordsTextureId = 0;
     _zCoordsTextureId = 0;
+    _xyCoordsTextureId = 0;
     _depthTextureId = 0;
     _frameBufferId = 0;
 
@@ -58,7 +56,6 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
     _indexBufferId = 0;
     _vertexAttribId = 0;
     _xyCoordsBufferId = 0;
-    _zCoordsBufferId = 0;
 
     _1stPassShader = nullptr;
     _2ndPassShader = nullptr;
@@ -97,13 +94,13 @@ RayCaster::~RayCaster()
         glDeleteTextures(1, &_colorMapTextureId);
         _colorMapTextureId = 0;
     }
-    if (_xyCoordsTextureId) {
-        glDeleteTextures(1, &_xyCoordsTextureId);
-        _xyCoordsTextureId = 0;
-    }
     if (_zCoordsTextureId) {
         glDeleteTextures(1, &_zCoordsTextureId);
         _zCoordsTextureId = 0;
+    }
+    if (_xyCoordsTextureId) {
+        glDeleteTextures(1, &_xyCoordsTextureId);
+        _xyCoordsTextureId = 0;
     }
     if (_depthTextureId) {
         glDeleteTextures(1, &_depthTextureId);
@@ -136,10 +133,6 @@ RayCaster::~RayCaster()
     if (_xyCoordsBufferId) {
         glDeleteBuffers(1, &_xyCoordsBufferId);
         _xyCoordsBufferId = 0;
-    }
-    if (_zCoordsBufferId) {
-        glDeleteBuffers(1, &_zCoordsBufferId);
-        _zCoordsBufferId = 0;
     }
 }
 
@@ -608,8 +601,6 @@ int RayCaster::_paintGL(bool fast)
         }
 
         _updateDataTextures(castingMode);
-
-        glBindTexture(GL_TEXTURE_3D, 0);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
@@ -719,8 +710,6 @@ int RayCaster::_initializeFramebufferTextures()
     glGenTextures(1, &_volumeTextureId);
     glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
     glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
-
-    /* Configure _volumeTextureId */
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -731,8 +720,6 @@ int RayCaster::_initializeFramebufferTextures()
     glGenTextures(1, &_colorMapTextureId);
     glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
-
-    /* Configure _colorMapTextureId */
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -741,19 +728,28 @@ int RayCaster::_initializeFramebufferTextures()
     glGenTextures(1, &_missingValueTextureId);
     glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
     glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
-
-    /* Configure _missingValueTextureId */
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    /* Generate buffer texture for 2D X-Y and 3D Z coordinates */
-    glGenTextures(1, &_xyCoordsTextureId);
+    /* Generate 3D texture: _zCoordsTextureId */
     glGenTextures(1, &_zCoordsTextureId);
+    glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
+    glBindTexture(GL_TEXTURE_3D, _zCoordsTextureId);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    /* Generate buffer texture for 2D X-Y coordinates */
+    /*   Note: the max size of buffer texture is actually much smaller than
+         that of a regular 3D texture, making it not suitable for a 3D volume.
+         (It is tested to be 512^3 on GeForce 1060 and Quadro GP100 cards.)  */
+    glGenTextures(1, &_xyCoordsTextureId);
     glGenBuffers(1, &_xyCoordsBufferId);
-    glGenBuffers(1, &_zCoordsBufferId);
 
     /* Generate and configure depth texture */
     glGenTextures(1, &_depthTextureId);
@@ -849,7 +845,7 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
 
     shader->SetUniform("MV", modelview);
     shader->SetUniform("Projection", projection);
-    shader->SetUniform("transposedInverseMV", glm::transpose(inversedMV));
+    // shader->SetUniform("transposedInverseMV", glm::transpose(inversedMV));
 
     const float *cboxMin = _userCoordinates.myGridMin;
     const float *cboxMax = _userCoordinates.myGridMax;
@@ -919,13 +915,13 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
     shader->SetUniform("missingValueMaskTexture", _missingValueTexOffset);
 
     if (castingMode == CellTraversal) {
+        glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
+        glBindTexture(GL_TEXTURE_3D, _zCoordsTextureId);
+        shader->SetUniform("zCoordsTexture", _zCoordsTexOffset);
+
         glActiveTexture(GL_TEXTURE0 + _xyCoordsTexOffset);
         glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
         shader->SetUniform("xyCoordsTexture", _xyCoordsTexOffset);
-
-        glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
-        glBindTexture(GL_TEXTURE_BUFFER, _zCoordsTextureId);
-        shader->SetUniform("zCoordsTexture", _zCoordsTexOffset);
     }
 }
 
@@ -1225,6 +1221,8 @@ void RayCaster::_updateColormap(RayCasterParams *params)
 
 void RayCaster::_updateDataTextures(int castingMode)
 {
+    const size_t *dims = _userCoordinates.dims;
+
     glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
     glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
 #ifdef Darwin
@@ -1236,42 +1234,44 @@ void RayCaster::_updateDataTextures(int castingMode)
     float dummyVolume[8] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume);
 #endif
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED, GL_FLOAT, _userCoordinates.dataField);
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0, GL_RED, GL_FLOAT, _userCoordinates.dataField);
 
     // Now we HAVE TO attach a missing value mask texture, because
     //   Intel driver on Mac doesn't like leaving the texture empty...
-    unsigned char dummyMask[8] = {0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u};
     glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);    // Alignment adjustment. Stupid.
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);    // Alignment adjustment. Stupid OpenGL thing.
     glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
-    if (_userCoordinates.missingValueMask)    // There is missing value.
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, _userCoordinates.missingValueMask);
-    else
+    if (_userCoordinates.missingValueMask) {
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, dims[0], dims[1], dims[2], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, _userCoordinates.missingValueMask);
+    } else {
+        unsigned char dummyMask[8] = {0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u};
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, 2, 2, 2, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, dummyMask);
+    }
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);    // Restore default alignment.
 
     // If using cell traverse ray casting, we need to upload user coordinates
     if (castingMode == CellTraversal) {
-        const size_t *dims = _userCoordinates.dims;
+        glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
+        glBindTexture(GL_TEXTURE_3D, _zCoordsTextureId);
+#ifdef Darwin
+        // Apply the same trick as noted above.
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume);
+#endif
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0, GL_RED, GL_FLOAT, _userCoordinates.zCoords);
 
         // Fill data to buffer object _xyCoordsBufferId
         glBindBuffer(GL_TEXTURE_BUFFER, _xyCoordsBufferId);
         glBufferData(GL_TEXTURE_BUFFER, 2 * sizeof(float) * dims[0] * dims[1], _userCoordinates.xyCoords, GL_STATIC_READ);
-        // Pass data to the buffer texture
+        // Pass this buffer object to the buffer texture: _xyCoordsTextureId
         glActiveTexture(GL_TEXTURE0 + _xyCoordsTexOffset);
         glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
         glTexBuffer(GL_TEXTURE_BUFFER, GL_RG32F, _xyCoordsBufferId);
 
-        // Repeat for the next buffer texture
-        glBindBuffer(GL_TEXTURE_BUFFER, _zCoordsBufferId);
-        glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * dims[0] * dims[1] * dims[2], _userCoordinates.zCoords, GL_STATIC_READ);
-        glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
-        glBindTexture(GL_TEXTURE_BUFFER, _zCoordsTextureId);
-        glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, _zCoordsBufferId);
-
         glBindBuffer(GL_TEXTURE_BUFFER, 0);
         glBindTexture(GL_TEXTURE_BUFFER, 0);
     }
+
+    glBindTexture(GL_TEXTURE_3D, 0);
 }
 
 void RayCaster::_updateNearClippingPlane()

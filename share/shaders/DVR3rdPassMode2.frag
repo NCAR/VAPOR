@@ -9,8 +9,8 @@ uniform sampler2D       frontFaceTexture;
 uniform sampler3D       volumeTexture;
 uniform usampler3D      missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D       colorMapTexture;
+uniform sampler3D       zCoordsTexture;
 uniform samplerBuffer   xyCoordsTexture;
-uniform samplerBuffer   zCoordsTexture;
 uniform sampler2D       depthTexture;
 
 uniform ivec3 volumeDims;        // number of vertices in each direction of this volume
@@ -49,10 +49,10 @@ vec3  boxSpan          = boxMax - boxMin;
 // Triangle vertices are ordered such that (v1-v0)x(v2-v0) faces inside.
 //
 const int triangles[36] = int[36](
-    /* front   back       top        bottom     right      left */
+    /* front | back     | top      | bottom   | right    | left */
     7, 6, 3,   0, 1, 4,   4, 5, 7,   3, 2, 0,   5, 1, 6,   4, 7, 0,
     2, 3, 6,   5, 4, 1,   6, 7, 5,   1, 0, 2,   2, 6, 1,   3, 0, 7
-    /* front   back       top        bottom     right      left */ );
+    /* front | back     | top      | bottom   | right    | left */ );
 
 //
 // Input:  logical index of a vertex
@@ -60,10 +60,8 @@ const int triangles[36] = int[36](
 //
 vec3 GetCoordinates( const in ivec3 index )
 {
-    int xyOffset = index.y *  volumeDims.x + index.x;
-    int zOffset  = index.z * (volumeDims.x * volumeDims.y) + xyOffset;
-    vec4 xyC     = texelFetch( xyCoordsTexture, xyOffset );
-    vec4 zC      = texelFetch( zCoordsTexture,  zOffset );
+    vec4 xyC     = texelFetch( xyCoordsTexture, index.y *  volumeDims.x + index.x );
+    vec4 zC      = texelFetch( zCoordsTexture,  index, 0 );
     return vec3( xyC.xy, zC.x );
 }
 
@@ -103,10 +101,8 @@ void FillCellVertCoordinates( const in ivec3 cellIdx, out vec3 coord[8] )
     for( int i = 0; i < 8; i++ )
     {
         ivec3 index  = cubeVertIdx[i];
-        int xyOffset = index.y *  volumeDims.x + index.x;
-        int zOffset  = index.z * (volumeDims.x * volumeDims.y) + xyOffset;
-        vec4 xyC     = texelFetch( xyCoordsTexture, xyOffset );
-        vec4 zC      = texelFetch( zCoordsTexture,  zOffset );
+        vec4 xyC     = texelFetch( xyCoordsTexture, index.y *  volumeDims.x + index.x );
+        vec4 zC      = texelFetch( zCoordsTexture,  index, 0 );
         coord[i].xy  = xyC.xy;
         coord[i].z   = zC.x;
     }
