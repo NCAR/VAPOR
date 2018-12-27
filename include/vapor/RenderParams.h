@@ -367,7 +367,7 @@ public:
     bool secondaryColormapVariable
 );
 	
- void _initBox();
+ void InitBox();
 protected:
 	DataMgr *_dataMgr;
 	
