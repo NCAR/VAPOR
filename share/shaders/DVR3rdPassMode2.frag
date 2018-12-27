@@ -43,29 +43,16 @@ float specularExp      = lightingCoeffs[3];
 vec3  volumeDims1o     = 1.0 / vec3( volumeDims );
 vec3  boxSpan          = boxMax - boxMin;
 
-//
-// Code for faces 
-//
-const int FaceFront    = 0;
-const int FaceBack     = 1;
-const int FaceTop      = 2;
-const int FaceBottom   = 3;
-const int FaceRight    = 4;
-const int FaceLeft     = 5;
-
 // 
 // Code for triangles:
 // Each triangle is represented as (v0, v1, v2)
 // Triangle vertices are ordered such that (v1-v0)x(v2-v0) faces inside.
 //
 const int triangles[36] = int[36](
-                          7, 6, 3,  2, 3, 6,    // two triangles of the front face
-                          0, 1, 4,  5, 4, 1,    // two triangles of the back face
-                          4, 5, 7,  6, 7, 5,    // two triangles of the top face
-                          3, 2, 0,  1, 0, 2,    // two triangles of the bottom face
-                          5, 1, 6,  2, 6, 1,    // two triangles of the right face
-                          4, 7, 0,  3, 0, 7 );  // two triangles of the left face
-
+    /* front   back       top        bottom     right      left */
+    7, 6, 3,   0, 1, 4,   4, 5, 7,   3, 2, 0,   5, 1, 6,   4, 7, 0,
+    2, 3, 6,   5, 4, 1,   6, 7, 5,   1, 0, 2,   2, 6, 1,   3, 0, 7
+    /* front   back       top        bottom     right      left */ );
 
 //
 // Input:  logical index of a vertex
@@ -560,9 +547,15 @@ void main(void)
     {
         ivec3 correctIdx;
         if( LocateNextCell( step1CellIdx, step1Model, correctIdx ) )
+        {
             step1CellIdx = correctIdx;
+            //color = vec4( 0.2, 0.9, 0.2, 1.0 ); // green
+        }
         else 
+        {
+            //color = vec4( 0.8, 0.2, 0.2, 1.0 ); // red
             discard;    // this case always happens on the boundary.
+        }
     }
     
     // Give color to step 1
