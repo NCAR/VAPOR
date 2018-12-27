@@ -84,8 +84,8 @@ void FillCellVertCoordinates( const in ivec3 cellIdx, out vec3 coord[8] )
     //      |  /            |  /
     //      | /             | /
     //     3|/______________|/    
-    //                     2
-    //     Z
+    //                      2 
+    //    Z
     ivec3 cubeVertIdx[8];
     ivec3 v0       = cellIdx;
     cubeVertIdx[0] = v0;
@@ -97,7 +97,6 @@ void FillCellVertCoordinates( const in ivec3 cellIdx, out vec3 coord[8] )
     cubeVertIdx[6] = ivec3(v0.x + 1, v0.y + 1, v0.z + 1 );
     cubeVertIdx[7] = ivec3(v0.x    , v0.y + 1, v0.z + 1 );
 
-    vec3 cubeVertCoord[8];
     for( int i = 0; i < 8; i++ )
     {
         ivec3 index  = cubeVertIdx[i];
