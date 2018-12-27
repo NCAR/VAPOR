@@ -513,6 +513,14 @@ int RayCaster::_initializeGL()
     glGetIntegerv(GL_VIEWPORT, viewport);
     std::memcpy(_currentViewport, viewport, 4 * sizeof(GLint));
 
+    int max_buffer_size, max_texture_size, max_3dtexture_size;
+    glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &max_buffer_size);
+    std::cout << "max buffer size = " << max_buffer_size << std::endl;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
+    std::cout << "max texture size = " << max_texture_size << std::endl;
+    glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &max_3dtexture_size);
+    std::cout << "max 3D texture size = " << max_3dtexture_size << std::endl;
+
     // Create any textures, framebuffers, etc.
     if (_initializeFramebufferTextures() != 0) {
         MyBase::SetErrMsg("Failed to Create Framebuffer and Textures!");
@@ -848,10 +856,10 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
     shader->SetUniform("boxMin", (glm::vec3 &)*cboxMin);
     shader->SetUniform("boxMax", (glm::vec3 &)*cboxMax);
     shader->SetUniform("colorMapRange", (glm::vec3 &)*_colorMapRange);
+    shader->SetUniform("viewportDims", glm::ivec2(_currentViewport[2], _currentViewport[3]));
 
     glm::ivec3 volumeDims(int(_userCoordinates.dims[0]), int(_userCoordinates.dims[1]), int(_userCoordinates.dims[2]));
     shader->SetUniform("volumeDims", volumeDims);
-    shader->SetUniform("viewportDims", glm::ivec2(_currentViewport[2], _currentViewport[3]));
 
     float planes[24];    // 6 planes, each with 4 elements
     Renderer::GetClippingPlanes(planes);
