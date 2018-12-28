@@ -839,20 +839,19 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
     shader->SetUniform("MV", modelview);
     shader->SetUniform("Projection", projection);
     shader->SetUniform("transposedInverseMV", glm::transpose(inversedMV));
-
-    const float *cboxMin = _userCoordinates.myGridMin;
-    const float *cboxMax = _userCoordinates.myGridMax;
-    shader->SetUniform("boxMin", (glm::vec3 &)*cboxMin);
-    shader->SetUniform("boxMax", (glm::vec3 &)*cboxMax);
-    shader->SetUniform("colorMapRange", (glm::vec3 &)*_colorMapRange);
+    shader->SetUniform("colorMapRange", (glm::vec3 &)_colorMapRange[0]);
     shader->SetUniform("viewportDims", glm::ivec2(_currentViewport[2], _currentViewport[3]));
-
     glm::ivec3 volumeDims(int(_userCoordinates.dims[0]), int(_userCoordinates.dims[1]), int(_userCoordinates.dims[2]));
     shader->SetUniform("volumeDims", volumeDims);
-
     float planes[24];    // 6 planes, each with 4 elements
     Renderer::GetClippingPlanes(planes);
     shader->SetUniformArray("clipPlanes", 6, (glm::vec4 *)planes);
+
+    // Only fixed-step ray casting require the grid min max info.
+    if (castingMode == FixedStep) {
+        shader->SetUniform("boxMin", (glm::vec3 &)_userCoordinates.myGridMin[0]);
+        shader->SetUniform("boxMax", (glm::vec3 &)_userCoordinates.myGridMax[0]);
+    }
 
     // Get light settings from params.
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
