@@ -29,6 +29,7 @@
 #include "RenderEventRouter.h"
 #include "vapor/RenderParams.h"
 #include "vapor/TwoDDataParams.h"
+#include "vapor/DVRParams.h"
 #include "vapor/ResourcePath.h"
 #include "TFWidget.h"
 #include "ErrorReporter.h"
@@ -977,9 +978,21 @@ string TFWidget::getTFVariableName(bool mainTF = true)
     return varname;
 }
 
-int TFWidget::convertOpacityToSliderValue(float opacity) const { return 100 * sqrtf(opacity); }
+int TFWidget::convertOpacityToSliderValue(float opacity) const
+{
+    if (_rParams->GetName() == DVRParams::GetClassType())
+        return 100 * sqrtf(opacity);
+    else
+        return 100 * opacity;
+}
 
-float TFWidget::convertSliderValueToOpacity(int value) const { return powf(value / 100.f, 2); }
+float TFWidget::convertSliderValueToOpacity(int value) const
+{
+    if (_rParams->GetName() == DVRParams::GetClassType())
+        return powf(value / 100.f, 2);
+    else
+        return value / 100.f;
+}
 
 LoadTFDialog::LoadTFDialog(QWidget *parent) : QDialog(parent)
 {
