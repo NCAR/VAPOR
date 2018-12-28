@@ -196,7 +196,10 @@ void VariablesWidget::setVariableDims(int index)
         orientationFrame->hide();
     }
 
+    _paramsMgr->BeginSaveStateGroup("Set variable dimensions");
     setDefaultVariables();
+    _rParams->InitBox();
+    _paramsMgr->EndSaveStateGroup();
 
     // Need to referesh variable list if dimension changes
     //

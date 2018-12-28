@@ -105,7 +105,7 @@ void RenderParams::_init()
     SetUseSingleColor(false);
 }
 
-void RenderParams::_initBox()
+void RenderParams::InitBox()
 {
     int            rc;
     vector<double> minExt, maxExt;
@@ -149,7 +149,7 @@ RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, const
 
     _Box = new Box(ssave);
     _Box->SetParent(this);
-    _initBox();
+    InitBox();
 
     _Colorbar = new ColorbarPbase(ssave);
     _Colorbar->SetParent(this);
