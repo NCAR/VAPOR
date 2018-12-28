@@ -985,7 +985,7 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
     
     shader->SetUniform("MV", modelview);
     shader->SetUniform("Projection", projection);
-    //shader->SetUniform("transposedInverseMV", glm::transpose(inversedMV));
+    shader->SetUniform("transposedInverseMV", glm::transpose(inversedMV));
 
     const float* cboxMin  = _userCoordinates.myGridMin;
     const float* cboxMax  = _userCoordinates.myGridMax;
