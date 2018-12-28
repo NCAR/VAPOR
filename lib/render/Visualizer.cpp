@@ -283,8 +283,6 @@ int Visualizer::paintEvent(bool fast)
         m_vizFeatures ->InScenePaint(timeStep);
         GL_ERR_BREAK();
     }
-    
-    // _glManager->ShowDepthBuffer();
 	
 	//Go back to MODELVIEW for any other matrix stuff
 	//By default the matrix is expected to be MODELVIEW
@@ -297,6 +295,8 @@ int Visualizer::paintEvent(bool fast)
 	renderColorbars(timeStep);
     GL_ERR_BREAK();
 
+    // _glManager->ShowDepthBuffer();
+    
 	//Perform final touch-up on the final images, before capturing or displaying them.
 	glFlush();
 	
