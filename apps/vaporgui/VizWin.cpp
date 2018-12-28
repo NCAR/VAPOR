@@ -261,7 +261,6 @@ void VizWin::_setUpModelViewMatrix() {
 // Either the window is minimized, maximized, restored, or just resized.
 //
 void VizWin::resizeGL(int width, int height){
-
 	if (! _openGLInitFlag || ! FrameBufferReady()) {
 		return;
 	}
@@ -278,16 +277,6 @@ void VizWin::resizeGL(int width, int height){
 
 	glViewport( 0, 0, (GLint)width, (GLint)height );
 
-	glClearColor(0.,0.,0.,1.);
-	glClear(GL_COLOR_BUFFER_BIT);
-	swapBuffers();
-
-	// Necessary?
-	//
-	glClearColor(0.,0.,0.,1.);
-	glClear(GL_COLOR_BUFFER_BIT);
-	swapBuffers();
-
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 	ViewpointParams* vParams = paramsMgr->GetViewpointParams(_winName);
 
@@ -297,6 +286,8 @@ void VizWin::resizeGL(int width, int height){
 	_controlExec->SetSaveStateEnabled(false);
 	vParams->SetWindowSize(width, height);
 	_controlExec->SetSaveStateEnabled(enabled);
+    
+    Render(true);
 }
 
 void VizWin::initializeGL()
@@ -380,7 +371,6 @@ void VizWin::_mousePressEventNavigate(QMouseEvent* e) {
 // We record the position of the click.
 //
 void VizWin::mousePressEvent(QMouseEvent* e) {
-
 	_buttonNum = 0;
 	_mouseClicked = true;
 
@@ -575,7 +565,6 @@ void VizWin::setFocus(){
 }
 
 void VizWin::Render(bool fast) {
-
 	// Need to call since we're not overriding QGLWidget::paintGL()
 	//
 	makeCurrent();
