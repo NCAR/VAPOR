@@ -37,8 +37,8 @@ float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
-vec3  volumeDims1o     = 1.0 / vec3( volumeDims );
-vec3  boxSpan          = boxMax - boxMin;
+vec3  volumeDims1o     = 1.0 / vec3( volumeDims - 1 );
+vec3  boxSpan1o        = 1.0 / (boxMax - boxMin);
 
 //
 // Input:  Location to be evaluated in texture coordinates and model coordinates.
@@ -156,7 +156,7 @@ void main(void)
     //   However, to prevent unpleasant boundary artifacts, we shift the starting point
     //   into the volume for 1/100 of a step size.
     vec3  step1Model       = startModel  + 0.01 * stepSize3D;
-    vec3  step1Texture     = (step1Model - boxMin) / boxSpan;
+    vec3  step1Texture     = (step1Model - boxMin) * boxSpan1o;
     if( !ShouldSkip( step1Texture, step1Model ) )
     {
         float step1Value   = texture( volumeTexture, step1Texture ).r;
@@ -184,7 +184,7 @@ void main(void)
             break;
         }
 
-        vec3 step2Texture  = (step2Model - boxMin) / boxSpan;
+        vec3 step2Texture  = (step2Model - boxMin) * boxSpan1o;
         if( ShouldSkip( step2Texture, step2Model ) )
             continue;
 
