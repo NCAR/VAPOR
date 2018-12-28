@@ -507,14 +507,6 @@ int RayCaster::_initializeGL()
     glGetIntegerv(GL_VIEWPORT, viewport);
     std::memcpy(_currentViewport, viewport, 4 * sizeof(GLint));
 
-    int max_buffer_size, max_texture_size, max_3dtexture_size;
-    glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &max_buffer_size);
-    std::cout << "max buffer size = " << max_buffer_size << std::endl;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
-    std::cout << "max texture size = " << max_texture_size << std::endl;
-    glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &max_3dtexture_size);
-    std::cout << "max 3D texture size = " << max_3dtexture_size << std::endl;
-
     // Create any textures, framebuffers, etc.
     if (_initializeFramebufferTextures() != 0) {
         MyBase::SetErrMsg("Failed to Create Framebuffer and Textures!");
