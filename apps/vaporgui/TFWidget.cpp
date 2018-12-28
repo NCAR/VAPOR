@@ -395,7 +395,7 @@ void TFWidget::updateMainSliders()
     getVariableRange(range, values);
 
     _rangeCombo->Update(range[0], range[1], values[0], values[1]);
-    _opacitySlider->setValue(getOpacity() * 100);
+    _opacitySlider->setValue(convertOpacityToSliderValue(getOpacity()));
 
     _minLabel->setText(QString::number(range[0]));
     _maxLabel->setText(QString::number(range[1]));
@@ -757,7 +757,7 @@ void TFWidget::opacitySliderChanged(int value)
     string          varName = getTFVariableName(mainTF);
     MapperFunction *tf = _rParams->GetMapperFunc(varName);
     assert(tf);
-    tf->setOpacityScale(value / 100.f);
+    tf->setOpacityScale(convertSliderValueToOpacity(value));
     emit emitChange();
 }
 
@@ -976,6 +976,10 @@ string TFWidget::getTFVariableName(bool mainTF = true)
 
     return varname;
 }
+
+int TFWidget::convertOpacityToSliderValue(float opacity) const { return 100 * sqrtf(opacity); }
+
+float TFWidget::convertSliderValueToOpacity(int value) const { return powf(value / 100.f, 2); }
 
 LoadTFDialog::LoadTFDialog(QWidget *parent) : QDialog(parent)
 {
