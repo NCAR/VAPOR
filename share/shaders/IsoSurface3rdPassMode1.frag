@@ -174,7 +174,7 @@ void main(void)
                 float valTrans  = (isoValues[j] - colorMapRange.x) / colorMapRange.z;
                 vec4  backColor = texture( colorMapTexture, valTrans );
                 float weight    = (isoValues[j] - step1Value) / (step2Value - step1Value);
-                vec3  isoModel  = step1Model + weight * (step2Model - step1Model);
+                vec3  isoModel  = mix( step1Model, step2Model, weight );
 
                 // Apply lighting (in eye space)
                 if( lighting && backColor.a > 0.001 )
