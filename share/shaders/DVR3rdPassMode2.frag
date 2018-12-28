@@ -61,7 +61,10 @@ const int triangles[36] = int[36](
 int cells[27] = int[27](0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
                         15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 );
 
-
+//
+// Re-order the cell indices based on the current ray direction, so that
+//   cells in front are more likely to contain a given position.
+//
 void ReorderCells( const in vec3 rayDirection )
 {
     vec3 center  = vec3( 0.5, 0.5, 0.5 );
