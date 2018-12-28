@@ -16,8 +16,6 @@ uniform sampler2D       depthTexture;
 uniform ivec3 volumeDims;        // number of vertices in each direction of this volume
 uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
-uniform vec3  boxMin;            // Model space min coordinates
-uniform vec3  boxMax;            // Model space max coordinates
 uniform vec3  colorMapRange;
 
 uniform float stepSize1D;        // ray casting step size
@@ -26,7 +24,7 @@ uniform float lightingCoeffs[4]; // lighting parameters
 
 uniform mat4  MV;
 uniform mat4  Projection;
-//uniform mat4  transposedInverseMV;
+uniform mat4  transposedInverseMV;
 
 //
 // Derive helper variables
@@ -40,8 +38,7 @@ float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
-vec3  volumeDims1o     = 1.0 / vec3( volumeDims );
-vec3  boxSpan          = boxMax - boxMin;
+vec3  volumeDims1o     = 1.0 / vec3( volumeDims - 1 );
 
 // 
 // Code for triangles:
@@ -344,31 +341,31 @@ bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3
 }
 
 
-vec3 CalculateCellCenterTex( const ivec3 cellIdx )
+vec3 CalculatePosTex( const ivec3 cellIdx, const vec3 pos )
 {
-    // only get coordinates for 4 vertices
-    ivec3 vertIdx[4];
-    vertIdx[0] = cellIdx;
-    vertIdx[1] = ivec3(cellIdx.x + 1, cellIdx.y    , cellIdx.z     );
-    vertIdx[2] = ivec3(cellIdx.x    , cellIdx.y    , cellIdx.z + 1 );
-    vertIdx[3] = ivec3(cellIdx.x    , cellIdx.y + 1, cellIdx.z     );
+    // First, find bounding box of this cell, in texture space.
+    vec3 bboxTex[2];
+    bboxTex[0] = vec3( cellIdx     ) * volumeDims1o;
+    bboxTex[1] = vec3( cellIdx + 1 ) * volumeDims1o;
 
-    vec3  vertCoord[4];
-    for( int i = 0; i < 4; i++ )
+    // Second, find bounding box of this cell, in model space.
+    vec3 vertCoords[8], bboxModel[2];
+    FillCellVertCoordinates( cellIdx, vertCoords );
+    bboxModel[0] = vertCoords[0];
+    bboxModel[1] = vertCoords[0];
+    for( int i = 1; i < 8; i++ )
     {
-        ivec3 index = vertIdx[i];
-        vec4 xyC    = texelFetch( xyCoordsTexture, index.y *  volumeDims.x + index.x );
-        vec4 zC     = texelFetch( zCoordsTexture,  index, 0 );
-        vertCoord[i].xy = xyC.xy;
-        vertCoord[i].z  = zC.x;
-    }
-        
-    vec3 centerModel;
-    centerModel.x = (vertCoord[1].x + vertCoord[0].x) * 0.5;
-    centerModel.y = (vertCoord[3].y + vertCoord[0].y) * 0.5;
-    centerModel.z = (vertCoord[2].z + vertCoord[0].z) * 0.5;
+        bboxModel[0].x = bboxModel[0].x < vertCoords[i].x ? bboxModel[0].x : vertCoords[i].x;
+        bboxModel[0].y = bboxModel[0].y < vertCoords[i].y ? bboxModel[0].y : vertCoords[i].y;
+        bboxModel[0].z = bboxModel[0].z < vertCoords[i].z ? bboxModel[0].z : vertCoords[i].z;
 
-    return (centerModel - boxMin) / boxSpan;
+        bboxModel[1].x = bboxModel[1].x > vertCoords[i].x ? bboxModel[1].x : vertCoords[i].x;
+        bboxModel[1].y = bboxModel[1].y > vertCoords[i].y ? bboxModel[1].y : vertCoords[i].y;
+        bboxModel[1].z = bboxModel[1].z > vertCoords[i].z ? bboxModel[1].z : vertCoords[i].z;
+    }
+
+    vec3 weight = (pos - bboxModel[0]) / (bboxModel[1] - bboxModel[0]);
+    return mix( bboxTex[0], bboxTex[1], weight );
 }
 
 
@@ -408,7 +405,7 @@ void main(void)
     }
     
     // Give color to step 1
-    vec3 step1Tex = CalculateCellCenterTex( step1CellIdx );
+    vec3 step1Tex = CalculatePosTex( step1CellIdx, step1Model );
     if( !ShouldSkip( step1Tex, step1Model ) )
     {   
         float step1Value   = texture( volumeTexture, step1Tex ).r;
@@ -437,7 +434,7 @@ void main(void)
             break;
         }
 
-        vec3 step2Tex      = CalculateCellCenterTex( step2CellIdx );
+        vec3 step2Tex      = CalculatePosTex( step2CellIdx, step2Model );
         float step2Value   = texture( volumeTexture, step2Tex ).r;
         float valTranslate = (step2Value - colorMapRange.x) / colorMapRange.z;
         vec4  backColor    = texture( colorMapTexture, valTranslate );
