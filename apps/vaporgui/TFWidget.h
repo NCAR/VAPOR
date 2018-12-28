@@ -138,8 +138,8 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
 
     string getTFVariableName(bool mainTF);
 
-    int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
-    int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);
+    int convertOpacityToSliderValue(float opacity) const;
+    float convertSliderValueToOpacity(int value) const;
 
     std::vector<double> _minExt;
     std::vector<double> _maxExt;
