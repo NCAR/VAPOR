@@ -110,7 +110,7 @@ void RenderParams::_init() {
     SetUseSingleColor(false);
 }
 
-void RenderParams::_initBox() {
+void RenderParams::InitBox() {
     int rc;
     vector<double> minExt, maxExt;
     string varname = GetVariableName();
@@ -159,7 +159,7 @@ RenderParams::RenderParams(
 
     _Box = new Box(ssave);
     _Box->SetParent(this);
-    _initBox();
+    InitBox();
 
     _Colorbar = new ColorbarPbase(ssave);
     _Colorbar->SetParent(this);
