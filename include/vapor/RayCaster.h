@@ -182,7 +182,7 @@ class RENDER_API RayCaster : public Renderer {
     ShaderProgram *_3rdPassMode2Shader;
 
     // Direction vectors that are used by the fragment shader.
-    glm::vec3 _directions[26];
+    glm::vec3 _unitDirections[26];
 
     //
     // Render the volume surface using triangle strips
