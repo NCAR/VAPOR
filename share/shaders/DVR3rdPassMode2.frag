@@ -318,14 +318,14 @@ bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3
     group[18] = ivec3( c.x + 1, c.y,     c.z + 1 ); // right-front
 
     // Next 8 cells are adjacent to the current one by corner
-    group[19] = ivec3( c.x - 1, c.y + 1, c.z + 1 ); // corner 7
-    group[20] = ivec3( c.x - 1, c.y + 1, c.z - 1 ); // corner 4
-    group[21] = ivec3( c.x + 1, c.y + 1, c.z - 1 ); // corner 5
-    group[22] = ivec3( c.x + 1, c.y + 1, c.z + 1 ); // corner 6
-    group[23] = ivec3( c.x - 1, c.y - 1, c.z + 1 ); // corner 3
-    group[24] = ivec3( c.x - 1, c.y - 1, c.z - 1 ); // corner 0
-    group[25] = ivec3( c.x + 1, c.y - 1, c.z - 1 ); // corner 1
-    group[26] = ivec3( c.x + 1, c.y - 1, c.z + 1 ); // corner 2
+    group[19] = ivec3( c.x - 1, c.y - 1, c.z - 1 ); // corner 0
+    group[20] = ivec3( c.x + 1, c.y - 1, c.z - 1 ); // corner 1
+    group[21] = ivec3( c.x + 1, c.y - 1, c.z + 1 ); // corner 2
+    group[22] = ivec3( c.x - 1, c.y - 1, c.z + 1 ); // corner 3
+    group[23] = ivec3( c.x - 1, c.y + 1, c.z - 1 ); // corner 4
+    group[24] = ivec3( c.x + 1, c.y + 1, c.z - 1 ); // corner 5
+    group[25] = ivec3( c.x + 1, c.y + 1, c.z + 1 ); // corner 6
+    group[26] = ivec3( c.x - 1, c.y + 1, c.z + 1 ); // corner 7
 
     for( int i = 0; i < 27; i++ )
     {
