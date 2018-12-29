@@ -855,6 +855,7 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
         shader->SetUniform("boxMin", (glm::vec3 &)_userCoordinates.myGridMin[0]);
         shader->SetUniform("boxMax", (glm::vec3 &)_userCoordinates.myGridMax[0]);
     } else {
+        shader->SetUniformArray("unitDirections", 26, _unitDirections);
     }
 
     // Get light settings from params.
@@ -1293,35 +1294,35 @@ void RayCaster::_initializeDirectionVectors()
 {
     // The order of the 6 faces is the same as group[1]-group[6]
     //   in LocateNextCell() of the shader.
-    _directions[0] = glm::vec3(-1.0f, 0.0f, 0.0f);    // left
-    _directions[1] = glm::vec3(1.0f, 0.0f, 0.0f);     // right
-    _directions[2] = glm::vec3(0.0f, -1.0f, 0.0f);    // bottom
-    _directions[3] = glm::vec3(0.0f, 1.0f, 0.0f);     // top
-    _directions[4] = glm::vec3(0.0f, 0.0f, -1.0f);    // back
-    _directions[5] = glm::vec3(0.0f, 0.0f, 1.0f);     // front
+    _unitDirections[0] = glm::vec3(-1.0f, 0.0f, 0.0f);    // left
+    _unitDirections[1] = glm::vec3(1.0f, 0.0f, 0.0f);     // right
+    _unitDirections[2] = glm::vec3(0.0f, -1.0f, 0.0f);    // bottom
+    _unitDirections[3] = glm::vec3(0.0f, 1.0f, 0.0f);     // top
+    _unitDirections[4] = glm::vec3(0.0f, 0.0f, -1.0f);    // back
+    _unitDirections[5] = glm::vec3(0.0f, 0.0f, 1.0f);     // front
 
     // The order of the 12 edges is the same as group[7]-group[18]
     //   in LocateNextCell() of the shader
-    _directions[6] = glm::normalize(glm::vec3(0.0f + 1.0f, +1.0f));
-    _diredgeDir[7] = glm::normalize(glm::vec3(-1.0f, +1.0f, 0.0f));
-    _diredgeDir[8] = glm::normalize(glm::vec3(0.0f, +1.0f, -1.0f));
-    _diredgeDir[9] = glm::normalize(glm::vec3(+1.0f, +1.0f, 0.0f));
-    _diredgeDir[10] = glm::normalize(glm::vec3(0.0f - 1.0f, +1.0f));
-    _diredgeDir[11] = glm::normalize(glm::vec3(-1.0f, -1.0f, 0.0f));
-    _diredgeDir[12] = glm::normalize(glm::vec3(0.0f - 1.0f, -1.0f));
-    _diredgeDir[13] = glm::normalize(glm::vec3(+1.0f, -1.0f, 0.0f));
-    _diredgeDir[14] = glm::normalize(glm::vec3(-1.0f, 0.0f + 1.0f));
-    _diredgeDir[15] = glm::normalize(glm::vec3(-1.0f, 0.0f - 1.0f));
-    _diredgeDir[16] = glm::normalize(glm::vec3(+1.0f, 0.0f - 1.0f));
-    _diredgeDir[17] = glm::normalize(glm::vec3(+1.0f, 0.0f + 1.0f));
+    _unitDirections[6] = glm::normalize(glm::vec3(0.0f, +1.0f, +1.0f));
+    _unitDirections[7] = glm::normalize(glm::vec3(-1.0f, +1.0f, 0.0f));
+    _unitDirections[8] = glm::normalize(glm::vec3(0.0f, +1.0f, -1.0f));
+    _unitDirections[9] = glm::normalize(glm::vec3(+1.0f, +1.0f, 0.0f));
+    _unitDirections[10] = glm::normalize(glm::vec3(0.0f, -1.0f, +1.0f));
+    _unitDirections[11] = glm::normalize(glm::vec3(-1.0f, -1.0f, 0.0f));
+    _unitDirections[12] = glm::normalize(glm::vec3(0.0f, -1.0f, -1.0f));
+    _unitDirections[13] = glm::normalize(glm::vec3(+1.0f, -1.0f, 0.0f));
+    _unitDirections[14] = glm::normalize(glm::vec3(-1.0f, 0.0f, +1.0f));
+    _unitDirections[15] = glm::normalize(glm::vec3(-1.0f, 0.0f, -1.0f));
+    _unitDirections[16] = glm::normalize(glm::vec3(+1.0f, 0.0f, -1.0f));
+    _unitDirections[17] = glm::normalize(glm::vec3(+1.0f, 0.0f, +1.0f));
 
     // The order of the 8 vertices is the same as group[19]-group[26] in LocateNextCell()
-    _directions[18] = glm::normalize(glm::vec3(-1.0f));
-    _dirvertDir[19] = glm::normalize(glm::vec3(+1.0f, -1.0f, -1.0f));
-    _dirvertDir[20] = glm::normalize(glm::vec3(+1.0f, -1.0f, +1.0f));
-    _dirvertDir[21] = glm::normalize(glm::vec3(-1.0f, -1.0f, +1.0f));
-    _dirvertDir[22] = glm::normalize(glm::vec3(-1.0f, +1.0f, -1.0f));
-    _dirvertDir[23] = glm::normalize(glm::vec3(+1.0f, +1.0f, -1.0f));
-    _dirvertDir[24] = glm::normalize(glm::vec3(+1.0f, +1.0f, +1.0f));
-    _dirvertDir[25] = glm::normalize(glm::vec3(-1.0f, +1.0f, +1.0f));
+    _unitDirections[18] = glm::normalize(glm::vec3(-1.0f));
+    _unitDirections[19] = glm::normalize(glm::vec3(+1.0f, -1.0f, -1.0f));
+    _unitDirections[20] = glm::normalize(glm::vec3(+1.0f, -1.0f, +1.0f));
+    _unitDirections[21] = glm::normalize(glm::vec3(-1.0f, -1.0f, +1.0f));
+    _unitDirections[22] = glm::normalize(glm::vec3(-1.0f, +1.0f, -1.0f));
+    _unitDirections[23] = glm::normalize(glm::vec3(+1.0f, +1.0f, -1.0f));
+    _unitDirections[24] = glm::normalize(glm::vec3(+1.0f, +1.0f, +1.0f));
+    _unitDirections[25] = glm::normalize(glm::vec3(-1.0f, +1.0f, +1.0f));
 }
