@@ -16,6 +16,7 @@ uniform sampler2D       depthTexture;
 uniform ivec3 volumeDims;        // number of vertices in each direction of this volume
 uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
+uniform vec4  unitDirections[26];
 uniform vec3  colorMapRange;
 
 uniform float stepSize1D;        // ray casting step size
@@ -64,53 +65,15 @@ int cells[27] = int[27](0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
 //
 void ReorderCells( const in vec3 rayDirection )
 {
-    vec3 center  = vec3( 0.5, 0.5, 0.5 );
     vec3 rayDir  = normalize( rayDirection );
-    vec3 faceDir[6], vertDir[8], edgeDir[12];
-
-    // The order of the 6 faces is the same as group[1]-group[6] in LocateNextCell()
-    faceDir[0]   = vec3( -1.0,  0.0,  0.0 );
-    faceDir[1]   = vec3(  1.0,  0.0,  0.0 );
-    faceDir[2]   = vec3(  0.0, -1.0,  0.0 );
-    faceDir[3]   = vec3(  0.0,  1.0,  0.0 );
-    faceDir[4]   = vec3(  0.0,  0.0, -1.0 );
-    faceDir[5]   = vec3(  0.0,  0.0,  1.0 );
-
-    // The order of the 8 vertices is the same as group[19]-group[26] in LocateNextCell()
-    vertDir[0]   = normalize( vec3( 0.0 )           - center );
-    vertDir[1]   = normalize( vec3( 1.0, 0.0, 0.0 ) - center );
-    vertDir[2]   = normalize( vec3( 1.0, 0.0, 1.0 ) - center );
-    vertDir[3]   = normalize( vec3( 0.0, 0.0, 1.0 ) - center );
-    vertDir[4]   = normalize( vec3( 0.0, 1.0, 0.0 ) - center );
-    vertDir[5]   = normalize( vec3( 1.0, 1.0, 0.0 ) - center );
-    vertDir[6]   = normalize( vec3( 1.0, 1.0, 1.0 ) - center );
-    vertDir[7]   = normalize( vec3( 0.0, 1.0, 1.0 ) - center );
-
-    // The order of the 12 edges is the same as group[7]-group[18] in LocateNextCell()
-    edgeDir[0]   = normalize( vertDir[6] + vertDir[7] );
-    edgeDir[1]   = normalize( vertDir[4] + vertDir[7] );
-    edgeDir[2]   = normalize( vertDir[4] + vertDir[5] );
-    edgeDir[3]   = normalize( vertDir[5] + vertDir[6] );
-    edgeDir[4]   = normalize( vertDir[2] + vertDir[3] );
-    edgeDir[5]   = normalize( vertDir[0] + vertDir[3] );
-    edgeDir[6]   = normalize( vertDir[0] + vertDir[1] );
-    edgeDir[7]   = normalize( vertDir[1] + vertDir[2] );
-    edgeDir[8]   = normalize( vertDir[3] + vertDir[7] );
-    edgeDir[9]   = normalize( vertDir[0] + vertDir[4] );
-    edgeDir[10]  = normalize( vertDir[1] + vertDir[5] );
-    edgeDir[11]  = normalize( vertDir[2] + vertDir[6] );
 
     // Fitness score is the cosine between rayDir and each direction.
     //   fit[i] will have the fitness value of group[i] in LocateNextCell()
     //   The current cell itself has the biggest fit value: 1.0
     float fit[27];
     fit[0]  = 1.0;
-    for( int i = 0; i < 6; i++ )
-        fit[ i+1 ]  = dot( rayDir, faceDir[i] );
-    for( int i = 0; i < 12; i++ )
-        fit[ i+7 ]  = dot( rayDir, edgeDir[i] );
-    for( int i = 0; i < 8; i++ )
-        fit[ i+19]  = dot( rayDir, vertDir[i] );
+    for( int i = 0; i < 26; i++ )
+        fit[ i+1 ]  = dot( rayDir, unitDirections[i] );
 
     // Bubble sort these fitness values, so that cell indices are reordered
     for( int i = 1; i < 26; i++ )
