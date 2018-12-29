@@ -152,9 +152,10 @@ protected:
     GLenum _drawBuffers[2];    // Draw buffers for the 1st and 2nd pass
 
     GLuint _vertexArrayId;
-    GLuint _vertexBufferId;    // Keeps user coordinates of 6 faces.
-    GLuint _indexBufferId;     // Auxiliary indices for efficiently drawing triangle strips.
-    GLuint _vertexAttribId;    // Attribute of vertices: (i, j k) logical indices.
+    GLuint _vertexBufferId;        // Keeps user coordinates of 6 faces.
+    GLuint _indexBufferId;         // Auxiliary indices for efficiently drawing triangle strips.
+    GLuint _vertexAttribId;        // Attribute of vertices: (i, j k) logical indices.
+    GLint  _currentViewport[4];    // current viewport in use
 
     // shaders
     ShaderProgram *_1stPassShader;
@@ -163,7 +164,8 @@ protected:
     ShaderProgram *_3rdPassMode1Shader;
     ShaderProgram *_3rdPassMode2Shader;
 
-    GLint _currentViewport[4];    // current viewport in use
+    // Direction vectors that are used by the fragment shader.
+    glm::vec3 _directions[26];
 
     //
     // Render the volume surface using triangle strips
@@ -188,6 +190,7 @@ protected:
     void _updateDataTextures(int castingMode);
     void _updateNearClippingPlane();
     void _enableVertexAttribute(const float *buf, size_t length, bool attrib1Enabled) const;
+    void _initializeDirectionVectors();
 
     double _getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const;
 

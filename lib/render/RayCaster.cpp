@@ -68,6 +68,8 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
 
     GLint viewport[4] = {0, 0, 0, 0};
     std::memcpy(_currentViewport, viewport, 4 * sizeof(GLint));
+
+    _initializeDirectionVectors();
 }
 
 // Destructor
@@ -848,9 +850,11 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
     shader->SetUniformArray("clipPlanes", 6, (glm::vec4 *)planes);
 
     // Only fixed-step ray casting require the grid min max info.
+    //   Cell traverse ray casting instead require direction info.
     if (castingMode == FixedStep) {
         shader->SetUniform("boxMin", (glm::vec3 &)_userCoordinates.myGridMin[0]);
         shader->SetUniform("boxMax", (glm::vec3 &)_userCoordinates.myGridMax[0]);
+    } else {
     }
 
     // Get light settings from params.
@@ -1283,4 +1287,41 @@ void RayCaster::_updateNearClippingPlane()
         near[i] /= near[i].w;
         std::memcpy(_userCoordinates.nearCoords + i * 3, glm::value_ptr(near[i]), 3 * sizeof(float));
     }
+}
+
+void RayCaster::_initializeDirectionVectors()
+{
+    // The order of the 6 faces is the same as group[1]-group[6]
+    //   in LocateNextCell() of the shader.
+    _directions[0] = glm::vec3(-1.0f, 0.0f, 0.0f);    // left
+    _directions[1] = glm::vec3(1.0f, 0.0f, 0.0f);     // right
+    _directions[2] = glm::vec3(0.0f, -1.0f, 0.0f);    // bottom
+    _directions[3] = glm::vec3(0.0f, 1.0f, 0.0f);     // top
+    _directions[4] = glm::vec3(0.0f, 0.0f, -1.0f);    // back
+    _directions[5] = glm::vec3(0.0f, 0.0f, 1.0f);     // front
+
+    // The order of the 12 edges is the same as group[7]-group[18]
+    //   in LocateNextCell() of the shader
+    _directions[6] = glm::normalize(glm::vec3(0.0f + 1.0f, +1.0f));
+    _diredgeDir[7] = glm::normalize(glm::vec3(-1.0f, +1.0f, 0.0f));
+    _diredgeDir[8] = glm::normalize(glm::vec3(0.0f, +1.0f, -1.0f));
+    _diredgeDir[9] = glm::normalize(glm::vec3(+1.0f, +1.0f, 0.0f));
+    _diredgeDir[10] = glm::normalize(glm::vec3(0.0f - 1.0f, +1.0f));
+    _diredgeDir[11] = glm::normalize(glm::vec3(-1.0f, -1.0f, 0.0f));
+    _diredgeDir[12] = glm::normalize(glm::vec3(0.0f - 1.0f, -1.0f));
+    _diredgeDir[13] = glm::normalize(glm::vec3(+1.0f, -1.0f, 0.0f));
+    _diredgeDir[14] = glm::normalize(glm::vec3(-1.0f, 0.0f + 1.0f));
+    _diredgeDir[15] = glm::normalize(glm::vec3(-1.0f, 0.0f - 1.0f));
+    _diredgeDir[16] = glm::normalize(glm::vec3(+1.0f, 0.0f - 1.0f));
+    _diredgeDir[17] = glm::normalize(glm::vec3(+1.0f, 0.0f + 1.0f));
+
+    // The order of the 8 vertices is the same as group[19]-group[26] in LocateNextCell()
+    _directions[18] = glm::normalize(glm::vec3(-1.0f));
+    _dirvertDir[19] = glm::normalize(glm::vec3(+1.0f, -1.0f, -1.0f));
+    _dirvertDir[20] = glm::normalize(glm::vec3(+1.0f, -1.0f, +1.0f));
+    _dirvertDir[21] = glm::normalize(glm::vec3(-1.0f, -1.0f, +1.0f));
+    _dirvertDir[22] = glm::normalize(glm::vec3(-1.0f, +1.0f, -1.0f));
+    _dirvertDir[23] = glm::normalize(glm::vec3(+1.0f, +1.0f, -1.0f));
+    _dirvertDir[24] = glm::normalize(glm::vec3(+1.0f, +1.0f, +1.0f));
+    _dirvertDir[25] = glm::normalize(glm::vec3(-1.0f, +1.0f, +1.0f));
 }
