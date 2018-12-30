@@ -181,6 +181,7 @@ void VariablesWidget::setColorMappedVariable(const QString &qname)
 
 void VariablesWidget::set2DOrientation(const QString &orientation) { cout << "2D orientation is currently a no-op" << endl; }
 
+// This takes the dropdown menu index, not the dimension
 void VariablesWidget::setVariableDims(int index)
 {
     assert(_rParams);
@@ -309,7 +310,10 @@ string VariablesWidget::updateVarCombo(QComboBox *varCombo, const vector<string>
 void VariablesWidget::updateScalarCombo()
 {
     if (_variableFlags & SCALAR) {
-        string         setVarReq = _rParams->GetVariableName();
+        string setVarReq = _rParams->GetVariableName();
+
+        if (_dataMgr->VariableExists(_rParams->GetCurrentTimestep(), setVarReq)) _activeDim = _dataMgr->GetNumDimensions(setVarReq);
+
         vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
         string         setVar = updateVarCombo(varnameCombo, vars, false, setVarReq);
         if (setVar != setVarReq) {
