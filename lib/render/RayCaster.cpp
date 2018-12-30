@@ -849,8 +849,8 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
     Renderer::GetClippingPlanes(planes);
     shader->SetUniformArray("clipPlanes", 6, (glm::vec4 *)planes);
 
-    // Only fixed-step ray casting require the grid min max info.
-    //   Cell traverse ray casting instead require direction info.
+    // Only fixed-step ray casting require the grid min and max info.
+    //   Cell traverse ray casting instead requires direction info.
     if (castingMode == FixedStep) {
         shader->SetUniform("boxMin", (glm::vec3 &)_userCoordinates.myGridMin[0]);
         shader->SetUniform("boxMax", (glm::vec3 &)_userCoordinates.myGridMax[0]);
