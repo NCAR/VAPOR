@@ -71,7 +71,7 @@ Visualizer::Visualizer(
     _imageCaptureEnabled = false;
     _animationCaptureEnabled = false;
 
-    _renderer.clear();
+    _renderers.clear();
 
     MyBase::SetDiagMsg("Visualizer::Visualizer() end");
 }
@@ -82,13 +82,13 @@ Visualizer::Visualizer(
 
 Visualizer::~Visualizer() {
 
-    for (int i = 0; i < _renderer.size(); i++) {
-        delete _renderer[i];
+    for (int i = 0; i < _renderers.size(); i++) {
+        delete _renderers[i];
 #ifdef VAPOR3_0_0_ALPHA
         TextObject::clearTextObjects(_renderer[i]);
 #endif
     }
-    _renderer.clear();
+    _renderers.clear();
 #ifdef VAPOR3_0_0_ALPHA
     _manipHolder.clear();
 #endif
@@ -151,9 +151,9 @@ int Visualizer::getCurrentTimestep() const {
 }
 
 void Visualizer::applyTransforms(int i) {
-    string datasetName = _renderer[i]->GetMyDatasetName();
-    string myName = _renderer[i]->GetMyName();
-    string myType = _renderer[i]->GetMyType();
+    string datasetName = _renderers[i]->GetMyDatasetName();
+    string myName = _renderers[i]->GetMyName();
+    string myType = _renderers[i]->GetMyType();
 
     VAPoR::ViewpointParams *vpParams = getActiveViewpointParams();
     vector<double> scales, rotations, translations, origin;
@@ -208,20 +208,20 @@ int Visualizer::paintEvent(bool fast) {
     _deleteFlaggedRenderers();
 
     int rc = 0;
-    for (int i = 0; i < _renderer.size(); i++) {
+    for (int i = 0; i < _renderers.size(); i++) {
         _glManager->matrixManager->MatrixModeModelView();
         _glManager->matrixManager->PushMatrix();
 
-        if (!_renderer[i]->IsGLInitialized()) {
-            int myrc = _renderer[i]->initializeGL(_glManager);
+        if (!_renderers[i]->IsGLInitialized()) {
+            int myrc = _renderers[i]->initializeGL(_glManager);
             GL_ERR_BREAK();
             if (myrc < 0)
                 rc = -1;
         }
 
-        if (_renderer[i]->IsGLInitialized()) {
+        if (_renderers[i]->IsGLInitialized()) {
             applyTransforms(i);
-            int myrc = _renderer[i]->paintGL(fast);
+            int myrc = _renderers[i]->paintGL(fast);
             GL_ERR_BREAK();
             if (myrc < 0) {
                 rc = -1;
@@ -233,7 +233,7 @@ int Visualizer::paintEvent(bool fast) {
         }
         _glManager->matrixManager->MatrixModeModelView();
         _glManager->matrixManager->PopMatrix();
-        int myrc = CheckGLErrorMsg(_renderer[i]->GetMyName().c_str());
+        int myrc = CheckGLErrorMsg(_renderers[i]->GetMyName().c_str());
         if (myrc < 0) {
             rc = -1;
         }
@@ -359,25 +359,25 @@ int Visualizer::initializeGL(GLManager *glManager) {
 
 void Visualizer::moveRendererToFront(const Renderer *ren) {
     int renIndex = -1;
-    for (int i = 0; i < _renderer.size(); i++) {
-        if (_renderer[i] == ren) {
+    for (int i = 0; i < _renderers.size(); i++) {
+        if (_renderers[i] == ren) {
             renIndex = i;
             break;
         }
     }
     assert(renIndex != -1);
 
-    Renderer *save = _renderer[renIndex];
+    Renderer *save = _renderers[renIndex];
 
-    for (int i = renIndex; i < _renderer.size() - 1; i++)
-        _renderer[i] = _renderer[i + 1];
+    for (int i = renIndex; i < _renderers.size() - 1; i++)
+        _renderers[i] = _renderers[i + 1];
 
-    _renderer[_renderer.size() - 1] = save;
+    _renderers[_renderers.size() - 1] = save;
 }
 
 void Visualizer::moveVolumeRenderersToFront() {
     Renderer *firstRendererMoved = nullptr;
-    auto rendererPointersCopy = _renderer;
+    auto rendererPointersCopy = _renderers;
     for (auto it = rendererPointersCopy.rbegin(); it != rendererPointersCopy.rend(); ++it) {
         if (*it == firstRendererMoved)
             break;
@@ -390,7 +390,7 @@ void Visualizer::moveVolumeRenderersToFront() {
 }
 
 void Visualizer::InsertRenderer(Renderer *ren) {
-    _renderer.push_back(ren);
+    _renderers.push_back(ren);
 }
 
 bool Visualizer::RemoveRenderer(Renderer *ren) {
@@ -398,11 +398,11 @@ bool Visualizer::RemoveRenderer(Renderer *ren) {
 
     //get it from the renderer list, and delete it:
     bool found = false;
-    for (i = 0; i < _renderer.size(); i++) {
-        if (_renderer[i] != ren)
+    for (i = 0; i < _renderers.size(); i++) {
+        if (_renderers[i] != ren)
             continue;
 
-        _renderer[i] = 0;
+        _renderers[i] = 0;
         found = true;
         break;
     }
@@ -412,18 +412,18 @@ bool Visualizer::RemoveRenderer(Renderer *ren) {
     int foundIndex = i;
 
     //Move renderers up.
-    int numRenderers = _renderer.size() - 1;
+    int numRenderers = _renderers.size() - 1;
     for (int j = foundIndex; j < numRenderers; j++) {
-        _renderer[j] = _renderer[j + 1];
+        _renderers[j] = _renderers[j + 1];
     }
-    _renderer.resize(numRenderers);
+    _renderers.resize(numRenderers);
     return true;
 }
 
 Renderer *Visualizer::getRenderer(string type, string instance) const {
 
-    for (int i = 0; i < _renderer.size(); i++) {
-        Renderer *ren = _renderer[i];
+    for (int i = 0; i < _renderers.size(); i++) {
+        Renderer *ren = _renderers[i];
         if (ren->GetMyType() == type && ren->GetMyName() == instance) {
             return (ren);
         }
@@ -678,7 +678,7 @@ bool Visualizer::getPixelData(unsigned char *data) const {
 }
 
 void Visualizer::_deleteFlaggedRenderers() {
-    vector<Renderer *> renderersCopy = _renderer;
+    vector<Renderer *> renderersCopy = _renderers;
     for (auto it = renderersCopy.begin(); it != renderersCopy.end(); ++it) {
         if ((*it)->IsFlaggedForDeletion()) {
             RemoveRenderer(*it);
@@ -704,10 +704,10 @@ void Visualizer::renderColorbars(int timeStep) {
     mm->MatrixModeProjection();
     mm->PushMatrix();
     mm->LoadIdentity();
-    for (int i = 0; i < _renderer.size(); i++) {
+    for (int i = 0; i < _renderers.size(); i++) {
         //If a renderer is not initialized, or if its bypass flag is set, then don't render.
         //Otherwise push and pop the GL matrix stack, and all attribs
-        _renderer[i]->renderColorbar();
+        _renderers[i]->renderColorbar();
     }
     mm->MatrixModeProjection();
     mm->PopMatrix();
