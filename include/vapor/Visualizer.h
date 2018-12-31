@@ -123,9 +123,6 @@ public:
     //! Remove (and delete) all the renderers in the renderer queue
     void removeAllRenderers();
 
-    //! Remove all disabled renderers from the queue
-    void removeDisabledRenderers();
-
 #ifdef VAPOR3_0_0_ALPHA
     //! Obtain the manip that is associated with a specified Params type
     //! \param[in] tag associated with the Params that owns the manip

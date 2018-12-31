@@ -622,24 +622,6 @@ Visualizer::OGLVendorType Visualizer::GetVendor()
     return (UNKNOWN);
 }
 
-void Visualizer::removeDisabledRenderers()
-{
-    // Repeat until we don't find any renderers to disable:
-
-    while (1) {
-        bool retry = false;
-        for (int i = 0; i < _renderer.size(); i++) {
-            RenderParams *rParams = _renderer[i]->GetActiveParams();
-            if (!rParams->IsEnabled()) {
-                RemoveRenderer(_renderer[i]);
-                retry = true;
-                break;
-            }
-        }
-        if (!retry) break;
-    }
-}
-
 double Visualizer::getPixelSize() const
 {
 #ifdef VAPOR3_0_0_ALPHA
