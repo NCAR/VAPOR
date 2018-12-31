@@ -217,12 +217,7 @@ private:
     string              m_winName;
     GLManager *         _glManager;
     AnnotationRenderer *m_vizFeatures;
-    bool                m_viewpointDirty;
 
-    //! There's a separate manipholder for each window
-#ifdef VAPOR3_0_0_ALPHA
-    vector<TranslateStretchManip *> _manipHolder;
-#endif
     bool   _imageCaptureEnabled;
     bool   _animationCaptureEnabled;
     string _captureImageFile;
