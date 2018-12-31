@@ -75,6 +75,8 @@ public:
 	float getOpacity();
 	void RefreshHistogram();
     void SetAutoUpdateParamChanged(bool changed);
+    bool IsOpacityIntegrated() const;
+    void SetOpacityIntegrated(bool value);
 
 private slots:
 	void loadTF();
@@ -159,6 +161,7 @@ private:
 	bool _secondaryHistoRangeChanged;
 	bool _mainHistoNeedsRefresh;
 	bool _secondaryHistoNeedsRefresh;
+    bool _isOpacityIntegrated;
 
 	bool _discreteColormap;
 	bool _textChanged;
