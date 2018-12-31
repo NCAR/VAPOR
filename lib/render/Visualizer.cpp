@@ -226,7 +226,7 @@ void Visualizer::_loadMatricesFromViewpointParams()
     mm->LoadMatrixd(m);
 }
 
-int Visualizer::initializeGL(GLManager *glManager)
+int Visualizer::InitializeGL(GLManager *glManager)
 {
     if (!glManager->IsCurrentOpenGLVersionSupported()) return -1;
 
@@ -249,7 +249,7 @@ int Visualizer::initializeGL(GLManager *glManager)
 }
 
 // Move to back of rendering list
-void Visualizer::moveRendererToFront(Renderer *ren)
+void Visualizer::MoveRendererToFront(Renderer *ren)
 {
     auto it = std::find(_renderers.begin(), _renderers.end(), ren);
     assert(it != _renderers.end());
@@ -257,14 +257,14 @@ void Visualizer::moveRendererToFront(Renderer *ren)
     _renderers.push_back(ren);
 }
 
-void Visualizer::moveVolumeRenderersToFront()
+void Visualizer::MoveVolumeRenderersToFront()
 {
     Renderer *firstRendererMoved = nullptr;
     auto      rendererPointersCopy = _renderers;
     for (auto it = rendererPointersCopy.rbegin(); it != rendererPointersCopy.rend(); ++it) {
         if (*it == firstRendererMoved) break;
         if ((*it)->GetMyType() == DVRenderer::GetClassType()) {
-            moveRendererToFront(*it);
+            MoveRendererToFront(*it);
             if (firstRendererMoved == nullptr) firstRendererMoved = *it;
         }
     }
