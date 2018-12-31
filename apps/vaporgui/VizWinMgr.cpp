@@ -35,6 +35,7 @@
 #include <QMdiSubWindow>
 #include <vapor/ControlExecutive.h>
 #include <vapor/ParamsMgr.h>
+#include <vapor/DataStatus.h>
 
 #include "AnimationParams.h"
 #include "MouseModeParams.h"

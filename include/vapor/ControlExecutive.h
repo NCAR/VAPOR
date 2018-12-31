@@ -7,12 +7,14 @@
 #include <map>
 
 #include <vapor/ParamsMgr.h>
-#include <vapor/Visualizer.h>
+#include <vapor/GLManager.h>
 
 using namespace std;
 namespace VAPoR {
 
 class CalcEngineMgr;
+class Visualizer;
+class DataStatus;
 
 //! \class ControlExec
 //! \ingroup Public
@@ -71,9 +73,9 @@ public:
     //! the number of cores detected. Has no effect until
     //! the next data set is loaded.
     //
-    void SetNumThreads(size_t nthreads) { _dataStatus->SetNumThreads(nthreads); }
+    void SetNumThreads(size_t nthreads);
 
-    size_t GetNumThreads() const { return (_dataStatus->GetNumThreads()); }
+    size_t GetNumThreads() const;
 
     //! Set the data cache size
     //!
@@ -83,7 +85,7 @@ public:
     //!
     //! \sa DataMgr
     //
-    void SetCacheSize(size_t sizeMB) { _dataStatus->SetCacheSize(sizeMB); }
+    void SetCacheSize(size_t sizeMB);
 
     //! Create a new visualizer
     //!
@@ -317,7 +319,7 @@ public:
     //!
     //! Return a vector of all availble render class type names
     //!
-    static vector<string> GetAllRenderClasses() { return (RendererFactory::Instance()->GetFactoryNames()); }
+    static vector<string> GetAllRenderClasses();
 
     //! Lookup window, data set, and class name from a render instance name
     //!

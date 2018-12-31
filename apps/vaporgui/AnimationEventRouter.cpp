@@ -28,6 +28,7 @@
 #include <iostream>
 #include <QTimer>
 
+#include <vapor/DataStatus.h>
 #include "AnimationParams.h"
 #include "RangeCombos.h"
 #include "AnimationEventRouter.h"

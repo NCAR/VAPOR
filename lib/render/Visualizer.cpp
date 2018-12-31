@@ -188,7 +188,7 @@ int Visualizer::paintEvent(bool fast)
     // Do not proceed if there is no DataMgr
     if (!m_dataStatus->GetDataMgrNames().size()) return (0);
 
-    if (!fbSetup()) return 0;
+    _clearFramebuffer();
 
     // Set up the OpenGL environment
     int timeStep = getCurrentTimestep();
@@ -211,13 +211,7 @@ int Visualizer::paintEvent(bool fast)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    vector<Renderer *> renderersCopy = _renderer;
-    for (auto it = renderersCopy.begin(); it != renderersCopy.end(); ++it) {
-        if ((*it)->IsFlaggedForDeletion()) {
-            RemoveRenderer(*it);
-            delete *it;
-        }
-    }
+    _deleteFlaggedRenderers();
 
     // Now we are ready for all the different renderers to proceed.
     // Sort them;  If they are opaque, they go first.  If not opaque, they
@@ -289,37 +283,6 @@ int Visualizer::paintEvent(bool fast)
     GL_ERR_BREAK();
     if (printOpenGLError()) return -1;
     return rc;
-}
-
-bool Visualizer::fbSetup()
-{
-#ifdef VAPOR3_0_0_ALPHA
-    // Following is needed in case undo/redo leaves a
-    // disabled renderer in the renderer list, so it can be deleted.
-    //
-    removeDisabledRenderers();
-#endif
-
-#ifdef VAPOR3_0_0_ALPHA
-    // Get the ModelView matrix from the viewpoint params, if it has changed.  If
-    // it is not changed, it will come from the Trackball
-    if (vpParams->VPHasChanged(_winNum))
-#else
-    // if (m_viewpointDirty)
-#endif
-
-        // Paint background
-        double clr[3];
-    getActiveAnnotationParams()->GetBackgroundColor(clr);
-
-    glClearColor(clr[0], clr[1], clr[2], 1.f);
-    // Clear out the depth buffer in preparation for rendering
-    glClearDepth(1);
-    // Make the depth buffer writable
-    glDepthMask(GL_TRUE);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-    return (FrameBufferReady());
 }
 
 int Visualizer::paintSetup(int timeStep)
@@ -746,6 +709,26 @@ bool Visualizer::getPixelData(unsigned char *data) const
     }
 
     return true;
+}
+
+void Visualizer::_deleteFlaggedRenderers()
+{
+    vector<Renderer *> renderersCopy = _renderer;
+    for (auto it = renderersCopy.begin(); it != renderersCopy.end(); ++it) {
+        if ((*it)->IsFlaggedForDeletion()) {
+            RemoveRenderer(*it);
+            delete *it;
+        }
+    }
+}
+
+void Visualizer::_clearFramebuffer()
+{
+    double clr[3];
+    getActiveAnnotationParams()->GetBackgroundColor(clr);
+
+    glClearColor(clr[0], clr[1], clr[2], 1.f);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 }
 
 void Visualizer::renderColorbars(int timeStep)
