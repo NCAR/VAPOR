@@ -286,22 +286,13 @@ int Visualizer::initializeGL(GLManager *glManager)
     return 0;
 }
 
-void Visualizer::moveRendererToFront(const Renderer *ren)
+// Move to back of rendering list
+void Visualizer::moveRendererToFront(Renderer *ren)
 {
-    int renIndex = -1;
-    for (int i = 0; i < _renderers.size(); i++) {
-        if (_renderers[i] == ren) {
-            renIndex = i;
-            break;
-        }
-    }
-    assert(renIndex != -1);
-
-    Renderer *save = _renderers[renIndex];
-
-    for (int i = renIndex; i < _renderers.size() - 1; i++) _renderers[i] = _renderers[i + 1];
-
-    _renderers[_renderers.size() - 1] = save;
+    auto it = std::find(_renderers.begin(), _renderers.end(), ren);
+    assert(it != _renderers.end());
+    _renderers.erase(it);
+    _renderers.push_back(ren);
 }
 
 void Visualizer::moveVolumeRenderersToFront()
@@ -318,30 +309,6 @@ void Visualizer::moveVolumeRenderersToFront()
 }
 
 void Visualizer::InsertRenderer(Renderer *ren) { _renderers.push_back(ren); }
-
-bool Visualizer::RemoveRenderer(Renderer *ren)
-{
-    int i;
-
-    // get it from the renderer list, and delete it:
-    bool found = false;
-    for (i = 0; i < _renderers.size(); i++) {
-        if (_renderers[i] != ren) continue;
-
-        _renderers[i] = 0;
-        found = true;
-        break;
-    }
-    if (!found) return (false);
-
-    int foundIndex = i;
-
-    // Move renderers up.
-    int numRenderers = _renderers.size() - 1;
-    for (int j = foundIndex; j < numRenderers; j++) { _renderers[j] = _renderers[j + 1]; }
-    _renderers.resize(numRenderers);
-    return true;
-}
 
 Renderer *Visualizer::getRenderer(string type, string instance) const
 {
@@ -571,7 +538,7 @@ void Visualizer::_deleteFlaggedRenderers()
     vector<Renderer *> renderersCopy = _renderers;
     for (auto it = renderersCopy.begin(); it != renderersCopy.end(); ++it) {
         if ((*it)->IsFlaggedForDeletion()) {
-            RemoveRenderer(*it);
+            _renderers.erase(std::find(_renderers.begin(), _renderers.end(), *it));
             delete *it;
         }
     }
