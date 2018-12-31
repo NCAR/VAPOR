@@ -70,10 +70,6 @@ Visualizer::Visualizer(
 	m_winName = winName;
     _glManager = nullptr;
 	m_vizFeatures = new AnnotationRenderer(pm, dataStatus, winName);
-	m_viewpointDirty = true;
-
-
-
 	_imageCaptureEnabled = false;
 	_animationCaptureEnabled = false;
 	
@@ -93,14 +89,8 @@ Visualizer::~Visualizer()
 	
 	for (int i = 0; i< _renderers.size(); i++){
 		delete _renderers[i];
-#ifdef	VAPOR3_0_0_ALPHA
-		TextObject::clearTextObjects(_renderer[i]);
-#endif
 	}
 	_renderers.clear();
-#ifdef	VAPOR3_0_0_ALPHA
-	_manipHolder.clear();
-#endif
 	
 }
 
@@ -422,7 +412,7 @@ bool Visualizer::RemoveRenderer(Renderer* ren){
 
 	//get it from the renderer list, and delete it:
 	bool found = false;
-	for (i = 0; i<_renderers.size(); i++) {		
+	for (i = 0; i<_renderers.size(); i++) {
 		if (_renderers[i] != ren) continue;
 
 		_renderers[i] = 0;
