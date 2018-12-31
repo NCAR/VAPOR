@@ -140,7 +140,7 @@ void main(void)
     //   Casting it to integer requires a +1 to cover all volume space.
     int   nSteps        = int(nStepsf) + 1;     
 
-    // Set depth value at the backface minus 1/10 of a step size,
+    // Set depth value at the backface minus 1/100 of a step size,
     //   so it's always inside of the volume.
     gl_FragDepth        =  CalculateDepth( stopModel - 0.01 * stepSize3D );
 
