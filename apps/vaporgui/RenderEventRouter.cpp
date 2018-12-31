@@ -28,6 +28,8 @@
 #include "ErrorReporter.h"
 #include "MappingFrame.h"
 #include "RenderEventRouter.h"
+#include <vapor/Renderer.h>
+#include <vapor/DataStatus.h>
 
 using namespace VAPoR;
 

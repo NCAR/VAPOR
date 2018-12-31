@@ -268,7 +268,10 @@ private:
 	//! Obtain the image from the gl back buffer
 	//! \param[out] data is array of rgb byte values, 3 bytes per pixel
 	//! \return true if successful
-	bool getPixelData(unsigned char* data) const ;
+	bool getPixelData(unsigned char* data) const;
+    
+    void _deleteFlaggedRenderers();
+    void _clearFramebuffer();
 
 	int getCurrentTimestep() const;
 
