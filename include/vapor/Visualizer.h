@@ -20,16 +20,13 @@
 //	navigation and resize, and defers drawing to the viz window's list of 
 //	registered renderers.
 
-#ifndef Visualizer_H
-#define Visualizer_H
+#pragma once
 
 #include <map>
 #include <vapor/DataStatus.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/Renderer.h>
 #include <vapor/AnnotationRenderer.h>
-
-
 
 namespace VAPoR {
 
@@ -103,12 +100,6 @@ public:
 	//! \param[in] RenderParams to be checked for renderer
 	//! \return associated RenderParams instance
 	Renderer* getRenderer(string type, string instance) const;
-
-#ifdef	VAPOR3_0_0_ALPHA
-	//! Identify the AnnotationRenderer associated with this Visualizer
-	//! \return associated RenderParams instance
-	AnnotationRenderer* getAnnotationRenderer() {return _vizFeatures;}
-#endif
 	
     void InsertRenderer(Renderer* ren);
     
@@ -120,21 +111,7 @@ public:
 	//! Remove a specific renderer from the renderer queue
 	//! \param[in] r renderer will be removed
 	//! \return true if successful.
-	bool RemoveRenderer(Renderer *r);  
-
-	//! Remove (and delete) all the renderers in the renderer queue
-	void removeAllRenderers();
-
-#ifdef	VAPOR3_0_0_ALPHA
-	//! Obtain the manip that is associated with a specified Params type
-	//! \param[in] tag associated with the Params that owns the manip
-	//! \return pointer to the Manip
-	TranslateStretchManip* getManip(const std::string& paramTag) const {
-		int mode = MouseModeParams::getModeFromParams(paramTag);
-		return _manipHolder[mode];
-	}
-
-#endif
+	bool RemoveRenderer(Renderer *r);
 
 	//! Determine the approximate size of a pixel in terms of user coordinates,
 	//! at the center of the scene.
@@ -266,5 +243,3 @@ private:
 };
 
 };
-
-#endif // Visualizer_H
