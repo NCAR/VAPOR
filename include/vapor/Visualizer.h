@@ -105,11 +105,7 @@ class RENDER_API Visualizer : public MyBase {
     AnnotationRenderer *getAnnotationRenderer() { return _vizFeatures; }
 #endif
 
-    //! Insert a renderer in the queue using the default (5) render order
-    //! \sa Visualizer::insertRenderer
-    //! \param[out] Renderer instance that is inserted in the queue
-    //! \return position in the renderer queue
-    int insertSortedRenderer(Renderer *ren) { return insertRenderer(ren, 5); }
+    void InsertRenderer(Renderer *ren);
 
     //! Move the renderer to the front of the render queue
     //! \param[out] Renderer instance that is moved to front
@@ -204,16 +200,6 @@ class RENDER_API Visualizer : public MyBase {
 
     bool fbSetup();
 
-    //! Renderers can be added early or late, using a "render Order" parameter.
-    //! The order is between 0 and 10; lower order gets rendered first.
-    //! Sorted renderers get sorted before each render
-    //! To insert a renderer specify the associated RenderParams, the Renderer, and the render order
-    //! \param[in] RenderParams associated with the renderer
-    //! \param[out] Renderer object constructed from the RenderParams
-    //! \param[in] render order
-    //! \return position in the renderer queue
-    int insertRenderer(Renderer *ren, int order);
-
     //! Definition of OpenGL Vendors
     enum OGLVendorType {
         UNKNOWN = 0,
@@ -273,7 +259,6 @@ class RENDER_API Visualizer : public MyBase {
     string _captureImageFile;
 
     vector<Renderer *> _renderer;
-    vector<int> _renderOrder;
 };
 
 }; // namespace VAPoR
