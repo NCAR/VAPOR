@@ -274,6 +274,7 @@ void VizWinMgr::_vizAboutToDisappear(string vizName)
     GUIStateParams *p = _getStateParams();
     string          activeViz = p->GetActiveVizName();
 
+    itr->second->makeCurrent();
     _controlExec->RemoveVisualizer(vizName);
 
     // disconnect all signals from window
