@@ -69,8 +69,6 @@ public:
     //! \return zero if successful.
     int paintEvent(bool fast);
 
-    void _applyTransformsForRenderer(Renderer *r);
-
     //! Issue the OpenGL resize call.  Must be called from an OpenGL context.
     //! \param[in] w Window width in pixels.
     //! \param[in] h Window height in pixels.
@@ -78,21 +76,16 @@ public:
 
     //! Identify the visualizer index associated with this visualizer
     //! \retval visualizer index;
-    string getWindowName() const { return m_winName; }
-
-    //! Determine the renderer in the renderer list associated with a specific index
-    //! \param[in] index
-    //! \return Renderer* associated with the index
-    Renderer *getRenderer(int i) const { return _renderers[i]; }
+    string GetWindowName() const { return m_winName; }
 
     //! Determine the number of renderers in the renderer list
     //! \return number of renderers
-    int getNumRenderers() const { return _renderers.size(); }
+    int GetNumRenderers() const { return _renderers.size(); }
 
     //! Get a renderer
     //! \param[in] RenderParams to be checked for renderer
     //! \return associated RenderParams instance
-    Renderer *getRenderer(string type, string instance) const;
+    Renderer *GetRenderer(string type, string instance) const;
 
     void InsertRenderer(Renderer *ren);
 
@@ -149,26 +142,21 @@ public:
 
 private:
     //! Render all the colorbars enabled in this visualizer.
-    void renderColorbars(int timeStep);
+    void _renderColorbars(int timeStep);
 
     //! Capture a single image to a file.  Filename must be *.tif or *.jpg
     //! Must be called during paintEvent when captureEnabled has been called.
     //! Will turn off the captureEnabled switch.
     //! \param[in] filename
     //! \return zero if successful
-    int captureImage(const std::string &path);
-
-#ifdef VAPOR3_0_0_ALPHA
-    //! Render the current active manip, if we are not in navigation mode
-    void renderManip();
-#endif
+    int _captureImage(const std::string &path);
 
     void _loadMatricesFromViewpointParams();
 
     bool fbSetup();
 
     //! Definition of OpenGL Vendors
-    enum OGLVendorType { UNKNOWN = 0, MESA, NVIDIA, ATI, INTEL };
+    enum GLVendorType { UNKNOWN = 0, MESA, NVIDIA, ATI, INTEL };
 
     //! Identify the OpenGL Vendor
     //! \return OpenGL vendor
@@ -200,6 +188,7 @@ private:
     void _deleteFlaggedRenderers();
     int  _initializeNewRenderers();
     void _clearFramebuffer();
+    void _applyTransformsForRenderer(Renderer *r);
 
     int getCurrentTimestep() const;
 

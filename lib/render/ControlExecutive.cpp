@@ -144,7 +144,7 @@ int ControlExec::ActivateRender(string winName, string dataSetName, string rende
         return -1;
     }
 
-    Renderer *ren = v->getRenderer(renderType, renderName);
+    Renderer *ren = v->GetRenderer(renderType, renderName);
 
     _paramsMgr->BeginSaveStateGroup("ActivateRender");
 
@@ -200,7 +200,7 @@ int ControlExec::ActivateRender(string winName, string dataSetName, const Render
 
     string renderType = RendererFactory::Instance()->GetRenderClassFromParamsClass(rp->GetName());
 
-    Renderer *ren = v->getRenderer(renderType, renderName);
+    Renderer *ren = v->GetRenderer(renderType, renderName);
 
     _paramsMgr->BeginSaveStateGroup("ActivateRender");
 
@@ -246,7 +246,7 @@ void ControlExec::_removeRendererHelper(string winName, string dataSetName, stri
     Visualizer *v = getVisualizer(winName);
     if (!v) return;
 
-    Renderer *ren = v->getRenderer(renderType, renderName);
+    Renderer *ren = v->GetRenderer(renderType, renderName);
     if (!ren) return;
 
     ren->FlagForDeletion();
