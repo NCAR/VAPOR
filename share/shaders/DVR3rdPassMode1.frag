@@ -186,7 +186,10 @@ void main(void)
 
         vec3 step2Texture  = (step2Model - boxMin) * boxSpan1o;
         if( ShouldSkip( step2Texture, step2Model ) )
+        {
+            step1Model     = step2Model;
             continue;
+        }
 
         float step2Value   = texture( volumeTexture, step2Texture ).r;
         float valTranslate = (step2Value - colorMapRange.x) / colorMapRange.z;
