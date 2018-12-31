@@ -393,23 +393,6 @@ void Visualizer::InsertRenderer(Renderer *ren) {
     _renderer.push_back(ren);
 }
 
-// Remove all renderers.  This is needed when we load new data into
-// an existing session
-void Visualizer::removeAllRenderers() {
-
-    //Prevent new rendering while we do this?
-
-#ifdef VAPOR3_0_0_ALPHA
-    for (int i = _renderer.size() - 1; i >= 0; i--) {
-        delete _renderer[i];
-    }
-#endif
-
-    _renderer.clear();
-}
-/* 
- * Remove renderer of specified renderParams
- */
 bool Visualizer::RemoveRenderer(Renderer *ren) {
     int i;
 
@@ -418,9 +401,6 @@ bool Visualizer::RemoveRenderer(Renderer *ren) {
     for (i = 0; i < _renderer.size(); i++) {
         if (_renderer[i] != ren)
             continue;
-#ifdef VAPOR3_0_0_ALPHA
-        delete _renderer[i];
-#endif
 
         _renderer[i] = 0;
         found = true;
