@@ -87,11 +87,11 @@ class RENDER_API Visualizer : public MyBase {
     //! Determine the renderer in the renderer list associated with a specific index
     //! \param[in] index
     //! \return Renderer* associated with the index
-    Renderer *getRenderer(int i) const { return _renderer[i]; }
+    Renderer *getRenderer(int i) const { return _renderers[i]; }
 
     //! Determine the number of renderers in the renderer list
     //! \return number of renderers
-    int getNumRenderers() const { return _renderer.size(); }
+    int getNumRenderers() const { return _renderers.size(); }
 
     //! Get a renderer
     //! \param[in] RenderParams to be checked for renderer
@@ -237,7 +237,7 @@ class RENDER_API Visualizer : public MyBase {
     bool _animationCaptureEnabled;
     string _captureImageFile;
 
-    vector<Renderer *> _renderer;
+    vector<Renderer *> _renderers;
 };
 
 }; // namespace VAPoR
