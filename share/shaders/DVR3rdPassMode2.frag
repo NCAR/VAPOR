@@ -32,8 +32,7 @@ uniform mat4  transposedInverseMV;
 //
 const float ULP        = 1.2e-7f;           // 2^-23 == 1.192e-7
 const float ULP10      = 1.2e-6f;
-bool  fast             = flags[0];          // fast rendering mode
-bool  lighting         = fast ? false : flags[1];   // no lighting in fast mode
+bool  lighting         = flags[1];
 bool  hasMissingValue  = flags[2];          // has missing values or not
 float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
@@ -424,6 +423,27 @@ void main(void)
         float step2Value   = texture( volumeTexture, step2Tex ).r;
         float valTranslate = (step2Value - colorMapRange.x) / colorMapRange.z;
         vec4  backColor    = texture( colorMapTexture, valTranslate );
+
+        // Apply lighting.
+        //   Note we do the calculation in eye space, because both the light direction
+        //   and view direction are defined in the eye space.
+        if( lighting && backColor.a > 0.001 )
+        {
+            vec3 gradientModel   = CalculateGradient( step2Tex );
+            if( length( gradientModel ) > ULP10 )
+            {
+                vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0 )).xyz;
+                     gradientEye = normalize( gradientEye );
+                float diffuse    = abs( dot(lightDirEye, gradientEye) );
+                vec3 step2Eye    = (MV * vec4( step2Model, 1.0 )).xyz;
+                vec3 viewDirEye  = normalize( -step2Eye );
+                vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
+                float specular   = pow( max(0.0, dot( reflectionEye, viewDirEye )), specularExp );
+                backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse * diffuseCoeff) +
+                                   specular * specularCoeff;
+            }
+        }
+
         color.rgb += (1.0 - color.a) * backColor.a * backColor.rgb;
         color.a   += (1.0 - color.a) * backColor.a;
 
