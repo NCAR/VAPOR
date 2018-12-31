@@ -323,60 +323,21 @@ int Visualizer::placeLights()
 {
     const ViewpointParams *vpParams = getActiveViewpointParams();
     size_t                 nLights = vpParams->getNumLights();
-    if (nLights > 3) nLights = 3;
+    assert(nLights <= 1);
     LegacyGL *lgl = _glManager->legacy;
 
-    float lightDirs[3][4];
-    for (int j = 0; j < nLights; j++) {
-        for (int i = 0; i < 4; i++) { lightDirs[j][i] = vpParams->getLightDirection(j, i); }
-    }
+    float lightDir[4];
+    for (int i = 0; i < 4; i++) { lightDir[i] = vpParams->getLightDirection(0, i); }
+
     if (nLights > 0) {
-        float   specColor[4], ambColor[4];
-        float   diffLight[3], specLight[3];
-        GLfloat lmodel_ambient[4];
-        specColor[0] = specColor[1] = specColor[2] = 0.8f;
-        ambColor[0] = ambColor[1] = ambColor[2] = 0.f;
-        specColor[3] = ambColor[3] = lmodel_ambient[3] = 1.f;
-
         // TODO GL
-        GL_LEGACY(glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, vpParams->getExponent()));
-        lmodel_ambient[0] = lmodel_ambient[1] = lmodel_ambient[2] = vpParams->getAmbientCoeff();
+        // GL_SHININESS = vpParams->getExponent())
+        // vpParams->getSpecularCoeff(0)
+        // vpParams->getDiffuseCoeff(0)
+        // vpParams->getAmbientCoeff()
         // All the geometry will get a white specular color:
-        GL_LEGACY(glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specColor));
-        GL_LEGACY(glLightfv(GL_LIGHT0, GL_POSITION, lightDirs[0]));
-        lgl->LightDirectionfv(lightDirs[0]);
 
-        specLight[0] = specLight[1] = specLight[2] = vpParams->getSpecularCoeff(0);
-
-        diffLight[0] = diffLight[1] = diffLight[2] = vpParams->getDiffuseCoeff(0);
-        GL_LEGACY(glLightfv(GL_LIGHT0, GL_DIFFUSE, diffLight));
-        GL_LEGACY(glLightfv(GL_LIGHT0, GL_SPECULAR, specLight));
-        GL_LEGACY(glLightfv(GL_LIGHT0, GL_AMBIENT, ambColor));
-        GL_LEGACY(glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient));
-        // Following has unpleasant effects on flow line lighting
-        // glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-
-        GL_LEGACY(glEnable(GL_LIGHT0));
-        if (nLights > 1) {
-            if (CheckGLError()) return -1;
-            GL_LEGACY(glLightfv(GL_LIGHT1, GL_POSITION, lightDirs[1]));
-            specLight[0] = specLight[1] = specLight[2] = vpParams->getSpecularCoeff(1);
-            diffLight[0] = diffLight[1] = diffLight[2] = vpParams->getDiffuseCoeff(1);
-            GL_LEGACY(glLightfv(GL_LIGHT1, GL_DIFFUSE, diffLight));
-            GL_LEGACY(glLightfv(GL_LIGHT1, GL_SPECULAR, specLight));
-            GL_LEGACY(glLightfv(GL_LIGHT1, GL_AMBIENT, ambColor));
-            GL_LEGACY(glEnable(GL_LIGHT1));
-
-        } else {
-            GL_LEGACY(glDisable(GL_LIGHT1));
-        }
-        if (nLights > 2) {
-            GL_LEGACY(glLightfv(GL_LIGHT2, GL_POSITION, lightDirs[2]); specLight[0] = specLight[1] = specLight[2] = vpParams->getSpecularCoeff(2);
-                      diffLight[0] = diffLight[1] = diffLight[2] = vpParams->getDiffuseCoeff(2); glLightfv(GL_LIGHT2, GL_DIFFUSE, diffLight); glLightfv(GL_LIGHT2, GL_SPECULAR, specLight);
-                      glLightfv(GL_LIGHT2, GL_AMBIENT, ambColor); glEnable(GL_LIGHT2););
-        } else {
-            GL_LEGACY(glDisable(GL_LIGHT2));
-        }
+        lgl->LightDirectionfv(lightDir);
     }
     if (CheckGLError()) return -1;
     return 0;
