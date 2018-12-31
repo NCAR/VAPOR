@@ -86,7 +86,6 @@ Visualizer::Visualizer(
 
 Visualizer::~Visualizer()
 {
-	
 	for (int i = 0; i< _renderers.size(); i++){
 		delete _renderers[i];
 	}
