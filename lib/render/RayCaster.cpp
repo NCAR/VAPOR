@@ -440,9 +440,9 @@ void RayCaster::UserCoordinates::FindBaseStepSize(int mode)
         float dist, smallest, diffx, diffy, diffz;
         diffx = xyCoords[2] - xyCoords[0];
         diffy = xyCoords[3] - xyCoords[1];
-        smallest = diffx * diffx + diffy * diffy;
+        smallest = std::sqrt(diffx * diffx + diffy * diffy);
         size_t    idx1, idx2, idx3, idx4;
-        glm::vec2 v1, v2, v3, v4, e1, e2;
+        glm::vec2 v1, v2, v3, v4;
 
         // Find the smallest edge among the XY plane
         for (size_t y = 0; y < dims[1]; y++)
@@ -470,20 +470,18 @@ void RayCaster::UserCoordinates::FindBaseStepSize(int mode)
                     v2.y = xyCoords[idx2 + 1];
                     v3.x = xyCoords[idx3];
                     v3.y = xyCoords[idx3 + 1];
-                    e1 = v1 - v2;
-                    e2 = v3 - v2 if (glm::dot(e1, e2) > 0.0f)    // Need to find the height from v1 to edge v3v2
+                    glm::vec3 e1(v1 - v2, 0.0f);
+                    glm::vec3 e2(v3 - v2, 0.0f);
+                    if (glm::dot(e1, e2) > 0.0f)    // Need to find the height from v1 to edge v3v2
                     {
                         // The area of the parallelogram
                         float area = glm::length(glm::cross(e1, e2));
                         float h = area / glm::length(e2);
-                        float h2 = h * h;
-                        smallest = smallest < h2 ? smallest : h2;
-                    }
-                    else    // Just use the length of edge v1v2
+                        smallest = smallest < h ? smallest : h;
+                    } else    // Just use the length of edge v1v2
                     {
                         float len = glm::length(e1);
-                        float len2 = len * len;
-                        smallest = smallest < len2 ? smallest : len2;
+                        smallest = smallest < len ? smallest : len;
                     }
                 }
 
@@ -492,22 +490,22 @@ void RayCaster::UserCoordinates::FindBaseStepSize(int mode)
                     v2.y = xyCoords[idx2 + 1];
                     v4.x = xyCoords[idx4];
                     v4.y = xyCoords[idx4 + 1];
-                    e1 = v2 - v1;
-                    e2 = v4 - v1;
+                    glm::vec3 e1(v2 - v1, 0.0f);
+                    glm::vec3 e2(v4 - v1, 0.0f);
                     if (glm::dot(e1, e2) < 0.0f)    // Need to find the height from v1 to edge v3v4
                     {
                         float area = glm::length(glm::cross(e1, e2));
                         float h = area / glm::length(e1);
-                        float h2 = h * h;
-                        smallest = smallest < h2 ? smallest : h2;
+                        smallest = smallest < h ? smallest : h;
                     } else    // Just use the length of edge v1v4
                     {
                         float len = glm::length(e2);
-                        float len2 = len * len;
-                        smallest = smallest < len2 ? smallest : len2;
+                        smallest = smallest < len ? smallest : len;
                     }
                 }
             }
+
+        float smallest2 = smallest * smallest;
 
         // Find the smallest edge among the Z edges
         size_t planeSize = dims[0] * dims[1];
@@ -519,10 +517,10 @@ void RayCaster::UserCoordinates::FindBaseStepSize(int mode)
                     idx2 = (z + 1) * planeSize + y * dims[0] + x;
                     diffz = zCoords[idx2] - zCoords[idx1];
                     dist = diffz * diffz;
-                    smallest = smallest < dist ? smallest : dist;
+                    smallest2 = smallest2 < dist ? smallest2 : dist;
                 }
 
-        baseStepSize = std::sqrt(smallest);
+        baseStepSize = std::sqrt(smallest2);
     }
 }
 
