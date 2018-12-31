@@ -196,7 +196,7 @@ int ControlExec::ActivateRender(
 			_paramsMgr->EndSaveStateGroup();
 			return(-1);
 		}
-		v->insertSortedRenderer(ren);
+		v->InsertRenderer(ren);
 	}
 
 
@@ -258,7 +258,7 @@ int ControlExec::ActivateRender(
 			_paramsMgr->EndSaveStateGroup();
 			return(-1);
 		}
-		v->insertSortedRenderer(ren);
+		v->InsertRenderer(ren);
 	}
 
 
