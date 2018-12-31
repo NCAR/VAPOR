@@ -18,7 +18,7 @@ public:
 
     static std::string GetClassType()
     {
-        return ("VolumeRenderer");
+        return ("Volume");
     }
 
 protected:
