@@ -81,7 +81,7 @@ Visualizer::Visualizer(const ParamsMgr *pm, const DataStatus *dataStatus, string
 
 Visualizer::~Visualizer()
 {
-    for (int i = 0; i < _renderers.size(); i++) { delete _renderers[i]; }
+    for (int i = 0; i < _renderers.size(); i++) delete _renderers[i];
     _renderers.clear();
 }
 
@@ -137,11 +137,11 @@ int Visualizer::getCurrentTimestep() const
     return (min_ts);
 }
 
-void Visualizer::applyTransforms(int i)
+void Visualizer::_applyTransformsForRenderer(Renderer *r)
 {
-    string datasetName = _renderers[i]->GetMyDatasetName();
-    string myName = _renderers[i]->GetMyName();
-    string myType = _renderers[i]->GetMyType();
+    string datasetName = r->GetMyDatasetName();
+    string myName = r->GetMyName();
+    string myType = r->GetMyType();
 
     VAPoR::ViewpointParams *vpParams = getActiveViewpointParams();
     vector<double>          scales, rotations, translations, origin;
@@ -153,9 +153,6 @@ void Visualizer::applyTransforms(int i)
     origin = t->GetOrigin();
 
     MatrixManager *mm = _glManager->matrixManager;
-
-    mm->MatrixModeModelView();
-    mm->PushMatrix();
 
     mm->Translate(origin[0], origin[1], origin[2]);
     mm->Scale(scales[0], scales[1], scales[2]);
@@ -171,6 +168,8 @@ int Visualizer::paintEvent(bool fast)
 {
     MyBase::SetDiagMsg("Visualizer::paintGL()");
     GL_ERR_BREAK();
+
+    MatrixManager *mm = _glManager->matrixManager;
 
     // Do not proceed if there is no DataMgr
     if (!m_dataStatus->GetDataMgrNames().size()) return (0);
@@ -193,28 +192,22 @@ int Visualizer::paintEvent(bool fast)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     _deleteFlaggedRenderers();
+    if (_initializeNewRenderers() < 0) return -1;
 
     int rc = 0;
     for (int i = 0; i < _renderers.size(); i++) {
         _glManager->matrixManager->MatrixModeModelView();
         _glManager->matrixManager->PushMatrix();
 
-        if (!_renderers[i]->IsGLInitialized()) {
-            int myrc = _renderers[i]->initializeGL(_glManager);
-            GL_ERR_BREAK();
-            if (myrc < 0) rc = -1;
-        }
-
         if (_renderers[i]->IsGLInitialized()) {
-            applyTransforms(i);
+            _applyTransformsForRenderer(_renderers[i]);
+
             int myrc = _renderers[i]->paintGL(fast);
             GL_ERR_BREAK();
             if (myrc < 0) { rc = -1; }
-            _glManager->matrixManager->PopMatrix();
-            if (myrc < 0) { rc = -1; }
         }
-        _glManager->matrixManager->MatrixModeModelView();
-        _glManager->matrixManager->PopMatrix();
+        mm->MatrixModeModelView();
+        mm->PopMatrix();
         int myrc = CheckGLErrorMsg(_renderers[i]->GetMyName().c_str());
         if (myrc < 0) { rc = -1; }
     }
@@ -288,35 +281,8 @@ int Visualizer::initializeGL(GLManager *glManager)
         return -1;
     }
 
-    glClearColor(1.f, 0.1f, 0.1f, 1.f);
-    glDepthMask(true);
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-
-    GLenum glErr;
-    glErr = glGetError();
-    if (glErr != GL_NO_ERROR) {
-        MyBase::SetErrMsg("Error: No Usable Graphics Driver.\n%s", "Check that drivers are properly installed.");
-        return -1;
-    }
-    glEnable(GL_MULTISAMPLE);
-    if (CheckGLError()) return -1;
-    // Check to see if we are using MESA:
     if (GetVendor() == MESA) { SetErrMsg("GL Vendor String is MESA.\nGraphics drivers may need to be reinstalled"); }
 
-    SetDiagMsg("OpenGL Capabilities : GLEW_VERSION_2_0 %s", GLEW_VERSION_2_0 ? "ok" : "missing");
-    SetDiagMsg("OpenGL Capabilities : GLEW_EXT_framebuffer_object %s", GLEW_EXT_framebuffer_object ? "ok" : "missing");
-    SetDiagMsg("OpenGL Capabilities : GLEW_ARB_vertex_buffer_object %s", GLEW_ARB_vertex_buffer_object ? "ok" : "missing");
-    SetDiagMsg("OpenGL Capabilities : GLEW_ARB_multitexture %s", GLEW_ARB_multitexture ? "ok" : "missing");
-    SetDiagMsg("OpenGL Capabilities : GLEW_ARB_shader_objects %s", GLEW_ARB_shader_objects ? "ok" : "missing");
-
-    // Initialize existing renderers:
-    //
-    if (CheckGLError()) return -1;
-
-#ifdef VAPOR3_0_0_ALPHA
-    if (setUpViewport(_width, _height) < 0) return -1;
-#endif
     return 0;
 }
 
@@ -609,6 +575,18 @@ void Visualizer::_deleteFlaggedRenderers()
             delete *it;
         }
     }
+}
+
+int Visualizer::_initializeNewRenderers()
+{
+    for (Renderer *r : _renderers) {
+        if (r->initializeGL(_glManager) < 0) {
+            MyBase::SetErrMsg("Failed to initialize renderer %s", r->GetInstanceName().c_str());
+            return -1;
+        }
+        GL_ERR_BREAK();
+    }
+    return 0;
 }
 
 void Visualizer::_clearFramebuffer()
