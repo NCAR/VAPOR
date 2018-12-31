@@ -58,18 +58,6 @@
 #include <string>
 #include <vapor/common.h>
 
-#ifndef NDEBUG
-    #ifdef Darwin
-        #define GL_LEGACY(x) {}
-    #else
-        #define GL_LEGACY(x) x
-    #endif
-    #define GL_ERR_BREAK() assert(!printOpenGLError())
-#else
-    #define GL_LEGACY(x)
-    #define GL_ERR_BREAK()
-#endif
-
 
 /* These vector and quaternion macros complement similar
  * routines.
@@ -106,7 +94,7 @@ void    ViewMatrix (float *m);
 void    StereoPerspective (int fovy, float aspect, float nearDist, float farDist, float converge, float eye);
 int    ViewAxis (int *direction);
 
-RENDER_API int printOglError(const char *file, int line, const char *msg = 0);
+RENDER_API int __CheckGLError(const char *file, int line, const char *msg = 0);
 
 //! Check for any OpenGL errors and return their error codes
 //!
@@ -125,13 +113,24 @@ RENDER_API void doubleToString(const double val, std::string& result, int digits
 //
 RENDER_API std::string oglGetErrMsg(std::vector <int> status);
 
-#define printOpenGLError() printOglError(__FILE__, __LINE__)
-#define printOpenGLErrorMsg(msg) printOglError(__FILE__, __LINE__, msg)
-
-
 //! Test readyness of OpenGL frame buffer, GL_FRAMEBUFFER
 //!
 RENDER_API bool FrameBufferReady();
 };
+
+#define CheckGLError() __CheckGLError(__FILE__, __LINE__)
+#define CheckGLErrorMsg(msg) __CheckGLError(__FILE__, __LINE__, msg)
+
+#ifndef NDEBUG
+    #ifdef Darwin
+        #define GL_LEGACY(x) {}
+    #else
+        #define GL_LEGACY(x) x
+    #endif
+    #define GL_ERR_BREAK() assert(!CheckGLError())
+#else
+    #define GL_LEGACY(x)
+    #define GL_ERR_BREAK()
+#endif
 
 #endif	// _glutil_h_

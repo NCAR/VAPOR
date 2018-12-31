@@ -544,7 +544,7 @@ int SliceRenderer::_paintGL(bool fast) {
     }
 
     _configureShader();
-    if (printOpenGLError() !=0) {
+    if (CheckGLError() !=0) {
         _resetState();
         return -1;
     }
@@ -560,7 +560,7 @@ int SliceRenderer::_paintGL(bool fast) {
     
     _resetState();
 
-    if (printOpenGLError() !=0) {
+    if (CheckGLError() !=0) {
         return -1;
     }
     return rc;
