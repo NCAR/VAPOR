@@ -241,7 +241,7 @@ int Visualizer::paintEvent(bool fast)
 
 	if (m_vizFeatures) m_vizFeatures->DrawText();
     GL_ERR_BREAK();
-	renderColorbars(timeStep);
+	_renderColorbars(timeStep);
     GL_ERR_BREAK();
 
     // _glManager->ShowDepthBuffer();
@@ -251,11 +251,11 @@ int Visualizer::paintEvent(bool fast)
     int captureImageSuccess = 0;
 	if (_imageCaptureEnabled)
     {
-        captureImageSuccess = captureImage(_captureImageFile);
+        captureImageSuccess = _captureImage(_captureImageFile);
     }
 	else if (_animationCaptureEnabled) 
     {
-		captureImageSuccess = captureImage(_captureImageFile);
+		captureImageSuccess = _captureImage(_captureImageFile);
 		incrementPath(_captureImageFile);
 	}
     if (captureImageSuccess < 0) {
@@ -339,7 +339,7 @@ void Visualizer::InsertRenderer(Renderer* ren)
     _renderers.push_back(ren);
 }
 
-Renderer* Visualizer::getRenderer(string type, string instance) const {
+Renderer* Visualizer::GetRenderer(string type, string instance) const {
 
 	for (int i=0; i<_renderers.size(); i++) {
 		Renderer *ren = _renderers[i];
@@ -462,7 +462,7 @@ AnnotationParams* Visualizer::getActiveAnnotationParams()  const {
 	return m_paramsMgr->GetAnnotationParams(m_winName);
 }
 
-int Visualizer:: captureImage(const std::string &path)
+int Visualizer:: _captureImage(const std::string &path)
 {
     //Turn off the single capture flag
     _imageCaptureEnabled = false;
@@ -584,7 +584,7 @@ void Visualizer::_clearFramebuffer()
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 }
 
-void Visualizer::renderColorbars(int timeStep){
+void Visualizer::_renderColorbars(int timeStep){
 	MatrixManager *mm = _glManager->matrixManager;
     mm->MatrixModeModelView();
     mm->PushMatrix();
