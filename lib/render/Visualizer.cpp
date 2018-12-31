@@ -159,13 +159,6 @@ int Visualizer::paintEvent(bool fast)
 	
     _clearFramebuffer();
 
-	//Set up the OpenGL environment
-	int timeStep = getCurrentTimestep();
-	if (timeStep < 0) {
-		MyBase::SetErrMsg("Invalid time step");
-		return -1;
-	}
-
     _loadMatricesFromViewpointParams();
     if (placeLights())
         return -1;
@@ -199,19 +192,12 @@ int Visualizer::paintEvent(bool fast)
             rc = -1;
 	}
     
-    if(m_vizFeatures) {
-        //Draw the domain frame and other in-scene features
-        m_vizFeatures->InScenePaint(timeStep);
-        GL_ERR_BREAK();
-    }
-	
-    _glManager->matrixManager->MatrixModeModelView();
-
-	//Draw any features that are overlaid on scene
-
-	if (m_vizFeatures) m_vizFeatures->DrawText();
+    //Draw the domain frame and other in-scene features
+    m_vizFeatures->InScenePaint(getCurrentTimestep());
     GL_ERR_BREAK();
-	_renderColorbars(timeStep);
+    m_vizFeatures->DrawText();
+    GL_ERR_BREAK();
+	_renderColorbars(getCurrentTimestep());
     GL_ERR_BREAK();
 
     // _glManager->ShowDepthBuffer();
@@ -219,12 +205,9 @@ int Visualizer::paintEvent(bool fast)
 	glFlush();
 	
     int captureImageSuccess = 0;
-	if (_imageCaptureEnabled)
-    {
+	if (_imageCaptureEnabled) {
         captureImageSuccess = _captureImage(_captureImageFile);
-    }
-	else if (_animationCaptureEnabled) 
-    {
+    } else if (_animationCaptureEnabled) {
 		captureImageSuccess = _captureImage(_captureImageFile);
 		incrementPath(_captureImageFile);
 	}
