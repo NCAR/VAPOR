@@ -203,10 +203,7 @@ private:
     void renderManip();
 #endif
 
-    //! Setup the OpenGL state for rendering
-    //! \param[in] timeStep is the timestep associated with the frame to be rendered.
-    //! \return 0 if successful.
-    int paintSetup(int timeStep);
+    void _loadMatricesFromViewpointParams();
 
     bool fbSetup();
 
@@ -276,8 +273,6 @@ private:
     bool   _imageCaptureEnabled;
     bool   _animationCaptureEnabled;
     string _captureImageFile;
-    int    _previousTimeStep;
-    int    _previousFrameNum;
 
     vector<Renderer *> _renderer;
     vector<int>        _renderOrder;
