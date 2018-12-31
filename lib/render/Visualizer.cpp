@@ -80,7 +80,7 @@ int Visualizer::resizeGL(int wid, int ht) {
     return 0;
 }
 
-int Visualizer::getCurrentTimestep() const {
+int Visualizer::_getCurrentTimestep() const {
     vector<string> dataSetNames = _dataStatus->GetDataMgrNames();
 
     bool first = true;
@@ -159,7 +159,7 @@ int Visualizer::paintEvent(bool fast) {
     _clearFramebuffer();
 
     _loadMatricesFromViewpointParams();
-    if (placeLights())
+    if (_configureLighting())
         return -1;
 
     glDepthMask(GL_TRUE);
@@ -192,11 +192,11 @@ int Visualizer::paintEvent(bool fast) {
     }
 
     //Draw the domain frame and other in-scene features
-    _vizFeatures->InScenePaint(getCurrentTimestep());
+    _vizFeatures->InScenePaint(_getCurrentTimestep());
     GL_ERR_BREAK();
     _vizFeatures->DrawText();
     GL_ERR_BREAK();
-    _renderColorbars(getCurrentTimestep());
+    _renderColorbars(_getCurrentTimestep());
     GL_ERR_BREAK();
 
     // _glManager->ShowDepthBuffer();
@@ -208,7 +208,7 @@ int Visualizer::paintEvent(bool fast) {
         captureImageSuccess = _captureImage(_captureImageFile);
     } else if (_animationCaptureEnabled) {
         captureImageSuccess = _captureImage(_captureImageFile);
-        incrementPath(_captureImageFile);
+        _incrementPath(_captureImageFile);
     }
     if (captureImageSuccess < 0) {
         SetErrMsg("Failed to save image");
@@ -298,7 +298,7 @@ Renderer *Visualizer::GetRenderer(string type, string instance) const {
     return (NULL);
 }
 
-int Visualizer::placeLights() {
+int Visualizer::_configureLighting() {
     const ViewpointParams *vpParams = getActiveViewpointParams();
     size_t nLights = vpParams->getNumLights();
     assert(nLights <= 1);
@@ -413,7 +413,7 @@ int Visualizer::_captureImage(const std::string &path) {
     int writeReturn = -1;
 
     framebuffer = new unsigned char[3 * width * height];
-    if (!getPixelData(framebuffer))
+    if (!_getPixelData(framebuffer))
         ; //goto captureImageEnd;
 
     if (geoTiffOutput)
@@ -454,7 +454,7 @@ captureImageEnd:
     return writeReturn;
 }
 
-bool Visualizer::getPixelData(unsigned char *data) const {
+bool Visualizer::_getPixelData(unsigned char *data) const {
     ViewpointParams *vpParams = getActiveViewpointParams();
 
     size_t width, height;
@@ -540,7 +540,7 @@ void Visualizer::_renderColorbars(int timeStep) {
     mm->PopMatrix();
 }
 
-void Visualizer::incrementPath(string &s) {
+void Visualizer::_incrementPath(string &s) {
     //truncate the last 4 characters (remove .tif or .jpg)
     string s1 = s.substr(0, s.length() - 4);
     string s_end = s.substr(s.length() - 4);
