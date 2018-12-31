@@ -73,10 +73,7 @@ public:
 	//! \return zero if successful.
 	int paintEvent(bool fast);
 
-	//! Apply user defined transforms to the current renderer being drawn
-	//! \param[in] renIndex The index of the current renderer being drawn,
-	//! referring to the _renderer list 
-	void applyTransforms(int renIndex);
+	void _applyTransformsForRenderer(Renderer *r);
 
 	//! Issue the OpenGL resize call.  Must be called from an OpenGL context.
 	//! \param[in] w Window width in pixels.
@@ -218,6 +215,7 @@ private:
 	bool getPixelData(unsigned char* data) const;
     
     void _deleteFlaggedRenderers();
+    int _initializeNewRenderers();
     void _clearFramebuffer();
 
 	int getCurrentTimestep() const;
