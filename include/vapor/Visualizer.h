@@ -264,6 +264,9 @@ class RENDER_API Visualizer : public MyBase {
     //! \return true if successful
     bool getPixelData(unsigned char *data) const;
 
+    void _deleteFlaggedRenderers();
+    void _clearFramebuffer();
+
     int getCurrentTimestep() const;
 
     static void incrementPath(string &s);

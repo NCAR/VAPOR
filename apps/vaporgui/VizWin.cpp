@@ -44,6 +44,7 @@
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
 #include "vapor/FileUtils.h"
+#include "vapor/Visualizer.h"
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
 
