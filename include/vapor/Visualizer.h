@@ -153,8 +153,6 @@ private:
 
     void _loadMatricesFromViewpointParams();
 
-    bool fbSetup();
-
     //! Definition of OpenGL Vendors
     enum GLVendorType { UNKNOWN = 0, MESA, NVIDIA, ATI, INTEL };
 
@@ -162,37 +160,22 @@ private:
     //! \return OpenGL vendor
     static GLVendorType GetVendor();
 
-    //! Set up the OpenGL viewport (performed during visualizer initialization
-    int setUpViewport();
-
-    // Set up viewing and projection matrices
-    //
-    void setUpViewMat();
-
-    //! Render all the text objects
-    void renderText();
-
     //! Place the OpenGL directional lights specified in the ViewpointParams
-    int placeLights();
-
-    //! Save the current GL modelview matrix in the viewpoint params
-    //! \param[in] timestep
-    //! \param[in] ViewpointParams  ViewpointParams in which the matrix will be saved
-    void saveGLMatrix(int timestep, ViewpointParams *);
+    int _configureLighting();
 
     //! Obtain the image from the gl back buffer
     //! \param[out] data is array of rgb byte values, 3 bytes per pixel
     //! \return true if successful
-    bool getPixelData(unsigned char *data) const;
+    bool _getPixelData(unsigned char *data) const;
 
     void _deleteFlaggedRenderers();
     int  _initializeNewRenderers();
     void _clearFramebuffer();
     void _applyTransformsForRenderer(Renderer *r);
 
-    int getCurrentTimestep() const;
+    int _getCurrentTimestep() const;
 
-    static void incrementPath(string &s);
+    static void _incrementPath(string &s);
 
     const ParamsMgr *   _paramsMgr;
     const DataStatus *  _dataStatus;
