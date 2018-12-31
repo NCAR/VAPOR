@@ -512,7 +512,7 @@ void Visualizer::_deleteFlaggedRenderers() {
 int Visualizer::_initializeNewRenderers() {
     assert(_insideGLContext);
     for (Renderer *r : _renderers) {
-        if (r->initializeGL(_glManager) < 0) {
+        if (!r->IsGLInitialized() && r->initializeGL(_glManager) < 0) {
             MyBase::SetErrMsg("Failed to initialize renderer %s", r->GetInstanceName().c_str());
             return -1;
         }
