@@ -354,7 +354,7 @@ class PARAMS_API RenderParams : public ParamsBase {
         int dim,
         bool secondaryColormapVariable);
 
-    void _initBox();
+    void InitBox();
 
   protected:
     DataMgr *_dataMgr;
