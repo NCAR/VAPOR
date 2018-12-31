@@ -48,7 +48,7 @@ Test_VizWin::Test_VizWin(QWidget *parent, ControlExec *ce, string winName) : QGL
 // Either the window is minimized, maximized, restored, or just resized.
 void Test_VizWin::resizeGL(int width, int height)
 {
-    int rc1 = printOpenGLErrorMsg("GLVizWindowResizeEvent");
+    int rc1 = CheckGLErrorMsg("GLVizWindowResizeEvent");
 
     int rc2 = _controlExec->ResizeViz(_windowName, width, height);
     if (!rc1 && !rc2) reallyUpdate();
@@ -56,10 +56,10 @@ void Test_VizWin::resizeGL(int width, int height)
 }
 void Test_VizWin::initializeGL()
 {
-    int rc1 = printOpenGLErrorMsg("GLVizWindowInitializeEvent");
+    int rc1 = CheckGLErrorMsg("GLVizWindowInitializeEvent");
     makeCurrent();
     int rc2 = _controlExec->InitializeViz(_windowName);
-    int rc3 = printOpenGLErrorMsg("GLVizWindowInitializeEvent");
+    int rc3 = CheckGLErrorMsg("GLVizWindowInitializeEvent");
 
     if (!(rc2 < 0)) { m_initialized = true; }
 }
@@ -70,14 +70,14 @@ void Test_VizWin::paintGL()
 
     // only paint if necessary
     // Note that makeCurrent is needed when here we have multiple windows.
-    int rc0 = printOpenGLErrorMsg("VizWindowPaintGL");
+    int rc0 = CheckGLErrorMsg("VizWindowPaintGL");
     int rc1 = 0, rc2 = 0;
     if (!rc0) {
         makeCurrent();
 
         rc1 = _controlExec->Paint(_windowName, false);
         if (!rc1) swapBuffers();
-        rc2 = printOpenGLErrorMsg("VizWindowPaintGL");
+        rc2 = CheckGLErrorMsg("VizWindowPaintGL");
     }
 
     return;
