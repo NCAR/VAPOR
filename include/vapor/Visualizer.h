@@ -170,7 +170,7 @@ class RENDER_API Visualizer : public MyBase {
 
     //! Identify the OpenGL Vendor
     //! \return OpenGL vendor
-    static OGLVendorType GetVendor();
+    static GLVendorType GetVendor();
 
     //! Set up the OpenGL viewport (performed during visualizer initialization
     int setUpViewport();
@@ -210,6 +210,7 @@ class RENDER_API Visualizer : public MyBase {
     GLManager *_glManager;
     AnnotationRenderer *m_vizFeatures;
 
+    bool _insideGLContext; // This is only to make sure we don't call certain functions when they are not supposed to be called. In some situations this variable will be set to true incorrectly. In those cases there is already some other error so it doesn't matter.
     bool _imageCaptureEnabled;
     bool _animationCaptureEnabled;
     string _captureImageFile;
