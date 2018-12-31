@@ -334,7 +334,6 @@ vec3 CalculatePosTex( const ivec3 cellIdx, const vec3 pos )
 
 void main(void)
 {
-    gl_FragDepth        = 1.0;
     color               = vec4( 0.0 );
     vec3  lightDirEye   = vec3(0.0, 0.0, 1.0); 
 
@@ -370,7 +369,6 @@ void main(void)
     // Set depth value at the backface minus 1/100 of a step size,
     //   so it's always inside of the volume.
     gl_FragDepth     =  CalculateDepth( stopModel - 0.01 * stepSize3D );
-
     // If something else on the scene results in a shallower depth, we need to 
     //    compare depth at every step.
     bool  shallow    = false;
@@ -416,6 +414,13 @@ void main(void)
         }
 
         vec3 step2Tex      = CalculatePosTex( step2CellIdx, step2Model );
+        if( ShouldSkip( step2Tex, step2Model ) )
+        {
+            step1CellIdx   = step2CellIdx;
+            step1Model     = step2Model;
+            continue;
+        }
+
         float step2Value   = texture( volumeTexture, step2Tex ).r;
         float valTranslate = (step2Value - colorMapRange.x) / colorMapRange.z;
         vec4  backColor    = texture( colorMapTexture, valTranslate );
