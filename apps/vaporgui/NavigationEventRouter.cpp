@@ -40,6 +40,8 @@
 #include <qmessagebox.h>
 #include "vapor/ViewpointParams.h"
 #include "vapor/ControlExecutive.h"
+#include <vapor/DataStatus.h>
+#include <vapor/DataMgrUtils.h>
 #include "ui_NavigationTab.h"
 #include "ErrorReporter.h"
 #include "TrackBall.h"
