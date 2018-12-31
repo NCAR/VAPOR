@@ -59,7 +59,7 @@ Visualizer::Visualizer(
 	m_dataStatus = dataStatus;
 	m_winName = winName;
     _glManager = nullptr;
-	m_vizFeatures = new AnnotationRenderer(pm, dataStatus, winName);
+	m_vizFeatures = nullptr;
     _insideGLContext = false;
 	_imageCaptureEnabled = false;
 	_animationCaptureEnabled = false;
@@ -75,6 +75,9 @@ Visualizer::~Visualizer()
 	for (int i = 0; i< _renderers.size(); i++)
 		delete _renderers[i];
     _renderers.clear();
+    
+    if (m_vizFeatures)
+        delete m_vizFeatures;
 }
 
 int Visualizer::resizeGL( int wid, int ht )
@@ -245,6 +248,8 @@ int Visualizer::initializeGL(GLManager *glManager)
         return -1;
     
     _glManager = glManager;
+    
+    m_vizFeatures = new AnnotationRenderer(m_paramsMgr, m_dataStatus, m_winName);
 	m_vizFeatures->InitializeGL(glManager);
 
 	// glewExperimental = GL_TRUE;
