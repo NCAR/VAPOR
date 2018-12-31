@@ -16,7 +16,7 @@ uniform sampler2D       depthTexture;
 uniform ivec3 volumeDims;        // number of vertices in each direction of this volume
 uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
-uniform vec4  unitDirections[26];
+uniform vec3  unitDirections[26];
 uniform vec3  colorMapRange;
 
 uniform float stepSize1D;        // ray casting step size
