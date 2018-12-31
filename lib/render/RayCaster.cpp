@@ -443,6 +443,7 @@ void RayCaster::UserCoordinates::FindBaseStepSize(int mode)
         smallest = std::sqrt(diffx * diffx + diffy * diffy);
         size_t    idx1, idx2, idx3, idx4;
         glm::vec2 v1, v2, v3, v4;
+        glm::vec3 e1(0.0f), e2(0.0f);
 
         // Find the smallest edge among the XY plane
         for (size_t y = 0; y < dims[1]; y++)
@@ -470,9 +471,9 @@ void RayCaster::UserCoordinates::FindBaseStepSize(int mode)
                     v2.y = xyCoords[idx2 + 1];
                     v3.x = xyCoords[idx3];
                     v3.y = xyCoords[idx3 + 1];
-                    glm::vec3 e1(v1 - v2, 0.0f);
-                    glm::vec3 e2(v3 - v2, 0.0f);
-                    if (glm::dot(e1, e2) > 0.0f)    // Need to find the height from v1 to edge v3v2
+                    e1 = glm::vec3(v1 - v2, 0.0f);
+                    e2 = glm::vec3(v3 - v2, 0.0f);
+                    if (glm::dot(e1, e2) > 0.0f)    // Need to find the height from v1 to edge v2v3
                     {
                         // The area of the parallelogram
                         float area = glm::length(glm::cross(e1, e2));
@@ -490,8 +491,8 @@ void RayCaster::UserCoordinates::FindBaseStepSize(int mode)
                     v2.y = xyCoords[idx2 + 1];
                     v4.x = xyCoords[idx4];
                     v4.y = xyCoords[idx4 + 1];
-                    glm::vec3 e1(v2 - v1, 0.0f);
-                    glm::vec3 e2(v4 - v1, 0.0f);
+                    e1 = glm::vec3(v2 - v1, 0.0f);
+                    e2 = glm::vec3(v4 - v1, 0.0f);
                     if (glm::dot(e1, e2) < 0.0f)    // Need to find the height from v1 to edge v3v4
                     {
                         float area = glm::length(glm::cross(e1, e2));
