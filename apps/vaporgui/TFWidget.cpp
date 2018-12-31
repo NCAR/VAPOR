@@ -56,6 +56,7 @@ TFWidget::TFWidget(QWidget* parent)
 	_mainHistoRangeChanged		= false;
 	_secondaryHistoRangeChanged = false;
 	_discreteColormap 			= false;
+	_isOpacityIntegrated        = false;
 	_mainVarName	  			= "";
 	_secondaryVarName 			= "";
 
@@ -1042,7 +1043,7 @@ string TFWidget::getTFVariableName(bool mainTF=true) {
 
 int TFWidget::convertOpacityToSliderValue(float opacity) const
 {
-    if (_rParams->GetName() == DVRParams::GetClassType())
+    if (IsOpacityIntegrated())
         return 100 * sqrtf(opacity);
     else
         return 100 * opacity;
@@ -1050,10 +1051,20 @@ int TFWidget::convertOpacityToSliderValue(float opacity) const
 
 float TFWidget::convertSliderValueToOpacity(int value) const
 {
-    if (_rParams->GetName() == DVRParams::GetClassType())
+    if (IsOpacityIntegrated())
         return powf(value/100.f, 2);
     else
         return value/100.f;
+}
+
+bool TFWidget::IsOpacityIntegrated() const
+{
+    return _isOpacityIntegrated;
+}
+
+void TFWidget::SetOpacityIntegrated(bool value)
+{
+    _isOpacityIntegrated = value;
 }
 
 LoadTFDialog::LoadTFDialog( QWidget* parent )
