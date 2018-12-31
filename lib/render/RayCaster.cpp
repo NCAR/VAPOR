@@ -441,37 +441,79 @@ void RayCaster::UserCoordinates::FindBaseStepSize(int mode)
         diffx = xyCoords[2] - xyCoords[0];
         diffy = xyCoords[3] - xyCoords[1];
         smallest = diffx * diffx + diffy * diffy;
-        size_t idx1, idx2, x, y, z;
+        size_t    idx1, idx2, idx3, idx4;
+        glm::vec2 v1, v2, v3, v4, e1, e2;
 
         // Find the smallest edge among the XY plane
-        for (y = 0; y < dims[1]; y++)
-            for (x = 0; x < dims[0]; x++) {
-                // First test edge between vertex (x, y) and (x+1, y)
+        for (size_t y = 0; y < dims[1]; y++)
+            for (size_t x = 0; x < dims[0]; x++) {
+                /*
+                  v4=(x, y+1)               v3=(x+1, y+1)
+                   ----------------------------
+                     \                         \
+                      \                         \
+                       \                         \
+                        \                         \
+                         \                         \
+                          \_________________________\
+                     v1=(x, y)                      v2=(x+1, y)
+                */
+                idx1 = (y * dims[0] + x) * 2;
+                idx2 = (y * dims[0] + x + 1) * 2;
+                idx3 = ((y + 1) * dims[0] + x + 1) * 2;
+                idx4 = ((y + 1) * dims[0] + x) * 2;
+                v1.x = xyCoords[idx1];
+                v1.y = xyCoords[idx1 + 1];
+
                 if (x < dims[0] - 1) {
-                    idx1 = (y * dims[0] + x) * 2;
-                    idx2 = (y * dims[0] + x + 1) * 2;
-                    diffx = xyCoords[idx2] - xyCoords[idx1];
-                    diffy = xyCoords[idx2 + 1] - xyCoords[idx1 + 1];
-                    dist = diffx * diffx + diffy * diffy;
-                    smallest = smallest < dist ? smallest : dist;
+                    v2.x = xyCoords[idx2];
+                    v2.y = xyCoords[idx2 + 1];
+                    v3.x = xyCoords[idx3];
+                    v3.y = xyCoords[idx3 + 1];
+                    e1 = v1 - v2;
+                    e2 = v3 - v2 if (glm::dot(e1, e2) > 0.0f)    // Need to find the height from v1 to edge v3v2
+                    {
+                        // The area of the parallelogram
+                        float area = glm::length(glm::cross(e1, e2));
+                        float h = area / glm::length(e2);
+                        float h2 = h * h;
+                        smallest = smallest < h2 ? smallest : h2;
+                    }
+                    else    // Just use the length of edge v1v2
+                    {
+                        float len = glm::length(e1);
+                        float len2 = len * len;
+                        smallest = smallest < len2 ? smallest : len2;
+                    }
                 }
 
-                // Second test edge between vertex (x, y) and (x, y+1)
                 if (y < dims[1] - 1) {
-                    idx1 = (y * dims[0] + x) * 2;
-                    idx2 = ((y + 1) * dims[0] + x) * 2;
-                    diffx = xyCoords[idx2] - xyCoords[idx1];
-                    diffy = xyCoords[idx2 + 1] - xyCoords[idx1 + 1];
-                    dist = diffx * diffx + diffy * diffy;
-                    smallest = smallest < dist ? smallest : dist;
+                    v2.x = xyCoords[idx2];
+                    v2.y = xyCoords[idx2 + 1];
+                    v4.x = xyCoords[idx4];
+                    v4.y = xyCoords[idx4 + 1];
+                    e1 = v2 - v1;
+                    e2 = v4 - v1;
+                    if (glm::dot(e1, e2) < 0.0f)    // Need to find the height from v1 to edge v3v4
+                    {
+                        float area = glm::length(glm::cross(e1, e2));
+                        float h = area / glm::length(e1);
+                        float h2 = h * h;
+                        smallest = smallest < h2 ? smallest : h2;
+                    } else    // Just use the length of edge v1v4
+                    {
+                        float len = glm::length(e2);
+                        float len2 = len * len;
+                        smallest = smallest < len2 ? smallest : len2;
+                    }
                 }
             }
 
         // Find the smallest edge among the Z edges
         size_t planeSize = dims[0] * dims[1];
-        for (z = 0; z < dims[2] - 1; z++)
-            for (y = 0; y < dims[1]; y++)
-                for (x = 0; x < dims[0]; x++) {
+        for (size_t z = 0; z < dims[2] - 1; z++)
+            for (size_t y = 0; y < dims[1]; y++)
+                for (size_t x = 0; x < dims[0]; x++) {
                     // Test edge between vertex (x, y, z) and (x, y, z+1)
                     idx1 = z * planeSize + y * dims[0] + x;
                     idx2 = (z + 1) * planeSize + y * dims[0] + x;
