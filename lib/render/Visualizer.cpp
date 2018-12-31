@@ -52,11 +52,11 @@ Visualizer::Visualizer(const ParamsMgr *pm, const DataStatus *dataStatus, string
 {
     MyBase::SetDiagMsg("Visualizer::Visualizer() begin");
 
-    m_paramsMgr = pm;
-    m_dataStatus = dataStatus;
-    m_winName = winName;
+    _paramsMgr = pm;
+    _dataStatus = dataStatus;
+    _winName = winName;
     _glManager = nullptr;
-    m_vizFeatures = nullptr;
+    _vizFeatures = nullptr;
     _insideGLContext = false;
     _imageCaptureEnabled = false;
     _animationCaptureEnabled = false;
@@ -71,21 +71,21 @@ Visualizer::~Visualizer()
     for (int i = 0; i < _renderers.size(); i++) delete _renderers[i];
     _renderers.clear();
 
-    if (m_vizFeatures) delete m_vizFeatures;
+    if (_vizFeatures) delete _vizFeatures;
 }
 
 int Visualizer::resizeGL(int wid, int ht) { return 0; }
 
 int Visualizer::getCurrentTimestep() const
 {
-    vector<string> dataSetNames = m_dataStatus->GetDataMgrNames();
+    vector<string> dataSetNames = _dataStatus->GetDataMgrNames();
 
     bool   first = true;
     size_t min_ts = 0;
     size_t max_ts = 0;
     for (int i = 0; i < dataSetNames.size(); i++) {
         vector<RenderParams *> rParams;
-        m_paramsMgr->GetRenderParams(m_winName, dataSetNames[i], rParams);
+        _paramsMgr->GetRenderParams(_winName, dataSetNames[i], rParams);
 
         if (rParams.size()) {
             // Use local time of first RenderParams instance on window
@@ -95,7 +95,7 @@ int Visualizer::getCurrentTimestep() const
             //
             size_t local_ts = rParams[0]->GetCurrentTimestep();
             size_t my_min_ts, my_max_ts;
-            m_dataStatus->MapLocalToGlobalTimeRange(dataSetNames[i], local_ts, my_min_ts, my_max_ts);
+            _dataStatus->MapLocalToGlobalTimeRange(dataSetNames[i], local_ts, my_min_ts, my_max_ts);
             if (first) {
                 min_ts = my_min_ts;
                 max_ts = my_max_ts;
@@ -147,7 +147,7 @@ int Visualizer::paintEvent(bool fast)
     MatrixManager *mm = _glManager->matrixManager;
 
     // Do not proceed if there is no DataMgr
-    if (!m_dataStatus->GetDataMgrNames().size()) return (0);
+    if (!_dataStatus->GetDataMgrNames().size()) return (0);
 
     _clearFramebuffer();
 
@@ -181,9 +181,9 @@ int Visualizer::paintEvent(bool fast)
     }
 
     // Draw the domain frame and other in-scene features
-    m_vizFeatures->InScenePaint(getCurrentTimestep());
+    _vizFeatures->InScenePaint(getCurrentTimestep());
     GL_ERR_BREAK();
-    m_vizFeatures->DrawText();
+    _vizFeatures->DrawText();
     GL_ERR_BREAK();
     _renderColorbars(getCurrentTimestep());
     GL_ERR_BREAK();
@@ -232,8 +232,8 @@ int Visualizer::initializeGL(GLManager *glManager)
 
     _glManager = glManager;
 
-    m_vizFeatures = new AnnotationRenderer(m_paramsMgr, m_dataStatus, m_winName);
-    m_vizFeatures->InitializeGL(glManager);
+    _vizFeatures = new AnnotationRenderer(_paramsMgr, _dataStatus, _winName);
+    _vizFeatures->InitializeGL(glManager);
 
     // glewExperimental = GL_TRUE;
     GLenum err = glewInit();
@@ -361,11 +361,11 @@ double Visualizer::getPixelSize() const
     return (0.0);
 }
 
-ViewpointParams *Visualizer::getActiveViewpointParams() const { return m_paramsMgr->GetViewpointParams(m_winName); }
+ViewpointParams *Visualizer::getActiveViewpointParams() const { return _paramsMgr->GetViewpointParams(_winName); }
 
-RegionParams *Visualizer::getActiveRegionParams() const { return m_paramsMgr->GetRegionParams(m_winName); }
+RegionParams *Visualizer::getActiveRegionParams() const { return _paramsMgr->GetRegionParams(_winName); }
 
-AnnotationParams *Visualizer::getActiveAnnotationParams() const { return m_paramsMgr->GetAnnotationParams(m_winName); }
+AnnotationParams *Visualizer::getActiveAnnotationParams() const { return _paramsMgr->GetAnnotationParams(_winName); }
 
 int Visualizer::_captureImage(const std::string &path)
 {
@@ -393,7 +393,7 @@ int Visualizer::_captureImage(const std::string &path)
     if (writer == nullptr) goto captureImageEnd;
 
     if (geoTiffOutput) {
-        string projString = m_dataStatus->GetDataMgr(m_dataStatus->GetDataMgrNames()[0])->GetMapProjection();
+        string projString = _dataStatus->GetDataMgr(_dataStatus->GetDataMgrNames()[0])->GetMapProjection();
 
         double m[16];
         vpParams->GetModelViewMatrix(m);
