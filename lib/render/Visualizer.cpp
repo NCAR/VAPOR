@@ -14,9 +14,6 @@
 //
 //	Date:		September, 2013
 //
-//	Description:  Implementation of Visualizer class:
-//		It performs the opengl rendering for visualizers
-//
 #include <vapor/glutil.h>    // Must be included first!!!
 #include <limits>
 #include <algorithm>
@@ -51,13 +48,6 @@
 
 using namespace VAPoR;
 
-/* note:
- * GL_ENUMS used by depth peeling for attaching the color buffers, currently 16 named points exist
- */
-GLenum attach_points[] = {GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1,  GL_COLOR_ATTACHMENT2,  GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4,  GL_COLOR_ATTACHMENT5,
-                          GL_COLOR_ATTACHMENT6,  GL_COLOR_ATTACHMENT7,  GL_COLOR_ATTACHMENT8,  GL_COLOR_ATTACHMENT9, GL_COLOR_ATTACHMENT10, GL_COLOR_ATTACHMENT11,
-                          GL_COLOR_ATTACHMENT12, GL_COLOR_ATTACHMENT13, GL_COLOR_ATTACHMENT14, GL_COLOR_ATTACHMENT15};
-
 Visualizer::Visualizer(const ParamsMgr *pm, const DataStatus *dataStatus, string winName)
 {
     MyBase::SetDiagMsg("Visualizer::Visualizer() begin");
@@ -67,6 +57,7 @@ Visualizer::Visualizer(const ParamsMgr *pm, const DataStatus *dataStatus, string
     m_winName = winName;
     _glManager = nullptr;
     m_vizFeatures = new AnnotationRenderer(pm, dataStatus, winName);
+    _insideGLContext = false;
     _imageCaptureEnabled = false;
     _animationCaptureEnabled = false;
 
@@ -75,32 +66,13 @@ Visualizer::Visualizer(const ParamsMgr *pm, const DataStatus *dataStatus, string
     MyBase::SetDiagMsg("Visualizer::Visualizer() end");
 }
 
-/*
-  Release allocated resources.
-*/
-
 Visualizer::~Visualizer()
 {
     for (int i = 0; i < _renderers.size(); i++) delete _renderers[i];
     _renderers.clear();
 }
 
-//
-//  Set up the OpenGL view port, matrix mode, etc.
-//
-
-int Visualizer::resizeGL(int wid, int ht)
-{
-    // Depth buffers are setup, now we need to setup the color textures
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);    // prevent framebuffers from being messed with
-
-    // prevent textures from being messed with
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    glActiveTexture(GL_TEXTURE0);
-    if (CheckGLError()) return -1;
-    return 0;
-}
+int Visualizer::resizeGL(int wid, int ht) { return 0; }
 
 int Visualizer::getCurrentTimestep() const
 {
@@ -166,6 +138,7 @@ void Visualizer::_applyTransformsForRenderer(Renderer *r)
 
 int Visualizer::paintEvent(bool fast)
 {
+    _insideGLContext = true;
     MyBase::SetDiagMsg("Visualizer::paintGL()");
     GL_ERR_BREAK();
 
@@ -204,12 +177,12 @@ int Visualizer::paintEvent(bool fast)
 
             int myrc = _renderers[i]->paintGL(fast);
             GL_ERR_BREAK();
-            if (myrc < 0) { rc = -1; }
+            if (myrc < 0) rc = -1;
         }
         mm->MatrixModeModelView();
         mm->PopMatrix();
         int myrc = CheckGLErrorMsg(_renderers[i]->GetMyName().c_str());
-        if (myrc < 0) { rc = -1; }
+        if (myrc < 0) rc = -1;
     }
 
     if (m_vizFeatures) {
@@ -245,6 +218,8 @@ int Visualizer::paintEvent(bool fast)
 
     GL_ERR_BREAK();
     if (CheckGLError()) return -1;
+
+    _insideGLContext = false;
     return rc;
 }
 
@@ -262,9 +237,6 @@ void Visualizer::_loadMatricesFromViewpointParams()
     mm->MatrixModeModelView();
     mm->LoadMatrixd(m);
 }
-//
-//  Set up the OpenGL rendering state, and define display list
-//
 
 int Visualizer::initializeGL(GLManager *glManager)
 {
@@ -343,7 +315,7 @@ int Visualizer::placeLights()
     return 0;
 }
 
-Visualizer::OGLVendorType Visualizer::GetVendor()
+Visualizer::GLVendorType Visualizer::GetVendor()
 {
     string ven_str((const char *)glGetString(GL_VENDOR));
     string ren_str((const char *)glGetString(GL_RENDERER));
@@ -364,7 +336,6 @@ Visualizer::OGLVendorType Visualizer::GetVendor()
     } else if ((ven_str.find("intel") != string::npos) || (ren_str.find("intel") != string::npos)) {
         return (INTEL);
     }
-
     return (UNKNOWN);
 }
 
@@ -399,6 +370,7 @@ double Visualizer::getPixelSize() const
 #endif
     return (0.0);
 }
+
 ViewpointParams *Visualizer::getActiveViewpointParams() const { return m_paramsMgr->GetViewpointParams(m_winName); }
 
 RegionParams *Visualizer::getActiveRegionParams() const { return m_paramsMgr->GetRegionParams(m_winName); }
@@ -458,7 +430,6 @@ captureImageEnd:
     return writeReturn;
 }
 
-// Produce an array based on current contents of the (back) buffer
 bool Visualizer::getPixelData(unsigned char *data) const
 {
     ViewpointParams *vpParams = getActiveViewpointParams();
@@ -496,6 +467,7 @@ bool Visualizer::getPixelData(unsigned char *data) const
 
 void Visualizer::_deleteFlaggedRenderers()
 {
+    assert(_insideGLContext);
     vector<Renderer *> renderersCopy = _renderers;
     for (auto it = renderersCopy.begin(); it != renderersCopy.end(); ++it) {
         if ((*it)->IsFlaggedForDeletion()) {
@@ -507,6 +479,7 @@ void Visualizer::_deleteFlaggedRenderers()
 
 int Visualizer::_initializeNewRenderers()
 {
+    assert(_insideGLContext);
     for (Renderer *r : _renderers) {
         if (r->initializeGL(_glManager) < 0) {
             MyBase::SetErrMsg("Failed to initialize renderer %s", r->GetInstanceName().c_str());
@@ -519,6 +492,7 @@ int Visualizer::_initializeNewRenderers()
 
 void Visualizer::_clearFramebuffer()
 {
+    assert(_insideGLContext);
     double clr[3];
     getActiveAnnotationParams()->GetBackgroundColor(clr);
 
