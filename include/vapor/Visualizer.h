@@ -62,7 +62,7 @@ class RENDER_API Visualizer : public MyBase {
 
     //! Method to initialize GL rendering.  Must be called from a GL context.
     //! \param[in] glManager A pointer to a GLManager
-    int initializeGL(GLManager *glManager);
+    int InitializeGL(GLManager *glManager);
 
     //! Set/clear a flag indicating that the trackball has changed the viewpoint.
     //! all the OpenGL rendering is performed in the paintEvent method.  It must be invoked from
@@ -92,8 +92,8 @@ class RENDER_API Visualizer : public MyBase {
 
     //! Move the renderer to the front of the render queue
     //! \param[out] Renderer instance that is moved to front
-    void moveRendererToFront(Renderer *ren);
-    void moveVolumeRenderersToFront();
+    void MoveRendererToFront(Renderer *ren);
+    void MoveVolumeRenderersToFront();
 
     //! Determine the approximate size of a pixel in terms of user coordinates,
     //! at the center of the scene.
@@ -101,7 +101,7 @@ class RENDER_API Visualizer : public MyBase {
 
     //! Turn on or off the image capture enablement.  If on, the next paintEvent will result in capture
     //! Also saves the capture file name
-    int setImageCaptureEnabled(bool onOff, string filename) {
+    int SetImageCaptureEnabled(bool onOff, string filename) {
         if (_animationCaptureEnabled) {
             SetErrMsg("Image capture concurrent with Animation Capture\n");
             return -1;
@@ -116,7 +116,7 @@ class RENDER_API Visualizer : public MyBase {
 
     //! Turn on or off the animation capture enablement.  If on, all paintEvents will result in capture
     //! until it is turned off
-    int setAnimationCaptureEnabled(bool onOff, string filename) {
+    int SetAnimationCaptureEnabled(bool onOff, string filename) {
         if (_imageCaptureEnabled) {
             SetErrMsg("Image capture concurrent with Animation Capture\n");
             return -1;
