@@ -14,9 +14,6 @@
 //
 //	Date:		September, 2013
 //
-//	Description:  Implementation of Visualizer class: 
-//		It performs the opengl rendering for visualizers
-//
 #include <vapor/glutil.h>	// Must be included first!!!
 #include <limits>
 #include <algorithm>
@@ -30,7 +27,6 @@
 #include <xtiffio.h>
 #endif
 
-
 #ifdef WIN32
 #pragma warning(disable : 4996)
 #endif
@@ -41,7 +37,6 @@
 #include <vapor/Renderer.h>
 #include <vapor/DataStatus.h>
 #include <vapor/Visualizer.h>
-
 
 #include <vapor/common.h>
 #include "vapor/GLManager.h"
@@ -54,11 +49,6 @@
 
 using namespace VAPoR;
 
-/* note: 
- * GL_ENUMS used by depth peeling for attaching the color buffers, currently 16 named points exist
- */
-GLenum attach_points[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7, GL_COLOR_ATTACHMENT8, GL_COLOR_ATTACHMENT9, GL_COLOR_ATTACHMENT10, GL_COLOR_ATTACHMENT11, GL_COLOR_ATTACHMENT12, GL_COLOR_ATTACHMENT13, GL_COLOR_ATTACHMENT14, GL_COLOR_ATTACHMENT15};
-
 Visualizer::Visualizer(
 	const ParamsMgr *pm, const DataStatus *dataStatus, string winName
 ) {
@@ -70,6 +60,7 @@ Visualizer::Visualizer(
 	m_winName = winName;
     _glManager = nullptr;
 	m_vizFeatures = new AnnotationRenderer(pm, dataStatus, winName);
+    _insideGLContext = false;
 	_imageCaptureEnabled = false;
 	_animationCaptureEnabled = false;
 	
@@ -79,11 +70,6 @@ Visualizer::Visualizer(
     MyBase::SetDiagMsg("Visualizer::Visualizer() end");
 }
 
-
-/*
-  Release allocated resources.
-*/
-
 Visualizer::~Visualizer()
 {
 	for (int i = 0; i< _renderers.size(); i++)
@@ -91,25 +77,10 @@ Visualizer::~Visualizer()
     _renderers.clear();
 }
 
-
-//
-//  Set up the OpenGL view port, matrix mode, etc.
-//
-
 int Visualizer::resizeGL( int wid, int ht )
 {
-    //Depth buffers are setup, now we need to setup the color textures
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); //prevent framebuffers from being messed with
-
-    //prevent textures from being messed with
-    glBindTexture(GL_TEXTURE_2D, 0); 
-
-    glActiveTexture(GL_TEXTURE0);
-    if(CheckGLError()) return -1;
 	return 0;
-
 }
-	
 
 int Visualizer::getCurrentTimestep() const {
 	vector <string> dataSetNames = m_dataStatus->GetDataMgrNames();
@@ -177,6 +148,7 @@ void Visualizer::_applyTransformsForRenderer(Renderer *r) {
 
 int Visualizer::paintEvent(bool fast)
 {
+    _insideGLContext = true;
 	MyBase::SetDiagMsg("Visualizer::paintGL()");
     GL_ERR_BREAK();
     
@@ -217,16 +189,14 @@ int Visualizer::paintEvent(bool fast)
             
 			int myrc = _renderers[i]->paintGL(fast);
             GL_ERR_BREAK();
-            if (myrc < 0) {
+            if (myrc < 0)
                 rc = -1;
-            }
 		}
         mm->MatrixModeModelView();
         mm->PopMatrix();
 		int myrc = CheckGLErrorMsg(_renderers[i]->GetMyName().c_str());
-        if (myrc < 0) {
+        if (myrc < 0)
             rc = -1;
-        }
 	}
     
     if(m_vizFeatures) {
@@ -266,6 +236,8 @@ int Visualizer::paintEvent(bool fast)
     GL_ERR_BREAK();
     if(CheckGLError())
         return -1;
+    
+    _insideGLContext = false;
 	return rc;
 }
 
@@ -283,9 +255,6 @@ void Visualizer::_loadMatricesFromViewpointParams()
     mm->MatrixModeModelView();
     mm->LoadMatrixd(m);
 }
-//
-//  Set up the OpenGL rendering state, and define display list
-//
 
 int Visualizer::initializeGL(GLManager *glManager)
 {
@@ -377,9 +346,7 @@ int Visualizer::placeLights(){
 }
 
 
-
-
-Visualizer::OGLVendorType Visualizer::GetVendor()
+Visualizer::GLVendorType Visualizer::GetVendor()
 {
 	string ven_str((const char *) glGetString(GL_VENDOR));
 	string ren_str((const char *) glGetString(GL_RENDERER));
@@ -391,31 +358,22 @@ Visualizer::OGLVendorType Visualizer::GetVendor()
 		if (isupper(ren_str[i])) ren_str[i] = tolower(ren_str[i]);
 	}
 
-	if (
-		(ven_str.find("mesa") != string::npos) || 
+	if ((ven_str.find("mesa") != string::npos) ||
 		(ren_str.find("mesa") != string::npos))  {
-
 		return(MESA);
 	}
-	else if (
-		(ven_str.find("nvidia") != string::npos) || 
-		(ren_str.find("nvidia") != string::npos))  {
-
+	else if ((ven_str.find("nvidia") != string::npos) ||
+             (ren_str.find("nvidia") != string::npos))  {
 		return(NVIDIA);
 	}
-	else if (
-		(ven_str.find("ati") != string::npos) || 
-		(ren_str.find("ati") != string::npos))  {
-
+	else if ((ven_str.find("ati") != string::npos) ||
+             (ren_str.find("ati") != string::npos))  {
 		return(ATI);
 	}
-	else if (
-		(ven_str.find("intel") != string::npos) || 
-		(ren_str.find("intel") != string::npos))  {
-
+	else if ((ven_str.find("intel") != string::npos) ||
+             (ren_str.find("intel") != string::npos))  {
 		return(INTEL);
 	}
-
 	return(UNKNOWN);
 }
 
@@ -450,17 +408,22 @@ double Visualizer::getPixelSize() const {
 #endif
 	return(0.0);
 }
+
+
 ViewpointParams* Visualizer::getActiveViewpointParams()  const {
 	return m_paramsMgr->GetViewpointParams(m_winName);
 }
+
 
 RegionParams* Visualizer::getActiveRegionParams()  const {
 	return m_paramsMgr->GetRegionParams(m_winName);
 }
 
+
 AnnotationParams* Visualizer::getActiveAnnotationParams()  const {
 	return m_paramsMgr->GetAnnotationParams(m_winName);
 }
+
 
 int Visualizer:: _captureImage(const std::string &path)
 {
@@ -516,9 +479,9 @@ captureImageEnd:
 	return writeReturn;
 }
 
-//Produce an array based on current contents of the (back) buffer
-bool Visualizer::getPixelData(unsigned char* data) const {
 
+bool Visualizer::getPixelData(unsigned char* data) const
+{
 	ViewpointParams* vpParams = getActiveViewpointParams();
 
 	size_t width, height;
@@ -551,8 +514,10 @@ bool Visualizer::getPixelData(unsigned char* data) const {
 	return true;
 }
 
+
 void Visualizer::_deleteFlaggedRenderers()
 {
+    assert(_insideGLContext);
     vector<Renderer *> renderersCopy = _renderers;
     for (auto it = renderersCopy.begin(); it != renderersCopy.end(); ++it) {
         if ((*it)->IsFlaggedForDeletion()) {
@@ -562,8 +527,10 @@ void Visualizer::_deleteFlaggedRenderers()
     }
 }
 
+
 int Visualizer::_initializeNewRenderers()
 {
+    assert(_insideGLContext);
     for (Renderer *r : _renderers) {
         if (r->initializeGL(_glManager) < 0) {
             MyBase::SetErrMsg("Failed to initialize renderer %s", r->GetInstanceName().c_str());
@@ -574,8 +541,10 @@ int Visualizer::_initializeNewRenderers()
     return 0;
 }
 
+
 void Visualizer::_clearFramebuffer()
 {
+    assert(_insideGLContext);
     double clr[3];
     getActiveAnnotationParams()->GetBackgroundColor(clr);
     
@@ -583,6 +552,7 @@ void Visualizer::_clearFramebuffer()
     glClearColor(clr[0],clr[1],clr[2], 1.f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 }
+
 
 void Visualizer::_renderColorbars(int timeStep){
 	MatrixManager *mm = _glManager->matrixManager;
@@ -602,6 +572,7 @@ void Visualizer::_renderColorbars(int timeStep){
 	mm->MatrixModeModelView();
     mm->PopMatrix();
 }
+
 
 void Visualizer::incrementPath(string& s){
 	//truncate the last 4 characters (remove .tif or .jpg)
@@ -631,5 +602,4 @@ void Visualizer::incrementPath(string& s){
 	string sval = string(result);
 	string newbody = s.substr(0, lastpos+1);
 	s = newbody + sval + s_end;
-
 }
