@@ -109,7 +109,7 @@ int Visualizer::resizeGL(int wid, int ht) {
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glActiveTexture(GL_TEXTURE0);
-    if (printOpenGLError())
+    if (CheckGLError())
         return -1;
     return 0;
 }
@@ -252,7 +252,7 @@ int Visualizer::paintEvent(bool fast) {
         }
         _glManager->matrixManager->MatrixModeModelView();
         _glManager->matrixManager->PopMatrix();
-        int myrc = printOpenGLErrorMsg(_renderer[i]->GetMyName().c_str());
+        int myrc = CheckGLErrorMsg(_renderer[i]->GetMyName().c_str());
         if (myrc < 0) {
             rc = -1;
         }
@@ -294,29 +294,29 @@ int Visualizer::paintEvent(bool fast) {
     }
 
     GL_ERR_BREAK();
-    if (printOpenGLError())
+    if (CheckGLError())
         return -1;
     return rc;
 }
 
 int Visualizer::paintSetup(int timeStep) {
-    assert(!printOpenGLError());
+    assert(!CheckGLError());
     ViewpointParams *vpParams = getActiveViewpointParams();
 
     double m[16];
     vpParams->GetProjectionMatrix(m);
     _glManager->matrixManager->MatrixModeProjection();
     _glManager->matrixManager->LoadMatrixd(m);
-    assert(!printOpenGLError());
+    assert(!CheckGLError());
 
     vpParams->GetModelViewMatrix(m);
     _glManager->matrixManager->MatrixModeModelView();
     _glManager->matrixManager->LoadMatrixd(m);
-    assert(!printOpenGLError());
+    assert(!CheckGLError());
 
     //Improve polygon antialiasing
     glEnable(GL_MULTISAMPLE);
-    assert(!printOpenGLError());
+    assert(!CheckGLError());
 
     //Lights are positioned relative to the view direction, do this before the modelView matrix is set
     if (placeLights())
@@ -358,7 +358,7 @@ int Visualizer::initializeGL(GLManager *glManager) {
     _previousTimeStep = -1;
     _previousFrameNum = -1;
     glEnable(GL_MULTISAMPLE);
-    if (printOpenGLError())
+    if (CheckGLError())
         return -1;
     //Check to see if we are using MESA:
     if (GetVendor() == MESA) {
@@ -383,7 +383,7 @@ int Visualizer::initializeGL(GLManager *glManager) {
 
     //Initialize existing renderers:
     //
-    if (printOpenGLError())
+    if (CheckGLError())
         return -1;
 
 #ifdef VAPOR3_0_0_ALPHA
@@ -528,7 +528,7 @@ Renderer *Visualizer::getRenderer(string type, string instance) const {
 }
 
 int Visualizer::placeLights() {
-    if (printOpenGLError())
+    if (CheckGLError())
         return -1;
     const ViewpointParams *vpParams = getActiveViewpointParams();
     size_t nLights = vpParams->getNumLights();
@@ -543,7 +543,7 @@ int Visualizer::placeLights() {
         }
     }
     if (nLights > 0) {
-        printOpenGLError();
+        CheckGLError();
         float specColor[4], ambColor[4];
         float diffLight[3], specLight[3];
         GLfloat lmodel_ambient[4];
@@ -570,11 +570,11 @@ int Visualizer::placeLights() {
         //glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
         GL_LEGACY(glEnable(GL_LIGHT0));
-        if (printOpenGLError()) {
+        if (CheckGLError()) {
             return -1;
         }
         if (nLights > 1) {
-            if (printOpenGLError())
+            if (CheckGLError())
                 return -1;
             GL_LEGACY(glLightfv(GL_LIGHT1, GL_POSITION, lightDirs[1]));
             specLight[0] = specLight[1] = specLight[2] = vpParams->getSpecularCoeff(1);
@@ -587,7 +587,7 @@ int Visualizer::placeLights() {
         } else {
 
             GL_LEGACY(glDisable(GL_LIGHT1));
-            if (printOpenGLError())
+            if (CheckGLError())
                 return -1;
         }
         if (nLights > 2) {
@@ -599,13 +599,13 @@ int Visualizer::placeLights() {
                 glLightfv(GL_LIGHT2, GL_SPECULAR, specLight);
                 glLightfv(GL_LIGHT2, GL_AMBIENT, ambColor);
                 glEnable(GL_LIGHT2););
-            if (printOpenGLError())
+            if (CheckGLError())
                 return -1;
         } else {
             GL_LEGACY(glDisable(GL_LIGHT2));
         }
     }
-    if (printOpenGLError())
+    if (CheckGLError())
         return -1;
     return 0;
 }
