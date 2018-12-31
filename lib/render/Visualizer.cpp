@@ -72,7 +72,6 @@ Visualizer::Visualizer(const ParamsMgr *pm, const DataStatus *dataStatus, string
     _imageCaptureEnabled = false;
     _animationCaptureEnabled = false;
 
-    _renderOrder.clear();
     _renderer.clear();
 
     MyBase::SetDiagMsg("Visualizer::Visualizer() end");
@@ -90,7 +89,6 @@ Visualizer::~Visualizer()
         TextObject::clearTextObjects(_renderer[i]);
 #endif
     }
-    _renderOrder.clear();
     _renderer.clear();
 #ifdef VAPOR3_0_0_ALPHA
     _manipHolder.clear();
@@ -344,14 +342,10 @@ void Visualizer::moveRendererToFront(const Renderer *ren)
     assert(renIndex != -1);
 
     Renderer *save = _renderer[renIndex];
-    int       saveOrder = _renderOrder[renIndex];
 
-    for (int i = renIndex; i < _renderer.size() - 1; i++) {
-        _renderer[i] = _renderer[i + 1];
-        _renderOrder[i] = _renderOrder[i + 1];
-    }
+    for (int i = renIndex; i < _renderer.size() - 1; i++) _renderer[i] = _renderer[i + 1];
+
     _renderer[_renderer.size() - 1] = save;
-    _renderOrder[_renderer.size() - 1] = saveOrder;
 }
 
 void Visualizer::moveVolumeRenderersToFront()
@@ -367,43 +361,7 @@ void Visualizer::moveVolumeRenderersToFront()
     }
 }
 
-/*
- * Insert a renderer to this visualizer
- * Add it after all renderers of lower render order
- */
-int Visualizer::insertRenderer(Renderer *ren, int newOrder)
-{
-    // For the first renderer:
-    if (_renderer.size() == 0) {
-        _renderer.push_back(ren);
-        _renderOrder.push_back(newOrder);
-        //		ren->initializeGL();
-        return 0;
-    }
-    // Find a renderer of lower order
-    int i;
-    for (i = _renderer.size() - 1; i >= 0; i--) {
-        if (_renderOrder[i] < newOrder) break;
-    }
-    // Remember the position in front of where this renderer will go:
-    int lastPosn = i;
-    int maxPosn = _renderer.size() - 1;
-    // Push the last one back, increasing the size of these vectors:
-    _renderer.push_back(_renderer[maxPosn]);
-    _renderOrder.push_back(_renderOrder[maxPosn]);
-    // Now the size is maxPosn+1, so copy everything up one position,
-    // Until we get to lastPosn (which we do not copy)
-    for (i = maxPosn; i > lastPosn + 1; i--) {
-        _renderer[i] = _renderer[i - 1];
-        _renderOrder[i] = _renderOrder[i - 1];
-    }
-    // Finally insert the new renderer at lastPosn+1
-    _renderer[lastPosn + 1] = ren;
-
-    _renderOrder[lastPosn + 1] = newOrder;
-    //	ren->initializeGL();
-    return lastPosn + 1;
-}
+void Visualizer::InsertRenderer(Renderer *ren) { _renderer.push_back(ren); }
 
 // Remove all renderers.  This is needed when we load new data into
 // an existing session
@@ -415,7 +373,6 @@ void Visualizer::removeAllRenderers()
     for (int i = _renderer.size() - 1; i >= 0; i--) { delete _renderer[i]; }
 #endif
 
-    _renderOrder.clear();
     _renderer.clear();
 }
 /*
@@ -443,12 +400,8 @@ bool Visualizer::RemoveRenderer(Renderer *ren)
 
     // Move renderers up.
     int numRenderers = _renderer.size() - 1;
-    for (int j = foundIndex; j < numRenderers; j++) {
-        _renderer[j] = _renderer[j + 1];
-        _renderOrder[j] = _renderOrder[j + 1];
-    }
+    for (int j = foundIndex; j < numRenderers; j++) { _renderer[j] = _renderer[j + 1]; }
     _renderer.resize(numRenderers);
-    _renderOrder.resize(numRenderers);
     return true;
 }
 

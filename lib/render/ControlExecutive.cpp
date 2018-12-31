@@ -168,7 +168,7 @@ int ControlExec::ActivateRender(string winName, string dataSetName, string rende
             _paramsMgr->EndSaveStateGroup();
             return (-1);
         }
-        v->insertSortedRenderer(ren);
+        v->InsertRenderer(ren);
     }
 
     RenderParams *rp = ren->GetActiveParams();
@@ -220,7 +220,7 @@ int ControlExec::ActivateRender(string winName, string dataSetName, const Render
             _paramsMgr->EndSaveStateGroup();
             return (-1);
         }
-        v->insertSortedRenderer(ren);
+        v->InsertRenderer(ren);
     }
 
     RenderParams *newRP = ren->GetActiveParams();
