@@ -692,6 +692,7 @@ void Visualizer::_clearFramebuffer()
     double clr[3];
     getActiveAnnotationParams()->GetBackgroundColor(clr);
 
+    glDepthMask(GL_TRUE);
     glClearColor(clr[0], clr[1], clr[2], 1.f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 }
