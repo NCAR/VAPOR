@@ -50,7 +50,6 @@
 #include <vapor/DVRenderer.h>
 
 using namespace VAPoR;
-bool Visualizer::_regionShareFlag = true;
 
 /* note:
  * GL_ENUMS used by depth peeling for attaching the color buffers, currently 16 named points exist

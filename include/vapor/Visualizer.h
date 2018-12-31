@@ -139,12 +139,6 @@ public:
     //! at the center of the scene.
     double getPixelSize() const;
 
-    //! Set the region share flag, indicating whether the active visualizer is sharing
-    //! the Region.  This is needed for Manip rendering, and is set whenever the active visualizer
-    //! is changed.
-    //! \param[in] true if the active visualizer uses the shared (global) Region
-    static void setRegionShareFlag(bool regionIsShared) { _regionShareFlag = regionIsShared; }
-
     //! Turn on or off the image capture enablement.  If on, the next paintEvent will result in capture
     //! Also saves the capture file name
     int setImageCaptureEnabled(bool onOff, string filename)
@@ -217,11 +211,6 @@ private:
     //! \return position in the renderer queue
     int insertRenderer(Renderer *ren, int order);
 
-    //! Determine if the active visualizer is using the shared Region.
-    //! \sa Visualizer::setRegionShareFlag()
-    //! \return true if the active visualizer uses the shared Region.
-    static bool activeWinSharesRegion() { return _regionShareFlag; }
-
     //! Definition of OpenGL Vendors
     enum OGLVendorType { UNKNOWN = 0, MESA, NVIDIA, ATI, INTEL };
 
@@ -276,21 +265,6 @@ private:
 
     vector<Renderer *> _renderer;
     vector<int>        _renderOrder;
-
-    // This flag is true if the active window is sharing the region.
-    // If the current window is not active, it will still share the region, if
-    // the region is shared, and the active region is shared.
-    static bool _regionShareFlag;
-
-    //! Reset the near/far clipping, so that the near and far clipping
-    //! planes are wide enough
-    //! to view twice the entire region from the current camera position.
-    //! If the camera is
-    //! inside the doubled region, make the near clipping plane 1% of the
-    //! region size.
-    //! \param[in] vpParams ViewpointParams* used to determine current
-    //! camera position.
-    void resetNearFar();
 };
 
 };    // namespace VAPoR
