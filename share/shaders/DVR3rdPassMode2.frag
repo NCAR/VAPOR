@@ -366,7 +366,19 @@ void main(void)
         else 
             discard;    // this case always happens on the boundary.
     }
-    
+
+    // Set depth value at the backface minus 1/100 of a step size,
+    //   so it's always inside of the volume.
+    gl_FragDepth     =  CalculateDepth( stopModel - 0.01 * stepSize3D );
+
+    // If something else on the scene results in a shallower depth, we need to 
+    //    compare depth at every step.
+    bool  shallow    = false;
+    // Retrieve depth of other objects on the scene, minus a tiny value to avoid equal depth.
+    float otherDepth = texture( depthTexture, fragTex ).x - ULP10;
+    if(   otherDepth < gl_FragDepth )
+          shallow    = true;
+
     // Give color to step 1
     vec3 step1Tex = CalculatePosTex( step1CellIdx, step1Model );
     if( !ShouldSkip( step1Tex, step1Model ) )
@@ -397,6 +409,12 @@ void main(void)
             break;
         }
 
+        if( shallow && ( CalculateDepth(step2Model) > otherDepth ) )
+        {
+            earlyTerm      = 3;
+            break;
+        }
+
         vec3 step2Tex      = CalculatePosTex( step2CellIdx, step2Model );
         float step2Value   = texture( volumeTexture, step2Tex ).r;
         float valTranslate = (step2Value - colorMapRange.x) / colorMapRange.z;
@@ -409,8 +427,14 @@ void main(void)
         step1Model   = step2Model;
     }
 
+    // If loop terminated early, we set depth value at step1 position. Otherwise, this fragment 
+    //    will have the depth value at the back of this volume, which is already set.
+    if( earlyTerm > 0 )
+        gl_FragDepth   = CalculateDepth( step1Model );
+
+    /* Debug use only
     if( earlyTerm == 2 && !CellOnBoundary( step1CellIdx ) )
-        color = vec4( 0.9, 0.2, 0.2, 1.0);
+        color = vec4( 0.9, 0.2, 0.2, 1.0); */
 
 }
 
