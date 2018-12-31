@@ -31,8 +31,8 @@
 #include <QContextMenuEvent>
 #include <QPaintEvent>
 #include <QMouseEvent>
-#include "vapor/Visualizer.h"
 #include "GUIStateParams.h"
+#include <vapor/ParamsMgr.h>
 
 #include <qpoint.h>
 #include <list>

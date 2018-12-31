@@ -40,7 +40,6 @@
 #include <vapor/DataMgrUtils.h>
 #include <vapor/BarbRenderer.h>
 #include <vapor/BarbParams.h>
-#include <vapor/Visualizer.h>
 
 #include <vapor/regionparams.h>
 #include <vapor/ViewpointParams.h>

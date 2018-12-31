@@ -11,6 +11,8 @@
 #include <vapor/ParamsMgr.h>
 #include <vapor/ControlExecutive.h>
 #include <vapor/CalcEngineMgr.h>
+#include <vapor/Visualizer.h>
+#include <vapor/DataStatus.h>
 
 using namespace VAPoR;
 using namespace std;
@@ -341,6 +343,18 @@ int ControlExec::LoadState(string stateFile) {
     return (0);
 }
 
+void ControlExec::SetNumThreads(size_t nthreads) {
+    _dataStatus->SetNumThreads(nthreads);
+}
+
+size_t ControlExec::GetNumThreads() const {
+    return (_dataStatus->GetNumThreads());
+}
+
+void ControlExec::SetCacheSize(size_t sizeMB) {
+    _dataStatus->SetCacheSize(sizeMB);
+}
+
 int ControlExec::activateClassRenderers(
     string vizName, string dataSetName, string pClassName,
     vector<string> instNames, bool reportErrs) {
@@ -661,6 +675,10 @@ vector<string> ControlExec::GetRenderInstances(
     string paramsType = RendererFactory::Instance()->GetParamsClassFromRenderClass(renderType);
 
     return (_paramsMgr->GetRenderParamInstances(winName, paramsType));
+}
+
+vector<string> ControlExec::GetAllRenderClasses() {
+    return (RendererFactory::Instance()->GetFactoryNames());
 }
 
 bool ControlExec::RenderLookup(
