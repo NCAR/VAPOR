@@ -144,13 +144,14 @@ bool ShouldSkip( const in vec3 tc, const in vec3 mc )
         return true;
 
     vec4 positionModel = vec4( mc, 1.0 );
-    float prd[6];
     for( int i = 0; i < 6; i++ )
-        prd[i] = dot(positionModel, clipPlanes[i]);
+    {
+        if( dot(positionModel, clipPlanes[i]) < 0.0 )
+            return true;
+    }
 
-    // Returns true if one product is less than zero
-    return ( prd[0] < 0.0 || prd[1] < 0.0 || prd[2] < 0.0 ||
-             prd[3] < 0.0 || prd[4] < 0.0 || prd[5] < 0.0  );
+    // Now we know that this position shouldn't be skipped!
+    return false;
 }
 
 //
