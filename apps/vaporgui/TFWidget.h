@@ -72,6 +72,8 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     float getOpacity();
     void RefreshHistogram();
     void SetAutoUpdateParamChanged(bool changed);
+    bool IsOpacityIntegrated() const;
+    void SetOpacityIntegrated(bool value);
 
   private slots:
     void loadTF();
@@ -109,6 +111,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
 
     void connectWidgets();
 
+    void calculateStride(string varName);
     void updateQtWidgets();
     void updateColorInterpolation();
     void updateConstColor();
@@ -137,8 +140,8 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
 
     string getTFVariableName(bool mainTF);
 
-    int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
-    int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);
+    int convertOpacityToSliderValue(float opacity) const;
+    float convertSliderValueToOpacity(int value) const;
 
     std::vector<double> _minExt;
     std::vector<double> _maxExt;
@@ -146,6 +149,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     int _cLevel;
     int _refLevel;
     int _timeStep;
+    int _stride;
     string _mainVarName;
     string _secondaryVarName;
     bool _initialized;
@@ -154,6 +158,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     bool _secondaryHistoRangeChanged;
     bool _mainHistoNeedsRefresh;
     bool _secondaryHistoNeedsRefresh;
+    bool _isOpacityIntegrated;
 
     bool _discreteColormap;
     bool _textChanged;
