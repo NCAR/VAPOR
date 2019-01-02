@@ -15,7 +15,7 @@ class RENDER_API DVRenderer : public RayCaster {
                DataMgr *dataMgr);
 
     static std::string GetClassType() {
-        return ("VolumeRenderer");
+        return ("Volume");
     }
 
   protected:

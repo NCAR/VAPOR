@@ -134,6 +134,7 @@ void NewRendererDialog::_buttonChecked() {
 }
 
 void NewRendererDialog::_buttonDoubleClicked() {
+    _buttonChecked();
     this->accept();
 }
 
@@ -599,6 +600,8 @@ void RenderHolder::Update() {
     int row = _getRow(activeRenderInst);
     if (row >= 0)
         _vaporTable->SetActiveRow(row);
+    else
+        p->SetActiveRenderer(activeViz, "", "");
 
     _updateDupCombo();
 
