@@ -187,7 +187,7 @@ bool SettingsParams::GetWinSizeLock() const {
 }
 
 bool SettingsParams::GetAutoStretchEnabled() const {
-	return (0!= GetValueLong(_autoStretchTag, (long) false));
+	return (0!= GetValueLong(_autoStretchTag, (long) true));
 }
 
 void SettingsParams::SetAutoStretchEnabled(bool val) {
