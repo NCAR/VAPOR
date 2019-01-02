@@ -35,6 +35,7 @@
 #include <QMdiSubWindow>
 #include <vapor/ControlExecutive.h>
 #include <vapor/ParamsMgr.h>
+#include <vapor/DataStatus.h>
 
 #include "AnimationParams.h"
 #include "MouseModeParams.h"
@@ -296,6 +297,7 @@ void VizWinMgr::_vizAboutToDisappear(string vizName) {
     GUIStateParams *p = _getStateParams();
     string activeViz = p->GetActiveVizName();
 
+    itr->second->makeCurrent();
     _controlExec->RemoveVisualizer(vizName);
 
     // disconnect all signals from window
