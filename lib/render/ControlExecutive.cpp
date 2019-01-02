@@ -11,6 +11,8 @@
 #include <vapor/ParamsMgr.h>
 #include <vapor/ControlExecutive.h>
 #include <vapor/CalcEngineMgr.h>
+#include <vapor/Visualizer.h>
+#include <vapor/DataStatus.h>
 
 using namespace VAPoR;
 using namespace std;
@@ -79,7 +81,7 @@ int ControlExec::InitializeViz(string winName, GLManager *glManager)
         return -1;
     }
 
-    if (v->initializeGL(glManager) < 0) {
+    if (v->InitializeGL(glManager) < 0) {
         SetErrMsg("InitializeGL failure");
         return -1;
     }
@@ -142,7 +144,7 @@ int ControlExec::ActivateRender(string winName, string dataSetName, string rende
         return -1;
     }
 
-    Renderer *ren = v->getRenderer(renderType, renderName);
+    Renderer *ren = v->GetRenderer(renderType, renderName);
 
     _paramsMgr->BeginSaveStateGroup("ActivateRender");
 
@@ -166,15 +168,15 @@ int ControlExec::ActivateRender(string winName, string dataSetName, string rende
             _paramsMgr->EndSaveStateGroup();
             return (-1);
         }
-        v->insertSortedRenderer(ren);
+        v->InsertRenderer(ren);
     }
 
     RenderParams *rp = ren->GetActiveParams();
     assert(rp);
 
     rp->SetEnabled(on);
-    v->moveRendererToFront(ren);
-    v->moveVolumeRenderersToFront();
+    v->MoveRendererToFront(ren);
+    v->MoveVolumeRenderersToFront();
 
     _paramsMgr->EndSaveStateGroup();
 
@@ -198,7 +200,7 @@ int ControlExec::ActivateRender(string winName, string dataSetName, const Render
 
     string renderType = RendererFactory::Instance()->GetRenderClassFromParamsClass(rp->GetName());
 
-    Renderer *ren = v->getRenderer(renderType, renderName);
+    Renderer *ren = v->GetRenderer(renderType, renderName);
 
     _paramsMgr->BeginSaveStateGroup("ActivateRender");
 
@@ -218,7 +220,7 @@ int ControlExec::ActivateRender(string winName, string dataSetName, const Render
             _paramsMgr->EndSaveStateGroup();
             return (-1);
         }
-        v->insertSortedRenderer(ren);
+        v->InsertRenderer(ren);
     }
 
     RenderParams *newRP = ren->GetActiveParams();
@@ -244,11 +246,8 @@ void ControlExec::_removeRendererHelper(string winName, string dataSetName, stri
     Visualizer *v = getVisualizer(winName);
     if (!v) return;
 
-    Renderer *ren = v->getRenderer(renderType, renderName);
+    Renderer *ren = v->GetRenderer(renderType, renderName);
     if (!ren) return;
-
-    // v->RemoveRenderer(ren);
-    // delete ren;
 
     ren->FlagForDeletion();
 
@@ -303,6 +302,12 @@ int ControlExec::LoadState(string stateFile)
 
     return (0);
 }
+
+void ControlExec::SetNumThreads(size_t nthreads) { _dataStatus->SetNumThreads(nthreads); }
+
+size_t ControlExec::GetNumThreads() const { return (_dataStatus->GetNumThreads()); }
+
+void ControlExec::SetCacheSize(size_t sizeMB) { _dataStatus->SetCacheSize(sizeMB); }
 
 int ControlExec::activateClassRenderers(string vizName, string dataSetName, string pClassName, vector<string> instNames, bool reportErrs)
 {
@@ -423,7 +428,7 @@ int ControlExec::EnableImageCapture(string filename, string winName)
         SetErrMsg("Invalid Visualizer \"%s\"", winName.c_str());
         return -1;
     }
-    if (v->setImageCaptureEnabled(true, filename)) {
+    if (v->SetImageCaptureEnabled(true, filename)) {
         SetErrMsg("Visualizer (%s) failed to enable capturing  image.", winName.c_str());
         return -1;
     }
@@ -449,7 +454,7 @@ int ControlExec::EnableAnimationCapture(string winName, bool onOff, string filen
         return -1;
     }
 
-    if (v->setAnimationCaptureEnabled(onOff, filename)) return -1;
+    if (v->SetAnimationCaptureEnabled(onOff, filename)) return -1;
     return 0;
 }
 
@@ -570,6 +575,8 @@ vector<string> ControlExec::GetRenderInstances(string winName, string renderType
 
     return (_paramsMgr->GetRenderParamInstances(winName, paramsType));
 }
+
+vector<string> ControlExec::GetAllRenderClasses() { return (RendererFactory::Instance()->GetFactoryNames()); }
 
 bool ControlExec::RenderLookup(string instName, string &winName, string &dataSetName, string &renderType) const
 {

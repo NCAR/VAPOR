@@ -14,9 +14,6 @@
 //
 //	Date:		September, 2013
 //
-//	Description:  Implementation of Visualizer class:
-//		It performs the opengl rendering for visualizers
-//
 #include <vapor/glutil.h>    // Must be included first!!!
 #include <limits>
 #include <algorithm>
@@ -50,81 +47,45 @@
 #include <vapor/DVRenderer.h>
 
 using namespace VAPoR;
-bool Visualizer::_regionShareFlag = true;
-
-/* note:
- * GL_ENUMS used by depth peeling for attaching the color buffers, currently 16 named points exist
- */
-GLenum attach_points[] = {GL_COLOR_ATTACHMENT0,  GL_COLOR_ATTACHMENT1,  GL_COLOR_ATTACHMENT2,  GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4,  GL_COLOR_ATTACHMENT5,
-                          GL_COLOR_ATTACHMENT6,  GL_COLOR_ATTACHMENT7,  GL_COLOR_ATTACHMENT8,  GL_COLOR_ATTACHMENT9, GL_COLOR_ATTACHMENT10, GL_COLOR_ATTACHMENT11,
-                          GL_COLOR_ATTACHMENT12, GL_COLOR_ATTACHMENT13, GL_COLOR_ATTACHMENT14, GL_COLOR_ATTACHMENT15};
 
 Visualizer::Visualizer(const ParamsMgr *pm, const DataStatus *dataStatus, string winName)
 {
     MyBase::SetDiagMsg("Visualizer::Visualizer() begin");
 
-    m_paramsMgr = pm;
-    m_dataStatus = dataStatus;
-    m_winName = winName;
+    _paramsMgr = pm;
+    _dataStatus = dataStatus;
+    _winName = winName;
     _glManager = nullptr;
-    m_vizFeatures = new AnnotationRenderer(pm, dataStatus, winName);
-    m_viewpointDirty = true;
-
+    _vizFeatures = nullptr;
+    _insideGLContext = false;
     _imageCaptureEnabled = false;
     _animationCaptureEnabled = false;
 
-    _renderOrder.clear();
-    _renderer.clear();
+    _renderers.clear();
 
     MyBase::SetDiagMsg("Visualizer::Visualizer() end");
 }
 
-/*
-  Release allocated resources.
-*/
-
 Visualizer::~Visualizer()
 {
-    for (int i = 0; i < _renderer.size(); i++) {
-        delete _renderer[i];
-#ifdef VAPOR3_0_0_ALPHA
-        TextObject::clearTextObjects(_renderer[i]);
-#endif
-    }
-    _renderOrder.clear();
-    _renderer.clear();
-#ifdef VAPOR3_0_0_ALPHA
-    _manipHolder.clear();
-#endif
+    for (int i = 0; i < _renderers.size(); i++) delete _renderers[i];
+    _renderers.clear();
+
+    if (_vizFeatures) delete _vizFeatures;
 }
 
-//
-//  Set up the OpenGL view port, matrix mode, etc.
-//
+int Visualizer::resizeGL(int wid, int ht) { return 0; }
 
-int Visualizer::resizeGL(int wid, int ht)
+int Visualizer::_getCurrentTimestep() const
 {
-    // Depth buffers are setup, now we need to setup the color textures
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);    // prevent framebuffers from being messed with
-
-    // prevent textures from being messed with
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    glActiveTexture(GL_TEXTURE0);
-    if (printOpenGLError()) return -1;
-    return 0;
-}
-
-int Visualizer::getCurrentTimestep() const
-{
-    vector<string> dataSetNames = m_dataStatus->GetDataMgrNames();
+    vector<string> dataSetNames = _dataStatus->GetDataMgrNames();
 
     bool   first = true;
     size_t min_ts = 0;
     size_t max_ts = 0;
     for (int i = 0; i < dataSetNames.size(); i++) {
         vector<RenderParams *> rParams;
-        m_paramsMgr->GetRenderParams(m_winName, dataSetNames[i], rParams);
+        _paramsMgr->GetRenderParams(_winName, dataSetNames[i], rParams);
 
         if (rParams.size()) {
             // Use local time of first RenderParams instance on window
@@ -134,7 +95,7 @@ int Visualizer::getCurrentTimestep() const
             //
             size_t local_ts = rParams[0]->GetCurrentTimestep();
             size_t my_min_ts, my_max_ts;
-            m_dataStatus->MapLocalToGlobalTimeRange(dataSetNames[i], local_ts, my_min_ts, my_max_ts);
+            _dataStatus->MapLocalToGlobalTimeRange(dataSetNames[i], local_ts, my_min_ts, my_max_ts);
             if (first) {
                 min_ts = my_min_ts;
                 max_ts = my_max_ts;
@@ -150,11 +111,11 @@ int Visualizer::getCurrentTimestep() const
     return (min_ts);
 }
 
-void Visualizer::applyTransforms(int i)
+void Visualizer::_applyTransformsForRenderer(Renderer *r)
 {
-    string datasetName = _renderer[i]->GetMyDatasetName();
-    string myName = _renderer[i]->GetMyName();
-    string myType = _renderer[i]->GetMyType();
+    string datasetName = r->GetMyDatasetName();
+    string myName = r->GetMyName();
+    string myType = r->GetMyType();
 
     VAPoR::ViewpointParams *vpParams = getActiveViewpointParams();
     vector<double>          scales, rotations, translations, origin;
@@ -166,9 +127,6 @@ void Visualizer::applyTransforms(int i)
     origin = t->GetOrigin();
 
     MatrixManager *mm = _glManager->matrixManager;
-
-    mm->MatrixModeModelView();
-    mm->PushMatrix();
 
     mm->Translate(origin[0], origin[1], origin[2]);
     mm->Scale(scales[0], scales[1], scales[2]);
@@ -182,104 +140,64 @@ void Visualizer::applyTransforms(int i)
 
 int Visualizer::paintEvent(bool fast)
 {
+    _insideGLContext = true;
     MyBase::SetDiagMsg("Visualizer::paintGL()");
     GL_ERR_BREAK();
 
+    MatrixManager *mm = _glManager->matrixManager;
+
     // Do not proceed if there is no DataMgr
-    if (!m_dataStatus->GetDataMgrNames().size()) return (0);
+    if (!_dataStatus->GetDataMgrNames().size()) return (0);
 
-    if (!fbSetup()) return 0;
+    _clearFramebuffer();
 
-    // Set up the OpenGL environment
-    int timeStep = getCurrentTimestep();
-    if (timeStep < 0) {
-        MyBase::SetErrMsg("Invalid time step");
-        return -1;
-    }
+    _loadMatricesFromViewpointParams();
+    if (_configureLighting()) return -1;
 
-    if (paintSetup(timeStep)) return -1;
-    // make sure to capture whenever the time step or frame index changes (once we implement capture!)
-
-    if (timeStep != _previousTimeStep) { _previousTimeStep = timeStep; }
-
-    // Prepare for Renderers
-    // Make the depth buffer writable
     glDepthMask(GL_TRUE);
-    // and readable
     glEnable(GL_DEPTH_TEST);
-    // Prepare for alpha values:
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    vector<Renderer *> renderersCopy = _renderer;
-    for (auto it = renderersCopy.begin(); it != renderersCopy.end(); ++it) {
-        if ((*it)->IsFlaggedForDeletion()) {
-            RemoveRenderer(*it);
-            delete *it;
-        }
-    }
+    _deleteFlaggedRenderers();
+    if (_initializeNewRenderers() < 0) return -1;
 
-    // Now we are ready for all the different renderers to proceed.
-    // Sort them;  If they are opaque, they go first.  If not opaque, they
-    // are sorted back-to-front.  Note: This only works if all the geometry of a renderer is ordered by
-    // a simple depth test.
     int rc = 0;
-    // Now go through all the active renderers, provided the error has not been set
-    for (int i = 0; i < _renderer.size(); i++) {
-        // If a renderer is not initialized, or if its bypass flag is set, then don't render.
-        // Otherwise push and pop the GL matrix stack, and all attribs
-        // Push or reset state
+    for (int i = 0; i < _renderers.size(); i++) {
         _glManager->matrixManager->MatrixModeModelView();
         _glManager->matrixManager->PushMatrix();
 
-        if (!_renderer[i]->IsGLInitialized()) {
-            int myrc = _renderer[i]->initializeGL(_glManager);
+        if (_renderers[i]->IsGLInitialized()) {
+            _applyTransformsForRenderer(_renderers[i]);
+
+            int myrc = _renderers[i]->paintGL(fast);
             GL_ERR_BREAK();
             if (myrc < 0) rc = -1;
         }
-
-        if (_renderer[i]->IsGLInitialized()) {
-            applyTransforms(i);
-            int myrc = _renderer[i]->paintGL(fast);
-            GL_ERR_BREAK();
-            if (myrc < 0) { rc = -1; }
-            _glManager->matrixManager->PopMatrix();
-            if (myrc < 0) { rc = -1; }
-        }
-        _glManager->matrixManager->MatrixModeModelView();
-        _glManager->matrixManager->PopMatrix();
-        int myrc = printOpenGLErrorMsg(_renderer[i]->GetMyName().c_str());
-        if (myrc < 0) { rc = -1; }
+        mm->MatrixModeModelView();
+        mm->PopMatrix();
+        int myrc = CheckGLErrorMsg(_renderers[i]->GetMyName().c_str());
+        if (myrc < 0) rc = -1;
     }
 
-    if (m_vizFeatures) {
-        // Draw the domain frame and other in-scene features
-        m_vizFeatures->InScenePaint(timeStep);
-        GL_ERR_BREAK();
-    }
-
-    // Go back to MODELVIEW for any other matrix stuff
-    // By default the matrix is expected to be MODELVIEW
-    _glManager->matrixManager->MatrixModeModelView();
-
-    // Draw any features that are overlaid on scene
-
-    if (m_vizFeatures) m_vizFeatures->DrawText();
+    // Draw the domain frame and other in-scene features
+    _vizFeatures->InScenePaint(_getCurrentTimestep());
     GL_ERR_BREAK();
-    renderColorbars(timeStep);
+    _vizFeatures->DrawText();
+    GL_ERR_BREAK();
+    _renderColorbars(_getCurrentTimestep());
     GL_ERR_BREAK();
 
     // _glManager->ShowDepthBuffer();
 
-    // Perform final touch-up on the final images, before capturing or displaying them.
     glFlush();
 
     int captureImageSuccess = 0;
     if (_imageCaptureEnabled) {
-        captureImageSuccess = captureImage(_captureImageFile);
+        captureImageSuccess = _captureImage(_captureImageFile);
     } else if (_animationCaptureEnabled) {
-        captureImageSuccess = captureImage(_captureImageFile);
-        incrementPath(_captureImageFile);
+        captureImageSuccess = _captureImage(_captureImageFile);
+        _incrementPath(_captureImageFile);
     }
     if (captureImageSuccess < 0) {
         SetErrMsg("Failed to save image");
@@ -287,76 +205,35 @@ int Visualizer::paintEvent(bool fast)
     }
 
     GL_ERR_BREAK();
-    if (printOpenGLError()) return -1;
+    if (CheckGLError()) return -1;
+
+    _insideGLContext = false;
     return rc;
 }
 
-bool Visualizer::fbSetup()
+void Visualizer::_loadMatricesFromViewpointParams()
 {
-#ifdef VAPOR3_0_0_ALPHA
-    // Following is needed in case undo/redo leaves a
-    // disabled renderer in the renderer list, so it can be deleted.
-    //
-    removeDisabledRenderers();
-#endif
-
-#ifdef VAPOR3_0_0_ALPHA
-    // Get the ModelView matrix from the viewpoint params, if it has changed.  If
-    // it is not changed, it will come from the Trackball
-    if (vpParams->VPHasChanged(_winNum))
-#else
-    // if (m_viewpointDirty)
-#endif
-
-        // Paint background
-        double clr[3];
-    getActiveAnnotationParams()->GetBackgroundColor(clr);
-
-    glClearColor(clr[0], clr[1], clr[2], 1.f);
-    // Clear out the depth buffer in preparation for rendering
-    glClearDepth(1);
-    // Make the depth buffer writable
-    glDepthMask(GL_TRUE);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-    return (FrameBufferReady());
-}
-
-int Visualizer::paintSetup(int timeStep)
-{
-    assert(!printOpenGLError());
-    ViewpointParams *vpParams = getActiveViewpointParams();
+    ViewpointParams *const vpParams = getActiveViewpointParams();
+    MatrixManager *const   mm = _glManager->matrixManager;
 
     double m[16];
     vpParams->GetProjectionMatrix(m);
-    _glManager->matrixManager->MatrixModeProjection();
-    _glManager->matrixManager->LoadMatrixd(m);
-    assert(!printOpenGLError());
+    mm->MatrixModeProjection();
+    mm->LoadMatrixd(m);
 
     vpParams->GetModelViewMatrix(m);
-    _glManager->matrixManager->MatrixModeModelView();
-    _glManager->matrixManager->LoadMatrixd(m);
-    assert(!printOpenGLError());
-
-    // Improve polygon antialiasing
-    glEnable(GL_MULTISAMPLE);
-    assert(!printOpenGLError());
-
-    // Lights are positioned relative to the view direction, do this before the modelView matrix is set
-    if (placeLights()) return -1;
-
-    return 0;
+    mm->MatrixModeModelView();
+    mm->LoadMatrixd(m);
 }
-//
-//  Set up the OpenGL rendering state, and define display list
-//
 
-int Visualizer::initializeGL(GLManager *glManager)
+int Visualizer::InitializeGL(GLManager *glManager)
 {
     if (!glManager->IsCurrentOpenGLVersionSupported()) return -1;
 
     _glManager = glManager;
-    m_vizFeatures->InitializeGL(glManager);
+
+    _vizFeatures = new AnnotationRenderer(_paramsMgr, _dataStatus, _winName);
+    _vizFeatures->InitializeGL(glManager);
 
     // glewExperimental = GL_TRUE;
     GLenum err = glewInit();
@@ -366,238 +243,69 @@ int Visualizer::initializeGL(GLManager *glManager)
         return -1;
     }
 
-    glClearColor(1.f, 0.1f, 0.1f, 1.f);
-    glDepthMask(true);
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-
-    GLenum glErr;
-    glErr = glGetError();
-    if (glErr != GL_NO_ERROR) {
-        MyBase::SetErrMsg("Error: No Usable Graphics Driver.\n%s", "Check that drivers are properly installed.");
-        return -1;
-    }
-    _previousTimeStep = -1;
-    _previousFrameNum = -1;
-    glEnable(GL_MULTISAMPLE);
-    if (printOpenGLError()) return -1;
-    // Check to see if we are using MESA:
     if (GetVendor() == MESA) { SetErrMsg("GL Vendor String is MESA.\nGraphics drivers may need to be reinstalled"); }
 
-    SetDiagMsg("OpenGL Capabilities : GLEW_VERSION_2_0 %s", GLEW_VERSION_2_0 ? "ok" : "missing");
-    SetDiagMsg("OpenGL Capabilities : GLEW_EXT_framebuffer_object %s", GLEW_EXT_framebuffer_object ? "ok" : "missing");
-    SetDiagMsg("OpenGL Capabilities : GLEW_ARB_vertex_buffer_object %s", GLEW_ARB_vertex_buffer_object ? "ok" : "missing");
-    SetDiagMsg("OpenGL Capabilities : GLEW_ARB_multitexture %s", GLEW_ARB_multitexture ? "ok" : "missing");
-    SetDiagMsg("OpenGL Capabilities : GLEW_ARB_shader_objects %s", GLEW_ARB_shader_objects ? "ok" : "missing");
-
-    // Initialize existing renderers:
-    //
-    if (printOpenGLError()) return -1;
-
-#ifdef VAPOR3_0_0_ALPHA
-    if (setUpViewport(_width, _height) < 0) return -1;
-#endif
     return 0;
 }
 
-void Visualizer::moveRendererToFront(const Renderer *ren)
+// Move to back of rendering list
+void Visualizer::MoveRendererToFront(Renderer *ren)
 {
-    int renIndex = -1;
-    for (int i = 0; i < _renderer.size(); i++) {
-        if (_renderer[i] == ren) {
-            renIndex = i;
-            break;
-        }
-    }
-    assert(renIndex != -1);
-
-    Renderer *save = _renderer[renIndex];
-    int       saveOrder = _renderOrder[renIndex];
-
-    for (int i = renIndex; i < _renderer.size() - 1; i++) {
-        _renderer[i] = _renderer[i + 1];
-        _renderOrder[i] = _renderOrder[i + 1];
-    }
-    _renderer[_renderer.size() - 1] = save;
-    _renderOrder[_renderer.size() - 1] = saveOrder;
+    auto it = std::find(_renderers.begin(), _renderers.end(), ren);
+    assert(it != _renderers.end());
+    _renderers.erase(it);
+    _renderers.push_back(ren);
 }
 
-void Visualizer::moveVolumeRenderersToFront()
+void Visualizer::MoveVolumeRenderersToFront()
 {
     Renderer *firstRendererMoved = nullptr;
-    auto      rendererPointersCopy = _renderer;
+    auto      rendererPointersCopy = _renderers;
     for (auto it = rendererPointersCopy.rbegin(); it != rendererPointersCopy.rend(); ++it) {
         if (*it == firstRendererMoved) break;
         if ((*it)->GetMyType() == DVRenderer::GetClassType()) {
-            moveRendererToFront(*it);
+            MoveRendererToFront(*it);
             if (firstRendererMoved == nullptr) firstRendererMoved = *it;
         }
     }
 }
 
-/*
- * Insert a renderer to this visualizer
- * Add it after all renderers of lower render order
- */
-int Visualizer::insertRenderer(Renderer *ren, int newOrder)
+void Visualizer::InsertRenderer(Renderer *ren) { _renderers.push_back(ren); }
+
+Renderer *Visualizer::GetRenderer(string type, string instance) const
 {
-    // For the first renderer:
-    if (_renderer.size() == 0) {
-        _renderer.push_back(ren);
-        _renderOrder.push_back(newOrder);
-        //		ren->initializeGL();
-        return 0;
-    }
-    // Find a renderer of lower order
-    int i;
-    for (i = _renderer.size() - 1; i >= 0; i--) {
-        if (_renderOrder[i] < newOrder) break;
-    }
-    // Remember the position in front of where this renderer will go:
-    int lastPosn = i;
-    int maxPosn = _renderer.size() - 1;
-    // Push the last one back, increasing the size of these vectors:
-    _renderer.push_back(_renderer[maxPosn]);
-    _renderOrder.push_back(_renderOrder[maxPosn]);
-    // Now the size is maxPosn+1, so copy everything up one position,
-    // Until we get to lastPosn (which we do not copy)
-    for (i = maxPosn; i > lastPosn + 1; i--) {
-        _renderer[i] = _renderer[i - 1];
-        _renderOrder[i] = _renderOrder[i - 1];
-    }
-    // Finally insert the new renderer at lastPosn+1
-    _renderer[lastPosn + 1] = ren;
-
-    _renderOrder[lastPosn + 1] = newOrder;
-    //	ren->initializeGL();
-    return lastPosn + 1;
-}
-
-// Remove all renderers.  This is needed when we load new data into
-// an existing session
-void Visualizer::removeAllRenderers()
-{
-    // Prevent new rendering while we do this?
-
-#ifdef VAPOR3_0_0_ALPHA
-    for (int i = _renderer.size() - 1; i >= 0; i--) { delete _renderer[i]; }
-#endif
-
-    _renderOrder.clear();
-    _renderer.clear();
-}
-/*
- * Remove renderer of specified renderParams
- */
-bool Visualizer::RemoveRenderer(Renderer *ren)
-{
-    int i;
-
-    // get it from the renderer list, and delete it:
-    bool found = false;
-    for (i = 0; i < _renderer.size(); i++) {
-        if (_renderer[i] != ren) continue;
-#ifdef VAPOR3_0_0_ALPHA
-        delete _renderer[i];
-#endif
-
-        _renderer[i] = 0;
-        found = true;
-        break;
-    }
-    if (!found) return (false);
-
-    int foundIndex = i;
-
-    // Move renderers up.
-    int numRenderers = _renderer.size() - 1;
-    for (int j = foundIndex; j < numRenderers; j++) {
-        _renderer[j] = _renderer[j + 1];
-        _renderOrder[j] = _renderOrder[j + 1];
-    }
-    _renderer.resize(numRenderers);
-    _renderOrder.resize(numRenderers);
-    return true;
-}
-
-Renderer *Visualizer::getRenderer(string type, string instance) const
-{
-    for (int i = 0; i < _renderer.size(); i++) {
-        Renderer *ren = _renderer[i];
+    for (int i = 0; i < _renderers.size(); i++) {
+        Renderer *ren = _renderers[i];
         if (ren->GetMyType() == type && ren->GetMyName() == instance) { return (ren); }
     }
     return (NULL);
 }
 
-int Visualizer::placeLights()
+int Visualizer::_configureLighting()
 {
-    if (printOpenGLError()) return -1;
     const ViewpointParams *vpParams = getActiveViewpointParams();
     size_t                 nLights = vpParams->getNumLights();
-    if (nLights > 3) nLights = 3;
+    assert(nLights <= 1);
     LegacyGL *lgl = _glManager->legacy;
 
-    float lightDirs[3][4];
-    for (int j = 0; j < nLights; j++) {
-        for (int i = 0; i < 4; i++) { lightDirs[j][i] = vpParams->getLightDirection(j, i); }
-    }
+    float lightDir[4];
+    for (int i = 0; i < 4; i++) { lightDir[i] = vpParams->getLightDirection(0, i); }
+
     if (nLights > 0) {
-        printOpenGLError();
-        float   specColor[4], ambColor[4];
-        float   diffLight[3], specLight[3];
-        GLfloat lmodel_ambient[4];
-        specColor[0] = specColor[1] = specColor[2] = 0.8f;
-        ambColor[0] = ambColor[1] = ambColor[2] = 0.f;
-        specColor[3] = ambColor[3] = lmodel_ambient[3] = 1.f;
-
         // TODO GL
-        GL_LEGACY(glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, vpParams->getExponent()));
-        lmodel_ambient[0] = lmodel_ambient[1] = lmodel_ambient[2] = vpParams->getAmbientCoeff();
+        // GL_SHININESS = vpParams->getExponent())
+        // vpParams->getSpecularCoeff(0)
+        // vpParams->getDiffuseCoeff(0)
+        // vpParams->getAmbientCoeff()
         // All the geometry will get a white specular color:
-        GL_LEGACY(glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specColor));
-        GL_LEGACY(glLightfv(GL_LIGHT0, GL_POSITION, lightDirs[0]));
-        lgl->LightDirectionfv(lightDirs[0]);
 
-        specLight[0] = specLight[1] = specLight[2] = vpParams->getSpecularCoeff(0);
-
-        diffLight[0] = diffLight[1] = diffLight[2] = vpParams->getDiffuseCoeff(0);
-        GL_LEGACY(glLightfv(GL_LIGHT0, GL_DIFFUSE, diffLight));
-        GL_LEGACY(glLightfv(GL_LIGHT0, GL_SPECULAR, specLight));
-        GL_LEGACY(glLightfv(GL_LIGHT0, GL_AMBIENT, ambColor));
-        GL_LEGACY(glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient));
-        // Following has unpleasant effects on flow line lighting
-        // glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-
-        GL_LEGACY(glEnable(GL_LIGHT0));
-        if (printOpenGLError()) { return -1; }
-        if (nLights > 1) {
-            if (printOpenGLError()) return -1;
-            GL_LEGACY(glLightfv(GL_LIGHT1, GL_POSITION, lightDirs[1]));
-            specLight[0] = specLight[1] = specLight[2] = vpParams->getSpecularCoeff(1);
-            diffLight[0] = diffLight[1] = diffLight[2] = vpParams->getDiffuseCoeff(1);
-            GL_LEGACY(glLightfv(GL_LIGHT1, GL_DIFFUSE, diffLight));
-            GL_LEGACY(glLightfv(GL_LIGHT1, GL_SPECULAR, specLight));
-            GL_LEGACY(glLightfv(GL_LIGHT1, GL_AMBIENT, ambColor));
-            GL_LEGACY(glEnable(GL_LIGHT1));
-
-        } else {
-            GL_LEGACY(glDisable(GL_LIGHT1));
-            if (printOpenGLError()) return -1;
-        }
-        if (nLights > 2) {
-            GL_LEGACY(glLightfv(GL_LIGHT2, GL_POSITION, lightDirs[2]); specLight[0] = specLight[1] = specLight[2] = vpParams->getSpecularCoeff(2);
-                      diffLight[0] = diffLight[1] = diffLight[2] = vpParams->getDiffuseCoeff(2); glLightfv(GL_LIGHT2, GL_DIFFUSE, diffLight); glLightfv(GL_LIGHT2, GL_SPECULAR, specLight);
-                      glLightfv(GL_LIGHT2, GL_AMBIENT, ambColor); glEnable(GL_LIGHT2););
-            if (printOpenGLError()) return -1;
-        } else {
-            GL_LEGACY(glDisable(GL_LIGHT2));
-        }
+        lgl->LightDirectionfv(lightDir);
     }
-    if (printOpenGLError()) return -1;
+    if (CheckGLError()) return -1;
     return 0;
 }
 
-Visualizer::OGLVendorType Visualizer::GetVendor()
+Visualizer::GLVendorType Visualizer::GetVendor()
 {
     string ven_str((const char *)glGetString(GL_VENDOR));
     string ren_str((const char *)glGetString(GL_RENDERER));
@@ -618,26 +326,7 @@ Visualizer::OGLVendorType Visualizer::GetVendor()
     } else if ((ven_str.find("intel") != string::npos) || (ren_str.find("intel") != string::npos)) {
         return (INTEL);
     }
-
     return (UNKNOWN);
-}
-
-void Visualizer::removeDisabledRenderers()
-{
-    // Repeat until we don't find any renderers to disable:
-
-    while (1) {
-        bool retry = false;
-        for (int i = 0; i < _renderer.size(); i++) {
-            RenderParams *rParams = _renderer[i]->GetActiveParams();
-            if (!rParams->IsEnabled()) {
-                RemoveRenderer(_renderer[i]);
-                retry = true;
-                break;
-            }
-        }
-        if (!retry) break;
-    }
 }
 
 double Visualizer::getPixelSize() const
@@ -671,13 +360,14 @@ double Visualizer::getPixelSize() const
 #endif
     return (0.0);
 }
-ViewpointParams *Visualizer::getActiveViewpointParams() const { return m_paramsMgr->GetViewpointParams(m_winName); }
 
-RegionParams *Visualizer::getActiveRegionParams() const { return m_paramsMgr->GetRegionParams(m_winName); }
+ViewpointParams *Visualizer::getActiveViewpointParams() const { return _paramsMgr->GetViewpointParams(_winName); }
 
-AnnotationParams *Visualizer::getActiveAnnotationParams() const { return m_paramsMgr->GetAnnotationParams(m_winName); }
+RegionParams *Visualizer::getActiveRegionParams() const { return _paramsMgr->GetRegionParams(_winName); }
 
-int Visualizer::captureImage(const std::string &path)
+AnnotationParams *Visualizer::getActiveAnnotationParams() const { return _paramsMgr->GetAnnotationParams(_winName); }
+
+int Visualizer::_captureImage(const std::string &path)
 {
     // Turn off the single capture flag
     _imageCaptureEnabled = false;
@@ -693,7 +383,7 @@ int Visualizer::captureImage(const std::string &path)
     int            writeReturn = -1;
 
     framebuffer = new unsigned char[3 * width * height];
-    if (!getPixelData(framebuffer))
+    if (!_getPixelData(framebuffer))
         ;    // goto captureImageEnd;
 
     if (geoTiffOutput)
@@ -703,7 +393,7 @@ int Visualizer::captureImage(const std::string &path)
     if (writer == nullptr) goto captureImageEnd;
 
     if (geoTiffOutput) {
-        string projString = m_dataStatus->GetDataMgr(m_dataStatus->GetDataMgrNames()[0])->GetMapProjection();
+        string projString = _dataStatus->GetDataMgr(_dataStatus->GetDataMgrNames()[0])->GetMapProjection();
 
         double m[16];
         vpParams->GetModelViewMatrix(m);
@@ -730,8 +420,7 @@ captureImageEnd:
     return writeReturn;
 }
 
-// Produce an array based on current contents of the (back) buffer
-bool Visualizer::getPixelData(unsigned char *data) const
+bool Visualizer::_getPixelData(unsigned char *data) const
 {
     ViewpointParams *vpParams = getActiveViewpointParams();
 
@@ -766,7 +455,43 @@ bool Visualizer::getPixelData(unsigned char *data) const
     return true;
 }
 
-void Visualizer::renderColorbars(int timeStep)
+void Visualizer::_deleteFlaggedRenderers()
+{
+    assert(_insideGLContext);
+    vector<Renderer *> renderersCopy = _renderers;
+    for (auto it = renderersCopy.begin(); it != renderersCopy.end(); ++it) {
+        if ((*it)->IsFlaggedForDeletion()) {
+            _renderers.erase(std::find(_renderers.begin(), _renderers.end(), *it));
+            delete *it;
+        }
+    }
+}
+
+int Visualizer::_initializeNewRenderers()
+{
+    assert(_insideGLContext);
+    for (Renderer *r : _renderers) {
+        if (!r->IsGLInitialized() && r->initializeGL(_glManager) < 0) {
+            MyBase::SetErrMsg("Failed to initialize renderer %s", r->GetInstanceName().c_str());
+            return -1;
+        }
+        GL_ERR_BREAK();
+    }
+    return 0;
+}
+
+void Visualizer::_clearFramebuffer()
+{
+    assert(_insideGLContext);
+    double clr[3];
+    getActiveAnnotationParams()->GetBackgroundColor(clr);
+
+    glDepthMask(GL_TRUE);
+    glClearColor(clr[0], clr[1], clr[2], 1.f);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+}
+
+void Visualizer::_renderColorbars(int timeStep)
 {
     MatrixManager *mm = _glManager->matrixManager;
     mm->MatrixModeModelView();
@@ -775,10 +500,10 @@ void Visualizer::renderColorbars(int timeStep)
     mm->MatrixModeProjection();
     mm->PushMatrix();
     mm->LoadIdentity();
-    for (int i = 0; i < _renderer.size(); i++) {
+    for (int i = 0; i < _renderers.size(); i++) {
         // If a renderer is not initialized, or if its bypass flag is set, then don't render.
         // Otherwise push and pop the GL matrix stack, and all attribs
-        _renderer[i]->renderColorbar();
+        _renderers[i]->renderColorbar();
     }
     mm->MatrixModeProjection();
     mm->PopMatrix();
@@ -786,7 +511,7 @@ void Visualizer::renderColorbars(int timeStep)
     mm->PopMatrix();
 }
 
-void Visualizer::incrementPath(string &s)
+void Visualizer::_incrementPath(string &s)
 {
     // truncate the last 4 characters (remove .tif or .jpg)
     string s1 = s.substr(0, s.length() - 4);

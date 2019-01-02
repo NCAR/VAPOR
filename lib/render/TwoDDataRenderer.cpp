@@ -165,7 +165,7 @@ int TwoDDataRenderer::_initializeGL()
 
 int TwoDDataRenderer::_paintGL(bool fast)
 {
-    if (printOpenGLError() != 0) return (-1);
+    if (CheckGLError() != 0) return (-1);
 
     TwoDDataParams *rp = (TwoDDataParams *)GetActiveParams();
 

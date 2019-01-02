@@ -150,7 +150,7 @@ string oglGetErrMsg(vector<int> status)
     return msg;
 }
 
-int printOglError(const char *file, int line, const char *msg)
+int __CheckGLError(const char *file, int line, const char *msg)
 {
     //
     // Returns -1 if an OpenGL error occurred, 0 otherwise.
@@ -161,7 +161,7 @@ int printOglError(const char *file, int line, const char *msg)
     glErr = glGetError();
 
     while (glErr != GL_NO_ERROR) {
-#ifdef DEBUG
+#ifndef NDEBUG
         std::cout << "glError: " << gluErrorString(glErr) << std::endl << "         " << file << " : " << line << std::endl;
 #endif
         if (msg) {

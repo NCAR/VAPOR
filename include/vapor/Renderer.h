@@ -60,6 +60,7 @@ public:
     //! Identify the name of the current renderer
     //! \return name of renderer
     string GetMyName() const { return (_instName); };
+    string GetInstanceName() const { return GetMyName(); }
 
     //! Identify the type of the current renderer
     //! \return type of renderer

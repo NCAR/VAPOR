@@ -304,7 +304,7 @@ void AnnotationRenderer::InScenePaint(size_t ts)
     mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
     vpParams->SetModelViewMatrix(mvMatrix);
 
-    printOpenGLErrorMsg(m_winName.c_str());
+    CheckGLErrorMsg(m_winName.c_str());
 }
 
 void AnnotationRenderer::scaleNormalizedCoordinatesToWorld(std::vector<double> &coords, string dataMgrName)

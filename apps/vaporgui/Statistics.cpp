@@ -34,6 +34,7 @@
 #include <cstdio>
 #include <algorithm>
 #include <vapor/MyBase.h>
+#include <vapor/DataStatus.h>
 
 using namespace Wasp;
 using namespace VAPoR;

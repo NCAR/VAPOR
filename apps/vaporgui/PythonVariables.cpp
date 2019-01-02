@@ -11,6 +11,7 @@
 #include <QStandardItemModel>
 
 #include <vapor/DC.h>
+#include <vapor/DataStatus.h>
 #include "vapor/ResourcePath.h"
 #include "ErrorReporter.h"
 #include "FileOperationChecker.h"

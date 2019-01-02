@@ -907,7 +907,7 @@ void MappingFrame::paintGL()
 
     resize();
 
-    int rc = printOpenGLErrorMsg("MappingFrame::paintGL");
+    int rc = CheckGLErrorMsg("MappingFrame::paintGL");
     if (rc < 0) {
         MSG_ERR("MappingFrame::paintGL");
         return;
@@ -1074,7 +1074,7 @@ void MappingFrame::paintGL()
 
     oglPopState();
 
-    printOpenGLErrorMsg("MappingFrame::paintGL");
+    CheckGLErrorMsg("MappingFrame::paintGL");
 }
 
 //----------------------------------------------------------------------------
@@ -1083,7 +1083,7 @@ void MappingFrame::paintGL()
 void MappingFrame::initializeGL()
 {
     MyBase::SetDiagMsg("MappingFrame::initializeGL()");
-    printOpenGLErrorMsg("MappingFrame");
+    CheckGLErrorMsg("MappingFrame");
     setAutoBufferSwap(false);
     qglClearColor(QColor(0, 0, 0));
 
@@ -1101,7 +1101,7 @@ void MappingFrame::initializeGL()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     if (_colorMappingEnabled) { _colorbarWidget->initializeGL(); }
-    printOpenGLErrorMsg("MappingFrame");
+    CheckGLErrorMsg("MappingFrame");
 }
 
 //----------------------------------------------------------------------------
@@ -1144,7 +1144,7 @@ int MappingFrame::drawHistogram()
 
     glDisable(GL_TEXTURE_2D);
 
-    return (printOpenGLErrorMsg("MappingFrame::paintGL"));
+    return (CheckGLErrorMsg("MappingFrame::paintGL"));
 }
 
 //----------------------------------------------------------------------------
@@ -1180,7 +1180,7 @@ int MappingFrame::drawOpacityCurve()
         glDisable(GL_LINE_SMOOTH);
         glDisable(GL_BLEND);
     }
-    int rc = printOpenGLErrorMsg("DrawOpacityCurve");
+    int rc = CheckGLErrorMsg("DrawOpacityCurve");
     if (rc < 0) return -1;
     return 0;
 }
