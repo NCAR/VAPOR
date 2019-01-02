@@ -2188,6 +2188,13 @@ void MainForm::launchPythonVariables() {
     _pythonVariables->ShowMe();
 }
 
+void MainForm::_setTimeStep() {
+    _paramsMgr->BeginSaveStateGroup("Change Timestep");
+    int ts = _timeStepEdit->text().toInt();
+    _tabMgr->AnimationSetTimestep(ts);
+    _paramsMgr->EndSaveStateGroup();
+}
+
 //Begin capturing animation images.
 //Launch a file save dialog to specify the names
 //Then start file saving mode.
