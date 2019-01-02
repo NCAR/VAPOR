@@ -600,6 +600,8 @@ void RenderHolder::Update() {
     int row = _getRow(activeRenderInst);
     if (row >= 0)
         _vaporTable->SetActiveRow(row);
+    else
+        p->SetActiveRenderer(activeViz, "", "");
 
     _updateDupCombo();
 
