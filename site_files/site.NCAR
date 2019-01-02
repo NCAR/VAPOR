@@ -1,16 +1,37 @@
+set (APPLE_THIRD_PARTY_DIR "/glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64")
+set (LINUX_THIRD_PARTY_DIR "/glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64")
+set (WINDOWS_THIRD_PARTY_DIR "C:/Vapor3rdParty2015")
+
+
+if (HOSTNAME MATCHES "yslogin[0-9]+" OR HOSTNAME MATCHES "geyser[0-9]+" OR HOSTNAME MATCHES "caldera[0-9]+")
+	set (ON_GEYSER_OR_CALDERA TRUE)
+else ()
+	set (ON_GEYSER_OR_CALDERA FALSE)
+endif ()
+
+
+# This file is only read if on an NCAR build system
+if (APPLE AND NOT EXISTS "${APPLE_THIRD_PARTY_DIR}")
+	return ()
+elseif (UNIX AND NOT APPLE AND NOT EXISTS "${LINUX_THIRD_PARTY_DIR}" AND NOT ${ON_GEYSER_OR_CALDERA})
+	return ()
+elseif (WIN32 AND NOT EXISTS "${WINDOWS_THIRD_PARTY_DIR}")
+	return ()
+endif ()
+
 
 if (APPLE)
-	set (THIRD_PARTY_DIR /glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64)
+	set (THIRD_PARTY_DIR "${APPLE_THIRD_PARTY_DIR}")
 elseif (UNIX AND NOT APPLE)
-	set (THIRD_PARTY_DIR /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64)
+	set (THIRD_PARTY_DIR "${LINUX_THIRD_PARTY_DIR}")
 else ()
-	set (THIRD_PARTY_DIR "C:/Vapor3rdParty2015")
+	set (THIRD_PARTY_DIR "${WINDOWS_THIRD_PARTY_DIR}")
 endif ()
 
 # Yellowstone and Geyser configuration
 # --------------------------------------------------------------------------------
 cmake_host_system_information(RESULT HOSTNAME QUERY HOSTNAME)
-if (HOSTNAME MATCHES "yslogin[0-9]+" OR HOSTNAME MATCHES "geyser[0-9]+" OR HOSTNAME MATCHES "caldera[0-9]+")
+if (${ON_GEYSER_OR_CALDERA})
 	set (THIRD_PARTY_DIR /glade/p/VAST/VAPOR/third-party/apps-2014/Linux_x86_64)
 endif ()
 # --------------------------------------------------------------------------------
