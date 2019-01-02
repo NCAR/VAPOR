@@ -26,7 +26,6 @@
 
 #include <vapor/Renderer.h>
 #include <vapor/ContourRenderer.h>
-#include <vapor/Visualizer.h>
 #include <vapor/ContourParams.h>
 #include <vapor/regionparams.h>
 #include <vapor/ViewpointParams.h>

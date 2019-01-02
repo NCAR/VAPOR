@@ -29,6 +29,8 @@
 #include <qlineedit.h>
 #include "GL/glew.h"
 #include <vapor/AnnotationParams.h>
+#include <vapor/DataStatus.h>
+#include <vapor/DataMgrUtils.h>
 
 #include "qcolordialog.h"
 #include <qlabel.h>

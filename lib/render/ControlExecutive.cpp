@@ -11,6 +11,8 @@
 #include <vapor/ParamsMgr.h>
 #include <vapor/ControlExecutive.h>
 #include <vapor/CalcEngineMgr.h>
+#include <vapor/Visualizer.h>
+#include <vapor/DataStatus.h>
 
 
 using namespace VAPoR;
@@ -95,7 +97,7 @@ int ControlExec::InitializeViz(string winName, GLManager *glManager) {
 		return -1;
 	}
 
-	if(v->initializeGL(glManager) < 0) {
+	if(v->InitializeGL(glManager) < 0) {
 		SetErrMsg("InitializeGL failure");
 		return -1;
 	}
@@ -163,7 +165,7 @@ int ControlExec::ActivateRender(
 	}
 
 
-	Renderer *ren = v->getRenderer(renderType, renderName);
+	Renderer *ren = v->GetRenderer(renderType, renderName);
 
 	_paramsMgr->BeginSaveStateGroup("ActivateRender");
 
@@ -194,7 +196,7 @@ int ControlExec::ActivateRender(
 			_paramsMgr->EndSaveStateGroup();
 			return(-1);
 		}
-		v->insertSortedRenderer(ren);
+		v->InsertRenderer(ren);
 	}
 
 
@@ -202,8 +204,8 @@ int ControlExec::ActivateRender(
 	assert(rp);
 
 	rp->SetEnabled(on);
-	v->moveRendererToFront(ren);
-    v->moveVolumeRenderersToFront();
+	v->MoveRendererToFront(ren);
+    v->MoveVolumeRenderersToFront();
 
 	_paramsMgr->EndSaveStateGroup();
 
@@ -230,7 +232,7 @@ int ControlExec::ActivateRender(
 	string renderType = RendererFactory::Instance()->
 		GetRenderClassFromParamsClass(rp->GetName());
 
-	Renderer *ren = v->getRenderer(renderType, renderName);
+	Renderer *ren = v->GetRenderer(renderType, renderName);
 
 	_paramsMgr->BeginSaveStateGroup("ActivateRender");
 
@@ -256,7 +258,7 @@ int ControlExec::ActivateRender(
 			_paramsMgr->EndSaveStateGroup();
 			return(-1);
 		}
-		v->insertSortedRenderer(ren);
+		v->InsertRenderer(ren);
 	}
 
 
@@ -289,11 +291,8 @@ void ControlExec::_removeRendererHelper(
 	Visualizer* v = getVisualizer(winName);
 	if (! v)  return;
 
-	Renderer *ren = v->getRenderer(renderType, renderName);
+	Renderer *ren = v->GetRenderer(renderType, renderName);
 	if (! ren) return;
-
-	// v->RemoveRenderer(ren);
-	// delete ren;
     
     ren->FlagForDeletion();
 
@@ -364,6 +363,18 @@ int ControlExec::LoadState(string stateFile) {
 	}
 
 	return(0);
+}
+
+void ControlExec::SetNumThreads(size_t nthreads) {
+    _dataStatus->SetNumThreads(nthreads);
+}
+
+size_t ControlExec::GetNumThreads() const {
+    return (_dataStatus->GetNumThreads());
+}
+
+void ControlExec::SetCacheSize(size_t sizeMB) {
+    _dataStatus->SetCacheSize(sizeMB);
 }
 
 int ControlExec::activateClassRenderers(
@@ -534,7 +545,7 @@ int ControlExec::EnableImageCapture(string filename, string winName)
 		SetErrMsg("Invalid Visualizer \"%s\"", winName.c_str());
 		return -1;
 	}
-	if(v->setImageCaptureEnabled(true, filename)) 
+	if(v->SetImageCaptureEnabled(true, filename)) 
     {
 		SetErrMsg("Visualizer (%s) failed to enable capturing  image.", winName.c_str());
         return -1;
@@ -564,7 +575,7 @@ int ControlExec::EnableAnimationCapture(
 		return -1;
 	}
 
-	if(v->setAnimationCaptureEnabled(onOff, filename)) return -1;
+	if(v->SetAnimationCaptureEnabled(onOff, filename)) return -1;
 	return 0;
 }
 
@@ -716,6 +727,10 @@ vector<string> ControlExec::GetRenderInstances(
 
 	return(_paramsMgr->GetRenderParamInstances(winName, paramsType));
 
+}
+
+vector <string> ControlExec::GetAllRenderClasses() {
+    return(RendererFactory::Instance()->GetFactoryNames());
 }
 
 bool ControlExec::RenderLookup(
