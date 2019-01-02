@@ -617,11 +617,15 @@ vector<double> BarbRenderer::_getScales()
     string                  myVisName = GetVisualizer();    // Not const :(
     VAPoR::ViewpointParams *vpp = _paramsMgr->GetViewpointParams(myVisName);
     string                  datasetName = GetMyDatasetName();
-    Transform *             t = vpp->GetTransform(datasetName);
+    Transform *             tDataset = vpp->GetTransform(datasetName);
+    Transform *             tRenderer = GetActiveParams()->GetTransform();
 
-    vector<double> scales{3, 1.0};
-    if (t != NULL) scales = t->GetScales();
-    ;
+    vector<double> scales = tDataset->GetScales();
+    vector<double> rendererScales = tRenderer->GetScales();
+
+    scales[0] *= rendererScales[0];
+    scales[1] *= rendererScales[1];
+    scales[2] *= rendererScales[2];
 
     return scales;
 }
