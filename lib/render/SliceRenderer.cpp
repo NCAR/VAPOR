@@ -37,8 +37,7 @@ SliceRenderer::SliceRenderer(
                                  instanceName,
                                  dataMgr) {
     _initialized = false;
-    _textureWidth = 200;
-    _textureHeight = 200;
+    _textureSideSize = 200;
 
     _vertexCoords = {
         0.0f, 0.0f, 0.f,
@@ -155,12 +154,9 @@ int SliceRenderer::_resetDataCache() {
     _cacheParams.textureSampleRate = p->GetSampleRate();
     _cacheParams.orientation = p->GetBox()->GetOrientation();
 
-    _textureWidth = _cacheParams.textureSampleRate;
-    _textureHeight = _cacheParams.textureSampleRate;
-    if (_textureWidth > MAX_TEXTURE_SIZE)
-        _textureWidth = MAX_TEXTURE_SIZE;
-    if (_textureHeight > MAX_TEXTURE_SIZE)
-        _textureHeight = MAX_TEXTURE_SIZE;
+    _textureSideSize = _cacheParams.textureSampleRate;
+    if (_textureSideSize > MAX_TEXTURE_SIZE)
+        _textureSideSize = MAX_TEXTURE_SIZE;
 
     _resetBoxCache();
     _resetColormapCache();
@@ -295,10 +291,10 @@ void SliceRenderer::_populateDataXY(
     coords[Z] = _cacheParams.boxMin[Z];
 
     int index = 0;
-    for (int j = 0; j < _textureHeight; j++) {
+    for (int j = 0; j < _textureSideSize; j++) {
         coords[X] = _cacheParams.domainMin[X];
 
-        for (int i = 0; i < _textureWidth; i++) {
+        for (int i = 0; i < _textureSideSize; i++) {
             varValue = grid->GetValue(coords);
             missingValue = grid->GetMissingValue();
             if (varValue == missingValue)
@@ -326,10 +322,10 @@ void SliceRenderer::_populateDataXZ(
     coords[Z] = _cacheParams.domainMin[Z];
 
     int index = 0;
-    for (int j = 0; j < _textureHeight; j++) {
+    for (int j = 0; j < _textureSideSize; j++) {
         coords[X] = _cacheParams.domainMin[X];
 
-        for (int i = 0; i < _textureWidth; i++) {
+        for (int i = 0; i < _textureSideSize; i++) {
             varValue = grid->GetValue(coords);
             missingValue = grid->GetMissingValue();
             if (varValue == missingValue)
@@ -357,10 +353,10 @@ void SliceRenderer::_populateDataYZ(
     coords[Z] = _cacheParams.domainMin[Z];
 
     int index = 0;
-    for (int j = 0; j < _textureHeight; j++) {
+    for (int j = 0; j < _textureSideSize; j++) {
         coords[Y] = _cacheParams.domainMin[Y];
 
-        for (int i = 0; i < _textureWidth; i++) {
+        for (int i = 0; i < _textureSideSize; i++) {
             varValue = grid->GetValue(coords);
             missingValue = grid->GetMissingValue();
             if (varValue == missingValue)
@@ -400,7 +396,7 @@ int SliceRenderer::_saveTextureData() {
 
     _setVertexPositions();
 
-    int textureSize = 2 * _textureWidth * _textureHeight;
+    int textureSize = 2 * _textureSideSize * _textureSideSize;
     float *dataValues = new float[textureSize];
 
     if (_cacheParams.orientation == XY)
@@ -437,8 +433,8 @@ void SliceRenderer::_createDataTexture(float *dataValues) {
         GL_TEXTURE_2D,
         0,
         GL_RG32F,
-        _textureWidth,
-        _textureHeight,
+        _textureSideSize,
+        _textureSideSize,
         0,
         GL_RG,
         GL_FLOAT,
