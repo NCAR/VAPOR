@@ -211,8 +211,8 @@ int Visualizer::paintEvent(bool fast)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    auto rendererPointersCopy = _renderer;
-    for (auto it = rendererPointersCopy.begin(); it != rendererPointersCopy.end(); ++it) {
+    vector<Renderer *> renderersCopy = _renderer;
+    for (auto it = renderersCopy.begin(); it != renderersCopy.end(); ++it) {
         if ((*it)->IsFlaggedForDeletion()) {
             RemoveRenderer(*it);
             delete *it;
@@ -258,8 +258,6 @@ int Visualizer::paintEvent(bool fast)
         GL_ERR_BREAK();
     }
 
-    // _glManager->ShowDepthBuffer();
-
     // Go back to MODELVIEW for any other matrix stuff
     // By default the matrix is expected to be MODELVIEW
     _glManager->matrixManager->MatrixModeModelView();
@@ -270,6 +268,8 @@ int Visualizer::paintEvent(bool fast)
     GL_ERR_BREAK();
     renderColorbars(timeStep);
     GL_ERR_BREAK();
+
+    // _glManager->ShowDepthBuffer();
 
     // Perform final touch-up on the final images, before capturing or displaying them.
     glFlush();

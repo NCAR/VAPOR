@@ -157,6 +157,10 @@ public:
     // iterate across values.  It must sample them instead.
     void SetIsSampling(bool isSampling);
 
+    void SetHistoNeedsUpdate(bool needsUpdate);
+
+    void SetStride(int stride);
+
 signals:
 
     //! Signal that is invoked when user starts to modify the transfer function.
@@ -184,27 +188,26 @@ public slots:
 private:
     // void updateMapperFunction(VAPoR::MapperFunction *mapper);
 
-    bool    colorMapping() const { return _colorMappingEnabled; }
-    bool    opacityMapping() const { return _opacityMappingEnabled; }
-    bool    isoSliderEnabled() const { return _isoSliderEnabled; }
-    bool    contourRangeSlider() const { return _contourRangeSliderEnabled; }
-    bool    isolineSlidersEnabled() const { return _isolineSlidersEnabled; }
-    void    setIsoValue(float val) { _isoVal = val; }
-    QString tipText(const QPoint &pos, bool isIso = false);
-    int     histoValue(const QPoint &pos);
-    float   xVariable(const QPoint &pos);
-    float   yVariable(const QPoint &pos);
-    bool    canBind();
-    void    updateHistogram();
-    string  getActiveRendererName() const;
-    void    getGridAndExtents(VAPoR::Grid **grid, std::vector<double> &minExts, std::vector<double> &maxExts) const;
-    void    populateHistogram();
-    void    populateSamplingHistogram();
-    // void populateSamplingHistogramXY();
-    // void populateSamplingHistogramXZ();
-    // void populateSamplingHistogramYZ();
+    bool                colorMapping() const { return _colorMappingEnabled; }
+    bool                opacityMapping() const { return _opacityMappingEnabled; }
+    bool                isoSliderEnabled() const { return _isoSliderEnabled; }
+    bool                contourRangeSlider() const { return _contourRangeSliderEnabled; }
+    bool                isolineSlidersEnabled() const { return _isolineSlidersEnabled; }
+    void                setIsoValue(float val) { _isoVal = val; }
+    QString             tipText(const QPoint &pos, bool isIso = false);
+    int                 histoValue(const QPoint &pos);
+    float               xVariable(const QPoint &pos);
+    float               yVariable(const QPoint &pos);
+    bool                canBind();
+    void                updateHistogram();
+    string              getActiveRendererName() const;
+    void                getGridAndExtents(VAPoR::Grid **grid, std::vector<double> &minExts, std::vector<double> &maxExts) const;
+    void                populateHistogram();
+    void                populateSamplingHistogram();
     void                populateIteratingHistogram();
+    void                setHistogramStride(int stride);
     std::vector<double> calculateDeltas(std::vector<double> minExts, std::vector<double> maxExts) const;
+    int                 _stride;
 
 protected slots:
     void setEditMode(bool);
@@ -316,6 +319,7 @@ private:
     map<string, Histo *>   _histogramMap;
 
     bool                _isSampling;
+    bool                _histoNeedsUpdate;
     bool                _opacityMappingEnabled;
     bool                _colorMappingEnabled;
     bool                _isoSliderEnabled;

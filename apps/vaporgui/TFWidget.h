@@ -67,6 +67,8 @@ public:
     float getOpacity();
     void  RefreshHistogram();
     void  SetAutoUpdateParamChanged(bool changed);
+    bool  IsOpacityIntegrated() const;
+    void  SetOpacityIntegrated(bool value);
 
 private slots:
     void loadTF();
@@ -104,6 +106,7 @@ private:
 
     void connectWidgets();
 
+    void calculateStride(string varName);
     void updateQtWidgets();
     void updateColorInterpolation();
     void updateConstColor();
@@ -132,8 +135,8 @@ private:
 
     string getTFVariableName(bool mainTF);
 
-    int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
-    int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);
+    int   convertOpacityToSliderValue(float opacity) const;
+    float convertSliderValueToOpacity(int value) const;
 
     std::vector<double> _minExt;
     std::vector<double> _maxExt;
@@ -141,6 +144,7 @@ private:
     int                 _cLevel;
     int                 _refLevel;
     int                 _timeStep;
+    int                 _stride;
     string              _mainVarName;
     string              _secondaryVarName;
     bool                _initialized;
@@ -149,6 +153,7 @@ private:
     bool                _secondaryHistoRangeChanged;
     bool                _mainHistoNeedsRefresh;
     bool                _secondaryHistoNeedsRefresh;
+    bool                _isOpacityIntegrated;
 
     bool  _discreteColormap;
     bool  _textChanged;
