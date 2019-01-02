@@ -29,6 +29,7 @@
 #include "RenderEventRouter.h"
 #include "vapor/RenderParams.h"
 #include "vapor/TwoDDataParams.h"
+#include "vapor/DVRParams.h"
 #include "vapor/ResourcePath.h"
 #include "TFWidget.h"
 #include "ErrorReporter.h"
@@ -54,6 +55,7 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
     _mainHistoRangeChanged = false;
     _secondaryHistoRangeChanged = false;
     _discreteColormap = false;
+    _isOpacityIntegrated = false;
     _mainVarName = "";
     _secondaryVarName = "";
 
@@ -395,7 +397,7 @@ void TFWidget::updateMainSliders()
     getVariableRange(range, values);
 
     _rangeCombo->Update(range[0], range[1], values[0], values[1]);
-    _opacitySlider->setValue(getOpacity() * 100);
+    _opacitySlider->setValue(convertOpacityToSliderValue(getOpacity()));
 
     _minLabel->setText(QString::number(range[0]));
     _maxLabel->setText(QString::number(range[1]));
@@ -757,7 +759,7 @@ void TFWidget::opacitySliderChanged(int value)
     string          varName = getTFVariableName(mainTF);
     MapperFunction *tf = _rParams->GetMapperFunc(varName);
     assert(tf);
-    tf->setOpacityScale(value / 100.f);
+    tf->setOpacityScale(convertSliderValueToOpacity(value));
     emit emitChange();
 }
 
@@ -976,6 +978,26 @@ string TFWidget::getTFVariableName(bool mainTF = true)
 
     return varname;
 }
+
+int TFWidget::convertOpacityToSliderValue(float opacity) const
+{
+    if (IsOpacityIntegrated())
+        return 100 * sqrtf(opacity);
+    else
+        return 100 * opacity;
+}
+
+float TFWidget::convertSliderValueToOpacity(int value) const
+{
+    if (IsOpacityIntegrated())
+        return powf(value / 100.f, 2);
+    else
+        return value / 100.f;
+}
+
+bool TFWidget::IsOpacityIntegrated() const { return _isOpacityIntegrated; }
+
+void TFWidget::SetOpacityIntegrated(bool value) { _isOpacityIntegrated = value; }
 
 LoadTFDialog::LoadTFDialog(QWidget *parent) : QDialog(parent)
 {
