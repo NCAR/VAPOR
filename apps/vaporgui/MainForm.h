@@ -332,11 +332,7 @@ private slots:
     void launchPythonVariables();
 
     // animation toolbar:
-    void _setTimeStep()
-    {
-        int ts = _timeStepEdit->text().toInt();
-        _tabMgr->AnimationSetTimestep(ts);
-    }
+    void _setTimeStep();
 
     void launchWebHelp(QAction *);
     void modeChange(int);
