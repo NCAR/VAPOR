@@ -53,6 +53,10 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/AxisAnnotation.h
 	${PROJECT_SOURCE_DIR}/include/vapor/WireFrameParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DatasetsParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/SliceParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/RayCasterParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/DVRParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/IsoSurfaceParams.h
 )
 
 add_library (params SHARED ${SRC} ${HEADERS})
