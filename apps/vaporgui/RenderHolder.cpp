@@ -138,6 +138,7 @@ void NewRendererDialog::_buttonChecked() {
 }
 
 void NewRendererDialog::_buttonDoubleClicked() {
+    _buttonChecked();
     this->accept();
 }
 
@@ -621,9 +622,13 @@ void RenderHolder::Update() {
 	int row = _getRow(activeRenderInst);
 	if (row >= 0)
 		_vaporTable->SetActiveRow(row);
+    else
+        p->SetActiveRenderer(activeViz, "", "");
 
 	_updateDupCombo();
 
+    
+    
 	// If there are no rows, there are no renderers, so we now set
 	// the current active renderer to be "empty"
 	//

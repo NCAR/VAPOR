@@ -59,7 +59,7 @@
 #define XZ 1
 #define YZ 2
 
-#define SAMPLE_RATE 100
+#define SAMPLE_RATE 30
 
 using namespace VAPoR;
 using namespace std;
@@ -100,10 +100,12 @@ void oglPopState() {
 //----------------------------------------------------------------------------
 MappingFrame::MappingFrame(QWidget* parent)
   : QGLWidget(parent),
+    _stride(1),
     _NUM_BINS(256),
     _mapper(NULL),
     _histogram(NULL),
     _isSampling(false),
+    _histoNeedsUpdate(false),
     _opacityMappingEnabled(false),
     _colorMappingEnabled(false),
 	_isoSliderEnabled(false),
@@ -258,7 +260,7 @@ void MappingFrame::RefreshHistogram()
     _histogram = new Histo(256, minRange, maxRange, _variableName, ts);
 
     populateHistogram();
-    
+
     _histogramMap[rendererName] = _histogram;
 }
 
@@ -266,6 +268,16 @@ void MappingFrame::SetIsSampling(
     bool isSampling
 ) {
     _isSampling= isSampling;
+}
+
+void MappingFrame::SetHistoNeedsUpdate(
+    bool needsUpdate
+) {
+    _histoNeedsUpdate = needsUpdate;
+}
+
+void MappingFrame::SetStride( int stride ) {
+    _stride = stride;
 }
 
 void MappingFrame::getGridAndExtents(
@@ -288,7 +300,6 @@ void MappingFrame::getGridAndExtents(
 }
 
 void MappingFrame::populateHistogram() {
-	double t0 = Wasp::GetTime();
     if (_isSampling) {
         populateSamplingHistogram();
 	}
@@ -312,27 +323,33 @@ void MappingFrame::populateSamplingHistogram() {
     std::vector<double> deltas = calculateDeltas(minExts, maxExts);
     float varValue, missingValue;
     std::vector<double> coords(3, 0.0);
-    coords[X] = minExts[X];
-    coords[Y] = minExts[Y];
-    coords[Z] = minExts[Z];
+
+    double xStartPoint = minExts[X] + deltas[X]/2.f;
+    double yStartPoint = minExts[Y] + deltas[Y]/2.f;
+    double zStartPoint = minExts[Z] + deltas[Z]/2.f;
+
+    coords[X] = xStartPoint;
+    coords[Y] = yStartPoint;
+    coords[Z] = zStartPoint;
 
     int iSamples = SAMPLE_RATE;
     int jSamples = SAMPLE_RATE;
     int kSamples = SAMPLE_RATE;
 
     if (deltas[X] == 0)
-        iSamples = 0;
+        iSamples = 1;
     if (deltas[Y] == 0)
-        jSamples = 0;
+        jSamples = 1;
     if (deltas[Z] == 0)
-        kSamples = 0;
+        kSamples = 1;
 
-    for (int k=0; k<=kSamples; k++) {
-        coords[Y] = minExts[Y];
-        for (int j=0; j<=jSamples; j++) {
-            coords[X] = minExts[X];
+    for (int k=0; k<kSamples; k++) {
+        coords[Y] = yStartPoint;
 
-            for (int i=0; i<=iSamples; i++) {
+        for (int j=0; j<jSamples; j++) {
+            coords[X] = xStartPoint;
+
+            for (int i=0; i<iSamples; i++) {
                 varValue = grid->GetValue(coords);
                 missingValue = grid->GetMissingValue();
                 if (varValue != missingValue)
@@ -348,13 +365,16 @@ void MappingFrame::populateSamplingHistogram() {
     grid = nullptr;
 }
 
+// Note: Since we offset the start of our samples by delta/2, each
+// delta is computed as the domain extents divided by exactly 
+// the number of samples being taken.
 std::vector<double> MappingFrame::calculateDeltas(
     std::vector<double> minExts,
     std::vector<double> maxExts
 ) const {
-    double dx = (maxExts[X]-minExts[X])/(1+SAMPLE_RATE);
-    double dy = (maxExts[Y]-minExts[Y])/(1+SAMPLE_RATE);
-    double dz = (maxExts[Z]-minExts[Z])/(1+SAMPLE_RATE);
+    double dx = (maxExts[X]-minExts[X]) / SAMPLE_RATE;
+    double dy = (maxExts[Y]-minExts[Y]) / SAMPLE_RATE;
+    double dz = (maxExts[Z]-minExts[Z]) / SAMPLE_RATE;
 
     std::vector<double> deltas = {dx, dy, dz};
     return deltas;
@@ -373,13 +393,16 @@ void MappingFrame::populateIteratingHistogram() {
     grid->SetInterpolationOrder(1);
 
 	float v;
-	Grid::Iterator itr;
-	Grid::Iterator enditr = grid->end();
-	for (itr=grid->begin(minExts, maxExts); itr!=enditr; ++itr){
-		v = *itr;
-		if (v==grid->GetMissingValue()) continue;
-		_histogram->addToBin(v);
-	}
+    float missingValue = grid->GetMissingValue();
+	Grid::ConstIterator itr = grid->cbegin();
+	Grid::ConstIterator enditr = grid->cend();
+
+    for ( ; itr!=enditr ; ) {
+        v = *itr;
+        if (v != missingValue)
+            _histogram->addToBin(v);
+        itr += _stride;
+    }
 	delete grid;
 }
 
@@ -1297,8 +1320,10 @@ int MappingFrame::drawHistogram() {
       updateTexture();
     }
 	
-    
-    glColor3f(0.0, 0.784, 0.784);
+    if (_histoNeedsUpdate)
+        glColor3f(0.65, 0.65, 0.65);
+    else
+        glColor3f(0.0, 0.784, 0.784);
 
 	glBegin(GL_QUADS);
     {
