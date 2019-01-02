@@ -80,6 +80,7 @@ public:
         _dvrParams = nullptr;
 
         setupUi(this);
+        _TFWidget->SetOpacityIntegrated(true);
         _TFWidget->Reinit((TFFlags)(0));
 
         _ambientWidget->SetLabel( QString::fromAscii("Ambient   ") );

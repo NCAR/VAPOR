@@ -69,9 +69,8 @@ public:
 
  //! Load a transfer function from a file, 
  //! \param[in] path Path of input file
- //! \param[in] defaultDataBounds if data bounds not provided in TF file this will be used
  //
- int LoadFromFile(string path, vector<double> defaultDataBounds);
+ int LoadFromFile(string path);
 
  // Get static string identifier for this params class
  //
@@ -135,7 +134,6 @@ public:
  float getMaxMapValue() const {
 	return(getMinMaxMapValue()[1]);
  };
-
 
  //! Set both minimum and maximum mapping (histo) values
  //! \param[in] val1 minimum value

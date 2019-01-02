@@ -29,10 +29,20 @@
 #include "RenderEventRouter.h"
 #include "vapor/RenderParams.h"
 #include "vapor/TwoDDataParams.h"
+#include "vapor/DVRParams.h"
+#include "vapor/ResourcePath.h"
 #include "TFWidget.h"
 #include "ErrorReporter.h"
+#include "FileOperationChecker.h"
+
+#define REQUIRED_SAMPLE_SIZE 1000000
 
 using namespace VAPoR;
+using namespace TFWidget_;
+
+#define GET_DATARANGE_STRIDE 16
+#define CANCEL -1
+#define ACCEPT  0
 
 string TFWidget::_nDimsTag = "ActiveDimension";
 
@@ -46,10 +56,13 @@ TFWidget::TFWidget(QWidget* parent)
 	_mainHistoRangeChanged		= false;
 	_secondaryHistoRangeChanged = false;
 	_discreteColormap 			= false;
+	_isOpacityIntegrated        = false;
 	_mainVarName	  			= "";
 	_secondaryVarName 			= "";
 
 	_myRGB[0] = _myRGB[1] = _myRGB[2] = 1.f;
+
+    _loadTFDialog = new LoadTFDialog(this);
 
 	_minCombo = new Combo(_minRangeEdit, _minRangeSlider);
 	_maxCombo = new Combo(_maxRangeEdit, _maxRangeSlider);
@@ -66,6 +79,7 @@ TFWidget::TFWidget(QWidget* parent)
 	_cLevel = 0;
 	_refLevel = 0;
 	_timeStep = 0;
+    _stride = 1;
 	for (int i=0; i<3; i++) {
 		_minExt.push_back(0.f);
 		_maxExt.push_back(0.f);
@@ -133,69 +147,96 @@ void TFWidget::Reinit(TFFlags flags) {
 }
 
 TFWidget::~TFWidget() {
-	if (_minCombo) {
+	if (_minCombo != nullptr) {
 		delete _minCombo;
-		_minCombo = NULL;
+		_minCombo = nullptr;
 	}   
-	if (_maxCombo) {
+	if (_maxCombo != nullptr) {
 		delete _maxCombo;
-		_maxCombo = NULL;
+		_maxCombo = nullptr;
 	}   
-	if (_rangeCombo) {
+	if (_rangeCombo != nullptr) {
 		delete _rangeCombo;
-		_rangeCombo = NULL;
+		_rangeCombo = nullptr;
 	}   
+    
+    if (_loadTFDialog != nullptr) {
+        delete _loadTFDialog;
+        _loadTFDialog = nullptr;
+    }
 }
 
 void TFWidget::loadTF() {
 	string varname = _rParams->GetColorMapVariableName();
-	if (varname.empty()) return;
+	if (varname.empty()) 
+        return;
+
+    int rc = _loadTFDialog->exec();
+    if (rc == CANCEL)
+        return; // cancel event
+
+    string fileName = _loadTFDialog->GetSelectedFile();
+    if ( !selectedTFFileOk( fileName ) )
+        return;
 
 	SettingsParams* sP;
 	sP = (SettingsParams*)_paramsMgr->GetParams(SettingsParams::GetClassType());
-	string path = sP->GetTFDir();
-
-	fileLoadTF(varname, path.c_str(), true);
-}
-
-void TFWidget::fileLoadTF(
-	string varname, const char* startPath, bool savePath
-) {
-	QString s = QFileDialog::getOpenFileName(0,
-					"Choose a transfer function file to open",
-					startPath,
-					"Vapor 3 Transfer Functions (*.tf3)");
-
-	// Null string indicates nothing selected
-	if (s.length()==0) return;
-	else {
-		SettingsParams* sP;
-		sP = (SettingsParams*)_paramsMgr->GetParams(SettingsParams::GetClassType());
-		sP->SetTFDir(s.toStdString());
-	}
-
-	// Force name to end with .tf3
-	if (!s.endsWith(".tf3")) {
-		s += ".tf3";
-	}
+	sP->SetTFDir(fileName);
 
 	MapperFunction *tf = _rParams->GetMapperFunc(varname);
 	assert(tf);
     
-    vector<double> defaultRange;
-    _dataMgr->GetDataRange(0, varname, 0, 0, 1, defaultRange);
+    float cachedMin = tf->getMinMapValue();
+    float cachedMax = tf->getMaxMapValue();
+    int numOpacityMaps = tf->getNumOpacityMaps();
+    std::vector<std::vector<double>> controlPoints;
+    for (int i=0; i<numOpacityMaps; i++) {
+        controlPoints.push_back(tf->GetOpacityMap(i)->GetControlPoints());
+    }
 
-    cout << "defaultRange " << defaultRange[0] << " " << defaultRange[1] << endl;
-
-	int rc = tf->LoadFromFile(s.toStdString(), defaultRange);
+	_paramsMgr->BeginSaveStateGroup("Loading Transfer Function from file");
+ 
+	rc = tf->LoadFromFile(fileName);
 	if (rc<0) {
 		MSG_ERR("Error loading transfer function");
 	}
+    else {
+        bool loadTF3DataRange = _loadTFDialog->GetLoadTF3DataRange();
+        if ( loadTF3DataRange == false )
+            tf->setMinMaxMapValue(cachedMin, cachedMax);
+
+        bool loadTF3Opacity = _loadTFDialog->GetLoadTF3OpacityMap();
+        if ( loadTF3Opacity == false ) {
+            for (int i=0; i<numOpacityMaps; i++) {
+                tf->GetOpacityMap(i)->SetControlPoints(controlPoints[i]);
+            }
+        }
+    }
+    
+	_paramsMgr->EndSaveStateGroup();
 
 	Update(_dataMgr, _paramsMgr, _rParams);
 }
 
-void TFWidget::fileSaveTF() {
+bool TFWidget::selectedTFFileOk( string fileName ) {
+    QString qFileName = QString::fromStdString(fileName);
+    if ( !FileOperationChecker::FileGoodToRead(qFileName) ) {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        return false;
+    }
+
+    QString qSuffix = "tf3";
+    if ( !FileOperationChecker::FileHasCorrectSuffix(qFileName, qSuffix) ) {
+        MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
+        return false;
+    }
+
+    return true;
+}
+
+
+
+void TFWidget::saveTF() {
 	//Launch a file save dialog, open resulting file
 	GUIStateParams *p;
 	p = (GUIStateParams*)_paramsMgr->GetParams(GUIStateParams::GetClassType());
@@ -233,9 +274,9 @@ void TFWidget::getVariableRange(
 	float values[2],
 	bool secondaryVariable = false
 ) {
-
 	range[0] = range[1] = 0.0;
 	values[0] = values[1] = 0.0;
+
 	string varName;
 	if (secondaryVariable)
 		varName = _rParams->GetColorMapVariableName();
@@ -252,7 +293,15 @@ void TFWidget::getVariableRange(
 	if (! _dataMgr->VariableExists(ts, varName, ref, cmp)) return;
 
 	vector <double> rangev;
-	int rc = _dataMgr->GetDataRange(ts, varName, ref, cmp, 1, rangev);
+	int rc = _dataMgr->GetDataRange(
+        ts, 
+        varName, 
+        ref, 
+        cmp,
+        _stride, 
+        rangev
+    );
+
     if (rc<0) {
         MSG_ERR("Error loading variable");
 		return;
@@ -266,6 +315,23 @@ void TFWidget::getVariableRange(
 	MapperFunction* tf = _rParams->GetMapperFunc(varName);
 	values[0] = tf->getMinMapValue();
 	values[1] = tf->getMaxMapValue();
+}
+
+void TFWidget::calculateStride( string varName ) {
+    std::vector<size_t> dimsAtLevel;
+	int ref = _rParams->GetRefinementLevel();
+    int rc = _dataMgr->GetDimLensAtLevel(varName, ref, dimsAtLevel);
+    assert(rc>=0);
+
+    long size = 1;
+    for (int i=0; i<dimsAtLevel.size(); i++)
+        size *= dimsAtLevel[i];
+
+    _stride = 1;
+    if ( size > REQUIRED_SAMPLE_SIZE)
+        _stride = 1 + size / REQUIRED_SAMPLE_SIZE;
+   
+    _mappingFrame->SetStride(_stride);
 }
 
 float TFWidget::getOpacity()
@@ -359,7 +425,7 @@ void TFWidget::updateMainSliders() {
 	getVariableRange(range, values);
 
 	_rangeCombo->Update(range[0], range[1], values[0], values[1]);
-	_opacitySlider->setValue(getOpacity() * 100);
+    _opacitySlider->setValue(convertOpacityToSliderValue(getOpacity()));
 
 	_minLabel->setText(QString::number(range[0]));
 	_maxLabel->setText(QString::number(range[1]));
@@ -378,18 +444,22 @@ void TFWidget::updateSecondarySliders() {
 }
 
 void TFWidget::updateMainMappingFrame() {
-    bool buttonPress = sender() == _updateMainHistoButton ? true : false;
-    if (!buttonPress)
-        buttonPress = getAutoUpdateMainHisto();
+    bool buttonPress = false;
+    if (sender() == _updateMainHistoButton ||
+        getAutoUpdateMainHisto()
+    ) {
+        buttonPress = true;
+    }
 
 	bool histogramRecalculated = _mappingFrame->Update(
                                     _dataMgr, 
                                     _paramsMgr, 
                                     _rParams, 
                                     buttonPress);
-    
+   
     if (histogramRecalculated) {
 	    _updateMainHistoButton->setEnabled(false);
+        _mappingFrame->SetHistoNeedsUpdate(false);
         _externalChangeHappened = false;
         _initialized = true;
     }
@@ -400,6 +470,7 @@ void TFWidget::updateMainMappingFrame() {
         checkForTimestepChanges();
 	    if (_externalChangeHappened || _mainHistoRangeChanged) {
 	        _updateMainHistoButton->setEnabled(true);
+            _mappingFrame->SetHistoNeedsUpdate(true);
         }
     }
 }
@@ -428,6 +499,7 @@ void TFWidget::updateSecondaryMappingFrame() {
     
     if (histogramRecalculated) {
 	    _updateSecondaryHistoButton->setEnabled(false);
+        _secondaryMappingFrame->SetHistoNeedsUpdate(false);
         _externalChangeHappened = false;
     }
     else  {
@@ -435,8 +507,10 @@ void TFWidget::updateSecondaryMappingFrame() {
         checkForBoxChanges();
         checkForSecondaryMapperRangeChanges();
         checkForTimestepChanges();
-	    if (_externalChangeHappened || _secondaryHistoRangeChanged)
+	    if (_externalChangeHappened || _secondaryHistoRangeChanged) {
 	        _updateSecondaryHistoButton->setEnabled(true);
+            _secondaryMappingFrame->SetHistoNeedsUpdate(true);
+        }
     }
 }
 
@@ -463,6 +537,7 @@ void TFWidget::Update(DataMgr *dataMgr,
 		setEnabled(true);
 	}
 
+    calculateStride(varname);
     updateQtWidgets();
 	updateMainMappingFrame();		// set mapper func to that of current variable, refresh _rParams etc
 	updateSecondaryMappingFrame();
@@ -505,6 +580,7 @@ void TFWidget::refreshSecondaryDuplicateHistogram() {
 		if (mainMF == secondaryMF) {
 			_secondaryMappingFrame->RefreshHistogram();
 			_updateSecondaryHistoButton->setEnabled(false);
+            _secondaryMappingFrame->SetHistoNeedsUpdate(false);
 		}
 	}
 }
@@ -515,6 +591,7 @@ void TFWidget::refreshMainDuplicateHistogram() {
 	if (mainMF == secondaryMF) {
 		_mappingFrame->RefreshHistogram();
 		_updateMainHistoButton->setEnabled(false);
+        _mappingFrame->SetHistoNeedsUpdate(false);
 	}
 }
 
@@ -557,12 +634,12 @@ void TFWidget::checkForMainMapperRangeChanges() {
 	double newMin = mf->getMinMapValue();
 	double newMax = mf->getMaxMapValue();
 
-	if (min != newMin)
+	if (min != newMin) {
 		_mainHistoRangeChanged = true;
-	if (max != newMax)
+    }
+	if (max != newMax) {
 		_mainHistoRangeChanged = true;
-	if (_mainHistoRangeChanged)
-		_mainHistoRangeChanged = true;
+    }
 }
 
 void TFWidget::checkForSecondaryMapperRangeChanges() {
@@ -606,9 +683,11 @@ void TFWidget::enableUpdateButtonsIfNeeded() {
         }
 		else if (_initialized) {
 			_updateMainHistoButton->setEnabled(true);
+            _mappingFrame->SetHistoNeedsUpdate(true);
         }
         else {
 			_updateMainHistoButton->setEnabled(false);
+            _mappingFrame->SetHistoNeedsUpdate(false);
         }
 	}
 	_mainHistoRangeChanged = false;
@@ -625,9 +704,11 @@ void TFWidget::enableUpdateButtonsIfNeeded() {
             }
 			else if (_initialized) {
 				_updateSecondaryHistoButton->setEnabled(true);
+                _secondaryMappingFrame->SetHistoNeedsUpdate(true);
             }
             else { 
 				_updateSecondaryHistoButton->setEnabled(false);
+                _secondaryMappingFrame->SetHistoNeedsUpdate(false);
                 _initialized = true;
             }
 		}
@@ -694,7 +775,7 @@ void TFWidget::connectWidgets() {
 	connect(_loadButton, SIGNAL(pressed()), 
 		this, SLOT(loadTF()));
 	connect(_saveButton, SIGNAL(pressed()), 
-		this, SLOT(fileSaveTF()));
+		this, SLOT(saveTF()));
 	connect(_mappingFrame, SIGNAL(updateParams()),
 		this, SLOT(setRange()));
 	connect(_mappingFrame, SIGNAL(endChange()),
@@ -727,7 +808,7 @@ void TFWidget::connectWidgets() {
 	connect(_secondaryLoadButton, SIGNAL(pressed()), 
 		this, SLOT(loadTF()));
 	connect(_secondarySaveButton, SIGNAL(pressed()), 
-		this, SLOT(fileSaveTF()));
+		this, SLOT(saveTF()));
 }	
 
 void TFWidget::emitTFChange() {
@@ -742,7 +823,7 @@ void TFWidget::opacitySliderChanged(int value)
 	string varName = getTFVariableName(mainTF);
 	MapperFunction *tf = _rParams->GetMapperFunc(varName);
 	assert(tf);
-	tf->setOpacityScale(value/100.f);
+	tf->setOpacityScale(convertSliderValueToOpacity(value));
 	emit emitChange();
 }
 
@@ -959,3 +1040,188 @@ string TFWidget::getTFVariableName(bool mainTF=true) {
 
 	return varname;
 }
+
+int TFWidget::convertOpacityToSliderValue(float opacity) const
+{
+    if (IsOpacityIntegrated())
+        return 100 * sqrtf(opacity);
+    else
+        return 100 * opacity;
+}
+
+float TFWidget::convertSliderValueToOpacity(int value) const
+{
+    if (IsOpacityIntegrated())
+        return powf(value/100.f, 2);
+    else
+        return value/100.f;
+}
+
+bool TFWidget::IsOpacityIntegrated() const
+{
+    return _isOpacityIntegrated;
+}
+
+void TFWidget::SetOpacityIntegrated(bool value)
+{
+    _isOpacityIntegrated = value;
+}
+
+LoadTFDialog::LoadTFDialog( QWidget* parent )
+    : QDialog( parent ) 
+{
+    setModal(true);
+
+    _loadOpacityMap = false;
+    _loadDataBounds = false;
+    _selectedFile = "";
+
+    initializeLayout();
+    configureLayout();
+
+    connectWidgets();
+}
+
+LoadTFDialog::~LoadTFDialog() {}
+
+bool LoadTFDialog::GetLoadTF3OpacityMap() const {
+    return _loadOpacityMap;
+}
+
+bool LoadTFDialog::GetLoadTF3DataRange() const {
+    return _loadDataBounds;
+}
+
+string LoadTFDialog::GetSelectedFile() const {
+    return _selectedFile;
+}
+
+void LoadTFDialog::initializeLayout() {
+    _mainLayout = new QVBoxLayout;
+
+    _loadOptionTab = new QTabWidget;
+    _checkboxFrame = new QFrame;
+    _checkboxLayout = new QHBoxLayout;
+    _loadOpacityMapCheckbox = new QCheckBox;
+    _loadDataBoundsCheckbox = new QCheckBox;
+    _optionSpacer1 = new QSpacerItem(
+        1,
+        1, 
+        QSizePolicy::Expanding, 
+        QSizePolicy::Fixed
+    );
+    _optionSpacer2 = new QSpacerItem(
+        1,
+        1, 
+        QSizePolicy::Expanding, 
+        QSizePolicy::Fixed
+    );
+    _optionSpacer3 = new QSpacerItem(
+        1,
+        1, 
+        QSizePolicy::Expanding, 
+        QSizePolicy::Fixed
+    );
+
+
+    _fileDialogTab = new QTabWidget;
+    _fileDialogFrame = new QFrame;
+    _fileDialog = new CustomFileDialog(this);
+    _fileDialogLayout = new QVBoxLayout;
+    /*_mainLayout = new QVBoxLayout(this);
+
+    _loadOptionTab = new QTabWidget(this);
+    _checkboxFrame = new QFrame(_loadOptionTab);
+    _checkboxLayout = new QHBoxLayout(_checkboxFrame);
+    _loadOpacityMapCheckbox = new QCheckBox(_checkboxFrame);
+    _loadDataBoundsCheckbox = new QCheckBox(_checkboxFrame);
+    _hSpacer = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    _fileDialogTab = new QTabWidget(this);
+    _fileDialogFrame = new QFrame(_fileDialogTab);
+    _fileDialog = new CustomFileDialog(_fileDialogFrame);
+    _fileDialogLayout = new QVBoxLayout(_fileDialogFrame);*/
+}
+
+void LoadTFDialog::configureLayout() {
+    _loadOpacityMapCheckbox->setLayoutDirection(Qt::RightToLeft);
+    _loadOpacityMapCheckbox->setText("Load opacity map from file\t");
+
+    _loadDataBoundsCheckbox->setLayoutDirection(Qt::RightToLeft);
+    _loadDataBoundsCheckbox->setText("Load data bounds from file\t");
+
+
+    _checkboxLayout->addSpacerItem(_optionSpacer1);
+    _checkboxLayout->addWidget(_loadOpacityMapCheckbox, 0);
+    _checkboxLayout->addSpacerItem(_optionSpacer2);
+    _checkboxLayout->addWidget(_loadDataBoundsCheckbox, 0);
+    _checkboxLayout->addSpacerItem(_optionSpacer3);
+    _checkboxLayout->setContentsMargins(0,0,0,0);
+    _checkboxFrame->setLayout(_checkboxLayout);
+
+    _loadOptionTab->addTab(_checkboxFrame, "Options");
+
+    _fileDialog->setWindowFlags(_fileDialog->windowFlags() & ~Qt::Dialog);
+    QString directory = QString::fromStdString(
+        Wasp::GetSharePath( string("palettes") )
+    );
+    _fileDialog->setDirectory(directory);
+    _fileDialog->setNameFilter("*.tf3");
+    _fileDialogLayout->addWidget(_fileDialog);
+    _fileDialogLayout->setContentsMargins(0,0,0,0);
+    _fileDialogFrame->setLayout(_fileDialogLayout);
+    _fileDialogTab->addTab(_fileDialogFrame, "Select .tf3 File");
+    
+
+    _mainLayout->addWidget(_loadOptionTab, 0);
+    _mainLayout->addWidget(_fileDialogTab, 1);
+    //_mainLayout->addStretch(0);
+    //_mainLayout->addStretch(1);
+    
+    setLayout(_mainLayout);
+    adjustSize();
+}
+
+void LoadTFDialog::connectWidgets() {
+    connect(_loadOpacityMapCheckbox, SIGNAL(stateChanged(int)),
+        this, SLOT(setLoadOpacity()));
+    connect(_loadDataBoundsCheckbox, SIGNAL(stateChanged(int)),
+        this, SLOT(setLoadBounds()));
+
+	connect(_fileDialog, SIGNAL(okClicked()),
+		this, SLOT(accept()));
+    connect(_fileDialog, SIGNAL(cancelClicked()),
+        this, SLOT(reject()));
+}
+
+void LoadTFDialog::setLoadOpacity() {
+    _loadOpacityMap = _loadOpacityMapCheckbox->isChecked();
+}
+
+void LoadTFDialog::setLoadBounds() {
+    _loadDataBounds = _loadDataBoundsCheckbox->isChecked();
+}
+
+void LoadTFDialog::accept() {
+    _loadOpacityMap = _loadOpacityMapCheckbox->isChecked();
+    _loadDataBounds = _loadDataBoundsCheckbox->isChecked();
+    QStringList selectedFiles = _fileDialog->selectedFiles();
+    if (selectedFiles.size() > 0)
+        _selectedFile = selectedFiles[0].toStdString();
+    done(ACCEPT);
+}
+
+void LoadTFDialog::reject() {
+    done(CANCEL);
+}
+
+CustomFileDialog::CustomFileDialog(QWidget* parent) : QFileDialog(parent) {}
+
+void CustomFileDialog::done(int result) {
+    emit cancelClicked();
+}
+
+void CustomFileDialog::accept() {
+    emit okClicked();
+}
+
