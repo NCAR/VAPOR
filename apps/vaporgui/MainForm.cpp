@@ -1341,7 +1341,7 @@ void MainForm::loadData(string fileName) {
 
     loadDataHelper(
         files, "Choose the Master data File to load",
-        "Vapor VDC files (*.nc)", "vdc", false);
+        "Vapor VDC files (*.nc *.vdc)", "vdc", false);
 }
 
 void MainForm::closeData(string fileName) {
