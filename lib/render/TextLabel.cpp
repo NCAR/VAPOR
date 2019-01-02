@@ -26,6 +26,9 @@ void TextLabel::DrawText(const glm::vec3 &position, const std::string &text)
     GLint viewport[4] = {0};
     glGetIntegerv(GL_VIEWPORT, viewport);
 
+    vec4  ndc = mm->GetModelViewProjectionMatrix() * vec4(position, 1.f);
+    float z = ndc.z / ndc.w;
+
     mm->MatrixModeProjection();
     mm->PushMatrix();
     mm->Ortho(0, viewport[2], 0, viewport[3]);
@@ -52,9 +55,9 @@ void TextLabel::DrawText(const glm::vec3 &position, const std::string &text)
     }
 
     glDepthMask(true);
-    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 
-    mm->Translate((int)x, (int)y, 0);
+    mm->Translate((int)x, (int)y, z);
 
     if (BackgroundColor.a > 0) {
         lgl->Color(BackgroundColor);

@@ -166,6 +166,7 @@ RayCaster::UserCoordinates::UserCoordinates()
     myVariableName = "";
     myRefinementLevel = -1;
     myCompressionLevel = -1;
+    myCastingMode = 1;
 }
 
 // Destructor
@@ -232,7 +233,7 @@ int RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params, Da
 bool RayCaster::UserCoordinates::IsMetadataUpToDate(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr) const
 {
     if ((myCurrentTimeStep != params->GetCurrentTimestep()) || (myVariableName != params->GetVariableName()) || (myRefinementLevel != params->GetRefinementLevel())
-        || (myCompressionLevel != params->GetCompressionLevel())) {
+        || (myCastingMode != params->GetCastingMode()) || (myCompressionLevel != params->GetCompressionLevel())) {
         return false;
     }
 
@@ -262,6 +263,7 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
     myVariableName = params->GetVariableName();
     myRefinementLevel = params->GetRefinementLevel();
     myCompressionLevel = params->GetCompressionLevel();
+    myCastingMode = params->GetCastingMode();
 
     /* Update member variables */
     std::vector<size_t> gridDims = grid->GetDimensions();
@@ -330,7 +332,7 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
         }
         float dataValue;
         for (size_t i = 0; i < numOfVertices; i++) {
-            dataValue = float(*valItr);
+            dataValue = *valItr;
             if (dataValue == missingValue) {
                 dataField[i] = 0.0f;
                 missingValueMask[i] = 127u;
@@ -343,7 +345,7 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
     } else    // No missing value!
     {
         for (size_t i = 0; i < numOfVertices; i++) {
-            dataField[i] = float(*valItr);
+            dataField[i] = *valItr;
             ++valItr;
         }
     }
@@ -467,6 +469,7 @@ int RayCaster::_paintGL(bool fast)
     const MatrixManager *mm = Renderer::_glManager->matrixManager;
 
     _updateViewportWhenNecessary();
+    glDisable(GL_POLYGON_SMOOTH);
 
     // Collect existing depth value of the scene
     glBindTexture(GL_TEXTURE_2D, _depthTextureId);
@@ -491,8 +494,21 @@ int RayCaster::_paintGL(bool fast)
         return GRIDERROR;
     }
 
-    // If there is an update event
+    // Use the correct shader for 3rd pass rendering
     long castingMode = params->GetCastingMode();
+    if (castingMode == FixedStep)
+        _3rdPassShader = _3rdPassMode1Shader;
+    else if (castingMode == CellTraversal)
+        _3rdPassShader = _3rdPassMode2Shader;
+    else {
+        MyBase::SetErrMsg("RayCasting Mode not supported!");
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        delete grid;
+        return JUSTERROR;
+    }
+
+    // If there is an update event
     if (!_userCoordinates.IsMetadataUpToDate(params, grid, _dataMgr)) {
         int success = _userCoordinates.UpdateFaceAndData(params, grid, _dataMgr);
         if (success != 0) {
@@ -548,17 +564,6 @@ int RayCaster::_paintGL(bool fast)
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
     // 3rd pass, perform ray casting
-    if (castingMode == FixedStep)
-        _3rdPassShader = _3rdPassMode1Shader;
-    else if (castingMode == CellTraversal)
-        _3rdPassShader = _3rdPassMode2Shader;
-    else {
-        MyBase::SetErrMsg("RayCasting Mode not supported!");
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        delete grid;
-        return JUSTERROR;
-    }
     _drawVolumeFaces(3, castingMode, insideACell, InversedMV, fast);
 
     // Restore default VAO settings!
@@ -1167,12 +1172,12 @@ void RayCaster::_updateDataTextures(int castingMode)
         // Fill data to buffer object _xyCoordsBufferId
         glBindBuffer(GL_TEXTURE_BUFFER, _xyCoordsBufferId);
         glBufferData(GL_TEXTURE_BUFFER, 2 * sizeof(float) * dims[0] * dims[1], _userCoordinates.xyCoords, GL_STATIC_READ);
-        // Pass data to the buffer texture: _xyCoordsTextureId
+        // Pass data to the buffer texture
         glActiveTexture(GL_TEXTURE0 + _xyCoordsTexOffset);
         glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
         glTexBuffer(GL_TEXTURE_BUFFER, GL_RG32F, _xyCoordsBufferId);
 
-        // Repeat for the next buffer texture: _zCoordsBufferId
+        // Repeat for the next buffer texture
         glBindBuffer(GL_TEXTURE_BUFFER, _zCoordsBufferId);
         glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * dims[0] * dims[1] * dims[2], _userCoordinates.zCoords, GL_STATIC_READ);
         glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);

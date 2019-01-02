@@ -328,14 +328,16 @@ public:
     //! \param[in] Indicates whether we're using color mapped variables
     void SetDefaultVariables(int dim, bool secondaryColormapVariable);
 
-    void _initBox();
+    void InitBox();
 
 protected:
     DataMgr *_dataMgr;
 
 private:
     void             _init();
+    void             _calculateStride(string varName);
     int              _maxDim;
+    int              _stride;
     ParamsContainer *_TFs;
     Box *            _Box;
     ColorbarPbase *  _Colorbar;

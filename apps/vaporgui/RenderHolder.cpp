@@ -126,7 +126,11 @@ void NewRendererDialog::_buttonChecked()
     _selectedRenderer = _rendererNames[index];
 }
 
-void NewRendererDialog::_buttonDoubleClicked() { this->accept(); }
+void NewRendererDialog::_buttonDoubleClicked()
+{
+    _buttonChecked();
+    this->accept();
+}
 
 void NewRendererDialog::_uncheckAllButtons()
 {
@@ -549,7 +553,10 @@ void RenderHolder::Update()
 
     _vaporTable->Update(numRows, 4, tableValues, rowHeader, colHeader);
     int row = _getRow(activeRenderInst);
-    if (row >= 0) _vaporTable->SetActiveRow(row);
+    if (row >= 0)
+        _vaporTable->SetActiveRow(row);
+    else
+        p->SetActiveRenderer(activeViz, "", "");
 
     _updateDupCombo();
 

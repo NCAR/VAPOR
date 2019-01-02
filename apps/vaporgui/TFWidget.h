@@ -1,6 +1,7 @@
 #ifndef TFWIDGET_H
 #define TFWIDGET_H
 
+#include <QFileDialog>
 #include "ui_TFWidgetGUI.h"
 #include "EventRouter.h"
 #include "RangeCombos.h"
@@ -10,6 +11,11 @@ namespace VAPoR {
 class ControlExec;
 class MapperFunction;
 }    // namespace VAPoR
+
+namespace TFWidget_ {
+class LoadTFDialog;
+class CustomFileDialog;
+}    // namespace TFWidget_
 
 //    V - Composition
 //    # - Association
@@ -57,16 +63,17 @@ public:
     bool isContainer() const { return true; }
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams, bool internalUpdate = false);
 
-    void fileLoadTF(string varname, const char *path, bool savePath);
-
     void  getVariableRange(float range[2], float values[2], bool secondaryVariable);
     float getOpacity();
     void  RefreshHistogram();
     void  SetAutoUpdateParamChanged(bool changed);
+    bool  IsOpacityIntegrated() const;
+    void  SetOpacityIntegrated(bool value);
 
 private slots:
     void loadTF();
-    void fileSaveTF();
+    void saveTF();
+    bool selectedTFFileOk(string fileName);
 
     void autoUpdateMainHistoChecked(int state);
     void autoUpdateSecondaryHistoChecked(int state);
@@ -89,13 +96,17 @@ private slots:
     void updateSecondaryMappingFrame();
 
 private:
+    TFWidget_::LoadTFDialog *_loadTFDialog;
+
     void refreshMainDuplicateHistogram();
     void refreshSecondaryDuplicateHistogram();
 
     void configureConstantColorControls();
     void configureSecondaryTransferFunction();
+
     void connectWidgets();
 
+    void calculateStride(string varName);
     void updateQtWidgets();
     void updateColorInterpolation();
     void updateConstColor();
@@ -124,8 +135,8 @@ private:
 
     string getTFVariableName(bool mainTF);
 
-    int confirmMinRangeEdit(VAPoR::MapperFunction *tf, float *range);
-    int confirmMaxRangeEdit(VAPoR::MapperFunction *tf, float *range);
+    int   convertOpacityToSliderValue(float opacity) const;
+    float convertSliderValueToOpacity(int value) const;
 
     std::vector<double> _minExt;
     std::vector<double> _maxExt;
@@ -133,6 +144,7 @@ private:
     int                 _cLevel;
     int                 _refLevel;
     int                 _timeStep;
+    int                 _stride;
     string              _mainVarName;
     string              _secondaryVarName;
     bool                _initialized;
@@ -141,6 +153,7 @@ private:
     bool                _secondaryHistoRangeChanged;
     bool                _mainHistoNeedsRefresh;
     bool                _secondaryHistoNeedsRefresh;
+    bool                _isOpacityIntegrated;
 
     bool  _discreteColormap;
     bool  _textChanged;
@@ -171,4 +184,58 @@ signals:
     void emitChange();
 };
 
+class TFWidget_::LoadTFDialog : public QDialog {
+    Q_OBJECT
+
+public:
+    LoadTFDialog(QWidget *parent = 0);
+    ~LoadTFDialog();
+    bool   GetLoadTF3OpacityMap() const;
+    bool   GetLoadTF3DataRange() const;
+    string GetSelectedFile() const;
+
+private slots:
+    void accept();
+    void reject();
+    void setLoadOpacity();
+    void setLoadBounds();
+
+private:
+    void initializeLayout();
+    void configureLayout();
+    void connectWidgets();
+
+    CustomFileDialog *_fileDialog;
+    QFrame *          _checkboxFrame;
+    QFrame *          _fileDialogFrame;
+    QVBoxLayout *     _mainLayout;
+    QHBoxLayout *     _checkboxLayout;
+    QVBoxLayout *     _fileDialogLayout;
+    QTabWidget *      _fileDialogTab;
+    QTabWidget *      _loadOptionTab;
+    QSpacerItem *     _optionSpacer1;
+    QSpacerItem *     _optionSpacer2;
+    QSpacerItem *     _optionSpacer3;
+    QCheckBox *       _loadOpacityMapCheckbox;
+    QCheckBox *       _loadDataBoundsCheckbox;
+
+    bool   _loadOpacityMap;
+    bool   _loadDataBounds;
+    string _selectedFile;
+};
+
+class TFWidget_::CustomFileDialog : public QFileDialog {
+    Q_OBJECT
+
+public:
+    CustomFileDialog(QWidget *parent);
+
+protected:
+    void done(int result);
+    void accept();
+
+signals:
+    void okClicked();
+    void cancelClicked();
+};
 #endif    // TFWIDGET_H

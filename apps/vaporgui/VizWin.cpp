@@ -249,16 +249,6 @@ void VizWin::resizeGL(int width, int height)
 
     glViewport(0, 0, (GLint)width, (GLint)height);
 
-    glClearColor(0., 0., 0., 1.);
-    glClear(GL_COLOR_BUFFER_BIT);
-    swapBuffers();
-
-    // Necessary?
-    //
-    glClearColor(0., 0., 0., 1.);
-    glClear(GL_COLOR_BUFFER_BIT);
-    swapBuffers();
-
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
     ViewpointParams *vParams = paramsMgr->GetViewpointParams(_winName);
 
@@ -268,6 +258,8 @@ void VizWin::resizeGL(int width, int height)
     _controlExec->SetSaveStateEnabled(false);
     vParams->SetWindowSize(width, height);
     _controlExec->SetSaveStateEnabled(enabled);
+
+    Render(true);
 }
 
 void VizWin::initializeGL()
@@ -279,7 +271,10 @@ void VizWin::initializeGL()
 
     printOpenGLErrorMsg("GLVizWindowInitializeEvent");
     int rc = _controlExec->InitializeViz(_winName, _glManager);
-    if (rc < 0) { MSG_ERR("Failure to initialize Visualizer"); }
+    if (rc < 0) {
+        MSG_FATAL("Failure to initialize Visualizer");
+        return;
+    }
     _glManager->legacy->Initialize();
     printOpenGLErrorMsg("GLVizWindowInitializeEvent");
 

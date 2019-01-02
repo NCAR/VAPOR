@@ -69,6 +69,22 @@ TabManager::TabManager(QWidget *parent, ControlExec *ce) : QTabWidget(parent)
     _initialized = true;
 }
 
+void TabManager::SetActiveRenderer(string activeViz, string renderClass, string renderInst)
+{
+    if (renderClass.empty() || renderInst.empty()) {
+        HideRenderWidgets();
+        return;
+    }
+
+    ShowRenderWidget(renderClass);
+
+    RenderEventRouter *eRouter = _getRenderEventRouter(activeViz, renderClass, renderInst);
+    eRouter->SetActive(renderInst);
+    eRouter->updateTab();
+
+    emit ActiveEventRouterChanged(eRouter->GetType());
+}
+
 void TabManager::ShowRenderWidget(string subTabName)
 {
     MoveToFront(subTabName);
@@ -230,23 +246,7 @@ void TabManager::_setFrontTab(int newFrontPosn)
     }
 }
 
-void TabManager::_setActive(string activeViz, string renderClass, string renderInst)
-{
-    if (renderClass.empty() || renderInst.empty()) {
-        HideRenderWidgets();
-        return;
-    }
-
-    ShowRenderWidget(renderClass);
-
-    RenderEventRouter *eRouter = _getRenderEventRouter(activeViz, renderClass, renderInst);
-
-    eRouter->SetActive(renderInst);
-
-    eRouter->updateTab();
-
-    emit ActiveEventRouterChanged(eRouter->GetType());
-}
+void TabManager::_setActive(string activeViz, string renderClass, string renderInst) { SetActiveRenderer(activeViz, renderClass, renderInst); }
 
 void TabManager::_newRenderer(string activeViz, string renderClass, string renderInst)
 {
