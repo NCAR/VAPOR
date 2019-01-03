@@ -56,6 +56,7 @@ void TextLabel::DrawText(const glm::vec3 &position, const std::string &text)
 
     glDepthMask(true);
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
 
     mm->Translate((int)x, (int)y, z);
 
@@ -71,7 +72,7 @@ void TextLabel::DrawText(const glm::vec3 &position, const std::string &text)
 
     font->DrawText(text, ForegroundColor);
 
-    glDepthMask(true);
+    glDepthFunc(GL_LESS);
 
     mm->PopMatrix();
     mm->MatrixModeProjection();
