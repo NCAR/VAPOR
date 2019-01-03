@@ -228,7 +228,7 @@ string MyPython::PyErr()
     // Erase the string
     //
     PyObject *eStr = PyString_FromString("");
-    int       rc = PyObject_SetAttrString(catcher, "value", eStr);
+    PyObject_SetAttrString(catcher, "value", eStr);
     Py_DECREF(eStr);
 
     return (s ? string(s) : string());
@@ -251,7 +251,7 @@ string MyPython::PyOut()
     // Erase the string
     //
     PyObject *eStr = PyString_FromString("");
-    int       rc = PyObject_SetAttrString(catcher, "value", eStr);
+    PyObject_SetAttrString(catcher, "value", eStr);
     Py_DECREF(eStr);
 
     return (s ? string(s) : string());
