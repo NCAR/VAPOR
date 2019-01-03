@@ -45,11 +45,14 @@ void GLManager::PixelCoordinateSystemPop()
 
 bool GLManager::IsCurrentOpenGLVersionSupported()
 {
-    int major, minor;
-    glGetIntegerv(GL_MAJOR_VERSION, &major);
-    glGetIntegerv(GL_MINOR_VERSION, &minor);
+    // OpenGL 1.1 does not support GL_VERSION integer query
+    if (std::string((const char *)glGetString(GL_VERSION)).substr(0, 3) != "1.1") {
+        int major, minor;
+        glGetIntegerv(GL_MAJOR_VERSION, &major);
+        glGetIntegerv(GL_MINOR_VERSION, &minor);
 
-    if (major > 4 || (major == 4 && minor >= 1)) return true;
+        if (major > 4 || (major == 4 && minor >= 1)) return true;
+    }
 
     Wasp::MyBase::SetErrMsg("OpenGL Version \"%s\" is too low and is not supported", glGetString(GL_VERSION));
     return false;
