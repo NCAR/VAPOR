@@ -91,7 +91,7 @@ void DomainWidget::drag(float dx, float dy, float)
 //----------------------------------------------------------------------------
 int DomainWidget::paintGL()
 {
-  int rc = printOpenGLErrorMsg("DomainWidget");
+  int rc = CheckGLErrorMsg("DomainWidget");
   if (rc < 0) return -1;
   float length = 0.03;
 
@@ -282,7 +282,7 @@ int DomainWidget::paintGL()
   glPopMatrix();
   glPopName();
 
-  rc = printOpenGLErrorMsg("DomainWidget");
+  rc = CheckGLErrorMsg("DomainWidget");
   if (rc < 0) return -1;
   return 0;
 }
@@ -361,7 +361,7 @@ int IsoSlider::paintGL(){
       }
 	  glPopMatrix();
       glPopName();
-	  int rc = printOpenGLError();
+	  int rc = CheckGLError();
 	  if (rc < 0) return -1;
 	  return 0;
 }
@@ -380,7 +380,7 @@ ContourRangeSlider::ContourRangeSlider(QWidget* parent, float min, float max) :
 //----------------------------------------------------------------------------
 int ContourRangeSlider::paintGL()
 {
-  int rc = printOpenGLErrorMsg("DomainWidget");
+  int rc = CheckGLErrorMsg("DomainWidget");
   if (rc < 0) return -1;
   float length = 0.03;
 
@@ -569,7 +569,7 @@ int ContourRangeSlider::paintGL()
   glPopMatrix();
   glPopName();
 
-  rc = printOpenGLErrorMsg("DomainWidget");
+  rc = CheckGLErrorMsg("DomainWidget");
   if (rc < 0) return -1;
   return 0;
 }
