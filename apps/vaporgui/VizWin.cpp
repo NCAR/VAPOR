@@ -44,6 +44,7 @@
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
 #include "vapor/FileUtils.h"
+#include "vapor/Visualizer.h"
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
 
@@ -265,7 +266,7 @@ void VizWin::resizeGL(int width, int height){
 		return;
 	}
 
-	int rc = printOpenGLErrorMsg("GLVizWindowResizeEvent");
+	int rc = CheckGLErrorMsg("GLVizWindowResizeEvent");
 	if (rc < 0) {
 		MSG_ERR("OpenGL error");
 	}
@@ -297,14 +298,14 @@ void VizWin::initializeGL()
     bool initialize = true;
     updateManip(initialize);
 
-	printOpenGLErrorMsg("GLVizWindowInitializeEvent");
+	CheckGLErrorMsg("GLVizWindowInitializeEvent");
 	int rc = _controlExec->InitializeViz(_winName, _glManager);
 	if (rc<0) {
 		MSG_FATAL("Failure to initialize Visualizer");
         return;
 	}
     _glManager->legacy->Initialize();
-	printOpenGLErrorMsg("GLVizWindowInitializeEvent");
+	CheckGLErrorMsg("GLVizWindowInitializeEvent");
 
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 	ViewpointParams* vParams = paramsMgr->GetViewpointParams(_winName);
@@ -617,7 +618,7 @@ void VizWin::Render(bool fast) {
 	
 	swapBuffers();
     
-	rc = printOpenGLErrorMsg("VizWindowPaintGL");
+	rc = CheckGLErrorMsg("VizWindowPaintGL");
 	if (rc < 0) {
 		MSG_ERR("OpenGL error");
 	}

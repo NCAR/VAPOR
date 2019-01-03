@@ -29,6 +29,7 @@
 #include <QTimer>
 
 
+#include <vapor/DataStatus.h>
 #include "AnimationParams.h"
 #include "RangeCombos.h"
 #include "AnimationEventRouter.h"
@@ -210,6 +211,8 @@ void AnimationEventRouter::GetWebHelp(
 void AnimationEventRouter::setCurrentTimestep(size_t ts) const {
 	DataStatus *dataStatus = _controlExec->GetDataStatus();
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+    
+    paramsMgr->BeginSaveStateGroup("Set Timestep");
 
 	// First set current *global* timestep in AnimationParams
 	//
@@ -237,6 +240,8 @@ void AnimationEventRouter::setCurrentTimestep(size_t ts) const {
 			}
 		}
 	}
+    
+    paramsMgr->EndSaveStateGroup();
 }
 
 /////////////////////////////////////////////////////////////////////////////
