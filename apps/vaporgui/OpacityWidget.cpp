@@ -241,7 +241,7 @@ list<float> OpacityWidget::selectedPoints() {
 //----------------------------------------------------------------------------
 int OpacityWidget::paintGL() {
 
-    int rc = printOpenGLErrorMsg("OpacityWidgetPaintGL");
+    int rc = CheckGLErrorMsg("OpacityWidgetPaintGL");
     if (rc < 0)
         return -1;
 
@@ -368,7 +368,7 @@ int OpacityWidget::paintGL() {
     glPopMatrix();
     glPopName();
 
-    rc = printOpenGLErrorMsg("OpacityWidget");
+    rc = CheckGLErrorMsg("OpacityWidget");
     if (rc < 0)
         return -1;
     return 0;

@@ -73,7 +73,8 @@ set (NUMPY_INCLUDE_DIR )
 set (THIRD_PARTY_LIB_DIR )
 set (THIRD_PARTY_INC_DIR )
 
-include (site.local OPTIONAL)
+include (site_files/site.NCAR OPTIONAL)
+include (site.local           OPTIONAL)
 
 include_directories ("${PROJECT_SOURCE_DIR}/include")
 include_directories (${THIRD_PARTY_INC_DIR})
