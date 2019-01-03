@@ -1,13 +1,13 @@
 #pragma once
 
 #include <vector>
-#include <vapor/PyEngine.h>
 #include <vapor/DataMgr.h>
 
 namespace VAPoR {
 
 class DataStatus;
 class ParamsMgr;
+class PyEngine;
 
 //! \class CalcEngineMgr
 //! \brief A class for managing CalcEngine class instances
