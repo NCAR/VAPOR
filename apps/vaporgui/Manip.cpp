@@ -519,6 +519,8 @@ bool TranslateStretchManip::pixelToVector(
 	GLint viewport[4];
 	glGetIntegerv(GL_VIEWPORT, viewport);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	gluProject(
 		strHandleMid[0],strHandleMid[1], strHandleMid[2], _modelViewMatrix, 
 		_projectionMatrix, viewport,&screenx,&screeny, &screenz
@@ -531,6 +533,7 @@ bool TranslateStretchManip::pixelToVector(
 		_projectionMatrix, viewport,
 		pt, pt+1, pt+2)
 	);
+#pragma GCC diagnostic pop
 	if (success){
 		//Subtract camera coords to get a direction vector:
 		vsub(pt, _cameraPosition, dirVec);
@@ -1259,11 +1262,14 @@ bool TranslateStretchManip::_projectPointToWin(
 	GLint viewport[4];
 	glGetIntegerv(GL_VIEWPORT, viewport);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	bool success = (0!=gluProject(
 		cbCoords[0],cbCoords[1],cbCoords[2], _modelViewMatrix,
 		_projectionMatrix, viewport, wCoords, 
 		(wCoords+1),(GLdouble*)(&depth))
-	);   
+	);
+#pragma GCC diagnostic pop
 
 	if (!success) return false;
 	winCoords[0] = wCoords[0];
