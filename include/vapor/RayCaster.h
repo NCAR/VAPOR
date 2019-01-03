@@ -1,25 +1,13 @@
 #ifndef RAYCASTER_H
 #define RAYCASTER_H
 
-#include <GL/glew.h>
+#include <vapor/glutil.h>
 #ifndef WIN32
     #include <sys/time.h>
 #endif
 
-#ifdef Darwin
-    #include <OpenGL/gl.h>
-    #include <OpenGL/glu.h>
-#else
-    #include <GL/gl.h>
-    #include <GL/glu.h>
-#endif
-
-#include "vapor/Visualizer.h"
+#include <vapor/Renderer.h>
 #include "vapor/RayCasterParams.h"
-#include "vapor/DataMgr.h"
-#include "vapor/DataMgrUtils.h"
-#include "vapor/Grid.h"
-#include "vapor/utils.h"
 #include "vapor/GLManager.h"
 
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES

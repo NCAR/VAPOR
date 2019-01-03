@@ -1013,6 +1013,7 @@ void MainForm::undoRedoHelper(bool undo)
     // Restore state saving
     //
     _controlExec->SetSaveStateEnabled(enabled);
+    _stateChangeCB();
 }
 
 void MainForm::undo()
@@ -1163,7 +1164,7 @@ void MainForm::loadData(string fileName)
     vector<string> files;
     if (!fileName.empty()) { files.push_back(fileName); }
 
-    loadDataHelper(files, "Choose the Master data File to load", "Vapor VDC files (*.nc)", "vdc", false);
+    loadDataHelper(files, "Choose the Master data File to load", "Vapor VDC files (*.nc *.vdc)", "vdc", false);
 }
 
 void MainForm::closeData(string fileName)
@@ -1965,6 +1966,14 @@ void MainForm::launchPythonVariables()
     if (!_pythonVariables) _pythonVariables = new PythonVariables(this);
     if (_controlExec) { _pythonVariables->InitControlExec(_controlExec); }
     _pythonVariables->ShowMe();
+}
+
+void MainForm::_setTimeStep()
+{
+    _paramsMgr->BeginSaveStateGroup("Change Timestep");
+    int ts = _timeStepEdit->text().toInt();
+    _tabMgr->AnimationSetTimestep(ts);
+    _paramsMgr->EndSaveStateGroup();
 }
 
 // Begin capturing animation images.

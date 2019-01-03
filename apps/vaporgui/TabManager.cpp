@@ -30,6 +30,7 @@
 #include "RenderEventRouter.h"
 #include "RenderHolder.h"
 #include "TabManager.h"
+#include <vapor/DataStatus.h>
 
 using namespace VAPoR;
 

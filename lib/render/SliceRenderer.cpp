@@ -9,6 +9,7 @@
 #include <vapor/LegacyGL.h>
 #include <vapor/GLManager.h>
 #include <vapor/ResourcePath.h>
+#include <vapor/DataMgrUtils.h>
 
 #define X  0
 #define Y  1
@@ -27,8 +28,7 @@ SliceRenderer::SliceRenderer(const ParamsMgr *pm, string winName, string dataSet
 : Renderer(pm, winName, dataSetName, SliceParams::GetClassType(), SliceRenderer::GetClassType(), instanceName, dataMgr)
 {
     _initialized = false;
-    _textureWidth = 200;
-    _textureHeight = 200;
+    _textureSideSize = 200;
 
     _vertexCoords = {0.0f, 0.0f, 0.f, 1.0f, 0.0f, 0.f, 0.0f, 1.0f, 0.f, 1.0f, 0.0f, 0.f, 1.0f, 1.0f, 0.f, 0.0f, 1.0f, 0.f};
 
@@ -129,10 +129,8 @@ int SliceRenderer::_resetDataCache()
     _cacheParams.textureSampleRate = p->GetSampleRate();
     _cacheParams.orientation = p->GetBox()->GetOrientation();
 
-    _textureWidth = _cacheParams.textureSampleRate;
-    _textureHeight = _cacheParams.textureSampleRate;
-    if (_textureWidth > MAX_TEXTURE_SIZE) _textureWidth = MAX_TEXTURE_SIZE;
-    if (_textureHeight > MAX_TEXTURE_SIZE) _textureHeight = MAX_TEXTURE_SIZE;
+    _textureSideSize = _cacheParams.textureSampleRate;
+    if (_textureSideSize > MAX_TEXTURE_SIZE) _textureSideSize = MAX_TEXTURE_SIZE;
 
     _resetBoxCache();
     _resetColormapCache();
@@ -241,10 +239,10 @@ void SliceRenderer::_populateDataXY(float *dataValues, Grid *grid) const
     coords[Z] = _cacheParams.boxMin[Z];
 
     int index = 0;
-    for (int j = 0; j < _textureHeight; j++) {
+    for (int j = 0; j < _textureSideSize; j++) {
         coords[X] = _cacheParams.domainMin[X];
 
-        for (int i = 0; i < _textureWidth; i++) {
+        for (int i = 0; i < _textureSideSize; i++) {
             varValue = grid->GetValue(coords);
             missingValue = grid->GetMissingValue();
             if (varValue == missingValue)
@@ -271,10 +269,10 @@ void SliceRenderer::_populateDataXZ(float *dataValues, Grid *grid) const
     coords[Z] = _cacheParams.domainMin[Z];
 
     int index = 0;
-    for (int j = 0; j < _textureHeight; j++) {
+    for (int j = 0; j < _textureSideSize; j++) {
         coords[X] = _cacheParams.domainMin[X];
 
-        for (int i = 0; i < _textureWidth; i++) {
+        for (int i = 0; i < _textureSideSize; i++) {
             varValue = grid->GetValue(coords);
             missingValue = grid->GetMissingValue();
             if (varValue == missingValue)
@@ -301,10 +299,10 @@ void SliceRenderer::_populateDataYZ(float *dataValues, Grid *grid) const
     coords[Z] = _cacheParams.domainMin[Z];
 
     int index = 0;
-    for (int j = 0; j < _textureHeight; j++) {
+    for (int j = 0; j < _textureSideSize; j++) {
         coords[Y] = _cacheParams.domainMin[Y];
 
-        for (int i = 0; i < _textureWidth; i++) {
+        for (int i = 0; i < _textureSideSize; i++) {
             varValue = grid->GetValue(coords);
             missingValue = grid->GetMissingValue();
             if (varValue == missingValue)
@@ -337,7 +335,7 @@ int SliceRenderer::_saveTextureData()
 
     _setVertexPositions();
 
-    int    textureSize = 2 * _textureWidth * _textureHeight;
+    int    textureSize = 2 * _textureSideSize * _textureSideSize;
     float *dataValues = new float[textureSize];
 
     if (_cacheParams.orientation == XY)
@@ -370,7 +368,7 @@ void SliceRenderer::_createDataTexture(float *dataValues)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, _textureWidth, _textureHeight, 0, GL_RG, GL_FLOAT, dataValues);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, _textureSideSize, _textureSideSize, 0, GL_RG, GL_FLOAT, dataValues);
 }
 
 bool SliceRenderer::_isDataCacheDirty() const
@@ -452,7 +450,7 @@ int SliceRenderer::_paintGL(bool fast)
     }
 
     _configureShader();
-    if (printOpenGLError() != 0) {
+    if (CheckGLError() != 0) {
         _resetState();
         return -1;
     }
@@ -468,7 +466,7 @@ int SliceRenderer::_paintGL(bool fast)
 
     _resetState();
 
-    if (printOpenGLError() != 0) { return -1; }
+    if (CheckGLError() != 0) { return -1; }
     return rc;
 }
 
