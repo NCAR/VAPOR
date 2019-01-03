@@ -215,6 +215,7 @@ void VariablesWidget::set2DOrientation(const QString &orientation) {
     cout << "2D orientation is currently a no-op" << endl;
 }
 
+// This takes the dropdown menu index, not the dimension
 void VariablesWidget::setVariableDims(int index) {
     assert(_rParams);
     if (!((_dimFlags & TWOD) && (_dimFlags & THREED)))
@@ -351,6 +352,7 @@ string VariablesWidget::updateVarCombo(
 void VariablesWidget::updateScalarCombo() {
     if (_variableFlags & SCALAR) {
         string setVarReq = _rParams->GetVariableName();
+
         vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
         string setVar = updateVarCombo(varnameCombo, vars, false, setVarReq);
         if (setVar != setVarReq) {
@@ -436,14 +438,18 @@ void VariablesWidget::updateCombos() {
 
     vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
 
+    updateDimCombo();
     updateScalarCombo();
     updateVectorCombo();
     updateColorCombo();
     updateHeightCombo();
-    updateDimCombo();
 }
 
 void VariablesWidget::updateDimCombo() {
+    string varName = _rParams->GetVariableName();
+    if (_dataMgr->VariableExists(_rParams->GetCurrentTimestep(), varName))
+        _activeDim = _dataMgr->GetNumDimensions(varName);
+
     // Only update if we support multiple dimensions
     if (((_dimFlags & TWOD) && (_dimFlags & THREED))) {
         int index = _activeDim - 2;
