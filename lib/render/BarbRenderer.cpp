@@ -548,14 +548,17 @@ void BarbRenderer::_reFormatExtents(vector<float> &rakeExts) const
     BarbParams *bParams = dynamic_cast<BarbParams *>(GetActiveParams());
     assert(bParams);
     vector<double> rMinExtents, rMaxExtents;
+
     bParams->GetBox()->GetExtents(rMinExtents, rMaxExtents);
+
+    bool planar = bParams->GetBox()->IsPlanar();
 
     rakeExts.push_back(rMinExtents[X]);
     rakeExts.push_back(rMinExtents[Y]);
-    rakeExts.push_back(rMinExtents[Z]);
+    rakeExts.push_back(planar ? 0 : rMinExtents[Z]);
     rakeExts.push_back(rMaxExtents[X]);
     rakeExts.push_back(rMaxExtents[Y]);
-    rakeExts.push_back(rMaxExtents[Z]);
+    rakeExts.push_back(planar ? 0 : rMaxExtents[Z]);
 }
 
 void BarbRenderer::_makeRakeGrid(vector<int> &rakeGrid) const
