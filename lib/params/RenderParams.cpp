@@ -355,7 +355,7 @@ void RenderParams::_calculateStride( string varName ) {
 
     _stride = 1;
     if ( size > REQUIRED_SAMPLE_SIZE)
-        _stride = size / REQUIRED_SAMPLE_SIZE;
+        _stride = 1 + size / REQUIRED_SAMPLE_SIZE;
 }
 
 MapperFunction* RenderParams::GetMapperFunc(string varname) {
