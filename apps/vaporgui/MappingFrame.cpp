@@ -1480,7 +1480,10 @@ void MappingFrame::select(int x, int y, Qt::KeyboardModifiers state)
     // mouse position.
     //
     glLoadIdentity();
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     gluPickMatrix(x, viewport[3] - y, 4, 4, viewport);
+#pragma GCC diagnostic pop
     glOrtho(_minX, _maxX, _minY, _maxY, -1.0, 1.0);
     glMatrixMode(GL_MODELVIEW);
 
