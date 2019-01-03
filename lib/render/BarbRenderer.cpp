@@ -285,6 +285,8 @@ int BarbRenderer::_paintGL(bool)
     // Render the barbs
     _operateOnGrid(varData);
 
+    _glManager->legacy->DisableLighting();
+
     // Release the locks on the data
     for (int i = 0; i < varData.size(); i++) {
         if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
