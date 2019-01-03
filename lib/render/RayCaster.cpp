@@ -569,6 +569,7 @@ int RayCaster::_paintGL(bool fast)
     // Restore default VAO settings!
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glDepthFunc(GL_LESS);
 
     delete grid;
 
