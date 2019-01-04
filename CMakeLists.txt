@@ -18,7 +18,6 @@ set (VERSION_MINOR 0)
 set (VERSION_MICRO 0)
 set (VERSION_RC )
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
-	message ("----------------------- Git Commit info run -----------------------")
 	get_git_head_revision (GIT_REFSPEC VERSION_COMMIT)
 	execute_process (
 		COMMAND git rev-parse --short ${VERSION_COMMIT}
