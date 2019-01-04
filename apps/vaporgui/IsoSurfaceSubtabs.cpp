@@ -66,7 +66,12 @@ void IsoSurfaceAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMg
 
     // Get the value range
     std::vector<double> valueRanged;
-    dataMgr->GetDataRange(params->GetCurrentTimestep(), params->GetVariableName(), params->GetRefinementLevel(), params->GetCompressionLevel(), 1, valueRanged);
+    bool                errEnabled = MyBase::EnableErrMsg(false);
+    int                 rc = dataMgr->GetDataRange(params->GetCurrentTimestep(), params->GetVariableName(), params->GetRefinementLevel(), params->GetCompressionLevel(), 1, valueRanged);
+    MyBase::EnableErrMsg(errEnabled);
+
+    if (rc < 0) return;
+
     float valueRange[2] = {float(valueRanged[0]), float(valueRanged[1])};
 
     // Retrieve Iso Values

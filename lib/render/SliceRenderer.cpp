@@ -325,13 +325,13 @@ int SliceRenderer::_saveTextureData()
     int   rc =
         DataMgrUtils::GetGrids(_dataMgr, _cacheParams.ts, _cacheParams.varName, _cacheParams.boxMin, _cacheParams.boxMax, true, &_cacheParams.refinementLevel, &_cacheParams.compressionLevel, &grid);
 
-    grid->SetInterpolationOrder(1);
-
     if (rc < 0) {
         SetErrMsg("Unable to acquire Grid for Slice texture");
         return (rc);
     }
     assert(grid);
+
+    grid->SetInterpolationOrder(1);
 
     _setVertexPositions();
 
