@@ -107,11 +107,11 @@ private:
 
     void _getStrides(vector<float> &strides, vector<int> &rakeGrid, vector<float> &rakeExts) const;
 
-    bool _defineBarb(std::vector<Grid *>, float start[3], float end[3], bool doColorMapping, float clut[1024]);
+    bool _defineBarb(const std::vector<Grid *>, float start[3], float end[3], bool doColorMapping, const float clut[1024]);
 
     void _operateOnGrid(vector<Grid *> variableData, bool drawBarb = true);
 
-    bool _getColorMapping(float val, float clut[256 * 4]);
+    bool _getColorMapping(float val, const float clut[256 * 4]);
 
     float _calculateDirVec(const float start[3], const float end[3], float dirVec[3]);
 
@@ -125,7 +125,7 @@ private:
     //! \param[in] const float startPoint[3] beginning position of barb
     //! \param[in] const float endPoint[3] ending position of barb
     // void drawBarb(const float startPoint[3], const float endPoint[3]);
-    void _drawBarb(const std::vector<Grid *> variableData, float startPoint[3], bool doColorMapping, float clut[1024]);
+    void _drawBarb(const std::vector<Grid *> variableData, const float startPoint[3], bool doColorMapping, const float clut[1024]);
 
 #ifdef DEBUG
     _printBackDiameter(const float startVertex[18]) const;
