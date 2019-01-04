@@ -931,7 +931,7 @@ void MainForm::_fileSaveHelper(string path)
         GUIStateParams *guiStateParams = GetStateParams();
 
         string dir;
-        if (not guiStateParams->GetCurrentSessionFile().empty())
+        if (!guiStateParams->GetCurrentSessionFile().empty())
             dir = FileUtils::Dirname(guiStateParams->GetCurrentSessionFile());
         else
             dir = sP->GetSessionDir();

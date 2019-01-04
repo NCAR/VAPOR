@@ -56,7 +56,7 @@ Visualizer::Visualizer(const ParamsMgr *pm, const DataStatus *dataStatus, string
     _dataStatus = dataStatus;
     _winName = winName;
     _glManager = nullptr;
-    _vizFeatures = nullptr;
+    _vizFeatures = new AnnotationRenderer(_paramsMgr, _dataStatus, _winName);
     _insideGLContext = false;
     _imageCaptureEnabled = false;
     _animationCaptureEnabled = false;
@@ -231,8 +231,6 @@ int Visualizer::InitializeGL(GLManager *glManager)
     if (!glManager->IsCurrentOpenGLVersionSupported()) return -1;
 
     _glManager = glManager;
-
-    _vizFeatures = new AnnotationRenderer(_paramsMgr, _dataStatus, _winName);
     _vizFeatures->InitializeGL(glManager);
 
     // glewExperimental = GL_TRUE;

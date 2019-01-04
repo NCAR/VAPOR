@@ -339,6 +339,8 @@ void VizWin::_mousePressEventNavigate(QMouseEvent *e)
 //
 void VizWin::mousePressEvent(QMouseEvent *e)
 {
+    if (_mouseClicked) return;
+
     _buttonNum = 0;
     _mouseClicked = true;
 

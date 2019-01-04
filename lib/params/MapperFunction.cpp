@@ -170,9 +170,6 @@ int MapperFunction::LoadFromFile(string path)
     XmlNode *       parent = this->GetNode()->GetParent();
     MapperFunction *newTF = new MapperFunction(_ssave, node);
 
-    double newMin = newTF->getMinMapValue();
-    double newMax = newTF->getMaxMapValue();
-
     // Assign (copy) new TF to this object
     //
     *this = *newTF;
