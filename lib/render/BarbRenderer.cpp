@@ -263,7 +263,6 @@ int BarbRenderer::_getVarGrid(
 			for (int i = 0; i<varData.size(); i++){
 				if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
 			}
-    		glEndList();
 			return(rc);
 		}
 		varData[varData.size()-1] = sg;
@@ -290,7 +289,6 @@ int BarbRenderer::_paintGL(bool) {
 	// Get vector variables
 	rc = _getVectorVarGrids(ts, refLevel, lod, minExts, maxExts, varData);
 	if(rc<0) {
-    	glEndList();
 		SetErrMsg("One or more selected field variables does not exist");
 		return -1;
 	}
