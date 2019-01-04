@@ -24,8 +24,8 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>418</width>
-    <height>32767</height>
+    <width>16777215</width>
+    <height>16777215</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -52,7 +52,7 @@ scene.</string>
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>50</height>
+       <height>0</height>
       </size>
      </property>
      <property name="maximumSize">
@@ -88,16 +88,7 @@ scene.</string>
        <property name="spacing">
         <number>0</number>
        </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
+       <property name="margin">
         <number>0</number>
        </property>
        <item>
