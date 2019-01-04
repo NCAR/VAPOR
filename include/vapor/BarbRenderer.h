@@ -152,17 +152,17 @@ class RENDER_API BarbRenderer : public Renderer {
         vector<float> &rakeExts) const;
 
     bool _defineBarb(
-        std::vector<Grid *>,
+        const std::vector<Grid *>,
         float start[3],
         float end[3],
         bool doColorMapping,
-        float clut[1024]);
+        const float clut[1024]);
 
     void _operateOnGrid(
         vector<Grid *> variableData,
         bool drawBarb = true);
 
-    bool _getColorMapping(float val, float clut[256 * 4]);
+    bool _getColorMapping(float val, const float clut[256 * 4]);
 
     float _calculateDirVec(
         const float start[3],
@@ -191,9 +191,9 @@ class RENDER_API BarbRenderer : public Renderer {
     //void drawBarb(const float startPoint[3], const float endPoint[3]);
     void _drawBarb(
         const std::vector<Grid *> variableData,
-        float startPoint[3],
+        const float startPoint[3],
         bool doColorMapping,
-        float clut[1024]);
+        const float clut[1024]);
 
 #ifdef DEBUG
     _printBackDiameter(const float startVertex[18]) const;
