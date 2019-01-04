@@ -103,9 +103,9 @@ void VizWinMgr::_attachVisualizer(string vizName)
     QString qvizname = QString::fromStdString(vizName);
 
     QGLFormat glFormat;
-    // glFormat.setVersion(3, 2);
-    // glFormat.setProfile(QGLFormat::CoreProfile); // Requires >=Qt-4.8.0
-    // glFormat.setSampleBuffers(true);
+    glFormat.setVersion(4, 1);
+    glFormat.setProfile(QGLFormat::CoreProfile);
+
     _vizWindow[vizName] = new VizWin(glFormat, _parent, qvizname, vizName, _controlExec, _trackBall
 
     );
