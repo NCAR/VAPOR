@@ -11,7 +11,7 @@
 #include "vapor/GLManager.h"
 
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
-#define GLM_FORCE_SIMD_AVX2
+#define GLM_FORCE_SIMD_AVX
 #include <glm/glm.hpp>
 
 namespace VAPoR {
