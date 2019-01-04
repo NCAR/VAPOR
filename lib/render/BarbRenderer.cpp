@@ -435,10 +435,13 @@ void BarbRenderer::_printBackDiameter(const float startVertex[18]) const {
 //
 void BarbRenderer::_drawBarb(
 	const std::vector<Grid*> variableData,
-	float startPoint[3],
+	const float startPoint_[3],
 	bool doColorMapping,
-	float clut[1024]
+	const float clut[1024]
 ) {
+    float startPoint[3];
+    memcpy(startPoint, startPoint_, sizeof(float)*3);
+    
 	assert(variableData.size() == 5);
     MatrixManager *mm = _glManager->matrixManager;
 
@@ -453,6 +456,15 @@ void BarbRenderer::_drawBarb(
 
     mm->MatrixModeModelView();
     mm->PushMatrix();
+    
+    mm->Translate(startPoint[0], startPoint[1], startPoint[2]);
+    
+    endPoint[0] -= startPoint[0];
+    endPoint[1] -= startPoint[1];
+    endPoint[2] -= startPoint[2];
+    
+    startPoint[0] = startPoint[1] = startPoint[2] = 0;
+    
 	vector<double> scales = _getScales();
 	mm->Scale(1.f/scales[0], 1.f/scales[1], 1.f/scales[2]);
 
@@ -755,11 +767,11 @@ void BarbRenderer::_getStrides(
 }
 
 bool BarbRenderer::_defineBarb(
-	std::vector<Grid*> variableData,
+	const std::vector<Grid*> variableData,
 	float start[3],
 	float end[3],
 	bool doColorMapping,
-	float clut[1024]
+	const float clut[1024]
 ) {
 	bool missing = false;
 	
@@ -866,7 +878,7 @@ void BarbRenderer::_getMagnitudeAtPoint(
 	}
 }
 
-bool BarbRenderer::_getColorMapping(float val, float clut[256*4]) {
+bool BarbRenderer::_getColorMapping(float val, const float clut[256*4]) {
 	bool missing = false;
 
 	MapperFunction* tf=0;
