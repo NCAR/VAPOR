@@ -62,20 +62,27 @@ size_t BufSize1 = 0;
 float *Buffer2;
 size_t BufSize2 = 0;
 
-void computeLMax(const float *buf1, const float *buf2, size_t nelements, double &lmax, double &min, double &max)
+void computeLMax(const float *buf1, const float *buf2, size_t nelements, double &lmax, double &min, double &max, bool hasMissing, float mv)
 {
     lmax = 0.0;
     min = 0.0;
     max = 0.0;
     if (nelements < 1) return;
 
-    min = max = *buf1;
+    size_t index = 0;
+    while (hasMissing && buf1[index] == mv && index < nelements) index++;
 
-    for (size_t i = 0; i < nelements; i++) {
-        if (min > buf1[i]) { min = buf1[i]; }
-        if (max < buf1[i]) { max = buf1[i]; }
+    if (index >= nelements) return;
 
-        double diff = fabs(buf1[i] - buf2[i]);
+    min = max = buf1[index];
+
+    for (; index < nelements; index++) {
+        if (hasMissing && buf1[index] == mv) continue;
+
+        if (min > buf1[index]) { min = buf1[index]; }
+        if (max < buf1[index]) { max = buf1[index]; }
+
+        double diff = fabs(buf1[index] - buf2[index]);
         if (diff > lmax) { lmax = diff; }
     }
 }
@@ -109,11 +116,19 @@ bool compare(DC *dc1, DC *dc2, size_t nts, string varname, double &nlmax_all)
         rc = dc1->GetVar(ts, varname, -1, -1, Buffer1);
         if (rc < 0) return (false);
 
+        DC::DataVar datavar;
+        bool        ok = dc1->GetDataVarInfo(varname, datavar);
+        assert(ok);
+
+        float mv = 0.0;
+        bool  hasMissing = datavar.GetHasMissing();
+        if (hasMissing) mv = datavar.GetMissingValue();
+
         rc = dc2->GetVar(ts, varname, -1, -1, Buffer2);
         if (rc < 0) return (false);
 
         double lmax, min, max;
-        computeLMax(Buffer1, Buffer2, nelements, lmax, min, max);
+        computeLMax(Buffer1, Buffer2, nelements, lmax, min, max, hasMissing, mv);
         if ((max - min) != 0.0) { lmax /= (max - min); }
         if (lmax > nlmax_all) { nlmax_all = lmax; }
     }
