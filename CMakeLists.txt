@@ -7,9 +7,9 @@ include (buildutils/GetGitRevisionDescription.cmake)
 set (CMAKE_CXX_STANDARD 11)
 
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
-  # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
+	set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build." FORCE)
+	# Set the possible values of build type for cmake-gui
+	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
 endif()
 set (CMAKE_OSX_DEPLOYMENT_TARGET 10.9)
 
@@ -17,13 +17,16 @@ set (VERSION_MAJOR 3)
 set (VERSION_MINOR 0)
 set (VERSION_MICRO 0)
 set (VERSION_RC )
-get_git_head_revision (GIT_REFSPEC VERSION_COMMIT)
-execute_process (
-	COMMAND git rev-parse --short ${VERSION_COMMIT}
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-	OUTPUT_VARIABLE VERSION_COMMIT 
-	OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+	message ("----------------------- Git Commit info run -----------------------")
+	get_git_head_revision (GIT_REFSPEC VERSION_COMMIT)
+	execute_process (
+		COMMAND git rev-parse --short ${VERSION_COMMIT}
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+		OUTPUT_VARIABLE VERSION_COMMIT 
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+endif ()
 string (TIMESTAMP VERSION_DATE UTC)
 if (VERSION_RC)
 	set (VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}.${VERSION_RC})
@@ -49,9 +52,15 @@ else ()
   SET (CMAKE_C_FLAGS   "/MP")
 endif()
 
+if (CMAKE_GENERATOR STREQUAL "Xcode")
+	set (DEFAULT_BUILD_UTILITIES OFF)
+else ()
+	set (DEFAULT_BUILD_UTILITIES ON)
+endif ()
+
 option (BUILD_VDC "Build VDC library and utilities" ON)
 option (BUILD_GUI "Build Vapor GUI" ON)
-option (BUILD_UTL "Build conversion and utility applications" OFF)
+option (BUILD_UTL "Build conversion and utility applications" ${DEFAULT_BUILD_UTILITIES})
 option (BUILD_DOC "Build Vapor Doxygen documentation" ON)
 option (BUILD_TEST_APPS "Build test applications" OFF)
 option (DIST_INSTALLER "Generate installer for distributing vapor binaries. Will generate standard make install if off" OFF)
