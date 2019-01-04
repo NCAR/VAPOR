@@ -165,8 +165,11 @@ int __CheckGLError(const char *file, int line, const char *msg) {
 
     while (glErr != GL_NO_ERROR) {
 #ifndef NDEBUG
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         std::cout << "glError: " << gluErrorString(glErr) << std::endl
                   << "         " << file << " : " << line << std::endl;
+#pragma GCC diagnostic pop
 #endif
         if (msg) {
             Wasp::MyBase::SetErrMsg("glError: %s\n", msg);

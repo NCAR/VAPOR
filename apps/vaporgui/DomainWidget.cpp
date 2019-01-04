@@ -15,6 +15,8 @@
 using namespace std;
 using namespace VAPoR;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 //----------------------------------------------------------------------------
 // Constructor
 //----------------------------------------------------------------------------
@@ -28,6 +30,7 @@ DomainWidget::DomainWidget(QWidget *parent, Qt::Orientation orientation,
     _minY = 1.14;
     _maxY = 1.3;
 }
+#pragma GCC diagnostic pop
 
 //----------------------------------------------------------------------------
 // Destructor
