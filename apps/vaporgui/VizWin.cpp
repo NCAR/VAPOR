@@ -330,7 +330,8 @@ void VizWin::_mousePressEventManip(QMouseEvent* e) {
 
 }
 
-void VizWin::_mousePressEventNavigate(QMouseEvent* e) {
+void VizWin::_mousePressEventNavigate(QMouseEvent* e)
+{
 	_navigateFlag = true;
 
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
@@ -372,6 +373,9 @@ void VizWin::_mousePressEventNavigate(QMouseEvent* e) {
 // We record the position of the click.
 //
 void VizWin::mousePressEvent(QMouseEvent* e) {
+    if (_mouseClicked)
+        return;
+    
 	_buttonNum = 0;
 	_mouseClicked = true;
 
@@ -452,8 +456,8 @@ void VizWin::_mouseReleaseEventNavigate(QMouseEvent*e) {
  * If the user releases the mouse or moves it (with the left mouse down)
  * then we note the displacement
  */
-void VizWin::mouseReleaseEvent(QMouseEvent*e){
-
+void VizWin::mouseReleaseEvent(QMouseEvent*e)
+{
 	if (_buttonNum == 0) return;
 
 	_mouseClicked = false;

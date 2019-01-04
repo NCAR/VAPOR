@@ -126,7 +126,6 @@ vector <size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const {
 float CurvilinearGrid::GetUserCoordinate(
     std::vector <size_t> &index, size_t dim
 ) const {
-	float v;
 	if (dim == 0) {
 		return(_xrg.AccessIndex(index));
 	}
