@@ -407,7 +407,8 @@ void VariablesWidget::updateCombos()
 void VariablesWidget::updateDimCombo()
 {
     string varName = _rParams->GetVariableName();
-    if (_dataMgr->VariableExists(_rParams->GetCurrentTimestep(), varName)) _activeDim = _dataMgr->GetNumDimensions(varName);
+    if (_dataMgr->VariableExists(_rParams->GetCurrentTimestep(), varName)) _activeDim = _dataMgr->GetVarTopologyDim(varName);
+    //_activeDim = _dataMgr->GetNumDimensions(varName);
 
     // Only update if we support multiple dimensions
     if (((_dimFlags & TWOD) && (_dimFlags & THREED))) {
