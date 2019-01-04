@@ -121,10 +121,7 @@ int ContourRenderer::_buildCache()
     vector<VertexData>           vertices;
     vector<pair<int, glm::vec4>> colors;
 
-    if (cParams->GetVariableName().empty()) {
-        glEndList();
-        return 0;
-    }
+    if (cParams->GetVariableName().empty()) { return 0; }
     MapperFunction *tf = cParams->GetMapperFunc(_cacheParams.varName);
     vector<double>  contours = cParams->GetContourValues(_cacheParams.varName);
     float(*contourColors)[4] = new float[contours.size()][4];
@@ -140,10 +137,7 @@ int ContourRenderer::_buildCache()
         heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, _cacheParams.boxMin, _cacheParams.boxMax);
     }
 
-    if (grid == NULL || (heightGrid == NULL && !_cacheParams.heightVarName.empty())) {
-        glEndList();
-        return -1;
-    }
+    if (grid == NULL || (heightGrid == NULL && !_cacheParams.heightVarName.empty())) { return -1; }
 
     double mv = grid->GetMissingValue();
 
