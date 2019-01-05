@@ -917,7 +917,7 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
     shader->SetUniform("colorMapRange", (glm::vec3 &)_colorMapRange[0]);
     shader->SetUniform("viewportDims", glm::ivec2(_currentViewport[2], _currentViewport[3]));
     const size_t *cdims = _userCoordinates.dims;
-    glm::ivec3    volumeDims((int)(cdims[0]), (int)(cdims[1]), (int)(cdims[2]));
+    glm::ivec3    volumeDims((int)cdims[0], (int)cdims[1], (int)cdims[2]);
     shader->SetUniform("volumeDims", volumeDims);
     float planes[24];    // 6 planes, each with 4 elements
     Renderer::GetClippingPlanes(planes);
@@ -963,7 +963,9 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
         }
     float     df[3] = {float(cdims[0]), float(cdims[1]), float(cdims[2])};
     float     numCells = std::sqrt(df[0] * df[0] + df[1] * df[1] + df[2] * df[2]);
-    glm::vec3 diagonal = gridMax - gridMin;
+    glm::vec4 gridMaxEye = modleview * glm::vec4(gridMax, 1.0);
+    glm::vec4 gridMinEye = modleview * glm::vec4(gridMin, 1.0);
+    glm::vec3 diagonal = (gridMaxEye - gridMinEye).xyz;
     if (numCells < 50.0f)    // Make sure at least 100 steps
         stepSize1D = glm::length(diagonal) / 100.0f * multiplier;
     else    // Use Nyquist frequency
