@@ -51,9 +51,10 @@ protected:
         float *        topFace, *bottomFace;    // user coordinates, size == bx * bz * 3
         float *        dataField;               // data field of this volume
         unsigned char *missingValueMask;        // 0 == is missing value; non-zero == not missing value
-        float *        xyCoords;                // X-Y coordinate values
-        float *        zCoords;                 // Z coordinate values
-        float          baseStepSize;
+        // float *xyCoords;                 // X-Y coordinate values
+        // float *zCoords;                  // Z coordinate values
+        float *vertCoords;
+        // float baseStepSize;
 
         size_t dims[3];    // num. of samples along each axis.
 
@@ -109,7 +110,7 @@ protected:
         // This function is supposed to be called at the end of either
         // UpdateFaceAndData() or UpdateCurviCoords() .
         //
-        void FindBaseStepSize(int mode);
+        // void FindBaseStepSize( int mode );
 
     };    // end of struct UserCoordinates
 
@@ -119,26 +120,28 @@ protected:
 
     // OpenGL stuff
     // textures
-    GLuint      _backFaceTextureId;
-    GLuint      _frontFaceTextureId;
-    GLuint      _volumeTextureId;
-    GLuint      _missingValueTextureId;
-    GLuint      _colorMapTextureId;
-    GLuint      _xyCoordsTextureId;
-    GLuint      _zCoordsTextureId;
+    GLuint _backFaceTextureId;
+    GLuint _frontFaceTextureId;
+    GLuint _volumeTextureId;
+    GLuint _missingValueTextureId;
+    GLuint _colorMapTextureId;
+    // GLuint              _xyCoordsTextureId;
+    // GLuint              _zCoordsTextureId;
+    GLuint      _vertCoordsTextureId;
     GLuint      _depthTextureId;
     const GLint _backFaceTexOffset;
     const GLint _frontFaceTexOffset;
     const GLint _volumeTexOffset;
     const GLint _colorMapTexOffset;
     const GLint _missingValueTexOffset;
-    const GLint _zCoordsTexOffset;
-    const GLint _xyCoordsTexOffset;
+    // const  GLint        _zCoordsTexOffset;
+    // const  GLint        _xyCoordsTexOffset;
+    const GLint _vertCoordsTexOffset;
     const GLint _depthTexOffset;
 
     // buffers and vertex arrays
     GLuint _frameBufferId;
-    GLuint _xyCoordsBufferId;
+    // GLuint              _xyCoordsBufferId;
     GLenum _drawBuffers[2];    // Draw buffers for the 1st and 2nd pass
 
     GLuint _vertexArrayId;
@@ -177,7 +180,8 @@ protected:
 
     void _updateViewportWhenNecessary();
     void _updateColormap(RayCasterParams *params);
-    void _updateDataTextures(int castingMode);
+    void _updateDataTextures();
+    int  _updateVertCoordsTexture(const glm::mat4 &MV);
     void _updateNearClippingPlane();
     void _enableVertexAttribute(const float *buf, size_t length, bool attrib1Enabled) const;
     void _initializeDirectionVectors();

@@ -4,6 +4,8 @@
 #include <fstream>
 #include <sstream>
 
+#include <glm/gtc/type_ptr.hpp>
+
 #define OUTOFDATE   1
 #define GRIDERROR   -1
 #define JUSTERROR   -2
@@ -39,15 +41,18 @@ void glCheckError() { }
 // Constructor
 RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string paramsType, std::string classType, std::string &instName, DataMgr *dataMgr)
 : Renderer(pm, winName, dataSetName, paramsType, classType, instName, dataMgr), _backFaceTexOffset(0), _frontFaceTexOffset(1), _volumeTexOffset(2), _colorMapTexOffset(3), _missingValueTexOffset(4),
-  _zCoordsTexOffset(5), _xyCoordsTexOffset(6), _depthTexOffset(7)
+  //_zCoordsTexOffset      ( 5 ),
+  //_xyCoordsTexOffset     ( 6 ),
+  _vertCoordsTexOffset(5), _depthTexOffset(6)
 {
     _backFaceTextureId = 0;
     _frontFaceTextureId = 0;
     _volumeTextureId = 0;
     _missingValueTextureId = 0;
     _colorMapTextureId = 0;
-    _zCoordsTextureId = 0;
-    _xyCoordsTextureId = 0;
+    //_zCoordsTextureId            = 0;
+    //_xyCoordsTextureId           = 0;
+    _vertCoordsTextureId = 0;
     _depthTextureId = 0;
     _frameBufferId = 0;
 
@@ -55,7 +60,7 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
     _vertexBufferId = 0;
     _indexBufferId = 0;
     _vertexAttribId = 0;
-    _xyCoordsBufferId = 0;
+    //_xyCoordsBufferId            = 0;
 
     _1stPassShader = nullptr;
     _2ndPassShader = nullptr;
@@ -96,14 +101,15 @@ RayCaster::~RayCaster()
         glDeleteTextures(1, &_colorMapTextureId);
         _colorMapTextureId = 0;
     }
-    if (_zCoordsTextureId) {
-        glDeleteTextures(1, &_zCoordsTextureId);
-        _zCoordsTextureId = 0;
+    if (_vertCoordsTextureId) {
+        glDeleteTextures(1, &_vertCoordsTextureId);
+        _vertCoordsTextureId = 0;
     }
-    if (_xyCoordsTextureId) {
-        glDeleteTextures(1, &_xyCoordsTextureId);
+    /*if( _xyCoordsTextureId )
+    {
+        glDeleteTextures( 1, &_xyCoordsTextureId );
         _xyCoordsTextureId = 0;
-    }
+    }*/
     if (_depthTextureId) {
         glDeleteTextures(1, &_depthTextureId);
         _depthTextureId = 0;
@@ -132,10 +138,11 @@ RayCaster::~RayCaster()
         glDeleteBuffers(1, &_vertexAttribId);
         _vertexAttribId = 0;
     }
-    if (_xyCoordsBufferId) {
-        glDeleteBuffers(1, &_xyCoordsBufferId);
+    /*if( _xyCoordsBufferId )
+    {
+        glDeleteBuffers( 1, &_xyCoordsBufferId );
         _xyCoordsBufferId = 0;
-    }
+    }*/
 }
 
 // Constructor
@@ -148,8 +155,8 @@ RayCaster::UserCoordinates::UserCoordinates()
     topFace = nullptr;
     bottomFace = nullptr;
     dataField = nullptr;
-    xyCoords = nullptr;
-    zCoords = nullptr;
+    // xyCoords         = nullptr;
+    vertCoords = nullptr;
     missingValueMask = nullptr;
     for (int i = 0; i < 3; i++) {
         myGridMin[i] = 0;
@@ -157,7 +164,6 @@ RayCaster::UserCoordinates::UserCoordinates()
         dims[i] = 0;
     }
 
-    baseStepSize = 0.0f;
     myCurrentTimeStep = 0;
     myVariableName = "";
     myRefinementLevel = -1;
@@ -196,13 +202,14 @@ RayCaster::UserCoordinates::~UserCoordinates()
         delete[] dataField;
         dataField = nullptr;
     }
-    if (xyCoords) {
+    /*if( xyCoords )
+    {
         delete[] xyCoords;
         xyCoords = nullptr;
-    }
-    if (zCoords) {
-        delete[] zCoords;
-        zCoords = nullptr;
+    }*/
+    if (vertCoords) {
+        delete[] vertCoords;
+        vertCoords = nullptr;
     }
     if (missingValueMask) {
         delete[] missingValueMask;
@@ -345,7 +352,7 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
     }
 
     // Calculate the base step size
-    this->FindBaseStepSize(FixedStep);
+    // this->FindBaseStepSize( FixedStep );
 
     return 0;
 }
@@ -391,65 +398,78 @@ void RayCaster::UserCoordinates::FillCoordsXZPlane(const StructuredGrid *grid, s
 
 int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr)
 {
-    if (xyCoords) delete[] xyCoords;
-    xyCoords = new float[dims[0] * dims[1] * 2];
-    if (zCoords) delete[] zCoords;
+    /*if( xyCoords )
+        delete[] xyCoords;
+    xyCoords = new float[ dims[0] * dims[1] * 2 ]; */
+    size_t numOfVertices = dims[0] * dims[1] * dims[2];
+    if (vertCoords) delete[] vertCoords;
     try {
-        zCoords = new float[dims[0] * dims[1] * dims[2]];
+        vertCoords = new float[3 * numOfVertices];
     } catch (const std::bad_alloc &e) {
         MyBase::SetErrMsg(e.what());
         return MEMERROR;
     }
 
-    // Gather the XY coordinate from frontFace buffer
+    /* Gather the XY coordinate from frontFace buffer
     size_t xyIdx = 0, xyzIdx = 0;
-    for (size_t y = 0; y < dims[1]; y++)
-        for (size_t x = 0; x < dims[0]; x++) {
-            xyCoords[xyIdx++] = frontFace[xyzIdx++];
-            xyCoords[xyIdx++] = frontFace[xyzIdx++];
+    for( size_t y = 0; y < dims[1]; y++ )
+        for( size_t x = 0; x < dims[0]; x++ )
+        {
+            xyCoords[ xyIdx++ ] = frontFace[xyzIdx++];
+            xyCoords[ xyIdx++ ] = frontFace[xyzIdx++];
             xyzIdx++;
         }
+    */
 
-    // Gather the Z coordinates from grid
+    // Gather the vertex coordinates from grid
     StructuredGrid::ConstCoordItr coordItr = grid->ConstCoordBegin();
-    size_t                        numOfVertices = dims[0] * dims[1] * dims[2];
-    for (xyzIdx = 0; xyzIdx < numOfVertices; xyzIdx++) {
-        zCoords[xyzIdx] = float((*coordItr)[2]);
+    for (int i = 0; i < numOfVertices; i++) {
+        vertCoords[3 * i] = float((*coordItr)[0]);
+        vertCoords[3 * i + 1] = float((*coordItr)[1]);
+        vertCoords[3 * i + 2] = float((*coordItr)[2]);
         ++coordItr;
     }
 
     // Calculate the base step size
-    this->FindBaseStepSize(CellTraversal);
+    // this->FindBaseStepSize( CellTraversal );
 
     return 0;
 }
 
-void RayCaster::UserCoordinates::FindBaseStepSize(int mode)
+#if 0
+void RayCaster::UserCoordinates::FindBaseStepSize( int mode )
 {
-    if (mode == FixedStep) {
-        float df[3] = {float(dims[0]), float(dims[1]), float(dims[2])};
+    if( mode == FixedStep )
+    {
+        float df[3]    =  { float(dims[0]), float(dims[1]), float(dims[2]) };
         float numCells = std::sqrt(df[0] * df[0] + df[1] * df[1] + df[2] * df[2]);
-        float span[3] = {myGridMax[0] - myGridMin[0], myGridMax[1] - myGridMin[1], myGridMax[2] - myGridMin[2]};
-        if (numCells < 50.0f)    // Make sure at least 100 steps
-            baseStepSize = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / 100.0f;
-        else {    // Use Nyquist frequency
-            baseStepSize = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / (numCells * 2.0f);
+        float span[3]  = {myGridMax[0] - myGridMin[0], 
+                          myGridMax[1] - myGridMin[1], 
+                          myGridMax[2] - myGridMin[2]};
+        if( numCells   < 50.0f )     // Make sure at least 100 steps
+            baseStepSize = std::sqrt( span[0]*span[0] + span[1]*span[1] + span[2]*span[2] ) / 100.0f;
+        else
+        {   // Use Nyquist frequency 
+            baseStepSize = std::sqrt( span[0]*span[0] + span[1]*span[1] + span[2]*span[2] ) / 
+                           ( numCells * 2.0f );
         }
-    } else    // mode == CellTraversal
+    }
+    else    // mode == CellTraversal
     {
         float dist, smallest, diffx, diffy, diffz;
-        diffx = xyCoords[2] - xyCoords[0];
-        diffy = xyCoords[3] - xyCoords[1];
-        smallest = std::sqrt(diffx * diffx + diffy * diffy);
-        size_t    idx1, idx2, idx3, idx4;
-        glm::vec2 v1, v2, v3, v4;
-        glm::vec3 e1(0.0f), e2(0.0f);
+        diffx    = xyCoords[2] - xyCoords[0];
+        diffy    = xyCoords[3] - xyCoords[1];
+        smallest = std::sqrt( diffx * diffx + diffy * diffy );
+        size_t     idx1, idx2, idx3, idx4;
+        glm::vec2  v1, v2, v3, v4;
+        glm::vec3  e1( 0.0f ), e2( 0.0f );
 
         // Find the smallest edge among the XY plane
-        for (size_t y = 0; y < dims[1]; y++)
-            for (size_t x = 0; x < dims[0]; x++) {
+        for( size_t y = 0; y < dims[1]; y++ )
+            for( size_t x = 0; x < dims[0]; x++ )
+            {
                 /*
-                  v4=(x, y+1)               v3=(x+1, y+1)
+                  v4=(x, y+1)               v3=(x+1, y+1)  
                    ----------------------------
                      \                         \
                       \                         \
@@ -459,71 +479,72 @@ void RayCaster::UserCoordinates::FindBaseStepSize(int mode)
                           \_________________________\
                      v1=(x, y)                      v2=(x+1, y)
                 */
-                idx1 = (y * dims[0] + x) * 2;
-                idx2 = (y * dims[0] + x + 1) * 2;
-                idx3 = ((y + 1) * dims[0] + x + 1) * 2;
-                idx4 = ((y + 1) * dims[0] + x) * 2;
-                v1.x = xyCoords[idx1];
-                v1.y = xyCoords[idx1 + 1];
+                idx1  = ( y    * dims[0] + x  ) * 2;
+                idx2  = ( y    * dims[0] + x+1) * 2;
+                idx3  = ((y+1) * dims[0] + x+1) * 2;
+                idx4  = ((y+1) * dims[0] + x  ) * 2;
+                v1.x  = xyCoords[idx1];    v1.y = xyCoords[idx1+1];
 
-                if (x < dims[0] - 1) {
-                    v2.x = xyCoords[idx2];
-                    v2.y = xyCoords[idx2 + 1];
-                    v3.x = xyCoords[idx3];
-                    v3.y = xyCoords[idx3 + 1];
-                    e1 = glm::vec3(v1 - v2, 0.0f);
-                    e2 = glm::vec3(v3 - v2, 0.0f);
-                    if (glm::dot(e1, e2) > 0.0f)    // Need to find the height from v1 to edge v2v3
+                if( x < dims[0] - 1 )
+                {
+                    v2.x  = xyCoords[idx2];    v2.y = xyCoords[idx2+1];
+                    v3.x  = xyCoords[idx3];    v3.y = xyCoords[idx3+1];
+                    e1    = glm::vec3( v1 - v2, 0.0f );
+                    e2    = glm::vec3( v3 - v2, 0.0f );
+                    if( glm::dot( e1, e2 ) > 0.0f ) // Need to find the height from v1 to edge v2v3
                     {
                         // The area of the parallelogram
-                        float area = glm::length(glm::cross(e1, e2));
-                        float h = area / glm::length(e2);
-                        smallest = smallest < h ? smallest : h;
-                    } else    // Just use the length of edge v1v2
+                        float area = glm::length( glm::cross( e1, e2 ));
+                        float h    = area / glm::length( e2 );
+                        smallest   = smallest < h ? smallest : h;
+                    }
+                    else    // Just use the length of edge v1v2
                     {
-                        float len = glm::length(e1);
-                        smallest = smallest < len ? smallest : len;
+                        float len  = glm::length( e1 );
+                        smallest   = smallest < len ? smallest : len;
                     }
                 }
 
-                if (y < dims[1] - 1) {
-                    v2.x = xyCoords[idx2];
-                    v2.y = xyCoords[idx2 + 1];
-                    v4.x = xyCoords[idx4];
-                    v4.y = xyCoords[idx4 + 1];
-                    e1 = glm::vec3(v2 - v1, 0.0f);
-                    e2 = glm::vec3(v4 - v1, 0.0f);
-                    if (glm::dot(e1, e2) < 0.0f)    // Need to find the height from v1 to edge v3v4
+                if( y < dims[1] - 1 )
+                {
+                    v2.x  = xyCoords[idx2];    v2.y = xyCoords[idx2+1];
+                    v4.x  = xyCoords[idx4];    v4.y = xyCoords[idx4+1];
+                    e1    = glm::vec3( v2 - v1, 0.0f );
+                    e2    = glm::vec3( v4 - v1, 0.0f );
+                    if( glm::dot( e1, e2 ) < 0.0f ) // Need to find the height from v1 to edge v3v4
                     {
-                        float area = glm::length(glm::cross(e1, e2));
-                        float h = area / glm::length(e1);
-                        smallest = smallest < h ? smallest : h;
-                    } else    // Just use the length of edge v1v4
+                        float area = glm::length( glm::cross( e1, e2 ));
+                        float h    = area / glm::length( e1 );
+                        smallest   = smallest < h ? smallest : h;
+                    }
+                    else    // Just use the length of edge v1v4
                     {
-                        float len = glm::length(e2);
-                        smallest = smallest < len ? smallest : len;
+                        float len  = glm::length( e2 );
+                        smallest   = smallest < len ? smallest : len;
                     }
                 }
             }
-
+        
         float smallest2 = smallest * smallest;
 
         // Find the smallest edge among the Z edges
         size_t planeSize = dims[0] * dims[1];
-        for (size_t z = 0; z < dims[2] - 1; z++)
-            for (size_t y = 0; y < dims[1]; y++)
-                for (size_t x = 0; x < dims[0]; x++) {
+        for( size_t z = 0; z < dims[2] - 1; z++ )
+            for( size_t y = 0; y < dims[1]; y++ )
+                for( size_t x = 0; x < dims[0]; x++ )
+                {
                     // Test edge between vertex (x, y, z) and (x, y, z+1)
-                    idx1 = z * planeSize + y * dims[0] + x;
-                    idx2 = (z + 1) * planeSize + y * dims[0] + x;
-                    diffz = zCoords[idx2] - zCoords[idx1];
-                    dist = diffz * diffz;
+                    idx1     = z * planeSize + y * dims[0] + x;
+                    idx2     = (z + 1) * planeSize + y * dims[0] + x;
+                    diffz    = zCoords[ idx2 ] - zCoords[ idx1 ];
+                    dist     = diffz * diffz;
                     smallest2 = smallest2 < dist ? smallest2 : dist;
                 }
 
-        baseStepSize = std::sqrt(smallest2);
+        baseStepSize = std::sqrt( smallest2 );
     }
 }
+#endif
 
 int RayCaster::_initializeGL()
 {
@@ -636,13 +657,23 @@ int RayCaster::_paintGL(bool fast)
             return JUSTERROR;
         }
 
-        _updateDataTextures(castingMode);
+        // Updates data volume texture and missing value texture
+        _updateDataTextures();
+    }
+
+    glm::mat4 ModelView = mm->GetModelViewMatrix();
+    if (castingMode == CellTraversal) {
+        if (_updateVertCoordsTexture(ModelView) != 0) {
+            MyBase::SetErrMsg("Error occured during calculating eye coordinates!");
+            glBindVertexArray(0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            delete grid;
+            return MEMERROR;
+        }
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
-
-    glm::mat4 ModelView = mm->GetModelViewMatrix();
 
     // 1st pass: render back facing polygons to texture0 of the framebuffer
     _drawVolumeFaces(1, castingMode, false);
@@ -771,10 +802,10 @@ int RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    /* Generate 3D texture: _zCoordsTextureId */
-    glGenTextures(1, &_zCoordsTextureId);
-    glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
-    glBindTexture(GL_TEXTURE_3D, _zCoordsTextureId);
+    /* Generate 3D texture: _vertCoordsTextureId */
+    glGenTextures(1, &_vertCoordsTextureId);
+    glActiveTexture(GL_TEXTURE0 + _vertCoordsTexOffset);
+    glBindTexture(GL_TEXTURE_3D, _vertCoordsTextureId);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -785,8 +816,8 @@ int RayCaster::_initializeFramebufferTextures()
     /*   Note: the max size of buffer texture is actually much smaller than
          that of a regular 3D texture, making it not suitable for a 3D volume.
          (It is tested to be 512^3 on GeForce 1060 and Quadro GP100 cards.)  */
-    glGenTextures(1, &_xyCoordsTextureId);
-    glGenBuffers(1, &_xyCoordsBufferId);
+    // glGenTextures( 1, &_xyCoordsTextureId );
+    // glGenBuffers(  1, &_xyCoordsBufferId  );
 
     /* Generate and configure depth texture */
     glGenTextures(1, &_depthTextureId);
@@ -885,7 +916,8 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
     shader->SetUniform("transposedInverseMV", glm::transpose(inversedMV));
     shader->SetUniform("colorMapRange", (glm::vec3 &)_colorMapRange[0]);
     shader->SetUniform("viewportDims", glm::ivec2(_currentViewport[2], _currentViewport[3]));
-    glm::ivec3 volumeDims(int(_userCoordinates.dims[0]), int(_userCoordinates.dims[1]), int(_userCoordinates.dims[2]));
+    const size_t *cdims = _userCoordinates.dims;
+    glm::ivec3    volumeDims((int)(cdims[0]), (int)(cdims[1]), (int)(cdims[2]));
     shader->SetUniform("volumeDims", volumeDims);
     float planes[24];    // 6 planes, each with 4 elements
     Renderer::GetClippingPlanes(planes);
@@ -893,9 +925,14 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
 
     // Only fixed-step ray casting require the grid min and max info.
     //   Cell traverse ray casting instead requires direction info.
+    glm::vec3 gridMin, gridMax;
+    for (int i = 0; i < 3; i++) {
+        gridMin[i] = _userCoordinates.myGridMin[i];
+        gridMax[i] = _userCoordinates.myGridMax[i];
+    }
     if (castingMode == FixedStep) {
-        shader->SetUniform("boxMin", (glm::vec3 &)_userCoordinates.myGridMin[0]);
-        shader->SetUniform("boxMax", (glm::vec3 &)_userCoordinates.myGridMax[0]);
+        shader->SetUniform("boxMin", gridMin);
+        shader->SetUniform("boxMax", gridMax);
     } else {
         shader->SetUniformArray("unitDirections", 26, _unitDirections);
     }
@@ -914,10 +951,8 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
     shader->SetUniformArray("flags", 3, flags);
 
     // Calculate the step size with sample rate multiplier taken into account.
-    float stepSize1D;
-    if (castingMode == FixedStep) {
-        float multiplier;
-        switch (params->GetSampleRateMultiplier()) {
+    float stepSize1D, multiplier = 1.0f;
+    if (castingMode == FixedStep) switch (params->GetSampleRateMultiplier()) {
         case 0: multiplier = 1.0f; break;    // These values need to be in sync with
         case 1: multiplier = 2.0f; break;    //   the multiplier values in the GUI.
         case 2: multiplier = 4.0f; break;
@@ -926,10 +961,15 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
         case 5: multiplier = 0.125f; break;
         default: multiplier = 1.0f; break;
         }
-        stepSize1D = _userCoordinates.baseStepSize / multiplier;
-        if (fast) stepSize1D *= 8.0f;    //  Increase step size, thus fewer steps, when fast rendering
-    } else
-        stepSize1D = _userCoordinates.baseStepSize * 0.95f;
+    float     df[3] = {float(cdims[0]), float(cdims[1]), float(cdims[2])};
+    float     numCells = std::sqrt(df[0] * df[0] + df[1] * df[1] + df[2] * df[2]);
+    glm::vec3 diagonal = gridMax - gridMin;
+    if (numCells < 50.0f)    // Make sure at least 100 steps
+        stepSize1D = glm::length(diagonal) / 100.0f * multiplier;
+    else    // Use Nyquist frequency
+        stepSize1D = glm::length(diagonal) / (numCells * 2.0f) * multiplier;
+
+    if (fast && castingMode == FixedStep) stepSize1D *= 8.0f;    //  Increase step size, thus fewer steps, when fast rendering
     shader->SetUniform("stepSize1D", stepSize1D);
 
     // Pass in textures
@@ -954,13 +994,13 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
     shader->SetUniform("missingValueMaskTexture", _missingValueTexOffset);
 
     if (castingMode == CellTraversal) {
-        glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
-        glBindTexture(GL_TEXTURE_3D, _zCoordsTextureId);
-        shader->SetUniform("zCoordsTexture", _zCoordsTexOffset);
+        glActiveTexture(GL_TEXTURE0 + _vertCoordsTexOffset);
+        glBindTexture(GL_TEXTURE_3D, _vertCoordsTextureId);
+        shader->SetUniform("vertCoordsTexture", _vertCoordsTexOffset);
 
-        glActiveTexture(GL_TEXTURE0 + _xyCoordsTexOffset);
-        glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
-        shader->SetUniform("xyCoordsTexture", _xyCoordsTexOffset);
+        // glActiveTexture(  GL_TEXTURE0 +      _xyCoordsTexOffset );
+        // glBindTexture(    GL_TEXTURE_BUFFER, _xyCoordsTextureId );
+        // shader->SetUniform("xyCoordsTexture", _xyCoordsTexOffset);
     }
 }
 
@@ -1258,7 +1298,7 @@ void RayCaster::_updateColormap(RayCasterParams *params)
     }
 }
 
-void RayCaster::_updateDataTextures(int castingMode)
+void RayCaster::_updateDataTextures()
 {
     const size_t *dims = _userCoordinates.dims;
 
@@ -1288,27 +1328,32 @@ void RayCaster::_updateDataTextures(int castingMode)
     }
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);    // Restore default alignment.
 
+#if 0
     // If using cell traverse ray casting, we need to upload user coordinates
-    if (castingMode == CellTraversal) {
-        glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
-        glBindTexture(GL_TEXTURE_3D, _zCoordsTextureId);
-#ifdef Darwin
-        // Apply the same trick as noted above.
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume);
-#endif
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0, GL_RED, GL_FLOAT, _userCoordinates.zCoords);
+    if( castingMode == CellTraversal )
+    {
+        glActiveTexture( GL_TEXTURE0 +  _zCoordsTexOffset );
+        glBindTexture(   GL_TEXTURE_3D, _zCoordsTextureId );
+    #ifdef Darwin
+        // Apply the same trick as noted above. 
+        glTexImage3D(    GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume );
+    #endif
+        glTexImage3D(    GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0,
+                         GL_RED, GL_FLOAT, _userCoordinates.zCoords );
 
         // Fill data to buffer object _xyCoordsBufferId
-        glBindBuffer(GL_TEXTURE_BUFFER, _xyCoordsBufferId);
-        glBufferData(GL_TEXTURE_BUFFER, 2 * sizeof(float) * dims[0] * dims[1], _userCoordinates.xyCoords, GL_STATIC_READ);
+        glBindBuffer(    GL_TEXTURE_BUFFER, _xyCoordsBufferId );
+        glBufferData(    GL_TEXTURE_BUFFER, 2 * sizeof(float) * dims[0] * dims[1],
+                         _userCoordinates.xyCoords, GL_STATIC_READ );
         // Pass this buffer object to the buffer texture: _xyCoordsTextureId
-        glActiveTexture(GL_TEXTURE0 + _xyCoordsTexOffset);
-        glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
-        glTexBuffer(GL_TEXTURE_BUFFER, GL_RG32F, _xyCoordsBufferId);
+        glActiveTexture( GL_TEXTURE0   +    _xyCoordsTexOffset );
+        glBindTexture(   GL_TEXTURE_BUFFER, _xyCoordsTextureId );
+        glTexBuffer(     GL_TEXTURE_BUFFER, GL_RG32F, _xyCoordsBufferId );
 
-        glBindBuffer(GL_TEXTURE_BUFFER, 0);
-        glBindTexture(GL_TEXTURE_BUFFER, 0);
+        glBindBuffer(    GL_TEXTURE_BUFFER, 0 );
+        glBindTexture(   GL_TEXTURE_BUFFER, 0 );
     }
+#endif
 
     glBindTexture(GL_TEXTURE_3D, 0);
 }
@@ -1330,6 +1375,45 @@ void RayCaster::_updateNearClippingPlane()
         near[i] /= near[i].w;
         std::memcpy(_userCoordinates.nearCoords + i * 3, glm::value_ptr(near[i]), 3 * sizeof(float));
     }
+}
+
+int RayCaster::_updateVertCoordsTexture(const glm::mat4 &MV)
+{
+    // First, transform every vertex coordinate to the eye space
+    size_t numOfVertices = _userCoordinates.dims[0] * _userCoordinates.dims[1] * _userCoordinates.dims[2];
+    float *coordEye = nullptr;
+    try {
+        coordEye = new float[3 * numOfVertices];
+    } catch (const std::bad_alloc &e) {
+        MyBase::SetErrMsg(e.what());
+        return MEMERROR;
+    }
+
+    const float *vc = _userCoordinates.vertCoords;
+    glm::vec4    posModel(1.0f);
+    for (size_t i = 0; i < numOfVertices; i++) {
+        posModel.x = vc[3 * i];
+        posModel.y = vc[3 * i + 1];
+        posModel.z = vc[3 * i + 2];
+        glm::vec4 posEye = MV * posModel;
+        std::memcpy(coordEye + 3 * i, glm::value_ptr(posEye), 12);    // 3 values, each 4 bytes
+    }
+
+    // Second, send these eye coordinates to the GPU
+    glActiveTexture(GL_TEXTURE0 + _vertCoordsTexOffset);
+    glBindTexture(GL_TEXTURE_3D, _vertCoordsTextureId);
+#ifdef Darwin
+    // Apply a dummy texture
+    float dummyVolume[8] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume);
+#endif
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RGB, GL_FLOAT, coordEye);
+
+    glBindTexture(GL_TEXTURE_3D, 0);
+
+    delete[] coordEye;
+
+    return 0;
 }
 
 void RayCaster::_initializeDirectionVectors()
