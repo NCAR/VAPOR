@@ -4,6 +4,8 @@
 #include <fstream>
 #include <sstream>
 
+#include <glm/gtc/type_ptr.hpp>
+
 #define OUTOFDATE    1
 #define GRIDERROR   -1
 #define JUSTERROR   -2
@@ -58,17 +60,19 @@ RayCaster::RayCaster( const ParamsMgr*    pm,
             _volumeTexOffset       ( 2 ),
             _colorMapTexOffset     ( 3 ),
             _missingValueTexOffset ( 4 ),
-            _zCoordsTexOffset      ( 5 ),
-            _xyCoordsTexOffset     ( 6 ),
-            _depthTexOffset        ( 7 )
+            //_zCoordsTexOffset      ( 5 ),
+            //_xyCoordsTexOffset     ( 6 ),
+            _vertCoordsTexOffset       ( 5 ),
+            _depthTexOffset        ( 6 )
 {
     _backFaceTextureId           = 0;
     _frontFaceTextureId          = 0;
     _volumeTextureId             = 0;
     _missingValueTextureId       = 0;
     _colorMapTextureId           = 0;
-    _zCoordsTextureId            = 0;
-    _xyCoordsTextureId           = 0;
+    //_zCoordsTextureId            = 0;
+    //_xyCoordsTextureId           = 0;
+    _vertCoordsTextureId             = 0;
     _depthTextureId              = 0;
     _frameBufferId               = 0;
 
@@ -76,7 +80,7 @@ RayCaster::RayCaster( const ParamsMgr*    pm,
     _vertexBufferId              = 0;
     _indexBufferId               = 0;
     _vertexAttribId              = 0;
-    _xyCoordsBufferId            = 0;
+    //_xyCoordsBufferId            = 0;
 
     _1stPassShader               = nullptr;
     _2ndPassShader               = nullptr;
@@ -122,16 +126,16 @@ RayCaster::~RayCaster()
         glDeleteTextures( 1, &_colorMapTextureId );
         _colorMapTextureId = 0;
     }
-    if( _zCoordsTextureId )
+    if( _vertCoordsTextureId )
     {
-        glDeleteTextures( 1, &_zCoordsTextureId );
-        _zCoordsTextureId = 0;
+        glDeleteTextures( 1, &_vertCoordsTextureId );
+        _vertCoordsTextureId = 0;
     }
-    if( _xyCoordsTextureId )
+    /*if( _xyCoordsTextureId )
     {
         glDeleteTextures( 1, &_xyCoordsTextureId );
         _xyCoordsTextureId = 0;
-    }
+    }*/
     if( _depthTextureId )
     {
         glDeleteTextures( 1, &_depthTextureId );
@@ -166,11 +170,11 @@ RayCaster::~RayCaster()
         glDeleteBuffers( 1, &_vertexAttribId );
         _vertexAttribId = 0;
     }
-    if( _xyCoordsBufferId )
+    /*if( _xyCoordsBufferId )
     {
         glDeleteBuffers( 1, &_xyCoordsBufferId );
         _xyCoordsBufferId = 0;
-    }
+    }*/
 }
 
 // Constructor
@@ -183,8 +187,8 @@ RayCaster::UserCoordinates::UserCoordinates()
     topFace          = nullptr;
     bottomFace       = nullptr;
     dataField        = nullptr;
-    xyCoords         = nullptr;
-    zCoords          = nullptr;
+    //xyCoords         = nullptr;
+    vertCoords           = nullptr;
     missingValueMask = nullptr;
     for( int i = 0; i < 3; i++ )
     {
@@ -193,7 +197,6 @@ RayCaster::UserCoordinates::UserCoordinates()
         dims[i]      = 0;
     }
     
-    baseStepSize       = 0.0f;
     myCurrentTimeStep  = 0;
     myVariableName     = "";
     myRefinementLevel  = -1;
@@ -239,15 +242,15 @@ RayCaster::UserCoordinates::~UserCoordinates()
         delete[] dataField;
         dataField = nullptr;
     }
-    if( xyCoords )
+    /*if( xyCoords )
     {
         delete[] xyCoords;
         xyCoords = nullptr;
-    }
-    if( zCoords )
+    }*/
+    if( vertCoords )
     {
-        delete[] zCoords;
-        zCoords = nullptr;
+        delete[] vertCoords;
+        vertCoords = nullptr;
     }
     if( missingValueMask )
     {
@@ -428,7 +431,7 @@ int  RayCaster::UserCoordinates::UpdateFaceAndData( const RayCasterParams* param
     }
 
     // Calculate the base step size
-    this->FindBaseStepSize( FixedStep );
+    //this->FindBaseStepSize( FixedStep );
 
     return 0;
 }
@@ -485,19 +488,20 @@ int  RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
                                                     const StructuredGrid*  grid, 
                                                           DataMgr*         dataMgr )
 {
-    if( xyCoords )
+    /*if( xyCoords )
         delete[] xyCoords;
-    xyCoords = new float[ dims[0] * dims[1] * 2 ];
-    if( zCoords )
-        delete[] zCoords;
-    try{   zCoords  = new float[ dims[0] * dims[1] * dims[2] ]; }
+    xyCoords = new float[ dims[0] * dims[1] * 2 ]; */
+    size_t numOfVertices = dims[0] * dims[1] * dims[2];
+    if( vertCoords )
+        delete[] vertCoords;
+    try{   vertCoords  = new float[ 3 * numOfVertices ]; }
     catch( const std::bad_alloc& e )
     {
         MyBase::SetErrMsg( e.what() );
         return MEMERROR;
     }
 
-    // Gather the XY coordinate from frontFace buffer
+    /* Gather the XY coordinate from frontFace buffer
     size_t xyIdx = 0, xyzIdx = 0;
     for( size_t y = 0; y < dims[1]; y++ )
         for( size_t x = 0; x < dims[0]; x++ )
@@ -506,22 +510,25 @@ int  RayCaster::UserCoordinates::UpdateCurviCoords( const RayCasterParams* param
             xyCoords[ xyIdx++ ] = frontFace[xyzIdx++];
             xyzIdx++;
         }
+    */
 
-    // Gather the Z coordinates from grid
+    // Gather the vertex coordinates from grid
     StructuredGrid::ConstCoordItr coordItr   = grid->ConstCoordBegin();
-    size_t numOfVertices = dims[0] * dims[1] * dims[2];
-    for( xyzIdx = 0; xyzIdx < numOfVertices; xyzIdx++ )
+    for( int i = 0; i < numOfVertices; i++ )
     {
-        zCoords[xyzIdx] = float((*coordItr)[2]);
+        vertCoords[ 3*i   ] = float((*coordItr)[0]);
+        vertCoords[ 3*i+1 ] = float((*coordItr)[1]);
+        vertCoords[ 3*i+2 ] = float((*coordItr)[2]);
         ++coordItr;
     }
 
     // Calculate the base step size
-    this->FindBaseStepSize( CellTraversal );
+    //this->FindBaseStepSize( CellTraversal );
 
     return 0;
 }
 
+#if 0
 void RayCaster::UserCoordinates::FindBaseStepSize( int mode )
 {
     if( mode == FixedStep )
@@ -629,6 +636,7 @@ void RayCaster::UserCoordinates::FindBaseStepSize( int mode )
         baseStepSize = std::sqrt( smallest2 );
     }
 }
+#endif
 
 int RayCaster::_initializeGL()
 {
@@ -710,7 +718,7 @@ int RayCaster::_paintGL( bool fast )
     
     // Collect existing depth value of the scene
     glBindTexture(GL_TEXTURE_2D, _depthTextureId);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, _currentViewport[0], 
+    glCopyTexImage2D(GL_TEXTURE_2D,   0, GL_DEPTH_COMPONENT32, _currentViewport[0], 
                      _currentViewport[1], _currentViewport[2], _currentViewport[3], 0);
 
     glBindVertexArray( _vertexArrayId );
@@ -753,13 +761,25 @@ int RayCaster::_paintGL( bool fast )
             return JUSTERROR;
         }
 
-        _updateDataTextures( castingMode );
+        // Updates data volume texture and missing value texture
+        _updateDataTextures( );
+    }
+
+    glm::mat4 ModelView = mm->GetModelViewMatrix();
+    if( castingMode == CellTraversal )
+    {
+        if( _updateVertCoordsTexture( ModelView ) != 0 )
+        {
+            MyBase::SetErrMsg( "Error occured during calculating eye coordinates!" );
+            glBindVertexArray( 0 );
+            glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+            delete grid;
+            return MEMERROR;
+        }
     }
 
     glBindFramebuffer( GL_FRAMEBUFFER, _frameBufferId );
     glViewport( 0, 0, _currentViewport[2], _currentViewport[3] );
-
-    glm::mat4 ModelView = mm->GetModelViewMatrix();
 
     // 1st pass: render back facing polygons to texture0 of the framebuffer
     _drawVolumeFaces( 1, castingMode, false );
@@ -895,10 +915,10 @@ int RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    /* Generate 3D texture: _zCoordsTextureId */
-    glGenTextures( 1, &_zCoordsTextureId  );
-    glActiveTexture( GL_TEXTURE0 + _zCoordsTexOffset );
-    glBindTexture( GL_TEXTURE_3D,  _zCoordsTextureId );
+    /* Generate 3D texture: _vertCoordsTextureId */
+    glGenTextures( 1, &_vertCoordsTextureId  );
+    glActiveTexture( GL_TEXTURE0 + _vertCoordsTexOffset );
+    glBindTexture( GL_TEXTURE_3D,  _vertCoordsTextureId );
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -909,8 +929,8 @@ int RayCaster::_initializeFramebufferTextures()
     /*   Note: the max size of buffer texture is actually much smaller than 
          that of a regular 3D texture, making it not suitable for a 3D volume.
          (It is tested to be 512^3 on GeForce 1060 and Quadro GP100 cards.)  */
-    glGenTextures( 1, &_xyCoordsTextureId );
-    glGenBuffers(  1, &_xyCoordsBufferId  );
+    //glGenTextures( 1, &_xyCoordsTextureId );
+    //glGenBuffers(  1, &_xyCoordsBufferId  );
     
     /* Generate and configure depth texture */
     glGenTextures(1, &_depthTextureId);
@@ -1021,9 +1041,8 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
     shader->SetUniform("transposedInverseMV", glm::transpose(inversedMV));
     shader->SetUniform("colorMapRange", (glm::vec3&)_colorMapRange[0]);
     shader->SetUniform("viewportDims", glm::ivec2(_currentViewport[2], _currentViewport[3]));
-    glm::ivec3 volumeDims(int(_userCoordinates.dims[0]),
-                          int(_userCoordinates.dims[1]),  
-                          int(_userCoordinates.dims[2]));
+    const size_t* cdims = _userCoordinates.dims;
+    glm::ivec3 volumeDims( (int)(cdims[0]), (int)(cdims[1]), (int)(cdims[2]) );
     shader->SetUniform("volumeDims", volumeDims);
     float planes[ 24 ];             // 6 planes, each with 4 elements
     Renderer::GetClippingPlanes( planes );
@@ -1031,10 +1050,16 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
 
     // Only fixed-step ray casting require the grid min and max info.
     //   Cell traverse ray casting instead requires direction info.
+    glm::vec3 gridMin, gridMax;
+    for( int i = 0; i < 3; i++ )
+    {
+        gridMin[i] = _userCoordinates.myGridMin[i];
+        gridMax[i] = _userCoordinates.myGridMax[i];
+    }
     if( castingMode == FixedStep )
     {
-        shader->SetUniform("boxMin", (glm::vec3&)_userCoordinates.myGridMin[0] );
-        shader->SetUniform("boxMax", (glm::vec3&)_userCoordinates.myGridMax[0] );
+        shader->SetUniform("boxMin", gridMin );
+        shader->SetUniform("boxMax", gridMax );
     }
     else
     {
@@ -1057,10 +1082,8 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
     shader->SetUniformArray("flags", 3, flags);
 
     // Calculate the step size with sample rate multiplier taken into account.
-    float stepSize1D;
+    float stepSize1D, multiplier = 1.0f;
     if( castingMode == FixedStep )
-    {
-        float multiplier;
         switch( params->GetSampleRateMultiplier() )
         {
             case 0  :   multiplier = 1.0f;   break;     // These values need to be in sync with
@@ -1071,12 +1094,16 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
             case 5  :   multiplier = 0.125f; break;
             default :   multiplier = 1.0f;   break;
         }
-        stepSize1D  = _userCoordinates.baseStepSize / multiplier;
-        if( fast )
-            stepSize1D  *= 8.0f;     //  Increase step size, thus fewer steps, when fast rendering
-    }
-    else
-        stepSize1D  = _userCoordinates.baseStepSize * 0.95f;
+    float df[3]    =  { float(cdims[0]), float(cdims[1]), float(cdims[2]) };
+    float numCells = std::sqrt(df[0] * df[0] + df[1] * df[1] + df[2] * df[2]);
+    glm::vec3 diagonal = gridMax - gridMin;
+    if( numCells   < 50.0f )    // Make sure at least 100 steps
+        stepSize1D = glm::length( diagonal ) / 100.0f * multiplier;
+    else                        // Use Nyquist frequency 
+        stepSize1D = glm::length( diagonal ) / ( numCells * 2.0f ) * multiplier;
+
+    if( fast && castingMode == FixedStep )
+        stepSize1D *= 8.0f;     //  Increase step size, thus fewer steps, when fast rendering
     shader->SetUniform("stepSize1D", stepSize1D);
 
     // Pass in textures
@@ -1102,13 +1129,13 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
 
     if( castingMode == CellTraversal )
     {
-        glActiveTexture(  GL_TEXTURE0 +      _zCoordsTexOffset );
-        glBindTexture(    GL_TEXTURE_3D,     _zCoordsTextureId );
-        shader->SetUniform("zCoordsTexture", _zCoordsTexOffset);
+        glActiveTexture(  GL_TEXTURE0 +      _vertCoordsTexOffset );
+        glBindTexture(    GL_TEXTURE_3D,     _vertCoordsTextureId );
+        shader->SetUniform("vertCoordsTexture", _vertCoordsTexOffset);
 
-        glActiveTexture(  GL_TEXTURE0 +      _xyCoordsTexOffset );
-        glBindTexture(    GL_TEXTURE_BUFFER, _xyCoordsTextureId );
-        shader->SetUniform("xyCoordsTexture", _xyCoordsTexOffset);
+        //glActiveTexture(  GL_TEXTURE0 +      _xyCoordsTexOffset );
+        //glBindTexture(    GL_TEXTURE_BUFFER, _xyCoordsTextureId );
+        //shader->SetUniform("xyCoordsTexture", _xyCoordsTexOffset);
     }
 }
     
@@ -1459,7 +1486,7 @@ void RayCaster::_updateColormap( RayCasterParams* params )
     }
 }
     
-void RayCaster::_updateDataTextures( int castingMode )
+void RayCaster::_updateDataTextures( )
 {
     const size_t* dims = _userCoordinates.dims;
 
@@ -1495,6 +1522,7 @@ void RayCaster::_updateDataTextures( int castingMode )
     }
     glPixelStorei( GL_UNPACK_ALIGNMENT, 4 );    // Restore default alignment.
 
+#if 0
     // If using cell traverse ray casting, we need to upload user coordinates
     if( castingMode == CellTraversal )
     {
@@ -1519,6 +1547,7 @@ void RayCaster::_updateDataTextures( int castingMode )
         glBindBuffer(    GL_TEXTURE_BUFFER, 0 );
         glBindTexture(   GL_TEXTURE_BUFFER, 0 );
     }
+#endif
 
     glBindTexture( GL_TEXTURE_3D, 0 );
 }
@@ -1542,6 +1571,50 @@ void RayCaster::_updateNearClippingPlane( )
         std::memcpy( _userCoordinates.nearCoords + i * 3, 
                      glm::value_ptr(near[i]), 3 * sizeof(float) );
     }
+}
+
+int RayCaster::_updateVertCoordsTexture( const glm::mat4& MV )
+{
+    // First, transform every vertex coordinate to the eye space
+    size_t numOfVertices = _userCoordinates.dims[0] * 
+                           _userCoordinates.dims[1] * 
+                           _userCoordinates.dims[2];
+    float* coordEye = nullptr;
+    try{   coordEye = new float[ 3 * numOfVertices ]; }
+    catch( const std::bad_alloc& e )
+    {
+        MyBase::SetErrMsg( e.what() );
+        return MEMERROR;
+    }
+
+    const float* vc = _userCoordinates.vertCoords;
+    glm::vec4 posModel( 1.0f );
+    for( size_t i = 0; i < numOfVertices; i++ )
+    {
+        posModel.x = vc[ 3*i ];
+        posModel.y = vc[ 3*i+1 ];
+        posModel.z = vc[ 3*i+2 ];
+        glm::vec4 posEye = MV * posModel;
+        std::memcpy( coordEye+3*i, glm::value_ptr(posEye), 12 ); // 3 values, each 4 bytes        
+    }
+
+    // Second, send these eye coordinates to the GPU
+    glActiveTexture( GL_TEXTURE0 +  _vertCoordsTexOffset );
+    glBindTexture(   GL_TEXTURE_3D, _vertCoordsTextureId );
+#ifdef Darwin
+    // Apply a dummy texture
+    float dummyVolume[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+    glTexImage3D( GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume );
+#endif
+    glTexImage3D( GL_TEXTURE_3D, 0, GL_RGB32F, _userCoordinates.dims[0], 
+                  _userCoordinates.dims[1],    _userCoordinates.dims[2],
+                  0, GL_RGB, GL_FLOAT, coordEye                       );
+
+    glBindTexture( GL_TEXTURE_3D, 0 );
+    
+    delete[] coordEye;
+
+    return 0;
 }
     
 void RayCaster::_initializeDirectionVectors()
