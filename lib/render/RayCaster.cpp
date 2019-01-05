@@ -930,9 +930,13 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
         gridMin[i] = _userCoordinates.myGridMin[i];
         gridMax[i] = _userCoordinates.myGridMax[i];
     }
+    glm::vec4 tmpVec4 = modelview * glm::vec4(gridMin, 1.0);
+    glm::vec3 gridMinEye(tmpVec4.x, tmpVec4.y, tmpVec4.z);
+    tmpVec4 = modelview * glm::vec4(gridMax, 1.0);
+    glm::vec3 gridMaxEye(tmpVec4.x, tmpVec4.y, tmpVec4.z);
     if (castingMode == FixedStep) {
-        shader->SetUniform("boxMin", gridMin);
-        shader->SetUniform("boxMax", gridMax);
+        shader->SetUniform("boxMinEye", gridMinEye);
+        shader->SetUniform("boxMaxEye", gridMaxEye);
     } else {
         shader->SetUniformArray("unitDirections", 26, _unitDirections);
     }
@@ -963,11 +967,7 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
         }
     glm::vec3 dimsf((float)cdims[0], (float)cdims[1], (float)cdims[2]);
     float     numCells = glm::length(dimsf);
-    glm::vec4 gridMaxEye = modelview * glm::vec4(gridMax, 1.0);
-    glm::vec4 gridMinEye = modelview * glm::vec4(gridMin, 1.0);
-    gridMaxEye.w = 0.0;
-    gridMinEye.w = 0.0;
-    glm::vec4 diagonal = gridMaxEye - gridMinEye;
+    glm::vec3 diagonal = gridMaxEye - gridMinEye;
     if (numCells < 50.0f)    // Make sure at least 100 steps
         stepSize1D = glm::length(diagonal) / 100.0f * multiplier;
     else    // Use Nyquist frequency
