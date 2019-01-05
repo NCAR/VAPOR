@@ -961,11 +961,13 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
         case 5: multiplier = 0.125f; break;
         default: multiplier = 1.0f; break;
         }
-    float     df[3] = {float(cdims[0]), float(cdims[1]), float(cdims[2])};
-    float     numCells = std::sqrt(df[0] * df[0] + df[1] * df[1] + df[2] * df[2]);
-    glm::vec4 gridMaxEye = modleview * glm::vec4(gridMax, 1.0);
-    glm::vec4 gridMinEye = modleview * glm::vec4(gridMin, 1.0);
-    glm::vec3 diagonal = (gridMaxEye - gridMinEye).xyz;
+    glm::vec3 dimsf((float)cdims[0], (float)cdims[1], (float)cdims[2]);
+    float     numCells = glm::length(dimsf);
+    glm::vec4 gridMaxEye = modelview * glm::vec4(gridMax, 1.0);
+    glm::vec4 gridMinEye = modelview * glm::vec4(gridMin, 1.0);
+    gridMaxEye.w = 0.0;
+    gridMinEye.w = 0.0;
+    glm::vec4 diagonal = gridMaxEye - gridMinEye;
     if (numCells < 50.0f)    // Make sure at least 100 steps
         stepSize1D = glm::length(diagonal) / 100.0f * multiplier;
     else    // Use Nyquist frequency
