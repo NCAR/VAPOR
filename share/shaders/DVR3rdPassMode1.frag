@@ -126,12 +126,12 @@ void main(void)
     vec3  lightDirEye   = vec3(0.0, 0.0, 1.0); 
 
     // Calculate texture coordinates of this fragment
-    vec2 fragTexture    = gl_FragCoord.xy / vec2( viewportDims );
+    vec2 fragTex        = gl_FragCoord.xy / vec2( viewportDims );
 
-    vec3 stopModel      = texture( backFaceTexture,  fragTexture ).xyz;
-    vec3 startModel     = texture( frontFaceTexture, fragTexture ).xyz;
-    vec3 rayDirModel    = stopModel - startModel ;
-    float rayDirLength  = length( rayDirModel );
+    vec3 stopEye        = texture( backFaceTexture,  fragTex ).xyz;
+    vec3 startEye       = texture( frontFaceTexture, fragTex ).xyz;
+    vec3 rayDirEye      = stopEye - startEye ;
+    float rayDirLength  = length( rayDirEye );
     if( rayDirLength    < ULP10 )
         discard;
 
@@ -149,7 +149,7 @@ void main(void)
     //    compare depth at every step.
     bool  shallow    = false;
     // Retrieve depth of other objects on the scene, minus a tiny value to avoid equal depth.
-    float otherDepth = texture( depthTexture, fragTexture ).x - ULP10;
+    float otherDepth = texture( depthTexture, fragTex ).x - ULP10;
     if(   otherDepth < gl_FragDepth )
           shallow    = true;
 
