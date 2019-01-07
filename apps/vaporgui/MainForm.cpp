@@ -1091,7 +1091,7 @@ void MainForm::_fileSaveHelper(string path) {
                                QString::fromAscii("Vapor 3 Session Save file (*.vs3)"));
 
         fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-        //fileDialog.setDefaultSuffix( QString::fromAscii("vs3") );
+        fileDialog.setDefaultSuffix(QString::fromAscii("vs3"));
         if (fileDialog.exec() != QDialog::Accepted)
             return;
 
