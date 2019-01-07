@@ -22,14 +22,15 @@ uniform bool  flags[3];
 uniform float lightingCoeffs[4];
 
 uniform mat4 MV;
+uniform mat4 inversedMV;
 uniform mat4 Projection;
-uniform mat4 transposedInverseMV;
 
 // 
 // Derive helper variables
 //
 const float ULP        = 1.2e-7f;
 const float ULP10      = 1.2e-6f;
+const float Opaque     = 0.999;  // You can still see something with 0.99...
 bool  fast             = flags[0];                  // fast rendering mode
 bool  lighting         = fast ? false : flags[1];   // no lighting in fast mode
 bool  hasMissingValue  = flags[2];                  // has missing values or not
@@ -39,6 +40,7 @@ float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
 vec3  volumeDims1o     = 1.0 / vec3( volumeDims - 1 );
 vec3  boxSpan1o        = 1.0 / (boxMax - boxMin);
+mat4  transposedInverseMV = transpose( inversedMV );
 
 //
 // Input:  Location to be evaluated in texture coordinates and model coordinates.
@@ -109,12 +111,12 @@ vec3 CalculateGradient( const in vec3 tc )
 }
 
 //
-// Input:  a position in the model space
+// Input:  a position in the eye space
 // Return: depth value at that position.
 //
-float CalculateDepth( const in vec3 pModel )
+float CalculateDepth( const in vec3 pEye )
 {
-    vec4    pClip =  Projection  * MV * vec4( pModel, 1.0 );
+    vec4    pClip =  Projection  * vec4( pEye, 1.0 );
     vec3    pNdc  =  pClip.xyz   / pClip.w;
     return (gl_DepthRange.diff * 0.5 * pNdc.z + (gl_DepthRange.near + gl_DepthRange.far) * 0.5);
 }
@@ -136,27 +138,26 @@ void main(void)
         discard;
 
     float nStepsf       = rayDirLength / stepSize1D;
-    vec3  stepSize3D    = rayDirModel  / nStepsf;
+    vec3  stepSize3D    = rayDirEye / nStepsf;
     // nStepsf is the perfect # of steps.
     //   Casting it to integer requires a +1 to cover all volume space.
     int   nSteps        = int(nStepsf) + 1;     
 
-    // Set depth value at the backface minus 1/100 of a step size,
-    //   so it's always inside of the volume.
-    gl_FragDepth        =  CalculateDepth( stopModel - 0.01 * stepSize3D );
+    // Set depth value at the backface minus a tiny value, so it's always inside of the volume.
+    gl_FragDepth     =  CalculateDepth( stopEye ) - ULP10;
 
-    // If something else on the scene results in a shallower depth, we need to 
+    // If something else on the scene resulting in a shallower depth, we need to 
     //    compare depth at every step.
     bool  shallow    = false;
-    // Retrieve depth of other objects on the scene, minus a tiny value to avoid equal depth.
-    float otherDepth = texture( depthTexture, fragTex ).x - ULP10;
+    float otherDepth = texture( depthTexture, fragTex ).x;
     if(   otherDepth < gl_FragDepth )
           shallow    = true;
 
     // Now we need to query the color at the starting point.
     //   However, to prevent unpleasant boundary artifacts, we shift the starting point
     //   into the volume for 1/100 of a step size.
-    vec3  step1Model       = startModel  + 0.01 * stepSize3D;
+    vec3  step1Eye         = startEye    + 0.01 * stepSize3D;
+    vec3  step1Model       = (inversedMV * vec4( step1Eye, 1.0 )).xyz;
     vec3  step1Texture     = (step1Model - boxMin) * boxSpan1o;
     if( !ShouldSkip( step1Texture, step1Model ) )
     {
@@ -171,20 +172,21 @@ void main(void)
     bool earlyTerm         = false;         // loop early terminated 
     for( int stepi = 1; stepi <= nSteps; stepi++ )  // notice that stepi starts from 1.
     {
-        if( color.a > 0.999 )  // You can still see something with 0.99...
+        if( color.a > Opaque )
         { 
             earlyTerm      = true;
             break;
         }
 
-        step2Model         = startModel  + stepSize3D * float( stepi );
+        vec3 step2Eye      = startEye  + stepSize3D * float( stepi );
 
-        if( shallow && ( CalculateDepth(step2Model) > otherDepth ) )
+        if( shallow && ( CalculateDepth(step2Eye) > otherDepth ) )
         { 
             earlyTerm      = true;
             break;
         }
 
+        vec3 step2Model    = (inversedMV * vec4(step2Eye, 1.0)).xyz;
         vec3 step2Texture  = (step2Model - boxMin) * boxSpan1o;
         if( ShouldSkip( step2Texture, step2Model ) )
         {
@@ -199,7 +201,7 @@ void main(void)
         // Apply lighting. 
         //   Note we do the calculation in eye space, because both the light direction
         //   and view direction are defined in the eye space.
-        if( lighting && backColor.a > 0.001 )
+        if( lighting && (backColor.a > 1.0 - Opaque) )
         {
             vec3 gradientModel = CalculateGradient( step2Texture );
             if( length( gradientModel ) > ULP10 )
@@ -207,7 +209,6 @@ void main(void)
                 vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0 )).xyz;
                      gradientEye = normalize( gradientEye );
                 float diffuse    = abs( dot(lightDirEye, gradientEye) );
-                vec3 step2Eye    = (MV * vec4( step2Model, 1.0 )).xyz;
                 vec3 viewDirEye  = normalize( -step2Eye );
                 vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
                 float specular   = pow( max(0.0, dot( reflectionEye, viewDirEye )), specularExp ); 
@@ -220,13 +221,16 @@ void main(void)
         color.rgb += (1.0 - color.a) * backColor.a * backColor.rgb;
         color.a   += (1.0 - color.a) * backColor.a;
 
+        step1Eye   = step2Eye;
         step1Model = step2Model;
     }
 
     // If loop terminated early, we set depth value at step1 position. Otherwise, this fragment 
     //    will have the depth value at the back of this volume, which is already set.
     if( earlyTerm )
-        gl_FragDepth   = CalculateDepth( step1Model );
-
+        gl_FragDepth = CalculateDepth( step1Eye );
+    // If this pixel is almost transparent, set the depth at the far clipping plane
+    else if( color.a < (1.0 - Opaque) )
+        gl_FragDepth = 1.0;
 }
 
