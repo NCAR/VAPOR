@@ -913,7 +913,7 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
 
     shader->SetUniform("MV", modelview);
     shader->SetUniform("Projection", projection);
-    shader->SetUniform("transposedInverseMV", glm::transpose(inversedMV));
+    shader->SetUniform("inversedMV", inversedMV);
     shader->SetUniform("colorMapRange", (glm::vec3 &)_colorMapRange[0]);
     shader->SetUniform("viewportDims", glm::ivec2(_currentViewport[2], _currentViewport[3]));
     const size_t *cdims = _userCoordinates.dims;
@@ -930,13 +930,9 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
         gridMin[i] = _userCoordinates.myGridMin[i];
         gridMax[i] = _userCoordinates.myGridMax[i];
     }
-    glm::vec4 tmpVec4 = modelview * glm::vec4(gridMin, 1.0);
-    glm::vec3 gridMinEye(tmpVec4.x, tmpVec4.y, tmpVec4.z);
-    tmpVec4 = modelview * glm::vec4(gridMax, 1.0);
-    glm::vec3 gridMaxEye(tmpVec4.x, tmpVec4.y, tmpVec4.z);
     if (castingMode == FixedStep) {
-        shader->SetUniform("boxMinEye", gridMinEye);
-        shader->SetUniform("boxMaxEye", gridMaxEye);
+        shader->SetUniform("boxMin", gridMin);
+        shader->SetUniform("boxMax", gridMax);
     } else {
         shader->SetUniformArray("unitDirections", 26, _unitDirections);
     }
@@ -967,6 +963,10 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
         }
     glm::vec3 dimsf((float)cdims[0], (float)cdims[1], (float)cdims[2]);
     float     numCells = glm::length(dimsf);
+    glm::vec4 tmpVec4 = modelview * glm::vec4(gridMin, 1.0);
+    glm::vec3 gridMinEye(tmpVec4.x, tmpVec4.y, tmpVec4.z);
+    tmpVec4 = modelview * glm::vec4(gridMax, 1.0);
+    glm::vec3 gridMaxEye(tmpVec4.x, tmpVec4.y, tmpVec4.z);
     glm::vec3 diagonal = gridMaxEye - gridMinEye;
     if (numCells < 50.0f)    // Make sure at least 100 steps
         stepSize1D = glm::length(diagonal) / 100.0f * multiplier;
