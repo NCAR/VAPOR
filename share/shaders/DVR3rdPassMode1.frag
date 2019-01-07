@@ -12,7 +12,7 @@ uniform sampler2D  depthTexture;
 
 uniform ivec3 volumeDims;        // number of vertices of this volumeTexture
 uniform ivec2 viewportDims;      // width and height of this viewport
-uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
+uniform vec4  clipPlanes[6];     // clipping planes in model coordinates
 uniform vec3  boxMin;            // min coordinates of the bounding box of this volume
 uniform vec3  boxMax;            // max coordinates of the bounding box of this volume
 uniform vec3  colorMapRange;
