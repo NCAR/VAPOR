@@ -168,7 +168,7 @@ int Visualizer::paintEvent(bool fast)
         _glManager->matrixManager->PushMatrix();
 
         if (_renderers[i]->IsGLInitialized()) {
-            _applyTransformsForRenderer(_renderers[i]);
+            _applyDatasetTransformsForRenderer(_renderers[i]);
 
             int myrc = _renderers[i]->paintGL(fast);
             GL_ERR_BREAK();
