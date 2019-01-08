@@ -99,9 +99,9 @@ void TranslateStretchManip::transformMatrix(VAPoR::Transform *transform) {
 
     mm->Translate(origins[X], origins[Y], origins[Z]);
     mm->Scale(scales[X], scales[Y], scales[Z]);
-    mm->Rotate(rotations[X], 1, 0, 0);
-    mm->Rotate(rotations[Y], 0, 1, 0);
-    mm->Rotate(rotations[Z], 0, 0, 1);
+    mm->Rotate(glm::radians(rotations[X]), 1, 0, 0);
+    mm->Rotate(glm::radians(rotations[Y]), 0, 1, 0);
+    mm->Rotate(glm::radians(rotations[Z]), 0, 0, 1);
     mm->Translate(-origins[X], -origins[Y], -origins[Z]);
 
     mm->Translate(translations[X], translations[Y], translations[Z]);
