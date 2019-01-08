@@ -9,8 +9,7 @@ uniform sampler2D       frontFaceTexture;
 uniform sampler3D       volumeTexture;
 uniform usampler3D      missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D       colorMapTexture;
-uniform sampler3D       zCoordsTexture;
-uniform samplerBuffer   xyCoordsTexture;
+uniform sampler3D       vertCoordsTexture;
 uniform sampler2D       depthTexture;
 
 uniform ivec3 volumeDims;        // number of vertices in each direction of this volume
@@ -24,6 +23,7 @@ uniform bool  flags[3];
 uniform float lightingCoeffs[4]; // lighting parameters
 
 uniform mat4  MV;
+uniform mat4  inversedMV;
 uniform mat4  Projection;
 uniform mat4  transposedInverseMV;
 
@@ -32,6 +32,8 @@ uniform mat4  transposedInverseMV;
 //
 const float ULP        = 1.2e-7f;           // 2^-23 == 1.192e-7
 const float ULP10      = 1.2e-6f;
+const float ULP100     = 1.2e-5f;
+const float Opaque     = 0.999;
 bool  lighting         = flags[1];
 bool  hasMissingValue  = flags[2];          // has missing values or not
 float ambientCoeff     = lightingCoeffs[0];
@@ -92,7 +94,7 @@ void ReorderCells( const in vec3 rayDirection )
 
 // 
 // Input:  logical index of a cell
-// Output: user coordinates of its 8 indices
+// Output: eye coordinates of its 8 indices
 //
 void FillCellVertCoordinates( const in ivec3 cellIdx, out vec3 coord[8] )
 {
@@ -124,11 +126,7 @@ void FillCellVertCoordinates( const in ivec3 cellIdx, out vec3 coord[8] )
 
     for( int i = 0; i < 8; i++ )
     {
-        ivec3 index  = cubeVertIdx[i];
-        vec4 xyC     = texelFetch( xyCoordsTexture, index.y * volumeDims.x + index.x );
-        vec4 zC      = texelFetch( zCoordsTexture,  index, 0 );
-        coord[i].xy  = xyC.xy;
-        coord[i].z   = zC.x;
+        coord[i]   = (texelFetch( vertCoordsTexture,  cubeVertIdx[i], 0 )).xyz;
     }
 }
 
@@ -201,12 +199,12 @@ vec3 CalculateGradient( const in vec3 tc)
 }
 
 //
-// Input:  a position in the model space
+// Input:  a position in the eye space
 // Return: depth value at that position.
 //
-float CalculateDepth( const in vec3 pModel )
+float CalculateDepth( const in vec3 pEye )
 {
-    vec4    pClip =  Projection  * MV * vec4( pModel, 1.0 );
+    vec4    pClip =  Projection  * vec4( pEye, 1.0 );
     vec3    pNdc  =  pClip.xyz   / pClip.w;
     return (gl_DepthRange.diff * 0.5 * pNdc.z + (gl_DepthRange.near + gl_DepthRange.far) * 0.5);
 }
@@ -224,7 +222,7 @@ bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
         vec3 v1v0   = cubeVertCoord[ tri[1] ] - cubeVertCoord[ tri[0] ];
         vec3 v2v0   = cubeVertCoord[ tri[2] ] - cubeVertCoord[ tri[0] ];
         vec3 inward = cross( v1v0, v2v0 );  // vector pointing inside of the cell
-        if( dot( posv0, inward ) < -ULP )   // pos tests to be outside of the cell
+        if( dot( posv0, inward ) < -ULP100  )   // pos tests to be outside of the cell
             return false;
     }
     
@@ -306,29 +304,10 @@ bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3
 
 vec3 CalculatePosTex( const ivec3 cellIdx, const vec3 pos )
 {
-    // First, find bounding box of this cell, in texture space.
-    vec3 bboxTex[2];
-    bboxTex[0] = vec3( cellIdx     ) * volumeDims1o;
-    bboxTex[1] = vec3( cellIdx + 1 ) * volumeDims1o;
-
-    // Second, find bounding box of this cell, in model space.
-    vec3 vertCoords[8], bboxModel[2];
-    FillCellVertCoordinates( cellIdx, vertCoords );
-    bboxModel[0] = vertCoords[0];
-    bboxModel[1] = vertCoords[0];
-    for( int i = 1; i < 8; i++ )
-    {
-        bboxModel[0].x = bboxModel[0].x < vertCoords[i].x ? bboxModel[0].x : vertCoords[i].x;
-        bboxModel[0].y = bboxModel[0].y < vertCoords[i].y ? bboxModel[0].y : vertCoords[i].y;
-        bboxModel[0].z = bboxModel[0].z < vertCoords[i].z ? bboxModel[0].z : vertCoords[i].z;
-
-        bboxModel[1].x = bboxModel[1].x > vertCoords[i].x ? bboxModel[1].x : vertCoords[i].x;
-        bboxModel[1].y = bboxModel[1].y > vertCoords[i].y ? bboxModel[1].y : vertCoords[i].y;
-        bboxModel[1].z = bboxModel[1].z > vertCoords[i].z ? bboxModel[1].z : vertCoords[i].z;
-    }
-
-    vec3 weight = (pos - bboxModel[0]) / (bboxModel[1] - bboxModel[0]);
-    return mix( bboxTex[0], bboxTex[1], weight );
+    // For VAPOR 3.1, we just use the center of the cell.
+    vec3 t1 = vec3( cellIdx     ) * volumeDims1o;
+    vec3 t2 = vec3( cellIdx + 1 ) * volumeDims1o;
+    return (t1 + t2) / 2.0;
 }
 
 
@@ -340,45 +319,51 @@ void main(void)
     // Get texture coordinates of this frament
     vec2 fragTex        = gl_FragCoord.xy / vec2( viewportDims );
 
-    vec3 stopModel      = texture( backFaceTexture,  fragTex ).xyz;
-    vec3 startModel     = texture( frontFaceTexture, fragTex ).xyz;
-    vec3 rayDirModel    = stopModel - startModel;
-    float rayDirLength  = length( rayDirModel );
-    if(   rayDirLength  < ULP )
+    vec3 stopEye        = texture( backFaceTexture,  fragTex ).xyz;
+    vec3 startEye       = texture( frontFaceTexture, fragTex ).xyz;
+    vec3 rayDirEye      = stopEye - startEye;
+    float rayDirLength  = length( rayDirEye );
+    if(   rayDirLength  < ULP10 )
         discard;
 
     // Find a good order to test the 27 cells based on the direction of this ray.
-    ReorderCells( rayDirModel );
+    ReorderCells( rayDirEye );
 
-    float nStepsf       = rayDirLength / stepSize1D;
+    // The incoming stepSize1D results in approximate 2 samples per cell.
+    //   In Mode 2 ray casting, we increase this step size.
+    float myStepSize1D  = 1.5 * stepSize1D;
+    float nStepsf       = rayDirLength / myStepSize1D;
+    vec3  stepSize3D    = rayDirEye    / nStepsf;
     int   nSteps        = int(nStepsf) + 1;
-    vec3  stepSize3D    = rayDirModel  / nStepsf;
-    vec3  step1Model    = startModel + 0.01 * stepSize3D;
+    vec3  step1Eye      = startEye + 0.01 * stepSize3D;
 
     // Test 1st step if inside of the cell, and correct it if not.
     ivec3 step1CellIdx  = provokingVertexIdx.xyz;
-    if( !PosInsideOfCell( step1CellIdx, step1Model ) )
+    if( !PosInsideOfCell( step1CellIdx, step1Eye ) )
     {
         ivec3 correctIdx;
-        if( LocateNextCell( step1CellIdx, step1Model, correctIdx ) )
+        if( LocateNextCell( step1CellIdx, step1Eye, correctIdx ) )
+        {
             step1CellIdx = correctIdx;
+        }
         else 
+        {
             discard;    // this case always happens on the boundary.
+        }
     }
 
-    // Set depth value at the backface minus 1/100 of a step size,
-    //   so it's always inside of the volume.
-    gl_FragDepth     =  CalculateDepth( stopModel - 0.01 * stepSize3D );
+    // Set depth value at the backface 
+    gl_FragDepth     =  CalculateDepth( stopEye ) - ULP10;
     // If something else on the scene results in a shallower depth, we need to 
     //    compare depth at every step.
     bool  shallow    = false;
-    // Retrieve depth of other objects on the scene, minus a tiny value to avoid equal depth.
-    float otherDepth = texture( depthTexture, fragTex ).x - ULP10;
+    float otherDepth = texture( depthTexture, fragTex ).x;
     if(   otherDepth < gl_FragDepth )
           shallow    = true;
 
     // Give color to step 1
-    vec3 step1Tex = CalculatePosTex( step1CellIdx, step1Model );
+    vec3 step1Tex    = CalculatePosTex( step1CellIdx, step1Eye );
+    vec3 step1Model  = (inversedMV * vec4(step1Eye, 1.0)).xyz;
     if( !ShouldSkip( step1Tex, step1Model ) )
     {   
         float step1Value   = texture( volumeTexture, step1Tex ).r;
@@ -388,35 +373,49 @@ void main(void)
     }
 
     // Let's do a ray casting!
-    vec3  step2Model       = step1Model;
     int   earlyTerm        = 0;         // why this ray got an early termination?
-    ivec3 step2CellIdx;
-    for( int stepi = 1; stepi <= nSteps; stepi++ )
+    bool  halfStep         = false;
+
+    // We set the loop to terminate at 2 times the number of steps, in case
+    //   there are many occurances of step size halved.
+    for( int stepi = 1; stepi <= 2 * nSteps; stepi++ )
     {
-        if( color.a > 0.999 )
+        if( color.a > Opaque )
         {
             earlyTerm      = 1;
             break;
         }
     
-        step2Model         = startModel + stepSize3D * float( stepi );
+        vec3 step2Eye      = step1Eye + stepSize3D; 
+        ivec3 step2CellIdx;
     
-        if( !LocateNextCell(  step1CellIdx, step2Model, step2CellIdx ) )
+        if( !LocateNextCell(  step1CellIdx, step2Eye, step2CellIdx ) )
         {
-            earlyTerm      = 2;
-            break;
+            // Attempt to find next cell again with half step size
+            step2Eye      -= stepSize3D * 0.5;
+            if( LocateNextCell( step1CellIdx, step2Eye, step2CellIdx ) )
+            {
+                halfStep   = true;
+            }
+            else
+            {
+                earlyTerm  = 2;
+                break;
+            }
         }
 
-        if( shallow && ( CalculateDepth(step2Model) > otherDepth ) )
+        if( shallow && ( CalculateDepth(step2Eye) > otherDepth ) )
         {
             earlyTerm      = 3;
             break;
         }
 
-        vec3 step2Tex      = CalculatePosTex( step2CellIdx, step2Model );
+        vec3 step2Model    = (inversedMV * vec4(step2Eye, 1.0)).xyz;
+        vec3 step2Tex      = CalculatePosTex( step2CellIdx, step2Eye );
         if( ShouldSkip( step2Tex, step2Model ) )
         {
             step1CellIdx   = step2CellIdx;
+            step1Eye       = step2Eye;
             step1Model     = step2Model;
             continue;
         }
@@ -424,11 +423,19 @@ void main(void)
         float step2Value   = texture( volumeTexture, step2Tex ).r;
         float valTranslate = (step2Value - colorMapRange.x) / colorMapRange.z;
         vec4  backColor    = texture( colorMapTexture, valTranslate );
+        
+        // If this step is half-sized, we need to adjust opacity.
+        if( halfStep )
+        {
+            backColor.a    = 1.0 - pow( 1.0 - backColor.a, 0.5);
+            halfStep       = false;
+        }
 
         // Apply lighting.
         //   Note we do the calculation in eye space, because both the light direction
         //   and view direction are defined in the eye space.
-        if( lighting && backColor.a > 0.001 )
+        /*
+        if( lighting && backColor.a > (1.0 - Opaque) )
         {
             vec3 gradientModel   = CalculateGradient( step2Tex );
             if( length( gradientModel ) > ULP10 )
@@ -436,31 +443,34 @@ void main(void)
                 vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0 )).xyz;
                      gradientEye = normalize( gradientEye );
                 float diffuse    = abs( dot(lightDirEye, gradientEye) );
-                vec3 step2Eye    = (MV * vec4( step2Model, 1.0 )).xyz;
                 vec3 viewDirEye  = normalize( -step2Eye );
                 vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
                 float specular   = pow( max(0.0, dot( reflectionEye, viewDirEye )), specularExp );
                 backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse * diffuseCoeff) +
                                    specular * specularCoeff;
             }
-        }
+        } */
 
         color.rgb += (1.0 - color.a) * backColor.a * backColor.rgb;
         color.a   += (1.0 - color.a) * backColor.a;
 
         // keep up step 1 values as well
         step1CellIdx = step2CellIdx;
+        step1Eye     = step2Eye; 
         step1Model   = step2Model;
     }
 
     // If loop terminated early, we set depth value at step1 position. Otherwise, this fragment 
     //    will have the depth value at the back of this volume, which is already set.
     if( earlyTerm > 0 )
-        gl_FragDepth   = CalculateDepth( step1Model );
+        gl_FragDepth   = CalculateDepth( step1Eye ) - ULP10;
 
-    /* Debug use only
+    // If this pixel is transparent, we set depth to the far clipping plane.
+    if( color.a < (1.0 - Opaque) )
+        gl_FragDepth = 1.0;
+
+    // Debug use only
     if( earlyTerm == 2 && !CellOnBoundary( step1CellIdx ) )
-        color = vec4( 0.9, 0.2, 0.2, 1.0); */
-
+        color = vec4( 0.9, 0.2, 0.2, 1.0); 
 }
 
