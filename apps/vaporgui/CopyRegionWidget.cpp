@@ -122,7 +122,8 @@ void CopyRegionWidget::copyRegion()
         std::vector<double> myMin, myMax;
         myBox->GetExtents(myMin, myMax);
         assert(minExtents.size() == maxExtents.size());
-        for (int i = 0; i < minExtents.size(); i++) {
+        assert(myMin.size() == myMax.size());
+        for (int i = 0; i < myMin.size(); i++) {
             myMin[i] = minExtents[i];
             myMax[i] = maxExtents[i];
         }
