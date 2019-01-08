@@ -632,10 +632,10 @@ void BarbRenderer::_reFormatExtents(
     
 	rakeExts.push_back(rMinExtents[X]);
 	rakeExts.push_back(rMinExtents[Y]);
-    rakeExts.push_back(planar ? 0 : rMinExtents[Z]);
+    rakeExts.push_back(planar ? _getDefaultZ(_dataMgr, bParams->GetCurrentTimestep()) : rMinExtents[Z]);
 	rakeExts.push_back(rMaxExtents[X]);
 	rakeExts.push_back(rMaxExtents[Y]);
-    rakeExts.push_back(planar ? 0 : rMaxExtents[Z]);
+    rakeExts.push_back(planar ? _getDefaultZ(_dataMgr, bParams->GetCurrentTimestep()) : rMaxExtents[Z]);
 }
 
 void BarbRenderer::_makeRakeGrid(
@@ -817,7 +817,7 @@ void BarbRenderer::_operateOnGrid(
 	float clut[1024];
 	bool doColorMapping = _makeCLUT(clut);
 
-	float start[3];//, end[3];
+	float start[3];
 	for (int i = 1; i<=rakeGrid[X]; i++){
 		start[X]= strides[X] * i + rakeExts[X];// + xStride/2.0;
 		for (int j = 1; j<=rakeGrid[Y]; j++){
