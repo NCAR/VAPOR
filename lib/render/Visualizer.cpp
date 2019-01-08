@@ -111,7 +111,7 @@ int Visualizer::_getCurrentTimestep() const
     return (min_ts);
 }
 
-void Visualizer::_applyTransformsForRenderer(Renderer *r)
+void Visualizer::_applyDatasetTransformsForRenderer(Renderer *r)
 {
     string datasetName = r->GetMyDatasetName();
     string myName = r->GetMyName();
@@ -130,9 +130,9 @@ void Visualizer::_applyTransformsForRenderer(Renderer *r)
 
     mm->Translate(origin[0], origin[1], origin[2]);
     mm->Scale(scales[0], scales[1], scales[2]);
-    mm->Rotate(rotations[0], 1, 0, 0);
-    mm->Rotate(rotations[1], 0, 1, 0);
-    mm->Rotate(rotations[2], 0, 0, 1);
+    mm->Rotate(glm::radians(rotations[0]), 1, 0, 0);
+    mm->Rotate(glm::radians(rotations[1]), 0, 1, 0);
+    mm->Rotate(glm::radians(rotations[2]), 0, 0, 1);
     mm->Translate(-origin[0], -origin[1], -origin[2]);
 
     mm->Translate(translations[0], translations[1], translations[2]);
@@ -168,7 +168,7 @@ int Visualizer::paintEvent(bool fast)
         _glManager->matrixManager->PushMatrix();
 
         if (_renderers[i]->IsGLInitialized()) {
-            _applyTransformsForRenderer(_renderers[i]);
+            _applyDatasetTransformsForRenderer(_renderers[i]);
 
             int myrc = _renderers[i]->paintGL(fast);
             GL_ERR_BREAK();
