@@ -932,11 +932,12 @@ void MainForm::_fileSaveHelper(string path)
 
         string dir;
         if (!guiStateParams->GetCurrentSessionFile().empty())
-            dir = FileUtils::Dirname(guiStateParams->GetCurrentSessionFile());
+            dir = guiStateParams->GetCurrentSessionFile();
         else
             dir = sP->GetSessionDir();
 
         QFileDialog fileDialog(this, "Save VAPOR session file", QString::fromStdString(dir), QString::fromAscii("Vapor 3 Session Save file (*.vs3)"));
+
         fileDialog.setAcceptMode(QFileDialog::AcceptSave);
         fileDialog.setDefaultSuffix(QString::fromAscii("vs3"));
         if (fileDialog.exec() != QDialog::Accepted) return;
