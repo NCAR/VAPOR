@@ -23,10 +23,6 @@
 
 #include <vapor/ParamsBase.h>
 
-#define XY 0
-#define XZ 1
-#define YZ 2
-
 namespace VAPoR {
 
 //! \class Box
@@ -41,6 +37,12 @@ namespace VAPoR {
 //!
 class PARAMS_API Box : public ParamsBase {
   public:
+    enum Orientation {
+        XY = 0,
+        XZ = 1,
+        YZ = 2,
+    };
+
     //! Create a Box object from scratch
     //
     Box(ParamsBase::StateSave *ssave);
