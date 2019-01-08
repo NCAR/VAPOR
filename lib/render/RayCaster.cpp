@@ -1050,7 +1050,7 @@ void RayCaster::_load3rdPassUniforms(int castingMode,
         stepSize1D = glm::length(diagonal) / (numCells * 2.0f) * multiplier;
 
     if (fast && castingMode == FixedStep)
-        stepSize1D *= 8.0f; //  Increase step size, thus fewer steps, when fast rendering
+        stepSize1D *= 8.0f; //  Increase step size, when fast rendering
     shader->SetUniform("stepSize1D", stepSize1D);
 
     // Pass in textures
