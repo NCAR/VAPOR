@@ -229,8 +229,9 @@ void main(void)
     //    will have the depth value at the back of this volume, which is already set.
     if( earlyTerm )
         gl_FragDepth = CalculateDepth( step1Eye );
+
     // If this pixel is almost transparent, set the depth at the far clipping plane
-    else if( color.a < (1.0 - Opaque) )
+    if( color.a < (1.0 - Opaque) )
         gl_FragDepth = 1.0;
 }
 
