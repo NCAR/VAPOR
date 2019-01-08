@@ -203,7 +203,7 @@ void main(void)
         //   and view direction are defined in the eye space.
         if( lighting && (backColor.a > 1.0 - Opaque) )
         {
-            vec3 gradientModel = CalculateGradient( step2Texture );
+            vec3 gradientModel   = CalculateGradient( step2Texture );
             if( length( gradientModel ) > ULP10 )
             {
                 vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0 )).xyz;

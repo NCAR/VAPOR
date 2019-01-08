@@ -25,7 +25,6 @@ uniform float lightingCoeffs[4]; // lighting parameters
 uniform mat4  MV;
 uniform mat4  inversedMV;
 uniform mat4  Projection;
-uniform mat4  transposedInverseMV;
 
 //
 // Derive helper variables
@@ -41,6 +40,7 @@ float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
 vec3  volumeDims1o     = 1.0 / vec3( volumeDims - 1 );
+mat4  transposedInverseMV = transpose( inversedMV );
 
 // 
 // Code for triangles:
@@ -432,7 +432,6 @@ void main(void)
         // Apply lighting.
         //   Note we do the calculation in eye space, because both the light direction
         //   and view direction are defined in the eye space.
-        /*
         if( lighting && backColor.a > (1.0 - Opaque) )
         {
             vec3 gradientModel   = CalculateGradient( step2Tex );
@@ -447,7 +446,7 @@ void main(void)
                 backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse * diffuseCoeff) +
                                    specular * specularCoeff;
             }
-        } */
+        }
 
         color.rgb += (1.0 - color.a) * backColor.a * backColor.rgb;
         color.a   += (1.0 - color.a) * backColor.a;
