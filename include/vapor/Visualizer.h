@@ -171,7 +171,7 @@ private:
     void _deleteFlaggedRenderers();
     int  _initializeNewRenderers();
     void _clearFramebuffer();
-    void _applyTransformsForRenderer(Renderer *r);
+    void _applyDatasetTransformsForRenderer(Renderer *r);
 
     int _getCurrentTimestep() const;
 

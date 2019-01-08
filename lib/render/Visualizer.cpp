@@ -111,7 +111,7 @@ int Visualizer::_getCurrentTimestep() const
     return (min_ts);
 }
 
-void Visualizer::_applyTransformsForRenderer(Renderer *r)
+void Visualizer::_applyDatasetTransformsForRenderer(Renderer *r)
 {
     string datasetName = r->GetMyDatasetName();
     string myName = r->GetMyName();
