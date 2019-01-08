@@ -327,7 +327,9 @@ void main(void)
         discard;
 
     // Find a good order to test the 27 cells based on the direction of this ray.
-    ReorderCells( rayDirEye );
+    //   Note: this works best in Model Coordinates. It decreases performance in 
+    //   eye coordinates. We disable it for now...
+    // ReorderCells( rayDirEye );
 
     // The incoming stepSize1D results in approximate 2 samples per cell.
     //   In Mode 2 ray casting, we increase this step size.
@@ -343,13 +345,9 @@ void main(void)
     {
         ivec3 correctIdx;
         if( LocateNextCell( step1CellIdx, step1Eye, correctIdx ) )
-        {
             step1CellIdx = correctIdx;
-        }
         else 
-        {
-            discard;    // this case always happens on the boundary.
-        }
+            discard;    // This case always happens on the boundary.
     }
 
     // Set depth value at the backface 
@@ -470,7 +468,7 @@ void main(void)
         gl_FragDepth = 1.0;
 
     // Debug use only
-    if( earlyTerm == 2 && !CellOnBoundary( step1CellIdx ) )
-        color = vec4( 0.9, 0.2, 0.2, 1.0); 
+    // if( earlyTerm == 2 && !CellOnBoundary( step1CellIdx ) )
+    //     color = vec4( 0.9, 0.2, 0.2, 1.0); 
 }
 
