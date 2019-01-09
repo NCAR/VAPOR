@@ -820,7 +820,7 @@ void TranslateStretchManip::drawBoxFaces() const
     // Now render the edges:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
-    GL_LEGACY(glLineWidth(2.0));
+    // glLineWidth( 2.0 );
 
     LegacyGL *lgl = _glManager->legacy;
 
@@ -1068,7 +1068,7 @@ void TranslateStretchManip::drawHandleConnector(int handleNum, double *handleExt
             handleDisp[i] = 0.f;
         }
     }
-    GL_LEGACY(glLineWidth(2.0));
+    // glLineWidth( 2.0 );
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     GL_LEGACY(glPolygonMode(GL_FRONT, GL_FILL));

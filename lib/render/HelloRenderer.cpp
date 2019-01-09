@@ -147,7 +147,7 @@ int HelloRenderer::_paintGL(bool)
         glEnable(GL_COLOR_MATERIAL);
     }
     glColor3fv(fcolor);
-    glLineWidth(width);
+    // glLineWidth(width);
 
     if (point1.size() != 3) {
         point1.push_back(0.0);

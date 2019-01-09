@@ -258,7 +258,7 @@ int WireFrameRenderer::_paintGL(bool fast)
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     glBindVertexArray(_VAO);
 
-    glLineWidth(1);
+    // glLineWidth(1);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
     glDrawElements(GL_LINES, _nIndices, GL_UNSIGNED_INT, 0);
 
