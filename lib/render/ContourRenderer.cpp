@@ -208,7 +208,7 @@ int ContourRenderer::_paintGL(bool)
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     glBindVertexArray(_VAO);
 
-    glLineWidth(_cacheParams.lineThickness);
+    // glLineWidth(_cacheParams.lineThickness);
     glDrawArrays(GL_LINES, 0, _nVertices);
 
     glBindVertexArray(0);
