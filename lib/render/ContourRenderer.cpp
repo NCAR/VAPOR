@@ -129,7 +129,6 @@ int ContourRenderer::_buildCache()
     
     if (cParams->GetVariableName().empty())
     {
-        glEndList();
         return 0;
     }
     MapperFunction *tf = cParams->GetMapperFunc(_cacheParams.varName);
@@ -155,11 +154,11 @@ int ContourRenderer::_buildCache()
     }
     
     if (grid == NULL || (heightGrid == NULL && !_cacheParams.heightVarName.empty())) {
-        glEndList();
         return -1;
     }
     
 	double mv = grid->GetMissingValue();
+    float Z0 = _getDefaultZ(_dataMgr, _cacheParams.ts);
 
     Grid::ConstCellIterator it = grid->ConstCellBegin(
 		_cacheParams.boxMin, _cacheParams.boxMax
@@ -201,7 +200,7 @@ int ContourRenderer::_buildCache()
                 float v[3];
                 v[0] = coords[a][0] + t * (coords[b][0] - coords[a][0]);
                 v[1] = coords[a][1] + t * (coords[b][1] - coords[a][1]);
-                v[2] = 0;
+                v[2] = Z0;
                 
                 if (heightGrid)
                 {
@@ -248,7 +247,7 @@ int ContourRenderer::_paintGL(bool)
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     glBindVertexArray(_VAO);
     
-    glLineWidth(_cacheParams.lineThickness);
+    // glLineWidth(_cacheParams.lineThickness);
     glDrawArrays(GL_LINES, 0, _nVertices);
     
     glBindVertexArray(0);
