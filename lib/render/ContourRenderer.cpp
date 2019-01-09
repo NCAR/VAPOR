@@ -121,10 +121,7 @@ int ContourRenderer::_buildCache()
     vector<VertexData>           vertices;
     vector<pair<int, glm::vec4>> colors;
 
-    if (cParams->GetVariableName().empty()) {
-        glEndList();
-        return 0;
-    }
+    if (cParams->GetVariableName().empty()) { return 0; }
     MapperFunction *tf = cParams->GetMapperFunc(_cacheParams.varName);
     vector<double>  contours = cParams->GetContourValues(_cacheParams.varName);
     float(*contourColors)[4] = new float[contours.size()][4];
@@ -140,12 +137,10 @@ int ContourRenderer::_buildCache()
         heightGrid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.heightVarName, _cacheParams.level, _cacheParams.lod, _cacheParams.boxMin, _cacheParams.boxMax);
     }
 
-    if (grid == NULL || (heightGrid == NULL && !_cacheParams.heightVarName.empty())) {
-        glEndList();
-        return -1;
-    }
+    if (grid == NULL || (heightGrid == NULL && !_cacheParams.heightVarName.empty())) { return -1; }
 
     double mv = grid->GetMissingValue();
+    float  Z0 = _getDefaultZ(_dataMgr, _cacheParams.ts);
 
     Grid::ConstCellIterator it = grid->ConstCellBegin(_cacheParams.boxMin, _cacheParams.boxMax);
 
@@ -176,7 +171,7 @@ int ContourRenderer::_buildCache()
                 float v[3];
                 v[0] = coords[a][0] + t * (coords[b][0] - coords[a][0]);
                 v[1] = coords[a][1] + t * (coords[b][1] - coords[a][1]);
-                v[2] = 0;
+                v[2] = Z0;
 
                 if (heightGrid) {
                     float aHeight = heightGrid->GetValue(coords[a]);
@@ -213,7 +208,7 @@ int ContourRenderer::_paintGL(bool)
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     glBindVertexArray(_VAO);
 
-    glLineWidth(_cacheParams.lineThickness);
+    // glLineWidth(_cacheParams.lineThickness);
     glDrawArrays(GL_LINES, 0, _nVertices);
 
     glBindVertexArray(0);

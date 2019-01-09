@@ -92,7 +92,7 @@ public:
     //! Move the renderer to the front of the render queue
     //! \param[out] Renderer instance that is moved to front
     void MoveRendererToFront(Renderer *ren);
-    void MoveVolumeRenderersToFront();
+    void MoveRenderersOfTypeToFront(const std::string &type);
 
     //! Determine the approximate size of a pixel in terms of user coordinates,
     //! at the center of the scene.
@@ -171,7 +171,7 @@ private:
     void _deleteFlaggedRenderers();
     int  _initializeNewRenderers();
     void _clearFramebuffer();
-    void _applyTransformsForRenderer(Renderer *r);
+    void _applyDatasetTransformsForRenderer(Renderer *r);
 
     int _getCurrentTimestep() const;
 

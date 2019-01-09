@@ -227,7 +227,6 @@ int BarbRenderer::_getVarGrid(int ts, int refLevel, int lod, string varName, std
             for (int i = 0; i < varData.size(); i++) {
                 if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
             }
-            glEndList();
             return (rc);
         }
         varData[varData.size() - 1] = sg;
@@ -254,7 +253,6 @@ int BarbRenderer::_paintGL(bool)
     // Get vector variables
     rc = _getVectorVarGrids(ts, refLevel, lod, minExts, maxExts, varData);
     if (rc < 0) {
-        glEndList();
         SetErrMsg("One or more selected field variables does not exist");
         return -1;
     }
@@ -382,8 +380,11 @@ void BarbRenderer::_printBackDiameter(const float startVertex[18]) const
 // Issue OpenGL calls to draw a cylinder with orthogonal ends from
 // one point to another.  Then put an barb head on the end
 //
-void BarbRenderer::_drawBarb(const std::vector<Grid *> variableData, float startPoint[3], bool doColorMapping, float clut[1024])
+void BarbRenderer::_drawBarb(const std::vector<Grid *> variableData, const float startPoint_[3], bool doColorMapping, const float clut[1024])
 {
+    float startPoint[3];
+    memcpy(startPoint, startPoint_, sizeof(float) * 3);
+
     assert(variableData.size() == 5);
     MatrixManager *mm = _glManager->matrixManager;
 
@@ -394,6 +395,15 @@ void BarbRenderer::_drawBarb(const std::vector<Grid *> variableData, float start
 
     mm->MatrixModeModelView();
     mm->PushMatrix();
+
+    mm->Translate(startPoint[0], startPoint[1], startPoint[2]);
+
+    endPoint[0] -= startPoint[0];
+    endPoint[1] -= startPoint[1];
+    endPoint[2] -= startPoint[2];
+
+    startPoint[0] = startPoint[1] = startPoint[2] = 0;
+
     vector<double> scales = _getScales();
     mm->Scale(1.f / scales[0], 1.f / scales[1], 1.f / scales[2]);
 
@@ -557,10 +567,10 @@ void BarbRenderer::_reFormatExtents(vector<float> &rakeExts) const
 
     rakeExts.push_back(rMinExtents[X]);
     rakeExts.push_back(rMinExtents[Y]);
-    rakeExts.push_back(planar ? 0 : rMinExtents[Z]);
+    rakeExts.push_back(planar ? _getDefaultZ(_dataMgr, bParams->GetCurrentTimestep()) : rMinExtents[Z]);
     rakeExts.push_back(rMaxExtents[X]);
     rakeExts.push_back(rMaxExtents[Y]);
-    rakeExts.push_back(planar ? 0 : rMaxExtents[Z]);
+    rakeExts.push_back(planar ? _getDefaultZ(_dataMgr, bParams->GetCurrentTimestep()) : rMaxExtents[Z]);
 }
 
 void BarbRenderer::_makeRakeGrid(vector<int> &rakeGrid) const
@@ -670,7 +680,7 @@ void BarbRenderer::_getStrides(vector<float> &strides, vector<int> &rakeGrid, ve
     strides.push_back(zStride);
 }
 
-bool BarbRenderer::_defineBarb(std::vector<Grid *> variableData, float start[3], float end[3], bool doColorMapping, float clut[1024])
+bool BarbRenderer::_defineBarb(const std::vector<Grid *> variableData, float start[3], float end[3], bool doColorMapping, const float clut[1024])
 {
     bool missing = false;
 
@@ -708,7 +718,7 @@ void BarbRenderer::_operateOnGrid(vector<Grid *> variableData, bool drawBarb)
     float clut[1024];
     bool  doColorMapping = _makeCLUT(clut);
 
-    float start[3];    //, end[3];
+    float start[3];
     for (int i = 1; i <= rakeGrid[X]; i++) {
         start[X] = strides[X] * i + rakeExts[X];    // + xStride/2.0;
         for (int j = 1; j <= rakeGrid[Y]; j++) {
@@ -748,7 +758,7 @@ void BarbRenderer::_getMagnitudeAtPoint(std::vector<VAPoR::Grid *> variables, fl
     if (maxValue > _maxValue) { _maxValue = maxValue; }
 }
 
-bool BarbRenderer::_getColorMapping(float val, float clut[256 * 4])
+bool BarbRenderer::_getColorMapping(float val, const float clut[256 * 4])
 {
     bool missing = false;
 

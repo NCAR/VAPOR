@@ -97,7 +97,7 @@ void AnnotationRenderer::drawDomainFrame(size_t ts) const
 
     double clr[3];
     vfParams->GetDomainColor(clr);
-    glLineWidth(1);
+    // glLineWidth(1);
     // Now draw the lines.  Divide each dimension into numLines[dim] sections.
 
     int x, y, z;
@@ -258,9 +258,9 @@ void AnnotationRenderer::applyTransform(Transform *t)
 
     _glManager->matrixManager->Translate(origin[0], origin[1], origin[2]);
     _glManager->matrixManager->Scale(scale[0], scale[1], scale[2]);
-    _glManager->matrixManager->Rotate(rotate[0], 1, 0, 0);
-    _glManager->matrixManager->Rotate(rotate[1], 0, 1, 0);
-    _glManager->matrixManager->Rotate(rotate[2], 0, 0, 1);
+    _glManager->matrixManager->Rotate(glm::radians(rotate[0]), 1, 0, 0);
+    _glManager->matrixManager->Rotate(glm::radians(rotate[1]), 0, 1, 0);
+    _glManager->matrixManager->Rotate(glm::radians(rotate[2]), 0, 0, 1);
     _glManager->matrixManager->Translate(-origin[0], -origin[1], -origin[2]);
 
     _glManager->matrixManager->Translate(translate[0], translate[1], translate[2]);
@@ -276,7 +276,6 @@ void AnnotationRenderer::InScenePaint(size_t ts)
     mm->MatrixModeModelView();
     mm->PushMatrix();
 
-    vector<string>   winNames = m_paramsMgr->GetVisualizerNames();
     ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
 
     vector<string> names = m_paramsMgr->GetDataMgrNames();
@@ -427,7 +426,7 @@ void AnnotationRenderer::_drawAxes(std::vector<double> min, std::vector<double> 
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     lgl->Color4f(color[0], color[1], color[2], color[3]);
-    GL_LEGACY(glLineWidth(width));
+    // glLineWidth(width);
     glEnable(GL_LINE_SMOOTH);
     lgl->Begin(GL_LINES);
     lgl->Vertex3f(min[0], origin[1], origin[2]);
@@ -444,7 +443,7 @@ void AnnotationRenderer::_drawTic(double startPosn[], double endPosn[], double w
 {
     LegacyGL *lgl = _glManager->legacy;
     lgl->Color4f(color[0], color[1], color[2], color[3]);
-    glLineWidth(width);
+    // glLineWidth(width);
     glEnable(GL_LINE_SMOOTH);
     lgl->Begin(GL_LINES);
     lgl->Vertex3dv(startPosn);
@@ -558,81 +557,97 @@ void AnnotationRenderer::drawAxisArrows(vector<double> minExts, vector<double> m
         origin[i] = minExts[i] + (axisArrowCoords[i]) * (maxExts[i] - minExts[i]);
         if (maxExts[i] - minExts[i] > maxLen) { maxLen = maxExts[i] - minExts[i]; }
     }
+    float len = maxLen * 0.2f;
 
-    LegacyGL *lgl = _glManager->legacy;
+    LegacyGL *     lgl = _glManager->legacy;
+    MatrixManager *mm = _glManager->matrixManager;
+
+    mm->MatrixModeModelView();
+    mm->PushMatrix();
+    mm->Translate(origin[0], origin[1], origin[2]);
+    mm->Scale(len, len, len);
+
+    ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
+    vector<string>   names = m_paramsMgr->GetDataMgrNames();
+    Transform *      t = vpParams->GetTransform(names[0]);
+    vector<double>   scale = t->GetScales();
+    mm->Scale(1 / scale[0], 1 / scale[1], 1 / scale[2]);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    float len = maxLen * 0.2f;
-    lgl->Color3f(1.f, 0.f, 0.f);
-    GL_LEGACY(glLineWidth(4.0));
+    lgl->Color3f(1, 0, 0);
     glEnable(GL_LINE_SMOOTH);
+
     lgl->Begin(GL_LINES);
-    lgl->Vertex3fv(origin);
-    lgl->Vertex3f(origin[0] + len, origin[1], origin[2]);
-
+    lgl->Vertex3f(0, 0, 0);
+    lgl->Vertex3f(1, 0, 0);
     lgl->End();
+
     lgl->Begin(GL_TRIANGLES);
-    lgl->Vertex3f(origin[0] + len, origin[1], origin[2]);
-    lgl->Vertex3f(origin[0] + .8 * len, origin[1] + .1 * len, origin[2]);
-    lgl->Vertex3f(origin[0] + .8 * len, origin[1], origin[2] + .1 * len);
+    lgl->Vertex3f(1, 0, 0);
+    lgl->Vertex3f(.8, .1, 0);
+    lgl->Vertex3f(.8, 0, .1);
 
-    lgl->Vertex3f(origin[0] + len, origin[1], origin[2]);
-    lgl->Vertex3f(origin[0] + .8 * len, origin[1], origin[2] + .1 * len);
-    lgl->Vertex3f(origin[0] + .8 * len, origin[1] - .1 * len, origin[2]);
+    lgl->Vertex3f(1, 0, 0);
+    lgl->Vertex3f(.8, 0, .1);
+    lgl->Vertex3f(.8, -.1, 0);
 
-    lgl->Vertex3f(origin[0] + len, origin[1], origin[2]);
-    lgl->Vertex3f(origin[0] + .8 * len, origin[1] - .1 * len, origin[2]);
-    lgl->Vertex3f(origin[0] + .8 * len, origin[1], origin[2] - .1 * len);
+    lgl->Vertex3f(1, 0, 0);
+    lgl->Vertex3f(.8, -.1, 0);
+    lgl->Vertex3f(.8, 0, -.1);
 
-    lgl->Vertex3f(origin[0] + len, origin[1], origin[2]);
-    lgl->Vertex3f(origin[0] + .8 * len, origin[1], origin[2] - .1 * len);
-    lgl->Vertex3f(origin[0] + .8 * len, origin[1] + .1 * len, origin[2]);
+    lgl->Vertex3f(1, 0, 0);
+    lgl->Vertex3f(.8, 0, -.1);
+    lgl->Vertex3f(.8, .1, 0);
     lgl->End();
 
-    lgl->Color3f(0.f, 1.f, 0.f);
+    lgl->Color3f(0, 1, 0);
     lgl->Begin(GL_LINES);
-    lgl->Vertex3fv(origin);
-    lgl->Vertex3f(origin[0], origin[1] + len, origin[2]);
+    lgl->Vertex3f(0, 0, 0);
+    lgl->Vertex3f(0, 1, 0);
     lgl->End();
+
     lgl->Begin(GL_TRIANGLES);
-    lgl->Vertex3f(origin[0], origin[1] + len, origin[2]);
-    lgl->Vertex3f(origin[0] + .1 * len, origin[1] + .8 * len, origin[2]);
-    lgl->Vertex3f(origin[0], origin[1] + .8 * len, origin[2] + .1 * len);
+    lgl->Vertex3f(0, 1, 0);
+    lgl->Vertex3f(.1, .8, 0);
+    lgl->Vertex3f(0, .8, .1);
 
-    lgl->Vertex3f(origin[0], origin[1] + len, origin[2]);
-    lgl->Vertex3f(origin[0], origin[1] + .8 * len, origin[2] + .1 * len);
-    lgl->Vertex3f(origin[0] - .1 * len, origin[1] + .8 * len, origin[2]);
+    lgl->Vertex3f(0, 1, 0);
+    lgl->Vertex3f(0, .8, .1);
+    lgl->Vertex3f(-.1, .8, 0);
 
-    lgl->Vertex3f(origin[0], origin[1] + len, origin[2]);
-    lgl->Vertex3f(origin[0] - .1 * len, origin[1] + .8 * len, origin[2]);
-    lgl->Vertex3f(origin[0], origin[1] + .8 * len, origin[2] - .1 * len);
+    lgl->Vertex3f(0, 1, 0);
+    lgl->Vertex3f(-.1, .8, 0);
+    lgl->Vertex3f(0, .8, -.1);
 
-    lgl->Vertex3f(origin[0], origin[1] + len, origin[2]);
-    lgl->Vertex3f(origin[0], origin[1] + .8 * len, origin[2] - .1 * len);
-    lgl->Vertex3f(origin[0] + .1 * len, origin[1] + .8 * len, origin[2]);
+    lgl->Vertex3f(0, 1, 0);
+    lgl->Vertex3f(0, .8, -.1);
+    lgl->Vertex3f(.1, .8, 0);
     lgl->End();
-    lgl->Color3f(0.f, 0.3f, 1.f);
+
+    lgl->Color3f(0, 0.3, 1);
     lgl->Begin(GL_LINES);
-    lgl->Vertex3fv(origin);
-    lgl->Vertex3f(origin[0], origin[1], origin[2] + len);
+    lgl->Vertex3f(0, 0, 0);
+    lgl->Vertex3f(0, 0, 1);
     lgl->End();
+
     lgl->Begin(GL_TRIANGLES);
-    lgl->Vertex3f(origin[0], origin[1], origin[2] + len);
-    lgl->Vertex3f(origin[0] + .1 * len, origin[1], origin[2] + .8 * len);
-    lgl->Vertex3f(origin[0], origin[1] + .1 * len, origin[2] + .8 * len);
+    lgl->Vertex3f(0, 0, 1);
+    lgl->Vertex3f(.1, 0, .8);
+    lgl->Vertex3f(0, .1, .8);
 
-    lgl->Vertex3f(origin[0], origin[1], origin[2] + len);
-    lgl->Vertex3f(origin[0], origin[1] + .1 * len, origin[2] + .8 * len);
-    lgl->Vertex3f(origin[0] - .1 * len, origin[1], origin[2] + .8 * len);
+    lgl->Vertex3f(0, 0, 1);
+    lgl->Vertex3f(0, .1, .8);
+    lgl->Vertex3f(-.1, 0, .8);
 
-    lgl->Vertex3f(origin[0], origin[1], origin[2] + len);
-    lgl->Vertex3f(origin[0] - .1 * len, origin[1], origin[2] + .8 * len);
-    lgl->Vertex3f(origin[0], origin[1] - .1 * len, origin[2] + .8 * len);
+    lgl->Vertex3f(0, 0, 1);
+    lgl->Vertex3f(-.1, 0, .8);
+    lgl->Vertex3f(0, -.1, .8);
 
-    lgl->Vertex3f(origin[0], origin[1], origin[2] + len);
-    lgl->Vertex3f(origin[0], origin[1] - .1 * len, origin[2] + .8 * len);
-    lgl->Vertex3f(origin[0] + .1 * len, origin[1], origin[2] + .8 * len);
+    lgl->Vertex3f(0, 0, 1);
+    lgl->Vertex3f(0, -.1, .8);
+    lgl->Vertex3f(.1, 0, .8);
     lgl->End();
 
+    mm->PopMatrix();
     glDisable(GL_LINE_SMOOTH);
 }

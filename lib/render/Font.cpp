@@ -12,10 +12,12 @@ using std::string;
 Font::Font(GLManager *glManager, const std::string &path, int size, FT_Library library) : _glManager(glManager), _library(nullptr), _size(size)
 {
     if (library == nullptr) {
-        assert(!FT_Init_FreeType(&_library));
+        int err = FT_Init_FreeType(&_library);
+        assert(!err);
         library = _library;
     }
-    assert(!FT_New_Face(library, path.c_str(), 0, &_face));
+    int err = FT_New_Face(library, path.c_str(), 0, &_face);
+    assert(!err);
     FT_Set_Pixel_Sizes(_face, 0, _size);
 
     glGenVertexArrays(1, &_VAO);

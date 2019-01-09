@@ -99,9 +99,9 @@ void TranslateStretchManip::transformMatrix(VAPoR::Transform *transform)
 
     mm->Translate(origins[X], origins[Y], origins[Z]);
     mm->Scale(scales[X], scales[Y], scales[Z]);
-    mm->Rotate(rotations[X], 1, 0, 0);
-    mm->Rotate(rotations[Y], 0, 1, 0);
-    mm->Rotate(rotations[Z], 0, 0, 1);
+    mm->Rotate(glm::radians(rotations[X]), 1, 0, 0);
+    mm->Rotate(glm::radians(rotations[Y]), 0, 1, 0);
+    mm->Rotate(glm::radians(rotations[Z]), 0, 0, 1);
     mm->Translate(-origins[X], -origins[Y], -origins[Z]);
 
     mm->Translate(translations[X], translations[Y], translations[Z]);
@@ -820,7 +820,7 @@ void TranslateStretchManip::drawBoxFaces() const
     // Now render the edges:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
-    GL_LEGACY(glLineWidth(2.0));
+    // glLineWidth( 2.0 );
 
     LegacyGL *lgl = _glManager->legacy;
 
@@ -1068,7 +1068,7 @@ void TranslateStretchManip::drawHandleConnector(int handleNum, double *handleExt
             handleDisp[i] = 0.f;
         }
     }
-    GL_LEGACY(glLineWidth(2.0));
+    // glLineWidth( 2.0 );
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     GL_LEGACY(glPolygonMode(GL_FRONT, GL_FILL));
