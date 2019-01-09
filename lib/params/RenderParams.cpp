@@ -73,9 +73,6 @@ void RenderParams::SetDefaultVariables(
 ) {
 	vector <string> varnames;
 	varnames = _dataMgr->GetDataVarNames(dim);
-	if (varnames.empty()){
-		varnames = _dataMgr->GetDataVarNames(dim-1);
-	}
 
 	string varname = "";
 	if (varnames.size()) {
