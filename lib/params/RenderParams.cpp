@@ -73,9 +73,6 @@ void RenderParams::SetDefaultVariables(
 ) {
 	vector <string> varnames;
 	varnames = _dataMgr->GetDataVarNames(dim);
-	if (varnames.empty()){
-		varnames = _dataMgr->GetDataVarNames(dim-1);
-	}
 
 	string varname = "";
 	if (varnames.size()) {
@@ -98,7 +95,7 @@ void RenderParams::SetDefaultVariables(
 void RenderParams::_init() {
 	SetEnabled(true);
 
-	SetDefaultVariables(_maxDim);
+	SetDefaultVariables();
 
 	SetRefinementLevel(0);
 	SetCompressionLevel(0);
