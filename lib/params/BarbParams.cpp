@@ -72,10 +72,10 @@ void BarbParams::_init() {
 
     vector<string> varnames;
     varnames = _dataMgr->GetDataVarNames(_maxDim);
-    if (varnames.empty()) {
+    if (varnames.empty())
         varnames = _dataMgr->GetDataVarNames(_maxDim - 1);
-    }
-    SetVariableName(varnames[0]);
+    if (!varnames.empty())
+        SetVariableName(varnames[0]);
 
     SetUseSingleColor(true);
     float rgb[] = {1.f, 1.f, 1.f};
