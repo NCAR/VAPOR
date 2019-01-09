@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>981</width>
-    <height>478</height>
+    <height>423</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -24,14 +24,14 @@
     <enum>QLayout::SetDefaultConstraint</enum>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_12" stretch="3,0,2">
+    <layout class="QHBoxLayout" name="horizontalLayout_12" stretch="0,0,0">
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
      <item>
       <widget class="QWidget" name="widget_3" native="true">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -51,7 +51,7 @@
           <item>
            <widget class="QTableWidget" name="VariablesTable">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
               <horstretch>1</horstretch>
               <verstretch>1</verstretch>
              </sizepolicy>
@@ -240,7 +240,7 @@
         <item>
          <widget class="FidelityWidget" name="MyFidelityWidget" native="true">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -252,6 +252,22 @@
            </size>
           </property>
          </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Expanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>0</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </widget>
@@ -278,7 +294,7 @@
      <item>
       <widget class="QWidget" name="widget_2" native="true">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+        <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -290,7 +306,7 @@
         <item>
          <widget class="GeometryWidget" name="MyGeometryWidget" native="true">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -305,6 +321,12 @@
         </item>
         <item>
          <widget class="CopyRegionWidget" name="MyCopyRegionWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -434,12 +456,12 @@
            <enum>Qt::Vertical</enum>
           </property>
           <property name="sizeType">
-           <enum>QSizePolicy::Preferred</enum>
+           <enum>QSizePolicy::Expanding</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
             <width>20</width>
-            <height>20</height>
+            <height>0</height>
            </size>
           </property>
          </spacer>
@@ -465,7 +487,7 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <property name="spacing">
-             <number>0</number>
+             <number>-1</number>
             </property>
             <item>
              <widget class="QPushButton" name="ExportButton">
@@ -493,19 +515,6 @@
              </widget>
             </item>
             <item>
-             <spacer name="horizontalSpacer_7">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
              <widget class="QPushButton" name="UpdateButton">
               <property name="minimumSize">
                <size>
@@ -523,32 +532,6 @@
                <bool>false</bool>
               </property>
              </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_9">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_6">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
             </item>
             <item>
              <widget class="QCheckBox" name="UpdateCheckbox">
@@ -570,6 +553,12 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>FidelityWidget</class>
+   <extends>QWidget</extends>
+   <header>FidelityWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>CopyRegionWidget</class>
    <extends>QWidget</extends>
    <header>CopyRegionWidget.h</header>
@@ -579,12 +568,6 @@
    <class>GeometryWidget</class>
    <extends>QWidget</extends>
    <header>GeometryWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>FidelityWidget</class>
-   <extends>QWidget</extends>
-   <header>FidelityWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
