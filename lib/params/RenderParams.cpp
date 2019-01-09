@@ -72,7 +72,6 @@ void RenderParams::SetDefaultVariables(int dim = 3, bool secondaryColormapVariab
 {
     vector<string> varnames;
     varnames = _dataMgr->GetDataVarNames(dim);
-    if (varnames.empty()) { varnames = _dataMgr->GetDataVarNames(dim - 1); }
 
     string varname = "";
     if (varnames.size()) { varname = varnames[0]; }
@@ -93,7 +92,7 @@ void RenderParams::_init()
 {
     SetEnabled(true);
 
-    SetDefaultVariables(_maxDim);
+    SetDefaultVariables();
 
     SetRefinementLevel(0);
     SetCompressionLevel(0);
