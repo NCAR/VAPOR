@@ -278,7 +278,7 @@
      <item>
       <widget class="QWidget" name="widget_2" native="true">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+        <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -290,7 +290,7 @@
         <item>
          <widget class="GeometryWidget" name="MyGeometryWidget" native="true">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -305,6 +305,12 @@
         </item>
         <item>
          <widget class="CopyRegionWidget" name="MyCopyRegionWidget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -570,6 +576,12 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>FidelityWidget</class>
+   <extends>QWidget</extends>
+   <header>FidelityWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>CopyRegionWidget</class>
    <extends>QWidget</extends>
    <header>CopyRegionWidget.h</header>
@@ -579,12 +591,6 @@
    <class>GeometryWidget</class>
    <extends>QWidget</extends>
    <header>GeometryWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>FidelityWidget</class>
-   <extends>QWidget</extends>
-   <header>FidelityWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
