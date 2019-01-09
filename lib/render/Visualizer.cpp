@@ -44,7 +44,6 @@
 
 #include "vapor/ImageWriter.h"
 #include "vapor/GeoTIFWriter.h"
-#include <vapor/DVRenderer.h>
 
 using namespace VAPoR;
 
@@ -255,13 +254,13 @@ void Visualizer::MoveRendererToFront(Renderer *ren)
     _renderers.push_back(ren);
 }
 
-void Visualizer::MoveVolumeRenderersToFront()
+void Visualizer::MoveRenderersOfTypeToFront(const std::string &type)
 {
     Renderer *firstRendererMoved = nullptr;
     auto      rendererPointersCopy = _renderers;
     for (auto it = rendererPointersCopy.rbegin(); it != rendererPointersCopy.rend(); ++it) {
         if (*it == firstRendererMoved) break;
-        if ((*it)->GetMyType() == DVRenderer::GetClassType()) {
+        if ((*it)->GetMyType() == type) {
             MoveRendererToFront(*it);
             if (firstRendererMoved == nullptr) firstRendererMoved = *it;
         }

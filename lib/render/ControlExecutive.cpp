@@ -14,6 +14,9 @@
 #include <vapor/Visualizer.h>
 #include <vapor/DataStatus.h>
 
+#include <vapor/DVRenderer.h>
+#include <vapor/IsoSurfaceRenderer.h>
+
 using namespace VAPoR;
 using namespace std;
 
@@ -176,7 +179,8 @@ int ControlExec::ActivateRender(string winName, string dataSetName, string rende
 
     rp->SetEnabled(on);
     v->MoveRendererToFront(ren);
-    v->MoveVolumeRenderersToFront();
+    v->MoveRenderersOfTypeToFront(IsoSurfaceRenderer::GetClassType());
+    v->MoveRenderersOfTypeToFront(DVRenderer::GetClassType());
 
     _paramsMgr->EndSaveStateGroup();
 
