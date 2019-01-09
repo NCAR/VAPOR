@@ -100,7 +100,7 @@ void AnnotationRenderer::drawDomainFrame(size_t ts) const {
 
     double clr[3];
     vfParams->GetDomainColor(clr);
-    glLineWidth(1);
+    // glLineWidth(1);
     //Now draw the lines.  Divide each dimension into numLines[dim] sections.
 
     int x, y, z;
@@ -438,7 +438,7 @@ void AnnotationRenderer::_drawAxes(
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     lgl->Color4f(color[0], color[1], color[2], color[3]);
-    GL_LEGACY(glLineWidth(width));
+    // glLineWidth(width);
     glEnable(GL_LINE_SMOOTH);
     lgl->Begin(GL_LINES);
     lgl->Vertex3f(min[0], origin[1], origin[2]);
@@ -458,7 +458,7 @@ void AnnotationRenderer::_drawTic(
     std::vector<double> color) {
     LegacyGL *lgl = _glManager->legacy;
     lgl->Color4f(color[0], color[1], color[2], color[3]);
-    glLineWidth(width);
+    // glLineWidth(width);
     glEnable(GL_LINE_SMOOTH);
     lgl->Begin(GL_LINES);
     lgl->Vertex3dv(startPosn);
