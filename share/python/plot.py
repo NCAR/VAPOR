@@ -9,7 +9,7 @@ def plotSequences( outFile, varNames, sequences, xValues, xLabel, yLabel ):
     matplotlib.use('AGG')
     import matplotlib.pyplot as plt
 
-    fig, ax = plt.subplots(figsize=(12, 8))
+    fig, ax = plt.subplots(figsize=(8, 6))
     if len(varNames) > 0:
         for i in range(len(varNames)):
             ax.plot( xValues, sequences[i], '-x', label=varNames[i] )
