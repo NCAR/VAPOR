@@ -10,8 +10,6 @@
 #include "vapor/RayCasterParams.h"
 #include "vapor/GLManager.h"
 
-#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
-#define GLM_FORCE_SIMD_AVX
 #include <glm/glm.hpp>
 
 namespace VAPoR {
@@ -60,10 +58,7 @@ class RENDER_API RayCaster : public Renderer {
         float *topFace, *bottomFace;     // user coordinates, size == bx * bz * 3
         float *dataField;                // data field of this volume
         unsigned char *missingValueMask; // 0 == is missing value; non-zero == not missing value
-        //float *xyCoords;                 // X-Y coordinate values
-        //float *zCoords;                  // Z coordinate values
         float *vertCoords;
-        //float baseStepSize;
 
         size_t dims[3]; // num. of samples along each axis.
 
@@ -123,13 +118,7 @@ class RENDER_API RayCaster : public Renderer {
         void FillCoordsXZPlane(const StructuredGrid *grid, // Input
                                size_t planeIdx,            // Input
                                float *coords);             // Output
-        //
-        // This function is supposed to be called at the end of either
-        // UpdateFaceAndData() or UpdateCurviCoords() .
-        //
-        //void FindBaseStepSize( int mode );
-
-    }; // end of struct UserCoordinates
+    };                                                     // end of struct UserCoordinates
 
     UserCoordinates _userCoordinates;
     std::vector<float> _colorMap;
@@ -142,8 +131,6 @@ class RENDER_API RayCaster : public Renderer {
     GLuint _volumeTextureId;
     GLuint _missingValueTextureId;
     GLuint _colorMapTextureId;
-    //GLuint              _xyCoordsTextureId;
-    //GLuint              _zCoordsTextureId;
     GLuint _vertCoordsTextureId;
     GLuint _depthTextureId;
     const GLint _backFaceTexOffset;
@@ -151,14 +138,11 @@ class RENDER_API RayCaster : public Renderer {
     const GLint _volumeTexOffset;
     const GLint _colorMapTexOffset;
     const GLint _missingValueTexOffset;
-    //const  GLint        _zCoordsTexOffset;
-    //const  GLint        _xyCoordsTexOffset;
     const GLint _vertCoordsTexOffset;
     const GLint _depthTexOffset;
 
     // buffers and vertex arrays
     GLuint _frameBufferId;
-    //GLuint              _xyCoordsBufferId;
     GLenum _drawBuffers[2]; // Draw buffers for the 1st and 2nd pass
 
     GLuint _vertexArrayId;
