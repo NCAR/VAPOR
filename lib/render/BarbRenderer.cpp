@@ -263,7 +263,6 @@ int BarbRenderer::_getVarGrid(
 			for (int i = 0; i<varData.size(); i++){
 				if (varData[i]) _dataMgr->UnlockGrid(varData[i]);
 			}
-    		glEndList();
 			return(rc);
 		}
 		varData[varData.size()-1] = sg;
@@ -290,7 +289,6 @@ int BarbRenderer::_paintGL(bool) {
 	// Get vector variables
 	rc = _getVectorVarGrids(ts, refLevel, lod, minExts, maxExts, varData);
 	if(rc<0) {
-    	glEndList();
 		SetErrMsg("One or more selected field variables does not exist");
 		return -1;
 	}
@@ -435,10 +433,13 @@ void BarbRenderer::_printBackDiameter(const float startVertex[18]) const {
 //
 void BarbRenderer::_drawBarb(
 	const std::vector<Grid*> variableData,
-	float startPoint[3],
+	const float startPoint_[3],
 	bool doColorMapping,
-	float clut[1024]
+	const float clut[1024]
 ) {
+    float startPoint[3];
+    memcpy(startPoint, startPoint_, sizeof(float)*3);
+    
 	assert(variableData.size() == 5);
     MatrixManager *mm = _glManager->matrixManager;
 
@@ -453,6 +454,15 @@ void BarbRenderer::_drawBarb(
 
     mm->MatrixModeModelView();
     mm->PushMatrix();
+    
+    mm->Translate(startPoint[0], startPoint[1], startPoint[2]);
+    
+    endPoint[0] -= startPoint[0];
+    endPoint[1] -= startPoint[1];
+    endPoint[2] -= startPoint[2];
+    
+    startPoint[0] = startPoint[1] = startPoint[2] = 0;
+    
 	vector<double> scales = _getScales();
 	mm->Scale(1.f/scales[0], 1.f/scales[1], 1.f/scales[2]);
 
@@ -622,10 +632,10 @@ void BarbRenderer::_reFormatExtents(
     
 	rakeExts.push_back(rMinExtents[X]);
 	rakeExts.push_back(rMinExtents[Y]);
-    rakeExts.push_back(planar ? 0 : rMinExtents[Z]);
+    rakeExts.push_back(planar ? _getDefaultZ(_dataMgr, bParams->GetCurrentTimestep()) : rMinExtents[Z]);
 	rakeExts.push_back(rMaxExtents[X]);
 	rakeExts.push_back(rMaxExtents[Y]);
-    rakeExts.push_back(planar ? 0 : rMaxExtents[Z]);
+    rakeExts.push_back(planar ? _getDefaultZ(_dataMgr, bParams->GetCurrentTimestep()) : rMaxExtents[Z]);
 }
 
 void BarbRenderer::_makeRakeGrid(
@@ -755,11 +765,11 @@ void BarbRenderer::_getStrides(
 }
 
 bool BarbRenderer::_defineBarb(
-	std::vector<Grid*> variableData,
+	const std::vector<Grid*> variableData,
 	float start[3],
 	float end[3],
 	bool doColorMapping,
-	float clut[1024]
+	const float clut[1024]
 ) {
 	bool missing = false;
 	
@@ -807,7 +817,7 @@ void BarbRenderer::_operateOnGrid(
 	float clut[1024];
 	bool doColorMapping = _makeCLUT(clut);
 
-	float start[3];//, end[3];
+	float start[3];
 	for (int i = 1; i<=rakeGrid[X]; i++){
 		start[X]= strides[X] * i + rakeExts[X];// + xStride/2.0;
 		for (int j = 1; j<=rakeGrid[Y]; j++){
@@ -866,7 +876,7 @@ void BarbRenderer::_getMagnitudeAtPoint(
 	}
 }
 
-bool BarbRenderer::_getColorMapping(float val, float clut[256*4]) {
+bool BarbRenderer::_getColorMapping(float val, const float clut[256*4]) {
 	bool missing = false;
 
 	MapperFunction* tf=0;
