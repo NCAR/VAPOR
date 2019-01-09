@@ -94,7 +94,6 @@ void BarbAppearanceSubtab::_showZDimWidgets() {
 }
 
 bool BarbAppearanceSubtab::_isVariable2D() const {
-    VAPoR::Grid *grid;
     int ts, level, lod;
     std::vector<string> varNames = _bParams->GetFieldVariableNames();
 
@@ -107,10 +106,9 @@ bool BarbAppearanceSubtab::_isVariable2D() const {
         ts = _bParams->GetCurrentTimestep();
         level = _bParams->GetRefinementLevel();
         lod = _bParams->GetCompressionLevel();
-        grid = _dataMgr->GetVariable(ts, varName, level, lod);
 
-        int dimSize = grid->GetDimensions().size();
-        if (dimSize == 2)
+        size_t nDims = _dataMgr->GetVarTopologyDim(varName);
+        if (nDims == 2)
             return true;
     }
 
