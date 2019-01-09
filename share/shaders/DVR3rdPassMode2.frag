@@ -15,7 +15,6 @@ uniform sampler2D       depthTexture;
 uniform ivec3 volumeDims;        // number of vertices in each direction of this volume
 uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
-uniform vec3  unitDirections[26];
 uniform vec3  colorMapRange;
 
 uniform float stepSize1D;        // ray casting step size
@@ -47,7 +46,7 @@ mat4  transposedInverseMV = transpose( inversedMV );
 // Each triangle is represented as (v0, v1, v2)
 // Triangle vertices are ordered such that (v1-v0)x(v2-v0) faces inside.
 //
-const int triangles[36] = int[36](
+const int Global_Triangles[36] = int[36](
     /* front   back       top        bottom     right      left */
     7, 6, 3,   0, 1, 4,   4, 5, 7,   3, 2, 0,   5, 1, 6,   4, 7, 0,
     2, 3, 6,   5, 4, 1,   6, 7, 5,   1, 0, 2,   2, 6, 1,   3, 0, 7
@@ -57,40 +56,8 @@ const int triangles[36] = int[36](
 // An optimized order of cells to search: cells appear in front of this list
 //   are supposed to have a higher probablity to be selected.
 //
-int cells[27] = int[27](0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-                        15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 );
-
-//
-// Re-order the cell indices based on the current ray direction, so that
-//   cells in front are more likely to contain a given position.
-//
-void ReorderCells( const in vec3 rayDirection )
-{
-    vec3 rayDir  = normalize( rayDirection );
-
-    // Fitness score is the cosine between rayDir and each direction.
-    //   fit[i] will have the fitness value of group[i] in LocateNextCell()
-    //   The current cell itself has the biggest fit value: 1.0
-    float fit[27];
-    fit[0]  = 1.0;
-    for( int i = 0; i < 26; i++ )
-        fit[ i+1 ]  = dot( rayDir, unitDirections[i] );
-
-    // Bubble sort these fitness values, so that cell indices are reordered
-    for( int i = 1; i < 26; i++ )
-        for( int j = i + 1; j < 27; j++ )
-        {
-            if( fit[j] > fit[i] )
-            {
-                int tmpI   = cells[i];
-                cells[i]   = cells[j];
-                cells[j]   = tmpI;
-                float tmpF = fit[i];
-                fit[i]     = fit[j];
-                fit[j]     = tmpF;
-            }
-        }
-}
+int Global_Cells[27] = int[27](0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+                               15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 );
 
 // 
 // Input:  logical index of a cell
@@ -130,18 +97,19 @@ void FillCellVertCoordinates( const in ivec3 cellIdx, out vec3 coord[8] )
     }
 }
 
+
 //
-// Input:  Location to be evaluated in texture coordinates and model coordinates.
+// Input:  Location to be evaluated in texture coordinates and eye coordinates.
 // Output: If this location should be skipped.
 // Note:   It is skipped in two cases: 1) it represents a missing value
 //                                     2) it is outside of clipping planes
 //
-bool ShouldSkip( const in vec3 tc, const in vec3 mc )
+bool ShouldSkip( const in vec3 tc, const in vec3 ec )
 {
     if( hasMissingValue && (texture(missingValueMaskTexture, tc).r != 0u) )
         return true;
 
-    vec4 positionModel = vec4( mc, 1.0 );
+    vec4 positionModel = (inversedMV * vec4(ec, 1.0));
     for( int i = 0; i < 6; i++ )
     {
         if( dot(positionModel, clipPlanes[i]) < 0.0 )
@@ -198,6 +166,7 @@ vec3 CalculateGradient( const in vec3 tc)
     return (a1-a0 / h);
 }
 
+
 //
 // Input:  a position in the eye space
 // Return: depth value at that position.
@@ -210,6 +179,10 @@ float CalculateDepth( const in vec3 pEye )
 }
 
 
+//
+// Input:  a cell index and a position in the eye space
+// Return: if this position is inside of this cell.
+//
 bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
 {
     vec3 cubeVertCoord[8];
@@ -217,7 +190,9 @@ bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
 
     for( int i = 0; i < 12; i++ )
     {
-        ivec3 tri   = ivec3( triangles[i*3], triangles[i*3+1], triangles[i*3+2] );
+        ivec3 tri   = ivec3( Global_Triangles[i*3], 
+                             Global_Triangles[i*3+1], 
+                             Global_Triangles[i*3+2] );
         vec3 posv0  = pos                     - cubeVertCoord[ tri[0] ];
         vec3 v1v0   = cubeVertCoord[ tri[1] ] - cubeVertCoord[ tri[0] ];
         vec3 v2v0   = cubeVertCoord[ tri[2] ] - cubeVertCoord[ tri[0] ];
@@ -251,6 +226,11 @@ bool CellOnBoundary( const in ivec3 cellIdx )
 }
 
 
+//
+// Input:  a current cell index, and a position.
+// Output: which neighbor cell contains this position.
+// Return: True if the neighbor cell was found; False if not.
+//
 bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3 nextCellIdx )
 {
     ivec3 c  = currentCellIdx;
@@ -290,7 +270,7 @@ bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3
 
     for( int i = 0; i < 27; i++ )
     {
-        int  j = cells[i];  // Re-ordered cell indices
+        int  j = Global_Cells[i];  // Re-ordered cell indices
         if( !CellOutsideBound( group[j] ) && PosInsideOfCell( group[j], pos ) )
         {
             nextCellIdx = group[j];
@@ -302,12 +282,16 @@ bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3
 }
 
 
+//
+// Input:  a cell index, and a position that's inside of this cell.
+// Output: the texture coordinate of that position.
+//
 vec3 CalculatePosTex( const ivec3 cellIdx, const vec3 pos )
 {
     // For VAPOR 3.1, we just use the center of the cell.
     vec3 t1 = vec3( cellIdx     ) * volumeDims1o;
     vec3 t2 = vec3( cellIdx + 1 ) * volumeDims1o;
-    return (t1 + t2) / 2.0;
+    return (t1 + t2) * 0.5;
 }
 
 
@@ -325,11 +309,6 @@ void main(void)
     float rayDirLength  = length( rayDirEye );
     if(   rayDirLength  < ULP10 )
         discard;
-
-    // Find a good order to test the 27 cells based on the direction of this ray.
-    //   Note: this works best in Model Coordinates. It decreases performance in 
-    //   eye coordinates. We disable it for now...
-    // ReorderCells( rayDirEye );
 
     // The incoming stepSize1D results in approximate 2 samples per cell.
     //   In Mode 2 ray casting, we increase this step size.
@@ -352,6 +331,7 @@ void main(void)
 
     // Set depth value at the backface 
     gl_FragDepth     =  CalculateDepth( stopEye ) - ULP10;
+
     // If something else on the scene results in a shallower depth, we need to 
     //    compare depth at every step.
     bool  shallow    = false;
@@ -361,8 +341,7 @@ void main(void)
 
     // Give color to step 1
     vec3 step1Tex    = CalculatePosTex( step1CellIdx, step1Eye );
-    vec3 step1Model  = (inversedMV * vec4(step1Eye, 1.0)).xyz;
-    if( !ShouldSkip( step1Tex, step1Model ) )
+    if( !ShouldSkip( step1Tex, step1Eye ) )
     {   
         float step1Value   = texture( volumeTexture, step1Tex ).r;
         float valTranslate = (step1Value - colorMapRange.x) / colorMapRange.z;
@@ -408,13 +387,11 @@ void main(void)
             break;
         }
 
-        vec3 step2Model    = (inversedMV * vec4(step2Eye, 1.0)).xyz;
         vec3 step2Tex      = CalculatePosTex( step2CellIdx, step2Eye );
-        if( ShouldSkip( step2Tex, step2Model ) )
+        if( ShouldSkip( step2Tex, step2Eye ) )
         {
             step1CellIdx   = step2CellIdx;
             step1Eye       = step2Eye;
-            step1Model     = step2Model;
             continue;
         }
 
@@ -454,7 +431,6 @@ void main(void)
         // keep up step 1 values as well
         step1CellIdx = step2CellIdx;
         step1Eye     = step2Eye; 
-        step1Model   = step2Model;
     }
 
     // If loop terminated early, we set depth value at step1 position. Otherwise, this fragment 
