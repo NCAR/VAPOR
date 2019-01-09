@@ -1071,7 +1071,7 @@ void TranslateStretchManip::drawHandleConnector(int handleNum, double *handleExt
     // glLineWidth( 2.0 );
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    GL_LEGACY(glPolygonMode(GL_FRONT, GL_FILL));
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     if ((handleNum == _selectedHandle) || (handleNum == (5 - _selectedHandle)))
         lgl->Color4fv(_faceSelectionColor);
     else

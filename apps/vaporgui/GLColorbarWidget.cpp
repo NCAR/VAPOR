@@ -149,7 +149,7 @@ void GLColorbarWidget::initializeGL()
     CheckGLErrorMsg("GLColorbarWidgetInitialize");
 
     glShadeModel(GL_SMOOTH);
-    glPolygonMode(GL_FRONT, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     glGenTextures(1, &_texid);
     glBindTexture(GL_TEXTURE_1D, _texid);
