@@ -727,26 +727,6 @@ available from the right mouse button.</string>
               <string>Linear</string>
              </property>
             </item>
-            <item>
-             <property name="text">
-              <string>histo fast</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>histo slow</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>dataMgr fast</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>dataMgr slow</string>
-             </property>
-            </item>
            </widget>
           </item>
          </layout>
