@@ -95,7 +95,7 @@ void RenderParams::SetDefaultVariables(
 void RenderParams::_init() {
     SetEnabled(true);
 
-    SetDefaultVariables(_maxDim);
+    SetDefaultVariables();
 
     SetRefinementLevel(0);
     SetCompressionLevel(0);
