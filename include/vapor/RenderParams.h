@@ -358,11 +358,11 @@ class PARAMS_API RenderParams : public ParamsBase {
 
   protected:
     DataMgr *_dataMgr;
+    int _maxDim;
 
   private:
     void _init();
     void _calculateStride(string varName);
-    int _maxDim;
     int _stride;
     ParamsContainer *_TFs;
     Box *_Box;
