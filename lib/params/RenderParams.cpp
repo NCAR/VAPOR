@@ -83,8 +83,6 @@ void RenderParams::SetDefaultVariables(
 	}
 	SetVariableName(varname);
 
-    cout << "varname " << varname << endl;
-
 	vector <string> fieldVarNames(3, "");
 	fieldVarNames[0] = _findVarStartingWithLetter(varnames, 'u');
 	fieldVarNames[1] = _findVarStartingWithLetter(varnames, 'v');
