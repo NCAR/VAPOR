@@ -14,7 +14,9 @@ IsoSurfaceParams::IsoSurfaceParams(DataMgr *dataManager,
                                    ParamsBase::StateSave *stateSave)
     : RayCasterParams(dataManager,
                       stateSave,
-                      IsoSurfaceParams::GetClassType()) {}
+                      IsoSurfaceParams::GetClassType()) {
+    SetUseSingleColor(true);
+}
 
 IsoSurfaceParams::IsoSurfaceParams(DataMgr *dataManager,
                                    ParamsBase::StateSave *stateSave,
