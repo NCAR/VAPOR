@@ -351,7 +351,7 @@ void main(void)
 
     // Let's do a ray casting!
     int   earlyTerm        = 0;         // why this ray got an early termination?
-    bool  halfStep         = false;
+    float OpacityCorr      = 1.0;
 
     // We set the loop to terminate at 2 times the number of steps, in case
     //   there are many occurances of step size halved.
@@ -368,13 +368,22 @@ void main(void)
     
         if( !LocateNextCell(  step1CellIdx, step2Eye, step2CellIdx ) )
         {
-            // Attempt to find next cell again with half step size
-            step2Eye      -= stepSize3D * 0.5;
-            if( LocateNextCell( step1CellIdx, step2Eye, step2CellIdx ) )
+            // Attempt to find next cell again with half step size, for at most 3 times
+            //   I.e., at most shrink it to 1/8 of the base step size.
+            vec3 tmpStepSize = stepSize3D;
+            for( int i = 0; i < 3; i++ )
             {
-                halfStep   = true;
+                tmpStepSize *= 0.5;
+                step2Eye     = step1Eye + tmpStepSize;
+                if( LocateNextCell( step1CellIdx, step2Eye, step2CellIdx ) )
+                {
+                    for( int j = 0; j <= i; j++ )
+                        OpacityCorr *= 0.5;
+                }
             }
-            else
+
+            // If still not finding a next cell, bail.
+            if( OpacityCorr == 1.0 )
             {
                 earlyTerm  = 2;
                 break;
@@ -399,11 +408,11 @@ void main(void)
         float valTranslate = (step2Value - colorMapRange.x) / colorMapRange.z;
         vec4  backColor    = texture( colorMapTexture, valTranslate );
         
-        // If this step is half-sized, we need to adjust opacity.
-        if( halfStep )
+        // If this step is shrunk, we need to correct opacity.
+        if( OpacityCorr < 1.0 )
         {
-            backColor.a    = 1.0 - pow( 1.0 - backColor.a, 0.5);
-            halfStep       = false;
+            backColor.a    = 1.0 - pow( 1.0 - backColor.a, OpacityCorr );
+            OpacityCorr    = 1.0;
         }
 
         // Apply lighting.
