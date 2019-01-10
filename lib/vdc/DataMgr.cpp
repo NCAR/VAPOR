@@ -533,6 +533,14 @@ bool is_blocked(const vector<size_t> &bs) {
         !std::all_of(bs.cbegin(), bs.cend(), [](size_t i) { return i == 1; }));
 }
 
+// Is string a number?
+//
+bool is_int(std::string str) {
+    if (!str.empty() && str[0] == '-')
+        str.erase(0, 1);
+    return str.find_first_not_of("0123456789") == std::string::npos;
+}
+
 }; // namespace
 
 DataMgr::DataMgr(
@@ -559,7 +567,9 @@ DataMgr::DataMgr(
 
     _regionsList.clear();
 
-    _varInfoCache.Clear();
+    _varInfoCacheSize_T.Clear();
+    _varInfoCacheDouble.Clear();
+    _varInfoCacheVoidPtr.Clear();
 
     _doTransformHorizontal = false;
     _doTransformVertical = false;
@@ -1546,7 +1556,7 @@ int DataMgr::GetVariableExtents(
 
     string key = "VariableExtents";
     vector<double> values;
-    if (_varInfoCache.Get(ts, cvars, level, 0, key, values)) {
+    if (_varInfoCacheDouble.Get(ts, cvars, level, 0, key, values)) {
         int n = values.size();
         for (int i = 0; i < n / 2; i++) {
             min.push_back(values[i]);
@@ -1568,7 +1578,7 @@ int DataMgr::GetVariableExtents(
         values.push_back(min[i]);
     for (int i = 0; i < max.size(); i++)
         values.push_back(max[i]);
-    _varInfoCache.Set(ts, cvars, level, 0, key, values);
+    _varInfoCacheDouble.Set(ts, cvars, level, 0, key, values);
 
     return (0);
 }
@@ -1601,7 +1611,7 @@ int DataMgr::GetDataRange(
     }
     string key = oss.str();
 
-    if (_varInfoCache.Get(ts, varname, level, lod, key, range)) {
+    if (_varInfoCacheDouble.Get(ts, varname, level, lod, key, range)) {
         assert(range.size() == 2);
         return (0);
     }
@@ -1653,7 +1663,7 @@ int DataMgr::GetDataRange(
     }
     delete sg;
 
-    _varInfoCache.Set(ts, varname, level, lod, key, range);
+    _varInfoCacheDouble.Set(ts, varname, level, lod, key, range);
 
     return (0);
 }
@@ -1761,7 +1771,7 @@ bool DataMgr::VariableExists(
 
     string key = "VariableExists";
     vector<size_t> dummy;
-    if (_varInfoCache.Get(ts, varname, level, lod, key, dummy)) {
+    if (_varInfoCacheSize_T.Get(ts, varname, level, lod, key, dummy)) {
         return (true);
     }
 
@@ -1787,12 +1797,12 @@ bool DataMgr::VariableExists(
     //
     vector<size_t> exists_vec;
     for (int i = 0; i < native_vars.size(); i++) {
-        if (_varInfoCache.Get(ts, native_vars[i], level, lod, key, exists_vec)) {
+        if (_varInfoCacheSize_T.Get(ts, native_vars[i], level, lod, key, exists_vec)) {
             continue;
         }
         bool exists = _dc->VariableExists(ts, native_vars[i], level, lod);
         if (exists) {
-            _varInfoCache.Set(ts, native_vars[i], level, lod, key, exists_vec);
+            _varInfoCacheSize_T.Set(ts, native_vars[i], level, lod, key, exists_vec);
         } else {
             return (false);
         }
@@ -1817,7 +1827,7 @@ bool DataMgr::VariableExists(
         }
     }
 
-    _varInfoCache.Set(ts, varname, level, lod, key, exists_vec);
+    _varInfoCacheSize_T.Set(ts, varname, level, lod, key, exists_vec);
     return (true);
 }
 
@@ -1869,17 +1879,6 @@ void DataMgr::Clear() {
             _blk_mem_mgr->FreeMem(region.blks);
     }
     _regionsList.clear();
-
-    vector<string> hash = _varInfoCache.GetVoidPtrHash();
-    for (int i = 0; i < hash.size(); i++) {
-        vector<void *> vals;
-        _varInfoCache.Get(hash[i], vals);
-        for (int j = 0; j < vals.size(); j++) {
-            if (vals[j])
-                delete (KDTreeRG *)vals[j];
-        }
-    }
-    _varInfoCache.Clear();
 }
 
 void DataMgr::UnlockGrid(
@@ -2367,6 +2366,10 @@ void DataMgr::_free_var(string varname) {
         } else
             itr++;
     }
+
+    _varInfoCacheSize_T.Purge(vector<string>(1, varname));
+    _varInfoCacheDouble.Purge(vector<string>(1, varname));
+    _varInfoCacheVoidPtr.Purge(vector<string>(1, varname));
 }
 
 bool DataMgr::_free_lru() {
@@ -2512,7 +2515,8 @@ bool DataMgr::_hasVerticalXForm(
     return (true);
 }
 
-string DataMgr::VarInfoCache::_make_hash(
+template <typename C>
+string DataMgr::VarInfoCache<C>::_make_hash(
     string key, size_t ts, vector<string> varnames, int level, int lod) {
     ostringstream oss;
 
@@ -2527,103 +2531,94 @@ string DataMgr::VarInfoCache::_make_hash(
     return (oss.str());
 }
 
-void DataMgr::VarInfoCache::Set(
-    size_t ts, vector<string> varnames, int level, int lod, string key,
-    const vector<size_t> &values) {
-    string hash = _make_hash(key, ts, varnames, level, lod);
-    _cacheSize_t[hash] = values;
+template <typename C>
+void DataMgr::VarInfoCache<C>::_decode_hash(
+    const string &hash,
+    string &key, size_t &ts, vector<string> &varnames, int &level, int &lod) {
+    varnames.clear();
+
+    stringstream ss(hash);
+    vector<string> result;
+
+    // parse hash into vector of strings
+    //
+    while (ss.good()) {
+        string substr;
+        getline(ss, substr, ':');
+        result.push_back(substr);
+    }
+    assert(result.size() >= 5);
+
+    int i = 0;
+    key = result[i++];
+    ts = (size_t)stoi(result[i++]);
+    while (!is_int(result[i])) {
+        varnames.push_back(result[i++]);
+    }
+    level = stoi(result[i++]);
+    lod = stoi(result[i++]);
 }
 
-bool DataMgr::VarInfoCache::Get(
+template <typename C>
+void DataMgr::VarInfoCache<C>::Set(
     size_t ts, vector<string> varnames, int level, int lod, string key,
-    vector<size_t> &values) const {
+    const vector<C> &values) {
+    string hash = _make_hash(key, ts, varnames, level, lod);
+    _cache[hash] = values;
+}
+
+template <typename C>
+bool DataMgr::VarInfoCache<C>::Get(
+    size_t ts, vector<string> varnames, int level, int lod, string key,
+    vector<C> &values) const {
     values.clear();
 
     string hash = _make_hash(key, ts, varnames, level, lod);
-    map<string, vector<size_t>>::const_iterator itr = _cacheSize_t.find(hash);
+    typename map<string, vector<C>>::const_iterator itr = _cache.find(hash);
 
-    if (itr == _cacheSize_t.end())
+    if (itr == _cache.end())
         return (false);
 
     values = itr->second;
     return (true);
 }
 
-void DataMgr::VarInfoCache::PurgeSize_t(
+template <typename C>
+void DataMgr::VarInfoCache<C>::Purge(
     size_t ts, vector<string> varnames, int level, int lod, string key) {
     string hash = _make_hash(key, ts, varnames, level, lod);
-    map<string, vector<size_t>>::iterator itr = _cacheSize_t.find(hash);
+    typename map<string, vector<C>>::iterator itr = _cache.find(hash);
 
-    if (itr == _cacheSize_t.end())
+    if (itr == _cache.end())
         return;
 
-    _cacheSize_t.erase(itr);
+    _cache.erase(itr);
 }
 
-void DataMgr::VarInfoCache::Set(
-    size_t ts, vector<string> varnames, int level, int lod, string key,
-    const vector<double> &values) {
-    string hash = _make_hash(key, ts, varnames, level, lod);
-    _cacheDouble[hash] = values;
-}
+template <typename C>
+void DataMgr::VarInfoCache<C>::Purge(
+    vector<string> varnames) {
 
-bool DataMgr::VarInfoCache::Get(
-    size_t ts, vector<string> varnames, int level, int lod, string key,
-    vector<double> &values) const {
-    values.clear();
+    vector<string> hashes;
+    typename map<string, std::vector<C>>::iterator itr;
+    for (itr = _cache.begin(); itr != _cache.end(); ++itr) {
+        hashes.push_back(itr->first);
+    }
 
-    string hash = _make_hash(key, ts, varnames, level, lod);
-    map<string, vector<double>>::const_iterator itr = _cacheDouble.find(hash);
+    for (int i = 0; i < hashes.size(); i++) {
+        string hash = hashes[i];
+        string key;
+        size_t ts;
+        vector<string> cvarnames;
+        int level;
+        int lod;
 
-    if (itr == _cacheDouble.end())
-        return (false);
+        _decode_hash(hash, key, ts, cvarnames, level, lod);
 
-    values = itr->second;
-    return (true);
-}
-
-void DataMgr::VarInfoCache::PurgeDouble(
-    size_t ts, vector<string> varnames, int level, int lod, string key) {
-    string hash = _make_hash(key, ts, varnames, level, lod);
-    map<string, vector<double>>::iterator itr = _cacheDouble.find(hash);
-
-    if (itr == _cacheDouble.end())
-        return;
-
-    _cacheDouble.erase(itr);
-}
-
-void DataMgr::VarInfoCache::Set(
-    size_t ts, vector<string> varnames, int level, int lod, string key,
-    const vector<void *> &values) {
-    string hash = _make_hash(key, ts, varnames, level, lod);
-    _cacheVoidPtr[hash] = values;
-}
-
-bool DataMgr::VarInfoCache::Get(
-    size_t ts, vector<string> varnames, int level, int lod, string key,
-    vector<void *> &values) const {
-    values.clear();
-
-    string hash = _make_hash(key, ts, varnames, level, lod);
-    map<string, vector<void *>>::const_iterator itr = _cacheVoidPtr.find(hash);
-
-    if (itr == _cacheVoidPtr.end())
-        return (false);
-
-    values = itr->second;
-    return (true);
-}
-
-void DataMgr::VarInfoCache::PurgeVoidPtr(
-    size_t ts, vector<string> varnames, int level, int lod, string key) {
-    string hash = _make_hash(key, ts, varnames, level, lod);
-    map<string, vector<void *>>::iterator itr = _cacheVoidPtr.find(hash);
-
-    if (itr == _cacheVoidPtr.end())
-        return;
-
-    _cacheVoidPtr.erase(itr);
+        if (varnames == cvarnames) {
+            Purge(ts, varnames, level, lod, key);
+        }
+    }
 }
 
 DataMgr::BlkExts::BlkExts() {
@@ -3020,7 +3015,7 @@ int DataMgr::_find_bounding_grid(
 
     // hash tag for block coordinate cache
     //
-    string hash = VarInfoCache::_make_hash(
+    string hash = VarInfoCache<int>::_make_hash(
         "BlkExts", hash_ts, scvars, level, lod);
 
     // See if bounding volumes for individual blocks are already
