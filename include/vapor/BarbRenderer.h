@@ -245,8 +245,13 @@ namespace VAPoR {
       
       bool _isCacheDirty() const;
       void _saveCacheParams();
+
+  void _clearCache() {
+	_cacheParams.fieldVarNames.clear();
+  }
       
   };
+
 };
 
 #endif //VAPOR_BARBRENDERER_H

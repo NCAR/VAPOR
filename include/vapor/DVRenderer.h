@@ -26,6 +26,7 @@ protected:
     void _3rdPassSpecialHandling( bool fast, long castMode );
 };
 
+
 };
 
 #endif
