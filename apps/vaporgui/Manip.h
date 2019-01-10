@@ -175,16 +175,6 @@ private:
      */
     virtual void _captureMouseDown(int handleNum, int buttonNum, const double strHandleMid[3]);
 
-    /*! Method to be invoked when the mouse is dragging a manip handle, from
-     * mouse move event.
-     */
-    //! \param[in] handleNum index of dragging handle
-    //! \param[in] movedRay is vector from camera to handle
-    /*! \param[in] constrain is true if the manip is constrained to stay inside
-     * full domain.
-     */
-    virtual void slideHandle(int handleNum, const double movedRay[3], bool constrain);
-
     //! Method invoked when manip handle drag begins, invoked from VizWin.
     //! \param[in] mouseCoords coordinates where mouse is pressed.
     //! \param[in] handleNum index over which the mouse is pressed
@@ -215,7 +205,7 @@ private:
     //! \param[out] dirVec resulting vector, from camera to handle
     //! \param[in] strHandleMid is middle of handle in stretched coordinates.
     //! \return true if successful
-    bool pixelToVector(double winCoords[2], double dirVec[3], const double strHandleMid[3]);
+    bool pixelToVector(double winCoords[2], double dirVec[3], const double strHandleMid[3], double mouseWorldPos[3] = NULL);
 
     //! Method to render the faces of the manipulator handlebars
     virtual void drawBoxFaces() const;
