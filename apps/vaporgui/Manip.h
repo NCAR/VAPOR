@@ -259,7 +259,8 @@ class TranslateStretchManip : public Manip {
     bool pixelToVector(
         double winCoords[2],
         double dirVec[3],
-        const double strHandleMid[3]);
+        const double strHandleMid[3],
+        double mouseWorldPos[3] = NULL);
 
     //! Method to render the faces of the manipulator handlebars
     virtual void drawBoxFaces() const;
