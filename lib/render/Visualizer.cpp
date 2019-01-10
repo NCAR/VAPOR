@@ -392,6 +392,9 @@ int Visualizer::_captureImage(const std::string &path)
     if (geoTiffOutput) {
         string projString = _dataStatus->GetDataMgr(_dataStatus->GetDataMgrNames()[0])->GetMapProjection();
 
+        vector<double> dataMinExtents, dataMaxExtents;
+        _dataStatus->GetActiveExtents(_paramsMgr, _winName, _getCurrentTimestep(), dataMinExtents, dataMaxExtents);
+
         double m[16];
         vpParams->GetModelViewMatrix(m);
         double posvec[3], upvec[3], dirvec[3];
@@ -402,10 +405,68 @@ int Visualizer::_captureImage(const std::string &path)
         float y = posvec[1];
         float aspect = width / (float)height;
 
+        float pixelScale[2] = {s * aspect * 2 / (float)width, s * 2 / (float)height};
+
+        // Crop to data extents
+
+        double cameraMinExtents[2] = {x - s * aspect, y - s};
+        double cameraMaxExtents[2] = {x + s * aspect, y + s};
+
+        int    cropMin[2] = {0, 0};
+        double newCameraMinExtents[2] = {cameraMinExtents[0], cameraMinExtents[1]};
+        for (int i = 0; i < 2; i++) {
+            if (cameraMinExtents[i] < dataMinExtents[i]) {
+                newCameraMinExtents[i] = dataMinExtents[i];
+                cropMin[i] = (dataMinExtents[i] - cameraMinExtents[i]) / pixelScale[i];
+            }
+        }
+
+        int    cropMax[2] = {(int)width, (int)height};
+        double newCameraMaxExtents[2] = {cameraMaxExtents[0], cameraMaxExtents[1]};
+        for (int i = 0; i < 2; i++) {
+            if (cameraMaxExtents[i] > dataMaxExtents[i]) {
+                newCameraMaxExtents[i] = dataMaxExtents[i];
+                cropMax[i] = cropMax[i] - (cameraMaxExtents[i] - dataMaxExtents[i]) / pixelScale[i];
+            }
+        }
+
+        int croppedWidth = cropMax[0] - cropMin[0];
+        int croppedHeight = cropMax[1] - cropMin[1];
+
+        if (croppedWidth <= 0 || croppedHeight <= 0) {
+            MyBase::SetErrMsg("Dataset not visible");
+            writeReturn = -1;
+            goto captureImageEnd;
+        }
+
+        // flip Y
+        int temp = cropMin[1];
+        cropMin[1] = height - cropMax[1];
+        cropMax[1] = height - temp;
+
+        unsigned char *croppedFB = new unsigned char[3 * croppedWidth * croppedHeight];
+        for (int y = 0; y < croppedHeight; y++) memcpy(&croppedFB[3 * y * croppedWidth], &framebuffer[3 * ((y + cropMin[1]) * width + cropMin[0])], 3 * croppedWidth);
+
+        delete[] framebuffer;
+        framebuffer = croppedFB;
+
+        framebuffer = croppedFB;
+        s *= croppedHeight / (float)height;
+
+        x = (newCameraMaxExtents[0] - newCameraMinExtents[0]) / 2 + newCameraMinExtents[0];
+        y = (newCameraMaxExtents[1] - newCameraMinExtents[1]) / 2 + newCameraMinExtents[1];
+
+        width = croppedWidth;
+        height = croppedHeight;
+        aspect = width / (float)height;
+
         GeoTIFWriter *geo = (GeoTIFWriter *)writer;
         geo->SetTiePoint(x, y, width / 2.f, height / 2.f);
         geo->SetPixelScale(s * aspect * 2 / (float)width, s * 2 / (float)height);
-        if (geo->ConfigureFromProj4(projString) < 0) goto captureImageEnd;
+        if (geo->ConfigureFromProj4(projString) < 0) {
+            writeReturn = -1;
+            goto captureImageEnd;
+        }
     }
 
     writeReturn = writer->Write(framebuffer, width, height);
