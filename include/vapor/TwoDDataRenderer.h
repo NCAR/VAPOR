@@ -229,6 +229,10 @@ class RENDER_API TwoDDataRenderer : public TwoDRenderer {
     const GLvoid *_getTexture(DataMgr *dataMgr);
 
     int _getOrientation(DataMgr *dataMgr, string varname);
+
+    void _clearCache() {
+        _tex_state.clear();
+    }
 };
 }; // namespace VAPoR
 
