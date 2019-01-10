@@ -148,7 +148,7 @@ protected:
 	//! Adjust the corners of the manipulator extents according to _dragDistance
 	//! param[in] corners describes the bounding box of the manipulator
 	virtual void _stretchCorners(double corners[8][3]) const = 0;
-	
+    
     GLManager *_glManager;
 	int _buttonNum;
 	int _selectedHandle;
@@ -223,20 +223,6 @@ private:
 		const double strHandleMid[3]
 	);
 
-	/*! Method to be invoked when the mouse is dragging a manip handle, from 
-	 * mouse move event.
-	 */
-	//! \param[in] handleNum index of dragging handle
-	//! \param[in] movedRay is vector from camera to handle
-	/*! \param[in] constrain is true if the manip is constrained to stay inside 
-	 * full domain.
-	 */
-	virtual void slideHandle(
-		int handleNum, 
-		const double movedRay[3], 
-		bool constrain
-	);
-
 	//! Method invoked when manip handle drag begins, invoked from VizWin.
 	//! \param[in] mouseCoords coordinates where mouse is pressed.
 	//! \param[in] handleNum index over which the mouse is pressed
@@ -272,8 +258,9 @@ private:
 	//! \return true if successful
 	bool pixelToVector(
 		double winCoords[2], 
-		double dirVec[3], 
-		const double strHandleMid[3]
+		double dirVec[3],
+		const double strHandleMid[3],
+        double mouseWorldPos[3] = NULL
 	);
 
 	//! Method to render the faces of the manipulator handlebars
