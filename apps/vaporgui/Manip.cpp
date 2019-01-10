@@ -200,7 +200,6 @@ void TranslateStretchManip::_mouseDrag(double screenCoords[2], double handleMidp
             double dirVec[3];
             double mouseWorldPos[3];
             pixelToVector(projScreenCoords, dirVec, handleMidpoint, mouseWorldPos);
-            // slideHandle(_selectedHandle, dirVec, false);
 
             vec3 norm(0, 0, 1);
             if (_selectedHandle == X_Neg || _selectedHandle == X_Pos) norm = vec3(1, 0, 0);
@@ -1001,64 +1000,6 @@ void TranslateStretchManip::_captureMouseDown(int handleNum, int buttonNum, cons
     // Reset any active rotation
     _tempRotation = 0.f;
     _tempRotAxis = -1;
-}
-
-// Slide the handle based on mouse move from previous capture.
-// Requires new direction vector associated with current mouse position
-// The new face position requires finding the planar displacement such that
-// the ray (in the scene) associated with the new mouse position is as near
-// as possible to the line projected from the original mouse position in the
-// direction of planar motion.
-// Initially calc done in  WORLD coords,
-// Converted to stretched world coords for bounds testing,
-// then final displacement is in cube coords.
-// If constrain is true, the slide will not go out of the full extents of the data.
-//
-
-void TranslateStretchManip::slideHandle(int handleNum, const double movedRay[3], bool constrain)
-{
-    double normalVector[3] = {0.f, 0.f, 0.f};
-    double q[3], r[3], w[3];
-    assert(handleNum >= 0);
-    int coord = (handleNum < 3) ? (2 - handleNum) : (handleNum - 3);
-
-    normalVector[coord] = 1.f;
-    // Calculate W:
-    vcopy(movedRay, w);
-    vnormal(w);
-    double scaleFactor = 1.f / vdot(w, normalVector);
-
-    // Calculate q:
-    vmult(w, scaleFactor, q);
-    vsub(q, normalVector, q);
-
-    // Calculate R:
-    scaleFactor *= vdot(_initialSelectionRay, normalVector);
-    vmult(w, scaleFactor, r);
-    vsub(r, _initialSelectionRay, r);
-
-    double denom = vdot(q, q);
-    _dragDistance = 0.f;
-    if (denom != 0.) { _dragDistance = -vdot(q, r) / denom; }
-
-    // Make sure the displacement is OK.  Not allowed to
-    // slide box out of full domain box.
-    // If stretching, not allowed to push face through opposite face.
-
-    float temp = _dragDistance;
-    deScaleScalarOnAxis(temp, coord);
-    _dragDistance = temp;
-
-    if (_isStretching) {    // don't push through opposite face ..
-        // Depends on whether we are pushing the "low" or "high" handle
-        // E.g., The low handle is limited by the low end of the extents, and the
-        // big end of the box
-        if (handleNum < 3) {
-            if (_dragDistance + _selection[coord] > _selection[coord + 3]) { _dragDistance = _selection[coord + 3] - _selection[coord]; }
-        } else {    // Moving "high" handle:
-            if (_dragDistance + _selection[coord + 3] < _selection[coord]) { _dragDistance = _selection[coord] - _selection[coord + 3]; }
-        }
-    }
 }
 
 // Draw a line connecting the specified handle to the box center.

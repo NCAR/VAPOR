@@ -175,16 +175,6 @@ private:
      */
     virtual void _captureMouseDown(int handleNum, int buttonNum, const double strHandleMid[3]);
 
-    /*! Method to be invoked when the mouse is dragging a manip handle, from
-     * mouse move event.
-     */
-    //! \param[in] handleNum index of dragging handle
-    //! \param[in] movedRay is vector from camera to handle
-    /*! \param[in] constrain is true if the manip is constrained to stay inside
-     * full domain.
-     */
-    virtual void slideHandle(int handleNum, const double movedRay[3], bool constrain);
-
     //! Method invoked when manip handle drag begins, invoked from VizWin.
     //! \param[in] mouseCoords coordinates where mouse is pressed.
     //! \param[in] handleNum index over which the mouse is pressed
