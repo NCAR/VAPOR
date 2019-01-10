@@ -162,6 +162,15 @@ public:
     virtual int		paintGL(bool fast);
 	
 
+	//! Clear render cache
+	//!
+	//! Called whenever renderer should clear any cached data
+	//
+	void ClearCache() {
+		_clearCache();
+	};
+
+
 #ifdef	VAPOR3_0_0_ALPHA
 #endif
 
@@ -314,6 +323,7 @@ protected:
     int level, int lod,  bool zeroOK
  ) const;
 	
+ virtual void _clearCache() = 0;
 	
 	static const int _imgHgt;
 	static const int _imgWid;

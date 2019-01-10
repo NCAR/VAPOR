@@ -62,6 +62,8 @@ protected:
 
 private:
 
+  void _clearCache() {}
+
 };
 };
 

@@ -145,6 +145,13 @@ public:
 		_vizFeatures->ClearText();
 	}
 
+	//! Force each renderer to empty its cache
+	//!
+	//! This method calls ClearCache on every renderer 
+	//
+	void ClearRenderCache();
+	
+
 private:
 	//! Render all the colorbars enabled in this visualizer.
 	void _renderColorbars(int timeStep);
