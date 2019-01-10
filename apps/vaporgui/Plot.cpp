@@ -125,6 +125,10 @@ Plot::~Plot() {
 }
 
 void Plot::Update() {
+    // Doesn't do anything if the current window isn't visible.
+    if (!(this->isVisible()))
+        return;
+
     // Initialize pointers
     std::vector<std::string> dmNames = _dataStatus->GetDataMgrNames();
     if (dmNames.empty()) {
@@ -145,6 +149,7 @@ void Plot::Update() {
         currentDatasetName = dmNames[0];
         currentIdx = 0;
         guiParams->SetPlotDatasetName(currentDatasetName);
+        _setInitialExtents();
     }
     VAPoR::DataMgr *currentDmgr = _dataStatus->GetDataMgr(currentDatasetName);
     VAPoR::PlotParams *plotParams = dynamic_cast<VAPoR::PlotParams *>(_paramsMgr->GetAppRenderParams(currentDatasetName, VAPoR::PlotParams::GetClassType()));
