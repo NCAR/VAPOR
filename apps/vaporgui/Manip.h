@@ -148,7 +148,7 @@ protected:
 	//! Adjust the corners of the manipulator extents according to _dragDistance
 	//! param[in] corners describes the bounding box of the manipulator
 	virtual void _stretchCorners(double corners[8][3]) const = 0;
-	
+    
     GLManager *_glManager;
 	int _buttonNum;
 	int _selectedHandle;
@@ -272,8 +272,9 @@ private:
 	//! \return true if successful
 	bool pixelToVector(
 		double winCoords[2], 
-		double dirVec[3], 
-		const double strHandleMid[3]
+		double dirVec[3],
+		const double strHandleMid[3],
+        double mouseWorldPos[3] = NULL
 	);
 
 	//! Method to render the faces of the manipulator handlebars
