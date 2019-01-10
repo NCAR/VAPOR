@@ -111,6 +111,10 @@ class RENDER_API SliceRenderer : public Renderer {
     GLuint _texCoordVBO;
 
     int _colorMapSize;
+
+    void _clearCache() {
+        _cacheParams.varName.clear();
+    }
 };
 
 }; // namespace VAPoR
