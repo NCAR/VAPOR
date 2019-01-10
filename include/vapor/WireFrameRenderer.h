@@ -74,7 +74,10 @@ private:
     bool _isCacheDirty() const;
     void _saveCacheParams();
     void _drawCell(vector<VertexData> &vertices, vector<unsigned int> &indices, const float *verts, const float *colors, int n, bool layered);
+
+    void _clearCache() { _cacheParams.varName.clear(); }
 };
+
 };    // namespace VAPoR
 
 #endif

@@ -154,7 +154,10 @@ private:
 
     bool _isCacheDirty() const;
     void _saveCacheParams();
+
+    void _clearCache() { _cacheParams.fieldVarNames.clear(); }
 };
+
 };    // namespace VAPoR
 
 #endif    // VAPOR_BARBRENDERER_H

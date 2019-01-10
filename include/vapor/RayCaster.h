@@ -174,6 +174,9 @@ protected:
     void _updateNearClippingPlane();
     void _enableVertexAttribute(const float *buf, size_t length, bool attrib1Enabled) const;
 
+private:
+    void _clearCache() { _userCoordinates.myVariableName.clear(); }
+
 };    // End of class RayCaster
 
 };    // End of namespace VAPoR

@@ -203,6 +203,10 @@ public:
     //
     virtual MapperFunction *GetMapperFunc(string varname);
 
+    //! Remove the mapper function for the named variable.
+    //
+    virtual void RemoveMapperFunc(string varname);
+
     //! Set current MapperFunction
     //!
     //! \param[in] varname Name of variable associated with mapping

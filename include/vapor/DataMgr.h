@@ -586,117 +586,45 @@ private:
     //
     // Cache for various metadata attributes
     //
-    class VarInfoCache {
+    template<typename C> class VarInfoCache {
     public:
         //
         //
-        void Set(size_t ts, std::vector<string> varnames, int level, int lod, string key, const std::vector<size_t> &values);
-        void Set(size_t ts, string varname, int level, int lod, string key, const std::vector<size_t> &values)
+        void Set(size_t ts, std::vector<string> varnames, int level, int lod, string key, const std::vector<C> &values);
+
+        void Set(size_t ts, string varname, int level, int lod, string key, const std::vector<C> &values)
         {
             std::vector<string> varnames;
             varnames.push_back(varname);
             Set(ts, varnames, level, lod, key, values);
         }
 
-        bool Get(size_t ts, std::vector<string> varnames, int level, int lod, string key, std::vector<size_t> &values) const;
+        bool Get(size_t ts, std::vector<string> varnames, int level, int lod, string key, std::vector<C> &values) const;
 
-        bool Get(size_t ts, string varname, int level, int lod, string key, std::vector<size_t> &values) const
+        bool Get(size_t ts, string varname, int level, int lod, string key, std::vector<C> &values) const
         {
             std::vector<string> varnames;
             varnames.push_back(varname);
             return Get(ts, varnames, level, lod, key, values);
         }
 
-        void PurgeSize_t(size_t ts, std::vector<string> varnames, int level, int lod, string key);
-        void PurgeSize_t(size_t ts, string varname, int level, int lod, string key)
+        void Purge(size_t ts, std::vector<string> varnames, int level, int lod, string key);
+        void Purge(size_t ts, string varname, int level, int lod, string key)
         {
             std::vector<string> varnames;
             varnames.push_back(varname);
-            PurgeSize_t(ts, varnames, level, lod, key);
+            Purge(ts, varnames, level, lod, key);
         }
+        void Purge(std::vector<string> varnames);
 
-        void Set(size_t ts, std::vector<string> varnames, int level, int lod, string key, const std::vector<double> &values);
-        void Set(size_t ts, string varname, int level, int lod, string key, const std::vector<double> &values)
-        {
-            std::vector<string> varnames;
-            varnames.push_back(varname);
-            Set(ts, varnames, level, lod, key, values);
-        }
-
-        bool Get(size_t ts, std::vector<string> varnames, int level, int lod, string key, std::vector<double> &values) const;
-
-        bool Get(size_t ts, string varname, int level, int lod, string key, std::vector<double> &values) const
-        {
-            std::vector<string> varnames;
-            varnames.push_back(varname);
-            return Get(ts, varnames, level, lod, key, values);
-        }
-
-        void PurgeDouble(size_t ts, std::vector<string> varnames, int level, int lod, string key);
-        void PurgeDouble(size_t ts, string varname, int level, int lod, string key)
-        {
-            std::vector<string> varnames;
-            varnames.push_back(varname);
-            PurgeDouble(ts, varnames, level, lod, key);
-        }
-
-        void Set(size_t ts, std::vector<string> varnames, int level, int lod, string key, const std::vector<void *> &values);
-        void Set(size_t ts, string varname, int level, int lod, string key, const std::vector<void *> &values)
-        {
-            std::vector<string> varnames;
-            varnames.push_back(varname);
-            Set(ts, varnames, level, lod, key, values);
-        }
-
-        bool Get(size_t ts, std::vector<string> varnames, int level, int lod, string key, std::vector<void *> &values) const;
-
-        bool Get(size_t ts, string varname, int level, int lod, string key, std::vector<void *> &values) const
-        {
-            std::vector<string> varnames;
-            varnames.push_back(varname);
-            return Get(ts, varnames, level, lod, key, values);
-        }
-        bool Get(string hash, std::vector<void *> &values) const
-        {
-            values.clear();
-            std::map<string, std::vector<void *>>::const_iterator itr;
-            itr = _cacheVoidPtr.find(hash);
-            if (itr != _cacheVoidPtr.end()) {
-                values = itr->second;
-                return (true);
-            }
-            return (false);
-        }
-
-        void PurgeVoidPtr(size_t ts, std::vector<string> varnames, int level, int lod, string key);
-        void PurgeVoidPtr(size_t ts, string varname, int level, int lod, string key)
-        {
-            std::vector<string> varnames;
-            varnames.push_back(varname);
-            PurgeVoidPtr(ts, varnames, level, lod, key);
-        }
-
-        vector<string> GetVoidPtrHash() const
-        {
-            vector<string>                                        keys;
-            std::map<string, std::vector<void *>>::const_iterator itr;
-            for (itr = _cacheVoidPtr.begin(); itr != _cacheVoidPtr.end(); ++itr) { keys.push_back(itr->first); }
-            return (keys);
-        }
-
-        void Clear()
-        {
-            _cacheSize_t.clear();
-            _cacheDouble.clear();
-            _cacheVoidPtr.clear();
-        }
+        void Clear() { _cache.clear(); }
 
         static string _make_hash(string key, size_t ts, std::vector<string> cvars, int level, int lod);
 
+        void _decode_hash(const string &hash, string &key, size_t &ts, vector<string> &varnames, int &level, int &lod);
+
     private:
-        std::map<string, std::vector<size_t>> _cacheSize_t;
-        std::map<string, std::vector<double>> _cacheDouble;
-        std::map<string, std::vector<void *>> _cacheVoidPtr;
+        std::map<string, std::vector<C>> _cache;
     };
 
     string _format;
@@ -735,7 +663,10 @@ private:
 
     std::vector<PipeLine *> _PipeLines;
 
-    mutable VarInfoCache      _varInfoCache;
+    mutable VarInfoCache<size_t> _varInfoCacheSize_T;
+    mutable VarInfoCache<double> _varInfoCacheDouble;
+    mutable VarInfoCache<void *> _varInfoCacheVoidPtr;
+
     std::map<string, BlkExts> _blkExtsCache;
 
     std::vector<string> _get_var_dependencies(string varname) const;
