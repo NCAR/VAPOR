@@ -86,7 +86,12 @@ class RENDER_API WireFrameRenderer : public Renderer {
         const float *colors,
         int n,
         bool layered);
+
+    void _clearCache() {
+        _cacheParams.varName.clear();
+    }
 };
+
 }; // namespace VAPoR
 
 #endif

@@ -122,6 +122,8 @@ class RENDER_API TwoDRenderer : public Renderer {
                                      size_t &texelSize,
                                      bool &gridAligned) = 0;
 
+    virtual void _clearCache() = 0;
+
     //! \copydoc Renderer::_initializeGL()
     virtual int _initializeGL();
 

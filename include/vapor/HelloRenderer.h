@@ -55,6 +55,7 @@ class RENDER_API HelloRenderer : public Renderer {
     virtual int _paintGL(bool fast);
 
   private:
+    void _clearCache() {}
 };
 }; // namespace VAPoR
 
