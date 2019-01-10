@@ -1589,8 +1589,6 @@ int DataMgr::AddDerivedVar(DerivedDataVar *derivedVar)
 
 void DataMgr::RemoveDerivedVar(string varname)
 {
-    cout << "DataMgr::RemoveDerivedVar " << varname << endl;
-
     if (!_dvm.HasVar(varname)) return;
 
     _dvm.RemoveVar(_dvm.GetVar(varname));

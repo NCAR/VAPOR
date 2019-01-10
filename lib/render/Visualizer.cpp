@@ -269,6 +269,11 @@ void Visualizer::MoveRenderersOfTypeToFront(const std::string &type)
 
 void Visualizer::InsertRenderer(Renderer *ren) { _renderers.push_back(ren); }
 
+void Visualizer::ClearRenderCache()
+{
+    for (int i = 0; i < _renderers.size(); i++) { _renderers[i]->ClearCache(); }
+}
+
 Renderer *Visualizer::GetRenderer(string type, string instance) const
 {
     for (int i = 0; i < _renderers.size(); i++) {

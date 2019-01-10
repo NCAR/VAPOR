@@ -140,6 +140,12 @@ public:
     //! \retval int zero if successful.
     virtual int paintGL(bool fast);
 
+    //! Clear render cache
+    //!
+    //! Called whenever renderer should clear any cached data
+    //
+    void ClearCache() { _clearCache(); };
+
 #ifdef VAPOR3_0_0_ALPHA
 #endif
 
@@ -287,6 +293,8 @@ protected:
     //! is true variables named "0" or "" evaluate to true.
     //
     virtual bool VariableExists(size_t ts, std::vector<string> &varnames, int level, int lod, bool zeroOK) const;
+
+    virtual void _clearCache() = 0;
 
     static const int _imgHgt;
     static const int _imgWid;

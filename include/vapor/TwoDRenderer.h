@@ -101,6 +101,8 @@ protected:
     //
     virtual const GLvoid *GetTexture(DataMgr *dataMgr, GLsizei &width, GLsizei &height, GLint &internalFormat, GLenum &format, GLenum &type, size_t &texelSize, bool &gridAligned) = 0;
 
+    virtual void _clearCache() = 0;
+
     //! \copydoc Renderer::_initializeGL()
     virtual int _initializeGL();
 
