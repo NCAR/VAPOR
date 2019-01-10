@@ -2322,6 +2322,7 @@ void MainForm::launchPlotUtility(){
     {
         _plot->show();
         _plot->activateWindow();
+        _plot->Update();
     }
 }
 
