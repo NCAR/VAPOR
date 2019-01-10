@@ -40,9 +40,7 @@ static RenParamsRegistrar<PlotParams> registrar( PlotParams::GetClassType() );
 
 PlotParams::PlotParams( DataMgr* dmgr, ParamsBase::StateSave *ssave) 
           : RenderParams( dmgr, ssave, PlotParams::GetClassType()) 
-{
-    SetUseSingleColor(true);
-};
+{ }
 
 PlotParams::PlotParams( DataMgr* dmgr, ParamsBase::StateSave *ssave, XmlNode *node) 
           : RenderParams( dmgr, ssave, node)
