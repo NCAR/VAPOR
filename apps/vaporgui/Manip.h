@@ -215,7 +215,7 @@ private:
     //! \param[out] dirVec resulting vector, from camera to handle
     //! \param[in] strHandleMid is middle of handle in stretched coordinates.
     //! \return true if successful
-    bool pixelToVector(double winCoords[2], double dirVec[3], const double strHandleMid[3]);
+    bool pixelToVector(double winCoords[2], double dirVec[3], const double strHandleMid[3], double mouseWorldPos[3] = NULL);
 
     //! Method to render the faces of the manipulator handlebars
     virtual void drawBoxFaces() const;

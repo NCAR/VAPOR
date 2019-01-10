@@ -28,6 +28,9 @@
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
 
+#include <glm/glm.hpp>
+using glm::vec3;
+
 using namespace VAPoR;
 
 const float Manip::_faceSelectionColor[4] = {0.8f, 0.8f, 0.0f, 0.5f};
@@ -50,6 +53,15 @@ const float Manip::_unselectedFaceColor[4] = {0.8f, 0.2f, 0.0f, 0.5f};
 #define MAXX 3
 #define MAXY 4
 #define MAXZ 5
+
+// Handle mapping
+#define X_Neg          2
+#define X_Pos          3
+#define Y_Neg          4
+#define Y_Pos          1
+#define Z_Neg          0
+#define Z_Pos          5
+#define INVALID_HANDLE -1
 
 TranslateStretchManip::TranslateStretchManip(GLManager *glManager) : Manip(glManager)
 {
@@ -186,8 +198,21 @@ void TranslateStretchManip::_mouseDrag(double screenCoords[2], double handleMidp
         bool   success = projectPointToLine(screenCoords, projScreenCoords);
         if (success) {
             double dirVec[3];
-            pixelToVector(projScreenCoords, dirVec, handleMidpoint);
-            slideHandle(_selectedHandle, dirVec, false);
+            double mouseWorldPos[3];
+            pixelToVector(projScreenCoords, dirVec, handleMidpoint, mouseWorldPos);
+            // slideHandle(_selectedHandle, dirVec, false);
+
+            vec3 norm(0, 0, 1);
+            if (_selectedHandle == X_Neg || _selectedHandle == X_Pos) norm = vec3(1, 0, 0);
+            if (_selectedHandle == Y_Neg || _selectedHandle == Y_Pos) norm = vec3(0, 1, 0);
+
+            vec3 mouseWorld(mouseWorldPos[0], mouseWorldPos[1], mouseWorldPos[2]);
+            vec3 handleWorld(handleMidpoint[0], handleMidpoint[1], handleMidpoint[2]);
+
+            float handleProjToNorm = glm::dot(norm, handleWorld);
+            float mouseProjToNorm = glm::dot(norm, mouseWorld);
+
+            _dragDistance = mouseProjToNorm - handleProjToNorm;
         }
     }
 }
@@ -449,7 +474,7 @@ bool TranslateStretchManip::projectPointToLine(const double mouseCoords[2], doub
 // from the camera associated with the screen coords.  Note screen coords
 // are OpenGL style.  strHandleMid is in stretched coordinates.
 //
-bool TranslateStretchManip::pixelToVector(double winCoords[2], double dirVec[3], const double strHandleMid[3])
+bool TranslateStretchManip::pixelToVector(double winCoords[2], double dirVec[3], const double strHandleMid[3], double mouseWorldPos[3])
 {
     GLdouble pt[3];
     // Project handleMid to find its z screen coordinate:
@@ -461,8 +486,11 @@ bool TranslateStretchManip::pixelToVector(double winCoords[2], double dirVec[3],
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     gluProject(strHandleMid[0], strHandleMid[1], strHandleMid[2], _modelViewMatrix, _projectionMatrix, viewport, &screenx, &screeny, &screenz);
+    double screen[3] = {screenx, screeny, screenz};
     // Obtain the coords of a point in view:
     bool success = (0 != gluUnProject((GLdouble)winCoords[0], (GLdouble)winCoords[1], screenz, _modelViewMatrix, _projectionMatrix, viewport, pt, pt + 1, pt + 2));
+    _dragDistance = pt[2] - strHandleMid[2];
+    if (mouseWorldPos) memcpy(mouseWorldPos, pt, sizeof(double) * 3);
 #pragma GCC diagnostic pop
     if (success) {
         // Subtract camera coords to get a direction vector:
@@ -520,7 +548,7 @@ void TranslateStretchManip::deScaleScalarOnAxis(float &whd, int axis) const
     vector<double> rpScales = _rpTransform->GetScales();
 
     whd /= dmScales[axis];
-    whd /= rpScales[axis];
+    // whd /= rpScales[axis];
 }
 
 // If we are deScaling a cube of the form extents[8][3], then that
