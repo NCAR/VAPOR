@@ -133,6 +133,10 @@ Plot::~Plot()
 
 void Plot::Update()
 {
+    // Doesn't do anything if the current window isn't visible.
+    if( !(this->isVisible()) )
+        return ;
+
     // Initialize pointers
     std::vector<std::string> dmNames = _dataStatus->GetDataMgrNames();
     if( dmNames.empty() )
@@ -156,6 +160,7 @@ void Plot::Update()
         currentDatasetName = dmNames[0];
         currentIdx         = 0;
         guiParams->SetPlotDatasetName( currentDatasetName );
+        _setInitialExtents();
     }
     VAPoR::DataMgr* currentDmgr = _dataStatus->GetDataMgr( currentDatasetName );
     VAPoR::PlotParams* plotParams = dynamic_cast<VAPoR::PlotParams*>
@@ -171,7 +176,7 @@ void Plot::Update()
     dataMgrCombo->blockSignals( false );
 
     // Update "Add a Variable"
-    std::vector<std::string> availVars   = currentDmgr->GetDataVarNames( 2 );
+    std::vector<std::string> availVars   = currentDmgr->GetDataVarNames( );
     for( int i = 0; i < enabledVars.size(); i++ )
         for( int rmIdx = 0; rmIdx < availVars.size(); rmIdx++ )
             if( availVars[ rmIdx ] == enabledVars[i] )

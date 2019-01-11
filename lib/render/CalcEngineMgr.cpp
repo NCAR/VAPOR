@@ -57,6 +57,17 @@ int CalcEngineMgr::AddFunction(
 	);
 	if (rc<0) return(-1);
 
+	// If the output variable had a previous definition we need to purge 
+	// the variable from the RenderParams mapper functions :-(
+	//
+	vector <RenderParams *> rParams;
+	_paramsMgr->GetRenderParams(rParams);
+	for (int j=0; j<rParams.size(); j++) {
+		for (int i=0; i<outputVarNames.size(); i++) {
+			rParams[j]->RemoveMapperFunc(outputVarNames[i]);
+		}
+	}
+
 	_paramsMgr->GetDatasetsParams()->SetScript(
 		dataSetName, scriptName, script, inputVarNames,
 		outputVarNames, outputVarMeshes, coordFlag

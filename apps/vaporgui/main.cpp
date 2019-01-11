@@ -156,7 +156,10 @@ if (getenv("VAPOR_DEBUG"))
 
     mw->setWindowTitle( "VAPOR User Interface" );
     mw->show();
+#ifdef NDEBUG
     std::string banner_file_name = "vapor_banner.png";
+    BannerGUI banner(mw, banner_file_name, 3000);
+#endif
     a.connect( &a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()) );
 	int estatus = a.exec();
 

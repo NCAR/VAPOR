@@ -166,6 +166,9 @@ private:
 	const vector <double> &scaleFac
  ) const;
 
+  void _clearCache() {    
+    _cacheHgtVar.clear();
+  } 
 
 };
 };

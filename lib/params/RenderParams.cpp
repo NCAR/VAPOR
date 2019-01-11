@@ -409,6 +409,10 @@ MapperFunction* RenderParams::GetMapperFunc(string varname) {
 	return(tfptr);
 }
 
+void RenderParams::RemoveMapperFunc(string varname) {
+	_TFs->Remove(varname);
+}
+
 void RenderParams::SetMapperFunc(string varname, MapperFunction *mf) {
 
 	if (_TFs->GetParams(varname)) {

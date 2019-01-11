@@ -126,6 +126,7 @@ protected:
                                     size_t &texelSize,
                                     bool &gridAligned) = 0;
 
+ virtual void _clearCache() = 0;
 
  //! \copydoc Renderer::_initializeGL()
  virtual int _initializeGL();
@@ -164,6 +165,7 @@ protected:
 	GLsizei w, GLsizei h,
 	GLfloat *normals
  );
+
 
 private:
 

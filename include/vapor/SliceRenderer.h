@@ -119,6 +119,10 @@ namespace VAPoR {
         GLuint _texCoordVBO;
 
         int _colorMapSize;
+
+		void _clearCache() {
+			_cacheParams.varName.clear();
+		}
     };
             
 };

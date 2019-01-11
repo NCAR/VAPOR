@@ -58,6 +58,7 @@ public:
     return("TwoDData");
   }
 
+
 protected:
  int _initializeGL();
 
@@ -249,6 +250,10 @@ private:
 
 
  int _getOrientation( DataMgr *dataMgr, string varname);
+
+  void _clearCache() {
+	_tex_state.clear();
+  }
 
 };
 };

@@ -93,7 +93,12 @@ private:
 			bool layered
 			);
 
+  void _clearCache() {
+	_cacheParams.varName.clear();
+  }
+
 };
+
 };
 
 #endif

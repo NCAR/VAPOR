@@ -806,6 +806,17 @@ int ControlExec::AddFunction(
 	const vector <string> &outputVarMeshes,
 	bool coordFlag
 ) {
+
+	// Ugh. Need to force each renderer to clear any cached data because
+	// if we redefine a variable the variable's data will change but
+	// the variable's name will not. Hence, if we don't clear the data
+	// the renderer may continue using old data
+	//
+	std::map<string, Visualizer*>::const_iterator itr;
+	for (itr=_visualizers.begin(); itr!=_visualizers.end(); ++itr) {
+		itr->second->ClearRenderCache();
+	}
+
 	return(
 		_calcEngineMgr->AddFunction(
 			scriptType, dataSetName, scriptName, script,

@@ -89,6 +89,10 @@ private:
     int  _buildCache();
     bool _isCacheDirty() const;
     void _saveCacheParams();
+
+	void _clearCache() {
+		_cacheParams.varName.clear();
+	}
 };
     
 };
