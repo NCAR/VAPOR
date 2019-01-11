@@ -68,7 +68,14 @@ std::string FileUtils::Dirname(const std::string &path)
 #endif
 }
 
-std::string FileUtils::Extension(const std::string &path) { return path.substr(path.rfind(".") + 1); }
+std::string FileUtils::Extension(const std::string &path)
+{
+    string basename = Basename(path);
+    size_t index = basename.rfind(".");
+    if (index == string::npos || index == 0)    // dotfile
+        return "";
+    return basename.substr(index + 1);
+}
 
 std::string FileUtils::POSIXPathToWindows(std::string path)
 {
