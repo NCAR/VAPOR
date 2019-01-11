@@ -416,10 +416,13 @@ AnnotationParams* Visualizer::getActiveAnnotationParams()  const {
 }
 
 
-int Visualizer:: _captureImage(const std::string &path)
+int Visualizer:: _captureImage(std::string path)
 {
     //Turn off the single capture flag
     _imageCaptureEnabled = false;
+    
+    if (FileUtils::Extension(path) == "")
+        path += ".png";
     
 	ViewpointParams* vpParams = getActiveViewpointParams();
 	size_t width, height;
