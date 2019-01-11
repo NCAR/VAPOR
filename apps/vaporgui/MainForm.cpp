@@ -1959,6 +1959,7 @@ void MainForm::launchPlotUtility()
     } else {
         _plot->show();
         _plot->activateWindow();
+        _plot->Update();
     }
 }
 
