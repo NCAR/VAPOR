@@ -682,6 +682,18 @@ void AnnotationRenderer::InScenePaint(size_t ts)
     vpParams->SetModelViewMatrix(mvMatrix);
    
     if (vfParams->GetUseDomainFrame()) drawDomainFrame(domainCorners);
+    if (vfParams->GetShowAxisArrows()) {
+
+        vector <double> minExts, maxExts;
+        m_dataStatus->GetActiveExtents(
+            m_paramsMgr, m_winName, ts, minExts, maxExts
+        );
+        drawAxisArrows(minExts, maxExts);
+    }
+
+    AxisAnnotation* aa = vfParams->GetAxisAnnotation();
+    if (aa->GetAxisAnnotationEnabled()) 
+        drawAxisTics(aa);
    
     mm->MatrixModeModelView();
     mm->PopMatrix();
