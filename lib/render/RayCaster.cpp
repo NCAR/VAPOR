@@ -13,6 +13,7 @@
 
 using namespace VAPoR;
 
+/*
 GLenum glCheckError_(const char *file, int line)
 {
     GLenum errorCode;
@@ -34,7 +35,6 @@ GLenum glCheckError_(const char *file, int line)
     return errorCode;
 }
 #define glCheckError() glCheckError_(__FILE__, __LINE__)
-/*
 void glCheckError() { }
 */
 
