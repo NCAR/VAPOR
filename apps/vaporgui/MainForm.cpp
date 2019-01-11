@@ -1468,6 +1468,11 @@ void MainForm::_setAnimationOnOff(bool on) {
 void MainForm::_setAnimationDraw() {
     _tabMgr->Update();
     _vizWinMgr->Update(false);
+
+    AnimationParams *aParams = GetAnimationParams();
+    size_t timestep = aParams->GetCurrentTimestep();
+
+    _timeStepEdit->setText(QString::number((int)timestep));
 }
 
 void MainForm::enableKeyframing(bool ison) {
