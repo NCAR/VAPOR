@@ -126,8 +126,6 @@ protected:
 
     // buffers and vertex arrays
     GLuint _frameBufferId;
-    GLenum _drawBuffers[2];    // Draw buffers for the 1st and 2nd pass
-
     GLuint _vertexArrayId;
     GLuint _vertexBufferId;        // Keeps user coordinates of 6 faces.
     GLuint _indexBufferId;         // Auxiliary indices for efficiently drawing triangle strips.
@@ -162,7 +160,7 @@ protected:
     //
     int _initializeFramebufferTextures();
 
-    void _updateViewportWhenNecessary();
+    void _updateViewportWhenNecessary(const GLint *viewport);
     void _updateColormap(RayCasterParams *params);
     void _updateDataTextures();
     int  _updateVertCoordsTexture(const glm::mat4 &MV);

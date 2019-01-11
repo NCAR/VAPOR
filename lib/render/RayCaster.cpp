@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #define OUTOFDATE   1
+#define GLNOTREADY  2
 #define GRIDERROR   -1
 #define JUSTERROR   -2
 #define PARAMSERROR -3
@@ -65,16 +66,18 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
     _3rdPassMode1Shader = nullptr;
     _3rdPassMode2Shader = nullptr;
 
-    _drawBuffers[0] = 0;
-    _drawBuffers[1] = 0;
-
-    GLint viewport[4] = {0, 0, 0, 0};
-    std::memcpy(_currentViewport, viewport, 4 * sizeof(GLint));
+    for (int i = 0; i < 4; i++) _currentViewport[i] = 0;
 }
 
 // Destructor
 RayCaster::~RayCaster()
 {
+    // Delete framebuffers
+    if (_frameBufferId) {
+        glDeleteFramebuffers(1, &_frameBufferId);
+        _frameBufferId = 0;
+    }
+
     // Delete textures
     if (_backFaceTextureId) {
         glDeleteTextures(1, &_backFaceTextureId);
@@ -105,13 +108,7 @@ RayCaster::~RayCaster()
         _depthTextureId = 0;
     }
 
-    // delete buffers
-    if (_frameBufferId) {
-        glDeleteFramebuffers(1, &_frameBufferId);
-        _frameBufferId = 0;
-    }
-
-    // delete vertex arrays
+    // Delete vertex arrays
     if (_vertexArrayId) {
         glDeleteVertexArrays(1, &_vertexArrayId);
         _vertexArrayId = 0;
@@ -419,6 +416,16 @@ int RayCaster::_initializeGL()
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     std::memcpy(_currentViewport, viewport, 4 * sizeof(GLint));
+    //
+    // Retrieved viewport may contain zero width and height sometimes.
+    //   Need to make these dimensions positive, so the initialization routine,
+    //   including the step of attaching textures to framebuffers, could complete.
+    //   Later, paintGL() will have another chance to set the correct dimensions.
+    //   The bottom line is, the rest of the class can safely assume that
+    //   _currentViewport[4] always contains non-zero dimensions.
+    //
+    for (int i = 2; i < 4; i++)
+        if (_currentViewport[i] < 1) _currentViewport[i] = 8;
 
     // Create any textures, framebuffers, etc.
     if (_initializeFramebufferTextures() != 0) {
@@ -431,6 +438,12 @@ int RayCaster::_initializeGL()
 
 int RayCaster::_paintGL(bool fast)
 {
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    // When viewport has zero dimensions, bail immediately.
+    if (viewport[2] < 1 || viewport[3] < 1) return 0;
+    _updateViewportWhenNecessary(viewport);
+
     // Collect params and grid that will be used repeatedly
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
     if (!params) {
@@ -459,8 +472,6 @@ int RayCaster::_paintGL(bool fast)
     }
 
     const MatrixManager *mm = Renderer::_glManager->matrixManager;
-
-    _updateViewportWhenNecessary();
     glDisable(GL_POLYGON_SMOOTH);
 
     // Collect existing depth value of the scene
@@ -567,10 +578,6 @@ int RayCaster::_initializeFramebufferTextures()
     glGenBuffers(1, &_indexBufferId);
     glGenBuffers(1, &_vertexAttribId);
 
-    /* Create an Frame Buffer Object for the back side of the volume. */
-    glGenFramebuffers(1, &_frameBufferId);
-    glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
-
     /* Generate back-facing texture */
     glGenTextures(1, &_backFaceTextureId);
     glActiveTexture(GL_TEXTURE0 + _backFaceTexOffset);
@@ -595,13 +602,16 @@ int RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    /* Set "_backFaceTextureId" as colour attachement #0,
-       and "_frontFaceTextureId" as attachement #1       */
+    /* Create an Frame Buffer Object for the front and back side of the volume. */
+    glGenFramebuffers(1, &_frameBufferId);
+    glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
+
+    /* Set "_backFaceTextureId"  as color attachement #0,
+       and "_frontFaceTextureId" as color attachement #1.  */
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _backFaceTextureId, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, _frontFaceTextureId, 0);
-    _drawBuffers[0] = GL_COLOR_ATTACHMENT0;
-    _drawBuffers[1] = GL_COLOR_ATTACHMENT1;
-    glDrawBuffers(2, _drawBuffers);
+    GLenum drawBuffers[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+    glDrawBuffers(2, drawBuffers);
 
     /* Check if framebuffer is complete */
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -1087,14 +1097,12 @@ double RayCaster::_getElapsedSeconds(const struct timeval *begin, const struct t
 #endif
 }
 
-void RayCaster::_updateViewportWhenNecessary()
+void RayCaster::_updateViewportWhenNecessary(const GLint *viewport)
 {
-    GLint newViewport[4];
-    glGetIntegerv(GL_VIEWPORT, newViewport);
-    if (std::memcmp(newViewport, _currentViewport, 4 * sizeof(GLint)) != 0) {
-        std::memcpy(_currentViewport, newViewport, 4 * sizeof(GLint));
+    if ((std::memcmp(viewport, _currentViewport, 4 * sizeof(GLint)) != 0)) {
+        std::memcpy(_currentViewport, viewport, 4 * sizeof(GLint));
 
-        // Re-size 2D textures
+        // Re-size 1st and 2nd pass rendering 2D textures
         glActiveTexture(GL_TEXTURE0 + _backFaceTexOffset);
         glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
@@ -1102,6 +1110,8 @@ void RayCaster::_updateViewportWhenNecessary()
         glActiveTexture(GL_TEXTURE0 + _frontFaceTexOffset);
         glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 0, GL_RGBA, GL_FLOAT, nullptr);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 }
 
