@@ -13,7 +13,6 @@
 
 using namespace VAPoR;
 
-/*
 GLenum glCheckError_(const char *file, int line)
 {
     GLenum errorCode;
@@ -35,8 +34,9 @@ GLenum glCheckError_(const char *file, int line)
     return errorCode;
 }
 #define glCheckError() glCheckError_(__FILE__, __LINE__)
-*/
+/*
 void glCheckError() { }
+*/
 
 // Constructor
 RayCaster::RayCaster( const ParamsMgr*    pm,
@@ -95,6 +95,13 @@ RayCaster::RayCaster( const ParamsMgr*    pm,
 // Destructor
 RayCaster::~RayCaster()
 {
+    // delete framebuffers
+    if( _frameBufferId )
+    {
+        glDeleteFramebuffers( 1, &_frameBufferId );
+        _frameBufferId = 0;
+    }
+
     // delete textures
     if( _backFaceTextureId   )
     {
@@ -135,13 +142,6 @@ RayCaster::~RayCaster()
     {
         glDeleteTextures( 1, &_depthTextureId );
         _depthTextureId = 0;
-    }
-
-    // delete buffers
-    if( _frameBufferId )
-    {
-        glDeleteFramebuffers( 1, &_frameBufferId );
-        _frameBufferId = 0;
     }
 
     // delete vertex arrays
@@ -699,10 +699,6 @@ int RayCaster::_initializeFramebufferTextures()
     glGenBuffers(      1, &_indexBufferId );
     glGenBuffers(      1, &_vertexAttribId );
 
-    /* Create an Frame Buffer Object for the back side of the volume. */
-    glGenFramebuffers(1, &_frameBufferId);
-    glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
-    
     /* Generate back-facing texture */
     glGenTextures(1, &_backFaceTextureId);
     glActiveTexture( GL_TEXTURE0 + _backFaceTexOffset );
@@ -728,10 +724,14 @@ int RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    /* Create an Frame Buffer Object for the front and back side of the volume. */
+    glGenFramebuffers(1, &_frameBufferId);
+    glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     
-    /* Set "_backFaceTextureId" as colour attachement #0, 
-       and "_frontFaceTextureId" as attachement #1       */
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _backFaceTextureId, 0);
+    /* Set "_backFaceTextureId"  as color attachement #0, 
+       and "_frontFaceTextureId" as color attachement #1.  */
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _backFaceTextureId,  0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, _frontFaceTextureId, 0);
     _drawBuffers[0]  =                   GL_COLOR_ATTACHMENT0;
     _drawBuffers[1]  =                   GL_COLOR_ATTACHMENT1;
