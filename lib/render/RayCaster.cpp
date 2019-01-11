@@ -446,6 +446,10 @@ int RayCaster::_initializeGL()
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     std::memcpy(_currentViewport, viewport, 4 * sizeof(GLint));
+    // newViewport contains zero width and height sometimes.
+    //   Need to filter out those instances.
+    for (int i = 2; i < 4; i++)
+        if (_currentViewport[i] < 1) _currentViewport[i] = 8;
 
     // Create any textures, framebuffers, etc.
     if (_initializeFramebufferTextures() != 0) {
@@ -1103,7 +1107,9 @@ void RayCaster::_updateViewportWhenNecessary()
 {
     GLint newViewport[4];
     glGetIntegerv(GL_VIEWPORT, newViewport);
-    if (std::memcmp(newViewport, _currentViewport, 4 * sizeof(GLint)) != 0) {
+    // newViewport contains zero width and height sometimes.
+    //   Need to filter out those instances.
+    if ((std::memcmp(newViewport, _currentViewport, 4 * sizeof(GLint)) != 0) && (newViewport[2] > 0) && (newViewport[3] > 0)) {
         std::memcpy(_currentViewport, newViewport, 4 * sizeof(GLint));
 
         // Re-size 2D textures
