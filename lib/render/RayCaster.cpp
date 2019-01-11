@@ -441,6 +441,7 @@ int RayCaster::_paintGL(bool fast)
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     // When viewport has zero dimensions, bail immediately.
+    //   This happens when undo/redo is issued.
     if (viewport[2] < 1 || viewport[3] < 1) return 0;
     _updateViewportWhenNecessary(viewport);
 
@@ -448,8 +449,6 @@ int RayCaster::_paintGL(bool fast)
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
     if (!params) {
         MyBase::SetErrMsg("Error occured during retrieving RayCaster parameters!");
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return PARAMSERROR;
     }
     // Do not perform any fast rendering in cell traverse mode
@@ -459,15 +458,11 @@ int RayCaster::_paintGL(bool fast)
     StructuredGrid *grid = nullptr;
     if (_userCoordinates.GetCurrentGrid(params, _dataMgr, &grid) != 0) {
         MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return GRIDERROR;
     }
 
     if (_load3rdPassShaders() != 0) {
         MyBase::SetErrMsg("Failed to load shaders");
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return GLERROR;
     }
 
