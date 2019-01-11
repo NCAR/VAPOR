@@ -915,7 +915,7 @@ bool CurvilinearGrid::_insideGridHelperTerrain(
 		};
 
 		inside = VAPoR::BarycentricCoordsTri(tverts1, pt, lambda);
-		assert(inside);
+		if (! inside) return(false);
 	}
 
 
