@@ -30,7 +30,7 @@ int IsoSurfaceRenderer::_load3rdPassShaders()
     return 0;    // Success
 }
 
-void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast, long castingMode)
+void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast, int castingMode)
 {
     IsoSurfaceParams *  params = dynamic_cast<IsoSurfaceParams *>(GetActiveParams());
     std::vector<double> isoValues = params->GetIsoValues();

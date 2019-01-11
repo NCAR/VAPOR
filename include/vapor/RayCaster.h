@@ -49,11 +49,9 @@ protected:
         float *        topFace, *bottomFace;    // user coordinates, size == bx * bz * 3
         float *        dataField;               // data field of this volume
         unsigned char *missingValueMask;        // 0 == is missing value; non-zero == not missing value
-        float *        xyCoords;                // X-Y coordinate values
-        float *        zCoords;                 // Z coordinate values
+        float *        vertCoords;
 
-        size_t dims[4];    // num. of samples along each axis.
-                           // !! Note: the last element is the diagnal length !!
+        size_t dims[3];    // num. of samples along each axis.
 
         //             0---------2
         //              |       |
@@ -85,7 +83,15 @@ protected:
         // Update meta data, as well as pointers: 6 faces + dataField + missingValueMask
         //   It returns 0 upon success, and non-zero upon errors:
         //
-        int  UpdateFaceAndData(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr);
+        int UpdateFaceAndData(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr);
+        //
+        // Update pointers: xyCoords and zCoords
+        // |-- Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
+        // |         UpdateFaceAndData() needs to be called priori to UpdateCurviCoords().
+        // |-- It returns 0 upon success, and non-zero upon errors:
+        //
+        int UpdateCurviCoords(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr);
+
         void FillCoordsXYPlane(const StructuredGrid *grid,        // Input
                                size_t                planeIdx,    // Input: which plane to retrieve
                                float *               coords);                    // Output buffer allocated by caller
@@ -95,14 +101,7 @@ protected:
         void FillCoordsXZPlane(const StructuredGrid *grid,        // Input
                                size_t                planeIdx,    // Input
                                float *               coords);                    // Output
-        //
-        // Update pointers: xyCoords and zCoords
-        // |-- Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
-        // |         UpdateFaceAndData() needs to be called priori to UpdateCurviCoords().
-        // |-- It returns 0 upon success, and non-zero upon errors:
-        //
-        int UpdateCurviCoords(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr);
-    };    // end of struct UserCoordinates
+    };                                                            // end of struct UserCoordinates
 
     UserCoordinates    _userCoordinates;
     std::vector<float> _colorMap;
@@ -115,29 +114,25 @@ protected:
     GLuint      _volumeTextureId;
     GLuint      _missingValueTextureId;
     GLuint      _colorMapTextureId;
-    GLuint      _xyCoordsTextureId;
-    GLuint      _zCoordsTextureId;
+    GLuint      _vertCoordsTextureId;
     GLuint      _depthTextureId;
     const GLint _backFaceTexOffset;
     const GLint _frontFaceTexOffset;
     const GLint _volumeTexOffset;
     const GLint _colorMapTexOffset;
     const GLint _missingValueTexOffset;
-    const GLint _xyCoordsTexOffset;
-    const GLint _zCoordsTexOffset;
+    const GLint _vertCoordsTexOffset;
     const GLint _depthTexOffset;
 
-    // buffers
+    // buffers and vertex arrays
     GLuint _frameBufferId;
-    GLuint _xyCoordsBufferId;
-    GLuint _zCoordsBufferId;
     GLenum _drawBuffers[2];    // Draw buffers for the 1st and 2nd pass
 
-    // vertex arrays
     GLuint _vertexArrayId;
-    GLuint _vertexBufferId;    // Keeps user coordinates of 6 faces.
-    GLuint _indexBufferId;     // Auxiliary indices for efficiently drawing triangle strips.
-    GLuint _vertexAttribId;    // Attribute of vertices: (i, j k) logical indices.
+    GLuint _vertexBufferId;        // Keeps user coordinates of 6 faces.
+    GLuint _indexBufferId;         // Auxiliary indices for efficiently drawing triangle strips.
+    GLuint _vertexAttribId;        // Attribute of vertices: (i, j k) logical indices.
+    GLint  _currentViewport[4];    // current viewport in use
 
     // shaders
     ShaderProgram *_1stPassShader;
@@ -146,19 +141,20 @@ protected:
     ShaderProgram *_3rdPassMode1Shader;
     ShaderProgram *_3rdPassMode2Shader;
 
-    GLint _currentViewport[4];    // current viewport in use
+    // Direction vectors that are used by the fragment shader.
+    glm::vec3 _unitDirections[26];
 
     //
     // Render the volume surface using triangle strips
     //   This is a subroutine used by _drawVolumeFaces().
     //
-    void _renderTriangleStrips(int whichPass, long castingMode) const;
+    void _renderTriangleStrips(int whichPass, int castingMode) const;
 
-    void _drawVolumeFaces(int whichPass, long whichCastingMode, bool insideACell = false, const glm::mat4 &inversedMV = glm::mat4(0.0f), bool fast = false);
+    void _drawVolumeFaces(int whichPass, int whichCastingMode, bool insideACell = false, const glm::mat4 &inversedMV = glm::mat4(0.0f), bool fast = false);
 
-    void _load3rdPassUniforms(long castingMode, const glm::mat4 &inversedMV, bool fast) const;
+    void _load3rdPassUniforms(int castingMode, const glm::mat4 &inversedMV, bool fast) const;
 
-    virtual void _3rdPassSpecialHandling(bool fast, long castingMode);
+    virtual void _3rdPassSpecialHandling(bool fast, int castingMode);
 
     //
     // Initialization for 1) framebuffers and 2) textures
@@ -166,13 +162,15 @@ protected:
     //
     int _initializeFramebufferTextures();
 
-    double _getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const;
-
     void _updateViewportWhenNecessary();
     void _updateColormap(RayCasterParams *params);
-    void _updateDataTextures(int castingMode);
+    void _updateDataTextures();
+    int  _updateVertCoordsTexture(const glm::mat4 &MV);
     void _updateNearClippingPlane();
     void _enableVertexAttribute(const float *buf, size_t length, bool attrib1Enabled) const;
+    void _initializeDirectionVectors();
+
+    double _getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const;
 
 private:
     void _clearCache() { _userCoordinates.myVariableName.clear(); }

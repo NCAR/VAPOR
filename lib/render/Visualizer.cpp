@@ -128,10 +128,10 @@ void Visualizer::_applyDatasetTransformsForRenderer(Renderer *r)
     MatrixManager *mm = _glManager->matrixManager;
 
     mm->Translate(origin[0], origin[1], origin[2]);
-    mm->Scale(scales[0], scales[1], scales[2]);
     mm->Rotate(glm::radians(rotations[0]), 1, 0, 0);
     mm->Rotate(glm::radians(rotations[1]), 0, 1, 0);
     mm->Rotate(glm::radians(rotations[2]), 0, 0, 1);
+    mm->Scale(scales[0], scales[1], scales[2]);
     mm->Translate(-origin[0], -origin[1], -origin[2]);
 
     mm->Translate(translations[0], translations[1], translations[2]);
@@ -369,10 +369,12 @@ RegionParams *Visualizer::getActiveRegionParams() const { return _paramsMgr->Get
 
 AnnotationParams *Visualizer::getActiveAnnotationParams() const { return _paramsMgr->GetAnnotationParams(_winName); }
 
-int Visualizer::_captureImage(const std::string &path)
+int Visualizer::_captureImage(std::string path)
 {
     // Turn off the single capture flag
     _imageCaptureEnabled = false;
+
+    if (FileUtils::Extension(path) == "") path += ".png";
 
     ViewpointParams *vpParams = getActiveViewpointParams();
     size_t           width, height;

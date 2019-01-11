@@ -4,6 +4,8 @@
 #include <fstream>
 #include <sstream>
 
+#include <glm/gtc/type_ptr.hpp>
+
 #define OUTOFDATE   1
 #define GRIDERROR   -1
 #define JUSTERROR   -2
@@ -41,15 +43,14 @@ void glCheckError() { }
 // Constructor
 RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string paramsType, std::string classType, std::string &instName, DataMgr *dataMgr)
 : Renderer(pm, winName, dataSetName, paramsType, classType, instName, dataMgr), _backFaceTexOffset(0), _frontFaceTexOffset(1), _volumeTexOffset(2), _colorMapTexOffset(3), _missingValueTexOffset(4),
-  _xyCoordsTexOffset(5), _zCoordsTexOffset(6), _depthTexOffset(7)
+  _vertCoordsTexOffset(5), _depthTexOffset(6)
 {
     _backFaceTextureId = 0;
     _frontFaceTextureId = 0;
     _volumeTextureId = 0;
     _missingValueTextureId = 0;
     _colorMapTextureId = 0;
-    _xyCoordsTextureId = 0;
-    _zCoordsTextureId = 0;
+    _vertCoordsTextureId = 0;
     _depthTextureId = 0;
     _frameBufferId = 0;
 
@@ -57,8 +58,6 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
     _vertexBufferId = 0;
     _indexBufferId = 0;
     _vertexAttribId = 0;
-    _xyCoordsBufferId = 0;
-    _zCoordsBufferId = 0;
 
     _1stPassShader = nullptr;
     _2ndPassShader = nullptr;
@@ -76,13 +75,13 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
 // Destructor
 RayCaster::~RayCaster()
 {
-    // delete framebuffers
+    // Delete framebuffers
     if (_frameBufferId) {
         glDeleteFramebuffers(1, &_frameBufferId);
         _frameBufferId = 0;
     }
 
-    // delete textures
+    // Delete textures
     if (_backFaceTextureId) {
         glDeleteTextures(1, &_backFaceTextureId);
         _backFaceTextureId = 0;
@@ -103,13 +102,9 @@ RayCaster::~RayCaster()
         glDeleteTextures(1, &_colorMapTextureId);
         _colorMapTextureId = 0;
     }
-    if (_xyCoordsTextureId) {
-        glDeleteTextures(1, &_xyCoordsTextureId);
-        _xyCoordsTextureId = 0;
-    }
-    if (_zCoordsTextureId) {
-        glDeleteTextures(1, &_zCoordsTextureId);
-        _zCoordsTextureId = 0;
+    if (_vertCoordsTextureId) {
+        glDeleteTextures(1, &_vertCoordsTextureId);
+        _vertCoordsTextureId = 0;
     }
     if (_depthTextureId) {
         glDeleteTextures(1, &_depthTextureId);
@@ -133,14 +128,6 @@ RayCaster::~RayCaster()
         glDeleteBuffers(1, &_vertexAttribId);
         _vertexAttribId = 0;
     }
-    if (_xyCoordsBufferId) {
-        glDeleteBuffers(1, &_xyCoordsBufferId);
-        _xyCoordsBufferId = 0;
-    }
-    if (_zCoordsBufferId) {
-        glDeleteBuffers(1, &_zCoordsBufferId);
-        _zCoordsBufferId = 0;
-    }
 }
 
 // Constructor
@@ -153,14 +140,13 @@ RayCaster::UserCoordinates::UserCoordinates()
     topFace = nullptr;
     bottomFace = nullptr;
     dataField = nullptr;
-    xyCoords = nullptr;
-    zCoords = nullptr;
+    vertCoords = nullptr;
     missingValueMask = nullptr;
     for (int i = 0; i < 3; i++) {
         myGridMin[i] = 0;
         myGridMax[i] = 0;
+        dims[i] = 0;
     }
-    for (int i = 0; i < 4; i++) { dims[i] = 0; }
 
     myCurrentTimeStep = 0;
     myVariableName = "";
@@ -200,13 +186,9 @@ RayCaster::UserCoordinates::~UserCoordinates()
         delete[] dataField;
         dataField = nullptr;
     }
-    if (xyCoords) {
-        delete[] xyCoords;
-        xyCoords = nullptr;
-    }
-    if (zCoords) {
-        delete[] zCoords;
-        zCoords = nullptr;
+    if (vertCoords) {
+        delete[] vertCoords;
+        vertCoords = nullptr;
     }
     if (missingValueMask) {
         delete[] missingValueMask;
@@ -270,8 +252,6 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
     dims[0] = gridDims[0];
     dims[1] = gridDims[1];
     dims[2] = gridDims[2];
-    float df[3] = {float(dims[0]), float(dims[1]), float(dims[2])};
-    dims[3] = size_t(std::sqrt(df[0] * df[0] + df[1] * df[1] + df[2] * df[2])) + 1;
 
     // Save front face user coordinates ( z == dims[2] - 1 )
     if (frontFace) delete[] frontFace;
@@ -394,30 +374,21 @@ void RayCaster::UserCoordinates::FillCoordsXZPlane(const StructuredGrid *grid, s
 
 int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr)
 {
-    if (xyCoords) delete[] xyCoords;
-    xyCoords = new float[dims[0] * dims[1] * 2];
-    if (zCoords) delete[] zCoords;
+    size_t numOfVertices = dims[0] * dims[1] * dims[2];
+    if (vertCoords) delete[] vertCoords;
     try {
-        zCoords = new float[dims[0] * dims[1] * dims[2]];
+        vertCoords = new float[3 * numOfVertices];
     } catch (const std::bad_alloc &e) {
         MyBase::SetErrMsg(e.what());
         return MEMERROR;
     }
 
-    // Gather the XY coordinate from frontFace buffer
-    size_t xyIdx = 0, xyzIdx = 0;
-    for (size_t y = 0; y < dims[1]; y++)
-        for (size_t x = 0; x < dims[0]; x++) {
-            xyCoords[xyIdx++] = frontFace[xyzIdx++];
-            xyCoords[xyIdx++] = frontFace[xyzIdx++];
-            xyzIdx++;
-        }
-
-    // Gather the Z coordinates from grid
+    // Gather the vertex coordinates from grid
     StructuredGrid::ConstCoordItr coordItr = grid->ConstCoordBegin();
-    size_t                        numOfVertices = dims[0] * dims[1] * dims[2];
-    for (xyzIdx = 0; xyzIdx < numOfVertices; xyzIdx++) {
-        zCoords[xyzIdx] = float((*coordItr)[2]);
+    for (int i = 0; i < numOfVertices; i++) {
+        vertCoords[3 * i] = float((*coordItr)[0]);
+        vertCoords[3 * i + 1] = float((*coordItr)[1]);
+        vertCoords[3 * i + 2] = float((*coordItr)[2]);
         ++coordItr;
     }
 
@@ -464,12 +435,33 @@ int RayCaster::_initializeGL()
 
 int RayCaster::_paintGL(bool fast)
 {
+    // Collect params and grid that will be used repeatedly
+    RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
+    if (!params) {
+        MyBase::SetErrMsg("Error occured during retrieving RayCaster parameters!");
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        return PARAMSERROR;
+    }
+    // Do not perform any fast rendering in cell traverse mode
+    int castingMode = int(params->GetCastingMode());
+    if (castingMode == CellTraversal && fast) return 0;
+
+    StructuredGrid *grid = nullptr;
+    if (_userCoordinates.GetCurrentGrid(params, _dataMgr, &grid) != 0) {
+        MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        return GRIDERROR;
+    }
+
     if (_load3rdPassShaders() != 0) {
         MyBase::SetErrMsg("Failed to load shaders");
         glBindVertexArray(0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return GLERROR;
     }
+
     const MatrixManager *mm = Renderer::_glManager->matrixManager;
 
     _updateViewportWhenNecessary();
@@ -482,24 +474,7 @@ int RayCaster::_paintGL(bool fast)
     glBindVertexArray(_vertexArrayId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
 
-    // Collect params and grid that will be used repeatedly
-    RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
-    if (!params) {
-        MyBase::SetErrMsg("Error occured during retrieving RayCaster parameters!");
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        return PARAMSERROR;
-    }
-    StructuredGrid *grid = nullptr;
-    if (_userCoordinates.GetCurrentGrid(params, _dataMgr, &grid) != 0) {
-        MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        return GRIDERROR;
-    }
-
     // Use the correct shader for 3rd pass rendering
-    long castingMode = params->GetCastingMode();
     if (castingMode == FixedStep)
         _3rdPassShader = _3rdPassMode1Shader;
     else if (castingMode == CellTraversal)
@@ -531,22 +506,23 @@ int RayCaster::_paintGL(bool fast)
             return JUSTERROR;
         }
 
-        _updateDataTextures(castingMode);
-
-        glBindTexture(GL_TEXTURE_3D, 0);
+        // Updates data volume texture and missing value texture
+        _updateDataTextures();
     }
 
-    _updateColormap(params);
-
-    glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
-    glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _colorMap.size() / 4, 0, GL_RGBA, GL_FLOAT, _colorMap.data());
-    glBindTexture(GL_TEXTURE_1D, 0);
+    glm::mat4 ModelView = mm->GetModelViewMatrix();
+    if (castingMode == CellTraversal) {
+        if (_updateVertCoordsTexture(ModelView) != 0) {
+            MyBase::SetErrMsg("Error occured during calculating eye coordinates!");
+            glBindVertexArray(0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            delete grid;
+            return MEMERROR;
+        }
+    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
-
-    glm::mat4 ModelView = mm->GetModelViewMatrix();
 
     // 1st pass: render back facing polygons to texture0 of the framebuffer
     _drawVolumeFaces(1, castingMode, false);
@@ -563,6 +539,13 @@ int RayCaster::_paintGL(bool fast)
 
     // 2nd pass, render front facing polygons
     _drawVolumeFaces(2, castingMode, insideACell);
+
+    // Collect the color map for the 3rd pass rendering, which is the actual ray casting.
+    _updateColormap(params);
+    glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
+    glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _colorMap.size() / 4, 0, GL_RGBA, GL_FLOAT, _colorMap.data());
+    glBindTexture(GL_TEXTURE_1D, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
@@ -638,8 +621,6 @@ int RayCaster::_initializeFramebufferTextures()
     glGenTextures(1, &_volumeTextureId);
     glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
     glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
-
-    /* Configure _volumeTextureId */
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -650,8 +631,6 @@ int RayCaster::_initializeFramebufferTextures()
     glGenTextures(1, &_colorMapTextureId);
     glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
-
-    /* Configure _colorMapTextureId */
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -660,19 +639,21 @@ int RayCaster::_initializeFramebufferTextures()
     glGenTextures(1, &_missingValueTextureId);
     glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
     glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
-
-    /* Configure _missingValueTextureId */
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    /* Generate buffer texture for 2D X-Y and 3D Z coordinates */
-    glGenTextures(1, &_xyCoordsTextureId);
-    glGenTextures(1, &_zCoordsTextureId);
-    glGenBuffers(1, &_xyCoordsBufferId);
-    glGenBuffers(1, &_zCoordsBufferId);
+    /* Generate 3D texture: _vertCoordsTextureId */
+    glGenTextures(1, &_vertCoordsTextureId);
+    glActiveTexture(GL_TEXTURE0 + _vertCoordsTexOffset);
+    glBindTexture(GL_TEXTURE_3D, _vertCoordsTextureId);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     /* Generate and configure depth texture */
     glGenTextures(1, &_depthTextureId);
@@ -691,7 +672,7 @@ int RayCaster::_initializeFramebufferTextures()
     return 0;
 }
 
-void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACell, const glm::mat4 &InversedMV, bool fast)
+void RayCaster::_drawVolumeFaces(int whichPass, int castingMode, bool insideACell, const glm::mat4 &InversedMV, bool fast)
 {
     glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
     glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
@@ -759,7 +740,7 @@ void RayCaster::_drawVolumeFaces(int whichPass, long castingMode, bool insideACe
     glUseProgram(0);
 }
 
-void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversedMV, bool fast) const
+void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedMV, bool fast) const
 {
     ShaderProgram *shader = _3rdPassShader;
 
@@ -768,21 +749,25 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
 
     shader->SetUniform("MV", modelview);
     shader->SetUniform("Projection", projection);
-    shader->SetUniform("transposedInverseMV", glm::transpose(inversedMV));
-
-    const float *cboxMin = _userCoordinates.myGridMin;
-    const float *cboxMax = _userCoordinates.myGridMax;
-    shader->SetUniform("boxMin", (glm::vec3 &)*cboxMin);
-    shader->SetUniform("boxMax", (glm::vec3 &)*cboxMax);
-    shader->SetUniform("colorMapRange", (glm::vec3 &)*_colorMapRange);
-
-    glm::ivec3 volumeDims(int(_userCoordinates.dims[0]), int(_userCoordinates.dims[1]), int(_userCoordinates.dims[2]));
-    shader->SetUniform("volumeDims", volumeDims);
+    shader->SetUniform("inversedMV", inversedMV);
+    shader->SetUniform("colorMapRange", (glm::vec3 &)_colorMapRange[0]);
     shader->SetUniform("viewportDims", glm::ivec2(_currentViewport[2], _currentViewport[3]));
-
+    const size_t *cdims = _userCoordinates.dims;
+    glm::ivec3    volumeDims((int)cdims[0], (int)cdims[1], (int)cdims[2]);
+    shader->SetUniform("volumeDims", volumeDims);
     float planes[24];    // 6 planes, each with 4 elements
     Renderer::GetClippingPlanes(planes);
     shader->SetUniformArray("clipPlanes", 6, (glm::vec4 *)planes);
+
+    glm::vec3 gridMin, gridMax;
+    for (int i = 0; i < 3; i++) {
+        gridMin[i] = _userCoordinates.myGridMin[i];
+        gridMax[i] = _userCoordinates.myGridMax[i];
+    }
+    if (castingMode == FixedStep) {
+        shader->SetUniform("boxMin", gridMin);
+        shader->SetUniform("boxMax", gridMax);
+    }
 
     // Get light settings from params.
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
@@ -798,24 +783,29 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     shader->SetUniformArray("flags", 3, flags);
 
     // Calculate the step size with sample rate multiplier taken into account.
-    float multiplier;
-    switch (params->GetSampleRateMultiplier()) {
-    case 0: multiplier = 1.0f; break;    // These values need to be in sync with
-    case 1: multiplier = 2.0f; break;    //   the multiplier values in the GUI.
-    case 2: multiplier = 4.0f; break;
-    case 3: multiplier = 0.5f; break;
-    case 4: multiplier = 0.25f; break;
-    case 5: multiplier = 0.125f; break;
-    default: multiplier = 1.0f; break;
-    }
-    float span[3] = {cboxMax[0] - cboxMin[0], cboxMax[1] - cboxMin[1], cboxMax[2] - cboxMin[2]};
-    float stepSize1D;
-    if (_userCoordinates.dims[3] < 50)    // Make sure at least 100 steps
-        stepSize1D = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / 100.0f;
-    else
-        stepSize1D = std::sqrt(span[0] * span[0] + span[1] * span[1] + span[2] * span[2]) / float(_userCoordinates.dims[3] * 2);    // Use Nyquist frequency by default
-    stepSize1D /= multiplier;
-    if (fast) stepSize1D *= 8.0;    // Increase step size, thus fewer steps, when fast rendering
+    float stepSize1D, multiplier = 1.0f;
+    if (castingMode == FixedStep) switch (params->GetSampleRateMultiplier()) {
+        case 0: multiplier = 1.0f; break;    // These values need to be in sync with
+        case 1: multiplier = 2.0f; break;    //   the multiplier values in the GUI.
+        case 2: multiplier = 4.0f; break;
+        case 3: multiplier = 0.5f; break;
+        case 4: multiplier = 0.25f; break;
+        case 5: multiplier = 0.125f; break;
+        default: multiplier = 1.0f; break;
+        }
+    glm::vec3 dimsf((float)cdims[0], (float)cdims[1], (float)cdims[2]);
+    float     numCells = glm::length(dimsf);
+    glm::vec4 tmpVec4 = modelview * glm::vec4(gridMin, 1.0);
+    glm::vec3 gridMinEye(tmpVec4.x, tmpVec4.y, tmpVec4.z);
+    tmpVec4 = modelview * glm::vec4(gridMax, 1.0);
+    glm::vec3 gridMaxEye(tmpVec4.x, tmpVec4.y, tmpVec4.z);
+    glm::vec3 diagonal = gridMaxEye - gridMinEye;
+    if (numCells < 50.0f)    // Make sure at least 100 steps
+        stepSize1D = glm::length(diagonal) / 100.0f * multiplier;
+    else    // Use Nyquist frequency
+        stepSize1D = glm::length(diagonal) / (numCells * 2.0f) * multiplier;
+
+    if (fast && castingMode == FixedStep) stepSize1D *= 8.0f;    //  Increase step size, when fast rendering
     shader->SetUniform("stepSize1D", stepSize1D);
 
     // Pass in textures
@@ -840,23 +830,19 @@ void RayCaster::_load3rdPassUniforms(long castingMode, const glm::mat4 &inversed
     shader->SetUniform("missingValueMaskTexture", _missingValueTexOffset);
 
     if (castingMode == CellTraversal) {
-        glActiveTexture(GL_TEXTURE0 + _xyCoordsTexOffset);
-        glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
-        shader->SetUniform("xyCoordsTexture", _xyCoordsTexOffset);
-
-        glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
-        glBindTexture(GL_TEXTURE_BUFFER, _zCoordsTextureId);
-        shader->SetUniform("zCoordsTexture", _zCoordsTexOffset);
+        glActiveTexture(GL_TEXTURE0 + _vertCoordsTexOffset);
+        glBindTexture(GL_TEXTURE_3D, _vertCoordsTextureId);
+        shader->SetUniform("vertCoordsTexture", _vertCoordsTexOffset);
     }
 }
 
-void RayCaster::_3rdPassSpecialHandling(bool fast, long castingMode)
+void RayCaster::_3rdPassSpecialHandling(bool fast, int castingMode)
 {
     // Left empty intentially.
     // Derived classes feel free to put stuff here.
 }
 
-void RayCaster::_renderTriangleStrips(int whichPass, long castingMode) const
+void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const
 {
     /* Give bx, by, bz type of "unsigned int" for indexBuffer */
     unsigned int bx = (unsigned int)_userCoordinates.dims[0];
@@ -1099,7 +1085,7 @@ void RayCaster::_enableVertexAttribute(const float *buf, size_t length, bool att
 double RayCaster::_getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const
 {
 #ifdef WIN32
-    return 1;
+    return 0.0;
 #else
     return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0);
 #endif
@@ -1138,6 +1124,7 @@ void RayCaster::_updateColormap(RayCasterParams *params)
         _colorMapRange[2] = 1e-5f;
     } else {
         params->GetMapperFunc()->makeLut(_colorMap);
+        assert(_colorMap.size() % 4 == 0);
         std::vector<double> range = params->GetMapperFunc()->getMinMaxMapValue();
         _colorMapRange[0] = float(range[0]);
         _colorMapRange[1] = float(range[1]);
@@ -1145,8 +1132,10 @@ void RayCaster::_updateColormap(RayCasterParams *params)
     }
 }
 
-void RayCaster::_updateDataTextures(int castingMode)
+void RayCaster::_updateDataTextures()
 {
+    const size_t *dims = _userCoordinates.dims;
+
     glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
     glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
 #ifdef Darwin
@@ -1158,42 +1147,22 @@ void RayCaster::_updateDataTextures(int castingMode)
     float dummyVolume[8] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume);
 #endif
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED, GL_FLOAT, _userCoordinates.dataField);
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0, GL_RED, GL_FLOAT, _userCoordinates.dataField);
 
     // Now we HAVE TO attach a missing value mask texture, because
     //   Intel driver on Mac doesn't like leaving the texture empty...
-    unsigned char dummyMask[8] = {0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u};
     glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);    // Alignment adjustment. Stupid.
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);    // Alignment adjustment. Stupid OpenGL thing.
     glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
-    if (_userCoordinates.missingValueMask)    // There is missing value.
-        glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, _userCoordinates.missingValueMask);
-    else
+    if (_userCoordinates.missingValueMask) {
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, dims[0], dims[1], dims[2], 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, _userCoordinates.missingValueMask);
+    } else {
+        unsigned char dummyMask[8] = {0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u};
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, 2, 2, 2, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, dummyMask);
+    }
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);    // Restore default alignment.
 
-    // If using cell traverse ray casting, we need to upload user coordinates
-    if (castingMode == CellTraversal) {
-        const size_t *dims = _userCoordinates.dims;
-
-        // Fill data to buffer object _xyCoordsBufferId
-        glBindBuffer(GL_TEXTURE_BUFFER, _xyCoordsBufferId);
-        glBufferData(GL_TEXTURE_BUFFER, 2 * sizeof(float) * dims[0] * dims[1], _userCoordinates.xyCoords, GL_STATIC_READ);
-        // Pass data to the buffer texture
-        glActiveTexture(GL_TEXTURE0 + _xyCoordsTexOffset);
-        glBindTexture(GL_TEXTURE_BUFFER, _xyCoordsTextureId);
-        glTexBuffer(GL_TEXTURE_BUFFER, GL_RG32F, _xyCoordsBufferId);
-
-        // Repeat for the next buffer texture
-        glBindBuffer(GL_TEXTURE_BUFFER, _zCoordsBufferId);
-        glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * dims[0] * dims[1] * dims[2], _userCoordinates.zCoords, GL_STATIC_READ);
-        glActiveTexture(GL_TEXTURE0 + _zCoordsTexOffset);
-        glBindTexture(GL_TEXTURE_BUFFER, _zCoordsTextureId);
-        glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, _zCoordsBufferId);
-
-        glBindBuffer(GL_TEXTURE_BUFFER, 0);
-        glBindTexture(GL_TEXTURE_BUFFER, 0);
-    }
+    glBindTexture(GL_TEXTURE_3D, 0);
 }
 
 void RayCaster::_updateNearClippingPlane()
@@ -1213,4 +1182,43 @@ void RayCaster::_updateNearClippingPlane()
         near[i] /= near[i].w;
         std::memcpy(_userCoordinates.nearCoords + i * 3, glm::value_ptr(near[i]), 3 * sizeof(float));
     }
+}
+
+int RayCaster::_updateVertCoordsTexture(const glm::mat4 &MV)
+{
+    // First, transform every vertex coordinate to the eye space
+    size_t numOfVertices = _userCoordinates.dims[0] * _userCoordinates.dims[1] * _userCoordinates.dims[2];
+    float *coordEye = nullptr;
+    try {
+        coordEye = new float[3 * numOfVertices];
+    } catch (const std::bad_alloc &e) {
+        MyBase::SetErrMsg(e.what());
+        return MEMERROR;
+    }
+
+    const float *vc = _userCoordinates.vertCoords;
+    glm::vec4    posModel(1.0f);
+    for (size_t i = 0; i < numOfVertices; i++) {
+        posModel.x = vc[3 * i];
+        posModel.y = vc[3 * i + 1];
+        posModel.z = vc[3 * i + 2];
+        glm::vec4 posEye = MV * posModel;
+        std::memcpy(coordEye + 3 * i, glm::value_ptr(posEye), 12);    // 3 values, each 4 bytes
+    }
+
+    // Second, send these eye coordinates to the GPU
+    glActiveTexture(GL_TEXTURE0 + _vertCoordsTexOffset);
+    glBindTexture(GL_TEXTURE_3D, _vertCoordsTextureId);
+#ifdef Darwin
+    // Apply a dummy texture
+    float dummyVolume[8] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume);
+#endif
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RGB, GL_FLOAT, coordEye);
+
+    glBindTexture(GL_TEXTURE_3D, 0);
+
+    delete[] coordEye;
+
+    return 0;
 }
