@@ -65,9 +65,6 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
     _3rdPassMode1Shader = nullptr;
     _3rdPassMode2Shader = nullptr;
 
-    _drawBuffers[0] = 0;
-    _drawBuffers[1] = 0;
-
     GLint viewport[4] = {0, 0, 0, 0};
     std::memcpy(_currentViewport, viewport, 4 * sizeof(GLint));
 }
@@ -604,9 +601,8 @@ int RayCaster::_initializeFramebufferTextures()
        and "_frontFaceTextureId" as color attachement #1.  */
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _backFaceTextureId, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, _frontFaceTextureId, 0);
-    _drawBuffers[0] = GL_COLOR_ATTACHMENT0;
-    _drawBuffers[1] = GL_COLOR_ATTACHMENT1;
-    glDrawBuffers(2, _drawBuffers);
+    GLenum drawBuffers[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+    glDrawBuffers(2, drawBuffers);
 
     /* Check if framebuffer is complete */
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
