@@ -369,10 +369,12 @@ RegionParams *Visualizer::getActiveRegionParams() const { return _paramsMgr->Get
 
 AnnotationParams *Visualizer::getActiveAnnotationParams() const { return _paramsMgr->GetAnnotationParams(_winName); }
 
-int Visualizer::_captureImage(const std::string &path)
+int Visualizer::_captureImage(std::string path)
 {
     // Turn off the single capture flag
     _imageCaptureEnabled = false;
+
+    if (FileUtils::Extension(path) == "") path += ".png";
 
     ViewpointParams *vpParams = getActiveViewpointParams();
     size_t           width, height;

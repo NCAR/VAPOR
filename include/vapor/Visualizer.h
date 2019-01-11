@@ -155,7 +155,7 @@ private:
     //! Will turn off the captureEnabled switch.
     //! \param[in] filename
     //! \return zero if successful
-    int _captureImage(const std::string &path);
+    int _captureImage(std::string path);
 
     void _loadMatricesFromViewpointParams();
 
