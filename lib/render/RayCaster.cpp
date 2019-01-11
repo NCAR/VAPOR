@@ -451,16 +451,12 @@ int RayCaster::_paintGL(bool fast)
         return GRIDERROR;
     }
 
-#ifndef NDEBUG
-    // Do NOT try to reload shaders in Release mode due to
-    //   large latencies on parallel filesystems
     if (_load3rdPassShaders() != 0) {
         MyBase::SetErrMsg("Failed to load shaders");
         glBindVertexArray(0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return GLERROR;
     }
-#endif
 
     const MatrixManager *mm = Renderer::_glManager->matrixManager;
 
