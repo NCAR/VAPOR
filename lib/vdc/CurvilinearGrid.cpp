@@ -675,17 +675,37 @@ float CurvilinearGrid::GetValueLinear(const std::vector<double> &coords) const
         return (v0 * zwgt[0] + v1 * zwgt[1]);
 }
 
-void CurvilinearGrid::_GetUserExtents(vector<double> &minext, vector<double> &maxext) const
+void CurvilinearGrid::_GetUserExtents(vector<double> &minu, vector<double> &maxu) const
 {
-    vector<size_t> dims = StructuredGrid::GetDimensions();
+    minu.clear();
+    maxu.clear();
 
-    vector<size_t> min, max;
-    for (int i = 0; i < dims.size(); i++) {
-        min.push_back(0);
-        max.push_back(dims[i] - 1);
+    // Get the horiztonal (X & Y) extents by visiting every point
+    // on a single plane (horizontal coordinates are constant over Z).
+    //
+    float xrange[2], yrange[2];
+    _xrg.GetRange(xrange);
+    _yrg.GetRange(yrange);
+
+    minu.push_back(xrange[0]);
+    minu.push_back(yrange[0]);
+    maxu.push_back(xrange[1]);
+    maxu.push_back(yrange[1]);
+
+    // We're done if 2D grid
+    //
+    if (GetGeometryDim() == 2) return;
+
+    if (_terrainFollowing) {
+        float zrange[2];
+        _zrg.GetRange(zrange);
+
+        minu.push_back(zrange[0]);
+        maxu.push_back(zrange[1]);
+    } else {
+        minu.push_back(_zcoords[0]);
+        maxu.push_back(_zcoords[_zcoords.size() - 1]);
     }
-
-    CurvilinearGrid::GetBoundingBox(min, max, minext, maxext);
 }
 
 bool CurvilinearGrid::_insideGridHelperStretched(double z, size_t &k, double zwgt[2]) const
