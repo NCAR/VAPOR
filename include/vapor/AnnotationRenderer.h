@@ -126,10 +126,17 @@ private:
         const glm::mat4 translateOriginMatrix
     ) const;
 
+    void _getDataMgrCorner(
+        const int cornerNumber,
+        glm::vec4 &dataMgrCorner,
+        const std::vector<double> minDataMgrExtents,
+        const std::vector<double> maxDataMgrExtents
+    ) const;
+
     void _calculateDomainCorners(
         std::vector<double> &domainCorners,
-        const std::vector<double> minExts,
-        const std::vector<double> maxExts,
+        const std::vector<double> dataMgrMinExts,
+        const std::vector<double> dataMgrMaxExts,
         const Transform* transform
     ) const;
 
