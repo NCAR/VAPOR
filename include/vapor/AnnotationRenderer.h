@@ -24,6 +24,7 @@
 #include <vapor/Renderer.h>
 #include <vapor/Transform.h>
 #include <vapor/DataMgrUtils.h>
+#include <vapor/GLManager.h>
 
 namespace VAPoR {
 
@@ -107,6 +108,34 @@ private:
 		double endPosn[],
 		double width,
 		std::vector<double> color);
+
+    void _makeTransformMatrices(
+        const Transform* transform,
+        glm::mat4 &scalingMatrix,
+        glm::mat4 &rotationMatrix,
+        glm::mat4 &translationMatrix,
+        glm::mat4 &translateOriginMatrix
+    ) const;
+
+    void _applyDataMgrCornerToDomain(
+        std::vector<double> &domainCorners,
+        const glm::vec4 dataMgrCorner,
+        const glm::mat4 scalingMatrix,
+        const glm::mat4 rotationMatrix,
+        const glm::mat4 translateMatrix,
+        const glm::mat4 translateOriginMatrix
+    ) const;
+
+    void _calculateDomainCorners(
+        std::vector<double> &domainCorners,
+        const std::vector<double> minExts,
+        const std::vector<double> maxExts,
+        const Transform* transform
+    ) const;
+
+    void drawDomainFrame(
+        const std::vector<double> corners
+    ) const;
 
 //! Render the domain fram
 	void drawDomainFrame(size_t ts) const;

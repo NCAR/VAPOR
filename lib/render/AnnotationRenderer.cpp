@@ -31,11 +31,14 @@
 #include <vapor/DataStatus.h>
 #include <vapor/AnnotationRenderer.h>
 #include <vapor/ResourcePath.h>
-#include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
 #include "vapor/TextLabel.h"
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
+
+#define X 0
+#define Y 1
+#define Z 2
 
 using namespace VAPoR;
 using namespace Wasp;
@@ -69,6 +72,123 @@ AnnotationRenderer::~AnnotationRenderer()
 
 void AnnotationRenderer::InitializeGL(GLManager *glManager) {
     _glManager = glManager;
+}
+
+
+
+
+
+void AnnotationRenderer::drawDomainFrame(
+    std::vector<double> corners
+) const {
+
+	AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
+
+	std::vector<double> minExts = { corners[X], corners[Y], corners[Z] };
+    std::vector<double> maxExts = { corners[X+3], corners[Y+3], corners[Z+3] };
+
+    //cout << "min corners " << corners[X] << " " << corners[Y] << " " << corners[Z] << endl;
+    //cout << "max corners " << corners[3] << " " << corners[4] << " " << corners[5] << endl << endl;
+//	m_dataStatus->GetActiveExtents(
+//		m_paramsMgr, m_winName, ts, minExts, maxExts
+//	);
+
+	int i; 
+	int numLines[3];
+	double fullSize[3], modMin[3],modMax[3];
+
+	//Instead:  either have 2 or 1 lines in each dimension.  2 if the size is < 1/3
+	for (i = 0; i<minExts.size(); i++){
+		double regionSize = maxExts[i]-minExts[i];
+
+		//Stretch size by 1%
+		fullSize[i] = (maxExts[i] - minExts[i])*1.01;
+		double mid = 0.5f*(maxExts[i]+minExts[i]);
+		modMin[i] = mid - 0.5f*fullSize[i];
+		modMax[i] = mid + 0.5f*fullSize[i];
+		if (regionSize < fullSize[i]*.3) numLines[i] = 2;
+		else numLines[i] = 1;
+		
+	}
+	
+	double clr[3];
+	vfParams->GetDomainColor(clr);
+	// glLineWidth(1);
+	//Now draw the lines.  Divide each dimension into numLines[dim] sections.
+
+	int x,y,z;
+	//Do the lines in each z-plane
+	//Turn on writing to the z-buffer
+	glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+	
+    LegacyGL *lgl = _glManager->legacy;
+	lgl->Color3f(clr[0], clr[1], clr[2]);
+    lgl->Begin(GL_LINES);
+	for (z = 0; z<=numLines[2]; z++){
+		float zCrd = modMin[2] + ((float)z/(float)numLines[2])*fullSize[2];
+		//Draw lines in x-direction for each y
+		for (y = 0; y<=numLines[1]; y++){
+			float yCrd = modMin[1] + ((float)y/(float)numLines[1])*fullSize[1];
+			
+			lgl->Vertex3f(  modMin[0],  yCrd, zCrd );
+			lgl->Vertex3f( modMax[0],  yCrd, zCrd );
+		}
+		//Draw lines in y-direction for each x
+		for (x = 0; x<=numLines[0]; x++){
+			float xCrd = modMin[0] + ((float)x/(float)numLines[0])*fullSize[0];
+			
+			lgl->Vertex3f(  xCrd, modMin[1], zCrd );
+			lgl->Vertex3f( xCrd, modMax[1], zCrd );
+		}
+	}
+	//Do the lines in each y-plane
+    
+	for (y = 0; y<=numLines[1]; y++){
+		float yCrd = modMin[1] + ((float)y/(float)numLines[1])*fullSize[1];
+		//Draw lines in x direction for each z
+		for (z = 0; z<=numLines[2]; z++){
+			float zCrd = modMin[2] + ((float)z/(float)numLines[2])*fullSize[2];
+			
+			lgl->Vertex3f(  modMin[0],  yCrd, zCrd );
+			lgl->Vertex3f( modMax[0],  yCrd, zCrd );
+			
+		}
+		//Draw lines in z direction for each x
+		for (x = 0; x<=numLines[0]; x++){
+			float xCrd = modMin[0] + ((float)x/(float)numLines[0])*fullSize[0];
+		
+			lgl->Vertex3f(  xCrd, yCrd, modMin[2] );
+			lgl->Vertex3f( xCrd, yCrd, modMax[2]);
+			
+		}
+	}
+	
+	//Do the lines in each x-plane
+	for (x = 0; x<=numLines[0]; x++){
+		float xCrd = modMin[0] + ((float)x/(float)numLines[0])*fullSize[0];
+		//Draw lines in y direction for each z
+		for (z = 0; z<=numLines[2]; z++){
+			float zCrd = modMin[2] + ((float)z/(float)numLines[2])*fullSize[2];
+			
+			lgl->Vertex3f(  xCrd, modMin[1], zCrd );
+			lgl->Vertex3f( xCrd, modMax[1], zCrd );
+			
+		}
+		//Draw lines in z direction for each y
+		//Draw lines in z direction for each y
+		for (y = 0; y<=numLines[1]; y++){
+			float yCrd = modMin[1] + ((float)y/(float)numLines[1])*fullSize[1];
+			
+			lgl->Vertex3f(  xCrd, yCrd, modMin[2] );
+			lgl->Vertex3f( xCrd, yCrd, modMax[2]);
+			
+		}
+	}
+    lgl->End();
+    
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
 }
 
 //Issue OpenGL commands to draw a grid of lines of the full domain.
@@ -278,6 +398,159 @@ void AnnotationRenderer::applyTransform(Transform *t) {
 	_glManager->matrixManager->Translate(translate[0], translate[1], translate[2]);
 }
 
+void AnnotationRenderer::_makeTransformMatrices(
+    const Transform* transform,
+    glm::mat4 &scalingMatrix,
+    glm::mat4 &rotationMatrix,
+    glm::mat4 &translationMatrix,
+    glm::mat4 &translateOriginMatrix
+) const {
+	vector<double>  scales       = transform->GetScales();
+	vector<double>  origins      = transform->GetOrigin();
+	vector <double> translations = transform->GetTranslations();
+	vector <double> rotations    = transform->GetRotations();
+
+    scalingMatrix = glm::scale(
+        glm::mat4(1.0f),
+        glm::vec3(
+            scales[X], 
+            scales[Y], 
+            scales[Z]
+        )
+    );
+
+    rotationMatrix = glm::mat4(1.0f);
+    /*rotationMatrix = glm::rotate(
+        rotationMatrix,
+        rotations[X],
+        glm::vec3(1.f, 0.f, 0.f)
+    );
+    rotationMatrix = glm::rotate(
+        rotationMatrix,
+        rotations[Y],
+        glm::vec3(0.f, 1.f, 0.f)
+    );
+    rotationMatrix = glm::rotate(
+        rotationMatrix,
+        rotations[Z],
+        glm::vec3(0.f, 0.f, 1.f)
+    );*/
+
+    translationMatrix = glm::translate(
+        glm::mat4(1.f),
+        glm::vec3(
+            translations[X],
+            translations[Y],
+            translations[Z]
+        )
+    );
+
+    translateOriginMatrix = glm::translate(
+        glm::mat4(1.f),
+        glm::vec3(
+            origins[X],
+            origins[Y],
+            origins[Z]
+        )
+    );
+}
+
+void AnnotationRenderer::_applyDataMgrCornerToDomain(
+    std::vector<double> &domainCorners,
+    const glm::vec4 dataMgrCorner,
+    const glm::mat4 scalingMatrix,
+    const glm::mat4 rotationMatrix,
+    const glm::mat4 translationMatrix,
+    const glm::mat4 translateOriginMatrix
+) const {
+    // transform our corner
+    glm::vec4 transformedCorner;
+    transformedCorner = glm::inverse(translateOriginMatrix) * dataMgrCorner;
+    transformedCorner = scalingMatrix * transformedCorner;
+    transformedCorner = rotationMatrix * transformedCorner;
+    transformedCorner = translationMatrix * transformedCorner;
+    transformedCorner = translateOriginMatrix * transformedCorner;
+  
+    for (int i=0; i<6; i++) {
+        int transformedCornerIndex = i%3;
+        // use this corner to define all domain corners that are uninitialized
+        if ( isnan(domainCorners[i]) )
+            domainCorners[i] = transformedCorner[ transformedCornerIndex ];
+        // otherwise see if the corner exceeds our currently defined domain minima
+        else if ( i<3 ){
+            //cout << endl << transformedCorner[transformedCornerIndex] << " " << domainCorners[i];
+            if (transformedCorner[transformedCornerIndex] < domainCorners[i]) {
+                //cout << " A" << endl;
+                domainCorners[i] = transformedCorner[transformedCornerIndex];
+            }
+        }
+        // otherwise see if the corner exceeds our currently defined domain maxima
+        else {
+            if (transformedCorner[transformedCornerIndex] > domainCorners[i]) {
+                //cout << " B" << endl;
+                domainCorners[i] = transformedCorner[transformedCornerIndex];
+            }
+        }
+    }
+}
+
+void AnnotationRenderer::_calculateDomainCorners(
+    std::vector<double> &domainCorners,
+    const std::vector<double> minExts,
+    const std::vector<double> maxExts,
+    const Transform* transform
+) const {
+
+    glm::mat4 scalingMatrix;
+    glm::mat4 rotationMatrix;
+    glm::mat4 translationMatrix;
+    glm::mat4 translateOriginMatrix;
+    _makeTransformMatrices(
+        transform,
+        scalingMatrix,
+        rotationMatrix,
+        translationMatrix,
+        translateOriginMatrix
+    );
+
+    cout << "before min" << domainCorners[0] << " " << domainCorners[1] << " " << domainCorners[2] << endl;
+    cout << "before max" << domainCorners[3] << " " << domainCorners[4] << " " << domainCorners[5] << endl;
+
+    glm::vec4 dataMgrCorner(
+        minExts[X],
+        minExts[Y],
+        minExts[Z],
+        1.f         // w
+    );
+
+    _applyDataMgrCornerToDomain(
+        domainCorners,
+        dataMgrCorner,
+        scalingMatrix,
+        rotationMatrix,
+        translationMatrix,
+        translateOriginMatrix
+    );
+
+    dataMgrCorner = glm::vec4(
+        maxExts[X],
+        maxExts[Y],
+        maxExts[Z],
+        1.f         // w
+    );
+    
+    _applyDataMgrCornerToDomain(
+        domainCorners,
+        dataMgrCorner,
+        scalingMatrix,
+        rotationMatrix,
+        translationMatrix,
+        translateOriginMatrix
+    );
+    cout << "after min" << domainCorners[0] << " " << domainCorners[1] << " " << domainCorners[2] << endl;
+    cout << "after max" << domainCorners[3] << " " << domainCorners[4] << " " << domainCorners[5] << endl << endl;
+}
+
 void AnnotationRenderer::InScenePaint(size_t ts)
 {
 	AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
@@ -285,41 +558,78 @@ void AnnotationRenderer::InScenePaint(size_t ts)
 
     _currentTimestep = ts;
 
-	mm->MatrixModeModelView();
-	mm->PushMatrix();
-	
 	ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
 
+    std::vector<double> domainCorners(6, NAN);
 	vector<string> names = m_paramsMgr->GetDataMgrNames();
-	Transform *t = vpParams->GetTransform(names[0]);
-	applyTransform(t);
+    for (int i=0; i<names.size(); i++ ) {
+        vector <double> dataMgrMinExts, dataMgrMaxExts;
+        m_dataStatus->GetActiveExtents(
+            m_paramsMgr, 
+            m_winName, 
+            ts, 
+            dataMgrMinExts, 
+            dataMgrMaxExts
+        );
+        
+        Transform* transform = vpParams->GetTransform(names[i]);
 
-	double mvMatrix[16];
-    mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
-	vpParams->SetModelViewMatrix(mvMatrix);
+        _calculateDomainCorners(
+            domainCorners,
+            dataMgrMinExts,
+            dataMgrMaxExts,
+            transform
+        );
 
-	if (vfParams->GetUseDomainFrame()) drawDomainFrame(ts);
+        mm->MatrixModeModelView();
+        mm->PushMatrix();
+        if (vfParams->GetUseDomainFrame()) drawDomainFrame(domainCorners);
+        mm->MatrixModeModelView();
+        mm->PopMatrix();
 
-	if (vfParams->GetShowAxisArrows()) {
+        return;
 
-		vector <double> minExts, maxExts;
-		m_dataStatus->GetActiveExtents(
-			m_paramsMgr, m_winName, ts, minExts, maxExts
-		);
-		drawAxisArrows(minExts, maxExts);
-	}
 
-	AxisAnnotation* aa = vfParams->GetAxisAnnotation();
-	if (aa->GetAxisAnnotationEnabled()) 
-		drawAxisTics(aa);
-    
-	mm->MatrixModeModelView();
-	mm->PopMatrix();
-	
-    mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
-	vpParams->SetModelViewMatrix(mvMatrix);
-    
-	CheckGLErrorMsg(m_winName.c_str());
+
+        mm->MatrixModeModelView();
+        mm->PushMatrix();
+        
+        Transform *t = vpParams->GetTransform(names[i]);
+        applyTransform(t);
+
+    //	ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
+
+    //	vector<string> names = m_paramsMgr->GetDataMgrNames();
+    //	Transform *t = vpParams->GetTransform(names[0]);
+    //	applyTransform(t);
+
+        double mvMatrix[16];
+        mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
+        vpParams->SetModelViewMatrix(mvMatrix);
+
+        if (vfParams->GetUseDomainFrame()) drawDomainFrame(ts);
+
+        if (vfParams->GetShowAxisArrows()) {
+
+            vector <double> minExts, maxExts;
+            m_dataStatus->GetActiveExtents(
+                m_paramsMgr, m_winName, ts, minExts, maxExts
+            );
+            drawAxisArrows(minExts, maxExts);
+        }
+
+        AxisAnnotation* aa = vfParams->GetAxisAnnotation();
+        if (aa->GetAxisAnnotationEnabled()) 
+            drawAxisTics(aa);
+        
+        mm->MatrixModeModelView();
+        mm->PopMatrix();
+        
+        mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
+        vpParams->SetModelViewMatrix(mvMatrix);
+        
+        CheckGLErrorMsg(m_winName.c_str());
+    }
 }
 
 void AnnotationRenderer::scaleNormalizedCoordinatesToWorld(
