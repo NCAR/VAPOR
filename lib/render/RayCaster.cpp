@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #define OUTOFDATE    1
+#define GLNOTREADY   2
 #define GRIDERROR   -1
 #define JUSTERROR   -2
 #define PARAMSERROR -3
@@ -83,8 +84,8 @@ RayCaster::RayCaster( const ParamsMgr*    pm,
     _3rdPassMode1Shader          = nullptr;
     _3rdPassMode2Shader          = nullptr;
 
-    GLint viewport[4]            = {0, 0, 0, 0};
-    std::memcpy( _currentViewport, viewport, 4 * sizeof(GLint) );
+    for( int i = 0; i < 4; i++ )
+        _currentViewport[i] = 0;
 }
 
 // Destructor
@@ -508,9 +509,14 @@ int RayCaster::_initializeGL()
     GLint viewport[4];
     glGetIntegerv( GL_VIEWPORT, viewport );
     std::memcpy( _currentViewport, viewport, 4 * sizeof(GLint) );
+    //
     // Retrieved viewport may contain zero width and height sometimes. 
-    //   Need to make these dimensions positive during initialization.
-    //   paintGL() will have another chance to set the correct dimensions.
+    //   Need to make these dimensions positive, so the initialization routine,
+    //   including the step of attaching textures to framebuffers, could complete.
+    //   Later, paintGL() will have another chance to set the correct dimensions.
+    //   The bottom line is, the rest of the class can safely assume that 
+    //   _currentViewport[4] always contains non-zero dimensions.
+    //
     for( int i = 2; i < 4; i++ )
         if( _currentViewport[i] < 1 )
             _currentViewport[i] = 8;
@@ -527,6 +533,13 @@ int RayCaster::_initializeGL()
 
 int RayCaster::_paintGL( bool fast ) 
 {
+    GLint viewport[4];
+    glGetIntegerv( GL_VIEWPORT, viewport );
+    // When viewport has zero dimensions, bail immediately.
+    if( viewport[2] < 1 || viewport[3] < 1 )
+        return 0;
+    _updateViewportWhenNecessary( viewport );
+
     // Collect params and grid that will be used repeatedly
     RayCasterParams* params = dynamic_cast<RayCasterParams*>( GetActiveParams() );
     if( !params )
@@ -559,10 +572,8 @@ int RayCaster::_paintGL( bool fast )
     }
 
     const MatrixManager* mm = Renderer::_glManager->matrixManager;
-
-    _updateViewportWhenNecessary();
     glDisable( GL_POLYGON_SMOOTH );
-    
+
     // Collect existing depth value of the scene
     glBindTexture(GL_TEXTURE_2D, _depthTextureId);
     glCopyTexImage2D(GL_TEXTURE_2D,   0, GL_DEPTH_COMPONENT32, _currentViewport[0], 
@@ -1266,18 +1277,13 @@ double RayCaster::_getElapsedSeconds( const struct timeval* begin,
 #endif
 }
 
-void RayCaster::_updateViewportWhenNecessary()
+void RayCaster::_updateViewportWhenNecessary( const GLint* viewport )
 {
-    GLint newViewport[4];
-    glGetIntegerv( GL_VIEWPORT, newViewport );
-    // newViewport contains zero width and height sometimes. 
-    //   Need to filter out those instances.
-    if( (std::memcmp( newViewport, _currentViewport, 4 * sizeof(GLint)) != 0) && 
-        (newViewport[2] > 0) && (newViewport[3] > 0) )
+    if( (std::memcmp( viewport, _currentViewport, 4 * sizeof(GLint)) != 0) )
     {
-        std::memcpy( _currentViewport, newViewport, 4 * sizeof(GLint) );
+        std::memcpy( _currentViewport, viewport, 4 * sizeof(GLint) );
 
-        // Re-size 2D textures
+        // Re-size 1st and 2nd pass rendering 2D textures
         glActiveTexture( GL_TEXTURE0 + _backFaceTexOffset );
         glBindTexture(GL_TEXTURE_2D,   _backFaceTextureId); 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
@@ -1287,6 +1293,8 @@ void RayCaster::_updateViewportWhenNecessary()
         glBindTexture(GL_TEXTURE_2D,   _frontFaceTextureId); 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
                      0, GL_RGBA, GL_FLOAT, nullptr);
+
+        glBindTexture( GL_TEXTURE_2D, 0 );
     }
 }
     
