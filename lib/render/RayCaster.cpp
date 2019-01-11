@@ -111,7 +111,7 @@ RayCaster::~RayCaster()
         _depthTextureId = 0;
     }
 
-    // delete vertex arrays
+    // Delete vertex arrays
     if (_vertexArrayId) {
         glDeleteVertexArrays(1, &_vertexArrayId);
         _vertexArrayId = 0;
@@ -419,8 +419,9 @@ int RayCaster::_initializeGL()
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     std::memcpy(_currentViewport, viewport, 4 * sizeof(GLint));
-    // newViewport contains zero width and height sometimes.
-    //   Need to filter out those instances.
+    // Retrieved viewport may contain zero width and height sometimes.
+    //   Need to make these dimensions positive during initialization.
+    //   paintGL() will have another chance to set the correct dimensions.
     for (int i = 2; i < 4; i++)
         if (_currentViewport[i] < 1) _currentViewport[i] = 8;
 
