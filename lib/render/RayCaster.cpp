@@ -13,30 +13,28 @@
 
 using namespace VAPoR;
 
-/*
 GLenum glCheckError_(const char *file, int line)
 {
     GLenum errorCode;
-    while ((errorCode = glGetError()) != GL_NO_ERROR)
-    {
+    while ((errorCode = glGetError()) != GL_NO_ERROR) {
         std::string error;
-        switch (errorCode)
-        {
-            case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
-            case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
-            case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
-            case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
-            case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
-            case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
-            case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
+        switch (errorCode) {
+        case GL_INVALID_ENUM: error = "INVALID_ENUM"; break;
+        case GL_INVALID_VALUE: error = "INVALID_VALUE"; break;
+        case GL_INVALID_OPERATION: error = "INVALID_OPERATION"; break;
+        case GL_STACK_OVERFLOW: error = "STACK_OVERFLOW"; break;
+        case GL_STACK_UNDERFLOW: error = "STACK_UNDERFLOW"; break;
+        case GL_OUT_OF_MEMORY: error = "OUT_OF_MEMORY"; break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
         }
         std::cout << error << " | " << file << " (" << line << ")" << std::endl;
     }
     return errorCode;
 }
 #define glCheckError() glCheckError_(__FILE__, __LINE__)
+/*
+void glCheckError() { }
 */
-void glCheckError() {}
 
 // Constructor
 RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string paramsType, std::string classType, std::string &instName, DataMgr *dataMgr)
@@ -76,6 +74,12 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
 // Destructor
 RayCaster::~RayCaster()
 {
+    // delete framebuffers
+    if (_frameBufferId) {
+        glDeleteFramebuffers(1, &_frameBufferId);
+        _frameBufferId = 0;
+    }
+
     // delete textures
     if (_backFaceTextureId) {
         glDeleteTextures(1, &_backFaceTextureId);
@@ -108,12 +112,6 @@ RayCaster::~RayCaster()
     if (_depthTextureId) {
         glDeleteTextures(1, &_depthTextureId);
         _depthTextureId = 0;
-    }
-
-    // delete buffers
-    if (_frameBufferId) {
-        glDeleteFramebuffers(1, &_frameBufferId);
-        _frameBufferId = 0;
     }
 
     // delete vertex arrays
@@ -584,10 +582,6 @@ int RayCaster::_initializeFramebufferTextures()
     glGenBuffers(1, &_indexBufferId);
     glGenBuffers(1, &_vertexAttribId);
 
-    /* Create an Frame Buffer Object for the back side of the volume. */
-    glGenFramebuffers(1, &_frameBufferId);
-    glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
-
     /* Generate back-facing texture */
     glGenTextures(1, &_backFaceTextureId);
     glActiveTexture(GL_TEXTURE0 + _backFaceTexOffset);
@@ -612,8 +606,12 @@ int RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    /* Set "_backFaceTextureId" as colour attachement #0,
-       and "_frontFaceTextureId" as attachement #1       */
+    /* Create an Frame Buffer Object for the front and back side of the volume. */
+    glGenFramebuffers(1, &_frameBufferId);
+    glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
+
+    /* Set "_backFaceTextureId"  as color attachement #0,
+       and "_frontFaceTextureId" as color attachement #1.  */
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _backFaceTextureId, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, _frontFaceTextureId, 0);
     _drawBuffers[0] = GL_COLOR_ATTACHMENT0;
