@@ -143,8 +143,6 @@ class RENDER_API RayCaster : public Renderer {
 
     // buffers and vertex arrays
     GLuint _frameBufferId;
-    GLenum _drawBuffers[2]; // Draw buffers for the 1st and 2nd pass
-
     GLuint _vertexArrayId;
     GLuint _vertexBufferId;    // Keeps user coordinates of 6 faces.
     GLuint _indexBufferId;     // Auxiliary indices for efficiently drawing triangle strips.
