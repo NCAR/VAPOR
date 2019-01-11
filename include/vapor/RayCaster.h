@@ -160,7 +160,7 @@ protected:
     //
     int _initializeFramebufferTextures();
 
-    void _updateViewportWhenNecessary();
+    void _updateViewportWhenNecessary(const GLint *viewport);
     void _updateColormap(RayCasterParams *params);
     void _updateDataTextures();
     int  _updateVertCoordsTexture(const glm::mat4 &MV);
