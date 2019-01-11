@@ -553,6 +553,7 @@ void AnnotationRenderer::_calculateDomainCorners(
 
 void AnnotationRenderer::InScenePaint(size_t ts)
 {
+    return;
 	AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
     MatrixManager *mm = _glManager->matrixManager;
 
@@ -583,15 +584,23 @@ void AnnotationRenderer::InScenePaint(size_t ts)
 
         mm->MatrixModeModelView();
         mm->PushMatrix();
+        double mvMatrix[16];
+        mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
+        vpParams->SetModelViewMatrix(mvMatrix);
+       
         if (vfParams->GetUseDomainFrame()) drawDomainFrame(domainCorners);
+       
         mm->MatrixModeModelView();
         mm->PopMatrix();
+        mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
+        vpParams->SetModelViewMatrix(mvMatrix);
+        CheckGLErrorMsg(m_winName.c_str());
 
         return;
 
 
 
-        mm->MatrixModeModelView();
+/*        mm->MatrixModeModelView();
         mm->PushMatrix();
         
         Transform *t = vpParams->GetTransform(names[i]);
@@ -629,6 +638,7 @@ void AnnotationRenderer::InScenePaint(size_t ts)
         vpParams->SetModelViewMatrix(mvMatrix);
         
         CheckGLErrorMsg(m_winName.c_str());
+*/
     }
 }
 
