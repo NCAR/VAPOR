@@ -1816,10 +1816,22 @@ void MainForm::captureSingleJpeg()
     string          imageDir = sP->GetImageDir();
     if (imageDir == "") imageDir = sP->GetDefaultImageDir();
 
-    QFileDialog fileDialog(this, "Specify single image capture file name", imageDir.c_str(),
-                           "PNG (*.png)\n"
-                           "JPG (*.jpg *.jpeg)\n"
-                           "TIFF (*.tif *.tiff)");
+    string           fileDialogOptions;
+    ViewpointParams *VPP = _paramsMgr->GetViewpointParams(GetStateParams()->GetActiveVizName());
+    if (VPP->GetProjectionType() == ViewpointParams::MapOrthographic) {
+        fileDialogOptions = ""
+                            "TIFF (*.tif *.tiff)\n"
+                            "PNG (*.png)\n"
+                            "JPG (*.jpg *.jpeg)";
+    } else {
+        fileDialogOptions = ""
+                            "PNG (*.png)\n"
+                            "JPG (*.jpg *.jpeg)\n"
+                            "TIFF (*.tif *.tiff)";
+    }
+
+    QFileDialog fileDialog(this, "Specify single image capture file name", imageDir.c_str(), QString::fromStdString(fileDialogOptions));
+
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     fileDialog.move(pos());
     fileDialog.resize(450, 450);
