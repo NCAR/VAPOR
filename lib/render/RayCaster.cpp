@@ -1433,7 +1433,7 @@ int RayCaster::_updateVertCoordsTexture( const glm::mat4& MV )
 #endif
     glTexImage3D( GL_TEXTURE_3D, 0, GL_RGB32F, _userCoordinates.dims[0], 
                   _userCoordinates.dims[1],    _userCoordinates.dims[2],
-                  0, GL_RGB, GL_FLOAT, coordEye                       );
+                  0, GL_RGB, GL_FLOAT,         coordEye               );
 
     glBindTexture( GL_TEXTURE_3D, 0 );
     
