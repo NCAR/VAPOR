@@ -483,6 +483,8 @@ int RayCaster::_paintGL(bool fast) {
         return 0;
     _updateViewportWhenNecessary(viewport);
 
+    glDisable(GL_POLYGON_SMOOTH);
+
     // Collect params and grid that will be used repeatedly
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
     if (!params) {
@@ -502,19 +504,9 @@ int RayCaster::_paintGL(bool fast) {
 
     if (_load3rdPassShaders() != 0) {
         MyBase::SetErrMsg("Failed to load shaders");
+        delete grid;
         return GLERROR;
     }
-
-    const MatrixManager *mm = Renderer::_glManager->matrixManager;
-    glDisable(GL_POLYGON_SMOOTH);
-
-    // Collect existing depth value of the scene
-    glBindTexture(GL_TEXTURE_2D, _depthTextureId);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, _currentViewport[0],
-                     _currentViewport[1], _currentViewport[2], _currentViewport[3], 0);
-
-    glBindVertexArray(_vertexArrayId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
 
     // Use the correct shader for 3rd pass rendering
     if (castingMode == FixedStep)
@@ -523,8 +515,6 @@ int RayCaster::_paintGL(bool fast) {
         _3rdPassShader = _3rdPassMode2Shader;
     else {
         MyBase::SetErrMsg("RayCasting Mode not supported!");
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         delete grid;
         return JUSTERROR;
     }
@@ -534,8 +524,6 @@ int RayCaster::_paintGL(bool fast) {
         int success = _userCoordinates.UpdateFaceAndData(params, grid, _dataMgr);
         if (success != 0) {
             MyBase::SetErrMsg("Error occured during updating face and volume data!");
-            glBindVertexArray(0);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
             delete grid;
             return JUSTERROR;
         }
@@ -543,8 +531,6 @@ int RayCaster::_paintGL(bool fast) {
         if (castingMode == CellTraversal &&
             _userCoordinates.UpdateCurviCoords(params, grid, _dataMgr) != 0) {
             MyBase::SetErrMsg("Error occured during updating curvilinear coordinates!");
-            glBindVertexArray(0);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
             delete grid;
             return JUSTERROR;
         }
@@ -553,16 +539,23 @@ int RayCaster::_paintGL(bool fast) {
         _updateDataTextures();
     }
 
+    const MatrixManager *mm = Renderer::_glManager->matrixManager;
     glm::mat4 ModelView = mm->GetModelViewMatrix();
     if (castingMode == CellTraversal) {
         if (_updateVertCoordsTexture(ModelView) != 0) {
             MyBase::SetErrMsg("Error occured during calculating eye coordinates!");
-            glBindVertexArray(0);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
             delete grid;
             return MEMERROR;
         }
     }
+
+    // Collect existing depth value of the scene
+    glBindTexture(GL_TEXTURE_2D, _depthTextureId);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, _currentViewport[0],
+                     _currentViewport[1], _currentViewport[2], _currentViewport[3], 0);
+
+    glBindVertexArray(_vertexArrayId);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
 
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
@@ -599,7 +592,8 @@ int RayCaster::_paintGL(bool fast) {
     // 3rd pass, perform ray casting
     _drawVolumeFaces(3, castingMode, insideACell, InversedMV, fast);
 
-    // Restore default VAO settings!
+    // Restore OpenGL values changed in this function.
+    glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glDepthFunc(GL_LESS);
