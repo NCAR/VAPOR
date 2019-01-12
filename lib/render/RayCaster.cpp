@@ -786,7 +786,7 @@ void RayCaster::_load3rdPassUniforms(int castingMode, bool fast, bool insideVolu
 {
     ShaderProgram *shader = _3rdPassShader;
 
-    shader->SetUniform("colorMapRange", (glm::vec3 &)_colorMapRange[0]);
+    shader->SetUniform("colorMapRange", glm::make_vec3(_colorMapRange));
     shader->SetUniform("viewportDims", glm::ivec2(_currentViewport[2], _currentViewport[3]));
     const size_t *cdims = _userCoordinates.dims;
     glm::ivec3    volumeDims((int)cdims[0], (int)cdims[1], (int)cdims[2]);
@@ -1212,14 +1212,12 @@ int RayCaster::_updateVertCoordsTexture(const glm::mat4 &MV)
         return MEMERROR;
     }
 
-    const float *vc = _userCoordinates.vertCoords;
-    glm::vec4    posModel(1.0f);
+    glm::vec4 posModel(1.0f);
+    float *   posModelPtr = glm::value_ptr(posModel);
     for (size_t i = 0; i < numOfVertices; i++) {
-        posModel.x = vc[3 * i];
-        posModel.y = vc[3 * i + 1];
-        posModel.z = vc[3 * i + 2];
+        std::memcpy(posModelPtr, _userCoordinates.vertCoords + 3 * i, 12);
         glm::vec4 posEye = MV * posModel;
-        std::memcpy(coordEye + 3 * i, glm::value_ptr(posEye), 12);    // 3 values, each 4 bytes
+        std::memcpy(coordEye + 3 * i, glm::value_ptr(posEye), 12);
     }
 
     // Second, send these eye coordinates to the GPU
