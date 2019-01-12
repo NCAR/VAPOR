@@ -520,7 +520,7 @@ int RayCaster::_paintGL(bool fast)
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
     // 1st pass: render back facing polygons to texture0 of the framebuffer
-    std::vector<size_t> cameraCellIdx(0);    // size 0 means not inside of the volume
+    std::vector<size_t> cameraCellIdx(0);
     _drawVolumeFaces(1, castingMode, cameraCellIdx);
 
     // Detect if we're inside the volume
@@ -530,7 +530,7 @@ int RayCaster::_paintGL(bool fast)
     cameraUser[1] = InversedMV[3][1];
     cameraUser[2] = InversedMV[3][2];
     bool insideACell = grid->GetIndicesCell(cameraUser, cameraCellIdx);
-    if (!insideACell) cameraCellIdx.clear();
+    if (!insideACell) cameraCellIdx.clear();    // Make sure size 0 to indicate outside of the volume
 
     // 2nd pass, render front facing polygons
     _drawVolumeFaces(2, castingMode, cameraCellIdx);
