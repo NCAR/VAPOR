@@ -150,7 +150,7 @@ protected:
 
     void _drawVolumeFaces(int whichPass, int whichCastingMode, bool insideACell = false, const glm::mat4 &inversedMV = glm::mat4(0.0f), bool fast = false);
 
-    void _load3rdPassUniforms(int castingMode, const glm::mat4 &inversedMV, bool fast) const;
+    void _load3rdPassUniforms(int castingMode, bool fast) const;
 
     virtual void _3rdPassSpecialHandling(bool fast, int castingMode);
 
