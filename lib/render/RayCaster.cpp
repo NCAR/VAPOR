@@ -520,20 +520,20 @@ int RayCaster::_paintGL(bool fast)
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
     // 1st pass: render back facing polygons to texture0 of the framebuffer
-    _drawVolumeFaces(1, castingMode, false);
+    std::vector<size_t> cameraCellIdx(0);    // size 0 means not inside of the volume
+    _drawVolumeFaces(1, castingMode, cameraCellIdx);
 
     // Detect if we're inside the volume
     glm::mat4           InversedMV = glm::inverse(ModelView);
-    std::vector<double> cameraUser(4, 1.0);    // camera position in user coordinates
+    std::vector<double> cameraUser(4, 1.0);    // current camera position in user coordinates
     cameraUser[0] = InversedMV[3][0];
     cameraUser[1] = InversedMV[3][1];
     cameraUser[2] = InversedMV[3][2];
-    std::vector<size_t> cameraCellIndices;    // camera position in which cell?
-    bool                insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
-    if (insideACell) { _updateNearClippingPlane(); }
+    bool insideACell = grid->GetIndicesCell(cameraUser, cameraCellIdx);
+    if (!insideACell) cameraCellIdx.clear();
 
     // 2nd pass, render front facing polygons
-    _drawVolumeFaces(2, castingMode, insideACell);
+    _drawVolumeFaces(2, castingMode, cameraCellIdx);
 
     // Update color map texture
     _updateColormap(params);
@@ -545,7 +545,7 @@ int RayCaster::_paintGL(bool fast)
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
     // 3rd pass, perform ray casting
-    _drawVolumeFaces(3, castingMode, insideACell, InversedMV, fast);
+    _drawVolumeFaces(3, castingMode, cameraCellIdx, InversedMV, fast);
 
     // Restore OpenGL values changed in this function.
     glBindTexture(GL_TEXTURE_1D, 0);
@@ -667,8 +667,13 @@ int RayCaster::_initializeFramebufferTextures()
     return 0;
 }
 
-void RayCaster::_drawVolumeFaces(int whichPass, int castingMode, bool insideACell, const glm::mat4 &InversedMV, bool fast)
+void RayCaster::_drawVolumeFaces(int whichPass, int castingMode,
+                                 // bool             insideACell,
+                                 const std::vector<size_t> &cameraCellIdx, const glm::mat4 &InversedMV, bool fast)
 {
+    assert(cameraCellIdx.size() == 0 || cameraCellIdx.size() == 3);
+    bool insideVolume = (cameraCellIdx.size() == 3);
+
     glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
     glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
@@ -686,6 +691,9 @@ void RayCaster::_drawVolumeFaces(int whichPass, int castingMode, bool insideACel
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 0, black);    // clear GL_COLOR_ATTACHMENT0
         glDisable(GL_BLEND);
+
+        // Render the back side of the volume.
+        _renderTriangleStrips(1, castingMode);
     } else if (whichPass == 2) {
         _2ndPassShader->Bind();
         _2ndPassShader->SetUniform("MV", modelview);
@@ -700,11 +708,26 @@ void RayCaster::_drawVolumeFaces(int whichPass, int castingMode, bool insideACel
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 1, black);    // clear GL_COLOR_ATTACHMENT1
         glDisable(GL_BLEND);
+
+        // Render the front side of the volume if not inside it.
+        // Do nothing if inside the volume.
+        if (!insideVolume) _renderTriangleStrips(2, castingMode);
     } else    // 3rd pass
     {
         _3rdPassShader->Bind();
+        _3rdPassShader->SetUniform("MV", modelview);
+        _3rdPassShader->SetUniform("Projection", projection);
         _3rdPassShader->SetUniform("inversedMV", InversedMV);
-        _load3rdPassUniforms(castingMode, fast);
+        if (castingMode == CellTraversal) {
+            glm::ivec3 entryCellIdx(-1);
+            if (insideVolume) {
+                entryCellIdx.x = int(cameraCellIdx[0]);
+                entryCellIdx.y = int(cameraCellIdx[1]);
+                entryCellIdx.z = int(cameraCellIdx[2]);
+            }
+            _3rdPassShader->SetUniform("entryCellIdx", entryCellIdx);
+        }
+        _load3rdPassUniforms(castingMode, fast, insideVolume);
         _3rdPassSpecialHandling(fast, castingMode);
 
         glEnable(GL_CULL_FACE);
@@ -712,39 +735,58 @@ void RayCaster::_drawVolumeFaces(int whichPass, int castingMode, bool insideACel
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
 
+        // When DVR is rendered the last, it blends with previous rendering.
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // Renders the near clipping plane if inside the volume.
+        //   Otherwise, render the front side of the volume.
+        if (insideVolume) {
+            // Transform the near clipping plane to model coordinate
+            //             0---------2
+            //              |       |
+            //              |       |
+            //              |       |
+            //             1|_______|3
+            GLfloat   nearCoords[12];
+            glm::mat4 MVP = _glManager->matrixManager->GetModelViewProjectionMatrix();
+            glm::mat4 InversedMVP = glm::inverse(MVP);
+            glm::vec4 topLeftNDC(-1.0f, 1.0f, -0.9999f, 1.0f);
+            glm::vec4 bottomLeftNDC(-1.0f, -1.0f, -0.9999f, 1.0f);
+            glm::vec4 topRightNDC(1.0f, 1.0f, -0.9999f, 1.0f);
+            glm::vec4 bottomRightNDC(1.0f, -1.0f, -0.9999f, 1.0f);
+            glm::vec4 near[4];
+            near[0] = InversedMVP * topLeftNDC;
+            near[1] = InversedMVP * bottomLeftNDC;
+            near[2] = InversedMVP * topRightNDC;
+            near[3] = InversedMVP * bottomRightNDC;
+            for (int i = 0; i < 4; i++) {
+                near[i] /= near[i].w;
+                std::memcpy(nearCoords + i * 3, glm::value_ptr(near[i]), 3 * sizeof(GLfloat));
+            }
+
+            glEnableVertexAttribArray(0);    // attribute 0 is vertex coordinates
+            glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
+            glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), nearCoords, GL_STREAM_DRAW);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glDisableVertexAttribArray(0);
+        } else {
+            _renderTriangleStrips(3, castingMode);
+        }
     }
 
-    if (insideACell)    // Only enters this section when 2nd pass
-    {
-        glEnableVertexAttribArray(0);    // attribute 0 is vertex coordinates
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
-        glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), _userCoordinates.nearCoords, GL_STREAM_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glDisableVertexAttribArray(0);
-    } else    // could be all 3 passes
-    {
-        _renderTriangleStrips(whichPass, castingMode);
-    }
-
+    // Let's also do some clean up.
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
-
     glUseProgram(0);
 }
 
-void RayCaster::_load3rdPassUniforms(int castingMode, bool fast) const
+void RayCaster::_load3rdPassUniforms(int castingMode, bool fast, bool insideVolume) const
 {
     ShaderProgram *shader = _3rdPassShader;
 
-    glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
-    glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
-
-    shader->SetUniform("MV", modelview);
-    shader->SetUniform("Projection", projection);
     shader->SetUniform("colorMapRange", (glm::vec3 &)_colorMapRange[0]);
     shader->SetUniform("viewportDims", glm::ivec2(_currentViewport[2], _currentViewport[3]));
     const size_t *cdims = _userCoordinates.dims;
@@ -773,9 +815,9 @@ void RayCaster::_load3rdPassUniforms(int castingMode, bool fast) const
         shader->SetUniformArray("lightingCoeffs", 4, coeffsF);
     }
 
-    // Pack in fast mode, lighting, and missing value booleans together
-    int flags[3] = {int(fast), int(lighting), int(_userCoordinates.missingValueMask != nullptr)};
-    shader->SetUniformArray("flags", 3, flags);
+    // Pack four booleans together
+    int flags[4] = {int(fast), int(lighting), int(insideVolume), int(_userCoordinates.missingValueMask != nullptr)};
+    shader->SetUniformArray("flags", 4, flags);
 
     // Calculate the step size with sample rate multiplier taken into account.
     float stepSize1D, multiplier = 1.0f;
@@ -790,6 +832,7 @@ void RayCaster::_load3rdPassUniforms(int castingMode, bool fast) const
         }
     glm::vec3 dimsf((float)cdims[0], (float)cdims[1], (float)cdims[2]);
     float     numCells = glm::length(dimsf);
+    glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
     glm::vec4 tmpVec4 = modelview * glm::vec4(gridMin, 1.0);
     glm::vec3 gridMinEye(tmpVec4.x, tmpVec4.y, tmpVec4.z);
     tmpVec4 = modelview * glm::vec4(gridMax, 1.0);
@@ -1156,25 +1199,6 @@ void RayCaster::_updateDataTextures()
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);    // Restore default alignment.
 
     glBindTexture(GL_TEXTURE_3D, 0);
-}
-
-void RayCaster::_updateNearClippingPlane()
-{
-    glm::mat4 MVP = Renderer::_glManager->matrixManager->GetModelViewProjectionMatrix();
-    glm::mat4 InversedMVP = glm::inverse(MVP);
-    glm::vec4 topLeftNDC(-1.0f, 1.0f, -0.9999f, 1.0f);
-    glm::vec4 bottomLeftNDC(-1.0f, -1.0f, -0.9999f, 1.0f);
-    glm::vec4 topRightNDC(1.0f, 1.0f, -0.9999f, 1.0f);
-    glm::vec4 bottomRightNDC(1.0f, -1.0f, -0.9999f, 1.0f);
-    glm::vec4 near[4];
-    near[0] = InversedMVP * topLeftNDC;
-    near[1] = InversedMVP * bottomLeftNDC;
-    near[2] = InversedMVP * topRightNDC;
-    near[3] = InversedMVP * bottomRightNDC;
-    for (int i = 0; i < 4; i++) {
-        near[i] /= near[i].w;
-        std::memcpy(_userCoordinates.nearCoords + i * 3, glm::value_ptr(near[i]), 3 * sizeof(float));
-    }
 }
 
 int RayCaster::_updateVertCoordsTexture(const glm::mat4 &MV)
