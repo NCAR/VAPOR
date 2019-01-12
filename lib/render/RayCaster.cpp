@@ -606,7 +606,7 @@ int RayCaster::_paintGL( bool fast )
 
     const MatrixManager* mm = Renderer::_glManager->matrixManager;
     glm::mat4 ModelView     = mm->GetModelViewMatrix();
-    if( castingMode == CellTraversal )
+    if( castingMode        == CellTraversal )
     {
         if( _updateVertCoordsTexture( ModelView ) != 0 )
         {
@@ -646,13 +646,12 @@ int RayCaster::_paintGL( bool fast )
     // 2nd pass, render front facing polygons
     _drawVolumeFaces( 2, castingMode, insideACell );    
 
-    // Collect the color map for the 3rd pass rendering, which is the actual ray casting.
+    // Update color map texture
     _updateColormap( params );
     glActiveTexture( GL_TEXTURE0 + _colorMapTexOffset );
     glBindTexture( GL_TEXTURE_1D,  _colorMapTextureId );
     glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA32F,     _colorMap.size()/4,
                    0, GL_RGBA,       GL_FLOAT,       _colorMap.data() );
-    glBindTexture( GL_TEXTURE_1D, 0 );
 
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
     glViewport( 0, 0, _currentViewport[2], _currentViewport[3] );
@@ -661,6 +660,7 @@ int RayCaster::_paintGL( bool fast )
     _drawVolumeFaces( 3, castingMode, insideACell, InversedMV, fast );
         
     // Restore OpenGL values changed in this function.
+    glBindTexture( GL_TEXTURE_1D, 0 );
     glBindTexture( GL_TEXTURE_2D, 0 );
     glBindVertexArray( 0 );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
@@ -826,7 +826,8 @@ void RayCaster::_drawVolumeFaces( int              whichPass,
     else    // 3rd pass
     { 
         _3rdPassShader->Bind();
-        _load3rdPassUniforms( castingMode, InversedMV, fast );
+        _3rdPassShader->SetUniform("inversedMV", InversedMV );
+        _load3rdPassUniforms( castingMode, fast );
         _3rdPassSpecialHandling( fast, castingMode );
 
         glEnable(    GL_CULL_FACE );
@@ -838,7 +839,8 @@ void RayCaster::_drawVolumeFaces( int              whichPass,
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    if( insideACell )   // Only enters this section when 1st or 2nd pass
+
+    if( insideACell )   // Only enters this section when 2nd pass
     {
         glEnableVertexAttribArray( 0 );  // attribute 0 is vertex coordinates
         glBindBuffer( GL_ARRAY_BUFFER, _vertexBufferId );
@@ -861,7 +863,6 @@ void RayCaster::_drawVolumeFaces( int              whichPass,
 }
 
 void RayCaster::_load3rdPassUniforms( int                castingMode,
-                                      const glm::mat4&   inversedMV,
                                       bool               fast ) const
 {
     ShaderProgram *shader = _3rdPassShader;
@@ -871,7 +872,6 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
     
     shader->SetUniform("MV", modelview);
     shader->SetUniform("Projection", projection);
-    shader->SetUniform("inversedMV", inversedMV);
     shader->SetUniform("colorMapRange", (glm::vec3&)_colorMapRange[0]);
     shader->SetUniform("viewportDims", glm::ivec2(_currentViewport[2], _currentViewport[3]));
     const size_t* cdims = _userCoordinates.dims;
