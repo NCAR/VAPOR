@@ -118,7 +118,7 @@ private:
     ) const;
 
     void _applyDataMgrCornerToDomain(
-        std::vector<double> &domainCorners,
+        std::vector<double> &domainExtents,
         const glm::vec4 dataMgrCorner,
         const glm::mat4 scalingMatrix,
         const glm::mat4 rotationMatrix,
@@ -133,11 +133,15 @@ private:
         const std::vector<double> maxDataMgrExtents
     ) const;
 
-    void _calculateDomainCorners(
-        std::vector<double> &domainCorners,
+    void _applyDataMgrToDomainExtents(
+        std::vector<double> &domainExtents,
         const std::vector<double> dataMgrMinExts,
         const std::vector<double> dataMgrMaxExts,
         const Transform* transform
+    ) const;
+
+    void _calculateDomainExtents(
+        std::vector<double> &domainExtents
     ) const;
 
     void drawDomainFrame(
@@ -164,6 +168,12 @@ private:
  // Draw the axis lines, while building text labels.
  //
  void drawAxisTics(AxisAnnotation* aa=NULL);
+ void drawAxisTics(
+    AxisAnnotation* aa,
+    std::vector<double> minTic,
+    std::vector<double> maxTic
+ );
+
  void applyTransform(Transform *t);
  void renderText(double text, double coords[], AxisAnnotation *aa = NULL);
  Transform* getTransform(string dataMgr="");
