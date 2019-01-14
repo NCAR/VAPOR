@@ -17,7 +17,7 @@ uniform vec3  boxMax;            // max coordinates of the bounding box of this 
 uniform vec3  colorMapRange;     // min and max and diff values on this color map
 
 uniform float stepSize1D;        // ray casting step size
-uniform bool  flags[3];
+uniform bool  flags[4];
 uniform float lightingCoeffs[4]; // lighting parameters
 
 uniform int   numOfIsoValues;    // how many iso values are valid in isoValues array?
@@ -35,7 +35,8 @@ const float ULP10      = 1.2e-6f;
 const float Opaque     = 0.999;
 bool  fast             = flags[0];
 bool  lighting         = flags[1];
-bool  hasMissingValue  = flags[2];
+bool  eyeInsideVolume  = flags[2];
+bool  hasMissingValue  = flags[3];
 float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
@@ -132,7 +133,9 @@ void main(void)
     vec2 fragTexture    = gl_FragCoord.xy / vec2( viewportDims );
 
     vec3 stopEye        = texture( backFaceTexture,  fragTexture ).xyz;
-    vec3 startEye       = texture( frontFaceTexture, fragTexture ).xyz;
+    vec3 startEye       = vec3( 0.0 );
+    if( !eyeInsideVolume )
+         startEye       = texture( frontFaceTexture, fragTexture ).xyz;
     vec3 rayDirEye      = stopEye - startEye;
     float rayDirLength  = length( rayDirEye );
     if( rayDirLength    < ULP10 )
