@@ -441,15 +441,16 @@ int RayCaster::_paintGL(bool fast)
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     // When viewport has zero dimensions, bail immediately.
+    //   This happens when undo/redo is issued.
     if (viewport[2] < 1 || viewport[3] < 1) return 0;
     _updateViewportWhenNecessary(viewport);
+
+    glDisable(GL_POLYGON_SMOOTH);
 
     // Collect params and grid that will be used repeatedly
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
     if (!params) {
         MyBase::SetErrMsg("Error occured during retrieving RayCaster parameters!");
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return PARAMSERROR;
     }
     // Do not perform any fast rendering in cell traverse mode
@@ -459,27 +460,14 @@ int RayCaster::_paintGL(bool fast)
     StructuredGrid *grid = nullptr;
     if (_userCoordinates.GetCurrentGrid(params, _dataMgr, &grid) != 0) {
         MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return GRIDERROR;
     }
 
     if (_load3rdPassShaders() != 0) {
         MyBase::SetErrMsg("Failed to load shaders");
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        delete grid;
         return GLERROR;
     }
-
-    const MatrixManager *mm = Renderer::_glManager->matrixManager;
-    glDisable(GL_POLYGON_SMOOTH);
-
-    // Collect existing depth value of the scene
-    glBindTexture(GL_TEXTURE_2D, _depthTextureId);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, _currentViewport[0], _currentViewport[1], _currentViewport[2], _currentViewport[3], 0);
-
-    glBindVertexArray(_vertexArrayId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
 
     // Use the correct shader for 3rd pass rendering
     if (castingMode == FixedStep)
@@ -488,8 +476,6 @@ int RayCaster::_paintGL(bool fast)
         _3rdPassShader = _3rdPassMode2Shader;
     else {
         MyBase::SetErrMsg("RayCasting Mode not supported!");
-        glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         delete grid;
         return JUSTERROR;
     }
@@ -499,16 +485,12 @@ int RayCaster::_paintGL(bool fast)
         int success = _userCoordinates.UpdateFaceAndData(params, grid, _dataMgr);
         if (success != 0) {
             MyBase::SetErrMsg("Error occured during updating face and volume data!");
-            glBindVertexArray(0);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
             delete grid;
             return JUSTERROR;
         }
 
         if (castingMode == CellTraversal && _userCoordinates.UpdateCurviCoords(params, grid, _dataMgr) != 0) {
             MyBase::SetErrMsg("Error occured during updating curvilinear coordinates!");
-            glBindVertexArray(0);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
             delete grid;
             return JUSTERROR;
         }
@@ -517,50 +499,57 @@ int RayCaster::_paintGL(bool fast)
         _updateDataTextures();
     }
 
-    glm::mat4 ModelView = mm->GetModelViewMatrix();
+    const MatrixManager *mm = Renderer::_glManager->matrixManager;
+    glm::mat4            ModelView = mm->GetModelViewMatrix();
     if (castingMode == CellTraversal) {
         if (_updateVertCoordsTexture(ModelView) != 0) {
             MyBase::SetErrMsg("Error occured during calculating eye coordinates!");
-            glBindVertexArray(0);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
             delete grid;
             return MEMERROR;
         }
     }
 
+    // Collect existing depth value of the scene
+    glBindTexture(GL_TEXTURE_2D, _depthTextureId);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, _currentViewport[0], _currentViewport[1], _currentViewport[2], _currentViewport[3], 0);
+
+    glBindVertexArray(_vertexArrayId);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
+
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
     // 1st pass: render back facing polygons to texture0 of the framebuffer
-    _drawVolumeFaces(1, castingMode, false);
+    std::vector<size_t> cameraCellIdx(0);
+    _drawVolumeFaces(1, castingMode, cameraCellIdx);
 
     // Detect if we're inside the volume
     glm::mat4           InversedMV = glm::inverse(ModelView);
-    std::vector<double> cameraUser(4, 1.0);    // camera position in user coordinates
+    std::vector<double> cameraUser(4, 1.0);    // current camera position in user coordinates
     cameraUser[0] = InversedMV[3][0];
     cameraUser[1] = InversedMV[3][1];
     cameraUser[2] = InversedMV[3][2];
-    std::vector<size_t> cameraCellIndices;    // camera position in which cell?
-    bool                insideACell = grid->GetIndicesCell(cameraUser, cameraCellIndices);
-    if (insideACell) { _updateNearClippingPlane(); }
+    bool insideACell = grid->GetIndicesCell(cameraUser, cameraCellIdx);
+    if (!insideACell) cameraCellIdx.clear();    // Make sure size 0 to indicate outside of the volume
 
     // 2nd pass, render front facing polygons
-    _drawVolumeFaces(2, castingMode, insideACell);
+    _drawVolumeFaces(2, castingMode, cameraCellIdx);
 
-    // Collect the color map for the 3rd pass rendering, which is the actual ray casting.
+    // Update color map texture
     _updateColormap(params);
     glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _colorMap.size() / 4, 0, GL_RGBA, GL_FLOAT, _colorMap.data());
-    glBindTexture(GL_TEXTURE_1D, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
     // 3rd pass, perform ray casting
-    _drawVolumeFaces(3, castingMode, insideACell, InversedMV, fast);
+    _drawVolumeFaces(3, castingMode, cameraCellIdx, InversedMV, fast);
 
-    // Restore default VAO settings!
+    // Restore OpenGL values changed in this function.
+    glBindTexture(GL_TEXTURE_1D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glDepthFunc(GL_LESS);
@@ -678,8 +667,11 @@ int RayCaster::_initializeFramebufferTextures()
     return 0;
 }
 
-void RayCaster::_drawVolumeFaces(int whichPass, int castingMode, bool insideACell, const glm::mat4 &InversedMV, bool fast)
+void RayCaster::_drawVolumeFaces(int whichPass, int castingMode, const std::vector<size_t> &cameraCellIdx, const glm::mat4 &InversedMV, bool fast)
 {
+    assert(cameraCellIdx.size() == 0 || cameraCellIdx.size() == 3);
+    bool insideVolume = (cameraCellIdx.size() == 3);
+
     glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
     glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
 
@@ -697,6 +689,9 @@ void RayCaster::_drawVolumeFaces(int whichPass, int castingMode, bool insideACel
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 0, black);    // clear GL_COLOR_ATTACHMENT0
         glDisable(GL_BLEND);
+
+        // Render the back side of the volume.
+        _renderTriangleStrips(1, castingMode);
     } else if (whichPass == 2) {
         _2ndPassShader->Bind();
         _2ndPassShader->SetUniform("MV", modelview);
@@ -711,10 +706,27 @@ void RayCaster::_drawVolumeFaces(int whichPass, int castingMode, bool insideACel
         const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 1, black);    // clear GL_COLOR_ATTACHMENT1
         glDisable(GL_BLEND);
+
+        // Render the front side of the volume if not inside it.
+        // Do nothing if inside the volume.
+        if (!insideVolume) _renderTriangleStrips(2, castingMode);
     } else    // 3rd pass
     {
         _3rdPassShader->Bind();
-        _load3rdPassUniforms(castingMode, InversedMV, fast);
+        _3rdPassShader->SetUniform("MV", modelview);
+        _3rdPassShader->SetUniform("Projection", projection);
+        _3rdPassShader->SetUniform("inversedMV", InversedMV);
+        if (castingMode == CellTraversal) {
+            // Upload entryCellIdx, no matter inside or outside of the volume
+            glm::ivec3 entryCellIdx(0);
+            if (insideVolume) {
+                entryCellIdx.x = int(cameraCellIdx[0]);
+                entryCellIdx.y = int(cameraCellIdx[1]);
+                entryCellIdx.z = int(cameraCellIdx[2]);
+            }
+            _3rdPassShader->SetUniform("entryCellIdx", entryCellIdx);
+        }
+        _load3rdPassUniforms(castingMode, fast, insideVolume);
         _3rdPassSpecialHandling(fast, castingMode);
 
         glEnable(GL_CULL_FACE);
@@ -722,41 +734,59 @@ void RayCaster::_drawVolumeFaces(int whichPass, int castingMode, bool insideACel
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
 
+        // When DVR is rendered the last, it blends with previous rendering.
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // Renders the near clipping plane if inside the volume.
+        //   Otherwise, render the front side of the volume.
+        if (insideVolume) {
+            // Transform the near clipping plane to model coordinate
+            //             0---------2
+            //              |       |
+            //              |       |
+            //              |       |
+            //             1|_______|3
+            GLfloat   nearCoords[12];
+            glm::mat4 MVP = _glManager->matrixManager->GetModelViewProjectionMatrix();
+            glm::mat4 InversedMVP = glm::inverse(MVP);
+            glm::vec4 topLeftNDC(-1.0f, 1.0f, -0.9999f, 1.0f);
+            glm::vec4 bottomLeftNDC(-1.0f, -1.0f, -0.9999f, 1.0f);
+            glm::vec4 topRightNDC(1.0f, 1.0f, -0.9999f, 1.0f);
+            glm::vec4 bottomRightNDC(1.0f, -1.0f, -0.9999f, 1.0f);
+            glm::vec4 near[4];
+            near[0] = InversedMVP * topLeftNDC;
+            near[1] = InversedMVP * bottomLeftNDC;
+            near[2] = InversedMVP * topRightNDC;
+            near[3] = InversedMVP * bottomRightNDC;
+            for (int i = 0; i < 4; i++) {
+                near[i] /= near[i].w;
+                std::memcpy(nearCoords + i * 3, glm::value_ptr(near[i]), 3 * sizeof(GLfloat));
+            }
+
+            glEnableVertexAttribArray(0);    // attribute 0 is vertex coordinates
+            glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
+            glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), nearCoords, GL_STREAM_DRAW);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glDisableVertexAttribArray(0);
+        } else {
+            _renderTriangleStrips(3, castingMode);
+        }
     }
 
-    if (insideACell)    // Only enters this section when 1st or 2nd pass
-    {
-        glEnableVertexAttribArray(0);    // attribute 0 is vertex coordinates
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
-        glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), _userCoordinates.nearCoords, GL_STREAM_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glDisableVertexAttribArray(0);
-    } else    // could be all 3 passes
-    {
-        _renderTriangleStrips(whichPass, castingMode);
-    }
-
+    // Let's also do some clean up.
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
-
     glUseProgram(0);
 }
 
-void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedMV, bool fast) const
+void RayCaster::_load3rdPassUniforms(int castingMode, bool fast, bool insideVolume) const
 {
     ShaderProgram *shader = _3rdPassShader;
 
-    glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
-    glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
-
-    shader->SetUniform("MV", modelview);
-    shader->SetUniform("Projection", projection);
-    shader->SetUniform("inversedMV", inversedMV);
-    shader->SetUniform("colorMapRange", (glm::vec3 &)_colorMapRange[0]);
+    shader->SetUniform("colorMapRange", glm::make_vec3(_colorMapRange));
     shader->SetUniform("viewportDims", glm::ivec2(_currentViewport[2], _currentViewport[3]));
     const size_t *cdims = _userCoordinates.dims;
     glm::ivec3    volumeDims((int)cdims[0], (int)cdims[1], (int)cdims[2]);
@@ -784,9 +814,10 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
         shader->SetUniformArray("lightingCoeffs", 4, coeffsF);
     }
 
-    // Pack in fast mode, lighting, and missing value booleans together
-    int flags[3] = {int(fast), int(lighting), int(_userCoordinates.missingValueMask != nullptr)};
-    shader->SetUniformArray("flags", 3, flags);
+    // Pack four booleans together, so there's one data transmission
+    //   to the GPU, instead of four.
+    int flags[4] = {int(fast), int(lighting), int(insideVolume), int(_userCoordinates.missingValueMask != nullptr)};
+    shader->SetUniformArray("flags", 4, flags);
 
     // Calculate the step size with sample rate multiplier taken into account.
     float stepSize1D, multiplier = 1.0f;
@@ -801,6 +832,7 @@ void RayCaster::_load3rdPassUniforms(int castingMode, const glm::mat4 &inversedM
         }
     glm::vec3 dimsf((float)cdims[0], (float)cdims[1], (float)cdims[2]);
     float     numCells = glm::length(dimsf);
+    glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
     glm::vec4 tmpVec4 = modelview * glm::vec4(gridMin, 1.0);
     glm::vec3 gridMinEye(tmpVec4.x, tmpVec4.y, tmpVec4.z);
     tmpVec4 = modelview * glm::vec4(gridMax, 1.0);
@@ -1169,25 +1201,6 @@ void RayCaster::_updateDataTextures()
     glBindTexture(GL_TEXTURE_3D, 0);
 }
 
-void RayCaster::_updateNearClippingPlane()
-{
-    glm::mat4 MVP = Renderer::_glManager->matrixManager->GetModelViewProjectionMatrix();
-    glm::mat4 InversedMVP = glm::inverse(MVP);
-    glm::vec4 topLeftNDC(-1.0f, 1.0f, -0.9999f, 1.0f);
-    glm::vec4 bottomLeftNDC(-1.0f, -1.0f, -0.9999f, 1.0f);
-    glm::vec4 topRightNDC(1.0f, 1.0f, -0.9999f, 1.0f);
-    glm::vec4 bottomRightNDC(1.0f, -1.0f, -0.9999f, 1.0f);
-    glm::vec4 near[4];
-    near[0] = InversedMVP * topLeftNDC;
-    near[1] = InversedMVP * bottomLeftNDC;
-    near[2] = InversedMVP * topRightNDC;
-    near[3] = InversedMVP * bottomRightNDC;
-    for (int i = 0; i < 4; i++) {
-        near[i] /= near[i].w;
-        std::memcpy(_userCoordinates.nearCoords + i * 3, glm::value_ptr(near[i]), 3 * sizeof(float));
-    }
-}
-
 int RayCaster::_updateVertCoordsTexture(const glm::mat4 &MV)
 {
     // First, transform every vertex coordinate to the eye space
@@ -1200,15 +1213,14 @@ int RayCaster::_updateVertCoordsTexture(const glm::mat4 &MV)
         return MEMERROR;
     }
 
-    const float *vc = _userCoordinates.vertCoords;
-    glm::vec4    posModel(1.0f);
+    glm::vec4 posModel(1.0f);
+    float *   posModelPtr = glm::value_ptr(posModel);
     for (size_t i = 0; i < numOfVertices; i++) {
-        posModel.x = vc[3 * i];
-        posModel.y = vc[3 * i + 1];
-        posModel.z = vc[3 * i + 2];
+        std::memcpy(posModelPtr, _userCoordinates.vertCoords + 3 * i, 3 * sizeof(float));
         glm::vec4 posEye = MV * posModel;
-        std::memcpy(coordEye + 3 * i, glm::value_ptr(posEye), 12);    // 3 values, each 4 bytes
+        std::memcpy(coordEye + 3 * i, glm::value_ptr(posEye), 3 * sizeof(float));
     }
+    posModelPtr = nullptr;
 
     // Second, send these eye coordinates to the GPU
     glActiveTexture(GL_TEXTURE0 + _vertCoordsTexOffset);
