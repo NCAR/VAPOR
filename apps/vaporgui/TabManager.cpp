@@ -92,9 +92,10 @@ void TabManager::SetActiveRenderer(string activeViz, string renderClass, string 
     emit ActiveEventRouterChanged(eRouter->GetType());
 }
 
-void TabManager::ShowRenderWidget(string subTabName){
-	
+void TabManager::ShowRenderWidget(string subTabName)
+{
 	MoveToFront(subTabName);
+    
 	for (int i = 0; i<_subTabWidgets[_renderersTabName].size(); i++){
 		if (_subTabNames[_renderersTabName][i] != subTabName) {
 			_subTabWidgets[_renderersTabName][i]->hide();
@@ -635,11 +636,13 @@ void TabManager::_updateRouters() {
     p->GetActiveRenderer(activeViz, renderClass, instName);
 
 	if (activeViz.size() && renderClass.size() && instName.size()) {
+        
 
 		EventRouter* eRouter = _getRenderEventRouter(
 			activeViz, renderClass, instName
 		);
 
+        ShowRenderWidget(eRouter->GetType());
 		eRouter->updateTab();
 	}
 }
