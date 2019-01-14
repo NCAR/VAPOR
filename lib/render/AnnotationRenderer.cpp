@@ -27,7 +27,7 @@
 #include <unistd.h>
 #endif
 
-
+#include <glm/gtc/matrix_transform.hpp>
 #include <vapor/DataStatus.h>
 #include <vapor/AnnotationRenderer.h>
 #include <vapor/ResourcePath.h>
