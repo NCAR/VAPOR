@@ -184,7 +184,9 @@ private:
  // Draw Axis arrows
  //
  void drawAxisArrows(
-	std::vector <double> minExts, std::vector <double> maxExts
+	std::vector <double> minExts, 
+    std::vector <double> maxExts,
+    Transform* transform
  );
 
 #ifdef	VAPOR3_0_0_ALPHA

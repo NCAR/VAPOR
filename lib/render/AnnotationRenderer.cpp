@@ -654,6 +654,38 @@ void AnnotationRenderer::_applyDataMgrToDomainExtents(
     //cout << "after max " << domainExtents[3] << " " << domainExtents[4] << " " << domainExtents[5] << endl << endl;
 }
 
+void AnnotationRenderer::_calculateDomainExtents(
+    std::vector<double> &domainExtents
+) const {
+    vector<string> names = m_paramsMgr->GetDataMgrNames();
+    for (int i=0; i<names.size(); i++ ) {
+        std::vector<double> dataMgrMinExts, dataMgrMaxExts;
+        size_t local_ts = m_dataStatus->MapGlobalToLocalTimeStep(
+            names[i],
+            _currentTimestep
+        );
+        DataMgr* dataMgr = m_dataStatus->GetDataMgr(names[i]);
+        std::vector<int> axes;
+        DataMgrUtils::GetExtents(
+            dataMgr,
+            local_ts,
+            string(),
+            dataMgrMinExts,
+            dataMgrMaxExts,
+            -1
+        );
+
+        ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
+        Transform* transform = vpParams->GetTransform(names[i]);
+        _applyDataMgrToDomainExtents(
+            domainExtents,
+            dataMgrMinExts,
+            dataMgrMaxExts,
+            transform
+        );
+    }
+}
+
 void AnnotationRenderer::InScenePaint(size_t ts)
 {
 	AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
@@ -664,7 +696,8 @@ void AnnotationRenderer::InScenePaint(size_t ts)
 	ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
 
     std::vector<double> domainExtents(6, NAN);
-	vector<string> names = m_paramsMgr->GetDataMgrNames();
+    _calculateDomainExtents(domainExtents);
+	/*vector<string> names = m_paramsMgr->GetDataMgrNames();
     for (int i=0; i<names.size(); i++ ) {
         std::vector<double> dataMgrMinExts, dataMgrMaxExts;
         size_t local_ts = m_dataStatus->MapGlobalToLocalTimeStep(
@@ -689,8 +722,63 @@ void AnnotationRenderer::InScenePaint(size_t ts)
             dataMgrMaxExts,
             transform
         );
-    }
+    }*/
 
+
+//	AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
+//  MatrixManager *mm = _glManager->matrixManager;
+
+    _currentTimestep = ts;
+
+	mm->MatrixModeModelView();
+	mm->PushMatrix();
+	
+    if (vfParams->GetUseDomainFrame()) 
+        drawDomainFrame(domainExtents);
+
+//	ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
+
+	vector<string> names = m_paramsMgr->GetDataMgrNames();
+    Transform* t = vpParams->GetTransform(names[0]);
+    if (names.size()) {
+        Transform* tmp;
+        for (int i=0; i<names.size(); i++) {
+            tmp = vpParams->GetTransform(names[i]);
+            if ( tmp->GetScales()[Z] < t->GetScales()[Z] )
+                t = tmp;
+        }
+    }
+	applyTransform(t);
+
+	double mvMatrix[16];
+    mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
+	vpParams->SetModelViewMatrix(mvMatrix);
+
+	//if (vfParams->GetUseDomainFrame()) drawDomainFrame(ts);
+
+	if (vfParams->GetShowAxisArrows()) {
+
+		vector <double> minExts, maxExts;
+		m_dataStatus->GetActiveExtents(
+			m_paramsMgr, m_winName, ts, minExts, maxExts
+		);
+		drawAxisArrows(minExts, maxExts, t);
+	}
+
+	AxisAnnotation* aa = vfParams->GetAxisAnnotation();
+	if (aa->GetAxisAnnotationEnabled()) 
+		drawAxisTics(aa);
+    
+	mm->MatrixModeModelView();
+	mm->PopMatrix();
+	
+    mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
+	vpParams->SetModelViewMatrix(mvMatrix);
+    
+	CheckGLErrorMsg(m_winName.c_str());
+
+
+/*
     mm->MatrixModeModelView();
     mm->PushMatrix();
     double mvMatrix[16];
@@ -711,73 +799,36 @@ void AnnotationRenderer::InScenePaint(size_t ts)
         domainExtents[Z+3] 
     };
 
-/*    Transform *t = vpParams->GetTransform(names[0]);
-    applyTransform(t);
-    if (vfParams->GetShowAxisArrows()) {
-//        m_dataStatus->GetActiveExtents(
-//            m_paramsMgr, m_winName, ts, minExts, maxExts
-//        );
-        drawAxisArrows(minExts, maxExts);
-    }
-    AxisAnnotation* aa = vfParams->GetAxisAnnotation();
-    if (aa->GetAxisAnnotationEnabled()) {
-        drawAxisTics(
-            aa,
-            minExts,
-            maxExts
-        );
-        //drawAxisTics(aa);
-    }
-  
     mm->MatrixModeModelView();
-    mm->PopMatrix();
+    mm->PushMatrix();
+    
+    vector<string> names = m_paramsMgr->GetDataMgrNames();
+    Transform *t = vpParams->GetTransform(names[0]);
+    applyTransform(t);
+
     mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
     vpParams->SetModelViewMatrix(mvMatrix);
-    CheckGLErrorMsg(m_winName.c_str());
-*/
-//    return;
 
+    if (vfParams->GetShowAxisArrows()) {
 
+        vector <double> minExts, maxExts;
+        m_dataStatus->GetActiveExtents(
+            m_paramsMgr, m_winName, ts, minExts, maxExts
+        );
+        drawAxisArrows(minExts, maxExts);
+    }
 
-        mm->MatrixModeModelView();
-        mm->PushMatrix();
-        
-        Transform *t = vpParams->GetTransform(names[0]);
-        applyTransform(t);
-
-    //	ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
-
-    //	vector<string> names = m_paramsMgr->GetDataMgrNames();
-//Transform *t = vpParams->GetTransform(names[0]);
-//applyTransform(t);
-
-//        double mvMatrix[16];
-        mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
-        vpParams->SetModelViewMatrix(mvMatrix);
-
-//        if (vfParams->GetUseDomainFrame()) drawDomainFrame(ts);
-
-        if (vfParams->GetShowAxisArrows()) {
-
-            vector <double> minExts, maxExts;
-            m_dataStatus->GetActiveExtents(
-                m_paramsMgr, m_winName, ts, minExts, maxExts
-            );
-            drawAxisArrows(minExts, maxExts);
-        }
-
-        AxisAnnotation* aa = vfParams->GetAxisAnnotation();
-        if (aa->GetAxisAnnotationEnabled()) 
+    AxisAnnotation* aa = vfParams->GetAxisAnnotation();
+    if (aa->GetAxisAnnotationEnabled()) 
             drawAxisTics(aa);
         
-        mm->MatrixModeModelView();
-        mm->PopMatrix();
-        
-        mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
-        vpParams->SetModelViewMatrix(mvMatrix);
-        
-        CheckGLErrorMsg(m_winName.c_str());
-
+    mm->MatrixModeModelView();
+    mm->PopMatrix();
+    
+    mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
+    vpParams->SetModelViewMatrix(mvMatrix);
+    
+    CheckGLErrorMsg(m_winName.c_str());*/
 }
 
 void AnnotationRenderer::scaleNormalizedCoordinatesToWorld(
@@ -1065,7 +1116,8 @@ void AnnotationRenderer::renderText(
 
 void AnnotationRenderer::drawAxisArrows(
 	vector <double> minExts,
-	vector <double> maxExts
+	vector <double> maxExts,
+    Transform* transform
 ) {
 	assert(minExts.size() == maxExts.size());
 	while (minExts.size() < 3) {
@@ -1098,8 +1150,8 @@ void AnnotationRenderer::drawAxisArrows(
     
     ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
     vector<string> names = m_paramsMgr->GetDataMgrNames();
-    Transform *t = vpParams->GetTransform(names[0]);
-    vector<double> scale = t->GetScales();
+    //Transform *t = vpParams->GetTransform(names[0]);
+    vector<double> scale = transform->GetScales();
     mm->Scale(1/scale[0], 1/scale[1], 1/scale[2]);
     
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
