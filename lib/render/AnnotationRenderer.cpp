@@ -639,9 +639,13 @@ void AnnotationRenderer::InScenePaint(size_t ts)
 		drawAxisArrows(minExts, maxExts, t);
 	}
 
+//	mm->MatrixModeModelView();
+//	mm->PopMatrix();
 	AxisAnnotation* aa = vfParams->GetAxisAnnotation();
-	if (aa->GetAxisAnnotationEnabled()) 
+	if (aa->GetAxisAnnotationEnabled()) {
 		drawAxisTics(aa);
+    }
+
     
 	mm->MatrixModeModelView();
 	mm->PopMatrix();
@@ -959,7 +963,6 @@ void AnnotationRenderer::drawAxisArrows(
     mm->Translate(origin[0], origin[1], origin[2]);
     mm->Scale(len, len, len);
     
-    ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
     vector<string> names = m_paramsMgr->GetDataMgrNames();
     vector<double> scale = transform->GetScales();
     mm->Scale(1/scale[0], 1/scale[1], 1/scale[2]);
