@@ -18,7 +18,7 @@ uniform vec3  boxMax;            // max coordinates of the bounding box of this 
 uniform vec3  colorMapRange;
 
 uniform float stepSize1D;
-uniform bool  flags[3];
+uniform bool  flags[4];
 uniform float lightingCoeffs[4];
 
 uniform mat4 MV;
@@ -31,9 +31,10 @@ uniform mat4 Projection;
 const float ULP        = 1.2e-7f;
 const float ULP10      = 1.2e-6f;
 const float Opaque     = 0.999;  // You can still see something with 0.99...
-bool  fast             = flags[0];                  // fast rendering mode
+bool  fast             = flags[0];
 bool  lighting         = fast ? false : flags[1];   // no lighting in fast mode
-bool  hasMissingValue  = flags[2];                  // has missing values or not
+bool  eyeInsideVolume  = flags[2];
+bool  hasMissingValue  = flags[3];
 float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
@@ -131,7 +132,9 @@ void main(void)
     vec2 fragTex        = gl_FragCoord.xy / vec2( viewportDims );
 
     vec3 stopEye        = texture( backFaceTexture,  fragTex ).xyz;
-    vec3 startEye       = texture( frontFaceTexture, fragTex ).xyz;
+    vec3 startEye       = vec3( 0.0 );
+    if( !eyeInsideVolume )
+         startEye       = texture( frontFaceTexture, fragTex ).xyz;
     vec3 rayDirEye      = stopEye - startEye ;
     float rayDirLength  = length( rayDirEye );
     if( rayDirLength    < ULP10 )
