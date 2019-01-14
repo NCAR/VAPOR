@@ -31,6 +31,7 @@ class RENDER_API RayCaster : public Renderer {
     // pure virtual functions from Renderer
     int _initializeGL();
     int _paintGL(bool fast);
+    void _clearCache(){};
 
     // Makes RayCaster an abstract class that cannot be instantiated,
     //   and it's up to the subclasses to decide which shader to load.
@@ -61,14 +62,6 @@ class RENDER_API RayCaster : public Renderer {
         float *vertCoords;
 
         size_t dims[3]; // num. of samples along each axis.
-
-        //             0---------2
-        //              |       |
-        //              |       |
-        //              |       |
-        //             1|_______|3
-        // Also keep the coordinates of 4 vertices of the the near clipping plane.
-        float nearCoords[12];
 
         /* Also keep the current meta data */
         size_t myCurrentTimeStep;
@@ -118,7 +111,7 @@ class RENDER_API RayCaster : public Renderer {
         void FillCoordsXZPlane(const StructuredGrid *grid, // Input
                                size_t planeIdx,            // Input
                                float *coords);             // Output
-    };                                                     // end of struct UserCoordinates
+    };                                                     // end of class UserCoordinates
 
     UserCoordinates _userCoordinates;
     std::vector<float> _colorMap;
@@ -156,9 +149,6 @@ class RENDER_API RayCaster : public Renderer {
     ShaderProgram *_3rdPassMode1Shader;
     ShaderProgram *_3rdPassMode2Shader;
 
-    // Direction vectors that are used by the fragment shader.
-    glm::vec3 _unitDirections[26];
-
     //
     // Render the volume surface using triangle strips
     //   This is a subroutine used by _drawVolumeFaces().
@@ -167,13 +157,13 @@ class RENDER_API RayCaster : public Renderer {
 
     void _drawVolumeFaces(int whichPass,
                           int whichCastingMode,
-                          bool insideACell = false,
+                          const std::vector<size_t> &cameraCellIdx,
                           const glm::mat4 &inversedMV = glm::mat4(0.0f),
                           bool fast = false);
 
     void _load3rdPassUniforms(int castingMode,
-                              const glm::mat4 &inversedMV,
-                              bool fast) const;
+                              bool fast,
+                              bool insideVolume) const;
 
     virtual void _3rdPassSpecialHandling(bool fast, int castingMode);
 
@@ -187,16 +177,10 @@ class RENDER_API RayCaster : public Renderer {
     void _updateColormap(RayCasterParams *params);
     void _updateDataTextures();
     int _updateVertCoordsTexture(const glm::mat4 &MV);
-    void _updateNearClippingPlane();
     void _enableVertexAttribute(const float *buf, size_t length, bool attrib1Enabled) const;
     void _initializeDirectionVectors();
 
     double _getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const;
-
-  private:
-    void _clearCache() {
-        _userCoordinates.myVariableName.clear();
-    }
 
 }; // End of class RayCaster
 
