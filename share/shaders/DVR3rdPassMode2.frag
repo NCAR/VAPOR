@@ -16,9 +16,10 @@ uniform ivec3 volumeDims;        // number of vertices in each direction of this
 uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
 uniform vec3  colorMapRange;
+uniform ivec3 entryCellIdx;
 
 uniform float stepSize1D;        // ray casting step size
-uniform bool  flags[3];
+uniform bool  flags[4];
 uniform float lightingCoeffs[4]; // lighting parameters
 
 uniform mat4  MV;
@@ -33,7 +34,8 @@ const float ULP10      = 1.2e-6f;
 const float ULP100     = 1.2e-5f;
 const float Opaque     = 0.999;
 bool  lighting         = flags[1];
-bool  hasMissingValue  = flags[2];          // has missing values or not
+bool  eyeInsideVolume  = flags[2];
+bool  hasMissingValue  = flags[3];          // has missing values or not
 float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
@@ -304,7 +306,9 @@ void main(void)
     vec2 fragTex        = gl_FragCoord.xy / vec2( viewportDims );
 
     vec3 stopEye        = texture( backFaceTexture,  fragTex ).xyz;
-    vec3 startEye       = texture( frontFaceTexture, fragTex ).xyz;
+    vec3 startEye       = vec3( 0.0 );
+    if( !eyeInsideVolume )
+         startEye       = texture( frontFaceTexture, fragTex ).xyz;
     vec3 rayDirEye      = stopEye - startEye;
     float rayDirLength  = length( rayDirEye );
     if(   rayDirLength  < ULP10 )
@@ -319,7 +323,11 @@ void main(void)
     vec3  step1Eye      = startEye + 0.01 * stepSize3D;
 
     // Test 1st step if inside of the cell, and correct it if not.
-    ivec3 step1CellIdx  = provokingVertexIdx.xyz;
+    ivec3 step1CellIdx;
+    if( eyeInsideVolume )
+        step1CellIdx    = entryCellIdx;
+    else
+        step1CellIdx    = provokingVertexIdx.xyz;
     if( !PosInsideOfCell( step1CellIdx, step1Eye ) )
     {
         ivec3 correctIdx;
