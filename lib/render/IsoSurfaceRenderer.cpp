@@ -47,3 +47,14 @@ void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast, int castingMode)
     _3rdPassShader->SetUniform("numOfIsoValues", numOfIsoValues);
     _3rdPassShader->SetUniformArray("isoValues", 4, validValues.data());
 }
+
+void IsoSurfaceRenderer::_colormapSpecialHandling(RayCasterParams *params)
+{
+    std::string colormapVariable = params->GetColorMapVariableName();
+    params->RenderParams::GetMapperFunc(colormapVariable)->makeLut(_colorMap);
+    assert(_colorMap.size() % 4 == 0);
+    std::vector<double> range = params->GetMapperFunc()->getMinMaxMapValue();
+    _colorMapRange[0] = float(range[0]);
+    _colorMapRange[1] = float(range[1]);
+    _colorMapRange[2] = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ? (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f;
+}

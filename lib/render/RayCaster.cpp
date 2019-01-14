@@ -1133,7 +1133,15 @@ void RayCaster::_updateColormap(RayCasterParams *params)
         _colorMapRange[0] = float(range[0]);
         _colorMapRange[1] = float(range[1]);
         _colorMapRange[2] = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ? (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f;
+
+        _colormapSpecialHandling(params);
     }
+}
+
+void RayCaster::_colormapSpecialHandling(RayCasterParams *params)
+{
+    // Left empty intentionally.
+    // Subclasses, e.g., IsoSurfaceRenderer and DVRenderer, feel free to implement it.
 }
 
 void RayCaster::_updateDataTextures()
