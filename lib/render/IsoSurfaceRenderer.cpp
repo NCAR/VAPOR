@@ -53,7 +53,7 @@ void IsoSurfaceRenderer::_colormapSpecialHandling(RayCasterParams *params)
     std::string colormapVariable = params->GetColorMapVariableName();
     params->RenderParams::GetMapperFunc(colormapVariable)->makeLut(_colorMap);
     assert(_colorMap.size() % 4 == 0);
-    std::vector<double> range = params->GetMapperFunc()->getMinMaxMapValue();
+    std::vector<double> range = params->RenderParams::GetMapperFunc(colormapVariable)->getMinMaxMapValue();
     _colorMapRange[0] = float(range[0]);
     _colorMapRange[1] = float(range[1]);
     _colorMapRange[2] = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ? (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f;
