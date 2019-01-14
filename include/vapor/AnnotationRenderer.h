@@ -148,10 +148,6 @@ private:
         const std::vector<double> corners
     ) const;
 
-//! Render the domain fram
-	void drawDomainFrame(size_t ts) const;
-
-
  std::vector<double> getDomainExtents() const;
  AxisAnnotation* getCurrentAxisAnnotation();
  string getCurrentDataMgrName() const;
