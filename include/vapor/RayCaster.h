@@ -176,6 +176,7 @@ class RENDER_API RayCaster : public Renderer {
                               bool fast) const;
 
     virtual void _3rdPassSpecialHandling(bool fast, int castingMode);
+    virtual void _colormapSpecialHandling(RayCasterParams *params);
 
     //
     // Initialization for 1) framebuffers and 2) textures
