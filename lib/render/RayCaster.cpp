@@ -1127,9 +1127,10 @@ void RayCaster::_updateColormap(RayCasterParams *params)
         _colorMapRange[1] = 0.0f;
         _colorMapRange[2] = 1e-5f;
     } else {
-        params->GetMapperFunc()->makeLut(_colorMap);
+        VAPoR::MapperFunction *mapperFunc = params->GetMapperFunc();
+        mapperFunc->makeLut(_colorMap);
         assert(_colorMap.size() % 4 == 0);
-        std::vector<double> range = params->GetMapperFunc()->getMinMaxMapValue();
+        std::vector<double> range = mapperFunc->getMinMaxMapValue();
         _colorMapRange[0] = float(range[0]);
         _colorMapRange[1] = float(range[1]);
         _colorMapRange[2] = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ? (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f;
