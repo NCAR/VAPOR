@@ -950,7 +950,8 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
         shader->SetUniformArray("lightingCoeffs", 4, coeffsF);
     }
 
-    // Pack four booleans together
+    // Pack four booleans together, so there's one data transmission
+    //   to the GPU, instead of four.
     int flags[4] = { int(fast), int(lighting), int(insideVolume),
                      int(_userCoordinates.missingValueMask != nullptr) };
     shader->SetUniformArray("flags", 4, flags);
