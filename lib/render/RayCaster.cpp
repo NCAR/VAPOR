@@ -1216,10 +1216,9 @@ int RayCaster::_updateVertCoordsTexture(const glm::mat4 &MV)
     glm::vec4 posModel(1.0f);
     float *   posModelPtr = glm::value_ptr(posModel);
     for (size_t i = 0; i < numOfVertices; i++) {
-        // Memcpy is operated on 3 floating point values, thus 3 * sizeof(float) == 12.
-        std::memcpy(posModelPtr, _userCoordinates.vertCoords + 3 * i, 12);
+        std::memcpy(posModelPtr, _userCoordinates.vertCoords + 3 * i, 3 * sizeof(float));
         glm::vec4 posEye = MV * posModel;
-        std::memcpy(coordEye + 3 * i, glm::value_ptr(posEye), 12);
+        std::memcpy(coordEye + 3 * i, glm::value_ptr(posEye), 3 * sizeof(float));
     }
     posModelPtr = nullptr;
 
