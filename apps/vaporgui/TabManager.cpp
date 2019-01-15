@@ -642,7 +642,6 @@ void TabManager::_updateRouters() {
 			activeViz, renderClass, instName
 		);
 
-        ShowRenderWidget(eRouter->GetType());
 		eRouter->updateTab();
 	}
 }
