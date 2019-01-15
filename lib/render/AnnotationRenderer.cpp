@@ -281,45 +281,18 @@ void AnnotationRenderer::applyTransform(Transform *t) {
 	_glManager->matrixManager->Translate(-origin[0], -origin[1], -origin[2]);
 }
 
-void AnnotationRenderer::_makeTransformMatrices(
+void AnnotationRenderer::_makeTransformMatrix(
     const Transform* transform,
-    glm::mat4 &scalingMatrix,
-    glm::mat4 &rotationMatrix,
-    glm::mat4 &translationMatrix,
-    glm::mat4 &translateOriginMatrix
+    glm::mat4 &transformMatrix
 ) const {
 	vector<double>  scales       = transform->GetScales();
 	vector<double>  origins      = transform->GetOrigin();
 	vector <double> translations = transform->GetTranslations();
 	vector <double> rotations    = transform->GetRotations();
 
-    scalingMatrix = glm::scale(
-        glm::mat4(1.0f),
-        glm::vec3(
-            scales[X], 
-            scales[Y], 
-            scales[Z]
-        )
-    );
+    glm::mat4 m;
 
-    rotationMatrix = glm::mat4(1.0f);
-    rotationMatrix = glm::rotate(
-        rotationMatrix,
-        glm::radians((float)rotations[X]),
-        glm::vec3(1.f, 0.f, 0.f)
-    );
-    rotationMatrix = glm::rotate(
-        rotationMatrix,
-        glm::radians((float)rotations[Y]),
-        glm::vec3(0.f, 1.f, 0.f)
-    );
-    rotationMatrix = glm::rotate(
-        rotationMatrix,
-        glm::radians((float)rotations[Z]),
-        glm::vec3(0.f, 0.f, 1.f)
-    );
-
-    translationMatrix = glm::translate(
+    m = glm::translate(
         glm::mat4(1.f),
         glm::vec3(
             translations[X],
@@ -328,41 +301,60 @@ void AnnotationRenderer::_makeTransformMatrices(
         )
     );
 
-    translateOriginMatrix = glm::translate(
-        glm::mat4(1.f),
+    m = glm::translate(
+        m,
         glm::vec3(
             origins[X],
             origins[Y],
             origins[Z]
         )
     );
+
+    m = glm::rotate(
+        m,
+        glm::radians((float)rotations[X]),
+        glm::vec3(1.f, 0.f, 0.f)
+    );
+    m = glm::rotate(
+        m,
+        glm::radians((float)rotations[Y]),
+        glm::vec3(0.f, 1.f, 0.f)
+    );
+    m = glm::rotate(
+        m,
+        glm::radians((float)rotations[Z]),
+        glm::vec3(0.f, 0.f, 1.f)
+    );
+
+    m = glm::scale(
+        m,
+        glm::vec3(
+            scales[X],
+            scales[Y],
+            scales[Z]
+        )
+    );
+
+    m = glm::translate(
+        m,
+        glm::vec3(
+            -origins[X],
+            -origins[Y],
+            -origins[Z]
+        )
+    );
+
+    transformMatrix = m;
 }
 
 void AnnotationRenderer::_applyDataMgrCornerToDomain(
-    //std::vector<double> &domainExtents,
     std::vector<double> *domainExtents,
-    const glm::vec4 dataMgrCorner,
-    const glm::mat4 scalingMatrix,
-    const glm::mat4 rotationMatrix,
-    const glm::mat4 translationMatrix,
-    const glm::mat4 translateOriginMatrix
+    const glm::vec4 *dataMgrCorner,
+    const glm::mat4 &transformMatrix
 ) const {
     // transform our corner
-    /*glm::vec4 transformedCorner;
-    //transformedCorner = glm::inverse(translateOriginMatrix) * dataMgrCorner;
-    glm::mat4 transformedMatrix;
-    transformedMatrix  = glm::inverse(translateOriginMatrix);
-    transformedMatrix *= rotationMatrix;
-    transformedMatrix *= translationMatrix;
-    transformedMatrix *= scalingMatrix;
-    transformedCorner  = dataMgrCorner * transformedMatrix;
-    transformedCorner  = transformedCorner * translateOriginMatrix;*/
     glm::vec4 transformedCorner;
-    transformedCorner = glm::inverse(translateOriginMatrix) * dataMgrCorner;
-    transformedCorner = rotationMatrix * transformedCorner;
-    transformedCorner = translationMatrix * transformedCorner;
-    transformedCorner = scalingMatrix * transformedCorner;
-    transformedCorner = translateOriginMatrix * transformedCorner;
+    transformedCorner = transformMatrix * *dataMgrCorner;
 
     // See if the minimum and maximum extents of our corner exceed the
     // the currently defined domain. 
@@ -403,9 +395,9 @@ void AnnotationRenderer::_applyDataMgrCornerToDomain(
 //  1 1 1       7
 void AnnotationRenderer::_getDataMgrCorner(
     const int cornerNumber,
-    glm::vec4 &dataMgrCorner,
-    const std::vector<double> minDataMgrExtents,
-    const std::vector<double> maxDataMgrExtents
+    glm::vec4 *dataMgrCorner,
+    const std::vector<double> &minDataMgrExtents,
+    const std::vector<double> &maxDataMgrExtents
 ) const {
     double xCoord, yCoord, zCoord;
     if (cornerNumber & 0b100)
@@ -423,44 +415,35 @@ void AnnotationRenderer::_getDataMgrCorner(
     else
         zCoord = minDataMgrExtents[Z];
   
-    dataMgrCorner = glm::vec4( xCoord, yCoord, zCoord, 1.f ); 
+    *dataMgrCorner = glm::vec4( xCoord, yCoord, zCoord, 1.f ); 
 }
 
 void AnnotationRenderer::_applyDataMgrToDomainExtents(
     std::vector<double> &domainExtents,
-    const std::vector<double> dataMgrMinExts,
-    const std::vector<double> dataMgrMaxExts,
+    const std::vector<double> &dataMgrMinExts,
+    const std::vector<double> &dataMgrMaxExts,
     const Transform* transform
 ) const {
 
-    glm::mat4 scalingMatrix;
-    glm::mat4 rotationMatrix;
-    glm::mat4 translationMatrix;
-    glm::mat4 translateOriginMatrix;
-    _makeTransformMatrices(
+    glm::mat4 transformMatrix;
+    _makeTransformMatrix(
         transform,
-        scalingMatrix,
-        rotationMatrix,
-        translationMatrix,
-        translateOriginMatrix
+        transformMatrix
     );
 
     glm::vec4 dataMgrCorner;
     for (int i=0; i<8; i++) {
         _getDataMgrCorner(
             i, 
-            dataMgrCorner, 
+            &dataMgrCorner, 
             dataMgrMinExts, 
             dataMgrMaxExts
         );
     
         _applyDataMgrCornerToDomain(
             &domainExtents,
-            dataMgrCorner,
-            scalingMatrix,
-            rotationMatrix,
-            translationMatrix,
-            translateOriginMatrix
+            &dataMgrCorner,
+            transformMatrix
         );
     }
 }
