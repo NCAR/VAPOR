@@ -138,6 +138,7 @@ RayCaster::UserCoordinates::UserCoordinates()
     bottomFace = nullptr;
     dataField = nullptr;
     vertCoords = nullptr;
+    secondVarData = nullptr;
     missingValueMask = nullptr;
     for (int i = 0; i < 3; i++) {
         myGridMin[i] = 0;
@@ -147,9 +148,13 @@ RayCaster::UserCoordinates::UserCoordinates()
 
     myCurrentTimeStep = 0;
     myVariableName = "";
+    mySecondVarName = "";
     myRefinementLevel = -1;
     myCompressionLevel = -1;
-    myCastingMode = 1;
+
+    dataFieldUpToDate = false;
+    vertCoordsUpToDate = false;
+    secondVarUpToDate = false;
 }
 
 // Destructor
@@ -209,23 +214,46 @@ int RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params, Da
     }
 }
 
-bool RayCaster::UserCoordinates::IsMetadataUpToDate(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr) const
+void RayCaster::UserCoordinates::CheckUpToDateStatus(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr)
 {
-    if ((myCurrentTimeStep != params->GetCurrentTimestep()) || (myVariableName != params->GetVariableName()) || (myRefinementLevel != params->GetRefinementLevel())
-        || (myCastingMode != params->GetCastingMode()) || (myCompressionLevel != params->GetCompressionLevel())) {
-        return false;
+    // First, if any of the metadata is changed, all data fields are not up-to-date
+    if ((myCurrentTimeStep != params->GetCurrentTimestep()) || (myRefinementLevel != params->GetRefinementLevel()) || (myCompressionLevel != params->GetCompressionLevel())) {
+        dataFieldUpToDate = false;
+        vertCoordsUpToDate = false;
+        secondVarUpToDate = false;
+        std::cout << "dataFieldUpToDate = " << dataFieldUpToDate << std::endl;
+        std::cout << "vertCoordsUpToDate = " << vertCoordsUpToDate << std::endl;
+        std::cout << "secondVarUpToDate = " << secondVarUpToDate << std::endl;
+        return;
     }
 
-    // compare grid extents
+    // Second, if the grid extents are changed, all data fields are not up-to-date
     std::vector<double> newMin, newMax;
     grid->GetUserExtents(newMin, newMax);
     assert(newMin.size() == 3 || newMax.size() == 3);
-    for (int i = 0; i < 3; i++) {
-        if ((myGridMin[i] != (float)newMin[i]) || (myGridMax[i] != (float)newMax[i])) return false;
+    for (int i = 0; i < 3; i++)
+        if ((myGridMin[i] != (float)newMin[i]) || (myGridMax[i] != (float)newMax[i])) {
+            dataFieldUpToDate = false;
+            vertCoordsUpToDate = false;
+            secondVarUpToDate = false;
+            std::cout << "dataFieldUpToDate = " << dataFieldUpToDate << std::endl;
+            std::cout << "vertCoordsUpToDate = " << vertCoordsUpToDate << std::endl;
+            std::cout << "secondVarUpToDate = " << secondVarUpToDate << std::endl;
+            return;
+        }
+
+    // Third, let's compare the primary variable name
+    if (myVariableName != params->GetVariableName()) {
+        dataFieldUpToDate = false;
+        std::cout << "dataFieldUpToDate = " << dataFieldUpToDate << std::endl;
     }
 
-    // now we know it's up to date!
-    return true;
+    // Fourth, let's check the vertex coordinates.
+    // Actually, the only way vertex coordinates go out of date is changing the metadata,
+    //   which is already checked. We don't need to do anything here!
+
+    // Fifth, let check if second variable data is up to date
+    // if( vertCoordsUpToDate
 }
 
 int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr)
@@ -242,7 +270,6 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
     myVariableName = params->GetVariableName();
     myRefinementLevel = params->GetRefinementLevel();
     myCompressionLevel = params->GetCompressionLevel();
-    myCastingMode = params->GetCastingMode();
 
     /* Update member variables */
     std::vector<size_t> gridDims = grid->GetDimensions();
@@ -327,6 +354,9 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
         }
     }
 
+    dataFieldUpToDate = true;
+    std::cout << "dataFieldUpToDate = " << dataFieldUpToDate << std::endl;
+
     return 0;
 }
 
@@ -369,8 +399,10 @@ void RayCaster::UserCoordinates::FillCoordsXZPlane(const StructuredGrid *grid, s
         }
 }
 
-int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr)
+int RayCaster::UserCoordinates::UpdateVertCoords(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr)
 {
+    assert(dataFieldUpToDate);
+
     size_t numOfVertices = dims[0] * dims[1] * dims[2];
     if (vertCoords) delete[] vertCoords;
     try {
@@ -388,6 +420,9 @@ int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params,
         vertCoords[3 * i + 2] = float((*coordItr)[2]);
         ++coordItr;
     }
+
+    vertCoordsUpToDate = true;
+    std::cout << "vertCoordsUpToDate = " << vertCoordsUpToDate << std::endl;
 
     return 0;
 }
@@ -480,33 +515,37 @@ int RayCaster::_paintGL(bool fast)
         return JUSTERROR;
     }
 
-    // If there is an update event
-    if (!_userCoordinates.IsMetadataUpToDate(params, grid, _dataMgr)) {
+    // Check if there is an update event
+    _userCoordinates.CheckUpToDateStatus(params, grid, _dataMgr);
+    // Update primary variable data field
+    if (!_userCoordinates.dataFieldUpToDate) {
         int success = _userCoordinates.UpdateFaceAndData(params, grid, _dataMgr);
         if (success != 0) {
             MyBase::SetErrMsg("Error occured during updating face and volume data!");
             delete grid;
             return JUSTERROR;
         }
+        // Texture for primary variable data is updated only when data changes
+        _updateDataTextures();
+    }
 
-        if (castingMode == CellTraversal && _userCoordinates.UpdateCurviCoords(params, grid, _dataMgr) != 0) {
+    // Update vertex coordinates data field
+    if (castingMode == CellTraversal && !_userCoordinates.vertCoordsUpToDate) {
+        int success = _userCoordinates.UpdateVertCoords(params, grid, _dataMgr);
+        if (success != 0) {
             MyBase::SetErrMsg("Error occured during updating curvilinear coordinates!");
             delete grid;
             return JUSTERROR;
         }
-
-        // Updates data volume texture and missing value texture
-        _updateDataTextures();
     }
 
-    const MatrixManager *mm = Renderer::_glManager->matrixManager;
-    glm::mat4            ModelView = mm->GetModelViewMatrix();
-    if (castingMode == CellTraversal) {
-        if (_updateVertCoordsTexture(ModelView) != 0) {
-            MyBase::SetErrMsg("Error occured during calculating eye coordinates!");
-            delete grid;
-            return MEMERROR;
-        }
+    // Transform vertex coordinate data to eye space, and then send to GPU.
+    //   This step occurs at every loop.
+    glm::mat4 ModelView = Renderer::_glManager->matrixManager->GetModelViewMatrix();
+    if (castingMode == CellTraversal && _updateVertCoordsTexture(ModelView) != 0) {
+        MyBase::SetErrMsg("Error occured during calculating eye coordinates!");
+        delete grid;
+        return MEMERROR;
     }
 
     // Collect existing depth value of the scene
