@@ -65,6 +65,7 @@ protected:
         unsigned char* missingValueMask; // 0 == is missing value; non-zero == not missing value
         float* vertCoords;               // vertex coordinates in user coordinates
         float* secondVarData;            // values of a second variable
+        unsigned char* secondVarMask;    // 0 == is missing value; non-zero == not missing value
 
         size_t  dims[3];                 // num. of samples along each axis. 
 
@@ -109,8 +110,11 @@ protected:
         // |         UpdateFaceAndData() needs to be called priori to UpdateVertCoords().
         // |-- It returns 0 upon success, and non-zero upon errors:
         //
-        int UpdateVertCoords(     const RayCasterParams* params,
-                                  const StructuredGrid*  grid, 
+        int UpdateVertCoords(   const   RayCasterParams* params,
+                                const   StructuredGrid*  grid, 
+                                        DataMgr*         dataMgr );
+
+        int Update2ndVariable(  const   RayCasterParams* params,
                                         DataMgr*         dataMgr );
 
         void FillCoordsXYPlane( const   StructuredGrid*  grid,  // Input 
