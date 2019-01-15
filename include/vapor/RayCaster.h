@@ -63,17 +63,23 @@ protected:
         float *topFace,         *bottomFace;         // user coordinates, size == bx * bz * 3   
         float *dataField;                // data field of this volume
         unsigned char* missingValueMask; // 0 == is missing value; non-zero == not missing value
-        float* vertCoords;
+        float* vertCoords;               // vertex coordinates in user coordinates
+        float* secondVarData;            // values of a second variable
 
         size_t  dims[3];                 // num. of samples along each axis. 
 
         /* Also keep the current meta data */ 
         size_t      myCurrentTimeStep;
         std::string myVariableName;
+        std::string mySecondVarName;
         int         myRefinementLevel, myCompressionLevel;
-        int         myCastingMode;
         float       myGridMin[3], myGridMax[3];   // Keeps the min and max of the current grid.
                                                   // !!NOT!! the value retrieved from params.
+
+        // A few flags to indicate if certain data is out of date
+        bool        dataFieldUpToDate;
+        bool        vertCoordsUpToDate;
+        bool        secondVarUpToDate;
 
         /* Member functions */
         UserCoordinates();    
@@ -86,9 +92,9 @@ protected:
                                   DataMgr*         dataMgr,
                                   StructuredGrid** gridpp ) const;
 
-        bool IsMetadataUpToDate(  const RayCasterParams* params, 
+        void CheckUpToDateStatus( const RayCasterParams* params, 
                                   const StructuredGrid*  grid, 
-                                        DataMgr*         dataMgr ) const;
+                                        DataMgr*         dataMgr );
         //
         // Update meta data, as well as pointers: 6 faces + dataField + missingValueMask
         //   It returns 0 upon success, and non-zero upon errors:
@@ -99,10 +105,10 @@ protected:
         //
         // Update pointers: xyCoords and zCoords
         // |-- Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
-        // |         UpdateFaceAndData() needs to be called priori to UpdateCurviCoords().
+        // |         UpdateFaceAndData() needs to be called priori to UpdateVertCoords().
         // |-- It returns 0 upon success, and non-zero upon errors:
         //
-        int UpdateCurviCoords(    const RayCasterParams* params,
+        int UpdateVertCoords(     const RayCasterParams* params,
                                   const StructuredGrid*  grid, 
                                         DataMgr*         dataMgr );
 
