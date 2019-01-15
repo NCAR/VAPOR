@@ -27,7 +27,7 @@
 #include <unistd.h>
 #endif
 
-
+#include <glm/glm.hpp>
 #include <vapor/DataStatus.h>
 #include <vapor/AnnotationRenderer.h>
 #include <vapor/ResourcePath.h>
@@ -337,7 +337,8 @@ void AnnotationRenderer::_makeTransformMatrices(
 }
 
 void AnnotationRenderer::_applyDataMgrCornerToDomain(
-    std::vector<double> &domainExtents,
+    //std::vector<double> &domainExtents,
+    std::vector<double> *domainExtents,
     const glm::vec4 dataMgrCorner,
     const glm::mat4 scalingMatrix,
     const glm::mat4 rotationMatrix,
@@ -345,6 +346,15 @@ void AnnotationRenderer::_applyDataMgrCornerToDomain(
     const glm::mat4 translateOriginMatrix
 ) const {
     // transform our corner
+    /*glm::vec4 transformedCorner;
+    //transformedCorner = glm::inverse(translateOriginMatrix) * dataMgrCorner;
+    glm::mat4 transformedMatrix;
+    transformedMatrix  = glm::inverse(translateOriginMatrix);
+    transformedMatrix *= rotationMatrix;
+    transformedMatrix *= translationMatrix;
+    transformedMatrix *= scalingMatrix;
+    transformedCorner  = dataMgrCorner * transformedMatrix;
+    transformedCorner  = transformedCorner * translateOriginMatrix;*/
     glm::vec4 transformedCorner;
     transformedCorner = glm::inverse(translateOriginMatrix) * dataMgrCorner;
     transformedCorner = rotationMatrix * transformedCorner;
@@ -357,18 +367,18 @@ void AnnotationRenderer::_applyDataMgrCornerToDomain(
     for (int i=0; i<6; i++) {
         int transformedCornerIndex = i%3;
         // use this corner to define all domain corners that are uninitialized
-        if ( isnan(domainExtents[i]) )
-            domainExtents[i] = transformedCorner[ transformedCornerIndex ];
+        if ( isnan( (*domainExtents)[i]) )
+            (*domainExtents)[i] = transformedCorner[ transformedCornerIndex ];
         // otherwise see if the corner exceeds our currently defined domain minima
         else if ( i<3 ){
-            if (transformedCorner[transformedCornerIndex] < domainExtents[i]) {
-                domainExtents[i] = transformedCorner[transformedCornerIndex];
+            if (transformedCorner[transformedCornerIndex] < (*domainExtents)[i]) {
+                (*domainExtents)[i] = transformedCorner[transformedCornerIndex];
             }
         }
         // otherwise see if the corner exceeds our currently defined domain maxima
         else {
-            if (transformedCorner[transformedCornerIndex] > domainExtents[i]) {
-                domainExtents[i] = transformedCorner[transformedCornerIndex];
+            if (transformedCorner[transformedCornerIndex] > (*domainExtents)[i]) {
+                (*domainExtents)[i] = transformedCorner[transformedCornerIndex];
             }
         }
     }
@@ -443,7 +453,7 @@ void AnnotationRenderer::_applyDataMgrToDomainExtents(
         );
     
         _applyDataMgrCornerToDomain(
-            domainExtents,
+            &domainExtents,
             dataMgrCorner,
             scalingMatrix,
             rotationMatrix,

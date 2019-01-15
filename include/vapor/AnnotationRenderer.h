@@ -118,7 +118,8 @@ private:
     ) const;
 
     void _applyDataMgrCornerToDomain(
-        std::vector<double> &domainExtents,
+        //std::vector<double> &domainExtents,
+        std::vector<double> *domainExtents,
         const glm::vec4 dataMgrCorner,
         const glm::mat4 scalingMatrix,
         const glm::mat4 rotationMatrix,
