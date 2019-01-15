@@ -555,6 +555,7 @@ RayCaster::UserCoordinates::Update2ndVariable( const RayCasterParams* params,
     delete grid;
     secondVarUpToDate = true;
 std::cout << "secondVarUpToDate = " << secondVarUpToDate << std::endl;
+
     return 0;
 }
 
