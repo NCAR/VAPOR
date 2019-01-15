@@ -140,6 +140,7 @@ RayCaster::UserCoordinates::UserCoordinates()
     vertCoords = nullptr;
     secondVarData = nullptr;
     missingValueMask = nullptr;
+    secondVarMask = nullptr;
     for (int i = 0; i < 3; i++) {
         myGridMin[i] = 0;
         myGridMax[i] = 0;
@@ -195,6 +196,14 @@ RayCaster::UserCoordinates::~UserCoordinates()
     if (missingValueMask) {
         delete[] missingValueMask;
         missingValueMask = nullptr;
+    }
+    if (secondVarData) {
+        delete[] secondVarData;
+        secondVarData = nullptr;
+    }
+    if (secondVarMask) {
+        delete[] secondVarMask;
+        secondVarMask = nullptr;
     }
 }
 
@@ -360,6 +369,89 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
     dataFieldUpToDate = true;
     std::cout << "dataFieldUpToDate = " << dataFieldUpToDate << std::endl;
 
+    return 0;
+}
+
+int RayCaster::UserCoordinates::Update2ndVariable(const RayCasterParams *params, DataMgr *dataMgr)
+{
+    assert(dataFieldUpToDate);
+
+    // Update 2nd variable name
+    my2ndVarName = params->GetColorMapVariableName();
+
+    // Retrieve grid for the 2nd variable
+    std::vector<double> extMin, extMax;
+    params->GetBox()->GetExtents(extMin, extMax);
+    StructuredGrid *grid = dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(myCurrentTimeStep, my2ndVarName, myRefinementLevel, myCompressionLevel, extMin, extMax));
+    if (grid == nullptr) {
+        MyBase::SetErrMsg("The secondary variable isn't on a StructuredGrid; "
+                          "the behavior is undefined in this case.");
+        return GRIDERROR;
+    }
+
+    // Make sure the secondary grid shares the same dimention as the primary grid
+    std::vector<size_t> gridDims = grid->GetDimensions();
+    for (int i = 0; i < 3; i++)
+        if (gridDims[i] != dims[i]) {
+            MyBase::SetErrMsg("The secondary and primary variable grids have different dimensions; "
+                              "the behavior is undefined in this case.");
+            delete grid;
+            return GRIDERROR;
+        }
+
+    // Allocate memory
+    size_t numOfVertices = dims[0] * dims[1] * dims[2];
+    if (secondVarData) {
+        delete[] secondVarData;
+        secondVarData = nullptr;
+    }
+    try {
+        secondVarData = new float[numOfVertices];
+    } catch (const std::bad_alloc &e) {
+        MyBase::SetErrMsg(e.what());
+        delete grid;
+        return MEMERROR;
+    }
+    if (secondVarMask) {
+        delete[] secondVarMask;
+        secondVarMask = nullptr;
+    }
+
+    // Get an iterator
+    StructuredGrid::ConstIterator valItr = grid->cbegin();
+
+    if (grid->HasMissingData()) {
+        float missingValue = grid->GetMissingValue();
+        try {
+            secondVarMask = new unsigned char[numOfVertices];
+        } catch (const std::bad_alloc &e) {
+            MyBase::SetErrMsg(e.what());
+            delete grid;
+            return MEMERROR;
+        }
+
+        float dataValue;
+        for (size_t i = 0; i < numOfVertices; i++) {
+            dataValue = *valItr;
+            if (dataValue == missingValue) {
+                secondVarData[i] = 0.0f;
+                secondVarMask[i] = 127u;
+            } else {
+                secondVarData[i] = dataValue;
+                secondVarMask[i] = 0u;
+            }
+            ++valItr;
+        }
+    } else {
+        for (size_t i = 0; i < numOfVertices; i++) {
+            secondVarData[i] = *valItr;
+            ++valItr;
+        }
+    }
+
+    delete grid;
+    secondVarUpToDate = true;
+    std::cout << "secondVarUpToDate = " << secondVarUpToDate << std::endl;
     return 0;
 }
 
@@ -536,7 +628,7 @@ int RayCaster::_paintGL(bool fast)
         _updateDataTextures();
     }
 
-    // Update vertex coordinates data field
+    // Update vertex coordinates field
     if (castingMode == CellTraversal && !_userCoordinates.vertCoordsUpToDate) {
         int success = _userCoordinates.UpdateVertCoords(params, grid, _dataMgr);
         if (success != 0) {
@@ -553,6 +645,16 @@ int RayCaster::_paintGL(bool fast)
         MyBase::SetErrMsg("Error occured during calculating eye coordinates!");
         delete grid;
         return MEMERROR;
+    }
+
+    // Update secondary variable
+    if (use2ndVar && !_userCoordinates.secondVarUpToDate) {
+        int success = _userCoordinates.Update2ndVariable(params, _dataMgr);
+        if (success != 0) {
+            MyBase::SetErrMsg("Error occured during updating secondary variable!");
+            delete grid;
+            return JUSTERROR;
+        }
     }
 
     // Collect existing depth value of the scene
