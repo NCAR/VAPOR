@@ -148,7 +148,7 @@ RayCaster::UserCoordinates::UserCoordinates()
 
     myCurrentTimeStep = 0;
     myVariableName = "";
-    mySecondVarName = "";
+    my2ndVarName = "";
     myRefinementLevel = -1;
     myCompressionLevel = -1;
 
@@ -214,7 +214,7 @@ int RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params, Da
     }
 }
 
-void RayCaster::UserCoordinates::CheckUpToDateStatus(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr)
+void RayCaster::UserCoordinates::CheckUpToDateStatus(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr, bool use2ndVar)
 {
     // First, if any of the metadata is changed, all data fields are not up-to-date
     if ((myCurrentTimeStep != params->GetCurrentTimestep()) || (myRefinementLevel != params->GetRefinementLevel()) || (myCompressionLevel != params->GetCompressionLevel())) {
@@ -253,7 +253,10 @@ void RayCaster::UserCoordinates::CheckUpToDateStatus(const RayCasterParams *para
     //   which is already checked. We don't need to do anything here!
 
     // Fifth, let check if second variable data is up to date
-    // if( vertCoordsUpToDate
+    if (use2ndVar && (my2ndVarName != params->GetColorMapVariableName())) {
+        secondVarUpToDate = false;
+        std::cout << "secondVarUpToDate = " << secondVarUpToDate << std::endl;
+    }
 }
 
 int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr)
@@ -515,8 +518,12 @@ int RayCaster::_paintGL(bool fast)
         return JUSTERROR;
     }
 
+    // Retrieve if we're using secondary variable
+    bool use2ndVar = _use2ndVariable(params);
+
     // Check if there is an update event
-    _userCoordinates.CheckUpToDateStatus(params, grid, _dataMgr);
+    _userCoordinates.CheckUpToDateStatus(params, grid, _dataMgr, use2ndVar);
+
     // Update primary variable data field
     if (!_userCoordinates.dataFieldUpToDate) {
         int success = _userCoordinates.UpdateFaceAndData(params, grid, _dataMgr);
@@ -1214,6 +1221,13 @@ void RayCaster::_colormapSpecialHandling(RayCasterParams *params)
 {
     // Left empty intentionally.
     // Subclasses, e.g., IsoSurfaceRenderer and DVRenderer, feel free to implement it.
+}
+
+bool RayCaster::_use2ndVariable(const RayCasterParams *params) const
+{
+    // By default a ray caster does not use a secondary variable.
+    // Subclasses can take advantage of it, for example, an IsoSurface Renderer.
+    return false;
 }
 
 void RayCaster::_updateDataTextures()

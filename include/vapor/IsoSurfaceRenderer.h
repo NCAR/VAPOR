@@ -16,6 +16,7 @@ protected:
     int  _load3rdPassShaders();
     void _3rdPassSpecialHandling(bool fast, int castMode);
     void _colormapSpecialHandling(RayCasterParams *params);
+    bool _use2ndVariable(const RayCasterParams *params) const;
 };
 
 };    // namespace VAPoR
