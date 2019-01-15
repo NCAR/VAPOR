@@ -359,7 +359,7 @@ void VariablesWidget::updateColorCombo()
         vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
         string         setVarReq = _rParams->GetColorMapVariableName();
 
-        string setVar = updateVarCombo(colormapVarCombo, vars, true, setVarReq);
+        string setVar = updateVarCombo(colormapVarCombo, vars, false, setVarReq);
 
         if (setVar != setVarReq) {
             bool enabled = _paramsMgr->GetSaveStateEnabled();
