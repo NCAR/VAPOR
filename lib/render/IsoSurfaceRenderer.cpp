@@ -74,3 +74,11 @@ void IsoSurfaceRenderer::_colormapSpecialHandling( RayCasterParams* params )
     _colorMapRange[2]         = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ?
                                 (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f ;
 }
+
+bool IsoSurfaceRenderer::_use2ndVariable( const RayCasterParams* params ) const
+{
+    if( params->UseSingleColor() )
+        return false;
+    else
+        return true;
+}
