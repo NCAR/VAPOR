@@ -67,7 +67,7 @@ class RENDER_API RayCaster : public Renderer {
         /* Also keep the current meta data */
         size_t myCurrentTimeStep;
         std::string myVariableName;
-        std::string mySecondVarName;
+        std::string my2ndVarName;
         int myRefinementLevel, myCompressionLevel;
         float myGridMin[3], myGridMax[3]; // Keeps the min and max of the current grid.
                                           // !!NOT!! the value retrieved from params.
@@ -90,7 +90,8 @@ class RENDER_API RayCaster : public Renderer {
 
         void CheckUpToDateStatus(const RayCasterParams *params,
                                  const StructuredGrid *grid,
-                                 DataMgr *dataMgr);
+                                 DataMgr *dataMgr,
+                                 bool use2ndVar);
         //
         // Update meta data, as well as pointers: 6 faces + dataField + missingValueMask
         //   It returns 0 upon success, and non-zero upon errors:
@@ -173,6 +174,7 @@ class RENDER_API RayCaster : public Renderer {
 
     virtual void _3rdPassSpecialHandling(bool fast, int castingMode);
     virtual void _colormapSpecialHandling(RayCasterParams *params);
+    virtual bool _use2ndVariable(const RayCasterParams *params) const;
 
     //
     // Initialization for 1) framebuffers and 2) textures
