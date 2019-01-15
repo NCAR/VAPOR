@@ -61,6 +61,7 @@ class RENDER_API RayCaster : public Renderer {
         unsigned char *missingValueMask; // 0 == is missing value; non-zero == not missing value
         float *vertCoords;               // vertex coordinates in user coordinates
         float *secondVarData;            // values of a second variable
+        unsigned char *secondVarMask;    // 0 == is missing value; non-zero == not missing value
 
         size_t dims[3]; // num. of samples along each axis.
 
@@ -108,6 +109,9 @@ class RENDER_API RayCaster : public Renderer {
         int UpdateVertCoords(const RayCasterParams *params,
                              const StructuredGrid *grid,
                              DataMgr *dataMgr);
+
+        int Update2ndVariable(const RayCasterParams *params,
+                              DataMgr *dataMgr);
 
         void FillCoordsXYPlane(const StructuredGrid *grid, // Input
                                size_t planeIdx,            // Input: which plane to retrieve
