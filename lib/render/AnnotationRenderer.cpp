@@ -256,14 +256,16 @@ void AnnotationRenderer::applyTransform(Transform *t) {
     assert(scale.size() == 3);
     assert(origin.size() == 3);
 
+    _glManager->matrixManager->Translate(translate[0], translate[1], translate[2]);
+
     _glManager->matrixManager->Translate(origin[0], origin[1], origin[2]);
-    _glManager->matrixManager->Scale(scale[0], scale[1], scale[2]);
+
     _glManager->matrixManager->Rotate(glm::radians(rotate[0]), 1, 0, 0);
     _glManager->matrixManager->Rotate(glm::radians(rotate[1]), 0, 1, 0);
     _glManager->matrixManager->Rotate(glm::radians(rotate[2]), 0, 0, 1);
-    _glManager->matrixManager->Translate(-origin[0], -origin[1], -origin[2]);
+    _glManager->matrixManager->Scale(scale[0], scale[1], scale[2]);
 
-    _glManager->matrixManager->Translate(translate[0], translate[1], translate[2]);
+    _glManager->matrixManager->Translate(-origin[0], -origin[1], -origin[2]);
 }
 
 void AnnotationRenderer::InScenePaint(size_t ts) {
