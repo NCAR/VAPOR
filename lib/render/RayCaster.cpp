@@ -648,23 +648,24 @@ int RayCaster::_paintGL(bool fast)
         _updateDataTextures();
     }
 
-    // Update vertex coordinates field
-    if (castingMode == CellTraversal && !_userCoordinates.vertCoordsUpToDate) {
-        int success = _userCoordinates.UpdateVertCoords(params, grid, _dataMgr);
-        if (success != 0) {
-            MyBase::SetErrMsg("Error occured during updating curvilinear coordinates!");
-            delete grid;
-            return JUSTERROR;
-        }
-    }
-
-    // Transform vertex coordinate data to eye space, and then send to GPU.
-    //   This step occurs at every loop.
+    // Update vertex coordinates field only when using CellTraversal method.
     glm::mat4 ModelView = Renderer::_glManager->matrixManager->GetModelViewMatrix();
-    if (castingMode == CellTraversal && _updateVertCoordsTexture(ModelView) != 0) {
-        MyBase::SetErrMsg("Error occured during calculating eye coordinates!");
-        delete grid;
-        return MEMERROR;
+    if (castingMode == CellTraversal) {
+        if (!_userCoordinates.vertCoordsUpToDate) {
+            int success = _userCoordinates.UpdateVertCoords(params, grid, _dataMgr);
+            if (success != 0) {
+                MyBase::SetErrMsg("Error occured during updating curvilinear coordinates!");
+                delete grid;
+                return JUSTERROR;
+            }
+        }
+
+        // Transform vertex coordinate data to eye space, and then send to GPU.
+        if (_updateVertCoordsTexture(ModelView) != 0) {
+            MyBase::SetErrMsg("Error occured during calculating eye coordinates!");
+            delete grid;
+            return MEMERROR;
+        }
     }
 
     // Update secondary variable
