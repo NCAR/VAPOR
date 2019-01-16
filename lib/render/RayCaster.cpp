@@ -230,9 +230,10 @@ void RayCaster::UserCoordinates::CheckUpToDateStatus(const RayCasterParams *para
         dataFieldUpToDate = false;
         vertCoordsUpToDate = false;
         secondVarUpToDate = false;
-        std::cout << "dataFieldUpToDate = " << dataFieldUpToDate << std::endl;
-        std::cout << "vertCoordsUpToDate = " << vertCoordsUpToDate << std::endl;
-        std::cout << "secondVarUpToDate = " << secondVarUpToDate << std::endl;
+        std::cout << "Metadata changes, resulting in all the following : " << std::endl;
+        std::cout << "  dataFieldUpToDate = " << dataFieldUpToDate << std::endl;
+        std::cout << "  vertCoordsUpToDate = " << vertCoordsUpToDate << std::endl;
+        std::cout << "  secondVarUpToDate = " << secondVarUpToDate << std::endl;
         return;
     }
 
@@ -245,9 +246,10 @@ void RayCaster::UserCoordinates::CheckUpToDateStatus(const RayCasterParams *para
             dataFieldUpToDate = false;
             vertCoordsUpToDate = false;
             secondVarUpToDate = false;
-            std::cout << "dataFieldUpToDate = " << dataFieldUpToDate << std::endl;
-            std::cout << "vertCoordsUpToDate = " << vertCoordsUpToDate << std::endl;
-            std::cout << "secondVarUpToDate = " << secondVarUpToDate << std::endl;
+            std::cout << "Grid extents changes, resulting in all the following : " << std::endl;
+            std::cout << "  dataFieldUpToDate = " << dataFieldUpToDate << std::endl;
+            std::cout << "  vertCoordsUpToDate = " << vertCoordsUpToDate << std::endl;
+            std::cout << "  secondVarUpToDate = " << secondVarUpToDate << std::endl;
             return;
         }
 
@@ -258,8 +260,8 @@ void RayCaster::UserCoordinates::CheckUpToDateStatus(const RayCasterParams *para
     }
 
     // Fourth, let's check the vertex coordinates.
-    // Actually, the only way vertex coordinates go out of date is changing the metadata,
-    //   which is already checked. We don't need to do anything here!
+    // Actually, the only way vertex coordinates go out of date is changing the metadata
+    //   and user extents, which is already checked. We don't need to do anything here!
 
     // Fifth, let check if second variable data is up to date
     if (use2ndVar && (my2ndVarName != params->GetColorMapVariableName())) {
