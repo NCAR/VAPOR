@@ -385,6 +385,7 @@ void VaporTable::setVerticalHeader(std::vector<std::string> header) {
     _table->setVerticalHeaderLabels(list);
     _table->resizeRowsToContents();
     _table->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    _table->verticalHeader()->setMaximumWidth(100);
 
     QTableWidgetItem *headerItem;
     for (int i = 0; i < size; i++) {
