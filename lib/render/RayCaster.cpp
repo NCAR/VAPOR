@@ -62,7 +62,9 @@ RayCaster::RayCaster(const ParamsMgr *pm,
       _colorMapTexOffset(3),
       _missingValueTexOffset(4),
       _vertCoordsTexOffset(5),
-      _depthTexOffset(6) {
+      _depthTexOffset(6),
+      _2ndVarDataTexOffset(7),
+      _2ndVarMaskTexOffset(8) {
     _backFaceTextureId = 0;
     _frontFaceTextureId = 0;
     _volumeTextureId = 0;
@@ -71,6 +73,8 @@ RayCaster::RayCaster(const ParamsMgr *pm,
     _vertCoordsTextureId = 0;
     _depthTextureId = 0;
     _frameBufferId = 0;
+    _2ndVarDataTexId = 0;
+    _2ndVarMaskTexId = 0;
 
     _vertexArrayId = 0;
     _vertexBufferId = 0;
@@ -123,6 +127,14 @@ RayCaster::~RayCaster() {
     if (_depthTextureId) {
         glDeleteTextures(1, &_depthTextureId);
         _depthTextureId = 0;
+    }
+    if (_2ndVarDataTexId) {
+        glDeleteTextures(1, &_2ndVarDataTexId);
+        _2ndVarDataTexId = 0;
+    }
+    if (_2ndVarMaskTexId) {
+        glDeleteTextures(1, &_2ndVarMaskTexId);
+        _2ndVarMaskTexId = 0;
     }
 
     // Delete vertex arrays
@@ -821,6 +833,16 @@ int RayCaster::_initializeFramebufferTextures() {
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
+    /* Generate and configure 3D texture: _2ndVarDataTexId */
+    glGenTextures(1, &_2ndVarDataTexId);
+    glActiveTexture(GL_TEXTURE0 + _2ndVarDataTexOffset);
+    glBindTexture(GL_TEXTURE_3D, _2ndVarDataTexId);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
     /* Generate and configure 1D texture: _colorMapTextureId */
     glGenTextures(1, &_colorMapTextureId);
     glActiveTexture(GL_TEXTURE0 + _colorMapTexOffset);
@@ -833,6 +855,16 @@ int RayCaster::_initializeFramebufferTextures() {
     glGenTextures(1, &_missingValueTextureId);
     glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
     glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    /* Generate and configure 3D texture: _2ndVarMaskTexId */
+    glGenTextures(1, &_2ndVarMaskTexId);
+    glActiveTexture(GL_TEXTURE0 + _2ndVarMaskTexOffset);
+    glBindTexture(GL_TEXTURE_3D, _2ndVarMaskTexId);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

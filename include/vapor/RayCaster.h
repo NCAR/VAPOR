@@ -137,6 +137,8 @@ class RENDER_API RayCaster : public Renderer {
     GLuint _colorMapTextureId;
     GLuint _vertCoordsTextureId;
     GLuint _depthTextureId;
+    GLuint _2ndVarDataTexId;
+    GLuint _2ndVarMaskTexId;
     const GLint _backFaceTexOffset;
     const GLint _frontFaceTexOffset;
     const GLint _volumeTexOffset;
@@ -144,6 +146,8 @@ class RENDER_API RayCaster : public Renderer {
     const GLint _missingValueTexOffset;
     const GLint _vertCoordsTexOffset;
     const GLint _depthTexOffset;
+    const GLint _2ndVarDataTexOffset;
+    const GLint _2ndVarMaskTexOffset;
 
     // buffers and vertex arrays
     GLuint _frameBufferId;
