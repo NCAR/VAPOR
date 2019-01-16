@@ -905,7 +905,10 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector
     //
     vector<string> coord_vars;
     bool           ok = GetVarCoordVars(varname, true, coord_vars);
-    assert(ok);
+    if (!ok) {
+        SetErrMsg("Failed to get coordinate variables for variable \"%s\"", varname.c_str());
+        return (NULL);
+    }
 
     while (min.size() > coord_vars.size()) {
         min.pop_back();
