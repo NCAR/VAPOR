@@ -727,6 +727,13 @@ int RayCaster::_paintGL( bool fast )
         return PARAMSERROR;
     }
 
+    // Return when there's no variable selected.
+    if( params->GetVariableName().empty() )
+    {
+        MyBase::SetErrMsg("Please select a valid 3D variable for operation!");
+        return PARAMSERROR;
+    }
+
     // Do not perform any fast rendering in cell traverse mode
     int castingMode  =  int(params->GetCastingMode());
     if( castingMode == CellTraversal && fast )
