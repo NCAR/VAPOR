@@ -276,27 +276,10 @@ void GeometryWidget::updateRangeLabels(
 
 	if (minExt.size() < 3) 
 	{
-		/*if (_dimFlags & THREED) {
-            Reinit(
-		    	(DimFlags)TWOD,
-		    	_varFlags,
-		    	_geometryFlags
-            );*/
-        //    QString text = "Z Coordinates aren't available for 2D variables!";
-		//    _zMinMaxLabel->setText(QString(text));
-        //}
         _zFrame->hide();
 	} 
 	else 
 	{
-        /*if (!(_dimFlags & THREED)) {
-    		Reinit(
-    			(DimFlags)THREED,
-    			_varFlags,
-    			_geometryFlags
-    		);
-        }*/
-
         if (_zFrame->isHidden() &&
             _dimFlags & THREED)
             _zFrame->show();
