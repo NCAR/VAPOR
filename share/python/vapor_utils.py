@@ -109,7 +109,7 @@ def Mag(*argv):
 	"""
 
 	for arg in argv:
-		assert isinstance(a, np.ndarray), 'A is not np.ndarray'
+		assert isinstance(arg, np.ndarray), 'A is not np.ndarray'
 
 	ndim = argv[0].ndim
 	for i in range(0,len(argv)-1):
