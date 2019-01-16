@@ -1304,7 +1304,7 @@ void RayCaster::_enableVertexAttribute(const float *buf, size_t length, bool att
 double RayCaster::_getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const
 {
 #ifdef WIN32
-    return 0.0;
+    return -1.0;
 #else
     return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0);
 #endif
