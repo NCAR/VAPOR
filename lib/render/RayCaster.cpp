@@ -494,7 +494,7 @@ int RayCaster::_paintGL(bool fast) {
 
     // Return when there's no variable selected.
     if (params->GetVariableName().empty()) {
-        MyBase::SetErrMsg("Please select a valid variable for operation!");
+        MyBase::SetErrMsg("Please select a valid 3D variable for operation!");
         return PARAMSERROR;
     }
 
