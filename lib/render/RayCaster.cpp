@@ -641,6 +641,7 @@ int RayCaster::_paintGL(bool fast) {
         MyBase::SetErrMsg("Error occured during retrieving RayCaster parameters!");
         return PARAMSERROR;
     }
+
     // Do not perform any fast rendering in cell traverse mode
     int castingMode = int(params->GetCastingMode());
     if (castingMode == CellTraversal && fast)
