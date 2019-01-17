@@ -14,8 +14,6 @@ class CustomLineEdit : public QLineEdit {
         CustomLineEdit(QWidget* parent = nullptr);
     protected:
         void focusOutEvent(QFocusEvent *event);
-    signals:
-        void validationError();
 };
 
 // class VaporTable
@@ -125,7 +123,6 @@ private:
  
  std::vector<std::string> convertToString(std::vector<double> values);
 
- //QLineEdit* createLineEdit(QString val);
  CustomLineEdit* createLineEdit(QString val);
 
  void setHorizontalHeader(std::vector<std::string> header);
