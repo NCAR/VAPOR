@@ -183,10 +183,9 @@ protected:
 
     void _load3rdPassUniforms( int                castingMode,
                                bool               fast,
-                               bool               insideVolume,
-                               bool               use2ndVar   ) const;
+                               bool               insideVolume ) const;
 
-    virtual void _3rdPassSpecialHandling( bool fast, int castingMode );
+    virtual void _3rdPassSpecialHandling( bool fast, int castingMode, bool use2ndVar );
     virtual void _colormapSpecialHandling( RayCasterParams* params );
     virtual bool _use2ndVariable( const RayCasterParams* params ) const;
 
