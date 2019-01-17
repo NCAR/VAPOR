@@ -3,9 +3,18 @@
 
 #include <QWidget>
 #include <QTableWidget>
+#include <QLineEdit>
 #include <sstream>
 
 struct Value;
+
+class CustomLineEdit : public QLineEdit {
+    Q_OBJECT
+    public:
+        CustomLineEdit(QWidget* parent = nullptr);
+    protected:
+        void focusOutEvent(QFocusEvent *event);
+};
 
 // class VaporTable
 //
@@ -114,7 +123,7 @@ private:
  
  std::vector<std::string> convertToString(std::vector<double> values);
 
- QLineEdit* createLineEdit(QString val);
+ CustomLineEdit* createLineEdit(QString val);
 
  void setHorizontalHeader(std::vector<std::string> header);
 
