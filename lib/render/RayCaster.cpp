@@ -781,6 +781,7 @@ int RayCaster::_paintGL( bool fast )
             delete grid;
             return JUSTERROR;
         }
+
         // Texture for primary variable data is updated only when data changes
         _updateDataTextures();
     }
@@ -801,6 +802,7 @@ int RayCaster::_paintGL( bool fast )
         }
 
         // Transform vertex coordinate data to eye space, and then send to GPU.
+        // This step takes place at every loop.
         if( _updateVertCoordsTexture( ModelView ) != 0 )
         {
             MyBase::SetErrMsg( "Error occured during calculating eye coordinates!" );
@@ -819,12 +821,16 @@ int RayCaster::_paintGL( bool fast )
             delete grid;
             return JUSTERROR;
         }
+    
+        _update2ndVarTextures();
     }
 
     // Collect existing depth value of the scene
-    glBindTexture(GL_TEXTURE_2D, _depthTextureId);
+    glActiveTexture( GL_TEXTURE0 + _depthTexOffset );
+    glBindTexture(GL_TEXTURE_2D,   _depthTextureId);
     glCopyTexImage2D(GL_TEXTURE_2D,   0, GL_DEPTH_COMPONENT32, _currentViewport[0], 
                      _currentViewport[1], _currentViewport[2], _currentViewport[3], 0);
+    glBindTexture(GL_TEXTURE_2D, 0 );
 
     glBindVertexArray( _vertexArrayId );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, _indexBufferId );
@@ -855,16 +861,15 @@ int RayCaster::_paintGL( bool fast )
     glBindTexture( GL_TEXTURE_1D,  _colorMapTextureId );
     glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA32F,     _colorMap.size()/4,
                    0, GL_RGBA,       GL_FLOAT,       _colorMap.data() );
+    glBindTexture( GL_TEXTURE_1D, 0 );
 
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
     glViewport( 0, 0, _currentViewport[2], _currentViewport[3] );
 
     // 3rd pass, perform ray casting
-    _drawVolumeFaces( 3, castingMode, cameraCellIdx, InversedMV, fast );
+    _drawVolumeFaces( 3, castingMode, cameraCellIdx, InversedMV, fast, use2ndVar );
         
     // Restore OpenGL values changed in this function.
-    glBindTexture( GL_TEXTURE_1D, 0 );
-    glBindTexture( GL_TEXTURE_2D, 0 );
     glBindVertexArray( 0 );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
     glDepthFunc(GL_LESS);
@@ -1009,7 +1014,8 @@ void RayCaster::_drawVolumeFaces( int                         whichPass,
                                   int                         castingMode,
                                   const std::vector<size_t>&  cameraCellIdx,
                                   const glm::mat4&            InversedMV,
-                                  bool                        fast )
+                                  bool                        fast,
+                                  bool                        use2ndVar )
 {
     assert( cameraCellIdx.size() == 0 || cameraCellIdx.size() == 3 );
     bool insideVolume = (cameraCellIdx.size() == 3);
@@ -1075,7 +1081,7 @@ void RayCaster::_drawVolumeFaces( int                         whichPass,
             }
             _3rdPassShader->SetUniform("entryCellIdx", entryCellIdx );
         }
-        _load3rdPassUniforms( castingMode, fast, insideVolume );
+        _load3rdPassUniforms( castingMode, fast, insideVolume, use2ndVar );
         _3rdPassSpecialHandling( fast, castingMode );
 
         glEnable(    GL_CULL_FACE );
@@ -1137,7 +1143,8 @@ void RayCaster::_drawVolumeFaces( int                         whichPass,
 
 void RayCaster::_load3rdPassUniforms( int                castingMode,
                                       bool               fast,
-                                      bool               insideVolume ) const
+                                      bool               insideVolume,
+                                      bool               use2ndVar   ) const
 {
     ShaderProgram *shader = _3rdPassShader;
     
@@ -1236,6 +1243,21 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
         glBindTexture(    GL_TEXTURE_3D,        _vertCoordsTextureId );
         shader->SetUniform("vertCoordsTexture", _vertCoordsTexOffset);
     }
+
+    if( use2ndVar )
+    {
+        glActiveTexture(  GL_TEXTURE0 +         _2ndVarDataTexOffset );
+        glBindTexture(    GL_TEXTURE_3D,        _2ndVarDataTexId );
+        shader->SetUniform("secondVarData",     _2ndVarDataTexOffset );
+
+        glActiveTexture(  GL_TEXTURE0 +         _2ndVarMaskTexOffset );
+        glBindTexture(    GL_TEXTURE_3D,        _2ndVarMaskTexId );
+        shader->SetUniform("secondVarMask",     _2ndVarMaskTexOffset );
+    }
+
+    glBindTexture( GL_TEXTURE_1D, 0 );
+    glBindTexture( GL_TEXTURE_2D, 0 );
+    glBindTexture( GL_TEXTURE_3D, 0 );
 }
     
 void RayCaster::_3rdPassSpecialHandling( bool fast, int castingMode )
@@ -1600,7 +1622,7 @@ bool RayCaster::_use2ndVariable( const RayCasterParams* params ) const
     // Subclasses can take advantage of it, for example, an IsoSurface Renderer.
     return false;
 }
-    
+
 void RayCaster::_updateDataTextures( )
 {
     const size_t* dims = _userCoordinates.dims;
@@ -1622,8 +1644,8 @@ void RayCaster::_updateDataTextures( )
     // Now we HAVE TO attach a missing value mask texture, because
     //   Intel driver on Mac doesn't like leaving the texture empty...
     glActiveTexture( GL_TEXTURE0 + _missingValueTexOffset );
-    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );  // Alignment adjustment. Stupid OpenGL thing.
     glBindTexture( GL_TEXTURE_3D,  _missingValueTextureId );
+    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );  // Alignment adjustment. Stupid OpenGL thing.
     if( _userCoordinates.missingValueMask )
     {
         glTexImage3D(  GL_TEXTURE_3D, 0, GL_R8UI, dims[0], dims[1], dims[2], 0,
@@ -1639,7 +1661,7 @@ void RayCaster::_updateDataTextures( )
 
     glBindTexture( GL_TEXTURE_3D, 0 );
 }
-    
+
 int RayCaster::_updateVertCoordsTexture( const glm::mat4& MV )
 {
     // First, transform every vertex coordinate to the eye space
@@ -1683,3 +1705,42 @@ int RayCaster::_updateVertCoordsTexture( const glm::mat4& MV )
     return 0;
 }
     
+
+void RayCaster::_update2ndVarTextures( )
+{
+    const size_t* dims = _userCoordinates.dims;
+
+    glActiveTexture( GL_TEXTURE0 + _2ndVarDataTexOffset );
+    glBindTexture( GL_TEXTURE_3D,  _2ndVarDataTexId );
+#ifdef Darwin
+    //
+    // Intel driver on MacOS seems to not able to correctly update the texture content
+    //   when the texture is moderately big. This workaround of loading a dummy texture
+    //   to force it to update seems to resolve this issue.
+    //
+    float dummyVolume[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+    glTexImage3D( GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume );
+#endif
+    glTexImage3D(  GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0,
+                   GL_RED, GL_FLOAT, _userCoordinates.secondVarData );
+
+    // Now we HAVE TO attach a missing value mask texture, because
+    //   Intel driver on Mac doesn't like leaving the texture empty...
+    glActiveTexture( GL_TEXTURE0 + _2ndVarMaskTexOffset );
+    glBindTexture( GL_TEXTURE_3D,  _2ndVarMaskTexId );
+    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );  // Alignment adjustment. Stupid OpenGL thing.
+    if( _userCoordinates.secondVarMask )
+    {
+        glTexImage3D(  GL_TEXTURE_3D, 0, GL_R8UI, dims[0], dims[1], dims[2], 0,
+                       GL_RED_INTEGER, GL_UNSIGNED_BYTE, _userCoordinates.secondVarMask );
+    }
+    else
+    {
+        unsigned char dummyMask[8] = { 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u };
+        glTexImage3D( GL_TEXTURE_3D, 0, GL_R8UI, 2, 2, 2, 0, 
+                      GL_RED_INTEGER, GL_UNSIGNED_BYTE, dummyMask );
+    }
+    glPixelStorei( GL_UNPACK_ALIGNMENT, 4 );    // Restore default alignment.
+
+    glBindTexture( GL_TEXTURE_3D, 0 );
+}
