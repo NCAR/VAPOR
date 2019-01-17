@@ -174,16 +174,16 @@ class RENDER_API RayCaster : public Renderer {
                           int whichCastingMode,
                           const std::vector<size_t> &cameraCellIdx,
                           const glm::mat4 &inversedMV = glm::mat4(0.0f),
-                          bool fast = false,
-                          bool use2ndVar = false);
+                          bool fast = false);
 
     void _load3rdPassUniforms(int castingMode,
                               bool fast,
                               bool insideVolume) const;
 
-    virtual void _3rdPassSpecialHandling(bool fast, int castingMode, bool use2ndVar);
+    virtual void _3rdPassSpecialHandling(bool fast, int castingMode);
     virtual void _colormapSpecialHandling(RayCasterParams *params);
     virtual bool _use2ndVariable(const RayCasterParams *params) const;
+    virtual void _update2ndVarTextures();
 
     //
     // Initialization for 1) framebuffers and 2) textures
@@ -194,7 +194,6 @@ class RENDER_API RayCaster : public Renderer {
     void _updateViewportWhenNecessary(const GLint *viewport);
     void _updateColormap(RayCasterParams *params);
     void _updateDataTextures();
-    void _update2ndVarTextures();
     int _updateVertCoordsTexture(const glm::mat4 &MV);
     void _enableVertexAttribute(const float *buf, size_t length, bool attrib1Enabled) const;
     void _initializeDirectionVectors();
