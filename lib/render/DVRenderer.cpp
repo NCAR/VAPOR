@@ -38,7 +38,7 @@ int DVRenderer::_load3rdPassShaders() {
     return 0; // Success
 }
 
-void DVRenderer::_3rdPassSpecialHandling(bool fast, int castingMode) {
+void DVRenderer::_3rdPassSpecialHandling(bool fast, int castingMode) const {
     // Collect existing depth value of the scene.
     glActiveTexture(GL_TEXTURE0 + _depthTexOffset);
     glBindTexture(GL_TEXTURE_2D, _depthTextureId);
@@ -47,4 +47,15 @@ void DVRenderer::_3rdPassSpecialHandling(bool fast, int castingMode) {
     _3rdPassShader->SetUniform("depthTexture", _depthTexOffset);
     // Note: Don't bind 0 to GL_TEXTURE_2D yet; it'll result in bad rendering,
     //   though I don't know why...
+}
+
+void DVRenderer::_colormapSpecialHandling(RayCasterParams *params) {
+    // Get colormap for the primary variable
+    VAPoR::MapperFunction *mapperFunc = params->GetMapperFunc();
+    mapperFunc->makeLut(_colorMap);
+    assert(_colorMap.size() % 4 == 0);
+    std::vector<double> range = mapperFunc->getMinMaxMapValue();
+    _colorMapRange[0] = float(range[0]);
+    _colorMapRange[1] = float(range[1]);
+    _colorMapRange[2] = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ? (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f;
 }

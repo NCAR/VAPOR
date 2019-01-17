@@ -16,28 +16,39 @@
 
 using namespace VAPoR;
 
-/*
-GLenum glCheckError_(const char *file, int line)
-{
+GLenum glCheckError_(const char *file, int line) {
     GLenum errorCode;
-    while ((errorCode = glGetError()) != GL_NO_ERROR)
-    {
+    while ((errorCode = glGetError()) != GL_NO_ERROR) {
         std::string error;
-        switch (errorCode)
-        {
-            case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
-            case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
-            case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
-            case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
-            case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
-            case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
-            case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
+        switch (errorCode) {
+        case GL_INVALID_ENUM:
+            error = "INVALID_ENUM";
+            break;
+        case GL_INVALID_VALUE:
+            error = "INVALID_VALUE";
+            break;
+        case GL_INVALID_OPERATION:
+            error = "INVALID_OPERATION";
+            break;
+        case GL_STACK_OVERFLOW:
+            error = "STACK_OVERFLOW";
+            break;
+        case GL_STACK_UNDERFLOW:
+            error = "STACK_UNDERFLOW";
+            break;
+        case GL_OUT_OF_MEMORY:
+            error = "OUT_OF_MEMORY";
+            break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION:
+            error = "INVALID_FRAMEBUFFER_OPERATION";
+            break;
         }
         std::cout << error << " | " << file << " (" << line << ")" << std::endl;
     }
     return errorCode;
 }
 #define glCheckError() glCheckError_(__FILE__, __LINE__)
+/*
 void glCheckError() { }
 */
 
@@ -764,8 +775,10 @@ int RayCaster::_paintGL(bool fast) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
+    glCheckError();
     // 3rd pass, perform ray casting
     _drawVolumeFaces(3, castingMode, cameraCellIdx, InversedMV, fast);
+    glCheckError();
 
     // Restore OpenGL values changed in this function.
     glBindVertexArray(0);
@@ -910,7 +923,7 @@ void RayCaster::_drawVolumeFaces(int whichPass,
                                  int castingMode,
                                  const std::vector<size_t> &cameraCellIdx,
                                  const glm::mat4 &InversedMV,
-                                 bool fast) {
+                                 bool fast) const {
     assert(cameraCellIdx.size() == 0 || cameraCellIdx.size() == 3);
     bool insideVolume = (cameraCellIdx.size() == 3);
 
@@ -969,8 +982,11 @@ void RayCaster::_drawVolumeFaces(int whichPass,
             }
             _3rdPassShader->SetUniform("entryCellIdx", entryCellIdx);
         }
+        glCheckError();
         _load3rdPassUniforms(castingMode, fast, insideVolume);
+        glCheckError();
         _3rdPassSpecialHandling(fast, castingMode);
+        glCheckError();
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -1015,7 +1031,9 @@ void RayCaster::_drawVolumeFaces(int whichPass,
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glDisableVertexAttribArray(0);
         } else {
+            glCheckError();
             _renderTriangleStrips(3, castingMode);
+            glCheckError();
         }
     }
 
@@ -1140,7 +1158,7 @@ void RayCaster::_load3rdPassUniforms(int castingMode,
     glBindTexture(GL_TEXTURE_3D, 0);
 }
 
-void RayCaster::_3rdPassSpecialHandling(bool fast, int castingMode) {
+void RayCaster::_3rdPassSpecialHandling(bool fast, int castingMode) const {
     // Left empty intentially.
     // Derived classes feel free to put stuff here.
 }
@@ -1166,6 +1184,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         attrib1Buffer = new int[big1 * big2 * 4]; // Enough length for all faces
     }
 
+    glCheckError();
     //
     // Render front face:
     //
@@ -1211,6 +1230,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
+    glCheckError();
 
     //
     // Render back face:
@@ -1245,6 +1265,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
+    glCheckError();
 
     //
     // Render top face:
@@ -1278,6 +1299,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
+    glCheckError();
 
     //
     // Render bottom face:
@@ -1311,6 +1333,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
+    glCheckError();
 
     // Each strip will have the same numOfVertices for the rest 2 faces.
     numOfVertices = by * 2;
@@ -1349,6 +1372,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
+    glCheckError();
 
     //
     // Render left face
@@ -1382,6 +1406,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
+    glCheckError();
 
     if (attrib1Enabled)
         delete[] attrib1Buffer;
@@ -1389,6 +1414,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glCheckError();
 }
 
 void RayCaster::_enableVertexAttribute(const float *buf,
@@ -1445,18 +1471,9 @@ void RayCaster::_updateColormap(RayCasterParams *params) {
         _colorMapRange[1] = 0.0f;
         _colorMapRange[2] = 1e-5f;
     } else {
-        // Get colormap for the primary variable
-        VAPoR::MapperFunction *mapperFunc = params->GetMapperFunc();
-        mapperFunc->makeLut(_colorMap);
-        assert(_colorMap.size() % 4 == 0);
-        std::vector<double> range = mapperFunc->getMinMaxMapValue();
-        _colorMapRange[0] = float(range[0]);
-        _colorMapRange[1] = float(range[1]);
-        _colorMapRange[2] = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ? (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f;
+        // Subclasses will have a chance here to use their own colormaps.
+        _colormapSpecialHandling(params);
     }
-
-    // Isosurface will have a chance to load 2nd variable colormap.
-    _colormapSpecialHandling(params);
 }
 
 void RayCaster::_colormapSpecialHandling(RayCasterParams *params) {
@@ -1468,6 +1485,10 @@ bool RayCaster::_use2ndVariable(const RayCasterParams *params) const {
     // By default a ray caster does not use a secondary variable.
     // Subclasses can take advantage of it, for example, an IsoSurface Renderer.
     return false;
+}
+
+void RayCaster::_update2ndVarTextures() {
+    // Intentionally left empty
 }
 
 void RayCaster::_updateDataTextures() {
@@ -1544,8 +1565,4 @@ int RayCaster::_updateVertCoordsTexture(const glm::mat4 &MV) {
     delete[] coordEye;
 
     return 0;
-}
-
-void RayCaster::_update2ndVarTextures() {
-    // Intentionally left empty
 }

@@ -174,13 +174,14 @@ class RENDER_API RayCaster : public Renderer {
                           int whichCastingMode,
                           const std::vector<size_t> &cameraCellIdx,
                           const glm::mat4 &inversedMV = glm::mat4(0.0f),
-                          bool fast = false);
+                          bool fast = false) const;
 
     void _load3rdPassUniforms(int castingMode,
                               bool fast,
                               bool insideVolume) const;
 
-    virtual void _3rdPassSpecialHandling(bool fast, int castingMode);
+    virtual void _3rdPassSpecialHandling(bool fast, int castingMode) const;
+    // params->GetMapperFunc() does not allow "params" to be const.
     virtual void _colormapSpecialHandling(RayCasterParams *params);
     virtual bool _use2ndVariable(const RayCasterParams *params) const;
     virtual void _update2ndVarTextures();
