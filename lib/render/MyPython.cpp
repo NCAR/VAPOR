@@ -74,22 +74,13 @@ int MyPython::Initialize() {
 	if (s) m_pyHome = s;
 
 	if (m_pyHome.empty()) {
-
-		// Set pythonhome to the vapor installation (based on VAPOR_HOME)
-		//
-
 		// On windows use VAPOR_HOME/lib/python2.7; VAPOR_HOME works 
 		// on Linux and Mac
-		//
-#ifdef _WINDOWS
-        m_pyHome = GetResourcePath("python27");
-#else
-        m_pyHome = GetResourcePath("");
-#endif
+		m_pyHome = GetPythonDir();
 	}
 
 	if (! m_pyHome.empty()) {
-#ifdef _WINDOWS
+#ifdef WIN32
 		Py_SetPythonHome((char *) m_pyHome.c_str());
 		MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
 #else
