@@ -70,8 +70,18 @@ FILE *OpenLog(string path_var) {
     return (fp);
 }
 
+#include <vapor/ResourcePath.h>
+
 QApplication *app;
 int main(int argc, char **argv) {
+    freopen("out.txt", "w", stdout);
+    freopen("err.txt", "w", stderr);
+
+    printf("GetPythonDir() = \"%s\"\n", Wasp::GetPythonDir().c_str());
+    printf("GetPythonPath() = \"%s\"\n", Wasp::GetPythonPath().c_str());
+
+    //return 0;
+
     //Install our own message handler.
     //Needed for SGI to avoid dithering:
 
@@ -137,6 +147,7 @@ int main(int argc, char **argv) {
     for (int i = 1; i < argc; i++) {
         files.push_back(argv[i]);
     }
+    files.push_back("C:\\Users\\stasj-admin\\Desktop\\Katrina-3.0.0.nc");
     MainForm *mw = new MainForm(files, app);
 
     //StartupParams* sParams = new StartupParams(0);
