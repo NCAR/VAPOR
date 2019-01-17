@@ -62,8 +62,7 @@ Box::Box(
 	angles.push_back(0.);
 	SetAngles(angles);
 
-	SetOrientation(2); 
-
+	SetOrientation(THREE_D); 
 }
 
 Box::Box(

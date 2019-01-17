@@ -43,6 +43,7 @@ public:
         XY = 0,
         XZ = 1,
         YZ = 2,
+        THREE_D = 3
     };
 	
 	//! Create a Box object from scratch
