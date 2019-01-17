@@ -24,6 +24,7 @@
 #include <vapor/Renderer.h>
 #include <vapor/Transform.h>
 #include <vapor/DataMgrUtils.h>
+#include <vapor/GLManager.h>
 
 namespace VAPoR {
 
@@ -105,8 +106,32 @@ class RENDER_API AnnotationRenderer : public MyBase {
                   double width,
                   std::vector<double> color);
 
-    //! Render the domain fram
-    void drawDomainFrame(size_t ts) const;
+    void _makeTransformMatrix(
+        const Transform *transform,
+        glm::mat4 &transformMatrix) const;
+
+    void _applyDataMgrCornerToDomain(
+        std::vector<double> *domainExtents,
+        const glm::vec4 *dataMgrCorner,
+        const glm::mat4 &transformMatrix) const;
+
+    void _getDataMgrCorner(
+        const int cornerNumber,
+        glm::vec4 *dataMgrCorner,
+        const std::vector<double> &minDataMgrExtents,
+        const std::vector<double> &maxDataMgrExtents) const;
+
+    void _applyDataMgrToDomainExtents(
+        std::vector<double> &domainExtents,
+        const std::vector<double> &dataMgrMinExts,
+        const std::vector<double> &dataMgrMaxExts,
+        const Transform *transform) const;
+
+    void _calculateDomainExtents(
+        std::vector<double> &domainExtents) const;
+
+    void drawDomainFrame(
+        const std::vector<double> corners) const;
 
     std::vector<double> getDomainExtents() const;
     AxisAnnotation *getCurrentAxisAnnotation();
@@ -123,6 +148,11 @@ class RENDER_API AnnotationRenderer : public MyBase {
     // Draw the axis lines, while building text labels.
     //
     void drawAxisTics(AxisAnnotation *aa = NULL);
+    void drawAxisTics(
+        AxisAnnotation *aa,
+        std::vector<double> minTic,
+        std::vector<double> maxTic);
+
     void applyTransform(Transform *t);
     void renderText(double text, double coords[], AxisAnnotation *aa = NULL);
     Transform *getTransform(string dataMgr = "");
@@ -133,7 +163,9 @@ class RENDER_API AnnotationRenderer : public MyBase {
     // Draw Axis arrows
     //
     void drawAxisArrows(
-        std::vector<double> minExts, std::vector<double> maxExts);
+        std::vector<double> minExts,
+        std::vector<double> maxExts,
+        Transform *transform);
 
 #ifdef VAPOR3_0_0_ALPHA
     //! Static method to convert axis coordinates between user and lat-lon
