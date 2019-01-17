@@ -505,7 +505,21 @@ void NavigationEventRouter::updateTransforms() {
 				vector<double> origin;
 				DataStatus *dataStatus = _controlExec->GetDataStatus();
 
-				dataStatus->GetActiveExtents(paramsMgr, winNames[i], names[j], ts, minExts, maxExts);
+                size_t local_ts = dataStatus->MapGlobalToLocalTimeStep(
+                    names[i],
+                    ts
+                );
+                DataMgr* dataMgr = dataStatus->GetDataMgr(names[j]);
+                std::vector<int> axes;
+                DataMgrUtils::GetExtents(
+                    dataMgr,
+                    local_ts,
+                    string(),
+                    minExts,
+                    maxExts,
+                    -1
+                );
+
 				origin.resize(minExts.size());
 				for (int k = 0; k < minExts.size(); k++)
 					origin[k] = minExts[k] + (maxExts[k] - minExts[k]) * 0.5;
