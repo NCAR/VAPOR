@@ -118,6 +118,8 @@ void CopyRegionWidget::_configurePlanarBox(const VAPoR::Box *myBox, std::vector<
     else
         return;
 
+    assert(planarAxis >= 0 && planarAxis < (*myMin).size() && planarAxis < (*myMax).size());
+
     double min = (*myMin)[planarAxis];
     double max = (*myMax)[planarAxis];
     double plane = (min + max) / 2.f;
