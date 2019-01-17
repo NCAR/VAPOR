@@ -20,9 +20,10 @@ class RENDER_API IsoSurfaceRenderer : public RayCaster {
 
   protected:
     int _load3rdPassShaders();
-    void _3rdPassSpecialHandling(bool fast, int castMode, bool use2ndVar);
+    void _3rdPassSpecialHandling(bool fast, int castMode);
     void _colormapSpecialHandling(RayCasterParams *params);
     bool _use2ndVariable(const RayCasterParams *params) const;
+    void _update2ndVarTextures();
 };
 
 }; // namespace VAPoR
