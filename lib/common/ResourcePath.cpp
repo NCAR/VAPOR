@@ -98,7 +98,7 @@ std::string Wasp::GetPythonPath() {
 
 std::string Wasp::GetPythonDir() {
 #ifdef WIN32
-#error TODO Check
+    return GetPythonPath();
 #endif
 
     string path = GetResourcePath("");
