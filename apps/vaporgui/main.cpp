@@ -72,6 +72,7 @@ FILE *OpenLog(string path_var) {
 
 QApplication *app;
 int main(int argc, char **argv) {
+
     //Install our own message handler.
     //Needed for SGI to avoid dithering:
 
