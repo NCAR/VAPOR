@@ -192,7 +192,8 @@ int Visualizer::paintEvent(bool fast)
         if (myrc < 0)
             rc = -1;
 	}
-    
+
+  
     //Draw the domain frame and other in-scene features
     _vizFeatures->InScenePaint(_getCurrentTimestep());
     GL_ERR_BREAK();
