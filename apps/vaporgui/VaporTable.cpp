@@ -26,6 +26,15 @@ QString selectionColor = "{color: white; background-color: blue}";
 QString normalColor = "{ color: black; background: white; }";
 } // namespace
 
+CustomLineEdit::CustomLineEdit(
+    QWidget *parent) : QLineEdit(parent) {}
+
+void CustomLineEdit::focusOutEvent(QFocusEvent *event) {
+    QLineEdit::focusOutEvent(event);
+    if (!hasAcceptableInput())
+        undo();
+}
+
 VaporTable::VaporTable(
     QTableWidget *table,
     bool lastRowIsCheckboxes,
@@ -182,7 +191,7 @@ void VaporTable::setTableCells(std::vector<std::string> values) {
 
             QString qVal = QString::fromStdString(value);
 
-            QLineEdit *edit = createLineEdit(qVal);
+            CustomLineEdit *edit = createLineEdit(qVal);
             edit->setProperty("row", j);
             edit->setProperty("col", i);
             if (_showToolTips)
@@ -263,8 +272,8 @@ void VaporTable::addCheckbox(int row, int column, bool checked) {
     cbWidget->installEventFilter(this);
 }
 
-QLineEdit *VaporTable::createLineEdit(QString val) {
-    QLineEdit *edit = new QLineEdit(_table);
+CustomLineEdit *VaporTable::createLineEdit(QString val) {
+    CustomLineEdit *edit = new CustomLineEdit(_table);
     setValidator(edit);
 
     edit->setText(val);
