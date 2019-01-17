@@ -39,6 +39,11 @@ private slots:
 
 private:
 	void updateCopyCombo();
+    void _configurePlanarBox(
+        const VAPoR::Box* myBox,
+        std::vector<double> *myMin,
+        std::vector<double> *myMax
+    ) const;
 
 	VAPoR::ParamsMgr* _paramsMgr;
 	VAPoR::RenderParams* _rParams;
