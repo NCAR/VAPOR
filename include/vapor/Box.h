@@ -37,7 +37,7 @@ namespace VAPoR {
 //!
 class PARAMS_API Box : public ParamsBase {
 public:
-    enum Orientation { XY = 0, XZ = 1, YZ = 2, THREE_D = 3 };
+    enum Orientation { XY = 0, XZ = 1, YZ = 2, XYZ = 3 };
 
     //! Create a Box object from scratch
     //
