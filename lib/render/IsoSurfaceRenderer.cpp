@@ -30,7 +30,7 @@ int IsoSurfaceRenderer::_load3rdPassShaders()
     return 0;    // Success
 }
 
-void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast, int castingMode)
+void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast, int castingMode, bool use2ndVar)
 {
     IsoSurfaceParams *  params = dynamic_cast<IsoSurfaceParams *>(GetActiveParams());
     std::vector<double> isoValues = params->GetIsoValues();
@@ -46,6 +46,19 @@ void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast, int castingMode)
 
     _3rdPassShader->SetUniform("numOfIsoValues", numOfIsoValues);
     _3rdPassShader->SetUniformArray("isoValues", 4, validValues.data());
+
+    _3rdPassShader->SetUniform("use2ndVar", int(use2ndVar));
+    if (use2ndVar) {
+        glActiveTexture(GL_TEXTURE0 + _2ndVarDataTexOffset);
+        glBindTexture(GL_TEXTURE_3D, _2ndVarDataTexId);
+        _3rdPassShader->SetUniform("secondVarData", _2ndVarDataTexOffset);
+
+        glActiveTexture(GL_TEXTURE0 + _2ndVarMaskTexOffset);
+        glBindTexture(GL_TEXTURE_3D, _2ndVarMaskTexId);
+        _3rdPassShader->SetUniform("secondVarMask", _2ndVarMaskTexOffset);
+
+        glBindTexture(GL_TEXTURE_3D, 0);
+    }
 }
 
 void IsoSurfaceRenderer::_colormapSpecialHandling(RayCasterParams *params)
