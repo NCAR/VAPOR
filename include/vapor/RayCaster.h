@@ -182,7 +182,7 @@ class RENDER_API RayCaster : public Renderer {
 
     virtual void _3rdPassSpecialHandling(bool fast, int castingMode) const;
     // params->GetMapperFunc() does not allow "params" to be const.
-    virtual void _colormapSpecialHandling(RayCasterParams *params);
+    virtual void _colormapSpecialHandling();
     virtual bool _use2ndVariable(const RayCasterParams *params) const;
     virtual void _update2ndVarTextures();
 

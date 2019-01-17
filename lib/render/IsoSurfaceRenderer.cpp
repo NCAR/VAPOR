@@ -72,7 +72,8 @@ void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast, int castingMode) con
     glBindTexture(GL_TEXTURE_3D, 0);
 }
 
-void IsoSurfaceRenderer::_colormapSpecialHandling(RayCasterParams *params) {
+void IsoSurfaceRenderer::_colormapSpecialHandling() {
+    IsoSurfaceParams *params = dynamic_cast<IsoSurfaceParams *>(GetActiveParams());
     if (_use2ndVariable(params)) {
         VAPoR::MapperFunction *mapperFunc = params->RenderParams::GetMapperFunc(params->GetColorMapVariableName());
         mapperFunc->makeLut(_colorMap);
