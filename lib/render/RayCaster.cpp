@@ -487,9 +487,9 @@ RayCaster::UserCoordinates::Update2ndVariable( const RayCasterParams* params,
     }    
 
     // Make sure the secondary grid shares the same dimention as the primary grid
-    std::vector<size_t> gridDims = grid->GetDimensions();
+    std::vector<size_t> seconDims = grid->GetDimensions();
     for( int i = 0; i < 3; i++ )
-        if( gridDims[i] != dims[i] )
+        if( seconDims[i] != dims[i] )
         {
             MyBase::SetErrMsg("The secondary and primary variable grids have different dimensions; "
                               "the behavior is undefined in this case.");
