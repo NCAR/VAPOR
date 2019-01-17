@@ -8,6 +8,8 @@ uniform sampler2D  frontFaceTexture;
 uniform sampler3D  volumeTexture;
 uniform usampler3D missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D  colorMapTexture;
+uniform sampler3D  secondVarDataTexture;
+uniform usampler3D secondVarMaskTexture; // !!unsigned integer!!
 
 uniform ivec3 volumeDims;        // number of vertices of this volumeTexture
 uniform ivec2 viewportDims;      // width and height of this viewport
@@ -17,8 +19,9 @@ uniform vec3  boxMax;            // max coordinates of the bounding box of this 
 uniform vec3  colorMapRange;     // min and max and diff values on this color map
 
 uniform float stepSize1D;        // ray casting step size
-uniform bool  flags[4];
 uniform float lightingCoeffs[4]; // lighting parameters
+uniform bool  flags[4];
+uniform bool  use2ndVar;
 
 uniform int   numOfIsoValues;    // how many iso values are valid in isoValues array?
 uniform float isoValues[4];      // currently set there are at most 4 iso values.
@@ -32,7 +35,7 @@ uniform mat4 Projection;
 //
 const float ULP        = 1.2e-7f;
 const float ULP10      = 1.2e-6f;
-const float Opaque     = 0.999;
+const float Opaque     = 0.99;
 bool  fast             = flags[0];
 bool  lighting         = flags[1];
 bool  eyeInsideVolume  = flags[2];
@@ -54,6 +57,9 @@ mat4  transposedInverseMV = transpose( inversedMV );
 bool ShouldSkip( const in vec3 tc, const in vec3 mc )
 {
     if( hasMissingValue && (texture(missingValueMaskTexture, tc).r != 0u) )
+        return true;
+
+    if( use2ndVar && (texture(secondVarMaskTexture, tc).r != 0u) )
         return true;
 
     vec4 positionModel = vec4( mc, 1.0 );
@@ -159,7 +165,7 @@ void main(void)
     // let's do a ray casting! 
     for( int stepi = 1; stepi <= nSteps; stepi++ )
     {
-        if( color.a > 0.999 )  // You can still see through with 0.99...
+        if( color.a > Opaque )
             break;
 
         vec3 step2Eye     = startEye    + stepSize3D * float( stepi );
@@ -177,12 +183,22 @@ void main(void)
 
         for( int j = 0; j < numOfIsoValues; j++ )
         {
-            if( (isoValues[j] - step1Value) * (isoValues[j] - step2Value) < 0.0 )
+            float isoValJ = isoValues[j];
+            if( ( isoValJ - step1Value) * (isoValJ - step2Value) < 0.0 )
             {
-                float valTrans  = (isoValues[j] - colorMapRange.x) / colorMapRange.z;
-                vec4  backColor = texture( colorMapTexture, valTrans );
-                float weight    = (isoValues[j] - step1Value) / (step2Value - step1Value);
+                float weight    = (isoValJ - step1Value) / (step2Value - step1Value);
+
+                // Retrieve data value of the secondary variable at the same location
+                //   if color mapping variable is enabled.
+                if( use2ndVar )
+                {
+                    vec3 isoTex = mix( step1Texture, step2Texture, weight );
+                    isoValJ     = texture( secondVarDataTexture,   isoTex ).x;
+                }
+
                 vec3  isoEye    = mix( step1Eye, step2Eye, weight );
+                float valTrans  = (isoValJ - colorMapRange.x) / colorMapRange.z;
+                vec4  backColor = texture( colorMapTexture, valTrans );
 
                 // Apply lighting (in eye space)
                 if( lighting && backColor.a > 0.001 )
