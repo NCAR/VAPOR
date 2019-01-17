@@ -32,7 +32,11 @@ int DVRenderer::_load3rdPassShaders()
 
 void DVRenderer::_3rdPassSpecialHandling(bool fast, int castingMode, bool use2ndVar)
 {
+    // Collect existing depth value of the scene.
     glActiveTexture(GL_TEXTURE0 + _depthTexOffset);
     glBindTexture(GL_TEXTURE_2D, _depthTextureId);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, _currentViewport[0], _currentViewport[1], _currentViewport[2], _currentViewport[3], 0);
     _3rdPassShader->SetUniform("depthTexture", _depthTexOffset);
+    // Note: Don't bind 0 to GL_TEXTURE_2D yet; it'll result in bad rendering,
+    //   though I don't know why...
 }

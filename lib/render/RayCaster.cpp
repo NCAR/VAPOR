@@ -682,12 +682,6 @@ int RayCaster::_paintGL(bool fast)
         _update2ndVarTextures();
     }
 
-    // Collect existing depth value of the scene
-    glActiveTexture(GL_TEXTURE0 + _depthTexOffset);
-    glBindTexture(GL_TEXTURE_2D, _depthTextureId);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, _currentViewport[0], _currentViewport[1], _currentViewport[2], _currentViewport[3], 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
     glBindVertexArray(_vertexArrayId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
 
