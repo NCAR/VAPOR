@@ -53,9 +53,10 @@ void DVRenderer::_3rdPassSpecialHandling( bool fast, int castingMode ) const
     //   though I don't know why...
 }
 
-void DVRenderer::_colormapSpecialHandling( RayCasterParams* params )
+void DVRenderer::_colormapSpecialHandling( )
 {
     // Get colormap for the primary variable
+    DVRParams*             params     = dynamic_cast<DVRParams*>( GetActiveParams() );
     VAPoR::MapperFunction* mapperFunc = params->GetMapperFunc();
     mapperFunc->makeLut( _colorMap );
     assert( _colorMap.size()  % 4 == 0 );
