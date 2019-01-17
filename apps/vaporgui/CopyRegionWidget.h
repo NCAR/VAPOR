@@ -41,6 +41,10 @@ private slots:
 
 private:
     void updateCopyCombo();
+
+    // Configures a box to have equal minimum and maximum
+    // extents along an axis, if the box is planar.  If not,
+    // the function returns.
     void _configurePlanarBox(const VAPoR::Box *myBox, std::vector<double> *myMin, std::vector<double> *myMax) const;
 
     VAPoR::ParamsMgr *   _paramsMgr;
