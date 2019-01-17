@@ -1081,8 +1081,8 @@ void RayCaster::_drawVolumeFaces( int                         whichPass,
             }
             _3rdPassShader->SetUniform("entryCellIdx", entryCellIdx );
         }
-        _load3rdPassUniforms( castingMode, fast, insideVolume, use2ndVar );
-        _3rdPassSpecialHandling( fast, castingMode );
+        _load3rdPassUniforms( castingMode, fast, insideVolume );
+        _3rdPassSpecialHandling( fast, castingMode, use2ndVar );
 
         glEnable(    GL_CULL_FACE );
         glCullFace(  GL_BACK );
@@ -1143,8 +1143,7 @@ void RayCaster::_drawVolumeFaces( int                         whichPass,
 
 void RayCaster::_load3rdPassUniforms( int                castingMode,
                                       bool               fast,
-                                      bool               insideVolume,
-                                      bool               use2ndVar   ) const
+                                      bool               insideVolume ) const
 {
     ShaderProgram *shader = _3rdPassShader;
     
@@ -1244,23 +1243,12 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
         shader->SetUniform("vertCoordsTexture", _vertCoordsTexOffset);
     }
 
-    if( use2ndVar )
-    {
-        glActiveTexture(  GL_TEXTURE0 +         _2ndVarDataTexOffset );
-        glBindTexture(    GL_TEXTURE_3D,        _2ndVarDataTexId );
-        shader->SetUniform("secondVarData",     _2ndVarDataTexOffset );
-
-        glActiveTexture(  GL_TEXTURE0 +         _2ndVarMaskTexOffset );
-        glBindTexture(    GL_TEXTURE_3D,        _2ndVarMaskTexId );
-        shader->SetUniform("secondVarMask",     _2ndVarMaskTexOffset );
-    }
-
     glBindTexture( GL_TEXTURE_1D, 0 );
     glBindTexture( GL_TEXTURE_2D, 0 );
     glBindTexture( GL_TEXTURE_3D, 0 );
 }
     
-void RayCaster::_3rdPassSpecialHandling( bool fast, int castingMode )
+void RayCaster::_3rdPassSpecialHandling( bool fast, int castingMode, bool use2ndVar )
 {
     // Left empty intentially.
     // Derived classes feel free to put stuff here.
