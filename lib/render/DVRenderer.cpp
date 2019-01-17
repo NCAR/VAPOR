@@ -30,7 +30,7 @@ int DVRenderer::_load3rdPassShaders()
     return 0;    // Success
 }
 
-void DVRenderer::_3rdPassSpecialHandling(bool fast, int castingMode, bool use2ndVar)
+void DVRenderer::_3rdPassSpecialHandling(bool fast, int castingMode)
 {
     // Collect existing depth value of the scene.
     glActiveTexture(GL_TEXTURE0 + _depthTexOffset);
