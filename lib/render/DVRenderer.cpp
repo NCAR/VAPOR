@@ -38,7 +38,7 @@ int DVRenderer::_load3rdPassShaders() {
     return 0; // Success
 }
 
-void DVRenderer::_3rdPassSpecialHandling(bool fast, int castingMode) {
+void DVRenderer::_3rdPassSpecialHandling(bool fast, int castingMode, bool use2ndVar) {
     glActiveTexture(GL_TEXTURE0 + _depthTexOffset);
     glBindTexture(GL_TEXTURE_2D, _depthTextureId);
     _3rdPassShader->SetUniform("depthTexture", _depthTexOffset);
