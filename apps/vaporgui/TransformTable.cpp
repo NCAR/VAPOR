@@ -90,8 +90,6 @@ void TransformTable::UpdateScales()
         for (int i = 0; i < transformScales.size(); i++) { allScales.push_back(transformScales[i]); }
     }
 
-    // if (_verticalHeaders.size())
-
     _scaleTable->Update(numDatasets, 3, allScales, _verticalHeaders, _horizontalHeaders);
 }
 
