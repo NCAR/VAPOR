@@ -44,7 +44,7 @@ std::string FileUtils::Basename(const std::string &path)
 #ifdef WIN32
     char fileName[_MAX_FNAME];
     char extension[_MAX_EXT];
-    _splitpath_s(path.c_str(), NULL, 0, NULL, 0, fileName, _MAX_FNAME, extension, _MAX_EXT);
+    _splitpath_s(CleanupPath(path).c_str(), NULL, 0, NULL, 0, fileName, _MAX_FNAME, extension, _MAX_EXT);
     return string(fileName) + string(extension);
 #else
     char * copy = strdup(path.c_str());
@@ -57,10 +57,9 @@ std::string FileUtils::Basename(const std::string &path)
 std::string FileUtils::Dirname(const std::string &path)
 {
 #ifdef WIN32
-    string pathCopy = CleanupPath(path);
-    char   drive[_MAX_DRIVE];
-    char   dir[_MAX_DIR];
-    _splitpath_s(pathCopy.c_str(), drive, _MAX_DRIVE, dir, _MAX_DIR, NULL, 0, NULL, 0);
+    char drive[_MAX_DRIVE];
+    char dir[_MAX_DIR];
+    _splitpath_s(CleanupPath(path).c_str(), drive, _MAX_DRIVE, dir, _MAX_DIR, NULL, 0, NULL, 0);
     return CleanupPath(string(drive) + string(dir));
 #else
     char * copy = strdup(path.c_str());
@@ -128,7 +127,6 @@ bool FileUtils::IsDirectory(const std::string &path) { return FileUtils::GetFile
 FileType FileUtils::GetFileType(const std::string &path)
 {
     struct STAT64 s;
-    printf("STAT(%s) = %i\n", path.c_str(), STAT64(path.c_str(), &s));
     if (STAT64(path.c_str(), &s) == 0) {
         if (s.st_mode & S_IFDIR)
             return FileType::Directory;
