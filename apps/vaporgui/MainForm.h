@@ -164,17 +164,18 @@ class MainForm : public QMainWindow {
 
     // Capture menu
     //
-    QAction *_captureStartJpegCaptureAction;
-    QAction *_captureStartPngCaptureAction;
-    QAction *_captureStartTiffCaptureAction;
+    QMenu *_singleImageMenu;
+    QAction *_captureStartJpegAction;
+    QAction *_captureStartPngAction;
+    QAction *_captureStartTiffAction;
 
-    QAction *_captureEndJpegCaptureAction;
-    QAction *_captureEndPngCaptureAction;
-    QAction *_captureEndTiffCaptureAction;
+    QAction *_captureEndJpegAction;
+    QAction *_captureEndPngAction;
+    QAction *_captureEndTiffAction;
 
-    QAction *_captureSingleJpegCaptureAction;
-    QAction *_captureSinglePngCaptureAction;
-    QAction *_captureSingleTiffCaptureAction;
+    QAction *_captureSingleJpegAction;
+    QAction *_captureSinglePngAction;
+    QAction *_captureSingleTiffAction;
 
     // Toolbars:
     //
@@ -340,7 +341,9 @@ class MainForm : public QMainWindow {
     void sessionNew();
     void startAnimCapture();
     void endAnimCapture();
-    void captureSingleImage(string filter);
+    void captureSingleImage(
+        string filter,
+        string defaultSuffix);
     void captureSingleJpeg();
     void captureSinglePng();
     void captureSingleTiff();
