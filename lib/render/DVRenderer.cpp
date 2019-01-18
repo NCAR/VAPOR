@@ -37,7 +37,7 @@ void DVRenderer::_3rdPassSpecialHandling(bool fast, int castingMode) const
     glBindTexture(GL_TEXTURE_2D, _depthTextureId);
     glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, _currentViewport[0], _currentViewport[1], _currentViewport[2], _currentViewport[3], 0);
     _3rdPassShader->SetUniform("depthTexture", _depthTexOffset);
-    // Note: Don't bind 0 to GL_TEXTURE_2D yet; it'll result in bad rendering,
+    // Note: Don't bind 0 to GL_TEXTURE_2D at this point yet; it'll result in bad rendering,
     //   though I don't know why...
 }
 
@@ -52,4 +52,6 @@ void DVRenderer::_colormapSpecialHandling()
     _colorMapRange[0] = float(range[0]);
     _colorMapRange[1] = float(range[1]);
     _colorMapRange[2] = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ? (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f;
+    // Note: _colorMapRange[2] keeps the range of a color map, which will later be used in the shader.
+    //       However, this range cannot be zero to prevent infinity values being generated.
 }
