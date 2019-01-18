@@ -580,7 +580,7 @@ void Visualizer::_incrementPath(string &s)
     // truncate the last 4 characters (remove .tif or .jpg)
     string s1 = s.substr(0, s.length() - 4);
     string s_end = s.substr(s.length() - 4);
-    if (s_end == "jpeg") {
+    if (s_end == "jpeg" || s_end == "tiff") {
         s1 = s.substr(0, s.length() - 5);
         s_end = s.substr(s.length() - 5);
     }
