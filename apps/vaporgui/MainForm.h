@@ -170,17 +170,16 @@ private:
  // Capture menu
  //
  QMenu*   _singleImageMenu;
- QAction* _captureStartJpegAction;
- QAction* _captureStartPngAction;
- QAction* _captureStartTiffAction;
-
- QAction* _captureEndJpegAction;
- QAction* _captureEndPngAction;
- QAction* _captureEndTiffAction;
-
  QAction* _captureSingleJpegAction;
  QAction* _captureSinglePngAction;
  QAction* _captureSingleTiffAction;
+
+ QMenu*   _imageSequenceMenu;
+ QAction* _captureJpegSequenceAction;
+ QAction* _capturePngSequenceAction;
+ QAction* _captureTiffSequenceAction;
+
+ QAction* _captureEndImageAction;
 
  // Toolbars:
  //
@@ -354,7 +353,13 @@ private slots:
  void importCFData();
  void importMPASData();
  void sessionNew();
- void startAnimCapture();
+ void captureJpegSequence();
+ void captureTiffSequence();
+ void capturePngSequence();
+ void startAnimCapture(
+    string filter,
+    string defaultSuffix
+ );
  void endAnimCapture();
  void captureSingleImage( 
     string filter,
