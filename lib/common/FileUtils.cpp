@@ -6,6 +6,7 @@
 
 #ifdef WIN32
 #include <Windows.h>
+#include <direct.h>
 #else
 #include <libgen.h>
 #endif
@@ -64,7 +65,10 @@ std::string FileUtils::Dirname(const std::string &path) {
                  dir, _MAX_DIR,
                  NULL, 0,
                  NULL, 0);
-    return string(drive) + string(dir);
+    string ret = string(drive) + string(dir);
+    if (ret == "")
+        ret = ".";
+    return ret;
 #else
     char *copy = strdup(path.c_str());
     string ret(dirname(copy));
@@ -128,6 +132,7 @@ bool FileUtils::IsDirectory(const std::string &path) {
 
 FileType FileUtils::GetFileType(const std::string &path) {
     struct STAT64 s;
+    printf("STAT(%s) = %i\n", path.c_str(), STAT64(path.c_str(), &s));
     if (STAT64(path.c_str(), &s) == 0) {
         if (s.st_mode & S_IFDIR)
             return FileType::Directory;
