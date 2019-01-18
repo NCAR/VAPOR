@@ -61,16 +61,15 @@ std::string FileUtils::Basename(const std::string &path)
 std::string FileUtils::Dirname(const std::string &path)
 {
 #ifdef WIN32
+	string pathCopy = CleanupPath(path);
 	char drive[_MAX_DRIVE];
 	char dir[_MAX_DIR];
-	_splitpath_s(path.c_str(),
+	_splitpath_s(pathCopy.c_str(),
 		drive, _MAX_DRIVE,
 		dir, _MAX_DIR,
 		NULL, 0,
 		NULL, 0);
-	string ret = string(drive) + string(dir);
-	if (ret == "") ret = ".";
-	return ret;
+	return CleanupPath(string(drive) + string(dir));
 #else
 	char *copy = strdup(path.c_str());
 	string ret(dirname(copy));
@@ -102,6 +101,15 @@ std::string FileUtils::POSIXPathToCurrentOS(const std::string &path)
 #else
     return path;
 #endif
+}
+
+std::string FileUtils::CleanupPath(std::string path)
+{
+	while (path.length() > 1 && (path.back() == '/' || path.back() == '\\'))
+		path.pop_back();
+	if (path == "")
+		path = ".";
+	return path;
 }
 
 long FileUtils::GetFileModifiedTime(const string &path)
@@ -174,7 +182,11 @@ int FileUtils::MakeDir(const std::string &path)
 {
     if (!Exists(Dirname(path)))
         MakeDir(Dirname(path));
-    return mkdir(path.c_str(), 0755);
+#if WIN32
+	return _mkdir(path.c_str());
+#else
+	return mkdir(path.c_str(), 0755);
+#endif
 }
 
 const char *FileUtils::LegacyBasename(const char *path)
