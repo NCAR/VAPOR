@@ -63,17 +63,24 @@ protected:
         float *topFace,         *bottomFace;         // user coordinates, size == bx * bz * 3   
         float *dataField;                // data field of this volume
         unsigned char* missingValueMask; // 0 == is missing value; non-zero == not missing value
-        float* vertCoords;
+        float* vertCoords;               // vertex coordinates in user coordinates
+        float* secondVarData;            // values of a second variable
+        unsigned char* secondVarMask;    // 0 == is missing value; non-zero == not missing value
 
         size_t  dims[3];                 // num. of samples along each axis. 
 
         /* Also keep the current meta data */ 
         size_t      myCurrentTimeStep;
         std::string myVariableName;
+        std::string my2ndVarName;
         int         myRefinementLevel, myCompressionLevel;
-        int         myCastingMode;
         float       myGridMin[3], myGridMax[3];   // Keeps the min and max of the current grid.
                                                   // !!NOT!! the value retrieved from params.
+
+        // A few flags to indicate if certain data is out of date
+        bool        dataFieldUpToDate;
+        bool        vertCoordsUpToDate;
+        bool        secondVarUpToDate;
 
         /* Member functions */
         UserCoordinates();    
@@ -86,9 +93,10 @@ protected:
                                   DataMgr*         dataMgr,
                                   StructuredGrid** gridpp ) const;
 
-        bool IsMetadataUpToDate(  const RayCasterParams* params, 
+        void CheckUpToDateStatus( const RayCasterParams* params, 
                                   const StructuredGrid*  grid, 
-                                        DataMgr*         dataMgr ) const;
+                                        DataMgr*         dataMgr,
+                                        bool             use2ndVar );
         //
         // Update meta data, as well as pointers: 6 faces + dataField + missingValueMask
         //   It returns 0 upon success, and non-zero upon errors:
@@ -99,11 +107,14 @@ protected:
         //
         // Update pointers: xyCoords and zCoords
         // |-- Note: meta data is updated in UpdateFaceAndData(), but *NOT* here, so
-        // |         UpdateFaceAndData() needs to be called priori to UpdateCurviCoords().
+        // |         UpdateFaceAndData() needs to be called priori to UpdateVertCoords().
         // |-- It returns 0 upon success, and non-zero upon errors:
         //
-        int UpdateCurviCoords(    const RayCasterParams* params,
-                                  const StructuredGrid*  grid, 
+        int UpdateVertCoords(   const   RayCasterParams* params,
+                                const   StructuredGrid*  grid, 
+                                        DataMgr*         dataMgr );
+
+        int Update2ndVariable(  const   RayCasterParams* params,
                                         DataMgr*         dataMgr );
 
         void FillCoordsXYPlane( const   StructuredGrid*  grid,  // Input 
@@ -115,6 +126,11 @@ protected:
         void FillCoordsXZPlane( const   StructuredGrid*  grid,  // Input 
                                 size_t  planeIdx,               // Input
                                 float*  coords );               // Output 
+        void IterateAGrid(      const   StructuredGrid*  grid,
+                                size_t                   numOfVert, // Length of buffers.
+                                float*                   dataBuf,   // Need to be already allocated.
+                                unsigned char*           maskBuf ); // Need to be already allocated.
+                                
     };  // end of class UserCoordinates 
 
     UserCoordinates     _userCoordinates;
@@ -130,6 +146,8 @@ protected:
     GLuint              _colorMapTextureId;
     GLuint              _vertCoordsTextureId;
     GLuint              _depthTextureId;
+    GLuint              _2ndVarDataTexId;
+    GLuint              _2ndVarMaskTexId;
     const  GLint        _backFaceTexOffset;
     const  GLint        _frontFaceTexOffset;
     const  GLint        _volumeTexOffset;
@@ -137,6 +155,8 @@ protected:
     const  GLint        _missingValueTexOffset;
     const  GLint        _vertCoordsTexOffset;
     const  GLint        _depthTexOffset;
+    const  GLint        _2ndVarDataTexOffset;
+    const  GLint        _2ndVarMaskTexOffset;
 
     // buffers and vertex arrays
     GLuint              _frameBufferId;
@@ -163,13 +183,16 @@ protected:
                                int                whichCastingMode,
                                const std::vector<size_t>&   cameraCellIdx,
                                const glm::mat4&   inversedMV  = glm::mat4(0.0f),
-                               bool               fast        = false );
+                               bool               fast        = false         ) const;
 
     void _load3rdPassUniforms( int                castingMode,
                                bool               fast,
                                bool               insideVolume ) const;
 
-    virtual void _3rdPassSpecialHandling( bool fast, int castingMode );
+    virtual void _3rdPassSpecialHandling( bool fast, int castingMode ) const;
+    virtual void _colormapSpecialHandling( ); // Cannot be const due to other subroutines.
+    virtual bool _use2ndVariable( const RayCasterParams* params ) const;
+    virtual void _update2ndVarTextures( );
 
     // 
     // Initialization for 1) framebuffers and 2) textures 
@@ -182,7 +205,9 @@ protected:
     void _updateDataTextures();
     int  _updateVertCoordsTexture( const glm::mat4& MV );
     void _enableVertexAttribute( const float* buf, size_t length, bool attrib1Enabled ) const;
-    void _initializeDirectionVectors();
+    void _configure3DTextureNearestInterpolation() const;
+    void _configure3DTextureLinearInterpolation() const;
+    void _configure2DTextureLinearInterpolation() const;
 
     double _getElapsedSeconds( const struct timeval* begin, const struct timeval* end ) const;
 
