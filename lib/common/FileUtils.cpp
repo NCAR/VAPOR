@@ -142,6 +142,12 @@ std::string FileUtils::JoinPaths(std::initializer_list<std::string> paths)
     return path;
 }
 
+int FileUtils::MakeDir(const std::string &path, const int mode)
+{
+    if (!Exists(Dirname(path))) MakeDir(Dirname(path), mode);
+    return mkdir(path.c_str(), mode);
+}
+
 const char *FileUtils::LegacyBasename(const char *path)
 {
     const char *last;
