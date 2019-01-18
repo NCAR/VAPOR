@@ -176,6 +176,9 @@ protected:
     void _updateDataTextures();
     int  _updateVertCoordsTexture(const glm::mat4 &MV);
     void _enableVertexAttribute(const float *buf, size_t length, bool attrib1Enabled) const;
+    void _configure3DTextureNearestInterpolation() const;
+    void _configure3DTextureLinearInterpolation() const;
+    void _configure2DTextureLinearInterpolation() const;
 
     double _getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const;
 
