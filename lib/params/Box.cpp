@@ -57,7 +57,7 @@ Box::Box(ParamsBase::StateSave *ssave) : ParamsBase(ssave, Box::GetClassType())
     angles.push_back(0.);
     SetAngles(angles);
 
-    SetOrientation(2);
+    SetOrientation(XYZ);
 }
 
 Box::Box(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node) {}
