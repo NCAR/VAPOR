@@ -59,8 +59,6 @@ void IsoSurfaceRenderer::_3rdPassSpecialHandling(bool fast, int castingMode) con
     glActiveTexture(GL_TEXTURE0 + _2ndVarMaskTexOffset);
     glBindTexture(GL_TEXTURE_3D, _2ndVarMaskTexId);
     _3rdPassShader->SetUniform("secondVarMaskTexture", _2ndVarMaskTexOffset);
-
-    glBindTexture(GL_TEXTURE_3D, 0);
 }
 
 void IsoSurfaceRenderer::_colormapSpecialHandling()
@@ -122,6 +120,4 @@ void IsoSurfaceRenderer::_update2ndVarTextures()
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, 2, 2, 2, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, dummyMask);
     }
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);    // Restore default alignment.
-
-    glBindTexture(GL_TEXTURE_3D, 0);
 }
