@@ -40,9 +40,10 @@ class PARAMS_API Box : public ParamsBase {
 public:
     
     enum Orientation {
-        XY = 0,
-        XZ = 1,
-        YZ = 2,
+        XY  = 0,
+        XZ  = 1,
+        YZ  = 2,
+        XYZ = 3
     };
 	
 	//! Create a Box object from scratch

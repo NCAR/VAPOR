@@ -62,8 +62,7 @@ Box::Box(
 	angles.push_back(0.);
 	SetAngles(angles);
 
-	SetOrientation(2); 
-
+	SetOrientation(XYZ); 
 }
 
 Box::Box(
