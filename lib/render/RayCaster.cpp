@@ -62,7 +62,9 @@ RayCaster::RayCaster(const ParamsMgr *pm,
       _colorMapTexOffset(3),
       _missingValueTexOffset(4),
       _vertCoordsTexOffset(5),
-      _depthTexOffset(6) {
+      _depthTexOffset(6),
+      _2ndVarDataTexOffset(7),
+      _2ndVarMaskTexOffset(8) {
     _backFaceTextureId = 0;
     _frontFaceTextureId = 0;
     _volumeTextureId = 0;
@@ -71,6 +73,8 @@ RayCaster::RayCaster(const ParamsMgr *pm,
     _vertCoordsTextureId = 0;
     _depthTextureId = 0;
     _frameBufferId = 0;
+    _2ndVarDataTexId = 0;
+    _2ndVarMaskTexId = 0;
 
     _vertexArrayId = 0;
     _vertexBufferId = 0;
@@ -124,6 +128,14 @@ RayCaster::~RayCaster() {
         glDeleteTextures(1, &_depthTextureId);
         _depthTextureId = 0;
     }
+    if (_2ndVarDataTexId) {
+        glDeleteTextures(1, &_2ndVarDataTexId);
+        _2ndVarDataTexId = 0;
+    }
+    if (_2ndVarMaskTexId) {
+        glDeleteTextures(1, &_2ndVarMaskTexId);
+        _2ndVarMaskTexId = 0;
+    }
 
     // Delete vertex arrays
     if (_vertexArrayId) {
@@ -154,7 +166,9 @@ RayCaster::UserCoordinates::UserCoordinates() {
     bottomFace = nullptr;
     dataField = nullptr;
     vertCoords = nullptr;
+    secondVarData = nullptr;
     missingValueMask = nullptr;
+    secondVarMask = nullptr;
     for (int i = 0; i < 3; i++) {
         myGridMin[i] = 0;
         myGridMax[i] = 0;
@@ -163,9 +177,13 @@ RayCaster::UserCoordinates::UserCoordinates() {
 
     myCurrentTimeStep = 0;
     myVariableName = "";
+    my2ndVarName = "";
     myRefinementLevel = -1;
     myCompressionLevel = -1;
-    myCastingMode = 1;
+
+    dataFieldUpToDate = false;
+    vertCoordsUpToDate = false;
+    secondVarUpToDate = false;
 }
 
 // Destructor
@@ -206,6 +224,14 @@ RayCaster::UserCoordinates::~UserCoordinates() {
         delete[] missingValueMask;
         missingValueMask = nullptr;
     }
+    if (secondVarData) {
+        delete[] secondVarData;
+        secondVarData = nullptr;
+    }
+    if (secondVarMask) {
+        delete[] secondVarMask;
+        secondVarMask = nullptr;
+    }
 }
 
 int RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params,
@@ -230,28 +256,45 @@ int RayCaster::UserCoordinates::GetCurrentGrid(const RayCasterParams *params,
     }
 }
 
-bool RayCaster::UserCoordinates::IsMetadataUpToDate(const RayCasterParams *params,
-                                                    const StructuredGrid *grid,
-                                                    DataMgr *dataMgr) const {
+void RayCaster::UserCoordinates::CheckUpToDateStatus(const RayCasterParams *params,
+                                                     const StructuredGrid *grid,
+                                                     DataMgr *dataMgr,
+                                                     bool use2ndVar) {
+    // First, if any of the metadata is changed, all data fields are not up-to-date
     if ((myCurrentTimeStep != params->GetCurrentTimestep()) ||
-        (myVariableName != params->GetVariableName()) ||
         (myRefinementLevel != params->GetRefinementLevel()) ||
-        (myCastingMode != params->GetCastingMode()) ||
         (myCompressionLevel != params->GetCompressionLevel())) {
-        return false;
+        dataFieldUpToDate = false;
+        vertCoordsUpToDate = false;
+        secondVarUpToDate = false;
+        return;
     }
 
-    // compare grid extents
+    // Second, if the grid extents are changed, all data fields are not up-to-date
     std::vector<double> newMin, newMax;
     grid->GetUserExtents(newMin, newMax);
     assert(newMin.size() == 3 || newMax.size() == 3);
-    for (int i = 0; i < 3; i++) {
-        if ((myGridMin[i] != (float)newMin[i]) || (myGridMax[i] != (float)newMax[i]))
-            return false;
+    for (int i = 0; i < 3; i++)
+        if ((myGridMin[i] != (float)newMin[i]) || (myGridMax[i] != (float)newMax[i])) {
+            dataFieldUpToDate = false;
+            vertCoordsUpToDate = false;
+            secondVarUpToDate = false;
+            return;
+        }
+
+    // Third, let's compare the primary variable name
+    if (myVariableName != params->GetVariableName()) {
+        dataFieldUpToDate = false;
     }
 
-    // now we know it's up to date!
-    return true;
+    // Fourth, let's check the vertex coordinates.
+    // Actually, the only way vertex coordinates go out of date is changing the metadata
+    //   and user extents, which is already checked. We don't need to do anything here!
+
+    // Fifth, let check if second variable data is up to date
+    if (use2ndVar && (my2ndVarName != params->GetColorMapVariableName())) {
+        secondVarUpToDate = false;
+    }
 }
 
 int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
@@ -269,7 +312,6 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
     myVariableName = params->GetVariableName();
     myRefinementLevel = params->GetRefinementLevel();
     myCompressionLevel = params->GetCompressionLevel();
-    myCastingMode = params->GetCastingMode();
 
     /* Update member variables */
     std::vector<size_t> gridDims = grid->GetDimensions();
@@ -329,38 +371,118 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
         delete[] missingValueMask;
         missingValueMask = nullptr;
     }
-
-    StructuredGrid::ConstIterator valItr = grid->cbegin(); // Iterator for data field values
-
     if (grid->HasMissingData()) {
-        float missingValue = grid->GetMissingValue();
         try {
             missingValueMask = new unsigned char[numOfVertices];
         } catch (const std::bad_alloc &e) {
             MyBase::SetErrMsg(e.what());
             return MEMERROR;
         }
-        float dataValue;
-        for (size_t i = 0; i < numOfVertices; i++) {
-            dataValue = *valItr;
-            if (dataValue == missingValue) {
-                dataField[i] = 0.0f;
-                missingValueMask[i] = 127u;
-            } else {
-                dataField[i] = dataValue;
-                missingValueMask[i] = 0u;
-            }
-            ++valItr;
+    }
+
+    // Now iterate the current grid
+    this->IterateAGrid(grid, numOfVertices, dataField, missingValueMask);
+
+    dataFieldUpToDate = true;
+
+    return 0;
+}
+
+int RayCaster::UserCoordinates::Update2ndVariable(const RayCasterParams *params,
+                                                  DataMgr *dataMgr) {
+    assert(dataFieldUpToDate);
+
+    // Update 2nd variable name
+    my2ndVarName = params->GetColorMapVariableName();
+
+    // Retrieve grid for the 2nd variable
+    std::vector<double> extMin, extMax;
+    params->GetBox()->GetExtents(extMin, extMax);
+    StructuredGrid *grid = dynamic_cast<StructuredGrid *>(dataMgr->GetVariable(
+        myCurrentTimeStep,
+        my2ndVarName,
+        myRefinementLevel,
+        myCompressionLevel,
+        extMin,
+        extMax));
+    if (grid == nullptr) {
+        MyBase::SetErrMsg("The secondary variable isn't on a StructuredGrid; "
+                          "the behavior is undefined in this case.");
+        return GRIDERROR;
+    }
+
+    // Make sure the secondary grid shares the same dimention as the primary grid
+    std::vector<size_t> seconDims = grid->GetDimensions();
+    for (int i = 0; i < 3; i++)
+        if (seconDims[i] != dims[i]) {
+            MyBase::SetErrMsg("The secondary and primary variable grids have different dimensions; "
+                              "the behavior is undefined in this case.");
+            delete grid;
+            return GRIDERROR;
         }
-    } else // No missing value!
-    {
-        for (size_t i = 0; i < numOfVertices; i++) {
-            dataField[i] = *valItr;
-            ++valItr;
+
+    // Allocate memory
+    size_t numOfVertices = dims[0] * dims[1] * dims[2];
+    if (secondVarData) {
+        delete[] secondVarData;
+        secondVarData = nullptr;
+    }
+    try {
+        secondVarData = new float[numOfVertices];
+    } catch (const std::bad_alloc &e) {
+        MyBase::SetErrMsg(e.what());
+        delete grid;
+        return MEMERROR;
+    }
+    if (secondVarMask) {
+        delete[] secondVarMask;
+        secondVarMask = nullptr;
+    }
+    if (grid->HasMissingData()) {
+        try {
+            secondVarMask = new unsigned char[numOfVertices];
+        } catch (const std::bad_alloc &e) {
+            MyBase::SetErrMsg(e.what());
+            delete grid;
+            return MEMERROR;
         }
     }
 
+    // Now iterate the current grid
+    this->IterateAGrid(grid, numOfVertices, secondVarData, secondVarMask);
+
+    delete grid;
+    secondVarUpToDate = true;
+
     return 0;
+}
+
+void RayCaster::UserCoordinates::IterateAGrid(const StructuredGrid *grid,
+                                              size_t numOfVert,
+                                              float *dataBuf,
+                                              unsigned char *maskBuf) {
+    StructuredGrid::ConstIterator valItr = grid->cbegin();
+
+    if (grid->HasMissingData()) {
+        float missingValue = grid->GetMissingValue();
+        float dataValue;
+        for (size_t i = 0; i < numOfVert; i++) {
+            dataValue = *valItr;
+            if (dataValue == missingValue) {
+                dataBuf[i] = 0.0f;
+                maskBuf[i] = 127u;
+            } else {
+                dataBuf[i] = dataValue;
+                maskBuf[i] = 0u;
+            }
+            ++valItr;
+        }
+    } else {
+        for (size_t i = 0; i < numOfVert; i++) {
+            dataBuf[i] = *valItr;
+            ++valItr;
+        }
+    }
 }
 
 void RayCaster::UserCoordinates::FillCoordsXYPlane(const StructuredGrid *grid,
@@ -405,9 +527,11 @@ void RayCaster::UserCoordinates::FillCoordsXZPlane(const StructuredGrid *grid,
         }
 }
 
-int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params,
-                                                  const StructuredGrid *grid,
-                                                  DataMgr *dataMgr) {
+int RayCaster::UserCoordinates::UpdateVertCoords(const RayCasterParams *params,
+                                                 const StructuredGrid *grid,
+                                                 DataMgr *dataMgr) {
+    assert(dataFieldUpToDate);
+
     size_t numOfVertices = dims[0] * dims[1] * dims[2];
     if (vertCoords)
         delete[] vertCoords;
@@ -426,6 +550,8 @@ int RayCaster::UserCoordinates::UpdateCurviCoords(const RayCasterParams *params,
         vertCoords[3 * i + 2] = float((*coordItr)[2]);
         ++coordItr;
     }
+
+    vertCoordsUpToDate = true;
 
     return 0;
 }
@@ -526,8 +652,14 @@ int RayCaster::_paintGL(bool fast) {
         return JUSTERROR;
     }
 
-    // If there is an update event
-    if (!_userCoordinates.IsMetadataUpToDate(params, grid, _dataMgr)) {
+    // Retrieve if we're using secondary variable
+    bool use2ndVar = _use2ndVariable(params);
+
+    // Check if there is an update event
+    _userCoordinates.CheckUpToDateStatus(params, grid, _dataMgr, use2ndVar);
+
+    // Update primary variable data field
+    if (!_userCoordinates.dataFieldUpToDate) {
         int success = _userCoordinates.UpdateFaceAndData(params, grid, _dataMgr);
         if (success != 0) {
             MyBase::SetErrMsg("Error occured during updating face and volume data!");
@@ -535,20 +667,24 @@ int RayCaster::_paintGL(bool fast) {
             return JUSTERROR;
         }
 
-        if (castingMode == CellTraversal &&
-            _userCoordinates.UpdateCurviCoords(params, grid, _dataMgr) != 0) {
-            MyBase::SetErrMsg("Error occured during updating curvilinear coordinates!");
-            delete grid;
-            return JUSTERROR;
-        }
-
-        // Updates data volume texture and missing value texture
+        // Texture for primary variable data is updated only when data changes
         _updateDataTextures();
     }
 
-    const MatrixManager *mm = Renderer::_glManager->matrixManager;
-    glm::mat4 ModelView = mm->GetModelViewMatrix();
+    // Update vertex coordinates field only when using CellTraversal method.
+    glm::mat4 ModelView = Renderer::_glManager->matrixManager->GetModelViewMatrix();
     if (castingMode == CellTraversal) {
+        if (!_userCoordinates.vertCoordsUpToDate) {
+            int success = _userCoordinates.UpdateVertCoords(params, grid, _dataMgr);
+            if (success != 0) {
+                MyBase::SetErrMsg("Error occured during updating curvilinear coordinates!");
+                delete grid;
+                return JUSTERROR;
+            }
+        }
+
+        // Transform vertex coordinate data to eye space, and then send to GPU.
+        // This step takes place at every loop.
         if (_updateVertCoordsTexture(ModelView) != 0) {
             MyBase::SetErrMsg("Error occured during calculating eye coordinates!");
             delete grid;
@@ -556,10 +692,19 @@ int RayCaster::_paintGL(bool fast) {
         }
     }
 
-    // Collect existing depth value of the scene
-    glBindTexture(GL_TEXTURE_2D, _depthTextureId);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, _currentViewport[0],
-                     _currentViewport[1], _currentViewport[2], _currentViewport[3], 0);
+    // Update secondary variable
+    if (use2ndVar && !_userCoordinates.secondVarUpToDate) {
+        int success = _userCoordinates.Update2ndVariable(params, _dataMgr);
+        if (success != 0) {
+            MyBase::SetErrMsg("Error occured during updating secondary variable!");
+            delete grid;
+            return JUSTERROR;
+        }
+    }
+
+    // This function has no effect for DVR. It's only usable for IsoSurface
+    //   with 2nd variable enabled.
+    _update2ndVarTextures();
 
     glBindVertexArray(_vertexArrayId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
@@ -590,6 +735,7 @@ int RayCaster::_paintGL(bool fast) {
     glBindTexture(GL_TEXTURE_1D, _colorMapTextureId);
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, _colorMap.size() / 4,
                  0, GL_RGBA, GL_FLOAT, _colorMap.data());
+    glBindTexture(GL_TEXTURE_1D, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
@@ -598,8 +744,6 @@ int RayCaster::_paintGL(bool fast) {
     _drawVolumeFaces(3, castingMode, cameraCellIdx, InversedMV, fast);
 
     // Restore OpenGL values changed in this function.
-    glBindTexture(GL_TEXTURE_1D, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glDepthFunc(GL_LESS);
@@ -616,31 +760,21 @@ int RayCaster::_initializeFramebufferTextures() {
     glGenBuffers(1, &_indexBufferId);
     glGenBuffers(1, &_vertexAttribId);
 
-    /* Generate back-facing texture */
+    /* Generate and configure 2D back-facing texture */
     glGenTextures(1, &_backFaceTextureId);
     glActiveTexture(GL_TEXTURE0 + _backFaceTexOffset);
     glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3],
                  0, GL_RGBA, GL_FLOAT, nullptr);
+    this->_configure2DTextureLinearInterpolation();
 
-    /* Configure the back-facing texture */
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    /* Generate front-facing texture */
+    /* Generate and configure 2D front-facing texture */
     glGenTextures(1, &_frontFaceTextureId);
     glActiveTexture(GL_TEXTURE0 + _frontFaceTexOffset);
     glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3],
                  0, GL_RGBA, GL_FLOAT, nullptr);
-
-    /* Configure the front-faceing texture */
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    this->_configure2DTextureLinearInterpolation();
 
     /* Create an Frame Buffer Object for the front and back side of the volume. */
     glGenFramebuffers(1, &_frameBufferId);
@@ -667,11 +801,13 @@ int RayCaster::_initializeFramebufferTextures() {
     glGenTextures(1, &_volumeTextureId);
     glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
     glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    this->_configure3DTextureLinearInterpolation();
+
+    /* Generate and configure 3D texture: _2ndVarDataTexId */
+    glGenTextures(1, &_2ndVarDataTexId);
+    glActiveTexture(GL_TEXTURE0 + _2ndVarDataTexOffset);
+    glBindTexture(GL_TEXTURE_3D, _2ndVarDataTexId);
+    this->_configure3DTextureLinearInterpolation();
 
     /* Generate and configure 1D texture: _colorMapTextureId */
     glGenTextures(1, &_colorMapTextureId);
@@ -685,30 +821,25 @@ int RayCaster::_initializeFramebufferTextures() {
     glGenTextures(1, &_missingValueTextureId);
     glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
     glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    this->_configure3DTextureNearestInterpolation();
+
+    /* Generate and configure 3D texture: _2ndVarMaskTexId */
+    glGenTextures(1, &_2ndVarMaskTexId);
+    glActiveTexture(GL_TEXTURE0 + _2ndVarMaskTexOffset);
+    glBindTexture(GL_TEXTURE_3D, _2ndVarMaskTexId);
+    this->_configure3DTextureNearestInterpolation();
 
     /* Generate 3D texture: _vertCoordsTextureId */
     glGenTextures(1, &_vertCoordsTextureId);
     glActiveTexture(GL_TEXTURE0 + _vertCoordsTexOffset);
     glBindTexture(GL_TEXTURE_3D, _vertCoordsTextureId);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    this->_configure3DTextureNearestInterpolation();
 
-    /* Generate and configure depth texture */
+    /* Generate and configure 2D depth texture */
     glGenTextures(1, &_depthTextureId);
     glActiveTexture(GL_TEXTURE0 + _depthTexOffset);
     glBindTexture(GL_TEXTURE_2D, _depthTextureId);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    this->_configure2DTextureLinearInterpolation();
 
     /* Bind the default textures */
     glBindTexture(GL_TEXTURE_1D, 0);
@@ -718,11 +849,34 @@ int RayCaster::_initializeFramebufferTextures() {
     return 0;
 }
 
+void RayCaster::_configure3DTextureNearestInterpolation() const {
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+}
+
+void RayCaster::_configure3DTextureLinearInterpolation() const {
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+}
+
+void RayCaster::_configure2DTextureLinearInterpolation() const {
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+
 void RayCaster::_drawVolumeFaces(int whichPass,
                                  int castingMode,
                                  const std::vector<size_t> &cameraCellIdx,
                                  const glm::mat4 &InversedMV,
-                                 bool fast) {
+                                 bool fast) const {
     assert(cameraCellIdx.size() == 0 || cameraCellIdx.size() == 3);
     bool insideVolume = (cameraCellIdx.size() == 3);
 
@@ -946,9 +1100,13 @@ void RayCaster::_load3rdPassUniforms(int castingMode,
         glBindTexture(GL_TEXTURE_3D, _vertCoordsTextureId);
         shader->SetUniform("vertCoordsTexture", _vertCoordsTexOffset);
     }
+
+    glBindTexture(GL_TEXTURE_1D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_3D, 0);
 }
 
-void RayCaster::_3rdPassSpecialHandling(bool fast, int castingMode) {
+void RayCaster::_3rdPassSpecialHandling(bool fast, int castingMode) const {
     // Left empty intentially.
     // Derived classes feel free to put stuff here.
 }
@@ -1216,7 +1374,7 @@ void RayCaster::_enableVertexAttribute(const float *buf,
 double RayCaster::_getElapsedSeconds(const struct timeval *begin,
                                      const struct timeval *end) const {
 #ifdef WIN32
-    return 0.0;
+    return -1.0;
 #else
     return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0);
 #endif
@@ -1253,13 +1411,24 @@ void RayCaster::_updateColormap(RayCasterParams *params) {
         _colorMapRange[1] = 0.0f;
         _colorMapRange[2] = 1e-5f;
     } else {
-        params->GetMapperFunc()->makeLut(_colorMap);
-        assert(_colorMap.size() % 4 == 0);
-        std::vector<double> range = params->GetMapperFunc()->getMinMaxMapValue();
-        _colorMapRange[0] = float(range[0]);
-        _colorMapRange[1] = float(range[1]);
-        _colorMapRange[2] = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ? (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f;
+        // Subclasses will have a chance here to use their own colormaps.
+        _colormapSpecialHandling();
     }
+}
+
+void RayCaster::_colormapSpecialHandling() {
+    // Left empty intentionally.
+    // Subclasses, e.g., IsoSurfaceRenderer and DVRenderer, feel free to implement it.
+}
+
+bool RayCaster::_use2ndVariable(const RayCasterParams *params) const {
+    // By default a ray caster does not use a secondary variable.
+    // Subclasses can take advantage of it, for example, an IsoSurface Renderer.
+    return false;
+}
+
+void RayCaster::_update2ndVarTextures() {
+    // Intentionally left empty
 }
 
 void RayCaster::_updateDataTextures() {
@@ -1282,8 +1451,8 @@ void RayCaster::_updateDataTextures() {
     // Now we HAVE TO attach a missing value mask texture, because
     //   Intel driver on Mac doesn't like leaving the texture empty...
     glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Alignment adjustment. Stupid OpenGL thing.
     glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Alignment adjustment. Stupid OpenGL thing.
     if (_userCoordinates.missingValueMask) {
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R8UI, dims[0], dims[1], dims[2], 0,
                      GL_RED_INTEGER, GL_UNSIGNED_BYTE, _userCoordinates.missingValueMask);
