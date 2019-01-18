@@ -2448,19 +2448,19 @@ void MainForm::_setTimeStep()
 
 void MainForm::captureJpegSequence() {
     string filter = "JPG (*.jpg *.jpeg)";
-    string defaultSuffix = ".jpg";
+    string defaultSuffix = "jpg";
     startAnimCapture( filter, defaultSuffix);
 }
 
 void MainForm::capturePngSequence() {
     string filter = "PNG (*.png)";
-    string defaultSuffix = ".png";
+    string defaultSuffix = "png";
     startAnimCapture( filter, defaultSuffix);
 }
 
 void MainForm::captureTiffSequence() {
     string filter = "TIFF (*.tif *.tiff)";
-    string defaultSuffix = ".tiff";
+    string defaultSuffix = "tiff";
     startAnimCapture( filter, defaultSuffix);
 }
 
@@ -2484,8 +2484,8 @@ void MainForm::startAnimCapture(
         QString::fromStdString(filter)
     );
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-	fileDialog.move(pos());
-	fileDialog.resize(450,450);
+	//fileDialog.move(pos());
+	//fileDialog.resize(450,450);
 	if (fileDialog.exec() != QDialog::Accepted) 
         return;
 	
@@ -2497,12 +2497,22 @@ void MainForm::startAnimCapture(
 	QFileInfo fileInfo = QFileInfo( fileName );
 
 	QString suffix = fileInfo.suffix();
-    cout << "suffix " << suffix.toStdString() << endl;
+	if ( suffix != ""     ||
+		 suffix != "jpg"  ||
+		 suffix != "jpeg" ||
+		 suffix != "tif"  ||
+		 suffix != "tiff" ||
+		 suffix != "png"
+	) {
+		
+	}
     if (suffix == "") {
+		suffix = QString::fromStdString(defaultSuffix);
         fileName += QString::fromStdString(defaultSuffix);
-        //fileInfo.setFile(fileName);
-		cout << "setting filename to " << fileName.toStdString() << endl;
     }
+	else {
+		fileName = fileInfo.absolutePath() + "/" + fileInfo.baseName();
+	}
 
 	//Save the path for future captures
 	sP->SetImageDir(fileInfo.absolutePath().toStdString());
