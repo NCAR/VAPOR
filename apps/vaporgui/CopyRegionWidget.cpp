@@ -26,6 +26,10 @@
 #include "vapor/DataMgrUtils.h"
 #include "CopyRegionWidget.h"
 
+#define X 0
+#define Y 1
+#define Z 2
+
 using namespace VAPoR;
 
 
@@ -110,6 +114,35 @@ void CopyRegionWidget::updateCopyCombo() {
 	}
 }
 
+void CopyRegionWidget::_configurePlanarBox(
+    const VAPoR::Box* myBox,
+    std::vector<double> *myMin,
+    std::vector<double> *myMax
+) const {
+        int planarAxis;
+        int orientation = myBox->GetOrientation();
+        if (orientation == Box::XY)
+            planarAxis = Z;
+        else if (orientation == Box::XZ)
+            planarAxis = Y;
+        else if (orientation == Box::YZ)
+            planarAxis = X;
+        else 
+            return;
+       
+        assert(
+            planarAxis >= 0 && 
+            planarAxis < (*myMin).size() && 
+            planarAxis < (*myMax).size()
+        );
+ 
+        double min = (*myMin)[planarAxis]; 
+        double max = (*myMax)[planarAxis]; 
+        double plane = ( min + max ) / 2.f;
+        (*myMin)[planarAxis] = plane;
+        (*myMax)[planarAxis] = plane;
+}
+
 void CopyRegionWidget::copyRegion() 
 {
 	string copyString = copyCombo->currentText().toStdString();
@@ -143,7 +176,10 @@ void CopyRegionWidget::copyRegion()
 			myMin[i] = minExtents[i];
 			myMax[i] = maxExtents[i];
 		}
-		myBox->SetExtents( myMin, myMax );
+      
+        _configurePlanarBox( myBox, &myMin, &myMax);
+		
+        myBox->SetExtents( myMin, myMax );
 
 		emit valueChanged();
 	}
