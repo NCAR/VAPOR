@@ -92,6 +92,8 @@ void IsoSurfaceRenderer::_colormapSpecialHandling( )
         _colorMapRange[2]         = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ?
                                     (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f ;
     }
+    // Note: _colorMapRange[2] keeps the range of a color map, which will later be used in the shader. 
+    //       However, this range cannot be zero to prevent infinity values being generated. 
 }
 
 bool IsoSurfaceRenderer::_use2ndVariable( const RayCasterParams* params ) const
