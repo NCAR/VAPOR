@@ -122,39 +122,7 @@ double Wasp::GetTime(){
 }
 
 int    Wasp::MkDirHier(const string &dir) {
-
-    stack <string> dirs;
-
-    string::size_type idx;
-    string s = dir;
-
-	dirs.push(s);
-    while ((idx = s.find_last_of(Separator)) != string::npos) {
-        s = s.substr(0, idx);
-		if (! s.empty()) dirs.push(s);
-    }
-
-    while (! dirs.empty()) {
-        s = dirs.top();
-		dirs.pop();
-#ifndef WIN32
-        if ((mkdir(s.c_str(), 0777) < 0) && dirs.empty() && errno != EEXIST) {
-			MyBase::SetErrMsg("mkdir(%s) : %M", s.c_str());
-            return(-1);
-        }
-#else 
-		//Windows version of mkdir:
-		//If it succeeds, return value is nonzero
-		if (!CreateDirectory(( LPCSTR)s.c_str(), 0)){
-			DWORD dw = GetLastError();
-			if (dw != 183){ //183 means file already exists
-				MyBase::SetErrMsg("mkdir(%s) : %M", s.c_str());
-				return(-1);
-			}
-		}
-#endif
-    }
-    return(0);
+    return FileUtils::MakeDir(dir);
 }
 
 std::string Wasp::GetEnvironmentalVariable(const std::string &name)
