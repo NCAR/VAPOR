@@ -22,6 +22,7 @@ COMMON_API std::string Dirname(const std::string &path);
 COMMON_API std::string Extension(const std::string &path);
 COMMON_API std::string POSIXPathToWindows(std::string path);
 COMMON_API std::string POSIXPathToCurrentOS(const std::string &path);
+COMMON_API std::string CleanupPath(std::string path);
 COMMON_API long GetFileModifiedTime(const std::string &path);
 COMMON_API bool IsPathAbsolute(const std::string &path);
 COMMON_API bool Exists(const std::string &path);
