@@ -749,7 +749,11 @@ void MainForm::_createCaptureMenu()
     _captureMenu->addAction(_captureEndJpegCaptureAction);
 
     connect(_captureSingleJpegCaptureAction, SIGNAL(triggered()), this, SLOT(captureSingleJpeg()));
+    connect(_captureSinglePngCaptureAction, SIGNAL(triggered()), this, SLOT(captureSinglePng()));
+    connect(_captureSingleTiffCaptureAction, SIGNAL(triggered()), this, SLOT(captureSingleTiff()));
+
     connect(_captureStartJpegCaptureAction, SIGNAL(triggered()), this, SLOT(startAnimCapture()));
+
     connect(_captureEndJpegCaptureAction, SIGNAL(triggered()), this, SLOT(endAnimCapture()));
 }
 
@@ -1811,40 +1815,45 @@ void MainForm::enableAnimationWidgets(bool on)
     }
 }
 
+void MainForm::captureSingleJpeg() {string filter = "JPG (*.jpg *.jpeg"); }
+
 // Capture just one image
 // Launch a file save dialog to specify the names
 //
-void MainForm::captureSingleJpeg()
+// void MainForm::captureSingleJpeg() {
+void MainForm::captureSingleImage(string filter)
 {
     showCitationReminder();
     SettingsParams *sP = GetSettingsParams();
     string          imageDir = sP->GetImageDir();
     if (imageDir == "") imageDir = sP->GetDefaultImageDir();
 
-    string           fileDialogOptions;
-    ViewpointParams *VPP = _paramsMgr->GetViewpointParams(GetStateParams()->GetActiveVizName());
+    string fileDialogOptions;
+    /*ViewpointParams *VPP = _paramsMgr->GetViewpointParams(GetStateParams()->GetActiveVizName());
     if (VPP->GetProjectionType() == ViewpointParams::MapOrthographic) {
         fileDialogOptions = ""
-                            "TIFF (*.tif *.tiff)\n"
-                            "PNG (*.png)\n"
-                            "JPG (*.jpg *.jpeg)";
+        "TIFF (*.tif *.tiff)\n"
+        "PNG (*.png)\n"
+        "JPG (*.jpg *.jpeg)";
     } else {
         fileDialogOptions = ""
-                            "PNG (*.png)\n"
-                            "JPG (*.jpg *.jpeg)\n"
-                            "TIFF (*.tif *.tiff)";
-    }
+        "PNG (*.png)\n"
+        "JPG (*.jpg *.jpeg)\n"
+        "TIFF (*.tif *.tiff)";
+    }*/
 
-    QFileDialog fileDialog(this, "Specify single image capture file name", imageDir.c_str(), QString::fromStdString(fileDialogOptions));
+    QFileDialog fileDialog(this, "Specify single image capture file name", imageDir.c_str(), QString::fromStdString(filter));
+    // QString::fromStdString(fileDialogOptions));
 
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     fileDialog.move(pos());
     fileDialog.resize(450, 450);
     QStringList mimeTypeFilters;
-    mimeTypeFilters << "image/jpeg"                   // will show "JPEG image (*.jpeg *.jpg *.jpe)
-                    << "image/png"                    // will show "PNG image (*.png)"
-                    << "application/octet-stream";    // will show "All files (*)"
-                                                      // fileDialog.setNameFilters(mimeTypeFilters);
+    /*mimeTypeFilters << "image/jpeg" // will show "JPEG image (*.jpeg *.jpg *.jpe)
+    << "image/png"  // will show "PNG image (*.png)"
+    << "application/octet-stream"; // will show "All files (*)"
+    */
+    // fileDialog.setNameFilters(mimeTypeFilters);
     if (fileDialog.exec() != QDialog::Accepted) return;
 
     // Extract the path, and the root name, from the returned string.
