@@ -32,6 +32,8 @@ COMMON_API FileType GetFileType(const std::string &path);
 //! @code JoinPaths({"home", "a/b"}); @endcode
 COMMON_API std::string JoinPaths(std::initializer_list<std::string> paths);
 
+COMMON_API int MakeDir(const std::string &path, const int mode = 755);
+
 COMMON_API const char *LegacyBasename(const char *path);
 
 } // namespace FileUtils
