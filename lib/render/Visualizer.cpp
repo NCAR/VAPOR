@@ -37,6 +37,7 @@
 #include <vapor/Renderer.h>
 #include <vapor/DataStatus.h>
 #include <vapor/Visualizer.h>
+#include <vapor/FileUtils.h>
 
 #include <vapor/common.h>
 #include "vapor/GLManager.h"
