@@ -170,8 +170,16 @@ private:
  // Capture menu
  //
  QAction* _captureStartJpegCaptureAction;
+ QAction* _captureStartPngCaptureAction;
+ QAction* _captureStartTiffCaptureAction;
+
  QAction* _captureEndJpegCaptureAction;
+ QAction* _captureEndPngCaptureAction;
+ QAction* _captureEndTiffCaptureAction;
+
  QAction* _captureSingleJpegCaptureAction;
+ QAction* _captureSinglePngCaptureAction;
+ QAction* _captureSingleTiffCaptureAction;
 
  // Toolbars:
  //
@@ -347,7 +355,10 @@ private slots:
  void sessionNew();
  void startAnimCapture();
  void endAnimCapture();
+ void captureSingleImage( string filter );
  void captureSingleJpeg();
+ void captureSinglePng();
+ void captureSingleTiff();
  void installCLITools();
  void launchStats();
  void launchPlotUtility();
