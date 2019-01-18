@@ -103,7 +103,12 @@ protected:
         void FillCoordsXZPlane(const StructuredGrid *grid,        // Input
                                size_t                planeIdx,    // Input
                                float *               coords);                    // Output
-    };                                                            // end of class UserCoordinates
+        void IterateAGrid(const StructuredGrid *grid,
+                          size_t                numOfVert,    // Length of buffers.
+                          float *               dataBuf,      // Need to be already allocated.
+                          unsigned char *       maskBuf);            // Need to be already allocated.
+
+    };    // end of class UserCoordinates
 
     UserCoordinates    _userCoordinates;
     std::vector<float> _colorMap;
@@ -156,8 +161,7 @@ protected:
     void _load3rdPassUniforms(int castingMode, bool fast, bool insideVolume) const;
 
     virtual void _3rdPassSpecialHandling(bool fast, int castingMode) const;
-    // params->GetMapperFunc() does not allow "params" to be const.
-    virtual void _colormapSpecialHandling();
+    virtual void _colormapSpecialHandling();    // Cannot be const due to other subroutines.
     virtual bool _use2ndVariable(const RayCasterParams *params) const;
     virtual void _update2ndVarTextures();
 
