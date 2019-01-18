@@ -2500,6 +2500,7 @@ void MainForm::startAnimCapture(
     if (suffix == "") {
         fileName += QString::fromStdString(defaultSuffix);
         fileInfo.setFile(fileName);
+		cout << "setting filename to " << fileName.toStdString() << endl;
     }
 
 	//Save the path for future captures
