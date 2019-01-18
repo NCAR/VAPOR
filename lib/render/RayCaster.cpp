@@ -760,31 +760,21 @@ int RayCaster::_initializeFramebufferTextures() {
     glGenBuffers(1, &_indexBufferId);
     glGenBuffers(1, &_vertexAttribId);
 
-    /* Generate back-facing texture */
+    /* Generate and configure 2D back-facing texture */
     glGenTextures(1, &_backFaceTextureId);
     glActiveTexture(GL_TEXTURE0 + _backFaceTexOffset);
     glBindTexture(GL_TEXTURE_2D, _backFaceTextureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3],
                  0, GL_RGBA, GL_FLOAT, nullptr);
+    this->_configure2DTextureLinearInterpolation();
 
-    /* Configure the back-facing texture */
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    /* Generate front-facing texture */
+    /* Generate and configure 2D front-facing texture */
     glGenTextures(1, &_frontFaceTextureId);
     glActiveTexture(GL_TEXTURE0 + _frontFaceTexOffset);
     glBindTexture(GL_TEXTURE_2D, _frontFaceTextureId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3],
                  0, GL_RGBA, GL_FLOAT, nullptr);
-
-    /* Configure the front-faceing texture */
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    this->_configure2DTextureLinearInterpolation();
 
     /* Create an Frame Buffer Object for the front and back side of the volume. */
     glGenFramebuffers(1, &_frameBufferId);
@@ -811,21 +801,13 @@ int RayCaster::_initializeFramebufferTextures() {
     glGenTextures(1, &_volumeTextureId);
     glActiveTexture(GL_TEXTURE0 + _volumeTexOffset);
     glBindTexture(GL_TEXTURE_3D, _volumeTextureId);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    this->_configure3DTextureLinearInterpolation();
 
     /* Generate and configure 3D texture: _2ndVarDataTexId */
     glGenTextures(1, &_2ndVarDataTexId);
     glActiveTexture(GL_TEXTURE0 + _2ndVarDataTexOffset);
     glBindTexture(GL_TEXTURE_3D, _2ndVarDataTexId);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    this->_configure3DTextureLinearInterpolation();
 
     /* Generate and configure 1D texture: _colorMapTextureId */
     glGenTextures(1, &_colorMapTextureId);
@@ -839,40 +821,25 @@ int RayCaster::_initializeFramebufferTextures() {
     glGenTextures(1, &_missingValueTextureId);
     glActiveTexture(GL_TEXTURE0 + _missingValueTexOffset);
     glBindTexture(GL_TEXTURE_3D, _missingValueTextureId);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    this->_configure3DTextureNearestInterpolation();
 
     /* Generate and configure 3D texture: _2ndVarMaskTexId */
     glGenTextures(1, &_2ndVarMaskTexId);
     glActiveTexture(GL_TEXTURE0 + _2ndVarMaskTexOffset);
     glBindTexture(GL_TEXTURE_3D, _2ndVarMaskTexId);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    this->_configure3DTextureNearestInterpolation();
 
     /* Generate 3D texture: _vertCoordsTextureId */
     glGenTextures(1, &_vertCoordsTextureId);
     glActiveTexture(GL_TEXTURE0 + _vertCoordsTexOffset);
     glBindTexture(GL_TEXTURE_3D, _vertCoordsTextureId);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    this->_configure3DTextureNearestInterpolation();
 
-    /* Generate and configure depth texture */
+    /* Generate and configure 2D depth texture */
     glGenTextures(1, &_depthTextureId);
     glActiveTexture(GL_TEXTURE0 + _depthTexOffset);
     glBindTexture(GL_TEXTURE_2D, _depthTextureId);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    this->_configure2DTextureLinearInterpolation();
 
     /* Bind the default textures */
     glBindTexture(GL_TEXTURE_1D, 0);
@@ -880,6 +847,29 @@ int RayCaster::_initializeFramebufferTextures() {
     glBindTexture(GL_TEXTURE_3D, 0);
 
     return 0;
+}
+
+void RayCaster::_configure3DTextureNearestInterpolation() const {
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+}
+
+void RayCaster::_configure3DTextureLinearInterpolation() const {
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+}
+
+void RayCaster::_configure2DTextureLinearInterpolation() const {
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 void RayCaster::_drawVolumeFaces(int whichPass,
