@@ -4,7 +4,6 @@
 #include <map>
 #include <cassert>
 #include "vapor/MyBase.h"
-#include "vapor/FileUtils.h"
 
 #ifdef WIN32
     #ifdef RENDER_EXPORTS
