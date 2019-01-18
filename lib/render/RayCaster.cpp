@@ -841,6 +841,7 @@ int RayCaster::_paintGL( bool fast )
     glBindVertexArray( 0 );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
     glDepthFunc(GL_LESS);
+    glActiveTexture( GL_TEXTURE0 );
 
     delete grid;
 
