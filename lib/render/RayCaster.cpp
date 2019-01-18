@@ -371,36 +371,17 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
         delete[] missingValueMask;
         missingValueMask = nullptr;
     }
-
-    StructuredGrid::ConstIterator valItr = grid->cbegin(); // Iterator for data field values
-
     if (grid->HasMissingData()) {
-        float missingValue = grid->GetMissingValue();
         try {
             missingValueMask = new unsigned char[numOfVertices];
         } catch (const std::bad_alloc &e) {
             MyBase::SetErrMsg(e.what());
             return MEMERROR;
         }
-        float dataValue;
-        for (size_t i = 0; i < numOfVertices; i++) {
-            dataValue = *valItr;
-            if (dataValue == missingValue) {
-                dataField[i] = 0.0f;
-                missingValueMask[i] = 127u;
-            } else {
-                dataField[i] = dataValue;
-                missingValueMask[i] = 0u;
-            }
-            ++valItr;
-        }
-    } else // No missing value!
-    {
-        for (size_t i = 0; i < numOfVertices; i++) {
-            dataField[i] = *valItr;
-            ++valItr;
-        }
     }
+
+    // Now iterate the current grid
+    this->IterateAGrid(grid, numOfVertices, dataField, missingValueMask);
 
     dataFieldUpToDate = true;
 
@@ -457,12 +438,7 @@ int RayCaster::UserCoordinates::Update2ndVariable(const RayCasterParams *params,
         delete[] secondVarMask;
         secondVarMask = nullptr;
     }
-
-    // Get an iterator
-    StructuredGrid::ConstIterator valItr = grid->cbegin();
-
     if (grid->HasMissingData()) {
-        float missingValue = grid->GetMissingValue();
         try {
             secondVarMask = new unsigned char[numOfVertices];
         } catch (const std::bad_alloc &e) {
@@ -470,30 +446,43 @@ int RayCaster::UserCoordinates::Update2ndVariable(const RayCasterParams *params,
             delete grid;
             return MEMERROR;
         }
-
-        float dataValue;
-        for (size_t i = 0; i < numOfVertices; i++) {
-            dataValue = *valItr;
-            if (dataValue == missingValue) {
-                secondVarData[i] = 0.0f;
-                secondVarMask[i] = 127u;
-            } else {
-                secondVarData[i] = dataValue;
-                secondVarMask[i] = 0u;
-            }
-            ++valItr;
-        }
-    } else {
-        for (size_t i = 0; i < numOfVertices; i++) {
-            secondVarData[i] = *valItr;
-            ++valItr;
-        }
     }
+
+    // Now iterate the current grid
+    this->IterateAGrid(grid, numOfVertices, secondVarData, secondVarMask);
 
     delete grid;
     secondVarUpToDate = true;
 
     return 0;
+}
+
+void RayCaster::UserCoordinates::IterateAGrid(const StructuredGrid *grid,
+                                              size_t numOfVert,
+                                              float *dataBuf,
+                                              unsigned char *maskBuf) {
+    StructuredGrid::ConstIterator valItr = grid->cbegin();
+
+    if (grid->HasMissingData()) {
+        float missingValue = grid->GetMissingValue();
+        float dataValue;
+        for (size_t i = 0; i < numOfVert; i++) {
+            dataValue = *valItr;
+            if (dataValue == missingValue) {
+                dataBuf[i] = 0.0f;
+                maskBuf[i] = 127u;
+            } else {
+                dataBuf[i] = dataValue;
+                maskBuf[i] = 0u;
+            }
+            ++valItr;
+        }
+    } else {
+        for (size_t i = 0; i < numOfVert; i++) {
+            dataBuf[i] = *valItr;
+            ++valItr;
+        }
+    }
 }
 
 void RayCaster::UserCoordinates::FillCoordsXYPlane(const StructuredGrid *grid,
