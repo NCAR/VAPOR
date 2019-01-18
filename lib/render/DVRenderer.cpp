@@ -45,8 +45,6 @@ void DVRenderer::_3rdPassSpecialHandling(bool fast, int castingMode) const {
     glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, _currentViewport[0],
                      _currentViewport[1], _currentViewport[2], _currentViewport[3], 0);
     _3rdPassShader->SetUniform("depthTexture", _depthTexOffset);
-    // Note: Don't bind 0 to GL_TEXTURE_2D at this point yet; it'll result in bad rendering,
-    //   though I don't know why...
 }
 
 void DVRenderer::_colormapSpecialHandling() {
