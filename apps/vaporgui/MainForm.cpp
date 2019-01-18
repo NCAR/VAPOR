@@ -2336,9 +2336,10 @@ void MainForm::startAnimCapture(
     QFileInfo fileInfo = QFileInfo(fileName);
 
     QString suffix = fileInfo.suffix();
+    cout << "suffix " << suffix.toStdString() << endl;
     if (suffix == "") {
         fileName += QString::fromStdString(defaultSuffix);
-        fileInfo.setFile(fileName);
+        //fileInfo.setFile(fileName);
         cout << "setting filename to " << fileName.toStdString() << endl;
     }
 
