@@ -197,14 +197,11 @@ void Plot::Update()
     if (enabledVars.size() > 0) {
         std::vector<double> min, max;
         std::vector<int>    axes;
-        // Retrieve the dimensionality
-        VAPoR::DataMgrUtils::GetExtents(currentDmgr, plotParams->GetCurrentTimestep(), enabledVars, min, max, axes);
-        size_t dimensionality = axes.size();
-        assert(dimensionality == 2 || dimensionality == 3);
 
         // First update the space tab
         min = plotParams->GetMinExtents();
         max = plotParams->GetMaxExtents();
+        size_t dimensionality = min.size();
 
         spaceTabP1->SetDimensionality(dimensionality);
         spaceTabP2->SetDimensionality(dimensionality);
@@ -218,6 +215,7 @@ void Plot::Update()
             pt.push_back(min.at(2));
         else if (pt.size() == 3 && dimensionality == 2)
             pt.pop_back();
+
         spaceTabP1->SetValue(pt);
         plotParams->SetPoint1(pt);
 
@@ -228,6 +226,7 @@ void Plot::Update()
             pt.push_back(max.at(2));
         else if (pt.size() == 3 && dimensionality == 2)
             pt.pop_back();
+
         spaceTabP2->SetValue(pt);
         plotParams->SetPoint2(pt);
 
@@ -294,7 +293,7 @@ void Plot::_newVarChanged(int index)
         std::vector<std::string> vars = plotParams->GetAuxVariableNames();
         vars.push_back(varName);
         plotParams->SetAuxVariableNames(vars);
-        _fixActiveExtents(varName);
+        _updateExtents();
     }
 }
 
@@ -383,7 +382,7 @@ void Plot::_spaceModeTimeChanged(int val)
     VAPoR::PlotParams *plotParams = this->_getCurrentPlotParams();
     plotParams->SetCurrentTimestep(val);
     std::string emptyStr;
-    _fixActiveExtents(emptyStr);
+    _updateExtents();
 }
 
 void Plot::_timeModePointChanged()
@@ -409,7 +408,7 @@ void Plot::_timeModeT1T2Changed()
 
     plotParams->SetMinMaxTS(rangeInt);
     std::string emptyStr;
-    _fixActiveExtents(emptyStr);
+    _updateExtents();
 }
 
 void Plot::_dataSourceChanged(int index)
@@ -486,6 +485,9 @@ void Plot::_spaceTabPlotClicked()
     std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
     int                      numOfSamples = plotParams->GetNumOfSamples();
 
+    // Do nothing if no variable is enabled
+    if (enabledVars.size() == 0) return;
+
     std::vector<double> p1p2span;
     for (int i = 0; i < point1.size(); i++) p1p2span.push_back(point2[i] - point1[i]);
 
@@ -560,6 +562,9 @@ void Plot::_timeTabPlotClicked()
     std::vector<double>      singlePt = plotParams->GetSinglePoint();
     std::vector<long int>    minMaxTS = plotParams->GetMinMaxTS();
     std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
+
+    // Do nothing if no variable is enabled
+    if (enabledVars.size() == 0) return;
 
     std::vector<std::vector<float>> sequences;
     for (int v = 0; v < enabledVars.size(); v++) {
@@ -773,41 +778,44 @@ void Plot::_axisLocksChanged(int val)
     _spaceModeP1Changed();
 }
 
-void Plot::_fixActiveExtents(const std::string varname)
+void Plot::_updateExtents()
 {
     VAPoR::DataMgr *         currentDmgr = this->_getCurrentDataMgr();
     VAPoR::PlotParams *      plotParams = this->_getCurrentPlotParams();
-    std::vector<std::string> enabledVars;
-    if (!varname.empty())
-        enabledVars.push_back(varname);
-    else
-        enabledVars = plotParams->GetAuxVariableNames();
+    std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
 
-    std::vector<double> minActive, maxActive, minActiveT, maxActiveT;
+    // Retrieve extents of all variables at 3 different time steps.
+    std::vector<double> min, max, minT1, maxT1, minT2, maxT2;
     std::vector<int>    axes;
-    VAPoR::DataMgrUtils::GetExtents(currentDmgr, plotParams->GetCurrentTimestep(), enabledVars, minActive, maxActive, axes);
-    VAPoR::DataMgrUtils::GetExtents(currentDmgr, plotParams->GetMinMaxTS().at(0), enabledVars, minActiveT, maxActiveT, axes);
+    std::vector<long>   TSToExamine;
+    TSToExamine.push_back(plotParams->GetCurrentTimestep());
+    TSToExamine.push_back(plotParams->GetMinMaxTS().at(0));
+    TSToExamine.push_back(plotParams->GetMinMaxTS().at(1));
 
-    // ActiveExtents from Params;
-    std::vector<double> minParams = plotParams->GetMinExtents();
-    if (minParams.size() == 0)    // 1st time invoking
-        minParams = minActive;
-    else {
-        for (size_t i = 0; i < minParams.size() && i < minActive.size(); i++) {
-            minParams[i] = minParams[i] < minActive[i] ? minParams[i] : minActive[i];
-            minParams[i] = minParams[i] < minActiveT[i] ? minParams[i] : minActiveT[i];
-        }
-    }
-    plotParams->SetMinExtents(minParams);
+    // TSToExamine[0] definitely needs to be evaluated.
+    VAPoR::DataMgrUtils::GetExtents(currentDmgr, TSToExamine[0], enabledVars, min, max, axes);
 
-    std::vector<double> maxParams = plotParams->GetMaxExtents();
-    if (maxParams.size() == 0)
-        maxParams = maxActive;
-    else {
-        for (size_t i = 0; i < maxParams.size() && i < maxActive.size(); i++) {
-            maxParams[i] = maxParams[i] > maxActive[i] ? maxParams[i] : maxActive[i];
-            maxParams[i] = maxParams[i] > maxActiveT[i] ? maxParams[i] : maxActiveT[i];
-        }
+    // TSToExamine[1] and TSToExamine[2] are evaluated only when not duplicate
+    if (TSToExamine[1] != TSToExamine[0]) {
+        VAPoR::DataMgrUtils::GetExtents(currentDmgr, TSToExamine[1], enabledVars, minT1, maxT1, axes);
+    } else {
+        minT1 = min;
+        maxT1 = max;
     }
-    plotParams->SetMaxExtents(maxParams);
+    if ((TSToExamine[2] != TSToExamine[1]) && (TSToExamine[2] != TSToExamine[0])) {
+        VAPoR::DataMgrUtils::GetExtents(currentDmgr, TSToExamine[2], enabledVars, minT2, maxT2, axes);
+    } else {
+        minT2 = min;
+        maxT2 = max;
+    }
+
+    // Find the union of the 3 extents
+    for (int i = 0; i < min.size(); i++) {
+        if (minT1[i] < min[i]) min[i] = minT1[i];
+        if (maxT1[i] > max[i]) max[i] = maxT1[i];
+        if (minT2[i] < min[i]) min[i] = minT2[i];
+        if (maxT2[i] > max[i]) max[i] = maxT2[i];
+    }
+    plotParams->SetMinExtents(min);
+    plotParams->SetMaxExtents(max);
 }
