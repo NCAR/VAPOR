@@ -88,12 +88,9 @@ class Plot : public QDialog, public Ui_PlotWindow {
     //
     std::string _getYLabel();
 
-    // Fix the min and max extents kept in the params class based on
-    //   what extents the new variable has.
-    //   If the new variable is an empty string, then update the extents
-    //   using all the enabled variables.
+    // Update the min and max extents based on all enabled variables.
     //
-    void _fixActiveExtents(const std::string);
+    void _updateExtents();
 };
 
 #endif // PLOT_H
