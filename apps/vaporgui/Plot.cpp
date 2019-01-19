@@ -542,6 +542,10 @@ void Plot::_spaceTabPlotClicked()
     std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
     int numOfSamples                     = plotParams->GetNumOfSamples();
 
+    // Do nothing if no variable is enabled
+    if( enabledVars.size() == 0 )
+        return;
+
     std::vector<double>     p1p2span;
     for( int i = 0; i < point1.size(); i++ )
         p1p2span.push_back( point2[i] - point1[i] );
@@ -631,6 +635,10 @@ void Plot::_timeTabPlotClicked()
     std::vector<double>     singlePt     = plotParams->GetSinglePoint();
     std::vector<long int>   minMaxTS     = plotParams->GetMinMaxTS();
     std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
+
+    // Do nothing if no variable is enabled
+    if( enabledVars.size() == 0 )
+        return;
 
     std::vector< std::vector<float> >    sequences;
     for( int v = 0; v < enabledVars.size(); v++ )
