@@ -175,14 +175,20 @@ class VDF_API Grid {
     //! size of \p indices must be equal to that of the \p dims vector
     //! returned by GetDimensions()
     //!
-    virtual float AccessIndex(const std::vector<size_t> &indices) const;
+    virtual float AccessIndex(const size_t indices[3]) const;
+    virtual float AccessIndex(const std::vector<size_t> &indices) const {
+        return (AccessIndex(indices.data()));
+    }
 
     //! Set the data value at the indicated grid point
     //!
     //! This method sets the data value of the grid point indexed by
     //! \p indices to \p value.
     //!
-    virtual void SetValue(const std::vector<size_t> &indices, float value);
+    virtual void SetValue(const size_t indices[3], float value);
+    virtual void SetValue(const std::vector<size_t> &indices, float value) {
+        SetValue(indices.data(), value);
+    }
 
     //! This method provides an alternate interface to Grid::AccessIndex()
     //! If the dimensionality of the grid as determined by GetDimensions() is
@@ -1073,8 +1079,13 @@ class VDF_API Grid {
     virtual float GetValueLinear(
         const std::vector<double> &coords) const = 0;
 
-    float *AccessIndex(
-        const std::vector<float *> &blks, const std::vector<size_t> &indices) const;
+    virtual float *AccessIndex(
+        const std::vector<float *> &blks, const size_t indices[3]) const;
+
+    virtual float *AccessIndex(
+        const std::vector<float *> &blks, const std::vector<size_t> &indices) const {
+        return AccessIndex(blks, indices.data());
+    }
 
     virtual void ClampIndex(
         const std::vector<size_t> &dims,
@@ -1090,6 +1101,42 @@ class VDF_API Grid {
                 indices[i] = dims[i] - 1;
             }
         }
+    }
+
+    virtual void ClampIndex(
+        const size_t indices[3],
+        size_t *cIndices) const {
+        const std::vector<size_t> &dims = GetNodeDimensions();
+        for (int i = 0; i < dims.size(); i++) {
+            cIndices[i] = indices[i];
+            if (cIndices[i] >= dims[i]) {
+                cIndices[i] = dims[i] - 1;
+            }
+        }
+    }
+
+    virtual void ClampIndex(
+        const std::vector<size_t> &indices,
+        size_t *cIndices) const {
+        ClampIndex(indices.data(), cIndices);
+    }
+
+    virtual void ClampCellIndex(
+        const size_t indices[3],
+        size_t *cIndices) const {
+        const std::vector<size_t> &dims = GetCellDimensions();
+        for (int i = 0; i < dims.size(); i++) {
+            cIndices[i] = indices[i];
+            if (cIndices[i] >= dims[i]) {
+                cIndices[i] = dims[i] - 1;
+            }
+        }
+    }
+
+    virtual void ClampCellIndex(
+        const std::vector<size_t> &indices,
+        size_t *cIndices) const {
+        ClampCellIndex(indices.data(), cIndices);
     }
 
   private:
