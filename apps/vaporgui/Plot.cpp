@@ -807,12 +807,6 @@ void Plot::_updateExtents() {
     TSToExamine.push_back(plotParams->GetMinMaxTS().at(0));
     TSToExamine.push_back(plotParams->GetMinMaxTS().at(1));
 
-    // Mark duplicate time steps as -1, since there's no legit time step being negative
-    if (TSToExamine[2] == TSToExamine[1] || TSToExamine[2] == TSToExamine[0])
-        TSToExamine[2] = -1;
-    if (TSToExamine[1] == TSToExamine[0])
-        TSToExamine[1] = -1;
-
     // TSToExamine[0] definitely needs to be evaluated.
     VAPoR::DataMgrUtils::GetExtents(currentDmgr,
                                     TSToExamine[0],
@@ -822,14 +816,14 @@ void Plot::_updateExtents() {
                                     axes);
 
     // TSToExamine[1] and TSToExamine[2] are evaluated only when not duplicate
-    if (TSToExamine[1] != -1) {
+    if (TSToExamine[1] != TSToExamine[0]) {
         VAPoR::DataMgrUtils::GetExtents(currentDmgr, TSToExamine[1],
                                         enabledVars, minT1, maxT1, axes);
     } else {
         minT1 = min;
         maxT1 = max;
     }
-    if (TSToExamine[2] != -1) {
+    if ((TSToExamine[2] != TSToExamine[1]) && (TSToExamine[2] != TSToExamine[0])) {
         VAPoR::DataMgrUtils::GetExtents(currentDmgr, TSToExamine[2],
                                         enabledVars, minT2, maxT2, axes);
     } else {
