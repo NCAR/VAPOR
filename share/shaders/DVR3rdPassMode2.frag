@@ -315,8 +315,9 @@ void main(void)
         discard;
 
     // The incoming stepSize1D results in approximate 2 samples per cell.
-    //   In Mode 2 ray casting, we increase this step size.
-    float myStepSize1D  = 1.5 * stepSize1D;
+    //   In Mode 2 ray casting, we increase this step size 
+    //   to be approximately 1 sample per cell.
+    float myStepSize1D  = 2.0 * stepSize1D;
     float nStepsf       = rayDirLength / myStepSize1D;
     vec3  stepSize3D    = rayDirEye    / nStepsf;
     int   nSteps        = int(nStepsf) + 1;
@@ -358,12 +359,12 @@ void main(void)
     }
 
     // Let's do a ray casting!
-    int   earlyTerm        = 0;         // why this ray got an early termination?
-    float OpacityCorr      = 1.0;
+    int   earlyTerm        = 0;     // why this ray got an early termination?
+    float OpacityCorr      = 1.0;   // Opacity correction ratio. 1.0 means no correction needed
 
-    // We set the loop to terminate at 2 times the number of steps, in case
+    // We set the loop to terminate at 8 times the number of steps, in case
     //   there are many occurances of step size halved.
-    for( int stepi = 1; stepi <= 2 * nSteps; stepi++ )
+    for( int stepi = 1; stepi <= 8 * nSteps; stepi++ )
     {
         if( color.a > Opaque )
         {
@@ -387,11 +388,12 @@ void main(void)
                 {
                     for( int j = 0; j <= i; j++ )
                         OpacityCorr *= 0.5;
+                    break;
                 }
             }
 
             // If still not finding a next cell, bail.
-            if( OpacityCorr == 1.0 )
+            if( !(OpacityCorr < 1.0) )
             {
                 earlyTerm  = 2;
                 break;
