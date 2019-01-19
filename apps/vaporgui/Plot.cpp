@@ -781,9 +781,31 @@ void Plot::_updateExtents()
     // Retrieve extents of all variables at 3 different time steps.
     std::vector<double> min, max, minT1, maxT1, minT2, maxT2;
     std::vector<int>    axes;
-    VAPoR::DataMgrUtils::GetExtents(currentDmgr, plotParams->GetCurrentTimestep(), enabledVars, min, max, axes);
-    VAPoR::DataMgrUtils::GetExtents(currentDmgr, plotParams->GetMinMaxTS().at(0), enabledVars, minT1, maxT1, axes);
-    VAPoR::DataMgrUtils::GetExtents(currentDmgr, plotParams->GetMinMaxTS().at(1), enabledVars, minT2, maxT2, axes);
+    std::vector<long>   TSToExamine;
+    TSToExamine.push_back(plotParams->GetCurrentTimestep());
+    TSToExamine.push_back(plotParams->GetMinMaxTS().at(0));
+    TSToExamine.push_back(plotParams->GetMinMaxTS().at(1));
+
+    // Mark duplicate time steps as -1, since there's no legit time step being negative
+    if (TSToExamine[2] == TSToExamine[1] || TSToExamine[2] == TSToExamine[0]) TSToExamine[2] = -1;
+    if (TSToExamine[1] == TSToExamine[0]) TSToExamine[1] = -1;
+
+    // TSToExamine[0] definitely needs to be evaluated.
+    VAPoR::DataMgrUtils::GetExtents(currentDmgr, TSToExamine[0], enabledVars, min, max, axes);
+
+    // TSToExamine[1] and TSToExamine[2] are evaluated only when not duplicate
+    if (TSToExamine[1] != -1) {
+        VAPoR::DataMgrUtils::GetExtents(currentDmgr, TSToExamine[1], enabledVars, minT1, maxT1, axes);
+    } else {
+        minT1 = min;
+        maxT1 = max;
+    }
+    if (TSToExamine[2] != -1) {
+        VAPoR::DataMgrUtils::GetExtents(currentDmgr, TSToExamine[2], enabledVars, minT2, maxT2, axes);
+    } else {
+        minT2 = min;
+        maxT2 = max;
+    }
 
     // Find the union of the 3 extents
     for (int i = 0; i < min.size(); i++) {
