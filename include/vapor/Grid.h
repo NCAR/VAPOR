@@ -1161,6 +1161,31 @@ protected:
 	}
  }
 
+ virtual void ClampIndex(
+	const std::vector <size_t> &indices,
+	size_t *cIndices
+ ) const {
+	const std::vector <size_t> &dims = GetNodeDimensions();
+	for (int i=0; i<indices.size(); i++) {
+		cIndices[i] = indices[i];
+		if (cIndices[i] >= dims[i]) {
+			cIndices[i] = dims[i] - 1;
+		}
+	}
+ }
+ virtual void ClampCellIndex(
+	const std::vector <size_t> &indices,
+	size_t *cIndices
+ ) const {
+	const std::vector <size_t> &dims = GetCellDimensions();
+	for (int i=0; i<indices.size(); i++) {
+		cIndices[i] = indices[i];
+		if (cIndices[i] >= dims[i]) {
+			cIndices[i] = dims[i] - 1;
+		}
+	}
+ }
+
 
 
 private:
