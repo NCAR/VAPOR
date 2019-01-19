@@ -215,12 +215,12 @@ int WireFrameRenderer::_buildCache() {
     Grid::ConstCellIterator end = grid->ConstCellEnd();
 
     float defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
+    vector<vector<size_t>> nodes;
+    vector<double> coord;
     for (; it != end; ++it) {
-        vector<vector<size_t>> nodes;
         grid->GetCellNodes(*it, nodes);
 
         for (int i = 0; i < nodes.size(); i++) {
-            vector<double> coord;
             grid->GetUserCoordinates(nodes[i], coord);
 
             coordsArray[3 * i + 0] = coord[0];
