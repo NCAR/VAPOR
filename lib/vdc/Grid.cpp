@@ -60,13 +60,13 @@ Grid::Grid(
 }
 
 
-float Grid::AccessIndex(const std::vector <size_t> &indices) const {
+float Grid::AccessIndex(const size_t indices[3]) const {
 	float *fptr = AccessIndex(_blks, indices);
 	if (! fptr) return(GetMissingValue());
 	return (*fptr);
 }
 
-void Grid::SetValue(const std::vector <size_t> &indices, float v) {
+void Grid::SetValue(const size_t indices[3], float v) {
 	float *fptr = AccessIndex(_blks, indices);
 	if (! fptr) return;
 	*fptr = v;
@@ -74,7 +74,7 @@ void Grid::SetValue(const std::vector <size_t> &indices, float v) {
 
 float *Grid::AccessIndex(
 	const std::vector <float *> &blks,
-	const std::vector <size_t> &indices
+	const size_t indices[3]
 ) const {
 
 	size_t cIndices[3];
@@ -105,7 +105,7 @@ float *Grid::AccessIndex(
 }
 
 float Grid::AccessIJK(size_t i, size_t j, size_t k) const {
-    std::vector <size_t> indices = {i,j,k};
+    size_t indices[] = {i,j,k};
     return(AccessIndex(indices));
 }
 
