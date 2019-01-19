@@ -36,10 +36,10 @@ bool StructuredGrid::GetCellNodes(
     std::vector<vector<size_t>> &nodes) const {
     nodes.clear();
 
-    vector<size_t> cCindices = cindices;
-    ClampCellIndex(cCindices);
+    size_t cCindices[3];
+    ClampCellIndex(cindices, cCindices);
 
-    vector<size_t> dims = GetDimensions();
+    const vector<size_t> &dims = GetDimensions();
 
     // Cells have the same ID's as their first node
     //
@@ -94,10 +94,10 @@ bool StructuredGrid::GetCellNeighbors(
     std::vector<vector<size_t>> &cells) const {
     cells.clear();
 
-    vector<size_t> cCindices = cindices;
-    ClampCellIndex(cCindices);
+    size_t cCindices[3];
+    ClampCellIndex(cindices, cCindices);
 
-    vector<size_t> dims = GetDimensions();
+    const vector<size_t> &dims = GetDimensions();
 
     assert((dims.size() == 2) && "3D cells not yet supported");
 
