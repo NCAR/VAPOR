@@ -198,7 +198,7 @@ bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
         vec3 posv0  = pos                     - cubeVertCoord[ tri[0] ];
         vec3 v1v0   = cubeVertCoord[ tri[1] ] - cubeVertCoord[ tri[0] ];
         vec3 v2v0   = cubeVertCoord[ tri[2] ] - cubeVertCoord[ tri[0] ];
-        vec3 inward = cross( v1v0, v2v0 );  // vector pointing inside of the cell
+        vec3 inward = cross( v1v0, v2v0 );      // vector pointing inside of the cell
         if( dot( posv0, inward ) < -ULP100  )   // pos tests to be outside of the cell
             return false;
     }
@@ -363,9 +363,10 @@ void main(void)
                                     // non-zero == early termination because of some reason.
     float OpacityCorr      = 1.0;   // Opacity correction ratio. 1.0 means no correction needed
 
+
     // We set the loop to terminate at 8 times the number of steps, in case
-    //   there are many occurances of step size halved.
-    for( int stepi = 1; stepi < 8 * nSteps; stepi++ )
+    //   there are many occurances of step size being halved.
+    for( int stepi = 0; stepi < 8 * nSteps; stepi++ )
     {
         if( color.a > Opaque )
         {
