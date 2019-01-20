@@ -315,9 +315,9 @@ void main(void)
         discard;
 
     // The incoming stepSize1D results in approximate 2 samples per cell.
-    //   In Mode 2 ray casting, we increase this step size 
-    //   to be approximately 1 sample per cell.
-    float myStepSize1D  = 2.0 * stepSize1D;
+    //   In Mode 2 ray casting, we may want to tune this step size by applying a multiplier.  
+    //   We ship VAPOR without changing it, i.e., multiplying by 1.0 .
+    float myStepSize1D  = 1.0 * stepSize1D;
     float nStepsf       = rayDirLength / myStepSize1D;
     vec3  stepSize3D    = rayDirEye    / nStepsf;
     int   nSteps        = int(nStepsf) + 1;
