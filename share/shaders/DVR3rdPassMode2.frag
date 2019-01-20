@@ -365,7 +365,7 @@ void main(void)
 
     // We set the loop to terminate at 8 times the number of steps, in case
     //   there are many occurances of step size halved.
-    for( int stepi = 1; stepi <= 8 * nSteps; stepi++ )
+    for( int stepi = 1; stepi < 8 * nSteps; stepi++ )
     {
         if( color.a > Opaque )
         {
@@ -448,12 +448,13 @@ void main(void)
         color.rgb += (1.0 - color.a) * backColor.a * backColor.rgb;
         color.a   += (1.0 - color.a) * backColor.a;
 
-        // keep up step 1 values as well
+        // Keep up step 1 values as well
         step1CellIdx = step2CellIdx;
         step1Eye     = step2Eye; 
 
-        // Terminate if step 2 is in a boundary cell!
-        if( CellOnBoundary( step2CellIdx )
+        // Terminate if step 2 reaches a boundary cell.
+        // Note we only do this test after the ray steps *almost* nSteps.
+        if( (stepi > nSteps - 4) && CellOnBoundary( step2CellIdx ) )
         {
             earlyTerm = 0;  // 0 means it goes through the entire cell before termination.
             break;
