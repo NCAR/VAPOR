@@ -359,7 +359,8 @@ void main(void)
     }
 
     // Let's do a ray casting!
-    int   earlyTerm        = 0;     // why this ray got an early termination?
+    int   earlyTerm        = 0;     // 0        == termination when goes through the volume.
+                                    // non-zero == early termination because of some reason.
     float OpacityCorr      = 1.0;   // Opacity correction ratio. 1.0 means no correction needed
 
     // We set the loop to terminate at 8 times the number of steps, in case
@@ -450,6 +451,13 @@ void main(void)
         // keep up step 1 values as well
         step1CellIdx = step2CellIdx;
         step1Eye     = step2Eye; 
+
+        // Terminate if step 2 is in a boundary cell!
+        if( CellOnBoundary( step2CellIdx )
+        {
+            earlyTerm = 0;  // 0 means it goes through the entire cell before termination.
+            break;
+        }
     }
 
     // If loop terminated early, we set depth value at step1 position. Otherwise, this fragment 
