@@ -43,8 +43,8 @@ void glCheckError() { }
 
 // Constructor
 RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string paramsType, std::string classType, std::string &instName, DataMgr *dataMgr)
-: Renderer(pm, winName, dataSetName, paramsType, classType, instName, dataMgr), _backFaceTexOffset(0), _frontFaceTexOffset(1), _volumeTexOffset(2), _colorMapTexOffset(3), _missingValueTexOffset(4),
-  _vertCoordsTexOffset(5), _depthTexOffset(6), _2ndVarDataTexOffset(7), _2ndVarMaskTexOffset(8)
+: Renderer(pm, winName, dataSetName, paramsType, classType, instName, dataMgr), _backFaceTexOffset(1), _frontFaceTexOffset(2), _volumeTexOffset(3), _colorMapTexOffset(4), _missingValueTexOffset(5),
+  _vertCoordsTexOffset(6), _depthTexOffset(7), _2ndVarDataTexOffset(8), _2ndVarMaskTexOffset(9)
 {
     _backFaceTextureId = 0;
     _frontFaceTextureId = 0;
@@ -626,6 +626,10 @@ int RayCaster::_paintGL(bool fast)
             int success = _userCoordinates.UpdateVertCoords(params, grid, _dataMgr);
             if (success != 0) {
                 MyBase::SetErrMsg("Error occured during updating curvilinear coordinates!");
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_1D, 0);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                glBindTexture(GL_TEXTURE_3D, 0);
                 delete grid;
                 return JUSTERROR;
             }
@@ -635,6 +639,10 @@ int RayCaster::_paintGL(bool fast)
         // This step takes place at every loop.
         if (_updateVertCoordsTexture(ModelView) != 0) {
             MyBase::SetErrMsg("Error occured during calculating eye coordinates!");
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_1D, 0);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindTexture(GL_TEXTURE_3D, 0);
             delete grid;
             return MEMERROR;
         }
@@ -645,6 +653,10 @@ int RayCaster::_paintGL(bool fast)
         int success = _userCoordinates.Update2ndVariable(params, _dataMgr);
         if (success != 0) {
             MyBase::SetErrMsg("Error occured during updating secondary variable!");
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_1D, 0);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindTexture(GL_TEXTURE_3D, 0);
             delete grid;
             return JUSTERROR;
         }
@@ -691,7 +703,6 @@ int RayCaster::_paintGL(bool fast)
     // Restore OpenGL values changed in this function.
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glDepthFunc(GL_LESS);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
