@@ -126,7 +126,7 @@ float CalculateDepth( const in vec3 pEye )
 {
     vec4    pClip =  Projection  * vec4( pEye, 1.0 );
     vec3    pNdc  =  pClip.xyz   / pClip.w;
-    return (gl_DepthRange.diff * 0.5 * pNdc.z + (gl_DepthRange.near + gl_DepthRange.far) * 0.5);
+    return  0.5 * fma( gl_DepthRange.diff, pNdc.z, (gl_DepthRange.near + gl_DepthRange.far) );
 }
 
 
@@ -187,24 +187,23 @@ void main(void)
             if( ( isoValJ - step1Value) * (isoValJ - step2Value) < 0.0 )
             {
                 float weight    = (isoValJ - step1Value) / (step2Value - step1Value);
+                vec3  isoEye    = mix( step1Eye, step2Eye, weight );
+                vec3  isoTex    = mix( step1Texture, step2Texture, weight );
 
                 // Retrieve data value of the secondary variable at the same location
                 //   if color mapping variable is enabled.
                 if( use2ndVar )
                 {
-                    vec3 isoTex = mix( step1Texture, step2Texture, weight );
                     isoValJ     = texture( secondVarDataTexture,   isoTex ).x;
                 }
 
-                vec3  isoEye    = mix( step1Eye, step2Eye, weight );
                 float valTrans  = (isoValJ - colorMapRange.x) / colorMapRange.z;
                 vec4  backColor = texture( colorMapTexture, valTrans );
 
                 // Apply lighting (in eye space)
                 if( lighting && backColor.a > 0.001 )
                 {
-                    vec3 isoTexture      = step1Texture + weight * (step2Texture - step1Texture);
-                    vec3 gradientModel   = CalculateGradient( isoTexture );
+                    vec3 gradientModel   = CalculateGradient( isoTex );
                     if( length( gradientModel ) > ULP10 ) // Only apply lighting if big enough gradient
                     {
                         vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0 )).xyz;
@@ -213,7 +212,7 @@ void main(void)
                         vec3 viewDirEye  = normalize( -isoEye );
                         vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
                         float specular   = pow( max(0.0, dot( reflectionEye, viewDirEye )), specularExp ); 
-                        backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse*diffuseCoeff) + 
+                        backColor.rgb    = backColor.rgb * fma( diffuse, diffuseCoeff, ambientCoeff ) +
                                            specular * specularCoeff;
                     }
                 }
