@@ -449,7 +449,7 @@ void main(void)
 
         // Normal termination: step 2 reaches a boundary cell.
         //   Note we only do this test after the ray steps *almost* nStepsf.
-        if( (stepi > int(nStepsf) - 1) && CellOnBoundary( step2CellIdx ) )
+        if( (stepi > int(nStepsf) - 2) && CellOnBoundary( step2CellIdx ) )
         {
             earlyTerm = 0;  // 0 means it goes through the entire cell before termination.
             break;
