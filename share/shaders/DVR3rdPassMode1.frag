@@ -119,7 +119,7 @@ float CalculateDepth( const in vec3 pEye )
 {
     vec4    pClip =  Projection  * vec4( pEye, 1.0 );
     vec3    pNdc  =  pClip.xyz   / pClip.w;
-    return (gl_DepthRange.diff * 0.5 * pNdc.z + (gl_DepthRange.near + gl_DepthRange.far) * 0.5);
+    return  0.5 * fma( gl_DepthRange.diff, pNdc.z, (gl_DepthRange.near + gl_DepthRange.far) );
 }
 
 
@@ -215,7 +215,7 @@ void main(void)
                 vec3 viewDirEye  = normalize( -step2Eye );
                 vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
                 float specular   = pow( max(0.0, dot( reflectionEye, viewDirEye )), specularExp ); 
-                backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse * diffuseCoeff) + 
+                backColor.rgb    = backColor.rgb * fma( diffuse, diffuseCoeff, ambientCoeff ) +
                                    specular * specularCoeff;
             }
         }
