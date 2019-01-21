@@ -90,7 +90,7 @@ void FillCellVertCoordinates( const in ivec3 cellIdx, out vec3 coord[8] )
     cubeVertIdx[3] = ivec3(v0.x    , v0.y    , v0.z + 1 );
     cubeVertIdx[4] = ivec3(v0.x    , v0.y + 1, v0.z     );
     cubeVertIdx[5] = ivec3(v0.x + 1, v0.y + 1, v0.z     );
-    cubeVertIdx[6] = ivec3(v0.x + 1, v0.y + 1, v0.z + 1 );
+    cubeVertIdx[6] = v0 + 1;
     cubeVertIdx[7] = ivec3(v0.x    , v0.y + 1, v0.z + 1 );
 
     for( int i = 0; i < 8; i++ )
@@ -165,7 +165,7 @@ vec3 CalculateGradient( const in vec3 tc)
     a0.z = texture( volumeTexture, tc + vec3(0.0,0.0,h0.z) ).r;
     a1.z = texture( volumeTexture, tc + vec3(0.0,0.0,h1.z) ).r;
 
-    return (a1-a0 / h);
+    return (a1 - a0 / h);
 }
 
 
@@ -190,11 +190,12 @@ bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
     vec3 cubeVertCoord[8];
     FillCellVertCoordinates( cellIdx, cubeVertCoord );
 
+    int tri[3];
     for( int i = 0; i < 12; i++ )
     {
-        ivec3 tri   = ivec3( Global_Triangles[i*3], 
-                             Global_Triangles[i*3+1], 
-                             Global_Triangles[i*3+2] );
+        tri[0]      = Global_Triangles[ i * 3     ]; 
+        tri[1]      = Global_Triangles[ i * 3 + 1 ];
+        tri[2]      = Global_Triangles[ i * 3 + 2 ];
         vec3 posv0  = pos                     - cubeVertCoord[ tri[0] ];
         vec3 v1v0   = cubeVertCoord[ tri[1] ] - cubeVertCoord[ tri[0] ];
         vec3 v2v0   = cubeVertCoord[ tri[2] ] - cubeVertCoord[ tri[0] ];
