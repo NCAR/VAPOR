@@ -315,12 +315,8 @@ void main(void)
         discard;
 
     // The incoming stepSize1D results in approximate 2 samples per cell.
-    //   In Mode 2 ray casting, we may want to tune this step size by applying a multiplier.  
-    //   We ship VAPOR without changing it, i.e., multiplying by 1.0 .
-    float myStepSize1D  = 1.0 * stepSize1D;
-    float nStepsf       = rayDirLength / myStepSize1D;
+    float nStepsf       = rayDirLength / stepSize1D;
     vec3  stepSize3D    = rayDirEye    / nStepsf;
-    int   nSteps        = int(nStepsf) + 1;
     vec3  step1Eye      = startEye + 0.01 * stepSize3D;
 
     // Test 1st step if inside of the cell, and correct it if not.
@@ -364,44 +360,45 @@ void main(void)
     float OpacityCorr      = 1.0;   // Opacity correction ratio. 1.0 means no correction needed
 
 
-    // We set the loop to terminate at 8 times the number of steps, in case
+    // We set the loop to terminate at 4 times the number of steps, in case
     //   there are many occurances of step size being halved.
-    for( int stepi = 0; stepi < 8 * nSteps; stepi++ )
+    for( int stepi = 0; stepi < 4 * int(nStepsf); stepi++ )
     {
+        // Early termination: enough opacity
         if( color.a > Opaque )
         {
             earlyTerm      = 1;
             break;
         }
     
-        vec3 step2Eye      = step1Eye + stepSize3D; 
         ivec3 step2CellIdx;
-    
-        if( !LocateNextCell(  step1CellIdx, step2Eye, step2CellIdx ) )
-        {
-            // Attempt to find next cell again with half step size, for at most 3 times
-            //   I.e., at most shrink it to 1/8 of the base step size.
-            vec3 tmpStepSize = stepSize3D;
-            for( int i = 0; i < 3; i++ )
-            {
-                tmpStepSize *= 0.5;
-                step2Eye     = step1Eye + tmpStepSize;
-                if( LocateNextCell( step1CellIdx, step2Eye, step2CellIdx ) )
-                {
-                    for( int j = 0; j <= i; j++ )
-                        OpacityCorr *= 0.5;
-                    break;
-                }
-            }
+        vec3  step2Eye;
+        bool  foundNextCell = false;
 
-            // If still not finding a next cell, bail.
-            if( !(OpacityCorr < 1.0) )
+        // Try 3 different step sizes: base step size, 1/2 step size, and 1/4 step size.
+        for( int i = 0; i < 3; i++ )
+        {
+            vec3 tmpStepSize  = stepSize3D;
+            for( int j = 0; j < i; j++ )
+                tmpStepSize  *= 0.5;
+            step2Eye          = step1Eye + tmpStepSize;
+
+            if( LocateNextCell( step1CellIdx, step2Eye, step2CellIdx ) )
             {
-                earlyTerm  = 2;
+                foundNextCell = true;
+                for( int j = 0; j < i; j++ )
+                    OpacityCorr *= 0.5;
                 break;
             }
         }
-
+        // Early termination: cannot find the next cell! 
+        if( !foundNextCell )
+        {
+            earlyTerm  = 2;
+            break;
+        }
+    
+        // Early termination: reach the depth of other objects in the scene
         if( shallow && ( CalculateDepth(step2Eye) > otherDepth ) )
         {
             earlyTerm      = 3;
@@ -416,6 +413,7 @@ void main(void)
             continue;
         }
 
+        // Retrieve color at this location
         float step2Value   = texture( volumeTexture, step2Tex ).r;
         float valTranslate = (step2Value - colorMapRange.x) / colorMapRange.z;
         vec4  backColor    = texture( colorMapTexture, valTranslate );
@@ -449,16 +447,17 @@ void main(void)
         color.rgb += (1.0 - color.a) * backColor.a * backColor.rgb;
         color.a   += (1.0 - color.a) * backColor.a;
 
-        // Keep up step 1 values as well
-        step1CellIdx = step2CellIdx;
-        step1Eye     = step2Eye; 
-
-        // Terminate if step 2 reaches a boundary cell.
-        // Note we only do this test after the ray steps *almost* nSteps.
-        if( (stepi > nSteps - 4) && CellOnBoundary( step2CellIdx ) )
+        // Normal termination: step 2 reaches a boundary cell.
+        //   Note we only do this test after the ray steps *almost* nStepsf.
+        if( (stepi > int(nStepsf) - 1) && CellOnBoundary( step2CellIdx ) )
         {
             earlyTerm = 0;  // 0 means it goes through the entire cell before termination.
             break;
+        }
+        else // Keep up step 1 values and get ready for the next step
+        {
+            step1CellIdx = step2CellIdx;
+            step1Eye     = step2Eye; 
         }
     }
 
