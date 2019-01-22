@@ -105,6 +105,8 @@ public:
  void ShowToolTips(bool showOrHide);
  bool GetShowToolTips() const;
 
+ void SetVerticalHeaderWidth(int width);
+
 public slots:
  void emitValueChanged();
  void emitReturnPressed();
