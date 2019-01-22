@@ -292,8 +292,8 @@ bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3
 vec3 CalculatePosTex( const ivec3 cellIdx, const vec3 pos )
 {
     // Find texture coordinates of two corners
-    vec3 tc1 = vec3( cellIdx     ) * volumeDims1o;
-    vec3 tc2 = vec3( cellIdx + 1 ) * volumeDims1o;
+    vec3 tc1  = vec3( cellIdx     ) * volumeDims1o;
+    vec3 tc2  = vec3( cellIdx + 1 ) * volumeDims1o;
 
     // Find the eye coordinates of two cornders
     vec4 ec1  = texelFetch( vertCoordsTexture,  cellIdx,     0 );
