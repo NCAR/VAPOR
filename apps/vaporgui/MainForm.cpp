@@ -2277,7 +2277,8 @@ void MainForm::captureSingleImage(
 	string imageDir = sP->GetImageDir();
 	if (imageDir=="") imageDir = sP->GetDefaultImageDir();
     
-	QFileDialog fileDialog(this,
+	QFileDialog fileDialog(
+        this,
 		"Specify single image capture file name",
 		imageDir.c_str(),
         QString::fromStdString(filter)
@@ -2301,7 +2302,8 @@ void MainForm::captureSingleImage(
         fileInfo.setFile(fn);
     }
 
-	string filepath = fileInfo.absoluteFilePath().toStdString();
+	string file = fileInfo.absoluteFilePath().toStdString();
+	string filepath = fileInfo.path().toStdString();
 
 	//Save the path for future captures
 	sP->SetImageDir(filepath);
@@ -2309,7 +2311,7 @@ void MainForm::captureSingleImage(
 	//Turn on "image capture mode" in the current active visualizer
 	GUIStateParams *p = GetStateParams();
 	string vizName = p->GetActiveVizName();
-	int success = _vizWinMgr->EnableImageCapture(filepath, vizName);
+	int success = _vizWinMgr->EnableImageCapture(file, vizName);
     
     if (success < 0)
         MSG_ERR("Error capturing image");
