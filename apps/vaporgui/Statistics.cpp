@@ -74,7 +74,11 @@ bool Statistics::Update()
     }
     GUIStateParams *guiParams = dynamic_cast<GUIStateParams *>(_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()));
     std::string     currentDatasetName = guiParams->GetStatsDatasetName();
-    assert(currentDatasetName != "" && currentDatasetName != "NULL");
+    if (currentDatasetName == "" || currentDatasetName == "NULL") {
+        this->close();
+        return false;
+    }
+
     int currentIdx = -1;
     for (int i = 0; i < dmNames.size(); i++)
         if (currentDatasetName == dmNames[i]) {
