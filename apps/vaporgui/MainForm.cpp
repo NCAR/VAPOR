@@ -1908,7 +1908,8 @@ void MainForm::captureSingleImage(string filter, string defaultSuffix)
         fileInfo.setFile(fn);
     }
 
-    string filepath = fileInfo.absoluteFilePath().toStdString();
+    string file = fileInfo.absoluteFilePath().toStdString();
+    string filepath = fileInfo.path().toStdString();
 
     // Save the path for future captures
     sP->SetImageDir(filepath);
@@ -1916,7 +1917,7 @@ void MainForm::captureSingleImage(string filter, string defaultSuffix)
     // Turn on "image capture mode" in the current active visualizer
     GUIStateParams *p = GetStateParams();
     string          vizName = p->GetActiveVizName();
-    int             success = _vizWinMgr->EnableImageCapture(filepath, vizName);
+    int             success = _vizWinMgr->EnableImageCapture(file, vizName);
 
     if (success < 0) MSG_ERR("Error capturing image");
 }
