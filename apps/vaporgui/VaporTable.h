@@ -80,7 +80,6 @@ public:
     bool GetShowToolTips() const;
 
     void SetVerticalHeaderWidth(int width);
-    int  GetVerticalHeaderWidth() const;
 
 public slots:
     void emitValueChanged();
@@ -124,7 +123,6 @@ private:
 
     int           _activeRow;
     int           _activeCol;
-    int           _verticalHeaderWidth;
     bool          _lastRowIsCheckboxes;
     bool          _lastColIsCheckboxes;
     bool          _checkboxesEnabled;
