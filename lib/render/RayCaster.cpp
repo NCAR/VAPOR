@@ -1397,12 +1397,25 @@ int RayCaster::_updateVertCoordsTexture(const glm::mat4 &MV)
     // Second, send these eye coordinates to the GPU
     glActiveTexture(GL_TEXTURE0 + _vertCoordsTexOffset);
     glBindTexture(GL_TEXTURE_3D, _vertCoordsTextureId);
+
 #ifdef Darwin
     // Apply a dummy texture
     float dummyVolume[8] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume);
 #endif
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RGB, GL_FLOAT, coordEye);
+
+    // Test if the existing texture has the same dimensions.
+    //   If so, simply substitute its content.
+    //   If not, create a new object.
+    int width, height, depth;
+    glGetTexLevelParameteriv(GL_TEXTURE_3D, 0, GL_TEXTURE_WIDTH, &width);
+    glGetTexLevelParameteriv(GL_TEXTURE_3D, 0, GL_TEXTURE_HEIGHT, &height);
+    glGetTexLevelParameteriv(GL_TEXTURE_3D, 0, GL_TEXTURE_DEPTH, &depth);
+    if ((size_t)width == _userCoordinates.dims[0] && (size_t)height == _userCoordinates.dims[1] && (size_t)depth == _userCoordinates.dims[2]) {
+        glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, width, height, depth, GL_RGB, GL_FLOAT, coordEye);
+    } else {
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RGB, GL_FLOAT, coordEye);
+    }
 
     delete[] coordEye;
 
