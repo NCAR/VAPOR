@@ -207,9 +207,17 @@ void MainForm::_initMembers() {
 	_statsAction = NULL;
     _pythonAction = NULL;
 
-	_captureStartJpegCaptureAction = NULL;
-	_captureEndJpegCaptureAction = NULL;
-	_captureSingleJpegCaptureAction = NULL;
+    _singleImageMenu = NULL;
+	_captureSingleJpegAction = NULL;
+	_captureSinglePngAction = NULL;
+	_captureSingleTiffAction = NULL;
+
+    _imageSequenceMenu = NULL;	
+    _captureJpegSequenceAction = NULL;
+	_capturePngSequenceAction = NULL;
+	_captureTiffSequenceAction = NULL;
+
+	_captureEndImageAction = NULL;
 
 	_mouseModeActions = NULL;
 	_tileAction = NULL;
@@ -923,46 +931,96 @@ void MainForm::_createToolsMenu() {
 
 void MainForm::_createCaptureMenu() {
 
-	_captureSingleJpegCaptureAction = new QAction(this);
-	_captureSingleJpegCaptureAction->setText( tr( "Single image capture" ) );
-	_captureSingleJpegCaptureAction->setToolTip(
-		"Capture one image from current active visualizer"
+	_captureSingleJpegAction = new QAction(this);
+	_captureSingleJpegAction->setText( tr( "JPEG" ) );
+	_captureSingleJpegAction->setToolTip(
+		"Capture one JPEG from current active visualizer"
+	);
+	_captureSinglePngAction = new QAction(this);
+	_captureSinglePngAction->setText( tr( "PNG" ) );
+	_captureSinglePngAction->setToolTip(
+		"Capture one PNG from current active visualizer"
+	);
+	_captureSingleTiffAction = new QAction(this);
+	_captureSingleTiffAction->setText( tr( "TIFF" ) );
+	_captureSingleTiffAction->setToolTip(
+		"Capture one TIFF from current active visualizer"
 	);
 
-	_captureStartJpegCaptureAction = new QAction( this );
-	_captureStartJpegCaptureAction->setText(
-		tr( "Begin image capture sequence " ) 
+	_captureJpegSequenceAction = new QAction( this );
+	_captureJpegSequenceAction->setText(
+		tr( "JPEG" ) 
 	);
-	_captureStartJpegCaptureAction->setToolTip(
-		"Begin saving jpeg image files rendered in current active visualizer"
+	_captureJpegSequenceAction->setToolTip(
+		"Begin saving JPEG image files rendered in current active visualizer"
+	);
+	_capturePngSequenceAction = new QAction( this );
+	_capturePngSequenceAction->setText(
+		tr( "PNG" ) 
+	);
+	_capturePngSequenceAction->setToolTip(
+		"Begin saving PNG image files rendered in current active visualizer"
+	);
+	_captureTiffSequenceAction = new QAction( this );
+	_captureTiffSequenceAction->setText(
+		tr( "TIFF" ) 
+	);
+	_captureTiffSequenceAction->setToolTip(
+		"Begin saving TIFF image files rendered in current active visualizer"
 	);
 
-	_captureEndJpegCaptureAction = new QAction( this);
-	_captureEndJpegCaptureAction->setText( tr( "End image capture" ) );
-	_captureEndJpegCaptureAction->setToolTip(
+	_captureEndImageAction = new QAction( this);
+	_captureEndImageAction->setText( tr( "End image capture" ) );
+	_captureEndImageAction->setToolTip(
 		"End capture of image files in current active visualizer"
 	);
-	_captureEndJpegCaptureAction->setEnabled(false);
+	_captureEndImageAction->setEnabled(false);
 
 
 	// Note that the ordering of the following 4 is significant, so that image
 	// capture actions correctly activate each other.
 	//
     _captureMenu = menuBar()->addMenu(tr("Capture"));
-	_captureMenu->addAction(_captureSingleJpegCaptureAction);
-	_captureMenu->addAction(_captureStartJpegCaptureAction);
-	_captureMenu->addAction(_captureEndJpegCaptureAction);
+    _singleImageMenu = _captureMenu->addMenu(tr("Single image"));
+    _singleImageMenu->addAction(_captureSingleJpegAction);
+    _singleImageMenu->addAction(_captureSinglePngAction);
+    _singleImageMenu->addAction(_captureSingleTiffAction);
+    //_captureMenu->addMenu("Single image");
+    _imageSequenceMenu = _captureMenu->addMenu(tr("Image sequence"));
+    _imageSequenceMenu->addAction(_captureJpegSequenceAction);
+    _imageSequenceMenu->addAction(_capturePngSequenceAction);
+    _imageSequenceMenu->addAction(_captureTiffSequenceAction);
+	//_captureMenu->addAction(_captureStartJpegAction);
+	_captureMenu->addAction(_captureEndImageAction);
 
 	connect (
-		_captureSingleJpegCaptureAction, SIGNAL(triggered()),
+		_captureSingleJpegAction, SIGNAL(triggered()),
 		this, SLOT (captureSingleJpeg())
 	);
+	connect (
+		_captureSinglePngAction, SIGNAL(triggered()),
+		this, SLOT (captureSinglePng())
+	);
+	connect (
+		_captureSingleTiffAction, SIGNAL(triggered()),
+		this, SLOT (captureSingleTiff())
+	);
+
 	connect( 
-		_captureStartJpegCaptureAction, SIGNAL( triggered() ),
-		this, SLOT( startAnimCapture() ) 
+		_captureJpegSequenceAction, SIGNAL( triggered() ),
+		this, SLOT( captureJpegSequence() ) 
 	);
 	connect( 
-		_captureEndJpegCaptureAction, SIGNAL( triggered() ),
+		_capturePngSequenceAction, SIGNAL( triggered() ),
+		this, SLOT( capturePngSequence() ) 
+	);
+	connect( 
+		_captureTiffSequenceAction, SIGNAL( triggered() ),
+		this, SLOT( captureTiffSequence() ) 
+	);
+
+	connect( 
+		_captureEndImageAction, SIGNAL( triggered() ),
 		this, SLOT( endAnimCapture() ) 
 	);
 }
@@ -2058,7 +2116,6 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 }
 
 void MainForm::updateMenus() {
-
 	GUIStateParams *p = GetStateParams();
 
 	// Close menu
@@ -2089,6 +2146,30 @@ void MainForm::updateMenus() {
 
 	_editUndoAction->setEnabled((bool) _controlExec->UndoSize());
 	_editRedoAction->setEnabled((bool) _controlExec->RedoSize());
+
+    // Turn off jpeg and png capture if we're in MapOrthographic mode
+    ViewpointParams *VPP;
+    VPP = _paramsMgr->GetViewpointParams(GetStateParams()->GetActiveVizName());
+    if (VPP->GetProjectionType() == ViewpointParams::MapOrthographic) {
+        if (_captureSingleJpegAction->isEnabled())
+            _captureSingleJpegAction->setEnabled(false);
+        if (_captureSinglePngAction->isEnabled())
+            _captureSinglePngAction->setEnabled(false);
+        if (_captureJpegSequenceAction->isEnabled())
+            _captureJpegSequenceAction->setEnabled(false);
+        if (_capturePngSequenceAction->isEnabled())
+            _capturePngSequenceAction->setEnabled(false);
+    }
+    else {
+        if ( !_captureSingleJpegAction->isEnabled() )
+            _captureSingleJpegAction->setEnabled(true);
+        if ( !_captureSinglePngAction->isEnabled() )
+            _captureSinglePngAction->setEnabled(true);
+        if ( !_captureJpegSequenceAction->isEnabled() )
+            _captureJpegSequenceAction->setEnabled(true);
+        if ( !_capturePngSequenceAction->isEnabled() )
+            _capturePngSequenceAction->setEnabled(true);
+    }
 }
 
 void MainForm::_performSessionAutoSave() {
@@ -2169,61 +2250,60 @@ void MainForm::enableAnimationWidgets(bool on) {
 	}
 }
 
-
-//Capture just one image
-//Launch a file save dialog to specify the names
-//
 void MainForm::captureSingleJpeg() {
+    string filter = "JPG (*.jpg *.jpeg)";
+    string defaultSuffix = ".jpg";
+    captureSingleImage( filter, defaultSuffix);
+}
+
+void MainForm::captureSinglePng() {
+    string filter = "PNG (*.png)";
+    string defaultSuffix = ".png";
+    captureSingleImage( filter, defaultSuffix);
+}
+
+void MainForm::captureSingleTiff() {
+    string filter = "TIFF (*.tif *.tiff)";
+    string defaultSuffix = ".tiff";
+    captureSingleImage( filter, defaultSuffix);
+}
+
+void MainForm::captureSingleImage(
+    string filter,
+    string defaultSuffix
+) {
 	showCitationReminder();
 	SettingsParams *sP = GetSettingsParams();
 	string imageDir = sP->GetImageDir();
 	if (imageDir=="") imageDir = sP->GetDefaultImageDir();
     
-    string fileDialogOptions;
-    ViewpointParams *VPP = _paramsMgr->GetViewpointParams(GetStateParams()->GetActiveVizName());
-    if (VPP->GetProjectionType() == ViewpointParams::MapOrthographic) {
-        fileDialogOptions = ""
-        "TIFF (*.tif *.tiff)\n"
-        "PNG (*.png)\n"
-        "JPG (*.jpg *.jpeg)";
-    } else {
-        fileDialogOptions = ""
-        "PNG (*.png)\n"
-        "JPG (*.jpg *.jpeg)\n"
-        "TIFF (*.tif *.tiff)";
-    }
-
-	QFileDialog fileDialog(this,
+	QFileDialog fileDialog(
+        this,
 		"Specify single image capture file name",
 		imageDir.c_str(),
-		QString::fromStdString(fileDialogOptions));
+        QString::fromStdString(filter)
+    );
     
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
 	fileDialog.move(pos());
 	fileDialog.resize(450,450);
     QStringList mimeTypeFilters;
-    mimeTypeFilters << "image/jpeg" // will show "JPEG image (*.jpeg *.jpg *.jpe)
-    << "image/png"  // will show "PNG image (*.png)"
-    << "application/octet-stream"; // will show "All files (*)"
-    //fileDialog.setNameFilters(mimeTypeFilters);
 	if (fileDialog.exec() != QDialog::Accepted) return;
 	
 	//Extract the path, and the root name, from the returned string.
 	QStringList files = fileDialog.selectedFiles();
 	if (files.isEmpty()) return;
 	QString fn = files[0];
-	//Extract the path, and the root name, from the returned string.
-	QFileInfo* fileInfo = new QFileInfo(fn);
-	QString suffix = fileInfo->suffix();
-    
-    /* QFileDialog takes care of this
-	if (suffix != "jpg" && suffix != "jpeg" && suffix != "png" ) {
-		MSG_ERR("Image capture file name must end with .png or .jpg or .jpeg");
-		return;
-	}
-     */
 
-	string filepath = fileInfo->absoluteFilePath().toStdString();
+    QFileInfo fileInfo( fn );
+	QString suffix = fileInfo.suffix();
+    if (suffix == "") {
+        fn += QString::fromStdString(defaultSuffix);
+        fileInfo.setFile(fn);
+    }
+
+	string file = fileInfo.absoluteFilePath().toStdString();
+	string filepath = fileInfo.path().toStdString();
 
 	//Save the path for future captures
 	sP->SetImageDir(filepath);
@@ -2231,12 +2311,10 @@ void MainForm::captureSingleJpeg() {
 	//Turn on "image capture mode" in the current active visualizer
 	GUIStateParams *p = GetStateParams();
 	string vizName = p->GetActiveVizName();
-	int success = _vizWinMgr->EnableImageCapture(filepath, vizName);
+	int success = _vizWinMgr->EnableImageCapture(file, vizName);
     
     if (success < 0)
         MSG_ERR("Error capturing image");
-
-    delete fileInfo;
 }
 
 void MainForm::installCLITools(){
@@ -2362,26 +2440,44 @@ void MainForm::_setTimeStep()
     _paramsMgr->EndSaveStateGroup();
 }
 
+void MainForm::captureJpegSequence() {
+    string filter = "JPG (*.jpg *.jpeg)";
+    string defaultSuffix = "jpg";
+    startAnimCapture( filter, defaultSuffix);
+}
+
+void MainForm::capturePngSequence() {
+    string filter = "PNG (*.png)";
+    string defaultSuffix = "png";
+    startAnimCapture( filter, defaultSuffix);
+}
+
+void MainForm::captureTiffSequence() {
+    string filter = "TIFF (*.tif *.tiff)";
+    string defaultSuffix = "tiff";
+    startAnimCapture( filter, defaultSuffix);
+}
+
 //Begin capturing animation images.
 //Launch a file save dialog to specify the names
 //Then start file saving mode.
-void MainForm::startAnimCapture() 
-{
+void MainForm::startAnimCapture(
+    string filter,
+    string defaultSuffix
+) {
 	showCitationReminder();
 	SettingsParams *sP = GetSettingsParams();
 	string imageDir = sP->GetImageDir();
 	if (imageDir=="") 
         imageDir = sP->GetDefaultImageDir();
 
-    QFileDialog fileDialog(this,
-                           "Specify single image capture file name",
-                           imageDir.c_str(),
-                           "PNG (*.png)\n"
-                           "JPG (*.jpg *.jpeg)\n"
-                           "TIFF (*.tif *.tiff)");
+    QFileDialog fileDialog(
+        this,
+        "Specify image sequence file name",
+        imageDir.c_str(),
+        QString::fromStdString(filter)
+    );
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-	fileDialog.move(pos());
-	fileDialog.resize(450,450);
 	if (fileDialog.exec() != QDialog::Accepted) 
         return;
 	
@@ -2389,12 +2485,30 @@ void MainForm::startAnimCapture()
 	QStringList qsl = fileDialog.selectedFiles();
 	if (qsl.isEmpty()) 
         return;
-	QFileInfo* fileInfo = new QFileInfo( qsl[0] );
+    QString fileName = qsl[0];
+	QFileInfo fileInfo = QFileInfo( fileName );
 
-	QString suffix = fileInfo->suffix();
+	QString suffix = fileInfo.suffix();
+	if ( suffix != ""     ||
+		 suffix != "jpg"  ||
+		 suffix != "jpeg" ||
+		 suffix != "tif"  ||
+		 suffix != "tiff" ||
+		 suffix != "png"
+	) {
+		
+	}
+    if (suffix == "") {
+		suffix = QString::fromStdString(defaultSuffix);
+        fileName += QString::fromStdString(defaultSuffix);
+    }
+	else {
+		fileName = fileInfo.absolutePath() + "/" + fileInfo.baseName();
+	}
+
 	//Save the path for future captures
-	sP->SetImageDir(fileInfo->absolutePath().toStdString());
-	QString fileBaseName = fileInfo->baseName();
+	sP->SetImageDir(fileInfo.absolutePath().toStdString());
+	QString fileBaseName = fileInfo.baseName();
 
 	int posn;
 	for (posn = fileBaseName.length()-1; posn >=0; posn--)
@@ -2410,7 +2524,7 @@ void MainForm::startAnimCapture()
 		fileBaseName.truncate(lastDigitPos);
 	}
 
-	QString filePath = fileInfo->absolutePath() + "/" + fileBaseName;
+	QString filePath = fileInfo.absolutePath() + "/" + fileBaseName;
 	//Insert up to 4 zeros
 	QString zeroes;
 	if (startFileNum == 0) 
@@ -2463,11 +2577,15 @@ void MainForm::startAnimCapture()
 	_controlExec->EnableAnimationCapture(vizName, true, fpath);
 	_capturingAnimationVizName = vizName;
 
-	_captureEndJpegCaptureAction->setEnabled(true);
-	_captureStartJpegCaptureAction->setEnabled(false);
-	_captureSingleJpegCaptureAction->setEnabled(false);
-
-	delete fileInfo;
+	_captureEndImageAction->setEnabled(true);
+    _imageSequenceMenu->setEnabled(false);
+	_captureJpegSequenceAction->setEnabled(false);
+	_capturePngSequenceAction->setEnabled(false);
+	_captureTiffSequenceAction->setEnabled(false);
+    _singleImageMenu->setEnabled(false);
+	_captureSingleJpegAction->setEnabled(false);
+	_captureSinglePngAction->setEnabled(false);
+	_captureSingleTiffAction->setEnabled(false);
 }
 
 void MainForm::endAnimCapture(){
@@ -2484,9 +2602,17 @@ void MainForm::endAnimCapture(){
 	_capturingAnimationVizName = "";
 
 
-	_captureEndJpegCaptureAction->setEnabled(false);
-	_captureStartJpegCaptureAction->setEnabled(true);
-	_captureSingleJpegCaptureAction->setEnabled(true);
+	_captureEndImageAction->setEnabled(false);
+
+    _imageSequenceMenu->setEnabled(true);
+	_captureJpegSequenceAction->setEnabled(true);
+	_capturePngSequenceAction->setEnabled(true);
+	_captureTiffSequenceAction->setEnabled(true);
+
+    _singleImageMenu->setEnabled(true);
+	_captureSingleJpegAction->setEnabled(true);
+	_captureSinglePngAction->setEnabled(true);
+	_captureSingleTiffAction->setEnabled(true);
 }
 
 string MainForm::_getDataSetName(string file, bool promptToReplaceExistingDataset) {
