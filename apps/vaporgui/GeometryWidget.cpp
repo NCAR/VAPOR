@@ -317,7 +317,19 @@ bool GeometryWidget::getVariableExtents(std::vector<double> &minFullExts, std::v
     int    level = _rParams->GetRefinementLevel();
     string varName = _rParams->GetVariableName();
 
-    if (varName.empty()) return false;
+    // If no variable name set find one.
+    //
+    if (varName.empty()) {
+        vector<string> varNames;
+        for (int dim = 3; dim > 1; dim--) {
+            varNames = _dataMgr->GetDataVarNames(dim);
+            if (!varNames.empty()) {
+                varName = varNames[0];
+                break;
+            }
+        }
+        if (varName.empty()) return (false);
+    }
     int rc = _dataMgr->GetVariableExtents(ts, varName, level, minFullExts, maxFullExts);
     if (rc < 0) {
         MyBase::SetErrMsg("Error: DataMgr could "
