@@ -58,10 +58,10 @@ bool RayCasterParams::GetLighting() const
 std::vector<double> RayCasterParams::GetLightingCoeffs() const
 {
     std::vector<double> defaultVec( 4 );
-    defaultVec[0] = 0.5;
-    defaultVec[1] = 0.3;
-    defaultVec[2] = 0.2;
-    defaultVec[3] = 12.0;
+    defaultVec[0] = 0.2;
+    defaultVec[1] = 0.5;
+    defaultVec[2] = 0.25;
+    defaultVec[3] = 8.0;
     return GetValueDoubleVec( _lightingCoeffsTag, defaultVec );
 }
     
