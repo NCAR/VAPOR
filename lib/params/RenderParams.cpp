@@ -111,6 +111,20 @@ void RenderParams::InitBox() {
     int rc;
     vector<double> minExt, maxExt;
     string varname = GetVariableName();
+
+    // If no variable name set find one.
+    //
+    if (varname.empty()) {
+        vector<string> varNames;
+        for (int dim = 3; dim > 1; dim--) {
+            varNames = _dataMgr->GetDataVarNames(dim);
+            if (!varNames.empty()) {
+                varname = varNames[0];
+                break;
+            }
+        }
+    }
+
     if (varname.empty())
         return;
 

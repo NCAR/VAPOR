@@ -90,7 +90,7 @@ void FillCellVertCoordinates( const in ivec3 cellIdx, out vec3 coord[8] )
     cubeVertIdx[3] = ivec3(v0.x    , v0.y    , v0.z + 1 );
     cubeVertIdx[4] = ivec3(v0.x    , v0.y + 1, v0.z     );
     cubeVertIdx[5] = ivec3(v0.x + 1, v0.y + 1, v0.z     );
-    cubeVertIdx[6] = ivec3(v0.x + 1, v0.y + 1, v0.z + 1 );
+    cubeVertIdx[6] = v0 + 1;
     cubeVertIdx[7] = ivec3(v0.x    , v0.y + 1, v0.z + 1 );
 
     for( int i = 0; i < 8; i++ )
@@ -165,7 +165,7 @@ vec3 CalculateGradient( const in vec3 tc)
     a0.z = texture( volumeTexture, tc + vec3(0.0,0.0,h0.z) ).r;
     a1.z = texture( volumeTexture, tc + vec3(0.0,0.0,h1.z) ).r;
 
-    return (a1-a0 / h);
+    return (a1 - a0 / h);
 }
 
 
@@ -177,7 +177,7 @@ float CalculateDepth( const in vec3 pEye )
 {
     vec4    pClip =  Projection  * vec4( pEye, 1.0 );
     vec3    pNdc  =  pClip.xyz   / pClip.w;
-    return (gl_DepthRange.diff * 0.5 * pNdc.z + (gl_DepthRange.near + gl_DepthRange.far) * 0.5);
+    return  0.5 * fma( gl_DepthRange.diff, pNdc.z, (gl_DepthRange.near + gl_DepthRange.far) );
 }
 
 
@@ -190,15 +190,16 @@ bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
     vec3 cubeVertCoord[8];
     FillCellVertCoordinates( cellIdx, cubeVertCoord );
 
+    int tri[3];
     for( int i = 0; i < 12; i++ )
     {
-        ivec3 tri   = ivec3( Global_Triangles[i*3], 
-                             Global_Triangles[i*3+1], 
-                             Global_Triangles[i*3+2] );
+        tri[0]      = Global_Triangles[ i * 3     ]; 
+        tri[1]      = Global_Triangles[ i * 3 + 1 ];
+        tri[2]      = Global_Triangles[ i * 3 + 2 ];
         vec3 posv0  = pos                     - cubeVertCoord[ tri[0] ];
         vec3 v1v0   = cubeVertCoord[ tri[1] ] - cubeVertCoord[ tri[0] ];
         vec3 v2v0   = cubeVertCoord[ tri[2] ] - cubeVertCoord[ tri[0] ];
-        vec3 inward = cross( v1v0, v2v0 );  // vector pointing inside of the cell
+        vec3 inward = cross( v1v0, v2v0 );      // vector pointing inside of the cell
         if( dot( posv0, inward ) < -ULP100  )   // pos tests to be outside of the cell
             return false;
     }
@@ -285,15 +286,30 @@ bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3
 
 
 //
-// Input:  a cell index, and a position that's inside of this cell.
+// Input:  a cell index, and a position of eye coordinate that's inside of this cell.
 // Output: the texture coordinate of that position.
 //
 vec3 CalculatePosTex( const ivec3 cellIdx, const vec3 pos )
 {
-    // For VAPOR 3.1, we just use the center of the cell.
-    vec3 t1 = vec3( cellIdx     ) * volumeDims1o;
-    vec3 t2 = vec3( cellIdx + 1 ) * volumeDims1o;
-    return (t1 + t2) * 0.5;
+    // Find texture coordinates of two corners
+    vec3 tc1  = vec3( cellIdx     ) * volumeDims1o;
+    vec3 tc2  = vec3( cellIdx + 1 ) * volumeDims1o;
+
+    // Find the eye coordinates of two cornders
+    vec4 ec1  = texelFetch( vertCoordsTexture,  cellIdx,     0 );
+    vec4 ec2  = texelFetch( vertCoordsTexture,  cellIdx + 1, 0 );
+
+    // Transform eye coordinates to model coordinates
+    ec1.w     = 1.0;
+    ec2.w     = 1.0;
+    vec3 mc1  = (inversedMV * ec1).xyz;
+    vec3 mc2  = (inversedMV * ec2).xyz;
+    vec3 mpos = (inversedMV * vec4(pos, 1.0)).xyz;
+
+    vec3 weight = (mpos - mc1) / (mc2 - mc1);
+    weight      = clamp( weight, 0.0, 1.0 );
+
+    return mix( tc1, tc2, weight );
 }
 
 
@@ -315,11 +331,8 @@ void main(void)
         discard;
 
     // The incoming stepSize1D results in approximate 2 samples per cell.
-    //   In Mode 2 ray casting, we increase this step size.
-    float myStepSize1D  = 1.5 * stepSize1D;
-    float nStepsf       = rayDirLength / myStepSize1D;
+    float nStepsf       = rayDirLength / stepSize1D;
     vec3  stepSize3D    = rayDirEye    / nStepsf;
-    int   nSteps        = int(nStepsf) + 1;
     vec3  step1Eye      = startEye + 0.01 * stepSize3D;
 
     // Test 1st step if inside of the cell, and correct it if not.
@@ -358,46 +371,50 @@ void main(void)
     }
 
     // Let's do a ray casting!
-    int   earlyTerm        = 0;         // why this ray got an early termination?
-    float OpacityCorr      = 1.0;
+    int   earlyTerm        = 0;     // 0        == termination when goes through the volume.
+                                    // non-zero == early termination because of some reason.
+    float OpacityCorr      = 1.0;   // Opacity correction ratio. 1.0 means no correction needed
 
-    // We set the loop to terminate at 2 times the number of steps, in case
-    //   there are many occurances of step size halved.
-    for( int stepi = 1; stepi <= 2 * nSteps; stepi++ )
+
+    // We set the loop to terminate at 4 times the number of steps, in case
+    //   there are many occurances of step size being halved.
+    for( int stepi = 0; stepi < 4 * int(nStepsf); stepi++ )
     {
+        // Early termination: enough opacity
         if( color.a > Opaque )
         {
             earlyTerm      = 1;
             break;
         }
     
-        vec3 step2Eye      = step1Eye + stepSize3D; 
         ivec3 step2CellIdx;
-    
-        if( !LocateNextCell(  step1CellIdx, step2Eye, step2CellIdx ) )
-        {
-            // Attempt to find next cell again with half step size, for at most 3 times
-            //   I.e., at most shrink it to 1/8 of the base step size.
-            vec3 tmpStepSize = stepSize3D;
-            for( int i = 0; i < 3; i++ )
-            {
-                tmpStepSize *= 0.5;
-                step2Eye     = step1Eye + tmpStepSize;
-                if( LocateNextCell( step1CellIdx, step2Eye, step2CellIdx ) )
-                {
-                    for( int j = 0; j <= i; j++ )
-                        OpacityCorr *= 0.5;
-                }
-            }
+        vec3  step2Eye;
+        bool  foundNextCell = false;
 
-            // If still not finding a next cell, bail.
-            if( OpacityCorr == 1.0 )
+        // Try 3 different step sizes: base step size, 1/2 step size, and 1/4 step size.
+        for( int i = 0; i < 3; i++ )
+        {
+            vec3 tmpStepSize  = stepSize3D;
+            for( int j = 0; j < i; j++ )
+                tmpStepSize  *= 0.5;
+            step2Eye          = step1Eye + tmpStepSize;
+
+            if( LocateNextCell( step1CellIdx, step2Eye, step2CellIdx ) )
             {
-                earlyTerm  = 2;
+                foundNextCell = true;
+                for( int j = 0; j < i; j++ )
+                    OpacityCorr *= 0.5;
                 break;
             }
         }
-
+        // Early termination: cannot find the next cell! 
+        if( !foundNextCell )
+        {
+            earlyTerm  = 2;
+            break;
+        }
+    
+        // Early termination: reach the depth of other objects in the scene
         if( shallow && ( CalculateDepth(step2Eye) > otherDepth ) )
         {
             earlyTerm      = 3;
@@ -412,6 +429,7 @@ void main(void)
             continue;
         }
 
+        // Retrieve color at this location
         float step2Value   = texture( volumeTexture, step2Tex ).r;
         float valTranslate = (step2Value - colorMapRange.x) / colorMapRange.z;
         vec4  backColor    = texture( colorMapTexture, valTranslate );
@@ -437,7 +455,7 @@ void main(void)
                 vec3 viewDirEye  = normalize( -step2Eye );
                 vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
                 float specular   = pow( max(0.0, dot( reflectionEye, viewDirEye )), specularExp );
-                backColor.rgb    = backColor.rgb * (ambientCoeff + diffuse * diffuseCoeff) +
+                backColor.rgb    = backColor.rgb * fma( diffuse, diffuseCoeff, ambientCoeff ) +
                                    specular * specularCoeff;
             }
         }
@@ -445,9 +463,18 @@ void main(void)
         color.rgb += (1.0 - color.a) * backColor.a * backColor.rgb;
         color.a   += (1.0 - color.a) * backColor.a;
 
-        // keep up step 1 values as well
-        step1CellIdx = step2CellIdx;
-        step1Eye     = step2Eye; 
+        // Normal termination: step 2 reaches a boundary cell.
+        //   Note we only do this test after the ray steps *almost* nStepsf.
+        if( (stepi > int(nStepsf) - 2) && CellOnBoundary( step2CellIdx ) )
+        {
+            earlyTerm = 0;  // 0 means it goes through the entire cell before termination.
+            break;
+        }
+        else // Keep up step 1 values and get ready for the next step
+        {
+            step1CellIdx = step2CellIdx;
+            step1Eye     = step2Eye; 
+        }
     }
 
     // If loop terminated early, we set depth value at step1 position. Otherwise, this fragment 
