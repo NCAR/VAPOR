@@ -175,6 +175,7 @@ bool UDUnits::IsLonUnit(string unitstr) const
     }
     return (status);
 }
+bool UDUnits::IsLatOrLonUnit(string unitstr) const { return (AreUnitsConvertible(_lonUnit, unitstr) || AreUnitsConvertible(_latUnit, unitstr)); }
 
 bool UDUnits::IsLengthUnit(string unitstr) const { return (AreUnitsConvertible(_lengthUnit, unitstr)); }
 
