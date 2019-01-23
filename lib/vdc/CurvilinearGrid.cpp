@@ -372,22 +372,18 @@ void CurvilinearGrid::GetUserCoordinates(
 	const std::vector <size_t> &indices,
 	std::vector <double> &coords
 ) const {
-    vector <size_t> cIndices = indices;
-    ClampIndex(cIndices);
+    size_t cIndices[3];
+    ClampIndex(indices, cIndices);
 
 	coords.clear();
 
-	vector <size_t> dims = StructuredGrid::GetDimensions();
-
-	vector <size_t> cIndices2D = {cIndices[0], cIndices[1]};
-
-	coords.push_back(_xrg.AccessIndex(cIndices2D));
-	coords.push_back(_yrg.AccessIndex(cIndices2D));
+	coords.push_back(_xrg.AccessIJK(cIndices[0], cIndices[1]));
+	coords.push_back(_yrg.AccessIJK(cIndices[0], cIndices[1]));
 
 	if (GetGeometryDim() < 3) return;
 
 	if (_terrainFollowing) {
-		coords.push_back(_zrg.AccessIndex(cIndices));
+		coords.push_back(_zrg.AccessIJK(cIndices[0], cIndices[1], cIndices[2]));
 	}
 	else {
 		coords.push_back(_zcoords[cIndices[2]]);

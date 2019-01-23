@@ -49,6 +49,8 @@ VaporTable::VaporTable(
 	_autoResizeHeight = false;
     _showToolTips = false;
 
+    SetVerticalHeaderWidth(100);
+
     _table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 }
 
@@ -106,6 +108,10 @@ void VaporTable::Update(int rows, int cols,
 	if (_highlightFlags & COLS) highlightActiveCol(_activeCol);
 
 	resizeTableHeight();
+}
+
+void VaporTable::SetVerticalHeaderWidth(int width) {
+    _table->verticalHeader()->setMaximumWidth(width);
 }
 
 void VaporTable::SetAutoResizeHeight(bool val) {
@@ -382,6 +388,8 @@ void VaporTable::setVerticalHeader(std::vector<std::string> header) {
 		_table->verticalHeader()->hide();
 		return;
 	}
+    else if ( _table->verticalHeader()->isHidden() )
+        _table->verticalHeader()->show();
 	
 	QStringList list;
 	for (int i=0; i<size; i++) {
