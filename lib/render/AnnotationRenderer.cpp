@@ -378,9 +378,23 @@ void AnnotationRenderer::_calculateDomainExtents(std::vector<double> &domainExte
         std::vector<int>    axes;
         DataMgrUtils::GetExtents(dataMgr, local_ts, string(), dataMgrMinExts, dataMgrMaxExts, -1);
 
+        // If the DataMgr has only 2D variables, we still need to define
+        // a z coordinate for its domain.  Specify it to 0.f.
+        if (dataMgrMinExts.size() == 2) dataMgrMinExts.push_back(0.f);
+        if (dataMgrMaxExts.size() == 2) dataMgrMaxExts.push_back(0.f);
+
         ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
         Transform *      transform = vpParams->GetTransform(names[i]);
         _applyDataMgrToDomainExtents(domainExtents, dataMgrMinExts, dataMgrMaxExts, transform);
+    }
+
+    if (domainExtents[Z] == NAN) {
+        cout << "correction min " << domainExtents[Z] << endl;
+        domainExtents[Z] = 0.f;
+    }
+    if (domainExtents[Z + 3] == NAN) {
+        cout << "correction max " << domainExtents[Z + 3] << endl;
+        domainExtents[Z + 3] = 0.f;
     }
 }
 
@@ -395,6 +409,8 @@ void AnnotationRenderer::InScenePaint(size_t ts)
 
     std::vector<double> domainExtents(6, NAN);
     _calculateDomainExtents(domainExtents);
+
+    cout << "z " << domainExtents[2] << " " << domainExtents[5] << endl;
 
     _currentTimestep = ts;
 
