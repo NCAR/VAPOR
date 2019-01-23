@@ -286,15 +286,30 @@ bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3
 
 
 //
-// Input:  a cell index, and a position that's inside of this cell.
+// Input:  a cell index, and a position of eye coordinate that's inside of this cell.
 // Output: the texture coordinate of that position.
 //
 vec3 CalculatePosTex( const ivec3 cellIdx, const vec3 pos )
 {
-    // For VAPOR 3.1, we just use the center of the cell.
-    vec3 t1 = vec3( cellIdx     ) * volumeDims1o;
-    vec3 t2 = vec3( cellIdx + 1 ) * volumeDims1o;
-    return (t1 + t2) * 0.5;
+    // Find texture coordinates of two corners
+    vec3 tc1  = vec3( cellIdx     ) * volumeDims1o;
+    vec3 tc2  = vec3( cellIdx + 1 ) * volumeDims1o;
+
+    // Find the eye coordinates of two cornders
+    vec4 ec1  = texelFetch( vertCoordsTexture,  cellIdx,     0 );
+    vec4 ec2  = texelFetch( vertCoordsTexture,  cellIdx + 1, 0 );
+
+    // Transform eye coordinates to model coordinates
+    ec1.w     = 1.0;
+    ec2.w     = 1.0;
+    vec3 mc1  = (inversedMV * ec1).xyz;
+    vec3 mc2  = (inversedMV * ec2).xyz;
+    vec3 mpos = (inversedMV * vec4(pos, 1.0)).xyz;
+
+    vec3 weight = (mpos - mc1) / (mc2 - mc1);
+    weight      = clamp( weight, 0.0, 1.0 );
+
+    return mix( tc1, tc2, weight );
 }
 
 
