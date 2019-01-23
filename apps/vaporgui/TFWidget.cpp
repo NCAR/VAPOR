@@ -869,7 +869,12 @@ void TFWidget::setUsingSingleColor(int state)
 
 void TFWidget::setColorInterpolation(int index)
 {
-    MapperFunction *mf = getMainMapperFunction();
+    MapperFunction *mf;
+    if (_flags & COLORMAP_VAR_IS_IN_TF2) {
+        mf = getSecondaryMapperFunction();
+    } else {
+        mf = getMainMapperFunction();
+    }
 
     if (index == 0) {
         mf->setColorInterpType(TFInterpolator::diverging);
