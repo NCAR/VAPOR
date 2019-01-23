@@ -1011,6 +1011,8 @@ bool NetCDFCFCollection::_IsLonCoordVar(
 	s.clear();
 	varinfo.GetAtt("standard_name", s);
 	if (StrCmpNoCase(s, "longitude") == 0) return(true);
+
+	if (StrCmpNoCase(s, "grid_longitude") == 0) return(true);
 	
 	string unit;
 	varinfo.GetAtt("units", unit);
@@ -1029,6 +1031,8 @@ bool NetCDFCFCollection::_IsLatCoordVar(
 	s.clear();
 	varinfo.GetAtt("standard_name", s);
 	if (StrCmpNoCase(s, "latitude") == 0) return(true);
+
+	if (StrCmpNoCase(s, "grid_latitude") == 0) return(true);
 	
 	string unit;
 	varinfo.GetAtt("units", unit);
