@@ -54,13 +54,6 @@ const int Global_Triangles[36] = int[36](
     2, 3, 6,   5, 4, 1,   6, 7, 5,   1, 0, 2,   2, 6, 1,   3, 0, 7
     /* front   back       top        bottom     right      left */ );
 
-//
-// An optimized order of cells to search: cells appear in front of this list
-//   are supposed to have a higher probablity to be selected.
-//
-int Global_Cells[27] = int[27](0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-                               15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 );
-
 // 
 // Input:  logical index of a cell
 // Output: eye coordinates of its 8 indices
@@ -273,10 +266,9 @@ bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3
 
     for( int i = 0; i < 27; i++ )
     {
-        int  j = Global_Cells[i];  // Re-ordered cell indices
-        if( !CellOutsideBound( group[j] ) && PosInsideOfCell( group[j], pos ) )
+        if( !CellOutsideBound( group[i] ) && PosInsideOfCell( group[i], pos ) )
         {
-            nextCellIdx = group[j];
+            nextCellIdx = group[i];
             return true;
         }
     }
