@@ -56,15 +56,15 @@ RayCaster::RayCaster( const ParamsMgr*    pm,
                       classType,
                       instName,
                       dataMgr ),
-            _backFaceTexOffset     ( 0 ),
-            _frontFaceTexOffset    ( 1 ),
-            _volumeTexOffset       ( 2 ),
-            _colorMapTexOffset     ( 3 ),
-            _missingValueTexOffset ( 4 ),
-            _vertCoordsTexOffset   ( 5 ),
-            _depthTexOffset        ( 6 ),
-            _2ndVarDataTexOffset   ( 7 ),
-            _2ndVarMaskTexOffset   ( 8 )
+            _backFaceTexOffset     ( 1 ),
+            _frontFaceTexOffset    ( 2 ),
+            _volumeTexOffset       ( 3 ),
+            _colorMapTexOffset     ( 4 ),
+            _missingValueTexOffset ( 5 ),
+            _vertCoordsTexOffset   ( 6 ),
+            _depthTexOffset        ( 7 ),
+            _2ndVarDataTexOffset   ( 8 ),
+            _2ndVarMaskTexOffset   ( 9 )
 {
     _backFaceTextureId           = 0;
     _frontFaceTextureId          = 0;
@@ -769,6 +769,10 @@ int RayCaster::_paintGL( bool fast )
             if( success != 0 )
             {
                 MyBase::SetErrMsg( "Error occured during updating curvilinear coordinates!" );
+                glActiveTexture( GL_TEXTURE0 );
+                glBindTexture(GL_TEXTURE_1D, 0);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                glBindTexture(GL_TEXTURE_3D, 0);
                 delete grid;
                 return JUSTERROR;
             }
@@ -779,6 +783,10 @@ int RayCaster::_paintGL( bool fast )
         if( _updateVertCoordsTexture( ModelView ) != 0 )
         {
             MyBase::SetErrMsg( "Error occured during calculating eye coordinates!" );
+            glActiveTexture( GL_TEXTURE0 );
+            glBindTexture(GL_TEXTURE_1D, 0);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindTexture(GL_TEXTURE_3D, 0);
             delete grid;
             return MEMERROR;
         }
@@ -791,6 +799,10 @@ int RayCaster::_paintGL( bool fast )
         if( success != 0 )
         {
             MyBase::SetErrMsg( "Error occured during updating secondary variable!" );
+            glActiveTexture( GL_TEXTURE0 );
+            glBindTexture(GL_TEXTURE_1D, 0);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindTexture(GL_TEXTURE_3D, 0);
             delete grid;
             return JUSTERROR;
         }
@@ -839,7 +851,6 @@ int RayCaster::_paintGL( bool fast )
     // Restore OpenGL values changed in this function.
     glBindVertexArray( 0 );
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-    glDepthFunc(GL_LESS);
     glActiveTexture( GL_TEXTURE0 );
     glBindTexture(GL_TEXTURE_1D, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -1624,14 +1635,33 @@ int RayCaster::_updateVertCoordsTexture( const glm::mat4& MV )
     // Second, send these eye coordinates to the GPU
     glActiveTexture( GL_TEXTURE0 +  _vertCoordsTexOffset );
     glBindTexture(   GL_TEXTURE_3D, _vertCoordsTextureId );
+
 #ifdef Darwin
     // Apply a dummy texture
     float dummyVolume[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
     glTexImage3D( GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume );
 #endif
-    glTexImage3D( GL_TEXTURE_3D, 0, GL_RGB32F, _userCoordinates.dims[0], 
-                  _userCoordinates.dims[1],    _userCoordinates.dims[2],
-                  0, GL_RGB, GL_FLOAT,         coordEye               );
+
+    // Test if the existing texture has the same dimensions. 
+    //   If so, simply substitute its content.
+    //   If not, create a new object.
+    int width, height, depth;
+    glGetTexLevelParameteriv( GL_TEXTURE_3D, 0, GL_TEXTURE_WIDTH,  &width );
+    glGetTexLevelParameteriv( GL_TEXTURE_3D, 0, GL_TEXTURE_HEIGHT, &height );
+    glGetTexLevelParameteriv( GL_TEXTURE_3D, 0, GL_TEXTURE_DEPTH,  &depth );
+    if( (size_t)width  == _userCoordinates.dims[0] && 
+        (size_t)height == _userCoordinates.dims[1] &&
+        (size_t)depth  == _userCoordinates.dims[2]  )
+    {
+        glTexSubImage3D( GL_TEXTURE_3D, 0, 0, 0, 0, width, height, depth, 
+                         GL_RGB, GL_FLOAT, coordEye                    );
+    }
+    else
+    {
+        glTexImage3D( GL_TEXTURE_3D, 0, GL_RGB32F, _userCoordinates.dims[0], 
+                      _userCoordinates.dims[1],    _userCoordinates.dims[2],
+                      0, GL_RGB, GL_FLOAT,         coordEye               );
+    }
     
     delete[] coordEye;
 

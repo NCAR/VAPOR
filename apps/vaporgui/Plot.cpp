@@ -542,6 +542,10 @@ void Plot::_spaceTabPlotClicked()
     std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
     int numOfSamples                     = plotParams->GetNumOfSamples();
 
+    // Do nothing if no variable is enabled
+    if( enabledVars.size() == 0 )
+        return;
+
     std::vector<double>     p1p2span;
     for( int i = 0; i < point1.size(); i++ )
         p1p2span.push_back( point2[i] - point1[i] );
@@ -631,6 +635,10 @@ void Plot::_timeTabPlotClicked()
     std::vector<double>     singlePt     = plotParams->GetSinglePoint();
     std::vector<long int>   minMaxTS     = plotParams->GetMinMaxTS();
     std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
+
+    // Do nothing if no variable is enabled
+    if( enabledVars.size() == 0 )
+        return;
 
     std::vector< std::vector<float> >    sequences;
     for( int v = 0; v < enabledVars.size(); v++ )
@@ -886,24 +894,40 @@ void Plot::_updateExtents( )
     // Retrieve extents of all variables at 3 different time steps.
     std::vector<double>  min, max, minT1, maxT1, minT2, maxT2;
     std::vector<int>     axes;
+    std::vector<long> TSToExamine;
+    TSToExamine.push_back( plotParams->GetCurrentTimestep() );
+    TSToExamine.push_back( plotParams->GetMinMaxTS().at(0)  );
+    TSToExamine.push_back( plotParams->GetMinMaxTS().at(1)  );
+
+    // TSToExamine[0] definitely needs to be evaluated.
     VAPoR::DataMgrUtils::GetExtents( currentDmgr,
-                                     plotParams->GetCurrentTimestep(),
+                                     TSToExamine[0],
                                      enabledVars,
                                      min, 
                                      max,
                                      axes );
-    VAPoR::DataMgrUtils::GetExtents( currentDmgr,
-                                     plotParams->GetMinMaxTS().at(0),
-                                     enabledVars,
-                                     minT1,
-                                     maxT1,
-                                     axes );
-    VAPoR::DataMgrUtils::GetExtents( currentDmgr,
-                                     plotParams->GetMinMaxTS().at(1),
-                                     enabledVars,
-                                     minT2,
-                                     maxT2,
-                                     axes );
+
+    // TSToExamine[1] and TSToExamine[2] are evaluated only when not duplicate
+    if( TSToExamine[1] != TSToExamine[0] )
+    {
+        VAPoR::DataMgrUtils::GetExtents( currentDmgr, TSToExamine[1],
+                                         enabledVars, minT1, maxT1, axes );
+    }
+    else
+    {
+        minT1 = min;
+        maxT1 = max;
+    }
+    if( (TSToExamine[2] != TSToExamine[1]) && (TSToExamine[2] != TSToExamine[0]) )
+    {
+        VAPoR::DataMgrUtils::GetExtents( currentDmgr, TSToExamine[2],
+                                         enabledVars, minT2, maxT2, axes );
+    }
+    else
+    {
+        minT2 = min;
+        maxT2 = max;
+    }
 
     // Find the union of the 3 extents
     for( int i = 0; i < min.size(); i++ )
