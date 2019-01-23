@@ -470,6 +470,13 @@ void AnnotationRenderer::_calculateDomainExtents(
             -1
         );
 
+        // If the DataMgr has only 2D variables, we still need to define
+        // a z coordinate for its domain.  Specify it to 0.f.
+        if ( dataMgrMinExts.size() == 2 )
+            dataMgrMinExts.push_back(0.f);
+        if ( dataMgrMaxExts.size() == 2 )
+            dataMgrMaxExts.push_back(0.f);
+
         ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
         Transform* transform = vpParams->GetTransform(names[i]);
         _applyDataMgrToDomainExtents(
