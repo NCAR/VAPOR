@@ -486,15 +486,6 @@ void AnnotationRenderer::_calculateDomainExtents(
             transform
         );
     }
-
-    if ( domainExtents[Z] == NAN){
-        cout << "correction min " << domainExtents[Z] << endl;
-        domainExtents[Z] = 0.f;
-    }
-    if ( domainExtents[Z+3] == NAN){
-        cout << "correction max " << domainExtents[Z+3] << endl;
-        domainExtents[Z+3] = 0.f;
-    }
 }
 
 void AnnotationRenderer::InScenePaint(size_t ts)
@@ -508,8 +499,6 @@ void AnnotationRenderer::InScenePaint(size_t ts)
 
     std::vector<double> domainExtents(6, NAN);
     _calculateDomainExtents(domainExtents);
-
-    cout << "z " << domainExtents[2] << " " << domainExtents[5] << endl;
 
     _currentTimestep = ts;
 
