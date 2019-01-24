@@ -64,6 +64,7 @@ set (SRCS
 	Combo.cpp
 	windowsUtils.cpp
 	Manip.cpp
+	VolumeEventRouter.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -85,6 +86,8 @@ set (SRCS
 	QSliderEdit.h
 	QRange.h
 	QSinglePoint.h
+	VolumeEventRouter.h
+	VolumeSubtabs.h
 
 	MainForm.h
 	VizWinMgr.h
@@ -194,6 +197,10 @@ set (UIS
 	StretchFactorTableGUI.ui
 	OrientationAnglesGUI.ui
 	CopyRegionWidgetGUI.ui
+	VolumeAnnotationGUI.ui
+	VolumeAppearanceGUI.ui
+	VolumeGeometryGUI.ui
+	VolumeVariablesGUI.ui
 	
 	QSliderEdit.ui
 	QRange.ui
