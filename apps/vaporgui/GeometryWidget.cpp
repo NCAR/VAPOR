@@ -123,18 +123,7 @@ void GeometryWidget::adjustLayoutToPlanarXY(bool reinit)
 
     if (!_rParams) return;
 
-    if (reinit) {
-        std::vector<double> minExt(3, 0);
-        std::vector<double> maxExt(3, 1);
-        getFullExtents(minExt, maxExt);
-        double average = (minExt[Z] + maxExt[Z]) / 2.f;
-        _zSinglePoint->SetValue(average);
-
-        minExt[Z] = average;
-        maxExt[Z] = average;
-        Box *box = _rParams->GetBox();
-        box->SetExtents(minExt, maxExt);
-    }
+    if (reinit) reinitBoxToPlanarAxis(Z, _zSinglePoint);
 }
 
 void GeometryWidget::adjustLayoutToPlanarXZ(bool reinit)
@@ -149,18 +138,7 @@ void GeometryWidget::adjustLayoutToPlanarXZ(bool reinit)
 
     if (!_rParams) return;
 
-    if (reinit) {
-        std::vector<double> minExt(3, 0);
-        std::vector<double> maxExt(3, 1);
-        getFullExtents(minExt, maxExt);
-        double average = (minExt[Y] + maxExt[Y]) / 2.f;
-        _ySinglePoint->SetValue(average);
-
-        minExt[Y] = average;
-        maxExt[Y] = average;
-        Box *box = _rParams->GetBox();
-        box->SetExtents(minExt, maxExt);
-    }
+    if (reinit) reinitBoxToPlanarAxis(Y, _ySinglePoint);
 }
 
 void GeometryWidget::adjustLayoutToPlanarYZ(bool reinit)
@@ -174,18 +152,22 @@ void GeometryWidget::adjustLayoutToPlanarYZ(bool reinit)
     _zPointFrame->hide();
 
     if (!_rParams) return;
-    if (reinit) {
-        std::vector<double> minExt(3, 0);
-        std::vector<double> maxExt(3, 1);
-        getFullExtents(minExt, maxExt);
-        double average = (minExt[X] + maxExt[X]) / 2.f;
-        _xSinglePoint->SetValue(average);
 
-        minExt[X] = average;
-        maxExt[X] = average;
-        Box *box = _rParams->GetBox();
-        box->SetExtents(minExt, maxExt);
-    }
+    if (reinit) reinitBoxToPlanarAxis(X, _xSinglePoint);
+}
+
+void GeometryWidget::reinitBoxToPlanarAxis(int planarAxis, QSliderEdit *slider)
+{
+    std::vector<double> minExt(3, 0);
+    std::vector<double> maxExt(3, 1);
+    getFullExtents(minExt, maxExt);
+    double average = (minExt[planarAxis] + maxExt[planarAxis]) / 2.f;
+    slider->SetValue(average);
+
+    minExt[planarAxis] = average;
+    maxExt[planarAxis] = average;
+    Box *box = _rParams->GetBox();
+    box->SetExtents(minExt, maxExt);
 }
 
 void GeometryWidget::adjustLayoutTo2D()
