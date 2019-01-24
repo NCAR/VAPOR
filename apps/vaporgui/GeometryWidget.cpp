@@ -100,16 +100,20 @@ void GeometryWidget::hideOrientationOptions() {
     _zPointFrame->hide();
 }
 
-void GeometryWidget::adjustPlanarOrientation(int plane) {
+void GeometryWidget::adjustPlanarOrientation(
+    int plane,
+    bool reinit // = true by default
+) {
     if (plane == XY)
-        adjustLayoutToPlanarXY();
+        adjustLayoutToPlanarXY(reinit);
     else if (plane == XZ)
-        adjustLayoutToPlanarXZ();
+        adjustLayoutToPlanarXZ(reinit);
     else if (plane == YZ)
-        adjustLayoutToPlanarYZ();
+        adjustLayoutToPlanarYZ(reinit);
 }
 
-void GeometryWidget::adjustLayoutToPlanarXY() {
+void GeometryWidget::adjustLayoutToPlanarXY(
+    bool reinit) {
     _xMinMaxFrame->show();
     _yMinMaxFrame->show();
     _zMinMaxFrame->hide();
@@ -120,19 +124,24 @@ void GeometryWidget::adjustLayoutToPlanarXY() {
 
     if (!_rParams)
         return;
+
     std::vector<double> minExt(3, 0);
     std::vector<double> maxExt(3, 1);
-    getFullExtents(minExt, maxExt);
-    double average = (minExt[Z] + maxExt[Z]) / 2.f;
-    _zSinglePoint->SetValue(average);
-
-    minExt[Z] = average;
-    maxExt[Z] = average;
     Box *box = _rParams->GetBox();
-    box->SetExtents(minExt, maxExt);
+    if (reinit) {
+        cout << "reinitXY" << endl;
+        getFullExtents(minExt, maxExt);
+        double average = (minExt[Z] + maxExt[Z]) / 2.f;
+        _zSinglePoint->SetValue(average);
+
+        minExt[Z] = average;
+        maxExt[Z] = average;
+        box->SetExtents(minExt, maxExt);
+    }
 }
 
-void GeometryWidget::adjustLayoutToPlanarXZ() {
+void GeometryWidget::adjustLayoutToPlanarXZ(
+    bool reinit) {
     _xMinMaxFrame->show();
     _yMinMaxFrame->hide();
     _zMinMaxFrame->show();
@@ -145,18 +154,21 @@ void GeometryWidget::adjustLayoutToPlanarXZ() {
         return;
     std::vector<double> minExt(3, 0);
     std::vector<double> maxExt(3, 1);
-    getFullExtents(minExt, maxExt);
-    //box->GetExtents(minExt, maxExt);
-    double average = (minExt[Y] + maxExt[Y]) / 2.f;
-    _ySinglePoint->SetValue(average);
-
-    minExt[Y] = average;
-    maxExt[Y] = average;
     Box *box = _rParams->GetBox();
-    box->SetExtents(minExt, maxExt);
+    if (reinit) {
+        cout << "reinitXZ" << endl;
+        getFullExtents(minExt, maxExt);
+        double average = (minExt[Y] + maxExt[Y]) / 2.f;
+        _ySinglePoint->SetValue(average);
+
+        minExt[Y] = average;
+        maxExt[Y] = average;
+        box->SetExtents(minExt, maxExt);
+    }
 }
 
-void GeometryWidget::adjustLayoutToPlanarYZ() {
+void GeometryWidget::adjustLayoutToPlanarYZ(
+    bool reinit) {
     _xMinMaxFrame->hide();
     _yMinMaxFrame->show();
     _zMinMaxFrame->show();
@@ -169,15 +181,17 @@ void GeometryWidget::adjustLayoutToPlanarYZ() {
         return;
     std::vector<double> minExt(3, 0);
     std::vector<double> maxExt(3, 1);
-    getFullExtents(minExt, maxExt);
-    //box->GetExtents(minExt, maxExt);
-    double average = (minExt[X] + maxExt[X]) / 2.f;
-    _xSinglePoint->SetValue(average);
-
-    minExt[X] = average;
-    maxExt[X] = average;
     Box *box = _rParams->GetBox();
-    box->SetExtents(minExt, maxExt);
+    if (reinit) {
+        cout << "reinitYZ" << endl;
+        getFullExtents(minExt, maxExt);
+        double average = (minExt[X] + maxExt[X]) / 2.f;
+        _xSinglePoint->SetValue(average);
+
+        minExt[X] = average;
+        maxExt[X] = average;
+        box->SetExtents(minExt, maxExt);
+    }
 }
 
 void GeometryWidget::adjustLayoutTo2D() {
@@ -204,7 +218,7 @@ void GeometryWidget::Reinit(
 
     if (_geometryFlags & PLANAR) {
         showOrientationOptions();
-        adjustPlanarOrientation(XY);
+        adjustPlanarOrientation(XY, false);
     } else
         hideOrientationOptions();
 
@@ -428,8 +442,17 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
     updateBoxCombos(minFullExt, maxFullExt);
 
     if (_geometryFlags & PLANAR) {
-        int orientation = _rParams->GetBox()->GetOrientation();
-        _planeComboBox->setCurrentIndex(orientation);
+        //int guiOrientation = _planeComboBox->currentIndex();
+        //if ( rParamsOrientation != guiOrientation ) {
+        _planeComboBox->blockSignals(true);
+
+        int rParamsOrientation = _rParams->GetBox()->GetOrientation();
+        _planeComboBox->setCurrentIndex(rParamsOrientation);
+
+        bool reinit = false;
+        adjustPlanarOrientation(rParamsOrientation, reinit);
+
+        _planeComboBox->blockSignals(false);
     }
 }
 
