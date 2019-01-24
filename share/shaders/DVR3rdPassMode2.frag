@@ -183,6 +183,19 @@ bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
     vec3 cubeVertCoord[8];
     FillCellVertCoordinates( cellIdx, cubeVertCoord );
 
+    // First locate and compare with the bounding box.
+    vec3 minCoord = cubeVertCoord[0], maxCoord = cubeVertCoord[0];
+    for( int i = 1; i < 8; i++ )
+    {
+        minCoord   = min( minCoord, cubeVertCoord[i] );
+        maxCoord   = max( maxCoord, cubeVertCoord[i] );
+    }
+    bvec3 tooSmall = lessThan(    pos, minCoord );
+    bvec3 tooBig   = greaterThan( pos, maxCoord );
+    if( any( tooSmall ) || any( tooBig ) )
+        return false;
+
+    // Second compare with the 12 triangles.
     int tri[3];
     for( int i = 0; i < 12; i++ )
     {
