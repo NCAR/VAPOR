@@ -41,6 +41,7 @@ float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
 vec3  volumeDims1o     = 1.0 / vec3( volumeDims - 1 );
+ivec3 volumeDimsm2     = volumeDims - 2;
 mat4  transposedInverseMV = transpose( inversedMV );
 
 // 
@@ -216,9 +217,9 @@ bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
 
 bool CellOutsideBound( const in ivec3 cellIdx )
 {
-    if( cellIdx.x < 0 || cellIdx.x > volumeDims.x - 2 || 
-        cellIdx.y < 0 || cellIdx.y > volumeDims.y - 2 ||
-        cellIdx.z < 0 || cellIdx.z > volumeDims.z - 2   )
+    bvec3 tooSmall = lessThan(    cellIdx, ivec3(0) );
+    bvec3 tooBig   = greaterThan( cellIdx, volumeDimsm2 );
+    if( any( tooSmall ) || any( tooBig ) )
         return true;
     else
         return false;
@@ -226,9 +227,9 @@ bool CellOutsideBound( const in ivec3 cellIdx )
 
 bool CellOnBoundary( const in ivec3 cellIdx )
 {
-    if( cellIdx.x == 0 || cellIdx.x == volumeDims.x - 2 || 
-        cellIdx.y == 0 || cellIdx.y == volumeDims.y - 2 ||
-        cellIdx.z == 0 || cellIdx.z == volumeDims.z - 2   )
+    bvec3 onSide1 = equal( cellIdx, ivec3(0) );
+    bvec3 onSide2 = equal( cellIdx, volumeDimsm2 );
+    if( any( onSide1 ) || any( onSide2 ) )
         return true;
     else
         return false;
