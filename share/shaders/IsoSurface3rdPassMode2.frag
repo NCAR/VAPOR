@@ -10,17 +10,24 @@ uniform sampler3D       volumeTexture;
 uniform usampler3D      missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D       colorMapTexture;
 uniform sampler3D       vertCoordsTexture;
-uniform sampler2D       depthTexture;
+uniform sampler3D       secondVarDataTexture;
+uniform usampler3D      secondVarMaskTexture;   // !!unsigned integer!!
 
 uniform ivec3 volumeDims;        // number of vertices in each direction of this volume
 uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
+uniform vec3  boxMin;            // min coordinates of the bounding box of this volume
+uniform vec3  boxMax;            // max coordinates of the bounding box of this volume
 uniform vec3  colorMapRange;
 uniform ivec3 entryCellIdx;
 
 uniform float stepSize1D;        // ray casting step size
-uniform bool  flags[4];
 uniform float lightingCoeffs[4]; // lighting parameters
+uniform bool  flags[4];
+uniform bool  use2ndVar;
+
+uniform int   numOfIsoValues;    // how many iso values are valid in isoValues array?
+uniform float isoValues[4];      // currently set there are at most 4 iso values.
 
 uniform mat4  MV;
 uniform mat4  inversedMV;
@@ -41,6 +48,7 @@ float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
 vec3  volumeDims1o     = 1.0 / vec3( volumeDims - 1 );
+ivec3 volumeDimsm2     = volumeDims - 2;
 mat4  transposedInverseMV = transpose( inversedMV );
 
 // 
@@ -94,17 +102,20 @@ void FillCellVertCoordinates( const in ivec3 cellIdx, out vec3 coord[8] )
 
 
 //
-// Input:  Location to be evaluated in texture coordinates and eye coordinates.
+// Input:  Location to be evaluated in texture coordinates and model coordinates.
 // Output: If this location should be skipped.
 // Note:   It is skipped in two cases: 1) it represents a missing value
 //                                     2) it is outside of clipping planes
 //
-bool ShouldSkip( const in vec3 tc, const in vec3 ec )
+bool ShouldSkip( const in vec3 tc, const in vec3 mc )
 {
     if( hasMissingValue && (texture(missingValueMaskTexture, tc).r != 0u) )
         return true;
 
-    vec4 positionModel = (inversedMV * vec4(ec, 1.0));
+    if( use2ndVar && (texture(secondVarMaskTexture, tc).r != 0u) )
+        return true;
+
+    vec4 positionModel = vec4(mc, 1.0);
     for( int i = 0; i < 6; i++ )
     {
         if( dot(positionModel, clipPlanes[i]) < 0.0 )
@@ -216,9 +227,9 @@ bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
 
 bool CellOutsideBound( const in ivec3 cellIdx )
 {
-    if( cellIdx.x < 0 || cellIdx.x > volumeDims.x - 2 || 
-        cellIdx.y < 0 || cellIdx.y > volumeDims.y - 2 ||
-        cellIdx.z < 0 || cellIdx.z > volumeDims.z - 2   )
+    bvec3 tooSmall = lessThan(    cellIdx, ivec3(0) );
+    bvec3 tooBig   = greaterThan( cellIdx, volumeDimsm2 );
+    if( any( tooSmall ) || any( tooBig ) )
         return true;
     else
         return false;
@@ -226,9 +237,10 @@ bool CellOutsideBound( const in ivec3 cellIdx )
 
 bool CellOnBoundary( const in ivec3 cellIdx )
 {
-    if( cellIdx.x == 0 || cellIdx.x == volumeDims.x - 2 || 
-        cellIdx.y == 0 || cellIdx.y == volumeDims.y - 2 ||
-        cellIdx.z == 0 || cellIdx.z == volumeDims.z - 2   )
+    // Assume the input is guaranteed to be inside of the volume
+    bvec3 onSmallSide = equal( cellIdx, ivec3(0) );
+    bvec3 onBigSide   = equal( cellIdx, volumeDimsm2 );
+    if( any( onSmallSide ) || any( onBigSide ) )
         return true;
     else
         return false;
@@ -347,28 +359,13 @@ void main(void)
     // Set depth value at the backface 
     gl_FragDepth     =  CalculateDepth( stopEye ) - ULP10;
 
-    // If something else on the scene results in a shallower depth, we need to 
-    //    compare depth at every step.
-    bool  shallow    = false;
-    float otherDepth = texture( depthTexture, fragTex ).x;
-    if(   otherDepth < gl_FragDepth )
-          shallow    = true;
-
-    // Give color to step 1
+    // Retrieve data value at step 1
     vec3 step1Tex    = CalculatePosTex( step1CellIdx, step1Eye );
-    if( !ShouldSkip( step1Tex, step1Eye ) )
-    {   
-        float step1Value   = texture( volumeTexture, step1Tex ).r;
-        float valTranslate = (step1Value - colorMapRange.x) / colorMapRange.z;
-              color        = texture( colorMapTexture, valTranslate );
-              color.rgb   *= color.a;
-    }
+    float step1Value = texture( volumeTexture, step1Tex ).r;
 
     // Let's do a ray casting!
     int   earlyTerm        = 0;     // 0        == termination when goes through the volume.
                                     // non-zero == early termination because of some reason.
-    float OpacityCorr      = 1.0;   // Opacity correction ratio. 1.0 means no correction needed
-
 
     // We set the loop to terminate at 4 times the number of steps, in case
     //   there are many occurances of step size being halved.
@@ -384,7 +381,6 @@ void main(void)
         ivec3 step2CellIdx;
         vec3  step2Eye;
         bool  foundNextCell = false;
-
         // Try 3 different step sizes: base step size, 1/2 step size, and 1/4 step size.
         for( int i = 0; i < 3; i++ )
         {
@@ -396,8 +392,6 @@ void main(void)
             if( LocateNextCell( step1CellIdx, step2Eye, step2CellIdx ) )
             {
                 foundNextCell = true;
-                for( int j = 0; j < i; j++ )
-                    OpacityCorr *= 0.5;
                 break;
             }
         }
@@ -407,55 +401,73 @@ void main(void)
             earlyTerm  = 2;
             break;
         }
-    
-        // Early termination: reach the depth of other objects in the scene
-        if( shallow && ( CalculateDepth(step2Eye) > otherDepth ) )
-        {
-            earlyTerm      = 3;
-            break;
-        }
 
+        // If step2 is at the same cell as step1, their data values are gonna be the same, 
+        //   thus move forward directly.
+        if( step2CellIdx == step1CellIdx )
+        {
+            step1Eye       = step2Eye;
+            continue;
+        }
+    
+        // Now we konw that step2 and step1 are at two adjacent cells
         vec3 step2Tex      = CalculatePosTex( step2CellIdx, step2Eye );
         if( ShouldSkip( step2Tex, step2Eye ) )
         {
             step1CellIdx   = step2CellIdx;
             step1Eye       = step2Eye;
+            step1Tex       = step2Tex;
             continue;
         }
-
-        // Retrieve color at this location
         float step2Value   = texture( volumeTexture, step2Tex ).r;
-        float valTranslate = (step2Value - colorMapRange.x) / colorMapRange.z;
-        vec4  backColor    = texture( colorMapTexture, valTranslate );
         
-        // If this step is shrunk, we need to correct opacity.
-        if( OpacityCorr < 1.0 )
+        // Test against iso values.
+        for( int j = 0; j < numOfIsoValues; j++ )
         {
-            backColor.a    = 1.0 - pow( 1.0 - backColor.a, OpacityCorr );
-            OpacityCorr    = 1.0;
-        }
-
-        // Apply lighting.
-        //   Note we do the calculation in eye space, because both the light direction
-        //   and view direction are defined in the eye space.
-        if( lighting && backColor.a > (1.0 - Opaque) )
-        {
-            vec3 gradientModel   = CalculateGradient( step2Tex );
-            if( length( gradientModel ) > ULP10 )
+            float isoValJ = isoValues[j];
+            if( ( isoValJ - step1Value) * (isoValJ - step2Value) < 0.0 )
             {
-                vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0 )).xyz;
-                     gradientEye = normalize( gradientEye );
-                float diffuse    = abs( dot(lightDirEye, gradientEye) );
-                vec3 viewDirEye  = normalize( -step2Eye );
-                vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
-                float specular   = pow( max(0.0, dot( reflectionEye, viewDirEye )), specularExp );
-                backColor.rgb    = backColor.rgb * fma( diffuse, diffuseCoeff, ambientCoeff ) +
-                                   specular * specularCoeff;
+                float weight    = (isoValJ - step1Value) / (step2Value - step1Value);
+                vec3  isoEye    = mix( step1Eye, step2Eye, weight );
+                vec3  isoTex    = mix( step1Tex, step2Tex, weight );
+
+                // Retrieve data value of the secondary variable at the same location
+                //   if color mapping variable is enabled.
+                if( use2ndVar )
+                {
+                    isoValJ     = texture( secondVarDataTexture, isoTex ).x;
+                }
+
+                float valTrans  = (isoValJ - colorMapRange.x) / colorMapRange.z;
+                vec4  backColor = texture( colorMapTexture, valTrans );
+
+
+                // Apply lighting.
+                //   Note we do the calculation in eye space, because both the light direction
+                //   and view direction are defined in the eye space.
+                if( lighting && backColor.a > (1.0 - Opaque) )
+                {
+                    vec3 gradientModel   = CalculateGradient( isoTex );
+                    if( length( gradientModel ) > ULP10 )
+                    {
+                        vec3 gradientEye = (transposedInverseMV * vec4(gradientModel, 0.0)).xyz;
+                             gradientEye = normalize( gradientEye );
+                        float diffuse    = abs( dot(lightDirEye, gradientEye) );
+                        vec3 viewDirEye  = normalize( -isoEye );
+                        vec3 reflectionEye = reflect( -lightDirEye, gradientEye );
+                        float specular   = pow( max(0.0, dot( reflectionEye, viewDirEye )), specularExp );
+                        backColor.rgb    = backColor.rgb * fma( diffuse, diffuseCoeff, ambientCoeff ) +
+                                           specular * specularCoeff;
+                    }
+                }
+
+                color.rgb += (1.0 - color.a) * backColor.a * backColor.rgb;
+                color.a   += (1.0 - color.a) * backColor.a;
+
+                // Apply depth no matter opacity
+                gl_FragDepth  =  CalculateDepth( isoEye );
             }
         }
-
-        color.rgb += (1.0 - color.a) * backColor.a * backColor.rgb;
-        color.a   += (1.0 - color.a) * backColor.a;
 
         // Normal termination: step 2 reaches a boundary cell.
         //   Note we only do this test after the ray steps *almost* nStepsf.
@@ -468,13 +480,10 @@ void main(void)
         {
             step1CellIdx = step2CellIdx;
             step1Eye     = step2Eye; 
+            step1Tex     = step2Tex; 
+            step1Value   = step2Value;
         }
     }
-
-    // If loop terminated early, we set depth value at step1 position. Otherwise, this fragment 
-    //    will have the depth value at the back of this volume, which is already set.
-    if( earlyTerm > 0 )
-        gl_FragDepth   = CalculateDepth( step1Eye ) - ULP10;
 
     // If this pixel is transparent, we set depth to the far clipping plane.
     if( color.a < (1.0 - Opaque) )
