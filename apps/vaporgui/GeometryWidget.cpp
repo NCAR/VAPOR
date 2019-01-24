@@ -127,17 +127,16 @@ void GeometryWidget::adjustLayoutToPlanarXY(
 
     if (!_rParams) return; 
     
-    std::vector<double> minExt(3,0);
-    std::vector<double> maxExt(3,1);
-    Box* box = _rParams->GetBox();
     if (reinit) {   
-        cout << "reinitXY" << endl;
+        std::vector<double> minExt(3,0);
+        std::vector<double> maxExt(3,1);
         getFullExtents(minExt, maxExt);
         double average = (minExt[Z]+maxExt[Z])/2.f;
         _zSinglePoint->SetValue(average);
         
         minExt[Z] = average;
         maxExt[Z] = average;
+        Box* box = _rParams->GetBox();
         box->SetExtents(minExt, maxExt);
     }
 }
@@ -154,17 +153,17 @@ void GeometryWidget::adjustLayoutToPlanarXZ(
     _zPointFrame->hide();
 
     if (!_rParams) return; 
-	std::vector<double> minExt(3,0);
-    std::vector<double> maxExt(3,1);
-    Box* box = _rParams->GetBox();
+
     if (reinit) {
-        cout << "reinitXZ" << endl;
+        std::vector<double> minExt(3,0);
+        std::vector<double> maxExt(3,1);
         getFullExtents(minExt, maxExt);
         double average = (minExt[Y]+maxExt[Y])/2.f;
         _ySinglePoint->SetValue(average);
         
         minExt[Y] = average;
         maxExt[Y] = average;
+        Box* box = _rParams->GetBox();
         box->SetExtents(minExt, maxExt);
     }
 }
@@ -181,26 +180,22 @@ void GeometryWidget::adjustLayoutToPlanarYZ(
     _zPointFrame->hide();
 
     if (!_rParams) return; 
-	std::vector<double> minExt(3,0);
-    std::vector<double> maxExt(3,1);
-    Box* box = _rParams->GetBox();
     if (reinit) {
-        cout << "reinitYZ" << endl;
+        std::vector<double> minExt(3,0);
+        std::vector<double> maxExt(3,1);
         getFullExtents(minExt, maxExt);
         double average = (minExt[X]+maxExt[X])/2.f;
         _xSinglePoint->SetValue(average);
         
         minExt[X] = average;
         maxExt[X] = average;
+        Box* box = _rParams->GetBox();
         box->SetExtents(minExt, maxExt);
     }
 }
 
 void GeometryWidget::adjustLayoutTo2D() {
 	_zFrame->hide();
-	//_minMaxContainerWidget->adjustSize();
-	//_minMaxTab->adjustSize();
-
 	adjustSize();
 }
 
