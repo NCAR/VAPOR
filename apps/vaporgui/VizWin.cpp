@@ -317,6 +317,7 @@ void VizWin::initializeGL() {
 }
 
 void VizWin::_mousePressEventManip(QMouseEvent *e) {
+    makeCurrent();
 
     std::vector<double> screenCoords = _getScreenCoords(e);
 
