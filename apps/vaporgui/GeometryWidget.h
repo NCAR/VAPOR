@@ -44,7 +44,7 @@ signals:
 private slots:
     void setPoint(double point);
 	void setRange(double min, double max, int dim=-1);
-    void adjustPlanarOrientation(int plane, bool reinit = true);
+    void adjustLayoutToPlanar(int plane, bool reinit = true);
 
 private:
 	void adjustLayoutTo2D();
