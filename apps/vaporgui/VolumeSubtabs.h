@@ -21,8 +21,8 @@ class VolumeVariablesSubtab : public QWidget, public Ui_VolumeVariablesGUI {
     VolumeVariablesSubtab(QWidget *parent) {
         setupUi(this);
         _variablesWidget->Reinit(
-            (VariableFlags)(SCALAR | HEIGHT),
-            (DimFlags)(THREED | TWOD));
+            (VariableFlags)(SCALAR),
+            (DimFlags)(THREED));
     }
 
     void Update(
@@ -40,6 +40,7 @@ class VolumeAppearanceSubtab : public QWidget, public Ui_VolumeAppearanceGUI {
   public:
     VolumeAppearanceSubtab(QWidget *parent) {
         setupUi(this);
+        _TFWidget->SetOpacityIntegrated(true);
         _TFWidget->Reinit((TFFlags)(CONSTANT_COLOR));
     }
 
