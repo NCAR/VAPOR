@@ -209,7 +209,7 @@ void main(void)
             vec3 gradientModel   = CalculateGradient( step2Texture );
             if( length( gradientModel ) > ULP10 )
             {
-                vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0 )).xyz;
+                vec3 gradientEye = (transposedInverseMV * vec4(gradientModel, 0.0)).xyz;
                      gradientEye = normalize( gradientEye );
                 float diffuse    = abs( dot(lightDirEye, gradientEye) );
                 vec3 viewDirEye  = normalize( -step2Eye );
