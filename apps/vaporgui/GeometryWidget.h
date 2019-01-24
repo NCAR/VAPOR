@@ -43,13 +43,16 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
   private slots:
     void setPoint(double point);
     void setRange(double min, double max, int dim = -1);
-    void adjustPlanarOrientation(int plane);
+    void adjustLayoutToPlanar(int plane, bool reinit = true);
 
   private:
     void adjustLayoutTo2D();
-    void adjustLayoutToPlanarXY();
-    void adjustLayoutToPlanarXZ();
-    void adjustLayoutToPlanarYZ();
+    void adjustLayoutToPlanarXY(bool reinit);
+    void adjustLayoutToPlanarXZ(bool reinit);
+    void adjustLayoutToPlanarYZ(bool reinit);
+    void reinitBoxToPlanarAxis(
+        int planarAxis,
+        QSliderEdit *slider);
     void showOrientationOptions();
     void hideOrientationOptions();
     void connectWidgets();
