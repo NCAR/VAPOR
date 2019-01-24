@@ -227,9 +227,10 @@ bool CellOutsideBound( const in ivec3 cellIdx )
 
 bool CellOnBoundary( const in ivec3 cellIdx )
 {
-    bvec3 onSide1 = equal( cellIdx, ivec3(0) );
-    bvec3 onSide2 = equal( cellIdx, volumeDimsm2 );
-    if( any( onSide1 ) || any( onSide2 ) )
+    // Assume the input is guaranteed to be inside of the volume
+    bvec3 onSmallSide = equal( cellIdx, ivec3(0) );
+    bvec3 onBigSide   = equal( cellIdx, volumeDimsm2 );
+    if( any( onSmallSide ) || any( onBigSide ) )
         return true;
     else
         return false;
@@ -444,7 +445,7 @@ void main(void)
             vec3 gradientModel   = CalculateGradient( step2Tex );
             if( length( gradientModel ) > ULP10 )
             {
-                vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0 )).xyz;
+                vec3 gradientEye = (transposedInverseMV * vec4(gradientModel, 0.0)).xyz;
                      gradientEye = normalize( gradientEye );
                 float diffuse    = abs( dot(lightDirEye, gradientEye) );
                 vec3 viewDirEye  = normalize( -step2Eye );
