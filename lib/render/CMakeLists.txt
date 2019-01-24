@@ -1,6 +1,7 @@
 set (SRC
 	BarbRenderer.cpp
 	ControlExecutive.cpp
+	VolumeRenderer.cpp
 	HelloRenderer.cpp
 	Renderer.cpp
 	ShaderProgram.cpp
@@ -47,6 +48,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/BarbRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ControlExecutive.h
 	${PROJECT_SOURCE_DIR}/include/vapor/HelloRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Renderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ShaderProgram.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TwoDDataRenderer.h
