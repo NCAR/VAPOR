@@ -200,37 +200,6 @@ void VolumeRenderer::_loadTF()
     delete [] LUT;
 }
 
-/*
-int glhUnProjectf(float winx, float winy, float winz, mat4 inv, int *viewport, vec3 &objectCoordinate)
-{
-    // Transformation matrices
-    // float m[16], A[16];
-    // float in[4], out[4];
-    mat4 m;
-    vec4 in, out;
-    // Calculation for inverting a matrix, compute projection x modelview
-    // and store in A[16]
-    // Now compute the inverse of matrix A
-    m = inv;
-    
-    // Transformation of normalized coordinates between -1 and 1
-    in[0]=(winx-(float)viewport[0])/(float)viewport[2]*2.0-1.0;
-    in[1]=(winy-(float)viewport[1])/(float)viewport[3]*2.0-1.0;
-    in[2]=2.0*winz-1.0;
-    in[3]=1.0;
-    
-    // Objects coordinates
-    out = m * in;
-    if(out[3]==0.0)
-        return 0;
-    out[3]=1.0/out[3];
-    objectCoordinate[0]=out[0]*out[3];
-    objectCoordinate[1]=out[1]*out[3];
-    objectCoordinate[2]=out[2]*out[3];
-    return 1;
-}
- */
-
 void VolumeRenderer::_createRayDirTexture()
 {
     GLint viewport[4] = {0};
