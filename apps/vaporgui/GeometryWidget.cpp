@@ -99,8 +99,8 @@ void GeometryWidget::hideOrientationOptions()
     _zPointFrame->hide();
 }
 
-void GeometryWidget::adjustPlanarOrientation(int  plane,
-                                             bool reinit    // = true by default
+void GeometryWidget::adjustLayoutToPlanar(int  plane,
+                                          bool reinit    // = true by default
 )
 {
     if (plane == XY)
@@ -213,7 +213,7 @@ void GeometryWidget::Reinit(DimFlags dimFlags, VariableFlags varFlags, GeometryF
 
     if (_geometryFlags & PLANAR) {
         showOrientationOptions();
-        adjustPlanarOrientation(XY, false);
+        adjustLayoutToPlanar(XY, false);
     } else
         hideOrientationOptions();
 
@@ -391,15 +391,13 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
     updateBoxCombos(minFullExt, maxFullExt);
 
     if (_geometryFlags & PLANAR) {
-        // int guiOrientation = _planeComboBox->currentIndex();
-        // if ( rParamsOrientation != guiOrientation ) {
         _planeComboBox->blockSignals(true);
 
         int rParamsOrientation = _rParams->GetBox()->GetOrientation();
         _planeComboBox->setCurrentIndex(rParamsOrientation);
 
         bool reinit = false;
-        adjustPlanarOrientation(rParamsOrientation, reinit);
+        adjustLayoutToPlanar(rParamsOrientation, reinit);
 
         _planeComboBox->blockSignals(false);
     }
@@ -422,7 +420,7 @@ void GeometryWidget::connectWidgets()
     connect(_xRangeCombo, SIGNAL(valueChanged(double, double)), this, SLOT(setRange(double, double)));
     connect(_yRangeCombo, SIGNAL(valueChanged(double, double)), this, SLOT(setRange(double, double)));
     connect(_zRangeCombo, SIGNAL(valueChanged(double, double)), this, SLOT(setRange(double, double)));
-    connect(_planeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(adjustPlanarOrientation(int)));
+    connect(_planeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(adjustLayoutToPlanar(int)));
 }
 
 void GeometryWidget::setPoint(double point) { setRange(point, point); }
