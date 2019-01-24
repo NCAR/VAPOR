@@ -229,42 +229,48 @@ bool CellOnBoundary( const in ivec3 cellIdx )
 //
 bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3 nextCellIdx )
 {
-    ivec3 c  = currentCellIdx;
-    ivec3 group[27];
+    // First test if pos is in the current cell. There's a good chance it is!
+    if( PosInsideOfCell( currentCellIdx, pos ) )
+    {
+        nextCellIdx = currentCellIdx;
+        return true;
+    }
 
-    group[0]  = c;           // first cell in this group is the current cell itself.
-    group[1]  = ivec3( c.x - 1, c.yz );              // next 6 cells are adjacent to
-    group[2]  = ivec3( c.x + 1, c.yz );              // the current cell by face
-    group[3]  = ivec3( c.x,     c.y - 1, c.z );
-    group[4]  = ivec3( c.x,     c.y + 1, c.z );
-    group[5]  = ivec3( c.xy,             c.z - 1 );
-    group[6]  = ivec3( c.xy,             c.z + 1 );
+    // Then we search its surrounding cells
+    ivec3 c  = currentCellIdx;
+    ivec3 group[26];
+    group[0]  = ivec3( c.x - 1, c.yz );  // First 6 cells are adjacent to
+    group[1]  = ivec3( c.x + 1, c.yz );  // the current cell by a face
+    group[2]  = ivec3( c.x,     c.y - 1, c.z );
+    group[3]  = ivec3( c.x,     c.y + 1, c.z );
+    group[4]  = ivec3( c.xy,             c.z - 1 );
+    group[5]  = ivec3( c.xy,             c.z + 1 );
 
     // Next 12 cells are adjacent to the current one by edge
-    group[7]  = ivec3( c.x,     c.y + 1, c.z + 1 ); // top-front
-    group[8]  = ivec3( c.x - 1, c.y + 1, c.z     ); // top-left
-    group[9]  = ivec3( c.x    , c.y + 1, c.z - 1 ); // top-back
-    group[10] = ivec3( c.x + 1, c.y + 1, c.z     ); // top-right
-    group[11] = ivec3( c.x,     c.y - 1, c.z + 1 ); // bottom-front
-    group[12] = ivec3( c.x - 1, c.y - 1, c.z     ); // bottom-left
-    group[13] = ivec3( c.x,     c.y - 1, c.z - 1 ); // bottom-back
-    group[14] = ivec3( c.x + 1, c.y - 1, c.z     ); // bottom-right
-    group[15] = ivec3( c.x - 1, c.y,     c.z + 1 ); // front-left
-    group[16] = ivec3( c.x - 1, c.y,     c.z - 1 ); // left-back
-    group[17] = ivec3( c.x + 1, c.y,     c.z - 1 ); // back-right
-    group[18] = ivec3( c.x + 1, c.y,     c.z + 1 ); // right-front
+    group[6]  = ivec3( c.x,     c.y + 1, c.z + 1 ); // top-front
+    group[7]  = ivec3( c.x - 1, c.y + 1, c.z     ); // top-left
+    group[8]  = ivec3( c.x    , c.y + 1, c.z - 1 ); // top-back
+    group[9]  = ivec3( c.x + 1, c.y + 1, c.z     ); // top-right
+    group[10] = ivec3( c.x,     c.y - 1, c.z + 1 ); // bottom-front
+    group[11] = ivec3( c.x - 1, c.y - 1, c.z     ); // bottom-left
+    group[12] = ivec3( c.x,     c.y - 1, c.z - 1 ); // bottom-back
+    group[13] = ivec3( c.x + 1, c.y - 1, c.z     ); // bottom-right
+    group[14] = ivec3( c.x - 1, c.y,     c.z + 1 ); // front-left
+    group[15] = ivec3( c.x - 1, c.y,     c.z - 1 ); // left-back
+    group[16] = ivec3( c.x + 1, c.y,     c.z - 1 ); // back-right
+    group[17] = ivec3( c.x + 1, c.y,     c.z + 1 ); // right-front
 
     // Next 8 cells are adjacent to the current one by corner
-    group[19] = ivec3( c.x - 1, c.y - 1, c.z - 1 ); // corner 0
-    group[20] = ivec3( c.x + 1, c.y - 1, c.z - 1 ); // corner 1
-    group[21] = ivec3( c.x + 1, c.y - 1, c.z + 1 ); // corner 2
-    group[22] = ivec3( c.x - 1, c.y - 1, c.z + 1 ); // corner 3
-    group[23] = ivec3( c.x - 1, c.y + 1, c.z - 1 ); // corner 4
-    group[24] = ivec3( c.x + 1, c.y + 1, c.z - 1 ); // corner 5
-    group[25] = ivec3( c.x + 1, c.y + 1, c.z + 1 ); // corner 6
-    group[26] = ivec3( c.x - 1, c.y + 1, c.z + 1 ); // corner 7
+    group[18] = ivec3( c.x - 1, c.y - 1, c.z - 1 ); // corner 0
+    group[19] = ivec3( c.x + 1, c.y - 1, c.z - 1 ); // corner 1
+    group[20] = ivec3( c.x + 1, c.y - 1, c.z + 1 ); // corner 2
+    group[21] = ivec3( c.x - 1, c.y - 1, c.z + 1 ); // corner 3
+    group[22] = ivec3( c.x - 1, c.y + 1, c.z - 1 ); // corner 4
+    group[23] = ivec3( c.x + 1, c.y + 1, c.z - 1 ); // corner 5
+    group[24] = ivec3( c.x + 1, c.y + 1, c.z + 1 ); // corner 6
+    group[25] = ivec3( c.x - 1, c.y + 1, c.z + 1 ); // corner 7
 
-    for( int i = 0; i < 27; i++ )
+    for( int i = 0; i < 26; i++ )
     {
         if( !CellOutsideBound( group[i] ) && PosInsideOfCell( group[i], pos ) )
         {
