@@ -294,6 +294,8 @@ void VizWin::initializeGL()
 
 void VizWin::_mousePressEventManip(QMouseEvent *e)
 {
+    makeCurrent();
+
     std::vector<double> screenCoords = _getScreenCoords(e);
 
     _manipFlag = _manip->MouseEvent(_buttonNum, screenCoords, _strHandleMid);
