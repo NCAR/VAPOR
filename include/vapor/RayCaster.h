@@ -200,6 +200,8 @@ protected:
     //
     int  _initializeFramebufferTextures();
 
+    int  _selectDefaultCastingMethod() const;
+
     void _updateViewportWhenNecessary( const GLint* viewport );
     void _updateColormap( RayCasterParams* params );
     void _updateDataTextures();

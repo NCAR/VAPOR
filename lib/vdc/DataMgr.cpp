@@ -2470,10 +2470,16 @@ bool DataMgr::_hasHorizontalXForm(string meshname) const {
 		bool ok = _dc->GetCoordVarInfo(coordVars[i], varInfo);
 		assert(ok);
 
-		if (varInfo.GetAxis() == 0 && _udunits.IsLonUnit(varInfo.GetUnits())) {
+		if (varInfo.GetAxis() == 0 && 
+			(_udunits.IsLonUnit(varInfo.GetUnits()) ||
+			_udunits.IsLatOrLonUnit(varInfo.GetUnits()))
+		) {
 			return(true);
 		}
-		if (varInfo.GetAxis() == 1 && _udunits.IsLatUnit(varInfo.GetUnits())) {
+		if (varInfo.GetAxis() == 1 && 
+			(_udunits.IsLatUnit(varInfo.GetUnits()) ||
+			_udunits.IsLatOrLonUnit(varInfo.GetUnits()))
+		) {
 			return(true);
 		}
 	}
