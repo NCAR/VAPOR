@@ -27,6 +27,7 @@ set (SRC
 	WireFrameParams.cpp
     SliceParams.cpp
 	DatasetsParams.cpp
+	VolumeParams.cpp
 )
 
 set (HEADERS
@@ -57,6 +58,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/RayCasterParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DVRParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/IsoSurfaceParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeParams.h
 )
 
 add_library (params SHARED ${SRC} ${HEADERS})
