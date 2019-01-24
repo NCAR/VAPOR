@@ -20,7 +20,7 @@ public:
     VolumeVariablesSubtab(QWidget *parent)
     {
         setupUi(this);
-        _variablesWidget->Reinit((VariableFlags)(SCALAR | HEIGHT), (DimFlags)(THREED | TWOD));
+        _variablesWidget->Reinit((VariableFlags)(SCALAR), (DimFlags)(THREED));
     }
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _variablesWidget->Update(dataMgr, paramsMgr, rParams); }
@@ -33,6 +33,7 @@ public:
     VolumeAppearanceSubtab(QWidget *parent)
     {
         setupUi(this);
+        _TFWidget->SetOpacityIntegrated(true);
         _TFWidget->Reinit((TFFlags)(CONSTANT_COLOR));
     }
 
