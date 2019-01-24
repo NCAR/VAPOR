@@ -89,6 +89,9 @@ RayCaster::RayCaster(const ParamsMgr *pm,
 
     for (int i = 0; i < 4; i++)
         _currentViewport[i] = 0;
+
+    // Set the default ray casting method upon creation of the RayCaster.
+    _selectDefaultCastingMethod();
 }
 
 // Destructor
@@ -1518,6 +1521,34 @@ int RayCaster::_updateVertCoordsTexture(const glm::mat4 &MV) {
     }
 
     delete[] coordEye;
+
+    return 0;
+}
+
+int RayCaster::_selectDefaultCastingMethod() const {
+    RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
+    if (!params) {
+        MyBase::SetErrMsg("Error occured during retrieving RayCaster parameters!");
+        return PARAMSERROR;
+    }
+
+    StructuredGrid *grid = nullptr;
+    if (_userCoordinates.GetCurrentGrid(params, _dataMgr, &grid) != 0) {
+        MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");
+        return GRIDERROR;
+    }
+
+    //
+    // In case of a regular grid, use "fixed step" ray casting.
+    // In other cases, use "cell traversal" ray casting.
+    //
+    RegularGrid *regular = dynamic_cast<RegularGrid *>(grid);
+    if (regular)
+        params->SetCastingMode(FixedStep);
+    else
+        params->SetCastingMode(CellTraversal);
+
+    delete grid;
 
     return 0;
 }
