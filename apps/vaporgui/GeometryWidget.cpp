@@ -100,16 +100,20 @@ void GeometryWidget::hideOrientationOptions() {
     _zPointFrame->hide();
 }
 
-void GeometryWidget::adjustPlanarOrientation(int plane) {
+void GeometryWidget::adjustLayoutToPlanar(
+    int plane,
+    bool reinit // = true by default
+) {
     if (plane == XY)
-        adjustLayoutToPlanarXY();
+        adjustLayoutToPlanarXY(reinit);
     else if (plane == XZ)
-        adjustLayoutToPlanarXZ();
+        adjustLayoutToPlanarXZ(reinit);
     else if (plane == YZ)
-        adjustLayoutToPlanarYZ();
+        adjustLayoutToPlanarYZ(reinit);
 }
 
-void GeometryWidget::adjustLayoutToPlanarXY() {
+void GeometryWidget::adjustLayoutToPlanarXY(
+    bool reinit) {
     _xMinMaxFrame->show();
     _yMinMaxFrame->show();
     _zMinMaxFrame->hide();
@@ -120,19 +124,13 @@ void GeometryWidget::adjustLayoutToPlanarXY() {
 
     if (!_rParams)
         return;
-    std::vector<double> minExt(3, 0);
-    std::vector<double> maxExt(3, 1);
-    getFullExtents(minExt, maxExt);
-    double average = (minExt[Z] + maxExt[Z]) / 2.f;
-    _zSinglePoint->SetValue(average);
 
-    minExt[Z] = average;
-    maxExt[Z] = average;
-    Box *box = _rParams->GetBox();
-    box->SetExtents(minExt, maxExt);
+    if (reinit)
+        reinitBoxToPlanarAxis(Z, _zSinglePoint);
 }
 
-void GeometryWidget::adjustLayoutToPlanarXZ() {
+void GeometryWidget::adjustLayoutToPlanarXZ(
+    bool reinit) {
     _xMinMaxFrame->show();
     _yMinMaxFrame->hide();
     _zMinMaxFrame->show();
@@ -143,20 +141,13 @@ void GeometryWidget::adjustLayoutToPlanarXZ() {
 
     if (!_rParams)
         return;
-    std::vector<double> minExt(3, 0);
-    std::vector<double> maxExt(3, 1);
-    getFullExtents(minExt, maxExt);
-    //box->GetExtents(minExt, maxExt);
-    double average = (minExt[Y] + maxExt[Y]) / 2.f;
-    _ySinglePoint->SetValue(average);
 
-    minExt[Y] = average;
-    maxExt[Y] = average;
-    Box *box = _rParams->GetBox();
-    box->SetExtents(minExt, maxExt);
+    if (reinit)
+        reinitBoxToPlanarAxis(Y, _ySinglePoint);
 }
 
-void GeometryWidget::adjustLayoutToPlanarYZ() {
+void GeometryWidget::adjustLayoutToPlanarYZ(
+    bool reinit) {
     _xMinMaxFrame->hide();
     _yMinMaxFrame->show();
     _zMinMaxFrame->show();
@@ -167,24 +158,28 @@ void GeometryWidget::adjustLayoutToPlanarYZ() {
 
     if (!_rParams)
         return;
+
+    if (reinit)
+        reinitBoxToPlanarAxis(X, _xSinglePoint);
+}
+
+void GeometryWidget::reinitBoxToPlanarAxis(
+    int planarAxis,
+    QSliderEdit *slider) {
     std::vector<double> minExt(3, 0);
     std::vector<double> maxExt(3, 1);
     getFullExtents(minExt, maxExt);
-    //box->GetExtents(minExt, maxExt);
-    double average = (minExt[X] + maxExt[X]) / 2.f;
-    _xSinglePoint->SetValue(average);
+    double average = (minExt[planarAxis] + maxExt[planarAxis]) / 2.f;
+    slider->SetValue(average);
 
-    minExt[X] = average;
-    maxExt[X] = average;
+    minExt[planarAxis] = average;
+    maxExt[planarAxis] = average;
     Box *box = _rParams->GetBox();
     box->SetExtents(minExt, maxExt);
 }
 
 void GeometryWidget::adjustLayoutTo2D() {
     _zFrame->hide();
-    //_minMaxContainerWidget->adjustSize();
-    //_minMaxTab->adjustSize();
-
     adjustSize();
 }
 
@@ -204,7 +199,7 @@ void GeometryWidget::Reinit(
 
     if (_geometryFlags & PLANAR) {
         showOrientationOptions();
-        adjustPlanarOrientation(XY);
+        adjustLayoutToPlanar(XY, false);
     } else
         hideOrientationOptions();
 
@@ -440,8 +435,15 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
     updateBoxCombos(minFullExt, maxFullExt);
 
     if (_geometryFlags & PLANAR) {
-        int orientation = _rParams->GetBox()->GetOrientation();
-        _planeComboBox->setCurrentIndex(orientation);
+        _planeComboBox->blockSignals(true);
+
+        int rParamsOrientation = _rParams->GetBox()->GetOrientation();
+        _planeComboBox->setCurrentIndex(rParamsOrientation);
+
+        bool reinit = false;
+        adjustLayoutToPlanar(rParamsOrientation, reinit);
+
+        _planeComboBox->blockSignals(false);
     }
 }
 
@@ -469,7 +471,7 @@ void GeometryWidget::connectWidgets() {
     connect(_zRangeCombo, SIGNAL(valueChanged(double, double)),
             this, SLOT(setRange(double, double)));
     connect(_planeComboBox, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(adjustPlanarOrientation(int)));
+            this, SLOT(adjustLayoutToPlanar(int)));
 }
 
 void GeometryWidget::setPoint(double point) {
