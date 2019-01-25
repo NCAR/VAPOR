@@ -16,8 +16,6 @@ uniform usampler3D      secondVarMaskTexture;   // !!unsigned integer!!
 uniform ivec3 volumeDims;        // number of vertices in each direction of this volume
 uniform ivec2 viewportDims;      // width and height of this viewport
 uniform vec4  clipPlanes[6];     // clipping planes in **un-normalized** model coordinates
-uniform vec3  boxMin;            // min coordinates of the bounding box of this volume
-uniform vec3  boxMax;            // max coordinates of the bounding box of this volume
 uniform vec3  colorMapRange;
 uniform ivec3 entryCellIdx;
 
@@ -102,12 +100,12 @@ void FillCellVertCoordinates( const in ivec3 cellIdx, out vec3 coord[8] )
 
 
 //
-// Input:  Location to be evaluated in texture coordinates and model coordinates.
+// Input:  Location to be evaluated in texture coordinates and eye coordinates.
 // Output: If this location should be skipped.
 // Note:   It is skipped in two cases: 1) it represents a missing value
 //                                     2) it is outside of clipping planes
 //
-bool ShouldSkip( const in vec3 tc, const in vec3 mc )
+bool ShouldSkip( const in vec3 tc, const in vec3 ec )
 {
     if( hasMissingValue && (texture(missingValueMaskTexture, tc).r != 0u) )
         return true;
@@ -115,7 +113,7 @@ bool ShouldSkip( const in vec3 tc, const in vec3 mc )
     if( use2ndVar && (texture(secondVarMaskTexture, tc).r != 0u) )
         return true;
 
-    vec4 positionModel = vec4(mc, 1.0);
+    vec4 positionModel = inversedMV * vec4(ec, 1.0);
     for( int i = 0; i < 6; i++ )
     {
         if( dot(positionModel, clipPlanes[i]) < 0.0 )
@@ -315,7 +313,8 @@ bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3
 vec3 CalculatePosTex( const ivec3 cellIdx, const vec3 pos )
 {
     // For VAPOR 3.1, we simply take the center point of the cell.
-    return ( vec3(cellIdx) + 0.5 ) * volumeDims1o;
+    //return ( vec3(cellIdx) + 0.5 ) * volumeDims1o;
+    return vec3(cellIdx) * volumeDims1o;
 }
 
 
@@ -490,7 +489,7 @@ void main(void)
         gl_FragDepth = 1.0;
 
     // Debug use only
-    // if( earlyTerm == 2 && !CellOnBoundary( step1CellIdx ) )
-    //     color = vec4( 0.9, 0.2, 0.2, 1.0); 
+    //if( earlyTerm == 2 && !CellOnBoundary( step1CellIdx ) )
+    //    color = vec4( 0.9, 0.2, 0.2, 1.0); 
 }
 
