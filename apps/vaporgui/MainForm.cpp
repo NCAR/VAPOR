@@ -332,7 +332,6 @@ MainForm::MainForm(
     _vizWinMgr = new VizWinMgr(this, _mdiArea, _controlExec);
 
     _tabMgr = new TabManager(this, _controlExec);
-    _tabMgr->setMaximumWidth(600);
     _tabMgr->setUsesScrollButtons(true);
 
     _tabMgr->setMinimumWidth(460);
