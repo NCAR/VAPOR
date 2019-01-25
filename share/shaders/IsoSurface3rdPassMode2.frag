@@ -312,9 +312,24 @@ bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3
 //
 vec3 CalculatePosTex( const ivec3 cellIdx, const vec3 pos )
 {
-    // For VAPOR 3.1, we simply take the center point of the cell.
-    //return ( vec3(cellIdx) + 0.5 ) * volumeDims1o;
-    return vec3(cellIdx) * volumeDims1o;
+    vec3 cubeVertCoord[8];
+    FillCellVertCoordinates( cellIdx, cubeVertCoord );  // These coords are in eye space
+
+    vec3 minCoord = (inversedMV * vec4(cubeVertCoord[0], 1.0)).xyz; // Model space
+    vec3 maxCoord =  minCoord;                                      // Model space
+    vec3 posCoord = (inversedMV * vec4(pos, 1.0)).xyz;              // Model space
+    for( int i = 1; i < 8; i++ )
+    {
+        vec3 mc   = (inversedMV * vec4(cubeVertCoord[i], 1.0)).xyz;
+        minCoord  = min( minCoord, mc );
+        maxCoord  = max( maxCoord, mc );
+    }
+
+    vec3 weight   = (posCoord - minCoord) / (maxCoord - minCoord);
+    vec3 minTex   =  vec3(cellIdx)     * volumeDims1o;  // Texture Coordinates
+    vec3 maxTex   =  vec3(cellIdx + 1) * volumeDims1o;  // Texture Coordinates
+
+    return mix( minTex, maxTex, weight );
 }
 
 
