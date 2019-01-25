@@ -105,7 +105,7 @@ bool ShouldSkip( const in vec3 tc, const in vec3 ec )
     if( hasMissingValue && (texture(missingValueMaskTexture, tc).r != 0u) )
         return true;
 
-    vec4 positionModel = (inversedMV * vec4(ec, 1.0));
+    vec4 positionModel = inversedMV * vec4(ec, 1.0);
     for( int i = 0; i < 6; i++ )
     {
         if( dot(positionModel, clipPlanes[i]) < 0.0 )
