@@ -16,6 +16,7 @@ int VolumeResampled::LoadData(const Grid *grid) {
     grid->GetUserExtents(min, max);
 
     for (int z = 0; z < d; z++) {
+        printf("Resampling... %i/%li\n", z, d);
         const float zSamplePos = (z + 0.5f) / (float)d * (max[2] - min[2]) + min[2];
         for (int y = 0; y < h; y++) {
             const float ySamplePos = (y + 0.5f) / (float)h * (max[1] - min[1]) + min[1];
@@ -25,7 +26,6 @@ int VolumeResampled::LoadData(const Grid *grid) {
             }
         }
     }
-    printf("Resampled\n");
 
     glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0, GL_RED, GL_FLOAT, data);
 
