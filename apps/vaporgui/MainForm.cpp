@@ -57,6 +57,7 @@
 #include <vapor/CFuncs.h>
 #include <vapor/FileUtils.h>
 #include <vapor/utils.h>
+#include <vapor/STLUtils.h>
 #include <vapor/Proj4API.h>
 
 #include "VizWinMgr.h"
@@ -950,7 +951,7 @@ void MainForm::sessionOpen(QString qfileName)
     state->GetActiveRenderer(vizWin, activeRendererType, activeRendererName);
     _controlExec->RenderLookup(activeRendererName, vizWin, activeDataSetName, activeRendererType);
 
-    if (Wasp::contains(openDataSetNames, activeDataSetName))
+    if (STLUtils::Contains(openDataSetNames, activeDataSetName))
         _tabMgr->SetActiveRenderer(vizWin, activeRendererType, activeRendererName);
     else
         _tabMgr->HideRenderWidgets();
