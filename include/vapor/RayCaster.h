@@ -135,7 +135,9 @@ protected:
 
     UserCoordinates     _userCoordinates;
     std::vector<float>  _colorMap;
-    float               _colorMapRange[3];  // min, max, and diff values.
+    float               _colorMapRange[3];   // min, max, and diff values.
+    glm::mat4           _currentMV;          // model view matrix in use
+    GLint               _currentViewport[4]; // current viewport in use
 
     // OpenGL stuff
     // textures
@@ -164,7 +166,6 @@ protected:
     GLuint              _vertexBufferId;    // Keeps user coordinates of 6 faces.
     GLuint              _indexBufferId;     // Auxiliary indices for efficiently drawing triangle strips.
     GLuint              _vertexAttribId;    // Attribute of vertices: (i, j k) logical indices.
-    GLint               _currentViewport[4]; // current viewport in use
 
     // shaders
     ShaderProgram*      _1stPassShader;
