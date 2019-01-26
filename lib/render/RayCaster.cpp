@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/ext/matrix_relational.hpp>
 
 #define OUTOFDATE   1
 #define GLNOTREADY  2
@@ -69,6 +70,8 @@ RayCaster::RayCaster(const ParamsMgr *pm, std::string &winName, std::string &dat
     _3rdPassMode2Shader = nullptr;
 
     for (int i = 0; i < 4; i++) _currentViewport[i] = 0;
+
+    _currentMV = glm::mat4(0.0f);
 
     // Set the default ray casting method upon creation of the RayCaster.
     _selectDefaultCastingMethod();
@@ -1384,6 +1387,12 @@ void RayCaster::_updateDataTextures()
 
 int RayCaster::_updateVertCoordsTexture(const glm::mat4 &MV)
 {
+    // Step zero: see if MV is the same as it was from the last iteration.
+    //   If so, return directly without updating these coordinates.
+    glm::bvec4 columeEqual = glm::equal(_currentMV, MV);
+    if (glm::all(columeEqual)) return 0;
+
+    // Now we need to calculate and upload the new vertex coordinates
     // First, transform every vertex coordinate to the eye space
     size_t numOfVertices = _userCoordinates.dims[0] * _userCoordinates.dims[1] * _userCoordinates.dims[2];
     float *coordEye = nullptr;
@@ -1425,6 +1434,9 @@ int RayCaster::_updateVertCoordsTexture(const glm::mat4 &MV)
     } else {
         glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, _userCoordinates.dims[0], _userCoordinates.dims[1], _userCoordinates.dims[2], 0, GL_RGB, GL_FLOAT, coordEye);
     }
+
+    // Don't forget to update the cached model view matrix
+    _currentMV = MV;
 
     delete[] coordEye;
 
