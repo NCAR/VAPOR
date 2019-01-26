@@ -754,8 +754,14 @@ int RayCaster::_paintGL(bool fast) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, _currentViewport[2], _currentViewport[3]);
 
+    struct timeval start, finish;
+    glFinish();
+    gettimeofday(&start, NULL);
     // 3rd pass, perform ray casting
     _drawVolumeFaces(3, castingMode, cameraCellIdx, InversedMV, fast);
+    glFinish();
+    gettimeofday(&finish, NULL);
+    std::cout << "ray casting time: " << _getElapsedSeconds(&start, &finish) << std::endl;
 
     // Restore OpenGL values changed in this function.
     glBindVertexArray(0);
@@ -1413,9 +1419,9 @@ void RayCaster::_updateColormap(RayCasterParams *params) {
         _colorMap.resize(8);   // _colorMap will have 2 RGBA values
         for (int i = 0; i < 8; i++)
             _colorMap[i] = singleColor[i % 4];
-        _colorMapRange[0] = 0.0f;
-        _colorMapRange[1] = 0.0f;
-        _colorMapRange[2] = 1e-5f;
+        _colorMapRange[0] = 0.0f;  // min value of the color map
+        _colorMapRange[1] = 0.0f;  // max value of the color map
+        _colorMapRange[2] = 1e-5f; // diff of color map. Has to be non-zero though.
     } else {
         // Subclasses will have a chance here to use their own colormaps.
         _colormapSpecialHandling();
