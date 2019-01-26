@@ -87,9 +87,8 @@ public:
 class SmartShaderProgram {
     ShaderProgram *_program;
 
-    SmartShaderProgram(ShaderProgram *program);
-
 public:
+    SmartShaderProgram(ShaderProgram *program);
     ~SmartShaderProgram();
     ShaderProgram *operator->() { return _program; }
     bool           IsValid() const;

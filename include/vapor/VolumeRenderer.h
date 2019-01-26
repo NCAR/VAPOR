@@ -1,6 +1,7 @@
 #pragma once
 
-#include "vapor/Renderer.h"
+#include <vapor/Renderer.h>
+#include <vapor/VolumeAlgorithm.h>
 
 using std::string;
 using std::vector;
@@ -21,14 +22,14 @@ protected:
 
     void _loadData();
     void _loadTF();
-    void _createRayDirTexture();
+
+    VolumeAlgorithm *algorithm;
 
     unsigned int VAO = 0;
     unsigned int VBO = 0;
     unsigned int dataTexture;
     unsigned int LUTTexture;
     unsigned int depthTexture;
-    unsigned int rayDirTexture;
 
     struct Cache {
         string var;
