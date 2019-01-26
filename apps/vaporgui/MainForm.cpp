@@ -245,6 +245,7 @@ void MainForm::_initMembers()
     _buttonPressed = false;
 }
 
+#include <vapor/VDCNetCDF.h>
 // Only the main program should call the constructor:
 //
 MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : QMainWindow(parent)
@@ -365,7 +366,13 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
     }
 
     if (files.size() && files[0].endsWith(".nc")) {
-        loadData(files[0].toStdString());
+        VDCNetCDF vdc;
+        int       ret = vdc.Initialize({files[0].toStdString()}, {}, VDC::R);
+        if (ret < 0) {
+            loadDataHelper({files[0].toStdString()}, "NetCDF CF files", "", "cf", true);
+        } else {
+            loadData(files[0].toStdString());
+        }
         _stateChangeCB();
     }
     app->installEventFilter(this);
