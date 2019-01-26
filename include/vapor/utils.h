@@ -45,11 +45,6 @@ class COMMON_API SmartBuf {
     size_t _buf_sz;
 };
 
-template <typename T>
-bool contains(const std::vector<T> &toSearch, const T &object) {
-    return std::find(toSearch.cbegin(), toSearch.cend(), object) != toSearch.cend();
-}
-
 //! Linearize multi-dimensional coordinates
 //!
 //! Convert multi-dimensional coordinates, \p coords, for a space
