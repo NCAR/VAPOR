@@ -125,6 +125,8 @@ int VolumeRenderer::_paintGL(bool fast) {
     if (!shader.IsValid())
         return -1;
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
+    // shader->SetUniform("ModelView", _glManager->matrixManager->GetModelViewMatrix());
+    // shader->SetUniform("Projection", _glManager->matrixManager->GetProjectionMatrix());
     // shader->SetUniform("resolution", vec2(resolution[0], resolution[1]));
     shader->SetUniform("cameraPos", vec3(cameraPos[0], cameraPos[1], cameraPos[2]));
     shader->SetUniform("dataBoundsMin", vec3(minExts[0], minExts[1], minExts[2]));
