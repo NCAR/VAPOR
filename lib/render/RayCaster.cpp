@@ -1439,6 +1439,12 @@ int RayCaster::_selectDefaultCastingMethod() const
         return PARAMSERROR;
     }
 
+    // If params already contain a value of mode 1 or 2, then do nothing.
+    //   This case happens when loading params from a session file.
+    int castingMode = int(params->GetCastingMode());
+    if (castingMode == FixedStep || castingMode == CellTraversal) return 0;
+
+    // castingMode == 0 if not initialized before. Let's figure out what value it should have.
     StructuredGrid *grid = nullptr;
     if (_userCoordinates.GetCurrentGrid(params, _dataMgr, &grid) != 0) {
         MyBase::SetErrMsg("Failed to retrieve a StructuredGrid");

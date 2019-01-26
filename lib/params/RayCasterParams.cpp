@@ -44,13 +44,16 @@ std::vector<double> RayCasterParams::GetLightingCoeffs() const
 
 void RayCasterParams::SetLightingCoeffs(const std::vector<double> &coeffs) { SetValueDoubleVec(_lightingCoeffsTag, "Coefficients for lighting effects", coeffs); }
 
-long RayCasterParams::GetCastingMode() const { return GetValueLong(_castingModeTag, 1); }
+long RayCasterParams::GetCastingMode() const
+{
+    return GetValueLong(_castingModeTag, 0);    // 0 means it's not set by the user yet.
+}
 
 void RayCasterParams::SetCastingMode(long mode)
 {
     if (mode == 1 || mode == 2)    // currently supported casting modes
         SetValueLong(_castingModeTag, "Which ray casting mode", mode);
-    else    // put a default mode
+    else    // put mode 1 here
         SetValueLong(_castingModeTag, "Which ray casting mode", 1);
 }
 
