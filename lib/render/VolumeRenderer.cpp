@@ -28,9 +28,11 @@ VolumeRenderer::VolumeRenderer(const ParamsMgr *pm,
                VolumeRenderer::GetClassType(),
                instName,
                dataMgr) {
-    VAO = 0;
-    VBO = 0;
-    dataTexture = 0;
+    VAO = NULL;
+    VBO = NULL;
+    dataTexture = NULL;
+    LUTTexture = NULL;
+    algorithm = VolumeAlgorithm::NewAlgorithm("Regular");
 }
 
 VolumeRenderer::~VolumeRenderer() {
@@ -42,10 +44,10 @@ VolumeRenderer::~VolumeRenderer() {
         glDeleteTextures(1, &dataTexture);
     if (LUTTexture)
         glDeleteTextures(1, &LUTTexture);
-    if (rayDirTexture)
-        glDeleteTextures(1, &rayDirTexture);
     if (cache.tf)
         delete cache.tf;
+    if (algorithm)
+        delete algorithm;
 }
 
 int VolumeRenderer::_initializeGL() {
@@ -70,7 +72,6 @@ int VolumeRenderer::_initializeGL() {
     glEnableVertexAttribArray(1);
 
     glGenTextures(1, &dataTexture);
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_3D, dataTexture);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -79,19 +80,10 @@ int VolumeRenderer::_initializeGL() {
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     glGenTextures(1, &LUTTexture);
-    glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_1D, LUTTexture);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-
-    glGenTextures(1, &rayDirTexture);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, rayDirTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     return 0;
 }
@@ -99,7 +91,6 @@ int VolumeRenderer::_initializeGL() {
 int VolumeRenderer::_paintGL(bool fast) {
     _loadData();
     _loadTF();
-    // _createRayDirTexture();
     cache.needsUpdate = false;
 
     GLint viewport[4] = {0};
@@ -115,19 +106,24 @@ int VolumeRenderer::_paintGL(bool fast) {
     vector<double> minExts, maxExts;
     GetActiveParams()->GetBox()->GetExtents(minExts, maxExts);
 
-    SmartShaderProgram shader = _glManager->shaderManager->GetSmartShader("ray");
+    SmartShaderProgram shader(algorithm->GetShader(_glManager->shaderManager));
     if (!shader.IsValid())
         return -1;
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
-    shader->SetUniform("resolution", vec2(resolution[0], resolution[1]));
+    // shader->SetUniform("resolution", vec2(resolution[0], resolution[1]));
     shader->SetUniform("cameraPos", vec3(cameraPos[0], cameraPos[1], cameraPos[2]));
     shader->SetUniform("dataBoundsMin", vec3(minExts[0], minExts[1], minExts[2]));
     shader->SetUniform("dataBoundsMax", vec3(maxExts[0], maxExts[1], maxExts[2]));
     shader->SetUniform("LUTMin", (float)cache.mapRange[0]);
     shader->SetUniform("LUTMax", (float)cache.mapRange[1]);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_3D, dataTexture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_1D, LUTTexture);
+
     shader->SetUniform("data", 0);
     shader->SetUniform("LUT", 1);
-    shader->SetUniform("dirs", 2);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -157,20 +153,8 @@ void VolumeRenderer::_loadData() {
 
     Grid *grid = _dataMgr->GetVariable(cache.ts, cache.var, cache.refinement, cache.compression);
 
-    vector<size_t> dims = grid->GetDimensions();
-    float *data = new float[dims[0] * dims[1] * dims[2]];
-
-    size_t i = 0;
-    auto end = grid->cend();
-    for (auto it = grid->cbegin(); it != end; ++it, ++i) {
-        data[i] = *it;
-    }
-
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_3D, dataTexture);
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0, GL_RED, GL_FLOAT, data);
-
-    delete[] data;
+    algorithm->LoadData(grid);
     delete grid;
 }
 
@@ -191,63 +175,8 @@ void VolumeRenderer::_loadTF() {
     float *LUT = new float[4 * 256];
     tf->makeLut(LUT);
 
-    glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_1D, LUTTexture);
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, 256, 0, GL_RGBA, GL_FLOAT, LUT);
 
     delete[] LUT;
-}
-
-void VolumeRenderer::_createRayDirTexture() {
-    GLint viewport[4] = {0};
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    int width = viewport[2];
-    int height = viewport[3];
-    // width /= 4;
-    // height /= 4;
-    vec2 size(width, height);
-    printf("size = %f, %f\n", size.x, size.y);
-
-    Viewpoint *VP = _paramsMgr->GetViewpointParams(_winName)->getCurrentViewpoint();
-    double m[16];
-    double cameraPos[3], cameraUp[3], cameraDir[3];
-    _glManager->matrixManager->GetDoublev(MatrixManager::Mode::ModelView, m);
-    VP->ReconstructCamera(m, cameraPos, cameraUp, cameraDir);
-    vec3 camera(cameraPos[0], cameraPos[1], cameraPos[2]);
-
-    vec3 *dirs = new vec3[width * height];
-
-    /*
-     vec2 screen = ST*2-1;
-     vec4 world = inverse(MVP) * vec4(screen, 1, 0.996f);
-     vec3 dir = normalize(world.xyz);
-     */
-    MatrixManager *mm = _glManager->matrixManager;
-    mat4 invMVP = glm::inverse(mm->GetModelViewProjectionMatrix());
-
-    double modelView[16], projection[16];
-    mm->GetDoublev(MatrixManager::Mode::ModelView, modelView);
-    mm->GetDoublev(MatrixManager::Mode::Projection, projection);
-
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            float xf = x, yf = y;
-            //            vec2 pixel(xf, yf);
-            //            vec2 screen = pixel/size * 2.f - 1.f;
-            //            vec4 world = invMVP * vec4(screen, 1, 1);
-            //            vec3 dir = glm::normalize(vec3(world));
-
-            double worldX, worldY, worldZ;
-            // gluUnProject(x, y, 1, modelView, projection, viewport, &worldX, &worldY, &worldZ);
-            vec3 world(worldX, worldY, worldZ);
-            // glhUnProjectf(x, y, 1, invMVP, viewport, world);
-            vec3 dir = glm::normalize(world - camera);
-
-            dirs[y * width + x] = dir;
-        }
-    }
-
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, rayDirTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, dirs);
 }
