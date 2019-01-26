@@ -42,6 +42,9 @@ set (SRC
 	TIFWriter.cpp
 	Proj4StringParser.cpp
 	glutil.cpp
+	VolumeAlgorithm.cpp
+	VolumeRegular.cpp
+	VolumeResampled.cpp
 )
 
 set (HEADERS
@@ -89,6 +92,9 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/Proj4StringParser.h
 	${PROJECT_SOURCE_DIR}/include/vapor/SliceRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/glutil.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeAlgorithm.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeRegular.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeResampled.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})
