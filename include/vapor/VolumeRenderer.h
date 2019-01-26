@@ -46,6 +46,8 @@ class RENDER_API VolumeRenderer : public Renderer {
         MapperFunction *tf = nullptr;
         vector<double> mapRange;
 
+        string algorithmName;
+
         bool needsUpdate;
     } cache;
 };

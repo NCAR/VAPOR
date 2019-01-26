@@ -48,8 +48,32 @@ class VolumeAppearanceSubtab : public QWidget, public Ui_VolumeAppearanceGUI {
         VAPoR::DataMgr *dataMgr,
         VAPoR::ParamsMgr *paramsMgr,
         VAPoR::RenderParams *rParams) {
+        VAPoR::VolumeParams *vp = (VAPoR::VolumeParams *)rParams;
+        _volumeParams = vp;
+
         _TFWidget->Update(dataMgr, paramsMgr, rParams);
+
+        int index = _algorithmCombo->findText(QString::fromStdString(vp->GetAlgorithm()));
+
+        if (index == -1) {
+            _algorithmCombo->clear();
+            const vector<string> algorithms = VAPoR::VolumeParams::GetAlgorithmNames();
+            for (const string &s : algorithms)
+                _algorithmCombo->addItem(QString::fromStdString(s));
+
+            index = _algorithmCombo->findText(QString::fromStdString(vp->GetAlgorithm()));
+        }
+
+        _algorithmCombo->setCurrentIndex(index);
     }
+
+  private slots:
+    void on__algorithmCombo_currentIndexChanged(const QString &text) {
+        _volumeParams->SetAlgorithm(text.toStdString());
+    }
+
+  private:
+    VAPoR::VolumeParams *_volumeParams;
 };
 
 class VolumeGeometrySubtab : public QWidget, public Ui_VolumeGeometryGUI {

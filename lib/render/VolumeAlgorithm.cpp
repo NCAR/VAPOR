@@ -6,10 +6,12 @@ using namespace VAPoR;
 using std::string;
 using std::vector;
 
-std::vector<std::string> VolumeAlgorithm::GetAlgorithmNames() {
-    return {
-        "Regular",
-        "Resampled"};
+const std::vector<std::string> VolumeAlgorithm::_algorithmNames = {
+    "Regular",
+    "Resampled"};
+
+const std::vector<std::string> &VolumeAlgorithm::GetAlgorithmNames() {
+    return _algorithmNames;
 }
 
 VolumeAlgorithm *VolumeAlgorithm::NewAlgorithm(const std::string &name) {
