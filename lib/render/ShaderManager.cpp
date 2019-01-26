@@ -2,9 +2,11 @@
 #include "vapor/ShaderManager.h"
 #include "vapor/FileUtils.h"
 #include <vapor/ResourcePath.h>
+#include <vapor/STLUtils.h>
 
 using namespace VAPoR;
 using namespace Wasp;
+using namespace STLUtils;
 
 using std::map;
 using std::pair;
@@ -86,7 +88,7 @@ Shader *ShaderManager::CompileNewShaderFromFile(const std::string &path)
         return nullptr;
     }
     Shader *shader = new Shader(shaderType);
-    int     compilationSuccess = shader->CompileFromSource(FileUtils::ReadFileToString(path));
+    int     compilationSuccess = shader->CompileFromSource(PreProcessShader(path));
     if (compilationSuccess < 0) {
         SetErrMsg("Shader \"%s\" failed to compile", FileUtils::Basename(path).c_str());
         delete shader;
@@ -102,4 +104,22 @@ unsigned int ShaderManager::GetShaderTypeFromPath(const std::string &path)
     if (ext == "frag") return GL_FRAGMENT_SHADER;
     if (ext == "geom") return GL_GEOMETRY_SHADER;
     return GL_INVALID_ENUM;
+}
+
+std::string ShaderManager::PreProcessShader(const std::string &path)
+{
+    string source = FileUtils::ReadFileToString(path);
+    auto   lines = Split(source, "\n");
+
+    int lineNum = 1;
+    for (string &line : lines) {
+        if (BeginsWith(line, "#include ")) {
+            assert(Split(line, " ").size() == 2);
+            line = "#line 1 1\n" + PreProcessShader(GetSharePath("shaders/" + Split(line, " ")[1]));
+            line += "\n#line " + std::to_string(lineNum + 2) + " 0";
+        }
+        lineNum++;
+    }
+
+    return Join(lines, "\n");
 }

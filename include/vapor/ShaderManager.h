@@ -38,6 +38,8 @@ public:
     //! \param[in] path to GLSL source code file
     //!
     static unsigned int GetShaderTypeFromPath(const std::string &path);
+
+    static std::string PreProcessShader(const std::string &path);
 };
 
 }    // namespace VAPoR
