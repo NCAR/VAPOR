@@ -2383,6 +2383,10 @@ void MainForm::installCLITools(){
 	}
 	
 	if (error == WINDOWS_SUCCESS && errorClose == WINDOWS_SUCCESS) {
+
+		// This tells windows to re-load the environment variables
+		SendMessage(HWND_BROADCAST, WM_WININICHANGE, NULL, (LPARAM)"Environment");
+
 		box.setIcon(QMessageBox::Information);
 		if (pathWasModified)
 			box.setText("Vapor conversion utilities were added to your path");
