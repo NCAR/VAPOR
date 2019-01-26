@@ -17,8 +17,14 @@ public:
 
     static string GetClassType() { return ("VolumeParams"); }
 
+    std::string                           GetAlgorithm() const;
+    void                                  SetAlgorithm(std::string algorithm);
+    static const std::vector<std::string> GetAlgorithmNames();
+
 private:
     void _init();
+
+    static const std::string _algorithmTag;
 };
 
 };    // namespace VAPoR
