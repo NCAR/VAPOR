@@ -29,7 +29,7 @@ void main(void)
     
     if (IntersectRayBoundingBox(cameraPos, dir, dataBoundsMin, dataBoundsMax, t0, t1)) {
         
-        float step = max(((t1-t0)/100.f)*1.01, 0.05);
+        float step = max(((t1-t0)/100.f)*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/100.f);
         for (float t = t1; t > t0; t -= step) {
             vec3 hit = cameraPos + dir * t;
             vec3 dataSTR = (hit - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
