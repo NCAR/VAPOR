@@ -87,8 +87,22 @@ int VolumeRenderer::_initializeGL()
     return 0;
 }
 
+#define CheckCache(cVar, pVar) \
+if (cVar != pVar) { \
+cache.needsUpdate = true; \
+cVar = pVar; \
+}
+
 int VolumeRenderer::_paintGL(bool fast)
 {
+    VolumeParams *vp = (VolumeParams *)GetActiveParams();
+    if (cache.algorithmName != vp->GetAlgorithm()) {
+        cache.algorithmName = vp->GetAlgorithm();
+        if (algorithm) delete algorithm;
+        algorithm = VolumeAlgorithm::NewAlgorithm(cache.algorithmName);
+        cache.needsUpdate = true;
+    }
+    
     _loadData();
     _loadTF();
     cache.needsUpdate = false;
@@ -136,15 +150,9 @@ int VolumeRenderer::_paintGL(bool fast)
     return 0;
 }
 
-#define CheckCache(cVar, pVar) \
-    if (cVar != pVar) { \
-        cache.needsUpdate = true; \
-        cVar = pVar; \
-    }
-
 void VolumeRenderer::_loadData()
 {
-    RenderParams *RP = GetActiveParams();
+    VolumeParams *RP = (VolumeParams *)GetActiveParams();
     CheckCache(cache.var, RP->GetVariableName());
     CheckCache(cache.ts, RP->GetCurrentTimestep());
     CheckCache(cache.refinement, RP->GetRefinementLevel());
