@@ -30,14 +30,20 @@ void main(void)
     if (IntersectRayBoundingBox(cameraPos, dir, dataBoundsMin, dataBoundsMax, t0, t1)) {
         
         float step = max(((t1-t0)/100.f)*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/100.f);
-        for (float t = t1; t > t0; t -= step) {
+        
+        for (float t = t0; t < t1; t += step) {
             vec3 hit = cameraPos + dir * t;
             vec3 dataSTR = (hit - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
             float dataNorm = (texture(data, dataSTR).r - LUTMin) / (LUTMax - LUTMin);
             vec4 color = texture(LUT, dataNorm);
             
-            accum = vec4((color.rgb*color.a) + accum.rgb*(1-color.a), accum.a*(1-color.a) + color.a);
+            accum.rgb += color.rgb * color.a * (1-accum.a);
+            accum.a += color.a * (1-accum.a);
+            
+            if (accum.a > 0.999)
+                break;
         }
+        
         fragColor = accum;
     }
         
