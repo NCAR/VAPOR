@@ -147,6 +147,9 @@ void RenderParams::InitBox() {
     if (planar) {
         minExt.push_back(0.0);
         maxExt.push_back(0.0);
+        _Box->SetOrientation(VAPoR::Box::XY);
+    } else {
+        _Box->SetOrientation(VAPoR::Box::XYZ);
     }
 
     _Box->SetExtents(minExt, maxExt);
