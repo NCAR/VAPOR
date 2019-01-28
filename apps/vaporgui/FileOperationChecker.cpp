@@ -100,8 +100,7 @@ FileOperationChecker::FileGoodToWrite( const QString& filename )
         }
         else
         {
-            std::fclose( f );
-            QString msg(" The following input file cannot be created! \n" );
+            QString msg(" The following file cannot be created! \n" );
             msg += filename;
             _message = msg;
             return false;
@@ -113,7 +112,7 @@ FileOperationChecker::FileGoodToWrite( const QString& filename )
     // Test if this is a file
     if( !fileInfo.isFile() )
     {
-        QString msg(" The following input is NOT a file! \n" );
+        QString msg(" The following is NOT a file! \n" );
         msg += filename;
         _message = msg;
         return false;
@@ -122,7 +121,7 @@ FileOperationChecker::FileGoodToWrite( const QString& filename )
     // Test if this file is readable
     if( !fileInfo.isReadable() )
     {
-        QString msg(" The following input is NOT readable! \n" );
+        QString msg(" The following file is NOT readable! \n" );
         msg += filename;
         _message = msg;
         return false;
@@ -131,7 +130,7 @@ FileOperationChecker::FileGoodToWrite( const QString& filename )
     // Test if this file is writable 
     if( !fileInfo.isWritable() )
     {
-        QString msg(" The following input is NOT writable! \n" );
+        QString msg(" The following file is NOT writable! \n" );
         msg += filename;
         _message = msg;
         return false;
