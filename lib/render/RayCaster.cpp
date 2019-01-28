@@ -851,14 +851,8 @@ int RayCaster::_paintGL( bool fast )
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
     glViewport( 0, 0, _currentViewport[2], _currentViewport[3] );
 
-struct timeval start, finish;
-glFinish();
-gettimeofday( &start, NULL );
     // 3rd pass, perform ray casting
     _drawVolumeFaces( 3, castingMode, cameraCellIdx, InversedMV, fast );
-glFinish();
-gettimeofday( &finish, NULL );
-std::cout << "ray casting time: " << _getElapsedSeconds( &start, &finish ) << std::endl;
 
     // Restore OpenGL values changed in this function.
     glBindVertexArray( 0 );
