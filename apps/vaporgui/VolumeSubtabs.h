@@ -58,7 +58,10 @@ public:
     }
 
 private slots:
-    void on__algorithmCombo_currentIndexChanged(const QString &text) { _volumeParams->SetAlgorithm(text.toStdString()); }
+    void on__algorithmCombo_currentIndexChanged(const QString &text)
+    {
+        if (!text.isEmpty()) _volumeParams->SetAlgorithm(text.toStdString());
+    }
 
 private:
     VAPoR::VolumeParams *_volumeParams;
