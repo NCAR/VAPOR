@@ -93,9 +93,7 @@ void FillCellVertCoordinates( const in ivec3 cellIdx, out vec3 coord[8] )
     cubeVertIdx[7] = ivec3(v0.x    , v0.y + 1, v0.z + 1 );
 
     for( int i = 0; i < 8; i++ )
-    {
         coord[i]   = (texelFetch( vertCoordsTexture,  cubeVertIdx[i], 0 )).xyz;
-    }
 }
 
 
@@ -378,8 +376,7 @@ void main(void)
     float step1Value = texture( volumeTexture, step1Tex ).r;
 
     // Let's do a ray casting!
-    int   earlyTerm        = 0;     // 0        == termination when goes through the volume.
-                                    // non-zero == early termination because of some reason.
+    int   earlyTerm        = 0;     // 0 == termination when goes through the volume.
 
     // We set the loop to terminate at 4 times the number of steps, in case
     //   there are many occurances of step size being halved.
@@ -418,13 +415,12 @@ void main(void)
 
         // If step2 is at the same cell as step1, their data values are gonna be the same, 
         //   thus move forward directly.
-        if( step2CellIdx == step1CellIdx )
-        {
-            step1Eye       = step2Eye;
-            continue;
-        }
+        //if( step2CellIdx == step1CellIdx )
+        //{
+        //    step1Eye       = step2Eye;
+        //    continue;
+        //}
     
-        // Now we konw that step2 and step1 are at two adjacent cells
         vec3 step2Tex      = CalculatePosTex( step2CellIdx, step2Eye );
         if( ShouldSkip( step2Tex, step2Eye ) )
         {
@@ -454,7 +450,6 @@ void main(void)
 
                 float valTrans  = (isoValJ - colorMapRange.x) / colorMapRange.z;
                 vec4  backColor = texture( colorMapTexture, valTrans );
-
 
                 // Apply lighting.
                 //   Note we do the calculation in eye space, because both the light direction
