@@ -1078,10 +1078,10 @@ void RayCaster::_drawVolumeFaces( int                         whichPass,
             GLfloat nearCoords[12];
             glm::mat4 MVP         = _glManager->matrixManager->GetModelViewProjectionMatrix();
             glm::mat4 InversedMVP = glm::inverse( MVP );
-            glm::vec4 topLeftNDC    ( -1.0f,  1.0f, -0.9999f, 1.0f );
-            glm::vec4 bottomLeftNDC ( -1.0f, -1.0f, -0.9999f, 1.0f );
-            glm::vec4 topRightNDC   ( 1.0f,  1.0f, -0.9999f, 1.0f );
-            glm::vec4 bottomRightNDC( 1.0f, -1.0f, -0.9999f, 1.0f );
+            glm::vec4 topLeftNDC    ( -1.0f,  1.0f, -0.999f, 1.0f );
+            glm::vec4 bottomLeftNDC ( -1.0f, -1.0f, -0.999f, 1.0f );
+            glm::vec4 topRightNDC   (  1.0f,  1.0f, -0.999f, 1.0f );
+            glm::vec4 bottomRightNDC(  1.0f, -1.0f, -0.999f, 1.0f );
             glm::vec4 near[4];
             near[0] = InversedMVP * topLeftNDC;
             near[1] = InversedMVP * bottomLeftNDC;
