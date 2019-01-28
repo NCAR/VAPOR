@@ -6,6 +6,8 @@
 #include <QLineEdit>
 #include <sstream>
 
+#include <vapor/MyBase.h>
+
 struct Value;
 
 class CustomLineEdit : public QLineEdit {
@@ -165,17 +167,24 @@ private:
 // int myVal = vaporTable->GetValue(0,0);
 // double myVal = vaporTable->GetValue(0,0);
 // std::string myVal = vaporTable->GetValue(0,0);
-struct Value{
-	std::string _value;
+struct Value
+{
+    std::string _value;
 
-	template<typename T>
-	operator T() const   //implicitly convert into T
-	{
-	   std::stringstream ss(_value);
-	   T convertedValue;
-	   if ( ss >> convertedValue ) return convertedValue;
-	   else throw std::runtime_error("conversion failed");
-	}
+    template<typename T>
+    operator T() const   //implicitly convert into T
+    {
+        std::stringstream ss(_value);
+        T convertedValue;
+        if ( ss >> convertedValue )
+            return convertedValue;
+        else
+        {
+            std::string msg = "conversion failed: " + _value;
+            Wasp::MyBase::SetErrMsg( _value.c_str() );
+            return 0;
+        }
+    }
 };
 
 #endif
