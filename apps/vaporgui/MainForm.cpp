@@ -1006,12 +1006,12 @@ void MainForm::_createCaptureMenu() {
 	//
     _captureMenu = menuBar()->addMenu(tr("Capture"));
     _singleImageMenu = _captureMenu->addMenu(tr("Single image"));
-    _singleImageMenu->addAction(_captureSingleJpegAction);
+    //_singleImageMenu->addAction(_captureSingleJpegAction);
     _singleImageMenu->addAction(_captureSinglePngAction);
     _singleImageMenu->addAction(_captureSingleTiffAction);
     //_captureMenu->addMenu("Single image");
     _imageSequenceMenu = _captureMenu->addMenu(tr("Image sequence"));
-    _imageSequenceMenu->addAction(_captureJpegSequenceAction);
+    //_imageSequenceMenu->addAction(_captureJpegSequenceAction);
     _imageSequenceMenu->addAction(_capturePngSequenceAction);
     _imageSequenceMenu->addAction(_captureTiffSequenceAction);
 	//_captureMenu->addAction(_captureStartJpegAction);
