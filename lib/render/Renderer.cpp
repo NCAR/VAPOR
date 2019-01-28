@@ -212,7 +212,7 @@ void Renderer::EnableClipToBox(ShaderProgram *shader, float haloFrac) const {
 	}
 	
 
-	if (minExts.size() == 3 || orientation != 0) {
+	if (minExts.size() == 3 || orientation != Box::YZ) { // YZ
 		x0Plane[3] = -minExts[0];
 		x1Plane[3] = maxExts[0];
         glEnable(GL_CLIP_DISTANCE0);
@@ -221,7 +221,7 @@ void Renderer::EnableClipToBox(ShaderProgram *shader, float haloFrac) const {
         shader->SetUniform("clippingPlanes[1]", glm::make_vec4(x1Plane));
 	}
 
-	if (minExts.size() == 3 || orientation != 1) {
+	if (minExts.size() == 3 || orientation != Box::XZ) { // XZ
 		y0Plane[3] = -minExts[1];
 		y1Plane[3] = maxExts[1];
         glEnable(GL_CLIP_DISTANCE2);
@@ -230,7 +230,7 @@ void Renderer::EnableClipToBox(ShaderProgram *shader, float haloFrac) const {
         shader->SetUniform("clippingPlanes[3]", glm::make_vec4(y1Plane));
 	}
 
-	if (minExts.size() == 3 || orientation != 2) {
+	if (minExts.size() == 3 || orientation != Box::XY) {  // XY
 		z0Plane[3] = -minExts[2];
 		z1Plane[3] = maxExts[2];
         glEnable(GL_CLIP_DISTANCE4);
