@@ -1,6 +1,7 @@
 
 #include <string>
 #include <vapor/VolumeParams.h>
+#include <vapor/STLUtils.h>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -49,13 +50,15 @@ std::string VolumeParams::GetAlgorithm() const {
 }
 
 void VolumeParams::SetAlgorithm(std::string algorithm) {
+    assert(STLUtils::Contains(GetAlgorithmNames(), algorithm));
     SetValueString(_algorithmTag, "Volume rendering algorithm", algorithm);
 }
 
 const std::vector<std::string> VolumeParams::GetAlgorithmNames() {
     return {
         "Regular",
-        "Resampled"};
+        "Resampled",
+        "Test"};
 }
 
 //Set everything to default values
