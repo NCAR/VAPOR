@@ -69,7 +69,8 @@ class VolumeAppearanceSubtab : public QWidget, public Ui_VolumeAppearanceGUI {
 
   private slots:
     void on__algorithmCombo_currentIndexChanged(const QString &text) {
-        _volumeParams->SetAlgorithm(text.toStdString());
+        if (!text.isEmpty())
+            _volumeParams->SetAlgorithm(text.toStdString());
     }
 
   private:
