@@ -30,10 +30,24 @@ public:
 
     void Update( VAPoR::DataMgr *dataMgr,
                 VAPoR::ParamsMgr *paramsMgr,
-                VAPoR::RenderParams *rParams) 
+                VAPoR::RenderParams *params) 
     {
-        _variablesWidget->Update(dataMgr, paramsMgr, rParams);
+        _isoParams = dynamic_cast<VAPoR::IsoSurfaceParams*>( params );
+        assert( _isoParams );
+        long mode = _isoParams->GetCastingMode();
+        _castingModeComboBox->setCurrentIndex( mode - 1 );
+
+        _variablesWidget->Update(dataMgr, paramsMgr, params);
     }
+
+private slots:
+    void on__castingModeComboBox_currentIndexChanged( int idx )
+    {
+        _isoParams->SetCastingMode( (long)idx + 1 );
+    }
+
+private:
+    VAPoR::IsoSurfaceParams* _isoParams;
 };
 
 
