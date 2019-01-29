@@ -53,6 +53,10 @@ int VolumeTest::LoadData(const Grid *grid) {
 
     // auto coord = grid->ConstCoordBegin(); // broken
     // auto end = grid->ConstCoordEnd();
+
+    vector<size_t> indices = {0, 0, 0};
+    vector<double> coords;
+
     for (int z = 0; z < d; z++) {
         printf("%i/%i\n", z, d);
         for (int y = 0; y < h; y++) {
@@ -64,11 +68,19 @@ int VolumeTest::LoadData(const Grid *grid) {
                 // float cz = (*coord)[2];
                 double dcx, dcy, dcz;
                 float cx, cy, cz;
-                grid->GetUserCoordinates(x, y, z, dcx, dcy, dcz);
-                cx = dcx;
-                cy = dcy;
-                cz = dcz;
+                // grid->GetUserCoordinates(x, y, z, dcx, dcy, dcz);
+                // cx = dcx;
+                // cy = dcy;
+                // cz = dcz;
                 // printf("[%i, %i, %i] = %.2f\t%.2f\t%.2f\n", x, y, z, dcx, dcy, dcz);
+
+                indices[0] = x;
+                indices[1] = y;
+                indices[2] = z;
+                grid->GetUserCoordinates(indices, coords);
+                cx = coords[0];
+                cy = coords[1];
+                cz = coords[2];
 
                 int dx = (cx - minX) / (maxX - minX) * (w - 1);
                 int dy = (cy - minY) / (maxY - minY) * (h - 1);
@@ -90,7 +102,7 @@ int VolumeTest::LoadData(const Grid *grid) {
     }
 
     glBindTexture(GL_TEXTURE_3D, zCoordTexture);
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, dims[0], dims[1], dims[2], 0, GL_RGB, GL_FLOAT, data);
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB16F, dims[0], dims[1], dims[2], 0, GL_RGB, GL_FLOAT, data);
 
     delete[] data;
     return 0;
