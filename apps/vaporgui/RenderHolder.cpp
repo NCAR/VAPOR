@@ -175,7 +175,7 @@ RenderHolder::RenderHolder(
 	);
 	_vaporTable = new VaporTable(tableWidget, false, true);
 	_vaporTable->Reinit(
-        (VaporTable::ValidatorFlags)(0),
+        (VaporTable::ValidatorFlags)(VaporTable::STRING),
 		(VaporTable::MutabilityFlags)(VaporTable::IMMUTABLE),
 		(VaporTable::HighlightFlags)(VaporTable::ROWS)
     );
