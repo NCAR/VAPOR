@@ -152,14 +152,17 @@
               <height>16777215</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The &amp;quot;Fixed-Stepsize&amp;quot; method is fast because it assumes the underlying grid is regular. That means, every cell in the volume has the same height, width, and depth. When this assumption does not hold true, renderings from the &amp;quot;Fixed-Stepsize&amp;quot; method will start to become misleading.&lt;/p&gt;&lt;p&gt;The &amp;quot;Cell-Traversal&amp;quot; method is slow because it takes into consideration different cell sizes and shapes. Renderings will always be accurate using this method, but it could be two orders of magnitude slower than &amp;quot;Fixed-Stepsize&amp;quot; rendering.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <item>
              <property name="text">
-              <string>Fixed Stepsize Casting </string>
+              <string>Fixed Stepsize Casting (Fast)</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Cell Traverse Casting</string>
+              <string>Cell Traverse Casting (Slow)</string>
              </property>
             </item>
            </widget>
