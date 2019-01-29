@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/ext/matrix_relational.hpp>
 
 #define OUTOFDATE    1
 #define GLNOTREADY   2
@@ -90,6 +91,11 @@ RayCaster::RayCaster( const ParamsMgr*    pm,
 
     for( int i = 0; i < 4; i++ )
         _currentViewport[i] = 0;
+
+    _currentMV = glm::mat4(0.0f);
+
+    // Set the default ray casting method upon creation of the RayCaster.
+    _selectDefaultCastingMethod();
 }
 
 // Destructor
@@ -1075,10 +1081,10 @@ void RayCaster::_drawVolumeFaces( int                         whichPass,
             GLfloat nearCoords[12];
             glm::mat4 MVP         = _glManager->matrixManager->GetModelViewProjectionMatrix();
             glm::mat4 InversedMVP = glm::inverse( MVP );
-            glm::vec4 topLeftNDC    ( -1.0f,  1.0f, -0.9999f, 1.0f );
-            glm::vec4 bottomLeftNDC ( -1.0f, -1.0f, -0.9999f, 1.0f );
-            glm::vec4 topRightNDC   ( 1.0f,  1.0f, -0.9999f, 1.0f );
-            glm::vec4 bottomRightNDC( 1.0f, -1.0f, -0.9999f, 1.0f );
+            glm::vec4 topLeftNDC    ( -1.0f,  1.0f, -0.999f, 1.0f );
+            glm::vec4 bottomLeftNDC ( -1.0f, -1.0f, -0.999f, 1.0f );
+            glm::vec4 topRightNDC   (  1.0f,  1.0f, -0.999f, 1.0f );
+            glm::vec4 bottomRightNDC(  1.0f, -1.0f, -0.999f, 1.0f );
             glm::vec4 near[4];
             near[0] = InversedMVP * topLeftNDC;
             near[1] = InversedMVP * bottomLeftNDC;
@@ -1542,9 +1548,9 @@ void RayCaster::_updateColormap( RayCasterParams* params )
         _colorMap.resize( 8 );                 // _colorMap will have 2 RGBA values
         for( int i = 0; i < 8; i++ )
             _colorMap [i]         = singleColor[ i % 4 ];
-        _colorMapRange[0]         = 0.0f;
-        _colorMapRange[1]         = 0.0f;
-        _colorMapRange[2]         = 1e-5f;
+        _colorMapRange[0]         = 0.0f;   // min value of the color map
+        _colorMapRange[1]         = 0.0f;   // max value of the color map
+        _colorMapRange[2]         = 1e-5f;  // diff of color map. Has to be non-zero though.
     }
     else
     {
@@ -1610,6 +1616,13 @@ void RayCaster::_updateDataTextures( )
 
 int RayCaster::_updateVertCoordsTexture( const glm::mat4& MV )
 {
+    // Step zero: see if MV is the same as it was from the last iteration.
+    //   If so, return directly without updating these coordinates.
+    glm::bvec4 columeEqual = glm::equal( _currentMV, MV );
+    if( glm::all( columeEqual ) )
+        return 0;
+
+    // Now we need to calculate and upload the new vertex coordinates
     // First, transform every vertex coordinate to the eye space
     size_t numOfVertices = _userCoordinates.dims[0] * 
                            _userCoordinates.dims[1] * 
@@ -1662,8 +1675,49 @@ int RayCaster::_updateVertCoordsTexture( const glm::mat4& MV )
                       _userCoordinates.dims[1],    _userCoordinates.dims[2],
                       0, GL_RGB, GL_FLOAT,         coordEye               );
     }
+
+    // Don't forget to update the cached model view matrix
+    _currentMV = MV;
     
     delete[] coordEye;
+
+    return 0;
+}
+
+int RayCaster::_selectDefaultCastingMethod() const
+{
+    RayCasterParams* params = dynamic_cast<RayCasterParams*>( GetActiveParams() );
+    if( !params )
+    {
+        MyBase::SetErrMsg("Error occured during retrieving RayCaster parameters!");
+        return PARAMSERROR;
+    }
+
+    // If params already contain a value of mode 1 or 2, then do nothing.
+    //   This case happens when loading params from a session file.
+    int castingMode = int(params->GetCastingMode());
+    if( castingMode == FixedStep || castingMode == CellTraversal )
+        return 0;
+
+    // castingMode == 0 if not initialized before. Let's figure out what value it should have.
+    StructuredGrid*  grid = nullptr;
+    if( _userCoordinates.GetCurrentGrid( params, _dataMgr, &grid ) != 0 )
+    {
+        MyBase::SetErrMsg( "Failed to retrieve a StructuredGrid" );
+        return GRIDERROR;
+    }
+
+    //
+    // In case of a regular grid, use "fixed step" ray casting.
+    // In other cases, use "cell traversal" ray casting.
+    //
+    RegularGrid* regular = dynamic_cast<RegularGrid*>( grid );
+    if( regular )
+        params->SetCastingMode( FixedStep );
+    else
+        params->SetCastingMode( CellTraversal );
+
+    delete grid;
 
     return 0;
 }
