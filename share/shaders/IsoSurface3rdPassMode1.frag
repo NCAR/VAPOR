@@ -35,7 +35,7 @@ uniform mat4 Projection;
 //
 const float ULP        = 1.2e-7f;
 const float ULP10      = 1.2e-6f;
-const float Opaque     = 0.99;
+const float Opaque     = 0.999;
 bool  fast             = flags[0];
 bool  lighting         = flags[1];
 bool  eyeInsideVolume  = flags[2];
@@ -44,7 +44,7 @@ float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
-vec3  volumeDimsf      = vec3( volumeDims );
+vec3  volumeDims1o     = 1.0 / vec3( volumeDims - 1 );
 vec3  boxSpan          = boxMax - boxMin;
 mat4  transposedInverseMV = transpose( inversedMV );
 
@@ -78,8 +78,8 @@ bool ShouldSkip( const in vec3 tc, const in vec3 mc )
 //
 vec3 CalculateGradient( const in vec3 tc )
 {
-    vec3 h0 = vec3(-0.5 ) / volumeDimsf;
-    vec3 h1 = vec3( 0.5 ) / volumeDimsf;
+    vec3 h0 = vec3(-0.5 ) * volumeDims1o;
+    vec3 h1 = vec3( 0.5 ) * volumeDims1o;
     vec3 h  = vec3( 1.0 );
 
     if ((tc.x + h0.x) < 0.0) {
@@ -201,12 +201,12 @@ void main(void)
                 vec4  backColor = texture( colorMapTexture, valTrans );
 
                 // Apply lighting (in eye space)
-                if( lighting && backColor.a > 0.001 )
+                if( lighting && backColor.a > (1.0 - Opaque) )
                 {
                     vec3 gradientModel   = CalculateGradient( isoTex );
                     if( length( gradientModel ) > ULP10 ) // Only apply lighting if big enough gradient
                     {
-                        vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0 )).xyz;
+                        vec3 gradientEye = (transposedInverseMV * vec4(gradientModel, 0.0)).xyz;
                              gradientEye = normalize( gradientEye );
                         float diffuse    = abs( dot(lightDirEye, gradientEye) );
                         vec3 viewDirEye  = normalize( -isoEye );

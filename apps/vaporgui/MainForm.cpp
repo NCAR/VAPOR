@@ -325,7 +325,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
     _vizWinMgr = new VizWinMgr(this, _mdiArea, _controlExec);
 
     _tabMgr = new TabManager(this, _controlExec);
-    _tabMgr->setMaximumWidth(600);
     _tabMgr->setUsesScrollButtons(true);
 
     _tabMgr->setMinimumWidth(460);
@@ -723,10 +722,30 @@ void MainForm::_createToolsMenu()
     _pythonAction->setText("Python Variables");
     _pythonAction->setEnabled(false);
 
+    _installCLIToolsAction = new QAction(this);
+    _installCLIToolsAction->setText("Install Command Line Tools");
+    _installCLIToolsAction->setToolTip("Add VAPOR_HOME to environment and add current utilities "
+                                       "location to path. Needs to updated if app bundle moved");
+
     _Tools = menuBar()->addMenu(tr("Tools"));
     _Tools->addAction(_plotAction);
     _Tools->addAction(_statsAction);
     _Tools->addAction(_pythonAction);
+#ifdef WIN32
+    #define ADD_INSTALL_CLI_TOOLS_ACTION 1
+#endif
+#ifdef Darwin
+    #define ADD_INSTALL_CLI_TOOLS_ACTION 1
+#endif
+#ifdef ADD_INSTALL_CLI_TOOLS_ACTION
+
+    _Tools->addSeparator();
+
+    _Tools->addAction(_installCLIToolsAction);
+
+    connect(_installCLIToolsAction, SIGNAL(triggered()), this, SLOT(installCLITools()));
+
+#endif
 
     connect(_statsAction, SIGNAL(triggered()), this, SLOT(launchStats()));
     connect(_plotAction, SIGNAL(triggered()), this, SLOT(launchPlotUtility()));
@@ -800,11 +819,6 @@ void MainForm::_createHelpMenu()
     _helpAboutAction->setToolTip(tr("Information about VAPOR"));
     _helpAboutAction->setEnabled(true);
 
-    _installCLIToolsAction = new QAction(this);
-    _installCLIToolsAction->setText("Install CLI Tools");
-    _installCLIToolsAction->setToolTip("Add VAPOR_HOME to environment and add current utilities "
-                                       "location to path. Needs to updated if app bundle moved");
-
     _helpMenu = menuBar()->addMenu(tr("Help"));
     _helpMenu->addAction(_whatsThisAction);
     _helpMenu->addSeparator();
@@ -820,15 +834,6 @@ void MainForm::_createHelpMenu()
     buildWebHelpMenus();
     _webTabHelpMenu = new QMenu("Web Help: About the current tab", this);
     _helpMenu->addMenu(_webTabHelpMenu);
-#ifdef WIN32
-    #define ADD_INSTALL_CLI_TOOLS_ACTION 1
-#endif
-#ifdef Darwin
-    #define ADD_INSTALL_CLI_TOOLS_ACTION 1
-#endif
-#ifdef ADD_INSTALL_CLI_TOOLS_ACTION
-    _helpMenu->addAction(_installCLIToolsAction);
-#endif
 
     connect(_helpAboutAction, SIGNAL(triggered()), this, SLOT(helpAbout()));
     connect(_webTabHelpMenu, SIGNAL(triggered(QAction *)), this, SLOT(launchWebHelp(QAction *)));
@@ -836,8 +841,6 @@ void MainForm::_createHelpMenu()
     connect(_webPythonHelpMenu, SIGNAL(triggered(QAction *)), this, SLOT(launchWebHelp(QAction *)));
     connect(_webPreferencesHelpMenu, SIGNAL(triggered(QAction *)), this, SLOT(launchWebHelp(QAction *)));
     connect(_webVisualizationHelpMenu, SIGNAL(triggered(QAction *)), this, SLOT(launchWebHelp(QAction *)));
-
-    connect(_installCLIToolsAction, SIGNAL(triggered()), this, SLOT(installCLITools()));
 }
 
 void MainForm::createMenus()
@@ -1987,6 +1990,9 @@ void MainForm::installCLITools()
     }
 
     if (error == WINDOWS_SUCCESS && errorClose == WINDOWS_SUCCESS) {
+        // This tells windows to re-load the environment variables
+        SendMessage(HWND_BROADCAST, WM_WININICHANGE, NULL, (LPARAM) "Environment");
+
         box.setIcon(QMessageBox::Information);
         if (pathWasModified)
             box.setText("Vapor conversion utilities were added to your path");
