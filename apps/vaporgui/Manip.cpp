@@ -235,16 +235,18 @@ void TranslateStretchManip::_mouseDrag(
 
             _dragDistance = mouseProjToNorm - handleProjToNorm;
 
-            // Copied from old code
-            // Prevent handle from going through opposite handle
-            int oppositeHandle = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
-            if (_selectedHandle < 3) {
-                if (_dragDistance + _selection[oppositeHandle] > _selection[oppositeHandle + 3]) {
-                    _dragDistance = _selection[oppositeHandle + 3] - _selection[oppositeHandle];
-                }
-            } else { //Moving "high" handle:
-                if (_dragDistance + _selection[oppositeHandle + 3] < _selection[oppositeHandle]) {
-                    _dragDistance = _selection[oppositeHandle] - _selection[oppositeHandle + 3];
+            if (_buttonNum == 3) { // Don't restrict movement if using the manip to drag
+                // Copied from old code
+                // Prevent handle from going through opposite handle
+                int oppositeHandle = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
+                if (_selectedHandle < 3) {
+                    if (_dragDistance + _selection[oppositeHandle] > _selection[oppositeHandle + 3]) {
+                        _dragDistance = _selection[oppositeHandle + 3] - _selection[oppositeHandle];
+                    }
+                } else { //Moving "high" handle:
+                    if (_dragDistance + _selection[oppositeHandle + 3] < _selection[oppositeHandle]) {
+                        _dragDistance = _selection[oppositeHandle] - _selection[oppositeHandle + 3];
+                    }
                 }
             }
         }
