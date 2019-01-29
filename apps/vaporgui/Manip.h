@@ -279,7 +279,7 @@ class TranslateStretchManip : public Manip {
 
     //! Method to scale, translate, or rotate the coordinates of the manipulator
     //! param[in] - the current dataset or renderer transform to operate upon
-    void transformMatrix(VAPoR::Transform *transform);
+    void transformMatrix(VAPoR::Transform *transform, std::vector<double> parentScales = {1, 1, 1});
 
     //! Method to remove the scaling of the manipulator extents
     //! param[in] extents are the current region of the manipulator
