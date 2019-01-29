@@ -58,6 +58,11 @@ class VDF_API UDUnits {
     bool IsLonUnit(std::string unitstr) const;
 
     //! Return true if the string provided by \p unitstr is recognized
+    //! by Udunits-2 as a unit of Longitude or Latitude
+    //!
+    bool IsLatOrLonUnit(std::string unitstr) const;
+
+    //! Return true if the string provided by \p unitstr is recognized
     //! by Udunits-2 as a unit of length
     //!
     bool IsLengthUnit(std::string unitstr) const;

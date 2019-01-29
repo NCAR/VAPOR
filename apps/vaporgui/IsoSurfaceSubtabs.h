@@ -27,9 +27,22 @@ class IsoSurfaceVariablesSubtab : public QWidget, public Ui_IsoSurfaceVariablesG
 
     void Update(VAPoR::DataMgr *dataMgr,
                 VAPoR::ParamsMgr *paramsMgr,
-                VAPoR::RenderParams *rParams) {
-        _variablesWidget->Update(dataMgr, paramsMgr, rParams);
+                VAPoR::RenderParams *params) {
+        _isoParams = dynamic_cast<VAPoR::IsoSurfaceParams *>(params);
+        assert(_isoParams);
+        long mode = _isoParams->GetCastingMode();
+        _castingModeComboBox->setCurrentIndex(mode - 1);
+
+        _variablesWidget->Update(dataMgr, paramsMgr, params);
     }
+
+  private slots:
+    void on__castingModeComboBox_currentIndexChanged(int idx) {
+        _isoParams->SetCastingMode((long)idx + 1);
+    }
+
+  private:
+    VAPoR::IsoSurfaceParams *_isoParams;
 };
 
 class IsoSurfaceAppearanceSubtab : public QWidget, public Ui_IsoSurfaceAppearanceGUI {

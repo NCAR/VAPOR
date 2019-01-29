@@ -131,7 +131,9 @@ class RENDER_API RayCaster : public Renderer {
 
     UserCoordinates _userCoordinates;
     std::vector<float> _colorMap;
-    float _colorMapRange[3]; // min, max, and diff values.
+    float _colorMapRange[3];   // min, max, and diff values.
+    glm::mat4 _currentMV;      // model view matrix in use
+    GLint _currentViewport[4]; // current viewport in use
 
     // OpenGL stuff
     // textures
@@ -157,10 +159,9 @@ class RENDER_API RayCaster : public Renderer {
     // buffers and vertex arrays
     GLuint _frameBufferId;
     GLuint _vertexArrayId;
-    GLuint _vertexBufferId;    // Keeps user coordinates of 6 faces.
-    GLuint _indexBufferId;     // Auxiliary indices for efficiently drawing triangle strips.
-    GLuint _vertexAttribId;    // Attribute of vertices: (i, j k) logical indices.
-    GLint _currentViewport[4]; // current viewport in use
+    GLuint _vertexBufferId; // Keeps user coordinates of 6 faces.
+    GLuint _indexBufferId;  // Auxiliary indices for efficiently drawing triangle strips.
+    GLuint _vertexAttribId; // Attribute of vertices: (i, j k) logical indices.
 
     // shaders
     ShaderProgram *_1stPassShader;
@@ -195,6 +196,8 @@ class RENDER_API RayCaster : public Renderer {
     //   It returns 0 upon success, and non-zero upon errors.
     //
     int _initializeFramebufferTextures();
+
+    int _selectDefaultCastingMethod() const;
 
     void _updateViewportWhenNecessary(const GLint *viewport);
     void _updateColormap(RayCasterParams *params);
