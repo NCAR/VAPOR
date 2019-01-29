@@ -506,7 +506,7 @@ void NavigationEventRouter::updateTransforms() {
 				DataStatus *dataStatus = _controlExec->GetDataStatus();
 
                 size_t local_ts = dataStatus->MapGlobalToLocalTimeStep(
-                    names[i],
+                    names[j],
                     ts
                 );
                 DataMgr* dataMgr = dataStatus->GetDataMgr(names[j]);
