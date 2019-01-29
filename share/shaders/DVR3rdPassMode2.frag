@@ -41,6 +41,7 @@ float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
 float specularExp      = lightingCoeffs[3];
 vec3  volumeDims1o     = 1.0 / vec3( volumeDims - 1 );
+ivec3 volumeDimsm2     = volumeDims - 2;
 mat4  transposedInverseMV = transpose( inversedMV );
 
 // 
@@ -53,13 +54,6 @@ const int Global_Triangles[36] = int[36](
     7, 6, 3,   0, 1, 4,   4, 5, 7,   3, 2, 0,   5, 1, 6,   4, 7, 0,
     2, 3, 6,   5, 4, 1,   6, 7, 5,   1, 0, 2,   2, 6, 1,   3, 0, 7
     /* front   back       top        bottom     right      left */ );
-
-//
-// An optimized order of cells to search: cells appear in front of this list
-//   are supposed to have a higher probablity to be selected.
-//
-int Global_Cells[27] = int[27](0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-                               15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 );
 
 // 
 // Input:  logical index of a cell
@@ -111,7 +105,7 @@ bool ShouldSkip( const in vec3 tc, const in vec3 ec )
     if( hasMissingValue && (texture(missingValueMaskTexture, tc).r != 0u) )
         return true;
 
-    vec4 positionModel = (inversedMV * vec4(ec, 1.0));
+    vec4 positionModel = inversedMV * vec4(ec, 1.0);
     for( int i = 0; i < 6; i++ )
     {
         if( dot(positionModel, clipPlanes[i]) < 0.0 )
@@ -190,6 +184,19 @@ bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
     vec3 cubeVertCoord[8];
     FillCellVertCoordinates( cellIdx, cubeVertCoord );
 
+    // First locate and compare with the bounding box.
+    vec3 minCoord = cubeVertCoord[0], maxCoord = cubeVertCoord[0];
+    for( int i = 1; i < 8; i++ )
+    {
+        minCoord   = min( minCoord, cubeVertCoord[i] );
+        maxCoord   = max( maxCoord, cubeVertCoord[i] );
+    }
+    bvec3 tooSmall = lessThan(    pos, minCoord );
+    bvec3 tooBig   = greaterThan( pos, maxCoord );
+    if( any( tooSmall ) || any( tooBig ) )
+        return false;
+
+    // Second compare with the 12 triangles.
     int tri[3];
     for( int i = 0; i < 12; i++ )
     {
@@ -210,9 +217,9 @@ bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
 
 bool CellOutsideBound( const in ivec3 cellIdx )
 {
-    if( cellIdx.x < 0 || cellIdx.x > volumeDims.x - 2 || 
-        cellIdx.y < 0 || cellIdx.y > volumeDims.y - 2 ||
-        cellIdx.z < 0 || cellIdx.z > volumeDims.z - 2   )
+    bvec3 tooSmall = lessThan(    cellIdx, ivec3(0) );
+    bvec3 tooBig   = greaterThan( cellIdx, volumeDimsm2 );
+    if( any( tooSmall ) || any( tooBig ) )
         return true;
     else
         return false;
@@ -220,9 +227,10 @@ bool CellOutsideBound( const in ivec3 cellIdx )
 
 bool CellOnBoundary( const in ivec3 cellIdx )
 {
-    if( cellIdx.x == 0 || cellIdx.x == volumeDims.x - 2 || 
-        cellIdx.y == 0 || cellIdx.y == volumeDims.y - 2 ||
-        cellIdx.z == 0 || cellIdx.z == volumeDims.z - 2   )
+    // Assume the input is guaranteed to be inside of the volume
+    bvec3 onSmallSide = equal( cellIdx, ivec3(0) );
+    bvec3 onBigSide   = equal( cellIdx, volumeDimsm2 );
+    if( any( onSmallSide ) || any( onBigSide ) )
         return true;
     else
         return false;
@@ -236,47 +244,52 @@ bool CellOnBoundary( const in ivec3 cellIdx )
 //
 bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3 nextCellIdx )
 {
-    ivec3 c  = currentCellIdx;
-    ivec3 group[27];
+    // First test if pos is in the current cell. There's a good chance it is!
+    if( PosInsideOfCell( currentCellIdx, pos ) )
+    {
+        nextCellIdx = currentCellIdx;
+        return true;
+    }
 
-    group[0]  = c;           // first cell in this group is the current cell itself.
-    group[1]  = ivec3( c.x - 1, c.yz );              // next 6 cells are adjacent to
-    group[2]  = ivec3( c.x + 1, c.yz );              // the current cell by face
-    group[3]  = ivec3( c.x,     c.y - 1, c.z );
-    group[4]  = ivec3( c.x,     c.y + 1, c.z );
-    group[5]  = ivec3( c.xy,             c.z - 1 );
-    group[6]  = ivec3( c.xy,             c.z + 1 );
+    // Then we search its surrounding cells
+    ivec3 c  = currentCellIdx;
+    ivec3 group[26];
+    group[0]  = ivec3( c.x - 1, c.yz );  // First 6 cells are adjacent to
+    group[1]  = ivec3( c.x + 1, c.yz );  // the current cell by a face
+    group[2]  = ivec3( c.x,     c.y - 1, c.z );
+    group[3]  = ivec3( c.x,     c.y + 1, c.z );
+    group[4]  = ivec3( c.xy,             c.z - 1 );
+    group[5]  = ivec3( c.xy,             c.z + 1 );
 
     // Next 12 cells are adjacent to the current one by edge
-    group[7]  = ivec3( c.x,     c.y + 1, c.z + 1 ); // top-front
-    group[8]  = ivec3( c.x - 1, c.y + 1, c.z     ); // top-left
-    group[9]  = ivec3( c.x    , c.y + 1, c.z - 1 ); // top-back
-    group[10] = ivec3( c.x + 1, c.y + 1, c.z     ); // top-right
-    group[11] = ivec3( c.x,     c.y - 1, c.z + 1 ); // bottom-front
-    group[12] = ivec3( c.x - 1, c.y - 1, c.z     ); // bottom-left
-    group[13] = ivec3( c.x,     c.y - 1, c.z - 1 ); // bottom-back
-    group[14] = ivec3( c.x + 1, c.y - 1, c.z     ); // bottom-right
-    group[15] = ivec3( c.x - 1, c.y,     c.z + 1 ); // front-left
-    group[16] = ivec3( c.x - 1, c.y,     c.z - 1 ); // left-back
-    group[17] = ivec3( c.x + 1, c.y,     c.z - 1 ); // back-right
-    group[18] = ivec3( c.x + 1, c.y,     c.z + 1 ); // right-front
+    group[6]  = ivec3( c.x,     c.y + 1, c.z + 1 ); // top-front
+    group[7]  = ivec3( c.x - 1, c.y + 1, c.z     ); // top-left
+    group[8]  = ivec3( c.x    , c.y + 1, c.z - 1 ); // top-back
+    group[9]  = ivec3( c.x + 1, c.y + 1, c.z     ); // top-right
+    group[10] = ivec3( c.x,     c.y - 1, c.z + 1 ); // bottom-front
+    group[11] = ivec3( c.x - 1, c.y - 1, c.z     ); // bottom-left
+    group[12] = ivec3( c.x,     c.y - 1, c.z - 1 ); // bottom-back
+    group[13] = ivec3( c.x + 1, c.y - 1, c.z     ); // bottom-right
+    group[14] = ivec3( c.x - 1, c.y,     c.z + 1 ); // front-left
+    group[15] = ivec3( c.x - 1, c.y,     c.z - 1 ); // left-back
+    group[16] = ivec3( c.x + 1, c.y,     c.z - 1 ); // back-right
+    group[17] = ivec3( c.x + 1, c.y,     c.z + 1 ); // right-front
 
     // Next 8 cells are adjacent to the current one by corner
-    group[19] = ivec3( c.x - 1, c.y - 1, c.z - 1 ); // corner 0
-    group[20] = ivec3( c.x + 1, c.y - 1, c.z - 1 ); // corner 1
-    group[21] = ivec3( c.x + 1, c.y - 1, c.z + 1 ); // corner 2
-    group[22] = ivec3( c.x - 1, c.y - 1, c.z + 1 ); // corner 3
-    group[23] = ivec3( c.x - 1, c.y + 1, c.z - 1 ); // corner 4
-    group[24] = ivec3( c.x + 1, c.y + 1, c.z - 1 ); // corner 5
-    group[25] = ivec3( c.x + 1, c.y + 1, c.z + 1 ); // corner 6
-    group[26] = ivec3( c.x - 1, c.y + 1, c.z + 1 ); // corner 7
+    group[18] = ivec3( c.x - 1, c.y - 1, c.z - 1 ); // corner 0
+    group[19] = ivec3( c.x + 1, c.y - 1, c.z - 1 ); // corner 1
+    group[20] = ivec3( c.x + 1, c.y - 1, c.z + 1 ); // corner 2
+    group[21] = ivec3( c.x - 1, c.y - 1, c.z + 1 ); // corner 3
+    group[22] = ivec3( c.x - 1, c.y + 1, c.z - 1 ); // corner 4
+    group[23] = ivec3( c.x + 1, c.y + 1, c.z - 1 ); // corner 5
+    group[24] = ivec3( c.x + 1, c.y + 1, c.z + 1 ); // corner 6
+    group[25] = ivec3( c.x - 1, c.y + 1, c.z + 1 ); // corner 7
 
-    for( int i = 0; i < 27; i++ )
+    for( int i = 0; i < 26; i++ )
     {
-        int  j = Global_Cells[i];  // Re-ordered cell indices
-        if( !CellOutsideBound( group[j] ) && PosInsideOfCell( group[j], pos ) )
+        if( !CellOutsideBound( group[i] ) && PosInsideOfCell( group[i], pos ) )
         {
-            nextCellIdx = group[j];
+            nextCellIdx = group[i];
             return true;
         }
     }
@@ -291,8 +304,24 @@ bool LocateNextCell( const in ivec3 currentCellIdx, const in vec3 pos, out ivec3
 //
 vec3 CalculatePosTex( const ivec3 cellIdx, const vec3 pos )
 {
-    // For VAPOR 3.1, we simply take the center point of the cell.
-    return ( vec3(cellIdx) + 0.5 ) * volumeDims1o;
+    vec3 cubeVertCoord[8];
+    FillCellVertCoordinates( cellIdx, cubeVertCoord );  // These coords are in eye space
+
+    vec3 minCoord = (inversedMV * vec4(cubeVertCoord[0], 1.0)).xyz; // Model space
+    vec3 maxCoord =  minCoord;                                      // Model space
+    vec3 posCoord = (inversedMV * vec4(pos, 1.0)).xyz;              // Model space
+    for( int i = 1; i < 8; i++ )
+    {
+        vec3 mc   = (inversedMV * vec4(cubeVertCoord[i], 1.0)).xyz;
+        minCoord  = min( minCoord, mc );
+        maxCoord  = max( maxCoord, mc );
+    }
+
+    vec3 weight   = (posCoord - minCoord) / (maxCoord - minCoord);
+    vec3 minTex   =  vec3(cellIdx)     * volumeDims1o;  // Texture Coordinates
+    vec3 maxTex   =  vec3(cellIdx + 1) * volumeDims1o;  // Texture Coordinates
+
+    return mix( minTex, maxTex, weight );
 }
 
 
@@ -432,7 +461,7 @@ void main(void)
             vec3 gradientModel   = CalculateGradient( step2Tex );
             if( length( gradientModel ) > ULP10 )
             {
-                vec3 gradientEye = (transposedInverseMV * vec4( gradientModel, 0.0 )).xyz;
+                vec3 gradientEye = (transposedInverseMV * vec4(gradientModel, 0.0)).xyz;
                      gradientEye = normalize( gradientEye );
                 float diffuse    = abs( dot(lightDirEye, gradientEye) );
                 vec3 viewDirEye  = normalize( -step2Eye );
