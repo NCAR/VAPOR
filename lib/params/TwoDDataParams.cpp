@@ -80,5 +80,5 @@ void TwoDDataParams::_init() {
 
     GetBox()->SetExtents(minExt, maxExt);
     GetBox()->SetPlanar(true);
-    GetBox()->SetOrientation(2);
+    GetBox()->SetOrientation(Box::XY);
 }
