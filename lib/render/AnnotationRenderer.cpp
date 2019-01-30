@@ -306,7 +306,7 @@ void AnnotationRenderer::_applyDataMgrCornerToDomain(std::vector<double> *domain
     for (int i = 0; i < 6; i++) {
         int transformedCornerIndex = i % 3;
         // use this corner to define all domain corners that are uninitialized
-        if (isnan((*domainExtents)[i])) (*domainExtents)[i] = transformedCorner[transformedCornerIndex];
+        if (std::isnan((*domainExtents)[i])) (*domainExtents)[i] = transformedCorner[transformedCornerIndex];
         // otherwise see if the corner exceeds our currently defined domain minima
         else if (i < 3) {
             if (transformedCorner[transformedCornerIndex] < (*domainExtents)[i]) { (*domainExtents)[i] = transformedCorner[transformedCornerIndex]; }
