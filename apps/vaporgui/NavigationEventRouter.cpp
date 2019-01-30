@@ -355,7 +355,7 @@ void NavigationEventRouter::updateTransforms()
                 vector<double> origin;
                 DataStatus *   dataStatus = _controlExec->GetDataStatus();
 
-                size_t           local_ts = dataStatus->MapGlobalToLocalTimeStep(names[i], ts);
+                size_t           local_ts = dataStatus->MapGlobalToLocalTimeStep(names[j], ts);
                 DataMgr *        dataMgr = dataStatus->GetDataMgr(names[j]);
                 std::vector<int> axes;
                 DataMgrUtils::GetExtents(dataMgr, local_ts, string(), minExts, maxExts, -1);
