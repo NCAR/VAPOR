@@ -119,28 +119,33 @@ void CopyRegionWidget::_configurePlanarBox(
     std::vector<double> *myMin,
     std::vector<double> *myMax
 ) const {
-        int planarAxis;
-        int orientation = myBox->GetOrientation();
-        if (orientation == Box::XY)
-            planarAxis = Z;
-        else if (orientation == Box::XZ)
-            planarAxis = Y;
-        else if (orientation == Box::YZ)
-            planarAxis = X;
-        else 
-            return;
-       
-        assert(
-            planarAxis >= 0 && 
-            planarAxis < (*myMin).size() && 
-            planarAxis < (*myMax).size()
-        );
- 
+    assert ( (*myMin).size() == (*myMax).size() );
+
+    int planarAxis;
+    int orientation = myBox->GetOrientation();
+    if (orientation == Box::XY)
+        planarAxis = Z;
+    else if (orientation == Box::XZ)
+        planarAxis = Y;
+    else if (orientation == Box::YZ)
+        planarAxis = X;
+    else 
+        return;
+   
+    // If our region is planar (IE SliceRenderer), then we need to set a
+    // reasonable Z coordinate, midway between the minimum and maximum.
+    // If we are dealing with a 2-D variable or renderer, there is no Z
+    // coordinate, so we don't do anything and return.
+    if( 
+        planarAxis < Z || // Not true for TwoD, Contour, and Image renderers
+        (*myMin).size() == 3
+    ) {
         double min = (*myMin)[planarAxis]; 
         double max = (*myMax)[planarAxis]; 
         double plane = ( min + max ) / 2.f;
         (*myMin)[planarAxis] = plane;
         (*myMax)[planarAxis] = plane;
+    }
 }
 
 void CopyRegionWidget::copyRegion() 
@@ -164,7 +169,6 @@ void CopyRegionWidget::copyRegion()
 		Box* copyBox = copyParams->GetBox();
 		std::vector<double> minExtents, maxExtents;
 		copyBox->GetExtents(minExtents, maxExtents);
-
         
 		Box* myBox = _rParams->GetBox();
 		std::vector<double> myMin, myMax;
@@ -177,6 +181,7 @@ void CopyRegionWidget::copyRegion()
 			myMax[i] = maxExtents[i];
 		}
       
+        
         _configurePlanarBox( myBox, &myMin, &myMax);
 		
         myBox->SetExtents( myMin, myMax );
