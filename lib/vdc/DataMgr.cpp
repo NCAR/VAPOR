@@ -2439,6 +2439,17 @@ bool DataMgr::_hasHorizontalXForm(string meshname) const {
         bool ok = _dc->GetCoordVarInfo(coordVars[i], varInfo);
         assert(ok);
 
+        //
+        if (varInfo.GetUnits().empty())
+            continue;
+
+        // Version 1.0 of CF conventions allows "degrees" as units
+        // for both lat and longitude. So we check IsLonUnit,
+        // which looks for "degrees_east", "degrees_E", etc., and
+        // IsLatOrLonUnit, which will return true for "degrees". Unforunately,
+        // IsLatOrLonUnit will also return true for an empty string "", so
+        // we explicitly test for that above.
+        //
         if (varInfo.GetAxis() == 0 &&
             (_udunits.IsLonUnit(varInfo.GetUnits()) ||
              _udunits.IsLatOrLonUnit(varInfo.GetUnits()))) {
