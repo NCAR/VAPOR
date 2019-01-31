@@ -47,7 +47,7 @@ void VolumeParams::SetAlgorithm(std::string algorithm)
     SetValueString(_algorithmTag, "Volume rendering algorithm", algorithm);
 }
 
-const std::vector<std::string> VolumeParams::GetAlgorithmNames() { return {"Regular", "Resampled", "Test"}; }
+const std::vector<std::string> VolumeParams::GetAlgorithmNames() { return {"Regular", "Resampled", "Cell Traversal", "Test"}; }
 
 // Set everything to default values
 void VolumeParams::_init() { SetDiagMsg("VolumeParams::_init()"); }
