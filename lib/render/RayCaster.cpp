@@ -1236,6 +1236,8 @@ void RayCaster::_renderTriangleStrips( int whichPass, int  castingMode ) const
     // Each strip will have the same numOfVertices for the first 4 faces
     size_t      numOfVertices = bx * 2;
     unsigned int* indexBuffer = new unsigned int[ numOfVertices ];
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int), 
+                  indexBuffer,              GL_DYNAMIC_DRAW );
 
     bool    attrib1Enabled = false;      // Attribute to hold provoking index of each triangle.
     int*    attrib1Buffer  = nullptr;
@@ -1300,8 +1302,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, int  castingMode ) const
             glVertexAttribIPointer( 1, 4,       GL_INT, 0, (void*)0 );
             glEnableVertexAttribArray( 1 );
         }
-        glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int), 
-                      indexBuffer,              GL_DYNAMIC_DRAW );
+        //glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int), 
+        //              indexBuffer,              GL_DYNAMIC_DRAW );
+        glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, 0,  numOfVertices * sizeof(unsigned int), indexBuffer );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
@@ -1348,8 +1351,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, int  castingMode ) const
             glVertexAttribIPointer( 1, 4,       GL_INT, 0, (void*)0 );
             glEnableVertexAttribArray( 1 );
         }
-        glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                      indexBuffer,              GL_DYNAMIC_DRAW );
+        //glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
+        //              indexBuffer,              GL_DYNAMIC_DRAW );
+        glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, 0,  numOfVertices * sizeof(unsigned int), indexBuffer );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
@@ -1406,8 +1410,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, int  castingMode ) const
             glVertexAttribIPointer( 1, 4,       GL_INT, 0, (void*)0 );
             glEnableVertexAttribArray( 1 );
         }
-        glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                      indexBuffer,              GL_DYNAMIC_DRAW );
+        //glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
+        //              indexBuffer,              GL_DYNAMIC_DRAW );
+        glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, 0,  numOfVertices * sizeof(unsigned int), indexBuffer );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
@@ -1454,8 +1459,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, int  castingMode ) const
             glVertexAttribIPointer( 1, 4,       GL_INT, 0, (void*)0 );
             glEnableVertexAttribArray( 1 );
         }
-        glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                      indexBuffer,              GL_DYNAMIC_DRAW );
+        //glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
+        //              indexBuffer,              GL_DYNAMIC_DRAW );
+        glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, 0,  numOfVertices * sizeof(unsigned int), indexBuffer );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
@@ -1464,6 +1470,8 @@ void RayCaster::_renderTriangleStrips( int whichPass, int  castingMode ) const
     numOfVertices = by * 2;
     delete[] indexBuffer;
     indexBuffer = new unsigned int[ numOfVertices ];
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int), 
+                  indexBuffer,              GL_DYNAMIC_DRAW );
     if( attrib1Enabled )
     {
         delete[] attrib1Buffer;
@@ -1516,8 +1524,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, int  castingMode ) const
             glVertexAttribIPointer( 1, 4,       GL_INT, 0, (void*)0 );
             glEnableVertexAttribArray( 1 );
         }
-        glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                      indexBuffer,              GL_DYNAMIC_DRAW );
+        //glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
+        //              indexBuffer,              GL_DYNAMIC_DRAW );
+        glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, 0,  numOfVertices * sizeof(unsigned int), indexBuffer );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
@@ -1564,8 +1573,9 @@ void RayCaster::_renderTriangleStrips( int whichPass, int  castingMode ) const
             glVertexAttribIPointer( 1, 4,       GL_INT, 0, (void*)0 );
             glEnableVertexAttribArray( 1 );
         }
-        glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
-                      indexBuffer,              GL_DYNAMIC_DRAW );
+        //glBufferData( GL_ELEMENT_ARRAY_BUFFER,  numOfVertices * sizeof(unsigned int),
+        //              indexBuffer,              GL_DYNAMIC_DRAW );
+        glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, 0,  numOfVertices * sizeof(unsigned int), indexBuffer );
         glDrawElements( GL_TRIANGLE_STRIP,      numOfVertices,
                         GL_UNSIGNED_INT,        (void*)0 );
     }
