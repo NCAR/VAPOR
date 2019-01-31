@@ -49,8 +49,11 @@ void GLManager::PixelCoordinateSystemPop()
     mm->MatrixModeModelView();
 }
 
-void GetVersionFromGLVersionString(std::string version, int *major, int *minor)
+void GLManager::GetGLVersion(int *major, int *minor)
 {
+    // Only >=3.0 guarentees glGetIntegerv
+    
+    string version = string((const char *)glGetString(GL_VERSION));
     version = version.substr(0, version.find(" "));
     const string majorString = version.substr(0, version.find("."));
     *major = std::stoi(majorString);
@@ -66,9 +69,8 @@ void GetVersionFromGLVersionString(std::string version, int *major, int *minor)
 
 bool GLManager::IsCurrentOpenGLVersionSupported()
 {
-	// Only >=3.0 guarentees glGetIntegerv
     int major, minor;
-    GetVersionFromGLVersionString(string((const char *)glGetString(GL_VERSION)), &major, &minor);
+    GetGLVersion(&major, &minor);
     
     int version = major * 100 + minor;
     
