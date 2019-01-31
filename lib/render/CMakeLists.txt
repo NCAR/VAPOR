@@ -46,6 +46,7 @@ set (SRC
 	VolumeRegular.cpp
 	VolumeResampled.cpp
 	VolumeTest.cpp
+	VolumeCellTraversal.cpp
 )
 
 set (HEADERS
@@ -97,6 +98,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeRegular.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeResampled.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeTest.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeCellTraversal.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})
