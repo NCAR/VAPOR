@@ -53,7 +53,8 @@ class VolumeAppearanceSubtab : public QWidget, public Ui_VolumeAppearanceGUI {
 
         _TFWidget->Update(dataMgr, paramsMgr, rParams);
 
-        int index = _algorithmCombo->findText(QString::fromStdString(vp->GetAlgorithm()));
+        string algorithm = vp->GetAlgorithm();
+        int index = _algorithmCombo->findText(QString::fromStdString(algorithm));
 
         if (index == -1) {
             _algorithmCombo->clear();
@@ -61,7 +62,7 @@ class VolumeAppearanceSubtab : public QWidget, public Ui_VolumeAppearanceGUI {
             for (const string &s : algorithms)
                 _algorithmCombo->addItem(QString::fromStdString(s));
 
-            index = _algorithmCombo->findText(QString::fromStdString(vp->GetAlgorithm()));
+            index = _algorithmCombo->findText(QString::fromStdString(algorithm));
         }
 
         _algorithmCombo->setCurrentIndex(index);
