@@ -990,7 +990,7 @@ void RayCaster::_drawVolumeFaces(int whichPass,
 
             glEnableVertexAttribArray(0); // attribute 0 is vertex coordinates
             glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
-            glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), nearCoords, GL_STREAM_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(GLfloat), nearCoords, GL_DYNAMIC_DRAW);
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1137,29 +1137,36 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
     int *attrib1Buffer = nullptr;
     if (castingMode == CellTraversal && whichPass == 3) {
         attrib1Enabled = true;
-        unsigned int big1 = bx > by ? bx : by;
-        unsigned int small = bx < by ? bx : by;
-        unsigned int big2 = bz > small ? bz : small;
-        attrib1Buffer = new int[big1 * big2 * 4]; // Enough length for all faces
+        attrib1Buffer = new int[bx * by * 4]; // Buffer for front and back face
+        std::memset(attrib1Buffer, 0, bx * by * 4 * sizeof(int));
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
+        glBufferData(GL_ARRAY_BUFFER, bx * by * 4 * sizeof(int),
+                     attrib1Buffer, GL_DYNAMIC_DRAW);
     }
 
     //
     // Render front face:
     //
-    _enableVertexAttribute(_userCoordinates.frontFace, bx * by * 3, attrib1Enabled);
+    //_enableVertexAttribute( _userCoordinates.frontFace, bx * by * 3, attrib1Enabled );
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
+    glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float),
+                 _userCoordinates.frontFace, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glEnableVertexAttribArray(0);
     for (unsigned int y = 0; y < by - 1; y++) // Looping over every TriangleStrip
     {
         idx = 0;
+        //
         // This loop controls rendering order of the triangle strip. It
-        // provides the indices for each vertex in a strip. Strips are
-        // created one row at a time.
+        // provides the indices for each vertex in the current strip.
         //
         for (unsigned int x = 0; x < bx; x++) // Filling indices for vertices of this TriangleStrip
         {
             indexBuffer[idx++] = (y + 1) * bx + x;
             indexBuffer[idx++] = y * bx + x;
         }
-
+        //
         // In cell-traverse ray casting mode we need a cell index for the
         // two triangles forming the face of a cell. Use the OpenGL "provoking"
         // vertex to provide this information.
@@ -1179,12 +1186,17 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
                 attrib1Buffer[attribIdx + 2] = int(bz) - 2;
                 attrib1Buffer[attribIdx + 3] = 0;
             }
-            glBufferData(GL_ARRAY_BUFFER, bx * by * 4 * sizeof(int),
-                         attrib1Buffer, GL_STREAM_DRAW);
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
+            //glBufferData( GL_ARRAY_BUFFER,      bx * by * 4 * sizeof(int),
+            //              attrib1Buffer,        GL_DYNAMIC_DRAW );
+            glBufferSubData(GL_ARRAY_BUFFER, y * bx * 4 * sizeof(int),
+                            2 * bx * 4 * sizeof(int), (attrib1Buffer + y * bx * 4));
             glVertexAttribIPointer(1, 4, GL_INT, 0, (void *)0);
+            glEnableVertexAttribArray(1);
         }
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int),
-                     indexBuffer, GL_STREAM_DRAW);
+                     indexBuffer, GL_DYNAMIC_DRAW);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
@@ -1192,7 +1204,13 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
     //
     // Render back face:
     //
-    _enableVertexAttribute(_userCoordinates.backFace, bx * by * 3, attrib1Enabled);
+    //_enableVertexAttribute( _userCoordinates.backFace, bx * by * 3, attrib1Enabled );
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
+    glBufferData(GL_ARRAY_BUFFER, bx * by * 3 * sizeof(float),
+                 _userCoordinates.backFace, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glEnableVertexAttribArray(0);
     for (unsigned int y = 0; y < by - 1; y++) // strip by strip
     {
         idx = 0;
@@ -1213,20 +1231,40 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
                 attrib1Buffer[attribIdx + 2] = 0;
                 attrib1Buffer[attribIdx + 3] = 1;
             }
-            glBufferData(GL_ARRAY_BUFFER, bx * by * 4 * sizeof(int),
-                         attrib1Buffer, GL_STREAM_DRAW);
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
+            //glBufferData( GL_ARRAY_BUFFER,      bx * by * 4 * sizeof(int),
+            //              attrib1Buffer,        GL_DYNAMIC_DRAW );
+            glBufferSubData(GL_ARRAY_BUFFER, y * bx * 4 * sizeof(int),
+                            2 * bx * 4 * sizeof(int), (attrib1Buffer + y * bx * 4));
             glVertexAttribIPointer(1, 4, GL_INT, 0, (void *)0);
+            glEnableVertexAttribArray(1);
         }
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int),
-                     indexBuffer, GL_STREAM_DRAW);
+                     indexBuffer, GL_DYNAMIC_DRAW);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
+    }
+
+    if (attrib1Enabled) {
+        delete[] attrib1Buffer;
+        attrib1Buffer = new int[bx * bz * 4]; // For top and bottom faces
+        std::memset(attrib1Buffer, 0, bx * bz * 4 * sizeof(int));
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
+        glBufferData(GL_ARRAY_BUFFER, bx * bz * 4 * sizeof(int),
+                     attrib1Buffer, GL_DYNAMIC_DRAW);
     }
 
     //
     // Render top face:
     //
-    _enableVertexAttribute(_userCoordinates.topFace, bx * bz * 3, attrib1Enabled);
+    //_enableVertexAttribute( _userCoordinates.topFace, bx * bz * 3, attrib1Enabled );
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
+    glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float),
+                 _userCoordinates.topFace, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glEnableVertexAttribArray(0);
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
         for (unsigned int x = 0; x < bx; x++) {
@@ -1246,12 +1284,17 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
                 attrib1Buffer[attribIdx + 2] = int(z);
                 attrib1Buffer[attribIdx + 3] = 2;
             }
-            glBufferData(GL_ARRAY_BUFFER, bx * bz * 4 * sizeof(int),
-                         attrib1Buffer, GL_STREAM_DRAW);
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
+            //glBufferData( GL_ARRAY_BUFFER,      bx * bz * 4 * sizeof(int),
+            //              attrib1Buffer,        GL_DYNAMIC_DRAW );
+            glBufferSubData(GL_ARRAY_BUFFER, z * bx * 4 * sizeof(int),
+                            2 * bx * 4 * sizeof(int), (attrib1Buffer + z * bx * 4));
             glVertexAttribIPointer(1, 4, GL_INT, 0, (void *)0);
+            glEnableVertexAttribArray(1);
         }
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int),
-                     indexBuffer, GL_STREAM_DRAW);
+                     indexBuffer, GL_DYNAMIC_DRAW);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
@@ -1259,7 +1302,13 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
     //
     // Render bottom face:
     //
-    _enableVertexAttribute(_userCoordinates.bottomFace, bx * bz * 3, attrib1Enabled);
+    //_enableVertexAttribute( _userCoordinates.bottomFace, bx * bz * 3, attrib1Enabled );
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
+    glBufferData(GL_ARRAY_BUFFER, bx * bz * 3 * sizeof(float),
+                 _userCoordinates.bottomFace, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glEnableVertexAttribArray(0);
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
         for (unsigned int x = 0; x < bx; x++) {
@@ -1279,12 +1328,17 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
                 attrib1Buffer[attribIdx + 2] = int(z);
                 attrib1Buffer[attribIdx + 3] = 3;
             }
-            glBufferData(GL_ARRAY_BUFFER, bx * bz * 4 * sizeof(int),
-                         attrib1Buffer, GL_STREAM_DRAW);
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
+            //glBufferData( GL_ARRAY_BUFFER,      bx * bz * 4 * sizeof(int),
+            //              attrib1Buffer,        GL_DYNAMIC_DRAW );
+            glBufferSubData(GL_ARRAY_BUFFER, z * bx * 4 * sizeof(int),
+                            2 * bx * 4 * sizeof(int), (attrib1Buffer + z * bx * 4));
             glVertexAttribIPointer(1, 4, GL_INT, 0, (void *)0);
+            glEnableVertexAttribArray(1);
         }
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int),
-                     indexBuffer, GL_STREAM_DRAW);
+                     indexBuffer, GL_DYNAMIC_DRAW);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
@@ -1293,11 +1347,25 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
     numOfVertices = by * 2;
     delete[] indexBuffer;
     indexBuffer = new unsigned int[numOfVertices];
+    if (attrib1Enabled) {
+        delete[] attrib1Buffer;
+        attrib1Buffer = new int[by * bz * 4]; // For right and left faces
+        std::memset(attrib1Buffer, 0, by * bz * 4 * sizeof(int));
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
+        glBufferData(GL_ARRAY_BUFFER, by * bz * 4 * sizeof(int),
+                     attrib1Buffer, GL_DYNAMIC_DRAW);
+    }
 
     //
     // Render right face:
     //
-    _enableVertexAttribute(_userCoordinates.rightFace, by * bz * 3, attrib1Enabled);
+    //_enableVertexAttribute( _userCoordinates.rightFace, by * bz * 3, attrib1Enabled );
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
+    glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float),
+                 _userCoordinates.rightFace, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glEnableVertexAttribArray(0);
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
         for (unsigned int y = 0; y < by; y++) {
@@ -1317,12 +1385,17 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
                 attrib1Buffer[attribIdx + 2] = int(z);
                 attrib1Buffer[attribIdx + 3] = 4;
             }
-            glBufferData(GL_ARRAY_BUFFER, by * bz * 4 * sizeof(int),
-                         attrib1Buffer, GL_STREAM_DRAW);
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
+            //glBufferData( GL_ARRAY_BUFFER,      by * bz * 4 * sizeof(int),
+            //              attrib1Buffer,        GL_DYNAMIC_DRAW );
+            glBufferSubData(GL_ARRAY_BUFFER, z * by * 4 * sizeof(int),
+                            2 * by * 4 * sizeof(int), (attrib1Buffer + z * by * 4));
             glVertexAttribIPointer(1, 4, GL_INT, 0, (void *)0);
+            glEnableVertexAttribArray(1);
         }
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int),
-                     indexBuffer, GL_STREAM_DRAW);
+                     indexBuffer, GL_DYNAMIC_DRAW);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
@@ -1330,7 +1403,13 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
     //
     // Render left face
     //
-    _enableVertexAttribute(_userCoordinates.leftFace, by * bz * 3, attrib1Enabled);
+    //_enableVertexAttribute( _userCoordinates.leftFace, by * bz * 3, attrib1Enabled );
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
+    glBufferData(GL_ARRAY_BUFFER, by * bz * 3 * sizeof(float),
+                 _userCoordinates.leftFace, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glEnableVertexAttribArray(0);
     for (unsigned int z = 0; z < bz - 1; z++) {
         idx = 0;
         for (unsigned int y = 0; y < by; y++) {
@@ -1350,12 +1429,17 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
                 attrib1Buffer[attribIdx + 2] = int(z);
                 attrib1Buffer[attribIdx + 3] = 5;
             }
-            glBufferData(GL_ARRAY_BUFFER, by * bz * 4 * sizeof(int),
-                         attrib1Buffer, GL_STREAM_DRAW);
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
+            //glBufferData( GL_ARRAY_BUFFER,      by * bz * 4 * sizeof(int),
+            //              attrib1Buffer,        GL_DYNAMIC_DRAW );
+            glBufferSubData(GL_ARRAY_BUFFER, z * by * 4 * sizeof(int),
+                            2 * by * 4 * sizeof(int), (attrib1Buffer + z * by * 4));
             glVertexAttribIPointer(1, 4, GL_INT, 0, (void *)0);
+            glEnableVertexAttribArray(1);
         }
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, numOfVertices * sizeof(unsigned int),
-                     indexBuffer, GL_STREAM_DRAW);
+                     indexBuffer, GL_DYNAMIC_DRAW);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
     }
@@ -1376,10 +1460,11 @@ void RayCaster::_enableVertexAttribute(const float *buf,
     glBufferData(GL_ARRAY_BUFFER, length * sizeof(float),
                  buf, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
-    if (attrib1Enabled) {
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexAttribId);
-    }
+    //if( attrib1Enabled )
+    //{
+    //    glEnableVertexAttribArray( 1 );
+    //    glBindBuffer( GL_ARRAY_BUFFER, _vertexAttribId );
+    //}
 }
 
 double RayCaster::_getElapsedSeconds(const struct timeval *begin,
