@@ -43,16 +43,29 @@ void GLManager::PixelCoordinateSystemPop() {
     mm->MatrixModeModelView();
 }
 
-bool GLManager::IsCurrentOpenGLVersionSupported() {
-    // OpenGL 1.1 does not support GL_VERSION integer query
-    if (std::string((const char *)glGetString(GL_VERSION)).substr(0, 3) != "1.1") {
-        int major, minor;
-        glGetIntegerv(GL_MAJOR_VERSION, &major);
-        glGetIntegerv(GL_MINOR_VERSION, &minor);
-
-        if (major > 4 || (major == 4 && minor >= 1))
-            return true;
+void GetVersionFromGLVersionString(std::string version, int *major, int *minor) {
+    version = version.substr(0, version.find(" "));
+    const string majorString = version.substr(0, version.find("."));
+    *major = std::stoi(majorString);
+    if (majorString.length() < version.length()) {
+        version = version.substr(majorString.length() + 1);
+        const string minorString = version.substr(0, version.find("."));
+        if (!minorString.empty())
+            *minor = std::stoi(minorString);
+        else
+            *minor = 0;
     }
+}
+
+bool GLManager::IsCurrentOpenGLVersionSupported() {
+    // Only >=3.0 guarentees glGetIntegerv
+    int major, minor;
+    GetVersionFromGLVersionString(string((const char *)glGetString(GL_VERSION)), &major, &minor);
+
+    int version = major * 100 + minor;
+
+    if (version >= 401)
+        return true;
 
     Wasp::MyBase::SetErrMsg("OpenGL Version \"%s\" is too low and is not supported", glGetString(GL_VERSION));
     return false;
