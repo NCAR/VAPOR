@@ -8,9 +8,10 @@ using std::vector;
 using namespace VAPoR;
 
 int VolumeResampled::LoadData(const Grid *grid) {
+#define S 5
     const vector<size_t> dims = grid->GetDimensions();
-    const size_t w = dims[0], h = dims[1], d = dims[2];
-    float *data = new float[dims[0] * dims[1] * dims[2]];
+    const size_t w = dims[0] * S, h = dims[1] * S, d = dims[2] * S;
+    float *data = new float[w * h * d];
 
     vector<double> min, max;
     grid->GetUserExtents(min, max);
@@ -27,7 +28,7 @@ int VolumeResampled::LoadData(const Grid *grid) {
         }
     }
 
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0, GL_RED, GL_FLOAT, data);
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, w, h, d, 0, GL_RED, GL_FLOAT, data);
 
     delete[] data;
     return 0;

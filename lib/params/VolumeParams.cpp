@@ -58,6 +58,7 @@ const std::vector<std::string> VolumeParams::GetAlgorithmNames() {
     return {
         "Regular",
         "Resampled",
+        "Cell Traversal",
         "Test"};
 }
 
