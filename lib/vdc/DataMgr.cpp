@@ -426,7 +426,7 @@ template<class T> void copy_block(const T *src, T *dst, const vector<size_t> &mi
 
     size_t block_size = VProduct(bs3);
 
-    for (long k = min3[2], kk = 0; k <= max3[2] && k < dims3[2]; k++, kk++) {
+    for (long k = min3[2], kk = 0; k <= (long)max3[2] && k < (long)dims3[2]; k++, kk++) {
         if (k < 0) continue;
 
         // Coordinates of destination block (block coordinates)
@@ -437,12 +437,12 @@ template<class T> void copy_block(const T *src, T *dst, const vector<size_t> &mi
         //
         size_t dst_k = k % bs3[2];
 
-        for (long j = min3[1], jj = 0; j <= max3[1] && j < dims3[1]; j++, jj++) {
+        for (long j = min3[1], jj = 0; j <= (long)max3[1] && j < (long)dims3[1]; j++, jj++) {
             if (j < 0) continue;
             size_t dst_j_b = j / bs3[1];
             size_t dst_j = j % bs3[1];
 
-            for (long i = min3[0], ii = 0; i <= max3[0] && i < dims3[0]; i++, ii++) {
+            for (long i = min3[0], ii = 0; i <= (long)max3[0] && i < (long)dims3[0]; i++, ii++) {
                 if (i < 0) continue;
 
                 size_t dst_i_b = i / bs3[0];
