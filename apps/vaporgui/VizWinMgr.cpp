@@ -105,8 +105,12 @@ void VizWinMgr::_attachVisualizer(string vizName) {
 
     QString qvizname = QString::fromStdString(vizName);
 
+    int major = 4, minor = 1;
+    if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_3_3) == 0)
+        major = minor = 1;
+
     QGLFormat glFormat;
-    glFormat.setVersion(4, 1);
+    glFormat.setVersion(major, minor);
     glFormat.setProfile(QGLFormat::CoreProfile);
 
     _vizWindow[vizName] = new VizWin(
