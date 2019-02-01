@@ -20,10 +20,16 @@ in vec2 ST;
 
 out vec4 fragColor;
 
+#define F_L 1
+#define F_R 2
+#define F_U 3
+#define F_D 4
+#define F_F 5
+#define F_B 6
+
 
 void main(void)
 {
-    
     vec2 screen = ST*2-1;
     vec4 world = inverse(MVP) * vec4(screen, 1, 1);
     world /= world.w;
@@ -47,6 +53,10 @@ void main(void)
                     t)) {
                         float dataNorm = (texture(data, (vec3(x,y,0)+vec3(0.5))/(coordDims-1)).r - LUTMin) / (LUTMax - LUTMin);
                         fragColor = texture(LUT, dataNorm);
+                        
+                        ivec3 cellIndex = ivec3(x, y, 0);
+                        int face = F_B;
+                        
                         return;
                 }
             }
