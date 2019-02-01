@@ -39,3 +39,48 @@ bool IntersectRayBoundingBox(vec3 o, vec3 d, vec3 boxMin, vec3 boxMax, out float
     return t0 < t1;
 }
 #endif
+
+bool IntersectRayPlane(vec3 o, vec3 d, vec3 v0, vec3 n, out float t)
+{
+    float denom = dot(n, d);
+    
+    if (abs(denom) > 1e-6) {
+        t = dot(v0 - o, n) / denom;
+        return t >= 0;
+    }
+    return false;
+}
+
+bool IntersectRayTriangle(vec3 o, vec3 d, vec3 v0, vec3 v1, vec3 v2, out float t)
+{
+    vec3 n = cross(v1-v0,v2-v0);
+    
+    if (IntersectRayPlane(o, d, v0, n, t)) {
+        vec3 P = o + d * t;
+        
+        vec3 edge0 = v1-v0;
+        vec3 vp0 = P - v0;
+        vec3 C0 = cross(edge0, vp0);
+        if (dot(n, C0) < 0) return false;
+        
+        vec3 edge1 = v2-v1;
+        vec3 vp1 = P - v1;
+        vec3 C1 = cross(edge1, vp1);
+        if (dot(n, C1) < 0) return false;
+        
+        vec3 edge2 = v0 - v2;
+        vec3 vp2 = P - v2;
+        vec3 C2 = cross(edge2, vp2);
+        if (dot(n, C2) < 0) return false;
+        
+        return true;
+    }
+    return false;
+}
+
+bool IntersectRayQuad(vec3 o, vec3 d, vec3 v0, vec3 v1, vec3 v2, vec3 v3, out float t)
+{
+    return IntersectRayTriangle(o, d, v0, v1, v2, t) ||
+    IntersectRayTriangle(o, d, v2, v3, v0, t);
+    return false;
+}

@@ -10,6 +10,8 @@ uniform vec3 dataBoundsMax;
 uniform float LUTMin;
 uniform float LUTMax;
 
+uniform ivec3 coordDims;
+
 uniform sampler3D data;
 uniform sampler1D LUT;
 uniform sampler3D coords;
@@ -19,29 +21,9 @@ in vec2 ST;
 out vec4 fragColor;
 
 
-bool IntersectRayPlane(vec3 o, vec3 d, vec3 v0, vec3 n, out float t)
-{
-	 float denom = dot(n, d);
-	
-	if (denom > 1e-6) {
-		t = dot(v0 - o, n) / denom;
-		return t >= 0;
-	}
-	return false;
-}
-
-
-bool IntersectRayQuad(vec3 o, vec3 d, vec3 v1, vec3 v2, vec3 v3, vec3 v4, out float t)
-{
-	vec3 n = cross(v2-v1, v3-v1);
-	
-	// if (abs(dot(n, d)) < 
-	return false;
-}
-
-
 void main(void)
 {
+    
     vec2 screen = ST*2-1;
     vec4 world = inverse(MVP) * vec4(screen, 1, 1);
     world /= world.w;
@@ -50,14 +32,25 @@ void main(void)
     vec4 accum = vec4(0);
     float t0, t1, tp;
     
-    if (IntersectRayBoundingBox(cameraPos, dir, dataBoundsMin, dataBoundsMax, t0, t1)) {
-
-		if (IntersectRayPlane(cameraPos, dir, vec3(1), vec3(0,0,-1), tp)) {
-			if (tp < t0) { 
-				fragColor = vec4(vec3(1), 1);
-				return;
-			}
-		}
+    bool intersectBox = IntersectRayBoundingBox(cameraPos, dir, dataBoundsMin, dataBoundsMax, t0, t1);
+    
+    if (intersectBox) {
+        
+        for (int y = 0; y < coordDims[1]-1; y++) {
+            for (int x = 0; x < coordDims[0]-1; x++) {
+                float t;
+                if (IntersectRayQuad(cameraPos, dir,
+                    texture(coords, vec3(x  , y  , 0)/coordDims).xyz,
+                    texture(coords, vec3(x+1, y  , 0)/coordDims).xyz,
+                    texture(coords, vec3(x+1, y+1, 0)/coordDims).xyz,
+                    texture(coords, vec3(x  , y+1, 0)/coordDims).xyz,
+                    t)) {
+                        float dataNorm = (texture(data, (vec3(x,y,0)+vec3(0.5))/(coordDims-1)).r - LUTMin) / (LUTMax - LUTMin);
+                        fragColor = texture(LUT, dataNorm);
+                        return;
+                }
+            }
+        }
         
         float step = max(((t1-t0)/100.f)*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/100.f);
         
@@ -77,8 +70,7 @@ void main(void)
         }
         
         fragColor = accum;
-    } else {
-	}
+    }
         
     if (accum.a < 0.1)
         discard;

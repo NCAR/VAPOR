@@ -2,6 +2,7 @@
 #include <vector>
 #include <vapor/glutil.h>
 #include <glm/glm.hpp>
+// #include <glm/integer.hpp>
 
 using std::vector;
 
@@ -11,16 +12,16 @@ VolumeCellTraversal::VolumeCellTraversal()
 {
     glGenTextures(1, &zCoordTexture);
     glBindTexture(GL_TEXTURE_3D, zCoordTexture);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     
     glGenTextures(1, &xyCoordTexture);
     glBindTexture(GL_TEXTURE_2D, xyCoordTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
@@ -38,6 +39,9 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     
     vector<size_t> dims = grid->GetDimensions();
     const int w = dims[0], h = dims[1], d = dims[2];
+    coordDims[0] = w;
+    coordDims[1] = h;
+    coordDims[2] = d;
     
     float *data = new float[w*h*d*3];
     
@@ -78,6 +82,8 @@ ShaderProgram *VolumeCellTraversal::GetShader(ShaderManager *sm)
     ShaderProgram *s = sm->GetShader("rayCellTraversal");
     if (!s) return nullptr;
     s->Bind();
+    
+    s->SetUniform("coordDims", *(glm::ivec3*)&coordDims);
     
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_3D, zCoordTexture);
