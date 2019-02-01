@@ -11,6 +11,7 @@ uniform float LUTMin;
 uniform float LUTMax;
 
 uniform ivec3 coordDims;
+vec3 coordDimsF = vec3(coordDims);
 
 uniform sampler3D data;
 uniform sampler1D LUT;
@@ -20,16 +21,64 @@ in vec2 ST;
 
 out vec4 fragColor;
 
-#define F_L ivec3(-1, 0, 0)
-#define F_R ivec3( 1, 0, 0)
-#define F_U ivec3( 0, 1, 0)
-#define F_D ivec3( 0,-1, 0)
-#define F_F ivec3( 0, 0,-1)
-#define F_B ivec3( 0, 0, 1)
+#define F_LEFT ivec3(-1, 0, 0)
+#define F_RIGHT ivec3( 1, 0, 0)
+#define F_UP ivec3( 0, 1, 0)
+#define F_DOWN ivec3( 0,-1, 0)
+#define F_FRONT ivec3( 0, 0,-1)
+#define F_BACK ivec3( 0, 0, 1)
+
+void GetFaceCoordinateIndices(ivec3 cell, ivec3 face, out ivec3 i0, out ivec3 i1, out ivec3 i2, out ivec3 i3)
+{
+    // CCW
+    if (face == F_DOWN) {
+        i0 = cell + ivec3(0, 0, 0);
+        i1 = cell + ivec3(0, 1, 0);
+        i2 = cell + ivec3(1, 1, 0);
+        i3 = cell + ivec3(1, 0, 0);
+    }
+    else if (face == F_UP) {
+        i0 = cell + ivec3(0, 0, 1);
+        i1 = cell + ivec3(1, 0, 1);
+        i2 = cell + ivec3(1, 1, 1);
+        i3 = cell + ivec3(0, 1, 1);
+    }
+    else if (face == F_LEFT) {
+        i0 = cell + ivec3(0, 0, 0);
+        i1 = cell + ivec3(0, 0, 1);
+        i2 = cell + ivec3(0, 1, 1);
+        i3 = cell + ivec3(0, 1, 0);
+    }
+    else if (face == F_RIGHT) {
+        i0 = cell + ivec3(1, 0, 0);
+        i1 = cell + ivec3(1, 1, 0);
+        i2 = cell + ivec3(1, 1, 1);
+        i3 = cell + ivec3(1, 0, 1);
+    }
+    else if (face == F_FRONT) {
+        i0 = cell + ivec3(0, 0, 0);
+        i1 = cell + ivec3(1, 0, 0);
+        i2 = cell + ivec3(1, 0, 1);
+        i3 = cell + ivec3(0, 0, 1);
+    }
+    else if (face == F_BACK) {
+        i0 = cell + ivec3(0, 1, 0);
+        i1 = cell + ivec3(0, 1, 1);
+        i2 = cell + ivec3(1, 1, 1);
+        i3 = cell + ivec3(1, 1, 0);
+    }
+}
 
 bool IntersectRayCellFace(vec3 o, vec3 d, ivec3 cellIndex, ivec3 face, out float t)
 {
-    return false;
+    ivec3 i0, i1, i2, i3;
+    GetFaceCoordinateIndices(cellIndex, face, i0, i1, i2, i3);
+    return IntersectRayQuad(o, d,
+        texture(coords, i0/coordDimsF).xyz,
+        texture(coords, i1/coordDimsF).xyz,
+        texture(coords, i2/coordDimsF).xyz,
+        texture(coords, i3/coordDimsF).xyz,
+        t);
 }
 
 void FindNextCell(vec3 origin, vec3 dir, float t, ivec3 currentCell)
@@ -54,17 +103,11 @@ void main(void)
         for (int y = 0; y < coordDims[1]-1; y++) {
             for (int x = 0; x < coordDims[0]-1; x++) {
                 float t;
-                if (IntersectRayQuad(cameraPos, dir,
-                    texture(coords, vec3(x  , y  , 0)/coordDims).xyz,
-                    texture(coords, vec3(x+1, y  , 0)/coordDims).xyz,
-                    texture(coords, vec3(x+1, y+1, 0)/coordDims).xyz,
-                    texture(coords, vec3(x  , y+1, 0)/coordDims).xyz,
-                    t)) {
+                if (IntersectRayCellFace(cameraPos, dir, ivec3(x, y, 0), F_DOWN, t)) {
                         float dataNorm = (texture(data, (vec3(x,y,0)+vec3(0.5))/(coordDims-1)).r - LUTMin) / (LUTMax - LUTMin);
                         fragColor = texture(LUT, dataNorm);
                         
                         ivec3 cellIndex = ivec3(x, y, 0);
-                        ivec3 face = F_B;
                         
                         return;
                 }
