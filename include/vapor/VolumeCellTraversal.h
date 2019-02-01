@@ -14,6 +14,8 @@ namespace VAPoR {
     private:
         unsigned int xyCoordTexture;
         unsigned int zCoordTexture;
+        
+        int coordDims[3];
     };
     
 }
