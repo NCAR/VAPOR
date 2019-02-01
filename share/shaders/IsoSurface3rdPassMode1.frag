@@ -145,7 +145,10 @@ void main(void)
     vec3 rayDirEye      = stopEye - startEye;
     float rayDirLength  = length( rayDirEye );
     if( rayDirLength    < ULP10 )
+    {
         discard;
+        return;
+    }
 
     float nStepsf       = rayDirLength  / stepSize1D;
     vec3  stepSize3D    = rayDirEye   / nStepsf;
