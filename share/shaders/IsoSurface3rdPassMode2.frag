@@ -346,7 +346,10 @@ void main(void)
     vec3 rayDirEye      = stopEye - startEye;
     float rayDirLength  = length( rayDirEye );
     if(   rayDirLength  < ULP10 )
+    {
         discard;
+        return;
+    }
 
     // The incoming stepSize1D results in approximate 2 samples per cell.
     float nStepsf       = rayDirLength / stepSize1D;
@@ -364,8 +367,11 @@ void main(void)
         ivec3 correctIdx;
         if( LocateNextCell( step1CellIdx, step1Eye, correctIdx ) )
             step1CellIdx = correctIdx;
-        else 
-            discard;    // This case always happens on the boundary.
+        else     // This case always happens on the boundary.
+        {
+            discard;
+            return;
+        }
     }
 
     // Set depth value at the backface 
