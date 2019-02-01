@@ -20,13 +20,22 @@ in vec2 ST;
 
 out vec4 fragColor;
 
-#define F_L 1
-#define F_R 2
-#define F_U 3
-#define F_D 4
-#define F_F 5
-#define F_B 6
+#define F_L ivec3(-1, 0, 0)
+#define F_R ivec3( 1, 0, 0)
+#define F_U ivec3( 0, 1, 0)
+#define F_D ivec3( 0,-1, 0)
+#define F_F ivec3( 0, 0,-1)
+#define F_B ivec3( 0, 0, 1)
 
+bool IntersectRayCellFace(vec3 o, vec3 d, ivec3 cellIndex, ivec3 face, out float t)
+{
+    return false;
+}
+
+void FindNextCell(vec3 origin, vec3 dir, float t, ivec3 currentCell)
+{
+    
+}
 
 void main(void)
 {
@@ -55,7 +64,7 @@ void main(void)
                         fragColor = texture(LUT, dataNorm);
                         
                         ivec3 cellIndex = ivec3(x, y, 0);
-                        int face = F_B;
+                        ivec3 face = F_B;
                         
                         return;
                 }
