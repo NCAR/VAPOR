@@ -188,7 +188,7 @@ void Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
     int i = 0;
     
     while (hasNext) {
-        hasNext = FindNextCell(cameraPos, dir, t0, currentCell, entranceFace, nextCell, exitFace, t1);
+        hasNext = FindNextCell(origin, dir, t0, currentCell, entranceFace, nextCell, exitFace, t1);
         
         currentCell = nextCell;
         entranceFace = -exitFace;
@@ -196,7 +196,7 @@ void Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
         i++;
     }
     
-    fragColor = vec4(vec3((i)/(cellDims[0]*2.0f)), 1);
+    fragColor = vec4(vec3((i)/5.0f), 1);
 }
 
 bool IsRayEnteringCell(vec3 d, ivec3 cellIndex, ivec3 face)
@@ -205,20 +205,34 @@ bool IsRayEnteringCell(vec3 d, ivec3 cellIndex, ivec3 face)
     return dot(d, n) < 0;
 }
 
-bool FindInitialCell(vec3 origin, vec3 dir, float t0, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+bool SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, ivec3 side, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
-    for (int y = 0; y < cellDims[1]; y++) {
-        for (int x = 0; x < cellDims[0]; x++) {
-            if (IntersectRayCellFace(cameraPos, dir, ivec3(x, y, 0), F_DOWN, t1)) {
-                cellIndex = ivec3(x,y,0);
-                entranceFace = F_DOWN;
-                
-                if (IsRayEnteringCell(dir, cellIndex, entranceFace))
+    ivec3 index = (side+1)/2 * (cellDims-1);
+    
+    // Perfomance improvement possible
+    for (index[slowDim] = 0; index[slowDim] < cellDims[slowDim]; index[slowDim]++) {
+        for (index[fastDim] = 0; index[fastDim] < cellDims[fastDim]; index[fastDim]++) {
+            if (IntersectRayCellFace(origin, dir, index, side, t1)) {
+                if (IsRayEnteringCell(dir, index, side)) {
+                    cellIndex = index;
+                    entranceFace = side;
                     return true;
+                }
             }
         }
     }
     return false;
+}
+
+bool FindInitialCell(vec3 origin, vec3 dir, float t0, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+{
+    
+    if (SearchSideForInitialCell(origin, dir, t0, F_DOWN, 0, 1, cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCell(origin, dir, t0, F_UP, 0, 1, cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCell(origin, dir, t0, F_LEFT, 1, 2, cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCell(origin, dir, t0, F_RIGHT, 1, 2, cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCell(origin, dir, t0, F_FRONT, 0, 2, cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCell(origin, dir, t0, F_BACK, 0, 2, cellIndex, entranceFace, t1)) return true;
 }
 
 
@@ -241,8 +255,9 @@ void main(void)
         float t0;
         float t1;
         if (FindInitialCell(cameraPos, dir, 0, initialCell, entranceFace, t0)) {
-            // fragColor = vec4(1,0,0,1);
+            fragColor = vec4(vec3(t0/5),1);
             // return;
+            
             Traverse(cameraPos, dir, t0, initialCell, entranceFace, t1);
         }
         return;
