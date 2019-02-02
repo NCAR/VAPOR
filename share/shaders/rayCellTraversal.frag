@@ -186,20 +186,23 @@ void Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
     float tStart = t0;
     
     int i = 0;
+    vec4 accum = vec4(0);
     
     while (hasNext) {
         hasNext = FindNextCell(origin, dir, t0, currentCell, entranceFace, nextCell, exitFace, t1);
+        
+        
         
         currentCell = nextCell;
         entranceFace = -exitFace;
         t0 = t1;
         i++;
         
-        if (i > 1) break;
+        // if (i > 1) break;
     }
     
-    // fragColor = vec4(vec3((i)/(cellDims[0]*2.0)), 1);
-    fragColor = vec4(1);
+    fragColor = vec4(vec3((i)/(cellDims[0]*2.0)), 1);
+    // fragColor = vec4(1);
 }
 
 bool IsRayEnteringCell(vec3 d, ivec3 cellIndex, ivec3 face)
