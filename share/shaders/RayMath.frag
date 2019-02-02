@@ -80,7 +80,7 @@ bool IntersectRayTriangle(vec3 o, vec3 d, vec3 v0, vec3 v1, vec3 v2, out float t
 
 bool IntersectRayQuad(vec3 o, vec3 d, vec3 v0, vec3 v1, vec3 v2, vec3 v3, out float t)
 {
-    return IntersectRayTriangle(o, d, v0, v1, v2, t) ||
-    IntersectRayTriangle(o, d, v2, v3, v0, t);
+    if (IntersectRayTriangle(o, d, v0, v1, v2, t)) return true;
+    if (IntersectRayTriangle(o, d, v2, v3, v0, t)) return true;
     return false;
 }
