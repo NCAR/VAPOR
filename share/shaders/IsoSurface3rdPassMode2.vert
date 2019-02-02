@@ -3,10 +3,16 @@
 // Input vertex positions, **un-normalized** model coordinate
 layout(location = 0) in vec3 vertexPosition;
 
-uniform mat4 MVP;
+// Input vertex indices in X, Y, Z directions
+layout(location = 1) in ivec4 vertexLogicalIdx;
+
+uniform mat4 MV;
+uniform mat4 Projection;
+
+flat out ivec4 provokingVertexIdx;
 
 void main(void)
 {
-    vec4 positionModel = vec4( vertexPosition, 1.0f );
-    gl_Position        = MVP * positionModel;
+    gl_Position        = Projection * MV * vec4( vertexPosition, 1.0 );
+    provokingVertexIdx = vertexLogicalIdx;
 }
