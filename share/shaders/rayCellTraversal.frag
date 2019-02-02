@@ -179,6 +179,20 @@ void Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
     fragColor = vec4(vec3((i)/6.0), 1);
 }
 
+bool FindInitialCell(vec3 origin, vec3 dir, float t0, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+{
+    for (int y = 0; y < coordDims[1]-1; y++) {
+        for (int x = 0; x < coordDims[0]-1; x++) {
+            if (IntersectRayCellFace(cameraPos, dir, ivec3(x, y, 0), F_DOWN, t1)) {
+                cellIndex = ivec3(x,y,0);
+                entranceFace = F_DOWN;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 
 void main(void)
 {
@@ -194,56 +208,14 @@ void main(void)
     
     if (intersectBox) {
         
-        for (int y = 0; y < coordDims[1]-1; y++) {
-            for (int x = 0; x < coordDims[0]-1; x++) {
-                float t;
-                if (IntersectRayCellFace(cameraPos, dir, ivec3(x, y, 0), F_DOWN, t)) {
-                    float dataNorm = NormalizeData(GetDataForCoordIndex(ivec3(x,y,0)));
-                    fragColor = texture(LUT, dataNorm);
-                    
-                    Traverse(cameraPos, dir, t, ivec3(x,y,0), F_DOWN, t1);
-                    return;
-                    
-                    ivec3 exitFace;
-                    float t1;
-                    // if (FindCellExit(cameraPos, dir, t, ivec3(x,y,0), exitFace, t1)) {
-                    //     fragColor = vec4(vec3(t1-t), 1);
-                    // }
-                    ivec3 nextCell;
-                    if (FindNextCell(cameraPos, dir, t, ivec3(x,y,0), nextCell, t1)) {
-                        fragColor = vec4(vec3(t1-t), 1);
-                    } else {
-                        //fragColor = vec4(1,0,0,1);
-                    }
-                    
-                    // fragColor.rgb = vec3(t/5);
-                    // fragColor.a = 1;
-                    
-                    
-                    
-                    return;
-                }
-            }
+        ivec3 initialCell;
+        ivec3 entranceFace;
+        float t0;
+        float t1;
+        if (FindInitialCell(cameraPos, dir, 0, initialCell, entranceFace, t0)) {
+            Traverse(cameraPos, dir, t0, initialCell, entranceFace, t1);
         }
-        
-        float step = max(((t1-t0)/100.f)*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/100.f);
-        
-		int stepi = 0;
-        for (float t = t0; t < t1 && stepi < 100; t += step, stepi++) {
-            vec3 hit = cameraPos + dir * t;
-            vec3 coordSTR = (hit - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
-			vec3 dataSTR = texture(coords, coordSTR).rgb;
-
-			vec4 color = vec4(dataSTR/3, 1);
-            
-            accum.rgb += color.rgb * color.a * (1-accum.a);
-            accum.a += color.a * (1-accum.a);
-            
-            if (accum.a > 0.999)
-                break;
-        }
-        
-        fragColor = accum;
+        return;
     }
         
     if (accum.a < 0.1)
