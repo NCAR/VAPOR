@@ -2,6 +2,8 @@
 
 #include RayMath.frag
 
+#define EPSILON 1.19e-07
+
 uniform mat4 MVP;
 // uniform vec2 resolution;
 uniform vec3 cameraPos;
@@ -117,12 +119,17 @@ bool IntersectRayCellFace(vec3 o, vec3 d, ivec3 cellIndex, ivec3 face, out float
         t);
 }
 
-bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 exitFace, out float t1)
+bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out ivec3 exitFace, out float t1)
 {
     for (int i = 0; i < 6; i++) {
-        if (IntersectRayCellFace(origin, dir, currentCell, GetFaceFromFaceIndex(i), t1)) {
-            if (t1 > t0) {
-                exitFace = GetFaceFromFaceIndex(i);
+        ivec3 testFace = GetFaceFromFaceIndex(i);
+        
+        if (testFace == entranceFace)
+            continue;
+            
+        if (IntersectRayCellFace(origin, dir, currentCell, testFace, t1)) {
+            if (t1 - t0 > EPSILON) {
+                exitFace = testFace;
                 return true;
             }
         }
@@ -130,10 +137,15 @@ bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 
     return false;
 }
 
-bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 nextCell, out float t1)
+// Recommended to provide entranceFace to guarentee no self-intersection
+bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 exitFace, out float t1)
 {
-    ivec3 exitFace;
-    if (FindCellExit(origin, dir, t0, currentCell, exitFace, t1)) {
+    return FindCellExit(origin, dir, t0, currentCell, ivec3(0), exitFace, t1);
+}
+
+bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out ivec3 nextCell, out ivec3 exitFace, out float t1)
+{
+    if (FindCellExit(origin, dir, t0, currentCell, entranceFace, exitFace, t1)) {
         nextCell = currentCell + exitFace;
         if (any(lessThan(nextCell, ivec3(0))) || any(greaterThanEqual(nextCell, cellDims)))
             return false;
@@ -141,6 +153,32 @@ bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 
     }
     return false;
 }
+
+bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 nextCell, out float t1)
+{
+    ivec3 null;
+    return FindNextCell(origin, dir, t0, currentCell, ivec3(0), nextCell, null, t1);
+}
+
+void Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out float t1)
+{
+    ivec3 nextCell;
+    ivec3 exitFace;
+    bool hasNext = true;
+    float tStart = t0;
+    
+    int i;
+    for (i = 0; i < 10 && hasNext; i++) {
+        hasNext = FindNextCell(cameraPos, dir, t0, currentCell, entranceFace, nextCell, exitFace, t1);
+        
+        currentCell = nextCell;
+        entranceFace = -exitFace;
+        t0 = t1;
+    }
+    
+    fragColor = vec4(vec3((i)/6.0), 1);
+}
+
 
 void main(void)
 {
@@ -162,6 +200,9 @@ void main(void)
                 if (IntersectRayCellFace(cameraPos, dir, ivec3(x, y, 0), F_DOWN, t)) {
                     float dataNorm = NormalizeData(GetDataForCoordIndex(ivec3(x,y,0)));
                     fragColor = texture(LUT, dataNorm);
+                    
+                    Traverse(cameraPos, dir, t, ivec3(x,y,0), F_DOWN, t1);
+                    return;
                     
                     ivec3 exitFace;
                     float t1;
