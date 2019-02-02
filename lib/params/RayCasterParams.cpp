@@ -35,22 +35,25 @@ bool RayCasterParams::GetLighting() const
 std::vector<double> RayCasterParams::GetLightingCoeffs() const
 {
     std::vector<double> defaultVec(4);
-    defaultVec[0] = 0.5;
-    defaultVec[1] = 0.3;
-    defaultVec[2] = 0.2;
-    defaultVec[3] = 12.0;
+    defaultVec[0] = 0.2;
+    defaultVec[1] = 0.5;
+    defaultVec[2] = 0.25;
+    defaultVec[3] = 8.0;
     return GetValueDoubleVec(_lightingCoeffsTag, defaultVec);
 }
 
 void RayCasterParams::SetLightingCoeffs(const std::vector<double> &coeffs) { SetValueDoubleVec(_lightingCoeffsTag, "Coefficients for lighting effects", coeffs); }
 
-long RayCasterParams::GetCastingMode() const { return GetValueLong(_castingModeTag, 1); }
+long RayCasterParams::GetCastingMode() const
+{
+    return GetValueLong(_castingModeTag, 0);    // 0 means it's not set by the user yet.
+}
 
 void RayCasterParams::SetCastingMode(long mode)
 {
     if (mode == 1 || mode == 2)    // currently supported casting modes
         SetValueLong(_castingModeTag, "Which ray casting mode", mode);
-    else    // put a default mode
+    else    // put mode 1 here
         SetValueLong(_castingModeTag, "Which ray casting mode", 1);
 }
 

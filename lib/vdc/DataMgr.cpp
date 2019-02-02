@@ -426,7 +426,7 @@ template<class T> void copy_block(const T *src, T *dst, const vector<size_t> &mi
 
     size_t block_size = VProduct(bs3);
 
-    for (long k = min3[2], kk = 0; k <= max3[2] && k < dims3[2]; k++, kk++) {
+    for (long k = min3[2], kk = 0; k <= (long)max3[2] && k < (long)dims3[2]; k++, kk++) {
         if (k < 0) continue;
 
         // Coordinates of destination block (block coordinates)
@@ -437,12 +437,12 @@ template<class T> void copy_block(const T *src, T *dst, const vector<size_t> &mi
         //
         size_t dst_k = k % bs3[2];
 
-        for (long j = min3[1], jj = 0; j <= max3[1] && j < dims3[1]; j++, jj++) {
+        for (long j = min3[1], jj = 0; j <= (long)max3[1] && j < (long)dims3[1]; j++, jj++) {
             if (j < 0) continue;
             size_t dst_j_b = j / bs3[1];
             size_t dst_j = j % bs3[1];
 
-            for (long i = min3[0], ii = 0; i <= max3[0] && i < dims3[0]; i++, ii++) {
+            for (long i = min3[0], ii = 0; i <= (long)max3[0] && i < (long)dims3[0]; i++, ii++) {
                 if (i < 0) continue;
 
                 size_t dst_i_b = i / bs3[0];
@@ -2050,6 +2050,16 @@ bool DataMgr::_hasHorizontalXForm(string meshname) const
         bool ok = _dc->GetCoordVarInfo(coordVars[i], varInfo);
         assert(ok);
 
+        //
+        if (varInfo.GetUnits().empty()) continue;
+
+        // Version 1.0 of CF conventions allows "degrees" as units
+        // for both lat and longitude. So we check IsLonUnit,
+        // which looks for "degrees_east", "degrees_E", etc., and
+        // IsLatOrLonUnit, which will return true for "degrees". Unforunately,
+        // IsLatOrLonUnit will also return true for an empty string "", so
+        // we explicitly test for that above.
+        //
         if (varInfo.GetAxis() == 0 && (_udunits.IsLonUnit(varInfo.GetUnits()) || _udunits.IsLatOrLonUnit(varInfo.GetUnits()))) { return (true); }
         if (varInfo.GetAxis() == 1 && (_udunits.IsLatUnit(varInfo.GetUnits()) || _udunits.IsLatOrLonUnit(varInfo.GetUnits()))) { return (true); }
     }
