@@ -185,16 +185,18 @@ void Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
     bool hasNext = true;
     float tStart = t0;
     
-    int i;
-    for (i = 0; i < 10 && hasNext; i++) {
+    int i = 0;
+    
+    while (hasNext) {
         hasNext = FindNextCell(cameraPos, dir, t0, currentCell, entranceFace, nextCell, exitFace, t1);
         
         currentCell = nextCell;
         entranceFace = -exitFace;
         t0 = t1;
+        i++;
     }
     
-    fragColor = vec4(vec3((i)/6.0), 1);
+    fragColor = vec4(vec3((i)/(cellDims[0]*2.0f)), 1);
 }
 
 bool IsRayEnteringCell(vec3 d, ivec3 cellIndex, ivec3 face)
