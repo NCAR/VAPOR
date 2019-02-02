@@ -92,6 +92,16 @@ void GetFaceCoordinateIndices(ivec3 cell, ivec3 face, out ivec3 i0, out ivec3 i1
     }
 }
 
+void GetFaceVertices(ivec3 cellIndex, ivec3 face, out vec3 v0, out vec3 v1, out vec3 v2, out vec3 v3)
+{
+    ivec3 i0, i1, i2, i3;
+    GetFaceCoordinateIndices(cellIndex, face, i0, i1, i2, i3);
+    v0 = texture(coords, i0/coordDimsF).xyz;
+    v1 = texture(coords, i1/coordDimsF).xyz;
+    v2 = texture(coords, i2/coordDimsF).xyz;
+    v3 = texture(coords, i3/coordDimsF).xyz;
+}
+
 float GetDataCoordinateSpace(vec3 coordinates)
 {
     return texture(data, (coordinates+vec3(0.5))/(coordDims-1)).r;
@@ -109,14 +119,22 @@ float NormalizeData(float data)
 
 bool IntersectRayCellFace(vec3 o, vec3 d, ivec3 cellIndex, ivec3 face, out float t)
 {
-    ivec3 i0, i1, i2, i3;
-    GetFaceCoordinateIndices(cellIndex, face, i0, i1, i2, i3);
-    return IntersectRayQuad(o, d,
-        texture(coords, i0/coordDimsF).xyz,
-        texture(coords, i1/coordDimsF).xyz,
-        texture(coords, i2/coordDimsF).xyz,
-        texture(coords, i3/coordDimsF).xyz,
-        t);
+    vec3 v0, v1, v2, v3;
+    GetFaceVertices(cellIndex, face, v0, v1, v2, v3);
+    return IntersectRayQuad(o, d, v0, v1, v2, v3, t);
+}
+
+vec3 GetTriangleNormal(vec3 v0, vec3 v1, vec3 v2)
+{
+    return cross(v1-v0, v2-v0);
+}
+
+vec3 GetCellFaceNormal(ivec3 cellIndex, ivec3 face)
+{
+    vec3 v0, v1, v2, v3;
+    GetFaceVertices(cellIndex, face, v0, v1, v2, v3);
+    
+    return (GetTriangleNormal(v0, v1, v2) + GetTriangleNormal(v0, v2, v3)) / 2.0f;
 }
 
 bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out ivec3 exitFace, out float t1)
@@ -179,14 +197,22 @@ void Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
     fragColor = vec4(vec3((i)/6.0), 1);
 }
 
+bool IsRayEnteringCell(vec3 d, ivec3 cellIndex, ivec3 face)
+{
+    vec3 n = GetCellFaceNormal(cellIndex, face);
+    return dot(d, n) < 0;
+}
+
 bool FindInitialCell(vec3 origin, vec3 dir, float t0, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
-    for (int y = 0; y < coordDims[1]-1; y++) {
-        for (int x = 0; x < coordDims[0]-1; x++) {
+    for (int y = 0; y < cellDims[1]; y++) {
+        for (int x = 0; x < cellDims[0]; x++) {
             if (IntersectRayCellFace(cameraPos, dir, ivec3(x, y, 0), F_DOWN, t1)) {
                 cellIndex = ivec3(x,y,0);
                 entranceFace = F_DOWN;
-                return true;
+                
+                if (IsRayEnteringCell(dir, cellIndex, entranceFace))
+                    return true;
             }
         }
     }
@@ -213,6 +239,8 @@ void main(void)
         float t0;
         float t1;
         if (FindInitialCell(cameraPos, dir, 0, initialCell, entranceFace, t0)) {
+            // fragColor = vec4(1,0,0,1);
+            // return;
             Traverse(cameraPos, dir, t0, initialCell, entranceFace, t1);
         }
         return;
