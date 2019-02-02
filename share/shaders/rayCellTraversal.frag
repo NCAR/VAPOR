@@ -28,6 +28,16 @@ out vec4 fragColor;
 #define F_FRONT ivec3( 0, 0,-1)
 #define F_BACK ivec3( 0, 0, 1)
 
+ivec3 GetFaceFromFaceIndex(int i)
+{
+    if (i == 0) return F_LEFT;
+    if (i == 1) return F_RIGHT;
+    if (i == 2) return F_UP;
+    if (i == 3) return F_DOWN;
+    if (i == 4) return F_FRONT;
+    if (i == 5) return F_BACK;
+}
+
 void GetFaceCoordinateIndices(ivec3 cell, ivec3 face, out ivec3 i0, out ivec3 i1, out ivec3 i2, out ivec3 i3)
 {
     // CCW
@@ -69,6 +79,21 @@ void GetFaceCoordinateIndices(ivec3 cell, ivec3 face, out ivec3 i0, out ivec3 i1
     }
 }
 
+float GetDataCoordinateSpace(vec3 coordinates)
+{
+    return texture(data, (coordinates+vec3(0.5))/(coordDims-1)).r;
+}
+
+float GetDataForCoordIndex(ivec3 coordIndex)
+{
+    return GetDataCoordinateSpace(vec3(coordIndex));
+}
+
+float NormalizeData(float data)
+{
+    return (data - LUTMin) / (LUTMax - LUTMin);
+}
+
 bool IntersectRayCellFace(vec3 o, vec3 d, ivec3 cellIndex, ivec3 face, out float t)
 {
     ivec3 i0, i1, i2, i3;
@@ -81,9 +106,19 @@ bool IntersectRayCellFace(vec3 o, vec3 d, ivec3 cellIndex, ivec3 face, out float
         t);
 }
 
-void FindNextCell(vec3 origin, vec3 dir, float t, ivec3 currentCell)
+bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 exitFace, out float t1)
 {
-    
+    for (int i = 0; i < 6; i++) {
+        if (IntersectRayCellFace(origin, dir, currentCell, GetFaceFromFaceIndex(i), t1)) {
+            if (t1 > t0) {
+                exitFace = GetFaceFromFaceIndex(i);
+                return true;
+                // if (any(lessThan(nextCell, ivec3(0))) || any(greaterThanEqual(nextCell, coordDims)))
+                    // return false;
+            }
+        }
+    }
+    return false;
 }
 
 void main(void)
@@ -104,12 +139,21 @@ void main(void)
             for (int x = 0; x < coordDims[0]-1; x++) {
                 float t;
                 if (IntersectRayCellFace(cameraPos, dir, ivec3(x, y, 0), F_DOWN, t)) {
-                        float dataNorm = (texture(data, (vec3(x,y,0)+vec3(0.5))/(coordDims-1)).r - LUTMin) / (LUTMax - LUTMin);
-                        fragColor = texture(LUT, dataNorm);
-                        
-                        ivec3 cellIndex = ivec3(x, y, 0);
-                        
-                        return;
+                    float dataNorm = NormalizeData(GetDataForCoordIndex(ivec3(x,y,0)));
+                    fragColor = texture(LUT, dataNorm);
+                    
+                    ivec3 exitFace;
+                    float t1;
+                    if (FindCellExit(cameraPos, dir, t, ivec3(x,y,0), exitFace, t1)) {
+                        fragColor = vec4(vec3(t1-t), 1);
+                    }
+                    
+                    // fragColor.rgb = vec3(t/5);
+                    // fragColor.a = 1;
+                    
+                    
+                    
+                    return;
                 }
             }
         }
