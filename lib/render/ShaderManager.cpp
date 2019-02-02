@@ -36,9 +36,11 @@ bool ShaderManager::_wasFileModified(const std::string &path) const {
 }
 
 ShaderProgram *ShaderManager::GetShader(const std::string &name) {
+#warning Remove auto reload of RayMath.frag
 #if SHADER_AUTORELOAD
     if (HasResource(name)) {
-        const vector<string> paths = _getSourceFilePaths(name);
+        vector<string> paths = _getSourceFilePaths(name);
+        paths.push_back(GetSharePath("shaders/RayMath.frag"));
         for (auto it = paths.begin(); it != paths.end(); ++it) {
             long mtime = FileUtils::GetFileModifiedTime(*it);
             if (mtime > _modifiedTimes[*it]) {
