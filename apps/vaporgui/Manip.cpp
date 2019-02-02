@@ -86,7 +86,7 @@ TranslateStretchManip::TranslateStretchManip(GLManager *glManager) : Manip(glMan
     }
 }
 
-void TranslateStretchManip::transformMatrix(VAPoR::Transform *transform) {
+void TranslateStretchManip::transformMatrix(VAPoR::Transform *transform, std::vector<double> parentScales) {
     MatrixManager *mm = _glManager->matrixManager;
 
     mm->MatrixModeModelView();
@@ -103,20 +103,23 @@ void TranslateStretchManip::transformMatrix(VAPoR::Transform *transform) {
     vector<double> translations = transform->GetTranslations();
     vector<double> rotations = transform->GetRotations();
     vector<double> scales = transform->GetScales();
-    vector<double> origins = transform->GetOrigin();
+    vector<double> origin = transform->GetOrigin();
     assert(translations.size() == 3);
     assert(rotations.size() == 3);
     assert(scales.size() == 3);
-    assert(origins.size() == 3);
+    assert(origin.size() == 3);
 
-    mm->Translate(origins[X], origins[Y], origins[Z]);
-    mm->Scale(scales[X], scales[Y], scales[Z]);
-    mm->Rotate(glm::radians(rotations[X]), 1, 0, 0);
-    mm->Rotate(glm::radians(rotations[Y]), 0, 1, 0);
-    mm->Rotate(glm::radians(rotations[Z]), 0, 0, 1);
-    mm->Translate(-origins[X], -origins[Y], -origins[Z]);
+    mm->Scale(1 / parentScales[0], 1 / parentScales[1], 1 / parentScales[2]);
 
-    mm->Translate(translations[X], translations[Y], translations[Z]);
+    mm->Translate(translations[0], translations[1], translations[2]);
+    mm->Translate(origin[0], origin[1], origin[2]);
+    mm->Rotate(glm::radians(rotations[0]), 1, 0, 0);
+    mm->Rotate(glm::radians(rotations[1]), 0, 1, 0);
+    mm->Rotate(glm::radians(rotations[2]), 0, 0, 1);
+    mm->Scale(scales[0], scales[1], scales[2]);
+    mm->Translate(-origin[0], -origin[1], -origin[2]);
+
+    mm->Scale(parentScales[0], parentScales[1], parentScales[2]);
 
     // Retrieve the transformed matrix and stick it back into
     // our _modelViewMatrix array
@@ -232,16 +235,18 @@ void TranslateStretchManip::_mouseDrag(
 
             _dragDistance = mouseProjToNorm - handleProjToNorm;
 
-            // Copied from old code
-            // Prevent handle from going through opposite handle
-            int oppositeHandle = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
-            if (_selectedHandle < 3) {
-                if (_dragDistance + _selection[oppositeHandle] > _selection[oppositeHandle + 3]) {
-                    _dragDistance = _selection[oppositeHandle + 3] - _selection[oppositeHandle];
-                }
-            } else { //Moving "high" handle:
-                if (_dragDistance + _selection[oppositeHandle + 3] < _selection[oppositeHandle]) {
-                    _dragDistance = _selection[oppositeHandle] - _selection[oppositeHandle + 3];
+            if (_buttonNum == 3) { // Don't restrict movement if using the manip to drag
+                // Copied from old code
+                // Prevent handle from going through opposite handle
+                int oppositeHandle = (_selectedHandle < 3) ? (2 - _selectedHandle) : (_selectedHandle - 3);
+                if (_selectedHandle < 3) {
+                    if (_dragDistance + _selection[oppositeHandle] > _selection[oppositeHandle + 3]) {
+                        _dragDistance = _selection[oppositeHandle + 3] - _selection[oppositeHandle];
+                    }
+                } else { //Moving "high" handle:
+                    if (_dragDistance + _selection[oppositeHandle + 3] < _selection[oppositeHandle]) {
+                        _dragDistance = _selection[oppositeHandle] - _selection[oppositeHandle + 3];
+                    }
                 }
             }
         }
@@ -826,7 +831,7 @@ void TranslateStretchManip::drawCubeFaces(double *extents, bool isSelected) {
 void TranslateStretchManip::Render() {
     transformMatrix(_dmTransform);
     if (_rpTransform != NULL)
-        transformMatrix(_rpTransform);
+        transformMatrix(_rpTransform, _dmTransform->GetScales());
 
     _handleSizeInScene = getPixelSize() * (float)HANDLE_DIAMETER;
 
