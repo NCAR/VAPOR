@@ -12,6 +12,7 @@ uniform float LUTMax;
 
 uniform ivec3 coordDims;
 vec3 coordDimsF = vec3(coordDims);
+ivec3 cellDims = coordDims - 1;
 
 uniform sampler3D data;
 uniform sampler1D LUT;
@@ -21,12 +22,12 @@ in vec2 ST;
 
 out vec4 fragColor;
 
-#define F_LEFT ivec3(-1, 0, 0)
+#define F_LEFT  ivec3(-1, 0, 0)
 #define F_RIGHT ivec3( 1, 0, 0)
-#define F_UP ivec3( 0, 1, 0)
-#define F_DOWN ivec3( 0,-1, 0)
-#define F_FRONT ivec3( 0, 0,-1)
-#define F_BACK ivec3( 0, 0, 1)
+#define F_UP    ivec3( 0, 0, 1)
+#define F_DOWN  ivec3( 0, 0,-1)
+#define F_FRONT ivec3( 0,-1, 0)
+#define F_BACK  ivec3( 0, 1, 0)
 
 ivec3 GetFaceFromFaceIndex(int i)
 {
@@ -36,6 +37,16 @@ ivec3 GetFaceFromFaceIndex(int i)
     if (i == 3) return F_DOWN;
     if (i == 4) return F_FRONT;
     if (i == 5) return F_BACK;
+}
+
+vec4 DEBUG_GetFaceColor(ivec3 face)
+{
+    if (face == F_LEFT)  return vec4(0,0,1,1); // Blue
+    if (face == F_RIGHT) return vec4(0,1,0,1); // Green
+    if (face == F_UP)    return vec4(0,1,1,1); // Cyan
+    if (face == F_DOWN)  return vec4(1,0,0,1); // Red
+    if (face == F_FRONT) return vec4(1,0,1,1); // Purple
+    if (face == F_BACK)  return vec4(1,1,0,1); // Yellow
 }
 
 void GetFaceCoordinateIndices(ivec3 cell, ivec3 face, out ivec3 i0, out ivec3 i1, out ivec3 i2, out ivec3 i3)
@@ -113,10 +124,20 @@ bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 
             if (t1 > t0) {
                 exitFace = GetFaceFromFaceIndex(i);
                 return true;
-                // if (any(lessThan(nextCell, ivec3(0))) || any(greaterThanEqual(nextCell, coordDims)))
-                    // return false;
             }
         }
+    }
+    return false;
+}
+
+bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 nextCell, out float t1)
+{
+    ivec3 exitFace;
+    if (FindCellExit(origin, dir, t0, currentCell, exitFace, t1)) {
+        nextCell = currentCell + exitFace;
+        if (any(lessThan(nextCell, ivec3(0))) || any(greaterThanEqual(nextCell, cellDims)))
+            return false;
+        return true;
     }
     return false;
 }
@@ -144,8 +165,14 @@ void main(void)
                     
                     ivec3 exitFace;
                     float t1;
-                    if (FindCellExit(cameraPos, dir, t, ivec3(x,y,0), exitFace, t1)) {
+                    // if (FindCellExit(cameraPos, dir, t, ivec3(x,y,0), exitFace, t1)) {
+                    //     fragColor = vec4(vec3(t1-t), 1);
+                    // }
+                    ivec3 nextCell;
+                    if (FindNextCell(cameraPos, dir, t, ivec3(x,y,0), nextCell, t1)) {
                         fragColor = vec4(vec3(t1-t), 1);
+                    } else {
+                        //fragColor = vec4(1,0,0,1);
                     }
                     
                     // fragColor.rgb = vec3(t/5);
