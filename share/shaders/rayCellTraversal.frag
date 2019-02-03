@@ -242,6 +242,8 @@ void Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
         i++;
         
         // if (i > 1) break;
+        if (accum.a > 0.995)
+            break;
     }
     fragColor = accum;
 }
