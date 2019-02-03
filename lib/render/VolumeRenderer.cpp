@@ -119,8 +119,12 @@ int VolumeRenderer::_paintGL(bool fast)
     _glManager->matrixManager->GetDoublev(MatrixManager::Mode::ModelView, m);
     VP->ReconstructCamera(m, cameraPos, cameraUp, cameraDir);
     
-    vector<double> minExts, maxExts;
-    GetActiveParams()->GetBox()->GetExtents(minExts, maxExts);
+    vector<double> dMinExts, dMaxExts;
+    GetActiveParams()->GetBox()->GetExtents(dMinExts, dMaxExts);
+    vec3 minExts(dMinExts[0], dMinExts[1], dMinExts[2]);
+    vec3 maxExts(dMaxExts[0], dMaxExts[1], dMaxExts[2]);
+    vec3 extLengths = maxExts - minExts;
+    float smallestDimension = min(extLengths[0], min(extLengths[1], extLengths[2]));
     
     SmartShaderProgram shader(algorithm->GetShader(_glManager->shaderManager));
     if (!shader.IsValid())
@@ -130,10 +134,11 @@ int VolumeRenderer::_paintGL(bool fast)
     // shader->SetUniform("Projection", _glManager->matrixManager->GetProjectionMatrix());
     // shader->SetUniform("resolution", vec2(resolution[0], resolution[1]));
     shader->SetUniform("cameraPos", vec3(cameraPos[0], cameraPos[1], cameraPos[2]));
-    shader->SetUniform("dataBoundsMin", vec3(minExts[0], minExts[1], minExts[2]));
-    shader->SetUniform("dataBoundsMax", vec3(maxExts[0], maxExts[1], maxExts[2]));
+    shader->SetUniform("dataBoundsMin", minExts);
+    shader->SetUniform("dataBoundsMax", maxExts);
     shader->SetUniform("LUTMin", (float)cache.mapRange[0]);
     shader->SetUniform("LUTMax", (float)cache.mapRange[1]);
+    shader->SetUniform("unitDistance", smallestDimension/100.f);
     
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_3D, dataTexture);
