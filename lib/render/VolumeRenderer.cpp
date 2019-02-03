@@ -112,7 +112,7 @@ int VolumeRenderer::_paintGL(bool fast) {
 
     GLint viewport[4] = {0};
     glGetIntegerv(GL_VIEWPORT, viewport);
-    float resolution[2] = {static_cast<float>(viewport[2]), static_cast<float>(viewport[3])};
+    // float resolution[2] = {static_cast<float>(viewport[2]), static_cast<float>(viewport[3])};
 
     Viewpoint *VP = _paramsMgr->GetViewpointParams(_winName)->getCurrentViewpoint();
     double m[16];
