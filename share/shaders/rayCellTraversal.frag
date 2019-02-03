@@ -13,6 +13,8 @@ uniform float LUTMin;
 uniform float LUTMax;
 
 uniform ivec3 coordDims;
+uniform float unitDistance;
+
 vec3 coordDimsF = vec3(coordDims);
 ivec3 cellDims = coordDims - 1;
 
@@ -104,17 +106,27 @@ void GetFaceVertices(ivec3 cellIndex, ivec3 face, out vec3 v0, out vec3 v1, out 
 
 float GetDataCoordinateSpace(vec3 coordinates)
 {
-    return texture(data, (coordinates+vec3(0.5))/(coordDims-1)).r;
+    return texture(data, (coordinates)/(coordDims-1)).r;
 }
 
 float GetDataForCoordIndex(ivec3 coordIndex)
 {
-    return GetDataCoordinateSpace(vec3(coordIndex));
+    return GetDataCoordinateSpace(vec3(coordIndex)+vec3(0.5));
 }
 
 float NormalizeData(float data)
 {
     return (data - LUTMin) / (LUTMax - LUTMin);
+}
+
+vec4 GetColorForNormalizedData(float normalizedData)
+{
+    return texture(LUT, normalizedData);
+}
+
+vec4 GetAverageColorForCoordIndex(ivec3 coordIndex)
+{
+    return GetColorForNormalizedData(NormalizeData(GetDataForCoordIndex(coordIndex)));
 }
 
 bool IntersectRayCellFace(vec3 o, vec3 d, ivec3 cellIndex, ivec3 face, out float t)
@@ -178,6 +190,33 @@ bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 
     return FindNextCell(origin, dir, t0, currentCell, ivec3(0), nextCell, null, t1);
 }
 
+void BlendToBack(inout vec4 accum, vec4 color)
+{
+    accum.rgb += color.rgb * color.a * (1-accum.a);
+    accum.a += color.a * (1-accum.a);
+}
+
+// In the above descrete blending equation we have (c = color.a):
+//
+// a_n+1 = a_n + c_n * (1-a_n)
+//
+// This can be rearranged to:
+//
+// a_n+1 = a_n(1-c_n)+c_n
+//
+// Integrating we get:
+//
+//              f n
+//             -|  c_n
+// a_n = 1 - e^ j 0
+//
+// And the for a constant c, the above integral evaluates to the linear function below
+//
+float IntegrateConstantAlpha(float a, float distance)
+{
+    return 1 - exp(-a * distance);
+}
+
 void Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out float t1)
 {
     ivec3 nextCell;
@@ -187,11 +226,15 @@ void Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
     
     int i = 0;
     vec4 accum = vec4(0);
+    float a = 0;
     
     while (hasNext) {
         hasNext = FindNextCell(origin, dir, t0, currentCell, entranceFace, nextCell, exitFace, t1);
         
+        vec4 color = GetAverageColorForCoordIndex(currentCell);
         
+        color.a = IntegrateConstantAlpha(color.a, (t1-t0)/unitDistance);
+        BlendToBack(accum, color);
         
         currentCell = nextCell;
         entranceFace = -exitFace;
@@ -200,9 +243,7 @@ void Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
         
         // if (i > 1) break;
     }
-    
-    fragColor = vec4(vec3((i)/(cellDims[0]*2.0)), 1);
-    // fragColor = vec4(1);
+    fragColor = accum;
 }
 
 bool IsRayEnteringCell(vec3 d, ivec3 cellIndex, ivec3 face)
