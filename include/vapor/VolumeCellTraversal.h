@@ -13,7 +13,7 @@ public:
 
 private:
     unsigned int xyCoordTexture;
-    unsigned int zCoordTexture;
+    unsigned int coordTexture;
 
     int coordDims[3];
 };
