@@ -9,8 +9,8 @@ using std::vector;
 using namespace VAPoR;
 
 VolumeCellTraversal::VolumeCellTraversal() {
-    glGenTextures(1, &zCoordTexture);
-    glBindTexture(GL_TEXTURE_3D, zCoordTexture);
+    glGenTextures(1, &coordTexture);
+    glBindTexture(GL_TEXTURE_3D, coordTexture);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -26,8 +26,8 @@ VolumeCellTraversal::VolumeCellTraversal() {
 }
 
 VolumeCellTraversal::~VolumeCellTraversal() {
-    if (zCoordTexture)
-        glDeleteTextures(1, &zCoordTexture);
+    if (coordTexture)
+        glDeleteTextures(1, &coordTexture);
     if (xyCoordTexture)
         glDeleteTextures(1, &xyCoordTexture);
 }
@@ -69,7 +69,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
         }
     }
 
-    glBindTexture(GL_TEXTURE_3D, zCoordTexture);
+    glBindTexture(GL_TEXTURE_3D, coordTexture);
     glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB16F, dims[0], dims[1], dims[2], 0, GL_RGB, GL_FLOAT, data);
 
     delete[] data;
@@ -85,7 +85,7 @@ ShaderProgram *VolumeCellTraversal::GetShader(ShaderManager *sm) {
     s->SetUniform("coordDims", *(glm::ivec3 *)&coordDims);
 
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_3D, zCoordTexture);
+    glBindTexture(GL_TEXTURE_3D, coordTexture);
 
     s->SetUniform("coords", 2);
 
