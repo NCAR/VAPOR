@@ -14,6 +14,7 @@ uniform float LUTMax;
 
 uniform ivec3 coordDims;
 uniform float unitDistance;
+uniform int BBLevels;
 
 vec3 coordDimsF = vec3(coordDims);
 ivec3 cellDims = coordDims - 1;
@@ -23,6 +24,7 @@ uniform sampler1D LUT;
 uniform sampler3D coords;
 uniform sampler2DArray boxMins;
 uniform sampler2DArray boxMaxs;
+uniform sampler2D levelDims;
 
 in vec2 ST;
 
