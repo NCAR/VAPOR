@@ -7,6 +7,14 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/ext/matrix_relational.hpp>
 
+#ifdef WIN32
+    #include <Windows.h>
+#else
+    #ifdef Darwin
+        #include <time.h>
+    #endif
+#endif
+
 #define OUTOFDATE   1
 #define GLNOTREADY  2
 #define GRIDERROR   -1
@@ -1123,6 +1131,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const
         // Update indices buffer
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
+        _sleepAWhile();
     }
 
     //
@@ -1159,6 +1168,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const
         }
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
+        _sleepAWhile();
     }
 
     if (attrib1Enabled) {
@@ -1203,6 +1213,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const
         }
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
+        _sleepAWhile();
     }
 
     //
@@ -1238,6 +1249,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const
         }
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
+        _sleepAWhile();
     }
 
     // Each strip will have the same numOfVertices for the rest 2 faces.
@@ -1288,6 +1300,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const
         }
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
+        _sleepAWhile();
     }
 
     //
@@ -1323,6 +1336,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const
         }
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices, GL_UNSIGNED_INT, (void *)0);
+        _sleepAWhile();
     }
 
     if (attrib1Enabled) delete[] attrib1Buffer;
@@ -1514,4 +1528,19 @@ int RayCaster::_selectDefaultCastingMethod() const
     delete grid;
 
     return 0;
+}
+
+void RayCaster::_sleepAWhile() const
+{
+    glFinish();
+#ifdef WIN32
+    Sleep(3);    // 3 milliseconds
+#else
+    #ifdef Darwin
+    struct timespec req, rem;
+    req.tv_sec = 0;
+    req.tv_nsec = 3000000L;    // 3 milliseconds
+    nanosleep(&req, &rem);
+    #endif
+#endif
 }
