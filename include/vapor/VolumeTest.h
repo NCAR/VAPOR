@@ -6,7 +6,7 @@ namespace VAPoR {
 
 class VolumeTest : public VolumeRegular {
   public:
-    VolumeTest();
+    VolumeTest(GLManager *gl);
     ~VolumeTest();
     virtual int LoadData(const Grid *grid);
     virtual ShaderProgram *GetShader(ShaderManager *sm);
