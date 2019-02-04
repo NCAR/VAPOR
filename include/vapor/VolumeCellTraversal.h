@@ -6,14 +6,18 @@ namespace VAPoR {
 
 class VolumeCellTraversal : public VolumeRegular {
   public:
-    VolumeCellTraversal();
+    VolumeCellTraversal(GLManager *gl);
     ~VolumeCellTraversal();
     virtual int LoadData(const Grid *grid);
     virtual ShaderProgram *GetShader(ShaderManager *sm);
 
   private:
-    unsigned int xyCoordTexture;
+    unsigned int minTexture;
+    unsigned int maxTexture;
     unsigned int coordTexture;
+
+    unsigned int VAO;
+    unsigned int VBO;
 
     int coordDims[3];
 };
