@@ -20,7 +20,7 @@ protected:
     int  _paintGL(bool fast);
     void _clearCache(){};
 
-    void _loadData();
+    int  _loadData();
     void _loadTF();
 
     VolumeAlgorithm *algorithm;

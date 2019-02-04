@@ -22,7 +22,7 @@ VolumeRenderer::VolumeRenderer(const ParamsMgr *pm, std::string &winName, std::s
     VBO = NULL;
     dataTexture = NULL;
     LUTTexture = NULL;
-    algorithm = VolumeAlgorithm::NewAlgorithm("Regular");
+    algorithm = VolumeAlgorithm::NewAlgorithm("Regular", _glManager);
 }
 
 VolumeRenderer::~VolumeRenderer()
@@ -82,11 +82,11 @@ int VolumeRenderer::_paintGL(bool fast)
     if (cache.algorithmName != vp->GetAlgorithm()) {
         cache.algorithmName = vp->GetAlgorithm();
         if (algorithm) delete algorithm;
-        algorithm = VolumeAlgorithm::NewAlgorithm(cache.algorithmName);
+        algorithm = VolumeAlgorithm::NewAlgorithm(cache.algorithmName, _glManager);
         cache.needsUpdate = true;
     }
 
-    _loadData();
+    if (_loadData() < 0) return -1;
     _loadTF();
     cache.needsUpdate = false;
 
@@ -124,6 +124,7 @@ int VolumeRenderer::_paintGL(bool fast)
     glBindTexture(GL_TEXTURE_3D, dataTexture);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_1D, LUTTexture);
+    GL_ERR_BREAK();
 
     shader->SetUniform("data", 0);
     shader->SetUniform("LUT", 1);
@@ -133,26 +134,28 @@ int VolumeRenderer::_paintGL(bool fast)
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glDisable(GL_BLEND);
+    GL_ERR_BREAK();
 
     glBindVertexArray(0);
 
     return 0;
 }
 
-void VolumeRenderer::_loadData()
+int VolumeRenderer::_loadData()
 {
     VolumeParams *RP = (VolumeParams *)GetActiveParams();
     CheckCache(cache.var, RP->GetVariableName());
     CheckCache(cache.ts, RP->GetCurrentTimestep());
     CheckCache(cache.refinement, RP->GetRefinementLevel());
     CheckCache(cache.compression, RP->GetCompressionLevel());
-    if (!cache.needsUpdate) return;
+    if (!cache.needsUpdate) return 0;
 
     Grid *grid = _dataMgr->GetVariable(cache.ts, cache.var, cache.refinement, cache.compression);
 
     glBindTexture(GL_TEXTURE_3D, dataTexture);
-    algorithm->LoadData(grid);
+    int ret = algorithm->LoadData(grid);
     delete grid;
+    return ret;
 }
 
 void VolumeRenderer::_loadTF()
