@@ -6,6 +6,7 @@
 #include <vapor/ShaderManager.h>
 // #include <glm/integer.hpp>
 
+using glm::ivec2;
 using glm::ivec3;
 using glm::vec3;
 using std::vector;
@@ -134,6 +135,8 @@ bool ComputeSideBBoxes(ivec3 side, int fastDim, int slowDim, vec3 *boxMins, vec3
     return false;
 }
 
+#define BBTYPE GL_TEXTURE_2D_ARRAY
+
 VolumeCellTraversal::VolumeCellTraversal(GLManager *gl)
     : VolumeRegular(gl) {
     glGenTextures(1, &coordTexture);
@@ -145,19 +148,19 @@ VolumeCellTraversal::VolumeCellTraversal(GLManager *gl)
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     glGenTextures(1, &minTexture);
-    glBindTexture(GL_TEXTURE_3D, minTexture);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glBindTexture(BBTYPE, minTexture);
+    glTexParameteri(BBTYPE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(BBTYPE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(BBTYPE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(BBTYPE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(BBTYPE, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     glGenTextures(1, &maxTexture);
-    glBindTexture(GL_TEXTURE_3D, maxTexture);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glBindTexture(BBTYPE, maxTexture);
+    glTexParameteri(BBTYPE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(BBTYPE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(BBTYPE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(BBTYPE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(BBTYPE, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     float BL = -1;
     float data[] = {
@@ -233,7 +236,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
     vector<size_t> cellDimsSorted = cellDims;
     std::sort(cellDimsSorted.begin(), cellDimsSorted.end());
     int bbDim = cellDimsSorted[2];
-    int bd = bbDim + bbDim / 2;
+    int bd = bbDim;
     int sd = bbDim;
 
     vec3 *boxMins = new vec3[bd * sd * 6];
@@ -252,11 +255,114 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
     ComputeSideBBoxes(F_FRONT, 0, 2, boxMins, boxMaxs, data, ivec3(cw, ch, cd), ivec3(w, h, d), bd, sd);
     ComputeSideBBoxes(F_BACK, 0, 2, boxMins, boxMaxs, data, ivec3(cw, ch, cd), ivec3(w, h, d), bd, sd);
 
-    glBindTexture(GL_TEXTURE_3D, minTexture);
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB16F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMins);
+    int levels = 1;
+    int size = bd;
+    while ((size = size >> 1))
+        levels++;
 
-    glBindTexture(GL_TEXTURE_3D, maxTexture);
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB16F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMaxs);
+    glBindTexture(BBTYPE, minTexture);
+    // glTexStorage3D(GL_TEXTURE_2D_ARRAY, levels, GL_RGB16F, sd, bd, 6);
+    // glTexSubImage3D(BBTYPE, 0, 0, 0, 0, sd, bd, 6, GL_RGB, GL_FLOAT, boxMins);
+    glTexImage3D(BBTYPE, 0, GL_RGB16F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMins);
+
+    glBindTexture(BBTYPE, maxTexture);
+    // glTexStorage3D(GL_TEXTURE_2D_ARRAY, levels, GL_RGB16F, sd, bd, 6);
+    // glTexSubImage3D(BBTYPE, 0, 0, 0, 0, sd, bd, 6, GL_RGB, GL_FLOAT, boxMaxs);
+    glTexImage3D(BBTYPE, 0, GL_RGB16F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMaxs);
+
+    int sizes[levels];
+    ivec2 mipDims[levels][6];
+    vec3 *minMip[levels];
+    vec3 *maxMip[levels];
+    sizes[0] = bd;
+    minMip[0] = boxMins;
+    maxMip[0] = boxMaxs;
+
+    mipDims[0][FI_LEFT] = ivec2(ch, cd);
+    mipDims[0][FI_RIGHT] = ivec2(ch, cd);
+    mipDims[0][FI_UP] = ivec2(cw, ch);
+    mipDims[0][FI_DOWN] = ivec2(cw, ch);
+    mipDims[0][FI_FRONT] = ivec2(cw, cd);
+    mipDims[0][FI_BACK] = ivec2(cw, cd);
+
+    for (int level = 1; level < levels; level++) {
+        int ms = bd >> level;
+        int mUpS = sizes[level - 1];
+
+        sizes[level] = ms;
+        minMip[level] = new vec3[ms * ms * 6];
+        maxMip[level] = new vec3[ms * ms * 6];
+
+        for (int z = 0; z < 6; z++) {
+
+            int mUpW = mipDims[level - 1][z][0];
+            int mUpH = mipDims[level - 1][z][1];
+
+            int mW = max(1, mUpW >> 1);
+            int mH = max(1, mUpH >> 1);
+            mipDims[level][z][0] = mW;
+            mipDims[level][z][1] = mH;
+
+            for (int y = 0; y < mH; y++) {
+                for (int x = 0; x < mW; x++) {
+
+                    vec3 v0 = minMip[level - 1][z * mUpS * mUpS + (y * 2) * mUpS + x * 2];
+                    vec3 v1 = minMip[level - 1][z * mUpS * mUpS + (y * 2) * mUpS + x * 2 + 1];
+                    vec3 v2 = minMip[level - 1][z * mUpS * mUpS + (y * 2 + 1) * mUpS + x * 2 + 1];
+                    vec3 v3 = minMip[level - 1][z * mUpS * mUpS + (y * 2 + 1) * mUpS + x * 2];
+
+                    minMip[level][z * ms * ms + y * ms + x] = glm::min(v0, glm::min(v1, glm::min(v2, v3)));
+
+                    v0 = maxMip[level - 1][z * mUpS * mUpS + (y * 2) * mUpS + x * 2];
+                    v1 = maxMip[level - 1][z * mUpS * mUpS + (y * 2) * mUpS + x * 2 + 1];
+                    v2 = maxMip[level - 1][z * mUpS * mUpS + (y * 2 + 1) * mUpS + x * 2 + 1];
+                    v3 = maxMip[level - 1][z * mUpS * mUpS + (y * 2 + 1) * mUpS + x * 2];
+
+                    maxMip[level][z * ms * ms + y * ms + x] = glm::max(v0, glm::max(v1, glm::max(v2, v3)));
+                }
+            }
+            if (mUpW % 2 == 1) {
+                for (int y = 0; y < mH; y++) {
+                    vec3 v0 = minMip[level][z * ms * ms + y * ms + mW - 1];
+                    vec3 v1 = minMip[level - 1][z * mUpS * mUpS + (y * 2) * mUpS + mUpW - 1];
+                    vec3 v2 = minMip[level - 1][z * mUpS * mUpS + (y * 2 + 1) * mUpS + mUpW - 1];
+                    minMip[level][z * ms * ms + y * ms + mW - 1] = glm::min(v0, glm::min(v1, v2));
+
+                    v0 = maxMip[level][z * ms * ms + y * ms + mW - 1];
+                    v1 = maxMip[level - 1][z * mUpS * mUpS + (y * 2) * mUpS + mUpW - 1];
+                    v2 = maxMip[level - 1][z * mUpS * mUpS + (y * 2 + 1) * mUpS + mUpW - 1];
+                    maxMip[level][z * ms * ms + y * ms + mW - 1] = glm::max(v0, glm::max(v1, v2));
+                }
+            }
+            if (mUpH % 2 == 1) {
+                for (int x = 0; x < mW; x++) {
+                    vec3 v0 = minMip[level][z * ms * ms + (mH - 1) * ms + x];
+                    vec3 v1 = minMip[level - 1][z * mUpS * mUpS + (mUpH - 1) * mUpS + x * 2];
+                    vec3 v2 = minMip[level - 1][z * mUpS * mUpS + (mUpH - 1) * mUpS + x * 2 + 1];
+                    minMip[level][z * ms * ms + (mH - 1) * ms + x] = glm::min(v0, glm::min(v1, v2));
+
+                    v0 = maxMip[level][z * ms * ms + (mH - 1) * ms + x];
+                    v1 = maxMip[level - 1][z * mUpS * mUpS + (mUpH - 1) * mUpS + x * 2];
+                    v2 = maxMip[level - 1][z * mUpS * mUpS + (mUpH - 1) * mUpS + x * 2 + 1];
+                    maxMip[level][z * ms * ms + (mH - 1) * ms + x] = glm::max(v0, glm::max(v1, v2));
+                }
+            }
+        }
+
+        glBindTexture(BBTYPE, minTexture);
+        // glTexSubImage3D(BBTYPE, level, 0, 0, 0, ms, ms, 6, GL_RGB, GL_FLOAT, minMip[level]);
+        glTexImage3D(BBTYPE, level, GL_RGB16F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, minMip[level]);
+        glBindTexture(BBTYPE, maxTexture);
+        // glTexSubImage3D(BBTYPE, level, 0, 0, 0, ms, ms, 6, GL_RGB, GL_FLOAT, maxMip[level]);
+        glTexImage3D(BBTYPE, level, GL_RGB16F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, maxMip[level]);
+    }
+
+    for (int level = 1; level < levels; level++) {
+        delete[] minMip[level];
+        delete[] maxMip[level];
+    }
+
+    GL_ERR_BREAK();
 
     delete[] data;
     delete[] boxMins;
@@ -277,11 +383,11 @@ ShaderProgram *VolumeCellTraversal::GetShader(ShaderManager *sm) {
     s->SetUniform("coords", 2);
 
     glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_3D, minTexture);
+    glBindTexture(BBTYPE, minTexture);
     s->SetUniform("boxMins", 3);
 
     glActiveTexture(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_3D, maxTexture);
+    glBindTexture(BBTYPE, maxTexture);
     s->SetUniform("boxMaxs", 4);
 
     return s;
