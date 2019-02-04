@@ -14,12 +14,14 @@ class VolumeCellTraversal : public VolumeRegular {
   private:
     unsigned int minTexture;
     unsigned int maxTexture;
+    unsigned int BBLevelDimTexture;
     unsigned int coordTexture;
 
     unsigned int VAO;
     unsigned int VBO;
 
     int coordDims[3];
+    int BBLevels;
 };
 
 } // namespace VAPoR
