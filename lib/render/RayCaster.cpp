@@ -930,14 +930,14 @@ void RayCaster::_drawVolumeFaces(int whichPass, int castingMode, const std::vect
             glm::vec4 bottomLeftNDC(-1.0f, -1.0f, -0.999f, 1.0f);
             glm::vec4 topRightNDC(1.0f, 1.0f, -0.999f, 1.0f);
             glm::vec4 bottomRightNDC(1.0f, -1.0f, -0.999f, 1.0f);
-            glm::vec4 near[4];
-            near[0] = InversedMVP * topLeftNDC;
-            near[1] = InversedMVP * bottomLeftNDC;
-            near[2] = InversedMVP * topRightNDC;
-            near[3] = InversedMVP * bottomRightNDC;
+            glm::vec4 nearP[4];
+            nearP[0] = InversedMVP * topLeftNDC;
+            nearP[1] = InversedMVP * bottomLeftNDC;
+            nearP[2] = InversedMVP * topRightNDC;
+            nearP[3] = InversedMVP * bottomRightNDC;
             for (int i = 0; i < 4; i++) {
-                near[i] /= near[i].w;
-                std::memcpy(nearCoords + i * 3, glm::value_ptr(near[i]), 3 * sizeof(GLfloat));
+                nearP[i] /= nearP[i].w;
+                std::memcpy(nearCoords + i * 3, glm::value_ptr(nearP[i]), 3 * sizeof(GLfloat));
             }
 
             glEnableVertexAttribArray(0);    // attribute 0 is vertex coordinates
@@ -1346,14 +1346,9 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-double RayCaster::_getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const
-{
-#ifdef WIN32
-    return -1.0;
-#else
-    return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0);
+#ifndef WIN32
+double RayCaster::_getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const { return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0); }
 #endif
-}
 
 void RayCaster::_updateViewportWhenNecessary(const GLint *viewport)
 {

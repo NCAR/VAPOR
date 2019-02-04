@@ -183,7 +183,9 @@ protected:
     void _configure2DTextureLinearInterpolation() const;
     void _sleepAWhile() const;
 
+#ifndef WIN32
     double _getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const;
+#endif
 
 };    // End of class RayCaster
 
