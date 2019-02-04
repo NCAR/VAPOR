@@ -77,6 +77,9 @@
           </property>
           <item>
            <widget class="QLabel" name="label">
+            <property name="statusTip">
+             <string>Select either contours of 3D or 2D variables</string>
+            </property>
             <property name="text">
              <string>Fidelity</string>
             </property>
@@ -146,7 +149,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>164</width>
+              <width>139</width>
               <height>20</height>
              </size>
             </property>
@@ -156,9 +159,15 @@
            <widget class="QComboBox" name="lodCombo">
             <property name="minimumSize">
              <size>
-              <width>125</width>
+              <width>150</width>
               <height>0</height>
              </size>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the approximation level (compression) for the data being used to calculate contour lines.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="whatsThis">
+             <string>The refinement level parameter and (in the case of VDC2 data) the level of detail (LOD) parameter control the quality of the approximation used when visualizing a variable.  The Refinement parameter selects the grid resolutiion.  Coarser resolutions require less memory (RAM); less computation by the visualization algorithms; and for VDC1 data, less storage space on disk, therefore less time to read the data.  For VDC2 data the Refinement level has no impact on disk storage.  The LOD parameter, which is only available for VDC2 data sets, selects a compression level.  Variables with greater compression require less disk storage and can thus be read from disk by vaporgui more quickly, but have no impact on memory  (RAM) or computation time required by the visualziation algorithms.  For both LOD and Refinement, level 0 corresponds to the coarsest approximation available.</string>
             </property>
            </widget>
           </item>
@@ -194,7 +203,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>146</width>
+              <width>121</width>
               <height>20</height>
              </size>
             </property>
@@ -204,9 +213,15 @@
            <widget class="QComboBox" name="refinementCombo">
             <property name="minimumSize">
              <size>
-              <width>125</width>
+              <width>150</width>
               <height>0</height>
              </size>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the refinement level (resolution) of the data used to calculate contour lines.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="whatsThis">
+             <string>The refinement level parameter and (in the case of VDC2 data) the level of detail (LOD) parameter control the quality of the approximation used when visualizing a variable.  The Refinement parameter selects the grid resolutiion.  Coarser resolutions require less memory (RAM); less computation by the visualization algorithms; and for VDC1 data, less storage space on disk, therefore less time to read the data.  For VDC2 data the Refinement level has no impact on disk storage.  The LOD parameter, which is only available for VDC2 data sets, selects a compression level.  Variables with greater compression require less disk storage and can thus be read from disk by vaporgui more quickly, but have no impact on memory  (RAM) or computation time required by the visualziation algorithms.  For both LOD and Refinement, level 0 corresponds to the coarsest approximation available.</string>
             </property>
            </widget>
           </item>
@@ -235,7 +250,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>300</width>
+              <width>231</width>
               <height>20</height>
              </size>
             </property>
@@ -243,6 +258,18 @@
           </item>
           <item>
            <widget class="QPushButton" name="fidelityDefaultButton">
+            <property name="minimumSize">
+             <size>
+              <width>155</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to set default Fidelity to current LOD and refinement levels.  The default can optionally be saved in user preferences.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="whatsThis">
+             <string>The fidelity setting controls both refinement levels and level of detail (LOD).  Click on the &quot;Set Default Fidelity&quot; button to establish a fidelity level that is interactive on the current platform.</string>
+            </property>
             <property name="text">
              <string>Default</string>
             </property>
