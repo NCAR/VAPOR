@@ -354,7 +354,8 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
 
     GL_ERR_BREAK();
     glBindTexture(GL_TEXTURE_2D, BBLevelDimTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16, levels, 6, 0, GL_RG, GL_INT, mipDims);
+    GL_ERR_BREAK();
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32I, levels, 6, 0, GL_RG_INTEGER, GL_INT, mipDims);
     GL_ERR_BREAK();
 
     for (int level = 1; level < levels; level++) {
