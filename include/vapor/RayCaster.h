@@ -206,6 +206,7 @@ class RENDER_API RayCaster : public Renderer {
     void _configure3DTextureNearestInterpolation() const;
     void _configure3DTextureLinearInterpolation() const;
     void _configure2DTextureLinearInterpolation() const;
+    void _sleepAWhile() const;
 
     double _getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const;
 
