@@ -1783,14 +1783,15 @@ int RayCaster::_selectDefaultCastingMethod() const
 
 void RayCaster::_sleepAWhile() const
 {
-glFinish();
 #ifdef WIN32
-    Sleep( 3 ); // 3 milliseconds
+    glFinish();
+    Sleep( 1 ); // 1 milliseconds
 #else
     #ifdef Darwin
         struct timespec req, rem;
         req.tv_sec  = 0;
-        req.tv_nsec = 3000000L; // 3 milliseconds
+        req.tv_nsec = 1000000L; // 1 milliseconds
+        glFinish();
         nanosleep( &req, &rem );
     #endif
 #endif
