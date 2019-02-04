@@ -146,14 +146,21 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>185</width>
+              <width>164</width>
               <height>20</height>
              </size>
             </property>
            </spacer>
           </item>
           <item>
-           <widget class="QComboBox" name="lodCombo"/>
+           <widget class="QComboBox" name="lodCombo">
+            <property name="minimumSize">
+             <size>
+              <width>125</width>
+              <height>0</height>
+             </size>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -187,14 +194,21 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>167</width>
+              <width>146</width>
               <height>20</height>
              </size>
             </property>
            </spacer>
           </item>
           <item>
-           <widget class="QComboBox" name="refinementCombo"/>
+           <widget class="QComboBox" name="refinementCombo">
+            <property name="minimumSize">
+             <size>
+              <width>125</width>
+              <height>0</height>
+             </size>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
