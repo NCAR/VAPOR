@@ -912,6 +912,7 @@ void MainForm::sessionOpenHelper(string fileName)
 //
 void MainForm::sessionOpen(QString qfileName)
 {
+#ifdef NDEBUG
     if (_stateChangeFlag) {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Are you sure?");
@@ -920,6 +921,7 @@ void MainForm::sessionOpen(QString qfileName)
         msgBox.setDefaultButton(QMessageBox::No);
         if (msgBox.exec() == QMessageBox::No) { return; }
     }
+#endif
 
     // This launches a panel that enables the
     // user to choose input session save files, then to
@@ -1283,6 +1285,7 @@ vector<string> MainForm::myGetOpenFileNames(string prompt, string dir, string fi
 
 void MainForm::sessionNew()
 {
+#ifdef NDEBUG
     if (_stateChangeFlag) {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Are you sure?");
@@ -1291,6 +1294,7 @@ void MainForm::sessionNew()
         msgBox.setDefaultButton(QMessageBox::No);
         if (msgBox.exec() == QMessageBox::No) { return; }
     }
+#endif
 
     sessionOpenHelper("");
 
