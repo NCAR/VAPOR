@@ -21,8 +21,8 @@ ivec3 cellDims = coordDims - 1;
 uniform sampler3D data;
 uniform sampler1D LUT;
 uniform sampler3D coords;
-uniform sampler3D boxMins;
-uniform sampler3D boxMaxs;
+uniform sampler2DArray boxMins;
+uniform sampler2DArray boxMaxs;
 
 in vec2 ST;
 
@@ -276,8 +276,9 @@ bool IsRayEnteringCell(vec3 d, ivec3 cellIndex, ivec3 face)
 void GetSideCellBBox(ivec3 cellIndex, int sideID, int fastDim, int slowDim, out vec3 bmin, out vec3 bmax)
 {
     ivec3 index = ivec3(cellIndex[fastDim], cellIndex[slowDim], sideID);
-    bmin = texelFetch(boxMins, index, 0).rgb;
-    bmax = texelFetch(boxMaxs, index, 0).rgb;
+    index += ivec3(0, 0, 0);
+    bmin = texelFetch(boxMins, index, 1).rgb;
+    bmax = texelFetch(boxMaxs, index, 1).rgb;
 }
 
 bool IntersectRaySideCellBBox(vec3 origin, vec3 dir, ivec3 cellIndex, int sideID, int fastDim, int slowDim)
@@ -300,15 +301,25 @@ bool SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, int f
     for (index[slowDim] = 0; index[slowDim] < cellDims[slowDim]; index[slowDim]++) {
         for (index[fastDim] = 0; index[fastDim] < cellDims[fastDim]; index[fastDim]++) {
             
-            if (IntersectRaySideCellBBox(origin, dir, index, sideID, fastDim, slowDim)) {
+            
+            if (side == F_RIGHT && index[slowDim] == 0 && index[fastDim] == 0 && IntersectRaySideCellBBox(origin, dir, index, sideID, fastDim, slowDim)) {
+                fragColor = vec4(1, 0, 0, 1);
+                t1 = -1;
+                return true;
+            }
+            
+            
+            // if (IntersectRaySideCellBBox(origin, dir, index, sideID, fastDim, slowDim)) {
                 if (IntersectRayCellFace(origin, dir, index, side, t1)) {
                     if (IsRayEnteringCell(dir, index, side)) {
                         cellIndex = index;
                         entranceFace = side;
+                        
+                        fragColor = vec4(1);
                         return true;
                     }
                 }
-            }
+            // }
         }
     }
     return false;
@@ -344,6 +355,8 @@ void main(void)
         float t0;
         float t1;
         if (FindInitialCell(cameraPos, dir, 0, initialCell, entranceFace, t0)) {
+            if (t0 == -1)
+                return;
             Traverse(cameraPos, dir, t0, initialCell, entranceFace, t1);
             return;
         }
