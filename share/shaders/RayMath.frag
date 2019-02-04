@@ -36,7 +36,7 @@ bool IntersectRayBoundingBox(vec3 o, vec3 d, vec3 boxMin, vec3 boxMax, out float
     vec3 bt2 = max(tMin, tMax);
     t0 = max(max(max(bt1.x, bt1.y), bt1.z), 0);
     t1 = min(min(bt2.x, bt2.y), bt2.z);
-    return t0 < t1;
+    return t0 <= t1;
 }
 #endif
 

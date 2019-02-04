@@ -8,6 +8,9 @@ using namespace VAPoR;
 using std::vector;
 using std::string;
 
+VolumeAlgorithm::VolumeAlgorithm(GLManager *gl)
+: _glManager(gl) {}
+
 const std::vector<std::string> VolumeAlgorithm::_algorithmNames = {
     "Regular",
     "Resampled",
@@ -19,11 +22,11 @@ const std::vector<std::string> &VolumeAlgorithm::GetAlgorithmNames()
     return _algorithmNames;
 }
 
-VolumeAlgorithm *VolumeAlgorithm::NewAlgorithm(const std::string &name)
+VolumeAlgorithm *VolumeAlgorithm::NewAlgorithm(const std::string &name, GLManager *gl)
 {
-    if (name == "Regular") return new VolumeRegular;
-    if (name == "Resampled") return new VolumeResampled;
-    if (name == "Test") return new VolumeTest;
-    if (name == "Cell Traversal") return new VolumeCellTraversal;
+    if (name == "Regular") return new VolumeRegular(gl);
+    if (name == "Resampled") return new VolumeResampled(gl);
+    if (name == "Test") return new VolumeTest(gl);
+    if (name == "Cell Traversal") return new VolumeCellTraversal(gl);
     return nullptr;
 }
