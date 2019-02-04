@@ -13,6 +13,8 @@ using std::vector;
 
 using namespace VAPoR;
 
+#define MAX_LEVELS 32
+
 #define FI_LEFT 0
 #define FI_RIGHT 1
 #define FI_UP 2
@@ -153,14 +155,19 @@ VolumeCellTraversal::VolumeCellTraversal(GLManager *gl)
     glTexParameteri(BBTYPE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(BBTYPE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(BBTYPE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(BBTYPE, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     glGenTextures(1, &maxTexture);
     glBindTexture(BBTYPE, maxTexture);
     glTexParameteri(BBTYPE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(BBTYPE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(BBTYPE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(BBTYPE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // glTexParameteri(BBTYPE, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    glGenTextures(1, &BBLevelDimTexture);
+    glBindTexture(GL_TEXTURE_2D, BBLevelDimTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     float BL = -1;
     float data[] = {
@@ -181,6 +188,7 @@ VolumeCellTraversal::VolumeCellTraversal(GLManager *gl)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
+    glBindVertexArray(0);
 }
 
 VolumeCellTraversal::~VolumeCellTraversal() {
@@ -188,6 +196,14 @@ VolumeCellTraversal::~VolumeCellTraversal() {
         glDeleteTextures(1, &coordTexture);
     if (minTexture)
         glDeleteTextures(1, &minTexture);
+    if (maxTexture)
+        glDeleteTextures(1, &maxTexture);
+    if (BBLevelDimTexture)
+        glDeleteTextures(1, &BBLevelDimTexture);
+    if (VAO)
+        glDeleteVertexArrays(1, &VAO);
+    if (VBO)
+        glDeleteBuffers(1, &VBO);
 }
 
 #include <vapor/VolumeRenderer.h>
@@ -259,6 +275,8 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
     int size = bd;
     while ((size = size >> 1))
         levels++;
+    levels = min(levels, MAX_LEVELS);
+    BBLevels = levels;
 
     glBindTexture(BBTYPE, minTexture);
     // glTexStorage3D(GL_TEXTURE_2D_ARRAY, levels, GL_RGB16F, sd, bd, 6);
@@ -357,6 +375,11 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
         glTexImage3D(BBTYPE, level, GL_RGB16F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, maxMip[level]);
     }
 
+    GL_ERR_BREAK();
+    glBindTexture(GL_TEXTURE_2D, BBLevelDimTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16, levels, 6, 0, GL_RG, GL_INT, mipDims);
+    GL_ERR_BREAK();
+
     for (int level = 1; level < levels; level++) {
         delete[] minMip[level];
         delete[] maxMip[level];
@@ -377,6 +400,7 @@ ShaderProgram *VolumeCellTraversal::GetShader(ShaderManager *sm) {
     s->Bind();
 
     s->SetUniform("coordDims", *(glm::ivec3 *)&coordDims);
+    s->SetUniform("BBLevels", BBLevels);
 
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_3D, coordTexture);
@@ -390,5 +414,10 @@ ShaderProgram *VolumeCellTraversal::GetShader(ShaderManager *sm) {
     glBindTexture(BBTYPE, maxTexture);
     s->SetUniform("boxMaxs", 4);
 
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, BBLevelDimTexture);
+    s->SetUniform("levelDims", 5);
+
+    GL_ERR_BREAK();
     return s;
 }
