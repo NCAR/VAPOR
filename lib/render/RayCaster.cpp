@@ -560,6 +560,16 @@ int RayCaster::_initializeGL()
         return GLERROR;
     }
 
+    // Detect if it's INTEL graphics card. If so, give a magic value to the params
+    const unsigned char *vendorC = glGetString(GL_VENDOR);
+    std::string          vendor((char *)vendorC);
+    for (int i = 0; i < vendor.size(); i++) vendor[i] = std::tolower(vendor[i]);
+    std::string::size_type n = vendor.find("intel");
+    if (n == std::string::npos)
+        _isIntel = false;
+    else
+        _isIntel = true;
+
     return 0;    // Success
 }
 
@@ -590,6 +600,12 @@ int RayCaster::_paintGL(bool fast)
     // Do not perform any fast rendering in cell traverse mode
     int castingMode = int(params->GetCastingMode());
     if (castingMode == CellTraversal && fast) return 0;
+
+    // Force casting mode to be FixedStep if on Intel GPU.
+    if (_isIntel) {
+        castingMode = FixedStep;
+        params->SetCastingMode(FixedStep);
+    }
 
     StructuredGrid *grid = nullptr;
     if (_userCoordinates.GetCurrentGrid(params, _dataMgr, &grid) != 0) {
