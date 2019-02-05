@@ -34,19 +34,10 @@ public:
     {
         _isoParams = dynamic_cast<VAPoR::IsoSurfaceParams*>( params );
         assert( _isoParams );
-        _variablesWidget->Update(dataMgr, paramsMgr, params);
-
         long mode = _isoParams->GetCastingMode();
-        if(  mode == 10 )   // Intel GPU
-        {
-            _castingModeComboBox->setCurrentIndex( 0 );
-            _castingModeComboBox->setEnabled( false );
-            _isoParams->SetCastingMode( 1 );    // Set to fixed-step ray casting
-        }
-        else
-        {
-            _castingModeComboBox->setCurrentIndex( mode - 1 );
-        }
+        _castingModeComboBox->setCurrentIndex( mode - 1 );
+
+        _variablesWidget->Update(dataMgr, paramsMgr, params);
     }
 
 private slots:
