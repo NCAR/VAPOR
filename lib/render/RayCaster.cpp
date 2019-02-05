@@ -1733,6 +1733,10 @@ int RayCaster::_updateVertCoordsTexture( const glm::mat4& MV )
 
 int RayCaster::_selectDefaultCastingMethod() const
 {
+    // First detect if it's INTEL graphics card. If so, give a magic value to the params
+    const unsigned char* vender = glGetString( GL_VENDOR );
+    printf("%s\n", vender );
+
     RayCasterParams* params = dynamic_cast<RayCasterParams*>( GetActiveParams() );
     if( !params )
     {
