@@ -134,6 +134,7 @@ class RENDER_API RayCaster : public Renderer {
     float _colorMapRange[3];   // min, max, and diff values.
     glm::mat4 _currentMV;      // model view matrix in use
     GLint _currentViewport[4]; // current viewport in use
+    bool _isIntel;
 
     // OpenGL stuff
     // textures
