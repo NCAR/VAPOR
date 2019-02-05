@@ -461,7 +461,7 @@ bool SearchSideForInitialCellWithOctree_3Levels(vec3 origin, vec3 dir, float t0,
 
 bool SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
-    // return SearchSideForInitialCellWithOctree_3Levels(origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+    return SearchSideForInitialCellWithOctree_3Levels(origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
     
     ivec3 side = GetFaceFromFaceIndex(sideID);
     ivec3 index = (side+1)/2 * (cellDims-1);
