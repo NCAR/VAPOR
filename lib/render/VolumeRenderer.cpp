@@ -77,7 +77,7 @@ int VolumeRenderer::_initializeGL()
 
 int VolumeRenderer::_paintGL(bool fast)
 {
-    if (fast) return 0;
+    if (fast && cache.algorithmName == "Cell Traversal") return 0;
     VolumeParams *vp = (VolumeParams *)GetActiveParams();
     if (cache.algorithmName != vp->GetAlgorithm()) {
         cache.algorithmName = vp->GetAlgorithm();
