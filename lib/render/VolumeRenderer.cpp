@@ -95,7 +95,7 @@ cVar = pVar; \
 
 int VolumeRenderer::_paintGL(bool fast)
 {
-    if (fast)
+    if (fast && cache.algorithmName == "Cell Traversal")
         return 0;
     VolumeParams *vp = (VolumeParams *)GetActiveParams();
     if (cache.algorithmName != vp->GetAlgorithm()) {
