@@ -7,6 +7,14 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/ext/matrix_relational.hpp>
 
+#ifdef WIN32
+#include <Windows.h>
+#else
+#ifdef Darwin
+#include <time.h>
+#endif
+#endif
+
 #define OUTOFDATE 1
 #define GLNOTREADY 2
 #define GRIDERROR -1
@@ -978,14 +986,14 @@ void RayCaster::_drawVolumeFaces(int whichPass,
             glm::vec4 bottomLeftNDC(-1.0f, -1.0f, -0.999f, 1.0f);
             glm::vec4 topRightNDC(1.0f, 1.0f, -0.999f, 1.0f);
             glm::vec4 bottomRightNDC(1.0f, -1.0f, -0.999f, 1.0f);
-            glm::vec4 near[4];
-            near[0] = InversedMVP * topLeftNDC;
-            near[1] = InversedMVP * bottomLeftNDC;
-            near[2] = InversedMVP * topRightNDC;
-            near[3] = InversedMVP * bottomRightNDC;
+            glm::vec4 nearP[4];
+            nearP[0] = InversedMVP * topLeftNDC;
+            nearP[1] = InversedMVP * bottomLeftNDC;
+            nearP[2] = InversedMVP * topRightNDC;
+            nearP[3] = InversedMVP * bottomRightNDC;
             for (int i = 0; i < 4; i++) {
-                near[i] /= near[i].w;
-                std::memcpy(nearCoords + i * 3, glm::value_ptr(near[i]), 3 * sizeof(GLfloat));
+                nearP[i] /= nearP[i].w;
+                std::memcpy(nearCoords + i * 3, glm::value_ptr(nearP[i]), 3 * sizeof(GLfloat));
             }
 
             glEnableVertexAttribArray(0); // attribute 0 is vertex coordinates
@@ -1201,6 +1209,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
+        _sleepAWhile();
     }
 
     //
@@ -1240,6 +1249,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
+        _sleepAWhile();
     }
 
     if (attrib1Enabled) {
@@ -1288,6 +1298,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
+        _sleepAWhile();
     }
 
     //
@@ -1326,6 +1337,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
+        _sleepAWhile();
     }
 
     // Each strip will have the same numOfVertices for the rest 2 faces.
@@ -1381,6 +1393,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
+        _sleepAWhile();
     }
 
     //
@@ -1419,6 +1432,7 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
+        _sleepAWhile();
     }
 
     if (attrib1Enabled)
@@ -1429,14 +1443,12 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+#ifndef WIN32
 double RayCaster::_getElapsedSeconds(const struct timeval *begin,
                                      const struct timeval *end) const {
-#ifdef WIN32
-    return -1.0;
-#else
     return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0);
-#endif
 }
+#endif
 
 void RayCaster::_updateViewportWhenNecessary(const GLint *viewport) {
     if ((std::memcmp(viewport, _currentViewport, 4 * sizeof(GLint)) != 0)) {
@@ -1618,4 +1630,19 @@ int RayCaster::_selectDefaultCastingMethod() const {
     delete grid;
 
     return 0;
+}
+
+void RayCaster::_sleepAWhile() const {
+#ifdef WIN32
+    glFinish();
+    Sleep(1); // 1 milliseconds
+#else
+#ifdef Darwin
+    struct timespec req, rem;
+    req.tv_sec = 0;
+    req.tv_nsec = 1000000L; // 1 milliseconds
+    glFinish();
+    nanosleep(&req, &rem);
+#endif
+#endif
 }
