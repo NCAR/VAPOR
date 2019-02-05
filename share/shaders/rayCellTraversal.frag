@@ -119,10 +119,10 @@ void GetFaceVertices(ivec3 cellIndex, ivec3 face, out vec3 v0, out vec3 v1, out 
 {
     ivec3 i0, i1, i2, i3;
     GetFaceCoordinateIndices(cellIndex, face, i0, i1, i2, i3);
-    v0 = texture(coords, i0/coordDimsF).xyz;
-    v1 = texture(coords, i1/coordDimsF).xyz;
-    v2 = texture(coords, i2/coordDimsF).xyz;
-    v3 = texture(coords, i3/coordDimsF).xyz;
+    v0 = texelFetch(coords, i0, 0).xyz;
+    v1 = texelFetch(coords, i1, 0).xyz;
+    v2 = texelFetch(coords, i2, 0).xyz;
+    v3 = texelFetch(coords, i3, 0).xyz;
 }
 
 float GetDataCoordinateSpace(vec3 coordinates)
