@@ -683,7 +683,7 @@ int RayCaster::_initializeGL()
         return GLERROR;
     }
 
-    // Detect if it's graphics card. If so, give a magic value to the params
+    // Detect if it's INTEL graphics card. If so, give a magic value to the params
     const unsigned char* vendorC = glGetString( GL_VENDOR );
     std::string vendor( (char*)vendorC );
     for( int i = 0; i < vendor.size(); i++ )
