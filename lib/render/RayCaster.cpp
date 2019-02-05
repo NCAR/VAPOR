@@ -1586,14 +1586,22 @@ int RayCaster::_updateVertCoordsTexture(const glm::mat4 &MV) {
 }
 
 int RayCaster::_selectDefaultCastingMethod() const {
-    // First detect if it's INTEL graphics card. If so, give a magic value to the params
-    const unsigned char *vender = glGetString(GL_VENDOR);
-    printf("%s\n", vender);
-
     RayCasterParams *params = dynamic_cast<RayCasterParams *>(GetActiveParams());
     if (!params) {
         MyBase::SetErrMsg("Error occured during retrieving RayCaster parameters!");
         return PARAMSERROR;
+    }
+
+    // Detect if it's graphics card. If so, give a magic value to the params
+    const unsigned char *vendorC = glGetString(GL_VENDOR);
+    std::string vendor((char *)vendorC);
+    for (int i = 0; i < vendor.size(); i++)
+        vendor[i] = std::tolower(vendor[i]);
+    std::string::size_type n = vendor.find("intel");
+    if (n != std::string::npos) // Detected Intel GPU
+    {
+        params->SetCastingMode(10); // 10 means GUI should disable this selection.
+        return 0;
     }
 
     // If params already contain a value of mode 1 or 2, then do nothing.
