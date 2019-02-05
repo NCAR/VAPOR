@@ -316,152 +316,11 @@ ivec2 GetBBoxArrayDimensions(int sideID, int level)
     return texelFetch(levelDims, ivec2(sideID, level), 0).rg;
 }
 
-#define DR(x) { t1=-1; fragColor = vec4((x), 0, 0, 1); return true; }
-#define DG(x) { t1=-1; fragColor = vec4(0, (x), 0, 1); return true; }
-#define DRG(r,g) { t1=-1; fragColor = vec4((r), (g), 0, 1); return true; }
-
-bool SearchSideForInitialCellWithOctreeParametric(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
-{
-    ivec3 side = GetFaceFromFaceIndex(sideID);
-    ivec3 index = (side+1)/2 * (cellDims-1);
-    
-    #define MAX_LEVELS 8
-    int x[MAX_LEVELS];
-    int y[MAX_LEVELS];
-    int xEnd[MAX_LEVELS];
-    int yEnd[MAX_LEVELS];
-    ivec2 dims[MAX_LEVELS];
-    
-    for (int i = 0; i < BBLevels; i++)
-    dims[i] = GetBBoxArrayDimensions(sideID, i);
-    
-    
-    int L = min(BBLevels-1, MAX_LEVELS-1);
-    int dL = 0;
-    
-    xEnd[L] = dims[L].x;
-    yEnd[L] = dims[L].y;
-    
-    while (true) {
-        for (y[L] = 0; y[L] < yEnd[L] && dL==0; y[L]++) {
-            for (x[L] = 0; x[L] < xEnd[L] && dL==0; x[L]++) {
-                if (IntersectRaySideCellBBoxDirect(origin, dir, x[L], y[L], sideID, L)) {
-                    if (L == 0) {
-                        index[slowDim] = y[L];
-                        index[fastDim] = x[L];
-                        if (IntersectRayCellFace(origin, dir, index, side, t1)) {
-                            if (IsRayEnteringCell(dir, index, side)) {
-                                cellIndex = index;
-                                entranceFace = side;
-                                return true;
-                            }
-                        }
-                    } else {
-                        dL = -1;
-                        xEnd[L-1] = x[L] == dims[L].x-1 ? dims[L-1].x : (x[L]+1)*2;
-                        yEnd[L-1] = y[L] == dims[L].y-1 ? dims[L-1].y : (y[L]+1)*2;
-                    }
-                }
-            }
-        }
-        if (dL == -1) {
-            L--;
-            dL = 0;
-        } else {
-            break;
-        }
-    }
-    return false;
-}
-
-bool SearchSideForInitialCellWithOctree_2Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
-{
-    ivec3 side = GetFaceFromFaceIndex(sideID);
-    ivec3 index = (side+1)/2 * (cellDims-1);
-    
-    ivec2 lDims1 = GetBBoxArrayDimensions(sideID, 1);
-    ivec2 lDims0 = GetBBoxArrayDimensions(sideID, 0);
-    
-    for (int y1 = 0; y1 < lDims1.y; y1++) {
-        for (int x1 = 0; x1 < lDims1.x; x1++) {
-            if (IntersectRaySideCellBBoxDirect(origin, dir, x1, y1, sideID, 1)) {
-                int y0End = y1 == lDims1.y-1 ? lDims0.y : (y1+1)*2;
-                int x0End = x1 == lDims1.x-1 ? lDims0.x : (x1+1)*2;
-                
-                for (int y0 = y1*2; y0 < y0End; y0++) {
-                    for (int x0 = x1*2; x0 < lDims0.x; x0++) {
-                        if (IntersectRaySideCellBBoxDirect(origin, dir, x0, y0, sideID, 0)) {
-                            index[slowDim] = y0;
-                            index[fastDim] = x0;
-                            if (IntersectRayCellFace(origin, dir, index, side, t1)) {
-                                if (IsRayEnteringCell(dir, index, side)) {
-                                    cellIndex = index;
-                                    entranceFace = side;
-                                    
-                                    fragColor = vec4(1);
-                                    return true;
-                                }
-                            }
-                            
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return false;
-}
-
-bool SearchSideForInitialCellWithOctree_3Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
-{
-    ivec3 side = GetFaceFromFaceIndex(sideID);
-    ivec3 index = (side+1)/2 * (cellDims-1);
-    
-    ivec2 lDims2 = GetBBoxArrayDimensions(sideID, 2);
-    ivec2 lDims1 = GetBBoxArrayDimensions(sideID, 1);
-    ivec2 lDims0 = GetBBoxArrayDimensions(sideID, 0);
-    
-    for (int y2 = 0; y2 < lDims2.y; y2++) {
-        for (int x2 = 0; x2 < lDims2.x; x2++) {
-            if (IntersectRaySideCellBBoxDirect(origin, dir, x2, y2, sideID, 2)) {
-                int y1End = y2 == lDims2.y-1 ? lDims1.y : (y2+1)*2;
-                int x1End = x2 == lDims2.x-1 ? lDims1.x : (x2+1)*2;
-                for (int y1 = 0; y1 < y1End; y1++) {
-                    for (int x1 = 0; x1 < x1End; x1++) {
-                        if (IntersectRaySideCellBBoxDirect(origin, dir, x1, y1, sideID, 1)) {
-                            int y0End = y1 == lDims1.y-1 ? lDims0.y : (y1+1)*2;
-                            int x0End = x1 == lDims1.x-1 ? lDims0.x : (x1+1)*2;
-                            
-                            for (int y0 = y1*2; y0 < y0End; y0++) {
-                                for (int x0 = x1*2; x0 < lDims0.x; x0++) {
-                                    if (IntersectRaySideCellBBoxDirect(origin, dir, x0, y0, sideID, 0)) {
-                                        index[slowDim] = y0;
-                                        index[fastDim] = x0;
-                                        if (IntersectRayCellFace(origin, dir, index, side, t1)) {
-                                            if (IsRayEnteringCell(dir, index, side)) {
-                                                cellIndex = index;
-                                                entranceFace = side;
-                                                
-                                                fragColor = vec4(1);
-                                                return true;
-                                            }
-                                        }
-                                        
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return false;
-}
+#include BBTraversalAlgorithms.frag
 
 bool SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
-    return SearchSideForInitialCellWithOctree_3Levels(origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+    // return SearchSideForInitialCellWithOctree_8Levels(origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
     
     ivec3 side = GetFaceFromFaceIndex(sideID);
     ivec3 index = (side+1)/2 * (cellDims-1);
@@ -474,8 +333,6 @@ bool SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, int f
                     if (IsRayEnteringCell(dir, index, side)) {
                         cellIndex = index;
                         entranceFace = side;
-                        
-                        fragColor = vec4(1);
                         return true;
                     }
                 }
