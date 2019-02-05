@@ -9,6 +9,7 @@
 
 #ifdef WIN32
 #include <Windows.h>
+#include <cctype>
 #else
 #ifdef Darwin
 #include <time.h>
