@@ -9,11 +9,8 @@
 
 #ifdef WIN32
 #include <Windows.h>
-#include <cctype>
 #else
-#ifdef Darwin
 #include <time.h>
-#endif
 #endif
 
 #define OUTOFDATE 1
@@ -1227,7 +1224,6 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
-        _sleepAWhile();
     }
 
     //
@@ -1267,7 +1263,6 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
-        _sleepAWhile();
     }
 
     if (attrib1Enabled) {
@@ -1316,7 +1311,6 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
-        _sleepAWhile();
     }
 
     //
@@ -1355,7 +1349,6 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
-        _sleepAWhile();
     }
 
     // Each strip will have the same numOfVertices for the rest 2 faces.
@@ -1411,7 +1404,6 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
-        _sleepAWhile();
     }
 
     //
@@ -1450,7 +1442,6 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, numOfVertices * sizeof(unsigned int), indexBuffer);
         glDrawElements(GL_TRIANGLE_STRIP, numOfVertices,
                        GL_UNSIGNED_INT, (void *)0);
-        _sleepAWhile();
     }
 
     if (attrib1Enabled)
@@ -1655,12 +1646,10 @@ void RayCaster::_sleepAWhile() const {
     glFinish();
     Sleep(1); // 1 milliseconds
 #else
-#ifdef Darwin
     struct timespec req, rem;
     req.tv_sec = 0;
     req.tv_nsec = 1000000L; // 1 milliseconds
     glFinish();
     nanosleep(&req, &rem);
-#endif
 #endif
 }
