@@ -33,14 +33,22 @@ class DVRVariablesSubtab : public QWidget, public Ui_DVRVariablesGUI {
                 VAPoR::RenderParams *params) {
         _dvrParams = dynamic_cast<VAPoR::DVRParams *>(params);
         assert(_dvrParams);
-        long mode = _dvrParams->GetCastingMode();
-        _castingModeComboBox->setCurrentIndex(mode - 1);
         _variablesWidget->Update(dataMgr, paramsMgr, params);
-        if (mode == 1) {
-            _sampleRateComboBox->setEnabled(true);
-            _sampleRateComboBox->setCurrentIndex(_dvrParams->GetSampleRateMultiplier());
+
+        long mode = _dvrParams->GetCastingMode();
+        if (mode == 10) // Intel GPU
+        {
+            _castingModeComboBox->setCurrentIndex(0);
+            _castingModeComboBox->setEnabled(false);
+            _dvrParams->SetCastingMode(1); // Set to fixed-step ray casting
         } else {
-            _sampleRateComboBox->setEnabled(false);
+            _castingModeComboBox->setCurrentIndex(mode - 1);
+            if (mode == 1) {
+                _sampleRateComboBox->setEnabled(true);
+                _sampleRateComboBox->setCurrentIndex(_dvrParams->GetSampleRateMultiplier());
+            } else {
+                _sampleRateComboBox->setEnabled(false);
+            }
         }
     }
 
