@@ -311,14 +311,19 @@ bool IntersectRaySideCellBBoxDirect(vec3 origin, vec3 dir, int x, int y, int sid
     return false;
 }
 
+ivec2 GetBBoxArrayDimensions(int sideID, int level)
+{
+    return texelFetch(levelDims, ivec2(sideID, level), 0).rg;
+}
+
 bool SearchSideForInitialCellWithOctree(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
     ivec3 side = GetFaceFromFaceIndex(sideID);
     ivec3 index = (side+1)/2 * (cellDims-1);
     
     
-    ivec2 lDims1 = texelFetch(levelDims, ivec2(1, sideID), 0).rg;
-    ivec2 lDims0 = texelFetch(levelDims, ivec2(0, sideID), 0).rg;
+    ivec2 lDims1 = GetBBoxArrayDimensions(sideID, 1);
+    ivec2 lDims0 = GetBBoxArrayDimensions(sideID, 0);
     
     for (int y1 = 0; y1 < lDims1.y; y1++) {
         for (int x1 = 0; x1 < lDims1.x; x1++) {
@@ -326,14 +331,9 @@ bool SearchSideForInitialCellWithOctree(vec3 origin, vec3 dir, float t0, int sid
                 int y0End = y1 == lDims1.y-1 ? lDims0.y : (y1+1)*2;
                 int x0End = x1 == lDims1.x-1 ? lDims0.x : (x1+1)*2;
                 
-                t1 = -1;
-                fragColor = vec4(lDims1.y/3.f, 0, 0, 1);
-                return true;
-                
                 for (int y0 = y1*2; y0 < y0End; y0++) {
                     for (int x0 = x1*2; x0 < lDims0.x; x0++) {
                         if (IntersectRaySideCellBBoxDirect(origin, dir, x0, y0, sideID, 0)) {
-                            
                             index[slowDim] = y0;
                             index[fastDim] = x0;
                             if (IntersectRayCellFace(origin, dir, index, side, t1)) {
@@ -381,13 +381,12 @@ bool SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, int f
 
 bool FindInitialCell(vec3 origin, vec3 dir, float t0, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
-    
-    if (SearchSideForInitialCell(origin, dir, t0, FI_DOWN, 0, 1, cellIndex, entranceFace, t1)) return true;
-    if (SearchSideForInitialCell(origin, dir, t0, FI_UP, 0, 1, cellIndex, entranceFace, t1)) return true;
-    if (SearchSideForInitialCell(origin, dir, t0, FI_LEFT, 1, 2, cellIndex, entranceFace, t1)) return true;
-    if (SearchSideForInitialCell(origin, dir, t0, FI_RIGHT, 1, 2, cellIndex, entranceFace, t1)) return true;
-    if (SearchSideForInitialCell(origin, dir, t0, FI_FRONT, 0, 2, cellIndex, entranceFace, t1)) return true;
-    if (SearchSideForInitialCell(origin, dir, t0, FI_BACK, 0, 2, cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCellWithOctree(origin, dir, t0, FI_DOWN, 0, 1, cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCellWithOctree(origin, dir, t0, FI_UP, 0, 1, cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCellWithOctree(origin, dir, t0, FI_LEFT, 1, 2, cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCellWithOctree(origin, dir, t0, FI_RIGHT, 1, 2, cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCellWithOctree(origin, dir, t0, FI_FRONT, 0, 2, cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCellWithOctree(origin, dir, t0, FI_BACK, 0, 2, cellIndex, entranceFace, t1)) return true;
     return false;
 }
 
