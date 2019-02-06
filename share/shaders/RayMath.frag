@@ -78,6 +78,89 @@ bool IntersectRayTriangle(vec3 o, vec3 d, vec3 v0, vec3 v1, vec3 v2, out float t
     return false;
 }
 
+int MaxDimension(vec3 v)
+{
+	return (v.x > v.y) ? ((v.x > v.z) ? 0 : 2) : ((v.y > v.z) ? 1 : 2);
+}
+
+vec3 Permute(vec3 v, int x, int y, int z)
+{
+	return vec3(v[x], v[y], v[z]);
+}
+
+bool IntersectRayTriangleIntel(vec3 o, vec3 dir, vec3 v0, vec3 v1, vec3 v2, out float t)
+{
+	// Transform triangle vertices to ray coordinate space
+	// Translate vertices based on ray origin
+	vec3 p0t = v0 - o;
+	vec3 p1t = v1 - o;
+	vec3 p2t = v2 - o;
+
+	// Permute components of triangle vertices and ray direction
+	int kz = MaxDimension(abs(dir));
+	int kx = kz + 1; if (kx == 3) kx = 0;
+	int ky = kx + 1; if (ky == 3) ky = 0;
+	vec3 d = Permute(dir, kx, ky, kz);
+	p0t = Permute(p0t, kx, ky, kz);
+	p1t = Permute(p1t, kx, ky, kz);
+	p2t = Permute(p2t, kx, ky, kz);
+
+	// Apply shear transformation to translated vertex positions
+	float Sx = -d.x / d.z;
+	float Sy = -d.y / d.z;
+	float Sz = 1.f / d.z;
+	p0t.x += Sx * p0t.z;
+	p0t.y += Sy * p0t.z;
+	p1t.x += Sx * p1t.z;
+	p1t.y += Sy * p1t.z;
+	p2t.x += Sx * p2t.z;
+	p2t.y += Sy * p2t.z;
+
+
+	// Compute edge function coefficients e0, e1, and e2
+	float e0 = p1t.x * p2t.y - p1t.y * p2t.x;
+	float e1 = p2t.x * p0t.y - p2t.y * p0t.x;
+	float e2 = p0t.x * p1t.y - p0t.y * p1t.x;
+
+	// Fall back to double-precision test at triangle edges
+	if (e0 == 0.0f || e1 == 0.0f || e2 == 0.0f) {
+		double p2txp1ty = double(p2t.x) * double(p1t.y);
+		double p2typ1tx = double(p2t.y) * double(p1t.x);
+		e0 = float(p2typ1tx - p2txp1ty);
+		double p0txp2ty = double(p0t.x) * double(p2t.y);
+		double p0typ2tx = double(p0t.y) * double(p2t.x);
+		e1 = float(p0typ2tx - p0txp2ty);
+		double p1txp0ty = double(p1t.x) * double(p0t.y);
+		double p1typ0tx = double(p1t.y) * double(p0t.x);
+		e2 = float(p1typ0tx - p1txp0ty);
+	}
+
+	// Perform triangle edge and determinant tests
+	if ((e0 < 0 || e1 < 0 || e2 < 0) && (e0 > 0 || e1 > 0 || e2 > 0))
+		return false;
+	float det = e0 + e1 + e2;
+	if (det == 0)
+		return false;
+
+	// Compute scaled hit distance to triangle and test against ray t range
+	p0t.z *= Sz;
+	p1t.z *= Sz;
+	p2t.z *= Sz;
+	float tScaled = e0 * p0t.z + e1 * p1t.z + e2 * p2t.z;
+	if (det < 0 && (tScaled >= 0 || tScaled < FLT_MAX * det))
+		return false;
+	else if (det > 0 && (tScaled <= 0 || tScaled > FLT_MAX * det))
+		return false;
+
+	float invDet = 1 / det;
+	float b0 = e0 * invDet;
+	float b1 = e1 * invDet;
+	float b2 = e2 * invDet;
+	t = tScaled * invDet;
+
+	return true;
+}
+
 bool IntersectRayQuad(vec3 o, vec3 d, vec3 v0, vec3 v1, vec3 v2, vec3 v3, out float t)
 {
     if (IntersectRayTriangle(o, d, v0, v1, v2, t)) return true;
