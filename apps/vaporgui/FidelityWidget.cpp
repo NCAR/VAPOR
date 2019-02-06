@@ -21,6 +21,7 @@
 #include <sstream>
 #include <qwidget.h>
 #include <QFileDialog>
+#include <QDesktopWidget>
 #include <qradiobutton.h>
 #include <qcolordialog.h>
 #include "vapor/RenderParams.h"
@@ -42,6 +43,10 @@ FidelityWidget::FidelityWidget(QWidget* parent)
     QHBoxLayout* hlay = new QHBoxLayout(fidelityBox);
     hlay->setAlignment(Qt::AlignHCenter);
     fidelityBox->setLayout(hlay);
+
+	int dpi = qApp->desktop()->logicalDpiX();
+	if (dpi > 96)
+		fidelityFrame->setMinimumHeight(100);
 
     connect (
         refinementCombo,SIGNAL(activated(int)), this,
