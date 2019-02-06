@@ -88,6 +88,7 @@ vec3 Permute(vec3 v, int x, int y, int z)
 	return vec3(v[x], v[y], v[z]);
 }
 
+/*
 bool IntersectRayTriangleIntel(vec3 o, vec3 dir, vec3 v0, vec3 v1, vec3 v2, out float t)
 {
 	// Transform triangle vertices to ray coordinate space
@@ -160,6 +161,7 @@ bool IntersectRayTriangleIntel(vec3 o, vec3 dir, vec3 v0, vec3 v1, vec3 v2, out 
 
 	return true;
 }
+ */
 
 bool IntersectRayQuad(vec3 o, vec3 d, vec3 v0, vec3 v1, vec3 v2, vec3 v3, out float t)
 {
