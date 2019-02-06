@@ -147,13 +147,8 @@ if (IntersectRaySideCellBBoxDirect(origin, dir, x$L, y$L, sideID, $L)) {
 		$ret .="
 	index[slowDim] = y0;
 	index[fastDim] = x0;
-	if (IntersectRayCellFace(origin, dir, index, side, t1)) {
-		if (IsRayEnteringCell(dir, index, side)) {
-			cellIndex = index;
-			entranceFace = side;
-			return true;
-		}
-	}
+	if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+		return true;
 ";
 
 	}
