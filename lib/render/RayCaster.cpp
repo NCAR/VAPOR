@@ -9,6 +9,7 @@
 
 #ifdef WIN32
     #include <Windows.h>
+    #include <cctype>
 #else
     #include <time.h>
 #endif
