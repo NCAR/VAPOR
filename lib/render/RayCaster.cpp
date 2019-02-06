@@ -875,7 +875,8 @@ glGetTexLevelParameteriv( GL_TEXTURE_1D, 0, GL_TEXTURE_WIDTH,  &colorMapTexWidth
 if( colorMapTexWidth == _colorMap.size() / 4 )
     glTexSubImage1D( GL_TEXTURE_1D, 0, 0, colorMapTexWidth, GL_RGBA, GL_FLOAT, _colorMap.data() );
 else
-    glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA32F,     _colorMap.size()/4,
+    //glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA32F,     _colorMap.size()/4,
+    glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA16F,     _colorMap.size()/4,
                    0, GL_RGBA,       GL_FLOAT,       _colorMap.data() );
 
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
@@ -1684,7 +1685,8 @@ void RayCaster::_updateDataTextures( )
     float dummyVolume[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
     glTexImage3D( GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume );
 #endif
-    glTexImage3D(  GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0,
+    //glTexImage3D(  GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0,
+    glTexImage3D(  GL_TEXTURE_3D, 0, GL_R16F, dims[0], dims[1], dims[2], 0,
                    GL_RED, GL_FLOAT, _userCoordinates.dataField );
 
 if( !_isIntel )
