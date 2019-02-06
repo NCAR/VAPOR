@@ -967,14 +967,14 @@ if( !_isIntel )
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
+if( !_isIntel )
+{
     /* Generate and configure 3D texture: _missingValueTextureId */
     glGenTextures( 1, &_missingValueTextureId );
     glActiveTexture( GL_TEXTURE0 + _missingValueTexOffset );
     glBindTexture( GL_TEXTURE_3D,  _missingValueTextureId );
     this->_configure3DTextureNearestInterpolation();
 
-if( !_isIntel )
-{
     /* Generate and configure 3D texture: _2ndVarMaskTexId */
     glGenTextures( 1, &_2ndVarMaskTexId );
     glActiveTexture( GL_TEXTURE0 + _2ndVarMaskTexOffset );
@@ -1247,9 +1247,12 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
     glBindTexture( GL_TEXTURE_1D,  _colorMapTextureId );
     shader->SetUniform("colorMapTexture", _colorMapTexOffset);
 
+if( !_isIntel )
+{
     glActiveTexture(  GL_TEXTURE0 +     _missingValueTexOffset );
     glBindTexture(    GL_TEXTURE_3D,    _missingValueTextureId );
     shader->SetUniform("missingValueMaskTexture", _missingValueTexOffset);
+}
 
     if( castingMode == CellTraversal )
     {
@@ -1684,6 +1687,8 @@ void RayCaster::_updateDataTextures( )
     glTexImage3D(  GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0,
                    GL_RED, GL_FLOAT, _userCoordinates.dataField );
 
+if( !_isIntel )
+{
     // Now we HAVE TO attach a missing value mask texture, because
     //   Intel driver on Mac doesn't like leaving the texture empty...
     glActiveTexture( GL_TEXTURE0 + _missingValueTexOffset );
@@ -1701,6 +1706,7 @@ void RayCaster::_updateDataTextures( )
                       GL_RED_INTEGER, GL_UNSIGNED_BYTE, dummyMask );
     }
     glPixelStorei( GL_UNPACK_ALIGNMENT, 4 );    // Restore default alignment.
+}
 }
 
 int RayCaster::_updateVertCoordsTexture( const glm::mat4& MV )
