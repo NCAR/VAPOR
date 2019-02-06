@@ -950,11 +950,14 @@ if( !_isIntel )
     glBindTexture( GL_TEXTURE_3D,  _volumeTextureId );
     this->_configure3DTextureLinearInterpolation();
 
+if( !_isIntel )
+{
     /* Generate and configure 3D texture: _2ndVarDataTexId */
     glGenTextures( 1, &_2ndVarDataTexId );
     glActiveTexture( GL_TEXTURE0 + _2ndVarDataTexOffset );
     glBindTexture( GL_TEXTURE_3D,  _2ndVarDataTexId );
     this->_configure3DTextureLinearInterpolation();
+}
 
     /* Generate and configure 1D texture: _colorMapTextureId */
     glGenTextures( 1, &_colorMapTextureId );
@@ -970,11 +973,14 @@ if( !_isIntel )
     glBindTexture( GL_TEXTURE_3D,  _missingValueTextureId );
     this->_configure3DTextureNearestInterpolation();
 
+if( !_isIntel )
+{
     /* Generate and configure 3D texture: _2ndVarMaskTexId */
     glGenTextures( 1, &_2ndVarMaskTexId );
     glActiveTexture( GL_TEXTURE0 + _2ndVarMaskTexOffset );
     glBindTexture( GL_TEXTURE_3D,  _2ndVarMaskTexId );
     this->_configure3DTextureNearestInterpolation();
+}
 
 if( !_isIntel )
 {
