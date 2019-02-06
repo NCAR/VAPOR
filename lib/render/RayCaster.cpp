@@ -64,15 +64,15 @@ RayCaster::RayCaster( const ParamsMgr*    pm,
                       classType,
                       instName,
                       dataMgr ),
-            _backFaceTexOffset     ( 1 ),
-            _frontFaceTexOffset    ( 2 ),
-            _volumeTexOffset       ( 3 ),
-            _colorMapTexOffset     ( 4 ),
-            _missingValueTexOffset ( 5 ),
+            _backFaceTexOffset     ( 0 ),
+            _frontFaceTexOffset    ( 1 ),
+            _volumeTexOffset       ( 2 ),
+            _colorMapTexOffset     ( 3 ),
+            _missingValueTexOffset ( 4 ),
+            _depthTexOffset        ( 5 ),
             _vertCoordsTexOffset   ( 6 ),
-            _depthTexOffset        ( 7 ),
-            _2ndVarDataTexOffset   ( 8 ),
-            _2ndVarMaskTexOffset   ( 9 )
+            _2ndVarDataTexOffset   ( 7 ),
+            _2ndVarMaskTexOffset   ( 8 )
 {
     _backFaceTextureId           = 0;
     _frontFaceTextureId          = 0;
@@ -989,13 +989,13 @@ if( !_isIntel )
     glActiveTexture( GL_TEXTURE0 + _vertCoordsTexOffset );
     glBindTexture( GL_TEXTURE_3D,  _vertCoordsTextureId );
     this->_configure3DTextureNearestInterpolation();
-}
 
     /* Generate and configure 2D depth texture */
     glGenTextures(1, &_depthTextureId);
     glActiveTexture( GL_TEXTURE0 + _depthTexOffset );
     glBindTexture(GL_TEXTURE_2D, _depthTextureId);
     this->_configure2DTextureLinearInterpolation();
+}
 
     return 0;
 }

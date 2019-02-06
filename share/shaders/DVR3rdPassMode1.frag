@@ -8,7 +8,7 @@ uniform sampler2D  frontFaceTexture;
 uniform sampler3D  volumeTexture;
 uniform usampler3D missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D  colorMapTexture;
-uniform sampler2D  depthTexture;
+//uniform sampler2D  depthTexture;
 
 uniform ivec3 volumeDims;        // number of vertices of this volumeTexture
 uniform ivec2 viewportDims;      // width and height of this viewport
@@ -155,7 +155,8 @@ void main(void)
     // If something else on the scene resulting in a shallower depth, we need to 
     //    compare depth at every step.
     bool  shallow    = false;
-    float otherDepth = texture( depthTexture, fragTex ).x;
+    //float otherDepth = texture( depthTexture, fragTex ).x;
+    float otherDepth = 1.0;
     if(   otherDepth < gl_FragDepth )
           shallow    = true;
 
