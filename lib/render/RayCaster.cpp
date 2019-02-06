@@ -870,6 +870,11 @@ if( _isIntel )
     _updateColormap( params );
     glActiveTexture( GL_TEXTURE0 + _colorMapTexOffset );
     glBindTexture( GL_TEXTURE_1D,  _colorMapTextureId );
+int colorMapTexWidth;
+glGetTexLevelParameteriv( GL_TEXTURE_1D, 0, GL_TEXTURE_WIDTH,  &colorMapTexWidth );
+if( colorMapTexWidth == _colorMap.size() / 4 )
+    glTexSubImage1D( GL_TEXTURE_1D, 0, 0, colorMapTexWidth, GL_RGBA, GL_FLOAT, _colorMap.data() );
+else
     glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA32F,     _colorMap.size()/4,
                    0, GL_RGBA,       GL_FLOAT,       _colorMap.data() );
 
