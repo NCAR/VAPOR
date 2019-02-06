@@ -134,6 +134,7 @@ class RENDER_API RayCaster : public Renderer {
     float _colorMapRange[3];   // min, max, and diff values.
     glm::mat4 _currentMV;      // model view matrix in use
     GLint _currentViewport[4]; // current viewport in use
+    bool _isIntel;
 
     // OpenGL stuff
     // textures
@@ -206,8 +207,11 @@ class RENDER_API RayCaster : public Renderer {
     void _configure3DTextureNearestInterpolation() const;
     void _configure3DTextureLinearInterpolation() const;
     void _configure2DTextureLinearInterpolation() const;
+    void _sleepAWhile() const;
 
+#ifndef WIN32
     double _getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const;
+#endif
 
 }; // End of class RayCaster
 
