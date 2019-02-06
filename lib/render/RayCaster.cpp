@@ -7,6 +7,12 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/ext/matrix_relational.hpp>
 
+#ifdef WIN32
+    #include <Windows.h>
+#else
+    #include <time.h>
+#endif
+
 #define OUTOFDATE   1
 #define GLNOTREADY  2
 #define GRIDERROR   -1
@@ -552,6 +558,16 @@ int RayCaster::_initializeGL()
         return GLERROR;
     }
 
+    // Detect if it's INTEL graphics card. If so, give a magic value to the params
+    const unsigned char *vendorC = glGetString(GL_VENDOR);
+    std::string          vendor((char *)vendorC);
+    for (int i = 0; i < vendor.size(); i++) vendor[i] = std::tolower(vendor[i]);
+    std::string::size_type n = vendor.find("intel");
+    if (n == std::string::npos)
+        _isIntel = false;
+    else
+        _isIntel = true;
+
     return 0;    // Success
 }
 
@@ -582,6 +598,12 @@ int RayCaster::_paintGL(bool fast)
     // Do not perform any fast rendering in cell traverse mode
     int castingMode = int(params->GetCastingMode());
     if (castingMode == CellTraversal && fast) return 0;
+
+    // Force casting mode to be FixedStep if on Intel GPU.
+    if (_isIntel) {
+        castingMode = FixedStep;
+        params->SetCastingMode(FixedStep);
+    }
 
     StructuredGrid *grid = nullptr;
     if (_userCoordinates.GetCurrentGrid(params, _dataMgr, &grid) != 0) {
@@ -922,14 +944,14 @@ void RayCaster::_drawVolumeFaces(int whichPass, int castingMode, const std::vect
             glm::vec4 bottomLeftNDC(-1.0f, -1.0f, -0.999f, 1.0f);
             glm::vec4 topRightNDC(1.0f, 1.0f, -0.999f, 1.0f);
             glm::vec4 bottomRightNDC(1.0f, -1.0f, -0.999f, 1.0f);
-            glm::vec4 near[4];
-            near[0] = InversedMVP * topLeftNDC;
-            near[1] = InversedMVP * bottomLeftNDC;
-            near[2] = InversedMVP * topRightNDC;
-            near[3] = InversedMVP * bottomRightNDC;
+            glm::vec4 nearP[4];
+            nearP[0] = InversedMVP * topLeftNDC;
+            nearP[1] = InversedMVP * bottomLeftNDC;
+            nearP[2] = InversedMVP * topRightNDC;
+            nearP[3] = InversedMVP * bottomRightNDC;
             for (int i = 0; i < 4; i++) {
-                near[i] /= near[i].w;
-                std::memcpy(nearCoords + i * 3, glm::value_ptr(near[i]), 3 * sizeof(GLfloat));
+                nearP[i] /= nearP[i].w;
+                std::memcpy(nearCoords + i * 3, glm::value_ptr(nearP[i]), 3 * sizeof(GLfloat));
             }
 
             glEnableVertexAttribArray(0);    // attribute 0 is vertex coordinates
@@ -1332,14 +1354,9 @@ void RayCaster::_renderTriangleStrips(int whichPass, int castingMode) const
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-double RayCaster::_getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const
-{
-#ifdef WIN32
-    return -1.0;
-#else
-    return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0);
+#ifndef WIN32
+double RayCaster::_getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const { return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec) / 1000000.0); }
 #endif
-}
 
 void RayCaster::_updateViewportWhenNecessary(const GLint *viewport)
 {
@@ -1514,4 +1531,18 @@ int RayCaster::_selectDefaultCastingMethod() const
     delete grid;
 
     return 0;
+}
+
+void RayCaster::_sleepAWhile() const
+{
+#ifdef WIN32
+    glFinish();
+    Sleep(1);    // 1 milliseconds
+#else
+    struct timespec req, rem;
+    req.tv_sec = 0;
+    req.tv_nsec = 1000000L;    // 1 milliseconds
+    glFinish();
+    nanosleep(&req, &rem);
+#endif
 }
