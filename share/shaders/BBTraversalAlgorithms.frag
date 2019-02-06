@@ -16,13 +16,8 @@ bool SearchSideForInitialCellWithOctree_1Levels(vec3 origin, vec3 dir, float t0,
 	
 		index[slowDim] = y0;
 		index[fastDim] = x0;
-		if (IntersectRayCellFace(origin, dir, index, side, t1)) {
-			if (IsRayEnteringCell(dir, index, side)) {
-				cellIndex = index;
-				entranceFace = side;
-				return true;
-			}
-		}
+		if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+			return true;
 	
 	
 	}
@@ -58,13 +53,8 @@ bool SearchSideForInitialCellWithOctree_2Levels(vec3 origin, vec3 dir, float t0,
 		
 			index[slowDim] = y0;
 			index[fastDim] = x0;
-			if (IntersectRayCellFace(origin, dir, index, side, t1)) {
-				if (IsRayEnteringCell(dir, index, side)) {
-					cellIndex = index;
-					entranceFace = side;
-					return true;
-				}
-			}
+			if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+				return true;
 		
 		
 		}
@@ -113,13 +103,8 @@ bool SearchSideForInitialCellWithOctree_3Levels(vec3 origin, vec3 dir, float t0,
 			
 				index[slowDim] = y0;
 				index[fastDim] = x0;
-				if (IntersectRayCellFace(origin, dir, index, side, t1)) {
-					if (IsRayEnteringCell(dir, index, side)) {
-						cellIndex = index;
-						entranceFace = side;
-						return true;
-					}
-				}
+				if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+					return true;
 			
 			
 			}
@@ -181,13 +166,8 @@ bool SearchSideForInitialCellWithOctree_4Levels(vec3 origin, vec3 dir, float t0,
 				
 					index[slowDim] = y0;
 					index[fastDim] = x0;
-					if (IntersectRayCellFace(origin, dir, index, side, t1)) {
-						if (IsRayEnteringCell(dir, index, side)) {
-							cellIndex = index;
-							entranceFace = side;
-							return true;
-						}
-					}
+					if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+						return true;
 				
 				
 				}
@@ -262,13 +242,8 @@ bool SearchSideForInitialCellWithOctree_5Levels(vec3 origin, vec3 dir, float t0,
 					
 						index[slowDim] = y0;
 						index[fastDim] = x0;
-						if (IntersectRayCellFace(origin, dir, index, side, t1)) {
-							if (IsRayEnteringCell(dir, index, side)) {
-								cellIndex = index;
-								entranceFace = side;
-								return true;
-							}
-						}
+						if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+							return true;
 					
 					
 					}
@@ -356,13 +331,8 @@ bool SearchSideForInitialCellWithOctree_6Levels(vec3 origin, vec3 dir, float t0,
 						
 							index[slowDim] = y0;
 							index[fastDim] = x0;
-							if (IntersectRayCellFace(origin, dir, index, side, t1)) {
-								if (IsRayEnteringCell(dir, index, side)) {
-									cellIndex = index;
-									entranceFace = side;
-									return true;
-								}
-							}
+							if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+								return true;
 						
 						
 						}
@@ -463,13 +433,8 @@ bool SearchSideForInitialCellWithOctree_7Levels(vec3 origin, vec3 dir, float t0,
 							
 								index[slowDim] = y0;
 								index[fastDim] = x0;
-								if (IntersectRayCellFace(origin, dir, index, side, t1)) {
-									if (IsRayEnteringCell(dir, index, side)) {
-										cellIndex = index;
-										entranceFace = side;
-										return true;
-									}
-								}
+								if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+									return true;
 							
 							
 							}
@@ -583,13 +548,8 @@ bool SearchSideForInitialCellWithOctree_8Levels(vec3 origin, vec3 dir, float t0,
 								
 									index[slowDim] = y0;
 									index[fastDim] = x0;
-									if (IntersectRayCellFace(origin, dir, index, side, t1)) {
-										if (IsRayEnteringCell(dir, index, side)) {
-											cellIndex = index;
-											entranceFace = side;
-											return true;
-										}
-									}
+									if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+										return true;
 								
 								
 								}
@@ -716,13 +676,8 @@ bool SearchSideForInitialCellWithOctree_9Levels(vec3 origin, vec3 dir, float t0,
 									
 										index[slowDim] = y0;
 										index[fastDim] = x0;
-										if (IntersectRayCellFace(origin, dir, index, side, t1)) {
-											if (IsRayEnteringCell(dir, index, side)) {
-												cellIndex = index;
-												entranceFace = side;
-												return true;
-											}
-										}
+										if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+											return true;
 									
 									
 									}
@@ -862,13 +817,8 @@ bool SearchSideForInitialCellWithOctree_10Levels(vec3 origin, vec3 dir, float t0
 										
 											index[slowDim] = y0;
 											index[fastDim] = x0;
-											if (IntersectRayCellFace(origin, dir, index, side, t1)) {
-												if (IsRayEnteringCell(dir, index, side)) {
-													cellIndex = index;
-													entranceFace = side;
-													return true;
-												}
-											}
+											if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+												return true;
 										
 										
 										}
