@@ -100,6 +100,17 @@ RayCaster::RayCaster( const ParamsMgr*    pm,
 
     _currentMV = glm::mat4(0.0f);
 
+    // Detect if it's INTEL graphics card. If so, give a magic value to the params
+    const unsigned char* vendorC = glGetString( GL_VENDOR );
+    std::string vendor( (char*)vendorC );
+    for( int i = 0; i < vendor.size(); i++ )
+        vendor[i] = std::tolower( vendor[i] );
+    std::string::size_type n = vendor.find("intel");
+    if( n == std::string::npos )
+        _isIntel = false;
+    else
+        _isIntel = true;
+
     // Set the default ray casting method upon creation of the RayCaster.
     _selectDefaultCastingMethod();
 }
@@ -689,17 +700,6 @@ int RayCaster::_initializeGL()
         return GLERROR;
     }
 
-    // Detect if it's INTEL graphics card. If so, give a magic value to the params
-    const unsigned char* vendorC = glGetString( GL_VENDOR );
-    std::string vendor( (char*)vendorC );
-    for( int i = 0; i < vendor.size(); i++ )
-        vendor[i] = std::tolower( vendor[i] );
-    std::string::size_type n = vendor.find("intel");
-    if( n == std::string::npos )
-        _isIntel = false;
-    else
-        _isIntel = true;
-
     return 0;   // Success
 }
 
@@ -735,12 +735,12 @@ int RayCaster::_paintGL( bool fast )
     if( castingMode == CellTraversal && fast )
         return 0;
 
-    //Force casting mode to be FixedStep if on Intel GPU.
-    if( _isIntel )
-    {
-        castingMode = FixedStep;
-        params->SetCastingMode( FixedStep );
-    }
+//Force casting mode to be FixedStep if on Intel GPU.
+if( _isIntel )
+{
+    castingMode = FixedStep;
+    params->SetCastingMode( FixedStep );
+}
 
     StructuredGrid*  grid = nullptr;
     if( _userCoordinates.GetCurrentGrid( params, _dataMgr, &grid ) != 0 )
@@ -897,6 +897,7 @@ int RayCaster::_initializeFramebufferTextures()
     glGenVertexArrays( 1, &_vertexArrayId );
     glGenBuffers(      1, &_vertexBufferId );
     glGenBuffers(      1, &_indexBufferId );
+if( !_isIntel )
     glGenBuffers(      1, &_vertexAttribId );
 
     /* Generate and configure 2D back-facing texture */
@@ -969,11 +970,14 @@ int RayCaster::_initializeFramebufferTextures()
     glBindTexture( GL_TEXTURE_3D,  _2ndVarMaskTexId );
     this->_configure3DTextureNearestInterpolation();
 
+if( !_isIntel )
+{
     /* Generate 3D texture: _vertCoordsTextureId */
     glGenTextures( 1, &_vertCoordsTextureId  );
     glActiveTexture( GL_TEXTURE0 + _vertCoordsTexOffset );
     glBindTexture( GL_TEXTURE_3D,  _vertCoordsTextureId );
     this->_configure3DTextureNearestInterpolation();
+}
 
     /* Generate and configure 2D depth texture */
     glGenTextures(1, &_depthTextureId);
@@ -1767,6 +1771,12 @@ int RayCaster::_selectDefaultCastingMethod() const
     int castingMode = int(params->GetCastingMode());
     if( castingMode == FixedStep || castingMode == CellTraversal )
         return 0;
+
+if( _isIntel )
+{
+    params->SetCastingMode( FixedStep );
+    return 0;
+}
 
     // castingMode == 0 if not initialized before. Let's figure out what value it should have.
     StructuredGrid*  grid = nullptr;
