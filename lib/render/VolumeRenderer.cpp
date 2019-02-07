@@ -5,6 +5,7 @@
 #include <vapor/GLManager.h>
 #include <vapor/glutil.h>
 #include <glm/glm.hpp>
+#include <chrono>
 
 using glm::vec2;
 using glm::vec3;
@@ -153,7 +154,17 @@ int VolumeRenderer::_paintGL(bool fast)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBindVertexArray(VAO);
+    
+    setlocale(LC_ALL, "");
+    glFinish();
+    
+    auto start = std::chrono::high_resolution_clock::now();
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    glFinish();
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    printf("Render time = %'lld\n", duration.count());
+    
     glDisable(GL_BLEND);
     GL_ERR_BREAK();
     

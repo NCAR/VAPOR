@@ -194,11 +194,16 @@ bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 
     return FindCellExit(origin, dir, t0, currentCell, ivec3(0), exitFace, t1);
 }
 
+bool IsCellInBounds(ivec3 cellIndex)
+{
+    return !(any(lessThan(cellIndex, ivec3(0))) || any(greaterThanEqual(cellIndex, cellDims)));
+}
+
 bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out ivec3 nextCell, out ivec3 exitFace, out float t1)
 {
     if (FindCellExit(origin, dir, t0, currentCell, entranceFace, exitFace, t1)) {
         nextCell = currentCell + exitFace;
-        if (any(lessThan(nextCell, ivec3(0))) || any(greaterThanEqual(nextCell, cellDims)))
+        if (!IsCellInBounds(nextCell))
             return false;
         return true;
     }
