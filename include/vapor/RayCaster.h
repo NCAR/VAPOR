@@ -145,10 +145,10 @@ protected:
     GLuint              _backFaceTextureId;
     GLuint              _frontFaceTextureId;
     GLuint              _volumeTextureId;
-    GLuint              _missingValueTextureId;
     GLuint              _colorMapTextureId;
-    GLuint              _vertCoordsTextureId;
+    GLuint              _missingValueTextureId;
     GLuint              _depthTextureId;
+    GLuint              _vertCoordsTextureId;
     GLuint              _2ndVarDataTexId;
     GLuint              _2ndVarMaskTexId;
     const  GLint        _backFaceTexOffset;
@@ -156,8 +156,8 @@ protected:
     const  GLint        _volumeTexOffset;
     const  GLint        _colorMapTexOffset;
     const  GLint        _missingValueTexOffset;
-    const  GLint        _vertCoordsTexOffset;
     const  GLint        _depthTexOffset;
+    const  GLint        _vertCoordsTexOffset;
     const  GLint        _2ndVarDataTexOffset;
     const  GLint        _2ndVarMaskTexOffset;
 

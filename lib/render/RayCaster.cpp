@@ -911,7 +911,8 @@ if( !_isIntel )
     glGenTextures(1, &_backFaceTextureId);
     glActiveTexture( GL_TEXTURE0 + _backFaceTexOffset );
     glBindTexture(GL_TEXTURE_2D,   _backFaceTextureId); 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _currentViewport[2], _currentViewport[3], 
                  0, GL_RGBA, GL_FLOAT, nullptr);
     this->_configure2DTextureLinearInterpolation();
 
@@ -919,7 +920,8 @@ if( !_isIntel )
     glGenTextures(1, &_frontFaceTextureId);
     glActiveTexture( GL_TEXTURE0 + _frontFaceTexOffset );
     glBindTexture(GL_TEXTURE_2D,   _frontFaceTextureId); 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _currentViewport[2], _currentViewport[3], 
                  0, GL_RGBA, GL_FLOAT, nullptr);
     this->_configure2DTextureLinearInterpolation();
 
@@ -1621,12 +1623,14 @@ void RayCaster::_updateViewportWhenNecessary( const GLint* viewport )
         // Re-size 1st and 2nd pass rendering 2D textures
         glActiveTexture( GL_TEXTURE0 + _backFaceTexOffset );
         glBindTexture(GL_TEXTURE_2D,   _backFaceTextureId); 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _currentViewport[2], _currentViewport[3], 
                      0, GL_RGBA, GL_FLOAT, nullptr);
 
         glActiveTexture( GL_TEXTURE0 + _frontFaceTexOffset );
         glBindTexture(GL_TEXTURE_2D,   _frontFaceTextureId); 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
+        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _currentViewport[2], _currentViewport[3], 
                      0, GL_RGBA, GL_FLOAT, nullptr);
     }
 }
