@@ -69,10 +69,6 @@ void IsoSurfaceRenderer::_3rdPassSpecialHandling( bool fast, int castingMode ) c
     glActiveTexture(  GL_TEXTURE0 +                    _2ndVarDataTexOffset );
     glBindTexture(    GL_TEXTURE_3D,                   _2ndVarDataTexId     );
     _3rdPassShader->SetUniform("secondVarDataTexture", _2ndVarDataTexOffset );
-
-    glActiveTexture(  GL_TEXTURE0 +                    _2ndVarMaskTexOffset );
-    glBindTexture(    GL_TEXTURE_3D,                   _2ndVarMaskTexId     );
-    _3rdPassShader->SetUniform("secondVarMaskTexture", _2ndVarMaskTexOffset );
 }
 
 void IsoSurfaceRenderer::_colormapSpecialHandling( )
@@ -110,7 +106,8 @@ void IsoSurfaceRenderer::_update2ndVarTextures( )
 
     glActiveTexture( GL_TEXTURE0 + _2ndVarDataTexOffset );
     glBindTexture( GL_TEXTURE_3D,  _2ndVarDataTexId );
-    float dummyVolume[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+    float dummyVolume[16] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                              0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
     if( use2ndVar )
     {
 #ifdef Darwin
@@ -119,31 +116,13 @@ void IsoSurfaceRenderer::_update2ndVarTextures( )
         //   when the texture is moderately big. This workaround of loading a dummy texture
         //   to force it to update seems to resolve this issue.
         //
-        glTexImage3D( GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume );
+        glTexImage3D( GL_TEXTURE_3D, 0, GL_RG16F, 2, 2, 2, 0, GL_RG, GL_FLOAT, dummyVolume );
 #endif
-        glTexImage3D(  GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0,
-                       GL_RED, GL_FLOAT, _userCoordinates.secondVarData );
+        glTexImage3D(  GL_TEXTURE_3D, 0, GL_RG16F, dims[0], dims[1], dims[2], 0,
+                       GL_RG, GL_FLOAT, _userCoordinates.secondVarData );
     }
     else
     {
-        glTexImage3D( GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume );
+        glTexImage3D( GL_TEXTURE_3D, 0, GL_RG16F, 2, 2, 2, 0, GL_RG, GL_FLOAT, dummyVolume );
     }
-
-    // Now we HAVE TO attach a missing value mask texture, because
-    //   Intel driver on Mac doesn't like leaving the texture empty...
-    glActiveTexture( GL_TEXTURE0 + _2ndVarMaskTexOffset );
-    glBindTexture( GL_TEXTURE_3D,  _2ndVarMaskTexId );
-    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );  // Alignment adjustment. Stupid OpenGL thing.
-    if( _userCoordinates.secondVarMask )
-    {
-        glTexImage3D(  GL_TEXTURE_3D, 0, GL_R8UI, dims[0], dims[1], dims[2], 0,
-                       GL_RED_INTEGER, GL_UNSIGNED_BYTE, _userCoordinates.secondVarMask );
-    }
-    else
-    {
-        unsigned char dummyMask[8] = { 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u };
-        glTexImage3D( GL_TEXTURE_3D, 0, GL_R8UI, 2, 2, 2, 0, 
-                      GL_RED_INTEGER, GL_UNSIGNED_BYTE, dummyMask );
-    }
-    glPixelStorei( GL_UNPACK_ALIGNMENT, 4 );    // Restore default alignment.
 }

@@ -62,10 +62,8 @@ protected:
         float *rightFace,       *leftFace;           // user coordinates, size == by * bz * 3
         float *topFace,         *bottomFace;         // user coordinates, size == bx * bz * 3   
         float *dataField;                // data field of this volume
-        unsigned char* missingValueMask; // 0 == is missing value; non-zero == not missing value
         float* vertCoords;               // vertex coordinates in user coordinates
         float* secondVarData;            // values of a second variable
-        unsigned char* secondVarMask;    // 0 == is missing value; non-zero == not missing value
 
         size_t  dims[3];                 // num. of samples along each axis. 
 
@@ -128,8 +126,7 @@ protected:
                                 float*  coords );               // Output 
         void IterateAGrid(      const   StructuredGrid*  grid,
                                 size_t                   numOfVert, // Length of buffers.
-                                float*                   dataBuf,   // Need to be already allocated.
-                                unsigned char*           maskBuf ); // Need to be already allocated.
+                                float*                   dataBuf ); // Need to be already allocated.
                                 
     };  // end of class UserCoordinates 
 
@@ -146,20 +143,16 @@ protected:
     GLuint              _frontFaceTextureId;
     GLuint              _volumeTextureId;
     GLuint              _colorMapTextureId;
-    GLuint              _missingValueTextureId;
     GLuint              _depthTextureId;
     GLuint              _vertCoordsTextureId;
     GLuint              _2ndVarDataTexId;
-    GLuint              _2ndVarMaskTexId;
     const  GLint        _backFaceTexOffset;
     const  GLint        _frontFaceTexOffset;
     const  GLint        _volumeTexOffset;
     const  GLint        _colorMapTexOffset;
-    const  GLint        _missingValueTexOffset;
     const  GLint        _depthTexOffset;
     const  GLint        _vertCoordsTexOffset;
     const  GLint        _2ndVarDataTexOffset;
-    const  GLint        _2ndVarMaskTexOffset;
 
     // buffers and vertex arrays
     GLuint              _frameBufferId;

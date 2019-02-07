@@ -68,22 +68,18 @@ RayCaster::RayCaster( const ParamsMgr*    pm,
             _frontFaceTexOffset    ( 1 ),
             _volumeTexOffset       ( 2 ),
             _colorMapTexOffset     ( 3 ),
-            _missingValueTexOffset ( 4 ),
-            _depthTexOffset        ( 5 ),
-            _vertCoordsTexOffset   ( 6 ),
-            _2ndVarDataTexOffset   ( 7 ),
-            _2ndVarMaskTexOffset   ( 8 )
+            _depthTexOffset        ( 4 ),
+            _vertCoordsTexOffset   ( 5 ),
+            _2ndVarDataTexOffset   ( 6 )
 {
     _backFaceTextureId           = 0;
     _frontFaceTextureId          = 0;
     _volumeTextureId             = 0;
-    _missingValueTextureId       = 0;
     _colorMapTextureId           = 0;
     _vertCoordsTextureId         = 0;
     _depthTextureId              = 0;
     _frameBufferId               = 0;
     _2ndVarDataTexId             = 0;
-    _2ndVarMaskTexId             = 0;
 
     _vertexArrayId               = 0;
     _vertexBufferId              = 0;
@@ -142,11 +138,6 @@ RayCaster::~RayCaster()
         glDeleteTextures( 1, &_volumeTextureId   );
         _volumeTextureId = 0;
     }
-    if( _missingValueTextureId   )
-    {
-        glDeleteTextures( 1, &_missingValueTextureId   );
-        _missingValueTextureId = 0;
-    }
     if( _colorMapTextureId )
     {
         glDeleteTextures( 1, &_colorMapTextureId );
@@ -166,11 +157,6 @@ RayCaster::~RayCaster()
     {
         glDeleteTextures(  1, &_2ndVarDataTexId );
         _2ndVarDataTexId = 0;
-    }
-    if( _2ndVarMaskTexId )
-    {
-        glDeleteTextures(  1, &_2ndVarMaskTexId );
-        _2ndVarMaskTexId = 0;
     }
 
     // Delete vertex arrays
@@ -208,8 +194,6 @@ RayCaster::UserCoordinates::UserCoordinates()
     dataField        = nullptr;
     vertCoords       = nullptr;
     secondVarData    = nullptr;
-    missingValueMask = nullptr;
-    secondVarMask    = nullptr;
     for( int i = 0; i < 3; i++ )
     {
         myGridMin[i] = 0;
@@ -271,20 +255,10 @@ RayCaster::UserCoordinates::~UserCoordinates()
         delete[] vertCoords;
         vertCoords = nullptr;
     }
-    if( missingValueMask )
-    {
-        delete[] missingValueMask;
-        missingValueMask = nullptr;
-    }
     if( secondVarData )
     {
         delete[] secondVarData;
         secondVarData = nullptr;
-    }
-    if( secondVarMask )
-    {
-        delete[] secondVarMask;
-        secondVarMask = nullptr;
     }
 }
 
@@ -430,29 +404,15 @@ RayCaster::UserCoordinates::UpdateFaceAndData( const RayCasterParams* params,
         delete[] dataField;
         dataField = nullptr;
     }
-    try{   dataField = new float[ numOfVertices ]; }
+    try{   dataField = new float[ numOfVertices * 2 ]; }
     catch( const std::bad_alloc& e )
     {
         MyBase::SetErrMsg( e.what() );
         return MEMERROR;
     }
-    if( missingValueMask )
-    {
-        delete[] missingValueMask;
-        missingValueMask = nullptr;
-    }
-    if( grid->HasMissingData() )
-    {
-        try{   missingValueMask   = new unsigned char[ numOfVertices ]; }
-        catch( const std::bad_alloc& e )
-        {
-            MyBase::SetErrMsg( e.what() );
-            return MEMERROR;
-        }
-    }
 
     // Now iterate the current grid
-    this->IterateAGrid( grid, numOfVertices, dataField, missingValueMask );
+    this->IterateAGrid( grid, numOfVertices, dataField );
 
     dataFieldUpToDate = true;
 
@@ -503,31 +463,16 @@ RayCaster::UserCoordinates::Update2ndVariable( const RayCasterParams* params,
         delete[] secondVarData;
         secondVarData = nullptr;
     }
-    try{   secondVarData = new float[ numOfVertices ]; }
+    try{   secondVarData = new float[ numOfVertices * 2 ]; }
     catch( const std::bad_alloc& e )
     {
         MyBase::SetErrMsg( e.what() );
         delete grid;
         return MEMERROR;
     }
-    if( secondVarMask )
-    {
-        delete[] secondVarMask;
-        secondVarMask = nullptr;
-    }
-    if( grid->HasMissingData() )
-    {
-        try{  secondVarMask = new unsigned char[ numOfVertices ]; }
-        catch( const std::bad_alloc& e )
-        {
-            MyBase::SetErrMsg( e.what() );
-            delete grid;
-            return MEMERROR;
-        }
-    }
 
     // Now iterate the current grid
-    this->IterateAGrid( grid, numOfVertices, secondVarData, secondVarMask );
+    this->IterateAGrid( grid, numOfVertices, secondVarData );
 
     delete grid;
     secondVarUpToDate = true;
@@ -538,8 +483,7 @@ RayCaster::UserCoordinates::Update2ndVariable( const RayCasterParams* params,
 void  
 RayCaster::UserCoordinates::IterateAGrid( const StructuredGrid* grid,
                                           size_t                numOfVert,
-                                          float*                dataBuf,
-                                          unsigned char*        maskBuf )
+                                          float*                dataBuf )
 {
     StructuredGrid::ConstIterator valItr = grid->cbegin();
 
@@ -552,13 +496,13 @@ RayCaster::UserCoordinates::IterateAGrid( const StructuredGrid* grid,
             dataValue      = *valItr;
             if( dataValue == missingValue )
             {
-                dataBuf[i] = 0.0f;
-                maskBuf[i] = 127u;
+                dataBuf[i*2]   = 0.0f;
+                dataBuf[i*2+1] = 0.0f;  // 0.0f means missing value.
             }
             else
             {
-                dataBuf[i] = dataValue;
-                maskBuf[i] = 0u;
+                dataBuf[i*2]   = dataValue;
+                dataBuf[i*2+1] = 1.0f;  // 1.0f means normal value.
             }
             ++valItr;
         }
@@ -567,7 +511,8 @@ RayCaster::UserCoordinates::IterateAGrid( const StructuredGrid* grid,
     {
         for( size_t i = 0; i < numOfVert; i++ )
         {
-            dataBuf[i] = *valItr;
+            dataBuf[i*2]   = *valItr;
+            dataBuf[i*2+1] = 1.0f;
             ++valItr;
         }
     }
@@ -964,18 +909,6 @@ int RayCaster::_initializeFramebufferTextures()
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
-    /* Generate and configure 3D texture: _missingValueTextureId */
-    glGenTextures( 1, &_missingValueTextureId );
-    glActiveTexture( GL_TEXTURE0 + _missingValueTexOffset );
-    glBindTexture( GL_TEXTURE_3D,  _missingValueTextureId );
-    this->_configure3DTextureNearestInterpolation();
-
-    /* Generate and configure 3D texture: _2ndVarMaskTexId */
-    glGenTextures( 1, &_2ndVarMaskTexId );
-    glActiveTexture( GL_TEXTURE0 + _2ndVarMaskTexOffset );
-    glBindTexture( GL_TEXTURE_3D,  _2ndVarMaskTexId );
-    this->_configure3DTextureNearestInterpolation();
-
 if( !_isIntel )
 {
     /* Generate 3D texture: _vertCoordsTextureId */
@@ -1178,21 +1111,19 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
     }
 
     // Get light settings from params.
+    float lightCoeffs[4]    = {0.0f, 0.0f, 0.0f, 0.0f};
     RayCasterParams* params = dynamic_cast<RayCasterParams*>( GetActiveParams() );
     bool lighting           = params->GetLighting();
     if( lighting )
     {
         std::vector<double> coeffsD = params->GetLightingCoeffs();
-        float coeffsF[4]            = { float(coeffsD[0]), float(coeffsD[1]), 
-                                        float(coeffsD[2]), float(coeffsD[3]) };
-        shader->SetUniformArray("lightingCoeffs", 4, coeffsF);
+        for( int i = 0; i < 4; i++ )
+            lightCoeffs[i]  = float(coeffsD.at(i));
     }
-
-    // Pack four booleans together, so there's one data transmission
-    //   to the GPU, instead of four.
-    int flags[4] = { int(fast), int(lighting), int(insideVolume),
-                     int(_userCoordinates.missingValueMask != nullptr) };
-    shader->SetUniformArray("flags", 4, flags);
+    shader->SetUniformArray("lightingCoeffs", 4, lightCoeffs);
+    shader->SetUniform( "fast", int(fast) );
+    shader->SetUniform( "lighting", int(lighting) );
+    shader->SetUniform( "eyeInsideVolume", int(insideVolume) );
 
     // Calculate the step size with sample rate multiplier taken into account.
     float stepSize1D, multiplier = 1.0f;
@@ -1219,9 +1150,6 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
         stepSize1D = glm::length( diagonal ) / 100.0f * multiplier;
     else                        // Use Nyquist frequency 
         stepSize1D = glm::length( diagonal ) / ( numCells * 2.0f ) * multiplier;
-
-    if( fast && castingMode == FixedStep )
-        stepSize1D *= 8.0f;     //  Increase step size, when fast rendering
     shader->SetUniform("stepSize1D", stepSize1D);
 
     // Pass in textures
@@ -1240,10 +1168,6 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
     glActiveTexture( GL_TEXTURE0 + _colorMapTexOffset );
     glBindTexture( GL_TEXTURE_1D,  _colorMapTextureId );
     shader->SetUniform("colorMapTexture", _colorMapTexOffset);
-
-    glActiveTexture(  GL_TEXTURE0 +     _missingValueTexOffset );
-    glBindTexture(    GL_TEXTURE_3D,    _missingValueTextureId );
-    shader->SetUniform("missingValueMaskTexture", _missingValueTexOffset);
 
     if( castingMode == CellTraversal )
     {
@@ -1666,30 +1590,22 @@ void RayCaster::_updateDataTextures( )
     //   when the texture is moderately big. This workaround of loading a dummy texture
     //   to force it to update seems to resolve this issue.
     //
-    float dummyVolume[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-    glTexImage3D( GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume );
+    float dummyVolume[16] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                              0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+    glTexImage3D( GL_TEXTURE_3D, 0, GL_RG16F, 2, 2, 2, 0, GL_RG, GL_FLOAT, dummyVolume );
 #endif
-    glTexImage3D(  GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0,
-    //glTexImage3D(  GL_TEXTURE_3D, 0, GL_R16F, dims[0], dims[1], dims[2], 0,
-                   GL_RED, GL_FLOAT, _userCoordinates.dataField );
-
-    // Now we HAVE TO attach a missing value mask texture, because
-    //   Intel driver on Mac doesn't like leaving the texture empty...
-    glActiveTexture( GL_TEXTURE0 + _missingValueTexOffset );
-    glBindTexture( GL_TEXTURE_3D,  _missingValueTextureId );
-    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );  // Alignment adjustment. Stupid OpenGL thing.
-    if( _userCoordinates.missingValueMask )
+    int width, height, depth;
+    glGetTexLevelParameteriv( GL_TEXTURE_3D, 0, GL_TEXTURE_WIDTH,  &width );
+    glGetTexLevelParameteriv( GL_TEXTURE_3D, 0, GL_TEXTURE_HEIGHT, &height );
+    glGetTexLevelParameteriv( GL_TEXTURE_3D, 0, GL_TEXTURE_DEPTH,  &depth );
+    if( (size_t)width == dims[0] && (size_t)height == dims[1] && (size_t)depth == dims[2] )
     {
-        glTexImage3D(  GL_TEXTURE_3D, 0, GL_R8UI, dims[0], dims[1], dims[2], 0,
-                       GL_RED_INTEGER, GL_UNSIGNED_BYTE, _userCoordinates.missingValueMask );
+        glTexSubImage3D( GL_TEXTURE_3D, 0, 0, 0, 0, width, height, depth, 
+                         GL_RG, GL_FLOAT, _userCoordinates.dataField   );
     }
     else
-    {
-        unsigned char dummyMask[8] = { 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u };
-        glTexImage3D( GL_TEXTURE_3D, 0, GL_R8UI, 2, 2, 2, 0, 
-                      GL_RED_INTEGER, GL_UNSIGNED_BYTE, dummyMask );
-    }
-    glPixelStorei( GL_UNPACK_ALIGNMENT, 4 );    // Restore default alignment.
+        glTexImage3D(  GL_TEXTURE_3D, 0, GL_RG16F, dims[0], dims[1], dims[2], 0,
+                       GL_RG, GL_FLOAT, _userCoordinates.dataField );
 }
 
 int RayCaster::_updateVertCoordsTexture( const glm::mat4& MV )
@@ -1702,9 +1618,8 @@ int RayCaster::_updateVertCoordsTexture( const glm::mat4& MV )
 
     // Now we need to calculate and upload the new vertex coordinates
     // First, transform every vertex coordinate to the eye space
-    size_t numOfVertices = _userCoordinates.dims[0] * 
-                           _userCoordinates.dims[1] * 
-                           _userCoordinates.dims[2];
+    const size_t* dims = _userCoordinates.dims;
+    size_t numOfVertices = dims[0] * dims[1] * dims[2];
     float* coordEye = nullptr;
     try{   coordEye = new float[ 3 * numOfVertices ]; }
     catch( const std::bad_alloc& e )
@@ -1729,8 +1644,9 @@ int RayCaster::_updateVertCoordsTexture( const glm::mat4& MV )
 
 #ifdef Darwin
     // Apply a dummy texture
-    float dummyVolume[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-    glTexImage3D( GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume );
+    float dummyVolume[16] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                              0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+    glTexImage3D( GL_TEXTURE_3D, 0, GL_RG32F, 2, 2, 2, 0, GL_RG, GL_FLOAT, dummyVolume );
 #endif
 
     // Test if the existing texture has the same dimensions. 
@@ -1740,18 +1656,15 @@ int RayCaster::_updateVertCoordsTexture( const glm::mat4& MV )
     glGetTexLevelParameteriv( GL_TEXTURE_3D, 0, GL_TEXTURE_WIDTH,  &width );
     glGetTexLevelParameteriv( GL_TEXTURE_3D, 0, GL_TEXTURE_HEIGHT, &height );
     glGetTexLevelParameteriv( GL_TEXTURE_3D, 0, GL_TEXTURE_DEPTH,  &depth );
-    if( (size_t)width  == _userCoordinates.dims[0] && 
-        (size_t)height == _userCoordinates.dims[1] &&
-        (size_t)depth  == _userCoordinates.dims[2]  )
+    if( (size_t)width == dims[0] && (size_t)height == dims[1] && (size_t)depth == dims[2] )
     {
         glTexSubImage3D( GL_TEXTURE_3D, 0, 0, 0, 0, width, height, depth, 
                          GL_RGB, GL_FLOAT, coordEye                    );
     }
     else
     {
-        glTexImage3D( GL_TEXTURE_3D, 0, GL_RGB32F, _userCoordinates.dims[0], 
-                      _userCoordinates.dims[1],    _userCoordinates.dims[2],
-                      0, GL_RGB, GL_FLOAT,         coordEye               );
+        glTexImage3D( GL_TEXTURE_3D, 0, GL_RGB32F, dims[0], dims[1], dims[2],
+                      0, GL_RGB, GL_FLOAT, coordEye                        );
     }
 
     // Don't forget to update the cached model view matrix
