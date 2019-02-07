@@ -7,7 +7,7 @@ uniform sampler2D  backFaceTexture;
 uniform sampler2D  frontFaceTexture;
 uniform sampler3D  volumeTexture;
 //uniform usampler3D missingValueMaskTexture; // !!unsigned integer!!
-//uniform sampler1D  colorMapTexture;
+uniform sampler1D  colorMapTexture;
 //uniform sampler2D  depthTexture;
 
 uniform ivec3 volumeDims;        // number of vertices of this volumeTexture
@@ -170,8 +170,7 @@ void main(void)
     {
         float step1Value   = texture( volumeTexture, step1Texture ).r;
         float valTranslate = (step1Value - colorMapRange.x) / colorMapRange.z;
-              //color        = texture( colorMapTexture, valTranslate );
-              color        = vec4( 0.5 );
+              color        = texture( colorMapTexture, valTranslate );
               color.rgb   *= color.a;
     }
 
@@ -204,8 +203,7 @@ void main(void)
 
         float step2Value   = texture( volumeTexture, step2Texture ).r;
         float valTranslate = (step2Value - colorMapRange.x) / colorMapRange.z;
-        //vec4  backColor    = texture( colorMapTexture, valTranslate );
-        vec4  backColor    = vec4( 0.5 );
+        vec4  backColor    = texture( colorMapTexture, valTranslate );
         
         // Apply lighting. 
         //   Note we do the calculation in eye space, because both the light direction
