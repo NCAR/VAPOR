@@ -182,6 +182,7 @@ void TwoDRenderer::_openGLInit() {
 //
 void TwoDRenderer::_openGLRestore()
 {
+    glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
