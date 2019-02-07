@@ -1693,6 +1693,16 @@ void RayCaster::_updateDataTextures( )
     glTexImage3D(  GL_TEXTURE_3D, 0, GL_R16F, dims[0], dims[1], dims[2], 0,
                    GL_RED, GL_FLOAT, _userCoordinates.dataField );
 
+    // Note: minmax needs to be passed to shader to have ultimately correct rendering.
+    //   We're skipping this step for now to just test it our. 
+    long len = dims[0] * dims[1] * dims[2];
+    float minmax[2];
+    unsigned short* buf = new unsigned short[ len ];
+    _32Fto16I( _userCoordinates.dataField, buf, len, minmax );
+    glTexImage3D(  GL_TEXTURE_3D, 0, GL_R16, dims[0], dims[1], dims[2], 0,
+                   GL_RED, GL_UNSIGNED_SHORT, buf );
+    delete[] buf;
+
 if( !_isIntel )
 {
     // Now we HAVE TO attach a missing value mask texture, because
@@ -1849,10 +1859,17 @@ void RayCaster::_32Fto16I( const float* inBuf, unsigned short* outBuf, long len,
     // First find the min and max of the input buffer
     float min = inBuf[0];
     float max = inBuf[0];
-    for( 
+    for( long i = 1; i < len; i++ )
+    {
+        if( inBuf[i] < min )    min = inBuf[i];
+        if( inBuf[i] > max )    max = inBuf[i];
+    }
+    *minmax = min;
+    *(minmax + 1) = max;
     
+    // Second perform normalization
     int nSteps = 65535;     // 2^16 = 65536
     float step = (max - min) / (float)nSteps;
     for( long i = 0; i < len; i++ )
-        outBuf[i] = (inBuf
+        outBuf[i] = static_cast<unsigned short>(std::round((inBuf[i] - min) / step));
 }
