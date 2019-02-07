@@ -212,6 +212,8 @@ protected:
     void _configure3DTextureLinearInterpolation() const;
     void _configure2DTextureLinearInterpolation() const;
     void _sleepAWhile() const;
+    void _32Fto16I( const float* inBuf, unsigned short* outBuf, long len,
+                    float* minmax /* output the min and max of inBuf */ ) const;
 
 #ifndef WIN32
     double _getElapsedSeconds( const struct timeval* begin, const struct timeval* end ) const;

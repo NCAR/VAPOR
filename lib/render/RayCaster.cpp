@@ -1842,3 +1842,17 @@ void RayCaster::_sleepAWhile() const
     nanosleep( &req, &rem );
 #endif
 }
+    
+void RayCaster::_32Fto16I( const float* inBuf, unsigned short* outBuf, long len,
+                           float* minmax /* output the min and max of inBuf */ ) const
+{
+    // First find the min and max of the input buffer
+    float min = inBuf[0];
+    float max = inBuf[0];
+    for( 
+    
+    int nSteps = 65535;     // 2^16 = 65536
+    float step = (max - min) / (float)nSteps;
+    for( long i = 0; i < len; i++ )
+        outBuf[i] = (inBuf
+}
