@@ -3,13 +3,13 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cctype>
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/ext/matrix_relational.hpp>
 
 #ifdef WIN32
     #include <Windows.h>
-    #include <cctype>
 #else
     #include <time.h>
 #endif
@@ -101,7 +101,7 @@ RayCaster::RayCaster( const ParamsMgr*    pm,
 
     _currentMV = glm::mat4(0.0f);
 
-    // Detect if it's INTEL graphics card. If so, give a magic value to the params
+    // Detect if it's INTEL graphics card.
     const unsigned char* vendorC = glGetString( GL_VENDOR );
     std::string vendor( (char*)vendorC );
     for( int i = 0; i < vendor.size(); i++ )
@@ -870,14 +870,13 @@ if( _isIntel )
     _updateColormap( params );
     glActiveTexture( GL_TEXTURE0 + _colorMapTexOffset );
     glBindTexture( GL_TEXTURE_1D,  _colorMapTextureId );
-int colorMapTexWidth;
-glGetTexLevelParameteriv( GL_TEXTURE_1D, 0, GL_TEXTURE_WIDTH,  &colorMapTexWidth );
-if( colorMapTexWidth == _colorMap.size() / 4 )
-    glTexSubImage1D( GL_TEXTURE_1D, 0, 0, colorMapTexWidth, GL_RGBA, GL_FLOAT, _colorMap.data() );
-else
-    //glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA32F,     _colorMap.size()/4,
-    glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA16F,     _colorMap.size()/4,
-                   0, GL_RGBA,       GL_FLOAT,       _colorMap.data() );
+    int colorMapTexWidth;
+    glGetTexLevelParameteriv( GL_TEXTURE_1D, 0, GL_TEXTURE_WIDTH,  &colorMapTexWidth );
+    if( long(colorMapTexWidth) == _colorMap.size() / 4 )
+        glTexSubImage1D( GL_TEXTURE_1D, 0, 0, colorMapTexWidth, GL_RGBA, GL_FLOAT, _colorMap.data() );
+    else
+        glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA32F,     _colorMap.size()/4,
+                       0, GL_RGBA,       GL_FLOAT,       _colorMap.data() );
 
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
     glViewport( 0, 0, _currentViewport[2], _currentViewport[3] );
@@ -904,15 +903,14 @@ int RayCaster::_initializeFramebufferTextures()
     glGenVertexArrays( 1, &_vertexArrayId );
     glGenBuffers(      1, &_vertexBufferId );
     glGenBuffers(      1, &_indexBufferId );
-if( !_isIntel )
-    glGenBuffers(      1, &_vertexAttribId );
+    if( !_isIntel )
+        glGenBuffers(  1, &_vertexAttribId );
 
     /* Generate and configure 2D back-facing texture */
     glGenTextures(1, &_backFaceTextureId);
     glActiveTexture( GL_TEXTURE0 + _backFaceTexOffset );
     glBindTexture(GL_TEXTURE_2D,   _backFaceTextureId); 
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _currentViewport[2], _currentViewport[3], 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
                  0, GL_RGBA, GL_FLOAT, nullptr);
     this->_configure2DTextureLinearInterpolation();
 
@@ -920,8 +918,7 @@ if( !_isIntel )
     glGenTextures(1, &_frontFaceTextureId);
     glActiveTexture( GL_TEXTURE0 + _frontFaceTexOffset );
     glBindTexture(GL_TEXTURE_2D,   _frontFaceTextureId); 
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _currentViewport[2], _currentViewport[3], 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
                  0, GL_RGBA, GL_FLOAT, nullptr);
     this->_configure2DTextureLinearInterpolation();
 
@@ -953,14 +950,11 @@ if( !_isIntel )
     glBindTexture( GL_TEXTURE_3D,  _volumeTextureId );
     this->_configure3DTextureLinearInterpolation();
 
-if( !_isIntel )
-{
     /* Generate and configure 3D texture: _2ndVarDataTexId */
     glGenTextures( 1, &_2ndVarDataTexId );
     glActiveTexture( GL_TEXTURE0 + _2ndVarDataTexOffset );
     glBindTexture( GL_TEXTURE_3D,  _2ndVarDataTexId );
     this->_configure3DTextureLinearInterpolation();
-}
 
     /* Generate and configure 1D texture: _colorMapTextureId */
     glGenTextures( 1, &_colorMapTextureId );
@@ -970,8 +964,6 @@ if( !_isIntel )
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
-if( !_isIntel )
-{
     /* Generate and configure 3D texture: _missingValueTextureId */
     glGenTextures( 1, &_missingValueTextureId );
     glActiveTexture( GL_TEXTURE0 + _missingValueTexOffset );
@@ -983,7 +975,6 @@ if( !_isIntel )
     glActiveTexture( GL_TEXTURE0 + _2ndVarMaskTexOffset );
     glBindTexture( GL_TEXTURE_3D,  _2ndVarMaskTexId );
     this->_configure3DTextureNearestInterpolation();
-}
 
 if( !_isIntel )
 {
@@ -992,13 +983,13 @@ if( !_isIntel )
     glActiveTexture( GL_TEXTURE0 + _vertCoordsTexOffset );
     glBindTexture( GL_TEXTURE_3D,  _vertCoordsTextureId );
     this->_configure3DTextureNearestInterpolation();
+}
 
     /* Generate and configure 2D depth texture */
     glGenTextures(1, &_depthTextureId);
     glActiveTexture( GL_TEXTURE0 + _depthTexOffset );
     glBindTexture(GL_TEXTURE_2D, _depthTextureId);
     this->_configure2DTextureLinearInterpolation();
-}
 
     return 0;
 }
@@ -1250,12 +1241,9 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
     glBindTexture( GL_TEXTURE_1D,  _colorMapTextureId );
     shader->SetUniform("colorMapTexture", _colorMapTexOffset);
 
-if( !_isIntel )
-{
     glActiveTexture(  GL_TEXTURE0 +     _missingValueTexOffset );
     glBindTexture(    GL_TEXTURE_3D,    _missingValueTextureId );
     shader->SetUniform("missingValueMaskTexture", _missingValueTexOffset);
-}
 
     if( castingMode == CellTraversal )
     {
@@ -1360,8 +1348,6 @@ void RayCaster::_renderTriangleStrips( int whichPass, int  castingMode ) const
     //
     glEnableVertexAttribArray( 0 );
     glBindBuffer( GL_ARRAY_BUFFER,              _vertexBufferId );
-    //glBufferData( GL_ARRAY_BUFFER,              bx * by * 3 * sizeof(float),
-    //              _userCoordinates.backFace,    GL_STATIC_DRAW );
     glBufferSubData( GL_ARRAY_BUFFER, 0, bx * by * 3 * sizeof(float), _userCoordinates.backFace );
     glVertexAttribPointer( 0, 3, GL_FLOAT,      GL_FALSE, 0, (void*)0 );
     for( unsigned int y = 0; y < by - 1; y++ )   // strip by strip
@@ -1456,8 +1442,6 @@ void RayCaster::_renderTriangleStrips( int whichPass, int  castingMode ) const
     //
     glEnableVertexAttribArray( 0 );
     glBindBuffer( GL_ARRAY_BUFFER,              _vertexBufferId );
-    //glBufferData( GL_ARRAY_BUFFER,              bx * bz * 3 * sizeof(float),
-    //              _userCoordinates.bottomFace,  GL_STATIC_DRAW );
     glBufferSubData( GL_ARRAY_BUFFER, 0, bx * bz * 3 * sizeof(float), _userCoordinates.bottomFace );
     glVertexAttribPointer( 0, 3, GL_FLOAT,      GL_FALSE, 0, (void*)0 );
     for( unsigned int z = 0; z < bz - 1; z++ )   
@@ -1559,8 +1543,6 @@ void RayCaster::_renderTriangleStrips( int whichPass, int  castingMode ) const
     //
     glEnableVertexAttribArray( 0 );
     glBindBuffer( GL_ARRAY_BUFFER,              _vertexBufferId );
-    //glBufferData( GL_ARRAY_BUFFER,              by * bz * 3 * sizeof(float),
-    //              _userCoordinates.leftFace,    GL_STATIC_DRAW );
     glBufferSubData( GL_ARRAY_BUFFER, 0, by * bz * 3 * sizeof(float), _userCoordinates.leftFace );
     glVertexAttribPointer( 0, 3, GL_FLOAT,      GL_FALSE, 0, (void*)0 );
     for( unsigned int z = 0; z < bz - 1; z++ )   
@@ -1623,14 +1605,12 @@ void RayCaster::_updateViewportWhenNecessary( const GLint* viewport )
         // Re-size 1st and 2nd pass rendering 2D textures
         glActiveTexture( GL_TEXTURE0 + _backFaceTexOffset );
         glBindTexture(GL_TEXTURE_2D,   _backFaceTextureId); 
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _currentViewport[2], _currentViewport[3], 
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
                      0, GL_RGBA, GL_FLOAT, nullptr);
 
         glActiveTexture( GL_TEXTURE0 + _frontFaceTexOffset );
         glBindTexture(GL_TEXTURE_2D,   _frontFaceTextureId); 
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _currentViewport[2], _currentViewport[3], 
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
                      0, GL_RGBA, GL_FLOAT, nullptr);
     }
 }
@@ -1689,22 +1669,10 @@ void RayCaster::_updateDataTextures( )
     float dummyVolume[8] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
     glTexImage3D( GL_TEXTURE_3D, 0, GL_R32F, 2, 2, 2, 0, GL_RED, GL_FLOAT, dummyVolume );
 #endif
-    //glTexImage3D(  GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0,
-    glTexImage3D(  GL_TEXTURE_3D, 0, GL_R16F, dims[0], dims[1], dims[2], 0,
+    glTexImage3D(  GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0,
+    //glTexImage3D(  GL_TEXTURE_3D, 0, GL_R16F, dims[0], dims[1], dims[2], 0,
                    GL_RED, GL_FLOAT, _userCoordinates.dataField );
 
-    // Note: minmax needs to be passed to shader to have ultimately correct rendering.
-    //   We're skipping this step for now to just test it our. 
-    long len = dims[0] * dims[1] * dims[2];
-    float minmax[2];
-    unsigned short* buf = new unsigned short[ len ];
-    _32Fto16I( _userCoordinates.dataField, buf, len, minmax );
-    glTexImage3D(  GL_TEXTURE_3D, 0, GL_R16, dims[0], dims[1], dims[2], 0,
-                   GL_RED, GL_UNSIGNED_SHORT, buf );
-    delete[] buf;
-
-if( !_isIntel )
-{
     // Now we HAVE TO attach a missing value mask texture, because
     //   Intel driver on Mac doesn't like leaving the texture empty...
     glActiveTexture( GL_TEXTURE0 + _missingValueTexOffset );
@@ -1722,7 +1690,6 @@ if( !_isIntel )
                       GL_RED_INTEGER, GL_UNSIGNED_BYTE, dummyMask );
     }
     glPixelStorei( GL_UNPACK_ALIGNMENT, 4 );    // Restore default alignment.
-}
 }
 
 int RayCaster::_updateVertCoordsTexture( const glm::mat4& MV )

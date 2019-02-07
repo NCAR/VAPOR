@@ -6,9 +6,9 @@ layout(location = 0) out vec4 color;
 uniform sampler2D  backFaceTexture;
 uniform sampler2D  frontFaceTexture;
 uniform sampler3D  volumeTexture;
-//uniform usampler3D missingValueMaskTexture; // !!unsigned integer!!
+uniform usampler3D missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D  colorMapTexture;
-//uniform sampler2D  depthTexture;
+uniform sampler2D  depthTexture;
 
 uniform ivec3 volumeDims;        // number of vertices of this volumeTexture
 uniform ivec2 viewportDims;      // width and height of this viewport
@@ -51,8 +51,8 @@ mat4  transposedInverseMV = transpose( inversedMV );
 //
 bool ShouldSkip( const in vec3 tc, const in vec3 mc )
 {
-    //if( hasMissingValue && (texture(missingValueMaskTexture, tc).r != 0u) )
-    //    return true;
+    if( hasMissingValue && (texture(missingValueMaskTexture, tc).r != 0u) )
+        return true;
 
     vec4 positionModel = vec4( mc, 1.0 );
     for( int i = 0; i < 6; i++ )
@@ -155,8 +155,7 @@ void main(void)
     // If something else on the scene resulting in a shallower depth, we need to 
     //    compare depth at every step.
     bool  shallow    = false;
-    //float otherDepth = texture( depthTexture, fragTex ).x;
-    float otherDepth = 1.0;
+    float otherDepth = texture( depthTexture, fragTex ).x;
     if(   otherDepth < gl_FragDepth )
           shallow    = true;
 
