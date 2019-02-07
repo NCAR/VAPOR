@@ -866,6 +866,8 @@ if( _isIntel )
     // 2nd pass, render front facing polygons
     _drawVolumeFaces( 2, castingMode, cameraCellIdx );
 
+if( !_isIntel )
+{
     // Update color map texture
     _updateColormap( params );
     glActiveTexture( GL_TEXTURE0 + _colorMapTexOffset );
@@ -878,6 +880,7 @@ else
     //glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA32F,     _colorMap.size()/4,
     glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA16F,     _colorMap.size()/4,
                    0, GL_RGBA,       GL_FLOAT,       _colorMap.data() );
+}
 
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
     glViewport( 0, 0, _currentViewport[2], _currentViewport[3] );
@@ -958,7 +961,6 @@ if( !_isIntel )
     glActiveTexture( GL_TEXTURE0 + _2ndVarDataTexOffset );
     glBindTexture( GL_TEXTURE_3D,  _2ndVarDataTexId );
     this->_configure3DTextureLinearInterpolation();
-}
 
     /* Generate and configure 1D texture: _colorMapTextureId */
     glGenTextures( 1, &_colorMapTextureId );
@@ -967,6 +969,7 @@ if( !_isIntel )
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+}
 
 if( !_isIntel )
 {
@@ -1244,12 +1247,12 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
     glBindTexture( GL_TEXTURE_3D,  _volumeTextureId );
     shader->SetUniform("volumeTexture", _volumeTexOffset);
 
+if( !_isIntel )
+{
     glActiveTexture( GL_TEXTURE0 + _colorMapTexOffset );
     glBindTexture( GL_TEXTURE_1D,  _colorMapTextureId );
     shader->SetUniform("colorMapTexture", _colorMapTexOffset);
 
-if( !_isIntel )
-{
     glActiveTexture(  GL_TEXTURE0 +     _missingValueTexOffset );
     glBindTexture(    GL_TEXTURE_3D,    _missingValueTextureId );
     shader->SetUniform("missingValueMaskTexture", _missingValueTexOffset);
