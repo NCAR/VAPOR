@@ -1,10 +1,10 @@
 #version 410 core
 
+in vec4 vEye;
 in vec4 gl_FragCoord;
 layout(location = 0) out vec4 color;
 
 uniform sampler2D  backFaceTexture;
-uniform sampler2D  frontFaceTexture;
 uniform sampler3D  volumeTexture;
 uniform sampler1D  colorMapTexture;
 uniform sampler3D  secondVarDataTexture;
@@ -137,7 +137,7 @@ void main(void)
     vec3 stopEye        = texture( backFaceTexture,  fragTexture ).xyz;
     vec3 startEye       = vec3( 0.0 );
     if( !eyeInsideVolume )
-         startEye       = texture( frontFaceTexture, fragTexture ).xyz;
+         startEye       = vEye.xyz;
     vec3 rayDirEye      = stopEye - startEye;
     float rayDirLength  = length( rayDirEye );
     if( rayDirLength    < ULP10 )

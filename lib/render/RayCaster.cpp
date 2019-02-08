@@ -65,15 +65,13 @@ RayCaster::RayCaster( const ParamsMgr*    pm,
                       instName,
                       dataMgr ),
             _backFaceTexOffset     ( 0 ),
-            _frontFaceTexOffset    ( 1 ),
-            _volumeTexOffset       ( 2 ),
-            _colorMapTexOffset     ( 3 ),
-            _depthTexOffset        ( 4 ),
-            _vertCoordsTexOffset   ( 5 ),
-            _2ndVarDataTexOffset   ( 6 )
+            _volumeTexOffset       ( 1 ),
+            _colorMapTexOffset     ( 2 ),
+            _depthTexOffset        ( 3 ),
+            _vertCoordsTexOffset   ( 4 ),
+            _2ndVarDataTexOffset   ( 5 )
 {
     _backFaceTextureId           = 0;
-    _frontFaceTextureId          = 0;
     _volumeTextureId             = 0;
     _colorMapTextureId           = 0;
     _vertCoordsTextureId         = 0;
@@ -127,11 +125,6 @@ RayCaster::~RayCaster()
     {
         glDeleteTextures( 1, &_backFaceTextureId   );
         _backFaceTextureId = 0;
-    }
-    if( _frontFaceTextureId   )
-    {
-        glDeleteTextures( 1, &_frontFaceTextureId   );
-        _frontFaceTextureId = 0;
     }
     if( _volumeTextureId   )
     {
@@ -809,7 +802,7 @@ if( _isIntel )
         cameraCellIdx.clear();  // Make sure size 0 to indicate outside of the volume
 
     // 2nd pass, render front facing polygons
-    _drawVolumeFaces( 2, castingMode, cameraCellIdx );
+     _drawVolumeFaces( 2, castingMode, cameraCellIdx );
 
     // Update color map texture
     _updateColormap( params );
@@ -859,24 +852,14 @@ int RayCaster::_initializeFramebufferTextures()
                  0, GL_RGBA, GL_FLOAT, nullptr);
     this->_configure2DTextureLinearInterpolation();
 
-    /* Generate and configure 2D front-facing texture */
-    glGenTextures(1, &_frontFaceTextureId);
-    glActiveTexture( GL_TEXTURE0 + _frontFaceTexOffset );
-    glBindTexture(GL_TEXTURE_2D,   _frontFaceTextureId); 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
-                 0, GL_RGBA, GL_FLOAT, nullptr);
-    this->_configure2DTextureLinearInterpolation();
-
-    /* Create an Frame Buffer Object for the front and back side of the volume. */
+    /* Create an Frame Buffer Object for the back side of the volume. */
     glGenFramebuffers(1, &_frameBufferId);
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
     
-    /* Set "_backFaceTextureId"  as color attachement #0, 
-       and "_frontFaceTextureId" as color attachement #1.  */
+    /* Set "_backFaceTextureId"  as color attachement #0 */
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _backFaceTextureId,  0);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, _frontFaceTextureId, 0);
-    GLenum drawBuffers[2]  =  { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-    glDrawBuffers(2, drawBuffers );
+    GLenum drawBuffers[1]  =  { GL_COLOR_ATTACHMENT0 }; 
+    glDrawBuffers(1, drawBuffers );
 
     /* Check if framebuffer is complete */
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -1002,8 +985,8 @@ void RayCaster::_drawVolumeFaces( int                         whichPass,
 
         // Render the front side of the volume if not inside it.
         // Do nothing if inside the volume.
-        if( !insideVolume )
-            _renderTriangleStrips( 2, castingMode );
+        //if( !insideVolume )
+        //    _renderTriangleStrips( 2, castingMode );
     }
     else    // 3rd pass
     { 
@@ -1159,10 +1142,6 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
     glActiveTexture( GL_TEXTURE0 + _backFaceTexOffset );
     glBindTexture( GL_TEXTURE_2D,  _backFaceTextureId );
     shader->SetUniform("backFaceTexture", _backFaceTexOffset);
-
-    glActiveTexture( GL_TEXTURE0 + _frontFaceTexOffset );
-    glBindTexture( GL_TEXTURE_2D,  _frontFaceTextureId );
-    shader->SetUniform("frontFaceTexture", _frontFaceTexOffset);
 
     glActiveTexture( GL_TEXTURE0 + _volumeTexOffset );
     glBindTexture( GL_TEXTURE_3D,  _volumeTextureId );
@@ -1529,14 +1508,9 @@ void RayCaster::_updateViewportWhenNecessary( const GLint* viewport )
     {
         std::memcpy( _currentViewport, viewport, 4 * sizeof(GLint) );
 
-        // Re-size 1st and 2nd pass rendering 2D textures
+        // Re-size 1st pass rendering 2D textures
         glActiveTexture( GL_TEXTURE0 + _backFaceTexOffset );
         glBindTexture(GL_TEXTURE_2D,   _backFaceTextureId); 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
-                     0, GL_RGBA, GL_FLOAT, nullptr);
-
-        glActiveTexture( GL_TEXTURE0 + _frontFaceTexOffset );
-        glBindTexture(GL_TEXTURE_2D,   _frontFaceTextureId); 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _currentViewport[2], _currentViewport[3], 
                      0, GL_RGBA, GL_FLOAT, nullptr);
     }
