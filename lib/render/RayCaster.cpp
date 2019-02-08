@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cctype>
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/ext/matrix_relational.hpp>
