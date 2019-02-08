@@ -9,10 +9,12 @@ layout(location = 1) in ivec4 vertexLogicalIdx;
 uniform mat4 MV;
 uniform mat4 Projection;
 
+out vec4       vEye;
 flat out ivec4 provokingVertexIdx;
 
 void main(void)
 {
-    gl_Position        = Projection * MV * vec4( vertexPosition, 1.0 );
+    vEye        = MV * vec4( vertexPosition, 1.0 );
+    gl_Position = Projection * vEye;
     provokingVertexIdx = vertexLogicalIdx;
 }
