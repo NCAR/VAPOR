@@ -161,7 +161,6 @@ protected:
 
     // shaders
     ShaderProgram*      _1stPassShader;
-    ShaderProgram*      _2ndPassShader;
     ShaderProgram*      _3rdPassShader;
     ShaderProgram*      _3rdPassMode1Shader;
     ShaderProgram*      _3rdPassMode2Shader;

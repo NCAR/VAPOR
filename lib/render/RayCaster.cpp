@@ -85,7 +85,6 @@ RayCaster::RayCaster( const ParamsMgr*    pm,
     _vertexAttribId              = 0;
 
     _1stPassShader               = nullptr;
-    _2ndPassShader               = nullptr;
     _3rdPassShader               = nullptr;
     _3rdPassMode1Shader          = nullptr;
     _3rdPassMode2Shader          = nullptr;
@@ -602,11 +601,6 @@ int RayCaster::_initializeGL()
     if( (shader = _glManager->shaderManager->GetShader("RayCaster1stPass")) )
         _1stPassShader      = shader;
     else
-        return GLERROR;
-
-    if( (shader = _glManager->shaderManager->GetShader("RayCaster2ndPass")) )
-        _2ndPassShader      = shader;
-    else 
         return GLERROR;
 
     // Load 3rd pass shaders
