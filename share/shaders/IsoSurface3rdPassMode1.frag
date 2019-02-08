@@ -6,10 +6,8 @@ layout(location = 0) out vec4 color;
 uniform sampler2D  backFaceTexture;
 uniform sampler2D  frontFaceTexture;
 uniform sampler3D  volumeTexture;
-uniform usampler3D missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D  colorMapTexture;
 uniform sampler3D  secondVarDataTexture;
-uniform usampler3D secondVarMaskTexture; // !!unsigned integer!!
 
 uniform ivec3 volumeDims;        // number of vertices of this volumeTexture
 uniform ivec2 viewportDims;      // width and height of this viewport
@@ -20,7 +18,9 @@ uniform vec3  colorMapRange;     // min and max and diff values on this color ma
 
 uniform float stepSize1D;        // ray casting step size
 uniform float lightingCoeffs[4]; // lighting parameters
-uniform bool  flags[4];
+uniform bool  fast;
+uniform bool  lighting;
+uniform bool  eyeInsideVolume;
 uniform bool  use2ndVar;
 
 uniform int   numOfIsoValues;    // how many iso values are valid in isoValues array?
@@ -36,10 +36,6 @@ uniform mat4 Projection;
 const float ULP        = 1.2e-7f;
 const float ULP10      = 1.2e-6f;
 const float Opaque     = 0.999;
-bool  fast             = flags[0];
-bool  lighting         = flags[1];
-bool  eyeInsideVolume  = flags[2];
-bool  hasMissingValue  = flags[3];
 float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
@@ -56,10 +52,10 @@ mat4  transposedInverseMV = transpose( inversedMV );
 //
 bool ShouldSkip( const in vec3 tc, const in vec3 mc )
 {
-    if( hasMissingValue && (texture(missingValueMaskTexture, tc).r != 0u) )
+    if( texture(volumeTexture, tc).g < ULP10 )
         return true;
 
-    if( use2ndVar && (texture(secondVarMaskTexture, tc).r != 0u) )
+    if( use2ndVar && (texture(secondVarDataTexture, tc).g < ULP10) )
         return true;
 
     vec4 positionModel = vec4( mc, 1.0 );
@@ -150,7 +146,8 @@ void main(void)
         return;
     }
 
-    float nStepsf       = rayDirLength  / stepSize1D;
+    float myStepSize1D  = fast ? stepSize1D * 8.0 : stepSize1D;
+    float nStepsf       = rayDirLength  / myStepSize1D;
     vec3  stepSize3D    = rayDirEye   / nStepsf;
     int   nSteps        = int(nStepsf) + 1;
 

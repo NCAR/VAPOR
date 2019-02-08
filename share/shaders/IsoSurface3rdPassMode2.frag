@@ -7,11 +7,9 @@ layout(location = 0) out vec4 color;
 uniform sampler2D       backFaceTexture;
 uniform sampler2D       frontFaceTexture;
 uniform sampler3D       volumeTexture;
-uniform usampler3D      missingValueMaskTexture; // !!unsigned integer!!
 uniform sampler1D       colorMapTexture;
 uniform sampler3D       vertCoordsTexture;
 uniform sampler3D       secondVarDataTexture;
-uniform usampler3D      secondVarMaskTexture;   // !!unsigned integer!!
 
 uniform ivec3 volumeDims;        // number of vertices in each direction of this volume
 uniform ivec2 viewportDims;      // width and height of this viewport
@@ -21,7 +19,9 @@ uniform ivec3 entryCellIdx;
 
 uniform float stepSize1D;        // ray casting step size
 uniform float lightingCoeffs[4]; // lighting parameters
-uniform bool  flags[4];
+uniform bool  fast;
+uniform bool  lighting;
+uniform bool  eyeInsideVolume;
 uniform bool  use2ndVar;
 
 uniform int   numOfIsoValues;    // how many iso values are valid in isoValues array?
@@ -38,9 +38,6 @@ const float ULP        = 1.2e-7f;           // 2^-23 == 1.192e-7
 const float ULP10      = 1.2e-6f;
 const float ULP100     = 1.2e-5f;
 const float Opaque     = 0.999;
-bool  lighting         = flags[1];
-bool  eyeInsideVolume  = flags[2];
-bool  hasMissingValue  = flags[3];          // has missing values or not
 float ambientCoeff     = lightingCoeffs[0];
 float diffuseCoeff     = lightingCoeffs[1];
 float specularCoeff    = lightingCoeffs[2];
@@ -105,10 +102,10 @@ void FillCellVertCoordinates( const in ivec3 cellIdx, out vec3 coord[8] )
 //
 bool ShouldSkip( const in vec3 tc, const in vec3 ec )
 {
-    if( hasMissingValue && (texture(missingValueMaskTexture, tc).r != 0u) )
+    if( texture(volumeTexture, tc).g < ULP10 )
         return true;
 
-    if( use2ndVar && (texture(secondVarMaskTexture, tc).r != 0u) )
+    if( use2ndVar && (texture(secondVarDataTexture, tc).g < ULP10) )
         return true;
 
     vec4 positionModel = inversedMV * vec4(ec, 1.0);
@@ -504,8 +501,11 @@ void main(void)
     if( color.a < (1.0 - Opaque) )
         gl_FragDepth = 1.0;
 
+    if( fast )
+    {
     // Debug use only
     //if( earlyTerm == 2 && !CellOnBoundary( step1CellIdx ) )
     //    color = vec4( 0.9, 0.2, 0.2, 1.0); 
+    }
 }
 
