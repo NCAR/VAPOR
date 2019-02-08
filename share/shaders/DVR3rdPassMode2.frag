@@ -356,6 +356,7 @@ void main(void)
         step1CellIdx    = entryCellIdx;
     else
         step1CellIdx    = provokingVertexIdx.xyz;
+#if 0
     if( !PosInsideOfCell( step1CellIdx, step1Eye ) )
     {
         ivec3 correctIdx;
@@ -367,6 +368,7 @@ void main(void)
             return;
         }
     }
+#endif
 
     // Set depth value at the backface 
     gl_FragDepth     =  CalculateDepth( stopEye ) - ULP10;
