@@ -103,7 +103,7 @@ RayCaster::RayCaster( const ParamsMgr*    pm,
     if( n == std::string::npos )
         _isIntel = false;
     else
-        _isIntel = true;
+        _isIntel = false;
 
     // Set the default ray casting method upon creation of the RayCaster.
     _selectDefaultCastingMethod();
