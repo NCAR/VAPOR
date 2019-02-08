@@ -820,7 +820,7 @@ if( _isIntel )
     if( long(colorMapTexWidth) == _colorMap.size() / 4 )
         glTexSubImage1D( GL_TEXTURE_1D, 0, 0, colorMapTexWidth, GL_RGBA, GL_FLOAT, _colorMap.data() );
     else
-        glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA32F,     _colorMap.size()/4,
+        glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA16F,     _colorMap.size()/4,
                        0, GL_RGBA,       GL_FLOAT,       _colorMap.data() );
 
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
