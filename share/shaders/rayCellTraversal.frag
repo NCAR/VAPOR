@@ -36,6 +36,7 @@ out vec4 fragColor;
 #define FI_DOWN  3
 #define FI_FRONT 4
 #define FI_BACK  5
+#define FI_NONE 99
 
 #define F_LEFT  ivec3(-1, 0, 0)
 #define F_RIGHT ivec3( 1, 0, 0)
@@ -43,6 +44,7 @@ out vec4 fragColor;
 #define F_DOWN  ivec3( 0, 0,-1)
 #define F_FRONT ivec3( 0,-1, 0)
 #define F_BACK  ivec3( 0, 1, 0)
+#define F_NONE  ivec3(-1,-1,-1)
 
 ivec3 GetFaceFromFaceIndex(int i)
 {
@@ -191,12 +193,27 @@ bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entr
 // Recommended to provide entranceFace to guarentee no self-intersection
 bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 exitFace, out float t1)
 {
-    return FindCellExit(origin, dir, t0, currentCell, ivec3(0), exitFace, t1);
+    return FindCellExit(origin, dir, t0, currentCell, F_NONE, exitFace, t1);
 }
 
 bool IsCellInBounds(ivec3 cellIndex)
 {
     return !(any(lessThan(cellIndex, ivec3(0))) || any(greaterThanEqual(cellIndex, cellDims)));
+}
+
+bool SearchNeighboringCells(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 nextCell, out ivec3 exitFace, out float t1)
+{
+    for (int sideID = 0; sideID < 6; sideID++) {
+        ivec3 side = GetFaceFromFaceIndex(sideID);
+        ivec3 testCell = currentCell + side;
+        if (IsCellInBounds(testCell)) {
+            if (FindCellExit(origin, dir, t0, testCell, F_NONE, exitFace, t1)) {
+                nextCell = testCell + exitFace;
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out ivec3 nextCell, out ivec3 exitFace, out float t1)
@@ -206,8 +223,9 @@ bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entr
         if (!IsCellInBounds(nextCell))
             return false;
         return true;
+    } else {
+        return SearchNeighboringCells(origin, dir, t0, currentCell, nextCell, exitFace, t1);
     }
-    return false;
 }
 
 bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 nextCell, out float t1)
@@ -358,7 +376,7 @@ bool SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, int f
     return SearchSideForInitialCellWithOctree_9Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
     // if (BBLevels ==  2) return SearchSideForInitialCellWithOctree_2Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
     // if (BBLevels ==  3) return SearchSideForInitialCellWithOctree_3Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
-    /// if (BBLevels >=  4) return SearchSideForInitialCellWithOctree_4Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+    // if (BBLevels ==  4) return SearchSideForInitialCellWithOctree_4Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
     
     // We run into the problem that GLSL takes too long to compile this if statement
     
@@ -368,6 +386,7 @@ bool SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, int f
     // if (BBLevels ==  8) return SearchSideForInitialCellWithOctree_8Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
     // if (BBLevels ==  9) return SearchSideForInitialCellWithOctree_9Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
     // if (BBLevels >= 10) return SearchSideForInitialCellWithOctree_10Levels(origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+    
     return false;
 }
 

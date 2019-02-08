@@ -194,6 +194,6 @@ sub Function {
 };
 
 
-for (my $i = 1; $i <= 10; $i++) {
+for (my $i = 1; $i <= 12; $i++) {
 	print Function($i);
 }
