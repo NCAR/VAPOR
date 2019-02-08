@@ -801,8 +801,9 @@ if( _isIntel )
     if( !insideACell )
         cameraCellIdx.clear();  // Make sure size 0 to indicate outside of the volume
 
-    // 2nd pass, render front facing polygons
-     _drawVolumeFaces( 2, castingMode, cameraCellIdx );
+    // 2nd pass, render front facing polygons.
+    // Note: for VAPOR 3.1 release, this pass is skipped to save a texture unit!
+    //_drawVolumeFaces( 2, castingMode, cameraCellIdx );
 
     // Update color map texture
     _updateColormap( params );
@@ -967,29 +968,19 @@ void RayCaster::_drawVolumeFaces( int                         whichPass,
         // Render the back side of the volume.
         _renderTriangleStrips( 1, castingMode );
     }
-    else if( whichPass == 2 )
-    {
-        _2ndPassShader->Bind();
-        _2ndPassShader->SetUniform("MV", modelview);
-        _2ndPassShader->SetUniform("Projection", projection);
-
+    else    // 3rd pass
+    { 
         glEnable( GL_CULL_FACE );
         glCullFace( GL_BACK );
         glEnable(GL_DEPTH_TEST);
         glClearDepth( 1.0 );   
         glClear( GL_DEPTH_BUFFER_BIT ); 
         glDepthFunc(GL_LEQUAL); 
-        const GLfloat black[] = {0.0f, 0.0f, 0.0f, 0.0f};
-        glClearBufferfv( GL_COLOR, 1, black );  // clear GL_COLOR_ATTACHMENT1
-        glDisable(GL_BLEND);
+        // When DVR is rendered the last, it blends with previous rendering.
+        glDepthMask( GL_TRUE );
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        // Render the front side of the volume if not inside it.
-        // Do nothing if inside the volume.
-        //if( !insideVolume )
-        //    _renderTriangleStrips( 2, castingMode );
-    }
-    else    // 3rd pass
-    { 
         _3rdPassShader->Bind();
         _3rdPassShader->SetUniform("MV", modelview);
         _3rdPassShader->SetUniform("Projection", projection);
@@ -1008,15 +999,6 @@ void RayCaster::_drawVolumeFaces( int                         whichPass,
         }
         _load3rdPassUniforms( castingMode, fast, insideVolume );
         _3rdPassSpecialHandling( fast, castingMode );
-
-        glEnable(    GL_CULL_FACE );
-        glCullFace(  GL_BACK );
-        glEnable(    GL_DEPTH_TEST );
-        glDepthMask( GL_TRUE );
-
-        // When DVR is rendered the last, it blends with previous rendering.
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // Renders the near clipping plane if inside the volume.
         //   Otherwise, render the front side of the volume.
