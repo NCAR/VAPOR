@@ -19,7 +19,6 @@ uniform ivec3 entryCellIdx;
 
 uniform float stepSize1D;        // ray casting step size
 uniform float lightingCoeffs[4]; // lighting parameters
-uniform bool  fast;
 uniform bool  lighting;
 uniform bool  eyeInsideVolume;
 uniform bool  use2ndVar;
@@ -501,11 +500,8 @@ void main(void)
     if( color.a < (1.0 - Opaque) )
         gl_FragDepth = 1.0;
 
-    if( fast )
-    {
     // Debug use only
     //if( earlyTerm == 2 && !CellOnBoundary( step1CellIdx ) )
     //    color = vec4( 0.9, 0.2, 0.2, 1.0); 
-    }
 }
 

@@ -1121,13 +1121,15 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
             lightCoeffs[i]  = float(coeffsD.at(i));
     }
     shader->SetUniformArray("lightingCoeffs", 4, lightCoeffs);
-    shader->SetUniform( "fast", int(fast) );
     shader->SetUniform( "lighting", int(lighting) );
     shader->SetUniform( "eyeInsideVolume", int(insideVolume) );
+    if( castingMode == FixedStep )  // no fast rendering in cell traversal mode
+        shader->SetUniform( "fast", int(fast) );
 
     // Calculate the step size with sample rate multiplier taken into account.
     float stepSize1D, multiplier = 1.0f;
     if( castingMode == FixedStep )
+    {
         switch( params->GetSampleRateMultiplier() )
         {
             case 0  :   multiplier = 1.0f;   break;     // These values need to be in sync with
@@ -1138,6 +1140,7 @@ void RayCaster::_load3rdPassUniforms( int                castingMode,
             case 5  :   multiplier = 0.125f; break;
             default :   multiplier = 1.0f;   break;
         }
+    }
     glm::vec3 dimsf( (float)cdims[0], (float)cdims[1], (float)cdims[2] );
     float     numCells  = glm::length( dimsf );
     glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
