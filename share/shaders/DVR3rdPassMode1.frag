@@ -234,7 +234,7 @@ void main(void)
     // If loop terminated early, we set depth value at step1 position. Otherwise, this fragment 
     //    will have the depth value at the back of this volume, which is already set.
     if( earlyTerm )
-        gl_FragDepth = CalculateDepth( step1Eye );
+        gl_FragDepth = CalculateDepth( step1Eye ) - ULP10;
 
     // If this pixel is almost transparent, set the depth at the far clipping plane
     if( color.a < (1.0 - Opaque) )
