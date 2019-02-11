@@ -395,13 +395,13 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
 }
 
 ShaderProgram *VolumeCellTraversal::GetShader(ShaderManager *sm) {
-    ShaderProgram *s = sm->GetShader("rayCellTraversal");
+    ShaderProgram *s = sm->GetShader("rayCellTraversal:BB_LEVELS " + std::to_string(BBLevels));
     if (!s)
         return nullptr;
     s->Bind();
 
     s->SetUniform("coordDims", *(glm::ivec3 *)&coordDims);
-    s->SetUniform("BBLevels", BBLevels);
+    // s->SetUniform("BBLevels", BBLevels);
 
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_3D, coordTexture);
