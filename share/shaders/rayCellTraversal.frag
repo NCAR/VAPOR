@@ -372,20 +372,42 @@ bool SearchSideForInitialCellBasic(vec3 origin, vec3 dir, float t0, int sideID, 
 
 bool SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
-    // return SearchSideForInitialCellBasic(origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+#if BB_LEVELS == 1
+    return SearchSideForInitialCellWithOctree_1Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+#endif
+#if BB_LEVELS == 2
+    return SearchSideForInitialCellWithOctree_2Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+#endif
+#if BB_LEVELS == 3
+    return SearchSideForInitialCellWithOctree_3Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+#endif
+#if BB_LEVELS == 4
+    return SearchSideForInitialCellWithOctree_4Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+#endif
+#if BB_LEVELS == 5
+    return SearchSideForInitialCellWithOctree_5Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+#endif
+#if BB_LEVELS == 6
     return SearchSideForInitialCellWithOctree_6Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
-    // if (BBLevels 2==  2) return SearchSideForInitialCellWithOctree_2Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
-    // if (BBLevels ==  3) return SearchSideForInitialCellWithOctree_3Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
-    // if (BBLevels ==  4) return SearchSideForInitialCellWithOctree_4Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
-    
-    // We run into the problem that GLSL takes too long to compile this if statement
-    
-    // if (BBLevels ==  5) return SearchSideForInitialCellWithOctree_5Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
-    // if (BBLevels ==  6) return SearchSideForInitialCellWithOctree_6Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
-    // if (BBLevels ==  7) return SearchSideForInitialCellWithOctree_7Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
-    // if (BBLevels ==  8) return SearchSideForInitialCellWithOctree_8Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
-    // if (BBLevels ==  9) return SearchSideForInitialCellWithOctree_9Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
-    // if (BBLevels >= 10) return SearchSideForInitialCellWithOctree_10Levels(origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+#endif
+#if BB_LEVELS == 7
+    return SearchSideForInitialCellWithOctree_7Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+#endif
+#if BB_LEVELS == 8
+    return SearchSideForInitialCellWithOctree_8Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+#endif
+#if BB_LEVELS == 9
+    return SearchSideForInitialCellWithOctree_9Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+#endif
+#if BB_LEVELS == 10
+    return SearchSideForInitialCellWithOctree_10Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+#endif
+#if BB_LEVELS == 11
+    return SearchSideForInitialCellWithOctree_11Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+#endif
+#if BB_LEVELS == 12
+    return SearchSideForInitialCellWithOctree_12Levels (origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+#endif
     
     return false;
 }
