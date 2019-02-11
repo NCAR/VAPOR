@@ -3,6 +3,7 @@
 #include "vapor/IResourceManager.h"
 #include "vapor/ShaderProgram.h"
 #include <string>
+#include <vector>
 
 namespace VAPoR {
 
@@ -17,20 +18,22 @@ namespace VAPoR {
 class RENDER_API ShaderManager : public IResourceManager<std::string, ShaderProgram> {
     std::map<std::string, long> _modifiedTimes;
 
-    std::vector<std::string> _getSourceFilePaths(const std::string &name) const;
-    bool                     _wasFileModified(const std::string &path) const;
+    std::vector<std::string>        _getSourceFilePaths(const std::string &name) const;
+    bool                            _wasFileModified(const std::string &path) const;
+    static std::string              _getNameFromKey(const std::string &key);
+    static std::vector<std::string> _getDefinesFromKey(const std::string &key);
 
 public:
     ShaderProgram *    GetShader(const std::string &name);
     SmartShaderProgram GetSmartShader(const std::string &name);
-    int                LoadResourceByKey(const std::string &name);
+    int                LoadResourceByKey(const std::string &key);
 
     //! \param[in] path to GLSL source code file
     //!
     //! \retval Shader* is returned on success
     //! \retval nullptr is returned on failure
     //!
-    static Shader *CompileNewShaderFromFile(const std::string &path);
+    static Shader *CompileNewShaderFromFile(const std::string &path, const std::vector<std::string> &defines = {});
 
     //! Returns an OpenGL shader type enum based on the file extension.
     //! Valid extensions are .vert, .frag, and .geom
@@ -39,7 +42,7 @@ public:
     //!
     static unsigned int GetShaderTypeFromPath(const std::string &path);
 
-    static std::string PreProcessShader(const std::string &path);
+    static std::string PreProcessShader(const std::string &path, const std::vector<std::string> &defines = {});
 };
 
 }    // namespace VAPoR
