@@ -35,38 +35,51 @@ bool ShaderManager::_wasFileModified(const std::string &path) const {
     return false;
 }
 
-ShaderProgram *ShaderManager::GetShader(const std::string &name) {
+std::string ShaderManager::_getNameFromKey(const std::string &key) {
+    return Split(key, ":")[0];
+}
+
+std::vector<std::string> ShaderManager::_getDefinesFromKey(const std::string &key) {
+    vector<string> defines = Split(key, ":");
+    defines.erase(defines.begin());
+    return defines;
+}
+
+ShaderProgram *ShaderManager::GetShader(const std::string &key) {
 #warning Remove auto reload of RayMath.frag
 #if SHADER_AUTORELOAD
-    if (HasResource(name)) {
-        vector<string> paths = _getSourceFilePaths(name);
+    if (HasResource(key)) {
+        vector<string> paths = _getSourceFilePaths(_getNameFromKey(key));
         paths.push_back(GetSharePath("shaders/RayMath.frag"));
         for (auto it = paths.begin(); it != paths.end(); ++it) {
             long mtime = FileUtils::GetFileModifiedTime(*it);
             if (mtime > _modifiedTimes[*it]) {
                 _modifiedTimes[*it] = mtime;
-                DeleteResource(name);
+                DeleteResource(key);
                 break;
             }
         }
     }
 #endif
-    return GetResource(name);
+    return GetResource(key);
 }
 
 SmartShaderProgram ShaderManager::GetSmartShader(const std::string &name) {
     return SmartShaderProgram(GetShader(name));
 }
 
-int ShaderManager::LoadResourceByKey(const std::string &name) {
-    if (HasResource(name)) {
+int ShaderManager::LoadResourceByKey(const std::string &key) {
+    if (HasResource(key)) {
         assert(!"Shader already loaded");
         return -1;
     }
+
+    const vector<string> defines = _getDefinesFromKey(key);
+
     ShaderProgram *program = new ShaderProgram;
-    const vector<string> paths = _getSourceFilePaths(name);
+    const vector<string> paths = _getSourceFilePaths(_getNameFromKey(key));
     for (auto it = paths.begin(); it != paths.end(); ++it) {
-        program->AddShader(CompileNewShaderFromFile(*it));
+        program->AddShader(CompileNewShaderFromFile(*it, defines));
         _modifiedTimes[*it] = FileUtils::GetFileModifiedTime(*it);
     }
     program->Link();
@@ -75,11 +88,11 @@ int ShaderManager::LoadResourceByKey(const std::string &name) {
         delete program;
         return -1;
     }
-    AddResource(name, program);
+    AddResource(key, program);
     return 1;
 }
 
-Shader *ShaderManager::CompileNewShaderFromFile(const std::string &path) {
+Shader *ShaderManager::CompileNewShaderFromFile(const std::string &path, const std::vector<std::string> &defines) {
     unsigned int shaderType = GetShaderTypeFromPath(path);
     if (shaderType == GL_INVALID_ENUM) {
         SetErrMsg("File \"%s\" does not have a valid shader file extension", FileUtils::Basename(path).c_str());
@@ -90,7 +103,7 @@ Shader *ShaderManager::CompileNewShaderFromFile(const std::string &path) {
         return nullptr;
     }
     Shader *shader = new Shader(shaderType);
-    int compilationSuccess = shader->CompileFromSource(PreProcessShader(path));
+    int compilationSuccess = shader->CompileFromSource(PreProcessShader(path, defines));
     if (compilationSuccess < 0) {
         SetErrMsg("Shader \"%s\" failed to compile", FileUtils::Basename(path).c_str());
         delete shader;
@@ -110,16 +123,24 @@ unsigned int ShaderManager::GetShaderTypeFromPath(const std::string &path) {
     return GL_INVALID_ENUM;
 }
 
-std::string ShaderManager::PreProcessShader(const std::string &path) {
+std::string ShaderManager::PreProcessShader(const std::string &path, const std::vector<std::string> &defines) {
     string source = FileUtils::ReadFileToString(path);
     auto lines = Split(source, "\n");
 
     int lineNum = 1;
     for (string &line : lines) {
+        if (!defines.empty() && BeginsWith(line, "#version ")) {
+            line += "\n";
+            for (const string &define : defines) {
+                line += "#define " + define + "\n";
+            }
+            line += "#line " + std::to_string(lineNum + 1) + " 0";
+        }
+
         if (BeginsWith(line, "#include ")) {
             assert(Split(line, " ").size() == 2);
             line = "#line 1 1\n" + PreProcessShader(GetSharePath("shaders/" + Split(line, " ")[1]));
-            line += "\n#line " + std::to_string(lineNum + 2) + " 0";
+            line += "\n#line " + std::to_string(lineNum + 1) + " 0";
         }
         lineNum++;
     }
