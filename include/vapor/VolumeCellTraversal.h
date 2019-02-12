@@ -9,7 +9,8 @@ class VolumeCellTraversal : public VolumeRegular {
     VolumeCellTraversal(GLManager *gl);
     ~VolumeCellTraversal();
     virtual int LoadData(const Grid *grid);
-    virtual ShaderProgram *GetShader(ShaderManager *sm);
+    virtual ShaderProgram *GetShader() const;
+    virtual void SetUniforms() const;
 
   private:
     unsigned int minTexture;
