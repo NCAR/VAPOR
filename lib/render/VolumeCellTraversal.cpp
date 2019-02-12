@@ -137,8 +137,6 @@ bool ComputeSideBBoxes(ivec3 side, int fastDim, int slowDim, vec3 *boxMins, vec3
     return false;
 }
 
-#define BBTYPE GL_TEXTURE_2D_ARRAY
-
 VolumeCellTraversal::VolumeCellTraversal(GLManager *gl)
     : VolumeRegular(gl) {
     glGenTextures(1, &coordTexture);
@@ -150,17 +148,17 @@ VolumeCellTraversal::VolumeCellTraversal(GLManager *gl)
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     glGenTextures(1, &minTexture);
-    glBindTexture(BBTYPE, minTexture);
-    glTexParameteri(BBTYPE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(BBTYPE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(BBTYPE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(BBTYPE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, minTexture);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glGenTextures(1, &maxTexture);
-    glBindTexture(BBTYPE, maxTexture);
-    glTexParameteri(BBTYPE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(BBTYPE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(BBTYPE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(BBTYPE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, maxTexture);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glGenTextures(1, &BBLevelDimTexture);
     glBindTexture(GL_TEXTURE_2D, BBLevelDimTexture);
@@ -278,15 +276,15 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
     levels = min(levels, MAX_LEVELS);
     BBLevels = levels;
 
-    glBindTexture(BBTYPE, minTexture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, minTexture);
     // glTexStorage3D(GL_TEXTURE_2D_ARRAY, levels, GL_RGB16F, sd, bd, 6);
-    // glTexSubImage3D(BBTYPE, 0, 0, 0, 0, sd, bd, 6, GL_RGB, GL_FLOAT, boxMins);
-    glTexImage3D(BBTYPE, 0, GL_RGB16F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMins);
+    // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, sd, bd, 6, GL_RGB, GL_FLOAT, boxMins);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB16F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMins);
 
-    glBindTexture(BBTYPE, maxTexture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, maxTexture);
     // glTexStorage3D(GL_TEXTURE_2D_ARRAY, levels, GL_RGB16F, sd, bd, 6);
-    // glTexSubImage3D(BBTYPE, 0, 0, 0, 0, sd, bd, 6, GL_RGB, GL_FLOAT, boxMaxs);
-    glTexImage3D(BBTYPE, 0, GL_RGB16F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMaxs);
+    // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, sd, bd, 6, GL_RGB, GL_FLOAT, boxMaxs);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB16F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMaxs);
 
     int sizes[levels];
     ivec2 mipDims[levels][6];
@@ -367,12 +365,12 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
             }
         }
 
-        glBindTexture(BBTYPE, minTexture);
-        // glTexSubImage3D(BBTYPE, level, 0, 0, 0, ms, ms, 6, GL_RGB, GL_FLOAT, minMip[level]);
-        glTexImage3D(BBTYPE, level, GL_RGB16F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, minMip[level]);
-        glBindTexture(BBTYPE, maxTexture);
-        // glTexSubImage3D(BBTYPE, level, 0, 0, 0, ms, ms, 6, GL_RGB, GL_FLOAT, maxMip[level]);
-        glTexImage3D(BBTYPE, level, GL_RGB16F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, maxMip[level]);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, minTexture);
+        // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, level, 0, 0, 0, ms, ms, 6, GL_RGB, GL_FLOAT, minMip[level]);
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, level, GL_RGB16F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, minMip[level]);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, maxTexture);
+        // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, level, 0, 0, 0, ms, ms, 6, GL_RGB, GL_FLOAT, maxMip[level]);
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, level, GL_RGB16F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, maxMip[level]);
     }
 
     GL_ERR_BREAK();
@@ -410,11 +408,11 @@ void VolumeCellTraversal::SetUniforms() const {
     s->SetUniform("coords", 2);
 
     glActiveTexture(GL_TEXTURE3);
-    glBindTexture(BBTYPE, minTexture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, minTexture);
     s->SetUniform("boxMins", 3);
 
     glActiveTexture(GL_TEXTURE4);
-    glBindTexture(BBTYPE, maxTexture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, maxTexture);
     s->SetUniform("boxMaxs", 4);
 
     glActiveTexture(GL_TEXTURE5);
