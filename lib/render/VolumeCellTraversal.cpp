@@ -371,11 +371,12 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     return 0;
 }
 
-ShaderProgram *VolumeCellTraversal::GetShader(ShaderManager *sm)
+ShaderProgram *VolumeCellTraversal::GetShader() const { return _glManager->shaderManager->GetShader("rayCellTraversal:BB_LEVELS " + std::to_string(BBLevels)); }
+
+void VolumeCellTraversal::SetUniforms() const
 {
-    ShaderProgram *s = sm->GetShader("rayCellTraversal:BB_LEVELS " + std::to_string(BBLevels));
-    if (!s) return nullptr;
-    s->Bind();
+    VolumeRegular::SetUniforms();
+    ShaderProgram *s = GetShader();
 
     s->SetUniform("coordDims", *(glm::ivec3 *)&coordDims);
     // s->SetUniform("BBLevels", BBLevels);
@@ -395,7 +396,4 @@ ShaderProgram *VolumeCellTraversal::GetShader(ShaderManager *sm)
     glActiveTexture(GL_TEXTURE5);
     glBindTexture(GL_TEXTURE_2D, BBLevelDimTexture);
     s->SetUniform("levelDims", 5);
-
-    GL_ERR_BREAK();
-    return s;
 }
