@@ -34,7 +34,10 @@ bool IntersectRayBoundingBox(vec3 o, vec3 d, vec3 boxMin, vec3 boxMax, out float
     vec3 tMax = (boxMax - o) / d;
     vec3 bt1 = min(tMin, tMax);
     vec3 bt2 = max(tMin, tMax);
-    t0 = max(max(max(bt1.x, bt1.y), bt1.z), 0);
+    t0 = max(max(bt1.x, bt1.y), bt1.z);
+#ifndef RAY_AS_LINE
+    t0 = max(t0, 0);
+#endif
     t1 = min(min(bt2.x, bt2.y), bt2.z);
     return t0 <= t1;
 }
@@ -46,7 +49,11 @@ bool IntersectRayPlane(vec3 o, vec3 d, vec3 v0, vec3 n, out float t)
     
     if (abs(denom) > 1e-6) {
         t = dot(v0 - o, n) / denom;
+#ifndef RAY_AS_LINE
         return t >= 0;
+#else
+        return true;
+#endif
     }
     return false;
 }
