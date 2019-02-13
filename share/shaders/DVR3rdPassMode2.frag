@@ -195,7 +195,10 @@ bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
     bvec3 tooBig   = greaterThan( pos, maxCoord );
     if( any( tooSmall ) || any( tooBig ) )
         return false;
+    else 
+        return true;
 
+#if 0
     // Second compare with the 12 triangles.
     int tri[3];
     for( int i = 0; i < 12; i++ )
@@ -212,6 +215,7 @@ bool PosInsideOfCell( const in ivec3 cellIdx, const in vec3 pos )
     }
     
     return true;
+#endif
 }
 
 
@@ -356,7 +360,6 @@ void main(void)
         step1CellIdx    = entryCellIdx;
     else
         step1CellIdx    = provokingVertexIdx.xyz;
-#if 0
     if( !PosInsideOfCell( step1CellIdx, step1Eye ) )
     {
         ivec3 correctIdx;
@@ -368,7 +371,6 @@ void main(void)
             return;
         }
     }
-#endif
 
     // Set depth value at the backface 
     gl_FragDepth     =  CalculateDepth( stopEye ) - ULP10;
