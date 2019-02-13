@@ -275,10 +275,11 @@ void Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
     while (hasNext) {
         hasNext = FindNextCell(origin, dir, t0, currentCell, entranceFace, nextCell, exitFace, t1);
         
-        vec4 color = GetAverageColorForCoordIndex(currentCell);
-        
-        color.a = IntegrateConstantAlpha(color.a, (t1-t0)/unitDistance);
-        BlendToBack(accum, color);
+        if (t0 >= 0) {
+            vec4 color = GetAverageColorForCoordIndex(currentCell);
+            color.a = IntegrateConstantAlpha(color.a, (t1-t0)/unitDistance);
+            BlendToBack(accum, color);
+        }
         
         currentCell = nextCell;
         entranceFace = -exitFace;
