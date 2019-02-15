@@ -405,12 +405,8 @@ bool SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, out i
 
 bool FindInitialCell(vec3 origin, vec3 dir, float t0, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
-    if (SearchSideForInitialCell(origin, dir, t0, FI_DOWN , cellIndex, entranceFace, t1)) return true;
-    if (SearchSideForInitialCell(origin, dir, t0, FI_UP   , cellIndex, entranceFace, t1)) return true;
-    if (SearchSideForInitialCell(origin, dir, t0, FI_LEFT , cellIndex, entranceFace, t1)) return true;
-    if (SearchSideForInitialCell(origin, dir, t0, FI_RIGHT, cellIndex, entranceFace, t1)) return true;
-    if (SearchSideForInitialCell(origin, dir, t0, FI_FRONT, cellIndex, entranceFace, t1)) return true;
-    if (SearchSideForInitialCell(origin, dir, t0, FI_BACK , cellIndex, entranceFace, t1)) return true;
+    for (int side = 0; side < 6; side++)
+        if (SearchSideForInitialCell(origin, dir, t0, side, cellIndex, entranceFace, t1)) return true;
     return false;
 }
 
