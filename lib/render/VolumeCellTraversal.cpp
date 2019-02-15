@@ -364,6 +364,15 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
                     maxMip[level][z*ms*ms + (mH-1)*ms + x] = glm::max(v0, glm::max(v1, v2));
                 }
             }
+            if (mUpW % 2 == 1 && mUpH % 2 == 1) {
+                vec3 v0 = minMip[level][z*ms*ms + (mH-1)*ms + mW-1];
+                vec3 v1 = minMip[level-1][z*mUpS*mUpS + (mUpH-1)*mUpS + mUpW-1];
+                minMip[level][z*ms*ms + (mH-1)*ms + mW-1] = glm::min(v0, v1);
+                
+                v0 = maxMip[level][z*ms*ms + (mH-1)*ms + mW-1];
+                v1 = maxMip[level-1][z*mUpS*mUpS + (mUpH-1)*mUpS + mUpW-1];
+                maxMip[level][z*ms*ms + (mH-1)*ms + mW-1] = glm::max(v0, v1);
+            }
         }
         
         glBindTexture(GL_TEXTURE_2D_ARRAY, minTexture);
@@ -381,8 +390,6 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
         delete [] minMip[level];
         delete [] maxMip[level];
     }
-    
-    GL_ERR_BREAK();
     
     
     delete [] data;
