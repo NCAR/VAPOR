@@ -34,6 +34,7 @@ int VolumeRegular::LoadData(const Grid *grid)
     for (auto it = grid->cbegin(); it != end; ++it, ++i) { data[i] = *it; }
 
     glBindTexture(GL_TEXTURE_3D, dataTexture);
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 0, 0, 0, 0, GL_RED, GL_FLOAT, NULL);    // Fix driver bug with re-uploading large textures
     glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0, GL_RED, GL_FLOAT, data);
 
     delete[] data;
