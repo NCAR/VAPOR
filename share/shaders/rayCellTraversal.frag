@@ -47,6 +47,28 @@ out vec4 fragColor;
 #define F_BACK  ivec3( 0, 1, 0)
 #define F_NONE  ivec3(-1,-1,-1)
 
+// face   fast  slow
+// DOWN    0     1
+// UP      0     1
+// LEFT    1     2
+// RIGHT   1     2
+// FRONT   0     2
+// BACK    0     2
+
+int GetFastDimForFaceIndex(int i)
+{
+    if (i == FI_LEFT || i == FI_RIGHT)
+    return 1;
+    return 0;
+}
+
+int GetSlowDimForFaceIndex(int i)
+{
+    if (i == FI_DOWN || i == FI_UP)
+    return 1;
+    return 2;
+}
+
 ivec3 GetFaceFromFaceIndex(int i)
 {
     if (i == 0) return F_LEFT;
@@ -374,19 +396,21 @@ bool SearchSideForInitialCellBasic(vec3 origin, vec3 dir, float t0, int sideID, 
 
 #define SearchSideForInitialCellWithOctree_NLevels(N, origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1) SearchSideForInitialCellWithOctree_ ## N ## Levels(origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1)
 
-bool SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+bool SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
+    int fastDim = GetFastDimForFaceIndex(sideID);
+    int slowDim = GetSlowDimForFaceIndex(sideID);
     return SearchSideForInitialCellWithOctree_NLevels(BB_LEVELS, origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
 }
 
 bool FindInitialCell(vec3 origin, vec3 dir, float t0, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
-    if (SearchSideForInitialCell(origin, dir, t0, FI_DOWN, 0, 1, cellIndex, entranceFace, t1)) return true;
-    if (SearchSideForInitialCell(origin, dir, t0, FI_UP, 0, 1, cellIndex, entranceFace, t1)) return true;
-    if (SearchSideForInitialCell(origin, dir, t0, FI_LEFT, 1, 2, cellIndex, entranceFace, t1)) return true;
-    if (SearchSideForInitialCell(origin, dir, t0, FI_RIGHT, 1, 2, cellIndex, entranceFace, t1)) return true;
-    if (SearchSideForInitialCell(origin, dir, t0, FI_FRONT, 0, 2, cellIndex, entranceFace, t1)) return true;
-    if (SearchSideForInitialCell(origin, dir, t0, FI_BACK, 0, 2, cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCell(origin, dir, t0, FI_DOWN , cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCell(origin, dir, t0, FI_UP   , cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCell(origin, dir, t0, FI_LEFT , cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCell(origin, dir, t0, FI_RIGHT, cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCell(origin, dir, t0, FI_FRONT, cellIndex, entranceFace, t1)) return true;
+    if (SearchSideForInitialCell(origin, dir, t0, FI_BACK , cellIndex, entranceFace, t1)) return true;
     return false;
 }
 
