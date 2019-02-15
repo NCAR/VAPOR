@@ -244,6 +244,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
     }
 
     glBindTexture(GL_TEXTURE_3D, coordTexture);
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 0, 0, 0, 0, GL_RED, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
     glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB16F, dims[0], dims[1], dims[2], 0, GL_RGB, GL_FLOAT, data);
 
     vector<size_t> cellDims = {dims[0] - 1, dims[1] - 1, dims[2] - 1};
@@ -279,11 +280,13 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
     glBindTexture(GL_TEXTURE_2D_ARRAY, minTexture);
     // glTexStorage3D(GL_TEXTURE_2D_ARRAY, levels, GL_RGB16F, sd, bd, 6);
     // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, sd, bd, 6, GL_RGB, GL_FLOAT, boxMins);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB16F, 0, 0, 0, 0, GL_RGB, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB16F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMins);
 
     glBindTexture(GL_TEXTURE_2D_ARRAY, maxTexture);
     // glTexStorage3D(GL_TEXTURE_2D_ARRAY, levels, GL_RGB16F, sd, bd, 6);
     // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, sd, bd, 6, GL_RGB, GL_FLOAT, boxMaxs);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB16F, 0, 0, 0, 0, GL_RGB, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB16F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMaxs);
 
     int sizes[levels];
@@ -373,11 +376,8 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
         glTexImage3D(GL_TEXTURE_2D_ARRAY, level, GL_RGB16F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, maxMip[level]);
     }
 
-    GL_ERR_BREAK();
     glBindTexture(GL_TEXTURE_2D, BBLevelDimTexture);
-    GL_ERR_BREAK();
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32I, 6, levels, 0, GL_RG_INTEGER, GL_INT, mipDims);
-    GL_ERR_BREAK();
 
     for (int level = 1; level < levels; level++) {
         delete[] minMip[level];
