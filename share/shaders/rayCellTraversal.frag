@@ -341,7 +341,7 @@ ivec2 GetBBoxArrayDimensions(int sideID, int level)
     return texelFetch(levelDims, ivec2(sideID, level), 0).rg;
 }
 
-bool IsFaceThatPassedBBTheInitialCell(vec3 origin, vec3 dir, ivec3 index, ivec3 side, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+bool IsFaceThatPassedBBTheInitialCell(vec3 origin, vec3 dir, float t0, ivec3 index, ivec3 side, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
     if (IntersectRayCellFace(origin, dir, index, side, t1)) {
         if (IsRayEnteringCell(dir, index, side)) {
@@ -364,7 +364,7 @@ bool SearchSideForInitialCellBasic(vec3 origin, vec3 dir, float t0, int sideID, 
         for (index[fastDim] = 0; index[fastDim] < cellDims[fastDim]; index[fastDim]++) {
             
             if (IntersectRaySideCellBBox(origin, dir, index, sideID, fastDim, slowDim)) {
-                if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+                if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
                     return true;
             }
         }
