@@ -16,7 +16,7 @@ bool SearchSideForInitialCellWithOctree_1Levels(vec3 origin, vec3 dir, float t0,
 	
 		index[slowDim] = y0;
 		index[fastDim] = x0;
-		if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+		if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
 			return true;
 	
 	
@@ -53,7 +53,7 @@ bool SearchSideForInitialCellWithOctree_2Levels(vec3 origin, vec3 dir, float t0,
 		
 			index[slowDim] = y0;
 			index[fastDim] = x0;
-			if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+			if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
 				return true;
 		
 		
@@ -103,7 +103,7 @@ bool SearchSideForInitialCellWithOctree_3Levels(vec3 origin, vec3 dir, float t0,
 			
 				index[slowDim] = y0;
 				index[fastDim] = x0;
-				if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+				if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
 					return true;
 			
 			
@@ -166,7 +166,7 @@ bool SearchSideForInitialCellWithOctree_4Levels(vec3 origin, vec3 dir, float t0,
 				
 					index[slowDim] = y0;
 					index[fastDim] = x0;
-					if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+					if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
 						return true;
 				
 				
@@ -242,7 +242,7 @@ bool SearchSideForInitialCellWithOctree_5Levels(vec3 origin, vec3 dir, float t0,
 					
 						index[slowDim] = y0;
 						index[fastDim] = x0;
-						if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+						if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
 							return true;
 					
 					
@@ -331,7 +331,7 @@ bool SearchSideForInitialCellWithOctree_6Levels(vec3 origin, vec3 dir, float t0,
 						
 							index[slowDim] = y0;
 							index[fastDim] = x0;
-							if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+							if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
 								return true;
 						
 						
@@ -433,7 +433,7 @@ bool SearchSideForInitialCellWithOctree_7Levels(vec3 origin, vec3 dir, float t0,
 							
 								index[slowDim] = y0;
 								index[fastDim] = x0;
-								if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+								if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
 									return true;
 							
 							
@@ -548,7 +548,7 @@ bool SearchSideForInitialCellWithOctree_8Levels(vec3 origin, vec3 dir, float t0,
 								
 									index[slowDim] = y0;
 									index[fastDim] = x0;
-									if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+									if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
 										return true;
 								
 								
@@ -676,7 +676,7 @@ bool SearchSideForInitialCellWithOctree_9Levels(vec3 origin, vec3 dir, float t0,
 									
 										index[slowDim] = y0;
 										index[fastDim] = x0;
-										if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+										if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
 											return true;
 									
 									
@@ -817,7 +817,7 @@ bool SearchSideForInitialCellWithOctree_10Levels(vec3 origin, vec3 dir, float t0
 										
 											index[slowDim] = y0;
 											index[fastDim] = x0;
-											if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+											if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
 												return true;
 										
 										
@@ -971,7 +971,7 @@ bool SearchSideForInitialCellWithOctree_11Levels(vec3 origin, vec3 dir, float t0
 											
 												index[slowDim] = y0;
 												index[fastDim] = x0;
-												if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+												if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
 													return true;
 											
 											
@@ -1138,7 +1138,7 @@ bool SearchSideForInitialCellWithOctree_12Levels(vec3 origin, vec3 dir, float t0
 												
 													index[slowDim] = y0;
 													index[fastDim] = x0;
-													if (IsFaceThatPassedBBTheInitialCell(origin, dir, index, side, cellIndex, entranceFace, t1))
+													if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
 														return true;
 												
 												
