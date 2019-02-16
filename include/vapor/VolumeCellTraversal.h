@@ -23,6 +23,8 @@ namespace VAPoR {
         
         int coordDims[3];
         int BBLevels;
+        
+        static bool Need32BitForCoordinates(const Grid *grid);
     };
     
 }

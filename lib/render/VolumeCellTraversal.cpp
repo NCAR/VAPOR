@@ -6,6 +6,10 @@
 #include <vapor/ShaderManager.h>
 // #include <glm/integer.hpp>
 
+#ifndef FLT16_MAX
+#define FLT16_MAX 6.55E4
+#endif
+
 using std::vector;
 using glm::vec3;
 using glm::ivec3;
@@ -202,8 +206,6 @@ VolumeCellTraversal::~VolumeCellTraversal()
     if (VBO) glDeleteBuffers(1, &VBO);
 }
 
-#include <vapor/VolumeRenderer.h>
-
 int VolumeCellTraversal::LoadData(const Grid *grid)
 {
     if (VolumeRegular::LoadData(grid) < 0)
@@ -243,8 +245,8 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     }
     
     glBindTexture(GL_TEXTURE_3D, coordTexture);
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 0, 0, 0, 0, GL_RED, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB16F, dims[0], dims[1], dims[2], 0, GL_RGB, GL_FLOAT, data);
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, 0, 0, 0, 0, GL_RED, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, dims[0], dims[1], dims[2], 0, GL_RGB, GL_FLOAT, data);
     
     vector<size_t> cellDims = {dims[0]-1, dims[1]-1, dims[2]-1};
     vector<size_t> cellDimsSorted = cellDims;
@@ -278,14 +280,14 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     glBindTexture(GL_TEXTURE_2D_ARRAY, minTexture);
     // glTexStorage3D(GL_TEXTURE_2D_ARRAY, levels, GL_RGB16F, sd, bd, 6);
     // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, sd, bd, 6, GL_RGB, GL_FLOAT, boxMins);
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB16F, 0, 0, 0, 0, GL_RGB, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB16F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMins);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, 0, 0, 0, 0, GL_RGB, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMins);
     
     glBindTexture(GL_TEXTURE_2D_ARRAY, maxTexture);
     // glTexStorage3D(GL_TEXTURE_2D_ARRAY, levels, GL_RGB16F, sd, bd, 6);
     // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, sd, bd, 6, GL_RGB, GL_FLOAT, boxMaxs);
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB16F, 0, 0, 0, 0, GL_RGB, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB16F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMaxs);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, 0, 0, 0, 0, GL_RGB, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMaxs);
     
     int sizes[levels];
     ivec2 mipDims[levels][6];
@@ -377,10 +379,10 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
         
         glBindTexture(GL_TEXTURE_2D_ARRAY, minTexture);
         // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, level, 0, 0, 0, ms, ms, 6, GL_RGB, GL_FLOAT, minMip[level]);
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, level, GL_RGB16F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, minMip[level]);
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, level, GL_RGB32F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, minMip[level]);
         glBindTexture(GL_TEXTURE_2D_ARRAY, maxTexture);
         // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, level, 0, 0, 0, ms, ms, 6, GL_RGB, GL_FLOAT, maxMip[level]);
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, level, GL_RGB16F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, maxMip[level]);
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, level, GL_RGB32F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, maxMip[level]);
     }
     
     glBindTexture(GL_TEXTURE_2D, BBLevelDimTexture);
@@ -426,4 +428,16 @@ void VolumeCellTraversal::SetUniforms() const
     glActiveTexture(GL_TEXTURE5);
     glBindTexture(GL_TEXTURE_2D, BBLevelDimTexture);
     s->SetUniform("levelDims", 5);
+}
+
+// Needs more consideration for frequency
+bool VolumeCellTraversal::Need32BitForCoordinates(const Grid *grid)
+{
+    vector<double> minExts, maxExts;
+    grid->GetUserExtents(minExts, maxExts);
+    double minExt = min(minExts[0], min(minExts[1], minExts[2]));
+    double maxExt = max(maxExts[0], max(maxExts[1], maxExts[2]));
+    if (minExt <= -FLT16_MAX || maxExt >= FLT16_MAX)
+        return true;
+    return false;
 }
