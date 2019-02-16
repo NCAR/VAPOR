@@ -25,13 +25,13 @@ VolumeRegular::~VolumeRegular() {
 }
 
 int VolumeRegular::LoadData(const Grid *grid) {
-    vector<size_t> dims = grid->GetDimensions();
-    float *data = new float[dims[0] * dims[1] * dims[2]];
+    const vector<size_t> dims = grid->GetDimensions();
+    const size_t nVerts = dims[0] * dims[1] * dims[2];
+    float *data = new float[nVerts];
 
-    size_t i = 0;
-    auto end = grid->cend();
-    for (auto it = grid->cbegin(); it != end; ++it, ++i) {
-        data[i] = *it;
+    auto dataIt = grid->cbegin();
+    for (size_t i = 0; i < nVerts; ++i, ++dataIt) {
+        data[i] = *dataIt;
     }
 
     glBindTexture(GL_TEXTURE_3D, dataTexture);
