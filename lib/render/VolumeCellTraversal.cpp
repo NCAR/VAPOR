@@ -213,35 +213,18 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     
     vector<size_t> dims = grid->GetDimensions();
     const int w = dims[0], h = dims[1], d = dims[2];
+    const size_t nCoords = (size_t)w*h*d;
     coordDims[0] = w;
     coordDims[1] = h;
     coordDims[2] = d;
     
-    float *data = new float[w*h*d*3];
+    float *data = new float[nCoords*3];
     
-    // auto coord = grid->ConstCoordBegin(); // broken
-    
-    vector <size_t> indices = {0,0,0};
-    vector <double> coords;
-    
-    for (int z = 0; z < d; z++) {
-        printf("%i/%i\n", z, d);
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                
-                indices[0] = x;
-                indices[1] = y;
-                indices[2] = z;
-                grid->GetUserCoordinates(indices, coords);
-                const float cx = coords[0];
-                const float cy = coords[1];
-                const float cz = coords[2];
-                
-                data[3 * (z*w*h + y*w + x)]   = cx;
-                data[3 * (z*w*h + y*w + x)+1] = cy;
-                data[3 * (z*w*h + y*w + x)+2] = cz;
-            }
-        }
+    auto coord = grid->ConstCoordBegin();
+    for (size_t i = 0; i < nCoords; ++i, ++coord) {
+        data[i*3  ] = (*coord)[0];
+        data[i*3+1] = (*coord)[1];
+        data[i*3+2] = (*coord)[2];
     }
     
     glBindTexture(GL_TEXTURE_3D, coordTexture);
