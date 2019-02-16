@@ -443,6 +443,7 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const CurvilinearGrid *cg, boo
         _yCoordItr = _cg->_yrg.cend();
         if (_terrainFollowing) { _zCoordItr = _cg->_zrg.cend(); }
         _index[dims.size() - 1] = dims[dims.size() - 1];
+        return;
     }
     _coords.push_back(*_xCoordItr);
     _coords.push_back(*_yCoordItr);
