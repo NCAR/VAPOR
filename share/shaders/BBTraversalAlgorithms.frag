@@ -1,7 +1,8 @@
-bool SearchSideForInitialCellWithOctree_1Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+int SearchSideForInitialCellWithOctree_1Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
+	int intersections = 0;
 
 	ivec2 lDims0 = GetBBoxArrayDimensions(sideID, 0);
 
@@ -12,25 +13,26 @@ bool SearchSideForInitialCellWithOctree_1Levels(vec3 origin, vec3 dir, float t0,
 	
 	for (int y0 = y1*2; y0 < yEnd0; y0++) {
 	for (int x0 = x1*2; x0 < xEnd0; x0++) {
-	if (IntersectRaySideCellBBoxDirect(origin, dir, x0, y0, sideID, 0)) {
+	if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x0, y0, sideID, 0)) {
 	
 		index[slowDim] = y0;
 		index[fastDim] = x0;
-		if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
-			return true;
+		if (IsFaceThatPassedBBAnInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
+			intersections++;
 	
 	
 	}
 	}
 	}
 
-	return false;
+	return intersections;
 }
 
-bool SearchSideForInitialCellWithOctree_2Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+int SearchSideForInitialCellWithOctree_2Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
+	int intersections = 0;
 
 	ivec2 lDims0 = GetBBoxArrayDimensions(sideID, 0);
 	ivec2 lDims1 = GetBBoxArrayDimensions(sideID, 1);
@@ -42,19 +44,19 @@ bool SearchSideForInitialCellWithOctree_2Levels(vec3 origin, vec3 dir, float t0,
 	
 	for (int y1 = y2*2; y1 < yEnd1; y1++) {
 	for (int x1 = x2*2; x1 < xEnd1; x1++) {
-	if (IntersectRaySideCellBBoxDirect(origin, dir, x1, y1, sideID, 1)) {
+	if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x1, y1, sideID, 1)) {
 	
 		int yEnd0 = y1 == lDims1.y-1 ? lDims0.y : (y1+1)*2;
 		int xEnd0 = x1 == lDims1.x-1 ? lDims0.x : (x1+1)*2;
 		
 		for (int y0 = y1*2; y0 < yEnd0; y0++) {
 		for (int x0 = x1*2; x0 < xEnd0; x0++) {
-		if (IntersectRaySideCellBBoxDirect(origin, dir, x0, y0, sideID, 0)) {
+		if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x0, y0, sideID, 0)) {
 		
 			index[slowDim] = y0;
 			index[fastDim] = x0;
-			if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
-				return true;
+			if (IsFaceThatPassedBBAnInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
+				intersections++;
 		
 		
 		}
@@ -66,13 +68,14 @@ bool SearchSideForInitialCellWithOctree_2Levels(vec3 origin, vec3 dir, float t0,
 	}
 	}
 
-	return false;
+	return intersections;
 }
 
-bool SearchSideForInitialCellWithOctree_3Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+int SearchSideForInitialCellWithOctree_3Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
+	int intersections = 0;
 
 	ivec2 lDims0 = GetBBoxArrayDimensions(sideID, 0);
 	ivec2 lDims1 = GetBBoxArrayDimensions(sideID, 1);
@@ -85,26 +88,26 @@ bool SearchSideForInitialCellWithOctree_3Levels(vec3 origin, vec3 dir, float t0,
 	
 	for (int y2 = y3*2; y2 < yEnd2; y2++) {
 	for (int x2 = x3*2; x2 < xEnd2; x2++) {
-	if (IntersectRaySideCellBBoxDirect(origin, dir, x2, y2, sideID, 2)) {
+	if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x2, y2, sideID, 2)) {
 	
 		int yEnd1 = y2 == lDims2.y-1 ? lDims1.y : (y2+1)*2;
 		int xEnd1 = x2 == lDims2.x-1 ? lDims1.x : (x2+1)*2;
 		
 		for (int y1 = y2*2; y1 < yEnd1; y1++) {
 		for (int x1 = x2*2; x1 < xEnd1; x1++) {
-		if (IntersectRaySideCellBBoxDirect(origin, dir, x1, y1, sideID, 1)) {
+		if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x1, y1, sideID, 1)) {
 		
 			int yEnd0 = y1 == lDims1.y-1 ? lDims0.y : (y1+1)*2;
 			int xEnd0 = x1 == lDims1.x-1 ? lDims0.x : (x1+1)*2;
 			
 			for (int y0 = y1*2; y0 < yEnd0; y0++) {
 			for (int x0 = x1*2; x0 < xEnd0; x0++) {
-			if (IntersectRaySideCellBBoxDirect(origin, dir, x0, y0, sideID, 0)) {
+			if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x0, y0, sideID, 0)) {
 			
 				index[slowDim] = y0;
 				index[fastDim] = x0;
-				if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
-					return true;
+				if (IsFaceThatPassedBBAnInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
+					intersections++;
 			
 			
 			}
@@ -121,13 +124,14 @@ bool SearchSideForInitialCellWithOctree_3Levels(vec3 origin, vec3 dir, float t0,
 	}
 	}
 
-	return false;
+	return intersections;
 }
 
-bool SearchSideForInitialCellWithOctree_4Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+int SearchSideForInitialCellWithOctree_4Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
+	int intersections = 0;
 
 	ivec2 lDims0 = GetBBoxArrayDimensions(sideID, 0);
 	ivec2 lDims1 = GetBBoxArrayDimensions(sideID, 1);
@@ -141,33 +145,33 @@ bool SearchSideForInitialCellWithOctree_4Levels(vec3 origin, vec3 dir, float t0,
 	
 	for (int y3 = y4*2; y3 < yEnd3; y3++) {
 	for (int x3 = x4*2; x3 < xEnd3; x3++) {
-	if (IntersectRaySideCellBBoxDirect(origin, dir, x3, y3, sideID, 3)) {
+	if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x3, y3, sideID, 3)) {
 	
 		int yEnd2 = y3 == lDims3.y-1 ? lDims2.y : (y3+1)*2;
 		int xEnd2 = x3 == lDims3.x-1 ? lDims2.x : (x3+1)*2;
 		
 		for (int y2 = y3*2; y2 < yEnd2; y2++) {
 		for (int x2 = x3*2; x2 < xEnd2; x2++) {
-		if (IntersectRaySideCellBBoxDirect(origin, dir, x2, y2, sideID, 2)) {
+		if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x2, y2, sideID, 2)) {
 		
 			int yEnd1 = y2 == lDims2.y-1 ? lDims1.y : (y2+1)*2;
 			int xEnd1 = x2 == lDims2.x-1 ? lDims1.x : (x2+1)*2;
 			
 			for (int y1 = y2*2; y1 < yEnd1; y1++) {
 			for (int x1 = x2*2; x1 < xEnd1; x1++) {
-			if (IntersectRaySideCellBBoxDirect(origin, dir, x1, y1, sideID, 1)) {
+			if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x1, y1, sideID, 1)) {
 			
 				int yEnd0 = y1 == lDims1.y-1 ? lDims0.y : (y1+1)*2;
 				int xEnd0 = x1 == lDims1.x-1 ? lDims0.x : (x1+1)*2;
 				
 				for (int y0 = y1*2; y0 < yEnd0; y0++) {
 				for (int x0 = x1*2; x0 < xEnd0; x0++) {
-				if (IntersectRaySideCellBBoxDirect(origin, dir, x0, y0, sideID, 0)) {
+				if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x0, y0, sideID, 0)) {
 				
 					index[slowDim] = y0;
 					index[fastDim] = x0;
-					if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
-						return true;
+					if (IsFaceThatPassedBBAnInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
+						intersections++;
 				
 				
 				}
@@ -189,13 +193,14 @@ bool SearchSideForInitialCellWithOctree_4Levels(vec3 origin, vec3 dir, float t0,
 	}
 	}
 
-	return false;
+	return intersections;
 }
 
-bool SearchSideForInitialCellWithOctree_5Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+int SearchSideForInitialCellWithOctree_5Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
+	int intersections = 0;
 
 	ivec2 lDims0 = GetBBoxArrayDimensions(sideID, 0);
 	ivec2 lDims1 = GetBBoxArrayDimensions(sideID, 1);
@@ -210,40 +215,40 @@ bool SearchSideForInitialCellWithOctree_5Levels(vec3 origin, vec3 dir, float t0,
 	
 	for (int y4 = y5*2; y4 < yEnd4; y4++) {
 	for (int x4 = x5*2; x4 < xEnd4; x4++) {
-	if (IntersectRaySideCellBBoxDirect(origin, dir, x4, y4, sideID, 4)) {
+	if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x4, y4, sideID, 4)) {
 	
 		int yEnd3 = y4 == lDims4.y-1 ? lDims3.y : (y4+1)*2;
 		int xEnd3 = x4 == lDims4.x-1 ? lDims3.x : (x4+1)*2;
 		
 		for (int y3 = y4*2; y3 < yEnd3; y3++) {
 		for (int x3 = x4*2; x3 < xEnd3; x3++) {
-		if (IntersectRaySideCellBBoxDirect(origin, dir, x3, y3, sideID, 3)) {
+		if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x3, y3, sideID, 3)) {
 		
 			int yEnd2 = y3 == lDims3.y-1 ? lDims2.y : (y3+1)*2;
 			int xEnd2 = x3 == lDims3.x-1 ? lDims2.x : (x3+1)*2;
 			
 			for (int y2 = y3*2; y2 < yEnd2; y2++) {
 			for (int x2 = x3*2; x2 < xEnd2; x2++) {
-			if (IntersectRaySideCellBBoxDirect(origin, dir, x2, y2, sideID, 2)) {
+			if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x2, y2, sideID, 2)) {
 			
 				int yEnd1 = y2 == lDims2.y-1 ? lDims1.y : (y2+1)*2;
 				int xEnd1 = x2 == lDims2.x-1 ? lDims1.x : (x2+1)*2;
 				
 				for (int y1 = y2*2; y1 < yEnd1; y1++) {
 				for (int x1 = x2*2; x1 < xEnd1; x1++) {
-				if (IntersectRaySideCellBBoxDirect(origin, dir, x1, y1, sideID, 1)) {
+				if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x1, y1, sideID, 1)) {
 				
 					int yEnd0 = y1 == lDims1.y-1 ? lDims0.y : (y1+1)*2;
 					int xEnd0 = x1 == lDims1.x-1 ? lDims0.x : (x1+1)*2;
 					
 					for (int y0 = y1*2; y0 < yEnd0; y0++) {
 					for (int x0 = x1*2; x0 < xEnd0; x0++) {
-					if (IntersectRaySideCellBBoxDirect(origin, dir, x0, y0, sideID, 0)) {
+					if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x0, y0, sideID, 0)) {
 					
 						index[slowDim] = y0;
 						index[fastDim] = x0;
-						if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
-							return true;
+						if (IsFaceThatPassedBBAnInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
+							intersections++;
 					
 					
 					}
@@ -270,13 +275,14 @@ bool SearchSideForInitialCellWithOctree_5Levels(vec3 origin, vec3 dir, float t0,
 	}
 	}
 
-	return false;
+	return intersections;
 }
 
-bool SearchSideForInitialCellWithOctree_6Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+int SearchSideForInitialCellWithOctree_6Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
+	int intersections = 0;
 
 	ivec2 lDims0 = GetBBoxArrayDimensions(sideID, 0);
 	ivec2 lDims1 = GetBBoxArrayDimensions(sideID, 1);
@@ -292,47 +298,47 @@ bool SearchSideForInitialCellWithOctree_6Levels(vec3 origin, vec3 dir, float t0,
 	
 	for (int y5 = y6*2; y5 < yEnd5; y5++) {
 	for (int x5 = x6*2; x5 < xEnd5; x5++) {
-	if (IntersectRaySideCellBBoxDirect(origin, dir, x5, y5, sideID, 5)) {
+	if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x5, y5, sideID, 5)) {
 	
 		int yEnd4 = y5 == lDims5.y-1 ? lDims4.y : (y5+1)*2;
 		int xEnd4 = x5 == lDims5.x-1 ? lDims4.x : (x5+1)*2;
 		
 		for (int y4 = y5*2; y4 < yEnd4; y4++) {
 		for (int x4 = x5*2; x4 < xEnd4; x4++) {
-		if (IntersectRaySideCellBBoxDirect(origin, dir, x4, y4, sideID, 4)) {
+		if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x4, y4, sideID, 4)) {
 		
 			int yEnd3 = y4 == lDims4.y-1 ? lDims3.y : (y4+1)*2;
 			int xEnd3 = x4 == lDims4.x-1 ? lDims3.x : (x4+1)*2;
 			
 			for (int y3 = y4*2; y3 < yEnd3; y3++) {
 			for (int x3 = x4*2; x3 < xEnd3; x3++) {
-			if (IntersectRaySideCellBBoxDirect(origin, dir, x3, y3, sideID, 3)) {
+			if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x3, y3, sideID, 3)) {
 			
 				int yEnd2 = y3 == lDims3.y-1 ? lDims2.y : (y3+1)*2;
 				int xEnd2 = x3 == lDims3.x-1 ? lDims2.x : (x3+1)*2;
 				
 				for (int y2 = y3*2; y2 < yEnd2; y2++) {
 				for (int x2 = x3*2; x2 < xEnd2; x2++) {
-				if (IntersectRaySideCellBBoxDirect(origin, dir, x2, y2, sideID, 2)) {
+				if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x2, y2, sideID, 2)) {
 				
 					int yEnd1 = y2 == lDims2.y-1 ? lDims1.y : (y2+1)*2;
 					int xEnd1 = x2 == lDims2.x-1 ? lDims1.x : (x2+1)*2;
 					
 					for (int y1 = y2*2; y1 < yEnd1; y1++) {
 					for (int x1 = x2*2; x1 < xEnd1; x1++) {
-					if (IntersectRaySideCellBBoxDirect(origin, dir, x1, y1, sideID, 1)) {
+					if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x1, y1, sideID, 1)) {
 					
 						int yEnd0 = y1 == lDims1.y-1 ? lDims0.y : (y1+1)*2;
 						int xEnd0 = x1 == lDims1.x-1 ? lDims0.x : (x1+1)*2;
 						
 						for (int y0 = y1*2; y0 < yEnd0; y0++) {
 						for (int x0 = x1*2; x0 < xEnd0; x0++) {
-						if (IntersectRaySideCellBBoxDirect(origin, dir, x0, y0, sideID, 0)) {
+						if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x0, y0, sideID, 0)) {
 						
 							index[slowDim] = y0;
 							index[fastDim] = x0;
-							if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
-								return true;
+							if (IsFaceThatPassedBBAnInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
+								intersections++;
 						
 						
 						}
@@ -364,13 +370,14 @@ bool SearchSideForInitialCellWithOctree_6Levels(vec3 origin, vec3 dir, float t0,
 	}
 	}
 
-	return false;
+	return intersections;
 }
 
-bool SearchSideForInitialCellWithOctree_7Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+int SearchSideForInitialCellWithOctree_7Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
+	int intersections = 0;
 
 	ivec2 lDims0 = GetBBoxArrayDimensions(sideID, 0);
 	ivec2 lDims1 = GetBBoxArrayDimensions(sideID, 1);
@@ -387,54 +394,54 @@ bool SearchSideForInitialCellWithOctree_7Levels(vec3 origin, vec3 dir, float t0,
 	
 	for (int y6 = y7*2; y6 < yEnd6; y6++) {
 	for (int x6 = x7*2; x6 < xEnd6; x6++) {
-	if (IntersectRaySideCellBBoxDirect(origin, dir, x6, y6, sideID, 6)) {
+	if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x6, y6, sideID, 6)) {
 	
 		int yEnd5 = y6 == lDims6.y-1 ? lDims5.y : (y6+1)*2;
 		int xEnd5 = x6 == lDims6.x-1 ? lDims5.x : (x6+1)*2;
 		
 		for (int y5 = y6*2; y5 < yEnd5; y5++) {
 		for (int x5 = x6*2; x5 < xEnd5; x5++) {
-		if (IntersectRaySideCellBBoxDirect(origin, dir, x5, y5, sideID, 5)) {
+		if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x5, y5, sideID, 5)) {
 		
 			int yEnd4 = y5 == lDims5.y-1 ? lDims4.y : (y5+1)*2;
 			int xEnd4 = x5 == lDims5.x-1 ? lDims4.x : (x5+1)*2;
 			
 			for (int y4 = y5*2; y4 < yEnd4; y4++) {
 			for (int x4 = x5*2; x4 < xEnd4; x4++) {
-			if (IntersectRaySideCellBBoxDirect(origin, dir, x4, y4, sideID, 4)) {
+			if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x4, y4, sideID, 4)) {
 			
 				int yEnd3 = y4 == lDims4.y-1 ? lDims3.y : (y4+1)*2;
 				int xEnd3 = x4 == lDims4.x-1 ? lDims3.x : (x4+1)*2;
 				
 				for (int y3 = y4*2; y3 < yEnd3; y3++) {
 				for (int x3 = x4*2; x3 < xEnd3; x3++) {
-				if (IntersectRaySideCellBBoxDirect(origin, dir, x3, y3, sideID, 3)) {
+				if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x3, y3, sideID, 3)) {
 				
 					int yEnd2 = y3 == lDims3.y-1 ? lDims2.y : (y3+1)*2;
 					int xEnd2 = x3 == lDims3.x-1 ? lDims2.x : (x3+1)*2;
 					
 					for (int y2 = y3*2; y2 < yEnd2; y2++) {
 					for (int x2 = x3*2; x2 < xEnd2; x2++) {
-					if (IntersectRaySideCellBBoxDirect(origin, dir, x2, y2, sideID, 2)) {
+					if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x2, y2, sideID, 2)) {
 					
 						int yEnd1 = y2 == lDims2.y-1 ? lDims1.y : (y2+1)*2;
 						int xEnd1 = x2 == lDims2.x-1 ? lDims1.x : (x2+1)*2;
 						
 						for (int y1 = y2*2; y1 < yEnd1; y1++) {
 						for (int x1 = x2*2; x1 < xEnd1; x1++) {
-						if (IntersectRaySideCellBBoxDirect(origin, dir, x1, y1, sideID, 1)) {
+						if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x1, y1, sideID, 1)) {
 						
 							int yEnd0 = y1 == lDims1.y-1 ? lDims0.y : (y1+1)*2;
 							int xEnd0 = x1 == lDims1.x-1 ? lDims0.x : (x1+1)*2;
 							
 							for (int y0 = y1*2; y0 < yEnd0; y0++) {
 							for (int x0 = x1*2; x0 < xEnd0; x0++) {
-							if (IntersectRaySideCellBBoxDirect(origin, dir, x0, y0, sideID, 0)) {
+							if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x0, y0, sideID, 0)) {
 							
 								index[slowDim] = y0;
 								index[fastDim] = x0;
-								if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
-									return true;
+								if (IsFaceThatPassedBBAnInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
+									intersections++;
 							
 							
 							}
@@ -471,13 +478,14 @@ bool SearchSideForInitialCellWithOctree_7Levels(vec3 origin, vec3 dir, float t0,
 	}
 	}
 
-	return false;
+	return intersections;
 }
 
-bool SearchSideForInitialCellWithOctree_8Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+int SearchSideForInitialCellWithOctree_8Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
+	int intersections = 0;
 
 	ivec2 lDims0 = GetBBoxArrayDimensions(sideID, 0);
 	ivec2 lDims1 = GetBBoxArrayDimensions(sideID, 1);
@@ -495,61 +503,61 @@ bool SearchSideForInitialCellWithOctree_8Levels(vec3 origin, vec3 dir, float t0,
 	
 	for (int y7 = y8*2; y7 < yEnd7; y7++) {
 	for (int x7 = x8*2; x7 < xEnd7; x7++) {
-	if (IntersectRaySideCellBBoxDirect(origin, dir, x7, y7, sideID, 7)) {
+	if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x7, y7, sideID, 7)) {
 	
 		int yEnd6 = y7 == lDims7.y-1 ? lDims6.y : (y7+1)*2;
 		int xEnd6 = x7 == lDims7.x-1 ? lDims6.x : (x7+1)*2;
 		
 		for (int y6 = y7*2; y6 < yEnd6; y6++) {
 		for (int x6 = x7*2; x6 < xEnd6; x6++) {
-		if (IntersectRaySideCellBBoxDirect(origin, dir, x6, y6, sideID, 6)) {
+		if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x6, y6, sideID, 6)) {
 		
 			int yEnd5 = y6 == lDims6.y-1 ? lDims5.y : (y6+1)*2;
 			int xEnd5 = x6 == lDims6.x-1 ? lDims5.x : (x6+1)*2;
 			
 			for (int y5 = y6*2; y5 < yEnd5; y5++) {
 			for (int x5 = x6*2; x5 < xEnd5; x5++) {
-			if (IntersectRaySideCellBBoxDirect(origin, dir, x5, y5, sideID, 5)) {
+			if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x5, y5, sideID, 5)) {
 			
 				int yEnd4 = y5 == lDims5.y-1 ? lDims4.y : (y5+1)*2;
 				int xEnd4 = x5 == lDims5.x-1 ? lDims4.x : (x5+1)*2;
 				
 				for (int y4 = y5*2; y4 < yEnd4; y4++) {
 				for (int x4 = x5*2; x4 < xEnd4; x4++) {
-				if (IntersectRaySideCellBBoxDirect(origin, dir, x4, y4, sideID, 4)) {
+				if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x4, y4, sideID, 4)) {
 				
 					int yEnd3 = y4 == lDims4.y-1 ? lDims3.y : (y4+1)*2;
 					int xEnd3 = x4 == lDims4.x-1 ? lDims3.x : (x4+1)*2;
 					
 					for (int y3 = y4*2; y3 < yEnd3; y3++) {
 					for (int x3 = x4*2; x3 < xEnd3; x3++) {
-					if (IntersectRaySideCellBBoxDirect(origin, dir, x3, y3, sideID, 3)) {
+					if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x3, y3, sideID, 3)) {
 					
 						int yEnd2 = y3 == lDims3.y-1 ? lDims2.y : (y3+1)*2;
 						int xEnd2 = x3 == lDims3.x-1 ? lDims2.x : (x3+1)*2;
 						
 						for (int y2 = y3*2; y2 < yEnd2; y2++) {
 						for (int x2 = x3*2; x2 < xEnd2; x2++) {
-						if (IntersectRaySideCellBBoxDirect(origin, dir, x2, y2, sideID, 2)) {
+						if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x2, y2, sideID, 2)) {
 						
 							int yEnd1 = y2 == lDims2.y-1 ? lDims1.y : (y2+1)*2;
 							int xEnd1 = x2 == lDims2.x-1 ? lDims1.x : (x2+1)*2;
 							
 							for (int y1 = y2*2; y1 < yEnd1; y1++) {
 							for (int x1 = x2*2; x1 < xEnd1; x1++) {
-							if (IntersectRaySideCellBBoxDirect(origin, dir, x1, y1, sideID, 1)) {
+							if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x1, y1, sideID, 1)) {
 							
 								int yEnd0 = y1 == lDims1.y-1 ? lDims0.y : (y1+1)*2;
 								int xEnd0 = x1 == lDims1.x-1 ? lDims0.x : (x1+1)*2;
 								
 								for (int y0 = y1*2; y0 < yEnd0; y0++) {
 								for (int x0 = x1*2; x0 < xEnd0; x0++) {
-								if (IntersectRaySideCellBBoxDirect(origin, dir, x0, y0, sideID, 0)) {
+								if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x0, y0, sideID, 0)) {
 								
 									index[slowDim] = y0;
 									index[fastDim] = x0;
-									if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
-										return true;
+									if (IsFaceThatPassedBBAnInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
+										intersections++;
 								
 								
 								}
@@ -591,13 +599,14 @@ bool SearchSideForInitialCellWithOctree_8Levels(vec3 origin, vec3 dir, float t0,
 	}
 	}
 
-	return false;
+	return intersections;
 }
 
-bool SearchSideForInitialCellWithOctree_9Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+int SearchSideForInitialCellWithOctree_9Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
+	int intersections = 0;
 
 	ivec2 lDims0 = GetBBoxArrayDimensions(sideID, 0);
 	ivec2 lDims1 = GetBBoxArrayDimensions(sideID, 1);
@@ -616,68 +625,68 @@ bool SearchSideForInitialCellWithOctree_9Levels(vec3 origin, vec3 dir, float t0,
 	
 	for (int y8 = y9*2; y8 < yEnd8; y8++) {
 	for (int x8 = x9*2; x8 < xEnd8; x8++) {
-	if (IntersectRaySideCellBBoxDirect(origin, dir, x8, y8, sideID, 8)) {
+	if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x8, y8, sideID, 8)) {
 	
 		int yEnd7 = y8 == lDims8.y-1 ? lDims7.y : (y8+1)*2;
 		int xEnd7 = x8 == lDims8.x-1 ? lDims7.x : (x8+1)*2;
 		
 		for (int y7 = y8*2; y7 < yEnd7; y7++) {
 		for (int x7 = x8*2; x7 < xEnd7; x7++) {
-		if (IntersectRaySideCellBBoxDirect(origin, dir, x7, y7, sideID, 7)) {
+		if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x7, y7, sideID, 7)) {
 		
 			int yEnd6 = y7 == lDims7.y-1 ? lDims6.y : (y7+1)*2;
 			int xEnd6 = x7 == lDims7.x-1 ? lDims6.x : (x7+1)*2;
 			
 			for (int y6 = y7*2; y6 < yEnd6; y6++) {
 			for (int x6 = x7*2; x6 < xEnd6; x6++) {
-			if (IntersectRaySideCellBBoxDirect(origin, dir, x6, y6, sideID, 6)) {
+			if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x6, y6, sideID, 6)) {
 			
 				int yEnd5 = y6 == lDims6.y-1 ? lDims5.y : (y6+1)*2;
 				int xEnd5 = x6 == lDims6.x-1 ? lDims5.x : (x6+1)*2;
 				
 				for (int y5 = y6*2; y5 < yEnd5; y5++) {
 				for (int x5 = x6*2; x5 < xEnd5; x5++) {
-				if (IntersectRaySideCellBBoxDirect(origin, dir, x5, y5, sideID, 5)) {
+				if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x5, y5, sideID, 5)) {
 				
 					int yEnd4 = y5 == lDims5.y-1 ? lDims4.y : (y5+1)*2;
 					int xEnd4 = x5 == lDims5.x-1 ? lDims4.x : (x5+1)*2;
 					
 					for (int y4 = y5*2; y4 < yEnd4; y4++) {
 					for (int x4 = x5*2; x4 < xEnd4; x4++) {
-					if (IntersectRaySideCellBBoxDirect(origin, dir, x4, y4, sideID, 4)) {
+					if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x4, y4, sideID, 4)) {
 					
 						int yEnd3 = y4 == lDims4.y-1 ? lDims3.y : (y4+1)*2;
 						int xEnd3 = x4 == lDims4.x-1 ? lDims3.x : (x4+1)*2;
 						
 						for (int y3 = y4*2; y3 < yEnd3; y3++) {
 						for (int x3 = x4*2; x3 < xEnd3; x3++) {
-						if (IntersectRaySideCellBBoxDirect(origin, dir, x3, y3, sideID, 3)) {
+						if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x3, y3, sideID, 3)) {
 						
 							int yEnd2 = y3 == lDims3.y-1 ? lDims2.y : (y3+1)*2;
 							int xEnd2 = x3 == lDims3.x-1 ? lDims2.x : (x3+1)*2;
 							
 							for (int y2 = y3*2; y2 < yEnd2; y2++) {
 							for (int x2 = x3*2; x2 < xEnd2; x2++) {
-							if (IntersectRaySideCellBBoxDirect(origin, dir, x2, y2, sideID, 2)) {
+							if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x2, y2, sideID, 2)) {
 							
 								int yEnd1 = y2 == lDims2.y-1 ? lDims1.y : (y2+1)*2;
 								int xEnd1 = x2 == lDims2.x-1 ? lDims1.x : (x2+1)*2;
 								
 								for (int y1 = y2*2; y1 < yEnd1; y1++) {
 								for (int x1 = x2*2; x1 < xEnd1; x1++) {
-								if (IntersectRaySideCellBBoxDirect(origin, dir, x1, y1, sideID, 1)) {
+								if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x1, y1, sideID, 1)) {
 								
 									int yEnd0 = y1 == lDims1.y-1 ? lDims0.y : (y1+1)*2;
 									int xEnd0 = x1 == lDims1.x-1 ? lDims0.x : (x1+1)*2;
 									
 									for (int y0 = y1*2; y0 < yEnd0; y0++) {
 									for (int x0 = x1*2; x0 < xEnd0; x0++) {
-									if (IntersectRaySideCellBBoxDirect(origin, dir, x0, y0, sideID, 0)) {
+									if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x0, y0, sideID, 0)) {
 									
 										index[slowDim] = y0;
 										index[fastDim] = x0;
-										if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
-											return true;
+										if (IsFaceThatPassedBBAnInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
+											intersections++;
 									
 									
 									}
@@ -724,13 +733,14 @@ bool SearchSideForInitialCellWithOctree_9Levels(vec3 origin, vec3 dir, float t0,
 	}
 	}
 
-	return false;
+	return intersections;
 }
 
-bool SearchSideForInitialCellWithOctree_10Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+int SearchSideForInitialCellWithOctree_10Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
+	int intersections = 0;
 
 	ivec2 lDims0 = GetBBoxArrayDimensions(sideID, 0);
 	ivec2 lDims1 = GetBBoxArrayDimensions(sideID, 1);
@@ -750,75 +760,75 @@ bool SearchSideForInitialCellWithOctree_10Levels(vec3 origin, vec3 dir, float t0
 	
 	for (int y9 = y10*2; y9 < yEnd9; y9++) {
 	for (int x9 = x10*2; x9 < xEnd9; x9++) {
-	if (IntersectRaySideCellBBoxDirect(origin, dir, x9, y9, sideID, 9)) {
+	if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x9, y9, sideID, 9)) {
 	
 		int yEnd8 = y9 == lDims9.y-1 ? lDims8.y : (y9+1)*2;
 		int xEnd8 = x9 == lDims9.x-1 ? lDims8.x : (x9+1)*2;
 		
 		for (int y8 = y9*2; y8 < yEnd8; y8++) {
 		for (int x8 = x9*2; x8 < xEnd8; x8++) {
-		if (IntersectRaySideCellBBoxDirect(origin, dir, x8, y8, sideID, 8)) {
+		if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x8, y8, sideID, 8)) {
 		
 			int yEnd7 = y8 == lDims8.y-1 ? lDims7.y : (y8+1)*2;
 			int xEnd7 = x8 == lDims8.x-1 ? lDims7.x : (x8+1)*2;
 			
 			for (int y7 = y8*2; y7 < yEnd7; y7++) {
 			for (int x7 = x8*2; x7 < xEnd7; x7++) {
-			if (IntersectRaySideCellBBoxDirect(origin, dir, x7, y7, sideID, 7)) {
+			if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x7, y7, sideID, 7)) {
 			
 				int yEnd6 = y7 == lDims7.y-1 ? lDims6.y : (y7+1)*2;
 				int xEnd6 = x7 == lDims7.x-1 ? lDims6.x : (x7+1)*2;
 				
 				for (int y6 = y7*2; y6 < yEnd6; y6++) {
 				for (int x6 = x7*2; x6 < xEnd6; x6++) {
-				if (IntersectRaySideCellBBoxDirect(origin, dir, x6, y6, sideID, 6)) {
+				if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x6, y6, sideID, 6)) {
 				
 					int yEnd5 = y6 == lDims6.y-1 ? lDims5.y : (y6+1)*2;
 					int xEnd5 = x6 == lDims6.x-1 ? lDims5.x : (x6+1)*2;
 					
 					for (int y5 = y6*2; y5 < yEnd5; y5++) {
 					for (int x5 = x6*2; x5 < xEnd5; x5++) {
-					if (IntersectRaySideCellBBoxDirect(origin, dir, x5, y5, sideID, 5)) {
+					if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x5, y5, sideID, 5)) {
 					
 						int yEnd4 = y5 == lDims5.y-1 ? lDims4.y : (y5+1)*2;
 						int xEnd4 = x5 == lDims5.x-1 ? lDims4.x : (x5+1)*2;
 						
 						for (int y4 = y5*2; y4 < yEnd4; y4++) {
 						for (int x4 = x5*2; x4 < xEnd4; x4++) {
-						if (IntersectRaySideCellBBoxDirect(origin, dir, x4, y4, sideID, 4)) {
+						if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x4, y4, sideID, 4)) {
 						
 							int yEnd3 = y4 == lDims4.y-1 ? lDims3.y : (y4+1)*2;
 							int xEnd3 = x4 == lDims4.x-1 ? lDims3.x : (x4+1)*2;
 							
 							for (int y3 = y4*2; y3 < yEnd3; y3++) {
 							for (int x3 = x4*2; x3 < xEnd3; x3++) {
-							if (IntersectRaySideCellBBoxDirect(origin, dir, x3, y3, sideID, 3)) {
+							if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x3, y3, sideID, 3)) {
 							
 								int yEnd2 = y3 == lDims3.y-1 ? lDims2.y : (y3+1)*2;
 								int xEnd2 = x3 == lDims3.x-1 ? lDims2.x : (x3+1)*2;
 								
 								for (int y2 = y3*2; y2 < yEnd2; y2++) {
 								for (int x2 = x3*2; x2 < xEnd2; x2++) {
-								if (IntersectRaySideCellBBoxDirect(origin, dir, x2, y2, sideID, 2)) {
+								if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x2, y2, sideID, 2)) {
 								
 									int yEnd1 = y2 == lDims2.y-1 ? lDims1.y : (y2+1)*2;
 									int xEnd1 = x2 == lDims2.x-1 ? lDims1.x : (x2+1)*2;
 									
 									for (int y1 = y2*2; y1 < yEnd1; y1++) {
 									for (int x1 = x2*2; x1 < xEnd1; x1++) {
-									if (IntersectRaySideCellBBoxDirect(origin, dir, x1, y1, sideID, 1)) {
+									if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x1, y1, sideID, 1)) {
 									
 										int yEnd0 = y1 == lDims1.y-1 ? lDims0.y : (y1+1)*2;
 										int xEnd0 = x1 == lDims1.x-1 ? lDims0.x : (x1+1)*2;
 										
 										for (int y0 = y1*2; y0 < yEnd0; y0++) {
 										for (int x0 = x1*2; x0 < xEnd0; x0++) {
-										if (IntersectRaySideCellBBoxDirect(origin, dir, x0, y0, sideID, 0)) {
+										if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x0, y0, sideID, 0)) {
 										
 											index[slowDim] = y0;
 											index[fastDim] = x0;
-											if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
-												return true;
+											if (IsFaceThatPassedBBAnInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
+												intersections++;
 										
 										
 										}
@@ -870,13 +880,14 @@ bool SearchSideForInitialCellWithOctree_10Levels(vec3 origin, vec3 dir, float t0
 	}
 	}
 
-	return false;
+	return intersections;
 }
 
-bool SearchSideForInitialCellWithOctree_11Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+int SearchSideForInitialCellWithOctree_11Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
+	int intersections = 0;
 
 	ivec2 lDims0 = GetBBoxArrayDimensions(sideID, 0);
 	ivec2 lDims1 = GetBBoxArrayDimensions(sideID, 1);
@@ -897,82 +908,82 @@ bool SearchSideForInitialCellWithOctree_11Levels(vec3 origin, vec3 dir, float t0
 	
 	for (int y10 = y11*2; y10 < yEnd10; y10++) {
 	for (int x10 = x11*2; x10 < xEnd10; x10++) {
-	if (IntersectRaySideCellBBoxDirect(origin, dir, x10, y10, sideID, 10)) {
+	if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x10, y10, sideID, 10)) {
 	
 		int yEnd9 = y10 == lDims10.y-1 ? lDims9.y : (y10+1)*2;
 		int xEnd9 = x10 == lDims10.x-1 ? lDims9.x : (x10+1)*2;
 		
 		for (int y9 = y10*2; y9 < yEnd9; y9++) {
 		for (int x9 = x10*2; x9 < xEnd9; x9++) {
-		if (IntersectRaySideCellBBoxDirect(origin, dir, x9, y9, sideID, 9)) {
+		if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x9, y9, sideID, 9)) {
 		
 			int yEnd8 = y9 == lDims9.y-1 ? lDims8.y : (y9+1)*2;
 			int xEnd8 = x9 == lDims9.x-1 ? lDims8.x : (x9+1)*2;
 			
 			for (int y8 = y9*2; y8 < yEnd8; y8++) {
 			for (int x8 = x9*2; x8 < xEnd8; x8++) {
-			if (IntersectRaySideCellBBoxDirect(origin, dir, x8, y8, sideID, 8)) {
+			if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x8, y8, sideID, 8)) {
 			
 				int yEnd7 = y8 == lDims8.y-1 ? lDims7.y : (y8+1)*2;
 				int xEnd7 = x8 == lDims8.x-1 ? lDims7.x : (x8+1)*2;
 				
 				for (int y7 = y8*2; y7 < yEnd7; y7++) {
 				for (int x7 = x8*2; x7 < xEnd7; x7++) {
-				if (IntersectRaySideCellBBoxDirect(origin, dir, x7, y7, sideID, 7)) {
+				if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x7, y7, sideID, 7)) {
 				
 					int yEnd6 = y7 == lDims7.y-1 ? lDims6.y : (y7+1)*2;
 					int xEnd6 = x7 == lDims7.x-1 ? lDims6.x : (x7+1)*2;
 					
 					for (int y6 = y7*2; y6 < yEnd6; y6++) {
 					for (int x6 = x7*2; x6 < xEnd6; x6++) {
-					if (IntersectRaySideCellBBoxDirect(origin, dir, x6, y6, sideID, 6)) {
+					if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x6, y6, sideID, 6)) {
 					
 						int yEnd5 = y6 == lDims6.y-1 ? lDims5.y : (y6+1)*2;
 						int xEnd5 = x6 == lDims6.x-1 ? lDims5.x : (x6+1)*2;
 						
 						for (int y5 = y6*2; y5 < yEnd5; y5++) {
 						for (int x5 = x6*2; x5 < xEnd5; x5++) {
-						if (IntersectRaySideCellBBoxDirect(origin, dir, x5, y5, sideID, 5)) {
+						if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x5, y5, sideID, 5)) {
 						
 							int yEnd4 = y5 == lDims5.y-1 ? lDims4.y : (y5+1)*2;
 							int xEnd4 = x5 == lDims5.x-1 ? lDims4.x : (x5+1)*2;
 							
 							for (int y4 = y5*2; y4 < yEnd4; y4++) {
 							for (int x4 = x5*2; x4 < xEnd4; x4++) {
-							if (IntersectRaySideCellBBoxDirect(origin, dir, x4, y4, sideID, 4)) {
+							if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x4, y4, sideID, 4)) {
 							
 								int yEnd3 = y4 == lDims4.y-1 ? lDims3.y : (y4+1)*2;
 								int xEnd3 = x4 == lDims4.x-1 ? lDims3.x : (x4+1)*2;
 								
 								for (int y3 = y4*2; y3 < yEnd3; y3++) {
 								for (int x3 = x4*2; x3 < xEnd3; x3++) {
-								if (IntersectRaySideCellBBoxDirect(origin, dir, x3, y3, sideID, 3)) {
+								if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x3, y3, sideID, 3)) {
 								
 									int yEnd2 = y3 == lDims3.y-1 ? lDims2.y : (y3+1)*2;
 									int xEnd2 = x3 == lDims3.x-1 ? lDims2.x : (x3+1)*2;
 									
 									for (int y2 = y3*2; y2 < yEnd2; y2++) {
 									for (int x2 = x3*2; x2 < xEnd2; x2++) {
-									if (IntersectRaySideCellBBoxDirect(origin, dir, x2, y2, sideID, 2)) {
+									if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x2, y2, sideID, 2)) {
 									
 										int yEnd1 = y2 == lDims2.y-1 ? lDims1.y : (y2+1)*2;
 										int xEnd1 = x2 == lDims2.x-1 ? lDims1.x : (x2+1)*2;
 										
 										for (int y1 = y2*2; y1 < yEnd1; y1++) {
 										for (int x1 = x2*2; x1 < xEnd1; x1++) {
-										if (IntersectRaySideCellBBoxDirect(origin, dir, x1, y1, sideID, 1)) {
+										if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x1, y1, sideID, 1)) {
 										
 											int yEnd0 = y1 == lDims1.y-1 ? lDims0.y : (y1+1)*2;
 											int xEnd0 = x1 == lDims1.x-1 ? lDims0.x : (x1+1)*2;
 											
 											for (int y0 = y1*2; y0 < yEnd0; y0++) {
 											for (int x0 = x1*2; x0 < xEnd0; x0++) {
-											if (IntersectRaySideCellBBoxDirect(origin, dir, x0, y0, sideID, 0)) {
+											if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x0, y0, sideID, 0)) {
 											
 												index[slowDim] = y0;
 												index[fastDim] = x0;
-												if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
-													return true;
+												if (IsFaceThatPassedBBAnInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
+													intersections++;
 											
 											
 											}
@@ -1029,13 +1040,14 @@ bool SearchSideForInitialCellWithOctree_11Levels(vec3 origin, vec3 dir, float t0
 	}
 	}
 
-	return false;
+	return intersections;
 }
 
-bool SearchSideForInitialCellWithOctree_12Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+int SearchSideForInitialCellWithOctree_12Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
+	int intersections = 0;
 
 	ivec2 lDims0 = GetBBoxArrayDimensions(sideID, 0);
 	ivec2 lDims1 = GetBBoxArrayDimensions(sideID, 1);
@@ -1057,89 +1069,89 @@ bool SearchSideForInitialCellWithOctree_12Levels(vec3 origin, vec3 dir, float t0
 	
 	for (int y11 = y12*2; y11 < yEnd11; y11++) {
 	for (int x11 = x12*2; x11 < xEnd11; x11++) {
-	if (IntersectRaySideCellBBoxDirect(origin, dir, x11, y11, sideID, 11)) {
+	if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x11, y11, sideID, 11)) {
 	
 		int yEnd10 = y11 == lDims11.y-1 ? lDims10.y : (y11+1)*2;
 		int xEnd10 = x11 == lDims11.x-1 ? lDims10.x : (x11+1)*2;
 		
 		for (int y10 = y11*2; y10 < yEnd10; y10++) {
 		for (int x10 = x11*2; x10 < xEnd10; x10++) {
-		if (IntersectRaySideCellBBoxDirect(origin, dir, x10, y10, sideID, 10)) {
+		if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x10, y10, sideID, 10)) {
 		
 			int yEnd9 = y10 == lDims10.y-1 ? lDims9.y : (y10+1)*2;
 			int xEnd9 = x10 == lDims10.x-1 ? lDims9.x : (x10+1)*2;
 			
 			for (int y9 = y10*2; y9 < yEnd9; y9++) {
 			for (int x9 = x10*2; x9 < xEnd9; x9++) {
-			if (IntersectRaySideCellBBoxDirect(origin, dir, x9, y9, sideID, 9)) {
+			if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x9, y9, sideID, 9)) {
 			
 				int yEnd8 = y9 == lDims9.y-1 ? lDims8.y : (y9+1)*2;
 				int xEnd8 = x9 == lDims9.x-1 ? lDims8.x : (x9+1)*2;
 				
 				for (int y8 = y9*2; y8 < yEnd8; y8++) {
 				for (int x8 = x9*2; x8 < xEnd8; x8++) {
-				if (IntersectRaySideCellBBoxDirect(origin, dir, x8, y8, sideID, 8)) {
+				if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x8, y8, sideID, 8)) {
 				
 					int yEnd7 = y8 == lDims8.y-1 ? lDims7.y : (y8+1)*2;
 					int xEnd7 = x8 == lDims8.x-1 ? lDims7.x : (x8+1)*2;
 					
 					for (int y7 = y8*2; y7 < yEnd7; y7++) {
 					for (int x7 = x8*2; x7 < xEnd7; x7++) {
-					if (IntersectRaySideCellBBoxDirect(origin, dir, x7, y7, sideID, 7)) {
+					if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x7, y7, sideID, 7)) {
 					
 						int yEnd6 = y7 == lDims7.y-1 ? lDims6.y : (y7+1)*2;
 						int xEnd6 = x7 == lDims7.x-1 ? lDims6.x : (x7+1)*2;
 						
 						for (int y6 = y7*2; y6 < yEnd6; y6++) {
 						for (int x6 = x7*2; x6 < xEnd6; x6++) {
-						if (IntersectRaySideCellBBoxDirect(origin, dir, x6, y6, sideID, 6)) {
+						if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x6, y6, sideID, 6)) {
 						
 							int yEnd5 = y6 == lDims6.y-1 ? lDims5.y : (y6+1)*2;
 							int xEnd5 = x6 == lDims6.x-1 ? lDims5.x : (x6+1)*2;
 							
 							for (int y5 = y6*2; y5 < yEnd5; y5++) {
 							for (int x5 = x6*2; x5 < xEnd5; x5++) {
-							if (IntersectRaySideCellBBoxDirect(origin, dir, x5, y5, sideID, 5)) {
+							if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x5, y5, sideID, 5)) {
 							
 								int yEnd4 = y5 == lDims5.y-1 ? lDims4.y : (y5+1)*2;
 								int xEnd4 = x5 == lDims5.x-1 ? lDims4.x : (x5+1)*2;
 								
 								for (int y4 = y5*2; y4 < yEnd4; y4++) {
 								for (int x4 = x5*2; x4 < xEnd4; x4++) {
-								if (IntersectRaySideCellBBoxDirect(origin, dir, x4, y4, sideID, 4)) {
+								if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x4, y4, sideID, 4)) {
 								
 									int yEnd3 = y4 == lDims4.y-1 ? lDims3.y : (y4+1)*2;
 									int xEnd3 = x4 == lDims4.x-1 ? lDims3.x : (x4+1)*2;
 									
 									for (int y3 = y4*2; y3 < yEnd3; y3++) {
 									for (int x3 = x4*2; x3 < xEnd3; x3++) {
-									if (IntersectRaySideCellBBoxDirect(origin, dir, x3, y3, sideID, 3)) {
+									if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x3, y3, sideID, 3)) {
 									
 										int yEnd2 = y3 == lDims3.y-1 ? lDims2.y : (y3+1)*2;
 										int xEnd2 = x3 == lDims3.x-1 ? lDims2.x : (x3+1)*2;
 										
 										for (int y2 = y3*2; y2 < yEnd2; y2++) {
 										for (int x2 = x3*2; x2 < xEnd2; x2++) {
-										if (IntersectRaySideCellBBoxDirect(origin, dir, x2, y2, sideID, 2)) {
+										if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x2, y2, sideID, 2)) {
 										
 											int yEnd1 = y2 == lDims2.y-1 ? lDims1.y : (y2+1)*2;
 											int xEnd1 = x2 == lDims2.x-1 ? lDims1.x : (x2+1)*2;
 											
 											for (int y1 = y2*2; y1 < yEnd1; y1++) {
 											for (int x1 = x2*2; x1 < xEnd1; x1++) {
-											if (IntersectRaySideCellBBoxDirect(origin, dir, x1, y1, sideID, 1)) {
+											if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x1, y1, sideID, 1)) {
 											
 												int yEnd0 = y1 == lDims1.y-1 ? lDims0.y : (y1+1)*2;
 												int xEnd0 = x1 == lDims1.x-1 ? lDims0.x : (x1+1)*2;
 												
 												for (int y0 = y1*2; y0 < yEnd0; y0++) {
 												for (int x0 = x1*2; x0 < xEnd0; x0++) {
-												if (IntersectRaySideCellBBoxDirect(origin, dir, x0, y0, sideID, 0)) {
+												if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x0, y0, sideID, 0)) {
 												
 													index[slowDim] = y0;
 													index[fastDim] = x0;
-													if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
-														return true;
+													if (IsFaceThatPassedBBAnInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
+														intersections++;
 												
 												
 												}
@@ -1201,6 +1213,6 @@ bool SearchSideForInitialCellWithOctree_12Levels(vec3 origin, vec3 dir, float t0
 	}
 	}
 
-	return false;
+	return intersections;
 }
 

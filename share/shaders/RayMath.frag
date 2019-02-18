@@ -28,41 +28,34 @@ bool IntersectRayBoundingBox(vec3 o, vec3 d, vec3 boxMin, vec3 boxMax, out float
     return true;
 }
 #elif IntersectRayBoundingBoxImplementation == 2
-bool IntersectRayBoundingBox(vec3 o, vec3 d, vec3 boxMin, vec3 boxMax, out float t0, out float t1)
+bool IntersectRayBoundingBox(vec3 o, vec3 d, float rt0, vec3 boxMin, vec3 boxMax, out float t0, out float t1)
 {
     vec3 tMin = (boxMin - o) / d;
     vec3 tMax = (boxMax - o) / d;
     vec3 bt1 = min(tMin, tMax);
     vec3 bt2 = max(tMin, tMax);
-    t0 = max(max(bt1.x, bt1.y), bt1.z);
-#ifndef RAY_AS_LINE
-    t0 = max(t0, 0);
-#endif
+    t0 = max(max(max(bt1.x, bt1.y), bt1.z), rt0);
     t1 = min(min(bt2.x, bt2.y), bt2.z);
     return t0 <= t1;
 }
 #endif
 
-bool IntersectRayPlane(vec3 o, vec3 d, vec3 v0, vec3 n, out float t)
+bool IntersectRayPlane(vec3 o, vec3 d, float rt0, vec3 v0, vec3 n, out float t)
 {
     float denom = dot(n, d);
     
     if (abs(denom) > 1e-6) {
         t = dot(v0 - o, n) / denom;
-#ifndef RAY_AS_LINE
-        return t >= 0;
-#else
-        return true;
-#endif
+        return t >= rt0;
     }
     return false;
 }
 
-bool IntersectRayTriangle(vec3 o, vec3 d, vec3 v0, vec3 v1, vec3 v2, out float t)
+bool IntersectRayTriangle(vec3 o, vec3 d, float rt0, vec3 v0, vec3 v1, vec3 v2, out float t)
 {
     vec3 n = cross(v1-v0,v2-v0);
     
-    if (IntersectRayPlane(o, d, v0, n, t)) {
+    if (IntersectRayPlane(o, d, rt0, v0, n, t)) {
         vec3 P = o + d * t;
         
         vec3 edge0 = v1-v0;
@@ -170,9 +163,9 @@ bool IntersectRayTriangleIntel(vec3 o, vec3 dir, vec3 v0, vec3 v1, vec3 v2, out 
 }
  */
 
-bool IntersectRayQuad(vec3 o, vec3 d, vec3 v0, vec3 v1, vec3 v2, vec3 v3, out float t)
+bool IntersectRayQuad(vec3 o, vec3 d, float rt0, vec3 v0, vec3 v1, vec3 v2, vec3 v3, out float t)
 {
-    if (IntersectRayTriangle(o, d, v0, v1, v2, t)) return true;
-    if (IntersectRayTriangle(o, d, v2, v3, v0, t)) return true;
+    if (IntersectRayTriangle(o, d, rt0, v0, v1, v2, t)) return true;
+    if (IntersectRayTriangle(o, d, rt0, v2, v3, v0, t)) return true;
     return false;
 }
