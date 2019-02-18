@@ -1,6 +1,5 @@
 #version 330 core
 
-#define RAY_AS_LINE
 #include RayMath.frag
 
 #define EPSILON 1.19e-07
@@ -175,11 +174,11 @@ vec4 GetAverageColorForCoordIndex(ivec3 coordIndex)
     return GetColorForNormalizedData(NormalizeData(GetDataForCoordIndex(coordIndex)));
 }
 
-bool IntersectRayCellFace(vec3 o, vec3 d, ivec3 cellIndex, ivec3 face, out float t)
+bool IntersectRayCellFace(vec3 o, vec3 d, float rt0, ivec3 cellIndex, ivec3 face, out float t)
 {
     vec3 v0, v1, v2, v3;
     GetFaceVertices(cellIndex, face, v0, v1, v2, v3);
-    return IntersectRayQuad(o, d, v0, v1, v2, v3, t);
+    return IntersectRayQuad(o, d, rt0, v0, v1, v2, v3, t);
 }
 
 vec3 GetTriangleNormal(vec3 v0, vec3 v1, vec3 v2)
@@ -203,7 +202,7 @@ bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entr
         if (testFace == entranceFace)
             continue;
             
-        if (IntersectRayCellFace(origin, dir, currentCell, testFace, t1)) {
+        if (IntersectRayCellFace(origin, dir, t0, currentCell, testFace, t1)) {
             if (t1 - t0 > EPSILON) {
                 exitFace = testFace;
                 return true;
@@ -263,6 +262,12 @@ void BlendToBack(inout vec4 accum, vec4 color)
     accum.a += color.a * (1-accum.a);
 }
 
+// GL_ONE_MINUS_DST_ALPHA, GL_ONE
+void BlendToBack2(inout vec4 accum, vec4 color)
+{
+    accum = color * (1-accum.a) + accum * (1);
+}
+
 // In the above descrete blending equation we have (c = color.a):
 //
 // a_n+1 = a_n + c_n * (1-a_n)
@@ -284,12 +289,13 @@ float IntegrateConstantAlpha(float a, float distance)
     return 1 - exp(-a * distance);
 }
 
-void Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out float t1)
+vec4 Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out float t1)
 {
     ivec3 nextCell;
     ivec3 exitFace;
     bool hasNext = true;
     float tStart = t0;
+    ivec3 initialCell = currentCell;
     
     int i = 0;
     vec4 accum = vec4(0);
@@ -313,7 +319,7 @@ void Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
         if (accum.a > 0.995)
             break;
     }
-    fragColor = accum;
+    return accum;
 }
 
 bool IsRayEnteringCell(vec3 d, ivec3 cellIndex, ivec3 face)
@@ -329,12 +335,12 @@ void GetSideCellBBox(ivec3 cellIndex, int sideID, int fastDim, int slowDim, out 
     bmax = texelFetch(boxMaxs, index, 0).rgb;
 }
 
-bool IntersectRaySideCellBBox(vec3 origin, vec3 dir, ivec3 cellIndex, int sideID, int fastDim, int slowDim)
+bool IntersectRaySideCellBBox(vec3 origin, vec3 dir, float rt0, ivec3 cellIndex, int sideID, int fastDim, int slowDim)
 {
     vec3 bmin, bmax;
     float t0, t1;
     GetSideCellBBox(cellIndex, sideID, fastDim, slowDim, bmin, bmax);
-    if (IntersectRayBoundingBox(origin, dir, bmin, bmax, t0, t1)) {
+    if (IntersectRayBoundingBox(origin, dir, rt0, bmin, bmax, t0, t1)) {
         return true;
     }
     return false;
@@ -347,12 +353,12 @@ void GetSideCellBBoxDirect(int x, int y, int sideID, int level, out vec3 bmin, o
     bmax = texelFetch(boxMaxs, index, level).rgb;
 }
 
-bool IntersectRaySideCellBBoxDirect(vec3 origin, vec3 dir, int x, int y, int sideID, int level)
+bool IntersectRaySideCellBBoxDirect(vec3 origin, vec3 dir, float rt0, int x, int y, int sideID, int level)
 {
     vec3 bmin, bmax;
     float t0, t1;
     GetSideCellBBoxDirect(x, y, sideID, level, bmin, bmax);
-    if (IntersectRayBoundingBox(origin, dir, bmin, bmax, t0, t1)) {
+    if (IntersectRayBoundingBox(origin, dir, rt0, bmin, bmax, t0, t1)) {
         return true;
     }
     return false;
@@ -363,12 +369,14 @@ ivec2 GetBBoxArrayDimensions(int sideID, int level)
     return texelFetch(levelDims, ivec2(sideID, level), 0).rg;
 }
 
-bool IsFaceThatPassedBBTheInitialCell(vec3 origin, vec3 dir, float t0, ivec3 index, ivec3 side, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+bool IsFaceThatPassedBBAnInitialCell(vec3 origin, vec3 dir, float t0, ivec3 index, ivec3 side, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
-    if (IntersectRayCellFace(origin, dir, index, side, t1)) {
+    float tFace;
+    if (IntersectRayCellFace(origin, dir, t0, index, side, tFace)) {
         if (IsRayEnteringCell(dir, index, side)) {
             cellIndex = index;
             entranceFace = side;
+            t1 = tFace;
             return true;
         }
     }
@@ -385,8 +393,8 @@ bool SearchSideForInitialCellBasic(vec3 origin, vec3 dir, float t0, int sideID, 
     for (index[slowDim] = 0; index[slowDim] < cellDims[slowDim]; index[slowDim]++) {
         for (index[fastDim] = 0; index[fastDim] < cellDims[fastDim]; index[fastDim]++) {
             
-            if (IntersectRaySideCellBBox(origin, dir, index, sideID, fastDim, slowDim)) {
-                if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
+            if (IntersectRaySideCellBBox(origin, dir, t0, index, sideID, fastDim, slowDim)) {
+                if (IsFaceThatPassedBBAnInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
                     return true;
             }
         }
@@ -396,18 +404,20 @@ bool SearchSideForInitialCellBasic(vec3 origin, vec3 dir, float t0, int sideID, 
 
 #define SearchSideForInitialCellWithOctree_NLevels(N, origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1) SearchSideForInitialCellWithOctree_ ## N ## Levels(origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1)
 
-bool SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+int SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
     int fastDim = GetFastDimForFaceIndex(sideID);
     int slowDim = GetSlowDimForFaceIndex(sideID);
     return SearchSideForInitialCellWithOctree_NLevels(BB_LEVELS, origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
+    SearchSideForInitialCellBasic(origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
 }
 
-bool FindInitialCell(vec3 origin, vec3 dir, float t0, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+int FindInitialCell(vec3 origin, vec3 dir, float t0, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
+    int intersections = 0;
     for (int side = 0; side < 6; side++)
-        if (SearchSideForInitialCell(origin, dir, t0, side, cellIndex, entranceFace, t1)) return true;
-    return false;
+        intersections += SearchSideForInitialCell(origin, dir, t0, side, cellIndex, entranceFace, t1);
+    return intersections;
 }
 
 
@@ -420,19 +430,29 @@ void main(void)
     
     float t0, t1, tp;
     
-    bool intersectBox = IntersectRayBoundingBox(cameraPos, dir, dataBoundsMin, dataBoundsMax, t0, t1);
+    bool intersectBox = IntersectRayBoundingBox(cameraPos, dir, 0, dataBoundsMin, dataBoundsMax, t0, t1);
     
     if (intersectBox) {
         ivec3 initialCell;
         ivec3 entranceFace;
-        float t0;
+        float t0 = -FLT_MAX;
         float t1;
-        if (FindInitialCell(cameraPos, dir, 0, initialCell, entranceFace, t0)) {
-            if (t0 == -1)
-                return;
-            Traverse(cameraPos, dir, t0, initialCell, entranceFace, t1);
-            return;
-        }
+        vec4 accum = vec4(0);
+        int intersections;
+        do {
+            intersections = FindInitialCell(cameraPos, dir, t0, initialCell, entranceFace, t1);
+            
+            if (intersections > 0) {
+                vec4 color = Traverse(cameraPos, dir, t1, initialCell, entranceFace, t1);
+                BlendToBack2(accum, color);
+            }
+                
+            t0 = t1;
+            
+        } while (intersections > 1);
+        
+        fragColor = accum;
+        return;
     }
     discard;
 }

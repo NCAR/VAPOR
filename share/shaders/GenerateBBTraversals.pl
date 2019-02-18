@@ -131,7 +131,7 @@ sub Loop {
 	my $ret ="
 for (int y$L = y$Lup*2; y$L < yEnd$L; y$L++) {
 for (int x$L = x$Lup*2; x$L < xEnd$L; x$L++) {
-if (IntersectRaySideCellBBoxDirect(origin, dir, x$L, y$L, sideID, $L)) {
+if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x$L, y$L, sideID, $L)) {
 ";
 	if ($L > 0) {
 		my $LN = $L-1;
@@ -147,8 +147,8 @@ if (IntersectRaySideCellBBoxDirect(origin, dir, x$L, y$L, sideID, $L)) {
 		$ret .="
 	index[slowDim] = y0;
 	index[fastDim] = x0;
-	if (IsFaceThatPassedBBTheInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
-		return true;
+	if (IsFaceThatPassedBBAnInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
+		intersections++;
 ";
 
 	}
@@ -164,10 +164,12 @@ if (IntersectRaySideCellBBoxDirect(origin, dir, x$L, y$L, sideID, $L)) {
 
 sub Function {
 	my ($levels) = @_;
-	my $ret = "bool SearchSideForInitialCellWithOctree_${levels}Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+	my $ret =
+"int SearchSideForInitialCellWithOctree_${levels}Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
+	int intersections = 0;
 
 ";
 
@@ -186,7 +188,7 @@ sub Function {
 
 	$ret .= IncrementSpacing(Loop($L), 1);
 	$ret .= "
-	return false;
+	return intersections;
 }
 \n";
 
