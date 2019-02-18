@@ -51,7 +51,7 @@ bool IntersectRayPlane(vec3 o, vec3 d, float rt0, vec3 v0, vec3 n, out float t)
     return false;
 }
 
-bool IntersectRayTriangle(vec3 o, vec3 d, float rt0, vec3 v0, vec3 v1, vec3 v2, out float t)
+bool IntersectRayTriangle(vec3 o, vec3 d, float rt0, vec3 v0, vec3 v1, vec3 v2, out float t, out vec3 barycentric)
 {
     vec3 n = cross(v1-v0,v2-v0);
     
@@ -72,6 +72,12 @@ bool IntersectRayTriangle(vec3 o, vec3 d, float rt0, vec3 v0, vec3 v1, vec3 v2, 
         vec3 vp2 = P - v2;
         vec3 C2 = cross(edge2, vp2);
         if (dot(n, C2) < 0) return false;
+        
+        float area = length(n);
+        float u = length(C1) / area;
+        float v = length(C2) / area;
+        float w = 1-u-v;
+        barycentric = vec3(u,v,w);
         
         return true;
     }
@@ -163,9 +169,16 @@ bool IntersectRayTriangleIntel(vec3 o, vec3 dir, vec3 v0, vec3 v1, vec3 v2, out 
 }
  */
 
-bool IntersectRayQuad(vec3 o, vec3 d, float rt0, vec3 v0, vec3 v1, vec3 v2, vec3 v3, out float t)
+bool IntersectRayQuad(vec3 o, vec3 d, float rt0, vec3 v0, vec3 v1, vec3 v2, vec3 v3, out float t, out vec4 weights)
 {
-    if (IntersectRayTriangle(o, d, rt0, v0, v1, v2, t)) return true;
-    if (IntersectRayTriangle(o, d, rt0, v2, v3, v0, t)) return true;
+    vec3 uvw;
+    if (IntersectRayTriangle(o, d, rt0, v0, v1, v2, t, uvw)) {
+        weights = vec4(uvw, 0);
+        return true;
+    }
+    if (IntersectRayTriangle(o, d, rt0, v0, v2, v3, t, uvw)) {
+        weights = vec4(uvw.x, 0, uvw.y, uvw.z);
+        return true;
+    }
     return false;
 }
