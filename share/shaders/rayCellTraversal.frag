@@ -139,9 +139,8 @@ void GetFaceCoordinateIndices(ivec3 cell, ivec3 face, out ivec3 i0, out ivec3 i1
     }
 }
 
-void GetFaceVertices(ivec3 cellIndex, ivec3 face, out vec3 v0, out vec3 v1, out vec3 v2, out vec3 v3)
+void GetFaceCoordsAndVertices(ivec3 cellIndex, ivec3 face, out ivec3 i0, out ivec3 i1, out ivec3 i2, out ivec3 i3, out vec3 v0, out vec3 v1, out vec3 v2, out vec3 v3)
 {
-    ivec3 i0, i1, i2, i3;
     GetFaceCoordinateIndices(cellIndex, face, i0, i1, i2, i3);
     v0 = texelFetch(coords, i0, 0).xyz;
     v1 = texelFetch(coords, i1, 0).xyz;
@@ -149,14 +148,21 @@ void GetFaceVertices(ivec3 cellIndex, ivec3 face, out vec3 v0, out vec3 v1, out 
     v3 = texelFetch(coords, i3, 0).xyz;
 }
 
+void GetFaceVertices(ivec3 cellIndex, ivec3 face, out vec3 v0, out vec3 v1, out vec3 v2, out vec3 v3)
+{
+    ivec3 i0, i1, i2, i3;
+    GetFaceCoordsAndVertices(cellIndex, face, i0, i1, i2, i3, v0, v1, v2, v3);
+}
+
 float GetDataCoordinateSpace(vec3 coordinates)
 {
-    return texture(data, (coordinates)/(coordDims-1)).r;
+    return texture(data, coordinates/coordDimsF).r;
 }
 
 float GetDataForCoordIndex(ivec3 coordIndex)
 {
-    return GetDataCoordinateSpace(vec3(coordIndex)+vec3(0.5));
+    vec3 coord = vec3(coordIndex)+vec3(0.5);
+    return texture(data, (coord)/(coordDims-1)).r;
 }
 
 float NormalizeData(float data)
@@ -174,11 +180,23 @@ vec4 GetAverageColorForCoordIndex(ivec3 coordIndex)
     return GetColorForNormalizedData(NormalizeData(GetDataForCoordIndex(coordIndex)));
 }
 
-bool IntersectRayCellFace(vec3 o, vec3 d, float rt0, ivec3 cellIndex, ivec3 face, out float t)
+vec4 GetColorAtCoord(vec3 coord)
 {
+    return GetColorForNormalizedData(NormalizeData(GetDataCoordinateSpace(coord)));
+}
+
+bool IntersectRayCellFace(vec3 o, vec3 d, float rt0, ivec3 cellIndex, ivec3 face, out float t, out vec3 dataCoordinate)
+{
+    ivec3 i0, i1, i2, i3;
     vec3 v0, v1, v2, v3;
-    GetFaceVertices(cellIndex, face, v0, v1, v2, v3);
-    return IntersectRayQuad(o, d, rt0, v0, v1, v2, v3, t);
+    GetFaceCoordsAndVertices(cellIndex, face, i0, i1, i2, i3, v0, v1, v2, v3);
+    
+    vec4 weights;
+    if (IntersectRayQuad(o, d, rt0, v0, v1, v2, v3, t, weights)) {
+        dataCoordinate = (weights.x*i0 + weights.y*i1 + weights.z*i2 + weights.w*i3 + vec3(0.5));
+        return true;
+    }
+    return false;
 }
 
 vec3 GetTriangleNormal(vec3 v0, vec3 v1, vec3 v2)
@@ -202,7 +220,8 @@ bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entr
         if (testFace == entranceFace)
             continue;
             
-        if (IntersectRayCellFace(origin, dir, t0, currentCell, testFace, t1)) {
+        vec3 null;
+        if (IntersectRayCellFace(origin, dir, t0, currentCell, testFace, t1, null)) {
             if (t1 - t0 > EPSILON) {
                 exitFace = testFace;
                 return true;
@@ -372,7 +391,8 @@ ivec2 GetBBoxArrayDimensions(int sideID, int level)
 bool IsFaceThatPassedBBAnInitialCell(vec3 origin, vec3 dir, float t0, ivec3 index, ivec3 side, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
     float tFace;
-    if (IntersectRayCellFace(origin, dir, t0, index, side, tFace)) {
+    vec3 null;
+    if (IntersectRayCellFace(origin, dir, t0, index, side, tFace, null)) {
         if (IsRayEnteringCell(dir, index, side)) {
             cellIndex = index;
             entranceFace = side;
@@ -441,6 +461,18 @@ void main(void)
         int intersections;
         do {
             intersections = FindInitialCell(cameraPos, dir, t0, initialCell, entranceFace, t1);
+            
+            
+            vec3 dataCoord;
+            if (IntersectRayCellFace(cameraPos, dir, 0, initialCell, entranceFace, t1, dataCoord)) {
+                // vec4 color = GetColorForNormalizedData(NormalizeData(texture(data, dataCoord/coordDimsF).r));
+                vec4 color = GetColorAtCoord(dataCoord);
+                
+                fragColor = vec4(color);
+            } else {
+                fragColor = vec4(0);
+            }
+             // return;
             
             if (intersections > 0) {
                 vec4 color = Traverse(cameraPos, dir, t1, initialCell, entranceFace, t1);
