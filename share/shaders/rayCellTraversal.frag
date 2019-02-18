@@ -212,7 +212,7 @@ vec3 GetCellFaceNormal(ivec3 cellIndex, ivec3 face)
     return (GetTriangleNormal(v0, v1, v2) + GetTriangleNormal(v0, v2, v3)) / 2.0f;
 }
 
-bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out ivec3 exitFace, out float t1)
+bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out ivec3 exitFace, out vec3 exitCoord, out float t1)
 {
     for (int i = 0; i < 6; i++) {
         ivec3 testFace = GetFaceFromFaceIndex(i);
@@ -220,8 +220,7 @@ bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entr
         if (testFace == entranceFace)
             continue;
             
-        vec3 null;
-        if (IntersectRayCellFace(origin, dir, t0, currentCell, testFace, t1, null)) {
+        if (IntersectRayCellFace(origin, dir, t0, currentCell, testFace, t1, exitCoord)) {
             if (t1 - t0 > EPSILON) {
                 exitFace = testFace;
                 return true;
@@ -231,24 +230,18 @@ bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entr
     return false;
 }
 
-// Recommended to provide entranceFace to guarentee no self-intersection
-bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 exitFace, out float t1)
-{
-    return FindCellExit(origin, dir, t0, currentCell, F_NONE, exitFace, t1);
-}
-
 bool IsCellInBounds(ivec3 cellIndex)
 {
     return !(any(lessThan(cellIndex, ivec3(0))) || any(greaterThanEqual(cellIndex, cellDims)));
 }
 
-bool SearchNeighboringCells(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 nextCell, out ivec3 exitFace, out float t1)
+bool SearchNeighboringCells(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 nextCell, out ivec3 exitFace, out vec3 exitCoord, out float t1)
 {
     for (int sideID = 0; sideID < 6; sideID++) {
         ivec3 side = GetFaceFromFaceIndex(sideID);
         ivec3 testCell = currentCell + side;
         if (IsCellInBounds(testCell)) {
-            if (FindCellExit(origin, dir, t0, testCell, F_NONE, exitFace, t1)) {
+            if (FindCellExit(origin, dir, t0, testCell, F_NONE, exitFace, exitCoord, t1)) {
                 nextCell = testCell + exitFace;
                 return true;
             }
@@ -257,22 +250,16 @@ bool SearchNeighboringCells(vec3 origin, vec3 dir, float t0, ivec3 currentCell, 
     return false;
 }
 
-bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out ivec3 nextCell, out ivec3 exitFace, out float t1)
+bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out ivec3 nextCell, out ivec3 exitFace, out vec3 exitCoord, out float t1)
 {
-    if (FindCellExit(origin, dir, t0, currentCell, entranceFace, exitFace, t1)) {
+    if (FindCellExit(origin, dir, t0, currentCell, entranceFace, exitFace, exitCoord, t1)) {
         nextCell = currentCell + exitFace;
         if (!IsCellInBounds(nextCell))
             return false;
         return true;
     } else {
-        return SearchNeighboringCells(origin, dir, t0, currentCell, nextCell, exitFace, t1);
+        return SearchNeighboringCells(origin, dir, t0, currentCell, nextCell, exitFace, exitCoord, t1);
     }
-}
-
-bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 nextCell, out float t1)
-{
-    ivec3 null;
-    return FindNextCell(origin, dir, t0, currentCell, ivec3(0), nextCell, null, t1);
 }
 
 void BlendToBack(inout vec4 accum, vec4 color)
@@ -308,10 +295,18 @@ float IntegrateConstantAlpha(float a, float distance)
     return 1 - exp(-a * distance);
 }
 
+vec4 IntegrateAbsorption(vec4 a, vec4 b, float distance)
+{
+    vec4 delta = b - a;
+    return 1 - exp(-(delta * distance*distance + a*distance));
+}
+
 vec4 Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out float t1)
 {
+    vec3 entranceCoord;
     ivec3 nextCell;
     ivec3 exitFace;
+    vec3 exitCoord;
     bool hasNext = true;
     float tStart = t0;
     ivec3 initialCell = currentCell;
@@ -320,10 +315,17 @@ vec4 Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
     vec4 accum = vec4(0);
     float a = 0;
     
+    float null;
+    IntersectRayCellFace(origin, dir, -FLT_MAX, currentCell, entranceFace, null, entranceCoord);
+    
     while (hasNext) {
-        hasNext = FindNextCell(origin, dir, t0, currentCell, entranceFace, nextCell, exitFace, t1);
+        hasNext = FindNextCell(origin, dir, t0, currentCell, entranceFace, nextCell, exitFace, exitCoord, t1);
         
         if (t0 >= 0) {
+            vec4 colorA = GetColorAtCoord(entranceCoord);
+            vec4 colorB = GetColorAtCoord(exitCoord);
+            // vec4 color = IntegrateAbsorption(colorA, colorB, (t1-t0)/unitDistance);
+            
             vec4 color = GetAverageColorForCoordIndex(currentCell);
             color.a = IntegrateConstantAlpha(color.a, (t1-t0)/unitDistance);
             BlendToBack(accum, color);
@@ -331,6 +333,7 @@ vec4 Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
         
         currentCell = nextCell;
         entranceFace = -exitFace;
+        entranceCoord = exitCoord;
         t0 = t1;
         i++;
         
