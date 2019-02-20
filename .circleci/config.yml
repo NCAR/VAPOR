@@ -4,6 +4,7 @@ jobs:
     docker:
       - image: sgpearse/vapor3-ubuntu16:latest
 
+
     steps:
       - checkout
 
@@ -15,6 +16,7 @@ jobs:
             cd build
             cmake ..
             make
+
 
       - run:
           name: Print the Current Time
