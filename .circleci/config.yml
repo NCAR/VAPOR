@@ -2,14 +2,19 @@ version: 2
 jobs:
   build:
     docker:
-      - image: debian:stretch
+      - image: sgpearse/vapor3-ubuntu16:latest
 
     steps:
       - checkout
 
       - run:
-          name: Greeting
-          command: echo Hello, world!
+          name: cmake and make
+          command: |
+            cd /VAPOR
+            mkdir build
+            cd build
+            cmake ..
+            make
 
       - run:
           name: Print the Current Time

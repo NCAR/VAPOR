@@ -48,6 +48,7 @@ RUN export TERM=xterm
 # Vapor configuration and build #
 #                               #
 #################################
+
 RUN apt-get update \
     && apt-get install -y curl \
     && apt-get install -y xz-utils \
