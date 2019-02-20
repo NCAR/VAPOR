@@ -10,9 +10,7 @@ jobs:
       - run:
           name: cmake and make
           command: |
-            cd /VAPOR
-            mkdir build
-            cd build
+            cd /VAPOR/build
             cmake ..
             make
 
