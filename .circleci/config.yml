@@ -20,7 +20,15 @@ jobs:
             cmake ..
             make
 
+  printTime:
+    docker:
+      - image: sgpearse/vapor3-ubuntu:latest
 
+    branches:
+      only:
+        - circleCI
+
+    steps:
       - run:
-          name: Print the Current Time
-          command: date
+        name: Print the Current Time
+        command: date
