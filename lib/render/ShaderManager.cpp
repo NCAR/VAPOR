@@ -66,7 +66,12 @@ SmartShaderProgram ShaderManager::GetSmartShader(const std::string &name) {
     return SmartShaderProgram(GetShader(name));
 }
 
+#include <vapor/GLManager.h>
+
 int ShaderManager::LoadResourceByKey(const std::string &key) {
+    printf("Begin Compile %s\n", key.c_str());
+    void *t = GLManager::BeginTimer();
+
     if (HasResource(key)) {
         assert(!"Shader already loaded");
         return -1;
@@ -87,6 +92,7 @@ int ShaderManager::LoadResourceByKey(const std::string &key) {
         return -1;
     }
     AddResource(key, program);
+    printf("End Compile %f\n", GLManager::EndTimer(t));
     return 1;
 }
 
