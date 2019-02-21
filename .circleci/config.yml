@@ -4,12 +4,6 @@ jobs:
     docker:
       - image: sgpearse/vapor3-ubuntu16:latest
 
-
-    branches:
-      only:
-        - circleCI
-
-
     steps:
       - checkout
 
@@ -23,10 +17,6 @@ jobs:
   printTime:
     docker:
       - image: sgpearse/vapor3-ubuntu:latest
-
-    branches:
-      only:
-        - circleCI
 
     steps:
       - run:
