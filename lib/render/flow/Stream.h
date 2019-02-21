@@ -9,8 +9,6 @@
 #include <string>
 #include <map>
 
-namespace VAPoR
-{
 namespace flow
 {
 class Stream
@@ -26,7 +24,6 @@ public:
    ~Stream();
 };
 
-};
 };
 
 #endif

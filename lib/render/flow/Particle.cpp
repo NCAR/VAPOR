@@ -1,6 +1,6 @@
 #include "Particle.h"
 
-using namespace VAPoR::flow;
+using namespace flow;
 
 Particle::Particle()
 {

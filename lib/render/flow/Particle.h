@@ -8,8 +8,6 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-namespace VAPoR
-{
 namespace flow
 {
 class Particle
@@ -27,7 +25,6 @@ public:
    ~Particle();
 };
 
-};
 };
 
 #endif
