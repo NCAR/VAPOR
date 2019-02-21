@@ -39,8 +39,8 @@ workflows:
     jobs:
       - build
       - print:
-        requires:
-          - build
-        filters:
-          branches:
-            only: circleCI
+          requires:
+            - build
+          filters:
+            branches:
+              only: circleCI
