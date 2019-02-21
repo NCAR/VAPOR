@@ -8,6 +8,8 @@ CC=clang
 CXX=clang++
 endif
 
+a.out: main.cpp Stream.o Particle.o
+	$(CXX) $^ -o $@ $(CXXFLAGS)
 
 Stream.o: Stream.cpp Particle.o
 	$(CXX) $< -o $@ $(CXXFLAGS) -c

@@ -4,29 +4,29 @@ using namespace VAPoR::flow;
 
 Particle::Particle()
 {
-    propertiesF.resize( 0 );    // memory considerations.
+    time = 0.0f;
 }
 
-Particle::Particle( const glm::vec3& loc )
+Particle::Particle( const glm::vec3& loc, float t )
 {
-    _location = loc;
-    _propertiesF.resize( 0 );
+    location = loc;
+    time     = t;
 }
 
-Particle::Particle( const float* loc )
+Particle::Particle( const float* loc, float t )
 {
-    _location.x = loc[0];
-    _location.y = loc[1];
-    _location.z = loc[2];
-    _propertiesF.resize( 0 );
+    location.x = loc[0];
+    location.y = loc[1];
+    location.z = loc[2];
+    time       = t;
 }
 
-Particle::Particle( float x, float y, float z )
+Particle::Particle( float x, float y, float z, float t )
 {
-    _location.x = x;
-    _location.y = y;
-    _location.z = z;
-    _propertiesF.resize( 0 );
+    location.x = x;
+    location.y = y;
+    location.z = z;
+    time       = t;
 }
 
 Particle::~Particle( )

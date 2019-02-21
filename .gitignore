@@ -47,4 +47,4 @@ lib/params/*.swp
 
 # object files
 *.o
-*.out
+*.out*

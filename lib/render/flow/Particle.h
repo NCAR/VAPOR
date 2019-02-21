@@ -15,15 +15,15 @@ namespace flow
 class Particle
 {
 public:
-    glm::vec3           _location;
-    glm::vec4           _color;
-    std::vector<float>  _propertiesF;
+    glm::vec3           location;
+    glm::vec4           color;
+    float               time;
 
     // Constructor and destructor
     Particle();
-    Particle( const glm::vec3& loc );
-    Particle( const float* loc );
-    Particle( float x, float y, float z );
+    Particle( const glm::vec3& loc, float t );
+    Particle( const float* loc, float t );
+    Particle( float x, float y, float z, float t );
    ~Particle();
 };
 
