@@ -4,6 +4,9 @@ jobs:
     docker:
       - image: sgpearse/vapor3-ubuntu16:latest
 
+    branches:
+      only:
+        - circleCI
 
     steps:
       - checkout
@@ -11,9 +14,7 @@ jobs:
       - run:
           name: cmake and make
           command: |
-            cd /VAPOR
-            mkdir build
-            cd build
+            cd /VAPOR/build
             cmake ..
             make
 
