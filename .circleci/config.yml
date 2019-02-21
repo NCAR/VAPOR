@@ -32,3 +32,15 @@ jobs:
       - run:
         name: Print the Current Time
         command: date
+
+workflows:
+  version: 2
+  build_and_print:
+    jobs:
+      - build
+      - print:
+        requires:
+          - build
+        filters:
+          branches:
+            only: circleCI
