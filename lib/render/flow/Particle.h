@@ -15,9 +15,9 @@ namespace flow
 class Particle
 {
 public:
-    glm::vec3           location;
-    glm::vec4           color;
-    std::vector<float>  propertiesF;
+    glm::vec3           _location;
+    glm::vec4           _color;
+    std::vector<float>  _propertiesF;
 
     // Constructor and destructor
     Particle();
@@ -25,11 +25,9 @@ public:
     Particle( const float* loc );
     Particle( float x, float y, float z );
    ~Particle();
+};
 
-
-};  // End of class Particle
-
-};  // End of namespace flow
-};  // End of namespace VAPoR
+};
+};
 
 #endif

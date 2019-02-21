@@ -44,3 +44,7 @@ apps/vaporgui/*.swp
 include/vapor/*.swp
 lib/render/*.swp
 lib/params/*.swp
+
+# object files
+*.o
+*.out
