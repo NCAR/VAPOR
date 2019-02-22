@@ -10,6 +10,13 @@
 
 namespace flow
 {
+enum ERROR_CODE
+{
+    SUCCESS      =  0,
+    OUT_OF_FIELD = -1,
+    OUT_OF_RANGE = -2
+};
+
 class Particle
 {
 public:
@@ -24,9 +31,9 @@ public:
     Particle( float x, float y, float z, float t );
    ~Particle();
 
-    void AttachProperty(  float v );
-    int  EditProperty    (  int i, float v ); 
-    int  RetrieveProperty(  int i,              // Input
+    void AttachProperty  (  float v );
+    int  EditProperty    (  int idx, float v ); 
+    int  RetrieveProperty(  int idx,            // Input
                             float& v ) const;   // Output
     void ClearProperties();
 
