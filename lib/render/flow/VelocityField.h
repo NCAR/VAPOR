@@ -40,7 +40,10 @@ public:
 
 protected:
     template <class T>
-    T lerp( const T& v1, const T& v2, float a );
+    T lerp( const T& v1, const T& v2, float a )
+    {
+        return glm::mix( v1, v2, a );
+    }
 
     glm::vec3 _fieldMin, _fieldMax;
 };

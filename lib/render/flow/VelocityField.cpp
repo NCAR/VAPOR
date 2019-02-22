@@ -23,9 +23,3 @@ VelocityField::insideField( const glm::vec3& pos )
     else
         return true;
 }
-
-template <class T>
-T VelocityField::lerp( const T& v1, const T& v2, float a )
-{
-    return glm::mix( v1, v2, a );
-}
