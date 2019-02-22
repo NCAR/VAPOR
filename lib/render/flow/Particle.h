@@ -14,7 +14,10 @@ enum ERROR_CODE
 {
     SUCCESS      =  0,
     OUT_OF_FIELD = -1,
-    OUT_OF_RANGE = -2
+    OUT_OF_RANGE = -2,
+    NO_VECTOR_FIELD_YET  = -3,
+    NO_SEED_PARTICLE_YET = -4,
+    FILE_ERROR           = -5
 };
 
 class Particle
@@ -36,6 +39,7 @@ public:
     int  RetrieveProperty(  int idx,            // Input
                             float& v ) const;   // Output
     void ClearProperties();
+    int  GetNumOfProperties() const;
 
 private:
     std::forward_list<float>  _properties;  // Forward_list takes only 8 bytes, whereas a vector takes 24 bytes!

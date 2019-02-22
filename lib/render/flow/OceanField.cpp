@@ -10,6 +10,9 @@ OceanField::OceanField()
     _fieldMax = glm::vec3(  1.0f );
 }
 
+OceanField::~OceanField()
+{ }
+
 bool
 OceanField::InsideField( const glm::vec3& pos ) const
 {
@@ -26,7 +29,7 @@ OceanField::Get( float t, const glm::vec3& pos, glm::vec3& vel ) const
         return OUT_OF_FIELD;
 
     // First calculate the direction of the velocity
-    if( std::fabs( pos.y ) > 0.01 )  // For numerical stability reasons
+    if( std::fabs( pos.y ) > 0.001 )  // For numerical stability reasons
     {
         // Depending on the sign of pos.y, make sure give vel a counter-clockwise direction.
         if( pos.y > 0 )
