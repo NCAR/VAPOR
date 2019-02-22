@@ -14,6 +14,7 @@ class Particle
 {
 public:
     glm::vec3                 location;
+    float                     value;
     float                     time;
     std::forward_list<float>  properties;   // Forward_list takes only 8 bytes, whereas a vector takes 24 bytes!
 
