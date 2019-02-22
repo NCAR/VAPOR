@@ -8,7 +8,7 @@ ifeq ($(ARCH), Darwin)
     CXX=clang++
 endif
 
-a.out: main.cpp Stream.o Particle.o
+a.out: main.cpp Particle.o
 	$(CXX) $^ -o $@ $(CXXFLAGS)
 
 Advection.o: Advection.cpp VelocityField.o

@@ -1,19 +1,26 @@
 #include <iostream>
-#include "Stream.h"
+#include <cstdlib>
+#include "Particle.h"
+
+#include <list>
+#include <forward_list>
+#include <deque>
+#include <stack>
+#include <queue>
+#include <vector>
 
 using namespace flow;
 
 int main()
 {
-    Stream s;
-    std::vector<float> tmpV;
-    s.properties.emplace("temp", tmpV);
-    
-    auto it = s.properties.find( "temp" );
-    it->second.push_back( 0.0f );
-    it->second.push_back( 1.0f );
-    it->second.push_back( 2.0f );
+    Particle p;
+    std::cout << sizeof(p) << std::endl;
+    std::cout << sizeof(Particle) << std::endl;
 
-    for( auto v = it->second.cbegin(); v != it->second.cend(); v++ )
-        std::cout << *v << std::endl;
+    std::cout << "vector size: " << sizeof(std::vector<float>) << std::endl;
+    std::cout << "list size: " << sizeof(std::list<float>) << std::endl;
+    std::cout << "forward_list size: " << sizeof(std::forward_list<float>) << std::endl;
+    std::cout << "deque size: " << sizeof(std::deque<float>) << std::endl;
+    std::cout << "stack size: " << sizeof(std::stack<float>) << std::endl;
+    std::cout << "queue size: " << sizeof(std::queue<float>) << std::endl;
 }
