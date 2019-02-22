@@ -16,7 +16,7 @@ public:
    ~OceanField();
  
     int  Get( float time, const glm::vec3& pos, glm::vec3& vel ) const;
-    bool insideField( const glm::vec3& pos ) const;
+    bool InsideField( const glm::vec3& pos ) const;
 };
 
 };

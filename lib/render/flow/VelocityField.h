@@ -6,18 +6,13 @@
 #define VELOCITYFIELD_H
 
 #include <glm/glm.hpp>
+#include "Particle.h"
 
 namespace flow
 {
 class VelocityField
 {
 public:
-    enum ERROR_CODE
-    {
-        SUCCESS      =  0,
-        OUT_OF_FIELD = -1
-    };
-
     // Constructor and destructor
     VelocityField();
    ~VelocityField();
@@ -32,7 +27,7 @@ public:
     // The base class implements a basic bounding box test.
     // Children classes can implement more complex schemes.
     //
-    virtual bool insideField( const glm::vec3& pos ) const;
+    virtual bool InsideField( const glm::vec3& pos ) const;
 
     // Class members
     bool      isSteady;

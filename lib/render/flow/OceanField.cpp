@@ -11,7 +11,7 @@ OceanField::OceanField()
 }
 
 bool
-OceanField::insideField( const glm::vec3& pos ) const
+OceanField::InsideField( const glm::vec3& pos ) const
 {
     if( glm::length( pos ) > 1.0f )
         return false;
@@ -22,7 +22,7 @@ OceanField::insideField( const glm::vec3& pos ) const
 int
 OceanField::Get( float t, const glm::vec3& pos, glm::vec3& vel ) const
 {
-    if( !insideField( pos ) )
+    if( !InsideField( pos ) )
         return OUT_OF_FIELD;
 
     // First calculate the direction of the velocity
