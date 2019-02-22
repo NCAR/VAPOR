@@ -11,7 +11,7 @@ OceanField::OceanField()
 }
 
 bool
-OceanField::insideField( const glm::vec3& pos )
+OceanField::insideField( const glm::vec3& pos ) const
 {
     if( glm::length( pos ) > 1.0f )
         return false;
@@ -20,7 +20,7 @@ OceanField::insideField( const glm::vec3& pos )
 }
 
 int
-OceanField::Get( float t, const glm::vec3& pos, glm::vec3& vel )
+OceanField::Get( float t, const glm::vec3& pos, glm::vec3& vel ) const
 {
     if( !insideField( pos ) )
         return OUT_OF_FIELD;
