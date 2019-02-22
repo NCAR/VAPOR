@@ -11,6 +11,9 @@ endif
 a.out: main.cpp Stream.o Particle.o
 	$(CXX) $^ -o $@ $(CXXFLAGS)
 
+Advection.o: Advection.cpp VelocityField.o
+	$(CXX) $< -o $@ $(CXXFLAGS) -c
+
 OceanField.o: OceanField.cpp VelocityField.o
 	$(CXX) $< -o $@ $(CXXFLAGS) -c
 
