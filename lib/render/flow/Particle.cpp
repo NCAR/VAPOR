@@ -39,8 +39,8 @@ Particle::~Particle( )
 void
 Particle::AttachProperty( float v )
 {
-    auto itr = _properties.cbegin();  
-    while( itr != _properties.cend() )
+    auto itr = _properties.cbefore_begin();  
+    for( const auto& x : _properties )
         ++itr;
     _properties.insert_after( itr, v );
 }
@@ -48,6 +48,9 @@ Particle::AttachProperty( float v )
 int
 Particle::EditProperty( int idx, float v )
 {
+    if( idx < 0 )
+        return OUT_OF_RANGE;
+
     auto itr = _properties.begin();
     for( int i = 0; i < idx; i++ )
     {
@@ -69,6 +72,9 @@ Particle::EditProperty( int idx, float v )
 int
 Particle::RetrieveProperty( int idx, float& v ) const
 {
+    if( idx < 0 )
+        return OUT_OF_RANGE;
+
     auto itr = _properties.begin();
     for( int i = 0; i < idx; i++ )
     {
@@ -86,4 +92,10 @@ Particle::RetrieveProperty( int idx, float& v ) const
         return 0;
     }
 
+}
+
+void
+Particle::ClearProperties()
+{
+    _properties.clear();
 }
