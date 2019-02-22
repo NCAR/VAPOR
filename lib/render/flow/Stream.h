@@ -13,12 +13,14 @@ namespace flow
 {
 class Stream
 {
-public:
-    std::vector<flow::Particle>     particles;
+private:
+    std::vector<Particle>   _particles;
+    size_t                  _startT, _finishT;
     
     // A Stream could optionally have multiple properties
     std::map< std::string, std::vector<float> >     properties;
 
+public:
     // Constructors and destructor
     Stream();
    ~Stream();
