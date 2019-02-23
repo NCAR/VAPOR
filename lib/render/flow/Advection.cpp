@@ -54,6 +54,9 @@ Advection::Advect( float dt, ADVECTION_METHOD method )
     for( auto& s : _streams )
     {
         auto& p0 = s.back();
+        if( !_vField->InsideField( p0.location ) )
+            continue;
+
         Particle p1;
         int rv;
         if( method == EULER )
