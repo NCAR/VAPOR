@@ -30,6 +30,12 @@ public:
 
     void UseVelocityField( VelocityField* p );
     void UseSeedParticles( std::vector<Particle>& seeds );
+
+    //
+    // Output a file that could be plotted by gnuplot
+    //   Command:  splot "filename" u 1:2:3 w lines
+    //   Tutorial: http://lowrank.net/gnuplot/datafile-e.html
+    //
     int  OutputStreamsGnuplot( const std::string& filename ) const;
 
 private:
