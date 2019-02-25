@@ -59,9 +59,16 @@ Advection::Advect( float dt, ADVECTION_METHOD method )
 
         Particle p1;
         int rv;
-        if( method == EULER )
-            rv = _advectEuler( p0, dt, p1 );
-        s.push_back( p1 );
+        switch (method)
+        {
+        case EULER:
+            rv = _advectEuler( p0, dt, p1 ); break;
+        case RK4:
+            rv = _advectRK4( p0, dt, p1 );   break;
+        }
+    
+        if( rv == 0 )
+            s.push_back( p1 );
     }
 
     return 0;
@@ -71,10 +78,32 @@ int
 Advection::_advectEuler( const Particle& p0, float dt, Particle& p1 ) const
 {
     glm::vec3 v0;
-    int rv = _vField->Get( p0.time, p0.location, v0 );    
+    int rv  = _vField->Get( p0.time, p0.location, v0 );    
     assert( rv == 0 );
     v0 *= dt;
     p1.location = p0.location + v0;
+    p1.time     = p0.time + dt;
+    return 0;
+}
+
+int
+Advection::_advectRK4( const Particle& p0, float dt, Particle& p1 ) const
+{
+    glm::vec3 k1, k2, k3, k4;
+    float dt2 = dt * 0.5f;
+    int rv;
+    rv = _vField->Get( p0.time,       p0.location,            k1 );
+    assert( rv == 0 );
+    rv = _vField->Get( p0.time + dt2, p0.location + dt2 * k1, k2 );
+    if( rv != 0 )
+        return rv;
+    rv = _vField->Get( p0.time + dt2, p0.location + dt2 * k2, k3 );
+    if( rv != 0 )
+        return rv;
+    rv = _vField->Get( p0.time + dt,  p0.location + dt  * k3, k4 );
+    if( rv != 0 )
+        return rv;
+    p1.location = p0.location + dt / 6.0f * (k1 + 2.0f * (k2 + k3) + k4 );
     p1.time     = p0.time + dt;
     return 0;
 }

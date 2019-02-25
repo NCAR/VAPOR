@@ -31,7 +31,7 @@ int main( int argc, char** argv )
 
     int steps = std::atoi( argv[1] );
     for( int i = 0; i < steps; i++ )
-        a.Advect( -0.02 );
+        a.Advect( 0.02f, flow::Advection::RK4 );
 
     std::string filename( "streams.dat" );
     a.OutputStreamsGnuplot( filename );

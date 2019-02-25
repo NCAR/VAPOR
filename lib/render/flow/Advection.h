@@ -43,8 +43,11 @@ private:
     std::vector< std::vector<Particle> >    _streams;
 
     int _readyToAdvect() const;
+
     // Advection methods here could assume all input is valid.
     int _advectEuler( const Particle& p0, float deltaT, // Input
+                            Particle& p1 ) const;       // Output
+    int _advectRK4(   const Particle& p0, float deltaT, // Input
                             Particle& p1 ) const;       // Output
 };
 

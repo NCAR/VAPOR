@@ -25,4 +25,4 @@ Particle.o: Particle.cpp
 
 
 clean:
-	rm *.o *.out 
+	rm *.o *.out*
