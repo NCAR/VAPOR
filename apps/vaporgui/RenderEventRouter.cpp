@@ -22,12 +22,12 @@
 #endif
 
 
+#include "RenderEventRouter.h"
 #include <QFileDialog>
 #include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
 #include "ErrorReporter.h"
 #include "MappingFrame.h"
-#include "RenderEventRouter.h"
 #include <vapor/Renderer.h>
 #include <vapor/DataStatus.h>
 

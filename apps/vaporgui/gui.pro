@@ -31,13 +31,14 @@ win32:QMAKE_CXXFLAGS_DEBUG += /EHsc
 win32:QMAKE_CXXFLAGS_RELEASE += /EHsc
 DEFINES += VOLUMIZER
 
+QT += widgets
 
 INCLUDEPATH += . \
 	../../include \
 	../../../apps/vaporgui/misc \
 	../../../apps/vaporgui/guis \
 	../../../apps/vaporgui/main \
-	../../../apps/vaporgui/render
+	../../../apps/vaporgui/render \
 
 MOC_DIR = ../../../apps/vaporgui/moc
 

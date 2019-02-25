@@ -202,7 +202,16 @@ set (UIS
 
 source_group (UIs FILES ${UIS})
 
-find_package(Qt4 REQUIRED)
+#find_package(Qt4 REQUIRED)
+#find_package(Qt5Core REQUIRED)
+#find_package(Qt5Gui REQUIRED)
+#find_package(Qt5OpenGL REQUIRED)
+find_package(Qt5 REQUIRED
+    Core 
+    Widgets 
+    OpenGL 
+    Gui 
+)
 set (CMAKE_AUTOUIC ON) # This needs to appear before adding sources to work properly
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
@@ -224,7 +233,8 @@ else ()
 endif()
 
 # target_link_libraries (vapor common vdc wasp render params m jpeg dl util GLEW tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL)
-target_link_libraries (vapor common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL python${PYTHONVERSION})
+#target_link_libraries (vapor common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL python${PYTHONVERSION})
+target_link_libraries (vapor common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp QtCore QtGui QtOpenGL python${PYTHONVERSION})
 
 if (APPLE)
 	find_library (CORESERVICES CoreServices)
