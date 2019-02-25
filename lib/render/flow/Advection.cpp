@@ -6,7 +6,11 @@ using namespace flow;
 
 Advection::Advection()
 {
-    _vField = nullptr;
+    _vField     = nullptr;
+    _lowerAngle = 3.0f;
+    _upperAngle = 15.0f;
+    _lowerAngleCos = glm::cos( glm::radians( _lowerAngle ) );
+    _upperAngleCos = glm::cos( glm::radians( _upperAngle ) );
 }
 
 Advection::~Advection()
@@ -80,8 +84,7 @@ Advection::_advectEuler( const Particle& p0, float dt, Particle& p1 ) const
     glm::vec3 v0;
     int rv  = _vField->Get( p0.time, p0.location, v0 );    
     assert( rv == 0 );
-    v0 *= dt;
-    p1.location = p0.location + v0;
+    p1.location = p0.location + dt * v0;
     p1.time     = p0.time + dt;
     return 0;
 }
@@ -106,6 +109,27 @@ Advection::_advectRK4( const Particle& p0, float dt, Particle& p1 ) const
     p1.location = p0.location + dt / 6.0f * (k1 + 2.0f * (k2 + k3) + k4 );
     p1.time     = p0.time + dt;
     return 0;
+}
+
+float
+Advection::_calcAdjustFactor( const Particle& p2, const Particle& p1, 
+                              const Particle& p0                    ) const
+{
+    glm::vec3 p2p1 = p1.location - p2.location;
+    glm::vec3 p1p0 = p0.location - p1.location;
+    float denominator = glm::length( p2p1 ) * glm::length( p1p0 );
+    float cosine;
+    if( denominator < 1e-7 )
+        return 1.0f;
+    else
+        cosine = glm::dot( p2p1, p1p0 ) / denominator;
+
+    if( cosine > _lowerAngleCos )       // Less than "_lowerAngle" degrees
+        return 1.25f;
+    else if( cosine < _upperAngleCos )  // More than "_upperAngle" degrees
+        return 0.5f;
+    else
+        return 1.0f;
 }
 
 int

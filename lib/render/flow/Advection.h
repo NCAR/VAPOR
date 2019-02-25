@@ -41,6 +41,8 @@ public:
 private:
     const VelocityField*                    _vField;
     std::vector< std::vector<Particle> >    _streams;
+    float   _lowerAngle,    _upperAngle;    // Thresholds for step size adjustment
+    float   _lowerAngleCos, _upperAngleCos; // Cosine values of the threshold angles
 
     int _readyToAdvect() const;
 
@@ -49,6 +51,14 @@ private:
                             Particle& p1 ) const;       // Output
     int _advectRK4(   const Particle& p0, float deltaT, // Input
                             Particle& p1 ) const;       // Output
+
+    // Get an adjust factor for deltaT based on how curvy the past two steps are.
+    //   A value in range (0.0, 1.0) means shrink deltaT.
+    //   A value in range (1.0, inf) means enlarge deltaT.
+    //   A value equals to 1.0 means not touching deltaT.
+    float _calcAdjustFactor( const Particle& past2, 
+                             const Particle& past1, 
+                             const Particle& current ) const;
 };
 
 };
