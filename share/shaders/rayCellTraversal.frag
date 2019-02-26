@@ -264,8 +264,8 @@ bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entr
 
 void BlendToBack(inout vec4 accum, vec4 color)
 {
-    accum.rgb += color.rgb * color.a * (1-accum.a);
-    accum.a += color.a * (1-accum.a);
+    color.rgb *= color.a;
+    accum = color * (1-accum.a) + accum * (1);
 }
 
 // GL_ONE_MINUS_DST_ALPHA, GL_ONE
@@ -274,31 +274,16 @@ void BlendToBack2(inout vec4 accum, vec4 color)
     accum = color * (1-accum.a) + accum * (1);
 }
 
-// In the above descrete blending equation we have (c = color.a):
-//
-// a_n+1 = a_n + c_n * (1-a_n)
-//
-// This can be rearranged to:
-//
-// a_n+1 = a_n(1-c_n)+c_n
-//
-// Integrating we get:
-//
-//              f n
-//             -|  c_n
-// a_n = 1 - e^ j 0
-//
-// And the for a constant c, the above integral evaluates to the linear function below
-//
 float IntegrateConstantAlpha(float a, float distance)
 {
     return 1 - exp(-a * distance);
 }
 
-vec4 IntegrateAbsorption(vec4 a, vec4 b, float distance)
+// Only accurate for tetrahedra
+// Its an approximation for cubes
+float IntegrateAbsorption(float a, float b, float distance)
 {
-    vec4 delta = b - a;
-    return 1 - exp(-(delta * distance*distance + a*distance));
+    return 1 - exp(-distance * (a+b)/2);
 }
 
 vec4 Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out float t1)
@@ -322,12 +307,16 @@ vec4 Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
         hasNext = FindNextCell(origin, dir, t0, currentCell, entranceFace, nextCell, exitFace, exitCoord, t1);
         
         if (t0 >= 0) {
-            vec4 colorA = GetColorAtCoord(entranceCoord);
-            vec4 colorB = GetColorAtCoord(exitCoord);
-            // vec4 color = IntegrateAbsorption(colorA, colorB, (t1-t0)/unitDistance);
-            
+#if 0
+            vec4 A = GetColorAtCoord(entranceCoord);
+            vec4 B = GetColorAtCoord(exitCoord);
+            float a = IntegrateAbsorption(A.a, B.a, (t1-t0)/unitDistance);
+            vec4 color = (A+B)/2;
+            color.a = a;
+#else
             vec4 color = GetAverageColorForCoordIndex(currentCell);
             color.a = IntegrateConstantAlpha(color.a, (t1-t0)/unitDistance);
+#endif
             BlendToBack(accum, color);
         }
         
