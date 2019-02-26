@@ -40,7 +40,7 @@ protected:
         return glm::mix( v1, v2, a );
     }
 
-    glm::vec3 _fieldMin, _fieldMax;
+    glm::vec3 _fieldMin, _fieldMax; // Bounding box of this field
 };
 };
 
