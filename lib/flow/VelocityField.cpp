@@ -6,8 +6,8 @@ VelocityField::VelocityField()
 { 
     _fieldMin = glm::vec3( 0.0f );
     _fieldMax = glm::vec3( 0.0f );
-    isSteady  = true;
-    isPeriodic = false;
+    IsSteady  = true;
+    IsPeriodic = false;
 }
 
 VelocityField::~VelocityField()

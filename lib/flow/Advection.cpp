@@ -65,7 +65,7 @@ Advection::Advect( ADVECTION_METHOD method )
     for( auto& s : _streams )
     {
         const auto& p0 = s.back();
-        if( !_vField->InsideField( p0.location ) )
+        if( !_vField->InsideField( p0.time, p0.location ) )
             continue;
 
         float dt = _baseDeltaT;

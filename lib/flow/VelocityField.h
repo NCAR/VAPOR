@@ -30,8 +30,8 @@ public:
     virtual bool InsideField( float time, const glm::vec3& pos ) const;
 
     // Class members
-    bool      isSteady;
-    bool      isPeriodic;
+    bool      IsSteady;
+    bool      IsPeriodic;
 
 protected:
     template <class T>

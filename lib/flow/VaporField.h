@@ -21,7 +21,7 @@ public:
    ~VaporField();
 
     int  Get( float time, const glm::vec3& pos, glm::vec3& vel ) const;
-    bool InsideField( const glm::vec3& pos ) const;    
+    bool InsideField(     float time, const glm::vec3& pos ) const;    
 
     void UseVelocityField( const VGrid* u, const VGrid* v, const VGrid* w );
     void UseValueField(    const VGrid* val );
@@ -31,6 +31,11 @@ private:
     const VGrid* _velocityV;
     const VGrid* _velocityW;
     const VGrid* _value;
+
+    //
+    // Detect if the current field is ready for operations (e.g., Get() )
+    //
+    bool  _isReady() const;
 };
 };
 
