@@ -8,6 +8,15 @@ ifeq ($(ARCH), Darwin)
     CXX=clang++
 endif
 
+HOME_DIR=/home/$(shell whoami)
+VAPOR_LIB_DIR=$(HOME_DIR)
+
+HOSTNAME=$(shell hostname)
+ifeq ($(HOSTNAME), wd-jasper)
+    VAPOR_LIB_DIR=$(HOME_DIR)/Build/VAPOR-flow-build/lib
+endif
+
+
 a.out: main.cpp Advection.o OceanField.o VelocityField.o OceanField.o Particle.o
 	$(CXX) $^ -o $@ $(CXXFLAGS)
 
