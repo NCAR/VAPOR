@@ -18,17 +18,17 @@ public:
     enum ADVECTION_METHOD
     {
         EULER =  0,
-        RK4   =  1
+        RK4   =  1      // Runge-Kutta 4th order
     };
 
     // Constructor and destructor
     Advection();
    ~Advection();
 
-    // Note: deltaT could be positive or negative!
-    int Advect( float deltaT, ADVECTION_METHOD method = EULER );
+    int Advect( ADVECTION_METHOD method = RK4 );
 
-    void UseVelocityField( VelocityField* p );
+    void SetBaseStepSize(  float deltaT );
+    void UseVelocityField( const VelocityField* p );
     void UseSeedParticles( std::vector<Particle>& seeds );
 
     //
@@ -43,6 +43,7 @@ private:
     std::vector< std::vector<Particle> >    _streams;
     float   _lowerAngle,    _upperAngle;    // Thresholds for step size adjustment
     float   _lowerAngleCos, _upperAngleCos; // Cosine values of the threshold angles
+    float   _baseDeltaT;
 
     int _readyToAdvect() const;
 

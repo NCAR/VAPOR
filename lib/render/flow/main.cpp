@@ -25,13 +25,14 @@ int main( int argc, char** argv )
 
     OceanField    f;
     Advection     a;
+    a.SetBaseStepSize( 0.5f );
     
     a.UseVelocityField( &f );
     a.UseSeedParticles( seeds );
 
     int steps = std::atoi( argv[1] );
     for( int i = 0; i < steps; i++ )
-        a.Advect( 0.02f, flow::Advection::RK4 );
+        a.Advect( flow::Advection::RK4 );
 
     std::string filename( "streams.dat" );
     a.OutputStreamsGnuplot( filename );
