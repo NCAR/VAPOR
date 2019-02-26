@@ -1,0 +1,4 @@
+These packages are required to build VAPOR with only VDC enabled:
+(tested on Ubuntu 18.04)
+
+libudunits2-dev,  libudunits2-dev,  libudunits2-dev
