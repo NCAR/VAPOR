@@ -1,5 +1,5 @@
 /*
- * A drived VelocityField that simulates the ocean flow.
+ * A derived VelocityField that simulates the ocean flow.
  */
 
 #ifndef OCEANFIELD_H
