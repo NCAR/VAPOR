@@ -26,6 +26,16 @@ SteadyVAPORField::_isReady() const
     return( _velocityU && _velocityV && _velocityW );
 }
 
+void
+SteadyVAPORField::DestroyGrids()
+{
+    if( _velocityU )    delete _velocityU;
+    if( _velocityV )    delete _velocityV;
+    if( _velocityW )    delete _velocityW;
+    if( _value )        delete _value;
+}
+
+
 int
 SteadyVAPORField::Get( float t, const glm::vec3& pos, glm::vec3& vel ) const
 {
