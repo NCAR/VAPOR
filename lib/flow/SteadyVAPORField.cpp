@@ -20,12 +20,6 @@ SteadyVAPORField::~SteadyVAPORField()
     _value     = nullptr;
 }
 
-bool
-SteadyVAPORField::_isReady() const
-{
-    return( _velocityU && _velocityV && _velocityW );
-}
-
 void
 SteadyVAPORField::DestroyGrids()
 {
@@ -37,12 +31,12 @@ SteadyVAPORField::DestroyGrids()
 
 
 int
-SteadyVAPORField::Get( float t, const glm::vec3& pos, glm::vec3& vel ) const
+SteadyVAPORField::GetVelocity( float t, const glm::vec3& pos, glm::vec3& vel ) const
 {
-    if( !_isReady() )
+    if( !_velocityU || !_velocityV || !_velocityW );
         return NO_VECTOR_FIELD_YET ;
 
-    if( !InsideField( t, pos ) )
+    if( !InsideVelocityField( t, pos ) )
         return OUT_OF_FIELD; 
 
     std::vector<double> coords {pos.x, pos.y, pos.z};
@@ -55,8 +49,22 @@ SteadyVAPORField::Get( float t, const glm::vec3& pos, glm::vec3& vel ) const
     return 0;
 }
 
+int
+SteadyVAPORField::GetFieldValue( float t, const glm::vec3& pos, float& val ) const
+{
+    if( !_value )
+        return NO_VALUE_FIELD_YET ;
+
+    std::vector<double> coords {pos.x, pos.y, pos.z};
+    float v = _value->GetValue( coords );
+    // Need to do: examine v is not missing value.
+    val = v;
+
+    return 0;
+}
+
 bool
-SteadyVAPORField::InsideField( float time, const glm::vec3& pos ) const
+SteadyVAPORField::InsideVelocityField( float time, const glm::vec3& pos ) const
 {
     std::vector<double> coords { pos.x, pos.y, pos.z }; 
     if( !_velocityU->InsideGrid( coords ) )
@@ -75,36 +83,10 @@ SteadyVAPORField::UseVelocityField( const VGrid* u, const VGrid* v, const VGrid*
     _velocityU = u;
     _velocityV = v;
     _velocityW = w;
-
-    // Collect user extents of these grids
-    std::vector<double> min, max;
-    _velocityU->GetUserExtents( min, max );
-    glm::vec3 min1( (min[0]), (min[1]), (min[2]) );
-    glm::vec3 max1( (max[0]), (max[1]), (max[2]) );
-
-    _velocityV->GetUserExtents( min, max );
-    glm::vec3 min2( (min[0]), (min[1]), (min[2]) );
-    glm::vec3 max2( (max[0]), (max[1]), (max[2]) );
-
-    _velocityW->GetUserExtents( min, max );
-    glm::vec3 min3( (min[0]), (min[1]), (min[2]) );
-    glm::vec3 max3( (max[0]), (max[1]), (max[2]) );
-
-    _fieldMin = glm::min( min1, glm::min(min2, min3) );
-    _fieldMax = glm::max( max1, glm::max(max2, max3) );
 }
 
 void 
 SteadyVAPORField::UseValueField( const VGrid* val )
 {
     _value = val;
-
-    // Collect user extents for this grid
-    std::vector<double> min, max;
-    _value->GetUserExtents( min, max );
-    glm::vec3 min1( (min[0]), (min[1]), (min[2]) );
-    glm::vec3 max1( (max[0]), (max[1]), (max[2]) );
-
-    _fieldMin = glm::min( _fieldMin, min1 );
-    _fieldMax = glm::max( _fieldMax, max1 );
 }

@@ -20,14 +20,13 @@ public:
     // 
     // Get the velocity value at a certain position, at a certain time.
     //
-    virtual int  Get( float time, const glm::vec3& pos,             // input 
-                                        glm::vec3& vel ) const = 0; // output
+    virtual int  GetVelocity( float time, const glm::vec3& pos,     // input 
+                              glm::vec3& vel ) const = 0;           // output
 
     // 
-    // The base class implements a basic bounding box test.
-    // Children classes can implement more complex schemes.
+    // If a given position at a given time is inside of this field
     //
-    virtual bool InsideField( float time, const glm::vec3& pos ) const;
+    virtual bool InsideVelocityField( float time, const glm::vec3& pos ) const = 0;
 
     // Class members
     bool      IsSteady;
@@ -39,8 +38,6 @@ protected:
     {
         return glm::mix( v1, v2, a );
     }
-
-    glm::vec3 _fieldMin, _fieldMax; // Bounding box of this field
 };
 };
 

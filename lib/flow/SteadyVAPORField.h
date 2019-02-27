@@ -21,8 +21,12 @@ public:
     SteadyVAPORField();
    ~SteadyVAPORField();
 
-    int  Get( float time, const glm::vec3& pos, glm::vec3& vel ) const;
-    bool InsideField(     float time, const glm::vec3& pos ) const;    
+    //
+    // Retrieve velocity or field value
+    //
+    int  GetVelocity( float time, const glm::vec3& pos, glm::vec3& vel ) const;
+    int  GetFieldValue( float time, const glm::vec3& pos, float& val ) const;
+    bool InsideVelocityField(     float time, const glm::vec3& pos ) const;    
 
     //
     // Modifiers
@@ -45,10 +49,6 @@ private:
     const VGrid* _velocityW;
     const VGrid* _value;
 
-    //
-    // Detect if the current field is ready for operations (e.g., Get() )
-    //
-    bool  _isReady() const;
 };
 
 };
