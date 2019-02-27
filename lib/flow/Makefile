@@ -25,7 +25,7 @@ a.out: main.cpp Advection.o OceanField.o VelocityField.o OceanField.o Particle.o
 Advection.o: Advection.cpp VelocityField.o
 	$(CXX) $< -c -o $@ $(CXXFLAGS)
 
-VaporField.o: VaporField.cpp VelocityField.o
+SteadyVAPORField.o: SteadyVAPORField.cpp VelocityField.o
 	$(CXX) $< -c -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR) -L$(VAPOR_LIB_DIR) -lvdc
 
 OceanField.o: OceanField.cpp VelocityField.o

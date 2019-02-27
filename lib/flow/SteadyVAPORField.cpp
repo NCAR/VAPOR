@@ -1,16 +1,18 @@
-#include "VaporField.h"
+#include "SteadyVAPORField.h"
 
 using namespace flow;
 
-VaporField::VaporField()
+SteadyVAPORField::SteadyVAPORField()
 {
+    IsSteady   = true;
+
     _velocityU = nullptr;
     _velocityV = nullptr;
     _velocityW = nullptr;
     _value     = nullptr;
 }
 
-VaporField::~VaporField()
+SteadyVAPORField::~SteadyVAPORField()
 {
     _velocityU = nullptr;
     _velocityV = nullptr;
@@ -19,16 +21,13 @@ VaporField::~VaporField()
 }
 
 bool
-VaporField::_isReady() const
+SteadyVAPORField::_isReady() const
 {
-    if( IsSteady )
-        return( _velocityU && _velocityV && _velocityW );
-    else
-        return false;
+    return( _velocityU && _velocityV && _velocityW );
 }
 
 int
-VaporField::Get( float t, const glm::vec3& pos, glm::vec3& vel ) const
+SteadyVAPORField::Get( float t, const glm::vec3& pos, glm::vec3& vel ) const
 {
     if( !_isReady() )
         return NO_VECTOR_FIELD_YET ;
@@ -36,39 +35,32 @@ VaporField::Get( float t, const glm::vec3& pos, glm::vec3& vel ) const
     if( !InsideField( t, pos ) )
         return OUT_OF_FIELD; 
 
-    if( IsSteady )
-    {
-        std::vector<double> coords {pos.x, pos.y, pos.z};
-        float u = _velocityU->GetValue( coords );
-        float v = _velocityV->GetValue( coords );
-        float w = _velocityW->GetValue( coords );
-        vel = glm::vec3( u, v, w );
-    }
+    std::vector<double> coords {pos.x, pos.y, pos.z};
+    float u = _velocityU->GetValue( coords );
+    float v = _velocityV->GetValue( coords );
+    float w = _velocityW->GetValue( coords );
+    // Need to do: examine u, v, w are not missing value.
+    vel = glm::vec3( u, v, w );
 
     return 0;
 }
 
 bool
-VaporField::InsideField( float time, const glm::vec3& pos ) const
+SteadyVAPORField::InsideField( float time, const glm::vec3& pos ) const
 {
-    if( IsSteady )
-    {
-        std::vector<double> coords { pos.x, pos.y, pos.z }; 
-        if( !_velocityU->InsideGrid( coords ) )
-            return false;
-        if( !_velocityV->InsideGrid( coords ) )
-            return false;
-        if( !_velocityW->InsideGrid( coords ) )
-            return false;
-
-        return true;
-    } 
-    else
+    std::vector<double> coords { pos.x, pos.y, pos.z }; 
+    if( !_velocityU->InsideGrid( coords ) )
         return false;
+    if( !_velocityV->InsideGrid( coords ) )
+        return false;
+    if( !_velocityW->InsideGrid( coords ) )
+        return false;
+
+    return true;
 }
 
 void
-VaporField::UseVelocityField( const VGrid* u, const VGrid* v, const VGrid* w )
+SteadyVAPORField::UseVelocityField( const VGrid* u, const VGrid* v, const VGrid* w )
 {
     _velocityU = u;
     _velocityV = v;
@@ -93,7 +85,7 @@ VaporField::UseVelocityField( const VGrid* u, const VGrid* v, const VGrid* w )
 }
 
 void 
-VaporField::UseValueField( const VGrid* val )
+SteadyVAPORField::UseValueField( const VGrid* val )
 {
     _value = val;
 
