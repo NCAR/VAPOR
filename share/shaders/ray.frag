@@ -17,6 +17,37 @@ in vec2 ST;
 
 out vec4 fragColor;
 
+vec3 GetNormal(vec3 p)
+{
+    vec3 dims = vec3(textureSize(data, 0));
+    vec3 d = 1/dims * 0.5;
+    vec3 s0, s1;
+    s1.x = texture(data, p + d*vec3(1,0,0)).r;
+    s1.y = texture(data, p + d*vec3(0,1,0)).r;
+    s1.z = texture(data, p + d*vec3(0,0,1)).r;
+    s0.x = texture(data, p - d*vec3(1,0,0)).r;
+    s0.y = texture(data, p - d*vec3(0,1,0)).r;
+    s0.z = texture(data, p - d*vec3(0,0,1)).r;
+    return normalize(s1-s0);
+    //return s1-s0;
+}
+
+vec3 lightDir = vec3(0,0,-1);
+
+float Shadow(vec3 to) {
+    float t = 0, t0, t1;
+    IntersectRayBoundingBox(to, -lightDir, 0, vec3(0), vec3(1), t0, t1);
+    //return t1;
+    
+    float acc = 0;
+    for (; t < t1; t+= 0.05) {
+        float dataNorm = (texture(data, to-t*lightDir).r - LUTMin) / (LUTMax - LUTMin);
+        float opacity = texture(LUT, dataNorm).a;
+        acc += opacity * (1-acc);
+    }
+    return 1-acc;
+}
+
 void main(void)
 {
     vec2 screen = ST*2-1;
@@ -36,6 +67,11 @@ void main(void)
             vec3 dataSTR = (hit - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
             float dataNorm = (texture(data, dataSTR).r - LUTMin) / (LUTMax - LUTMin);
             vec4 color = texture(LUT, dataNorm);
+            vec3 normal = GetNormal(dataSTR);
+            
+            // float diffuse = max(dot(normal, -lightDir), 0.0);
+            // diffuse = min(diffuse + 0.3, 1.0);
+            //color.rgb *= diffuse;
             
             accum.rgb += color.rgb * color.a * (1-accum.a);
             accum.a += color.a * (1-accum.a);
