@@ -39,7 +39,7 @@ SteadyVAPORField::GetVelocity( float t, const glm::vec3& pos, glm::vec3& vel ) c
     if( !InsideVelocityField( t, pos ) )
         return OUT_OF_FIELD; 
 
-    std::vector<double> coords {pos.x, pos.y, pos.z};
+    const std::vector<double> coords {pos.x, pos.y, pos.z};
     float u = _velocityU->GetValue( coords );
     float v = _velocityV->GetValue( coords );
     float w = _velocityW->GetValue( coords );
