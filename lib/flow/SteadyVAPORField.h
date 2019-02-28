@@ -25,20 +25,22 @@ public:
     // Retrieve velocity or field value
     //
     int  GetVelocity( float time, const glm::vec3& pos, glm::vec3& vel ) const;
-    int  GetFieldValue( float time, const glm::vec3& pos, float& val ) const;
     bool InsideVelocityField(     float time, const glm::vec3& pos ) const;    
+    int  GetFieldValue( float time, const glm::vec3& pos, float& val ) const;
 
     //
     // Modifiers
     //
     void UseVelocityField( const VGrid* u, const VGrid* v, const VGrid* w );
-    void UseValueField(    const VGrid* val );
+    void UseFieldValue(    const VGrid* val );
 
     // 
     // Since the grids are passed in, SteadyVAPORField does NOT destroy them by default.
     // However, SteadyVAPORField could perform this task if desired.
     //
     void DestroyGrids();
+
+    std::string VarNameFieldValue;
 
 private:
     // 
@@ -47,8 +49,7 @@ private:
     const VGrid* _velocityU;
     const VGrid* _velocityV;
     const VGrid* _velocityW;
-    const VGrid* _value;
-
+    const VGrid* _fieldValue;
 };
 
 };

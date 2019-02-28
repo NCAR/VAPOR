@@ -29,12 +29,13 @@ public:
     int  AddTimeStep( const VGrid* u, const VGrid* v, const VGrid* w,
                       const VGrid* value, float time );
 
-     // 
-     // Since the grids are passed in, SteadyVAPORField does NOT destroy them by default.
-     // However, SteadyVAPORField could perform this task if desired.
-     //
-     void DestroyGrids();
+    // 
+    // Since the grids are passed in, SteadyVAPORField does NOT destroy them by default.
+    // However, SteadyVAPORField could perform this task if desired.
+    //
+    void DestroyGrids();
 
+    std::string VarNameFieldValue;
 
 private:
     // 
@@ -44,7 +45,7 @@ private:
     std::vector<const VGrid*>   _velArrU;
     std::vector<const VGrid*>   _velArrV;
     std::vector<const VGrid*>   _velArrW;
-    std::vector<const VGrid*>   _valueArr;
+    std::vector<const VGrid*>   _fieldValueArr;
     std::vector<float>          _timestamps;    // always in ascending order
 
     //

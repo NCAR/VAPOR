@@ -6,6 +6,7 @@
 #define VELOCITYFIELD_H
 
 #include <glm/glm.hpp>
+#include <string>
 #include "Particle.h"
 
 namespace flow
@@ -29,8 +30,9 @@ public:
     virtual bool InsideVelocityField( float time, const glm::vec3& pos ) const = 0;
 
     // Class members
-    bool      IsSteady;
-    bool      IsPeriodic;
+    bool        IsSteady;
+    bool        IsPeriodic;
+    std::string VarNameU, VarNameV, VarNameW;   // Varuable names for 3 velocity components
 };
 };
 
