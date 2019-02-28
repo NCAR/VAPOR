@@ -9,6 +9,7 @@ uniform vec3 dataBoundsMin;
 uniform vec3 dataBoundsMax;
 uniform float LUTMin;
 uniform float LUTMax;
+uniform float isoValue;
 
 uniform sampler3D data;
 uniform sampler1D LUT;
@@ -85,11 +86,9 @@ void main(void)
             vec3 dataSTR = (hit - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
             float dv = texture(data, dataSTR).r;
             
-#define ISO 0.3
-            
-            if ((ld < ISO && dv >= ISO) || (ld > ISO && dv <= ISO)) {
+            if ((ld < isoValue && dv >= isoValue) || (ld > isoValue && dv <= isoValue)) {
                 float lt = t - step;
-                float t = lt + step*(ISO-ld)/(dv-ld);
+                float t = lt + step*(isoValue-ld)/(dv-ld);
                 
                 vec3 hit = cameraPos + dir * t;
                 vec3 dataSTR = (hit - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);

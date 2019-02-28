@@ -113,6 +113,11 @@ int ShaderProgram::GetUniformLocation(const std::string &name) const
     return glGetUniformLocation(_id, name.c_str());
 }
 
+bool ShaderProgram::HasUniform(const std::string &name) const
+{
+    return GetUniformLocation(name) != -1;
+}
+
 
 template<typename T> bool ShaderProgram::SetUniform(const std::string &name, const T &value) const
 {
