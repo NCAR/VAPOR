@@ -8,6 +8,9 @@ namespace VAPoR {
     public:
         VolumeTest(GLManager *gl);
         ~VolumeTest();
+        
+        static std::string GetName() { return "Test"; }
+        
         virtual int LoadData(const Grid *grid);
         virtual ShaderProgram *GetShader(ShaderManager *sm);
         
