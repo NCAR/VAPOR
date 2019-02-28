@@ -18,6 +18,12 @@ ifeq ($(HOSTNAME), wd-jasper)
     VAPOR_INC_DIR=$(HOME_DIR)/Git/VAPOR-flow-src/include
 endif
 
+ifeq ($(HOSTNAME), cisl-jasper)
+    HOME_DIR=/Users/$(shell whoami)
+    VAPOR_LIB_DIR=$(HOME_DIR)/Build/VAPOR-flow-build/lib
+    VAPOR_INC_DIR=$(HOME_DIR)/Git/VAPOR-flow-src/include
+endif
+
 
 a.out: main.cpp Advection.o OceanField.o VelocityField.o OceanField.o Particle.o
 	$(CXX) $^ -o $@ $(CXXFLAGS)

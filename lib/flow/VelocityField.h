@@ -16,7 +16,7 @@ class VelocityField
 public:
     // Constructor and destructor
     VelocityField();
-   ~VelocityField();
+    virtual ~VelocityField();
 
     // 
     // Get the velocity value at a certain position, at a certain time.
@@ -28,6 +28,7 @@ public:
     // If a given position at a given time is inside of this field
     //
     virtual bool InsideVelocityField( float time, const glm::vec3& pos ) const = 0;
+
 
     // Class members
     bool        IsSteady;

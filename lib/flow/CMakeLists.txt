@@ -1,10 +1,10 @@
 set (SRC
-	Advection.cpp
-	OceanField.cpp
 	Particle.cpp
+	VelocityField.cpp
+	OceanField.cpp
 	SteadyVAPORField.cpp
 	UnsteadyVAPORField.cpp
-	VelocityField.cpp
+	Advection.cpp
 )
 
 set (HEADERS
