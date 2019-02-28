@@ -14,3 +14,4 @@ if (BUILD_GUI)
 endif()
 
 
+add_subdirectory( flow )
