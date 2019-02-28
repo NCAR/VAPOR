@@ -7,6 +7,8 @@ using std::vector;
 
 using namespace VAPoR;
 
+static VolumeAlgorithmRegistrar<VolumeResampled> registration;
+
 int VolumeResampled::LoadData(const Grid *grid) {
 #define S 5
     const vector<size_t> dims = grid->GetDimensions();
