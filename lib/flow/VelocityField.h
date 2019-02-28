@@ -31,13 +31,6 @@ public:
     // Class members
     bool      IsSteady;
     bool      IsPeriodic;
-
-protected:
-    template <class T>
-    T lerp( const T& v1, const T& v2, float a ) const
-    {
-        return glm::mix( v1, v2, a );
-    }
 };
 };
 

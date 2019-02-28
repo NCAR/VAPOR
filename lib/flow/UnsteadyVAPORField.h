@@ -51,8 +51,8 @@ private:
     // Find one index whose timestamp is just below a given time
     // I.e., _timestamps[floor] <= time 
     //
-    int _locateTimestamps( float   time,                        // Input
-                           size_t& floor ) const;               // Output
+    int _locateTimestamp( float   time,                        // Input
+                          size_t& floor ) const;               // Output
 
     template< typename T >
     size_t _binarySearch( const std::vector<T>& vec, T val, size_t begin, size_t end ) const;

@@ -40,19 +40,82 @@ UnsteadyVAPORField::DestroyGrids()
     _valueArr.clear();
 }
 
+int
+UnsteadyVAPORField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& vel )const
+{
+    // First test if we have this time step
+    size_t floor;
+    int rv  = _locateTimestamp( time, floor );
+    if( rv != 0 )
+        return rv;
+
+    // Second test if this position is inside of the volume
+    if( !InsideVelocityField( time, pos ) )
+        return OUT_OF_FIELD;
+
+    // Now we retrieve the velocity of this position at time step "floor"
+    const std::vector<double> coords {pos.x, pos.y, pos.z};
+    float u = _velArrU[ floor ]->GetValue( coords );
+    float v = _velArrV[ floor ]->GetValue( coords );
+    float w = _velArrW[ floor ]->GetValue( coords );
+    //   Need to do: examine u, v, w are not missing value.
+    glm::vec3 velFloor( u, v, w );
+
+    // If time is greater than _timestamps[floor], we also need to retrieve _timestamps[floor+1] 
+    //   We could probably still return velFloor if the time difference is small enough
+    if( time == _timestamps[floor] )
+    {
+        vel = velFloor;
+        return 0;
+    }
+    else
+    {
+        float u1 = _velArrU[ floor+1 ]->GetValue( coords );
+        float v1 = _velArrV[ floor+1 ]->GetValue( coords );
+        float w1 = _velArrW[ floor+1 ]->GetValue( coords );
+        //   Need to do: examine u, v, w are not missing value.
+        glm::vec3 velCeil( u1, v1, w1 );
+        glm::vec3 velDiff = velCeil - velFloor;
+        float weight = (time - _timestamps[floor]) / (_timestamps[floor+1] - _timestamps[floor]);
+        vel = glm::mix( velFloor, velCeil, weight );
+        return 0;
+    }
+}
+
 bool
 UnsteadyVAPORField::InsideVelocityField( float time, const glm::vec3& pos ) const
 {
-    float floor = std::floor( time );
-    float ceil  = std::ceil(  time );
+    // First test if we have this time step
+    size_t floor;
+    int rv  = _locateTimestamp( time, floor );
+    if( rv != 0 )
+        return false;
 
+    // Second test if pos is inside of time step "floor"
+    const std::vector<double> coords { pos.x, pos.y, pos.z }; 
+    if( !_velArrU[ floor ]->InsideGrid( coords ) )
+        return false;
+    if( !_velArrV[ floor ]->InsideGrid( coords ) )
+        return false;
+    if( !_velArrW[ floor ]->InsideGrid( coords ) )
+        return false;
+
+    // If time is larger than _timestamps[floor], we also need to test _timestamps[floor+1]
+    if( time > _timestamps[floor] )
+    {
+        if( !_velArrU[ floor+1 ]->InsideGrid( coords ) )
+            return false;
+        if( !_velArrV[ floor+1 ]->InsideGrid( coords ) )
+            return false;
+        if( !_velArrW[ floor+1 ]->InsideGrid( coords ) )
+            return false;
+    }
+    
     return true;
-    // First test time step "floor"
-    //const VGrid* u = _velArr
 }
 
 int
-UnsteadyVAPORField::_locateTimestamps( float time, size_t& floor ) const
+UnsteadyVAPORField::_locateTimestamp( float time, size_t& floor ) const
 {
     if( _timestamps.size() == 0 )
         return NOT_CONTAIN_TIME;
