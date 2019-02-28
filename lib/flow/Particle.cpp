@@ -41,7 +41,10 @@ Particle::AttachProperty( float v )
 {
     auto itr = _properties.cbefore_begin();  
     for( const auto& x : _properties )
+    {
+        (void) x;
         ++itr;
+    }
     _properties.insert_after( itr, v );
 }
 
@@ -105,6 +108,9 @@ Particle::GetNumOfProperties() const
 {
     int count = 0;
     for( const auto& x : _properties )
+    {
+        (void) x;
         count++;
+    }
     return count;
 }
