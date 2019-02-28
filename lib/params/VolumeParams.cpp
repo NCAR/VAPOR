@@ -11,6 +11,8 @@ using namespace VAPoR;
 //
 static RenParamsRegistrar<VolumeParams> registrar(VolumeParams::GetClassType());
 
+std::vector<std::string> VolumeParams::_algorithmNames;
+
 const std::string VolumeParams::_algorithmTag = "AlgorithmTag";
 
 VolumeParams::VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave) : RenderParams(dataMgr, ssave, VolumeParams::GetClassType(), 3)
@@ -47,7 +49,13 @@ void VolumeParams::SetAlgorithm(std::string algorithm)
     SetValueString(_algorithmTag, "Volume rendering algorithm", algorithm);
 }
 
-const std::vector<std::string> VolumeParams::GetAlgorithmNames() { return {"Regular", "Resampled", "Cell Traversal", "Test"}; }
+const std::vector<std::string> VolumeParams::GetAlgorithmNames() { return _algorithmNames; }
+
+void VolumeParams::Register(const std::string &name)
+{
+    assert(!STLUtils::Contains(_algorithmNames, name));
+    _algorithmNames.push_back(name);
+}
 
 // Set everything to default values
 void VolumeParams::_init() { SetDiagMsg("VolumeParams::_init()"); }
