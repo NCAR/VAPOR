@@ -75,8 +75,6 @@
          <height>484</height>
         </size>
        </property>
-       <zorder>tabWidget</zorder>
-       <zorder>tabWidget</zorder>
       </widget>
      </item>
      <item>
@@ -97,34 +95,51 @@
         <attribute name="title">
          <string>Settings</string>
         </attribute>
-        <widget class="QComboBox" name="_algorithmCombo">
-         <property name="geometry">
-          <rect>
-           <x>180</x>
-           <y>10</y>
-           <width>171</width>
-           <height>26</height>
-          </rect>
-         </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <property name="text">
-           <string>Default</string>
-          </property>
+          <widget class="QFrame" name="frame">
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Algorithm</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="_algorithmCombo">
+              <item>
+               <property name="text">
+                <string>Default</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </item>
-        </widget>
-        <widget class="QLabel" name="label">
-         <property name="geometry">
-          <rect>
-           <x>100</x>
-           <y>10</y>
-           <width>60</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>Algorithm</string>
-         </property>
-        </widget>
+         <item>
+          <widget class="QFrame" name="frame_2">
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QSliderEdit" name="_isoEdit" native="true"/>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </widget>
      </item>
@@ -153,6 +168,12 @@
    <class>TFWidget</class>
    <extends>QWidget</extends>
    <header>TFWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QSliderEdit</class>
+   <extends>QWidget</extends>
+   <header>qslideredit.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

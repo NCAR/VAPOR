@@ -15,8 +15,16 @@ namespace VAPoR {
         virtual ShaderProgram *GetShader() const;
         virtual void SetUniforms() const;
         
-    public:
+    private:
         unsigned int dataTexture;
+    };
+    
+    
+    class IsoRegular : public VolumeRegular {
+    public:
+        IsoRegular(GLManager *gl):VolumeRegular(gl){}
+        static std::string GetName() { return "Iso Regular"; }
+        virtual ShaderProgram *GetShader() const;
     };
     
 }
