@@ -14,6 +14,7 @@ static RenParamsRegistrar<VolumeParams> registrar(VolumeParams::GetClassType());
 std::vector<std::string> VolumeParams::_algorithmNames;
 
 const std::string VolumeParams::_algorithmTag = "AlgorithmTag";
+const std::string VolumeParams::_isoValueTag = "IsoValueTag";
 
 VolumeParams::VolumeParams(
     DataMgr *dataMgr, ParamsBase::StateSave *ssave) : RenderParams(dataMgr, ssave, VolumeParams::GetClassType(), 3) {
@@ -54,6 +55,14 @@ std::string VolumeParams::GetAlgorithm() const {
 void VolumeParams::SetAlgorithm(std::string algorithm) {
     assert(STLUtils::Contains(GetAlgorithmNames(), algorithm));
     SetValueString(_algorithmTag, "Volume rendering algorithm", algorithm);
+}
+
+double VolumeParams::GetIsoValue() const {
+    return GetValueDouble(_isoValueTag, 0);
+}
+
+void VolumeParams::SetIsoValue(double isoValue) {
+    SetValueDouble(_isoValueTag, "Iso surface value", isoValue);
 }
 
 const std::vector<std::string> VolumeParams::GetAlgorithmNames() {
