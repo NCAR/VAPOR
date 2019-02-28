@@ -51,8 +51,9 @@ public:
     unsigned int GetID() const;
     unsigned int WasLinkingSuccessful() const;
 
-    int GetAttributeLocation(const std::string &name) const;
-    int GetUniformLocation(const std::string &name) const;
+    int  GetAttributeLocation(const std::string &name) const;
+    int  GetUniformLocation(const std::string &name) const;
+    bool HasUniform(const std::string &name) const;
 
     template<typename T> bool SetUniform(const std::string &name, const T &value) const;
     void                      SetUniform(int location, const int &value) const;
