@@ -19,7 +19,9 @@ enum ERROR_CODE
     NO_SEED_PARTICLE_YET = -4,
     FILE_ERROR           = -5,
     NO_VALUE_FIELD_YET   = -6,
-    DUPLICATE_TIME       = -7
+    DUPLICATE_TIME       = -7,
+    NO_THIS_TIME_STEP    = -8,
+    NOT_CONTAIN_TIME     = -9
 };
 
 class Particle
