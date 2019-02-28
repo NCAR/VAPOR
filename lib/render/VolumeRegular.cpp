@@ -8,6 +8,8 @@ using std::vector;
 
 using namespace VAPoR;
 
+static VolumeAlgorithmRegistrar<VolumeRegular> registration;
+
 VolumeRegular::VolumeRegular(GLManager *gl) :
 VolumeAlgorithm(gl),
 dataTexture(NULL)
