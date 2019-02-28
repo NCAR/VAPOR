@@ -55,3 +55,9 @@ void VolumeRegular::SetUniforms() const {
     glBindTexture(GL_TEXTURE_3D, dataTexture);
     s->SetUniform("data", 0);
 }
+
+static VolumeAlgorithmRegistrar<IsoRegular> registrationIso;
+
+ShaderProgram *IsoRegular::GetShader() const {
+    return _glManager->shaderManager->GetShader("iso");
+}

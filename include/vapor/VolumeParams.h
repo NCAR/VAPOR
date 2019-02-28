@@ -21,6 +21,8 @@ class PARAMS_API VolumeParams : public RenderParams {
 
     std::string GetAlgorithm() const;
     void SetAlgorithm(std::string algorithm);
+    double GetIsoValue() const;
+    void SetIsoValue(double isoValue);
 
     static const std::vector<std::string> GetAlgorithmNames();
     static void Register(const std::string &name);
@@ -31,6 +33,7 @@ class PARAMS_API VolumeParams : public RenderParams {
     static std::vector<std::string> _algorithmNames;
 
     static const std::string _algorithmTag;
+    static const std::string _isoValueTag;
 };
 
 }; // namespace VAPoR

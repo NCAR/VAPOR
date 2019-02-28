@@ -130,6 +130,8 @@ int VolumeRenderer::_paintGL(bool fast) {
     shader->SetUniform("LUTMin", (float)cache.mapRange[0]);
     shader->SetUniform("LUTMax", (float)cache.mapRange[1]);
     shader->SetUniform("unitDistance", smallestDimension / 100.f);
+    if (shader->HasUniform("isoValue"))
+        shader->SetUniform("isoValue", (float)vp->GetIsoValue());
 
     algorithm->SetUniforms();
 
