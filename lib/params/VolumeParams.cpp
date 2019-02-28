@@ -11,6 +11,8 @@ using namespace VAPoR;
 //
 static RenParamsRegistrar<VolumeParams> registrar(VolumeParams::GetClassType());
 
+std::vector<std::string> VolumeParams::_algorithmNames;
+
 const std::string VolumeParams::_algorithmTag = "AlgorithmTag";
 
 VolumeParams::VolumeParams(
@@ -55,11 +57,12 @@ void VolumeParams::SetAlgorithm(std::string algorithm) {
 }
 
 const std::vector<std::string> VolumeParams::GetAlgorithmNames() {
-    return {
-        "Regular",
-        "Resampled",
-        "Cell Traversal",
-        "Test"};
+    return _algorithmNames;
+}
+
+void VolumeParams::Register(const std::string &name) {
+    assert(!STLUtils::Contains(_algorithmNames, name));
+    _algorithmNames.push_back(name);
 }
 
 //Set everything to default values

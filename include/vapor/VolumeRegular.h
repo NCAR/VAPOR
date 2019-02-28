@@ -9,6 +9,8 @@ class VolumeRegular : public VolumeAlgorithm {
     VolumeRegular(GLManager *gl);
     ~VolumeRegular();
 
+    static std::string GetName() { return "Regular"; }
+
     virtual int LoadData(const Grid *grid);
     virtual ShaderProgram *GetShader() const;
     virtual void SetUniforms() const;

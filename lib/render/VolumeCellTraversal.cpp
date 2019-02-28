@@ -17,6 +17,8 @@ using std::vector;
 
 using namespace VAPoR;
 
+static VolumeAlgorithmRegistrar<VolumeCellTraversal> registration;
+
 #define MAX_LEVELS 32
 
 #define FI_LEFT 0

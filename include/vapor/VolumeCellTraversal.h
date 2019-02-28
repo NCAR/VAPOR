@@ -8,6 +8,9 @@ class VolumeCellTraversal : public VolumeRegular {
   public:
     VolumeCellTraversal(GLManager *gl);
     ~VolumeCellTraversal();
+
+    static std::string GetName() { return "Cell Traversal"; }
+
     virtual int LoadData(const Grid *grid);
     virtual ShaderProgram *GetShader() const;
     virtual void SetUniforms() const;
