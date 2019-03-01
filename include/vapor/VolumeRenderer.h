@@ -2,6 +2,7 @@
 
 #include <vapor/Renderer.h>
 #include <vapor/VolumeAlgorithm.h>
+#include <glm/fwd.hpp>
 
 using std::vector;
 using std::string;
@@ -31,6 +32,7 @@ protected:
     
     int _loadData();
     void _loadTF();
+    glm::vec3 _getVolumeScales() const;
     
     VolumeAlgorithm *algorithm;
     
