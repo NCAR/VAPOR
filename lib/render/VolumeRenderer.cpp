@@ -118,7 +118,9 @@ int VolumeRenderer::_paintGL(bool fast) {
     vec3 minExts(dMinExts[0], dMinExts[1], dMinExts[2]);
     vec3 maxExts(dMaxExts[0], dMaxExts[1], dMaxExts[2]);
     vec3 extLengths = maxExts - minExts;
-    float smallestDimension = min(extLengths[0], min(extLengths[1], extLengths[2]));
+    vec3 extScales = _getVolumeScales();
+    vec3 extLengthsScaled = extLengths * extScales;
+    float smallestDimension = min(extLengthsScaled[0], min(extLengthsScaled[1], extLengthsScaled[2]));
 
     SmartShaderProgram shader(algorithm->GetShader());
     if (!shader.IsValid())
@@ -130,6 +132,7 @@ int VolumeRenderer::_paintGL(bool fast) {
     shader->SetUniform("LUTMin", (float)cache.mapRange[0]);
     shader->SetUniform("LUTMax", (float)cache.mapRange[1]);
     shader->SetUniform("unitDistance", smallestDimension / 100.f);
+    shader->SetUniform("scales", extScales);
     if (shader->HasUniform("isoValue"))
         shader->SetUniform("isoValue", (float)vp->GetIsoValue());
 
@@ -192,4 +195,20 @@ void VolumeRenderer::_loadTF() {
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, 256, 0, GL_RGBA, GL_FLOAT, LUT);
 
     delete[] LUT;
+}
+
+glm::vec3 VolumeRenderer::_getVolumeScales() const {
+    ViewpointParams *vpp = _paramsMgr->GetViewpointParams(_winName);
+    Transform *datasetTransform = vpp->GetTransform(GetMyDatasetName());
+    Transform *rendererTransform = GetActiveParams()->GetTransform();
+    assert(datasetTransform && rendererTransform);
+
+    vector<double> datasetScales, rendererScales;
+    datasetScales = datasetTransform->GetScales();
+    rendererScales = rendererTransform->GetScales();
+
+    return glm::vec3(
+        datasetScales[0] * rendererScales[0],
+        datasetScales[1] * rendererScales[1],
+        datasetScales[2] * rendererScales[2]);
 }
