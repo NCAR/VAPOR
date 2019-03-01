@@ -32,10 +32,10 @@ public:
         return false;
     }
 
-    //
-    //! Obtain current MapperFunction for the primary variable.
-    //
-    MapperFunction* GetMapperFunc();
+    static std::string GetClassType() 
+    {
+        return ("FlowParams");
+    }
 
 protected:
 
