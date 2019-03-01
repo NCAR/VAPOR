@@ -7,7 +7,7 @@
 
 #include <glm/glm.hpp>
 #include <string>
-#include "Particle.h"
+#include "vapor/Particle.h"
 
 namespace flow
 {

@@ -5,7 +5,7 @@
 #ifndef STEADYVAPORFIELD_H
 #define STEADYVAPORFIELD_H
 
-#include "VelocityField.h"
+#include "vapor/VelocityField.h"
 #include "vapor/Grid.h"
 #include <unordered_map>
 

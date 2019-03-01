@@ -5,7 +5,7 @@
 #ifndef OCEANFIELD_H
 #define OCEANFIELD_H
 
-#include "VelocityField.h"
+#include "vapor/VelocityField.h"
 
 namespace flow
 {

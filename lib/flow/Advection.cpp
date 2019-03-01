@@ -1,6 +1,6 @@
 #include <cstdio>
 
-#include "Advection.h"
+#include "vapor/Advection.h"
 
 using namespace flow;
 
