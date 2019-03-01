@@ -14,6 +14,7 @@ uniform float LUTMax;
 
 uniform ivec3 coordDims;
 uniform float unitDistance;
+uniform vec3 scales;
 uniform int BBLevels;
 
 vec3 coordDimsF = vec3(coordDims);
@@ -295,6 +296,7 @@ vec4 Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
     bool hasNext = true;
     float tStart = t0;
     ivec3 initialCell = currentCell;
+    float unitDistanceScaled = unitDistance / length(dir * scales);
     
     int i = 0;
     vec4 accum = vec4(0);
@@ -307,15 +309,16 @@ vec4 Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
         hasNext = FindNextCell(origin, dir, t0, currentCell, entranceFace, nextCell, exitFace, exitCoord, t1);
         
         if (t0 >= 0) {
+            float l = (t1-t0)/unitDistanceScaled;
 #if 0
             vec4 A = GetColorAtCoord(entranceCoord);
             vec4 B = GetColorAtCoord(exitCoord);
-            float a = IntegrateAbsorption(A.a, B.a, (t1-t0)/unitDistance);
+            float a = IntegrateAbsorption(A.a, B.a, l);
             vec4 color = (A+B)/2;
             color.a = a;
 #else
             vec4 color = GetAverageColorForCoordIndex(currentCell);
-            color.a = IntegrateConstantAlpha(color.a, (t1-t0)/unitDistance);
+            color.a = IntegrateConstantAlpha(color.a, l);
 #endif
             BlendToBack(accum, color);
         }
@@ -464,7 +467,6 @@ void main(void)
             } else {
                 fragColor = vec4(0);
             }
-             // return;
             
             if (intersections > 0) {
                 vec4 color = Traverse(cameraPos, dir, t1, initialCell, entranceFace, t1);
