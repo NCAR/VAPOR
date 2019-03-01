@@ -4,7 +4,7 @@
 
 #include <qobject.h>
 #include <vapor/MyBase.h>
-#include <vapor/SliceRenderer.h>
+#include <vapor/FlowRenderer.h>
 #include "GL/glew.h"
 #include "RenderEventRouter.h"
 #include "VariablesWidget.h"
@@ -44,7 +44,7 @@ public:
 
  //
  static string GetClassType() {
-	 return(VAPoR::SliceRenderer::GetClassType());
+	 return(VAPoR::FlowRenderer::GetClassType());
  }
  string GetType() const {return GetClassType(); }
 
@@ -79,6 +79,6 @@ private:
 
 };
 
-#endif //SLICEEVENTROUTER_H 
+#endif //FLOWEVENTROUTER_H 
 
 

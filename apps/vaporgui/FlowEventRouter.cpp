@@ -10,9 +10,7 @@
 #include <QFileDialog>
 #include <vector>
 #include <string>
-//#include "vapor/FlowParams.h"
-#include "vapor/SliceParams.h"
-#include "vapor/SliceRenderer.h"
+#include "vapor/FlowParams.h"
 #include "VariablesWidget.h"
 #include "FlowEventRouter.h"
 #include "EventRouter.h"
@@ -29,8 +27,7 @@ static RenderEventRouterRegistrar<FlowEventRouter> registrar(
 
 FlowEventRouter::FlowEventRouter( QWidget *parent, ControlExec *ce) 
                     : QTabWidget(parent),
-//	                  RenderEventRouter( ce, FlowParams::GetClassType())
-	                  RenderEventRouter( ce, SliceParams::GetClassType())
+	                  RenderEventRouter( ce, FlowParams::GetClassType())
 {
 	_variables = new FlowVariablesSubtab(this);
 	QScrollArea *qsvar = new QScrollArea(this);
