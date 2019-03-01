@@ -2,6 +2,7 @@
 
 using namespace VAPoR;
 
+static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
 
 FlowParams::FlowParams(   DataMgr*                dataManager, 
                           ParamsBase::StateSave*  stateSave,
