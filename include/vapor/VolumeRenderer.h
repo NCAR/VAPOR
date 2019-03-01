@@ -2,6 +2,7 @@
 
 #include <vapor/Renderer.h>
 #include <vapor/VolumeAlgorithm.h>
+#include <glm/fwd.hpp>
 
 using std::string;
 using std::vector;
@@ -28,6 +29,7 @@ class RENDER_API VolumeRenderer : public Renderer {
 
     int _loadData();
     void _loadTF();
+    glm::vec3 _getVolumeScales() const;
 
     VolumeAlgorithm *algorithm;
 
