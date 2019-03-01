@@ -3,6 +3,8 @@
 using namespace VAPoR;
 
 
+// Constructor
+#if 0
 FlowParams::FlowParams(   DataMgr*                dataManager, 
                           ParamsBase::StateSave*  stateSave,
                           std::string             classType )
@@ -13,8 +15,18 @@ FlowParams::FlowParams(   DataMgr*                dataManager,
 {
     SetDiagMsg("FlowParams::FlowParams() this=%p", this);
 }
+#endif
 
-// Constructor
+FlowParams::FlowParams(   DataMgr*                 dataManager,
+                          ParamsBase::StateSave*   stateSave )
+          : RenderParams( dataManager,
+                          stateSave, 
+                          FlowParams::GetClassType(),
+                          3 /* max dim */ )
+{
+    SetDiagMsg("FlowParams::FlowParams() this=%p", this);
+}
+
 FlowParams::FlowParams(   DataMgr*                dataManager, 
                           ParamsBase::StateSave*  stateSave,
                           XmlNode*                node )
