@@ -35,6 +35,10 @@ GLenum glCheckError_(const char *file, int line)
 void glCheckError() { }
 */
 
+static RendererRegistrar<FlowRenderer> registrar(
+    FlowRenderer::GetClassType(), FlowParams::GetClassType()
+);
+
 // Constructor
 FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
                       std::string&        winName,
