@@ -167,7 +167,6 @@ int ControlExec::ActivateRender(
 		return -1;
 	}
 
-    cout << "ren type/name " << renderType << " " << renderName << endl;
 	Renderer *ren = v->GetRenderer(renderType, renderName);
 
 	_paramsMgr->BeginSaveStateGroup("ActivateRender");
@@ -177,7 +176,6 @@ int ControlExec::ActivateRender(
 		string paramsType = RendererFactory::Instance()->
 			GetParamsClassFromRenderClass(renderType);
 
-        cout << "!ren " << paramsType << endl;
 		assert(! paramsType.empty());
 
 		// Need to create a params instance for this renderer
