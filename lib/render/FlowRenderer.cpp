@@ -39,15 +39,13 @@ void glCheckError() { }
 FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
                       std::string&        winName,
                       std::string&        dataSetName,
-                      std::string         paramsType,
-                      std::string         classType,
                       std::string&        instName,
                       DataMgr*            dataMgr )
           : Renderer( pm,
                       winName,
                       dataSetName,
-                      paramsType,
-                      classType,
+                      FlowParams::GetClassType(),
+                      FlowRenderer::GetClassType(),
                       instName,
                       dataMgr )
 { }
