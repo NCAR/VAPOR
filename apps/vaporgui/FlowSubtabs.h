@@ -5,7 +5,7 @@
 
 #include <QWidget>
 #include <QVBoxLayout>
-#include <vapor/SliceParams.h>
+#include <vapor/FlowParams.h>
 
 namespace VAPoR {
 	class ControlExec;
@@ -45,7 +45,7 @@ public:
 	);
 
 private:
-    VAPoR::SliceParams*      _params;
+    VAPoR::FlowParams*      _params;
     VariablesWidget* _variablesWidget;
 };
 
@@ -63,7 +63,7 @@ public:
 	);
 
 private:
-    VAPoR::SliceParams* _params;
+    VAPoR::FlowParams* _params;
     TFWidget*   _TFWidget;
 };
 
@@ -81,7 +81,7 @@ public:
 	); 
 
 private:
-    VAPoR::SliceParams*     _params;
+    VAPoR::FlowParams*     _params;
     GeometryWidget*         _geometryWidget;
     CopyRegionWidget*       _copyRegionWidget;
     TransformTable*         _transformTable;

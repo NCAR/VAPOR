@@ -32,7 +32,7 @@ void FlowVariablesSubtab::Update(
     VAPoR::ParamsMgr *paramsMgr,
     VAPoR::RenderParams *rParams
 ) {
-    _params = dynamic_cast<VAPoR::SliceParams*>(rParams);
+    _params = dynamic_cast<VAPoR::FlowParams*>(rParams);
     assert(_params);
     _variablesWidget->Update(dataMgr, paramsMgr, rParams);
 }
@@ -53,7 +53,7 @@ void FlowAppearanceSubtab::Update(
     VAPoR::ParamsMgr *paramsMgr,
     VAPoR::RenderParams *rParams
 ) {
-    _params = dynamic_cast<VAPoR::SliceParams*>(rParams);
+    _params = dynamic_cast<VAPoR::FlowParams*>(rParams);
     assert(_params);
 
     _TFWidget->Update(dataMgr, paramsMgr, rParams);
@@ -83,7 +83,7 @@ void FlowGeometrySubtab::Update(
     VAPoR::DataMgr *dataMgr,
     VAPoR::RenderParams *rParams
 ) {
-    _params = dynamic_cast<VAPoR::SliceParams*>(rParams);
+    _params = dynamic_cast<VAPoR::FlowParams*>(rParams);
     assert(_params);
 
     _geometryWidget->Update(paramsMgr, dataMgr, rParams);
