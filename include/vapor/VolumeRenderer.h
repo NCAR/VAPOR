@@ -2,6 +2,7 @@
 
 #include <vapor/Renderer.h>
 #include <vapor/VolumeAlgorithm.h>
+#include <glm/fwd.hpp>
 
 using std::string;
 using std::vector;
@@ -20,8 +21,9 @@ protected:
     int  _paintGL(bool fast);
     void _clearCache(){};
 
-    int  _loadData();
-    void _loadTF();
+    int       _loadData();
+    void      _loadTF();
+    glm::vec3 _getVolumeScales() const;
 
     VolumeAlgorithm *algorithm;
 
