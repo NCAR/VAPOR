@@ -77,10 +77,6 @@ private:
  FlowAppearanceSubtab *_appearance;
  FlowAnnotationSubtab *_annotation;
 
-#ifdef VAPOR3_0_0_ALPHA
- 	SliceImageGUI *_image;
-#endif
-
 };
 
 #endif //SLICEEVENTROUTER_H 
