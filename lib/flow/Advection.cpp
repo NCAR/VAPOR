@@ -65,7 +65,7 @@ Advection::Advect( ADVECTION_METHOD method )
     for( auto& s : _streams )
     {
         const auto& p0 = s.back();
-        if( !_vField->InsideField( p0.location ) )
+        if( !_vField->InsideVelocityField( p0.time, p0.location ) )
             continue;
 
         float dt = _baseDeltaT;
@@ -99,7 +99,7 @@ int
 Advection::_advectEuler( const Particle& p0, float dt, Particle& p1 ) const
 {
     glm::vec3 v0;
-    int rv  = _vField->Get( p0.time, p0.location, v0 );    
+    int rv  = _vField->GetVelocity( p0.time, p0.location, v0 );    
     assert( rv == 0 );
     p1.location = p0.location + dt * v0;
     p1.time     = p0.time + dt;
@@ -112,15 +112,15 @@ Advection::_advectRK4( const Particle& p0, float dt, Particle& p1 ) const
     glm::vec3 k1, k2, k3, k4;
     float dt2 = dt * 0.5f;
     int rv;
-    rv = _vField->Get( p0.time,       p0.location,            k1 );
+    rv = _vField->GetVelocity( p0.time,       p0.location,            k1 );
     assert( rv == 0 );
-    rv = _vField->Get( p0.time + dt2, p0.location + dt2 * k1, k2 );
+    rv = _vField->GetVelocity( p0.time + dt2, p0.location + dt2 * k1, k2 );
     if( rv != 0 )
         return rv;
-    rv = _vField->Get( p0.time + dt2, p0.location + dt2 * k2, k3 );
+    rv = _vField->GetVelocity( p0.time + dt2, p0.location + dt2 * k2, k3 );
     if( rv != 0 )
         return rv;
-    rv = _vField->Get( p0.time + dt,  p0.location + dt  * k3, k4 );
+    rv = _vField->GetVelocity( p0.time + dt,  p0.location + dt  * k3, k4 );
     if( rv != 0 )
         return rv;
     p1.location = p0.location + dt / 6.0f * (k1 + 2.0f * (k2 + k3) + k4 );

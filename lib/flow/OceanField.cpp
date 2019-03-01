@@ -4,17 +4,13 @@
 using namespace flow;
 
 OceanField::OceanField()
-{
-    // Ocean field has a radius of one.
-    _fieldMin = glm::vec3( -1.0f );
-    _fieldMax = glm::vec3(  1.0f );
-}
+{ }
 
 OceanField::~OceanField()
 { }
 
 bool
-OceanField::InsideField( const glm::vec3& pos ) const
+OceanField::InsideVelocityField( float t, const glm::vec3& pos ) const
 {
     if( glm::length( pos ) > 1.0f )
         return false;
@@ -23,9 +19,9 @@ OceanField::InsideField( const glm::vec3& pos ) const
 }
 
 int
-OceanField::Get( float t, const glm::vec3& pos, glm::vec3& vel ) const
+OceanField::GetVelocity( float t, const glm::vec3& pos, glm::vec3& vel ) const
 {
-    if( !InsideField( pos ) )
+    if( !InsideVelocityField( t, pos ) )
         return OUT_OF_FIELD;
 
     // First calculate the direction of the velocity
