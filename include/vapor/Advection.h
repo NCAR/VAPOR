@@ -36,7 +36,9 @@ public:
     //   Command:  splot "filename" u 1:2:3 w lines
     //   Tutorial: http://lowrank.net/gnuplot/datafile-e.html
     //
-    int  OutputStreamsGnuplot( const std::string& filename ) const;
+    int OutputStreamsGnuplot( const std::string& filename ) const;
+
+    int IsReady() const;
 
 private:
     const VelocityField*                    _vField;
@@ -44,8 +46,6 @@ private:
     float   _lowerAngle,    _upperAngle;    // Thresholds for step size adjustment
     float   _lowerAngleCos, _upperAngleCos; // Cosine values of the threshold angles
     float   _baseDeltaT;
-
-    int _readyToAdvect() const;
 
     // Advection methods here could assume all input is valid.
     int _advectEuler( const Particle& p0, float deltaT, // Input

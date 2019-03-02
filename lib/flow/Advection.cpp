@@ -41,7 +41,7 @@ Advection::UseSeedParticles( std::vector<Particle>& seeds )
 }
 
 int
-Advection::_readyToAdvect() const
+Advection::IsReady() const
 {
     if( _vField == nullptr )
         return NO_VECTOR_FIELD_YET;
@@ -58,7 +58,7 @@ Advection::_readyToAdvect() const
 int
 Advection::Advect( ADVECTION_METHOD method )
 {
-    int ready = _readyToAdvect();
+    int ready = IsReady();
     if( ready != 0 )
         return ready;
 

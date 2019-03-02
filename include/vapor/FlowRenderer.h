@@ -9,6 +9,8 @@
 #include "vapor/Renderer.h"
 #include "vapor/FlowParams.h"
 #include "vapor/GLManager.h"
+#include "vapor/Advection.h"
+#include "vapor/VelocityField.h"
 
 #include <glm/glm.hpp>
 
@@ -38,8 +40,14 @@ protected:
     int  _paintGL( bool fast );
     void _clearCache() {};
 
+    flow::Advection         _advec;
+    flow::VelocityField*    _velField;
+
     // OpenGL stuff: shaders
     ShaderProgram*      _lineShader;
+
+
+    void _useOceanField();
 
 #ifndef WIN32
     double _getElapsedSeconds( const struct timeval* begin, const struct timeval* end ) const;
