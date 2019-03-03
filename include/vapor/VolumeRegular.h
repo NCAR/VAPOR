@@ -17,6 +17,9 @@ class VolumeRegular : public VolumeAlgorithm {
 
   private:
     unsigned int dataTexture;
+    unsigned int missingTexture;
+
+    bool hasMissingData;
 };
 
 class IsoRegular : public VolumeRegular {

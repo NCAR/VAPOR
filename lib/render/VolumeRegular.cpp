@@ -11,9 +11,18 @@ using namespace VAPoR;
 static VolumeAlgorithmRegistrar<VolumeRegular> registration;
 
 VolumeRegular::VolumeRegular(GLManager *gl) : VolumeAlgorithm(gl),
-                                              dataTexture(NULL) {
+                                              dataTexture(NULL),
+                                              missingTexture(NULL) {
     glGenTextures(1, &dataTexture);
     glBindTexture(GL_TEXTURE_3D, dataTexture);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    glGenTextures(1, &missingTexture);
+    glBindTexture(GL_TEXTURE_3D, missingTexture);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -24,9 +33,12 @@ VolumeRegular::VolumeRegular(GLManager *gl) : VolumeAlgorithm(gl),
 VolumeRegular::~VolumeRegular() {
     if (dataTexture)
         glDeleteTextures(1, &dataTexture);
+    if (missingTexture)
+        glDeleteTextures(1, &missingTexture);
 }
 
 int VolumeRegular::LoadData(const Grid *grid) {
+    printf("Loading data...\n");
     const vector<size_t> dims = grid->GetDimensions();
     const size_t nVerts = dims[0] * dims[1] * dims[2];
     float *data = new float[nVerts];
@@ -39,6 +51,26 @@ int VolumeRegular::LoadData(const Grid *grid) {
     glBindTexture(GL_TEXTURE_3D, dataTexture);
     glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 0, 0, 0, 0, GL_RED, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
     glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0, GL_RED, GL_FLOAT, data);
+
+    hasMissingData = grid->HasMissingData();
+    if (hasMissingData) {
+        printf("Loading missing data...\n");
+        const float missingValue = grid->GetMissingValue();
+        unsigned char *missingMask = new unsigned char[nVerts];
+        memset(missingMask, 0, nVerts);
+
+        for (size_t i = 0; i < nVerts; i++)
+            if (data[i] == missingValue)
+                missingMask[i] = 255;
+
+        glBindTexture(GL_TEXTURE_3D, missingTexture);
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 0, 0, 0, 0, GL_RED, GL_UNSIGNED_BYTE, NULL); // Fix driver bug with re-uploading large textures
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R8, dims[0], dims[1], dims[2], 0, GL_RED, GL_UNSIGNED_BYTE, missingMask);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+        delete[] missingMask;
+    }
 
     delete[] data;
     return 0;
@@ -54,6 +86,12 @@ void VolumeRegular::SetUniforms() const {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_3D, dataTexture);
     s->SetUniform("data", 0);
+
+    s->SetUniform("hasMissingData", hasMissingData);
+
+    glActiveTexture(GL_TEXTURE6);
+    glBindTexture(GL_TEXTURE_3D, missingTexture);
+    s->SetUniform("missingMask", 6);
 }
 
 static VolumeAlgorithmRegistrar<IsoRegular> registrationIso;
