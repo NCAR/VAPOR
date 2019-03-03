@@ -94,8 +94,7 @@ vec3 Permute(vec3 v, int x, int y, int z)
 	return vec3(v[x], v[y], v[z]);
 }
 
-/*
-bool IntersectRayTriangleIntel(vec3 o, vec3 dir, vec3 v0, vec3 v1, vec3 v2, out float t)
+bool IntersectRayTriangleIntel(vec3 o, vec3 dir, float rt0, vec3 v0, vec3 v1, vec3 v2, out float t, out vec3 barycentric)
 {
 	// Transform triangle vertices to ray coordinate space
 	// Translate vertices based on ray origin
@@ -163,11 +162,11 @@ bool IntersectRayTriangleIntel(vec3 o, vec3 dir, vec3 v0, vec3 v1, vec3 v2, out 
 	float b0 = e0 * invDet;
 	float b1 = e1 * invDet;
 	float b2 = e2 * invDet;
+    barycentric = vec3(b0, b1, b2);
 	t = tScaled * invDet;
 
 	return true;
 }
- */
 
 bool IntersectRayQuad(vec3 o, vec3 d, float rt0, vec3 v0, vec3 v1, vec3 v2, vec3 v3, out float t, out vec4 weights)
 {
