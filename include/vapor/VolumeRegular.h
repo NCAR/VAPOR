@@ -17,6 +17,9 @@ namespace VAPoR {
         
     private:
         unsigned int dataTexture;
+        unsigned int missingTexture;
+        
+        bool hasMissingData;
     };
     
     
