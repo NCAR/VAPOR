@@ -77,10 +77,12 @@ void main(void)
     float t0, t1;
     
     if (IntersectRayBoundingBox(cameraPos, dir, 0, dataBoundsMin, dataBoundsMax, t0, t1)) {
-        
-        float step = max(((t1-t0)/100.f)*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/100.f);
+
+#define STEPS 100
+        float step = max(((t1-t0)/float(STEPS))*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/float(STEPS));
         float ld = texture(data, ((cameraPos + dir * t0) - dataBoundsMin) / (dataBoundsMax-dataBoundsMin)).r;
         
+        int i = 0;
         for (float t = t0; t < t1; t += step) {
             vec3 hit = cameraPos + dir * t;
             vec3 dataSTR = (hit - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
@@ -105,6 +107,10 @@ void main(void)
             ld = dv;
             
             if (accum.a > 0.999)
+                break;
+                
+            // Failsafe
+            if (i++ > STEPS)
                 break;
         }
         
