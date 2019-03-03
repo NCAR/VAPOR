@@ -140,6 +140,22 @@ void GetFaceCoordinateIndices(ivec3 cell, ivec3 face, out ivec3 i0, out ivec3 i1
     }
 }
 
+vec4 ROYGBV(float v, float minV, float maxV)
+{
+    vec3 colors[6];
+    colors[0] = vec3(1.00, 0.00, 0.00);
+    colors[1] = vec3(1.00, 0.60, 0.00);
+    colors[2] = vec3(1.00, 1.00, 0.00);
+    colors[3] = vec3(0.00, 1.00, 0.00);
+    colors[4] = vec3(0.00, 0.00, 1.00);
+    colors[5] = vec3(0.32, 0.00, 0.32);
+    float ratio = 5.0 * clamp((v-minV)/(maxV-minV), 0, 1);
+    int indexMin=int(floor(ratio));
+    int indexMax=min(int(indexMin)+1,5);
+    vec3 c = mix(colors[indexMin], colors[indexMax], ratio-indexMin);
+    return vec4(c, 1);
+}
+
 void GetFaceCoordsAndVertices(ivec3 cellIndex, ivec3 face, out ivec3 i0, out ivec3 i1, out ivec3 i2, out ivec3 i3, out vec3 v0, out vec3 v1, out vec3 v2, out vec3 v3)
 {
     GetFaceCoordinateIndices(cellIndex, face, i0, i1, i2, i3);
@@ -315,6 +331,7 @@ vec4 Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
             vec4 B = GetColorAtCoord(exitCoord);
             float a = IntegrateAbsorption(A.a, B.a, l);
             vec4 color = (A+B)/2;
+            // vec4 color = GetAverageColorForCoordIndex(currentCell);
             color.a = a;
 #else
             vec4 color = GetAverageColorForCoordIndex(currentCell);
@@ -329,7 +346,9 @@ vec4 Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
         t0 = t1;
         i++;
         
-        // if (i > 1) break;
+//        if (i > 500) {
+//            return vec4(1,0,1,1);
+//        }
         if (accum.a > 0.995)
             break;
     }
@@ -424,7 +443,6 @@ int SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, out iv
     int fastDim = GetFastDimForFaceIndex(sideID);
     int slowDim = GetSlowDimForFaceIndex(sideID);
     return SearchSideForInitialCellWithOctree_NLevels(BB_LEVELS, origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
-    SearchSideForInitialCellBasic(origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1);
 }
 
 int FindInitialCell(vec3 origin, vec3 dir, float t0, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
@@ -454,6 +472,7 @@ void main(void)
         float t1;
         vec4 accum = vec4(0);
         int intersections;
+        int i = 0;
         do {
             intersections = FindInitialCell(cameraPos, dir, t0, initialCell, entranceFace, t1);
             
@@ -472,10 +491,15 @@ void main(void)
                 vec4 color = Traverse(cameraPos, dir, t1, initialCell, entranceFace, t1);
                 BlendToBack2(accum, color);
             }
+            
+            // Failsafe to prevent infinite recursion due to float precision error
+            if (i++ > 8 || t1-t0 <= EPSILON)
+                break;
                 
             t0 = t1;
             
         } while (intersections > 1);
+         //if (intersections == 0) { fragColor = vec4(1,0,0,1);return;}
         
         fragColor = accum;
         return;
