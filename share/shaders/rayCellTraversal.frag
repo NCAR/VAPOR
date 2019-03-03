@@ -11,6 +11,7 @@ uniform vec3 dataBoundsMin;
 uniform vec3 dataBoundsMax;
 uniform float LUTMin;
 uniform float LUTMax;
+uniform bool hasMissingData;
 
 uniform ivec3 coordDims;
 uniform float unitDistance;
@@ -26,6 +27,7 @@ uniform sampler3D coords;
 uniform sampler2DArray boxMins;
 uniform sampler2DArray boxMaxs;
 uniform isampler2D levelDims;
+uniform sampler3D missingMask;
 
 in vec2 ST;
 
@@ -202,6 +204,12 @@ vec4 GetColorAtCoord(vec3 coord)
     return GetColorForNormalizedData(NormalizeData(GetDataCoordinateSpace(coord)));
 }
 
+bool DoesCellHaveMissingData(ivec3 cellCoord)
+{
+    vec3 coord = vec3(cellCoord)+vec3(0.5);
+    return texture(missingMask, (coord)/(coordDims-1)).r > 0;
+}
+
 bool IntersectRayCellFace(vec3 o, vec3 d, float rt0, ivec3 cellIndex, ivec3 face, out float t, out vec3 dataCoordinate)
 {
     ivec3 i0, i1, i2, i3;
@@ -303,6 +311,13 @@ float IntegrateAbsorption(float a, float b, float distance)
     return 1 - exp(-distance * (a+b)/2);
 }
 
+bool ShouldRenderCell(const ivec3 cellIndex)
+{
+    if (hasMissingData && DoesCellHaveMissingData(cellIndex))
+        return false;
+    return true;
+}
+
 vec4 Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out float t1)
 {
     vec3 entranceCoord;
@@ -337,7 +352,9 @@ vec4 Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
             vec4 color = GetAverageColorForCoordIndex(currentCell);
             color.a = IntegrateConstantAlpha(color.a, l);
 #endif
-            BlendToBack(accum, color);
+
+            if (ShouldRenderCell(currentCell))
+                BlendToBack(accum, color);
         }
         
         currentCell = nextCell;

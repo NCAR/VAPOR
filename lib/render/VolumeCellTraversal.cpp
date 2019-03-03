@@ -213,6 +213,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     if (VolumeRegular::LoadData(grid) < 0)
         return -1;
     
+    printf("Loading coordinate data...\n");
     vector<size_t> dims = grid->GetDimensions();
     const int w = dims[0], h = dims[1], d = dims[2];
     const size_t nCoords = (size_t)w*h*d;
@@ -233,6 +234,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, 0, 0, 0, 0, GL_RED, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
     glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, dims[0], dims[1], dims[2], 0, GL_RGB, GL_FLOAT, data);
     
+    printf("Computing acceleration tree...\n");
     vector<size_t> cellDims = {dims[0]-1, dims[1]-1, dims[2]-1};
     vector<size_t> cellDimsSorted = cellDims;
     std::sort(cellDimsSorted.begin(), cellDimsSorted.end());
