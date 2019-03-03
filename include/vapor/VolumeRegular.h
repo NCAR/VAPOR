@@ -17,6 +17,9 @@ public:
 
 private:
     unsigned int dataTexture;
+    unsigned int missingTexture;
+
+    bool hasMissingData;
 };
 
 class IsoRegular : public VolumeRegular {
