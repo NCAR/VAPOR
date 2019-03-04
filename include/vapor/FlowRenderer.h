@@ -44,10 +44,13 @@ protected:
     flow::VelocityField*    _velField;
 
     // OpenGL stuff: shaders
-    ShaderProgram*      _lineShader;
+    ShaderProgram*      _shader;
+    GLuint              _vertexArrayId; 
+    GLuint              _vertexBufferId; 
 
 
     void _useOceanField();
+    int  _drawAStream( const std::vector<flow::Particle>& s ) const;
 
 #ifndef WIN32
     double _getElapsedSeconds( const struct timeval* begin, const struct timeval* end ) const;

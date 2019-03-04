@@ -31,6 +31,9 @@ public:
     void UseVelocityField( const VelocityField* p );
     void UseSeedParticles( std::vector<Particle>& seeds );
 
+    size_t GetNumberOfStreams() const;
+    const std::vector<Particle>& GetStreamAt( size_t i ) const;
+
     //
     // Output a file that could be plotted by gnuplot
     //   Command:  splot "filename" u 1:2:3 w lines

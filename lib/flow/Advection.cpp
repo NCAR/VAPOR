@@ -167,3 +167,15 @@ Advection::OutputStreamsGnuplot( const std::string& filename ) const
     
     return 0;
 }
+
+size_t 
+Advection::GetNumberOfStreams() const
+{
+    return _streams.size();
+}
+
+const std::vector<Particle>&
+Advection::GetStreamAt( size_t i ) const
+{
+    return _streams.at(i);
+}
