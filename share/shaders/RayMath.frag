@@ -168,14 +168,20 @@ bool IntersectRayTriangleIntel(vec3 o, vec3 dir, float rt0, vec3 v0, vec3 v1, ve
 	return true;
 }
 
+#ifdef USE_INTEL_TRI_ISECT
+#define TRI_INSTERSECT_ROUTINE IntersectRayTriangleIntel
+#else
+#define TRI_INSTERSECT_ROUTINE IntersectRayTriangle
+#endif
+
 bool IntersectRayQuad(vec3 o, vec3 d, float rt0, vec3 v0, vec3 v1, vec3 v2, vec3 v3, out float t, out vec4 weights)
 {
     vec3 uvw;
-    if (IntersectRayTriangle(o, d, rt0, v0, v1, v2, t, uvw)) {
+    if (TRI_INSTERSECT_ROUTINE(o, d, rt0, v0, v1, v2, t, uvw)) {
         weights = vec4(uvw, 0);
         return true;
     }
-    if (IntersectRayTriangle(o, d, rt0, v0, v2, v3, t, uvw)) {
+    if (TRI_INSTERSECT_ROUTINE(o, d, rt0, v0, v2, v3, t, uvw)) {
         weights = vec4(uvw.x, 0, uvw.y, uvw.z);
         return true;
     }

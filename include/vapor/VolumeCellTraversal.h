@@ -26,7 +26,9 @@ class VolumeCellTraversal : public VolumeRegular {
 
     int coordDims[3];
     int BBLevels;
+    bool useHighPrecisionTriangleRoutine;
 
+    bool NeedsHighPrecisionTriangleRoutine(const Grid *grid);
     static bool Need32BitForCoordinates(const Grid *grid);
 };
 
