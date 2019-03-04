@@ -100,32 +100,16 @@ FlowRenderer::_initializeGL()
 int
 FlowRenderer::_paintGL( bool fast )
 {
-    if( !_advec.IsReady() )
+    int ready  = _advec.IsReady();
+    if( ready != 0 )
         _useOceanField();
 
-/*
     size_t numOfStreams = _advec.GetNumberOfStreams();
     for( size_t i = 0; i < numOfStreams; i++ )
     {
         const auto& s = _advec.GetStreamAt( i );
         _drawAStream( s );
     }
-*/
-
-    glm::mat4 modelview  = _glManager->matrixManager->GetModelViewMatrix();
-    glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
-    _shader->Bind();
-    _shader->SetUniform("MV", modelview);
-    _shader->SetUniform("Projection", projection);
-    float vert[] = {0.0, 0.0, 0.0, 10.0, 10.0, 10.0};
-    glBindVertexArray( _vertexArrayId );
-    glEnableVertexAttribArray( 0 );
-    glBindBuffer( GL_ARRAY_BUFFER, _vertexBufferId );
-    glBufferData( GL_ARRAY_BUFFER, sizeof(vert), vert, GL_STREAM_DRAW );
-    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
-    glDrawArrays( GL_LINES, 0, 2 );
-    glBindBuffer( GL_ARRAY_BUFFER, 0 );
-    glDisableVertexAttribArray( 0 );
 
     return 0;
 }
@@ -139,10 +123,19 @@ FlowRenderer::_drawAStream( const std::vector<flow::Particle>& stream ) const
     size_t offset    = 0;
     for( const auto& p : stream )
     {
-        std::memcpy( posBuf + offset, glm::value_ptr(p.location), sizeof(glm::vec3) );
-        offset += 3;
+        //std::memcpy( posBuf + offset, glm::value_ptr(p.location), sizeof(glm::vec3) );
+        //offset += 3;
+        posBuf[offset++] = p.location.x * 20.0 + 40.0;
+        posBuf[offset++] = p.location.y * 20.0 + 40.0;
+        posBuf[offset++] = p.location.z * 20.0 + 40.0;
     }
 
+    glm::mat4 modelview  = _glManager->matrixManager->GetModelViewMatrix();
+    glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
+    _shader->Bind();
+    _shader->SetUniform("MV", modelview);
+    _shader->SetUniform("Projection", projection);
+    glBindVertexArray( _vertexArrayId );
     glEnableVertexAttribArray( 0 );
     glBindBuffer( GL_ARRAY_BUFFER, _vertexBufferId );
     glBufferData( GL_ARRAY_BUFFER, sizeof(glm::vec3) * numOfPart, posBuf, GL_STREAM_DRAW );
@@ -150,6 +143,7 @@ FlowRenderer::_drawAStream( const std::vector<flow::Particle>& stream ) const
     glDrawArrays( GL_LINE_STRIP, 0, numOfPart );
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     glDisableVertexAttribArray( 0 );
+    glBindVertexArray( 0 );
 
     delete[] posBuf;
 

@@ -8,12 +8,12 @@ set (SRC
 )
 
 set (HEADERS
-	Advection.h
-	OceanField.h
-	Particle.h
-	SteadyVAPORField.h
-	UnsteadyVAPORField.h
-	VelocityField.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Advection.h
+	${PROJECT_SOURCE_DIR}/include/vapor/OceanField.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Particle.h
+	${PROJECT_SOURCE_DIR}/include/vapor/SteadyVAPORField.h
+	${PROJECT_SOURCE_DIR}/include/vapor/UnsteadyVAPORField.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VelocityField.h
 )
 
 add_library (flow SHARED ${SRC} ${HEADERS})
