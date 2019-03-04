@@ -134,7 +134,7 @@ bool ComputeSideBBoxes(ivec3 side, int fastDim, int slowDim, vec3 *boxMins, vec3
     return false;
 }
 
-VolumeCellTraversal::VolumeCellTraversal(GLManager *gl) : VolumeRegular(gl)
+VolumeCellTraversal::VolumeCellTraversal(GLManager *gl) : VolumeRegular(gl), useHighPrecisionTriangleRoutine(false)
 {
     glGenTextures(1, &coordTexture);
     glBindTexture(GL_TEXTURE_3D, coordTexture);
@@ -194,6 +194,8 @@ VolumeCellTraversal::~VolumeCellTraversal()
 int VolumeCellTraversal::LoadData(const Grid *grid)
 {
     if (VolumeRegular::LoadData(grid) < 0) return -1;
+
+    useHighPrecisionTriangleRoutine = NeedsHighPrecisionTriangleRoutine(grid);
 
     printf("Loading coordinate data...\n");
     vector<size_t> dims = grid->GetDimensions();
@@ -366,7 +368,17 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     return 0;
 }
 
-ShaderProgram *VolumeCellTraversal::GetShader() const { return _glManager->shaderManager->GetShader("rayCellTraversal:BB_LEVELS " + std::to_string(BBLevels)); }
+ShaderProgram *VolumeCellTraversal::GetShader() const
+{
+    string shaderName = "rayCellTraversal";
+    if (useHighPrecisionTriangleRoutine) {
+        printf("Using high precision triangle routine\n");
+        shaderName += ":USE_INTEL_TRI_ISECT";
+    }
+    shaderName += ":BB_LEVELS " + std::to_string(BBLevels);
+
+    return _glManager->shaderManager->GetShader(shaderName);
+}
 
 void VolumeCellTraversal::SetUniforms() const
 {
@@ -391,6 +403,25 @@ void VolumeCellTraversal::SetUniforms() const
     glActiveTexture(GL_TEXTURE5);
     glBindTexture(GL_TEXTURE_2D, BBLevelDimTexture);
     s->SetUniform("levelDims", 5);
+}
+
+bool VolumeCellTraversal::NeedsHighPrecisionTriangleRoutine(const Grid *grid)
+{
+    vector<double> extentsMin, extentsMax;
+    grid->GetUserExtents(extentsMin, extentsMax);
+    vector<double> lengths = {
+        extentsMax[0] - extentsMin[0],
+        extentsMax[1] - extentsMin[1],
+        extentsMax[2] - extentsMin[2],
+    };
+    double minLength = min(lengths[0], min(lengths[1], lengths[2]));
+    double maxLength = max(lengths[0], max(lengths[1], lengths[2]));
+    double ratio = maxLength / minLength;
+
+    if (ratio > 500000)
+        return true;
+    else
+        return false;
 }
 
 // Needs more consideration for frequency
