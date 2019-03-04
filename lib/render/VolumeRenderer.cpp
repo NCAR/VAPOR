@@ -32,6 +32,7 @@ VolumeRenderer::VolumeRenderer(const ParamsMgr *pm,
     VAO = NULL;
     VBO = NULL;
     LUTTexture = NULL;
+    depthTexture = NULL;
     algorithm = NULL;
 }
 
@@ -42,6 +43,8 @@ VolumeRenderer::~VolumeRenderer() {
         glDeleteBuffers(1, &VBO);
     if (LUTTexture)
         glDeleteTextures(1, &LUTTexture);
+    if (depthTexture)
+        glDeleteTextures(1, &depthTexture);
     if (cache.tf)
         delete cache.tf;
     if (algorithm)
@@ -76,6 +79,13 @@ int VolumeRenderer::_initializeGL() {
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+
+    glGenTextures(1, &depthTexture);
+    glBindTexture(GL_TEXTURE_2D, depthTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     return 0;
 }
@@ -122,6 +132,9 @@ int VolumeRenderer::_paintGL(bool fast) {
     vec3 extLengthsScaled = extLengths * extScales;
     float smallestDimension = min(extLengthsScaled[0], min(extLengthsScaled[1], extLengthsScaled[2]));
 
+    glBindTexture(GL_TEXTURE_2D, depthTexture);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, viewport[0], viewport[1], viewport[2], viewport[3], 0);
+
     SmartShaderProgram shader(algorithm->GetShader());
     if (!shader.IsValid())
         return -1;
@@ -141,6 +154,10 @@ int VolumeRenderer::_paintGL(bool fast) {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_1D, LUTTexture);
     shader->SetUniform("LUT", 1);
+
+    glActiveTexture(GL_TEXTURE7);
+    glBindTexture(GL_TEXTURE_2D, depthTexture);
+    shader->SetUniform("sceneDepth", 7);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
