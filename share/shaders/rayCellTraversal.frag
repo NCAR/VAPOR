@@ -419,15 +419,18 @@ ivec2 GetBBoxArrayDimensions(int sideID, int level)
     return texelFetch(levelDims, ivec2(sideID, level), 0).rg;
 }
 
-bool IsFaceThatPassedBBAnInitialCell(vec3 origin, vec3 dir, float t0, ivec3 index, ivec3 side, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+bool IsFaceThatPassedBBAnInitialCell(vec3 origin, vec3 dir, float t0, ivec3 index, ivec3 side, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
 {
     float tFace;
     vec3 null;
     if (IntersectRayCellFace(origin, dir, t0, index, side, tFace, null)) {
         if (IsRayEnteringCell(dir, index, side)) {
-            cellIndex = index;
-            entranceFace = side;
-            t1 = tFace;
+            // Only update initial cell values if this is the closest cell
+            if (tFace < t1) {
+                cellIndex = index;
+                entranceFace = side;
+                t1 = tFace;
+            }
             return true;
         }
     }
@@ -455,7 +458,7 @@ bool SearchSideForInitialCellBasic(vec3 origin, vec3 dir, float t0, int sideID, 
 
 #define SearchSideForInitialCellWithOctree_NLevels(N, origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1) SearchSideForInitialCellWithOctree_ ## N ## Levels(origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1)
 
-int SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+int SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
 {
     int fastDim = GetFastDimForFaceIndex(sideID);
     int slowDim = GetSlowDimForFaceIndex(sideID);
@@ -464,6 +467,7 @@ int SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, out iv
 
 int FindInitialCell(vec3 origin, vec3 dir, float t0, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
 {
+    t1 = FLT_MAX;
     int intersections = 0;
     for (int side = 0; side < 6; side++)
         intersections += SearchSideForInitialCell(origin, dir, t0, side, cellIndex, entranceFace, t1);
