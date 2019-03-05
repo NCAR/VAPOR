@@ -6,8 +6,7 @@
 #include "TransformTable.h"
 #include "ColorbarWidget.h"
 
-QVaporSubtab::QVaporSubtab(QWidget* parent)
-    : QWidget(parent)
+QVaporSubtab::QVaporSubtab(QWidget* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
     _layout->setContentsMargins(0,0,0,0);
@@ -15,8 +14,7 @@ QVaporSubtab::QVaporSubtab(QWidget* parent)
     setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Maximum);
 }
 
-FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) 
-    : QVaporSubtab(parent)
+FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
 {
     _variablesWidget = new VariablesWidget(this);
     _variablesWidget->Reinit(
@@ -27,18 +25,16 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent)
     _layout->addWidget( _variablesWidget, 0, 0 );
 }
 
-void FlowVariablesSubtab::Update(
-    VAPoR::DataMgr *dataMgr,
-    VAPoR::ParamsMgr *paramsMgr,
-    VAPoR::RenderParams *rParams
-) {
+void FlowVariablesSubtab::Update(   VAPoR::DataMgr *dataMgr,
+                                    VAPoR::ParamsMgr *paramsMgr,
+                                    VAPoR::RenderParams *rParams) 
+{
     _params = dynamic_cast<VAPoR::FlowParams*>(rParams);
     assert(_params);
     _variablesWidget->Update(dataMgr, paramsMgr, rParams);
 }
 
-FlowAppearanceSubtab::FlowAppearanceSubtab(QWidget* parent)
-    : QVaporSubtab(parent)
+FlowAppearanceSubtab::FlowAppearanceSubtab(QWidget* parent) : QVaporSubtab(parent)
 {
     _TFWidget = new TFWidget(this);
     _TFWidget->Reinit((TFFlags)(SAMPLING));
@@ -48,28 +44,24 @@ FlowAppearanceSubtab::FlowAppearanceSubtab(QWidget* parent)
     _params = NULL;
 }
 
-void FlowAppearanceSubtab::Update(
-    VAPoR::DataMgr *dataMgr,
-    VAPoR::ParamsMgr *paramsMgr,
-    VAPoR::RenderParams *rParams
-) {
+void FlowAppearanceSubtab::Update(  VAPoR::DataMgr *dataMgr,
+                                    VAPoR::ParamsMgr *paramsMgr,
+                                    VAPoR::RenderParams *rParams) 
+{
     _params = dynamic_cast<VAPoR::FlowParams*>(rParams);
     assert(_params);
 
     _TFWidget->Update(dataMgr, paramsMgr, rParams);
 }
 
-FlowGeometrySubtab::FlowGeometrySubtab(QWidget* parent) 
-    : QVaporSubtab(parent)
+FlowGeometrySubtab::FlowGeometrySubtab(QWidget* parent) : QVaporSubtab(parent)
 {
     _geometryWidget   = new GeometryWidget(this);
     _copyRegionWidget = new CopyRegionWidget(this);
     _transformTable   = new TransformTable(this);
-    _geometryWidget->Reinit(
-        (DimFlags)THREED,
-        (VariableFlags)SCALAR,
-        (GeometryFlags)PLANAR
-    );
+    _geometryWidget->Reinit( (DimFlags)THREED,
+                             (VariableFlags)SCALAR,
+                             (GeometryFlags)PLANAR );
 
     _layout->addWidget( _geometryWidget, 0 ,0 );
     _layout->addWidget( _copyRegionWidget, 0 ,0 );
@@ -78,11 +70,10 @@ FlowGeometrySubtab::FlowGeometrySubtab(QWidget* parent)
     _params = NULL;
 }
 
-void FlowGeometrySubtab::Update(
-    VAPoR::ParamsMgr *paramsMgr,
-    VAPoR::DataMgr *dataMgr,
-    VAPoR::RenderParams *rParams
-) {
+void FlowGeometrySubtab::Update( VAPoR::ParamsMgr *paramsMgr,
+                                 VAPoR::DataMgr *dataMgr,
+                                 VAPoR::RenderParams *rParams) 
+{
     _params = dynamic_cast<VAPoR::FlowParams*>(rParams);
     assert(_params);
 
@@ -92,17 +83,15 @@ void FlowGeometrySubtab::Update(
 }
 
 
-FlowAnnotationSubtab::FlowAnnotationSubtab(QWidget* parent)
-    : QVaporSubtab(parent)
+FlowAnnotationSubtab::FlowAnnotationSubtab(QWidget* parent) : QVaporSubtab(parent)
 {
     _colorbarWidget = new ColorbarWidget(this);
     _layout->addWidget(_colorbarWidget, 0, 0);
 }
 
-void FlowAnnotationSubtab::Update(
-    VAPoR::ParamsMgr *paramsMgr,
-    VAPoR::DataMgr *dataMgr,
-    VAPoR::RenderParams *rParams
-) {
+void FlowAnnotationSubtab::Update(  VAPoR::ParamsMgr *paramsMgr,
+                                    VAPoR::DataMgr *dataMgr,
+                                    VAPoR::RenderParams *rParams) 
+{
     _colorbarWidget->Update(dataMgr, paramsMgr, rParams);
 }
