@@ -224,7 +224,7 @@ void VariablesWidget::setColorMappedVariable(const QString& qname) {
 	string name = qname.toStdString();
 	name = name == "0" ? "" : name;
 	_rParams->SetColorMapVariableName(name);
-    cout << "Color Variable: " << name.toStdString() << endl;
+    cout << "Color Variable: " << name << endl;
 }
 
 void VariablesWidget::set2DOrientation(const QString& orientation) {
