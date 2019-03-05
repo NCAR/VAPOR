@@ -287,14 +287,13 @@ bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entr
     }
 }
 
-void BlendToBack(inout vec4 accum, vec4 color)
+vec4 PremultiplyAlpha(vec4 color)
 {
-    color.rgb *= color.a;
-    accum = color * (1-accum.a) + accum * (1);
+    return vec4(color.rgb * color.a, color.a);
 }
 
 // GL_ONE_MINUS_DST_ALPHA, GL_ONE
-void BlendToBack2(inout vec4 accum, vec4 color)
+void BlendToBack(inout vec4 accum, vec4 color)
 {
     accum = color * (1-accum.a) + accum * (1);
 }
@@ -354,7 +353,7 @@ vec4 Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
 #endif
 
             if (ShouldRenderCell(currentCell))
-                BlendToBack(accum, color);
+                BlendToBack(accum, PremultiplyAlpha(color));
         }
         
         currentCell = nextCell;
@@ -510,7 +509,7 @@ void main(void)
             
             if (intersections > 0) {
                 vec4 color = Traverse(cameraPos, dir, t1, initialCell, entranceFace, t1);
-                BlendToBack2(accum, color);
+                BlendToBack(accum, color);
             }
             
             // Failsafe to prevent infinite recursion due to float precision error
