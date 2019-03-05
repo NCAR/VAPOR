@@ -12,7 +12,7 @@ public:
     static std::string GetName() { return "Test"; }
 
     virtual int            LoadData(const Grid *grid);
-    virtual ShaderProgram *GetShader(ShaderManager *sm);
+    virtual ShaderProgram *GetShader() const;
 
 private:
     unsigned int xyCoordTexture;
