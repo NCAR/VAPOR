@@ -4,7 +4,7 @@ using namespace flow;
 
 SteadyVAPORField::SteadyVAPORField()
 {
-    IsSteady   = true;
+    IsSteady    = true;
 
     _velocityU  = nullptr;
     _velocityV  = nullptr;
@@ -36,7 +36,7 @@ SteadyVAPORField::GetVelocity( float t, const glm::vec3& pos, glm::vec3& vel ) c
     if( !_velocityU || !_velocityV || !_velocityW )
         return NO_VECTOR_FIELD_YET ;
 
-    if( !InsideVelocityField( t, pos ) )
+    if( !InsideVolume( t, pos ) )
         return OUT_OF_FIELD; 
 
     const std::vector<double> coords {pos.x, pos.y, pos.z};
@@ -64,7 +64,7 @@ SteadyVAPORField::GetFieldValue( float t, const glm::vec3& pos, float& val ) con
 }
 
 bool
-SteadyVAPORField::InsideVelocityField( float time, const glm::vec3& pos ) const
+SteadyVAPORField::InsideVolume( float time, const glm::vec3& pos ) const
 {
     std::vector<double> coords { pos.x, pos.y, pos.z }; 
     if( !_velocityU->InsideGrid( coords ) )
@@ -72,6 +72,10 @@ SteadyVAPORField::InsideVelocityField( float time, const glm::vec3& pos ) const
     if( !_velocityV->InsideGrid( coords ) )
         return false;
     if( !_velocityW->InsideGrid( coords ) )
+        return false;
+
+    // If there's field value, we test it too
+    if( (_fieldValue != nullptr) && (!_fieldValue->InsideGrid( coords )) )
         return false;
 
     return true;
@@ -88,5 +92,6 @@ SteadyVAPORField::UseVelocityField( const VGrid* u, const VGrid* v, const VGrid*
 void 
 SteadyVAPORField::UseFieldValue( const VGrid* val )
 {
-    _fieldValue = val;
+    _fieldValue   = val;
+    HasFieldValue = true;
 }

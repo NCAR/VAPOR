@@ -11,9 +11,6 @@ class PARAMS_API FlowParams : public RenderParams
 {
 public:
 
-    //FlowParams( DataMgr*                 dataManager, 
-    //            ParamsBase::StateSave*   stateSave,
-    //            std::string              classType );
     FlowParams( DataMgr*                 dataManager, 
                 ParamsBase::StateSave*   stateSave );
     FlowParams( DataMgr*                 dataManager, 
@@ -39,7 +36,19 @@ public:
         return ("FlowParams");
     }
 
+    void SetVelocityVarNameU( std::string& );
+    void SetVelocityVarNameV( std::string& );
+    void SetVelocityVarNameW( std::string& );
+    
+    std::string GetVelocityVarNameU() const;
+    std::string GetVelocityVarNameV() const;
+    std::string GetVelocityVarNameW() const;
+
 protected:
+
+    static const std::string _velocityUTag;
+    static const std::string _velocityVTag;
+    static const std::string _velocityWTag;
 
 };
 

@@ -65,7 +65,7 @@ Advection::Advect( ADVECTION_METHOD method )
     for( auto& s : _streams )
     {
         const auto& p0 = s.back();
-        if( !_vField->InsideVelocityField( p0.time, p0.location ) )
+        if( !_vField->InsideVolume( p0.time, p0.location ) )
             continue;
 
         float dt = _baseDeltaT;
@@ -82,14 +82,23 @@ Advection::Advect( ADVECTION_METHOD method )
         int rv;
         switch (method)
         {
-        case EULER:
-            rv = _advectEuler( p0, dt, p1 ); break;
-        case RK4:
-            rv = _advectRK4(   p0, dt, p1 ); break;
+            case EULER:
+                rv = _advectEuler( p0, dt, p1 ); break;
+            case RK4:
+                rv = _advectRK4(   p0, dt, p1 ); break;
         }
     
-        if( rv == 0 )
-            s.push_back( p1 );
+        if( rv != 0 )
+            continue;
+    
+        if( _vField->HasFieldValue )
+        {
+            rv = _vField->GetFieldValue( p1.time, p1.location, p1.value );
+            if( rv != 0 )
+                continue;
+        }
+
+        s.push_back( p1 );
     }
 
     return 0;
