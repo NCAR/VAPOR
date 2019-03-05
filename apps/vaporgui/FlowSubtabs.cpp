@@ -20,7 +20,7 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent)
 {
     _variablesWidget = new VariablesWidget(this);
     _variablesWidget->Reinit(
-        (VariableFlags)(SCALAR),
+        (VariableFlags)(VECTOR | COLOR),
         (DimFlags)(THREED)
     );
 
