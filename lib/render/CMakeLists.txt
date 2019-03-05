@@ -46,6 +46,7 @@ set (SRC
 	VolumeRegular.cpp
 	VolumeResampled.cpp
 	VolumeTest.cpp
+	VolumeTest2.cpp
 	VolumeCellTraversal.cpp
 )
 
@@ -98,6 +99,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeRegular.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeResampled.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeTest.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeTest2.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeCellTraversal.h
 )
 
