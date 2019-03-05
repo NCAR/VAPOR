@@ -35,7 +35,7 @@ static VolumeAlgorithmRegistrar<VolumeCellTraversal> registration;
 #define F_FRONT ivec3(0, -1, 0)
 #define F_BACK  ivec3(0, 1, 0)
 
-ivec3 GetFaceFromFaceIndex(int i)
+static ivec3 GetFaceFromFaceIndex(int i)
 {
     if (i == FI_LEFT) return F_LEFT;
     if (i == FI_RIGHT) return F_RIGHT;
@@ -47,7 +47,7 @@ ivec3 GetFaceFromFaceIndex(int i)
     return F_LEFT;
 }
 
-int GetFaceIndexFromFace(const ivec3 face)
+static int GetFaceIndexFromFace(const ivec3 face)
 {
     if (face == F_LEFT) return FI_LEFT;
     if (face == F_RIGHT) return FI_RIGHT;
@@ -59,7 +59,7 @@ int GetFaceIndexFromFace(const ivec3 face)
     return 0;
 }
 
-void GetFaceCoordinateIndices(const ivec3 &cell, const ivec3 &face, ivec3 &i0, ivec3 &i1, ivec3 &i2, ivec3 &i3)
+static void GetFaceCoordinateIndices(const ivec3 &cell, const ivec3 &face, ivec3 &i0, ivec3 &i1, ivec3 &i2, ivec3 &i3)
 {
     // CCW
     if (face == F_DOWN) {
@@ -95,7 +95,7 @@ void GetFaceCoordinateIndices(const ivec3 &cell, const ivec3 &face, ivec3 &i0, i
     }
 }
 
-vec3 GetCoordAtIndex(const ivec3 &index, const float *data, const ivec3 &dims)
+static vec3 GetCoordAtIndex(const ivec3 &index, const float *data, const ivec3 &dims)
 {
     const int w = dims.x;
     const int h = dims.y;
@@ -107,7 +107,7 @@ vec3 GetCoordAtIndex(const ivec3 &index, const float *data, const ivec3 &dims)
     return vec3(data[3 * (z * w * h + y * w + x)], data[3 * (z * w * h + y * w + x) + 1], data[3 * (z * w * h + y * w + x) + 2]);
 }
 
-void GetFaceVertices(const ivec3 &cellIndex, const ivec3 &face, const float *data, const ivec3 &dims, vec3 &v0, vec3 &v1, vec3 &v2, vec3 &v3)
+static void GetFaceVertices(const ivec3 &cellIndex, const ivec3 &face, const float *data, const ivec3 &dims, vec3 &v0, vec3 &v1, vec3 &v2, vec3 &v3)
 {
     ivec3 i0, i1, i2, i3;
     GetFaceCoordinateIndices(cellIndex, face, i0, i1, i2, i3);
@@ -117,7 +117,7 @@ void GetFaceVertices(const ivec3 &cellIndex, const ivec3 &face, const float *dat
     v3 = GetCoordAtIndex(i3, data, dims);
 }
 
-bool ComputeSideBBoxes(ivec3 side, int fastDim, int slowDim, vec3 *boxMins, vec3 *boxMaxs, float *coordData, const ivec3 &cellDims, const ivec3 &coordDims, const int bd, const int sd)
+static bool ComputeSideBBoxes(ivec3 side, int fastDim, int slowDim, vec3 *boxMins, vec3 *boxMaxs, float *coordData, const ivec3 &cellDims, const ivec3 &coordDims, const int bd, const int sd)
 {
     ivec3 index = (side + 1) / 2 * (cellDims - 1);
     int   sideID = GetFaceIndexFromFace(side);
