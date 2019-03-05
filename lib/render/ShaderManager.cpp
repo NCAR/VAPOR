@@ -153,6 +153,8 @@ std::string ShaderManager::PreProcessShader(const std::string &path, const std::
         if (BeginsWith(line, "#include ")) {
             assert(Split(line, " ").size() == 2);
             line = "#line 1 1\n" + PreProcessShader(GetSharePath("shaders/" + Split(line, " ")[1]));
+            // Sometimes, the reported line number for a syntax error will be incorrect.
+            // This is a bug in the glsl compiler.
             line += "\n#line " + std::to_string(lineNum+1) + " 0";
         }
         lineNum++;
