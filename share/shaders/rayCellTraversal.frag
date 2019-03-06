@@ -275,7 +275,7 @@ bool ShouldRenderCell(const ivec3 cellIndex)
     return true;
 }
 
-vec4 Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out float t1)
+vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, out float t1)
 {
     vec3 entranceCoord;
     ivec3 nextCell;
@@ -294,9 +294,12 @@ vec4 Traverse(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entrance
     IntersectRayCellFace(origin, dir, -FLT_MAX, currentCell, entranceFace, null, entranceCoord);
     
     while (hasNext) {
+        if (t0 > tMax)
+            break;
+        
         hasNext = FindNextCell(origin, dir, t0, currentCell, entranceFace, nextCell, exitFace, exitCoord, t1);
         
-        if (t0 >= 0) {
+        if (t0 >= tMin || (t0 <= tMin && tMin < t1)) {
             float l = (t1-t0)/unitDistanceScaled;
 #if 0
             vec4 A = GetColorAtCoord(entranceCoord);
@@ -440,7 +443,8 @@ void main(void)
     
     float t0, t1, tp;
     
-    bool intersectBox = IntersectRayBoundingBox(cameraPos, dir, 0, dataBoundsMin, dataBoundsMax, t0, t1);
+    bool intersectBox = IntersectRayBoundingBox(cameraPos, dir, 0, userExtsMin, userExtsMax, t0, t1);
+    float tMin = t0, tMax = t1;
     
     if (intersectBox) {
         ivec3 initialCell;
@@ -454,7 +458,7 @@ void main(void)
             intersections = FindInitialCell(cameraPos, dir, t0, initialCell, entranceFace, t1);
             
             if (intersections > 0) {
-                vec4 color = Traverse(cameraPos, dir, t1, initialCell, entranceFace, t1);
+                vec4 color = Traverse(cameraPos, dir, tMin, tMax, t1, initialCell, entranceFace, t1);
                 BlendToBack(accum, color);
             }
             
