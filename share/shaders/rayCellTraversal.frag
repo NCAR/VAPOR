@@ -1,16 +1,7 @@
 #version 410 core
 
-#include RayMath.frag
+#include VolumeBase.frag
 
-#define EPSILON 1.19e-07
-
-uniform mat4 MVP;
-// uniform vec2 resolution;
-uniform vec3 cameraPos;
-uniform vec3 dataBoundsMin;
-uniform vec3 dataBoundsMax;
-uniform float LUTMin;
-uniform float LUTMax;
 uniform bool hasMissingData;
 
 uniform ivec3 coordDims;
@@ -21,17 +12,11 @@ uniform int BBLevels;
 vec3 coordDimsF = vec3(coordDims);
 ivec3 cellDims = coordDims - 1;
 
-uniform sampler3D data;
-uniform sampler1D LUT;
 uniform sampler3D coords;
 uniform sampler2DArray boxMins;
 uniform sampler2DArray boxMaxs;
 uniform isampler2D levelDims;
 uniform sampler3D missingMask;
-
-in vec2 ST;
-
-out vec4 fragColor;
 
 #define FI_LEFT  0
 #define FI_RIGHT 1
@@ -140,22 +125,6 @@ void GetFaceCoordinateIndices(ivec3 cell, ivec3 face, out ivec3 i0, out ivec3 i1
         i2 = cell + ivec3(1, 1, 1);
         i3 = cell + ivec3(1, 1, 0);
     }
-}
-
-vec4 ROYGBV(float v, float minV, float maxV)
-{
-    vec3 colors[6];
-    colors[0] = vec3(1.00, 0.00, 0.00);
-    colors[1] = vec3(1.00, 0.60, 0.00);
-    colors[2] = vec3(1.00, 1.00, 0.00);
-    colors[3] = vec3(0.00, 1.00, 0.00);
-    colors[4] = vec3(0.00, 0.00, 1.00);
-    colors[5] = vec3(0.32, 0.00, 0.32);
-    float ratio = 5.0 * clamp((v-minV)/(maxV-minV), 0, 1);
-    int indexMin=int(floor(ratio));
-    int indexMax=min(int(indexMin)+1,5);
-    vec3 c = mix(colors[indexMin], colors[indexMax], ratio-indexMin);
-    return vec4(c, 1);
 }
 
 void GetFaceCoordsAndVertices(ivec3 cellIndex, ivec3 face, out ivec3 i0, out ivec3 i1, out ivec3 i2, out ivec3 i3, out vec3 v0, out vec3 v1, out vec3 v2, out vec3 v3)
@@ -285,17 +254,6 @@ bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entr
     } else {
         return SearchNeighboringCells(origin, dir, t0, currentCell, nextCell, exitFace, exitCoord, t1);
     }
-}
-
-vec4 PremultiplyAlpha(vec4 color)
-{
-    return vec4(color.rgb * color.a, color.a);
-}
-
-// GL_ONE_MINUS_DST_ALPHA, GL_ONE
-void BlendToBack(inout vec4 accum, vec4 color)
-{
-    accum = color * (1-accum.a) + accum * (1);
 }
 
 float IntegrateConstantAlpha(float a, float distance)
@@ -476,10 +434,9 @@ int FindInitialCell(vec3 origin, vec3 dir, float t0, out ivec3 cellIndex, out iv
 
 void main(void)
 {
-    vec2 screen = ST*2-1;
-    vec4 world = inverse(MVP) * vec4(screen, 1, 1);
-    world /= world.w;
-    vec3 dir = normalize(world.xyz - cameraPos);
+    vec3 dir;
+    float sceneDepthT;
+    GetRayParameters(dir, sceneDepthT);
     
     float t0, t1, tp;
     
