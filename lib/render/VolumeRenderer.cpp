@@ -102,11 +102,9 @@ int VolumeRenderer::_paintGL(bool fast)
     _glManager->matrixManager->GetDoublev(MatrixManager::Mode::ModelView, m);
     VP->ReconstructCamera(m, cameraPos, cameraUp, cameraDir);
 
-    vector<double> dMinExts, dMaxExts;
-    GetActiveParams()->GetBox()->GetExtents(dMinExts, dMaxExts);
-    vec3  minExts(dMinExts[0], dMinExts[1], dMinExts[2]);
-    vec3  maxExts(dMaxExts[0], dMaxExts[1], dMaxExts[2]);
-    vec3  extLengths = maxExts - minExts;
+    glm::vec3 dataMin, dataMax, userMin, userMax;
+    _getExtents(&dataMin, &dataMax, &userMin, &userMax);
+    vec3  extLengths = dataMax - dataMin;
     vec3  extScales = _getVolumeScales();
     vec3  extLengthsScaled = extLengths * extScales;
     float smallestDimension = min(extLengthsScaled[0], min(extLengthsScaled[1], extLengthsScaled[2]));
@@ -118,8 +116,10 @@ int VolumeRenderer::_paintGL(bool fast)
     if (!shader.IsValid()) return -1;
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     shader->SetUniform("cameraPos", vec3(cameraPos[0], cameraPos[1], cameraPos[2]));
-    shader->SetUniform("dataBoundsMin", minExts);
-    shader->SetUniform("dataBoundsMax", maxExts);
+    shader->SetUniform("dataBoundsMin", dataMin);
+    shader->SetUniform("dataBoundsMax", dataMax);
+    shader->SetUniform("userExtsMin", userMin);
+    shader->SetUniform("userExtsMax", userMax);
     shader->SetUniform("LUTMin", (float)cache.mapRange[0]);
     shader->SetUniform("LUTMax", (float)cache.mapRange[1]);
     shader->SetUniform("unitDistance", smallestDimension / 100.f);
@@ -201,4 +201,16 @@ glm::vec3 VolumeRenderer::_getVolumeScales() const
     rendererScales = rendererTransform->GetScales();
 
     return glm::vec3(datasetScales[0] * rendererScales[0], datasetScales[1] * rendererScales[1], datasetScales[2] * rendererScales[2]);
+}
+
+void VolumeRenderer::_getExtents(glm::vec3 *dataMin, glm::vec3 *dataMax, glm::vec3 *userMin, glm::vec3 *userMax) const
+{
+    VolumeParams * vp = (VolumeParams *)GetActiveParams();
+    vector<double> dMinExts, dMaxExts;
+    vp->GetBox()->GetExtents(dMinExts, dMaxExts);
+    *userMin = vec3(dMinExts[0], dMinExts[1], dMinExts[2]);
+    *userMax = vec3(dMaxExts[0], dMaxExts[1], dMaxExts[2]);
+    _dataMgr->GetVariableExtents(cache.ts, cache.var, cache.refinement, dMinExts, dMaxExts);
+    *dataMin = vec3(dMinExts[0], dMinExts[1], dMinExts[2]);
+    *dataMax = vec3(dMaxExts[0], dMaxExts[1], dMaxExts[2]);
 }

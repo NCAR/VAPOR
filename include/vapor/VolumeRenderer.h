@@ -24,6 +24,7 @@ protected:
     int       _loadData();
     void      _loadTF();
     glm::vec3 _getVolumeScales() const;
+    void      _getExtents(glm::vec3 *dataMin, glm::vec3 *dataMax, glm::vec3 *userMin, glm::vec3 *userMax) const;
 
     VolumeAlgorithm *algorithm;
 
