@@ -17,10 +17,8 @@ QVaporSubtab::QVaporSubtab(QWidget* parent) : QWidget(parent)
 FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
 {
     _variablesWidget = new VariablesWidget(this);
-    _variablesWidget->Reinit(
-        (VariableFlags)(VECTOR | COLOR),
-        (DimFlags)(THREED)
-    );
+    _variablesWidget->Reinit(   (VariableFlags)(VECTOR | COLOR),
+                                (DimFlags)(THREED) );
 
     _layout->addWidget( _variablesWidget, 0, 0 );
 }

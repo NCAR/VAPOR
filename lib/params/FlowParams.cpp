@@ -2,9 +2,11 @@
 
 using namespace VAPoR;
 
+/*
 const std::string FlowParams::_velocityUTag = "velocityUTag";
 const std::string FlowParams::_velocityVTag = "velocityVTag";
 const std::string FlowParams::_velocityWTag = "velocityWTag";
+*/
 
 static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
 
@@ -36,6 +38,7 @@ FlowParams::~FlowParams()
     SetDiagMsg( "FlowParams::~FlowParams() this=%p", this );
 }
 
+/*
 void
 FlowParams::SetVelocityVarNameU( std::string& s )
 {
@@ -71,3 +74,4 @@ FlowParams::GetVelocityVarNameW() const
 {
 	return GetValueString( _velocityWTag, "" );
 }
+*/

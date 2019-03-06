@@ -179,19 +179,16 @@ void VariablesWidget::setVectorVarName(const QString& qname, int component) {
 void VariablesWidget::setXVarName(const QString& name) {
 	assert(_rParams);
 	setVectorVarName(name, X);
-    cout << "X Variable: " << name.toStdString() << endl;
 }
 
 void VariablesWidget::setYVarName(const QString& name) {
 	assert(_rParams);
 	setVectorVarName(name, Y);
-    cout << "Y Variable: " << name.toStdString() << endl;
 }
 
 void VariablesWidget::setZVarName(const QString& name) {
 	assert(_rParams);
 	setVectorVarName(name, Z);
-    cout << "Z Variable: " << name.toStdString() << endl;
 }
 
 void VariablesWidget::setXDistVarName(const QString& name){
@@ -224,7 +221,6 @@ void VariablesWidget::setColorMappedVariable(const QString& qname) {
 	string name = qname.toStdString();
 	name = name == "0" ? "" : name;
 	_rParams->SetColorMapVariableName(name);
-    cout << "Color Variable: " << name << endl;
 }
 
 void VariablesWidget::set2DOrientation(const QString& orientation) {

@@ -36,6 +36,7 @@ public:
         return ("FlowParams");
     }
 
+/*
     void SetVelocityVarNameU( std::string& );
     void SetVelocityVarNameV( std::string& );
     void SetVelocityVarNameW( std::string& );
@@ -43,12 +44,15 @@ public:
     std::string GetVelocityVarNameU() const;
     std::string GetVelocityVarNameV() const;
     std::string GetVelocityVarNameW() const;
+*/
 
 protected:
 
+/*
     static const std::string _velocityUTag;
     static const std::string _velocityVTag;
     static const std::string _velocityWTag;
+*/
 
 };
 
