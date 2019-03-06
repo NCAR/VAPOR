@@ -292,7 +292,7 @@ bool Renderer::VariableExists(
 ) const {
 
 	for (int i=0; i<varnames.size(); i++) {
-		if (zeroOK && (varnames[i] == "0" || varnames[i] == "")) {
+		if (zeroOK && (varnames[i] == "<no-variable>" || varnames[i] == "")) {
 			continue;
 		}
 
