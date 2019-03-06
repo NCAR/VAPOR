@@ -305,7 +305,7 @@ void RenderParams::SetEnabled(bool val){
 
 void RenderParams::SetVariableName(string varname){
 
-	varname = string_replace(varname, "0", "NULL");
+	varname = string_replace(varname, "<no-variable>", "NULL");
 	varname = string_replace(varname, "", "NULL");
 
 	SetValueString(_variableNameTag,"Specify variable name", varname);
@@ -469,7 +469,7 @@ vector<string> RenderParams::GetFieldVariableNames()  const {
 
 void RenderParams::SetFieldVariableNames(vector<string> varnames){
 
-	varnames = string_replace(varnames, "0", "NULL");
+	varnames = string_replace(varnames, "<no-variable>", "NULL");
 	varnames = string_replace(varnames, "", "NULL");
 	for (int i=varnames.size(); i<3; i++) varnames.push_back("NULL");
 
@@ -489,7 +489,7 @@ vector<string> RenderParams::GetAuxVariableNames()  const
 
 void RenderParams::SetAuxVariableNames(std::vector<std::string> varnames)
 {
-    varnames = string_replace(varnames, "0", "NULL");
+    varnames = string_replace(varnames, "<no-variable>", "NULL");
     varnames = string_replace(varnames, "", "NULL");
     SetValueStringVec( _auxVariableNamesTag, "Specify auxiliary varnames", varnames);
 }
@@ -516,7 +516,7 @@ string RenderParams::GetHeightVariableName() const {
 
 void RenderParams::SetHeightVariableName(string varname) {
 
-	varname = string_replace(varname, "0", "NULL");
+	varname = string_replace(varname, "<no-variable>", "NULL");
 	varname = string_replace(varname, "", "NULL");
 
 	SetValueString(
@@ -535,7 +535,7 @@ string RenderParams::GetColorMapVariableName() const {
 
 void RenderParams::SetColorMapVariableName(string varname) {
 
-	varname = string_replace(varname, "0", "NULL");
+	varname = string_replace(varname, "<no-variable>", "NULL");
 	varname = string_replace(varname, "", "NULL");
 
 	SetValueString(
