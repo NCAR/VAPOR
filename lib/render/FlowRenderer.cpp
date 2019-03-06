@@ -1,6 +1,7 @@
 #include "vapor/glutil.h"
 #include "vapor/FlowRenderer.h"
 #include "vapor/OceanField.h"
+#include "vapor/SteadyVAPORField.h"
 #include "vapor/Particle.h"
 #include <iostream>
 #include <cstring>
@@ -9,8 +10,8 @@
 
 using namespace VAPoR;
 
-static RendererRegistrar<FlowRenderer> registrar(
-    FlowRenderer::GetClassType(), FlowParams::GetClassType() );
+static RendererRegistrar<FlowRenderer> registrar( FlowRenderer::GetClassType(), 
+                                                  FlowParams::GetClassType() );
 
 GLenum glCheckError_(const char *file, int line)
 {
@@ -172,6 +173,51 @@ FlowRenderer::_useOceanField()
     _advec.UseSeedParticles( seeds );
     for( int i = 0; i < numOfSteps; i++ )
         _advec.Advect( flow::Advection::RK4 );
+}
+
+void
+FlowRenderer::_useSteadyVAPORField()
+{
+    // First retrieve variable names from the params class
+    FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
+    std::vector<std::string> velVars = params->GetFieldVariableNames();
+    assert( velVars.size() == 3 );  // need to have three components
+
+    // Second use these variable names to get data grids
+
+    
+    if( _velField )
+    {
+        delete _velField;
+        _velField = nullptr;
+    }
+    _velField = new flow::SteadyVAPORField();
+}
+
+int
+FlowRenderer::_getAGrid( const FlowParams* params, 
+                         int               timestep,
+                         std::string&      varName,
+                         Grid**            gridpp  ) const
+{
+    std::vector<double>           extMin, extMax;
+    params->GetBox()->GetExtents( extMin, extMax );
+    Grid* grid = _dataMgr->GetVariable( timestep,
+                                        varName,
+                                        params->GetRefinementLevel(),
+                                        params->GetCompressionLevel(),
+                                        extMin,
+                                        extMax );
+    if( grid == nullptr )
+    {
+        MyBase::SetErrMsg("Not able to get a grid!");
+        return flow::GRID_ERROR;
+    }
+    else
+    {
+        *gridpp = grid;
+        return 0;
+    }
 }
 
 

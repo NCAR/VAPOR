@@ -50,7 +50,13 @@ protected:
 
 
     void _useOceanField();
+    void _useSteadyVAPORField();
     int  _drawAStream( const std::vector<flow::Particle>& s ) const;
+
+    int  _getAGrid( const FlowParams* params,           // Input
+                    int               timestep,         // Input
+                    std::string&      varName,          // Input
+                    Grid**            gridpp  ) const;  // Output
 
 #ifndef WIN32
     double _getElapsedSeconds( const struct timeval* begin, const struct timeval* end ) const;
