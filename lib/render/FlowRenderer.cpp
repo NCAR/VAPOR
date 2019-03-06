@@ -175,7 +175,7 @@ FlowRenderer::_useOceanField()
         _advec.Advect( flow::Advection::RK4 );
 }
 
-void
+int
 FlowRenderer::_useSteadyVAPORField()
 {
     // First retrieve variable names from the params class
@@ -184,14 +184,23 @@ FlowRenderer::_useSteadyVAPORField()
     assert( velVars.size() == 3 );  // need to have three components
 
     // Second use these variable names to get data grids
-
+    Grid *gridU, *gridV, *gridW;
+    int currentTS = params->GetCurrentTimestep();
+    int rv  = _getAGrid( params, currentTS, velVars[0], &gridU );
+    if( rv != 0 )   return rv;
+    rv      = _getAGrid( params, currentTS, velVars[1], &gridV );
+    if( rv != 0 )   return rv;
+    rv      = _getAGrid( params, currentTS, velVars[2], &gridW );
+    if( rv != 0 )   return rv;
     
+    // Third create a SteadyVAPORField using these grids
+    flow::SteadyVAPORField* field = new flow::SteadyVAPORField();
+    field->UseVelocities( gridU, gridV, gridW );
     if( _velField )
-    {
         delete _velField;
-        _velField = nullptr;
-    }
-    _velField = new flow::SteadyVAPORField();
+    _velField = field;
+
+    return 0;
 }
 
 int
