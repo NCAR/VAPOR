@@ -138,7 +138,7 @@ void VariablesWidget::setVarName(const QString &qname) {
         return;
 
     string name = qname.toStdString();
-    name = name == "0" ? "" : name;
+    name = name == "<no-variable>" ? "" : name;
     _rParams->SetVariableName(name);
 
     if (!(_variableFlags & COLOR))
@@ -155,7 +155,7 @@ void VariablesWidget::setVectorVarName(const QString &qname, int component) {
         return;
 
     string name = qname.toStdString();
-    name = name == "0" ? "" : name;
+    name = name == "<no-variable>" ? "" : name;
 
     vector<string> varnames = _rParams->GetFieldVariableNames();
     varnames[component] = name;
@@ -196,7 +196,7 @@ void VariablesWidget::setHeightVarName(const QString &qname) {
         return;
 
     string name = qname.toStdString();
-    name = name == "0" ? "" : name;
+    name = name == "<no-variable>" ? "" : name;
     _rParams->SetHeightVariableName(name);
 }
 
@@ -207,7 +207,7 @@ void VariablesWidget::setColorMappedVariable(const QString &qname) {
         return;
 
     string name = qname.toStdString();
-    name = name == "0" ? "" : name;
+    name = name == "<no-variable>" ? "" : name;
     _rParams->SetColorMapVariableName(name);
 }
 
@@ -322,10 +322,10 @@ string VariablesWidget::updateVarCombo(
     vector<string> my_varnames = varnames;
 
     if (doZero)
-        my_varnames.insert(my_varnames.begin(), "0");
+        my_varnames.insert(my_varnames.begin(), "<no-variable>");
 
     if (currentVar == "") {
-        currentVar = "0";
+        currentVar = "<no-variable>";
     }
 
     varCombo->clear();
