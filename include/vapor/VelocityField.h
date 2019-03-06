@@ -26,7 +26,7 @@ public:
     // 
     // Get the field value at a certain position, at a certain time.
     //
-    virtual int  GetFieldValue( float time, const glm::vec3& pos,   // input 
+    virtual int  GetScalar(     float time, const glm::vec3& pos,   // input 
                                 float& val) const = 0;              // output
 
     // 

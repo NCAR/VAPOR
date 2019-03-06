@@ -62,7 +62,7 @@ OceanField::GetVelocity( float t, const glm::vec3& pos, glm::vec3& vel ) const
 }
 
 int
-OceanField::GetFieldValue( float t, const glm::vec3& pos, float& val ) const
+OceanField::GetScalar( float t, const glm::vec3& pos, float& val ) const
 {
     if( !InsideVolume( t, pos ) )
         return OUT_OF_FIELD;

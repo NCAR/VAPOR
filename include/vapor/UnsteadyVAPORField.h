@@ -21,7 +21,7 @@ public:
    ~UnsteadyVAPORField();
 
     int  GetVelocity(   float time, const glm::vec3& pos, glm::vec3& vel ) const;
-    int  GetFieldValue( float time, const glm::vec3& pos, float& val ) const;
+    int  GetScalar  (   float time, const glm::vec3& pos, float& val ) const;
     bool InsideVolume(  float time, const glm::vec3& pos ) const;    
 
     //
@@ -44,7 +44,7 @@ private:
     std::vector<const VGrid*>   _velArrU;
     std::vector<const VGrid*>   _velArrV;
     std::vector<const VGrid*>   _velArrW;
-    std::vector<const VGrid*>   _fieldValueArr;
+    std::vector<const VGrid*>   _scalarArr;
     std::vector<float>          _timestamps;    // always in ascending order
 
     //
