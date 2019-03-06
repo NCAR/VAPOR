@@ -275,7 +275,7 @@ bool Renderer::VariableExists(
     int level, int lod, bool zeroOK) const {
 
     for (int i = 0; i < varnames.size(); i++) {
-        if (zeroOK && (varnames[i] == "0" || varnames[i] == "")) {
+        if (zeroOK && (varnames[i] == "<no-variable>" || varnames[i] == "")) {
             continue;
         }
 
