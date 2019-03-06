@@ -8,6 +8,8 @@ uniform mat4 MVP;
 uniform vec3 cameraPos;
 uniform vec3 dataBoundsMin;
 uniform vec3 dataBoundsMax;
+uniform vec3 userExtsMin;
+uniform vec3 userExtsMax;
 uniform float LUTMin;
 uniform float LUTMax;
 
