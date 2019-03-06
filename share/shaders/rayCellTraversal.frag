@@ -453,17 +453,6 @@ void main(void)
         do {
             intersections = FindInitialCell(cameraPos, dir, t0, initialCell, entranceFace, t1);
             
-            
-            vec3 dataCoord;
-            if (IntersectRayCellFace(cameraPos, dir, 0, initialCell, entranceFace, t1, dataCoord)) {
-                // vec4 color = GetColorForNormalizedData(NormalizeData(texture(data, dataCoord/coordDimsF).r));
-                vec4 color = GetColorAtCoord(dataCoord);
-                
-                fragColor = vec4(color);
-            } else {
-                fragColor = vec4(0);
-            }
-            
             if (intersections > 0) {
                 vec4 color = Traverse(cameraPos, dir, t1, initialCell, entranceFace, t1);
                 BlendToBack(accum, color);
