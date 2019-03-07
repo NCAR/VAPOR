@@ -41,7 +41,8 @@ void main(void)
             vec4 color = texture(LUT, dataNorm);
             vec3 normal = GetNormal(dataSTR);
             
-            BlendToBack(accum, PremultiplyAlpha(color));
+            if (ShouldRenderSample(dataSTR))
+                BlendToBack(accum, PremultiplyAlpha(color));
             
             if (accum.a > 0.999)
                 break;
