@@ -120,17 +120,16 @@ int
 FlowRenderer::_drawAStream( const std::vector<flow::Particle>& stream ) const
 {
     size_t numOfPart = stream.size();
-    float* posBuf    = new float[ 3 * numOfPart ];
+    float* posBuf    = new float[ 4 * numOfPart ];
     size_t offset    = 0;
     for( const auto& p : stream )
     {
         std::memcpy( posBuf + offset, glm::value_ptr(p.location), sizeof(glm::vec3) );
         offset += 3;
-        //posBuf[offset++] = p.location.x * 20.0 + 40.0;
-        //posBuf[offset++] = p.location.y * 20.0 + 40.0;
-        //posBuf[offset++] = p.location.z * 20.0 + 40.0;
+        posBuf[ offset++ ] = p.value;
     }
 
+    // Make some OpenGL function calls
     glm::mat4 modelview  = _glManager->matrixManager->GetModelViewMatrix();
     glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
     _shader->Bind();
@@ -139,8 +138,8 @@ FlowRenderer::_drawAStream( const std::vector<flow::Particle>& stream ) const
     glBindVertexArray( _vertexArrayId );
     glEnableVertexAttribArray( 0 );
     glBindBuffer( GL_ARRAY_BUFFER, _vertexBufferId );
-    glBufferData( GL_ARRAY_BUFFER, sizeof(glm::vec3) * numOfPart, posBuf, GL_STREAM_DRAW );
-    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+    glBufferData( GL_ARRAY_BUFFER, sizeof(float) * 4 * numOfPart, posBuf, GL_STREAM_DRAW );
+    glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0 );
     glDrawArrays( GL_LINE_STRIP, 0, numOfPart );
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     glDisableVertexAttribArray( 0 );
