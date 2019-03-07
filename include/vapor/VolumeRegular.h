@@ -15,7 +15,7 @@ namespace VAPoR {
         virtual ShaderProgram *GetShader() const;
         virtual void SetUniforms() const;
         
-    private:
+    protected:
         unsigned int dataTexture;
         unsigned int missingTexture;
         
