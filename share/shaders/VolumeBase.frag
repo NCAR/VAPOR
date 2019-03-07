@@ -12,10 +12,12 @@ uniform vec3 userExtsMin;
 uniform vec3 userExtsMax;
 uniform float LUTMin;
 uniform float LUTMax;
+uniform bool hasMissingData;
 
 uniform sampler3D data;
 uniform sampler1D LUT;
 uniform sampler2D sceneDepth;
+uniform sampler3D missingMask;
 
 vec3 lightDir = vec3(0,0,-1);
 bool readDepthBuffer = true;
@@ -36,6 +38,19 @@ vec4 ROYGBV(float v, float minV, float maxV)
     int indexMax=min(int(indexMin)+1,5);
     vec3 c = mix(colors[indexMin], colors[indexMax], ratio-indexMin);
     return vec4(c, 1);
+}
+
+bool DoesSampleHaveMissingData(vec3 dataSTR)
+{
+    return texture(missingMask, dataSTR).r > 0;
+}
+
+bool ShouldRenderSample(const vec3 sampleSTR)
+{
+    if (hasMissingData)
+        if (DoesSampleHaveMissingData(sampleSTR))
+            return false;
+    return true;
 }
 
 float GetDepthBuffer()

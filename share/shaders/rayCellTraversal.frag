@@ -2,8 +2,6 @@
 
 #include VolumeBase.frag
 
-uniform bool hasMissingData;
-
 uniform ivec3 coordDims;
 uniform float unitDistance;
 uniform vec3 scales;
@@ -16,7 +14,6 @@ uniform sampler3D coords;
 uniform sampler2DArray boxMins;
 uniform sampler2DArray boxMaxs;
 uniform isampler2D levelDims;
-uniform sampler3D missingMask;
 
 #define FI_LEFT  0
 #define FI_RIGHT 1
@@ -176,7 +173,7 @@ vec4 GetColorAtCoord(vec3 coord)
 bool DoesCellHaveMissingData(ivec3 cellCoord)
 {
     vec3 coord = vec3(cellCoord)+vec3(0.5);
-    return texture(missingMask, (coord)/(coordDims-1)).r > 0;
+    return DoesSampleHaveMissingData((coord)/(coordDims-1));
 }
 
 bool IntersectRayCellFace(vec3 o, vec3 d, float rt0, ivec3 cellIndex, ivec3 face, out float t, out vec3 dataCoordinate)
@@ -270,8 +267,9 @@ float IntegrateAbsorption(float a, float b, float distance)
 
 bool ShouldRenderCell(const ivec3 cellIndex)
 {
-    if (hasMissingData && DoesCellHaveMissingData(cellIndex))
-        return false;
+    if (hasMissingData)
+        if (DoesCellHaveMissingData(cellIndex))
+            return false;
     return true;
 }
 
