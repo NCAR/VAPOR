@@ -1,22 +1,8 @@
 #version 410 core
 
-#include RayMath.frag
+#include VolumeBase.frag
 
-uniform mat4 MVP;
-// uniform vec2 resolution;
-uniform vec3 cameraPos;
-uniform vec3 dataBoundsMin;
-uniform vec3 dataBoundsMax;
-uniform float LUTMin;
-uniform float LUTMax;
-
-uniform sampler3D data;
-uniform sampler1D LUT;
 uniform sampler3D coordLUT;
-
-in vec2 ST;
-
-out vec4 fragColor;
 
 void main(void)
 {
@@ -49,8 +35,8 @@ void main(void)
 				color = texture(LUT, dataNorm);
 			}
             
-            accum.rgb += color.rgb * color.a * (1-accum.a);
-            accum.a += color.a * (1-accum.a);
+            if (ShouldRenderSample(dataSTR))
+                BlendToBack(accum, PremultiplyAlpha(color));
             
             if (accum.a > 0.999)
                 break;
