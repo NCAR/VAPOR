@@ -6,7 +6,7 @@
 #include <iostream>
 #include <cstring>
 
-#define GLERROR     -10
+#define GL_ERROR     -20
 
 using namespace VAPoR;
 
@@ -87,7 +87,7 @@ FlowRenderer::_initializeGL()
     if( (shader = _glManager->shaderManager->GetShader("FlowLine")) )
         _shader      = shader;
     else
-        return GLERROR;
+        return GL_ERROR;
 
     /* Create Vertex Array Object (VAO) */
     glGenVertexArrays( 1, &_vertexArrayId );
@@ -178,12 +178,20 @@ FlowRenderer::_useOceanField()
 int
 FlowRenderer::_useSteadyVAPORField()
 {
-    // First retrieve variable names from the params class
+    // Step 1: retrieve variable names from the params class
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
     std::vector<std::string> velVars = params->GetFieldVariableNames();
     assert( velVars.size() == 3 );  // need to have three components
+    for( auto& s : velVars )
+    {
+        if( s.empty() )
+        {
+            MyBase::SetErrMsg("Missing velocity field");
+            return flow::GRID_ERROR;
+        }
+    }
 
-    // Second use these variable names to get data grids
+    // Step 2: use these variable names to get data grids
     Grid *gridU, *gridV, *gridW;
     int currentTS = params->GetCurrentTimestep();
     int rv  = _getAGrid( params, currentTS, velVars[0], &gridU );
@@ -192,10 +200,27 @@ FlowRenderer::_useSteadyVAPORField()
     if( rv != 0 )   return rv;
     rv      = _getAGrid( params, currentTS, velVars[2], &gridW );
     if( rv != 0 )   return rv;
+
+    // Step 3: repeat step 2 for the color mapping variable
+    Grid* scalarP    = nullptr;
+    bool singleColor = params->UseSingleColor();
+    if( !singleColor )
+    {
+        std::string scalarVar = params->GetColorMapVariableName();
+        if( !scalarVar.empty() )
+        {
+            rv      = _getAGrid( params, currentTS, scalarVar, &scalarP );
+            if( rv != 0 )   return rv;
+        }
+    }
     
-    // Third create a SteadyVAPORField using these grids, and ask Advection to use it!
+    // Step 4: create a SteadyVAPORField using these grids, and ask Advection to use it!
     flow::SteadyVAPORField* field = new flow::SteadyVAPORField();
     field->UseVelocities( gridU, gridV, gridW );
+    if( !singleColor )
+        field->UseScalar( scalarP );
+    
+    // Step 5: hand over this velocity field
     if( _velField )
         delete _velField;
     _velField = field;
@@ -206,7 +231,8 @@ FlowRenderer::_useSteadyVAPORField()
     _advec.UseSeedParticles( seeds );
     _advec.UseVelocityField( _velField );
 
-    int numOfSteps = 100;
+    // Do some advection
+    int numOfSteps = 200;
     for( int i = 0; i < numOfSteps; i++ )
         _advec.Advect( flow::Advection::RK4 );
     
