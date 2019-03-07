@@ -7,9 +7,9 @@
 #include <queue>
 #include <vector>
 
-#include "Particle.h"
-#include "Advection.h"
-#include "OceanField.h"
+#include "vapor/Particle.h"
+#include "vapor/Advection.h"
+#include "vapor/OceanField.h"
 
 using namespace flow;
 

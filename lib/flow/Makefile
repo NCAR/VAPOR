@@ -26,10 +26,10 @@ endif
 
 
 a.out: main.cpp Advection.o OceanField.o VelocityField.o OceanField.o Particle.o
-	$(CXX) $^ -o $@ $(CXXFLAGS)
+	$(CXX) $^ -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR) 
 
 Advection.o: Advection.cpp VelocityField.o
-	$(CXX) $< -c -o $@ $(CXXFLAGS)
+	$(CXX) $< -c -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR) 
 
 UnsteadyVAPORField.o: UnsteadyVAPORField.cpp VelocityField.o
 	$(CXX) $< -c -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR) -L$(VAPOR_LIB_DIR) -lvdc
@@ -38,13 +38,13 @@ SteadyVAPORField.o: SteadyVAPORField.cpp VelocityField.o
 	$(CXX) $< -c -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR) -L$(VAPOR_LIB_DIR) -lvdc
 
 OceanField.o: OceanField.cpp VelocityField.o
-	$(CXX) $< -c -o $@ $(CXXFLAGS)
+	$(CXX) $< -c -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR)
 
 VelocityField.o: VelocityField.cpp
-	$(CXX) $< -c -o $@ $(CXXFLAGS)
+	$(CXX) $< -c -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR)
 
 Particle.o: Particle.cpp
-	$(CXX) $^ -c -o $@ $(CXXFLAGS)
+	$(CXX) $^ -c -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR)
 
 
 clean:
