@@ -61,6 +61,11 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     );
     _layout->addWidget( _geometryWidget );
    
+    _pathSelectorTest = new VPathSelector(this, "testFileSelector");
+    connect( _pathSelectorTest, SIGNAL( _pathChanged() ),
+        this, SLOT( _pathSelected() ));
+    _layout->addWidget( _pathSelectorTest );
+
     _pushTest = new VPushButton(this, "testLabel", "testButton"); 
     connect( _pushTest, SIGNAL( _pressed() ),
         this, SLOT( _pushTestPressed()));
@@ -78,6 +83,7 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     connect( _checkboxTest, SIGNAL( _checkboxClicked() ),
         this, SLOT( _checkBoxSelected() ) );
     _layout->addWidget( _checkboxTest );
+
 }
 
 void FlowSeedingSubtab::Update(
@@ -104,6 +110,11 @@ void FlowSeedingSubtab::_checkBoxSelected()
 {
     bool checked = _checkboxTest->GetCheckState();
     cout << "Checkbox is checked? " << checked << endl;
+}
+
+void FlowSeedingSubtab::_pathSelected() {
+    string path = _pathSelectorTest->GetPath();
+    cout << "Path changed to " << path << endl;
 }
 
 FlowGeometrySubtab::FlowGeometrySubtab(QWidget* parent) : QVaporSubtab(parent)

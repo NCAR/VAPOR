@@ -8,6 +8,7 @@
 #include "ui_VPushButton.h"
 #include "ui_VComboBox.h"
 #include "ui_VCheckBox.h"
+#include "ui_VPathSelector.h"
 
 namespace Ui {
 class QSliderEdit;
@@ -89,7 +90,8 @@ class VPathSelector : public QWidget, public Ui_VPathSelector
 public:
     VPathSelector(
         QWidget* parent,
-        std::string labelText
+        std::string labelText = "Label",
+        std::string filePath = QDir::homePath().toStdString()
     );
     void SetLabelText( std::string text );
     std::string GetPath() const;
@@ -101,6 +103,9 @@ private slots:
 
 signals:
     void _pathChanged();
+
+private:
+    std::string _filePath;
 };
 
 
