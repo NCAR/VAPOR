@@ -265,7 +265,7 @@ void Renderer::DisableClippingPlanes()
 bool Renderer::VariableExists(size_t ts, std::vector<string> &varnames, int level, int lod, bool zeroOK) const
 {
     for (int i = 0; i < varnames.size(); i++) {
-        if (zeroOK && (varnames[i] == "0" || varnames[i] == "")) { continue; }
+        if (zeroOK && (varnames[i] == "<no-variable>" || varnames[i] == "")) { continue; }
 
         if (!_dataMgr->VariableExists(ts, varnames[i], level, lod)) { return (false); }
     }
