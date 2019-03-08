@@ -19,6 +19,7 @@ void main(void)
         float step = max(((t1-t0)/float(STEPS))*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/float(STEPS));
         float ld = texture(data, ((cameraPos + dir * t0) - dataBoundsMin) / (dataBoundsMax-dataBoundsMin)).r;
         
+        t1 = min(t1, sceneDepthT);
         int i = 0;
         for (float t = t0; t < t1; t += step) {
             vec3 hit = cameraPos + dir * t;

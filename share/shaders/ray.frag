@@ -32,8 +32,9 @@ void main(void)
 #define STEPS 100
         float step = max(((t1-t0)/float(STEPS))*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/float(STEPS));
         
+        t1 = min(t1, sceneDepthT);
         int i = 0;
-        for (float t = t0; t < t1 && t < sceneDepthT; t += step) {
+        for (float t = t0; t < t1; t += step) {
             
             vec3 hit = cameraPos + dir * t;
             vec3 dataSTR = (hit - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
