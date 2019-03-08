@@ -396,7 +396,7 @@ MainForm::MainForm(
 
 	if (files.size() && files[0].endsWith(".nc")) {
         VDCNetCDF vdc;
-        int ret = vdc.Initialize({files[0].toStdString()}, {}, VDC::R);
+        int ret = vdc.Initialize(files[0].toStdString(), {}, VDC::R);
         if (ret < 0) {
             loadDataHelper({files[0].toStdString()}, "NetCDF CF files", "", "cf", true);
         } else {

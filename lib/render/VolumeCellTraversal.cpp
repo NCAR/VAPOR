@@ -1,5 +1,6 @@
 #include <vapor/VolumeCellTraversal.h>
 #include <vector>
+#include <algorithm>
 #include <vapor/glutil.h>
 #include <glm/glm.hpp>
 #include <vapor/GLManager.h>
