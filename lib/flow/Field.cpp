@@ -1,13 +1,13 @@
-#include "vapor/VelocityField.h"
+#include "vapor/Field.h"
 
 using namespace flow;
 
-VelocityField::VelocityField()
+Field::Field()
 { 
     IsSteady       = true;
     IsPeriodic     = false;
     HasScalarValue = false;
 }
 
-VelocityField::~VelocityField()
+Field::~Field()
 { }

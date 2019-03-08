@@ -1,17 +1,16 @@
 /*
- * A derived VelocityField that properly retrieves a steady field from VAPOR.
+ * A derived Field that properly retrieves a steady field from VAPOR.
  */
 
 #ifndef STEADYVAPORFIELD_H
 #define STEADYVAPORFIELD_H
 
-#include "vapor/VelocityField.h"
+#include "vapor/Field.h"
 #include "vapor/Grid.h"
-#include <unordered_map>
 
 namespace flow
 {
-class SteadyVAPORField : public VelocityField
+class SteadyVAPORField : public Field
 {
 
 // Define a few alias

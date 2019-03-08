@@ -1,9 +1,10 @@
 /*
- * The base class of all possible velocity fields for flow integration.
+ * The base class of all possible fields for flow integration.
+ * It must contain a velocity field and possibly a scalar field.
  */
 
-#ifndef VELOCITYFIELD_H
-#define VELOCITYFIELD_H
+#ifndef FIELD_H
+#define FIELD_H
 
 #include <glm/glm.hpp>
 #include <string>
@@ -11,12 +12,12 @@
 
 namespace flow
 {
-class VelocityField
+class Field
 {
 public:
     // Constructor and destructor
-    VelocityField();
-    virtual ~VelocityField();
+    Field();
+    virtual ~Field();
 
     // 
     // Get the velocity value at a certain position, at a certain time.

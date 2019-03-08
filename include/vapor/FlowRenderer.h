@@ -10,7 +10,7 @@
 #include "vapor/FlowParams.h"
 #include "vapor/GLManager.h"
 #include "vapor/Advection.h"
-#include "vapor/VelocityField.h"
+#include "vapor/Field.h"
 
 #include <glm/glm.hpp>
 
@@ -42,7 +42,6 @@ protected:
 
     // Member variables
     flow::Advection         _advec;
-    flow::VelocityField*    _velField;
     std::vector<float>      _colorMap;
     float                   _colorMapRange[3];   // min, max, and their diff
 

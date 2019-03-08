@@ -1,6 +1,6 @@
 set (SRC
 	Particle.cpp
-	VelocityField.cpp
+	Field.cpp
 	OceanField.cpp
 	SteadyVAPORField.cpp
 	UnsteadyVAPORField.cpp
@@ -13,7 +13,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/Particle.h
 	${PROJECT_SOURCE_DIR}/include/vapor/SteadyVAPORField.h
 	${PROJECT_SOURCE_DIR}/include/vapor/UnsteadyVAPORField.h
-	${PROJECT_SOURCE_DIR}/include/vapor/VelocityField.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Field.h
 )
 
 add_library (flow SHARED ${SRC} ${HEADERS})

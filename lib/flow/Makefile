@@ -25,22 +25,22 @@ ifeq ($(HOSTNAME), cisl-jasper)
 endif
 
 
-a.out: main.cpp Advection.o OceanField.o VelocityField.o OceanField.o Particle.o
+a.out: main.cpp Advection.o OceanField.o Field.o OceanField.o Particle.o
 	$(CXX) $^ -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR) 
 
-Advection.o: Advection.cpp VelocityField.o
+Advection.o: Advection.cpp Field.o
 	$(CXX) $< -c -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR) 
 
-UnsteadyVAPORField.o: UnsteadyVAPORField.cpp VelocityField.o
+UnsteadyVAPORField.o: UnsteadyVAPORField.cpp Field.o
 	$(CXX) $< -c -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR) -L$(VAPOR_LIB_DIR) -lvdc
 
-SteadyVAPORField.o: SteadyVAPORField.cpp VelocityField.o
+SteadyVAPORField.o: SteadyVAPORField.cpp Field.o
 	$(CXX) $< -c -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR) -L$(VAPOR_LIB_DIR) -lvdc
 
-OceanField.o: OceanField.cpp VelocityField.o
+OceanField.o: OceanField.cpp Field.o
 	$(CXX) $< -c -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR)
 
-VelocityField.o: VelocityField.cpp
+Field.o: Field.cpp
 	$(CXX) $< -c -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR)
 
 Particle.o: Particle.cpp

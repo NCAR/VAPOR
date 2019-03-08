@@ -1,15 +1,15 @@
 /*
- * A derived VelocityField that simulates the ocean flow.
+ * A derived Field that simulates the ocean flow.
  */
 
 #ifndef OCEANFIELD_H
 #define OCEANFIELD_H
 
-#include "vapor/VelocityField.h"
+#include "vapor/Field.h"
 
 namespace flow
 {
-class OceanField : public VelocityField
+class OceanField : public Field
 {
 public:
     OceanField();

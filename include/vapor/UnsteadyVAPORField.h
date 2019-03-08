@@ -1,16 +1,16 @@
 /*
- * A derived VelocityField that properly retrieves an unsteady field from VAPOR.
+ * A derived Field that properly retrieves an unsteady field from VAPOR.
  */
 
 #ifndef UNSTEADYVAPORFIELD_H
 #define UNSTEADYVAPORFIELD_H
 
-#include "vapor/VelocityField.h"
+#include "vapor/Field.h"
 #include "vapor/Grid.h"
 
 namespace flow
 {
-class UnsteadyVAPORField : public VelocityField
+class UnsteadyVAPORField : public Field
 {
 
 // Define a few alias
