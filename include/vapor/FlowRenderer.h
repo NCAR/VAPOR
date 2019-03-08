@@ -46,6 +46,11 @@ protected:
     std::vector<float>      _colorMap;
     float                   _colorMapRange[3];   // min, max, and their diff
 
+    // A few variables to keep the current advection states
+    size_t                  _state_currentTS;
+    int                     _state_refinementLevel;
+    int                     _state_compressionLevel;
+
     // Member variables for OpenGL
     const  GLint        _colorMapTexOffset;
     ShaderProgram*      _shader;
@@ -68,6 +73,7 @@ protected:
     int  _genSeedsXY( std::vector<flow::Particle>& seeds ) const;
 
     void _updateColormap( FlowParams* );
+
 
 #ifndef WIN32
     double _getElapsedSeconds( const struct timeval* begin, const struct timeval* end ) const;
