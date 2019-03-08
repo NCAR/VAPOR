@@ -200,3 +200,49 @@ UnsteadyVAPORField::_binarySearch( const std::vector<T>& vec, T val,
     else
         return _binarySearch( vec, val, middle, end );
 }
+
+int  
+UnsteadyVAPORField::GetExtents( float time, glm::vec3& minExt, glm::vec3& maxExt ) const
+{
+    size_t floor;
+    int rv = _locateTimestamp( time, floor );
+    if( rv != 0 )
+        return NOT_CONTAIN_TIME;
+
+    // find the cloest time step
+    size_t idx = floor;
+    if( floor < _timestamps.size() - 1 )
+    {
+        size_t ceil = floor + 1;
+        if( _timestamps[ceil] - time > time - _timestamps[floor] )
+            idx = ceil;
+    }
+
+    std::vector<double>            gridMin, gridMax;
+    _velArrU[idx]->GetUserExtents( gridMin, gridMax );
+    glm::vec3 uMin( gridMin.at(0), gridMin.at(1), gridMin.at(2) );
+    glm::vec3 uMax( gridMax.at(0), gridMax.at(1), gridMax.at(2) );
+
+    _velArrV[idx]->GetUserExtents( gridMin, gridMax );
+    glm::vec3 vMin( gridMin.at(0), gridMin.at(1), gridMin.at(2) );
+    glm::vec3 vMax( gridMax.at(0), gridMax.at(1), gridMax.at(2) );
+
+    _velArrW[idx]->GetUserExtents( gridMin, gridMax );
+    glm::vec3 wMin( gridMin.at(0), gridMin.at(1), gridMin.at(2) );
+    glm::vec3 wMax( gridMax.at(0), gridMax.at(1), gridMax.at(2) );
+
+    minExt = glm::min( uMin, glm::min( vMin, wMin ) );
+    maxExt = glm::max( uMax, glm::max( vMax, wMax ) );
+
+    if( _scalarArr.size() > 0 )
+    {
+        _scalarArr[idx]->GetUserExtents( gridMin, gridMax );
+        glm::vec3 sMin( gridMin.at(0),   gridMin.at(1), gridMin.at(2) );
+        glm::vec3 sMax( gridMax.at(0),   gridMax.at(1), gridMax.at(2) );
+
+        minExt = glm::min( minExt, sMin );
+        maxExt = glm::max( maxExt, sMax );
+    }
+    
+    return 0;
+}

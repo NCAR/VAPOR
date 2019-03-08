@@ -98,3 +98,38 @@ SteadyVAPORField::UseScalar( const VGrid* val )
     _scalar       = val;
     HasFieldValue = true;
 }
+
+int  
+SteadyVAPORField::GetExtents( float time, glm::vec3& minExt, glm::vec3& maxExt ) const
+{
+    if( !_velocityU || !_velocityV || !_velocityW )
+        return NO_VECTOR_FIELD_YET ;
+    
+    std::vector<double>         gridMin, gridMax;
+    _velocityU->GetUserExtents( gridMin, gridMax );
+    glm::vec3 uMin( gridMin.at(0), gridMin.at(1), gridMin.at(2) );
+    glm::vec3 uMax( gridMax.at(0), gridMax.at(1), gridMax.at(2) );
+
+    _velocityV->GetUserExtents( gridMin, gridMax );
+    glm::vec3 vMin( gridMin.at(0), gridMin.at(1), gridMin.at(2) );
+    glm::vec3 vMax( gridMax.at(0), gridMax.at(1), gridMax.at(2) );
+
+    _velocityW->GetUserExtents( gridMin, gridMax );
+    glm::vec3 wMin( gridMin.at(0), gridMin.at(1), gridMin.at(2) );
+    glm::vec3 wMax( gridMax.at(0), gridMax.at(1), gridMax.at(2) );
+
+    minExt = glm::min( uMin, glm::min( vMin, wMin ) );
+    maxExt = glm::max( uMax, glm::max( vMax, wMax ) );
+
+    if( _scalar )
+    {
+        _scalar->GetUserExtents( gridMin, gridMax );
+        glm::vec3 sMin( gridMin.at(0), gridMin.at(1), gridMin.at(2) );
+        glm::vec3 sMax( gridMax.at(0), gridMax.at(1), gridMax.at(2) );
+
+        minExt = glm::min( minExt, sMin );
+        maxExt = glm::max( maxExt, sMax );
+    }
+
+    return 0;
+}

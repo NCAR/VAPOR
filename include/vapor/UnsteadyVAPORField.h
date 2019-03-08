@@ -24,6 +24,10 @@ public:
     int  GetScalar  (   float time, const glm::vec3& pos, float& val ) const;
     bool InsideVolume(  float time, const glm::vec3& pos ) const;    
 
+    // Note: if time falls in between two time steps, the extents of the nearest 
+    // time step will be returned.
+    int  GetExtents(    float time, glm::vec3& minExt, glm::vec3& maxExt ) const;
+
     //
     // Modifiers
     //

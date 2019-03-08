@@ -34,6 +34,11 @@ public:
     //
     virtual bool InsideVolume( float time, const glm::vec3& pos ) const = 0;
 
+    //
+    // Retrieve the extents of this field. 
+    //
+    virtual int GetExtents( float time, glm::vec3& minExt, glm::vec3& maxExt ) const = 0;
+
 
     // Class members
     bool        IsSteady;

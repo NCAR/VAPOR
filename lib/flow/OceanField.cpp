@@ -72,3 +72,11 @@ OceanField::GetScalar( float t, const glm::vec3& pos, float& val ) const
         return 0;
     }
 }
+
+int  
+OceanField::GetExtents( float time, glm::vec3& minExt, glm::vec3& maxExt ) const
+{
+    minExt = glm::vec3( -1.0, -1.0, -1.0 );
+    maxExt = glm::vec3(  1.0,  1.0,  1.0 );
+    return 0;
+}
