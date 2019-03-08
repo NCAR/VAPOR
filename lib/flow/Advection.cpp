@@ -55,6 +55,42 @@ Advection::IsReady() const
     return 0;
 }
 
+bool
+Advection::IsSteady() const
+{
+    return _vField->IsSteady;
+}
+bool
+Advection::IsPeriodic() const
+{
+    return _vField->IsPeriodic;
+}
+bool
+Advection::HasScalarValue() const
+{
+    return _vField->HasScalarValue;
+}
+const std::string& 
+Advection::GetVelocityNameU() const
+{
+    return _vField->VelocityNameU;
+}
+const std::string& 
+Advection::GetVelocityNameV() const
+{
+    return _vField->VelocityNameV;
+}
+const std::string& 
+Advection::GetVelocityNameW() const
+{
+    return _vField->VelocityNameW;
+}
+const std::string& 
+Advection::GetScalarName() const
+{
+    return _vField->ScalarName;
+}
+
 int
 Advection::Advect( ADVECTION_METHOD method )
 {
@@ -91,7 +127,7 @@ Advection::Advect( ADVECTION_METHOD method )
         if( rv != 0 )
             continue;
     
-        if( _vField->HasFieldValue )
+        if( _vField->HasScalarValue )
         {
             rv = _vField->GetScalar( p1.time, p1.location, p1.value );
             if( rv != 0 )

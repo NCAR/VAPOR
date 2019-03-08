@@ -4,9 +4,9 @@ using namespace flow;
 
 VelocityField::VelocityField()
 { 
-    IsSteady      = true;
-    IsPeriodic    = false;
-    HasFieldValue = false;
+    IsSteady       = true;
+    IsPeriodic     = false;
+    HasScalarValue = false;
 }
 
 VelocityField::~VelocityField()

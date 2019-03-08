@@ -39,9 +39,18 @@ public:
     //   Command:  splot "filename" u 1:2:3 w lines
     //   Tutorial: http://lowrank.net/gnuplot/datafile-e.html
     //
-    int OutputStreamsGnuplot( const std::string& filename ) const;
+    int  OutputStreamsGnuplot( const std::string& filename ) const;
 
-    int IsReady() const;
+    // Query properties (most are properties of the velocity field)
+    int  IsReady() const;
+    bool IsSteady() const;
+    bool IsPeriodic() const;
+    bool HasScalarValue() const;
+    const std::string& GetVelocityNameU() const;
+    const std::string& GetVelocityNameV() const;
+    const std::string& GetVelocityNameW() const;
+    const std::string& GetScalarName() const;
+    
 
 private:
     const VelocityField*                    _vField;

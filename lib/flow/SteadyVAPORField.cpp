@@ -95,8 +95,8 @@ SteadyVAPORField::UseVelocities( const VGrid* u, const VGrid* v, const VGrid* w 
 void 
 SteadyVAPORField::UseScalar( const VGrid* val )
 {
-    _scalar       = val;
-    HasFieldValue = true;
+    _scalar        = val;
+    HasScalarValue = true;
 }
 
 int  

@@ -43,7 +43,7 @@ public:
     // Class members
     bool        IsSteady;
     bool        IsPeriodic;
-    bool        HasFieldValue;
+    bool        HasScalarValue;
     // Varuable names for 3 velocity components
     std::string VelocityNameU, VelocityNameV, VelocityNameW;
     std::string ScalarName;    // Varuable names for the value field
