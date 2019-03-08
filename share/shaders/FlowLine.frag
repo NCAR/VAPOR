@@ -4,11 +4,19 @@ layout(location = 0) out vec4 color;
 
 in float scalarV;
 
+uniform sampler1D   colorMapTexture;
+uniform vec3        colorMapRange;
+uniform bool        singleColor;
+
+
 void main(void)
 {
-    if( scalarV < 1.0 )
-        color = vec4( 1.0 );
+    if( singleColor )
+        color = texelFetch( colorMapTexture, 0, 0 );
     else
-        color = vec4( 1.0, 0.2, 0.2, 1.0 );
+    {
+        float valTranslate = (scalarV - colorMapRange.x) / colorMapRange.z;
+        color = texture( colorMapTexture, valTranslate );
+    }
 }
 

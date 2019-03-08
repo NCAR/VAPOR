@@ -2,6 +2,7 @@
 
 using namespace flow;
 
+// Constructor
 SteadyVAPORField::SteadyVAPORField()
 {
     IsSteady    = true;
@@ -12,12 +13,10 @@ SteadyVAPORField::SteadyVAPORField()
     _scalar     = nullptr;
 }
 
+// Destructor
 SteadyVAPORField::~SteadyVAPORField()
 {
-    _velocityU  = nullptr;
-    _velocityV  = nullptr;
-    _velocityW  = nullptr;
-    _scalar     = nullptr;
+    this->DestroyGrids();
 }
 
 void
@@ -26,7 +25,11 @@ SteadyVAPORField::DestroyGrids()
     if( _velocityU )    delete _velocityU;
     if( _velocityV )    delete _velocityV;
     if( _velocityW )    delete _velocityW;
-    if( _scalar    )   delete _scalar   ;
+    if( _scalar    )    delete _scalar;
+    _velocityU  = nullptr;
+    _velocityV  = nullptr;
+    _velocityW  = nullptr;
+    _scalar     = nullptr;
 }
 
 

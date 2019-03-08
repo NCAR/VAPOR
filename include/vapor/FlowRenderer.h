@@ -40,26 +40,34 @@ protected:
     int  _paintGL( bool fast );
     void _clearCache() {};
 
+    // Member variables
     flow::Advection         _advec;
     flow::VelocityField*    _velField;
+    std::vector<float>      _colorMap;
+    float                   _colorMapRange[3];   // min, max, and their diff
 
-    // OpenGL stuff: shaders
+    // Member variables for OpenGL
+    const  GLint        _colorMapTexOffset;
     ShaderProgram*      _shader;
     GLuint              _vertexArrayId; 
     GLuint              _vertexBufferId; 
+    GLuint              _colorMapTexId;
 
-
+    // Member functions
     void _useOceanField();
-    int  _useSteadyVAPORField();
+    int  _useSteadyVAPORField( const FlowParams* );
 
-    int  _drawAStream( const std::vector<flow::Particle>& s ) const;
+    int  _drawAStream( const std::vector<flow::Particle>&,
+                       const FlowParams*      ) const;
 
     int  _getAGrid( const FlowParams* params,           // Input
                     int               timestep,         // Input
                     std::string&      varName,          // Input
                     Grid**            gridpp  ) const;  // Output
 
-    int _genSeedsXY( std::vector<flow::Particle>& seeds ) const;
+    int  _genSeedsXY( std::vector<flow::Particle>& seeds ) const;
+
+    void _updateColormap( FlowParams* );
 
 #ifndef WIN32
     double _getElapsedSeconds( const struct timeval* begin, const struct timeval* end ) const;

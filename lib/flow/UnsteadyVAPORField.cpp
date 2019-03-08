@@ -8,8 +8,11 @@ UnsteadyVAPORField::UnsteadyVAPORField()
     IsSteady = false;
 }
 
+// Destructor
 UnsteadyVAPORField::~UnsteadyVAPORField()
-{ }
+{ 
+    this->DestroyGrids();
+}
 
 int
 UnsteadyVAPORField::AddTimeStep( const VGrid* u, const VGrid* v, const VGrid* w,
