@@ -66,7 +66,6 @@ set (SRCS
 	Manip.cpp
     FlowEventRouter.cpp
     FlowSubtabs.cpp
-    VaporWidgets.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -89,7 +88,6 @@ set (SRCS
 	QSliderEdit.h
 	QRange.h
 	QSinglePoint.h
-    VaporWidgets.h
 
 	MainForm.h
 	VizWinMgr.h
@@ -203,9 +201,6 @@ set (UIS
 	QSliderEdit.ui
 	QRange.ui
 	QSinglePoint.ui
-    VPushButton.ui
-    VComboBox.ui
-    VCheckBox.ui
 )
 
 source_group (UIs FILES ${UIS})

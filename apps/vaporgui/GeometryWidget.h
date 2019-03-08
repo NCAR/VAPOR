@@ -83,7 +83,6 @@ private:
 		std::vector<double> &minFullExts,
 		std::vector<double> &maxFullExts
     );
-    VAPoR::Box* getBoxHack();
 
 	VAPoR::ParamsMgr* _paramsMgr;
 	VAPoR::DataMgr* _dataMgr;

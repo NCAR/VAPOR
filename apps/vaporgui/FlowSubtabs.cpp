@@ -5,7 +5,6 @@
 #include "CopyRegionWidget.h"
 #include "TransformTable.h"
 #include "ColorbarWidget.h"
-#include "VaporWidgets.h"
 
 QVaporSubtab::QVaporSubtab(QWidget* parent) : QWidget(parent)
 {
@@ -28,6 +27,8 @@ void FlowVariablesSubtab::Update(   VAPoR::DataMgr *dataMgr,
                                     VAPoR::ParamsMgr *paramsMgr,
                                     VAPoR::RenderParams *rParams) 
 {
+    _params = dynamic_cast<VAPoR::FlowParams*>(rParams);
+    assert(_params);
     _variablesWidget->Update(dataMgr, paramsMgr, rParams);
 }
 
@@ -51,81 +52,14 @@ void FlowAppearanceSubtab::Update(  VAPoR::DataMgr *dataMgr,
     _TFWidget->Update(dataMgr, paramsMgr, rParams);
 }
 
-FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
-{
-    _geometryWidget   = new GeometryWidget(this);
-    _geometryWidget->Reinit( 
-        (DimFlags)THREED,
-        (VariableFlags)VECTOR
-        //(GeometryFlags)RAKE_HACK
-    );
-    _layout->addWidget( _geometryWidget );
-   
-    _pathSelectorTest = new VPathSelector(this, "testFileSelector");
-    connect( _pathSelectorTest, SIGNAL( _pathChanged() ),
-        this, SLOT( _pathSelected() ));
-    _layout->addWidget( _pathSelectorTest );
-
-    _pushTest = new VPushButton(this, "testLabel", "testButton"); 
-    connect( _pushTest, SIGNAL( _pressed() ),
-        this, SLOT( _pushTestPressed()));
-    _layout->addWidget( _pushTest );
-
-    _comboTest = new VComboBox(this);//, "testCombo");
-    _comboTest->AddOption( "foo" );
-    _comboTest->AddOption( "bar" );
-    _comboTest->AddOption( "baz" );
-    connect( _comboTest, SIGNAL( _indexChanged(int) ),
-        this, SLOT( _comboBoxSelected(int) ));
-    _layout->addWidget( _comboTest );
-
-    _checkboxTest = new VCheckBox(this, "testCheckbox");
-    connect( _checkboxTest, SIGNAL( _checkboxClicked() ),
-        this, SLOT( _checkBoxSelected() ) );
-    _layout->addWidget( _checkboxTest );
-
-}
-
-void FlowSeedingSubtab::Update(
-        VAPoR::DataMgr *dataMgr,
-        VAPoR::ParamsMgr *paramsMgr,
-        VAPoR::RenderParams *rParams
-    )
-{
-    _geometryWidget->Update(paramsMgr, dataMgr, rParams);
-}
-
-void FlowSeedingSubtab::_pushTestPressed() 
-{
-    cout << "Push button pressed" << endl;
-}
-
-void FlowSeedingSubtab::_comboBoxSelected( int index ) 
-{
-    string option = _comboTest->GetCurrentText();
-    cout << "Combo selected at index " << index << " for option " << option << endl;
-}
-
-void FlowSeedingSubtab::_checkBoxSelected() 
-{
-    bool checked = _checkboxTest->GetCheckState();
-    cout << "Checkbox is checked? " << checked << endl;
-}
-
-void FlowSeedingSubtab::_pathSelected() {
-    string path = _pathSelectorTest->GetPath();
-    cout << "Path changed to " << path << endl;
-}
-
 FlowGeometrySubtab::FlowGeometrySubtab(QWidget* parent) : QVaporSubtab(parent)
 {
     _geometryWidget   = new GeometryWidget(this);
     _copyRegionWidget = new CopyRegionWidget(this);
     _transformTable   = new TransformTable(this);
-    _geometryWidget->Reinit( 
-        (DimFlags)THREED,
-        (VariableFlags)VECTOR
-    );
+    _geometryWidget->Reinit( (DimFlags)THREED,
+                             (VariableFlags)SCALAR,
+                             (GeometryFlags)PLANAR );
 
     _layout->addWidget( _geometryWidget, 0 ,0 );
     _layout->addWidget( _copyRegionWidget, 0 ,0 );
@@ -138,6 +72,9 @@ void FlowGeometrySubtab::Update( VAPoR::ParamsMgr *paramsMgr,
                                  VAPoR::DataMgr *dataMgr,
                                  VAPoR::RenderParams *rParams) 
 {
+    _params = dynamic_cast<VAPoR::FlowParams*>(rParams);
+    assert(_params);
+
     _geometryWidget->Update(paramsMgr, dataMgr, rParams);
     _copyRegionWidget->Update(paramsMgr, rParams);
     _transformTable->Update(rParams->GetTransform());

@@ -75,7 +75,6 @@ private:
  FlowVariablesSubtab  *_variables;
  FlowGeometrySubtab   *_geometry;
  FlowAppearanceSubtab *_appearance;
- FlowSeedingSubtab    *_seeding;
  FlowAnnotationSubtab *_annotation;
 
 };
