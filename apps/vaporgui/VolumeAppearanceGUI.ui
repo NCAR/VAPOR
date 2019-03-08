@@ -173,7 +173,7 @@
   <customwidget>
    <class>QSliderEdit</class>
    <extends>QWidget</extends>
-   <header>qslideredit.h</header>
+   <header>QSliderEdit.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
