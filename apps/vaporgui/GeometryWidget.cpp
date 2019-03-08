@@ -22,6 +22,7 @@
 #include <QFileDialog>
 #include "vapor/ParamsMgr.h"
 #include "vapor/RenderParams.h"
+#include "vapor/FlowParams.h"
 #include "vapor/DataMgrUtils.h"
 #include "GeometryWidget.h"
 
@@ -177,7 +178,7 @@ void GeometryWidget::reinitBoxToPlanarAxis(
     
     minExt[planarAxis] = average;
     maxExt[planarAxis] = average;
-    Box* box = _rParams->GetBox();
+    Box* box = getBoxHack();
     box->SetExtents(minExt, maxExt);
 }
 
@@ -390,7 +391,7 @@ void GeometryWidget::updateBoxCombos(
 
 	// Get current user selected extents
 	//
-	Box* box = _rParams->GetBox();
+	Box* box = getBoxHack();
 	std::vector<double> minExt, maxExt;
 	box->GetExtents(minExt, maxExt);
 	
@@ -443,7 +444,7 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
     if (_geometryFlags & PLANAR) {
         _planeComboBox->blockSignals(true);
 
-        int rParamsOrientation = _rParams->GetBox()->GetOrientation();
+        int rParamsOrientation = getBoxHack()->GetOrientation();
         _planeComboBox->setCurrentIndex(rParamsOrientation);
 
         bool reinit=false;
@@ -451,6 +452,15 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
 
         _planeComboBox->blockSignals(false);
     }
+}
+
+VAPoR::Box* GeometryWidget::getBoxHack() {
+    if ( _geometryFlags & RAKE_HACK ) {
+        FlowParams *flowParams = dynamic_cast<FlowParams*>(_rParams);
+        return flowParams->GetRakeBox();
+    }
+    else
+        return _rParams->GetBox();
 }
 
 void GeometryWidget::getFullExtents(
@@ -496,7 +506,7 @@ void GeometryWidget::setRange(double min, double max, int dimension) {
 	}
 
 	std::vector<double> minExt, maxExt;
-	Box* box = _rParams->GetBox();
+	Box* box = getBoxHack();
 
 	box->GetExtents(minExt, maxExt);
 	minExt[dimension] = min;

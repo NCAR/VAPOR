@@ -36,6 +36,10 @@ public:
         return ("FlowParams");
     }
 
+    VAPoR::Box* GetRakeBox() {
+        return _rakeBox;
+    }
+
 /*
     void SetVelocityVarNameU( std::string& );
     void SetVelocityVarNameV( std::string& );
@@ -48,6 +52,7 @@ public:
 
 protected:
 
+    VAPoR::Box* _rakeBox;
 /*
     static const std::string _velocityUTag;
     static const std::string _velocityVTag;
