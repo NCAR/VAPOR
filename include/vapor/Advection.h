@@ -25,7 +25,7 @@ public:
     Advection();
    ~Advection();
 
-    int Advect( ADVECTION_METHOD method = RK4 );
+    int  Advect( ADVECTION_METHOD method = RK4 );
 
     void SetBaseStepSize(  float deltaT );
     void UseVelocityField( const VelocityField* p );
