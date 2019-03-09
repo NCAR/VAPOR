@@ -40,14 +40,16 @@ protected:
     void _clearCache() {};
 
     // Member variables
-    flow::Advection         _advec;
-    std::vector<float>      _colorMap;
-    float                   _colorMapRange[3];   // min, max, and their diff
+    flow::Advection     _advec;
+    std::vector<float>  _colorMap;
+    float               _colorMapRange[3];   // min, max, and their diff
 
     // A few variables to keep the current advection states
-    size_t                  _state_currentTS;
-    int                     _state_refinementLevel;
-    int                     _state_compressionLevel;
+    size_t              _state_currentTS;
+    int                 _state_refinementLevel;
+    int                 _state_compressionLevel;
+    bool                _state_velocitiesUpToDate;
+    bool                _state_scalarUpToDate;
 
     // Member variables for OpenGL
     const  GLint        _colorMapTexOffset;
@@ -71,6 +73,8 @@ protected:
     int  _genSeedsXY( std::vector<flow::Particle>& seeds ) const;
 
     void _updateColormap( FlowParams* );
+
+    void _udpateAdvectionState( const FlowParams* );
 
 
 #ifndef WIN32
