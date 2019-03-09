@@ -10,7 +10,6 @@
 #include "vapor/FlowParams.h"
 #include "vapor/GLManager.h"
 #include "vapor/Advection.h"
-#include "vapor/Field.h"
 
 #include <glm/glm.hpp>
 

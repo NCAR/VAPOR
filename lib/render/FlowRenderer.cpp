@@ -187,7 +187,7 @@ void
 FlowRenderer::_useOceanField()
 {
     flow::OceanField* field = new flow::OceanField();
-    _advec.UseVelocityField( field );
+    _advec.UseField( field );
     _advec.SetBaseStepSize( 0.1f );
 
     int numOfSeeds = 5, numOfSteps = 100;
@@ -249,7 +249,7 @@ FlowRenderer::_useSteadyVAPORField( const FlowParams* params )
     std::vector<flow::Particle> seeds;
     _genSeedsXY( seeds );
     _advec.UseSeedParticles( seeds );
-    _advec.UseVelocityField( field );
+    _advec.UseField( field );
 
     // Do some advection
     int numOfSteps = 200;

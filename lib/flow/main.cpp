@@ -27,7 +27,7 @@ int main( int argc, char** argv )
     Advection     a;
     a.SetBaseStepSize( 0.5f );
     
-    a.UseVelocityField( &f );
+    a.UseField( &f );
     a.UseSeedParticles( seeds );
 
     int steps = std::atoi( argv[1] );

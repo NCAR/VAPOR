@@ -26,7 +26,7 @@ Advection::SetBaseStepSize( float f )
 }
 
 void
-Advection::UseVelocityField( const Field* p )
+Advection::UseField( const Field* p )
 {
     _field = p;
 }
