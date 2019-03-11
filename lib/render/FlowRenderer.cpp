@@ -51,11 +51,19 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
                       dataMgr ),
             _colorMapTexOffset ( 0 )
 { 
+    // Initialize OpenGL states
     _shader         = nullptr;
-
     _vertexArrayId  = 0;
     _vertexBufferId = 0;
     _colorMapTexId  = 0;
+
+    // Initialize advection states
+    _cache_currentTS        =  0;
+    _cache_refinementLevel  = -2;
+    _cache_compressionLevel = -2;
+    _cache_isSteady         = false;
+    _state_scalarUpToDate   = false;
+    _state_velocitiesUpToDate = false;
 }
 
 // Destructor
@@ -182,6 +190,36 @@ FlowRenderer::_drawAStream( const std::vector<flow::Particle>& stream,
     return 0;
 }
 
+void
+FlowRenderer::_updateFlowStates( const FlowParams* params )
+{
+    if( _cache_currentTS != params->GetCurrentTimestep() )
+    {
+        _cache_currentTS = params->GetCurrentTimestep();
+        if( _cache_isSteady )   // current time step only matters with steady flow
+        {
+            _state_velocitiesUpToDate = false;
+            _state_scalarUpToDate = false;
+        }
+    }
+    if( _cache_refinementLevel != params->GetRefinementLevel() )
+    {
+        _cache_refinementLevel = params->GetRefinementLevel();
+        _state_velocitiesUpToDate = false;
+        _state_scalarUpToDate = false;
+    }
+    if( _cache_compressionLevel != params->GetCompressionLevel() )
+    {
+        _cache_compressionLevel = params->GetCompressionLevel();
+        _state_velocitiesUpToDate = false;
+        _state_scalarUpToDate = false;
+    }
+    if( _cache_isSteady != params->GetIsSteady() )
+    {
+        _state_velocitiesUpToDate = false;
+        _state_scalarUpToDate = false;
+    }
+}
 
 void
 FlowRenderer::_useOceanField()

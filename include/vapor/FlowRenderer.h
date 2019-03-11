@@ -45,9 +45,10 @@ protected:
     float               _colorMapRange[3];   // min, max, and their diff
 
     // A few variables to keep the current advection states
-    size_t              _state_currentTS;
-    int                 _state_refinementLevel;
-    int                 _state_compressionLevel;
+    size_t              _cache_currentTS;
+    int                 _cache_refinementLevel;
+    int                 _cache_compressionLevel;
+    bool                _cache_isSteady;
     bool                _state_velocitiesUpToDate;
     bool                _state_scalarUpToDate;
 
@@ -74,7 +75,8 @@ protected:
 
     void _updateColormap( FlowParams* );
 
-    void _udpateAdvectionState( const FlowParams* );
+    // Update values of _cache_* and _state_* member variables.
+    void _updateFlowStates( const FlowParams* );
 
 
 #ifndef WIN32
