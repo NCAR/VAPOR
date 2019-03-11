@@ -35,13 +35,13 @@ FlowParams::~FlowParams()
 }
 
 void
-FlowParams::SetSteady( bool steady)
+FlowParams::SetIsSteady( bool steady)
 {
 	SetValueLong( _isSteadyTag, "are we using steady advection", long(steady) );
 }
 
 bool
-FlowParams::GetSteady() const
+FlowParams::GetIsSteady() const
 {
 	long rv = GetValueLong( _isSteadyTag, long(true) );
     return bool(rv);
