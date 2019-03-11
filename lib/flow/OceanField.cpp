@@ -1,4 +1,5 @@
 #include "vapor/OceanField.h"
+#include "vapor/Particle.h"
 #include <cmath>
 
 using namespace flow;

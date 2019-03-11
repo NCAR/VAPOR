@@ -1,4 +1,5 @@
 #include "vapor/UnsteadyVAPORField.h"
+#include "vapor/Particle.h"
 #include <cmath>
 
 using namespace flow;

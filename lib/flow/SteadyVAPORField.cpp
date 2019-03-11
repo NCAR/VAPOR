@@ -1,4 +1,5 @@
 #include "vapor/SteadyVAPORField.h"
+#include "vapor/Particle.h"
 
 using namespace flow;
 
