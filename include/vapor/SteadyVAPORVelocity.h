@@ -30,7 +30,7 @@ public:
     //
     // Modifiers
     //
-    void UseVelocities( const VGrid* u, const VGrid* v, const VGrid* w );
+    void UseGrids( const VGrid* u, const VGrid* v, const VGrid* w );
 
     // 
     // Since the grids are passed in, SteadyVAPORField does NOT destroy them by default.

@@ -281,7 +281,7 @@ FlowRenderer::_useSteadyVAPORField( const FlowParams* params )
     
     // Step 4: create a SteadyVAPORVelocity using these grids, and ask Advection to use it!
     flow::SteadyVAPORVelocity* field = new flow::SteadyVAPORVelocity();
-    field->UseVelocities( gridU, gridV, gridW );
+    field->UseGrids( gridU, gridV, gridW );
     //if( !singleColor )
     //    field->UseScalar( scalarP );
     
