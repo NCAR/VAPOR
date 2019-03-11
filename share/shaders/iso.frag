@@ -43,7 +43,7 @@ void main(void)
             }
             ld = dv;
             
-            if (accum.a > 0.999)
+            if (accum.a > ALPHA_BREAK)
                 break;
                 
             // Failsafe
