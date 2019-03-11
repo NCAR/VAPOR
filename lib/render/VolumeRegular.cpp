@@ -80,7 +80,7 @@ int VolumeRegular::LoadData(const Grid *grid)
 
 ShaderProgram *VolumeRegular::GetShader() const
 {
-    return _glManager->shaderManager->GetShader("ray");
+    return _glManager->shaderManager->GetShader("VolumeDVR");
 }
 
 void VolumeRegular::SetUniforms() const
@@ -103,5 +103,5 @@ static VolumeAlgorithmRegistrar<IsoRegular> registrationIso;
 
 ShaderProgram *IsoRegular::GetShader() const
 {
-    return _glManager->shaderManager->GetShader("iso");
+    return _glManager->shaderManager->GetShader("VolumeISO");
 }
