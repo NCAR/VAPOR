@@ -36,23 +36,14 @@ public:
         return ("FlowParams");
     }
 
-/*
-    void SetVelocityVarNameU( std::string& );
-    void SetVelocityVarNameV( std::string& );
-    void SetVelocityVarNameW( std::string& );
-    
-    std::string GetVelocityVarNameU() const;
-    std::string GetVelocityVarNameV() const;
-    std::string GetVelocityVarNameW() const;
-*/
+    // True  == Steady
+    // False == Unteady
+    void SetSteady( bool steady );
+    bool GetSteady() const;
 
 protected:
 
-/*
-    static const std::string _velocityUTag;
-    static const std::string _velocityVTag;
-    static const std::string _velocityWTag;
-*/
+    static const std::string _isSteadyTag;
 
 };
 
