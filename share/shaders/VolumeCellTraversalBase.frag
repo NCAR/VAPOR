@@ -434,6 +434,9 @@ void main(void)
             // Failsafe to prevent infinite recursion due to float precision error
             if (i++ > 8 || t1-t0 <= EPSILON)
                 break;
+
+			if (accum.a > ALPHA_BREAK)
+				break;
                 
             t0 = t1;
             

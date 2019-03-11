@@ -23,6 +23,8 @@ vec3 lightDir = vec3(0,0,-1);
 bool readDepthBuffer = true;
 
 
+#define ALPHA_BREAK 0.999
+
 
 vec4 ROYGBV(float v, float minV, float maxV)
 {
