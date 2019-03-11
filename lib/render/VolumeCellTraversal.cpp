@@ -19,6 +19,7 @@ using std::vector;
 using namespace VAPoR;
 
 static VolumeAlgorithmRegistrar<VolumeCellTraversal> registration;
+static VolumeAlgorithmRegistrar<IsoCellTraversal>    registration2;
 
 #define MAX_LEVELS 32
 
@@ -369,17 +370,18 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     return 0;
 }
 
-ShaderProgram *VolumeCellTraversal::GetShader() const
+std::string VolumeCellTraversal::AddDefinitionsToShader(std::string shaderName) const
 {
-    string shaderName = "VolumeCellDVR";
     if (useHighPrecisionTriangleRoutine) {
         printf("Using high precision triangle routine\n");
         shaderName += ":USE_INTEL_TRI_ISECT";
     }
     shaderName += ":BB_LEVELS " + std::to_string(BBLevels);
 
-    return _glManager->shaderManager->GetShader(shaderName);
+    return shaderName;
 }
+
+ShaderProgram *VolumeCellTraversal::GetShader() const { return _glManager->shaderManager->GetShader(AddDefinitionsToShader("VolumeCellDVR")); }
 
 void VolumeCellTraversal::SetUniforms() const
 {
@@ -435,3 +437,5 @@ bool VolumeCellTraversal::Need32BitForCoordinates(const Grid *grid)
     if (minExt <= -FLT16_MAX || maxExt >= FLT16_MAX) return true;
     return false;
 }
+
+ShaderProgram *IsoCellTraversal::GetShader() const { return _glManager->shaderManager->GetShader(AddDefinitionsToShader("VolumeCellISO")); }
