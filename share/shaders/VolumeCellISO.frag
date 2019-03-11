@@ -2,6 +2,8 @@
 
 #include VolumeCellBase.frag
 
+uniform float isoValue;
+
 vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, out float t1)
 {
     vec3 entranceCoord;
@@ -19,6 +21,7 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
     
     float null;
     IntersectRayCellFace(origin, dir, -FLT_MAX, currentCell, entranceFace, null, entranceCoord);
+    float ld = GetDataCoordinateSpace(entranceCoord);
     
     while (hasNext) {
         if (t0 > tMax)
@@ -27,21 +30,21 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
         hasNext = FindNextCell(origin, dir, t0, currentCell, entranceFace, nextCell, exitFace, exitCoord, t1);
         
         if (t0 >= tMin || (t0 <= tMin && tMin < t1)) {
-            float l = (t1-t0)/unitDistanceScaled;
-#if 0
-            vec4 A = GetColorAtCoord(entranceCoord);
-            vec4 B = GetColorAtCoord(exitCoord);
-            float a = IntegrateAbsorption(A.a, B.a, l);
-            vec4 color = (A+B)/2;
-            // vec4 color = GetAverageColorForCoordIndex(currentCell);
-            color.a = a;
-#else
-            vec4 color = GetAverageColorForCoordIndex(currentCell);
-            color.a = IntegrateConstantAlpha(color.a, l);
-#endif
-
-            if (ShouldRenderCell(currentCell))
-                BlendToBack(accum, PremultiplyAlpha(color));
+            
+            float dv = GetDataCoordinateSpace(exitCoord);
+            
+            if ((ld < isoValue && dv >= isoValue) || (ld > isoValue && dv <= isoValue)) {
+                vec3 isoCoord = mix(entranceCoord, exitCoord, (isoValue-ld)/(dv-ld));
+                
+                vec4 color = vec4(1);
+                vec3 normal = GetNormal(isoCoord/coordDimsF);
+                
+                color.rgb *= PhongLighting(normal, dir);
+                
+                if (ShouldRenderCell(currentCell))
+                    BlendToBack(accum, PremultiplyAlpha(color));
+            }
+            ld = dv;
         }
         
         currentCell = nextCell;
