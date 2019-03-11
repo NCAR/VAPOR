@@ -393,7 +393,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
 }
 
 ShaderProgram *VolumeCellTraversal::GetShader() const {
-    string shaderName = "rayCellTraversal";
+    string shaderName = "VolumeCellDVR";
     if (useHighPrecisionTriangleRoutine) {
         printf("Using high precision triangle routine\n");
         shaderName += ":USE_INTEL_TRI_ISECT";
