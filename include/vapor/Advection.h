@@ -46,10 +46,10 @@ public:
     bool IsSteady() const;
     bool IsPeriodic() const;
     bool HasScalarValue() const;
-    const std::string& GetVelocityNameU() const;
-    const std::string& GetVelocityNameV() const;
-    const std::string& GetVelocityNameW() const;
-    const std::string& GetScalarName() const;
+    const std::string GetVelocityNameU() const;
+    const std::string GetVelocityNameV() const;
+    const std::string GetVelocityNameW() const;
+    const std::string GetScalarName() const;
     
 
 private:
