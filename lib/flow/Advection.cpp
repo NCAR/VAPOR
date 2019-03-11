@@ -52,7 +52,7 @@ int
 Advection::IsReady() const
 {
     if( _field == nullptr )
-        return NO_VECTOR_FIELD_YET;
+        return NO_FIELD_YET;
 
     for( const auto& s : _streams )
     {

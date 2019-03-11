@@ -15,12 +15,11 @@ enum ERROR_CODE
     SUCCESS      =  0,
     OUT_OF_FIELD = -1,
     OUT_OF_RANGE = -2,
-    NO_VECTOR_FIELD_YET  = -3,
+    NO_FIELD_YET  = -3,
     NO_SEED_PARTICLE_YET = -4,
     FILE_ERROR           = -5,
-    NO_VALUE_FIELD_YET   = -6,
-    NOT_CONTAIN_TIME     = -7,
-    GRID_ERROR           = -8
+    NOT_CONTAIN_TIME     = -6,
+    GRID_ERROR           = -7
 };
 
 class Particle
