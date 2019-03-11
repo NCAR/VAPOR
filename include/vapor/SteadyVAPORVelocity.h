@@ -42,9 +42,9 @@ private:
     // 
     // These variables keep the steady grids
     //
-    const VGrid* _velocityU;
-    const VGrid* _velocityV;
-    const VGrid* _velocityW;
+    const VGrid* _gridU;
+    const VGrid* _gridV;
+    const VGrid* _gridW;
 };
 
 };
