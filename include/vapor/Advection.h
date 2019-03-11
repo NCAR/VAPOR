@@ -44,7 +44,6 @@ public:
     // Query properties (most are properties of the velocity field)
     int  IsReady() const;
     bool IsSteady() const;
-    bool IsPeriodic() const;
     //bool HasScalarValue() const;
     const std::string GetVelocityNameU() const;
     const std::string GetVelocityNameV() const;

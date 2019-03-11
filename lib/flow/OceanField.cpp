@@ -5,7 +5,9 @@
 using namespace flow;
 
 OceanField::OceanField()
-{ }
+{ 
+    IsSteady = true;
+}
 
 OceanField::~OceanField()
 { }
@@ -61,20 +63,6 @@ OceanField::GetVelocity( float t, const glm::vec3& pos, glm::vec3& vel ) const
 
     return 0;
 }
-
-#if 0
-int
-OceanField::GetScalar( float t, const glm::vec3& pos, float& val ) const
-{
-    if( !InsideVolume( t, pos ) )
-        return OUT_OF_FIELD;
-    else
-    {
-        val = glm::length( pos );
-        return 0;
-    }
-}
-#endif
 
 int  
 OceanField::GetExtents( float time, glm::vec3& minExt, glm::vec3& maxExt ) const

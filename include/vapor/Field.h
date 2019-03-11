@@ -29,7 +29,6 @@ public:
 
     // Class members
     bool        IsSteady;
-    bool        IsPeriodic;
 };
 };
 
