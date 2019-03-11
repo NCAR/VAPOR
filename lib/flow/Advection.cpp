@@ -32,7 +32,7 @@ Advection::SetBaseStepSize( float f )
 }
 
 void
-Advection::UseField( const VelocityField* p )
+Advection::UseVelocity( const VelocityField* p )
 {
     if( _field )
         delete _field;

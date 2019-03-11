@@ -2,23 +2,23 @@
  * A derived Field that properly retrieves a steady field from VAPOR.
  */
 
-#ifndef STEADYVAPORFIELD_H
-#define STEADYVAPORFIELD_H
+#ifndef STEADYVAPORVelocity_H
+#define STEADYVAPORVelocity_H
 
 #include "vapor/VelocityField.h"
 #include "vapor/Grid.h"
 
 namespace flow
 {
-class SteadyVAPORField : public VelocityField
+class SteadyVAPORVelocity : public VelocityField
 {
 
 // Define a few alias
 using VGrid = VAPoR::Grid;
 
 public:
-    SteadyVAPORField();
-   ~SteadyVAPORField();
+    SteadyVAPORVelocity();
+   ~SteadyVAPORVelocity();
 
     //
     // Retrieve velocity or field value

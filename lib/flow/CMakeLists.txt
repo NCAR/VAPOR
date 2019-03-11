@@ -1,7 +1,7 @@
 set (SRC
 	Particle.cpp
 	OceanField.cpp
-	SteadyVAPORField.cpp
+	SteadyVAPORVelocity.cpp
 	UnsteadyVAPORField.cpp
 	Advection.cpp
 	Field.cpp
@@ -13,7 +13,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/Advection.h
 	${PROJECT_SOURCE_DIR}/include/vapor/OceanField.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Particle.h
-	${PROJECT_SOURCE_DIR}/include/vapor/SteadyVAPORField.h
+	${PROJECT_SOURCE_DIR}/include/vapor/SteadyVAPORVelocity.h
 	${PROJECT_SOURCE_DIR}/include/vapor/UnsteadyVAPORField.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Field.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VelocityField.h

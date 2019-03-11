@@ -1,10 +1,10 @@
-#include "vapor/SteadyVAPORField.h"
+#include "vapor/SteadyVAPORVelocity.h"
 #include "vapor/Particle.h"
 
 using namespace flow;
 
 // Constructor
-SteadyVAPORField::SteadyVAPORField()
+SteadyVAPORVelocity::SteadyVAPORVelocity()
 {
     IsSteady    = true;
 
@@ -14,13 +14,13 @@ SteadyVAPORField::SteadyVAPORField()
 }
 
 // Destructor
-SteadyVAPORField::~SteadyVAPORField()
+SteadyVAPORVelocity::~SteadyVAPORVelocity()
 {
     this->DestroyGrids();
 }
 
 void
-SteadyVAPORField::DestroyGrids()
+SteadyVAPORVelocity::DestroyGrids()
 {
     if( _velocityU )    delete _velocityU;
     if( _velocityV )    delete _velocityV;
@@ -32,7 +32,7 @@ SteadyVAPORField::DestroyGrids()
 
 
 int
-SteadyVAPORField::GetVelocity( float t, const glm::vec3& pos, glm::vec3& vel ) const
+SteadyVAPORVelocity::GetVelocity( float t, const glm::vec3& pos, glm::vec3& vel ) const
 {
     if( !_velocityU || !_velocityV || !_velocityW )
         return NO_VECTOR_FIELD_YET ;
@@ -51,7 +51,7 @@ SteadyVAPORField::GetVelocity( float t, const glm::vec3& pos, glm::vec3& vel ) c
 }
 
 bool
-SteadyVAPORField::InsideVolume( float time, const glm::vec3& pos ) const
+SteadyVAPORVelocity::InsideVolume( float time, const glm::vec3& pos ) const
 {
     std::vector<double> coords { pos.x, pos.y, pos.z }; 
     if( !_velocityU->InsideGrid( coords ) )
@@ -65,7 +65,7 @@ SteadyVAPORField::InsideVolume( float time, const glm::vec3& pos ) const
 }
 
 void
-SteadyVAPORField::UseVelocities( const VGrid* u, const VGrid* v, const VGrid* w )
+SteadyVAPORVelocity::UseVelocities( const VGrid* u, const VGrid* v, const VGrid* w )
 {
     _velocityU = u;
     _velocityV = v;
@@ -73,7 +73,7 @@ SteadyVAPORField::UseVelocities( const VGrid* u, const VGrid* v, const VGrid* w 
 }
 
 int  
-SteadyVAPORField::GetExtents( float time, glm::vec3& minExt, glm::vec3& maxExt ) const
+SteadyVAPORVelocity::GetExtents( float time, glm::vec3& minExt, glm::vec3& maxExt ) const
 {
     if( !_velocityU || !_velocityV || !_velocityW )
         return NO_VECTOR_FIELD_YET ;
