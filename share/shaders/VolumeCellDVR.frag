@@ -1,6 +1,6 @@
 #version 410 core
 
-#include VolumeCellTraversalBase.frag
+#include VolumeCellBase.frag
 
 vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, out float t1)
 {
