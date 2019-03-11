@@ -45,7 +45,7 @@ void main(void)
             if (ShouldRenderSample(dataSTR))
                 BlendToBack(accum, PremultiplyAlpha(color));
             
-            if (accum.a > 0.999)
+            if (accum.a > ALPHA_BREAK)
                 break;
                 
             // Failsafe
