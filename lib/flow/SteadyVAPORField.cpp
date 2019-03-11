@@ -53,6 +53,7 @@ SteadyVAPORField::GetVelocity( float t, const glm::vec3& pos, glm::vec3& vel ) c
     return 0;
 }
 
+#if 0
 int
 SteadyVAPORField::GetScalar( float t, const glm::vec3& pos, float& val ) const
 {
@@ -66,6 +67,7 @@ SteadyVAPORField::GetScalar( float t, const glm::vec3& pos, float& val ) const
 
     return 0;
 }
+#endif
 
 bool
 SteadyVAPORField::InsideVolume( float time, const glm::vec3& pos ) const
@@ -93,12 +95,14 @@ SteadyVAPORField::UseVelocities( const VGrid* u, const VGrid* v, const VGrid* w 
     _velocityW = w;
 }
 
+#if 0
 void 
 SteadyVAPORField::UseScalar( const VGrid* val )
 {
     _scalar        = val;
     HasScalarValue = true;
 }
+#endif
 
 int  
 SteadyVAPORField::GetExtents( float time, glm::vec3& minExt, glm::vec3& maxExt ) const

@@ -1,10 +1,12 @@
 set (SRC
 	Particle.cpp
-	Field.cpp
 	OceanField.cpp
 	SteadyVAPORField.cpp
 	UnsteadyVAPORField.cpp
 	Advection.cpp
+	Field.cpp
+	VelocityField.cpp
+	ScalarField.cpp
 )
 
 set (HEADERS
@@ -14,6 +16,8 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/SteadyVAPORField.h
 	${PROJECT_SOURCE_DIR}/include/vapor/UnsteadyVAPORField.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Field.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VelocityField.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ScalarField.h
 )
 
 add_library (flow SHARED ${SRC} ${HEADERS})

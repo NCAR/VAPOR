@@ -5,12 +5,12 @@
 #ifndef STEADYVAPORFIELD_H
 #define STEADYVAPORFIELD_H
 
-#include "vapor/Field.h"
+#include "vapor/VelocityField.h"
 #include "vapor/Grid.h"
 
 namespace flow
 {
-class SteadyVAPORField : public Field
+class SteadyVAPORField : public VelocityField
 {
 
 // Define a few alias
@@ -24,7 +24,7 @@ public:
     // Retrieve velocity or field value
     //
     int  GetVelocity(   float time, const glm::vec3& pos, glm::vec3& vel ) const;
-    int  GetScalar  (   float time, const glm::vec3& pos, float& val ) const;
+    //int  GetScalar  (   float time, const glm::vec3& pos, float& val ) const;
     bool InsideVolume(  float time, const glm::vec3& pos ) const;    
     int  GetExtents(    float time, glm::vec3& minExt, glm::vec3& maxExt ) const;
 
@@ -32,7 +32,7 @@ public:
     // Modifiers
     //
     void UseVelocities( const VGrid* u, const VGrid* v, const VGrid* w );
-    void UseScalar (    const VGrid* val );
+    //void UseScalar (    const VGrid* val );
 
     // 
     // Since the grids are passed in, SteadyVAPORField does NOT destroy them by default.
