@@ -63,7 +63,7 @@ public:
     
 
 private:
-    const VelocityField*                    _field;
+    const VelocityField*                    _velocity;
     std::vector< std::vector<Particle> >    _streams;
     float   _lowerAngle,    _upperAngle;    // Thresholds for step size adjustment
     float   _lowerAngleCos, _upperAngleCos; // Cosine values of the threshold angles
