@@ -40,7 +40,7 @@ protected:
     void _clearCache() {};
 
     // Member variables
-    flow::Advection     _advec;
+    flow::Advection     _advection;
     std::vector<float>  _colorMap;
     float               _colorMapRange[3];   // min, max, and their diff
 
@@ -59,7 +59,9 @@ protected:
     GLuint              _vertexBufferId; 
     GLuint              _colorMapTexId;
 
+    //
     // Member functions
+    //
     //void _useOceanField();
     int  _useSteadyVAPORField( const FlowParams* );
 
@@ -77,6 +79,9 @@ protected:
 
     // Update values of _cache_* and _state_* member variables.
     void _updateFlowStates( const FlowParams* );
+
+    // Perform advection one step at a time
+    int  _advectAStep();
 
 
 #ifndef WIN32

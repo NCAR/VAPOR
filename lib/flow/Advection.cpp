@@ -49,7 +49,7 @@ Advection::UseSeedParticles( std::vector<Particle>& seeds )
 }
 
 int
-Advection::IsReady() const
+Advection::CheckReady() const
 {
     if( _velocity == nullptr )
         return NO_FIELD_YET;
@@ -119,7 +119,7 @@ Advection::GetScalarName() const
 int
 Advection::Advect( ADVECTION_METHOD method )
 {
-    int ready = IsReady();
+    int ready = CheckReady();
     if( ready != 0 )
         return ready;
 
@@ -151,14 +151,6 @@ Advection::Advect( ADVECTION_METHOD method )
     
         if( rv != 0 )
             continue;
-/*
-        if( _velocity->HasScalarValue )
-        {
-            rv = _velocity->GetScalar( p1.time, p1.location, p1.value );
-            if( rv != 0 )
-                continue;
-        }
-*/
 
         s.push_back( p1 );
     }

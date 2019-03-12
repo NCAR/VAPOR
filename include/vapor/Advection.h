@@ -55,7 +55,7 @@ public:
     int  OutputStreamsGnuplot( const std::string& filename ) const;
 
     // Query properties (most are properties of the velocity field)
-    int  IsReady() const;
+    int  CheckReady() const;
     bool IsSteady() const;
     const std::string GetVelocityNameU() const;
     const std::string GetVelocityNameV() const;

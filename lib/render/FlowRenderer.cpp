@@ -119,11 +119,15 @@ FlowRenderer::_paintGL( bool fast )
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
 
-    int ready  = _advec.IsReady();
+    int ready  = _advection.CheckReady();
     if( ready != 0 )
     {
         _useSteadyVAPORField( params );
     }
+
+    // Advect 200 steps
+    for( int i = 0; i < 200; i++ )
+        _advectAStep();
 
     // Update color map texture
     _updateColormap( params );
@@ -133,10 +137,10 @@ FlowRenderer::_paintGL( bool fast )
                    0, GL_RGBA,       GL_FLOAT,       _colorMap.data() );
     glBindTexture( GL_TEXTURE_1D,  _colorMapTexId );
 
-    size_t numOfStreams = _advec.GetNumberOfStreams();
+    size_t numOfStreams = _advection.GetNumberOfStreams();
     for( size_t i = 0; i < numOfStreams; i++ )
     {
-        const auto& s = _advec.GetStreamAt( i );
+        const auto& s = _advection.GetStreamAt( i );
         _drawAStream( s, params );
     }
 
@@ -226,8 +230,8 @@ void
 FlowRenderer::_useOceanField()
 {
     flow::OceanField* field = new flow::OceanField();
-    _advec.UseField( field );
-    _advec.SetBaseStepSize( 0.1f );
+    _advection.UseField( field );
+    _advection.SetBaseStepSize( 0.1f );
 
     int numOfSeeds = 5, numOfSteps = 100;
     std::vector<flow::Particle> seeds( numOfSeeds );
@@ -235,9 +239,9 @@ FlowRenderer::_useOceanField()
     seeds[1].location = glm::vec3( 0.3f, 0.3f, 0.1f );
     for( int i = 2; i < numOfSeeds; i++ )
         seeds[i].location = glm::vec3( float(i + 1) / float(numOfSeeds + 1), 0.0f, 0.0f );
-    _advec.UseSeedParticles( seeds );
+    _advection.UseSeedParticles( seeds );
     for( int i = 0; i < numOfSteps; i++ )
-        _advec.Advect( flow::Advection::RK4 );
+        _advection.Advect( flow::Advection::RK4 );
 }
 #endif
 
@@ -245,9 +249,9 @@ int
 FlowRenderer::_useSteadyVAPORField( const FlowParams* params )
 {
     // Step 1: retrieve variable names from the params class
-    std::vector<std::string> velVars = params->GetFieldVariableNames();
-    assert( velVars.size() == 3 );  // need to have three components
-    for( auto& s : velVars )
+    std::vector<std::string> varnames = params->GetFieldVariableNames();
+    assert( varnames.size() == 3 );  // need to have three components
+    for( auto& s : varnames )
     {
         if( s.empty() )
         {
@@ -259,42 +263,45 @@ FlowRenderer::_useSteadyVAPORField( const FlowParams* params )
     // Step 2: use these variable names to get data grids
     Grid *gridU, *gridV, *gridW;
     int currentTS = params->GetCurrentTimestep();
-    int rv  = _getAGrid( params, currentTS, velVars[0], &gridU );
+    int rv  = _getAGrid( params, currentTS, varnames[0], &gridU );
     if( rv != 0 )   return rv;
-    rv      = _getAGrid( params, currentTS, velVars[1], &gridV );
+    rv      = _getAGrid( params, currentTS, varnames[1], &gridV );
     if( rv != 0 )   return rv;
-    rv      = _getAGrid( params, currentTS, velVars[2], &gridW );
+    rv      = _getAGrid( params, currentTS, varnames[2], &gridW );
     if( rv != 0 )   return rv;
 
     // Step 3: repeat step 2 for the color mapping variable
+/*
     Grid* scalarP    = nullptr;
     bool singleColor = params->UseSingleColor();
     if( !singleColor )
     {
-        /* std::string scalarVar = params->GetColorMapVariableName();
+        std::string scalarVar = params->GetColorMapVariableName();
         if( !scalarVar.empty() )
         {
             rv      = _getAGrid( params, currentTS, scalarVar, &scalarP );
             if( rv != 0 )   return rv;
-        } */
+        }
     }
+*/
     
     // Step 4: create a SteadyVAPORVelocity using these grids, and ask Advection to use it!
-    flow::SteadyVAPORVelocity* field = new flow::SteadyVAPORVelocity();
-    field->UseGrids( gridU, gridV, gridW );
-    //if( !singleColor )
-    //    field->UseScalar( scalarP );
+    flow::SteadyVAPORVelocity* velocity = new flow::SteadyVAPORVelocity();
+    velocity->UseGrids( gridU, gridV, gridW );
+    velocity->VelocityNameU = varnames[0];
+    velocity->VelocityNameV = varnames[1];
+    velocity->VelocityNameW = varnames[2];
     
-    // Plant seeds
+    // Get ready Advection class
     std::vector<flow::Particle> seeds;
     _genSeedsXY( seeds );
-    _advec.UseSeedParticles( seeds );
-    _advec.UseVelocity( field );
+    _advection.UseSeedParticles( seeds );
+    _advection.UseVelocity( velocity );
 
     // Do some advection
-    int numOfSteps = 200;
-    for( int i = 0; i < numOfSteps; i++ )
-        _advec.Advect( flow::Advection::RK4 );
+    //int numOfSteps = 200;
+    //for( int i = 0; i < numOfSteps; i++ )
+    //    _advection.Advect( flow::Advection::RK4 );
     
     return 0;
 }
@@ -377,6 +384,18 @@ FlowRenderer::_updateColormap( FlowParams* params )
         _colorMapRange[2]         = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ?
                                     (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f ;
     }
+}
+
+int
+FlowRenderer::_advectAStep()
+{
+    int ready = _advection.CheckReady();
+    if( ready != 0 )
+        return ready;
+    else
+        _advection.Advect( flow::Advection::RK4 );
+    
+    return 0;
 }
 
 #ifndef WIN32
