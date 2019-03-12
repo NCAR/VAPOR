@@ -41,9 +41,13 @@ public:
     void SetIsSteady( bool steady );
     bool GetIsSteady() const;
 
+    void SetAlreadyAdvectionStep( long );
+    long GetAlreadyAdvectionStep() const;
+
 protected:
 
     static const std::string _isSteadyTag;
+    static const std::string _alreadyAdvectionStepTag;
 
 };
 

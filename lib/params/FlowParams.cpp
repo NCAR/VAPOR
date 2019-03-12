@@ -3,6 +3,7 @@
 using namespace VAPoR;
 
 const std::string FlowParams::_isSteadyTag = "isSteadyTag";
+const std::string FlowParams::_alreadyAdvectionStepTag = "alreadyAdvectionStepTag";
 
 static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
 
@@ -45,4 +46,16 @@ FlowParams::GetIsSteady() const
 {
 	long rv = GetValueLong( _isSteadyTag, long(true) );
     return bool(rv);
+}
+
+void
+FlowParams::SetAlreadyAdvectionStep( long i )
+{
+    SetValueLong( _alreadyAdvectionStepTag, "how many step already", i );
+}
+
+long
+FlowParams::GetAlreadyAdvectionStep( ) const
+{
+    return GetValueLong( _alreadyAdvectionStepTag, 0 );
 }
