@@ -81,7 +81,7 @@ protected:
     void _updateFlowStates( const FlowParams* );
 
     // Perform advection one step at a time
-    int  _advectAStep();
+    int  _advectAStep( FlowParams* p );
 
 
 #ifndef WIN32
