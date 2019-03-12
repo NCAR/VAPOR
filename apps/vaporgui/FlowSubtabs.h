@@ -20,9 +20,9 @@ class GeometryWidget;
 class CopyRegionWidget;
 class TransformTable;
 class ColorbarWidget;
-class VPushButton;
-class VComboBox;
-class VCheckBox;
+//class VPushButton;
+//class VComboBox;
+//class VCheckBox;
 
 class QVaporSubtab : public QWidget {
     Q_OBJECT

@@ -19,6 +19,7 @@ set (SRC
 	jfilewrite.cpp
 	RayCaster.cpp
 	DVRenderer.cpp
+	FlowRenderer.cpp
 	IsoSurfaceRenderer.cpp
 	ControlExecutive.cpp
 	ContourRenderer.cpp
@@ -75,6 +76,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/TextLabel.h
 	${PROJECT_SOURCE_DIR}/include/vapor/RayCaster.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DVRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/FlowRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/IsoSurfaceRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/PyEngine.h
 	${PROJECT_SOURCE_DIR}/include/vapor/CalcEngineMgr.h
@@ -91,7 +93,7 @@ set (HEADERS
 
 add_library (render SHARED ${SRC} ${HEADERS})
 
-target_link_libraries (render PUBLIC common vdc params ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} python${PYTHONVERSION} ${GLEW} ${OPENGL_LIBRARIES})
+target_link_libraries (render PUBLIC common vdc params flow ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} python${PYTHONVERSION} ${GLEW} ${OPENGL_LIBRARIES})
 
 if (UNIX AND NOT APPLE)
 	target_link_libraries (render PUBLIC GLU)

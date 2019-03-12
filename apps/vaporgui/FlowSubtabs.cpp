@@ -28,13 +28,15 @@ void FlowVariablesSubtab::Update(   VAPoR::DataMgr *dataMgr,
                                     VAPoR::ParamsMgr *paramsMgr,
                                     VAPoR::RenderParams *rParams) 
 {
+    _params = dynamic_cast<VAPoR::FlowParams*>(rParams);
+    assert(_params);
     _variablesWidget->Update(dataMgr, paramsMgr, rParams);
 }
 
 FlowAppearanceSubtab::FlowAppearanceSubtab(QWidget* parent) : QVaporSubtab(parent)
 {
     _TFWidget = new TFWidget(this);
-    _TFWidget->Reinit((TFFlags)(SAMPLING));
+    _TFWidget->Reinit((TFFlags)(SAMPLING | CONSTANT_COLOR));
 
     _layout->addWidget( _TFWidget, 0, 0 );
 
@@ -127,6 +129,9 @@ void FlowGeometrySubtab::Update( VAPoR::ParamsMgr *paramsMgr,
                                  VAPoR::DataMgr *dataMgr,
                                  VAPoR::RenderParams *rParams) 
 {
+    _params = dynamic_cast<VAPoR::FlowParams*>(rParams);
+    assert(_params);
+
     _geometryWidget->Update(paramsMgr, dataMgr, rParams);
     _copyRegionWidget->Update(paramsMgr, rParams);
     _transformTable->Update(rParams->GetTransform());
