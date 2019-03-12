@@ -1,4 +1,5 @@
 #include "vapor/Particle.h"
+#include <stdexcept>
 
 using namespace flow;
 
@@ -12,7 +13,7 @@ Particle::Particle( const glm::vec3& loc, float t )
 {
     location = loc;
     time     = t;
-    value = 0.0f;
+    value    = 0.0f;
 }
 
 Particle::Particle( const float* loc, float t )
@@ -21,7 +22,7 @@ Particle::Particle( const float* loc, float t )
     location.y = loc[1];
     location.z = loc[2];
     time       = t;
-    value = 0.0f;
+    value      = 0.0f;
 }
 
 Particle::Particle( float x, float y, float z, float t )
@@ -30,7 +31,7 @@ Particle::Particle( float x, float y, float z, float t )
     location.y = y;
     location.z = z;
     time       = t;
-    value = 0.0f;
+    value      = 0.0f;
 }
 
 Particle::~Particle( )
@@ -48,53 +49,25 @@ Particle::AttachProperty( float v )
     _properties.insert_after( itr, v );
 }
 
-int
-Particle::EditProperty( int idx, float v )
+float
+Particle::RetrieveProperty( int idx ) const
 {
     if( idx < 0 )
-        return OUT_OF_RANGE;
+        throw std::out_of_range( "flow::Particle" );
 
-    auto itr = _properties.begin();
+    auto itr = _properties.cbegin();
     for( int i = 0; i < idx; i++ )
     {
-        if( itr == _properties.end() )
-            return OUT_OF_RANGE;
+        if( itr == _properties.cend() )
+            throw std::out_of_range( "flow::Particle" );
         else
             ++itr;
     }
 
-    if( itr == _properties.end() )
-        return OUT_OF_RANGE;
+    if( itr == _properties.cend() )
+        throw std::out_of_range( "flow::Particle" );
     else
-    {
-        *itr = v;
-        return 0;
-    }
-}
-
-int
-Particle::RetrieveProperty( int idx, float& v ) const
-{
-    if( idx < 0 )
-        return OUT_OF_RANGE;
-
-    auto itr = _properties.begin();
-    for( int i = 0; i < idx; i++ )
-    {
-        if( itr == _properties.end() )
-            return OUT_OF_RANGE;
-        else
-            ++itr;
-    }
-
-    if( itr == _properties.end() )
-        return OUT_OF_RANGE;
-    else
-    {
-        v = *itr;
-        return 0;
-    }
-
+        return *itr;
 }
 
 void

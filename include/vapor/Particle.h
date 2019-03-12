@@ -37,12 +37,11 @@ public:
     Particle( float x, float y, float z, float t );
    ~Particle();
 
-    void AttachProperty  (  float v );
-    int  EditProperty    (  int idx, float v ); 
-    int  RetrieveProperty(  int idx,            // Input
-                            float& v ) const;   // Output
-    void ClearProperties();
-    int  GetNumOfProperties() const;
+    void  AttachProperty  (  float v );
+    // This function will throw an exception when idx is out of bound
+    float RetrieveProperty(  int idx ) const;
+    void  ClearProperties();
+    int   GetNumOfProperties() const;
 
 private:
     std::forward_list<float>  _properties;  // Forward_list takes only 8 bytes, whereas a vector takes 24 bytes!

@@ -15,6 +15,7 @@ using namespace flow;
 
 int main( int argc, char** argv )
 {
+/*
     int numOfSeeds = 5;
     std::vector<Particle> seeds( numOfSeeds );
     
@@ -36,4 +37,15 @@ int main( int argc, char** argv )
 
     std::string filename( "streams.dat" );
     a.OutputStreamsGnuplot( filename );
+*/
+
+    Particle p;
+    int numOfProp = 10;
+    for( int i = 0; i < numOfProp; i++ )
+        p.AttachProperty( float(i) );
+
+    for( int i = 0; i < p.GetNumOfProperties(); i++ )
+    {
+        std::cout << p.RetrieveProperty( i ) << std::endl;
+    }
 }
