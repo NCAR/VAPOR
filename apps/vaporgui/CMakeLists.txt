@@ -64,12 +64,15 @@ set (SRCS
 	Combo.cpp
 	windowsUtils.cpp
 	Manip.cpp
+    FlowEventRouter.cpp
+    FlowSubtabs.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
 	DVRSubtabs.h
 	IsoSurfaceSubtabs.h
 	WireFrameSubtabs.h
+    FlowSubtabs.h
 	Statistics.h
 	Plot.h
     PythonVariables.h
@@ -103,7 +106,7 @@ set (SRCS
 	AnnotationEventRouter.h
 	BannerGUI.h
 	BarbEventRouter.h
-	BarbEventRouter.h
+	FlowEventRouter.h
 	Combo.h
 	ContourEventRouter.h
 	ControlPointEditor.h
