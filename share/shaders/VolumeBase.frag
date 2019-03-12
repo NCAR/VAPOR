@@ -79,7 +79,7 @@ float PhongLighting(vec3 normal, vec3 viewDir)
     float spec = pow(abs(dot(viewDir, reflectDir)), SHININESS);
     float specular = specularStrength * spec;
 
-    return AMBIENT + diffuse + specular;
+    return max(AMBIENT + diffuse + specular, AMBIENT);
 }
 
 vec3 GetNormal(vec3 p)
