@@ -39,13 +39,13 @@ public:
     const std::vector<Particle>& GetStreamAt( size_t i ) const;
 
     // As part of the functionality of this class, it manages the 
-    // particles that it stores.
-    // 1) this function assigns values to the Particle.value field.
-    int  AssignParticleValues( std::vector<float>& );
-    // 2) this function calls Particle::AttachProperty() function
-    int  AttachParticleProperties( std::vector<float>& );
+    //    particles that it stores.
+    // 1) this function assigns values to the Particle.value field for a stream
+    int  AssignParticleValuesOfAStream( std::vector<float>&, size_t );
+    // 2) this function calls Particle::AttachProperty() function for a stream
+    int  AttachParticlePropertiesOfAStream( std::vector<float>&, size_t );
     // 3) this function calls Particle::ClearProperties() function
-    int  ClearParticleProperties( );
+    void ClearParticleProperties( );
 
     //
     // Output a file that could be plotted by gnuplot

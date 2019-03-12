@@ -248,5 +248,51 @@ Advection::GetNumberOfStreams() const
 const std::vector<Particle>&
 Advection::GetStreamAt( size_t i ) const
 {
+    // Since this function is almost always used together with GetNumberOfStreams(),
+    // I'm offloading the range check to std::vector. 
     return _streams.at(i);
+}
+
+int
+Advection::AssignParticleValuesOfAStream( std::vector<float>& valsIn, size_t idx )
+{
+    if( idx >= _streams.size() || idx < 0 )
+        return OUT_OF_RANGE;
+    if( valsIn.size() != _streams[idx].size() )
+        return SIZE_MISMATCH;
+
+    // Now we assign value to each particle
+    auto itr = _streams[idx].begin();
+    for( auto v : valsIn )
+    {
+        (*itr).value = v;
+        ++itr;
+    }
+    return 0;
+}
+
+int
+Advection::AttachParticlePropertiesOfAStream( std::vector<float>& prop, size_t idx )
+{
+    if( idx >= _streams.size() || idx < 0 )
+        return OUT_OF_RANGE;
+    if( prop.size() != _streams[idx].size() )
+        return SIZE_MISMATCH;
+
+    // Now we attach properties to each particle
+    auto itr = _streams[idx].begin();
+    for( auto v : prop )
+    {
+        (*itr).AttachProperty( v );
+        ++itr;
+    }
+    return 0;
+}
+
+void 
+Advection::ClearParticleProperties()
+{
+    for( auto& stream : _streams )
+        for( auto& part : stream )
+            part.ClearProperties();
 }

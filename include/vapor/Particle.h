@@ -19,15 +19,16 @@ enum ERROR_CODE
     NO_SEED_PARTICLE_YET = -4,
     FILE_ERROR           = -5,
     NOT_CONTAIN_TIME     = -6,
-    GRID_ERROR           = -7
+    GRID_ERROR           = -7,
+    SIZE_MISMATCH        = -8
 };
 
 class Particle
 {
 public:
     glm::vec3                 location;
-    float                     value;
     float                     time;
+    float                     value;
 
     // Constructor and destructor
     Particle();
