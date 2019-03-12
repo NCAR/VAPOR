@@ -12,6 +12,7 @@ namespace flow
 {
 enum ERROR_CODE
 {
+    ADVECT_HAPPENED = 1,
     SUCCESS      =  0,
     OUT_OF_FIELD = -1,
     OUT_OF_RANGE = -2,

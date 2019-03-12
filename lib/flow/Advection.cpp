@@ -123,6 +123,7 @@ Advection::Advect( ADVECTION_METHOD method )
     if( ready != 0 )
         return ready;
 
+    bool happened = false;
     for( auto& s : _streams )
     {
         const auto& p0 = s.back();
@@ -148,14 +149,17 @@ Advection::Advect( ADVECTION_METHOD method )
             case RK4:
                 rv = _advectRK4(   p0, dt, p1 ); break;
         }
-    
         if( rv != 0 )
             continue;
 
+        happened = true;
         s.push_back( p1 );
     }
 
-    return 0;
+    if( happened )
+        return ADVECT_HAPPENED;
+    else
+        return 0;
 }
 
 int
