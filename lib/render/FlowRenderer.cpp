@@ -117,40 +117,50 @@ FlowRenderer::_initializeGL()
 int
 FlowRenderer::_paintGL( bool fast )
 {
+    fast = true;
+
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
 
-    int ready  = _advection.CheckReady();
-    if( ready != 0 )
+    int rv  = _advection.CheckReady();
+    if( rv != 0 )
     {
         _useSteadyVAPORField( params );
     }
 
-    // Advect 200 steps
-    for( int i = 0; i < 200; i++ )
-        _advectAStep( params );
+    // Attempt to do a step of Advection
+    rv = _advection.Advect( flow::Advection::RK4 );
+    while( rv == flow::ADVECT_HAPPENED )
+    {
+        _purePaint( params, true );    // use fast rendering for intermediate results
+        rv = _advection.Advect( flow::Advection::RK4 );
+    }
+        
+    _purePaint( params, fast );
 
-    // Update color map texture
-    _updateColormap( params );
-    glActiveTexture( GL_TEXTURE0 + _colorMapTexOffset );
-    glBindTexture( GL_TEXTURE_1D,  _colorMapTexId );
-    glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA32F,     _colorMap.size()/4,
-                   0, GL_RGBA,       GL_FLOAT,       _colorMap.data() );
-    glBindTexture( GL_TEXTURE_1D,  _colorMapTexId );
+    _restoreGLState();
+
+    return 0;
+}
+
+int
+FlowRenderer::_purePaint( FlowParams* params, bool fast )
+{
+    _sendColormap( params );
 
     size_t numOfStreams = _advection.GetNumberOfStreams();
     for( size_t i = 0; i < numOfStreams; i++ )
     {
         const auto& s = _advection.GetStreamAt( i );
-        _drawAStream( s, params );
+        if( fast )
+            _drawAStreamAsLines( s, params );
+        //else
+            //_drawAStreamBeautifully( s, params );
     }
-
-    return 0;
 }
 
-
 int
-FlowRenderer::_drawAStream( const std::vector<flow::Particle>& stream,
-                            const FlowParams* params ) const
+FlowRenderer::_drawAStreamAsLines( const std::vector<flow::Particle>& stream,
+                                   const FlowParams* params ) const
 {
     size_t numOfPart = stream.size();
     float* posBuf    = new float[ 4 * numOfPart ];
@@ -357,7 +367,7 @@ FlowRenderer::_getAGrid( const FlowParams* params,
 }
     
 void
-FlowRenderer::_updateColormap( FlowParams* params )
+FlowRenderer::_sendColormap( FlowParams* params )
 {
     if( params->UseSingleColor() )
     {
@@ -384,26 +394,35 @@ FlowRenderer::_updateColormap( FlowParams* params )
         _colorMapRange[2]         = (_colorMapRange[1] - _colorMapRange[0]) > 1e-5f ?
                                     (_colorMapRange[1] - _colorMapRange[0]) : 1e-5f ;
     }
+    glActiveTexture( GL_TEXTURE0 + _colorMapTexOffset );
+    glBindTexture( GL_TEXTURE_1D,  _colorMapTexId );
+    glTexImage1D(  GL_TEXTURE_1D, 0, GL_RGBA32F,     _colorMap.size()/4,
+                   0, GL_RGBA,       GL_FLOAT,       _colorMap.data() );
 }
 
-int
-FlowRenderer::_advectAStep( FlowParams* params )
+void
+FlowRenderer::_restoreGLState() const
 {
-    int rv  = _advection.CheckReady();
-    if( rv != 0 )
-        return rv;
-    else
-        rv = _advection.Advect( flow::Advection::RK4 );
+    glActiveTexture( GL_TEXTURE0 );
+    glBindTexture( GL_TEXTURE_1D, 0 );
+}
 
-    if( rv <= 0 )   // Error or no advection happened
-        return rv;
-    else            // Advection happened
+/*
+int
+FlowRenderer::_advectAStep( )
+{
+    int rv =  _advection.Advect( flow::Advection::RK4 );
+
+    if( rv == flow::ADVECT_HAPPENED )
     {
-        long already = params->GetAlreadyAdvectionStep(); 
-        params->SetAlreadyAdvectionStep( already + 1 );
         return 0;
     }
+    else // Error or no advection happened. Stop paint as well. 
+    {
+        return rv;
+    }
 }
+*/
 
 #ifndef WIN32
 double FlowRenderer::_getElapsedSeconds( const struct timeval* begin, 

@@ -124,16 +124,15 @@ Advection::Advect( ADVECTION_METHOD method )
         return ready;
 
     bool happened = false;
-    for( auto& s : _streams )
+    for( auto& s : _streams )       // Process one stream at a time
     {
-        const auto& p0 = s.back();
+        const auto& p0 = s.back();  // Start from the last particle in this stream
         if( !_velocity->InsideVolume( p0.time, p0.location ) )
             continue;
 
         float dt = _baseDeltaT;
-        // If there are at least 3 particles in the stream, we also adjust dt
-        if( s.size() > 2 )
-        {
+        if( s.size() > 2 )  // If there are at least 3 particles in the stream, 
+        {                   // we also adjust *dt*
             const auto& past1 = s[ s.size()-2 ];
             const auto& past2 = s[ s.size()-3 ];
             dt  = p0.time - past1.time;     // step size used by last integration
@@ -149,11 +148,13 @@ Advection::Advect( ADVECTION_METHOD method )
             case RK4:
                 rv = _advectRK4(   p0, dt, p1 ); break;
         }
-        if( rv != 0 )
+        if( rv != 0 )   // Advection wasn't successful for some reason...
             continue;
-
-        happened = true;
-        s.push_back( p1 );
+        else            // Advection successful, keep the new particle.
+        {
+            happened = true;
+            s.push_back( p1 );
+        }
     }
 
     if( happened )

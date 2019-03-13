@@ -65,23 +65,28 @@ protected:
     //void _useOceanField();
     int  _useSteadyVAPORField( const FlowParams* );
 
-    int  _drawAStream( const std::vector<flow::Particle>&,
-                       const FlowParams*      ) const;
+    int  _genSeedsXY( std::vector<flow::Particle>& seeds ) const;
+
+    int  _purePaint( FlowParams*,  bool fast ) ;
+    void _sendColormap( FlowParams* );
+    int  _drawAStreamAsLines( const std::vector<flow::Particle>&,
+                              const FlowParams* ) const;
+    int  _drawAStreamBeautifully( const std::vector<flow::Particle>&,
+                                  const FlowParams* ) const;
+    void _restoreGLState() const;
 
     int  _getAGrid( const FlowParams* params,           // Input
                     int               timestep,         // Input
                     std::string&      varName,          // Input
                     Grid**            gridpp  ) const;  // Output
 
-    int  _genSeedsXY( std::vector<flow::Particle>& seeds ) const;
 
-    void _updateColormap( FlowParams* );
 
     // Update values of _cache_* and _state_* member variables.
     void _updateFlowStates( const FlowParams* );
 
-    // Perform advection one step at a time
-    int  _advectAStep( FlowParams* p );
+    // Perform advection and paint repeatedly.
+    //int  _advectAndPaint( );
 
 
 #ifndef WIN32
