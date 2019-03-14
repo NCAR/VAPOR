@@ -13,6 +13,12 @@ namespace VAPoR {
     
     class VolumeAlgorithm {
     public:
+        enum class Type {
+            Any,
+            DVR,
+            Iso
+        };
+        
         VolumeAlgorithm(GLManager *gl);
         virtual ~VolumeAlgorithm() {}
         virtual int LoadData(const Grid *grid) = 0;
@@ -34,6 +40,7 @@ namespace VAPoR {
     class VolumeAlgorithmFactory {
     public:
         std::string name;
+        VolumeAlgorithm::Type type;
         virtual VolumeAlgorithm *Create(GLManager *gl) = 0;
     };
     
@@ -43,6 +50,7 @@ namespace VAPoR {
         VolumeAlgorithmRegistrar() {
             static_assert(std::is_base_of<VolumeAlgorithm, T>::value, "Register is not derived from VolumeAlgorithm");
             name = T::GetName();
+            type = T::GetType();
             VolumeAlgorithm::Register(this);
         }
         VolumeAlgorithm *Create(GLManager *gl) { return new T(gl); }
