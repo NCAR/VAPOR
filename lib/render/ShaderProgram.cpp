@@ -114,7 +114,7 @@ bool ShaderProgram::SetUniform(const std::string &name, const T &value) const {
     }
     const int location = glGetUniformLocation(_id, name.c_str());
     if (location == -1) {
-        printf("Uniform \"%s\" not found\n", name.c_str());
+        // printf("Uniform \"%s\" not found\n", name.c_str());
         if (UniformNotFoundPolicy == Policy::Strict)
             assert(!"Uniform name not found");
         return false;
