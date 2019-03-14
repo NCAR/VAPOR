@@ -57,7 +57,7 @@ void VPushButton::SetButtonText(const QString &text) { _button->setText(text); }
 
 void VPushButton::_buttonPressed() { emit _pressed(); }
 
-VComboBox::VComboBox(QWidget *parent, std::string labelText) : VaporWidget(parent, labelText)
+VComboBox::VComboBox(QWidget *parent, const std::string &labelText) : VaporWidget(parent, labelText)
 {
     _combo = new QComboBox(this);
     _layout->addWidget(_combo);
@@ -75,7 +75,7 @@ void VComboBox::AddOption(const std::string &option, int index) { _combo->insert
 
 void VComboBox::RemoveOption(int index = 0) { _combo->removeItem(index); }
 
-VCheckBox::VCheckBox(QWidget *parent, std::string labelText) : VaporWidget(parent, labelText)
+VCheckBox::VCheckBox(QWidget *parent, const std::string &labelText) : VaporWidget(parent, labelText)
 {
     _checkbox = new QCheckBox("", this);
     _layout->addWidget(_checkbox);
