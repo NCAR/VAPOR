@@ -2,6 +2,7 @@
 #include "vapor/FlowRenderer.h"
 #include "vapor/OceanField.h"
 #include "vapor/SteadyVAPORVelocity.h"
+#include "vapor/SteadyVAPORScalar.h"
 #include "vapor/Particle.h"
 #include <iostream>
 #include <cstring>
@@ -64,6 +65,8 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
     _cache_isSteady         = false;
     _state_scalarUpToDate   = false;
     _state_velocitiesUpToDate = false;
+
+    _colorField = nullptr;
 }
 
 // Destructor
@@ -210,30 +213,59 @@ FlowRenderer::_updateFlowStates( const FlowParams* params )
 {
     if( _cache_currentTS != params->GetCurrentTimestep() )
     {
-        _cache_currentTS = params->GetCurrentTimestep();
+        _cache_currentTS  = params->GetCurrentTimestep();
         if( _cache_isSteady )   // current time step only matters with steady flow
         {
             _state_velocitiesUpToDate = false;
-            _state_scalarUpToDate = false;
+            _state_scalarUpToDate     = false;
         }
     }
     if( _cache_refinementLevel != params->GetRefinementLevel() )
     {
-        _cache_refinementLevel = params->GetRefinementLevel();
+        _cache_refinementLevel    = params->GetRefinementLevel();
         _state_velocitiesUpToDate = false;
-        _state_scalarUpToDate = false;
+        _state_scalarUpToDate     = false;
     }
-    if( _cache_compressionLevel != params->GetCompressionLevel() )
+    if( _cache_compressionLevel  != params->GetCompressionLevel() )
     {
-        _cache_compressionLevel = params->GetCompressionLevel();
+        _cache_compressionLevel   = params->GetCompressionLevel();
         _state_velocitiesUpToDate = false;
-        _state_scalarUpToDate = false;
+        _state_scalarUpToDate     = false;
     }
     if( _cache_isSteady != params->GetIsSteady() )
     {
         _state_velocitiesUpToDate = false;
-        _state_scalarUpToDate = false;
+        _state_scalarUpToDate     = false;
     }
+}
+
+int
+FlowRenderer::_createColorField( const FlowParams* params )
+{
+    // The caller of this function is responsible for checking if 
+    //   this function is in need to be called.
+    //
+    std::string colorVarName = params->GetColorMapVariableName();
+    if( colorVarName.empty() )
+    {
+        MyBase::SetErrMsg("Missing color mapping variable");
+        return flow::GRID_ERROR;
+    }
+    
+    Grid *grid;
+    int rv  = _getAGrid( params, _cache_currentTS, colorVarName, &grid );
+    if( rv != 0 )   
+        return rv;
+
+    flow::SteadyVAPORScalar* ptr = new flow::SteadyVAPORScalar();
+    ptr->UseGrid( grid );
+    ptr->ScalarName = colorVarName;
+
+    if( _colorField )
+        delete _colorField;
+    _colorField = ptr;
+
+    return 0;
 }
 
 int
@@ -247,6 +279,9 @@ FlowRenderer::_populateParticleProperties( const std::string& varname,
 int
 FlowRenderer::_useSteadyVAPORField( const FlowParams* params )
 {
+    // The caller of this function is responsible for checking if 
+    //   this function is in need to be called.
+    //
     // Step 1: retrieve variable names from the params class
     std::vector<std::string> varnames = params->GetFieldVariableNames();
     assert( varnames.size() == 3 );  // need to have three components

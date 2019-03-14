@@ -10,6 +10,7 @@
 #include "vapor/FlowParams.h"
 #include "vapor/GLManager.h"
 #include "vapor/Advection.h"
+#include "vapor/ScalarField.h"
 
 #include <glm/glm.hpp>
 
@@ -41,6 +42,7 @@ protected:
 
     // Member variables
     flow::Advection     _advection;
+    flow::ScalarField*  _colorField;
     std::vector<float>  _colorMap;
     float               _colorMapRange[3];   // min, max, and their diff
 
@@ -91,6 +93,9 @@ protected:
     int  _populateParticleProperties( const std::string& varname,
                                       const FlowParams*  params,
                                       bool  useAsColor );
+
+    // Use the current color mapping variable to create _colorField.
+    int  _createColorField( const FlowParams*  params );
 
 
 #ifndef WIN32
