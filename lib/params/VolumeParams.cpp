@@ -143,4 +143,5 @@ void VolumeParams::Register(const std::string &name, Type type) {
 //Set everything to default values
 void VolumeParams::_init() {
     SetDiagMsg("VolumeParams::_init()");
+    SetUseSingleColor(true);
 }
