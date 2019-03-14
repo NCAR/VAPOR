@@ -61,19 +61,14 @@ void VolumeIsoAppearanceSubtab::Update( VAPoR::DataMgr      *dataMgr,
 {
     _TFWidget->Update(dataMgr, paramsMgr, params);
 
-    _params = dynamic_cast<VAPoR::VolumeIsoParams*>( params );
-    assert( _params );
-    // TODO volume
-    // _lightingCheckBox->setChecked( _params->GetLighting() );
+    _params = dynamic_cast<VAPoR::VolumeIsoParams*>(params);
+    assert(_params);
+    _lightingCheckBox->setChecked(_params->GetLightingEnabled());
 
-    // Retrieve lighting coefficients
-    // TODO volume
-    // std::vector<double> coeffs = _params->GetLightingCoeffs();
-    std::vector<double> coeffs = {0,0,0,0};
-    _ambientWidget->SetValue(   coeffs[0] );
-    _diffuseWidget->SetValue(   coeffs[1] );
-    _specularWidget->SetValue(  coeffs[2] );
-    _shininessWidget->SetValue( coeffs[3] ); 
+    _ambientWidget->SetValue  (_params->GetPhongAmbient());
+    _diffuseWidget->SetValue  (_params->GetPhongDiffuse());
+    _specularWidget->SetValue (_params->GetPhongSpecular());
+    _shininessWidget->SetValue(_params->GetPhongShininess());
 
     // Get the value range
     std::vector<double> valueRanged;
@@ -123,8 +118,7 @@ void VolumeIsoAppearanceSubtab::Update( VAPoR::DataMgr      *dataMgr,
 
 void VolumeIsoAppearanceSubtab::on__lightingCheckBox_toggled( bool checked )
 {
-    // TODO volume
-    // _params->SetLighting( checked );
+    _params->SetLightingEnabled(checked);
 
     _ambientWidget->setEnabled(checked);
     _diffuseWidget->setEnabled(checked);
@@ -134,45 +128,30 @@ void VolumeIsoAppearanceSubtab::on__lightingCheckBox_toggled( bool checked )
 
 void VolumeIsoAppearanceSubtab::on__ambientWidget_valueChanged( double value )
 {
-    // TODO volume
-    // std::vector<double> coeffs = _params->GetLightingCoeffs();
-    // coeffs[0]                  = value;
-    // _params->SetLightingCoeffs( coeffs );
+    _params->SetPhongAmbient(value);
 }
 
 void VolumeIsoAppearanceSubtab::on__diffuseWidget_valueChanged( double value )
 {
-    // TODO volume
-    // std::vector<double> coeffs = _params->GetLightingCoeffs();
-    // coeffs[1]                  = value;
-    // _params->SetLightingCoeffs( coeffs );
+    _params->SetPhongDiffuse(value);
 }
 
 void VolumeIsoAppearanceSubtab::on__specularWidget_valueChanged( double value )
 {
-    // TODO volume
-    // std::vector<double> coeffs = _params->GetLightingCoeffs();
-    // coeffs[2]                  = value;
-    // _params->SetLightingCoeffs( coeffs );
+    _params->SetPhongSpecular(value);
 }
 
 void VolumeIsoAppearanceSubtab::on__shininessWidget_valueChanged( int value )
 {
-    // TODO volume
-    // std::vector<double> coeffs = _params->GetLightingCoeffs();
-    // coeffs[3]                  = double(value);
-    // _params->SetLightingCoeffs( coeffs );
+    _params->SetPhongShininess(value);
 }
 
 void VolumeIsoAppearanceSubtab::on__defaultLightingButton_clicked( bool checked )
 {
-    std::vector<double> defaultLightingCoeffs( 4 );
-    defaultLightingCoeffs[0] = 0.5;
-    defaultLightingCoeffs[1] = 0.3;
-    defaultLightingCoeffs[2] = 0.2;
-    defaultLightingCoeffs[3] = 12.0;
-    // TODO volume
-    // _params->SetLightingCoeffs( defaultLightingCoeffs );
+    _params->SetPhongAmbient  (_params->GetDefaultPhongAmbient());
+    _params->SetPhongDiffuse  (_params->GetDefaultPhongDiffuse());
+    _params->SetPhongSpecular (_params->GetDefaultPhongSpecular());
+    _params->SetPhongShininess(_params->GetDefaultPhongShininess());
 }
     
 void VolumeIsoAppearanceSubtab::on__isoValueCheckbox0_toggled( bool checked )

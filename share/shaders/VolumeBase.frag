@@ -14,6 +14,11 @@ uniform float LUTMin;
 uniform float LUTMax;
 uniform bool hasMissingData;
 
+uniform float phongAmbient;
+uniform float phongDiffuse;
+uniform float phongSpecular;
+uniform float phongShininess;
+
 uniform sampler3D data;
 uniform sampler1D LUT;
 uniform sampler2D sceneDepth;
@@ -65,21 +70,16 @@ float GetDepthBuffer()
     }
 }
 
-#define AMBIENT 0.2
-#define DIFFUSE 0.5
-#define SPECULAR 0.25
-#define SHININESS 8
-
 float PhongLighting(vec3 normal, vec3 viewDir)
 {
-    float diffuse = abs(dot(normal, -lightDir)) * DIFFUSE;
+    float diffuse = abs(dot(normal, -lightDir)) * phongDiffuse;
 
-    float specularStrength = SPECULAR;
+    float specularStrength = phongSpecular;
     vec3 reflectDir = reflect(lightDir, normal);
-    float spec = pow(abs(dot(viewDir, reflectDir)), SHININESS);
+    float spec = pow(abs(dot(viewDir, reflectDir)), phongShininess);
     float specular = specularStrength * spec;
 
-    return max(AMBIENT + diffuse + specular, AMBIENT);
+    return max(phongAmbient + diffuse + specular, phongAmbient);
 }
 
 vec3 GetNormal(vec3 p)

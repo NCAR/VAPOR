@@ -16,7 +16,8 @@ public:
   {
 	  return("VolumeIsoParams");
   }
-    
+   
+    virtual bool GetDefaultLightingEnabled() const { return true; }
     virtual string GetDefaultAlgorithmName() const;
     
 private:

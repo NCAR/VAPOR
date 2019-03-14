@@ -17,6 +17,12 @@ public:
 
  virtual bool usingVariable(const std::string& varname);
  virtual string GetDefaultAlgorithmName() const;
+    
+    virtual bool GetDefaultLightingEnabled() const { return false; }
+    double GetDefaultPhongAmbient()   const { return 0.2; }
+    double GetDefaultPhongDiffuse()   const { return 0.5; }
+    double GetDefaultPhongSpecular()  const { return 0.25; }
+    double GetDefaultPhongShininess() const { return 8; }
 
   static string GetClassType() 
   {
@@ -33,6 +39,17 @@ public:
     void SetEnabledIsoValues(std::vector<bool> mask);
     std::vector<bool> GetEnabledIsoValues() const;
     
+    void  SetLightingEnabled(bool v);
+    bool  GetLightingEnabled() const;
+    void  SetPhongAmbient(float v);
+    float GetPhongAmbient() const;
+    void  SetPhongDiffuse(float v);
+    float GetPhongDiffuse() const;
+    void  SetPhongSpecular(float v);
+    float GetPhongSpecular() const;
+    void  SetPhongShininess(float v);
+    float GetPhongShininess() const;
+    
     static const std::vector<std::string> GetAlgorithmNames();
     static void Register(const std::string &name);
 
@@ -46,6 +63,11 @@ private:
     static const std::string _isoValueTag;
     static const std::string _isoValuesTag;
     static const std::string _enabledIsoValuesTag;
+    static const std::string _lightingEnabledTag;
+    static const std::string _phongAmbientTag;
+    static const std::string _phongDiffuseTag;
+    static const std::string _phongSpecularTag;
+    static const std::string _phongShininessTag;
 
 
 };

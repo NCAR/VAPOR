@@ -19,6 +19,11 @@ const std::string VolumeParams::_algorithmTag = "AlgorithmTag";
 const std::string VolumeParams::_isoValueTag = "IsoValueTag";
 const std::string VolumeParams::_isoValuesTag = "IsoValuesTag";
 const std::string VolumeParams::_enabledIsoValuesTag = "EnabledIsoValuesTag";
+const std::string VolumeParams::_lightingEnabledTag = "LightingEnabledTag";
+const std::string VolumeParams::_phongAmbientTag = "PhongAmbientTag";
+const std::string VolumeParams::_phongDiffuseTag = "PhongDiffuseTag";
+const std::string VolumeParams::_phongSpecularTag = "PhongSpecularTag";
+const std::string VolumeParams::_phongShininessTag = "PhongShininessTag";
 
 VolumeParams::VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave)
 : RenderParams(dataMgr, ssave, VolumeParams::GetClassType(), 3)
@@ -121,6 +126,17 @@ std::vector<bool> VolumeParams::GetEnabledIsoValues() const
         mask.push_back(v);
     return mask;
 }
+
+void   VolumeParams::SetLightingEnabled(bool v) {        SetValueLong(_lightingEnabledTag, "Lighting enabled", v); }
+bool   VolumeParams::GetLightingEnabled() const { return GetValueLong(_lightingEnabledTag, GetDefaultLightingEnabled());  }
+void   VolumeParams::SetPhongAmbient(float v)   {        SetValueDouble(_phongAmbientTag,    "Phong ambient", v); };
+float VolumeParams::GetPhongAmbient() const     { return GetValueDouble(_phongAmbientTag,    GetDefaultPhongAmbient()); };
+void   VolumeParams::SetPhongDiffuse(float v)   {        SetValueDouble(_phongDiffuseTag,    "Phong diffuse", v); };
+float VolumeParams::GetPhongDiffuse() const     { return GetValueDouble(_phongDiffuseTag,    GetDefaultPhongDiffuse()); };
+void   VolumeParams::SetPhongSpecular(float v)  {        SetValueDouble(_phongSpecularTag,   "Phong specular", v); };
+float VolumeParams::GetPhongSpecular() const    { return GetValueDouble(_phongSpecularTag,   GetDefaultPhongSpecular()); };
+void   VolumeParams::SetPhongShininess(float v) {        SetValueDouble(_phongShininessTag,  "Phong shininess", v); };
+float VolumeParams::GetPhongShininess() const   { return GetValueDouble(_phongShininessTag,  GetDefaultPhongShininess()); };
 
 const std::vector<std::string> VolumeParams::GetAlgorithmNames()
 {
