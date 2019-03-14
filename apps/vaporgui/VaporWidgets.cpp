@@ -95,7 +95,7 @@ bool VCheckBox::GetCheckState() const
 
 void VCheckBox::_userClickedCheckbox() { emit _checkboxClicked(); }
 
-VPathSelector::VPathSelector(QWidget *parent, Flags flags, const std::string &labelText, const std::string &filePath, QFileDialog::FileMode fileMode) : VPushButton(parent, labelText)
+VPathSelector::VPathSelector(QWidget *parent, const std::string &labelText, const std::string &filePath, QFileDialog::FileMode fileMode) : VPushButton(parent, labelText)
 {
     _fileMode = fileMode;
 
