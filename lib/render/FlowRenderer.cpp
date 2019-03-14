@@ -124,9 +124,14 @@ FlowRenderer::_paintGL( bool fast )
 
     _updateFlowStates( params );
     if( !_state_velocitiesUpToDate )
+    {
         _useSteadyVAPORField( params );
+    }
     if( !_state_scalarUpToDate )
+    {
         _useSteadyColorField( params );
+        _populateParticleProperties( params->GetColorMapVariableName(), params, true );
+    }
 
     // Attempt to do a step of Advection
     int rv = _advection.Advect( flow::Advection::RK4 );
@@ -315,11 +320,10 @@ FlowRenderer::_colorLastParticle()
         float oldValue       = particle.value;
         if( oldValue == 0.0f )  // We only calculate its value if it's not been calculated yet.
         {
-            const auto& loc  = particle.location;
-            float newValue;
-            int rv  = _colorField->GetScalar( _cache_currentTS, loc, newValue );
+            float newVal;
+            int rv  = _colorField->GetScalar( particle.time, particle.location, newVal );
             if( rv == 0 )   // We have the new value!
-                _advection.AssignLastParticleValueOfAStream( newValue, i );
+                _advection.AssignLastParticleValueOfAStream( newVal, i );
             else            // Copy the value from previous particle
                 _advection.RepeatLastTwoParticleValuesOfAStream( i );
         }
@@ -332,6 +336,54 @@ FlowRenderer::_populateParticleProperties( const std::string& varname,
                                            const FlowParams*  params,
                                            bool  useAsColor )
 {
+    flow::ScalarField* scalar = nullptr;
+    if( useAsColor )
+        scalar = _colorField;
+    else
+    {
+        std::string name = varname; // Subsequent functions ain't const
+        if( params->GetIsSteady() )
+        {
+            Grid *grid;
+            int rv  = _getAGrid( params, _cache_currentTS, name, &grid );
+            if( rv != 0 )   
+                return rv;
+
+            flow::SteadyVAPORScalar* ptr = new flow::SteadyVAPORScalar();
+            ptr->UseGrid( grid );
+            ptr->ScalarName = name;
+            scalar = ptr;
+        }
+        else
+        { 
+            // create an UnsteadyVAPORScalar
+        }
+    }
+
+    if( scalar == nullptr )
+        return flow::NO_FIELD_YET;
+
+    std::vector<float> properties;
+    size_t numOfStreams = _advection.GetNumberOfStreams();
+    for( size_t i = 0; i < numOfStreams; i++ )
+    {
+        const auto& stream   = _advection.GetStreamAt( i );
+        properties.clear();
+        float newVal = 0.0f;
+        for( const auto& p : stream )
+        {
+            scalar->GetScalar( p.time, p.location, newVal );
+            properties.push_back( newVal );
+        }
+        if( useAsColor )
+            _advection.AssignParticleValuesOfAStream( properties, i );
+        else
+            _advection.AttachParticlePropertiesOfAStream( properties, i );
+    }
+
+    if( scalar != _colorField ) // Clean up scalar if it's what we just created
+        delete scalar;
+    
     return 0;
 }
 
