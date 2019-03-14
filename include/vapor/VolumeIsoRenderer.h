@@ -15,6 +15,8 @@ public:
     ~VolumeIsoRenderer();
 
     static std::string GetClassType() { return ("VolumeIso"); }
+
+    bool _usingColorMapData() const;
 };
 
 };    // namespace VAPoR

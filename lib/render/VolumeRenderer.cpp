@@ -187,6 +187,14 @@ int VolumeRenderer::_loadData()
     return ret;
 }
 
+bool VolumeRenderer::_usingColorMapData() const { return false; }
+
+int VolumeRenderer::_loadSecondaryData()
+{
+    VolumeParams *vp = (VolumeParams *)GetActiveParams();
+    return 0;
+}
+
 void VolumeRenderer::_loadTF()
 {
     MapperFunction *tf = GetActiveParams()->GetMapperFunc(cache.var);
