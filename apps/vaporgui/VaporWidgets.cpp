@@ -95,7 +95,7 @@ bool VCheckBox::GetCheckState() const
 
 void VCheckBox::_userClickedCheckbox() { emit _checkboxClicked(); }
 
-VPathSelector::VPathSelector(QWidget *parent, Flags flags, const std::string &labelText, const std::string &filePath, QFileMode fileMode) : VPushButton(parent, labelText)
+VPathSelector::VPathSelector(QWidget *parent, Flags flags, const std::string &labelText, const std::string &filePath, QFileDialog::FileMode fileMode) : VPushButton(parent, labelText)
 {
     _fileMode = fileMode;
 
@@ -136,7 +136,10 @@ void VPathSelector::_openFileDialog()
 
     QString filePath = files[0];
 
-    bool operable = FileOperationChecker::FileGoodToRead(filePath);
+    bool operable;
+    if (_fileMode == QFileDialog::FileMode::ExistingFile) operable = FileOperationChecker::FileGoodToRead(filePath);
+    if (_fileMode == QFileDialog::FileMode::Directory) operable = FileOperationChecker::DirectoryGoodToRead(filePath);
+
     if (!operable) {
         MSG_ERR(FileOperationChecker::GetLastErrorMessage().toStdString());
         SetPath(_filePath);
