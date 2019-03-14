@@ -5,10 +5,6 @@
 #include <QDoubleValidator>
 
 #include "Combo.h"
-#include "ui_VPushButton.h"
-#include "ui_VComboBox.h"
-#include "ui_VCheckBox.h"
-#include "ui_VPathSelector.h"
 
 namespace Ui {
 class QSliderEdit;
