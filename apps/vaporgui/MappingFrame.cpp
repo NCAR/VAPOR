@@ -33,6 +33,7 @@
 #include <vapor/OpacityMap.h>
 #include <vapor/ContourParams.h>
 #include <vapor/IsoSurfaceParams.h>
+#include <vapor/VolumeIsoParams.h>
 #include "OpacityWidget.h"
 #include "DomainWidget.h"
 #include "GLColorbarWidget.h"
@@ -465,23 +466,22 @@ bool MappingFrame::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *
         vector<double>    isovals;
         ContourParams *   cp;
         IsoSurfaceParams *ip;
+        VolumeIsoParams * vp;
 
         // This should probably be rethought
         // Maybe we need an IsoParams base class?
         cp = dynamic_cast<ContourParams *>(rParams);
-        if (cp == NULL) {
-            ip = dynamic_cast<IsoSurfaceParams *>(rParams);
-            assert(ip);
-            isovals = ip->GetIsoValues();
-            // std::vector<bool>enabled = ip->GetEnabledIsoValueFlags();
-            // int size = enabled.size();
-            // for (int i=size-1; i>=0; i--) {
-            //    if (!enabled[i])
-            //        isovals.erase(isovals.begin()+i);
-            //}
-        } else {
+        ip = dynamic_cast<IsoSurfaceParams *>(rParams);
+        vp = dynamic_cast<VolumeIsoParams *>(rParams);
+
+        if (cp)
             isovals = cp->GetContourValues(_variableName);
-        }
+        else if (ip)
+            isovals = ip->GetIsoValues();
+        else if (vp)
+            isovals = vp->GetIsoValues();
+        else
+            assert(0);    // This is what the old code did
 
         setIsolineSliders(isovals);
 
@@ -1241,7 +1241,12 @@ int MappingFrame::drawIsolineSliders()
     // std::vector<bool> enabledIsoValues(true, _isolineSliders.size());
     std::vector<bool> enabledIsoValues(_isolineSliders.size(), true);
     IsoSurfaceParams *ip = dynamic_cast<IsoSurfaceParams *>(_rParams);
-    if (ip != NULL) { enabledIsoValues = ip->GetEnabledIsoValueFlags(); }
+    VolumeIsoParams * vp = dynamic_cast<VolumeIsoParams *>(_rParams);
+
+    if (vp != NULL)
+        enabledIsoValues = vp->GetEnabledIsoValues();
+    else if (ip != NULL)
+        enabledIsoValues = ip->GetEnabledIsoValueFlags();
 
     for (int i = 0; i < _isolineSliders.size(); i++) {
         if (enabledIsoValues[i] == true) {
@@ -2339,20 +2344,26 @@ void MappingFrame::setIsolineSlider(int index)
 
     emit              startChange("Slide Isoline value slider");
     IsoSurfaceParams *iParams = dynamic_cast<IsoSurfaceParams *>(_rParams);
+    VolumeIsoParams * vParams = dynamic_cast<VolumeIsoParams *>(_rParams);
 
     // If _rParams is not an IsoSurfaceParams, then it's a ContourParams.
     // Therefore, we ignore the user's change to the isoline, an force a
     // redrawing of the MappingFrame through calls to Update() and updateGL().
     // I wish there were a cleaner way to do this, with fewer dynamic casts.
-    if (iParams == NULL) {
+
+    if (vParams) {
+        vector<double> isovals = vParams->GetIsoValues();
+        isovals[index] = (0.5 * (max + min));
+        vParams->SetIsoValues(isovals);
+    } else if (iParams) {
+        vector<double> isovals = iParams->GetIsoValues();
+        isovals[index] = (0.5 * (max + min));
+        iParams->SetIsoValues(isovals);
+    } else {
         Update(_dataMgr, _paramsMgr, _rParams);
         updateGL();
         return;
     }
-
-    vector<double> isovals = iParams->GetIsoValues();
-    isovals[index] = (0.5 * (max + min));
-    iParams->SetIsoValues(isovals);
 
     emit endChange();
 

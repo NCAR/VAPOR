@@ -65,6 +65,9 @@ set (SRCS
 	windowsUtils.cpp
 	Manip.cpp
 	VolumeEventRouter.cpp
+	VolumeIsoEventRouter.cpp
+	IsoSurfaceSubtabs.cpp
+	VolumeIsoSubtabs.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -87,7 +90,10 @@ set (SRCS
 	QRange.h
 	QSinglePoint.h
 	VolumeEventRouter.h
+	VolumeIsoEventRouter.h
 	VolumeSubtabs.h
+	VolumeIsoSubtabs.h
+	IsoSurfaceSubtabs.h
 
 	MainForm.h
 	VizWinMgr.h

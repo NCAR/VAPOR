@@ -15,11 +15,18 @@ std::vector<std::string> VolumeParams::_algorithmNames;
 
 const std::string VolumeParams::_algorithmTag = "AlgorithmTag";
 const std::string VolumeParams::_isoValueTag = "IsoValueTag";
+const std::string VolumeParams::_isoValuesTag = "IsoValuesTag";
+const std::string VolumeParams::_enabledIsoValuesTag = "EnabledIsoValuesTag";
 
 VolumeParams::VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave) : RenderParams(dataMgr, ssave, VolumeParams::GetClassType(), 3)
 {
     SetDiagMsg("VolumeParams::VolumeParams() this=%p", this);
+    _init();
+}
 
+VolumeParams::VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, std::string classType) : RenderParams(dataMgr, ssave, classType, 3)
+{
+    SetDiagMsg("VolumeParams::VolumeParams() this=%p", this);
     _init();
 }
 
@@ -42,7 +49,9 @@ bool VolumeParams::IsOpaque() const { return true; }
 
 bool VolumeParams::usingVariable(const std::string &varname) { return (varname.compare(GetVariableName()) == 0); }
 
-std::string VolumeParams::GetAlgorithm() const { return GetValueString(_algorithmTag, "Regular"); }
+string VolumeParams::GetDefaultAlgorithmName() const { return "Regular"; }
+
+std::string VolumeParams::GetAlgorithm() const { return GetValueString(_algorithmTag, GetDefaultAlgorithmName()); }
 
 void VolumeParams::SetAlgorithm(std::string algorithm)
 {
@@ -53,6 +62,35 @@ void VolumeParams::SetAlgorithm(std::string algorithm)
 double VolumeParams::GetIsoValue() const { return GetValueDouble(_isoValueTag, 0); }
 
 void VolumeParams::SetIsoValue(double isoValue) { SetValueDouble(_isoValueTag, "Iso surface value", isoValue); }
+
+void VolumeParams::SetIsoValues(std::vector<double> mask)
+{
+    if (mask.size() != 4) mask.resize(4, 0.0);
+    SetValueDoubleVec(_isoValuesTag, "Iso surface values", mask);
+}
+
+std::vector<double> VolumeParams::GetIsoValues() const
+{
+    std::vector<double> defaultVec(4, 0.0);
+    return GetValueDoubleVec(_isoValuesTag, defaultVec);
+}
+
+void VolumeParams::SetEnabledIsoValues(std::vector<bool> mask)
+{
+    if (mask.size() != 4) mask.resize(4, 0.0);
+    vector<long> maskL;
+    for (bool b : mask) maskL.push_back(b);
+
+    SetValueLongVec(_enabledIsoValuesTag, "Iso surface values", maskL);
+}
+
+std::vector<bool> VolumeParams::GetEnabledIsoValues() const
+{
+    auto              maskLong = GetValueLongVec(_enabledIsoValuesTag, {1, 0, 0, 0});
+    std::vector<bool> mask;
+    for (long v : maskLong) mask.push_back(v);
+    return mask;
+}
 
 const std::vector<std::string> VolumeParams::GetAlgorithmNames() { return _algorithmNames; }
 

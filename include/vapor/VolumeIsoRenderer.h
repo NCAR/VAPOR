@@ -9,12 +9,12 @@ using std::vector;
 
 namespace VAPoR {
 
-class RENDER_API VolumeRenderer : public Renderer {
+class RENDER_API VolumeIsoRenderer : public Renderer {
 public:
-    VolumeRenderer(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string &instName, DataMgr *dataMgr);
-    ~VolumeRenderer();
+    VolumeIsoRenderer(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string &instName, DataMgr *dataMgr);
+    ~VolumeIsoRenderer();
 
-    static std::string GetClassType() { return ("Volume2"); }
+    static std::string GetClassType() { return ("VolumeIso"); }
 
 protected:
     int  _initializeGL();
@@ -34,15 +34,15 @@ protected:
     unsigned int depthTexture;
 
     struct Cache {
-        string var = "";
-        size_t ts = -1;
+        string var;
+        size_t ts;
         int    refinement;
         int    compression;
 
         MapperFunction *tf = nullptr;
         vector<double>  mapRange;
 
-        string algorithmName = "";
+        string algorithmName;
 
         bool needsUpdate;
     } cache;
