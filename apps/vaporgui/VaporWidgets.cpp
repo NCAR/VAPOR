@@ -135,7 +135,7 @@ VPathSelector::VPathSelector(
     Flags flags,
     const std::string &labelText,
     const std::string &filePath,
-    QFileMode fileMode) : VPushButton(parent, labelText) {
+    QFileDialog::FileMode fileMode) : VPushButton(parent, labelText) {
     _fileMode = fileMode;
 
     _lineEdit = new QLineEdit(this);
@@ -182,7 +182,12 @@ void VPathSelector::_openFileDialog() {
 
     QString filePath = files[0];
 
-    bool operable = FileOperationChecker::FileGoodToRead(filePath);
+    bool operable;
+    if (_fileMode == QFileDialog::FileMode::ExistingFile)
+        operable = FileOperationChecker::FileGoodToRead(filePath);
+    if (_fileMode == QFileDialog::FileMode::Directory)
+        operable = FileOperationChecker::DirectoryGoodToRead(filePath);
+
     if (!operable) {
         MSG_ERR(
             FileOperationChecker::GetLastErrorMessage().toStdString());
