@@ -1,14 +1,15 @@
 #ifndef VAPORWIDGETS_H 
 #define VAPORWIDGETS_H 
 
-#include <QWidget>
-#include <QDoubleValidator>
-
-#include "Combo.h"
-
-namespace Ui {
-class QSliderEdit;
-}
+class QWidget;
+class QLabel;
+class QComboBox;
+class QCheckBox;
+class QPushButton;
+class QLineEdit;
+class QDoubleValidator;
+class QSpacerItem;
+class QHBoxLayout;
 
 class VaporWidget : public QWidget
 {
