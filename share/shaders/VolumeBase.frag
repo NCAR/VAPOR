@@ -14,6 +14,7 @@ uniform float LUTMin;
 uniform float LUTMax;
 uniform bool hasMissingData;
 
+uniform bool lightingEnabled;
 uniform float phongAmbient;
 uniform float phongDiffuse;
 uniform float phongSpecular;
@@ -72,6 +73,9 @@ float GetDepthBuffer()
 
 float PhongLighting(vec3 normal, vec3 viewDir)
 {
+	if (!lightingEnabled)
+		return 1;
+
     float diffuse = abs(dot(normal, -lightDir)) * phongDiffuse;
 
     float specularStrength = phongSpecular;
