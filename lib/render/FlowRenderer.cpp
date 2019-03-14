@@ -128,12 +128,16 @@ FlowRenderer::_paintGL( bool fast )
         _useSteadyVAPORField( params );
     }
 
+    _createColorField( params );
+
     // Attempt to do a step of Advection
     rv = _advection.Advect( flow::Advection::RK4 );
+    _colorLastParticle();
     while( rv == flow::ADVECT_HAPPENED )
     {
         _purePaint( params, true );    // use fast rendering for intermediate results
         rv = _advection.Advect( flow::Advection::RK4 );
+        _colorLastParticle();
     }
         
     _purePaint( params, fast );
@@ -160,6 +164,8 @@ FlowRenderer::_purePaint( FlowParams* params, bool fast )
             _drawAStreamAsLines( s, params );
         }
     }
+    
+    return 0;
 }
 
 int
@@ -265,6 +271,35 @@ FlowRenderer::_createColorField( const FlowParams* params )
         delete _colorField;
     _colorField = ptr;
 
+    return 0;
+}
+
+int
+FlowRenderer::_colorLastParticle()
+{
+    // The caller of this function is responsible for checking if 
+    //   this function is in need to be called.
+    //
+    if( _colorField == nullptr )
+        return flow::NO_FIELD_YET;
+
+    size_t numOfStreams = _advection.GetNumberOfStreams();
+    for( size_t i = 0; i < numOfStreams; i++ )
+    {
+        const auto& stream   = _advection.GetStreamAt( i );
+        const auto& particle = stream.back();
+        float oldValue       = particle.value;
+        if( oldValue == 0.0f )  // We only calculate its value if it's not been calculated yet.
+        {
+            const auto& loc  = particle.location;
+            float newValue;
+            int rv  = _colorField->GetScalar( _cache_currentTS, loc, newValue );
+            if( rv == 0 )   // We have the new value!
+                _advection.AssignLastParticleValueOfAStream( newValue, i );
+            else            // Copy the value from previous particle
+                _advection.RepeatLastTwoParticleValuesOfAStream( i );
+        }
+    }
     return 0;
 }
 

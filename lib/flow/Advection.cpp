@@ -265,6 +265,17 @@ Advection::AssignLastParticleValueOfAStream( float newVal, size_t idx )
 }
 
 int
+Advection::RepeatLastTwoParticleValuesOfAStream( size_t idx )
+{
+    auto& s = _streams.at(idx);
+    size_t size = s.size();
+    if( size > 1 )  // At least there are two particles
+        s[ size-1 ].value = s[ size-2 ].value;
+
+    return 0;
+}
+
+int
 Advection::AttachParticlePropertiesOfAStream( std::vector<float>& prop, size_t idx )
 {
     if( prop.size() != _streams.at(idx).size() )
