@@ -37,5 +37,10 @@ VolumeIsoRenderer::~VolumeIsoRenderer()
 {
 }
 
+bool VolumeIsoRenderer::_usingColorMapData() const
+{
+    return !GetActiveParams()->UseSingleColor();
+}
+
 
 

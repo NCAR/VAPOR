@@ -24,6 +24,8 @@ public:
     {
         return ("VolumeIso");
     }
+    
+    bool _usingColorMapData() const;
 };
 
 
