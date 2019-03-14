@@ -18,6 +18,7 @@ public:
   }
    
     virtual bool GetDefaultLightingEnabled() const { return true; }
+    virtual double GetDefaultPhongAmbient()   const { return 0.2; }
     virtual string GetDefaultAlgorithmName() const;
     
 private:

@@ -41,6 +41,9 @@ void main(void)
             float dataNorm = (texture(data, dataSTR).r - LUTMin) / (LUTMax - LUTMin);
             vec4 color = texture(LUT, dataNorm);
             vec3 normal = GetNormal(dataSTR);
+			
+			if (lightingEnabled)
+				color.rgb *= PhongLighting(normal, dir);
             
             if (ShouldRenderSample(dataSTR))
                 BlendToBack(accum, PremultiplyAlpha(color));

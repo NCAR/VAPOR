@@ -48,21 +48,18 @@ public:
 		_TFWidget->Reinit((TFFlags)(CONSTANT_COLOR));
 	}
 
-	void Update(
-		VAPoR::DataMgr *dataMgr,
-		VAPoR::ParamsMgr *paramsMgr,
-		VAPoR::RenderParams *rParams
-	) {
-        VAPoR::VolumeParams *vp = (VAPoR::VolumeParams *)rParams;
-        _volumeParams = vp;
-        
-		_TFWidget->Update(dataMgr, paramsMgr, rParams);
-	}
+	void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     
 private slots:
+    void on__lightingCheckBox_toggled(bool checked);
+    void on__ambientWidget_valueChanged(double value);
+    void on__diffuseWidget_valueChanged(double value);
+    void on__specularWidget_valueChanged(double value);
+    void on__shininessWidget_valueChanged(int value);
+    void on__defaultLightingButton_clicked(bool checked);
     
 private:
-    VAPoR::VolumeParams *_volumeParams;
+    VAPoR::VolumeParams *_params;
 };
 
 class VolumeGeometrySubtab : public QWidget, public Ui_VolumeGeometryGUI {
