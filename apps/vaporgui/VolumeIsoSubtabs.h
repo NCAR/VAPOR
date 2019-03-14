@@ -26,21 +26,10 @@ class VolumeIsoVariablesSubtab : public QWidget, public Ui_VolumeIsoVariablesGUI
 
     void Update(VAPoR::DataMgr *dataMgr,
                 VAPoR::ParamsMgr *paramsMgr,
-                VAPoR::RenderParams *params) {
-        _isoParams = dynamic_cast<VAPoR::VolumeIsoParams *>(params);
-        assert(_isoParams);
-        // TODO volume
-        // long mode = _isoParams->GetCastingMode();
-        // _castingModeComboBox->setCurrentIndex( mode - 1 );
-
-        _variablesWidget->Update(dataMgr, paramsMgr, params);
-    }
+                VAPoR::RenderParams *params);
 
   private slots:
-    void on__castingModeComboBox_currentIndexChanged(int idx) {
-        // TODO volume
-        // _isoParams->SetCastingMode( (long)idx + 1 );
-    }
+    void on__castingModeComboBox_currentIndexChanged(const QString &text);
 
   private:
     VAPoR::VolumeIsoParams *_isoParams;
