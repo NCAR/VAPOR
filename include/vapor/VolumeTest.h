@@ -10,6 +10,7 @@ public:
     ~VolumeTest();
 
     static std::string GetName() { return "Test"; }
+    static Type        GetType() { return Type::Any; }
 
     virtual int            LoadData(const Grid *grid);
     virtual ShaderProgram *GetShader() const;

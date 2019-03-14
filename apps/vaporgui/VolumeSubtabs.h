@@ -6,6 +6,7 @@
 #include "ui_VolumeAnnotationGUI.h"
 #include "Flags.h"
 #include <vapor/MapperFunction.h>
+#include <vapor/VolumeParams.h>
 
 namespace VAPoR {
 class ControlExec;
@@ -24,7 +25,13 @@ public:
         _variablesWidget->Reinit((VariableFlags)(SCALAR), (DimFlags)(THREED));
     }
 
-    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _variablesWidget->Update(dataMgr, paramsMgr, rParams); }
+    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
+
+private slots:
+    void on__castingModeComboBox_currentIndexChanged(const QString &text);
+
+private:
+    VAPoR::VolumeParams *_volumeParams;
 };
 
 class VolumeAppearanceSubtab : public QWidget, public Ui_VolumeAppearanceGUI {
@@ -36,7 +43,6 @@ public:
         setupUi(this);
         _TFWidget->SetOpacityIntegrated(true);
         _TFWidget->Reinit((TFFlags)(CONSTANT_COLOR));
-        _isoEdit->SetLabel("Iso Value");
     }
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
@@ -45,39 +51,9 @@ public:
         _volumeParams = vp;
 
         _TFWidget->Update(dataMgr, paramsMgr, rParams);
-
-        //------------------------
-        // Algorithm Selector
-        //------------------------
-
-        string algorithm = vp->GetAlgorithm();
-        int    index = _algorithmCombo->findText(QString::fromStdString(algorithm));
-
-        if (index == -1) {
-            _algorithmCombo->clear();
-            const vector<string> algorithms = VAPoR::VolumeParams::GetAlgorithmNames();
-            for (const string &s : algorithms) _algorithmCombo->addItem(QString::fromStdString(s));
-
-            index = _algorithmCombo->findText(QString::fromStdString(algorithm));
-        }
-
-        _algorithmCombo->setCurrentIndex(index);
-
-        //------------------------
-        // Iso Slider
-        //------------------------
-        VAPoR::MapperFunction *tf = rParams->GetMapperFunc(rParams->GetVariableName());
-        vector<double>         mapRange = tf->getMinMaxMapValue();
-        _isoEdit->SetExtents(mapRange[0], mapRange[1]);
     }
 
 private slots:
-    void on__algorithmCombo_currentIndexChanged(const QString &text)
-    {
-        if (!text.isEmpty()) _volumeParams->SetAlgorithm(text.toStdString());
-    }
-
-    void on__isoEdit_valueChanged(double value) { _volumeParams->SetIsoValue(value); }
 
 private:
     VAPoR::VolumeParams *_volumeParams;
