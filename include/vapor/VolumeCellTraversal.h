@@ -42,6 +42,7 @@ namespace VAPoR {
         static std::string GetName() { return "Iso Cell Traversal"; }
         static Type        GetType() { return Type::Iso; }
         virtual ShaderProgram *GetShader() const;
+        virtual void SetUniforms() const;
     };
     
 }

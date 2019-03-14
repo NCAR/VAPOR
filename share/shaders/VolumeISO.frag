@@ -1,9 +1,7 @@
 #version 410 core
 
 #include VolumeBase.frag
-
-uniform float isoValue[4];
-uniform bool  isoEnabled[4];
+#include VolumeIsoInclude.frag
 
 void TestIso(vec3 cameraPos, vec3 dir, float value, float dv, float ld, float step, float t, inout vec4 accum)
 {
@@ -13,9 +11,8 @@ void TestIso(vec3 cameraPos, vec3 dir, float value, float dv, float ld, float st
 		
 		vec3 hit = cameraPos + dir * t;
 		vec3 dataSTR = (hit - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
-		float data = texture(data, dataSTR).r;
-		float dataNorm = (data - LUTMin) / (LUTMax - LUTMin);
-		vec4 color = vec4(1);
+
+		vec4 color = GetIsoSurfaceColor(dataSTR);
 		vec3 normal = GetNormal(dataSTR);
 		
 		color.rgb *= PhongLighting(normal, dir);
