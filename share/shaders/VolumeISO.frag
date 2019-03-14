@@ -3,6 +3,26 @@
 #include VolumeBase.frag
 
 uniform float isoValue[4];
+uniform bool  isoEnabled[4];
+
+void TestIso(vec3 cameraPos, vec3 dir, float value, float dv, float ld, float step, float t, inout vec4 accum)
+{
+	if ((ld < value && dv >= value) || (ld > value && dv <= value)) {
+		float lt = t - step;
+		float t = lt + step*(value-ld)/(dv-ld);
+		
+		vec3 hit = cameraPos + dir * t;
+		vec3 dataSTR = (hit - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
+		float data = texture(data, dataSTR).r;
+		float dataNorm = (data - LUTMin) / (LUTMax - LUTMin);
+		vec4 color = vec4(1);
+		vec3 normal = GetNormal(dataSTR);
+		
+		color.rgb *= PhongLighting(normal, dir);
+		
+		BlendToBack(accum, PremultiplyAlpha(color));
+	}
+}
 
 void main(void)
 {
@@ -30,21 +50,11 @@ void main(void)
 			bool shouldRender = ShouldRenderSample(dataSTR);
             
 			if (shouldRender && lastShouldRender) {
-				if ((ld < isoValue[0] && dv >= isoValue[0]) || (ld > isoValue[0] && dv <= isoValue[0])) {
-					float lt = t - step;
-					float t = lt + step*(isoValue[0]-ld)/(dv-ld);
-					
-					vec3 hit = cameraPos + dir * t;
-					vec3 dataSTR = (hit - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
-					float data = texture(data, dataSTR).r;
-					float dataNorm = (data - LUTMin) / (LUTMax - LUTMin);
-					vec4 color = vec4(1);
-					vec3 normal = GetNormal(dataSTR);
-					
-					color.rgb *= PhongLighting(normal, dir);
-					
-					BlendToBack(accum, PremultiplyAlpha(color));
-				}
+				// Unrolled intentionally
+				if (isoEnabled[0]) TestIso(cameraPos, dir, isoValue[0], dv, ld, step, t, accum);
+				if (isoEnabled[1]) TestIso(cameraPos, dir, isoValue[1], dv, ld, step, t, accum);
+				if (isoEnabled[2]) TestIso(cameraPos, dir, isoValue[2], dv, ld, step, t, accum);
+				if (isoEnabled[3]) TestIso(cameraPos, dir, isoValue[3], dv, ld, step, t, accum);
 			}
             ld = dv;
 			lastShouldRender = shouldRender;

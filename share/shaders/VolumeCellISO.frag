@@ -2,7 +2,22 @@
 
 #include VolumeCellBase.frag
 
-uniform float isoValue;
+uniform float isoValue[4];
+uniform bool  isoEnabled[4];
+
+void TestIso(float value, float dv, float ld, vec3 entranceCoord, vec3 exitCoord, vec3 dir, inout vec4 accum)
+{
+    if ((ld < value && dv >= value) || (ld > value && dv <= value)) {
+        vec3 isoCoord = mix(entranceCoord, exitCoord, (value-ld)/(dv-ld));
+        
+        vec4 color = vec4(1);
+        vec3 normal = GetNormal(isoCoord/coordDimsF);
+        
+        color.rgb *= PhongLighting(normal, dir);
+        
+        BlendToBack(accum, PremultiplyAlpha(color));
+    }
+}
 
 vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, out float t1)
 {
@@ -30,20 +45,15 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
         hasNext = FindNextCell(origin, dir, t0, currentCell, entranceFace, nextCell, exitFace, exitCoord, t1);
         
         if (t0 >= tMin || (t0 <= tMin && tMin < t1)) {
-            
             float dv = GetDataCoordinateSpace(exitCoord);
+
+			if (ShouldRenderCell(currentCell)) {
+				if (isoEnabled[0]) TestIso(isoValue[0], dv, ld, entranceCoord, exitCoord, dir, accum);
+				if (isoEnabled[1]) TestIso(isoValue[1], dv, ld, entranceCoord, exitCoord, dir, accum);
+				if (isoEnabled[2]) TestIso(isoValue[2], dv, ld, entranceCoord, exitCoord, dir, accum);
+				if (isoEnabled[3]) TestIso(isoValue[3], dv, ld, entranceCoord, exitCoord, dir, accum);
+			}
             
-            if ((ld < isoValue && dv >= isoValue) || (ld > isoValue && dv <= isoValue)) {
-                vec3 isoCoord = mix(entranceCoord, exitCoord, (isoValue-ld)/(dv-ld));
-                
-                vec4 color = vec4(1);
-                vec3 normal = GetNormal(isoCoord/coordDimsF);
-                
-                color.rgb *= PhongLighting(normal, dir);
-                
-                if (ShouldRenderCell(currentCell))
-                    BlendToBack(accum, PremultiplyAlpha(color));
-            }
             ld = dv;
         }
         
