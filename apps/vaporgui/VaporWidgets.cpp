@@ -4,6 +4,16 @@
 #include "FileOperationChecker.h"
 #include "ErrorReporter.h"
 
+#include <QWidget>
+#include <QLabel>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QDoubleValidator>
+#include <QSpacerItem>
+#include <QHBoxLayout>
+
 #include <iostream>
 #include <cassert>
 
