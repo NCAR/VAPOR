@@ -1,5 +1,37 @@
 #include "VolumeIsoSubtabs.h"
 
+using namespace VAPoR;
+
+void VolumeIsoVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *params)
+{
+    VolumeIsoParams *vp = dynamic_cast<VolumeIsoParams *>(params);
+    _isoParams = vp;
+    assert(vp);
+    // TODO volume
+    // long mode = _isoParams->GetCastingMode();
+    // _castingModeComboBox->setCurrentIndex( mode - 1 );
+
+    string algorithm = vp->GetAlgorithm();
+    int    index = _castingModeComboBox->findText(QString::fromStdString(algorithm));
+
+    if (index == -1) {
+        _castingModeComboBox->clear();
+        const vector<string> algorithms = VAPoR::VolumeParams::GetAlgorithmNames();
+        for (const string &s : algorithms) _castingModeComboBox->addItem(QString::fromStdString(s));
+
+        index = _castingModeComboBox->findText(QString::fromStdString(algorithm));
+    }
+
+    _castingModeComboBox->setCurrentIndex(index);
+
+    _variablesWidget->Update(dataMgr, paramsMgr, params);
+}
+
+void VolumeIsoVariablesSubtab::on__castingModeComboBox_currentIndexChanged(const QString &text)
+{
+    if (!text.isEmpty()) _isoParams->SetAlgorithm(text.toStdString());
+}
+
 VolumeIsoAppearanceSubtab::VolumeIsoAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
