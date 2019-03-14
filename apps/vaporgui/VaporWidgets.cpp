@@ -12,34 +12,50 @@
 #include <iostream>
 #include <cassert>
 
+VaporWidget::VaporWidget(
+    QWidget *parent,
+    const std::string &labelText) : QWidget(parent) {
+    _layout = new QHBoxLayout();
+    _layout->setContentsMargins(10, 0, 10, 0);
+    setLayout(_layout);
+
+    SetLabelText(labelText);
+
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+}
+
+VaporWidget::VaporWidget(
+    QWidget *parent,
+    const QString &labelText) : VaporWidget(parent, labelText.toStdString()) {}
+
+void VaporWidget::SetLabelText(const std::string &text) {
+    _label->setText(QString::fromStdString(text));
+}
+
+void VaporWidget::SetLabelText(const QString &text) {
+    _label->setText(text);
+}
+
 VPushButton::VPushButton(
     QWidget *parent,
     std::string labelText,
-    std::string buttonText) : QWidget(parent),
-                              Ui_VPushButton() {
-    setupUi(this);
+    std::string buttonText) : VaporWidget(parent, labelText) {
+    _button = new QPushButton(this);
+    _layout->addWidget(_button);
 
     SetLabelText(QString::fromStdString(labelText));
     SetButtonText(QString::fromStdString(buttonText));
 
-    connect(_myButton, SIGNAL(pressed()),
+    connect(_button, SIGNAL(pressed()),
             this, SLOT(_buttonPressed()));
 }
 
-void VPushButton::SetLabelText(const std::string text) {
-    SetLabelText(QString::fromStdString(text));
-}
-
-void VPushButton::SetLabelText(const QString text) {
-    _myLabel->setText(text);
-}
-
-void VPushButton::SetButtonText(const std::string text) {
+void VPushButton::SetButtonText(const std::string &text) {
     SetButtonText(QString::fromStdString(text));
 }
 
-void VPushButton::SetButtonText(const QString text) {
-    _myButton->setText(text);
+void VPushButton::SetButtonText(const QString &text) {
+    _button->setText(text);
 }
 
 void VPushButton::_buttonPressed() {
@@ -48,18 +64,11 @@ void VPushButton::_buttonPressed() {
 
 VComboBox::VComboBox(
     QWidget *parent,
-    std::string labelText) : QWidget(parent),
-                             Ui_VComboBox() {
-    setupUi(this);
-
+    std::string labelText) : VaporWidget(parent, labelText) {
     SetLabelText(labelText);
 
-    connect(_myCombo, SIGNAL(currentIndexChanged(int)),
+    connect(_combo, SIGNAL(currentIndexChanged(int)),
             this, SLOT(_userIndexChanged(int)));
-}
-
-void VComboBox::SetLabelText(std::string text) {
-    _myLabel->setText(QString::fromStdString(text));
 }
 
 void VComboBox::_userIndexChanged(int index) {
@@ -67,39 +76,33 @@ void VComboBox::_userIndexChanged(int index) {
 }
 
 int VComboBox::GetCurrentIndex() const {
-    return _myCombo->currentIndex();
+    return _combo->currentIndex();
 }
 
 std::string VComboBox::GetCurrentText() const {
-    return _myCombo->currentText().toStdString();
+    return _combo->currentText().toStdString();
 }
 
-void VComboBox::AddOption(std::string option, int index) {
-    _myCombo->insertItem(index, QString::fromStdString(option));
+void VComboBox::AddOption(const std::string &option, int index) {
+    _combo->insertItem(index, QString::fromStdString(option));
 }
 
 void VComboBox::RemoveOption(int index = 0) {
-    _myCombo->removeItem(index);
+    _combo->removeItem(index);
 }
 
 VCheckBox::VCheckBox(
     QWidget *parent,
-    std::string labelText) : QWidget(parent),
-                             Ui_VCheckBox() {
-    setupUi(this);
+    std::string labelText) : VaporWidget(parent, labelText) {
+    _checkbox = new QCheckBox("", this);
+    _layout->addWidget(_checkbox);
 
-    SetLabelText(labelText);
-
-    connect(_myCheckbox, SIGNAL(stateChanged(int)),
+    connect(_checkbox, SIGNAL(stateChanged(int)),
             this, SLOT(_userClickedCheckbox()));
 }
 
-void VCheckBox::SetLabelText(std::string text) {
-    _myLabel->setText(QString::fromStdString(text));
-}
-
 bool VCheckBox::GetCheckState() const {
-    if (_myCheckbox->checkState() == Qt::Checked)
+    if (_checkbox->checkState() == Qt::Checked)
         return true;
     else
         return false;
@@ -112,30 +115,25 @@ void VCheckBox::_userClickedCheckbox() {
 VPathSelector::VPathSelector(
     QWidget *parent,
     std::string labelText,
-    std::string filePath) : QWidget(parent),
-                            Ui_VPathSelector() {
-    setupUi(this);
-
+    std::string filePath) : VPushButton(parent, labelText) {
+    _lineEdit = new QLineEdit(this);
+    _layout->addWidget(_lineEdit);
     SetLabelText(labelText);
     SetPath(filePath);
 
-    connect(_myButton, SIGNAL(pressed()),
+    connect(_button, SIGNAL(pressed()),
             this, SLOT(_openFileDialog()));
-    connect(_myLineEdit, SIGNAL(returnPressed()),
+    connect(_lineEdit, SIGNAL(returnPressed()),
             this, SLOT(_setFilePath()));
-}
-
-void VPathSelector::SetLabelText(std::string text) {
-    _myLabel->setText(QString::fromStdString(text));
 }
 
 std::string VPathSelector::GetPath() const {
     return _filePath;
 }
 
-void VPathSelector::SetPath(std::string path) {
+void VPathSelector::SetPath(const std::string &path) {
     _filePath = path;
-    _myLineEdit->setText(QString::fromStdString(path));
+    _lineEdit->setText(QString::fromStdString(path));
     std::cout << "set path to " << _filePath << std::endl;
 }
 
@@ -174,7 +172,7 @@ void VPathSelector::_openFileDialog() {
 
 void VPathSelector::_setFilePath() {
     std::cout << "setFilePath" << std::endl;
-    QString filePath = _myLineEdit->text();
+    QString filePath = _lineEdit->text();
     bool operable = FileOperationChecker::FileGoodToRead(filePath);
     if (!operable) {
         MSG_ERR(
