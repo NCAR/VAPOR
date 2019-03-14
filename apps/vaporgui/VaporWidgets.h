@@ -30,8 +30,7 @@ class VaporWidget : public QWidget {
     QHBoxLayout *_layout;
 };
 
-class VPushButton : public VaporWidget //QWidget, public Ui_VPushButton
-{
+class VPushButton : public VaporWidget {
     Q_OBJECT
 
   public:
@@ -53,8 +52,7 @@ class VPushButton : public VaporWidget //QWidget, public Ui_VPushButton
     void _buttonPressed();
 };
 
-class VComboBox : public VaporWidget //public QWidget, public Ui_VComboBox
-{
+class VComboBox : public VaporWidget {
     Q_OBJECT
 
   public:
@@ -76,8 +74,7 @@ class VComboBox : public VaporWidget //public QWidget, public Ui_VComboBox
     void _indexChanged(int index);
 };
 
-class VCheckBox : public VaporWidget //QWidget, public Ui_VCheckBox
-{
+class VCheckBox : public VaporWidget {
     Q_OBJECT
 
   public:
@@ -96,8 +93,7 @@ class VCheckBox : public VaporWidget //QWidget, public Ui_VCheckBox
     void _checkboxClicked();
 };
 
-class VPathSelector : public VPushButton //QWidget, public Ui_VPathSelector
-{
+class VPathSelector : public VPushButton {
     Q_OBJECT
 
   public:
