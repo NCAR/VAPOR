@@ -10,6 +10,7 @@ class VolumeCellTraversal : public VolumeRegular {
     ~VolumeCellTraversal();
 
     static std::string GetName() { return "Cell Traversal"; }
+    static Type GetType() { return Type::DVR; }
 
     virtual int LoadData(const Grid *grid);
     virtual ShaderProgram *GetShader() const;
@@ -39,6 +40,7 @@ class IsoCellTraversal : public VolumeCellTraversal {
   public:
     IsoCellTraversal(GLManager *gl) : VolumeCellTraversal(gl) {}
     static std::string GetName() { return "Iso Cell Traversal"; }
+    static Type GetType() { return Type::Iso; }
     virtual ShaderProgram *GetShader() const;
 };
 

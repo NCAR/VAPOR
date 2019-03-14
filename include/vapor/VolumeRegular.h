@@ -10,6 +10,7 @@ class VolumeRegular : public VolumeAlgorithm {
     ~VolumeRegular();
 
     static std::string GetName() { return "Regular"; }
+    static Type GetType() { return Type::DVR; }
 
     virtual int LoadData(const Grid *grid);
     virtual ShaderProgram *GetShader() const;
@@ -26,6 +27,7 @@ class IsoRegular : public VolumeRegular {
   public:
     IsoRegular(GLManager *gl) : VolumeRegular(gl) {}
     static std::string GetName() { return "Iso Regular"; }
+    static Type GetType() { return Type::Iso; }
     virtual ShaderProgram *GetShader() const;
 };
 
