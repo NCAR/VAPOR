@@ -19,11 +19,11 @@ public:
     virtual bool   usingVariable(const std::string &varname);
     virtual string GetDefaultAlgorithmName() const;
 
-    virtual bool GetDefaultLightingEnabled() const { return false; }
-    double       GetDefaultPhongAmbient() const { return 0.2; }
-    double       GetDefaultPhongDiffuse() const { return 0.5; }
-    double       GetDefaultPhongSpecular() const { return 0.25; }
-    double       GetDefaultPhongShininess() const { return 8; }
+    virtual bool   GetDefaultLightingEnabled() const { return false; }
+    virtual double GetDefaultPhongAmbient() const { return 0.6; }
+    virtual double GetDefaultPhongDiffuse() const { return 0.5; }
+    virtual double GetDefaultPhongSpecular() const { return 0.25; }
+    virtual double GetDefaultPhongShininess() const { return 8; }
 
     static string GetClassType() { return ("VolumeParams"); }
 

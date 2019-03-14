@@ -28,3 +28,43 @@ void VolumeVariablesSubtab::on__castingModeComboBox_currentIndexChanged(const QS
 {
     if (!text.isEmpty()) _volumeParams->SetAlgorithm(text.toStdString());
 }
+
+void VolumeAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
+{
+    VAPoR::VolumeParams *vp = (VAPoR::VolumeParams *)rParams;
+    _params = vp;
+
+    _TFWidget->Update(dataMgr, paramsMgr, rParams);
+
+    _lightingCheckBox->setChecked(_params->GetLightingEnabled());
+    _ambientWidget->SetValue(_params->GetPhongAmbient());
+    _diffuseWidget->SetValue(_params->GetPhongDiffuse());
+    _specularWidget->SetValue(_params->GetPhongSpecular());
+    _shininessWidget->SetValue(_params->GetPhongShininess());
+}
+
+void VolumeAppearanceSubtab::on__lightingCheckBox_toggled(bool checked)
+{
+    _params->SetLightingEnabled(checked);
+
+    _ambientWidget->setEnabled(checked);
+    _diffuseWidget->setEnabled(checked);
+    _specularWidget->setEnabled(checked);
+    _shininessWidget->setEnabled(checked);
+}
+
+void VolumeAppearanceSubtab::on__ambientWidget_valueChanged(double value) { _params->SetPhongAmbient(value); }
+
+void VolumeAppearanceSubtab::on__diffuseWidget_valueChanged(double value) { _params->SetPhongDiffuse(value); }
+
+void VolumeAppearanceSubtab::on__specularWidget_valueChanged(double value) { _params->SetPhongSpecular(value); }
+
+void VolumeAppearanceSubtab::on__shininessWidget_valueChanged(int value) { _params->SetPhongShininess(value); }
+
+void VolumeAppearanceSubtab::on__defaultLightingButton_clicked(bool checked)
+{
+    _params->SetPhongAmbient(_params->GetDefaultPhongAmbient());
+    _params->SetPhongDiffuse(_params->GetDefaultPhongDiffuse());
+    _params->SetPhongSpecular(_params->GetDefaultPhongSpecular());
+    _params->SetPhongShininess(_params->GetDefaultPhongShininess());
+}
