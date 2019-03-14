@@ -18,6 +18,8 @@ public:
     VolumeAlgorithm(GLManager *gl);
     virtual ~VolumeAlgorithm() {}
     virtual int            LoadData(const Grid *grid) = 0;
+    virtual int            LoadSecondaryData(const Grid *grid) = 0;
+    virtual void           DeleteSecondaryData() = 0;
     virtual ShaderProgram *GetShader() const = 0;
     virtual void           SetUniforms() const = 0;
 

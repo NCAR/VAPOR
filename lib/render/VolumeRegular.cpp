@@ -10,34 +10,51 @@ using namespace VAPoR;
 
 static VolumeAlgorithmRegistrar<VolumeRegular> registration;
 
-VolumeRegular::VolumeRegular(GLManager *gl) : VolumeAlgorithm(gl), dataTexture(NULL), missingTexture(NULL)
+VolumeRegular::VolumeRegular(GLManager *gl) : VolumeAlgorithm(gl), _dataTexture(NULL), _missingTexture(NULL), _hasSecondData(false), _dataTexture2(NULL), _missingTexture2(NULL)
 {
-    glGenTextures(1, &dataTexture);
-    glBindTexture(GL_TEXTURE_3D, dataTexture);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    glGenTextures(1, &missingTexture);
-    glBindTexture(GL_TEXTURE_3D, missingTexture);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    initializeTexture(_dataTexture);
+    initializeTexture(_missingTexture);
 }
 
 VolumeRegular::~VolumeRegular()
 {
-    if (dataTexture) glDeleteTextures(1, &dataTexture);
-    if (missingTexture) glDeleteTextures(1, &missingTexture);
+    if (_dataTexture) glDeleteTextures(1, &_dataTexture);
+    if (_missingTexture) glDeleteTextures(1, &_missingTexture);
+    if (_dataTexture2) glDeleteTextures(1, &_dataTexture2);
+    if (_missingTexture2) glDeleteTextures(1, &_missingTexture2);
 }
 
 int VolumeRegular::LoadData(const Grid *grid)
 {
     printf("Loading data...\n");
+    dataDimensions = grid->GetDimensions();
+    _hasSecondData = false;
+    return loadDataDirect(grid, _dataTexture, _missingTexture, &_hasMissingData);
+}
+
+int VolumeRegular::LoadSecondaryData(const Grid *grid)
+{
+    printf("Loading secondary data...\n");
+    _hasSecondData = false;
+    if (dataDimensions != grid->GetDimensions()) { return -1; }
+    initializeTexture(_dataTexture2);
+    initializeTexture(_missingTexture2);
+    int ret = loadDataDirect(grid, _dataTexture2, _missingTexture2, &_hasMissingData2);
+    if (ret >= 0) _hasSecondData = true;
+    return ret;
+}
+
+void VolumeRegular::DeleteSecondaryData()
+{
+    _hasSecondData = false;
+    if (_dataTexture2) glDeleteTextures(1, &_dataTexture2);
+    if (_missingTexture2) glDeleteTextures(1, &_missingTexture2);
+    _dataTexture2 = NULL;
+    _missingTexture2 = NULL;
+}
+
+int VolumeRegular::loadDataDirect(const Grid *grid, const unsigned int dataTexture, const unsigned int missingTexture, bool *hasMissingData)
+{
     const vector<size_t> dims = grid->GetDimensions();
     const size_t         nVerts = dims[0] * dims[1] * dims[2];
     float *              data = new float[nVerts];
@@ -49,8 +66,8 @@ int VolumeRegular::LoadData(const Grid *grid)
     glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 0, 0, 0, 0, GL_RED, GL_FLOAT, NULL);    // Fix driver bug with re-uploading large textures
     glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0, GL_RED, GL_FLOAT, data);
 
-    hasMissingData = grid->HasMissingData();
-    if (hasMissingData) {
+    *hasMissingData = grid->HasMissingData();
+    if (*hasMissingData) {
         printf("Loading missing data...\n");
         const float    missingValue = grid->GetMissingValue();
         unsigned char *missingMask = new unsigned char[nVerts];
@@ -72,6 +89,19 @@ int VolumeRegular::LoadData(const Grid *grid)
     return 0;
 }
 
+void VolumeRegular::initializeTexture(unsigned int &texture)
+{
+    if (texture) return;
+
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_3D, texture);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+}
+
 ShaderProgram *VolumeRegular::GetShader() const { return _glManager->shaderManager->GetShader("VolumeDVR"); }
 
 void VolumeRegular::SetUniforms() const
@@ -79,16 +109,34 @@ void VolumeRegular::SetUniforms() const
     ShaderProgram *s = GetShader();
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_3D, dataTexture);
+    glBindTexture(GL_TEXTURE_3D, _dataTexture);
     s->SetUniform("data", 0);
 
-    s->SetUniform("hasMissingData", hasMissingData);
+    s->SetUniform("hasMissingData", _hasMissingData);
 
     glActiveTexture(GL_TEXTURE6);
-    glBindTexture(GL_TEXTURE_3D, missingTexture);
+    glBindTexture(GL_TEXTURE_3D, _missingTexture);
     s->SetUniform("missingMask", 6);
+
+    if (_hasSecondData) {
+        glActiveTexture(GL_TEXTURE8);
+        glBindTexture(GL_TEXTURE_3D, _dataTexture2);
+        s->SetUniform("data2", 8);
+
+        s->SetUniform("hasMissingData2", _hasMissingData2);
+
+        glActiveTexture(GL_TEXTURE9);
+        glBindTexture(GL_TEXTURE_3D, _missingTexture2);
+        s->SetUniform("missingMask2", 9);
+    }
 }
 
 static VolumeAlgorithmRegistrar<IsoRegular> registrationIso;
 
 ShaderProgram *IsoRegular::GetShader() const { return _glManager->shaderManager->GetShader("VolumeISO"); }
+
+void IsoRegular::SetUniforms() const
+{
+    VolumeRegular::SetUniforms();
+    GetShader()->SetUniform("useColormapData", _hasSecondData);
+}

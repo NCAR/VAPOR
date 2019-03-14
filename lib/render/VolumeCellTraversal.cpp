@@ -439,3 +439,9 @@ bool VolumeCellTraversal::Need32BitForCoordinates(const Grid *grid)
 }
 
 ShaderProgram *IsoCellTraversal::GetShader() const { return _glManager->shaderManager->GetShader(AddDefinitionsToShader("VolumeCellISO")); }
+
+void IsoCellTraversal::SetUniforms() const
+{
+    VolumeCellTraversal::SetUniforms();
+    GetShader()->SetUniform("useColormapData", _hasSecondData);
+}
