@@ -5,7 +5,6 @@
 #include <vapor/GLManager.h>
 #include <vapor/glutil.h>
 #include <glm/glm.hpp>
-#include <chrono>
 
 using glm::vec2;
 using glm::vec3;
