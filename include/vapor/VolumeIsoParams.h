@@ -15,6 +15,7 @@ class PARAMS_API VolumeIsoParams : public VolumeParams {
         return ("VolumeIsoParams");
     }
 
+    virtual bool GetDefaultLightingEnabled() const { return true; }
     virtual string GetDefaultAlgorithmName() const;
 
   private:
