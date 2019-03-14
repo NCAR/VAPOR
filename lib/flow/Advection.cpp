@@ -71,16 +71,7 @@ Advection::IsSteady() const
     else
         return false;
 }
-/*
-bool
-Advection::HasScalarValue() const
-{
-    if( _velocity )
-        return _velocity->HasScalarValue;
-    else
-        return false;
-} 
-*/
+
 const std::string 
 Advection::GetVelocityNameU() const
 {
@@ -253,13 +244,11 @@ Advection::GetStreamAt( size_t i ) const
 int
 Advection::AssignParticleValuesOfAStream( std::vector<float>& valsIn, size_t idx )
 {
-    if( idx >= _streams.size() )
-        return OUT_OF_RANGE;
-    if( valsIn.size() != _streams[idx].size() )
+    if( valsIn.size() != _streams.at(idx).size() )
         return SIZE_MISMATCH;
 
     // Now we assign value to each particle
-    auto itr = _streams[idx].begin();
+    auto itr = _streams.at(idx).begin();
     for( auto v : valsIn )
     {
         (*itr).value = v;
@@ -271,23 +260,18 @@ Advection::AssignParticleValuesOfAStream( std::vector<float>& valsIn, size_t idx
 int
 Advection::AssignLastParticleValueOfAStream( float newVal, size_t idx )
 {
-    if( idx >= _streams.size() )
-        return OUT_OF_RANGE;
- 
-    _streams[idx].back().value = newVal;
+    _streams.at(idx).back().value = newVal;
     return 0;
 }
 
 int
 Advection::AttachParticlePropertiesOfAStream( std::vector<float>& prop, size_t idx )
 {
-    if( idx >= _streams.size() )
-        return OUT_OF_RANGE;
-    if( prop.size() != _streams[idx].size() )
+    if( prop.size() != _streams.at(idx).size() )
         return SIZE_MISMATCH;
 
     // Now we attach properties to each particle
-    auto itr = _streams[idx].begin();
+    auto itr = _streams.at(idx).begin();
     for( auto v : prop )
     {
         (*itr).AttachProperty( v );
