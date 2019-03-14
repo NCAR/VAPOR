@@ -168,8 +168,16 @@ int VolumeRenderer::_paintGL(bool fast)
     shader->SetUniform("phongDiffuse",   vp->GetPhongDiffuse());
     shader->SetUniform("phongSpecular",  vp->GetPhongSpecular());
     shader->SetUniform("phongShininess", vp->GetPhongShininess());
-    if (shader->HasUniform("isoValue"))
-        shader->SetUniform("isoValue", (float)vp->GetIsoValues()[0]);
+    if (shader->HasUniform("isoValue")) {
+        vector<double> isoValuesD = vp->GetIsoValues();
+        vector<float> isoValues(isoValuesD.begin(), isoValuesD.end());
+        vector<bool> enabledIsoValues = vp->GetEnabledIsoValues();
+        shader->SetUniformArray("isoValue", 4, isoValues.data());
+        shader->SetUniform("isoEnabled[0]", (bool)enabledIsoValues[0]);
+        shader->SetUniform("isoEnabled[1]", (bool)enabledIsoValues[1]);
+        shader->SetUniform("isoEnabled[2]", (bool)enabledIsoValues[2]);
+        shader->SetUniform("isoEnabled[3]", (bool)enabledIsoValues[3]);
+    }
     
     algorithm->SetUniforms();
     
