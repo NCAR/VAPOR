@@ -161,6 +161,10 @@ int VolumeRenderer::_paintGL(bool fast)
     shader->SetUniform("LUTMax", (float)cache.mapRange[1]);
     shader->SetUniform("unitDistance", smallestDimension/100.f);
     shader->SetUniform("scales", extScales);
+    shader->SetUniform("phongAmbient",   vp->GetPhongAmbient());
+    shader->SetUniform("phongDiffuse",   vp->GetPhongDiffuse());
+    shader->SetUniform("phongSpecular",  vp->GetPhongSpecular());
+    shader->SetUniform("phongShininess", vp->GetPhongShininess());
     if (shader->HasUniform("isoValue"))
         shader->SetUniform("isoValue", (float)vp->GetIsoValues()[0]);
     
