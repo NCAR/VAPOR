@@ -5,7 +5,7 @@
 #include "CopyRegionWidget.h"
 #include "TransformTable.h"
 #include "ColorbarWidget.h"
-#include "VaporWidgets.h"
+//#include "VaporWidgets.h"
 
 QVaporSubtab::QVaporSubtab(QWidget* parent) : QWidget(parent)
 {
@@ -63,7 +63,7 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     );
     _layout->addWidget( _geometryWidget );
    
-    _pushTest = new VPushButton(this, "testLabel", "testButton"); 
+    /*_pushTest = new VPushButton(this, "testLabel", "testButton"); 
     connect( _pushTest, SIGNAL( _pressed() ),
         this, SLOT( _pushTestPressed()));
     _layout->addWidget( _pushTest );
@@ -85,7 +85,7 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     _layout->addWidget( _pathTest );
     
     _pathTest2 = new VPathSelector( this, "directory", "~/", QFileDialog::Directory );
-    _layout->addWidget( _pathTest2 );
+    _layout->addWidget( _pathTest2 );*/
 }
 
 void FlowSeedingSubtab::Update(
@@ -104,13 +104,13 @@ void FlowSeedingSubtab::_pushTestPressed()
 
 void FlowSeedingSubtab::_comboBoxSelected( int index ) 
 {
-    string option = _comboTest->GetCurrentText();
+    string option = "*** Need to turn on _comboTest at FlowSubtabs.cpp:107";//_comboTest->GetCurrentText();
     cout << "Combo selected at index " << index << " for option " << option << endl;
 }
 
 void FlowSeedingSubtab::_checkBoxSelected() 
 {
-    bool checked = _checkboxTest->GetCheckState();
+    bool checked = 0;//_checkboxTest->GetCheckState();
     cout << "Checkbox is checked? " << checked << endl;
 }
 
