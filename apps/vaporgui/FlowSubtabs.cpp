@@ -5,7 +5,7 @@
 #include "CopyRegionWidget.h"
 #include "TransformTable.h"
 #include "ColorbarWidget.h"
-//#include "VaporWidgets.h"
+#include "VaporWidgets.h"
 
 QVaporSubtab::QVaporSubtab(QWidget* parent) : QWidget(parent)
 {
@@ -63,7 +63,7 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     );
     _layout->addWidget( _geometryWidget );
    
-/*    _pushTest = new VPushButton(this, "testLabel", "testButton"); 
+    _pushTest = new VPushButton(this, "testLabel", "testButton"); 
     connect( _pushTest, SIGNAL( _pressed() ),
         this, SLOT( _pushTestPressed()));
     _layout->addWidget( _pushTest );
@@ -79,7 +79,10 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     _checkboxTest = new VCheckBox(this, "testCheckbox");
     connect( _checkboxTest, SIGNAL( _checkboxClicked() ),
         this, SLOT( _checkBoxSelected() ) );
-    _layout->addWidget( _checkboxTest );*/
+    _layout->addWidget( _checkboxTest );
+
+    _pathTest = new VPathSelector( this, "filePath", "~/" );
+    _layout->addWidget( _pathTest );
 }
 
 void FlowSeedingSubtab::Update(
