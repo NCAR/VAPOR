@@ -95,7 +95,7 @@ protected:
                                       bool  useAsColor );
 
     // Use the current color mapping variable to create _colorField.
-    int  _createColorField( const FlowParams*  params );
+    int  _useSteadyColorField( const FlowParams*  params );
 
     // Color the last particle in a stream
     int  _colorLastParticle();
