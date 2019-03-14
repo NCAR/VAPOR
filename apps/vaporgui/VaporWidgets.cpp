@@ -198,8 +198,11 @@ void VPathSelector::_openFileDialog() {
     if (fileDialog.exec() != QDialog::Accepted)
         return;
 
-    if (_multipleFiles) 
-        QString filePath = fileDialog.selectedFile();
+    QStringList files = fileDialog.selectedFiles();
+    if (files.size() != 1)
+        return;
+
+    QString filePath = files[0];
 
     bool operable = FileOperationChecker::FileGoodToRead(filePath);
     if (!operable) {
@@ -216,7 +219,7 @@ void VPathSelector::_openFileDialog() {
 void VPathSelector::_setFilePath() {
     std::cout << "setFilePath" << std::endl;
     QString filePath = _lineEdit->text();
-    bool operable = FileOperationChecker::FileGoodToRead(filePath);
+    bool operable = FileOperationChecker::DirectoryGoodToRead(filePath);
     if (!operable) {
         MSG_ERR(
             FileOperationChecker::GetLastErrorMessage().toStdString()

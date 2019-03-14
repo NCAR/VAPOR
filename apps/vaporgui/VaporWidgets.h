@@ -112,8 +112,7 @@ public:
     VPathSelector(
         QWidget* parent,
         std::string labelText = "Label",
-        std::string filePath = QDir::homePath().toStdString(),
-        bool multipleFiles = false
+        std::string filePath = QDir::homePath().toStdString()
     );
     void SetPath( const std::string& defaultPath);
     std::string GetPath() const;
