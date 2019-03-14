@@ -16,7 +16,7 @@ void VolumeIsoVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Re
 
     if (index == -1) {
         _castingModeComboBox->clear();
-        const vector<string> algorithms = VAPoR::VolumeParams::GetAlgorithmNames();
+        const vector<string> algorithms = VolumeParams::GetAlgorithmNames(VolumeParams::Type::Iso);
         for (const string &s : algorithms) _castingModeComboBox->addItem(QString::fromStdString(s));
 
         index = _castingModeComboBox->findText(QString::fromStdString(algorithm));
