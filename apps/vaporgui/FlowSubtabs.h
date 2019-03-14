@@ -94,6 +94,7 @@ private:
     GeometryWidget*         _geometryWidget;
     VPushButton*            _pushTest;
     VPathSelector*          _pathTest;
+    VPathSelector*          _pathTest2;
     VComboBox*              _comboTest;
     VCheckBox*              _checkboxTest;
 };
