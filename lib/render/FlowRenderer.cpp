@@ -143,7 +143,7 @@ FlowRenderer::_paintGL( bool fast )
 int
 FlowRenderer::_purePaint( FlowParams* params, bool fast )
 {
-    _prepareColormap( params, fast );
+    _prepareColormap( params );
 
     size_t numOfStreams = _advection.GetNumberOfStreams();
     for( size_t i = 0; i < numOfStreams; i++ )
@@ -153,7 +153,7 @@ FlowRenderer::_purePaint( FlowParams* params, bool fast )
             _drawAStreamAsLines( s, params );
         else
         {
-            //_drawAStreamBeautifully( s, params );
+            //_drawAStreamAsTubes( s, params );
             _drawAStreamAsLines( s, params );
         }
     }
@@ -236,25 +236,13 @@ FlowRenderer::_updateFlowStates( const FlowParams* params )
     }
 }
 
-#if 0
-void
-FlowRenderer::_useOceanField()
+int
+FlowRenderer::_populateParticleProperties( const std::string& varname,
+                                           const FlowParams*  params,
+                                           bool  useAsColor )
 {
-    flow::OceanField* field = new flow::OceanField();
-    _advection.UseField( field );
-    _advection.SetBaseStepSize( 0.1f );
-
-    int numOfSeeds = 5, numOfSteps = 100;
-    std::vector<flow::Particle> seeds( numOfSeeds );
-    seeds[0].location = glm::vec3( 0.65f, 0.65f, 0.1f );
-    seeds[1].location = glm::vec3( 0.3f, 0.3f, 0.1f );
-    for( int i = 2; i < numOfSeeds; i++ )
-        seeds[i].location = glm::vec3( float(i + 1) / float(numOfSeeds + 1), 0.0f, 0.0f );
-    _advection.UseSeedParticles( seeds );
-    for( int i = 0; i < numOfSteps; i++ )
-        _advection.Advect( flow::Advection::RK4 );
+    return 0;
 }
-#endif
 
 int
 FlowRenderer::_useSteadyVAPORField( const FlowParams* params )
@@ -348,10 +336,9 @@ FlowRenderer::_getAGrid( const FlowParams* params,
 }
     
 void
-FlowRenderer::_prepareColormap( FlowParams* params, bool fast )
+FlowRenderer::_prepareColormap( FlowParams* params )
 {
-    // In fast mode, disable color mapping.
-    if( params->UseSingleColor() || fast )
+    if( params->UseSingleColor() )
     {
         float singleColor[4];
         params->GetConstantColor( singleColor );
@@ -394,6 +381,26 @@ double FlowRenderer::_getElapsedSeconds( const struct timeval* begin,
                                          const struct timeval* end ) const
 {
     return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec)/1000000.0);
+}
+#endif
+
+#if 0
+void
+FlowRenderer::_useOceanField()
+{
+    flow::OceanField* field = new flow::OceanField();
+    _advection.UseField( field );
+    _advection.SetBaseStepSize( 0.1f );
+
+    int numOfSeeds = 5, numOfSteps = 100;
+    std::vector<flow::Particle> seeds( numOfSeeds );
+    seeds[0].location = glm::vec3( 0.65f, 0.65f, 0.1f );
+    seeds[1].location = glm::vec3( 0.3f, 0.3f, 0.1f );
+    for( int i = 2; i < numOfSeeds; i++ )
+        seeds[i].location = glm::vec3( float(i + 1) / float(numOfSeeds + 1), 0.0f, 0.0f );
+    _advection.UseSeedParticles( seeds );
+    for( int i = 0; i < numOfSteps; i++ )
+        _advection.Advect( flow::Advection::RK4 );
 }
 #endif
 
