@@ -20,11 +20,11 @@ public:
     // 
     // Get the field value at a certain position, at a certain time.
     //
-    virtual int  GetScalar(     float time, const glm::vec3& pos,   // input 
-                                float& val) const = 0;              // output
+    virtual int  GetScalar(  float time, const glm::vec3& pos,   // input 
+                             float& val) const = 0;              // output
 
 
-    std::string ScalarName;    // Varuable names for the value field
+    std::string ScalarName;  // Varuable names for the value field
 
 };
 };

@@ -67,10 +67,10 @@ protected:
 
     int  _genSeedsXY( std::vector<flow::Particle>& seeds ) const;
 
-    int  _purePaint( FlowParams*,  bool fast ) ;
-    void _prepareColormap(    FlowParams* );
-    int  _drawAStreamAsLines( const std::vector<flow::Particle>&,
-                              const FlowParams* ) const;
+    int  _purePaint( FlowParams*, bool fast ) ;
+    void _prepareColormap(        FlowParams* , bool fast );
+    int  _drawAStreamAsLines(     const std::vector<flow::Particle>&,
+                                  const FlowParams* ) const;
     int  _drawAStreamBeautifully( const std::vector<flow::Particle>&,
                                   const FlowParams* ) const;
     void _restoreGLState() const;
@@ -80,10 +80,10 @@ protected:
                     std::string&      varName,          // Input
                     Grid**            gridpp  ) const;  // Output
 
-
-
     // Update values of _cache_* and _state_* member variables.
     void _updateFlowStates( const FlowParams* );
+
+    // A function to query particle properties.
 
 
 #ifndef WIN32

@@ -117,8 +117,6 @@ FlowRenderer::_initializeGL()
 int
 FlowRenderer::_paintGL( bool fast )
 {
-    fast = true;
-
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
 
     int rv  = _advection.CheckReady();
@@ -145,7 +143,7 @@ FlowRenderer::_paintGL( bool fast )
 int
 FlowRenderer::_purePaint( FlowParams* params, bool fast )
 {
-    _prepareColormap( params );
+    _prepareColormap( params, fast );
 
     size_t numOfStreams = _advection.GetNumberOfStreams();
     for( size_t i = 0; i < numOfStreams; i++ )
@@ -153,8 +151,11 @@ FlowRenderer::_purePaint( FlowParams* params, bool fast )
         const auto& s = _advection.GetStreamAt( i );
         if( fast )
             _drawAStreamAsLines( s, params );
-        //else
+        else
+        {
             //_drawAStreamBeautifully( s, params );
+            _drawAStreamAsLines( s, params );
+        }
     }
 }
 
@@ -347,9 +348,10 @@ FlowRenderer::_getAGrid( const FlowParams* params,
 }
     
 void
-FlowRenderer::_prepareColormap( FlowParams* params )
+FlowRenderer::_prepareColormap( FlowParams* params, bool fast )
 {
-    if( params->UseSingleColor() )
+    // In fast mode, disable color mapping.
+    if( params->UseSingleColor() || fast )
     {
         float singleColor[4];
         params->GetConstantColor( singleColor );
