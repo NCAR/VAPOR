@@ -108,11 +108,18 @@ class VPathSelector : public VPushButton//QWidget, public Ui_VPathSelector
 {
     Q_OBJECT
 
+enum Flags {
+    SINGLE_FILE    = (1u << 0),
+    PATH           = (1u << 2)
+};
+
 public:
     VPathSelector(
         QWidget* parent,
-        std::string labelText = "Label",
-        std::string filePath = QDir::homePath().toStdString()
+        Flags flags,
+        const std::string& labelText = "Label",
+        const std::string& filePath = QDir::homePath().toStdString()
+        QFileMode fileMode = QFileDialog::ExistingFile;
     );
     void SetPath( const std::string& defaultPath);
     std::string GetPath() const;
@@ -127,6 +134,7 @@ signals:
 private:
     QLineEdit* _lineEdit;
     std::string _filePath;
+    QFileMode _fileMode;
 };
 
 
