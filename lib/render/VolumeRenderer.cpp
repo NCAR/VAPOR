@@ -18,18 +18,37 @@ static RendererRegistrar<VolumeRenderer> registrar( VolumeRenderer::GetClassType
                                                 VolumeParams::GetClassType() );
 
 
-VolumeRenderer::VolumeRenderer( const ParamsMgr*    pm,
-                        std::string&        winName,
-                        std::string&        dataSetName,
-                        std::string&        instName,
-                        DataMgr*            dataMgr )
-          : Renderer(  pm,
-                        winName,
-                        dataSetName,
-                        VolumeParams::GetClassType(),
-                        VolumeRenderer::GetClassType(),
-                        instName,
-                        dataMgr )
+VolumeRenderer::VolumeRenderer(
+                        const ParamsMgr* pm,
+                        std::string&     winName,
+                        std::string&     dataSetName,
+                        std::string&     instName,
+                        DataMgr*         dataMgr )
+: VolumeRenderer(
+           pm,
+           winName,
+           dataSetName,
+           VolumeParams::GetClassType(),
+           VolumeRenderer::GetClassType(),
+           instName,
+           dataMgr)
+{}
+
+VolumeRenderer::VolumeRenderer(
+               const ParamsMgr* pm,
+               std::string&     winName,
+               std::string&     dataSetName,
+               std::string      paramsType,
+               std::string      classType,
+               std::string&     instName,
+               DataMgr*         dataMgr )
+          : Renderer(pm,
+                     winName,
+                     dataSetName,
+                     paramsType,
+                     classType,
+                     instName,
+                     dataMgr)
 {
     VAO = NULL;
     VBO = NULL;
