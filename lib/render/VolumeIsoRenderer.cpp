@@ -1,5 +1,5 @@
-#include "vapor/VolumeRenderer.h"
-#include <vapor/VolumeParams.h>
+#include "vapor/VolumeIsoRenderer.h"
+#include <vapor/VolumeIsoParams.h>
 
 #include <vapor/MatrixManager.h>
 #include <vapor/GLManager.h>
@@ -14,11 +14,11 @@ using glm::mat4;
 
 using namespace VAPoR;
 
-static RendererRegistrar<VolumeRenderer> registrar( VolumeRenderer::GetClassType(),
-                                                VolumeParams::GetClassType() );
+static RendererRegistrar<VolumeIsoRenderer> registrar( VolumeIsoRenderer::GetClassType(),
+                                                VolumeIsoParams::GetClassType() );
 
 
-VolumeRenderer::VolumeRenderer( const ParamsMgr*    pm,
+VolumeIsoRenderer::VolumeIsoRenderer( const ParamsMgr*    pm,
                         std::string&        winName,
                         std::string&        dataSetName,
                         std::string&        instName,
@@ -26,8 +26,8 @@ VolumeRenderer::VolumeRenderer( const ParamsMgr*    pm,
           : Renderer(  pm,
                         winName,
                         dataSetName,
-                        VolumeParams::GetClassType(),
-                        VolumeRenderer::GetClassType(),
+                        VolumeIsoParams::GetClassType(),
+                        VolumeIsoRenderer::GetClassType(),
                         instName,
                         dataMgr )
 {
@@ -38,7 +38,7 @@ VolumeRenderer::VolumeRenderer( const ParamsMgr*    pm,
     algorithm = NULL;
 }
 
-VolumeRenderer::~VolumeRenderer()
+VolumeIsoRenderer::~VolumeIsoRenderer()
 {
     if (VAO) glDeleteVertexArrays(1, &VAO);
     if (VBO) glDeleteBuffers(1, &VBO);
@@ -48,7 +48,7 @@ VolumeRenderer::~VolumeRenderer()
     if (algorithm) delete algorithm;
 }
 
-int VolumeRenderer::_initializeGL()
+int VolumeIsoRenderer::_initializeGL()
 {
     float BL = -1;
     float data[] = {
@@ -60,6 +60,8 @@ int VolumeRenderer::_initializeGL()
         1, BL,    1, 0,
         1,  1,    1, 1
     };
+    
+    algorithm = VolumeAlgorithm::NewAlgorithm("Regular", _glManager);
     
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -93,7 +95,7 @@ cache.needsUpdate = true; \
 cVar = pVar; \
 }
 
-int VolumeRenderer::_paintGL(bool fast)
+int VolumeIsoRenderer::_paintGL(bool fast)
 {
     if (fast && cache.algorithmName == "Cell Traversal")
         return 0;
@@ -172,7 +174,7 @@ int VolumeRenderer::_paintGL(bool fast)
     return 0;
 }
 
-int VolumeRenderer::_loadData()
+int VolumeIsoRenderer::_loadData()
 {
     VolumeParams *RP = (VolumeParams *)GetActiveParams();
     CheckCache(cache.var, RP->GetVariableName());
@@ -189,7 +191,7 @@ int VolumeRenderer::_loadData()
     return ret;
 }
 
-void VolumeRenderer::_loadTF()
+void VolumeIsoRenderer::_loadTF()
 {
     MapperFunction *tf = GetActiveParams()->GetMapperFunc(cache.var);
     
@@ -212,7 +214,7 @@ void VolumeRenderer::_loadTF()
     delete [] LUT;
 }
 
-glm::vec3 VolumeRenderer::_getVolumeScales() const
+glm::vec3 VolumeIsoRenderer::_getVolumeScales() const
 {
     ViewpointParams *vpp = _paramsMgr->GetViewpointParams(_winName);
     Transform *datasetTransform = vpp->GetTransform(GetMyDatasetName());
@@ -230,7 +232,7 @@ glm::vec3 VolumeRenderer::_getVolumeScales() const
     );
 }
 
-void VolumeRenderer::_getExtents(glm::vec3 *dataMin, glm::vec3 *dataMax, glm::vec3 *userMin, glm::vec3 *userMax) const
+void VolumeIsoRenderer::_getExtents(glm::vec3 *dataMin, glm::vec3 *dataMax, glm::vec3 *userMin, glm::vec3 *userMax) const
 {
     VolumeParams *vp = (VolumeParams *)GetActiveParams();
     vector<double> dMinExts, dMaxExts;
