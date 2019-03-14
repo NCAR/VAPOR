@@ -126,6 +126,7 @@ void VPathSelector::_openFileDialog()
 
     QFileDialog::FileMode fileMode = QFileDialog::ExistingFile;
     fileDialog.setFileMode(fileMode);
+
     if (fileDialog.exec() != QDialog::Accepted) return;
 
     QStringList files = fileDialog.selectedFiles();
