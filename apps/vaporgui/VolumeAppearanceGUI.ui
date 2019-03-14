@@ -54,7 +54,7 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="0">
      <property name="spacing">
       <number>0</number>
      </property>
@@ -77,88 +77,6 @@
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QTabWidget" name="tabWidget">
-       <property name="tabShape">
-        <enum>QTabWidget::Rounded</enum>
-       </property>
-       <property name="currentIndex">
-        <number>0</number>
-       </property>
-       <widget class="QWidget" name="tab">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>100</height>
-         </size>
-        </property>
-        <attribute name="title">
-         <string>Settings</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <widget class="QFrame" name="frame">
-           <property name="frameShape">
-            <enum>QFrame::StyledPanel</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>Algorithm</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="_algorithmCombo">
-              <item>
-               <property name="text">
-                <string>Default</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QFrame" name="frame_2">
-           <property name="frameShape">
-            <enum>QFrame::StyledPanel</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QSliderEdit" name="_isoEdit" native="true"/>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </widget>
-     </item>
-     <item>
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Minimum</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
     </layout>
    </item>
   </layout>
@@ -168,12 +86,6 @@
    <class>TFWidget</class>
    <extends>QWidget</extends>
    <header>TFWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QSliderEdit</class>
-   <extends>QWidget</extends>
-   <header>QSliderEdit.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
