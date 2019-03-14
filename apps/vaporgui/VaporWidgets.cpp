@@ -92,7 +92,7 @@ void VPushButton::_buttonPressed() {
 
 VComboBox::VComboBox(
         QWidget *parent,
-        std::string labelText
+        const std::string& labelText
     ) :
     VaporWidget(parent, labelText)
 {
@@ -125,7 +125,7 @@ void VComboBox::RemoveOption( int index=0 ) {
 
 VCheckBox::VCheckBox(
         QWidget *parent,
-        std::string labelText
+        const std::string& labelText
     ) :
     VaporWidget(parent, labelText)
 {
