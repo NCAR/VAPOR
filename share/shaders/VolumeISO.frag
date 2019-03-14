@@ -2,7 +2,7 @@
 
 #include VolumeBase.frag
 
-uniform float isoValue;
+uniform float isoValue[4];
 
 void main(void)
 {
@@ -17,7 +17,9 @@ void main(void)
 
 #define STEPS 100
         float step = max(((t1-t0)/float(STEPS))*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/float(STEPS));
-        float ld = texture(data, ((cameraPos + dir * t0) - dataBoundsMin) / (dataBoundsMax-dataBoundsMin)).r;
+		vec3 initialSample = ((cameraPos + dir * t0) - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
+        float ld = texture(data, initialSample).r;
+		bool lastShouldRender = ShouldRenderSample(initialSample);
         
         t1 = min(t1, sceneDepthT);
         int i = 0;
@@ -25,23 +27,27 @@ void main(void)
             vec3 hit = cameraPos + dir * t;
             vec3 dataSTR = (hit - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
             float dv = texture(data, dataSTR).r;
+			bool shouldRender = ShouldRenderSample(dataSTR);
             
-            if ((ld < isoValue && dv >= isoValue) || (ld > isoValue && dv <= isoValue)) {
-                float lt = t - step;
-                float t = lt + step*(isoValue-ld)/(dv-ld);
-                
-                vec3 hit = cameraPos + dir * t;
-                vec3 dataSTR = (hit - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
-                float data = texture(data, dataSTR).r;
-                float dataNorm = (data - LUTMin) / (LUTMax - LUTMin);
-                vec4 color = vec4(1);
-                vec3 normal = GetNormal(dataSTR);
-                
-                color.rgb *= PhongLighting(normal, dir);
-                
-                BlendToBack(accum, PremultiplyAlpha(color));
-            }
+			if (shouldRender && lastShouldRender) {
+				if ((ld < isoValue[0] && dv >= isoValue[0]) || (ld > isoValue[0] && dv <= isoValue[0])) {
+					float lt = t - step;
+					float t = lt + step*(isoValue[0]-ld)/(dv-ld);
+					
+					vec3 hit = cameraPos + dir * t;
+					vec3 dataSTR = (hit - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
+					float data = texture(data, dataSTR).r;
+					float dataNorm = (data - LUTMin) / (LUTMax - LUTMin);
+					vec4 color = vec4(1);
+					vec3 normal = GetNormal(dataSTR);
+					
+					color.rgb *= PhongLighting(normal, dir);
+					
+					BlendToBack(accum, PremultiplyAlpha(color));
+				}
+			}
             ld = dv;
+			lastShouldRender = shouldRender;
             
             if (accum.a > ALPHA_BREAK)
                 break;
