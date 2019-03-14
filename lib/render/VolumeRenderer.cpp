@@ -127,6 +127,8 @@ int VolumeRenderer::_paintGL(bool fast) {
 
     if (_loadData() < 0)
         return -1;
+    if (_loadSecondaryData() < 0)
+        return -1;
     _loadTF();
     cache.needsUpdate = false;
 
@@ -228,11 +230,28 @@ bool VolumeRenderer::_usingColorMapData() const {
 
 int VolumeRenderer::_loadSecondaryData() {
     VolumeParams *vp = (VolumeParams *)GetActiveParams();
-    return 0;
+    CheckCache(cache.useColorMapVar, _usingColorMapData());
+    CheckCache(cache.colorMapVar, vp->GetColorMapVariableName());
+    if (!cache.needsUpdate)
+        return 0;
+
+    if (cache.useColorMapVar) {
+        Grid *grid = _dataMgr->GetVariable(cache.ts, cache.colorMapVar, cache.refinement, cache.compression);
+        int ret = algorithm->LoadSecondaryData(grid);
+        delete grid;
+        return ret;
+    } else {
+        algorithm->DeleteSecondaryData();
+        return 0;
+    }
 }
 
 void VolumeRenderer::_loadTF() {
-    MapperFunction *tf = GetActiveParams()->GetMapperFunc(cache.var);
+    MapperFunction *tf;
+    if (cache.useColorMapVar)
+        tf = GetActiveParams()->GetMapperFunc(cache.colorMapVar);
+    else
+        tf = GetActiveParams()->GetMapperFunc(cache.var);
 
     if (cache.tf && *cache.tf != *tf)
         cache.needsUpdate = true;
