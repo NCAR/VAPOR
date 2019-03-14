@@ -40,7 +40,7 @@ void VaporWidget::SetLabelText(const std::string &text) { _label->setText(QStrin
 
 void VaporWidget::SetLabelText(const QString &text) { _label->setText(text); }
 
-VPushButton::VPushButton(QWidget *parent, std::string labelText, std::string buttonText) : VaporWidget(parent, labelText)
+VPushButton::VPushButton(QWidget *parent, const std::string &labelText, const std::string &buttonText) : VaporWidget(parent, labelText)
 {
     _button = new QPushButton(this);
     _layout->addWidget(_button);

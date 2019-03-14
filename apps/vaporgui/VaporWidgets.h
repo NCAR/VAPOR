@@ -31,7 +31,7 @@ class VPushButton : public VaporWidget    // QWidget, public Ui_VPushButton
     Q_OBJECT
 
 public:
-    VPushButton(QWidget *parent, std::string labelText = "Label", std::string buttonText = "Button");
+    VPushButton(QWidget *parent, const std::string &labelText = "Label", const std::string &buttonText = "Button");
 
     void SetButtonText(const std::string &text);
     void SetButtonText(const QString &text);
@@ -51,7 +51,7 @@ class VComboBox : public VaporWidget    // public QWidget, public Ui_VComboBox
     Q_OBJECT
 
 public:
-    VComboBox(QWidget *parent, std::string labelText = "Label");
+    VComboBox(QWidget *parent, const std::string &labelText = "Label");
     int         GetCurrentIndex() const;
     std::string GetCurrentText() const;
     void        AddOption(const std::string &option, int index = 0);
@@ -72,7 +72,7 @@ class VCheckBox : public VaporWidget    // QWidget, public Ui_VCheckBox
     Q_OBJECT
 
 public:
-    VCheckBox(QWidget *parent, std::string labelText = "Label");
+    VCheckBox(QWidget *parent, const std::string &labelText = "Label");
     bool GetCheckState() const;
 
 private:
