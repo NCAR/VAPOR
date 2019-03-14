@@ -26,8 +26,7 @@ protected:
     QHBoxLayout *_layout;
 };
 
-class VPushButton : public VaporWidget    // QWidget, public Ui_VPushButton
-{
+class VPushButton : public VaporWidget {
     Q_OBJECT
 
 public:
@@ -46,8 +45,7 @@ private slots:
     void _buttonPressed();
 };
 
-class VComboBox : public VaporWidget    // public QWidget, public Ui_VComboBox
-{
+class VComboBox : public VaporWidget {
     Q_OBJECT
 
 public:
@@ -67,8 +65,7 @@ signals:
     void _indexChanged(int index);
 };
 
-class VCheckBox : public VaporWidget    // QWidget, public Ui_VCheckBox
-{
+class VCheckBox : public VaporWidget {
     Q_OBJECT
 
 public:
@@ -85,8 +82,7 @@ signals:
     void _checkboxClicked();
 };
 
-class VPathSelector : public VPushButton    // QWidget, public Ui_VPathSelector
-{
+class VPathSelector : public VPushButton {
     Q_OBJECT
 
 public:
