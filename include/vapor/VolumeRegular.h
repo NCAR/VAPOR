@@ -13,14 +13,25 @@ namespace VAPoR {
         static Type        GetType() { return Type::DVR; }
         
         virtual int LoadData(const Grid *grid);
+        virtual int LoadSecondaryData(const Grid *grid);
+        virtual void DeleteSecondaryData();
         virtual ShaderProgram *GetShader() const;
         virtual void SetUniforms() const;
         
     protected:
-        unsigned int dataTexture;
-        unsigned int missingTexture;
+        unsigned int _dataTexture;
+        unsigned int _missingTexture;
+        bool _hasMissingData;
         
-        bool hasMissingData;
+        std::vector<size_t> dataDimensions;
+        
+        bool _hasSecondData;
+        unsigned int _dataTexture2;
+        unsigned int _missingTexture2;
+        bool _hasMissingData2;
+        
+        static int loadDataDirect(const Grid *grid, const unsigned int dataTexture, const unsigned int missingTexture, bool *hasMissingData);
+        static void initializeTexture(unsigned int &texture);
     };
     
     
@@ -30,6 +41,7 @@ namespace VAPoR {
         static std::string GetName() { return "Iso Regular"; }
         static Type        GetType() { return Type::Iso; }
         virtual ShaderProgram *GetShader() const;
+        virtual void SetUniforms() const;
     };
     
 }

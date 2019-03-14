@@ -34,8 +34,8 @@ int VolumeResampled::LoadData(const Grid *grid)
     
     glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, w, h, d, 0, GL_RED, GL_FLOAT, data);
     
-    hasMissingData = grid->HasMissingData();
-    if (hasMissingData) {
+    _hasMissingData = grid->HasMissingData();
+    if (_hasMissingData) {
         printf("Loading missing data...\n");
         const float missingValue = grid->GetMissingValue();
         unsigned char *missingMask = new unsigned char[w*h*d];
@@ -45,7 +45,7 @@ int VolumeResampled::LoadData(const Grid *grid)
             if (data[i] == missingValue)
                 missingMask[i] = 255;
         
-        glBindTexture(GL_TEXTURE_3D, missingTexture);
+        glBindTexture(GL_TEXTURE_3D, _missingTexture);
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 0, 0, 0, 0, GL_RED, GL_UNSIGNED_BYTE, NULL); // Fix driver bug with re-uploading large textures
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R8, dims[0], dims[1], dims[2], 0, GL_RED, GL_UNSIGNED_BYTE, missingMask);

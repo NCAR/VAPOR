@@ -1,17 +1,16 @@
 #version 410 core
 
 #include VolumeCellBase.frag
-
-uniform float isoValue[4];
-uniform bool  isoEnabled[4];
+#include VolumeIsoInclude.frag
 
 void TestIso(float value, float dv, float ld, vec3 entranceCoord, vec3 exitCoord, vec3 dir, inout vec4 accum)
 {
     if ((ld < value && dv >= value) || (ld > value && dv <= value)) {
         vec3 isoCoord = mix(entranceCoord, exitCoord, (value-ld)/(dv-ld));
+		vec3 isoSampleSTR = isoCoord/coordDimsF;
         
-        vec4 color = vec4(1);
-        vec3 normal = GetNormal(isoCoord/coordDimsF);
+        vec4 color = GetIsoSurfaceColor(isoSampleSTR);
+        vec3 normal = GetNormal(isoSampleSTR);
         
         color.rgb *= PhongLighting(normal, dir);
         
