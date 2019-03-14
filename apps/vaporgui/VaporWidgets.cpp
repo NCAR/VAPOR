@@ -132,7 +132,6 @@ void VCheckBox::_userClickedCheckbox() {
 
 VPathSelector::VPathSelector(
     QWidget *parent,
-    Flags flags,
     const std::string &labelText,
     const std::string &filePath,
     QFileDialog::FileMode fileMode) : VPushButton(parent, labelText) {
