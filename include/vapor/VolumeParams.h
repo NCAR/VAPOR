@@ -7,6 +7,12 @@ namespace VAPoR {
 
 class PARAMS_API VolumeParams : public RenderParams {
   public:
+    enum class Type {
+        Any,
+        DVR,
+        Iso
+    };
+
     VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave);
     VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, std::string classType);
     VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node);
@@ -48,13 +54,20 @@ class PARAMS_API VolumeParams : public RenderParams {
     void SetPhongShininess(float v);
     float GetPhongShininess() const;
 
-    static const std::vector<std::string> GetAlgorithmNames();
-    static void Register(const std::string &name);
+    static const std::vector<std::string> GetAlgorithmNames(Type type = Type::Any);
+    static void Register(const std::string &name, Type type = Type::Any);
 
   private:
     void _init();
 
-    static std::vector<std::string> _algorithmNames;
+    struct AlgorithmEntry {
+        const std::string name;
+        const Type type;
+        bool operator==(const VolumeParams::AlgorithmEntry &b) {
+            return std::tie(name, type) == std::tie(b.name, b.type);
+        }
+    };
+    static std::vector<AlgorithmEntry> _algorithms;
 
     static const std::string _algorithmTag;
     static const std::string _isoValueTag;

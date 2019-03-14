@@ -11,7 +11,7 @@ using namespace VAPoR;
 //
 static RenParamsRegistrar<VolumeParams> registrar(VolumeParams::GetClassType());
 
-std::vector<std::string> VolumeParams::_algorithmNames;
+std::vector<VolumeParams::AlgorithmEntry> VolumeParams::_algorithms;
 
 const std::string VolumeParams::_algorithmTag = "AlgorithmTag";
 const std::string VolumeParams::_isoValueTag = "IsoValueTag";
@@ -121,13 +121,23 @@ float VolumeParams::GetPhongSpecular() const { return GetValueDouble(_phongSpecu
 void VolumeParams::SetPhongShininess(float v) { SetValueDouble(_phongShininessTag, "Phong shininess", v); };
 float VolumeParams::GetPhongShininess() const { return GetValueDouble(_phongShininessTag, GetDefaultPhongShininess()); };
 
-const std::vector<std::string> VolumeParams::GetAlgorithmNames() {
-    return _algorithmNames;
+const std::vector<std::string> VolumeParams::GetAlgorithmNames(Type type) {
+    vector<string> names;
+    for (const AlgorithmEntry &entry : _algorithms) {
+        if (entry.type == type || type == Type::Any)
+            names.push_back(entry.name);
+    }
+    return names;
 }
 
-void VolumeParams::Register(const std::string &name) {
-    assert(!STLUtils::Contains(_algorithmNames, name));
-    _algorithmNames.push_back(name);
+void VolumeParams::Register(const std::string &name, Type type) {
+    AlgorithmEntry entry = {name, type};
+
+    for (const AlgorithmEntry &existing : _algorithms)
+        if (entry == existing)
+            assert(!"Algorithm already registered");
+
+    _algorithms.push_back(entry);
 }
 
 //Set everything to default values
