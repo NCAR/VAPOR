@@ -21,6 +21,10 @@ VolumeAlgorithm *VolumeAlgorithm::NewAlgorithm(const std::string &name, GLManage
 std::map<std::string, VolumeAlgorithmFactory*> VolumeAlgorithm::factories;
 void VolumeAlgorithm::Register(VolumeAlgorithmFactory *f)
 {
+    VolumeParams::Type type = VolumeParams::Type::Any;
+    if      (f->type == Type::Iso) type = VolumeParams::Type::Iso;
+    else if (f->type == Type::DVR) type = VolumeParams::Type::DVR;
+ 
     factories[f->name] = f;
-    VolumeParams::Register(f->name);
+    VolumeParams::Register(f->name, type);
 }

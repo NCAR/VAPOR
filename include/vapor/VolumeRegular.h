@@ -10,6 +10,7 @@ namespace VAPoR {
         ~VolumeRegular();
         
         static std::string GetName() { return "Regular"; }
+        static Type        GetType() { return Type::DVR; }
         
         virtual int LoadData(const Grid *grid);
         virtual ShaderProgram *GetShader() const;
@@ -27,6 +28,7 @@ namespace VAPoR {
     public:
         IsoRegular(GLManager *gl):VolumeRegular(gl){}
         static std::string GetName() { return "Iso Regular"; }
+        static Type        GetType() { return Type::Iso; }
         virtual ShaderProgram *GetShader() const;
     };
     
