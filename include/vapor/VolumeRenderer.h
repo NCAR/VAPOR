@@ -16,6 +16,13 @@ class RENDER_API VolumeRenderer : public Renderer {
                    std::string &dataSetName,
                    std::string &instName,
                    DataMgr *dataMgr);
+    VolumeRenderer(const ParamsMgr *pm,
+                   std::string &winName,
+                   std::string &dataSetName,
+                   std::string paramsType,
+                   std::string classType,
+                   std::string &instName,
+                   DataMgr *dataMgr);
     ~VolumeRenderer();
 
     static std::string GetClassType() {
