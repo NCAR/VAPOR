@@ -27,6 +27,17 @@ VaporWidget::VaporWidget(
     _layout->setContentsMargins( 10, 0, 10, 0);
     setLayout(_layout);
 
+    _label = new QLabel(this);
+    _spacer = new QSpacerItem(
+        10, 
+        10, 
+        QSizePolicy::MinimumExpanding, 
+        QSizePolicy::Minimum
+    );
+
+    _layout->addWidget( _label );
+    _layout->addItem( _spacer );
+
     SetLabelText( labelText );
     
     setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
@@ -85,7 +96,8 @@ VComboBox::VComboBox(
     ) :
     VaporWidget(parent, labelText)
 {
-    SetLabelText( labelText );
+    _combo = new QComboBox(this);
+    _layout->addWidget( _combo );
 
     connect( _combo, SIGNAL( currentIndexChanged(int) ),
         this, SLOT( _userIndexChanged(int) ) );
@@ -117,8 +129,10 @@ VCheckBox::VCheckBox(
     ) :
     VaporWidget(parent, labelText)
 {
-    _checkbox = new QCheckBox( "", this);
+    _checkbox = new QCheckBox( "", this );
     _layout->addWidget( _checkbox );
+
+    _layout->setContentsMargins( 10, 0, 16, 0);
 
     connect( _checkbox, SIGNAL( stateChanged(int) ),
         this, SLOT( _userClickedCheckbox() ) );
