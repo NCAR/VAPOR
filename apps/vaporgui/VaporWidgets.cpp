@@ -194,11 +194,8 @@ void VPathSelector::_openFileDialog() {
     if (fileDialog.exec() != QDialog::Accepted)
         return;
 
-    QStringList files = fileDialog.selectedFiles();
-    if (files.size() != 1)
-        return;
-
-    QString filePath = files[0];
+    if (_multipleFiles) 
+        QString filePath = fileDialog.selectedFile();
 
     bool operable = FileOperationChecker::FileGoodToRead(filePath);
     if (!operable) {
