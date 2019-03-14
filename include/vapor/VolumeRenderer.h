@@ -34,6 +34,8 @@ protected:
     unsigned int LUTTexture;
     unsigned int depthTexture;
 
+    double lastRenderTime;
+
     struct Cache {
         string var = "";
         size_t ts = -1;
