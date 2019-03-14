@@ -1,5 +1,6 @@
 uniform float isoValue[4];
 uniform bool  isoEnabled[4];
+uniform vec4 constantColor;
 
 uniform bool useColormapData;
 uniform bool hasMissingData2;
@@ -22,6 +23,6 @@ vec4 GetIsoSurfaceColor(vec3 sampleSTR)
 		float dataNorm = (data - LUTMin) / (LUTMax - LUTMin);
 		return texture(LUT, dataNorm);
 	} else {
-		return vec4(1);
+		return constantColor;
 	}
 }

@@ -6,6 +6,8 @@
 #include <vapor/glutil.h>
 #include <glm/glm.hpp>
 
+using std::vector;
+using std::string;
 using glm::vec2;
 using glm::vec3;
 using glm::vec4;
@@ -178,6 +180,8 @@ int VolumeRenderer::_paintGL(bool fast)
         shader->SetUniform("isoEnabled[2]", (bool)enabledIsoValues[2]);
         shader->SetUniform("isoEnabled[3]", (bool)enabledIsoValues[3]);
     }
+    if (cache.constantColor.size() == 4)
+        shader->SetUniform("constantColor", *(vec4*)cache.constantColor.data());
     
     algorithm->SetUniforms();
     
@@ -249,11 +253,16 @@ int VolumeRenderer::_loadSecondaryData()
 
 void VolumeRenderer::_loadTF()
 {
+    VolumeParams *vp = (VolumeParams *)GetActiveParams();
     MapperFunction *tf;
-    if (cache.useColorMapVar)
-        tf = GetActiveParams()->GetMapperFunc(cache.colorMapVar);
-    else
-        tf = GetActiveParams()->GetMapperFunc(cache.var);
+    if (cache.useColorMapVar) {
+        tf = vp->GetMapperFunc(cache.colorMapVar);
+    } else {
+        tf = vp->GetMapperFunc(cache.var);
+        vector<float> constantColor = vp->GetConstantColor();
+        constantColor.push_back(tf->getOpacityScale());
+        CheckCache(cache.constantColor, constantColor);
+    }
     
     if (cache.tf && *cache.tf != *tf)
         cache.needsUpdate = true;

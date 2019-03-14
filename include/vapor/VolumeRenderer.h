@@ -4,9 +4,6 @@
 #include <vapor/VolumeAlgorithm.h>
 #include <glm/fwd.hpp>
 
-using std::vector;
-using std::string;
-
 namespace VAPoR
 {
 
@@ -54,18 +51,19 @@ protected:
     double lastRenderTime;
     
     struct Cache {
-        string var = "";
+        std::string var = "";
         size_t ts = -1;
         int refinement;
         int compression;
         
         bool useColorMapVar = false;
-        string colorMapVar = "";
+        std::string colorMapVar = "";
         
         MapperFunction *tf = nullptr;
-        vector<double> mapRange;
+        std::vector<double> mapRange;
+        std::vector<float> constantColor;
         
-        string algorithmName = "";
+        std::string algorithmName = "";
         
         bool needsUpdate;
     } cache;
