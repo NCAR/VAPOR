@@ -68,6 +68,7 @@ set (SRCS
 	VolumeIsoEventRouter.cpp
 	IsoSurfaceSubtabs.cpp
 	VolumeIsoSubtabs.cpp
+	VolumeSubtabs.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h

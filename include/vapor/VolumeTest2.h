@@ -10,6 +10,7 @@ class VolumeTest2 : public VolumeRegular {
     ~VolumeTest2();
 
     static std::string GetName() { return "Test2"; }
+    static Type GetType() { return Type::Any; }
 
     virtual int LoadData(const Grid *grid);
     virtual ShaderProgram *GetShader() const;
