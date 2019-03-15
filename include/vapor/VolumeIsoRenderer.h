@@ -22,7 +22,7 @@ public:
 
     static std::string GetClassType()
     {
-        return ("VolumeIso");
+        return ("NEW_IsoSurface");
     }
     
     bool _usingColorMapData() const;

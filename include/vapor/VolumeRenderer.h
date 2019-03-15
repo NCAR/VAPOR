@@ -26,7 +26,7 @@ public:
 
     static std::string GetClassType()
     {
-        return ("Volume2");
+        return ("NEW_Volume");
     }
 
 protected:
