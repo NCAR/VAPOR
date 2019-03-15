@@ -12,7 +12,7 @@ public:
     VolumeRenderer(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string paramsType, std::string classType, std::string &instName, DataMgr *dataMgr);
     ~VolumeRenderer();
 
-    static std::string GetClassType() { return ("Volume2"); }
+    static std::string GetClassType() { return ("NEW_Volume"); }
 
 protected:
     int  _initializeGL();

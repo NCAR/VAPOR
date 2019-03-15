@@ -37,6 +37,10 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
             color.a = a;
 #else
             vec4 color = GetAverageColorForCoordIndex(currentCell);
+            
+            vec3 normal = GetNormal((vec3(currentCell)+vec3(0.5))/cellDims);
+            color.rgb *= PhongLighting(normal, dir);
+            
             color.a = IntegrateConstantAlpha(color.a, l);
 #endif
 
