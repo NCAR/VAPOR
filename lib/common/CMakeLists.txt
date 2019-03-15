@@ -13,6 +13,7 @@ set (SRC
 	FileUtils.cpp
 	ResourcePath.cpp
 	LegacyVectorMath.cpp
+	STLUtils.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/CMakeConfig.cpp
 )
 
@@ -31,6 +32,7 @@ set (HEADERS
     ${PROJECT_SOURCE_DIR}/include/vapor/FileUtils.h
     ${PROJECT_SOURCE_DIR}/include/vapor/ResourcePath.h
     ${PROJECT_SOURCE_DIR}/include/vapor/LegacyVectorMath.h
+    ${PROJECT_SOURCE_DIR}/include/vapor/STLUtils.h
 )
 
 add_library (common SHARED ${SRC} ${HEADERS})
