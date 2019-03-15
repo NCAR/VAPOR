@@ -19,7 +19,7 @@ class RENDER_API VolumeIsoRenderer : public VolumeRenderer {
     ~VolumeIsoRenderer();
 
     static std::string GetClassType() {
-        return ("VolumeIso");
+        return ("NEW_IsoSurface");
     }
 
     bool _usingColorMapData() const;

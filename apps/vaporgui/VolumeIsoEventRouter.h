@@ -52,10 +52,10 @@ class VolumeIsoEventRouter : public QTabWidget, public RenderEventRouter {
     virtual string _getDescription() const;
 
     virtual string _getSmallIconImagePath() const {
-        return ("WireFrame_small.png");
+        return ("IsoSurface_small.png");
     }
     virtual string _getIconImagePath() const {
-        return ("WireFrame.png");
+        return ("IsoSurface.png");
     }
 
   private:
