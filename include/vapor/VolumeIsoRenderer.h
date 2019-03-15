@@ -23,6 +23,7 @@ class RENDER_API VolumeIsoRenderer : public VolumeRenderer {
     }
 
     bool _usingColorMapData() const;
+    virtual std::string _getDefaultAlgorithmForGrid(const Grid *grid) const;
 };
 
 }; // namespace VAPoR

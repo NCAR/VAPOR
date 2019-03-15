@@ -19,7 +19,7 @@ using std::vector;
 using namespace VAPoR;
 
 static VolumeAlgorithmRegistrar<VolumeCellTraversal> registration;
-static VolumeAlgorithmRegistrar<IsoCellTraversal> registration2;
+static VolumeAlgorithmRegistrar<VolumeCellTraversalIso> registration2;
 
 #define MAX_LEVELS 32
 
@@ -460,11 +460,11 @@ bool VolumeCellTraversal::Need32BitForCoordinates(const Grid *grid) {
     return false;
 }
 
-ShaderProgram *IsoCellTraversal::GetShader() const {
+ShaderProgram *VolumeCellTraversalIso::GetShader() const {
     return _glManager->shaderManager->GetShader(AddDefinitionsToShader("VolumeCellISO"));
 }
 
-void IsoCellTraversal::SetUniforms() const {
+void VolumeCellTraversalIso::SetUniforms() const {
     VolumeCellTraversal::SetUniforms();
     GetShader()->SetUniform("useColormapData", _hasSecondData);
 }

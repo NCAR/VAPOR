@@ -37,6 +37,8 @@ class RENDER_API VolumeRenderer : public Renderer {
     void _loadTF();
     glm::vec3 _getVolumeScales() const;
     void _getExtents(glm::vec3 *dataMin, glm::vec3 *dataMax, glm::vec3 *userMin, glm::vec3 *userMax) const;
+    virtual std::string _getDefaultAlgorithmForGrid(const Grid *grid) const;
+    bool _needToSetDefaultAlgorithm() const;
 
     VolumeAlgorithm *algorithm;
 

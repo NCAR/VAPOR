@@ -35,6 +35,9 @@ class PARAMS_API VolumeParams : public RenderParams {
 
     std::string GetAlgorithm() const;
     void SetAlgorithm(std::string algorithm);
+    bool GetAlgorithmWasManuallySetByUser() const;
+    void SetAlgorithmWasManuallySetByUser(bool v);
+
     double GetIsoValue() const;
     void SetIsoValue(double isoValue);
 
@@ -70,6 +73,7 @@ class PARAMS_API VolumeParams : public RenderParams {
     static std::vector<AlgorithmEntry> _algorithms;
 
     static const std::string _algorithmTag;
+    static const std::string _algorithmWasManuallySetByUserTag;
     static const std::string _isoValueTag;
     static const std::string _isoValuesTag;
     static const std::string _enabledIsoValuesTag;
