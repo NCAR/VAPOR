@@ -148,14 +148,14 @@ void VolumeRegular::SetUniforms() const
 }
 
 
-static VolumeAlgorithmRegistrar<IsoRegular> registrationIso;
+static VolumeAlgorithmRegistrar<VolumeRegularIso> registrationIso;
 
-ShaderProgram *IsoRegular::GetShader() const
+ShaderProgram *VolumeRegularIso::GetShader() const
 {
     return _glManager->shaderManager->GetShader("VolumeISO");
 }
 
-void IsoRegular::SetUniforms() const
+void VolumeRegularIso::SetUniforms() const
 {
     VolumeRegular::SetUniforms();
     GetShader()->SetUniform("useColormapData", _hasSecondData);

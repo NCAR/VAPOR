@@ -5,6 +5,8 @@
 #include <vapor/GLManager.h>
 #include <vapor/glutil.h>
 #include <glm/glm.hpp>
+#include <vapor/VolumeRegular.h>
+#include <vapor/VolumeCellTraversal.h>
 
 using std::vector;
 using std::string;
@@ -57,6 +59,14 @@ VolumeRenderer::VolumeRenderer(
     depthTexture = NULL;
     algorithm = NULL;
     lastRenderTime = 100;
+    
+    if (_needToSetDefaultAlgorithm()) {
+        VolumeParams *vp = (VolumeParams*)GetActiveParams();
+        Grid *grid = _dataMgr->GetVariable(vp->GetCurrentTimestep(), vp->GetVariableName(), vp->GetRefinementLevel(), vp->GetCompressionLevel());
+        string algorithmName = _getDefaultAlgorithmForGrid(grid);
+        vp->SetAlgorithm(algorithmName);
+        delete grid;
+    }
 }
 
 VolumeRenderer::~VolumeRenderer()
@@ -222,6 +232,13 @@ int VolumeRenderer::_loadData()
     
     Grid *grid = _dataMgr->GetVariable(cache.ts, cache.var, cache.refinement, cache.compression);
     
+    if (_needToSetDefaultAlgorithm()) {
+        if (algorithm) delete algorithm;
+        string algorithmName = _getDefaultAlgorithmForGrid(grid);
+        algorithm = VolumeAlgorithm::NewAlgorithm(algorithmName, _glManager);
+        RP->SetAlgorithm(algorithmName);
+    }
+    
     int ret = algorithm->LoadData(grid);
     delete grid;
     return ret;
@@ -311,4 +328,17 @@ void VolumeRenderer::_getExtents(glm::vec3 *dataMin, glm::vec3 *dataMax, glm::ve
     _dataMgr->GetVariableExtents(cache.ts, cache.var, cache.refinement, dMinExts, dMaxExts);
     *dataMin = vec3(dMinExts[0], dMinExts[1], dMinExts[2]);
     *dataMax = vec3(dMaxExts[0], dMaxExts[1], dMaxExts[2]);
+}
+
+std::string VolumeRenderer::_getDefaultAlgorithmForGrid(const Grid *grid) const
+{
+    const RegularGrid* regular = dynamic_cast<const RegularGrid*>(grid);
+    if (regular)
+        return VolumeRegular::GetName();
+    return VolumeCellTraversal::GetName();
+}
+
+bool VolumeRenderer::_needToSetDefaultAlgorithm() const
+{
+    return !((VolumeParams*)GetActiveParams())->GetAlgorithmWasManuallySetByUser();
 }

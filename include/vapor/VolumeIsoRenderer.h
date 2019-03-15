@@ -26,6 +26,7 @@ public:
     }
     
     bool _usingColorMapData() const;
+    virtual std::string _getDefaultAlgorithmForGrid(const Grid *grid) const;
 };
 
 

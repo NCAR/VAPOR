@@ -35,9 +35,9 @@ namespace VAPoR {
     };
     
     
-    class IsoRegular : public VolumeRegular {
+    class VolumeRegularIso : public VolumeRegular {
     public:
-        IsoRegular(GLManager *gl):VolumeRegular(gl){}
+        VolumeRegularIso(GLManager *gl):VolumeRegular(gl){}
         static std::string GetName() { return "Iso Regular"; }
         static Type        GetType() { return Type::Iso; }
         virtual ShaderProgram *GetShader() const;
