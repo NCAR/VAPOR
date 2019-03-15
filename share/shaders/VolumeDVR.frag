@@ -42,8 +42,7 @@ void main(void)
             vec4 color = texture(LUT, dataNorm);
             vec3 normal = GetNormal(dataSTR);
 			
-			if (lightingEnabled)
-				color.rgb *= PhongLighting(normal, dir);
+            color.rgb *= PhongLighting(normal, dir);
             
             if (ShouldRenderSample(dataSTR))
                 BlendToBack(accum, PremultiplyAlpha(color));
