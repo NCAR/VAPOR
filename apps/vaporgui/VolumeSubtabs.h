@@ -42,7 +42,7 @@ public:
     {
         setupUi(this);
         _TFWidget->SetOpacityIntegrated(true);
-        _TFWidget->Reinit((TFFlags)(CONSTANT_COLOR));
+        _TFWidget->Reinit((TFFlags)(0));
     }
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
