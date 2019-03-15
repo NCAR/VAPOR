@@ -30,8 +30,8 @@ namespace VAPoR {
         unsigned int _missingTexture2;
         bool _hasMissingData2;
         
-        static int loadDataDirect(const Grid *grid, const unsigned int dataTexture, const unsigned int missingTexture, bool *hasMissingData);
-        static void initializeTexture(unsigned int &texture);
+        static int _loadDataDirect(const Grid *grid, const unsigned int dataTexture, const unsigned int missingTexture, bool *hasMissingData);
+        static void _initializeTexture(unsigned int &texture);
     };
     
     
