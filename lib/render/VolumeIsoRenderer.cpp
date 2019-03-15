@@ -5,7 +5,9 @@
 #include <vapor/GLManager.h>
 #include <vapor/glutil.h>
 #include <glm/glm.hpp>
-#include <chrono>
+
+#include <vapor/VolumeRegular.h>
+#include <vapor/VolumeCellTraversal.h>
 
 using glm::mat4;
 using glm::vec2;
@@ -24,3 +26,10 @@ VolumeIsoRenderer::VolumeIsoRenderer(const ParamsMgr *pm, std::string &winName, 
 VolumeIsoRenderer::~VolumeIsoRenderer() {}
 
 bool VolumeIsoRenderer::_usingColorMapData() const { return !GetActiveParams()->UseSingleColor(); }
+
+std::string VolumeIsoRenderer::_getDefaultAlgorithmForGrid(const Grid *grid) const
+{
+    const RegularGrid *regular = dynamic_cast<const RegularGrid *>(grid);
+    if (regular) return VolumeRegularIso::GetName();
+    return VolumeCellTraversalIso::GetName();
+}

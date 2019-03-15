@@ -16,7 +16,8 @@ public:
 
     static std::string GetClassType() { return ("NEW_IsoSurface"); }
 
-    bool _usingColorMapData() const;
+    bool                _usingColorMapData() const;
+    virtual std::string _getDefaultAlgorithmForGrid(const Grid *grid) const;
 };
 
 };    // namespace VAPoR
