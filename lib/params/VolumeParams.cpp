@@ -14,6 +14,7 @@ static RenParamsRegistrar<VolumeParams> registrar(VolumeParams::GetClassType());
 std::vector<VolumeParams::AlgorithmEntry> VolumeParams::_algorithms;
 
 const std::string VolumeParams::_algorithmTag = "AlgorithmTag";
+const std::string VolumeParams::_algorithmWasManuallySetByUserTag = "AlgorithmWasManuallySetByUserTag";
 const std::string VolumeParams::_isoValueTag = "IsoValueTag";
 const std::string VolumeParams::_isoValuesTag = "IsoValuesTag";
 const std::string VolumeParams::_enabledIsoValuesTag = "EnabledIsoValuesTag";
@@ -71,6 +72,14 @@ std::string VolumeParams::GetAlgorithm() const {
 void VolumeParams::SetAlgorithm(std::string algorithm) {
     assert(STLUtils::Contains(GetAlgorithmNames(), algorithm));
     SetValueString(_algorithmTag, "Volume rendering algorithm", algorithm);
+}
+
+bool VolumeParams::GetAlgorithmWasManuallySetByUser() const {
+    return GetValueLong(_algorithmWasManuallySetByUserTag, 0);
+}
+
+void VolumeParams::SetAlgorithmWasManuallySetByUser(bool v) {
+    SetValueLong(_algorithmWasManuallySetByUserTag, "User manually changed the algorithm", false);
 }
 
 double VolumeParams::GetIsoValue() const {

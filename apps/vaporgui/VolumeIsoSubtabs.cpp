@@ -28,8 +28,10 @@ void VolumeIsoVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Re
 }
 
 void VolumeIsoVariablesSubtab::on__castingModeComboBox_currentIndexChanged(const QString &text) {
-    if (!text.isEmpty())
+    if (!text.isEmpty()) {
         _isoParams->SetAlgorithm(text.toStdString());
+        _isoParams->SetAlgorithmWasManuallySetByUser(true);
+    }
 }
 
 VolumeIsoAppearanceSubtab::VolumeIsoAppearanceSubtab(QWidget *parent) {

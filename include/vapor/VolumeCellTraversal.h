@@ -36,9 +36,9 @@ class VolumeCellTraversal : public VolumeRegular {
     std::string AddDefinitionsToShader(std::string shaderName) const;
 };
 
-class IsoCellTraversal : public VolumeCellTraversal {
+class VolumeCellTraversalIso : public VolumeCellTraversal {
   public:
-    IsoCellTraversal(GLManager *gl) : VolumeCellTraversal(gl) {}
+    VolumeCellTraversalIso(GLManager *gl) : VolumeCellTraversal(gl) {}
     static std::string GetName() { return "Iso Cell Traversal"; }
     static Type GetType() { return Type::Iso; }
     virtual ShaderProgram *GetShader() const;
