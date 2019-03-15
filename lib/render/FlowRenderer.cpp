@@ -136,11 +136,12 @@ FlowRenderer::_paintGL( bool fast )
     // Attempt to do a step of Advection
     int rv = _advection.Advect( flow::Advection::RK4 );
     _colorLastParticle();
-    while( rv == flow::ADVECT_HAPPENED )
+    size_t totalSteps = 1, maxSteps = 200;
+    while( rv == flow::ADVECT_HAPPENED && totalSteps < maxSteps )
     {
-        _purePaint( params, true );    // use fast rendering for intermediate results
         rv = _advection.Advect( flow::Advection::RK4 );
         _colorLastParticle();
+        totalSteps++;
     }
         
     _purePaint( params, fast );
@@ -163,7 +164,6 @@ FlowRenderer::_purePaint( FlowParams* params, bool fast )
             _drawAStreamAsLines( s, params );
         else
         {
-            //_drawAStreamAsTubes( s, params );
             _drawAStreamAsLines( s, params );
         }
     }

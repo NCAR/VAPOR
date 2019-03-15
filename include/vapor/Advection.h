@@ -79,10 +79,10 @@ private:
     float   _baseDeltaT;
 
     // Advection methods here could assume all input is valid.
-    int _advectEuler( const Particle& p0, float deltaT, // Input
-                            Particle& p1 ) const;       // Output
-    int _advectRK4(   const Particle& p0, float deltaT, // Input
-                            Particle& p1 ) const;       // Output
+    int _advectEuler( const Particle& p0,  float deltaT, // Input
+                            Particle& p1 ) const;        // Output
+    int _advectRK4(   const Particle& p0,  float deltaT, // Input
+                            Particle& p1 ) const;        // Output
 
     // Get an adjust factor for deltaT based on how curvy the past two steps are.
     //   A value in range (0.0, 1.0) means shrink deltaT.
