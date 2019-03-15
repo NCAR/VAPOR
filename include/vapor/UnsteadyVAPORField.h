@@ -21,25 +21,27 @@ public:
    ~UnsteadyVAPORField();
 
     int  GetVelocity(   float time, const glm::vec3& pos, glm::vec3& vel ) const;
-    //int  GetScalar  (   float time, const glm::vec3& pos, float& val ) const;
     bool InsideVolume(  float time, const glm::vec3& pos ) const;    
-
+    //
     // Note: if time falls in between two time steps, the extents of the nearest 
     // time step will be returned.
+    //
     int  GetExtents(    float time, glm::vec3& minExt, glm::vec3& maxExt ) const;
 
     //
     // Modifiers
     //
-    int  AddTimeStep( const VGrid* u, const VGrid* v, const VGrid* w,
-                      const VGrid* value, float time );
+    int  AddTimeStep( const VGrid* u, const VGrid* v, const VGrid* w, float time );
 
-    // 
-    // Since the grids are passed in, SteadyVAPORField does NOT destroy them by default.
-    // However, SteadyVAPORField could perform this task if desired.
-    //
+    // Clean up 
     void DestroyGrids();
 
+    //
+    // Find one index whose timestamp is just below a given time
+    // I.e., _timestamps[floor] <= time 
+    //
+    int LocateTimestamp( float   time,                        // Input
+                         size_t& floor ) const;               // Output
 private:
     // 
     // These vectors keep grids for all time steps, 
@@ -48,21 +50,11 @@ private:
     std::vector<const VGrid*>   _velArrU;
     std::vector<const VGrid*>   _velArrV;
     std::vector<const VGrid*>   _velArrW;
-    //std::vector<const VGrid*>   _scalarArr;
     std::vector<float>          _timestamps;    // always in ascending order
-
-    //
-    // Find one index whose timestamp is just below a given time
-    // I.e., _timestamps[floor] <= time 
-    //
-    int _locateTimestamp( float   time,                        // Input
-                          size_t& floor ) const;               // Output
 
     template< typename T >
     size_t _binarySearch( const std::vector<T>& vec, T val, size_t begin, size_t end ) const;
-
 };
-
 };
 
 #endif

@@ -123,6 +123,7 @@ FlowRenderer::_paintGL( bool fast )
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
 
     _updateFlowStates( params );
+
     if( !_state_velocitiesUpToDate )
     {
         _useSteadyVAPORField( params );
@@ -149,7 +150,6 @@ FlowRenderer::_paintGL( bool fast )
     }
 
     _purePaint( params, fast );
-
     _restoreGLState();
 
     return 0;
