@@ -7,12 +7,13 @@ using namespace flow;
 // Constructor;
 Advection::Advection()
 {
-    _velocity      = nullptr;
+    _velocity   = nullptr;
     _baseDeltaT = 0.01f;
     _lowerAngle = 3.0f;
     _upperAngle = 15.0f;
     _lowerAngleCos = glm::cos( glm::radians( _lowerAngle ) );
     _upperAngleCos = glm::cos( glm::radians( _upperAngle ) );
+    _advectionComplete = false;
 }
 
 // Destructor;
@@ -70,6 +71,18 @@ Advection::IsSteady() const
         return _velocity->IsSteady;
     else
         return false;
+}
+
+bool
+Advection::IsAdvectionComplete() const
+{
+    return _advectionComplete;
+}
+
+void
+Advection::ToggleAdvectionComplete( bool comp )
+{
+    _advectionComplete = comp;
 }
 
 const std::string 

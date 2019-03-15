@@ -133,17 +133,21 @@ FlowRenderer::_paintGL( bool fast )
         _populateParticleProperties( params->GetColorMapVariableName(), params, true );
     }
 
-    // Attempt to do a step of Advection
-    int rv = _advection.Advect( flow::Advection::RK4 );
-    _colorLastParticle();
-    size_t totalSteps = 1, maxSteps = 200;
-    while( rv == flow::ADVECT_HAPPENED && totalSteps < maxSteps )
+    if( !_advection.IsAdvectionComplete() )
     {
-        rv = _advection.Advect( flow::Advection::RK4 );
+        int rv = _advection.Advect( flow::Advection::RK4 );
         _colorLastParticle();
-        totalSteps++;
+        size_t totalSteps = 1, maxSteps = 200;
+        while( rv == flow::ADVECT_HAPPENED && totalSteps < maxSteps )
+        {
+            rv = _advection.Advect( flow::Advection::RK4 );
+            _colorLastParticle();
+            totalSteps++;
+        }
+
+        _advection.ToggleAdvectionComplete( true );
     }
-        
+
     _purePaint( params, fast );
 
     _restoreGLState();
@@ -427,6 +431,7 @@ FlowRenderer::_useSteadyVAPORField( const FlowParams* params )
     _genSeedsXY( seeds );
     _advection.UseSeedParticles( seeds );
     _advection.UseVelocity( velocity );
+    _advection.ToggleAdvectionComplete( false );
 
     _state_velocitiesUpToDate = true;
     

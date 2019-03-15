@@ -66,10 +66,11 @@ public:
     // Query properties (most are properties of the velocity field)
     int  CheckReady() const;
     bool IsSteady() const;
+    bool IsAdvectionComplete() const;
+    void ToggleAdvectionComplete( bool b );
     const std::string GetVelocityNameU() const;
     const std::string GetVelocityNameV() const;
     const std::string GetVelocityNameW() const;
-    
 
 private:
     const VelocityField*                    _velocity;
@@ -92,6 +93,7 @@ private:
                              const Particle& past1, 
                              const Particle& current ) const;
 
+    bool  _advectionComplete;    
 };
 };
 
