@@ -27,8 +27,10 @@ void VolumeVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Rende
 
 void VolumeVariablesSubtab::on__castingModeComboBox_currentIndexChanged(const QString &text)
 {
-    if (!text.isEmpty())
+    if (!text.isEmpty()) {
         _volumeParams->SetAlgorithm(text.toStdString());
+        _volumeParams->SetAlgorithmWasManuallySetByUser(true);
+    }
 }
 
 void VolumeAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
