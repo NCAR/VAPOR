@@ -96,3 +96,9 @@ SteadyVAPORVelocity::GetExtents( float time, glm::vec3& minExt, glm::vec3& maxEx
 
     return 0;
 }
+
+int
+SteadyVAPORVelocity::GetNumberOfTimesteps( ) const
+{
+    return 1;
+}

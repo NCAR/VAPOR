@@ -63,3 +63,9 @@ SteadyVAPORScalar::GetExtents( float time, glm::vec3& minExt, glm::vec3& maxExt 
 
     return 0;
 }
+
+int
+SteadyVAPORScalar::GetNumberOfTimesteps( ) const
+{
+    return 1;
+}

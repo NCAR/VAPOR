@@ -23,6 +23,7 @@ public:
     virtual int  GetScalar(  float time, const glm::vec3& pos,   // input 
                              float& val) const = 0;              // output
 
+    virtual int GetNumberOfTimesteps() const = 0;
 
     std::string ScalarName;  // Varuable names for the value field
 

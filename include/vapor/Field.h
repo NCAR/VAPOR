@@ -26,6 +26,11 @@ public:
     //
     virtual int GetExtents( float time, glm::vec3& minExt, glm::vec3& maxExt ) const = 0;
 
+    //
+    // Retrieve the number of time steps in this field
+    //
+    virtual int GetNumberOfTimesteps() const = 0;
+
 
     // Class members
     bool        IsSteady;
