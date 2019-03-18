@@ -34,6 +34,17 @@ public:
         return ("Flow");
     }
 
+    enum class UpdateStatus
+    {
+        SIMPLE_OUTOFDATE,   // When variable name or compression is out of date,
+                            //   and in case of steady field, timestep wrong.
+        MISS_TIMESTEP,      // Unsteady field only, when other params are all good,
+                            //   but there are missing timesteps.
+        EXTRA_TIMESTEP,     // Unsteady field only, when other params are all good,
+                            //   but the current fields carry extra time steps.
+        UPTODATE            // Everything is up-to-date
+    };
+
 protected:
     // C++ stuff: pure virtual functions from Renderer
     int  _initializeGL();
@@ -51,8 +62,8 @@ protected:
     int                 _cache_refinementLevel;
     int                 _cache_compressionLevel;
     bool                _cache_isSteady;
-    bool                _state_velocitiesUpToDate;
-    bool                _state_scalarUpToDate;
+    UpdateStatus        _velocityStatus;
+    UpdateStatus        _scalarStatus;
 
     // Member variables for OpenGL
     const  GLint        _colorMapTexOffset;
@@ -64,7 +75,6 @@ protected:
     //
     // Member functions
     //
-    //void _useOceanField();
     int  _useSteadyVAPORField( const FlowParams* );
 
     int  _genSeedsXY( std::vector<flow::Particle>& seeds ) const;
