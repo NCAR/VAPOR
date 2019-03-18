@@ -86,12 +86,12 @@ void VolumeParams::SetAlgorithm(std::string algorithm)
 
 bool VolumeParams::GetAlgorithmWasManuallySetByUser() const
 {
-    return GetValueLong(_algorithmWasManuallySetByUserTag, 0);
+    return GetValueLong(_algorithmWasManuallySetByUserTag, false);
 }
 
 void VolumeParams::SetAlgorithmWasManuallySetByUser(bool v)
 {
-    SetValueLong(_algorithmWasManuallySetByUserTag, "User manually changed the algorithm", false);
+    SetValueLong(_algorithmWasManuallySetByUserTag, "User manually changed the algorithm", v);
 }
 
 double VolumeParams::GetIsoValue() const
