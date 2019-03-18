@@ -2,6 +2,7 @@
 #include "vapor/FlowRenderer.h"
 #include "vapor/OceanField.h"
 #include "vapor/SteadyVAPORVelocity.h"
+#include "vapor/UnsteadyVAPORVelocity.h"
 #include "vapor/SteadyVAPORScalar.h"
 #include "vapor/Particle.h"
 #include <iostream>
@@ -153,7 +154,14 @@ FlowRenderer::_paintGL( bool fast )
     }
     else
     {
+        if( _velocityStatus == UpdateStatus::SIMPLE_OUTOFDATE )
+        {
 
+        }
+        if( _scalarStatus == UpdateStatus::SIMPLE_OUTOFDATE )
+        {
+
+        }
     }
 
     _purePaint( params, fast );
@@ -443,12 +451,11 @@ FlowRenderer::_useSteadyVAPORField( const FlowParams* params )
 
     // Step 2: use these variable names to get data grids
     Grid *gridU, *gridV, *gridW;
-    int currentTS = params->GetCurrentTimestep();
-    int rv  = _getAGrid( params, currentTS, varnames[0], &gridU );
+    int rv  = _getAGrid( params, _cache_currentTS, varnames[0], &gridU );
     if( rv != 0 )   return rv;
-    rv      = _getAGrid( params, currentTS, varnames[1], &gridV );
+    rv      = _getAGrid( params, _cache_currentTS, varnames[1], &gridV );
     if( rv != 0 )   return rv;
-    rv      = _getAGrid( params, currentTS, varnames[2], &gridW );
+    rv      = _getAGrid( params, _cache_currentTS, varnames[2], &gridW );
     if( rv != 0 )   return rv;
 
     // Step 3: create a SteadyVAPORVelocity using these grids, and ask Advection to use it!
@@ -460,7 +467,7 @@ FlowRenderer::_useSteadyVAPORField( const FlowParams* params )
     
     // Get ready Advection class
     std::vector<flow::Particle> seeds;
-    _genSeedsXY( seeds );
+    _genSeedsXY( seeds, 0.0f );
     _advection.UseSeedParticles( seeds );
     _advection.UseVelocity( velocity );
     _advection.ToggleAdvectionComplete( false );
@@ -471,7 +478,54 @@ FlowRenderer::_useSteadyVAPORField( const FlowParams* params )
 }
 
 int
-FlowRenderer::_genSeedsXY( std::vector<flow::Particle>& seeds ) const
+FlowRenderer::_useUnsteadyVAPORField( const FlowParams* params )
+{
+    // Step 1: collect all variable names
+    std::vector<std::string> varnames = params->GetFieldVariableNames();
+    assert( varnames.size() == 3 );  // need to have three components
+    for( auto& s : varnames )
+    {
+        if( s.empty() )
+        {
+            MyBase::SetErrMsg("Missing velocity field");
+            return flow::GRID_ERROR;
+        }
+    }
+
+    // Step 2: Create an UnsteadyVAPORVelocity field
+    flow::UnsteadyVAPORVelocity* velocity = new flow::UnsteadyVAPORVelocity();
+    velocity->VelocityNameU = varnames[0];
+    velocity->VelocityNameV = varnames[1];
+    velocity->VelocityNameW = varnames[2];
+    std::vector<double> timeCoords = _dataMgr->GetTimeCoordinates();
+    assert( timeCoords.size() > _cache_currentTS );
+    Grid *gridU, *gridV, *gridW;
+    int rv;
+    for( size_t ts = 0; ts <= _cache_currentTS; ts++ )
+    {
+        rv      = _getAGrid( params, ts, varnames[0], &gridU );
+        if( rv != 0 )   return rv;
+        rv      = _getAGrid( params, ts, varnames[1], &gridV );
+        if( rv != 0 )   return rv;
+        rv      = _getAGrid( params, ts, varnames[2], &gridW );
+        if( rv != 0 )   return rv;
+        velocity->AddTimeStep( gridU, gridV, gridW, timeCoords[ts] );
+    }
+
+    _advection.UseVelocity( velocity );
+    std::vector<flow::Particle> seeds;
+    _genSeedsXY( seeds, timeCoords[0] );
+    _advection.UseSeedParticles( seeds );
+
+    _advection.ToggleAdvectionComplete( false );
+
+    _velocityStatus = UpdateStatus::UPTODATE;
+
+    return 0;
+}
+
+int
+FlowRenderer::_genSeedsXY( std::vector<flow::Particle>& seeds, float timeVal ) const
 {
     int numX = 5, numY = 5;
     std::vector<double>           extMin, extMax;
@@ -489,6 +543,7 @@ FlowRenderer::_genSeedsXY( std::vector<flow::Particle>& seeds ) const
             seeds[idx].location.x = extMin[0] + (x+1.0f) * stepX;
             seeds[idx].location.y = extMin[1] + (y+1.0f) * stepY;
             seeds[idx].location.z = stepZ ;
+            seeds[idx].time       = timeVal;
         }
 
     return 0;
