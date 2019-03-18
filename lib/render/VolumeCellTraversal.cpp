@@ -395,7 +395,6 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
 std::string VolumeCellTraversal::AddDefinitionsToShader(std::string shaderName) const
 {
     if (useHighPrecisionTriangleRoutine) {
-        printf("Using high precision triangle routine\n");
         shaderName += ":USE_INTEL_TRI_ISECT";
     }
     shaderName += ":BB_LEVELS " + std::to_string(BBLevels);
@@ -446,7 +445,7 @@ bool VolumeCellTraversal::NeedsHighPrecisionTriangleRoutine(const Grid *grid)
     double maxLength = max(lengths[0], max(lengths[1], lengths[2]));
     double ratio = maxLength/minLength;
     
-    if (ratio > 500000)
+    if (ratio > 100000)
         return true;
     else
         return false;
