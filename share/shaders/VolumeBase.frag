@@ -25,7 +25,6 @@ uniform sampler1D LUT;
 uniform sampler2D sceneDepth;
 uniform sampler3D missingMask;
 
-vec3 lightDir = vec3(0,0,-1);
 bool readDepthBuffer = true;
 
 
@@ -75,6 +74,8 @@ float PhongLighting(vec3 normal, vec3 viewDir)
 {
 	if (!lightingEnabled)
 		return 1;
+    
+    vec3 lightDir = viewDir;
 
     float diffuse = abs(dot(normal, -lightDir)) * phongDiffuse;
 
