@@ -55,7 +55,11 @@ void VPushButton::SetButtonText(const std::string &text) { SetButtonText(QString
 
 void VPushButton::SetButtonText(const QString &text) { _button->setText(text); }
 
-void VPushButton::_buttonPressed() { emit _pressed(); }
+void VPushButton::_buttonPressed()
+{
+    _button->setDown(false);
+    emit _pressed();
+}
 
 VComboBox::VComboBox(QWidget *parent, const std::string &labelText) : VaporWidget(parent, labelText)
 {
@@ -135,14 +139,21 @@ void VFileSelector::_openFileDialog()
 
     fileDialog.setFileMode(_fileMode);
 
-    if (fileDialog.exec() != QDialog::Accepted) return;
+    if (fileDialog.exec() != QDialog::Accepted) {
+        _button->setDown(false);
+        return;
+    }
 
     QStringList files = fileDialog.selectedFiles();
-    if (files.size() != 1) return;
+    if (files.size() != 1) {
+        _button->setDown(false);
+        return;
+    }
 
     QString filePath = files[0];
 
     SetPath(filePath.toStdString());
+    _button->setDown(false);
 }
 
 void VFileSelector::_setPathFromLineEdit()
