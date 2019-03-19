@@ -162,7 +162,9 @@ VFileSelector::VFileSelector(
     _layout->addWidget( _lineEdit );
     
     SetLabelText( labelText );
-    SetPath( filePath );
+    //SetPath( filePath );
+    _filePath = filePath;
+    _lineEdit->setText( QString::fromStdString( filePath ) );
     
     connect( _button, SIGNAL( pressed() ),
         this, SLOT( _openFileDialog() ) );
