@@ -44,6 +44,8 @@ class RENDER_API VolumeRenderer : public Renderer {
 
     unsigned int VAO = 0;
     unsigned int VBO = 0;
+    unsigned int VAO2 = 0;
+    unsigned int VBO2 = 0;
     unsigned int LUTTexture;
     unsigned int depthTexture;
 
