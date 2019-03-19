@@ -184,13 +184,6 @@ void VFileSelector::_openFileDialog() {
 
     QString filePath = files[0];
 
-    if (!_isFileOperable(filePath)) {
-        MSG_ERR(
-            FileOperationChecker::GetLastErrorMessage().toStdString());
-        SetPath(_filePath);
-        return;
-    }
-
     SetPath(filePath.toStdString());
 }
 
