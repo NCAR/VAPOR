@@ -110,6 +110,7 @@ class VFileSelector : public VPushButton
 
 public:
     void SetPath( const std::string& defaultPath);
+    void SetPath( const QString& defaultPath);
     std::string GetPath() const;
 
 protected:
