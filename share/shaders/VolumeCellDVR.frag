@@ -54,10 +54,7 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
         t0 = t1;
         i++;
         
-//        if (i > 500) {
-//            return vec4(1,0,1,1);
-//        }
-        if (accum.a > ALPHA_BREAK)
+        if (accum.a > ALPHA_BREAK || i > 4096)
             break;
     }
     return accum;
