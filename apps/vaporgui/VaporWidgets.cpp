@@ -175,7 +175,7 @@ std::string VFileSelector::GetPath() const {
 }
 
 void VFileSelector::SetPath( const QString& path) {
-    SetPath( QString::fromStdString( path ) );
+    SetPath( path.toStdString() );
 }
 
 void VFileSelector::SetPath( const std::string& path ) {
@@ -234,12 +234,16 @@ VFileReader::VFileReader(
     ) 
 {}
 
-bool VFileReader::_isFileOperable( const QString& filePath ) const {
+bool VFileReader::_isFileOperable( const std::string& filePath ) const {
     bool operable = false;
-    if ( _fileMode == QFileDialog::FileMode::ExistingFile )
-        operable = FileOperationChecker::FileGoodToRead(filePath);
-    if ( _fileMode == QFileDialog::FileMode::Directory )
-        operable = FileOperationChecker::DirectoryGoodToRead(filePath);
+    if ( _fileMode == QFileDialog::FileMode::ExistingFile ) {
+        operable = FileOperationChecker::FileGoodToRead( 
+            QString::fromStdString( filePath ) );
+    }
+    if ( _fileMode == QFileDialog::FileMode::Directory ) {
+        operable = FileOperationChecker::DirectoryGoodToRead(
+            QString::fromStdString( filePath ) );
+    }
 
     return operable;
 }
@@ -256,10 +260,12 @@ VFileWriter::VFileWriter(
     ) 
 {}
 
-bool VFileWriter::_isFileOperable( const QString& filePath ) const {
+bool VFileWriter::_isFileOperable( const std::string& filePath ) const {
     bool operable = false;
-    if ( _fileMode == QFileDialog::FileMode::ExistingFile )
-        operable = FileOperationChecker::FileGoodToWrite(filePath);
+    if ( _fileMode == QFileDialog::FileMode::ExistingFile ) {
+        operable = FileOperationChecker::FileGoodToWrite(
+            QString::fromStdString( filePath ) );
+    }
 
     return operable;
 }
