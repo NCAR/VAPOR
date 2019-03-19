@@ -175,6 +175,13 @@ std::string VFileSelector::GetPath() const {
 }
 
 void VFileSelector::SetPath( const std::string& path ) {
+    if ( !_isFileOperable( path ) ) {
+        MSG_ERR(
+            FileOperationChecker::GetLastErrorMessage().toStdString()
+        );
+        _lineEdit->setText( QString::fromStdString( _filePath ) );
+        return;
+    }
     _filePath = path;
     _lineEdit->setText( QString::fromStdString(path) );
 }
@@ -201,13 +208,6 @@ void VFileSelector::_openFileDialog() {
 
     QString filePath = files[0];
 
-    
-    /*bool operable;
-    if ( _fileMode == QFileDialog::FileMode::ExistingFile )
-        operable = FileOperationChecker::FileGoodToRead(filePath);
-    if ( _fileMode == QFileDialog::FileMode::Directory )
-        operable = FileOperationChecker::DirectoryGoodToRead(filePath);*/
-
     if (!_isFileOperable( filePath )) {
         MSG_ERR(
             FileOperationChecker::GetLastErrorMessage().toStdString()
@@ -221,17 +221,7 @@ void VFileSelector::_openFileDialog() {
 
 void VFileSelector::_setFilePath() {
     QString filePath = _lineEdit->text();
-
-    //bool operable = FileOperationChecker::FileGoodToRead(filePath);
-    //if (!operable) {
-    if ( !_isFileOperable( filePath ) ) {
-        MSG_ERR(
-            FileOperationChecker::GetLastErrorMessage().toStdString()
-        );
-        SetPath( _filePath );
-        return;
-    }
-    SetPath(filePath.toStdString());
+    SetPath( filePath.toStdString() );
 }
 
 VFileReader::VFileReader(
