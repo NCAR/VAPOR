@@ -121,7 +121,7 @@ class VFileSelector : public VPushButton {
     QLineEdit *_lineEdit;
     std::string _filePath;
 
-    virtual bool _isFileOperable(const QString &filePath) const = 0;
+    virtual bool _isFileOperable(const std::string &filePath) const = 0;
 };
 
 class VFileReader : public VFileSelector {
@@ -135,7 +135,7 @@ class VFileReader : public VFileSelector {
         QFileDialog::FileMode fileMode = QFileDialog::FileMode::ExistingFile);
 
   private:
-    virtual bool _isFileOperable(const QString &filePath) const;
+    virtual bool _isFileOperable(const std::string &filePath) const;
 };
 
 class VFileWriter : public VFileSelector {
@@ -148,7 +148,7 @@ class VFileWriter : public VFileSelector {
         const std::string &filePath = QDir::homePath().toStdString());
 
   private:
-    virtual bool _isFileOperable(const QString &filePath) const;
+    virtual bool _isFileOperable(const std::string &filePath) const;
 };
 
 #endif // VAPORWIDGETS_H
