@@ -174,6 +174,10 @@ std::string VFileSelector::GetPath() const {
     return _filePath;
 }
 
+void VFileSelector::SetPath( const QString& path) {
+    SetPath( QString::fromStdString( path ) );
+}
+
 void VFileSelector::SetPath( const std::string& path ) {
     if ( !_isFileOperable( path ) ) {
         MSG_ERR(
