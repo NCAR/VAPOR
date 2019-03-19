@@ -123,7 +123,7 @@ FlowRenderer::_paintGL( bool fast )
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
 
-    _updateFlowStates( params );
+    _updateFlowCacheAndStates( params );
 
     if( _cache_isSteady )
     {
@@ -250,7 +250,7 @@ FlowRenderer::_drawAStreamAsLines( const std::vector<flow::Particle>& stream,
 }
 
 void
-FlowRenderer::_updateFlowStates( const FlowParams* params )
+FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
 {
     // Check variable names
     std::vector<std::string> varnames = params->GetFieldVariableNames();
@@ -265,7 +265,6 @@ FlowRenderer::_updateFlowStates( const FlowParams* params )
     {
         MyBase::SetErrMsg("Missing velocity variable");
         std::cout << "Missing velocity variable" << std::endl;
-        return;
     }
     if( _colorField )
     {
@@ -328,7 +327,6 @@ FlowRenderer::_updateFlowStates( const FlowParams* params )
         _state_scalarUpToDate     = false;
         return;
     } */
-
 }
 
 int
@@ -511,11 +509,6 @@ FlowRenderer::_useUnsteadyVAPORField( const FlowParams* params )
     velocity->VelocityNameV = varnames[1];
     velocity->VelocityNameW = varnames[2];
     std::vector<double> timeCoords = _dataMgr->GetTimeCoordinates();
-
-    std::cout << "print timestamps " << std::endl;
-    for( auto e : timeCoords )
-        std::cout << e << ", ";
-    std::cout << std::endl << "finish printing timestamps " << std::endl;
 
     assert( timeCoords.size() > _cache_currentTS );
     Grid *gridU, *gridV, *gridW;
