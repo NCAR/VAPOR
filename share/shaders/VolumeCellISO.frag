@@ -3,7 +3,7 @@
 #include VolumeCellBase.frag
 #include VolumeIsoInclude.frag
 
-void TestIso(float value, float dv, float ld, vec3 entranceCoord, vec3 exitCoord, vec3 dir, inout vec4 accum)
+void TestIso(vec3 o, vec3 d, float t0, float t1, float value, float dv, float ld, vec3 entranceCoord, vec3 exitCoord, vec3 dir, inout vec4 accum)
 {
     if ((ld < value && dv >= value) || (ld > value && dv <= value)) {
         vec3 isoCoord = mix(entranceCoord, exitCoord, (value-ld)/(dv-ld));
@@ -15,6 +15,12 @@ void TestIso(float value, float dv, float ld, vec3 entranceCoord, vec3 exitCoord
         color.rgb *= PhongLighting(normal, dir);
         
         BlendToBack(accum, PremultiplyAlpha(color));
+        
+        if (color.a > ALPHA_BREAK) {
+            float t = mix(t0, t1, (value-ld)/(dv-ld));
+            vec3 hit = o + d*t;
+            gl_FragDepth = CalculateDepth(hit);
+        }
     }
 }
 
@@ -47,10 +53,10 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
             float dv = GetDataCoordinateSpace(exitCoord);
 
 			if (ShouldRenderCell(currentCell)) {
-				if (isoEnabled[0]) TestIso(isoValue[0], dv, ld, entranceCoord, exitCoord, dir, accum);
-				if (isoEnabled[1]) TestIso(isoValue[1], dv, ld, entranceCoord, exitCoord, dir, accum);
-				if (isoEnabled[2]) TestIso(isoValue[2], dv, ld, entranceCoord, exitCoord, dir, accum);
-				if (isoEnabled[3]) TestIso(isoValue[3], dv, ld, entranceCoord, exitCoord, dir, accum);
+				if (isoEnabled[0]) TestIso(origin, dir, t0, t1, isoValue[0], dv, ld, entranceCoord, exitCoord, dir, accum);
+				if (isoEnabled[1]) TestIso(origin, dir, t0, t1, isoValue[1], dv, ld, entranceCoord, exitCoord, dir, accum);
+				if (isoEnabled[2]) TestIso(origin, dir, t0, t1, isoValue[2], dv, ld, entranceCoord, exitCoord, dir, accum);
+				if (isoEnabled[3]) TestIso(origin, dir, t0, t1, isoValue[3], dv, ld, entranceCoord, exitCoord, dir, accum);
 			}
             
             ld = dv;
@@ -62,10 +68,7 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
         t0 = t1;
         i++;
         
-//        if (i > 500) {
-//            return vec4(1,0,1,1);
-//        }
-        if (accum.a > ALPHA_BREAK)
+        if (accum.a > ALPHA_BREAK || i > 4096)
             break;
     }
     return accum;
