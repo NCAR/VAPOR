@@ -140,14 +140,13 @@ VFileSelector::VFileSelector(
     _layout->addWidget(_lineEdit);
 
     SetLabelText(labelText);
-    //SetPath( filePath );
     _filePath = filePath;
     _lineEdit->setText(QString::fromStdString(filePath));
 
     connect(_button, SIGNAL(pressed()),
             this, SLOT(_openFileDialog()));
     connect(_lineEdit, SIGNAL(returnPressed()),
-            this, SLOT(_setFilePath()));
+            this, SLOT(_setPathFromLineEdit()));
 }
 
 std::string VFileSelector::GetPath() const {
@@ -193,7 +192,7 @@ void VFileSelector::_openFileDialog() {
     SetPath(filePath.toStdString());
 }
 
-void VFileSelector::_setFilePath() {
+void VFileSelector::_setPathFromLineEdit() {
     QString filePath = _lineEdit->text();
     SetPath(filePath.toStdString());
 }
