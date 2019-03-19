@@ -160,8 +160,7 @@ public:
     VFileWriter(
         QWidget* parent,
         const std::string& labelText = "Label",
-        const std::string& filePath = QDir::homePath().toStdString(),
-        QFileDialog::FileMode fileMode = QFileDialog::FileMode::ExistingFile
+        const std::string& filePath = QDir::homePath().toStdString()
     );
 
 private:
