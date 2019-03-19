@@ -42,10 +42,9 @@ struct RENDER_API GLManager {
     //! Draws the depth buffer in the top right corner
     //!
     void ShowDepthBuffer();
-
+#endif
     static void *BeginTimer();
     static double EndTimer(void *startTime);
-#endif
 };
 
 } // namespace VAPoR
