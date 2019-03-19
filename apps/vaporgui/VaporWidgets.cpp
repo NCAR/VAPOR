@@ -110,7 +110,7 @@ VFileSelector::VFileSelector(QWidget *parent, const std::string &labelText, cons
 
 std::string VFileSelector::GetPath() const { return _filePath; }
 
-void VFileSelector::SetPath(const QString &path) { SetPath(QString::fromStdString(path)); }
+void VFileSelector::SetPath(const QString &path) { SetPath(path.toStdString()); }
 
 void VFileSelector::SetPath(const std::string &path)
 {
@@ -151,21 +151,21 @@ void VFileSelector::_setFilePath()
 
 VFileReader::VFileReader(QWidget *parent, const std::string &labelText, const std::string &filePath, QFileDialog::FileMode fileMode) : VFileSelector(parent, labelText, filePath, fileMode) {}
 
-bool VFileReader::_isFileOperable(const QString &filePath) const
+bool VFileReader::_isFileOperable(const std::string &filePath) const
 {
     bool operable = false;
-    if (_fileMode == QFileDialog::FileMode::ExistingFile) operable = FileOperationChecker::FileGoodToRead(filePath);
-    if (_fileMode == QFileDialog::FileMode::Directory) operable = FileOperationChecker::DirectoryGoodToRead(filePath);
+    if (_fileMode == QFileDialog::FileMode::ExistingFile) { operable = FileOperationChecker::FileGoodToRead(QString::fromStdString(filePath)); }
+    if (_fileMode == QFileDialog::FileMode::Directory) { operable = FileOperationChecker::DirectoryGoodToRead(QString::fromStdString(filePath)); }
 
     return operable;
 }
 
 VFileWriter::VFileWriter(QWidget *parent, const std::string &labelText, const std::string &filePath) : VFileSelector(parent, labelText, filePath) {}
 
-bool VFileWriter::_isFileOperable(const QString &filePath) const
+bool VFileWriter::_isFileOperable(const std::string &filePath) const
 {
     bool operable = false;
-    if (_fileMode == QFileDialog::FileMode::ExistingFile) operable = FileOperationChecker::FileGoodToWrite(filePath);
+    if (_fileMode == QFileDialog::FileMode::ExistingFile) { operable = FileOperationChecker::FileGoodToWrite(QString::fromStdString(filePath)); }
 
     return operable;
 }

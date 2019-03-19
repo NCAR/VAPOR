@@ -107,7 +107,7 @@ private:
     QLineEdit * _lineEdit;
     std::string _filePath;
 
-    virtual bool _isFileOperable(const QString &filePath) const = 0;
+    virtual bool _isFileOperable(const std::string &filePath) const = 0;
 };
 
 class VFileReader : public VFileSelector {
@@ -118,7 +118,7 @@ public:
                 QFileDialog::FileMode fileMode = QFileDialog::FileMode::ExistingFile);
 
 private:
-    virtual bool _isFileOperable(const QString &filePath) const;
+    virtual bool _isFileOperable(const std::string &filePath) const;
 };
 
 class VFileWriter : public VFileSelector {
@@ -128,7 +128,7 @@ public:
     VFileWriter(QWidget *parent, const std::string &labelText = "Label", const std::string &filePath = QDir::homePath().toStdString());
 
 private:
-    virtual bool _isFileOperable(const QString &filePath) const;
+    virtual bool _isFileOperable(const std::string &filePath) const;
 };
 
 #endif    // VAPORWIDGETS_H
