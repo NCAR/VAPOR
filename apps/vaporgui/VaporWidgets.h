@@ -124,8 +124,7 @@ class VFileWriter : public VFileSelector {
     Q_OBJECT
 
 public:
-    VFileWriter(QWidget *parent, const std::string &labelText = "Label", const std::string &filePath = QDir::homePath().toStdString(),
-                QFileDialog::FileMode fileMode = QFileDialog::FileMode::ExistingFile);
+    VFileWriter(QWidget *parent, const std::string &labelText = "Label", const std::string &filePath = QDir::homePath().toStdString());
 
 private:
     virtual bool _isFileOperable(const QString &filePath) const;

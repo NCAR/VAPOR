@@ -173,7 +173,7 @@ bool VFileReader::_isFileOperable(const QString &filePath) const
     return operable;
 }
 
-VFileWriter::VFileWriter(QWidget *parent, const std::string &labelText, const std::string &filePath, QFileDialog::FileMode fileMode) : VFileSelector(parent, labelText, filePath, fileMode) {}
+VFileWriter::VFileWriter(QWidget *parent, const std::string &labelText, const std::string &filePath) : VFileSelector(parent, labelText, filePath) {}
 
 bool VFileWriter::_isFileOperable(const QString &filePath) const
 {
