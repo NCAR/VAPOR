@@ -130,6 +130,7 @@ void GLManager::ShowDepthBuffer()
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 }
+#endif
 
 void *GLManager::BeginTimer()
 {
@@ -152,4 +153,3 @@ double GLManager::EndTimer(void *startTime)
 
     return (double)duration.count() / 1000000.0;
 }
-#endif
