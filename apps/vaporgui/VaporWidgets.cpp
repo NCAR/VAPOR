@@ -87,7 +87,6 @@ void VPushButton::SetButtonText( const QString& text )
 }
 
 void VPushButton::_buttonPressed() {
-    _button->setDown(false);
     emit _pressed();
 }
 
