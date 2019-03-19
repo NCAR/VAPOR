@@ -52,6 +52,8 @@ VolumeRenderer::VolumeRenderer(
                dataMgr) {
     VAO = NULL;
     VBO = NULL;
+    VAO2 = NULL;
+    VBO2 = NULL;
     LUTTexture = NULL;
     depthTexture = NULL;
     algorithm = NULL;
@@ -71,6 +73,10 @@ VolumeRenderer::~VolumeRenderer() {
         glDeleteVertexArrays(1, &VAO);
     if (VBO)
         glDeleteBuffers(1, &VBO);
+    if (VAO2)
+        glDeleteVertexArrays(1, &VAO2);
+    if (VBO2)
+        glDeleteBuffers(1, &VBO2);
     if (LUTTexture)
         glDeleteTextures(1, &LUTTexture);
     if (depthTexture)
@@ -97,6 +103,36 @@ int VolumeRenderer::_initializeGL() {
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), NULL);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    vector<vec4> d;
+    float s = 2 / (float)8;
+    float ts = 1 / (float)8;
+    for (int yi = 0; yi < 8; yi++) {
+        float y = 2 * yi / (float)8 - 1;
+        float ty = yi / (float)8;
+        for (int xi = 0; xi < 8; xi++) {
+            float x = 2 * xi / (float)8 - 1;
+            float tx = xi / (float)8;
+
+            d.push_back(vec4(x, y, tx, ty));
+            d.push_back(vec4(x + s, y, tx + ts, ty));
+            d.push_back(vec4(x, y + s, tx, ty + ts));
+
+            d.push_back(vec4(x, y + s, tx, ty + ts));
+            d.push_back(vec4(x + s, y, tx + ts, ty));
+            d.push_back(vec4(x + s, y + s, tx + ts, ty + ts));
+        }
+    }
+
+    glGenVertexArrays(1, &VAO2);
+    glGenBuffers(1, &VBO2);
+    glBindVertexArray(VAO2);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * d.size(), d.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), NULL);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
     glEnableVertexAttribArray(0);
@@ -209,10 +245,18 @@ int VolumeRenderer::_paintGL(bool fast) {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    glBindVertexArray(VAO);
 
     void *start = GLManager::BeginTimer();
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    if (algorithm->IsSlow()) {
+        glBindVertexArray(VAO2);
+        for (int i = 0; i < 8 * 8; i++) {
+            glDrawArrays(GL_TRIANGLES, i * 6, 6);
+            glFinish();
+        }
+    } else {
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
     lastRenderTime = GLManager::EndTimer(start);
     printf("Render time = %f\n", lastRenderTime);
 
