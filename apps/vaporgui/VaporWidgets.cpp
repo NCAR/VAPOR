@@ -74,6 +74,7 @@ void VPushButton::SetButtonText(const QString &text) {
 }
 
 void VPushButton::_buttonPressed() {
+    _button->setDown(false);
     emit _pressed();
 }
 
@@ -181,16 +182,21 @@ void VFileSelector::_openFileDialog() {
 
     fileDialog.setFileMode(_fileMode);
 
-    if (fileDialog.exec() != QDialog::Accepted)
+    if (fileDialog.exec() != QDialog::Accepted) {
+        _button->setDown(false);
         return;
+    }
 
     QStringList files = fileDialog.selectedFiles();
-    if (files.size() != 1)
+    if (files.size() != 1) {
+        _button->setDown(false);
         return;
+    }
 
     QString filePath = files[0];
 
     SetPath(filePath.toStdString());
+    _button->setDown(false);
 }
 
 void VFileSelector::_setPathFromLineEdit() {
