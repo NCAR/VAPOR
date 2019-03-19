@@ -23,10 +23,15 @@ UnsteadyVAPORVelocity::AddTimeStep( const VGrid* u, const VGrid* v, const VGrid*
     _velArrW.push_back( w );
     //
     // The new timestamp should be bigger than the last timestamp
-    if( time >= _timestamps.back() )
-        _timestamps.push_back( time );
+    if( !_timestamps.empty() )
+    {
+        if( time >= _timestamps.back() )
+            _timestamps.push_back( time );
+        else
+            return OUT_OF_RANGE;
+    }
     else
-        return OUT_OF_RANGE;
+        _timestamps.push_back( time );
 
     return 0;
 }

@@ -156,11 +156,24 @@ FlowRenderer::_paintGL( bool fast )
     {
         if( _velocityStatus == UpdateStatus::SIMPLE_OUTOFDATE )
         {
-
+            _useUnsteadyVAPORField( params );
         }
         if( _scalarStatus == UpdateStatus::SIMPLE_OUTOFDATE )
         {
+            ;
+        }
 
+        if( !_advection.IsAdvectionComplete() )
+        {
+            int rv = _advection.Advect( flow::Advection::RK4 );
+            size_t totalSteps = 1, maxSteps = 200;
+            while( rv == flow::ADVECT_HAPPENED && totalSteps < maxSteps )
+            {
+                rv = _advection.Advect( flow::Advection::RK4 );
+                totalSteps++;
+            }
+
+            _advection.ToggleAdvectionComplete( true );
         }
     }
 
@@ -498,6 +511,12 @@ FlowRenderer::_useUnsteadyVAPORField( const FlowParams* params )
     velocity->VelocityNameV = varnames[1];
     velocity->VelocityNameW = varnames[2];
     std::vector<double> timeCoords = _dataMgr->GetTimeCoordinates();
+
+    std::cout << "print timestamps " << std::endl;
+    for( auto e : timeCoords )
+        std::cout << e << ", ";
+    std::cout << std::endl << "finish printing timestamps " << std::endl;
+
     assert( timeCoords.size() > _cache_currentTS );
     Grid *gridU, *gridV, *gridW;
     int rv;
