@@ -125,7 +125,7 @@ protected:
 
 private slots:
     void _openFileDialog();
-    void _setFilePath();
+    void _setPathFromLineEdit();
 
 signals:
     void _pathChanged();
