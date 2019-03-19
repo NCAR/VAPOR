@@ -11,6 +11,7 @@ class VolumeCellTraversal : public VolumeRegular {
 
     static std::string GetName() { return "Cell Traversal"; }
     static Type GetType() { return Type::DVR; }
+    virtual bool IsSlow() { return true; }
 
     virtual int LoadData(const Grid *grid);
     virtual ShaderProgram *GetShader() const;

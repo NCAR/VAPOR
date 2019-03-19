@@ -13,6 +13,7 @@ uniform vec3 userExtsMax;
 uniform float LUTMin;
 uniform float LUTMax;
 uniform bool hasMissingData;
+uniform bool fast;
 
 uniform bool lightingEnabled;
 uniform float phongAmbient;
