@@ -103,6 +103,13 @@ vec3 GetNormal(vec3 p)
     //return s1-s0;
 }
 
+float CalculateDepth(vec3 pos)
+{
+	vec4 ndc = MVP * vec4(pos, 1);
+	ndc.xyz /= ndc.w;
+	return 0.5 * (gl_DepthRange.diff * ndc.z + (gl_DepthRange.near + gl_DepthRange.far));
+}
+
 vec4 PremultiplyAlpha(vec4 color)
 {
     return vec4(color.rgb * color.a, color.a);
