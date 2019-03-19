@@ -55,6 +55,7 @@ VPushButton::VPushButton(
     const std::string &labelText,
     const std::string &buttonText) : VaporWidget(parent, labelText) {
     _button = new QPushButton(this);
+    _button->setCheckable(false);
     _layout->addWidget(_button);
 
     SetLabelText(QString::fromStdString(labelText));
