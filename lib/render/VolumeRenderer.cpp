@@ -126,8 +126,9 @@ cVar = pVar; \
 
 int VolumeRenderer::_paintGL(bool fast)
 {
-    if (fast && lastRenderTime > 0.1)
+    if (fast && algorithm && algorithm->IsSlow() && lastRenderTime > 0.1) {
         return 0;
+    }
     
     VolumeParams *vp = (VolumeParams *)GetActiveParams();
     if (cache.algorithmName != vp->GetAlgorithm()) {
@@ -175,6 +176,7 @@ int VolumeRenderer::_paintGL(bool fast)
     shader->SetUniform("LUTMax", (float)cache.mapRange[1]);
     shader->SetUniform("unitDistance", smallestDimension/100.f);
     shader->SetUniform("scales", extScales);
+    shader->SetUniform("fast", fast);
     shader->SetUniform("lightingEnabled", vp->GetLightingEnabled());
     shader->SetUniform("phongAmbient",   vp->GetPhongAmbient());
     shader->SetUniform("phongDiffuse",   vp->GetPhongDiffuse());
