@@ -57,6 +57,9 @@ void main(void)
 				if (isoEnabled[1]) TestIso(cameraPos, dir, isoValue[1], dv, ld, step, t, accum);
 				if (isoEnabled[2]) TestIso(cameraPos, dir, isoValue[2], dv, ld, step, t, accum);
 				if (isoEnabled[3]) TestIso(cameraPos, dir, isoValue[3], dv, ld, step, t, accum);
+                
+                if (accum.a > ALPHA_BREAK)
+                    gl_FragDepth = CalculateDepth(hit);
 			}
             ld = dv;
 			lastShouldRender = shouldRender;
