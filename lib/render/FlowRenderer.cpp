@@ -154,14 +154,18 @@ FlowRenderer::_paintGL( bool fast )
     }
     else
     {
+        // First check the status of velocity field
         if( _velocityStatus == UpdateStatus::SIMPLE_OUTOFDATE )
         {
             _useUnsteadyVAPORField( params );
         }
-        if( _scalarStatus == UpdateStatus::SIMPLE_OUTOFDATE )
+        else if( _velocityStatus == UpdateStatus::MISS_TIMESTEP )
         {
-            ;
+            std::cout << "need to add steps" << std::endl;
         }
+        // Second check the status of scalar field
+        if( _scalarStatus == UpdateStatus::SIMPLE_OUTOFDATE )
+        { }
 
         if( !_advection.IsAdvectionComplete() )
         {
@@ -207,14 +211,41 @@ int
 FlowRenderer::_drawAStreamAsLines( const std::vector<flow::Particle>& stream,
                                    const FlowParams* params ) const
 {
-    size_t numOfPart = stream.size();
-    float* posBuf    = new float[ 4 * numOfPart ];
-    size_t offset    = 0;
-    for( const auto& p : stream )
+    size_t numOfPart = 0;
+    std::vector<float> vec;
+    const float* bufPtr = nullptr;
+
+    if( _cache_isSteady ) // In case of steady flow, we render all available particles
     {
-        std::memcpy( posBuf + offset, glm::value_ptr(p.location), sizeof(glm::vec3) );
-        offset += 3;
-        posBuf[ offset++ ] = p.value;
+        numOfPart     = stream.size();
+        float* buffer = new float[ 4 * numOfPart ];
+        size_t offset = 0;
+        for( const auto& p : stream )
+        {
+            std::memcpy( buffer + offset, glm::value_ptr(p.location), sizeof(glm::vec3) );
+            offset += 3;
+            buffer[ offset++ ] = p.value;
+        }
+        bufPtr = buffer;
+    }
+    else // In case of unsteady, we use particles up to currentTS
+    {
+        std::vector<double> timeCoords = _dataMgr->GetTimeCoordinates();
+        float timestamp = timeCoords.at( _cache_currentTS );
+        for( const auto& p : stream )
+        {
+            if( p.time <= timestamp )
+            {
+                vec.push_back( p.location.x );
+                vec.push_back( p.location.y );
+                vec.push_back( p.location.z );
+                vec.push_back( p.value );
+            }
+            else
+                break;
+        }
+        numOfPart = vec.size() / 4;
+        bufPtr    = vec.data();
     }
 
     // Make some OpenGL function calls
@@ -234,7 +265,7 @@ FlowRenderer::_drawAStreamAsLines( const std::vector<flow::Particle>& stream,
     glBindVertexArray( _vertexArrayId );
     glEnableVertexAttribArray( 0 );
     glBindBuffer( GL_ARRAY_BUFFER, _vertexBufferId );
-    glBufferData( GL_ARRAY_BUFFER, sizeof(float) * 4 * numOfPart, posBuf, GL_STREAM_DRAW );
+    glBufferData( GL_ARRAY_BUFFER, sizeof(float) * 4 * numOfPart, bufPtr, GL_STREAM_DRAW );
     glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0 );
     glDrawArrays( GL_LINE_STRIP, 0, numOfPart );
 
@@ -244,7 +275,8 @@ FlowRenderer::_drawAStreamAsLines( const std::vector<flow::Particle>& stream,
     glBindTexture( GL_TEXTURE_1D,  _colorMapTexId );
     glBindVertexArray( 0 );
 
-    delete[] posBuf;
+    if( _cache_isSteady )
+        delete[] bufPtr;
 
     return 0;
 }
@@ -298,6 +330,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     // Time step is a little tricky...
     if( _cache_currentTS != params->GetCurrentTimestep() )
     {
+std::cout << "updating TS" << std::endl;
         _cache_currentTS  = params->GetCurrentTimestep();
         size_t totalNumTS = _cache_currentTS + 1;
         if( _cache_isSteady )
