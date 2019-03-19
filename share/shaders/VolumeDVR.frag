@@ -18,6 +18,11 @@ float Shadow(vec3 to) {
 }
  */
 
+float IntegrateConstantAlpha(float a, float distance)
+{
+    return 1 - exp(-a * distance);
+}
+
 void main(void)
 {
     vec3 dir;
@@ -29,7 +34,13 @@ void main(void)
     
     if (IntersectRayBoundingBox(cameraPos, dir, 0, userExtsMin, userExtsMax, t0, t1)) {
         
-#define STEPS 100
+        int STEPS;
+        float integratePart = 1/7.0;
+        if (fast) {
+            STEPS = 100;
+            integratePart = 1;
+        } else
+            STEPS = 700;
         float step = max(((t1-t0)/float(STEPS))*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/float(STEPS));
         
         t1 = min(t1, sceneDepthT);
@@ -43,6 +54,8 @@ void main(void)
             vec3 normal = GetNormal(dataSTR);
 			
             color.rgb *= PhongLighting(normal, dir);
+            
+            color.a = IntegrateConstantAlpha(color.a, integratePart);
             
             if (ShouldRenderSample(dataSTR))
                 BlendToBack(accum, PremultiplyAlpha(color));
