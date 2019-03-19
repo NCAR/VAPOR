@@ -413,7 +413,7 @@ void main(void)
     float t0, t1, tp;
     
     bool intersectBox = IntersectRayBoundingBox(cameraPos, dir, 0, userExtsMin, userExtsMax, t0, t1);
-    float tMin = t0, tMax = t1;
+    float tMin = t0, tMax = min(t1, sceneDepthT);
     
     if (intersectBox) {
         ivec3 initialCell;
@@ -443,6 +443,7 @@ void main(void)
         } while (intersections > 1);
          //if (intersections == 0) { fragColor = vec4(1,0,0,1);return;}
         
+		if (accum.a < 0.01) discard;
         fragColor = accum;
         return;
     }
