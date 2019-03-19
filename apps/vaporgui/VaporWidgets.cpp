@@ -20,9 +20,8 @@
 VaporWidget::VaporWidget(
     QWidget *parent,
     const std::string &labelText) : QWidget(parent) {
-    _layout = new QHBoxLayout();
+    _layout = new QHBoxLayout(this);
     _layout->setContentsMargins(10, 0, 10, 0);
-    setLayout(_layout);
 
     _label = new QLabel(this);
     _spacer = new QSpacerItem(
@@ -32,7 +31,7 @@ VaporWidget::VaporWidget(
         QSizePolicy::Minimum);
 
     _layout->addWidget(_label);
-    _layout->addItem(_spacer);
+    _layout->addItem(_spacer); // sets _spacer's parent to _layout
 
     SetLabelText(labelText);
 
