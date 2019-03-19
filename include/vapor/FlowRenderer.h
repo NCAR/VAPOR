@@ -56,6 +56,7 @@ protected:
     flow::ScalarField*  _colorField;
     std::vector<float>  _colorMap;
     float               _colorMapRange[3];   // min, max, and their diff
+    bool                _advectionComplete;
 
     // A few variables to keep the current advection states
     size_t              _cache_currentTS;
@@ -77,6 +78,7 @@ protected:
     //
     int  _useSteadyVAPORField( const FlowParams* );
     int  _useSteadyColorField( const FlowParams* );
+
     int  _useUnsteadyVAPORField( const FlowParams* );
     int  _useUnsteadyColorField( const FlowParams* );
 

@@ -67,6 +67,8 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
     _velocityStatus         = UpdateStatus::SIMPLE_OUTOFDATE;
     _scalarStatus           = UpdateStatus::SIMPLE_OUTOFDATE;
 
+    _advectionComplete      = false;
+
     _colorField = nullptr;
 }
 
@@ -130,6 +132,7 @@ FlowRenderer::_paintGL( bool fast )
         if( _velocityStatus == UpdateStatus::SIMPLE_OUTOFDATE )
         {
             _useSteadyVAPORField( params );
+            _advectionComplete = false;
         }
         if( _scalarStatus == UpdateStatus::SIMPLE_OUTOFDATE )
         {
@@ -137,7 +140,7 @@ FlowRenderer::_paintGL( bool fast )
             _populateParticleProperties( params->GetColorMapVariableName(), params, true );
         }
 
-        if( !_advection.IsAdvectionComplete() )
+        if( !_advectionComplete )
         {
             int rv = _advection.Advect( flow::Advection::RK4 );
             _colorLastParticle();
@@ -149,7 +152,7 @@ FlowRenderer::_paintGL( bool fast )
                 totalSteps++;
             }
 
-            _advection.ToggleAdvectionComplete( true );
+            _advectionComplete = false;
         }
     }
     else
@@ -158,16 +161,19 @@ FlowRenderer::_paintGL( bool fast )
         if( _velocityStatus == UpdateStatus::SIMPLE_OUTOFDATE )
         {
             _useUnsteadyVAPORField( params );
+            _advectionComplete = false;
         }
         else if( _velocityStatus == UpdateStatus::MISS_TIMESTEP )
         {
             std::cout << "need to add steps" << std::endl;
+            _advectionComplete = false;
         }
+
         // Second check the status of scalar field
         if( _scalarStatus == UpdateStatus::SIMPLE_OUTOFDATE )
         { }
 
-        if( !_advection.IsAdvectionComplete() )
+        if( !_advectionComplete )
         {
             int rv = _advection.Advect( flow::Advection::RK4 );
             size_t totalSteps = 1, maxSteps = 200;
@@ -177,7 +183,7 @@ FlowRenderer::_paintGL( bool fast )
                 totalSteps++;
             }
 
-            _advection.ToggleAdvectionComplete( true );
+            _advectionComplete = true;
         }
     }
 
@@ -514,7 +520,6 @@ FlowRenderer::_useSteadyVAPORField( const FlowParams* params )
     _genSeedsXY( seeds, 0.0f );
     _advection.UseSeedParticles( seeds );
     _advection.UseVelocity( velocity );
-    _advection.ToggleAdvectionComplete( false );
 
     _velocityStatus = UpdateStatus::UPTODATE;
     
@@ -561,8 +566,6 @@ FlowRenderer::_useUnsteadyVAPORField( const FlowParams* params )
     std::vector<flow::Particle> seeds;
     _genSeedsXY( seeds, timeCoords[0] );
     _advection.UseSeedParticles( seeds );
-
-    _advection.ToggleAdvectionComplete( false );
 
     _velocityStatus = UpdateStatus::UPTODATE;
 
