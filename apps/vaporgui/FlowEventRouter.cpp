@@ -67,11 +67,6 @@ FlowEventRouter::FlowEventRouter( QWidget *parent, ControlExec *ce)
 }
 
 FlowEventRouter::~FlowEventRouter(){
-	if (_variables)  delete _variables;
-	if (_geometry)   delete _geometry;
-	if (_seeding)    delete _seeding;
-	if (_appearance) delete _appearance;
-	if (_annotation) delete _annotation;
 }
 
 void FlowEventRouter::GetWebHelp(
