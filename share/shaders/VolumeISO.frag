@@ -32,7 +32,12 @@ void main(void)
     
     if (IntersectRayBoundingBox(cameraPos, dir, 0, userExtsMin, userExtsMax, t0, t1)) {
 
-#define STEPS 100
+        int STEPS;
+        if (fast) {
+            STEPS = 100;
+        } else
+            STEPS = 700;
+
         float step = max(((t1-t0)/float(STEPS))*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/float(STEPS));
 		vec3 initialSample = ((cameraPos + dir * t0) - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
         float ld = texture(data, initialSample).r;
