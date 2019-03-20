@@ -20,6 +20,10 @@ class GeometryWidget;
 class CopyRegionWidget;
 class TransformTable;
 class ColorbarWidget;
+class VPushButton;
+class VComboBox;
+class VCheckBox;
+class VPathSelector;
 
 class QVaporSubtab : public QWidget {
     Q_OBJECT
@@ -65,6 +69,34 @@ public:
 private:
     VAPoR::FlowParams* _params;
     TFWidget*   _TFWidget;
+};
+
+class FlowSeedingSubtab : public QVaporSubtab {
+
+	Q_OBJECT
+
+public:
+	FlowSeedingSubtab(QWidget* parent);
+
+	void Update(
+		VAPoR::DataMgr *dataMgr,
+		VAPoR::ParamsMgr *paramsMgr,
+		VAPoR::RenderParams *rParams
+	);
+
+protected slots:
+    void _pushTestPressed();
+    void _comboBoxSelected( int index );
+    void _checkBoxSelected();
+
+private:
+    VAPoR::FlowParams*      _params;
+    GeometryWidget*         _geometryWidget;
+    VPushButton*            _pushTest;
+    VPathSelector*          _pathTest;
+    VPathSelector*          _pathTest2;
+    VComboBox*              _comboTest;
+    VCheckBox*              _checkboxTest;
 };
 
 class FlowGeometrySubtab : public QVaporSubtab {

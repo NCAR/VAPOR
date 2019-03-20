@@ -44,6 +44,13 @@ FlowEventRouter::FlowEventRouter( QWidget *parent, ControlExec *ce)
 	qsapp->setWidgetResizable(true);
 	addTab(qsapp,"Appearance");
 
+	_seeding = new FlowSeedingSubtab(this);
+	QScrollArea* qsseed = new QScrollArea(this);
+	qsseed->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	qsseed->setWidget(_seeding);
+	qsseed->setWidgetResizable(true);
+	addTab(qsseed,"Seeding");
+
 	_geometry = new FlowGeometrySubtab(this);
 	QScrollArea *qsgeo = new QScrollArea(this);
 	qsgeo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -60,10 +67,6 @@ FlowEventRouter::FlowEventRouter( QWidget *parent, ControlExec *ce)
 }
 
 FlowEventRouter::~FlowEventRouter(){
-	if (_variables)  delete _variables;
-	if (_geometry)   delete _geometry;
-	if (_appearance) delete _appearance;
-	if (_annotation) delete _annotation;
 }
 
 void FlowEventRouter::GetWebHelp(
@@ -114,6 +117,11 @@ void FlowEventRouter::_updateTab(){
 		_controlExec->GetParamsMgr(),
 		GetActiveParams()
 	);
+	_seeding->Update(
+		GetActiveDataMgr(),
+		_controlExec->GetParamsMgr(),
+		GetActiveParams()
+    );
 	_geometry->Update(
 		_controlExec->GetParamsMgr(),
 		GetActiveDataMgr(),

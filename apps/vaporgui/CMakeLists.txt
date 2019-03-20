@@ -139,7 +139,6 @@ set (SRCS
 	VariablesWidget.h
 	VizSelectCombo.h
 	WireFrameEventRouter.h
-    VaporWidgets.h
 )
 
 set (UIS 
