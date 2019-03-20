@@ -81,6 +81,7 @@ protected:
 
     int  _useUnsteadyVAPORField( const FlowParams* );
     int  _useUnsteadyColorField( const FlowParams* );
+    //int  _addTimestepUnsteadyVAPORField( const FlowParams* );
 
     int  _genSeedsXY( std::vector<flow::Particle>& seeds, float timeVal ) const;
 

@@ -165,7 +165,6 @@ FlowRenderer::_paintGL( bool fast )
         }
         else if( _velocityStatus == UpdateStatus::MISS_TIMESTEP )
         {
-            std::cout << "need to add steps" << std::endl;
             _advectionComplete = false;
         }
 
@@ -336,7 +335,6 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     // Time step is a little tricky...
     if( _cache_currentTS != params->GetCurrentTimestep() )
     {
-std::cout << "updating TS" << std::endl;
         _cache_currentTS  = params->GetCurrentTimestep();
         size_t totalNumTS = _cache_currentTS + 1;
         if( _cache_isSteady )
@@ -546,12 +544,13 @@ FlowRenderer::_useUnsteadyVAPORField( const FlowParams* params )
     velocity->VelocityNameU = varnames[0];
     velocity->VelocityNameV = varnames[1];
     velocity->VelocityNameW = varnames[2];
-    std::vector<double> timeCoords = _dataMgr->GetTimeCoordinates();
+    const auto& timeCoords  = _dataMgr->GetTimeCoordinates();
+    int numOfTimesteps      = _dataMgr->GetNumTimeSteps();
+    assert( numOfTimesteps == timeCoords.size() );
 
-    assert( timeCoords.size() > _cache_currentTS );
     Grid *gridU, *gridV, *gridW;
     int rv;
-    for( size_t ts = 0; ts <= _cache_currentTS; ts++ )
+    for( size_t ts = 0; ts < numOfTimesteps; ts++ )
     {
         rv      = _getAGrid( params, ts, varnames[0], &gridU );
         if( rv != 0 )   return rv;
@@ -571,6 +570,25 @@ FlowRenderer::_useUnsteadyVAPORField( const FlowParams* params )
 
     return 0;
 }
+
+/*
+int
+FlowRenderer::_AddTimestepUnsteadyVAPORField( const FlowParams* )
+{
+    // Step 1: collect all variable names
+    const auto& nameU = _advection.GetVelocityNameU();
+    const auto& nameV = _advection.GetVelocityNameV();
+    const auto& nameW = _advection.GetVelocityNameW();
+
+    // Step 2: prepare for adding new timesteps
+    const auto& timeCoords = _dataMgr->GetTimeCoordinates();
+    Grid  *gridU, *gridV, *gridW;
+    int   rv;
+    flow::UnsteadyVAPORVelocity* ptr = dynamic_cast<flow::UnsteadyVAPORVelocity*>();
+    size_t alreadyHave = _advection->GetNumberOfTimesteps();
+
+    return 0;
+} */
 
 int
 FlowRenderer::_genSeedsXY( std::vector<flow::Particle>& seeds, float timeVal ) const
