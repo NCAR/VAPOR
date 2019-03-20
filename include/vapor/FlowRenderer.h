@@ -60,6 +60,7 @@ protected:
 
     // A few variables to keep the current advection states
     size_t              _cache_currentTS;
+    float               _cache_time;        // Actual time value at current time step
     int                 _cache_refinementLevel;
     int                 _cache_compressionLevel;
     bool                _cache_isSteady;
