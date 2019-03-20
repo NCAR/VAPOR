@@ -155,7 +155,7 @@ VFileSelector::VFileSelector(
         const std::string& filePath,
         QFileDialog::FileMode fileMode
     ) :
-    VPushButton(parent, labelText)
+    VPushButton(parent, labelText, "Select")
 {
     _fileMode = fileMode;
 
@@ -230,14 +230,13 @@ void VFileSelector::_setPathFromLineEdit() {
 VFileReader::VFileReader(
         QWidget *parent,
         const std::string& labelText,
-        const std::string& filePath,
-        QFileDialog::FileMode fileMode
+        const std::string& filePath
     ) : 
     VFileSelector(
         parent,
         labelText,
         filePath,
-        fileMode
+        QFileDialog::FileMode::ExistingFile
     ) 
 {}
 
