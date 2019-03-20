@@ -256,6 +256,20 @@ Advection::GetStreamAt( size_t i ) const
     return _streams.at(i);
 }
 
+float
+Advection::GetLatestAdvectionTime() const
+{
+    // Create lambda expressions
+    auto max = [](float x, float y)->float{ return x > y ? x : y; };
+    auto min = [](float x, float y)->float{ return x < y ? x : y; };
+
+    float latest = _streams.at(0).back().time;
+    for( const auto& s : _streams )
+        latest = max( latest, s.back().time );
+
+    return latest;
+}
+
 int
 Advection::AssignParticleValuesOfAStream( std::vector<float>& valsIn, size_t idx )
 {

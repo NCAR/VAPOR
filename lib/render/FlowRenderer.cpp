@@ -124,6 +124,7 @@ FlowRenderer::_initializeGL()
 int
 FlowRenderer::_paintGL( bool fast )
 {
+std::cout << "paint triggered" << std::endl;
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
 
     _updateFlowCacheAndStates( params );
@@ -178,11 +179,10 @@ FlowRenderer::_paintGL( bool fast )
         if( !_advectionComplete )
         {
             int rv = _advection.Advect( flow::Advection::RK4 );
-            size_t totalSteps = 1, maxSteps = 200;
-            while( rv == flow::ADVECT_HAPPENED && totalSteps < maxSteps )
+            while( rv == flow::ADVECT_HAPPENED &&
+                   _advection.GetLatestAdvectionTime() <= _cache_time )
             {
                 rv = _advection.Advect( flow::Advection::RK4 );
-                totalSteps++;
             }
 
             _advectionComplete = true;
@@ -345,7 +345,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
             _scalarStatus             = UpdateStatus::SIMPLE_OUTOFDATE;
             _velocityStatus           = UpdateStatus::SIMPLE_OUTOFDATE;
         }
-        // The following 2 cases are for unsteady field.
+        /*
         else if( _advection.GetNumberOfTimesteps() < totalNumTS )
         {
             _scalarStatus             = UpdateStatus::MISS_TIMESTEP;
@@ -355,7 +355,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         {
             _scalarStatus             = UpdateStatus::EXTRA_TIMESTEP;
             _velocityStatus           = UpdateStatus::EXTRA_TIMESTEP;
-        }
+        }*/
     }
 
     /* I'm not sure if this piece of code is necessary

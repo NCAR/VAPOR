@@ -37,6 +37,7 @@ public:
     // Retrieve the resulting particles as "streams."
     size_t GetNumberOfStreams() const;
     const  std::vector<Particle>& GetStreamAt( size_t i ) const;
+    float  GetLatestAdvectionTime() const;
 
     int    GetNumberOfTimesteps() const;
 
