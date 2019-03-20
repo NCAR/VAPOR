@@ -229,11 +229,12 @@ Advection::OutputStreamsGnuplot( const std::string& filename ) const
     if( f == nullptr )
         return FILE_ERROR;
 
-    std::fprintf( f, "%s\n", "# X      Y      Z" );
+    std::fprintf( f, "%s\n", "# X-position      Y-position      Z-position     Time     Value" );
     for( const auto& s : _streams )
     {
         for( const auto& p : s )
-            std::fprintf( f, "%f, %f, %f\n", p.location.x, p.location.y, p.location.z );
+            std::fprintf( f, "%f, %f, %f, %f, %f\n", p.location.x, p.location.y, p.location.z,
+                              p.time, p.value );
         std::fprintf( f, "\n\n" );
     }
     std::fclose( f );

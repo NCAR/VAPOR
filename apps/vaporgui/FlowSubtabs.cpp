@@ -72,7 +72,9 @@ void FlowSeedingSubtab::Update(
         VAPoR::RenderParams *rParams
     )
 {
-    _geometryWidget->Update(paramsMgr, dataMgr, rParams);
+    //VAPoR::Box* rakeBox = rParams->GetRakeBox();
+    //_geometryWidget->Update(paramsMgr, dataMgr, rParams, rakeBox);
+    _geometryWidget->Update(paramsMgr, dataMgr, rParams );
 }
 
 void FlowSeedingSubtab::_pushTestPressed() 

@@ -162,6 +162,8 @@ FlowRenderer::_paintGL( bool fast )
         {
             _useUnsteadyVAPORField( params );
             _advectionComplete = false;
+            //std::string filename( "seeds.txt" );
+            //_advection.OutputStreamsGnuplot( filename );
         }
         else if( _velocityStatus == UpdateStatus::MISS_TIMESTEP )
         {
