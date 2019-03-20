@@ -66,6 +66,7 @@ set (SRCS
 	Manip.cpp
     FlowEventRouter.cpp
     FlowSubtabs.cpp
+    VaporWidgets.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -138,6 +139,7 @@ set (SRCS
 	VariablesWidget.h
 	VizSelectCombo.h
 	WireFrameEventRouter.h
+    VaporWidgets.h
 )
 
 set (UIS 
