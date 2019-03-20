@@ -177,8 +177,7 @@ void GeometryWidget::reinitBoxToPlanarAxis(
     
     minExt[planarAxis] = average;
     maxExt[planarAxis] = average;
-    Box* box = _rParams->GetBox();
-    box->SetExtents(minExt, maxExt);
+    _box->SetExtents(minExt, maxExt);
 }
 
 void GeometryWidget::adjustLayoutTo2D() {
@@ -390,9 +389,8 @@ void GeometryWidget::updateBoxCombos(
 
 	// Get current user selected extents
 	//
-	Box* box = _rParams->GetBox();
 	std::vector<double> minExt, maxExt;
-	box->GetExtents(minExt, maxExt);
+	_box->GetExtents(minExt, maxExt);
 	
 	// Force the user extents to be within the domain extents
 	//
@@ -422,7 +420,8 @@ void GeometryWidget::updateBoxCombos(
 
 void GeometryWidget::Update(ParamsMgr *paramsMgr,
 							DataMgr* dataMgr,
-							RenderParams* rParams
+							RenderParams* rParams,
+                            Box* box
 ) {
 	assert(paramsMgr);
 	assert(dataMgr);
@@ -431,6 +430,12 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
 	_paramsMgr = paramsMgr;
 	_dataMgr = dataMgr;
 	_rParams = rParams;
+
+    if ( box != NULL )
+        _box = box;
+    else
+        _box = _rParams->GetBox();
+    assert( _box );
 
 	// Get current domain extents
 	//
@@ -443,7 +448,7 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr,
     if (_geometryFlags & PLANAR) {
         _planeComboBox->blockSignals(true);
 
-        int rParamsOrientation = _rParams->GetBox()->GetOrientation();
+        int rParamsOrientation = _box->GetOrientation();
         _planeComboBox->setCurrentIndex(rParamsOrientation);
 
         bool reinit=false;
@@ -496,12 +501,11 @@ void GeometryWidget::setRange(double min, double max, int dimension) {
 	}
 
 	std::vector<double> minExt, maxExt;
-	Box* box = _rParams->GetBox();
 
-	box->GetExtents(minExt, maxExt);
+	_box->GetExtents(minExt, maxExt);
 	minExt[dimension] = min;
 	maxExt[dimension] = max;
-	box->SetExtents(minExt, maxExt);
+	_box->SetExtents(minExt, maxExt);
 
 	emit valueChanged();
 }
