@@ -32,13 +32,13 @@ public:
     //
     // Modifiers
     //
-    void UseGrid( const VGrid* g );
+    void AddGrid( const VGrid* g );
 
 private:
     // 
     // These variables keep the steady grids
     //
-    const VGrid* _grid;
+    std::vector<const VGrid*>   _grids;
 };
 
 };

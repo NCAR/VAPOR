@@ -6,20 +6,20 @@ using namespace flow;
 // Constructor
 UnsteadyVAPORScalar::UnsteadyVAPORScalar()
 {
-    IsSteady    = true;
-    _grid       = nullptr;
+    IsSteady    = false;
 }
 
 // Destructor
 UnsteadyVAPORScalar::~UnsteadyVAPORScalar()
 {
-    if( _grid )
-        delete _grid;
+    for( auto ptr : _grids )
+        delete ptr;
 }
 
 int
 UnsteadyVAPORScalar::GetScalar( float t, const glm::vec3& pos, float& val ) const
 {
+#if 0
     if( !_grid )
         return NO_FIELD_YET ;
 
@@ -30,6 +30,7 @@ UnsteadyVAPORScalar::GetScalar( float t, const glm::vec3& pos, float& val ) cons
     float scalar = _grid->GetValue( coords );
     // Need to do: examine scalar is not missing value
     val = scalar;
+#endif
 
     return 0;
 }
@@ -37,22 +38,26 @@ UnsteadyVAPORScalar::GetScalar( float t, const glm::vec3& pos, float& val ) cons
 bool
 UnsteadyVAPORScalar::InsideVolume( float time, const glm::vec3& pos ) const
 {
+#if 0
     std::vector<double> coords { pos.x, pos.y, pos.z }; 
     if( !_grid->InsideGrid( coords ) )
         return false;
     else
+#endif
         return true;
 }
 
 void
-UnsteadyVAPORScalar::UseGrid( const VGrid* g )
+UnsteadyVAPORScalar::AddGrid( const VGrid* g )
 {
-    _grid = g;
+    if( g != nullptr )
+        _grids.push_back( g );
 }
 
 int  
 UnsteadyVAPORScalar::GetExtents( float time, glm::vec3& minExt, glm::vec3& maxExt ) const
 {
+#if 0
     if( !_grid )
         return NO_FIELD_YET ;
     
@@ -60,12 +65,12 @@ UnsteadyVAPORScalar::GetExtents( float time, glm::vec3& minExt, glm::vec3& maxEx
     _grid->GetUserExtents( gridMin, gridMax );
     glm::vec3 uMin( gridMin.at(0), gridMin.at(1), gridMin.at(2) );
     glm::vec3 uMax( gridMax.at(0), gridMax.at(1), gridMax.at(2) );
-
+#endif
     return 0;
 }
 
 int
 UnsteadyVAPORScalar::GetNumberOfTimesteps( ) const
 {
-    return 1;
+    return _grids.size();
 }
