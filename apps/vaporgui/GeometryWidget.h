@@ -37,7 +37,7 @@ public:
 	void Update(VAPoR::ParamsMgr* paramsMgr,
 				VAPoR::DataMgr* dataMgr,
 				VAPoR::RenderParams* rParams,
-                VAPoR::Box* box = NULL
+                VAPoR::Box* box = nullptr
         );
 
 signals:
