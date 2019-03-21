@@ -86,6 +86,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     void setColorInterpolation(int index);
     void emitTFChange();
     void opacitySliderChanged(int value);
+    void opacitySliderReleased();
 
     void setSingleColor();
     void setUsingSingleColor(int checkState);
@@ -159,6 +160,7 @@ class TFWidget : public QWidget, public Ui_TFWidgetGUI {
     bool _mainHistoNeedsRefresh;
     bool _secondaryHistoNeedsRefresh;
     bool _isOpacityIntegrated;
+    bool _wasOpacitySliderReleased;
 
     bool _discreteColormap;
     bool _textChanged;
