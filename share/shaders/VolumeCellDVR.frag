@@ -2,6 +2,7 @@
 
 #include VolumeCellBase.frag
 
+
 vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, out float t1)
 {
     vec3 entranceCoord;
@@ -12,6 +13,8 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
     float tStart = t0;
     ivec3 initialCell = currentCell;
     float unitDistanceScaled = unitDistance / length(dir * scales);
+    float step = unitDistanceScaled/8;
+    float stepOpacityValue = 1/8.0;
     
     int i = 0;
     vec4 accum = vec4(0);
@@ -29,12 +32,54 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
         if (t0 >= tMin || (t0 <= tMin && tMin < t1)) {
             float l = (t1-t0)/unitDistanceScaled;
 #if 0
-            vec4 A = GetColorAtCoord(entranceCoord);
-            vec4 B = GetColorAtCoord(exitCoord);
-            float a = IntegrateAbsorption(A.a, B.a, l);
-            vec4 color = (A+B)/2;
-            // vec4 color = GetAverageColorForCoordIndex(currentCell);
-            color.a = a;
+            vec4 acc2 = vec4(0);
+            for (float t = step * (floor(t0/step)+1); t < t1; t+= step) {
+//            for (float t = t0; t < t1; t+= step) {
+                vec3 hit = mix(entranceCoord, exitCoord, (t-t0)/(t1-t0));
+                vec4 color = GetColorAtCoord(hit);
+                vec3 normal = GetNormalAtCoord(hit);
+                color.rgb *= PhongLighting(normal, dir);
+                BlendToBack(acc2, PremultiplyAlpha(color));
+            }
+            vec4 color = acc2;
+            if (ShouldRenderCell(currentCell))
+                BlendToBack(accum, color);
+                
+                
+                
+                
+            
+            
+            
+#elif 1
+            vec4 acc2 = vec4(0);
+            vec4 c = GetColorAtCoord(entranceCoord);
+            vec3 normal = GetNormalAtCoord(entranceCoord);
+            c.rgb *= PhongLighting(normal, dir);
+            l = min(step - mod(t0, step), t1-t0)/step;
+            c.a = IntegrateConstantAlpha(c.a, l * stepOpacityValue);
+            BlendToBack(acc2, PremultiplyAlpha(c));
+            
+            for (float t = step * (floor(t0/step)+1); t < t1; t+= step) {
+                vec3 hit = mix(entranceCoord, exitCoord, (t-t0)/(t1-t0));
+                vec4 color = GetColorAtCoord(hit);
+                vec3 normal = GetNormalAtCoord(hit);
+                color.rgb *= PhongLighting(normal, dir);
+                float l = min(step, t1-t)/step;
+                color.a = IntegrateConstantAlpha(color.a, l * stepOpacityValue);
+                BlendToBack(acc2, PremultiplyAlpha(color));
+            }
+            
+            vec4 color = acc2;
+            if (ShouldRenderCell(currentCell))
+            BlendToBack(accum, color);
+            
+            
+            
+            
+            
+            
+            
 #else
             vec4 color = GetAverageColorForCoordIndex(currentCell);
             
@@ -42,10 +87,10 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
             color.rgb *= PhongLighting(normal, dir);
             
             color.a = IntegrateConstantAlpha(color.a, l);
-#endif
-
+            
             if (ShouldRenderCell(currentCell))
                 BlendToBack(accum, PremultiplyAlpha(color));
+#endif
         }
         
         currentCell = nextCell;

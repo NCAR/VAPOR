@@ -168,6 +168,11 @@ vec4 GetColorAtCoord(vec3 coord)
     return GetColorForNormalizedData(NormalizeData(GetDataCoordinateSpace(coord)));
 }
 
+vec3 GetNormalAtCoord(vec3 coord)
+{
+    return GetNormal(coord/coordDimsF);
+}
+
 bool DoesCellHaveMissingData(ivec3 cellCoord)
 {
     vec3 coord = vec3(cellCoord)+vec3(0.5);
@@ -443,7 +448,7 @@ void main(void)
         } while (intersections > 1);
          //if (intersections == 0) { fragColor = vec4(1,0,0,1);return;}
         
-		if (accum.a < 0.01) discard;
+		//if (accum.a < 0.01) discard;
         fragColor = accum;
         return;
     }
