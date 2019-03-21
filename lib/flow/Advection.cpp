@@ -13,6 +13,7 @@ Advection::Advection()
     _upperAngle = 15.0f;
     _lowerAngleCos = glm::cos( glm::radians( _lowerAngle ) );
     _upperAngleCos = glm::cos( glm::radians( _upperAngle ) );
+    _latestAdvectionTime = 0.0f;
     //_advectionComplete = false;
 }
 
@@ -47,6 +48,8 @@ Advection::UseSeedParticles( std::vector<Particle>& seeds )
     _streams.resize( seeds.size() );
     for( size_t i = 0; i < seeds.size(); i++ )
         _streams[i].push_back( seeds[i] );
+    
+    _latestAdvectionTime = seeds.at(0).time;
 }
 
 int
@@ -161,6 +164,8 @@ Advection::Advect( ADVECTION_METHOD method )
         {
             happened = true;
             s.push_back( p1 );
+            if( p1.time > _latestAdvectionTime )
+                _latestAdvectionTime = p1.time;
         }
     }
 
@@ -261,15 +266,7 @@ Advection::GetStreamAt( size_t i ) const
 float
 Advection::GetLatestAdvectionTime() const
 {
-    // Create lambda expressions
-    auto max = [](float x, float y)->float{ return x > y ? x : y; };
-    auto min = [](float x, float y)->float{ return x < y ? x : y; };
-
-    float latest = _streams.at(0).back().time;
-    for( const auto& s : _streams )
-        latest = max( latest, s.back().time );
-
-    return latest;
+    return _latestAdvectionTime;
 }
 
 int
