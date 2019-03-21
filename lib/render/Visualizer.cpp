@@ -166,6 +166,10 @@ int Visualizer::paintEvent(bool fast) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    //Draw the domain frame and other in-scene features
+    _vizFeatures->InScenePaint(_getCurrentTimestep());
+    GL_ERR_BREAK();
+
     _deleteFlaggedRenderers();
     if (_initializeNewRenderers() < 0)
         return -1;
@@ -190,15 +194,12 @@ int Visualizer::paintEvent(bool fast) {
             rc = -1;
     }
 
-    //Draw the domain frame and other in-scene features
-    _vizFeatures->InScenePaint(_getCurrentTimestep());
-    GL_ERR_BREAK();
     _vizFeatures->DrawText();
     GL_ERR_BREAK();
     _renderColorbars(_getCurrentTimestep());
     GL_ERR_BREAK();
 
-    //     _glManager->ShowDepthBuffer();
+    //    _glManager->ShowDepthBuffer();
 
     glFlush();
 
