@@ -3,6 +3,7 @@ set (SRC
 	SteadyVAPORVelocity.cpp
 	SteadyVAPORScalar.cpp
 	UnsteadyVAPORVelocity.cpp
+	UnsteadyVAPORScalar.cpp
 	Advection.cpp
 	Field.cpp
 	VelocityField.cpp
@@ -15,6 +16,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/SteadyVAPORVelocity.h
 	${PROJECT_SOURCE_DIR}/include/vapor/SteadyVAPORScalar.h
 	${PROJECT_SOURCE_DIR}/include/vapor/UnsteadyVAPORVelocity.h
+	${PROJECT_SOURCE_DIR}/include/vapor/UnsteadyVAPORScalar.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Field.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VelocityField.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ScalarField.h
