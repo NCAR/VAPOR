@@ -205,6 +205,8 @@ int VolumeRenderer::_paintGL(bool fast)
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
 
     void *start = GLManager::BeginTimer();
     if (algorithm->IsSlow()) {

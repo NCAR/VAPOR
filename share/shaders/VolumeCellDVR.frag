@@ -97,5 +97,7 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
         if (accum.a > ALPHA_BREAK || i > 4096)
             break;
     }
+    
+    gl_FragDepth = CalculateDepth(cameraPos + dir*t1);
     return accum;
 }

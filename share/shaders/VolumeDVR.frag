@@ -60,17 +60,19 @@ void main(void)
             if (ShouldRenderSample(dataSTR))
                 BlendToBack(accum, PremultiplyAlpha(color));
             
-            if (accum.a > ALPHA_BREAK)
+            if (accum.a > ALPHA_BREAK) {
+                t1 = t;
                 break;
+            }
                 
             // Failsafe
             if (i++ > STEPS)
                 break;
         }
         
+        gl_FragDepth = CalculateDepth(cameraPos + dir*t1);
         fragColor = accum;
     }
-        
     if (accum.a < 0.01)
         discard;
 }
