@@ -21,6 +21,7 @@ class CopyRegionWidget;
 class TransformTable;
 class ColorbarWidget;
 class VFileReader;
+class VCheckBox;
 
 class QVaporSubtab : public QWidget {
     Q_OBJECT
@@ -32,6 +33,9 @@ protected:
     QVBoxLayout* _layout;
 };
 
+//
+//================================
+//
 class FlowVariablesSubtab : public QVaporSubtab {
 
 	Q_OBJECT
@@ -48,8 +52,16 @@ public:
 private:
     VAPoR::FlowParams*      _params;
     VariablesWidget* _variablesWidget;
+
+    VCheckBox* _steady;
+
+    // Respond to user input
+    void _steadyGotClicked();
 };
 
+//
+//================================
+//
 class FlowAppearanceSubtab : public QVaporSubtab {
 
 	Q_OBJECT
@@ -68,6 +80,9 @@ private:
     TFWidget*   _TFWidget;
 };
 
+//
+//================================
+//
 class FlowSeedingSubtab : public QVaporSubtab {
 
 	Q_OBJECT
@@ -92,6 +107,9 @@ private:
     VFileReader*            _fileReader;
 };
 
+//
+//================================
+//
 class FlowGeometrySubtab : public QVaporSubtab {
 
 	Q_OBJECT
@@ -112,6 +130,9 @@ private:
     TransformTable*         _transformTable;
 };
 
+//
+//================================
+//
 class FlowAnnotationSubtab : public QVaporSubtab {
 
 	Q_OBJECT

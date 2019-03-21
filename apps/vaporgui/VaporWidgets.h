@@ -11,6 +11,10 @@ class QDoubleValidator;
 class QSpacerItem;
 class QHBoxLayout;
 
+
+//
+// ====================================
+//
 class VaporWidget : public QWidget
 {
     Q_OBJECT
@@ -34,6 +38,10 @@ protected:
     QHBoxLayout* _layout;
 };
 
+
+//
+// ====================================
+//
 class VPushButton: public VaporWidget
 {
     Q_OBJECT
@@ -58,6 +66,10 @@ private slots:
     void _buttonPressed();
 };
 
+
+//
+// ====================================
+//
 class VComboBox : public VaporWidget
 {
     Q_OBJECT
@@ -83,6 +95,10 @@ signals:
     void _indexChanged(int index);
 };
 
+
+//
+// ====================================
+//
 class VCheckBox : public VaporWidget
 {
     Q_OBJECT
@@ -105,6 +121,10 @@ signals:
     void _checkboxClicked();
 };
 
+
+//
+// ====================================
+//
 class VFileSelector : public VPushButton
 {
     Q_OBJECT
@@ -138,6 +158,10 @@ private:
     virtual bool _isFileOperable( const std::string& filePath ) const = 0;
 };
 
+
+//
+// ====================================
+//
 class VFileReader : public VFileSelector
 {
     Q_OBJECT
@@ -153,6 +177,10 @@ private:
     virtual bool _isFileOperable( const std::string& filePath ) const;
 };
 
+
+//
+// ====================================
+//
 class VFileWriter : public VFileSelector
 {
     Q_OBJECT

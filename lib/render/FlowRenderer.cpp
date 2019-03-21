@@ -125,6 +125,8 @@ int
 FlowRenderer::_paintGL( bool fast )
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
+std::cout << "is steady = " << params->GetIsSteady() << std::endl;
+return 0;
 
     _updateFlowCacheAndStates( params );
 
