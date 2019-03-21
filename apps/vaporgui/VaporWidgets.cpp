@@ -123,6 +123,10 @@ void VComboBox::RemoveOption( int index=0 ) {
     _combo->removeItem( index ) ;
 }
 
+void VComboBox::SetIndex( int index ) {
+    _combo->setCurrentIndex( index );
+}
+
 VCheckBox::VCheckBox(
         QWidget *parent,
         const std::string& labelText
@@ -143,6 +147,13 @@ bool VCheckBox::GetCheckState() const {
         return true;
     else
         return false;
+}
+
+void VCheckBox::SetCheckState( bool checkState ) {
+    if ( checkState )
+        _checkbox->setCheckState( Qt::Checked );
+    else
+        _checkbox->setCheckState( Qt::Unchecked );
 }
 
 void VCheckBox::_userClickedCheckbox() {
