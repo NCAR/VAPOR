@@ -47,7 +47,11 @@ SteadyVAPORScalar::InsideVolume( float time, const glm::vec3& pos ) const
 void
 SteadyVAPORScalar::UseGrid( const VGrid* g )
 {
-    _grid = g;
+    if( g )
+    {
+        if( _grid ) delete _grid;
+        _grid = g;
+    }
 }
 
 int  
