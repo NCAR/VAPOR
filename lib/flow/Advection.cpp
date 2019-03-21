@@ -141,6 +141,8 @@ Advection::Advect( ADVECTION_METHOD method )
             const auto& past1 = s[ s.size()-2 ];
             const auto& past2 = s[ s.size()-3 ];
             dt  = p0.time - past1.time;     // step size used by last integration
+            dt  = dt < _baseDeltaT * 10.0f ? dt : _baseDeltaT * 10.0f;
+            dt  = dt > _baseDeltaT / 10.0f ? dt : _baseDeltaT / 10.0f;
             dt *= _calcAdjustFactor( past2, past1, p0 );
         }
 
