@@ -37,11 +37,6 @@ public:
     enum class UpdateStatus
     {
         SIMPLE_OUTOFDATE,   // When variable name or compression is out of date,
-                            //   and in case of steady field, timestep wrong.
-        MISS_TIMESTEP,      // Unsteady field only, when other params are all good,
-                            //   but there are missing timesteps.
-        EXTRA_TIMESTEP,     // Unsteady field only, when other params are all good,
-                            //   but the current fields carry extra time steps.
         UPTODATE            // Everything is up-to-date
     };
 
