@@ -56,6 +56,7 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
     _secondaryHistoRangeChanged = false;
     _discreteColormap = false;
     _isOpacityIntegrated = false;
+    _wasOpacitySliderReleased = false;
     _mainVarName = "";
     _secondaryVarName = "";
 
@@ -733,6 +734,7 @@ void TFWidget::connectWidgets()
     connect(_mappingFrame, SIGNAL(updateParams()), this, SLOT(setRange()));
     connect(_mappingFrame, SIGNAL(endChange()), this, SLOT(setRange()));
     connect(_opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacitySliderChanged(int)));
+    connect(_opacitySlider, SIGNAL(sliderReleased()), this, SLOT(opacitySliderReleased()));
     connect(_colorSelectButton, SIGNAL(pressed()), this, SLOT(setSingleColor()));
     connect(_useConstColorCheckbox, SIGNAL(stateChanged(int)), this, SLOT(setUsingSingleColor(int)));
 
@@ -740,6 +742,7 @@ void TFWidget::connectWidgets()
     //
     connect(_secondaryMappingFrame, SIGNAL(endChange()), this, SLOT(setSecondaryRange()));
     connect(_secondaryOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacitySliderChanged(int)));
+    connect(_secondaryOpacitySlider, SIGNAL(sliderReleased()), this, SLOT(opacitySliderReleased()));
     connect(_updateSecondaryHistoButton, SIGNAL(pressed()), this, SLOT(updateSecondaryMappingFrame()));
     connect(_autoUpdateSecondaryHistoCheckbox, SIGNAL(stateChanged(int)), this, SLOT(autoUpdateSecondaryHistoChecked(int)));
     connect(_secondaryVarInterpCombo, SIGNAL(activated(int)), this, SLOT(setColorInterpolation(int)));
@@ -754,6 +757,9 @@ void TFWidget::emitTFChange() { emit emitChange(); }
 
 void TFWidget::opacitySliderChanged(int value)
 {
+    if (!_wasOpacitySliderReleased) return;
+    _wasOpacitySliderReleased = false;
+
     bool mainTF = true;
     if (COLORMAP_VAR_IS_IN_TF2) mainTF = false;
     string          varName = getTFVariableName(mainTF);
@@ -762,6 +768,8 @@ void TFWidget::opacitySliderChanged(int value)
     tf->setOpacityScale(convertSliderValueToOpacity(value));
     emit emitChange();
 }
+
+void TFWidget::opacitySliderReleased() { _wasOpacitySliderReleased = true; }
 
 void TFWidget::setRange()
 {
