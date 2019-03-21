@@ -448,7 +448,7 @@ void main(void)
         } while (intersections > 1);
          //if (intersections == 0) { fragColor = vec4(1,0,0,1);return;}
         
-		//if (accum.a < 0.01) discard;
+        if (accum.a < 0.01) discard;
         fragColor = accum;
         return;
     }
