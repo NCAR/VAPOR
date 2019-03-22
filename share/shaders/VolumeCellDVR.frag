@@ -78,13 +78,14 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
         hasNext = FindNextCell(origin, dir, t0, currentCell, entranceFace, nextCell, exitFace, exitCoord, t1);
         
         if (t0 >= tMin || (t0 <= tMin && tMin < t1)) {
+            float tEnd = min(t1, tMax);
 
 #if 1
             if (ShouldRenderCell(currentCell))
-                BlendToBack(accum, RenderCellSmartSampling(dir, entranceCoord, exitCoord, t0, t1, step, stepOpacityUnit));
+                BlendToBack(accum, RenderCellSmartSampling(dir, entranceCoord, exitCoord, t0, tEnd, step, stepOpacityUnit));
 #else
             if (ShouldRenderCell(currentCell))
-                BlendToBack(accum, RenderCellConstant(dir, currentCell, t0, t1, unitDistanceScaled));
+                BlendToBack(accum, RenderCellConstant(dir, currentCell, t0, tEnd, unitDistanceScaled));
 #endif
         }
         
