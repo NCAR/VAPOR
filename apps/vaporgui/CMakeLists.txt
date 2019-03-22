@@ -1,5 +1,5 @@
 set (SRCS
-	EventRouter.cpp
+#[[	EventRouter.cpp
 	RenderEventRouter.cpp
 	RenderHolder.cpp
 	ImageFrame.cpp
@@ -34,10 +34,10 @@ set (SRCS
 	AnimationParams.cpp
 	GUIStateParams.cpp
 	MouseModeParams.cpp
-	SettingsParams.cpp
+	SettingsParams.cpp ]]
 	main.cpp
 	MainForm.cpp
-	VizWin.cpp
+#[[  VizWin.cpp
 	VizWinMgr.cpp
 	TabManager.cpp
 	TrackBall.cpp
@@ -63,20 +63,21 @@ set (SRCS
 	FileOperationChecker.cpp
 	Combo.cpp
 	windowsUtils.cpp
-	Manip.cpp
+	Manip.cpp 
+]]
 
 	# Need to include all files that request .ui files
-	TwoDSubtabs.h
-	DVRSubtabs.h
-	IsoSurfaceSubtabs.h
-	WireFrameSubtabs.h
-	Statistics.h
-	Plot.h
+#[[  TwoDSubtabs.h
+    DVRSubtabs.h
+    IsoSurfaceSubtabs.h
+    WireFrameSubtabs.h
+    Statistics.h
+    Plot.h
     PythonVariables.h
-	BarbSubtabs.h
-	ColorbarWidget.h
+    BarbSubtabs.h
+    ColorbarWidget.h
 	OrientationAngles.h
-	TransformTable.h
+    TransformTable.h
 	ImageSubtabs.h
 	ContourSubtabs.h
     SliceSubtabs.h
@@ -85,9 +86,11 @@ set (SRCS
 	QSliderEdit.h
 	QRange.h
 	QSinglePoint.h
+]]
 
 	MainForm.h
-	VizWinMgr.h
+
+#[[	VizWinMgr.h
 	windowsUtils.h
 	ErrorReporter.h
 	Histo.h
@@ -96,7 +99,7 @@ set (SRCS
 	VizWin.h
 	Core3_2_context.h
 	TrackBall.h
-	Manip.h
+    Manip.h
 	NavigationEventRouter.h
 	AnimationEventRouter.h
 	AnimationParams.h
@@ -134,11 +137,11 @@ set (SRCS
 	TabManager.h
 	VariablesWidget.h
 	VizSelectCombo.h
-	WireFrameEventRouter.h
+	WireFrameEventRouter.h ]]
 )
 
 set (UIS 
-	LeftPanel.ui
+#[[	LeftPanel.ui
 	animationTab.ui
 	NavigationTab.ui
 	boxframe.ui
@@ -197,7 +200,7 @@ set (UIS
 	
 	QSliderEdit.ui
 	QRange.ui
-	QSinglePoint.ui
+	QSinglePoint.ui ]]
 )
 
 source_group (UIs FILES ${UIS})
