@@ -48,10 +48,13 @@ UnsteadyVAPORScalar::InsideVolume( float time, const glm::vec3& pos ) const
 }
 
 void
-UnsteadyVAPORScalar::AddGrid( const VGrid* g )
+UnsteadyVAPORScalar::AddGrid( const VGrid* g, float time )
 {
-    if( g != nullptr )
+    if( g != nullptr && time >= _timestamps.back() )
+    {
         _grids.push_back( g );
+        _timestamps.push_back( time );
+    }
 }
 
 int  
@@ -72,5 +75,5 @@ UnsteadyVAPORScalar::GetExtents( float time, glm::vec3& minExt, glm::vec3& maxEx
 int
 UnsteadyVAPORScalar::GetNumberOfTimesteps( ) const
 {
-    return _grids.size();
+    return _timestamps.size();
 }

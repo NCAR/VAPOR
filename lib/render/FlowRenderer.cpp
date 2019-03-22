@@ -125,8 +125,6 @@ int
 FlowRenderer::_paintGL( bool fast )
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
-std::cout << "is steady = " << params->GetIsSteady() << std::endl;
-return 0;
 
     _updateFlowCacheAndStates( params );
 
@@ -168,11 +166,6 @@ return 0;
             //std::string filename( "seeds.txt" );
             //_advection.OutputStreamsGnuplot( filename );
         }
-        /*else if( _velocityStatus == UpdateStatus::MISS_TIMESTEP )
-        {
-            _advectionComplete = false;
-        }*/
-
         // Second check the status of scalar field
         if( _scalarStatus == UpdateStatus::SIMPLE_OUTOFDATE )
         { }
@@ -180,10 +173,12 @@ return 0;
         if( !_advectionComplete )
         {
             int rv = _advection.Advect( flow::Advection::RK4 );
+//            _colorLastParticle();
             while( rv == flow::ADVECT_HAPPENED &&
                    _advection.GetLatestAdvectionTime() <= _cache_time )
             {
                 rv = _advection.Advect( flow::Advection::RK4 );
+//                _colorLastParticle();
             }
 
             _advectionComplete = true;
@@ -571,6 +566,12 @@ FlowRenderer::_useUnsteadyVAPORField( const FlowParams* params )
 
     _velocityStatus = UpdateStatus::UPTODATE;
 
+    return 0;
+}
+
+int
+FlowRenderer::_useUnsteadyColorField( const FlowParams* params )
+{
     return 0;
 }
 
