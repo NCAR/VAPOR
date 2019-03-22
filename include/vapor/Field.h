@@ -24,16 +24,29 @@ public:
     //
     // Retrieve the extents of this field. 
     //
-    virtual int GetExtents( float time, glm::vec3& minExt, glm::vec3& maxExt ) const = 0;
+    // virtual int GetExtents( float time, glm::vec3& minExt, glm::vec3& maxExt ) const = 0;
 
     //
     // Retrieve the number of time steps in this field
     //
     virtual int GetNumberOfTimesteps() const = 0;
 
+    //
+    // Get the field value at a certain position, at a certain time.
+    //  
+    virtual int  GetScalar(  float time, const glm::vec3& pos,   // input 
+                             float& val) const = 0;              // output
+
+    //
+    // Get the velocity value at a certain position, at a certain time.
+    //  
+    virtual int  GetVelocity( float time, const glm::vec3& pos,     // input 
+                              glm::vec3& vel ) const = 0;           // output
 
     // Class members
-    bool        IsSteady;
+    bool            IsSteady;
+    std::string     ScalarName;
+    std::string     VelocityNameU, VelocityNameV, VelocityNameW;
 };
 };
 
