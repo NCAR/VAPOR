@@ -25,7 +25,7 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
     _steady = new VCheckBox( this, "Use Steady Flow" );
     _layout->addWidget( _steady );
 
-    connect( _steady, SIGNAL( _checkboxClicked() ), this, _steadyGotClicked() );
+    connect( _steady, SIGNAL( _checkboxClicked() ), this, SLOT( _steadyGotClicked() ) );
 }
 
 void FlowVariablesSubtab::Update(   VAPoR::DataMgr *dataMgr,
