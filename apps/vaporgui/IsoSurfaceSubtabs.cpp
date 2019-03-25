@@ -13,42 +13,42 @@ IsoSurfaceAppearanceSubtab::IsoSurfaceAppearanceSubtab(QWidget* parent)
     _params = nullptr;
 
     // Set up lighting parameter widgets
-    _ambientWidget->SetLabel( QString::fromAscii("Ambient   ") );
+    _ambientWidget->SetLabel( QString("Ambient   ") );
     _ambientWidget->SetDecimals( 2 );
     _ambientWidget->SetExtents( 0.0, 1.0 );
     _ambientWidget->SetIntType( false );
 
-    _diffuseWidget->SetLabel( QString::fromAscii("Diffuse     ") );
+    _diffuseWidget->SetLabel( QString("Diffuse     ") );
     _diffuseWidget->SetDecimals( 2 );
     _diffuseWidget->SetExtents( 0.0, 1.0 );
     _diffuseWidget->SetIntType( false );
 
-    _specularWidget->SetLabel( QString::fromAscii("Specular  ") );
+    _specularWidget->SetLabel( QString("Specular  ") );
     _specularWidget->SetDecimals( 2 );
     _specularWidget->SetExtents( 0.0, 1.0 );
     _specularWidget->SetIntType( false );
 
-    _shininessWidget->SetLabel( QString::fromAscii("Shininess ") );
+    _shininessWidget->SetLabel( QString("Shininess ") );
     _shininessWidget->SetExtents( 1.0, 100.0 );
     _shininessWidget->SetIntType( true );
 
     // Set up iso-value widgets
-    _isoWidget0->SetLabel( QString::fromAscii("Value 1") );
+    _isoWidget0->SetLabel( QString("Value 1") );
     _isoWidget0->SetIntType( false );
     _isoWidget0->SetDecimals( 4 );
     _isoWidget0->setEnabled( true );
 
-    _isoWidget1->SetLabel( QString::fromAscii("Value 2") );
+    _isoWidget1->SetLabel( QString("Value 2") );
     _isoWidget1->SetIntType( false );
     _isoWidget1->SetDecimals( 4 );
     _isoWidget1->setEnabled( false );
 
-    _isoWidget2->SetLabel( QString::fromAscii("Value 3") );
+    _isoWidget2->SetLabel( QString("Value 3") );
     _isoWidget2->SetIntType( false );
     _isoWidget2->SetDecimals( 4 );
     _isoWidget2->setEnabled( false );
 
-    _isoWidget3->SetLabel( QString::fromAscii("Value 4") );
+    _isoWidget3->SetLabel( QString("Value 4") );
     _isoWidget3->SetIntType( false );
     _isoWidget3->SetDecimals( 4 );
     _isoWidget3->setEnabled( false );

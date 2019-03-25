@@ -68,11 +68,11 @@ TFWidget::TFWidget(QWidget* parent)
 	_maxCombo = new Combo(_maxRangeEdit, _maxRangeSlider);
 	_rangeCombo = new RangeCombo(_minCombo, _maxCombo);
 
-    _secondaryMinSliderEdit->SetLabel( QString::fromAscii("Min") );
+    _secondaryMinSliderEdit->SetLabel( QString("Min") );
     _secondaryMinSliderEdit->SetIntType(false);
     _secondaryMinSliderEdit->SetExtents(0.f, 1.f);
     
-    _secondaryMaxSliderEdit->SetLabel( QString::fromAscii("Max") );
+    _secondaryMaxSliderEdit->SetLabel( QString("Max") );
     _secondaryMaxSliderEdit->SetIntType(false);
     _secondaryMaxSliderEdit->SetExtents(0.f, 1.f);
 

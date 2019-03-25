@@ -1,8 +1,7 @@
 set (SRCS
-#[[	EventRouter.cpp
+	EventRouter.cpp
 	RenderEventRouter.cpp
 	RenderHolder.cpp
-	ImageFrame.cpp
 	ControlPointEditor.cpp
 	DomainWidget.cpp
 	GLWidget.cpp
@@ -34,10 +33,10 @@ set (SRCS
 	AnimationParams.cpp
 	GUIStateParams.cpp
 	MouseModeParams.cpp
-	SettingsParams.cpp ]]
+	SettingsParams.cpp
 	main.cpp
 	MainForm.cpp
-#[[  VizWin.cpp
+    VizWin.cpp
 	VizWinMgr.cpp
 	TabManager.cpp
 	TrackBall.cpp
@@ -64,10 +63,9 @@ set (SRCS
 	Combo.cpp
 	windowsUtils.cpp
 	Manip.cpp 
-]]
 
-	# Need to include all files that request .ui files
-#[[  TwoDSubtabs.h
+#	 Need to include all files that request .ui files
+    TwoDSubtabs.h
     DVRSubtabs.h
     IsoSurfaceSubtabs.h
     WireFrameSubtabs.h
@@ -76,21 +74,21 @@ set (SRCS
     PythonVariables.h
     BarbSubtabs.h
     ColorbarWidget.h
-	OrientationAngles.h
+    OrientationAngles.h
     TransformTable.h
 	ImageSubtabs.h
 	ContourSubtabs.h
     SliceSubtabs.h
-	VaporTable.h
+	VaporTable.h 
 	FidelityWidget.h
 	QSliderEdit.h
 	QRange.h
 	QSinglePoint.h
-]]
+
 
 	MainForm.h
 
-#[[	VizWinMgr.h
+	VizWinMgr.h
 	windowsUtils.h
 	ErrorReporter.h
 	Histo.h
@@ -99,8 +97,8 @@ set (SRCS
 	VizWin.h
 	Core3_2_context.h
 	TrackBall.h
-    Manip.h
-	NavigationEventRouter.h
+    Manip.h 
+	NavigationEventRouter.h 
 	AnimationEventRouter.h
 	AnimationParams.h
 	AnnotationEventRouter.h
@@ -109,7 +107,7 @@ set (SRCS
 	BarbEventRouter.h
 	Combo.h
 	ContourEventRouter.h
-	ControlPointEditor.h
+	ControlPointEditor.h 
 	CopyRegionWidget.h
 	DomainWidget.h
 	FileOperationChecker.h
@@ -118,8 +116,6 @@ set (SRCS
 	GeometryWidget.h
 	ImageEventRouter.h
 	ImageEventRouter.h
-	ImageFrame.h
-	ImageFrame.h
 	IsoSurfaceEventRouter.h
 	MappingFrame.h
 	MouseModeParams.h
@@ -137,11 +133,11 @@ set (SRCS
 	TabManager.h
 	VariablesWidget.h
 	VizSelectCombo.h
-	WireFrameEventRouter.h ]]
+	WireFrameEventRouter.h
 )
 
 set (UIS 
-#[[	LeftPanel.ui
+	LeftPanel.ui
 	animationTab.ui
 	NavigationTab.ui
 	boxframe.ui
@@ -200,7 +196,7 @@ set (UIS
 	
 	QSliderEdit.ui
 	QRange.ui
-	QSinglePoint.ui ]]
+	QSinglePoint.ui
 )
 
 source_group (UIs FILES ${UIS})
@@ -209,12 +205,21 @@ source_group (UIs FILES ${UIS})
 #find_package(Qt5Core REQUIRED)
 #find_package(Qt5Gui REQUIRED)
 #find_package(Qt5OpenGL REQUIRED)
-find_package(Qt5 REQUIRED
-    Core 
-    Widgets 
-    OpenGL 
-    Gui 
-)
+
+# Pre 3/25
+#find_package(Qt5Widgets CONFIG REQUIRED)
+#find_package(Qt5 REQUIRED
+#    Core 
+#    Widgets 
+#    OpenGL 
+#    Gui 
+#)
+
+find_package(Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt5 REQUIRED COMPONENTS OpenGL)
+find_package(Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt5 REQUIRED COMPONENTS Gui)
+
 set (CMAKE_AUTOUIC ON) # This needs to appear before adding sources to work properly
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
@@ -237,7 +242,14 @@ endif()
 
 # target_link_libraries (vapor common vdc wasp render params m jpeg dl util GLEW tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL)
 #target_link_libraries (vapor common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL python${PYTHONVERSION})
-target_link_libraries (vapor common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp QtCore QtGui QtOpenGL python${PYTHONVERSION})
+
+# Pre 3/25
+#target_link_libraries (vapor common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp QtCore QtGui QtOpenGL Widgets  python${PYTHONVERSION})
+target_link_libraries (
+    vapor common vdc wasp render params jpeg ${GLEW} 
+    tiff geotiff assimp Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui 
+    python${PYTHONVERSION}
+)
 
 if (APPLE)
 	find_library (CORESERVICES CoreServices)

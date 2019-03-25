@@ -22,6 +22,7 @@
 #include <qwidget.h>
 #include <QFileDialog>
 #include <QDesktopWidget>
+#include <QButtonGroup>
 #include <qradiobutton.h>
 #include <qcolordialog.h>
 #include "vapor/RenderParams.h"
