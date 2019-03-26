@@ -12,10 +12,10 @@ namespace flow
 {
 enum ERROR_CODE
 {
-    ADVECT_HAPPENED = 1,
-    SUCCESS      =  0,
-    OUT_OF_FIELD = -1,
-    NO_FIELD_YET  = -2,
+    ADVECT_HAPPENED      = 1,
+    SUCCESS              =  0,
+    OUT_OF_FIELD         = -1,
+    NO_FIELD_YET         = -2,
     NO_SEED_PARTICLE_YET = -3,
     FILE_ERROR           = -4,
     TIME_ERROR           = -5,

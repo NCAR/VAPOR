@@ -2,8 +2,10 @@
 #define VAPORFIELD_H
 
 #include "vapor/Field.h"
+#include "vapor/Particle.h"
 #include "vapor/DataMgr.h"
 #include "vapor/FlowParams.h"
+#include "vapor/Grid.h"
 
 namespace flow
 {
@@ -26,8 +28,8 @@ public:
     //
     // Functions for interaction with VAPOR components
     //
-    void AssignDataManager( const VAPoR::DataMgr*    dmgr );
-    void UpdateParams(      const VAPoR::FlowParams* p );
+    void AssignDataManager( VAPoR::DataMgr*    dmgr );
+    void UpdateParams(const VAPoR::FlowParams* p );
 
     //  
     // Find one index whose timestamp is just below a given time
@@ -42,7 +44,7 @@ private:
    
     // Member variables
     std::vector<float>          _timestamps;    // in ascending order
-    const VAPoR::DataMgr*       _datamgr;   
+    VAPoR::DataMgr*             _datamgr;   
     const VAPoR::FlowParams*    _params;
 
 
@@ -53,7 +55,7 @@ private:
     // _getAGrid will use the cached params, _params, to generate grids. 
     int  _getAGrid( int               timestep,         // Input
                     std::string&      varName,          // Input
-                    Grid**            gridpp  ) const;  // Output
+                    VAPoR::Grid**     gridpp  ) const;  // Output
 };
 };
 

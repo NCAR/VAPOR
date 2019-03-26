@@ -1,4 +1,4 @@
-#include "vapor/Field.h"
+#include "vapor/VaporField.h"
 
 using namespace flow;
 
@@ -14,7 +14,7 @@ VaporField::~VaporField()
 
 
 void
-VaporField::AssignDataManager( const VAPoR::DataMgr* dmgr )
+VaporField::AssignDataManager( VAPoR::DataMgr* dmgr )
 {
     _datamgr = dmgr;
 
@@ -91,19 +91,19 @@ VaporField::GetNumberOfTimesteps() const
 int
 VaporField::_getAGrid( int               timestep,
                        std::string&      varName,
-                       Grid**            gridpp  ) const
+                       VAPoR::Grid**     gridpp  ) const
 {
     std::vector<double>           extMin, extMax;
     _params->GetBox()->GetExtents( extMin, extMax );
-    Grid* grid = _dataMgr->GetVariable( timestep,
-                                        varName,
-                                        _params->GetRefinementLevel(),
-                                        _params->GetCompressionLevel(),
-                                        extMin,
-                                        extMax );
+    VAPoR::Grid* grid = _datamgr->GetVariable( timestep,
+                                               varName,
+                                               _params->GetRefinementLevel(),
+                                               _params->GetCompressionLevel(),
+                                               extMin,
+                                               extMax );
     if( grid == nullptr )
     {
-        MyBase::SetErrMsg("Not able to get a grid!");
+        Wasp::MyBase::SetErrMsg("Not able to get a grid!");
         return GRID_ERROR;
     }
     else

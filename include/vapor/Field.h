@@ -6,6 +6,7 @@
 #define FIELD_H
 
 #include <glm/glm.hpp>
+#include <string>
 
 namespace flow
 {

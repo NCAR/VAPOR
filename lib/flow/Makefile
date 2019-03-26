@@ -40,6 +40,9 @@ SteadyVAPORField.o: SteadyVAPORField.cpp Field.o
 OceanField.o: OceanField.cpp Field.o
 	$(CXX) $< -c -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR)
 
+VaporField.o: VaporField.cpp Field.o
+	$(CXX) $< -c -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR)
+
 Field.o: Field.cpp
 	$(CXX) $< -c -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR)
 
