@@ -1,4 +1,4 @@
-#version 410 core
+#pragma auto_version
 
 #include VolumeBase.frag
 #include VolumeIsoInclude.frag
