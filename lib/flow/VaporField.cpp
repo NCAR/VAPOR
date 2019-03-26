@@ -5,11 +5,85 @@ using namespace flow;
 VaporField::VaporField()
 {
     _datamgr = nullptr;
+    _params  = nullptr;
 }
 
 // Destructor
 VaporField::~VaporField()
 { 
+}
+
+
+bool
+VaporField::InsideVolume( float time, const glm::vec3& pos ) const
+{
+    const std::vector<double> coords{ pos.x, pos.y, pos.z };
+    VAPoR::Grid* grid = nullptr;
+    if( !_params )          return false;
+    for( auto& e : VelocityNames )
+        if( e.empty() )     return false;
+
+    // In case of steady field, we only check a specific time step
+    if( IsSteady )
+    {
+        size_t currentTS = _params->GetCurrentTimestep();
+        for( auto v : VelocityNames )   // cannot use reference here...
+        {
+            int rv = _getAGrid( currentTS, v, &grid );
+            assert( rv == 0 );
+            if( !grid->InsideGrid( coords ) )
+            {
+                delete grid;
+                return false;
+            }
+            delete grid;
+            grid = nullptr;
+        }
+    }
+    else    // we check two time steps
+    {
+        // First check if the query time is within range
+        if( time < _timestamps.front() || time > _timestamps.back() )
+            return false;
+
+        // Then locate the 2 time steps
+        size_t floor;
+        int rv  = LocateTimestamp( time, floor );
+        if( rv != 0 ) return false;
+
+        // Second test if pos is inside of time step "floor"
+        for( auto v : VelocityNames )   // cannot use references...
+        {
+            rv = _getAGrid( floor, v, &grid );
+            assert( rv == 0 );
+            if( !grid->InsideGrid( coords ) )
+            {
+                delete grid;
+                return false;
+            }
+            delete grid;
+            grid = nullptr;
+        }
+
+        // If time is larger than _timestamps[floor], we also need to test _timestamps[floor+1]
+        if( time > _timestamps[floor] )
+        {
+            for( auto v : VelocityNames )   // cannot use references
+            {
+                rv = _getAGrid( floor + 1, v, &grid );
+                assert( rv == 0 );
+                if( !grid->InsideGrid( coords ) )
+                {
+                    delete grid;
+                    return false;
+                }
+                delete grid;
+                grid = nullptr;
+            }
+        }
+    }
+
+    return true;
 }
 
 

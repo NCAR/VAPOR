@@ -47,7 +47,7 @@ public:
     // Class members
     bool            IsSteady;
     std::string     ScalarName;
-    std::string     VelocityNameU, VelocityNameV, VelocityNameW;
+    std::string     VelocityNames[3];
 };
 };
 

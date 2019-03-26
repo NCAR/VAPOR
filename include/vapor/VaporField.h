@@ -18,6 +18,7 @@ public:
     //
     // Functions from class Field
     //
+    // For VaporField, we only check if the position is inside of the velocity fields.
     virtual bool InsideVolume( float time, const glm::vec3& pos ) const;
     virtual int  GetVelocity(  float time, const glm::vec3& pos,     // input 
                                glm::vec3& vel ) const;               // output
