@@ -15,13 +15,12 @@ enum ERROR_CODE
     ADVECT_HAPPENED = 1,
     SUCCESS      =  0,
     OUT_OF_FIELD = -1,
-    OUT_OF_RANGE = -2,
-    NO_FIELD_YET  = -3,
-    NO_SEED_PARTICLE_YET = -4,
-    FILE_ERROR           = -5,
-    NOT_CONTAIN_TIME     = -6,
-    GRID_ERROR           = -7,
-    SIZE_MISMATCH        = -8
+    NO_FIELD_YET  = -2,
+    NO_SEED_PARTICLE_YET = -3,
+    FILE_ERROR           = -4,
+    TIME_ERROR           = -5,
+    GRID_ERROR           = -6,
+    SIZE_MISMATCH        = -7
 };
 
 class Particle
