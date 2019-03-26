@@ -63,6 +63,15 @@ void GLManager::GetGLVersion(int *major, int *minor)
     }
 }
 
+int GLManager::GetGLSLVersion()
+{
+    int major, minor;
+    GetGLVersion(&major, &minor);
+
+    // This does not work for < OpenGL 3.3 but we do not support it anyway
+    return 100 * major + 10 * minor;
+}
+
 bool GLManager::IsCurrentOpenGLVersionSupported()
 {
     int major, minor;
@@ -70,7 +79,7 @@ bool GLManager::IsCurrentOpenGLVersionSupported()
 
     int version = major * 100 + minor;
 
-    if (version >= 401) return true;
+    if (version >= 303) return true;
 
     Wasp::MyBase::SetErrMsg("OpenGL Version \"%s\" is too low and is not supported", glGetString(GL_VERSION));
     return false;
