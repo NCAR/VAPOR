@@ -28,7 +28,7 @@ UnsteadyVAPORVelocity::AddTimeStep( const VGrid* u, const VGrid* v, const VGrid*
         if( time >= _timestamps.back() )
             _timestamps.push_back( time );
         else
-            return OUT_OF_RANGE;
+            return TIME_ERROR;
     }
     else
         _timestamps.push_back( time );
@@ -164,11 +164,11 @@ int
 UnsteadyVAPORVelocity::LocateTimestamp( float time, size_t& floor ) const
 {
     if( _timestamps.size() == 0 )
-        return NOT_CONTAIN_TIME;
+        return TIME_ERROR;
     if( _timestamps.size() == 1 )
     {
         if( _timestamps[0] != time )
-            return NOT_CONTAIN_TIME;
+            return TIME_ERROR;
         else
         {
             floor = 0;
@@ -177,7 +177,7 @@ UnsteadyVAPORVelocity::LocateTimestamp( float time, size_t& floor ) const
     }
 
     if( time < _timestamps.front() || time > _timestamps.back() )
-        return NOT_CONTAIN_TIME;
+        return TIME_ERROR;
     else
     {
         floor = _binarySearch( _timestamps, time, 0, _timestamps.size() - 1 );
@@ -212,7 +212,7 @@ UnsteadyVAPORVelocity::GetExtents( float time, glm::vec3& minExt, glm::vec3& max
     size_t floor;
     int rv = LocateTimestamp( time, floor );
     if( rv != 0 )
-        return NOT_CONTAIN_TIME;
+        return TIME_ERROR;
 
     // find the cloest time step
     size_t idx = floor;
