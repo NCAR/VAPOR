@@ -129,6 +129,7 @@ bool IntersectRayTriangleIntel(vec3 o, vec3 dir, float rt0, vec3 v0, vec3 v1, ve
 	float e1 = p2t.x * p0t.y - p2t.y * p0t.x;
 	float e2 = p0t.x * p1t.y - p0t.y * p1t.x;
 
+#if __VERSION__ >= 400
 	// Fall back to double-precision test at triangle edges
 	if (e0 == 0.0f || e1 == 0.0f || e2 == 0.0f) {
 		double p2txp1ty = double(p2t.x) * double(p1t.y);
@@ -141,6 +142,7 @@ bool IntersectRayTriangleIntel(vec3 o, vec3 dir, float rt0, vec3 v0, vec3 v1, ve
 		double p1typ0tx = double(p1t.y) * double(p0t.x);
 		e2 = float(p1typ0tx - p1txp0ty);
 	}
+#endif
 
 	// Perform triangle edge and determinant tests
 	if ((e0 < 0 || e1 < 0 || e2 < 0) && (e0 > 0 || e1 > 0 || e2 > 0))
