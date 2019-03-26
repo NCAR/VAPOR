@@ -35,6 +35,7 @@ struct RENDER_API GLManager {
     void PixelCoordinateSystemPop();
 
     static void GetGLVersion(int *major, int *minor);
+    static int GetGLSLVersion();
     static bool IsCurrentOpenGLVersionSupported();
     static bool CheckError();
 
