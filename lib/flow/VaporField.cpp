@@ -19,9 +19,7 @@ VaporField::InsideVolume( float time, const glm::vec3& pos ) const
 {
     const std::vector<double> coords{ pos.x, pos.y, pos.z };
     VAPoR::Grid* grid = nullptr;
-    if( !_params )          return false;
-    for( auto& e : VelocityNames )
-        if( e.empty() )     return false;
+    assert( _isReady() );
 
     // In case of steady field, we only check a specific time step
     if( IsSteady )
@@ -82,6 +80,93 @@ VaporField::InsideVolume( float time, const glm::vec3& pos ) const
             }
         }
     }
+
+    return true;
+}
+
+
+int
+VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity ) const
+{
+    const std::vector<double> coords{ pos.x, pos.y, pos.z };
+    VAPoR::Grid* grid = nullptr;
+    assert( _isReady() );
+
+    // First make sure the query positions are inside of the volume
+    if( !InsideVolume( time, pos ) )
+        return OUT_OF_FIELD; 
+
+    if( IsSteady )
+    {
+        size_t currentTS = _params->GetCurrentTimestep();
+        for( int i = 0; i < 3; i++ )
+        {
+            auto varname = VelocityNames[i];
+            int     rv = _getAGrid( currentTS, varname, &grid );
+            assert( rv == 0 );
+            velocity[i] = grid->GetValue( coords );
+            delete grid;
+            grid = nullptr;
+        }
+        // Need to do: examine if velocity contains missing value.
+    }
+    else
+    {
+        // First check if the query time is within range
+        if( time < _timestamps.front() || time > _timestamps.back() )
+            return TIME_ERROR;
+
+        // Then we locate the floor time step
+        size_t floorTS;
+        int rv  = LocateTimestamp( time, floorTS );
+        assert( rv == 0 );
+
+        // Find the velocity values at floor time step
+        glm::vec3 floorVelocity;
+        for( int i = 0; i < 3; i++ )
+        {
+            auto varname = VelocityNames[i];
+            int     rv   = _getAGrid( floorTS, varname, &grid );
+            assert( rv  == 0 );
+            floorVelocity[i] = grid->GetValue( coords );
+            delete grid;
+            grid = nullptr;
+        }
+        // Need to do: examine if velocity contains missing value.
+
+        // Find the velocity values at the ceiling time step
+        if( time == _timestamps[floorTS] )
+            velocity = floorVelocity; 
+        else
+        {
+            glm::vec3 ceilVelocity;
+            for( int i = 0; i < 3; i++ )
+            {
+                auto varname = VelocityNames[i];
+                int     rv   = _getAGrid( floorTS + 1, varname, &grid );
+                assert( rv  == 0 );
+                ceilVelocity[i] = grid->GetValue( coords );
+                delete grid;
+                grid = nullptr;
+            }
+            // Need to do: examine if velocity contains missing value.
+            float weight = (time - _timestamps[floorTS]) / 
+                           (_timestamps[floorTS+1] - _timestamps[floorTS]);
+            velocity = glm::mix( floorVelocity, ceilVelocity, weight );
+        }
+    }
+
+    return 0;
+}
+
+
+bool
+VaporField::_isReady() const
+{
+    if( !_datamgr )         return false;
+    if( !_params )          return false;
+    for( auto& e : VelocityNames )
+        if( e.empty() )     return false;
 
     return true;
 }
