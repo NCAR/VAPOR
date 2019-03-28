@@ -10,13 +10,14 @@
 namespace VAPoR {
 	class ControlExec;
 	class MapperFunction;
-    class VPushButtonWithDoubleClick;
 }
 
 namespace TFWidget_ {
     class LoadTFDialog;
     class CustomFileDialog;
 }
+
+class VPushButtonWithDoubleClick;
 
 //    V - Composition
 //    # - Association
@@ -215,13 +216,14 @@ class TFWidget_::LoadTFDialog : public QDialog {
         void setLoadBounds();
         void buttonChecked();
         void buttonDoubleClicked();
+        void checkSelectedColorButton( const QString& );
 
     private:
         void initializeLayout();
         void configureLayout();
         void connectWidgets();
         void rebuildWidgets();
-        VAPoR::VPushButtonWithDoubleClick makeButton( 
+        VPushButtonWithDoubleClick* makeButton( 
             const QString& path,
             const QString& file
         );
