@@ -7,7 +7,7 @@ using namespace flow;
 // Constructor;
 Advection::Advection()
 {
-    _velocity   = nullptr;
+    //_velocity   = nullptr;
     _baseDeltaT = 0.01f;
     _lowerAngle = 3.0f;
     _upperAngle = 15.0f;
@@ -20,11 +20,11 @@ Advection::Advection()
 // Destructor;
 Advection::~Advection()
 {
-    if( _velocity )
+/*    if( _velocity )
     {
         delete _velocity;
         _velocity = nullptr;
-    }
+    }*/
 }
 
 void
@@ -33,13 +33,14 @@ Advection::SetBaseStepSize( float f )
     _baseDeltaT = f;
 }
 
+/*
 void
 Advection::UseVelocity( const VelocityField* p )
 {
     if( _velocity )
         delete _velocity;
     _velocity = p;
-}
+}*/
 
 void
 Advection::UseSeedParticles( std::vector<Particle>& seeds )
@@ -55,8 +56,8 @@ Advection::UseSeedParticles( std::vector<Particle>& seeds )
 int
 Advection::CheckReady() const
 {
-    if( _velocity == nullptr )
-        return NO_FIELD_YET;
+    //if( _velocity == nullptr )
+    //    return NO_FIELD_YET;
 
     for( const auto& s : _streams )
     {
@@ -67,6 +68,7 @@ Advection::CheckReady() const
     return 0;
 }
 
+/*
 bool
 Advection::IsSteady() const
 {
@@ -74,7 +76,7 @@ Advection::IsSteady() const
         return _velocity->IsSteady;
     else
         return false;
-}
+}*/
 
 /*
 bool
@@ -87,7 +89,7 @@ void
 Advection::ToggleAdvectionComplete( bool comp )
 {
     _advectionComplete = comp;
-} */
+}
 
 const std::string 
 Advection::GetVelocityNameU() const
@@ -113,7 +115,7 @@ Advection::GetVelocityNameW() const
     else
         return std::string("");
 }
-/*
+
 const std::string 
 Advection::GetScalarName() const
 {
@@ -125,7 +127,7 @@ Advection::GetScalarName() const
 */
 
 int
-Advection::Advect( ADVECTION_METHOD method )
+Advection::Advect( const Field* velocity, ADVECTION_METHOD method )
 {
     int ready = CheckReady();
     if( ready != 0 )
@@ -135,7 +137,7 @@ Advection::Advect( ADVECTION_METHOD method )
     for( auto& s : _streams )       // Process one stream at a time
     {
         const auto& p0 = s.back();  // Start from the last particle in this stream
-        if( !_velocity->InsideVolume( p0.time, p0.location ) )
+        if( !velocity->InsideVolume( p0.time, p0.location ) )
             continue;
 
         float dt = _baseDeltaT;
@@ -154,9 +156,9 @@ Advection::Advect( ADVECTION_METHOD method )
         switch (method)
         {
             case EULER:
-                rv = _advectEuler( p0, dt, p1 ); break;
+                rv = _advectEuler( velocity, p0, dt, p1 ); break;
             case RK4:
-                rv = _advectRK4(   p0, dt, p1 ); break;
+                rv = _advectRK4(   velocity, p0, dt, p1 ); break;
         }
         if( rv != 0 )   // Advection wasn't successful for some reason...
             continue;
@@ -176,10 +178,10 @@ Advection::Advect( ADVECTION_METHOD method )
 }
 
 int
-Advection::_advectEuler( const Particle& p0, float dt, Particle& p1 ) const
+Advection::_advectEuler( const Field* velocity, const Particle& p0, float dt, Particle& p1 ) const
 {
     glm::vec3 v0;
-    int rv  = _velocity->GetVelocity( p0.time, p0.location, v0 );    
+    int rv  = velocity->GetVelocity( p0.time, p0.location, v0 );    
     assert( rv == 0 );
     p1.location = p0.location + dt * v0;
     p1.time     = p0.time + dt;
@@ -187,20 +189,20 @@ Advection::_advectEuler( const Particle& p0, float dt, Particle& p1 ) const
 }
 
 int
-Advection::_advectRK4( const Particle& p0, float dt, Particle& p1 ) const
+Advection::_advectRK4( const Field* velocity, const Particle& p0, float dt, Particle& p1 ) const
 {
     glm::vec3 k1, k2, k3, k4;
     float dt2 = dt * 0.5f;
     int rv;
-    rv = _velocity->GetVelocity( p0.time,       p0.location,            k1 );
+    rv = velocity->GetVelocity( p0.time,       p0.location,            k1 );
     assert( rv == 0 );
-    rv = _velocity->GetVelocity( p0.time + dt2, p0.location + dt2 * k1, k2 );
+    rv = velocity->GetVelocity( p0.time + dt2, p0.location + dt2 * k1, k2 );
     if( rv != 0 )
         return rv;
-    rv = _velocity->GetVelocity( p0.time + dt2, p0.location + dt2 * k2, k3 );
+    rv = velocity->GetVelocity( p0.time + dt2, p0.location + dt2 * k2, k3 );
     if( rv != 0 )
         return rv;
-    rv = _velocity->GetVelocity( p0.time + dt,  p0.location + dt  * k3, k4 );
+    rv = velocity->GetVelocity( p0.time + dt,  p0.location + dt  * k3, k4 );
     if( rv != 0 )
         return rv;
     p1.location = p0.location + dt / 6.0f * (k1 + 2.0f * (k2 + k3) + k4 );
@@ -327,6 +329,7 @@ Advection::ClearParticleProperties()
             part.ClearProperties();
 }
 
+/*
 int
 Advection::GetNumberOfTimesteps( ) const
 {
@@ -334,4 +337,4 @@ Advection::GetNumberOfTimesteps( ) const
         return _velocity->GetNumberOfTimesteps();
     else
         return 0;
-}
+}*/

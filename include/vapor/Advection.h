@@ -27,11 +27,15 @@ public:
    ~Advection();
 
     // Major action function
-    int  Advect( ADVECTION_METHOD method = RK4 );
+    //int  Advect( ADVECTION_METHOD method = RK4 );
+    int  Advect( const Field* velocityField, ADVECTION_METHOD method = RK4 );
+
+    // TODO: this function needs to be thought through.
+    int CalculateParticleProperty( const Field* scalarField );
 
     // Set advection basics
     void SetBaseStepSize(  float deltaT );
-    void UseVelocity( const VelocityField* p );
+    //void UseVelocity( const VelocityField* p );
     void UseSeedParticles( std::vector<Particle>& seeds );
 
     // Retrieve the resulting particles as "streams."
@@ -39,7 +43,7 @@ public:
     const  std::vector<Particle>& GetStreamAt( size_t i ) const;
     float  GetLatestAdvectionTime() const;
 
-    int    GetNumberOfTimesteps() const;
+    //int    GetNumberOfTimesteps() const;
 
     // As part of the functionality of this class, it manages the 
     //    particles that it stores.
@@ -68,15 +72,15 @@ public:
 
     // Query properties (most are properties of the velocity field)
     int  CheckReady() const;
-    bool IsSteady() const;
+    //bool IsSteady() const;
     //bool IsAdvectionComplete() const;
     //void ToggleAdvectionComplete( bool b );
-    const std::string GetVelocityNameU() const;
-    const std::string GetVelocityNameV() const;
-    const std::string GetVelocityNameW() const;
+    //const std::string GetVelocityNameU() const;
+    //const std::string GetVelocityNameV() const;
+    //const std::string GetVelocityNameW() const;
 
 private:
-    const VelocityField*                    _velocity;
+    //const VelocityField*                    _velocity;
     std::vector< std::vector<Particle> >    _streams;
     float   _lowerAngle,    _upperAngle;    // Thresholds for step size adjustment
     float   _lowerAngleCos, _upperAngleCos; // Cosine values of the threshold angles
@@ -84,9 +88,11 @@ private:
     float   _latestAdvectionTime;
 
     // Advection methods here could assume all input is valid.
-    int _advectEuler( const Particle& p0,  float deltaT, // Input
+    //int _advectEuler( const Particle& p0,  float deltaT, // Input
+    int _advectEuler( const Field*, const Particle& p0,  float deltaT, // Input
                             Particle& p1 ) const;        // Output
-    int _advectRK4(   const Particle& p0,  float deltaT, // Input
+    //int _advectRK4(   const Particle& p0,  float deltaT, // Input
+    int _advectRK4( const Field*,  const Particle& p0,  float deltaT, // Input
                             Particle& p1 ) const;        // Output
 
     // Get an adjust factor for deltaT based on how curvy the past two steps are.
@@ -97,7 +103,6 @@ private:
                              const Particle& past1, 
                              const Particle& current ) const;
 
-    //bool  _advectionComplete;    
 };
 };
 
