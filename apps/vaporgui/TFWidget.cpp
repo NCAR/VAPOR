@@ -168,11 +168,6 @@ TFWidget::~TFWidget() {
 		delete _rangeCombo;
 		_rangeCombo = nullptr;
 	}   
-    
-    if (_loadTFDialog != nullptr) {
-        delete _loadTFDialog;
-        _loadTFDialog = nullptr;
-    }
 }
 
 void TFWidget::loadTF() {
@@ -189,19 +184,6 @@ void TFWidget::loadTF() {
     string fileName = _loadTFDialog->GetSelectedFile();
     if ( !selectedTFFileOk( fileName ) )
         return;
-
-
-    /*QString qFileName = QString::fromStdString( fileName );
-    QDir dir = QFileInfo( qFileName ).absoluteDir();
-    QStringList files = dir.entryList( QDir::Files );
-    
-    MapperFunction tmpFunc( nullptr );// = *_rParams->GetMapperFunc( varname );
-    for ( const auto& i : files ) {
-        tmpFunc.LoadFromFile( i.toStdString() );
-        qDebug() << i;
-    }*/
-
-
 
 	SettingsParams* sP;
 	sP = (SettingsParams*)_paramsMgr->GetParams(SettingsParams::GetClassType());
@@ -1116,10 +1098,10 @@ LoadTFDialog::LoadTFDialog( QWidget* parent )
         _loadOpacityMapCheckbox(nullptr),
         _loadDataBoundsCheckbox(nullptr), 
         _buttonGroup(nullptr),
+        _myDir(""),
         _loadOpacityMap(false),
         _loadDataBounds(false),
-        _selectedFile(""),
-        _myDir("")
+        _selectedFile("")
 {
     setModal(true);
 
@@ -1145,17 +1127,54 @@ string LoadTFDialog::GetSelectedFile() const {
 
 void LoadTFDialog::SetMapperFunction( const VAPoR::MapperFunction *fn ) {
     assert( fn );
-    _buttonBuilder = make_unique<VAPoR::MapperFunction>(*fn);
+    _mapperFnCopy = make_unique<VAPoR::MapperFunction>(*fn);
     BuildColormapButtons();
 }
 
 void LoadTFDialog::BuildColormapButtons( ) {
-    // If we've already built the buttons, return
+    // If we've already built the buttons for this directory, return
     //
     if ( _myDir == _fileDialog->directory() ) {
         return;
     }
 
+    rebuildWidgets();
+
+    _myDir = _fileDialog->directory();
+    QStringList files = _myDir.entryList( QDir::Files );
+    QString path = _myDir.absolutePath();
+
+    int buttonIndex = 0; 
+    for ( const auto& i : files ) {
+
+        if (  !FileOperationChecker::FileHasCorrectSuffix( i, "tf3" ) ) {
+            qDebug() << FileOperationChecker::GetLastErrorMessage();
+            continue;
+        }
+        
+        QString fullPath = path + "//" + i;
+        if ( !FileOperationChecker::FileGoodToRead( fullPath ) ) {
+            qDebug() << FileOperationChecker::GetLastErrorMessage();
+            continue;
+        }
+
+        VAPoR::VPushButtonWithDoubleClick *button = makeButton( path, i );
+
+        int row = buttonIndex%4;
+        int col = buttonIndex/4;
+        _buttonGroup->addButton( button );
+        _colormapButtonLayout->addWidget(button, row, col);
+
+        buttonIndex++;
+    }
+
+    if ( buttonIndex == 0 )
+        _colormapButtonFrame->hide();
+    else
+        _colormapButtonFrame->show();
+}
+
+void LoadTFDialog::rebuildWidgets() {
     if (_buttonGroup != nullptr) {
         delete _buttonGroup;
         _buttonGroup = nullptr;
@@ -1163,77 +1182,70 @@ void LoadTFDialog::BuildColormapButtons( ) {
     _buttonGroup = new QButtonGroup( this );
     _buttonGroup->setExclusive(true);
 
-    _myDir = _fileDialog->directory();
-    QStringList files = _myDir.entryList( QDir::Files );
-    string dirName = _myDir.absolutePath().toStdString();
-
-    float minValue, maxValue, stride;
-  
-    int buttonIndex = 0; 
-    int numEntries = _buttonBuilder->getNumEntries();
-    float rgb[3]; 
-    for ( const auto& i : files ) {
-        cout << _buttonBuilder->LoadFromFile( dirName + "//" + i.toStdString() ) << endl;
-        float minValue = _buttonBuilder->getMinMapValue(); 
-        float maxValue = _buttonBuilder->getMaxMapValue(); 
-        float stride = ( maxValue - minValue ) / numEntries; 
-        
-        QImage image( numEntries, 1, QImage::Format_RGB32 );
-        for ( int j=0; j<numEntries; j++) {
-            float lookupValue = _buttonBuilder->mapIndexToFloat(j);
-            _buttonBuilder->rgbValue(lookupValue, rgb);
-            QRgb value = qRgb( 
-                (int)(rgb[0]*255), 
-                (int)(rgb[1]*255), 
-                (int)(rgb[2]*255) 
-            );
-            image.setPixel( j, 0, value );
-        }
-        QPixmap pixmap = QPixmap::fromImage(image);
-        pixmap = pixmap.scaled( 100, 10);
-        QIcon buttonIcon(pixmap);
-
-        VPushButtonWithDoubleClick* button; 
-        button = new VPushButtonWithDoubleClick( _colormapButtonTab );
-        button->setCheckable(true);
-        button->setIcon(buttonIcon);
-        button->setIconSize(pixmap.rect().size());
-        QString path = _myDir.absolutePath() + "/" + i;
-        button->setProperty("path", _myDir.absolutePath() );
-        button->setProperty("file", i );
-        connect(button, SIGNAL(toggled(bool)), this, SLOT(buttonChecked()));
-        connect(button, SIGNAL(doubleClicked()), this, SLOT(buttonDoubleClicked()));
-
-        int row = buttonIndex/4;
-        int col = buttonIndex%4;
-        _buttonGroup->addButton( button );
-        _colormapButtonLayout->addWidget(button, row, col);
-
-        cout << dirName + "//" + i.toStdString() << endl;
-        qDebug() << i;
-
-        if (buttonIndex == 0)
-            button->setChecked(true);
-
-        buttonIndex++;
+    if (_colormapButtonFrame != nullptr) {
+        // this also deletes its child, _colormapButtonLayout
+        delete _colormapButtonFrame;   
+        _colormapButtonFrame = nullptr;
     }
-    //_colormapButtonLayout->addWidget( _buttonGroup, 0, 0);
+    _colormapButtonFrame = new QFrame;  
+    _colormapButtonLayout = new QGridLayout( _colormapButtonFrame );
+
+    _colormapButtonTab->addTab(_colormapButtonFrame, "Colormap Preview");
 }
 
-void LoadTFDialog::uncheckAllButtons() {
-    int count = _colormapButtonLayout->count();
-    for (int i=0; i<count; i++) {
-        QPushButton* button;
-        button = (QPushButton*)_colormapButtonLayout->itemAt(i)->widget();
-        button->blockSignals(true);
-        button->setChecked(false);
-        button->blockSignals(false);
+VAPoR::VPushButtonWithDoubleClick* LoadTFDialog::makeButton( 
+    const QString& path, 
+    const QString& file
+) {
+
+    QString fullFilePath = path + "//" + file;
+
+    _mapperFnCopy->LoadFromFile( fullFilePath.toStdString() );
+
+    float rgb[3]; 
+
+    int numEntries   = _mapperFnCopy->getNumEntries();
+    float minValue   = _mapperFnCopy->getMinMapValue(); 
+    float maxValue   = _mapperFnCopy->getMaxMapValue(); 
+    float stride     = ( maxValue - minValue ) / numEntries; 
+    QImage image( numEntries, 1, QImage::Format_RGB32 );
+    for ( int j=0; j<numEntries; j++) {
+        float lookupValue = _mapperFnCopy->mapIndexToFloat(j);
+        _mapperFnCopy->rgbValue(lookupValue, rgb);
+        QRgb value = qRgb( 
+            (int)(rgb[0]*255), 
+            (int)(rgb[1]*255), 
+            (int)(rgb[2]*255) 
+        );
+        image.setPixel( j, 0, value );
     }
+
+    QPixmap pixmap = QPixmap::fromImage(image);
+    pixmap = pixmap.scaled( 100, 10);
+    QIcon buttonIcon(pixmap);
+
+    VAPoR::VPushButtonWithDoubleClick* button; 
+    button = new VAPoR::VPushButtonWithDoubleClick( _colormapButtonTab );
+    button->setCheckable(true);
+    button->setIcon(buttonIcon);
+    button->setIconSize(pixmap.rect().size());
+    button->setProperty("path", path );
+    button->setProperty("file", file );
+    connect(button, SIGNAL(toggled(bool)), this, SLOT(buttonChecked()));
+    connect(button, SIGNAL(doubleClicked()), this, SLOT(buttonDoubleClicked()));
+
+    return button;
+/*
+    int row = buttonIndex%4;
+    int col = buttonIndex/4;
+    _buttonGroup->addButton( button );
+    _colormapButtonLayout->addWidget(button, row, col);
+*/
+//    if (buttonIndex == 0)
+//        button->setChecked(true);
 }
 
 void LoadTFDialog::buttonChecked() {
-    //uncheckAllButtons();
-
     QPushButton* button = (QPushButton*)sender();
     QString path = button->property("path").toString();
     QString file = button->property("file").toString();
@@ -1293,6 +1305,7 @@ void LoadTFDialog::initializeLayout() {
     _fileDialogLayout = new QVBoxLayout;
 
     _colormapButtonTab    = new QTabWidget;
+    _colormapButtonTab->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     _colormapButtonFrame  = new QFrame;
     _colormapButtonLayout = new QGridLayout( _colormapButtonFrame );
 }
@@ -1315,6 +1328,7 @@ void LoadTFDialog::configureLayout() {
 
     _loadOptionTab->addTab(_checkboxFrame, "Options");
 
+    //_colormapButtonLayout = new QGridLayout( _colormapButtonFrame );
     _colormapButtonTab->addTab(_colormapButtonFrame, "Colormap Preview");
 
     _fileDialog->setWindowFlags(_fileDialog->windowFlags() & ~Qt::Dialog);
