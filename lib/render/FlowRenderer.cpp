@@ -65,12 +65,12 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
     _cache_refinementLevel  = -2;
     _cache_compressionLevel = -2;
     _cache_isSteady         = false;
-    _velocityStatus         = UpdateStatus::SIMPLE_OUTOFDATE;
-    _scalarStatus           = UpdateStatus::SIMPLE_OUTOFDATE;
+    _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
+    _scalarStatus           = FlowStatus::SIMPLE_OUTOFDATE;
 
     _advectionComplete      = false;
 
-    _colorField = nullptr;
+    //_colorField = nullptr;
 }
 
 // Destructor
@@ -99,6 +99,10 @@ FlowRenderer::~FlowRenderer()
 int
 FlowRenderer::_initializeGL()
 {
+    // First prepare the VelocityField
+    _velocityField.AssignDataManager( _dataMgr );
+
+    // Followed by real OpenGL initializations
     ShaderProgram *shader   = nullptr;
     if( (shader = _glManager->shaderManager->GetShader("FlowLine")) )
         _shader      = shader;
@@ -126,64 +130,30 @@ FlowRenderer::_paintGL( bool fast )
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
 
+    _velocityField.UpdateParams( params );
     _updateFlowCacheAndStates( params );
 
-    if( _cache_isSteady )
+    if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
-        if( _velocityStatus == UpdateStatus::SIMPLE_OUTOFDATE )
-        {
-            _useSteadyVAPORField( params );
-            _advectionComplete = false;
-        }
-        if( _scalarStatus == UpdateStatus::SIMPLE_OUTOFDATE )
-        {
-            _useSteadyColorField( params );
-            _populateParticleProperties( params->GetColorMapVariableName(), params, true );
-        }
-
-        if( !_advectionComplete )
-        {
-            int rv = _advection.Advect( flow::Advection::RK4 );
-            _colorLastParticle();
-            size_t totalSteps = 1, maxSteps = 200;
-            while( rv == flow::ADVECT_HAPPENED && totalSteps < maxSteps )
-            {
-                rv = _advection.Advect( flow::Advection::RK4 );
-                _colorLastParticle();
-                totalSteps++;
-            }
-
-            _advectionComplete = false;
-        }
+        std::vector<flow::Particle> seeds;
+        _genSeedsXY( seeds, _cache_time );
+        _advection.UseSeedParticles( seeds );
+        _advectionComplete = false;
     }
-    else
+
+    if( !_advectionComplete )
     {
-        // First check the status of velocity field
-        if( _velocityStatus == UpdateStatus::SIMPLE_OUTOFDATE )
+        int rv = _advection.Advect( &_velocityField, flow::Advection::RK4 );
+        size_t totalSteps = 1, maxSteps = 200;
+        while( rv == flow::ADVECT_HAPPENED && totalSteps < maxSteps )
         {
-            _useUnsteadyVAPORField( params );
-            _advectionComplete = false;
-            //std::string filename( "seeds.txt" );
-            //_advection.OutputStreamsGnuplot( filename );
+            rv = _advection.Advect( &_velocityField, flow::Advection::RK4 );
+            totalSteps++;
         }
-        // Second check the status of scalar field
-        if( _scalarStatus == UpdateStatus::SIMPLE_OUTOFDATE )
-        { }
 
-        if( !_advectionComplete )
-        {
-            int rv = _advection.Advect( flow::Advection::RK4 );
-//            _colorLastParticle();
-            while( rv == flow::ADVECT_HAPPENED &&
-                   _advection.GetLatestAdvectionTime() <= _cache_time )
-            {
-                rv = _advection.Advect( flow::Advection::RK4 );
-//                _colorLastParticle();
-            }
-
-            _advectionComplete = true;
-        }
+        _advectionComplete = false;
     }
+
 
     _purePaint( params, fast );
     _restoreGLState();
@@ -290,43 +260,43 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     std::vector<std::string> varnames = params->GetFieldVariableNames();
     if( varnames.size() == 3 )
     {
-        if( ( varnames[0] != _advection.GetVelocityNameU() ) ||
-            ( varnames[1] != _advection.GetVelocityNameV() ) ||
-            ( varnames[2] != _advection.GetVelocityNameW() ) )
-            _velocityStatus = UpdateStatus::SIMPLE_OUTOFDATE;
+        if( ( varnames[0] != _velocityField.VelocityNames[0] ) ||
+            ( varnames[1] != _velocityField.VelocityNames[1] ) ||
+            ( varnames[2] != _velocityField.VelocityNames[2] ) )
+            _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
     }
     else
     {
         MyBase::SetErrMsg("Missing velocity variable");
         std::cout << "Missing velocity variable" << std::endl;
     }
-    if( _colorField )
+    /*if( _colorField )
     {
         std::string colorVarName = params->GetColorMapVariableName();
         if( colorVarName != _colorField->ScalarName )
-            _scalarStatus = UpdateStatus::SIMPLE_OUTOFDATE;
-    } 
+            _scalarStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    }*/ 
 
     // Check compression parameters
     if( _cache_refinementLevel != params->GetRefinementLevel() )
     {
         _cache_refinementLevel    = params->GetRefinementLevel();
-        _scalarStatus             = UpdateStatus::SIMPLE_OUTOFDATE;
-        _velocityStatus           = UpdateStatus::SIMPLE_OUTOFDATE;
+        _scalarStatus             = FlowStatus::SIMPLE_OUTOFDATE;
+        _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
     }
     if( _cache_compressionLevel  != params->GetCompressionLevel() )
     {
         _cache_compressionLevel   = params->GetCompressionLevel();
-        _scalarStatus             = UpdateStatus::SIMPLE_OUTOFDATE;
-        _velocityStatus           = UpdateStatus::SIMPLE_OUTOFDATE;
+        _scalarStatus             = FlowStatus::SIMPLE_OUTOFDATE;
+        _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
     }
 
     // Check steady/unsteady status
     if( _cache_isSteady != params->GetIsSteady() )
     {
         _cache_isSteady           = params->GetIsSteady();
-        _scalarStatus             = UpdateStatus::SIMPLE_OUTOFDATE;
-        _velocityStatus           = UpdateStatus::SIMPLE_OUTOFDATE;
+        _scalarStatus             = FlowStatus::SIMPLE_OUTOFDATE;
+        _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
     }
 
     // Time step is a little tricky...
@@ -337,19 +307,19 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         _cache_time       = timeCoords.at( _cache_currentTS );
         if( _cache_isSteady )
         {
-            _scalarStatus             = UpdateStatus::SIMPLE_OUTOFDATE;
-            _velocityStatus           = UpdateStatus::SIMPLE_OUTOFDATE;
+            _scalarStatus             = FlowStatus::SIMPLE_OUTOFDATE;
+            _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
         }
         /*
         else if( _advection.GetNumberOfTimesteps() < totalNumTS )
         {
-            _scalarStatus             = UpdateStatus::MISS_TIMESTEP;
-            _velocityStatus           = UpdateStatus::MISS_TIMESTEP;
+            _scalarStatus             = FlowStatus::MISS_TIMESTEP;
+            _velocityStatus           = FlowStatus::MISS_TIMESTEP;
         }
         else
         {
-            _scalarStatus             = UpdateStatus::EXTRA_TIMESTEP;
-            _velocityStatus           = UpdateStatus::EXTRA_TIMESTEP;
+            _scalarStatus             = FlowStatus::EXTRA_TIMESTEP;
+            _velocityStatus           = FlowStatus::EXTRA_TIMESTEP;
         }*/
     }
 
@@ -364,6 +334,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     } */
 }
 
+#if 0
 int
 FlowRenderer::_useSteadyColorField( const FlowParams* params )
 {
@@ -392,7 +363,9 @@ FlowRenderer::_useSteadyColorField( const FlowParams* params )
 
     return 0;
 }
+#endif
 
+/*
 int
 FlowRenderer::_colorLastParticle()
 {
@@ -419,8 +392,9 @@ FlowRenderer::_colorLastParticle()
         }
     }
     return 0;
-}
+}*/
 
+/*
 int
 FlowRenderer::_populateParticleProperties( const std::string& varname,
                                            const FlowParams*  params,
@@ -476,7 +450,9 @@ FlowRenderer::_populateParticleProperties( const std::string& varname,
     
     return 0;
 }
+*/
 
+#if 0
 int
 FlowRenderer::_useSteadyVAPORField( const FlowParams* params )
 {
@@ -517,7 +493,7 @@ FlowRenderer::_useSteadyVAPORField( const FlowParams* params )
     _advection.UseSeedParticles( seeds );
     _advection.UseVelocity( velocity );
 
-    _velocityStatus = UpdateStatus::UPTODATE;
+    _velocityStatus = FlowStatus::UPTODATE;
     
     return 0;
 }
@@ -564,7 +540,7 @@ FlowRenderer::_useUnsteadyVAPORField( const FlowParams* params )
     _genSeedsXY( seeds, timeCoords[0] );
     _advection.UseSeedParticles( seeds );
 
-    _velocityStatus = UpdateStatus::UPTODATE;
+    _velocityStatus = FlowStatus::UPTODATE;
 
     return 0;
 }
@@ -574,6 +550,7 @@ FlowRenderer::_useUnsteadyColorField( const FlowParams* params )
 {
     return 0;
 }
+#endif
 
 /*
 int

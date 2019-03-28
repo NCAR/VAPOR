@@ -6,8 +6,8 @@
 #ifndef ADVECTION_H
 #define ADVECTION_H
 
-#include "vapor/VelocityField.h"
 #include "vapor/Particle.h"
+#include "vapor/Field.h"
 #include <string>
 #include <vector>
 

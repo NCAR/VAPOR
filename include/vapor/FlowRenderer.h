@@ -10,7 +10,7 @@
 #include "vapor/FlowParams.h"
 #include "vapor/GLManager.h"
 #include "vapor/Advection.h"
-#include "vapor/ScalarField.h"
+#include "vapor/VaporField.h"
 
 #include <glm/glm.hpp>
 
@@ -22,10 +22,10 @@ class RENDER_API FlowRenderer : public Renderer
 public:
 
     FlowRenderer(  const ParamsMgr*  pm, 
-                std::string&      winName, 
-                std::string&      dataSetName,
-                std::string&      instName, 
-                DataMgr*          dataMgr);
+                   std::string&      winName, 
+                   std::string&      dataSetName,
+                   std::string&      instName, 
+                   DataMgr*          dataMgr);
 
     virtual ~FlowRenderer();
 
@@ -34,7 +34,7 @@ public:
         return ("Flow");
     }
 
-    enum class UpdateStatus
+    enum class FlowStatus
     {
         SIMPLE_OUTOFDATE,   // When variable name or compression is out of date,
         UPTODATE            // Everything is up-to-date
@@ -48,7 +48,8 @@ protected:
 
     // Member variables
     flow::Advection     _advection;
-    flow::ScalarField*  _colorField;
+    flow::VaporField    _velocityField;
+    //flow::ScalarField*  _colorField;
     std::vector<float>  _colorMap;
     float               _colorMapRange[3];   // min, max, and their diff
     bool                _advectionComplete;
@@ -59,8 +60,8 @@ protected:
     int                 _cache_refinementLevel;
     int                 _cache_compressionLevel;
     bool                _cache_isSteady;
-    UpdateStatus        _velocityStatus;
-    UpdateStatus        _scalarStatus;
+    FlowStatus          _velocityStatus;
+    FlowStatus          _scalarStatus;
 
     // Member variables for OpenGL
     const  GLint        _colorMapTexOffset;
@@ -72,11 +73,11 @@ protected:
     //
     // Member functions
     //
-    int  _useSteadyVAPORField( const FlowParams* );
-    int  _useSteadyColorField( const FlowParams* );
+    //int  _useSteadyVAPORField( const FlowParams* );
+    //int  _useSteadyColorField( const FlowParams* );
 
-    int  _useUnsteadyVAPORField( const FlowParams* );
-    int  _useUnsteadyColorField( const FlowParams* );
+    //int  _useUnsteadyVAPORField( const FlowParams* );
+    //int  _useUnsteadyColorField( const FlowParams* );
 
     int  _genSeedsXY( std::vector<flow::Particle>& seeds, float timeVal ) const;
 
