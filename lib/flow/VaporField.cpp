@@ -246,6 +246,12 @@ void
 VaporField::UpdateParams( const VAPoR::FlowParams* p )
 {
     _params = p;
+    // Update properties of this Field
+    IsSteady = p->GetIsSteady();
+    ScalarName = p->GetColorMapVariableName();
+    auto& velNames = params->GetFieldVariableNames();
+    for( int i = 0; i < 3; i++ )
+        VelocityNames[i] = velNames.at(i);
 }
 
 
