@@ -5,12 +5,10 @@
 using namespace flow;
 
 // Constructor;
-Advection::Advection()
+Advection::Advection() : _lowerAngle( 3.0f ), _upperAngle( 15.0f )
 {
     //_velocity   = nullptr;
     _baseDeltaT = 0.01f;
-    _lowerAngle = 3.0f;
-    _upperAngle = 15.0f;
     _lowerAngleCos = glm::cos( glm::radians( _lowerAngle ) );
     _upperAngleCos = glm::cos( glm::radians( _upperAngle ) );
     _latestAdvectionTime = 0.0f;
