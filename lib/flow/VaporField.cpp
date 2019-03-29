@@ -297,25 +297,22 @@ VaporField::_getAGrid( size_t               timestep,
     for( auto it = _recentGrids.cbegin(); it != _recentGrids.cend(); ++it )
         if( it->equals( timestep, varName, refLevel, compLevel, extMin, extMax ) )
         {     
-            // Output the underlying grid;
             *gridpp = it->realGrid;
             // Move this node to the front of the list
-            _recentGrids.splice( _recentGrids.cbegin(), _recentGrids, it );
-            
+            if( it != _recentGrids.cbegin() )
+                _recentGrids.splice( _recentGrids.cbegin(), _recentGrids, it );
             return 0;
         }
 
     // There's no such grid in our cache! Let's ask for it from the data manager,
     // and also keep it in our cache!
-
     VAPoR::Grid* grid = _datamgr->GetVariable( timestep, varName, refLevel, compLevel,
-                                               extMin, extMax );
+                                               extMin, extMax, true );
     if( grid == nullptr )
     {
         Wasp::MyBase::SetErrMsg("Not able to get a grid!");
         return GRID_ERROR;
     }
-    // Outout the grid:
     *gridpp = grid;
     // Put it in our cache     
     _recentGrids.emplace_front( grid, timestep, varName, refLevel, compLevel,
@@ -354,6 +351,7 @@ VaporField::RichGrid::RichGrid( const VAPoR::Grid* g,
                                 mgr( dm )
 {}
 
+// Destructor
 VaporField::RichGrid::~RichGrid()
 {
     if( mgr && realGrid )

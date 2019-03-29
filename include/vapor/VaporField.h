@@ -71,7 +71,7 @@ private:
     VAPoR::DataMgr*             _datamgr;   
     const VAPoR::FlowParams*    _params;
 
-    // Keep copies of recent grids
+    // Keep copies of recent grids.
     const int                   _recentGridLimit;
     std::list<RichGrid>         _recentGrids;
 
