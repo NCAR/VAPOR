@@ -39,6 +39,21 @@ public:
     int LocateTimestamp( float   time,                        // Input
                          size_t& floor ) const;               // Output
 
+    struct RichGrid
+    {
+        const VAPoR::Grid*        realGrid;
+        const size_t              TS;
+        const std::string         varName;
+        const int                 refinementLevel, compressionLevel; 
+        const std::vector<double> extMin, extMax;
+        VAPoR::DataMgr*           mgr;  // for unlocking realGrid
+
+        RichGrid( const VAPoR::Grid* g, size_t currentTS,
+                  const std::string& var, int refLevel, int compLevel,
+                  const std::vector<double>& min, const std::vector<double>& max,
+                  VAPoR::DataMgr* dm );
+       ~RichGrid();
+    };
 
 
 private:
@@ -48,6 +63,7 @@ private:
     VAPoR::DataMgr*             _datamgr;   
     const VAPoR::FlowParams*    _params;
 
+    // Keep copies of recent grids
 
     // Member functions
     template< typename T > 
