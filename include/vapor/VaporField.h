@@ -48,6 +48,7 @@ public:
         const std::vector<double> extMin, extMax;
         VAPoR::DataMgr*           mgr;  // for unlocking realGrid
 
+        RichGrid();
         RichGrid( const VAPoR::Grid* g, size_t currentTS,
                   const std::string& var, int refLevel, int compLevel,
                   const std::vector<double>& min, const std::vector<double>& max,
@@ -64,6 +65,8 @@ private:
     const VAPoR::FlowParams*    _params;
 
     // Keep copies of recent grids
+    RichGrid                    _floorVelocity[3], _ceilingVelocity[3];
+    RichGrid                    _floorScalar, ceilingScalar;
 
     // Member functions
     template< typename T > 
