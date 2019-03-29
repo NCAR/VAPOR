@@ -2,7 +2,7 @@
 
 using namespace flow;
 
-VaporField::VaporField() : _recentGridLimit( 9 )
+VaporField::VaporField() : _recentGridLimit( 12 )
 {
     _datamgr = nullptr;
     _params  = nullptr;
@@ -332,31 +332,25 @@ VaporField::_getAGrid( size_t               timestep,
             return 0;
         }
 
-    /*if( found )
-    {
-        _recentGrids.remove( target )
-        _recentGrids.push_front( target );
-        *gridpp = target.realGrid;
-        return 0;
-    }*/
+    // There's no such grid in our cache! Let's ask for it from the data manager,
+    // and also keep it in our cache!
 
-
-    VAPoR::Grid* grid = _datamgr->GetVariable( timestep,
-                                               varName,
-                                               _params->GetRefinementLevel(),
-                                               _params->GetCompressionLevel(),
-                                               extMin,
-                                               extMax );
+    VAPoR::Grid* grid = _datamgr->GetVariable( timestep, varName, refLevel, compLevel,
+                                               extMin, extMax );
     if( grid == nullptr )
     {
         Wasp::MyBase::SetErrMsg("Not able to get a grid!");
         return GRID_ERROR;
     }
-    else
-    {
-        *gridpp = grid;
-        return 0;
-    }
+    // Outout the grid:
+    *gridpp = grid;
+    // Put it in our cache     
+    _recentGrids.emplace_front( grid, timestep, varName, refLevel, compLevel,
+                                extMin, extMax, _datamgr );
+    if( _recentGrids.size() > _recentGridLimit )
+        _recentGrids.pop_back();
+
+    return 0;
 }
 
 VaporField::RichGrid::RichGrid() :  realGrid( nullptr ),

@@ -83,9 +83,9 @@ private:
     bool _isReady() const;
 
     // _getAGrid will use the cached params, _params, to generate grids. 
-    int  _getAGrid( size_t            timestep,         // Input
-                    std::string&      varName,          // Input
-                    const VAPoR::Grid**     gridpp  );  // Output
+    int  _getAGrid( size_t              timestep,   // Input
+                    std::string&        varName,    // Input
+                    const VAPoR::Grid** gridpp  );  // Output
 };
 };
 
