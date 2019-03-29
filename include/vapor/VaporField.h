@@ -1,6 +1,7 @@
 #ifndef VAPORFIELD_H
 #define VAPORFIELD_H
 
+#include <list>
 #include "vapor/Field.h"
 #include "vapor/Particle.h"
 #include "vapor/DataMgr.h"
@@ -19,12 +20,12 @@ public:
     // Functions from class Field
     //
     // For VaporField, we only check if the position is inside of the velocity fields.
-    virtual bool InsideVolume( float time, const glm::vec3& pos ) const;
+    virtual bool InsideVolume( float time, const glm::vec3& pos );
     virtual int  GetVelocity(  float time, const glm::vec3& pos,     // input 
-                               glm::vec3& vel ) const;               // output
+                               glm::vec3& vel );                     // output
     virtual int  GetScalar(    float time, const glm::vec3& pos,     // input 
-                               float& val) const ;                   // output
-    virtual int  GetNumberOfTimesteps() const;
+                               float& val) ;                         // output
+    virtual int  GetNumberOfTimesteps() ;
 
     //
     // Functions for interaction with VAPOR components
@@ -39,6 +40,10 @@ public:
     int LocateTimestamp( float   time,                        // Input
                          size_t& floor ) const;               // Output
 
+    //
+    // This class keeps a pointer to a vapor grid, and all the metadata
+    // associated with the grid.
+    //
     struct RichGrid
     {
         const VAPoR::Grid*        realGrid;
@@ -54,6 +59,8 @@ public:
                   const std::vector<double>& min, const std::vector<double>& max,
                   VAPoR::DataMgr* dm );
        ~RichGrid();
+        bool equals( size_t currentTS, const std::string& var, int refLevel, int compLevel,
+                     const std::vector<double>& min, const std::vector<double>& max ) const;
     };
 
 
@@ -65,8 +72,8 @@ private:
     const VAPoR::FlowParams*    _params;
 
     // Keep copies of recent grids
-    RichGrid                    _floorVelocity[3], _ceilingVelocity[3];
-    RichGrid                    _floorScalar, ceilingScalar;
+    const int                   _recentGridLimit;
+    std::list<RichGrid>         _recentGrids;
 
     // Member functions
     template< typename T > 
@@ -76,9 +83,9 @@ private:
     bool _isReady() const;
 
     // _getAGrid will use the cached params, _params, to generate grids. 
-    int  _getAGrid( int               timestep,         // Input
+    int  _getAGrid( size_t            timestep,         // Input
                     std::string&      varName,          // Input
-                    VAPoR::Grid**     gridpp  ) const;  // Output
+                    const VAPoR::Grid**     gridpp  );  // Output
 };
 };
 

@@ -28,7 +28,7 @@ public:
 
     // Major action function
     //int  Advect( ADVECTION_METHOD method = RK4 );
-    int  Advect( const Field* velocityField, ADVECTION_METHOD method = RK4 );
+    int  Advect( Field* velocityField, ADVECTION_METHOD method = RK4 );
 
     // TODO: this function needs to be thought through.
     int CalculateParticleProperty( const Field* scalarField );
@@ -88,12 +88,10 @@ private:
     float       _latestAdvectionTime;
 
     // Advection methods here could assume all input is valid.
-    //int _advectEuler( const Particle& p0,  float deltaT, // Input
-    int _advectEuler( const Field*, const Particle& p0,  float deltaT, // Input
-                            Particle& p1 ) const;        // Output
-    //int _advectRK4(   const Particle& p0,  float deltaT, // Input
-    int _advectRK4( const Field*,  const Particle& p0,  float deltaT, // Input
-                            Particle& p1 ) const;        // Output
+    int _advectEuler( Field*, const Particle&, float deltaT, // Input
+                      Particle& p1 ) const;                  // Output
+    int _advectRK4( Field*, const Particle&, float deltaT,   // Input
+                    Particle& p1 ) const;                    // Output
 
     // Get an adjust factor for deltaT based on how curvy the past two steps are.
     //   A value in range (0.0, 1.0) means shrink deltaT.
