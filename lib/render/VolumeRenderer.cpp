@@ -192,15 +192,18 @@ int VolumeRenderer::_paintGL(bool fast)
     }
     if (_cache.constantColor.size() == 4) shader->SetUniform("constantColor", *(vec4 *)_cache.constantColor.data());
 
-    _algorithm->SetUniforms();
+    int nextTextureUnit = 0;
+    _algorithm->SetUniforms(&nextTextureUnit);
 
-    glActiveTexture(GL_TEXTURE1);
+    glActiveTexture(GL_TEXTURE0 + nextTextureUnit);
     glBindTexture(GL_TEXTURE_1D, _LUTTexture);
-    shader->SetUniform("LUT", 1);
+    shader->SetUniform("LUT", nextTextureUnit);
+    nextTextureUnit++;
 
-    glActiveTexture(GL_TEXTURE7);
+    glActiveTexture(GL_TEXTURE0 + nextTextureUnit);
     glBindTexture(GL_TEXTURE_2D, _depthTexture);
-    shader->SetUniform("sceneDepth", 7);
+    shader->SetUniform("sceneDepth", nextTextureUnit);
+    nextTextureUnit++;
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
