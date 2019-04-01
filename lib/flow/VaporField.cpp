@@ -296,7 +296,7 @@ VaporField::_getAGrid( size_t               timestep,
 
     for( auto it = _recentGrids.cbegin(); it != _recentGrids.cend(); ++it )
         if( it->equals( timestep, varName, refLevel, compLevel, extMin, extMax ) )
-        {     
+        {   // We found it!
             *gridpp = it->realGrid;
             // Move this node to the front of the list
             if( it != _recentGrids.cbegin() )
@@ -305,7 +305,7 @@ VaporField::_getAGrid( size_t               timestep,
         }
 
     // There's no such grid in our cache! Let's ask for it from the data manager,
-    // and also keep it in our cache!
+    // and then keep it in our cache!
     VAPoR::Grid* grid = _datamgr->GetVariable( timestep, varName, refLevel, compLevel,
                                                extMin, extMax, true );
     if( grid == nullptr )
@@ -323,6 +323,8 @@ VaporField::_getAGrid( size_t               timestep,
     return 0;
 }
 
+/* Sometimes the container calls a default constructor like this.
+ * We can delete this block of code if it doesn't cause problem for some time.
 VaporField::RichGrid::RichGrid() :  realGrid( nullptr ),
                                     TS( 0 ),
                                     varName(),
@@ -332,6 +334,7 @@ VaporField::RichGrid::RichGrid() :  realGrid( nullptr ),
                                     extMax(),
                                     mgr( nullptr )
 {}
+*/
 
 VaporField::RichGrid::RichGrid( const VAPoR::Grid* g, 
                                 size_t currentTS,

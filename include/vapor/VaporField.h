@@ -53,7 +53,7 @@ public:
         const std::vector<double> extMin, extMax;
         VAPoR::DataMgr*           mgr;  // for unlocking realGrid
 
-        RichGrid();
+        //RichGrid();
         RichGrid( const VAPoR::Grid* g, size_t currentTS,
                   const std::string& var, int refLevel, int compLevel,
                   const std::vector<double>& min, const std::vector<double>& max,
@@ -79,10 +79,11 @@ private:
     template< typename T > 
     size_t _binarySearch( const std::vector<T>& vec, T val, size_t begin, size_t end ) const;
 
-    // If all the necessary member variables are properly set?
+    // Are the following member variables properly set:
+    //  1) _datamgr, 2) _params, and 3) velocitynames.
     bool _isReady() const;
 
-    // _getAGrid will use the cached params, _params, to generate grids. 
+    // _getAGrid will use _params to retrieve/generate grids. 
     int  _getAGrid( size_t              timestep,   // Input
                     std::string&        varName,    // Input
                     const VAPoR::Grid** gridpp  );  // Output

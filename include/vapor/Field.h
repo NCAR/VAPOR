@@ -23,11 +23,6 @@ public:
     virtual bool InsideVolume( float time, const glm::vec3& pos ) = 0;
 
     //
-    // Retrieve the extents of this field. 
-    //
-    // virtual int GetExtents( float time, glm::vec3& minExt, glm::vec3& maxExt ) const = 0;
-
-    //
     // Retrieve the number of time steps in this field
     //
     virtual int GetNumberOfTimesteps() = 0;
