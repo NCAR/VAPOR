@@ -5,7 +5,6 @@
 #include <glm/glm.hpp>
 #include <vapor/GLManager.h>
 #include <vapor/ShaderManager.h>
-// #include <glm/integer.hpp>
 
 #ifndef FLT16_MAX
 #define FLT16_MAX 6.55E4
@@ -272,14 +271,10 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
     BBLevels = levels;
 
     glBindTexture(GL_TEXTURE_2D_ARRAY, minTexture);
-    // glTexStorage3D(GL_TEXTURE_2D_ARRAY, levels, GL_RGB16F, sd, bd, 6);
-    // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, sd, bd, 6, GL_RGB, GL_FLOAT, boxMins);
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, 0, 0, 0, 0, GL_RGB, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMins);
 
     glBindTexture(GL_TEXTURE_2D_ARRAY, maxTexture);
-    // glTexStorage3D(GL_TEXTURE_2D_ARRAY, levels, GL_RGB16F, sd, bd, 6);
-    // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, sd, bd, 6, GL_RGB, GL_FLOAT, boxMaxs);
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, 0, 0, 0, 0, GL_RGB, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMaxs);
 
@@ -372,10 +367,8 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
         }
 
         glBindTexture(GL_TEXTURE_2D_ARRAY, minTexture);
-        // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, level, 0, 0, 0, ms, ms, 6, GL_RGB, GL_FLOAT, minMip[level]);
         glTexImage3D(GL_TEXTURE_2D_ARRAY, level, GL_RGB32F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, minMip[level]);
         glBindTexture(GL_TEXTURE_2D_ARRAY, maxTexture);
-        // glTexSubImage3D(GL_TEXTURE_2D_ARRAY, level, 0, 0, 0, ms, ms, 6, GL_RGB, GL_FLOAT, maxMip[level]);
         glTexImage3D(GL_TEXTURE_2D_ARRAY, level, GL_RGB32F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, maxMip[level]);
     }
 
@@ -411,7 +404,6 @@ void VolumeCellTraversal::SetUniforms(int *nextTextureUnit) const {
     ShaderProgram *s = GetShader();
 
     s->SetUniform("coordDims", *(glm::ivec3 *)&coordDims);
-    // s->SetUniform("BBLevels", BBLevels);
 
     glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
     glBindTexture(GL_TEXTURE_3D, coordTexture);
