@@ -5,7 +5,6 @@
 #include <new>
 #include <vapor/utils.h>
 #include <vapor/DataMgrUtils.h>
-#include <vapor/MyPython.h>
 #include <vapor/PyEngine.h>
 using namespace Wasp;
 using namespace VAPoR;
