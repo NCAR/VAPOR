@@ -319,8 +319,10 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
             _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
         }
         else
-        {
-            _scalarStatus             = FlowStatus::TIME_STEP_OFD;
+        {   // !! Only apply status "TIME_STEP_OFD" if the old status is "UPTODATE" !!
+            if( _scalarStatus        == FlowStatus::UPTODATE )
+                _scalarStatus         = FlowStatus::TIME_STEP_OFD;
+            if( _velocityStatus      == FlowStatus::UPTODATE )
             _velocityStatus           = FlowStatus::TIME_STEP_OFD;
         }
         /*
