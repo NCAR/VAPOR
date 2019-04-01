@@ -75,6 +75,6 @@ void main(void)
         fragColor = accum;
     }
         
-    if (accum.a < 0.1)
+    if (accum.a < ALPHA_DISCARD)
         discard;
 }

@@ -73,6 +73,6 @@ void main(void)
         gl_FragDepth = CalculateDepth(cameraPos + dir*t1);
         fragColor = accum;
     }
-    if (accum.a < 0.01)
+    if (accum.a < ALPHA_DISCARD)
         discard;
 }
