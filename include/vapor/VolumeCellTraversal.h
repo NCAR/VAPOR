@@ -18,23 +18,20 @@ class VolumeCellTraversal : public VolumeRegular {
     virtual void SetUniforms(int *nextTextureUnit) const;
 
   private:
-    unsigned int minTexture;
-    unsigned int maxTexture;
-    unsigned int BBLevelDimTexture;
-    unsigned int coordTexture;
+    unsigned int _minTexture;
+    unsigned int _maxTexture;
+    unsigned int _BBLevelDimTexture;
+    unsigned int _coordTexture;
 
-    unsigned int VAO;
-    unsigned int VBO;
+    int _coordDims[3];
+    int _BBLevels;
+    bool _useHighPrecisionTriangleRoutine;
 
-    int coordDims[3];
-    int BBLevels;
-    bool useHighPrecisionTriangleRoutine;
-
-    bool NeedsHighPrecisionTriangleRoutine(const Grid *grid);
-    static bool Need32BitForCoordinates(const Grid *grid);
+    bool _needsHighPrecisionTriangleRoutine(const Grid *grid);
+    static bool _need32BitForCoordinates(const Grid *grid);
 
   protected:
-    std::string AddDefinitionsToShader(std::string shaderName) const;
+    std::string _addDefinitionsToShader(std::string shaderName) const;
 };
 
 class VolumeCellTraversalIso : public VolumeCellTraversal {

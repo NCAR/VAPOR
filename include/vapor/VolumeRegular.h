@@ -24,7 +24,7 @@ class VolumeRegular : public VolumeAlgorithm {
     unsigned int _missingTexture;
     bool _hasMissingData;
 
-    std::vector<size_t> dataDimensions;
+    std::vector<size_t> _dataDimensions;
 
     bool _hasSecondData;
     unsigned int _dataTexture2;

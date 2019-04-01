@@ -146,85 +146,60 @@ static bool ComputeSideBBoxes(ivec3 side, int fastDim, int slowDim, vec3 *boxMin
 
 VolumeCellTraversal::VolumeCellTraversal(GLManager *gl)
     : VolumeRegular(gl),
-      useHighPrecisionTriangleRoutine(false) {
-    glGenTextures(1, &coordTexture);
-    glBindTexture(GL_TEXTURE_3D, coordTexture);
+      _useHighPrecisionTriangleRoutine(false) {
+    glGenTextures(1, &_coordTexture);
+    glBindTexture(GL_TEXTURE_3D, _coordTexture);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    glGenTextures(1, &minTexture);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, minTexture);
+    glGenTextures(1, &_minTexture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _minTexture);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glGenTextures(1, &maxTexture);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, maxTexture);
+    glGenTextures(1, &_maxTexture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _maxTexture);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    glGenTextures(1, &BBLevelDimTexture);
-    glBindTexture(GL_TEXTURE_2D, BBLevelDimTexture);
+    glGenTextures(1, &_BBLevelDimTexture);
+    glBindTexture(GL_TEXTURE_2D, _BBLevelDimTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    float BL = -1;
-    float data[] = {
-        BL, BL, 0, 0,
-        1, BL, 1, 0,
-        BL, 1, 0, 1,
-
-        BL, 1, 0, 1,
-        1, BL, 1, 0,
-        1, 1, 1, 1};
-
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), NULL);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glBindVertexArray(0);
 }
 
 VolumeCellTraversal::~VolumeCellTraversal() {
-    if (coordTexture)
-        glDeleteTextures(1, &coordTexture);
-    if (minTexture)
-        glDeleteTextures(1, &minTexture);
-    if (maxTexture)
-        glDeleteTextures(1, &maxTexture);
-    if (BBLevelDimTexture)
-        glDeleteTextures(1, &BBLevelDimTexture);
-    if (VAO)
-        glDeleteVertexArrays(1, &VAO);
-    if (VBO)
-        glDeleteBuffers(1, &VBO);
+    if (_coordTexture)
+        glDeleteTextures(1, &_coordTexture);
+    if (_minTexture)
+        glDeleteTextures(1, &_minTexture);
+    if (_maxTexture)
+        glDeleteTextures(1, &_maxTexture);
+    if (_BBLevelDimTexture)
+        glDeleteTextures(1, &_BBLevelDimTexture);
 }
 
 int VolumeCellTraversal::LoadData(const Grid *grid) {
     if (VolumeRegular::LoadData(grid) < 0)
         return -1;
 
-    useHighPrecisionTriangleRoutine = NeedsHighPrecisionTriangleRoutine(grid);
+    _useHighPrecisionTriangleRoutine = _needsHighPrecisionTriangleRoutine(grid);
 
     printf("Loading coordinate data...\n");
     vector<size_t> dims = grid->GetDimensions();
     const int w = dims[0], h = dims[1], d = dims[2];
     const size_t nCoords = (size_t)w * h * d;
-    coordDims[0] = w;
-    coordDims[1] = h;
-    coordDims[2] = d;
+    _coordDims[0] = w;
+    _coordDims[1] = h;
+    _coordDims[2] = d;
 
     float *data = new float[nCoords * 3];
 
@@ -235,7 +210,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
         data[i * 3 + 2] = (*coord)[2];
     }
 
-    glBindTexture(GL_TEXTURE_3D, coordTexture);
+    glBindTexture(GL_TEXTURE_3D, _coordTexture);
     glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, 0, 0, 0, 0, GL_RED, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
     glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, dims[0], dims[1], dims[2], 0, GL_RGB, GL_FLOAT, data);
 
@@ -268,13 +243,13 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
     while ((size = size >> 1))
         levels++;
     levels = min(levels, MAX_LEVELS);
-    BBLevels = levels;
+    _BBLevels = levels;
 
-    glBindTexture(GL_TEXTURE_2D_ARRAY, minTexture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _minTexture);
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, 0, 0, 0, 0, GL_RGB, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMins);
 
-    glBindTexture(GL_TEXTURE_2D_ARRAY, maxTexture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _maxTexture);
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, 0, 0, 0, 0, GL_RGB, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMaxs);
 
@@ -366,13 +341,13 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
             }
         }
 
-        glBindTexture(GL_TEXTURE_2D_ARRAY, minTexture);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, _minTexture);
         glTexImage3D(GL_TEXTURE_2D_ARRAY, level, GL_RGB32F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, minMip[level]);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, maxTexture);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, _maxTexture);
         glTexImage3D(GL_TEXTURE_2D_ARRAY, level, GL_RGB32F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, maxMip[level]);
     }
 
-    glBindTexture(GL_TEXTURE_2D, BBLevelDimTexture);
+    glBindTexture(GL_TEXTURE_2D, _BBLevelDimTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32I, 6, levels, 0, GL_RG_INTEGER, GL_INT, mipDims);
 
     for (int level = 1; level < levels; level++) {
@@ -386,47 +361,47 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
     return 0;
 }
 
-std::string VolumeCellTraversal::AddDefinitionsToShader(std::string shaderName) const {
-    if (useHighPrecisionTriangleRoutine) {
+std::string VolumeCellTraversal::_addDefinitionsToShader(std::string shaderName) const {
+    if (_useHighPrecisionTriangleRoutine) {
         shaderName += ":USE_INTEL_TRI_ISECT";
     }
-    shaderName += ":BB_LEVELS " + std::to_string(BBLevels);
+    shaderName += ":BB_LEVELS " + std::to_string(_BBLevels);
 
     return shaderName;
 }
 
 ShaderProgram *VolumeCellTraversal::GetShader() const {
-    return _glManager->shaderManager->GetShader(AddDefinitionsToShader("VolumeCellDVR"));
+    return _glManager->shaderManager->GetShader(_addDefinitionsToShader("VolumeCellDVR"));
 }
 
 void VolumeCellTraversal::SetUniforms(int *nextTextureUnit) const {
     VolumeRegular::SetUniforms(nextTextureUnit);
     ShaderProgram *s = GetShader();
 
-    s->SetUniform("coordDims", *(glm::ivec3 *)&coordDims);
+    s->SetUniform("coordDims", *(glm::ivec3 *)&_coordDims);
 
     glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
-    glBindTexture(GL_TEXTURE_3D, coordTexture);
+    glBindTexture(GL_TEXTURE_3D, _coordTexture);
     s->SetUniform("coords", *nextTextureUnit);
     (*nextTextureUnit)++;
 
     glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, minTexture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _minTexture);
     s->SetUniform("boxMins", *nextTextureUnit);
     (*nextTextureUnit)++;
 
     glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, maxTexture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _maxTexture);
     s->SetUniform("boxMaxs", *nextTextureUnit);
     (*nextTextureUnit)++;
 
     glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
-    glBindTexture(GL_TEXTURE_2D, BBLevelDimTexture);
+    glBindTexture(GL_TEXTURE_2D, _BBLevelDimTexture);
     s->SetUniform("levelDims", *nextTextureUnit);
     (*nextTextureUnit)++;
 }
 
-bool VolumeCellTraversal::NeedsHighPrecisionTriangleRoutine(const Grid *grid) {
+bool VolumeCellTraversal::_needsHighPrecisionTriangleRoutine(const Grid *grid) {
     vector<double> extentsMin, extentsMax;
     grid->GetUserExtents(extentsMin, extentsMax);
     vector<double> lengths = {
@@ -445,7 +420,7 @@ bool VolumeCellTraversal::NeedsHighPrecisionTriangleRoutine(const Grid *grid) {
 }
 
 // Needs more consideration for frequency
-bool VolumeCellTraversal::Need32BitForCoordinates(const Grid *grid) {
+bool VolumeCellTraversal::_need32BitForCoordinates(const Grid *grid) {
     vector<double> minExts, maxExts;
     grid->GetUserExtents(minExts, maxExts);
     double minExt = min(minExts[0], min(minExts[1], minExts[2]));
@@ -456,7 +431,7 @@ bool VolumeCellTraversal::Need32BitForCoordinates(const Grid *grid) {
 }
 
 ShaderProgram *VolumeCellTraversalIso::GetShader() const {
-    return _glManager->shaderManager->GetShader(AddDefinitionsToShader("VolumeCellISO"));
+    return _glManager->shaderManager->GetShader(_addDefinitionsToShader("VolumeCellISO"));
 }
 
 void VolumeCellTraversalIso::SetUniforms(int *nextTextureUnit) const {
