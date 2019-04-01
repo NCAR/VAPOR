@@ -30,6 +30,7 @@ bool readDepthBuffer = true;
 
 
 #define ALPHA_BREAK 0.999
+#define ALPHA_DISCARD 0.01
 
 
 vec4 ROYGBV(float v, float minV, float maxV)

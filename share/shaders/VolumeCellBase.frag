@@ -40,14 +40,14 @@ uniform isampler2D levelDims;
 int GetFastDimForFaceIndex(int i)
 {
     if (i == FI_LEFT || i == FI_RIGHT)
-    return 1;
+        return 1;
     return 0;
 }
 
 int GetSlowDimForFaceIndex(int i)
 {
     if (i == FI_DOWN || i == FI_UP)
-    return 1;
+        return 1;
     return 2;
 }
 
@@ -341,8 +341,14 @@ bool IsFaceThatPassedBBAnInitialCell(vec3 origin, vec3 dir, float t0, ivec3 inde
     return false;
 }
 
+
+// The nvidia compiler optimizer cannot handle deep nested loops
+// This disables the optimization
+// Side note: This is supposed to be an inline change but it is in fact a source-wide flag
+
 #pragma optionNV(inline none)
 #pragma optionNV(unroll none)
+
 
 #include BBTraversalAlgorithmsNV.frag
 
@@ -446,9 +452,12 @@ void main(void)
             t0 = t1;
             
         } while (intersections > 1);
-         //if (intersections == 0) { fragColor = vec4(1,0,0,1);return;}
         
-        if (accum.a < 0.01) discard;
+        if (accum.a < ALPHA_DISCARD) {
+            // discard; // There is a bug on in the 2015 15" AMD MBP laptops where this does not work with larger(?) datasets
+            fragColor = vec4(0);
+            return;
+        }
         fragColor = accum;
         return;
     }
