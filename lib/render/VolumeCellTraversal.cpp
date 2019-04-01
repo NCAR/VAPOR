@@ -407,29 +407,33 @@ ShaderProgram *VolumeCellTraversal::GetShader() const
     return _glManager->shaderManager->GetShader(AddDefinitionsToShader("VolumeCellDVR"));
 }
 
-void VolumeCellTraversal::SetUniforms() const
+void VolumeCellTraversal::SetUniforms(int *nextTextureUnit) const
 {
-    VolumeRegular::SetUniforms();
+    VolumeRegular::SetUniforms(nextTextureUnit);
     ShaderProgram *s = GetShader();
     
     s->SetUniform("coordDims", *(glm::ivec3*)&coordDims);
     // s->SetUniform("BBLevels", BBLevels);
     
-    glActiveTexture(GL_TEXTURE2);
+    glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
     glBindTexture(GL_TEXTURE_3D, coordTexture);
-    s->SetUniform("coords", 2);
+    s->SetUniform("coords", *nextTextureUnit);
+    (*nextTextureUnit)++;
     
-    glActiveTexture(GL_TEXTURE3);
+    glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
     glBindTexture(GL_TEXTURE_2D_ARRAY, minTexture);
-    s->SetUniform("boxMins", 3);
+    s->SetUniform("boxMins", *nextTextureUnit);
+    (*nextTextureUnit)++;
     
-    glActiveTexture(GL_TEXTURE4);
+    glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
     glBindTexture(GL_TEXTURE_2D_ARRAY, maxTexture);
-    s->SetUniform("boxMaxs", 4);
+    s->SetUniform("boxMaxs", *nextTextureUnit);
+    (*nextTextureUnit)++;
     
-    glActiveTexture(GL_TEXTURE5);
+    glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
     glBindTexture(GL_TEXTURE_2D, BBLevelDimTexture);
-    s->SetUniform("levelDims", 5);
+    s->SetUniform("levelDims", *nextTextureUnit);
+    (*nextTextureUnit)++;
 }
 
 bool VolumeCellTraversal::NeedsHighPrecisionTriangleRoutine(const Grid *grid)
@@ -468,8 +472,8 @@ ShaderProgram *VolumeCellTraversalIso::GetShader() const
     return _glManager->shaderManager->GetShader(AddDefinitionsToShader("VolumeCellISO"));
 }
 
-void VolumeCellTraversalIso::SetUniforms() const
+void VolumeCellTraversalIso::SetUniforms(int *nextTextureUnit) const
 {
-    VolumeCellTraversal::SetUniforms();
+    VolumeCellTraversal::SetUniforms(nextTextureUnit);
     GetShader()->SetUniform("useColormapData", _hasSecondData);
 }

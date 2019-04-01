@@ -25,7 +25,7 @@ namespace VAPoR {
         virtual int LoadSecondaryData(const Grid *grid) = 0;
         virtual void DeleteSecondaryData() = 0;
         virtual ShaderProgram *GetShader() const = 0;
-        virtual void SetUniforms() const = 0;
+        virtual void SetUniforms(int *nextTextureUnit) const = 0;
         virtual bool IsSlow() = 0;
         
         static VolumeAlgorithm *NewAlgorithm(const std::string &name, GLManager *gl);
