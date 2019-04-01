@@ -27,14 +27,14 @@ VolumeRenderer::VolumeRenderer(const ParamsMgr *pm, std::string &winName, std::s
 VolumeRenderer::VolumeRenderer(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string paramsType, std::string classType, std::string &instName, DataMgr *dataMgr)
 : Renderer(pm, winName, dataSetName, paramsType, classType, instName, dataMgr)
 {
-    VAO = NULL;
-    VBO = NULL;
-    VAO2 = NULL;
-    VBO2 = NULL;
-    LUTTexture = NULL;
-    depthTexture = NULL;
-    algorithm = NULL;
-    lastRenderTime = 100;
+    _VAO = NULL;
+    _VBO = NULL;
+    _VAOChunked = NULL;
+    _VBOChunked = NULL;
+    _LUTTexture = NULL;
+    _depthTexture = NULL;
+    _algorithm = NULL;
+    _lastRenderTime = 100;
 
     if (_needToSetDefaultAlgorithm()) {
         VolumeParams *vp = (VolumeParams *)GetActiveParams();
@@ -47,14 +47,14 @@ VolumeRenderer::VolumeRenderer(const ParamsMgr *pm, std::string &winName, std::s
 
 VolumeRenderer::~VolumeRenderer()
 {
-    if (VAO) glDeleteVertexArrays(1, &VAO);
-    if (VBO) glDeleteBuffers(1, &VBO);
-    if (VAO2) glDeleteVertexArrays(1, &VAO2);
-    if (VBO2) glDeleteBuffers(1, &VBO2);
-    if (LUTTexture) glDeleteTextures(1, &LUTTexture);
-    if (depthTexture) glDeleteTextures(1, &depthTexture);
-    if (cache.tf) delete cache.tf;
-    if (algorithm) delete algorithm;
+    if (_VAO) glDeleteVertexArrays(1, &_VAO);
+    if (_VBO) glDeleteBuffers(1, &_VBO);
+    if (_VAOChunked) glDeleteVertexArrays(1, &_VAOChunked);
+    if (_VBOChunked) glDeleteBuffers(1, &_VBOChunked);
+    if (_LUTTexture) glDeleteTextures(1, &_LUTTexture);
+    if (_depthTexture) glDeleteTextures(1, &_depthTexture);
+    if (_cache.tf) delete _cache.tf;
+    if (_algorithm) delete _algorithm;
 }
 
 int VolumeRenderer::_initializeGL()
@@ -64,10 +64,10 @@ int VolumeRenderer::_initializeGL()
 
                     BL, 1,  0, 1, 1, BL, 1, 0, 1,  1, 1, 1};
 
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glGenVertexArrays(1, &_VAO);
+    glGenBuffers(1, &_VBO);
+    glBindVertexArray(_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), NULL);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
@@ -94,24 +94,24 @@ int VolumeRenderer::_initializeGL()
         }
     }
 
-    glGenVertexArrays(1, &VAO2);
-    glGenBuffers(1, &VBO2);
-    glBindVertexArray(VAO2);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+    glGenVertexArrays(1, &_VAOChunked);
+    glGenBuffers(1, &_VBOChunked);
+    glBindVertexArray(_VAOChunked);
+    glBindBuffer(GL_ARRAY_BUFFER, _VBOChunked);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * d.size(), d.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), NULL);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    glGenTextures(1, &LUTTexture);
-    glBindTexture(GL_TEXTURE_1D, LUTTexture);
+    glGenTextures(1, &_LUTTexture);
+    glBindTexture(GL_TEXTURE_1D, _LUTTexture);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 
-    glGenTextures(1, &depthTexture);
-    glBindTexture(GL_TEXTURE_2D, depthTexture);
+    glGenTextures(1, &_depthTexture);
+    glBindTexture(GL_TEXTURE_2D, _depthTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -120,32 +120,31 @@ int VolumeRenderer::_initializeGL()
     return 0;
 }
 
-#define CheckCache(cVar, pVar)    \
-    if (cVar != pVar) {           \
-        cache.needsUpdate = true; \
-        cVar = pVar;              \
+#define CheckCache(cVar, pVar)     \
+    if (cVar != pVar) {            \
+        _cache.needsUpdate = true; \
+        cVar = pVar;               \
     }
 
 int VolumeRenderer::_paintGL(bool fast)
 {
-    if (fast && algorithm && algorithm->IsSlow() && lastRenderTime > 0.1) { return 0; }
+    if (fast && _algorithm && _algorithm->IsSlow() && _lastRenderTime > 0.1) { return 0; }
 
     VolumeParams *vp = (VolumeParams *)GetActiveParams();
-    if (cache.algorithmName != vp->GetAlgorithm()) {
-        cache.algorithmName = vp->GetAlgorithm();
-        if (algorithm) delete algorithm;
-        algorithm = VolumeAlgorithm::NewAlgorithm(cache.algorithmName, _glManager);
-        cache.needsUpdate = true;
+    if (_cache.algorithmName != vp->GetAlgorithm()) {
+        _cache.algorithmName = vp->GetAlgorithm();
+        if (_algorithm) delete _algorithm;
+        _algorithm = VolumeAlgorithm::NewAlgorithm(_cache.algorithmName, _glManager);
+        _cache.needsUpdate = true;
     }
 
     if (_loadData() < 0) return -1;
     if (_loadSecondaryData() < 0) return -1;
     _loadTF();
-    cache.needsUpdate = false;
+    _cache.needsUpdate = false;
 
     GLint viewport[4] = {0};
     glGetIntegerv(GL_VIEWPORT, viewport);
-    // float resolution[2] = {static_cast<float>(viewport[2]), static_cast<float>(viewport[3])};
 
     Viewpoint *VP = _paramsMgr->GetViewpointParams(_winName)->getCurrentViewpoint();
     double     m[16];
@@ -160,10 +159,10 @@ int VolumeRenderer::_paintGL(bool fast)
     vec3  extLengthsScaled = extLengths * extScales;
     float smallestDimension = min(extLengthsScaled[0], min(extLengthsScaled[1], extLengthsScaled[2]));
 
-    glBindTexture(GL_TEXTURE_2D, depthTexture);
+    glBindTexture(GL_TEXTURE_2D, _depthTexture);
     glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, viewport[0], viewport[1], viewport[2], viewport[3], 0);
 
-    SmartShaderProgram shader(algorithm->GetShader());
+    SmartShaderProgram shader(_algorithm->GetShader());
     if (!shader.IsValid()) return -1;
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     shader->SetUniform("cameraPos", vec3(cameraPos[0], cameraPos[1], cameraPos[2]));
@@ -171,8 +170,8 @@ int VolumeRenderer::_paintGL(bool fast)
     shader->SetUniform("dataBoundsMax", dataMax);
     shader->SetUniform("userExtsMin", userMin);
     shader->SetUniform("userExtsMax", userMax);
-    shader->SetUniform("LUTMin", (float)cache.mapRange[0]);
-    shader->SetUniform("LUTMax", (float)cache.mapRange[1]);
+    shader->SetUniform("LUTMin", (float)_cache.mapRange[0]);
+    shader->SetUniform("LUTMax", (float)_cache.mapRange[1]);
     shader->SetUniform("unitDistance", smallestDimension / 100.f);
     shader->SetUniform("scales", extScales);
     shader->SetUniform("fast", fast);
@@ -191,16 +190,16 @@ int VolumeRenderer::_paintGL(bool fast)
         shader->SetUniform("isoEnabled[2]", (bool)enabledIsoValues[2]);
         shader->SetUniform("isoEnabled[3]", (bool)enabledIsoValues[3]);
     }
-    if (cache.constantColor.size() == 4) shader->SetUniform("constantColor", *(vec4 *)cache.constantColor.data());
+    if (_cache.constantColor.size() == 4) shader->SetUniform("constantColor", *(vec4 *)_cache.constantColor.data());
 
-    algorithm->SetUniforms();
+    _algorithm->SetUniforms();
 
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_1D, LUTTexture);
+    glBindTexture(GL_TEXTURE_1D, _LUTTexture);
     shader->SetUniform("LUT", 1);
 
     glActiveTexture(GL_TEXTURE7);
-    glBindTexture(GL_TEXTURE_2D, depthTexture);
+    glBindTexture(GL_TEXTURE_2D, _depthTexture);
     shader->SetUniform("sceneDepth", 7);
 
     glEnable(GL_BLEND);
@@ -210,18 +209,18 @@ int VolumeRenderer::_paintGL(bool fast)
     glDepthFunc(GL_ALWAYS);
 
     void *start = GLManager::BeginTimer();
-    if (algorithm->IsSlow()) {
-        glBindVertexArray(VAO2);
+    if (_algorithm->IsSlow()) {
+        glBindVertexArray(_VAOChunked);
         for (int i = 0; i < 8 * 8; i++) {
             glDrawArrays(GL_TRIANGLES, i * 6, 6);
             glFinish();
         }
     } else {
-        glBindVertexArray(VAO);
+        glBindVertexArray(_VAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
-    lastRenderTime = GLManager::EndTimer(start);
-    printf("Render time = %f\n", lastRenderTime);
+    _lastRenderTime = GLManager::EndTimer(start);
+    printf("Render time = %f\n", _lastRenderTime);
 
     glDepthFunc(GL_LESS);
     glDisable(GL_BLEND);
@@ -235,22 +234,22 @@ int VolumeRenderer::_paintGL(bool fast)
 int VolumeRenderer::_loadData()
 {
     VolumeParams *RP = (VolumeParams *)GetActiveParams();
-    CheckCache(cache.var, RP->GetVariableName());
-    CheckCache(cache.ts, RP->GetCurrentTimestep());
-    CheckCache(cache.refinement, RP->GetRefinementLevel());
-    CheckCache(cache.compression, RP->GetCompressionLevel());
-    if (!cache.needsUpdate) return 0;
+    CheckCache(_cache.var, RP->GetVariableName());
+    CheckCache(_cache.ts, RP->GetCurrentTimestep());
+    CheckCache(_cache.refinement, RP->GetRefinementLevel());
+    CheckCache(_cache.compression, RP->GetCompressionLevel());
+    if (!_cache.needsUpdate) return 0;
 
-    Grid *grid = _dataMgr->GetVariable(cache.ts, cache.var, cache.refinement, cache.compression);
+    Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.var, _cache.refinement, _cache.compression);
 
     if (_needToSetDefaultAlgorithm()) {
-        if (algorithm) delete algorithm;
+        if (_algorithm) delete _algorithm;
         string algorithmName = _getDefaultAlgorithmForGrid(grid);
-        algorithm = VolumeAlgorithm::NewAlgorithm(algorithmName, _glManager);
+        _algorithm = VolumeAlgorithm::NewAlgorithm(algorithmName, _glManager);
         RP->SetAlgorithm(algorithmName);
     }
 
-    int ret = algorithm->LoadData(grid);
+    int ret = _algorithm->LoadData(grid);
     delete grid;
     return ret;
 }
@@ -260,17 +259,17 @@ bool VolumeRenderer::_usingColorMapData() const { return false; }
 int VolumeRenderer::_loadSecondaryData()
 {
     VolumeParams *vp = (VolumeParams *)GetActiveParams();
-    CheckCache(cache.useColorMapVar, _usingColorMapData());
-    CheckCache(cache.colorMapVar, vp->GetColorMapVariableName());
-    if (!cache.needsUpdate) return 0;
+    CheckCache(_cache.useColorMapVar, _usingColorMapData());
+    CheckCache(_cache.colorMapVar, vp->GetColorMapVariableName());
+    if (!_cache.needsUpdate) return 0;
 
-    if (cache.useColorMapVar) {
-        Grid *grid = _dataMgr->GetVariable(cache.ts, cache.colorMapVar, cache.refinement, cache.compression);
-        int   ret = algorithm->LoadSecondaryData(grid);
+    if (_cache.useColorMapVar) {
+        Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.colorMapVar, _cache.refinement, _cache.compression);
+        int   ret = _algorithm->LoadSecondaryData(grid);
         delete grid;
         return ret;
     } else {
-        algorithm->DeleteSecondaryData();
+        _algorithm->DeleteSecondaryData();
         return 0;
     }
 }
@@ -279,27 +278,27 @@ void VolumeRenderer::_loadTF()
 {
     VolumeParams *  vp = (VolumeParams *)GetActiveParams();
     MapperFunction *tf;
-    if (cache.useColorMapVar) {
-        tf = vp->GetMapperFunc(cache.colorMapVar);
+    if (_cache.useColorMapVar) {
+        tf = vp->GetMapperFunc(_cache.colorMapVar);
     } else {
-        tf = vp->GetMapperFunc(cache.var);
+        tf = vp->GetMapperFunc(_cache.var);
         vector<float> constantColor = vp->GetConstantColor();
         constantColor.push_back(tf->getOpacityScale());
-        CheckCache(cache.constantColor, constantColor);
+        CheckCache(_cache.constantColor, constantColor);
     }
 
-    if (cache.tf && *cache.tf != *tf) cache.needsUpdate = true;
+    if (_cache.tf && *_cache.tf != *tf) _cache.needsUpdate = true;
 
-    if (!cache.needsUpdate) return;
+    if (!_cache.needsUpdate) return;
 
-    if (cache.tf) delete cache.tf;
-    cache.tf = new MapperFunction(*tf);
-    cache.mapRange = tf->getMinMaxMapValue();
+    if (_cache.tf) delete _cache.tf;
+    _cache.tf = new MapperFunction(*tf);
+    _cache.mapRange = tf->getMinMaxMapValue();
 
     float *LUT = new float[4 * 256];
     tf->makeLut(LUT);
 
-    glBindTexture(GL_TEXTURE_1D, LUTTexture);
+    glBindTexture(GL_TEXTURE_1D, _LUTTexture);
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, 256, 0, GL_RGBA, GL_FLOAT, LUT);
 
     delete[] LUT;
@@ -326,7 +325,7 @@ void VolumeRenderer::_getExtents(glm::vec3 *dataMin, glm::vec3 *dataMax, glm::ve
     vp->GetBox()->GetExtents(dMinExts, dMaxExts);
     *userMin = vec3(dMinExts[0], dMinExts[1], dMinExts[2]);
     *userMax = vec3(dMaxExts[0], dMaxExts[1], dMaxExts[2]);
-    _dataMgr->GetVariableExtents(cache.ts, cache.var, cache.refinement, dMinExts, dMaxExts);
+    _dataMgr->GetVariableExtents(_cache.ts, _cache.var, _cache.refinement, dMinExts, dMaxExts);
     *dataMin = vec3(dMinExts[0], dMinExts[1], dMinExts[2]);
     *dataMax = vec3(dMaxExts[0], dMaxExts[1], dMaxExts[2]);
 }
