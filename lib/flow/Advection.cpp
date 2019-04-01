@@ -135,7 +135,7 @@ Advection::Advect( Field* velocity, ADVECTION_METHOD method )
     for( auto& s : _streams )       // Process one stream at a time
     {
         const auto& p0 = s.back();  // Start from the last particle in this stream
-        if( !velocity->InsideVolume( p0.time, p0.location ) )
+        if( !velocity->InsideVolumeVelocity( p0.time, p0.location ) )
             continue;
 
         float dt = _baseDeltaT;

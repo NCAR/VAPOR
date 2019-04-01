@@ -19,8 +19,8 @@ public:
     //
     // Functions from class Field
     //
-    // For VaporField, we only check if the position is inside of the velocity fields.
-    virtual bool InsideVolume( float time, const glm::vec3& pos );
+    virtual bool InsideVolumeVelocity( float time, const glm::vec3& pos );
+    virtual bool InsideVolumeScalar(   float time, const glm::vec3& pos );
     virtual int  GetVelocity(  float time, const glm::vec3& pos,     // input 
                                glm::vec3& vel );                     // output
     virtual int  GetScalar(    float time, const glm::vec3& pos,     // input 
@@ -79,8 +79,8 @@ private:
     template< typename T > 
     size_t _binarySearch( const std::vector<T>& vec, T val, size_t begin, size_t end ) const;
 
-    // Are the following member variables properly set:
-    //  1) _datamgr, 2) _params, and 3) velocitynames.
+    // Are the following member variables pointers set?
+    //  1) _datamgr and 2) _params
     bool _isReady() const;
 
     // _getAGrid will use _params to retrieve/generate grids. 
