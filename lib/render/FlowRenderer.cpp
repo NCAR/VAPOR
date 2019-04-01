@@ -148,11 +148,15 @@ FlowRenderer::_paintGL( bool fast )
 
     if( !_advectionComplete )
     {
-        int rv = _advection.Advect( &_velocityField, flow::Advection::RK4 );
+        float deltaT = 0.05;    // For steady flow, and unsteady with only 1 time step.
+        if( _cache_timestamps.size() > 1 )
+            deltaT *= _cache_timestamps[1] - _cache_timestamps[0];
+        
+        int rv = _advection.Advect( &_velocityField, deltaT );
         size_t totalSteps = 1, maxSteps = 70;
         while( rv == flow::ADVECT_HAPPENED && totalSteps < maxSteps )
         {
-            rv = _advection.Advect( &_velocityField, flow::Advection::RK4 );
+            rv = _advection.Advect( &_velocityField, deltaT );
             totalSteps++;
         }
 
