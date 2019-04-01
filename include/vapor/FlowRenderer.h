@@ -37,6 +37,7 @@ public:
     enum class FlowStatus
     {
         SIMPLE_OUTOFDATE,   // When variable name or compression is out of date,
+        TIME_STEP_OFD,      // When the current time step is out of date
         UPTODATE            // Everything is up-to-date
     };
 
@@ -56,7 +57,7 @@ protected:
 
     // A few variables to keep the current advection states
     size_t              _cache_currentTS;
-    float               _cache_time;        // Actual time value at current time step
+    std::vector<double> _cache_timestamps;
     int                 _cache_refinementLevel;
     int                 _cache_compressionLevel;
     bool                _cache_isSteady;
