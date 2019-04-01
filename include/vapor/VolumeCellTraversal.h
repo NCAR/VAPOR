@@ -15,7 +15,7 @@ class VolumeCellTraversal : public VolumeRegular {
 
     virtual int LoadData(const Grid *grid);
     virtual ShaderProgram *GetShader() const;
-    virtual void SetUniforms() const;
+    virtual void SetUniforms(int *nextTextureUnit) const;
 
   private:
     unsigned int minTexture;
@@ -43,7 +43,7 @@ class VolumeCellTraversalIso : public VolumeCellTraversal {
     static std::string GetName() { return "Iso Cell Traversal"; }
     static Type GetType() { return Type::Iso; }
     virtual ShaderProgram *GetShader() const;
-    virtual void SetUniforms() const;
+    virtual void SetUniforms(int *nextTextureUnit) const;
 };
 
 } // namespace VAPoR
