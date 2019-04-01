@@ -267,6 +267,7 @@ Advection::GetLatestAdvectionTime() const
     return _latestAdvectionTime;
 }
 
+/*
 int
 Advection::AssignParticleValuesOfAStream( std::vector<float>& valsIn, size_t idx )
 {
@@ -316,6 +317,7 @@ Advection::AttachParticlePropertiesOfAStream( std::vector<float>& prop, size_t i
     }
     return 0;
 }
+*/
 
 void 
 Advection::ClearParticleProperties()

@@ -49,16 +49,16 @@ public:
     //    particles that it stores.
     //
     // 1) this function assigns values to the Particle.value field for an entire stream
-    int  AssignParticleValuesOfAStream( std::vector<float>& values, size_t idx );
+    //int  AssignParticleValuesOfAStream( std::vector<float>& values, size_t idx );
     //
     // 2) this function assigns a value to the last Particle of a stream
-    int  AssignLastParticleValueOfAStream( float value, size_t idx );
+    //int  AssignLastParticleValueOfAStream( float value, size_t idx );
     //
     // 3) this function copies the value field from second last particle to the last one
-    int  RepeatLastTwoParticleValuesOfAStream( size_t idx );
+    //int  RepeatLastTwoParticleValuesOfAStream( size_t idx );
     //
     // 4) this function calls Particle::AttachProperty() function for a stream
-    int  AttachParticlePropertiesOfAStream( std::vector<float>& properties, size_t idx );
+    //int  AttachParticlePropertiesOfAStream( std::vector<float>& properties, size_t idx );
     //
     // 5) this function calls Particle::ClearProperties() function
     void ClearParticleProperties( );
