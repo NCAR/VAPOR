@@ -27,7 +27,7 @@ VolumeRegular::~VolumeRegular()
 int VolumeRegular::LoadData(const Grid *grid)
 {
     printf("Loading data...\n");
-    dataDimensions = grid->GetDimensions();
+    _dataDimensions = grid->GetDimensions();
     _hasSecondData = false;
     return _loadDataDirect(grid, _dataTexture, _missingTexture, &_hasMissingData);
 }
@@ -36,7 +36,7 @@ int VolumeRegular::LoadSecondaryData(const Grid *grid)
 {
     printf("Loading secondary data...\n");
     _hasSecondData = false;
-    if (dataDimensions != grid->GetDimensions()) { return -1; }
+    if (_dataDimensions != grid->GetDimensions()) { return -1; }
     _initializeTexture(_dataTexture2);
     _initializeTexture(_missingTexture2);
     int ret = _loadDataDirect(grid, _dataTexture2, _missingTexture2, &_hasMissingData2);
