@@ -120,30 +120,34 @@ ShaderProgram *VolumeRegular::GetShader() const
     return _glManager->shaderManager->GetShader("VolumeDVR");
 }
 
-void VolumeRegular::SetUniforms() const
+void VolumeRegular::SetUniforms(int *nextTextureUnit) const
 {
     ShaderProgram *s = GetShader();
     
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
     glBindTexture(GL_TEXTURE_3D, _dataTexture);
-    s->SetUniform("data", 0);
+    s->SetUniform("data", *nextTextureUnit);
+    (*nextTextureUnit)++;
     
     s->SetUniform("hasMissingData", _hasMissingData);
     
-    glActiveTexture(GL_TEXTURE6);
+    glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
     glBindTexture(GL_TEXTURE_3D, _missingTexture);
-    s->SetUniform("missingMask", 6);
+    s->SetUniform("missingMask", *nextTextureUnit);
+    (*nextTextureUnit)++;
     
     if (_hasSecondData) {
-        glActiveTexture(GL_TEXTURE8);
+        glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
         glBindTexture(GL_TEXTURE_3D, _dataTexture2);
-        s->SetUniform("data2", 8);
+        s->SetUniform("data2", *nextTextureUnit);
+        (*nextTextureUnit)++;
         
         s->SetUniform("hasMissingData2", _hasMissingData2);
         
-        glActiveTexture(GL_TEXTURE9);
+        glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
         glBindTexture(GL_TEXTURE_3D, _missingTexture2);
-        s->SetUniform("missingMask2", 9);
+        s->SetUniform("missingMask2", *nextTextureUnit);
+        (*nextTextureUnit)++;
     }
 }
 
@@ -155,8 +159,8 @@ ShaderProgram *VolumeRegularIso::GetShader() const
     return _glManager->shaderManager->GetShader("VolumeISO");
 }
 
-void VolumeRegularIso::SetUniforms() const
+void VolumeRegularIso::SetUniforms(int *nextTextureUnit) const
 {
-    VolumeRegular::SetUniforms();
+    VolumeRegular::SetUniforms(nextTextureUnit);
     GetShader()->SetUniform("useColormapData", _hasSecondData);
 }
