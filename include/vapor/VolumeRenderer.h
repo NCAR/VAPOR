@@ -40,16 +40,16 @@ class RENDER_API VolumeRenderer : public Renderer {
     virtual std::string _getDefaultAlgorithmForGrid(const Grid *grid) const;
     bool _needToSetDefaultAlgorithm() const;
 
-    VolumeAlgorithm *algorithm;
+    VolumeAlgorithm *_algorithm;
 
-    unsigned int VAO = 0;
-    unsigned int VBO = 0;
-    unsigned int VAO2 = 0;
-    unsigned int VBO2 = 0;
-    unsigned int LUTTexture;
-    unsigned int depthTexture;
+    unsigned int _VAO = 0;
+    unsigned int _VBO = 0;
+    unsigned int _VAOChunked = 0;
+    unsigned int _VBOChunked = 0;
+    unsigned int _LUTTexture;
+    unsigned int _depthTexture;
 
-    double lastRenderTime;
+    double _lastRenderTime;
 
     struct Cache {
         std::string var = "";
@@ -67,7 +67,7 @@ class RENDER_API VolumeRenderer : public Renderer {
         std::string algorithmName = "";
 
         bool needsUpdate;
-    } cache;
+    } _cache;
 };
 
 }; // namespace VAPoR
