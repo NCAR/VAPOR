@@ -139,13 +139,14 @@ Advection::Advect( Field* velocity, ADVECTION_METHOD method )
             continue;
 
         float dt = _baseDeltaT;
+        float mindt = _baseDeltaT / 20.0f,   maxdt = _baseDeltaT * 50.0f;
         if( s.size() > 2 )  // If there are at least 3 particles in the stream, 
         {                   // we also adjust *dt*
             const auto& past1 = s[ s.size()-2 ];
             const auto& past2 = s[ s.size()-3 ];
             dt  = p0.time - past1.time;     // step size used by last integration
-            dt  = dt < _baseDeltaT * 10.0f ? dt : _baseDeltaT * 10.0f;
-            dt  = dt > _baseDeltaT / 10.0f ? dt : _baseDeltaT / 10.0f;
+            dt  = dt < maxdt ? dt : maxdt ;
+            dt  = dt > mindt ? dt : mindt ;
             dt *= _calcAdjustFactor( past2, past1, p0 );
         }
 
