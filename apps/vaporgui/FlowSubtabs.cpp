@@ -38,10 +38,13 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
     _zMultiplier = new QLineEdit( this );
     _layout->addWidget( _zMultiplier );
 
-    connect( _steady,   SIGNAL( _checkboxClicked() ), this, SLOT( _steadyGotClicked() ) );
-    connect( _xMultiplier, SIGNAL( returnPressed() ), this, SLOT( _velocityMultiplierChanged() ) );
-    connect( _yMultiplier, SIGNAL( returnPressed() ), this, SLOT( _velocityMultiplierChanged() ) );
-    connect( _zMultiplier, SIGNAL( returnPressed() ), this, SLOT( _velocityMultiplierChanged() ) );
+    connect( _steady,   SIGNAL( _checkboxClicked() ),   this, SLOT( _steadyGotClicked() ) );
+    connect( _xMultiplier, SIGNAL( returnPressed() ),   this, SLOT( _velocityMultiplierChanged() ) );
+    connect( _yMultiplier, SIGNAL( returnPressed() ),   this, SLOT( _velocityMultiplierChanged() ) );
+    connect( _zMultiplier, SIGNAL( returnPressed() ),   this, SLOT( _velocityMultiplierChanged() ) );
+    connect( _xMultiplier, SIGNAL( editingFinished() ), this, SLOT( _velocityMultiplierChanged() ) );
+    connect( _yMultiplier, SIGNAL( editingFinished() ), this, SLOT( _velocityMultiplierChanged() ) );
+    connect( _zMultiplier, SIGNAL( editingFinished() ), this, SLOT( _velocityMultiplierChanged() ) );
 }
 
 void 
