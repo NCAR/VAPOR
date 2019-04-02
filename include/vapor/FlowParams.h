@@ -40,14 +40,14 @@ public:
     void SetIsSteady( bool steady );
     bool GetIsSteady() const;
 
-    //void SetAlreadyAdvectionStep( long );
-    //long GetAlreadyAdvectionStep() const;
+
+    std::vector<double> GetVelocityMultiplier() const;
+    void SetVelocityMultiplier( const std::vector<double>& coeffs );
 
 protected:
 
-    static const std::string _isSteadyTag;
-    //static const std::string _alreadyAdvectionStepTag;
-
+    static const std::string    _isSteadyTag;
+    static const std::string    _velocityMultiplierTag;
 };
 
 }
