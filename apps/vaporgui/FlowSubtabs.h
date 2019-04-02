@@ -7,6 +7,8 @@
 #include <QVBoxLayout>
 #include <vapor/FlowParams.h>
 
+#include <QLineEdit>
+
 namespace VAPoR {
 	class ControlExec;
 	class RenderParams;
@@ -50,14 +52,24 @@ public:
 	);
 
 private:
-    VAPoR::FlowParams*      _params;
-    VariablesWidget* _variablesWidget;
+    VAPoR::FlowParams*  _params;
+    VariablesWidget*    _variablesWidget;
 
-    VCheckBox* _steady;
+    VCheckBox*          _steady;
+
+    // Sam's attempt to add more widgets
+    //   TODO: add validator/mask so that only numerical input 
+    //   between 0.001 and 1000 are valid.
+    QLineEdit*          _xMultiplier;
+    QLineEdit*          _yMultiplier;
+    QLineEdit*          _zMultiplier;
+    
 
 private slots:
     // Respond to user input
     void _steadyGotClicked();
+
+    void _velocityMultiplierChanged();
 };
 
 //
