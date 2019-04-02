@@ -29,9 +29,7 @@ public:
     // Major action function
     int  Advect( Field* velocityField, float deltaT, 
                  ADVECTION_METHOD method = ADVECTION_METHOD::RK4 );
-
-    // TODO: this function needs to be thought through.
-    int CalculateParticleProperty( const Field* scalarField );
+    int CalculateParticleProperty( Field* scalarField, bool useAsColor );
 
     // Set advection basics
     //void SetBaseStepSize(  float deltaT );

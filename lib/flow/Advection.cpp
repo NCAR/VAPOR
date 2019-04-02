@@ -174,6 +174,48 @@ Advection::Advect( Field* velocity, float deltaT, ADVECTION_METHOD method )
 }
 
 int
+Advection::CalculateParticleProperty( Field* scalar, bool useAsColor )
+{
+    size_t mostSteps = 0;
+    for( const auto& s : _streams )
+        if( s.size() > mostSteps )
+            mostSteps = s.size();
+
+    if( useAsColor )    // put the new value to the "value" field of the particle
+    {
+    for( size_t i = 0; i < mostSteps; i++ )
+    {
+        for( auto& s : _streams )
+            if( i < s.size() )
+            {
+                auto& p = s[i];
+                float value;
+                int rv = scalar->GetScalar( p.time, p.location, value );
+                assert( rv == 0 || rv == OUT_OF_FIELD );
+                p.value = value;
+            }
+    }
+    }
+    else    // put the new value to the "properties" field of the particle
+    {
+    for( size_t i = 0; i < mostSteps; i++ )
+    {
+        for( auto& s : _streams )
+            if( i < s.size() )
+            {
+                auto& p = s[i];
+                float value;
+                int rv = scalar->GetScalar( p.time, p.location, value );
+                assert( rv == 0 || rv == OUT_OF_FIELD );
+                p.AttachProperty( value );
+            }
+    }
+    }
+
+    return 0;
+}
+
+int
 Advection::_advectEuler( Field* velocity, const Particle& p0, float dt, Particle& p1 ) const
 {
     glm::vec3 v0;

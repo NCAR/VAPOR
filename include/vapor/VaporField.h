@@ -14,6 +14,7 @@ class VaporField : public Field
 {
 public:
     VaporField();
+    VaporField(int recentGridLimit);
     virtual ~VaporField();
 
     //

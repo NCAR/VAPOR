@@ -8,6 +8,12 @@ VaporField::VaporField() : _recentGridLimit( 12 )
     _params  = nullptr;
 }
 
+VaporField::VaporField(int limit) : _recentGridLimit( limit )
+{
+    _datamgr = nullptr;
+    _params  = nullptr;
+}
+
 // Destructor
 VaporField::~VaporField()
 { 

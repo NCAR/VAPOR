@@ -50,10 +50,11 @@ protected:
     // Member variables
     flow::Advection     _advection;
     flow::VaporField    _velocityField;
-    //flow::ScalarField*  _colorField;
+    flow::VaporField    _colorField;
     std::vector<float>  _colorMap;
     float               _colorMapRange[3];   // min, max, and their diff
     bool                _advectionComplete;
+    bool                _coloringComplete;
 
     // A few variables to keep the current advection states
     size_t              _cache_currentTS;
@@ -62,7 +63,7 @@ protected:
     int                 _cache_compressionLevel;
     bool                _cache_isSteady;
     FlowStatus          _velocityStatus;
-    FlowStatus          _scalarStatus;
+    FlowStatus          _colorStatus;
 
     // Member variables for OpenGL
     const  GLint        _colorMapTexOffset;

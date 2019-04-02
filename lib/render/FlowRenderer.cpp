@@ -51,7 +51,9 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
                       FlowRenderer::GetClassType(),
                       instName,
                       dataMgr ),
-            _colorMapTexOffset ( 0 )
+            _colorMapTexOffset ( 0 ),
+            _velocityField     ( 9 ),
+            _colorField        ( 3 )
 { 
     // Initialize OpenGL states
     _shader         = nullptr;
@@ -65,9 +67,10 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
     _cache_compressionLevel = -2;
     _cache_isSteady         = false;
     _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
-    _scalarStatus           = FlowStatus::SIMPLE_OUTOFDATE;
+    _colorStatus           = FlowStatus::SIMPLE_OUTOFDATE;
 
     _advectionComplete      = false;
+    _coloringComplete       = false;
 
     //_colorField = nullptr;
 }
@@ -100,6 +103,7 @@ FlowRenderer::_initializeGL()
 {
     // First prepare the VelocityField
     _velocityField.AssignDataManager( _dataMgr );
+    _colorField.AssignDataManager(    _dataMgr );
 
     // Followed by real OpenGL initializations
     ShaderProgram *shader   = nullptr;
@@ -131,6 +135,7 @@ FlowRenderer::_paintGL( bool fast )
 
     _updateFlowCacheAndStates( params );
     _velocityField.UpdateParams( params );
+    _colorField.UpdateParams( params );
 
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
@@ -144,6 +149,12 @@ FlowRenderer::_paintGL( bool fast )
     {
         _advectionComplete = false;
         _velocityStatus = FlowStatus::UPTODATE;
+    }
+
+    if( !params->UseSingleColor() && _colorStatus == FlowStatus::SIMPLE_OUTOFDATE )
+    {
+        _coloringComplete = false;
+        _colorStatus      = FlowStatus::UPTODATE;
     }
 
     if( !_advectionComplete )
@@ -163,6 +174,11 @@ FlowRenderer::_paintGL( bool fast )
         _advectionComplete = true;
     }
 
+    if( !_coloringComplete )
+    {
+        int rv = _advection.CalculateParticleProperty( &_colorField, true );
+        _coloringComplete = true;
+    }
 
     _purePaint( params, fast );
     _restoreGLState();
@@ -279,24 +295,21 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         MyBase::SetErrMsg("Missing velocity variable");
         std::cout << "Missing velocity variable" << std::endl;
     }
-    /*if( _colorField )
-    {
-        std::string colorVarName = params->GetColorMapVariableName();
-        if( colorVarName != _colorField->ScalarName )
-            _scalarStatus = FlowStatus::SIMPLE_OUTOFDATE;
-    }*/ 
+    std::string colorVarName = params->GetColorMapVariableName();
+    if( colorVarName != _colorField.ScalarName )
+        _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
 
     // Check compression parameters
     if( _cache_refinementLevel != params->GetRefinementLevel() )
     {
         _cache_refinementLevel    = params->GetRefinementLevel();
-        _scalarStatus             = FlowStatus::SIMPLE_OUTOFDATE;
+        _colorStatus              = FlowStatus::SIMPLE_OUTOFDATE;
         _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
     }
     if( _cache_compressionLevel  != params->GetCompressionLevel() )
     {
         _cache_compressionLevel   = params->GetCompressionLevel();
-        _scalarStatus             = FlowStatus::SIMPLE_OUTOFDATE;
+        _colorStatus              = FlowStatus::SIMPLE_OUTOFDATE;
         _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
     }
 
@@ -304,7 +317,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     if( _cache_isSteady != params->GetIsSteady() )
     {
         _cache_isSteady           = params->GetIsSteady();
-        _scalarStatus             = FlowStatus::SIMPLE_OUTOFDATE;
+        _colorStatus              = FlowStatus::SIMPLE_OUTOFDATE;
         _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
     }
 
@@ -315,27 +328,16 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         _cache_timestamps = _dataMgr->GetTimeCoordinates();
         if( _cache_isSteady )
         {
-            _scalarStatus             = FlowStatus::SIMPLE_OUTOFDATE;
+            _colorStatus              = FlowStatus::SIMPLE_OUTOFDATE;
             _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
         }
         else
         {   // !! Only apply status "TIME_STEP_OFD" if the old status is "UPTODATE" !!
-            if( _scalarStatus        == FlowStatus::UPTODATE )
-                _scalarStatus         = FlowStatus::TIME_STEP_OFD;
+            if( _colorStatus         == FlowStatus::UPTODATE )
+                _colorStatus          = FlowStatus::TIME_STEP_OFD;
             if( _velocityStatus      == FlowStatus::UPTODATE )
-            _velocityStatus           = FlowStatus::TIME_STEP_OFD;
+                _velocityStatus       = FlowStatus::TIME_STEP_OFD;
         }
-        /*
-        else if( _advection.GetNumberOfTimesteps() < totalNumTS )
-        {
-            _scalarStatus             = FlowStatus::MISS_TIMESTEP;
-            _velocityStatus           = FlowStatus::MISS_TIMESTEP;
-        }
-        else
-        {
-            _scalarStatus             = FlowStatus::EXTRA_TIMESTEP;
-            _velocityStatus           = FlowStatus::EXTRA_TIMESTEP;
-        }*/
     }
 
     /* I'm not sure if this piece of code is necessary
