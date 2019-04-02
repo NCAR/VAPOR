@@ -348,15 +348,15 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         _cache_timestamps = _dataMgr->GetTimeCoordinates();
         if( _cache_isSteady )
         {
-            _colorStatus              = FlowStatus::SIMPLE_OUTOFDATE;
-            _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
+            _colorStatus          = FlowStatus::SIMPLE_OUTOFDATE;
+            _velocityStatus       = FlowStatus::SIMPLE_OUTOFDATE;
         }
         else
         {   // !! Only apply status "TIME_STEP_OFD" if the old status is "UPTODATE" !!
-            if( _colorStatus         == FlowStatus::UPTODATE )
-                _colorStatus          = FlowStatus::TIME_STEP_OFD;
-            if( _velocityStatus      == FlowStatus::UPTODATE )
-                _velocityStatus       = FlowStatus::TIME_STEP_OFD;
+            if( _colorStatus     == FlowStatus::UPTODATE )
+                _colorStatus      = FlowStatus::TIME_STEP_OFD;
+            if( _velocityStatus  == FlowStatus::UPTODATE )
+                _velocityStatus   = FlowStatus::TIME_STEP_OFD;
         }
     }
 
