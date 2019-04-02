@@ -139,6 +139,9 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity )
     if( !InsideVolumeVelocity( time, pos ) )
         return OUT_OF_FIELD; 
 
+    // Retrieve the velocity multiplier from params
+    const auto& mult = _params->GetVelocityMultiplier();
+
     if( IsSteady )
     {
         size_t currentTS = _params->GetCurrentTimestep();
@@ -147,7 +150,7 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity )
             auto varname = VelocityNames[i];
             int     rv = _getAGrid( currentTS, varname, &grid );
             assert( rv == 0 );
-            velocity[i] = grid->GetValue( coords );
+            velocity[i] = grid->GetValue( coords ) * float(mult[i]);
         }
         // Need to do: examine if velocity contains missing value.
     }
@@ -163,7 +166,7 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity )
         assert( rv == 0 );
 
         // Find the velocity values at floor time step
-        glm::vec3 floorVelocity;
+        glm::vec3 floorVelocity, ceilVelocity;
         for( int i = 0; i < 3; i++ )
         {
             auto varname = VelocityNames[i];
@@ -171,14 +174,15 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity )
             assert( rv  == 0 );
             floorVelocity[i] = grid->GetValue( coords );
         }
-        // Need to do: examine if velocity contains missing value.
+        // Need to do: examine if floorVelocity contains missing value.
+
+        glm::vec3 multVec( mult[0], mult[1], mult[2] );
 
         // Find the velocity values at the ceiling time step
         if( time == _timestamps[floorTS] )
-            velocity = floorVelocity; 
+            velocity = floorVelocity * multVec; 
         else
         {
-            glm::vec3 ceilVelocity;
             for( int i = 0; i < 3; i++ )
             {
                 auto varname = VelocityNames[i];
@@ -189,7 +193,7 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity )
             // Need to do: examine if velocity contains missing value.
             float weight = (time - _timestamps[floorTS]) / 
                            (_timestamps[floorTS+1] - _timestamps[floorTS]);
-            velocity = glm::mix( floorVelocity, ceilVelocity, weight );
+            velocity = glm::mix( floorVelocity, ceilVelocity, weight ) * multVec;
         }
     }
 
