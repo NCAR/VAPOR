@@ -164,7 +164,7 @@ FlowRenderer::_paintGL( bool fast )
             deltaT *= _cache_timestamps[1] - _cache_timestamps[0];
         
         int rv = _advection.Advect( &_velocityField, deltaT );
-        size_t totalSteps = 1, maxSteps = 70;
+        size_t totalSteps = 1, maxSteps = 1000;
         while( rv == flow::ADVECT_HAPPENED && totalSteps < maxSteps )
         {
             rv = _advection.Advect( &_velocityField, deltaT );
@@ -317,6 +317,26 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     if( _cache_isSteady != params->GetIsSteady() )
     {
         _cache_isSteady           = params->GetIsSteady();
+        _colorStatus              = FlowStatus::SIMPLE_OUTOFDATE;
+        _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
+    }
+
+    // Check velocity multipliers
+    const auto& vmult = params->GetVelocityMultiplier();
+    bool equal = true;
+    if( _cache_velocityMultipliers.size() != 3 )
+        equal  = false;
+    else
+    {
+        for( int i = 0; i < 3; i++ )
+            if( _cache_velocityMultipliers[i] != float(vmult[i]) )
+                equal = false;
+    }
+    if( equal == false )
+    {
+        _cache_velocityMultipliers.resize(3);
+        for( int i = 0; i < 3; i++ )
+            _cache_velocityMultipliers[i] = float(vmult[i]);
         _colorStatus              = FlowStatus::SIMPLE_OUTOFDATE;
         _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
     }
