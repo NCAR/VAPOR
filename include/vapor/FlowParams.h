@@ -41,8 +41,8 @@ public:
     bool GetIsSteady() const;
 
 
-    std::vector<double> GetVelocityMultiplier() const;
-    void SetVelocityMultiplier( const std::vector<double>& coeffs );
+    double GetVelocityMultiplier() const;
+    void SetVelocityMultiplier( double );
 
 protected:
 

@@ -60,9 +60,7 @@ private:
     // Sam's attempt to add more widgets
     //   TODO: add validator/mask so that only numerical input 
     //   between 0.001 and 1000 are valid.
-    QLineEdit*          _xMultiplier;
-    QLineEdit*          _yMultiplier;
-    QLineEdit*          _zMultiplier;
+    QLineEdit*          _velocityMltp;
     
 
 private slots:

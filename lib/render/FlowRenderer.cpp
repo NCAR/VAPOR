@@ -164,7 +164,7 @@ FlowRenderer::_paintGL( bool fast )
             deltaT *= _cache_timestamps[1] - _cache_timestamps[0];
 
         // The expected number of steps in total based on deltaT.
-        size_t maxSteps = size_t( float(_cache_timestamps()) / deltaT );
+        size_t maxSteps = size_t( float(_cache_timestamps.size()) / deltaT );
         int rv = _advection.Advect( &_velocityField, deltaT );
         for( size_t i = 0; i < maxSteps && rv == flow::ADVECT_HAPPENED; i++ )
         {
@@ -322,13 +322,12 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     }
 
     // Check velocity multipliers
-    const auto& mult = params->GetVelocityMultiplier();
-    glm::vec3 multVec( mult[0], mult[1], mult[2] );
-    if( _cache_velocityMultipliers != multVec )
+    const float mult = params->GetVelocityMultiplier();
+    if( _cache_velocityMltp != mult )
     {
-        _cache_velocityMultipliers  = multVec;
-        _colorStatus                = FlowStatus::SIMPLE_OUTOFDATE;
-        _velocityStatus             = FlowStatus::SIMPLE_OUTOFDATE;
+        _cache_velocityMltp       = mult;
+        _colorStatus              = FlowStatus::SIMPLE_OUTOFDATE;
+        _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
     }
 
     // Time step is a little tricky...
