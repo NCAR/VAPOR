@@ -159,16 +159,16 @@ FlowRenderer::_paintGL( bool fast )
 
     if( !_advectionComplete )
     {
-        float deltaT = 0.05;    // For steady flow, and unsteady with only 1 time step.
-        if( _cache_timestamps.size() > 1 )
+        float deltaT = 0.05;                // For only 1 timestep case
+        if( _cache_timestamps.size() > 1 )  // For multiple timestep case
             deltaT *= _cache_timestamps[1] - _cache_timestamps[0];
-        
+
+        // The expected number of steps in total based on deltaT.
+        size_t maxSteps = size_t( float(_cache_timestamps()) / deltaT );
         int rv = _advection.Advect( &_velocityField, deltaT );
-        size_t totalSteps = 1, maxSteps = 1000;
-        while( rv == flow::ADVECT_HAPPENED && totalSteps < maxSteps )
+        for( size_t i = 0; i < maxSteps && rv == flow::ADVECT_HAPPENED; i++ )
         {
             rv = _advection.Advect( &_velocityField, deltaT );
-            totalSteps++;
         }
 
         _advectionComplete = true;
