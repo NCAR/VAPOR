@@ -163,12 +163,23 @@ FlowRenderer::_paintGL( bool fast )
         if( _cache_timestamps.size() > 1 )  // For multiple timestep case
             deltaT *= _cache_timestamps[1] - _cache_timestamps[0];
 
-        // The expected number of steps in total based on deltaT.
+        int rv = flow::ADVECT_HAPPENED;
+
+        /* Advection scheme 1: advect a maximum number of steps.
+         * The expected number of steps in total based on deltaT.
+         *
         size_t maxSteps = size_t( float(_cache_timestamps.size()) / deltaT );
-        int rv = _advection.AdvectOneStep( &_velocityField, deltaT );
+        rv = _advection.AdvectOneStep( &_velocityField, deltaT );
         for( size_t i = 0; i < maxSteps && rv == flow::ADVECT_HAPPENED; i++ )
         {
             rv = _advection.AdvectOneStep( &_velocityField, deltaT );
+        }*/
+
+        /* Advection scheme 2: advect to a certain timestamp */
+        for( int i = 1; i <= _cache_currentTS && rv == flow::ADVECT_HAPPENED; i++ )
+        {
+            rv = _advection.AdvectTillTime( &_velocityField, deltaT, 
+                                             _cache_timestamps.at(i) );
         }
 
         _advectionComplete = true;
