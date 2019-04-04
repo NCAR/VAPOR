@@ -122,7 +122,7 @@ Advection::GetScalarName() const
 */
 
 int
-Advection::Advect( Field* velocity, float deltaT, ADVECTION_METHOD method )
+Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method )
 {
     int ready = CheckReady();
     if( ready != 0 )
@@ -164,6 +164,63 @@ Advection::Advect( Field* velocity, float deltaT, ADVECTION_METHOD method )
             s.push_back( p1 );
             if( p1.time > _latestAdvectionTime )
                 _latestAdvectionTime = p1.time;
+        }
+    }
+
+    if( happened )
+        return ADVECT_HAPPENED;
+    else
+        return 0;
+}
+
+int
+Advection::AdvectTillTime( Field* velocity, float deltaT, float targetT, ADVECTION_METHOD method )
+{
+    int ready = CheckReady();
+    if( ready != 0 )
+        return ready;
+
+    bool happened = false;
+    for( auto& s : _streams )       // Process one stream at a time
+    {
+        auto& p0 = s.back();  // Start from the last particle in this stream
+        while( p0.time < targetT )
+        {
+            if( !velocity->InsideVolumeVelocity( p0.time, p0.location ) )
+                break;
+
+            float dt = deltaT;
+            float mindt = deltaT / 20.0f,   maxdt = deltaT * 50.0f;
+            if( s.size() > 2 )  // If there are at least 3 particles in the stream, 
+            {                   // we also adjust *dt*
+                const auto& past1 = s[ s.size()-2 ];
+                const auto& past2 = s[ s.size()-3 ];
+                dt  = p0.time - past1.time;     // step size used by last integration
+                dt  = dt < maxdt ? dt : maxdt ;
+                dt  = dt > mindt ? dt : mindt ;
+                dt *= _calcAdjustFactor( past2, past1, p0 );
+            }
+
+            Particle p1;
+            int rv;
+            switch (method)
+            {
+                case ADVECTION_METHOD::EULER:
+                    rv = _advectEuler( velocity, p0, dt, p1 ); break;
+                case ADVECTION_METHOD::RK4:
+                    rv = _advectRK4(   velocity, p0, dt, p1 ); break;
+            }
+            if( rv != 0 )   // Advection wasn't successful for some reason...
+                continue;
+            else            // Advection successful, keep the new particle.
+            {
+                happened = true;
+                s.push_back( p1 );
+                if( p1.time > _latestAdvectionTime )
+                    _latestAdvectionTime = p1.time;
+
+                p0 = s.back();
+            }
         }
     }
 
