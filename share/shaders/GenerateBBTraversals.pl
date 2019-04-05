@@ -13,7 +13,7 @@
 #              Example 2 Level Traversal                #
 #########################################################
 # 
-# bool SearchSideForInitialCellWithOctree_2Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+# bool SearchSideForInitialCellWithOctree_2Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, OUT float t1)
 # {
 #     ivec3 side = GetFaceFromFaceIndex(sideID);
 #     ivec3 index = (side+1)/2 * (cellDims-1);
@@ -53,7 +53,7 @@
 #               Non-Recursive Traversal                 #
 #########################################################
 # 
-# bool SearchSideForInitialCellWithOctreeParametric(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+# bool SearchSideForInitialCellWithOctreeParametric(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, OUT float t1)
 # {
 #     ivec3 side = GetFaceFromFaceIndex(sideID);
 #     ivec3 index = (side+1)/2 * (cellDims-1);
@@ -165,7 +165,7 @@ if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x$L, y$L, sideID, $L)) {
 sub Function {
 	my ($levels) = @_;
 	my $ret =
-"int SearchSideForInitialCellWithOctree_${levels}Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
+"int SearchSideForInitialCellWithOctree_${levels}Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
