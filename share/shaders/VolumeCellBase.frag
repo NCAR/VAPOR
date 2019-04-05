@@ -81,7 +81,7 @@ vec4 DEBUG_GetFaceColor(ivec3 face)
     if (face == F_BACK)  return vec4(1,1,0,1); // Yellow
 }
 
-void GetFaceCoordinateIndices(ivec3 cell, ivec3 face, out ivec3 i0, out ivec3 i1, out ivec3 i2, out ivec3 i3)
+void GetFaceCoordinateIndices(ivec3 cell, ivec3 face, OUT ivec3 i0, OUT ivec3 i1, OUT ivec3 i2, OUT ivec3 i3)
 {
     // CCW
     if (face == F_DOWN) {
@@ -122,7 +122,7 @@ void GetFaceCoordinateIndices(ivec3 cell, ivec3 face, out ivec3 i0, out ivec3 i1
     }
 }
 
-void GetFaceCoordsAndVertices(ivec3 cellIndex, ivec3 face, out ivec3 i0, out ivec3 i1, out ivec3 i2, out ivec3 i3, out vec3 v0, out vec3 v1, out vec3 v2, out vec3 v3)
+void GetFaceCoordsAndVertices(ivec3 cellIndex, ivec3 face, OUT ivec3 i0, OUT ivec3 i1, OUT ivec3 i2, OUT ivec3 i3, OUT vec3 v0, OUT vec3 v1, OUT vec3 v2, OUT vec3 v3)
 {
     GetFaceCoordinateIndices(cellIndex, face, i0, i1, i2, i3);
     v0 = texelFetch(coords, i0, 0).xyz;
@@ -131,7 +131,7 @@ void GetFaceCoordsAndVertices(ivec3 cellIndex, ivec3 face, out ivec3 i0, out ive
     v3 = texelFetch(coords, i3, 0).xyz;
 }
 
-void GetFaceVertices(ivec3 cellIndex, ivec3 face, out vec3 v0, out vec3 v1, out vec3 v2, out vec3 v3)
+void GetFaceVertices(ivec3 cellIndex, ivec3 face, OUT vec3 v0, OUT vec3 v1, OUT vec3 v2, OUT vec3 v3)
 {
     ivec3 i0, i1, i2, i3;
     GetFaceCoordsAndVertices(cellIndex, face, i0, i1, i2, i3, v0, v1, v2, v3);
@@ -179,7 +179,7 @@ bool DoesCellHaveMissingData(ivec3 cellCoord)
     return DoesSampleHaveMissingData((coord)/(coordDims-1));
 }
 
-bool IntersectRayCellFace(vec3 o, vec3 d, float rt0, ivec3 cellIndex, ivec3 face, out float t, out vec3 dataCoordinate)
+bool IntersectRayCellFace(vec3 o, vec3 d, float rt0, ivec3 cellIndex, ivec3 face, OUT float t, OUT vec3 dataCoordinate)
 {
     ivec3 i0, i1, i2, i3;
     vec3 v0, v1, v2, v3;
@@ -206,7 +206,7 @@ vec3 GetCellFaceNormal(ivec3 cellIndex, ivec3 face)
     return (GetTriangleNormal(v0, v1, v2) + GetTriangleNormal(v0, v2, v3)) / 2.0f;
 }
 
-bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out ivec3 exitFace, out vec3 exitCoord, out float t1)
+bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, OUT ivec3 exitFace, OUT vec3 exitCoord, OUT float t1)
 {
     for (int i = 0; i < 6; i++) {
         ivec3 testFace = GetFaceFromFaceIndex(i);
@@ -229,7 +229,7 @@ bool IsCellInBounds(ivec3 cellIndex)
     return !(any(lessThan(cellIndex, ivec3(0))) || any(greaterThanEqual(cellIndex, cellDims)));
 }
 
-bool SearchNeighboringCells(vec3 origin, vec3 dir, float t0, ivec3 currentCell, out ivec3 nextCell, out ivec3 exitFace, out vec3 exitCoord, out float t1)
+bool SearchNeighboringCells(vec3 origin, vec3 dir, float t0, ivec3 currentCell, OUT ivec3 nextCell, OUT ivec3 exitFace, OUT vec3 exitCoord, OUT float t1)
 {
     for (int sideID = 0; sideID < 6; sideID++) {
         ivec3 side = GetFaceFromFaceIndex(sideID);
@@ -244,7 +244,7 @@ bool SearchNeighboringCells(vec3 origin, vec3 dir, float t0, ivec3 currentCell, 
     return false;
 }
 
-bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, out ivec3 nextCell, out ivec3 exitFace, out vec3 exitCoord, out float t1)
+bool FindNextCell(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, OUT ivec3 nextCell, OUT ivec3 exitFace, OUT vec3 exitCoord, OUT float t1)
 {
     if (FindCellExit(origin, dir, t0, currentCell, entranceFace, exitFace, exitCoord, t1)) {
         nextCell = currentCell + exitFace;
@@ -282,7 +282,7 @@ bool IsRayEnteringCell(vec3 d, ivec3 cellIndex, ivec3 face)
     return dot(d, n) < 0;
 }
 
-void GetSideCellBBox(ivec3 cellIndex, int sideID, int fastDim, int slowDim, out vec3 bmin, out vec3 bmax)
+void GetSideCellBBox(ivec3 cellIndex, int sideID, int fastDim, int slowDim, OUT vec3 bmin, OUT vec3 bmax)
 {
     ivec3 index = ivec3(cellIndex[fastDim], cellIndex[slowDim], sideID);
     bmin = texelFetch(boxMins, index, 0).rgb;
@@ -300,7 +300,7 @@ bool IntersectRaySideCellBBox(vec3 origin, vec3 dir, float rt0, ivec3 cellIndex,
     return false;
 }
 
-void GetSideCellBBoxDirect(int x, int y, int sideID, int level, out vec3 bmin, out vec3 bmax)
+void GetSideCellBBoxDirect(int x, int y, int sideID, int level, OUT vec3 bmin, OUT vec3 bmax)
 {
     ivec3 index = ivec3(x, y, sideID);
     bmin = texelFetch(boxMins, index, level).rgb;
@@ -323,7 +323,7 @@ ivec2 GetBBoxArrayDimensions(int sideID, int level)
     return texelFetch(levelDims, ivec2(sideID, level), 0).rg;
 }
 
-bool IsFaceThatPassedBBAnInitialCell(vec3 origin, vec3 dir, float t0, ivec3 index, ivec3 side, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
+bool IsFaceThatPassedBBAnInitialCell(vec3 origin, vec3 dir, float t0, ivec3 index, ivec3 side, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
     float tFace;
     vec3 null;
@@ -352,7 +352,7 @@ bool IsFaceThatPassedBBAnInitialCell(vec3 origin, vec3 dir, float t0, ivec3 inde
 
 #include BBTraversalAlgorithmsNV.frag
 
-bool SearchSideForInitialCellBasic(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+bool SearchSideForInitialCellBasic(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, OUT float t1)
 {
     ivec3 side = GetFaceFromFaceIndex(sideID);
     ivec3 index = (side+1)/2 * (cellDims-1);
@@ -372,7 +372,7 @@ bool SearchSideForInitialCellBasic(vec3 origin, vec3 dir, float t0, int sideID, 
 // Does not work on nvidia
 // #define SearchSideForInitialCellWithOctree_NLevels(N, origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1) SearchSideForInitialCellWithOctree_ ## N ## Levels(origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1)
 
-int SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
+int SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
     int fastDim = GetFastDimForFaceIndex(sideID);
     int slowDim = GetSlowDimForFaceIndex(sideID);
@@ -404,7 +404,7 @@ int SearchSideForInitialCell(vec3 origin, vec3 dir, float t0, int sideID, out iv
 #endif
 }
 
-int FindInitialCell(vec3 origin, vec3 dir, float t0, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+int FindInitialCell(vec3 origin, vec3 dir, float t0, OUT ivec3 cellIndex, OUT ivec3 entranceFace, OUT float t1)
 {
     t1 = FLT_MAX;
     int intersections = 0;
@@ -413,7 +413,7 @@ int FindInitialCell(vec3 origin, vec3 dir, float t0, out ivec3 cellIndex, out iv
     return intersections;
 }
 
-vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, out float t1);
+vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, OUT float t1);
 
 void main(void)
 {

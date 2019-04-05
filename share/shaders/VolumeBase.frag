@@ -1,6 +1,3 @@
-
-#include RayMath.frag
-
 in vec2 ST;
 out vec4 fragColor;
 
@@ -32,6 +29,13 @@ bool readDepthBuffer = true;
 #define ALPHA_BREAK 0.999
 #define ALPHA_DISCARD 0.01
 
+
+// This is required for the Nvidia compiler to work with cell traversal
+#define OUT inout
+
+
+
+#include RayMath.frag
 
 vec4 ROYGBV(float v, float minV, float maxV)
 {
@@ -122,7 +126,7 @@ void BlendToBack(inout vec4 accum, vec4 color)
     accum = color * (1-accum.a) + accum * (1);
 }
 
-void GetRayParameters(out vec3 dir, out float maxT)
+void GetRayParameters(out vec3 dir, OUT float maxT)
 {
 	vec2 screen = ST*2-1;
     vec4 world = inverse(MVP) * vec4(screen, GetDepthBuffer(), 1);
