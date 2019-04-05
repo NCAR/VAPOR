@@ -24,7 +24,7 @@ void TestIso(vec3 o, vec3 d, float t0, float t1, float value, float dv, float ld
     }
 }
 
-vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, out float t1)
+vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, OUT float t1)
 {
     vec3 entranceCoord;
     ivec3 nextCell;

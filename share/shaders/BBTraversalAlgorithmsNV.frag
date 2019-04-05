@@ -1,4 +1,4 @@
-int SearchSideForInitialCellWithOctree_Sub4(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1, int x4, int y4)
+int SearchSideForInitialCellWithOctree_Sub4(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1, int x4, int y4)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
@@ -67,7 +67,7 @@ int SearchSideForInitialCellWithOctree_Sub4(vec3 origin, vec3 dir, float t0, int
 	return intersections;
 }
 
-int SearchSideForInitialCellWithOctree_Sub8(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1, int x8, int y8)
+int SearchSideForInitialCellWithOctree_Sub8(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1, int x8, int y8)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
@@ -133,7 +133,7 @@ int SearchSideForInitialCellWithOctree_Sub8(vec3 origin, vec3 dir, float t0, int
 	return intersections;
 }
 
-int SearchSideForInitialCellWithOctree_1Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
+int SearchSideForInitialCellWithOctree_1Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
@@ -164,7 +164,7 @@ int SearchSideForInitialCellWithOctree_1Levels(vec3 origin, vec3 dir, float t0, 
 	return intersections;
 }
 
-int SearchSideForInitialCellWithOctree_2Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
+int SearchSideForInitialCellWithOctree_2Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
@@ -208,7 +208,7 @@ int SearchSideForInitialCellWithOctree_2Levels(vec3 origin, vec3 dir, float t0, 
 	return intersections;
 }
 
-int SearchSideForInitialCellWithOctree_3Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
+int SearchSideForInitialCellWithOctree_3Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
@@ -265,7 +265,7 @@ int SearchSideForInitialCellWithOctree_3Levels(vec3 origin, vec3 dir, float t0, 
 	return intersections;
 }
 
-int SearchSideForInitialCellWithOctree_4Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
+int SearchSideForInitialCellWithOctree_4Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
@@ -335,7 +335,7 @@ int SearchSideForInitialCellWithOctree_4Levels(vec3 origin, vec3 dir, float t0, 
 	return intersections;
 }
 
-int SearchSideForInitialCellWithOctree_5Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
+int SearchSideForInitialCellWithOctree_5Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
@@ -363,7 +363,7 @@ int SearchSideForInitialCellWithOctree_5Levels(vec3 origin, vec3 dir, float t0, 
 	return intersections;
 }
 
-int SearchSideForInitialCellWithOctree_6Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
+int SearchSideForInitialCellWithOctree_6Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
@@ -404,7 +404,7 @@ int SearchSideForInitialCellWithOctree_6Levels(vec3 origin, vec3 dir, float t0, 
 	return intersections;
 }
 
-int SearchSideForInitialCellWithOctree_7Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
+int SearchSideForInitialCellWithOctree_7Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
@@ -458,7 +458,7 @@ int SearchSideForInitialCellWithOctree_7Levels(vec3 origin, vec3 dir, float t0, 
 	return intersections;
 }
 
-int SearchSideForInitialCellWithOctree_8Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
+int SearchSideForInitialCellWithOctree_8Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
@@ -525,7 +525,7 @@ int SearchSideForInitialCellWithOctree_8Levels(vec3 origin, vec3 dir, float t0, 
 	return intersections;
 }
 
-int SearchSideForInitialCellWithOctree_9Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
+int SearchSideForInitialCellWithOctree_9Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
@@ -553,7 +553,7 @@ int SearchSideForInitialCellWithOctree_9Levels(vec3 origin, vec3 dir, float t0, 
 	return intersections;
 }
 
-int SearchSideForInitialCellWithOctree_10Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
+int SearchSideForInitialCellWithOctree_10Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
@@ -594,7 +594,7 @@ int SearchSideForInitialCellWithOctree_10Levels(vec3 origin, vec3 dir, float t0,
 	return intersections;
 }
 
-int SearchSideForInitialCellWithOctree_11Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
+int SearchSideForInitialCellWithOctree_11Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
@@ -648,7 +648,7 @@ int SearchSideForInitialCellWithOctree_11Levels(vec3 origin, vec3 dir, float t0,
 	return intersections;
 }
 
-int SearchSideForInitialCellWithOctree_12Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, inout float t1)
+int SearchSideForInitialCellWithOctree_12Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
