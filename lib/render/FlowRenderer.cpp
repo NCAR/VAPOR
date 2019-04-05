@@ -166,20 +166,24 @@ FlowRenderer::_paintGL( bool fast )
         int rv = flow::ADVECT_HAPPENED;
 
         /* Advection scheme 1: advect a maximum number of steps.
-         * The expected number of steps in total based on deltaT.
-         *
-        size_t maxSteps = size_t( float(_cache_timestamps.size()) / deltaT );
-        rv = _advection.AdvectOneStep( &_velocityField, deltaT );
-        for( size_t i = 0; i < maxSteps && rv == flow::ADVECT_HAPPENED; i++ )
+         * This scheme is used for steady flow */
+        if( params->GetIsSteady() )
         {
-            rv = _advection.AdvectOneStep( &_velocityField, deltaT );
-        }*/
-
-        /* Advection scheme 2: advect to a certain timestamp */
-        for( int i = 1; i <= _cache_currentTS && rv == flow::ADVECT_HAPPENED; i++ )
+            int numOfSteps = params->GetSteadyNumOfSteps();
+            for( size_t i = 0; i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
+            {
+                rv = _advection.AdvectOneStep( &_velocityField, deltaT );
+            }
+        }
+        /* Advection scheme 2: advect to a certain timestamp.
+         * This scheme is used for unsteady flow */
+        else
         {
-            rv = _advection.AdvectTillTime( &_velocityField, deltaT, 
-                                             _cache_timestamps.at(i) );
+            for( int i = 1; i <= _cache_currentTS && rv == flow::ADVECT_HAPPENED; i++ )
+            {
+                rv = _advection.AdvectTillTime( &_velocityField, deltaT, 
+                                                 _cache_timestamps.at(i) );
+            }
         }
 
         _advectionComplete = true;

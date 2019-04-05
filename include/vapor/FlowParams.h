@@ -37,14 +37,14 @@ public:
     }
 
     // True  == Steady; False == Unteady
-    void SetIsSteady( bool steady );
-    bool GetIsSteady() const;
+    void   SetIsSteady( bool steady );
+    bool   GetIsSteady() const;
 
     double GetVelocityMultiplier() const;
     void   SetVelocityMultiplier( double );
 
-    int  GetSteadyNumOfSteps() const;
-    void SetSteadyNumOfSteps( int );
+    int    GetSteadyNumOfSteps() const;
+    void   SetSteadyNumOfSteps( int );
 
 protected:
 
