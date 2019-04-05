@@ -35,8 +35,9 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
     _steadyNumOfSteps = new QLineEdit( this );
     _layout->addWidget( _steadyNumOfSteps);
 
-    connect( _steady,    SIGNAL( _checkboxClicked() ),   this, SLOT( _steadyGotClicked() ) );
-    connect( _velocityMltp, SIGNAL( editingFinished() ), this, SLOT( _velocityMultiplierChanged() ) );
+    connect( _steady,           SIGNAL( _checkboxClicked() ), this, SLOT( _steadyGotClicked() ) );
+    connect( _velocityMltp,     SIGNAL( editingFinished() ),  this, SLOT( _velocityMultiplierChanged() ) );
+    connect( _steadyNumOfSteps, SIGNAL( editingFinished() ),  this, SLOT( _steadyNumOfStepsChanged() ) );
 }
 
 void 
