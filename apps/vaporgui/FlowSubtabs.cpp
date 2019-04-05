@@ -26,11 +26,11 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
                                 (DimFlags)(THREED) );
     _layout->addWidget( _variablesWidget, 0, 0 );
 
-    _steady = new VCheckBox( this, "Use Steady Flow" );
-    _layout->addWidget( _steady );
-
     _velocityMltp= new QLineEdit( this );
     _layout->addWidget( _velocityMltp );
+
+    _steady = new VCheckBox( this, "Use Steady Flow" );
+    _layout->addWidget( _steady );
 
     connect( _steady,    SIGNAL( _checkboxClicked() ),   this, SLOT( _steadyGotClicked() ) );
     connect( _velocityMltp, SIGNAL( editingFinished() ), this, SLOT( _velocityMultiplierChanged() ) );
