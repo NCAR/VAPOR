@@ -66,7 +66,7 @@ if (IntersectRaySideCellBBoxDirect(origin, dir, x$L, y$L, sideID, $L) || BBLevel
 
 sub Function {
 	my ($levels) = @_;
-	my $ret = "bool SearchSideForInitialCellWithOctree(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, out ivec3 cellIndex, out ivec3 entranceFace, out float t1)
+	my $ret = "bool SearchSideForInitialCellWithOctree(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, OUT float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);

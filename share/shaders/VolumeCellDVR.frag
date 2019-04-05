@@ -51,7 +51,7 @@ vec4 RenderCellConstant(const vec3 dir, const ivec3 currentCell, const float t0,
     return PremultiplyAlpha(color);
 }
 
-vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, out float t1)
+vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, OUT float t1)
 {
     vec3 entranceCoord;
     ivec3 nextCell;

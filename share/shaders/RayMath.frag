@@ -6,7 +6,7 @@
 
 #define IntersectRayBoundingBoxImplementation 2
 #if IntersectRayBoundingBoxImplementation == 1
-bool IntersectRayBoundingBox(vec3 o, vec3 d, vec3 boxMin, vec3 boxMax, out float t0, out float t1)
+bool IntersectRayBoundingBox(vec3 o, vec3 d, vec3 boxMin, vec3 boxMax, OUT float t0, OUT float t1)
 {
     t0 = 0, t1 = FLT_MAX;
     vec3 tNear = (boxMin - o) / d;
@@ -29,7 +29,7 @@ bool IntersectRayBoundingBox(vec3 o, vec3 d, vec3 boxMin, vec3 boxMax, out float
     return true;
 }
 #elif IntersectRayBoundingBoxImplementation == 2
-bool IntersectRayBoundingBox(vec3 o, vec3 d, float rt0, vec3 boxMin, vec3 boxMax, out float t0, out float t1)
+bool IntersectRayBoundingBox(vec3 o, vec3 d, float rt0, vec3 boxMin, vec3 boxMax, OUT float t0, OUT float t1)
 {
     vec3 tMin = (boxMin - o) / d;
     vec3 tMax = (boxMax - o) / d;
@@ -41,7 +41,7 @@ bool IntersectRayBoundingBox(vec3 o, vec3 d, float rt0, vec3 boxMin, vec3 boxMax
 }
 #endif
 
-bool IntersectRayPlane(vec3 o, vec3 d, float rt0, vec3 v0, vec3 n, out float t)
+bool IntersectRayPlane(vec3 o, vec3 d, float rt0, vec3 v0, vec3 n, OUT float t)
 {
     float denom = dot(n, d);
     
@@ -52,7 +52,7 @@ bool IntersectRayPlane(vec3 o, vec3 d, float rt0, vec3 v0, vec3 n, out float t)
     return false;
 }
 
-bool IntersectRayTriangle(vec3 o, vec3 d, float rt0, vec3 v0, vec3 v1, vec3 v2, out float t, out vec3 barycentric)
+bool IntersectRayTriangle(vec3 o, vec3 d, float rt0, vec3 v0, vec3 v1, vec3 v2, OUT float t, OUT vec3 barycentric)
 {
     vec3 n = cross(v1-v0,v2-v0);
     
@@ -95,7 +95,7 @@ vec3 Permute(vec3 v, int x, int y, int z)
 	return vec3(v[x], v[y], v[z]);
 }
 
-bool IntersectRayTriangleIntel(vec3 o, vec3 dir, float rt0, vec3 v0, vec3 v1, vec3 v2, out float t, out vec3 barycentric)
+bool IntersectRayTriangleIntel(vec3 o, vec3 dir, float rt0, vec3 v0, vec3 v1, vec3 v2, OUT float t, OUT vec3 barycentric)
 {
 	// Transform triangle vertices to ray coordinate space
 	// Translate vertices based on ray origin
@@ -177,7 +177,7 @@ bool IntersectRayTriangleIntel(vec3 o, vec3 dir, float rt0, vec3 v0, vec3 v1, ve
 #define TRI_INSTERSECT_ROUTINE IntersectRayTriangle
 #endif
 
-bool IntersectRayQuad(vec3 o, vec3 d, float rt0, vec3 v0, vec3 v1, vec3 v2, vec3 v3, out float t, out vec4 weights)
+bool IntersectRayQuad(vec3 o, vec3 d, float rt0, vec3 v0, vec3 v1, vec3 v2, vec3 v3, OUT float t, OUT vec4 weights)
 {
     vec3 uvw;
     if (TRI_INSTERSECT_ROUTINE(o, d, rt0, v0, v1, v2, t, uvw)) {
