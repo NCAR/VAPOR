@@ -40,14 +40,17 @@ public:
     void SetIsSteady( bool steady );
     bool GetIsSteady() const;
 
-
     double GetVelocityMultiplier() const;
-    void SetVelocityMultiplier( double );
+    void   SetVelocityMultiplier( double );
+
+    int  GetSteadyNumOfSteps() const;
+    void SetSteadyNumOfSteps( int );
 
 protected:
 
     static const std::string    _isSteadyTag;
     static const std::string    _velocityMultiplierTag;
+    static const std::string    _steadyNumOfStepsTag;
 };
 
 }

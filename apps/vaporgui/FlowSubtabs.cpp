@@ -26,11 +26,14 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
                                 (DimFlags)(THREED) );
     _layout->addWidget( _variablesWidget, 0, 0 );
 
-    _velocityMltp= new QLineEdit( this );
+    _velocityMltp = new QLineEdit( this );
     _layout->addWidget( _velocityMltp );
 
     _steady = new VCheckBox( this, "Use Steady Flow" );
     _layout->addWidget( _steady );
+
+    _steadyNumOfSteps = new QLineEdit( this );
+    _layout->addWidget( _steadyNumOfSteps);
 
     connect( _steady,    SIGNAL( _checkboxClicked() ),   this, SLOT( _steadyGotClicked() ) );
     connect( _velocityMltp, SIGNAL( editingFinished() ), this, SLOT( _velocityMultiplierChanged() ) );
@@ -51,6 +54,9 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
 
     auto mltp = _params->GetVelocityMultiplier();
     _velocityMltp->setText( QString::number( mltp, 'f', 3 ) );
+
+    int numOfSteps = _params->GetSteadyNumOfSteps();
+    _steadyNumOfSteps->setText( QString::number( numOfSteps ) );
 }
 
 void
@@ -64,12 +70,19 @@ void
 FlowVariablesSubtab::_velocityMultiplierChanged()
 {
     bool ok;
-    double d = 1.0;
-    d = _velocityMltp->text().toDouble( &ok );
+    double d = _velocityMltp->text().toDouble( &ok );
     if( ok )    // We don't need this verification once the line edit has its own validator
         _params->SetVelocityMultiplier( d );
 }
 
+void 
+FlowVariablesSubtab::_steadyNumOfStepsChanged()
+{
+    bool ok;
+    int i = _steadyNumOfSteps->text().toInt( &ok );
+    if( ok )    // We don't need this verification once the line edit has its own validator
+        _params->SetSteadyNumOfSteps( i );
+}
 
 //
 //================================
