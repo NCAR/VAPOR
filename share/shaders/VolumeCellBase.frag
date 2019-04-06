@@ -352,8 +352,10 @@ bool IsFaceThatPassedBBAnInitialCell(vec3 origin, vec3 dir, float t0, ivec3 inde
 
 #include BBTraversalAlgorithmsNV.frag
 
-bool SearchSideForInitialCellBasic(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, OUT float t1)
+int SearchSideForInitialCellBasic(vec3 origin, vec3 dir, float t0, int sideID, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
+    int fastDim = GetFastDimForFaceIndex(sideID);
+    int slowDim = GetSlowDimForFaceIndex(sideID);
     ivec3 side = GetFaceFromFaceIndex(sideID);
     ivec3 index = (side+1)/2 * (cellDims-1);
     
@@ -362,11 +364,11 @@ bool SearchSideForInitialCellBasic(vec3 origin, vec3 dir, float t0, int sideID, 
             
             if (IntersectRaySideCellBBox(origin, dir, t0, index, sideID, fastDim, slowDim)) {
                 if (IsFaceThatPassedBBAnInitialCell(origin, dir, t0, index, side, cellIndex, entranceFace, t1))
-                    return true;
+                    return 1;
             }
         }
     }
-    return false;
+    return 0;
 }
 
 // Does not work on nvidia
