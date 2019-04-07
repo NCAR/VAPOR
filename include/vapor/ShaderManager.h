@@ -16,7 +16,7 @@ namespace VAPoR {
 //! \date    August, 2018
 
 class RENDER_API ShaderManager : public IResourceManager<std::string, ShaderProgram> {
-    std::map<std::string, long> _modifiedTimes;
+    std::map<std::string, std::map<string, long>> _dependencyModifiedTimes;
 
     std::vector<std::string> _getSourceFilePaths(const std::string &name) const;
     bool _wasFileModified(const std::string &path) const;
@@ -43,6 +43,7 @@ class RENDER_API ShaderManager : public IResourceManager<std::string, ShaderProg
     static unsigned int GetShaderTypeFromPath(const std::string &path);
 
     static std::string PreProcessShader(const std::string &path, const std::vector<std::string> &defines = {});
+    static std::vector<std::string> GetShaderDependencies(const std::string &path);
 };
 
 } // namespace VAPoR
