@@ -34,6 +34,15 @@ struct RENDER_API GLManager {
     void PixelCoordinateSystemPush();
     void PixelCoordinateSystemPop();
 
+    enum class Vendor {
+        Intel,
+        Nvidia,
+        AMD,
+        Mesa,
+        Other
+    };
+
+    static Vendor GetVendor();
     static void GetGLVersion(int *major, int *minor);
     static int GetGLSLVersion();
     static bool IsCurrentOpenGLVersionSupported();
