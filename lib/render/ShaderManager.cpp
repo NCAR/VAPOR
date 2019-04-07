@@ -46,16 +46,37 @@ std::vector<std::string> ShaderManager::_getDefinesFromKey(const std::string &ke
 ShaderProgram *ShaderManager::GetShader(const std::string &key)
 {
 #if SHADER_AUTORELOAD
+    if (!_dependencyModifiedTimes.count(key)) {
+        vector<string>    paths = _getSourceFilePaths(_getNameFromKey(key));
+        vector<string>    deps;
+        map<string, long> times;
+
+        for (const string &path : paths) STLUtils::AppendTo(deps, GetShaderDependencies(path));
+
+        for (const string &path : deps) times[path] = FileUtils::GetFileModifiedTime(path);
+
+        _dependencyModifiedTimes[key] = times;
+    }
     if (HasResource(key)) {
-        vector<string> paths = _getSourceFilePaths(_getNameFromKey(key));
-        for (auto it = paths.begin(); it != paths.end(); ++it) {
-            long mtime = FileUtils::GetFileModifiedTime(*it);
-            if (mtime > _modifiedTimes[*it]) {
-                _modifiedTimes[*it] = mtime;
-                DeleteResource(key);
-                break;
+        bool reload = false;
+        for (auto &pair : _dependencyModifiedTimes[key]) {
+            long mtime = FileUtils::GetFileModifiedTime(pair.first);
+            if (mtime > pair.second) {
+                pair.second = mtime;
+                reload = true;
             }
         }
+
+        bool rebind = false;
+        int  boundProgram;
+        glGetIntegerv(GL_CURRENT_PROGRAM, &boundProgram);
+        if (GetResource(key)->GetID() == boundProgram) rebind = true;
+
+        if (reload) DeleteResource(key);
+
+        ShaderProgram *shader = GetResource(key);
+        if (rebind) shader->Bind();
+        return shader;
     }
 #endif
     return GetResource(key);
@@ -79,10 +100,7 @@ int ShaderManager::LoadResourceByKey(const std::string &key)
 
     ShaderProgram *      program = new ShaderProgram;
     const vector<string> paths = _getSourceFilePaths(_getNameFromKey(key));
-    for (auto it = paths.begin(); it != paths.end(); ++it) {
-        program->AddShader(CompileNewShaderFromFile(*it, defines));
-        _modifiedTimes[*it] = FileUtils::GetFileModifiedTime(*it);
-    }
+    for (auto it = paths.begin(); it != paths.end(); ++it) { program->AddShader(CompileNewShaderFromFile(*it, defines)); }
     program->Link();
     if (!program->WasLinkingSuccessful()) {
         SetErrMsg("Failed to link shader:\n%s", program->GetLog().c_str());
@@ -156,4 +174,20 @@ std::string ShaderManager::PreProcessShader(const std::string &path, const std::
     }
 
     return Join(lines, "\n");
+}
+
+std::vector<std::string> ShaderManager::GetShaderDependencies(const std::string &path)
+{
+    vector<string> deps = {path};
+    string         source = FileUtils::ReadFileToString(path);
+    auto           lines = Split(source, "\n");
+    for (const string &line : lines) {
+        if (BeginsWith(line, "#include ")) {
+            auto args = Split(line, " ");
+            assert(args.size() == 2);
+            string include = args[1];
+            STLUtils::AppendTo(deps, GetShaderDependencies(GetSharePath("shaders/" + include)));
+        }
+    }
+    return deps;
 }

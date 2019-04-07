@@ -34,10 +34,13 @@ struct RENDER_API GLManager {
     void PixelCoordinateSystemPush();
     void PixelCoordinateSystemPop();
 
-    static void GetGLVersion(int *major, int *minor);
-    static int  GetGLSLVersion();
-    static bool IsCurrentOpenGLVersionSupported();
-    static bool CheckError();
+    enum class Vendor { Intel, Nvidia, AMD, Mesa, Other };
+
+    static Vendor GetVendor();
+    static void   GetGLVersion(int *major, int *minor);
+    static int    GetGLSLVersion();
+    static bool   IsCurrentOpenGLVersionSupported();
+    static bool   CheckError();
 
 #ifndef NDEBUG
     //! Draws the depth buffer in the top right corner
