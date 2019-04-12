@@ -70,7 +70,7 @@ ShaderProgram *ShaderManager::GetShader(const std::string &key)
         bool rebind = false;
         int  boundProgram;
         glGetIntegerv(GL_CURRENT_PROGRAM, &boundProgram);
-        if (GetResource(key)->GetID() == boundProgram) rebind = true;
+        if (reload && GetResource(key)->GetID() == boundProgram) rebind = true;
 
         if (reload) DeleteResource(key);
 
