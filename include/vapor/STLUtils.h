@@ -17,6 +17,7 @@ namespace STLUtils {
     }
     
     bool Contains(const std::string &toSearch, const std::string &query);
+    bool ContainsIgnoreCase(const std::string &toSearch, const std::string &query);
     bool BeginsWith(const std::string &str, const std::string &match);
     std::string ToLower(std::string str);
     std::vector<std::string> Split(std::string str, const std::string &delimeter);
