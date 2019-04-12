@@ -15,17 +15,18 @@ vec4 RenderCellSampling(const vec3 dir, const vec3 entranceCoord, const vec3 exi
     return acc2;
 }
 
-vec4 RenderCellSmartSampling(const vec3 dir, const vec3 entranceCoord, const vec3 exitCoord, const float t0, const float t1, const float step, const float stepOpacityUnit)
+vec4 RenderCellSmartSampling(const vec3 dir, const vec3 entranceCoord, const vec3 exitCoord, const float tStart, const float tEnd, const float t0, const float t1, const float step, const float stepOpacityUnit)
 {
     vec4 acc2 = vec4(0);
-    vec4 c = GetColorAtCoord(entranceCoord);
-    vec3 normal = GetNormalAtCoord(entranceCoord);
+    vec3 hit = mix(entranceCoord, exitCoord, (tStart-t0)/(t1-t0));
+    vec4 c = GetColorAtCoord(hit);
+    vec3 normal = GetNormalAtCoord(hit);
     c.rgb *= PhongLighting(normal, dir);
-    float l = min(step - mod(t0, step), t1-t0)/step;
+    float l = min(step - mod(tStart, step), tEnd-tStart)/step;
     c.a = IntegrateConstantAlpha(c.a, l * stepOpacityUnit);
     BlendToBack(acc2, PremultiplyAlpha(c));
     
-    for (float t = step * (floor(t0/step)+1); t < t1; t+= step) {
+    for (float t = step * (floor(tStart/step)+1); t < tEnd; t+= step) {
         vec3 hit = mix(entranceCoord, exitCoord, (t-t0)/(t1-t0));
         vec4 color = GetColorAtCoord(hit);
         vec3 normal = GetNormalAtCoord(hit);
@@ -79,14 +80,15 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
         
         if (t0 >= tMin || (t0 <= tMin && tMin < t1)) {
             float tEnd = min(t1, tMax);
-
+            float tStart = max(t0, tMin);
+            
+            if (ShouldRenderCell(currentCell)) {
 #if 1
-            if (ShouldRenderCell(currentCell))
-                BlendToBack(accum, RenderCellSmartSampling(dir, entranceCoord, exitCoord, t0, tEnd, step, stepOpacityUnit));
+                BlendToBack(accum, RenderCellSmartSampling(dir, entranceCoord, exitCoord, tStart, tEnd, t0, t1, step, stepOpacityUnit));
 #else
-            if (ShouldRenderCell(currentCell))
-                BlendToBack(accum, RenderCellConstant(dir, currentCell, t0, tEnd, unitDistanceScaled));
+                BlendToBack(accum, RenderCellConstant     (dir, currentCell, tStart, tEnd, unitDistanceScaled));
 #endif
+            }
         }
         
         currentCell = nextCell;
