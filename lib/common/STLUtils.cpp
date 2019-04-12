@@ -5,6 +5,8 @@ using std::vector;
 
 bool STLUtils::Contains(const std::string &toSearch, const std::string &query) { return toSearch.find(query) != string::npos; }
 
+bool STLUtils::ContainsIgnoreCase(const std::string &toSearch, const std::string &query) { return Contains(ToLower(toSearch), ToLower(query)); }
+
 bool STLUtils::BeginsWith(const std::string &str, const std::string &match) { return str.size() >= match.size() && equal(match.begin(), match.end(), str.begin()); }
 
 std::string STLUtils::ToLower(std::string str)
