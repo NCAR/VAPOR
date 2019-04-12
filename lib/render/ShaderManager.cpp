@@ -65,6 +65,7 @@ ShaderProgram *ShaderManager::GetShader(const std::string &key) {
         for (auto &pair : _dependencyModifiedTimes[key]) {
             long mtime = FileUtils::GetFileModifiedTime(pair.first);
             if (mtime > pair.second) {
+                printf("Reload \"%s\"\n", pair.first.c_str());
                 pair.second = mtime;
                 reload = true;
             }
