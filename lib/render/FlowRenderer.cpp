@@ -70,6 +70,7 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
     _cache_velocityMltp     = 1.0;
     _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
     _colorStatus            = FlowStatus::SIMPLE_OUTOFDATE;
+    _steadyTotalSteps       = 0;
 
     _advectionComplete      = false;
     _coloringComplete       = false;
@@ -149,6 +150,7 @@ _velocityField.GetVelocity( _timestamps.at(0), position, vel );
         _advection.UseSeedParticles( seeds );
         _advectionComplete = false;
         _velocityStatus = FlowStatus::UPTODATE;
+        _steadyTotalSteps = 0;
     }
     else if( _velocityStatus == FlowStatus::TIME_STEP_OOD )
     {
@@ -178,13 +180,14 @@ _velocityField.GetVelocity( _timestamps.at(0), position, vel );
             int numOfSteps = params->GetSteadyNumOfSteps();
 struct timeval startT, finishT;
 gettimeofday( &startT, NULL );
-            for( size_t i = 0; i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
+            for( size_t i = _steadyTotalSteps; i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
             {
                 rv = _advection.AdvectOneStep( &_velocityField, deltaT );
+                _steadyTotalSteps++;
                 actualSteps++;
             }
 gettimeofday( &finishT, NULL );
-std::cout << "Max advection steps: " << actualSteps << std::endl;
+std::cout << "Advection execution steps: " << actualSteps << std::endl;
 std::cout << "Using time: " << _getElapsedSeconds( &startT, &finishT ) << std::endl;
 
         }
@@ -685,7 +688,7 @@ FlowRenderer::_AddTimestepUnsteadyVAPORField( const FlowParams* )
 int
 FlowRenderer::_genSeedsXY( std::vector<flow::Particle>& seeds, float timeVal ) const
 {
-    int numX = 5, numY = 5;
+    int numX = 20, numY = 20;
     std::vector<double>           extMin, extMax;
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
     params->GetBox()->GetExtents( extMin, extMax );
