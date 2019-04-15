@@ -30,7 +30,6 @@
     #include <vapor/ControlExecutive.h>
     #include "ui_statsWindow.h"
     #include "ui_errMsg.h"
-    #include "RangeController.h"
     #include <RangeCombos.h>
     #include <StatisticsParams.h>
 
