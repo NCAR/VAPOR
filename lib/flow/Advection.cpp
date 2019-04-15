@@ -211,7 +211,9 @@ Advection::AdvectTillTime( Field* velocity, float deltaT, float targetT, ADVECTI
                     rv = _advectRK4(   velocity, p0, dt, p1 ); break;
             }
             if( rv != 0 )   // Advection wasn't successful for some reason...
+            {
                 break;
+            }
             else            // Advection successful, keep the new particle.
             {
                 happened = true;
@@ -229,6 +231,7 @@ Advection::AdvectTillTime( Field* velocity, float deltaT, float targetT, ADVECTI
     else
         return 0;
 }
+
 
 int
 Advection::CalculateParticleProperty( Field* scalar, bool useAsColor )

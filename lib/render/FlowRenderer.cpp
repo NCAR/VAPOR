@@ -138,6 +138,10 @@ FlowRenderer::_paintGL( bool fast )
     _velocityField.UpdateParams( params );
     _colorField.UpdateParams( params );
 
+// retrieve something from the velocity field
+glm::vec3 position( 0.0 ), vel;
+_velocityField.GetVelocity( _timestamps.at(0), position, vel );
+
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
         std::vector<flow::Particle> seeds;
@@ -170,17 +174,26 @@ FlowRenderer::_paintGL( bool fast )
          * This scheme is used for steady flow */
         if( params->GetIsSteady() )
         {
+            size_t actualSteps = 0;
             int numOfSteps = params->GetSteadyNumOfSteps();
+struct timeval startT, finishT;
+gettimeofday( &startT, NULL );
             for( size_t i = 0; i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
             {
                 rv = _advection.AdvectOneStep( &_velocityField, deltaT );
+                actualSteps++;
             }
+gettimeofday( &finishT, NULL );
+std::cout << "Max advection steps: " << actualSteps << std::endl;
+std::cout << "Using time: " << _getElapsedSeconds( &startT, &finishT ) << std::endl;
+
         }
+
         /* Advection scheme 2: advect to a certain timestamp.
          * This scheme is used for unsteady flow */
         else
         {
-            for( int i = 1; i <= _cache_currentTS && rv == flow::ADVECT_HAPPENED; i++ )
+            for( int i = 1; i <= _cache_currentTS; i++ )
             {
                 rv = _advection.AdvectTillTime( &_velocityField, deltaT, _timestamps.at(i) );
             }
@@ -378,7 +391,8 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
             _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
         }
     }
-    else    // unsteady flow
+    /* in case of unsteady flow */
+    else
     {
         if( !_cache_isSteady )  // unsteady state isn't changed
         {
