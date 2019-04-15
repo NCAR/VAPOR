@@ -7,6 +7,9 @@
 
 #include <vapor/MyBase.h>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-register"
+
 #ifdef WIN32
 #ifdef _DEBUG
 #undef _DEBUG
@@ -18,6 +21,8 @@
 #else
 #include <Python.h>
 #endif
+
+#pragma clang diagnostic pop
 
 namespace Wasp {
 
