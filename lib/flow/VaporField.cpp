@@ -130,17 +130,20 @@ VaporField::InsideVolumeScalar( float time, const glm::vec3& pos )
 
 
 int
-VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity )
+VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity,
+                         bool  checkInsideVolume )
 {
     const std::vector<double> coords{ pos.x, pos.y, pos.z };
     const VAPoR::Grid* grid = nullptr;
 
     // First make sure the query positions are inside of the volume
-    if( !InsideVolumeVelocity( time, pos ) )
-        return OUT_OF_FIELD; 
+    if( checkInsideVolume )
+        if( !InsideVolumeVelocity( time, pos ) )
+            return OUT_OF_FIELD; 
 
-    // Retrieve the velocity multiplier from params
+    // Retrieve the missing value velocity multiplier 
     const float mult = _params->GetVelocityMultiplier();
+    glm::vec3 missingV;
 
     if( IsSteady )
     {
@@ -148,11 +151,16 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity )
         for( int i = 0; i < 3; i++ )
         {
             auto varname = VelocityNames[i];
-            int     rv = _getAGrid( currentTS, varname, &grid );
+            int     rv  = _getAGrid( currentTS, varname, &grid );
             assert( rv == 0 );
-            velocity[i] = grid->GetValue( coords ) * mult;
+            velocity[i] = grid->GetValue( coords );
+            missingV[i] = grid->GetMissingValue();
         }
-        // Need to do: examine if velocity contains missing value.
+        auto hasMissing = glm::equal( velocity, missingV );
+        if( glm::any( hasMissing ) )
+            velocity = glm::vec3( 0.0f );
+        else
+            velocity *= mult;
     }
     else
     {
@@ -173,8 +181,14 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity )
             int     rv   = _getAGrid( floorTS, varname, &grid );
             assert( rv  == 0 );
             floorVelocity[i] = grid->GetValue( coords );
+            missingV[i]      = grid->GetMissingValue();
         }
-        // Need to do: examine if floorVelocity contains missing value.
+        auto hasMissing = glm::equal( floorVelocity, missingV );
+        if( glm::any( hasMissing ) )
+        {
+            velocity = glm::vec3( 0.0f );
+            return 0;
+        }
 
         // Find the velocity values at the ceiling time step
         if( time == _timestamps[floorTS] )
@@ -187,8 +201,15 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity )
                 int     rv   = _getAGrid( floorTS + 1, varname, &grid );
                 assert( rv  == 0 );
                 ceilVelocity[i] = grid->GetValue( coords );
+                missingV[i]     = grid->GetMissingValue();
             }
-            // Need to do: examine if velocity contains missing value.
+            hasMissing = glm::equal( ceilVelocity, missingV );
+            if( glm::any( hasMissing ) )
+            {
+                velocity = glm::vec3( 0.0f );
+                return 0;
+            }
+            
             float weight = (time - _timestamps[floorTS]) / 
                            (_timestamps[floorTS+1] - _timestamps[floorTS]);
             velocity = glm::mix( floorVelocity, ceilVelocity, weight ) * mult;
@@ -200,12 +221,15 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity )
 
 
 int
-VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar )
+VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar,
+                       bool  checkInsideVolume )
 {
     if( ScalarName.empty() )
         return NO_FIELD_YET;
-    if( !InsideVolumeScalar( time, pos ) )
-        return OUT_OF_FIELD;
+    if( checkInsideVolume )
+        if( !InsideVolumeScalar( time, pos ) )
+            return OUT_OF_FIELD;
+
     std::string scalarname = ScalarName;    // const requirement...
 
     const std::vector<double> coords{ pos.x, pos.y, pos.z };
@@ -216,8 +240,11 @@ VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar )
         size_t currentTS = _params->GetCurrentTimestep();
         int     rv = _getAGrid( currentTS, scalarname, &grid );
         assert( rv == 0 );
-        scalar = grid->GetValue( coords );
-        // Need to do: examine if velocity contains missing value.
+        float gridV = grid->GetValue( coords );
+        if( gridV  == grid->GetMissingValue() )
+            scalar  = 0.0f;
+        else
+            scalar  = gridV;
     }
     else
     {
@@ -229,9 +256,14 @@ VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar )
         size_t floorTS;
         int rv  = LocateTimestamp( time, floorTS );
         assert( rv == 0 );
-        rv         = _getAGrid( floorTS, scalarname, &grid );
+        rv          = _getAGrid( floorTS, scalarname, &grid );
         assert( rv == 0 );
         float floorScalar = grid->GetValue( coords );
+        if( floorScalar  == grid->GetMissingValue() )
+        {
+            scalar = 0.0f;
+            return 0;
+        }
 
         if( time == _timestamps[floorTS] )
             scalar = floorScalar;
@@ -240,6 +272,11 @@ VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar )
             rv = _getAGrid( floorTS + 1, scalarname, &grid );
             assert( rv == 0 );
             float ceilScalar = grid->GetValue( coords );
+            if( ceilScalar  == grid->GetMissingValue() )
+            {
+                scalar = 0.0f;
+                return 0;
+            }
             float weight = (time - _timestamps[floorTS]) /
                            (_timestamps[floorTS+1] - _timestamps[floorTS]);
             scalar = glm::mix( floorScalar, ceilScalar, weight );

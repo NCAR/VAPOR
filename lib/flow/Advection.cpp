@@ -279,7 +279,7 @@ int
 Advection::_advectEuler( Field* velocity, const Particle& p0, float dt, Particle& p1 ) const
 {
     glm::vec3 v0;
-    int rv  = velocity->GetVelocity( p0.time, p0.location, v0 );    
+    int rv  = velocity->GetVelocity( p0.time, p0.location, v0, false );
     assert( rv == 0 );
     p1.location = p0.location + dt * v0;
     p1.time     = p0.time + dt;
@@ -292,15 +292,15 @@ Advection::_advectRK4( Field* velocity, const Particle& p0, float dt, Particle& 
     glm::vec3 k1, k2, k3, k4;
     float dt2 = dt * 0.5f;
     int rv;
-    rv = velocity->GetVelocity( p0.time,       p0.location,            k1 );
+    rv = velocity->GetVelocity( p0.time,       p0.location,            k1, false );
     assert( rv == 0 );
-    rv = velocity->GetVelocity( p0.time + dt2, p0.location + dt2 * k1, k2 );
+    rv = velocity->GetVelocity( p0.time + dt2, p0.location + dt2 * k1, k2, false );
     if( rv != 0 )
         return rv;
-    rv = velocity->GetVelocity( p0.time + dt2, p0.location + dt2 * k2, k3 );
+    rv = velocity->GetVelocity( p0.time + dt2, p0.location + dt2 * k2, k3, false );
     if( rv != 0 )
         return rv;
-    rv = velocity->GetVelocity( p0.time + dt,  p0.location + dt  * k3, k4 );
+    rv = velocity->GetVelocity( p0.time + dt,  p0.location + dt  * k3, k4, false );
     if( rv != 0 )
         return rv;
     p1.location = p0.location + dt / 6.0f * (k1 + 2.0f * (k2 + k3) + k4 );

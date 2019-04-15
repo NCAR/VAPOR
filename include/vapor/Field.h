@@ -30,15 +30,19 @@ public:
 
     //
     // Get the field value at a certain position, at a certain time.
+    // Users could control if this method checks position inside volume.
     //  
     virtual int  GetScalar(  float time, const glm::vec3& pos,  // input 
-                             float& val) = 0;                   // output
+                             float& val,                        // output
+                             bool checkInsideVolume = true ) = 0;
 
     //
     // Get the velocity value at a certain position, at a certain time.
+    // Users could control if this method checks position inside volume.
     //  
     virtual int  GetVelocity( float time, const glm::vec3& pos, // input 
-                              glm::vec3& vel ) = 0;             // output
+                              glm::vec3& vel,                   // output
+                              bool checkInsideVolume = true ) = 0;
 
     // Class members
     bool            IsSteady;
