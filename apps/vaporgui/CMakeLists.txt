@@ -19,7 +19,6 @@ set (SRCS
 	NavigationEventRouter.cpp
 	TwoDDataEventRouter.cpp
 	WireFrameEventRouter.cpp
-	RangeController.cpp
     PythonVariables.cpp
 	Statistics.cpp
 	Plot.cpp
@@ -125,7 +124,6 @@ set (SRCS
     PythonVariablesParams.h
 	QIntValidatorWithFixup.h
 	RangeCombos.h
-	RangeController.h
 	RenderEventRouter.h
 	RenderHolder.h
 	SettingsEventRouter.h
