@@ -343,10 +343,11 @@ bool IsFaceThatPassedBBAnInitialCell(vec3 origin, vec3 dir, float t0, ivec3 inde
 
 
 // The nvidia compiler optimizer cannot handle deep nested loops
-// This disables the optimization
+// unroll none improves compile time
+// inline none breaks the compiler
 // Side note: This is supposed to be an inline change but it is in fact a source-wide flag
 
-#pragma optionNV(inline none)
+// #pragma optionNV(inline none)
 #pragma optionNV(unroll none)
 
 

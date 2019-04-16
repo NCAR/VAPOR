@@ -1,6 +1,7 @@
 #include "vapor/glutil.h"
 
 #include <stdio.h>
+#include <time.h>
 #include <cassert>
 
 #include "vapor/Shader.h"
@@ -14,8 +15,10 @@ Shader::~Shader()
     if (_id) glDeleteShader(_id);
 }
 
-int Shader::CompileFromSource(const std::string &source)
+int Shader::CompileFromSource(const std::string &source_)
 {
+    string source = source_;
+    source += "\n// " + std::to_string(time(NULL));
     assert(!_compiled);
     char *buffer = new char[source.length() + 1];
     strcpy(buffer, source.c_str());

@@ -116,11 +116,6 @@
 #########################################################
 #                    Generate Code                      #
 #########################################################
-#
-# Max loops per function for Nvidia: 4
-#
-
-$FunctionArgs = "vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1";
 
 sub IncrementSpacing {
 	my ($str, $n) = @_;
@@ -134,25 +129,21 @@ sub Loop {
 	my $Lup = $L+1;
 
 	my $ret ="
-for (int y$L = y$Lup*2; y$L < yEnd$L; y$L++) {
-for (int x$L = x$Lup*2; x$L < xEnd$L; x$L++) {
+// for (int y$L = y$Lup*2; y$L < yEnd$L; y$L++) {
+int y$L = y$Lup*2;
+for (int x$L = x$Lup*2; x$L < xEnd$L && y$L < yEnd$L; x$L++) {
 if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x$L, y$L, sideID, $L)) {
 ";
 	if ($L > 0) {
-		if ($L % 4 == 0) {
-			$ret .="
-	intersections += SearchSideForInitialCellWithOctree_Sub$L(origin, dir, t0, sideID, fastDim, slowDim, cellIndex, entranceFace, t1, x$L, y$L);
-";
-		} else {
-			my $LN = $L-1;
+		my $LN = $L-1;
 
-			$ret .="
+		$ret .="
 	int yEnd$LN = y$L == lDims$L.y-1 ? lDims$LN.y : (y$L+1)*2;
 	int xEnd$LN = x$L == lDims$L.x-1 ? lDims$LN.x : (x$L+1)*2;";
-			$ret .="\n";
+		$ret .="\n";
 
-			$ret .= IncrementSpacing(Loop($LN), 1);
-		}
+
+		$ret .= IncrementSpacing(Loop($LN), 1);
 	} else {
 		$ret .="
 	index[slowDim] = y0;
@@ -164,50 +155,20 @@ if (IntersectRaySideCellBBoxDirect(origin, dir, t0, x$L, y$L, sideID, $L)) {
 	}
 
 	$ret .= "
-
 }
+if (x$L == xEnd$L-1) {
+	x$L = x$Lup*2-1;
+	y$L++;
 }
 }
 ";
-	return $ret;
-}
-
-sub SubFunction {
-	my ($levels) = @_;
-	my $ret =
-"int SearchSideForInitialCellWithOctree_Sub$levels($FunctionArgs, int x$levels, int y$levels)
-{
-	ivec3 side = GetFaceFromFaceIndex(sideID);
-	ivec3 index = (side+1)/2 * (cellDims-1);
-	int intersections = 0;
-
-
-";
-	for (my $i = $levels-4; $i <= $levels; $i++) {
-		$ret .= "	ivec2 lDims$i = GetBBoxArrayDimensions(sideID, $i);\n"
-	}
-
-	my $L = $levels-1;
-	my $Lup = $L+1;
-	$ret .="
-	int yEnd$L = y$Lup == lDims$Lup.y-1 ? lDims$L.y : (y$Lup+1)*2;
-	int xEnd$L = x$Lup == lDims$Lup.x-1 ? lDims$L.x : (x$Lup+1)*2;
-";
-
-	$ret .= IncrementSpacing(Loop($L), 1);
-
-	$ret .= "
-	return intersections;
-}
-\n";
-
 	return $ret;
 }
 
 sub Function {
 	my ($levels) = @_;
 	my $ret =
-"int SearchSideForInitialCellWithOctree_${levels}Levels($FunctionArgs)
+"int SearchSideForInitialCellWithOctree_${levels}Levels(vec3 origin, vec3 dir, float t0, int sideID, int fastDim, int slowDim, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {
 	ivec3 side = GetFaceFromFaceIndex(sideID);
 	ivec3 index = (side+1)/2 * (cellDims-1);
@@ -217,7 +178,7 @@ sub Function {
 ";
 
 
-	for (my $i = $levels%4==0?$levels-4:$levels - ($levels % 4); $i < $levels; $i++) {
+	for (my $i = 0; $i < $levels; $i++) {
 		$ret .= "	ivec2 lDims$i = GetBBoxArrayDimensions(sideID, $i);\n"
 	}
 
@@ -238,9 +199,7 @@ sub Function {
 	return $ret;
 };
 
-print SubFunction(4);
-print SubFunction(8);
 
 for (my $i = 1; $i <= 12; $i++) {
-print Function($i);
+	print Function($i);
 }

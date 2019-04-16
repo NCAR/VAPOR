@@ -31,6 +31,7 @@ private:
     static bool _need32BitForCoordinates(const Grid *grid);
 
 protected:
+    int         _getHeuristicBBLevels() const;
     std::string _addDefinitionsToShader(std::string shaderName) const;
 };
 
