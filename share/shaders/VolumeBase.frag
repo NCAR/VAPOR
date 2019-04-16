@@ -30,8 +30,8 @@ bool readDepthBuffer = true;
 #define ALPHA_DISCARD 0.01
 
 
-// This is required for the Nvidia compiler to work with cell traversal
-#define OUT inout
+// This is *no longer* required for the Nvidia compiler to work with cell traversal
+#define OUT out
 
 
 
