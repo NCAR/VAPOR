@@ -13,7 +13,6 @@
 //  Date:       January 2018
 //
 
-#include <Python.h>
 #include <vapor/MyPython.h>
 #include <vapor/DC.h>
 
