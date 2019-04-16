@@ -569,7 +569,6 @@ bool TranslateStretchManip::pixelToVector(
 		strHandleMid[0],strHandleMid[1], strHandleMid[2], _modelViewMatrix, 
 		_projectionMatrix, viewport,&screenx,&screeny, &screenz
 	);
-    double screen[3] = {screenx, screeny, screenz};
 	//Obtain the coords of a point in view:
 	bool success = (0 != gluUnProject(
 		(GLdouble)winCoords[0],
