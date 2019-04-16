@@ -361,11 +361,37 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
     return 0;
 }
 
+// System: CISL-VAPOR
+// Vendor: NVIDIA
+// Dataset: Lee Orf tornado
+//
+//                  Render Times
+// Levels  Compile   Max    Min
+//   9        64     0.05    -
+//   8        24     0.05    -
+//   7        9.5    0.04    -
+//   6        4      0.05   0.01
+//   5        1.8    0.067  0.01
+//   4        0.9    0.22   0.012
+//   3        0.56    -     0.022
+
+int VolumeCellTraversal::_getHeuristicBBLevels() const {
+    const int levels = _BBLevels;
+
+    if (levels >= 9)
+        return levels - 3;
+    if (levels >= 7)
+        return levels - 2;
+    if (levels >= 2)
+        return levels - 1;
+    return levels;
+}
+
 std::string VolumeCellTraversal::_addDefinitionsToShader(std::string shaderName) const {
     if (_useHighPrecisionTriangleRoutine) {
         shaderName += ":USE_INTEL_TRI_ISECT";
     }
-    shaderName += ":BB_LEVELS " + std::to_string(_BBLevels);
+    shaderName += ":BB_LEVELS " + std::to_string(_getHeuristicBBLevels());
 
     return shaderName;
 }
