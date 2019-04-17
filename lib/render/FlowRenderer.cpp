@@ -418,66 +418,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
             _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
         }
     }
-
-#if 0
-    // Check steady/unsteady status
-    if( _cache_isSteady != params->GetIsSteady() )
-    {
-        _cache_isSteady           = params->GetIsSteady();
-        _colorStatus              = FlowStatus::SIMPLE_OUTOFDATE;
-        _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
-    }
-
-    // Time step is a little tricky...
-    if( _cache_currentTS != params->GetCurrentTimestep() )
-    {
-        _cache_currentTS  = params->GetCurrentTimestep();
-        if( _cache_isSteady )
-        {
-            _colorStatus          = FlowStatus::SIMPLE_OUTOFDATE;
-            _velocityStatus       = FlowStatus::SIMPLE_OUTOFDATE;
-        }
-        else
-        {   // !! Only apply status "TIME_STEP_OOD" if the old status is "UPTODATE" !!
-            if( _colorStatus     == FlowStatus::UPTODATE )
-                _colorStatus      = FlowStatus::TIME_STEP_OOD;
-            if( _velocityStatus  == FlowStatus::UPTODATE )
-                _velocityStatus   = FlowStatus::TIME_STEP_OOD;
-        }
-    }
-#endif
 }
-
-#if 0
-int
-FlowRenderer::_useSteadyColorField( const FlowParams* params )
-{
-    // The caller of this function is responsible for checking if 
-    //   this function is in need to be called.
-    //
-    std::string colorVarName = params->GetColorMapVariableName();
-    if( colorVarName.empty() )
-    {
-        MyBase::SetErrMsg("Missing color mapping variable");
-        return flow::GRID_ERROR;
-    }
-    
-    Grid *grid;
-    int rv  = _getAGrid( params, _cache_currentTS, colorVarName, &grid );
-    if( rv != 0 )   
-        return rv;
-
-    flow::SteadyVAPORScalar* ptr = new flow::SteadyVAPORScalar();
-    ptr->UseGrid( grid );
-    ptr->ScalarName = colorVarName;
-
-    if( _colorField )
-        delete _colorField;
-    _colorField = ptr;
-
-    return 0;
-}
-#endif
 
 /*
 int
@@ -566,129 +507,12 @@ FlowRenderer::_populateParticleProperties( const std::string& varname,
 }
 */
 
-#if 0
-int
-FlowRenderer::_useSteadyVAPORField( const FlowParams* params )
-{
-    // The caller of this function is responsible for checking if 
-    //   this function is in need to be called.
-    //
-    // Step 1: retrieve variable names from the params class
-    std::vector<std::string> varnames = params->GetFieldVariableNames();
-    assert( varnames.size() == 3 );  // need to have three components
-    for( auto& s : varnames )
-    {
-        if( s.empty() )
-        {
-            MyBase::SetErrMsg("Missing velocity field");
-            return flow::GRID_ERROR;
-        }
-    }
 
-    // Step 2: use these variable names to get data grids
-    Grid *gridU, *gridV, *gridW;
-    int rv  = _getAGrid( params, _cache_currentTS, varnames[0], &gridU );
-    if( rv != 0 )   return rv;
-    rv      = _getAGrid( params, _cache_currentTS, varnames[1], &gridV );
-    if( rv != 0 )   return rv;
-    rv      = _getAGrid( params, _cache_currentTS, varnames[2], &gridW );
-    if( rv != 0 )   return rv;
-
-    // Step 3: create a SteadyVAPORVelocity using these grids, and ask Advection to use it!
-    flow::SteadyVAPORVelocity* velocity = new flow::SteadyVAPORVelocity();
-    velocity->UseGrids( gridU, gridV, gridW );
-    velocity->VelocityNameU = varnames[0];
-    velocity->VelocityNameV = varnames[1];
-    velocity->VelocityNameW = varnames[2];
-    
-    // Get ready Advection class
-    std::vector<flow::Particle> seeds;
-    _genSeedsXY( seeds, 0.0f );
-    _advection.UseSeedParticles( seeds );
-    _advection.UseVelocity( velocity );
-
-    _velocityStatus = FlowStatus::UPTODATE;
-    
-    return 0;
-}
-
-int
-FlowRenderer::_useUnsteadyVAPORField( const FlowParams* params )
-{
-    // Step 1: collect all variable names
-    std::vector<std::string> varnames = params->GetFieldVariableNames();
-    assert( varnames.size() == 3 );  // need to have three components
-    for( auto& s : varnames )
-    {
-        if( s.empty() )
-        {
-            MyBase::SetErrMsg("Missing velocity field");
-            return flow::GRID_ERROR;
-        }
-    }
-
-    // Step 2: Create an UnsteadyVAPORVelocity field
-    flow::UnsteadyVAPORVelocity* velocity = new flow::UnsteadyVAPORVelocity();
-    velocity->VelocityNameU = varnames[0];
-    velocity->VelocityNameV = varnames[1];
-    velocity->VelocityNameW = varnames[2];
-    const auto& timeCoords  = _dataMgr->GetTimeCoordinates();
-    int numOfTimesteps      = _dataMgr->GetNumTimeSteps();
-    assert( numOfTimesteps == timeCoords.size() );
-
-    Grid *gridU, *gridV, *gridW;
-    int rv;
-    for( size_t ts = 0; ts < numOfTimesteps; ts++ )
-    {
-        rv      = _getAGrid( params, ts, varnames[0], &gridU );
-        if( rv != 0 )   return rv;
-        rv      = _getAGrid( params, ts, varnames[1], &gridV );
-        if( rv != 0 )   return rv;
-        rv      = _getAGrid( params, ts, varnames[2], &gridW );
-        if( rv != 0 )   return rv;
-        velocity->AddTimeStep( gridU, gridV, gridW, timeCoords[ts] );
-    }
-
-    _advection.UseVelocity( velocity );
-    std::vector<flow::Particle> seeds;
-    _genSeedsXY( seeds, timeCoords[0] );
-    _advection.UseSeedParticles( seeds );
-
-    _velocityStatus = FlowStatus::UPTODATE;
-
-    return 0;
-}
-
-int
-FlowRenderer::_useUnsteadyColorField( const FlowParams* params )
-{
-    return 0;
-}
-#endif
-
-/*
-int
-FlowRenderer::_AddTimestepUnsteadyVAPORField( const FlowParams* )
-{
-    // Step 1: collect all variable names
-    const auto& nameU = _advection.GetVelocityNameU();
-    const auto& nameV = _advection.GetVelocityNameV();
-    const auto& nameW = _advection.GetVelocityNameW();
-
-    // Step 2: prepare for adding new timesteps
-    const auto& timeCoords = _dataMgr->GetTimeCoordinates();
-    Grid  *gridU, *gridV, *gridW;
-    int   rv;
-    flow::UnsteadyVAPORVelocity* ptr = dynamic_cast<flow::UnsteadyVAPORVelocity*>();
-    size_t alreadyHave = _advection->GetNumberOfTimesteps();
-
-    return 0;
-} */
 
 int
 FlowRenderer::_genSeedsXY( std::vector<flow::Particle>& seeds, float timeVal ) const
 {
-    int numX = 20, numY = 20;
+    int numX = 5, numY = 5;
     std::vector<double>           extMin, extMax;
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
     params->GetBox()->GetExtents( extMin, extMax );
