@@ -25,7 +25,7 @@ ifeq ($(HOSTNAME), cisl-jasper)
 endif
 
 
-a.out: main.cpp Particle.o
+a.out: main.cpp
 	$(CXX) $^ -o $@ $(CXXFLAGS) -I$(VAPOR_INC_DIR) 
 
 Advection.o: Advection.cpp Field.o

@@ -38,16 +38,12 @@ public:
     int CalculateParticleProperty( Field* scalarField, bool useAsColor );
 
     // Set advection basics
-    //void SetBaseStepSize(  float deltaT );
-    //void UseVelocity( const VelocityField* p );
-    void UseSeedParticles( std::vector<Particle>& seeds );
+    void UseSeedParticles( const std::vector<Particle>& seeds );
 
     // Retrieve the resulting particles as "streams."
     size_t GetNumberOfStreams() const;
     const  std::vector<Particle>& GetStreamAt( size_t i ) const;
     float  GetLatestAdvectionTime() const;
-
-    //int    GetNumberOfTimesteps() const;
 
     // As part of the functionality of this class, it manages the 
     //    particles that it stores.
@@ -71,17 +67,18 @@ public:
     // Output a file that could be plotted by gnuplot
     //   Command:  splot "filename" u 1:2:3 w lines
     //   Tutorial: http://lowrank.net/gnuplot/datafile-e.html
-    //
+    // Input seed points from a CVS file. 
+    //   This CVS file should follow gnuplot conventions, meaning:
+    //   - lines starting with # are treated as comments
+    //   - empty lines are omitted
+    //   - each line should have at least three columns for X, Y, Z position.
+    //     An optional 4th column is used to indicate time.
+    //     The rest columns are omitted.
     int  OutputStreamsGnuplot( const std::string& filename ) const;
+    int  InputStreamsGnuplot(  const std::string& filename );
 
     // Query properties (most are properties of the velocity field)
     int  CheckReady() const;
-    //bool IsSteady() const;
-    //bool IsAdvectionComplete() const;
-    //void ToggleAdvectionComplete( bool b );
-    //const std::string GetVelocityNameU() const;
-    //const std::string GetVelocityNameV() const;
-    //const std::string GetVelocityNameW() const;
 
 private:
     //const VelocityField*                    _velocity;

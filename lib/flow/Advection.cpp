@@ -1,5 +1,6 @@
 #include <iostream>
 #include "vapor/Advection.h"
+#include <fstream>
 
 using namespace flow;
 
@@ -38,7 +39,7 @@ Advection::UseVelocity( const VelocityField* p )
 }*/
 
 void
-Advection::UseSeedParticles( std::vector<Particle>& seeds )
+Advection::UseSeedParticles( const std::vector<Particle>& seeds )
 {
     _streams.clear();
     _streams.resize( seeds.size() );
@@ -349,6 +350,68 @@ Advection::OutputStreamsGnuplot( const std::string& filename ) const
     return 0;
 }
 
+int
+Advection::InputStreamsGnuplot( const std::string& filename )
+{
+    std::ifstream ifs( filename );
+    if( !ifs.is_open() )
+        return FILE_ERROR;
+
+    std::vector<Particle> newSeeds;
+    std::string line;
+
+    while( std::getline( ifs, line ) )
+    {
+        // remove leading spaces and tabs
+        size_t found = line.find_first_not_of( " \t" );
+        if( found != std::string::npos)
+            line = line.substr( found, line.size() - found );
+        // skip this line if it's empty
+        if( line.empty() )      
+            continue;
+
+        // If leading by a #, then skip it.
+        if( line.front() == '#' )
+            continue;
+
+        // Now try to parse numbers separated by comma
+        line.push_back(',');
+        std::vector<float> values;
+        size_t start = 0;
+        size_t end   = line.find( ',' );
+        while( end != std::string::npos && values.size() < 4 )
+        {
+            auto str = line.substr( start, end - start );
+            float val;
+            try{  val = std::stof( str ); }
+            catch( const std::invalid_argument& e )
+            {
+                break;
+            }
+            values.push_back( val );
+            start = end + 1;
+            end = line.find(',', start );
+        }
+        
+        // See if we have collected enough numbers
+        if( values.size() < 3 )
+        {
+            ifs.close();
+            return FILE_ERROR;
+        }
+        else if( values.size() == 3 )
+            newSeeds.emplace_back( values.data(), 0.0f );
+        else  // values.size() == 4 
+            newSeeds.emplace_back( values.data(), values[3] );
+    }
+    ifs.close();
+
+    if( !newSeeds.empty() )
+        this->UseSeedParticles( newSeeds );
+
+    return 0;
+}
+
 size_t 
 Advection::GetNumberOfStreams() const
 {
@@ -428,13 +491,3 @@ Advection::ClearParticleProperties()
         for( auto& part : stream )
             part.ClearProperties();
 }
-
-/*
-int
-Advection::GetNumberOfTimesteps( ) const
-{
-    if( _velocity )
-        return _velocity->GetNumberOfTimesteps();
-    else
-        return 0;
-}*/
