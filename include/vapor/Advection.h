@@ -35,7 +35,17 @@ public:
     // Advect as many steps as necessary to reach a certain time: targetT.
     int  AdvectTillTime( Field* velocityField, float deltaT, float targetT,
                          ADVECTION_METHOD method = ADVECTION_METHOD::RK4 );
-    int CalculateParticleProperty( Field* scalarField, bool useAsColor );
+    // Retrieve field values of a particle based on its location, and put the result in
+    // the "value" field or the "properties" field of a particle
+    //   If "skipNonZero" is true, then this function only overwrites zeros.
+    //   Otherwise, it will overwrite values anyway.
+    int CalculateParticleValues(     Field* scalarField, bool skipNonZero );
+    int CalculateParticleProperties( Field* scalarField  );
+
+    // Reset all particle values to zero
+    void ResetParticleValues( );
+    // Clear all existing properties of a particle
+    void ClearParticleProperties( );
 
     // Set advection basics
     void UseSeedParticles( const std::vector<Particle>& seeds );
@@ -60,8 +70,6 @@ public:
     // 4) this function calls Particle::AttachProperty() function for a stream
     //int  AttachParticlePropertiesOfAStream( std::vector<float>& properties, size_t idx );
     //
-    // 5) this function calls Particle::ClearProperties() function
-    void ClearParticleProperties( );
 
     //
     // Output a file that could be plotted by gnuplot
