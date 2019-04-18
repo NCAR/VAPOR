@@ -10,6 +10,7 @@
 
 using std::vector;
 using std::string;
+using glm::ivec2;
 using glm::vec2;
 using glm::vec3;
 using glm::vec4;
@@ -60,7 +61,8 @@ VolumeRenderer::VolumeRenderer(
     _LUTTexture = NULL;
     _depthTexture = NULL;
     _algorithm = NULL;
-    _lastRenderTime = 100;
+    _lastRenderTime = 10000;
+    _framebufferRatio = 1;
     
     if (_needToSetDefaultAlgorithm()) {
         VolumeParams *vp = (VolumeParams*)GetActiveParams();
@@ -77,6 +79,8 @@ VolumeRenderer::~VolumeRenderer()
     if (_VBO) glDeleteBuffers(1, &_VBO);
     if (_VAOChunked) glDeleteVertexArrays(1, &_VAOChunked);
     if (_VBOChunked) glDeleteBuffers(1, &_VBOChunked);
+    if (_framebuffer) glDeleteFramebuffers(1, &_framebuffer);
+    if (_framebufferTexture) glDeleteTextures(1, &_framebufferTexture);
     if (_LUTTexture)   glDeleteTextures(1, &_LUTTexture);
     if (_depthTexture) glDeleteTextures(1, &_depthTexture);
     if (_cache.tf) delete _cache.tf;
@@ -106,35 +110,15 @@ int VolumeRenderer::_initializeGL()
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     
-    vector<vec4> d;
-    float s = 2/(float)8;
-    float ts = 1/(float)8;
-    for (int yi = 0; yi < 8; yi++) {
-        float y = 2*yi/(float)8 - 1;
-        float ty = yi/(float)8;
-        for (int xi = 0; xi < 8; xi++) {
-            float x = 2*xi/(float)8 - 1;
-            float tx = xi/(float)8;
-            
-            d.push_back(vec4(x, y,      tx, ty));
-            d.push_back(vec4(x+s, y,    tx+ts, ty));
-            d.push_back(vec4(x,  y+s,    tx, ty+ts));
-            
-            d.push_back(vec4(x,  y+s,    tx, ty+ts));
-            d.push_back(vec4(x+s, y,    tx+ts, ty));
-            d.push_back(vec4(x+s,  y+s,    tx+ts, ty+ts));
-        }
-    }
-    
     glGenVertexArrays(1, &_VAOChunked);
     glGenBuffers(1, &_VBOChunked);
     glBindVertexArray(_VAOChunked);
     glBindBuffer(GL_ARRAY_BUFFER, _VBOChunked);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*4*d.size(), d.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), NULL);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2*sizeof(float)));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
+    _generateChunkedRenderMesh(8);
     
     glGenTextures(1, &_LUTTexture);
     glBindTexture(GL_TEXTURE_1D, _LUTTexture);
@@ -149,7 +133,54 @@ int VolumeRenderer::_initializeGL()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     
+    glGenFramebuffers(1, &_framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+    
+    glGenTextures(1, &_framebufferTexture);
+    glBindTexture(GL_TEXTURE_2D, _framebufferTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    _framebufferSize[0] = 0;
+    _framebufferSize[1] = 0;
+    
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _framebufferTexture, 0);
+    
+    assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
     return 0;
+}
+
+void VolumeRenderer::_generateChunkedRenderMesh(const float C)
+{
+    vector<vec4> d;
+    d.reserve(powf(ceil(C),2));
+    float s = 2/(float)C;
+    float ts = 1/(float)C;
+    for (int yi = 0; yi < C; yi++) {
+        float y = 2*yi/(float)C - 1;
+        float ty = yi/(float)C;
+        float y2 = min(y+s, 1.0f);
+        float ty2 = min(ty+ts, 1.0f);
+        for (int xi = 0; xi < C; xi++) {
+            float x = 2*xi/(float)C - 1;
+            float tx = xi/(float)C;
+            float x2 = min(x+s, 1.0f);
+            float tx2 = min(tx+ts, 1.0f);
+            
+            d.push_back(vec4(x, y,      tx, ty));
+            d.push_back(vec4(x2, y,    tx2, ty));
+            d.push_back(vec4(x,  y2,    tx, ty2));
+            
+            d.push_back(vec4(x,  y2,    tx, ty2));
+            d.push_back(vec4(x2, y,    tx2, ty));
+            d.push_back(vec4(x2,  y2,    tx2, ty2));
+        }
+    }
+    glBindBuffer(GL_ARRAY_BUFFER, _VBOChunked);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*4*d.size(), d.data(), GL_STATIC_DRAW);
 }
 
 #define CheckCache(cVar, pVar) \
@@ -158,10 +189,37 @@ _cache.needsUpdate = true; \
 cVar = pVar; \
 }
 
+#define MAX_FRAMEBUFFER_RATIO 15.0f
+
 int VolumeRenderer::_paintGL(bool fast)
 {
-    if (fast && _algorithm && _algorithm->IsSlow() && _lastRenderTime > 0.1) {
-        return 0;
+    bool useFramebuffer = false;
+    if (fast && _algorithm) {
+        float prevFPS = 1/_lastRenderTime;
+        if (!_lastRenderWasFast)
+            prevFPS *= _algorithm->GuestimateFastModeSpeedupFactor();
+        
+        if (_lastRenderWasFast && prevFPS < 10 && _framebufferRatio == MAX_FRAMEBUFFER_RATIO)
+            return 0;
+        
+        if (prevFPS < 24 || (prevFPS > 40 && _framebufferRatio > 3) || prevFPS > 60) {
+            float ratioTo30FPS = 30/prevFPS;
+            float perDimRatio = sqrtf(ratioTo30FPS);
+            _framebufferRatio *= perDimRatio;
+            _framebufferRatio = min(_framebufferRatio, MAX_FRAMEBUFFER_RATIO);
+            _framebufferRatio = max(_framebufferRatio, 1.0f);
+        }
+        int chunksPerDim = ceil(8.0/_framebufferRatio);
+        _generateChunkedRenderMesh(chunksPerDim);
+        _nChunks = chunksPerDim*chunksPerDim;
+        useFramebuffer = true;
+    }
+    else {
+        _framebufferRatio = 1;
+        if (_algorithm && _algorithm->IsSlow()) {
+            _generateChunkedRenderMesh(8);
+            _nChunks = 64;
+        }
     }
     
     VolumeParams *vp = (VolumeParams *)GetActiveParams();
@@ -180,6 +238,28 @@ int VolumeRenderer::_paintGL(bool fast)
     GLint viewport[4] = {0};
     glGetIntegerv(GL_VIEWPORT, viewport);
     
+    glBindTexture(GL_TEXTURE_2D, _depthTexture);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,   viewport[0], viewport[1], viewport[2], viewport[3], 0);
+    
+    if (useFramebuffer) {
+        ivec2 fbSize(viewport[2], viewport[3]);
+        fbSize /= _framebufferRatio;
+        if (fbSize[0] != _framebufferSize[0] || fbSize[1] != _framebufferSize[1]) {
+            _framebufferSize[0] = fbSize[0];
+            _framebufferSize[1] = fbSize[1];
+            glActiveTexture(GL_TEXTURE0); // Don't mess up bound textures
+            glBindTexture(GL_TEXTURE_2D, _framebufferTexture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fbSize[0], fbSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+        
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glViewport(0, 0, fbSize[0], fbSize[1]);
+    }
+    
     Viewpoint *VP = _paramsMgr->GetViewpointParams(_winName)->getCurrentViewpoint();
     double m[16];
     double cameraPos[3], cameraUp[3], cameraDir[3];
@@ -192,9 +272,6 @@ int VolumeRenderer::_paintGL(bool fast)
     vec3 extScales = _getVolumeScales();
     vec3 extLengthsScaled = extLengths * extScales;
     float smallestDimension = min(extLengthsScaled[0], min(extLengthsScaled[1], extLengthsScaled[2]));
-    
-    glBindTexture(GL_TEXTURE_2D, _depthTexture);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,   viewport[0], viewport[1], viewport[2], viewport[3], 0);
     
     SmartShaderProgram shader(_algorithm->GetShader());
     if (!shader.IsValid())
@@ -247,10 +324,11 @@ int VolumeRenderer::_paintGL(bool fast)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_ALWAYS);
     
+    printf("Begin Render... ");
     void *start = GLManager::BeginTimer();
     if (_algorithm->IsSlow()) {
         glBindVertexArray(_VAOChunked);
-        for (int i = 0; i < 8*8; i++) {
+        for (int i = 0; i < _nChunks; i++) {
             glDrawArrays(GL_TRIANGLES, i*6, 6);
             glFinish();
         }
@@ -258,8 +336,21 @@ int VolumeRenderer::_paintGL(bool fast)
         glBindVertexArray(_VAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
-    _lastRenderTime = GLManager::EndTimer(start);
-    printf("Render time = %f\n", _lastRenderTime);
+    double renderTime = GLManager::EndTimer(start);
+    printf("Render time = %f, ", renderTime);
+    printf("FPS = %f\n", 1/renderTime);
+    _lastRenderTime = renderTime;
+    _lastRenderWasFast = fast;
+    
+    if (useFramebuffer) {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+        SmartShaderProgram framebufferShader = _glManager->shaderManager->GetShader("Framebuffer");
+        glBindVertexArray(_VAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _framebufferTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
     
     glDepthFunc(GL_LESS);
     glDisable(GL_BLEND);
