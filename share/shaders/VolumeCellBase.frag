@@ -350,8 +350,11 @@ bool IsFaceThatPassedBBAnInitialCell(vec3 origin, vec3 dir, float t0, ivec3 inde
 // #pragma optionNV(inline none)
 #pragma optionNV(unroll none)
 
-
+#ifdef NVIDIA
 #include BBTraversalAlgorithmsNV.frag
+#else
+#include BBTraversalAlgorithms.frag
+#endif
 
 int SearchSideForInitialCellBasic(vec3 origin, vec3 dir, float t0, int sideID, OUT ivec3 cellIndex, OUT ivec3 entranceFace, inout float t1)
 {

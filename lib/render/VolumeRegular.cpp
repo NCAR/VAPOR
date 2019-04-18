@@ -135,6 +135,8 @@ void VolumeRegular::SetUniforms(int *nextTextureUnit) const
     }
 }
 
+float VolumeRegular::GuestimateFastModeSpeedupFactor() const { return 5; }
+
 static VolumeAlgorithmRegistrar<VolumeRegularIso> registrationIso;
 
 ShaderProgram *VolumeRegularIso::GetShader() const { return _glManager->shaderManager->GetShader("VolumeISO"); }

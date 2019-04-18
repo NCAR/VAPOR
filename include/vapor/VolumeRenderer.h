@@ -19,6 +19,7 @@ protected:
     int  _paintGL(bool fast);
     void _clearCache(){};
 
+    void                _generateChunkedRenderMesh(const float chunks);
     int                 _loadData();
     virtual bool        _usingColorMapData() const;
     int                 _loadSecondaryData();
@@ -34,10 +35,16 @@ protected:
     unsigned int _VBO = 0;
     unsigned int _VAOChunked = 0;
     unsigned int _VBOChunked = 0;
+    unsigned int _framebuffer = 0;
+    unsigned int _framebufferTexture = 0;
     unsigned int _LUTTexture;
     unsigned int _depthTexture;
 
+    int    _nChunks = 64;
     double _lastRenderTime;
+    bool   _lastRenderWasFast;
+    int    _framebufferSize[2];
+    float  _framebufferRatio;
 
     struct Cache {
         std::string var = "";
