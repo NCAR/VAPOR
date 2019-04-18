@@ -97,43 +97,47 @@ int VSpinBox::GetValue() const {
     return _spinBox->value();
 }
 
-/*VDoubleSpinBox::VDoubleSpinBox(
+VDoubleSpinBox::VDoubleSpinBox(
         QWidget *parent,
         const std::string& labelText,
-        int defaultValue
+        double defaultValue
     ) :
     VaporWidget(parent, labelText)
 {
-    _spinBox = new QSpinBox( this );
+    _spinBox = new QDoubleSpinBox( this );
     _spinBox->setFocusPolicy(Qt::NoFocus);
     _layout->addWidget( _spinBox );
 
     SetLabelText( QString::fromStdString( labelText ) );
     SetValue( defaultValue );
 
-    connect( _spinBox, SIGNAL( valueChanged(int) ),
-        this, SLOT( _changed(int) ) );
+    connect( _spinBox, SIGNAL( valueChanged(double) ),
+        this, SLOT( _changed(double) ) );
 }
 
-void VSpinBox::_changed( int value ) {
+void VDoubleSpinBox::_changed( double value ) {
     emit _valueChanged( value );
 }
 
-void VSpinBox::SetMaximum( int maximum ) {
+void VDoubleSpinBox::SetMaximum( double maximum ) {
     _spinBox->setMaximum( maximum );
 }
 
-void VSpinBox::SetMinimum( int minimum ) {
+void VDoubleSpinBox::SetMinimum( double minimum ) {
     _spinBox->setMinimum( minimum );
 }
 
-void VSpinBox::SetValue( int value ) {
+void VDoubleSpinBox::SetValue( double value ) {
     _spinBox->setValue( value );
 }
 
-int VSpinBox::GetValue() const {
+void VDoubleSpinBox::SetDecimals( int decimals ) {
+    _spinBox->setDecimals( decimals );
+}
+
+double VDoubleSpinBox::GetValue() const {
     return _spinBox->value();
-}*/
+}
 
 VLineEdit::VLineEdit(
         QWidget *parent,
