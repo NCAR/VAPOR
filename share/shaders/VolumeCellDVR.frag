@@ -62,8 +62,12 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
     float tStart = t0;
     ivec3 initialCell = currentCell;
     float unitDistanceScaled = unitDistance / length(dir * scales);
-    float step = unitDistanceScaled/8;
-    float stepOpacityUnit = 1/8.0;
+    float step = unitDistanceScaled/7;
+    float stepOpacityUnit = 1/7.0;
+    if (fast) {
+        step = unitDistanceScaled;
+        stepOpacityUnit = 1;
+    }
     
     int i = 0;
     vec4 accum = vec4(0);
