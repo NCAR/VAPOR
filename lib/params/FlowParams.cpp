@@ -5,6 +5,7 @@ using namespace VAPoR;
 const std::string FlowParams::_isSteadyTag = "isSteadyTag";
 const std::string FlowParams::_velocityMultiplierTag = "velocityMultiplierTag";
 const std::string FlowParams::_steadyNumOfStepsTag   = "steadyNumOfStepsTag";
+const std::string FlowParams::_seedGenModeTag = "seedGenModeTag";
 
 static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
 
@@ -62,14 +63,28 @@ FlowParams::SetVelocityMultiplier( double coeff )
     SetValueDouble( _velocityMultiplierTag, "velocity multiplier", coeff );
 }
 
-int
+long
 FlowParams::GetSteadyNumOfSteps() const
 {
-    return int( GetValueLong( _steadyNumOfStepsTag, 0 ) );
+    return GetValueLong( _steadyNumOfStepsTag, 0 );
 }
 
 void
-FlowParams::SetSteadyNumOfSteps( int i )
+FlowParams::SetSteadyNumOfSteps( long i )
 {
     SetValueLong( _steadyNumOfStepsTag, "num of steps for a steady integration", i );
 }
+
+long
+FlowParams::GetSeedGenMode() const
+{
+    return GetValueLong( _seedGenModeTag, 0 );
+}
+
+void
+FlowParams::SetSeedGenMode( long i )
+{
+    SetValueLong( _seedGenModeTag, "which mode do we use to generate seeds", i );
+}
+
+

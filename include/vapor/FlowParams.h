@@ -43,14 +43,18 @@ public:
     double GetVelocityMultiplier() const;
     void   SetVelocityMultiplier( double );
 
-    int    GetSteadyNumOfSteps() const;
-    void   SetSteadyNumOfSteps( int );
+    long   GetSteadyNumOfSteps() const;
+    void   SetSteadyNumOfSteps( long );
+
+    long  GetSeedGenMode() const;
+    void  SetSeedGenMode( long );
 
 protected:
 
     static const std::string    _isSteadyTag;
     static const std::string    _velocityMultiplierTag;
     static const std::string    _steadyNumOfStepsTag;
+    static const std::string    _seedGenModeTag;
 };
 
 }
