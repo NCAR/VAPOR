@@ -10,7 +10,7 @@
 #include <QCheckBox>
 #include <QPushButton>
 #include <QLineEdit>
-#include <QDoubleValidator>
+#include <QValidator>
 #include <QSpacerItem>
 #include <QHBoxLayout>
 #include <QSpinBox>
@@ -93,6 +93,48 @@ void VSpinBox::SetValue( int value ) {
     _spinBox->setValue( value );
 }
 
+int VSpinBox::GetValue() const {
+    return _spinBox->value();
+}
+
+/*VDoubleSpinBox::VDoubleSpinBox(
+        QWidget *parent,
+        const std::string& labelText,
+        int defaultValue
+    ) :
+    VaporWidget(parent, labelText)
+{
+    _spinBox = new QSpinBox( this );
+    _spinBox->setFocusPolicy(Qt::NoFocus);
+    _layout->addWidget( _spinBox );
+
+    SetLabelText( QString::fromStdString( labelText ) );
+    SetValue( defaultValue );
+
+    connect( _spinBox, SIGNAL( valueChanged(int) ),
+        this, SLOT( _changed(int) ) );
+}
+
+void VSpinBox::_changed( int value ) {
+    emit _valueChanged( value );
+}
+
+void VSpinBox::SetMaximum( int maximum ) {
+    _spinBox->setMaximum( maximum );
+}
+
+void VSpinBox::SetMinimum( int minimum ) {
+    _spinBox->setMinimum( minimum );
+}
+
+void VSpinBox::SetValue( int value ) {
+    _spinBox->setValue( value );
+}
+
+int VSpinBox::GetValue() const {
+    return _spinBox->value();
+}*/
+
 VLineEdit::VLineEdit(
         QWidget *parent,
         const std::string& labelText,
@@ -111,6 +153,10 @@ VLineEdit::VLineEdit(
         this, SLOT( _returnPressed() ) );
 }
 
+void VLineEdit::SetValidator( const QValidator* v ) {
+    _edit->setValidator( v );
+}
+
 void VLineEdit::SetEditText( const std::string& text )
 {
     SetEditText(QString::fromStdString( text ) );
@@ -119,6 +165,11 @@ void VLineEdit::SetEditText( const std::string& text )
 void VLineEdit::SetEditText( const QString& text )
 {
     _edit->setText( text );
+}
+
+std::string VLineEdit::GetEditText() const {
+    std::string text = _edit->text().toStdString();
+    return text;
 }
 
 void VLineEdit::_returnPressed() {
