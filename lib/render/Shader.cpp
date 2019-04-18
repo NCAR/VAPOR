@@ -18,7 +18,10 @@ Shader::~Shader()
 int Shader::CompileFromSource(const std::string &source_)
 {
     string source = source_;
+#ifndef NDEBUG
+    // Prevent caching
     source += "\n// " + std::to_string(time(NULL));
+#endif
     assert(!_compiled);
     char *buffer = new char[source.length() + 1];
     strcpy(buffer, source.c_str());
