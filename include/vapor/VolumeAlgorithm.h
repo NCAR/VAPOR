@@ -27,6 +27,7 @@ namespace VAPoR {
         virtual ShaderProgram *GetShader() const = 0;
         virtual void SetUniforms(int *nextTextureUnit) const = 0;
         virtual bool IsSlow() = 0;
+        virtual float GuestimateFastModeSpeedupFactor() const { return 1; }
         
         static VolumeAlgorithm *NewAlgorithm(const std::string &name, GLManager *gl);
 

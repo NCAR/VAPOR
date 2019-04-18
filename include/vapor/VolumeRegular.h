@@ -18,6 +18,7 @@ namespace VAPoR {
         virtual void DeleteSecondaryData();
         virtual ShaderProgram *GetShader() const;
         virtual void SetUniforms(int *nextTextureUnit) const;
+        virtual float GuestimateFastModeSpeedupFactor() const;
         
     protected:
         unsigned int _dataTexture;
