@@ -150,7 +150,6 @@ void
 FlowSeedingSubtab::_seedGenModeChanged( int newIdx )
 {
     _params->SetSeedGenMode( newIdx );
-std::cout << newIdx << std::endl;
 }
 
 void

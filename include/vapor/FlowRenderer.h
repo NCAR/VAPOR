@@ -65,7 +65,6 @@ protected:
     bool                _cache_isSteady;
     long                _cache_steadyNumOfSteps;
     size_t              _cache_currentTS;
-
     // A few different modes to generate advection seeds:
     //   0 - programmatical
     //   1 - reading a list of seeds
