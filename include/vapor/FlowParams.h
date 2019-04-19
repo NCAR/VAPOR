@@ -49,12 +49,16 @@ public:
     long  GetSeedGenMode() const;
     void  SetSeedGenMode( long );
 
+    std::string GetSeedInputFilename() const;
+    void        SetSeedInputFilename( std::string& ) ;
+
 protected:
 
     static const std::string    _isSteadyTag;
     static const std::string    _velocityMultiplierTag;
     static const std::string    _steadyNumOfStepsTag;
     static const std::string    _seedGenModeTag;
+    static const std::string    _seedInputFilenameTag;
 };
 
 }

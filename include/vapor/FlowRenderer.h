@@ -63,8 +63,17 @@ protected:
     int                 _cache_compressionLevel;
     float               _cache_velocityMltp;
     bool                _cache_isSteady;
-    int                 _cache_steadyNumOfSteps;
+    long                _cache_steadyNumOfSteps;
     size_t              _cache_currentTS;
+
+    // A few different modes to generate advection seeds:
+    //   0 - programmatical
+    //   1 - reading a list of seeds
+    //   2 - uniformly generate 
+    //   3 - randomly generate
+    //   4 - randomly generate with bias
+    long                _cache_seedGenMode;
+    std::string         _cache_seedInputFilename;
 
     FlowStatus          _velocityStatus;
     FlowStatus          _colorStatus;

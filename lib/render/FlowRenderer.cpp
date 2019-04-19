@@ -68,6 +68,8 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
     _cache_isSteady         = false;
     _cache_steadyNumOfSteps = 0;
     _cache_velocityMltp     = 1.0;
+    _cache_seedGenMode      = 0;
+
     _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
     _colorStatus            = FlowStatus::SIMPLE_OUTOFDATE;
     _steadyTotalSteps       = 0;
@@ -134,6 +136,7 @@ int
 FlowRenderer::_paintGL( bool fast )
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
+    int rv;     // return value
 
     _updateFlowCacheAndStates( params );
     _velocityField.UpdateParams( params );
@@ -141,9 +144,22 @@ FlowRenderer::_paintGL( bool fast )
 
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
-        std::vector<flow::Particle> seeds;
-        _genSeedsXY( seeds, _timestamps.at(0) );
-        _advection.UseSeedParticles( seeds );
+        if( _cache_seedGenMode == 0 )
+        {
+            std::vector<flow::Particle> seeds;
+            _genSeedsXY( seeds, _timestamps.at(0) );
+            _advection.UseSeedParticles( seeds );
+        }
+        else if( _cache_seedGenMode == 1 )
+        {
+            rv = _advection.InputStreamsGnuplot( params->GetSeedInputFilename() );
+            if( rv != 0 )
+            {
+                MyBase::SetErrMsg("Input seed list wrong!");
+                return flow::FILE_ERROR;
+            }
+        }
+
         _advectionComplete = false;
         _velocityStatus = FlowStatus::UPTODATE;
         _steadyTotalSteps = 0;
@@ -175,7 +191,7 @@ FlowRenderer::_paintGL( bool fast )
         if( _timestamps.size() > 1 )  // For multiple timestep case
             deltaT *= _timestamps[1] - _timestamps[0];
 
-        int rv = flow::ADVECT_HAPPENED;
+        rv = flow::ADVECT_HAPPENED;
 
         /* Advection scheme 1: advect a maximum number of steps.
          * This scheme is used for steady flow */
@@ -208,7 +224,7 @@ FlowRenderer::_paintGL( bool fast )
 
     if( !_coloringComplete )
     {
-        int rv = _advection.CalculateParticleValues( &_colorField, true );
+        rv = _advection.CalculateParticleValues( &_colorField, true );
         _coloringComplete = true;
     }
 
@@ -327,6 +343,26 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
      *   streams out of date.
      * Second, branch into steady and unsteady cases, and deal with them separately.
      */
+
+    // Check seed generation mode
+    if( _cache_seedGenMode != params->GetSeedGenMode() )
+    {
+        _cache_seedGenMode  = params->GetSeedGenMode();
+        _velocityStatus     = FlowStatus::SIMPLE_OUTOFDATE;
+        _colorStatus        = FlowStatus::SIMPLE_OUTOFDATE;
+    }
+
+    // Check seed input filename
+    if( _cache_seedInputFilename != params->GetSeedInputFilename() )
+    {
+        _cache_seedInputFilename  = params->GetSeedInputFilename();
+        // we only update status if the current seed generation mode IS seed list.
+        if( _cache_seedGenMode   == 1 )
+        {
+            _velocityStatus     = FlowStatus::SIMPLE_OUTOFDATE;
+            _colorStatus        = FlowStatus::SIMPLE_OUTOFDATE;
+        }
+    }
 
     // Check variable names
     // If names not the same, entire stream is out of date
