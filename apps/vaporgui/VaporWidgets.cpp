@@ -107,6 +107,11 @@ void VComboBox::_userIndexChanged(int index) {
     emit _indexChanged(index);
 }
 
+int VComboBox::GetNumOfItems() const
+{
+    return _combo->count();
+}
+
 int VComboBox::GetCurrentIndex() const {
     return _combo->currentIndex();
 }

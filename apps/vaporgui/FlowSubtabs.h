@@ -9,21 +9,20 @@
 
 #include <QLineEdit>
 
+#include "VariablesWidget.h"
+#include "TFWidget.h"
+#include "GeometryWidget.h"
+#include "CopyRegionWidget.h"
+#include "TransformTable.h"
+#include "ColorbarWidget.h"
+#include "VaporWidgets.h"
+
 namespace VAPoR {
 	class ControlExec;
 	class RenderParams;
 	class ParamsMgr;
 	class DataMgr;
 }
-
-class VariablesWidget;
-class TFWidget;
-class GeometryWidget;
-class CopyRegionWidget;
-class TransformTable;
-class ColorbarWidget;
-class VFileReader;
-class VCheckBox;
 
 class QVaporSubtab : public QWidget {
     Q_OBJECT
@@ -70,9 +69,7 @@ private:
 private slots:
     // Respond to user input
     void _steadyGotClicked();
-
     void _velocityMultiplierChanged();
-
     void _steadyNumOfStepsChanged();
 };
 
@@ -113,14 +110,16 @@ public:
 		VAPoR::RenderParams *rParams
 	);
 
-protected slots:
-    void _pushTestPressed();
-    void _comboBoxSelected( int index );
-    void _checkBoxSelected();
+private slots:
+    // Respond to user input
+    void _seedGenModeChanged( int newIdx );
+    void _fileReaderChanged();
 
 private:
     VAPoR::FlowParams*      _params;
+
     GeometryWidget*         _geometryWidget;
+    VComboBox*              _seedGenMode;
     VFileReader*            _fileReader;
 };
 

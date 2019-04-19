@@ -84,6 +84,7 @@ public:
     void        AddOption( const std::string& option, int index=0 );
     void        RemoveOption( int index );
     void        SetIndex( int index );
+    int         GetNumOfItems() const;
 
 private:
     QComboBox* _combo;
