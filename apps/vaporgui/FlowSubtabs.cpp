@@ -141,9 +141,8 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
         _seedGenMode->SetIndex( idx );
     else
         _seedGenMode->SetIndex( 0 );
-
-    // Scott to implement this functionality
-    // _fileReader->UpdateDisplayText( _params->GetSeedInputFilename() );
+    if( !_params->GetSeedInputFilename().empty() ) 
+        _fileReader->SetPath( _params->GetSeedInputFilename() );
 }
 
 void
@@ -155,10 +154,8 @@ FlowSeedingSubtab::_seedGenModeChanged( int newIdx )
 void
 FlowSeedingSubtab::_fileReaderChanged()
 {
-    // Scott: needs to ask FileSelector actually emit a signal
     std::string filename = _fileReader->GetPath();
     _params->SetSeedInputFilename( filename );
-std::cout << filename << std::endl;
 }
 
 
