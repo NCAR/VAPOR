@@ -67,7 +67,6 @@ VSpinBox::VSpinBox(
     VaporWidget(parent, labelText)
 {
     _spinBox = new QSpinBox( this );
-    _spinBox->setFocusPolicy(Qt::NoFocus);
     _layout->addWidget( _spinBox );
 
     SetLabelText( QString::fromStdString( labelText ) );
@@ -105,7 +104,6 @@ VDoubleSpinBox::VDoubleSpinBox(
     VaporWidget(parent, labelText)
 {
     _spinBox = new QDoubleSpinBox( this );
-    _spinBox->setFocusPolicy(Qt::NoFocus);
     _layout->addWidget( _spinBox );
 
     SetLabelText( QString::fromStdString( labelText ) );
@@ -147,7 +145,6 @@ VLineEdit::VLineEdit(
     VaporWidget(parent, labelText)
 {
     _edit = new QLineEdit( this );
-    _edit->setFocusPolicy(Qt::NoFocus);
     _layout->addWidget( _edit );
 
     SetLabelText( QString::fromStdString( labelText ) );
@@ -188,7 +185,6 @@ VPushButton::VPushButton(
     VaporWidget(parent, labelText)
 {
     _button = new QPushButton( this );
-    _button->setFocusPolicy(Qt::NoFocus);
     _layout->addWidget( _button );
 
     SetLabelText( QString::fromStdString( labelText ) );
