@@ -9,8 +9,6 @@ Advection::Advection() : _lowerAngle( 3.0f ), _upperAngle( 15.0f )
 {
     _lowerAngleCos = glm::cos( glm::radians( _lowerAngle ) );
     _upperAngleCos = glm::cos( glm::radians( _upperAngle ) );
-    _latestAdvectionTime = 0.0f;
-    //_advectionComplete = false;
 }
 
 // Destructor;
@@ -45,8 +43,6 @@ Advection::UseSeedParticles( const std::vector<Particle>& seeds )
     _streams.resize( seeds.size() );
     for( size_t i = 0; i < seeds.size(); i++ )
         _streams[i].push_back( seeds[i] );
-    
-    _latestAdvectionTime = seeds.at(0).time;
 }
 
 int
@@ -162,8 +158,6 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
         {
             happened = true;
             s.push_back( p1 );
-            if( p1.time > _latestAdvectionTime )
-                _latestAdvectionTime = p1.time;
         }
     }
 
@@ -218,9 +212,6 @@ Advection::AdvectTillTime( Field* velocity, float deltaT, float targetT, ADVECTI
             {
                 happened = true;
                 s.push_back( p1 );
-                if( p1.time > _latestAdvectionTime )
-                    _latestAdvectionTime = p1.time;
-
                 p0 = p1;
             }
         }
@@ -434,12 +425,6 @@ Advection::GetStreamAt( size_t i ) const
     // Since this function is almost always used together with GetNumberOfStreams(),
     // I'm offloading the range check to std::vector. 
     return _streams.at(i);
-}
-
-float
-Advection::GetLatestAdvectionTime() const
-{
-    return _latestAdvectionTime;
 }
 
 /*
