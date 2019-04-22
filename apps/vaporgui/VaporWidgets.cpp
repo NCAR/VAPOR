@@ -72,13 +72,16 @@ VSpinBox::VSpinBox(
     SetLabelText( QString::fromStdString( labelText ) );
     SetValue( defaultValue );
 
-    //connect( _spinBox, SIGNAL( valueChanged(int) ),
     connect( _spinBox, SIGNAL( editingFinished() ),
         this, SLOT( _changed() ) );
 }
 
 void VSpinBox::_changed(){
-    emit _valueChanged();
+    double newValue = _spinBox->value();
+    if ( newValue != _value ) {
+        _value = newValue;
+        emit _valueChanged();
+    }
 }
 
 void VSpinBox::SetMaximum( int maximum ) {
@@ -94,7 +97,7 @@ void VSpinBox::SetValue( int value ) {
 }
 
 int VSpinBox::GetValue() const {
-    return _spinBox->value();
+    return _value;
 }
 
 VDoubleSpinBox::VDoubleSpinBox(
@@ -110,12 +113,16 @@ VDoubleSpinBox::VDoubleSpinBox(
     SetLabelText( QString::fromStdString( labelText ) );
     SetValue( defaultValue );
 
-    connect( _spinBox, SIGNAL( valueChanged(double) ),
-        this, SLOT( _changed(double) ) );
+    connect( _spinBox, SIGNAL( editingFinished() ),
+        this, SLOT( _changed() ) );
 }
 
-void VDoubleSpinBox::_changed( double value ) {
-    emit _valueChanged( value );
+void VDoubleSpinBox::_changed() {
+    double newValue = _spinBox->value();
+    if ( newValue != _value ) {
+        _value = newValue;
+        emit _valueChanged();
+    }
 }
 
 void VDoubleSpinBox::SetMaximum( double maximum ) {
@@ -135,7 +142,7 @@ void VDoubleSpinBox::SetDecimals( int decimals ) {
 }
 
 double VDoubleSpinBox::GetValue() const {
-    return _spinBox->value();
+    return _value;
 }
 
 VLineEdit::VLineEdit(
