@@ -7,6 +7,7 @@ const std::string FlowParams::_velocityMultiplierTag = "velocityMultiplierTag";
 const std::string FlowParams::_steadyNumOfStepsTag   = "steadyNumOfStepsTag";
 const std::string FlowParams::_seedGenModeTag        = "seedGenModeTag";
 const std::string FlowParams::_seedInputFilenameTag  = "seedInputFilenameTag";
+const std::string FlowParams::_flowDirectionTag      = "flowDirectionTag";
 
 static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
 
@@ -98,4 +99,16 @@ void
 FlowParams::SetSeedInputFilename( std::string& name )
 {
     SetValueString( _seedInputFilenameTag, "filename for input seeding list", name ); 
+}
+
+long
+FlowParams::GetFlowDirection() const
+{
+    return GetValueLong( _flowDirectionTag, 0 );
+}
+
+void
+FlowParams::SetFlowDirection( long i )
+{
+    SetValueLong( _flowDirectionTag, "does flow integration go forward, backward, or bi-directional", i );
 }

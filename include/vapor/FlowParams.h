@@ -52,6 +52,9 @@ public:
     std::string GetSeedInputFilename() const;
     void        SetSeedInputFilename( std::string& ) ;
 
+    long  GetFlowDirection() const;
+    void  SetFlowDirection( long );
+
 protected:
 
     static const std::string    _isSteadyTag;
@@ -59,6 +62,8 @@ protected:
     static const std::string    _steadyNumOfStepsTag;
     static const std::string    _seedGenModeTag;
     static const std::string    _seedInputFilenameTag;
+    static const std::string    _flowDirectionTag;
+
 };
 
 }
