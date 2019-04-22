@@ -64,7 +64,8 @@ VSpinBox::VSpinBox(
         const std::string& labelText,
         int defaultValue
     ) :
-    VaporWidget(parent, labelText)
+    VaporWidget(parent, labelText), 
+    _value( defaultValue )
 {
     _spinBox = new QSpinBox( this );
     _layout->addWidget( _spinBox );
@@ -105,7 +106,8 @@ VDoubleSpinBox::VDoubleSpinBox(
         const std::string& labelText,
         double defaultValue
     ) :
-    VaporWidget(parent, labelText)
+    VaporWidget(parent, labelText),
+    _value( defaultValue )
 {
     _spinBox = new QDoubleSpinBox( this );
     _layout->addWidget( _spinBox );
@@ -150,7 +152,8 @@ VLineEdit::VLineEdit(
         const std::string& labelText,
         const std::string& editText
     ) :
-    VaporWidget(parent, labelText)
+    VaporWidget(parent, labelText),
+    _validator( nullptr )
 {
     _text = editText;
 
@@ -164,8 +167,15 @@ VLineEdit::VLineEdit(
         this, SLOT( _returnPressed() ) );
 }
 
-void VLineEdit::SetValidator( const QValidator* v ) {
-    _edit->setValidator( v );
+VLineEdit::~VLineEdit() {
+    if (_validator != nullptr) {
+        delete _validator;
+        _validator = nullptr;
+    }
+}
+
+void VLineEdit::SetValidator( QValidator* v ) {
+    _validator = v;
 }
 
 void VLineEdit::SetEditText( const std::string& text )
@@ -176,26 +186,32 @@ void VLineEdit::SetEditText( const std::string& text )
 void VLineEdit::SetEditText( const QString& text )
 {
     _edit->setText( text );
+   
+    // set local copy after line edit runs validation
+    _text = _edit->text().toStdString();
 }
 
 std::string VLineEdit::GetEditText() const {
-    std::string text = _edit->text().toStdString();
-    return text;
+    return _text;
 }
 
 void VLineEdit::_returnPressed() {
-    const QValidator* validator = _edit->validator();
-    if ( validator != nullptr ) {
-        QString text = _edit->text();
+    QString text = _edit->text();
+    //const QValidator* validator = _edit->validator();
+    //if ( validator != nullptr ) {
+    if ( _validator != nullptr ) {
         int i=0;
-        const QValidator::State state = validator->validate( text, i );
-        if ( state != QValidator::Acceptable )
-            _edit->setText( QString::fromStdString( _text ) );
-        else
-            _text = _edit->text().toStdString();
-    }
+        const QValidator::State state = _validator->validate( text, i );
 
-    std::cout << _text << std::endl;
+        if ( state == QValidator::Acceptable )
+            _text = _edit->text().toStdString();
+
+        _edit->setText( QString::fromStdString( _text ) );
+    }
+    else {
+        _edit->setText( text );
+        _text = text.toStdString();    
+    }
 
     emit _editingFinished();
 }
@@ -307,7 +323,9 @@ VFileSelector::VFileSelector(
         const std::string& filePath,
         QFileDialog::FileMode fileMode
     ) :
-    VPushButton(parent, labelText, "Select")
+    VPushButton(parent, labelText, "Select"),
+    _filePath( filePath ),
+    _filter( "" )
 {
     _fileMode = fileMode;
 
@@ -315,7 +333,6 @@ VFileSelector::VFileSelector(
     _layout->addWidget( _lineEdit );
     
     SetLabelText( labelText );
-    _filePath = filePath;
     _lineEdit->setText( QString::fromStdString( filePath ) );
     
     connect( _button, SIGNAL( pressed() ),
@@ -344,6 +361,14 @@ void VFileSelector::SetPath( const std::string& path ) {
     _lineEdit->setText( QString::fromStdString(path) );
 }
 
+void VFileSelector::SetFileFilter( const QString& filter ) {
+    SetFileFilter( filter.toStdString() );
+}
+
+void VFileSelector::SetFileFilter( const std::string& filter) {
+    _filter = filter;
+}
+
 void VFileSelector::_openFileDialog() {
     QString title = "Select file containing seed points";
     QFileDialog fileDialog(
@@ -351,6 +376,8 @@ void VFileSelector::_openFileDialog() {
         title,
         QString::fromStdString( GetPath() )
     );
+
+    fileDialog.setNameFilter( QString::fromStdString(_filter) );
 
     QFileDialog::AcceptMode acceptMode = QFileDialog::AcceptOpen;
     fileDialog.setAcceptMode( acceptMode );
