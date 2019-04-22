@@ -144,6 +144,8 @@ VLineEdit::VLineEdit(
     ) :
     VaporWidget(parent, labelText)
 {
+    _text = editText;
+
     _edit = new QLineEdit( this );
     _layout->addWidget( _edit );
 
@@ -173,7 +175,20 @@ std::string VLineEdit::GetEditText() const {
     return text;
 }
 
-void VLineEdit::_finished() {
+void VLineEdit::_returnPressed() {
+    const QValidator* validator = _edit->validator();
+    if ( validator != nullptr ) {
+        QString text = _edit->text();
+        int i=0;
+        const QValidator::State state = validator->validate( text, i );
+        if ( state != QValidator::Acceptable )
+            _edit->setText( QString::fromStdString( _text ) );
+        else
+            _text = _edit->text().toStdString();
+    }
+
+    std::cout << _text << std::endl;
+
     emit _editingFinished();
 }
 
@@ -354,6 +369,7 @@ void VFileSelector::_openFileDialog() {
 void VFileSelector::_setPathFromLineEdit() {
     QString filePath = _lineEdit->text();
     SetPath( filePath.toStdString() );
+    emit _pathChanged();
 }
 
 VFileReader::VFileReader(
