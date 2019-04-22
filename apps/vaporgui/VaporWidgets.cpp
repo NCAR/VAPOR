@@ -72,12 +72,13 @@ VSpinBox::VSpinBox(
     SetLabelText( QString::fromStdString( labelText ) );
     SetValue( defaultValue );
 
-    connect( _spinBox, SIGNAL( valueChanged(int) ),
-        this, SLOT( _changed(int) ) );
+    //connect( _spinBox, SIGNAL( valueChanged(int) ),
+    connect( _spinBox, SIGNAL( editingFinished() ),
+        this, SLOT( _changed() ) );
 }
 
-void VSpinBox::_changed( int value ) {
-    emit _valueChanged( value );
+void VSpinBox::_changed(){
+    emit _valueChanged();
 }
 
 void VSpinBox::SetMaximum( int maximum ) {
@@ -364,6 +365,8 @@ void VFileSelector::_openFileDialog() {
 
     SetPath( filePath.toStdString() );
     _button->setDown(false);
+
+    emit _pathChanged();
 }
 
 void VFileSelector::_setPathFromLineEdit() {
