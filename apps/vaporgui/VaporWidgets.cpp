@@ -70,7 +70,6 @@ VSpinBox::VSpinBox(
     _spinBox = new QSpinBox( this );
     _layout->addWidget( _spinBox );
 
-    SetLabelText( QString::fromStdString( labelText ) );
     SetValue( defaultValue );
 
     connect( _spinBox, SIGNAL( editingFinished() ),
@@ -112,7 +111,6 @@ VDoubleSpinBox::VDoubleSpinBox(
     _spinBox = new QDoubleSpinBox( this );
     _layout->addWidget( _spinBox );
 
-    SetLabelText( QString::fromStdString( labelText ) );
     SetValue( defaultValue );
 
     connect( _spinBox, SIGNAL( editingFinished() ),
@@ -160,7 +158,6 @@ VLineEdit::VLineEdit(
     _edit = new QLineEdit( this );
     _layout->addWidget( _edit );
 
-    SetLabelText( QString::fromStdString( labelText ) );
     SetEditText( QString::fromStdString( editText ) );
 
     connect( _edit, SIGNAL( returnPressed() ),
@@ -226,7 +223,6 @@ VPushButton::VPushButton(
     _button = new QPushButton( this );
     _layout->addWidget( _button );
 
-    SetLabelText( QString::fromStdString( labelText ) );
     SetButtonText( QString::fromStdString( buttonText ) );
 
     connect( _button, SIGNAL( pressed() ),
@@ -320,19 +316,27 @@ void VCheckBox::_userClickedCheckbox() {
 VFileSelector::VFileSelector(
         QWidget *parent,
         const std::string& labelText,
+        const std::string& buttonText,
         const std::string& filePath,
         QFileDialog::FileMode fileMode
     ) :
-    VPushButton(parent, labelText, "Select"),
-    _filePath( filePath ),
-    _filter( "" )
+    VPushButton(parent, labelText, buttonText),
+    _filePath( filePath )
 {
     _fileMode = fileMode;
 
     _lineEdit = new QLineEdit(this);
     _layout->addWidget( _lineEdit );
+
+    _fileDialog = new QFileDialog(
+        this,
+        QString::fromStdString( labelText ),
+        QString::fromStdString( GetPath() )
+    );
+    QFileDialog::AcceptMode acceptMode = QFileDialog::AcceptOpen;
+    _fileDialog->setAcceptMode( acceptMode );
+    _fileDialog->setFileMode( _fileMode );
     
-    SetLabelText( labelText );
     _lineEdit->setText( QString::fromStdString( filePath ) );
     
     connect( _button, SIGNAL( pressed() ),
@@ -366,30 +370,30 @@ void VFileSelector::SetFileFilter( const QString& filter ) {
 }
 
 void VFileSelector::SetFileFilter( const std::string& filter) {
-    _filter = filter;
+    _fileDialog->setNameFilter( QString::fromStdString(filter) );
 }
 
 void VFileSelector::_openFileDialog() {
-    QString title = "Select file containing seed points";
-    QFileDialog fileDialog(
+    /*QString title = "Select file containing seed points";
+    QFileDialog _fileDialog(
         this,
         title,
         QString::fromStdString( GetPath() )
     );
 
-    fileDialog.setNameFilter( QString::fromStdString(_filter) );
+    _fileDialog.setNameFilter( QString::fromStdString(_filter) );
 
     QFileDialog::AcceptMode acceptMode = QFileDialog::AcceptOpen;
-    fileDialog.setAcceptMode( acceptMode );
+    _fileDialog.setAcceptMode( acceptMode );
 
-    fileDialog.setFileMode( _fileMode );
+    _fileDialog.setFileMode( _fileMode );*/
 
-    if (fileDialog.exec() != QDialog::Accepted) {
+    if (_fileDialog->exec() != QDialog::Accepted) {
         _button->setDown(false);
         return;
     }
 
-    QStringList files = fileDialog.selectedFiles();
+    QStringList files = _fileDialog->selectedFiles();
     if (files.size() != 1) {
         _button->setDown(false);
         return;
@@ -412,11 +416,13 @@ void VFileSelector::_setPathFromLineEdit() {
 VFileReader::VFileReader(
         QWidget *parent,
         const std::string& labelText,
+        const std::string& buttonText,
         const std::string& filePath
     ) : 
     VFileSelector(
         parent,
         labelText,
+        buttonText,
         filePath,
         QFileDialog::FileMode::ExistingFile
     ) 
@@ -439,11 +445,13 @@ bool VFileReader::_isFileOperable( const std::string& filePath ) const {
 VFileWriter::VFileWriter(
         QWidget *parent,
         const std::string& labelText,
+        const std::string& buttonText,
         const std::string& filePath
     ) : 
     VFileSelector(
         parent,
         labelText,
+        buttonText,
         filePath
     ) 
 {}
