@@ -115,7 +115,7 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     _layout->addWidget( _geometryWidget );
 
     _seedGenMode = new VComboBox( this, "Seed Generation Mode" );
-    // Index numbers are in agreement with what's in FlowRenderer.h
+    /* Index numbers are in agreement with what's in FlowRenderer.h */
     _seedGenMode->AddOption( "Programatically", 0 );
     _seedGenMode->AddOption( "From a List", 1 );
     _layout->addWidget( _seedGenMode );
@@ -124,6 +124,14 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     _fileReader = new VFileReader( this, "Seed File" );
     _layout->addWidget( _fileReader );
     connect( _fileReader, SIGNAL( _pathChanged() ), this, SLOT( _fileReaderChanged() ) );
+
+    _flowDirection = new VComboBox( this, "Steady Flow Direction" );
+    /* Index numbers are in agreement with what's in FlowRenderer.h */
+    _flowDirection->AddOption( "Forward", 0 );
+    _flowDirection->AddOption( "Backward", 1 );
+    _flowDirection->AddOption( "Bi-Directional", 2 );
+    _layout->addWidget( _flowDirection );
+    connect( _flowDirection, SIGNAL(_indexChanged(int)), this, SLOT( _flowDirectionChanged(int) ) );
 }
 
 void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
@@ -156,6 +164,12 @@ FlowSeedingSubtab::_fileReaderChanged()
 {
     std::string filename = _fileReader->GetPath();
     _params->SetSeedInputFilename( filename );
+}
+
+void
+FlowSeedingSubtab::_flowDirectionChanged( int newIdx )
+{
+    _params->SetFlowDirection( newIdx );
 }
 
 
