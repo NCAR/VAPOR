@@ -194,8 +194,6 @@ std::string VLineEdit::GetEditText() const {
 
 void VLineEdit::_returnPressed() {
     QString text = _edit->text();
-    //const QValidator* validator = _edit->validator();
-    //if ( validator != nullptr ) {
     if ( _validator != nullptr ) {
         int i=0;
         const QValidator::State state = _validator->validate( text, i );
@@ -374,19 +372,6 @@ void VFileSelector::SetFileFilter( const std::string& filter) {
 }
 
 void VFileSelector::_openFileDialog() {
-    /*QString title = "Select file containing seed points";
-    QFileDialog _fileDialog(
-        this,
-        title,
-        QString::fromStdString( GetPath() )
-    );
-
-    _fileDialog.setNameFilter( QString::fromStdString(_filter) );
-
-    QFileDialog::AcceptMode acceptMode = QFileDialog::AcceptOpen;
-    _fileDialog.setAcceptMode( acceptMode );
-
-    _fileDialog.setFileMode( _fileMode );*/
 
     if (_fileDialog->exec() != QDialog::Accepted) {
         _button->setDown(false);
