@@ -140,7 +140,10 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
             const auto& past2 = s[ s.size()-3 ];
             dt  = p0.time - past1.time;     // step size used by last integration
             dt *= _calcAdjustFactor( past2, past1, p0 );
-            dt  = glm::clamp( dt, mindt, maxdt );
+            if( dt > 0 )    // integrate forward 
+                dt  = glm::clamp( dt, mindt, maxdt );
+            else            // integrate backward
+                dt  = glm::clamp( dt, maxdt, mindt );
         }
 
         Particle p1;
