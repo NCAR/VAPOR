@@ -27,42 +27,6 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
 	QComboBox* refinementCombo = _variablesWidget->_fidelityWidget->refinementCombo;
 	connect(refinementCombo, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(_setDefaultSampleRate()));
-
-    spinBox = new VSpinBox(this, "VSpinBox");
-    layout()->addWidget( spinBox );
-    connect( spinBox, SIGNAL( _valueChanged() ), this, SLOT( spinComboChanged() ) );
-    
-    dSpinBox = new VDoubleSpinBox(this, "VDoubleSpinBox");
-    layout()->addWidget( dSpinBox );
-    connect( dSpinBox, SIGNAL( _valueChanged() ), this, SLOT( dSpinComboChanged() ) );
-
-    edit = new VLineEdit(this, "without validator");
-    layout()->addWidget( edit );
-    connect( edit, SIGNAL( _editingFinished() ) , this, SLOT( editChanged() ) );
-    
-    vedit = new VLineEdit(this, "with validator");
-    QDoubleValidator* v = new QDoubleValidator( -1000, .0001, 4);
-    vedit->SetValidator(v);
-    layout()->addWidget( vedit );
-    connect( vedit, SIGNAL( _editingFinished() ) , this, SLOT( veditChanged() ) );
-
-    reader = new VFileReader(this, "readFile");
-    layout()->addWidget(reader);
-    connect( reader, SIGNAL( _pathChanged() ), this, SLOT( readFile() ) );
-    
-    readerFilter = new VFileReader(this, "readWithFilter");
-    readerFilter->SetFileFilter((std::string)"*.vdf");
-    layout()->addWidget(readerFilter);
-    connect( readerFilter, SIGNAL( _pathChanged() ), this, SLOT( readFileFilter() ) );
-
-    writer = new VFileWriter(this, "writeFile");
-    layout()->addWidget(writer);
-    connect( writer, SIGNAL( _pathChanged() ), this, SLOT( writeFile() ) );
-    
-    writerFilter = new VFileWriter(this, "writeWithFilter");
-    writerFilter->SetFileFilter((std::string)"*.vdf");
-    layout()->addWidget(writerFilter);
-    connect( writerFilter, SIGNAL( _pathChanged() ), this, SLOT( writeFileFilter() ) );
 }
 
 void SliceVariablesSubtab::Update(
