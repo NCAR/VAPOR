@@ -65,6 +65,7 @@ protected:
     bool                _cache_isSteady;
     long                _cache_steadyNumOfSteps;
     size_t              _cache_currentTS;
+
     // A few different modes to generate advection seeds:
     //   0 - programmatical
     //   1 - reading a list of seeds
@@ -73,6 +74,12 @@ protected:
     //   4 - randomly generate with bias
     long                _cache_seedGenMode;
     std::string         _cache_seedInputFilename;
+
+    // A few different ways to integrate a flow line in steady mode:
+    //   0 - forward
+    //   1 - backward
+    //   2 - bi-directional
+    long                _cache_flowDirection;
 
     FlowStatus          _velocityStatus;
     FlowStatus          _colorStatus;
