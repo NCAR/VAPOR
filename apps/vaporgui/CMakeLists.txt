@@ -18,7 +18,6 @@ set (SRCS
 	NavigationEventRouter.cpp
 	TwoDDataEventRouter.cpp
 	WireFrameEventRouter.cpp
-	RangeController.cpp
     PythonVariables.cpp
 	Statistics.cpp
 	Plot.cpp
@@ -62,7 +61,8 @@ set (SRCS
 	FileOperationChecker.cpp
 	Combo.cpp
 	windowsUtils.cpp
-	Manip.cpp 
+	Manip.cpp
+    VaporWidgets.cpp
 
 #	 Need to include all files that request .ui files
     TwoDSubtabs.h
@@ -123,7 +123,6 @@ set (SRCS
     PythonVariablesParams.h
 	QIntValidatorWithFixup.h
 	RangeCombos.h
-	RangeController.h
 	RenderEventRouter.h
 	RenderHolder.h
 	SettingsEventRouter.h
@@ -134,6 +133,7 @@ set (SRCS
 	VariablesWidget.h
 	VizSelectCombo.h
 	WireFrameEventRouter.h
+    VaporWidgets.h
 )
 
 set (UIS 

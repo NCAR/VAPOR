@@ -1,5 +1,5 @@
 #include <vector>
-#include <Python.h>
+#include <vapor/MyPython.h>
 #include <vapor/DataMgr.h>
 #include <vapor/DC.h>
 
