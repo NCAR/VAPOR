@@ -52,6 +52,7 @@ protected:
     unsigned int _VBOChunked = 0;
     unsigned int _framebuffer = 0;
     unsigned int _framebufferTexture = 0;
+    unsigned int _framebufferDepthTexture = 0;
     unsigned int _LUTTexture;
     unsigned int _depthTexture;
     
