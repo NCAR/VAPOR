@@ -55,6 +55,7 @@ VolumeRenderer::~VolumeRenderer()
     if (_VBOChunked) glDeleteBuffers(1, &_VBOChunked);
     if (_framebuffer) glDeleteFramebuffers(1, &_framebuffer);
     if (_framebufferTexture) glDeleteTextures(1, &_framebufferTexture);
+    if (_framebufferDepthTexture) glDeleteTextures(1, &_framebufferDepthTexture);
     if (_LUTTexture) glDeleteTextures(1, &_LUTTexture);
     if (_depthTexture) glDeleteTextures(1, &_depthTexture);
     if (_cache.tf) delete _cache.tf;
@@ -109,14 +110,22 @@ int VolumeRenderer::_initializeGL()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+    glGenTextures(1, &_framebufferDepthTexture);
+    glBindTexture(GL_TEXTURE_2D, _framebufferDepthTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 1, 1, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
     glBindTexture(GL_TEXTURE_2D, 0);
-    _framebufferSize[0] = 0;
-    _framebufferSize[1] = 0;
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _framebufferTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _framebufferDepthTexture, 0);
 
     assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    _framebufferSize[0] = 0;
+    _framebufferSize[1] = 0;
 
     return 0;
 }
@@ -161,7 +170,7 @@ void VolumeRenderer::_generateChunkedRenderMesh(const float C)
 
 int VolumeRenderer::_paintGL(bool fast)
 {
-    bool useFramebuffer = false;
+    bool useFramebuffer = true;
     if (fast && _algorithm) {
         float prevFPS = 1 / _lastRenderTime;
         if (!_lastRenderWasFast) prevFPS *= _algorithm->GuestimateFastModeSpeedupFactor();
@@ -215,12 +224,15 @@ int VolumeRenderer::_paintGL(bool fast)
             glActiveTexture(GL_TEXTURE0);    // Don't mess up bound textures
             glBindTexture(GL_TEXTURE_2D, _framebufferTexture);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fbSize[0], fbSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            glBindTexture(GL_TEXTURE_2D, _framebufferDepthTexture);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, fbSize[0], fbSize[1], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
 
         glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
         glClearColor(0, 0, 0, 0);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glDepthMask(true);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, fbSize[0], fbSize[1]);
     }
 
@@ -308,9 +320,14 @@ int VolumeRenderer::_paintGL(bool fast)
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
         SmartShaderProgram framebufferShader = _glManager->shaderManager->GetShader("Framebuffer");
+        if (!framebufferShader.IsValid()) return -1;
         glBindVertexArray(_VAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _framebufferTexture);
+        framebufferShader->SetUniform("colorBuffer", 0);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, _framebufferDepthTexture);
+        framebufferShader->SetUniform("depthBuffer", 1);
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
 
