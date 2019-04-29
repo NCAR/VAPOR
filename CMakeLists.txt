@@ -86,6 +86,10 @@ set (THIRD_PARTY_INC_DIR )
 include (site_files/site.NCAR OPTIONAL)
 include (site.local           OPTIONAL)
 
+message(STATUS "third party dir ${THIRD_PARTY_DIR}" )
+message(STATUS "third party lib dir ${THIRD_PARTY_LIB_DIR}" )
+message(STATUS "third party inc dir ${THIRD_PARTY_INC_DIR}" )
+
 include_directories ("${PROJECT_SOURCE_DIR}/include")
 include_directories (${THIRD_PARTY_INC_DIR})
 #include_directories (${QTDIR}/lib/QtCore.framework/Headers)
