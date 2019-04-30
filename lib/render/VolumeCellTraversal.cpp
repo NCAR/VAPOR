@@ -148,42 +148,14 @@ VolumeCellTraversal::VolumeCellTraversal(GLManager *gl)
 : VolumeRegular(gl),
 _useHighPrecisionTriangleRoutine(false)
 {
-    glGenTextures(1, &_coordTexture);
-    glBindTexture(GL_TEXTURE_3D, _coordTexture);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    
-    
-    glGenTextures(1, &_minTexture);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _minTexture);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glGenTextures(1, &_maxTexture);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _maxTexture);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    
-    glGenTextures(1, &_BBLevelDimTexture);
-    glBindTexture(GL_TEXTURE_2D, _BBLevelDimTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    _coordTexture.Generate(GL_NEAREST);
+    _minTexture.Generate(GL_NEAREST);
+    _maxTexture.Generate(GL_NEAREST);
+    _BBLevelDimTexture.Generate(GL_NEAREST);
 }
 
 VolumeCellTraversal::~VolumeCellTraversal()
 {
-    if (_coordTexture)  glDeleteTextures(1, &_coordTexture);
-    if (_minTexture) glDeleteTextures(1, &_minTexture);
-    if (_maxTexture) glDeleteTextures(1, &_maxTexture);
-    if (_BBLevelDimTexture) glDeleteTextures(1, &_BBLevelDimTexture);
 }
 
 int VolumeCellTraversal::LoadData(const Grid *grid)
@@ -211,9 +183,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
         data[i*3+2] = (*coord)[2];
     }
     
-    glBindTexture(GL_TEXTURE_3D, _coordTexture);
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, 0, 0, 0, 0, GL_RED, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, dims[0], dims[1], dims[2], 0, GL_RGB, GL_FLOAT, data);
+    _coordTexture.TexImage(GL_RGB32F, dims[0], dims[1], dims[2], GL_RGB, GL_FLOAT, data);
     
     printf("Computing acceleration tree...\n");
     vector<size_t> cellDims = {dims[0]-1, dims[1]-1, dims[2]-1};
@@ -245,13 +215,8 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     levels = min(levels, MAX_LEVELS);
     _BBLevels = levels;
     
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _minTexture);
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, 0, 0, 0, 0, GL_RGB, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMins);
-    
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _maxTexture);
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, 0, 0, 0, 0, GL_RGB, GL_FLOAT, NULL); // Fix driver bug with re-uploading large textures
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB32F, sd, bd, 6, 0, GL_RGB, GL_FLOAT, boxMaxs);
+    _minTexture.TexImage(GL_RGB32F, sd, bd, 6, GL_RGB, GL_FLOAT, boxMins);
+    _maxTexture.TexImage(GL_RGB32F, sd, bd, 6, GL_RGB, GL_FLOAT, boxMaxs);
     
     int sizes[levels];
     ivec2 mipDims[levels][6];
@@ -341,14 +306,11 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
             }
         }
         
-        glBindTexture(GL_TEXTURE_2D_ARRAY, _minTexture);
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, level, GL_RGB32F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, minMip[level]);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, _maxTexture);
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, level, GL_RGB32F, ms, ms, 6, 0, GL_RGB, GL_FLOAT, maxMip[level]);
+        _minTexture.TexImage(GL_RGB32F, ms, ms, 6, GL_RGB, GL_FLOAT, minMip[level], level);
+        _maxTexture.TexImage(GL_RGB32F, ms, ms, 6, GL_RGB, GL_FLOAT, maxMip[level], level);
     }
     
-    glBindTexture(GL_TEXTURE_2D, _BBLevelDimTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32I, 6, levels, 0, GL_RG_INTEGER, GL_INT, mipDims);
+    _BBLevelDimTexture.TexImage(GL_RG32I, 6, levels, 0, GL_RG_INTEGER, GL_INT, mipDims);
     
     for (int level = 1; level < levels; level++) {
         delete [] minMip[level];
@@ -414,22 +376,22 @@ void VolumeCellTraversal::SetUniforms(int *nextTextureUnit) const
     s->SetUniform("coordDims", *(glm::ivec3*)&_coordDims);
     
     glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
-    glBindTexture(GL_TEXTURE_3D, _coordTexture);
+    _coordTexture.Bind();
     s->SetUniform("coords", *nextTextureUnit);
     (*nextTextureUnit)++;
     
     glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _minTexture);
+    _minTexture.Bind();
     s->SetUniform("boxMins", *nextTextureUnit);
     (*nextTextureUnit)++;
     
     glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _maxTexture);
+    _maxTexture.Bind();
     s->SetUniform("boxMaxs", *nextTextureUnit);
     (*nextTextureUnit)++;
     
     glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
-    glBindTexture(GL_TEXTURE_2D, _BBLevelDimTexture);
+    _BBLevelDimTexture.Bind();
     s->SetUniform("levelDims", *nextTextureUnit);
     (*nextTextureUnit)++;
 }

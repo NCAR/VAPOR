@@ -5,13 +5,14 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <vapor/NonCopyableMixin.h>
 
 namespace VAPoR {
     
     struct GLManager;
 	class VolumeAlgorithmFactory;
     
-    class VolumeAlgorithm {
+    class VolumeAlgorithm : private NonCopyableMixin {
     public:
         enum class Type {
             Any,
