@@ -1,5 +1,6 @@
 #include "vapor/glutil.h"
 #include "vapor/ShaderManager.h"
+#include <vapor/Shader.h>
 #include "vapor/FileUtils.h"
 #include <vapor/ResourcePath.h>
 #include <vapor/STLUtils.h>
