@@ -26,7 +26,7 @@ class VolumeAlgorithm : private NonCopyableMixin {
     virtual int LoadSecondaryData(const Grid *grid) = 0;
     virtual void DeleteSecondaryData() = 0;
     virtual ShaderProgram *GetShader() const = 0;
-    virtual void SetUniforms(int *nextTextureUnit) const = 0;
+    virtual void SetUniforms(const ShaderProgram *shader) const = 0;
     virtual bool IsSlow() = 0;
     virtual float GuestimateFastModeSpeedupFactor() const { return 1; }
 

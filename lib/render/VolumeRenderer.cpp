@@ -114,14 +114,13 @@ int VolumeRenderer::_initializeGL() {
     glEnableVertexAttribArray(1);
     _generateChunkedRenderMesh(8);
 
-    _depthTexture.Generate();
-
     _framebufferSize[0] = -1;
     _framebufferSize[1] = -1;
 
     _framebuffer.EnableDepthBuffer();
     _framebuffer.Generate();
     _LUTTexture.Generate();
+    _depthTexture.Generate();
 
     return 0;
 }
@@ -233,9 +232,10 @@ int VolumeRenderer::_paintGL(bool fast) {
     vec3 extLengthsScaled = extLengths * extScales;
     float smallestDimension = min(extLengthsScaled[0], min(extLengthsScaled[1], extLengthsScaled[2]));
 
-    SmartShaderProgram shader(_algorithm->GetShader());
-    if (!shader.IsValid())
+    ShaderProgram *shader = _algorithm->GetShader();
+    if (!shader)
         return -1;
+    shader->Bind();
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     shader->SetUniform("cameraPos", vec3(cameraPos[0], cameraPos[1], cameraPos[2]));
     shader->SetUniform("dataBoundsMin", dataMin);
@@ -265,18 +265,10 @@ int VolumeRenderer::_paintGL(bool fast) {
     if (_cache.constantColor.size() == 4)
         shader->SetUniform("constantColor", *(vec4 *)_cache.constantColor.data());
 
-    int nextTextureUnit = 0;
-    _algorithm->SetUniforms(&nextTextureUnit);
+    shader->SetSampler("LUT", _LUTTexture);
+    shader->SetSampler("sceneDepth", _depthTexture);
 
-    glActiveTexture(GL_TEXTURE0 + nextTextureUnit);
-    _LUTTexture.Bind();
-    shader->SetUniform("LUT", nextTextureUnit);
-    nextTextureUnit++;
-
-    glActiveTexture(GL_TEXTURE0 + nextTextureUnit);
-    _depthTexture.Bind();
-    shader->SetUniform("sceneDepth", nextTextureUnit);
-    nextTextureUnit++;
+    _algorithm->SetUniforms(shader);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -302,18 +294,15 @@ int VolumeRenderer::_paintGL(bool fast) {
     _lastRenderTime = renderTime;
     _lastRenderWasFast = fast;
 
+    shader->UnBind();
     _framebuffer.UnBind();
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
     SmartShaderProgram framebufferShader = _glManager->shaderManager->GetShader("Framebuffer");
     if (!framebufferShader.IsValid())
         return -1;
     glBindVertexArray(_VAO);
-    glActiveTexture(GL_TEXTURE0);
-    _framebuffer.GetColorTexture()->Bind();
-    framebufferShader->SetUniform("colorBuffer", 0);
-    glActiveTexture(GL_TEXTURE1);
-    _framebuffer.GetDepthTexture()->Bind();
-    framebufferShader->SetUniform("depthBuffer", 1);
+    framebufferShader->SetSampler("colorBuffer", *_framebuffer.GetColorTexture());
+    framebufferShader->SetSampler("depthBuffer", *_framebuffer.GetDepthTexture());
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glDepthFunc(GL_LESS);
@@ -397,7 +386,6 @@ void VolumeRenderer::_loadTF() {
     float *LUT = new float[4 * 256];
     tf->makeLut(LUT);
 
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA8, 256, 0, GL_RGBA, GL_FLOAT, LUT);
     _LUTTexture.TexImage(GL_RGBA8, 256, 0, 0, GL_RGBA, GL_FLOAT, LUT);
 
     delete[] LUT;
