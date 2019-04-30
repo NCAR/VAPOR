@@ -2,9 +2,9 @@
 
 #include <vector>
 #include <string>
+#include <map>
 #include <glm/fwd.hpp>
-
-#include "vapor/Shader.h"
+#include <vapor/MyBase.h>
 
 namespace VAPoR {
 
@@ -16,11 +16,15 @@ namespace VAPoR {
 //! \author Stanislaw Jaroszynski
 //! \date August, 2018
 
+class Shader;
+class Texture;
+
 class RENDER_API ShaderProgram : public Wasp::MyBase {
     unsigned int _id;
     std::vector<Shader *> _shaders;
     bool _linked;
     int _successStatus;
+    std::map<std::string, int> _samplerLocations;
 
   public:
     enum class Policy {
@@ -57,6 +61,7 @@ class RENDER_API ShaderProgram : public Wasp::MyBase {
     int GetAttributeLocation(const std::string &name) const;
     int GetUniformLocation(const std::string &name) const;
     bool HasUniform(const std::string &name) const;
+    void ComputeSamplerLocations();
 
     template <typename T>
     bool SetUniform(const std::string &name, const T &value) const;
@@ -77,9 +82,13 @@ class RENDER_API ShaderProgram : public Wasp::MyBase {
     void SetUniformArray(int location, int count, const glm::vec3 *values) const;
     void SetUniformArray(int location, int count, const glm::vec4 *values) const;
 
+    template <typename T>
+    bool SetSampler(const std::string &name, const T &value) const;
+
     std::string GetLog() const;
     void PrintUniforms() const;
     static const char *GLTypeToString(const unsigned int type);
+    static bool IsGLTypeSampler(const unsigned int type);
 };
 
 //! \class SmartShaderProgram

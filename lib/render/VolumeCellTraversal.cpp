@@ -362,31 +362,15 @@ ShaderProgram *VolumeCellTraversal::GetShader() const {
     return _glManager->shaderManager->GetShader(_addDefinitionsToShader("VolumeCellDVR"));
 }
 
-void VolumeCellTraversal::SetUniforms(int *nextTextureUnit) const {
-    VolumeRegular::SetUniforms(nextTextureUnit);
-    ShaderProgram *s = GetShader();
+void VolumeCellTraversal::SetUniforms(const ShaderProgram *s) const {
+    VolumeRegular::SetUniforms(s);
 
     s->SetUniform("coordDims", *(glm::ivec3 *)&_coordDims);
 
-    glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
-    _coordTexture.Bind();
-    s->SetUniform("coords", *nextTextureUnit);
-    (*nextTextureUnit)++;
-
-    glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
-    _minTexture.Bind();
-    s->SetUniform("boxMins", *nextTextureUnit);
-    (*nextTextureUnit)++;
-
-    glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
-    _maxTexture.Bind();
-    s->SetUniform("boxMaxs", *nextTextureUnit);
-    (*nextTextureUnit)++;
-
-    glActiveTexture(GL_TEXTURE0 + *nextTextureUnit);
-    _BBLevelDimTexture.Bind();
-    s->SetUniform("levelDims", *nextTextureUnit);
-    (*nextTextureUnit)++;
+    s->SetSampler("coords", _coordTexture);
+    s->SetSampler("boxMins", _minTexture);
+    s->SetSampler("boxMaxs", _maxTexture);
+    s->SetSampler("levelDims", _BBLevelDimTexture);
 }
 
 float VolumeCellTraversal::GuestimateFastModeSpeedupFactor() const {
@@ -426,7 +410,7 @@ ShaderProgram *VolumeCellTraversalIso::GetShader() const {
     return _glManager->shaderManager->GetShader(_addDefinitionsToShader("VolumeCellISO"));
 }
 
-void VolumeCellTraversalIso::SetUniforms(int *nextTextureUnit) const {
-    VolumeCellTraversal::SetUniforms(nextTextureUnit);
-    GetShader()->SetUniform("useColormapData", _hasSecondData);
+void VolumeCellTraversalIso::SetUniforms(const ShaderProgram *shader) const {
+    VolumeCellTraversal::SetUniforms(shader);
+    shader->SetUniform("useColormapData", _hasSecondData);
 }
