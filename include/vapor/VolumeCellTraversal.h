@@ -19,10 +19,10 @@ class VolumeCellTraversal : public VolumeRegular {
     virtual float GuestimateFastModeSpeedupFactor() const;
 
   private:
-    unsigned int _minTexture;
-    unsigned int _maxTexture;
-    unsigned int _BBLevelDimTexture;
-    unsigned int _coordTexture;
+    Texture3D _coordTexture;
+    Texture2DArray _minTexture;
+    Texture2DArray _maxTexture;
+    Texture2D _BBLevelDimTexture;
 
     int _coordDims[3];
     int _BBLevels;
