@@ -1,5 +1,6 @@
 #include <vapor/Framebuffer.h>
 #include <vapor/glutil.h>
+#include <cassert>
 
 using namespace VAPoR;
 
