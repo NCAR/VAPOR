@@ -18,7 +18,7 @@ public:
     virtual int            LoadSecondaryData(const Grid *grid);
     virtual void           DeleteSecondaryData();
     virtual ShaderProgram *GetShader() const;
-    virtual void           SetUniforms(int *nextTextureUnit) const;
+    virtual void           SetUniforms(const ShaderProgram *shader) const;
     virtual float          GuestimateFastModeSpeedupFactor() const;
 
 protected:
@@ -42,7 +42,7 @@ public:
     static std::string     GetName() { return "Iso Regular"; }
     static Type            GetType() { return Type::Iso; }
     virtual ShaderProgram *GetShader() const;
-    virtual void           SetUniforms(int *nextTextureUnit) const;
+    virtual void           SetUniforms(const ShaderProgram *shader) const;
 };
 
 }    // namespace VAPoR
