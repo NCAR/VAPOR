@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vapor/VolumeAlgorithm.h>
+#include <vapor/Texture.h>
 
 namespace VAPoR {
 
@@ -21,19 +22,18 @@ public:
     virtual float          GuestimateFastModeSpeedupFactor() const;
 
 protected:
-    unsigned int _dataTexture;
-    unsigned int _missingTexture;
-    bool         _hasMissingData;
+    Texture3D _data;
+    Texture3D _missing;
+    bool      _hasMissingData;
 
     std::vector<size_t> _dataDimensions;
 
-    bool         _hasSecondData;
-    unsigned int _dataTexture2;
-    unsigned int _missingTexture2;
-    bool         _hasMissingData2;
+    bool      _hasSecondData;
+    Texture3D _data2;
+    Texture3D _missing2;
+    bool      _hasMissingData2;
 
-    static int  _loadDataDirect(const Grid *grid, const unsigned int dataTexture, const unsigned int missingTexture, bool *hasMissingData);
-    static void _initializeTexture(unsigned int &texture);
+    int _loadDataDirect(const Grid *grid, Texture3D *dataTexture, Texture3D *missingTexture, bool *hasMissingData);
 };
 
 class VolumeRegularIso : public VolumeRegular {

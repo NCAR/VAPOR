@@ -173,7 +173,9 @@ int Visualizer::paintEvent(bool fast)
         if (_renderers[i]->IsGLInitialized()) {
             _applyDatasetTransformsForRenderer(_renderers[i]);
 
-            int myrc = _renderers[i]->paintGL(fast);
+            void *t = _glManager->BeginTimer();
+            int   myrc = _renderers[i]->paintGL(fast);
+            printf("%s: %f\n", _renderers[i]->GetMyName().c_str(), _glManager->EndTimer(t));
             GL_ERR_BREAK();
             if (myrc < 0) rc = -1;
         }
