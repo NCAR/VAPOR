@@ -15,7 +15,7 @@ namespace VAPoR {
         
         virtual int LoadData(const Grid *grid);
         virtual ShaderProgram *GetShader() const;
-        virtual void SetUniforms(int *nextTextureUnit) const;
+        virtual void SetUniforms(const ShaderProgram *shader) const;
         virtual float GuestimateFastModeSpeedupFactor() const;
         
     private:
@@ -43,7 +43,7 @@ namespace VAPoR {
         static std::string GetName() { return "Iso Cell Traversal"; }
         static Type        GetType() { return Type::Iso; }
         virtual ShaderProgram *GetShader() const;
-        virtual void SetUniforms(int *nextTextureUnit) const;
+        virtual void SetUniforms(const ShaderProgram *shader) const;
     };
     
 }
