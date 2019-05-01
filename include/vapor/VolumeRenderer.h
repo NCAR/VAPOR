@@ -33,7 +33,7 @@ class RENDER_API VolumeRenderer : public Renderer {
     int _paintGL(bool fast);
     void _clearCache(){};
 
-    virtual void _setShaderUniforms(const ShaderProgram *shader) const;
+    virtual void _setShaderUniforms(const ShaderProgram *shader, const bool fast) const;
     void _drawScreenQuad();
     void _drawScreenQuadChuncked();
     void _generateChunkedRenderMesh(const float chunks);
@@ -41,6 +41,11 @@ class RENDER_API VolumeRenderer : public Renderer {
     void _computeNewFramebufferRatio();
     bool _shouldUseChunkedRender() const;
     virtual bool _usingColorMapData() const;
+    void _saveOriginalViewport();
+    void _restoreOriginalViewport();
+    void _initializeFramebuffer(bool fast);
+    int _renderFramebufferToDisplay();
+    void _initializeAlgorithm();
     int _loadData();
     int _loadSecondaryData();
     void _loadTF();
@@ -49,19 +54,19 @@ class RENDER_API VolumeRenderer : public Renderer {
     virtual std::string _getDefaultAlgorithmForGrid(const Grid *grid) const;
     bool _needToSetDefaultAlgorithm() const;
 
-    VolumeAlgorithm *_algorithm;
-
-    unsigned int _VAO = 0;
-    unsigned int _VBO = 0;
-    unsigned int _VAOChunked = 0;
-    unsigned int _VBOChunked = 0;
+    unsigned int _VAO = NULL;
+    unsigned int _VBO = NULL;
+    unsigned int _VAOChunked = NULL;
+    unsigned int _VBOChunked = NULL;
+    VolumeAlgorithm *_algorithm = NULL;
     Texture1D _LUTTexture;
     Texture2D _depthTexture;
     Framebuffer _framebuffer;
 
-    int _nChunks = 64;
+    int _nChunks;
     double _lastRenderTime;
     bool _lastRenderWasFast;
+    int _originalViewport[4];
     int _framebufferSize[2];
     float _framebufferRatio;
 
