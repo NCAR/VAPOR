@@ -45,9 +45,9 @@ bool VolumeIsoRenderer::_usingColorMapData() const
     return !GetActiveParams()->UseSingleColor();
 }
 
-void VolumeIsoRenderer::_setShaderUniforms(const ShaderProgram *shader) const
+void VolumeIsoRenderer::_setShaderUniforms(const ShaderProgram *shader, const bool fast) const
 {
-    VolumeRenderer::_setShaderUniforms(shader);
+    VolumeRenderer::_setShaderUniforms(shader, fast);
     
     VolumeIsoParams *vp = (VolumeIsoParams *)GetActiveParams();
     
