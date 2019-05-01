@@ -21,9 +21,15 @@ protected:
     int  _paintGL(bool fast);
     void _clearCache(){};
 
+    virtual void        _setShaderUniforms(const ShaderProgram *shader) const;
+    void                _drawScreenQuad();
+    void                _drawScreenQuadChuncked();
     void                _generateChunkedRenderMesh(const float chunks);
-    int                 _loadData();
+    bool                _wasTooSlowForFastRender() const;
+    void                _computeNewFramebufferRatio();
+    bool                _shouldUseChunkedRender() const;
     virtual bool        _usingColorMapData() const;
+    int                 _loadData();
     int                 _loadSecondaryData();
     void                _loadTF();
     glm::vec3           _getVolumeScales() const;

@@ -34,6 +34,7 @@ VolumeRenderer::VolumeRenderer(const ParamsMgr *pm, std::string &winName, std::s
     _VBOChunked = NULL;
     _algorithm = NULL;
     _lastRenderTime = 10000;
+    _lastRenderWasFast = false;
     _framebufferRatio = 1;
 
     if (_needToSetDefaultAlgorithm()) {
@@ -93,69 +94,20 @@ int VolumeRenderer::_initializeGL()
     return 0;
 }
 
-void VolumeRenderer::_generateChunkedRenderMesh(const float C)
-{
-    vector<vec4> d;
-    d.reserve(powf(ceil(C), 2));
-    float s = 2 / (float)C;
-    float ts = 1 / (float)C;
-    for (int yi = 0; yi < C; yi++) {
-        float y = 2 * yi / (float)C - 1;
-        float ty = yi / (float)C;
-        float y2 = min(y + s, 1.0f);
-        float ty2 = min(ty + ts, 1.0f);
-        for (int xi = 0; xi < C; xi++) {
-            float x = 2 * xi / (float)C - 1;
-            float tx = xi / (float)C;
-            float x2 = min(x + s, 1.0f);
-            float tx2 = min(tx + ts, 1.0f);
-
-            d.push_back(vec4(x, y, tx, ty));
-            d.push_back(vec4(x2, y, tx2, ty));
-            d.push_back(vec4(x, y2, tx, ty2));
-
-            d.push_back(vec4(x, y2, tx, ty2));
-            d.push_back(vec4(x2, y, tx2, ty));
-            d.push_back(vec4(x2, y2, tx2, ty2));
-        }
-    }
-    glBindBuffer(GL_ARRAY_BUFFER, _VBOChunked);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * d.size(), d.data(), GL_STATIC_DRAW);
-}
-
 #define CheckCache(cVar, pVar)     \
     if (cVar != pVar) {            \
         _cache.needsUpdate = true; \
         cVar = pVar;               \
     }
 
-#define MAX_FRAMEBUFFER_RATIO 15.0f
-
 int VolumeRenderer::_paintGL(bool fast)
 {
-    if (fast && _algorithm) {
-        float prevFPS = 1 / _lastRenderTime;
-        if (!_lastRenderWasFast) prevFPS *= _algorithm->GuestimateFastModeSpeedupFactor();
+    if (_wasTooSlowForFastRender()) return 0;
 
-        if (_lastRenderWasFast && prevFPS < 10 && _framebufferRatio == MAX_FRAMEBUFFER_RATIO) return 0;
-
-        if (prevFPS < 24 || (prevFPS > 40 && _framebufferRatio > 3) || prevFPS > 60) {
-            float ratioTo30FPS = 30 / prevFPS;
-            float perDimRatio = sqrtf(ratioTo30FPS);
-            _framebufferRatio *= perDimRatio;
-            _framebufferRatio = min(_framebufferRatio, MAX_FRAMEBUFFER_RATIO);
-            _framebufferRatio = max(_framebufferRatio, 1.0f);
-        }
-        int chunksPerDim = ceil(8.0 / _framebufferRatio);
-        _generateChunkedRenderMesh(chunksPerDim);
-        _nChunks = chunksPerDim * chunksPerDim;
-    } else {
+    if (fast && _algorithm)
+        _computeNewFramebufferRatio();
+    else
         _framebufferRatio = 1;
-        if (_algorithm && _algorithm->IsSlow()) {
-            _generateChunkedRenderMesh(8);
-            _nChunks = 64;
-        }
-    }
 
     VolumeParams *vp = (VolumeParams *)GetActiveParams();
     if (_cache.algorithmName != vp->GetAlgorithm()) {
@@ -184,54 +136,14 @@ int VolumeRenderer::_paintGL(bool fast)
     glDepthMask(true);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    Viewpoint *VP = _paramsMgr->GetViewpointParams(_winName)->getCurrentViewpoint();
-    double     m[16];
-    double     cameraPos[3], cameraUp[3], cameraDir[3];
-    _glManager->matrixManager->GetDoublev(MatrixManager::Mode::ModelView, m);
-    VP->ReconstructCamera(m, cameraPos, cameraUp, cameraDir);
-
-    glm::vec3 dataMin, dataMax, userMin, userMax;
-    _getExtents(&dataMin, &dataMax, &userMin, &userMax);
-    vec3  extLengths = dataMax - dataMin;
-    vec3  extScales = _getVolumeScales();
-    vec3  extLengthsScaled = extLengths * extScales;
-    float smallestDimension = min(extLengthsScaled[0], min(extLengthsScaled[1], extLengthsScaled[2]));
-
     ShaderProgram *shader = _algorithm->GetShader();
     if (!shader) return -1;
     shader->Bind();
-    shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
-    shader->SetUniform("cameraPos", vec3(cameraPos[0], cameraPos[1], cameraPos[2]));
-    shader->SetUniform("dataBoundsMin", dataMin);
-    shader->SetUniform("dataBoundsMax", dataMax);
-    shader->SetUniform("userExtsMin", userMin);
-    shader->SetUniform("userExtsMax", userMax);
-    shader->SetUniform("LUTMin", (float)_cache.mapRange[0]);
-    shader->SetUniform("LUTMax", (float)_cache.mapRange[1]);
-    shader->SetUniform("unitDistance", smallestDimension / 100.f);
-    shader->SetUniform("scales", extScales);
+    _setShaderUniforms(shader);
+    _algorithm->SetUniforms(shader);
     shader->SetUniform("fast", fast);
-    shader->SetUniform("lightingEnabled", vp->GetLightingEnabled());
-    shader->SetUniform("phongAmbient", vp->GetPhongAmbient());
-    shader->SetUniform("phongDiffuse", vp->GetPhongDiffuse());
-    shader->SetUniform("phongSpecular", vp->GetPhongSpecular());
-    shader->SetUniform("phongShininess", vp->GetPhongShininess());
-    if (shader->HasUniform("isoValue")) {
-        vector<double> isoValuesD = vp->GetIsoValues();
-        vector<float>  isoValues(isoValuesD.begin(), isoValuesD.end());
-        vector<bool>   enabledIsoValues = vp->GetEnabledIsoValues();
-        shader->SetUniformArray("isoValue", 4, isoValues.data());
-        shader->SetUniform("isoEnabled[0]", (bool)enabledIsoValues[0]);
-        shader->SetUniform("isoEnabled[1]", (bool)enabledIsoValues[1]);
-        shader->SetUniform("isoEnabled[2]", (bool)enabledIsoValues[2]);
-        shader->SetUniform("isoEnabled[3]", (bool)enabledIsoValues[3]);
-    }
-    if (_cache.constantColor.size() == 4) shader->SetUniform("constantColor", *(vec4 *)_cache.constantColor.data());
-
     shader->SetSampler("LUT", _LUTTexture);
     shader->SetSampler("sceneDepth", _depthTexture);
-
-    _algorithm->SetUniforms(shader);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -239,21 +151,13 @@ int VolumeRenderer::_paintGL(bool fast)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_ALWAYS);
 
-    printf("Begin Render... ");
     void *start = GLManager::BeginTimer();
-    if (_algorithm->IsSlow()) {
-        glBindVertexArray(_VAOChunked);
-        for (int i = 0; i < _nChunks; i++) {
-            glDrawArrays(GL_TRIANGLES, i * 6, 6);
-            glFinish();
-        }
+    if (_shouldUseChunkedRender()) {
+        _drawScreenQuadChuncked();
     } else {
-        glBindVertexArray(_VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        _drawScreenQuad();
     }
     double renderTime = GLManager::EndTimer(start);
-    printf("Render time = %f, ", renderTime);
-    printf("FPS = %f\n", 1 / renderTime);
     _lastRenderTime = renderTime;
     _lastRenderWasFast = fast;
 
@@ -262,10 +166,9 @@ int VolumeRenderer::_paintGL(bool fast)
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
     SmartShaderProgram framebufferShader = _glManager->shaderManager->GetShader("Framebuffer");
     if (!framebufferShader.IsValid()) return -1;
-    glBindVertexArray(_VAO);
     framebufferShader->SetSampler("colorBuffer", *_framebuffer.GetColorTexture());
     framebufferShader->SetSampler("depthBuffer", *_framebuffer.GetDepthTexture());
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    _drawScreenQuad();
 
     glDepthFunc(GL_LESS);
     glDisable(GL_BLEND);
@@ -275,6 +178,118 @@ int VolumeRenderer::_paintGL(bool fast)
 
     return 0;
 }
+
+void VolumeRenderer::_setShaderUniforms(const ShaderProgram *shader) const
+{
+    VolumeParams *vp = (VolumeParams *)GetActiveParams();
+    Viewpoint *   viewpoint = _paramsMgr->GetViewpointParams(_winName)->getCurrentViewpoint();
+    double        m[16];
+    double        cameraPos[3], cameraUp[3], cameraDir[3];
+    _glManager->matrixManager->GetDoublev(MatrixManager::Mode::ModelView, m);
+    viewpoint->ReconstructCamera(m, cameraPos, cameraUp, cameraDir);
+
+    shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
+    shader->SetUniform("cameraPos", vec3(cameraPos[0], cameraPos[1], cameraPos[2]));
+    shader->SetUniform("lightingEnabled", vp->GetLightingEnabled());
+    shader->SetUniform("phongAmbient", vp->GetPhongAmbient());
+    shader->SetUniform("phongDiffuse", vp->GetPhongDiffuse());
+    shader->SetUniform("phongSpecular", vp->GetPhongSpecular());
+    shader->SetUniform("phongShininess", vp->GetPhongShininess());
+
+    glm::vec3 dataMin, dataMax, userMin, userMax;
+    _getExtents(&dataMin, &dataMax, &userMin, &userMax);
+    vec3  extLengths = dataMax - dataMin;
+    vec3  extScales = _getVolumeScales();
+    vec3  extLengthsScaled = extLengths * extScales;
+    float smallestDimension = min(extLengthsScaled[0], min(extLengthsScaled[1], extLengthsScaled[2]));
+
+    shader->SetUniform("dataBoundsMin", dataMin);
+    shader->SetUniform("dataBoundsMax", dataMax);
+    shader->SetUniform("userExtsMin", userMin);
+    shader->SetUniform("userExtsMax", userMax);
+    shader->SetUniform("unitDistance", smallestDimension / 100.f);
+    shader->SetUniform("scales", extScales);
+
+    shader->SetUniform("LUTMin", (float)_cache.mapRange[0]);
+    shader->SetUniform("LUTMax", (float)_cache.mapRange[1]);
+}
+
+void VolumeRenderer::_drawScreenQuad()
+{
+    glBindVertexArray(_VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void VolumeRenderer::_drawScreenQuadChuncked()
+{
+    int chunksPerDim = ceil(8.0 / _framebufferRatio);
+    _generateChunkedRenderMesh(chunksPerDim);
+
+    glBindVertexArray(_VAOChunked);
+    for (int i = 0; i < _nChunks; i++) {
+        glDrawArrays(GL_TRIANGLES, i * 6, 6);
+        glFinish();
+    }
+}
+
+void VolumeRenderer::_generateChunkedRenderMesh(const float C)
+{
+    vector<vec4> d;
+    _nChunks = powf(ceil(C), 2);
+    d.reserve(powf(ceil(C), 2) * 6);
+    float s = 2 / (float)C;
+    float ts = 1 / (float)C;
+    for (int yi = 0; yi < C; yi++) {
+        float y = 2 * yi / (float)C - 1;
+        float ty = yi / (float)C;
+        float y2 = min(y + s, 1.0f);
+        float ty2 = min(ty + ts, 1.0f);
+        for (int xi = 0; xi < C; xi++) {
+            float x = 2 * xi / (float)C - 1;
+            float tx = xi / (float)C;
+            float x2 = min(x + s, 1.0f);
+            float tx2 = min(tx + ts, 1.0f);
+
+            d.push_back(vec4(x, y, tx, ty));
+            d.push_back(vec4(x2, y, tx2, ty));
+            d.push_back(vec4(x, y2, tx, ty2));
+
+            d.push_back(vec4(x, y2, tx, ty2));
+            d.push_back(vec4(x2, y, tx2, ty));
+            d.push_back(vec4(x2, y2, tx2, ty2));
+        }
+    }
+    glBindBuffer(GL_ARRAY_BUFFER, _VBOChunked);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * d.size(), d.data(), GL_STATIC_DRAW);
+}
+
+#define MAX_FRAMEBUFFER_RATIO 15.0f
+
+bool VolumeRenderer::_wasTooSlowForFastRender() const
+{
+    float prevFPS = 1 / _lastRenderTime;
+
+    if (_lastRenderWasFast && prevFPS < 10 && _framebufferRatio == MAX_FRAMEBUFFER_RATIO) return true;
+    return false;
+}
+
+void VolumeRenderer::_computeNewFramebufferRatio()
+{
+    float prevFPS = 1 / _lastRenderTime;
+    if (!_lastRenderWasFast) prevFPS *= _algorithm->GuestimateFastModeSpeedupFactor();
+
+    if (prevFPS < 24 || (prevFPS > 40 && _framebufferRatio > 3) || prevFPS > 60) {
+        float ratioTo30FPS = 30 / prevFPS;
+        float perDimRatio = sqrtf(ratioTo30FPS);
+        _framebufferRatio *= perDimRatio;
+        _framebufferRatio = min(_framebufferRatio, MAX_FRAMEBUFFER_RATIO);
+        _framebufferRatio = max(_framebufferRatio, 1.0f);
+    }
+}
+
+bool VolumeRenderer::_shouldUseChunkedRender() const { return _algorithm && _algorithm->IsSlow(); }
+
+bool VolumeRenderer::_usingColorMapData() const { return false; }
 
 int VolumeRenderer::_loadData()
 {
@@ -298,8 +313,6 @@ int VolumeRenderer::_loadData()
     delete grid;
     return ret;
 }
-
-bool VolumeRenderer::_usingColorMapData() const { return false; }
 
 int VolumeRenderer::_loadSecondaryData()
 {
