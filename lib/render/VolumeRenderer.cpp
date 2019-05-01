@@ -16,6 +16,12 @@ using glm::vec3;
 using glm::vec4;
 using glm::mat4;
 
+#define CheckCache(cVar, pVar) \
+if (cVar != pVar) { \
+_cache.needsUpdate = true; \
+cVar = pVar; \
+}
+
 using namespace VAPoR;
 
 static RendererRegistrar<VolumeRenderer> registrar( VolumeRenderer::GetClassType(),
@@ -54,11 +60,6 @@ VolumeRenderer::VolumeRenderer(
                      instName,
                      dataMgr)
 {
-    _VAO = NULL;
-    _VBO = NULL;
-    _VAOChunked = NULL;
-    _VBOChunked = NULL;
-    _algorithm = NULL;
     _lastRenderTime = 10000;
     _lastRenderWasFast = false;
     _framebufferRatio = 1;
@@ -84,8 +85,8 @@ VolumeRenderer::~VolumeRenderer()
 
 int VolumeRenderer::_initializeGL()
 {
-    float BL = -1;
-    float data[] = {
+    const float BL = -1;
+    const float data[] = {
         BL, BL,    0, 0,
         1, BL,    1, 0,
         BL,  1,    0, 1,
@@ -113,7 +114,6 @@ int VolumeRenderer::_initializeGL()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2*sizeof(float)));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    _generateChunkedRenderMesh(8);
     
     _framebufferSize[0] = -1;
     _framebufferSize[1] = -1;
@@ -126,57 +126,25 @@ int VolumeRenderer::_initializeGL()
     return 0;
 }
 
-#define CheckCache(cVar, pVar) \
-if (cVar != pVar) { \
-_cache.needsUpdate = true; \
-cVar = pVar; \
-}
-
 int VolumeRenderer::_paintGL(bool fast)
 {
     if (fast && _wasTooSlowForFastRender())
         return 0;
     
-    if (fast && _algorithm)
-        _computeNewFramebufferRatio();
-    else
-        _framebufferRatio = 1;
     
-    VolumeParams *vp = (VolumeParams *)GetActiveParams();
-    if (_cache.algorithmName != vp->GetAlgorithm()) {
-        _cache.algorithmName = vp->GetAlgorithm();
-        if (_algorithm) delete _algorithm;
-        _algorithm = VolumeAlgorithm::NewAlgorithm(_cache.algorithmName, _glManager);
-        _cache.needsUpdate = true;
-    }
-    
+    _initializeAlgorithm();
     if (_loadData() < 0) return -1;
     if (_loadSecondaryData() < 0) return -1;
     _loadTF();
     _cache.needsUpdate = false;
     
-    GLint viewport[4] = {0};
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    
     _depthTexture.CopyDepthBuffer();
-    
-    ivec2 fbSize(viewport[2], viewport[3]);
-    fbSize /= _framebufferRatio;
-    _framebuffer.SetSize(fbSize.x, fbSize.y);
-    
-    _framebuffer.MakeRenderTarget();
-    glClearColor(0, 0, 0, 0);
-    glDepthMask(true);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    _initializeFramebuffer(fast);
     
     ShaderProgram *shader = _algorithm->GetShader();
     if (!shader) return -1;
     shader->Bind();
-    _setShaderUniforms(shader);
-    _algorithm->SetUniforms(shader);
-    shader->SetUniform("fast", fast);
-    shader->SetSampler("LUT", _LUTTexture);
-    shader->SetSampler("sceneDepth", _depthTexture);
+    _setShaderUniforms(shader, fast);
     
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -193,26 +161,17 @@ int VolumeRenderer::_paintGL(bool fast)
     _lastRenderTime = renderTime;
     _lastRenderWasFast = fast;
     
-    shader->UnBind();
-    _framebuffer.UnBind();
-    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-    SmartShaderProgram framebufferShader = _glManager->shaderManager->GetShader("Framebuffer");
-    if (!framebufferShader.IsValid())
-        return -1;
-    framebufferShader->SetSampler("colorBuffer", *_framebuffer.GetColorTexture());
-    framebufferShader->SetSampler("depthBuffer", *_framebuffer.GetDepthTexture());
-    _drawScreenQuad();
+    int ret = _renderFramebufferToDisplay();
     
     glDepthFunc(GL_LESS);
     glDisable(GL_BLEND);
-    GL_ERR_BREAK();
-    
     glBindVertexArray(0);
+    ShaderProgram::UnBind();
     
-    return 0;
+    return ret;
 }
 
-void VolumeRenderer::_setShaderUniforms(const ShaderProgram *shader) const
+void VolumeRenderer::_setShaderUniforms(const ShaderProgram *shader, const bool fast) const
 {
     VolumeParams *vp = (VolumeParams *)GetActiveParams();
     Viewpoint *viewpoint = _paramsMgr->GetViewpointParams(_winName)->getCurrentViewpoint();
@@ -245,6 +204,13 @@ void VolumeRenderer::_setShaderUniforms(const ShaderProgram *shader) const
     
     shader->SetUniform("LUTMin", (float)_cache.mapRange[0]);
     shader->SetUniform("LUTMax", (float)_cache.mapRange[1]);
+    
+    shader->SetSampler("LUT", _LUTTexture);
+    shader->SetSampler("sceneDepth", _depthTexture);
+    
+    shader->SetUniform("fast", fast);
+    
+    _algorithm->SetUniforms(shader);
 }
 
 void VolumeRenderer::_drawScreenQuad()
@@ -332,6 +298,58 @@ bool VolumeRenderer::_usingColorMapData() const
     return false;
 }
 
+void VolumeRenderer::_saveOriginalViewport()
+{
+    glGetIntegerv(GL_VIEWPORT, _originalViewport);
+}
+
+void VolumeRenderer::_restoreOriginalViewport()
+{
+    glViewport(_originalViewport[0], _originalViewport[1], _originalViewport[2], _originalViewport[3]);
+}
+
+void VolumeRenderer::_initializeFramebuffer(bool fast)
+{
+    if (fast) _computeNewFramebufferRatio();
+    else _framebufferRatio = 1;
+    
+    _saveOriginalViewport();
+    ivec2 fbSize(_originalViewport[2], _originalViewport[3]);
+    fbSize /= _framebufferRatio;
+    _framebuffer.SetSize(fbSize.x, fbSize.y);
+    
+    _framebuffer.MakeRenderTarget();
+    glClearColor(0, 0, 0, 0);
+    glDepthMask(true);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+int VolumeRenderer::_renderFramebufferToDisplay()
+{
+    _framebuffer.UnBind();
+    _restoreOriginalViewport();
+    SmartShaderProgram framebufferShader = _glManager->shaderManager->GetShader("Framebuffer");
+    if (!framebufferShader.IsValid())
+        return -1;
+    framebufferShader->SetSampler("colorBuffer", *_framebuffer.GetColorTexture());
+    framebufferShader->SetSampler("depthBuffer", *_framebuffer.GetDepthTexture());
+    _drawScreenQuad();
+    
+    return 0;
+}
+
+void VolumeRenderer::_initializeAlgorithm()
+{
+    VolumeParams *vp = (VolumeParams *)GetActiveParams();
+    
+    if (_cache.algorithmName != vp->GetAlgorithm()) {
+        _cache.algorithmName = vp->GetAlgorithm();
+        if (_algorithm) delete _algorithm;
+        _algorithm = VolumeAlgorithm::NewAlgorithm(_cache.algorithmName, _glManager);
+        _cache.needsUpdate = true;
+    }
+}
+
 int VolumeRenderer::_loadData()
 {
     VolumeParams *RP = (VolumeParams *)GetActiveParams();
@@ -345,10 +363,8 @@ int VolumeRenderer::_loadData()
     Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.var, _cache.refinement, _cache.compression);
     
     if (_needToSetDefaultAlgorithm()) {
-        if (_algorithm) delete _algorithm;
-        string algorithmName = _getDefaultAlgorithmForGrid(grid);
-        _algorithm = VolumeAlgorithm::NewAlgorithm(algorithmName, _glManager);
-        RP->SetAlgorithm(algorithmName);
+        RP->SetAlgorithm(_getDefaultAlgorithmForGrid(grid));
+        _initializeAlgorithm();
     }
     
     int ret = _algorithm->LoadData(grid);

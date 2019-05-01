@@ -26,7 +26,7 @@ public:
     }
     
     virtual bool _usingColorMapData() const;
-    virtual void _setShaderUniforms(const ShaderProgram *shader) const;
+    virtual void _setShaderUniforms(const ShaderProgram *shader, const bool fast) const;
     virtual std::string _getDefaultAlgorithmForGrid(const Grid *grid) const;
 };
 
