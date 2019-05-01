@@ -102,7 +102,7 @@ int VolumeRenderer::_initializeGL()
 
 int VolumeRenderer::_paintGL(bool fast)
 {
-    if (_wasTooSlowForFastRender()) return 0;
+    if (fast && _wasTooSlowForFastRender()) return 0;
 
     if (fast && _algorithm)
         _computeNewFramebufferRatio();
@@ -152,11 +152,10 @@ int VolumeRenderer::_paintGL(bool fast)
     glDepthFunc(GL_ALWAYS);
 
     void *start = GLManager::BeginTimer();
-    if (_shouldUseChunkedRender()) {
+    if (_shouldUseChunkedRender())
         _drawScreenQuadChuncked();
-    } else {
+    else
         _drawScreenQuad();
-    }
     double renderTime = GLManager::EndTimer(start);
     _lastRenderTime = renderTime;
     _lastRenderWasFast = fast;
