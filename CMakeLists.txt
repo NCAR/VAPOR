@@ -7,7 +7,7 @@ include (buildutils/GetGitRevisionDescription.cmake)
 set (CMAKE_CXX_STANDARD 11)
 
 if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build." FORCE)
+	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
 	# Set the possible values of build type for cmake-gui
 	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
 endif()
@@ -62,7 +62,7 @@ option (BUILD_GUI "Build Vapor GUI" ON)
 option (BUILD_UTL "Build conversion and utility applications" ${DEFAULT_BUILD_UTILITIES})
 option (BUILD_DOC "Build Vapor Doxygen documentation" ON)
 option (BUILD_TEST_APPS "Build test applications" OFF)
-option (DIST_INSTALLER "Generate installer for distributing vapor binaries. Will generate standard make install if off" OFF)
+option (DIST_INSTALLER "Generate installer for distributing vapor binaries. Will generate standard make install if off" ON)
 
 set (GENERATE_FULL_INSTALLER ON)
 if (BUILD_GUI)
@@ -73,9 +73,7 @@ set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-#set (QTDIR /Users/pearse/Qt5_12/5.12.1/clang_64)
-#set (Qt5Core_DIR /Users/pearse/Qt5_12/5.12.1/clang_64)
-#find_package (Qt5Core REQUIRED)
+set (QTDIR )
 set (PYTHONDIR )
 set (PYTHONVERSION )
 set (PYTHONPATH )
@@ -88,13 +86,10 @@ include (site.local           OPTIONAL)
 
 include_directories ("${PROJECT_SOURCE_DIR}/include")
 include_directories (${THIRD_PARTY_INC_DIR})
-#include_directories (${QTDIR}/lib/QtCore.framework/Headers)
-#include_directories (${QTDIR}/lib/QtWidgets.framework/Versions/5/Headers)
-#include_directories (${QTDIR}/lib/QtOpenGL.framework/Versions/5/Headers)
 include_directories (${THIRD_PARTY_INC_DIR}/freetype2)
 link_directories (${THIRD_PARTY_LIB_DIR})
-#list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR} "/Users/pearse/Qt5_12/5.12.1/clang_64/lib/cmake")
-#list (APPEND CMAKE_PROGRAM_PATH ${QTDIR}/bin)
+list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
+list (APPEND CMAKE_PROGRAM_PATH ${QTDIR}/bin)
 include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION})
 if (WIN32)
 	include_directories (${PYTHONPATH}/Lib/site-packages/numpy/core/include)
@@ -194,6 +189,7 @@ if (WIN32)
 
 	if (GENERATE_FULL_INSTALLER)
 		set (DLL_DIR "C:/vaporwin64deps2015/vapordlls")
+		#file (GLOB WIN_INSTALL_DLLS ${DLL_DIR}/*.dll ${QTDIR}/bin/*.dll C:\\Qt\\5.12.3\\msvc2017_64\\plugins\\platforms\\*.dll)
 		file (GLOB WIN_INSTALL_DLLS ${DLL_DIR}/*.dll ${QTDIR}/bin/*.dll)
 		install (
 			FILES ${WIN_INSTALL_DLLS}
@@ -205,6 +201,10 @@ if (WIN32)
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
+		install(FILES
+			${QTDIR}/plugins/platforms/qwindows.dll
+			DESTINATION platforms
+		)
 	endif (GENERATE_FULL_INSTALLER)
 
 	set (CPACK_NSIS_MODIFY_PATH OFF)
