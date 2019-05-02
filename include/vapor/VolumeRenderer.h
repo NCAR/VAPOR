@@ -45,7 +45,7 @@ class RENDER_API VolumeRenderer : public Renderer {
     void _restoreOriginalViewport();
     void _initializeFramebuffer(bool fast);
     int _renderFramebufferToDisplay();
-    void _initializeAlgorithm();
+    int _initializeAlgorithm();
     int _loadData();
     int _loadSecondaryData();
     void _loadTF();
