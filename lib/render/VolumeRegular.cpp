@@ -117,7 +117,7 @@ static VolumeAlgorithmRegistrar<VolumeRegularIso> registrationIso;
 
 ShaderProgram *VolumeRegularIso::GetShader() const
 {
-    return _glManager->shaderManager->GetShader("VolumeISO");
+    return _glManager->shaderManager->GetShader("VolumeIso");
 }
 
 void VolumeRegularIso::SetUniforms(const ShaderProgram *shader) const
