@@ -36,19 +36,7 @@ static VolumeAlgorithmRegistrar<VolumeCellTraversalIso> registration2;
 #define F_FRONT ivec3(0, -1, 0)
 #define F_BACK  ivec3(0, 1, 0)
 
-static ivec3 GetFaceFromFaceIndex(int i)
-{
-    if (i == FI_LEFT) return F_LEFT;
-    if (i == FI_RIGHT) return F_RIGHT;
-    if (i == FI_UP) return F_UP;
-    if (i == FI_DOWN) return F_DOWN;
-    if (i == FI_FRONT) return F_FRONT;
-    if (i == FI_BACK) return F_BACK;
-    assert(0);
-    return F_LEFT;
-}
-
-static int GetFaceIndexFromFace(const ivec3 face)
+static int GetFaceIndexFromFace(const ivec3 &face)
 {
     if (face == F_LEFT) return FI_LEFT;
     if (face == F_RIGHT) return FI_RIGHT;
@@ -152,7 +140,6 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     _useHighPrecisionTriangleRoutine = _needsHighPrecisionTriangleRoutine(grid);
     _nvidiaGPU = _glManager->GetVendor() == GLManager::Vendor::Nvidia;
 
-    printf("Loading coordinate data...\n");
     vector<size_t> dims = grid->GetDimensions();
     const int      w = dims[0], h = dims[1], d = dims[2];
     const size_t   nCoords = (size_t)w * h * d;
@@ -171,7 +158,10 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
 
     _coordTexture.TexImage(GL_RGB32F, dims[0], dims[1], dims[2], GL_RGB, GL_FLOAT, data);
 
-    printf("Computing acceleration tree...\n");
+    // ---------------------------------------
+    // Compute bounding boxes for outside faces
+    // ---------------------------------------
+
     vector<size_t> cellDims = {dims[0] - 1, dims[1] - 1, dims[2] - 1};
     vector<size_t> cellDimsSorted = cellDims;
     std::sort(cellDimsSorted.begin(), cellDimsSorted.end());
@@ -203,6 +193,10 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
 
     _minTexture.TexImage(GL_RGB32F, sd, bd, 6, GL_RGB, GL_FLOAT, boxMins);
     _maxTexture.TexImage(GL_RGB32F, sd, bd, 6, GL_RGB, GL_FLOAT, boxMaxs);
+
+    // ---------------------------------------
+    // Compute mipmap for acceleration tree
+    // ---------------------------------------
 
     int   sizes[levels];
     ivec2 mipDims[levels][6];
@@ -309,7 +303,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
 
 // System: CISL-VAPOR
 // Vendor: NVIDIA
-// Dataset: Lee Orf tornado
+// Dataset: Lee Orf tornado Max/Min resolutions
 //
 //                  Render Times
 // Levels  Compile   Max    Min
