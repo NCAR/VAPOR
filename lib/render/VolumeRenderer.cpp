@@ -130,7 +130,8 @@ int VolumeRenderer::_paintGL(bool fast) {
     if (fast && _wasTooSlowForFastRender())
         return 0;
 
-    _initializeAlgorithm();
+    if (_initializeAlgorithm() < 0)
+        return -1;
     if (_loadData() < 0)
         return -1;
     if (_loadSecondaryData() < 0)
@@ -329,7 +330,7 @@ int VolumeRenderer::_renderFramebufferToDisplay() {
     return 0;
 }
 
-void VolumeRenderer::_initializeAlgorithm() {
+int VolumeRenderer::_initializeAlgorithm() {
     VolumeParams *vp = (VolumeParams *)GetActiveParams();
 
     if (_cache.algorithmName != vp->GetAlgorithm()) {
@@ -339,6 +340,10 @@ void VolumeRenderer::_initializeAlgorithm() {
         _algorithm = VolumeAlgorithm::NewAlgorithm(_cache.algorithmName, _glManager);
         _cache.needsUpdate = true;
     }
+    if (_algorithm)
+        return 0;
+    else
+        return -1;
 }
 
 int VolumeRenderer::_loadData() {
@@ -354,7 +359,10 @@ int VolumeRenderer::_loadData() {
 
     if (_needToSetDefaultAlgorithm()) {
         RP->SetAlgorithm(_getDefaultAlgorithmForGrid(grid));
-        _initializeAlgorithm();
+        if (_initializeAlgorithm() < 0) {
+            delete grid;
+            return -1;
+        }
     }
 
     int ret = _algorithm->LoadData(grid);
