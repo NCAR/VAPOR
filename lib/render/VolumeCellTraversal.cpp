@@ -381,7 +381,7 @@ bool VolumeCellTraversal::_need32BitForCoordinates(const Grid *grid)
     return false;
 }
 
-ShaderProgram *VolumeCellTraversalIso::GetShader() const { return _glManager->shaderManager->GetShader(_addDefinitionsToShader("VolumeCellISO")); }
+ShaderProgram *VolumeCellTraversalIso::GetShader() const { return _glManager->shaderManager->GetShader(_addDefinitionsToShader("VolumeCellIso")); }
 
 void VolumeCellTraversalIso::SetUniforms(const ShaderProgram *shader) const
 {

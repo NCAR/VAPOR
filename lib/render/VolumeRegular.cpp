@@ -98,7 +98,7 @@ float VolumeRegular::GuestimateFastModeSpeedupFactor() const { return 5; }
 
 static VolumeAlgorithmRegistrar<VolumeRegularIso> registrationIso;
 
-ShaderProgram *VolumeRegularIso::GetShader() const { return _glManager->shaderManager->GetShader("VolumeISO"); }
+ShaderProgram *VolumeRegularIso::GetShader() const { return _glManager->shaderManager->GetShader("VolumeIso"); }
 
 void VolumeRegularIso::SetUniforms(const ShaderProgram *shader) const
 {
