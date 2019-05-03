@@ -369,7 +369,7 @@ void VFileSelector::SetPath( const std::string& path ) {
 }
 
 void VFileSelector::SetFileFilter( const QString& filter ) {
-    SetFileFilter( filter.toStdString() );
+    _fileDialog->setNameFilter( filter );
 }
 
 void VFileSelector::SetFileFilter( const std::string& filter) {
