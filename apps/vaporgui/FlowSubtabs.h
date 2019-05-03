@@ -114,6 +114,7 @@ private slots:
     // Respond to user input
     void _seedGenModeChanged( int newIdx );
     void _fileReaderChanged();
+    void _fileWriterChanged();
     void _flowDirectionChanged( int newIdx );
 
 private:
@@ -123,6 +124,7 @@ private:
 
     VComboBox*              _seedGenMode;
     VFileReader*            _fileReader;
+    VFileWriter*            _fileWriter;
 
     VComboBox*              _flowDirection;
 };
