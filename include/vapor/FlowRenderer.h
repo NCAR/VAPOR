@@ -81,6 +81,9 @@ protected:
     //   2 - bi-directional
     long                _cache_flowDirection;
 
+    // This Advection class is only used in bi-directional advection mode 
+    flow::Advection*    _2ndAdvection;
+
     FlowStatus          _velocityStatus;
     FlowStatus          _colorStatus;
 
