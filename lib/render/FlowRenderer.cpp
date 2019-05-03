@@ -225,6 +225,11 @@ FlowRenderer::_paintGL( bool fast )
                 assert( deltaT > 0.0f );
                 float   deltaT2 = deltaT * -1.0f;
                 rv = flow::ADVECT_HAPPENED;
+                for( size_t i = _2ndAdvection->GetMaxNumOfSteps(); 
+                            i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
+                {
+                    rv = _2ndAdvection->AdvectOneStep( &_velocityField, deltaT2 );
+                }
             }
 
         }
@@ -246,6 +251,8 @@ FlowRenderer::_paintGL( bool fast )
     if( !_coloringComplete )
     {
         rv = _advection.CalculateParticleValues( &_colorField, true );
+        if( _2ndAdvection )     // bi-directional advection
+            rv = _2ndAdvection->CalculateParticleValues( &_colorField, true );
         _coloringComplete = true;
     }
 
@@ -269,6 +276,21 @@ FlowRenderer::_purePaint( FlowParams* params, bool fast )
         else
         {
             _drawAStreamAsLines( s, params );
+        }
+    }
+
+    if( _2ndAdvection )
+    {
+        numOfStreams = _2ndAdvection->GetNumberOfStreams();
+        for( size_t i = 0; i < numOfStreams; i++ )
+        {
+            const auto& s = _2ndAdvection->GetStreamAt( i );
+            if( fast )
+                _drawAStreamAsLines( s, params );
+            else
+            {
+                _drawAStreamAsLines( s, params );
+            }
         }
     }
     
@@ -460,7 +482,10 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
             if( _cache_flowDirection == 2 && !_2ndAdvection )
                 _2ndAdvection = new flow::Advection();
             if( _cache_flowDirection != 2 && _2ndAdvection )
+            {
                 delete _2ndAdvection;
+                _2ndAdvection = nullptr;
+            }
         }
     }
 
@@ -497,9 +522,9 @@ FlowRenderer::_genSeedsXY( std::vector<flow::Particle>& seeds, float timeVal ) c
     std::vector<double>           extMin, extMax;
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
     params->GetBox()->GetExtents( extMin, extMax );
-    float stepX = (extMax[0] - extMin[0]) / (numX + 1.0);
-    float stepY = (extMax[1] - extMin[1]) / (numY + 1.0);
-    float stepZ = extMin[2] + (extMax[2] - extMin[2]) / 100.0;
+    float stepX = (extMax[0] - extMin[0]) / (numX + 1.0f);
+    float stepY = (extMax[1] - extMin[1]) / (numY + 1.0f);
+    float stepZ = extMin[2] + (extMax[2] - extMin[2]) / 4.0f;
 
     seeds.resize( numX * numY );
     for( int y = 0; y < numY; y++ )
