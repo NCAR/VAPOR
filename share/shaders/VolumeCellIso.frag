@@ -3,27 +3,6 @@
 #include VolumeCellBase.frag
 #include VolumeIsoInclude.frag
 
-void TestIso(vec3 o, vec3 d, float t0, float t1, float value, float dv, float ld, vec3 entranceCoord, vec3 exitCoord, vec3 dir, inout vec4 accum)
-{
-    if ((ld < value && dv >= value) || (ld > value && dv <= value)) {
-        vec3 isoCoord = mix(entranceCoord, exitCoord, (value-ld)/(dv-ld));
-		vec3 isoSampleSTR = isoCoord/coordDimsF;
-        
-        vec4 color = GetIsoSurfaceColor(isoSampleSTR);
-        vec3 normal = GetNormal(isoSampleSTR);
-        
-        color.rgb *= PhongLighting(normal, dir);
-        
-        BlendToBack(accum, PremultiplyAlpha(color));
-        
-        if (color.a > ALPHA_BREAK) {
-            float t = mix(t0, t1, (value-ld)/(dv-ld));
-            vec3 hit = o + d*t;
-            gl_FragDepth = CalculateDepth(hit);
-        }
-    }
-}
-
 void TestIsoSample(const vec3 hit, const vec3 dir, float value, float dv, float ld, inout vec4 accum)
 {
     if ((ld < value && dv >= value) || (ld > value && dv <= value)) {
@@ -90,42 +69,12 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
         hasNext = FindNextCell(origin, dir, t0, currentCell, entranceFace, nextCell, exitFace, exitCoord, t1);
         
         if (t0 >= tMin || (t0 <= tMin && tMin < t1)) {
-#if 1
             float tEnd = min(t1, tMax);
             float tStart = max(t0, tMin);
 
 			if (ShouldRenderCell(currentCell)) {
                 RenderCellSmartSampling(dir, entranceCoord, exitCoord, tStart, tEnd, t0, t1, step, ld, accum);
 			}
-#else
-            float dv = GetDataCoordinateSpace(exitCoord);
-            bool increasing = dv-ld > 0;
-            if (ShouldRenderCell(currentCell)) {
-                bool e[4] = isoEnabled;
-                float v[4] = isoValue;
-                
-                /*
-                for (int i = 0; i < 3; i++) {
-                    for (int j = i+1; j < 4; j++) {
-                        if ((increasing && v[i] > v[j]) || (!increasing && v[i] < v[j])) {
-                            float tv = v[i];
-                            bool te = e[i];
-                            v[i] = v[j];
-                            e[i] = e[j];
-                            v[j] = tv;
-                            e[j] = te;
-                        }
-                    }
-                }
-                 */
-
-                if (e[0]) TestIso(origin, dir, t0, t1, v[0], dv, ld, entranceCoord, exitCoord, dir, accum);
-                if (e[1]) TestIso(origin, dir, t0, t1, v[1], dv, ld, entranceCoord, exitCoord, dir, accum);
-                if (e[2]) TestIso(origin, dir, t0, t1, v[2], dv, ld, entranceCoord, exitCoord, dir, accum);
-                if (e[3]) TestIso(origin, dir, t0, t1, v[3], dv, ld, entranceCoord, exitCoord, dir, accum);
-            }
-            ld = dv;
-#endif
         }
         
         currentCell = nextCell;
