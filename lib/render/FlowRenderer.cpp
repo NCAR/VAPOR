@@ -73,7 +73,6 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
 
     _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
     _colorStatus            = FlowStatus::SIMPLE_OUTOFDATE;
-    _steadyTotalSteps       = 0;
 
     _advectionComplete      = false;
     _coloringComplete       = false;
@@ -175,7 +174,6 @@ FlowRenderer::_paintGL( bool fast )
 
         _advectionComplete = false;
         _velocityStatus = FlowStatus::UPTODATE;
-        _steadyTotalSteps = 0;
     }
     else if( _velocityStatus == FlowStatus::TIME_STEP_OOD )
     {
@@ -215,13 +213,10 @@ FlowRenderer::_paintGL( bool fast )
             /* If the advection is single-directional */
             if( params->GetFlowDirection() == 1 )   // backward integration
                 deltaT *= -1.0f;
-            size_t actualSteps = 0;
             int numOfSteps = params->GetSteadyNumOfSteps();
-            for( size_t i = _steadyTotalSteps; i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
+            for( size_t i = _advection.GetMaxNumOfSteps(); i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
             {
                 rv = _advection.AdvectOneStep( &_velocityField, deltaT );
-                _steadyTotalSteps++;
-                actualSteps++;
             }
 
             /* If the advection is bi-directional */
@@ -230,7 +225,6 @@ FlowRenderer::_paintGL( bool fast )
                 assert( deltaT > 0.0f );
                 float   deltaT2 = deltaT * -1.0f;
                 rv = flow::ADVECT_HAPPENED;
-                actualSteps = 0;
             }
 
         }
