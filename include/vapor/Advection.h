@@ -54,6 +54,9 @@ public:
     size_t GetNumberOfStreams() const;
     const  std::vector<Particle>& GetStreamAt( size_t i ) const;
 
+    // Retrieve the maximum number of steps
+    size_t GetMaxNumOfSteps() const;
+
     // As part of the functionality of this class, it manages the 
     //    particles that it stores.
     //
