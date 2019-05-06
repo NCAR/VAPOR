@@ -378,7 +378,7 @@ bool VolumeCellTraversal::_needsHighPrecisionTriangleRoutine(const Grid *grid) {
     double maxLength = max(lengths[0], max(lengths[1], lengths[2]));
     double ratio = maxLength / minLength;
 
-    if (ratio > 100000)
+    if (ratio > 10000)
         return true;
     else
         return false;
