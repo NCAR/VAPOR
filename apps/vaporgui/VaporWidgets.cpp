@@ -329,8 +329,7 @@ VFileSelector::VFileSelector(
         QString::fromStdString( labelText ),
         QString::fromStdString( GetPath() )
     );
-    //QFileDialog::AcceptMode acceptMode = QFileDialog::AcceptOpen;
-    //_fileDialog->setAcceptMode( acceptMode );
+    
     _fileMode = fileMode;
     _fileDialog->setFileMode( _fileMode );
     
