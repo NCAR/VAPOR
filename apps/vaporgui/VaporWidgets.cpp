@@ -171,6 +171,40 @@ VLineEdit::~VLineEdit() {
     }
 }
 
+void VLineEdit::SetExtents( int min, int max ) {
+    assert( _validator );
+
+    QIntValidator* val = qobject_cast<QIntValidator*>(_validator);
+    assert( val );
+
+    val->setRange( min, max );
+}
+
+void VLineEdit::SetExtents( double min, double max ) {
+    assert( _validator );
+
+    QDoubleValidator* val = qobject_cast<QDoubleValidator*>(_validator);
+    assert( val );
+
+    val->setRange( min, max );
+}
+
+void VLineEdit::SetIntType() {
+    if (_validator != nullptr)
+        delete _validator;
+
+    _validator = new QIntValidator( this );
+    _edit->setValidator( _validator );
+}
+
+void VLineEdit::SetDoubleType() {
+    if (_validator != nullptr)
+        delete _validator;
+
+    _validator = new QDoubleValidator( this );
+    _edit->setValidator( _validator );
+}
+
 void VLineEdit::SetValidator( QValidator* v ) {
     _validator = v;
 }
@@ -258,6 +292,11 @@ void VComboBox::_userIndexChanged(int index) {
     emit _indexChanged(index);
 }
 
+int VComboBox::GetNumOfItems() const
+{
+    return _combo->count();
+}
+
 int VComboBox::GetCurrentIndex() const {
     return _combo->currentIndex();
 }
@@ -321,18 +360,20 @@ VFileSelector::VFileSelector(
     VPushButton(parent, labelText, buttonText),
     _filePath( filePath )
 {
-    _fileMode = fileMode;
-
     _lineEdit = new QLineEdit(this);
     _layout->addWidget( _lineEdit );
+
+    QString defaultPath = QString::fromStdString( GetPath() );
+    if ( _filePath.empty() )
+        defaultPath = QDir::homePath();
 
     _fileDialog = new QFileDialog(
         this,
         QString::fromStdString( labelText ),
-        QString::fromStdString( GetPath() )
+        defaultPath
     );
-    QFileDialog::AcceptMode acceptMode = QFileDialog::AcceptOpen;
-    _fileDialog->setAcceptMode( acceptMode );
+    
+    _fileMode = fileMode;
     _fileDialog->setFileMode( _fileMode );
     
     _lineEdit->setText( QString::fromStdString( filePath ) );
@@ -352,6 +393,9 @@ void VFileSelector::SetPath( const QString& path) {
 }
 
 void VFileSelector::SetPath( const std::string& path ) {
+    if ( path.empty() )
+        return;
+
     if ( !_isFileOperable( path ) ) {
         MSG_ERR(
             FileOperationChecker::GetLastErrorMessage().toStdString()
@@ -364,7 +408,7 @@ void VFileSelector::SetPath( const std::string& path ) {
 }
 
 void VFileSelector::SetFileFilter( const QString& filter ) {
-    SetFileFilter( filter.toStdString() );
+    _fileDialog->setNameFilter( filter );
 }
 
 void VFileSelector::SetFileFilter( const std::string& filter) {
@@ -439,15 +483,17 @@ VFileWriter::VFileWriter(
         buttonText,
         filePath
     ) 
-{}
+{
+    QFileDialog::AcceptMode acceptMode = QFileDialog::AcceptSave;
+    _fileDialog->setAcceptMode( acceptMode );
+    _fileMode = QFileDialog::AnyFile;
+    _fileDialog->setFileMode( _fileMode );
+}
 
 bool VFileWriter::_isFileOperable( const std::string& filePath ) const {
     bool operable = false;
-    if ( _fileMode == QFileDialog::FileMode::ExistingFile ) {
-        operable = FileOperationChecker::FileGoodToWrite(
-            QString::fromStdString( filePath ) );
-    }
-
+    QString qFilePath = QString::fromStdString( filePath );
+    operable = FileOperationChecker::FileGoodToWrite( qFilePath );
     return operable;
 }
 
