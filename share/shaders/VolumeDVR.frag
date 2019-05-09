@@ -36,12 +36,14 @@ void main(void)
         
         int STEPS;
         float integratePart = 1/7.0;
+        float noise = 1;
         if (fast) {
             STEPS = 100;
             integratePart = 1;
+            noise = fract(sin(gl_FragCoord.x * 12.989 + gl_FragCoord.y * 78.233) * 43758.5453) * 0.1 + 1; // Compensate for lower sampling rate
         } else
             STEPS = 700;
-        float step = max(((t1-t0)/float(STEPS))*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/float(STEPS));
+        float step = noise * max(((t1-t0)/float(STEPS))*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/float(STEPS));
         
         t1 = min(t1, sceneDepthT);
         int i = 0;
