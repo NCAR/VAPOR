@@ -262,7 +262,10 @@ void TabManager::_newRenderer(string activeViz, string renderClass, string rende
     RenderEventRouter *er = _getRenderEventRouter(activeViz, renderClass, renderInst);
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    string     winName, dataSetName, paramsType;
+
+    string winName, dataSetName, className;
+    bool   ok = paramsMgr->RenderParamsLookup(renderInst, winName, dataSetName, className);
+    assert(ok);
 
     AnimationParams *aParams = (AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType());
     size_t           ts = aParams->GetCurrentTimestep();
