@@ -1,5 +1,6 @@
 #include <vapor/VolumeCellTraversal.h>
 #include <vector>
+#include <array>
 #include <algorithm>
 #include <vapor/glutil.h>
 #include <glm/glm.hpp>
@@ -11,6 +12,7 @@
 #endif
 
 using std::vector;
+using std::array;
 using glm::vec3;
 using glm::ivec3;
 using glm::ivec2;
@@ -213,7 +215,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     // ---------------------------------------
     
     vector<int> sizes(levels);
-    vector<ivec2[6]> mipDims(levels);
+    vector<array<ivec2,6>> mipDims(levels);
 	vector<vec3 *>minMip(levels);
 	vector<vec3 *>maxMip(levels);
     sizes[0]  = bd;
