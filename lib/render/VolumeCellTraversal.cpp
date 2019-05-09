@@ -212,10 +212,10 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     // Compute mipmap for acceleration tree
     // ---------------------------------------
     
-    int sizes[levels];
-    ivec2 mipDims[levels][6];
-    vec3 *minMip[levels];
-    vec3 *maxMip[levels];
+    vector<int> sizes(levels);
+    vector<ivec2[6]> mipDims(levels);
+	vector<vec3 *>minMip(levels);
+	vector<vec3 *>maxMip(levels);
     sizes[0]  = bd;
     minMip[0] = boxMins;
     maxMip[0] = boxMaxs;
@@ -304,7 +304,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
         _maxTexture.TexImage(GL_RGB32F, ms, ms, 6, GL_RGB, GL_FLOAT, maxMip[level], level);
     }
     
-    _BBLevelDimTexture.TexImage(GL_RG32I, 6, levels, 0, GL_RG_INTEGER, GL_INT, mipDims);
+    _BBLevelDimTexture.TexImage(GL_RG32I, 6, levels, 0, GL_RG_INTEGER, GL_INT, mipDims.data());
     
     for (int level = 1; level < levels; level++) {
         delete [] minMip[level];
