@@ -1,5 +1,6 @@
 #include <vapor/VolumeCellTraversal.h>
 #include <vector>
+#include <array>
 #include <algorithm>
 #include <vapor/glutil.h>
 #include <glm/glm.hpp>
@@ -13,6 +14,7 @@
 using glm::ivec2;
 using glm::ivec3;
 using glm::vec3;
+using std::array;
 using std::vector;
 
 using namespace VAPoR;
@@ -198,10 +200,10 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     // Compute mipmap for acceleration tree
     // ---------------------------------------
 
-    vector<int>      sizes(levels);
-    vector<ivec2[6]> mipDims(levels);
-    vector<vec3 *>   minMip(levels);
-    vector<vec3 *>   maxMip(levels);
+    vector<int>             sizes(levels);
+    vector<array<ivec2, 6>> mipDims(levels);
+    vector<vec3 *>          minMip(levels);
+    vector<vec3 *>          maxMip(levels);
     sizes[0] = bd;
     minMip[0] = boxMins;
     maxMip[0] = boxMaxs;
