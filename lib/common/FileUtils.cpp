@@ -178,6 +178,9 @@ std::string FileUtils::JoinPaths(std::initializer_list<std::string> paths)
 
 int FileUtils::MakeDir(const std::string &path)
 {
+    if (IsDirectory(path))
+        return 0;
+    
     if (!Exists(Dirname(path)))
         MakeDir(Dirname(path));
 #if WIN32
