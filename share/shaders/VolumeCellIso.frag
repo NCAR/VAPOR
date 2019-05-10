@@ -37,6 +37,11 @@ void RenderCellSmartSampling(const vec3 dir, const vec3 entranceCoord, const vec
         if (isoEnabled[3]) TestIsoSample(hit, dir, isoValue[3], dv, ld, accum);
 
         ld = dv;
+        
+        if (accum.a > ALPHA_BREAK) {
+            gl_FragDepth = CalculateDepth(cameraPos + dir*t);
+            return;
+        }
     }
 }
 
