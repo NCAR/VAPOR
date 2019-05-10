@@ -1132,25 +1132,31 @@ int DerivedCoordVar_TimeInSeconds::Initialize()
 
     size_t numTS = _dc->GetNumTimeSteps(_nativeTimeVar);
 
-    float *buf = new float[2 * numTS];
-    float *bufptr1 = buf;
-    float *bufptr2 = buf + numTS;
+    // Need a single precision and double precision buffer. Single for GetVar,
+    // double for udunits.Convert :-(
+    //
+    float * buf = new float[numTS];
+    double *dbuf = new double[2 * numTS];
+    double *dbufptr1 = dbuf;
+    double *dbufptr2 = dbuf + numTS;
 
-    rc = _dc->GetVar(_nativeTimeVar, -1, -1, bufptr1);
+    rc = _dc->GetVar(_nativeTimeVar, -1, -1, buf);
     if (rc < 0) {
         SetErrMsg("Can't read time variable");
         return (-1);
     }
+    for (int i = 0; i < numTS; i++) { dbufptr1[i] = (double)buf[i]; }
 
-    status = udunits.Convert(cvar.GetUnits(), "seconds", bufptr1, bufptr2, numTS);
+    status = udunits.Convert(cvar.GetUnits(), "seconds", dbufptr1, dbufptr2, numTS);
     if (!status) {
         SetErrMsg("Invalid coordinate variable %s", _nativeTimeVar.c_str());
         return (-1);
     }
 
     _times.clear();
-    for (int i = 0; i < numTS; i++) { _times.push_back(bufptr2[i]); }
+    for (int i = 0; i < numTS; i++) { _times.push_back(dbufptr2[i]); }
     delete[] buf;
+    delete[] dbuf;
 
     return (0);
 }
