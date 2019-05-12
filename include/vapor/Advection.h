@@ -84,7 +84,7 @@ public:
     //   - each line should have at least three columns for X, Y, Z position.
     //     An optional 4th column is used to indicate time.
     //     The rest columns are omitted.
-    int  OutputStreamsGnuplot( const std::string& filename ) const;
+    int  OutputStreamsGnuplot( const std::string& filename, bool append = false ) const;
     int  InputStreamsGnuplot(  const std::string& filename );
 
     // Query properties (most are properties of the velocity field)

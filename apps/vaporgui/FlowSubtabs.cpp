@@ -135,8 +135,20 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     connect( _flowDirection, SIGNAL(_indexChanged(int)), this, SLOT( _flowDirectionChanged(int) ) );
 
     _fileWriter = new VFileWriter( this, "Output Flow Lines" );
+    _fileWriter->SetFileFilter( QString::fromAscii("*.txt") );
     _layout->addWidget( _fileWriter );
     connect( _fileWriter, SIGNAL( _pathChanged() ), this, SLOT( _fileWriterChanged() ) );
+
+    _outputButton = new QPushButton( "Output Flow Lines", this );
+    _layout->addWidget( _outputButton );
+    connect( _outputButton, SIGNAL( clicked() ), this, SLOT( _outputButtonClicked() ) );
+}
+
+void
+FlowSeedingSubtab::_outputButtonClicked( )
+{
+std::cerr << "button clicked" << std::endl;
+    _params->SetNeedFlowlineOutput( true );
 }
 
 void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
@@ -179,7 +191,6 @@ FlowSeedingSubtab::_fileWriterChanged()
 {
     std::string filename = _fileWriter->GetPath();
     _params->SetFlowlineOutputFilename( filename );
-std::cout << filename << std::endl;
 }
 
 void

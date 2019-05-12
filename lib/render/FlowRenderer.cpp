@@ -146,6 +146,18 @@ FlowRenderer::_paintGL( bool fast )
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
     int rv;     // return value
 
+    if( params->GetNeedFlowlineOutput() )
+    {
+        rv = _advection.OutputStreamsGnuplot( params->GetFlowlineOutputFilename() );
+        if( rv != 0 )
+        {
+                MyBase::SetErrMsg("Input seed list wrong!");
+                return flow::FILE_ERROR;
+        }
+        if( _2ndAdvection )     // bi-directional advection
+            _2ndAdvection->OutputStreamsGnuplot( params->GetSeedInputFilename(), true );
+    }
+
     _updateFlowCacheAndStates( params );
     _velocityField.UpdateParams( params );
     _colorField.UpdateParams( params );

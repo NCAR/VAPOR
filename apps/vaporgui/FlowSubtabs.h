@@ -5,6 +5,7 @@
 
 #include <QWidget>
 #include <QVBoxLayout>
+#include <QPushButton>
 #include <vapor/FlowParams.h>
 
 #include <QLineEdit>
@@ -116,6 +117,7 @@ private slots:
     void _fileReaderChanged();
     void _fileWriterChanged();
     void _flowDirectionChanged( int newIdx );
+    void _outputButtonClicked();
 
 private:
     VAPoR::FlowParams*      _params;
@@ -125,6 +127,7 @@ private:
     VComboBox*              _seedGenMode;
     VFileReader*            _fileReader;
     VFileWriter*            _fileWriter;
+    QPushButton*            _outputButton;
 
     VComboBox*              _flowDirection;
 };
