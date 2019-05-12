@@ -65,6 +65,10 @@ private:
     // Sam's attempt to add more widgets
     //   TODO: add validator/mask so that only positive integers are accepted
     QLineEdit*          _steadyNumOfSteps;
+
+    VCheckBox*          _periodicX;
+    VCheckBox*          _periodicY;
+    VCheckBox*          _periodicZ;
     
 
 private slots:
@@ -72,6 +76,7 @@ private slots:
     void _steadyGotClicked();
     void _velocityMultiplierChanged();
     void _steadyNumOfStepsChanged();
+    void _periodicClicked();
 };
 
 //

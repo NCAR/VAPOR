@@ -10,6 +10,7 @@ const std::string FlowParams::_seedInputFilenameTag  = "seedInputFilenameTag";
 const std::string FlowParams::_flowlineOutputFilenameTag  = "flowlineOutputFilenameTag";
 const std::string FlowParams::_flowDirectionTag      = "flowDirectionTag";
 const std::string FlowParams::_needFlowlineOutputTag = "needFlowlineOutputTag";
+const std::string FlowParams::_periodicTag           = "periodicTag";
 
 static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
 
@@ -138,4 +139,28 @@ void
 FlowParams::SetFlowDirection( long i )
 {
     SetValueLong( _flowDirectionTag, "does flow integration go forward, backward, or bi-directional", i );
+}
+
+std::vector<bool> 
+FlowParams::GetPeriodic() const
+{
+    std::vector<long> tmp( 3, 0 );
+    auto longs = GetValueLongVec( _periodicTag, tmp );
+    std::vector<bool> bools( 3, false );
+    for( int i = 0; i < 3; i++ )
+        if( longs[i] != 0 )
+            bools[i] = true;
+
+    return bools;
+}
+
+void              
+FlowParams::SetPeriodic( std::vector<bool> bools )
+{
+    std::vector<long> longs( 3, 0 );
+    for( int i = 0; i < 3; i++ )
+        if( bools[i] )
+            longs[i] = 1;
+
+    SetValueLongVec( _periodicTag, "any axis is periodic", longs );
 }

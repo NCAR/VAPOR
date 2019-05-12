@@ -25,12 +25,23 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
     _steady = new VCheckBox( this, "Use Steady Flow" );
     _layout->addWidget( _steady );
 
+    _periodicX = new VCheckBox( this, "Particles periodic in X" );
+    _layout->addWidget( _periodicX );
+    _periodicY = new VCheckBox( this, "Particles periodic in Y" );
+    _layout->addWidget( _periodicY );
+    _periodicZ = new VCheckBox( this, "Particles periodic in Z" );
+    _layout->addWidget( _periodicZ );
+
     _steadyNumOfSteps = new QLineEdit( this );
     _layout->addWidget( _steadyNumOfSteps);
 
     connect( _steady,           SIGNAL( _checkboxClicked() ), this, SLOT( _steadyGotClicked() ) );
     connect( _velocityMltp,     SIGNAL( editingFinished() ),  this, SLOT( _velocityMultiplierChanged() ) );
     connect( _steadyNumOfSteps, SIGNAL( editingFinished() ),  this, SLOT( _steadyNumOfStepsChanged() ) );
+
+    connect( _periodicX,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodClicked() ) );
+    connect( _periodicY,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodClicked() ) );
+    connect( _periodicZ,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodClicked() ) );
 }
 
 void 
@@ -51,6 +62,21 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
 
     int numOfSteps = _params->GetSteadyNumOfSteps();
     _steadyNumOfSteps->setText( QString::number( numOfSteps ) );
+
+    auto bools = _params->GetPeriodic();
+    _periodicX->SetCheckState( bools[0] );
+    _periodicY->SetCheckState( bools[1] );
+    _periodicZ->SetCheckState( bools[2] );
+}
+    
+void 
+FlowVariablesSubtab::_periodicClicked()
+{
+    std::vector<bool> bools( 3, false );
+    bools[0] = _periodicX->GetCheckState();
+    bools[1] = _periodicY->GetCheckState();
+    bools[2] = _periodicZ->GetCheckState();
+    _params->SetPeriodic( bools );
 }
 
 void
