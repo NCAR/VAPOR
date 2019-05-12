@@ -84,7 +84,7 @@ FlowParams::SetVelocityMultiplier( double coeff )
 long
 FlowParams::GetSteadyNumOfSteps() const
 {
-    return GetValueLong( _steadyNumOfStepsTag, 2 );
+    return GetValueLong( _steadyNumOfStepsTag, 100 );
 }
 
 void

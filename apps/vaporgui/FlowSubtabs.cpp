@@ -25,15 +25,15 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
     _steady = new VCheckBox( this, "Use Steady Flow" );
     _layout->addWidget( _steady );
 
+    _steadyNumOfSteps = new QLineEdit( this );
+    _layout->addWidget( _steadyNumOfSteps);
+
     _periodicX = new VCheckBox( this, "Particles periodic in X" );
     _layout->addWidget( _periodicX );
     _periodicY = new VCheckBox( this, "Particles periodic in Y" );
     _layout->addWidget( _periodicY );
     _periodicZ = new VCheckBox( this, "Particles periodic in Z" );
     _layout->addWidget( _periodicZ );
-
-    _steadyNumOfSteps = new QLineEdit( this );
-    _layout->addWidget( _steadyNumOfSteps);
 
     connect( _steady,           SIGNAL( _checkboxClicked() ), this, SLOT( _steadyGotClicked() ) );
     connect( _velocityMltp,     SIGNAL( editingFinished() ),  this, SLOT( _velocityMultiplierChanged() ) );
