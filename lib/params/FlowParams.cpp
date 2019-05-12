@@ -51,7 +51,7 @@ FlowParams::SetIsSteady( bool steady)
 bool
 FlowParams::GetIsSteady() const
 {
-	long rv = GetValueLong( _isSteadyTag, long(false) );
+	long rv = GetValueLong( _isSteadyTag, long(true) );
     return bool(rv);
 }
 
@@ -71,7 +71,7 @@ FlowParams::GetNeedFlowlineOutput( ) const
 double
 FlowParams::GetVelocityMultiplier() const
 {
-    return GetValueDouble( _velocityMultiplierTag, 1.0 );
+    return GetValueDouble( _velocityMultiplierTag, 0.001 );
 }
     
 void 
@@ -83,7 +83,7 @@ FlowParams::SetVelocityMultiplier( double coeff )
 long
 FlowParams::GetSteadyNumOfSteps() const
 {
-    return GetValueLong( _steadyNumOfStepsTag, 0 );
+    return GetValueLong( _steadyNumOfStepsTag, 2 );
 }
 
 void

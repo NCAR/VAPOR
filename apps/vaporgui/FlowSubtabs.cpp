@@ -147,7 +147,6 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
 void
 FlowSeedingSubtab::_outputButtonClicked( )
 {
-std::cerr << "button clicked" << std::endl;
     _params->SetNeedFlowlineOutput( true );
 }
 
