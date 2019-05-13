@@ -156,9 +156,9 @@ bool IntersectRayTriangleIntel(vec3 o, vec3 dir, float rt0, vec3 v0, vec3 v1, ve
 	p1t.z *= Sz;
 	p2t.z *= Sz;
 	float tScaled = e0 * p0t.z + e1 * p1t.z + e2 * p2t.z;
-	if (det < 0 && (tScaled >= 0 || tScaled < FLT_MAX * det))
+	if (det < 0 && (tScaled >= rt0*det || tScaled < FLT_MAX * det))
 		return false;
-	else if (det > 0 && (tScaled <= 0 || tScaled > FLT_MAX * det))
+	else if (det > 0 && (tScaled <= rt0*det || tScaled > FLT_MAX * det))
 		return false;
 
 	float invDet = 1 / det;
