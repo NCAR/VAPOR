@@ -198,7 +198,6 @@ template bool ShaderProgram::SetSampler <Texture2DArray>(const std::string &name
 
 std::string ShaderProgram::GetLog() const
 {
-    assert(!_shaders.empty());
     if (_linked) {
         char buf[512];
         glGetProgramInfoLog(_id, 512, NULL, buf);
