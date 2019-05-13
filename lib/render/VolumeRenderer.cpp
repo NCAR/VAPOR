@@ -221,8 +221,17 @@ void VolumeRenderer::_drawScreenQuad()
 
 void VolumeRenderer::_drawScreenQuadChuncked()
 {
-    int chunksPerDim = ceil(8.0/_framebufferRatio);
-    _generateChunkedRenderMesh(chunksPerDim);
+    // This constant is not correctly parenthesized because of precision issues
+#define CHUNKS_PER_DIM_CONSTANT 64/(1000*1000)
+    
+    int width = _originalViewport[2] - _originalViewport[0];
+    int height = _originalViewport[3] - _originalViewport[1];
+    float nPixels = width * height;
+    
+    double chunksPerDim = sqrt(nPixels * CHUNKS_PER_DIM_CONSTANT);
+    
+    int framebufferChunksPerDim = ceil(chunksPerDim/_framebufferRatio);
+    _generateChunkedRenderMesh(framebufferChunksPerDim);
     
     glBindVertexArray(_VAOChunked);
     for (int i = 0; i < _nChunks; i++) {
