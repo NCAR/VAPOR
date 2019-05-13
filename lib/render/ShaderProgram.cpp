@@ -185,7 +185,6 @@ template bool ShaderProgram::SetSampler<Texture3D>(const std::string &name, cons
 template bool ShaderProgram::SetSampler<Texture2DArray>(const std::string &name, const Texture2DArray &value) const;
 
 std::string ShaderProgram::GetLog() const {
-    assert(!_shaders.empty());
     if (_linked) {
         char buf[512];
         glGetProgramInfoLog(_id, 512, NULL, buf);
