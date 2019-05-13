@@ -148,6 +148,15 @@ void NavigationEventRouter::_performAutoStretching(string dataSetName)
     vector<double> minExt, maxExt;
 
     for (int i = 0; i < winNames.size(); i++) {
+        ViewpointParams *   vpParams = paramsMgr->GetViewpointParams(winNames[i]);
+        Transform *         transform = vpParams->GetTransform(dataSetName);
+        std::vector<double> scales = transform->GetScales();
+        int                 zDimension = 2;
+
+        // If the z-dimension scale is not 1.f, the user has saved a session with
+        // a non-default value.  Don't modify it.
+        if (scales[zDimension] != 1.f) continue;
+
         DataMgr *           dm = ds->GetDataMgr(dataSetName);
         std::vector<string> varNames = dm->GetDataVarNames(3);
 
@@ -169,8 +178,6 @@ void NavigationEventRouter::_performAutoStretching(string dataSetName)
             if (range[i] < (maxRange / 10.0)) { scale[i] = maxRange / (10.0 * range[i]); }
         }
 
-        ViewpointParams *vpParams = paramsMgr->GetViewpointParams(winNames[i]);
-        Transform *      transform = vpParams->GetTransform(dataSetName);
         transform->SetScales(scale);
     }
 }
