@@ -1096,6 +1096,9 @@ void MappingFrame::paintGL() {
 	return;
   }
 
+  QPainter p(this);
+  p.beginNativePainting();
+
   resize();
 
   int rc = CheckGLErrorMsg("MappingFrame::paintGL");
@@ -1139,6 +1142,7 @@ void MappingFrame::paintGL() {
   if (rc < 0) {
       MSG_ERR("MappingFrame");
 	  oglPopState();
+	  p.endNativePainting();
 	  return;
   }
 
@@ -1149,6 +1153,7 @@ void MappingFrame::paintGL() {
   if (rc < 0) {
       MSG_ERR("MappingFrame");
 	  oglPopState();
+	  p.endNativePainting();
 	  return;
   }
 
@@ -1159,6 +1164,7 @@ void MappingFrame::paintGL() {
   if (rc < 0) {
       oglPopState();
       MSG_ERR("MappingFrame");
+	  p.endNativePainting();
 	  return;
   }
 
@@ -1169,6 +1175,7 @@ void MappingFrame::paintGL() {
   if (rc < 0) {
       MSG_ERR("MappingFrame");
       oglPopState();
+	  p.endNativePainting();
 	  return;
   }
 
@@ -1176,6 +1183,7 @@ void MappingFrame::paintGL() {
   if (rc < 0) {
       MSG_ERR("MappingFrame");
       oglPopState();
+	  p.endNativePainting();
 	  return;
   }
 
@@ -1183,6 +1191,7 @@ void MappingFrame::paintGL() {
   if (rc < 0) {
       MSG_ERR("MappingFrame");
       oglPopState();
+	  p.endNativePainting();
 	  return;
   }
   //
@@ -1213,6 +1222,7 @@ void MappingFrame::paintGL() {
   if (rc < 0) {
       MSG_ERR("MappingFrame");
       oglPopState();
+	  p.endNativePainting();
 	  return;
   }
 
@@ -1265,6 +1275,8 @@ void MappingFrame::paintGL() {
   glFlush();
 
   oglPopState();
+
+  p.endNativePainting();
 
   CheckGLErrorMsg("MappingFrame::paintGL");
 }
