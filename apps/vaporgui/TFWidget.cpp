@@ -191,6 +191,7 @@ void TFWidget::loadTF() {
     for (int i = 0; i < numOpacityMaps; i++) {
         controlPoints.push_back(tf->GetOpacityMap(i)->GetControlPoints());
     }
+    float opacityScale = tf->getOpacityScale();
 
     _paramsMgr->BeginSaveStateGroup("Loading Transfer Function from file");
 
@@ -199,14 +200,18 @@ void TFWidget::loadTF() {
         MSG_ERR("Error loading transfer function");
     } else {
         bool loadTF3DataRange = _loadTFDialog->GetLoadTF3DataRange();
-        if (loadTF3DataRange == false)
+        if (loadTF3DataRange == false) {
+            // Ignore values in the file.  Load values from current session.
             tf->setMinMaxMapValue(cachedMin, cachedMax);
+        }
 
         bool loadTF3Opacity = _loadTFDialog->GetLoadTF3OpacityMap();
         if (loadTF3Opacity == false) {
+            // Ignore values in the file.  Load values from current session.
             for (int i = 0; i < numOpacityMaps; i++) {
                 tf->GetOpacityMap(i)->SetControlPoints(controlPoints[i]);
             }
+            tf->setOpacityScale(opacityScale);
         }
     }
 
