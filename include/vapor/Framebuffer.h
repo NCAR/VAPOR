@@ -15,14 +15,16 @@ class Framebuffer : private NonCopyableMixin {
 public:
     ~Framebuffer();
 
-    int  Generate();
-    bool Initialized() const;
-    bool IsComplete() const;
-    void Bind();
-    void UnBind();
-    void SetSize(int width, int height);
-    int  MakeRenderTarget();
-    void EnableDepthBuffer();
+    int         Generate();
+    bool        Initialized() const;
+    bool        IsComplete() const;
+    int         GetStatus() const;
+    const char *GetStatusString() const;
+    void        Bind();
+    void        UnBind();
+    void        SetSize(int width, int height);
+    int         MakeRenderTarget();
+    void        EnableDepthBuffer();
 
     const Texture2D *GetColorTexture() const;
     const Texture2D *GetDepthTexture() const;
