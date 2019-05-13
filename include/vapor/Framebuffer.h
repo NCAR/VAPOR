@@ -18,6 +18,8 @@ namespace VAPoR {
         int Generate();
         bool Initialized() const;
         bool IsComplete() const;
+		int GetStatus() const;
+		const char *GetStatusString() const;
         void Bind();
         void UnBind();
         void SetSize(int width, int height);
