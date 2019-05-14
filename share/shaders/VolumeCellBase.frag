@@ -2,7 +2,6 @@
 
 uniform ivec3 coordDims;
 uniform float unitDistance;
-uniform vec3 scales;
 uniform int BBLevels;
 
 vec3 coordDimsF = vec3(coordDims);
@@ -419,13 +418,13 @@ int FindInitialCell(vec3 origin, vec3 dir, float t0, OUT ivec3 cellIndex, OUT iv
     return intersections;
 }
 
-vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, OUT float t1);
+vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, OUT float t1);
 
 void main(void)
 {
-    vec3 dir;
+    vec3 dir, rayLightingNormal;
     float sceneDepthT;
-    GetRayParameters(dir, sceneDepthT);
+    GetRayParameters(dir, rayLightingNormal, sceneDepthT);
     
     float t0, t1, tp;
     
@@ -444,7 +443,7 @@ void main(void)
             intersections = FindInitialCell(cameraPos, dir, t0, initialCell, entranceFace, t1);
             
             if (intersections > 0) {
-                vec4 color = Traverse(cameraPos, dir, tMin, tMax, t1, initialCell, entranceFace, t1);
+                vec4 color = Traverse(cameraPos, dir, rayLightingNormal, tMin, tMax, t1, initialCell, entranceFace, t1);
                 BlendToBack(accum, color);
             }
             
