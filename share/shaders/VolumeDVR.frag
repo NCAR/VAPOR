@@ -25,9 +25,9 @@ float IntegrateConstantAlpha(float a, float distance)
 
 void main(void)
 {
-    vec3 dir;
+    vec3 dir, rayLightingNormal;
     float sceneDepthT;
-    GetRayParameters(dir, sceneDepthT);
+    GetRayParameters(dir, rayLightingNormal, sceneDepthT);
     
     vec4 accum = vec4(0);
     float t0, t1;
@@ -55,7 +55,7 @@ void main(void)
             vec4 color = texture(LUT, dataNorm);
             vec3 normal = GetNormal(dataSTR);
 			
-            color.rgb *= PhongLighting(normal, dir);
+            color.rgb *= PhongLighting(normal, rayLightingNormal);
             
             color.a = IntegrateConstantAlpha(color.a, integratePart);
             
