@@ -7,6 +7,7 @@ uniform vec3 dataBoundsMin;
 uniform vec3 dataBoundsMax;
 uniform vec3 userExtsMin;
 uniform vec3 userExtsMax;
+uniform vec3 scales;
 uniform float LUTMin;
 uniform float LUTMax;
 uniform bool hasMissingData;
@@ -126,11 +127,12 @@ void BlendToBack(inout vec4 accum, vec4 color)
     accum = color * (1-accum.a) + accum * (1);
 }
 
-void GetRayParameters(out vec3 dir, OUT float maxT)
+void GetRayParameters(out vec3 dir, out vec3 normal, OUT float maxT)
 {
 	vec2 screen = ST*2-1;
     vec4 world = inverse(MVP) * vec4(screen, GetDepthBuffer(), 1);
     world /= world.w;
     dir = normalize(world.xyz - cameraPos);
+    normal = normalize((world.xyz - cameraPos) * scales);
     maxT = length(world.xyz - cameraPos);
 }

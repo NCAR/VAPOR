@@ -3,7 +3,7 @@
 #include VolumeBase.frag
 #include VolumeIsoInclude.frag
 
-void TestIso(vec3 cameraPos, vec3 dir, float value, float dv, float ld, float step, float t, inout vec4 accum)
+void TestIso(vec3 cameraPos, vec3 dir, vec3 rayLightingNormal, float value, float dv, float ld, float step, float t, inout vec4 accum)
 {
 	if ((ld < value && dv >= value) || (ld > value && dv <= value)) {
 		float lt = t - step;
@@ -15,7 +15,7 @@ void TestIso(vec3 cameraPos, vec3 dir, float value, float dv, float ld, float st
 		vec4 color = GetIsoSurfaceColor(dataSTR);
 		vec3 normal = GetNormal(dataSTR);
 		
-		color.rgb *= PhongLighting(normal, dir);
+		color.rgb *= PhongLighting(normal, rayLightingNormal);
 		
 		BlendToBack(accum, PremultiplyAlpha(color));
 	}
@@ -23,9 +23,9 @@ void TestIso(vec3 cameraPos, vec3 dir, float value, float dv, float ld, float st
 
 void main(void)
 {
-    vec3 dir;
+    vec3 dir, rayLightingNormal;
     float sceneDepthT;
-    GetRayParameters(dir, sceneDepthT);
+    GetRayParameters(dir, rayLightingNormal, sceneDepthT);
     
     vec4 accum = vec4(0);
     float t0, t1;
@@ -53,10 +53,10 @@ void main(void)
             
 			if (shouldRender && lastShouldRender) {
 				// Unrolled intentionally
-				if (isoEnabled[0]) TestIso(cameraPos, dir, isoValue[0], dv, ld, step, t, accum);
-				if (isoEnabled[1]) TestIso(cameraPos, dir, isoValue[1], dv, ld, step, t, accum);
-				if (isoEnabled[2]) TestIso(cameraPos, dir, isoValue[2], dv, ld, step, t, accum);
-				if (isoEnabled[3]) TestIso(cameraPos, dir, isoValue[3], dv, ld, step, t, accum);
+				if (isoEnabled[0]) TestIso(cameraPos, dir, rayLightingNormal, isoValue[0], dv, ld, step, t, accum);
+				if (isoEnabled[1]) TestIso(cameraPos, dir, rayLightingNormal, isoValue[1], dv, ld, step, t, accum);
+				if (isoEnabled[2]) TestIso(cameraPos, dir, rayLightingNormal, isoValue[2], dv, ld, step, t, accum);
+				if (isoEnabled[3]) TestIso(cameraPos, dir, rayLightingNormal, isoValue[3], dv, ld, step, t, accum);
                 
                 if (accum.a > ALPHA_BREAK)
                     gl_FragDepth = CalculateDepth(hit);
