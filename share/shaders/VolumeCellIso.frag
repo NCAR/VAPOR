@@ -3,7 +3,7 @@
 #include VolumeCellBase.frag
 #include VolumeIsoInclude.frag
 
-void TestIsoSample(const vec3 hit, const vec3 dir, float value, float dv, float ld, inout vec4 accum)
+void TestIsoSample(const vec3 hit, const vec3 dir, vec3 rayLightingNormal, float value, float dv, float ld, inout vec4 accum)
 {
     if ((ld < value && dv >= value) || (ld > value && dv <= value)) {
         
@@ -11,30 +11,30 @@ void TestIsoSample(const vec3 hit, const vec3 dir, float value, float dv, float 
         vec4 color = GetIsoSurfaceColor(isoSampleSTR);
         vec3 normal = GetNormal(isoSampleSTR);
         
-        color.rgb *= PhongLighting(normal, dir);
+        color.rgb *= PhongLighting(normal, rayLightingNormal);
         
         BlendToBack(accum, PremultiplyAlpha(color));
     }
 }
 
-void RenderCellSmartSampling(const vec3 dir, const vec3 entranceCoord, const vec3 exitCoord, const float tStart, const float tEnd, const float t0, const float t1, const float step, inout float ld, inout vec4 accum)
+void RenderCellSmartSampling(const vec3 dir, vec3 rayLightingNormal, const vec3 entranceCoord, const vec3 exitCoord, const float tStart, const float tEnd, const float t0, const float t1, const float step, inout float ld, inout vec4 accum)
 {
     vec3 hit = mix(entranceCoord, exitCoord, (tStart-t0)/(t1-t0));
     float dv = GetDataCoordinateSpace(hit);
-    if (isoEnabled[0]) TestIsoSample(hit, dir, isoValue[0], dv, ld, accum);
-    if (isoEnabled[1]) TestIsoSample(hit, dir, isoValue[1], dv, ld, accum);
-    if (isoEnabled[2]) TestIsoSample(hit, dir, isoValue[2], dv, ld, accum);
-    if (isoEnabled[3]) TestIsoSample(hit, dir, isoValue[3], dv, ld, accum);
+    if (isoEnabled[0]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[0], dv, ld, accum);
+    if (isoEnabled[1]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[1], dv, ld, accum);
+    if (isoEnabled[2]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[2], dv, ld, accum);
+    if (isoEnabled[3]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[3], dv, ld, accum);
     ld = dv;
     
     for (float t = step * (floor(tStart/step)+1); t < tEnd; t+= step) {
         vec3 hit = mix(entranceCoord, exitCoord, (t-t0)/(t1-t0));
         float dv = GetDataCoordinateSpace(hit);
         
-        if (isoEnabled[0]) TestIsoSample(hit, dir, isoValue[0], dv, ld, accum);
-        if (isoEnabled[1]) TestIsoSample(hit, dir, isoValue[1], dv, ld, accum);
-        if (isoEnabled[2]) TestIsoSample(hit, dir, isoValue[2], dv, ld, accum);
-        if (isoEnabled[3]) TestIsoSample(hit, dir, isoValue[3], dv, ld, accum);
+        if (isoEnabled[0]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[0], dv, ld, accum);
+        if (isoEnabled[1]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[1], dv, ld, accum);
+        if (isoEnabled[2]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[2], dv, ld, accum);
+        if (isoEnabled[3]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[3], dv, ld, accum);
 
         ld = dv;
         
@@ -45,7 +45,7 @@ void RenderCellSmartSampling(const vec3 dir, const vec3 entranceCoord, const vec
     }
 }
 
-vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, OUT float t1)
+vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, OUT float t1)
 {
     vec3 entranceCoord;
     ivec3 nextCell;
@@ -78,7 +78,7 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
             float tStart = max(t0, tMin);
 
 			if (ShouldRenderCell(currentCell)) {
-                RenderCellSmartSampling(dir, entranceCoord, exitCoord, tStart, tEnd, t0, t1, step, ld, accum);
+                RenderCellSmartSampling(dir, rayLightingNormal, entranceCoord, exitCoord, tStart, tEnd, t0, t1, step, ld, accum);
 			}
         }
         

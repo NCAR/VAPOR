@@ -15,7 +15,7 @@ vec4 RenderCellSampling(const vec3 dir, const vec3 entranceCoord, const vec3 exi
     return acc2;
 }
 
-vec4 RenderCellSmartSampling(const vec3 dir, const vec3 entranceCoord, const vec3 exitCoord, const float tStart, const float tEnd, const float t0, const float t1, const float step, const float stepOpacityUnit)
+vec4 RenderCellSmartSampling(const vec3 dir, vec3 rayLightingNormal, const vec3 entranceCoord, const vec3 exitCoord, const float tStart, const float tEnd, const float t0, const float t1, const float step, const float stepOpacityUnit)
 {
     vec4 acc2 = vec4(0);
     vec3 hit = mix(entranceCoord, exitCoord, (tStart-t0)/(t1-t0));
@@ -30,7 +30,7 @@ vec4 RenderCellSmartSampling(const vec3 dir, const vec3 entranceCoord, const vec
         vec3 hit = mix(entranceCoord, exitCoord, (t-t0)/(t1-t0));
         vec4 color = GetColorAtCoord(hit);
         vec3 normal = GetNormalAtCoord(hit);
-        color.rgb *= PhongLighting(normal, dir);
+        color.rgb *= PhongLighting(normal, rayLightingNormal);
         float l = min(step, t1-t)/step;
         color.a = IntegrateConstantAlpha(color.a, l * stepOpacityUnit);
         BlendToBack(acc2, PremultiplyAlpha(color));
@@ -52,7 +52,7 @@ vec4 RenderCellConstant(const vec3 dir, const ivec3 currentCell, const float t0,
     return PremultiplyAlpha(color);
 }
 
-vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, OUT float t1)
+vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, OUT float t1)
 {
     vec3 entranceCoord;
     ivec3 nextCell;
@@ -88,7 +88,7 @@ vec4 Traverse(vec3 origin, vec3 dir, float tMin, float tMax, float t0, ivec3 cur
             
             if (ShouldRenderCell(currentCell)) {
 #if 1
-                BlendToBack(accum, RenderCellSmartSampling(dir, entranceCoord, exitCoord, tStart, tEnd, t0, t1, step, stepOpacityUnit));
+                BlendToBack(accum, RenderCellSmartSampling(dir, rayLightingNormal, entranceCoord, exitCoord, tStart, tEnd, t0, t1, step, stepOpacityUnit));
 #else
                 BlendToBack(accum, RenderCellConstant     (dir, currentCell, tStart, tEnd, unitDistanceScaled));
 #endif
