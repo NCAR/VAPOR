@@ -235,39 +235,52 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
             int mUpW = mipDims[level - 1][z][0];
             int mUpH = mipDims[level - 1][z][1];
 
-            int mW = max(1, mUpW >> 1);
-            int mH = max(1, mUpH >> 1);
+            int mW = std::max(1, mUpW >> 1);
+            int mH = std::max(1, mUpH >> 1);
             mipDims[level][z][0] = mW;
             mipDims[level][z][1] = mH;
+
+            // At each higher mipmap, the dimensions halve. So each pixel maps to at least 4
+            // pixels at the previous level. However if the previous level dim was 1, it
+            // no longer halves so we set the increment to 0. This resamples the same pixel twice
+            // for simplicities sake.
+            int ix = 1, iy = 1;
+            if (mUpW == 1)
+                ix = 0;
+            if (mUpH == 1)
+                iy = 0;
 
             for (int y = 0; y < mH; y++) {
                 for (int x = 0; x < mW; x++) {
 
                     vec3 v0 = minMip[level - 1][z * mUpS * mUpS + (y * 2) * mUpS + x * 2];
-                    vec3 v1 = minMip[level - 1][z * mUpS * mUpS + (y * 2) * mUpS + x * 2 + 1];
-                    vec3 v2 = minMip[level - 1][z * mUpS * mUpS + (y * 2 + 1) * mUpS + x * 2 + 1];
-                    vec3 v3 = minMip[level - 1][z * mUpS * mUpS + (y * 2 + 1) * mUpS + x * 2];
+                    vec3 v1 = minMip[level - 1][z * mUpS * mUpS + (y * 2) * mUpS + x * 2 + ix];
+                    vec3 v2 = minMip[level - 1][z * mUpS * mUpS + (y * 2 + iy) * mUpS + x * 2 + ix];
+                    vec3 v3 = minMip[level - 1][z * mUpS * mUpS + (y * 2 + iy) * mUpS + x * 2];
 
+                    // glm::min and glm::max are component-wise
                     minMip[level][z * ms * ms + y * ms + x] = glm::min(v0, glm::min(v1, glm::min(v2, v3)));
 
                     v0 = maxMip[level - 1][z * mUpS * mUpS + (y * 2) * mUpS + x * 2];
-                    v1 = maxMip[level - 1][z * mUpS * mUpS + (y * 2) * mUpS + x * 2 + 1];
-                    v2 = maxMip[level - 1][z * mUpS * mUpS + (y * 2 + 1) * mUpS + x * 2 + 1];
-                    v3 = maxMip[level - 1][z * mUpS * mUpS + (y * 2 + 1) * mUpS + x * 2];
+                    v1 = maxMip[level - 1][z * mUpS * mUpS + (y * 2) * mUpS + x * 2 + ix];
+                    v2 = maxMip[level - 1][z * mUpS * mUpS + (y * 2 + iy) * mUpS + x * 2 + ix];
+                    v3 = maxMip[level - 1][z * mUpS * mUpS + (y * 2 + iy) * mUpS + x * 2];
 
                     maxMip[level][z * ms * ms + y * ms + x] = glm::max(v0, glm::max(v1, glm::max(v2, v3)));
                 }
             }
+            // If the upper level is odd, the top and right border pixels map to 6 pixels in the previous
+            // level which are accounted for here.
             if (mUpW % 2 == 1) {
                 for (int y = 0; y < mH; y++) {
                     vec3 v0 = minMip[level][z * ms * ms + y * ms + mW - 1];
                     vec3 v1 = minMip[level - 1][z * mUpS * mUpS + (y * 2) * mUpS + mUpW - 1];
-                    vec3 v2 = minMip[level - 1][z * mUpS * mUpS + (y * 2 + 1) * mUpS + mUpW - 1];
+                    vec3 v2 = minMip[level - 1][z * mUpS * mUpS + (y * 2 + iy) * mUpS + mUpW - 1];
                     minMip[level][z * ms * ms + y * ms + mW - 1] = glm::min(v0, glm::min(v1, v2));
 
                     v0 = maxMip[level][z * ms * ms + y * ms + mW - 1];
                     v1 = maxMip[level - 1][z * mUpS * mUpS + (y * 2) * mUpS + mUpW - 1];
-                    v2 = maxMip[level - 1][z * mUpS * mUpS + (y * 2 + 1) * mUpS + mUpW - 1];
+                    v2 = maxMip[level - 1][z * mUpS * mUpS + (y * 2 + iy) * mUpS + mUpW - 1];
                     maxMip[level][z * ms * ms + y * ms + mW - 1] = glm::max(v0, glm::max(v1, v2));
                 }
             }
@@ -275,15 +288,17 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
                 for (int x = 0; x < mW; x++) {
                     vec3 v0 = minMip[level][z * ms * ms + (mH - 1) * ms + x];
                     vec3 v1 = minMip[level - 1][z * mUpS * mUpS + (mUpH - 1) * mUpS + x * 2];
-                    vec3 v2 = minMip[level - 1][z * mUpS * mUpS + (mUpH - 1) * mUpS + x * 2 + 1];
+                    vec3 v2 = minMip[level - 1][z * mUpS * mUpS + (mUpH - 1) * mUpS + x * 2 + ix];
                     minMip[level][z * ms * ms + (mH - 1) * ms + x] = glm::min(v0, glm::min(v1, v2));
 
                     v0 = maxMip[level][z * ms * ms + (mH - 1) * ms + x];
                     v1 = maxMip[level - 1][z * mUpS * mUpS + (mUpH - 1) * mUpS + x * 2];
-                    v2 = maxMip[level - 1][z * mUpS * mUpS + (mUpH - 1) * mUpS + x * 2 + 1];
+                    v2 = maxMip[level - 1][z * mUpS * mUpS + (mUpH - 1) * mUpS + x * 2 + ix];
                     maxMip[level][z * ms * ms + (mH - 1) * ms + x] = glm::max(v0, glm::max(v1, v2));
                 }
             }
+            // If the both upper dims are odd, the top-right pixel maps to 9 pixels in the previous level.
+            // 8 of these were already accounted for. This accounts for the last pixel in the corner
             if (mUpW % 2 == 1 && mUpH % 2 == 1) {
                 vec3 v0 = minMip[level][z * ms * ms + (mH - 1) * ms + mW - 1];
                 vec3 v1 = minMip[level - 1][z * mUpS * mUpS + (mUpH - 1) * mUpS + mUpW - 1];
