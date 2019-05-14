@@ -151,10 +151,14 @@ void NavigationEventRouter::_performAutoStretching(string dataSetName)
         ViewpointParams *   vpParams = paramsMgr->GetViewpointParams(winNames[i]);
         Transform *         transform = vpParams->GetTransform(dataSetName);
         std::vector<double> scales = transform->GetScales();
+        int                 xDimension = 0;
+        int                 yDimension = 1;
         int                 zDimension = 2;
 
-        // If the z-dimension scale is not 1.f, the user has saved a session with
+        // If a dimension's scale is not 1.f, the user has saved a session with
         // a non-default value.  Don't modify it.
+        if (scales[xDimension] != 1.f) continue;
+        if (scales[yDimension] != 1.f) continue;
         if (scales[zDimension] != 1.f) continue;
 
         DataMgr *           dm = ds->GetDataMgr(dataSetName);
