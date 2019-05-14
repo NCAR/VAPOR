@@ -79,7 +79,10 @@ vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float t
 
 			if (ShouldRenderCell(currentCell)) {
                 RenderCellSmartSampling(dir, rayLightingNormal, entranceCoord, exitCoord, tStart, tEnd, t0, t1, step, ld, accum);
-			}
+            } else {
+                // Leaving missing value cell
+                ld = GetDataCoordinateSpace(exitCoord);
+            }
         }
         
         currentCell = nextCell;
