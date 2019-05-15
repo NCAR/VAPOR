@@ -31,6 +31,14 @@ VolumeIsoRenderer::VolumeIsoRenderer(const ParamsMgr *pm,
                      VolumeIsoRenderer::GetClassType(),
                      instName,
                      dataMgr) {
+    // An ugly fix but I don't think we have a mechanism for this
+    if (_needToSetDefaultAlgorithm()) {
+        VolumeParams *vp = (VolumeParams *)GetActiveParams();
+        Grid *grid = _dataMgr->GetVariable(vp->GetCurrentTimestep(), vp->GetVariableName(), vp->GetRefinementLevel(), vp->GetCompressionLevel());
+        string algorithmName = _getDefaultAlgorithmForGrid(grid);
+        vp->SetAlgorithm(algorithmName);
+        delete grid;
+    }
 }
 
 VolumeIsoRenderer::~VolumeIsoRenderer() {
