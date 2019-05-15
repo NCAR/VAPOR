@@ -89,6 +89,9 @@ void TabManager::SetActiveRenderer(string activeViz, string renderClass, string 
     eRouter->SetActive(renderInst);
     eRouter->updateTab();
     
+	GUIStateParams *p = _getStateParams();
+    p->SetActiveRenderer( activeViz, renderClass, renderInst );
+
     emit ActiveEventRouterChanged(eRouter->GetType());
 }
 
@@ -181,8 +184,24 @@ int TabManager::_getTabIndex(string tabName) const {
 }
 
 void TabManager::SetActiveViz(const QString &vizNameQ) {
-
 	this->show();
+
+    string vizName = vizNameQ.toStdString();
+
+	std::vector<string> renderClasses;
+    renderClasses = _controlExec->GetRenderClassNames(vizName);
+    if ( renderClasses.empty() )
+        return;
+    string renderClass = renderClasses[0];
+
+    std::vector<string> renderInstances;
+    renderInstances = _controlExec->GetRenderInstances(vizName, renderClass);
+    if ( renderInstances.empty() )
+        return;
+    string renderInstance = renderInstances[0];
+
+    SetActiveRenderer(vizName, renderClass, renderInstance);
+
 	// Make the renderHolder show either the active renderer or none.
 	//
 	_renderHolder->Update();
@@ -295,10 +314,7 @@ void TabManager::_newRenderer(
 	);
 
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-
-    string winName, dataSetName, className;
-	bool ok = paramsMgr->RenderParamsLookup(renderInst, winName, dataSetName, className);
-	assert(ok);
+    string winName, dataSetName, paramsType;
 
 	AnimationParams* aParams = (AnimationParams *) paramsMgr->GetParams(
 		AnimationParams::GetClassType()
