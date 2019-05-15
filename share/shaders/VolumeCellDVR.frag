@@ -62,11 +62,11 @@ vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float t
     float tStart = t0;
     ivec3 initialCell = currentCell;
     float unitDistanceScaled = unitDistance / length(dir * scales);
-    float step = unitDistanceScaled/7;
-    float stepOpacityUnit = 1/7.0;
+    float step = unitDistanceScaled/7.f;
+    float stepOpacityUnit = unitOpacityScalar/7.f;
     if (fast) {
         step = unitDistanceScaled;
-        stepOpacityUnit = 1;
+        stepOpacityUnit = unitOpacityScalar;
     }
     
     int i = 0;
