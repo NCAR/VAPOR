@@ -4,31 +4,6 @@
 #define DBL_MIN 2.2250738585072014e-308
 #define EPSILON 1.19e-07
 
-#define IntersectRayBoundingBoxImplementation 2
-#if IntersectRayBoundingBoxImplementation == 1
-bool IntersectRayBoundingBox(vec3 o, vec3 d, vec3 boxMin, vec3 boxMax, OUT float t0, OUT float t1)
-{
-    t0 = 0, t1 = FLT_MAX;
-    vec3 tNear = (boxMin - o) / d;
-    vec3 tFar =  (boxMax - o) / d;
-    
-    for (int i = 0; i < 3; ++i) {
-        float tNear = tNear[i];
-        float tFar = tFar[i];
-        
-        if (tNear > tFar) {
-            float temp = tNear;
-            tNear = tFar;
-            tFar = temp;
-        }
-        
-        if (tNear > t0) t0 = tNear;
-        if (tFar  < t1) t1 = tFar;
-        if (t0 > t1) return false;
-    }
-    return true;
-}
-#elif IntersectRayBoundingBoxImplementation == 2
 bool IntersectRayBoundingBox(vec3 o, vec3 d, float rt0, vec3 boxMin, vec3 boxMax, OUT float t0, OUT float t1)
 {
     vec3 tMin = (boxMin - o) / d;
@@ -39,7 +14,6 @@ bool IntersectRayBoundingBox(vec3 o, vec3 d, float rt0, vec3 boxMin, vec3 boxMax
     t1 = min(min(bt2.x, bt2.y), bt2.z);
     return t0 <= t1;
 }
-#endif
 
 bool IntersectRayPlane(vec3 o, vec3 d, float rt0, vec3 v0, vec3 n, OUT float t)
 {
