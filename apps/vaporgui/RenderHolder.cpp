@@ -290,7 +290,7 @@ void RenderHolder::_deleteRenderer() {
     assert(rc == 0);
 
     _controlExec->RemoveRenderer(
-        activeViz, dataSetName, rendererType, rendererName);
+        activeViz, dataSetName, rendererType, rendererName, false);
 
     // Update will rebuild the TableWidget with the updated state
     //

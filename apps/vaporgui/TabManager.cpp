@@ -612,6 +612,8 @@ void TabManager::_updateRouters() {
 
     if (activeViz.size() && renderClass.size() && instName.size()) {
 
+        SetActiveRenderer(activeViz, renderClass, instName);
+
         EventRouter *eRouter = _getRenderEventRouter(
             activeViz, renderClass, instName);
 
