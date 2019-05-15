@@ -9,7 +9,7 @@ class VolumeCellTraversal : public VolumeRegular {
     VolumeCellTraversal(GLManager *gl);
     ~VolumeCellTraversal();
 
-    static std::string GetName() { return "Cell Traversal"; }
+    static std::string GetName() { return "Curvilinear"; }
     static Type GetType() { return Type::DVR; }
     virtual bool IsSlow() { return true; }
 
@@ -40,7 +40,7 @@ class VolumeCellTraversal : public VolumeRegular {
 class VolumeCellTraversalIso : public VolumeCellTraversal {
   public:
     VolumeCellTraversalIso(GLManager *gl) : VolumeCellTraversal(gl) {}
-    static std::string GetName() { return "Iso Cell Traversal"; }
+    static std::string GetName() { return "Iso Curvilinear"; }
     static Type GetType() { return Type::Iso; }
     virtual ShaderProgram *GetShader() const;
     virtual void SetUniforms(const ShaderProgram *shader) const;
