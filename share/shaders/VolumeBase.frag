@@ -36,7 +36,7 @@ bool readDepthBuffer = true;
 
 
 
-#include RayMath.frag
+#include VolumeRayMath.frag
 
 vec4 ROYGBV(float v, float minV, float maxV)
 {
