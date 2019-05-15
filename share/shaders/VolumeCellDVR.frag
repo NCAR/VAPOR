@@ -65,7 +65,7 @@ vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float t
     float step = unitDistanceScaled/7.f;
     float stepOpacityUnit = unitOpacityScalar/7.f;
     if (fast) {
-        step = unitDistanceScaled;
+        step = unitDistanceScaled * GetSamplingNoise();
         stepOpacityUnit = unitOpacityScalar;
     }
     
