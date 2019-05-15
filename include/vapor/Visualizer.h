@@ -82,16 +82,34 @@ public:
     //! \return number of renderers
     int GetNumRenderers() const { return _renderers.size(); }
 
-    //! Get a renderer
-    //! \param[in] RenderParams to be checked for renderer
-    //! \return associated RenderParams instance
-    Renderer *GetRenderer(string type, string instance) const;
+    //! \note A render params instance must have been previously created for
+    //! this renderer.
+    //
+    int CreateRenderer(string dataSetName, string renderType, string renderName);
 
-    void InsertRenderer(Renderer *ren);
+    //! Flag a renderer for destruction.
+    //!
+    //! \param[in] hasOpenGLContext If true it is the callers job to ensure that the
+    //! OpenGL Context for the window \p winName is active. In this case the renderer
+    //! is destroyed immediately. If false the renderer is queue'd for later destruction
+    //! when \p winName has an active OpenGL context.
+    //
+    void DestroyRenderer(string renderType, string renderName, bool hasOpenGLContext);
+
+    //! Flag all rendereres for destruction.
+    //!
+    //! \param[in] hasOpenGLContext If true it is the callers job to ensure that the
+    //! OpenGL Context for the window \p winName is active. In this case the renderer
+    //! is destroyed immediately. If false the renderer is queue'd for later destruction
+    //! when \p winName has an active OpenGL context.
+    //
+    void DestroyAllRenderers(bool hasOpenGLContext);
+
+    bool HasRenderer(string renderType, string renderName) const;
 
     //! Move the renderer to the front of the render queue
     //! \param[out] Renderer instance that is moved to front
-    void MoveRendererToFront(Renderer *ren);
+    void MoveRendererToFront(string renderType, string renderName);
     void MoveRenderersOfTypeToFront(const std::string &type);
 
     //! Determine the approximate size of a pixel in terms of user coordinates,
@@ -183,6 +201,8 @@ private:
 
     static void _incrementPath(string &s);
 
+    Renderer *_getRenderer(string type, string instance) const;
+
     const ParamsMgr *   _paramsMgr;
     const DataStatus *  _dataStatus;
     string              _winName;
@@ -196,6 +216,7 @@ private:
     string _captureImageFile;
 
     vector<Renderer *> _renderers;
+    vector<Renderer *> _renderersToDestroy;
 };
 
 };    // namespace VAPoR
