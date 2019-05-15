@@ -12,7 +12,7 @@ VolumeAlgorithm *VolumeAlgorithm::NewAlgorithm(const std::string &name, GLManage
     if (factories.count(name)) {
         return factories[name]->Create(gl);
     }
-    printf("Invalid volume rendering algorithm: \"%s\"\n", name.c_str());
+    Wasp::MyBase::SetErrMsg("Invalid volume rendering algorithm: \"%s\"\n", name.c_str());
     assert(0);
     return nullptr;
 }
