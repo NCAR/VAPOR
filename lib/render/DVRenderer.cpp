@@ -7,8 +7,7 @@ using namespace VAPoR;
 //
 // Register class with object factory!!!
 //
-static RendererRegistrar<DVRenderer> registrar(DVRenderer::GetClassType(),
-                                               DVRParams::GetClassType());
+//static RendererRegistrar<DVRenderer> registrar( DVRenderer::GetClassType(), DVRParams::GetClassType() );
 
 DVRenderer::DVRenderer(const ParamsMgr *pm,
                        std::string &winName,

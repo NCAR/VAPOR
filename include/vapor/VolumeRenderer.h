@@ -25,7 +25,7 @@ class RENDER_API VolumeRenderer : public Renderer {
     ~VolumeRenderer();
 
     static std::string GetClassType() {
-        return ("NEW_Volume");
+        return ("Volume");
     }
 
   protected:

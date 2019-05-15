@@ -20,8 +20,7 @@ using namespace VAPoR;
 //
 // Register class with object factory!!!
 //
-static RenderEventRouterRegistrar<IsoSurfaceEventRouter> registrar(
-    IsoSurfaceEventRouter::GetClassType());
+//static RenderEventRouterRegistrar<IsoSurfaceEventRouter> registrar(IsoSurfaceEventRouter::GetClassType() );
 
 IsoSurfaceEventRouter::IsoSurfaceEventRouter(QWidget *parent, ControlExec *ce)
     : QTabWidget(parent),

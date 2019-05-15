@@ -20,8 +20,7 @@ using namespace VAPoR;
 //
 // Register class with object factory!!!
 //
-static RenderEventRouterRegistrar<DVREventRouter> registrar(
-    DVREventRouter::GetClassType());
+//static RenderEventRouterRegistrar<DVREventRouter> registrar(DVREventRouter::GetClassType() );
 
 DVREventRouter::DVREventRouter(QWidget *parent, ControlExec *ce)
     : QTabWidget(parent),

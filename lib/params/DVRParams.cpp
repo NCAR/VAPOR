@@ -5,7 +5,7 @@ using namespace VAPoR;
 //
 // Register class with object factory
 //
-static RenParamsRegistrar<DVRParams> registrar(DVRParams::GetClassType());
+//static RenParamsRegistrar<DVRParams> registrar( DVRParams::GetClassType() );
 
 DVRParams::DVRParams(DataMgr *dataManager,
                      ParamsBase::StateSave *stateSave)
