@@ -160,12 +160,14 @@ void VolumeRenderer::_setShaderUniforms(const ShaderProgram *shader, const bool 
     vec3  extScales = _getVolumeScales();
     vec3  extLengthsScaled = extLengths * extScales;
     float smallestDimension = min(extLengthsScaled[0], min(extLengthsScaled[1], extLengthsScaled[2]));
+    float largestDimension = max(extLengthsScaled[0], max(extLengthsScaled[1], extLengthsScaled[2]));
 
     shader->SetUniform("dataBoundsMin", dataMin);
     shader->SetUniform("dataBoundsMax", dataMax);
     shader->SetUniform("userExtsMin", userMin);
     shader->SetUniform("userExtsMax", userMax);
-    shader->SetUniform("unitDistance", smallestDimension / 100.f);
+    shader->SetUniform("unitDistance", largestDimension / 100.f);
+    shader->SetUniform("unitOpacityScalar", largestDimension / smallestDimension);
     shader->SetUniform("scales", extScales);
 
     shader->SetUniform("LUTMin", (float)_cache.mapRange[0]);
