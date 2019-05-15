@@ -4,6 +4,8 @@ using namespace VAPoR;
 
 void VolumeIsoVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *params)
 {
+    _castingModeComboBox->blockSignals(true);
+    
     VolumeIsoParams *vp = dynamic_cast<VolumeIsoParams*>( params );
     _isoParams = vp;
     assert(vp);
@@ -21,9 +23,12 @@ void VolumeIsoVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Re
             _castingModeComboBox->addItem(QString::fromStdString(s));
         
         index = _castingModeComboBox->findText(QString::fromStdString(algorithm));
+        
     }
     
     _castingModeComboBox->setCurrentIndex(index);
+    
+    _castingModeComboBox->blockSignals(false);
     
     _variablesWidget->Update(dataMgr, paramsMgr, params);
 }
