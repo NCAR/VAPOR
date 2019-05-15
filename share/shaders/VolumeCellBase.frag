@@ -2,6 +2,7 @@
 
 uniform ivec3 coordDims;
 uniform float unitDistance;
+uniform float unitOpacityScalar;
 uniform int BBLevels;
 
 vec3 coordDimsF = vec3(coordDims);
