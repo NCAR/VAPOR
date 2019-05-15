@@ -8,7 +8,7 @@ const std::string IsoSurfaceParams::_enabledIsoValuesTag = "EnabledIsoValuesTag"
 //
 // Register class with object factory
 //
-static RenParamsRegistrar<IsoSurfaceParams> registrar(IsoSurfaceParams::GetClassType());
+// static RenParamsRegistrar<IsoSurfaceParams> registrar( IsoSurfaceParams::GetClassType() );
 
 IsoSurfaceParams::IsoSurfaceParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave) : RayCasterParams(dataManager, stateSave, IsoSurfaceParams::GetClassType()) { SetUseSingleColor(true); }
 

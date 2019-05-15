@@ -14,7 +14,7 @@ public:
     VolumeIsoRenderer(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string &instName, DataMgr *dataMgr);
     ~VolumeIsoRenderer();
 
-    static std::string GetClassType() { return ("NEW_IsoSurface"); }
+    static std::string GetClassType() { return ("IsoSurface"); }
 
     virtual bool        _usingColorMapData() const;
     virtual void        _setShaderUniforms(const ShaderProgram *shader, const bool fast) const;
