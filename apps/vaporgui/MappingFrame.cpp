@@ -905,8 +905,10 @@ void MappingFrame::paintGL()
 
     if (!_mapper) { return; }
 
+#ifdef WIN32
     QPainter p(this);
     p.beginNativePainting();
+#endif
 
     resize();
 
@@ -951,7 +953,9 @@ void MappingFrame::paintGL()
     if (rc < 0) {
         MSG_ERR("MappingFrame");
         oglPopState();
+#ifdef WIN32
         p.endNativePainting();
+#endif
         return;
     }
 
@@ -962,7 +966,9 @@ void MappingFrame::paintGL()
     if (rc < 0) {
         MSG_ERR("MappingFrame");
         oglPopState();
+#ifdef WIN32
         p.endNativePainting();
+#endif
         return;
     }
 
@@ -973,7 +979,9 @@ void MappingFrame::paintGL()
     if (rc < 0) {
         oglPopState();
         MSG_ERR("MappingFrame");
+#ifdef WIN32
         p.endNativePainting();
+#endif
         return;
     }
 
@@ -984,7 +992,9 @@ void MappingFrame::paintGL()
     if (rc < 0) {
         MSG_ERR("MappingFrame");
         oglPopState();
+#ifdef WIN32
         p.endNativePainting();
+#endif
         return;
     }
 
@@ -992,7 +1002,9 @@ void MappingFrame::paintGL()
     if (rc < 0) {
         MSG_ERR("MappingFrame");
         oglPopState();
+#ifdef WIN32
         p.endNativePainting();
+#endif
         return;
     }
 
@@ -1000,7 +1012,9 @@ void MappingFrame::paintGL()
     if (rc < 0) {
         MSG_ERR("MappingFrame");
         oglPopState();
+#ifdef WIN32
         p.endNativePainting();
+#endif
         return;
     }
     //
@@ -1031,7 +1045,9 @@ void MappingFrame::paintGL()
     if (rc < 0) {
         MSG_ERR("MappingFrame");
         oglPopState();
+#ifdef WIN32
         p.endNativePainting();
+#endif
         return;
     }
 
@@ -1084,7 +1100,9 @@ void MappingFrame::paintGL()
 
     oglPopState();
 
+#ifdef WIN32
     p.endNativePainting();
+#endif
 
     CheckGLErrorMsg("MappingFrame::paintGL");
 }
