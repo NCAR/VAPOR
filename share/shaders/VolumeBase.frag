@@ -54,6 +54,14 @@ vec4 ROYGBV(float v, float minV, float maxV)
     return vec4(c, 1);
 }
 
+float GetSamplingNoise()
+{
+	// This helps compensate for a lower sampling rate
+	// It replaces banding artifacts with less obtrusive noise
+
+	return fract(sin(gl_FragCoord.x * 12.989 + gl_FragCoord.y * 78.233) * 43758.5453) * 0.1 + 1; 
+}
+
 bool DoesSampleHaveMissingData(vec3 dataSTR)
 {
     return texture(missingMask, dataSTR).r > 0;
