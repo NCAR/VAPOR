@@ -198,6 +198,9 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
 
     // ---------------------------------------
     // Compute mipmap for acceleration tree
+    //
+    // Each subsequent mipmip level contains outermost bounds of all the bounding
+    // boxes it encompases from the previous level.
     // ---------------------------------------
 
     vector<int>             sizes(levels);
