@@ -7,8 +7,7 @@ using namespace VAPoR;
 //
 // Register class with object factory!!!
 //
-static RendererRegistrar<IsoSurfaceRenderer> registrar( IsoSurfaceRenderer::GetClassType(), 
-                                                        IsoSurfaceParams::GetClassType() );
+//static RendererRegistrar<IsoSurfaceRenderer> registrar( IsoSurfaceRenderer::GetClassType(), IsoSurfaceParams::GetClassType() );
 
 
 IsoSurfaceRenderer::IsoSurfaceRenderer( const ParamsMgr*    pm,
