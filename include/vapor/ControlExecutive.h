@@ -213,9 +213,26 @@ class RENDER_API ControlExec : public MyBase {
         string winName, string dataSetName,
         const RenderParams *rp, string renderName, bool on);
 
+    //! Remove (destroy) the indicated renderer
+    //!
+    //! \param[in] hasOpenGLContext If true it is the callers job to ensure that the
+    //! OpenGL Context for the window \p winName is active. In this case the renderer
+    //! is destroyed immediately. If false the renderer is queue'd for later destruction
+    //! when \p winName has an active OpenGL context.
+    //!
     void RemoveRenderer(
         string winName, string dataSetName,
-        string renderType, string renderName);
+        string renderType, string renderName, bool hasOpenGLContext);
+
+    //! Remove (destroy) all renderers on this window
+    //!
+    //! \param[in] hasOpenGLContext If true it is the callers job to ensure that the
+    //! OpenGL Context for the window \p winName is active. In this case the renderer
+    //! is destroyed immediately. If false the renderer is queue'd for later destruction
+    //! when \p winName has an active OpenGL context.
+    //!
+    void RemoveAllRenderers(
+        string winName, bool hasOpenGLContext);
 
     //! Obtain the ParamsMgr, for use in accessing the Params instances.
     //! \return ParamsMgr*
@@ -687,7 +704,7 @@ class RENDER_API ControlExec : public MyBase {
 
     void _removeRendererHelper(
         string winName, string dataSetName, string renderType, string renderName,
-        bool removeFromParamsFlag);
+        bool removeFromParamsFlag, bool hasOpenGLContext);
 };
 }; // namespace VAPoR
 
