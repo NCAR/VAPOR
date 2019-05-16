@@ -276,6 +276,7 @@ void VizWinMgr::_vizAboutToDisappear(string vizName)
     string          activeViz = p->GetActiveVizName();
 
     itr->second->makeCurrent();
+    _controlExec->RemoveAllRenderers(vizName, true);
     _controlExec->RemoveVisualizer(vizName);
 
     // disconnect all signals from window

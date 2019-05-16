@@ -599,6 +599,7 @@ void MainForm::hookupSignals()
     connect(_vizWinMgr, SIGNAL(activateViz(const QString &)), _tabMgr, SLOT(SetActiveViz(const QString &)));
 
     connect(_tabMgr, SIGNAL(Proj4StringChanged(string)), this, SLOT(_setProj4String(string)));
+    connect(_vizWinMgr, SIGNAL(removeViz(const QString &)), _tabMgr, SLOT(SetActiveViz(const QString &)));
 }
 
 void MainForm::_createFileMenu()

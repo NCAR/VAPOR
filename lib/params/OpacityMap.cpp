@@ -129,8 +129,9 @@ void OpacityMap::addControlPoint(float value, float opacity)
 void OpacityMap::deleteControlPoint(int index)
 {
     vector<double> cps = GetControlPoints();
+
     if (index >= 0 && index < cps.size() / 2 - 1 && cps.size() > 2) {
-        cps.erase(cps.begin() + 2 * index, cps.begin() + 2 * index + 1);
+        cps.erase(cps.begin() + 2 * index, cps.begin() + 2 * index + 2);
         SetControlPoints(cps);
     }
 }
