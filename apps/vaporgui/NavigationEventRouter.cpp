@@ -504,8 +504,16 @@ void NavigationEventRouter::updateTransforms() {
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 	vector <string> winNames = paramsMgr->GetVisualizerNames();
 	for (int i=0; i<winNames.size(); i++) {
+
+        // Make sure we have a valid ViewpointParams for the current visualizer
 		ViewpointParams *vParams = paramsMgr->GetViewpointParams(winNames[i]);
 		if (! vParams) continue;
+
+        // Make sure we're updating the GUI according to the currently active
+        // visualizer
+	    GUIStateParams *guiParams = GetStateParams();
+        if ( winNames[i] != guiParams->GetActiveVizName())
+            continue;
 
 		vector<string> names = paramsMgr->GetDataMgrNames();
 
