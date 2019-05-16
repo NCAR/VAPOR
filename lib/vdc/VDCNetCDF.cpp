@@ -323,7 +323,7 @@ int VDCNetCDF::GetPath(
             max_ts = numts;
         if (max_ts == 0) {
             idx = ts;
-            file_ts = ts;
+            file_ts = 0;
             max_ts = 1;
         } else {
             idx = ts / max_ts;

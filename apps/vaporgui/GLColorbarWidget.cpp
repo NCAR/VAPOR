@@ -333,7 +333,11 @@ list<float> GLColorbarWidget::selectedPoints() {
 // Delete the selected control points.
 //----------------------------------------------------------------------------
 void GLColorbarWidget::deleteSelectedControlPoint() {
-    if (_colormap && selected() && _colormap->numControlPoints() > 2) {
+    if (_colormap &&
+        selected() &&
+        _colormap->numControlPoints() > 2 &&
+        _selected != 0 &&
+        _selected != _colormap->numControlPoints() - 1) {
         emit startChange("Delete color control point");
 
         _colormap->deleteControlPoint(_selected);
