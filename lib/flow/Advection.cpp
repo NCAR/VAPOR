@@ -13,28 +13,8 @@ Advection::Advection() : _lowerAngle( 3.0f ), _upperAngle( 15.0f )
 
 // Destructor;
 Advection::~Advection()
-{
-/*    if( _velocity )
-    {
-        delete _velocity;
-        _velocity = nullptr;
-    }*/
-}
+{ }
 
-/*
-void
-Advection::SetBaseStepSize( float f )
-{
-    _baseDeltaT = f;
-}
-
-void
-Advection::UseVelocity( const VelocityField* p )
-{
-    if( _velocity )
-        delete _velocity;
-    _velocity = p;
-}*/
 
 void
 Advection::UseSeedParticles( const std::vector<Particle>& seeds )
@@ -48,8 +28,6 @@ Advection::UseSeedParticles( const std::vector<Particle>& seeds )
 int
 Advection::CheckReady() const
 {
-    //if( _velocity == nullptr )
-    //    return NO_FIELD_YET;
 
     for( const auto& s : _streams )
     {
@@ -393,58 +371,6 @@ Advection::GetMaxNumOfSteps() const
         num = s.size() > num ? s.size() : num;
     return num;
 }
-
-/*
-int
-Advection::AssignParticleValuesOfAStream( std::vector<float>& valsIn, size_t idx )
-{
-    if( valsIn.size() != _streams.at(idx).size() )
-        return SIZE_MISMATCH;
-
-    // Now we assign value to each particle
-    auto itr = _streams.at(idx).begin();
-    for( auto v : valsIn )
-    {
-        (*itr).value = v;
-        ++itr;
-    }
-    return 0;
-}
-
-int
-Advection::AssignLastParticleValueOfAStream( float newVal, size_t idx )
-{
-    _streams.at(idx).back().value = newVal;
-    return 0;
-}
-
-int
-Advection::RepeatLastTwoParticleValuesOfAStream( size_t idx )
-{
-    auto& s = _streams.at(idx);
-    size_t size = s.size();
-    if( size > 1 )  // At least there are two particles
-        s[ size-1 ].value = s[ size-2 ].value;
-
-    return 0;
-}
-
-int
-Advection::AttachParticlePropertiesOfAStream( std::vector<float>& prop, size_t idx )
-{
-    if( prop.size() != _streams.at(idx).size() )
-        return SIZE_MISMATCH;
-
-    // Now we attach properties to each particle
-    auto itr = _streams.at(idx).begin();
-    for( auto v : prop )
-    {
-        (*itr).AttachProperty( v );
-        ++itr;
-    }
-    return 0;
-}
-*/
 
 void 
 Advection::ClearParticleProperties()
