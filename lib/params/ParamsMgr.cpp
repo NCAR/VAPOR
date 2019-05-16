@@ -333,12 +333,17 @@ ViewpointParams *ParamsMgr::CreateVisualizerParamsInstance(
 
 	ViewpointParams *vpParams = get_vp_params(winName);
 	if (! vpParams) {
+
+        // If a ViewpointParams already exists for another visualizer,
+        // just copy it so our new visualizer retains the user-defined
+        // values
         std::vector<string> winNames = GetVisualizerNames();
         if ( winNames.size() ) {
             ViewpointParams* copyParams = GetViewpointParams( winNames.front() );
             vpParams = new ViewpointParams( *copyParams );
 	        _viewpointParamsMap[winName] = vpParams;
         }
+        // Or if one does not exist, make one from scratch
         else
 		    vpParams = make_vp_params(winName);
 	}
