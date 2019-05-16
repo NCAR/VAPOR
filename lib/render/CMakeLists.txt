@@ -43,9 +43,9 @@ set (SRC
 	glutil.cpp
 	VolumeAlgorithm.cpp
 	VolumeRegular.cpp
-	VolumeResampled.cpp
-	VolumeTest.cpp
-	VolumeTest2.cpp
+	# VolumeResampled.cpp
+	# VolumeTest.cpp
+	# VolumeTest2.cpp
 	VolumeCellTraversal.cpp
 	Texture.cpp
 	Framebuffer.cpp
@@ -97,9 +97,9 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/glutil.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeAlgorithm.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeRegular.h
-	${PROJECT_SOURCE_DIR}/include/vapor/VolumeResampled.h
-	${PROJECT_SOURCE_DIR}/include/vapor/VolumeTest.h
-	${PROJECT_SOURCE_DIR}/include/vapor/VolumeTest2.h
+	# ${PROJECT_SOURCE_DIR}/include/vapor/VolumeResampled.h
+	# ${PROJECT_SOURCE_DIR}/include/vapor/VolumeTest.h
+	# ${PROJECT_SOURCE_DIR}/include/vapor/VolumeTest2.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeCellTraversal.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Texture.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Framebuffer.h
