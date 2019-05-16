@@ -28,7 +28,10 @@ int VolumeRegular::LoadData(const Grid *grid)
 int VolumeRegular::LoadSecondaryData(const Grid *grid)
 {
     _hasSecondData = false;
-    if (_dataDimensions != grid->GetDimensions()) { return -1; }
+    if (_dataDimensions != grid->GetDimensions()) {
+        Wasp::MyBase::SetErrMsg("Secondary (color mapped) variable has different grid from primary variable");
+        return -1;
+    }
     if (!_data2.Initialized()) _data2.Generate();
     if (!_missing2.Initialized()) _missing2.Generate();
     int ret = _loadDataDirect(grid, &_data2, &_missing2, &_hasMissingData2);
