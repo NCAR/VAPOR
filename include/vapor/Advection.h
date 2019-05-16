@@ -57,22 +57,6 @@ public:
     // Retrieve the maximum number of steps
     size_t GetMaxNumOfSteps() const;
 
-    // As part of the functionality of this class, it manages the 
-    //    particles that it stores.
-    //
-    // 1) this function assigns values to the Particle.value field for an entire stream
-    //int  AssignParticleValuesOfAStream( std::vector<float>& values, size_t idx );
-    //
-    // 2) this function assigns a value to the last Particle of a stream
-    //int  AssignLastParticleValueOfAStream( float value, size_t idx );
-    //
-    // 3) this function copies the value field from second last particle to the last one
-    //int  RepeatLastTwoParticleValuesOfAStream( size_t idx );
-    //
-    // 4) this function calls Particle::AttachProperty() function for a stream
-    //int  AttachParticlePropertiesOfAStream( std::vector<float>& properties, size_t idx );
-
-
     //
     // Output a file that could be plotted by gnuplot
     //   Command:  splot "filename" u 1:2:3 w lines
