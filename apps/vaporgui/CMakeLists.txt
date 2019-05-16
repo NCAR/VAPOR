@@ -44,9 +44,6 @@ set (SRCS
 	ImageEventRouter.cpp
 	ContourEventRouter.cpp
     SliceEventRouter.cpp
-	DVREventRouter.cpp
-	IsoSurfaceEventRouter.cpp
-	IsoSurfaceSubtabs.cpp
 	PlotParams.cpp
 	StatisticsParams.cpp
 	ContourSubtabs.cpp
@@ -65,15 +62,12 @@ set (SRCS
 	Manip.cpp
 	VolumeEventRouter.cpp
 	VolumeIsoEventRouter.cpp
-	IsoSurfaceSubtabs.cpp
 	VolumeIsoSubtabs.cpp
 	VolumeSubtabs.cpp
     VaporWidgets.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
-	DVRSubtabs.h
-	IsoSurfaceSubtabs.h
 	WireFrameSubtabs.h
 	Statistics.h
 	Plot.h
@@ -94,7 +88,6 @@ set (SRCS
 	VolumeIsoEventRouter.h
 	VolumeSubtabs.h
 	VolumeIsoSubtabs.h
-	IsoSurfaceSubtabs.h
 
 	MainForm.h
 	VizWinMgr.h
@@ -127,7 +120,6 @@ set (SRCS
 	ImageEventRouter.h
 	ImageFrame.h
 	ImageFrame.h
-	IsoSurfaceEventRouter.h
 	MappingFrame.h
 	MouseModeParams.h
 	PlotParams.h
@@ -158,14 +150,6 @@ set (UIS
 	appSettingsTab.ui
 	NewRendererDialog.ui
 	errMsg.ui
-	DVRVariablesGUI.ui
-	DVRAppearanceGUI.ui
-	DVRGeometryGUI.ui
-	DVRAnnotationGUI.ui
-	IsoSurfaceVariablesGUI.ui
-	IsoSurfaceAppearanceGUI.ui
-	IsoSurfaceGeometryGUI.ui
-	IsoSurfaceAnnotationGUI.ui
 	helloLayoutSubtab.ui
 	helloAppearanceSubtab.ui
 	BarbAppearanceGUI.ui
