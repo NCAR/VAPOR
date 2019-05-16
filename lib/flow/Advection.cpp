@@ -9,6 +9,12 @@ Advection::Advection() : _lowerAngle( 3.0f ), _upperAngle( 15.0f )
 {
     _lowerAngleCos = glm::cos( glm::radians( _lowerAngle ) );
     _upperAngleCos = glm::cos( glm::radians( _upperAngle ) );
+
+    for( int i = 0; i < 3; i++ )
+    {
+        _isPeriodic[i]     = false;
+        _periodicBounds[i] = glm::vec2( 0.0f );
+    }
 }
 
 // Destructor;
@@ -386,4 +392,25 @@ Advection::ResetParticleValues()
     for( auto& stream : _streams )
         for( auto& part : stream )
             part.value = 0.0f;
+}
+
+void
+Advection::SetXPeriodicity( bool isPeri, float min, float max )
+{
+    _isPeriodic[0]     = isPeri;
+    _periodicBounds[0] = glm::vec2( min, max );
+}
+
+void
+Advection::SetYPeriodicity( bool isPeri, float min, float max )
+{
+    _isPeriodic[1]     = isPeri;
+    _periodicBounds[1] = glm::vec2( min, max );
+}
+
+void
+Advection::SetZPeriodicity( bool isPeri, float min, float max )
+{
+    _isPeriodic[2]     = isPeri;
+    _periodicBounds[2] = glm::vec2( min, max );
 }
