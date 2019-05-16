@@ -2,6 +2,7 @@
 
 using namespace flow;
 
+// Constructor
 VaporField::VaporField() : _recentGridLimit( 12 )
 {
     _datamgr = nullptr;
@@ -16,8 +17,7 @@ VaporField::VaporField(int limit) : _recentGridLimit( limit )
 
 // Destructor
 VaporField::~VaporField()
-{ 
-}
+{ }
 
 
 bool

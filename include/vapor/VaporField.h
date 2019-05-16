@@ -67,7 +67,7 @@ public:
     };
 
 
-private:
+protected:
    
     // Member variables
     std::vector<float>          _timestamps;    // in ascending order
