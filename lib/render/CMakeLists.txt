@@ -20,8 +20,6 @@ set (SRC
 	AnnotationRenderer.cpp
 	jfilewrite.cpp
 	RayCaster.cpp
-	DVRenderer.cpp
-	IsoSurfaceRenderer.cpp
 	ControlExecutive.cpp
 	ContourRenderer.cpp
     SliceRenderer.cpp
@@ -86,8 +84,6 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/IResourceManager.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TextLabel.h
 	${PROJECT_SOURCE_DIR}/include/vapor/RayCaster.h
-	${PROJECT_SOURCE_DIR}/include/vapor/DVRenderer.h
-	${PROJECT_SOURCE_DIR}/include/vapor/IsoSurfaceRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/PyEngine.h
 	${PROJECT_SOURCE_DIR}/include/vapor/CalcEngineMgr.h
 	${PROJECT_SOURCE_DIR}/include/vapor/GeoTIFWriter.h
