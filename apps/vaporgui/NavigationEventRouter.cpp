@@ -287,16 +287,12 @@ void NavigationEventRouter::_performAutoStretching(string dataSetName) {
         int yDimension = 1;
         int zDimension = 2;
 
-        cout << "autoscaling " << winNames[i] << endl;
-
         // If a dimension's scale is not 1.f, the user has saved a session with
         // a non-default value.  Don't modify it.
         if ( scales[ xDimension ] != 1.f &&
              scales[ yDimension ] != 1.f &&
              scales[ zDimension ] != 1.f )
             continue;
-
-        cout << "performing on " << winNames[i] << " " << dataSetName << endl;
 
 		DataMgr* dm = ds->GetDataMgr(dataSetName);
 		std::vector<string> varNames = dm->GetDataVarNames(3);
