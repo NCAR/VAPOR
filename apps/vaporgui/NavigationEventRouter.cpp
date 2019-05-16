@@ -289,9 +289,11 @@ void NavigationEventRouter::_performAutoStretching(string dataSetName) {
 
         // If a dimension's scale is not 1.f, the user has saved a session with
         // a non-default value.  Don't modify it.
-        if ( scales[ xDimension ] != 1.f &&
-             scales[ yDimension ] != 1.f &&
-             scales[ zDimension ] != 1.f )
+        if ( scales[ xDimension ] != 1.f )
+            continue;
+        if ( scales[ yDimension ] != 1.f )
+            continue;
+        if ( scales[ zDimension ] != 1.f )
             continue;
 
 		DataMgr* dm = ds->GetDataMgr(dataSetName);
