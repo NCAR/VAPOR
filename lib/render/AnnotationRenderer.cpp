@@ -514,12 +514,13 @@ void AnnotationRenderer::InScenePaint(size_t ts)
         Transform* tmp;
         for (int i=0; i<names.size(); i++) {
             tmp = vpParams->GetTransform(names[i]);
-            if ( tmp->GetScales()[Z] < t->GetScales()[Z] )
+            if ( tmp->GetScales()[Z] < t->GetScales()[Z] ) {
                 t = tmp;
+            }
         }
     }
 	applyTransform(t);
-
+    
 	double mvMatrix[16];
     mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
 	vpParams->SetModelViewMatrix(mvMatrix);
