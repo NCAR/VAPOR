@@ -60,63 +60,6 @@ Advection::CheckReady() const
     return 0;
 }
 
-/*
-bool
-Advection::IsSteady() const
-{
-    if( _velocity )
-        return _velocity->IsSteady;
-    else
-        return false;
-}*/
-
-/*
-bool
-Advection::IsAdvectionComplete() const
-{
-    return _advectionComplete;
-}
-
-void
-Advection::ToggleAdvectionComplete( bool comp )
-{
-    _advectionComplete = comp;
-}
-
-const std::string 
-Advection::GetVelocityNameU() const
-{
-    if( _velocity )
-        return _velocity->VelocityNameU;
-    else
-        return std::string("");
-}
-const std::string 
-Advection::GetVelocityNameV() const
-{
-    if( _velocity )
-        return _velocity->VelocityNameV;
-    else
-        return std::string("");
-}
-const std::string 
-Advection::GetVelocityNameW() const
-{
-    if( _velocity )
-        return _velocity->VelocityNameW;
-    else
-        return std::string("");
-}
-
-const std::string 
-Advection::GetScalarName() const
-{
-    if( _velocity )
-        return _velocity->ScalarName;
-    else
-        return std::string("");
-}
-*/
 
 int
 Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method )
