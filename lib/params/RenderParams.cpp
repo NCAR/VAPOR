@@ -357,7 +357,13 @@ void RenderParams::SetColorbarPbase(ColorbarPbase* pb){
 	
 }
 
-void RenderParams::_calculateStride( string varName ) {
+void RenderParams::_calculateStride(string varName)
+{
+    if (varName.empty() || varName == "NULL") {
+        _stride = 1;
+        return;
+    }
+    
     std::vector<size_t> dimsAtLevel;
     int ref = GetRefinementLevel();
 
