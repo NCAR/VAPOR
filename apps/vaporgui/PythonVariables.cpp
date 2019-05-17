@@ -39,6 +39,10 @@ PythonVariables::PythonVariables(
 {
     setupUi(this);
 
+
+    _importScriptButton->hide();
+    _exportScriptButton->hide();
+
     setWindowTitle("Derived variables with Python");
 
     _script      = "";
