@@ -157,13 +157,13 @@ int	main(int argc, char **argv) {
 	}
 
 	if (opt.help) {
-		cerr << "Usage: " << ProgName << " [options] netcdffile datafile" << endl;
+		cerr << "Usage: " << ProgName << " [options] vdcFile rawDataFile" << endl;
 		op.PrintOptionHelp(stderr);
 		exit(0);
 	}
 
 	if (argc != 3) {
-		cerr << "Usage: " << ProgName << " [options] netcdffile datafile" << endl;
+		cerr << "Usage: " << ProgName << " [options] vdcFile rawDataFile" << endl;
 		op.PrintOptionHelp(stderr);
 		exit(1);
 	}
