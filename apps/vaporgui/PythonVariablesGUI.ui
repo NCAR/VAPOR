@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>591</width>
-    <height>617</height>
+    <height>685</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -422,7 +422,7 @@
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>Open</string>
+                  <string>Open from Session</string>
                  </property>
                  <property name="autoDefault">
                   <bool>false</bool>
