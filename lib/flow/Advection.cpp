@@ -55,9 +55,25 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
     bool happened = false;
     for( auto& s : _streams )       // Process one stream at a time
     {
-        const auto& p0 = s.back();  // Start from the last particle in this stream
+        auto& p0 = s.back();  // Start from the last particle in this stream
+
+        // Check if the particle is inside of the volume, and apply periodicity if enabled
         if( !velocity->InsideVolumeVelocity( p0.time, p0.location ) )
-            continue;
+        {
+            // Attempt to apply periodicity
+            auto loc = p0.location;
+            for( int i = 0; i < 3; i++ )    // correct coordinates in each periodic dimension
+            {
+                if( _isPeriodic[i] )
+                    loc[i] = _applyPeriodic( loc[i], _periodicBounds[i][0], _periodicBounds[i][1] );
+            }
+
+            // If the new location comes inside volume, give it to p0. Otherwise, skip p0.
+            if( velocity->InsideVolumeVelocity( p0.time, loc ) )
+                p0.location = loc;
+            else
+                continue;
+        }
 
         float dt = deltaT;
         float mindt = deltaT / 20.0f,   maxdt = deltaT * 50.0f;
@@ -422,4 +438,25 @@ Advection::SetZPeriodicity( bool isPeri, float min, float max )
         _periodicBounds[2] = glm::vec2( min, max );
     else
         _periodicBounds[2] = glm::vec2( 0.0f );
+}
+
+float
+Advection::_applyPeriodic( float val, float min, float max ) const
+{
+    float span = max - min;
+    float pval = val;
+    if( val < min )
+    {
+        while( pval < min )
+            pval += span;
+        return pval;
+    }
+    if( val >= min && val <= max )
+        return pval;
+    else    // val > max
+    {
+        while( pval > max )
+            pval -= span;
+        return pval;
+    }
 }

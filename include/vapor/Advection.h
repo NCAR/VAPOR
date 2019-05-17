@@ -76,9 +76,9 @@ public:
     int  CheckReady() const;
 
     // Specify periodicity on each dimension
-    void SetXPeriodicity( bool, float min = 0.0f, float max = 0.0f );
-    void SetYPeriodicity( bool, float min = 0.0f, float max = 0.0f );
-    void SetZPeriodicity( bool, float min = 0.0f, float max = 0.0f );
+    void  SetXPeriodicity( bool, float min = 0.0f, float max = 0.0f );
+    void  SetYPeriodicity( bool, float min = 0.0f, float max = 0.0f );
+    void  SetZPeriodicity( bool, float min = 0.0f, float max = 0.0f );
 
 private:
     std::vector< std::vector<Particle> >    _streams;
@@ -103,7 +103,11 @@ private:
     // These variables are **not** intended to be decided by Advection, but by someone
     // who's more knowledgeable about the field.
     bool        _isPeriodic[3];         // is it periodic in X, Y, Z dimensions ?
-    glm::vec2   _periodicBounds[3];
+    glm::vec2   _periodicBounds[3];     // periodic boundaries in X, Y, Z dimensions
+
+    // Adjust input "val" according to the bound specified by min and max.
+    // Returns the value after adjustment.
+    float       _applyPeriodic( float val, float min, float max ) const;
 
 };
 };
