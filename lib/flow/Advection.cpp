@@ -397,20 +397,29 @@ Advection::ResetParticleValues()
 void
 Advection::SetXPeriodicity( bool isPeri, float min, float max )
 {
-    _isPeriodic[0]     = isPeri;
-    _periodicBounds[0] = glm::vec2( min, max );
+    _isPeriodic[0] = isPeri;
+    if( isPeri )
+        _periodicBounds[0] = glm::vec2( min, max );
+    else
+        _periodicBounds[0] = glm::vec2( 0.0f );
 }
 
 void
 Advection::SetYPeriodicity( bool isPeri, float min, float max )
 {
     _isPeriodic[1]     = isPeri;
-    _periodicBounds[1] = glm::vec2( min, max );
+    if( isPeri )
+        _periodicBounds[1] = glm::vec2( min, max );
+    else
+        _periodicBounds[1] = glm::vec2( 0.0f );
 }
 
 void
 Advection::SetZPeriodicity( bool isPeri, float min, float max )
 {
     _isPeriodic[2]     = isPeri;
-    _periodicBounds[2] = glm::vec2( min, max );
+    if( isPeri )
+        _periodicBounds[2] = glm::vec2( min, max );
+    else
+        _periodicBounds[2] = glm::vec2( 0.0f );
 }
