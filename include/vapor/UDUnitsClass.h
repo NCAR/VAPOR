@@ -30,6 +30,8 @@ class VDF_API UDUnits {
     UDUnits();
     ~UDUnits();
 
+    static std::string GetDatabasePath();
+
     //! Initialize the Udunits-2 data base. Must be called after the
     //! constructor, prior to any other class methods
     //!
