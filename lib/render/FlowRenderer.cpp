@@ -165,6 +165,7 @@ FlowRenderer::_paintGL( bool fast )
     _updateFlowCacheAndStates( params );
     _velocityField.UpdateParams( params );
     _colorField.UpdateParams( params );
+    _updatePeriodicity( &_advection, params );
 
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
@@ -621,6 +622,14 @@ FlowRenderer::_restoreGLState() const
 {
     glActiveTexture( GL_TEXTURE0 );
     glBindTexture( GL_TEXTURE_1D, 0 );
+}
+
+void
+FlowRenderer::_updatePeriodicity( flow::Advection* advc, const FlowParams* params )
+{
+    glm::vec3 minxyz, maxxyz;
+    _velocityField.GetFirstStepVelocityIntersection( minxyz, maxxyz );
+    advc->SetZPeriodicity( true, minxyz.z, maxxyz.z );
 }
 
 #ifndef WIN32

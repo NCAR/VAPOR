@@ -114,6 +114,8 @@ protected:
     // Update values of _cache_* and _state_* member variables.
     void _updateFlowCacheAndStates( const FlowParams* );
 
+    void _updatePeriodicity( flow::Advection* advc, const FlowParams* params );
+
     // A function to populate particle properties.
     // If useAsColor == true, then this calculated property will be stored in a field
     //    of a Particle that will be used for coloring the particle.

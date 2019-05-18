@@ -128,6 +128,31 @@ VaporField::InsideVolumeScalar( float time, const glm::vec3& pos )
     return true;
 }
 
+void
+VaporField::GetFirstStepVelocityIntersection( glm::vec3& minxyz, glm::vec3& maxxyz )
+{
+    const VAPoR::Grid* grid = nullptr;
+    std::vector<double> min[3], max[3];
+
+    for( int i = 0; i < 3; i++ )
+    {
+        auto varname = VelocityNames[i];
+        int rv       = _getAGrid( 0, varname, &grid );
+        assert(  rv == 0 );
+        grid->GetUserExtents( min[i], max[i] );
+    }
+
+    minxyz = glm::vec3 ( min[0][0], min[0][1], min[0][2] );
+    maxxyz = glm::vec3 ( max[0][0], max[0][1], max[0][2] );
+
+    for( int i = 1; i < 3; i++ )
+    {
+        glm::vec3 xyz(      min[i][0], min[i][1], min[i][2] );
+        minxyz = glm::max(  minxyz, xyz );
+        xyz    = glm::vec3( max[i][0], max[i][1], max[i][2] );
+        maxxyz = glm::min(  maxxyz, xyz );
+    }
+}
 
 int
 VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity,
