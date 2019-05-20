@@ -1190,10 +1190,9 @@ void MainForm::sessionOpenHelper(string fileName) {
 	_tabMgr->Restart();
 }
 
-// Open session file
-//
 void MainForm::sessionOpen(QString qfileName)
 {
+    // Disable "Are you sure?" popup in debug build
 #ifdef NDEBUG
     if( _stateChangeFlag )
     {
@@ -1643,6 +1642,7 @@ vector <string> MainForm::myGetOpenFileNames(
 
 void MainForm::sessionNew()
 {
+    // Disable "Are you sure?" popup in debug build
 #ifdef NDEBUG
     if( _stateChangeFlag )
     {
@@ -1736,6 +1736,7 @@ void MainForm::modeChange(int newmode){
 }
 
 void MainForm::showCitationReminder(){
+    // Disable citation reminder in Debug build
 #ifndef NDEBUG
     return;
 #endif
