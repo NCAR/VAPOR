@@ -22,7 +22,7 @@ using namespace VAPoR;
 static VolumeAlgorithmRegistrar<VolumeCellTraversal> registration;
 static VolumeAlgorithmRegistrar<VolumeCellTraversalIso> registration2;
 
-#define MAX_LEVELS 32
+#define MAX_LEVELS 12
 
 #define FI_LEFT 0
 #define FI_RIGHT 1
