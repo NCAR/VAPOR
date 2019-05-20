@@ -1,5 +1,10 @@
 #include VolumeBase.frag
 
+// This file implements the cell traversal and provides a framework
+// for rendering a curvilinear grid.
+// It defines a Traverse function which needs to be
+// overridden that does the rendering
+
 uniform ivec3 coordDims;
 uniform float unitDistance;
 uniform float unitOpacityScalar;
