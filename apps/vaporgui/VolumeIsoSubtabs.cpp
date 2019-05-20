@@ -42,7 +42,7 @@ void VolumeIsoVariablesSubtab::on__castingModeComboBox_currentIndexChanged(const
 VolumeIsoAppearanceSubtab::VolumeIsoAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
-    _TFWidget->Reinit((TFFlags)(CONSTANT_COLOR | COLORMAP_VAR_IS_IN_TF2 | ISOLINES));
+    _TFWidget->Reinit((TFFlags)(CONSTANT_COLOR | COLORMAP_VAR_IS_IN_TF2 | ISOLINES | SAMPLING));
 
     _params = nullptr;
 

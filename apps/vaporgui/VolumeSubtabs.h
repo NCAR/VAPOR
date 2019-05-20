@@ -42,7 +42,7 @@ public:
     {
         setupUi(this);
         _TFWidget->SetOpacityIntegrated(true);
-        _TFWidget->Reinit((TFFlags)(0));
+        _TFWidget->Reinit((TFFlags)(SAMPLING));
 
         _params = nullptr;
 
