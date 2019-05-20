@@ -38,9 +38,13 @@ VolumeIsoRenderer::VolumeIsoRenderer( const ParamsMgr*    pm,
     if (_needToSetDefaultAlgorithm()) {
         VolumeParams *vp = (VolumeParams*)GetActiveParams();
         Grid *grid = _dataMgr->GetVariable(vp->GetCurrentTimestep(), vp->GetVariableName(), vp->GetRefinementLevel(), vp->GetCompressionLevel());
-        string algorithmName = _getDefaultAlgorithmForGrid(grid);
-        vp->SetAlgorithm(algorithmName);
-        delete grid;
+        if (grid) {
+            string algorithmName = _getDefaultAlgorithmForGrid(grid);
+            vp->SetAlgorithm(algorithmName);
+            delete grid;
+        } else {
+            vp->SetAlgorithm(VolumeRegularIso::GetName());
+        }
     }
 }
 
