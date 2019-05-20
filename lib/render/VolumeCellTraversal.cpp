@@ -156,6 +156,10 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
     _coordDims[2] = d;
 
     float *data = new float[nCoords * 3];
+    if (!data) {
+        Wasp::MyBase::SetErrMsg("Could not allocate enough RAM to load data coordinates");
+        return -1;
+    }
 
     auto coord = grid->ConstCoordBegin();
     for (size_t i = 0; i < nCoords; ++i, ++coord) {
