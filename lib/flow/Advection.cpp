@@ -209,6 +209,9 @@ Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
             if( i < s.size() )
             {
                 auto& p = s[i];
+                // Skip this particle if it's a separator
+                if( p.GetSpecialState() )
+                    continue;
                 // Do not evaluate this particle if its value is non-zero
                 if( skipNonZero && p.value != 0.0f )
                     continue;
