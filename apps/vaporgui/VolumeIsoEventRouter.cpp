@@ -4,10 +4,8 @@
 #endif
 
 #include <vapor/glutil.h>
-#include <qlineedit.h>
-#include <qscrollarea.h>
-#include <qcolordialog.h>
-#include <QFileDialog>
+#include <QLineEdit>
+#include <QScrollArea>
 #include <vector>
 #include <string>
 #include "vapor/VolumeIsoParams.h"
