@@ -55,38 +55,62 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
     bool happened = false;
     for( auto& s : _streams )       // Process one stream at a time
     {
-        auto& p0 = s.back();  // Start from the last particle in this stream
+        auto& p0 = s.back();        // Start from the last particle in this stream
 
-        // Check if the particle is inside of the volume, and apply periodicity if enabled
+        // Check if the particle is inside of the volume.
+        // Also wrap it along periodic dimensions if enabled.
         if( !velocity->InsideVolumeVelocity( p0.time, p0.location ) )
         {
             // Attempt to apply periodicity
+            bool locChanged = false;
             auto loc = p0.location;
             for( int i = 0; i < 3; i++ )    // correct coordinates in each periodic dimension
             {
                 if( _isPeriodic[i] )
+                {
                     loc[i] = _applyPeriodic( loc[i], _periodicBounds[i][0], _periodicBounds[i][1] );
+                    locChanged = true;
+                }
             }
 
-            // If the new location comes inside volume, give it to p0. Otherwise, skip p0.
+            if( !locChanged )   // no dimension is periodic
+                continue;
+
+            // If the new location comes inside volume, then we do these things:
+            // 1) Update the location of p0 to represent the wrapped result.
+            // 2) Insert a separator particle before p0.
+            // Note: the order of these two operations cannot be altered.
             if( velocity->InsideVolumeVelocity( p0.time, loc ) )
+            {
                 p0.location = loc;
+
+                Particle separator;
+                separator.SetSpecialState( true );
+                auto itr = s.cend();
+                --itr;      // insert before the last element, p0
+                s.insert( itr, separator );
+            }
             else
                 continue;
         }
 
+        p0 = s.back();      // make sure p0 still represents the last element
+   
         float dt = deltaT;
         float mindt = deltaT / 20.0f,   maxdt = deltaT * 50.0f;
-        if( s.size() > 2 )  // If there are at least 3 particles in the stream, 
-        {                   // we also adjust *dt*
+        if( s.size() > 2 )  // If there are at least 3 particles in the stream and
+        {                   // neither is a separator, we also adjust *dt*
             const auto& past1 = s[ s.size()-2 ];
             const auto& past2 = s[ s.size()-3 ];
-            dt  = p0.time - past1.time;     // step size used by last integration
-            dt *= _calcAdjustFactor( past2, past1, p0 );
-            if( dt > 0 )    // integrate forward 
-                dt  = glm::clamp( dt, mindt, maxdt );
-            else            // integrate backward
-                dt  = glm::clamp( dt, maxdt, mindt );
+            if( (!past1.GetSpecialState()) && (!past2.GetSpecialState()) )
+            {
+                dt  = p0.time - past1.time;     // step size used by last integration
+                dt *= _calcAdjustFactor( past2, past1, p0 );
+                if( dt > 0 )    // integrate forward 
+                    dt  = glm::clamp( dt, mindt, maxdt );
+                else            // integrate backward
+                    dt  = glm::clamp( dt, maxdt, mindt );
+            }
         }
 
         Particle p1;
@@ -445,14 +469,14 @@ Advection::_applyPeriodic( float val, float min, float max ) const
 {
     float span = max - min;
     float pval = val;
-    if( val < min )
+    if( val >= min && val <= max )
+        return pval;
+    else if( val < min )
     {
         while( pval < min )
             pval += span;
         return pval;
     }
-    if( val >= min && val <= max )
-        return pval;
     else    // val > max
     {
         while( pval > max )
