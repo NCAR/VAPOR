@@ -35,11 +35,11 @@ void main(void)
     if (IntersectRayBoundingBox(cameraPos, dir, 0, userExtsMin, userExtsMax, t0, t1)) {
         
         int STEPS;
-        float integratePart = 1/7.0;
+        float integratePart = 1;
         float noise = 1;
         if (fast) {
             STEPS = 100;
-            integratePart = 1;
+            integratePart = 7;
             noise = GetSamplingNoise();
         } else {
             STEPS = 700;
@@ -58,7 +58,7 @@ void main(void)
 			
             color.rgb *= PhongLighting(normal, rayLightingNormal);
             
-            color.a = IntegrateConstantAlpha(color.a, integratePart);
+            color.a = IntegrateConstantAlpha(color.a * density, integratePart);
             
             if (ShouldRenderSample(dataSTR))
                 BlendToBack(accum, PremultiplyAlpha(color));
