@@ -579,7 +579,7 @@ bool MappingFrame::Update(DataMgr *dataMgr,
 		//Synchronize sliders with isovalues
 		vector<double> isovals;
 		ContourParams* cp;
-        VolumeIsoParams *vp;
+		VolumeIsoParams *vp;
 
 		// This should probably be rethought
 		// Maybe we need an IsoParams base class?
@@ -1478,7 +1478,7 @@ int MappingFrame::drawIsolineSliders()
 {
 	//std::vector<bool> enabledIsoValues(true, _isolineSliders.size());
 	std::vector<bool> enabledIsoValues(_isolineSliders.size(), true);
-    VolumeIsoParams* vp = dynamic_cast<VolumeIsoParams*>(_rParams);
+	VolumeIsoParams* vp = dynamic_cast<VolumeIsoParams*>(_rParams);
     
 	if (vp != NULL)
         enabledIsoValues = vp->GetEnabledIsoValues();
