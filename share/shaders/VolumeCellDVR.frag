@@ -23,7 +23,7 @@ vec4 RenderCellSmartSampling(const vec3 dir, vec3 rayLightingNormal, const vec3 
     vec3 normal = GetNormalAtCoord(hit);
     c.rgb *= PhongLighting(normal, rayLightingNormal);
     float l = min(step - mod(tStart, step), tEnd-tStart)/step;
-    c.a = IntegrateConstantAlpha(c.a, l * stepOpacityUnit);
+    c.a = IntegrateConstantAlpha(c.a * density, l * stepOpacityUnit);
     BlendToBack(acc2, PremultiplyAlpha(c));
     
     for (float t = step * (floor(tStart/step)+1); t < tEnd; t+= step) {
@@ -32,7 +32,7 @@ vec4 RenderCellSmartSampling(const vec3 dir, vec3 rayLightingNormal, const vec3 
         vec3 normal = GetNormalAtCoord(hit);
         color.rgb *= PhongLighting(normal, rayLightingNormal);
         float l = min(step, t1-t)/step;
-        color.a = IntegrateConstantAlpha(color.a, l * stepOpacityUnit);
+        color.a = IntegrateConstantAlpha(color.a * density, l * stepOpacityUnit);
         BlendToBack(acc2, PremultiplyAlpha(color));
     }
     
@@ -47,7 +47,7 @@ vec4 RenderCellConstant(const vec3 dir, const vec3 rayLightingNormal, const ivec
     vec3 normal = GetNormal((vec3(currentCell)+vec3(0.5))/cellDims);
     color.rgb *= PhongLighting(normal, rayLightingNormal);
     
-    color.a = IntegrateConstantAlpha(color.a, l * unitOpacityScalar);
+    color.a = IntegrateConstantAlpha(color.a * density, l * unitOpacityScalar);
     
     return PremultiplyAlpha(color);
 }
@@ -63,10 +63,10 @@ vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float t
     ivec3 initialCell = currentCell;
     float unitDistanceScaled = unitDistance / length(dir * scales);
     float step = unitDistanceScaled/7.f * GetSamplingNoise();
-    float stepOpacityUnit = unitOpacityScalar/7.f;
+    float stepOpacityUnit = unitOpacityScalar;
     if (fast) {
         step = unitDistanceScaled * GetSamplingNoise();
-        stepOpacityUnit = unitOpacityScalar;
+        stepOpacityUnit = unitOpacityScalar * 7;
     }
     
     int i = 0;
