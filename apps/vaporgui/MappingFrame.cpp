@@ -1008,6 +1008,12 @@ void MappingFrame::paintGL() {
         return;
     }
 
+    // The Qt paint API which is used for rendering text here requires
+    // a QPainter to be configured. On Windows, if it is not configured,
+    // it will corrupt OpenGL. It turns out this is still not the correct
+    // configuration but it fixes the issue on Windows. On other OS it
+    // causes a warning to be printed. Since this code will be (hopefully)
+    // re-written soon, I don't bother fixing it.
 #ifdef WIN32
     QPainter p(this);
     p.beginNativePainting();
