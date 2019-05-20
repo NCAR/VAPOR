@@ -43,7 +43,8 @@ VolumeIsoAppearanceSubtab::VolumeIsoAppearanceSubtab(QWidget *parent) {
     _TFWidget->Reinit((TFFlags)(
         CONSTANT_COLOR |
         COLORMAP_VAR_IS_IN_TF2 |
-        ISOLINES));
+        ISOLINES |
+        SAMPLING));
 
     _params = nullptr;
 
