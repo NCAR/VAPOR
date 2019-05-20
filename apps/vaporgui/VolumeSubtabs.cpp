@@ -34,8 +34,9 @@ void VolumeVariablesSubtab::on__castingModeComboBox_currentIndexChanged(const QS
 
 void VolumeAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
 {
-    VAPoR::VolumeParams *vp = (VAPoR::VolumeParams *)rParams;
+    VAPoR::VolumeParams *vp = dynamic_cast<VolumeParams *>(rParams);
     _params = vp;
+    assert(vp);
 
     _TFWidget->Update(dataMgr, paramsMgr, rParams);
 
