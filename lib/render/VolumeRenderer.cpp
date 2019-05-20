@@ -205,6 +205,7 @@ void VolumeRenderer::_setShaderUniforms(const ShaderProgram *shader, const bool 
     shader->SetUniform("unitOpacityScalar", largestDimension / smallestDimension);
     shader->SetUniform("scales", extScales);
 
+    shader->SetUniform("density", (float)_cache.tf->getOpacityScale());
     shader->SetUniform("LUTMin", (float)_cache.mapRange[0]);
     shader->SetUniform("LUTMax", (float)_cache.mapRange[1]);
 
@@ -399,6 +400,18 @@ int VolumeRenderer::_loadSecondaryData() {
     }
 }
 
+void VolumeRenderer::_getLUTFromTF(const MapperFunction *tf, float *LUT) const {
+    // Constant opacity needs to be removed here and applied in the shader
+    // because otherwise we run out of precision in the LUT
+    MapperFunction tfSansConstantOpacity(*tf);
+    tfSansConstantOpacity.setOpacityScale(1);
+
+    tfSansConstantOpacity.makeLut(LUT);
+    for (int i = 0; i < 256; i++) {
+        LUT[4 * i + 3] = powf(LUT[4 * i + 3], 2);
+    }
+}
+
 void VolumeRenderer::_loadTF() {
     VolumeParams *vp = (VolumeParams *)GetActiveParams();
     MapperFunction *tf;
@@ -423,7 +436,7 @@ void VolumeRenderer::_loadTF() {
     _cache.mapRange = tf->getMinMaxMapValue();
 
     float *LUT = new float[4 * 256];
-    tf->makeLut(LUT);
+    _getLUTFromTF(tf, LUT);
 
     _LUTTexture.TexImage(GL_RGBA8, 256, 0, 0, GL_RGBA, GL_FLOAT, LUT);
 
