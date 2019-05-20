@@ -43,6 +43,10 @@ public:
     void  ClearProperties();
     int   GetNumOfProperties() const;
 
+    // A particle could be set to be at a special state.
+    void  SetSpecialState( bool isSpecial );
+    bool  GetSpecialState() const; 
+
 private:
     std::forward_list<float>  _properties;  // Forward_list takes only 8 bytes, whereas a vector takes 24 bytes!
 };
