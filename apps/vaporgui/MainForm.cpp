@@ -380,7 +380,9 @@ MainForm::MainForm(
 
     if (files.size() && files[0].endsWith(".nc")) {
         VDCNetCDF vdc;
+        Wasp::MyBase::EnableErrMsg(false);
         int ret = vdc.Initialize(files[0].toStdString(), {}, VDC::R);
+        Wasp::MyBase::EnableErrMsg(true);
         if (ret < 0) {
             loadDataHelper({files[0].toStdString()}, "NetCDF CF files", "", "cf", true);
         } else {
