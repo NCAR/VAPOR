@@ -36,6 +36,7 @@ protected:
     int                 _initializeAlgorithm();
     int                 _loadData();
     int                 _loadSecondaryData();
+    virtual void        _getLUTFromTF(const MapperFunction *tf, float *LUT) const;
     void                _loadTF();
     glm::vec3           _getVolumeScales() const;
     void                _getExtents(glm::vec3 *dataMin, glm::vec3 *dataMax, glm::vec3 *userMin, glm::vec3 *userMax) const;

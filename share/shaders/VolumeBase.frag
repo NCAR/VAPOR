@@ -8,6 +8,7 @@ uniform vec3 dataBoundsMax;
 uniform vec3 userExtsMin;
 uniform vec3 userExtsMax;
 uniform vec3 scales;
+uniform float density;
 uniform float LUTMin;
 uniform float LUTMax;
 uniform bool hasMissingData;

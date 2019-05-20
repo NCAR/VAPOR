@@ -58,3 +58,5 @@ std::string VolumeIsoRenderer::_getDefaultAlgorithmForGrid(const Grid *grid) con
     if (regular) return VolumeRegularIso::GetName();
     return VolumeCellTraversalIso::GetName();
 }
+
+void VolumeIsoRenderer::_getLUTFromTF(const MapperFunction *tf, float *LUT) const { tf->makeLut(LUT); }

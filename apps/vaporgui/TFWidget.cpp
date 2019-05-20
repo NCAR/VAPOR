@@ -76,6 +76,8 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
     _secondaryMaxSliderEdit->SetIntType(false);
     _secondaryMaxSliderEdit->SetExtents(0.f, 1.f);
 
+    _opacitySlider->setRange(0, 1000);
+
     _cLevel = 0;
     _refLevel = 0;
     _timeStep = 0;
@@ -1001,17 +1003,17 @@ string TFWidget::getTFVariableName(bool mainTF = true)
 int TFWidget::convertOpacityToSliderValue(float opacity) const
 {
     if (IsOpacityIntegrated())
-        return 100 * sqrtf(opacity);
+        return 1000 * powf(opacity, 1 / 4.f);
     else
-        return 100 * opacity;
+        return 1000 * opacity;
 }
 
 float TFWidget::convertSliderValueToOpacity(int value) const
 {
     if (IsOpacityIntegrated())
-        return powf(value / 100.f, 2);
+        return powf(value / 1000.f, 4);
     else
-        return value / 100.f;
+        return value / 1000.f;
 }
 
 bool TFWidget::IsOpacityIntegrated() const { return _isOpacityIntegrated; }
