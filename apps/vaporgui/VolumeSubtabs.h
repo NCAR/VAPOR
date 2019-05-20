@@ -44,7 +44,7 @@ class VolumeAppearanceSubtab : public QWidget, public Ui_VolumeAppearanceGUI {
     VolumeAppearanceSubtab(QWidget *parent) {
         setupUi(this);
         _TFWidget->SetOpacityIntegrated(true);
-        _TFWidget->Reinit((TFFlags)(0));
+        _TFWidget->Reinit((TFFlags)(SAMPLING));
 
         _params = nullptr;
 
