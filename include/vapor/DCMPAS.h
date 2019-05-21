@@ -179,6 +179,7 @@ class VDF_API DCMPAS : public VAPoR::DC {
     NetCDFCollection *_ncdfc;
     VAPoR::UDUnits _udunits;
     DerivedVarMgr _dvm;
+    bool _hasVertical; // has 3D data (i.e. vertical data)
 
     class MPASFileObject : public DC::FileTable::FileObject {
       public:
@@ -209,6 +210,7 @@ class VDF_API DCMPAS : public VAPoR::DC {
     int _InitVerticalCoordinatesDerived(NetCDFCollection *ncdfc);
 
     int _CheckRequiredFields(NetCDFCollection *ncdfc) const;
+    bool _HasVertical(NetCDFCollection *ncdfc) const;
 
     int _InitDimensions(NetCDFCollection *ncdfc);
 
