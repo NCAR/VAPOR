@@ -972,7 +972,6 @@ VAPoR::ViewpointParams *NavigationEventRouter::_getActiveParams() const {
 }
 
 void NavigationEventRouter::_makeTransformsConsistent() const {
-    return;
 	ViewpointParams* activeVPParams = _getActiveParams();
     if ( activeVPParams == NULL)
         return;
@@ -1014,6 +1013,8 @@ void NavigationEventRouter::_makeTransformsConsistent() const {
             cout << "    o " << activeOrigin[0] << " " << activeOrigin[1] << " " << activeOrigin[2] << endl;
         }
 	}
+
+    paramsMgr->EndSaveStateGroup();
 }
 
 void NavigationEventRouter::_setViewpointParams(

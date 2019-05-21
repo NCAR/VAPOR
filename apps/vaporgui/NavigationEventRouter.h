@@ -92,8 +92,6 @@ private:
 
  VAPoR::ViewpointParams *_getActiveParams() const;
 
- void _makeTransformsConsistent() const;
-
  void _setViewpointParams(
 	const vector <double> &modelview, const vector <double> &center
  ) const; 
@@ -119,6 +117,8 @@ public slots:
 	void CenterSubRegion();
 
 private slots:
+    void _makeTransformsConsistent() const;
+
 	void setCameraChanged();
 	void setCameraLatLonChanged();
 	void setLightChanged();
