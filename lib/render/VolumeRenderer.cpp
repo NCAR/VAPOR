@@ -302,7 +302,7 @@ void VolumeRenderer::_computeNewFramebufferRatio() {
 }
 
 bool VolumeRenderer::_shouldUseChunkedRender() const {
-    return _algorithm && _algorithm->IsSlow();
+    return _algorithm && _algorithm->RequiresChunkedRendering();
 }
 
 bool VolumeRenderer::_usingColorMapData() const {
