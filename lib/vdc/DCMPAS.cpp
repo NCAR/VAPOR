@@ -38,13 +38,16 @@ namespace {
 
 	const vector <string> requiredDimNames = {
 		timeDimName,
-		nVertLevelsDimName,
 		nCellsDimName,
 		nVerticesDimName,
 		nEdgesDimName,
 		maxEdgesDimName,
 		maxEdges2DimName,
 		vertexDegreeDimName
+	};
+
+	const vector <string> optionalVertDimNames = {
+		nVertLevelsDimName
 	};
 
 	// Horizontal coordinate variable names
@@ -79,6 +82,10 @@ namespace {
 	// Vertical coordinate variables
 	//
 	const string zGridP1VarName = "zgrid";
+
+	const vector <string> optionalVertCoordVarNames = {
+		zGridP1VarName
+	};
 
 	// Time coordinate variables
 	//
@@ -258,6 +265,7 @@ DCMPAS::DCMPAS() {
 	_cellVars.clear();
 	_pointVars.clear();
 	_edgeVars.clear();
+	_hasVertical = false;
 
 }
 
@@ -303,6 +311,8 @@ int DCMPAS::initialize(
 	//
 	rc = _CheckRequiredFields(ncdfc);
 	if (rc < 0) return(-1);
+
+	_hasVertical = _HasVertical(ncdfc);
 
 
 	//
@@ -1050,7 +1060,7 @@ int DCMPAS::_InitCoordvars(
 	vector <bool> periodic(false);
 	vector <string> dimnames;
 
-	if (_isAtmosphere(ncdfc)) {
+	if (_isAtmosphere(ncdfc) && _hasVertical) {
 
 		// Vertical coordinate variables
 		//
@@ -1113,6 +1123,7 @@ int DCMPAS::_InitVerticalCoordinatesDerived(
 	// which is the elevation of the staggered grid, primary (cell) mesh.
 	//
 
+	if (! _hasVertical) return(0);
 	if (! _isAtmosphere(ncdfc)) return(0);
 
 	DerivedCoordVar *derivedVar = NULL;
@@ -1222,6 +1233,42 @@ int DCMPAS::_CheckRequiredFields(
 
 
 	return(0);
+}
+
+bool DCMPAS::_HasVertical(
+	NetCDFCollection *ncdfc
+) const {
+
+	vector <string>::const_iterator itr;
+
+	// Check for dimensions
+	//
+	vector <string> dimnames = ncdfc->GetDimNames();
+	for (int i=0; i<optionalVertDimNames.size(); i++) {
+		string s = optionalVertDimNames[i];
+
+		itr = find(dimnames.begin(), dimnames.end(), s);
+		if (itr == dimnames.end()) {
+			return(false);
+		}
+	}
+
+	vector <string> varnames;
+	for (int ndim = 1; ndim<3; ndim++) {
+		vector <string> v = ncdfc->GetVariableNames(ndim, true);
+		varnames.insert(varnames.end(), v.begin(), v.end());
+	}
+
+	for (int i=0; i<optionalVertCoordVarNames.size(); i++) {
+		string s = optionalVertCoordVarNames[i];
+
+		itr = find(varnames.begin(), varnames.end(), s);
+		if (itr == varnames.end()) {
+			return(false);
+		}
+	} 
+	return(true);
+
 }
 
 // Get Space and time dimensions from MPAS data set. Initialize
@@ -1357,7 +1404,7 @@ int DCMPAS::_InitMeshes(
 	);
 
 
-	if (_isAtmosphere(ncdfc)) {
+	if (_isAtmosphere(ncdfc) && _hasVertical) {
 		coordvars = {lonCellVarName, latCellVarName, zGridVarName };
 		_meshMap[mesh3DTriName] = Mesh(
 			mesh3DTriName, 3, dimension.GetLength(),
@@ -1388,7 +1435,7 @@ int DCMPAS::_InitMeshes(
 		nCellsDimName, coordvars, verticesOnCellVarName, cellsOnVertexVarName
 	);
 
-	if (_isAtmosphere(ncdfc)) {
+	if (_isAtmosphere(ncdfc) && _hasVertical) {
 
 		coordvars = {lonVertexVarName, latVertexVarName, zGridVertVarName};
 		_meshMap[mesh3DCellName] = Mesh(
