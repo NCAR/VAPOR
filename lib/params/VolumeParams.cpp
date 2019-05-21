@@ -15,6 +15,7 @@ std::vector<VolumeParams::AlgorithmEntry> VolumeParams::_algorithms;
 
 const std::string VolumeParams::_algorithmTag = "AlgorithmTag";
 const std::string VolumeParams::_algorithmWasManuallySetByUserTag = "AlgorithmWasManuallySetByUserTag";
+const std::string VolumeParams::_samplingRateMultiplierTag = "SamplingRateMultiplierTag";
 const std::string VolumeParams::_isoValueTag = "IsoValueTag";
 const std::string VolumeParams::_isoValuesTag = "IsoValuesTag";
 const std::string VolumeParams::_enabledIsoValuesTag = "EnabledIsoValuesTag";
@@ -80,6 +81,18 @@ bool VolumeParams::GetAlgorithmWasManuallySetByUser() const {
 
 void VolumeParams::SetAlgorithmWasManuallySetByUser(bool v) {
     SetValueLong(_algorithmWasManuallySetByUserTag, "User manually changed the algorithm", v);
+}
+
+std::vector<float> VolumeParams::GetSamplingRateMultiples() {
+    return {1, 2, 3, 4};
+}
+
+float VolumeParams::GetSamplingMultiplier() const {
+    return GetValueDouble(_samplingRateMultiplierTag, 1.0);
+}
+
+void VolumeParams::SetSamplingMultiplier(float d) {
+    SetValueDouble(_samplingRateMultiplierTag, "Sampling Rate Multiplier", d);
 }
 
 double VolumeParams::GetIsoValue() const {
