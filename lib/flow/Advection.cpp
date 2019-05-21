@@ -55,12 +55,11 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
     bool happened = false;
     for( auto& s : _streams )       // Process one stream at a time
     {
-        auto& p0 = s.back();        // Start from the last particle in this stream
-
         // Check if the particle is inside of the volume.
         // Also wrap it along periodic dimensions if enabled.
-        if( !velocity->InsideVolumeVelocity( p0.time, p0.location ) )
+        if( !velocity->InsideVolumeVelocity( s.back().time, s.back().location ) )
         {
+            auto& p0 = s.back();
             // Attempt to apply periodicity
             bool locChanged = false;
             auto loc = p0.location;
@@ -85,27 +84,29 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
                 p0.location = loc;
 
                 Particle separator;
-                separator.SetSpecialState( true );
-                auto itr = s.cend();
-                --itr;      // insert before the last element, p0
-                s.insert( itr, separator );
+                auto citr = s.cend();
+                --citr;      // insert before the last element, p0
+                s.insert( citr, separator );
+                auto itr2 = s.end();
+                --itr2;     // now pointing to the last element
+                --itr2;     // now pointing to the 2nd last element
+                itr2->SetSpecial( true );
             }
             else
                 continue;
         }
 
-        p0 = s.back();      // make sure p0 still represents the last element
-   
+        const auto& past0 = s.back();
         float dt = deltaT;
         float mindt = deltaT / 20.0f,   maxdt = deltaT * 50.0f;
         if( s.size() > 2 )  // If there are at least 3 particles in the stream and
         {                   // neither is a separator, we also adjust *dt*
             const auto& past1 = s[ s.size()-2 ];
             const auto& past2 = s[ s.size()-3 ];
-            if( (!past1.GetSpecialState()) && (!past2.GetSpecialState()) )
+            if( (!past1.IsSpecial()) && (!past2.IsSpecial()) )
             {
-                dt  = p0.time - past1.time;     // step size used by last integration
-                dt *= _calcAdjustFactor( past2, past1, p0 );
+                dt  = past0.time - past1.time;     // step size used by last integration
+                dt *= _calcAdjustFactor( past2, past1, past0 );
                 if( dt > 0 )    // integrate forward 
                     dt  = glm::clamp( dt, mindt, maxdt );
                 else            // integrate backward
@@ -118,9 +119,9 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
         switch (method)
         {
             case ADVECTION_METHOD::EULER:
-                rv = _advectEuler( velocity, p0, dt, p1 ); break;
+                rv = _advectEuler( velocity, past0, dt, p1 ); break;
             case ADVECTION_METHOD::RK4:
-                rv = _advectRK4(   velocity, p0, dt, p1 ); break;
+                rv = _advectRK4(   velocity, past0, dt, p1 ); break;
         }
         if( rv != 0 )   // Advection wasn't successful for some reason...
             continue;
@@ -210,7 +211,7 @@ Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
             {
                 auto& p = s[i];
                 // Skip this particle if it's a separator
-                if( p.GetSpecialState() )
+                if( p.IsSpecial() )
                     continue;
                 // Do not evaluate this particle if its value is non-zero
                 if( skipNonZero && p.value != 0.0f )
