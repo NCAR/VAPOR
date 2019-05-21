@@ -9,6 +9,18 @@ using std::string;
 
 namespace VAPoR
 {
+    
+    //! \class VolumeIsoRenderer
+    //! \ingroup Public_Render
+    //!
+    //! \brief Isosurface renderer
+    //!
+    //! \author Stanislaw Jaroszynski
+    //! \date Feburary, 2019
+    //!
+    //! Since Vapor requires a separate class for each renderer, this
+    //! class is a copy of the VolumeRenderer class but it only gives access
+    //! to the isosurface rendering algorithms
 
 class RENDER_API VolumeIsoRenderer : public VolumeRenderer
 {
