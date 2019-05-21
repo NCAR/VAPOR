@@ -273,12 +273,95 @@ FlowRenderer::_paintGL( bool fast )
         _coloringComplete = true;
     }
 
-    _purePaint( params, fast );
+    _prepareColormap( params );
+    _renderFromAnAdvection( &_advection, params, fast );
     _restoreGLState();
 
     return 0;
 }
 
+int
+FlowRenderer::_renderFromAnAdvection( const flow::Advection* adv,
+                                      FlowParams*            params,
+                                      bool                   fast )
+{
+
+    size_t numOfStreams = adv->GetNumberOfStreams();
+    auto   numOfPart    = params->GetSteadyNumOfSteps() + 1;
+    bool   singleColor  = params->UseSingleColor();
+
+
+    if( _cache_isSteady )
+    {
+        std::vector<float> vec;
+        for( size_t s = 0; s < numOfStreams; s++ )
+        {
+            const auto& stream = adv->GetStreamAt( s );
+            size_t totalPart   = 0;
+            for( size_t i = 0; i < stream.size() && totalPart <= numOfPart; i++ )
+            {
+                const auto& p = stream[i];
+                if( !p.IsSpecial() )  // p isn't a separator
+                {
+                    vec.push_back( p.location.x );
+                    vec.push_back( p.location.y );
+                    vec.push_back( p.location.z );
+                    vec.push_back( p.value );
+                    totalPart++;
+                }
+                else                        // p is a separator
+                {
+                    _drawLineSegs( vec.data(), vec.size() / 4, singleColor );
+                    vec.clear();
+                }
+            }   // Finish processing a stream
+                    
+            if( !vec.empty() )
+            {
+                _drawLineSegs( vec.data(), vec.size() / 4, singleColor );
+                vec.clear();
+            }
+        }   // Finish processing all streams
+
+    }   // Finish processing steady case
+
+    return 0;
+}
+
+
+int
+FlowRenderer::_drawLineSegs( const float* buf, size_t numOfParts, bool singleColor ) const
+{
+    // Make some OpenGL function calls
+    glm::mat4 modelview  = _glManager->matrixManager->GetModelViewMatrix();
+    glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
+    _shader->Bind();
+    _shader->SetUniform("MV", modelview);
+    _shader->SetUniform("Projection", projection);
+    _shader->SetUniform("colorMapRange", glm::make_vec3(_colorMapRange));
+    _shader->SetUniform( "singleColor", int(singleColor) );
+
+    glActiveTexture( GL_TEXTURE0 + _colorMapTexOffset );
+    glBindTexture( GL_TEXTURE_1D,  _colorMapTexId );
+    _shader->SetUniform("colorMapTexture", _colorMapTexOffset);
+
+    glBindVertexArray( _vertexArrayId );
+    glEnableVertexAttribArray( 0 );
+    glBindBuffer( GL_ARRAY_BUFFER, _vertexBufferId );
+    glBufferData( GL_ARRAY_BUFFER, sizeof(float) * 4 * numOfParts, buf, GL_STREAM_DRAW );
+    glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0 );
+    glDrawArrays( GL_LINE_STRIP, 0, numOfParts );
+
+    // Some OpenGL cleanup
+    glBindBuffer( GL_ARRAY_BUFFER, 0 );
+    glDisableVertexAttribArray( 0 );
+    glBindTexture( GL_TEXTURE_1D,  _colorMapTexId );
+    glBindVertexArray( 0 );
+
+    return 0;
+}
+
+#if 0
 int
 FlowRenderer::_purePaint( FlowParams* params, bool fast )
 {
@@ -394,6 +477,7 @@ FlowRenderer::_drawAStreamAsLines( const std::vector<flow::Particle>& stream,
 
     return 0;
 }
+#endif
 
 void
 FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
@@ -535,7 +619,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
 int
 FlowRenderer::_genSeedsXY( std::vector<flow::Particle>& seeds, float timeVal ) const
 {
-    int numX = 8, numY = 8;
+    int numX = 4, numY = 4;
     std::vector<double>           extMin, extMax;
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
     params->GetBox()->GetExtents( extMin, extMax );
