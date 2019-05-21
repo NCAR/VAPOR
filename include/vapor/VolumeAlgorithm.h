@@ -33,8 +33,13 @@ public:
     virtual void           DeleteSecondaryData() = 0;
     virtual ShaderProgram *GetShader() const = 0;
     virtual void           SetUniforms(const ShaderProgram *shader) const = 0;
-    virtual bool           IsSlow() = 0;
-    virtual float          GuestimateFastModeSpeedupFactor() const { return 1; }
+
+    //! On OSX, some shaders can run for a long time without problems
+    //! while others will crash if the run too long. It seems to correlate
+    //! with complexity. Chunked rendering splits the rendering into smaller
+    //! tasks so they won't crash
+    virtual bool  RequiresChunkedRendering() = 0;
+    virtual float GuestimateFastModeSpeedupFactor() const { return 1; }
 
     static VolumeAlgorithm *NewAlgorithm(const std::string &name, GLManager *gl);
 
