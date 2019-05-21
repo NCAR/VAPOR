@@ -28,7 +28,6 @@ public:
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
 private slots:
-    void on__castingModeComboBox_currentIndexChanged(const QString &text);
 
 private:
     VAPoR::VolumeParams *_volumeParams;
@@ -38,38 +37,15 @@ class VolumeAppearanceSubtab : public QWidget, public Ui_VolumeAppearanceGUI {
     Q_OBJECT
 
 public:
-    VolumeAppearanceSubtab(QWidget *parent)
-    {
-        setupUi(this);
-        _TFWidget->SetOpacityIntegrated(true);
-        _TFWidget->Reinit((TFFlags)(SAMPLING));
-
-        _params = nullptr;
-
-        // Set up lighting parameter widgets
-        _ambientWidget->SetLabel(QString::fromAscii("Ambient   "));
-        _ambientWidget->SetDecimals(2);
-        _ambientWidget->SetExtents(0.0, 1.0);
-        _ambientWidget->SetIntType(false);
-
-        _diffuseWidget->SetLabel(QString::fromAscii("Diffuse     "));
-        _diffuseWidget->SetDecimals(2);
-        _diffuseWidget->SetExtents(0.0, 1.0);
-        _diffuseWidget->SetIntType(false);
-
-        _specularWidget->SetLabel(QString::fromAscii("Specular  "));
-        _specularWidget->SetDecimals(2);
-        _specularWidget->SetExtents(0.0, 1.0);
-        _specularWidget->SetIntType(false);
-
-        _shininessWidget->SetLabel(QString::fromAscii("Shininess "));
-        _shininessWidget->SetExtents(1.0, 100.0);
-        _shininessWidget->SetIntType(true);
-    }
-
+    VolumeAppearanceSubtab(QWidget *parent);
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
+    static QString GetQStringForSamplingRate(const float rate);
+    static float   GetSamplingRateForQString(const QString &str);
+
 private slots:
+    void on__castingModeComboBox_currentIndexChanged(const QString &text);
+    void on__samplingRateComboBox_currentIndexChanged(const QString &text);
     void on__lightingCheckBox_toggled(bool checked);
     void on__ambientWidget_valueChanged(double value);
     void on__diffuseWidget_valueChanged(double value);

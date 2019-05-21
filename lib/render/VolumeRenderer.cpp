@@ -152,6 +152,7 @@ void VolumeRenderer::_setShaderUniforms(const ShaderProgram *shader, const bool 
 
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     shader->SetUniform("cameraPos", vec3(cameraPos[0], cameraPos[1], cameraPos[2]));
+    shader->SetUniform("samplingRateMultiplier", vp->GetSamplingMultiplier());
     shader->SetUniform("lightingEnabled", vp->GetLightingEnabled());
     shader->SetUniform("phongAmbient", vp->GetPhongAmbient());
     shader->SetUniform("phongDiffuse", vp->GetPhongDiffuse());

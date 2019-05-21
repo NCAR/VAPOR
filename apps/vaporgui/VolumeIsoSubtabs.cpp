@@ -1,11 +1,10 @@
 #include "VolumeIsoSubtabs.h"
+#include "VolumeSubtabs.h"
 
 using namespace VAPoR;
 
 void VolumeIsoVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *params)
 {
-    _castingModeComboBox->blockSignals(true);
-
     VolumeIsoParams *vp = dynamic_cast<VolumeIsoParams *>(params);
     _isoParams = vp;
     assert(vp);
@@ -13,30 +12,7 @@ void VolumeIsoVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Re
     // long mode = _isoParams->GetCastingMode();
     // _castingModeComboBox->setCurrentIndex( mode - 1 );
 
-    string algorithm = vp->GetAlgorithm();
-    int    index = _castingModeComboBox->findText(QString::fromStdString(algorithm));
-
-    if (index == -1) {
-        _castingModeComboBox->clear();
-        const vector<string> algorithms = VolumeParams::GetAlgorithmNames(VolumeParams::Type::Iso);
-        for (const string &s : algorithms) _castingModeComboBox->addItem(QString::fromStdString(s));
-
-        index = _castingModeComboBox->findText(QString::fromStdString(algorithm));
-    }
-
-    _castingModeComboBox->setCurrentIndex(index);
-
-    _castingModeComboBox->blockSignals(false);
-
     _variablesWidget->Update(dataMgr, paramsMgr, params);
-}
-
-void VolumeIsoVariablesSubtab::on__castingModeComboBox_currentIndexChanged(const QString &text)
-{
-    if (!text.isEmpty()) {
-        _isoParams->SetAlgorithm(text.toStdString());
-        _isoParams->SetAlgorithmWasManuallySetByUser(true);
-    }
 }
 
 VolumeIsoAppearanceSubtab::VolumeIsoAppearanceSubtab(QWidget *parent)
@@ -45,6 +21,11 @@ VolumeIsoAppearanceSubtab::VolumeIsoAppearanceSubtab(QWidget *parent)
     _TFWidget->Reinit((TFFlags)(CONSTANT_COLOR | COLORMAP_VAR_IS_IN_TF2 | ISOLINES | SAMPLING));
 
     _params = nullptr;
+
+    _samplingRateComboBox->blockSignals(true);
+    vector<float> samplingOptions = VolumeParams::GetSamplingRateMultiples();
+    for (double rate : samplingOptions) _samplingRateComboBox->addItem(VolumeAppearanceSubtab::GetQStringForSamplingRate(rate));
+    _samplingRateComboBox->blockSignals(false);
 
     // Set up lighting parameter widgets
     _ambientWidget->SetLabel(QString::fromAscii("Ambient   "));
@@ -94,6 +75,25 @@ void VolumeIsoAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr
 
     _params = dynamic_cast<VAPoR::VolumeIsoParams *>(params);
     assert(_params);
+
+    _castingModeComboBox->blockSignals(true);
+    string algorithm = _params->GetAlgorithm();
+    int    index = _castingModeComboBox->findText(QString::fromStdString(algorithm));
+
+    if (index == -1) {
+        _castingModeComboBox->clear();
+        const vector<string> algorithms = VolumeParams::GetAlgorithmNames(VolumeParams::Type::Iso);
+        for (const string &s : algorithms) _castingModeComboBox->addItem(QString::fromStdString(s));
+
+        index = _castingModeComboBox->findText(QString::fromStdString(algorithm));
+    }
+    _castingModeComboBox->setCurrentIndex(index);
+    _castingModeComboBox->blockSignals(false);
+
+    _samplingRateComboBox->blockSignals(true);
+    _samplingRateComboBox->setCurrentIndex(_samplingRateComboBox->findText(VolumeAppearanceSubtab::GetQStringForSamplingRate(_params->GetSamplingMultiplier())));
+    _samplingRateComboBox->blockSignals(false);
+
     _lightingCheckBox->setChecked(_params->GetLightingEnabled());
 
     _ambientWidget->SetValue(_params->GetPhongAmbient());
@@ -137,6 +137,19 @@ void VolumeIsoAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr
         _isoWidget3->SetExtents(valueRange[0], valueRange[1]);
         _isoWidget3->SetValue(isoValues[3]);
     }
+}
+
+void VolumeIsoAppearanceSubtab::on__castingModeComboBox_currentIndexChanged(const QString &text)
+{
+    if (!text.isEmpty()) {
+        _params->SetAlgorithm(text.toStdString());
+        _params->SetAlgorithmWasManuallySetByUser(true);
+    }
+}
+
+void VolumeIsoAppearanceSubtab::on__samplingRateComboBox_currentIndexChanged(const QString &text)
+{
+    if (!text.isEmpty()) { _params->SetSamplingMultiplier(VolumeAppearanceSubtab::GetSamplingRateForQString(text)); }
 }
 
 void VolumeIsoAppearanceSubtab::on__lightingCheckBox_toggled(bool checked)
