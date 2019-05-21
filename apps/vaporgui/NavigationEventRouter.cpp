@@ -1005,12 +1005,6 @@ void NavigationEventRouter::_makeTransformsConsistent() const {
             targetTransform->SetRotations(    activeRotations );
             targetTransform->SetTranslations( activeTranslations );
             targetTransform->SetOrigin(       activeOrigin );
-
-            cout << datasetName << " set as: " << endl;
-            cout << "    s " << activeScales[0] << " " << activeScales[1] << " " << activeScales[2] << endl;
-            cout << "    r " << activeRotations[0] << " " << activeRotations[1] << " " << activeRotations[2] << endl;
-            cout << "    t " << activeTranslations[0] << " " << activeTranslations[1] << " " << activeTranslations[2] << endl;
-            cout << "    o " << activeOrigin[0] << " " << activeOrigin[1] << " " << activeOrigin[2] << endl;
         }
 	}
 
@@ -1036,7 +1030,6 @@ void NavigationEventRouter::_setViewpointParams(
 	paramsMgr->BeginSaveStateGroup("Move camera");
 
 	for (int i=0; i<winNames.size(); i++) {
-
 		ViewpointParams *vpParams = paramsMgr->GetViewpointParams(winNames[i]);
 
 		vpParams->SetModelViewMatrix(modelview);
