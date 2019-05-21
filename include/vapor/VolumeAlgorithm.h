@@ -12,6 +12,16 @@ namespace VAPoR {
 struct GLManager;
 class VolumeAlgorithmFactory;
 
+//! \class VolumeAlgorithm
+//! \ingroup Public_Render
+//!
+//! \brief Strategy pattern for volume rendering algorithms
+//!
+//! \author Stanislaw Jaroszynski
+//! \date Feburary, 2019
+//!
+//! Instances are created with a Factory pattern
+
 class VolumeAlgorithm : private NonCopyableMixin {
   public:
     enum class Type {

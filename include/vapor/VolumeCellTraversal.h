@@ -4,6 +4,31 @@
 
 namespace VAPoR {
 
+//! \class VolumeCellTraversal
+//! \ingroup Public_Render
+//!
+//! \brief Curvilinear grid rendering algorithm
+//!
+//! \author Stanislaw Jaroszynski
+//! \date Feburary, 2019
+//!
+//! Renders a curvilinear grid by traversing through the cells. The c++ code
+//! does the following:
+//! 1. Loads scalar data
+//! 2. Loads the coordinates
+//! 3. Generates a bounding box for every border face
+//! 4. Groups bounding boxs recursively into a tree, i.e. a bounding box at level n
+//!    would encapsulate the 4 associated bounding boxes at level n-1
+//!
+//! The glsl code does the following:
+//! 1. Find the initial border face that the ray intersects with by traversing
+//!    the tree built on the CPU
+//! 2. Loop:
+//! 3. Find the exit face of the current cell
+//! 4. Render the ray segment from the entrance to the exit
+//! 5. Set the current exit face to the new entrance face
+//! 6. Goto Loop until the ray exits the volume
+
 class VolumeCellTraversal : public VolumeRegular {
   public:
     VolumeCellTraversal(GLManager *gl);
@@ -36,6 +61,17 @@ class VolumeCellTraversal : public VolumeRegular {
     int _getHeuristicBBLevels() const;
     std::string _addDefinitionsToShader(std::string shaderName) const;
 };
+
+//! \class VolumeCellTraversalIso
+//! \ingroup Public_Render
+//!
+//! \brief Curvilinear grid isosurface rendering algorithm
+//!
+//! \author Stanislaw Jaroszynski
+//! \date Feburary, 2019
+//!
+//! Renders isosurfaces by ray tracing. This class is the same as the curvilinear DVR
+//! except it renders an isosurface
 
 class VolumeCellTraversalIso : public VolumeCellTraversal {
   public:
