@@ -240,7 +240,9 @@ void NavigationEventRouter::hookUpTab() {
              this, SLOT(projectionComboBoxChanged(const QString &))
     );
 	
-	
+	connect (
+        transformTable, SIGNAL( TransformChanged() ),
+            this, SLOT( _makeTransformsConsistent() ) );
 
 }
 
@@ -279,8 +281,9 @@ void NavigationEventRouter::_performAutoStretching(string dataSetName) {
 
 	vector<double> minExt, maxExt;
 	
-	for (int i=0; i<winNames.size(); i++) {
-		ViewpointParams *vpParams = paramsMgr->GetViewpointParams(winNames[i]);
+	//for (int i=0; i<winNames.size(); i++) {
+	//	ViewpointParams *vpParams = paramsMgr->GetViewpointParams(winNames[i]);
+	    ViewpointParams* vpParams = _getActiveParams();
 		Transform* transform = vpParams->GetTransform(dataSetName);
         std::vector<double> scales = transform->GetScales();
         int xDimension = 0;
@@ -290,11 +293,11 @@ void NavigationEventRouter::_performAutoStretching(string dataSetName) {
         // If a dimension's scale is not 1.f, the user has saved a session with
         // a non-default value.  Don't modify it.
         if ( scales[ xDimension ] != 1.f )
-            continue;
+            return;//continue;
         if ( scales[ yDimension ] != 1.f )
-            continue;
+            return;//continue;
         if ( scales[ zDimension ] != 1.f )
-            continue;
+            return;//continue;
 
 		DataMgr* dm = ds->GetDataMgr(dataSetName);
 		std::vector<string> varNames = dm->GetDataVarNames(3);
@@ -324,7 +327,8 @@ void NavigationEventRouter::_performAutoStretching(string dataSetName) {
 		}
 
 		transform->SetScales(scale);
-	}
+	//}
+    _makeTransformsConsistent();
 }
 
 void NavigationEventRouter::LoadDataNotify(string dataSetName) {
@@ -967,9 +971,57 @@ VAPoR::ViewpointParams *NavigationEventRouter::_getActiveParams() const {
 	return(paramsMgr->GetViewpointParams(vizName));
 }
 
+void NavigationEventRouter::_makeTransformsConsistent() const {
+    return;
+	ViewpointParams* activeVPParams = _getActiveParams();
+    if ( activeVPParams == NULL)
+        return;
+
+	// Set modelview and rotation center for *all* visualizers
+	//
+	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	vector <string> winNames = paramsMgr->GetVisualizerNames();
+
+    string message = "Make transforms consistent across ViewpointParams instances";	
+    paramsMgr->BeginSaveStateGroup( message );
+
+	for (int i=0; i<winNames.size(); i++) {
+		ViewpointParams *vpParams = paramsMgr->GetViewpointParams(winNames[i]);
+		vector<string> datasetNames = paramsMgr->GetDataMgrNames();
+        
+        for ( int j=0; j<datasetNames.size(); j++ ) {
+            string datasetName = datasetNames[j];
+            if ( datasetName == GetStateParams()->GetActiveVizName() )
+                continue;
+
+            Transform* activeTransform = activeVPParams->GetTransform( datasetName );
+            Transform* targetTransform = vpParams->GetTransform( datasetName );
+
+            vector<double> activeScales       = activeTransform->GetScales();
+            vector<double> activeRotations    = activeTransform->GetRotations();
+            vector<double> activeTranslations = activeTransform->GetTranslations();
+            vector<double> activeOrigin       = activeTransform->GetOrigin();
+
+            targetTransform->SetScales(       activeScales );
+            targetTransform->SetRotations(    activeRotations );
+            targetTransform->SetTranslations( activeTranslations );
+            targetTransform->SetOrigin(       activeOrigin );
+
+            cout << datasetName << " set as: " << endl;
+            cout << "    s " << activeScales[0] << " " << activeScales[1] << " " << activeScales[2] << endl;
+            cout << "    r " << activeRotations[0] << " " << activeRotations[1] << " " << activeRotations[2] << endl;
+            cout << "    t " << activeTranslations[0] << " " << activeTranslations[1] << " " << activeTranslations[2] << endl;
+            cout << "    o " << activeOrigin[0] << " " << activeOrigin[1] << " " << activeOrigin[2] << endl;
+        }
+	}
+}
+
 void NavigationEventRouter::_setViewpointParams(
 	const vector <double> &modelview, const vector <double> &center
 ) const {
+
+    _makeTransformsConsistent();
+
 	assert(modelview.size() == 16);
 	assert(center.size() == 3);
 
@@ -979,7 +1031,7 @@ void NavigationEventRouter::_setViewpointParams(
 	vector <string> winNames = paramsMgr->GetVisualizerNames();
 
 	vector<double> minExt, maxExt;
-	
+
 	paramsMgr->BeginSaveStateGroup("Move camera");
 
 	for (int i=0; i<winNames.size(); i++) {
