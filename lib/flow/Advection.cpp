@@ -154,13 +154,44 @@ Advection::AdvectTillTime( Field* velocity, float deltaT, float targetT, ADVECTI
         return ready;
 
     bool happened = false;
+    size_t streamIdx = 0;
     for( auto& s : _streams )       // Process one stream at a time
     {
         Particle p0 = s.back();     // Start from the last particle in this stream
         while( p0.time < targetT )
         {
+            // Check if the particle is inside of the volume.
+            // Wrap it along periodic dimensions if applicable.
             if( !velocity->InsideVolumeVelocity( p0.time, p0.location ) )
-                break;
+            {
+                bool locChanged = false;
+                auto itr = s.end(); --itr;  // last element
+                auto loc = itr->location;
+                for( int i = 0; i < 3; i++ )
+                {
+                    if( _isPeriodic[i] )
+                    {
+                        loc[i] = _applyPeriodic( loc[i], _periodicBounds[i][0], _periodicBounds[i][1] );  
+                        locChanged = true; 
+                    } 
+                }
+                if( !locChanged )   // no dimension is periodic
+                    break;
+
+                // See if the new location is inside of the volume
+                if( velocity->InsideVolumeVelocity( p0.time, loc ) )
+                {
+                    itr->location = loc;
+                    p0 = *itr;
+                    
+                    Particle separator;
+                    separator.SetSpecial( true );
+                    s.insert( itr, separator );
+                    _separatorCount[streamIdx]++;
+                }
+                else 
+                    break;
+            }
 
             float dt = deltaT;
             float mindt = deltaT / 20.0f,   maxdt = deltaT * 50.0f;
@@ -168,10 +199,13 @@ Advection::AdvectTillTime( Field* velocity, float deltaT, float targetT, ADVECTI
             {                   // we also adjust *dt*
                 const auto& past1 = s[ s.size()-2 ];
                 const auto& past2 = s[ s.size()-3 ];
-                dt  = p0.time - past1.time;     // step size used by last integration
-                dt  = dt < maxdt ? dt : maxdt ;
-                dt  = dt > mindt ? dt : mindt ;
-                dt *= _calcAdjustFactor( past2, past1, p0 );
+                if( (!past1.IsSpecial()) && (!past2.IsSpecial()) )
+                {
+                    dt  = p0.time - past1.time;     // step size used by last integration
+                    dt  = dt < maxdt ? dt : maxdt ;
+                    dt  = dt > mindt ? dt : mindt ;
+                    dt *= _calcAdjustFactor( past2, past1, p0 );
+                }
             }
 
             Particle p1;
@@ -193,8 +227,9 @@ Advection::AdvectTillTime( Field* velocity, float deltaT, float targetT, ADVECTI
                 s.push_back( p1 );
                 p0 = p1;
             }
-        }
-    }
+        }   // Finish the while loop to advect one particle to a time
+        streamIdx++;
+    }   // Finish the for loop to advect all particles to a time
 
     if( happened )
         return ADVECT_HAPPENED;
