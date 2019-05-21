@@ -25,7 +25,7 @@ class VolumeRegular : public VolumeAlgorithm {
 
     static std::string GetName() { return "Regular"; }
     static Type GetType() { return Type::DVR; }
-    virtual bool IsSlow() { return false; }
+    virtual bool RequiresChunkedRendering() { return false; }
 
     virtual int LoadData(const Grid *grid);
     virtual int LoadSecondaryData(const Grid *grid);
