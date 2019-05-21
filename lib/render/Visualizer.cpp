@@ -165,6 +165,14 @@ int Visualizer::paintEvent(bool fast)
 
 	//Do not proceed if there is no DataMgr
 	if (! _dataStatus->GetDataMgrNames().size()) return(0);
+    
+    // Do not proceed with invalid viewport
+    // This can occur sometimes on Qt startup
+    int viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    if (viewport[2] - viewport[0] <= 0) return 0;
+    if (viewport[3] - viewport[1] <= 0) return 0;
+    
 	
     _clearFramebuffer();
 
