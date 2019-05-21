@@ -42,6 +42,20 @@ public:
     //!
     static unsigned int GetShaderTypeFromPath(const std::string &path);
     
+    //! Implements the following preprocessor directives:
+    //! - #pragma auto_version
+    //!   This sets the GLSL version to the highest available
+    //!
+    //! - #include FileName.glsl
+    //!   c-style include without quotes. Path is relative to shader base path
+    //!   This will also update line numbers with the #line directive
+    //!
+    //! - #define X
+    //!   Each item in the defines list is added to the GLSL code after the #version directive
+    //!
+    //! \param[in] path to GLSL source code file
+    //! \param[in] defines list of definitions to be added to source
+    //!
     static std::string PreProcessShader(const std::string &path, const std::vector<std::string> &defines = {});
     static std::vector<std::string> GetShaderDependencies(const std::string &path);
 };

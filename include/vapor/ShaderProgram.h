@@ -15,6 +15,9 @@ namespace VAPoR {
 //!
 //! \author Stanislaw Jaroszynski
 //! \date August, 2018
+//!
+//! Automatically manages sampler uniforms and the active gl texture.
+//! This allows samplers to be set simply like uniforms.
     
     class Shader;
     class Texture;
@@ -79,7 +82,14 @@ public:
     void SetUniformArray(int location, int count, const glm::vec3 *values) const;
     void SetUniformArray(int location, int count, const glm::vec4 *values) const;
     
-    template<typename T> bool SetSampler(const std::string &name, const T &value) const;
+    //! This function behaves just like setting a uniform
+    //!
+    //! \param[in] name uniform name
+    //! \param[in] value an instance of VAPoR::Texture
+    //!
+    //! \retval false if uniform name is not found
+    //!
+    template<typename T> bool SetSampler(const std::string &name, const T &texture) const;
     
     std::string GetLog() const;
     void PrintUniforms() const;
@@ -94,6 +104,11 @@ public:
 //!
 //! \author Stanislaw Jaroszynski
 //! \date August, 2018
+//!
+//! This class causes shaders to automatically bind when requested from the ShaderManager.
+//! Once the object becomes out of scope, the shader is unbound.
+//! Since this class is intended to be used as an object, not a pointer, IsValid replaces
+//! the usual NULL check
     
 class SmartShaderProgram {
     ShaderProgram *_program;
