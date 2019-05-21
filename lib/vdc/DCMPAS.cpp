@@ -648,6 +648,10 @@ int DCMPAS::_readVarToSmartBuf(
 	int rc = _ncdfc->Read(buf, fd);
 	if (rc<0) return(fd);
 
+	if (is_lat_or_lon(varname)) {
+		rad2degrees((float *) buf, n);
+	}
+
 	return(_ncdfc->Close(fd));
 }
 
@@ -743,22 +747,23 @@ void DCMPAS::_splitOnBoundary(string varname, int *connData) const {
 	//
 	int n = connDims[0];
 	for (size_t j = 0; j<connDims[1]; j++) {
-		double lon1 = lonBuf1[j];
 
 		// Ha ha. despite MPAS documentation longitude may run -pi to pi
 		//
-		if (lon1 > M_PI) lon1 -= 2*M_PI;
-		for (size_t i=0; i<n && connData[j*n+i] >= 0; i++) {
+		double lon1 = lonBuf2[connData[j*n]-1];
+		if (lon1 > 180.0) lon1 -= 360.0;
+		for (size_t i=1; i<n && connData[j*n+i] >= 0; i++) {
+
 			size_t index = connData[j*n+i] - 1;	// Arrg. Index starts from 1!!
 			double lon2 = lonBuf2[index];
 
 			// Ha ha. despite MPAS documentation longitude may run -pi to pi
 			//
-			if (lon2 > M_PI) lon2 -= 2*M_PI;
+			if (lon2 > 180.0) lon2 -= 360.0;
 
 			// Ugh. Test for cell stradling -pi and pi
 			//
-			if (fabs(lon1-lon2) > M_PI * 0.5) {
+			if (fabs(lon1-lon2) > 180.0 * 0.5) {
 				connData[j*n+i] = -2;
 			}
 		}
