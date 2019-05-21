@@ -57,6 +57,7 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
         return ready;
 
     bool happened = false;
+    size_t streamIdx = 0;
     for( auto& s : _streams )       // Process one stream at a time
     {
         // Check if the particle is inside of the volume.
@@ -95,6 +96,7 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
                 --itr2;     // now pointing to the last element
                 --itr2;     // now pointing to the 2nd last element
                 itr2->SetSpecial( true );
+                _separatorCount[streamIdx]++;
             }
             else
                 continue;
@@ -134,6 +136,8 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
             happened = true;
             s.push_back( p1 );
         }
+
+        streamIdx++;
     }
 
     if( happened )
