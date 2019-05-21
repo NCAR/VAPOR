@@ -40,6 +40,10 @@ public:
     bool GetAlgorithmWasManuallySetByUser() const;
     void SetAlgorithmWasManuallySetByUser(bool v);
     
+    static std::vector<float> GetSamplingRateMultiples();
+    float GetSamplingMultiplier() const;
+    void SetSamplingMultiplier(float d);
+    
     double GetIsoValue() const;
     void SetIsoValue(double isoValue);
     
@@ -78,6 +82,7 @@ private:
     
     static const std::string _algorithmTag;
     static const std::string _algorithmWasManuallySetByUserTag;
+    static const std::string _samplingRateMultiplierTag;
     static const std::string _isoValueTag;
     static const std::string _isoValuesTag;
     static const std::string _enabledIsoValuesTag;

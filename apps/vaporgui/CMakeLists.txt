@@ -192,6 +192,10 @@ set (UIS
 	VolumeAppearanceGUI.ui
 	VolumeGeometryGUI.ui
 	VolumeVariablesGUI.ui
+	VolumeIsoAnnotationGUI.ui
+	VolumeIsoAppearanceGUI.ui
+	VolumeIsoGeometryGUI.ui
+	VolumeIsoVariablesGUI.ui
 	
 	QSliderEdit.ui
 	QRange.ui
