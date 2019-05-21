@@ -148,6 +148,7 @@ private:
     NetCDFCollection *_ncdfc;
     VAPoR::UDUnits    _udunits;
     DerivedVarMgr     _dvm;
+    bool              _hasVertical;    // has 3D data (i.e. vertical data)
 
     class MPASFileObject : public DC::FileTable::FileObject {
     public:
@@ -176,7 +177,8 @@ private:
 
     int _InitVerticalCoordinatesDerived(NetCDFCollection *ncdfc);
 
-    int _CheckRequiredFields(NetCDFCollection *ncdfc) const;
+    int  _CheckRequiredFields(NetCDFCollection *ncdfc) const;
+    bool _HasVertical(NetCDFCollection *ncdfc) const;
 
     int _InitDimensions(NetCDFCollection *ncdfc);
 
