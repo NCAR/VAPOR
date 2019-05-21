@@ -35,14 +35,14 @@ void main(void)
     if (IntersectRayBoundingBox(cameraPos, dir, 0, userExtsMin, userExtsMax, t0, t1)) {
         
         int STEPS;
-        float integratePart = 1;
+        float integratePart = 1 / samplingRateMultiplier;
         float noise = 1;
         if (fast) {
             STEPS = 100;
             integratePart = 7;
             noise = GetSamplingNoise();
         } else {
-            STEPS = 700;
+            STEPS = int(700 * samplingRateMultiplier);
 		}
         float step = noise * max(((t1-t0)/float(STEPS))*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/float(STEPS));
         

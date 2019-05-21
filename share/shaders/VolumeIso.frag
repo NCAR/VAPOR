@@ -36,7 +36,7 @@ void main(void)
         if (fast) {
             STEPS = 100;
         } else
-            STEPS = 700;
+            STEPS = int(700 * samplingRateMultiplier);
 
         float step = max(((t1-t0)/float(STEPS))*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/float(STEPS));
 		vec3 initialSample = ((cameraPos + dir * t0) - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);

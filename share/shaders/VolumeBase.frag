@@ -14,6 +14,7 @@ uniform float LUTMax;
 uniform bool hasMissingData;
 uniform bool fast;
 
+uniform float samplingRateMultiplier;
 uniform bool lightingEnabled;
 uniform float phongAmbient;
 uniform float phongDiffuse;

@@ -55,7 +55,7 @@ vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float t
     float tStart = t0;
     ivec3 initialCell = currentCell;
     float unitDistanceScaled = unitDistance / length(dir * scales);
-    float step = unitDistanceScaled/7 * GetSamplingNoise();
+    float step = unitDistanceScaled/7/samplingRateMultiplier * GetSamplingNoise();
     if (fast)
         step = unitDistanceScaled * GetSamplingNoise();
     
