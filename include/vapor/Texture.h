@@ -6,6 +6,18 @@ namespace VAPoR {
 
 class Framebuffer;
 
+//! \class Texture
+//! \ingroup Public_Render
+//! \brief Wrapper class for an OpenGL texture
+//! \author Stas Jaroszynski
+//! \version 1.0
+//! \date May 2019
+//!
+//! This class is intended to be used as a member object for a renderer.
+//! Any use of this class (including the destructor and except the constructor)
+//! must occur inside the correct OpenGL context.
+//!
+
 class Texture : private NonCopyableMixin {
   protected:
     unsigned int _id = 0;
