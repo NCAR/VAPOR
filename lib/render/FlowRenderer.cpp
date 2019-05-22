@@ -70,6 +70,8 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
     _cache_velocityMltp     = 1.0;
     _cache_seedGenMode      = 0;
     _cache_flowDirection    = 0;
+    for( int i = 0; i < 3; i++ )
+        _cache_periodic[i] = false;
 
     _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
     _colorStatus            = FlowStatus::SIMPLE_OUTOFDATE;
@@ -165,7 +167,6 @@ FlowRenderer::_paintGL( bool fast )
     _updateFlowCacheAndStates( params );
     _velocityField.UpdateParams( params );
     _colorField.UpdateParams( params );
-    _updatePeriodicity( &_advection, params );
 
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
@@ -173,9 +174,16 @@ FlowRenderer::_paintGL( bool fast )
         {
             std::vector<flow::Particle> seeds;
             _genSeedsXY( seeds, _timestamps.at(0) );
+            // Note on UseSeedParticles(): this is the only function that resets
+            // all the streams inside of an Advection class.
+            // It should immediately followed by a function to set its periodicity
             _advection.UseSeedParticles( seeds );
+            _updatePeriodicity( &_advection );
             if( _2ndAdvection )     // bi-directional advection
+            {
                 _2ndAdvection->UseSeedParticles( seeds );
+                _updatePeriodicity( _2ndAdvection ); 
+            }
         }
         else if( _cache_seedGenMode == 1 )
         {
@@ -275,6 +283,9 @@ FlowRenderer::_paintGL( bool fast )
 
     _prepareColormap( params );
     _renderFromAnAdvection( &_advection, params, fast );
+    /* If the advection is bi-directional */
+    if( _2ndAdvection )
+        _renderFromAnAdvection( _2ndAdvection, params, fast );
     _restoreGLState();
 
     return 0;
@@ -576,6 +587,20 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
     }
 
+    // Check periodicity
+    // If periodicity changes along any dimension, then the entire stream is out of date
+    const auto& peri = params->GetPeriodic();
+    if( ( _cache_periodic[0] != peri.at(0) ) ||
+        ( _cache_periodic[1] != peri.at(1) ) ||
+        ( _cache_periodic[2] != peri.at(2) )  )
+    {
+        for( int i = 0; i < 3; i++ )
+            _cache_periodic[i] = peri[i];
+        _colorStatus              = FlowStatus::SIMPLE_OUTOFDATE;
+        _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
+    }
+    
+
     /* Now we branch into steady and unsteady cases, and treat them separately */
     if( params->GetIsSteady() )
     {
@@ -740,11 +765,25 @@ FlowRenderer::_restoreGLState() const
 }
 
 void
-FlowRenderer::_updatePeriodicity( flow::Advection* advc, const FlowParams* params )
+FlowRenderer::_updatePeriodicity( flow::Advection* advc )
 {
     glm::vec3 minxyz, maxxyz;
     _velocityField.GetFirstStepVelocityIntersection( minxyz, maxxyz );
-    advc->SetZPeriodicity( true, minxyz.z, maxxyz.z );
+
+    if( _cache_periodic[0] )
+        advc->SetXPeriodicity( true, minxyz.x, maxxyz.x );
+    else
+        advc->SetXPeriodicity( false );
+
+    if( _cache_periodic[1] )
+        advc->SetYPeriodicity( true, minxyz.y, maxxyz.y );
+    else
+        advc->SetYPeriodicity( false );
+
+    if( _cache_periodic[2] )
+        advc->SetZPeriodicity( true, minxyz.z, maxxyz.z );
+    else
+        advc->SetZPeriodicity( false );
 }
 
 #ifndef WIN32
