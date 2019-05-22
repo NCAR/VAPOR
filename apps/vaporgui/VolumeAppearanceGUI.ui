@@ -97,7 +97,7 @@
         </attribute>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
-          <widget class="QFrame" name="frame_3">
+          <widget class="QFrame" name="_raytracingFrame">
            <property name="frameShape">
             <enum>QFrame::NoFrame</enum>
            </property>
