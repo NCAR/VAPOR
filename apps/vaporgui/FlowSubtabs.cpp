@@ -39,9 +39,9 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
     connect( _velocityMltp,     SIGNAL( editingFinished() ),  this, SLOT( _velocityMultiplierChanged() ) );
     connect( _steadyNumOfSteps, SIGNAL( editingFinished() ),  this, SLOT( _steadyNumOfStepsChanged() ) );
 
-    connect( _periodicX,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodClicked() ) );
-    connect( _periodicY,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodClicked() ) );
-    connect( _periodicZ,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodClicked() ) );
+    connect( _periodicX,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodicClicked() ) );
+    connect( _periodicY,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodicClicked() ) );
+    connect( _periodicZ,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodicClicked() ) );
 }
 
 void 
