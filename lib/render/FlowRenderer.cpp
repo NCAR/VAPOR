@@ -285,7 +285,6 @@ FlowRenderer::_renderFromAnAdvection( const flow::Advection* adv,
                                       FlowParams*            params,
                                       bool                   fast )
 {
-
     size_t numOfStreams = adv->GetNumberOfStreams();
     auto   numOfPart    = params->GetSteadyNumOfSteps() + 1;
     bool   singleColor  = params->UseSingleColor();
@@ -322,8 +321,40 @@ FlowRenderer::_renderFromAnAdvection( const flow::Advection* adv,
                 vec.clear();
             }
         }   // Finish processing all streams
+    }
+    else    // Unsteady flow
+    {
+        std::vector<float> vec;
+        for( size_t s = 0; s < numOfStreams; s++ )
+        {
+            const auto& stream = adv->GetStreamAt( s );
+            for( const auto& p : stream )
+            {
+                // Finish this stream once we go beyond the current TS
+                if( p.time > _timestamps.at( _cache_currentTS ) )
+                    break;
 
-    }   // Finish processing steady case
+                if( !p.IsSpecial() )    // p isn't a separator
+                {
+                    vec.push_back( p.location.x );
+                    vec.push_back( p.location.y );
+                    vec.push_back( p.location.z );
+                    vec.push_back( p.value );
+                }
+                else                    // p is a separator
+                {
+                    _drawLineSegs( vec.data(), vec.size() / 4, singleColor );
+                    vec.clear();
+                }
+            }   // Finish processing a stream
+                    
+            if( !vec.empty() )
+            {
+                _drawLineSegs( vec.data(), vec.size() / 4, singleColor );
+                vec.clear();
+            }
+        }   // Finish processing all streams
+    }
 
     return 0;
 }
