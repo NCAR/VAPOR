@@ -102,8 +102,6 @@ protected:
     int  _renderFromAnAdvection( const flow::Advection*, FlowParams*, bool fast );
     void _prepareColormap(        FlowParams* );
     int  _drawLineSegs( const float* buf, size_t numOfParts, bool singleColor ) const; 
-    //int  _drawAStreamAsTubes(     const std::vector<flow::Particle>&,
-    //                              const FlowParams* ) const;
     void _restoreGLState() const;
 
     int  _getAGrid( const FlowParams* params,           // Input

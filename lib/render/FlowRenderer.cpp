@@ -403,128 +403,11 @@ FlowRenderer::_drawLineSegs( const float* buf, size_t numOfParts, bool singleCol
     return 0;
 }
 
-#if 0
-int
-FlowRenderer::_purePaint( FlowParams* params, bool fast )
-{
-    _prepareColormap( params );
-
-    size_t numOfStreams = _advection.GetNumberOfStreams();
-    for( size_t i = 0; i < numOfStreams; i++ )
-    {
-        const auto& s = _advection.GetStreamAt( i );
-        if( fast )
-            _drawAStreamAsLines( s, params );
-        else
-        {
-            _drawAStreamAsLines( s, params );
-        }
-    }
-
-    if( _2ndAdvection )
-    {
-        numOfStreams = _2ndAdvection->GetNumberOfStreams();
-        for( size_t i = 0; i < numOfStreams; i++ )
-        {
-            const auto& s = _2ndAdvection->GetStreamAt( i );
-            if( fast )
-                _drawAStreamAsLines( s, params );
-            else
-            {
-                _drawAStreamAsLines( s, params );
-            }
-        }
-    }
-    
-    return 0;
-}
-
-int
-FlowRenderer::_drawAStreamAsLines( const std::vector<flow::Particle>& stream,
-                                   const FlowParams* params ) const
-{
-    size_t numOfPart = 0;
-    std::vector<float> vec;
-    const float* bufPtr = nullptr;
-
-    // In case of steady flow, we render up to _cache_steadyNumOfSteps + 1.
-    if( _cache_isSteady )
-    {
-        size_t numOfStep = params->GetSteadyNumOfSteps();
-        numOfPart     = stream.size();
-        numOfPart     = numOfPart < numOfStep+1 ? numOfPart : numOfStep+1;
-        float* buffer = new float[ 4 * numOfPart ];
-        size_t i = 0;
-        for( const auto& p : stream )
-        {
-            if( i < numOfPart )
-            {
-                std::memcpy( buffer + i * 4, glm::value_ptr(p.location), sizeof(glm::vec3) );
-                buffer[ i * 4 + 3 ] = p.value;
-                i++;
-            }
-            else
-                break;
-        }
-        bufPtr = buffer;
-    }
-    // In case of unsteady, we use particles up to currentTS
-    else 
-    {
-        for( const auto& p : stream )
-        {
-            if( p.time <= _timestamps.at( _cache_currentTS ) )
-            {
-                vec.push_back( p.location.x );
-                vec.push_back( p.location.y );
-                vec.push_back( p.location.z );
-                vec.push_back( p.value );
-            }
-            else
-                break;
-        }
-        numOfPart = vec.size() / 4;
-        bufPtr    = vec.data();
-    }
-
-    // Make some OpenGL function calls
-    glm::mat4 modelview  = _glManager->matrixManager->GetModelViewMatrix();
-    glm::mat4 projection = _glManager->matrixManager->GetProjectionMatrix();
-    _shader->Bind();
-    _shader->SetUniform("MV", modelview);
-    _shader->SetUniform("Projection", projection);
-    _shader->SetUniform("colorMapRange", glm::make_vec3(_colorMapRange));
-    bool singleColor = params->UseSingleColor();
-    _shader->SetUniform( "singleColor", int(singleColor) );
-
-    glActiveTexture( GL_TEXTURE0 + _colorMapTexOffset );
-    glBindTexture( GL_TEXTURE_1D,  _colorMapTexId );
-    _shader->SetUniform("colorMapTexture", _colorMapTexOffset);
-
-    glBindVertexArray( _vertexArrayId );
-    glEnableVertexAttribArray( 0 );
-    glBindBuffer( GL_ARRAY_BUFFER, _vertexBufferId );
-    glBufferData( GL_ARRAY_BUFFER, sizeof(float) * 4 * numOfPart, bufPtr, GL_STREAM_DRAW );
-    glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0 );
-    glDrawArrays( GL_LINE_STRIP, 0, numOfPart );
-
-    // Some OpenGL cleanup
-    glBindBuffer( GL_ARRAY_BUFFER, 0 );
-    glDisableVertexAttribArray( 0 );
-    glBindTexture( GL_TEXTURE_1D,  _colorMapTexId );
-    glBindVertexArray( 0 );
-
-    if( _cache_isSteady )
-        delete[] bufPtr;
-
-    return 0;
-}
-#endif
-
 void
 FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
 {
-    /* Strategy:
+    /* 
+     * Strategy:
      * First, compare parameters that if changed, they would put both steady and unsteady
      *   streams out of date.
      * Second, branch into steady and unsteady cases, and deal with them separately.
@@ -601,7 +484,9 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     }
     
 
-    /* Now we branch into steady and unsteady cases, and treat them separately */
+    /* 
+     * Now we branch into steady and unsteady cases, and treat them separately 
+     */
     if( params->GetIsSteady() )
     {
         if( _cache_isSteady )   // steady state isn't changed
@@ -645,8 +530,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
             }
         }
     }
-
-    else  /* in case of unsteady flow */
+    else  // in case of unsteady flow
     {
         if( !_cache_isSteady )  // unsteady state isn't changed
         {
