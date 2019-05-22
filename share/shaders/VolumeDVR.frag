@@ -36,15 +36,13 @@ void main(void)
         
         int STEPS;
         float integratePart = 1 / samplingRateMultiplier;
-        float noise = 1;
         if (fast) {
             STEPS = 100;
             integratePart = 7;
-            noise = GetSamplingNoise();
         } else {
             STEPS = int(700 * samplingRateMultiplier);
 		}
-        float step = noise * max(((t1-t0)/float(STEPS))*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/float(STEPS));
+        float step = GetSamplingNoise() * max(((t1-t0)/float(STEPS))*1.01, (dataBoundsMax[2]-dataBoundsMin[2])/float(STEPS));
         
         t1 = min(t1, sceneDepthT);
         int i = 0;
