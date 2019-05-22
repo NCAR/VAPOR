@@ -486,15 +486,15 @@ int TwoDDataRenderer::_getMeshUnStructured(
 
     // Count the number of triangle vertex indices needed
     //
-    size_t maxVertexPerFace = g->GetMaxVertexPerFace();
+    size_t maxVertexPerCell = g->GetMaxVertexPerCell();
     _nindices = 0;
     Grid::ConstCellIterator citr;
     Grid::ConstCellIterator endcitr = g->ConstCellEnd();
     for (citr = g->ConstCellBegin(); citr != endcitr; ++citr) {
 
-        size_t nodes[maxVertexPerFace];
+        size_t nodes[maxVertexPerCell];
         int numNodes;
-        ((UnstructuredGrid *)g)->GetCellNodes((*citr).data(), nodes, numNodes);
+        g->GetCellNodes((*citr).data(), nodes, numNodes);
 
         if (numNodes < 3)
             continue; // degenerate
@@ -599,15 +599,15 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(
     // and compute an index
     // array for the triangle list
     //
-    size_t maxVertexPerFace = g->GetMaxVertexPerFace();
+    size_t maxVertexPerCell = g->GetMaxVertexPerCell();
     Grid::ConstCellIterator citr;
     Grid::ConstCellIterator endcitr = g->ConstCellEnd();
     size_t index = 0;
     for (citr = g->ConstCellBegin(); citr != endcitr; ++citr) {
 
-        size_t nodes[maxVertexPerFace];
+        size_t nodes[maxVertexPerCell];
         int numNodes;
-        ((UnstructuredGrid *)g)->GetCellNodes((*citr).data(), nodes, numNodes);
+        g->GetCellNodes((*citr).data(), nodes, numNodes);
 
         if (numNodes < 3)
             continue; // degenerate

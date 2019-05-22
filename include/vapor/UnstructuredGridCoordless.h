@@ -47,11 +47,6 @@ class VDF_API UnstructuredGridCoordless : public UnstructuredGrid {
         return (std::vector<size_t>(1, 1));
     }
 
-    virtual float GetUserCoordinate(
-        std::vector<size_t> &index, size_t dim) const override {
-        return (0.0);
-    }
-
     static std::string GetClassType() {
         return ("UnstructuredCoordless");
     }
@@ -77,11 +72,9 @@ class VDF_API UnstructuredGridCoordless : public UnstructuredGrid {
         max.clear();
     }
 
-    void GetUserCoordinates(
-        const std::vector<size_t> &,
-        std::vector<double> &coords) const override {
-        coords.clear();
-    }
+    virtual void GetUserCoordinates(
+        const size_t indices[],
+        double coords[]) const override {}
 
     void GetIndices(
         const std::vector<double> &,
