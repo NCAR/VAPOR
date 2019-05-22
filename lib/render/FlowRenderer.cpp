@@ -333,7 +333,7 @@ FlowRenderer::_renderFromAnAdvection( const flow::Advection* adv,
             }
         }   // Finish processing all streams
     }
-    else    // Unsteady flow
+    else    // Unsteady flow (only forward direction)
     {
         std::vector<float> vec;
         for( size_t s = 0; s < numOfStreams; s++ )
