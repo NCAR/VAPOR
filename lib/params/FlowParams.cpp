@@ -72,7 +72,7 @@ FlowParams::GetNeedFlowlineOutput( ) const
 double
 FlowParams::GetVelocityMultiplier() const
 {
-    return GetValueDouble( _velocityMultiplierTag, 0.001 );
+    return GetValueDouble( _velocityMultiplierTag, 0.01 );
 }
     
 void 
