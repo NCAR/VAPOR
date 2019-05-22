@@ -95,22 +95,6 @@ public:
     //!
     virtual std::vector<size_t> GetCoordDimensions(size_t dim) const = 0;
 
-    //! Return the user coordinate for the specified dimension
-    //!
-    //! This method returns a user coordinate for the axis specified
-    //! by \p dim at the logical index given by \p index. If either \p dim
-    //! or \p index are outside of the range of possible values zero is returned
-    //!
-    //! \param[in] index Logical index into coordinate array. The dimensionality
-    //! and range of component values are given by GetCoordDimensions(). The
-    //! starting value for each component of \p index is zero.
-    //!
-    //! \param[in] dim An integer between 0 and the return value
-    //! of GetGeometryDim() - 1, indicating which
-    //! coordinate dimensions are to be returned.
-    //!
-    virtual float GetUserCoordinate(std::vector<size_t> &index, size_t dim) const = 0;
-
     virtual std::string GetType() const = 0;
 
     //! Get geometric dimension of cells
@@ -211,6 +195,13 @@ public:
     //! \sa GetUserExtents()
     //!
     virtual float GetValue(const std::vector<double> &coords) const;
+
+    virtual float GetValue(const double coords[]) const
+    {
+        std::vector<double> coordsVec(GetGeometryDim(), 0);
+        for (int i = 0; i < coordsVec.size(); i++) coordsVec[i] = coords[i];
+        return (GetValue(coordsVec));
+    }
 
     virtual float GetValue(double x, double y) const
     {
@@ -352,11 +343,18 @@ public:
     //!
     //! Results are undefined if \p indices is out of range.
     //!
-    //! \param[in] indices Array of grid indices.
-    //! \param[out] coord User coordinates of grid point with indices
-    //! given by \p indices.
+    //! \param[in] index Logical index into coordinate array. The dimensionality
+    //! and range of component values are given by GetNodeDimensions(). The
+    //! starting value for each component of \p index is zero. \p index must contain
+    //! GetNodeDimensions().size() elements.
     //!
-    virtual void GetUserCoordinates(const std::vector<size_t> &indices, std::vector<double> &coords) const = 0;
+    //! \param[out] coord User coordinates of grid point with indices
+    //! given by \p indices. \p coord must have space for the number of elements
+    //! returned by GetGeometryDim().
+    //!
+    virtual void GetUserCoordinates(const size_t indices[], double coords[]) const = 0;
+
+    virtual void GetUserCoordinates(const std::vector<size_t> &indices, std::vector<double> &coords) const;
 
     virtual void GetUserCoordinates(size_t i, double &x, double &y, double &z) const;
     virtual void GetUserCoordinates(size_t i, size_t j, double &x, double &y, double &z) const;
@@ -427,13 +425,29 @@ public:
     //! For 2D cells the node IDs are returned in counter-clockwise order.
     //! For 3D cells the ordering is dependent on the shape of the node. TBD.
     //!
+    //! \param[in] cindices An array of size Grid::GetDimensions.size() specifying
+    //! the index of the cell to query.
+    //! \param[out] nodes An array of size
+    //! Grid::GetMaxVertexPerCell() x Grid::GetDimensions.size() that will contain
+    //! the concatenated list of node indices on return.
+    //! \param[out] n The number of node indices returned in \p nodes, an integer
+    //! in the range (0..Grid::GetMaxVertexPerCell()).
+    //!
+    //!
+    virtual bool GetCellNodes(const size_t cindices[], size_t nodes[], int &n) const = 0;
+
+    //! Get the indices of the nodes that define a cell
+    //!
+    //! This method is equivalent in functionality
+    //! to Grid::GetCellNodes(const size_t cindices[], size_t nodes[], int &n)
+    //! but less performant due to the use of std::vector
     //!
     //! \param[in] cindices An ordered vector of multi-dimensional cell
     //! indices.
     //! \param[out] nodes A vector of index vectors . Each index vector
     //! has size given by GetDimensions.size()
-    //!
-    virtual bool GetCellNodes(const std::vector<size_t> &cindices, std::vector<std::vector<size_t>> &nodes) const = 0;
+    //
+    virtual bool GetCellNodes(const std::vector<size_t> &cindices, std::vector<std::vector<size_t>> &nodes) const;
 
     //! Get the IDs (indices) of all of the cells that border a cell
     //!
@@ -589,6 +603,13 @@ public:
         bool operator()(const std::vector<double> &pt) const
         {
             for (int i = 0; i < _min.size() && i < pt.size(); i++) {
+                if (pt[i] < _min[i] || pt[i] > _max[i]) return (false);
+            }
+            return (true);
+        }
+        bool operator()(const double pt[]) const
+        {
+            for (int i = 0; i < _min.size(); i++) {
                 if (pt[i] < _min[i] || pt[i] > _max[i]) return (false);
             }
             return (true);
@@ -838,7 +859,7 @@ public:
         ConstCoordItr _coordItr;
 #else
         const Grid *_g;
-        bool        _cellInsideBox(const std::vector<size_t> &cindices) const;
+        bool        _cellInsideBox(const size_t cindices[]) const;
 #endif
     };
 

@@ -95,24 +95,6 @@ bool UnstructuredGrid::GetCellNodes(const size_t cindices[], size_t nodes[], int
     return (true);
 }
 
-bool UnstructuredGrid::GetCellNodes(const std::vector<size_t> &cindices, std::vector<vector<size_t>> &nodes) const
-{
-    const vector<size_t> &cdims = GetCellDimensions();
-    size_t                nodes_a[_maxVertexPerFace * cdims.size()];
-    int                   n = 0;
-
-    bool ok = GetCellNodes(cindices.data(), nodes_a, n);
-    if (!ok) return (ok);
-
-    nodes.resize(n);
-    vector<size_t> indices(cdims.size(), 0);
-    for (int j = 0; j < n; j++) {
-        for (int i = 0; i < cdims.size(); i++) { indices[i] = nodes_a[j * cdims.size() + i]; }
-        nodes[j] = indices;
-    }
-    return (true);
-}
-
 bool UnstructuredGrid::GetCellNeighbors(const std::vector<size_t> &cindices, std::vector<vector<size_t>> &cells) const
 {
     cells.clear();
