@@ -63,11 +63,6 @@ public:
 
  virtual std::vector <size_t> GetCoordDimensions(size_t dim) const override;
 
- virtual float GetUserCoordinate(
-	std::vector <size_t> &index, size_t dim
- ) const override;
-
-
  static std::string GetClassType() {
 	return("Layered");
  }  
@@ -122,9 +117,9 @@ public:
 
  //! \copydoc Grid::GetUserCoordinates()
  //!
- void GetUserCoordinates(
-	const std::vector <size_t> &indices,
-	std::vector <double> &coords
+ virtual void GetUserCoordinates(
+	const size_t indices[],
+	double coords[]
  ) const override;
 
  void GetUserCoordinates(
@@ -133,7 +128,7 @@ public:
  ) const override {
 	std::vector <size_t> indices = {i,j,k};
 	std::vector <double> coords;
-	GetUserCoordinates(indices, coords);
+	Grid::GetUserCoordinates(indices, coords);
 	x = coords[0];
 	y = coords[1];
 	z = coords[2];

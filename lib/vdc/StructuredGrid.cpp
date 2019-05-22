@@ -34,10 +34,11 @@ StructuredGrid::StructuredGrid(
 }
 
 bool StructuredGrid::GetCellNodes(
-    const std::vector <size_t> &cindices,
-    std::vector <vector <size_t> > &nodes
+    const size_t cindices[],
+    size_t nodes[],
+    int &n
 ) const {
-	nodes.clear();
+	n = 0;
 
     size_t cCindices[3];
     ClampCellIndex(cindices, cCindices);
@@ -51,43 +52,53 @@ bool StructuredGrid::GetCellNodes(
 	vector <size_t> indices;
 
 	if (dims.size() == 2) {
-		indices =  {cCindices[0], cCindices[1]};
-		nodes.push_back(indices);
+		nodes[0] = cCindices[0];
+		nodes[1] = cCindices[1];
 
-		indices =  {cCindices[0]+1, cCindices[1]};
-		nodes.push_back(indices);
+		nodes[2] = cCindices[0]+1;
+		nodes[3] = cCindices[1];
 
-		indices =  {cCindices[0]+1, cCindices[1]+1};
-		nodes.push_back(indices);
+		nodes[4] = cCindices[0]+1;
+		nodes[5] = cCindices[1]+1;
 
-		indices =  {cCindices[0], cCindices[1]+1};
-		nodes.push_back(indices);
+		nodes[6] = cCindices[0];
+		nodes[7] = cCindices[1]+1;
+		n = 4;
 
 	}
 	else if (dims.size() == 3 && dims[2] > 1) {
-		indices =  {cCindices[0], cCindices[1], cCindices[2]};
-		nodes.push_back(indices);
+		nodes[0] = cCindices[0];
+		nodes[1] = cCindices[1];
+		nodes[2] = cCindices[2];
 
-		indices =  {cCindices[0]+1, cCindices[1], cCindices[2]};
-		nodes.push_back(indices);
+		nodes[3] = cCindices[0]+1;
+		nodes[4] = cCindices[1];
+		nodes[5] = cCindices[2];
 
-		indices =  {cCindices[0]+1, cCindices[1]+1, cCindices[2]};
-		nodes.push_back(indices);
+		nodes[6] = cCindices[0]+1;
+		nodes[7] = cCindices[1]+1;
+		nodes[8] = cCindices[2];
 
-		indices =  {cCindices[0], cCindices[1]+1, cCindices[2]};
-		nodes.push_back(indices);
+		nodes[9] = cCindices[0];
+		nodes[10] = cCindices[1]+1;
+		nodes[11] = cCindices[2];
 
-		indices =  {cCindices[0], cCindices[1], cCindices[2]+1};
-		nodes.push_back(indices);
+		nodes[12] = cCindices[0];
+		nodes[13] = cCindices[1];
+		nodes[14] = cCindices[2]+1;
 
-		indices =  {cCindices[0]+1, cCindices[1], cCindices[2]+1};
-		nodes.push_back(indices);
+		nodes[15] = cCindices[0]+1;
+		nodes[16] = cCindices[1];
+		nodes[17] = cCindices[2]+1;
 
-		indices =  {cCindices[0]+1, cCindices[1]+1, cCindices[2]+1};
-		nodes.push_back(indices);
+		nodes[18] = cCindices[0]+1;
+		nodes[19] = cCindices[1]+1;
+		nodes[20] = cCindices[2]+1;
 
-		indices =  {cCindices[0], cCindices[1]+1, cCindices[2]+1};
-		nodes.push_back(indices);
+		nodes[21] = cCindices[0];
+		nodes[22] = cCindices[1]+1;
+		nodes[23] = cCindices[2]+1;
+		n = 8;
 	}
 
 	return(true);

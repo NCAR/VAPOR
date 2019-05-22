@@ -209,6 +209,21 @@ float Grid::GetValue(const std::vector <double> &coords) const {
     }
 }
 
+void Grid::GetUserCoordinates(
+	const std::vector <size_t> &indices,
+	std::vector <double> &coords
+) const {
+	coords.clear();
+
+	double coordsArray[3];
+	GetUserCoordinates(indices.data(), coordsArray);
+
+	coords.resize(GetGeometryDim());
+	for (int i=0; i<GetGeometryDim(); i++) {
+		coords[i] = coordsArray[i];
+	}
+}
+
 void Grid::_getUserCoordinatesHelper(
 	const vector <double> &coords, double &x, double &y, double &z
 ) const {
@@ -258,6 +273,29 @@ void Grid::SetInterpolationOrder(int order) {
 	_interpolationOrder = order;
 }
 
+bool Grid::GetCellNodes(
+    const std::vector <size_t> &cindices,
+    std::vector <vector <size_t> > &nodes
+) const {
+	nodes.clear();
+
+	const vector <size_t> &ndims = GetNodeDimensions();
+	size_t nodes_a[GetMaxVertexPerCell() * ndims.size()];
+	int n = 0;
+
+	bool ok = GetCellNodes(cindices.data(), nodes_a, n);
+	if (! ok) return(ok);
+
+	nodes.resize(n);
+	vector <size_t> indices(ndims.size(), 0);
+	for (int j=0; j<n; j++) {
+		for (int i=0; i<ndims.size(); i++) {
+			indices[i] = nodes_a[j*ndims.size()+i];
+		}
+		nodes[j] = indices;
+	}
+	return(true);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -455,16 +493,21 @@ void Grid::ConstCellIteratorSG::next(const long &offset) {
 }
 
 bool Grid::ConstCellIteratorBoxSG::_cellInsideBox(
-	const std::vector <size_t> &cindices
+	const size_t cindices[]
 ) const {
-	vector <std::vector <size_t> > nodes;
-	bool status = _g->GetCellNodes(cindices, nodes);
+	size_t maxNodes = _g->GetMaxVertexPerCell();
+	size_t nodeDim = _g->GetNodeDimensions().size();
+	size_t nodes[maxNodes * nodeDim];
+	size_t coordDim = _g->GetGeometryDim();
+	double coord[coordDim];
+
+	int numNodes;
+	bool status = _g->GetCellNodes(cindices, nodes, numNodes);
 	if (! status) return(false);
 
-	for (int i=0; i<nodes.size(); i++) {
-		vector <double> coords;
-		_g->GetUserCoordinates(nodes[i], coords);
-		if (!_pred(coords)) return (false);
+	for (int i=0; i<numNodes; i++) {
+		_g->GetUserCoordinates(&nodes[i*nodeDim], coord);
+		if (!_pred(coord)) return (false);
 	}
 
 	return(true);
@@ -488,7 +531,7 @@ Grid::ConstCellIteratorBoxSG::ConstCellIteratorBoxSG(
 
 	// Advance to first node inside box
 	//
-	if (! _cellInsideBox(_index)) {
+	if (! _cellInsideBox(_index.data())) {
 		next();
 	}
 #endif
@@ -520,7 +563,7 @@ void Grid::ConstCellIteratorBoxSG::next() {
 #else
 	do {
 		ConstCellIteratorSG::next();
-	} while (! _cellInsideBox(_index) && _index != _lastIndex);
+	} while (! _cellInsideBox(_index.data()) && _index != _lastIndex);
 #endif
 }
 
@@ -537,7 +580,7 @@ void Grid::ConstCellIteratorBoxSG::next(const long &offset) {
 #else 
 
 	long count = offset;
-	while (! _cellInsideBox(_index) && _index != _lastIndex && count > 0) {
+	while (! _cellInsideBox(_index.data()) && _index != _lastIndex && count > 0) {
 		ConstCellIteratorSG::next();
 		count--;
 	}
