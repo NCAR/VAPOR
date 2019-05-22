@@ -18,10 +18,12 @@ int Framebuffer::Generate() {
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
 
     _colorBuffer.Generate();
+    _colorBuffer.TexImage(GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _colorBuffer._id, 0);
 
     if (_hasDepthBuffer) {
         _depthBuffer.Generate();
+        _depthBuffer.TexImage(GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthBuffer._id, 0);
     }
 
