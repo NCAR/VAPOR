@@ -72,29 +72,6 @@ vector <size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const {
 	}
 }
 
-float UnstructuredGrid2D::GetUserCoordinate(
-	std::vector <size_t> &index, size_t dim
-) const {
-
-	if (dim == 0) {
-		return(_xug.AccessIndex(index));
-	}
-	else if (dim == 1) {
-		return(_yug.AccessIndex(index));
-	}
-	else if (dim == 2) {
-		if (GetGeometryDim() == 3) {
-			return(_zug.AccessIndex(index));
-		}
-		else {
-			return(0.0);
-		}
-	}
-	else {
-		return(0.0);
-	}
-}
-
 size_t UnstructuredGrid2D::GetGeometryDim() const {
 	return(_zug.GetDimensions().size() == 0 ? 2 : 3);
 }
@@ -179,20 +156,17 @@ void UnstructuredGrid2D::GetEnclosingRegion(
 }
 
 void UnstructuredGrid2D::GetUserCoordinates(
-	const std::vector <size_t> &indices,
-	std::vector <double> &coords
+	const size_t indices[],
+	double coords[]
 ) const {
 
-    vector <size_t> cIndices = indices;
-    ClampIndex(cIndices);
+    size_t cIndices[1];
+    ClampIndex(indices, cIndices);
 
-	assert(cIndices.size() == 1);
-	coords.clear();
-
-	coords.push_back(_xug.AccessIndex(cIndices));
-	coords.push_back(_yug.AccessIndex(cIndices));
+	coords[0] = _xug.AccessIndex(cIndices);
+	coords[1] = (_yug.AccessIndex(cIndices));
 	if (GetGeometryDim() == 3) {
-		coords.push_back(_zug.AccessIndex(cIndices));
+		coords[2] = _zug.AccessIndex(cIndices);
 	}
 	
 }

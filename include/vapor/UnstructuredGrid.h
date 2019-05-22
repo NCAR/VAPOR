@@ -137,16 +137,8 @@ public:
 	const size_t cindices[],
 	size_t nodes[],
 	int &n
- ) const;
- 
- //! \copydoc Grid::GetCellNodes()
- //!
- virtual bool GetCellNodes(
-	const std::vector <size_t> &cindices,
-	std::vector <std::vector <size_t> > &nodes
  ) const override;
-
-
+ 
  //! \copydoc Grid::GetCellNeighbors()
  //!
  virtual bool GetCellNeighbors(
