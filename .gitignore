@@ -41,6 +41,7 @@ bin
 
 # vim swap files
 *.swp
+*.swo
 
 # object files
 *.o
