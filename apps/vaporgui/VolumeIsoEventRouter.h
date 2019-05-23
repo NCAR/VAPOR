@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QObject.h>
+#include <QObject>
 #include <vapor/MyBase.h>
 #include "GL/glew.h"
 #include "vapor/VolumeIsoRenderer.h"
