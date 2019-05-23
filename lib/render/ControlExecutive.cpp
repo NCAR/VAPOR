@@ -14,8 +14,8 @@
 #include <vapor/Visualizer.h>
 #include <vapor/DataStatus.h>
 
-#include <vapor/DVRenderer.h>
-#include <vapor/IsoSurfaceRenderer.h>
+#include <vapor/VolumeRenderer.h>
+#include <vapor/VolumeIsoRenderer.h>
 
 using namespace VAPoR;
 using namespace std;
@@ -180,8 +180,8 @@ int ControlExec::ActivateRender(string winName, string dataSetName, string rende
 
     rp->SetEnabled(on);
     v->MoveRendererToFront(renderType, renderName);
-    v->MoveRenderersOfTypeToFront(IsoSurfaceRenderer::GetClassType());
-    v->MoveRenderersOfTypeToFront(DVRenderer::GetClassType());
+    v->MoveRenderersOfTypeToFront(VolumeIsoRenderer::GetClassType());
+    v->MoveRenderersOfTypeToFront(VolumeRenderer::GetClassType());
 
     _paramsMgr->EndSaveStateGroup();
 
@@ -234,8 +234,8 @@ int ControlExec::ActivateRender(string winName, string dataSetName, const Render
 
     newRP->SetEnabled(on);
     v->MoveRendererToFront(renderType, renderName);
-    v->MoveRenderersOfTypeToFront(IsoSurfaceRenderer::GetClassType());
-    v->MoveRenderersOfTypeToFront(DVRenderer::GetClassType());
+    v->MoveRenderersOfTypeToFront(VolumeIsoRenderer::GetClassType());
+    v->MoveRenderersOfTypeToFront(VolumeRenderer::GetClassType());
 
     _paramsMgr->EndSaveStateGroup();
 

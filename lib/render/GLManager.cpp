@@ -1,8 +1,11 @@
 #include "vapor/glutil.h"
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
+#include "vapor/STLUtils.h"
+#include <chrono>
 
 using namespace VAPoR;
+using namespace std::chrono;
 
 GLManager::GLManager() : shaderManager(new ShaderManager), fontManager(new FontManager(this)), matrixManager(new MatrixManager), legacy(new LegacyGL(this)) {}
 
@@ -43,6 +46,19 @@ void GLManager::PixelCoordinateSystemPop()
     mm->MatrixModeModelView();
 }
 
+GLManager::Vendor GLManager::GetVendor()
+{
+    string vendorString((const char *)glGetString(GL_VENDOR));
+    vendorString = STLUtils::ToLower(vendorString);
+
+    if (STLUtils::Contains(vendorString, "intel")) return Vendor::Intel;
+    if (STLUtils::Contains(vendorString, "nvidia")) return Vendor::Nvidia;
+    if (STLUtils::Contains(vendorString, "amd")) return Vendor::AMD;
+    if (STLUtils::Contains(vendorString, "mesa")) return Vendor::Mesa;
+
+    return Vendor::Other;
+}
+
 void GLManager::GetGLVersion(int *major, int *minor)
 {
     // Only >=3.0 guarentees glGetIntegerv
@@ -61,6 +77,15 @@ void GLManager::GetGLVersion(int *major, int *minor)
     }
 }
 
+int GLManager::GetGLSLVersion()
+{
+    int major, minor;
+    GetGLVersion(&major, &minor);
+
+    // This does not work for < OpenGL 3.3 but we do not support it anyway
+    return 100 * major + 10 * minor;
+}
+
 bool GLManager::IsCurrentOpenGLVersionSupported()
 {
     int major, minor;
@@ -68,7 +93,7 @@ bool GLManager::IsCurrentOpenGLVersionSupported()
 
     int version = major * 100 + minor;
 
-    if (version >= 401) return true;
+    if (version >= 303) return true;
 
     Wasp::MyBase::SetErrMsg("OpenGL Version \"%s\" is too low and is not supported", glGetString(GL_VERSION));
     return false;
@@ -129,3 +154,25 @@ void GLManager::ShowDepthBuffer()
     glBindVertexArray(0);
 }
 #endif
+
+void *GLManager::BeginTimer()
+{
+    glFinish();
+    auto start = new chrono::time_point<chrono::high_resolution_clock>;
+    *start = chrono::high_resolution_clock::now();
+    return start;
+}
+
+double GLManager::EndTimer(void *startTime)
+{
+    assert(startTime);
+    auto start = (chrono::time_point<chrono::high_resolution_clock> *)startTime;
+
+    glFinish();
+    auto stop = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::microseconds>(stop - *start);
+
+    delete start;
+
+    return (double)duration.count() / 1000000.0;
+}
