@@ -2,9 +2,9 @@
 
 #include <vector>
 #include <string>
+#include <map>
 #include <glm/fwd.hpp>
-
-#include "vapor/Shader.h"
+#include <vapor/MyBase.h>
 
 namespace VAPoR {
 
@@ -15,12 +15,19 @@ namespace VAPoR {
 //!
 //! \author Stanislaw Jaroszynski
 //! \date August, 2018
+//!
+//! Automatically manages sampler uniforms and the active gl texture.
+//! This allows samplers to be set simply like uniforms.
+
+class Shader;
+class Texture;
 
 class RENDER_API ShaderProgram : public Wasp::MyBase {
     unsigned int _id;
     std::vector<Shader *> _shaders;
     bool _linked;
     int _successStatus;
+    std::map<std::string, int> _samplerLocations;
 
   public:
     enum class Policy {
@@ -56,6 +63,8 @@ class RENDER_API ShaderProgram : public Wasp::MyBase {
 
     int GetAttributeLocation(const std::string &name) const;
     int GetUniformLocation(const std::string &name) const;
+    bool HasUniform(const std::string &name) const;
+    void ComputeSamplerLocations();
 
     template <typename T>
     bool SetUniform(const std::string &name, const T &value) const;
@@ -76,9 +85,20 @@ class RENDER_API ShaderProgram : public Wasp::MyBase {
     void SetUniformArray(int location, int count, const glm::vec3 *values) const;
     void SetUniformArray(int location, int count, const glm::vec4 *values) const;
 
+    //! This function behaves just like setting a uniform
+    //!
+    //! \param[in] name uniform name
+    //! \param[in] value an instance of VAPoR::Texture
+    //!
+    //! \retval false if uniform name is not found
+    //!
+    template <typename T>
+    bool SetSampler(const std::string &name, const T &texture) const;
+
     std::string GetLog() const;
     void PrintUniforms() const;
     static const char *GLTypeToString(const unsigned int type);
+    static bool IsGLTypeSampler(const unsigned int type);
 };
 
 //! \class SmartShaderProgram
@@ -88,13 +108,17 @@ class RENDER_API ShaderProgram : public Wasp::MyBase {
 //!
 //! \author Stanislaw Jaroszynski
 //! \date August, 2018
+//!
+//! This class causes shaders to automatically bind when requested from the ShaderManager.
+//! Once the object becomes out of scope, the shader is unbound.
+//! Since this class is intended to be used as an object, not a pointer, IsValid replaces
+//! the usual NULL check
 
 class SmartShaderProgram {
     ShaderProgram *_program;
 
-    SmartShaderProgram(ShaderProgram *program);
-
   public:
+    SmartShaderProgram(ShaderProgram *program);
     ~SmartShaderProgram();
     ShaderProgram *operator->() { return _program; }
     bool IsValid() const;

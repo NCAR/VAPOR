@@ -156,6 +156,7 @@ int main(int argc, char **argv) {
 
     mw->setWindowTitle("VAPOR User Interface");
     mw->show();
+    // Disable banner in debug build
 #ifdef NDEBUG
     std::string banner_file_name = "vapor_banner.png";
     BannerGUI banner(mw, banner_file_name, 3000);
