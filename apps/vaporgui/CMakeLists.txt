@@ -44,9 +44,6 @@ set (SRCS
 	ImageEventRouter.cpp
 	ContourEventRouter.cpp
     SliceEventRouter.cpp
-	DVREventRouter.cpp
-	IsoSurfaceEventRouter.cpp
-	IsoSurfaceSubtabs.cpp
 	PlotParams.cpp
 	StatisticsParams.cpp
 	ContourSubtabs.cpp
@@ -63,12 +60,14 @@ set (SRCS
 	Combo.cpp
 	windowsUtils.cpp
 	Manip.cpp
+	VolumeEventRouter.cpp
+	VolumeIsoEventRouter.cpp
+	VolumeIsoSubtabs.cpp
+	VolumeSubtabs.cpp
     VaporWidgets.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
-	DVRSubtabs.h
-	IsoSurfaceSubtabs.h
 	WireFrameSubtabs.h
 	Statistics.h
 	Plot.h
@@ -85,6 +84,10 @@ set (SRCS
 	QSliderEdit.h
 	QRange.h
 	QSinglePoint.h
+	VolumeEventRouter.h
+	VolumeIsoEventRouter.h
+	VolumeSubtabs.h
+	VolumeIsoSubtabs.h
 
 	MainForm.h
 	VizWinMgr.h
@@ -117,7 +120,6 @@ set (SRCS
 	ImageEventRouter.h
 	ImageFrame.h
 	ImageFrame.h
-	IsoSurfaceEventRouter.h
 	MappingFrame.h
 	MouseModeParams.h
 	PlotParams.h
@@ -148,14 +150,6 @@ set (UIS
 	appSettingsTab.ui
 	NewRendererDialog.ui
 	errMsg.ui
-	DVRVariablesGUI.ui
-	DVRAppearanceGUI.ui
-	DVRGeometryGUI.ui
-	DVRAnnotationGUI.ui
-	IsoSurfaceVariablesGUI.ui
-	IsoSurfaceAppearanceGUI.ui
-	IsoSurfaceGeometryGUI.ui
-	IsoSurfaceAnnotationGUI.ui
 	helloLayoutSubtab.ui
 	helloAppearanceSubtab.ui
 	BarbAppearanceGUI.ui
@@ -194,6 +188,14 @@ set (UIS
 	StretchFactorTableGUI.ui
 	OrientationAnglesGUI.ui
 	CopyRegionWidgetGUI.ui
+	VolumeAnnotationGUI.ui
+	VolumeAppearanceGUI.ui
+	VolumeGeometryGUI.ui
+	VolumeVariablesGUI.ui
+	VolumeIsoAnnotationGUI.ui
+	VolumeIsoAppearanceGUI.ui
+	VolumeIsoGeometryGUI.ui
+	VolumeIsoVariablesGUI.ui
 	
 	QSliderEdit.ui
 	QRange.ui

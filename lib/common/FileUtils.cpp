@@ -27,11 +27,15 @@ string FileUtils::ReadFileToString(const string &path) {
         fseek(f, 0, SEEK_END);
         long length = ftell(f);
         rewind(f);
+
         char *buf = new char[length + 1];
         fread(buf, length, 1, f);
+        fclose(f);
+
         buf[length] = 0;
         string ret(buf);
         delete[] buf;
+
         return ret;
     } else {
         return "";
