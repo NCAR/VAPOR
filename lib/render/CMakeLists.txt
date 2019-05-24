@@ -1,6 +1,8 @@
 set (SRC
 	BarbRenderer.cpp
 	ControlExecutive.cpp
+	VolumeRenderer.cpp
+	VolumeIsoRenderer.cpp
 	HelloRenderer.cpp
 	Renderer.cpp
 	ShaderProgram.cpp
@@ -18,8 +20,6 @@ set (SRC
 	AnnotationRenderer.cpp
 	jfilewrite.cpp
 	RayCaster.cpp
-	DVRenderer.cpp
-	IsoSurfaceRenderer.cpp
 	ControlExecutive.cpp
 	ContourRenderer.cpp
     SliceRenderer.cpp
@@ -41,12 +41,22 @@ set (SRC
 	TIFWriter.cpp
 	Proj4StringParser.cpp
 	glutil.cpp
+	VolumeAlgorithm.cpp
+	VolumeRegular.cpp
+	# VolumeResampled.cpp
+	# VolumeTest.cpp
+	# VolumeTest2.cpp
+	VolumeCellTraversal.cpp
+	Texture.cpp
+	Framebuffer.cpp
 )
 
 set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/BarbRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ControlExecutive.h
 	${PROJECT_SOURCE_DIR}/include/vapor/HelloRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeIsoRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Renderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ShaderProgram.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TwoDDataRenderer.h
@@ -74,8 +84,6 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/IResourceManager.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TextLabel.h
 	${PROJECT_SOURCE_DIR}/include/vapor/RayCaster.h
-	${PROJECT_SOURCE_DIR}/include/vapor/DVRenderer.h
-	${PROJECT_SOURCE_DIR}/include/vapor/IsoSurfaceRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/PyEngine.h
 	${PROJECT_SOURCE_DIR}/include/vapor/CalcEngineMgr.h
 	${PROJECT_SOURCE_DIR}/include/vapor/GeoTIFWriter.h
@@ -87,6 +95,14 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/Proj4StringParser.h
 	${PROJECT_SOURCE_DIR}/include/vapor/SliceRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/glutil.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeAlgorithm.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeRegular.h
+	# ${PROJECT_SOURCE_DIR}/include/vapor/VolumeResampled.h
+	# ${PROJECT_SOURCE_DIR}/include/vapor/VolumeTest.h
+	# ${PROJECT_SOURCE_DIR}/include/vapor/VolumeTest2.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeCellTraversal.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Texture.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Framebuffer.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})

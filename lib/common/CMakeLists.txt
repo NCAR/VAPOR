@@ -33,6 +33,7 @@ set (HEADERS
     ${PROJECT_SOURCE_DIR}/include/vapor/ResourcePath.h
     ${PROJECT_SOURCE_DIR}/include/vapor/LegacyVectorMath.h
     ${PROJECT_SOURCE_DIR}/include/vapor/STLUtils.h
+    ${PROJECT_SOURCE_DIR}/include/vapor/NonCopyableMixin.h
 )
 
 add_library (common SHARED ${SRC} ${HEADERS})
