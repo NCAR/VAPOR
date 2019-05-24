@@ -17,6 +17,7 @@ set (TARGETS
 	wrf2vdc
 	vdccompare
 	vaporpychecker
+	vapor_check_udunits
 	)
 
 append (LAUNCHER_TARGETS _launcher ${TARGETS})
