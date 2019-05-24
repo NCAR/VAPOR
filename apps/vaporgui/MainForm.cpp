@@ -254,6 +254,7 @@ void MainForm::_initMembers() {
 
 }
 
+#include <vapor/VDCNetCDF.h>
 // Only the main program should call the constructor:
 //
 MainForm::MainForm(
@@ -393,8 +394,17 @@ MainForm::MainForm(
 		sessionNew();
 	}
 
+    
 	if (files.size() && files[0].endsWith(".nc")) {
-        loadData(files[0].toStdString());
+        VDCNetCDF vdc;
+        bool errReportingEnabled = Wasp::MyBase::EnableErrMsg(false);
+        int ret = vdc.Initialize(files[0].toStdString(), {}, VDC::R);
+        Wasp::MyBase::EnableErrMsg(errReportingEnabled);
+        if (ret < 0) {
+            loadDataHelper({files[0].toStdString()}, "NetCDF CF files", "", "cf", true);
+        } else {
+            loadData(files[0].toStdString());
+        }
         _stateChangeCB();
 	}
 	app->installEventFilter(this);
@@ -1180,10 +1190,10 @@ void MainForm::sessionOpenHelper(string fileName) {
 	_tabMgr->Restart();
 }
 
-// Open session file
-//
 void MainForm::sessionOpen(QString qfileName)
 {
+    // Disable "Are you sure?" popup in debug build
+#ifdef NDEBUG
     if( _stateChangeFlag )
     {
 		QMessageBox msgBox; 
@@ -1196,6 +1206,7 @@ void MainForm::sessionOpen(QString qfileName)
 			return;
 		}
     }
+#endif
 
 	// This launches a panel that enables the
     // user to choose input session save files, then to
@@ -1631,6 +1642,8 @@ vector <string> MainForm::myGetOpenFileNames(
 
 void MainForm::sessionNew()
 {
+    // Disable "Are you sure?" popup in debug build
+#ifdef NDEBUG
     if( _stateChangeFlag )
     {
 		QMessageBox msgBox; 
@@ -1643,6 +1656,7 @@ void MainForm::sessionNew()
 			return;
 		}
     }
+#endif
 
 	sessionOpenHelper("");
 
@@ -1722,6 +1736,7 @@ void MainForm::modeChange(int newmode){
 }
 
 void MainForm::showCitationReminder(){
+    // Disable citation reminder in Debug build
 #ifndef NDEBUG
     return;
 #endif

@@ -3,6 +3,7 @@
 #include <cassert>
 #include <glm/glm.hpp>
 #include "vapor/GLManager.h"
+#include "vapor/ShaderProgram.h"
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace VAPoR;
