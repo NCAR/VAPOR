@@ -353,7 +353,6 @@ class VDF_API NetCDFSimple : public Wasp::MyBase {
     int _ncid;
     std::map<int, int> _ovr_table; // open variable map: fd -> varid
     string _path;
-    size_t _chsz;
     std::vector<string> _dimnames;
     std::vector<size_t> _dims;
     std::vector<string> _unlimited_dimnames;
