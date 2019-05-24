@@ -229,6 +229,11 @@ int NetCDFSimple::Close(int fd)
 
     _ovr_table.erase(itr);
 
+    if (_ovr_table.empty() && _ncid != -1) {
+        (void)nc_close(_ncid);
+        _ncid = -1;
+    }
+
     return (0);
 }
 
