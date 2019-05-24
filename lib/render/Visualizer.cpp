@@ -154,6 +154,13 @@ int Visualizer::paintEvent(bool fast)
     // Do not proceed if there is no DataMgr
     if (!_dataStatus->GetDataMgrNames().size()) return (0);
 
+    // Do not proceed with invalid viewport
+    // This can occur sometimes on Qt startup
+    int viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    if (viewport[2] - viewport[0] <= 0) return 0;
+    if (viewport[3] - viewport[1] <= 0) return 0;
+
     _clearFramebuffer();
 
     _loadMatricesFromViewpointParams();
@@ -163,6 +170,10 @@ int Visualizer::paintEvent(bool fast)
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Draw the domain frame and other in-scene features
+    _vizFeatures->InScenePaint(_getCurrentTimestep());
+    GL_ERR_BREAK();
 
     _deleteFlaggedRenderers();
     if (_initializeNewRenderers() < 0) return -1;
@@ -175,7 +186,9 @@ int Visualizer::paintEvent(bool fast)
         if (_renderers[i]->IsGLInitialized()) {
             _applyDatasetTransformsForRenderer(_renderers[i]);
 
+            //            void *t = _glManager->BeginTimer();
             int myrc = _renderers[i]->paintGL(fast);
+            //            printf("%s: %f\n", _renderers[i]->GetMyName().c_str(), _glManager->EndTimer(t));
             GL_ERR_BREAK();
             if (myrc < 0) rc = -1;
         }
@@ -185,15 +198,12 @@ int Visualizer::paintEvent(bool fast)
         if (myrc < 0) rc = -1;
     }
 
-    // Draw the domain frame and other in-scene features
-    _vizFeatures->InScenePaint(_getCurrentTimestep());
-    GL_ERR_BREAK();
     _vizFeatures->DrawText();
     GL_ERR_BREAK();
     _renderColorbars(_getCurrentTimestep());
     GL_ERR_BREAK();
 
-    // _glManager->ShowDepthBuffer();
+    //    _glManager->ShowDepthBuffer();
 
     glFlush();
 

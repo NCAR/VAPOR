@@ -81,6 +81,7 @@ private slots:
     void setColorInterpolation(int index);
     void emitTFChange();
     void opacitySliderChanged(int value);
+    void opacitySliderReleased();
 
     void setSingleColor();
     void setUsingSingleColor(int checkState);
@@ -154,6 +155,7 @@ private:
     bool                _mainHistoNeedsRefresh;
     bool                _secondaryHistoNeedsRefresh;
     bool                _isOpacityIntegrated;
+    bool                _wasOpacitySliderReleased;
 
     bool  _discreteColormap;
     bool  _textChanged;
