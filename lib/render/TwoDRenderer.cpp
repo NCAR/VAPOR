@@ -110,17 +110,12 @@ int TwoDRenderer::_paintGL(bool) {
 
     if (!_gridAligned) {
         assert(_structuredMesh);
-
         assert(_meshWidth >= 2);
         assert(_meshHeight >= 2);
 
-        _texCoords = (GLfloat *)_sb_texCoords.Alloc(
-            _meshWidth * _meshHeight * 2 * sizeof(*_texCoords));
-
+        _texCoords = (GLfloat *)_sb_texCoords.Alloc(_meshWidth * _meshHeight * 2 * sizeof(*_texCoords));
         _computeTexCoords(_texCoords, _meshWidth, _meshHeight);
 
-        // Render the 2D surface
-        //
         _renderMeshUnAligned();
     } else {
         assert(_meshWidth == _texWidth);
@@ -135,17 +130,13 @@ int TwoDRenderer::_paintGL(bool) {
     return (0);
 }
 
-// Setup OpenGL state for rendering
-//
 void TwoDRenderer::_openGLInit() {
     if (!_gridAligned) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _textureID);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexImage2D(
-            GL_TEXTURE_2D, 0, _texInternalFormat, _texWidth, _texHeight, 0,
-            _texFormat, _texType, _texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, _texInternalFormat, _texWidth, _texHeight, 0, _texFormat, _texType, _texture);
     }
 
     _glManager->matrixManager->MatrixModeModelView();
@@ -153,30 +144,12 @@ void TwoDRenderer::_openGLInit() {
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
 
-    // LIGHTING IS NOT ENABLED
-    //
-    /*
-	int nLights = 0;
-	if (nLights >0){
-		glEnable(GL_LIGHTING);
-		glShadeModel(GL_SMOOTH);
-//		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, elevGridColor);
-	} else {
-		glDisable(GL_LIGHTING);
-//		glColor3fv(elevGridColor);
-	}
-     */
-
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Do write to the z buffer
-    //
     glDepthMask(GL_TRUE);
 }
 
-// Restore OpenGL settings to OpenGL defaults
-//
 void TwoDRenderer::_openGLRestore() {
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_BLEND);
