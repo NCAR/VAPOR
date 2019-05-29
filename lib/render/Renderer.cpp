@@ -168,6 +168,7 @@ int Renderer::paintGL(bool fast)
 void Renderer::EnableClipToBox(ShaderProgram *shader, float haloFrac) const
 {
     shader->Bind();
+    assert(shader->HasUniform("clippingPlanes"));
 
     float x0Plane[] = {1.0, 0.0, 0.0, 0.0};
     float x1Plane[] = {-1.0, 0.0, 0.0, 0.0};
@@ -216,40 +217,6 @@ void Renderer::EnableClipToBox(ShaderProgram *shader, float haloFrac) const
         shader->SetUniform("clippingPlanes[4]", glm::make_vec4(z0Plane));
         shader->SetUniform("clippingPlanes[5]", glm::make_vec4(z1Plane));
     }
-}
-
-void Renderer::EnableClipToBox2DXY(float haloFrac) const
-{
-    GLdouble x0Plane[] = {1.0, 0.0, 0.0, 0.0};
-    GLdouble x1Plane[] = {-1.0, 0.0, 0.0, 0.0};
-    GLdouble y0Plane[] = {0.0, 1.0, 0.0, 0.0};
-    GLdouble y1Plane[] = {0.0, -1.0, 0.0, 0.0};
-
-    const RenderParams *rParams = GetActiveParams();
-    vector<double>      minExts, maxExts;
-    rParams->GetBox()->GetExtents(minExts, maxExts);
-    assert(minExts.size() == maxExts.size());
-    assert(minExts.size() > 0 && minExts.size() < 4);
-
-    for (int i = 0; i < minExts.size(); i++) {
-        float halo = (maxExts[i] - minExts[i]) * haloFrac;
-        minExts[i] -= halo;
-        maxExts[i] += halo;
-    }
-
-    x0Plane[3] = -minExts[0];
-    x1Plane[3] = maxExts[0];
-    glEnable(GL_CLIP_PLANE0);
-    glClipPlane(GL_CLIP_PLANE0, x0Plane);
-    glEnable(GL_CLIP_PLANE1);
-    glClipPlane(GL_CLIP_PLANE1, x1Plane);
-
-    y0Plane[3] = -minExts[1];
-    y1Plane[3] = maxExts[1];
-    glEnable(GL_CLIP_PLANE2);
-    glClipPlane(GL_CLIP_PLANE2, y0Plane);
-    glEnable(GL_CLIP_PLANE3);
-    glClipPlane(GL_CLIP_PLANE3, y1Plane);
 }
 
 void Renderer::DisableClippingPlanes()
