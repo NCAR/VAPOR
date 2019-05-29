@@ -106,8 +106,6 @@ int TwoDRenderer::_paintGL(bool) {
 		return(-1);
 	}
 
-	EnableClipToBox(_glManager->shaderManager->GetShader("2DData")); // TODO GL
-
 	if (! _gridAligned) {
 		assert(_structuredMesh);
 		assert(_meshWidth >= 2);
@@ -124,7 +122,6 @@ int TwoDRenderer::_paintGL(bool) {
 
 		_renderMeshAligned();
 	}
-	DisableClippingPlanes();
     
     GL_ERR_BREAK();
 
@@ -171,7 +168,8 @@ void TwoDRenderer::_renderMeshUnAligned() {
     shader->Bind();
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     shader->SetUniform("constantOpacity", opacity);
-
+    
+    EnableClipToBox(shader);
 	_openGLInit();
     
     int W = _meshWidth;
@@ -193,6 +191,7 @@ void TwoDRenderer::_renderMeshUnAligned() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	_openGLRestore();
+    DisableClippingPlanes();
 }
 
 void TwoDRenderer::_renderMeshAligned() {
@@ -206,6 +205,7 @@ void TwoDRenderer::_renderMeshAligned() {
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     shader->SetUniform("constantOpacity", opacity);
 
+    EnableClipToBox(shader);
 	_openGLInit();
 
 	// Ugh. For aligned data the type must be GLfloat.
@@ -248,6 +248,7 @@ void TwoDRenderer::_renderMeshAligned() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	_openGLRestore();
+    DisableClippingPlanes();
 }
 
 
