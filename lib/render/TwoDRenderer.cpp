@@ -199,18 +199,20 @@ void TwoDRenderer::_renderMeshUnAligned() {
 
     _openGLInit();
 
-    // Draw triangle strips one row at a time
-    //
+    int W = _meshWidth;
+    int H = _meshHeight;
+
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * _meshWidth * sizeof(float), _indices, GL_DYNAMIC_DRAW);
-    for (int j = 0; j < _meshHeight - 1; j++) {
-        glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-        glBufferData(GL_ARRAY_BUFFER, _meshWidth * 6 * sizeof(float), &_verts[j * _meshWidth * 3], GL_STREAM_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, _dataVBO);
-        glBufferData(GL_ARRAY_BUFFER, _meshWidth * 4 * sizeof(float), &_texCoords[j * _meshWidth * 2], GL_STREAM_DRAW);
-        glDrawElements(GL_TRIANGLE_STRIP, 2 * _meshWidth, GL_UNSIGNED_INT, 0);
-    }
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * W * sizeof(GLuint), _indices, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glBufferData(GL_ARRAY_BUFFER, H * W * 3 * sizeof(float), _verts, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, _dataVBO);
+    glBufferData(GL_ARRAY_BUFFER, H * W * 2 * sizeof(float), _texCoords, GL_DYNAMIC_DRAW);
+
+    for (int j = 0; j < H - 1; j++)
+        glDrawElementsBaseVertex(GL_TRIANGLE_STRIP, 2 * W, GL_UNSIGNED_INT, 0, j * W);
+
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
