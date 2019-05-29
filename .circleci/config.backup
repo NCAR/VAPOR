@@ -4,9 +4,6 @@ jobs:
     docker:
       - image: sgpearse/vapor3-ubuntu16:latest
 
-    branches:
-      only:
-        - circleCI
 
     steps:
       - checkout
@@ -18,6 +15,23 @@ jobs:
             cmake ..
             make
 
+  printTime:
+    docker:
+      - image: sgpearse/vapor3-ubuntu:latest
+
+    steps:
       - run:
-          name: Print the Current Time
-          command: date
+        name: Print the Current Time
+        command: date
+
+workflows:
+  version: 2
+  build_and_print:
+    jobs:
+      - build
+      - print:
+          requires:
+            - build
+          filters:
+            branches:
+              only: circleCI
