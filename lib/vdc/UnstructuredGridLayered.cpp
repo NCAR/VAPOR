@@ -150,7 +150,7 @@ void UnstructuredGridLayered::GetUserCoordinates(
 	size_t indices2d[] = {cIndices[0]};
 	_ug2d.GetUserCoordinates(indices2d, coords);
 
-	coords[2] = _zug.AccessIndex(cIndices);
+	coords[2] = _zug.GetValueAtIndex(cIndices);
 }
 
 void UnstructuredGridLayered::GetIndices(

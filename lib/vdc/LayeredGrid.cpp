@@ -110,8 +110,8 @@ void LayeredGrid::GetBoundingBox(
 	// varying dimension are stored as values of a scalar function
 	// sampling the coordinate space.
 	//
-	float mincoord = _rg.AccessIndex(cMin);
-	float maxcoord = _rg.AccessIndex(cMax);
+	float mincoord = _rg.GetValueAtIndex(cMin);
+	float maxcoord = _rg.GetValueAtIndex(cMax);
 
 	// Now find the extreme values of the varying dimension's coordinates
 	//
@@ -223,7 +223,7 @@ float LayeredGrid::GetValueNearestNeighbor (
 	vector <size_t> indices;
 	GetIndices(coords, indices);
 
-	return(AccessIndex(indices));
+	return(GetValueAtIndex(indices));
 }
 
 
@@ -403,7 +403,7 @@ void LayeredGrid::GetUserCoordinates(
 
 	// Now get coordinates of varying dimension
 	//
-	coords[2] = _rg.AccessIndex(cIndices);
+	coords[2] = _rg.GetValueAtIndex(cIndices);
 }
 
 void LayeredGrid::GetIndices(
