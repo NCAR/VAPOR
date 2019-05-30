@@ -62,7 +62,7 @@ protected:
     unsigned int _VBO = (int)NULL;
     unsigned int _VAOChunked = (int)NULL;
     unsigned int _VBOChunked = (int)NULL;
-    VolumeAlgorithm *_algorithm = NULL;
+    VolumeAlgorithm *_algorithm = nullptr;
     Texture1D _LUTTexture;
     Texture2D _depthTexture;
     Framebuffer _framebuffer;
