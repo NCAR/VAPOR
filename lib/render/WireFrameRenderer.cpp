@@ -236,12 +236,12 @@ int WireFrameRenderer::_buildCache() {
             if (coordDim == 3) {
                 coordsArray[3 * i + 2] = coord[2];
             } else if (heightGrid) {
-                coordsArray[3 * i + 2] = heightGrid->AccessIndex(&nodes[i * nodeDim]);
+                coordsArray[3 * i + 2] = heightGrid->GetValueAtIndex(&nodes[i * nodeDim]);
             } else {
                 coordsArray[3 * i + 2] = defaultZ;
             }
 
-            float dataValue = grid->AccessIndex(&nodes[i * nodeDim]);
+            float dataValue = grid->GetValueAtIndex(&nodes[i * nodeDim]);
             if (dataValue == mv) {
                 colorsArray[4 * i + 0] = 0.0;
                 colorsArray[4 * i + 1] = 0.0;

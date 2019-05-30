@@ -153,10 +153,10 @@ void UnstructuredGrid2D::GetUserCoordinates(
     size_t cIndices[1];
     ClampIndex(indices, cIndices);
 
-    coords[0] = _xug.AccessIndex(cIndices);
-    coords[1] = (_yug.AccessIndex(cIndices));
+    coords[0] = _xug.GetValueAtIndex(cIndices);
+    coords[1] = (_yug.GetValueAtIndex(cIndices));
     if (GetGeometryDim() == 3) {
-        coords[2] = _zug.AccessIndex(cIndices);
+        coords[2] = _zug.GetValueAtIndex(cIndices);
     }
 }
 
@@ -241,7 +241,7 @@ float UnstructuredGrid2D::GetValueNearestNeighbor(
     _kdtree->Nearest(cCoords, vertex_indices);
     assert(vertex_indices.size() == 1);
 
-    return (AccessIndex(vertex_indices));
+    return (GetValueAtIndex(vertex_indices));
 }
 
 float UnstructuredGrid2D::GetValueLinear(
