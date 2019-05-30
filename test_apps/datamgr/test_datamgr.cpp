@@ -202,7 +202,7 @@ void dump(const Grid *g)
 
     while (index != max) {
         g->GetUserCoordinates(index, coord);
-        float v = g->AccessIndex(index);
+        float v = g->GetValueAtIndex(index);
 
         for (int i = 0; i < dims.size(); i++) { cout << coord[i] << " "; }
         cout << v << endl;

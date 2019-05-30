@@ -106,7 +106,7 @@ void UnstructuredGridLayered::GetUserCoordinates(const size_t indices[], double 
     size_t indices2d[] = {cIndices[0]};
     _ug2d.GetUserCoordinates(indices2d, coords);
 
-    coords[2] = _zug.AccessIndex(cIndices);
+    coords[2] = _zug.GetValueAtIndex(cIndices);
 }
 
 void UnstructuredGridLayered::GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const

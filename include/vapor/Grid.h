@@ -148,8 +148,8 @@ public:
     //! size of \p indices must be equal to that of the \p dims vector
     //! returned by GetDimensions()
     //!
-    virtual float AccessIndex(const size_t indices[3]) const;
-    virtual float AccessIndex(const std::vector<size_t> &indices) const { return (AccessIndex(indices.data())); }
+    virtual float GetValueAtIndex(const size_t indices[3]) const;
+    virtual float GetValueAtIndex(const std::vector<size_t> &indices) const { return (GetValueAtIndex(indices.data())); }
 
     //! Set the data value at the indicated grid point
     //!
@@ -159,7 +159,7 @@ public:
     virtual void SetValue(const size_t indices[3], float value);
     virtual void SetValue(const std::vector<size_t> &indices, float value) { SetValue(indices.data(), value); }
 
-    //! This method provides an alternate interface to Grid::AccessIndex()
+    //! This method provides an alternate interface to Grid::GetValueAtIndex()
     //! If the dimensionality of the grid as determined by GetDimensions() is
     //! less than three subsequent parameters are ignored. Parameters
     //! that are outside of range are clamped to boundaries.
@@ -975,9 +975,9 @@ protected:
 
     virtual float GetValueLinear(const std::vector<double> &coords) const = 0;
 
-    virtual float *AccessIndex(const std::vector<float *> &blks, const size_t indices[3]) const;
+    virtual float *GetValueAtIndex(const std::vector<float *> &blks, const size_t indices[3]) const;
 
-    virtual float *AccessIndex(const std::vector<float *> &blks, const std::vector<size_t> &indices) const { return AccessIndex(blks, indices.data()); }
+    virtual float *GetValueAtIndex(const std::vector<float *> &blks, const std::vector<size_t> &indices) const { return GetValueAtIndex(blks, indices.data()); }
 
     virtual void ClampIndex(const std::vector<size_t> &dims, std::vector<size_t> &indices) const
     {

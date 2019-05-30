@@ -163,7 +163,7 @@ int ContourRenderer::_buildCache()
         for (int i = 0; i < numNodes; i++) {
             grid->GetUserCoordinates(&nodes[i * nodeDim], &coords[i * coordDim]);
             // values[i] = grid->GetValue(&coords[i*coordDim]);
-            values[i] = grid->AccessIndex(&nodes[i * nodeDim]);
+            values[i] = grid->GetValueAtIndex(&nodes[i * nodeDim]);
             if (values[i] == mv) { hasMissing = true; }
         }
         if (hasMissing) continue;
@@ -184,8 +184,8 @@ int ContourRenderer::_buildCache()
                 if (heightGrid) {
                     // float aHeight = heightGrid->GetValue(&coords[a*coordDim]);
                     // float bHeight = heightGrid->GetValue(&coords[b*coordDim]);
-                    float aHeight = heightGrid->AccessIndex(&nodes[a * nodeDim]);
-                    float bHeight = heightGrid->AccessIndex(&nodes[b * nodeDim]);
+                    float aHeight = heightGrid->GetValueAtIndex(&nodes[a * nodeDim]);
+                    float bHeight = heightGrid->GetValueAtIndex(&nodes[b * nodeDim]);
                     v[2] = aHeight + t * (bHeight - aHeight);
                 }
 
