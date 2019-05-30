@@ -90,7 +90,7 @@ SmartShaderProgram ShaderManager::GetSmartShader(const std::string &name) { retu
 int ShaderManager::LoadResourceByKey(const std::string &key)
 {
     //    printf("Begin Compile %s\n", key.c_str());
-    void *t = GLManager::BeginTimer();
+    //    void *t = GLManager::BeginTimer();
 
     if (HasResource(key)) {
         assert(!"Shader already loaded");

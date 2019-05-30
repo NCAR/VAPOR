@@ -609,13 +609,13 @@ void DCMPAS::_splitOnBoundary(string varname, int *connData) const
     ok = GetVarDimLens(lonCellVarName, true, lonCellDims);
     assert(ok && lonCellDims.size() == 1);
 
-    float *lonBuf1 = NULL;
+    // float *lonBuf1 = NULL;
     float *lonBuf2 = NULL;
     if (connDims[1] == lonVertexDims[0]) {
-        lonBuf1 = (float *)_lonVertexSmartBuf.GetBuf();
+        // lonBuf1 = (float *) _lonVertexSmartBuf.GetBuf();
         lonBuf2 = (float *)_lonCellSmartBuf.GetBuf();
     } else if (connDims[1] == lonCellDims[0]) {
-        lonBuf1 = (float *)_lonCellSmartBuf.GetBuf();
+        // lonBuf1 = (float *) _lonCellSmartBuf.GetBuf();
         lonBuf2 = (float *)_lonVertexSmartBuf.GetBuf();
     } else {
         assert(0);
