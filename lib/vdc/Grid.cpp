@@ -251,7 +251,7 @@ bool Grid::GetCellNodes(const std::vector<size_t> &cindices, std::vector<vector<
     nodes.clear();
 
     const vector<size_t> &ndims = GetNodeDimensions();
-    size_t                nodes_a[GetMaxVertexPerCell() * ndims.size()];
+    size_t *              nodes_a = (size_t *)alloca(sizeof(size_t) * GetMaxVertexPerCell() * ndims.size());
     int                   n = 0;
 
     bool ok = GetCellNodes(cindices.data(), nodes_a, n);
@@ -418,11 +418,11 @@ void Grid::ConstCellIteratorSG::next(const long &offset)
 
 bool Grid::ConstCellIteratorBoxSG::_cellInsideBox(const size_t cindices[]) const
 {
-    size_t maxNodes = _g->GetMaxVertexPerCell();
-    size_t nodeDim = _g->GetNodeDimensions().size();
-    size_t nodes[maxNodes * nodeDim];
-    size_t coordDim = _g->GetGeometryDim();
-    double coord[coordDim];
+    size_t  maxNodes = _g->GetMaxVertexPerCell();
+    size_t  nodeDim = _g->GetNodeDimensions().size();
+    size_t *nodes = (size_t *)alloca(sizeof(size_t) * maxNodes * nodeDim);
+    size_t  coordDim = _g->GetGeometryDim();
+    double *coord = (double *)alloca(sizeof(double) * coordDim);
 
     int  numNodes;
     bool status = _g->GetCellNodes(cindices, nodes, numNodes);
