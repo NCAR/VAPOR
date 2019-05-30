@@ -728,6 +728,7 @@ class VDF_API NetCDFCollection : public Wasp::MyBase {
         }
         bool GetTimeVarying() const { return (_time_varying); };
         bool GetMissingValue(string attname, double &mv) const;
+        void Sort();
 
         friend std::ostream &operator<<(std::ostream &o, const TimeVaryingVar &var);
 
