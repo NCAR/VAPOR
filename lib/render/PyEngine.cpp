@@ -130,9 +130,11 @@ void copy_coord(
 	// dimensions are less than grid dimensions than the coordinate
 
 	vector <size_t> index = min;
+	vector <double> coord;
 	for (size_t i=0; i < VProduct(Dims(min, max)); i++) {
 
-		dst[i] = g->GetUserCoordinate(index, axis);
+		g->GetUserCoordinates(index, coord);
+		dst[i] = coord[axis];
 
         index = IncrementCoords(min, max, index);
 	}
