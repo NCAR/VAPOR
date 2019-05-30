@@ -178,5 +178,4 @@ void CopyRegionWidget::Update(ParamsMgr *paramsMgr, RenderParams *rParams)
     _rParams = rParams;
 
     updateCopyCombo();
-    adjustSize();
 }
