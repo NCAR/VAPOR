@@ -200,5 +200,4 @@ void CopyRegionWidget::Update(ParamsMgr *paramsMgr,
 	_rParams = rParams;
 
 	updateCopyCombo();
-	adjustSize();
 }
