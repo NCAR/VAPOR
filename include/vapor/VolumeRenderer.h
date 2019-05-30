@@ -39,7 +39,7 @@ class RENDER_API VolumeRenderer : public Renderer {
     void _generateChunkedRenderMesh(const float chunks);
     bool _wasTooSlowForFastRender() const;
     void _computeNewFramebufferRatio();
-    bool _shouldUseChunkedRender() const;
+    bool _shouldUseChunkedRender(bool fast) const;
     virtual bool _usingColorMapData() const;
     void _saveOriginalViewport();
     void _restoreOriginalViewport();
@@ -70,6 +70,7 @@ class RENDER_API VolumeRenderer : public Renderer {
     int _originalViewport[4];
     int _framebufferSize[2];
     float _framebufferRatio;
+    float _previousFramebufferRatio;
 
     struct Cache {
         std::string var = "";
