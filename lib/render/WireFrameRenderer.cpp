@@ -218,10 +218,10 @@ int WireFrameRenderer::_buildCache() {
 
     size_t maxNodes = grid->GetMaxVertexPerCell();
     size_t nodeDim = grid->GetNodeDimensions().size();
-    size_t nodes[maxNodes * nodeDim];
+    size_t *nodes = (size_t *)alloca(sizeof(size_t) * maxNodes * nodeDim);
 
     size_t coordDim = grid->GetGeometryDim();
-    double coord[coordDim];
+    double *coord = (double *)alloca(sizeof(double) * coordDim);
 
     for (; it != end; ++it) {
         int numNodes;
