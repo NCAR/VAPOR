@@ -58,10 +58,10 @@ protected:
     virtual std::string _getDefaultAlgorithmForGrid(const Grid *grid) const;
     bool _needToSetDefaultAlgorithm() const;
     
-    unsigned int _VAO = NULL;
-    unsigned int _VBO = NULL;
-    unsigned int _VAOChunked = NULL;
-    unsigned int _VBOChunked = NULL;
+    unsigned int _VAO = (int)NULL;
+    unsigned int _VBO = (int)NULL;
+    unsigned int _VAOChunked = (int)NULL;
+    unsigned int _VBOChunked = (int)NULL;
     VolumeAlgorithm *_algorithm = NULL;
     Texture1D _LUTTexture;
     Texture2D _depthTexture;
