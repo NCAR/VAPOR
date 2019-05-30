@@ -51,11 +51,6 @@ public:
 
  virtual std::vector <size_t> GetCoordDimensions(size_t dim) const override;
 
- virtual float GetUserCoordinate(
-	std::vector <size_t> &index, size_t dim
- ) const override;
-
-
  virtual size_t GetGeometryDim() const override;
 
  static std::string GetClassType() {
@@ -77,12 +72,12 @@ public:
 	std::vector <size_t> &min, std::vector <size_t> &max
  ) const override;
 
- void GetUserCoordinates(
-	const std::vector <size_t> &indices,
-	std::vector <double> &coords
+ virtual void GetUserCoordinates(
+	const size_t indices[],
+	double coords[]
  ) const override;
   
-void GetIndices(
+ void GetIndices(
 	const std::vector <double> &coords,
 	std::vector <size_t> &indices
  ) const override;
