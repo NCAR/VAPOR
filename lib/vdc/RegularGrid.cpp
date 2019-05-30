@@ -66,26 +66,6 @@ vector<size_t> RegularGrid::GetCoordDimensions(size_t dim) const
     }
 }
 
-float RegularGrid::GetUserCoordinate(vector<size_t> &index, size_t dim) const
-{
-    if (dim == 0) {
-        ClampIndex(vector<size_t>(1, GetDimensions()[0]), index);
-        return (index[0] * _delta[0] + _minu[0]);
-    } else if (dim == 1) {
-        ClampIndex(vector<size_t>(1, GetDimensions()[1]), index);
-        return (index[0] * _delta[1] + _minu[1]);
-    } else if (dim == 2) {
-        if (GetDimensions().size() == 3) {
-            ClampIndex(vector<size_t>(1, GetDimensions()[2]), index);
-            return (index[0] * _delta[2] + _minu[2]);
-        } else {
-            return (0.0);
-        }
-    } else {
-        return (0.0);
-    }
-}
-
 float RegularGrid::GetValueNearestNeighbor(const std::vector<double> &coords) const
 {
     std::vector<double> cCoords = coords;
@@ -234,8 +214,8 @@ void RegularGrid::GetBoundingBox(const vector<size_t> &min, const vector<size_t>
 
     assert(cMin.size() == cMax.size());
 
-    RegularGrid::GetUserCoordinates(cMin, minu);
-    RegularGrid::GetUserCoordinates(cMax, maxu);
+    Grid::GetUserCoordinates(cMin, minu);
+    Grid::GetUserCoordinates(cMax, maxu);
 }
 
 void RegularGrid::GetEnclosingRegion(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const
@@ -265,21 +245,19 @@ void RegularGrid::GetEnclosingRegion(const std::vector<double> &minu, const std:
     }
 }
 
-void RegularGrid::GetUserCoordinates(const std::vector<size_t> &indices, std::vector<double> &coords) const
+void RegularGrid::GetUserCoordinates(const size_t indices[], double coords[]) const
 {
-    vector<size_t> cIndices = indices;
-    ClampIndex(cIndices);
-
-    coords.clear();
+    size_t cIndices[3];
+    ClampIndex(indices, cIndices);
 
     const vector<size_t> &dims = GetDimensions();
 
-    for (int i = 0; i < cIndices.size(); i++) {
+    for (int i = 0; i < dims.size(); i++) {
         size_t index = cIndices[i];
 
         if (index >= dims[i]) { index = dims[i] - 1; }
 
-        coords.push_back(cIndices[i] * _delta[i] + _minu[i]);
+        coords[i] = cIndices[i] * _delta[i] + _minu[i];
     }
 }
 

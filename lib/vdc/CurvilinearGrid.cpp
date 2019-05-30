@@ -96,24 +96,6 @@ vector<size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const
     }
 }
 
-float CurvilinearGrid::GetUserCoordinate(std::vector<size_t> &index, size_t dim) const
-{
-    if (dim == 0) {
-        return (_xrg.AccessIndex(index));
-    } else if (dim == 1) {
-        return (_yrg.AccessIndex(index));
-    } else if (dim == 2) {
-        if (_terrainFollowing) {
-            return (_zrg.AccessIndex(index));
-        } else {
-            ClampIndex(vector<size_t>(1, _zcoords.size()), index);
-            return (_zcoords[index[0]]);
-        }
-    } else {
-        return (0.0);
-    }
-}
-
 void CurvilinearGrid::GetBoundingBox(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<double> &minu, std::vector<double> &maxu) const
 {
     vector<size_t> cMin = min;
@@ -308,22 +290,20 @@ void CurvilinearGrid::GetEnclosingRegion(const std::vector<double> &minu, const 
     _getEnclosingRegionHelper(cMinu, cMaxu, min, max);
 }
 
-void CurvilinearGrid::GetUserCoordinates(const std::vector<size_t> &indices, std::vector<double> &coords) const
+void CurvilinearGrid::GetUserCoordinates(const size_t indices[], double coords[]) const
 {
     size_t cIndices[3];
     ClampIndex(indices, cIndices);
 
-    coords.clear();
-
-    coords.push_back(_xrg.AccessIJK(cIndices[0], cIndices[1]));
-    coords.push_back(_yrg.AccessIJK(cIndices[0], cIndices[1]));
+    coords[0] = _xrg.AccessIJK(cIndices[0], cIndices[1]);
+    coords[1] = _yrg.AccessIJK(cIndices[0], cIndices[1]);
 
     if (GetGeometryDim() < 3) return;
 
     if (_terrainFollowing) {
-        coords.push_back(_zrg.AccessIJK(cIndices[0], cIndices[1], cIndices[2]));
+        coords[2] = _zrg.AccessIJK(cIndices[0], cIndices[1], cIndices[2]);
     } else {
-        coords.push_back(_zcoords[cIndices[2]]);
+        coords[2] = _zcoords[cIndices[2]];
     }
 }
 

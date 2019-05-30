@@ -417,15 +417,17 @@ int TwoDDataRenderer::_getMeshUnStructured(DataMgr *dataMgr, const Grid *g, doub
 
     // Count the number of triangle vertex indices needed
     //
+    size_t maxVertexPerCell = g->GetMaxVertexPerCell();
     _nindices = 0;
     Grid::ConstCellIterator citr;
     Grid::ConstCellIterator endcitr = g->ConstCellEnd();
     for (citr = g->ConstCellBegin(); citr != endcitr; ++citr) {
-        std::vector<std::vector<size_t>> nodes;
-        g->GetCellNodes(*citr, nodes);
+        size_t nodes[maxVertexPerCell];
+        int    numNodes;
+        g->GetCellNodes((*citr).data(), nodes, numNodes);
 
-        if (nodes.size() < 3) continue;    // degenerate
-        _nindices += 3 * (nodes.size() - 2);
+        if (numNodes < 3) continue;    // degenerate
+        _nindices += 3 * (numNodes - 2);
     }
 
     // (Re)allocate space for verts
@@ -517,22 +519,27 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g
     // and compute an index
     // array for the triangle list
     //
+    size_t                  maxVertexPerCell = g->GetMaxVertexPerCell();
     Grid::ConstCellIterator citr;
     Grid::ConstCellIterator endcitr = g->ConstCellEnd();
     size_t                  index = 0;
     for (citr = g->ConstCellBegin(); citr != endcitr; ++citr) {
-        std::vector<std::vector<size_t>> nodes;
-        g->GetCellNodes(*citr, nodes);
+        size_t nodes[maxVertexPerCell];
+        int    numNodes;
+        g->GetCellNodes((*citr).data(), nodes, numNodes);
 
-        if (nodes.size() < 3) continue;    // degenerate
+        if (numNodes < 3) continue;    // degenerate
 
         // Compute triangle node indices, with common vertex at
         // nodes[0]
         //
-        for (int i = 0; i < nodes.size() - 2; i++) {
-            indices[index++] = LinearizeCoords(nodes[0], dims);
-            indices[index++] = LinearizeCoords(nodes[i + 1], dims);
-            indices[index++] = LinearizeCoords(nodes[i + 2], dims);
+        for (int i = 0; i < numNodes - 2; i++) {
+            // indices[index++] = LinearizeCoords(nodes[0], dims);
+            // indices[index++] = LinearizeCoords(nodes[i+1], dims);
+            // indices[index++] = LinearizeCoords(nodes[i+2], dims);
+            indices[index++] = nodes[0];
+            indices[index++] = nodes[i + 1];
+            indices[index++] = nodes[i + 2];
         }
     }
 

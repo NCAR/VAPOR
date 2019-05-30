@@ -37,8 +37,6 @@ public:
 
     virtual std::vector<size_t> GetCoordDimensions(size_t dim) const override { return (std::vector<size_t>(1, 1)); }
 
-    virtual float GetUserCoordinate(std::vector<size_t> &index, size_t dim) const override { return (0.0); }
-
     static std::string GetClassType() { return ("UnstructuredCoordless"); }
     std::string        GetType() const override { return (GetClassType()); }
 
@@ -60,7 +58,7 @@ public:
         max.clear();
     }
 
-    void GetUserCoordinates(const std::vector<size_t> &, std::vector<double> &coords) const override { coords.clear(); }
+    virtual void GetUserCoordinates(const size_t indices[], double coords[]) const override {}
 
     void GetIndices(const std::vector<double> &, std::vector<size_t> &indices) const override
     {

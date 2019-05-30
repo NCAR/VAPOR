@@ -50,21 +50,21 @@ Grid::Grid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const
     _blks = blks;
 }
 
-float Grid::AccessIndex(const size_t indices[3]) const
+float Grid::GetValueAtIndex(const size_t indices[3]) const
 {
-    float *fptr = AccessIndex(_blks, indices);
+    float *fptr = GetValueAtIndex(_blks, indices);
     if (!fptr) return (GetMissingValue());
     return (*fptr);
 }
 
 void Grid::SetValue(const size_t indices[3], float v)
 {
-    float *fptr = AccessIndex(_blks, indices);
+    float *fptr = GetValueAtIndex(_blks, indices);
     if (!fptr) return;
     *fptr = v;
 }
 
-float *Grid::AccessIndex(const std::vector<float *> &blks, const size_t indices[3]) const
+float *Grid::GetValueAtIndex(const std::vector<float *> &blks, const size_t indices[3]) const
 {
     size_t cIndices[3];
     ClampIndex(indices, cIndices);
@@ -96,7 +96,7 @@ float *Grid::AccessIndex(const std::vector<float *> &blks, const size_t indices[
 float Grid::AccessIJK(size_t i, size_t j, size_t k) const
 {
     size_t indices[] = {i, j, k};
-    return (AccessIndex(indices));
+    return (GetValueAtIndex(indices));
 }
 
 void Grid::SetValueIJK(size_t i, size_t j, size_t k, float v)
@@ -195,6 +195,17 @@ float Grid::GetValue(const std::vector<double> &coords) const
     }
 }
 
+void Grid::GetUserCoordinates(const std::vector<size_t> &indices, std::vector<double> &coords) const
+{
+    coords.clear();
+
+    double coordsArray[3];
+    GetUserCoordinates(indices.data(), coordsArray);
+
+    coords.resize(GetGeometryDim());
+    for (int i = 0; i < GetGeometryDim(); i++) { coords[i] = coordsArray[i]; }
+}
+
 void Grid::_getUserCoordinatesHelper(const vector<double> &coords, double &x, double &y, double &z) const
 {
     if (coords.size() >= 1) { x = coords[0]; }
@@ -233,6 +244,26 @@ void Grid::SetInterpolationOrder(int order)
 {
     if (order < 0 || order > 2) order = 1;
     _interpolationOrder = order;
+}
+
+bool Grid::GetCellNodes(const std::vector<size_t> &cindices, std::vector<vector<size_t>> &nodes) const
+{
+    nodes.clear();
+
+    const vector<size_t> &ndims = GetNodeDimensions();
+    size_t                nodes_a[GetMaxVertexPerCell() * ndims.size()];
+    int                   n = 0;
+
+    bool ok = GetCellNodes(cindices.data(), nodes_a, n);
+    if (!ok) return (ok);
+
+    nodes.resize(n);
+    vector<size_t> indices(ndims.size(), 0);
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < ndims.size(); i++) { indices[i] = nodes_a[j * ndims.size() + i]; }
+        nodes[j] = indices;
+    }
+    return (true);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -385,16 +416,21 @@ void Grid::ConstCellIteratorSG::next(const long &offset)
     _index = Wasp::VectorizeCoords(newIndexL, _dims);
 }
 
-bool Grid::ConstCellIteratorBoxSG::_cellInsideBox(const std::vector<size_t> &cindices) const
+bool Grid::ConstCellIteratorBoxSG::_cellInsideBox(const size_t cindices[]) const
 {
-    vector<std::vector<size_t>> nodes;
-    bool                        status = _g->GetCellNodes(cindices, nodes);
+    size_t maxNodes = _g->GetMaxVertexPerCell();
+    size_t nodeDim = _g->GetNodeDimensions().size();
+    size_t nodes[maxNodes * nodeDim];
+    size_t coordDim = _g->GetGeometryDim();
+    double coord[coordDim];
+
+    int  numNodes;
+    bool status = _g->GetCellNodes(cindices, nodes, numNodes);
     if (!status) return (false);
 
-    for (int i = 0; i < nodes.size(); i++) {
-        vector<double> coords;
-        _g->GetUserCoordinates(nodes[i], coords);
-        if (!_pred(coords)) return (false);
+    for (int i = 0; i < numNodes; i++) {
+        _g->GetUserCoordinates(&nodes[i * nodeDim], coord);
+        if (!_pred(coord)) return (false);
     }
 
     return (true);
@@ -413,7 +449,7 @@ Grid::ConstCellIteratorBoxSG::ConstCellIteratorBoxSG(const Grid *g, const std::v
 
     // Advance to first node inside box
     //
-    if (!_cellInsideBox(_index)) { next(); }
+    if (!_cellInsideBox(_index.data())) { next(); }
 #endif
 }
 
@@ -437,7 +473,7 @@ void Grid::ConstCellIteratorBoxSG::next()
 #else
     do {
         ConstCellIteratorSG::next();
-    } while (!_cellInsideBox(_index) && _index != _lastIndex);
+    } while (!_cellInsideBox(_index.data()) && _index != _lastIndex);
 #endif
 }
 
@@ -453,7 +489,7 @@ void Grid::ConstCellIteratorBoxSG::next(const long &offset)
 #else
 
     long count = offset;
-    while (!_cellInsideBox(_index) && _index != _lastIndex && count > 0) {
+    while (!_cellInsideBox(_index.data()) && _index != _lastIndex && count > 0) {
         ConstCellIteratorSG::next();
         count--;
     }

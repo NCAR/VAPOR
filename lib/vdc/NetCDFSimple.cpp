@@ -12,7 +12,6 @@ NetCDFSimple::NetCDFSimple()
     _ncid = -1;
     _ovr_table.clear();
     _path = "";    // so _path.c_str() returns an empty string
-    _chsz = 4 * 1024 * 1024;
     _dimnames.clear();
     _dims.clear();
     _unlimited_dimnames.clear();
@@ -44,11 +43,10 @@ int NetCDFSimple::Initialize(string path)
     _variables.clear();
     _path = path;
 
-    size_t chsz = _chsz;
-    int    ncid;
-    int    rc = nc__open(path.c_str(), NC_NOWRITE, &chsz, &ncid);
+    int ncid;
+    int rc = nc_open(path.c_str(), NC_NOWRITE, &ncid);
     if (rc != 0) {
-        SetErrMsg("nc__open(%s,) : %s", path.c_str(), nc_strerror(rc));
+        SetErrMsg("nc_open(%s,) : %s", path.c_str(), nc_strerror(rc));
         return (-1);
     }
 
@@ -146,11 +144,10 @@ int NetCDFSimple::OpenRead(const NetCDFSimple::Variable &variable)
     // If _ncid is not valid open the NetCDF file
     //
     if (_ncid == -1) {
-        size_t chsz = _chsz;
-        int    ncid;
-        int    rc = nc__open(_path.c_str(), NC_NOWRITE, &chsz, &ncid);
+        int ncid;
+        int rc = nc_open(_path.c_str(), NC_NOWRITE, &ncid);
         if (rc != 0) {
-            SetErrMsg("nc__open(%s,) : %s", _path.c_str(), nc_strerror(rc));
+            SetErrMsg("nc_open(%s,) : %s", _path.c_str(), nc_strerror(rc));
             return (-1);
         }
         _ncid = ncid;

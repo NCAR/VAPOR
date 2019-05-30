@@ -59,26 +59,6 @@ vector<size_t> StretchedGrid::GetCoordDimensions(size_t dim) const
     }
 }
 
-float StretchedGrid::GetUserCoordinate(vector<size_t> &index, size_t dim) const
-{
-    if (dim == 0) {
-        ClampIndex(vector<size_t>(1, GetDimensions()[0]), index);
-        return (_xcoords[index[0]]);
-    } else if (dim == 1) {
-        ClampIndex(vector<size_t>(1, GetDimensions()[1]), index);
-        return (_ycoords[index[0]]);
-    } else if (dim == 2) {
-        if (GetDimensions().size() == 3) {
-            ClampIndex(vector<size_t>(1, GetDimensions()[2]), index);
-            return (_zcoords[index[0]]);
-        } else {
-            return (0.0);
-        }
-    } else {
-        return (0.0);
-    }
-}
-
 void StretchedGrid::GetBoundingBox(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<double> &minu, std::vector<double> &maxu) const
 {
     vector<size_t> cMin = min;
@@ -189,19 +169,17 @@ void StretchedGrid::GetEnclosingRegion(const std::vector<double> &minu, const st
     max[2] = kmax;
 }
 
-void StretchedGrid::GetUserCoordinates(const std::vector<size_t> &indices, std::vector<double> &coords) const
+void StretchedGrid::GetUserCoordinates(const size_t indices[], double coords[]) const
 {
-    vector<size_t> cIndices = indices;
-    ClampIndex(cIndices);
-
-    coords.clear();
+    size_t cIndices[3];
+    ClampIndex(indices, cIndices);
 
     vector<size_t> dims = StructuredGrid::GetDimensions();
 
-    coords.push_back(_xcoords[cIndices[0]]);
-    coords.push_back(_ycoords[cIndices[1]]);
+    coords[0] = _xcoords[cIndices[0]];
+    coords[1] = _ycoords[cIndices[1]];
 
-    if (GetGeometryDim() > 2) { coords.push_back(_zcoords[cIndices[2]]); }
+    if (GetGeometryDim() > 2) { coords[2] = _zcoords[cIndices[2]]; }
 }
 
 void StretchedGrid::GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const
