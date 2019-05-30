@@ -184,12 +184,12 @@ int WireFrameRenderer::_buildCache()
 
     float defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
 
-    size_t maxNodes = grid->GetMaxVertexPerCell();
-    size_t nodeDim = grid->GetNodeDimensions().size();
-    size_t nodes[maxNodes * nodeDim];
+    size_t  maxNodes = grid->GetMaxVertexPerCell();
+    size_t  nodeDim = grid->GetNodeDimensions().size();
+    size_t *nodes = (size_t *)alloca(sizeof(size_t) * maxNodes * nodeDim);
 
-    size_t coordDim = grid->GetGeometryDim();
-    double coord[coordDim];
+    size_t  coordDim = grid->GetGeometryDim();
+    double *coord = (double *)alloca(sizeof(double) * coordDim);
 
     for (; it != end; ++it) {
         int numNodes;

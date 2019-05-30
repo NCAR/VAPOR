@@ -144,14 +144,14 @@ int ContourRenderer::_buildCache()
 
     Grid::ConstCellIterator it = grid->ConstCellBegin(_cacheParams.boxMin, _cacheParams.boxMax);
 
-    size_t maxNodes = grid->GetMaxVertexPerCell();
-    size_t nodeDim = grid->GetNodeDimensions().size();
-    size_t nodes[maxNodes * nodeDim];
+    size_t  maxNodes = grid->GetMaxVertexPerCell();
+    size_t  nodeDim = grid->GetNodeDimensions().size();
+    size_t *nodes = (size_t *)alloca(sizeof(size_t) * maxNodes * nodeDim);
 
     size_t coordDim = grid->GetGeometryDim();
 
-    float  values[maxNodes];
-    double coords[maxNodes * coordDim];
+    float * values = (float *)alloca(sizeof(float) * maxNodes);
+    double *coords = (double *)alloca(sizeof(double) * maxNodes * coordDim);
 
     Grid::ConstCellIterator end = grid->ConstCellEnd();
     for (; it != end; ++it) {
