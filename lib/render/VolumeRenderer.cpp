@@ -37,6 +37,7 @@ VolumeRenderer::VolumeRenderer(const ParamsMgr *pm, std::string &winName, std::s
     _lastRenderTime = 10000;
     _lastRenderWasFast = false;
     _framebufferRatio = 1;
+    _previousFramebufferRatio = 1;
 
     if (_needToSetDefaultAlgorithm()) {
         VolumeParams *vp = (VolumeParams *)GetActiveParams();
@@ -123,7 +124,7 @@ int VolumeRenderer::_paintGL(bool fast)
     glDepthFunc(GL_ALWAYS);
 
     void *start = GLManager::BeginTimer();
-    if (_shouldUseChunkedRender())
+    if (_shouldUseChunkedRender(fast))
         _drawScreenQuadChuncked();
     else
         _drawScreenQuad();
@@ -269,7 +270,21 @@ void VolumeRenderer::_computeNewFramebufferRatio()
     }
 }
 
-bool VolumeRenderer::_shouldUseChunkedRender() const { return _algorithm && _algorithm->RequiresChunkedRendering(); }
+bool VolumeRenderer::_shouldUseChunkedRender(bool fast) const
+{
+    if (_algorithm) {
+        if (_algorithm->RequiresChunkedRendering()) return true;
+
+        float estimatedTime = _lastRenderTime;
+        if (_lastRenderWasFast && !fast) {
+            estimatedTime *= powf(_previousFramebufferRatio, 2);
+            estimatedTime *= _algorithm->GuestimateFastModeSpeedupFactor();
+        }
+
+        if (estimatedTime > 4.0f) return true;
+    }
+    return false;
+}
 
 bool VolumeRenderer::_usingColorMapData() const { return false; }
 
@@ -279,6 +294,8 @@ void VolumeRenderer::_restoreOriginalViewport() { glViewport(_originalViewport[0
 
 void VolumeRenderer::_initializeFramebuffer(bool fast)
 {
+    _previousFramebufferRatio = _framebufferRatio;
+
     if (fast)
         _computeNewFramebufferRatio();
     else
