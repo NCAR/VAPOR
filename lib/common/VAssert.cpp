@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <string.h>
 #include <vapor/FileUtils.h>
 
 void Wasp::_VAssertFailed(const char *expr, const char *path, const unsigned int line) {
