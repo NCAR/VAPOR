@@ -47,11 +47,11 @@ UnstructuredGridLayered::UnstructuredGridLayered(
                                   UnstructuredGridCoordless(), kdtree),
                               _zug(zug) {
 
-    assert(xug.GetDimensions().size() == 1);
-    assert(yug.GetDimensions().size() == 1);
-    assert(zug.GetDimensions().size() == 2);
+    VAssert(xug.GetDimensions().size() == 1);
+    VAssert(yug.GetDimensions().size() == 1);
+    VAssert(zug.GetDimensions().size() == 2);
 
-    assert(location == NODE);
+    VAssert(location == NODE);
 }
 
 vector<size_t> UnstructuredGridLayered::GetCoordDimensions(size_t dim) const {
@@ -120,7 +120,7 @@ void UnstructuredGridLayered::GetEnclosingRegion(
     vector<double> cMaxu = maxu;
     ClampCoord(cMaxu);
 
-    assert(0 && "Not implemented");
+    VAssert(0 && "Not implemented");
 }
 
 void UnstructuredGridLayered::GetUserCoordinates(
@@ -176,7 +176,7 @@ bool UnstructuredGridLayered::_insideGrid(
     std::vector<size_t> &nodes2D,
     std::vector<double> &lambda,
     float zwgt[2]) const {
-    assert(_location == NODE);
+    VAssert(_location == NODE);
 
     cindices.clear();
     nodes2D.clear();
@@ -195,7 +195,7 @@ bool UnstructuredGridLayered::_insideGrid(
     if (!status)
         return (status);
 
-    assert(lambda.size() == nodes.size());
+    VAssert(lambda.size() == nodes.size());
     for (int i = 0; i < nodes.size(); i++) {
         nodes2D.push_back(nodes[i][0]);
     }
@@ -220,7 +220,7 @@ bool UnstructuredGridLayered::_insideGrid(
     if (rc != 0)
         return (false);
 
-    assert(k >= 0 && k < nz);
+    VAssert(k >= 0 && k < nz);
     cindices.push_back(k);
 
     float z = cCoords[2];
@@ -378,7 +378,7 @@ void UnstructuredGridLayered::ConstCoordItrULayered::next() {
 }
 
 void UnstructuredGridLayered::ConstCoordItrULayered::next(const long &offset) {
-    assert(offset >= 0);
+    VAssert(offset >= 0);
 
     long offset2D = offset % _nElements2D;
 

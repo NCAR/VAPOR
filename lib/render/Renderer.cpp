@@ -117,7 +117,7 @@ double Renderer::_getDefaultZ(
     vector<double> maxExts;
 
     bool status = DataMgrUtils::GetExtents(dataMgr, ts, "", minExts, maxExts);
-    assert(status);
+    VAssert(status);
 
     return (minExts.size() == 3 ? minExts[2] : 0.0);
 }
@@ -135,10 +135,10 @@ int Renderer::paintGL(bool fast) {
     vector<double> rotate = rParams->GetTransform()->GetRotations();
     vector<double> scale = rParams->GetTransform()->GetScales();
     vector<double> origin = rParams->GetTransform()->GetOrigin();
-    assert(translate.size() == 3);
-    assert(rotate.size() == 3);
-    assert(scale.size() == 3);
-    assert(origin.size() == 3);
+    VAssert(translate.size() == 3);
+    VAssert(rotate.size() == 3);
+    VAssert(scale.size() == 3);
+    VAssert(origin.size() == 3);
 
     Transform *datasetTransform = _paramsMgr->GetViewpointParams(_winName)->GetTransform(_dataSetName);
     vector<double> datasetScales = datasetTransform->GetScales();
@@ -177,7 +177,7 @@ int Renderer::paintGL(bool fast) {
 
 void Renderer::EnableClipToBox(ShaderProgram *shader, float haloFrac) const {
     shader->Bind();
-    assert(shader->HasUniform("clippingPlanes"));
+    VAssert(shader->HasUniform("clippingPlanes"));
 
     float x0Plane[] = {1.0, 0.0, 0.0, 0.0};
     float x1Plane[] = {-1.0, 0.0, 0.0, 0.0};
@@ -189,8 +189,8 @@ void Renderer::EnableClipToBox(ShaderProgram *shader, float haloFrac) const {
     const RenderParams *rParams = GetActiveParams();
     vector<double> minExts, maxExts;
     rParams->GetBox()->GetExtents(minExts, maxExts);
-    assert(minExts.size() == maxExts.size());
-    assert(minExts.size() > 0 && minExts.size() < 4);
+    VAssert(minExts.size() == maxExts.size());
+    VAssert(minExts.size() > 0 && minExts.size() < 4);
 
     int orientation = rParams->GetBox()->GetOrientation();
 
@@ -695,8 +695,8 @@ void Renderer::GetClippingPlanes(float planes[24]) const {
     const RenderParams *rParams = GetActiveParams();
     std::vector<double> minExts, maxExts;
     rParams->GetBox()->GetExtents(minExts, maxExts);
-    assert(minExts.size() == maxExts.size());
-    assert(minExts.size() > 0 && minExts.size() < 4);
+    VAssert(minExts.size() == maxExts.size());
+    VAssert(minExts.size() > 0 && minExts.size() < 4);
 
     int orientation = rParams->GetBox()->GetOrientation();
 

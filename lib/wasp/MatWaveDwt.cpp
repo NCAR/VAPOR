@@ -291,7 +291,7 @@ void forward_xform(
     const double *sigIn, size_t sigInLen,
     const double *low_filter, const double *high_filter,
     int filterLen, double *cA, double *cD, bool oddlow, bool oddhigh) {
-    //	assert(sigInLen > filterLen);
+    //	VAssert(sigInLen > filterLen);
 
     size_t xlstart = oddlow ? 1 : 0;
     size_t xl;
@@ -324,7 +324,7 @@ void inverse_xform_even(
     size_t xi; // input and out signal indecies
     int k;     // filter index
 
-    assert((filterLen % 2) == 0);
+    VAssert((filterLen % 2) == 0);
 
     for (size_t yi = 0; yi < sigOutLen; yi++) {
         sigOut[yi] = 0.0;
@@ -369,7 +369,7 @@ void inverse_xform_odd(
     size_t xi; // input and out signal indecies
     int k;     // filter index
 
-    assert((filterLen % 2) == 1);
+    VAssert((filterLen % 2) == 1);
 
     for (size_t yi = 0; yi < sigOutLen; yi++) {
         sigOut[yi] = 0.0;
@@ -572,7 +572,7 @@ int dwt_template(
             cAdbl, cDdbl, oddlow, oddhigh);
     } else {
         const WaveFiltInt *wfi = dynamic_cast<const WaveFiltInt *>(wf);
-        assert(wfi != NULL);
+        VAssert(wfi != NULL);
 
         const long *s = (const long *)sigExtended;
         long *cAlong = (long *)sigConvolved;
@@ -826,7 +826,7 @@ int idwt_template(
             wf->GetHighReconFilCoef(), filterLen, s, !do_sym_conv);
     } else {
         const WaveFiltInt *wfi = dynamic_cast<const WaveFiltInt *>(wf);
-        assert(wfi != NULL);
+        VAssert(wfi != NULL);
 
         const long *cAlong = (const long *)cATemp;
         const long *cDlong = (const long *)cDTemp;

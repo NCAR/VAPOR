@@ -61,7 +61,7 @@ bool fexists(string filename) {
 
 bool apiFileExists() {
     QString qhome = QDir::homePath();
-    assert(!qhome.isEmpty()); // Qt API guarantees an absolute home path
+    VAssert(!qhome.isEmpty()); // Qt API guarantees an absolute home path
 
     qhome = QDir::toNativeSeparators(qhome);
 

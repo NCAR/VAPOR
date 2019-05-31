@@ -33,14 +33,14 @@
 using namespace VAPoR;
 
 RenderParams *RenderEventRouter::GetActiveParams() const {
-    assert(!_instName.empty());
+    VAssert(!_instName.empty());
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
     string winName, dataSetName, paramsType;
     bool status = paramsMgr->RenderParamsLookup(
         _instName, winName, dataSetName, paramsType);
-    assert(status);
+    VAssert(status);
 
     string renderType = RendererFactory::Instance()->GetRenderClassFromParamsClass(paramsType);
 
@@ -49,7 +49,7 @@ RenderParams *RenderEventRouter::GetActiveParams() const {
 }
 
 DataMgr *RenderEventRouter::GetActiveDataMgr() const {
-    assert(!_instName.empty());
+    VAssert(!_instName.empty());
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 
@@ -57,11 +57,11 @@ DataMgr *RenderEventRouter::GetActiveDataMgr() const {
 
     bool status = paramsMgr->RenderParamsLookup(
         _instName, winName, dataSetName, paramsType);
-    assert(status);
+    VAssert(status);
 
     DataStatus *dataStatus = _controlExec->GetDataStatus();
     DataMgr *dataMgr = dataStatus->GetDataMgr(dataSetName);
-    assert(dataMgr);
+    VAssert(dataMgr);
 
     return (dataMgr);
 }

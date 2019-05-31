@@ -23,7 +23,7 @@ StructuredGrid::StructuredGrid(
     const vector<size_t> &bs,
     const vector<float *> &blks) : Grid(dims, bs, blks, dims.size()) {
 
-    assert(bs.size() == 2 || bs.size() == 3);
+    VAssert(bs.size() == 2 || bs.size() == 3);
 
     _cellDims = Grid::GetDimensions();
     for (int i = 0; i < _cellDims.size(); i++) {
@@ -110,7 +110,7 @@ bool StructuredGrid::GetCellNeighbors(
 
     const vector<size_t> &dims = GetDimensions();
 
-    assert((dims.size() == 2) && "3D cells not yet supported");
+    VAssert((dims.size() == 2) && "3D cells not yet supported");
 
     // Cells have the same ID's as their first node
     //
@@ -148,9 +148,9 @@ bool StructuredGrid::GetNodeCells(
     cells.clear();
 
     vector<size_t> dims = GetDimensions();
-    assert(indices.size() == dims.size());
+    VAssert(indices.size() == dims.size());
 
-    assert((dims.size() == 2) && "3D cells not yet supported");
+    VAssert((dims.size() == 2) && "3D cells not yet supported");
 
     // Check if invalid indices
     //
@@ -186,7 +186,7 @@ bool StructuredGrid::GetNodeCells(
 }
 
 void StructuredGrid::ClampCoord(std::vector<double> &coords) const {
-    assert(coords.size() >= GetGeometryDim());
+    VAssert(coords.size() >= GetGeometryDim());
 
     while (coords.size() > GetGeometryDim()) {
         coords.pop_back();

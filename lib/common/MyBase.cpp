@@ -85,7 +85,7 @@ void MyBase::_SetErrMsg(
     //#endif
     if (!*msgbuf) {
         *msgbuf = new char[alloc_size];
-        assert(*msgbuf != NULL);
+        VAssert(*msgbuf != NULL);
         *msgbufsz = alloc_size;
     }
 
@@ -118,7 +118,7 @@ void MyBase::_SetErrMsg(
             if (*msgbuf)
                 delete[] * msgbuf;
             *msgbuf = new char[*msgbufsz + alloc_size];
-            assert(*msgbuf != NULL);
+            VAssert(*msgbuf != NULL);
             *msgbufsz += alloc_size;
         }
     }

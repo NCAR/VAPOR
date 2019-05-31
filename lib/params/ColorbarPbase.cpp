@@ -201,7 +201,7 @@ vector<double> ColorbarPbase::GetBackgroundColor() const {
 //! Set the background color as an rgb triple
 //! \param[in] color = (r,g,b)
 void ColorbarPbase::SetBackgroundColor(vector<double> color) {
-    assert(color.size() == 3);
+    VAssert(color.size() == 3);
     for (int i = 0; i < color.size(); i++) {
         if (color[i] < 0.0)
             color[i] = 0.0;

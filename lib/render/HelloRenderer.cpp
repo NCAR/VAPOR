@@ -79,8 +79,8 @@ int HelloRenderer::_paintGL(bool) {
     //Get the end points from the Params:
     vector<double> point1 = rParams->GetPoint1();
     vector<double> point2 = rParams->GetPoint2();
-    assert(point1.size() == point2.size());
-    assert(point1.size() >= 2 && point1.size() <= 3);
+    VAssert(point1.size() == point2.size());
+    VAssert(point1.size() >= 2 && point1.size() <= 3);
 
     cout << "helloParams point: " << endl;
     cout << "point1: " << point1[0] << " " << point1[1] << " " << point1[2] << endl;

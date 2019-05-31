@@ -432,7 +432,7 @@ int NetCDFCFCollection::GetVarCoordVarNames(
             break;
         }
     }
-    assert(cvars.size() == tmpcvars.size());
+    VAssert(cvars.size() == tmpcvars.size());
 
     return (0);
 }
@@ -2386,7 +2386,7 @@ int NetCDFCFCollection::DerivedVarTime::Open(size_t ts) {
     if (rc < 0)
         return (-1);
 
-    assert(timesvec.size() == _timedim);
+    VAssert(timesvec.size() == _timedim);
     for (int i = 0; i < timesvec.size(); i++) {
         _timecoords[i] = timesvec[i];
     }
@@ -2436,7 +2436,7 @@ NetCDFCFCollection::DerivedVar_vertStag::DerivedVar_vertStag(
     _fd = -1;
 
     _dims = _ncdfc->GetSpatialDims(unstagVar);
-    assert(_dims.size() == 3);
+    VAssert(_dims.size() == 3);
     _dims[0] += 1;
 
     _dimnames = _ncdfc->GetSpatialDimNames(unstagVar);
@@ -2536,6 +2536,6 @@ int NetCDFCFCollection::DerivedVar_vertStag::ReadSlice(
 
 int NetCDFCFCollection::DerivedVar_vertStag::SeekSlice(
     int offset, int whence, int) {
-    assert(0 && "Not implemented");
+    VAssert(0 && "Not implemented");
     return (0);
 }

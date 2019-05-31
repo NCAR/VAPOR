@@ -136,7 +136,7 @@ void AnnotationParams::_getColor(vector<double> &color, string tag) const {
 }
 
 void AnnotationParams::m_setColor(vector<double> color, string tag, string msg) {
-    assert(color.size() == 3);
+    VAssert(color.size() == 3);
     for (int i = 0; i < color.size(); i++) {
         if (color[i] < 0.0)
             color[i] = 0.0;
@@ -199,7 +199,7 @@ bool AnnotationParams::GetShowAxisArrows() const {
 }
 
 void AnnotationParams::SetAxisArrowCoords(vector<double> val) {
-    assert(val.size() == 3);
+    VAssert(val.size() == 3);
     SetValueDoubleVec(_axisArrowCoordsTag, "Set axis arrow coords", val);
 }
 

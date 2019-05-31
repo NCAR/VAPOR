@@ -242,8 +242,8 @@ bool GeoImageGeoTiff::_getTiffTime(
 //
 int GeoImageGeoTiff::_getBestDirNum(size_t ts) const {
 
-    assert(ts < _times.size());
-    assert(_tiffTimes.size());
+    VAssert(ts < _times.size());
+    VAssert(_tiffTimes.size());
 
     double t = _times[ts];
 
@@ -269,7 +269,7 @@ int GeoImageGeoTiff::_getGTIFInfo(
     proj4String.clear();
 
     GTIF *gtifHandle = GTIFNew(tif);
-    assert(gtifHandle != NULL);
+    VAssert(gtifHandle != NULL);
 
     // Read proj4 string from geotiff file
     //
@@ -513,8 +513,8 @@ bool GeoImageGeoTiff::_extractSubtexture(
     //
     // Extract the image
     //
-    assert(nx <= width);
-    assert(ny <= height);
+    VAssert(nx <= width);
+    VAssert(ny <= height);
     rc = geotile->GetMap(
         pixelSW[0], pixelSW[1], pixelNE[0], pixelNE[1], 0, texture);
     if (rc != 0) {
@@ -538,7 +538,7 @@ bool GeoImageGeoTiff::_extractSubtexture(
             subProj4StringImg += oss.str();
         } else {
             string::size_type last = subProj4StringImg.find(" ", first);
-            assert(last != string::npos);
+            VAssert(last != string::npos);
             subProj4StringImg.replace(first, last - first, oss.str());
         }
     }

@@ -813,7 +813,7 @@ bool NetCDFCpp::ValidFile(string path) {
 int NetCDFCpp::_PutVara(
     string varname, vector<size_t> start, vector<size_t> count,
     const void *data, string func) {
-    assert(start.size() == count.size());
+    VAssert(start.size() == count.size());
 
     int varid;
     int rc = NetCDFCpp::InqVarid(varname, varid);
@@ -850,7 +850,7 @@ int NetCDFCpp::_PutVara(
         rc = nc_put_vara_uchar(
             _ncid, varid, mystart, mycount, (const unsigned char *)data);
     } else {
-        assert(func == "");
+        VAssert(func == "");
     }
     MY_NC_ERR(rc, _path, func);
 
@@ -923,7 +923,7 @@ int NetCDFCpp::_PutVar(string varname, const void *data, string func) {
     } else if (func == "nc_put_var_uchar") {
         rc = nc_put_var_uchar(_ncid, varid, (const unsigned char *)data);
     } else {
-        assert(func == "");
+        VAssert(func == "");
     }
     MY_NC_ERR(rc, _path, func);
 
@@ -957,7 +957,7 @@ int NetCDFCpp::PutVar(string varname, const unsigned char *data) {
 int NetCDFCpp::_GetVara(
     string varname,
     vector<size_t> start, vector<size_t> count, void *data, string func) const {
-    assert(start.size() == count.size());
+    VAssert(start.size() == count.size());
 
     int varid;
     int rc = NetCDFCpp::InqVarid(varname, varid);
@@ -991,7 +991,7 @@ int NetCDFCpp::_GetVara(
         rc = nc_get_vara_uchar(
             _ncid, varid, mystart, mycount, (unsigned char *)data);
     } else {
-        assert(func == "");
+        VAssert(func == "");
     }
     MY_NC_ERR(rc, _path, func);
 
@@ -1059,7 +1059,7 @@ int NetCDFCpp::_GetVar(string varname, void *data, string func) const {
     } else if (func == "nc_get_var_uchar") {
         rc = nc_get_var_uchar(_ncid, varid, (unsigned char *)data);
     } else {
-        assert(func == "");
+        VAssert(func == "");
     }
     MY_NC_ERR(rc, _path, func);
 
@@ -1098,7 +1098,7 @@ int NetCDFCpp::CopyVar(string varname, NetCDFCpp &ncdf_out) const {
         return (-1);
 
     size_t elem_size = NetCDFCpp::SizeOf(xtype);
-    assert(elem_size != 0);
+    VAssert(elem_size != 0);
 
     vector<string> dimnames;
     vector<size_t> dims;

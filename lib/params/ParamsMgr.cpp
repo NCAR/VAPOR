@@ -249,7 +249,7 @@ void ParamsMgr::_initAppRenParams(string dataSetName) {
 
     if (appRenParamsSep->HasChild(dataSetName)) {
         XmlNode *node = appRenParamsSep->GetNode()->GetChild(dataSetName);
-        assert(node);
+        VAssert(node);
 
         rpc = new RenParamsContainer(
             _dataMgrMap[dataSetName], &_ssave, node);
@@ -317,7 +317,7 @@ ViewpointParams *ParamsMgr::CreateVisualizerParamsInstance(
     if (!vpParams) {
         vpParams = make_vp_params(winName);
     }
-    assert(vpParams != NULL);
+    VAssert(vpParams != NULL);
 
     _ssave.EndGroup();
 
@@ -355,7 +355,7 @@ RenParamsContainer *ParamsMgr::createRenderParamsHelper(
     if (!vpParams) {
         vpParams = CreateVisualizerParamsInstance(winName);
     }
-    assert(vpParams != NULL);
+    VAssert(vpParams != NULL);
 
     RenParamsContainer *container = get_ren_container(
         winName, dataSetName, className);
@@ -363,7 +363,7 @@ RenParamsContainer *ParamsMgr::createRenderParamsHelper(
         container = make_ren_container(
             winName, dataSetName, className);
     }
-    assert(container != NULL);
+    VAssert(container != NULL);
 
     return (container);
 }
@@ -397,7 +397,7 @@ RenderParams *ParamsMgr::CreateRenderParamsInstance(
 
 RenderParams *ParamsMgr::CreateRenderParamsInstance(
     string winName, string dataSetName, string instName, const RenderParams *rp) {
-    assert(rp);
+    VAssert(rp);
 
     _ssave.BeginGroup("CreateRenderParamsInstance");
 
@@ -850,7 +850,7 @@ void ParamsMgr::InsertRenderParamsInstance(
     if (!container) {
         container = make_ren_container(className, winName);
     }
-    assert(container != NULL);
+    VAssert(container != NULL);
 
     container->Insert(rp, instName);
 }
@@ -986,7 +986,7 @@ RenParamsContainer *ParamsMgr::make_ren_container(
 
     if (dataSep->HasChild(renderName)) {
         XmlNode *node = dataSep->GetNode()->GetChild(renderName);
-        assert(node);
+        VAssert(node);
 
         rpc = new RenParamsContainer(
             _dataMgrMap[dataSetName], &_ssave, node);
@@ -1033,7 +1033,7 @@ ViewpointParams *ParamsMgr::make_vp_params(
 
     if (windowSep->HasChild(ViewpointParams::GetClassType())) {
         XmlNode *node = windowSep->GetNode()->GetChild(ViewpointParams::GetClassType());
-        assert(node);
+        VAssert(node);
 
         vpParams = new ViewpointParams(&_ssave, node);
     } else {
@@ -1163,8 +1163,8 @@ ParamsMgr::PMgrStateSave::~PMgrStateSave() {
 
 void ParamsMgr::PMgrStateSave::Save(
     const XmlNode *node, string description) {
-    assert(_rootNode);
-    assert(node);
+    VAssert(_rootNode);
+    VAssert(node);
 
     if (!GetEnabled()) {
         return;
@@ -1216,8 +1216,8 @@ void ParamsMgr::PMgrStateSave::Save(
 }
 
 void ParamsMgr::PMgrStateSave::BeginGroup(string description) {
-    assert(_rootNode);
-    assert(!description.empty());
+    VAssert(_rootNode);
+    VAssert(!description.empty());
     if (!GetEnabled())
         return;
 
@@ -1225,7 +1225,7 @@ void ParamsMgr::PMgrStateSave::BeginGroup(string description) {
 }
 
 void ParamsMgr::PMgrStateSave::EndGroup() {
-    assert(_rootNode);
+    VAssert(_rootNode);
 
     if (!GetEnabled())
         return;
@@ -1275,7 +1275,7 @@ void ParamsMgr::PMgrStateSave::EndGroup() {
 
 const XmlNode *ParamsMgr::PMgrStateSave::GetTop(
     string &description) const {
-    assert(_rootNode);
+    VAssert(_rootNode);
     description.clear();
 
     if (!_undoStack.size())
@@ -1288,7 +1288,7 @@ const XmlNode *ParamsMgr::PMgrStateSave::GetTop(
 }
 
 bool ParamsMgr::PMgrStateSave::Undo() {
-    assert(_rootNode);
+    VAssert(_rootNode);
 
     if (!_undoStack.size())
         return (false);
@@ -1309,7 +1309,7 @@ bool ParamsMgr::PMgrStateSave::Undo() {
 }
 
 bool ParamsMgr::PMgrStateSave::Redo() {
-    assert(_rootNode);
+    VAssert(_rootNode);
 
     if (!_redoStack.size())
         return (false);
@@ -1330,7 +1330,7 @@ bool ParamsMgr::PMgrStateSave::Redo() {
 }
 
 void ParamsMgr::PMgrStateSave::Clear() {
-    assert(_rootNode);
+    VAssert(_rootNode);
 
     cleanStack(0, _undoStack);
     cleanStack(0, _redoStack);

@@ -39,7 +39,7 @@ static ivec3 GetFaceFromFaceIndex(int i) {
         return F_FRONT;
     if (i == FI_BACK)
         return F_BACK;
-    assert(0);
+    VAssert(0);
     return F_LEFT;
 }
 
@@ -56,7 +56,7 @@ static int GetFaceIndexFromFace(const ivec3 face) {
         return FI_FRONT;
     if (face == F_BACK)
         return FI_BACK;
-    assert(0);
+    VAssert(0);
     return 0;
 }
 
@@ -102,7 +102,7 @@ static vec3 GetCoordAtIndex(const ivec3 &index, const vec3 *data, const ivec3 &d
     const int x = index.x;
     const int y = index.y;
     const int z = index.z;
-    assert(x >= 0 && x < w && y >= 0 && y < h && z >= 0 && z < d);
+    VAssert(x >= 0 && x < w && y >= 0 && y < h && z >= 0 && z < d);
     return data[(z * w * h + y * w + x)];
 }
 

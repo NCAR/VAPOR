@@ -16,7 +16,7 @@ int Texture::Generate() {
 }
 
 int Texture::Generate(int filter) {
-    assert(!Initialized());
+    VAssert(!Initialized());
     glGenTextures(1, &_id);
     glBindTexture(_type, _id);
 
@@ -48,7 +48,7 @@ bool Texture::Initialized() const {
 }
 
 void Texture::Bind() const {
-    assert(Initialized());
+    VAssert(Initialized());
     glBindTexture(_type, _id);
 }
 
@@ -58,9 +58,9 @@ void Texture::UnBind() const {
 
 //glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, dims[0], dims[1], dims[2], 0, GL_RED, GL_FLOAT, data);
 int Texture::TexImage(int internalFormat, int width, int height, int depth, unsigned int format, unsigned int type, const void *data, int level) {
-    assert(Initialized());
-    assert(_nDims >= 2 || height == 0);
-    assert(_nDims >= 3 || depth == 0);
+    VAssert(Initialized());
+    VAssert(_nDims >= 2 || height == 0);
+    VAssert(_nDims >= 3 || depth == 0);
     _width = width;
     _height = height;
     _depth = depth;
@@ -92,7 +92,7 @@ unsigned int Texture::GetDimsCount(unsigned int glTextureEnum) {
         return 3;
 
     default:
-        assert(0);
+        VAssert(0);
         return -1;
     }
 }

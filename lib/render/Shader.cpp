@@ -22,7 +22,7 @@ int Shader::CompileFromSource(const std::string &source_) {
     // Prevent caching
     source += "\n// " + std::to_string(time(NULL));
 #endif
-    assert(!_compiled);
+    VAssert(!_compiled);
     char *buffer = new char[source.length() + 1];
     strcpy(buffer, source.c_str());
     _id = glCreateShader(_type);

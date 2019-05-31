@@ -489,7 +489,7 @@ void SignificanceMap::GetMap(unsigned char *encodedMap) {
     for (int i = 0; i < header_data.size(); i++) {
         size_t entry = header_data[i];
 
-        assert(((ucptr + 8) - encodedMap) <= HEADER_SIZE);
+        VAssert(((ucptr + 8) - encodedMap) <= HEADER_SIZE);
 
         if (do_swapbytes) {
             swapbytes(&entry, 1);

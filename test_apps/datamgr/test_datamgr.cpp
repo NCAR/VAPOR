@@ -255,7 +255,7 @@ void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts) {
 
     vector<double> minu, maxu;
     if (opt.minu.size()) {
-        assert(opt.minu.size() == opt.maxu.size());
+        VAssert(opt.minu.size() == opt.maxu.size());
         minu = opt.minu;
         maxu = opt.maxu;
     } else {

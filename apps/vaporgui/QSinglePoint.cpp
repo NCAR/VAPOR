@@ -37,7 +37,7 @@ void QSinglePoint::_coordinateChanged(double value) // value isn't used though
 }
 
 void QSinglePoint::SetDimensionality(int dim) {
-    assert(dim >= 2 && dim <= 4);
+    VAssert(dim >= 2 && dim <= 4);
     _dimensionality = dim;
     _ui->xSliderEdit->setVisible(true);
     _ui->ySliderEdit->setVisible(true);

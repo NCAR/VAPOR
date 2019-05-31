@@ -100,7 +100,7 @@ string escapeStr(string s) {
 XmlNode::XmlNode(
     const string &tag, const map<string, string> &attrs,
     size_t numChildrenHint) {
-    assert(isValidXMLElement(tag));
+    VAssert(isValidXMLElement(tag));
 
     _longmap.clear();
     _doublemap.clear();
@@ -125,7 +125,7 @@ XmlNode::XmlNode(
 XmlNode::XmlNode(
     const string &tag,
     size_t numChildrenHint) {
-    assert(isValidXMLElement(tag));
+    VAssert(isValidXMLElement(tag));
 
     _longmap.clear();
     _doublemap.clear();
@@ -248,13 +248,13 @@ XmlNode::~XmlNode() {
 
 void XmlNode::SetElementLong(
     const string &tag, const vector<long> &values) {
-    assert(isValidXMLElement(tag));
+    VAssert(isValidXMLElement(tag));
     _longmap[tag] = values;
 }
 
 void XmlNode::SetElementLong(
     const vector<string> &tags, const vector<long> &values) {
-    assert(!tags.empty());
+    VAssert(!tags.empty());
 
     //Iterate through tags, finding associated node
     XmlNode *currNode = this;
@@ -267,13 +267,13 @@ void XmlNode::SetElementLong(
     }
 
     string tag = tags[tags.size() - 1];
-    assert(isValidXMLElement(tag));
+    VAssert(isValidXMLElement(tag));
     currNode->_longmap[tag] = values;
 }
 
 void XmlNode::SetElementDouble(
     const vector<string> &tags, const vector<double> &values) {
-    assert(!tags.empty());
+    VAssert(!tags.empty());
 
     //Iterate through tags, finding associated node
     XmlNode *currNode = this;
@@ -286,7 +286,7 @@ void XmlNode::SetElementDouble(
     }
 
     string tag = tags[tags.size() - 1];
-    assert(isValidXMLElement(tag));
+    VAssert(isValidXMLElement(tag));
     currNode->_doublemap[tag] = values;
 }
 
@@ -310,7 +310,7 @@ bool XmlNode::HasElementLong(const string &tag) const {
 
 void XmlNode::SetElementDouble(
     const string &tag, const vector<double> &values) {
-    assert(isValidXMLElement(tag));
+    VAssert(isValidXMLElement(tag));
     _doublemap[tag] = values;
 }
 
@@ -336,14 +336,14 @@ bool XmlNode::HasElementDouble(const string &tag) const {
 
 void XmlNode::SetElementString(
     const string &tag, const string &str) {
-    assert(isValidXMLElement(tag));
+    VAssert(isValidXMLElement(tag));
 
     _stringmap[tag] = str;
 }
 
 void XmlNode::SetElementStringVec(
     const string &tag, const vector<string> &strvec) {
-    assert(isValidXMLElement(tag));
+    VAssert(isValidXMLElement(tag));
 
     string s;
     for (int i = 0; i < strvec.size(); i++) {
@@ -357,7 +357,7 @@ void XmlNode::SetElementStringVec(
 
 void XmlNode::SetElementStringVec(
     const vector<string> &tags, const vector<string> &strvec) {
-    assert(!tags.empty());
+    VAssert(!tags.empty());
 
     //Iterate through tags, finding associated node
     XmlNode *currNode = this;
@@ -369,7 +369,7 @@ void XmlNode::SetElementStringVec(
         currNode = child;
     }
     string tag = tags[tags.size() - 1];
-    assert(isValidXMLElement(tag));
+    VAssert(isValidXMLElement(tag));
 
     string s;
     for (int i = 0; i < strvec.size(); i++) {
@@ -466,7 +466,7 @@ int XmlNode::DeleteChild(size_t index) {
     }
 
     XmlNode *node = _children[index];
-    assert(node);
+    VAssert(node);
 
     // Remove from parent's list of children and
     // recursively delete this node's children, if any
@@ -482,7 +482,7 @@ int XmlNode::DeleteChild(const string &tag) {
 
     for (size_t i = 0; i < _children.size(); i++) {
         child = GetChild(i);
-        assert(child);
+        VAssert(child);
 
         if (StrCmpNoCase(child->_tag, tag) == 0) {
             return (XmlNode::DeleteChild(i));
@@ -529,7 +529,7 @@ bool XmlNode::HasChild(const string &tag) const {
 
     for (size_t i = 0; i < _children.size(); i++) {
         child = GetChild(i);
-        assert(child != NULL);
+        VAssert(child != NULL);
 
         if (StrCmpNoCase(child->_tag, tag) == 0)
             return (true);
@@ -626,7 +626,7 @@ void XmlNode::DeleteAll() {
     for (int i = 0; i < (int)_children.size(); i++) {
         if (_children[i]) {
             XmlNode *node = _children[i];
-            assert(node);
+            VAssert(node);
 
             delete node;
         }
@@ -777,7 +777,7 @@ void _StartElementHandler(
     while (*attrs) {
         string key = *attrs;
         attrs++;
-        assert(*attrs);
+        VAssert(*attrs);
         string value = *attrs;
         attrs++;
         myattrs[key] = value;
@@ -810,7 +810,7 @@ XmlParser::XmlParser() {
 }
 
 int XmlParser::LoadFromFile(XmlNode *node, string path) {
-    assert(node != NULL);
+    VAssert(node != NULL);
 
     _root = node;
     _nodeType = UNKNOWN;
@@ -831,7 +831,7 @@ int XmlParser::LoadFromFile(XmlNode *node, string path) {
     }
 
     XML_Parser expatParser = XML_ParserCreate(NULL);
-    assert(expatParser != NULL);
+    VAssert(expatParser != NULL);
 
     XML_SetElementHandler(
         expatParser, _StartElementHandler, _EndElementHandler);
@@ -890,7 +890,7 @@ void XmlParser::_startElementHandler(
             _nodeStack.push(childptr);
         }
     } else if (_isDataElement(tag, myattrs, dtype)) {
-        assert(!_nodeStack.empty());
+        VAssert(!_nodeStack.empty());
         _nodeType = dtype;
     }
     //cout << "_startElementHandler() tag, type " << tag << " " << _nodeType << endl;
@@ -898,7 +898,7 @@ void XmlParser::_startElementHandler(
 
 void XmlParser::_endElementHandler(string tag) {
 
-    assert(!_nodeStack.empty());
+    VAssert(!_nodeStack.empty());
 
     //cout << "_endElementHandler() tag, type /" << tag << " " << _nodeType << endl;
 
@@ -910,7 +910,7 @@ void XmlParser::_endElementHandler(string tag) {
 
     switch (_nodeType) {
     case PARENT:
-        assert(tag == node->Tag());
+        VAssert(tag == node->Tag());
         _nodeStack.pop();
         break;
 
@@ -938,7 +938,7 @@ void XmlParser::_endElementHandler(string tag) {
         node->SetElementString(tag, _stringData);
         break;
     default:
-        assert(0);
+        VAssert(0);
     }
     _nodeType = PARENT;
 }
