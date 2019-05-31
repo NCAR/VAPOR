@@ -749,8 +749,8 @@ class VDF_API NetCDFCollection : public Wasp::MyBase {
         bool _time_varying; // true if variable's slowest varying dimension
             // is a time dimension.
         friend bool tvmap_cmp(
-            NetCDFCollection::TimeVaryingVar::tvmap_t a,
-            NetCDFCollection::TimeVaryingVar::tvmap_t b);
+            NetCDFCollection::TimeVaryingVar::tvmap_t &a,
+            NetCDFCollection::TimeVaryingVar::tvmap_t &b);
     };
 
     class DerivedVar {
