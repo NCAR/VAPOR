@@ -62,14 +62,16 @@ void MatrixManager::LoadMatrixd(const double *m) {
 }
 
 void MatrixManager::GetDoublev(Mode mode, double *m) const {
-    const float *data;
+    const float *data = nullptr;
     if (mode == Mode::ModelView)
         data = glm::value_ptr(_modelviewStack.top());
     else if (mode == Mode::Projection)
         data = glm::value_ptr(_projectionStack.top());
 
-    for (int i = 0; i < 16; i++)
-        m[i] = data[i];
+    if (data) {
+        for (int i = 0; i < 16; i++)
+            m[i] = data[i];
+    }
 }
 
 void MatrixManager::LoadIdentity() {
