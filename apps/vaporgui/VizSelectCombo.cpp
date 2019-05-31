@@ -19,7 +19,7 @@
 //		the visualizer to activate.
 //
 #include <string>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <qcombobox.h>
 #include <QToolBar>
 #include <qtooltip.h>

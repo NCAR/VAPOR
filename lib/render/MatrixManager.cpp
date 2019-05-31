@@ -1,6 +1,6 @@
 #include <vapor/glutil.h>
 #include "vapor/MatrixManager.h"
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

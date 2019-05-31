@@ -29,7 +29,7 @@
 
 #include <string>
 #include <vector>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <QMessageBox>
 
 //! \class ErrorReporterPopup

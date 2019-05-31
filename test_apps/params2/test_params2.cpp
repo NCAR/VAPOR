@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <cstdio>
-#include <cassert>
+#include "vapor/VAssert.h"
 
 #include <vapor/CFuncs.h>
 #include <vapor/OptionParser.h>

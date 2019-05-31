@@ -41,7 +41,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cstdio>
 
 #include <vapor/CFuncs.h>

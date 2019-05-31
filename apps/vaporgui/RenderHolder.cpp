@@ -16,7 +16,7 @@
 //
 //	Description:	Implements the RenderHolder class
 
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <qcombobox.h>
 #include <QStringList>
 #include <QTableWidget>

@@ -24,7 +24,7 @@
 #ifndef MAINFORM_H
 #define MAINFORM_H
 
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <qvariant.h>
 #include <qmainwindow.h>
 #include <qstring.h>
