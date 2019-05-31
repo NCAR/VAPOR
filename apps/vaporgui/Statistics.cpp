@@ -245,8 +245,8 @@ void Statistics::_updateStatsTable() {
     VariablesTable->setRowCount(enabledVars.size());
     int numberOfDigits = 3;
     for (int row = 0; row < enabledVars.size(); row++) {
-        float m3[3], median, stddev;
-        long count;
+        float m3[3]{0.0f, 0.0f, 0.0f}, median = 0.0f, stddev = 0.0f;
+        long count = 0;
         _validStats.GetCount(enabledVars[row], &count);
         _validStats.Get3MStats(enabledVars[row], m3);
         _validStats.GetMedian(enabledVars[row], &median);
@@ -419,13 +419,13 @@ void Statistics::_updateButtonClicked() {
 
     for (int i = 0; i < _validStats.GetVariableCount(); i++) {
         std::string varname = _validStats.GetVariableName(i);
-        long count;
+        long count = 0;
         _validStats.GetCount(varname, &count);
         if (count == -1) {
             _calc3M(varname);
             _updateStatsTable();
         }
-        float m3[3], median, stddev;
+        float m3[3]{0.0f, 0.0f, 0.0f}, median = 0.0f, stddev = 0.0f;
         _validStats.Get3MStats(varname, m3);
         _validStats.GetMedian(varname, &median);
         _validStats.GetStddev(varname, &stddev);
