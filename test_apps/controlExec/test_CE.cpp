@@ -4,7 +4,7 @@
 #include <vector>
 #include <sstream>
 #include <cstdio>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <qapplication.h>
 #include <QGLWidget>
 #include <vapor/OptionParser.h>

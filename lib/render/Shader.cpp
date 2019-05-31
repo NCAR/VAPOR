@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <time.h>
-#include <cassert>
+#include "vapor/VAssert.h"
 
 #include "vapor/Shader.h"
 

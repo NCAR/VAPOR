@@ -2,7 +2,7 @@
 
 #include <string>
 #include <map>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include "vapor/MyBase.h"
 
 #ifdef WIN32

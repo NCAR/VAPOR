@@ -29,7 +29,7 @@
     #include <GL/glu.h>
 #endif
 
-#include <cassert>
+#include "vapor/VAssert.h"
 
 #include <vapor/Renderer.h>
 #include <vapor/ContourParams.h>

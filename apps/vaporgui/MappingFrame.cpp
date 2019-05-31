@@ -16,7 +16,7 @@
 
 #include <vapor/glutil.h>    // Must be included first!!!
 #include <iostream>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cmath>
 #include <qcursor.h>
 #include <QMenu>

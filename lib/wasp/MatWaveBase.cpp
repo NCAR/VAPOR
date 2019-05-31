@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cmath>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <vapor/MatWaveBase.h>
 #include <vapor/WaveFiltDaub.h>
 #include <vapor/WaveFiltCoif.h>

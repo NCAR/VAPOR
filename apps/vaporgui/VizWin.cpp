@@ -20,7 +20,7 @@
 //		Supports mouse event reporting.
 //
 #include <vapor/glutil.h>    // Must be included first!!!
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <QResizeEvent>
 #include <QFocusEvent>
 #include <QMouseEvent>

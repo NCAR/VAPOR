@@ -15,7 +15,7 @@
 #include <QHBoxLayout>
 
 #include <iostream>
-#include <cassert>
+#include "vapor/VAssert.h"
 
 VaporWidget::VaporWidget(QWidget *parent, const std::string &labelText) : QWidget(parent)
 {

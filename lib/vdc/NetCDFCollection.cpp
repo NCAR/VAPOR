@@ -1,7 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <utility>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <netcdf.h>
 #include <vapor/NetCDFCollection.h>
 

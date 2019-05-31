@@ -4,7 +4,7 @@
 #include <cstring>
 #include <algorithm>
 #include <vapor/OptionParser.h>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cctype>
 #include <sstream>
 #include <locale>

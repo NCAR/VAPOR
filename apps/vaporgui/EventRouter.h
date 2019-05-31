@@ -20,7 +20,7 @@
 
 #ifndef EVENTROUTER_H
 #define EVENTROUTER_H
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <QObject>
 #include <QLineEdit>
 #include <QSlider>

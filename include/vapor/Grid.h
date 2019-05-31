@@ -5,7 +5,7 @@
 #include <ostream>
 #include <vector>
 #include <string>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <memory>
 #include <vapor/common.h>
 

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <limits>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cmath>
 #include <algorithm>
 #include <cstdio>

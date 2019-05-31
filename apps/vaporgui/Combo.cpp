@@ -7,7 +7,7 @@
 #include "Combo.h"
 #include <QDoubleValidator>
 #include <QIntValidator>
-#include <cassert>
+#include "vapor/VAssert.h"
 
 Combo::Combo(QLineEdit *edit, QSlider *slider, bool intType)
 {

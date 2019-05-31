@@ -1,7 +1,7 @@
 #include <vapor/Framebuffer.h>
 #include <vapor/MyBase.h>
 #include <vapor/glutil.h>
-#include <cassert>
+#include "vapor/VAssert.h"
 
 using namespace VAPoR;
 

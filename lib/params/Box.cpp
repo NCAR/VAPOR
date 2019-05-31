@@ -21,7 +21,7 @@
 
 #include <cfloat>
 #include <vector>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <vapor/Box.h>
 
 using namespace std;
