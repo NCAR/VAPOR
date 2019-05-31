@@ -137,7 +137,7 @@ void RenderParams::InitBox() {
 	}
 	EnableErrMsg(prev);
 	
-	assert(
+	VAssert(
 		minExt.size()==maxExt.size() && 
 		(minExt.size()==2 || minExt.size()==3)
 	);
@@ -426,7 +426,7 @@ MapperFunction* RenderParams::GetMapperFunc(string varname) {
 
 	_TFs->Insert(&tf, varname);
 	tfptr =  (MapperFunction *) _TFs->GetParams(varname);
-	assert(tfptr != NULL);
+	VAssert(tfptr != NULL);
 
 	_ssave->SetEnabled(enabled);
 
@@ -651,8 +651,8 @@ vector <string> RenParamsFactory::GetFactoryNames() const {
 RenParamsContainer::RenParamsContainer(
 	DataMgr *dataMgr, ParamsBase::StateSave *ssave, const string &name
 ) {
-	assert(dataMgr != NULL);
-	assert(ssave != NULL);
+	VAssert(dataMgr != NULL);
+	VAssert(ssave != NULL);
 
 	_dataMgr = dataMgr;
 	_ssave = ssave;
@@ -666,9 +666,9 @@ RenParamsContainer::RenParamsContainer(
 RenParamsContainer::RenParamsContainer(
 	DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node
 ) {
-	assert(dataMgr != NULL);
-	assert(ssave != NULL);
-	assert(node != NULL);
+	VAssert(dataMgr != NULL);
+	VAssert(ssave != NULL);
+	VAssert(node != NULL);
 
 	_dataMgr = dataMgr;
 	_ssave = ssave;
@@ -730,7 +730,7 @@ RenParamsContainer::RenParamsContainer(
 
 RenParamsContainer &RenParamsContainer::operator=(const RenParamsContainer& rhs ) 
 {
-	assert(_separator);
+	VAssert(_separator);
 
 	vector <string> mynames = GetNames();
 	for (int i=0; i<mynames.size(); i++) {
@@ -745,7 +745,7 @@ RenParamsContainer &RenParamsContainer::operator=(const RenParamsContainer& rhs 
 	vector <string> names = rhs.GetNames();
 	for (int i=0; i<names.size(); i++) {
 		XmlNode *eleNameNode = _separator->GetNode()->GetChild(names[i]);
-		assert (eleNameNode);
+		VAssert (eleNameNode);
 
 		ParamsSeparator mySep(_ssave, eleNameNode);
 
@@ -778,7 +778,7 @@ RenParamsContainer::~RenParamsContainer() {
 }
 
 RenderParams *RenParamsContainer::Insert(const RenderParams *pb, string name) {
-	assert(pb != NULL);
+	VAssert(pb != NULL);
 
     if (name.empty()) {
         name = "NULL";
@@ -801,7 +801,7 @@ RenderParams *RenParamsContainer::Insert(const RenderParams *pb, string name) {
 	RenderParams *mypb = RenParamsFactory::Instance()->CreateInstance(
             classname, _dataMgr, _ssave, node
 	);
-	assert(mypb != NULL);
+	VAssert(mypb != NULL);
 	mypb->SetParent(&mySep);
 
 	_elements[name] = mypb;
@@ -811,8 +811,8 @@ RenderParams *RenParamsContainer::Insert(const RenderParams *pb, string name) {
 }
 
 RenderParams *RenParamsContainer::Create(string className, string name) {
-	assert(! className.empty());
-	assert(! name.empty());
+	VAssert(! className.empty());
+	VAssert(! name.empty());
 
     map <string, RenderParams *>::iterator itr = _elements.find(name);
     if (itr != _elements.end()) {
@@ -829,7 +829,7 @@ RenderParams *RenParamsContainer::Create(string className, string name) {
     RenderParams *mypb = RenParamsFactory::Instance()->CreateInstance(
             className, _dataMgr, _ssave, NULL
     );
-    assert(mypb != NULL);
+    VAssert(mypb != NULL);
 
     mypb->SetParent(&mySep);
 

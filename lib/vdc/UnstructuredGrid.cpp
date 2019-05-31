@@ -37,13 +37,13 @@ UnstructuredGrid::UnstructuredGrid(
 		bs, blks, topology_dimension
 	) {
 
-	assert(vertexDims.size() == 1 || vertexDims.size() == 2);
-	assert(vertexDims.size() == faceDims.size());
-	assert(vertexDims.size() == edgeDims.size() || edgeDims.size() == 0);
+	VAssert(vertexDims.size() == 1 || vertexDims.size() == 2);
+	VAssert(vertexDims.size() == faceDims.size());
+	VAssert(vertexDims.size() == edgeDims.size() || edgeDims.size() == 0);
 
 	// Edge data not supported yet
 	//
-	assert(location == NODE || location == CELL);
+	VAssert(location == NODE || location == CELL);
 
 	_vertexDims = vertexDims;
 	_faceDims = faceDims;
@@ -191,9 +191,9 @@ bool UnstructuredGrid::GetNodeCells(
 	cells.clear();
 
 	vector <size_t> dims = GetDimensions();
-	assert (indices.size() == dims.size());
+	VAssert (indices.size() == dims.size());
 
-	assert(0 && "GetNodeCells() Not supported");
+	VAssert(0 && "GetNodeCells() Not supported");
 	return false;
 }
 

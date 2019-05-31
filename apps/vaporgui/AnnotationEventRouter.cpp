@@ -210,7 +210,7 @@ void AnnotationEventRouter::copyRegionFromRenderer()
 												dataSetName,
 												renType, 
 												renderer);
-	assert(copyParams);
+	VAssert(copyParams);
 
 	Box* copyBox = copyParams->GetBox();
 	std::vector<double> minExtents, maxExtents;

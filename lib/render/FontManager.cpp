@@ -12,8 +12,8 @@ using std::pair;
 FontManager::FontManager(GLManager *glManager)
 : _glManager(glManager), _library(nullptr)
 {
-    assert(glManager);
-    assert(!FT_Init_FreeType(&_library));
+    VAssert(glManager);
+    VAssert(!FT_Init_FreeType(&_library));
 }
 
 FontManager::~FontManager()
@@ -33,7 +33,7 @@ Font *FontManager::GetFont(const std::string &name, unsigned int size)
 int FontManager::LoadResourceByKey(const std::pair<std::string, unsigned int> &key)
 {
     if (HasResource(key)) {
-        assert(!"Font already loaded");
+        VAssert(!"Font already loaded");
         return -1;
     }
     const string name = key.first;

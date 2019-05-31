@@ -255,17 +255,17 @@ static void ApplyWorldFile(const char *worldfilename, TIFF *out)
 
     int rt;
     rt = std::fscanf( tfw, "%lf", pixsize + 0 );
-    assert( rt > 0 && rt != EOF );
+    VAssert( rt > 0 && rt != EOF );
     rt = std::fscanf( tfw, "%lf", &y_rot );
-    assert( rt > 0 && rt != EOF );
+    VAssert( rt > 0 && rt != EOF );
     rt = std::fscanf( tfw, "%lf", &x_rot );
-    assert( rt > 0 && rt != EOF );
+    VAssert( rt > 0 && rt != EOF );
     rt = std::fscanf( tfw, "%lf", pixsize + 1 );
-    assert( rt > 0 && rt != EOF );
+    VAssert( rt > 0 && rt != EOF );
     rt = std::fscanf( tfw, "%lf", &xoff );
-    assert( rt > 0 && rt != EOF );
+    VAssert( rt > 0 && rt != EOF );
     rt = std::fscanf( tfw, "%lf", &yoff );
-    assert( rt > 0 && rt != EOF );
+    VAssert( rt > 0 && rt != EOF );
 
     fclose( tfw );
 

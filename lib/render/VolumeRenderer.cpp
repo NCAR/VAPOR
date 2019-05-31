@@ -482,7 +482,7 @@ glm::vec3 VolumeRenderer::_getVolumeScales() const
     ViewpointParams *vpp = _paramsMgr->GetViewpointParams(_winName);
     Transform *datasetTransform = vpp->GetTransform(GetMyDatasetName());
     Transform *rendererTransform = GetActiveParams()->GetTransform();
-    assert(datasetTransform && rendererTransform);
+    VAssert(datasetTransform && rendererTransform);
  
     vector<double> datasetScales, rendererScales;
     datasetScales = datasetTransform->GetScales();

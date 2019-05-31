@@ -280,10 +280,10 @@ PyObject *MyPython::CreatePyFunc(
 	// to PyRun_String
 	//
 	PyObject *pLocal = PyModule_GetDict(pModule);
-	assert (pLocal != NULL);	// no fail
+	VAssert (pLocal != NULL);	// no fail
 
 	PyObject *pGlobal = PyModule_GetDict(pMain);
-	assert (pGlobal != NULL);	// no fail
+	VAssert (pGlobal != NULL);	// no fail
 
 
 	PyObject *pValue = PyRun_String(
@@ -295,7 +295,7 @@ PyObject *MyPython::CreatePyFunc(
 	Py_DECREF(pValue);
 
 	PyObject *pFunc = PyObject_GetAttrString(pModule, funcName.c_str());
-	assert(pFunc != NULL);
+	VAssert(pFunc != NULL);
 
 	int rc = PyCallable_Check(pFunc);
 	if (rc != 1) {	// Yes, this API call returns a 1 on success.

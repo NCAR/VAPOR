@@ -496,7 +496,7 @@ void AnimationEventRouter::setPlay(int direction) {
 	
 	
 void AnimationEventRouter::playNextFrame() {
-	assert (_direction == -1 || _direction == 1);
+	VAssert (_direction == -1 || _direction == 1);
 
 	// Draw the frame, and then advance the frame count
 	//

@@ -6,7 +6,7 @@ void VolumeVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Rende
 {
     VolumeParams *vp = dynamic_cast<VolumeParams*>( params );
     _volumeParams = vp;
-    assert(vp);
+    VAssert(vp);
     
     _variablesWidget->Update(dataMgr, paramsMgr, params);
 }
@@ -49,7 +49,7 @@ void VolumeAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *p
 {
     VAPoR::VolumeParams *vp = dynamic_cast<VolumeParams*>(rParams);
     _params = vp;
-    assert(vp);
+    VAssert(vp);
     
     _TFWidget->Update(dataMgr, paramsMgr, rParams);
     

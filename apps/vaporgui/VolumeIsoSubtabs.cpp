@@ -7,7 +7,7 @@ void VolumeIsoVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Re
 {
     VolumeIsoParams *vp = dynamic_cast<VolumeIsoParams*>( params );
     _isoParams = vp;
-    assert(vp);
+    VAssert(vp);
     // TODO volume
     // long mode = _isoParams->GetCastingMode();
     // _castingModeComboBox->setCurrentIndex( mode - 1 );
@@ -85,7 +85,7 @@ void VolumeIsoAppearanceSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _TFWidget->Update(dataMgr, paramsMgr, params);
 
     _params = dynamic_cast<VAPoR::VolumeIsoParams*>(params);
-    assert(_params);
+    VAssert(_params);
     
     
     _castingModeComboBox->blockSignals(true);
