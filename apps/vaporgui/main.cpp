@@ -100,6 +100,8 @@ int main(int argc, char **argv) {
 #endif
     QApplication a(argc, argv, true);
 
+    setlocale(LC_ALL, "C");
+
     // Set path for Qt to look for its plugins.
     //
     QString filePath = GetResourcePath("plugins").c_str();
