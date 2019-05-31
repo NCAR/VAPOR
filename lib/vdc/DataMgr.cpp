@@ -2,7 +2,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <cstring>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cfloat>
 #include <vector>
 #include <map>

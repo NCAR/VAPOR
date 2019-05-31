@@ -23,7 +23,7 @@
 #include <string>
 #include <cstring>
 #include <string>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <vapor/RenderParams.h>
 #include <vapor/DataMgr.h>
 

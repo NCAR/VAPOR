@@ -1,6 +1,6 @@
 #include "vapor/GeoTIFWriter.h"
 #include "vapor/Proj4StringParser.h"
-#include <cassert>
+#include "vapor/VAssert.h"
 
 #ifdef WIN32
 #include <geotiff/geo_normalize.h>

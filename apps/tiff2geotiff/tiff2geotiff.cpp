@@ -16,7 +16,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctype.h>
-#include <cassert>
+#include "vapor/VAssert.h"
 
 /* GeoTIFF overrides */
 

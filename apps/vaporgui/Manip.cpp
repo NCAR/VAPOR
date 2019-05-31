@@ -19,7 +19,7 @@
 #include <iterator>
 #include <iomanip>
 #include <iostream>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cmath>
 
 #include "Manip.h"

@@ -20,7 +20,7 @@
 #ifndef PARAMSMGR_H
 #define PARAMSMGR_H
 
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <map>
 #include <deque>
 #include <stack>

@@ -21,7 +21,7 @@
 #include <string>
 #include <cstring>
 #include <string>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <StatisticsParams.h>
 
 using namespace VAPoR;

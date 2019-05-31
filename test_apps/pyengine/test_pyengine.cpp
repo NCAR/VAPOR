@@ -4,7 +4,7 @@
 #include <vector>
 #include <sstream>
 #include <cstdio>
-#include <cassert>
+#include "vapor/VAssert.h"
 
 #include <vapor/CFuncs.h>
 #include <vapor/FileUtils.h>
