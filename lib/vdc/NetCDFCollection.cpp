@@ -50,12 +50,6 @@ bool readOK(vector<size_t> dims, size_t start[], size_t count[]) {
 
 }; // namespace
 
-bool VAPoR::tvmap_cmp(
-    NetCDFCollection::TimeVaryingVar::tvmap_t &a,
-    NetCDFCollection::TimeVaryingVar::tvmap_t &b) {
-    return (a._time < b._time);
-}
-
 NetCDFCollection::NetCDFCollection() {
     _variableList.clear();
     _staggeredDims.clear();
@@ -1990,7 +1984,13 @@ void NetCDFCollection::TimeVaryingVar::Sort() {
     //
     // Sort variable by time
     //
-    std::sort(_tvmaps.begin(), _tvmaps.end(), tvmap_cmp);
+    std::sort(_tvmaps.begin(), _tvmaps.end(), NetCDFCollection::TimeVaryingVar::tvmap_cmp);
+}
+
+bool NetCDFCollection::TimeVaryingVar::tvmap_cmp(
+    NetCDFCollection::TimeVaryingVar::tvmap_t &a,
+    NetCDFCollection::TimeVaryingVar::tvmap_t &b) {
+    return (a._time < b._time);
 }
 
 NetCDFCollection::fileHandle::fileHandle() {
