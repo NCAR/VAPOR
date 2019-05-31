@@ -9,7 +9,6 @@
 #include <vapor/EasyThreads.h>
 //#include <vapor/MyBase.h>
 
-#include <cassert>
 using namespace Wasp;
 
 #ifdef ENABLE_THREADS

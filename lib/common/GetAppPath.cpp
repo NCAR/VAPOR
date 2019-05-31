@@ -5,7 +5,6 @@
 #include <iostream>
 #include <sstream>
 #include <cctype>
-#include <cassert>
 #include <sys/stat.h>
 #include "vapor/CMakeConfig.h"
 #include "vapor/FileUtils.h"
