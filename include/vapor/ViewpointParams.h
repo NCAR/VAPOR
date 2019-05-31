@@ -181,7 +181,7 @@ class PARAMS_API ViewpointParams : public ParamsBase {
     //! \retval Viewpoint* current viewpoint.
     virtual Viewpoint *getCurrentViewpoint() const {
         Viewpoint *v = (Viewpoint *)m_VPs->GetParams(_currentViewTag);
-        assert(v != NULL);
+        VAssert(v != NULL);
         return (v);
     }
 
@@ -200,7 +200,7 @@ class PARAMS_API ViewpointParams : public ParamsBase {
         getCurrentViewpoint()->SetModelViewMatrix(matrix);
     }
     void SetModelViewMatrix(const std::vector<double> mvec) {
-        assert(mvec.size() == 16);
+        VAssert(mvec.size() == 16);
         double m[16];
         for (int i = 0; i < mvec.size(); i++)
             m[i] = mvec[i];
@@ -226,7 +226,7 @@ class PARAMS_API ViewpointParams : public ParamsBase {
 
     void GetRotationCenter(double c[3]) const {
         vector<double> val = GetRotationCenter();
-        assert(val.size() == 3);
+        VAssert(val.size() == 3);
         for (int i = 0; i < val.size(); i++)
             c[i] = val[i];
     }

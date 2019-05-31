@@ -149,7 +149,7 @@ class VDF_API DataMgr : public Wasp::MyBase {
     //! \copydoc DC::GetDimensionNames()
     //
     std::vector<string> GetDimensionNames() const {
-        assert(_dc);
+        VAssert(_dc);
         return (_dc->GetDimensionNames());
     }
 
@@ -157,14 +157,14 @@ class VDF_API DataMgr : public Wasp::MyBase {
     //
     bool GetDimension(
         string dimname, DC::Dimension &dimension) const {
-        assert(_dc);
+        VAssert(_dc);
         return (_dc->GetDimension(dimname, dimension));
     }
 
     //! \copydoc DC::GetMeshNames()
     //
     std::vector<string> GetMeshNames() const {
-        assert(_dc);
+        VAssert(_dc);
         return (_dc->GetMeshNames());
     }
 

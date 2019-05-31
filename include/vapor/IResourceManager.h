@@ -67,7 +67,7 @@ bool IResourceManager<K, T>::HasResource(const T *resource) const {
 template <typename K, typename T>
 bool IResourceManager<K, T>::AddResource(const K &key, T *resource) {
     if (HasResource(key) || HasResource(resource)) {
-        assert(!"Resource already exists");
+        VAssert(!"Resource already exists");
         return false;
     }
     _map.insert(std::pair<K, T *>(key, resource));
@@ -76,7 +76,7 @@ bool IResourceManager<K, T>::AddResource(const K &key, T *resource) {
 
 template <typename K, typename T>
 void IResourceManager<K, T>::DeleteResource(const K &key) {
-    assert(HasResource(key));
+    VAssert(HasResource(key));
     delete _map[key];
     _map.erase(key);
 }
