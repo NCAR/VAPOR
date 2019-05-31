@@ -52,6 +52,8 @@ namespace {
 };
 
 namespace {
+
+#ifndef NDEBUG
 	bool isValidXMLElement(string s) {
 		if (s.empty()) return(false);
 		if (! (std::isalpha(s[0]) || s[0] == '_')) return(false);
@@ -70,6 +72,7 @@ namespace {
 
 		return(true);
 	}
+#endif
 
 	string escapeStr(string s) {
 		string eS;
