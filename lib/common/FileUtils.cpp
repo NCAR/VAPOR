@@ -29,9 +29,13 @@ string FileUtils::ReadFileToString(const string &path)
         long length = ftell(f);
         rewind(f);
 
-        char *buf = new char[length + 1];
-        fread(buf, length, 1, f);
+        char * buf = new char[length + 1];
+        size_t rv = fread(buf, length, 1, f);
         fclose(f);
+        if (rv != length) {
+            delete[] buf;
+            return string("");
+        }
 
         buf[length] = 0;
         string ret(buf);

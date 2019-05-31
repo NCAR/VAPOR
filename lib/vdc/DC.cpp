@@ -312,7 +312,10 @@ size_t DC::Mesh::GetTopologyDim() const
     case UNSTRUC_2D: return (2); break;
     case UNSTRUC_LAYERED: return (3); break;
     case UNSTRUC_3D: return (3); break;
-    default: assert(0 && "Invalid mesh type"); break;
+    default:
+        assert(false);
+        return (0);
+        break;
     }
 }
 

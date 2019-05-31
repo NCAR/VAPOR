@@ -52,6 +52,8 @@ const string StringType = "String";
 };    // namespace
 
 namespace {
+
+#ifndef NDEBUG
 bool isValidXMLElement(string s)
 {
     if (s.empty()) return (false);
@@ -63,6 +65,7 @@ bool isValidXMLElement(string s)
 
     return (true);
 }
+#endif
 
 string escapeStr(string s)
 {
