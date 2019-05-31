@@ -407,11 +407,11 @@ int DCCF:: _get_latlon_coordvars(
 
 	for (int i=0; i<cvars.size(); i++) {
 		if (ncdfc->IsLatCoordVar(cvars[i])) {
-			assert(latcvar.empty());
+			VAssert(latcvar.empty());
 			latcvar = cvars[i];
 		}
 		else if (ncdfc->IsLonCoordVar(cvars[i])) {
-			assert(loncvar.empty());
+			VAssert(loncvar.empty());
 			loncvar = cvars[i];
 		}
 	}
@@ -534,7 +534,7 @@ int DCCF::_get_vertical_coordvar(
 
 	for (int i=0; i<cvars.size(); i++) {
 		if (ncdfc->IsVertCoordVar(cvars[i])) {
-			assert(cvar.empty());
+			VAssert(cvar.empty());
 			cvar = cvars[i];
 		}
 	}
@@ -600,7 +600,7 @@ int DCCF:: _get_time_coordvar(
 
 	for (int i=0; i<cvars.size(); i++) {
 		if (ncdfc->IsTimeCoordVar(cvars[i])) {
-			assert(cvar.empty());
+			VAssert(cvar.empty());
 			cvar = cvars[i];
 		}
 	}
@@ -664,7 +664,7 @@ int DCCF::_InitDimensions(
 	//
 	vector <string> dimnames = ncdfc->GetDimNames();
 	vector <size_t> dimlens = ncdfc->GetDims();
-	assert(dimnames.size() == dimlens.size());
+	VAssert(dimnames.size() == dimlens.size());
 
 
 	//

@@ -156,7 +156,7 @@ namespace {
 	// Return the name of the mesh for a specific set of dimension names
 	//
 	string get_mesh_name(vector <string> dimnames) {
-		assert(dimnames.size() == 1 || dimnames.size() == 2);
+		VAssert(dimnames.size() == 1 || dimnames.size() == 2);
 
 		if (dimnames[0] == nCellsDimName) {
 			if ((dimnames.size()==2) && (dimnames[1]==nVertLevelsDimName)) {
@@ -637,7 +637,7 @@ int DCMPAS::_readVarToSmartBuf(
 ) {
 	vector <size_t> dims;
 	bool ok = GetVarDimLens(varname, true, dims);
-	assert(ok);
+	VAssert(ok);
 
 	size_t n = vproduct(dims);
 	float *buf = (float *) smartBuf.Alloc(n * sizeof (*buf));
@@ -681,12 +681,12 @@ void DCMPAS::_addMissingFlag(int *data) const {
 
 	DC::Dimension dimension;
 	bool ok = GetDimension(nCellsDimName, dimension);
-	assert(ok);
+	VAssert(ok);
 
 	size_t nCells = dimension.GetLength();
 
 	ok = GetDimension(maxEdgesDimName, dimension);
-	assert(ok);
+	VAssert(ok);
 
 	size_t nMaxEdges = dimension.GetLength();
 
@@ -707,19 +707,19 @@ void DCMPAS::_splitOnBoundary(string varname, int *connData) const {
 
 	vector <size_t> connDims;
 	bool ok = GetVarDimLens(varname, true, connDims);
-	assert(ok && connDims.size() == 2);
+	VAssert(ok && connDims.size() == 2);
 
 	// Dimensions for vertex lon
 	//
 	vector <size_t> lonVertexDims;
 	ok = GetVarDimLens(lonVertexVarName, true, lonVertexDims);
-	assert(ok && lonVertexDims.size() == 1);
+	VAssert(ok && lonVertexDims.size() == 1);
 
 	// Dimensions for cell lon
 	//
 	vector <size_t> lonCellDims;
 	ok = GetVarDimLens(lonCellVarName, true, lonCellDims);
-	assert(ok && lonCellDims.size() == 1);
+	VAssert(ok && lonCellDims.size() == 1);
 
 	// float *lonBuf1 = NULL; 
 	float *lonBuf2 = NULL; 
@@ -732,7 +732,7 @@ void DCMPAS::_splitOnBoundary(string varname, int *connData) const {
 		lonBuf2 = (float *) _lonVertexSmartBuf.GetBuf();
 	}
 	else {
-		assert(0);
+		VAssert(0);
 	}
 		
 
@@ -830,8 +830,8 @@ int DCMPAS::_readRegionTransposed(
     MPASFileObject *w,
 	const vector <size_t> &min, const vector <size_t> &max, float *region
 ) {
-	assert(min.size() == 1 || min.size() == 2);
-	assert(min.size() == max.size());
+	VAssert(min.size() == 1 || min.size() == 2);
+	VAssert(min.size() == max.size());
 
     int aux = w->GetAux();
 
@@ -866,8 +866,8 @@ int DCMPAS::_readRegionEdgeVariable(
     MPASFileObject *w,
 	const vector <size_t> &min, const vector <size_t> &max, float *region
 ) {
-	assert(min.size() == 1 || min.size() == 2);
-	assert(min.size() == max.size());
+	VAssert(min.size() == 1 || min.size() == 2);
+	VAssert(min.size() == max.size());
 
 	vector <size_t> dims = _ncdfc->GetDims(edgesOnVertexVarName);
 	int *edgesOnVertex =  new int[vproduct(dims)];
@@ -878,7 +878,7 @@ int DCMPAS::_readRegionEdgeVariable(
 	}
 
 	size_t vertexDegree = dims[1];
-	assert(vertexDegree == 3);
+	VAssert(vertexDegree == 3);
 
 	string varname = w->GetVarname();
 
@@ -948,12 +948,12 @@ int DCMPAS::_readRegionTemplate(
 
 	if (isEdgeVariable(_ncdfc, varname)) {
 
-		assert((std::is_same<float *, T *>::value) == true);
+		VAssert((std::is_same<float *, T *>::value) == true);
 		return(_readRegionEdgeVariable(w, min, max, (float *) region)); 
 
 	} else if (isTransposed(_ncdfc, varname)) {
 
-		assert((std::is_same<float *, T *>::value) == true);
+		VAssert((std::is_same<float *, T *>::value) == true);
 		return(_readRegionTransposed(w, min, max, (float *) region)); 
 	}
 
@@ -1027,7 +1027,7 @@ int DCMPAS::_InitCoordvars(
 		int axis = 0;
 		string name = cvars[i];
 		dimnames = ncdfc->GetDimNames(name);
-		assert(dimnames.size() == 1);
+		VAssert(dimnames.size() == 1);
 
 		_coordVarsMap[name] = CoordVar(
 			name, units, DC::FLOAT, periodic, axis, false,
@@ -1050,7 +1050,7 @@ int DCMPAS::_InitCoordvars(
 		int axis = 1;
 		string name = cvars[i];
 		dimnames = ncdfc->GetDimNames(name);
-		assert(dimnames.size() == 1);
+		VAssert(dimnames.size() == 1);
 
 		_coordVarsMap[name] = CoordVar(
 			name, units, DC::FLOAT, periodic, axis, false,
@@ -1073,7 +1073,7 @@ int DCMPAS::_InitCoordvars(
 		int axis = 2;
 		string name = zGridP1VarName;
 		dimnames = ncdfc->GetDimNames(name);
-		assert(dimnames.size() == 2);
+		VAssert(dimnames.size() == 2);
 
 		_coordVarsMap[name] = CoordVar(
 			name, units, DC::FLOAT, periodic, axis, false,
@@ -1113,7 +1113,7 @@ int DCMPAS::_InitDerivedVars(
 	//
 	DC::CoordVar cvarInfo;
 	bool ok = _dvm.GetCoordVarInfo(timeDimName, cvarInfo);
-	assert(ok);
+	VAssert(ok);
 
 	_coordVarsMap[timeDimName] = cvarInfo;
 
@@ -1144,7 +1144,7 @@ int DCMPAS::_InitVerticalCoordinatesDerived(
 
 	DC::CoordVar cvarInfo;
 	bool ok = _dvm.GetCoordVarInfo(zGridVarName, cvarInfo);
-	assert(ok);
+	VAssert(ok);
 	_coordVarsMap[zGridVarName] = cvarInfo;
 
 	derivedVar = new DerivedCoordVertFromCell(
@@ -1157,7 +1157,7 @@ int DCMPAS::_InitVerticalCoordinatesDerived(
 	_dvm.AddCoordVar(derivedVar);
 
 	ok = _dvm.GetCoordVarInfo(zGridVertP1VarName, cvarInfo);
-	assert(ok);
+	VAssert(ok);
 	_coordVarsMap[zGridVertP1VarName] = cvarInfo;
 		
 	derivedVar = new DerivedCoordVertFromCell(
@@ -1170,7 +1170,7 @@ int DCMPAS::_InitVerticalCoordinatesDerived(
 	_dvm.AddCoordVar(derivedVar);
 
 	ok = _dvm.GetCoordVarInfo(zGridVertVarName, cvarInfo);
-	assert(ok);
+	VAssert(ok);
 	_coordVarsMap[zGridVertVarName] = cvarInfo;
 
 	return(0);
@@ -1289,7 +1289,7 @@ int DCMPAS::_InitDimensions(
 	//
 	vector <string> dimnames = ncdfc->GetDimNames();
 	vector <size_t> dimlens = ncdfc->GetDims();
-	assert(dimnames.size() == dimlens.size());
+	VAssert(dimnames.size() == dimlens.size());
 
 	for (int i=0; i<dimnames.size(); i++) {
 
@@ -1321,7 +1321,7 @@ int DCMPAS::_GetVarCoordinates(
 	time_coordvar.clear();
 
 	vector <string> dimnames = ncdfc->GetDimNames(varname);
-	assert(dimnames.size() >= 1);
+	VAssert(dimnames.size() >= 1);
 
 	if (ncdfc->IsTimeVarying(varname)) {
 		time_dim_name = dimnames[0];
@@ -1377,7 +1377,7 @@ int DCMPAS::_GetVarCoordinates(
 		}
 	}
 	else {
-		assert(0);
+		VAssert(0);
 	}
 
 	return(0);
@@ -1391,7 +1391,7 @@ int DCMPAS::_InitMeshes(
 	//
 	DC::Dimension dimension;
 	bool ok = GetDimension(maxEdgesDimName, dimension);
-	assert(ok);
+	VAssert(ok);
 
 	//
 	// Dual meshes (triangle mesh)
@@ -1695,7 +1695,7 @@ int DCMPAS::DerivedCoordVertFromCell::Initialize() {
 	}
 
 	vector <string> dimNames = _coordVarInfo.GetDimNames();
-	assert(dimNames.size());
+	VAssert(dimNames.size());
 
 	dimNames[0] = _derivedDimName;
 
@@ -1854,7 +1854,7 @@ int DCMPAS::DerivedCoordVertFromCell::ReadRegion(
 
 	// only handle triangles for dual mesh
 	//
-	assert(vertexDegree == 3);	
+	VAssert(vertexDegree == 3);	
 
 	if (! cellsOnVertex) {
 		delete [] cellData;

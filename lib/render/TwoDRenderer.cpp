@@ -92,8 +92,8 @@ int TwoDRenderer::_paintGL(bool) {
 	if (! _texture) {
 		return(-1);
 	}
-	assert(_texWidth >= 1);
-	assert(_texHeight >= 1);
+	VAssert(_texWidth >= 1);
+	VAssert(_texHeight >= 1);
 
 	// Get the proxy geometry used to render the 2D surface (vertices and
 	// normals)
@@ -107,9 +107,9 @@ int TwoDRenderer::_paintGL(bool) {
 	}
 
 	if (! _gridAligned) {
-		assert(_structuredMesh);
-		assert(_meshWidth >= 2);
-		assert(_meshHeight >= 2);
+		VAssert(_structuredMesh);
+		VAssert(_meshWidth >= 2);
+		VAssert(_meshHeight >= 2);
 	
         _texCoords = (GLfloat *) _sb_texCoords.Alloc(_meshWidth * _meshHeight * 2 * sizeof(*_texCoords));
 		_computeTexCoords(_texCoords, _meshWidth, _meshHeight);
@@ -117,8 +117,8 @@ int TwoDRenderer::_paintGL(bool) {
 		_renderMeshUnAligned();
 	}
 	else {
-		assert(_meshWidth == _texWidth);
-		assert(_meshHeight == _texHeight);
+		VAssert(_meshWidth == _texWidth);
+		VAssert(_meshHeight == _texHeight);
 
 		_renderMeshAligned();
 	}
@@ -210,8 +210,8 @@ void TwoDRenderer::_renderMeshAligned() {
 
 	// Ugh. For aligned data the type must be GLfloat.
 	//
-	assert (_texType == GL_FLOAT);
-	assert (_texelSize == 8);
+	VAssert (_texType == GL_FLOAT);
+	VAssert (_texelSize == 8);
 	const GLfloat *data = (GLfloat *) _texture;
 
 	if (_structuredMesh) {
@@ -229,9 +229,9 @@ void TwoDRenderer::_renderMeshAligned() {
 		}
 	}
 	else {
-		assert(_meshWidth >= 3);
-		assert(_meshHeight == 1);
-		assert((_nindices % 3) == 0);
+		VAssert(_meshWidth >= 3);
+		VAssert(_meshHeight == 1);
+		VAssert((_nindices % 3) == 0);
         
         glBindVertexArray(_VAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
@@ -302,8 +302,8 @@ void TwoDRenderer::_computeTexCoords(
 	size_t w, 
 	size_t h
 ) const {
-	assert(_meshWidth >= 2);
-	assert(_meshHeight >= 2);
+	VAssert(_meshWidth >= 2);
+	VAssert(_meshHeight >= 2);
 
 	double deltax = 1.0 / (_meshWidth - 1);
 	double deltay = 1.0 / (_meshHeight - 1);

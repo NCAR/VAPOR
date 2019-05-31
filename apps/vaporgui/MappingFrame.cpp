@@ -242,7 +242,7 @@ void MappingFrame::RefreshHistogram()
 {
 	MapperFunction *mapper;
 	mapper = _rParams->GetMapperFunc(_variableName);
-	assert(mapper);
+	VAssert(mapper);
 	updateMapperFunction(mapper);
 
     string rendererName = getActiveRendererName();
@@ -411,7 +411,7 @@ void MappingFrame::populateIteratingHistogram() {
 //----------------------------------------------------------------------------
 void MappingFrame::updateMapperFunction(MapperFunction *mapper)
 {
-  assert(mapper);
+  VAssert(mapper);
   deleteOpacityWidgets();
  
   _mapper = mapper;
@@ -480,7 +480,7 @@ void MappingFrame::setOpacityMapping(bool flag)
   {
     // Error condition. Can't enable opacity mapping after it has been
     // disabled. 
-    //assert(0);
+    //VAssert(0);
   }
 }
 
@@ -511,7 +511,7 @@ void MappingFrame::setColorMapping(bool flag)
   {
     // Error condition. Can't enable opacity mapping after it has been
     // disabled. 
-    //assert(0);
+    //VAssert(0);
   }    
 }
 
@@ -525,9 +525,9 @@ bool MappingFrame::Update(DataMgr *dataMgr,
 ) {
     bool histogramRecalculated = false;
 
-	assert(dataMgr);
-	assert(paramsMgr);
-	assert(rParams);
+	VAssert(dataMgr);
+	VAssert(paramsMgr);
+	VAssert(rParams);
 	
 	_dataMgr = dataMgr;
 	_rParams = rParams;
@@ -546,7 +546,7 @@ bool MappingFrame::Update(DataMgr *dataMgr,
 
 	MapperFunction *mapper;
 	mapper = _rParams->GetMapperFunc(_variableName);
-	assert(mapper);
+	VAssert(mapper);
 
 	updateMapperFunction(mapper);
 
@@ -591,7 +591,7 @@ bool MappingFrame::Update(DataMgr *dataMgr,
         else if (vp)
             isovals = vp->GetIsoValues();
         else
-            assert(0); // This is what the old code did
+            VAssert(0); // This is what the old code did
 
 		setIsolineSliders(isovals);
 		
@@ -674,7 +674,7 @@ QString MappingFrame::tipText(const QPoint &pos, bool isIso)
 //----------------------------------------------------------------------------
 int MappingFrame::histoValue(const QPoint &p)
 {
-  assert(_histogram);
+  VAssert(_histogram);
   
   QPoint pos = mapFromParent(p);
  
@@ -1864,7 +1864,7 @@ void MappingFrame::select(int hits, GLuint *selectionBuffer, Qt::KeyboardModifie
     }
   }
 
-  assert(_lastSelected);
+  VAssert(_lastSelected);
 
   _lastSelected->select(selectionBuffer[hitOffset+maxCount+2], state);
 
@@ -2393,7 +2393,7 @@ float MappingFrame::yWorldToData(float y)
 //----------------------------------------------------------------------------
 float MappingFrame::yViewToWorld(float y)
 {
-  assert(height() != 0);
+  VAssert(height() != 0);
   return _minY + ((y / (float)height()) * (_maxY - _minY)); 
 }
 

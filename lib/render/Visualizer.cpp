@@ -138,7 +138,7 @@ void Visualizer::_applyDatasetTransformsForRenderer(Renderer *r) {
 	VAPoR::ViewpointParams* vpParams = getActiveViewpointParams();
 	vector<double> scales, rotations, translations, origin;
 	Transform *t = vpParams->GetTransform(datasetName);
-	assert(t);
+	VAssert(t);
 	scales = t->GetScales();
 	rotations = t->GetRotations();
 	translations = t->GetTranslations();
@@ -269,7 +269,7 @@ int Visualizer::InitializeGL(GLManager *glManager)
 
 	// glewExperimental = GL_TRUE;
 	GLenum err = glewInit();
-	assert(GLManager::CheckError());
+	VAssert(GLManager::CheckError());
 	if (GLEW_OK != err) {
 		MyBase::SetErrMsg("Error: Unable to initialize GLEW");
 		return -1;
@@ -289,7 +289,7 @@ void Visualizer::MoveRendererToFront(string renderType, string renderName)
     if (! ren) return;
 
     auto it = std::find(_renderers.begin(), _renderers.end(), ren);
-    assert(it != _renderers.end());
+    VAssert(it != _renderers.end());
     _renderers.erase(it);
     _renderers.push_back(ren);
 }
@@ -391,7 +391,7 @@ Renderer* Visualizer::_getRenderer(string type, string instance) const {
 int Visualizer::_configureLighting(){
 	const ViewpointParams* vpParams = getActiveViewpointParams();
 	size_t nLights = vpParams->getNumLights();
-    assert(nLights <= 1);
+    VAssert(nLights <= 1);
     LegacyGL *lgl = _glManager->legacy;
 
 	float lightDir[4];
@@ -650,7 +650,7 @@ bool Visualizer::_getPixelData(unsigned char* data) const
 
 void Visualizer::_deleteFlaggedRenderers()
 {
-    assert(_insideGLContext);
+    VAssert(_insideGLContext);
 
     for (auto it = _renderersToDestroy.begin(); it != _renderersToDestroy.end(); ++it) {
 
@@ -663,7 +663,7 @@ void Visualizer::_deleteFlaggedRenderers()
 
 int Visualizer::_initializeNewRenderers()
 {
-    assert(_insideGLContext);
+    VAssert(_insideGLContext);
     for (Renderer *r : _renderers) {
         if (!r->IsGLInitialized() && r->initializeGL(_glManager) < 0) {
             MyBase::SetErrMsg("Failed to initialize renderer %s", r->GetInstanceName().c_str());
@@ -677,7 +677,7 @@ int Visualizer::_initializeNewRenderers()
 
 void Visualizer::_clearFramebuffer()
 {
-    assert(_insideGLContext);
+    VAssert(_insideGLContext);
     double clr[3];
     getActiveAnnotationParams()->GetBackgroundColor(clr);
     
@@ -720,7 +720,7 @@ void Visualizer::_incrementPath(string& s){
     }
 	//Find digits (before .tif or .jpg)
 	size_t lastpos = s1.find_last_not_of("0123456789");
-	assert(lastpos < s1.length());
+	VAssert(lastpos < s1.length());
 	string s2 = s1.substr(lastpos+1);
 	int val = stol(s2);
 	//Convert val+1 to a string, with leading zeroes, of same length as s2.

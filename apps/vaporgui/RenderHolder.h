@@ -126,7 +126,7 @@ private:
  RenderHolder() {}
 
  GUIStateParams *_getStateParams() const {
-	assert(_controlExec != NULL);
+	VAssert(_controlExec != NULL);
 	return (
 		(GUIStateParams *) _controlExec->
 		GetParamsMgr()->GetParams(GUIStateParams::GetClassType())

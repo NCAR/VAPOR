@@ -346,7 +346,7 @@ void VizWin::_mousePressEventNavigate(QMouseEvent* e)
 
 	double posvec[3], upvec[3], dirvec[3];
 	bool status = vParams->ReconstructCamera(m, posvec, upvec, dirvec);
-	assert(status);
+	VAssert(status);
 
 	// Set trackball from current ViewpointParams matrix;
 	//

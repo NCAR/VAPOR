@@ -122,7 +122,7 @@ bool compare(DC *dc1, DC *dc2, size_t nts, string varname, double &nlmax_all) {
 	rc = dc2->GetDimLensAtLevel(varname, -1, dims2, bs2);
 	if (rc<0) return(false);
 
-	assert(dims == dims2);
+	VAssert(dims == dims2);
 
 	size_t nelements = 1;
 	for (int i=0; i<dims.size(); i++) {
@@ -145,7 +145,7 @@ bool compare(DC *dc1, DC *dc2, size_t nts, string varname, double &nlmax_all) {
 
 		DC::DataVar datavar;
 		bool ok = dc1->GetDataVarInfo(varname, datavar);
-		assert(ok);
+		VAssert(ok);
 
 		float mv = 0.0;
 		bool hasMissing = datavar.GetHasMissing();
@@ -248,7 +248,7 @@ int	main(int argc, char **argv) {
 	for (int i=0; i<varnames.size(); i++) {
 		int nts = dc1->GetNumTimeSteps(varnames[i]);
 		nts = opt.numts != -1 && nts > opt.numts ? opt.numts : nts;
-		assert(nts >= 0);
+		VAssert(nts >= 0);
 
 		if (! opt.quiet) {
 			cout << "Testing variable " << varnames[i] << endl;

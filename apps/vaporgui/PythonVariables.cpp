@@ -985,7 +985,7 @@ int PythonVariables::_checkForDuplicateNames(
 void PythonVariables::InitControlExec(
     VAPoR::ControlExec* ce
 ) {
-    assert(ce);
+    VAssert(ce);
     _controlExec = ce;
 }
 

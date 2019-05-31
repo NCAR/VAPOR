@@ -186,7 +186,7 @@ void TFWidget::loadTF() {
 	sP->SetTFDir(fileName);
 
 	MapperFunction *tf = _rParams->GetMapperFunc(varname);
-	assert(tf);
+	VAssert(tf);
     
     float cachedMin = tf->getMinMapValue();
     float cachedMax = tf->getMaxMapValue();
@@ -268,7 +268,7 @@ void TFWidget::saveTF() {
 	if (varname.empty()) return;
 
 	MapperFunction *tf = _rParams->GetMapperFunc(varname);
-	assert(tf);
+	VAssert(tf);
 
 	int rc = tf->SaveToFile(s.toStdString());
 	if (rc<0) {
@@ -315,7 +315,7 @@ void TFWidget::getVariableRange(
 		return;
     }
 	
-    assert(rangev.size() == 2);
+    VAssert(rangev.size() == 2);
 
 	range[0] = rangev[0];
 	range[1] = rangev[1];
@@ -329,7 +329,7 @@ void TFWidget::calculateStride( string varName ) {
     std::vector<size_t> dimsAtLevel;
 	int ref = _rParams->GetRefinementLevel();
     int rc = _dataMgr->GetDimLensAtLevel(varName, ref, dimsAtLevel);
-    assert(rc>=0);
+    VAssert(rc>=0);
 
     long size = 1;
     for (int i=0; i<dimsAtLevel.size(); i++)
@@ -350,7 +350,7 @@ float TFWidget::getOpacity()
 	string varName = getTFVariableName(mainTF);
 
 	MapperFunction *tf = _rParams->GetMapperFunc(varName);
-	assert(tf);
+	VAssert(tf);
 
 	return tf->getOpacityScale();
 }
@@ -527,9 +527,9 @@ void TFWidget::Update(DataMgr *dataMgr,
 					RenderParams *rParams,
                     bool internalUpdate) {
 
-	assert(paramsMgr);
-	assert(dataMgr);
-	assert(rParams);
+	VAssert(paramsMgr);
+	VAssert(dataMgr);
+	VAssert(rParams);
 
 	_paramsMgr = paramsMgr;
 	_dataMgr = dataMgr;
@@ -837,7 +837,7 @@ void TFWidget::opacitySliderChanged(int value)
 		mainTF = false;
 	string varName = getTFVariableName(mainTF);
 	MapperFunction *tf = _rParams->GetMapperFunc(varName);
-	assert(tf);
+	VAssert(tf);
     tf->setOpacityScale(convertSliderValueToOpacity(value));
     emit emitChange();
 }
@@ -1038,14 +1038,14 @@ MapperFunction* TFWidget::getMainMapperFunction() {
 	bool mainTF = true;
 	string varname = getTFVariableName(mainTF);
 	MapperFunction *mf = _rParams->GetMapperFunc(varname);
-	assert(mf);
+	VAssert(mf);
 	return mf;
 }
 
 MapperFunction* TFWidget::getSecondaryMapperFunction() {
 	string varname = _rParams->GetColorMapVariableName();
 	MapperFunction *mf = _rParams->GetMapperFunc(varname);
-	assert(mf);
+	VAssert(mf);
 	return mf;
 }
 

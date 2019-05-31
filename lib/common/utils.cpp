@@ -26,12 +26,12 @@ size_t Wasp::LinearizeCoords(
 ) {
 	size_t offset = 0;
 
-	assert (min.size() == max.size());
-	assert (min.size() == max.size());
+	VAssert (min.size() == max.size());
+	VAssert (min.size() == max.size());
 
 	for (int i=0; i<coords.size(); i++) {
-		assert(coords[i] >= min[i]);
-		assert(coords[i] <= max[i]);
+		VAssert(coords[i] >= min[i]);
+		VAssert(coords[i] <= max[i]);
 	}
 
 	size_t factor = 1;
@@ -45,7 +45,7 @@ size_t Wasp::LinearizeCoords(
 size_t Wasp::LinearizeCoords(
 	const vector <size_t> &coords, const vector <size_t> &dims
 ) {
-	assert (coords.size() == dims.size());
+	VAssert (coords.size() == dims.size());
 	
 	vector <size_t> min(dims.size());
 	vector <size_t> max(dims.size());
@@ -63,18 +63,18 @@ vector <size_t> Wasp::VectorizeCoords(
 	const vector <size_t> &min,
 	const vector <size_t> &max
 ) {
-	assert (min.size() == max.size());
+	VAssert (min.size() == max.size());
 
 	vector <size_t> coords(min.size());
 
 	size_t factor = 1;
 	for (int i=0; i<coords.size(); i++) {
-		assert(min[i] <= max[i]);
+		VAssert(min[i] <= max[i]);
 		coords[i] = (offset % (factor * (max[i]-min[i]+1))) / factor;
 		offset = offset - coords[i] * factor;
 		factor *= (max[i]-min[i]+1);
 	}
-	assert(offset == 0);
+	VAssert(offset == 0);
 
 	return(coords);
 }
@@ -100,8 +100,8 @@ vector <size_t> Wasp::IncrementCoords(
 	vector <size_t> counter,
 	int dim
 ) {
-	assert(min.size() == max.size());
-	assert(min.size() == counter.size());
+	VAssert(min.size() == max.size());
+	VAssert(min.size() == counter.size());
 
 	for (int i=dim; i<counter.size(); i++) {
 		if (counter[i] < (max[i])) {
@@ -116,11 +116,11 @@ vector <size_t> Wasp::IncrementCoords(
 vector <size_t> Wasp::Dims(
 	const vector <size_t> &min, const vector <size_t> &max
 ) {
-	assert(min.size() == max.size());
+	VAssert(min.size() == max.size());
 	vector <size_t> dims;
 
 	for (int i=0; i<min.size(); i++) {
-		assert(min[i] <= max[i]);
+		VAssert(min[i] <= max[i]);
 		dims.push_back(max[i] - min[i] + 1);
 	}
 	return(dims);

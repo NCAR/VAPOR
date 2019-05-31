@@ -25,17 +25,17 @@ Grid::Grid(
     const std::vector <float *> &blks,
     size_t topology_dimension
 ) {
-	assert (dims.size() == bs.size());
-	assert (dims.size() <= 3);
+	VAssert (dims.size() == bs.size());
+	VAssert (dims.size() <= 3);
 
 	for (int i=0; i<bs.size(); i++) {
 
-		assert(bs[i] > 0);
-		assert(dims[i] > 0);
+		VAssert(bs[i] > 0);
+		VAssert(dims[i] > 0);
 
 		_bdims.push_back(((dims[i]-1) / bs[i]) + 1);
 	}
-	assert(
+	VAssert(
 		blks.size() == 0 ||	// dataless
 		blks.size() == std::accumulate(
 			_bdims.begin(), _bdims.end(), 1, std::multiplies<size_t>()
@@ -145,7 +145,7 @@ void Grid::GetRange(
 
 	const vector <size_t> &dims = GetDimensions();
 
-    assert(cMin.size() == cMax.size());
+    VAssert(cMin.size() == cMax.size());
 
 
 	float mv = GetMissingValue();
@@ -355,7 +355,7 @@ void Grid::ConstNodeIteratorSG::next() {
 	if (_index[2] < _dims[2] || _dims.size() == 3) {
 		return;
 	}
-	assert(0 && "Invalid state");
+	VAssert(0 && "Invalid state");
 
 }
 
@@ -471,7 +471,7 @@ void Grid::ConstCellIteratorSG::next() {
 	if (_index[2] < (_dims[2]) || _dims.size() == 3) {
 		return;
 	}
-	assert(0 && "Invalid state");
+	VAssert(0 && "Invalid state");
 
 }
 
@@ -764,7 +764,7 @@ template <class T>
 Grid::ForwardIterator<T> &Grid::ForwardIterator<T>::
 operator+=(const long int &offset) {
 
-	assert(offset >= 0);
+	VAssert(offset >= 0);
 
 	if (! _blks.size()) return(*this);
 

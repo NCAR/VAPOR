@@ -45,7 +45,7 @@ using namespace VAPoR;
 EventRouter::EventRouter(
 	ControlExec *ce, string paramsType
 ) {
-	assert(ce != NULL);
+	VAssert(ce != NULL);
 
 	_controlExec = ce;
 	_paramsType = paramsType;
@@ -54,7 +54,7 @@ EventRouter::EventRouter(
 
 ParamsBase *EventRouter::GetActiveParams() const {
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-	assert(paramsMgr);
+	VAssert(paramsMgr);
 
 		
 

@@ -434,7 +434,7 @@ Value VaporTable::GetValue(int row, int col) {
 	int nCols = _table->columnCount();
 
 	QWidget *widget = _table->cellWidget(row, col);
-	assert(widget);
+	VAssert(widget);
 
 	if ((col==nCols-1 && _lastColIsCheckboxes) ||
 		(row==nRows-1 && _lastRowIsCheckboxes)) 

@@ -73,8 +73,8 @@ VizWinMgr::VizWinMgr(
 ) : QObject (parent) {
 
 	_parent = parent;
-	assert(mdiArea);
-	assert(ce);
+	VAssert(mdiArea);
+	VAssert(ce);
 
     _mdiArea = mdiArea;
 	_controlExec = ce;
@@ -263,7 +263,7 @@ vector <string> VizWinMgr::_getVisualizerNames() const {
 //Method to enable closing of a vizWin
 void VizWinMgr::_killViz(string vizName){
 	
-	assert(_vizWindow.find(vizName) != _vizWindow.end());
+	VAssert(_vizWindow.find(vizName) != _vizWindow.end());
 
 	_mdiArea->removeSubWindow(_vizMdiWin[vizName]);
 
@@ -302,7 +302,7 @@ void VizWinMgr::_vizAboutToDisappear(string vizName)  {
 	if (itr == _vizWindow.end()) return;
 
 	std::map<string,QMdiSubWindow*>::iterator itr2 = _vizMdiWin.find(vizName);
-	assert(itr2 != _vizMdiWin.end());
+	VAssert(itr2 != _vizMdiWin.end());
 
 	GUIStateParams *p = _getStateParams();
 	string activeViz = p->GetActiveVizName();
@@ -365,8 +365,8 @@ void VizWinMgr::Shutdown() {
 	for (int i=0; i<vizNames.size(); i++) {
 		_killViz(vizNames[i]);
 	}
-	assert(_vizMdiWin.empty());
-	assert(_vizWindow.empty());
+	VAssert(_vizMdiWin.empty());
+	VAssert(_vizWindow.empty());
 
 	_initialized = false;
 }
@@ -401,8 +401,8 @@ void VizWinMgr::Reinit() {
 
 	vector <double> minExts, maxExts;
 	dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
-	assert(minExts.size() == 3);
-	assert(maxExts.size() == 3);
+	VAssert(minExts.size() == 3);
+	VAssert(maxExts.size() == 3);
 
 	double scale[3];
 	scale[0] = scale[1] = scale[2] = max(

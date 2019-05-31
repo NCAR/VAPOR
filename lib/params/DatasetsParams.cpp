@@ -99,7 +99,7 @@ void DatasetsParams::SetScript(
 
 		_datasets->Insert(&sParams, datasetName);
 		s = (DatasetParams*) _datasets->GetParams(datasetName);
-		assert(s);
+		VAssert(s);
 	}
 
 	s->SetScript(
@@ -219,7 +219,7 @@ void DatasetParams::SetScript(
 
 		_scripts->Insert(&sParams, name);
 		s = (ScriptParams*) _scripts->GetParams(name);
-		assert(s);
+		VAssert(s);
 	}
 
 	s->SetScript(

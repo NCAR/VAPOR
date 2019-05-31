@@ -37,8 +37,8 @@ void block_align(
 	astart = start;
 	acount = count;
 
-	assert(start.size() == count.size());
-	assert(start.size() == bs.size());
+	VAssert(start.size() == count.size());
+	VAssert(start.size() == bs.size());
 
 	for (int i=0; i<start.size(); i++) {
 		size_t stop = astart[i] + acount[i] - 1;
@@ -65,11 +65,11 @@ vector <size_t> compressor_bs(vector <size_t> bs) {
 // vector subtraction. Return a - b
 //
 vector <size_t> vector_sub(const vector <size_t> &a, const vector <size_t> &b) {
-	assert(a.size() == b.size());
+	VAssert(a.size() == b.size());
 
 	vector <size_t> c;
 	for (int i=0; i<a.size(); i++) {
-		assert(a[i]>=b[i]);
+		VAssert(a[i]>=b[i]);
 		c.push_back(a[i]-b[i]);
 	}
 	return(c);
@@ -122,13 +122,13 @@ vectorinc::vectorinc(
 	vector <size_t> dims,
 	vector <size_t> inc
 ) {
-	assert(start.size() == count.size());
-	assert(start.size() == dims.size());
-	assert(start.size() == inc.size());
+	VAssert(start.size() == count.size());
+	VAssert(start.size() == dims.size());
+	VAssert(start.size() == inc.size());
 
 	for (int i=0; i<start.size(); i++) {
 		_end.push_back(start[i] + count[i]);
-		//assert(_end[i] <= dims[i]);
+		//VAssert(_end[i] <= dims[i]);
 	}
 		
 	_start = start;
@@ -159,7 +159,7 @@ vectorinc::vectorinc(
 void vectorinc::ith(
 	size_t index, vector <size_t> &start, size_t &offset
 ) const {
-	assert (index < _num);
+	VAssert (index < _num);
 
 	start.clear();
 	offset = 0;
@@ -271,7 +271,7 @@ void to_block_coords(
 	vector <size_t> &bcoords,
 	size_t &residual
 ) {
-	assert(vcoords.size() == bs.size());
+	VAssert(vcoords.size() == bs.size());
 
 	bcoords = vcoords;
 
@@ -304,7 +304,7 @@ void pad_line(
 	long index;
 	int inc;
 
-	assert(l1>0 && stride != 0);
+	VAssert(l1>0 && stride != 0);
 	if (l1==l2) return;
 
 	if (l1 == 1) {
@@ -449,7 +449,7 @@ size_t vproduct(vector <size_t> a) {
 // Elementwise difference between vector a and b (return (a-b));
 //
 vector <size_t> vdiff(vector <size_t> a, vector <size_t> b) {
-	assert(a.size() == b.size());
+	VAssert(a.size() == b.size());
 
 	vector <size_t> c(a.size(), 0);
 
@@ -484,9 +484,9 @@ void Block(
 	min = 0;
 	max = 0;
 
-	assert(dims.size() >= 1 && dims.size() <= 4);
-	assert(dims.size() == start.size());
-	assert(dims.size() == bs.size());
+	VAssert(dims.size() >= 1 && dims.size() <= 4);
+	VAssert(dims.size() == start.size());
+	VAssert(dims.size() == bs.size());
 
 	size_t offset = linearize_coords(start, dims);
 	data += offset;
@@ -648,10 +648,10 @@ void UnBlock(
 	vector <size_t> origin, 
 	vector <size_t> start
 ) {
-	assert(dims.size() >= 1 && dims.size() <= 4);
-	assert(dims.size() == start.size());
-	assert(dims.size() == bs.size());
-	assert(dims.size() == origin.size());
+	VAssert(dims.size() >= 1 && dims.size() <= 4);
+	VAssert(dims.size() == start.size());
+	VAssert(dims.size() == bs.size());
+	VAssert(dims.size() == origin.size());
 
 	// Deal with block dimensions of length 1
 	//
@@ -936,7 +936,7 @@ int StoreBlockCompressed(
 	// Current code assumes each wavelet decomposition is stored in a 
 	// different file
 	//
-	assert(ncdfcptrs.size() >= ncoeffs.size());
+	VAssert(ncdfcptrs.size() >= ncoeffs.size());
 	for (int i=0; i<ncoeffs.size(); i++) {
 		start[start.size()-1] = i==0 ? BLK_HDR_SZ : 0;	// skip header
 		count[start.size()-1] = ncoeffs[i];
@@ -951,7 +951,7 @@ int StoreBlockCompressed(
 		// Sigmap size (in words) is difference between encoded_dims and 
 		// number of coefficients
 		//
-		assert(encoded_dims[i] >= ncoeffs[i]);
+		VAssert(encoded_dims[i] >= ncoeffs[i]);
 		size_t n = encoded_dims[i] - ncoeffs[i];
 
 		if (i==0) n-=BLK_HDR_SZ;	// adjust for header
@@ -1059,7 +1059,7 @@ int FetchBlockCompressed(
 	// Current code assumes each wavelet decomposition is stored in a 
 	// different file
 	//
-	assert(ncdfcptrs.size() >= ncoeffs.size());
+	VAssert(ncdfcptrs.size() >= ncoeffs.size());
 	for (int i=0; i<ncoeffs.size(); i++) {
 		start[start.size()-1] = i==0 ? BLK_HDR_SZ : 0;	// skip header
 		count[start.size()-1] = ncoeffs[i];
@@ -1074,7 +1074,7 @@ int FetchBlockCompressed(
 		// Sigmap size (in words) is difference between encoded_dims and 
 		// number of coefficients
 		//
-		assert(encoded_dims[i] >= ncoeffs[i]);
+		VAssert(encoded_dims[i] >= ncoeffs[i]);
 		size_t n = encoded_dims[i] - ncoeffs[i];
 		if (i==0) n-=BLK_HDR_SZ;
 
@@ -1147,7 +1147,7 @@ void *RunWriteThreadTemplate(thread_state &s, T dummy)
 		vector <size_t> bcoords;
 		size_t residual;
 		to_block_coords(start, s._bs, bcoords, residual);
-		assert(residual == 0);
+		VAssert(residual == 0);
 
 		// Write the transformed block to disk. Need a mutex because
 		// NetCDF library is not thread safe
@@ -1188,7 +1188,7 @@ void *RunWriteThread(void *arg) {
 		return(RunWriteThreadTemplate(s, dummy));
 	}
 	default:
-		assert(0);
+		VAssert(0);
 		return(NULL);
 	}
 }
@@ -1248,7 +1248,7 @@ void *RunWriteThreadCompressedTemplate(thread_state &s, T dummy1, U dummy2) {
 		vector <size_t> bcoords;
 		size_t residual;
 		to_block_coords(start, s._bs, bcoords, residual);
-		assert(residual == 0);
+		VAssert(residual == 0);
 
 		// Write the transformed block to disk. Need a mutex because
 		// NetCDF library is not thread safe
@@ -1271,7 +1271,7 @@ void *RunWriteThreadCompressedTemplate(thread_state &s, T dummy1, U dummy2) {
 void *RunWriteThreadCompressed(void *arg) {
 	thread_state &s = *(thread_state *) arg;
 
-	assert(s._block_type == NC_INT64 || s._block_type == NC_DOUBLE);
+	VAssert(s._block_type == NC_INT64 || s._block_type == NC_DOUBLE);
 
 	// Establish types for template functions. Data types aren't preserved
 	// when passed in thread_state, which must be cast to void to support
@@ -1342,7 +1342,7 @@ void *RunWriteThreadCompressed(void *arg) {
 	break;
 	default:
 		cerr << "Data type " << s._data_type << endl;
-		assert(0 && s._data_type);
+		VAssert(0 && s._data_type);
 		return(NULL);
 	}
 }
@@ -1377,7 +1377,7 @@ void *RunReadThreadTemplate(thread_state &s, T dummy) {
 		vector <size_t> bcoords;
 		size_t residual;
 		to_block_coords(start, s._bs, bcoords, residual);
-		assert(residual == 0);
+		VAssert(residual == 0);
 
 		// Transform coordinates from global to the region-of-interest
 		//
@@ -1440,7 +1440,7 @@ void *RunReadThread(void *arg) {
 		return(RunReadThreadTemplate(s, dummy));
 	}
 	default:
-		assert(0);
+		VAssert(0);
 		return(NULL);
 	}
 }
@@ -1477,7 +1477,7 @@ void *RunReadThreadCompressedTemplate(thread_state &s, T dummy1, U dummy2) {
 		vector <size_t> bcoords;
 		size_t residual;
 		to_block_coords(start, s._bs, bcoords, residual);
-		assert(residual == 0);
+		VAssert(residual == 0);
 
 		// Read wavelet coefficients from disk. Need a mutex because
 		// NetCDF API is not thread safe
@@ -1533,7 +1533,7 @@ void *RunReadThreadCompressedTemplate(thread_state &s, T dummy1, U dummy2) {
 void *RunReadThreadCompressed(void *arg) {
 	thread_state &s = *(thread_state *) arg;
 
-	assert(s._block_type == NC_INT64 || s._block_type == NC_DOUBLE);
+	VAssert(s._block_type == NC_INT64 || s._block_type == NC_DOUBLE);
 
 	// Establish types for template functions. Data types aren't preserved
 	// when passed in thread_state, which must be cast to void to support
@@ -1597,7 +1597,7 @@ void *RunReadThreadCompressed(void *arg) {
 		}
 	}
 	default:
-		assert(0);
+		VAssert(0);
 		return(NULL);
 	}
 }
@@ -2188,7 +2188,7 @@ void WASP::_dims_at_level(
 	while (bs_at_level.size() != dims.size()) {
 		bs_at_level.insert(bs_at_level.begin(), 1);
 	}
-	assert(dims.size() == bs_at_level.size());
+	VAssert(dims.size() == bs_at_level.size());
 
 	dims_at_level = dims;
 	int  ldelta = cmp.GetNumLevels() - level;
@@ -2439,7 +2439,7 @@ int WASP::OpenVarRead(string name, int level, int lod) {
 		for (int i=0; i<_nthreads; i++) {
 			_open_compressors[i] = new Compressor(compressor_bs(bs), wname);
 		}
-		assert(_nthreads >= 1);
+		VAssert(_nthreads >= 1);
 		numlevels = _open_compressors[0]->GetNumLevels();
 	}
 	else {
@@ -2501,7 +2501,7 @@ bool WASP::_validate_put_vara_compressed(
 	if (start.size() != udims.size() || count.size() != udims.size()) {
         return(false);
 	}
-	assert (bs.size() == start.size());
+	VAssert (bs.size() == start.size());
 
 	for (int i=0; i<count.size(); i++) {
 		if (count[i] < 1 || count[i] > udims[i]) return(false);
@@ -2541,7 +2541,7 @@ bool WASP::_validate_get_vara_compressed(
 	if (start.size() != udims.size() || count.size() != udims.size()) {
         return(false);
 	}
-	assert (bs.size() == start.size());
+	VAssert (bs.size() == start.size());
 
 	if (unblock) {
 		for (int i=0; i<count.size(); i++) {
@@ -2685,7 +2685,7 @@ int WASP::_PutVara(
 		return(NetCDFCpp::PutVara(_open_varname, start, count, data));
 	}
 
-	assert(_open_compressors.size() != 0);
+	VAssert(_open_compressors.size() != 0);
 	if (_open_compressors[0] && _open_compressors[0]->wavelet()->isint()) {
 		long dummy = 0;
 		return(_PutVara(start, count, data, mask, dummy));
@@ -3002,7 +3002,7 @@ int WASP::_GetVara(
 		return(NetCDFCpp::GetVara(_open_varname, start, count, data));
 	}
 
-    assert(_open_compressors.size() != 0);
+    VAssert(_open_compressors.size() != 0);
 	if (_open_compressors[0] && _open_compressors[0]->wavelet()->isint()) {
 		long dummy = 0;
 		return(_GetVara(start, count, unblock_flag, data, dummy));
@@ -3288,7 +3288,7 @@ int WASP::CopyVar(string varname, WASP &wasp) {
 	if (! dst_waspvar) {
 		return(this->CopyVarTo(varname, wasp));
 	}
-	assert(src_waspvar && dst_waspvar);
+	VAssert(src_waspvar && dst_waspvar);
 
 	rc = WASP::OpenVarRead(varname, -1, -1);
 	if (rc<0) return(-1);
@@ -3361,7 +3361,7 @@ int WASP::_GetCompressedDims(
 	vector <size_t> &encoded_dims
 ) const {
 
-	assert(dimnames.size() == bs.size());
+	VAssert(dimnames.size() == bs.size());
 
 	cdimnames.clear();
 	cdims.clear();
@@ -3506,7 +3506,7 @@ void WASP::_get_encoding_vectors(
 			encoded_dims.push_back(header_size+n+s);
 		}
 		else {
-			assert (naccum == ntotal);
+			VAssert (naccum == ntotal);
 
 			// Special case. Don't need to explicitly store sigmap
 			//
