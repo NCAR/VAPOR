@@ -100,6 +100,16 @@ int main(int argc, char **argv) {
 #endif
     QApplication a(argc, argv, true);
 
+    // All C programs are run with the locale set to "C"
+    // Initalizing QApplication changes the locale to the system configuration
+    // which can cause problems if it is not supported.
+    // Udunits does not support it and vapor potentially does not either.
+    //
+    // https://www.gnu.org/software/libc/manual/html_node/Setting-the-Locale.html
+    // https://doc.qt.io/qt-5/qcoreapplication.html#locale-settings
+    //
+    setlocale(LC_ALL, "C");
+
     // Set path for Qt to look for its plugins.
     //
     QString filePath = GetResourcePath("plugins").c_str();
