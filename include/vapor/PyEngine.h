@@ -26,7 +26,7 @@ public:
     //
     PyEngine(DataMgr *dataMgr)
     {
-        assert(dataMgr != NULL);
+        VAssert(dataMgr != NULL);
         _dataMgr = dataMgr;
     }
 

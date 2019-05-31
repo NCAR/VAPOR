@@ -162,7 +162,7 @@ public:
     //!
     string GetName() const
     {
-        assert(_node);
+        VAssert(_node);
         return (_node->Tag());
     }
 

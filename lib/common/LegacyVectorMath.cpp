@@ -1,6 +1,6 @@
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
-#include <VAssert.h>
+#include "vapor/VAssert.h"
 #include <float.h>
 #include <string>
 #include <cmath>

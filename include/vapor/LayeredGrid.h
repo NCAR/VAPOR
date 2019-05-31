@@ -124,7 +124,7 @@ public:
     //
     virtual void SetPeriodic(const std::vector<bool> &periodic) override
     {
-        assert(periodic.size() == 3);
+        VAssert(periodic.size() == 3);
         std::vector<bool> myPeriodic = periodic;
         myPeriodic[2] = false;
         Grid::SetPeriodic(myPeriodic);

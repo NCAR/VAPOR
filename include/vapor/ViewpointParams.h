@@ -171,7 +171,7 @@ public:
     virtual Viewpoint *getCurrentViewpoint() const
     {
         Viewpoint *v = (Viewpoint *)m_VPs->GetParams(_currentViewTag);
-        assert(v != NULL);
+        VAssert(v != NULL);
         return (v);
     }
 
@@ -188,7 +188,7 @@ public:
     void SetModelViewMatrix(const double matrix[16]) { getCurrentViewpoint()->SetModelViewMatrix(matrix); }
     void SetModelViewMatrix(const std::vector<double> mvec)
     {
-        assert(mvec.size() == 16);
+        VAssert(mvec.size() == 16);
         double m[16];
         for (int i = 0; i < mvec.size(); i++) m[i] = mvec[i];
         getCurrentViewpoint()->SetModelViewMatrix(m);
@@ -204,7 +204,7 @@ public:
     void GetRotationCenter(double c[3]) const
     {
         vector<double> val = GetRotationCenter();
-        assert(val.size() == 3);
+        VAssert(val.size() == 3);
         for (int i = 0; i < val.size(); i++) c[i] = val[i];
     }
 

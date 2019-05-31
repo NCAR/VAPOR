@@ -148,7 +148,7 @@ public:
 		const vector<double>& minExt, const vector<double>& maxExt, 
 		int timestep = -1
 	) {
-		assert(minExt.size() == maxExt.size() && minExt.size() == 3);
+		VAssert(minExt.size() == maxExt.size() && minExt.size() == 3);
 		vector <double> extents = minExt;
 		extents.insert(extents.end(), maxExt.begin(), maxExt.end());
 		SetLocalExtents(extents, timestep);
@@ -289,7 +289,7 @@ private:
 		double extents[6], bool rotated = false
 	) const {
 
-		assert( ! rotated);
+		VAssert( ! rotated);
 		if (!rotated) GetStretchedLocalExtents(extents,-1);
 		//else calcRotatedStretchedBoxExtents(extents);
 
