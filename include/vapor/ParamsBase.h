@@ -202,7 +202,7 @@ public:
  //! Method for obtaining the name and/or tag associated with the instance
  //!
  string GetName() const {
-	assert(_node);
+	VAssert(_node);
 	return(_node->Tag());
  }
 
