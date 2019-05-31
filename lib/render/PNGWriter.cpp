@@ -1,4 +1,5 @@
 #include "vapor/PNGWriter.h"
+#include "vapor/VAssert.h"
 
 #define USE_PYTHON_PNG 1
 
