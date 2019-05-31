@@ -417,6 +417,7 @@ int find_nearest(const vector <double> &timeCoords, double time) {
 		}
 	}
 	assert(0);
+    return -1;
 }
 };
 
