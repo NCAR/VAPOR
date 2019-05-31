@@ -22,8 +22,8 @@ class RENDER_API CalcEngineMgr : public Wasp::MyBase {
     //! variables created by this class will be managed.
     //
     CalcEngineMgr(DataStatus *dataStatus, ParamsMgr *paramsMgr) {
-        assert(dataStatus != NULL);
-        assert(paramsMgr != NULL);
+        VAssert(dataStatus != NULL);
+        VAssert(paramsMgr != NULL);
 
         _dataStatus = dataStatus;
         _paramsMgr = paramsMgr;

@@ -98,8 +98,8 @@ class VDF_API KDTreeRG {
       public:
         // Constructor
         PointCloud2D(const Grid &xg, const Grid &yg) {
-            assert(xg.GetDimensions() == yg.GetDimensions());
-            assert(xg.GetDimensions().size() <= 2);
+            VAssert(xg.GetDimensions() == yg.GetDimensions());
+            VAssert(xg.GetDimensions().size() <= 2);
 
             // number of elements
             std::vector<size_t> dims = xg.GetDimensions();
@@ -121,7 +121,7 @@ class VDF_API KDTreeRG {
 
         // Must return the number of data points
         inline size_t kdtree_get_point_count() const {
-            assert(X.size() == Y.size());
+            VAssert(X.size() == Y.size());
             return X.size();
         }
 
