@@ -390,24 +390,27 @@ DC::Mesh::Mesh(
 	_dim_names.push_back(layers_dim_name);
 }
 
-size_t DC::Mesh::GetTopologyDim() const {
-	switch (_mtype) {
-	case STRUCTURED:
-		return(_dim_names.size());
-	break;
-	case UNSTRUC_2D:
-		return(2);
-	break;
-	case UNSTRUC_LAYERED:
-		return(3);
-	break;
-	case UNSTRUC_3D:
-		return(3);
-	break;
-	default:
-		assert(0 && "Invalid mesh type");
-	break;
-	}
+size_t DC::Mesh::GetTopologyDim() const 
+{
+    switch (_mtype) 
+    {
+        case STRUCTURED:
+            return(_dim_names.size());
+            break;
+        case UNSTRUC_2D:
+            return(2);
+            break;
+        case UNSTRUC_LAYERED:
+            return(3);
+            break;
+        case UNSTRUC_3D:
+            return(3);
+            break;
+        default:
+            assert(false);
+            return (0);
+            break;
+    }
 }
 
 DC::DC() {
