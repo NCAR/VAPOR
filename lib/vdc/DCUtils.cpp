@@ -21,7 +21,7 @@
 #endif
 
 #include <iostream>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <algorithm>
 
 

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstdarg>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cmath>
 #include <cstdio>
 #include <sys/stat.h>

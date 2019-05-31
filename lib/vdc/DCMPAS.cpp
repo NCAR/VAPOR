@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <map>
 #include <iostream>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <stdio.h>
 
 #ifdef _WINDOWS

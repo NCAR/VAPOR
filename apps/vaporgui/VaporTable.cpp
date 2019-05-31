@@ -17,7 +17,7 @@
 
 #include <QtGui>
 #include <iostream>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <stdlib.h>
 #include "VaporTable.h"
 

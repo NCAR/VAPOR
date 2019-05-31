@@ -2,7 +2,7 @@
 #include <sstream>
 #include <iterator>
 #include <algorithm>
-#include <cassert>
+#include "vapor/VAssert.h"
 #ifdef WIN32
 #include "vapor/udunits2.h"
 #else

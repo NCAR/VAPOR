@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cmath>
 #include <time.h>
 #ifdef  Darwin

@@ -1,7 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <list>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <vapor/BlkMemMgr.h>
 #include <vapor/DC.h>
 #include <vapor/MyBase.h>
