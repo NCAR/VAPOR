@@ -68,7 +68,7 @@ namespace VAPoR {
     class VolumeAlgorithmRegistrar : public VolumeAlgorithmFactory {
     public:
         VolumeAlgorithmRegistrar() {
-            static_VAssert(std::is_base_of<VolumeAlgorithm, T>::value, "Register is not derived from VolumeAlgorithm");
+            static_assert(std::is_base_of<VolumeAlgorithm, T>::value, "Register is not derived from VolumeAlgorithm");
             name = T::GetName();
             type = T::GetType();
             VolumeAlgorithm::Register(this);
