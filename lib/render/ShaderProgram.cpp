@@ -26,7 +26,7 @@ int ShaderProgram::Link()
 {
     if (_linked) { return 1; }
     _id = glCreateProgram();
-    assert(_id);
+    VAssert(_id);
     for (auto it = _shaders.begin(); it != _shaders.end(); it++) {
         if (*it == nullptr || !(*it)->WasCompilationSuccessful()) { return -1; }
         glAttachShader(_id, (*it)->GetID());
@@ -102,13 +102,13 @@ template<typename T> bool ShaderProgram::SetUniform(const std::string &name, con
     //    if ((typeid(T) == typeid(int)) && _samplerLocations.count(name)) printf("%s set to %i\n", name.c_str(), *(int*)((void*)&value));
 
     if (!IsBound()) {
-        assert(!"Program not bound");
+        VAssert(!"Program not bound");
         return false;
     }
     const int location = glGetUniformLocation(_id, name.c_str());
     if (location == -1) {
         // printf("Uniform \"%s\" not found\n", name.c_str());
-        if (UniformNotFoundPolicy == Policy::Strict) assert(!"Uniform name not found");
+        if (UniformNotFoundPolicy == Policy::Strict) VAssert(!"Uniform name not found");
         return false;
     }
     SetUniform(location, value);
@@ -208,7 +208,7 @@ void ShaderProgram::ComputeSamplerLocations()
         glGetActiveUniform(_id, i, 128, &nameLength, &size, &type, name);
         if (IsGLTypeSampler(type)) _samplerLocations[string(name)] = samplerId++;
     }
-    assert(samplerId <= GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS - 1);
+    VAssert(samplerId <= GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS - 1);
 }
 
 const char *ShaderProgram::GLTypeToString(const unsigned int type)

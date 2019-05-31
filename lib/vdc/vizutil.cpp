@@ -120,7 +120,7 @@ void VAPoR::BaryTet(const Point3d &p, const Point3d &a, const Point3d &b, const 
     temp = vac.cross(vad);
     v = vab.dot(temp) * frecip;
 
-    assert(v != 0.0);
+    VAssert(v != 0.0);
     double vrecip = 1.0 / v;
 
     ans.x = va * vrecip;
@@ -150,7 +150,7 @@ void VAPoR::BaryTri(const Point3d &p, const Point3d &a, const Point3d &b, const 
     nc = vab.cross(vap);
 
     double nrecip = n.dot(n);
-    assert(nrecip != 0);
+    VAssert(nrecip != 0);
     nrecip = 1.0 / nrecip;
 
     ans.x = n.dot(na) * nrecip;
@@ -267,7 +267,7 @@ bool VAPoR::WachspressCoords2D(const double verts[], const double pt[], int n, d
 
 bool VAPoR::InsideConvexPolygon(const double verts[], const double pt[], int n)
 {
-    assert(n >= 3);
+    VAssert(n >= 3);
 
     // Partition the convex polygon into a triangle fan, testing each triangle
     // to see if it contains the point

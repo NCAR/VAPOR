@@ -96,7 +96,7 @@ bool name_in(string name, const vector<string> &names) { return (find(names.begi
 //
 void get_compressed_dims(const vector<string> &dimnames, const vector<size_t> &dimlens, vector<string> &cdimnames, vector<size_t> &cdimlens)
 {
-    assert(dimnames.size() == dimlens.size());
+    VAssert(dimnames.size() == dimlens.size());
     cdimnames = dimnames;
     cdimlens = dimlens;
 
@@ -128,7 +128,7 @@ vector<size_t> get_bs(const vector<string> &dimnames, const vector<size_t> &dims
     vector<size_t> cdims;
     get_compressed_dims(dimnames, dims, cdimnames, cdims);
 
-    assert(cdims.size() == 2 || cdims.size() == 3);
+    VAssert(cdims.size() == 2 || cdims.size() == 3);
 
     if (cdims.size() == 3) return (opt.bs);
 
@@ -150,7 +150,7 @@ vector<size_t> get_cratios(const vector<string> &dimnames, const vector<size_t> 
     vector<size_t> cdims;
     get_compressed_dims(dimnames, dims, cdimnames, cdims);
 
-    assert(cdims.size() == 2 || cdims.size() == 3);
+    VAssert(cdims.size() == 2 || cdims.size() == 3);
 
     if (cdims.size() == 3) return (opt.cratios);
 
@@ -178,7 +178,7 @@ int DefFile(const NetCDFCpp &ncdf, WASP &wasp)
     int rc = ncdf.InqDims(dimnames, dimlens);
     if (rc < 0) return (-1);
 
-    assert(dimnames.size() == dimlens.size());
+    VAssert(dimnames.size() == dimlens.size());
 
     for (int i = 0; i < dimnames.size(); i++) {
         rc = wasp.DefDim(dimnames[i], dimlens[i]);

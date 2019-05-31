@@ -83,7 +83,7 @@ void DatasetsParams::SetScript(string datasetName, string name, string script, c
 
         _datasets->Insert(&sParams, datasetName);
         s = (DatasetParams *)_datasets->GetParams(datasetName);
-        assert(s);
+        VAssert(s);
     }
 
     s->SetScript(name, script, inputVarNames, outputVarNames, outputVarMeshes, coordFlag);
@@ -176,7 +176,7 @@ void DatasetParams::SetScript(string name, string script, const vector<string> &
 
         _scripts->Insert(&sParams, name);
         s = (ScriptParams *)_scripts->GetParams(name);
-        assert(s);
+        VAssert(s);
     }
 
     s->SetScript(script, inputVarNames, outputVarNames, outputVarMeshes, coordFlag);

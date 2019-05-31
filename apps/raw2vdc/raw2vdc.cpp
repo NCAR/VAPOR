@@ -164,7 +164,7 @@ int main(int argc, char **argv)
 
     vector<size_t> dimlens;
     bool           ok = vdc.GetVarDimLens(opt.varname, true, dimlens);
-    assert(ok == true);
+    VAssert(ok == true);
 
     size_t ntotal = 1;
     for (int i = 0; i < dimlens.size(); i++) { ntotal *= dimlens[i]; }

@@ -13,7 +13,7 @@ Framebuffer::~Framebuffer()
 
 int Framebuffer::Generate()
 {
-    assert(!Initialized());
+    VAssert(!Initialized());
 
     glGenFramebuffers(1, &_id);
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
@@ -58,7 +58,7 @@ const char *Framebuffer::GetStatusString() const
 
 void Framebuffer::Bind()
 {
-    assert(Initialized());
+    VAssert(Initialized());
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
 }
 
@@ -66,7 +66,7 @@ void Framebuffer::UnBind() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 
 void Framebuffer::SetSize(int width, int height)
 {
-    assert(Initialized());
+    VAssert(Initialized());
 
     width = width <= 0 ? 1 : width;
     height = height <= 0 ? 1 : height;
@@ -86,7 +86,7 @@ int Framebuffer::MakeRenderTarget()
     if (!IsComplete()) {
         Wasp::MyBase::SetErrMsg("Incomplete framebuffer: %s\n", GetStatusString());
         UnBind();
-        assert(false);
+        VAssert(false);
         return -1;
     }
 
@@ -96,21 +96,21 @@ int Framebuffer::MakeRenderTarget()
 
 void Framebuffer::EnableDepthBuffer()
 {
-    assert(!Initialized());
+    VAssert(!Initialized());
     _hasDepthBuffer = true;
 }
 
 const Texture2D *Framebuffer::GetColorTexture() const
 {
-    assert(Initialized());
+    VAssert(Initialized());
     return &_colorBuffer;
 }
 
 const Texture2D *Framebuffer::GetDepthTexture() const
 {
-    assert(Initialized());
+    VAssert(Initialized());
     if (!_hasDepthBuffer) {
-        assert(!"Depth buffer requested from Framebuffer that does not have one");
+        VAssert(!"Depth buffer requested from Framebuffer that does not have one");
         return nullptr;
     }
     return &_depthBuffer;

@@ -251,7 +251,7 @@ size_t NetCDFSimple::DimLen(string name) const
 {
     vector<string> names;
     vector<size_t> dims;
-    assert(dims.size() == names.size());
+    VAssert(dims.size() == names.size());
 
     NetCDFSimple::GetDimensions(names, dims);
     for (int i = 0; i < names.size(); i++) {

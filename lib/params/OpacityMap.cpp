@@ -319,7 +319,7 @@ bool OpacityMap::inDataBounds(float value) const { return (value >= minValue() &
 
 void OpacityMap::SetDataBounds(const vector<double> &bounds)
 {
-    assert(bounds.size() == 2);
+    VAssert(bounds.size() == 2);
 
     SetValueDoubleVec(_dataBoundsTag, "Set min max map value", bounds);
 }

@@ -32,7 +32,7 @@ char *copy_create_arg_string(char **argv, int argc)
         len++; /* one for the space	*/
     }
     s = (char *)malloc(len + 1);
-    assert(s != NULL);
+    VAssert(s != NULL);
 
     s = strcpy(s, argv[0]);
     for (i = 1, t = s; i < argc; i++) {

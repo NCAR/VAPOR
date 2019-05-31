@@ -91,7 +91,7 @@ vector<float *> alloc_blocks(const vector<size_t> &bs, const vector<size_t> &dim
     for (int i = 0; i < bs.size(); i++) {
         block_size *= bs[i];
 
-        assert(dims[i] > 0);
+        VAssert(dims[i] > 0);
         size_t nb = ((dims[i] - 1) / bs[i]) + 1;
 
         nblocks *= nb;
@@ -108,10 +108,10 @@ vector<float *> alloc_blocks(const vector<size_t> &bs, const vector<size_t> &dim
 
 VAPoR::RegularGrid *make_regular_grid()
 {
-    assert(opt.bs.size() == opt.minu.size());
-    assert(opt.bs.size() == opt.maxu.size());
-    assert(opt.bs.size() == opt.dims.size());
-    assert(opt.bs.size() == opt.periodic.size());
+    VAssert(opt.bs.size() == opt.minu.size());
+    VAssert(opt.bs.size() == opt.maxu.size());
+    VAssert(opt.bs.size() == opt.dims.size());
+    VAssert(opt.bs.size() == opt.periodic.size());
 
     vector<float *> blks = alloc_blocks(opt.bs, opt.dims);
 
@@ -122,10 +122,10 @@ VAPoR::RegularGrid *make_regular_grid()
 
 VAPoR::StretchedGrid *make_stretched_grid()
 {
-    assert(opt.bs.size() == opt.minu.size());
-    assert(opt.bs.size() == opt.maxu.size());
-    assert(opt.bs.size() == opt.dims.size());
-    assert(opt.bs.size() == opt.periodic.size());
+    VAssert(opt.bs.size() == opt.minu.size());
+    VAssert(opt.bs.size() == opt.maxu.size());
+    VAssert(opt.bs.size() == opt.dims.size());
+    VAssert(opt.bs.size() == opt.periodic.size());
 
     vector<float *> blks = alloc_blocks(opt.bs, opt.dims);
 
@@ -145,11 +145,11 @@ VAPoR::StretchedGrid *make_stretched_grid()
 
 VAPoR::LayeredGrid *make_layered_grid()
 {
-    assert(opt.bs.size() == 3);
-    assert(opt.bs.size() == opt.minu.size());
-    assert(opt.bs.size() == opt.maxu.size());
-    assert(opt.bs.size() == opt.dims.size());
-    assert(opt.bs.size() == opt.periodic.size());
+    VAssert(opt.bs.size() == 3);
+    VAssert(opt.bs.size() == opt.minu.size());
+    VAssert(opt.bs.size() == opt.maxu.size());
+    VAssert(opt.bs.size() == opt.dims.size());
+    VAssert(opt.bs.size() == opt.periodic.size());
 
     vector<float *> zblks = alloc_blocks(opt.bs, opt.dims);
 
@@ -175,11 +175,11 @@ VAPoR::LayeredGrid *make_layered_grid()
 
 VAPoR::CurvilinearGrid *make_curvilinear_grid()
 {
-    assert(opt.bs.size() == 3);
-    assert(opt.bs.size() == opt.minu.size());
-    assert(opt.bs.size() == opt.maxu.size());
-    assert(opt.bs.size() == opt.dims.size());
-    assert(opt.bs.size() == opt.periodic.size());
+    VAssert(opt.bs.size() == 3);
+    VAssert(opt.bs.size() == opt.minu.size());
+    VAssert(opt.bs.size() == opt.maxu.size());
+    VAssert(opt.bs.size() == opt.dims.size());
+    VAssert(opt.bs.size() == opt.periodic.size());
 
     vector<size_t> bs2d = {opt.bs[0], opt.bs[1]};
     vector<size_t> dims2d = {opt.dims[0], opt.dims[1]};
@@ -220,11 +220,11 @@ VAPoR::CurvilinearGrid *make_curvilinear_grid()
 
 VAPoR::CurvilinearGrid *make_curvilinear_terrain_grid()
 {
-    assert(opt.bs.size() == 3);
-    assert(opt.bs.size() == opt.minu.size());
-    assert(opt.bs.size() == opt.maxu.size());
-    assert(opt.bs.size() == opt.dims.size());
-    assert(opt.bs.size() == opt.periodic.size());
+    VAssert(opt.bs.size() == 3);
+    VAssert(opt.bs.size() == opt.minu.size());
+    VAssert(opt.bs.size() == opt.maxu.size());
+    VAssert(opt.bs.size() == opt.dims.size());
+    VAssert(opt.bs.size() == opt.periodic.size());
 
     vector<size_t> bs2d = {opt.bs[0], opt.bs[1]};
     vector<size_t> dims2d = {opt.dims[0], opt.dims[1]};

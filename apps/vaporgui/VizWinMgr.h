@@ -139,21 +139,21 @@ private:
 
     GUIStateParams *_getStateParams() const
     {
-        assert(_controlExec != NULL);
+        VAssert(_controlExec != NULL);
         VAPoR::ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
         return ((GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType()));
     }
 
     AnimationParams *_getAnimationParams() const
     {
-        assert(_controlExec != NULL);
+        VAssert(_controlExec != NULL);
         VAPoR::ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
         return ((AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType()));
     }
 
     VAPoR::ViewpointParams *_getViewpointParams(string winName) const
     {
-        assert(_controlExec != NULL);
+        VAssert(_controlExec != NULL);
         VAPoR::ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
         return (paramsMgr->GetViewpointParams(winName));
     }

@@ -73,10 +73,10 @@ void vdc_2_ncdfcoords(size_t ts0, size_t ts1, bool time_varying, const vector<si
     start.clear();
     count.clear();
 
-    assert(min.size() == max.size());
+    VAssert(min.size() == max.size());
     ;
-    assert(max.size() <= 3);
-    assert(ts1 >= ts0);
+    VAssert(max.size() <= 3);
+    VAssert(ts1 >= ts0);
 
     if (time_varying) {
         start.push_back(ts0);
@@ -84,7 +84,7 @@ void vdc_2_ncdfcoords(size_t ts0, size_t ts1, bool time_varying, const vector<si
     }
 
     for (int i = min.size() - 1; i >= 0; i--) {
-        assert(max[i] >= min[i]);
+        VAssert(max[i] >= min[i]);
         start.push_back(min[i]);
         count.push_back(max[i] - min[i] + 1);
     }
@@ -268,7 +268,7 @@ int VDCNetCDF::GetPath(string varname, size_t ts, string &path, size_t &file_ts,
         int           idx;
         ostringstream oss;
         size_t        numts = dimensions[dimensions.size() - 1].GetLength();
-        assert(numts > 0);
+        VAssert(numts > 0);
         max_ts = _variable_threshold / ngridpoints;
         if (max_ts > numts) max_ts = numts;
         if (max_ts == 0) {
@@ -322,7 +322,7 @@ int VDCNetCDF::getDimLensAtLevel(string varname, int level, vector<size_t> &dims
 
     vector<size_t> bs = _bs;
     while (bs.size() > dimlens.size()) { bs.pop_back(); }
-    assert(bs.size() == dimlens.size());
+    VAssert(bs.size() == dimlens.size());
 
     if (varinfo.IsCompressed()) {
         string wname = varinfo.GetWName();
@@ -636,7 +636,7 @@ template<class T> int VDCNetCDF::_writeSliceTemplate(int fd, const T *slice)
     size_t         nslice;
     rc = GetHyperSliceInfo(varname, level, hslice_dims, nslice);
     if (rc < 0) return (rc);
-    assert(hslice_dims.size() == dims_at_level.size());
+    VAssert(hslice_dims.size() == dims_at_level.size());
 
     int slice_num = o->GetSlice();
     if (slice_num >= nslice) return (0);    // Done writing;
@@ -884,8 +884,8 @@ int VDCNetCDF::_copyVar0d(DC &dc, size_t ts, const BaseVar &varInfo)
 template<class T>
 int VDCNetCDF::_copyVarHelper(DC &dc, int fdr, int fdw, vector<size_t> &buffer_dims, vector<size_t> &src_hslice_dims, vector<size_t> &dst_hslice_dims, size_t src_nslice, size_t dst_nslice, T *buffer)
 {
-    assert(buffer_dims.size() == src_hslice_dims.size());
-    assert(buffer_dims.size() == dst_hslice_dims.size());
+    VAssert(buffer_dims.size() == src_hslice_dims.size());
+    VAssert(buffer_dims.size() == dst_hslice_dims.size());
 
     size_t dim = buffer_dims.size() - 1;
 
@@ -1656,7 +1656,7 @@ int VDCNetCDF::_DefBaseVar(WASP *wasp, const VDC::BaseVar &var, size_t max_ts)
 {
     vector<VDC::Dimension> dims;
     bool                   status = GetVarDimensions(var.GetName(), false, dims);
-    assert(status);
+    VAssert(status);
 
     bool time_varying = IsTimeVarying(var.GetName());
 
@@ -1737,7 +1737,7 @@ int VDCNetCDF::_DefDataVar(WASP *wasp, const VDC::DataVar &var, size_t max_ts)
 
     vector<string> coord_vars;
     bool           status = GetVarCoordVars(var.GetName(), false, coord_vars);
-    assert(status);
+    VAssert(status);
 
     rc = wasp->PutAtt(var.GetName(), "CoordVars", coord_vars);
     if (rc < 0) return (-1);
@@ -1818,7 +1818,7 @@ bool VDCNetCDF::_var_in_master(const VDC::BaseVar &var) const
 {
     vector<DC::Dimension> dims;
     bool                  ok = GetVarDimensions(var.GetName(), false, dims);
-    assert(ok);
+    VAssert(ok);
 
     bool time_varying = IsTimeVarying(var.GetName());
 

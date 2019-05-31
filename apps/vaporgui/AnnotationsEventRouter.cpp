@@ -145,7 +145,7 @@ void AnnotationsEventRouter::confirmText()
 
 #ifdef VAPOR3_0_0_ALPHA
     AnnotationsParams *defParams = (AnnotationsParams *)_paramsMgr->GetDefaultParams(Params::_visualizerFeaturesParamsTag);
-    assert(defParams);
+    VAssert(defParams);
     Command *cmd = Command::CaptureStart(vParams, "vizfeature text edit", AnnotationsParams::UndoRedo, defParams);
 
 #endif
@@ -296,7 +296,7 @@ void AnnotationsEventRouter::copyRegionFromRenderer()
 
     ParamsMgr *   paramsMgr = _controlExec->GetParamsMgr();
     RenderParams *copyParams = paramsMgr->GetRenderParams(visualizer, dataSetName, renType, renderer);
-    assert(copyParams);
+    VAssert(copyParams);
 
     Box *               copyBox = copyParams->GetBox();
     std::vector<double> minExtents, maxExtents;
@@ -380,7 +380,7 @@ void AnnotationsEventRouter::updateLatLonCheckbox()
     string      dmName = dataMgrSelectorCombo->currentText().toStdString();
     DataStatus *dataStatus = _controlExec->GetDataStatus();
     DataMgr *   dataMgr = dataStatus->GetDataMgr(dmName);
-    assert(dataMgr);
+    VAssert(dataMgr);
     string projString = dataMgr->GetMapProjection();
 
     if (projString.size() == 0) {

@@ -55,7 +55,7 @@ public:
         auto itr = _modes.cbegin();
         for (; itr != _modes.cend(); ++itr)
             if (itr->name == name) break;
-        assert(itr != _modes.end());
+        VAssert(itr != _modes.end());
         return itr->icon;
     }
 

@@ -64,7 +64,7 @@ void WaveFiltCoif::_analysis_initialize(int member)
     case 3: pFilterCoef = coif3; break;
     case 4: pFilterCoef = coif4; break;
     case 5: pFilterCoef = coif5; break;
-    default: assert(pFilterCoef != NULL);
+    default: VAssert(pFilterCoef != NULL);
     }
 
     wrev(pFilterCoef, _lowDecomFilCoef, _filterLength);
@@ -87,7 +87,7 @@ void WaveFiltCoif::_synthesis_initialize(int member)
     case 3: pFilterCoef = coif3; break;
     case 4: pFilterCoef = coif4; break;
     case 5: pFilterCoef = coif5; break;
-    default: assert(pFilterCoef != NULL);
+    default: VAssert(pFilterCoef != NULL);
     }
 
     verbatim_copy(pFilterCoef, _lowReconFilCoef, _filterLength);

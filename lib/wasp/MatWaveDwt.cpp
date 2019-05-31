@@ -224,7 +224,7 @@ template<class T, class U> int wextend_1D_center(const T *sigIn, size_t sigInLen
 //
 void forward_xform(const double *sigIn, size_t sigInLen, const double *low_filter, const double *high_filter, int filterLen, double *cA, double *cD, bool oddlow, bool oddhigh)
 {
-    //	assert(sigInLen > filterLen);
+    //	VAssert(sigInLen > filterLen);
 
     size_t xlstart = oddlow ? 1 : 0;
     size_t xl;
@@ -255,7 +255,7 @@ void inverse_xform_even(const double *cA, const double *cD, size_t sigOutLen, co
     size_t xi;    // input and out signal indecies
     int    k;     // filter index
 
-    assert((filterLen % 2) == 0);
+    VAssert((filterLen % 2) == 0);
 
     for (size_t yi = 0; yi < sigOutLen; yi++) {
         sigOut[yi] = 0.0;
@@ -298,7 +298,7 @@ void inverse_xform_odd(const double *cA, const double *cD, size_t sigOutLen, con
     size_t xi;    // input and out signal indecies
     int    k;     // filter index
 
-    assert((filterLen % 2) == 1);
+    VAssert((filterLen % 2) == 1);
 
     for (size_t yi = 0; yi < sigOutLen; yi++) {
         sigOut[yi] = 0.0;
@@ -472,7 +472,7 @@ int dwt_template(MatWaveDwt *dwt, const T *sigIn, size_t sigInLen, const WaveFil
         forward_xform(s, L[0] + L[1], wf->GetLowDecomFilCoef(), wf->GetHighDecomFilCoef(), filterLen, cAdbl, cDdbl, oddlow, oddhigh);
     } else {
         const WaveFiltInt *wfi = dynamic_cast<const WaveFiltInt *>(wf);
-        assert(wfi != NULL);
+        VAssert(wfi != NULL);
 
         const long *s = (const long *)sigExtended;
         long *      cAlong = (long *)sigConvolved;
@@ -680,7 +680,7 @@ int idwt_template(MatWaveDwt *dwt, const T *cA, const T *cD, const size_t L[3], 
         inverse_xform(cAdbl, cDdbl, L[2], wf->GetLowReconFilCoef(), wf->GetHighReconFilCoef(), filterLen, s, !do_sym_conv);
     } else {
         const WaveFiltInt *wfi = dynamic_cast<const WaveFiltInt *>(wf);
-        assert(wfi != NULL);
+        VAssert(wfi != NULL);
 
         const long *cAlong = (const long *)cATemp;
         const long *cDlong = (const long *)cDTemp;

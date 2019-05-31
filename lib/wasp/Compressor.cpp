@@ -159,7 +159,7 @@ int compress_template(Compressor *cmp, const T *src_arr, T *dst_arr, size_t dst_
     }
     if (rc < 0) return (-1);
 
-    assert(dst_arr_len >= numkeep);
+    VAssert(dst_arr_len >= numkeep);
 
     rc = sigmap->Reshape(clen);
     if (rc < 0) return (-1);

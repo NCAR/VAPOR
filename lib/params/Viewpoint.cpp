@@ -71,7 +71,7 @@ void Viewpoint::GetModelViewMatrix(double m[16]) const
     for (int i = 0; i < 16; i++) defaultv.push_back(_defaultModelViewMatrix[i]);
 
     vector<double> val = GetValueDoubleVec(_modelViewMatrixTag, defaultv);
-    assert(val.size() == 16);
+    VAssert(val.size() == 16);
 
     for (int i = 0; i < val.size(); i++) m[i] = val[i];
 }
@@ -98,7 +98,7 @@ void Viewpoint::GetProjectionMatrix(double m[16]) const
     for (int i = 0; i < 16; i++) defaultv.push_back(_defaultProjectionMatrix[i]);
 
     vector<double> val = GetValueDoubleVec(_projectionMatrixTag, defaultv);
-    assert(val.size() == 16);
+    VAssert(val.size() == 16);
 
     for (int i = 0; i < val.size(); i++) m[i] = val[i];
 }

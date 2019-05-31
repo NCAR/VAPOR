@@ -128,7 +128,7 @@ void grid2c(const vector<varinfo_t> &varInfoVec, const vector<float *> &inputVar
         Grid::ConstIterator itr = g->cbegin();
         Grid::ConstIterator enditr = g->cend();
 
-        assert(idx < inputVarArrays.size());
+        VAssert(idx < inputVarArrays.size());
         float *bufptr = inputVarArrays[idx];
 
         // Copy data. Missing values are always set to infinity for
@@ -146,7 +146,7 @@ void grid2c(const vector<varinfo_t> &varInfoVec, const vector<float *> &inputVar
 
         idx++;
         for (int j = 0; j < vref._coordNames.size(); j++) {
-            assert(idx < inputVarArrays.size());
+            VAssert(idx < inputVarArrays.size());
             float *bufptr = inputVarArrays[idx];
 
             copy_coord(g, vref._coordAxes[j], bufptr);
@@ -160,7 +160,7 @@ void get_var_info(DataMgr *dataMgr, const vector<Grid *> &gs, const vector<strin
 {
     varinfoVec.clear();
 
-    assert(gs.size() == varNames.size());
+    VAssert(gs.size() == varNames.size());
 
     // Need to keep track of all coordinate variables. We generate a
     // unique list
@@ -186,11 +186,11 @@ void get_var_info(DataMgr *dataMgr, const vector<Grid *> &gs, const vector<strin
 
         DC::DataVar dvar;
         bool        ok = dataMgr->GetDataVarInfo(varNames[i], dvar);
-        assert(ok);
+        VAssert(ok);
 
         DC::Mesh m;
         ok = dataMgr->GetMesh(dvar.GetMeshName(), m);
-        assert(ok);
+        VAssert(ok);
 
         vector<string> coordNames = m.GetCoordVars();
         for (int j = 0; j < coordNames.size(); j++) {
@@ -201,7 +201,7 @@ void get_var_info(DataMgr *dataMgr, const vector<Grid *> &gs, const vector<strin
 
             DC::CoordVar cvar;
             ok = dataMgr->GetCoordVarInfo(coordNames[j], cvar);
-            assert(ok);
+            VAssert(ok);
 
             varinfo._coordNames.push_back(coordNames[j]);
             varinfo._coordAxes.push_back(cvar.GetAxis());
@@ -231,7 +231,7 @@ int PyEngine::Initialize()
 
 int PyEngine::AddFunction(string name, string script, const vector<string> &inputVarNames, const vector<string> &outputVarNames, const vector<string> &outputVarMeshes, bool coordFlag)
 {
-    assert(outputVarNames.size() == outputVarMeshes.size());
+    VAssert(outputVarNames.size() == outputVarMeshes.size());
 
     // cout << "PyEngine::AddFunction() " << name << endl;
     // cout << "	" << script << endl;
@@ -289,7 +289,7 @@ void PyEngine::RemoveFunction(string name)
     const func_c &                    func = itr->second;
     const vector<string> &            outputVarNames = func._outputVarNames;
     const vector<DerivedPythonVar *> &dvars = func._derivedVars;
-    assert(outputVarNames.size() == dvars.size());
+    VAssert(outputVarNames.size() == dvars.size());
 
     for (int i = 0; i < outputVarNames.size(); i++) {
         _dataMgr->RemoveDerivedVar(outputVarNames[i]);
@@ -363,10 +363,10 @@ PyEngine::~PyEngine()
 int PyEngine::Calculate(const string &script, vector<string> inputVarNames, vector<vector<size_t>> inputVarDims, vector<float *> inputVarArrays, vector<string> outputVarNames,
                         vector<vector<size_t>> outputVarDims, vector<float *> outputVarArrays)
 {
-    assert(inputVarNames.size() == inputVarDims.size());
-    assert(inputVarNames.size() == inputVarArrays.size());
-    assert(outputVarNames.size() == outputVarDims.size());
-    assert(outputVarNames.size() == outputVarArrays.size());
+    VAssert(inputVarNames.size() == inputVarDims.size());
+    VAssert(inputVarNames.size() == inputVarArrays.size());
+    VAssert(outputVarNames.size() == outputVarDims.size());
+    VAssert(outputVarNames.size() == outputVarArrays.size());
 
     vector<string> allNames = inputVarNames;
     allNames.insert(allNames.end(), outputVarNames.begin(), outputVarNames.end());
@@ -382,7 +382,7 @@ int PyEngine::Calculate(const string &script, vector<string> inputVarNames, vect
     }
 
     PyObject *mainDict = PyModule_GetDict(mainModule);
-    assert(mainDict != NULL);
+    VAssert(mainDict != NULL);
 
     // Copy arrays into python environment
     //
@@ -429,7 +429,7 @@ int PyEngine::_c2python(PyObject *dict, vector<string> inputVarNames, vector<vec
 {
     npy_intp pyDims[3];
     for (int i = 0; i < inputVarNames.size(); i++) {
-        assert(inputVarDims[i].size() >= 1 && inputVarDims[i].size() <= 3);
+        VAssert(inputVarDims[i].size() >= 1 && inputVarDims[i].size() <= 3);
 
         const vector<size_t> &dims = inputVarDims[i];
         for (int j = 0; j < dims.size(); j++) { pyDims[dims.size() - j - 1] = dims[j]; }
@@ -521,7 +521,7 @@ int PyEngine::DerivedPythonVar::Initialize()
     for (int i = 0; i < dimNames.size(); i++) {
         DC::Dimension dim;
         status = _dataMgr->GetDimension(dimNames[i], dim);
-        assert(status);
+        VAssert(status);
 
         _dims.push_back(dim.GetLength());
     }
@@ -545,7 +545,7 @@ int PyEngine::DerivedPythonVar::Initialize()
     if (_meshMatchFlag && _inNames.size()) {
         DC::DataVar dvar;
         bool        ok = _dataMgr->GetDataVarInfo(_inNames[0], dvar);
-        assert(ok);
+        VAssert(ok);
         _varInfo.SetCRatios(dvar.GetCRatios());
     }
 
@@ -562,7 +562,7 @@ int PyEngine::DerivedPythonVar::GetDimLensAtLevel(int level, std::vector<size_t>
 {
     if (_meshMatchFlag && _inNames.size()) {
         int rc = _dataMgr->GetDimLensAtLevel(_inNames[0], level, dims_at_level);
-        assert(rc >= 0);
+        VAssert(rc >= 0);
     } else {
         dims_at_level = _dims;
     }

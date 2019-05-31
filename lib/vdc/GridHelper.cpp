@@ -36,7 +36,7 @@ bool isUnstructuredLayered(const DC::Mesh &m, const vector<DC::CoordVar> &cvarsi
 
 bool isRegular(const DC::Mesh &m, const vector<DC::CoordVar> &cvarsinfo, const vector<vector<string>> &cdimnames)
 {
-    assert(cvarsinfo.size() == cdimnames.size());
+    VAssert(cvarsinfo.size() == cdimnames.size());
 
     for (int i = 0; i < cdimnames.size(); i++) {
         if (!(cdimnames[i].size() == 1 && cvarsinfo[i].GetUniform())) { return (false); }
@@ -46,7 +46,7 @@ bool isRegular(const DC::Mesh &m, const vector<DC::CoordVar> &cvarsinfo, const v
 
 bool isStretched(const DC::Mesh &m, const vector<DC::CoordVar> &cvarsinfo, const vector<vector<string>> &cdimnames)
 {
-    assert(cvarsinfo.size() == cdimnames.size());
+    VAssert(cvarsinfo.size() == cdimnames.size());
 
     // All dimensions need to be 1D and at least one non-uniform
     //
@@ -65,7 +65,7 @@ bool isStretched(const DC::Mesh &m, const vector<DC::CoordVar> &cvarsinfo, const
 
 bool isLayered(const DC::Mesh &m, const vector<DC::CoordVar> &cvarsinfo, const vector<vector<string>> &cdimnames)
 {
-    assert(cvarsinfo.size() == cdimnames.size());
+    VAssert(cvarsinfo.size() == cdimnames.size());
 
     if (cdimnames.size() != 3) return (false);
 
@@ -78,7 +78,7 @@ bool isLayered(const DC::Mesh &m, const vector<DC::CoordVar> &cvarsinfo, const v
 
 bool isCurvilinear(const DC::Mesh &m, const vector<DC::CoordVar> &cvarsinfo, const vector<vector<string>> &cdimnames)
 {
-    assert(cvarsinfo.size() == cdimnames.size());
+    VAssert(cvarsinfo.size() == cdimnames.size());
 
     if (!(cdimnames.size() == 2 || cdimnames.size() == 3)) return (false);
 
@@ -96,8 +96,8 @@ using namespace Wasp;
 
 const KDTreeRG *GridHelper::_getKDTree2D(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const Grid &xg, const Grid &yg, const vector<size_t> &bmin, const vector<size_t> &bmax)
 {
-    assert(cvarsinfo.size() >= 2);
-    assert(xg.GetDimensions() == yg.GetDimensions());
+    VAssert(cvarsinfo.size() >= 2);
+    VAssert(xg.GetDimensions() == yg.GetDimensions());
 
     vector<string> varnames;
     for (int i = 0; i < cvarsinfo.size(); i++) { varnames.push_back(cvarsinfo[i].GetName()); }
@@ -137,9 +137,9 @@ RegularGrid *GridHelper::_make_grid_regular(const vector<size_t> &dims, const ve
 
 ) const
 {
-    assert(dims.size() == bs.size());
-    assert(dims.size() == bmin.size());
-    assert(dims.size() == bmax.size());
+    VAssert(dims.size() == bs.size());
+    VAssert(dims.size() == bmin.size());
+    VAssert(dims.size() == bmax.size());
 
     vector<double> minu, maxu;
     for (int i = 0; i < dims.size(); i++) {
@@ -169,9 +169,9 @@ StretchedGrid *GridHelper::_make_grid_stretched(const vector<size_t> &dims, cons
 
 ) const
 {
-    assert(dims.size() == bs.size());
-    assert(dims.size() == bmin.size());
-    assert(dims.size() == bmax.size());
+    VAssert(dims.size() == bs.size());
+    VAssert(dims.size() == bmin.size());
+    VAssert(dims.size() == bmax.size());
 
     size_t nblocks = 1;
     size_t block_size = 1;
@@ -203,11 +203,11 @@ StretchedGrid *GridHelper::_make_grid_stretched(const vector<size_t> &dims, cons
 
 LayeredGrid *GridHelper::_make_grid_layered(const vector<size_t> &dims, const vector<float *> &blkvec, const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax) const
 {
-    assert(bs.size() == bmin.size());
-    assert(bs.size() == bmax.size());
-    assert(dims.size() == bs.size());
-    assert(dims.size() == bmin.size());
-    assert(dims.size() == bmax.size());
+    VAssert(bs.size() == bmin.size());
+    VAssert(bs.size() == bmax.size());
+    VAssert(dims.size() == bs.size());
+    VAssert(dims.size() == bmin.size());
+    VAssert(dims.size() == bmax.size());
 
     // Get horizontal dimensions
     //
@@ -253,11 +253,11 @@ LayeredGrid *GridHelper::_make_grid_layered(const vector<size_t> &dims, const ve
 CurvilinearGrid *GridHelper::_make_grid_curvilinear(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const vector<size_t> &dims, const vector<float *> &blkvec,
                                                     const vector<size_t> &bs, const vector<size_t> &bmin, const vector<size_t> &bmax)
 {
-    assert(bs.size() == bmin.size());
-    assert(bs.size() == bmax.size());
-    assert(dims.size() == bs.size());
-    assert(dims.size() == bmin.size());
-    assert(dims.size() == bmax.size());
+    VAssert(bs.size() == bmin.size());
+    VAssert(bs.size() == bmax.size());
+    VAssert(dims.size() == bs.size());
+    VAssert(dims.size() == bmin.size());
+    VAssert(dims.size() == bmax.size());
 
     // Data blocks
     //
@@ -340,13 +340,13 @@ UnstructuredGrid2D *GridHelper::_make_grid_unstructured2d(size_t ts, int level, 
                                                           const vector<size_t> &vertexDims, const vector<size_t> &faceDims, const vector<size_t> &edgeDims, UnstructuredGrid::Location location,
                                                           size_t maxVertexPerFace, size_t maxFacePerVertex, long vertexOffset, long faceOffset)
 {
-    assert(dims.size() == 1);
-    assert(dims.size() == bs.size());
-    assert(dims.size() == bmin.size());
-    assert(dims.size() == bmax.size());
-    assert(blkvec.size() == 3);
+    VAssert(dims.size() == 1);
+    VAssert(dims.size() == bs.size());
+    VAssert(dims.size() == bmin.size());
+    VAssert(dims.size() == bmax.size());
+    VAssert(blkvec.size() == 3);
 
-    assert(conn_blkvec.size() >= 2);
+    VAssert(conn_blkvec.size() >= 2);
 
     // block pointers for data
     //
@@ -417,13 +417,13 @@ UnstructuredGridLayered *GridHelper::_make_grid_unstructured_layered(size_t ts, 
                                                                      const vector<size_t> &vertexDims, const vector<size_t> &faceDims, const vector<size_t> &edgeDims,
                                                                      UnstructuredGrid::Location location, size_t maxVertexPerFace, size_t maxFacePerVertex, long vertexOffset, long faceOffset)
 {
-    assert(dims.size() == 2);
-    assert(dims.size() == bs.size());
-    assert(dims.size() == bmin.size());
-    assert(dims.size() == bmax.size());
-    assert(blkvec.size() == 4);
+    VAssert(dims.size() == 2);
+    VAssert(dims.size() == bs.size());
+    VAssert(dims.size() == bmin.size());
+    VAssert(dims.size() == bmax.size());
+    VAssert(blkvec.size() == 4);
 
-    assert(conn_blkvec.size() >= 2);
+    VAssert(conn_blkvec.size() >= 2);
 
     // block pointers for data
     //
@@ -509,7 +509,7 @@ UnstructuredGridLayered *GridHelper::_make_grid_unstructured_layered(size_t ts, 
 
 void GridHelper::_makeGridHelper(const DC::DataVar &var, const vector<size_t> &roi_dims, const vector<size_t> &dims, Grid *g) const
 {
-    assert(roi_dims.size() == dims.size());
+    VAssert(roi_dims.size() == dims.size());
 
     vector<bool> has_periodic = var.GetPeriodic();
     vector<bool> periodic;

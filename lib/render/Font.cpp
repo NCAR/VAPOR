@@ -13,11 +13,11 @@ Font::Font(GLManager *glManager, const std::string &path, int size, FT_Library l
 {
     if (library == nullptr) {
         int err = FT_Init_FreeType(&_library);
-        assert(!err);
+        VAssert(!err);
         library = _library;
     }
     int err = FT_New_Face(library, path.c_str(), 0, &_face);
-    assert(!err);
+    VAssert(!err);
     FT_Set_Pixel_Sizes(_face, 0, _size);
 
     glGenVertexArrays(1, &_VAO);

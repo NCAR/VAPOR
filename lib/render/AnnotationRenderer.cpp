@@ -254,10 +254,10 @@ void AnnotationRenderer::applyTransform(Transform *t)
     vector<double> origin = t->GetOrigin();
     vector<double> translate = t->GetTranslations();
     vector<double> rotate = t->GetRotations();
-    assert(translate.size() == 3);
-    assert(rotate.size() == 3);
-    assert(scale.size() == 3);
-    assert(origin.size() == 3);
+    VAssert(translate.size() == 3);
+    VAssert(rotate.size() == 3);
+    VAssert(scale.size() == 3);
+    VAssert(origin.size() == 3);
 
     _glManager->matrixManager->Translate(translate[0], translate[1], translate[2]);
 
@@ -680,7 +680,7 @@ void AnnotationRenderer::renderText(double text, double coord[], AxisAnnotation 
 
 void AnnotationRenderer::drawAxisArrows(vector<double> minExts, vector<double> maxExts, Transform *transform)
 {
-    assert(minExts.size() == maxExts.size());
+    VAssert(minExts.size() == maxExts.size());
     while (minExts.size() < 3) {
         minExts.push_back(0.0);
         maxExts.push_back(0.0);

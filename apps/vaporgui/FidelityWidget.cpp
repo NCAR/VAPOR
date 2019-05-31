@@ -53,7 +53,7 @@ FidelityWidget::FidelityWidget(QWidget *parent) : QWidget(parent), Ui_FidelityWi
 
 void FidelityWidget::setNumRefinements(int num)
 {
-    assert(_rParams);
+    VAssert(_rParams);
 
     _rParams->SetRefinementLevel(num);
 
@@ -66,9 +66,9 @@ void FidelityWidget::setNumRefinements(int num)
 //
 void FidelityWidget::setFidelity(int buttonID)
 {
-    assert(_rParams);
+    VAssert(_rParams);
 
-    assert(buttonID >= 0 && buttonID < _fidelityLodIdx.size());
+    VAssert(buttonID >= 0 && buttonID < _fidelityLodIdx.size());
 
     int lod = _fidelityLodIdx[buttonID];
     int ref = _fidelityMultiresIdx[buttonID];
@@ -106,7 +106,7 @@ void FidelityWidget::SetFidelityDefault()
 
 void FidelityWidget::getCmpFactors(string varname, vector<float> &lodCF, vector<string> &lodStr, vector<float> &multiresCF, vector<string> &multiresStr) const
 {
-    assert(!varname.empty());
+    VAssert(!varname.empty());
 
     lodCF.clear();
     lodStr.clear();
@@ -125,7 +125,7 @@ void FidelityWidget::getCmpFactors(string varname, vector<float> &lodCF, vector<
     for (int l = 0; l < numLevels; l++) {
         vector<size_t> dims_at_level;
         int            rc = _dataMgr->GetDimLensAtLevel(varname, l, dims_at_level);
-        assert(rc >= 0);
+        VAssert(rc >= 0);
 
         size_t        n = 1;
         ostringstream oss;
@@ -175,7 +175,7 @@ void FidelityWidget::uncheckFidelity()
 
 void FidelityWidget::setCompRatio(int num)
 {
-    assert(_rParams);
+    VAssert(_rParams);
 
     _rParams->SetCompressionLevel(num);
 
@@ -188,9 +188,9 @@ void FidelityWidget::setCompRatio(int num)
 
 void FidelityWidget::Update(const DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *rParams)
 {
-    assert(dataMgr);
-    assert(paramsMgr);
-    assert(rParams);
+    VAssert(dataMgr);
+    VAssert(paramsMgr);
+    VAssert(rParams);
 
     _dataMgr = dataMgr;
     _paramsMgr = paramsMgr;

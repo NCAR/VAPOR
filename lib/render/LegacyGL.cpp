@@ -24,13 +24,13 @@ LegacyGL::~LegacyGL()
 void LegacyGL::Initialize()
 {
     GL_ERR_BREAK();
-    assert(!_initialized);
+    VAssert(!_initialized);
 
     glGenVertexArrays(1, &_VAO);
     glGenBuffers(1, &_VBO);
 
-    assert(_VAO);
-    assert(_VBO);
+    VAssert(_VAO);
+    VAssert(_VBO);
 
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
@@ -51,7 +51,7 @@ void LegacyGL::Initialize()
 
 void LegacyGL::Begin(unsigned int mode)
 {
-    assert(!_insideBeginEndBlock);
+    VAssert(!_insideBeginEndBlock);
 
     if (mode == LGL_QUADS) {
         _emulateQuads = true;
@@ -65,7 +65,7 @@ void LegacyGL::Begin(unsigned int mode)
 void LegacyGL::End()
 {
     if (!_initialized) Initialize();
-    assert(_insideBeginEndBlock);
+    VAssert(_insideBeginEndBlock);
 
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
@@ -80,8 +80,8 @@ void LegacyGL::End()
     _shader->SetUniform("textureEnabled", _textureEnabled);
     _shader->SetUniform("lightDir", glm::make_vec3(_lightDir));
 
-    assert(glIsVertexArray(_VAO) == GL_TRUE);
-    assert(glIsBuffer(_VBO) == GL_TRUE);
+    VAssert(glIsVertexArray(_VAO) == GL_TRUE);
+    VAssert(glIsBuffer(_VBO) == GL_TRUE);
 
     glDrawArrays(_mode, 0, _vertices.size());
 
@@ -101,7 +101,7 @@ void LegacyGL::Vertex2f(float x, float y) { Vertex3f(x, y, 0); }
 
 void LegacyGL::Vertex3f(float x, float y, float z)
 {
-    assert(_insideBeginEndBlock);
+    VAssert(_insideBeginEndBlock);
     _vertices.push_back({x, y, z, _nx, _ny, _nz, _r, _g, _b, _a, _s, _t});
 
     if (_emulateQuads && _vertices.size() % 3 == 0) {

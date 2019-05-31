@@ -136,10 +136,10 @@ void process_volume(size_t ts, string varname, int level, int lod, VDCNetCDF &vd
 void process_region(size_t ts, string varname, int level, int lod, VDCNetCDF &vdc, FILE *fp, vector<size_t> dims, string type, const vector<int> &xregion, const vector<int> &yregion,
                     const vector<int> &zregion)
 {
-    assert(dims.size() >= 1 && dims.size() <= 3);
-    assert(xregion.size() == 2);
-    assert(yregion.size() == 2);
-    assert(zregion.size() == 2);
+    VAssert(dims.size() >= 1 && dims.size() <= 3);
+    VAssert(xregion.size() == 2);
+    VAssert(yregion.size() == 2);
+    VAssert(zregion.size() == 2);
 
     vector<size_t> min_bound;
     vector<size_t> max_bound;

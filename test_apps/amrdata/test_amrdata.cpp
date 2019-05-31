@@ -59,22 +59,22 @@ int main(int argc, char **argv)
 
     FlashHDFFile hdffile(argv[1]);
 
-    assert(hdffile.GetNumberOfDimensions() == 3);
+    VAssert(hdffile.GetNumberOfDimensions() == 3);
 
     int total_blocks = hdffile.GetNumberOfBlocks();
 
     int *gids = new int[total_blocks * 15];
-    assert(gids != NULL);
+    VAssert(gids != NULL);
 
     hdffile.GetGlobalIds(gids);
 
     float *bboxes = new float[total_blocks * 3 * 2];
-    assert(bboxes != NULL);
+    VAssert(bboxes != NULL);
 
     hdffile.GetBoundingBoxes(bboxes);
 
     int *refine_levels = new int[total_blocks];
-    assert(refine_levels != NULL);
+    VAssert(refine_levels != NULL);
 
     hdffile.GetRefineLevels(refine_levels);
 
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
     hdffile.GetCellDimensions(dim);
 
     float *variable = new float[total_blocks * dim[0] * dim[1] * dim[2]];
-    assert(variable != NULL);
+    VAssert(variable != NULL);
 
     hdffile.GetScalarVariable("vely", 0, total_blocks, variable);
 
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
     size = vdim[0] * vdim[1] * vdim[2];
 
     float *grid = new float[size];
-    assert(grid != NULL);
+    VAssert(grid != NULL);
 
     for (int i = 0; i < size; i++) { grid[i] = 1.0; }
 

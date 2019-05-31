@@ -60,7 +60,7 @@ vector<size_t> decimate_dims(const vector<size_t> &dims, int l)
 //
 template<typename T> void decimate1d(const vector<size_t> &src_bs, const T *src, T *dst)
 {
-    assert(src_bs.size() == 1);
+    VAssert(src_bs.size() == 1);
 
     vector<size_t> dst_bs;
     for (int i = 0; i < src_bs.size(); i++) { dst_bs.push_back(decimate_length(src_bs[i])); }
@@ -78,7 +78,7 @@ template<typename T> void decimate1d(const vector<size_t> &src_bs, const T *src,
         if (i == ni0 - 1 && ni0 % 2) iwgt = 1.0;    // odd i boundary
         float w = iwgt;
 
-        assert(w <= 1.0);
+        VAssert(w <= 1.0);
 
         dst[ii] += w * src[i];
         if (i % 2) ii++;
@@ -87,7 +87,7 @@ template<typename T> void decimate1d(const vector<size_t> &src_bs, const T *src,
 
 template<typename T> void decimate2d(const vector<size_t> &src_bs, const T *src, T *dst)
 {
-    assert(src_bs.size() == 2);
+    VAssert(src_bs.size() == 2);
 
     vector<size_t> dst_bs;
     for (int i = 0; i < src_bs.size(); i++) { dst_bs.push_back(decimate_length(src_bs[i])); }
@@ -113,7 +113,7 @@ template<typename T> void decimate2d(const vector<size_t> &src_bs, const T *src,
             if (i == ni0 - 1 && ni0 % 2) iwgt = 0.5;    // odd i boundary
             float w = iwgt + jwgt;
 
-            assert(w <= 1.0);
+            VAssert(w <= 1.0);
 
             dst[jj * ni1 + ii] += w * src[j * ni0 + i];
             if (i % 2) ii++;
@@ -124,7 +124,7 @@ template<typename T> void decimate2d(const vector<size_t> &src_bs, const T *src,
 
 template<typename T> void decimate3d(const vector<size_t> &src_bs, const T *src, T *dst)
 {
-    assert(src_bs.size() == 3);
+    VAssert(src_bs.size() == 3);
 
     vector<size_t> dst_bs;
     for (int i = 0; i < src_bs.size(); i++) { dst_bs.push_back(decimate_length(src_bs[i])); }
@@ -158,7 +158,7 @@ template<typename T> void decimate3d(const vector<size_t> &src_bs, const T *src,
                 if (i == ni0 - 1 && ni0 % 2) iwgt = 0.25;    // odd i boundary
                 float w = iwgt + jwgt + kwgt;
 
-                assert(w <= 1.0);
+                VAssert(w <= 1.0);
 
                 dst[kk * ni1 * nj1 + jj * ni1 + ii] += w * src[k * ni0 * nj0 + j * ni0 + i];
                 if (i % 2) ii++;
@@ -173,9 +173,9 @@ template<typename T> void decimate3d(const vector<size_t> &src_bs, const T *src,
 //
 template<typename T> void decimate(const vector<size_t> &bmin, const vector<size_t> &bmax, const vector<size_t> &src_bs, const T *src, T *dst)
 {
-    assert(bmin.size() == bmax.size());
-    assert(bmin.size() == src_bs.size());
-    assert(src_bs.size() >= 1 && src_bs.size() <= 3);
+    VAssert(bmin.size() == bmax.size());
+    VAssert(bmin.size() == src_bs.size());
+    VAssert(src_bs.size() >= 1 && src_bs.size() <= 3);
 
     vector<size_t> dst_bs;
     for (int i = 0; i < src_bs.size(); i++) { dst_bs.push_back(decimate_length(src_bs[i])); }
@@ -214,7 +214,7 @@ template<typename T> void decimate(const vector<size_t> &bmin, const vector<size
 
 void downsample_compute_weights(size_t nIn, size_t nOut, vector<float> &wgts)
 {
-    assert(nOut <= nIn);
+    VAssert(nOut <= nIn);
     wgts.resize(nOut, 0.0);
 
     float deltax = (float)nIn / (float)nOut;
@@ -224,8 +224,8 @@ void downsample_compute_weights(size_t nIn, size_t nOut, vector<float> &wgts)
 
 template<typename T> void downsample1d(const T *signalIn, size_t nIn, size_t strideIn, T *signalOut, size_t nOut, size_t strideOut, const vector<float> &wgts)
 {
-    assert(nOut <= nIn);
-    assert(nOut == wgts.size());
+    VAssert(nOut <= nIn);
+    VAssert(nOut == wgts.size());
 
     for (size_t i = 0; i < nOut; i++) {
         size_t i0 = wgts[i];
@@ -236,8 +236,8 @@ template<typename T> void downsample1d(const T *signalIn, size_t nIn, size_t str
 
 template<typename T> void downsample2d(const T *signalIn, vector<size_t> inDims, T *signalOut, vector<size_t> outDims)
 {
-    assert(inDims.size() == 2);
-    assert(inDims.size() == outDims.size());
+    VAssert(inDims.size() == 2);
+    VAssert(inDims.size() == outDims.size());
 
     // Sample along first dimension
     //
@@ -277,8 +277,8 @@ template<typename T> void downsample2d(const T *signalIn, vector<size_t> inDims,
 
 template<typename T> void downsample3d(const T *signalIn, vector<size_t> inDims, T *signalOut, vector<size_t> outDims)
 {
-    assert(inDims.size() == 3);
-    assert(inDims.size() == outDims.size());
+    VAssert(inDims.size() == 3);
+    VAssert(inDims.size() == outDims.size());
 
     // Sample along XY planes first
     //
@@ -318,8 +318,8 @@ template<typename T> void downsample3d(const T *signalIn, vector<size_t> inDims,
 
 template<typename T> void downsample(const T *signalIn, vector<size_t> inDims, T *signalOut, vector<size_t> outDims)
 {
-    assert(inDims.size() >= 1 && inDims.size() <= 3);
-    assert(inDims.size() == outDims.size());
+    VAssert(inDims.size() >= 1 && inDims.size() <= 3);
+    VAssert(inDims.size() == outDims.size());
 
     if (inDims.size() == 1) {
         vector<float> wgts;
@@ -337,7 +337,7 @@ template<typename T> void downsample(const T *signalIn, vector<size_t> inDims, T
 //
 void map_vox_to_blk(vector<size_t> bs, const vector<size_t> &vcoord, vector<size_t> &bcoord)
 {
-    assert(bs.size() == vcoord.size());
+    VAssert(bs.size() == vcoord.size());
     bcoord.clear();
 
     for (int i = 0; i < bs.size(); i++) { bcoord.push_back(vcoord[i] / bs[i]); }
@@ -345,8 +345,8 @@ void map_vox_to_blk(vector<size_t> bs, const vector<size_t> &vcoord, vector<size
 
 void map_blk_to_vox(vector<size_t> bs, const vector<size_t> &bmin, const vector<size_t> &bmax, vector<size_t> &vmin, vector<size_t> &vmax)
 {
-    assert(bs.size() == bmin.size());
-    assert(bs.size() == bmax.size());
+    VAssert(bs.size() == bmin.size());
+    VAssert(bs.size() == bmax.size());
     vmin.clear();
     vmax.clear();
 
@@ -360,9 +360,9 @@ void map_blk_to_vox(vector<size_t> bs, const vector<size_t> &bmin, const vector<
 //
 void map_blk_to_vox(const vector<size_t> &bs, const vector<size_t> &dims, const vector<size_t> &bmin, const vector<size_t> &bmax, vector<size_t> &vmin, vector<size_t> &vmax)
 {
-    assert(bs.size() == bmin.size());
-    assert(bs.size() == bmax.size());
-    assert(bs.size() == dims.size());
+    VAssert(bs.size() == bmin.size());
+    VAssert(bs.size() == bmax.size());
+    VAssert(bs.size() == dims.size());
     vmin.clear();
     vmax.clear();
 
@@ -386,11 +386,11 @@ void map_blk_to_vox(const vector<size_t> &bs, const vector<size_t> &dims, const 
 template<class T> void copy_block(const T *src, T *dst, const vector<size_t> &min, const vector<size_t> &max, const vector<size_t> &bs, const vector<size_t> &grid_min, const vector<size_t> &grid_max)
 {
     const int ndim = 3;
-    assert(min.size() <= ndim);
-    assert(min.size() == max.size());
-    assert(min.size() == bs.size());
-    assert(min.size() == grid_min.size());
-    assert(min.size() == grid_max.size());
+    VAssert(min.size() <= ndim);
+    VAssert(min.size() == max.size());
+    VAssert(min.size() == bs.size());
+    VAssert(min.size() == grid_min.size());
+    VAssert(min.size() == grid_max.size());
 
     // 3D versions of input parameters
     //
@@ -624,7 +624,7 @@ int DataMgr::Initialize(const vector<string> &files, const std::vector<string> &
 
 bool DataMgr::GetMesh(string meshname, DC::Mesh &m) const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     bool ok = _dvm.GetMesh(meshname, m);
     if (!ok) { ok = _dc->GetMesh(meshname, m); }
@@ -661,7 +661,7 @@ bool DataMgr::GetMesh(string meshname, DC::Mesh &m) const
 
 vector<string> DataMgr::GetDataVarNames() const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     vector<string> validvars;
     for (int ndim = 2; ndim <= 3; ndim++) {
@@ -673,7 +673,7 @@ vector<string> DataMgr::GetDataVarNames() const
 
 vector<string> DataMgr::GetDataVarNames(int ndim) const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     vector<string> vars = _dc->GetDataVarNames(ndim);
     vector<string> derived_vars = _getDataVarNamesDerived(ndim);
@@ -696,7 +696,7 @@ vector<string> DataMgr::GetDataVarNames(int ndim) const
 
 vector<string> DataMgr::GetCoordVarNames() const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     vector<string> vars = _dc->GetCoordVarNames();
     vector<string> derived_vars = _dvm.GetCoordVarNames();
@@ -707,7 +707,7 @@ vector<string> DataMgr::GetCoordVarNames() const
 
 string DataMgr::GetTimeCoordVarName() const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     // There can be only one time coordinate variable. If a
     // derived one exists, use it.
@@ -716,14 +716,14 @@ string DataMgr::GetTimeCoordVarName() const
     if (!cvars.empty()) return (cvars[0]);
 
     cvars = _dc->GetTimeCoordVarNames();
-    assert(cvars.size());
+    VAssert(cvars.size());
 
     return (cvars[0]);
 }
 
 bool DataMgr::GetVarCoordVars(string varname, bool spatial, std::vector<string> &coord_vars) const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     coord_vars.clear();
 
@@ -746,7 +746,7 @@ bool DataMgr::GetVarCoordVars(string varname, bool spatial, std::vector<string> 
 
 bool DataMgr::GetDataVarInfo(string varname, VAPoR::DC::DataVar &var) const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     bool ok = _dvm.GetDataVarInfo(varname, var);
     if (!ok) { ok = _dc->GetDataVarInfo(varname, var); }
@@ -766,7 +766,7 @@ bool DataMgr::GetDataVarInfo(string varname, VAPoR::DC::DataVar &var) const
 
 bool DataMgr::GetCoordVarInfo(string varname, VAPoR::DC::CoordVar &var) const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     bool ok = _dvm.GetCoordVarInfo(varname, var);
     if (!ok) { ok = _dc->GetCoordVarInfo(varname, var); }
@@ -775,7 +775,7 @@ bool DataMgr::GetCoordVarInfo(string varname, VAPoR::DC::CoordVar &var) const
 
 bool DataMgr::GetBaseVarInfo(string varname, VAPoR::DC::BaseVar &var) const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     bool ok = _dvm.GetBaseVarInfo(varname, var);
     if (!ok) { ok = _dc->GetBaseVarInfo(varname, var); }
@@ -784,7 +784,7 @@ bool DataMgr::GetBaseVarInfo(string varname, VAPoR::DC::BaseVar &var) const
 
 bool DataMgr::IsTimeVarying(string varname) const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     // If var is a data variable and has a time coordinate variable defined
     //
@@ -803,7 +803,7 @@ bool DataMgr::IsTimeVarying(string varname) const
 
 bool DataMgr::IsCompressed(string varname) const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     DC::BaseVar var;
 
@@ -817,7 +817,7 @@ bool DataMgr::IsCompressed(string varname) const
 
 int DataMgr::GetNumTimeSteps(string varname) const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     // If data variable get it's time coordinate variable if it exists
     //
@@ -849,7 +849,7 @@ int DataMgr::GetNumTimeSteps() const { return (_timeCoordinates.size()); }
 
 size_t DataMgr::GetNumRefLevels(string varname) const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     if (varname == "") return 1;
 
@@ -861,7 +861,7 @@ size_t DataMgr::GetNumRefLevels(string varname) const
 
 vector<size_t> DataMgr::GetCRatios(string varname) const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     DC::BaseVar var;
     int         rc = GetBaseVarInfo(varname, var);
@@ -891,7 +891,7 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, bool l
 
 Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector<double> min, vector<double> max, bool lock)
 {
-    assert(min.size() == max.size());
+    VAssert(min.size() == max.size());
 
     SetDiagMsg("DataMgr::GetVariable(%d, %s, %d, %d, %s, %s, %d)", ts, varname.c_str(), level, lod, vector_to_string(min).c_str(), vector_to_string(max).c_str(), lock);
 
@@ -962,19 +962,19 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, bool 
 void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &data_dimlens, const vector<size_t> &data_bmin, const vector<size_t> &data_bmax, string coord_varname, int order,
                                     vector<size_t> &coord_dimlens, vector<size_t> &coord_bmin, vector<size_t> &coord_bmax, bool structured) const
 {
-    assert(data_bmin.size() == data_bmax.size());
+    VAssert(data_bmin.size() == data_bmax.size());
     coord_dimlens.clear();
     coord_bmin.clear();
     coord_bmax.clear();
 
     vector<DC::Dimension> data_dims;
     bool                  ok = _getVarDimensions(data_varname, data_dims);
-    assert(ok);
-    assert(data_dims.size() == data_bmin.size());
+    VAssert(ok);
+    VAssert(data_dims.size() == data_bmin.size());
 
     vector<DC::Dimension> coord_dims;
     ok = _getVarDimensions(coord_varname, coord_dims);
-    assert(ok);
+    VAssert(ok);
 
     if (structured) {
         // For structured data
@@ -984,28 +984,28 @@ void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &d
         // have data and coordinate variables that use different dimension
         // names (but have the same length)
         //
-        assert(data_dims.size() >= 1 && data_dims.size() <= 3);
+        VAssert(data_dims.size() >= 1 && data_dims.size() <= 3);
         if (data_dims.size() == 1) {
-            assert(coord_dims.size() == 1);
-            assert(order == 0);
-            assert(data_dims[0].GetLength() == coord_dims[0].GetLength());
+            VAssert(coord_dims.size() == 1);
+            VAssert(order == 0);
+            VAssert(data_dims[0].GetLength() == coord_dims[0].GetLength());
 
             coord_dimlens.push_back(data_dimlens[0]);
             coord_bmin.push_back(data_bmin[0]);
             coord_bmax.push_back(data_bmax[0]);
         } else if (data_dims.size() == 2) {
-            assert(coord_dims.size() >= 1 && coord_dims.size() <= 2);
-            assert(order >= 0 && order <= 1);
+            VAssert(coord_dims.size() >= 1 && coord_dims.size() <= 2);
+            VAssert(order >= 0 && order <= 1);
 
             if (coord_dims.size() == 1) {
-                assert(data_dims[order].GetLength() == coord_dims[0].GetLength());
+                VAssert(data_dims[order].GetLength() == coord_dims[0].GetLength());
 
                 coord_dimlens.push_back(data_dimlens[order]);
                 coord_bmin.push_back(data_bmin[order]);
                 coord_bmax.push_back(data_bmax[order]);
             } else {
-                assert(data_dims[0].GetLength() == coord_dims[0].GetLength());
-                assert(data_dims[1].GetLength() == coord_dims[1].GetLength());
+                VAssert(data_dims[0].GetLength() == coord_dims[0].GetLength());
+                VAssert(data_dims[1].GetLength() == coord_dims[1].GetLength());
 
                 coord_dimlens.push_back(data_dimlens[0]);
                 coord_bmin.push_back(data_bmin[0]);
@@ -1015,11 +1015,11 @@ void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &d
                 coord_bmax.push_back(data_bmax[1]);
             }
         } else if (data_dims.size() == 3) {
-            assert(coord_dims.size() >= 1 && coord_dims.size() <= 3);
-            assert(order >= 0 && order <= 2);
+            VAssert(coord_dims.size() >= 1 && coord_dims.size() <= 3);
+            VAssert(order >= 0 && order <= 2);
 
             if (coord_dims.size() == 1) {
-                assert(data_dims[order].GetLength() == coord_dims[0].GetLength());
+                VAssert(data_dims[order].GetLength() == coord_dims[0].GetLength());
 
                 coord_dimlens.push_back(data_dimlens[order]);
                 coord_bmin.push_back(data_bmin[order]);
@@ -1029,7 +1029,7 @@ void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &d
                 // No way currently to distinguish XZ and YZ plane 2D coordinates
                 // for 3D data :-(
                 //
-                assert(order >= 0 && order <= 1);
+                VAssert(order >= 0 && order <= 1);
                 coord_dimlens.push_back(data_dimlens[0]);
                 coord_bmin.push_back(data_bmin[0]);
                 coord_bmax.push_back(data_bmax[0]);
@@ -1049,7 +1049,7 @@ void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &d
                 coord_bmax.push_back(data_bmax[2]);
             }
         } else {
-            assert(0 && "Only 1, 2, or 3D data supported");
+            VAssert(0 && "Only 1, 2, or 3D data supported");
         }
 
     } else {
@@ -1059,7 +1059,7 @@ void DataMgr::_setupCoordVecsHelper(string data_varname, const vector<size_t> &d
         int i = 0;
         for (int j = 0; j < coord_dims.size(); j++) {
             while (data_dims[i].GetLength() != coord_dims[j].GetLength() && i < data_dims.size()) { i++; }
-            assert(i < data_dims.size());
+            VAssert(i < data_dims.size());
             coord_dimlens.push_back(data_dimlens[i]);
             coord_bmin.push_back(data_bmin[i]);
             coord_bmax.push_back(data_bmax[i]);
@@ -1085,7 +1085,7 @@ int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, cons
     //
     vector<size_t> dims;
     int            rc = GetDimLensAtLevel(varname, level, dims);
-    assert(rc >= 0);
+    VAssert(rc >= 0);
     dimsvec.push_back(dims);
 
     vector<size_t> bs(_bs.begin(), _bs.begin() + dims.size());
@@ -1101,7 +1101,7 @@ int DataMgr::_setupCoordVecs(size_t ts, string varname, int level, int lod, cons
 
     vector<string> cvarnames;
     bool           ok = GetVarCoordVars(varname, true, cvarnames);
-    assert(ok);
+    VAssert(ok);
 
     for (int i = 0; i < cvarnames.size(); i++) {
         // Map data indices to coordinate indices. Coordinate indices
@@ -1200,12 +1200,12 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
 
     DC::DataVar dvar;
     bool        status = DataMgr::GetDataVarInfo(varname, dvar);
-    assert(status);
+    VAssert(status);
 
     vector<DC::CoordVar> cvarsinfo;
     DC::CoordVar         dummy;
     status = _get_coord_vars(varname, cvarsinfo, dummy);
-    assert(status);
+    VAssert(status);
 
     vector<string>         varnames;
     vector<size_t>         roi_dims;
@@ -1262,7 +1262,7 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
     } else {
         rg = _gridHelper.MakeGridStructured(gridType, ts, level, lod, dvar, cvarsinfo, roi_dims, dimsvec[0], blkvec, bsvec, bminvec, bmaxvec);
     }
-    assert(rg);
+    VAssert(rg);
 
     //
     // Inform the grid of the offsets from the larger mesh to the
@@ -1289,7 +1289,7 @@ Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, vecto
 
 Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector<size_t> min, vector<size_t> max, bool lock)
 {
-    assert(min.size() == max.size());
+    VAssert(min.size() == max.size());
 
     SetDiagMsg("DataMgr::GetVariable(%d, %s, %d, %d, %s, %s, %d)", ts, varname.c_str(), level, lod, vector_to_string(min).c_str(), vector_to_string(max).c_str(), lock);
 
@@ -1303,7 +1303,7 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector
     //
     vector<string> coord_vars;
     bool           ok = GetVarCoordVars(varname, true, coord_vars);
-    assert(ok);
+    VAssert(ok);
 
     while (min.size() > coord_vars.size()) {
         min.pop_back();
@@ -1378,7 +1378,7 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, size_t 
     string key = oss.str();
 
     if (_varInfoCacheDouble.Get(ts, varname, level, lod, key, range)) {
-        assert(range.size() == 2);
+        VAssert(range.size() == 2);
         return (0);
     }
 
@@ -1429,7 +1429,7 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, size_t 
 
 int DataMgr::GetDimLensAtLevel(string varname, int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
 {
-    assert(_dc);
+    VAssert(_dc);
     dims_at_level.clear();
     bs_at_level.clear();
 
@@ -1627,7 +1627,7 @@ void DataMgr::UnlockGrid(const Grid *rg)
 
 size_t DataMgr::GetNumDimensions(string varname) const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     DC::DataVar dvar;
     bool        status = GetDataVarInfo(varname, dvar);
@@ -1649,7 +1649,7 @@ size_t DataMgr::GetNumDimensions(string varname) const
 
 size_t DataMgr::GetVarTopologyDim(string varname) const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     DC::DataVar var;
     bool        status = GetDataVarInfo(varname, var);
@@ -1703,8 +1703,8 @@ int DataMgr::_get_unblocked_region_from_fs(size_t ts, string varname, int level,
     if (level < -nlevels) {
         vector<size_t> dims;
         int            rc = GetDimLensAtLevel(varname, level, dims);
-        assert(rc >= 0);
-        assert(dims.size() == grid_dims.size());
+        VAssert(rc >= 0);
+        VAssert(dims.size() == grid_dims.size());
 
         // grid_min and grid_max are specified in voxel coordinates
         // relative to the downsampled grid. Figure out coordinates for
@@ -1811,7 +1811,7 @@ T *DataMgr::_get_region_from_fs(size_t ts, string varname, int level, int lod, c
 
     vector<size_t> file_dims, file_bs;
     int            rc = GetDimLensAtLevel(varname, level, file_dims, file_bs);
-    assert(rc >= 0);
+    VAssert(rc >= 0);
 
     // Get voxel coordinates of requested region, clamped to grid
     // boundaries.
@@ -1904,8 +1904,8 @@ int DataMgr::_get_regions(size_t ts, const vector<string> &varnames, int level, 
 
 void *DataMgr::_alloc_region(size_t ts, string varname, int level, int lod, vector<size_t> bmin, vector<size_t> bmax, vector<size_t> bs, int element_sz, bool lock, bool fill)
 {
-    assert(bmin.size() == bmax.size());
-    assert(bmin.size() == bs.size());
+    VAssert(bmin.size() == bmax.size());
+    VAssert(bmin.size() == bs.size());
 
     size_t mem_block_size;
     if (!_blk_mem_mgr) {
@@ -2025,7 +2025,7 @@ vector<string> DataMgr::_get_native_variables() const
 
 bool DataMgr::_hasHorizontalXForm() const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     vector<string> meshnames = _dc->GetMeshNames();
 
@@ -2048,7 +2048,7 @@ bool DataMgr::_hasHorizontalXForm(string meshname) const
         DC::CoordVar varInfo;
 
         bool ok = _dc->GetCoordVarInfo(coordVars[i], varInfo);
-        assert(ok);
+        VAssert(ok);
 
         //
         if (varInfo.GetUnits().empty()) continue;
@@ -2069,7 +2069,7 @@ bool DataMgr::_hasHorizontalXForm(string meshname) const
 
 bool DataMgr::_hasVerticalXForm() const
 {
-    assert(_dc);
+    VAssert(_dc);
 
     // Only 3D variables can have vertical coordinates?
     //
@@ -2097,7 +2097,7 @@ bool DataMgr::_hasVerticalXForm(string meshname, string &standard_name, string &
     DC::CoordVar cvarInfo;
     for (int i = 0; i < coordVars.size(); i++) {
         bool ok = _dc->GetCoordVarInfo(coordVars[i], cvarInfo);
-        assert(ok);
+        VAssert(ok);
 
         if (cvarInfo.GetAxis() == 2) {
             hasVertCoord = true;
@@ -2154,7 +2154,7 @@ template<typename C> void DataMgr::VarInfoCache<C>::_decode_hash(const string &h
         getline(ss, substr, ':');
         result.push_back(substr);
     }
-    assert(result.size() >= 5);
+    VAssert(result.size() >= 5);
 
     int i = 0;
     key = result[i++];
@@ -2223,8 +2223,8 @@ DataMgr::BlkExts::BlkExts()
 
 DataMgr::BlkExts::BlkExts(const std::vector<size_t> &bmin, const std::vector<size_t> &bmax)
 {
-    assert(bmin.size() == bmax.size());
-    assert(bmin.size() >= 1 && bmax.size() <= 3);
+    VAssert(bmin.size() == bmax.size());
+    VAssert(bmin.size() >= 1 && bmax.size() <= 3);
 
     _bmin = bmin;
     _bmax = bmax;
@@ -2245,7 +2245,7 @@ void DataMgr::BlkExts::Insert(const std::vector<size_t> &bcoord, const std::vect
 
 bool DataMgr::BlkExts::Intersect(const std::vector<double> &min, const std::vector<double> &max, std::vector<size_t> &bmin, std::vector<size_t> &bmax) const
 {
-    assert(_mins.size() >= 1);
+    VAssert(_mins.size() >= 1);
 
     bmin = _bmax;
     bmax = _bmin;
@@ -2327,7 +2327,7 @@ bool DataMgr::_get_coord_vars(string varname, vector<string> &scvars, string &tc
     // Split out time and space coord vars
     //
     if (IsTimeVarying(varname)) {
-        assert(scvars.size());
+        VAssert(scvars.size());
 
         tcvar = scvars.back();
         scvars.pop_back();
@@ -2425,35 +2425,35 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
 
     DC::Mesh m;
     bool     status = GetMesh(var.GetMeshName(), m);
-    assert(status);
+    VAssert(status);
 
     DC::Dimension dimension;
 
     size_t layers_dimlen = 0;
     if (m.GetMeshType() == DC::Mesh::UNSTRUC_LAYERED) {
         string dimname = m.GetLayersDimName();
-        assert(!dimname.empty());
+        VAssert(!dimname.empty());
         status = _dc->GetDimension(dimname, dimension);
-        assert(status);
+        VAssert(status);
         layers_dimlen = dimension.GetLength();
     }
 
     string dimname = m.GetNodeDimName();
     status = _dc->GetDimension(dimname, dimension);
-    assert(status);
+    VAssert(status);
     vertexDims.push_back(dimension.GetLength());
     if (layers_dimlen) { vertexDims.push_back(layers_dimlen); }
 
     dimname = m.GetFaceDimName();
     status = _dc->GetDimension(dimname, dimension);
-    assert(status);
+    VAssert(status);
     faceDims.push_back(dimension.GetLength());
     if (layers_dimlen) { faceDims.push_back(layers_dimlen - 1); }
 
     dimname = m.GetEdgeDimName();
     if (dimname.size()) {
         status = _dc->GetDimension(dimname, dimension);
-        assert(status);
+        VAssert(status);
         edgeDims.push_back(dimension.GetLength());
         if (layers_dimlen) { edgeDims.push_back(layers_dimlen - 1); }
     }
@@ -2477,15 +2477,15 @@ void DataMgr::_ugrid_setup(const DC::DataVar &var, std::vector<size_t> &vertexDi
     string dummy;
 
     bool ok = _getVarConnVars(var.GetName(), face_node_var, node_face_var, dummy, dummy, dummy, dummy);
-    assert(ok);
+    VAssert(ok);
 
     DC::AuxVar auxvar;
     status = _dc->GetAuxVarInfo(face_node_var, auxvar);
-    assert(status);
+    VAssert(status);
     vertexOffset = auxvar.GetOffset();
 
     status = _dc->GetAuxVarInfo(node_face_var, auxvar);
-    assert(status);
+    VAssert(status);
     faceOffset = auxvar.GetOffset();
 }
 
@@ -2507,11 +2507,11 @@ string DataMgr::_get_grid_type(string varname) const
 
     DC::DataVar dvar;
     ok = GetDataVarInfo(varname, dvar);
-    assert(ok);
+    VAssert(ok);
 
     DC::Mesh m;
     ok = GetMesh(dvar.GetMeshName(), m);
-    assert(ok);
+    VAssert(ok);
 
     return (_gridHelper.GetGridType(m, cvarsinfo, cdimnames));
 }
@@ -2624,7 +2624,7 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
         //
         _blkExtsCache[hash] = blkexts;
         itr = _blkExtsCache.find(hash);
-        assert(itr != _blkExtsCache.end());
+        VAssert(itr != _blkExtsCache.end());
 
     } else {
         SetDiagMsg("DataMgr::_find_bounding_grid() - coordinates in cache");
@@ -2711,14 +2711,14 @@ bool DataMgr::_hasCoordForAxis(vector<string> coord_vars, int axis) const
 
 string DataMgr::_defaultCoordVar(const DC::Mesh &m, int axis) const
 {
-    assert(axis >= 0 && axis <= 2);
+    VAssert(axis >= 0 && axis <= 2);
 
     // For a structured mesh use the coresponding dimension name
     // as the coordinate variable name. For unstructured nothing
     // we can do
     //
     if (m.GetMeshType() == DC::Mesh::STRUCTURED) {
-        assert(m.GetDimNames().size() >= axis);
+        VAssert(m.GetDimNames().size() >= axis);
         return (m.GetDimNames()[axis]);
     } else {
         return ("");
@@ -2730,7 +2730,7 @@ void DataMgr::_assignHorizontalCoords(vector<string> &coord_vars) const
     for (int i = 0; i < coord_vars.size(); i++) {
         DC::CoordVar varInfo;
         bool         ok = GetCoordVarInfo(coord_vars[i], varInfo);
-        assert(ok);
+        VAssert(ok);
 
         if (_udunits.IsLonUnit(varInfo.GetUnits())) { coord_vars[i] = coord_vars[i] + "X"; }
         if (_udunits.IsLatUnit(varInfo.GetUnits())) { coord_vars[i] = coord_vars[i] + "Y"; }
@@ -2743,7 +2743,7 @@ void DataMgr::_assignTimeCoord(string &coord_var) const
 
     DC::CoordVar varInfo;
     bool         ok = GetCoordVarInfo(coord_var, varInfo);
-    assert(ok);
+    VAssert(ok);
 
     if (varInfo.GetAxis() == 3 && !_udunits.IsTimeUnit(varInfo.GetUnits())) { coord_var = coord_var + "T"; }
 }
@@ -2785,7 +2785,7 @@ bool DataMgr::_getDataVarDimensions(string varname, vector<DC::Dimension> &dimen
         case DC::Mesh::NODE: dimnames.push_back(mesh.GetNodeDimName()); break;
         case DC::Mesh::EDGE: dimnames.push_back(mesh.GetEdgeDimName()); break;
         case DC::Mesh::FACE: dimnames.push_back(mesh.GetFaceDimName()); break;
-        case DC::Mesh::VOLUME: assert(0 && "VOLUME cells not supported"); break;
+        case DC::Mesh::VOLUME: VAssert(0 && "VOLUME cells not supported"); break;
         }
         if (mesh.GetMeshType() == DC::Mesh::UNSTRUC_LAYERED) { dimnames.push_back(mesh.GetLayersDimName()); }
     }
@@ -2906,7 +2906,7 @@ template<class T> int DataMgr::_readRegionBlock(int fd, const vector<size_t> &mi
 {
     DerivedVar *derivedVar = _getDerivedVar(_openVarName);
     if (derivedVar) {
-        assert((std::is_same<T, float>::value) == true);
+        VAssert((std::is_same<T, float>::value) == true);
         return (derivedVar->ReadRegionBlock(fd, min, max, (float *)region));
     }
 
@@ -2917,7 +2917,7 @@ template<class T> int DataMgr::_readRegion(int fd, const vector<size_t> &min, co
 {
     DerivedVar *derivedVar = _getDerivedVar(_openVarName);
     if (derivedVar) {
-        assert((std::is_same<T, float>::value) == true);
+        VAssert((std::is_same<T, float>::value) == true);
         return (derivedVar->ReadRegion(fd, min, max, (float *)region));
     }
 
@@ -2989,7 +2989,7 @@ int DataMgr::_getLatlonExtents(string varname, bool lonflag, float &min, float &
         SetErrMsg("Invalid variable reference : %s", varname.c_str());
         return (-1);
     }
-    assert(dims.size() >= 1 && dims.size() <= 2);
+    VAssert(dims.size() >= 1 && dims.size() <= 2);
 
     float *buf = new float[VProduct(dims)];
 
@@ -3152,7 +3152,7 @@ int DataMgr::_initVerticalCoordVars()
         bool     ok = _dc->GetMesh(meshnames[i], m);
         if (!ok) continue;
 
-        assert(m.GetCoordVars().size() > 2);
+        VAssert(m.GetCoordVars().size() > 2);
 
         DerivedCoordVarStandardWRF_Terrain *derivedVar = new DerivedCoordVarStandardWRF_Terrain(_dc, meshnames[i], formula_terms);
 
@@ -3178,14 +3178,14 @@ namespace VAPoR {
 
 std::ostream &operator<<(std::ostream &o, const DataMgr::BlkExts &b)
 {
-    assert(b._bmin.size() == b._bmax.size());
-    assert(b._mins.size() == b._maxs.size());
+    VAssert(b._bmin.size() == b._bmax.size());
+    VAssert(b._mins.size() == b._maxs.size());
 
     o << "Block dimensions" << endl;
     for (int i = 0; i < b._bmin.size(); i++) { o << "  " << b._bmin[i] << " " << b._bmax[i] << endl; }
     o << "Block coordinates" << endl;
     for (int i = 0; i < b._mins.size(); i++) {
-        assert(b._mins[i].size() == b._maxs[i].size());
+        VAssert(b._mins[i].size() == b._maxs[i].size());
         o << "Block index " << i << endl;
         for (int j = 0; j < b._mins[i].size(); j++) { o << "  " << b._mins[i][j] << " " << b._maxs[i][j] << endl; }
         o << endl;

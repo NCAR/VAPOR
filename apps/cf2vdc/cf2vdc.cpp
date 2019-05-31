@@ -68,8 +68,8 @@ size_t lcm(size_t n1, size_t n2) { return ((n1 * n2) / gcd(n1, n2)); }
 int copyVarHelper(DC &dc, VDC &vdc, int fdr, int fdw, vector<size_t> &buffer_dims, vector<size_t> &src_hslice_dims, vector<size_t> &dst_hslice_dims, size_t src_nslice, size_t dst_nslice, double mv,
                   float *buffer)
 {
-    assert(buffer_dims.size() == src_hslice_dims.size());
-    assert(buffer_dims.size() == dst_hslice_dims.size());
+    VAssert(buffer_dims.size() == src_hslice_dims.size());
+    VAssert(buffer_dims.size() == dst_hslice_dims.size());
 
     size_t dim = buffer_dims.size() - 1;
 
@@ -254,7 +254,7 @@ int main(int argc, char **argv)
     for (int i = 0; i < varnames.size(); i++) {
         int nts = dccf.GetNumTimeSteps(varnames[i]);
         nts = opt.numts != -1 && nts > opt.numts ? opt.numts : nts;
-        assert(nts >= 0);
+        VAssert(nts >= 0);
 
         cout << "Copying variable " << varnames[i] << endl;
 
@@ -276,7 +276,7 @@ int main(int argc, char **argv)
     for (int i = 0; i < varnames.size(); i++) {
         int nts = dccf.GetNumTimeSteps(varnames[i]);
         nts = opt.numts != -1 && nts > opt.numts ? opt.numts : nts;
-        assert(nts >= 0);
+        VAssert(nts >= 0);
 
         cout << "Copying variable " << varnames[i] << endl;
 

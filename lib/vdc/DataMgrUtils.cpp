@@ -51,7 +51,7 @@ bool DataMgrUtils::MaxLODPresent(const DataMgr *dataMgr, size_t timestep, string
     maxLOD = 0;
 
     vector<size_t> cratios = dataMgr->GetCRatios(varname);
-    assert(cratios.size() > 0);
+    VAssert(cratios.size() > 0);
 
     for (maxLOD = 0; maxLOD < cratios.size(); maxLOD++) {
         if (!dataMgr->VariableExists(timestep, varname, 0, maxLOD)) break;
@@ -111,7 +111,7 @@ int DataMgrUtils::GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &va
                            vector<Grid *> &grids)
 {
     grids.clear();
-    assert(minExtsReq.size() == maxExtsReq.size());
+    VAssert(minExtsReq.size() == maxExtsReq.size());
 
     for (int i = 0; i < varnames.size(); i++) grids.push_back(NULL);
 
@@ -242,7 +242,7 @@ bool DataMgrUtils::GetAxes(const DataMgr *dataMgr, string varname, vector<int> &
         VAPoR::DC::CoordVar cvar;
 
         status = dataMgr->GetCoordVarInfo(coordvars[i], cvar);
-        assert(status);
+        VAssert(status);
 
         axes.push_back(cvar.GetAxis());
     }
@@ -314,8 +314,8 @@ bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, const vector<st
         // apply to.
         //
         status = DataMgrUtils::GetAxes(dataMgr, varnames[i], varAxes);
-        assert(status);
-        assert(varMinExts.size() == varAxes.size());
+        VAssert(status);
+        VAssert(varMinExts.size() == varAxes.size());
 
         for (int j = 0; j < varAxes.size(); j++) {
             int axis = varAxes[j];

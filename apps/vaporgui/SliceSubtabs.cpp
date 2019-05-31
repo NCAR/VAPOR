@@ -28,7 +28,7 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget *parent)
 void SliceVariablesSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
 {
     _params = dynamic_cast<VAPoR::SliceParams *>(rParams);
-    assert(_params);
+    VAssert(_params);
     _variablesWidget->Update(dataMgr, paramsMgr, rParams);
 }
 
@@ -64,7 +64,7 @@ void SliceAppearanceSubtab::_qualityChanged(int quality)
 void SliceAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
 {
     _params = dynamic_cast<VAPoR::SliceParams *>(rParams);
-    assert(_params);
+    VAssert(_params);
 
     _TFWidget->Update(dataMgr, paramsMgr, rParams);
 
@@ -89,7 +89,7 @@ SliceGeometrySubtab::SliceGeometrySubtab(QWidget *parent)
 void SliceGeometrySubtab::Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams)
 {
     _params = dynamic_cast<VAPoR::SliceParams *>(rParams);
-    assert(_params);
+    VAssert(_params);
 
     _geometryWidget->Update(paramsMgr, dataMgr, rParams);
     _copyRegionWidget->Update(paramsMgr, rParams);

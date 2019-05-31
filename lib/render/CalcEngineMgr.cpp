@@ -153,12 +153,12 @@ void CalcEngineMgr::_sync()
 
     vector<string>  dataSetNames = _dataStatus->GetDataMgrNames();
     DatasetsParams *dParams = _paramsMgr->GetDatasetsParams();
-    assert(dParams);
+    VAssert(dParams);
 
     for (int i = 0; i < dataSetNames.size(); i++) {
         PyEngine *pyEngine = new PyEngine(_dataStatus->GetDataMgr(dataSetNames[i]));
         int       rc = pyEngine->Initialize();
-        assert(rc >= 0);
+        VAssert(rc >= 0);
 
         _pyScripts[dataSetNames[i]] = pyEngine;
 

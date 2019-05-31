@@ -67,7 +67,7 @@ string ProgName;
 //
 void maskvar(vector<string> dimnames, string &name)
 {
-    assert(dimnames.size() >= 1);
+    VAssert(dimnames.size() >= 1);
     name.clear();
 
     name = "mask";
@@ -94,7 +94,7 @@ void DefineMaskVars(const DCCF &dccf, VDCNetCDF &vdc)
             //
             vector<string> dimnames;
             bool           ok = dccf.GetVarDimNames(datanames[i], true, dimnames);
-            assert(ok);
+            VAssert(ok);
 
             string maskvar_name;
             maskvar(dimnames, maskvar_name);
@@ -217,7 +217,7 @@ int main(int argc, char **argv)
         string         time_dimname;
 
         bool ok = dccf.GetVarDimNames(coordnames[i], sdimnames, time_dimname);
-        assert(ok);
+        VAssert(ok);
 
         rc = vdc.SetCompressionBlock(opt.wname, cratios);
         if (rc < 0) return (1);
@@ -275,18 +275,18 @@ int main(int argc, char **argv)
 
             vector<string> dimnames;
             bool           ok = dccf.GetVarDimNames(datanames[i], false, dimnames);
-            assert(ok);
+            VAssert(ok);
 
             vector<string> coordvars;
             ok = dccf.GetVarCoordVars(datanames[i], false, coordvars);
-            assert(ok);
+            VAssert(ok);
 
             if (!dvar.GetHasMissing() || !compress) {
                 rc = vdc.DefineDataVar(dvar.GetName(), dimnames, coordvars, dvar.GetUnits(), dvar.GetXType(), compress);
             } else {
                 vector<string> sdimnames;
                 bool           ok = dccf.GetVarDimNames(datanames[i], true, sdimnames);
-                assert(ok);
+                VAssert(ok);
 
                 string maskvar_name;
                 maskvar(sdimnames, maskvar_name);

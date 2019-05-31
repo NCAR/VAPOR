@@ -271,7 +271,7 @@ int TwoDDataRenderer::GetMesh(DataMgr *dataMgr, GLfloat **verts, GLfloat **norma
     int   rc = DataMgrUtils::GetGrids(dataMgr, ts, varname, minBoxReq, maxBoxReq, true, &refLevel, &lod, &g);
     if (rc < 0) return (-1);
 
-    assert(g);
+    VAssert(g);
 
     double defaultZ = _getDefaultZ(dataMgr, ts);
 
@@ -366,7 +366,7 @@ int TwoDDataRenderer::_getMeshStructured(DataMgr *dataMgr, const StructuredGrid 
     TwoDDataParams *rParams = (TwoDDataParams *)GetActiveParams();
 
     vector<size_t> dims = g->GetDimensions();
-    assert(dims.size() == 2);
+    VAssert(dims.size() == 2);
 
     _vertsWidth = dims[0];
     _vertsHeight = dims[1];
@@ -407,7 +407,7 @@ int TwoDDataRenderer::_getMeshStructured(DataMgr *dataMgr, const StructuredGrid 
 //
 int TwoDDataRenderer::_getMeshUnStructured(DataMgr *dataMgr, const Grid *g, double defaultZ)
 {
-    assert(g->GetTopologyDim() == 2);
+    VAssert(g->GetTopologyDim() == 2);
     vector<size_t> dims = g->GetDimensions();
 
     // Unstructured 2d grids are stored in 1d
@@ -466,10 +466,10 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(DataMgr *dataMgr, const Grid *g
         int rc = DataMgrUtils::GetGrids(dataMgr, ts, hgtvar, minExts, maxExts, true, &refLevel, &lod, &hgtGrid);
 
         if (rc < 0) return (rc);
-        assert(hgtGrid);
+        VAssert(hgtGrid);
     }
 
-    assert(g->GetTopologyDim() == 2);
+    VAssert(g->GetTopologyDim() == 2);
     vector<size_t> dims = g->GetDimensions();
 
     GLfloat *verts = (GLfloat *)_sb_verts.GetBuf();
@@ -571,15 +571,15 @@ int TwoDDataRenderer::_getMeshStructuredDisplaced(DataMgr *dataMgr, const Struct
     // Try to get requested refinement level or the nearest acceptable level:
     //
     string hgtvar = rParams->GetHeightVariableName();
-    assert(!hgtvar.empty());
+    VAssert(!hgtvar.empty());
 
     Grid *hgtGrid = NULL;
     int   rc = DataMgrUtils::GetGrids(dataMgr, ts, hgtvar, minExtsReq, maxExtsReq, true, &refLevel, &lod, &hgtGrid);
     if (rc < 0) return (rc);
-    assert(hgtGrid);
+    VAssert(hgtGrid);
 
     vector<size_t> dims = g->GetDimensions();
-    assert(dims.size() == 2);
+    VAssert(dims.size() == 2);
 
     size_t   width = dims[0];
     size_t   height = dims[1];
@@ -619,7 +619,7 @@ int TwoDDataRenderer::_getMeshStructuredDisplaced(DataMgr *dataMgr, const Struct
 int TwoDDataRenderer::_getMeshStructuredPlane(DataMgr *dataMgr, const StructuredGrid *g, double defaultZ)
 {
     vector<size_t> dims = g->GetDimensions();
-    assert(dims.size() == 2);
+    VAssert(dims.size() == 2);
 
     size_t   width = dims[0];
     size_t   height = dims[1];
@@ -644,8 +644,8 @@ int TwoDDataRenderer::_getOrientation(DataMgr *dataMgr, string varname)
 {
     vector<string> coordvars;
     bool           ok = dataMgr->GetVarCoordVars(varname, true, coordvars);
-    assert(ok);
-    assert(coordvars.size() == 2);
+    VAssert(ok);
+    VAssert(coordvars.size() == 2);
 
     vector<int> axes;    // order list of coordinate axes
     for (int i = 0; i < coordvars.size(); i++) {
@@ -662,7 +662,7 @@ int TwoDDataRenderer::_getOrientation(DataMgr *dataMgr, string varname)
             return (1);    // X-Z
     }
 
-    assert(axes[0] == 1 && axes[2] == 2);
+    VAssert(axes[0] == 1 && axes[2] == 2);
     return (0);    // Y-Z
 }
 

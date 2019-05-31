@@ -93,7 +93,7 @@ int ShaderManager::LoadResourceByKey(const std::string &key)
     //    void *t = GLManager::BeginTimer();
 
     if (HasResource(key)) {
-        assert(!"Shader already loaded");
+        VAssert(!"Shader already loaded");
         return -1;
     }
 
@@ -164,7 +164,7 @@ std::string ShaderManager::PreProcessShader(const std::string &path, const std::
             }
 
             if (BeginsWith(line, "#include ")) {
-                assert(Split(line, " ").size() == 2);
+                VAssert(Split(line, " ").size() == 2);
                 line = "#line 1 1\n" + PreProcessShader(GetSharePath("shaders/" + Split(line, " ")[1]));
                 // Sometimes, the reported line number for a syntax error will be incorrect.
                 // This is a bug in the glsl compiler.
@@ -185,7 +185,7 @@ std::vector<std::string> ShaderManager::GetShaderDependencies(const std::string 
     for (const string &line : lines) {
         if (BeginsWith(line, "#include ")) {
             auto args = Split(line, " ");
-            assert(args.size() == 2);
+            VAssert(args.size() == 2);
             string include = args[1];
             STLUtils::AppendTo(deps, GetShaderDependencies(GetSharePath("shaders/" + include)));
         }

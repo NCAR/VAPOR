@@ -107,7 +107,7 @@ void CopyRegionWidget::updateCopyCombo()
 
 void CopyRegionWidget::_configurePlanarBox(const VAPoR::Box *myBox, std::vector<double> *myMin, std::vector<double> *myMax) const
 {
-    assert((*myMin).size() == (*myMax).size());
+    VAssert((*myMin).size() == (*myMax).size());
 
     int planarAxis;
     int orientation = myBox->GetOrientation();
@@ -145,7 +145,7 @@ void CopyRegionWidget::copyRegion()
         string                   renderer = elems[3];
 
         RenderParams *copyParams = _paramsMgr->GetRenderParams(visualizer, dataSetName, renType, renderer);
-        assert(copyParams);
+        VAssert(copyParams);
 
         Box *               copyBox = copyParams->GetBox();
         std::vector<double> minExtents, maxExtents;
@@ -154,8 +154,8 @@ void CopyRegionWidget::copyRegion()
         Box *               myBox = _rParams->GetBox();
         std::vector<double> myMin, myMax;
         myBox->GetExtents(myMin, myMax);
-        assert(minExtents.size() == maxExtents.size());
-        assert(myMin.size() == myMax.size());
+        VAssert(minExtents.size() == maxExtents.size());
+        VAssert(myMin.size() == myMax.size());
         for (int i = 0; i < myMin.size(); i++) {
             myMin[i] = minExtents[i];
             myMax[i] = maxExtents[i];
@@ -171,8 +171,8 @@ void CopyRegionWidget::copyRegion()
 
 void CopyRegionWidget::Update(ParamsMgr *paramsMgr, RenderParams *rParams)
 {
-    assert(paramsMgr);
-    assert(rParams);
+    VAssert(paramsMgr);
+    VAssert(rParams);
 
     _paramsMgr = paramsMgr;
     _rParams = rParams;

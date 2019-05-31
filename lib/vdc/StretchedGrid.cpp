@@ -13,8 +13,8 @@ using namespace VAPoR;
 
 void StretchedGrid::_stretchedGrid(const vector<double> &xcoords, const vector<double> &ycoords, const vector<double> &zcoords)
 {
-    assert(xcoords.size() != 0);
-    assert(ycoords.size() != 0);
+    VAssert(xcoords.size() != 0);
+    VAssert(ycoords.size() != 0);
 
     _xcoords.clear();
     _ycoords.clear();
@@ -34,8 +34,8 @@ StretchedGrid::StretchedGrid(const vector<size_t> &dims, const vector<size_t> &b
                              const vector<double> &zcoords)
 : StructuredGrid(dims, bs, blks)
 {
-    assert(bs.size() == dims.size());
-    assert(bs.size() >= 1 && bs.size() <= 3);
+    VAssert(bs.size() == dims.size());
+    VAssert(bs.size() >= 1 && bs.size() <= 3);
 
     _stretchedGrid(xcoords, ycoords, zcoords);
 }
@@ -67,9 +67,9 @@ void StretchedGrid::GetBoundingBox(const std::vector<size_t> &min, const std::ve
     vector<size_t> cMax = max;
     ClampIndex(cMax);
 
-    assert(cMin.size() == cMax.size());
+    VAssert(cMin.size() == cMax.size());
 
-    for (int i = 0; i < cMin.size(); i++) { assert(cMin[i] <= cMax[i]); }
+    for (int i = 0; i < cMin.size(); i++) { VAssert(cMin[i] <= cMax[i]); }
 
     minu.clear();
     maxu.clear();
@@ -100,7 +100,7 @@ void StretchedGrid::GetEnclosingRegion(const std::vector<double> &minu, const st
     vector<double> cMaxu = maxu;
     ClampCoord(cMaxu);
 
-    assert(cMinu.size() == cMaxu.size());
+    VAssert(cMinu.size() == cMaxu.size());
 
     // Initialize voxels coords to full grid
     //
@@ -405,9 +405,9 @@ float StretchedGrid::GetValueLinear(const std::vector<double> &coords) const
     if (!inside) return (GetMissingValue());
 
     vector<size_t> dims = GetDimensions();
-    assert(i < dims[0] - 1);
-    assert(j < dims[1] - 1);
-    if (dims.size() > 2) assert(k < dims[2] - 1);
+    VAssert(i < dims[0] - 1);
+    VAssert(j < dims[1] - 1);
+    if (dims.size() > 2) VAssert(k < dims[2] - 1);
 
     float v0 = ((AccessIJK(i, j, k) * xwgt[0] + AccessIJK(i + 1, j, k) * xwgt[1]) * ywgt[0]) + ((AccessIJK(i, j + 1, k) * xwgt[0] + AccessIJK(i + 1, j + 1, k) * xwgt[1]) * ywgt[1]);
 

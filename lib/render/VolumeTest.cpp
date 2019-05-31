@@ -88,16 +88,16 @@ int VolumeTest::LoadData(const Grid *grid)
                 int dy = (cy - minY) / (maxY - minY) * (h - 1);
                 int dz = (cz - minZ) / (maxZ - minZ) * (d - 1);
 
-                // assert(dx>=0 && dx<w);
-                // assert(dy>=0 && dy<h);
-                // assert(dz>=0 && dz<d);
+                // VAssert(dx>=0 && dx<w);
+                // VAssert(dy>=0 && dy<h);
+                // VAssert(dz>=0 && dz<d);
 
                 data[3 * (dz * w * h + dy * w + dx)] = x / (float)w;
                 data[3 * (dz * w * h + dy * w + dx) + 1] = y / (float)h;
                 data[3 * (dz * w * h + dy * w + dx) + 2] = z / (float)d;
                 // printf("Set data[%i, %i, %i] = %i, %i, %i\n", dx, dy, dz, x,y,z);
 
-                // assert(coord != end);
+                // VAssert(coord != end);
                 // ++coord;
             }
         }

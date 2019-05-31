@@ -115,7 +115,7 @@ void ColorMap::Color::toRGB(float *rgb)
         rgb[0] = _val;
         rgb[2] = b;
         break;
-    default: assert(0);
+    default: VAssert(0);
     }
 }
 
@@ -365,7 +365,7 @@ ColorMap::Color ColorMap::color(float value) const
     //
     int index = leftIndex(nv);
 
-    assert(index >= 0 && index * 4 + 7 < cps.size());
+    VAssert(index >= 0 && index * 4 + 7 < cps.size());
     double leftVal = cps[4 * index + 3];
     double rightVal = cps[4 * index + 7];
 
@@ -473,7 +473,7 @@ int ColorMap::GetUseWhitespace() const
 
 void ColorMap::SetDataBounds(const vector<double> &bounds)
 {
-    assert(bounds.size() == 2);
+    VAssert(bounds.size() == 2);
 
     SetValueDoubleVec(_dataBoundsTag, "Set min max map value", bounds);
 }

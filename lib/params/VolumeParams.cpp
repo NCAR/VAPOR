@@ -62,7 +62,7 @@ std::string VolumeParams::GetAlgorithm() const { return GetValueString(_algorith
 
 void VolumeParams::SetAlgorithm(std::string algorithm)
 {
-    assert(STLUtils::Contains(GetAlgorithmNames(), algorithm));
+    VAssert(STLUtils::Contains(GetAlgorithmNames(), algorithm));
     SetValueString(_algorithmTag, "Volume rendering algorithm", algorithm);
 }
 
@@ -134,7 +134,7 @@ void VolumeParams::Register(const std::string &name, Type type)
     AlgorithmEntry entry = {name, type};
 
     for (const AlgorithmEntry &existing : _algorithms)
-        if (entry == existing) assert(!"Algorithm already registered");
+        if (entry == existing) VAssert(!"Algorithm already registered");
 
     _algorithms.push_back(entry);
 }

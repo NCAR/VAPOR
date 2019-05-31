@@ -116,7 +116,7 @@ void ContourParams::MakeNewContours(string varName)
     Contours newContours(_ssave);
 
     MapperFunction *mf = GetMapperFunc(varName);
-    assert(mf);
+    VAssert(mf);
     vector<double> minMax = mf->getMinMaxMapValue();
     int            numContours = newContours.GetContourValues().size();
     double         spacing = (minMax[1] - minMax[0]) / (numContours - 1);
@@ -158,8 +158,8 @@ void ContourParams::_init()
     // Crap. No error handling from constructor. Need Initialization()
     // method.
     //
-    assert(rc >= 0);
-    assert(minExt.size() == maxExt.size() && minExt.size() >= 2);
+    VAssert(rc >= 0);
+    VAssert(minExt.size() == maxExt.size() && minExt.size() >= 2);
 
     GetBox()->SetExtents(minExt, maxExt);
 }
@@ -204,7 +204,7 @@ void ContourParams::GetLineColor(int lineNum, float color[3])
         string          varName = GetVariableName();
         MapperFunction *tf = 0;
         tf = (MapperFunction *)GetMapperFunc(varName);
-        assert(tf);
+        VAssert(tf);
 
         vector<double> vals = GetContourValues(varName);
         double         val = vals[lineNum];

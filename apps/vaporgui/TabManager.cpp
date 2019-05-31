@@ -113,7 +113,7 @@ void TabManager::MoveToFront(string subTabName)
     if (tabName.empty()) return;
 
     int tabIndex = _getTabIndex(tabName);
-    assert(tabIndex >= 0);
+    VAssert(tabIndex >= 0);
 
     int subTabIndex = _getSubTabIndex(tabName, subTabName);
     if (subTabIndex < 0) return;
@@ -265,7 +265,7 @@ void TabManager::_newRenderer(string activeViz, string renderClass, string rende
 
     string winName, dataSetName, className;
     bool   ok = paramsMgr->RenderParamsLookup(renderInst, winName, dataSetName, className);
-    assert(ok);
+    VAssert(ok);
 
     AnimationParams *aParams = (AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType());
     size_t           ts = aParams->GetCurrentTimestep();
@@ -279,7 +279,7 @@ void TabManager::_newRenderer(string activeViz, string renderClass, string rende
     er->SetActive(renderInst);
 
     QWidget *w = dynamic_cast<QWidget *>(er);
-    assert(w);
+    VAssert(w);
     w->setEnabled(true);
 
     er->updateTab();
@@ -308,7 +308,7 @@ void TabManager::EnableRouters(bool onOff)
         //
 
         QWidget *w = dynamic_cast<QWidget *>(itr->second);
-        assert(w);
+        VAssert(w);
         w->setEnabled(onOff);
     }
 }
@@ -346,7 +346,7 @@ EventRouter *TabManager::_getEventRouter(string erType) const
     map<string, EventRouter *>::const_iterator itr;
     itr = _eventRouterMap.find(erType);
     if (itr == _eventRouterMap.end()) {
-        assert(0);
+        VAssert(0);
         return 0;
     }
     return itr->second;
@@ -357,11 +357,11 @@ RenderEventRouter *TabManager::_getRenderEventRouter(string winName, string rend
     map<string, EventRouter *>::const_iterator itr;
     itr = _eventRouterMap.find(renderType);
     if (itr == _eventRouterMap.end()) {
-        assert(0);
+        VAssert(0);
         return 0;
     }
     RenderEventRouter *er = dynamic_cast<RenderEventRouter *>(itr->second);
-    assert(er);
+    VAssert(er);
 
     er->SetActive(instName);
 
@@ -430,7 +430,7 @@ void TabManager::_createAllDefaultTabs()
     for (int i = 0; i < renderNames.size(); i++) {
         RenderEventRouter *er = RenderEventRouterFactory::Instance()->CreateInstance(renderNames[i], parent, _controlExec);
 
-        assert(er);
+        VAssert(er);
 
         _installTab(_renderersTabName, er->GetType(), er);
     }
@@ -453,7 +453,7 @@ void TabManager::_installTab(string tabName, string subTabName, EventRouter *eRo
     _registerEventRouter(subTabName, eRouter);
     eRouter->hookUpTab();
     QWidget *tabWidget = dynamic_cast<QWidget *>(eRouter);
-    assert(tabWidget);
+    VAssert(tabWidget);
     if (subTabName != SettingsParams::GetClassType()) { tabWidget->setEnabled(false); }
     _addSubTabWidget(tabWidget, subTabName, tabName);
 }

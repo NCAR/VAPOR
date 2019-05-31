@@ -236,7 +236,7 @@ int ErrorReporter::OpenLogFile(std::string path)
 
 ErrorReporter::ErrorReporter(QWidget *parent)
 {
-    assert(parent != NULL);
+    VAssert(parent != NULL);
 
     if (_instance) return;
 

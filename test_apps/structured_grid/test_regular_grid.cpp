@@ -57,10 +57,10 @@ float *BlkBuf = NULL;
 
 VAPoR::RegularGrid *make_regular_grid()
 {
-    assert(opt.bs.size() == opt.min.size());
-    assert(opt.bs.size() == opt.max.size());
-    assert(opt.bs.size() == opt.extents.size() >> 1);
-    assert(opt.bs.size() == opt.periodic.size());
+    VAssert(opt.bs.size() == opt.min.size());
+    VAssert(opt.bs.size() == opt.max.size());
+    VAssert(opt.bs.size() == opt.extents.size() >> 1);
+    VAssert(opt.bs.size() == opt.periodic.size());
 
     size_t block_size = 1;
     size_t nblocks = 1;
@@ -157,14 +157,14 @@ int main(int argc, char **argv)
     RegularGrid::ConstIterator itr;
     RegularGrid::ConstIterator enditr = rg->end();
     for (itr = rg->begin(); itr != enditr; ++itr) {
-        assert(*itr == (float)index);
+        VAssert(*itr == (float)index);
         index++;
     }
 
     index = 100033;
     itr = rg->begin() + index;
     for (; itr != rg->end(); ++itr) {
-        assert(*itr == (float)index);
+        VAssert(*itr == (float)index);
         index++;
     }
 

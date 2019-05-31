@@ -1372,7 +1372,7 @@ int NetCDFCollection::Read(size_t start[], size_t count[], float *data, int fd)
 
 int NetCDFCollection::Read(vector<size_t> start, vector<size_t> count, float *data, int fd)
 {
-    assert(start.size() == count.size());
+    VAssert(start.size() == count.size());
 
     size_t mystart[NC_MAX_VAR_DIMS];
     size_t mycount[NC_MAX_VAR_DIMS];
@@ -1406,7 +1406,7 @@ int NetCDFCollection::Read(size_t start[], size_t count[], int *data, int fd)
 
 int NetCDFCollection::Read(vector<size_t> start, vector<size_t> count, int *data, int fd)
 {
-    assert(start.size() == count.size());
+    VAssert(start.size() == count.size());
 
     size_t mystart[NC_MAX_VAR_DIMS];
     size_t mycount[NC_MAX_VAR_DIMS];
@@ -1579,7 +1579,7 @@ void NetCDFCollection::InstallDerivedVar(string varname, DerivedVar *derivedVar)
 {
     vector<string> sdimnames = derivedVar->GetSpatialDimNames();
     vector<size_t> sdimlens = derivedVar->GetSpatialDims();
-    assert(sdimlens.size() == sdimnames.size());
+    VAssert(sdimlens.size() == sdimnames.size());
 
     // Add any new dimensions to the dimensions map. Should be
     // checking for re-definition of exisiting dimensions, but

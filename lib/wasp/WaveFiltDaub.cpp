@@ -89,7 +89,7 @@ void WaveFiltDaub::_analysis_initialize(int member)
     case 8: pFilterCoef = db8; break;
     case 9: pFilterCoef = db9; break;
     case 10: pFilterCoef = db10; break;
-    default: assert(pFilterCoef != NULL);
+    default: VAssert(pFilterCoef != NULL);
     }
 
     wrev(pFilterCoef, _lowDecomFilCoef, _filterLength);
@@ -115,7 +115,7 @@ void WaveFiltDaub::_synthesis_initialize(int member)
     case 8: pFilterCoef = db8; break;
     case 9: pFilterCoef = db9; break;
     case 10: pFilterCoef = db10; break;
-    default: assert(pFilterCoef != NULL);
+    default: VAssert(pFilterCoef != NULL);
     }
 
     verbatim_copy(pFilterCoef, _lowReconFilCoef, _filterLength);

@@ -1746,7 +1746,7 @@ bool MainForm::event(QEvent *e) { return QWidget::event(e); }
 
 bool MainForm::eventFilter(QObject *obj, QEvent *event)
 {
-    assert(_controlExec && _vizWinMgr);
+    VAssert(_controlExec && _vizWinMgr);
 
     // Only update the GUI if the Params state has changed
     //
@@ -1833,7 +1833,7 @@ void MainForm::_performSessionAutoSave()
 
 void MainForm::update()
 {
-    assert(_controlExec);
+    VAssert(_controlExec);
 
     AnimationParams *aParams = GetAnimationParams();
     size_t           timestep = aParams->GetCurrentTimestep();
@@ -2047,8 +2047,8 @@ void MainForm::launchStats()
 void MainForm::launchPlotUtility()
 {
     if (!_plot) {
-        assert(_controlExec->GetDataStatus());
-        assert(_controlExec->GetParamsMgr());
+        VAssert(_controlExec->GetDataStatus());
+        VAssert(_controlExec->GetParamsMgr());
         _plot = new Plot(_controlExec->GetDataStatus(), _controlExec->GetParamsMgr(), this);
     } else {
         _plot->show();

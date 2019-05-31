@@ -411,7 +411,7 @@ void SettingsParams::SetFidelityDefault2D(long lodDef, long refDef)
 bool SettingsParams::_loadFromSettingsFile()
 {
     XmlNode *node = GetNode();
-    assert(node != NULL);
+    VAssert(node != NULL);
 
     bool enabled = MyBase::GetEnableErrMsg();
     MyBase::EnableErrMsg(false);

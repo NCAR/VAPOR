@@ -269,7 +269,7 @@ void RayCaster::UserCoordinates::CheckUpToDateStatus(const RayCasterParams *para
     // Second, if the grid extents are changed, all data fields are not up-to-date
     std::vector<double> newMin, newMax;
     grid->GetUserExtents(newMin, newMax);
-    assert(newMin.size() == 3 || newMax.size() == 3);
+    VAssert(newMin.size() == 3 || newMax.size() == 3);
     for (int i = 0; i < 3; i++)
         if ((myGridMin[i] != (float)newMin[i]) || (myGridMax[i] != (float)newMax[i])) {
             dataFieldUpToDate = false;
@@ -294,7 +294,7 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
     /* Update meta data */
     std::vector<double> newMin, newMax;
     grid->GetUserExtents(newMin, newMax);
-    assert(newMin.size() == 3 || newMax.size() == 3);
+    VAssert(newMin.size() == 3 || newMax.size() == 3);
     for (int i = 0; i < 3; i++) {
         myGridMin[i] = (float)newMin[i];
         myGridMax[i] = (float)newMax[i];
@@ -375,7 +375,7 @@ int RayCaster::UserCoordinates::UpdateFaceAndData(const RayCasterParams *params,
 
 int RayCaster::UserCoordinates::Update2ndVariable(const RayCasterParams *params, DataMgr *dataMgr)
 {
-    assert(dataFieldUpToDate);
+    VAssert(dataFieldUpToDate);
 
     // Update 2nd variable name
     my2ndVarName = params->GetColorMapVariableName();
@@ -503,7 +503,7 @@ void RayCaster::UserCoordinates::FillCoordsXZPlane(const StructuredGrid *grid, s
 
 int RayCaster::UserCoordinates::UpdateVertCoords(const RayCasterParams *params, const StructuredGrid *grid, DataMgr *dataMgr)
 {
-    assert(dataFieldUpToDate);
+    VAssert(dataFieldUpToDate);
 
     size_t numOfVertices = dims[0] * dims[1] * dims[2];
     if (vertCoords) delete[] vertCoords;
@@ -862,7 +862,7 @@ void RayCaster::_configure2DTextureLinearInterpolation() const
 
 void RayCaster::_drawVolumeFaces(int whichPass, int castingMode, const std::vector<size_t> &cameraCellIdx, const glm::mat4 &InversedMV, bool fast) const
 {
-    assert(cameraCellIdx.size() == 0 || cameraCellIdx.size() == 3);
+    VAssert(cameraCellIdx.size() == 0 || cameraCellIdx.size() == 3);
     bool insideVolume = (cameraCellIdx.size() == 3);
 
     glm::mat4 modelview = _glManager->matrixManager->GetModelViewMatrix();
