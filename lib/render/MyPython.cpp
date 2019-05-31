@@ -28,6 +28,7 @@
 
 #include <vapor/ResourcePath.h>
 #include <vapor/MyPython.h>
+#include "vapor/VAssert.h"
 
 
 using namespace Wasp;
