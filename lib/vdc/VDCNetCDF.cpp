@@ -1429,10 +1429,13 @@ int VDCNetCDF::_ReadMasterAttributes(
     for (int i = 0; i < attnames.size(); i++) {
 
         tag = prefix + ".Attribute." + attnames[i] + ".XType";
+        int typetmp = -1;
+        rc = _master->GetAtt("", tag, typetmp);
         VDC::XType xtype;
-        rc = _master->GetAtt("", tag, (int &)xtype);
         if (rc < 0)
             return (rc);
+        else
+            xtype = (VAPoR::DC::XType)typetmp;
 
         tag = prefix + ".Attribute." + attnames[i] + ".Values";
         switch (xtype) {
