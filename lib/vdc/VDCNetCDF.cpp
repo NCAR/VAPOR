@@ -1415,9 +1415,9 @@ int VDCNetCDF::_ReadMasterAttributes (
 
 		tag = prefix + ".Attribute." + attnames[i] + ".XType";
         int typetmp = -1;
-		rc = _master->GetAtt("", tag, typetmp );
-		VDC::XType xtype;
-		if (rc<0) 
+        rc = _master->GetAtt("", tag, typetmp );
+        VDC::XType xtype;
+        if (rc<0) 
             return(rc);
         else
             xtype = (VAPoR::DC::XType)typetmp;
