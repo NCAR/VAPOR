@@ -520,7 +520,7 @@ void Renderer::renderColorbarText(ColorbarPbase* cbpb,
 
 	// Corners in texture coordinates, to be derived later
 	//
-	double Trx, Tlx, Tly, Tuy;
+	double Trx = 0.0, Tlx = 0.0, Tly = 0.0, Tuy = 0.0;
     
     _glManager->PixelCoordinateSystemPush();
 
