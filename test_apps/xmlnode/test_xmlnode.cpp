@@ -83,18 +83,18 @@ int main(int argc, char **argv) {
     child1->SetElementLong("long_data2", 5);
     child1->SetElementString("string_data", "my string");
     child1->SetElementDouble("double_data1", 6.0);
-    assert(child1->GetParent() == parent);
+    VAssert(child1->GetParent() == parent);
 
     XmlNode *child2 = parent->NewChild("child2");
     child2->SetElementLong("long_data1", 7);
     child2->SetElementLong("long_data2", 8);
     child2->SetElementString("string_data", "my string");
     child2->SetElementDouble("double_data1", 9.0);
-    assert(child2->GetParent() == parent);
+    VAssert(child2->GetParent() == parent);
 
     XmlNode *child3 = child2->NewChild("child3");
-    assert(child3 != NULL);
-    assert(child3->GetParent() == child2);
+    VAssert(child3 != NULL);
+    VAssert(child3->GetParent() == child2);
 
     child3->SetElementLong("long_data1", 10);
     child3->SetElementLong("long_data2", 11);

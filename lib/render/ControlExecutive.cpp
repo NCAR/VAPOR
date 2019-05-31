@@ -164,7 +164,7 @@ int ControlExec::ActivateRender(
 
     if (!v->HasRenderer(renderType, renderName)) {
 
-        assert(!paramsType.empty());
+        VAssert(!paramsType.empty());
 
         // Need to create a params instance for this renderer
         //
@@ -188,7 +188,7 @@ int ControlExec::ActivateRender(
     //
     RenderParams *rp = _paramsMgr->GetRenderParams(
         winName, dataSetName, paramsType, renderName);
-    assert(rp);
+    VAssert(rp);
 
     rp->SetEnabled(on);
     v->MoveRendererToFront(renderType, renderName);
@@ -203,7 +203,7 @@ int ControlExec::ActivateRender(
 int ControlExec::ActivateRender(
     string winName, string dataSetName, const RenderParams *rp,
     string renderName, bool on) {
-    assert(rp);
+    VAssert(rp);
 
     if (!_dataStatus->GetDataMgrNames().size()) {
         SetErrMsg("Invalid state : no data");
@@ -246,7 +246,7 @@ int ControlExec::ActivateRender(
 
     RenderParams *newRP = _paramsMgr->GetRenderParams(
         winName, dataSetName, paramsType, renderName);
-    assert(newRP);
+    VAssert(newRP);
 
     newRP->SetEnabled(on);
     v->MoveRendererToFront(renderType, renderName);
@@ -390,7 +390,7 @@ int ControlExec::activateClassRenderers(
     for (int i = 0; i < instNames.size(); i++) {
         RenderParams *rp = _paramsMgr->GetRenderParams(
             vizName, dataSetName, pClassName, instNames[i]);
-        assert(rp);
+        VAssert(rp);
 
         // Convert from params render type to render type. Sigh
         //
@@ -612,7 +612,7 @@ void ControlExec::undoRedoHelper() {
     // Data-dependent re-initialization
     //
     int rc = openDataHelper(false);
-    assert(rc >= 0);
+    VAssert(rc >= 0);
 
     SetSaveStateEnabled(enabled);
 }

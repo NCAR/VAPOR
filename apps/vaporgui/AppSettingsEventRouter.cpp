@@ -204,7 +204,7 @@ void AppSettingsEventRouter::save() {
     aParams->saveCurrentSettings();
     //save to default prefs file
     StartupParams *sParams = (StartupParams *)_paramsMgr->GetDefaultParams(StartupParams::_startupParamsTag);
-    assert(sParams);
+    VAssert(sParams);
     int rc = _controlExec->SavePreferences(sParams->GetCurrentPrefsPath());
     if (!rc)
         _settingsChanged = false;

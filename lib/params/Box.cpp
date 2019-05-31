@@ -73,7 +73,7 @@ Box::~Box() {
 
 void Box::SetExtents(
     const vector<double> &minExt, const vector<double> &maxExt) {
-    assert(minExt.size() == maxExt.size());
+    VAssert(minExt.size() == maxExt.size());
 
     vector<double> exts;
     for (int i = 0; i < minExt.size(); i++)
@@ -635,7 +635,7 @@ bool Box::intersectRotatedBox(double boxExts[6], double intersectPoint[3], doubl
             interSide[interNum] = k;
             interNum++;
         }
-        assert(interNum == 0 || interNum == 2);
+        VAssert(interNum == 0 || interNum == 2);
         //Are there two intersections?
         if (interNum == 2) {
             //are they on opposite sides?
@@ -653,7 +653,7 @@ bool Box::intersectRotatedBox(double boxExts[6], double intersectPoint[3], doubl
                             minx = maxt;
                     }
                 } else { //It must intersect the two vertical edges, check if vertex 0 is inside half-space
-                    assert(interSide[0] == 1);
+                    VAssert(interSide[0] == 1);
                     if (cornerInFace[interSide[0]][face]) {
                         double mint = Min(interT[0], interT[1]);
                         if (maxy > mint)
@@ -716,7 +716,7 @@ bool Box::intersectRotatedBox(double boxExts[6], double intersectPoint[3], doubl
                         maxy = Min(maxy, newcory);
                     }
                 } else
-                    assert(0);
+                    VAssert(0);
             } //end of cutting off corner
         } else {
             //If no intersections, check if the probe is completely outside slab determined by the face
@@ -930,7 +930,7 @@ void Box::
     getRotatedVoxelExtents(string varname, float voxdims[2], int numRefinements) {
 
     StructuredGrid *rGrid = GetDataMgr()->GetVariable(_dataStatus->getMinTimestep(), varname, numRefinements, 0);
-    assert(rGrid);
+    VAssert(rGrid);
     double exts[6], fullSizes[3];
     rGrid->GetUserExtents(exts);
     for (int i = 0; i < 3; i++)
@@ -1004,7 +1004,7 @@ void Box::setBoxToExtents(const double extents[6]) {
     SetLocalExtents(pExts, -1);
     success = fitToBox(extents);
 
-    assert(success);
+    VAssert(success);
 
     return;
 }

@@ -169,7 +169,7 @@ void *GLManager::BeginTimer() {
 }
 
 double GLManager::EndTimer(void *startTime) {
-    assert(startTime);
+    VAssert(startTime);
     auto start = (chrono::time_point<chrono::high_resolution_clock> *)startTime;
 
     glFinish();

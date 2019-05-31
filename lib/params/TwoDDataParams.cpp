@@ -75,8 +75,8 @@ void TwoDDataParams::_init() {
     // Crap. No error handling from constructor. Need Initialization()
     // method.
     //
-    assert(rc >= 0);
-    assert(minExt.size() == maxExt.size() && minExt.size() == 2);
+    VAssert(rc >= 0);
+    VAssert(minExt.size() == maxExt.size() && minExt.size() == 2);
 
     GetBox()->SetExtents(minExt, maxExt);
     GetBox()->SetPlanar(true);

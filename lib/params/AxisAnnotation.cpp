@@ -105,7 +105,7 @@ void AxisAnnotation::SetAxisColor(std::vector<double> color) {
 }
 
 void AxisAnnotation::SetNumTics(std::vector<double> num) {
-    assert(num.size() == 3);
+    VAssert(num.size() == 3);
     for (int i = 0; i < num.size(); i++) {
         if (num[i] < 0)
             num[i] = 0;
@@ -130,7 +130,7 @@ std::vector<double> AxisAnnotation::GetNumTics() const {
 }
 
 void AxisAnnotation::SetAxisOrigin(vector<double> orig) {
-    assert(orig.size() == 3);
+    VAssert(orig.size() == 3);
     SetValueDoubleVec(_originTag, "Set axis val", orig);
 }
 
@@ -140,7 +140,7 @@ vector<double> AxisAnnotation::GetAxisOrigin() const {
 }
 
 void AxisAnnotation::SetMinTics(vector<double> ticMin) {
-    assert(ticMin.size() == 3);
+    VAssert(ticMin.size() == 3);
     SetValueDoubleVec(_minTicsTag, "Set minimum tics", ticMin);
 }
 
@@ -150,7 +150,7 @@ vector<double> AxisAnnotation::GetMinTics() const {
 }
 
 void AxisAnnotation::SetMaxTics(vector<double> ticMax) {
-    assert(ticMax.size() == 3);
+    VAssert(ticMax.size() == 3);
     SetValueDoubleVec(_maxTicsTag, "Set maximum tics", ticMax);
 }
 
@@ -161,7 +161,7 @@ vector<double> AxisAnnotation::GetMaxTics() const {
 }
 
 void AxisAnnotation::SetTicSize(vector<double> ticSizes) {
-    assert(ticSizes.size() == 3);
+    VAssert(ticSizes.size() == 3);
     SetValueDoubleVec(_ticSizeTag, "Set tic sizes", ticSizes);
 }
 
@@ -171,7 +171,7 @@ vector<double> AxisAnnotation::GetTicSize() const {
 }
 
 void AxisAnnotation::SetTicDirs(vector<double> ticDirs) {
-    assert(ticDirs.size() == 3);
+    VAssert(ticDirs.size() == 3);
     SetValueDoubleVec(_ticDirsTag, "Set tic direction", ticDirs);
 }
 

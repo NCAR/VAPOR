@@ -198,7 +198,7 @@ int compress_template(
     if (rc < 0)
         return (-1);
 
-    assert(dst_arr_len >= numkeep);
+    VAssert(dst_arr_len >= numkeep);
 
     rc = sigmap->Reshape(clen);
     if (rc < 0)

@@ -96,7 +96,7 @@ void get_compressed_dims(
     const vector<size_t> &dimlens,
     vector<string> &cdimnames,
     vector<size_t> &cdimlens) {
-    assert(dimnames.size() == dimlens.size());
+    VAssert(dimnames.size() == dimlens.size());
     cdimnames = dimnames;
     cdimlens = dimlens;
 
@@ -129,7 +129,7 @@ vector<size_t> get_bs(
     vector<size_t> cdims;
     get_compressed_dims(dimnames, dims, cdimnames, cdims);
 
-    assert(cdims.size() == 2 || cdims.size() == 3);
+    VAssert(cdims.size() == 2 || cdims.size() == 3);
 
     if (cdims.size() == 3)
         return (opt.bs);
@@ -153,7 +153,7 @@ vector<size_t> get_cratios(
     vector<size_t> cdims;
     get_compressed_dims(dimnames, dims, cdimnames, cdims);
 
-    assert(cdims.size() == 2 || cdims.size() == 3);
+    VAssert(cdims.size() == 2 || cdims.size() == 3);
 
     if (cdims.size() == 3)
         return (opt.cratios);
@@ -184,7 +184,7 @@ int DefFile(const NetCDFCpp &ncdf, WASP &wasp) {
     if (rc < 0)
         return (-1);
 
-    assert(dimnames.size() == dimlens.size());
+    VAssert(dimnames.size() == dimlens.size());
 
     for (int i = 0; i < dimnames.size(); i++) {
         rc = wasp.DefDim(dimnames[i], dimlens[i]);

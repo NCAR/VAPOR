@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < varnames.size(); i++) {
         int nts = dcwrf.GetNumTimeSteps(varnames[i]);
         nts = opt.numts != -1 && nts > opt.numts ? opt.numts : nts;
-        assert(nts >= 0);
+        VAssert(nts >= 0);
 
         cout << "Copying variable " << varnames[i] << endl;
 
@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < varnames.size(); i++) {
         int nts = dcwrf.GetNumTimeSteps(varnames[i]);
         nts = opt.numts != -1 && nts > opt.numts ? opt.numts : nts;
-        assert(nts >= 0);
+        VAssert(nts >= 0);
 
         cout << "Copying variable " << varnames[i] << endl;
 

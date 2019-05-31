@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
         vector<string> sdimnames;
         string time_dimname;
         bool ok = dcwrf.GetVarDimNames(coordnames[i], sdimnames, time_dimname);
-        assert(ok);
+        VAssert(ok);
 
         rc = vdc.SetCompressionBlock(opt.wname, cratios);
         if (rc < 0)
@@ -216,11 +216,11 @@ int main(int argc, char **argv) {
 
             vector<string> dimnames;
             bool ok = dcwrf.GetVarDimNames(datanames[i], false, dimnames);
-            assert(ok);
+            VAssert(ok);
 
             vector<string> coordvars;
             ok = dcwrf.GetVarCoordVars(datanames[i], false, coordvars);
-            assert(ok);
+            VAssert(ok);
 
             rc = vdc.DefineDataVar(
                 dvar.GetName(), dimnames, coordvars, dvar.GetUnits(),

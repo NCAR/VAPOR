@@ -777,7 +777,7 @@ void NavigationEventRouter::AlignView(int axis) {
             dirvec[2] = -1.f;
             break;
         default:
-            assert(0);
+            VAssert(0);
         }
     }
 
@@ -884,8 +884,8 @@ void NavigationEventRouter::ViewAll() {
 
     vector<double> minExts, maxExts;
     dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
-    assert(minExts.size() == 3);
-    assert(maxExts.size() == 3);
+    VAssert(minExts.size() == 3);
+    VAssert(maxExts.size() == 3);
 
     double maxSide = max(
         maxExts[2] - minExts[2],
@@ -926,8 +926,8 @@ VAPoR::ViewpointParams *NavigationEventRouter::_getActiveParams() const {
 
 void NavigationEventRouter::_setViewpointParams(
     const vector<double> &modelview, const vector<double> &center) const {
-    assert(modelview.size() == 16);
-    assert(center.size() == 3);
+    VAssert(modelview.size() == 16);
+    VAssert(center.size() == 3);
 
     // Set modelview and rotation center for *all* visualizers
     //

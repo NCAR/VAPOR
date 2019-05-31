@@ -99,7 +99,7 @@ int GetDims(
     if (rc < 0)
         return (-1);
 
-    assert(my_dimnames.size() == my_dimlens.size());
+    VAssert(my_dimnames.size() == my_dimlens.size());
 
     for (int i = 0; i < my_dimnames.size(); i++) {
         if (name_in(my_dimnames[i], all_dimnames)) {
@@ -122,7 +122,7 @@ int DefFile(const WASP &wasp, NetCDFCpp &ncdf) {
     if (rc < 0)
         return (-1);
 
-    assert(dimnames.size() == dimlens.size());
+    VAssert(dimnames.size() == dimlens.size());
 
     for (int i = 0; i < dimnames.size(); i++) {
         rc = ncdf.DefDim(dimnames[i], dimlens[i]);

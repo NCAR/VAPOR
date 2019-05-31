@@ -280,7 +280,7 @@ DC::Mesh::Mesh(
     std::string name,
     std::vector<string> dim_names,
     std::vector<string> coord_vars) {
-    assert(coord_vars.size() >= dim_names.size());
+    VAssert(coord_vars.size() >= dim_names.size());
 
     _Mesh(name, coord_vars, 4, 4, STRUCTURED);
 
@@ -300,7 +300,7 @@ DC::Mesh::Mesh(
     std::vector<std::string> coord_vars,
     std::string face_node_var,
     std::string node_face_var) {
-    assert(coord_vars.size() >= 2);
+    VAssert(coord_vars.size() >= 2);
 
     _Mesh(name, coord_vars, max_nodes_per_face, max_faces_per_node, UNSTRUC_2D);
 
@@ -322,7 +322,7 @@ DC::Mesh::Mesh(
     std::vector<std::string> coord_vars,
     std::string face_node_var,
     std::string node_face_var) {
-    assert(coord_vars.size() == 3);
+    VAssert(coord_vars.size() == 3);
 
     _Mesh(
         name, coord_vars, max_nodes_per_face, max_faces_per_node,
@@ -353,7 +353,7 @@ size_t DC::Mesh::GetTopologyDim() const {
         return (3);
         break;
     default:
-        assert(false);
+        VAssert(false);
         return (0);
         break;
     }
@@ -453,7 +453,7 @@ bool DC::_getDataVarDimensions(
             dimnames.push_back(mesh.GetFaceDimName());
             break;
         case Mesh::VOLUME:
-            assert(0 && "VOLUME cells not supported");
+            VAssert(0 && "VOLUME cells not supported");
             break;
         }
         if (mesh.GetMeshType() == Mesh::UNSTRUC_LAYERED) {
@@ -484,7 +484,7 @@ bool DC::_getDataVarDimensions(
         if (!status)
             return (false);
 
-        assert(timedims.size() == 1);
+        VAssert(timedims.size() == 1);
         dimensions.push_back(timedims[0]);
     }
 
@@ -596,7 +596,7 @@ int DC::_readSliceTemplate(int fd, T *slice) {
     rc = GetHyperSliceInfo(varname, level, hslice_dims, nslice);
     if (rc < 0)
         return (rc);
-    assert(hslice_dims.size() == dims_at_level.size());
+    VAssert(hslice_dims.size() == dims_at_level.size());
 
     if (sliceNum >= nslice)
         return (0); // Done reading;
@@ -1020,7 +1020,7 @@ std::vector<string> DC::GetTimeCoordVarNames() const {
     for (int i = 0; i < cvars.size(); i++) {
         CoordVar cvar;
         bool status = GetCoordVarInfo(cvars[i], cvar);
-        assert(status);
+        VAssert(status);
 
         if (cvar.GetAxis() == 3) {
             timeCoordVars.push_back(cvars[i]);

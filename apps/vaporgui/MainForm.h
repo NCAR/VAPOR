@@ -255,25 +255,25 @@ class MainForm : public QMainWindow {
     }
 
     GUIStateParams *GetStateParams() const {
-        assert(_paramsMgr != NULL);
+        VAssert(_paramsMgr != NULL);
         return ((GUIStateParams *)
                     _paramsMgr->GetParams(GUIStateParams::GetClassType()));
     }
 
     SettingsParams *GetSettingsParams() const {
-        assert(_paramsMgr != NULL);
+        VAssert(_paramsMgr != NULL);
         return ((SettingsParams *)
                     _paramsMgr->GetParams(SettingsParams::GetClassType()));
     }
 
     AnimationParams *GetAnimationParams() const {
-        assert(_paramsMgr != NULL);
+        VAssert(_paramsMgr != NULL);
         return ((AnimationParams *)
                     _paramsMgr->GetParams(AnimationParams::GetClassType()));
     }
 
     /*MiscParams *GetMiscParams() const {
-	assert(_paramsMgr != NULL);
+	VAssert(_paramsMgr != NULL);
 	return ((MiscParams *)
 		_paramsMgr->GetParams(MiscParams::GetClassType())
 	);
