@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <iostream>
-#include <cassert>
 #include <cmath>
 #include <cfloat>
 #include "vapor/utils.h"
 #include "vapor/LayeredGrid.h"
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
-#include <vapor/LegacyVectorMath.h>
+#include "vapor/LegacyVectorMath.h"
+#include "vapor/VAssert.h"
 
 using namespace std;
 using namespace VAPoR;
@@ -15,9 +15,9 @@ void LayeredGrid::_layeredGrid(
     const vector<double> &minu,
     const vector<double> &maxu,
     const RegularGrid &rg) {
-    assert(GetDimensions().size() == 3);
-    assert(minu.size() == maxu.size());
-    assert(minu.size() == 2);
+    VAssert(GetDimensions().size() == 3);
+    VAssert(minu.size() == maxu.size());
+    VAssert(minu.size() == 2);
 
     _minu.clear();
     _maxu.clear();
@@ -84,7 +84,7 @@ void LayeredGrid::GetBoundingBox(
     vector<size_t> cMax = max;
     ClampIndex(cMax);
 
-    assert(cMin.size() == cMax.size());
+    VAssert(cMin.size() == cMax.size());
 
     minu.clear();
     maxu.clear();
@@ -137,8 +137,8 @@ void LayeredGrid::GetEnclosingRegion(
     vector<double> cMaxu = maxu;
     ClampCoord(cMaxu);
 
-    assert(cMinu.size() == cMaxu.size());
-    assert(cMinu.size() == 3);
+    VAssert(cMinu.size() == cMaxu.size());
+    VAssert(cMinu.size() == 3);
 
     min.clear();
     max.clear();
@@ -147,7 +147,7 @@ void LayeredGrid::GetEnclosingRegion(
     // Get coords for non-varying dimension AND varying dimension.
     //
     for (int i = 0; i < 2; i++) {
-        assert(cMinu[i] <= cMaxu[i]);
+        VAssert(cMinu[i] <= cMaxu[i]);
         double u = cMinu[i];
         if (u < cMinu[i]) {
             u = cMinu[i];
@@ -217,7 +217,7 @@ float LayeredGrid::GetValueNearestNeighbor(
 
 float LayeredGrid::GetValueLinear(
     const std::vector<double> &coords) const {
-    assert(coords.size() == 3);
+    VAssert(coords.size() == 3);
 
     vector<size_t> dims = GetDimensions();
 
@@ -435,7 +435,7 @@ void LayeredGrid::GetIndices(
                 (clampedCoords[i] - _minu[i]) / _delta[i]);
         }
 
-        assert(indices[i] < dims[i]);
+        VAssert(indices[i] < dims[i]);
 
         double wgt = 0.0;
 
@@ -503,7 +503,7 @@ bool LayeredGrid::GetIndicesCell(
                 (clampedCoords[i] - _minu[i]) / _delta[i]);
         }
 
-        assert(indices[i] < dims[i]);
+        VAssert(indices[i] < dims[i]);
     }
 
     // Now find index for layered grid
@@ -519,7 +519,7 @@ bool LayeredGrid::GetIndicesCell(
 }
 
 bool LayeredGrid::InsideGrid(const std::vector<double> &coords) const {
-    assert(coords.size() == 3);
+    VAssert(coords.size() == 3);
 
     // Clamp coordinates on periodic boundaries to reside within the
     // grid extents (vary-dimensions can not have periodic boundaries)
@@ -631,7 +631,7 @@ void LayeredGrid::_getBilinearWeights(const vector<double> &coords,
 
     vector<size_t> indices0;
     bool found = GetIndicesCell(coords, indices0);
-    assert(found);
+    VAssert(found);
 
     vector<size_t> indices1 = indices0;
     if (indices0[0] != dims[0] - 1) {
