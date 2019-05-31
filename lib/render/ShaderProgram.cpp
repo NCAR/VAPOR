@@ -1,7 +1,7 @@
 #include "vapor/glutil.h"    // Must be included first!!!
 #include "vapor/ShaderProgram.h"
 #include "vapor/FileUtils.h"
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vapor/Shader.h>

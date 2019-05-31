@@ -21,7 +21,7 @@
 //		that retain their state in xml nodes
 //
 #include <string>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <functional>
 #include <vapor/XmlNode.h>
 #include <vapor/ParamsBase.h>

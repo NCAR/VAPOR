@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <iostream>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cmath>
 #include <cfloat>
 #include <vapor/utils.h>

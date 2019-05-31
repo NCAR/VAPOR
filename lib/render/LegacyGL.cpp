@@ -1,6 +1,6 @@
 #include "vapor/glutil.h"
 #include "vapor/LegacyGL.h"
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <glm/glm.hpp>
 #include "vapor/GLManager.h"
 #include "vapor/ShaderProgram.h"

@@ -30,7 +30,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cstdio>
 #include <algorithm>
 #include <vapor/MyBase.h>

@@ -1,5 +1,5 @@
 #include <iostream>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <netcdf.h>
 #include <vapor/NetCDFSimple.h>
 

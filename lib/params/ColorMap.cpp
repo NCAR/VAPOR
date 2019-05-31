@@ -10,7 +10,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <vapor/ColorMap.h>
 
 #ifndef MAX

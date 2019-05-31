@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <vector>
 #include <cmath>
-#include <cassert>
+#include "vapor/VAssert.h"
 #ifdef WIN32
 #include <tiff/tiffio.h>
 #else

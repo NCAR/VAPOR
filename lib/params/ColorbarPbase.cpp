@@ -19,7 +19,7 @@
 //
 
 #include <vector>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <vapor/ColorbarPbase.h>
 
 

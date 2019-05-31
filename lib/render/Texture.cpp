@@ -1,6 +1,6 @@
 #include <vapor/Texture.h>
 #include <vapor/glutil.h>
-#include <cassert>
+#include "vapor/VAssert.h"
 
 using namespace VAPoR;
 

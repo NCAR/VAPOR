@@ -22,7 +22,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cctype>
 #include <algorithm>
 #include <expat.h>

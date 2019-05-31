@@ -47,7 +47,7 @@
 #define  NANOFLANN_HPP_
 
 #include <vector>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <algorithm>
 #include <stdexcept>
 #include <cstdio>  // for fwrite()

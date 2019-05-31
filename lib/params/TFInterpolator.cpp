@@ -17,7 +17,7 @@
 //		Currently only supports linear interpolation
 //
 #include <cmath>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <iostream>
 #include <vapor/TFInterpolator.h>
 using namespace std;

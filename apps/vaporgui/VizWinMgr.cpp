@@ -28,7 +28,7 @@
 #include <fstream>
 #include <sstream>
 #include <typeinfo>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include "GL/glew.h"
 #include <qapplication.h>
 #include <QMdiArea>

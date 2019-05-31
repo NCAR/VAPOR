@@ -25,7 +25,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <algorithm>
 #include <vapor/MapperFunction.h>
 #include <vapor/ColorMap.h>
