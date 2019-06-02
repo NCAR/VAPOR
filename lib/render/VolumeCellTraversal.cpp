@@ -87,6 +87,12 @@ static void GetFaceCoordinateIndices(const ivec3 &cell, const ivec3 &face, ivec3
         i1 = cell + ivec3(0, 1, 1);
         i2 = cell + ivec3(1, 1, 1);
         i3 = cell + ivec3(1, 1, 0);
+    } else {
+        VAssert(!"Invalid face enum");
+        i0 = ivec3(0);
+        i1 = ivec3(0);
+        i2 = ivec3(0);
+        i3 = ivec3(0);
     }
 }
 
