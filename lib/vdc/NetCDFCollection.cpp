@@ -2029,18 +2029,17 @@ bool NetCDFCollection::TimeVaryingVar::GetMissingValue(
 
 void NetCDFCollection::TimeVaryingVar::Sort() {
 
-	//
-	// Sort variable by time
-	//
-	std::sort(_tvmaps.begin(), _tvmaps.end(), NetCDFCollection::TimeVaryingVar::tvmap_cmp);
-}
+    //
+    // Sort variable by time
+    //
 
-bool NetCDFCollection::TimeVaryingVar::tvmap_cmp(
-	NetCDFCollection::TimeVaryingVar::tvmap_t &a,
-	NetCDFCollection::TimeVaryingVar::tvmap_t &b
-)
-{
-	return(a._time < b._time);
+    auto lambda = [] (const NetCDFCollection::TimeVaryingVar::tvmap_t& s1, 
+                      const NetCDFCollection::TimeVaryingVar::tvmap_t& s2) -> bool
+    {
+        return( s1._time < s2._time );
+    };
+
+    std::sort( _tvmaps.begin(), _tvmaps.end(), lambda );
 }
 
 
