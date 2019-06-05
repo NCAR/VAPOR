@@ -545,6 +545,7 @@ void TabManager::_installWidgets() {
             QTabWidget *qtw = (QTabWidget *)_tabWidgets[tab];
             qtw->addTab(myScrollArea, QString::fromStdString(subTabName));
             myScrollArea->setWidget(_subTabWidgets[tab][j]);
+            myScrollArea->setWidgetResizable(true);
         }
     }
 
