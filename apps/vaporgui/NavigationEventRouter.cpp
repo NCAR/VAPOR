@@ -64,6 +64,8 @@ NavigationEventRouter::NavigationEventRouter(
 {
 	setupUi(this);
 
+    futureFeaturesTab->hide();
+
 	// Not implemented
 	//
 	camPosLat->setEnabled(false);
