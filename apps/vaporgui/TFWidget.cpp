@@ -1022,6 +1022,7 @@ void TFWidget::SetOpacitySupported(bool value)
 {
     if (!value && !_opacitySlider->isHidden()) _opacitySlider->hide();
     if (value && _opacitySlider->isHidden()) _opacitySlider->show();
+    _mappingFrame->setOpacityMapping(value);
 
     _isOpacitySupported = value;
 }
