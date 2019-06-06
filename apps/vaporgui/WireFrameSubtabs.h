@@ -41,6 +41,7 @@ class WireFrameAppearanceSubtab : public QWidget, public Ui_WireFrameAppearanceG
   public:
     WireFrameAppearanceSubtab(QWidget *parent) {
         setupUi(this);
+        _TFWidget->SetOpacitySupported(false);
         _TFWidget->Reinit((TFFlags)(CONSTANT_COLOR));
     }
 
