@@ -87,6 +87,8 @@ AnnotationEventRouter::AnnotationEventRouter(
 
     _animConnected = false;
     _ap = NULL;
+
+    adjustSize();
 }
 
 AnnotationEventRouter::~AnnotationEventRouter() {
