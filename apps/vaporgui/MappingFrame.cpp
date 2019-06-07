@@ -2051,11 +2051,10 @@ void MappingFrame::contextMenuEvent(QContextMenuEvent * /*event*/) {
         _widgetEnabledSubMenu->actions()[ENABLED]->setEnabled(opacWidget->enabled());
         _widgetEnabledSubMenu->actions()[DISABLED]->setEnabled(!opacWidget->enabled());
 
-        QAction *ac = _contextMenu->addMenu(_widgetEnabledSubMenu);
-        ac->setText("Opacity Contribution");
-        _contextMenu->addAction(_deleteOpacityWidgetAction);
-
-        _contextMenu->addSeparator();
+        //    QAction* ac = _contextMenu->addMenu(_widgetEnabledSubMenu);
+        //    ac->setText("Opacity Contribution");
+        //    _contextMenu->addAction(_deleteOpacityWidgetAction);
+        //    _contextMenu->addSeparator();
 
         if (_colorbarWidget) {
             _contextMenu->addAction(_addColorControlPointAction);
@@ -2078,8 +2077,8 @@ void MappingFrame::contextMenuEvent(QContextMenuEvent * /*event*/) {
     //
     else {
         if (_opacityMappingEnabled) {
-            QAction *act = _contextMenu->addMenu(_addOpacityWidgetSubMenu);
-            act->setText("New Opacity Widget");
+            //QAction* act = _contextMenu->addMenu(_addOpacityWidgetSubMenu);
+            //act->setText("New Opacity Widget");
         }
 
         _contextMenu->addSeparator();
