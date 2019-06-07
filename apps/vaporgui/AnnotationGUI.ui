@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>418</width>
-    <height>1372</height>
+    <height>1100</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -24,8 +24,8 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>16777215</width>
-    <height>16777215</height>
+    <width>418</width>
+    <height>2200</height>
    </size>
   </property>
   <property name="baseSize">
@@ -40,17 +40,14 @@
   <property name="whatsThis">
    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This panel specifies properties of each visualizer.  Additional information about this panel is available as a tooltip for each element.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,0,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,0,0,0">
    <property name="spacing">
     <number>20</number>
-   </property>
-   <property name="sizeConstraint">
-    <enum>QLayout::SetMinimumSize</enum>
    </property>
    <item>
     <widget class="QTabWidget" name="_axisAnnotationTab">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -59,12 +56,6 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="tab">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
       <attribute name="title">
        <string>Axis Annotations</string>
       </attribute>
@@ -88,9 +79,6 @@
         <layout class="QHBoxLayout" name="horizontalLayout">
          <property name="spacing">
           <number>0</number>
-         </property>
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
          </property>
          <property name="topMargin">
           <number>0</number>
@@ -132,9 +120,6 @@
          <property name="spacing">
           <number>0</number>
          </property>
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
-         </property>
          <property name="topMargin">
           <number>0</number>
          </property>
@@ -174,9 +159,6 @@
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <property name="spacing">
           <number>0</number>
-         </property>
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
          </property>
          <property name="topMargin">
           <number>0</number>
@@ -228,9 +210,6 @@
          <property name="spacing">
           <number>0</number>
          </property>
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
-         </property>
          <property name="topMargin">
           <number>0</number>
          </property>
@@ -280,9 +259,6 @@
         <layout class="QHBoxLayout" name="horizontalLayout_9">
          <property name="spacing">
           <number>5</number>
-         </property>
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
          </property>
          <property name="topMargin">
           <number>0</number>
@@ -355,9 +331,6 @@
          <property name="spacing">
           <number>5</number>
          </property>
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
-         </property>
          <property name="topMargin">
           <number>0</number>
          </property>
@@ -428,9 +401,6 @@
         <layout class="QHBoxLayout" name="horizontalLayout_11">
          <property name="spacing">
           <number>5</number>
-         </property>
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
          </property>
          <property name="topMargin">
           <number>0</number>
@@ -504,7 +474,7 @@
        <item>
         <widget class="QTableWidget" name="axisAnnotationTable">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -521,9 +491,6 @@
         <layout class="QHBoxLayout" name="horizontalLayout_8">
          <property name="spacing">
           <number>4</number>
-         </property>
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
          </property>
          <property name="topMargin">
           <number>0</number>
@@ -593,9 +560,6 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
-         </property>
          <property name="topMargin">
           <number>0</number>
          </property>
@@ -638,7 +602,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget_3">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -647,12 +611,6 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="tab_4">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
       <attribute name="title">
        <string>Time Annotation</string>
       </attribute>
@@ -997,7 +955,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget_2">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -1006,12 +964,6 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="tab_3">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
       <attribute name="title">
        <string>3D Geometry</string>
       </attribute>
@@ -1356,7 +1308,7 @@
    <item>
     <widget class="QTabWidget" name="_orientationArrowTab">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -1365,12 +1317,6 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="tab_2">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
       <attribute name="title">
        <string>Orientation Arrows</string>
       </attribute>
@@ -1577,22 +1523,6 @@
       </layout>
      </widget>
     </widget>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::Minimum</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>
