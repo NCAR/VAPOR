@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>496</width>
-    <height>350</height>
+    <width>418</width>
+    <height>1300</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -40,11 +40,11 @@ specifies the position of the viewer
 and the lights that illuminate the
 scene.</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="TransformTable" name="transformTable" native="true">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -66,7 +66,7 @@ scene.</string>
    <item>
     <widget class="QTabWidget" name="datasetProjectionTab">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+      <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -81,12 +81,6 @@ scene.</string>
       <number>0</number>
      </property>
      <widget class="QWidget" name="tab_2">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
       <attribute name="title">
        <string>Dataset Projections</string>
       </attribute>
@@ -94,25 +88,13 @@ scene.</string>
        <property name="spacing">
         <number>0</number>
        </property>
-       <property name="sizeConstraint">
-        <enum>QLayout::SetMinimumSize</enum>
-       </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
+       <property name="margin">
         <number>0</number>
        </property>
        <item>
         <widget class="QTableWidget" name="datasetProjectionTable">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -141,12 +123,6 @@ scene.</string>
    </item>
    <item>
     <widget class="QFrame" name="frame">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
@@ -168,12 +144,6 @@ scene.</string>
       </property>
       <item>
        <widget class="QLabel" name="label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
         <property name="text">
          <string>Projection Mode</string>
         </property>
@@ -183,9 +153,6 @@ scene.</string>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Minimum</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -197,12 +164,6 @@ scene.</string>
       </item>
       <item>
        <widget class="QComboBox" name="_projectionCombo">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
         <property name="editable">
          <bool>false</bool>
         </property>
@@ -222,25 +183,19 @@ scene.</string>
     </widget>
    </item>
    <item>
-    <widget class="QTabWidget" name="futureFeaturesTab">
+    <widget class="QTabWidget" name="tabWidget">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+      <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>16777215</height>
-      </size>
      </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
      <widget class="QWidget" name="tab">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -251,25 +206,13 @@ scene.</string>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <layout class="QVBoxLayout">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
-         </property>
          <item>
           <layout class="QHBoxLayout">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetMinimumSize</enum>
-           </property>
            <item>
             <widget class="QLabel" name="textLabel1_3">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="minimumSize">
               <size>
-               <width>0</width>
+               <width>110</width>
                <height>0</height>
               </size>
              </property>
@@ -284,7 +227,7 @@ scene.</string>
            <item>
             <widget class="QLabel" name="textLabel4_2">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -309,7 +252,7 @@ scene.</string>
            <item>
             <widget class="QLabel" name="textLabel5_2">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -328,7 +271,7 @@ scene.</string>
            <item>
             <widget class="QLabel" name="textLabel6_2">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -348,20 +291,11 @@ scene.</string>
          </item>
          <item>
           <layout class="QHBoxLayout">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetMinimumSize</enum>
-           </property>
            <item>
             <widget class="QLabel" name="textLabel2_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="minimumSize">
               <size>
-               <width>0</width>
+               <width>110</width>
                <height>0</height>
               </size>
              </property>
@@ -378,12 +312,6 @@ scene.</string>
            </item>
            <item>
             <widget class="QLineEdit" name="viewDir0">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>100</width>
@@ -415,12 +343,6 @@ where the camera is pointed.</string>
            </item>
            <item>
             <widget class="QLineEdit" name="viewDir1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>100</width>
@@ -452,12 +374,6 @@ where the camera is pointed.</string>
            </item>
            <item>
             <widget class="QLineEdit" name="viewDir2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>100</width>
@@ -491,20 +407,11 @@ where the camera is pointed.</string>
          </item>
          <item>
           <layout class="QHBoxLayout">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetMinimumSize</enum>
-           </property>
            <item>
             <widget class="QLabel" name="textLabel3_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="minimumSize">
               <size>
-               <width>0</width>
+               <width>110</width>
                <height>0</height>
               </size>
              </property>
@@ -521,12 +428,6 @@ where the camera is pointed.</string>
            </item>
            <item>
             <widget class="QLineEdit" name="upVec0">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>100</width>
@@ -558,12 +459,6 @@ where the camera is pointed.</string>
            </item>
            <item>
             <widget class="QLineEdit" name="upVec1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>100</width>
@@ -595,12 +490,6 @@ where the camera is pointed.</string>
            </item>
            <item>
             <widget class="QLineEdit" name="upVec2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>100</width>
@@ -634,20 +523,11 @@ where the camera is pointed.</string>
          </item>
          <item>
           <layout class="QHBoxLayout">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetMinimumSize</enum>
-           </property>
            <item>
             <widget class="QLabel" name="textLabel1_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="minimumSize">
               <size>
-               <width>0</width>
+               <width>110</width>
                <height>0</height>
               </size>
              </property>
@@ -664,12 +544,6 @@ where the camera is pointed.</string>
            </item>
            <item>
             <widget class="QLineEdit" name="camPos0">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>100</width>
@@ -698,12 +572,6 @@ where the camera is pointed.</string>
            </item>
            <item>
             <widget class="QLineEdit" name="camPos1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>100</width>
@@ -735,12 +603,6 @@ where the camera is pointed.</string>
            </item>
            <item>
             <widget class="QLineEdit" name="camPos2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>100</width>
@@ -774,20 +636,11 @@ where the camera is pointed.</string>
          </item>
          <item>
           <layout class="QHBoxLayout">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetMinimumSize</enum>
-           </property>
            <item>
             <widget class="QLabel" name="textLabel3_2_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="minimumSize">
               <size>
-               <width>0</width>
+               <width>110</width>
                <height>0</height>
               </size>
              </property>
@@ -804,12 +657,6 @@ where the camera is pointed.</string>
            </item>
            <item>
             <widget class="QLineEdit" name="rotCenter0">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>100</width>
@@ -841,12 +688,6 @@ where the camera is pointed.</string>
            </item>
            <item>
             <widget class="QLineEdit" name="rotCenter1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>100</width>
@@ -878,12 +719,6 @@ where the camera is pointed.</string>
            </item>
            <item>
             <widget class="QLineEdit" name="rotCenter2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>100</width>
@@ -919,22 +754,26 @@ where the camera is pointed.</string>
        </item>
        <item>
         <layout class="QVBoxLayout">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
-         </property>
          <item>
           <layout class="QHBoxLayout">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetMinimumSize</enum>
-           </property>
+           <item>
+            <spacer name="spacer190">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>41</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
            <item>
             <widget class="QCheckBox" name="latLonCheckbox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="toolTip">
               <string>Check to position camera and rotation center using lat/lon coordinates</string>
              </property>
@@ -946,29 +785,49 @@ where the camera is pointed.</string>
              </property>
             </widget>
            </item>
+           <item>
+            <spacer name="spacer191">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>61</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
           </layout>
          </item>
          <item>
           <layout class="QHBoxLayout">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetMinimumSize</enum>
-           </property>
+           <item>
+            <spacer name="spacer192">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>21</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
            <item>
             <layout class="QGridLayout" name="gridlayout1">
-             <property name="sizeConstraint">
-              <enum>QLayout::SetMinimumSize</enum>
-             </property>
              <item row="0" column="0">
               <widget class="QLabel" name="textLabel4_4">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
                <property name="minimumSize">
                 <size>
-                 <width>0</width>
+                 <width>110</width>
                  <height>0</height>
                 </size>
                </property>
@@ -982,15 +841,9 @@ where the camera is pointed.</string>
              </item>
              <item row="1" column="0">
               <widget class="QLabel" name="textLabel1_2_2">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
                <property name="minimumSize">
                 <size>
-                 <width>0</width>
+                 <width>110</width>
                  <height>0</height>
                 </size>
                </property>
@@ -1007,12 +860,6 @@ where the camera is pointed.</string>
              </item>
              <item row="1" column="2">
               <widget class="QLineEdit" name="camPosLat">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
                <property name="toolTip">
                 <string>Specify the coordinates in the scene about which the scene is rotated by the left mouse drags</string>
                </property>
@@ -1038,12 +885,6 @@ where the camera is pointed.</string>
              </item>
              <item row="2" column="1">
               <widget class="QLineEdit" name="rotCenterLon">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
                <property name="toolTip">
                 <string>Specify the coordinates in the scene about which the scene is rotated by the left mouse drags</string>
                </property>
@@ -1069,12 +910,6 @@ where the camera is pointed.</string>
              </item>
              <item row="0" column="1">
               <widget class="QLabel" name="textLabel5">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
                <property name="text">
                 <string>Longitude</string>
                </property>
@@ -1088,15 +923,9 @@ where the camera is pointed.</string>
              </item>
              <item row="2" column="0">
               <widget class="QLabel" name="textLabel3_2_2_2">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
                <property name="minimumSize">
                 <size>
-                 <width>0</width>
+                 <width>110</width>
                  <height>0</height>
                 </size>
                </property>
@@ -1113,12 +942,6 @@ where the camera is pointed.</string>
              </item>
              <item row="1" column="1">
               <widget class="QLineEdit" name="camPosLon">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
                <property name="toolTip">
                 <string>Specify the coordinates in the scene about which the scene is rotated by the left mouse drags</string>
                </property>
@@ -1144,12 +967,6 @@ where the camera is pointed.</string>
              </item>
              <item row="2" column="2">
               <widget class="QLineEdit" name="rotCenterLat">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
                <property name="toolTip">
                 <string>Specify the coordinates in the scene about which the scene is rotated by the left mouse drags</string>
                </property>
@@ -1175,12 +992,6 @@ where the camera is pointed.</string>
              </item>
              <item row="0" column="2">
               <widget class="QLabel" name="textLabel6">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
                <property name="text">
                 <string>Latitude</string>
                </property>
@@ -1194,18 +1005,28 @@ where the camera is pointed.</string>
              </item>
             </layout>
            </item>
+           <item>
+            <spacer name="spacer193">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>31</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
           </layout>
          </item>
         </layout>
        </item>
        <item>
         <widget class="QFrame" name="latLonFrame">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
          <property name="frameShape">
           <enum>QFrame::NoFrame</enum>
          </property>
@@ -1217,12 +1038,6 @@ where the camera is pointed.</string>
        </item>
        <item>
         <widget class="QLabel" name="textLabel3_3">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
          <property name="text">
           <string>Lighting Parameters</string>
          </property>
@@ -1236,20 +1051,27 @@ where the camera is pointed.</string>
        </item>
        <item>
         <layout class="QGridLayout" name="gridLayout">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
-         </property>
+         <item row="0" column="2">
+          <spacer name="spacer33">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>21</width>
+             <height>21</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="textLabel1_5">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
            <property name="minimumSize">
             <size>
-             <width>0</width>
+             <width>100</width>
              <height>0</height>
             </size>
            </property>
@@ -1260,7 +1082,7 @@ where the camera is pointed.</string>
             <string>Separation Angle:</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            <set>Qt::AlignCenter</set>
            </property>
            <property name="wordWrap">
             <bool>false</bool>
@@ -1269,12 +1091,6 @@ where the camera is pointed.</string>
          </item>
          <item row="0" column="1">
           <widget class="QLineEdit" name="stereoSeparationEdit">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
            <property name="maximumSize">
             <size>
              <width>70</width>
@@ -1297,15 +1113,9 @@ where the camera is pointed.</string>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="textLabel2_3">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
            <property name="minimumSize">
             <size>
-             <width>0</width>
+             <width>100</width>
              <height>0</height>
             </size>
            </property>
@@ -1325,12 +1135,6 @@ where the camera is pointed.</string>
          </item>
          <item row="1" column="1">
           <widget class="QComboBox" name="stereoCombo">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
            <property name="toolTip">
             <string>Change viewpoint to Left, Right, or Center for creating stereo pairs</string>
            </property>
@@ -1354,16 +1158,26 @@ where the camera is pointed.</string>
            </item>
           </widget>
          </item>
+         <item row="1" column="2">
+          <spacer name="spacer34">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>31</width>
+             <height>21</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
         </layout>
        </item>
        <item>
         <widget class="QLabel" name="textLabel1_4">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
          <property name="font">
           <font>
            <pointsize>9</pointsize>
@@ -1389,12 +1203,6 @@ p, li { white-space: pre-wrap; }
        </item>
        <item>
         <widget class="QLabel" name="textLabel4_3">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
          <property name="text">
           <string>Stereo Controls</string>
          </property>
@@ -1408,20 +1216,11 @@ p, li { white-space: pre-wrap; }
        </item>
        <item>
         <layout class="QHBoxLayout">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
-         </property>
          <item>
           <widget class="QLabel" name="textLabel7_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
            <property name="minimumSize">
             <size>
-             <width>0</width>
+             <width>100</width>
              <height>0</height>
             </size>
            </property>
@@ -1442,7 +1241,7 @@ p, li { white-space: pre-wrap; }
             <bool>true</bool>
            </property>
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -1472,20 +1271,33 @@ p, li { white-space: pre-wrap; }
            </property>
           </widget>
          </item>
+         <item>
+          <spacer name="spacer66">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>91</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
         </layout>
        </item>
        <item>
         <layout class="QGridLayout" name="gridlayout2">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
-         </property>
          <item row="4" column="2">
           <spacer name="spacer13_3_2">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Fixed</enum>
+            <enum>QSizePolicy::Expanding</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1499,12 +1311,6 @@ p, li { white-space: pre-wrap; }
           <widget class="QLineEdit" name="lightPos21">
            <property name="enabled">
             <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
            </property>
            <property name="maximumSize">
             <size>
@@ -1534,12 +1340,6 @@ p, li { white-space: pre-wrap; }
           <widget class="QLineEdit" name="lightPos02">
            <property name="enabled">
             <bool>true</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
            </property>
            <property name="maximumSize">
             <size>
@@ -1571,12 +1371,6 @@ p, li { white-space: pre-wrap; }
          </item>
          <item row="3" column="0">
           <widget class="QLabel" name="textLabel8_2_3">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
            <property name="toolTip">
             <string>Specify the direction of the second light source, relative to the current view direction.</string>
            </property>
@@ -1602,12 +1396,6 @@ p, li { white-space: pre-wrap; }
           <widget class="QLineEdit" name="lightPos10">
            <property name="enabled">
             <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
            </property>
            <property name="maximumSize">
             <size>
@@ -1639,7 +1427,7 @@ p, li { white-space: pre-wrap; }
             <enum>Qt::Vertical</enum>
            </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Fixed</enum>
+            <enum>QSizePolicy::Expanding</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1653,12 +1441,6 @@ p, li { white-space: pre-wrap; }
           <widget class="QLineEdit" name="lightPos20">
            <property name="enabled">
             <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
            </property>
            <property name="maximumSize">
             <size>
@@ -1690,7 +1472,7 @@ p, li { white-space: pre-wrap; }
             <enum>Qt::Vertical</enum>
            </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Minimum</enum>
+            <enum>QSizePolicy::Expanding</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1704,12 +1486,6 @@ p, li { white-space: pre-wrap; }
           <widget class="QLineEdit" name="lightPos11">
            <property name="enabled">
             <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
            </property>
            <property name="maximumSize">
             <size>
@@ -1737,12 +1513,6 @@ p, li { white-space: pre-wrap; }
          </item>
          <item row="0" column="3">
           <widget class="QLabel" name="textLabel11_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
            <property name="text">
             <string>Z</string>
            </property>
@@ -1756,12 +1526,6 @@ p, li { white-space: pre-wrap; }
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="textLabel8_3">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
            <property name="toolTip">
             <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -1789,12 +1553,6 @@ p, li { white-space: pre-wrap; }
          </item>
          <item row="5" column="0">
           <widget class="QLabel" name="textLabel8_2_2_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
            <property name="toolTip">
             <string>Specify the direction of the third light source, relative to the current view direction.</string>
            </property>
@@ -1820,12 +1578,6 @@ p, li { white-space: pre-wrap; }
           <widget class="QLineEdit" name="lightPos12">
            <property name="enabled">
             <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
            </property>
            <property name="maximumSize">
             <size>
@@ -1857,7 +1609,7 @@ p, li { white-space: pre-wrap; }
             <enum>Qt::Vertical</enum>
            </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Minimum</enum>
+            <enum>QSizePolicy::Expanding</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1873,7 +1625,7 @@ p, li { white-space: pre-wrap; }
             <enum>Qt::Vertical</enum>
            </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Minimum</enum>
+            <enum>QSizePolicy::Expanding</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1887,12 +1639,6 @@ p, li { white-space: pre-wrap; }
           <widget class="QLineEdit" name="lightPos01">
            <property name="enabled">
             <bool>true</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
            </property>
            <property name="maximumSize">
             <size>
@@ -1924,12 +1670,6 @@ p, li { white-space: pre-wrap; }
          </item>
          <item row="0" column="2">
           <widget class="QLabel" name="textLabel10_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
            <property name="text">
             <string>Y</string>
            </property>
@@ -1943,12 +1683,6 @@ p, li { white-space: pre-wrap; }
          </item>
          <item row="0" column="1">
           <widget class="QLabel" name="textLabel9_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
            <property name="text">
             <string>X</string>
            </property>
@@ -1966,7 +1700,7 @@ p, li { white-space: pre-wrap; }
             <enum>Qt::Vertical</enum>
            </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Minimum</enum>
+            <enum>QSizePolicy::Expanding</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1982,7 +1716,7 @@ p, li { white-space: pre-wrap; }
             <enum>Qt::Vertical</enum>
            </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Minimum</enum>
+            <enum>QSizePolicy::Expanding</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1998,7 +1732,7 @@ p, li { white-space: pre-wrap; }
             <enum>Qt::Vertical</enum>
            </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Minimum</enum>
+            <enum>QSizePolicy::Expanding</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -2012,12 +1746,6 @@ p, li { white-space: pre-wrap; }
           <widget class="QLineEdit" name="lightPos00">
            <property name="enabled">
             <bool>true</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
            </property>
            <property name="maximumSize">
             <size>
@@ -2053,7 +1781,7 @@ p, li { white-space: pre-wrap; }
             <enum>Qt::Vertical</enum>
            </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Minimum</enum>
+            <enum>QSizePolicy::Expanding</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -2067,12 +1795,6 @@ p, li { white-space: pre-wrap; }
           <widget class="QLineEdit" name="lightPos22">
            <property name="enabled">
             <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
            </property>
            <property name="maximumSize">
             <size>
@@ -2102,24 +1824,15 @@ p, li { white-space: pre-wrap; }
        </item>
        <item>
         <layout class="QHBoxLayout">
-         <property name="spacing">
-          <number>0</number>
-         </property>
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
-         </property>
          <item>
           <layout class="QGridLayout" name="gridlayout3">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetMinimumSize</enum>
-           </property>
            <item row="2" column="2">
             <spacer name="spacer13_4_2_2">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeType">
-              <enum>QSizePolicy::Minimum</enum>
+              <enum>QSizePolicy::Expanding</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -2131,12 +1844,6 @@ p, li { white-space: pre-wrap; }
            </item>
            <item row="1" column="0">
             <widget class="QLabel" name="textLabel8_3_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="toolTip">
               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -2166,12 +1873,6 @@ p, li { white-space: pre-wrap; }
             <widget class="QLineEdit" name="lightDiff2">
              <property name="enabled">
               <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
              </property>
              <property name="maximumSize">
               <size>
@@ -2207,7 +1908,7 @@ p, li { white-space: pre-wrap; }
               <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeType">
-              <enum>QSizePolicy::Minimum</enum>
+              <enum>QSizePolicy::Expanding</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -2221,12 +1922,6 @@ p, li { white-space: pre-wrap; }
             <widget class="QLineEdit" name="lightDiff0">
              <property name="enabled">
               <bool>true</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
              </property>
              <property name="maximumSize">
               <size>
@@ -2258,12 +1953,6 @@ p, li { white-space: pre-wrap; }
            </item>
            <item row="0" column="2">
             <widget class="QLabel" name="textLabel10_2_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>120</width>
@@ -2288,12 +1977,6 @@ p, li { white-space: pre-wrap; }
             <widget class="QLineEdit" name="lightSpec0">
              <property name="enabled">
               <bool>true</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
              </property>
              <property name="maximumSize">
               <size>
@@ -2328,12 +2011,6 @@ p, li { white-space: pre-wrap; }
              <property name="enabled">
               <bool>false</bool>
              </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>120</width>
@@ -2366,12 +2043,6 @@ p, li { white-space: pre-wrap; }
             <widget class="QLineEdit" name="lightDiff1">
              <property name="enabled">
               <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
              </property>
              <property name="maximumSize">
               <size>
@@ -2407,7 +2078,7 @@ p, li { white-space: pre-wrap; }
               <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeType">
-              <enum>QSizePolicy::Minimum</enum>
+              <enum>QSizePolicy::Expanding</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -2423,7 +2094,7 @@ p, li { white-space: pre-wrap; }
               <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeType">
-              <enum>QSizePolicy::Minimum</enum>
+              <enum>QSizePolicy::Expanding</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -2439,7 +2110,7 @@ p, li { white-space: pre-wrap; }
               <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeType">
-              <enum>QSizePolicy::Fixed</enum>
+              <enum>QSizePolicy::Expanding</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -2455,7 +2126,7 @@ p, li { white-space: pre-wrap; }
               <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeType">
-              <enum>QSizePolicy::Fixed</enum>
+              <enum>QSizePolicy::Expanding</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -2469,12 +2140,6 @@ p, li { white-space: pre-wrap; }
             <widget class="QLineEdit" name="lightSpec1">
              <property name="enabled">
               <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
              </property>
              <property name="maximumSize">
               <size>
@@ -2506,12 +2171,6 @@ p, li { white-space: pre-wrap; }
            </item>
            <item row="0" column="1">
             <widget class="QLabel" name="textLabel9_2_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>120</width>
@@ -2535,7 +2194,7 @@ p, li { white-space: pre-wrap; }
               <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeType">
-              <enum>QSizePolicy::Minimum</enum>
+              <enum>QSizePolicy::Expanding</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -2547,12 +2206,6 @@ p, li { white-space: pre-wrap; }
            </item>
            <item row="3" column="0">
             <widget class="QLabel" name="textLabel8_2_3_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="toolTip">
               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -2580,12 +2233,6 @@ p, li { white-space: pre-wrap; }
            </item>
            <item row="5" column="0">
             <widget class="QLabel" name="textLabel8_2_2_2_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="toolTip">
               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
@@ -2614,18 +2261,25 @@ p, li { white-space: pre-wrap; }
           </layout>
          </item>
          <item>
-          <layout class="QVBoxLayout">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetMinimumSize</enum>
+          <spacer name="spacer68">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
            </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <layout class="QVBoxLayout">
            <item>
             <widget class="QLabel" name="textLabel3">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>120</width>
@@ -2645,12 +2299,6 @@ p, li { white-space: pre-wrap; }
            </item>
            <item>
             <widget class="QLineEdit" name="ambientEdit">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>120</width>
@@ -2681,7 +2329,7 @@ p, li { white-space: pre-wrap; }
               <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeType">
-              <enum>QSizePolicy::Minimum</enum>
+              <enum>QSizePolicy::Expanding</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -2693,12 +2341,6 @@ p, li { white-space: pre-wrap; }
            </item>
            <item>
             <widget class="QLabel" name="textLabel4">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>120</width>
@@ -2718,12 +2360,6 @@ p, li { white-space: pre-wrap; }
            </item>
            <item>
             <widget class="QLineEdit" name="shininessEdit">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
              <property name="maximumSize">
               <size>
                <width>120</width>
@@ -2754,7 +2390,7 @@ p, li { white-space: pre-wrap; }
               <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeType">
-              <enum>QSizePolicy::Minimum</enum>
+              <enum>QSizePolicy::Expanding</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -2766,21 +2402,28 @@ p, li { white-space: pre-wrap; }
            </item>
           </layout>
          </item>
+         <item>
+          <spacer name="spacer70">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>21</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
         </layout>
        </item>
        <item>
         <layout class="QHBoxLayout">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
-         </property>
          <item>
           <widget class="QLabel" name="textLabel2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
            <property name="font">
             <font>
              <pointsize>9</pointsize>
@@ -2803,7 +2446,7 @@ p, li { white-space: pre-wrap; }
             <enum>Qt::Horizontal</enum>
            </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Minimum</enum>
+            <enum>QSizePolicy::Expanding</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -2823,9 +2466,6 @@ p, li { white-space: pre-wrap; }
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::Expanding</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
