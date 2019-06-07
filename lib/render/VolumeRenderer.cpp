@@ -408,6 +408,7 @@ int VolumeRenderer::_loadData()
     }
     
     int ret = _algorithm->LoadData(grid);
+    _lastRenderTime = 10000;
     delete grid;
     return ret;
 }
@@ -509,10 +510,10 @@ void VolumeRenderer::_getExtents(glm::vec3 *dataMin, glm::vec3 *dataMax, glm::ve
 
 std::string VolumeRenderer::_getDefaultAlgorithmForGrid(const Grid *grid) const
 {
-    const RegularGrid* regular = dynamic_cast<const RegularGrid*>(grid);
-    if (regular)
-        return VolumeRegular::GetName();
-    return VolumeCellTraversal::GetName();
+    if (dynamic_cast<const RegularGrid *>   (grid)) return VolumeRegular      ::GetName();
+    if (dynamic_cast<const StructuredGrid *>(grid)) return VolumeCellTraversal::GetName();
+    MyBase::SetErrMsg("Unsupported grid type: %s", grid->GetType().c_str());
+    return "";
 }
 
 bool VolumeRenderer::_needToSetDefaultAlgorithm() const
