@@ -144,10 +144,11 @@ int VolumeRenderer::_paintGL(bool fast)
 
 void VolumeRenderer::_setShaderUniforms(const ShaderProgram *shader, const bool fast) const
 {
-    VolumeParams *vp = (VolumeParams *)GetActiveParams();
-    Viewpoint *   viewpoint = _paramsMgr->GetViewpointParams(_winName)->getCurrentViewpoint();
-    double        m[16];
-    double        cameraPos[3], cameraUp[3], cameraDir[3];
+    VolumeParams *   vp = (VolumeParams *)GetActiveParams();
+    ViewpointParams *viewpointParams = _paramsMgr->GetViewpointParams(_winName);
+    Viewpoint *      viewpoint = viewpointParams->getCurrentViewpoint();
+    double           m[16];
+    double           cameraPos[3], cameraUp[3], cameraDir[3];
     _glManager->matrixManager->GetDoublev(MatrixManager::Mode::ModelView, m);
     viewpoint->ReconstructCamera(m, cameraPos, cameraUp, cameraDir);
 
@@ -179,6 +180,7 @@ void VolumeRenderer::_setShaderUniforms(const ShaderProgram *shader, const bool 
     shader->SetUniform("density", (float)_cache.tf->getOpacityScale());
     shader->SetUniform("LUTMin", (float)_cache.mapRange[0]);
     shader->SetUniform("LUTMax", (float)_cache.mapRange[1]);
+    shader->SetUniform("mapOrthoMode", viewpointParams->GetProjectionType() == ViewpointParams::MapOrthographic);
 
     shader->SetSampler("LUT", _LUTTexture);
     shader->SetSampler("sceneDepth", _depthTexture);

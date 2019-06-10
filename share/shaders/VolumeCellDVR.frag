@@ -105,6 +105,6 @@ vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float t
             break;
     }
     
-    gl_FragDepth = CalculateDepth(cameraPos + dir*t1);
+    gl_FragDepth = CalculateDepth(origin + dir*t1);
     return accum;
 }

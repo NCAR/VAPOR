@@ -428,13 +428,13 @@ vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float t
 
 void main(void)
 {
-    vec3 dir, rayLightingNormal;
+    vec3 eye, dir, rayLightingNormal;
     float sceneDepthT;
-    GetRayParameters(dir, rayLightingNormal, sceneDepthT);
+    GetRayParameters(eye, dir, rayLightingNormal, sceneDepthT);
     
     float t0, t1, tp;
     
-    bool intersectBox = IntersectRayBoundingBox(cameraPos, dir, 0, userExtsMin, userExtsMax, t0, t1);
+    bool intersectBox = IntersectRayBoundingBox(eye, dir, 0, userExtsMin, userExtsMax, t0, t1);
     float tMin = t0, tMax = min(t1, sceneDepthT);
     
     if (intersectBox) {
@@ -446,10 +446,10 @@ void main(void)
         int intersections;
         int i = 0;
         do {
-            intersections = FindInitialCell(cameraPos, dir, t0, initialCell, entranceFace, t1);
+            intersections = FindInitialCell(eye, dir, t0, initialCell, entranceFace, t1);
             
             if (intersections > 0) {
-                vec4 color = Traverse(cameraPos, dir, rayLightingNormal, tMin, tMax, t1, initialCell, entranceFace, t1);
+                vec4 color = Traverse(eye, dir, rayLightingNormal, tMin, tMax, t1, initialCell, entranceFace, t1);
                 BlendToBack(accum, color);
             }
             
