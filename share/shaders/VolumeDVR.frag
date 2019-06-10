@@ -25,14 +25,14 @@ float IntegrateConstantAlpha(float a, float distance)
 
 void main(void)
 {
-    vec3 dir, rayLightingNormal;
+    vec3 eye, dir, rayLightingNormal;
     float sceneDepthT;
-    GetRayParameters(dir, rayLightingNormal, sceneDepthT);
+    GetRayParameters(eye, dir, rayLightingNormal, sceneDepthT);
     
     vec4 accum = vec4(0);
     float t0, t1;
     
-    if (IntersectRayBoundingBox(cameraPos, dir, 0, userExtsMin, userExtsMax, t0, t1)) {
+    if (IntersectRayBoundingBox(eye, dir, 0, userExtsMin, userExtsMax, t0, t1)) {
         
         int STEPS;
         float integratePart = 1 / samplingRateMultiplier;
@@ -48,7 +48,7 @@ void main(void)
         int i = 0;
         for (float t = t0; t < t1; t += step) {
             
-            vec3 hit = cameraPos + dir * t;
+            vec3 hit = eye + dir * t;
             vec3 dataSTR = (hit - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
             float dataNorm = (texture(data, dataSTR).r - LUTMin) / (LUTMax - LUTMin);
             vec4 color = texture(LUT, dataNorm);
@@ -71,7 +71,7 @@ void main(void)
                 break;
         }
         
-        gl_FragDepth = CalculateDepth(cameraPos + dir*t1);
+        gl_FragDepth = CalculateDepth(eye + dir*t1);
         fragColor = accum;
     }
     if (accum.a < ALPHA_DISCARD)
