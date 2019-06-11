@@ -81,8 +81,6 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
 
     _animConnected = false;
     _ap = NULL;
-
-    adjustSize();
 }
 
 AnnotationEventRouter::~AnnotationEventRouter() {}

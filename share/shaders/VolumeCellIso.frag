@@ -17,7 +17,7 @@ void TestIsoSample(const vec3 hit, const vec3 dir, vec3 rayLightingNormal, float
     }
 }
 
-void RenderCellSmartSampling(const vec3 dir, vec3 rayLightingNormal, const vec3 entranceCoord, const vec3 exitCoord, const float tStart, const float tEnd, const float t0, const float t1, const float step, inout float ld, inout vec4 accum)
+void RenderCellSmartSampling(const vec3 origin, const vec3 dir, vec3 rayLightingNormal, const vec3 entranceCoord, const vec3 exitCoord, const float tStart, const float tEnd, const float t0, const float t1, const float step, inout float ld, inout vec4 accum)
 {
     vec3 hit = mix(entranceCoord, exitCoord, (tStart-t0)/(t1-t0));
     float dv = GetDataCoordinateSpace(hit);
@@ -39,7 +39,7 @@ void RenderCellSmartSampling(const vec3 dir, vec3 rayLightingNormal, const vec3 
         ld = dv;
         
         if (accum.a > ALPHA_BREAK) {
-            gl_FragDepth = CalculateDepth(cameraPos + dir*t);
+            gl_FragDepth = CalculateDepth(origin + dir*t);
             return;
         }
     }
@@ -78,7 +78,7 @@ vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float t
             float tStart = max(t0, tMin);
 
 			if (ShouldRenderCell(currentCell)) {
-                RenderCellSmartSampling(dir, rayLightingNormal, entranceCoord, exitCoord, tStart, tEnd, t0, t1, step, ld, accum);
+                RenderCellSmartSampling(origin, dir, rayLightingNormal, entranceCoord, exitCoord, tStart, tEnd, t0, t1, step, ld, accum);
             } else {
                 // Leaving missing value cell
                 ld = GetDataCoordinateSpace(exitCoord);

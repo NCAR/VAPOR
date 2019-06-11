@@ -34,6 +34,7 @@ public:
     WireFrameAppearanceSubtab(QWidget *parent)
     {
         setupUi(this);
+        _TFWidget->SetOpacitySupported(false);
         _TFWidget->Reinit((TFFlags)(CONSTANT_COLOR));
     }
 
