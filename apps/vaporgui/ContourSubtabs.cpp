@@ -56,8 +56,10 @@ void ContourAppearanceSubtab::Initialize(VAPoR::ContourParams *cParams) {
 
     _cParams = cParams;
     string varname = _cParams->GetVariableName();
-    if (varname.empty())
+    if (varname.empty()) {
+        _paramsMgr->EndSaveStateGroup();
         return;
+    }
 
     double minBound, maxBound;
     GetContourBounds(minBound, maxBound);
