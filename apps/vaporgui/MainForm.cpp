@@ -2143,7 +2143,6 @@ void MainForm::captureSingleImage(
     string filter,
     string defaultSuffix) {
     showCitationReminder();
-    SettingsParams *sP = GetSettingsParams();
     auto imageDir = QDir::homePath();
 
     QFileDialog fileDialog(
@@ -2174,9 +2173,6 @@ void MainForm::captureSingleImage(
 
     string file = fileInfo.absoluteFilePath().toStdString();
     string filepath = fileInfo.path().toStdString();
-
-    //Save the path for future captures
-    sP->SetImageDir(filepath);
 
     //Turn on "image capture mode" in the current active visualizer
     GUIStateParams *p = GetStateParams();
@@ -2339,7 +2335,6 @@ void MainForm::startAnimCapture(
     string filter,
     string defaultSuffix) {
     showCitationReminder();
-    SettingsParams *sP = GetSettingsParams();
     auto imageDir = QDir::homePath();
 
     QFileDialog fileDialog(
@@ -2373,8 +2368,6 @@ void MainForm::startAnimCapture(
         fileName = fileInfo.absolutePath() + "/" + fileInfo.baseName();
     }
 
-    //Save the path for future captures
-    sP->SetImageDir(fileInfo.absolutePath().toStdString());
     QString fileBaseName = fileInfo.baseName();
 
     int posn;

@@ -119,8 +119,6 @@ void SettingsEventRouter::hookUpTab() {
             this, SLOT(_setSessionPath()));
     connect(_metadataPathEdit, SIGNAL(returnPressed()),
             this, SLOT(_setMetadataPath()));
-    connect(_imagePathEdit, SIGNAL(returnPressed()),
-            this, SLOT(_setImagePath()));
     connect(_tfPathEdit, SIGNAL(returnPressed()),
             this, SLOT(_setTFPath()));
     connect(_flowPathEdit, SIGNAL(returnPressed()),
@@ -131,8 +129,6 @@ void SettingsEventRouter::hookUpTab() {
             this, SLOT(_chooseSessionPath()));
     connect(_metadataPathButton, SIGNAL(clicked()),
             this, SLOT(_chooseMetadataPath()));
-    connect(_imagePathButton, SIGNAL(clicked()),
-            this, SLOT(_chooseImagePath()));
     connect(_tfPathButton, SIGNAL(clicked()),
             this, SLOT(_chooseTFPath()));
     connect(_flowPathButton, SIGNAL(clicked()),
@@ -283,14 +279,6 @@ void SettingsEventRouter::_setMetadataPath() {
                  *sParams, _metadataPathEdit);
 }
 
-void SettingsEventRouter::_setImagePath() {
-    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
-
-    _setFilePath(&SettingsParams::SetImageDir,
-                 &SettingsParams::GetImageDir,
-                 *sParams, _imagePathEdit);
-}
-
 void SettingsEventRouter::_setFlowPath() {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
 
@@ -366,9 +354,6 @@ void SettingsEventRouter::_updateDirectoryPaths() {
 
     string metaPath = sParams->GetMetadataDir();
     _metadataPathEdit->setText(QString::fromStdString(metaPath));
-
-    string imagePath = sParams->GetImageDir();
-    _imagePathEdit->setText(QString::fromStdString(imagePath));
 
     string tfPath = sParams->GetTFDir();
     _tfPathEdit->setText(QString::fromStdString(tfPath));
@@ -451,18 +436,6 @@ void SettingsEventRouter::_chooseMetadataPath() {
 
     if (!dir.empty()) {
         sParams->SetMetadataDir(dir);
-        _saveSettings();
-    }
-}
-
-void SettingsEventRouter::_chooseImagePath() {
-    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
-
-    string dir = _choosePathHelper(
-        sParams->GetImageDir(), "Choose the image file directory");
-
-    if (!dir.empty()) {
-        sParams->SetImageDir(dir);
         _saveSettings();
     }
 }
