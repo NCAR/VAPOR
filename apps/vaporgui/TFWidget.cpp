@@ -136,10 +136,8 @@ void TFWidget::Reinit(TFFlags flags) {
     else
         _mappingFrame->setIsolineSliders(false);
 
-    if (_flags & SAMPLING) {
+    if (_flags & SAMPLING)
         _mappingFrame->SetIsSampling(true);
-        _secondaryMappingFrame->SetIsSampling(true);
-    }
 
     configureSecondaryTransferFunction();
     configureConstantColorControls();
