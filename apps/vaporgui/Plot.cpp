@@ -579,6 +579,8 @@ void Plot::_spaceTabPlotClicked()
             }
             sequences.push_back( seq );
         }
+
+        delete grid;
     }
     
     // Decide X label and values
@@ -655,6 +657,8 @@ void Plot::_timeTabPlotClicked()
                 else
                     seq.push_back( std::nanf("1") );
             }
+
+            delete grid;
         }
         sequences.push_back( seq );
     }
