@@ -179,7 +179,7 @@ void StartupEventRouter::updateDirChanged()
 
     sessionPathEdit->setText(QString::fromStdString(sParams->GetSessionDir()));
     metadataPathEdit->setText(QString::fromStdString(sParams->GetMetadataDir()));
-    imagePathEdit->setText(QString::fromStdString(sParams->GetImageDir()));
+    imagePathEdit->setText(QDir::homePath());
     tfPathEdit->setText(QString::fromStdString(sParams->GetTFDir()));
     flowPathEdit->setText(QString::fromStdString(sParams->GetFlowDir()));
     pythonPathEdit->setText(QString::fromStdString(sParams->GetPythonDir()));
@@ -234,7 +234,7 @@ void StartupEventRouter::chooseImagePath()
 {
     StartupParams *sParams = (StartupParams *)GetActiveParams();
 
-    string dir = choosePathHelper(sParams->GetImageDir(), "Choose the image file directory");
+    string dir = QDir::homePath().toStdString();
 
     if (!dir.empty()) { sParams->SetImageDir(dir); }
 }
