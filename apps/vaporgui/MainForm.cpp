@@ -1914,10 +1914,9 @@ void MainForm::captureSingleImage(string filter, string defaultSuffix)
 {
     showCitationReminder();
     SettingsParams *sP = GetSettingsParams();
-    string          imageDir = sP->GetImageDir();
-    if (imageDir == "") imageDir = sP->GetDefaultImageDir();
+    auto            imageDir = QDir::homePath();
 
-    QFileDialog fileDialog(this, "Specify single image capture file name", imageDir.c_str(), QString::fromStdString(filter));
+    QFileDialog fileDialog(this, "Specify single image capture file name", imageDir, QString::fromStdString(filter));
 
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     fileDialog.move(pos());
@@ -2100,10 +2099,9 @@ void MainForm::startAnimCapture(string filter, string defaultSuffix)
 {
     showCitationReminder();
     SettingsParams *sP = GetSettingsParams();
-    string          imageDir = sP->GetImageDir();
-    if (imageDir == "") imageDir = sP->GetDefaultImageDir();
+    auto            imageDir = QDir::homePath();
 
-    QFileDialog fileDialog(this, "Specify image sequence file name", imageDir.c_str(), QString::fromStdString(filter));
+    QFileDialog fileDialog(this, "Specify image sequence file name", imageDir, QString::fromStdString(filter));
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fileDialog.exec() != QDialog::Accepted) return;
 
