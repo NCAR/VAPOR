@@ -283,7 +283,7 @@ bool VolumeRenderer::_shouldUseChunkedRender(bool fast) const
             estimatedTime *= _algorithm->GuestimateFastModeSpeedupFactor();
         }
 
-        if (estimatedTime > 4.0f) return true;
+        if (estimatedTime > 1.0f) return true;
     }
     return false;
 }
