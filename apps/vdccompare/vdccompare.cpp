@@ -10,6 +10,7 @@
 #include <vapor/DCWRF.h>
 #include <vapor/DCCF.h>
 #include <vapor/DCMPAS.h>
+#include <vapor/DataMgr.h>
 #include <vapor/FileUtils.h>
 
 using namespace Wasp;
@@ -19,7 +20,9 @@ using namespace VAPoR;
 struct opt_t {
 	int nthreads;
 	int numts;
+	int memsize;
     std::vector <string> vars;
+	OptionParser::Boolean_T	datamgr;
 	OptionParser::Boolean_T	quiet;
 	OptionParser::Boolean_T	help;
 } opt;
@@ -34,11 +37,15 @@ OptionParser::OptDescRec_T	set_opts[] = {
 		"Number of timesteps to be included in the VDC. Default (-1) includes all timesteps."
 	},
 	{
+		"memsize",    1,  "2000","Cache size in MBs (if -datamgr used)",
+	},
+	{
 		"vars",1, "",
 		"Colon delimited list of 3D variable names (compressed) "
 		"to be included in "
 		"the VDC"
 	},
+	{"datamgr",	0,	"",	"Get data from second data source via DataMgr"},
 	{"quiet",	0,	"",	"Don't print individual variable results"},
 	{"help",	0,	"",	"Print this message and exit"},
 	{NULL}
@@ -48,7 +55,9 @@ OptionParser::OptDescRec_T	set_opts[] = {
 OptionParser::Option_T	get_options[] = {
 	{"nthreads",Wasp::CvtToInt,		&opt.nthreads,	sizeof(opt.nthreads)},
 	{"numts",	Wasp::CvtToInt,		&opt.numts,		sizeof(opt.numts)},
+	{"memsize",	Wasp::CvtToInt,		&opt.memsize,	sizeof(opt.memsize)},
 	{"vars",	Wasp::CvtToStrVec,	&opt.vars,		sizeof(opt.vars)},
+	{"datamgr",	Wasp::CvtToBoolean,	&opt.datamgr,	sizeof(opt.datamgr)},
 	{"quiet",	Wasp::CvtToBoolean,	&opt.quiet,		sizeof(opt.quiet)},
 	{"help",	Wasp::CvtToBoolean,	&opt.help,		sizeof(opt.help)},
 	{NULL}
@@ -112,14 +121,37 @@ void computeLMax(
 	}
 }
 
-bool compare(DC *dc1, DC *dc2, size_t nts, string varname, double &nlmax_all) {
+int get_var(
+	DC *dc, size_t ts, string varname,  float *Buffer
+) {
+	return(dc->GetVar(ts, varname, -1, -1, Buffer));
+}
 
-	vector <size_t> dims, bs;
-	int rc = dc1->GetDimLensAtLevel(varname, -1, dims, bs);
+int get_var(
+	DataMgr *data_mgr, size_t ts, string varname,  float *Buffer
+) {
+	Grid *grid =  data_mgr->GetVariable(ts, varname, -1, -1);
+	if (! grid) return(-1);
+
+	Grid::Iterator itr;
+	Grid::Iterator enditr = grid->end();
+	for (itr = grid->begin(); itr != enditr; ++itr, ++Buffer) {
+		*Buffer = *itr;
+	}
+	
+	delete grid;
+	return(0);
+}
+
+template <class S, class T>
+bool compare(S *dc1, T *dc2, size_t nts, string varname, double &nlmax_all) {
+
+	vector <size_t> dims;
+	int rc = dc1->GetDimLens(varname, dims);
 	if (rc<0) return(false);
 
-	vector <size_t> dims2, bs2;
-	rc = dc2->GetDimLensAtLevel(varname, -1, dims2, bs2);
+	vector <size_t> dims2;
+	rc = dc2->GetDimLens(varname, dims2);
 	if (rc<0) return(false);
 
 	VAssert(dims == dims2);
@@ -140,7 +172,7 @@ bool compare(DC *dc1, DC *dc2, size_t nts, string varname, double &nlmax_all) {
 
 	nlmax_all = 0.0;
 	for (int ts = 0; ts<nts; ts++) {
-		rc = dc1->GetVar(ts, varname, -1, -1, Buffer1);
+		rc = get_var(dc1, ts, varname, Buffer1);
 		if (rc<0) return(false);
 
 		DC::DataVar datavar;
@@ -152,7 +184,7 @@ bool compare(DC *dc1, DC *dc2, size_t nts, string varname, double &nlmax_all) {
 		if (hasMissing) mv = datavar.GetMissingValue();
 		
 
-		rc = dc2->GetVar(ts, varname, -1, -1, Buffer2);
+		rc = get_var(dc2, ts, varname, Buffer2);
 		if (rc<0) return(false);
 
 		double lmax, min, max;
@@ -167,6 +199,56 @@ bool compare(DC *dc1, DC *dc2, size_t nts, string varname, double &nlmax_all) {
 
 
 	return(true);
+}
+
+template <class S, class T>
+int process(
+	S *dc1, const vector <string> &files1, 
+	T *dc2, const vector <string> &files2
+) {
+
+	int rc = dc1->Initialize(files1, vector <string> ());
+	if (rc<0) return(1);
+
+	rc = dc2->Initialize(files2, vector <string> ());
+	if (rc<0) return(1);
+
+	vector <string> varnames;
+	if (opt.vars.size()) { 
+		varnames = opt.vars;
+	}
+	else {
+		varnames = dc1->GetDataVarNames();
+	}
+
+	double max_nlmax = 0;
+	bool success = true;
+	for (int i=0; i<varnames.size(); i++) {
+		int nts = dc1->GetNumTimeSteps(varnames[i]);
+		nts = opt.numts != -1 && nts > opt.numts ? opt.numts : nts;
+		VAssert(nts >= 0);
+
+		if (! opt.quiet) {
+			cout << "Testing variable " << varnames[i] << endl;
+		}
+
+		double nlmax;
+		bool ok = compare(dc1, dc2, nts, varnames[i], nlmax);
+		if (! ok) {
+			cout << "failed!" << endl;
+			success = false;
+			break;
+		}
+		if (! opt.quiet) {
+			cout << "	NLmax = " << nlmax << endl;
+		}
+		if (nlmax > max_nlmax) {
+			max_nlmax = nlmax;
+		}
+	}
+	cout << "Max NLmax = " << max_nlmax << endl;
+
+	return success ? 0 : 1;
 }
 
 int	main(int argc, char **argv) {
@@ -222,53 +304,17 @@ int	main(int argc, char **argv) {
 	}
 
 	DC *dc1 = NULL;
-	DC *dc2 = NULL;
-
 	dc1 = DCCreate(ftype1);
-	dc2 = DCCreate(ftype2);
+	if (! dc1) return(1);
 
-	if (! dc1 || ! dc2) return(1);
-	
-	int rc = dc1->Initialize(files1, vector <string> ());
-	if (rc<0) return(1);
-
-	rc = dc2->Initialize(files2, vector <string> ());
-	if (rc<0) return(1);
-
-	vector <string> varnames;
-	if (opt.vars.size()) { 
-		varnames = opt.vars;
+	if (opt.datamgr) {
+		DataMgr *datamgr2 = new DataMgr(ftype2, opt.memsize, opt.nthreads);
+		return (process(dc1, files1, datamgr2, files2));
 	}
 	else {
-		varnames = dc1->GetDataVarNames();
+		DC *dc2 = DCCreate(ftype2);
+		if (! dc2) return(1);
+
+		return(process(dc1, files1, dc2, files2));
 	}
-
-	double max_nlmax = 0;
-	bool success = true;
-	for (int i=0; i<varnames.size(); i++) {
-		int nts = dc1->GetNumTimeSteps(varnames[i]);
-		nts = opt.numts != -1 && nts > opt.numts ? opt.numts : nts;
-		VAssert(nts >= 0);
-
-		if (! opt.quiet) {
-			cout << "Testing variable " << varnames[i] << endl;
-		}
-
-		double nlmax;
-		bool ok = compare(dc1, dc2, nts, varnames[i], nlmax);
-		if (! ok) {
-			cout << "failed!" << endl;
-			success = false;
-			break;
-		}
-		if (! opt.quiet) {
-			cout << "	NLmax = " << nlmax << endl;
-		}
-		if (nlmax > max_nlmax) {
-			max_nlmax = nlmax;
-		}
-	}
-	cout << "Max NLmax = " << max_nlmax << endl;
-
-	return success ? 0 : 1;
 }
