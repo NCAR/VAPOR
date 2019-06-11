@@ -81,7 +81,8 @@ std::string VolumeParams::GetAlgorithm() const
 
 void VolumeParams::SetAlgorithm(std::string algorithm)
 {
-    VAssert(STLUtils::Contains(GetAlgorithmNames(), algorithm));
+    if (!STLUtils::Contains(GetAlgorithmNames(), algorithm))
+        MyBase::SetErrMsg("Invalid volume rendering algorithm \"%s\"", algorithm.c_str());
     SetValueString(_algorithmTag, "Volume rendering algorithm", algorithm);
 }
 
