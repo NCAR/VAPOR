@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>496</width>
-    <height>350</height>
+    <height>1298</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -40,7 +40,7 @@ specifies the position of the viewer
 and the lights that illuminate the
 scene.</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0">
    <item>
     <widget class="TransformTable" name="transformTable" native="true">
      <property name="sizePolicy">
@@ -222,23 +222,17 @@ scene.</string>
     </widget>
    </item>
    <item>
-    <widget class="QTabWidget" name="futureFeaturesTab">
+    <widget class="QTabWidget" name="tabWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>16777215</height>
-      </size>
-     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="cameraPositionTab">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
         <horstretch>0</horstretch>
@@ -246,9 +240,15 @@ scene.</string>
        </sizepolicy>
       </property>
       <attribute name="title">
-       <string>Future Features</string>
+       <string>Camera Position</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
        <item>
         <layout class="QVBoxLayout">
          <property name="sizeConstraint">
@@ -917,6 +917,38 @@ where the camera is pointed.</string>
          </item>
         </layout>
        </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTabWidget" name="futureFeaturesTab">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <attribute name="title">
+       <string>Future Features</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <layout class="QVBoxLayout">
          <property name="sizeConstraint">
