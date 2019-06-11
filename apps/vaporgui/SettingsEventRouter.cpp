@@ -380,6 +380,8 @@ void SettingsEventRouter::_updateDirectoryPaths(){
 	string metaPath = sParams->GetMetadataDir();
 	_metadataPathEdit->setText(QString::fromStdString(metaPath));
 
+    _imagePathEdit->setText( QDir::homePath() );
+
 	string tfPath = sParams->GetTFDir();
 	_tfPathEdit->setText(QString::fromStdString(tfPath));
 
