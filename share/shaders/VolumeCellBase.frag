@@ -220,10 +220,11 @@ bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entr
             continue;
             
         if (IntersectRayCellFace(origin, dir, t0, currentCell, testFace, t1, exitCoord)) {
-            if (t1 - t0 > EPSILON) {
+            // There are cases where very thin cells will result in the same t
+            //if (t1 - t0 > EPSILON) {
                 exitFace = testFace;
                 return true;
-            }
+            //}
         }
     }
     return false;
