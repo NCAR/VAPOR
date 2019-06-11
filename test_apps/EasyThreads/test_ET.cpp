@@ -81,7 +81,7 @@ void *my_thread_func(void *arg)
 
     cout << "Thread id, offset, length " << thread_arg._id << " " << thread_arg._offset << " " << thread_arg._length << endl;
 
-    multiply(Matrix1, Matrix2, Result, N, thread_arg._offset, thread_arg._id);
+    multiply(Matrix1, Matrix2, Result, N, thread_arg._offset, thread_arg._length);
 
     return (NULL);
 }
