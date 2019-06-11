@@ -92,11 +92,6 @@ public:
  string GetDefaultMetadataDir() const;
  void SetDefaultMetadataDir(string dir);
 
- string GetImageDir() const;
- void SetImageDir(string dir);
- string GetDefaultImageDir() const;
- void SetDefaultImageDir(string dir);
-
  string GetTFDir() const;
  void SetTFDir(string dir);
  string GetDefaultTFDir() const;
@@ -149,8 +144,6 @@ private:
  static const string _defaultSessionDirTag;
  static const string _metadataDirTag;
  static const string _defaultMetadataDirTag;
- static const string _imageDirTag;
- static const string _defaultImageDirTag;
  static const string _tfDirTag;
  static const string _defaultTfDirTag;
  static const string _flowDirTag;
