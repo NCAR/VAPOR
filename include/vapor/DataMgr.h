@@ -443,6 +443,13 @@ public:
         return (GetDimLensAtLevel(varname, level, dims_at_level, dummy));
     }
 
+    //! Return a variable's array dimension lengths
+    //!
+    //! This method is equivalent to calling GetDimLensAtLevel() with \p level
+    //! equal to -1
+    //!
+    virtual int GetDimLens(string varname, std::vector<size_t> &dims) { return (GetDimLensAtLevel(varname, -1, dims)); }
+
     //! Unlock a floating-point region of memory
     //!
     //! Decrement the lock counter associatd with a
