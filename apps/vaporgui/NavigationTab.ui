@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>496</width>
+    <width>460</width>
     <height>1298</height>
    </rect>
   </property>
@@ -44,7 +44,7 @@ scene.</string>
    <item>
     <widget class="TransformTable" name="transformTable" native="true">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Minimum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -66,7 +66,7 @@ scene.</string>
    <item>
     <widget class="QTabWidget" name="datasetProjectionTab">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Minimum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -142,7 +142,7 @@ scene.</string>
    <item>
     <widget class="QFrame" name="frame">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -189,7 +189,7 @@ scene.</string>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>134</width>
+          <width>60</width>
           <height>20</height>
          </size>
         </property>
@@ -222,12 +222,18 @@ scene.</string>
     </widget>
    </item>
    <item>
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="cameraControlTab">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Minimum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>16777215</height>
+      </size>
      </property>
      <property name="currentIndex">
       <number>0</number>
@@ -240,587 +246,150 @@ scene.</string>
        </sizepolicy>
       </property>
       <attribute name="title">
-       <string>Camera Position</string>
+       <string>Camera Controls</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
        <item>
-        <layout class="QVBoxLayout">
+        <layout class="QHBoxLayout">
          <property name="sizeConstraint">
           <enum>QLayout::SetMinimumSize</enum>
          </property>
          <item>
-          <layout class="QHBoxLayout">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetMinimumSize</enum>
+          <widget class="QLabel" name="textLabel1_3">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <item>
-            <widget class="QLabel" name="textLabel1_3">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="wordWrap">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="textLabel4_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>32767</width>
-               <height>21</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>X</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="wordWrap">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="textLabel5_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Y</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="wordWrap">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="textLabel6_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Z</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="wordWrap">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+          </widget>
          </item>
          <item>
-          <layout class="QHBoxLayout">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetMinimumSize</enum>
+          <widget class="QLabel" name="textLabel4_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <item>
-            <widget class="QLabel" name="textLabel2_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>view direction</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-             <property name="wordWrap">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="viewDir0">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>32767</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>Specify the coordinates of a vector in which the camera is pointed</string>
-             </property>
-             <property name="whatsThis">
-              <string>These four vectors specify where
-the camera is located, in the same
-coordinates system as the
-data is located (see the region panel).
-The rotation center specifies the
-position (usually the center of the
-current region) around which the
-scene rotates or zooms during
-mouse navigation, which is also
-where the camera is pointed.</string>
-             </property>
-             <property name="text">
-              <string>0.7071</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignHCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="viewDir1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>Specify the coordinates of a vector in which the camera is pointed</string>
-             </property>
-             <property name="whatsThis">
-              <string>These four vectors specify where
-the camera is located, in the same
-coordinates system as the
-data is located (see the region panel).
-The rotation center specifies the
-position (usually the center of the
-current region) around which the
-scene rotates or zooms during
-mouse navigation, which is also
-where the camera is pointed.</string>
-             </property>
-             <property name="text">
-              <string>0.7071</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignHCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="viewDir2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>Specify the coordinates of a vector in which the camera is pointed</string>
-             </property>
-             <property name="whatsThis">
-              <string>These four vectors specify where
-the camera is located, in the same
-coordinates system as the
-data is located (see the region panel).
-The rotation center specifies the
-position (usually the center of the
-current region) around which the
-scene rotates or zooms during
-mouse navigation, which is also
-where the camera is pointed.</string>
-             </property>
-             <property name="text">
-              <string>0.5002</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignHCenter</set>
-             </property>
-            </widget>
-           </item>
-          </layout>
+           <property name="maximumSize">
+            <size>
+             <width>32767</width>
+             <height>21</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>X</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+          </widget>
          </item>
          <item>
-          <layout class="QHBoxLayout">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetMinimumSize</enum>
+          <widget class="QLabel" name="textLabel5_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <item>
-            <widget class="QLabel" name="textLabel3_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>up vector</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-             <property name="wordWrap">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="upVec0">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>32767</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>Specify the coordinates of a vector that will point upward in the scene</string>
-             </property>
-             <property name="whatsThis">
-              <string>These four vectors specify where
-the camera is located, in the same
-coordinates system as the
-data is located (see the region panel).
-The rotation center specifies the
-position (usually the center of the
-current region) around which the
-scene rotates or zooms during
-mouse navigation, which is also
-where the camera is pointed.</string>
-             </property>
-             <property name="text">
-              <string>0.0</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignHCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="upVec1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>Specify the coordinates of a vector that will point upward in the scene</string>
-             </property>
-             <property name="whatsThis">
-              <string>These four vectors specify where
-the camera is located, in the same
-coordinates system as the
-data is located (see the region panel).
-The rotation center specifies the
-position (usually the center of the
-current region) around which the
-scene rotates or zooms during
-mouse navigation, which is also
-where the camera is pointed.</string>
-             </property>
-             <property name="text">
-              <string>0.0</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignHCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="upVec2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>Specify the coordinates of a vector that will point upward in the scene</string>
-             </property>
-             <property name="whatsThis">
-              <string>These four vectors specify where
-the camera is located, in the same
-coordinates system as the
-data is located (see the region panel).
-The rotation center specifies the
-position (usually the center of the
-current region) around which the
-scene rotates or zooms during
-mouse navigation, which is also
-where the camera is pointed.</string>
-             </property>
-             <property name="text">
-              <string>1.0</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignHCenter</set>
-             </property>
-            </widget>
-           </item>
-          </layout>
+           <property name="text">
+            <string>Y</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+          </widget>
          </item>
          <item>
-          <layout class="QHBoxLayout">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetMinimumSize</enum>
+          <widget class="QLabel" name="textLabel6_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <item>
-            <widget class="QLabel" name="textLabel1_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>camera position</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-             <property name="wordWrap">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="camPos0">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>32767</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>Specify the coordinates of the viewer (i.e. camera)</string>
-             </property>
-             <property name="whatsThis">
-              <string>These four vectors specify where
-the camera is located, in the same
-coordinates system as the
-data is located (see the region panel).
-The rotation center specifies the
-position (usually the center of the
-current region) around which the
-scene rotates or zooms during
-mouse navigation, which is also
-where the camera is pointed.</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignHCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="camPos1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>Specify the coordinates of the viewer (i.e. camera)</string>
-             </property>
-             <property name="whatsThis">
-              <string>These four vectors specify where
-the camera is located, in the same
-coordinates system as the
-data is located (see the region panel).
-The rotation center specifies the
-position (usually the center of the
-current region) around which the
-scene rotates or zooms during
-mouse navigation, which is also
-where the camera is pointed.</string>
-             </property>
-             <property name="text">
-              <string>3.12332</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignHCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="camPos2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>Specify the coordinates of the viewer (i.e. camera)</string>
-             </property>
-             <property name="whatsThis">
-              <string>These four vectors specify where
-the camera is located, in the same
-coordinates system as the
-data is located (see the region panel).
-The rotation center specifies the
-position (usually the center of the
-current region) around which the
-scene rotates or zooms during
-mouse navigation, which is also
-where the camera is pointed.</string>
-             </property>
-             <property name="text">
-              <string>-0.24556</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignHCenter</set>
-             </property>
-            </widget>
-           </item>
-          </layout>
+           <property name="text">
+            <string>Z</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout">
+         <property name="sizeConstraint">
+          <enum>QLayout::SetMinimumSize</enum>
+         </property>
+         <item>
+          <widget class="QLabel" name="textLabel2_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>direction</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+          </widget>
          </item>
          <item>
-          <layout class="QHBoxLayout">
-           <property name="sizeConstraint">
-            <enum>QLayout::SetMinimumSize</enum>
+          <widget class="QLineEdit" name="viewDir0">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <item>
-            <widget class="QLabel" name="textLabel3_2_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>rotation center</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-             <property name="wordWrap">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="rotCenter0">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>32767</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>Specify the coordinates in the scene about which the scene is rotated by the left mouse drags</string>
-             </property>
-             <property name="whatsThis">
-              <string>These four vectors specify where
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>32767</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Specify the coordinates of a vector in which the camera is pointed</string>
+           </property>
+           <property name="whatsThis">
+            <string>These four vectors specify where
 the camera is located, in the same
 coordinates system as the
 data is located (see the region panel).
@@ -830,34 +399,34 @@ current region) around which the
 scene rotates or zooms during
 mouse navigation, which is also
 where the camera is pointed.</string>
-             </property>
-             <property name="text">
-              <string>0.5</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignHCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="rotCenter1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>Specify the coordinates in the scene about which the scene is rotated by the left mouse drags</string>
-             </property>
-             <property name="whatsThis">
-              <string>These four vectors specify where
+           </property>
+           <property name="text">
+            <string>0.7071</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignHCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="viewDir1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Specify the coordinates of a vector in which the camera is pointed</string>
+           </property>
+           <property name="whatsThis">
+            <string>These four vectors specify where
 the camera is located, in the same
 coordinates system as the
 data is located (see the region panel).
@@ -867,34 +436,34 @@ current region) around which the
 scene rotates or zooms during
 mouse navigation, which is also
 where the camera is pointed.</string>
-             </property>
-             <property name="text">
-              <string>0.5</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignHCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="rotCenter2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>Specify the coordinates in the scene about which the scene is rotated by the left mouse drags</string>
-             </property>
-             <property name="whatsThis">
-              <string>These four vectors specify where
+           </property>
+           <property name="text">
+            <string>0.7071</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignHCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="viewDir2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Specify the coordinates of a vector in which the camera is pointed</string>
+           </property>
+           <property name="whatsThis">
+            <string>These four vectors specify where
 the camera is located, in the same
 coordinates system as the
 data is located (see the region panel).
@@ -904,16 +473,440 @@ current region) around which the
 scene rotates or zooms during
 mouse navigation, which is also
 where the camera is pointed.</string>
-             </property>
-             <property name="text">
-              <string>0.5</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignHCenter</set>
-             </property>
-            </widget>
-           </item>
-          </layout>
+           </property>
+           <property name="text">
+            <string>0.5002</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignHCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout">
+         <property name="sizeConstraint">
+          <enum>QLayout::SetMinimumSize</enum>
+         </property>
+         <item>
+          <widget class="QLabel" name="textLabel3_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>up vector</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="upVec0">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>32767</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Specify the coordinates of a vector that will point upward in the scene</string>
+           </property>
+           <property name="whatsThis">
+            <string>These four vectors specify where
+the camera is located, in the same
+coordinates system as the
+data is located (see the region panel).
+The rotation center specifies the
+position (usually the center of the
+current region) around which the
+scene rotates or zooms during
+mouse navigation, which is also
+where the camera is pointed.</string>
+           </property>
+           <property name="text">
+            <string>0.0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignHCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="upVec1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Specify the coordinates of a vector that will point upward in the scene</string>
+           </property>
+           <property name="whatsThis">
+            <string>These four vectors specify where
+the camera is located, in the same
+coordinates system as the
+data is located (see the region panel).
+The rotation center specifies the
+position (usually the center of the
+current region) around which the
+scene rotates or zooms during
+mouse navigation, which is also
+where the camera is pointed.</string>
+           </property>
+           <property name="text">
+            <string>0.0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignHCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="upVec2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Specify the coordinates of a vector that will point upward in the scene</string>
+           </property>
+           <property name="whatsThis">
+            <string>These four vectors specify where
+the camera is located, in the same
+coordinates system as the
+data is located (see the region panel).
+The rotation center specifies the
+position (usually the center of the
+current region) around which the
+scene rotates or zooms during
+mouse navigation, which is also
+where the camera is pointed.</string>
+           </property>
+           <property name="text">
+            <string>1.0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignHCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout">
+         <property name="sizeConstraint">
+          <enum>QLayout::SetMinimumSize</enum>
+         </property>
+         <item>
+          <widget class="QLabel" name="textLabel1_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>position</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="camPos0">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>32767</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Specify the coordinates of the viewer (i.e. camera)</string>
+           </property>
+           <property name="whatsThis">
+            <string>These four vectors specify where
+the camera is located, in the same
+coordinates system as the
+data is located (see the region panel).
+The rotation center specifies the
+position (usually the center of the
+current region) around which the
+scene rotates or zooms during
+mouse navigation, which is also
+where the camera is pointed.</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignHCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="camPos1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Specify the coordinates of the viewer (i.e. camera)</string>
+           </property>
+           <property name="whatsThis">
+            <string>These four vectors specify where
+the camera is located, in the same
+coordinates system as the
+data is located (see the region panel).
+The rotation center specifies the
+position (usually the center of the
+current region) around which the
+scene rotates or zooms during
+mouse navigation, which is also
+where the camera is pointed.</string>
+           </property>
+           <property name="text">
+            <string>3.12332</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignHCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="camPos2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Specify the coordinates of the viewer (i.e. camera)</string>
+           </property>
+           <property name="whatsThis">
+            <string>These four vectors specify where
+the camera is located, in the same
+coordinates system as the
+data is located (see the region panel).
+The rotation center specifies the
+position (usually the center of the
+current region) around which the
+scene rotates or zooms during
+mouse navigation, which is also
+where the camera is pointed.</string>
+           </property>
+           <property name="text">
+            <string>-0.24556</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignHCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout">
+         <property name="sizeConstraint">
+          <enum>QLayout::SetMinimumSize</enum>
+         </property>
+         <item>
+          <widget class="QLabel" name="textLabel3_2_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>origin</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="wordWrap">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="rotCenter0">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>32767</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Specify the coordinates in the scene about which the scene is rotated by the left mouse drags</string>
+           </property>
+           <property name="whatsThis">
+            <string>These four vectors specify where
+the camera is located, in the same
+coordinates system as the
+data is located (see the region panel).
+The rotation center specifies the
+position (usually the center of the
+current region) around which the
+scene rotates or zooms during
+mouse navigation, which is also
+where the camera is pointed.</string>
+           </property>
+           <property name="text">
+            <string>0.5</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignHCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="rotCenter1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Specify the coordinates in the scene about which the scene is rotated by the left mouse drags</string>
+           </property>
+           <property name="whatsThis">
+            <string>These four vectors specify where
+the camera is located, in the same
+coordinates system as the
+data is located (see the region panel).
+The rotation center specifies the
+position (usually the center of the
+current region) around which the
+scene rotates or zooms during
+mouse navigation, which is also
+where the camera is pointed.</string>
+           </property>
+           <property name="text">
+            <string>0.5</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignHCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="rotCenter2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Specify the coordinates in the scene about which the scene is rotated by the left mouse drags</string>
+           </property>
+           <property name="whatsThis">
+            <string>These four vectors specify where
+the camera is located, in the same
+coordinates system as the
+data is located (see the region panel).
+The rotation center specifies the
+position (usually the center of the
+current region) around which the
+scene rotates or zooms during
+mouse navigation, which is also
+where the camera is pointed.</string>
+           </property>
+           <property name="text">
+            <string>0.5</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignHCenter</set>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -931,7 +924,7 @@ where the camera is pointed.</string>
      </property>
      <property name="maximumSize">
       <size>
-       <width>16777215</width>
+       <width>100</width>
        <height>16777215</height>
       </size>
      </property>

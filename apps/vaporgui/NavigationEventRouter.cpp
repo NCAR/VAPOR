@@ -63,6 +63,10 @@ NavigationEventRouter::NavigationEventRouter(
     setupUi(this);
 
     futureFeaturesTab->hide();
+    //frame->hide();
+    //datasetProjectionTab->hide();
+    //cameraControlTab->hide();
+    //transformTable->hide();
 
     // Not implemented
     //
@@ -73,6 +77,7 @@ NavigationEventRouter::NavigationEventRouter(
     stereoCombo->setEnabled(false);
     latLonCheckbox->setEnabled(false);
     stereoSeparationEdit->setEnabled(false);
+    adjustSize();
 }
 
 NavigationEventRouter::~NavigationEventRouter() {

@@ -1,0 +1,3 @@
+[*.{c,cpp,h,pl,frag,vert}]
+indent_style = tab
+indent_size = 4
