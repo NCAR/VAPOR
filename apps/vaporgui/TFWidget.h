@@ -75,6 +75,8 @@ public:
 	float getOpacity();
 	void RefreshHistogram();
     void SetAutoUpdateParamChanged(bool changed);
+    bool IsOpacitySupported() const;
+    void SetOpacitySupported(bool value);
     bool IsOpacityIntegrated() const;
     void SetOpacityIntegrated(bool value);
 
@@ -162,6 +164,7 @@ private:
 	bool _secondaryHistoRangeChanged;
 	bool _mainHistoNeedsRefresh;
 	bool _secondaryHistoNeedsRefresh;
+    bool _isOpacitySupported;
     bool _isOpacityIntegrated;
     bool _wasOpacitySliderReleased;
 

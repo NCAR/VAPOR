@@ -11,6 +11,7 @@ uniform vec3 scales;
 uniform float density;
 uniform float LUTMin;
 uniform float LUTMax;
+uniform bool mapOrthoMode;
 uniform bool hasMissingData;
 uniform bool fast;
 
@@ -137,12 +138,17 @@ void BlendToBack(inout vec4 accum, vec4 color)
     accum = color * (1-accum.a) + accum * (1);
 }
 
-void GetRayParameters(out vec3 dir, out vec3 normal, OUT float maxT)
+void GetRayParameters(out vec3 eye, out vec3 dir, out vec3 normal, OUT float maxT)
 {
 	vec2 screen = ST*2-1;
     vec4 world = inverse(MVP) * vec4(screen, GetDepthBuffer(), 1);
-    world /= world.w;
-    dir = normalize(world.xyz - cameraPos);
-    normal = normalize((world.xyz - cameraPos) * scales);
-    maxT = length(world.xyz - cameraPos);
+    if (mapOrthoMode) {
+        eye = vec3(world.xy, cameraPos.z);
+    } else {
+        world /= world.w;
+        eye = cameraPos;
+    }
+    dir = normalize(world.xyz - eye);
+    normal = normalize((world.xyz - eye) * scales);
+    maxT = length(world.xyz - eye);
 }
