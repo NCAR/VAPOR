@@ -61,10 +61,6 @@ NavigationEventRouter::NavigationEventRouter(QWidget *parent, ControlExec *ce) :
     setupUi(this);
 
     futureFeaturesTab->hide();
-    // frame->hide();
-    // datasetProjectionTab->hide();
-    // cameraControlTab->hide();
-    // transformTable->hide();
 
     // Not implemented
     //
