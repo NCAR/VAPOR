@@ -155,7 +155,6 @@ void MainForm::_initMembers()
     _navigationAction = NULL;
     _editUndoAction = NULL;
     _editRedoAction = NULL;
-    _editUndoRedoClearAction = NULL;
     _timeStepEdit = NULL;
     _timeStepEditValidator = NULL;
 
@@ -709,21 +708,13 @@ void MainForm::_createEditMenu()
     _editRedoAction->setToolTip("Redo the last undone session state change");
     _editRedoAction->setEnabled(false);
 
-    _editUndoRedoClearAction = new QAction(this);
-    _editUndoRedoClearAction->setEnabled(true);
-    _editUndoRedoClearAction->setText(tr("&Clear undo/redo"));
-    _editUndoRedoClearAction->setToolTip("Clear the undo/redo queue");
-    _editUndoRedoClearAction->setEnabled(true);
-
     _Edit = menuBar()->addMenu(tr("Edit"));
     _Edit->addAction(_editUndoAction);
     _Edit->addAction(_editRedoAction);
-    _Edit->addAction(_editUndoRedoClearAction);
     _Edit->addSeparator();
 
     connect(_editUndoAction, SIGNAL(triggered()), this, SLOT(undo()));
     connect(_editRedoAction, SIGNAL(triggered()), this, SLOT(redo()));
-    connect(_editUndoRedoClearAction, SIGNAL(triggered()), this, SLOT(clear()));
 }
 
 void MainForm::_createToolsMenu()
@@ -1084,8 +1075,6 @@ void MainForm::redo()
     if (!_controlExec->RedoSize()) return;
     undoRedoHelper(false);
 }
-
-void MainForm::clear() { _controlExec->UndoRedoClear(); }
 
 void MainForm::helpAbout()
 {
