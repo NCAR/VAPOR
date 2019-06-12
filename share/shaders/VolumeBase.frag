@@ -92,6 +92,8 @@ float PhongLighting(vec3 normal, vec3 viewDir)
 {
 	if (!lightingEnabled)
 		return 1;
+        
+    normal = clamp(normal, vec3(-1), vec3(1));
     
     vec3 lightDir = viewDir;
 
