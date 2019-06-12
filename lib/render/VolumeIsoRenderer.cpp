@@ -70,10 +70,12 @@ void VolumeIsoRenderer::_setShaderUniforms(const ShaderProgram *shader, const bo
 }
 
 std::string VolumeIsoRenderer::_getDefaultAlgorithmForGrid(const Grid *grid) const {
-    const RegularGrid *regular = dynamic_cast<const RegularGrid *>(grid);
-    if (regular)
-        return VolumeRegularIso::GetName();
-    return VolumeCellTraversalIso::GetName();
+    if (dynamic_cast<const RegularGrid *>(grid))
+        return VolumeRegularIso ::GetName();
+    if (dynamic_cast<const StructuredGrid *>(grid))
+        return VolumeCellTraversalIso::GetName();
+    MyBase::SetErrMsg("Unsupported grid type: %s", grid->GetType().c_str());
+    return "";
 }
 
 void VolumeIsoRenderer::_getLUTFromTF(const MapperFunction *tf, float *LUT) const {
