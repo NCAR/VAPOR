@@ -88,6 +88,7 @@ void TabManager::SetActiveRenderer(string activeViz, string renderClass, string 
 }
 
 void TabManager::ShowRenderWidget(string subTabName) {
+    cout << "MoveToFront " << subTabName << endl;
     MoveToFront(subTabName);
 
     for (int i = 0; i < _subTabWidgets[_renderersTabName].size(); i++) {
@@ -611,8 +612,8 @@ void TabManager::_updateRouters() {
     p->GetActiveRenderer(activeViz, renderClass, instName);
 
     if (activeViz.size() && renderClass.size() && instName.size()) {
-
-        SetActiveRenderer(activeViz, renderClass, instName);
+        if (_currentFrontTab == _renderersTabName)
+            SetActiveRenderer(activeViz, renderClass, instName);
 
         EventRouter *eRouter = _getRenderEventRouter(
             activeViz, renderClass, instName);
