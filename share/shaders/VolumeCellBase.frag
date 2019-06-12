@@ -34,6 +34,62 @@ uniform isampler2D levelDims;
 #define F_BACK  ivec3( 0, 1, 0)
 #define F_NONE  ivec3(-1,-1,-1)
 
+#define CI_LEFT  0
+#define CI_RIGHT 1
+#define CI_UP    2
+#define CI_DOWN  3
+#define CI_FRONT 4
+#define CI_BACK  5
+#define CI_LEFT_FRONT  6
+#define CI_LEFT_BACK   7
+#define CI_RIGHT_FRONT 8
+#define CI_RIGHT_BACK  9
+#define CI_UP_FRONT   10
+#define CI_UP_BACK    11
+#define CI_DOWN_FRONT  12
+#define CI_DOWN_BACK   13
+#define CI_UP_LEFT    14
+#define CI_UP_RIGHT   15
+#define CI_DOWN_LEFT   16
+#define CI_DOWN_RIGHT  17
+#define CI_UP_LEFT_FRONT   18
+#define CI_UP_LEFT_BACK    19
+#define CI_UP_RIGHT_FRONT  20
+#define CI_UP_RIGHT_BACK   21
+#define CI_DOWN_LEFT_FRONT  22
+#define CI_DOWN_LEFT_BACK   23
+#define CI_DOWN_RIGHT_FRONT 24
+#define CI_DOWN_RIGHT_BACK  25
+#define CI_NONE  99
+
+#define C_LEFT  ivec3(-1, 0, 0)
+#define C_RIGHT ivec3( 1, 0, 0)
+#define C_UP    ivec3( 0, 0, 1)
+#define C_DOWN  ivec3( 0, 0,-1)
+#define C_FRONT ivec3( 0,-1, 0)
+#define C_BACK  ivec3( 0, 1, 0)
+#define C_LEFT_FRONT  (C_LEFT+C_FRONT)
+#define C_LEFT_BACK   (C_LEFT+C_BACK)
+#define C_RIGHT_FRONT (C_RIGHT+C_FRONT)
+#define C_RIGHT_BACK  (C_RIGHT+C_BACK)
+#define C_UP_FRONT    (C_UP+C_FRONT)
+#define C_UP_BACK     (C_UP+C_BACK)
+#define C_DOWN_FRONT  (C_DOWN+C_FRONT)
+#define C_DOWN_BACK   (C_DOWN+C_BACK)
+#define C_UP_LEFT     (C_UP+C_LEFT)
+#define C_UP_RIGHT    (C_UP+C_RIGHT)
+#define C_DOWN_LEFT   (C_DOWN+C_LEFT)
+#define C_DOWN_RIGHT  (C_DOWN+C_RIGHT)
+#define C_UP_LEFT_FRONT    (C_UP+C_LEFT+C_FRONT)
+#define C_UP_LEFT_BACK     (C_UP+C_LEFT+C_BACK)
+#define C_UP_RIGHT_FRONT   (C_UP+C_RIGHT+C_FRONT)
+#define C_UP_RIGHT_BACK    (C_UP+C_RIGHT+C_BACK)
+#define C_DOWN_LEFT_FRONT  (C_DOWN+C_LEFT+C_FRONT)
+#define C_DOWN_LEFT_BACK   (C_DOWN+C_LEFT+C_BACK)
+#define C_DOWN_RIGHT_FRONT (C_DOWN+C_RIGHT+C_FRONT)
+#define C_DOWN_RIGHT_BACK  (C_DOWN+C_RIGHT+C_BACK)
+#define C_NONE  ivec3(-1,-1,-1)
+
 // face   fast  slow
 // DOWN    0     1
 // UP      0     1
@@ -64,6 +120,36 @@ ivec3 GetFaceFromFaceIndex(int i)
     if (i == 3) return F_DOWN;
     if (i == 4) return F_FRONT;
     if (i == 5) return F_BACK;
+}
+
+ivec3 GetNeighborFromNeighborCellIndex(const int i)
+{
+    if (i == CI_LEFT)             return C_LEFT;
+    if (i == CI_RIGHT)            return C_RIGHT;
+    if (i == CI_UP)               return C_UP;
+    if (i == CI_DOWN)             return C_DOWN;
+    if (i == CI_FRONT)            return C_FRONT;
+    if (i == CI_BACK)             return C_BACK;
+    if (i == CI_LEFT_FRONT)       return C_LEFT_FRONT;
+    if (i == CI_LEFT_BACK)        return C_LEFT_BACK;
+    if (i == CI_RIGHT_FRONT)      return C_RIGHT_FRONT;
+    if (i == CI_RIGHT_BACK)       return C_RIGHT_BACK;
+    if (i == CI_UP_FRONT)         return C_UP_FRONT;
+    if (i == CI_UP_BACK)          return C_UP_BACK;
+    if (i == CI_DOWN_FRONT)       return C_DOWN_FRONT;
+    if (i == CI_DOWN_BACK)        return C_DOWN_BACK;
+    if (i == CI_UP_LEFT)          return C_UP_LEFT;
+    if (i == CI_UP_RIGHT)         return C_UP_RIGHT;
+    if (i == CI_DOWN_LEFT)        return C_DOWN_LEFT;
+    if (i == CI_DOWN_RIGHT)       return C_DOWN_RIGHT;
+    if (i == CI_UP_LEFT_FRONT)    return C_UP_LEFT_FRONT;
+    if (i == CI_UP_LEFT_BACK)     return C_UP_LEFT_BACK;
+    if (i == CI_UP_RIGHT_FRONT)   return C_UP_RIGHT_FRONT;
+    if (i == CI_UP_RIGHT_BACK)    return C_UP_RIGHT_BACK;
+    if (i == CI_DOWN_LEFT_FRONT)  return C_DOWN_LEFT_FRONT;
+    if (i == CI_DOWN_LEFT_BACK)   return C_DOWN_LEFT_BACK;
+    if (i == CI_DOWN_RIGHT_FRONT) return C_DOWN_RIGHT_FRONT;
+    if (i == CI_DOWN_RIGHT_BACK)  return C_DOWN_RIGHT_BACK;
 }
 
 int GetFaceIndexFromFace(ivec3 face)
@@ -211,7 +297,7 @@ vec3 GetCellFaceNormal(ivec3 cellIndex, ivec3 face)
     return (GetTriangleNormal(v0, v1, v2) + GetTriangleNormal(v0, v2, v3)) / 2.0f;
 }
 
-bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, OUT ivec3 exitFace, OUT vec3 exitCoord, OUT float t1)
+bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, bool allowThinCells, OUT ivec3 exitFace, OUT vec3 exitCoord, OUT float t1)
 {
     for (int i = 0; i < 6; i++) {
         ivec3 testFace = GetFaceFromFaceIndex(i);
@@ -220,13 +306,19 @@ bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entr
             continue;
             
         if (IntersectRayCellFace(origin, dir, t0, currentCell, testFace, t1, exitCoord)) {
-            if (t1 - t0 > EPSILON) {
+            // There are cases where very thin cells will result in the same t
+            if (allowThinCells || t1 - t0 > EPSILON) {
                 exitFace = testFace;
                 return true;
             }
         }
     }
     return false;
+}
+
+bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, OUT ivec3 exitFace, OUT vec3 exitCoord, OUT float t1)
+{
+    return FindCellExit(origin, dir, t0, currentCell, entranceFace, true, exitFace, exitCoord, t1);
 }
 
 bool IsCellInBounds(ivec3 cellIndex)
@@ -236,11 +328,11 @@ bool IsCellInBounds(ivec3 cellIndex)
 
 bool SearchNeighboringCells(vec3 origin, vec3 dir, float t0, ivec3 currentCell, OUT ivec3 nextCell, OUT ivec3 exitFace, OUT vec3 exitCoord, OUT float t1)
 {
-    for (int sideID = 0; sideID < 6; sideID++) {
-        ivec3 side = GetFaceFromFaceIndex(sideID);
+    for (int sideID = 0; sideID < 26; sideID++) {
+        ivec3 side = GetNeighborFromNeighborCellIndex(sideID);
         ivec3 testCell = currentCell + side;
         if (IsCellInBounds(testCell)) {
-            if (FindCellExit(origin, dir, t0, testCell, F_NONE, exitFace, exitCoord, t1)) {
+            if (FindCellExit(origin, dir, t0, testCell, -side, false, exitFace, exitCoord, t1)) {
                 nextCell = testCell + exitFace;
                 return true;
             }
