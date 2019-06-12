@@ -60,6 +60,8 @@ NavigationEventRouter::NavigationEventRouter(QWidget *parent, ControlExec *ce) :
 {
     setupUi(this);
 
+    futureFeaturesTab->hide();
+
     // Not implemented
     //
     camPosLat->setEnabled(false);
@@ -69,6 +71,7 @@ NavigationEventRouter::NavigationEventRouter(QWidget *parent, ControlExec *ce) :
     stereoCombo->setEnabled(false);
     latLonCheckbox->setEnabled(false);
     stereoSeparationEdit->setEnabled(false);
+    adjustSize();
 }
 
 NavigationEventRouter::~NavigationEventRouter() {}
