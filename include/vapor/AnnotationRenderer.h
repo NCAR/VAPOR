@@ -97,9 +97,9 @@ private:
 
     void _makeTransformMatrix(const Transform *transform, glm::mat4 &transformMatrix) const;
 
-    void _applyDataMgrCornerToDomain(std::vector<double> *domainExtents, const glm::vec4 *dataMgrCorner, const glm::mat4 &transformMatrix) const;
+    void _applyDataMgrCornerToDomain(std::vector<double> &domainExtents, const glm::vec4 &dataMgrCorner, const glm::mat4 &transformMatrix) const;
 
-    void _getDataMgrCorner(const int cornerNumber, glm::vec4 *dataMgrCorner, const std::vector<double> &minDataMgrExtents, const std::vector<double> &maxDataMgrExtents) const;
+    void _getDataMgrCorner(const int cornerNumber, glm::vec4 &dataMgrCorner, const std::vector<double> &minDataMgrExtents, const std::vector<double> &maxDataMgrExtents) const;
 
     void _applyDataMgrToDomainExtents(std::vector<double> &domainExtents, const std::vector<double> &dataMgrMinExts, const std::vector<double> &dataMgrMaxExts, const Transform *transform) const;
 

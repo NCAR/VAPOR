@@ -73,6 +73,8 @@ void AnnotationRenderer::InitializeGL(GLManager *glManager) { _glManager = glMan
 
 void AnnotationRenderer::drawDomainFrame(std::vector<double> corners) const
 {
+    assert(corners.size() == 6);
+
     AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
 
     std::vector<double> minExts = {corners[X], corners[Y], corners[Z]};
@@ -295,25 +297,27 @@ void AnnotationRenderer::_makeTransformMatrix(const Transform *transform, glm::m
     transformMatrix = m;
 }
 
-void AnnotationRenderer::_applyDataMgrCornerToDomain(std::vector<double> *domainExtents, const glm::vec4 *dataMgrCorner, const glm::mat4 &transformMatrix) const
+void AnnotationRenderer::_applyDataMgrCornerToDomain(std::vector<double> &domainExtents, const glm::vec4 &dataMgrCorner, const glm::mat4 &transformMatrix) const
 {
+    assert(domainExtents.size() == 6);
+
     // transform our corner
     glm::vec4 transformedCorner;
-    transformedCorner = transformMatrix * *dataMgrCorner;
+    transformedCorner = transformMatrix * dataMgrCorner;
 
     // See if the minimum and maximum extents of our corner exceed the
     // the currently defined domain.
     for (int i = 0; i < 6; i++) {
         int transformedCornerIndex = i % 3;
         // use this corner to define all domain corners that are uninitialized
-        if (std::isnan((*domainExtents)[i])) (*domainExtents)[i] = transformedCorner[transformedCornerIndex];
+        if (std::isnan(domainExtents[i])) domainExtents[i] = transformedCorner[transformedCornerIndex];
         // otherwise see if the corner exceeds our currently defined domain minima
         else if (i < 3) {
-            if (transformedCorner[transformedCornerIndex] < (*domainExtents)[i]) { (*domainExtents)[i] = transformedCorner[transformedCornerIndex]; }
+            if (transformedCorner[transformedCornerIndex] < domainExtents[i]) { domainExtents[i] = transformedCorner[transformedCornerIndex]; }
         }
         // otherwise see if the corner exceeds our currently defined domain maxima
         else {
-            if (transformedCorner[transformedCornerIndex] > (*domainExtents)[i]) { (*domainExtents)[i] = transformedCorner[transformedCornerIndex]; }
+            if (transformedCorner[transformedCornerIndex] > domainExtents[i]) { domainExtents[i] = transformedCorner[transformedCornerIndex]; }
         }
     }
 }
@@ -333,8 +337,12 @@ void AnnotationRenderer::_applyDataMgrCornerToDomain(std::vector<double> *domain
 //  1 0 1       5
 //  1 1 0       6
 //  1 1 1       7
-void AnnotationRenderer::_getDataMgrCorner(const int cornerNumber, glm::vec4 *dataMgrCorner, const std::vector<double> &minDataMgrExtents, const std::vector<double> &maxDataMgrExtents) const
+void AnnotationRenderer::_getDataMgrCorner(const int cornerNumber, glm::vec4 &dataMgrCorner, const std::vector<double> &minDataMgrExtents, const std::vector<double> &maxDataMgrExtents) const
 {
+    assert(minDataMgrExtents.size() == 3);
+    assert(maxDataMgrExtents.size() == 3);
+    assert(cornerNumber >= 0 && cornerNumber <= 7);
+
     double xCoord, yCoord, zCoord;
     if (cornerNumber & 0b100)
         xCoord = maxDataMgrExtents[X];
@@ -351,25 +359,31 @@ void AnnotationRenderer::_getDataMgrCorner(const int cornerNumber, glm::vec4 *da
     else
         zCoord = minDataMgrExtents[Z];
 
-    *dataMgrCorner = glm::vec4(xCoord, yCoord, zCoord, 1.f);
+    dataMgrCorner = glm::vec4(xCoord, yCoord, zCoord, 1.f);
 }
 
 void AnnotationRenderer::_applyDataMgrToDomainExtents(std::vector<double> &domainExtents, const std::vector<double> &dataMgrMinExts, const std::vector<double> &dataMgrMaxExts,
                                                       const Transform *transform) const
 {
+    assert(domainExtents.size() == 6);
+    assert(dataMgrMinExts.size() == 3);
+    assert(dataMgrMaxExts.size() == 3);
+
     glm::mat4 transformMatrix;
     _makeTransformMatrix(transform, transformMatrix);
 
     glm::vec4 dataMgrCorner;
     for (int i = 0; i < 8; i++) {
-        _getDataMgrCorner(i, &dataMgrCorner, dataMgrMinExts, dataMgrMaxExts);
+        _getDataMgrCorner(i, dataMgrCorner, dataMgrMinExts, dataMgrMaxExts);
 
-        _applyDataMgrCornerToDomain(&domainExtents, &dataMgrCorner, transformMatrix);
+        _applyDataMgrCornerToDomain(domainExtents, dataMgrCorner, transformMatrix);
     }
 }
 
 void AnnotationRenderer::_calculateDomainExtents(std::vector<double> &domainExtents) const
 {
+    domainExtents = {NAN, NAN, NAN, NAN, NAN, NAN};
+
     vector<string> names = m_paramsMgr->GetDataMgrNames();
     for (int i = 0; i < names.size(); i++) {
         std::vector<double> dataMgrMinExts, dataMgrMaxExts;
@@ -389,6 +403,10 @@ void AnnotationRenderer::_calculateDomainExtents(std::vector<double> &domainExte
         Transform *      transform = vpParams->GetTransform(names[i]);
         _applyDataMgrToDomainExtents(domainExtents, dataMgrMinExts, dataMgrMaxExts, transform);
     }
+
+    for (int i = 0; i < 6; i++) {
+        if (std::isnan(domainExtents[i])) domainExtents[i] = 0.f;
+    }
 }
 
 void AnnotationRenderer::InScenePaint(size_t ts)
@@ -400,7 +418,7 @@ void AnnotationRenderer::InScenePaint(size_t ts)
 
     ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
 
-    std::vector<double> domainExtents(6, NAN);
+    std::vector<double> domainExtents;
     _calculateDomainExtents(domainExtents);
 
     _currentTimestep = ts;
@@ -416,7 +434,7 @@ void AnnotationRenderer::InScenePaint(size_t ts)
         Transform *tmp;
         for (int i = 0; i < names.size(); i++) {
             tmp = vpParams->GetTransform(names[i]);
-            if (tmp->GetScales()[Z] < t->GetScales()[Z]) t = tmp;
+            if (tmp->GetScales()[Z] < t->GetScales()[Z]) *t = *tmp;
         }
     }
     applyTransform(t);
