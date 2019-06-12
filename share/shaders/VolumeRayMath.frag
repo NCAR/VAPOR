@@ -126,21 +126,26 @@ bool IntersectRayTriangleIntel(vec3 o, vec3 dir, float rt0, vec3 v0, vec3 v1, ve
 		return false;
 
 	// Compute scaled hit distance to triangle and test against ray t range
-	p0t.z *= Sz;
-	p1t.z *= Sz;
-	p2t.z *= Sz;
-	float tScaled = e0 * p0t.z + e1 * p1t.z + e2 * p2t.z;
-	if (det < 0 && (tScaled >= rt0*det || tScaled < FLT_MAX * det))
-		return false;
-	else if (det > 0 && (tScaled <= rt0*det || tScaled > FLT_MAX * det))
-		return false;
+//    p0t.z *= Sz;
+//    p1t.z *= Sz;
+//    p2t.z *= Sz;
+//    float tScaled = e0 * p0t.z + e1 * p1t.z + e2 * p2t.z;
+//    if (det < 0 && (tScaled >= rt0*det || tScaled < FLT_MAX * det))
+//        return false;
+//    else if (det > 0 && (tScaled <= rt0*det || tScaled > FLT_MAX * det))
+//        return false;
+//    t = tScaled * invDet;
+
+    // This routine provides consistent results at t = t0
+    // as opposed to the one above
+    if (!IntersectRayPlane(o, dir, rt0, v0, cross(v1-v0,v2-v0), t))
+        return false;
 
 	float invDet = 1 / det;
 	float b0 = e0 * invDet;
 	float b1 = e1 * invDet;
 	float b2 = e2 * invDet;
     barycentric = vec3(b0, b1, b2);
-	t = tScaled * invDet;
 
 	return true;
 }
