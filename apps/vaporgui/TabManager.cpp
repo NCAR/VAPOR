@@ -611,8 +611,8 @@ void TabManager::_updateRouters() {
     p->GetActiveRenderer(activeViz, renderClass, instName);
 
     if (activeViz.size() && renderClass.size() && instName.size()) {
-
-        SetActiveRenderer(activeViz, renderClass, instName);
+        if (_currentFrontTab == _renderersTabName)
+            SetActiveRenderer(activeViz, renderClass, instName);
 
         EventRouter *eRouter = _getRenderEventRouter(
             activeViz, renderClass, instName);
