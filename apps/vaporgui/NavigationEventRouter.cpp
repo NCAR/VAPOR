@@ -62,6 +62,8 @@ NavigationEventRouter::NavigationEventRouter(
                                         EventRouter(ce, ViewpointParams::GetClassType()) {
     setupUi(this);
 
+    futureFeaturesTab->hide();
+
     // Not implemented
     //
     camPosLat->setEnabled(false);
@@ -71,6 +73,7 @@ NavigationEventRouter::NavigationEventRouter(
     stereoCombo->setEnabled(false);
     latLonCheckbox->setEnabled(false);
     stereoSeparationEdit->setEnabled(false);
+    adjustSize();
 }
 
 NavigationEventRouter::~NavigationEventRouter() {
