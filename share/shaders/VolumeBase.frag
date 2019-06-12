@@ -92,8 +92,6 @@ float PhongLighting(vec3 normal, vec3 viewDir)
 {
 	if (!lightingEnabled)
 		return 1;
-        
-    normal = clamp(normal, vec3(-1), vec3(1));
     
     vec3 lightDir = viewDir;
 
@@ -118,8 +116,13 @@ vec3 GetNormal(vec3 p)
     s0.x = texture(data, p - d*vec3(1,0,0)).r;
     s0.y = texture(data, p - d*vec3(0,1,0)).r;
     s0.z = texture(data, p - d*vec3(0,0,1)).r;
-    return normalize(s1-s0);
-    //return s1-s0;
+    
+    // glsl::normalize does not handle 0 length vectors
+    vec3 v = s1-s0;
+    float l = length(v);
+    if (l == 0)
+        return vec3(0);
+    return v/l;
 }
 
 float CalculateDepth(vec3 pos)
