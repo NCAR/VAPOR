@@ -98,13 +98,11 @@ void SettingsEventRouter::hookUpTab()
     connect(_defaultButton, SIGNAL(clicked()), this, SLOT(_restoreDefaults()));
     connect(_sessionPathEdit, SIGNAL(returnPressed()), this, SLOT(_setSessionPath()));
     connect(_metadataPathEdit, SIGNAL(returnPressed()), this, SLOT(_setMetadataPath()));
-    connect(_imagePathEdit, SIGNAL(returnPressed()), this, SLOT(_setImagePath()));
     connect(_tfPathEdit, SIGNAL(returnPressed()), this, SLOT(_setTFPath()));
     connect(_flowPathEdit, SIGNAL(returnPressed()), this, SLOT(_setFlowPath()));
     connect(_pythonPathEdit, SIGNAL(returnPressed()), this, SLOT(_setPythonPath()));
     connect(_sessionPathButton, SIGNAL(clicked()), this, SLOT(_chooseSessionPath()));
     connect(_metadataPathButton, SIGNAL(clicked()), this, SLOT(_chooseMetadataPath()));
-    connect(_imagePathButton, SIGNAL(clicked()), this, SLOT(_chooseImagePath()));
     connect(_tfPathButton, SIGNAL(clicked()), this, SLOT(_chooseTFPath()));
     connect(_flowPathButton, SIGNAL(clicked()), this, SLOT(_chooseFlowPath()));
     connect(_pythonPathButton, SIGNAL(clicked()), this, SLOT(_choosePythonPath()));
@@ -255,13 +253,6 @@ void SettingsEventRouter::_setMetadataPath()
     _setFilePath(&SettingsParams::SetMetadataDir, &SettingsParams::GetMetadataDir, *sParams, _metadataPathEdit);
 }
 
-void SettingsEventRouter::_setImagePath()
-{
-    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
-
-    _setFilePath(&SettingsParams::SetImageDir, &SettingsParams::GetImageDir, *sParams, _imagePathEdit);
-}
-
 void SettingsEventRouter::_setFlowPath()
 {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
@@ -335,8 +326,7 @@ void SettingsEventRouter::_updateDirectoryPaths()
     string metaPath = sParams->GetMetadataDir();
     _metadataPathEdit->setText(QString::fromStdString(metaPath));
 
-    string imagePath = sParams->GetImageDir();
-    _imagePathEdit->setText(QString::fromStdString(imagePath));
+    _imagePathEdit->setText(QDir::homePath());
 
     string tfPath = sParams->GetTFDir();
     _tfPathEdit->setText(QString::fromStdString(tfPath));
@@ -421,18 +411,6 @@ void SettingsEventRouter::_chooseMetadataPath()
 
     if (!dir.empty()) {
         sParams->SetMetadataDir(dir);
-        _saveSettings();
-    }
-}
-
-void SettingsEventRouter::_chooseImagePath()
-{
-    SettingsParams *sParams = (SettingsParams *)GetActiveParams();
-
-    string dir = _choosePathHelper(sParams->GetImageDir(), "Choose the image file directory");
-
-    if (!dir.empty()) {
-        sParams->SetImageDir(dir);
         _saveSettings();
     }
 }

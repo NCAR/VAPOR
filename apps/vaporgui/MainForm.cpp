@@ -1902,11 +1902,9 @@ void MainForm::captureSingleTiff()
 void MainForm::captureSingleImage(string filter, string defaultSuffix)
 {
     showCitationReminder();
-    SettingsParams *sP = GetSettingsParams();
-    string          imageDir = sP->GetImageDir();
-    if (imageDir == "") imageDir = sP->GetDefaultImageDir();
+    auto imageDir = QDir::homePath();
 
-    QFileDialog fileDialog(this, "Specify single image capture file name", imageDir.c_str(), QString::fromStdString(filter));
+    QFileDialog fileDialog(this, "Specify single image capture file name", imageDir, QString::fromStdString(filter));
 
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     fileDialog.move(pos());
@@ -1928,9 +1926,6 @@ void MainForm::captureSingleImage(string filter, string defaultSuffix)
 
     string file = fileInfo.absoluteFilePath().toStdString();
     string filepath = fileInfo.path().toStdString();
-
-    // Save the path for future captures
-    sP->SetImageDir(filepath);
 
     // Turn on "image capture mode" in the current active visualizer
     GUIStateParams *p = GetStateParams();
@@ -2088,11 +2083,9 @@ void MainForm::captureTiffSequence()
 void MainForm::startAnimCapture(string filter, string defaultSuffix)
 {
     showCitationReminder();
-    SettingsParams *sP = GetSettingsParams();
-    string          imageDir = sP->GetImageDir();
-    if (imageDir == "") imageDir = sP->GetDefaultImageDir();
+    auto imageDir = QDir::homePath();
 
-    QFileDialog fileDialog(this, "Specify image sequence file name", imageDir.c_str(), QString::fromStdString(filter));
+    QFileDialog fileDialog(this, "Specify image sequence file name", imageDir, QString::fromStdString(filter));
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fileDialog.exec() != QDialog::Accepted) return;
 
@@ -2111,8 +2104,6 @@ void MainForm::startAnimCapture(string filter, string defaultSuffix)
         fileName = fileInfo.absolutePath() + "/" + fileInfo.baseName();
     }
 
-    // Save the path for future captures
-    sP->SetImageDir(fileInfo.absolutePath().toStdString());
     QString fileBaseName = fileInfo.baseName();
 
     int posn;

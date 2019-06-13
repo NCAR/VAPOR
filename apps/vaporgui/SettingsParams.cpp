@@ -50,8 +50,6 @@ const string SettingsParams::_sessionDirTag = "SessionDir";
 const string SettingsParams::_defaultSessionDirTag = "SessionDir";
 const string SettingsParams::_metadataDirTag = "MetadataDir";
 const string SettingsParams::_defaultMetadataDirTag = "MetadataDir";
-const string SettingsParams::_imageDirTag = "ImageDir";
-const string SettingsParams::_defaultImageDirTag = "ImageDir";
 const string SettingsParams::_tfDirTag = "TFDir";
 const string SettingsParams::_defaultTfDirTag = "TFDir";
 const string SettingsParams::_flowDirTag = "FlowDir";
@@ -288,25 +286,6 @@ void SettingsParams::SetDefaultMetadataDir(string dir)
     SetValueString(_defaultMetadataDirTag, description, dir);
 }
 
-string SettingsParams::GetImageDir() const
-{
-    string defaultDir = GetDefaultImageDir();
-    string dir = GetValueString(_imageDirTag, defaultDir);
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
-    return (dir);
-}
-
-void SettingsParams::SetImageDir(string dir) { SetValueString(_imageDirTag, "set image directory", dir); }
-
-string SettingsParams::GetDefaultImageDir() const
-{
-    string dir = GetValueString(_defaultImageDirTag, string("."));
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
-    return (dir);
-}
-
-void SettingsParams::SetDefaultImageDir(string dir) { SetValueString(_defaultImageDirTag, "Set default image directory", dir); }
-
 string SettingsParams::GetTFDir() const
 {
     string defaultDir = GetDefaultTFDir();
@@ -461,9 +440,6 @@ void SettingsParams::_init()
 
     string palettes = GetSharePath("palettes");
     SetDefaultTFDir(string(palettes));
-
-    string images = GetSharePath("images");
-    SetDefaultImageDir(string(images));
 
     string python = GetPythonDir();
     SetDefaultPythonDir(string(python));
