@@ -19,6 +19,16 @@ namespace VAPoR {
 	class ParamsMgr;
 }
 
+class QCheckBoxTest : public QCheckBox {
+    Q_OBJECT;
+    
+public:
+    QCheckBoxTest(QString s):QCheckBox(s){}
+    ~QCheckBoxTest() {
+        printf("Test::Destructor() +++++++++\n");
+    }
+};
+
 class QPushButtonWithDoubleClick : public QPushButton {
     Q_OBJECT
     using QPushButton::QPushButton;
@@ -139,6 +149,8 @@ private:
 
  //Convert name to a unique name (among renderer names)
  std::string uniqueName(std::string name);
+    
+    void _showIntelDriverWarning(const string &rendererType);
 
 private slots:
  void _showNewRendererDialog();

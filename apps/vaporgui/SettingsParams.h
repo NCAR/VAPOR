@@ -117,6 +117,9 @@ public:
 
  string GetFontFile() const;
  void SetFontFile(string file);
+    
+ bool GetDontShowIntelDriverWarning() const;
+ void SetDontShowIntelDriverWarning(bool b);
 
  string GetCurrentPrefsPath() const;
  void SetCurrentPrefsPath(string pth);
@@ -167,6 +170,7 @@ private:
  static const string _sessionAutoSaveEnabledTag;
  static const string _fontFileTag;
  static const string _fontSizeTag;
+ static const string _dontShowIntelDriverWarningTag;
 
  void _init();
  bool _loadFromSettingsFile();
