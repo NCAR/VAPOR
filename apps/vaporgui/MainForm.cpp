@@ -2128,15 +2128,12 @@ void MainForm::captureSingleImage(
     string filter,
     string defaultSuffix) {
     showCitationReminder();
-    SettingsParams *sP = GetSettingsParams();
-    string imageDir = sP->GetImageDir();
-    if (imageDir == "")
-        imageDir = sP->GetDefaultImageDir();
+    auto imageDir = QDir::homePath();
 
     QFileDialog fileDialog(
         this,
         "Specify single image capture file name",
-        imageDir.c_str(),
+        imageDir,
         QString::fromStdString(filter));
 
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
@@ -2161,9 +2158,6 @@ void MainForm::captureSingleImage(
 
     string file = fileInfo.absoluteFilePath().toStdString();
     string filepath = fileInfo.path().toStdString();
-
-    //Save the path for future captures
-    sP->SetImageDir(filepath);
 
     //Turn on "image capture mode" in the current active visualizer
     GUIStateParams *p = GetStateParams();
@@ -2326,15 +2320,12 @@ void MainForm::startAnimCapture(
     string filter,
     string defaultSuffix) {
     showCitationReminder();
-    SettingsParams *sP = GetSettingsParams();
-    string imageDir = sP->GetImageDir();
-    if (imageDir == "")
-        imageDir = sP->GetDefaultImageDir();
+    auto imageDir = QDir::homePath();
 
     QFileDialog fileDialog(
         this,
         "Specify image sequence file name",
-        imageDir.c_str(),
+        imageDir,
         QString::fromStdString(filter));
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fileDialog.exec() != QDialog::Accepted)
@@ -2362,8 +2353,6 @@ void MainForm::startAnimCapture(
         fileName = fileInfo.absolutePath() + "/" + fileInfo.baseName();
     }
 
-    //Save the path for future captures
-    sP->SetImageDir(fileInfo.absolutePath().toStdString());
     QString fileBaseName = fileInfo.baseName();
 
     int posn;
