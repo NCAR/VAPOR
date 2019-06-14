@@ -208,7 +208,7 @@ void RenderHolder::_showIntelDriverWarning(const string &rendererType)
     if (sp->GetDontShowIntelDriverWarning()) return;
 
     // Qt will automatically delete this for us apparently
-    QCheckBox *dontShowAgain = new QCheckBoxTest("Don't show again");
+    QCheckBox *dontShowAgain = new QCheckBox("Don't show again");
     dontShowAgain->blockSignals(true);
 
     QMessageBox warning;
