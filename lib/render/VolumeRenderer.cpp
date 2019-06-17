@@ -288,7 +288,11 @@ bool VolumeRenderer::_shouldUseChunkedRender(bool fast) const
     return false;
 }
 
-bool VolumeRenderer::_usingColorMapData() const { return false; }
+bool VolumeRenderer::_usingColorMapData() const
+{
+    // Overriden by VolumeIsoRenderer
+    return false;
+}
 
 void VolumeRenderer::_saveOriginalViewport() { glGetIntegerv(GL_VIEWPORT, _originalViewport); }
 
