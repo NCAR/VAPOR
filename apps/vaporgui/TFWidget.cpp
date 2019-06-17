@@ -78,6 +78,7 @@ TFWidget::TFWidget(QWidget *parent)
     _secondaryMaxSliderEdit->SetExtents(0.f, 1.f);
 
     _opacitySlider->setRange(0, 1000);
+    _secondaryOpacitySlider->setRange(0, 1000);
 
     _cLevel = 0;
     _refLevel = 0;
@@ -112,11 +113,16 @@ void TFWidget::configureSecondaryTransferFunction() {
             _tabWidget->insertTab(1, _secondaryTFE, "Color Mapped VARIABLE");
 
         _mappingFrame->setColorMapping(false);
+        _mappingFrame->setOpacityMapping(false);
+        _opacitySlider->hide();
         _whitespaceFrame->hide();
         _colorInterpolationFrame->hide();
         _loadSaveFrame->hide();
         adjustSize();
     } else {
+        _mappingFrame->setColorMapping(true);
+        _mappingFrame->setOpacityMapping(true);
+        _opacitySlider->show();
         _tabWidget->removeTab(1);
         _whitespaceFrame->show();
         _colorInterpolationFrame->show();
@@ -439,6 +445,7 @@ void TFWidget::updateSecondarySliders() {
     _secondaryMinSliderEdit->SetValue(values[0]);
     _secondaryMaxSliderEdit->SetExtents(range[0], range[1]);
     _secondaryMaxSliderEdit->SetValue(values[1]);
+    _secondaryOpacitySlider->setValue(convertOpacityToSliderValue(getOpacity()));
 
     _secondaryMinLabel->setText(QString::number(range[0]));
     _secondaryMaxLabel->setText(QString::number(range[1]));
@@ -826,6 +833,7 @@ void TFWidget::opacitySliderChanged(int value) {
     MapperFunction *tf = _rParams->GetMapperFunc(varName);
     VAssert(tf);
     tf->setOpacityScale(convertSliderValueToOpacity(value));
+
     emit emitChange();
 }
 
