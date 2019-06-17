@@ -299,6 +299,7 @@ vec3 GetCellFaceNormal(ivec3 cellIndex, ivec3 face)
 
 bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, bool allowThinCells, OUT ivec3 exitFace, OUT vec3 exitCoord, OUT float t1)
 {
+    exitFace = F_NONE;
     for (int i = 0; i < 6; i++) {
         ivec3 testFace = GetFaceFromFaceIndex(i);
         
@@ -307,12 +308,16 @@ bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entr
             
         if (IntersectRayCellFace(origin, dir, t0, currentCell, testFace, t1, exitCoord)) {
             // There are cases where very thin cells will result in the same t
-            if (allowThinCells || t1 - t0 > EPSILON) {
+            if (t1 - t0 > EPSILON) {
                 exitFace = testFace;
                 return true;
+            } else if (allowThinCells) {
+                exitFace = testFace;
             }
         }
     }
+    if (exitFace != F_NONE)
+        return true;
     return false;
 }
 
