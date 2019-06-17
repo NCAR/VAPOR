@@ -328,6 +328,7 @@ bool VolumeRenderer::_shouldUseChunkedRender(bool fast) const
 
 bool VolumeRenderer::_usingColorMapData() const
 {
+    // Overriden by VolumeIsoRenderer
     return false;
 }
 
