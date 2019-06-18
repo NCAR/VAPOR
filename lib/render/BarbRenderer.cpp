@@ -239,6 +239,9 @@ int BarbRenderer::_paintGL(bool)
 {
     int rc = 0;
 
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+
     // _saveCacheParams();
 
     // Set up the variable data required, while determining data
