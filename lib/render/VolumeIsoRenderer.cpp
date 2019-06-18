@@ -37,7 +37,12 @@ VolumeIsoRenderer::VolumeIsoRenderer(const ParamsMgr *pm, std::string &winName, 
 
 VolumeIsoRenderer::~VolumeIsoRenderer() {}
 
-bool VolumeIsoRenderer::_usingColorMapData() const { return !GetActiveParams()->UseSingleColor(); }
+bool VolumeIsoRenderer::_usingColorMapData() const
+{
+    bool rVal = !GetActiveParams()->UseSingleColor();
+    cout << "usingColorMapData() " << rVal << endl;
+    return rVal;
+}
 
 void VolumeIsoRenderer::_setShaderUniforms(const ShaderProgram *shader, const bool fast) const
 {
