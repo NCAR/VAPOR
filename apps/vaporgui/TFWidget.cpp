@@ -737,7 +737,6 @@ void TFWidget::updateConstColor() {
 
         if (_flags & COLORMAP_VAR_IS_IN_TF2) {
             _opacitySlider->hide();
-            cout << "hidden 760" << endl;
         }
     }
 
@@ -952,7 +951,6 @@ void TFWidget::setUsingSingleColor(int state) {
         if (_flags & COLORMAP_VAR_IS_IN_TF2) {
             _tabWidget->setTabEnabled(1, false);
             _opacitySlider->hide();
-            cout << "hidden 972" << endl;
         }
     } else {
         _rParams->SetUseSingleColor(false);
@@ -1096,7 +1094,6 @@ bool TFWidget::IsOpacitySupported() const {
 void TFWidget::SetOpacitySupported(bool value) {
     if (!value && !_opacitySlider->isHidden()) {
         _opacitySlider->hide();
-        cout << "hidden 1126" << endl;
     }
     if (value &&
         _opacitySlider->isHidden() &&
