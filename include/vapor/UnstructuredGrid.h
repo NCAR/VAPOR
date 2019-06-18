@@ -133,13 +133,12 @@ public:
  }  
  std::string GetType() const override {return (GetClassType()); }
 
- //! \copydoc Grid::GetCellNodes()
- //!
- virtual bool GetCellNodes(
-	const std::vector <size_t> &cindices,
-	std::vector <std::vector <size_t> > &nodes
+ bool GetCellNodes(
+	const size_t cindices[],
+	size_t nodes[],
+	int &n
  ) const override;
-
+ 
  //! \copydoc Grid::GetCellNeighbors()
  //!
  virtual bool GetCellNeighbors(
@@ -209,7 +208,7 @@ public:
  }
 
  virtual void ClampCoord(std::vector <double> &coords) const override {
-	assert(coords.size() >= GetGeometryDim());
+	VAssert(coords.size() >= GetGeometryDim());
     while (coords.size() > GetGeometryDim()) {
         coords.pop_back();
     }

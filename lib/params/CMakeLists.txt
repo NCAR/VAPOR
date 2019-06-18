@@ -21,13 +21,13 @@ set (SRC
 	TFInterpolator.cpp
 	ContourParams.cpp
 	RayCasterParams.cpp
-	DVRParams.cpp
-	IsoSurfaceParams.cpp
 	AxisAnnotation.cpp
 	WireFrameParams.cpp
     SliceParams.cpp
 	DatasetsParams.cpp
 	FlowParams.cpp
+	VolumeParams.cpp
+	VolumeIsoParams.cpp
 )
 
 set (HEADERS
@@ -56,9 +56,9 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/DatasetsParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/SliceParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/RayCasterParams.h
-	${PROJECT_SOURCE_DIR}/include/vapor/DVRParams.h
-	${PROJECT_SOURCE_DIR}/include/vapor/IsoSurfaceParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/FlowParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeIsoParams.h
 )
 
 add_library (params SHARED ${SRC} ${HEADERS})

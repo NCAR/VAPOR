@@ -1,7 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstdarg>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cmath>
 #include <cstdio>
 #include <sys/stat.h>
@@ -216,7 +216,7 @@ unsigned char *GeoImageTMS::GetImage(
 		}
 		else {
 			string::size_type last = proj4StringImg.find(" ", first);
-			assert (last != string::npos);
+			VAssert (last != string::npos);
 			proj4StringImg.replace(first, last-first, oss.str());
 		}
 	}
@@ -380,7 +380,7 @@ int GeoImageTMS::_getBestLOD(
 		int rc = _geotile->MapSize(
 			pixelSW[0],pixelSW[1],pixelNE[0],pixelNE[1],lod,nx, ny
 		);
-		assert(! (rc<0));
+		VAssert(! (rc<0));
 
 		if (nx > maxWidthReq || ny > maxHeightReq) {
 			done = true;
@@ -450,7 +450,7 @@ int GeoImageTMS::_getMap(
 				if (rc<0) return(-1);
 
 				rc = _geotile->Insert(quadkey, _tileBuf);
-				assert( !(rc<0));
+				VAssert( !(rc<0));
 			}
 			tileX = (tileX + 1) % ntiles;
 

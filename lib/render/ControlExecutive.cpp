@@ -14,8 +14,8 @@
 #include <vapor/Visualizer.h>
 #include <vapor/DataStatus.h>
 
-#include <vapor/DVRenderer.h>
-#include <vapor/IsoSurfaceRenderer.h>
+#include <vapor/VolumeRenderer.h>
+#include <vapor/VolumeIsoRenderer.h>
 
 
 using namespace VAPoR;
@@ -171,12 +171,15 @@ int ControlExec::ActivateRender(
 
 	_paramsMgr->BeginSaveStateGroup("ActivateRender");
 
-	if (! ren) { 
-
-		string paramsType = RendererFactory::Instance()->
+	// Create new renderer if one does not exist
+	//
+	string paramsType = RendererFactory::Instance()->
 			GetParamsClassFromRenderClass(renderType);
 
-		assert(! paramsType.empty());
+	if (! v->HasRenderer(renderType, renderName)) { 
+
+
+		VAssert(! paramsType.empty());
 
 		// Need to create a params instance for this renderer
 		//
@@ -189,26 +192,26 @@ int ControlExec::ActivateRender(
 			return -1;
 		}
 
-		ren = RendererFactory::Instance()->CreateInstance(
-			_paramsMgr, winName, dataSetName, renderType, renderName,
-			_dataStatus->GetDataMgr(dataSetName)
-		);
-		if (! ren) {
+		int rc = v->CreateRenderer(dataSetName, renderType, renderName);
+		if (rc<0) {
 			SetErrMsg("Invalid renderer of type \"%s\"",renderType.c_str());
 			_paramsMgr->EndSaveStateGroup();
 			return(-1);
 		}
-		v->InsertRenderer(ren);
 	}
 
 
-	RenderParams *rp = ren->GetActiveParams();
-	assert(rp);
+	// Get newly created (or existing) render params for this renderer
+	//
+	RenderParams *rp = _paramsMgr->GetRenderParams(
+		winName, dataSetName, paramsType, renderName
+	);
+	VAssert(rp);
 
 	rp->SetEnabled(on);
-	v->MoveRendererToFront(ren);
-    v->MoveRenderersOfTypeToFront(IsoSurfaceRenderer::GetClassType());
-    v->MoveRenderersOfTypeToFront(DVRenderer::GetClassType());
+	v->MoveRendererToFront(renderType, renderName);
+    v->MoveRenderersOfTypeToFront(VolumeIsoRenderer::GetClassType());
+    v->MoveRenderersOfTypeToFront(VolumeRenderer::GetClassType());
 
 	_paramsMgr->EndSaveStateGroup();
 
@@ -219,7 +222,7 @@ int ControlExec::ActivateRender(
 	string winName, string dataSetName, const RenderParams *rp, 
 	string renderName, bool on
 ) {
-	assert (rp);
+	VAssert (rp);
 
 	if (! _dataStatus->GetDataMgrNames().size()) {
 		SetErrMsg("Invalid state : no data");
@@ -235,11 +238,13 @@ int ControlExec::ActivateRender(
 	string renderType = RendererFactory::Instance()->
 		GetRenderClassFromParamsClass(rp->GetName());
 
-	Renderer *ren = v->GetRenderer(renderType, renderName);
+	string paramsType = rp->GetName();
 
 	_paramsMgr->BeginSaveStateGroup("ActivateRender");
 
-	if (! ren) { 
+	// Create new renderer if one does not exist
+	//
+	if (! v->HasRenderer(renderType, renderName)) { 
 
 		// Need to create a params instance for this renderer
 		//
@@ -252,23 +257,23 @@ int ControlExec::ActivateRender(
 			return -1;
 		}
 
-		ren = RendererFactory::Instance()->CreateInstance(
-			_paramsMgr, winName, dataSetName, renderType, renderName,
-			_dataStatus->GetDataMgr(dataSetName)
-		);
-		if (! ren) {
+		int rc = v->CreateRenderer(dataSetName, renderType, renderName);
+		if (rc<0) {
 			SetErrMsg("Invalid renderer of type \"%s\"",renderType.c_str());
 			_paramsMgr->EndSaveStateGroup();
 			return(-1);
 		}
-		v->InsertRenderer(ren);
 	}
 
-
-	RenderParams *newRP = ren->GetActiveParams();
-	assert(newRP);
+	RenderParams *newRP = _paramsMgr->GetRenderParams(
+		winName, dataSetName, paramsType, renderName
+	);
+	VAssert(newRP);
 
 	newRP->SetEnabled(on);
+	v->MoveRendererToFront(renderType, renderName);
+    v->MoveRenderersOfTypeToFront(VolumeIsoRenderer::GetClassType());
+    v->MoveRenderersOfTypeToFront(VolumeRenderer::GetClassType());
 
 	_paramsMgr->EndSaveStateGroup();
 
@@ -277,7 +282,7 @@ int ControlExec::ActivateRender(
 
 void ControlExec::_removeRendererHelper(
 	string winName, string dataSetName, string renderType, string renderName,
-	bool removeFromParamsFlag
+	bool removeFromParamsFlag, bool hasOpenGLContext
 ) {
 
 	// No-op if tuple of winName, dataSetName, renderType, and
@@ -294,10 +299,7 @@ void ControlExec::_removeRendererHelper(
 	Visualizer* v = getVisualizer(winName);
 	if (! v)  return;
 
-	Renderer *ren = v->GetRenderer(renderType, renderName);
-	if (! ren) return;
-    
-    ren->FlagForDeletion();
+	v->DestroyRenderer(renderType, renderName, hasOpenGLContext);
 
 	if (removeFromParamsFlag) {
 		_paramsMgr->RemoveRenderParamsInstance(
@@ -307,9 +309,42 @@ void ControlExec::_removeRendererHelper(
 }
 
 void ControlExec::RemoveRenderer(
-	string winName, string dataSetName, string renderType, string renderName
+	string winName, string dataSetName, string renderType, string renderName,
+	bool hasOpenGLContext
 ) {
-	_removeRendererHelper(winName, dataSetName, renderType, renderName, true);
+	_removeRendererHelper(
+		winName, dataSetName, renderType, renderName, true, hasOpenGLContext
+	);
+}
+
+void ControlExec::RemoveAllRenderers(
+	string winName, bool hasOpenGLContext
+) {
+	vector <string> dataSetNames = _paramsMgr->GetDataMgrNames();
+	for (int k=0; k<dataSetNames.size(); k++) {
+
+		vector <string> pClassNames = _paramsMgr->
+			GetRenderParamsClassNames(winName, dataSetNames[k]);
+
+		for (int j=0; j<pClassNames.size(); j++) {
+			vector <string> instNames = _paramsMgr->GetRenderParamInstances(
+				winName, dataSetNames[k], pClassNames[j]
+			);
+
+			string rClassName =
+				RendererFactory::Instance()->GetRenderClassFromParamsClass(
+					pClassNames[j]
+				);
+
+			for (int i=0; i<instNames.size(); i++) {
+
+				_removeRendererHelper(
+					winName, dataSetNames[k], rClassName,
+					instNames[i], true, hasOpenGLContext
+				);
+			}
+		}
+	}
 }
 
 void ControlExec::LoadState() {
@@ -390,7 +425,7 @@ int ControlExec::activateClassRenderers(
 		RenderParams *rp = _paramsMgr->GetRenderParams(
 			vizName, dataSetName, pClassName, instNames[i]
 		);
-		assert(rp);
+		VAssert(rp);
 
 		// Convert from params render type to render type. Sigh
 		//
@@ -485,7 +520,7 @@ int ControlExec::OpenData(
 
 					_removeRendererHelper(
 						vizNames[k], dataSetName, rClassName,
-						instNames[i], false
+						instNames[i], false, false
 					);
 				}
 			}
@@ -531,7 +566,7 @@ void ControlExec::CloseData(string dataSetName) {
 				// render type, and render instance does not exist
 				//
 				RemoveRenderer(
-					winNames[i], dataSetName, renderTypes[j], renderNames[k]
+					winNames[i], dataSetName, renderTypes[j], renderNames[k], false
 				);
 			}
 		}
@@ -631,7 +666,7 @@ void ControlExec::undoRedoHelper() {
 	// Data-dependent re-initialization
 	//
 	int rc = openDataHelper(false);
-	assert(rc>=0);
+	VAssert(rc>=0);
 
 	SetSaveStateEnabled(enabled);
 }

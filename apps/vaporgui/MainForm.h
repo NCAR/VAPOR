@@ -24,7 +24,7 @@
 #ifndef MAINFORM_H
 #define MAINFORM_H
 
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <qvariant.h>
 #include <qmainwindow.h>
 #include <qstring.h>
@@ -112,7 +112,6 @@ private:
  QAction* _navigationAction;
  QAction* _editUndoAction;
  QAction* _editRedoAction;
- QAction* _editUndoRedoClearAction;
  QLineEdit* _timeStepEdit;
  QIntValidator *_timeStepEditValidator;
 
@@ -262,28 +261,28 @@ private:
  }
 
  GUIStateParams *GetStateParams() const {
-	assert(_paramsMgr != NULL);
+	VAssert(_paramsMgr != NULL);
 	return ((GUIStateParams *)
 		_paramsMgr->GetParams(GUIStateParams::GetClassType())
 	);
  }
 
  SettingsParams *GetSettingsParams() const {
-	assert(_paramsMgr != NULL);
+	VAssert(_paramsMgr != NULL);
 	return ((SettingsParams *)
 		_paramsMgr->GetParams(SettingsParams::GetClassType())
 	);
  }
 
  AnimationParams *GetAnimationParams() const {
-	assert(_paramsMgr != NULL);
+	VAssert(_paramsMgr != NULL);
 	return ((AnimationParams *)
 		_paramsMgr->GetParams(AnimationParams::GetClassType())
 	);
  }
 
  /*MiscParams *GetMiscParams() const {
-	assert(_paramsMgr != NULL);
+	VAssert(_paramsMgr != NULL);
 	return ((MiscParams *)
 		_paramsMgr->GetParams(MiscParams::GetClassType())
 	);
@@ -345,7 +344,6 @@ private slots:
  void fileExit();
  void undo();
  void redo();
- void clear();
  void helpAbout();
  void loadData(string fileName="");
  void closeData(string fileName="");

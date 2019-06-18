@@ -16,7 +16,7 @@
 #include <QSpinBox>
 
 #include <iostream>
-#include <cassert>
+#include "vapor/VAssert.h"
 
 VaporWidget::VaporWidget(
         QWidget* parent,

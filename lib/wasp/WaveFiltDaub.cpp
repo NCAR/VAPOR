@@ -21,7 +21,7 @@
  */
 
 #include <cmath>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <vapor/WaveFiltDaub.h>
 
 
@@ -210,7 +210,7 @@ void WaveFiltDaub::_analysis_initialize (int member)
       pFilterCoef = db10;
       break;
     default:
-		assert(pFilterCoef != NULL);
+		VAssert(pFilterCoef != NULL);
     }
 
   wrev(pFilterCoef, _lowDecomFilCoef, _filterLength);
@@ -259,7 +259,7 @@ void WaveFiltDaub::_synthesis_initialize (int member)
       pFilterCoef = db10;
       break;
     default:
-		assert(pFilterCoef != NULL);
+		VAssert(pFilterCoef != NULL);
     }
 
   verbatim_copy(pFilterCoef, _lowReconFilCoef, _filterLength);

@@ -27,7 +27,7 @@ public:
  //! variables created by this class will be managed.
  //
  PyEngine(DataMgr *dataMgr) {
-	assert(dataMgr != NULL);
+	VAssert(dataMgr != NULL);
 	_dataMgr = dataMgr;
  }
 

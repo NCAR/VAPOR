@@ -51,8 +51,6 @@ const string SettingsParams::_sessionDirTag = "SessionDir";
 const string SettingsParams::_defaultSessionDirTag = "SessionDir";
 const string SettingsParams::_metadataDirTag = "MetadataDir";
 const string SettingsParams::_defaultMetadataDirTag = "MetadataDir";
-const string SettingsParams::_imageDirTag = "ImageDir";
-const string SettingsParams::_defaultImageDirTag = "ImageDir";
 const string SettingsParams::_tfDirTag = "TFDir";
 const string SettingsParams::_defaultTfDirTag = "TFDir";
 const string SettingsParams::_flowDirTag = "FlowDir";
@@ -70,6 +68,7 @@ const string SettingsParams::_defaultAutoSaveFileTag = "DefaultAutoSaveFile";
 const string SettingsParams::_sessionAutoSaveEnabledTag = "AutoSaveEnabled";
 const string SettingsParams::_fontFileTag = "FontFile";
 const string SettingsParams::_fontSizeTag = "FontSize";
+const string SettingsParams::_dontShowIntelDriverWarningTag = "DontShowIntelDriverWarning";
 
 //
 // Register class with object factory!!!
@@ -300,31 +299,6 @@ void SettingsParams::SetDefaultMetadataDir(string dir){
 	SetValueString(_defaultMetadataDirTag, description, dir);
 }
 
-string SettingsParams::GetImageDir() const {
-	string defaultDir = GetDefaultImageDir();
-	string dir = GetValueString(_imageDirTag,defaultDir);
-	if (dir == "~") {
-		dir = QDir::homePath().toStdString();
-	}
-	return(dir);
-}
-
-void SettingsParams::SetImageDir(string dir){
-	SetValueString(_imageDirTag,"set image directory", dir);
-}
-
-string SettingsParams::GetDefaultImageDir() const {
-	string dir = GetValueString(_defaultImageDirTag,string("."));
-	if (dir == "~") {
-		dir = QDir::homePath().toStdString();
-	}
-	return(dir);
-}
-
-void SettingsParams::SetDefaultImageDir(string dir){
-	SetValueString(_defaultImageDirTag,"Set default image directory", dir);
-}
-
 string SettingsParams::GetTFDir() const {
 	string defaultDir = GetDefaultTFDir();
 	string dir = GetValueString(_tfDirTag,defaultDir);
@@ -436,6 +410,14 @@ void SettingsParams::SetFontFile(string file) {
 
 }
 
+bool SettingsParams::GetDontShowIntelDriverWarning() const {
+    return GetValueLong(_dontShowIntelDriverWarningTag, false);
+}
+
+void SettingsParams::SetDontShowIntelDriverWarning(bool b) {
+    SetValueLong(_dontShowIntelDriverWarningTag, "Hide Intel driver warning", b);
+}
+
 void SettingsParams::SetFidelityDefault3D(long lodDef, long refDef){
 	vector <long> val;
 	val.push_back(lodDef);
@@ -453,7 +435,7 @@ void SettingsParams::SetFidelityDefault2D(long lodDef, long refDef){
 bool SettingsParams::_loadFromSettingsFile() {
 
     XmlNode *node = GetNode();
-    assert(node != NULL);
+    VAssert(node != NULL);
 
     bool enabled = MyBase::GetEnableErrMsg();
     MyBase::EnableErrMsg(false);
@@ -502,9 +484,6 @@ void SettingsParams::_init() {
 
 	string palettes = GetSharePath("palettes");
 	SetDefaultTFDir(string(palettes));
-
-	string images = GetSharePath("images");
-	SetDefaultImageDir(string(images));
 
 	string python = GetPythonDir();
 	SetDefaultPythonDir(string(python));

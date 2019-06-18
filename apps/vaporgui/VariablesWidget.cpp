@@ -145,7 +145,7 @@ void VariablesWidget::collapseColorVarSettings() {
 }
 
 void VariablesWidget::setVarName(const QString& qname){
-	assert(_rParams);
+	VAssert(_rParams);
 
 	_paramsMgr->BeginSaveStateGroup("Set variable and possible color "
 		"variable name");
@@ -163,8 +163,8 @@ void VariablesWidget::setVarName(const QString& qname){
 }
 
 void VariablesWidget::setVectorVarName(const QString& qname, int component) {
-	assert(_rParams);
-	assert(component >= 0 && component <= 2);
+	VAssert(_rParams);
+	VAssert(component >= 0 && component <= 2);
 
 	if (! (_variableFlags & VECTOR)) return;
 
@@ -177,34 +177,34 @@ void VariablesWidget::setVectorVarName(const QString& qname, int component) {
 }
 
 void VariablesWidget::setXVarName(const QString& name) {
-	assert(_rParams);
+	VAssert(_rParams);
 	setVectorVarName(name, X);
 }
 
 void VariablesWidget::setYVarName(const QString& name) {
-	assert(_rParams);
+	VAssert(_rParams);
 	setVectorVarName(name, Y);
 }
 
 void VariablesWidget::setZVarName(const QString& name) {
-	assert(_rParams);
+	VAssert(_rParams);
 	setVectorVarName(name, Z);
 }
 
 void VariablesWidget::setXDistVarName(const QString& name){
-	assert(_rParams);
+	VAssert(_rParams);
 }
 
 void VariablesWidget::setYDistVarName(const QString& name){
-	assert(_rParams);
+	VAssert(_rParams);
 }
 
 void VariablesWidget::setZDistVarName(const QString& name){
-	assert(_rParams);
+	VAssert(_rParams);
 }
 
 void VariablesWidget::setHeightVarName(const QString& qname){
-	assert(_rParams);
+	VAssert(_rParams);
 
 	if (! (_variableFlags & HEIGHT)) return;
 
@@ -214,7 +214,7 @@ void VariablesWidget::setHeightVarName(const QString& qname){
 }
 
 void VariablesWidget::setColorMappedVariable(const QString& qname) {
-	assert(_rParams);
+	VAssert(_rParams);
 
 	if (! (_variableFlags & COLOR)) return;
 
@@ -229,9 +229,9 @@ void VariablesWidget::set2DOrientation(const QString& orientation) {
 
 // This takes the dropdown menu index, not the dimension
 void VariablesWidget::setVariableDims(int index){
-	assert(_rParams);
+	VAssert(_rParams);
 	if (! ((_dimFlags & TWOD) && (_dimFlags & THREED)) ) return;
-	assert(index >= 0 && index <= 1);
+	VAssert(index >= 0 && index <= 1);
 
 	//_activeDim = index == 0 ? TWODIMS : THREEDIMS;
     if (index == 0) {
@@ -392,11 +392,11 @@ void VariablesWidget::updateScalarCombo() {
 
 void VariablesWidget::updateVectorCombo() {
 	if (_variableFlags & VECTOR) {
-		vector <string> setVarsReq = _rParams->GetFieldVariableNames();
-		assert(setVarsReq.size() == 3);
-		
-		vector <string> setVars;
-		vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
+        vector <string> setVarsReq = _rParams->GetFieldVariableNames();
+        VAssert(setVarsReq.size() == 3);
+
+        vector <string> setVars;
+        vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
 	
 		// If our vector variables are empty, choose some defaults	
 		if (setVarsReq[0] == "" && 
@@ -460,7 +460,7 @@ void VariablesWidget::updateHeightCombo() {
 }
 
 void VariablesWidget::updateCombos() {
-	assert(_activeDim == TWODIMS || _activeDim == THREEDIMS);
+	VAssert(_activeDim == TWODIMS || _activeDim == THREEDIMS);
 	
 	vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
 
@@ -488,9 +488,9 @@ void VariablesWidget::Update(
 	ParamsMgr *paramsMgr,
 	RenderParams *rParams
 ) {
-	assert(dataMgr);
-	assert(paramsMgr);
-	assert(rParams);
+	VAssert(dataMgr);
+	VAssert(paramsMgr);
+	VAssert(rParams);
 
 	_dataMgr = dataMgr;
 	_paramsMgr = paramsMgr;

@@ -2,7 +2,7 @@
 #include <sstream>
 #include <iterator>
 #include <algorithm>
-#include <cassert>
+#include "vapor/VAssert.h"
 #ifdef WIN32
 #include "vapor/udunits2.h"
 #else
@@ -43,26 +43,31 @@ UDUnits::UDUnits() {
 	_unitSystem = NULL;
 }
 
+std::string UDUnits::GetDatabasePath()
+{
+    return GetSharePath("udunits/udunits2.xml");
+}
+
 int UDUnits::Initialize() {
 
 	//
 	// Need to turn off error messages, which go to stderr by default
 	//
 	ut_set_error_message_handler(ut_ignore);
+    string unitstr;
 
-	string path = GetSharePath("udunits/udunits2.xml");
+	string path = GetDatabasePath();
 	if (! path.empty()) {
 		_unitSystem = ut_read_xml(path.c_str());
 	}
 	else {
+        MyBase::SetErrMsg("Could not find VAPOR installed UDUnits database");
+        MyBase::SetErrMsg("Attempting to fall back to system install");
 		_unitSystem = ut_read_xml(NULL);
 	}
-	if (! _unitSystem) {
-		_status = (int) ut_get_status();
-		return(-1);
-	};
-
-	string unitstr;
+    
+	if (! _unitSystem)
+        goto UDUnits_Initialize_Error;
 
 	//
 	// We need to be able to determine if a given unit is of a
@@ -75,40 +80,38 @@ int UDUnits::Initialize() {
 
 	unitstr = "Pa";	// Pascal units of Pressure
 	_pressureUnit = ut_parse(_unitSystem, unitstr.c_str(), UT_ASCII);
-	if (! _pressureUnit) {
-		_status = (int) ut_get_status();
-		return(-1);
-	}
+	if (! _pressureUnit)
+        goto UDUnits_Initialize_Unit_Error;
 
 	unitstr = "seconds";
 	_timeUnit = ut_parse(_unitSystem, unitstr.c_str(), UT_ASCII);
-	if (! _timeUnit) {
-		_status = (int) ut_get_status();
-		return(-1);
-	}
+	if (! _timeUnit)
+        goto UDUnits_Initialize_Unit_Error;
 
 	unitstr = "degrees_north";
 	_latUnit = ut_parse(_unitSystem, unitstr.c_str(), UT_ASCII);
-	if (! _latUnit) {
-		_status = (int) ut_get_status();
-		return(-1);
-	}
+	if (! _latUnit)
+        goto UDUnits_Initialize_Unit_Error;
 
 	unitstr = "degrees_east";
 	_lonUnit = ut_parse(_unitSystem, unitstr.c_str(), UT_ASCII);
-	if (! _lonUnit) {
-		_status = (int) ut_get_status();
-		return(-1);
-	}
+	if (! _lonUnit)
+        goto UDUnits_Initialize_Unit_Error;
 
 	unitstr = "meter";
 	_lengthUnit = ut_parse(_unitSystem, unitstr.c_str(), UT_ASCII);
-	if (! _lengthUnit) {
-		_status = (int) ut_get_status();
-		return(-1);
-	}
+	if (! _lengthUnit)
+        goto UDUnits_Initialize_Unit_Error;
 
-	return(0);
+	return 0;
+    
+UDUnits_Initialize_Unit_Error:
+    MyBase::SetErrMsg("UDUnits failed to parse unit \"%s\"", unitstr.c_str());
+UDUnits_Initialize_Error:
+    _status = (int)ut_get_status();
+    MyBase::SetErrMsg("UDUnits failed to initialize");
+    MyBase::SetErrMsg("UDUnits Error: %s", GetErrMsg().c_str());
+    return -1;
 }
 
 bool UDUnits::AreUnitsConvertible(const ut_unit *unit, string unitstr) const {

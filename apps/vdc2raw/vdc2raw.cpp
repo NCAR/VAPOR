@@ -4,7 +4,7 @@
 #include <sstream>
 #include <cstdio>
 #include <cerrno>
-#include <cassert>
+#include "vapor/VAssert.h"
 
 #include <vapor/CFuncs.h>
 #include <vapor/OptionParser.h>
@@ -179,10 +179,10 @@ void process_region(
 	const vector <int> &yregion,
 	const vector <int> &zregion
 ) {
-	assert(dims.size() >= 1 && dims.size() <= 3); 
-	assert(xregion.size() == 2);
-	assert(yregion.size() == 2);
-	assert(zregion.size() == 2);
+	VAssert(dims.size() >= 1 && dims.size() <= 3); 
+	VAssert(xregion.size() == 2);
+	VAssert(yregion.size() == 2);
+	VAssert(zregion.size() == 2);
 
 	vector <size_t> min_bound;
 	vector <size_t> max_bound;
