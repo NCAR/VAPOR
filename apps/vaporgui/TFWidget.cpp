@@ -112,9 +112,9 @@ void TFWidget::configureSecondaryTransferFunction() {
         if (_tabWidget->count() < 2)
             _tabWidget->insertTab(1, _secondaryTFE, "Color Mapped VARIABLE");
 
+        _tabWidget->setTabEnabled(1, false);
         _mappingFrame->setColorMapping(false);
         _mappingFrame->setOpacityMapping(false);
-        _opacitySlider->hide();
         _whitespaceFrame->hide();
         _colorInterpolationFrame->hide();
         _loadSaveFrame->hide();
@@ -122,7 +122,6 @@ void TFWidget::configureSecondaryTransferFunction() {
     } else {
         _mappingFrame->setColorMapping(true);
         _mappingFrame->setOpacityMapping(true);
-        _opacitySlider->show();
         _tabWidget->removeTab(1);
         _whitespaceFrame->show();
         _colorInterpolationFrame->show();
@@ -348,12 +347,16 @@ void TFWidget::calculateStride(string varName) {
 
 float TFWidget::getOpacity() {
     bool mainTF = true;
-    if (_flags & COLORMAP_VAR_IS_IN_TF2)
+    if (_flags & COLORMAP_VAR_IS_IN_TF2 &&
+        !_rParams->UseSingleColor()) {
         mainTF = false;
+    }
     string varName = getTFVariableName(mainTF);
 
     MapperFunction *tf = _rParams->GetMapperFunc(varName);
     VAssert(tf);
+
+    cout << varName << " " << tf->getOpacityScale() << endl;
 
     return tf->getOpacityScale();
 }
@@ -727,10 +730,16 @@ void TFWidget::updateConstColor() {
 
     _useConstColorCheckbox->blockSignals(true);
     bool useSingleColor = _rParams->UseSingleColor();
-    if (useSingleColor)
+    if (useSingleColor) {
         _useConstColorCheckbox->setCheckState(Qt::Checked);
-    else
+        _opacitySlider->show();
+    } else {
         _useConstColorCheckbox->setCheckState(Qt::Unchecked);
+
+        if (_flags & COLORMAP_VAR_IS_IN_TF2)
+            _opacitySlider->hide();
+    }
+
     _useConstColorCheckbox->blockSignals(false);
 
     string varName;
@@ -827,9 +836,12 @@ void TFWidget::opacitySliderChanged(int value) {
     _wasOpacitySliderReleased = false;
 
     bool mainTF = true;
-    if (COLORMAP_VAR_IS_IN_TF2)
+    if (COLORMAP_VAR_IS_IN_TF2 &&
+        !_rParams->UseSingleColor()) {
         mainTF = false;
+    }
     string varName = getTFVariableName(mainTF);
+    cout << "setting opacity for " << varName << endl;
     MapperFunction *tf = _rParams->GetMapperFunc(varName);
     VAssert(tf);
     tf->setOpacityScale(convertSliderValueToOpacity(value));
@@ -937,12 +949,16 @@ void TFWidget::setSingleColor() {
 void TFWidget::setUsingSingleColor(int state) {
     if (state > 0) {
         _rParams->SetUseSingleColor(true);
-        if (_flags & COLORMAP_VAR_IS_IN_TF2)
-            _secondaryTFE->setEnabled(false);
+        if (_flags & COLORMAP_VAR_IS_IN_TF2) {
+            _tabWidget->setTabEnabled(1, false);
+            _opacitySlider->hide();
+        }
     } else {
         _rParams->SetUseSingleColor(false);
-        if (_flags & COLORMAP_VAR_IS_IN_TF2)
-            _secondaryTFE->setEnabled(true);
+        if (_flags & COLORMAP_VAR_IS_IN_TF2) {
+            _tabWidget->setTabEnabled(1, true);
+            _opacitySlider->show();
+        }
     }
 }
 
@@ -1044,7 +1060,7 @@ MapperFunction *TFWidget::getSecondaryMapperFunction() {
 
 string TFWidget::getTFVariableName(bool mainTF = true) {
     string varname;
-
+    cout << "mainTF is " << mainTF << endl;
     if (mainTF == true) {
         if (_flags & COLORMAP_VAR_IS_IN_TF2) {
             varname = _rParams->GetVariableName();
