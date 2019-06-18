@@ -363,8 +363,6 @@ float TFWidget::getOpacity()
 	MapperFunction *tf = _rParams->GetMapperFunc(varName);
 	VAssert(tf);
 
-    cout << varName << " " << tf->getOpacityScale() << endl;
-
 	return tf->getOpacityScale();
 }
 
@@ -751,13 +749,15 @@ void TFWidget::updateConstColor() {
 	bool useSingleColor = _rParams->UseSingleColor();
 	if (useSingleColor) {
         _useConstColorCheckbox->setCheckState(Qt::Checked);
-        _opacitySlider->show();
+        if (_isOpacitySupported)
+            _opacitySlider->show();
     }
 	else {
         _useConstColorCheckbox->setCheckState(Qt::Unchecked);
 
-	    if (_flags & COLORMAP_VAR_IS_IN_TF2)
-            _opacitySlider->hide();
+	    if (_flags & COLORMAP_VAR_IS_IN_TF2) {
+            _opacitySlider->hide(); cout << "hidden 760" << endl;
+        }
     }
 
 	_useConstColorCheckbox->blockSignals(false);
@@ -862,7 +862,6 @@ void TFWidget::opacitySliderChanged(int value)
 		mainTF = false;
     }
 	string varName = getTFVariableName(mainTF);
-    cout << "setting opacity for " << varName << endl;
 	MapperFunction *tf = _rParams->GetMapperFunc(varName);
 	VAssert(tf);
     tf->setOpacityScale(convertSliderValueToOpacity(value));
@@ -969,14 +968,15 @@ void TFWidget::setUsingSingleColor(int state) {
 		 _rParams->SetUseSingleColor(true);
 		if (_flags & COLORMAP_VAR_IS_IN_TF2) {
             _tabWidget->setTabEnabled(1, false);
-            _opacitySlider->hide();
+            _opacitySlider->hide(); cout << "hidden 972" << endl;
         }
 	}
 	else {
 		_rParams->SetUseSingleColor(false);
 		if (_flags & COLORMAP_VAR_IS_IN_TF2) {
             _tabWidget->setTabEnabled(1, true);
-            _opacitySlider->show();
+            if (_isOpacitySupported)
+                _opacitySlider->show();
         }
 	}
 }
@@ -1083,7 +1083,6 @@ MapperFunction* TFWidget::getSecondaryMapperFunction() {
 
 string TFWidget::getTFVariableName(bool mainTF=true) {
 	string varname;
-    cout << "mainTF is " << mainTF << endl;
 	if (mainTF==true) {
 		if (_flags & COLORMAP_VAR_IS_IN_TF2){
 			varname = _rParams->GetVariableName();
@@ -1122,8 +1121,14 @@ bool TFWidget::IsOpacitySupported() const
 
 void TFWidget::SetOpacitySupported(bool value)
 {
-    if (!value && !_opacitySlider->isHidden()) _opacitySlider->hide();
-    if ( value &&  _opacitySlider->isHidden()) _opacitySlider->show();
+    if (!value && !_opacitySlider->isHidden()) {
+        _opacitySlider->hide(); cout << "hidden 1126" << endl;
+    }
+    if ( value &&  
+        _opacitySlider->isHidden() && 
+        _isOpacitySupported) {
+            _opacitySlider->show();
+    }
     _mappingFrame->setOpacityMapping(value);
     
     _isOpacitySupported = value;
