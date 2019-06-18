@@ -167,8 +167,6 @@ int ControlExec::ActivateRender(
 		return -1;
 	}
 
-	Renderer *ren = v->GetRenderer(renderType, renderName);
-
 	_paramsMgr->BeginSaveStateGroup("ActivateRender");
 
 	// Create new renderer if one does not exist
