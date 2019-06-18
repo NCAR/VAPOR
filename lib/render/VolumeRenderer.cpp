@@ -416,6 +416,7 @@ int VolumeRenderer::_loadSecondaryData() {
         return 0;
 
     if (_cache.useColorMapVar) {
+        cout << "Volume renderer using colorMapVar" << endl;
         Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.colorMapVar, _cache.refinement, _cache.compression);
         if (!grid)
             return -1;
