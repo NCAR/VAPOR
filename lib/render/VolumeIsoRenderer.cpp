@@ -77,6 +77,9 @@ void VolumeIsoRenderer::_setShaderUniforms(const ShaderProgram *shader, const bo
 
 std::string VolumeIsoRenderer::_getDefaultAlgorithmForGrid(const Grid *grid) const
 {
+    if (GLManager::GetVendor() == GLManager::Vendor::Intel)
+        return VolumeRegularIso::GetName();
+    
     if (dynamic_cast<const RegularGrid *>   (grid)) return VolumeRegularIso      ::GetName();
     if (dynamic_cast<const StructuredGrid *>(grid)) return VolumeCellTraversalIso::GetName();
     MyBase::SetErrMsg("Unsupported grid type: %s", grid->GetType().c_str());
