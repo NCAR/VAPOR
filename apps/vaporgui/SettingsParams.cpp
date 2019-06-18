@@ -67,6 +67,7 @@ const string SettingsParams::_defaultAutoSaveFileTag = "DefaultAutoSaveFile";
 const string SettingsParams::_sessionAutoSaveEnabledTag = "AutoSaveEnabled";
 const string SettingsParams::_fontFileTag = "FontFile";
 const string SettingsParams::_fontSizeTag = "FontSize";
+const string SettingsParams::_dontShowIntelDriverWarningTag = "DontShowIntelDriverWarning";
 
 //
 // Register class with object factory!!!
@@ -370,6 +371,10 @@ void SettingsParams::SetFontSize(int size) {}
 string SettingsParams::GetFontFile() const { return ""; }
 
 void SettingsParams::SetFontFile(string file) {}
+
+bool SettingsParams::GetDontShowIntelDriverWarning() const { return GetValueLong(_dontShowIntelDriverWarningTag, false); }
+
+void SettingsParams::SetDontShowIntelDriverWarning(bool b) { SetValueLong(_dontShowIntelDriverWarningTag, "Hide Intel driver warning", b); }
 
 void SettingsParams::SetFidelityDefault3D(long lodDef, long refDef)
 {

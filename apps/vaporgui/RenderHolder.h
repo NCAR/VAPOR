@@ -121,6 +121,8 @@ private:
     // Convert name to a unique name (among renderer names)
     std::string uniqueName(std::string name);
 
+    void _showIntelDriverWarning(const string &rendererType);
+
 private slots:
     void _showNewRendererDialog();
     void _deleteRenderer();
