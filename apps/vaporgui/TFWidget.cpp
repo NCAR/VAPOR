@@ -77,6 +77,7 @@ TFWidget::TFWidget(QWidget *parent) : QWidget(parent), Ui_TFWidgetGUI()
     _secondaryMaxSliderEdit->SetExtents(0.f, 1.f);
 
     _opacitySlider->setRange(0, 1000);
+    _secondaryOpacitySlider->setRange(0, 1000);
 
     _cLevel = 0;
     _refLevel = 0;
@@ -111,12 +112,16 @@ void TFWidget::configureSecondaryTransferFunction()
     if (_flags & COLORMAP_VAR_IS_IN_TF2) {
         if (_tabWidget->count() < 2) _tabWidget->insertTab(1, _secondaryTFE, "Color Mapped VARIABLE");
 
+        _tabWidget->setTabEnabled(1, false);
         _mappingFrame->setColorMapping(false);
+        _mappingFrame->setOpacityMapping(false);
         _whitespaceFrame->hide();
         _colorInterpolationFrame->hide();
         _loadSaveFrame->hide();
         adjustSize();
     } else {
+        _mappingFrame->setColorMapping(true);
+        _mappingFrame->setOpacityMapping(true);
         _tabWidget->removeTab(1);
         _whitespaceFrame->show();
         _colorInterpolationFrame->show();
@@ -322,7 +327,7 @@ void TFWidget::calculateStride(string varName)
 float TFWidget::getOpacity()
 {
     bool mainTF = true;
-    if (_flags & COLORMAP_VAR_IS_IN_TF2) mainTF = false;
+    if (_flags & COLORMAP_VAR_IS_IN_TF2 && !_rParams->UseSingleColor()) { mainTF = false; }
     string varName = getTFVariableName(mainTF);
 
     MapperFunction *tf = _rParams->GetMapperFunc(varName);
@@ -423,6 +428,7 @@ void TFWidget::updateSecondarySliders()
     _secondaryMinSliderEdit->SetValue(values[0]);
     _secondaryMaxSliderEdit->SetExtents(range[0], range[1]);
     _secondaryMaxSliderEdit->SetValue(values[1]);
+    _secondaryOpacitySlider->setValue(convertOpacityToSliderValue(getOpacity()));
 
     _secondaryMinLabel->setText(QString::number(range[0]));
     _secondaryMaxLabel->setText(QString::number(range[1]));
@@ -696,10 +702,15 @@ void TFWidget::updateConstColor()
 
     _useConstColorCheckbox->blockSignals(true);
     bool useSingleColor = _rParams->UseSingleColor();
-    if (useSingleColor)
+    if (useSingleColor) {
         _useConstColorCheckbox->setCheckState(Qt::Checked);
-    else
+        if (_isOpacitySupported) _opacitySlider->show();
+    } else {
         _useConstColorCheckbox->setCheckState(Qt::Unchecked);
+
+        if (_flags & COLORMAP_VAR_IS_IN_TF2) { _opacitySlider->hide(); }
+    }
+
     _useConstColorCheckbox->blockSignals(false);
 
     string varName;
@@ -772,11 +783,12 @@ void TFWidget::opacitySliderChanged(int value)
     _wasOpacitySliderReleased = false;
 
     bool mainTF = true;
-    if (COLORMAP_VAR_IS_IN_TF2) mainTF = false;
+    if (COLORMAP_VAR_IS_IN_TF2 && !_rParams->UseSingleColor()) { mainTF = false; }
     string          varName = getTFVariableName(mainTF);
     MapperFunction *tf = _rParams->GetMapperFunc(varName);
     VAssert(tf);
     tf->setOpacityScale(convertSliderValueToOpacity(value));
+
     emit emitChange();
 }
 
@@ -879,10 +891,16 @@ void TFWidget::setUsingSingleColor(int state)
 {
     if (state > 0) {
         _rParams->SetUseSingleColor(true);
-        if (_flags & COLORMAP_VAR_IS_IN_TF2) _secondaryTFE->setEnabled(false);
+        if (_flags & COLORMAP_VAR_IS_IN_TF2) {
+            _tabWidget->setTabEnabled(1, false);
+            _opacitySlider->hide();
+        }
     } else {
         _rParams->SetUseSingleColor(false);
-        if (_flags & COLORMAP_VAR_IS_IN_TF2) _secondaryTFE->setEnabled(true);
+        if (_flags & COLORMAP_VAR_IS_IN_TF2) {
+            _tabWidget->setTabEnabled(1, true);
+            if (_isOpacitySupported) _opacitySlider->show();
+        }
     }
 }
 
@@ -989,7 +1007,6 @@ MapperFunction *TFWidget::getSecondaryMapperFunction()
 string TFWidget::getTFVariableName(bool mainTF = true)
 {
     string varname;
-
     if (mainTF == true) {
         if (_flags & COLORMAP_VAR_IS_IN_TF2) {
             varname = _rParams->GetVariableName();
@@ -1023,8 +1040,8 @@ bool TFWidget::IsOpacitySupported() const { return _isOpacitySupported; }
 
 void TFWidget::SetOpacitySupported(bool value)
 {
-    if (!value && !_opacitySlider->isHidden()) _opacitySlider->hide();
-    if (value && _opacitySlider->isHidden()) _opacitySlider->show();
+    if (!value && !_opacitySlider->isHidden()) { _opacitySlider->hide(); }
+    if (value && _opacitySlider->isHidden() && _isOpacitySupported) { _opacitySlider->show(); }
     _mappingFrame->setOpacityMapping(value);
 
     _isOpacitySupported = value;
