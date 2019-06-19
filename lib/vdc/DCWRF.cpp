@@ -3,6 +3,7 @@
 #include <map>
 #include <iostream>
 #include "vapor/VAssert.h"
+#include <cassert>
 #include <stdio.h>
 
 #ifdef _WINDOWS
