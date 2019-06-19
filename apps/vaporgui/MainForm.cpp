@@ -1446,6 +1446,25 @@ void MainForm::importMPASData() {
         files, "MPAS files", "", "mpas", true);
 }
 
+bool MainForm::doesQStringContainNonASCIICharacter(const QString &s) {
+    for (int i = 0; i < s.length(); i++)
+        if (s.at(i).unicode() > 127)
+            return true;
+    return false;
+}
+
+int MainForm::checkQStringContainsNonASCIICharacter(const QString &s) {
+    if (doesQStringContainNonASCIICharacter(s)) {
+#ifdef WIN32
+        MyBase::SetErrMsg("Windows will convert a colon (common in WRF timestamps) to a non-ASCII dot character. This needs to be renamed.\n");
+#endif
+        MyBase::SetErrMsg("Vapor does not support paths with non-ASCII characters.\n");
+        MSG_ERR("Non ASCII Character in path");
+        return -1;
+    }
+    return 0;
+}
+
 vector<string> MainForm::myGetOpenFileNames(
     string prompt, string dir, string filter, bool multi) {
     QString qPrompt(prompt.c_str());
@@ -1459,15 +1478,21 @@ vector<string> MainForm::myGetOpenFileNames(
         QStringList list = fileNames;
         QStringList::Iterator it = list.begin();
         while (it != list.end()) {
-            if (!it->isNull())
+            if (!it->isNull()) {
+                if (checkQStringContainsNonASCIICharacter(*it) < 0)
+                    return vector<string>();
                 files.push_back((*it).toStdString());
+            }
             ++it;
         }
     } else {
         QString fileName = QFileDialog::getOpenFileName(
             this, qPrompt, qDir, qFilter);
-        if (!fileName.isNull())
+        if (!fileName.isNull()) {
+            if (checkQStringContainsNonASCIICharacter(fileName) < 0)
+                return vector<string>();
             files.push_back(fileName.toStdString());
+        }
     }
 
     for (int i = 0; i < files.size(); i++) {
