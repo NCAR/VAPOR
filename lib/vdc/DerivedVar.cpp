@@ -1154,6 +1154,10 @@ int DerivedCoordVar_WRFTime::Initialize() {
 	size_t numTS = _ncdfc->GetNumTimeSteps();
 
 	vector <size_t> dims = _ncdfc->GetSpatialDims(_wrfTimeVar);
+	if (dims.size() != 1) {
+		SetErrMsg("Invalid WRF time variable : %s", _wrfTimeVar.c_str());
+		return(-1);
+	}
 
 	char *buf = new char[dims[0]+1];
 	buf[dims[0]] = '\0';	// Null terminate
