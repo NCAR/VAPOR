@@ -1424,7 +1424,7 @@ bool MainForm::openDataHelper(
 
 	// Open the data set
 	//
-	int rc = _controlExec->OpenData(
+	int rc = _controlExec->OpenData( 
 		files, options, dataSetName, format
 	);
 	if (rc<0) {
@@ -2242,6 +2242,9 @@ void MainForm::update() {
 	size_t timestep = aParams->GetCurrentTimestep();
 
 	_timeStepEdit->setText(QString::number((int) timestep));
+    _modeCombo->blockSignals(true);
+    _modeCombo->setCurrentIndex(_modeCombo->findText(QString::fromStdString(GetStateParams()->GetMouseModeParams()->GetCurrentMouseMode())));
+    _modeCombo->blockSignals(false);
 
 	updateMenus();
 
