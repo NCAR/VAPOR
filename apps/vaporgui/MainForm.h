@@ -295,6 +295,8 @@ private:
  void updateMenus();
  void update();
  virtual void undoRedoHelper(bool undo);
+ static bool doesQStringContainNonASCIICharacter(const QString &s);
+ static int checkQStringContainsNonASCIICharacter(const QString &s);
  std::vector <string> myGetOpenFileNames(
 	string prompt, string dir, string filter, bool multi
  ) ;
