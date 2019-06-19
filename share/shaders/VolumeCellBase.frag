@@ -311,7 +311,7 @@ bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entr
             if (t1 - t0 > EPSILON) {
                 exitFace = testFace;
                 return true;
-            } else if (allowThinCells) {
+            } else if (allowThinCells && (t1 - t0 >= 0)) {
                 exitFace = testFace;
             }
         }
