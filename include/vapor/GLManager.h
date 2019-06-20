@@ -34,7 +34,7 @@ struct RENDER_API GLManager {
     void PixelCoordinateSystemPush();
     void PixelCoordinateSystemPop();
 
-    enum class Vendor { Intel, Nvidia, AMD, Mesa, Other };
+    enum class Vendor { Intel, Nvidia, AMD, Mesa, Other, Unknown };
 
     static Vendor GetVendor();
     static void   GetGLVersion(int *major, int *minor);
@@ -49,6 +49,11 @@ struct RENDER_API GLManager {
 #endif
     static void * BeginTimer();
     static double EndTimer(void *startTime);
+
+private:
+    static Vendor _cachedVendor;
+
+    void _queryVendor();
 };
 
 }    // namespace VAPoR

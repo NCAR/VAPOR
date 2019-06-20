@@ -89,6 +89,8 @@ int ControlExec::InitializeViz(string winName, GLManager *glManager)
         return -1;
     }
 
+    _cachedVendor = glManager->GetVendor();
+
     return 0;
 }
 
@@ -112,6 +114,8 @@ int ControlExec::ResizeViz(string winName, int width, int height)
 
     return 0;
 }
+
+GLManager::Vendor ControlExec::GetGPUVendor() const { return _cachedVendor; }
 
 int ControlExec::Paint(string winName, bool fast)
 {

@@ -151,6 +151,8 @@ public:
     //
     int ResizeViz(string name, int width, int height);
 
+    GLManager::Vendor GetGPUVendor() const;
+
     //! Determine how many visualizer windows are present
     //! \return number of visualizers
     //!
@@ -630,6 +632,8 @@ private:
     DataStatus *                   _dataStatus;
     CalcEngineMgr *                _calcEngineMgr;
     std::map<string, Visualizer *> _visualizers;
+
+    GLManager::Vendor _cachedVendor = GLManager::Vendor::Unknown;
 
     //! obtain an existing visualizer
     //! \param[in] viz Handle of desired visualizer
