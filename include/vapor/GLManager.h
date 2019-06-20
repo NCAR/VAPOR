@@ -39,7 +39,8 @@ struct RENDER_API GLManager {
         Nvidia,
         AMD,
         Mesa,
-        Other
+        Other,
+        Unknown
     };
 
     static Vendor GetVendor();
@@ -55,6 +56,11 @@ struct RENDER_API GLManager {
 #endif
     static void *BeginTimer();
     static double EndTimer(void *startTime);
+
+  private:
+    static Vendor _cachedVendor;
+
+    void _queryVendor();
 };
 
 } // namespace VAPoR
