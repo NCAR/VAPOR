@@ -229,7 +229,7 @@ void RenderHolder::_initializeNewRendererDialog(vector<string> datasetNames) {
 
 void RenderHolder::_showIntelDriverWarning(const string &rendererType)
 {
-    if (GLManager::GetVendor() != GLManager::Vendor::Intel)
+    if (_controlExec->GetGPUVendor() != GLManager::Vendor::Intel)
         return;
     if (rendererType != VolumeRenderer::GetClassType() &&
         rendererType != VolumeIsoRenderer::GetClassType())
