@@ -402,6 +402,11 @@ int VolumeRenderer::_loadData()
     if (!grid)
         return -1;
     
+    if (dynamic_cast<const UnstructuredGrid *>(grid)) {
+        MyBase::SetErrMsg("Unstructured grids are not supported by this renderer");
+        return -1;
+    }
+    
     if (_needToSetDefaultAlgorithm()) {
         RP->SetAlgorithm(_getDefaultAlgorithmForGrid(grid));
         if (_initializeAlgorithm() < 0) {
