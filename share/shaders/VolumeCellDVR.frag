@@ -23,7 +23,7 @@ vec4 RenderCellSmartSampling(const vec3 dir, vec3 rayLightingNormal, const vec3 
     vec3 normal = GetNormalAtCoord(hit);
     c.rgb *= PhongLighting(normal, rayLightingNormal);
     float l = min(step - mod(tStart, step), tEnd-tStart)/step;
-    c.a = IntegrateConstantAlpha(c.a * density, l * stepOpacityUnit);
+    c.a = IntegrateConstantAlpha(c.a * density, max(l * stepOpacityUnit, 0.0f));
     BlendToBack(acc2, PremultiplyAlpha(c));
     
     for (float t = step * (floor(tStart/step)+1); t < tEnd; t+= step) {
