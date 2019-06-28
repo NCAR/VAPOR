@@ -874,8 +874,8 @@ int DCMPAS::_readRegionEdgeVariable(
         return (-1);
     }
 
-    size_t j0 = min.size() == 2 ? min[0] : 0;
-    size_t j1 = max.size() == 2 ? max[0] : 0;
+    size_t j0 = min.size() == 2 ? min[1] : 0;
+    size_t j1 = max.size() == 2 ? max[1] : 0;
 
     float wgt = 1.0 / (float)vertexDegree;
     for (size_t j = j0; j <= j1; j++) {
