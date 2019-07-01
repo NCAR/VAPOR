@@ -358,7 +358,8 @@ std::string VolumeCellTraversal::_addDefinitionsToShader(std::string shaderName)
     if (_useHighPrecisionTriangleRoutine) shaderName += ":USE_INTEL_TRI_ISECT";
 
     GLManager::Vendor vendor = GLManager::GetVendor();
-    if (vendor == GLManager::Vendor::Nvidia || vendor == GLManager::Vendor::AMD) shaderName += ":NVIDIA";
+
+    if (vendor == GLManager::Vendor::Nvidia || vendor == GLManager::Vendor::AMD || vendor == GLManager::Vendor::Mesa) shaderName += ":NVIDIA";
 
     shaderName += ":BB_LEVELS " + std::to_string(_getHeuristicBBLevels());
 
