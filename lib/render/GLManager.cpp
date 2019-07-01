@@ -55,7 +55,7 @@ GLManager::Vendor GLManager::GetVendor() {
 }
 
 void GLManager::_queryVendor() {
-    string vendorString((const char *)glGetString(GL_VENDOR));
+    string vendorString((const char *)glGetString(GL_VERSION));
     vendorString = STLUtils::ToLower(vendorString);
 
     if (STLUtils::Contains(vendorString, "intel"))
