@@ -207,6 +207,6 @@ print "// Any changes made to this file will be lost\n";
 print "// ---------------------------------------------\n";
 print "\n\n";
 
-for (my $i = 1; $i <= 12; $i++) {
+for (my $i = 1; $i <= 8; $i++) {
 	print Function($i);
 }
