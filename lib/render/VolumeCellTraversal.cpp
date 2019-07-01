@@ -161,7 +161,6 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
         return -1;
     
     _useHighPrecisionTriangleRoutine = _needsHighPrecisionTriangleRoutine(grid);
-    _nvidiaGPU = _glManager->GetVendor() == GLManager::Vendor::Nvidia;
     
     vector<size_t> dims = grid->GetDimensions();
     const int w = dims[0], h = dims[1], d = dims[2];
@@ -380,7 +379,10 @@ std::string VolumeCellTraversal::_addDefinitionsToShader(std::string shaderName)
 {
     if (_useHighPrecisionTriangleRoutine)
         shaderName += ":USE_INTEL_TRI_ISECT";
-    if (_nvidiaGPU)
+    
+    GLManager::Vendor vendor = GLManager::GetVendor();
+    if (vendor == GLManager::Vendor::Nvidia ||
+        vendor == GLManager::Vendor::AMD)
         shaderName += ":NVIDIA";
     
     shaderName += ":BB_LEVELS " + std::to_string(_getHeuristicBBLevels());
