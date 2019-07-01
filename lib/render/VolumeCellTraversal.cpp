@@ -365,6 +365,8 @@ int VolumeCellTraversal::_getHeuristicBBLevels() const
 {
 	const int levels = _BBLevels;
 	
+    if (levels == 12)
+        return levels - 4;
 	if (levels >= 9)
 		return levels - 3;
 	if (levels >= 7)
