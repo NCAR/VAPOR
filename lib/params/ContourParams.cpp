@@ -151,7 +151,6 @@ void ContourParams::_init()
     vector<double> minExt, maxExt;
     int            rc = _dataMgr->GetVariableExtents(0, varname, 0, minExt, maxExt);
 
-    SetUseSingleColor(false);
     float rgb[] = {1., 1., 1.};
     SetConstantColor(rgb);
 

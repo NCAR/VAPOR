@@ -65,6 +65,9 @@ public:
     //
     static string GetClassType() { return ("BarbParams"); }
 
+protected:
+    virtual bool GetUseSingleColorDefault() const { return true; }
+
 private:
     void                _init();
     static const string _needToRecalculateScalesTag;
