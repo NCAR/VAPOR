@@ -17,6 +17,9 @@ public:
     virtual double GetDefaultPhongAmbient() const { return 0.2; }
     virtual string GetDefaultAlgorithmName() const;
 
+protected:
+    virtual bool GetUseSingleColorDefault() const { return true; }
+
 private:
     void _init();
 };
