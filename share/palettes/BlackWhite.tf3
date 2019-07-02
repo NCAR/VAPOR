@@ -17,7 +17,7 @@
   0 
 </ColorInterpolationType>
 <ColorMapControlPoints Type="Double">
-  -0.002785515272989869 0 0 0 -0.002785515272989869 0 1 0.9900000095367432 
+  0 0 0 0 0 0 1 0.9900000095367432 
 </ColorMapControlPoints>
 </ColorMapParams>
 <OpacityMaps>
