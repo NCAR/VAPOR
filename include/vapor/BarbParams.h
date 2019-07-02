@@ -78,7 +78,8 @@ public:
 	return("BarbParams");
  }
 
- 
+protected:
+    virtual bool GetUseSingleColorDefault() const { return true; }
 
 private:
 
