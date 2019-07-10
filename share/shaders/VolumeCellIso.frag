@@ -27,7 +27,7 @@ void RenderCellSmartSampling(const vec3 origin, const vec3 dir, vec3 rayLighting
     if (isoEnabled[3]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[3], dv, ld, accum);
     ld = dv;
     if (accum.a > ALPHA_BREAK) {
-        gl_FragDepth = CalculateDepth(origin + dir*hit);
+        gl_FragDepth = CalculateDepth(origin + dir*tStart);
         return;
     }
     
@@ -43,7 +43,7 @@ void RenderCellSmartSampling(const vec3 origin, const vec3 dir, vec3 rayLighting
         ld = dv;
         
         if (accum.a > ALPHA_BREAK) {
-            gl_FragDepth = CalculateDepth(origin + dir*hit);
+            gl_FragDepth = CalculateDepth(origin + dir*t);
             return;
         }
     }
