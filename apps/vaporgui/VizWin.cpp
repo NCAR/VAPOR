@@ -224,7 +224,7 @@ void VizWin::_setUpProjMatrix() {
         mm->Ortho(-s * w, s * w, -s, s, nearDist, farDist);
     } else {
         double fov = vParams->GetFOV();
-        mm->Perspective(fov, w, nearDist, farDist);
+        mm->Perspective(glm::radians(fov), w, nearDist, farDist);
     }
 
     double pMatrix[16];
