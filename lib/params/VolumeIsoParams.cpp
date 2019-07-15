@@ -47,5 +47,4 @@ string VolumeIsoParams::GetDefaultAlgorithmName() const
 //Set everything to default values
 void VolumeIsoParams::_init() {
     SetDiagMsg("VolumeParams::_init()");
-    SetUseSingleColor(true);
 }

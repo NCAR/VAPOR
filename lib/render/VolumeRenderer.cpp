@@ -402,6 +402,11 @@ int VolumeRenderer::_loadData()
     if (!grid)
         return -1;
     
+    if (dynamic_cast<const UnstructuredGrid *>(grid)) {
+        MyBase::SetErrMsg("Unstructured grids are not supported by this renderer");
+        return -1;
+    }
+    
     if (_needToSetDefaultAlgorithm()) {
         RP->SetAlgorithm(_getDefaultAlgorithmForGrid(grid));
         if (_initializeAlgorithm() < 0) {
@@ -509,6 +514,10 @@ void VolumeRenderer::_getExtents(glm::vec3 *dataMin, glm::vec3 *dataMax, glm::ve
     _dataMgr->GetVariableExtents(_cache.ts, _cache.var, _cache.refinement, dMinExts, dMaxExts);
     *dataMin = vec3(dMinExts[0], dMinExts[1], dMinExts[2]);
     *dataMax = vec3(dMaxExts[0], dMaxExts[1], dMaxExts[2]);
+    
+    // Moving domain allows area outside of data to be selected
+    *userMin = glm::max(*userMin, *dataMin);
+    *userMax = glm::min(*userMax, *dataMax);
 }
 
 std::string VolumeRenderer::_getDefaultAlgorithmForGrid(const Grid *grid) const

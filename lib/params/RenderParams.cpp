@@ -107,7 +107,6 @@ void RenderParams::_init() {
 	float rgb[] = {1.0, 1.0, 1.0};
 	SetConstantColor(rgb);
 	SetConstantOpacity(1.0);
-	SetUseSingleColor(false);
 }
 
 void RenderParams::InitBox() {
@@ -540,6 +539,14 @@ string RenderParams::GetColorMapVariableName() const {
 	varname = string_replace(varname, "NULL", "");
 
 	return(varname);
+}
+
+bool RenderParams::UseSingleColor() const {
+    return GetValueLong(_useSingleColorTag, GetUseSingleColorDefault());
+}
+
+void RenderParams::SetUseSingleColor(bool val) {
+    SetValueLong(_useSingleColorTag, "enable/disable use single color", (long)val);
 }
 
 void RenderParams::SetColorMapVariableName(string varname) {

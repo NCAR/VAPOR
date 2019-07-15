@@ -7,13 +7,17 @@
 using namespace VAPoR;
 using namespace std::chrono;
 
+GLManager::Vendor GLManager::_cachedVendor = Vendor::Unknown;
+
 GLManager::GLManager()
 :
 shaderManager(new ShaderManager),
 fontManager(new FontManager(this)),
 matrixManager(new MatrixManager),
 legacy(new LegacyGL(this))
-{}
+{
+    _queryVendor();
+}
 
 GLManager::~GLManager()
 {
@@ -54,15 +58,19 @@ void GLManager::PixelCoordinateSystemPop()
 
 GLManager::Vendor GLManager::GetVendor()
 {
-    string vendorString((const char *)glGetString(GL_VENDOR));
+    return _cachedVendor;
+}
+
+void GLManager::_queryVendor()
+{
+    string vendorString((const char *)glGetString(GL_VERSION));
     vendorString = STLUtils::ToLower(vendorString);
-    
-    if (STLUtils::Contains(vendorString, "intel"))  return Vendor::Intel;
-    if (STLUtils::Contains(vendorString, "nvidia")) return Vendor::Nvidia;
-    if (STLUtils::Contains(vendorString, "amd"))    return Vendor::AMD;
-    if (STLUtils::Contains(vendorString, "mesa"))   return Vendor::Mesa;
-    
-    return Vendor::Other;
+
+    if      (STLUtils::Contains(vendorString, "intel"))  _cachedVendor =  Vendor::Intel;
+    else if (STLUtils::Contains(vendorString, "nvidia")) _cachedVendor =  Vendor::Nvidia;
+    else if (STLUtils::Contains(vendorString, "amd"))    _cachedVendor =  Vendor::AMD;
+    else if (STLUtils::Contains(vendorString, "mesa"))   _cachedVendor =  Vendor::Mesa;
+    else _cachedVendor = Vendor::Other;
 }
 
 void GLManager::GetGLVersion(int *major, int *minor)
