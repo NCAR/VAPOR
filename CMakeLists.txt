@@ -109,6 +109,11 @@ find_library(GEOTIFF geotiff)
 find_library(JPEG jpeg)
 find_library(TIFF tiff)
 
+if (APPLE)
+	include_directories ("/Users/stas/Documents/ospray-test/external/ospray/include")
+	link_directories ("/Users/stas/Documents/ospray-test/external/ospray/lib")
+endif ()
+
 if (BUILD_VDC)
 	find_package (OpenGL REQUIRED)
 	include_directories (${OPENGL_INCLUDE_DIRS})

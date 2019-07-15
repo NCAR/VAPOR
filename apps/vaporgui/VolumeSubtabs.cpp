@@ -43,6 +43,22 @@ VolumeAppearanceSubtab::VolumeAppearanceSubtab(QWidget* parent) {
     _shininessWidget->SetLabel( QString::fromAscii("Shininess") );
     _shininessWidget->SetExtents( 1.0, 100.0 );
     _shininessWidget->SetIntType( true );
+    
+    QFrame *item = new QFrame;
+    QHBoxLayout *layout = new QHBoxLayout;
+    layout->setMargin(0);
+    item->setLayout(layout);
+    
+    QLabel *label = new QLabel("OSPRay");
+    QSpacerItem *spacer = new QSpacerItem(108, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+    _osprayCheckBox = new QCheckBox();
+    connect(_osprayCheckBox, SIGNAL(clicked(bool)), this, SLOT(ospray_clicked(bool)));
+    
+    layout->addWidget(label);
+    layout->addItem(spacer);
+    layout->addWidget(_osprayCheckBox);
+    
+    _raytracingFrame->layout()->addWidget(item);
 }
 
 void VolumeAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
@@ -79,6 +95,9 @@ void VolumeAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *p
     _samplingRateComboBox->setCurrentIndex(_samplingRateComboBox->findText(GetQStringForSamplingRate(_params->GetSamplingMultiplier())));
     _samplingRateComboBox->blockSignals(false);
     
+    _osprayCheckBox->blockSignals(true);
+    _osprayCheckBox->setChecked(vp->GetValueLong("ospray", false));
+    _osprayCheckBox->blockSignals(false);
     
     
     // ---------------------------
@@ -90,6 +109,11 @@ void VolumeAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *p
     _diffuseWidget->SetValue  (_params->GetPhongDiffuse());
     _specularWidget->SetValue (_params->GetPhongSpecular());
     _shininessWidget->SetValue(_params->GetPhongShininess());
+}
+
+void VolumeAppearanceSubtab::ospray_clicked(bool checked)
+{
+    _params->SetValueLong("ospray", "ospray", checked);
 }
 
 void VolumeAppearanceSubtab::on__castingModeComboBox_currentIndexChanged(const QString &text)

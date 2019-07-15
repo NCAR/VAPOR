@@ -25,6 +25,7 @@
 #include <vapor/MyBase.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/RenderParams.h>
+#include <ospray/ospray.h>
 
 namespace VAPoR {
 
@@ -335,6 +336,9 @@ private:
 	static ControlExec* _controlExec;
 #endif
 	
+public:
+    virtual int OSPRayUpdate(OSPModel world) {return -1;}
+    virtual void OSPRayDelete(OSPModel world) {}
 };
 
 

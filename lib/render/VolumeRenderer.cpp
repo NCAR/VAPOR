@@ -136,7 +136,7 @@ int VolumeRenderer::_paintGL(bool fast)
     if (fast && _wasTooSlowForFastRender())
         return 0;
     
-    
+    CheckCache(_cache.useOSPRay, GetActiveParams()->GetValueLong("ospray", false));
     if (_initializeAlgorithm() < 0) return -1;
     if (_loadData() < 0) return -1;
     if (_loadSecondaryData() < 0) return -1;
@@ -388,14 +388,20 @@ int VolumeRenderer::_initializeAlgorithm()
     else return -1;
 }
 
-int VolumeRenderer::_loadData()
+bool VolumeRenderer::_needToLoadData()
 {
     VolumeParams *RP = (VolumeParams *)GetActiveParams();
     CheckCache(_cache.var, RP->GetVariableName());
     CheckCache(_cache.ts, RP->GetCurrentTimestep());
     CheckCache(_cache.refinement, RP->GetRefinementLevel());
     CheckCache(_cache.compression, RP->GetCompressionLevel());
-    if (!_cache.needsUpdate)
+    return _cache.needsUpdate;
+}
+
+int VolumeRenderer::_loadData()
+{
+    VolumeParams *RP = (VolumeParams *)GetActiveParams();
+    if (!_needToLoadData())
         return 0;
     
     Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.var, _cache.refinement, _cache.compression);
@@ -455,10 +461,11 @@ void VolumeRenderer::_getLUTFromTF(const MapperFunction *tf, float *LUT) const
     }
 }
 
-void VolumeRenderer::_loadTF()
+MapperFunction *VolumeRenderer::_needToLoadTF()
 {
     VolumeParams *vp = (VolumeParams *)GetActiveParams();
     MapperFunction *tf;
+    
     if (_cache.useColorMapVar) {
         tf = vp->GetMapperFunc(_cache.colorMapVar);
     } else {
@@ -471,7 +478,16 @@ void VolumeRenderer::_loadTF()
     if (_cache.tf && *_cache.tf != *tf)
         _cache.needsUpdate = true;
     
-    if (!_cache.needsUpdate)
+    if (_cache.needsUpdate)
+        return tf;
+    else
+        return nullptr;
+}
+
+void VolumeRenderer::_loadTF()
+{
+    MapperFunction *tf = _needToLoadTF();
+    if (!tf)
         return;
     
     if (_cache.tf) delete _cache.tf;
@@ -509,15 +525,15 @@ void VolumeRenderer::_getExtents(glm::vec3 *dataMin, glm::vec3 *dataMax, glm::ve
     VolumeParams *vp = (VolumeParams *)GetActiveParams();
     vector<double> dMinExts, dMaxExts;
     vp->GetBox()->GetExtents(dMinExts, dMaxExts);
-    *userMin = vec3(dMinExts[0], dMinExts[1], dMinExts[2]);
-    *userMax = vec3(dMaxExts[0], dMaxExts[1], dMaxExts[2]);
+    if (userMin) *userMin = vec3(dMinExts[0], dMinExts[1], dMinExts[2]);
+    if (userMax) *userMax = vec3(dMaxExts[0], dMaxExts[1], dMaxExts[2]);
     _dataMgr->GetVariableExtents(_cache.ts, _cache.var, _cache.refinement, dMinExts, dMaxExts);
-    *dataMin = vec3(dMinExts[0], dMinExts[1], dMinExts[2]);
-    *dataMax = vec3(dMaxExts[0], dMaxExts[1], dMaxExts[2]);
+    if (dataMin) *dataMin = vec3(dMinExts[0], dMinExts[1], dMinExts[2]);
+    if (dataMax) *dataMax = vec3(dMaxExts[0], dMaxExts[1], dMaxExts[2]);
     
     // Moving domain allows area outside of data to be selected
-    *userMin = glm::max(*userMin, *dataMin);
-    *userMax = glm::min(*userMax, *dataMax);
+    if (userMin) *userMin = glm::max(*userMin, *dataMin);
+    if (userMax) *userMax = glm::min(*userMax, *dataMax);
 }
 
 std::string VolumeRenderer::_getDefaultAlgorithmForGrid(const Grid *grid) const
@@ -534,4 +550,235 @@ std::string VolumeRenderer::_getDefaultAlgorithmForGrid(const Grid *grid) const
 bool VolumeRenderer::_needToSetDefaultAlgorithm() const
 {
     return !((VolumeParams*)GetActiveParams())->GetAlgorithmWasManuallySetByUser();
+}
+
+int VolumeRenderer::OSPRayUpdate(OSPModel world)
+{
+    VolumeParams *vp = (VolumeParams*)GetActiveParams();
+    CheckCache(_cache.useOSPRay, vp->GetValueLong("ospray", false));
+    
+    _initializeAlgorithm();
+    OSPRayLoadData(world);
+    OSPRayLoadTF();
+    
+    ospSet1b(_volume, "singleShade", false);
+    ospSet1b(_volume, "gradientShadingEnabled", vp->GetLightingEnabled());
+    
+//    if (_cache.needsUpdate)
+        ospCommit(_volume);
+    
+    _cache.needsUpdate = false;
+    return 0;
+}
+
+void VolumeRenderer::OSPRayDelete(OSPModel world)
+{
+    ospRemoveVolume(world, _volume);
+    ospRemoveGeometry(world, sphere);
+    
+    ospRelease(sphere); sphere = nullptr;
+    ospRelease(_volume); _volume = nullptr;
+    ospRelease(_tf); _tf = nullptr;
+}
+
+int VolumeRenderer::OSPRayLoadData(OSPModel world)
+{
+    if (!_needToLoadData())
+        return 0;
+    
+    OSPRayDelete(world);
+    
+    Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.var, _cache.refinement, _cache.compression);
+    
+    if (dynamic_cast<UnstructuredGrid*>(grid))
+        return 1;
+    else if (_cache.algorithmName == VolumeRegular::GetName())
+        return OSPRayLoadDataRegular(world, grid);
+    else
+        return OSPRayLoadDataStructured(world, grid);
+    
+    delete grid;
+    
+    return 1;
+}
+
+int VolumeRenderer::OSPRayLoadDataRegular(OSPModel world, Grid *grid)
+{
+    glm::vec3 dataMin, dataMax, userMin, userMax;
+    _getExtents(&dataMin, &dataMax, &userMin, &userMax);
+    
+    if (!_volume) {
+        _volume = ospNewVolume("block_bricked_volume");
+        ospAddVolume(world, _volume);
+        
+        sphere = ospNewGeometry("spheres");
+        float sphereData[4] = {dataMin.x,dataMin.y,dataMin.z,0};
+        OSPData spheres = ospNewData(4, OSP_FLOAT, sphereData);
+        ospCommit(spheres);
+        ospSetData(sphere, "spheres", spheres);
+        //        ospSetf(sphere, "radius", 200000);
+        ospSetf(sphere, "radius", 0.1);
+        ospCommit(sphere);
+        ospAddGeometry(world, sphere);
+    }
+    
+    const vector<size_t> dims = grid->GetDimensions();
+    const size_t nVerts = dims[0]*dims[1]*dims[2];
+    float *volumeData = new float[nVerts];
+    
+    auto dataIt = grid->cbegin();
+    for (size_t i = 0; i < nVerts; ++i, ++dataIt)
+        volumeData[i] = *dataIt;
+    
+    ospSet3i(_volume, "dimensions", dims[0], dims[1], dims[2]);
+    ospSetString(_volume, "voxelType", "float");
+//    ospSetf(_volume, "samplingRate", 10);
+    
+    ospSetRegion(_volume, volumeData, {0,0,0}, {static_cast<int>(dims[0]), static_cast<int>(dims[1]), static_cast<int>(dims[2])});
+    delete [] volumeData;
+    
+    vec3 gridDims(dims[0], dims[1], dims[2]);
+    vec3 gridSpacing = (dataMax-dataMin)/(gridDims-vec3(1));
+    
+    vec3 origin = _getOrigin();
+    vec3 scales = _getTotalScaling();
+    
+    vec3 pos = (dataMin-origin)*scales + origin;
+    gridSpacing *= scales;
+    
+    ospSet3fv(_volume, "gridOrigin", glm::value_ptr(pos));
+    ospSet3fv(_volume, "gridSpacing", glm::value_ptr(gridSpacing));
+    
+    return 0;
+}
+
+int VolumeRenderer::OSPRayLoadDataStructured(OSPModel world, Grid *grid)
+{
+    _volume = ospNewVolume("unstructured_volume");
+    ospAddVolume(world, _volume);
+    
+    const vector<size_t> dims = grid->GetDimensions();
+    const int VW = dims[0], VH = dims[1], VD = dims[2];
+    const size_t nVerts = dims[0]*dims[1]*dims[2];
+    float *data = new float[nVerts*3];
+    
+    auto dataIt = grid->cbegin();
+    for (size_t i = 0; i < nVerts; ++i, ++dataIt)
+        data[i] = *dataIt;
+    
+    OSPData ospData = ospNewData(nVerts, OSP_FLOAT, data);
+    ospCommit(ospData);
+    ospSetData(_volume, "field", ospData);
+    ospRelease(ospData);
+    
+    
+    vec3 scales = _getTotalScaling();
+    vec3 origin = _getOrigin();
+    vec3 *coords = (vec3*)data;
+    auto coord = grid->ConstCoordBegin();
+    for (size_t i = 0; i < nVerts; ++i, ++coord) {
+        data[i*3  ] = (*coord)[0];
+        data[i*3+1] = (*coord)[1];
+        data[i*3+2] = (*coord)[2];
+        
+        coords[i] = (coords[i]-origin)*scales + origin;
+    }
+    ospData = ospNewData(nVerts, OSP_FLOAT3, data);
+    ospCommit(ospData);
+    ospSetData(_volume, "vertices", ospData);
+    ospRelease(ospData);
+    delete [] data;
+    
+    
+    typedef struct {
+        int i0, i1, i2, i3, i4, i5, i6, i7;
+    } Cell;
+    Cell *indices = new Cell[nVerts];
+#define I(x,y,z) (int)((z)*VH*VW+(y)*VW+(x))
+    
+    int VCD = VD-1;
+    int VCH = VH-1;
+    int VCW = VW-1;
+    
+    for (int z = 0; z < VCD; z++) {
+        for (int y = 0; y < VCH; y++) {
+            for (int x = 0; x < VCW; x++) {
+                indices[z*VCH*VCW + y*VCW + x] = {
+                    I(x  ,y  ,z  ), I(x+1,y  ,z  ), I(x+1,y+1,z  ), I(x  ,y+1,z  ),
+                    I(x  ,y  ,z+1), I(x+1,y  ,z+1), I(x+1,y+1,z+1), I(x  ,y+1,z+1),
+                };
+            }
+        }
+    }
+    
+    ospData = ospNewData(VCD*VCH*VCW*2, OSP_INT4, indices);
+    ospCommit(ospData);
+    ospSetData(_volume, "indices", ospData);
+    ospRelease(ospData);
+    delete[] indices;
+    
+    
+    return 0;
+}
+
+int VolumeRenderer::OSPRayLoadTF()
+{
+    MapperFunction *tf = _needToLoadTF();
+    if (!tf)
+        return 0;
+    
+    if (_cache.tf) delete _cache.tf;
+    _cache.tf = new MapperFunction(*tf);
+    _cache.mapRange = tf->getMinMaxMapValue();
+    
+    float *LUT = new float[4 * 256];
+    tf->makeLut(LUT);
+    
+    if (!_tf) {
+        _tf = ospNewTransferFunction("piecewise_linear");
+        ospSetObject(_volume, "transferFunction", _tf);
+    }
+    
+    float colors[3*256];
+    float opacities[256];
+    for (int i = 0; i < 256; i++) {
+        colors[i*3]   = LUT[i*4];
+        colors[i*3+1] = LUT[i*4+1];
+        colors[i*3+2] = LUT[i*4+2];
+        opacities[i]  = LUT[i*4+3];
+    }
+    delete [] LUT;
+    
+    OSPData colorData = ospNewData(256, OSP_FLOAT3, colors);
+    OSPData opacityData = ospNewData(256, OSP_FLOAT, opacities);
+    ospCommit(colorData);
+    ospCommit(opacityData);
+    ospSetData(_tf, "colors", colorData);
+    ospSetData(_tf, "opacities", opacityData);
+    ospRelease(colorData);
+    ospRelease(opacityData);
+    
+    osp::vec2f valueRange = {(float)_cache.mapRange[0], (float)_cache.mapRange[1]};
+    ospSetVec2f(_tf, "valueRange", valueRange);
+    
+    ospCommit(_tf);
+    
+    return 0;
+}
+
+glm::vec3 VolumeRenderer::_getTotalScaling() const
+{
+    Transform *datasetTransform = _paramsMgr->GetViewpointParams(_winName)->GetTransform(_dataSetName);
+    vector<double> datasetScaleD = datasetTransform->GetScales();
+    vector<double> scaleD        = GetActiveParams()->GetTransform()->GetScales();
+    vec3 datasetScale(datasetScaleD[0], datasetScaleD[1], datasetScaleD[2]);
+    vec3 scale(scaleD[0], scaleD[1], scaleD[2]);
+    
+    return datasetScale * scale;
+}
+
+glm::vec3 VolumeRenderer::_getOrigin() const
+{
+    vector<double> originD = GetActiveParams()->GetTransform()->GetOrigin();
+    return vec3(originD[0], originD[1], originD[2]);
 }

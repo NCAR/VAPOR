@@ -198,7 +198,7 @@ int Visualizer::paintEvent(bool fast)
         _glManager->matrixManager->MatrixModeModelView();
         _glManager->matrixManager->PushMatrix();
         
-		if (_renderers[i]->IsGLInitialized()) {
+		if (_renderers[i]->IsGLInitialized() && !_renderers[i]->GetActiveParams()->GetValueLong("ospray", false)) {
             _applyDatasetTransformsForRenderer(_renderers[i]);
             
 //            void *t = _glManager->BeginTimer();
@@ -223,6 +223,11 @@ int Visualizer::paintEvent(bool fast)
 //    _glManager->ShowDepthBuffer();
     
 	glFlush();
+    
+    if (_renderOSPRay() < 0)
+        return -1;
+    
+    
 	
     int captureImageSuccess = 0;
 	if (_imageCaptureEnabled) {
@@ -242,6 +247,129 @@ int Visualizer::paintEvent(bool fast)
     
     _insideGLContext = false;
 	return rc;
+}
+
+#include <vapor/VolumeRenderer.h>
+
+bool Visualizer::_needToRenderOSPRay() const
+{
+    for (int i = 0; i < _renderers.size(); i++) {
+        RenderParams *rp = _renderers[i]->GetActiveParams();
+        if (rp->IsEnabled() && rp->GetValueLong("ospray", false))
+            return true;
+    }
+    return false;
+}
+
+int Visualizer::_renderOSPRay()
+{
+    if (!OSPRayInitialized() && _needToRenderOSPRay()) {
+        MyBase::SetErrMsg("OSPRay failed to initialize: %s", OSPInitStatusMessage);
+        return -1;
+    }
+    
+    if (!_renderer) {
+        _renderer = ospNewRenderer("scivis");
+    }
+    if (!_camera) {
+        _camera = ospNewCamera("perspective");
+        ospSetObject(_renderer, "camera", _camera);
+    }
+    
+    ViewpointParams *viewpointParams = _paramsMgr->GetViewpointParams(_winName);
+    Viewpoint *viewpoint = viewpointParams->getCurrentViewpoint();
+    double m[16];
+    double cameraPos[3], cameraUp[3], cameraDir[3];
+    _glManager->matrixManager->GetDoublev(MatrixManager::Mode::ModelView, m);
+    viewpoint->ReconstructCamera(m, cameraPos, cameraUp, cameraDir);
+    size_t width, height;
+    viewpointParams->GetWindowSize(width, height);
+    
+    float fov = viewpointParams->GetFOV();
+    float aspect = width/(float)height;
+    ospSetf(_camera, "fovy", fov);
+    ospSetf(_camera, "aspect", aspect);
+    ospSet3f(_camera, "pos", cameraPos[0], cameraPos[1], cameraPos[2]);
+    ospSet3f(_camera, "dir", cameraDir[0], cameraDir[1], cameraDir[2]);
+    ospSet3f(_camera, "up",  cameraUp[0], cameraUp[1], cameraUp[2]);
+    ospCommit(_camera);
+    
+    if (!_ambient) {
+        _ambient = ospNewLight3("ambient");
+        ospSet3f(_ambient, "color", 1, 1, 1);
+        ospSetf(_ambient, "intensity", 0.6);
+        ospCommit(_ambient);
+        
+        _cameraSpotlight = ospNewLight3("distant");
+        ospSet3f(_cameraSpotlight, "color", 1, 1, 1);
+        ospSet3f(_cameraSpotlight, "direction", cameraDir[0], cameraDir[1], cameraDir[2]);
+        
+        OSPLight lightsArray[2] = {_ambient, _cameraSpotlight};
+        OSPData lights = ospNewData(2, OSP_LIGHT, lightsArray, 0);
+        ospCommit(lights);
+        ospSetData(_renderer, "lights", lights);
+        ospRelease(lights);
+    }
+    
+    ospSet3f(_cameraSpotlight, "direction", cameraDir[0], cameraDir[1], cameraDir[2]);
+    ospCommit(_cameraSpotlight);
+    
+    if (!_world) {
+        _world = ospNewModel();
+        ospSetObject(_renderer, "model",  _world);
+    }
+    
+    for (int i = 0; i < _renderers.size(); i++) {
+        RenderParams *rp = _renderers[i]->GetActiveParams();
+        if (rp->IsEnabled() && rp->GetValueLong("ospray", false))
+            _renderers[i]->OSPRayUpdate(_world);
+        else
+            _renderers[i]->OSPRayDelete(_world);
+    }
+    
+    if (!_needToRenderOSPRay())
+        return 0;
+    
+    ospCommit(_world);
+    ospCommit(_renderer);
+    
+    if (_framebuffer && (_framebufferSize.x != width || _framebufferSize.y != height)) {
+        ospRelease(_framebuffer);
+        _framebuffer = nullptr;
+    }
+    
+    if (!_framebuffer) {
+        osp::vec2i size;
+        size.x = width;
+        size.y = height;
+        _framebuffer = ospNewFrameBuffer(size, OSP_FB_SRGBA, OSP_FB_COLOR | /*OSP_FB_DEPTH |*/ OSP_FB_ACCUM);
+        _framebufferSize = size;
+    }
+    
+    ospFrameBufferClear(_framebuffer, OSP_FB_COLOR | OSP_FB_ACCUM);
+    ospRenderFrame(_framebuffer, _renderer, OSP_FB_COLOR | OSP_FB_ACCUM);
+    
+    unsigned char *buf = new unsigned char[width*height*4];
+    memset(buf, 1, width*height*4);
+    for (int i = 0; i < width*height; i++) {
+        buf[i*4] = 255;
+        buf[i*4+3] = 40;
+    }
+    
+    const uint32_t *framebufferColor = (uint32_t*)ospMapFrameBuffer(_framebuffer, OSP_FB_COLOR);
+    _texture.TexImage(GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, framebufferColor);
+    ospUnmapFrameBuffer(framebufferColor, _framebuffer);
+    delete [] buf;
+    
+    SmartShaderProgram framebufferShader = _glManager->shaderManager->GetShader("Framebuffer");
+    framebufferShader->SetUniform("depth", false);
+    framebufferShader->SetSampler("colorBuffer", _texture);
+    
+    glEnable(GL_BLEND);
+    glDepthMask(false);
+    glDisable(GL_DEPTH_TEST);
+    glBindVertexArray(_VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void Visualizer::_loadMatricesFromViewpointParams()
@@ -279,6 +407,35 @@ int Visualizer::InitializeGL(GLManager *glManager)
 		SetErrMsg("GL Vendor String is MESA.\nGraphics drivers may need to be reinstalled");
 	}
 	
+    
+    
+    
+    _texture.Generate();
+    
+    
+    const float BL = -1;
+    const float data[] = {
+        BL, BL,    0, 0,
+        1, BL,    1, 0,
+        BL,  1,    0, 1,
+        
+        BL,  1,    0, 1,
+        1, BL,    1, 0,
+        1,  1,    1, 1
+    };
+    
+    glGenVertexArrays(1, &_VAO);
+    glGenBuffers(1, &_VBO);
+    glBindVertexArray(_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), NULL);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2*sizeof(float)));
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    
+    
+    
 	return 0;
 }
 
@@ -340,6 +497,7 @@ void Visualizer::DestroyRenderer(
 	// queue for later destruction
 	//
 	if (haveOpenGLContext) {
+        ren->OSPRayDelete(_world);
 		delete ren;
 		return;
 	}
