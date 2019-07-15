@@ -1,8 +1,9 @@
 #pragma once
 
 #include <ospray/ospray.h>
+#include <vapor/common.h>
 
-extern OSPError OSPInitStatus;
-extern const char *OSPInitStatusMessage;
+extern RENDER_API OSPError OSPInitStatus;
+extern RENDER_API const char *OSPInitStatusMessage;
 
-bool OSPRayInitialized();
+bool RENDER_API OSPRayInitialized();
