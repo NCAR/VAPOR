@@ -154,7 +154,7 @@ public:
 	); 
 
 private:
-    VAPoR::FlowParams*     _params;
+    VAPoR::FlowParams*      _params;
     GeometryWidget*         _geometryWidget;
     CopyRegionWidget*       _copyRegionWidget;
     TransformTable*         _transformTable;
