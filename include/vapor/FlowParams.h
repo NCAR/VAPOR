@@ -64,6 +64,10 @@ public:
     std::vector<bool> GetPeriodic() const;
     void              SetPeriodic( std::vector<bool> );
 
+    // 6 values to represent a rake in this particular order: 
+    //   xmin, xmax, ymin, ymax, zmin, zmax
+    std::vector<double> GetRake() const;
+    void                SetRake( std::vector<double> );
 
 protected:
 
@@ -76,6 +80,7 @@ protected:
     static const std::string    _flowDirectionTag;
     static const std::string    _needFlowlineOutputTag;
     static const std::string    _periodicTag;
+    static const std::string    _rakeTag;
 
 };
 

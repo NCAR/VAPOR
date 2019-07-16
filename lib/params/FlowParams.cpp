@@ -11,6 +11,7 @@ const std::string FlowParams::_flowlineOutputFilenameTag  = "flowlineOutputFilen
 const std::string FlowParams::_flowDirectionTag      = "flowDirectionTag";
 const std::string FlowParams::_needFlowlineOutputTag = "needFlowlineOutputTag";
 const std::string FlowParams::_periodicTag           = "periodicTag";
+const std::string FlowParams::_rakeTag               = "rakeTag";
 
 static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
 
@@ -163,4 +164,20 @@ FlowParams::SetPeriodic( std::vector<bool> bools )
             longs[i] = 1;
 
     SetValueLongVec( _periodicTag, "any axis is periodic", longs );
+}
+
+std::vector<double>
+FlowParams::GetRake() const
+{
+    std::vector<double> tmp( 6, 0.0 );
+    auto doubles = GetValueDoubleVec( _rakeTag, tmp );
+    VAssert( doubles.size() == 6 );
+    return doubles;
+}
+
+void
+FlowParams::SetRake( std::vector<double> doubles )
+{
+    VAssert( doubles.size() == 6 );
+    SetValueDoubleVec( _rakeTag, "rake boundaries", doubles );
 }
