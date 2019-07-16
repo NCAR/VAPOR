@@ -110,11 +110,9 @@ class FlowSeedingSubtab : public QVaporSubtab {
 public:
 	FlowSeedingSubtab(QWidget* parent);
 
-	void Update(
-		VAPoR::DataMgr *dataMgr,
-		VAPoR::ParamsMgr *paramsMgr,
-		VAPoR::RenderParams *rParams
-	);
+	void Update ( VAPoR::DataMgr*         dataMgr,
+		          VAPoR::ParamsMgr*       paramsMgr,
+		          VAPoR::RenderParams*    rParams );
 
 private slots:
     // Respond to user input
@@ -127,7 +125,7 @@ private slots:
 private:
     VAPoR::FlowParams*      _params;
 
-    GeometryWidget*         _geometryWidget;
+    //GeometryWidget*         _geometryWidget;
 
     VComboBox*              _seedGenMode;
     VFileReader*            _fileReader;
