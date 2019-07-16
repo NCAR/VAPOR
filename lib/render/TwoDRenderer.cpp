@@ -81,47 +81,55 @@ int TwoDRenderer::_initializeGL(){
 	return(0);
 }
 
-int TwoDRenderer::_paintGL(bool) {
-
-	// Get the 2D texture
-	//
-	_texture = GetTexture(
-		_dataMgr, _texWidth, _texHeight, _texInternalFormat,
-		_texFormat, _texType, _texelSize, _gridAligned
-	);
-	if (! _texture) {
-		return(-1);
-	}
-	VAssert(_texWidth >= 1);
-	VAssert(_texHeight >= 1);
-
-	// Get the proxy geometry used to render the 2D surface (vertices and
-	// normals)
-	//
-	int rc = GetMesh(
-		_dataMgr, &_verts, &_normals, _nverts, _meshWidth, _meshHeight,
-		&_indices, _nindices, _structuredMesh
-	);
-	if (rc < 0) {
-		return(-1);
-	}
-
-	if (! _gridAligned) {
-		VAssert(_structuredMesh);
-		VAssert(_meshWidth >= 2);
-		VAssert(_meshHeight >= 2);
-	
+int TwoDRenderer::_generateMesh()
+{
+    // Get the 2D texture
+    //
+    _texture = GetTexture(
+                          _dataMgr, _texWidth, _texHeight, _texInternalFormat,
+                          _texFormat, _texType, _texelSize, _gridAligned
+                          );
+    if (! _texture) {
+        return(-1);
+    }
+    VAssert(_texWidth >= 1);
+    VAssert(_texHeight >= 1);
+    
+    // Get the proxy geometry used to render the 2D surface (vertices and
+    // normals)
+    //
+    int rc = GetMesh(
+                     _dataMgr, &_verts, &_normals, _nverts, _meshWidth, _meshHeight,
+                     &_indices, _nindices, _structuredMesh
+                     );
+    if (rc < 0) {
+        return(-1);
+    }
+    
+    if (! _gridAligned) {
+        VAssert(_structuredMesh);
+        VAssert(_meshWidth >= 2);
+        VAssert(_meshHeight >= 2);
+        
         _texCoords = (GLfloat *) _sb_texCoords.Alloc(_meshWidth * _meshHeight * 2 * sizeof(*_texCoords));
-		_computeTexCoords(_texCoords, _meshWidth, _meshHeight);
+        _computeTexCoords(_texCoords, _meshWidth, _meshHeight);
+    }
+    else {
+        VAssert(_meshWidth == _texWidth);
+        VAssert(_meshHeight == _texHeight);
+    }
+    
+    return(0);
+}
 
+int TwoDRenderer::_paintGL(bool) {
+	if (_generateMesh() < 0)
+		return -1;
+
+	if (! _gridAligned)
 		_renderMeshUnAligned();
-	}
-	else {
-		VAssert(_meshWidth == _texWidth);
-		VAssert(_meshHeight == _texHeight);
-
+	else
 		_renderMeshAligned();
-	}
     
     GL_ERR_BREAK();
 
@@ -316,3 +324,12 @@ void TwoDRenderer::_computeTexCoords(
 	}
 }
 
+int TwoDRenderer::OSPRayUpdate(OSPModel world)
+{
+    
+}
+
+void TwoDRenderer::OSPRayDelete(OSPModel world)
+{
+    
+}

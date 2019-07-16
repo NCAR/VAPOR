@@ -660,13 +660,14 @@ int VolumeRenderer::OSPRayLoadDataStructured(OSPModel world, Grid *grid)
     const vector<size_t> dims = grid->GetDimensions();
     const int VW = dims[0], VH = dims[1], VD = dims[2];
     const size_t nVerts = dims[0]*dims[1]*dims[2];
-    float *data = new float[nVerts*3];
+    float *scalarData = new float[nVerts];
+    float *coordData = new float[nVerts*3];
     
     auto dataIt = grid->cbegin();
     for (size_t i = 0; i < nVerts; ++i, ++dataIt)
-        data[i] = *dataIt;
+        scalarData[i] = *dataIt;
     
-    OSPData ospData = ospNewData(nVerts, OSP_FLOAT, data);
+    OSPData ospData = ospNewData(nVerts, OSP_FLOAT, scalarData);
     ospCommit(ospData);
     ospSetData(_volume, "field", ospData);
     ospRelease(ospData);
@@ -674,20 +675,20 @@ int VolumeRenderer::OSPRayLoadDataStructured(OSPModel world, Grid *grid)
     
     vec3 scales = _getTotalScaling();
     vec3 origin = _getOrigin();
-    vec3 *coords = (vec3*)data;
+    vec3 *coords = (vec3*)coordData;
     auto coord = grid->ConstCoordBegin();
     for (size_t i = 0; i < nVerts; ++i, ++coord) {
-        data[i*3  ] = (*coord)[0];
-        data[i*3+1] = (*coord)[1];
-        data[i*3+2] = (*coord)[2];
+        coordData[i*3  ] = (*coord)[0];
+        coordData[i*3+1] = (*coord)[1];
+        coordData[i*3+2] = (*coord)[2];
         
         coords[i] = (coords[i]-origin)*scales + origin;
     }
-    ospData = ospNewData(nVerts, OSP_FLOAT3, data);
+    ospData = ospNewData(nVerts, OSP_FLOAT3, coordData);
     ospCommit(ospData);
     ospSetData(_volume, "vertices", ospData);
     ospRelease(ospData);
-    delete [] data;
+    delete [] coordData;
     
     
     typedef struct {
@@ -700,10 +701,27 @@ int VolumeRenderer::OSPRayLoadDataStructured(OSPModel world, Grid *grid)
     int VCH = VH-1;
     int VCW = VW-1;
     
+    bool hasMissing = grid->HasMissingData();
+    float missingValue = grid->GetMissingValue();
+    size_t indexId = 0;
+    
     for (int z = 0; z < VCD; z++) {
         for (int y = 0; y < VCH; y++) {
             for (int x = 0; x < VCW; x++) {
-                indices[z*VCH*VCW + y*VCW + x] = {
+                if (hasMissing) {
+                    if (scalarData[I(x  , y  , z  )] == missingValue ||
+                        scalarData[I(x+1, y  , z  )] == missingValue ||
+                        scalarData[I(x+1, y+1, z  )] == missingValue ||
+                        scalarData[I(x  , y+1, z  )] == missingValue ||
+                        scalarData[I(x  , y  , z+1)] == missingValue ||
+                        scalarData[I(x+1, y  , z+1)] == missingValue ||
+                        scalarData[I(x+1, y+1, z+1)] == missingValue ||
+                        scalarData[I(x  , y+1, z+1)] == missingValue
+                        ) {
+                        continue;
+                    }
+                }
+                indices[indexId++] = {
                     I(x  ,y  ,z  ), I(x+1,y  ,z  ), I(x+1,y+1,z  ), I(x  ,y+1,z  ),
                     I(x  ,y  ,z+1), I(x+1,y  ,z+1), I(x+1,y+1,z+1), I(x  ,y+1,z+1),
                 };
@@ -711,11 +729,12 @@ int VolumeRenderer::OSPRayLoadDataStructured(OSPModel world, Grid *grid)
         }
     }
     
-    ospData = ospNewData(VCD*VCH*VCW*2, OSP_INT4, indices);
+    ospData = ospNewData(indexId*2, OSP_INT4, indices);
     ospCommit(ospData);
     ospSetData(_volume, "indices", ospData);
     ospRelease(ospData);
-    delete[] indices;
+    delete [] indices;
+    delete [] scalarData;
     
     
     return 0;

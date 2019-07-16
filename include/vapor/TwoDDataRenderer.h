@@ -62,6 +62,7 @@ public:
 protected:
  int _initializeGL();
 
+    int _loadTF();
  int _paintGL(bool fast);
 
  int GetMesh(  DataMgr *dataMgr,
@@ -203,6 +204,7 @@ private:
 
  GLuint _cMapTexID;
  GLfloat *_colormap;
+    vector<double> _colormapRange;
  size_t _colormapsize;
 
  bool _gridStateDirty() const; 

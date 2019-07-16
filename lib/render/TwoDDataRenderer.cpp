@@ -183,37 +183,30 @@ int TwoDDataRenderer::_initializeGL() {
 	return(TwoDRenderer::_initializeGL());
 }
 
+int TwoDDataRenderer::_loadTF()
+{
+    TwoDDataParams *rp = (TwoDDataParams *) GetActiveParams();
+    
+    MapperFunction *tf = rp->GetMapperFunc(rp->GetVariableName());
+    tf->makeLut(_colormap);
+    _colormapRange = tf->getMinMaxMapValue();
+    
+    return 0;
+}
+
 int TwoDDataRenderer::_paintGL(bool fast) {
 	if (CheckGLError() != 0) return(-1);
-
-
-	TwoDDataParams *rp = (TwoDDataParams *) GetActiveParams();
-
-	MapperFunction *tf = rp->GetMapperFunc(rp->GetVariableName());
-	tf->makeLut(_colormap);
-	vector <double> crange = tf->getMinMaxMapValue();
+    
+    if (_loadTF() < 0)
+        return -1;
 
 	int rc;
-#ifndef	NOSHADER
-
-	string effect = getEffectInstance(GridAligned);
-
-	// 2D Data LIGHT parameters hard coded
-	//
-	// _shaderMgr->UploadEffectData(effect, "lightingEnabled", (int) false);
-	// _shaderMgr->UploadEffectData(effect, "kd", (float) 0.6);
-	// _shaderMgr->UploadEffectData(effect, "ka", (float) 0.3);
-	// _shaderMgr->UploadEffectData(effect, "ks", (float) 0.1);
-	// _shaderMgr->UploadEffectData(effect, "expS", (float) 16.0);
-	// _shaderMgr->UploadEffectData( effect, "lightDirection", (float) 0.0, (float) 0.0, (float) 1.0);
-
-#endif
     
     ShaderProgram *s = _glManager->shaderManager->GetShader("2DData");
     if (s == nullptr) return -1;
     s->Bind();
-    s->SetUniform("minLUTValue", (float)crange[0]);
-    s->SetUniform("maxLUTValue", (float)crange[1]);
+    s->SetUniform("minLUTValue", (float)_colormapRange[0]);
+    s->SetUniform("maxLUTValue", (float)_colormapRange[1]);
     
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_1D, _cMapTexID);
