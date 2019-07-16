@@ -100,8 +100,9 @@ protected:
     int  _genSeedsXY( std::vector<flow::Particle>& seeds, float timeVal ) const;
 
     int  _renderFromAnAdvection( const flow::Advection*, FlowParams*, bool fast );
-    void _prepareColormap(        FlowParams* );
-    int  _drawLineSegs( const float* buf, size_t numOfParts, bool singleColor ) const; 
+    void _prepareColormap(       FlowParams* );
+    void _particleHelper1( std::vector<float>& vec, const flow::Particle& p, bool singleColor ) const;
+    int  _drawALineSeg( const float* buf, size_t numOfParts, bool singleColor ) const; 
     void _restoreGLState() const;
 
     int  _getAGrid( const FlowParams* params,           // Input
