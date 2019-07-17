@@ -124,7 +124,7 @@ public:
 
     void SetEditText( const std::string& text );
     void SetEditText( const QString& text );
-    void SetValidator( QValidator* v );
+    //void SetValidator( QValidator* v );
     std::string GetEditText() const;
 
 signals:
@@ -138,7 +138,19 @@ protected:
     // signal to be emitted with invalid input, so we can change it to the
     // previous value.  Therefore, we perform validation within the VLineEdit,
     // not the QLineEdit.
-    QValidator* _validator;
+
+    // Sam comment on 7/16/2019:
+    // This is pretty dangerous design, because VLineEdit maintains a pointer that
+    // points to an object that it doesn't own. 
+    // Once the object is destroyed (e.g. out of bound), this pointer becomes
+    // a dangling pointer.
+    // Two possible fixes:
+    // 1) VLineEdit owns a validator of itself.
+    // 2) VLineEdit doesn't perform any validation work at all.
+    // Sam's action on 7/16/2019: opt for option 2) by commenting out dangerous code
+    // unless Scott implements option 1).
+
+    //QValidator* _validator;
 
 private slots:
     void _returnPressed();
