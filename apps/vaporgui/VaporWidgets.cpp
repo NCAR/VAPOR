@@ -160,8 +160,8 @@ VLineEdit::VLineEdit(
 
     SetEditText( QString::fromStdString( editText ) );
 
-    connect( _edit, SIGNAL( editingFinished() ),
-        this, SLOT( _relaySignal() ) );
+    connect( _edit, SIGNAL( returnPressed() ),
+        this, SLOT( _returnPressed() ) );
 }
 
 VLineEdit::~VLineEdit() {
@@ -192,7 +192,7 @@ std::string VLineEdit::GetEditText() const {
     return _text;
 }
 
-void VLineEdit::_relaySignal() {
+void VLineEdit::_returnPressed() {
     QString text = _edit->text();
 //    if ( _validator != nullptr ) {
 //        int i=0;
