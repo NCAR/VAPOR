@@ -150,8 +150,8 @@ VLineEdit::VLineEdit(
         const std::string& labelText,
         const std::string& editText
     ) :
-    VaporWidget(parent, labelText),
-    _validator( nullptr )
+    VaporWidget(parent, labelText)
+    //_validator( nullptr )
 {
     _text = editText;
 
@@ -165,49 +165,49 @@ VLineEdit::VLineEdit(
 }
 
 VLineEdit::~VLineEdit() {
-    if (_validator != nullptr) {
-        delete _validator;
-        _validator = nullptr;
-    }
+//    if (_validator != nullptr) {
+//        delete _validator;
+//        _validator = nullptr;
+//    }
 }
 
 void VLineEdit::SetExtents( int min, int max ) {
-    assert( _validator );
+//    assert( _validator );
 
-    QIntValidator* val = qobject_cast<QIntValidator*>(_validator);
-    assert( val );
+//    QIntValidator* val = qobject_cast<QIntValidator*>(_validator);
+//    assert( val );
 
     val->setRange( min, max );
 }
 
 void VLineEdit::SetExtents( double min, double max ) {
-    assert( _validator );
+//    assert( _validator );
 
-    QDoubleValidator* val = qobject_cast<QDoubleValidator*>(_validator);
-    assert( val );
+//    QDoubleValidator* val = qobject_cast<QDoubleValidator*>(_validator);
+//    assert( val );
 
     val->setRange( min, max );
 }
 
 void VLineEdit::SetIntType() {
-    if (_validator != nullptr)
-        delete _validator;
-
-    _validator = new QIntValidator( this );
-    _edit->setValidator( _validator );
+//    if (_validator != nullptr)
+//        delete _validator;
+//
+//    _validator = new QIntValidator( this );
+//    _edit->setValidator( _validator );
 }
 
 void VLineEdit::SetDoubleType() {
-    if (_validator != nullptr)
-        delete _validator;
-
-    _validator = new QDoubleValidator( this );
-    _edit->setValidator( _validator );
+//    if (_validator != nullptr)
+//        delete _validator;
+//
+//    _validator = new QDoubleValidator( this );
+//    _edit->setValidator( _validator );
 }
 
-void VLineEdit::SetValidator( QValidator* v ) {
-    _validator = v;
-}
+//void VLineEdit::SetValidator( QValidator* v ) {
+//    _validator = v;
+//}
 
 void VLineEdit::SetEditText( const std::string& text )
 {
@@ -228,19 +228,19 @@ std::string VLineEdit::GetEditText() const {
 
 void VLineEdit::_relaySignal() {
     QString text = _edit->text();
-    if ( _validator != nullptr ) {
-        int i=0;
-        const QValidator::State state = _validator->validate( text, i );
-
-        if ( state == QValidator::Acceptable )
-            _text = _edit->text().toStdString();
-
-        _edit->setText( QString::fromStdString( _text ) );
-    }
-    else {
+//    if ( _validator != nullptr ) {
+//        int i=0;
+//        const QValidator::State state = _validator->validate( text, i );
+//
+//        if ( state == QValidator::Acceptable )
+//            _text = _edit->text().toStdString();
+//
+//        _edit->setText( QString::fromStdString( _text ) );
+//    }
+//    else {
         _edit->setText( text );
         _text = text.toStdString();    
-    }
+//    }
 
     emit _editingFinished();
 }
