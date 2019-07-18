@@ -257,6 +257,8 @@ private:
 	_tex_state.clear();
   }
 
+    int OSPRayUpdate(OSPModel world);
+    
 };
 };
 

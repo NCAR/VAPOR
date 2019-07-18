@@ -226,6 +226,70 @@ int TwoDDataRenderer::_paintGL(bool fast) {
 	return(rc);
 }
 
+int TwoDDataRenderer::OSPRayUpdate(OSPModel world)
+{
+    if (_loadTF() < 0)
+        return -1;
+    
+    if (TwoDRenderer::OSPRayUpdate(world) < 0)
+        return -1;
+    
+    if (!_ospColorTexture) {
+        _ospColorTexture = ospNewTexture("texture2d");
+        _ospOpacityTexture = ospNewTexture("texture2d");
+        ospSetObject(_material, "map_Kd", _ospColorTexture);
+        ospSetObject(_material, "map_d", _ospOpacityTexture);
+    }
+    
+    ospSet2i(_ospColorTexture, "size", _colormapsize, 1);
+    ospSet1i(_ospColorTexture, "type", OSP_TEXTURE_RGB8);
+    ospSet2i(_ospOpacityTexture, "size", _colormapsize, 1);
+    ospSet1i(_ospOpacityTexture, "type", OSP_TEXTURE_R8);
+    
+    unsigned char colorData[_colormapsize*3];
+    unsigned char opacityData[_colormapsize];
+    for (int i = 0; i < _colormapsize; i++) {
+        colorData[i*3+0] = _colormap[i*4+0]*255;
+        colorData[i*3+1] = _colormap[i*4+1]*255;
+        colorData[i*3+2] = _colormap[i*4+2]*255;
+        opacityData[i]   = _colormap[i*4+3]*255;
+    }
+    
+    OSPData data = ospNewData(_colormapsize, OSP_UCHAR3, colorData);
+    ospCommit(data);
+    ospSetData(_ospColorTexture, "data", data);
+    ospRelease(data);
+    
+    data = ospNewData(_colormapsize, OSP_UCHAR, opacityData);
+    ospCommit(data);
+    ospSetData(_ospOpacityTexture, "data", data);
+    ospRelease(data);
+    
+    ospSet3f(_material, "Kd", 1, 1, 1);
+    
+    const int W = _texWidth;
+    const int H = _texHeight;
+    float *texCoords = new float[W*H*2];
+    float *dataTex = (float*)_texture;
+    
+    for (int i = 0; i < W*H; i++) {
+        texCoords[i*2] = (dataTex[i*2] - _colormapRange[0]) / (_colormapRange[1] - _colormapRange[0]);
+        texCoords[i*2+1] = dataTex[i*2+1];
+    }
+    
+    data = ospNewData(W * H, OSP_FLOAT2, texCoords);
+    ospCommit(data);
+    ospSetData(_ospMesh, "vertex.texcoord", data);
+    ospRelease(data);
+    delete [] texCoords;
+    
+    ospCommit(_ospColorTexture);
+    ospCommit(_ospOpacityTexture);
+    ospCommit(_material);
+    ospCommit(_ospMesh);
+    return 0;
+}
+
 const GLvoid *TwoDDataRenderer::GetTexture(  DataMgr *dataMgr,
                                               GLsizei &width,
                                               GLsizei &height,

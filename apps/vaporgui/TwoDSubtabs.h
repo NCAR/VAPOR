@@ -6,6 +6,7 @@
 #include "ui_TwoDGeometryGUI.h"
 #include "ui_TwoDAnnotationGUI.h"
 #include "Flags.h"
+#include "OSPRayEnableCheckbox.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -40,10 +41,15 @@ class TwoDAppearanceSubtab : public QWidget, public Ui_TwoDAppearanceGUI {
 
 	Q_OBJECT
 
+    OSPRayEnableCheckbox *_osprayEnable;
+    
 public:
 	TwoDAppearanceSubtab(QWidget* parent) {
 		setupUi(this);
 		_TFWidget->Reinit((TFFlags)(0));
+        _osprayEnable = new OSPRayEnableCheckbox(this);
+//        verticalLayout->addWidget(_osprayEnable);
+        _TFWidget->_tabWidget->widget(0)->layout()->addWidget(_osprayEnable);
 	}
 
 	void Update(
@@ -52,6 +58,7 @@ public:
 		VAPoR::RenderParams *rParams
 	) {
 		_TFWidget->Update(dataMgr, paramsMgr, rParams);
+        _osprayEnable->Update(rParams);
 	}
 };
 

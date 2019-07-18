@@ -65,6 +65,7 @@ set (SRCS
 	VolumeIsoSubtabs.cpp
 	VolumeSubtabs.cpp
     VaporWidgets.cpp
+	OSPRayEnableCheckbox.cpp
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -137,6 +138,7 @@ set (SRCS
 	VizSelectCombo.h
 	WireFrameEventRouter.h
     VaporWidgets.h
+	OSPRayEnableCheckbox.h
 )
 
 set (UIS 

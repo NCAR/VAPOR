@@ -326,10 +326,69 @@ void TwoDRenderer::_computeTexCoords(
 
 int TwoDRenderer::OSPRayUpdate(OSPModel world)
 {
+    if (!_ospMesh) {
+        _ospMesh = ospNewGeometry("quads");
+        ospAddGeometry(world, _ospMesh);
+    }
     
+    if (_generateMesh() < 0)
+        return -1;
+    
+    const int W = _meshWidth;
+    const int H = _meshHeight;
+    const int CW = W-1;
+    const int CH = H-1;
+    
+    OSPData data;
+    data = ospNewData(W * H, OSP_FLOAT3, _verts);
+    ospCommit(data);
+    ospSetData(_ospMesh, "vertex", data);
+    ospRelease(data);
+    
+    data = ospNewData(W * H, OSP_FLOAT3, _normals);
+    ospCommit(data);
+    ospSetData(_ospMesh, "vertex.normal", data);
+    ospRelease(data);
+    
+    typedef struct {
+        int i0, i1, i2, i3;
+    } Cell;
+    Cell *indices = new Cell[CW*CH];
+#define I(x,y) (int)((y)*W+(x))
+    
+    
+    size_t indexId = 0;
+    
+    for (int y = 0; y < CH; y++) {
+        for (int x = 0; x < CW; x++) {
+            indices[indexId++] = {
+                I(x  ,y  ), I(x+1,y  ), I(x+1,y+1), I(x  ,y+1)
+            };
+        }
+    }
+    
+    data = ospNewData(indexId, OSP_INT4, indices);
+    delete [] indices;
+    ospCommit(data);
+    ospSetData(_ospMesh, "index", data);
+    ospRelease(data);
+    
+    
+    if (!_material) {
+        _material = ospNewMaterial2("scivis", "OBJMaterial");
+        ospSetMaterial(_ospMesh, _material);
+    }
+    
+    ospCommit(_material);
+    ospCommit(_ospMesh);
+    return 0;
 }
 
 void TwoDRenderer::OSPRayDelete(OSPModel world)
 {
-    
+    ospRemoveGeometry(world, _ospMesh);
+    ospRelease(_ospMesh); _ospMesh = nullptr;
+    ospRelease(_material); _material = nullptr;
+    ospRelease(_ospColorTexture); _ospColorTexture = nullptr;
+    ospRelease(_ospOpacityTexture); _ospOpacityTexture = nullptr;
 }

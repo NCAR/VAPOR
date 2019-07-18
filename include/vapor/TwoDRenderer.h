@@ -172,7 +172,9 @@ protected:
 private:
 
  GLuint _textureID;
+protected:
  const GLvoid *_texture;
+private:
  GLfloat *_texCoords;
  GLsizei _texWidth;
  GLsizei _texHeight;
@@ -204,6 +206,12 @@ private:
 public:
     int OSPRayUpdate(OSPModel world);
     void OSPRayDelete(OSPModel world);
+    
+protected:
+    OSPGeometry _ospMesh = nullptr;
+    OSPMaterial _material = nullptr;
+    OSPTexture _ospColorTexture = nullptr;
+    OSPTexture _ospOpacityTexture = nullptr;
 };
 };
 
