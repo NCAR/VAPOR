@@ -49,9 +49,8 @@ public:
         //! \param[in] varname	Name of the netCDF variable
         //! \param[in] dimnames A vector dimension names, ordered from
         //! slowest-varying to fastest.
-        //! \param[in] varid The netCDF variable ID
         //! \param[in] type The netCDF external data type for the variable
-        Variable(string varname, std::vector<string> dimnames, int varid, int type);
+        Variable(string varname, std::vector<string> dimnames, int type);
 
         //! Return the variable's name
         //
@@ -84,10 +83,6 @@ public:
         //!
         int GetXType() const { return (_type); };
 
-        //! Return the netCDF variable ID for this variable
-        //
-        int GetVarID() const { return (_varid); };
-
         //! Return attribute values for attribute of type float
         //!
         //! Return the values of the named attribute converted to type float.
@@ -119,7 +114,7 @@ public:
         VDF_API friend bool          operator==(const Variable &v1, const Variable &v2)
         {
             return ((v1._name == v2._name) && (v1._dimnames == v2._dimnames) && (v1._flt_atts == v2._flt_atts) && (v1._int_atts == v2._int_atts) && (v1._str_atts == v2._str_atts)
-                    && (v1._type == v2._type) && (v1._varid == v2._varid));
+                    && (v1._type == v2._type));
         }
 
     private:
@@ -128,8 +123,7 @@ public:
         std::vector<std::pair<string, std::vector<double>>> _flt_atts;
         std::vector<std::pair<string, std::vector<long>>>   _int_atts;
         std::vector<std::pair<string, string>>              _str_atts;
-        int                                                 _type;     // netCDF variable type
-        int                                                 _varid;    // netCDF variable id
+        int                                                 _type;    // netCDF variable type
     };
 
     //! Initialize the class instance for a netCDF file
