@@ -254,21 +254,12 @@ bool NetCDFCollection::IsStaggeredDim(string dimname) const {
 	return(false);
 }
 
-namespace {
-bool id_name_cmp(
-    pair<int, string > p, pair<int, string > q
-) {
-	return(p.first < q.first);
-}
-};
-
 vector <string> NetCDFCollection::GetVariableNames(
 	int ndims, bool spatial
 ) const {
 	map <string,TimeVaryingVar>::const_iterator p = _variableList.begin();
 
 	vector <string> names;
-	vector <pair <int, string> > id_names;
 
 	for (; p!=_variableList.end(); ++p) {
 		const TimeVaryingVar &tvvars = p->second;
@@ -277,24 +268,9 @@ vector <string> NetCDFCollection::GetVariableNames(
 			myndims++; 
 		}
 		if (myndims == ndims) {
-			NetCDFSimple::Variable varinfo;
-			tvvars.GetVariableInfo(varinfo);
-			id_names.push_back(make_pair(varinfo.GetVarID(), p->first));
-			
+			names.push_back(p->first);
 		}
 	}
-
-	//
-	// Sort the list based on the NetCDF varid. No reason to do this
-	// other than to maintain consistency with legacy codes
-	//
-	sort(id_names.begin(), id_names.end(), id_name_cmp);
-	for (int i=0; i<id_names.size(); i++) {
-		names.push_back(id_names[i].second);
-	}
-
-	
-
 
 	//
 	// Add any derived variables
@@ -657,7 +633,7 @@ bool NetCDFCollection::_GetVariableInfo(
 			dimnames.insert(dimnames.begin(), derivedVar->GetTimeDimName());
 		}
 
-		varinfo = NetCDFSimple::Variable(varname, dimnames, 0, NC_FLOAT);
+		varinfo = NetCDFSimple::Variable(varname, dimnames, NC_FLOAT);
 		vector <string> attnames = derivedVar->GetAttNames();
 		for (int i=0; i<attnames.size(); i++) {
 			string s = attnames[i];
