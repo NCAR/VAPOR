@@ -121,7 +121,7 @@ int NetCDFSimple::Initialize(string path) {
             dims.push_back(_dims[dimids[i]]);
         }
 
-        Variable var(namebuf, dimnames, varid, xtype);
+        Variable var(namebuf, dimnames, xtype);
 
         vector<pair<string, vector<double>>> flt_atts;
         vector<pair<string, vector<long>>> int_atts;
@@ -162,6 +162,15 @@ int NetCDFSimple::OpenRead(
         _ncid = ncid;
     }
 
+    int varid;
+    int rc = nc_inq_varid(_ncid, variable.GetName().c_str(), &varid);
+    if (rc != 0) {
+        SetErrMsg(
+            "nc_inq_varid(%d, %s, ) : %s",
+            _ncid, variable.GetName().c_str(), nc_strerror(rc));
+        return (-1);
+    }
+
     //
     // Find a file descriptor. Use lowest available, starting with zero
     //
@@ -171,7 +180,7 @@ int NetCDFSimple::OpenRead(
             break;
         }
     }
-    _ovr_table[fd] = variable.GetVarID();
+    _ovr_table[fd] = varid;
 
     return (fd);
 }
@@ -585,15 +594,13 @@ NetCDFSimple::Variable::Variable() {
     _int_atts.clear();
     _str_atts.clear();
     _type = -1;
-    _varid = -1;
 }
 
 NetCDFSimple::Variable::Variable(
     string name, vector<string> dimnames,
-    int varid, int type) {
+    int type) {
     _name = name;
     _dimnames = dimnames;
-    _varid = varid;
     _type = type;
     _flt_atts.clear();
     _int_atts.clear();
@@ -694,7 +701,6 @@ std::ostream &operator<<(std::ostream &o, const NetCDFSimple::Variable &var) {
 
     o << "Variable" << endl;
     o << " Name : " << var._name << endl;
-    o << " NetCDFSimple var id : " << var._varid << endl;
     o << " NetCDFSimple type : " << var._type << endl;
     o << " Dimensions : " << endl;
     for (int i = 0; i < var._dimnames.size(); i++) {
