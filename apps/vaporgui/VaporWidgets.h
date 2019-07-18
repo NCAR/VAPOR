@@ -123,11 +123,6 @@ public:
 
     void SetEditText( const std::string& text );
     void SetEditText( const QString& text );
-    void SetExtents( int min, int max );
-    void SetExtents( double min, double max );
-    void SetIntType();
-    void SetDoubleType();
-    //void SetValidator( QValidator* v );
     std::string GetEditText() const;
 
 signals:
@@ -135,13 +130,6 @@ signals:
 
 protected:
     QLineEdit* _edit;
-
-    // If we assign a validator to the QLineEdit, the QLineEdit will not emit
-    // the returnPressed() signal with invalid input.  However we do want this
-    // signal to be emitted with invalid input, so we can change it to the
-    // previous value.  Therefore, we perform validation within the VLineEdit,
-    // not the QLineEdit.
-    //QValidator* _validator;
 
 private slots:
     void _relaySignal();
