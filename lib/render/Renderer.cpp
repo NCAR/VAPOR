@@ -134,6 +134,84 @@ double Renderer::_getDefaultZ(
 	return(minExts.size() == 3 ? minExts[2] : 0.0); 
 }
 
+glm::mat4 Renderer::_getDatasetTransformMatrix() const
+{
+    VAPoR::ViewpointParams* vpParams = _paramsMgr->GetViewpointParams(_winName);
+    vector<double> scales, rotations, translations, origin;
+    Transform *t = vpParams->GetTransform(GetMyDatasetName());
+    VAssert(t);
+    scales = t->GetScales();
+    rotations = t->GetRotations();
+    translations = t->GetTranslations();
+    origin = t->GetOrigin();
+    
+    MatrixManager *mm = _glManager->matrixManager;
+    mm->PushMatrix();
+    mm->LoadIdentity();
+    
+    mm->Translate(translations[0], translations[1], translations[2]);
+    mm->Translate(origin[0], origin[1], origin[2]);
+    mm->Rotate(glm::radians(rotations[0]), 1, 0, 0);
+    mm->Rotate(glm::radians(rotations[1]), 0, 1, 0);
+    mm->Rotate(glm::radians(rotations[2]), 0, 0, 1);
+    mm->Scale(scales[0], scales[1], scales[2]);
+    mm->Translate(-origin[0], -origin[1], -origin[2]);
+    
+    glm::mat4 m = mm->GetCurrentMatrix();
+    mm->PopMatrix();
+    
+    return m;
+}
+void Renderer::_applyDatasetTransform()
+{
+    MatrixManager *mm = _glManager->matrixManager;
+    mm->SetCurrentMatrix(mm->GetCurrentMatrix() * _getDatasetTransformMatrix());
+}
+
+glm::mat4 Renderer::_getRendererTransformMatrix() const
+{
+    const RenderParams *rParams = GetActiveParams();
+    MatrixManager *mm = _glManager->matrixManager;
+    
+    vector <double> translate = rParams->GetTransform()->GetTranslations();
+    vector <double> rotate    = rParams->GetTransform()->GetRotations();
+    vector <double> scale     = rParams->GetTransform()->GetScales();
+    vector <double> origin    = rParams->GetTransform()->GetOrigin();
+    VAssert(translate.size() == 3);
+    VAssert(rotate.size()    == 3);
+    VAssert(scale.size()     == 3);
+    VAssert(origin.size()    == 3);
+    
+    Transform *datasetTransform = _paramsMgr->GetViewpointParams(_winName)->GetTransform(_dataSetName);
+    vector<double> datasetScales = datasetTransform->GetScales();
+    
+    mm->PushMatrix();
+    mm->LoadIdentity();
+    
+    mm->Scale(1/datasetScales[0], 1/datasetScales[1], 1/datasetScales[2]);
+    
+    mm->Translate(translate[0], translate[1], translate[2]);
+    mm->Translate(origin[0], origin[1], origin[2]);
+    mm->Rotate(glm::radians(rotate[0]), 1, 0, 0);
+    mm->Rotate(glm::radians(rotate[1]), 0, 1, 0);
+    mm->Rotate(glm::radians(rotate[2]), 0, 0, 1);
+    mm->Scale(scale[0], scale[1], scale[2]);
+    mm->Translate(-origin[0], -origin[1], -origin[2]);
+    
+    mm->Scale(datasetScales[0], datasetScales[1], datasetScales[2]);
+    
+    glm::mat4 m = mm->GetCurrentMatrix();
+    mm->PopMatrix();
+    
+    return m;
+}
+
+void Renderer::_applyRendererTransform()
+{
+    MatrixManager *mm = _glManager->matrixManager;
+    mm->SetCurrentMatrix(mm->GetCurrentMatrix() * _getRendererTransformMatrix());
+}
+
 int Renderer::paintGL(bool fast) {
 	const RenderParams *rParams = GetActiveParams();
     MatrixManager *mm = _glManager->matrixManager;
@@ -142,32 +220,11 @@ int Renderer::paintGL(bool fast) {
 
 	_timestep = rParams->GetCurrentTimestep();
 
-	vector <double> translate = rParams->GetTransform()->GetTranslations();
-	vector <double> rotate	= rParams->GetTransform()->GetRotations();
-	vector <double> scale	 = rParams->GetTransform()->GetScales();
-	vector <double> origin	= rParams->GetTransform()->GetOrigin();
-	VAssert(translate.size() == 3);
-	VAssert(rotate.size()	== 3);
-	VAssert(scale.size()	 == 3);
-	VAssert(origin.size()	== 3);
-    
-    Transform *datasetTransform = _paramsMgr->GetViewpointParams(_winName)->GetTransform(_dataSetName);
-    vector<double> datasetScales = datasetTransform->GetScales();
-
 	mm->MatrixModeModelView();
     mm->PushMatrix();
     
-    mm->Scale(1/datasetScales[0], 1/datasetScales[1], 1/datasetScales[2]);
-
-    mm->Translate(translate[0], translate[1], translate[2]);
-	mm->Translate(origin[0], origin[1], origin[2]);
-    mm->Rotate(glm::radians(rotate[0]), 1, 0, 0);
-	mm->Rotate(glm::radians(rotate[1]), 0, 1, 0);
-	mm->Rotate(glm::radians(rotate[2]), 0, 0, 1);
-    mm->Scale(scale[0], scale[1], scale[2]);
-	mm->Translate(-origin[0], -origin[1], -origin[2]);
-    
-    mm->Scale(datasetScales[0], datasetScales[1], datasetScales[2]);
+    _applyDatasetTransform();
+    _applyRendererTransform();
 
 	int rc = _paintGL(fast);
 

@@ -26,6 +26,7 @@
 #include <vapor/ParamsMgr.h>
 #include <vapor/RenderParams.h>
 #include <ospray/ospray.h>
+#include <glm/fwd.hpp>
 
 namespace VAPoR {
 
@@ -283,7 +284,10 @@ protected:
 	//! \return 0 if successful
 	int makeColorbarTexture();
 
-	
+    glm::mat4 _getDatasetTransformMatrix() const;
+    void      _applyDatasetTransform();
+    glm::mat4 _getRendererTransformMatrix() const;
+    void      _applyRendererTransform();
 
 	//! All OpenGL rendering is performed in the pure virtual paintGL method.
     virtual int	_paintGL(bool fast) = 0;
