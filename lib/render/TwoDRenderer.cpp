@@ -18,6 +18,7 @@
 
 using namespace VAPoR;
 using namespace Wasp;
+using namespace glm;
 
 //----------------------------------------------------------------------------
 //
@@ -339,16 +340,28 @@ int TwoDRenderer::OSPRayUpdate(OSPModel world)
     const int CW = W-1;
     const int CH = H-1;
     
+    mat4 model = _getDatasetTransformMatrix() * _getRendererTransformMatrix();
+    mat3 normalModel(glm::transpose(glm::inverse(model)));
+    vec3 *transformedData = new vec3[W*H];
+    
+    for (int i = 0; i < W*H; i++)
+        transformedData[i] = model * vec4(((vec3*)_verts)[i], 1);
+    
     OSPData data;
-    data = ospNewData(W * H, OSP_FLOAT3, _verts);
+    data = ospNewData(W * H, OSP_FLOAT3, transformedData);
     ospCommit(data);
     ospSetData(_ospMesh, "vertex", data);
     ospRelease(data);
     
-    data = ospNewData(W * H, OSP_FLOAT3, _normals);
+    for (int i = 0; i < W*H; i++)
+        transformedData[i] = normalModel * ((vec3*)_normals)[i];
+    
+    data = ospNewData(W * H, OSP_FLOAT3, transformedData);
     ospCommit(data);
     ospSetData(_ospMesh, "vertex.normal", data);
     ospRelease(data);
+    
+    delete [] transformedData;
     
     typedef struct {
         int i0, i1, i2, i3;
