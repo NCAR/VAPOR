@@ -246,14 +246,27 @@ int TwoDDataRenderer::OSPRayUpdate(OSPModel world)
     ospSet2i(_ospOpacityTexture, "size", _colormapsize, 1);
     ospSet1i(_ospOpacityTexture, "type", OSP_TEXTURE_R8);
     
-    unsigned char colorData[_colormapsize*3];
-    unsigned char opacityData[_colormapsize];
+    // Need to add padding to each edge
+    // OSPRay forces texture wrapping and blends at the seam
+    const float texCoordMin = 1/(float)(_colormapsize+2);
+    const float texCoordMax = (_colormapsize+1)/(float)(_colormapsize+2);
+    
+    unsigned char colorData[_colormapsize*3+2];
+    unsigned char opacityData[_colormapsize+2];
     for (int i = 0; i < _colormapsize; i++) {
-        colorData[i*3+0] = _colormap[i*4+0]*255;
-        colorData[i*3+1] = _colormap[i*4+1]*255;
-        colorData[i*3+2] = _colormap[i*4+2]*255;
-        opacityData[i]   = _colormap[i*4+3]*255;
+        colorData[3 + i*3+0] = _colormap[i*4+0]*255;
+        colorData[3 + i*3+1] = _colormap[i*4+1]*255;
+        colorData[3 + i*3+2] = _colormap[i*4+2]*255;
+        opacityData[1 + i]   = _colormap[i*4+3]*255;
     }
+    opacityData[0] = opacityData[1];
+    opacityData[_colormapsize] = opacityData[_colormapsize+1];
+    colorData[0] = colorData[3];
+    colorData[1] = colorData[4];
+    colorData[2] = colorData[5];
+    colorData[_colormapsize*3+3] = colorData[_colormapsize*3];
+    colorData[_colormapsize*3+4] = colorData[_colormapsize*3+1];
+    colorData[_colormapsize*3+5] = colorData[_colormapsize*3+2];
     
     OSPData data = ospNewData(_colormapsize, OSP_UCHAR3, colorData);
     ospCommit(data);
@@ -271,10 +284,11 @@ int TwoDDataRenderer::OSPRayUpdate(OSPModel world)
     const int H = _texHeight;
     float *texCoords = new float[W*H*2];
     float *dataTex = (float*)_texture;
+    const float tfRange[2] = {(float)_colormapRange[0], (float)_colormapRange[1]};
     
     for (int i = 0; i < W*H; i++) {
-        texCoords[i*2] = (dataTex[i*2] - _colormapRange[0]) / (_colormapRange[1] - _colormapRange[0]);
-        texCoords[i*2+1] = dataTex[i*2+1];
+        texCoords[i*2] = glm::clamp((dataTex[i*2] - tfRange[0]) / (tfRange[1] - tfRange[0]), texCoordMin, texCoordMax);
+        texCoords[i*2+1] = 0;
     }
     
     data = ospNewData(W * H, OSP_FLOAT2, texCoords);
