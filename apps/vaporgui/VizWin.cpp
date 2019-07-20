@@ -212,6 +212,8 @@ void VizWin::_setUpProjMatrix() {
 	_getNearFarDist(posvec, dirvec, nearDist, farDist);
 	nearDist *= 0.25;
 	farDist *= 4.0;
+    vParams->SetNearClip(nearDist);
+    vParams->SetFarClip(farDist);
 
 	size_t width, height;
 	vParams->GetWindowSize(width, height);
