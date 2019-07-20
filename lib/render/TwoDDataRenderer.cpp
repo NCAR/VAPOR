@@ -895,7 +895,8 @@ const GLvoid *TwoDDataRenderer::_getTexture(
 		SetErrMsg("Invalid variable: %s ", varname.c_str());
 		return(NULL);
 	}
-	
+    
+    _hasMissingData = g->HasMissingData();
 
 	// For structured grid variable data are stored in a 2D array.
 	// For structured grid variable data are stored in a 1D array.

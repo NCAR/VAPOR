@@ -212,6 +212,8 @@ protected:
     OSPMaterial _material = nullptr;
     OSPTexture _ospColorTexture = nullptr;
     OSPTexture _ospOpacityTexture = nullptr;
+    
+    bool _hasMissingData = false;
 };
 };
 

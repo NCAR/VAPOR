@@ -369,11 +369,18 @@ int TwoDRenderer::OSPRayUpdate(OSPModel world)
     Cell *indices = new Cell[CW*CH];
 #define I(x,y) (int)((y)*W+(x))
     
-    
+    float *dataTex = (float*)_texture;
     size_t indexId = 0;
     
     for (int y = 0; y < CH; y++) {
         for (int x = 0; x < CW; x++) {
+            if (_hasMissingData) {
+                if (dataTex[I(x  ,y  )*2+1] != 0 ||
+                    dataTex[I(x+1,y  )*2+1] != 0 ||
+                    dataTex[I(x+1,y+1)*2+1] != 0 ||
+                    dataTex[I(x  ,y+1)*2+1] != 0)
+                    continue;
+            }
             indices[indexId++] = {
                 I(x  ,y  ), I(x+1,y  ), I(x+1,y+1), I(x  ,y+1)
             };
