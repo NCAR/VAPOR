@@ -346,6 +346,8 @@ int Visualizer::_renderOSPRay()
     glDisable(GL_DEPTH_TEST);
     glBindVertexArray(_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    
+    return 0;
 }
 
 void Visualizer::_loadMatricesFromViewpointParams()
