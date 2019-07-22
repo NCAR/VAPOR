@@ -37,6 +37,7 @@
 
 namespace VAPoR{
 
+    class OSPRayParams;
 //!
 //!
 
@@ -394,6 +395,12 @@ public:
 	);
  };
 
+    //! Obtain the OSPRayParams that are applicable in a particular Visualizer
+    //! window.
+    //!
+    //! \retval ptr OSPRayParams instance that is applicable.
+    //
+    OSPRayParams* GetOSPRayParams() const;
 
  //! Optain any paramers registered by the application
  //!

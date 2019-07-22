@@ -26,6 +26,7 @@
 #include <vapor/ParamsMgr.h>
 #include <vapor/ViewpointParams.h>
 #include <vapor/regionparams.h>
+#include <vapor/OSPRayParams.h>
 
 
 using namespace VAPoR;
@@ -85,6 +86,12 @@ void ParamsMgr::_init(
 			DatasetsParams::GetClassType(), DatasetsParams::GetClassType()
 		);
 	}
+    
+    if (! _otherParams->GetParams(OSPRayParams::GetClassType())) {
+        _otherParams->Create(
+                             OSPRayParams::GetClassType(), OSPRayParams::GetClassType()
+                             );
+    }
 
 	// Deal with any Params registered by the application
 	//
@@ -142,6 +149,12 @@ void ParamsMgr::_destroy() {
 ParamsMgr::~ParamsMgr() {
 	_destroy();
 }
+
+OSPRayParams* ParamsMgr::GetOSPRayParams() const {
+    return((OSPRayParams *)
+           _otherParams->GetParams(OSPRayParams::GetClassType())
+           );
+};
 
 void ParamsMgr::LoadState() {
 	_destroy();

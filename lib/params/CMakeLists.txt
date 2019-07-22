@@ -27,6 +27,7 @@ set (SRC
 	DatasetsParams.cpp
 	VolumeParams.cpp
 	VolumeIsoParams.cpp
+	OSPRayParams.cpp
 )
 
 set (HEADERS
@@ -57,6 +58,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/RayCasterParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeIsoParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/OSPRayParams.h
 )
 
 add_library (params SHARED ${SRC} ${HEADERS})

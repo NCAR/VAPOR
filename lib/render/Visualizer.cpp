@@ -45,7 +45,7 @@
 
 #include "vapor/ImageWriter.h"
 #include "vapor/GeoTIFWriter.h"
-
+#include <vapor/OSPRayParams.h>
 
 using namespace VAPoR;
 
@@ -313,6 +313,10 @@ int Visualizer::_renderOSPRay()
     delete [] glDepthBuffer;
     ospSetObject(_renderer, "maxDepthTexture", depthTexture);
     ospRelease(depthTexture);
+    
+    OSPRayParams *op = _paramsMgr->GetOSPRayParams();
+    ospSet1i(_renderer, "spp", op->GetValueLong(op->_samplesPerPixelTag, 1));
+    ospSet1i(_renderer, "aoSamples", op->GetAOSamples());
     
     ospCommit(_world);
     ospCommit(_renderer);
