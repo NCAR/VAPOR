@@ -55,16 +55,11 @@ private:
     VAPoR::FlowParams*  _params;
     VariablesWidget*    _variablesWidget;
 
-    // Sam's attempt to add more widgets
-    //   TODO: add validator/mask so that only numerical input 
-    //   between 0.001 and 1000 are valid.
-    QLineEdit*          _velocityMltp;
+    VLineEdit*          _velocityMltp;
 
     VCheckBox*          _steady;
 
-    // Sam's attempt to add more widgets
-    //   TODO: add validator/mask so that only positive integers are accepted
-    QLineEdit*          _steadyNumOfSteps;
+    VLineEdit*          _steadyNumOfSteps;
 
     VCheckBox*          _periodicX;
     VCheckBox*          _periodicY;

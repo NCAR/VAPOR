@@ -19,13 +19,13 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
                                 (DimFlags)(THREED) );
     _layout->addWidget( _variablesWidget, 0, 0 );
 
-    _velocityMltp = new QLineEdit( this );
+    _velocityMltp = new VLineEdit( this, "Velocity Multiplier", "1.0" );
     _layout->addWidget( _velocityMltp );
 
     _steady = new VCheckBox( this, "Use Steady Flow" );
     _layout->addWidget( _steady );
 
-    _steadyNumOfSteps = new QLineEdit( this );
+    _steadyNumOfSteps = new VLineEdit( this, "Steady Integration Steps", "100" );
     _layout->addWidget( _steadyNumOfSteps);
 
     _periodicX = new VCheckBox( this, "Particles periodic in X" );
@@ -36,8 +36,8 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
     _layout->addWidget( _periodicZ );
 
     connect( _steady,           SIGNAL( _checkboxClicked() ), this, SLOT( _steadyGotClicked() ) );
-    connect( _velocityMltp,     SIGNAL( editingFinished() ),  this, SLOT( _velocityMultiplierChanged() ) );
-    connect( _steadyNumOfSteps, SIGNAL( editingFinished() ),  this, SLOT( _steadyNumOfStepsChanged() ) );
+    connect( _velocityMltp,     SIGNAL( _editingFinished() ), this, SLOT( _velocityMultiplierChanged() ) );
+    connect( _steadyNumOfSteps, SIGNAL( _editingFinished() ), this, SLOT( _steadyNumOfStepsChanged() ) );
 
     connect( _periodicX,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodicClicked() ) );
     connect( _periodicY,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodicClicked() ) );
@@ -58,10 +58,10 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _steady->SetCheckState( isSteady );
 
     auto mltp = _params->GetVelocityMultiplier();
-    _velocityMltp->setText( QString::number( mltp, 'f', 3 ) );
+    _velocityMltp->SetEditText( QString::number( mltp, 'f', 3 ) );
 
     int numOfSteps = _params->GetSteadyNumOfSteps();
-    _steadyNumOfSteps->setText( QString::number( numOfSteps ) );
+    _steadyNumOfSteps->SetEditText( QString::number( numOfSteps ) );
 
     auto bools = _params->GetPeriodic();
     _periodicX->SetCheckState( bools[0] );
@@ -89,19 +89,45 @@ FlowVariablesSubtab::_steadyGotClicked()
 void
 FlowVariablesSubtab::_velocityMultiplierChanged()
 {
-    bool ok;
-    double d = _velocityMltp->text().toDouble( &ok );
-    if( ok )    // Scott: this verification is no longer needed once the line edit has its own validator
-        _params->SetVelocityMultiplier( d );
+    double newval, oldval;
+    oldval = _params->GetVelocityMultiplier();
+    try
+    {
+        newval = std::stod( _velocityMltp->GetEditText() );
+    }
+    catch ( const std::invalid_argument& e )
+    {
+        std::cerr << "bad input: " << _velocityMltp->GetEditText() << std::endl;
+        _velocityMltp->SetEditText( QString::number( oldval, 'f', 3 ) );
+        return;
+    }
+
+    if( newval >= 0.001 && newval <= 1.0 )    // in the valid range
+        _params->SetVelocityMultiplier( newval );
+    else
+        _velocityMltp->SetEditText( QString::number( oldval, 'f', 3 ) );
 }
 
 void 
 FlowVariablesSubtab::_steadyNumOfStepsChanged()
 {
-    bool ok;
-    int i = _steadyNumOfSteps->text().toInt( &ok );
-    if( ok )    // Scott: this verification is no longer needed once the line edit has its own validator
-        _params->SetSteadyNumOfSteps( i );
+    int newval, oldval;
+    oldval = (int)_params->GetSteadyNumOfSteps();
+    try
+    {
+        newval = std::stoi( _steadyNumOfSteps->GetEditText() );
+    }
+    catch ( const std::invalid_argument& e )
+    {
+        std::cerr << "bad input: " << _steadyNumOfSteps->GetEditText() << std::endl;
+        _steadyNumOfSteps->SetEditText( QString::number( oldval ) );
+        return;
+    }
+
+    if( newval >= 0 )    // in the valid range
+        _params->SetSteadyNumOfSteps( newval );
+    else
+        _steadyNumOfSteps->SetEditText( QString::number( oldval ) );
 }
 
 //
