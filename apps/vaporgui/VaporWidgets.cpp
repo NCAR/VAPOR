@@ -4,6 +4,7 @@
 #include "FileOperationChecker.h"
 #include "ErrorReporter.h"
 
+#include <QSlider>
 #include <QWidget>
 #include <QLabel>
 #include <QComboBox>
@@ -143,6 +144,121 @@ void VDoubleSpinBox::SetDecimals( int decimals ) {
 
 double VDoubleSpinBox::GetValue() const {
     return _value;
+}
+
+//
+// ====================================
+//
+VSlider::VSlider( QWidget* parent, const std::string& label, float min, float max )
+       : VaporWidget( parent, label )
+{
+    _min = min;
+    _max = max;
+    VAssert( _max > _min );
+    _currentVal = (_min + _max) / 2.0f;
+    
+    _qslider = new QSlider( this );
+    /* QSlider will always have its range in integers from 0 to 100, and step size 0.01. */
+    _qslider->setMinimum( 0 );
+    _qslider->setMaximum( 100 );
+    connect( _qslider, SIGNAL( sliderReleased() ), this, SLOT( _respondQSliderReleased() ) );
+    connect( _qslider, SIGNAL( sliderMoved(int) ), this, SLOT( _respondQSliderMoved(int) ) );
+    _layout->addWidget( _qslider );
+        
+    _qedit = new QLineEdit( this );
+    connect( _qedit, SIGNAL( editingFinished() ), this, SLOT( _respondQLineEdit() ) );
+    _layout->addWidget( _qedit );
+
+    this->_updateWidgetDisplay();
+}
+
+VSlider::~VSlider() {}
+
+void
+VSlider::SetRange( float min, float max )
+{
+    VAssert( min < max );
+    _min = min;
+    _max = max;
+
+    /* keep the old _currentVal if it's still within the range.
+       Otherwise, re-assign the middle point to _currentVal */
+    if( _currentVal < min ||  _currentVal > max )
+    {
+        _currentVal = (min + max) / 2.0f;
+        this->_updateWidgetDisplay();
+    }
+}
+
+void
+VSlider::SetCurrentValue( float val )
+{
+    /* Only respond if val is within range */
+    if( val >= _min && val <= _max )
+    {
+        _currentVal = val;
+        _updateWidgetDisplay();
+    }
+}
+
+float
+VSlider::GetCurrentValue() const
+{
+    return _currentVal;
+}
+
+void
+VSlider::_respondQSliderReleased()
+{
+    /* QSlider is always giving a valid value, so no need to validate range */
+    int newvalI = _qslider->value();
+    float perc  = (float)newvalI / 100.0f;
+    _currentVal = _min + perc * (_max - _min);
+    _qedit->setText( QString::number( _currentVal, 'f', 3 ) );
+    
+    emit _valueChanged();
+}
+
+void
+VSlider::_respondQSliderMoved( int newPos )
+{
+    /* QSlider is always at a valid position, so no need to validate range */
+    float perc   = (float)newPos / 100.0f;
+    float tmpVal = _min + perc * (_max - _min);
+    _qedit->setText( QString::number( tmpVal, 'f', 3 ) );
+}
+
+void
+VSlider::_respondQLineEdit()
+{
+    std::string newtext = _qedit->text().toStdString();
+    float   newval;
+
+    try
+    {
+        newval = std::stof( newtext );
+    }
+    catch ( const std::invalid_argument& e )
+    {
+        std::cerr << "bad input: " << newtext << std::endl;
+        _qedit->setText( QString::number( _currentVal, 'f', 3 ) );
+        return;
+    }
+
+    /* Now update _currentVal, _qslider, and emit signal */
+    _currentVal = newval;
+    float perc = (_currentVal - _min) / (_max - _min) * 100.0f;
+    _qslider->setValue( std::lround( perc ) );
+
+    emit _valueChanged();
+}
+
+void
+VSlider::_updateWidgetDisplay()
+{
+    float perc = (_currentVal - _min) / (_max - _min) * 100.0f;
+    _qslider->setValue( std::lround( perc ) );
+    _qedit->setText( QString::number( _currentVal, 'f', 3 ) );
 }
 
 //
