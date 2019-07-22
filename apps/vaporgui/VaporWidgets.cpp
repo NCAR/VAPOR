@@ -145,13 +145,16 @@ double VDoubleSpinBox::GetValue() const {
     return _value;
 }
 
+//
+// ====================================
+//
+
 VLineEdit::VLineEdit(
         QWidget *parent,
         const std::string& labelText,
         const std::string& editText
     ) :
-    VaporWidget(parent, labelText),
-    _validator( nullptr )
+    VaporWidget(parent, labelText)
 {
     _text = editText;
 
@@ -160,20 +163,11 @@ VLineEdit::VLineEdit(
 
     SetEditText( QString::fromStdString( editText ) );
 
-    connect( _edit, SIGNAL( returnPressed() ),
-        this, SLOT( _returnPressed() ) );
+    connect( _edit, SIGNAL( editingFinished() ),
+        this, SLOT( _relaySignal() ) );
 }
 
-VLineEdit::~VLineEdit() {
-    if (_validator != nullptr) {
-        delete _validator;
-        _validator = nullptr;
-    }
-}
-
-void VLineEdit::SetValidator( QValidator* v ) {
-    _validator = v;
-}
+VLineEdit::~VLineEdit() { }
 
 void VLineEdit::SetEditText( const std::string& text )
 {
@@ -183,8 +177,6 @@ void VLineEdit::SetEditText( const std::string& text )
 void VLineEdit::SetEditText( const QString& text )
 {
     _edit->setText( text );
-   
-    // set local copy after line edit runs validation
     _text = _edit->text().toStdString();
 }
 
@@ -192,24 +184,17 @@ std::string VLineEdit::GetEditText() const {
     return _text;
 }
 
-void VLineEdit::_returnPressed() {
+void VLineEdit::_relaySignal() {
     QString text = _edit->text();
-    if ( _validator != nullptr ) {
-        int i=0;
-        const QValidator::State state = _validator->validate( text, i );
-
-        if ( state == QValidator::Acceptable )
-            _text = _edit->text().toStdString();
-
-        _edit->setText( QString::fromStdString( _text ) );
-    }
-    else {
-        _edit->setText( text );
-        _text = text.toStdString();    
-    }
+    _edit->setText( text );
+    _text = text.toStdString();    
 
     emit _editingFinished();
 }
+
+//
+// ====================================
+//
 
 VPushButton::VPushButton(
         QWidget *parent,
@@ -329,10 +314,14 @@ VFileSelector::VFileSelector(
     _lineEdit = new QLineEdit(this);
     _layout->addWidget( _lineEdit );
 
+    QString defaultPath = QString::fromStdString( GetPath() );
+    if ( _filePath.empty() )
+        defaultPath = QDir::homePath();
+
     _fileDialog = new QFileDialog(
         this,
         QString::fromStdString( labelText ),
-        QString::fromStdString( GetPath() )
+        defaultPath
     );
     
     _fileMode = fileMode;
@@ -355,6 +344,9 @@ void VFileSelector::SetPath( const QString& path) {
 }
 
 void VFileSelector::SetPath( const std::string& path ) {
+    if ( path.empty() )
+        return;
+
     if ( !_isFileOperable( path ) ) {
         MSG_ERR(
             FileOperationChecker::GetLastErrorMessage().toStdString()
