@@ -7,6 +7,7 @@ class QComboBox;
 class QCheckBox;
 class QPushButton;
 class QLineEdit;
+class QSlider;
 class QSpacerItem;
 class QHBoxLayout;
 class QSpinBox;
@@ -136,6 +137,47 @@ private slots:
 
 private:
     std::string _text;
+};
+
+//
+// ====================================
+// VSlider augments QSlider by providing a text box displaying the value.
+//
+// Note: this widget is re-implemented by Sam instead of using the existing
+//   QSliderEdit class because:
+//   1) this class does NOT use a UI file following the VWidget convension;
+//   2) this class does NOT validate the input as QSliderEdit does; and
+//   3) this class does NOT use the Combo class that's deprecated.
+//
+// Note2: QSlider class always uses integer type for recording its positions.
+//   Thus this widget uses an internal variable to keep the actual value.
+// ====================================
+//
+class VSlider : public VaporWidget
+{
+    Q_OBJECT
+
+public:
+    VSlider( QWidget* parent, const std::string& label, float min, float max );
+    ~VSlider();
+
+    void  SetRange( float min, float max );
+    void  SetCurrentValue( float val );
+    float GetCurrentValue() const;
+
+signals:
+    /* This signal is emitted representing the entire widget */
+    void  _valueChanged();
+
+private slots:
+    void  _respondQSliderReleased();    // emit signal
+    void  _respondQSliderMoved(int);    // sync qSlider and qLineEdit
+    void  _respondQLineEdit();          // emit signal
+
+private:
+    float       _min, _max, _currentVal, _qsliderStepSize;
+    QSlider*    _qslider;
+    QLineEdit*  _qedit;
 };
 
 //
