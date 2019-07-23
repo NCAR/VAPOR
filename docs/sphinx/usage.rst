@@ -18,7 +18,7 @@ _______________
 
 Displays the user's 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.  These 3D variables may be offset by a height variable.
 
-.. figure:: ../DVR.png
+.. figure:: ../_images/DVR.png
     :align: center
     :figclass: align-center
 
@@ -27,7 +27,7 @@ ___________
 
 Displays the user's 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.  These 3D variables may be offset by a height variable.
 
-.. figure:: ../IsoSurface.png
+.. figure:: ../_images/IsoSurface.png
     :align: center
     :figclass: align-center
 
@@ -36,7 +36,7 @@ ______
 
 Displays an axis-aligned slice or cutting plane through a 3D variable.  Slices are sampled along the plane's axes according to a sampling rate define by the user.
 
-.. figure:: ../Slice.png
+.. figure:: ../_images/Slice.png
     :align: center
     :figclass: align-center
 
@@ -45,7 +45,7 @@ ________
 
 Displays a series of user defined contours along a two dimensional plane within the user's domain.\n\nContours may hae constant coloration, or may be colored according to a secondary variable.  Contours may be displaced by a height variable.
 
-.. figure:: ../Contours.png
+.. figure:: ../_images/Contours.png
     :align: center
     :figclass: align-center
 
@@ -54,7 +54,7 @@ _____
 
 Displays an array of arrows with the users domain, with custom dimensions that are defined by the user in the X, Y, and Z axes.  The arrows represent a vector whos direction is determined by up to three user-defined variables. Barbs can have a constant color applied to them, or they may be colored according to an additional user-defined variable.
 
-.. figure:: ../Barbs.png
+.. figure:: ../_images/Barbs.png
     :align: center
     :figclass: align-center
 
@@ -63,7 +63,7 @@ _________________________
 
 Displays the user's 2D data variables along the plane described by the source data file. These 2D variables may be offset by a height variable.
 
-.. figure:: ../TwoDData.png
+.. figure:: ../_images/TwoDData.png
     :align: center
     :figclass: align-center
 
@@ -72,7 +72,7 @@ ___________________
 
 Displays a georeferenced image that is automatically reprojected and fit to the user's data, as long as the data contains georeference metadata.  The image renderer may be offset by a height variable to show bathymetry or mountainous terrain.
 
-.. figure:: ../Image.png
+.. figure:: ../_images/Image.png
     :align: center
     :figclass: align-center
 
@@ -81,7 +81,7 @@ __________
 
 Displays a wireframe of the mesh for the selected variable
 
-.. figure:: ../WireFrame.png
+.. figure:: ../_images/WireFrame.png
     :align: center
     :figclass: align-center
 
@@ -105,7 +105,7 @@ Each renderer is unique, the specification of their parameters is mostly the sam
 
 See the :ref:`Renderers <renderers>` section for mor information on how each of these tabs work for a given renderer.  Again, they all operate in the same way for the most part.
 
-.. figure:: ../variablesTab.png
+.. figure:: ../_images/variablesTab.png
     :align: center
     :width: 500 
     :figclass: align-center
@@ -126,7 +126,7 @@ The appearance tab controls the `color <controllingColor>`_ and `opacity <contro
 
 The Transfer Function consists of a `Probability Density Function (PDF) <https://en.wikipedia.org/wiki/Probability_density_function>`_ of your currently selected variable.  Underneath the PDF is a color bar that shows the colors that get applied to the values located directly above it.
 
-.. figure:: ../transferFunctionDocumentation.png
+.. figure:: ../_images/transferFunctionDocumentation.png
     :align: center
     :figclass: align-center
 
@@ -136,7 +136,7 @@ In the figure above, we can see that our transfer function is operating on the v
 
 Below the histogram is a button to update the histogram, which is calculated only when the user requests it to save on compute time.  Options to change the color interpolation type are also available.
 
-.. figure:: ../TFOptions.png
+.. figure:: ../_images/TFOptions.png
     :align: center
     :width: 500
     :figclass: align-center
@@ -152,7 +152,7 @@ Vapor's default color map is called CoolWarm.  This is arbitrary, and may not su
 
 The colors in the color map be moved by creating a color-control-point, and dragging it.  To create a new color-control-point, right click on the Colorbar, and then click "New Color Control Point."  The color at this control point may now be dragged to suit your needs.
 
-.. figure:: ../colorControlPoint.gif
+.. figure:: ../_images/colorControlPoint.gif
     :align: center
     :figclass: align-center
 
@@ -165,7 +165,7 @@ Controlling Opacity
 
 Opacity is controlled by the green line on top of the PDF.  The higher this green line is on the PDF's Y axis, the more opaque the colors will be at that point.  For example, the green bar is set to Y=0 over the blue values in the image below.  All of these values will be masked out.  The green bar then ramps up, and the values become more opaque, until we reach full opacity in the red region.
 
-.. figure:: ../opacityMap.png
+.. figure:: ../_images/opacityMap.png
     :align: center
     :width: 500 
     :figclass: align-center
@@ -179,7 +179,7 @@ ____________
 
 The Geometry tab controls where your renderer is drawing, within the space of your simulation.  By excluding regions of data from being drawn, occluded features may be seen more clearly. Compute time will also be reduced, as well as the memory needed for a given renderer.
 
-.. figure:: ../geometryWidget.png
+.. figure:: ../_images/geometryWidget.png
     :align: center
     :width: 500
     :figclass: align-center
@@ -188,7 +188,7 @@ The Geometry tab controls where your renderer is drawing, within the space of yo
     
 If you have a region of interest in another renderer, that region can be copied in the Geometry tab.
 
-.. figure:: ../copyRegionWidget.png
+.. figure:: ../_images/copyRegionWidget.png
     :align: center
     :width: 500 
     :figclass: align-center
@@ -198,7 +198,7 @@ If you have a region of interest in another renderer, that region can be copied 
 
 Users can apply transforms to scale, translate, and rotate their renderers on X, Y, or Z.  The origin used for these transforms may also be adjusted.
 
-.. figure:: ../transformTable.png
+.. figure:: ../_images/transformTable.png
     :align: center
     :width: 500 
     :figclass: align-center
@@ -209,14 +209,14 @@ Users can apply transforms to scale, translate, and rotate their renderers on X,
 
 Users may also control the geometry of their renderer by using the `Region Mouse Mode`, located at the top left corner of the application.  This will enable a red box with handlebars that can be right-clicked to grow or shrink the region beingh rendered on any axis.
 
-.. figure:: ../selectRegionMouseMode.png
+.. figure:: ../_images/selectRegionMouseMode.png
     :align: center
     :width: 400 
     :figclass: align-center
 
     Select the Region Mouse Mode for interactive geometry adjustment
 
-.. figure:: ../regionMouseMode.png
+.. figure:: ../_images/regionMouseMode.png
     :align: center
     :width: 500 
     :figclass: align-center
@@ -230,14 +230,14 @@ ______________
 
 Quantifying the colors to your viewers can be done by adding a colorbar in the Annotation tab.
 
-.. figure:: ../colorbarTab.png
+.. figure:: ../_images/colorbarTab.png
     :align: center
     :width: 500 
     :figclass: align-center
 
     Colorbar size and position controlls, located in the Annotation tab
 
-.. figure:: ../colorbar.png
+.. figure:: ../_images/colorbar.png
     :align: center
     :figclass: align-center
 
@@ -257,7 +257,7 @@ ____________________
 
 The Volume and Isosurface renderers perform a method called raycasting, where a line is drawn from each pixel on the screen into the loaded dataset.  Each line samples data values and returns a color, according to what's been configured in the Transfer Function.  Additional appearance settings for raycasting renderers are naturally found in the Appearance tab.
 
-.. figure:: ../raycastingOptions.png
+.. figure:: ../_images/raycastingOptions.png
     :align: center
     :width: 500 
     :figclass: align-center
@@ -269,14 +269,14 @@ _________________________
 
 The Isosurface Appearance tab is unique in that it allows the user to select up to four values to draw isosurfaces with.
 
-.. figure:: ../isovalueSelector.png
+.. figure:: ../_images/isovalueSelector.png
     :align: center
     :width: 500 
     :figclass: align-center
 
 Isosurfaces can be colored by a secondary variable, and therefore have a Transfer Function that is split into an isovalue selector, and a color mapping.  When the user disables the "Use Constant Color" checkbox, the Color Mapped Variable tab will be enabled.
 
-.. figure:: ../isosurfaceTF.png
+.. figure:: ../_images/isosurfaceTF.png
     :align: center
     :width: 750 
     :figclass: align-center
@@ -288,14 +288,14 @@ _______________________
 
 The TwoDData, Barb, Contour, Image, and Wireframe renderers all have the option to offset the data by a height variable.
 
-.. figure:: ../contourHeightSelection.png
+.. figure:: ../_images/contourHeightSelection.png
     :align: center
     :width: 500 
     :figclass: align-center
 
     Selecting a height variable in the Contour renderer
 
-.. figure:: ../contourWithHeight.png
+.. figure:: ../_images/contourWithHeight.png
     :align: center
     :width: 500 
     :figclass: align-center
@@ -307,7 +307,7 @@ _____________________
 
 The Slice renderer samples variable data at a fixed rate across a two dimensional plane.  Usually the default sampling rate is sufficient, but it can be increased with the Quality controller in the Appearance tab.
 
-.. figure:: ../sliceQualityAdjustment.png
+.. figure:: ../_images/sliceQualityAdjustment.png
     :align: center
     :width: 500 
     :figclass: align-center
@@ -319,7 +319,7 @@ _________________
 
 The Appearance tab for the Contour renderer includes controls for the contour count, spacing between contours, minimum contour value, and the width of the contours being rendered.
 
-.. figure:: ../contourAppearance.png
+.. figure:: ../_images/contourAppearance.png
     :align: center
     :width: 500 
     :figclass: align-center
@@ -334,7 +334,7 @@ The Barb renderer operates on a set of vectors to determine which direction they
 
 Users may also offset the barbs by a height variable, and color them according to an addional variable if desired.  For example, users may have wind barbs being drawn based on their U, V, and W variables, and colored by their Pressure variable.
 
-.. figure:: ../barbVariableSelector.png
+.. figure:: ../_images/barbVariableSelector.png
     :align: center
     :width: 500 
     :figclass: align-center
@@ -348,7 +348,7 @@ The Image renderer is the only one that does not have a Transfer Function.  All 
 
 The Image renderer is also the only renderer than can extend beyond the domain of the user's data.  This can be done by switching to the :ref:`Region Mouse Mode <regionMouseMode>`.
 
-.. figure:: ../imagePastDomain.png
+.. figure:: ../_images/imagePastDomain.png
     :align: center
     :width: 500 
     :figclass: align-center
@@ -379,7 +379,7 @@ Projection strings can also be modified if a dataset is georeferenced.
 
 Finally, camera position and direction values are displayed here and may be changed numerically for convenience.
 
-.. figure:: ../viewpointTab.png
+.. figure:: ../_images/viewpointTab.png
     :align: center
     :width: 500 
     :figclass: align-center
@@ -391,7 +391,7 @@ Global Settings
 
 The last top-level tab next to the Renderers and Navigation tabs is called Settings.  This is where Vapor's session file save frequency is set, as well as programatic settings like window sizes and cache sizes.
 
-.. figure:: ../settingsTab.png
+.. figure:: ../_images/settingsTab.png
     :align: center
     :width: 500 
     :figclass: align-center
@@ -410,7 +410,7 @@ The Python Engine is a tool that allows users to derive new variables based on t
 
 Note: Input variables must exist on the same grid to produce a valid output.
 
-.. figure:: ../pythonEditor.png
+.. figure:: ../_images/pythonEditor.png
     :align: center
     :width: 500 
     :figclass: align-center
@@ -420,14 +420,14 @@ ________
 
 Users can generate two-dimensional line lots of their variables using the Plot Utility.  Line plots can be done either through two points in space at a single timestep, or through a single point across a timespan.
 
-.. figure:: ../plotUtility.png
+.. figure:: ../_images/plotUtility.png
     :align: center
     :width: 500 
     :figclass: align-center
 
     The user interface for hte Plot Utility
 
-.. figure:: ../plot.png
+.. figure:: ../_images/plot.png
     :align: center
     :width: 500 
     :figclass: align-center
@@ -439,7 +439,7 @@ __________
 
 Statistical values can help users select meaningful values for renderer color extents, isosurface values, and contour values.  Vapor currently supports calculating the minimum, maximum, mean, median, and mode for variables.  The spatial and temporal extents of the variables being queried is adjustable by the user.
 
-.. figure:: ../statistics.png
+.. figure:: ../_images/statistics.png
     :align: center
     :width: 500 
     :figclass: align-center
