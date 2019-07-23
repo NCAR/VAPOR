@@ -10,6 +10,7 @@ class QLineEdit;
 class QSlider;
 class QSpacerItem;
 class QHBoxLayout;
+class QVBoxLayout;
 class QSpinBox;
 class QDoubleSpinBox;
 
@@ -178,6 +179,42 @@ private:
     float       _min, _max, _currentVal;
     QSlider*    _qslider;
     QLineEdit*  _qedit;
+};
+
+//
+// ====================================
+// VRange combines two VSliders, 
+// representing the min and max values of a range.
+// ====================================
+//
+class VRange : public QWidget
+{
+    Q_OBJECT
+
+public:
+    VRange( QWidget* parent, float min, float max );
+    ~VRange();
+
+    void  SetRange( float min, float max );
+    void  SetCurrentValMin(    float );
+    void  SetCurrentValMax(    float );
+    void  GetCurrentValRange(  float& rangeMin, float& rangeMax );
+
+signals:
+    void  _rangeChanged();
+
+private slots:
+    void  _respondMinSlider();
+    void  _respondMaxSlider();
+
+private:
+    VSlider        *_minSlider, *_maxSlider;
+    QVBoxLayout*    _layout;
+
+    /* In case _minSlider is changed, adjust _maxSlider if necessary. */
+    void  _adjustMaxToMin();    
+    /* In case _maxSlider is changed, adjust _minSlider if necessary. */
+    void  _adjustMinToMax();
 };
 
 //
