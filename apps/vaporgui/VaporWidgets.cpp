@@ -253,8 +253,8 @@ VSlider::VSlider( QWidget* parent, const std::string& label, float min, float ma
     _layout->addWidget( _qedit );
 
     /* update widget display */
-    float perc = (_currentVal - _min) / (_max - _min) * 100.0f;
-    _qslider->setValue( std::lround( perc ) );
+    float percent = (_currentVal - _min) / (_max - _min) * 100.0f;
+    _qslider->setValue( std::lround( percent ) );
     _qedit->setText( QString::number( _currentVal, 'f', 3 ) );
 }
 
@@ -271,9 +271,9 @@ VSlider::SetRange( float min, float max )
        Otherwise, re-assign the middle point to _currentVal */
     if( _currentVal < min ||  _currentVal > max )
     {
-        _currentVal = (min + max) / 2.0f;
-        float perc = (_currentVal - _min) / (_max - _min) * 100.0f;
-        _qslider->setValue( std::lround( perc ) );
+        _currentVal   = (min + max) / 2.0f;
+        float percent = (_currentVal - _min) / (_max - _min) * 100.0f;
+        _qslider->setValue( std::lround( percent ) );
         _qedit->setText( QString::number( _currentVal, 'f', 3 ) );
     }
 }
@@ -284,9 +284,9 @@ VSlider::SetCurrentValue( float val )
     /* Only respond if val is within range */
     if( val >= _min && val <= _max )
     {
-        _currentVal = val;
-        float perc = (_currentVal - _min) / (_max - _min) * 100.0f;
-        _qslider->setValue( std::lround( perc ) );
+        _currentVal   = val;
+        float percent = (_currentVal - _min) / (_max - _min) * 100.0f;
+        _qslider->setValue( std::lround( percent ) );
         _qedit->setText( QString::number( _currentVal, 'f', 3 ) );
     }
 }
@@ -301,9 +301,9 @@ void
 VSlider::_respondQSliderReleased()
 {
     /* QSlider is always giving a valid value, so no need to validate range */
-    int newvalI = _qslider->value();
-    float perc  = (float)newvalI / 100.0f;
-    _currentVal = _min + perc * (_max - _min);
+    int newvalI    = _qslider->value();
+    float percent  = (float)newvalI / 100.0f;
+    _currentVal = _min + percent * (_max - _min);
     _qedit->setText( QString::number( _currentVal, 'f', 3 ) );
     
     emit _valueChanged();
@@ -313,8 +313,8 @@ void
 VSlider::_respondQSliderMoved( int newPos )
 {
     /* QSlider is always at a valid position, so no need to validate range */
-    float perc   = (float)newPos / 100.0f;
-    float tmpVal = _min + perc * (_max - _min);
+    float percent   = (float)newPos / 100.0f;
+    float tmpVal    = _min + percent * (_max - _min);
     _qedit->setText( QString::number( tmpVal, 'f', 3 ) );
 }
 
@@ -342,9 +342,9 @@ VSlider::_respondQLineEdit()
     }
 
     /* Now update _currentVal, _qslider, and emit signal */
-    _currentVal = newval;
-    float perc = (_currentVal - _min) / (_max - _min) * 100.0f;
-    _qslider->setValue( std::lround( perc ) );
+    _currentVal   = newval;
+    float percent = (_currentVal - _min) / (_max - _min) * 100.0f;
+    _qslider->setValue( std::lround( percent ) );
 
     emit _valueChanged();
 }
