@@ -118,6 +118,7 @@ private slots:
     void _outputButtonClicked();
 
     void _catchASignal();
+    void _catch2Signal();
 
 private:
     VAPoR::FlowParams*      _params;
@@ -132,6 +133,7 @@ private:
     VComboBox*              _flowDirection;
 
     VSlider*                _slider1;
+    VRange*                 _range1;
 };
 
 //

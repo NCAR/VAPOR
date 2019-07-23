@@ -193,7 +193,9 @@ class VRange : public QWidget
     Q_OBJECT
 
 public:
-    VRange( QWidget* parent, float min, float max );
+    VRange( QWidget* parent, float min, float max,
+            const std::string& minLabel = "Min",
+            const std::string& maxLabel = "Max"  );
     ~VRange();
 
     void  SetRange( float min, float max );

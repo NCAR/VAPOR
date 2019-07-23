@@ -150,12 +150,13 @@ double VDoubleSpinBox::GetValue() const {
 //
 // ====================================
 //
-VRange::VRange( QWidget* parent, float min, float max ) : QWidget( parent )
+VRange::VRange( QWidget* parent, float min, float max, const std::string& minLabel, 
+                const std::string& maxLabel ) : QWidget( parent )
 {
     _layout    = new QVBoxLayout(this);
 
-    _minSlider = new VSlider( this, "Min", min, max );
-    _maxSlider = new VSlider( this, "Max", min, max );
+    _minSlider = new VSlider( this, minLabel, min, max );
+    _maxSlider = new VSlider( this, maxLabel, min, max );
     connect( _minSlider, SIGNAL( _valueChanged() ), this, SLOT( _respondMinSlider() ) );
     connect( _maxSlider, SIGNAL( _valueChanged() ), this, SLOT( _respondMaxSlider() ) );
 

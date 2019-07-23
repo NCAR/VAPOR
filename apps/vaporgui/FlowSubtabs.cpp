@@ -198,12 +198,25 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     _slider1 = new VSlider( this, "value", -10.0, -5.0 );
     _layout->addWidget( _slider1 );
     connect( _slider1, SIGNAL( _valueChanged() ), this, SLOT( _catchASignal() ) );
+
+
+    _range1 = new VRange( this, 10.0, 20.0, "Range Low", "Range Heigh" );
+    _layout->addWidget( _range1 );
+    connect( _range1, SIGNAL( _rangeChanged() ), this, SLOT( _catch2Signal() ) );
 }
 
 void
 FlowSeedingSubtab::_catchASignal()
 {
-    std::cout << _slider1->GetCurrentValue() << std::endl;
+    std::cout << "slider value = " << _slider1->GetCurrentValue() << std::endl;
+}
+
+void
+FlowSeedingSubtab::_catch2Signal()
+{
+    float rangeMin, rangeMax;
+    _range1->GetCurrentValRange( rangeMin, rangeMax );
+    printf( "range (min, max) = (%f, %f)\n", rangeMin, rangeMax );
 }
 
 void
