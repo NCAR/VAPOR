@@ -159,7 +159,7 @@ VSlider::VSlider( QWidget* parent, const std::string& label, float min, float ma
     
     _qslider = new QSlider( this );
     _qslider->setOrientation( Qt::Horizontal );
-    /* QSlider will always have its range in integers from 0 to 100, and step size 0.01. */
+    /* QSlider will always have its range in integers from 0 to 100. */
     _qslider->setMinimum( 0 );
     _qslider->setMaximum( 100 );
     connect( _qslider, SIGNAL( sliderReleased() ), this, SLOT( _respondQSliderReleased() ) );
