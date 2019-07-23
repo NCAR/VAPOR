@@ -117,6 +117,8 @@ private slots:
     void _flowDirectionChanged( int newIdx );
     void _outputButtonClicked();
 
+    void _catchASignal();
+
 private:
     VAPoR::FlowParams*      _params;
 
@@ -128,6 +130,8 @@ private:
     QPushButton*            _outputButton;
 
     VComboBox*              _flowDirection;
+
+    VSlider*                _slider1;
 };
 
 //

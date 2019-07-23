@@ -193,6 +193,17 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     _outputButton = new QPushButton( "Output Flow Lines", this );
     _layout->addWidget( _outputButton );
     connect( _outputButton, SIGNAL( clicked() ), this, SLOT( _outputButtonClicked() ) );
+
+
+    _slider1 = new VSlider( this, "value", -10.0, -5.0 );
+    _layout->addWidget( _slider1 );
+    connect( _slider1, SIGNAL( _valueChanged() ), this, SLOT( _catchASignal() ) );
+}
+
+void
+FlowSeedingSubtab::_catchASignal()
+{
+    std::cout << _slider1->GetCurrentValue() << std::endl;
 }
 
 void
