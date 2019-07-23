@@ -150,7 +150,7 @@ private:
 //   3) this class does NOT use the Combo class that's deprecated.
 //
 // Note2: QSlider class always uses integer type for recording its positions.
-//   Thus this widget uses an internal variable to keep the actual value.
+//   Thus this widget uses an internal variable to keep the actual value in float.
 // ====================================
 //
 class VSlider : public VaporWidget
@@ -175,7 +175,7 @@ private slots:
     void  _respondQLineEdit();          // emit signal
 
 private:
-    float       _min, _max, _currentVal, _qsliderStepSize;
+    float       _min, _max, _currentVal;
     QSlider*    _qslider;
     QLineEdit*  _qedit;
 };
