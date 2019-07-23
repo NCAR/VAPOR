@@ -73,3 +73,12 @@ void ParamsWidgetNumber::valueChangedSlot()
     if (_params)
         _params->SetValueLong(_tag, _tag, _lineEdit->text().toInt());
 }
+
+
+
+
+ParamsWidgetGroup::ParamsWidgetGroup(const std::string &title)
+: QGroupBox(title.c_str())
+{
+    setLayout(new QVBoxLayout);
+}

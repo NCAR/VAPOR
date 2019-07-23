@@ -3,6 +3,7 @@
 #include <QWidget>
 #include <QCheckBox>
 #include <QLineEdit>
+#include <QGroupBox>
 #include <vapor/ParamsBase.h>
 
 class ParamsWidget : public QWidget {
@@ -48,4 +49,14 @@ public:
     
 private slots:
     void valueChangedSlot();
+};
+
+
+
+
+class ParamsWidgetGroup : public QGroupBox {
+    Q_OBJECT
+    
+public:
+    ParamsWidgetGroup(const std::string &title);
 };

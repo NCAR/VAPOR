@@ -6,7 +6,7 @@
 #include "qcolordialog.h"
 
 #include <qlabel.h>
-#include <QScrollArea>
+#include <QGroupBox>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -28,37 +28,17 @@ OSPRayEventRouter::OSPRayEventRouter(
 ) : QWidget(parent),
 	EventRouter(ce, OSPRayParams::GetClassType())
 {
-    QVBoxLayout *GLayout = new QVBoxLayout;
+    QVBoxLayout *layout = new QVBoxLayout;
     this->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Minimum);
-    this->setLayout(GLayout);
+    this->setLayout(layout);
     
-    QWidget *item = new QWidget;
-    QHBoxLayout *layout = new QHBoxLayout;
-    layout->setMargin(0);
-    item->setLayout(layout);
+    ParamsWidgetGroup *group = new ParamsWidgetGroup("Global Config");
     
-    QLabel *label = new QLabel("Label 1");
-    QSpacerItem *spacer = new QSpacerItem(108, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    QComboBox *box = new QComboBox();
-    box->addItem("1");
-    box->addItem("2");
-    box->addItem("3");
+    _addParamsWidget(group, new ParamsWidgetNumber(OSPRayParams::_aoSamplesTag, "Ambient Occlusion Samples"));
+    _addParamsWidget(group, new ParamsWidgetNumber(OSPRayParams::_samplesPerPixelTag));
     
-    //connect(box, SIGNAL(stateChanged(int)), this, SLOT(on_memoryCheckbox_stateChanged(int)));
-    
-    layout->addWidget(label);
-    layout->addItem(spacer);
-    layout->addWidget(box);
-    
-    this->layout()->addWidget(item);
-    
-    _addParamsWidget(this, new ParamsWidgetCheckbox("test", "Test Label"));
-    _addParamsWidget(this, new ParamsWidgetNumber(OSPRayParams::_aoSamplesTag, "Ambient Occlusion Samples"));
-    _addParamsWidget(this, new ParamsWidgetNumber(OSPRayParams::_samplesPerPixelTag));
-    
-    
-    
-    GLayout->addStretch();
+    layout->addWidget(group);
+    layout->addStretch();
 }
 
 
