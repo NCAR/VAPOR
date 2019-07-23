@@ -14,6 +14,7 @@ class QVBoxLayout;
 class QSpinBox;
 class QDoubleSpinBox;
 
+#include <cmath>
 #include <QTabWidget>
 
 //
