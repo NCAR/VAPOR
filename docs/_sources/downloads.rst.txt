@@ -64,9 +64,7 @@ Vapor's current master branch source code can be downloaded from GitHub_.
 
 **Step 2 - Install Vapor's third party libraries**
 
-Windows users may download the libraries here_.
-
-.. _here: https://drive.google.com/open?id=1yPE-7stLWsfaVGv1S4aiYFfS6kR_k4y5
+Windows users may download the libraries `here <https://drive.google.com/open?id=1yPE-7stLWsfaVGv1S4aiYFfS6kR_k4y5>`_.
 
 *Linux and OSX*
 
