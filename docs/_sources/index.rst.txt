@@ -22,7 +22,7 @@ Users can perform ad-hoc analysis with VAPOR’s interactive Python interpreter;
 
 VAPOR is a product of the National Center for Atmospheric Research’s Computational and Information Systems Lab. Support for VAPOR is provided by the U.S. National Science Foundation (grants # 03-25934 and 09-06379, ACI-14-40412), and by the Korea Institute of Science and Technology Information
 
-.. image:: ../vaporBanner.png
+.. image:: ../_images/vaporBanner.png
 
 .. toctree::
    :caption: Contents:
