@@ -71,11 +71,14 @@ Windows users may download the libraries `here <https://drive.google.com/open?id
 If building on Linux or OSX, third party libraries are unable to be written to arbitrary directory locations.  If you choose do download the pre-built libraries, they must be unpacked in the following directories:
 
 OSX: /glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64/
+
+    `Link to OSX third-party libraries <https://drive.google.com/open?id=1JHl6kHkBvbd17BUC-9nvWZupjyWfwyw7>`_
+
 Linux: /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/
 
-`Link to OSX third-party libraries <https://drive.google.com/open?id=1JHl6kHkBvbd17BUC-9nvWZupjyWfwyw7>`_
-`Link to Ubuntu third-party libraries <https://drive.google.com/open?id=0B0dQMtxB89M0azF5RW1RSE5qcTg>`_
-`Link to CentOS third-party libraries <https://drive.google.com/open?id=1_JdUuiy_iQUuIDoPyBn2pupBTz-LS4pM>`_
+    `Link to Ubuntu third-party libraries <https://drive.google.com/open?id=0B0dQMtxB89M0azF5RW1RSE5qcTg>`_
+
+    `Link to CentOS third-party libraries <https://drive.google.com/open?id=1_JdUuiy_iQUuIDoPyBn2pupBTz-LS4pM>`_
 
 Alternatively, you can build the libraries youself and store them wherever you want.  If you choose to do this, you must also configure CMake to point to your custom directory.
 
