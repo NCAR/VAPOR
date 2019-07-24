@@ -255,7 +255,6 @@ private:
  );
  void buildWebHelpMenus();
 
- bool event(QEvent*);
  void stopAnimCapture(string vizName){
 	if (vizName == _capturingAnimationVizName) endAnimCapture();
  }
