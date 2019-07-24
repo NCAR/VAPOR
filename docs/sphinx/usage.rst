@@ -8,7 +8,7 @@ Vapor 3 is comprised of a set of tools called Renderers.  Each Renderer visualiz
 
 We recommend that all users either watch our :ref:`Introductory Tutorial <introTutorial>` or work through the :ref:`quickStartGuide`.
 
-If any feature in Vapor is not sufficenty self describing in the applicaiton, this is where to find elaboration.  Please :ref:`contact our team <contactAndContribute>` if you think you may have found a bug, usability issue, or you'd like to request an enhancement.
+If any feature in Vapor is not sufficienty self describing in the application, this is where to find elaboration.  Please :ref:`contact our team <contactAndContribute>` if you think you may have found a bug, usability issue, or you'd like to request an enhancement.
 
 The Renderers
 -------------
@@ -43,7 +43,7 @@ Displays an axis-aligned slice or cutting plane through a 3D variable.  Slices a
 Contours
 ________
 
-Displays a series of user defined contours along a two dimensional plane within the user's domain.  Contours may hae constant coloration.  Contours may be displaced by a height variable.
+Displays a series of user defined contours along a two dimensional plane within the user's domain.  Contours may have constant coloration.  Contours may be displaced by a height variable.
 
 .. figure:: ../_images/Contours.png
     :align: center
@@ -52,7 +52,7 @@ Displays a series of user defined contours along a two dimensional plane within 
 Barbs
 _____
 
-Displays an array of arrows with the users domain, with custom dimensions that are defined by the user in the X, Y, and Z axes.  The arrows represent a vector whos direction is determined by up to three user-defined variables. Barbs can have a constant color applied to them, or they may be colored according to an additional user-defined variable.
+Displays an array of arrows with the users domain, with custom dimensions that are defined by the user in the X, Y, and Z axes.  The arrows represent a vector whose direction is determined by up to three user-defined variables. Barbs can have a constant color applied to them, or they may be colored according to an additional user-defined variable.
 
 The Barb renderer may be offset by a height variable, if the barbs are referencing two-dimensional variables.
 
@@ -105,7 +105,7 @@ Each renderer is unique, the specification of their parameters is mostly the sam
 
 .. _variablesTab:
 
-See the :ref:`Renderers <renderers>` section for mor information on how each of these tabs work for a given renderer.  Again, they all operate in the same way for the most part.
+See the :ref:`Renderers <renderers>` section for more information on how each of these tabs work for a given renderer.  Again, they all operate in the same way for the most part.
 
 .. figure:: ../_images/variablesTab.png
     :align: center
@@ -209,7 +209,7 @@ Users can apply transforms to scale, translate, and rotate their renderers on X,
 
 .. _regionMouseMode:
 
-Users may also control the geometry of their renderer by using the `Region Mouse Mode`, located at the top left corner of the application.  This will enable a red box with handlebars that can be right-clicked to grow or shrink the region beingh rendered on any axis.
+Users may also control the geometry of their renderer by using the `Region Mouse Mode`, located at the top left corner of the application.  This will enable a red box with handlebars that can be right-clicked to grow or shrink the region being rendered on any axis.
 
 .. figure:: ../_images/selectRegionMouseMode.png
     :align: center
@@ -334,7 +334,7 @@ _______________
 
 The Barb renderer operates on a set of vectors to determine which direction they point in.  Users need to select variables to correspond with the X, Y, and optionally Z vectors in their dataset.
 
-Users may also offset the barbs by a height variable, and color them according to an addional variable if desired.  For example, users may have wind barbs being drawn based on their U, V, and W variables, and colored by their Pressure variable.
+Users may also offset the barbs by a height variable, and color them according to an additional variable if desired.  For example, users may have wind barbs being drawn based on their U, V, and W variables, and colored by their Pressure variable.
 
 .. figure:: ../_images/barbVariableSelector.png
     :align: center
