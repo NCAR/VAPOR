@@ -212,6 +212,17 @@ void Renderer::_applyRendererTransform()
     mm->SetCurrentMatrix(mm->GetCurrentMatrix() * _getRendererTransformMatrix());
 }
 
+glm::mat4 Renderer::_getModelMatrix() const
+{
+    return _getDatasetTransformMatrix() * _getRendererTransformMatrix();
+}
+
+void Renderer::_applyModelMatrix()
+{
+    MatrixManager *mm = _glManager->matrixManager;
+    mm->SetCurrentMatrix(mm->GetCurrentMatrix() * _getModelMatrix());
+}
+
 int Renderer::paintGL(bool fast) {
 	const RenderParams *rParams = GetActiveParams();
     MatrixManager *mm = _glManager->matrixManager;
@@ -223,8 +234,7 @@ int Renderer::paintGL(bool fast) {
 	mm->MatrixModeModelView();
     mm->PushMatrix();
     
-    _applyDatasetTransform();
-    _applyRendererTransform();
+    _applyModelMatrix();
 
 	int rc = _paintGL(fast);
 

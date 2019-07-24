@@ -340,7 +340,7 @@ int TwoDRenderer::OSPRayUpdate(OSPModel world)
     const int CW = W-1;
     const int CH = H-1;
     
-    mat4 model = _getDatasetTransformMatrix() * _getRendererTransformMatrix();
+    mat4 model = _getModelMatrix();
     mat3 normalModel(glm::transpose(glm::inverse(model)));
     vec3 *transformedData = new vec3[W*H];
     
