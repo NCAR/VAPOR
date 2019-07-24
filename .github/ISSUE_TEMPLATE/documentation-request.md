@@ -2,7 +2,7 @@
 name: Documentation Request
 about: Submit a request fo Documentation on VAPOR
 title: ''
-labels: ''
+labels: Documentation
 assignees: ''
 
 ---
