@@ -3,6 +3,7 @@
 #include <QHBoxLayout>
 #include <QSpacerItem>
 #include <QIntValidator>
+#include <QEvent>
 
 using namespace VAPoR;
 
@@ -107,4 +108,13 @@ ParamsWidgetGroup::ParamsWidgetGroup(const std::string &title)
 : QGroupBox(title.c_str())
 {
     setLayout(new QVBoxLayout);
+}
+
+void ParamsWidgetGroup::changeEvent(QEvent *event)
+{
+    QWidget::changeEvent(event);
+    if (event->type() == QEvent::FontChange && !fontUpdated) {
+        fontUpdated = true;
+        this->setStyleSheet("font-size: " + QString::number(font().pointSize()) + "pt");
+    }
 }

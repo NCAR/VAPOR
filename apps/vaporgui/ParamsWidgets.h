@@ -71,6 +71,11 @@ public:
 class ParamsWidgetGroup : public QGroupBox {
     Q_OBJECT
     
+    bool fontUpdated = false;
+    
 public:
     ParamsWidgetGroup(const std::string &title);
+    
+protected:
+    void changeEvent(QEvent *event);
 };
