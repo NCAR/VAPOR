@@ -8,7 +8,7 @@ Vapor 3 is comprised of a set of tools called Renderers.  Each Renderer visualiz
 
 We recommend that all users either watch our :ref:`Introductory Tutorial <introTutorial>` or work through the :ref:`quickStartGuide`.
 
-If any feature in Vapor is not sufficenty self describing in the applicaiton, this is where to find elaboration.  Please :ref:`contact our team `<contactAndContribute>` if you think you may have found a bug, usability issue, or you'd like to request an enhancement.
+If any feature in Vapor is not sufficenty self describing in the applicaiton, this is where to find elaboration.  Please :ref:`contact our team <contactAndContribute>` if you think you may have found a bug, usability issue, or you'd like to request an enhancement.
 
 The Renderers
 -------------
@@ -16,7 +16,7 @@ The Renderers
 Volume Renderer
 _______________
 
-Displays the user's 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.  These 3D variables may be offset by a height variable.
+Displays the user's 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.
 
 .. figure:: ../_images/DVR.png
     :align: center
@@ -25,7 +25,7 @@ Displays the user's 3D data variables within a volume described by the source da
 Isosurfaces
 ___________
 
-Displays the user's 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.  These 3D variables may be offset by a height variable.
+Displays the user's 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.
 
 .. figure:: ../_images/IsoSurface.png
     :align: center
@@ -34,7 +34,7 @@ Displays the user's 3D data variables within a volume described by the source da
 Slices
 ______
 
-Displays an axis-aligned slice or cutting plane through a 3D variable.  Slices are sampled along the plane's axes according to a sampling rate define by the user.
+Displays an axis-aligned slice or cutting plane through a 3D variable.  Slices are sampled along the plane's axes according to a sampling rate defined by the user.
 
 .. figure:: ../_images/Slice.png
     :align: center
@@ -43,7 +43,7 @@ Displays an axis-aligned slice or cutting plane through a 3D variable.  Slices a
 Contours
 ________
 
-Displays a series of user defined contours along a two dimensional plane within the user's domain.\n\nContours may hae constant coloration, or may be colored according to a secondary variable.  Contours may be displaced by a height variable.
+Displays a series of user defined contours along a two dimensional plane within the user's domain.  Contours may hae constant coloration.  Contours may be displaced by a height variable.
 
 .. figure:: ../_images/Contours.png
     :align: center
@@ -53,6 +53,8 @@ Barbs
 _____
 
 Displays an array of arrows with the users domain, with custom dimensions that are defined by the user in the X, Y, and Z axes.  The arrows represent a vector whos direction is determined by up to three user-defined variables. Barbs can have a constant color applied to them, or they may be colored according to an additional user-defined variable.
+
+The Barb renderer may be offset by a height variable, if the barbs are referencing two-dimensional variables.
 
 .. figure:: ../_images/Barbs.png
     :align: center
@@ -122,7 +124,7 @@ Users that have converted their data into :ref:`VDC <vdc>` will have a fidelity 
 
 Appearance Tab
 ______________
-The appearance tab controls the `color <controllingColor>`_ and `opacity <controllingOpacity>`_ of the variable being used by your renderer.  This is done through the Transfer Function.
+The appearance tab controls the color and opacity of the variable being used by your renderer.  This is done through the Transfer Function.
 
 The Transfer Function consists of a `Probability Density Function (PDF) <https://en.wikipedia.org/wiki/Probability_density_function>`_ of your currently selected variable.  Underneath the PDF is a color bar that shows the colors that get applied to the values located directly above it.
 
@@ -401,12 +403,14 @@ The last top-level tab next to the Renderers and Navigation tabs is called Setti
 Ancillary Tools
 ---------------
 
-Vapor comes with a Tools menu that provides utilities that can help with visualization and analysis
+Vapor comes with a Tools menu that provides utilities that can help with visualization and analysis.
 
 Python Engine
 _____________
 
 The Python Engine is a tool that allows users to derive new variables based on the data that exist in their files.  Users need to select input variables that will be read in their script, and they will need to define an output variable.  If the script successfully run by the Python Engine, the output variable will be usable in the same way as the native variables are in the dataset.
+
+The modules *numpy* and *vapor_utils* are available for importation in the Python Engine.
 
 Note: Input variables must exist on the same grid to produce a valid output.
 
@@ -437,7 +441,7 @@ Users can generate two-dimensional line lots of their variables using the Plot U
 Statistics
 __________
 
-Statistical values can help users select meaningful values for renderer color extents, isosurface values, and contour values.  Vapor currently supports calculating the minimum, maximum, mean, median, and mode for variables.  The spatial and temporal extents of the variables being queried is adjustable by the user.
+Statistical values can help users select meaningful values for renderer color extents, isosurface values, and contour values.  Vapor currently supports calculating the minimum, maximum, mean, median, and mode for variables.  The spatial and temporal extents of the variables being queried are adjustable by the user.
 
 .. figure:: ../_images/statistics.png
     :align: center
