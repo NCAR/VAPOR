@@ -247,7 +247,6 @@ class MainForm : public QMainWindow {
         const vector<pair<string, string>> &help);
     void buildWebHelpMenus();
 
-    bool event(QEvent *);
     void stopAnimCapture(string vizName) {
         if (vizName == _capturingAnimationVizName)
             endAnimCapture();
