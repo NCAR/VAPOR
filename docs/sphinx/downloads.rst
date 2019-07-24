@@ -80,7 +80,7 @@ Linux: /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/
 
     `Link to CentOS third-party libraries <https://drive.google.com/open?id=1_JdUuiy_iQUuIDoPyBn2pupBTz-LS4pM>`_
 
-Alternatively, you can build the libraries youself and store them wherever you want.  If you choose to do this, you must also configure CMake to point to your custom directory.
+Alternatively, you can build the libraries yourself and store them wherever you want.  If you choose to do this, you must also configure CMake to point to your custom directory.
 
 +-----------------+-----------------+----------------------------------------------+
 | *Vapor 3 was build with the following third party library configuration.*        |
@@ -95,7 +95,7 @@ Alternatively, you can build the libraries youself and store them wherever you w
 +-----------------+-----------------+----------------------------------------------+
 | glew            | 2.0.0           |                                              |
 +-----------------+-----------------+----------------------------------------------+
-| grib_api        | 1.19.0          | Built with unrealsed memory leak patches     |
+| grib_api        | 1.19.0          | Built with unreleased memory leak patches    |
 +-----------------+-----------------+----------------------------------------------+
 | hdf5            | 1.10.0          |                                              |
 +-----------------+-----------------+----------------------------------------------+
