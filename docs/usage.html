@@ -203,33 +203,33 @@
 <span id="usage"></span><h1>Using Vapor 3<a class="headerlink" href="#using-vapor-3" title="Permalink to this headline">¶</a></h1>
 <p>Vapor 3 is comprised of a set of tools called Renderers.  Each Renderer visualizes your data in different ways based on your specifications.</p>
 <p>We recommend that all users either watch our <span class="xref std std-ref">Introductory Tutorial</span> or work through the <a class="reference internal" href="quickStartGuide.html#quickstartguide"><span class="std std-ref">Quick Start Guide</span></a>.</p>
-<p>If any feature in Vapor is not sufficenty self describing in the applicaiton, this is where to find elaboration.  Please <a class="reference internal" href="contactAndContribute.html#contactandcontribute"><span class="std std-ref">contact our team `</span></a> if you think you may have found a bug, usability issue, or you’d like to request an enhancement.</p>
+<p>If any feature in Vapor is not sufficenty self describing in the applicaiton, this is where to find elaboration.  Please <a class="reference internal" href="contactAndContribute.html#contactandcontribute"><span class="std std-ref">contact our team</span></a> if you think you may have found a bug, usability issue, or you’d like to request an enhancement.</p>
 <div class="section" id="the-renderers">
 <h2>The Renderers<a class="headerlink" href="#the-renderers" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="volume-renderer">
 <h3>Volume Renderer<a class="headerlink" href="#volume-renderer" title="Permalink to this headline">¶</a></h3>
-<p>Displays the user’s 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.  These 3D variables may be offset by a height variable.</p>
+<p>Displays the user’s 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.</p>
 <div class="align-center figure">
 <img alt="_images/DVR.png" src="_images/DVR.png" />
 </div>
 </div>
 <div class="section" id="isosurfaces">
 <h3>Isosurfaces<a class="headerlink" href="#isosurfaces" title="Permalink to this headline">¶</a></h3>
-<p>Displays the user’s 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.  These 3D variables may be offset by a height variable.</p>
+<p>Displays the user’s 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.</p>
 <div class="align-center figure">
 <img alt="_images/IsoSurface.png" src="_images/IsoSurface.png" />
 </div>
 </div>
 <div class="section" id="slices">
 <h3>Slices<a class="headerlink" href="#slices" title="Permalink to this headline">¶</a></h3>
-<p>Displays an axis-aligned slice or cutting plane through a 3D variable.  Slices are sampled along the plane’s axes according to a sampling rate define by the user.</p>
+<p>Displays an axis-aligned slice or cutting plane through a 3D variable.  Slices are sampled along the plane’s axes according to a sampling rate defined by the user.</p>
 <div class="align-center figure">
 <img alt="_images/Slice.png" src="_images/Slice.png" />
 </div>
 </div>
 <div class="section" id="contours">
 <h3>Contours<a class="headerlink" href="#contours" title="Permalink to this headline">¶</a></h3>
-<p>Displays a series of user defined contours along a two dimensional plane within the user’s domain.nnContours may hae constant coloration, or may be colored according to a secondary variable.  Contours may be displaced by a height variable.</p>
+<p>Displays a series of user defined contours along a two dimensional plane within the user’s domain.  Contours may hae constant coloration.  Contours may be displaced by a height variable.</p>
 <div class="align-center figure">
 <img alt="_images/Contours.png" src="_images/Contours.png" />
 </div>
@@ -237,6 +237,7 @@
 <div class="section" id="barbs">
 <h3>Barbs<a class="headerlink" href="#barbs" title="Permalink to this headline">¶</a></h3>
 <p>Displays an array of arrows with the users domain, with custom dimensions that are defined by the user in the X, Y, and Z axes.  The arrows represent a vector whos direction is determined by up to three user-defined variables. Barbs can have a constant color applied to them, or they may be colored according to an additional user-defined variable.</p>
+<p>The Barb renderer may be offset by a height variable, if the barbs are referencing two-dimensional variables.</p>
 <div class="align-center figure">
 <img alt="_images/Barbs.png" src="_images/Barbs.png" />
 </div>
@@ -290,7 +291,7 @@
 </div>
 <div class="section" id="appearance-tab">
 <span id="appearancetab"></span><h3>Appearance Tab<a class="headerlink" href="#appearance-tab" title="Permalink to this headline">¶</a></h3>
-<p>The appearance tab controls the <a class="reference external" href="controllingColor">color</a> and <a class="reference external" href="controllingOpacity">opacity</a> of the variable being used by your renderer.  This is done through the Transfer Function.</p>
+<p>The appearance tab controls the color and opacity of the variable being used by your renderer.  This is done through the Transfer Function.</p>
 <p>The Transfer Function consists of a <a class="reference external" href="https://en.wikipedia.org/wiki/Probability_density_function">Probability Density Function (PDF)</a> of your currently selected variable.  Underneath the PDF is a color bar that shows the colors that get applied to the values located directly above it.</p>
 <div class="align-center figure" id="id2">
 <img alt="_images/transferFunctionDocumentation.png" src="_images/transferFunctionDocumentation.png" />
@@ -466,10 +467,11 @@
 </div>
 <div class="section" id="ancillary-tools">
 <h2>Ancillary Tools<a class="headerlink" href="#ancillary-tools" title="Permalink to this headline">¶</a></h2>
-<p>Vapor comes with a Tools menu that provides utilities that can help with visualization and analysis</p>
+<p>Vapor comes with a Tools menu that provides utilities that can help with visualization and analysis.</p>
 <div class="section" id="python-engine">
 <h3>Python Engine<a class="headerlink" href="#python-engine" title="Permalink to this headline">¶</a></h3>
 <p>The Python Engine is a tool that allows users to derive new variables based on the data that exist in their files.  Users need to select input variables that will be read in their script, and they will need to define an output variable.  If the script successfully run by the Python Engine, the output variable will be usable in the same way as the native variables are in the dataset.</p>
+<p>The modules <em>numpy</em> and <em>vapor_utils</em> are available for importation in the Python Engine.</p>
 <p>Note: Input variables must exist on the same grid to produce a valid output.</p>
 <div class="align-center figure">
 <a class="reference internal image-reference" href="_images/pythonEditor.png"><img alt="_images/pythonEditor.png" src="_images/pythonEditor.png" style="width: 500px;" /></a>
@@ -489,7 +491,7 @@
 </div>
 <div class="section" id="statistics">
 <h3>Statistics<a class="headerlink" href="#statistics" title="Permalink to this headline">¶</a></h3>
-<p>Statistical values can help users select meaningful values for renderer color extents, isosurface values, and contour values.  Vapor currently supports calculating the minimum, maximum, mean, median, and mode for variables.  The spatial and temporal extents of the variables being queried is adjustable by the user.</p>
+<p>Statistical values can help users select meaningful values for renderer color extents, isosurface values, and contour values.  Vapor currently supports calculating the minimum, maximum, mean, median, and mode for variables.  The spatial and temporal extents of the variables being queried are adjustable by the user.</p>
 <div class="align-center figure">
 <a class="reference internal image-reference" href="_images/statistics.png"><img alt="_images/statistics.png" src="_images/statistics.png" style="width: 500px;" /></a>
 </div>

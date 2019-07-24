@@ -33,8 +33,9 @@ With VDC, users can configure their renderers quickly at low fidelity, and then 
 
 Creating a VDC is a two step process using command line tools.
 
-Step 1) Create a .vdc metadata file that describes the structure of your data
-Step 2) Apply the wavelet transform to populate your VDC
+    Step 1) Create a .vdc metadata file that describes the structure of your data
+
+    Step 2) Apply the wavelet transform to populate your VDC
 
 This process is supported with :ref:`WRF-ARW <wrf>`, :ref:`NetCDF-CF <netCDF-CF>`, and `raw binary data <binary>`.  Read on to find instructions for your data type.
 
