@@ -1757,8 +1757,6 @@ void MainForm::_setProj4String(string proj4String)
     _App->installEventFilter(this);
 }
 
-bool MainForm::event(QEvent *e) { return QWidget::event(e); }
-
 bool MainForm::eventFilter(QObject *obj, QEvent *event)
 {
     VAssert(_controlExec && _vizWinMgr);
