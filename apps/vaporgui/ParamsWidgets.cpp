@@ -77,6 +77,32 @@ void ParamsWidgetNumber::valueChangedSlot()
 
 
 
+
+ParamsWidgetFloat::ParamsWidgetFloat(const std::string &tag, const std::string &labelText)
+: ParamsWidget(tag, labelText)
+{
+    _lineEdit = new QLineEdit();
+    _lineEdit->setValidator(new QDoubleValidator(this));
+    connect(_lineEdit, SIGNAL(editingFinished()), this, SLOT(valueChangedSlot()));
+    
+    layout()->addWidget(_lineEdit);
+}
+
+void ParamsWidgetFloat::Update(VAPoR::ParamsBase *p)
+{
+    _params = p;
+    _lineEdit->setText(QString::number(p->GetValueDouble(_tag, false)));
+}
+
+void ParamsWidgetFloat::valueChangedSlot()
+{
+    if (_params)
+        _params->SetValueDouble(_tag, _tag, _lineEdit->text().toDouble());
+}
+
+
+
+
 ParamsWidgetGroup::ParamsWidgetGroup(const std::string &title)
 : QGroupBox(title.c_str())
 {
