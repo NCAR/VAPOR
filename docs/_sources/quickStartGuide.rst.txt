@@ -52,15 +52,6 @@ Creating a Renderer
 ```````````````````
 Now that we've loaded some data to visualize, we can create a new :ref:`Renderer <Renderers>`.
 
-Click on ``New``.  This will raise a window that will let you choose from the currently available renderers.  Pick the Slice Renderer by either double-clicking on the ``Slice`` button.
-
-.. figure:: ../_images/newRenderer.png
-    :width: 500
-    :align: center
-    :figclass: align-center
-
-    Vapor3's ``New Renderer`` Dialog
-
 Vapor3 displays all of your renderers in a table in the upper left corner of the application.  Next to this table are controls that  let you create ``New`` renderers, ``Delete`` renderers, or ``Duplicate`` existing renderers.  
 
 .. figure:: ../_images/rendererTable.png
@@ -70,15 +61,24 @@ Vapor3 displays all of your renderers in a table in the upper left corner of the
 
     Vapor3's Renderer Table.
 
-Notice that your new :ref:`Slice Renderer <Slice>` has been added to the Renderer Table.  By default, all renderers are disabled after being created.  To enable your Slice renderer, click the ``Enabled`` checkbox in the Renderer Table that's in the same row as your new Slice.
+Click on ``New``.  This will raise a window that will let you choose from the currently available renderers.  Pick the Slice Renderer by double-clicking on the ``Slice`` button.
+
+.. figure:: ../_images/newRenderer.png
+    :width: 500
+    :align: center
+    :figclass: align-center
+
+    Vapor3's ``New Renderer`` Dialog
+
+Notice that your new Slice Renderer has been added to the Renderer Table.  By default, all renderers are disabled after being created.  To enable your Slice renderer, click the ``Enabled`` checkbox in the Renderer Table that's in the same row as your new Slice.
 
 Now that you have your first Renderer, you can do the following:
 
-1. Change the displayed variable in the :ref:`Variables Tab <VariablesTab>`
-2. Change the color mapping of your variable in the :ref:`Appearance Tab <AppearanceTab>`
-3. Modify the orientation and region that your renderer is drawn to in the :ref:`Geometry Tab <GeometryTab>`
-4. Add annotations and color bars in the :ref:`Annotations Tab <AnnotationTab>`
+1. Change the displayed variable in the :ref:`Variables Tab <variablesTab>`
+2. Change the color mapping of your variable in the :ref:`Appearance Tab <appearanceTab>`
+3. Modify the orientation and region that your renderer is drawn to in the :ref:`Geometry Tab <geometryTab>`
+4. Add annotations and color bars in the :ref:`Annotations Tab <annotationTab>`
 
-At this point, we've created our first renderer.  To customize it, we need to get familiar with the four tabs listed above.  The `Variables Tab <VariablesTab>` and `Appearance Tab <AppearanceTab>` are the most important to get started with.  We also encourage you to watch active demonstrations in our `Video <Videos>` archive.
+At this point, we've created our first renderer.  To customize it, we need to get familiar with the four tabs listed above.  The :ref:`Variables Tab <variablesTab>` and :ref:`Appearance Tab <appearanceTab>` are the most important to get started with.  We also encourage you to watch active demonstrations in our :ref:`Video <videos>` archive.
 
-If you have any questions, bug reports, or feature requests, see our `Help <Help>` section.  Thank you. 
+If you have any questions, bug reports, or feature requests, see our :ref:`Help <getHelp>` section.  Thank you. 
