@@ -124,7 +124,7 @@ Variables with missing data values must have the attribute *_FillValue* or *miss
 Step 1: Create .vdc metadata file 
 _________________________________
 
-Once your NetCDF files have attributes that make them CF compliant, you may produce VDC by doing the follwing.
+Once your NetCDF files have attributes that make them CF compliant, you may produce VDC by doing the following.
 
 In the directory where Vapor 3 is installed, there is a command line utility called *cfvdccreate*.  Issue this command in a terminal (Unix) or command prompt (Windows), followed by your NetCDF-CF files, and finally the name of the .vdc file to be written.
 
