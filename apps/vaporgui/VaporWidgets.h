@@ -199,9 +199,9 @@ public:
     ~VRange();
 
     void  SetRange( float min, float max );
-    void  SetCurrentValMin(    float );
-    void  SetCurrentValMax(    float );
-    void  GetCurrentValRange(  float& rangeMin, float& rangeMax );
+    void  SetCurrentValLow(    float );
+    void  SetCurrentValHigh(   float );
+    void  GetCurrentValRange(  float& low, float& high );
 
 signals:
     void  _rangeChanged();
@@ -219,6 +219,42 @@ private:
     /* In case _maxSlider is changed, adjust _minSlider if necessary. */
     void  _adjustMinToMax();
 };
+
+//
+// ====================================
+// VGeometry combines two or three VRanges, 
+// representing a 2D or 3D geometry.
+// Note:
+//   Many functions in this class have two versions for 2D or 3D geometries.
+//   These two versions are implemented using two separate functions, instead
+//   of std::vectors or variable argument lists, because:
+//   1) this class is never supposed to be used beyond 2D and 3D cases, and
+//   2) two separate function implementations can help catch errors at compile time.
+// ====================================
+//
+//class VGeometry : public QWidget
+//{
+//    Q_OBJECT
+//
+//public:
+//    /* Constructor for 2D geometries. 
+//       Four floating point values required to specify the range. */
+//    VGeometry( QWidget* parent, float min1, float max1,
+//                                float min2, float max2 );
+//    /* Constructor for 3D geometries. 
+//       Six floating point values required to specify the range. */
+//    VGeometry( QWidget* parent, float min1, float max1,
+//                                float min2, float max2,
+//                                float min3, float max3 );
+//
+//    ~VGeometry();
+//
+//    void SetRange(  float min1, float max1,     // 2D 
+//                    float min2, float max2 );
+//    void SetRange(  float min1, float max1,     // 3D 
+//                    float min2, float max2,
+//                    float min3, float max3 );
+//};
 
 //
 // ====================================
