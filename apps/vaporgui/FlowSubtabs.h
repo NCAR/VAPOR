@@ -119,6 +119,7 @@ private slots:
 
     void _catchASignal();
     void _catch2Signal();
+    void _catch3Signal();
 
 private:
     VAPoR::FlowParams*      _params;
@@ -134,6 +135,7 @@ private:
 
     VSlider*                _slider1;
     VRange*                 _range1;
+    VGeometry*              _geometry;
 };
 
 //

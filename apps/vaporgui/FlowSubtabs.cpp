@@ -203,6 +203,32 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     _range1 = new VRange( this, 10.0, 20.0, "Range Low", "Range Heigh" );
     _layout->addWidget( _range1 );
     connect( _range1, SIGNAL( _rangeChanged() ), this, SLOT( _catch2Signal() ) );
+
+    std::vector<float> geoRange = {0.0, 10.0, -10.0, 10.0}; //, -20.0, -10.0};
+    _geometry = new VGeometry( this, 2, geoRange );
+    _layout->addWidget( _geometry );
+    connect( _geometry, SIGNAL( _geometryChanged() ), this, SLOT( _catch3Signal() ) );
+}
+
+void
+FlowSeedingSubtab::_catch3Signal()
+{
+    std::vector<float> range;
+    _geometry->GetCurrentValues( range );
+    for( int i = 0; i < range.size(); i++ )
+        std::cout << range[i] << ",  ";
+    std::cout << std::endl;
+
+    if( range[0] == 2.0f )
+    {
+        std::vector<float> range2 = {-1.0, 10.0, 30.0, 40.0};
+        _geometry->SetDimAndRange( 2, range2 );
+    }
+    else if( range[0] == 3.0f )
+    {
+        std::vector<float> range3 = {-1.0, 10.0, 30.0, 40.0, -20.0, 10.0};
+        _geometry->SetDimAndRange( 3, range3 );
+    }
 }
 
 void
