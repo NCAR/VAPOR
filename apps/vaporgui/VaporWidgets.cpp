@@ -273,10 +273,12 @@ VSlider::SetRange( float min, float max )
     if( _currentVal < min ||  _currentVal > max )
     {
         _currentVal   = (min + max) / 2.0f;
-        float percent = (_currentVal - _min) / (_max - _min) * 100.0f;
-        _qslider->setValue( std::lround( percent ) );
         _qedit->setText( QString::number( _currentVal, 'f', 3 ) );
     }
+
+    /* update the slider position based on new range. */
+    float percent = (_currentVal - _min) / (_max - _min) * 100.0f;
+    _qslider->setValue( std::lround( percent ) );
 }
 
 void
