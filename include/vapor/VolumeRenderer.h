@@ -107,6 +107,7 @@ protected:
     OSPVolume _volume = nullptr;
     OSPTransferFunction _tf = nullptr;
     
+    bool OSPRayNeedToLoadData();
     int OSPRayLoadData(OSPModel world);
     int OSPRayLoadDataRegular(OSPModel world, Grid *grid);
     int OSPRayLoadDataStructured(OSPModel world, Grid *grid);

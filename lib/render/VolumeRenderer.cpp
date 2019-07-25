@@ -559,7 +559,7 @@ int VolumeRenderer::OSPRayUpdate(OSPModel world)
     
     _initializeAlgorithm();
     if (OSPRayLoadData(world) < 0) return -1;
-    OSPRayLoadTF();
+    if (OSPRayLoadTF() < 0) return -1;
     
     ospSet1b(_volume, "singleShade", false);
     ospSet1b(_volume, "gradientShadingEnabled", vp->GetLightingEnabled());
@@ -588,10 +588,18 @@ void VolumeRenderer::OSPRayDelete(OSPModel world)
     ospRelease(_tf); _tf = nullptr;
 }
 
-int VolumeRenderer::OSPRayLoadData(OSPModel world)
+bool VolumeRenderer::OSPRayNeedToLoadData()
 {
     CheckCache(_ospCache.coordTransform, _getModelMatrix());
-    if (!_needToLoadData())
+    if (!_volume)
+        _cache.needsUpdate = true;
+    
+    return _needToLoadData();
+}
+
+int VolumeRenderer::OSPRayLoadData(OSPModel world)
+{
+    if (!OSPRayNeedToLoadData())
         return 0;
     
     OSPRayDelete(world);
