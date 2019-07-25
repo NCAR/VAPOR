@@ -360,8 +360,10 @@ VGeometry::VGeometry( QWidget* parent, int dim, const std::vector<float>& range 
 {
     VAssert( dim == 2 || dim == 3 );
     VAssert( range.size() == dim * 2 );
-    _dim = dim;
+    for( int i = 0; i < dim; i++ )
+        VAssert( range[ i*2 ] < range[ i*2+1 ] );
 
+    _dim = dim;
     _xrange = new VRange( this, range[0], range[1], "XMin", "XMax" );
     _yrange = new VRange( this, range[2], range[3], "YMin", "YMax" );
     if( _dim == 3 )
@@ -389,6 +391,8 @@ VGeometry::SetDimAndRange( int dim, const std::vector<float>& range )
 {
     VAssert( dim == 2 || dim == 3 );
     VAssert( range.size() == dim * 2 );
+    for( int i = 0; i < dim; i++ )
+        VAssert( range[ i*2 ] < range[ i*2+1 ] );
 
     /* Adjust the appearance if necessary */
     if( _dim == 2 && dim == 3 )
@@ -407,6 +411,8 @@ void
 VGeometry::SetCurrentValues( const std::vector<float>& vals )
 {
     VAssert( vals.size() == _dim * 2 );
+    for( int i = 0; i < _dim; i++ )
+        VAssert( vals[ i*2 ] < vals[ i*2+1 ] );
 
     /* VRange widgets will only respond to values within their ranges */
     _xrange->SetCurrentValLow(  vals[0] );
