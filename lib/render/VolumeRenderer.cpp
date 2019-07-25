@@ -564,6 +564,13 @@ int VolumeRenderer::OSPRayUpdate(OSPModel world)
     ospSet1b(_volume, "singleShade", false);
     ospSet1b(_volume, "gradientShadingEnabled", vp->GetLightingEnabled());
     
+    glm::vec3 dataMin, dataMax, userMin, userMax;
+    _getExtents(&dataMin, &dataMax, &userMin, &userMax);
+    vec3 ospMin = _ospCoordTransform * vec4(userMin, 1.f);
+    vec3 ospMax = _ospCoordTransform * vec4(userMax, 1.f);
+    ospSet3fv(_volume, "volumeClippingBoxUpper", (float*)&ospMax);
+    ospSet3fv(_volume, "volumeClippingBoxLower", (float*)&ospMin);
+    
 //    if (_cache.needsUpdate)
         ospCommit(_volume);
     
@@ -676,13 +683,15 @@ int VolumeRenderer::OSPRayLoadDataStructured(OSPModel world, Grid *grid)
     vec3 scales = _getTotalScaling();
     vec3 origin = _getOrigin();
     vec3 *coords = (vec3*)coordData;
+    mat4 model = _getModelMatrix();
     auto coord = grid->ConstCoordBegin();
     for (size_t i = 0; i < nVerts; ++i, ++coord) {
         coordData[i*3  ] = (*coord)[0];
         coordData[i*3+1] = (*coord)[1];
         coordData[i*3+2] = (*coord)[2];
         
-        coords[i] = (coords[i]-origin)*scales + origin;
+//        coords[i] = (coords[i]-origin)*scales + origin;
+        coords[i] = model * vec4(coords[i], 1.0f);
     }
     ospData = ospNewData(nVerts, OSP_FLOAT3, coordData);
     ospCommit(ospData);
@@ -690,6 +699,12 @@ int VolumeRenderer::OSPRayLoadDataStructured(OSPModel world, Grid *grid)
     ospRelease(ospData);
     delete [] coordData;
     
+//    mat4 m = glm::mat4(1.0);
+//    m = glm::translate(m, origin);
+//    m = glm::scale(m, scales);
+//    m = glm::translate(m, -origin);
+//    _ospCoordTransform = m;
+    _ospCoordTransform = model;
     
     typedef struct {
         int i0, i1, i2, i3, i4, i5, i6, i7;
