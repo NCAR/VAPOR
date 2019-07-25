@@ -199,9 +199,9 @@ public:
     ~VRange();
 
     void  SetRange( float min, float max );
-    void  SetCurrentValMin(    float );
-    void  SetCurrentValMax(    float );
-    void  GetCurrentValRange(  float& rangeMin, float& rangeMax );
+    void  SetCurrentValLow(    float );
+    void  SetCurrentValHigh(   float );
+    void  GetCurrentValRange(  float& low, float& high ) const;
 
 signals:
     void  _rangeChanged();
@@ -218,6 +218,43 @@ private:
     void  _adjustMaxToMin();    
     /* In case _maxSlider is changed, adjust _minSlider if necessary. */
     void  _adjustMinToMax();
+};
+
+//
+// ====================================
+// VGeometry combines two or three VRanges, 
+// representing a 2D or 3D geometry.
+// Note: this class is never supposed to be used beyond 2D and 3D cases.
+// ====================================
+//
+class VGeometry : public QWidget
+{
+    Q_OBJECT
+
+public:
+    /* Constructor for 2D or 3D geometries. 
+       Four floating point values imply a 2D geometry, while Six floating point 
+       values imply a 3D geometry. All other numbers are illegal. */
+    VGeometry( QWidget* parent, int dim, const std::vector<float>& range );
+
+    ~VGeometry();
+
+    /* Adjust the dimension and/or value ranges through this function. */
+    void  SetDimAndRange( int dim, const std::vector<float>& range );
+    /* The number of incoming values MUST match the current dimensionality. */
+    void  SetCurrentValues( const std::vector<float>& vals );
+    void  GetCurrentValues( std::vector<float>& vals ) const;
+
+signals:
+    void  _geometryChanged();
+
+private slots:
+    void  _respondChanges();
+
+private:
+    int          _dim;
+    VRange      *_xrange, *_yrange, *_zrange;
+    QVBoxLayout* _layout;
 };
 
 //
