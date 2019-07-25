@@ -67,6 +67,15 @@ TransformTable::TransformTable(QWidget* parent) {
 	_horizontalHeaders.push_back("X");
 	_horizontalHeaders.push_back("Y");
 	_horizontalHeaders.push_back("Z");
+    
+    // Disable rotations
+    _rotationWidgetToDelete = this->transformTabs->widget(2);
+    this->transformTabs->removeTab(2);
+}
+
+TransformTable::~TransformTable()
+{
+    delete _rotationWidgetToDelete;
 }
 
 void TransformTable::Update(const std::map <string, Transform *> &transforms) {

@@ -165,6 +165,7 @@ set (UIS
 	ImageAppearanceGUI.ui
 	ImageGeometryGUI.ui
 	ImageVariablesGUI.ui
+	TransformTableGUI.ui
 	TwoDVariablesGUI.ui
 	TwoDAppearanceGUI.ui
 	TwoDGeometryGUI.ui
