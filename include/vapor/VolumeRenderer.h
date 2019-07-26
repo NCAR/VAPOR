@@ -5,7 +5,7 @@
 #include <vapor/Framebuffer.h>
 #include <vapor/VolumeAlgorithm.h>
 #include <glm/glm.hpp>
-#include <ospray/ospray.h>
+#include <vapor/OSPRay.h>
 
 namespace VAPoR
 {
@@ -111,6 +111,7 @@ protected:
     int OSPRayLoadData(OSPModel world);
     int OSPRayLoadDataRegular(OSPModel world, Grid *grid);
     int OSPRayLoadDataStructured(OSPModel world, Grid *grid);
+    int OSPRayLoadDataUnstructured(OSPModel world, Grid *grid);
     int OSPRayLoadTF();
     glm::vec3 _getTotalScaling() const;
     glm::vec3 _getOrigin() const;

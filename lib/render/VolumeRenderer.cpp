@@ -563,6 +563,9 @@ int VolumeRenderer::OSPRayUpdate(OSPModel world)
     
     ospSet1b(_volume, "singleShade", false);
     ospSet1b(_volume, "gradientShadingEnabled", vp->GetLightingEnabled());
+    float samplingRate = vp->GetValueDouble(VolumeParams::OSPRaySamplingRateTag, 1);
+    ospSet1f(_volume, "samplingRate", samplingRate);
+    ospSet1f(_volume, "adaptiveMaxSamplingRate", samplingRate*OSPRAY_ADAPTIVE_SAMPLING_MULTIPLIER);
     
     glm::vec3 dataMin, dataMax, userMin, userMax;
     _getExtents(&dataMin, &dataMax, &userMin, &userMax);
@@ -607,7 +610,7 @@ int VolumeRenderer::OSPRayLoadData(OSPModel world)
     Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.var, _cache.refinement, _cache.compression);
     
     if (dynamic_cast<UnstructuredGrid*>(grid))
-        return 1;
+        return OSPRayLoadDataUnstructured(world, grid);
     else if (_cache.algorithmName == VolumeRegular::GetName())
         return OSPRayLoadDataRegular(world, grid);
     else
@@ -648,7 +651,6 @@ int VolumeRenderer::OSPRayLoadDataRegular(OSPModel world, Grid *grid)
     
     ospSet3i(_volume, "dimensions", dims[0], dims[1], dims[2]);
     ospSetString(_volume, "voxelType", "float");
-//    ospSetf(_volume, "samplingRate", 10);
     
     ospSetRegion(_volume, volumeData, {0,0,0}, {static_cast<int>(dims[0]), static_cast<int>(dims[1]), static_cast<int>(dims[2])});
     delete [] volumeData;
@@ -762,6 +764,11 @@ int VolumeRenderer::OSPRayLoadDataStructured(OSPModel world, Grid *grid)
     
     
     return 0;
+}
+
+int VolumeRenderer::OSPRayLoadDataUnstructured(OSPModel world, Grid *grid)
+{
+    return -1;
 }
 
 int VolumeRenderer::OSPRayLoadTF()

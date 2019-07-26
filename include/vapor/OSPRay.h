@@ -4,6 +4,8 @@
 #include <vapor/common.h>
 #include <glm/fwd.hpp>
 
+#define OSPRAY_ADAPTIVE_SAMPLING_MULTIPLIER (15.0)
+
 extern RENDER_API OSPError OSPInitStatus;
 extern RENDER_API const char *OSPInitStatusMessage;
 
