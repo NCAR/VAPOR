@@ -113,6 +113,7 @@ protected:
     int OSPRayLoadDataStructured(OSPModel world, Grid *grid);
     int OSPRayLoadDataUnstructured(OSPModel world, Grid *grid);
     int OSPRayLoadTF();
+    virtual void OSPRayAddObjectToWorld(OSPModel world);
     glm::vec3 _getTotalScaling() const;
     glm::vec3 _getOrigin() const;
     
