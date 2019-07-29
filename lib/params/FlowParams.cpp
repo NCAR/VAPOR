@@ -170,13 +170,18 @@ std::vector<float>
 FlowParams::GetRake() const
 {
     const long rakeSize = 6;
-    std::vector<double> tmp( rakeSize, 0.0 );
+    std::vector<double> tmp(6, std::nan("1") );
     auto doubles = GetValueDoubleVec( _rakeTag, tmp );
     VAssert( doubles.size() == rakeSize );
 
     std::vector<float> floats( rakeSize, 0.0f );
-    for( int i = 0; i < rakeSize; i++ )
-        floats[i] = doubles[i];
+    if( std::isnan( doubles[0] ) )
+        floats[0] = std::nan("1");
+    else
+    {
+        for( int i = 0; i < rakeSize; i++ )
+            floats[i] = float(doubles[i]);
+    }
     return floats;
 }
 

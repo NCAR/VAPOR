@@ -64,8 +64,11 @@ public:
     std::vector<bool>   GetPeriodic() const;
     void                SetPeriodic( const std::vector<bool>& );
 
-    // 6 values to represent a rake in this particular order: 
-    //   xmin, xmax, ymin, ymax, zmin, zmax
+    /* 
+     *6 values to represent a rake in this particular order: 
+     *   xmin, xmax, ymin, ymax, zmin, zmax 
+     *   If the rake wasn't set by users, it returns a vector containing nans.
+     */
     std::vector<float>  GetRake() const;
     void                SetRake( const std::vector<float>& );
 
