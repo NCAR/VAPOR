@@ -117,9 +117,9 @@ private slots:
     void _flowDirectionChanged( int newIdx );
     void _outputButtonClicked();
 
-    void _catchASignal();
-    void _catch2Signal();
-    void _catch3Signal();
+    //void _catchASignal();
+    //void _catch2Signal();
+    //void _catch3Signal();
 
 private:
     VAPoR::FlowParams*      _params;
@@ -133,9 +133,9 @@ private:
 
     VComboBox*              _flowDirection;
 
-    VSlider*                _slider1;
-    VRange*                 _range1;
-    VGeometry*              _geometry;
+    //VSlider*                _slider1;
+    //VRange*                 _range1;
+    //VGeometry*              _geometry;
 };
 
 //

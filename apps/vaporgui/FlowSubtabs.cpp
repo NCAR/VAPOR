@@ -195,6 +195,7 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     connect( _outputButton, SIGNAL( clicked() ), this, SLOT( _outputButtonClicked() ) );
 
 
+/*
     _slider1 = new VSlider( this, "value", -10.0, -5.0 );
     _layout->addWidget( _slider1 );
     connect( _slider1, SIGNAL( _valueChanged() ), this, SLOT( _catchASignal() ) );
@@ -204,13 +205,14 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     _layout->addWidget( _range1 );
     connect( _range1, SIGNAL( _rangeChanged() ), this, SLOT( _catch2Signal() ) );
 
-    std::vector<float> geoRange = {0.0, 10.0, -10.0, 10.0}; //, -20.0, -10.0};
-    _geometry = new VGeometry( this, 2, geoRange );
+    std::vector<float> geoRange = {0.0, 10.0, -10.0, 10.0, -20.0, -10.0};
+    _geometry = new VGeometry( this, 3, geoRange );
     _layout->addWidget( _geometry );
     connect( _geometry, SIGNAL( _geometryChanged() ), this, SLOT( _catch3Signal() ) );
+*/
 }
 
-void
+/* void
 FlowSeedingSubtab::_catch3Signal()
 {
     std::vector<float> range;
@@ -243,7 +245,7 @@ FlowSeedingSubtab::_catch2Signal()
     float rangeMin, rangeMax;
     _range1->GetCurrentValRange( rangeMin, rangeMax );
     printf( "range (min, max) = (%f, %f)\n", rangeMin, rangeMax );
-}
+} */
 
 void
 FlowSeedingSubtab::_outputButtonClicked( )
