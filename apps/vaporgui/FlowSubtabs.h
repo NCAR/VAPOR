@@ -119,7 +119,7 @@ private slots:
 
     //void _catchASignal();
     //void _catch2Signal();
-    void _seedRegionChanged();
+    void _rakeChanged();
 
 private:
     VAPoR::FlowParams*      _params;
@@ -133,7 +133,7 @@ private:
 
     //VSlider*                _slider1;
     //VRange*                 _range1;
-    VGeometry*              _seedRegion;
+    VGeometry*              _rake;
 };
 
 //

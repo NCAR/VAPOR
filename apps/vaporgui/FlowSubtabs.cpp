@@ -1,4 +1,5 @@
 #include "FlowSubtabs.h"
+#include "vapor/DataMgrUtils.h"
 
 QVaporSubtab::QVaporSubtab(QWidget* parent) : QWidget(parent)
 {
@@ -163,9 +164,9 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     /* Index numbers are in agreement with what's in FlowRenderer.h */
     _seedGenMode->AddOption( "Programatically", 0 );
     _seedGenMode->AddOption( "From a List",     1 );
-    _seedGenMode->AddOption( "From a Region, Uniformly",  2 );
-    _seedGenMode->AddOption( "From a Region, Randomly",   3 );
-    _seedGenMode->AddOption( "From a Region, Randomly with Bias",   4 );
+    _seedGenMode->AddOption( "From a Rake, Uniformly",  2 );
+    _seedGenMode->AddOption( "From a Rake, Randomly",   3 );
+    _seedGenMode->AddOption( "From a Rake, Randomly with Bias",   4 );
     _layout->addWidget( _seedGenMode );
     connect( _seedGenMode, SIGNAL( _indexChanged(int) ), this, SLOT( _seedGenModeChanged(int) ) );
    
@@ -191,17 +192,17 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     _layout->addWidget( _outputButton );
     connect( _outputButton, SIGNAL( clicked() ), this, SLOT( _outputButtonClicked() ) );
 
-    std::vector<float> geoRange = {0.0, 10.0, 0.0, 10.0, 0.0, 10.0}; // temporary range
-    _seedRegion = new VGeometry( this, 3, geoRange );
-    _layout->addWidget( _seedRegion );
-    connect( _seedRegion, SIGNAL( _geometryChanged() ), this, SLOT( _seedRegionChanged() ) );
+    std::vector<float> geoRange = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0}; // temporary range
+    _rake = new VGeometry( this, 3, geoRange );
+    _layout->addWidget( _rake );
+    connect( _rake, SIGNAL( _geometryChanged() ), this, SLOT( _rakeChanged() ) );
 }
 
 void
-FlowSeedingSubtab::_seedRegionChanged()
+FlowSeedingSubtab::_rakeChanged()
 {
     std::vector<float> range;
-    _seedRegion->GetCurrentValues( range );
+    _rake->GetCurrentValues( range );
     for( int i = 0; i < range.size(); i++ )
         std::cout << range[i] << ",  ";
     std::cout << std::endl;
@@ -233,6 +234,33 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
         _flowDirection->SetIndex( idx );
     else
         _flowDirection->SetIndex( 0 );
+
+    /* Update rake range */
+    std::vector<double> minExt, maxExt;
+    std::vector<int>    axes;
+    VAPoR::DataMgrUtils::GetExtents( dataMgr, 
+                                     _params->GetCurrentTimestep(), 
+                                     _params->GetFieldVariableNames(),         
+                                     minExt, 
+                                     maxExt, 
+                                     axes  );
+    VAssert( minExt.size() == 3 && maxExt.size() == 3 );
+    std::vector<float> range;
+    for( int i = 0; i < 3; i++ )
+    {
+        range.push_back( float(minExt[i]) );
+        range.push_back( float(maxExt[i]) );
+    }
+    _rake->SetDimAndRange( 3, range );
+
+    /* Update rake values */
+    auto rakeVals = _params->GetRake();
+    // In case the user hasn't set the rake, set the current value to be the rake extents.
+    //   Otherwise, apply the actual rake values.
+    if( std::isnan( rakeVals[0] ) )
+        _rake->SetCurrentValues( range );
+    else
+        _rake->SetCurrentValues( rakeVals );
 
     /* Update input and output file names */
     if( !_params->GetSeedInputFilename().empty() ) 
