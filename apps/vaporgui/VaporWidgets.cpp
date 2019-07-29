@@ -151,7 +151,8 @@ double VDoubleSpinBox::GetValue() const {
 // ====================================
 //
 VRange::VRange( QWidget* parent, float min, float max, const std::string& minLabel, 
-                const std::string& maxLabel ) : QWidget( parent )
+                const std::string& maxLabel ) 
+      : QWidget( parent )
 {
     _layout    = new QVBoxLayout(this);
 
@@ -357,6 +358,7 @@ VSlider::_respondQLineEdit()
 //
 
 VGeometry::VGeometry( QWidget* parent, int dim, const std::vector<float>& range )
+         : QWidget( parent )
 {
     VAssert( dim == 2 || dim == 3 );
     VAssert( range.size() == dim * 2 );
