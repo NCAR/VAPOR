@@ -119,12 +119,10 @@ private slots:
 
     //void _catchASignal();
     //void _catch2Signal();
-    //void _catch3Signal();
+    void _seedRegionChanged();
 
 private:
     VAPoR::FlowParams*      _params;
-
-    //GeometryWidget*         _geometryWidget;
 
     VComboBox*              _seedGenMode;
     VFileReader*            _fileReader;
@@ -135,7 +133,7 @@ private:
 
     //VSlider*                _slider1;
     //VRange*                 _range1;
-    //VGeometry*              _geometry;
+    VGeometry*              _seedRegion;
 };
 
 //

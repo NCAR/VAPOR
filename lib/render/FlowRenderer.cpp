@@ -554,7 +554,7 @@ int
 FlowRenderer::_genSeedsXY( std::vector<flow::Particle>& seeds, float timeVal ) const
 {
     int numX = 4, numY = 4;
-    std::vector<double>           extMin, extMax;
+    std::vector<double>  extMin, extMax;
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
     params->GetBox()->GetExtents( extMin, extMax );
     float stepX = (extMax[0] - extMin[0]) / (numX + 1.0f);

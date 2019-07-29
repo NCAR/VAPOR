@@ -159,16 +159,13 @@ void FlowAppearanceSubtab::Update(  VAPoR::DataMgr *dataMgr,
 //
 FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
 {
-    /*
-    _geometryWidget   = new GeometryWidget(this);
-    _geometryWidget->Reinit( (DimFlags)THREED, (VariableFlags)VECTOR);
-    _layout->addWidget( _geometryWidget );
-    */
-
     _seedGenMode = new VComboBox( this, "Seed Generation Mode" );
     /* Index numbers are in agreement with what's in FlowRenderer.h */
     _seedGenMode->AddOption( "Programatically", 0 );
-    _seedGenMode->AddOption( "From a List", 1 );
+    _seedGenMode->AddOption( "From a List",     1 );
+    _seedGenMode->AddOption( "From a Region, Uniformly",  2 );
+    _seedGenMode->AddOption( "From a Region, Randomly",   3 );
+    _seedGenMode->AddOption( "From a Region, Randomly with Bias",   4 );
     _layout->addWidget( _seedGenMode );
     connect( _seedGenMode, SIGNAL( _indexChanged(int) ), this, SLOT( _seedGenModeChanged(int) ) );
    
@@ -194,58 +191,21 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     _layout->addWidget( _outputButton );
     connect( _outputButton, SIGNAL( clicked() ), this, SLOT( _outputButtonClicked() ) );
 
-
-/*
-    _slider1 = new VSlider( this, "value", -10.0, -5.0 );
-    _layout->addWidget( _slider1 );
-    connect( _slider1, SIGNAL( _valueChanged() ), this, SLOT( _catchASignal() ) );
-
-
-    _range1 = new VRange( this, 10.0, 20.0, "Range Low", "Range Heigh" );
-    _layout->addWidget( _range1 );
-    connect( _range1, SIGNAL( _rangeChanged() ), this, SLOT( _catch2Signal() ) );
-
-    std::vector<float> geoRange = {0.0, 10.0, -10.0, 10.0, -20.0, -10.0};
-    _geometry = new VGeometry( this, 3, geoRange );
-    _layout->addWidget( _geometry );
-    connect( _geometry, SIGNAL( _geometryChanged() ), this, SLOT( _catch3Signal() ) );
-*/
+    std::vector<float> geoRange = {0.0, 10.0, 0.0, 10.0, 0.0, 10.0}; // temporary range
+    _seedRegion = new VGeometry( this, 3, geoRange );
+    _layout->addWidget( _seedRegion );
+    connect( _seedRegion, SIGNAL( _geometryChanged() ), this, SLOT( _seedRegionChanged() ) );
 }
 
-/* void
-FlowSeedingSubtab::_catch3Signal()
+void
+FlowSeedingSubtab::_seedRegionChanged()
 {
     std::vector<float> range;
-    _geometry->GetCurrentValues( range );
+    _seedRegion->GetCurrentValues( range );
     for( int i = 0; i < range.size(); i++ )
         std::cout << range[i] << ",  ";
     std::cout << std::endl;
-
-    if( range[0] == 2.0f )
-    {
-        std::vector<float> range2 = {-1.0, 10.0, 30.0, 40.0};
-        _geometry->SetDimAndRange( 2, range2 );
-    }
-    else if( range[0] == 3.0f )
-    {
-        std::vector<float> range3 = {-1.0, 10.0, 30.0, 40.0, -20.0, 10.0};
-        _geometry->SetDimAndRange( 3, range3 );
-    }
 }
-
-void
-FlowSeedingSubtab::_catchASignal()
-{
-    std::cout << "slider value = " << _slider1->GetCurrentValue() << std::endl;
-}
-
-void
-FlowSeedingSubtab::_catch2Signal()
-{
-    float rangeMin, rangeMax;
-    _range1->GetCurrentValRange( rangeMin, rangeMax );
-    printf( "range (min, max) = (%f, %f)\n", rangeMin, rangeMax );
-} */
 
 void
 FlowSeedingSubtab::_outputButtonClicked( )
@@ -258,17 +218,23 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
                                 VAPoR::RenderParams *params )
 {
     _params = dynamic_cast<VAPoR::FlowParams*>(params);
+    VAssert( _params );
 
-    //VAPoR::Box* rakeBox = params->GetRakeBox();
-    //_geometryWidget->Update(paramsMgr, dataMgr, params, rakeBox);
-    //_geometryWidget->Update(paramsMgr, dataMgr, params );
-
+    /* Update seed generation mode combo */
     long idx = _params->GetSeedGenMode();
     if( idx >= 0 && idx < _seedGenMode->GetNumOfItems() )
         _seedGenMode->SetIndex( idx );
     else
         _seedGenMode->SetIndex( 0 );
 
+    /* Update flow direction combo */
+    idx = _params->GetFlowDirection();
+    if( idx >= 0 && idx < _flowDirection->GetNumOfItems() )
+        _flowDirection->SetIndex( idx );
+    else
+        _flowDirection->SetIndex( 0 );
+
+    /* Update input and output file names */
     if( !_params->GetSeedInputFilename().empty() ) 
         _fileReader->SetPath( _params->GetSeedInputFilename() );
     if( !_params->GetFlowlineOutputFilename().empty() ) 
