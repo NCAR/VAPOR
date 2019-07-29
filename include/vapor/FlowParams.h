@@ -56,18 +56,18 @@ public:
     void   SetFlowDirection( long );
 
     std::string GetSeedInputFilename() const;
-    void        SetSeedInputFilename( std::string& ) ;
+    void        SetSeedInputFilename( const std::string& ) ;
 
     std::string GetFlowlineOutputFilename() const;
-    void        SetFlowlineOutputFilename( std::string& ) ;
+    void        SetFlowlineOutputFilename( const std::string& ) ;
 
-    std::vector<bool> GetPeriodic() const;
-    void              SetPeriodic( std::vector<bool> );
+    std::vector<bool>   GetPeriodic() const;
+    void                SetPeriodic( const std::vector<bool>& );
 
     // 6 values to represent a rake in this particular order: 
     //   xmin, xmax, ymin, ymax, zmin, zmax
-    std::vector<double> GetRake() const;
-    void                SetRake( std::vector<double> );
+    std::vector<float>  GetRake() const;
+    void                SetRake( const std::vector<float>& );
 
 protected:
 
