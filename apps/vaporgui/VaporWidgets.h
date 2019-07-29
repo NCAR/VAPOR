@@ -243,7 +243,8 @@ public:
        Argument range must contain 4 or 6 values organized in the following order:
        xmin, xmax, ymin, ymax, (zmin, zmax).                                    */
     void  SetDimAndRange( int dim, const std::vector<float>& range );
-    /* The number of incoming values MUST match the current dimensionality. */
+    /* The number of incoming values MUST match the current dimensionality. 
+       I.e., 4 values for 2D widgets, and 6 values for 3D widgets.       */
     void  SetCurrentValues( const std::vector<float>& vals );
     void  GetCurrentValues( std::vector<float>& vals ) const;
 
