@@ -5,6 +5,7 @@
 #include <glm/fwd.hpp>
 
 #define OSPRAY_ADAPTIVE_SAMPLING_MULTIPLIER (15.0)
+#define OSPRAY_DEFAULT_VOLUME_SPECULAR (0.3)
 
 extern RENDER_API OSPError OSPInitStatus;
 extern RENDER_API const char *OSPInitStatusMessage;

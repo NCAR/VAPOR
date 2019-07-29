@@ -48,6 +48,7 @@ const string RenderParams::_RefinementLevelTag = "RefinementLevel";
 const string RenderParams::_transferFunctionsTag = "MapperFunctions";
 const string RenderParams::_stretchFactorsTag = "StretchFactors";
 const string RenderParams::_currentTimestepTag = "CurrentTimestep";
+const string RenderParams::OSPRayEnabledTag = "OSPRayEnabled";
 
 #define REQUIRED_SAMPLE_SIZE 1000000
 
@@ -104,6 +105,8 @@ void RenderParams::_init() {
 	float rgb[] = {1.0, 1.0, 1.0};
 	SetConstantColor(rgb);
 	SetConstantOpacity(1.0);
+    
+    SetValueLong(OSPRayEnabledTag, OSPRayEnabledTag, false);
 }
 
 void RenderParams::InitBox() {

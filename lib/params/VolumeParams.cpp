@@ -27,6 +27,8 @@ const std::string VolumeParams::_phongDiffuseTag = "PhongDiffuseTag";
 const std::string VolumeParams::_phongSpecularTag = "PhongSpecularTag";
 const std::string VolumeParams::_phongShininessTag = "PhongShininessTag";
 const std::string VolumeParams::OSPRaySamplingRateTag = "OSPRaySamplingRate";
+const std::string VolumeParams::OSPRayLightingEnabledTag = "OSPRayLightingEnabled";
+const std::string VolumeParams::OSPRaySpecularTag = "OSPRaySpecular";
 
 VolumeParams::VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave)
 : RenderParams(dataMgr, ssave, VolumeParams::GetClassType(), 3)
@@ -193,5 +195,7 @@ void VolumeParams::_init() {
 	SetDiagMsg("VolumeParams::_init()");
     
     SetValueDouble(OSPRaySamplingRateTag, OSPRaySamplingRateTag, 1);
+    SetValueLong(OSPRayLightingEnabledTag, OSPRayLightingEnabledTag, true);
+    SetValueDouble(OSPRaySpecularTag, OSPRaySpecularTag, 0.3);
 }
 

@@ -409,6 +409,9 @@ private:
 	std::vector<string> searchVars,
 	char letter
  );
+    
+public:
+    static const string OSPRayEnabledTag;
 };
 
 

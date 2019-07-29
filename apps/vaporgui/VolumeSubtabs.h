@@ -8,6 +8,7 @@
 #include <vapor/MapperFunction.h>
 #include <vapor/VolumeParams.h>
 #include "OSPRayEnableCheckbox.h"
+#include "ParamsWidgets.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -62,6 +63,7 @@ private slots:
 private:
     VAPoR::VolumeParams *_params;
     OSPRayEnableCheckbox *_osprayCheckBox;
+    ParamsWidgetTabGroup *_osprayGroup;
     
 };
 

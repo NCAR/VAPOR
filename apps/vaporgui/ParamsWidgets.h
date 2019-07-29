@@ -1,9 +1,11 @@
 #pragma once
 
+#include <vector>
 #include <QWidget>
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QGroupBox>
+#include <QTabWidget>
 #include <vapor/ParamsBase.h>
 
 class ParamsWidget : public QWidget {
@@ -61,6 +63,8 @@ public:
     ParamsWidgetFloat(const std::string &tag, const std::string &label = "");
     void Update(VAPoR::ParamsBase *p);
     
+    ParamsWidgetFloat *SetRange(float min, float max);
+    
     private slots:
     void valueChangedSlot();
 };
@@ -78,4 +82,18 @@ public:
     
 protected:
     void changeEvent(QEvent *event);
+};
+
+
+
+class ParamsWidgetTabGroup : public QTabWidget {
+    Q_OBJECT
+    
+    QWidget *_tab() const;
+    std::vector<ParamsWidget *> _widgets;
+    
+public:
+    ParamsWidgetTabGroup(const std::string &title);
+    void Update(VAPoR::ParamsBase *p);
+    void Add(ParamsWidget *widget);
 };

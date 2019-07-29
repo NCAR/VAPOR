@@ -72,6 +72,22 @@ FILE *OpenLog(string path_var) {
 	return(fp);
 }
 
+#warning Qt4 uses deprecated OSX calls which pollute the console with warnings
+#if defined(Darwin) && !defined(NDEBUG)
+//#ifdef DEBUG
+#include <unistd.h>
+int _savedSTDERR;
+void HideSTDERR()
+{
+    _savedSTDERR = dup(STDERR_FILENO);
+    freopen("/dev/null", "w", stderr);
+}
+void RestoreSTDERR()
+{
+    dup2(_savedSTDERR, STDERR_FILENO);
+}
+#endif
+
 QApplication* app;
 int main( int argc, char ** argv ) {
     
@@ -102,6 +118,9 @@ if (getenv("VAPOR_DEBUG"))
 #ifdef IRIX    
 	    QApplication::setColorSpec( QApplication::ManyColor );
 #endif
+#if defined(Darwin) && !defined(NDEBUG)
+    HideSTDERR();
+#endif
     	QApplication a( argc, argv,true );
     
     // All C programs are run with the locale set to "C"
@@ -114,7 +133,7 @@ if (getenv("VAPOR_DEBUG"))
     //
     setlocale(LC_ALL, "C");
 	
-	// Set path for Qt to look for its plugins. 
+	// Set path for Qt to look for its plugins.
 	//
     QString filePath = GetResourcePath("plugins").c_str();
     QStringList filePaths(filePath);
@@ -153,6 +172,10 @@ if (getenv("VAPOR_DEBUG"))
 		files.push_back(argv[i]);
 	}
 	MainForm* mw = new MainForm(files,app);
+    
+#if defined(Darwin) && !defined(NDEBUG)
+    RestoreSTDERR();
+#endif
 
 
 	//StartupParams* sParams = new StartupParams(0);

@@ -173,7 +173,7 @@ int Visualizer::paintEvent(bool fast)
         _glManager->matrixManager->MatrixModeModelView();
         _glManager->matrixManager->PushMatrix();
         
-		if (_renderers[i]->IsGLInitialized() && !_renderers[i]->GetActiveParams()->GetValueLong("ospray", false)) {
+		if (_renderers[i]->IsGLInitialized() && !_renderers[i]->GetActiveParams()->GetValueLong(RenderParams::OSPRayEnabledTag, false)) {
             
 //            void *t = _glManager->BeginTimer();
 			int myrc = _renderers[i]->paintGL(fast);
@@ -228,7 +228,7 @@ bool Visualizer::_needToRenderOSPRay() const
 {
     for (int i = 0; i < _renderers.size(); i++) {
         RenderParams *rp = _renderers[i]->GetActiveParams();
-        if (rp->IsEnabled() && rp->GetValueLong("ospray", false))
+        if (rp->IsEnabled() && rp->GetValueLong(RenderParams::OSPRayEnabledTag, false))
             return true;
     }
     return false;
@@ -305,7 +305,7 @@ int Visualizer::_renderOSPRay()
     
     for (int i = 0; i < _renderers.size(); i++) {
         RenderParams *rp = _renderers[i]->GetActiveParams();
-        if (rp->IsEnabled() && rp->GetValueLong("ospray", false))
+        if (rp->IsEnabled() && rp->GetValueLong(RenderParams::OSPRayEnabledTag, false))
             _renderers[i]->OSPRayUpdate(_world);
         else
             _renderers[i]->OSPRayDelete(_world);

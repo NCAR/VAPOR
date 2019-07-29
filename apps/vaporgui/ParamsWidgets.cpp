@@ -76,14 +76,11 @@ void ParamsWidgetNumber::valueChangedSlot()
 }
 
 
-
-
-
 ParamsWidgetFloat::ParamsWidgetFloat(const std::string &tag, const std::string &labelText)
 : ParamsWidget(tag, labelText)
 {
     _lineEdit = new QLineEdit();
-    _lineEdit->setValidator(new QDoubleValidator(this));
+    _lineEdit->setValidator(new QDoubleValidator);
     connect(_lineEdit, SIGNAL(editingFinished()), this, SLOT(valueChangedSlot()));
     
     layout()->addWidget(_lineEdit);
@@ -93,6 +90,14 @@ void ParamsWidgetFloat::Update(VAPoR::ParamsBase *p)
 {
     _params = p;
     _lineEdit->setText(QString::number(p->GetValueDouble(_tag, false)));
+}
+
+ParamsWidgetFloat *ParamsWidgetFloat::SetRange(float min, float max)
+{
+    const QValidator *toDelete = _lineEdit->validator();
+    _lineEdit->setValidator(new QDoubleValidator(min, max, 2));
+    if (toDelete) delete toDelete;
+    return this;
 }
 
 void ParamsWidgetFloat::valueChangedSlot()
@@ -117,4 +122,30 @@ void ParamsWidgetGroup::changeEvent(QEvent *event)
         fontUpdated = true;
         this->setStyleSheet("font-size: " + QString::number(font().pointSize()) + "pt");
     }
+}
+
+
+
+
+ParamsWidgetTabGroup::ParamsWidgetTabGroup(const std::string &title)
+{
+    this->addTab(new QWidget(this), QString::fromStdString(title));
+    _tab()->setLayout(new QVBoxLayout);
+}
+
+QWidget *ParamsWidgetTabGroup::_tab() const
+{
+    return this->widget(0);
+}
+
+void ParamsWidgetTabGroup::Update(VAPoR::ParamsBase *p)
+{
+    for (ParamsWidget *w : _widgets)
+        w->Update(p);
+}
+
+void ParamsWidgetTabGroup::Add(ParamsWidget *widget)
+{
+    _tab()->layout()->addWidget(widget);
+    _widgets.push_back(widget);
 }
