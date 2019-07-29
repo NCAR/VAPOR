@@ -611,7 +611,7 @@ int VolumeRenderer::OSPRayLoadData(OSPModel world)
     
     Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.var, _cache.refinement, _cache.compression);
     
-    if (dynamic_cast<UnstructuredGrid*>(grid))
+    if (dynamic_cast<UnstructuredGrid*>(grid) || GetActiveParams()->GetValueLong("force_unstructured", 0))
         return OSPRayLoadDataUnstructured(world, grid);
     else if (_cache.algorithmName == VolumeRegular::GetName())
         return OSPRayLoadDataRegular(world, grid);
@@ -770,7 +770,109 @@ int VolumeRenderer::OSPRayLoadDataStructured(OSPModel world, Grid *grid)
 
 int VolumeRenderer::OSPRayLoadDataUnstructured(OSPModel world, Grid *grid)
 {
-    return -1;
+    _volume = ospNewVolume("unstructured_volume");
+    ospAddVolume(world, _volume);
+    
+    auto cellEnd = grid->ConstCellEnd();
+    size_t maxNodes = grid->GetMaxVertexPerCell();
+    size_t coordDim = grid->GetGeometryDim();
+    size_t nodeDim = grid->GetNodeDimensions().size();
+    double missingValue = grid->GetMissingValue();
+    size_t *nodes = (size_t*)alloca(sizeof(size_t) * maxNodes * nodeDim);
+    float *values = (float*)alloca(sizeof(float) * maxNodes);
+    double *coords = (double*)alloca(sizeof(double) * maxNodes * coordDim);
+    
+    mat4 model = _ospCache.coordTransform;
+    
+    typedef struct{int i[8];} OSPRayCell;
+    vector<vec3> vertices;
+    vector<float> fields;
+    vector<OSPRayCell> indices;
+    
+    int n[8] = {0};
+    
+    for (auto cellIt = grid->ConstCellBegin(); cellIt != cellEnd; ++cellIt) {
+        const vector<size_t> &cell = *cellIt;
+        int numNodes;
+        grid->GetCellNodes(cell.data(), nodes, numNodes);
+        
+        bool hasMissing = false;
+        for (int i = 0; i < numNodes; i++)
+        {
+            grid->GetUserCoordinates(&nodes[i*nodeDim], &coords[i*coordDim]);
+            //values[i] = grid->GetValue(&coords[i*coordDim]);
+            values[i] = grid->GetValueAtIndex(&nodes[i*nodeDim]);
+            if (values[i] == missingValue) {
+                hasMissing = true;
+            }
+        }
+        if (hasMissing) continue;
+        
+        n[numNodes-1]++;
+        if (numNodes == 4) {
+            OSPRayCell c = {{-1}};
+            int start = fields.size();
+            assert(start < 2000000000);
+            
+            for (int i = 0; i < 4; i++) {
+                vec3 originalCoord(coords[i*coordDim], coords[i*coordDim+1], coords[i*coordDim+2]);
+                vertices.push_back(model * vec4(originalCoord, 1.0f));
+                fields.push_back(values[i]);
+                c.i[i+4] = start+i;
+            }
+            
+            indices.push_back(c);
+        } else if (numNodes == 6) {
+            OSPRayCell c = {{-2}};
+            int start = fields.size();
+            assert(start < 2000000000);
+            
+            for (int i = 0; i < 6; i++) {
+                vec3 originalCoord(coords[i*coordDim], coords[i*coordDim+1], coords[i*coordDim+2]);
+                vertices.push_back(model * vec4(originalCoord, 1.0f));
+                fields.push_back(values[i]);
+                c.i[i+2] = start+i;
+            }
+            
+            indices.push_back(c);
+        } else if (numNodes == 8) {
+            OSPRayCell c;
+            int start = fields.size();
+            assert(start < 2000000000);
+            
+            for (int i = 0; i < 8; i++) {
+                vec3 originalCoord(coords[i*coordDim], coords[i*coordDim+1], coords[i*coordDim+2]);
+                vertices.push_back(model * vec4(originalCoord, 1.0f));
+                fields.push_back(values[i]);
+                c.i[i] = start+i;
+            }
+            
+            indices.push_back(c);
+        } else {
+//            assert(0);
+        }
+    }
+    
+    for (int i = 0; i < 8; i++) {
+        printf("%i nodes = %i\n", i+1, n[i]);
+    }
+    
+    OSPData ospData = ospNewData(fields.size(), OSP_FLOAT, fields.data());
+    ospCommit(ospData);
+    ospSetData(_volume, "field", ospData);
+    ospRelease(ospData);
+    
+    ospData = ospNewData(vertices.size(), OSP_FLOAT3, vertices.data());
+    ospCommit(ospData);
+    ospSetData(_volume, "vertices", ospData);
+    ospRelease(ospData);
+    
+    ospData = ospNewData(indices.size()*2, OSP_INT4, indices.data());
+    ospCommit(ospData);
+    ospSetData(_volume, "indices", ospData);
+    ospRelease(ospData);
+    
+    return 0;
 }
 
 int VolumeRenderer::OSPRayLoadTF()
