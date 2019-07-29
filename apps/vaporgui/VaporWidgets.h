@@ -239,7 +239,9 @@ public:
 
     ~VGeometry();
 
-    /* Adjust the dimension and/or value ranges through this function. */
+    /* Adjust the dimension and/or value ranges through this function.
+       Argument range must contain 4 or 6 values organized in the following order:
+       xmin, xmax, ymin, ymax, (zmin, zmax).                                    */
     void  SetDimAndRange( int dim, const std::vector<float>& range );
     /* The number of incoming values MUST match the current dimensionality. */
     void  SetCurrentValues( const std::vector<float>& vals );
