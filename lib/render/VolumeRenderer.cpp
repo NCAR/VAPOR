@@ -586,9 +586,7 @@ int VolumeRenderer::OSPRayUpdate(OSPModel world)
 void VolumeRenderer::OSPRayDelete(OSPModel world)
 {
     OSPRayRemoveObjectFromWorld(world);
-    ospRemoveGeometry(world, sphere);
-    
-    ospRelease(sphere); sphere = nullptr;
+
     ospRelease(_volume); _volume = nullptr;
     ospRelease(_tf); _tf = nullptr;
 }
@@ -631,16 +629,6 @@ int VolumeRenderer::OSPRayLoadDataRegular(OSPModel world, Grid *grid)
     if (!_volume) {
         _volume = ospNewVolume("block_bricked_volume");
         OSPRayAddObjectToWorld(world);
-        
-        sphere = ospNewGeometry("spheres");
-        float sphereData[4] = {dataMin.x,dataMin.y,dataMin.z,0};
-        OSPData spheres = ospNewData(4, OSP_FLOAT, sphereData);
-        ospCommit(spheres);
-        ospSetData(sphere, "spheres", spheres);
-        //        ospSetf(sphere, "radius", 200000);
-        ospSetf(sphere, "radius", 0.1);
-        ospCommit(sphere);
-        ospAddGeometry(world, sphere);
     }
     
     const vector<size_t> dims = grid->GetDimensions();

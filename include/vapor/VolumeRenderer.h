@@ -103,7 +103,6 @@ public:
     int OSPRayUpdate(OSPModel world);
     void OSPRayDelete(OSPModel world);
 protected:
-    OSPGeometry sphere = nullptr;
     OSPVolume _volume = nullptr;
     OSPTransferFunction _tf = nullptr;
     
