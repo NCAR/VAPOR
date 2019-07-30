@@ -37,10 +37,22 @@ public:
         return ("IsoSurface");
     }
     
+protected:
     virtual bool _usingColorMapData() const;
     virtual void _setShaderUniforms(const ShaderProgram *shader, const bool fast) const;
     virtual std::string _getDefaultAlgorithmForGrid(const Grid *grid) const;
     virtual void _getLUTFromTF(const MapperFunction *tf, float *LUT) const;
+    
+public:
+    int OSPRayUpdate(OSPModel world);
+    void OSPRayDelete(OSPModel world);
+    
+protected:
+    int OSPRayLoadTF();
+    void OSPRayAddObjectToWorld(OSPModel world);
+    void OSPRayRemoveObjectFromWorld(OSPModel world);
+    
+    OSPGeometry _ospIsoSurfaces = nullptr;
 };
 
 

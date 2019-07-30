@@ -585,7 +585,7 @@ int VolumeRenderer::OSPRayUpdate(OSPModel world)
 
 void VolumeRenderer::OSPRayDelete(OSPModel world)
 {
-    ospRemoveVolume(world, _volume);
+    OSPRayRemoveObjectFromWorld(world);
     ospRemoveGeometry(world, sphere);
     
     ospRelease(sphere); sphere = nullptr;
@@ -923,6 +923,11 @@ int VolumeRenderer::OSPRayLoadTF()
 void VolumeRenderer::OSPRayAddObjectToWorld(OSPModel world)
 {
     ospAddVolume(world, _volume);
+}
+
+void VolumeRenderer::OSPRayRemoveObjectFromWorld(OSPModel world)
+{
+    ospRemoveVolume(world, _volume);
 }
 
 glm::vec3 VolumeRenderer::_getTotalScaling() const

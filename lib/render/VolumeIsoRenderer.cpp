@@ -91,3 +91,93 @@ void VolumeIsoRenderer::_getLUTFromTF(const MapperFunction *tf, float *LUT) cons
     tf->makeLut(LUT);
 }
 
+int VolumeIsoRenderer::OSPRayUpdate(OSPModel world)
+{
+    int ret = VolumeRenderer::OSPRayUpdate(world);
+    
+    VolumeIsoParams *vp = (VolumeIsoParams *)GetActiveParams();
+    vector<double> allIsoValues = vp->GetIsoValues();
+    vector<bool> enabledIsoValueFlags = vp->GetEnabledIsoValues();
+    vector<float> enabledIsoValues;
+    for (int i = 0; i < allIsoValues.size(); i++) {
+        if (enabledIsoValueFlags[i])
+            enabledIsoValues.push_back(allIsoValues[i]);
+    }
+    
+    OSPData ospData = ospNewData(enabledIsoValues.size(), OSP_FLOAT, enabledIsoValues.data());
+    ospCommit(ospData);
+    ospSetData(_ospIsoSurfaces, "isovalues", ospData);
+    ospRelease(ospData);
+    
+    ospCommit(_ospIsoSurfaces);
+    
+    return ret;
+}
+
+void VolumeIsoRenderer::OSPRayDelete(OSPModel world)
+{
+    VolumeRenderer::OSPRayDelete(world);
+    
+    ospRelease(_ospIsoSurfaces);
+    _ospIsoSurfaces = nullptr;
+}
+
+int VolumeIsoRenderer::OSPRayLoadTF()
+{
+    RenderParams *rp = GetActiveParams();
+    if (!rp->UseSingleColor())
+        return VolumeRenderer::OSPRayLoadTF();
+    
+    MapperFunction *tf = _needToLoadTF();
+    if (!tf)
+        return 0;
+    
+    if (_cache.tf) delete _cache.tf;
+    _cache.tf = new MapperFunction(*tf);
+    _cache.mapRange = tf->getMinMaxMapValue();
+    
+    float *LUT = new float[4 * 256];
+    tf->makeLut(LUT);
+    
+    if (!_tf) {
+        _tf = ospNewTransferFunction("piecewise_linear");
+        ospSetObject(_volume, "transferFunction", _tf);
+    }
+    
+    float colors[3];
+    float opacities[1];
+    
+    rp->GetConstantColor(colors);
+    opacities[0] = rp->GetConstantOpacity();
+    
+    OSPData colorData = ospNewData(1, OSP_FLOAT3, colors);
+    OSPData opacityData = ospNewData(1, OSP_FLOAT, opacities);
+    ospCommit(colorData);
+    ospCommit(opacityData);
+    ospSetData(_tf, "colors", colorData);
+    ospSetData(_tf, "opacities", opacityData);
+    ospRelease(colorData);
+    ospRelease(opacityData);
+    
+    osp::vec2f valueRange = {(float)_cache.mapRange[0], (float)_cache.mapRange[1]};
+    ospSetVec2f(_tf, "valueRange", valueRange);
+    
+    ospCommit(_tf);
+    
+    return 0;
+}
+
+void VolumeIsoRenderer::OSPRayAddObjectToWorld(OSPModel world)
+{
+    if (!_ospIsoSurfaces) {
+        _ospIsoSurfaces = ospNewGeometry("isosurfaces");
+        ospAddGeometry(world, _ospIsoSurfaces);
+    }
+    
+    ospSetObject(_ospIsoSurfaces, "volume", _volume);
+}
+
+void VolumeIsoRenderer::OSPRayRemoveObjectFromWorld(OSPModel world)
+{
+    ospRemoveGeometry(world, _ospIsoSurfaces);
+}

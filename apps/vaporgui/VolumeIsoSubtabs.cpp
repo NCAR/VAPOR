@@ -75,6 +75,12 @@ VolumeIsoAppearanceSubtab::VolumeIsoAppearanceSubtab(QWidget* parent)
     _isoWidget3->SetIntType( false );
     _isoWidget3->SetDecimals( 4 );
     _isoWidget3->setEnabled( false );
+    
+    _osprayGroup = new ParamsWidgetTabGroup("OSPRay");
+    _osprayGroup->Add(new ParamsWidgetCheckbox(RenderParams::OSPRayEnabledTag, "Enabled"));
+    _osprayGroup->Add(new ParamsWidgetCheckbox("force_unstructured"));
+    
+    layout()->addWidget(_osprayGroup);
 }
 
 
@@ -83,6 +89,7 @@ void VolumeIsoAppearanceSubtab::Update( VAPoR::DataMgr      *dataMgr,
                                          VAPoR::RenderParams *params ) 
 {
     _TFWidget->Update(dataMgr, paramsMgr, params);
+    _osprayGroup->Update(params);
 
     _params = dynamic_cast<VAPoR::VolumeIsoParams*>(params);
     VAssert(_params);

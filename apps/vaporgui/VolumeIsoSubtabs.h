@@ -6,6 +6,7 @@
 #include "ui_VolumeIsoAnnotationGUI.h"
 
 #include "vapor/VolumeIsoParams.h"
+#include "ParamsWidgets.h"
 
 namespace VAPoR 
 {
@@ -72,7 +73,7 @@ private slots:
 
 private:
     VAPoR::VolumeIsoParams* _params;
-
+    ParamsWidgetTabGroup * _osprayGroup;
 }; 
 
 
