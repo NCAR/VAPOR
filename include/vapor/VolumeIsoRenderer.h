@@ -52,6 +52,7 @@ protected:
     void OSPRayAddObjectToWorld(OSPModel world);
     void OSPRayRemoveObjectFromWorld(OSPModel world);
     
+    OSPMaterial _ospMaterial = nullptr;
     OSPGeometry _ospIsoSurfaces = nullptr;
 };
 

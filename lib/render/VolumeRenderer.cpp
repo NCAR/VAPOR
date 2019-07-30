@@ -576,8 +576,7 @@ int VolumeRenderer::OSPRayUpdate(OSPModel world)
     ospSet3fv(_volume, "volumeClippingBoxUpper", (float*)&ospMax);
     ospSet3fv(_volume, "volumeClippingBoxLower", (float*)&ospMin);
     
-//    if (_cache.needsUpdate)
-        ospCommit(_volume);
+    ospCommit(_volume);
     
     _cache.needsUpdate = false;
     return 0;
@@ -638,6 +637,13 @@ int VolumeRenderer::OSPRayLoadDataRegular(OSPModel world, Grid *grid)
     auto dataIt = grid->cbegin();
     for (size_t i = 0; i < nVerts; ++i, ++dataIt)
         volumeData[i] = *dataIt;
+    
+    if (grid->HasMissingData()) {
+        float missingValue = grid->GetMissingValue();
+        for (size_t i = 0; i < nVerts; i++)
+            if (volumeData[i] == missingValue)
+                volumeData[i] = NAN;
+    }
     
     ospSet3i(_volume, "dimensions", dims[0], dims[1], dims[2]);
     ospSetString(_volume, "voxelType", "float");

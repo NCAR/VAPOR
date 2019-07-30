@@ -109,6 +109,20 @@ int VolumeIsoRenderer::OSPRayUpdate(OSPModel world)
     ospSetData(_ospIsoSurfaces, "isovalues", ospData);
     ospRelease(ospData);
     
+    if (!_ospMaterial) {
+        _ospMaterial = ospNewMaterial2("scivis", "OBJMaterial");
+        ospSetMaterial(_ospIsoSurfaces, _ospMaterial);
+    }
+    
+    vec3 diffuse = glm::make_vec3(vp->GetConstantColor().data());
+    diffuse *= vp->GetPhongDiffuse();
+    vec3 specular = vec3(1.f) * vp->GetPhongSpecular();
+    ospSet3fv(_ospMaterial, "Kd", (float*)&diffuse);
+    ospSet3fv(_ospMaterial, "Ks", (float*)&specular);
+    ospSet1f(_ospMaterial, "Ns", vp->GetPhongShininess());
+    ospSet1f(_ospMaterial, "d", _cache.tf->getOpacityScale());
+    
+    ospCommit(_ospMaterial);
     ospCommit(_ospIsoSurfaces);
     
     return ret;
@@ -118,8 +132,8 @@ void VolumeIsoRenderer::OSPRayDelete(OSPModel world)
 {
     VolumeRenderer::OSPRayDelete(world);
     
-    ospRelease(_ospIsoSurfaces);
-    _ospIsoSurfaces = nullptr;
+    ospRelease(_ospMaterial); _ospMaterial = nullptr;
+    ospRelease(_ospIsoSurfaces); _ospIsoSurfaces = nullptr;
 }
 
 int VolumeIsoRenderer::OSPRayLoadTF()

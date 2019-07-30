@@ -4,6 +4,7 @@
 #include <QSpacerItem>
 #include <QIntValidator>
 #include <QEvent>
+#include <QColorDialog>
 
 using namespace VAPoR;
 
@@ -104,6 +105,54 @@ void ParamsWidgetFloat::valueChangedSlot()
 {
     if (_params)
         _params->SetValueDouble(_tag, _tag, _lineEdit->text().toDouble());
+}
+
+
+
+
+ParamsWidgetColor::ParamsWidgetColor(const std::string &tag, const std::string &label)
+: ParamsWidget(tag, label)
+{
+    _button = new QPushButton("Select");
+    connect(_button, SIGNAL(clicked()), this, SLOT(pressed()));
+    
+    layout()->addWidget(_button);
+}
+
+void ParamsWidgetColor::Update(VAPoR::ParamsBase *p)
+{
+    _params = p;
+    
+    QColor color = VectorToQColor(p->GetValueDoubleVec(_tag));
+    QString style = "background-color: " + color.name() + "; ";
+    if (color.valueF() > 0.6)
+        style += "color: black;";
+    else
+        style += "color: white;";
+    
+    _button->setStyleSheet(style);
+}
+
+void ParamsWidgetColor::pressed()
+{
+    QColor newColor = QColorDialog::getColor();
+    if (_params)
+        _params->SetValueDoubleVec(_tag, _tag, QColorToVector(newColor));
+}
+
+QColor ParamsWidgetColor::VectorToQColor(const std::vector<double> &v)
+{
+    if (v.size() != 3) return QColor::fromRgb(0,0,0);
+    return QColor::fromRgb(v[0]*255, v[1]*255, v[2]*255);
+}
+
+std::vector<double> ParamsWidgetColor::QColorToVector(const QColor &c)
+{
+    vector<double> v(3, 0);
+    v[0] = c.redF();
+    v[1] = c.greenF();
+    v[2] = c.blueF();
+    return v;
 }
 
 

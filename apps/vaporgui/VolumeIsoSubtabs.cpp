@@ -79,6 +79,7 @@ VolumeIsoAppearanceSubtab::VolumeIsoAppearanceSubtab(QWidget* parent)
     _osprayGroup = new ParamsWidgetTabGroup("OSPRay");
     _osprayGroup->Add(new ParamsWidgetCheckbox(RenderParams::OSPRayEnabledTag, "Enabled"));
     _osprayGroup->Add(new ParamsWidgetCheckbox("force_unstructured"));
+    _osprayGroup->Add(new ParamsWidgetColor("color"));
     
     layout()->addWidget(_osprayGroup);
 }
