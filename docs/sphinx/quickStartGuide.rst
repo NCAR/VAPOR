@@ -36,7 +36,7 @@ There are two ways to get data into Vapor3.  Once you've loaded data, we can cre
 
 To load data, do one of the following from the ``File`` menu:
 
-1. Load a .vdc file after converting it into :ref:`VDC`
+1. Load a .vdc file after converting your data into a :ref:`VDC`
     ``File->Open VDC``
 
 2. Import your data, if it's one of the :ref:`natively supported data types <gettingDataIntoVapor>` (WRF, NetCDF-CF, MPAS)
