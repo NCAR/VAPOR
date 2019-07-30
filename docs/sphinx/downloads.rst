@@ -4,6 +4,7 @@
 Downloads
 =========
 
+If you are looking for our legacy version of Vapor 2.6, follow :ref:`this link <vapor2>` to the bottom of the page.
 
 Current Release: Vapor 3.1.0
 ----------------------------
@@ -32,6 +33,8 @@ Release notes for VAPOR-3.1.0
 Installation Instructions
 -------------------------
 
+We encourage users of Vapor to install with the methods described here.  If you're a developer and would like to contribute, see the :ref:`Building From Source <buildFromSource>` section below.
+
 **Linux**
 
 Run the downloaded .sh script in a terminal window.  It will prompt you as to where the binaries will be installed. For example:
@@ -56,6 +59,8 @@ Run the downloaded .exe file.  A wizard will step you through the installer sett
 Building From Source
 --------------------
 
+**Warning: Building Vapor from source is a complex process.  We highly encourage users to use our binary installers provided above.**
+
 **Step 1 - Download the source code**
 
 Vapor's current master branch source code can be downloaded from GitHub_.
@@ -64,7 +69,15 @@ Vapor's current master branch source code can be downloaded from GitHub_.
 
 **Step 2 - Install Vapor's third party libraries**
 
-Windows users may download the libraries `here <https://drive.google.com/open?id=1yPE-7stLWsfaVGv1S4aiYFfS6kR_k4y5>`_.
+*Windows*
+
+Untar the three files linked below into the root of your C:\ directory.
+
+    `vaporwin64deps2015.tar <https://drive.google.com/a/ucar.edu/file/d/1CHUxsPZYrZPDVqRCT-1qtTEQtZfgTn7u/view?usp=sharing>`_
+
+    `Vapor3rdParty2015.tar <https://drive.google.com/a/ucar.edu/file/d/1ZDK2pDu66XDVhJBpFogdqVgNFIMKsrtM/view?usp=sharing>`_
+
+    `Qt-2015.tar <https://drive.google.com/a/ucar.edu/file/d/19RGYew30dH6T6zG3HzfWwck4RZNLXAhp/view?usp=sharing>`_
 
 *Linux and OSX*
 
@@ -153,15 +166,11 @@ On Linux, run  *cmake <build_directory> && make linuxpreinstall && make installe
 Sample Data
 -----------
 
-Link to sample data 1
-
-Link to sample data 2
-
-Link to sample data 3
-
-Link to sample data 4
+**Coming soon**
 
 |
+
+.. _vapor2:
 
 Vapor 2
 -------
@@ -170,4 +179,4 @@ If you are interested in using Vapor 2, it can be `downloaded after filling out 
 
 Vapor 2 is deprecated, and we strongly encourage users to download the currently supported releases of Vapor 3.
 
-Legacy documentation for Vapor 2 can be found `here <https://ncar.github.io/vapor2website/index.html>`_.  Please note that this website is no longer supported, and some links may be broken.  Use at your own discretion.
+`Legacy documentation for Vapor 2 can be found here <https://ncar.github.io/vapor2website/index.html>`_.  Please note that this website is no longer supported, and some links may be broken.  Use at your own discretion.
