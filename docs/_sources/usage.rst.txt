@@ -10,6 +10,8 @@ We recommend that all users either watch our :ref:`Introductory Tutorial <introT
 
 If any feature in Vapor is not sufficienty self describing in the application, this is where to find elaboration.  Please :ref:`contact our team <contactAndContribute>` if you think you may have found a bug, usability issue, or you'd like to request an enhancement.
 
+.. _renderers:
+
 The Renderers
 -------------
 
@@ -103,8 +105,6 @@ Each renderer is unique, the specification of their parameters is mostly the sam
     - :ref:`Geometry <geometryTab>`
     - :ref:`Annotation <annotationTab>`
 
-.. _variablesTab:
-
 See the :ref:`Renderers <renderers>` section for more information on how each of these tabs work for a given renderer.  Again, they all operate in the same way for the most part.
 
 .. figure:: ../_images/variablesTab.png
@@ -113,6 +113,8 @@ See the :ref:`Renderers <renderers>` section for more information on how each of
     :figclass: align-center
 
     Variables tab for the Slice renderer
+
+.. _variablesTab:
 
 Variables Tab
 _____________
@@ -124,7 +126,7 @@ Users that have converted their data into :ref:`VDC <vdc>` will have a fidelity 
 
 Appearance Tab
 ______________
-The appearance tab controls the color and opacity of the variable being used by your renderer.  This is done through the Transfer Function.
+The appearance tab controls the color, opacity, and any renderer-specific parameters of your renderer.  Color and opacity are controlled by the Transfer Function.  Renderer-specific parameters will be grouped togheter within the Appearance Tab.  See the :ref:`Renderers <renderers>` section for more info on renderer-specific parameters.
 
 The Transfer Function consists of a `Probability Density Function (PDF) <https://en.wikipedia.org/wiki/Probability_density_function>`_ of your currently selected variable.  Underneath the PDF is a color bar that shows the colors that get applied to the values located directly above it.
 
@@ -246,8 +248,6 @@ Quantifying the colors to your viewers can be done by adding a colorbar in the A
     An exmaple colorbar
 
 |
-
-.. _renderers:
 
 Unique Renderer Controls
 ------------------------

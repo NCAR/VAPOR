@@ -205,7 +205,7 @@
 <p>We recommend that all users either watch our <span class="xref std std-ref">Introductory Tutorial</span> or work through the <a class="reference internal" href="quickStartGuide.html#quickstartguide"><span class="std std-ref">Quick Start Guide</span></a>.</p>
 <p>If any feature in Vapor is not sufficienty self describing in the application, this is where to find elaboration.  Please <a class="reference internal" href="contactAndContribute.html#contactandcontribute"><span class="std std-ref">contact our team</span></a> if you think you may have found a bug, usability issue, or you’d like to request an enhancement.</p>
 <div class="section" id="the-renderers">
-<h2>The Renderers<a class="headerlink" href="#the-renderers" title="Permalink to this headline">¶</a></h2>
+<span id="renderers"></span><h2>The Renderers<a class="headerlink" href="#the-renderers" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="volume-renderer">
 <h3>Volume Renderer<a class="headerlink" href="#volume-renderer" title="Permalink to this headline">¶</a></h3>
 <p>Displays the user’s 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.</p>
@@ -279,19 +279,19 @@
 <li><a class="reference internal" href="#annotationtab"><span class="std std-ref">Annotation</span></a></li>
 </ul>
 </div></blockquote>
-<p id="variablestab">See the <a class="reference internal" href="#renderers"><span class="std std-ref">Renderers</span></a> section for more information on how each of these tabs work for a given renderer.  Again, they all operate in the same way for the most part.</p>
+<p>See the <a class="reference internal" href="#renderers"><span class="std std-ref">Renderers</span></a> section for more information on how each of these tabs work for a given renderer.  Again, they all operate in the same way for the most part.</p>
 <div class="align-center figure" id="id1">
 <a class="reference internal image-reference" href="_images/variablesTab.png"><img alt="_images/variablesTab.png" src="_images/variablesTab.png" style="width: 500px;" /></a>
 <p class="caption"><span class="caption-text">Variables tab for the Slice renderer</span></p>
 </div>
 <div class="section" id="variables-tab">
-<h3>Variables Tab<a class="headerlink" href="#variables-tab" title="Permalink to this headline">¶</a></h3>
+<span id="variablestab"></span><h3>Variables Tab<a class="headerlink" href="#variables-tab" title="Permalink to this headline">¶</a></h3>
 <p>The Variables Tab allows the user to define what variables are used as input to a renderer.  The options presented to the user in this tab depend on the renderer currently being used.</p>
 <p>Users that have converted their data into <a class="reference internal" href="gettingDataIntoVapor.html#vdc"><span class="std std-ref">VDC</span></a> will have a fidelity controller, which allows them to view compressed data to speed up their rendering time.  Making a visualization interactive lets you change parameters faster, so you can crank up the fidelity of your data for a final visualization after exploring first.</p>
 </div>
 <div class="section" id="appearance-tab">
 <span id="appearancetab"></span><h3>Appearance Tab<a class="headerlink" href="#appearance-tab" title="Permalink to this headline">¶</a></h3>
-<p>The appearance tab controls the color and opacity of the variable being used by your renderer.  This is done through the Transfer Function.</p>
+<p>The appearance tab controls the color, opacity, and any renderer-specific parameters of your renderer.  Color and opacity are controlled by the Transfer Function.  Renderer-specific parameters will be grouped togheter within the Appearance Tab.  See the <a class="reference internal" href="#renderers"><span class="std std-ref">Renderers</span></a> section for more info on renderer-specific parameters.</p>
 <p>The Transfer Function consists of a <a class="reference external" href="https://en.wikipedia.org/wiki/Probability_density_function">Probability Density Function (PDF)</a> of your currently selected variable.  Underneath the PDF is a color bar that shows the colors that get applied to the values located directly above it.</p>
 <div class="align-center figure" id="id2">
 <img alt="_images/transferFunctionDocumentation.png" src="_images/transferFunctionDocumentation.png" />
@@ -366,7 +366,7 @@
 </div>
 </div>
 <div class="section" id="unique-renderer-controls">
-<span id="renderers"></span><h2>Unique Renderer Controls<a class="headerlink" href="#unique-renderer-controls" title="Permalink to this headline">¶</a></h2>
+<h2>Unique Renderer Controls<a class="headerlink" href="#unique-renderer-controls" title="Permalink to this headline">¶</a></h2>
 <p>Some renderers have unique controls that do not exist elsewhere.</p>
 <div class="section" id="raycasting-renderers">
 <h3>Raycasting Renderers<a class="headerlink" href="#raycasting-renderers" title="Permalink to this headline">¶</a></h3>

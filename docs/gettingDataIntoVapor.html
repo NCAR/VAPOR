@@ -85,26 +85,14 @@
 <li class="toctree-l1"><a class="reference internal" href="downloads.html">Downloads</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickStartGuide.html">Quick Start Guide</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Data into Vapor3</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#importing-data-vs-loading-vdc">Importing data vs Loading VDC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#importing-data">Importing data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#vapor-data-collection-vdc">Vapor Data Collection (VDC)</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#wrf-arw-data-to-vdc">WRF-ARW data to VDC</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#step-1-create-vdc-metadata-file">Step 1: Create .vdc metadata file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#step-2-the-wavelet-transform">Step 2: The wavelet transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-the-command-line-tools">Using the Command Line Tools</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#netcdf-cf-data-to-vdc">NetCDF-CF data to VDC</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#coordinate-variables">Coordinate Variables</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1">Step 1: Create .vdc metadata file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">Step 2: The wavelet transform</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#raw-binary-data-to-vdc">Raw binary data to VDC</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id3">Step 1: Create .vdc metadata file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id4">Step 2: The wavelet transform</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#wrf-arw">WRF-ARW</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#netcdf-and-the-cf-conventions">NetCDF and the CF Conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#raw-binary-data">Raw Binary Data</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Using Vapor 3</a></li>
@@ -176,98 +164,85 @@
             
   <div class="section" id="getting-data-into-vapor3">
 <span id="gettingdataintovapor"></span><h1>Getting Data into Vapor3<a class="headerlink" href="#getting-data-into-vapor3" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="importing-data-vs-loading-vdc">
-<h2>Importing data vs Loading VDC<a class="headerlink" href="#importing-data-vs-loading-vdc" title="Permalink to this headline">¶</a></h2>
-<p>Vapor can directly read the data formats listed below.  We call this importing data.</p>
-<ul class="simple">
-<li>NetCDF files that follow the CF Convention (NetCDF-CF)</li>
-<li>WRF-ARW</li>
-<li>MPAS</li>
+<p>Vapor can directly import the datasets listed below.  Some of them can be converted into the <a class="reference internal" href="#vdc"><span class="std std-ref">VDC</span></a> format if you are experiencing a performance bottleneck.  We strongly recommend that users start by importing their data and only convert VDC if necessary.</p>
+<blockquote>
+<div><ul class="simple">
+<li>NetCDF files that follow the CF Convention (<a class="reference internal" href="#netcdf-cf"><span class="std std-ref">NetCDF-CF</span></a>)</li>
+<li>WRF-ARW <a class="reference internal" href="#wrf"><span class="std std-ref">WRF-ARW</span></a></li>
+<li>MPAS <span class="xref std std-ref">mpas</span></li>
 </ul>
-<p>NetCDF-CF, WRF, and raw binary files can also be converted into a Vapor Data Collection (VDC).  This method which has advantages <a class="reference internal" href="#vdc"><span class="std std-ref">described below</span></a>.  MPAS is currently not supported for VDC conversion.</p>
-<p>Users can either load VDC, or import their data through Vapor’s <code class="docutils literal notranslate"><span class="pre">File</span></code> menu.</p>
-<table border="1" class="docutils">
-<colgroup>
-<col width="48%" />
-<col width="4%" />
-<col width="48%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td>Loading a .vdc file</td>
-<td>&#160;</td>
-<td>Importing data</td>
-</tr>
-<tr class="row-even"><td><img alt="_images/loadData.png" class="first last" src="_images/loadData.png" />
-</td>
-<td>or</td>
-<td><img alt="_images/importWRF.png" class="first last" src="_images/importWRF.png" />
-</td>
-</tr>
-</tbody>
-</table>
+</div></blockquote>
+<p><a class="reference internal" href="#binary"><span class="std std-ref">Raw binary</span></a> data must be converted to VDC before loading into Vapor.</p>
+<div class="section" id="importing-data">
+<h2>Importing data<a class="headerlink" href="#importing-data" title="Permalink to this headline">¶</a></h2>
+<p>Users can import their data through Vapor’s <code class="docutils literal notranslate"><span class="pre">File</span></code> menu.</p>
+<div class="align-center figure" id="id1">
+<a class="reference internal image-reference" href="_images/importWRF.png"><img alt="_images/importWRF.png" src="_images/importWRF.png" style="width: 400px;" /></a>
+<p class="caption"><span class="caption-text">Importing WRF data into Vapor.</span></p>
+</div>
 </div>
 <div class="section" id="vapor-data-collection-vdc">
 <span id="vdc"></span><h2>Vapor Data Collection (VDC)<a class="headerlink" href="#vapor-data-collection-vdc" title="Permalink to this headline">¶</a></h2>
-<p>One of Vapor’s strengths is the VDC data format, which allows users to render their data at different levels of compression.  Viewing compressed data reduces the time a rendering takes to complete, improving interactivity.</p>
+<p>In most cases, directly importing data is sufficient for an interactive user experience.  However, if rendering times keep the application from being interactive, users may want to consider using the VDC data foramt.</p>
+<p>The VDC data format allows users to render their data at different levels of compression.  Viewing compressed data reduces the time a rendering takes to complete, improving interactivity.</p>
 <p>With VDC, users can configure their renderers quickly at low fidelity, and then turn off compression for their final renderings.  Being able to interact with your data becomes important when rendering takes many seconds, minutes, or even hours to complete.</p>
-<p>Creating a VDC is a two step process using command line tools.</p>
+<div class="section" id="using-the-command-line-tools">
+<h3>Using the Command Line Tools<a class="headerlink" href="#using-the-command-line-tools" title="Permalink to this headline">¶</a></h3>
+<p>Creating a VDC requires command line tools that come bundled with Vapor.  These tools can be found and issued in the installation directory.  For example, Windows users may find it in C:Program FilesVAPORand Linux users may find it in /home/john_doe/vapor/bin/wrf2vdc.</p>
+<p>Alternatively, the tools can be added to the user’s system path by clicking on the <cite>Tools</cite> menu, and selecting <cite>Install Command Line Tools</cite>.After doing this, users will be able to issue the command line utilities from any directory in their terminal or command prompt.</p>
+<div class="align-center figure" id="id2">
+<img alt="_images/installCLTools.png" src="_images/installCLTools.png" />
+<p class="caption"><span class="caption-text">Installing the command line tools for VDC creation, through Vapor’s GUI.</span></p>
+</div>
+<p>The two step VDC creation process is as follows:</p>
 <blockquote>
 <div><p>Step 1) Create a .vdc metadata file that describes the structure of your data</p>
-<p>Step 2) Apply the wavelet transform to populate your VDC</p>
+<p>Step 2) Transform the data values into VDC format</p>
 </div></blockquote>
-<p>This process is supported with <a class="reference internal" href="#wrf"><span class="std std-ref">WRF-ARW</span></a>, <a class="reference internal" href="#netcdf-cf"><span class="std std-ref">NetCDF-CF</span></a>, and <cite>raw binary data &lt;binary&gt;</cite>.  Read on to find instructions for your data type.</p>
-<div class="section" id="wrf-arw-data-to-vdc">
-<span id="wrf"></span><h3>WRF-ARW data to VDC<a class="headerlink" href="#wrf-arw-data-to-vdc" title="Permalink to this headline">¶</a></h3>
-<p>The two tools for converting WRF-ARW into VDC are <code class="docutils literal notranslate"><span class="pre">wrfvdccreate</span></code> and <code class="docutils literal notranslate"><span class="pre">wrf2vdc</span></code>.  If these commands are issued by themselves, advanced options will be listed to the terminal.  These advanced options are usually not necessary.</p>
-<div class="section" id="step-1-create-vdc-metadata-file">
-<h4>Step 1: Create .vdc metadata file<a class="headerlink" href="#step-1-create-vdc-metadata-file" title="Permalink to this headline">¶</a></h4>
+<p>This process is supported with <a class="reference internal" href="#wrf"><span class="std std-ref">WRF-ARW</span></a>, <a class="reference internal" href="#netcdf-cf"><span class="std std-ref">NetCDF-CF</span></a>, and <cite>raw binary data &lt;binary&gt;</cite>.</p>
+<p>Once the conversion is complete, users can load VDC files into Vapor.  Read on for instructions for your data type.</p>
+<div class="align-center figure" id="id3">
+<a class="reference internal image-reference" href="_images/loadData.png"><img alt="_images/loadData.png" src="_images/loadData.png" style="width: 400px;" /></a>
+<p class="caption"><span class="caption-text">Loading a VDC into Vapor.</span></p>
+</div>
+</div>
+</div>
+<div class="section" id="wrf-arw">
+<span id="wrf"></span><h2>WRF-ARW<a class="headerlink" href="#wrf-arw" title="Permalink to this headline">¶</a></h2>
+<p>Vapor supports WRF-ARW model output, so it can be <span class="xref std std-ref">directly imported</span>.</p>
+<p>The two tools for converting WRF-ARW into VDC are <code class="docutils literal notranslate"><span class="pre">wrfvdccreate</span></code> and <code class="docutils literal notranslate"><span class="pre">wrf2vdc</span></code>.  If either of these commands are issued by themselves, advanced options will be listed to the terminal.  These advanced options are usually not necessary.</p>
 <p>In the directory where Vapor 3 is installed, there is a command line utility called <code class="docutils literal notranslate"><span class="pre">wrfvdccreate</span></code>.  Issue this command in a terminal (Unix) or command prompt (Windows), followed by your WRF-ARW files, and finally the name of the .vdc file to be written.</p>
-<div class="align-center figure" id="id5">
+<blockquote>
+<div><code class="docutils literal notranslate"><span class="pre">wrfvdccreate</span> <span class="pre">wrfout_d02_2005-08-29_02</span> <span class="pre">katrina.vdc</span></code></div></blockquote>
+<div class="align-center figure" id="id4">
 <img alt="_images/wrfvdccreate.png" src="_images/wrfvdccreate.png" />
 <p class="caption"><span class="caption-text">Creating a .vdc metadata file with <code class="docutils literal notranslate"><span class="pre">wrfvdccreate</span></code>.</span></p>
 </div>
-</div>
-<div class="section" id="step-2-the-wavelet-transform">
-<h4>Step 2: The wavelet transform<a class="headerlink" href="#step-2-the-wavelet-transform" title="Permalink to this headline">¶</a></h4>
-<p>Once we have a .vdc file, the metadata has been recorded and we can apply the wavelet transform.  From Vapor 3’s installation directory, issue the command <code class="docutils literal notranslate"><span class="pre">wrf2vdc</span></code>, followed by your WRF-ARW files, and finally followed by the .vdc file that was made in Step 1.</p>
-<div class="align-center figure" id="id6">
+<p>Once we have a .vdc file, the metadata has been recorded and we can transform the data into the VDC format.  From Vapor 3’s installation directory, issue the command <code class="docutils literal notranslate"><span class="pre">wrf2vdc</span></code>, followed by your WRF-ARW files, and finally followed by the .vdc file that was made in Step 1.</p>
+<blockquote>
+<div><code class="docutils literal notranslate"><span class="pre">wrf2vdce</span> <span class="pre">wrfout_d02_2005-08-29_02</span> <span class="pre">katrina.vdc</span></code></div></blockquote>
+<div class="align-center figure" id="id5">
 <img alt="_images/wrf2vdc.png" src="_images/wrf2vdc.png" />
-<p class="caption"><span class="caption-text">Applying the wavelet transform to WRF-ARW data with <code class="docutils literal notranslate"><span class="pre">wrf2vdc</span></code></span></p>
+<p class="caption"><span class="caption-text">Applying the VDC transform to WRF-ARW data with <code class="docutils literal notranslate"><span class="pre">wrf2vdc</span></code></span></p>
 </div>
 </div>
-</div>
-<div class="section" id="netcdf-cf-data-to-vdc">
-<span id="netcdf-cf"></span><h3>NetCDF-CF data to VDC<a class="headerlink" href="#netcdf-cf-data-to-vdc" title="Permalink to this headline">¶</a></h3>
-<p>If your NetCDF data follows the CF conventions, then the process of converting it to VDC is nearly identical to the WRF conversion process.  The commands that will be used are named <em>cfvdccreate</em> for .vdc metadata creation, and <em>cf2vdc</em> for applying the wavelet transform.</p>
+<div class="section" id="netcdf-and-the-cf-conventions">
+<span id="netcdf-cf"></span><h2>NetCDF and the CF Conventions<a class="headerlink" href="#netcdf-and-the-cf-conventions" title="Permalink to this headline">¶</a></h2>
+<p>If your NetCDF data follows the CF conventions, then the process of converting it to VDC is nearly identical to the WRF conversion process.  The commands that will be used are named <em>cfvdccreate</em> for .vdc metadata creation, and <em>cf2vdc</em> for applying the transform.</p>
+<p>The <a class="reference external" href="http://cfconventions.org/compliance-checker.html">CF Conformance Checker</a> may be used to test if your data adheres to the standard.  Passing this checker does not guarantee that Vapor will read the data, but a failer is a strong indicator that Vapor will not be able to read the data.</p>
 <p>In order for NetCDF data to be compliant with the CF conventions, the following conditions must be met for the file’s vector, scalar, and coordinate variables.</p>
-<div class="section" id="coordinate-variables">
-<h4>Coordinate Variables<a class="headerlink" href="#coordinate-variables" title="Permalink to this headline">¶</a></h4>
 <p>What is a “Coordinate Variable”?  From the CF1.X Definition:</p>
 <p><em>We use this term precisely as it is defined in section 2.3.1 of the NUG.  It is a one- dimensional variable with the same name as its dimension [e.g., time(time)], and it is defined as a numeric data type with values that are ordered monotonically. Missing values are not allowed in coordinate variables.</em></p>
-<div class="section" id="the-axis-attribute">
-<h5>The <code class="docutils literal notranslate"><span class="pre">axis</span></code> attribute<a class="headerlink" href="#the-axis-attribute" title="Permalink to this headline">¶</a></h5>
 <p>Each coordinate variable must have an <code class="docutils literal notranslate"><span class="pre">axis</span></code> attribute as follows:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal notranslate"><span class="pre">X</span></code> coordinate variables must contain an <code class="docutils literal notranslate"><span class="pre">axis</span></code> attribute that is equal to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</li>
-<li><code class="docutils literal notranslate"><span class="pre">Y</span></code> coordinate variables must contain an <code class="docutils literal notranslate"><span class="pre">axis</span></code> attribute that is equal to <code class="docutils literal notranslate"><span class="pre">1</span></code>.</li>
-<li><code class="docutils literal notranslate"><span class="pre">Z</span></code> coordinate variables must contain an <code class="docutils literal notranslate"><span class="pre">axis</span></code> attribute that is equal to <code class="docutils literal notranslate"><span class="pre">2</span></code>.</li>
-<li><code class="docutils literal notranslate"><span class="pre">Time</span></code> coordinate variables must contain an <code class="docutils literal notranslate"><span class="pre">axis</span></code> attribute that is equal to <code class="docutils literal notranslate"><span class="pre">3</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">X</span></code> coordinate variables must contain an <code class="docutils literal notranslate"><span class="pre">axis</span></code> attribute that is equal to <code class="docutils literal notranslate"><span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">X</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">Y</span></code> coordinate variables must contain an <code class="docutils literal notranslate"><span class="pre">axis</span></code> attribute that is equal to <code class="docutils literal notranslate"><span class="pre">1</span></code> or <code class="docutils literal notranslate"><span class="pre">Y</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">Z</span></code> coordinate variables must contain an <code class="docutils literal notranslate"><span class="pre">axis</span></code> attribute that is equal to <code class="docutils literal notranslate"><span class="pre">2</span></code> or <code class="docutils literal notranslate"><span class="pre">Z</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">Time</span></code> coordinate variables must contain an <code class="docutils literal notranslate"><span class="pre">axis</span></code> attribute that is equal to <code class="docutils literal notranslate"><span class="pre">3</span></code> or <code class="docutils literal notranslate"><span class="pre">T</span></code>.</li>
 </ul>
 </div></blockquote>
-</div>
-<div class="section" id="the-units-attribute">
-<h5>The <code class="docutils literal notranslate"><span class="pre">units</span></code> attribute<a class="headerlink" href="#the-units-attribute" title="Permalink to this headline">¶</a></h5>
-<p>Coordinate variables for the X, Y and Z axes may have an attribute that defines the units they are measured in.  Some suitable values for the <code class="docutils literal notranslate"><span class="pre">units</span></code> attribute are:</p>
-<blockquote>
-<div><ul class="simple">
-<li>degree_east</li>
-<li>meters</li>
-<li>m</li>
-<li>km</li>
-</ul>
-</div></blockquote>
-<p>Optionally, the Time coordinate variable may have a <code class="docutils literal notranslate"><span class="pre">units</span></code> attribute which must be identifiable by the Udunits library.  Suitable <code class="docutils literal notranslate"><span class="pre">units</span></code> attributes include:</p>
+<p>The Time coordinate variable <strong>must</strong> have a <code class="docutils literal notranslate"><span class="pre">units</span></code> attribute which must be identifiable by the Udunits library.  Suitable <code class="docutils literal notranslate"><span class="pre">units</span></code> attributes include:</p>
 <blockquote>
 <div><ul class="simple">
 <li>seconds</li>
@@ -276,45 +251,42 @@
 <li>seconds since 2011-01-01 00:00:00</li>
 </ul>
 </div></blockquote>
-</div>
-<div class="section" id="vertical-coordinates">
-<h5>Vertical Coordinates<a class="headerlink" href="#vertical-coordinates" title="Permalink to this headline">¶</a></h5>
+<p>Coordinate variables for the X, Y and Z axes may have an attribute that defines the units they are measured in.  These units will assiste vapor in creating renderings that are accurate between multiple datasets.  Some suitable values for the <code class="docutils literal notranslate"><span class="pre">units</span></code> attribute are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>degree_east</li>
+<li>meters</li>
+<li>m</li>
+<li>km</li>
+</ul>
+</div></blockquote>
 <p><em>Need to elaborate.  We currently support ocean_s_coordinate_g1 and ocean_s_coordinate_g2 when the vertical coordinate is dimensionless.  What about other cases?</em></p>
-</div>
-<div class="section" id="missing-values">
-<h5>Missing Values<a class="headerlink" href="#missing-values" title="Permalink to this headline">¶</a></h5>
 <p>Variables with missing data values must have the attribute <em>_FillValue</em> or <em>missing_value</em> specified.  See section 2.5.1 of the CF 1.6 specification for more information.</p>
-</div>
-</div>
-<div class="section" id="id1">
-<h4>Step 1: Create .vdc metadata file<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
 <p>Once your NetCDF files have attributes that make them CF compliant, you may produce VDC by doing the following.</p>
 <p>In the directory where Vapor 3 is installed, there is a command line utility called <em>cfvdccreate</em>.  Issue this command in a terminal (Unix) or command prompt (Windows), followed by your NetCDF-CF files, and finally the name of the .vdc file to be written.</p>
 <p>Typing the command <em>cfvdccreate</em> alone will display the optional arguments that may be used, but these are usually not necessary.</p>
 </div>
-<div class="section" id="id2">
-<h4>Step 2: The wavelet transform<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
-</div>
-</div>
-<div class="section" id="raw-binary-data-to-vdc">
-<span id="binary"></span><h3>Raw binary data to VDC<a class="headerlink" href="#raw-binary-data-to-vdc" title="Permalink to this headline">¶</a></h3>
-<p>Converting raw binary data to VDC is the most complex process for converting data in Vapor 3.  With WRF-ARW and NetCDF-CF data, Vapor can read the files an extract metadata that describes the grid that the data exists within.  With raw binary data, we need to define that metadata ourselves in step 1.</p>
-<div class="section" id="id3">
-<h4>Step 1: Create .vdc metadata file<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="raw-binary-data">
+<span id="binary"></span><h2>Raw Binary Data<a class="headerlink" href="#raw-binary-data" title="Permalink to this headline">¶</a></h2>
+<p>Converting raw binary data to VDC is a complex process for converting data in Vapor 3.  With WRF-ARW and NetCDF-CF data, Vapor can read the files an extract metadata that describes the grid that the data exists within.  With raw binary data, we need to define that metadata ourselves in step 1.</p>
 <p>To make a VDC from scratch, users need to carefully read all options in the <code class="docutils literal notranslate"><span class="pre">vdccreate</span></code> utility, and define their .vdc metadata file accordingly.</p>
-<div class="align-center figure" id="id7">
+<p>In this <a class="reference external" href="https://drive.google.com/open?id=1wJtPX0DPgovZSulAC8kntDKVcDkTw1Y7">sample dataset of a sphere</a>, we have a 64x64x64 rectilinear grid with one timestep, and one 3D variable.  For this example, we can create a .vdc metadata file with the following flags from vdccreate.  Note that we are not using the raw data file yet, just defining the grid, time dimension, and variables.</p>
+<blockquote>
+<div><code class="docutils literal notranslate"><span class="pre">vdccreate</span> <span class="pre">-dimension</span> <span class="pre">64x64x64</span> <span class="pre">-numts</span> <span class="pre">1</span> <span class="pre">-vars3d</span> <span class="pre">exampleVar</span> <span class="pre">sphere64.vdc</span></code></div></blockquote>
+<div class="align-center figure" id="id6">
 <img alt="_images/vdccreate.png" src="_images/vdccreate.png" />
 <p class="caption"><span class="caption-text">Command line arguments for vdccreate, seen by issuing the command without any arguments</span></p>
 </div>
+<p>Now that a .vdc metadata file has been created, the VDC transform can take place.  Each variable must be converted individually with <code class="docutils literal notranslate"><span class="pre">raw2vdc</span></code>, and this must be done one timestep at a time.</p>
+<blockquote>
+<div><code class="docutils literal notranslate"><span class="pre">raw2vdc</span> <span class="pre">-ts</span> <span class="pre">0</span> <span class="pre">-varname</span> <span class="pre">exampleVar</span> <span class="pre">sphere64.vdc</span> <span class="pre">sphere64.raw</span></code></div></blockquote>
+<div class="align-center figure" id="id7">
+<img alt="_images/sphere.png" src="_images/sphere.png" />
+<p class="caption"><span class="caption-text">A volume rendering of our sphere, converted from raw binary data.</span></p>
 </div>
-<div class="section" id="id4">
-<h4>Step 2: The wavelet transform<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
-<p>Now that a .vdc metadata file has been created, the wavelet decomposition can take place.  Each variable must be converted individually with <code class="docutils literal notranslate"><span class="pre">raw2vdc</span></code>, and this must be done one timestep at a time.</p>
 <div class="align-center figure" id="id8">
 <img alt="_images/raw2vdc.png" src="_images/raw2vdc.png" />
-<p class="caption"><span class="caption-text">Command line arguments for raw2vdc wavelet transform, seen by issuing the command without any arguments</span></p>
-</div>
-</div>
+<p class="caption"><span class="caption-text">Command line arguments for raw2vdc wavelet transform, seen by issuing the command without any arguments.</span></p>
 </div>
 </div>
 </div>
