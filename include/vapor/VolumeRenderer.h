@@ -108,9 +108,11 @@ protected:
     
     bool OSPRayNeedToLoadData();
     int OSPRayLoadData(OSPModel world);
-    int OSPRayLoadDataRegular(OSPModel world, Grid *grid);
-    int OSPRayLoadDataStructured(OSPModel world, Grid *grid);
-    int OSPRayLoadDataUnstructured(OSPModel world, Grid *grid);
+    
+    static OSPVolume OSPRayCreateVolumeFromGrid            (const Grid *grid, const glm::mat4 &transform);
+    static OSPVolume OSPRayCreateVolumeFromRegularGrid     (const Grid *grid, const glm::mat4 &transform);
+    static OSPVolume OSPRayCreateVolumeFromStructuredGrid  (const Grid *grid, const glm::mat4 &transform);
+    static OSPVolume OSPRayCreateVolumeFromUnstructuredGrid(const Grid *grid, const glm::mat4 &transform);
     virtual int OSPRayLoadTF();
     virtual void OSPRayAddObjectToWorld(OSPModel world);
     virtual void OSPRayRemoveObjectFromWorld(OSPModel world);

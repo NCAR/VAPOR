@@ -608,27 +608,42 @@ int VolumeRenderer::OSPRayLoadData(OSPModel world)
     
     Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.var, _cache.refinement, _cache.compression);
     
-    if (dynamic_cast<UnstructuredGrid*>(grid) || GetActiveParams()->GetValueLong("force_unstructured", 0))
-        return OSPRayLoadDataUnstructured(world, grid);
-    else if (_cache.algorithmName == VolumeRegular::GetName())
-        return OSPRayLoadDataRegular(world, grid);
+    if (GetActiveParams()->GetValueLong("force_unstructured", 0))
+        _volume = OSPRayCreateVolumeFromUnstructuredGrid(grid, _ospCache.coordTransform);
     else
-        return OSPRayLoadDataStructured(world, grid);
+        _volume = OSPRayCreateVolumeFromGrid(grid, _ospCache.coordTransform);
+    
+    if (_volume)
+        ospAddVolume(world, _volume);
     
     delete grid;
     
-    return 1;
+    if (_volume)
+        return 0;
+    else
+        return -1;
 }
 
-int VolumeRenderer::OSPRayLoadDataRegular(OSPModel world, Grid *grid)
+OSPVolume VolumeRenderer::OSPRayCreateVolumeFromGrid(const Grid *grid, const glm::mat4 &transform)
 {
-    glm::vec3 dataMin, dataMax, userMin, userMax;
-    _getExtents(&dataMin, &dataMax, &userMin, &userMax);
+    if (dynamic_cast<const RegularGrid*>(grid))
+        return OSPRayCreateVolumeFromStructuredGrid(grid, transform);
+    else if (dynamic_cast<const StructuredGrid*>(grid))
+        return OSPRayCreateVolumeFromRegularGrid(grid, transform);
+    else if (dynamic_cast<const UnstructuredGrid*>(grid))
+        return OSPRayCreateVolumeFromUnstructuredGrid(grid, transform);
     
-    if (!_volume) {
-        _volume = ospNewVolume("block_bricked_volume");
-        OSPRayAddObjectToWorld(world);
-    }
+    return nullptr;
+}
+
+OSPVolume VolumeRenderer::OSPRayCreateVolumeFromRegularGrid(const Grid *grid, const glm::mat4 &transform)
+{
+    vector<double> dataMinD, dataMaxD;
+    grid->GetUserExtents(dataMinD, dataMaxD);
+    glm::vec3 dataMin(dataMinD[0], dataMinD[1], dataMinD[2]);
+    glm::vec3 dataMax(dataMaxD[0], dataMaxD[1], dataMaxD[2]);
+    
+    OSPVolume volume = ospNewVolume("block_bricked_volume");
     
     const vector<size_t> dims = grid->GetDimensions();
     const size_t nVerts = dims[0]*dims[1]*dims[2];
@@ -645,34 +660,27 @@ int VolumeRenderer::OSPRayLoadDataRegular(OSPModel world, Grid *grid)
                 volumeData[i] = NAN;
     }
     
-    ospSet3i(_volume, "dimensions", dims[0], dims[1], dims[2]);
-    ospSetString(_volume, "voxelType", "float");
+    ospSet3i(volume, "dimensions", dims[0], dims[1], dims[2]);
+    ospSetString(volume, "voxelType", "float");
     
-    ospSetRegion(_volume, volumeData, {0,0,0}, {static_cast<int>(dims[0]), static_cast<int>(dims[1]), static_cast<int>(dims[2])});
+    ospSetRegion(volume, volumeData, {0,0,0}, {static_cast<int>(dims[0]), static_cast<int>(dims[1]), static_cast<int>(dims[2])});
     delete [] volumeData;
     
+    vec3 dataMinWorld = transform * vec4(dataMin, 1.0f);
+    vec3 dataMaxWorld = transform * vec4(dataMax, 1.0f);
+    
     vec3 gridDims(dims[0], dims[1], dims[2]);
-    vec3 gridSpacing = (dataMax-dataMin)/(gridDims-vec3(1));
+    vec3 gridSpacing = (dataMaxWorld-dataMinWorld)/(gridDims-vec3(1));
     
-    vec3 origin = _getOrigin();
-    vec3 scales = _getTotalScaling();
-    mat4 model = _ospCache.coordTransform;
+    ospSet3fv(volume, "gridOrigin", glm::value_ptr(dataMinWorld));
+    ospSet3fv(volume, "gridSpacing", glm::value_ptr(gridSpacing));
     
-    vec3 pos = (dataMin-origin)*scales + origin;
-    gridSpacing *= scales;
-    
-    pos = model * vec4(dataMin, 1.0f);
-    
-    ospSet3fv(_volume, "gridOrigin", glm::value_ptr(pos));
-    ospSet3fv(_volume, "gridSpacing", glm::value_ptr(gridSpacing));
-    
-    return 0;
+    return volume;
 }
 
-int VolumeRenderer::OSPRayLoadDataStructured(OSPModel world, Grid *grid)
+OSPVolume VolumeRenderer::OSPRayCreateVolumeFromStructuredGrid(const Grid *grid, const glm::mat4 &transform)
 {
-    _volume = ospNewVolume("unstructured_volume");
-    OSPRayAddObjectToWorld(world);
+    OSPVolume volume = ospNewVolume("unstructured_volume");
     
     const vector<size_t> dims = grid->GetDimensions();
     const int VW = dims[0], VH = dims[1], VD = dims[2];
@@ -686,12 +694,11 @@ int VolumeRenderer::OSPRayLoadDataStructured(OSPModel world, Grid *grid)
     
     OSPData ospData = ospNewData(nVerts, OSP_FLOAT, scalarData);
     ospCommit(ospData);
-    ospSetData(_volume, "field", ospData);
+    ospSetData(volume, "field", ospData);
     ospRelease(ospData);
     
     
     vec3 *coords = (vec3*)coordData;
-    mat4 model = _ospCache.coordTransform;
     auto coord = grid->ConstCoordBegin();
     for (size_t i = 0; i < nVerts; ++i, ++coord) {
         coordData[i*3  ] = (*coord)[0];
@@ -699,19 +706,13 @@ int VolumeRenderer::OSPRayLoadDataStructured(OSPModel world, Grid *grid)
         coordData[i*3+2] = (*coord)[2];
         
 //        coords[i] = (coords[i]-origin)*scales + origin;
-        coords[i] = model * vec4(coords[i], 1.0f);
+        coords[i] = transform * vec4(coords[i], 1.0f);
     }
     ospData = ospNewData(nVerts, OSP_FLOAT3, coordData);
     ospCommit(ospData);
-    ospSetData(_volume, "vertices", ospData);
+    ospSetData(volume, "vertices", ospData);
     ospRelease(ospData);
     delete [] coordData;
-    
-//    mat4 m = glm::mat4(1.0);
-//    m = glm::translate(m, origin);
-//    m = glm::scale(m, scales);
-//    m = glm::translate(m, -origin);
-//    _ospCoordTransform = m;
     
     typedef struct {
         int i0, i1, i2, i3, i4, i5, i6, i7;
@@ -753,19 +754,18 @@ int VolumeRenderer::OSPRayLoadDataStructured(OSPModel world, Grid *grid)
     
     ospData = ospNewData(indexId*2, OSP_INT4, indices);
     ospCommit(ospData);
-    ospSetData(_volume, "indices", ospData);
+    ospSetData(volume, "indices", ospData);
     ospRelease(ospData);
     delete [] indices;
     delete [] scalarData;
     
     
-    return 0;
+    return volume;
 }
 
-int VolumeRenderer::OSPRayLoadDataUnstructured(OSPModel world, Grid *grid)
+OSPVolume VolumeRenderer::OSPRayCreateVolumeFromUnstructuredGrid(const Grid *grid, const glm::mat4 &transform)
 {
-    _volume = ospNewVolume("unstructured_volume");
-    OSPRayAddObjectToWorld(world);
+    OSPVolume volume = ospNewVolume("unstructured_volume");
     
     auto cellEnd = grid->ConstCellEnd();
     size_t maxNodes = grid->GetMaxVertexPerCell();
@@ -775,8 +775,6 @@ int VolumeRenderer::OSPRayLoadDataUnstructured(OSPModel world, Grid *grid)
     size_t *nodes = (size_t*)alloca(sizeof(size_t) * maxNodes * nodeDim);
     float *values = (float*)alloca(sizeof(float) * maxNodes);
     double *coords = (double*)alloca(sizeof(double) * maxNodes * coordDim);
-    
-    mat4 model = _ospCache.coordTransform;
     
     typedef struct{int i[8];} OSPRayCell;
     vector<vec3> vertices;
@@ -810,7 +808,7 @@ int VolumeRenderer::OSPRayLoadDataUnstructured(OSPModel world, Grid *grid)
             
             for (int i = 0; i < 4; i++) {
                 vec3 originalCoord(coords[i*coordDim], coords[i*coordDim+1], coords[i*coordDim+2]);
-                vertices.push_back(model * vec4(originalCoord, 1.0f));
+                vertices.push_back(transform * vec4(originalCoord, 1.0f));
                 fields.push_back(values[i]);
                 c.i[i+4] = start+i;
             }
@@ -823,7 +821,7 @@ int VolumeRenderer::OSPRayLoadDataUnstructured(OSPModel world, Grid *grid)
             
             for (int i = 0; i < 6; i++) {
                 vec3 originalCoord(coords[i*coordDim], coords[i*coordDim+1], coords[i*coordDim+2]);
-                vertices.push_back(model * vec4(originalCoord, 1.0f));
+                vertices.push_back(transform * vec4(originalCoord, 1.0f));
                 fields.push_back(values[i]);
                 c.i[i+2] = start+i;
             }
@@ -836,7 +834,7 @@ int VolumeRenderer::OSPRayLoadDataUnstructured(OSPModel world, Grid *grid)
             
             for (int i = 0; i < 8; i++) {
                 vec3 originalCoord(coords[i*coordDim], coords[i*coordDim+1], coords[i*coordDim+2]);
-                vertices.push_back(model * vec4(originalCoord, 1.0f));
+                vertices.push_back(transform * vec4(originalCoord, 1.0f));
                 fields.push_back(values[i]);
                 c.i[i] = start+i;
             }
@@ -853,20 +851,20 @@ int VolumeRenderer::OSPRayLoadDataUnstructured(OSPModel world, Grid *grid)
     
     OSPData ospData = ospNewData(fields.size(), OSP_FLOAT, fields.data());
     ospCommit(ospData);
-    ospSetData(_volume, "field", ospData);
+    ospSetData(volume, "field", ospData);
     ospRelease(ospData);
     
     ospData = ospNewData(vertices.size(), OSP_FLOAT3, vertices.data());
     ospCommit(ospData);
-    ospSetData(_volume, "vertices", ospData);
+    ospSetData(volume, "vertices", ospData);
     ospRelease(ospData);
     
     ospData = ospNewData(indices.size()*2, OSP_INT4, indices.data());
     ospCommit(ospData);
-    ospSetData(_volume, "indices", ospData);
+    ospSetData(volume, "indices", ospData);
     ospRelease(ospData);
     
-    return 0;
+    return volume;
 }
 
 int VolumeRenderer::OSPRayLoadTF()
