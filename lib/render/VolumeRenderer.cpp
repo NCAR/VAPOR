@@ -627,9 +627,9 @@ int VolumeRenderer::OSPRayLoadData(OSPModel world)
 OSPVolume VolumeRenderer::OSPRayCreateVolumeFromGrid(const Grid *grid, const glm::mat4 &transform)
 {
     if (dynamic_cast<const RegularGrid*>(grid))
-        return OSPRayCreateVolumeFromStructuredGrid(grid, transform);
-    else if (dynamic_cast<const StructuredGrid*>(grid))
         return OSPRayCreateVolumeFromRegularGrid(grid, transform);
+    else if (dynamic_cast<const StructuredGrid*>(grid))
+        return OSPRayCreateVolumeFromStructuredGrid(grid, transform);
     else if (dynamic_cast<const UnstructuredGrid*>(grid))
         return OSPRayCreateVolumeFromUnstructuredGrid(grid, transform);
     
