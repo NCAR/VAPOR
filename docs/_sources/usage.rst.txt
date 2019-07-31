@@ -10,6 +10,10 @@ We recommend that all users either watch our :ref:`Introductory Tutorial <introT
 
 If any feature in Vapor is not sufficienty self describing in the application, this is where to find elaboration.  Please :ref:`contact our team <contactAndContribute>` if you think you may have found a bug, usability issue, or you'd like to request an enhancement.
 
+.. raw:: html
+
+    <iframe width="560" height="315" src=""https://youtu.be/CtXHdI4WUDE frameborder="0" allowfullscreen></iframe>
+
 .. _renderers:
 
 The Renderers
