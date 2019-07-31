@@ -377,7 +377,7 @@ VGeometry::VGeometry( QWidget* parent, int dim, const std::vector<float>& range 
     else    // Create anyway. Will be hidden though.
     {
         _zrange = new VRange( _pageWidget, 0.0f, 100.0f, "ZMin", "ZMax" );
-        _zrange->hide(); 
+        _zrange->hide();
     }
 
     connect( _xrange, SIGNAL( _rangeChanged() ), this, SLOT( _respondChanges() ) );
@@ -385,9 +385,9 @@ VGeometry::VGeometry( QWidget* parent, int dim, const std::vector<float>& range 
     connect( _zrange, SIGNAL( _rangeChanged() ), this, SLOT( _respondChanges() ) );
 
     //_layout = new QVBoxLayout(this);
-    _pageWidget->addWidget( _xrange );
-    _pageWidget->addWidget( _yrange );
-    _pageWidget->addWidget( _zrange );
+    layout->addWidget( _xrange );
+    layout->addWidget( _yrange );
+    layout->addWidget( _zrange );
     addTab( _pageWidget, "Geometry" );
 }
 
