@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <iostream>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cmath>
 #include <cfloat>
 #include <vapor/utils.h>
@@ -16,8 +16,8 @@ void StretchedGrid::_stretchedGrid(
 	const vector <double> &ycoords,
 	const vector <double> &zcoords
 ) {
-	assert(xcoords.size() != 0);
-	assert(ycoords.size() != 0);
+	VAssert(xcoords.size() != 0);
+	VAssert(ycoords.size() != 0);
 
 	_xcoords.clear();
 	_ycoords.clear();
@@ -43,8 +43,8 @@ StretchedGrid::StretchedGrid(
 	const vector <double> &zcoords
  ) : StructuredGrid(dims, bs, blks) {
 
-	assert(bs.size() == dims.size());
-	assert(bs.size() >= 1 && bs.size() <= 3); 
+	VAssert(bs.size() == dims.size());
+	VAssert(bs.size() >= 1 && bs.size() <= 3); 
 
 	_stretchedGrid(xcoords, ycoords, zcoords);
 }
@@ -73,31 +73,6 @@ vector <size_t> StretchedGrid::GetCoordDimensions(size_t dim) const {
 	}
 }
 
-float StretchedGrid::GetUserCoordinate(
-    vector <size_t> &index, size_t dim
-) const {
-	if (dim == 0) {
-		ClampIndex(vector<size_t> (1,GetDimensions()[0]), index);
-		return(_xcoords[index[0]]);
-	}
-	else if (dim == 1) {
-		ClampIndex(vector<size_t> (1,GetDimensions()[1]), index);
-		return(_ycoords[index[0]]);
-	}
-	else if (dim == 2) {
-		if (GetDimensions().size() == 3) {
-			ClampIndex(vector<size_t> (1,GetDimensions()[2]), index);
-			return(_zcoords[index[0]]);
-		}
-		else {
-			return(0.0);
-		}
-	}
-	else {
-		return(0.0);
-	}
-}
-
 
 void StretchedGrid::GetBoundingBox(
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
@@ -110,10 +85,10 @@ void StretchedGrid::GetBoundingBox(
 	vector <size_t> cMax = max;
 	ClampIndex(cMax); 
 
-	assert(cMin.size() == cMax.size());
+	VAssert(cMin.size() == cMax.size());
 
 	for (int i=0; i<cMin.size(); i++) {
-		assert(cMin[i] <= cMax[i]);
+		VAssert(cMin[i] <= cMax[i]);
 	}
 
 	minu.clear();
@@ -149,7 +124,7 @@ void StretchedGrid::GetEnclosingRegion(
 	vector <double> cMaxu = maxu;
 	ClampCoord(cMaxu);
 
-	assert(cMinu.size() == cMaxu.size());
+	VAssert(cMinu.size() == cMaxu.size());
 
 	// Initialize voxels coords to full grid
 	//
@@ -221,22 +196,20 @@ void StretchedGrid::GetEnclosingRegion(
 
 
 void StretchedGrid::GetUserCoordinates(
-	const std::vector <size_t> &indices,
-	std::vector <double> &coords
+	const size_t indices[],
+	double coords[]
 ) const {
 
-    vector <size_t> cIndices = indices;
-    ClampIndex(cIndices);
-
-	coords.clear();
+    size_t cIndices[3];
+    ClampIndex(indices, cIndices);
 
 	vector <size_t> dims = StructuredGrid::GetDimensions();
 
-	coords.push_back(_xcoords[cIndices[0]]);
-	coords.push_back(_ycoords[cIndices[1]]);
+	coords[0] = _xcoords[cIndices[0]];
+	coords[1] = _ycoords[cIndices[1]];
 
 	if (GetGeometryDim() > 2) {
-		coords.push_back(_zcoords[cIndices[2]]);
+		coords[2] = _zcoords[cIndices[2]];
 	}
 }
 
@@ -494,9 +467,9 @@ float StretchedGrid::GetValueLinear(
 	if (! inside) return(GetMissingValue());
 
 	vector <size_t> dims = GetDimensions();
-	assert(i<dims[0]-1);
-	assert(j<dims[1]-1);
-	if (dims.size() > 2) assert(k<dims[2]-1);
+	VAssert(i<dims[0]-1);
+	VAssert(j<dims[1]-1);
+	if (dims.size() > 2) VAssert(k<dims[2]-1);
 
 	float v0 = 
 		((AccessIJK(i,j,k)*xwgt[0] + AccessIJK(i+1,j,k)*xwgt[1]) * ywgt[0]) +

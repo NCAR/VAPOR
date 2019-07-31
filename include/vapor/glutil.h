@@ -127,7 +127,7 @@ RENDER_API bool FrameBufferReady();
     #else
         #define GL_LEGACY(x) x
     #endif
-    #define GL_ERR_BREAK() assert(!CheckGLError())
+    #define GL_ERR_BREAK() VAssert(!CheckGLError())
 #else
     #define GL_LEGACY(x)
     #define GL_ERR_BREAK()

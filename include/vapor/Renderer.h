@@ -301,8 +301,6 @@ protected:
 	//! \sa DisableClippingPlanes
 	void EnableClipToBox(ShaderProgram *shader, float haloFrac = 0.0) const;
 
-	void EnableClipToBox2DXY(float haloFrac = 0.0) const;
-
 	//! Disable clipping planes. 
 	//! If clipping is enabled this  method should be called prior to
 	//! returning from _paintGL()

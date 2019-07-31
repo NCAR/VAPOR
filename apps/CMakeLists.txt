@@ -17,6 +17,7 @@ if ((BUILD_VDC OR BUILD_GUI) AND BUILD_UTL)
 	add_subdirectory (wrf2vdc)
 	add_subdirectory (wrfvdccreate)
 	add_subdirectory (vdccompare)
+	add_subdirectory (vapor_check_udunits)
 endif()
 
 if (BUILD_GUI)

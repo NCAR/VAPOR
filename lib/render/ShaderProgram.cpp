@@ -1,12 +1,15 @@
 #include "vapor/glutil.h"    // Must be included first!!!
 #include "vapor/ShaderProgram.h"
 #include "vapor/FileUtils.h"
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <vapor/Shader.h>
+#include <vapor/Texture.h>
 
 using namespace VAPoR;
 using std::vector;
+using std::string;
 
 ShaderProgram::Policy ShaderProgram::UniformNotFoundPolicy = ShaderProgram::Policy::Relaxed;
 
@@ -28,7 +31,7 @@ int ShaderProgram::Link()
         return 1;
     }
     _id = glCreateProgram();
-    assert(_id);
+    VAssert(_id);
     for (auto it = _shaders.begin(); it != _shaders.end(); it++) {
         if(*it == nullptr || !(*it)->WasCompilationSuccessful()) {
             return -1;
@@ -43,10 +46,12 @@ int ShaderProgram::Link()
         delete _shaders[i];
 	_shaders.clear();
 
-    if (_successStatus)
-        return 1;
-    else
+    if (!_successStatus)
         return -1;
+    
+    ComputeSamplerLocations();
+    
+    return 1;
 }
 
 void ShaderProgram::Bind()
@@ -113,18 +118,25 @@ int ShaderProgram::GetUniformLocation(const std::string &name) const
     return glGetUniformLocation(_id, name.c_str());
 }
 
+bool ShaderProgram::HasUniform(const std::string &name) const
+{
+    return GetUniformLocation(name) != -1;
+}
+
 
 template<typename T> bool ShaderProgram::SetUniform(const std::string &name, const T &value) const
 {
+//    if ((typeid(T) == typeid(int)) && _samplerLocations.count(name)) printf("%s set to %i\n", name.c_str(), *(int*)((void*)&value));
+    
     if (!IsBound()) {
-        assert(!"Program not bound");
+        VAssert(!"Program not bound");
         return false;
     }
     const int location = glGetUniformLocation(_id, name.c_str());
     if (location == -1) {
-        printf("Uniform \"%s\" not found\n", name.c_str());
+        // printf("Uniform \"%s\" not found\n", name.c_str());
         if (UniformNotFoundPolicy == Policy::Strict)
-            assert(!"Uniform name not found");
+            VAssert(!"Uniform name not found");
         return false;
     }
     SetUniform(location, value);
@@ -165,9 +177,27 @@ void ShaderProgram::SetUniformArray(int location, int count, const float     *va
 void ShaderProgram::SetUniformArray(int location, int count, const glm::vec3 *values) const { glUniform3fv(location, count, (float *)values); }
 void ShaderProgram::SetUniformArray(int location, int count, const glm::vec4 *values) const { glUniform4fv(location, count, (float *)values); }
 
+template<typename T> bool ShaderProgram::SetSampler(const std::string &name, const T &value) const
+{
+    auto itr = _samplerLocations.find(name);
+    if (itr == _samplerLocations.end()) return false;
+    int textureUnit = itr->second;
+    
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    value.Bind();
+    SetUniform(name, textureUnit);
+    
+    glActiveTexture(GL_TEXTURE0);
+    
+    return true;
+}
+template bool ShaderProgram::SetSampler <Texture1D>     (const std::string &name, const Texture1D      &value) const;
+template bool ShaderProgram::SetSampler <Texture2D>     (const std::string &name, const Texture2D      &value) const;
+template bool ShaderProgram::SetSampler <Texture3D>     (const std::string &name, const Texture3D      &value) const;
+template bool ShaderProgram::SetSampler <Texture2DArray>(const std::string &name, const Texture2DArray &value) const;
+
 std::string ShaderProgram::GetLog() const
 {
-    assert(!_shaders.empty());
     if (_linked) {
         char buf[512];
         glGetProgramInfoLog(_id, 512, NULL, buf);
@@ -193,6 +223,24 @@ void ShaderProgram::PrintUniforms() const
         glGetActiveUniform(_id, i, 64, &nameLength, &size, &type, name);
         printf("%s %s\n", GLTypeToString(type), name);
     }
+}
+
+void ShaderProgram::ComputeSamplerLocations()
+{
+    GLint count;
+    GLint size;
+    GLenum type;
+    char name[128];
+    int nameLength;
+    int samplerId = 1; // Starting at 1 fixes some super weird GL bug
+    
+    glGetProgramiv(_id, GL_ACTIVE_UNIFORMS, &count);
+    for (int i = 0; i < count; i++) {
+        glGetActiveUniform(_id, i, 128, &nameLength, &size, &type, name);
+        if (IsGLTypeSampler(type))
+            _samplerLocations[string(name)] = samplerId++;
+    }
+    VAssert(samplerId <= GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS - 1);
 }
 
 const char *ShaderProgram::GLTypeToString(const unsigned int type)
@@ -306,6 +354,51 @@ const char *ShaderProgram::GLTypeToString(const unsigned int type)
 		case GL_UNSIGNED_INT_ATOMIC_COUNTER: return "atomic_uint";
 #endif
 		default: return "INVALID ENUM";
+    }
+}
+
+bool ShaderProgram::IsGLTypeSampler(const unsigned int type)
+{
+    switch (type) {
+        case GL_SAMPLER_1D:
+        case GL_SAMPLER_2D:
+        case GL_SAMPLER_3D:
+        case GL_SAMPLER_CUBE:
+        case GL_SAMPLER_1D_SHADOW:
+        case GL_SAMPLER_2D_SHADOW:
+        case GL_SAMPLER_1D_ARRAY:
+        case GL_SAMPLER_2D_ARRAY:
+        case GL_SAMPLER_1D_ARRAY_SHADOW:
+        case GL_SAMPLER_2D_ARRAY_SHADOW:
+        case GL_SAMPLER_2D_MULTISAMPLE:
+        case GL_SAMPLER_2D_MULTISAMPLE_ARRAY:
+        case GL_SAMPLER_CUBE_SHADOW:
+        case GL_SAMPLER_BUFFER:
+        case GL_SAMPLER_2D_RECT:
+        case GL_SAMPLER_2D_RECT_SHADOW:
+        case GL_INT_SAMPLER_1D:
+        case GL_INT_SAMPLER_2D:
+        case GL_INT_SAMPLER_3D:
+        case GL_INT_SAMPLER_CUBE:
+        case GL_INT_SAMPLER_1D_ARRAY:
+        case GL_INT_SAMPLER_2D_ARRAY:
+        case GL_INT_SAMPLER_2D_MULTISAMPLE:
+        case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+        case GL_INT_SAMPLER_BUFFER:
+        case GL_INT_SAMPLER_2D_RECT:
+        case GL_UNSIGNED_INT_SAMPLER_1D:
+        case GL_UNSIGNED_INT_SAMPLER_2D:
+        case GL_UNSIGNED_INT_SAMPLER_3D:
+        case GL_UNSIGNED_INT_SAMPLER_CUBE:
+        case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY:
+        case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
+        case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE:
+        case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+        case GL_UNSIGNED_INT_SAMPLER_BUFFER:
+        case GL_UNSIGNED_INT_SAMPLER_2D_RECT:
+            return true;
+        default:
+            return false;
     }
 }
 

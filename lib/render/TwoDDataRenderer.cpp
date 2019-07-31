@@ -314,7 +314,7 @@ int TwoDDataRenderer::GetMesh( DataMgr *dataMgr,
 	);
 	if(rc<0) return (-1);
 
-	assert(g);
+	VAssert(g);
 
 	double defaultZ = _getDefaultZ(dataMgr, ts);
 
@@ -444,7 +444,7 @@ int TwoDDataRenderer::_getMeshStructured(
 	TwoDDataParams *rParams = (TwoDDataParams *) GetActiveParams();
 
 	vector <size_t> dims = g->GetDimensions();
-	assert(dims.size() == 2);
+	VAssert(dims.size() == 2);
 
 	_vertsWidth = dims[0];
 	_vertsHeight = dims[1];
@@ -490,7 +490,7 @@ int TwoDDataRenderer::_getMeshUnStructured(
 	const Grid *g,
 	double defaultZ
 ) {
-	assert(g->GetTopologyDim() == 2);
+	VAssert(g->GetTopologyDim() == 2);
 	vector <size_t> dims = g->GetDimensions();
 
 	// Unstructured 2d grids are stored in 1d
@@ -502,16 +502,18 @@ int TwoDDataRenderer::_getMeshUnStructured(
 
 	// Count the number of triangle vertex indices needed
 	//
+	size_t maxVertexPerCell = g->GetMaxVertexPerCell();
+	size_t *nodes = (size_t*)alloca(sizeof(size_t) * maxVertexPerCell);
 	_nindices = 0;
 	Grid::ConstCellIterator citr;
 	Grid::ConstCellIterator endcitr = g->ConstCellEnd();
 	for (citr = g->ConstCellBegin(); citr != endcitr; ++citr) {
 
-		std::vector <std::vector <size_t> > nodes;
-		g->GetCellNodes(*citr, nodes);
+		int numNodes;
+		g->GetCellNodes((*citr).data(), nodes, numNodes);
 
-		if (nodes.size() < 3) continue;	// degenerate
-		_nindices += 3 * (nodes.size() - 2);
+		if (numNodes < 3) continue;	// degenerate
+		_nindices += 3 * (numNodes - 2);
 	}
 
 	// (Re)allocate space for verts
@@ -558,10 +560,10 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(
 		);
 
 		if(rc<0) return(rc);
-		assert(hgtGrid);
+		VAssert(hgtGrid);
 	}
 
-	assert(g->GetTopologyDim() == 2);
+	VAssert(g->GetTopologyDim() == 2);
 	vector <size_t> dims = g->GetDimensions();
 
 	GLfloat *verts = (GLfloat *) _sb_verts.GetBuf();
@@ -614,23 +616,27 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(
 	// and compute an index 
 	// array for the triangle list
 	//
+	size_t maxVertexPerCell = g->GetMaxVertexPerCell();
+	size_t *nodes = (size_t*)alloca(sizeof(size_t) * maxVertexPerCell);
 	Grid::ConstCellIterator citr;
 	Grid::ConstCellIterator endcitr = g->ConstCellEnd();
 	size_t index = 0;
 	for (citr = g->ConstCellBegin(); citr != endcitr; ++citr) {
+		int numNodes;
+		g->GetCellNodes((*citr).data(), nodes, numNodes);
 
-		std::vector <std::vector <size_t> > nodes;
-		g->GetCellNodes(*citr, nodes);
-
-		if (nodes.size() < 3) continue;	// degenerate
+		if (numNodes < 3) continue;	// degenerate
 
 		// Compute triangle node indices, with common vertex at 
 		// nodes[0]
 		//
-		for (int i=0; i<nodes.size()-2; i++) {
-			indices[index++] = LinearizeCoords(nodes[0], dims);
-			indices[index++] = LinearizeCoords(nodes[i+1], dims);
-			indices[index++] = LinearizeCoords(nodes[i+2], dims);
+		for (int i=0; i<numNodes-2; i++) {
+			//indices[index++] = LinearizeCoords(nodes[0], dims);
+			//indices[index++] = LinearizeCoords(nodes[i+1], dims);
+			//indices[index++] = LinearizeCoords(nodes[i+2], dims);
+			indices[index++] = nodes[0];
+			indices[index++] = nodes[i+1];
+			indices[index++] = nodes[i+2];
 		}
 	}
 
@@ -669,7 +675,7 @@ int TwoDDataRenderer::_getMeshStructuredDisplaced(
 	//Try to get requested refinement level or the nearest acceptable level:
 	//
 	string hgtvar = rParams->GetHeightVariableName();
-	assert (! hgtvar.empty());
+	VAssert (! hgtvar.empty());
 
 	Grid* hgtGrid = NULL;
 	int rc = DataMgrUtils::GetGrids(
@@ -677,10 +683,10 @@ int TwoDDataRenderer::_getMeshStructuredDisplaced(
 		&refLevel, &lod,  &hgtGrid
 	);
 	if(rc<0) return(rc);
-	assert(hgtGrid);
+	VAssert(hgtGrid);
 
 	vector <size_t> dims = g->GetDimensions();
-	assert(dims.size() == 2);
+	VAssert(dims.size() == 2);
 
 	size_t width = dims[0];
 	size_t height = dims[1];
@@ -727,7 +733,7 @@ int TwoDDataRenderer::_getMeshStructuredPlane(
 ) {
 
 	vector <size_t> dims = g->GetDimensions();
-	assert(dims.size() == 2);
+	VAssert(dims.size() == 2);
 
 	size_t width = dims[0];
 	size_t height = dims[1];
@@ -757,8 +763,8 @@ int TwoDDataRenderer::_getOrientation(
 
 	vector <string> coordvars;
 	bool ok = dataMgr->GetVarCoordVars(varname, true, coordvars);
-	assert(ok);
-	assert(coordvars.size() == 2);
+	VAssert(ok);
+	VAssert(coordvars.size() == 2);
 	
 	vector <int> axes;	// order list of coordinate axes
 	for (int i=0; i<coordvars.size(); i++) {
@@ -773,7 +779,7 @@ int TwoDDataRenderer::_getOrientation(
 		else return(1);	// X-Z
 	}
 
-	assert(axes[0] == 1 && axes[2] == 2); 
+	VAssert(axes[0] == 1 && axes[2] == 2); 
 	return(0);	// Y-Z
 }
 

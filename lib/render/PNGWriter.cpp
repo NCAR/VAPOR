@@ -1,4 +1,5 @@
 #include "vapor/PNGWriter.h"
+#include "vapor/VAssert.h"
 
 #define USE_PYTHON_PNG 1
 
@@ -22,7 +23,7 @@ int PNGWriter::Write(const unsigned char *buffer, const unsigned int width, cons
 {
 #if USE_PYTHON_PNG
     
-    assert(format == Format::RGB);
+    VAssert(format == Format::RGB);
     
     PyObject *pName, *pModule, *pFunc, *pArgs, *pValue;
     
@@ -65,11 +66,11 @@ int PNGWriter::Write(const unsigned char *buffer, const unsigned int width, cons
         // The 4th argument: RGB buffer
         long nChars = width * height * 3;
         PyObject* pListOfChars = PyList_New( nChars );
-        assert( pListOfChars );
+        VAssert( pListOfChars );
         for( long i = 0; i < nChars; i++ )
         {
             int rt = PyList_SetItem( pListOfChars, i, PyInt_FromLong( (long)buffer[i] ) );
-            assert( rt == 0 );
+            VAssert( rt == 0 );
         }
         PyTuple_SetItem( pArgs, 3, pListOfChars );
         
@@ -111,11 +112,11 @@ int PNGWriter::Write(const unsigned char *buffer, const unsigned int width, cons
     
     png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (png_ptr == NULL)
-        assert(0);
+        VAssert(0);
     
     info_ptr = png_create_info_struct(png_ptr);
     if (info_ptr == NULL)
-        assert(0);
+        VAssert(0);
     
     png_init_io(png_ptr, fp);
     

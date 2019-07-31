@@ -1,7 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <list>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <vapor/BlkMemMgr.h>
 #include <vapor/DC.h>
 #include <vapor/MyBase.h>
@@ -153,7 +153,7 @@ public:
  //! \copydoc DC::GetDimensionNames()
  //
  std::vector <string> GetDimensionNames() const {
-	assert(_dc);
+	VAssert(_dc);
 	return(_dc->GetDimensionNames());
  }
 
@@ -162,14 +162,14 @@ public:
  bool GetDimension(
     string dimname, DC::Dimension &dimension
  ) const {
-	assert(_dc);
+	VAssert(_dc);
 	return(_dc->GetDimension(dimname, dimension));
  }
 
  //! \copydoc DC::GetMeshNames()
  //
  std::vector <string> GetMeshNames() const {
-	assert(_dc);
+	VAssert(_dc);
 	return(_dc->GetMeshNames());
  }
  
@@ -471,6 +471,17 @@ std::vector <size_t> GetCRatios(string varname) const;
  ) const {
 	std::vector <size_t> dummy;
 	return(GetDimLensAtLevel(varname, level, dims_at_level, dummy));
+ }
+
+ //! Return a variable's array dimension lengths
+ //!
+ //! This method is equivalent to calling GetDimLensAtLevel() with \p level
+ //! equal to -1
+ //!
+ virtual int GetDimLens(
+    string varname, std::vector <size_t> &dims
+ ) {
+    return(GetDimLensAtLevel(varname, -1, dims));
  }
 
  //! Unlock a floating-point region of memory

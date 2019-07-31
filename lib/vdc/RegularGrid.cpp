@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cmath>
 #include <time.h>
 #ifdef  Darwin
@@ -23,7 +23,7 @@ void RegularGrid::_SetExtents(
 	const vector <double> &minu,
 	const vector <double> &maxu
 ) {
-	assert(minu.size() == maxu.size());
+	VAssert(minu.size() == maxu.size());
 
 	_minu.clear();
 	_maxu.clear();
@@ -52,8 +52,8 @@ RegularGrid::RegularGrid(
 	const vector <double> &maxu
 ) : StructuredGrid(dims, bs, blks) {
 
-	assert(minu.size() == maxu.size());
-	assert(minu.size() >= GetDimensions().size());
+	VAssert(minu.size() == maxu.size());
+	VAssert(minu.size() >= GetDimensions().size());
 
 	_SetExtents(minu, maxu);
 }
@@ -82,33 +82,6 @@ vector <size_t> RegularGrid::GetCoordDimensions(size_t dim) const {
 	}
 }
 
-float RegularGrid::GetUserCoordinate(
-    vector <size_t> &index, size_t dim
-) const {
-	if (dim == 0) {
-		ClampIndex(vector<size_t> (1,GetDimensions()[0]), index);
-		return(index[0] * _delta[0] + _minu[0]);
-	}
-	else if (dim == 1) {
-		ClampIndex(vector<size_t> (1,GetDimensions()[1]), index);
-		return(index[0] * _delta[1] + _minu[1]);
-	}
-	else if (dim == 2) {
-		if (GetDimensions().size() == 3) {
-			ClampIndex(vector<size_t> (1,GetDimensions()[2]), index);
-			return(index[0] * _delta[2] + _minu[2]);
-		}
-		else {
-			return(0.0);
-		}
-	}
-	else {
-		return(0.0);
-	}
-}
-
-
-
 float RegularGrid::GetValueNearestNeighbor(
 	const std::vector <double> &coords
 ) const {
@@ -130,11 +103,11 @@ float RegularGrid::GetValueNearestNeighbor(
 	if (dims.size() == 3) 
 		if (_delta[2] != 0.0) k = (size_t) floor ((cCoords[2]-_minu[2]) / _delta[2]);
 
-	assert(i<dims[0]);
-	assert(j<dims[1]);
+	VAssert(i<dims[0]);
+	VAssert(j<dims[1]);
 
 	if (dims.size() == 3) 
-		assert(k<dims[2]);
+		VAssert(k<dims[2]);
 
 	double iwgt = 0.0;
 	double jwgt = 0.0;
@@ -190,11 +163,11 @@ float RegularGrid::GetValueLinear(const std::vector <double> &coords) const {
 		k = (size_t) floor ((cCoords[2]-_minu[2]) / _delta[2]);
 	}
 
-	assert(i<dims[0]);
-	assert(j<dims[1]);
+	VAssert(i<dims[0]);
+	VAssert(j<dims[1]);
 
 	if (dims.size() == 3) {
-		assert(k<dims[2]);
+		VAssert(k<dims[2]);
 	}
 
 	double iwgt = 0.0;
@@ -285,10 +258,10 @@ void RegularGrid::GetBoundingBox(
 	vector <size_t> cMax = max;
 	ClampIndex(cMax); 
 
-	assert(cMin.size() == cMax.size());
+	VAssert(cMin.size() == cMax.size());
 
-	RegularGrid::GetUserCoordinates(cMin, minu);
-	RegularGrid::GetUserCoordinates(cMax, maxu);
+	Grid::GetUserCoordinates(cMin, minu);
+	Grid::GetUserCoordinates(cMax, maxu);
 }
 
 void    RegularGrid::GetEnclosingRegion(
@@ -302,13 +275,13 @@ void    RegularGrid::GetEnclosingRegion(
 	vector <double> cMaxu = maxu;
 	ClampCoord(cMaxu);
 
-	assert(cMinu.size() == cMaxu.size());
+	VAssert(cMinu.size() == cMaxu.size());
 
 	min.clear();
 	max.clear();
 
 	for (int i=0; i<cMinu.size(); i++) {
-		assert(cMinu[i] <= cMaxu[i]);
+		VAssert(cMinu[i] <= cMaxu[i]);
 		double u = cMinu[i]; 
 		if (u < cMinu[i]) {
 			u = cMinu[i];
@@ -327,25 +300,23 @@ void    RegularGrid::GetEnclosingRegion(
 }
 
 void RegularGrid::GetUserCoordinates(
-	const std::vector <size_t> &indices,
-	std::vector <double> &coords
+	const size_t indices[],
+	double coords[]
 ) const {
 
-	vector <size_t> cIndices = indices;
-	ClampIndex(cIndices);
-
-	coords.clear();
+	size_t cIndices[3];
+	ClampIndex(indices, cIndices);
 
 	const vector <size_t> &dims = GetDimensions();
 
-	for (int i=0; i<cIndices.size(); i++) {
+	for (int i=0; i<dims.size(); i++) {
 		size_t index = cIndices[i];
 		
 		if (index >= dims[i]) {
 			index = dims[i] - 1;
 		}
 
-		coords.push_back(cIndices[i] * _delta[i] + _minu[i]);
+		coords[i] = cIndices[i] * _delta[i] + _minu[i];
 	}
 }
 
@@ -380,7 +351,7 @@ void RegularGrid::GetIndices(
 			);
 		}
 
-		assert(indices[i]<dims[i]);
+		VAssert(indices[i]<dims[i]);
 
 		double wgt = 0.0;
 
@@ -418,7 +389,7 @@ bool RegularGrid::GetIndicesCell(
 			);
 		}
 
-		assert(indices[i]<dims[i]);
+		VAssert(indices[i]<dims[i]);
 
 	}
 

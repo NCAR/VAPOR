@@ -68,7 +68,7 @@ void TextLabel::DrawText(const glm::vec3 &position, const std::string &text)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     
-    mm->Translate((int)x, (int)y, z);
+    mm->Translate((int)x, (int)y, -z);
     
     if (BackgroundColor.a > 0) {
         lgl->Color(BackgroundColor);

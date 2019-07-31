@@ -4,7 +4,7 @@
 #include <cstring>
 #include <algorithm>
 #include <vapor/OptionParser.h>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cctype>
 #include <sstream>
 #include <locale>
@@ -37,7 +37,7 @@ char	*copy_create_arg_string(
 		len++;	/* one for the space	*/
 	}
 	s = (char *) malloc(len+1);
-	assert(s != NULL);
+	VAssert(s != NULL);
 
 	s = strcpy(s, argv[0]);
 	for(i=1, t=s; i<argc; i++) {

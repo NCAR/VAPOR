@@ -7,7 +7,7 @@
 #include "Combo.h"
 #include <QDoubleValidator>
 #include <QIntValidator>
-#include <cassert>
+#include "vapor/VAssert.h"
 
 Combo::Combo(QLineEdit* edit, QSlider* slider, bool intType)
 {
@@ -164,7 +164,7 @@ void Combo::setSlider() {
     int min = _slider->minimum();
     int max = _slider->maximum();
 
-    assert(min <= pos && max >= pos);
+    VAssert(min <= pos && max >= pos);
 
     double value = ((double) (pos - min) / (double) (max-min)) * 
         (_maxValid - _minValid) + _minValid;
@@ -186,7 +186,7 @@ void Combo::setSliderMini( int pos ) {
     int min = _slider->minimum();
     int max = _slider->maximum();
 
-    assert(min <= pos && max >= pos);
+    VAssert(min <= pos && max >= pos);
 
     double value = ((double) (pos - min) / (double) (max-min)) * 
         (_maxValid - _minValid) + _minValid;
