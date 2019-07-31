@@ -357,26 +357,30 @@ VSlider::_respondQLineEdit()
 // ====================================
 //
 
-VGeometry::VGeometry( QWidget* parent, int dim, const std::vector<float>& range )
-         : QTabWidget( parent )
+VGeometry::VGeometry( 
+        QWidget* parent, 
+        int dim, 
+        const std::vector<float>& range,
+        const std::string& label
+) : QTabWidget( parent )
 {
     VAssert( dim == 2 || dim == 3 );
     VAssert( range.size() == dim * 2 );
     for( int i = 0; i < dim; i++ )
         VAssert( range[ i*2 ] < range[ i*2+1 ] );
 
-    _pageWidget = new QWidget();
+    QWidget* pageWidget = new QWidget();
     QVBoxLayout* layout = new QVBoxLayout();
-    _pageWidget->setLayout( layout );
+    pageWidget->setLayout( layout );
 
     _dim = dim;
-    _xrange = new VRange( _pageWidget, range[0], range[1], "XMin", "XMax" );
-    _yrange = new VRange( _pageWidget, range[2], range[3], "YMin", "YMax" );
+    _xrange = new VRange( pageWidget, range[0], range[1], "XMin", "XMax" );
+    _yrange = new VRange( pageWidget, range[2], range[3], "YMin", "YMax" );
     if( _dim == 3 )
-        _zrange = new VRange( _pageWidget, range[4], range[5], "ZMin", "ZMax" );
+        _zrange = new VRange( pageWidget, range[4], range[5], "ZMin", "ZMax" );
     else    // Create anyway. Will be hidden though.
     {
-        _zrange = new VRange( _pageWidget, 0.0f, 100.0f, "ZMin", "ZMax" );
+        _zrange = new VRange( pageWidget, 0.0f, 100.0f, "ZMin", "ZMax" );
         _zrange->hide();
     }
 
@@ -388,7 +392,7 @@ VGeometry::VGeometry( QWidget* parent, int dim, const std::vector<float>& range 
     layout->addWidget( _xrange );
     layout->addWidget( _yrange );
     layout->addWidget( _zrange );
-    addTab( _pageWidget, "Geometry" );
+    addTab( pageWidget, QString::fromStdString(label) );
 }
 
 VGeometry::~VGeometry() {}
