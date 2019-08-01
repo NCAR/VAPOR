@@ -608,7 +608,9 @@ int VolumeRenderer::OSPRayLoadData(OSPModel world)
     
     Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.var, _cache.refinement, _cache.compression);
     
-    if (GetActiveParams()->GetValueLong("force_unstructured", 0))
+    if (GetActiveParams()->GetValueLong("force_regular", 0))
+        _volume = OSPRayCreateVolumeFromRegularGrid(grid, _ospCache.coordTransform);
+    else if (GetActiveParams()->GetValueLong("force_unstructured", 0))
         _volume = OSPRayCreateVolumeFromUnstructuredGrid(grid, _ospCache.coordTransform);
     else
         _volume = OSPRayCreateVolumeFromGrid(grid, _ospCache.coordTransform);

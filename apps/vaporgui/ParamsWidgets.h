@@ -50,6 +50,8 @@ public:
     ParamsWidgetNumber(const std::string &tag, const std::string &label = "");
     void Update(VAPoR::ParamsBase *p);
     
+    ParamsWidgetNumber *SetRange(int min, int max);
+    
 private slots:
     void valueChangedSlot();
 };

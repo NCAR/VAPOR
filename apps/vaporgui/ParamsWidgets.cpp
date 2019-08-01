@@ -58,7 +58,7 @@ ParamsWidgetNumber::ParamsWidgetNumber(const std::string &tag, const std::string
 : ParamsWidget(tag, labelText)
 {
     _lineEdit = new QLineEdit();
-    _lineEdit->setValidator(new QIntValidator(this));
+    _lineEdit->setValidator(new QIntValidator);
     connect(_lineEdit, SIGNAL(editingFinished()), this, SLOT(valueChangedSlot()));
     
     layout()->addWidget(_lineEdit);
@@ -68,6 +68,14 @@ void ParamsWidgetNumber::Update(VAPoR::ParamsBase *p)
 {
     _params = p;
     _lineEdit->setText(QString::number(p->GetValueLong(_tag, false)));
+}
+
+ParamsWidgetNumber *ParamsWidgetNumber::SetRange(int min, int max)
+{
+    const QValidator *toDelete = _lineEdit->validator();
+    _lineEdit->setValidator(new QIntValidator(min, max));
+    if (toDelete) delete toDelete;
+    return this;
 }
 
 void ParamsWidgetNumber::valueChangedSlot()

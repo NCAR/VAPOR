@@ -53,6 +53,7 @@ VolumeAppearanceSubtab::VolumeAppearanceSubtab(QWidget* parent) {
     _osprayGroup->Add(new ParamsWidgetCheckbox(VolumeParams::OSPRayLightingEnabledTag, "Lighting"));
     _osprayGroup->Add((new ParamsWidgetFloat(VolumeParams::OSPRaySpecularTag, "Specular Strength"))->SetRange(0, 1));
     _osprayGroup->Add(new ParamsWidgetCheckbox("force_unstructured"));
+    _osprayGroup->Add(new ParamsWidgetCheckbox("force_regular"));
     
     layout()->addWidget(_osprayGroup);
 }
