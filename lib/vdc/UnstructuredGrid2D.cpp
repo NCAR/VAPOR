@@ -584,7 +584,7 @@ QuadTreeRectangle<float, size_t> *UnstructuredGrid2D::_makeQuadTreeRectangle() c
 	Grid::ConstCellIterator end = ConstCellEnd();
 	for (; it != end; ++it) {
 		const vector<size_t> &cell = *it;
-		assert(cell.size() == 1);
+		VAssert(cell.size() == 1);
 		int numNodes;
 		GetCellNodes(cell.data(), nodes, numNodes);
 		if (numNodes < 2) continue;

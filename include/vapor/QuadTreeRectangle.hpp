@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <cstdint>
+#include <vapor/VAssert.h>
 
 namespace VAPoR {
 
@@ -11,8 +12,8 @@ class QuadTreeRectangle {
 public:
 
  QuadTreeRectangle(T left, T top, T right, T bottom, size_t reserve_size = 1000) {
-	assert(left <= right);
-	assert(top <= bottom);
+	VAssert(left <= right);
+	VAssert(top <= bottom);
 	_nodes.reserve(reserve_size);
 	_nodes.push_back(node_t(left, top, right, bottom));
 	_rootidx = 0;
@@ -178,7 +179,7 @@ private:
 		case 3: return nodes[_child0 + 3];
     }
 	return nodes[_child0 + 0];
-	assert(0);
+	VAssert(0);
   }
   node_t &quadrant(std::vector <node_t> &nodes, uint32_t n) const {
     switch (n & 0x03) {
@@ -188,7 +189,7 @@ private:
 		case 3: return nodes[_child0 + 3];
     }
 	return nodes[_child0 + 0];
-	assert(0);
+	VAssert(0);
   }
 
   bool insert(std::vector <node_t> &nodes, const rectangle_t &rec, S payload) { 
@@ -221,7 +222,7 @@ std::cout << "oh no mr bill" << std::endl;
 		node_t &child = quadrant(nodes, q);
 		if (child.intersects(rec)) {
 			bool ok = child.insert(nodes, rec, payload);
-			assert(ok);
+			VAssert(ok);
 		}
 	}
 
@@ -246,7 +247,8 @@ std::cout << "oh no mr bill" << std::endl;
 			return(node.get_payload_contains(nodes, x,y,payloads));
 		}
 	}
-	assert(0);
+	VAssert(0);
+	return(false);
   }
 		
 	

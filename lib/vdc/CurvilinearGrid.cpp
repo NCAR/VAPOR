@@ -27,6 +27,7 @@ void CurvilinearGrid::_curvilinearGrid(
 
 	_zcoords = zcoords;
 
+	_qtr = qtr;
 	_qtrOwner = false;
 	if (! _qtr) {
 		_qtr = _makeQuadTreeRectangle();
