@@ -1,5 +1,6 @@
 #include "VolumeIsoSubtabs.h"
 #include "VolumeSubtabs.h"
+#include <vapor/OSPRayParams.h>
 
 using namespace VAPoR;
 
@@ -76,10 +77,14 @@ VolumeIsoAppearanceSubtab::VolumeIsoAppearanceSubtab(QWidget* parent)
     _isoWidget3->SetDecimals( 4 );
     _isoWidget3->setEnabled( false );
     
+    _osprayCheckBox = new OSPRayEnableCheckbox(this);
+    _raytracingFrame->layout()->addWidget(_osprayCheckBox);
+    
     _osprayGroup = new ParamsWidgetTabGroup("OSPRay");
-    _osprayGroup->Add(new ParamsWidgetCheckbox(RenderParams::OSPRayEnabledTag, "Enabled"));
-    _osprayGroup->Add(new ParamsWidgetCheckbox("force_unstructured"));
-    _osprayGroup->Add(new ParamsWidgetColor("color"));
+    _osprayGroup->Add((new ParamsWidgetNumber(OSPRayParams::_samplesPerPixelTag, "Samples Per Pixel"))->SetRange(1, 100));
+    _osprayGroup->Add((new ParamsWidgetNumber(OSPRayParams::_aoSamplesTag, "Ambient Occlusion Samples"))->SetRange(0, 1000));
+    _osprayGroup->Add((new ParamsWidgetFloat(OSPRayParams::_ambientIntensity, "Ambient Light"))->SetRange(0, 1));
+    _osprayGroup->Add((new ParamsWidgetFloat(OSPRayParams::_spotlightIntensity, "Spotlight"))->SetRange(0, 1));
     
     layout()->addWidget(_osprayGroup);
 }
@@ -90,7 +95,8 @@ void VolumeIsoAppearanceSubtab::Update( VAPoR::DataMgr      *dataMgr,
                                          VAPoR::RenderParams *params ) 
 {
     _TFWidget->Update(dataMgr, paramsMgr, params);
-    _osprayGroup->Update(params);
+    _osprayCheckBox->Update(params);
+    _osprayGroup->Update(paramsMgr->GetOSPRayParams());
 
     _params = dynamic_cast<VAPoR::VolumeIsoParams*>(params);
     VAssert(_params);
@@ -117,13 +123,14 @@ void VolumeIsoAppearanceSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _samplingRateComboBox->setCurrentIndex(_samplingRateComboBox->findText(VolumeAppearanceSubtab::GetQStringForSamplingRate(_params->GetSamplingMultiplier())));
     _samplingRateComboBox->blockSignals(false);
     
-    
-    _lightingCheckBox->setChecked(_params->GetLightingEnabled());
 
     _ambientWidget->SetValue  (_params->GetPhongAmbient());
     _diffuseWidget->SetValue  (_params->GetPhongDiffuse());
     _specularWidget->SetValue (_params->GetPhongSpecular());
     _shininessWidget->SetValue(_params->GetPhongShininess());
+    
+    bool ospray = _params->GetValueLong(RenderParams::OSPRayEnabledTag, false);
+    _ambientWidget->setEnabled(!ospray);
 
     // Get the value range
     std::vector<double> valueRanged;
@@ -184,16 +191,6 @@ void VolumeIsoAppearanceSubtab::on__samplingRateComboBox_currentIndexChanged(con
     if (!text.isEmpty()) {
         _params->SetSamplingMultiplier(VolumeAppearanceSubtab::GetSamplingRateForQString(text));
     }
-}
-
-void VolumeIsoAppearanceSubtab::on__lightingCheckBox_toggled( bool checked )
-{
-    _params->SetLightingEnabled(checked);
-
-    _ambientWidget->setEnabled(checked);
-    _diffuseWidget->setEnabled(checked);
-    _specularWidget->setEnabled(checked);
-    _shininessWidget->setEnabled(checked);
 }
 
 void VolumeIsoAppearanceSubtab::on__ambientWidget_valueChanged( double value )

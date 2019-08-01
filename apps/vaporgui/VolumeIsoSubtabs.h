@@ -6,6 +6,7 @@
 #include "ui_VolumeIsoAnnotationGUI.h"
 
 #include "vapor/VolumeIsoParams.h"
+#include "OSPRayEnableCheckbox.h"
 #include "ParamsWidgets.h"
 
 namespace VAPoR 
@@ -54,7 +55,6 @@ private slots:
     void on__castingModeComboBox_currentIndexChanged(const QString &text);
     void on__samplingRateComboBox_currentIndexChanged(const QString &text);
     
-    void on__lightingCheckBox_toggled( bool checked );
     void on__ambientWidget_valueChanged( double value );
     void on__diffuseWidget_valueChanged( double value );
     void on__specularWidget_valueChanged( double value );
@@ -73,6 +73,7 @@ private slots:
 
 private:
     VAPoR::VolumeIsoParams* _params;
+    OSPRayEnableCheckbox *_osprayCheckBox;
     ParamsWidgetTabGroup * _osprayGroup;
 }; 
 

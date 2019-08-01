@@ -562,11 +562,11 @@ int VolumeRenderer::OSPRayUpdate(OSPModel world)
     if (OSPRayLoadTF() < 0) return -1;
     
     ospSet1b(_volume, "singleShade", false);
-    ospSet1b(_volume, "gradientShadingEnabled", vp->GetValueLong(VolumeParams::OSPRayLightingEnabledTag, true));
-    float samplingRate = vp->GetValueDouble(VolumeParams::OSPRaySamplingRateTag, 1);
+    ospSet1b(_volume, "gradientShadingEnabled", vp->GetLightingEnabled());
+    float samplingRate = vp->GetSamplingMultiplier() * 2;
     ospSet1f(_volume, "samplingRate", samplingRate);
     ospSet1f(_volume, "adaptiveMaxSamplingRate", samplingRate*OSPRAY_ADAPTIVE_SAMPLING_MULTIPLIER);
-    float specular = vp->GetValueDouble(VolumeParams::OSPRaySpecularTag, 0);
+    float specular = vp->GetPhongSpecular();
     ospSet3f(_volume, "specular", specular, specular, specular);
     
     glm::vec3 dataMin, dataMax, userMin, userMax;
