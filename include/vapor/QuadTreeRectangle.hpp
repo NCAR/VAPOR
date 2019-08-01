@@ -7,37 +7,102 @@
 
 namespace VAPoR {
 
+//
+//! \class QuadTreeRectangle
+//! \brief This class implements a 2D quad tree space partitioning tree
+//! that operates on rectangular regions.
+//! 
+//
 template <typename T, typename S>
 class QuadTreeRectangle {
 public:
 
- QuadTreeRectangle(T left, T top, T right, T bottom, size_t reserve_size = 1000) {
+ //! Construct a QuadTreeRectangle instance for a defined 2D region
+ //!
+ //! This contstructor initiates a 2D quad tree with specified min
+ //! and max bounds. Subsequent insertions into the tree will only 
+ //! succeed for regions that intersect the tree bounds
+ //!
+ //! \param[in] left Minimum X coordinate bound.
+ //! \param[in] top Minimum Y coordinate bound.
+ //! \param[in] right Maximum X coordinate bound. Must be greater than
+ //! or equal to \p left.
+ //! \param[in] bottom Maximum Y coordinate bound. Must be greater than
+ //! or equal to \p top.
+ //! \param[in] max_depth The maximum permitted depth of the tree. The 
+ //! tree will not be refined beyond \p max_depth levels.
+ //! \param[in] reserve_size A hint indicating the antcipated number of 
+ //! nodes in the tree. Accurate estimates will increase performance
+ //! of tree insertions
+ //
+ QuadTreeRectangle(
+	T left, T top, T right, T bottom, size_t max_depth = 16,
+	size_t reserve_size = 1000
+ ) {
 	VAssert(left <= right);
 	VAssert(top <= bottom);
 	_nodes.reserve(reserve_size);
 	_nodes.push_back(node_t(left, top, right, bottom));
 	_rootidx = 0;
+	_maxDepth = max_depth;
  }
- QuadTreeRectangle(size_t reserve_size = 1000) {
+
+ //! Construct a QuadTreeRectangle instance for a unit 2D region
+ //!
+ //! Default contructor definining a quad tree covering the region
+ //! (.0, .0) to (1. ,1.)
+ //!
+ QuadTreeRectangle(size_t max_depth = 16, size_t reserve_size = 1000) {
 	_nodes.reserve(reserve_size);
 	_nodes.push_back(node_t(0.0, 0.0, 1.0, 1.0));
 	_rootidx = 0;
+	_maxDepth = max_depth;
  }
 
+ //! Insert an element into the tree
+ //!
+ //! This method inserts a payload, \p payload, into the tree contained
+ //! in the rectangular region defined by \p left, \p top, \p right,
+ //! \p bottom. If the region to be inserted does not intersect
+ //! the tree bound defined by the contructor method fails and returns
+ //! false. Otherwise, the tree is subdivided as necessary and the defined
+ //! region along with its payload are inserted. The refinement algorithm
+ //! for subdividing the tree operates as follows: The tree nodes that
+ //! intersect the region are subdivided until both the width and height
+ //! of the region to be inserted are larger than the respective
+ //! width and height of the node intersecting the region, or the 
+ //! maximum depth of the tree is reached.
+ //! 
+ //! \retval status Return true on success, or false if region to be inserted
+ //! does not overlap the region managed by the tree.
+ //
  bool Insert(T left, T top, T right, T bottom, S payload) {
 
 	node_t &root = _nodes[_rootidx];
     if (! root.intersects(rectangle_t(left, top, right, bottom))) return(false);
 
-    return(root.insert(_nodes, rectangle_t(left, top, right, bottom), payload));
+    return(root.insert(
+		_nodes, rectangle_t(left, top, right, bottom), payload, _maxDepth)
+	);
 
  }
 
- bool GetPayloadContained(T x, T y, std::vector <S> &payloads) const {
+ //! Return a list of payloads that intersect a specified point
+ //!
+ //! This method searches the tree for all nodes whose associated regions
+ //! intersect the point (\p x, \p y), and returns any payload found
+ //! at those nodes.
+ //!
+ //! \p param[in] x X coordinate of point
+ //! \p param[in] y Y coordinate of point
+ //! \p payloads[out] A vector of payloads whose regions intersect
+ //! \p x and \p y.
+ //!
+ void GetPayloadContained(T x, T y, std::vector <S> &payloads) const {
     payloads.clear();
 
 	const node_t &root = _nodes[_rootidx];
-    return(root.get_payload_contains(_nodes, x,y,payloads));
+    root.get_payload_contains(_nodes, x,y,payloads);
  }
 
  friend std::ostream& operator<<(std::ostream &os, const QuadTreeRectangle& q) {
@@ -97,6 +162,8 @@ private:
   }
 
 
+  // return the sub-rectangle for the specified quadrant
+  //
   rectangle_t quadrant(uint32_t n) const {
     T const center_x((_left + _right) / 2);
     T const center_y((_top + _bottom) / 2);
@@ -192,12 +259,11 @@ private:
 	VAssert(0);
   }
 
-  bool insert(std::vector <node_t> &nodes, const rectangle_t &rec, S payload) { 
+  bool insert(
+	std::vector <node_t> &nodes, const rectangle_t &rec, S payload,
+	size_t maxDepth
+  ) { 
 	if (! _rectangle.intersects(rec)) return(false);
-
-if (_level > 74730) {
-std::cout << "oh no mr bill" << std::endl;
-}
 
 	// if rec is larger than a quadrant (half the width and height of this
 	// node) there is no point in refining. I.e. stop descending the
@@ -206,7 +272,7 @@ std::cout << "oh no mr bill" << std::endl;
 	if (
 		(_rectangle.width() / 2.0 < rec.width() && 
 		_rectangle.height() / 2.0 < rec.height()) ||
-		_level > 16
+		_level > maxDepth
 	) {
 		_payloads.push_back(payload);
 		return(true);
@@ -221,7 +287,7 @@ std::cout << "oh no mr bill" << std::endl;
 	for (int q=0; q<4; q++) {
 		node_t &child = quadrant(nodes, q);
 		if (child.intersects(rec)) {
-			bool ok = child.insert(nodes, rec, payload);
+			bool ok = child.insert(nodes, rec, payload, maxDepth);
 			VAssert(ok);
 		}
 	}
@@ -229,26 +295,24 @@ std::cout << "oh no mr bill" << std::endl;
 	return(true);
   }
 	
-  bool get_payload_contains(
+  void get_payload_contains(
 	const std::vector <node_t> &nodes,
 	T x, T y, std::vector <S> &payloads
   ) const {
 
-	if (! _rectangle.contains(x,y)) return(false);
+	if (! _rectangle.contains(x,y)) return;
 
 	if (_payloads.size()) {
 		payloads.insert(payloads.end(), _payloads.begin(), _payloads.end());
 	}
-	if (_is_leaf) return(true);
+	if (_is_leaf) return;
 
 	for (int q=0; q<4; q++) {
 		const node_t &node = quadrant(nodes, q);
 		if (node._rectangle.contains(x,y)) { 
-			return(node.get_payload_contains(nodes, x,y,payloads));
+			node.get_payload_contains(nodes, x,y,payloads);
 		}
 	}
-	VAssert(0);
-	return(false);
   }
 		
 	
@@ -281,6 +345,7 @@ std::cout << "oh no mr bill" << std::endl;
 
  std::vector <node_t> _nodes;
  size_t _rootidx;
+ size_t _maxDepth;
 
 };
 };

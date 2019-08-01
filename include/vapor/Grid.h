@@ -670,6 +670,21 @@ public:
 	_minAbs = minAbs;
  }
 
+ //! Test whether a point is contained in a bounding rectangle
+ //!
+ //! This static method checks to see if a 2D point \p pt is contained
+ //! in the smallest rectangle that bounds the list of 2D points (vertices)
+ //! given by \p verts. If \p pt is inside or on the boundary of the bounding
+ //! rectangle true is returned, otherwise false
+ //!
+ //! \param[in] pt A two-element array of point coordinates
+ //! \param[in] verts An array of dimensions \p n * 2 containing 
+ //! a list of \p points.
+ //! \param[in] n The number of 2D points in \p verts
+ //!
+ //! \retval status Returns true if \pt is inside or on the bounding rectangle
+ //! of \p verts. False otherwise.
+ //
  static bool PointInsideBoundingRectangle(
 	const double pt[], const double verts[], int n
  ) {

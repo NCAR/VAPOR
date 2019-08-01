@@ -108,6 +108,12 @@ public:
  //!
  //! \param[in] maxVertexPerFace The maxium number of nodes that a face
  //! may have.
+ //!
+ //! \param[in] nodeOffset The offset from zero for the first element
+ //! in \p vertexOnFace
+ //!
+ //! \param[in] cellOffset The offset from zero for the first element
+ //! in \p faceOnVertex or \p faceOnFace
  //
  UnstructuredGrid(
 	const std::vector <size_t> &vertexDims,
@@ -215,6 +221,11 @@ public:
         coords.pop_back();
     }
  }
+
+ // A no-op for unstructured grids. Needs to be set in the constuctor :-(
+ //
+ virtual void SetNodeOffset(long offset) { }
+ virtual void SetCellOffset(long offset) { }
 
 
 

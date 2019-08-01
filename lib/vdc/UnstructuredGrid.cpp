@@ -64,8 +64,8 @@ UnstructuredGrid::UnstructuredGrid(
 	_missingID = -1;
 	_boundaryID = -2;
 
-	SetNodeOffset(nodeOffset);
-	SetCellOffset(cellOffset);
+	Grid::SetNodeOffset(nodeOffset);
+	Grid::SetCellOffset(cellOffset);
 }
 
 

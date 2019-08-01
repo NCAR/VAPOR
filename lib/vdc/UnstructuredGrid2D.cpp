@@ -576,7 +576,7 @@ QuadTreeRectangle<float, size_t> *UnstructuredGrid2D::_makeQuadTreeRectangle() c
 	QuadTreeRectangle<float, size_t> *qtr = 
 		new QuadTreeRectangle<float, size_t>(
 			(float) minu[0], (float) minu[1], (float) maxu[0], (float) maxu[1], 
-			reserve_size
+			16, reserve_size
 		);
 
 	double coords[2];
