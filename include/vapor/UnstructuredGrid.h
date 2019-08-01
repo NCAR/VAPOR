@@ -121,7 +121,9 @@ public:
 	const int *faceOnFace,
 	Location location,	// node,face, edge
 	size_t maxVertexPerFace,
-	size_t maxFacePerVertex
+	size_t maxFacePerVertex,
+	long nodeOffset,
+	long cellOffset
 
  );
 

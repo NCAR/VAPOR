@@ -6,7 +6,7 @@
 #include <memory>
 #include <vapor/common.h>
 #include <vapor/UnstructuredGrid2D.h>
-#include <vapor/KDTreeRG.h>
+#include <vapor/QuadTreeRectangle.hpp>
 
 
 #ifdef WIN32
@@ -39,14 +39,20 @@ public:
 	Location location,	// node,face, edge
 	size_t maxVertexPerFace,
 	size_t maxFacePerVertex,
+	long nodeOffset,
+	long cellOffset,
 	const UnstructuredGridCoordless &xug,
 	const UnstructuredGridCoordless &yug,
 	const UnstructuredGridCoordless &zug,
-	const KDTreeRG *kdtree
+	const QuadTreeRectangle<float, size_t> *qtr
  );
 
  UnstructuredGridLayered() = default;
  virtual ~UnstructuredGridLayered() = default;
+
+ const QuadTreeRectangle<float, size_t> *GetQuadTreeRectangle() const {
+	return(_ug2d.GetQuadTreeRectangle());
+ }
 
  virtual std::vector <size_t> GetCoordDimensions(size_t dim) const override; 
 

@@ -667,7 +667,30 @@ public:
 	const std::vector <size_t> &minAbs
  ) {
 	VAssert(minAbs.size() == GetDimensions().size());
-	_minAbs = _minAbs;
+	_minAbs = minAbs;
+ }
+
+ static bool PointInsideBoundingRectangle(
+	const double pt[], const double verts[], int n
+ ) {
+	VAssert(n > 2);
+
+	double left = verts[0];
+	double right = verts[0];
+	double top = verts[1];
+	double bottom = verts[1];
+
+	for (int i=1; i<n; i++) {
+		if (verts[i*2+0] < left) left = verts[i*2+0];
+		if (verts[i*2+0] > right) right = verts[i*2+0];
+		if (verts[i*2+1] < top) top = verts[i*2+1];
+		if (verts[i*2+1] > bottom) bottom = verts[i*2+1];
+	}
+
+	return (
+		(left <= pt[0]) && (right >= pt[0]) &&
+		(top <= pt[1]) && (bottom >= pt[1])
+	);
  }
 
 
