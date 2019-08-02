@@ -12,6 +12,7 @@ const std::string FlowParams::_flowDirectionTag      = "flowDirectionTag";
 const std::string FlowParams::_needFlowlineOutputTag = "needFlowlineOutputTag";
 const std::string FlowParams::_periodicTag           = "periodicTag";
 const std::string FlowParams::_rakeTag               = "rakeTag";
+const std::string FlowParams::_rakeNumOfSeedsTag     = "rakeNumOfSeedsTag";
 
 static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
 
@@ -195,4 +196,20 @@ FlowParams::SetRake( const std::vector<float>& rake )
         doubles[i] = rake[i];
         
     SetValueDoubleVec( _rakeTag, "rake boundaries", doubles );
+}
+
+void
+FlowParams::SetRakeNumOfSeeds( const std::vector<long>& num )
+{
+    VAssert( num.size() == 4 );
+    SetValueLongVec( _rakeNumOfSeedsTag, "rake num of seeds", num );
+}
+
+std::vector<long>
+FlowParams::GetRakeNumOfSeeds() const
+{
+    const std::vector<long> tmp( 4, 1 );
+    auto num = GetValueLongVec( _rakeNumOfSeedsTag, tmp );
+    VAssert( num.size() == 4 );
+    return num;
 }

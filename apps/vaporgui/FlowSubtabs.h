@@ -110,30 +110,32 @@ public:
 		          VAPoR::RenderParams*    rParams );
 
 private slots:
-    // Respond to user input
+    /* Respond to user input */
     void _seedGenModeChanged( int newIdx );
     void _fileReaderChanged();
     void _fileWriterChanged();
     void _flowDirectionChanged( int newIdx );
     void _outputButtonClicked();
 
-    //void _catchASignal();
-    //void _catch2Signal();
-    void _rakeChanged();
+    void _rakeGeometryChanged();
+    void _rakeNumOfSeedsChanged();
 
 private:
     VAPoR::FlowParams*      _params;
 
+    /* Add some QT widgets */
     VComboBox*              _seedGenMode;
     VFileReader*            _fileReader;
     VFileWriter*            _fileWriter;
     QPushButton*            _outputButton;
-
     VComboBox*              _flowDirection;
 
-    //VSlider*                _slider1;
-    //VRange*                 _range1;
+    /* Rake related widgets */
     VGeometry*              _rake;
+    VLineEdit              *_rakeXNum, *_rakeYNum, *_rakeZNum, *_rakeTotalNum;
+
+    /* Helper functions */
+    
 };
 
 //

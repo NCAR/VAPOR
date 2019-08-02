@@ -104,7 +104,14 @@ FlowVariablesSubtab::_velocityMultiplierChanged()
     }
 
     if( newval >= 0.001 && newval <= 1.0 )    // in the valid range
-        _params->SetVelocityMultiplier( newval );
+    {
+        /* std::stod() would convert "3.83aaa" without throwing an exception.
+           We set the correct text based on the number identified.        */
+        _velocityMltp->SetEditText( QString::number( newval, 'f', 3 ) );
+        /* Only write back to _params if newval is different from oldval */
+        if( newval != oldval )
+            _params->SetVelocityMultiplier( newval );
+    }
     else
         _velocityMltp->SetEditText( QString::number( oldval, 'f', 3 ) );
 }
@@ -126,7 +133,14 @@ FlowVariablesSubtab::_steadyNumOfStepsChanged()
     }
 
     if( newval >= 0 )    // in the valid range
-        _params->SetSteadyNumOfSteps( newval );
+    {
+        /* std::stoi() would convert "383aaa" without throwing an exception.
+           We set the correct text based on the number identified.        */
+        _steadyNumOfSteps->SetEditText( QString::number( newval ) );
+        /* Only write back to _params if newval is different from oldval */
+        if( newval != oldval )
+            _params->SetSteadyNumOfSteps( newval );
+    }
     else
         _steadyNumOfSteps->SetEditText( QString::number( oldval ) );
 }
@@ -192,14 +206,87 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     _layout->addWidget( _outputButton );
     connect( _outputButton, SIGNAL( clicked() ), this, SLOT( _outputButtonClicked() ) );
 
+    /* Set up the Rake selector */
     std::vector<float> geoRange = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0}; // temporary range
     _rake = new VGeometry( this, 3, geoRange );
     _layout->addWidget( _rake );
-    connect( _rake, SIGNAL( _geometryChanged() ), this, SLOT( _rakeChanged() ) );
+    connect( _rake, SIGNAL( _geometryChanged() ), this, SLOT( _rakeGeometryChanged() ) );
+
+    /* Set up rake seed number controls */
+    _rakeXNum     = new VLineEdit( this, "Num. of Seeds in X",  "1" );
+    _rakeYNum     = new VLineEdit( this, "Num. of Seeds in Y",  "1" );
+    _rakeZNum     = new VLineEdit( this, "Num. of Seeds in Z",  "1" );
+    _rakeTotalNum = new VLineEdit( this, "Total Num. of Seeds", "1" );
+    _layout->addWidget( _rakeXNum );
+    _layout->addWidget( _rakeYNum );
+    _layout->addWidget( _rakeZNum );
+    _layout->addWidget( _rakeTotalNum );
+    connect( _rakeXNum, SIGNAL( _editingFinished() ), this, SLOT( _rakeNumOfSeedsChanged() ) );
+    connect( _rakeYNum, SIGNAL( _editingFinished() ), this, SLOT( _rakeNumOfSeedsChanged() ) );
+    connect( _rakeZNum, SIGNAL( _editingFinished() ), this, SLOT( _rakeNumOfSeedsChanged() ) );
+    connect( _rakeTotalNum, SIGNAL( _editingFinished() ), this, SLOT( _rakeNumOfSeedsChanged() ) );
 }
 
 void
-FlowSeedingSubtab::_rakeChanged()
+FlowSeedingSubtab::_rakeNumOfSeedsChanged()
+{
+    /* These fields should ALWAYS contain legal values, even when not in use.
+       That's why we validate every one of them!                           */
+    
+    const std::vector<long> oldVal = _params->GetRakeNumOfSeeds();
+    std::vector<long> newVal( 4, -1 );
+    
+    std::vector<VLineEdit*> pointers = {_rakeXNum, _rakeYNum, _rakeZNum, _rakeTotalNum};
+    for( int i = 0; i < 4; i++ )
+    {
+        long tmp;
+        try
+        {
+            tmp = std::stol( pointers[i]->GetEditText() );
+        }
+        catch( const std::invalid_argument& e ) // If not a long number
+        {
+            std::cerr << "bad input: " << pointers[i]->GetEditText() << std::endl;
+            newVal[i] = oldVal[i];
+            pointers[i]->SetEditText( QString::number( oldVal[i] ) );
+            continue;
+        }
+        
+        if( tmp > 0 )   // In the valid range, which is positive here
+        {
+            newVal[i] = tmp;
+            /* std::stol() would convert "383aaa" without throwing an exception.
+               We set the correct text based on the number identified.        */
+            pointers[i]->SetEditText( QString::number( tmp ) );
+        }
+        else
+        {
+            newVal[i] = oldVal[i];
+            pointers[i]->SetEditText( QString::number( oldVal[i] ) );
+        }
+    }
+
+    /* Only write back to _params when newVal is different from oldVal */
+    bool diff = false;
+    for( int i = 0; i < 4; i++ )
+    {
+        if( newVal[i] != oldVal[i] )
+        {
+            diff = true;
+            break;
+        }
+    }
+    if( diff )
+    {
+        for( int i = 0; i < 4; i++ )
+            std::cout << newVal[i] << "  ";
+        std::cout << std::endl;
+        _params->SetRakeNumOfSeeds( newVal );
+    }
+}
+
+void
+FlowSeedingSubtab::_rakeGeometryChanged()
 {
     std::vector<float> range;
     _rake->GetCurrentValues( range );
