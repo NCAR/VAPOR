@@ -610,7 +610,7 @@ int VolumeRenderer::OSPRayLoadData(OSPModel world)
     
     if (GetActiveParams()->GetValueLong("force_regular", 0))
         _volume = OSPRayCreateVolumeFromRegularGrid(grid, _ospCache.coordTransform);
-    else if (GetActiveParams()->GetValueLong("force_unstructured", 0))
+    else if (false)
         _volume = OSPRayCreateVolumeFromUnstructuredGrid(grid, _ospCache.coordTransform);
     else
         _volume = OSPRayCreateVolumeFromGrid(grid, _ospCache.coordTransform);
@@ -767,104 +767,112 @@ OSPVolume VolumeRenderer::OSPRayCreateVolumeFromStructuredGrid(const Grid *grid,
 
 OSPVolume VolumeRenderer::OSPRayCreateVolumeFromUnstructuredGrid(const Grid *grid, const glm::mat4 &transform)
 {
-    OSPVolume volume = ospNewVolume("unstructured_volume");
+    const vector<size_t> nodeDims = grid->GetDimensions();
+    size_t nodeDim = nodeDims.size();
+    const size_t nVerts = nodeDims[0]*nodeDims[1];
+    const vector<size_t> cellDims = grid->GetCellDimensions();
+    const size_t nCells = cellDims[0]*cellDims[1];
     
-    auto cellEnd = grid->ConstCellEnd();
+    VAssert(nodeDim == 2 && cellDims.size() == 2);
+    
+    bool hasMissing = grid->HasMissingData();
+    float missingValue = grid->GetMissingValue();
     size_t maxNodes = grid->GetMaxVertexPerCell();
     size_t coordDim = grid->GetGeometryDim();
-    size_t nodeDim = grid->GetNodeDimensions().size();
-    double missingValue = grid->GetMissingValue();
     size_t *nodes = (size_t*)alloca(sizeof(size_t) * maxNodes * nodeDim);
-    float *values = (float*)alloca(sizeof(float) * maxNodes);
-    double *coords = (double*)alloca(sizeof(double) * maxNodes * coordDim);
+    
+    printf("nVerts = %li\n", nVerts);
+    printf("maxNodes = %li\n", maxNodes);
+    printf("coordDim = %li\n", coordDim);
+    printf("nodeDim = %li\n", nodeDim);
+    
+    OSPVolume volume = ospNewVolume("unstructured_volume");
+    
+    float *scalarData = new float[nVerts];
+    float *coordData = new float[nVerts*3];
+    
+    auto dataIt = grid->cbegin();
+    for (size_t i = 0; i < nVerts; ++i, ++dataIt)
+        scalarData[i] = *dataIt;
+    
+    OSPData ospData = ospNewData(nVerts, OSP_FLOAT, scalarData);
+    ospCommit(ospData);
+    ospSetData(volume, "field", ospData);
+    ospRelease(ospData);
+    
+    
+    vec3 *coords = (vec3*)coordData;
+    auto coord = grid->ConstCoordBegin();
+    for (size_t i = 0; i < nVerts; ++i, ++coord) {
+        coordData[i*3  ] = (*coord)[0];
+        coordData[i*3+1] = (*coord)[1];
+        coordData[i*3+2] = (*coord)[2];
+        
+        coords[i] = transform * vec4(coords[i], 1.0f);
+    }
+    ospData = ospNewData(nVerts, OSP_FLOAT3, coordData);
+    ospCommit(ospData);
+    ospSetData(volume, "vertices", ospData);
+    ospRelease(ospData);
+    delete [] coordData;
+    
+    
     
     typedef struct{int i[8];} OSPRayCell;
-    vector<vec3> vertices;
-    vector<float> fields;
-    vector<OSPRayCell> indices;
+    OSPRayCell *cells = new OSPRayCell[nCells];
+    size_t cellId = 0;
     
     int n[8] = {0};
     
-    for (auto cellIt = grid->ConstCellBegin(); cellIt != cellEnd; ++cellIt) {
+    auto cellIt = grid->ConstCellBegin();
+    for (size_t cellCounter = 0; cellCounter < nCells; ++cellIt, ++cellCounter) {
         const vector<size_t> &cell = *cellIt;
         int numNodes;
         grid->GetCellNodes(cell.data(), nodes, numNodes);
         
-        bool hasMissing = false;
-        for (int i = 0; i < numNodes; i++)
-        {
-            grid->GetUserCoordinates(&nodes[i*nodeDim], &coords[i*coordDim]);
-            //values[i] = grid->GetValue(&coords[i*coordDim]);
-            values[i] = grid->GetValueAtIndex(&nodes[i*nodeDim]);
-            if (values[i] == missingValue) {
-                hasMissing = true;
-            }
-        }
-        if (hasMissing) continue;
-        
         n[numNodes-1]++;
         if (numNodes == 4) {
             OSPRayCell c = {{-1}};
-            int start = fields.size();
-            assert(start < 2000000000);
+            for (int i = 0; i < 4; i++)
+                c.i[i+4] = nodes[i*nodeDim] + nodes[i*nodeDim+1]*nodeDims[0];
             
-            for (int i = 0; i < 4; i++) {
-                vec3 originalCoord(coords[i*coordDim], coords[i*coordDim+1], coords[i*coordDim+2]);
-                vertices.push_back(transform * vec4(originalCoord, 1.0f));
-                fields.push_back(values[i]);
-                c.i[i+4] = start+i;
-            }
-            
-            indices.push_back(c);
-        } else if (numNodes == 6) {
+            cells[cellId++] = c;
+        }
+        else if (numNodes == 6) {
             OSPRayCell c = {{-2}};
-            int start = fields.size();
-            assert(start < 2000000000);
+            for (int i = 0; i < 6; i++)
+                c.i[i+2] = nodes[i*nodeDim] + nodes[i*nodeDim+1]*nodeDims[0];
             
-            for (int i = 0; i < 6; i++) {
-                vec3 originalCoord(coords[i*coordDim], coords[i*coordDim+1], coords[i*coordDim+2]);
-                vertices.push_back(transform * vec4(originalCoord, 1.0f));
-                fields.push_back(values[i]);
-                c.i[i+2] = start+i;
-            }
-            
-            indices.push_back(c);
-        } else if (numNodes == 8) {
+            cells[cellId++] = c;
+        }
+        else if (numNodes == 8) {
             OSPRayCell c;
-            int start = fields.size();
-            assert(start < 2000000000);
+            for (int i = 0; i < 8; i++)
+                c.i[i] = nodes[i*nodeDim] + nodes[i*nodeDim+1]*nodeDims[0];
             
-            for (int i = 0; i < 8; i++) {
-                vec3 originalCoord(coords[i*coordDim], coords[i*coordDim+1], coords[i*coordDim+2]);
-                vertices.push_back(transform * vec4(originalCoord, 1.0f));
-                fields.push_back(values[i]);
-                c.i[i] = start+i;
-            }
-            
-            indices.push_back(c);
-        } else {
-//            assert(0);
+            cells[cellId++] = c;
+        }
+        
+        if (hasMissing) {
+            bool cellHasMissing = false;
+            for (int i = 0; i < 8; i++)
+                if (cells[cellId-1].i[i] >= 0 && scalarData[cells[cellId-1].i[i]] == missingValue)
+                    cellHasMissing = true;
+            if (cellHasMissing)
+                cellId--;
         }
     }
+    delete [] scalarData;
     
     for (int i = 0; i < 8; i++) {
         printf("%i nodes = %i\n", i+1, n[i]);
     }
     
-    OSPData ospData = ospNewData(fields.size(), OSP_FLOAT, fields.data());
-    ospCommit(ospData);
-    ospSetData(volume, "field", ospData);
-    ospRelease(ospData);
-    
-    ospData = ospNewData(vertices.size(), OSP_FLOAT3, vertices.data());
-    ospCommit(ospData);
-    ospSetData(volume, "vertices", ospData);
-    ospRelease(ospData);
-    
-    ospData = ospNewData(indices.size()*2, OSP_INT4, indices.data());
+    ospData = ospNewData(cellId*2, OSP_INT4, cells);
     ospCommit(ospData);
     ospSetData(volume, "indices", ospData);
     ospRelease(ospData);
+    delete [] cells;
     
     return volume;
 }

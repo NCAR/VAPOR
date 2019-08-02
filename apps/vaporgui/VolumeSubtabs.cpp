@@ -106,10 +106,12 @@ void VolumeAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *p
     
     bool lighting = vp->GetLightingEnabled();
     bool ospray = vp->GetValueLong(RenderParams::OSPRayEnabledTag, false);
+    _castingModeComboBox->setEnabled(!ospray);
     _ambientWidget->setEnabled(lighting && !ospray);
     _diffuseWidget->setEnabled(lighting && !ospray);
     _specularWidget->setEnabled(lighting);
     _shininessWidget->setEnabled(lighting && !ospray);
+    _defaultLightingButton->setEnabled(lighting);
 }
 
 void VolumeAppearanceSubtab::on__castingModeComboBox_currentIndexChanged(const QString &text)

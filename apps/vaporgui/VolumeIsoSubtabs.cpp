@@ -85,6 +85,7 @@ VolumeIsoAppearanceSubtab::VolumeIsoAppearanceSubtab(QWidget* parent)
     _osprayGroup->Add((new ParamsWidgetNumber(OSPRayParams::_aoSamplesTag, "Ambient Occlusion Samples"))->SetRange(0, 1000));
     _osprayGroup->Add((new ParamsWidgetFloat(OSPRayParams::_ambientIntensity, "Ambient Light"))->SetRange(0, 1));
     _osprayGroup->Add((new ParamsWidgetFloat(OSPRayParams::_spotlightIntensity, "Spotlight"))->SetRange(0, 1));
+    _osprayGroup->Add(new ParamsWidgetCheckbox("force_unstructured"));
     
     layout()->addWidget(_osprayGroup);
 }
@@ -130,6 +131,7 @@ void VolumeIsoAppearanceSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _shininessWidget->SetValue(_params->GetPhongShininess());
     
     bool ospray = _params->GetValueLong(RenderParams::OSPRayEnabledTag, false);
+    _castingModeComboBox->setEnabled(!ospray);
     _ambientWidget->setEnabled(!ospray);
 
     // Get the value range
