@@ -105,6 +105,27 @@ public:
     root.get_payload_contains(_nodes, x,y,payloads);
  }
 
+ void GetStats(
+	std::vector <size_t> &payload_histo, std::vector <size_t> &level_histo
+ ) const {
+	payload_histo.clear();
+	level_histo.clear();
+
+	for (size_t i = 0; i<_nodes.size(); i++) {
+		size_t b = _nodes[i].get_payloads().size();
+		if (b >= payload_histo.size()) {
+			payload_histo.resize(b+1, 0);
+		}
+		payload_histo[b] += 1;
+
+		b = _nodes[i].get_level();
+		if (b >= level_histo.size()) {
+			level_histo.resize(b+1, 0);
+		}
+		level_histo[b] += 1;
+	}
+ }
+
  friend std::ostream& operator<<(std::ostream &os, const QuadTreeRectangle& q) {
     os << "Num nodes : " << q._nodes.size() << std::endl;
 	const node_t &root = q._nodes[q._rootidx];
@@ -270,8 +291,8 @@ private:
 	// tree and store the payload here.
 	//
 	if (
-		(_rectangle.width() / 2.0 < rec.width() && 
-		_rectangle.height() / 2.0 < rec.height()) ||
+		(_rectangle.width() < rec.width() && 
+		_rectangle.height() < rec.height()) ||
 		_level > maxDepth
 	) {
 		_payloads.push_back(payload);
@@ -333,6 +354,12 @@ private:
 			child.print(nodes, os);
 		}
 	}
+ }
+ const std::vector<S> &get_payloads() const {
+	return(_payloads);
+ }
+ size_t get_level() const {
+	return(_level);
  }
 
  private:

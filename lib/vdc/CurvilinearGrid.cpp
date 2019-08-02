@@ -981,8 +981,8 @@ bool CurvilinearGrid::_insideGrid(
 	for (int l=0; l<2; l++) zwgt[l] = 0.0;
 	i = j = k = 0;
 
-	vector <size_t> dims = StructuredGrid::GetDimensions();
-	vector <size_t> dims2d = {dims[0], dims[1]};
+	const vector <size_t> &dims = StructuredGrid::GetDimensions();
+	size_t dims2d[] = {dims[0], dims[1]};
 
 	// Find the indices for the faces that might contain the point
 	//
@@ -991,10 +991,12 @@ bool CurvilinearGrid::_insideGrid(
 
 	bool inside = false;
 	double pt[] = {x,y};
-	vector <size_t> face;
-	for (int i=0; i<face_indices.size(); i++) {
-		face = Wasp::VectorizeCoords(face_indices[i], dims2d);
+	vector <size_t> face(2,0);
+	for (int ii=0; ii<face_indices.size(); ii++) {
+		Wasp::VectorizeCoords(face_indices[ii], dims2d, face.data(), 2);
 		if (_insideFace(face, pt, lambda)) {
+			i = face[0];
+			j = face[1];
 			inside = true;
 			break;
 		}
@@ -1041,10 +1043,10 @@ QuadTreeRectangle<float, size_t> *CurvilinearGrid::_makeQuadTreeRectangle() cons
 
 		// Find bounding rectangle for each cell
 		//
-		float left = FLT_MAX;
-		float right = FLT_MIN;
-		float top = FLT_MAX;
-		float bottom = FLT_MIN;
+		float left = std::numeric_limits<float>::max();
+		float right = std::numeric_limits<float>::lowest();
+		float top = std::numeric_limits<float>::max();
+		float bottom = std::numeric_limits<float>::lowest();
 		for(size_t jj=0; jj<2; jj++) {
 		for(size_t ii=0; ii<2; ii++) {
 			coords[0] = _xrg.AccessIJK(i+ii, j+jj);
@@ -1064,6 +1066,21 @@ QuadTreeRectangle<float, size_t> *CurvilinearGrid::_makeQuadTreeRectangle() cons
 		);
 	}
 	}
+
+	vector <size_t> payload_histo;
+	vector <size_t> level_histo;
+	qtr->GetStats(payload_histo, level_histo);
+	cout << "Payload histo" << endl;
+	for (int i=0; i<payload_histo.size(); i++) {
+		cout << "	" << i << " " << payload_histo[i] << endl;
+	}
+
+	cout << "Level histo" << endl;
+	for (int i=0; i<level_histo.size(); i++) {
+		cout << "	" << i << " " << level_histo[i] << endl;
+	}
+	cout << endl;
+	
 
 	return(qtr);
 }

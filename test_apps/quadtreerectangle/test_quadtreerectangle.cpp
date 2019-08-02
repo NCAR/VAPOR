@@ -31,12 +31,28 @@ OptionParser::Option_T	get_options[] = {
 
 const char	*ProgName;
 
+void print_histo(const QuadTreeRectangle<float, size_t> &qtr) {
+	vector <size_t> payload_histo;
+	vector <size_t> level_histo;
+	qtr.GetStats(payload_histo, level_histo);
+	cout << "Payload histo" << endl;
+	for (int i=0; i<payload_histo.size(); i++) {
+		cout << "   " << i << " " << payload_histo[i] << endl;
+	}
+
+	cout << "Level histo" << endl;
+	for (int i=0; i<level_histo.size(); i++) {
+		cout << "   " << i << " " << level_histo[i] << endl;
+	}
+	cout << endl;
+}
+
 void test_mesh() {
 
 	size_t n = opt.n;
 	VAssert(n>=2);
 
-	QuadTreeRectangle<float, size_t> qtp(0.0, 0.0, 1.0, 1.0, n*n);
+	QuadTreeRectangle<float, size_t> qtr(0.0, 0.0, 1.0, 1.0, n*n);
 
 	float delta = 1.0 / (float) (n - 1); 
 
@@ -50,7 +66,7 @@ void test_mesh() {
 		float top = (float) j * delta;
 		float bottom = (float) j * delta + delta;
 
-		qtp.Insert(left, top, right, bottom, index);
+		qtr.Insert(left, top, right, bottom, index);
 
 		index++;
 	}
@@ -68,7 +84,7 @@ void test_mesh() {
 
 		vector <size_t> payloads;
 
-		qtp.GetPayloadContained(x, y, payloads);
+		qtr.GetPayloadContained(x, y, payloads);
 		if (payloads.size()  < 1) {
 			num_missed++;
 			continue;
@@ -89,7 +105,9 @@ void test_mesh() {
 	}
 	cout << "	Num missed : " << num_missed << endl;
 	cout << "	Num wrong : " << num_wrong << endl;
-	//cout << qtp;
+	//cout << qtr;
+
+	print_histo(qtr);
 
 }
 
@@ -118,17 +136,17 @@ int main(int argc, char **argv) {
 		exit(0);
 	}
 
-	QuadTreeRectangle<float, int> qtp;
-	cout << qtp;
+	QuadTreeRectangle<float, int> qtr;
+	cout << qtr;
 
-	qtp.Insert(0.0, 0.0, 1.0, 1.0, 100);
-	qtp.Insert(0.0, 0.0, 0.2, 0.2, 101);
-	qtp.Insert(0.9, 0.9, 1.0, 1.0, 102);
-	cout << qtp;
+	qtr.Insert(0.0, 0.0, 1.0, 1.0, 100);
+	qtr.Insert(0.0, 0.0, 0.2, 0.2, 101);
+	qtr.Insert(0.9, 0.9, 1.0, 1.0, 102);
+	cout << qtr;
 
 	vector <int> payloads;
 
-	qtp.GetPayloadContained(0.1, 0.1, payloads);
+	qtr.GetPayloadContained(0.1, 0.1, payloads);
 
 	cout << "quads intersecting 0.1, 0.1" << endl;
 	for (int i=0; i<payloads.size(); i++) {
@@ -136,7 +154,7 @@ int main(int argc, char **argv) {
 	}
 	cout << endl;
 
-	qtp.GetPayloadContained(0.9, 0.9, payloads);
+	qtr.GetPayloadContained(0.9, 0.9, payloads);
 
 	cout << "quads intersecting 0.9, 0.9" << endl;
 	for (int i=0; i<payloads.size(); i++) {

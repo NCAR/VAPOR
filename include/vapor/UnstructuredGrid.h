@@ -224,8 +224,8 @@ public:
 
  // A no-op for unstructured grids. Needs to be set in the constuctor :-(
  //
- virtual void SetNodeOffset(long offset) { }
- virtual void SetCellOffset(long offset) { }
+ virtual void SetNodeOffset(long offset) override { }
+ virtual void SetCellOffset(long offset) override { }
 
 
 
