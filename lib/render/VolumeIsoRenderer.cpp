@@ -9,6 +9,11 @@
 #include <vapor/VolumeRegular.h>
 #include <vapor/VolumeCellTraversal.h>
 
+#define CheckCache(cVar, pVar) \
+if (cVar != pVar) { \
+_cache.needsUpdate = true; \
+cVar = pVar; \
+}
 
 using glm::vec2;
 using glm::vec3;
@@ -122,6 +127,18 @@ int VolumeIsoRenderer::OSPRayUpdate(OSPModel world)
     ospSet1f(_ospMaterial, "Ns", vp->GetPhongShininess());
     ospSet1f(_ospMaterial, "d", _cache.tf->getOpacityScale());
     
+
+    if (_colormappingVolume) {
+        ospCommit(_colormappingVolume);
+        if (!_ospColormapVolumeTexture) {
+            _ospColormapVolumeTexture = ospNewTexture("volume");
+            ospSetObject(_ospMaterial, "map_Kd", _ospColormapVolumeTexture);
+        }
+        ospSetObject(_ospColormapVolumeTexture, "volume", _colormappingVolume);
+        ospCommit(_ospColormapVolumeTexture);
+    }
+    
+        
     ospCommit(_ospMaterial);
     ospCommit(_ospIsoSurfaces);
     
@@ -134,14 +151,12 @@ void VolumeIsoRenderer::OSPRayDelete(OSPModel world)
     
     ospRelease(_ospMaterial); _ospMaterial = nullptr;
     ospRelease(_ospIsoSurfaces); _ospIsoSurfaces = nullptr;
+    ospRelease(_ospColormapVolumeTexture); _ospColormapVolumeTexture = nullptr;
 }
 
 int VolumeIsoRenderer::OSPRayLoadTF()
 {
     RenderParams *rp = GetActiveParams();
-    if (!rp->UseSingleColor())
-        if (VolumeRenderer::OSPRayLoadTF() < 0)
-            return -1;
     
     MapperFunction *tf = _needToLoadTF();
     if (!tf)
@@ -151,15 +166,12 @@ int VolumeIsoRenderer::OSPRayLoadTF()
     _cache.tf = new MapperFunction(*tf);
     _cache.mapRange = tf->getMinMaxMapValue();
     
-    float *LUT = new float[4 * 256];
-    tf->makeLut(LUT);
-    
     if (!_tf) {
         _tf = ospNewTransferFunction("piecewise_linear");
         ospSetObject(_volume, "transferFunction", _tf);
     }
     
-    float colors[3] = {1.0f};
+    float colors[3] = {1.0f, 1.0f, 1.0f};
     float opacities[1];
     
     if (rp->UseSingleColor())
@@ -179,6 +191,9 @@ int VolumeIsoRenderer::OSPRayLoadTF()
     ospSetVec2f(_tf, "valueRange", valueRange);
     
     ospCommit(_tf);
+    
+    if (!rp->UseSingleColor())
+        VolumeRenderer::OSPRayLoadTF(_colormappingVolume, &_colormappingTF, tf);
     
     return 0;
 }

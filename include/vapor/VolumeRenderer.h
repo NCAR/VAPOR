@@ -96,6 +96,7 @@ protected:
     } _cache;
     
     bool _needToLoadData();
+    bool _needToLoadSecondaryData();
     MapperFunction * _needToLoadTF();
     
     
@@ -104,16 +105,20 @@ public:
     void OSPRayDelete(OSPModel world);
 protected:
     OSPVolume _volume = nullptr;
+    OSPVolume _colormappingVolume = nullptr;
     OSPTransferFunction _tf = nullptr;
+    OSPTransferFunction _colormappingTF = nullptr;
     
     bool OSPRayNeedToLoadData();
     int OSPRayLoadData(OSPModel world);
+    int OSPRayLoadSecondaryData(OSPModel world);
     
     static OSPVolume OSPRayCreateVolumeFromGrid            (const Grid *grid, const glm::mat4 &transform);
     static OSPVolume OSPRayCreateVolumeFromRegularGrid     (const Grid *grid, const glm::mat4 &transform);
     static OSPVolume OSPRayCreateVolumeFromStructuredGrid  (const Grid *grid, const glm::mat4 &transform);
     static OSPVolume OSPRayCreateVolumeFromUnstructuredGrid(const Grid *grid, const glm::mat4 &transform);
     virtual int OSPRayLoadTF();
+    static int OSPRayLoadTF(OSPVolume volume, OSPTransferFunction *ospTF, MapperFunction *vTF);
     virtual void OSPRayAddObjectToWorld(OSPModel world);
     virtual void OSPRayRemoveObjectFromWorld(OSPModel world);
     glm::vec3 _getTotalScaling() const;

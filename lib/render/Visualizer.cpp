@@ -246,7 +246,7 @@ int Visualizer::_renderOSPRay()
     if (!_renderer) {
         _renderer = ospNewRenderer("scivis");
         ospSet1b(_renderer, "oneSidedLighting", false);
-        ospSet1b(_renderer, "aoTransparencyEnabled", true);
+        ospSet1b(_renderer, "aoTransparencyEnabled", false);
     }
     if (!_camera) {
         _camera = ospNewCamera("perspective");

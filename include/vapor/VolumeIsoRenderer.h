@@ -54,6 +54,7 @@ protected:
     
     OSPMaterial _ospMaterial = nullptr;
     OSPGeometry _ospIsoSurfaces = nullptr;
+    OSPTexture _ospColormapVolumeTexture = nullptr;
 };
 
 
