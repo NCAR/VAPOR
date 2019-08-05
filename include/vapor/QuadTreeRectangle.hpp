@@ -36,13 +36,13 @@ public:
  //! of tree insertions
  //
  QuadTreeRectangle(
-	T left, T top, T right, T bottom, size_t max_depth = 16,
+	T left, T top, T right, T bottom, size_t max_depth = 12,
 	size_t reserve_size = 1000
  ) {
 	VAssert(left <= right);
 	VAssert(top <= bottom);
 	_nodes.reserve(reserve_size);
-	_nodes.push_back(node_t(left, top, right, bottom));
+	_nodes.push_back(new node_t(left, top, right, bottom));
 	_rootidx = 0;
 	_maxDepth = max_depth;
  }
@@ -52,12 +52,46 @@ public:
  //! Default contructor definining a quad tree covering the region
  //! (.0, .0) to (1. ,1.)
  //!
- QuadTreeRectangle(size_t max_depth = 16, size_t reserve_size = 1000) {
+ QuadTreeRectangle(size_t max_depth = 12, size_t reserve_size = 1000) {
 	_nodes.reserve(reserve_size);
-	_nodes.push_back(node_t(0.0, 0.0, 1.0, 1.0));
+	_nodes.push_back(new node_t(0.0, 0.0, 1.0, 1.0));
 	_rootidx = 0;
 	_maxDepth = max_depth;
  }
+
+ QuadTreeRectangle(const QuadTreeRectangle &rhs) {
+	_nodes.resize(rhs._nodes.size());
+	for (size_t i=0; i<rhs._nodes.size(); i++) {
+		_nodes[i] = new node_t(*(rhs._nodes[i]));
+	}
+	_rootidx = rhs._rootidx;
+	_maxDepth = rhs._maxDepth;
+ }
+
+ QuadTreeRectangle &operator=(const QuadTreeRectangle& rhs){
+	if (*this == rhs) return *this;
+
+	for (size_t i=0; i<_nodes.size(); i++) {
+		if (_nodes[i]) delete _nodes[i];
+	}
+
+	_nodes.resize(rhs._nodes.size());
+	for (size_t i=0; i<rhs._nodes.size(); i++) {
+		_nodes[i] = new node_t(*(rhs._nodes[i]));
+	}
+	_rootidx = rhs._rootidx;
+	_maxDepth = rhs._maxDepth;
+	return *this;
+ }
+
+ ~QuadTreeRectangle() {
+	for (size_t i=0; i<_nodes.size(); i++) {
+		if (_nodes[i]) delete _nodes[i];
+	}
+	_nodes.clear();
+ }
+
+ 
 
  //! Insert an element into the tree
  //!
@@ -78,10 +112,10 @@ public:
  //
  bool Insert(T left, T top, T right, T bottom, S payload) {
 
-	node_t &root = _nodes[_rootidx];
-    if (! root.intersects(rectangle_t(left, top, right, bottom))) return(false);
+	node_t *root = _nodes[_rootidx];
+    if (! root->intersects(rectangle_t(left, top, right, bottom))) return(false);
 
-    return(root.insert(
+    return(root->insert(
 		_nodes, rectangle_t(left, top, right, bottom), payload, _maxDepth)
 	);
 
@@ -101,8 +135,8 @@ public:
  void GetPayloadContained(T x, T y, std::vector <S> &payloads) const {
     payloads.clear();
 
-	const node_t &root = _nodes[_rootidx];
-    root.get_payload_contains(_nodes, x,y,payloads);
+	const node_t *root = _nodes[_rootidx];
+    root->get_payload_contains(_nodes, x,y,payloads);
  }
 
  void GetStats(
@@ -112,13 +146,13 @@ public:
 	level_histo.clear();
 
 	for (size_t i = 0; i<_nodes.size(); i++) {
-		size_t b = _nodes[i].get_payloads().size();
+		size_t b = _nodes[i]->get_payloads().size();
 		if (b >= payload_histo.size()) {
 			payload_histo.resize(b+1, 0);
 		}
 		payload_histo[b] += 1;
 
-		b = _nodes[i].get_level();
+		b = _nodes[i]->get_level();
 		if (b >= level_histo.size()) {
 			level_histo.resize(b+1, 0);
 		}
@@ -128,8 +162,8 @@ public:
 
  friend std::ostream& operator<<(std::ostream &os, const QuadTreeRectangle& q) {
     os << "Num nodes : " << q._nodes.size() << std::endl;
-	const node_t &root = q._nodes[q._rootidx];
-	root.print(q._nodes, os);
+	const node_t *root = q._nodes[q._rootidx];
+	root->print(q._nodes, os);
 	return(os);
  }
 
@@ -248,18 +282,18 @@ private:
 	return(_rectangle.touches(other));
   }
 
-  void subdivide(std::vector <node_t> &nodes) {
+  void subdivide(std::vector <node_t *> &nodes) {
  	if (! _is_leaf) return;
 
 	_is_leaf = false;
 	_child0 = nodes.size();
-	nodes.push_back( node_t(_rectangle.quadrant(0), _level+1));
-	nodes.push_back( node_t(_rectangle.quadrant(1), _level+1));
-	nodes.push_back( node_t(_rectangle.quadrant(2), _level+1));
-	nodes.push_back( node_t(_rectangle.quadrant(3), _level+1));
+	nodes.push_back( new node_t(_rectangle.quadrant(0), _level+1));
+	nodes.push_back( new node_t(_rectangle.quadrant(1), _level+1));
+	nodes.push_back( new node_t(_rectangle.quadrant(2), _level+1));
+	nodes.push_back( new node_t(_rectangle.quadrant(3), _level+1));
   }
 
-  const node_t &quadrant(const std::vector <node_t> &nodes, uint32_t n) const {
+  const node_t *quadrant(const std::vector <node_t *> &nodes, uint32_t n) const {
     switch (n & 0x03) {
 		case 0: return nodes[_child0 + 0];
 		case 1: return nodes[_child0 + 1];
@@ -269,7 +303,7 @@ private:
 	return nodes[_child0 + 0];
 	VAssert(0);
   }
-  node_t &quadrant(std::vector <node_t> &nodes, uint32_t n) const {
+  node_t *quadrant(std::vector <node_t *> &nodes, uint32_t n) const {
     switch (n & 0x03) {
 		case 0: return nodes[_child0 + 0];
 		case 1: return nodes[_child0 + 1];
@@ -281,7 +315,7 @@ private:
   }
 
   bool insert(
-	std::vector <node_t> &nodes, const rectangle_t &rec, S payload,
+	std::vector <node_t *> &nodes, const rectangle_t &rec, S payload,
 	size_t maxDepth
   ) { 
 	if (! _rectangle.intersects(rec)) return(false);
@@ -293,7 +327,7 @@ private:
 	if (
 		(_rectangle.width() < rec.width() && 
 		_rectangle.height() < rec.height()) ||
-		_level > maxDepth
+		_level >= maxDepth
 	) {
 		_payloads.push_back(payload);
 		return(true);
@@ -306,9 +340,9 @@ private:
 	// Recursively insert in each child node that intersects rec
 	//
 	for (int q=0; q<4; q++) {
-		node_t &child = quadrant(nodes, q);
-		if (child.intersects(rec)) {
-			bool ok = child.insert(nodes, rec, payload, maxDepth);
+		node_t *child = quadrant(nodes, q);
+		if (child->intersects(rec)) {
+			bool ok = child->insert(nodes, rec, payload, maxDepth);
 			VAssert(ok);
 		}
 	}
@@ -317,7 +351,7 @@ private:
   }
 	
   void get_payload_contains(
-	const std::vector <node_t> &nodes,
+	const std::vector <node_t *> &nodes,
 	T x, T y, std::vector <S> &payloads
   ) const {
 
@@ -329,16 +363,16 @@ private:
 	if (_is_leaf) return;
 
 	for (int q=0; q<4; q++) {
-		const node_t &node = quadrant(nodes, q);
-		if (node._rectangle.contains(x,y)) { 
-			node.get_payload_contains(nodes, x,y,payloads);
+		const node_t *node = quadrant(nodes, q);
+		if (node->_rectangle.contains(x,y)) { 
+			node->get_payload_contains(nodes, x,y,payloads);
 		}
 	}
   }
 		
 	
 
-  void print(const std::vector <node_t> &nodes, std::ostream &os) const {
+  void print(const std::vector <node_t *> &nodes, std::ostream &os) const {
 	for (int i=0; i<_level; i++) os << " ";
 	os << _rectangle;
 
@@ -350,8 +384,8 @@ private:
 	os << std::endl;
 	if (! _is_leaf) {
 		for (int q=0; q<4; q++) {
-			const node_t &child = quadrant(nodes, q);
-			child.print(nodes, os);
+			const node_t *child = quadrant(nodes, q);
+			child->print(nodes, os);
 		}
 	}
  }
@@ -370,7 +404,7 @@ private:
   std::vector <S> _payloads;
  };
 
- std::vector <node_t> _nodes;
+ std::vector <node_t *> _nodes;
  size_t _rootidx;
  size_t _maxDepth;
 
