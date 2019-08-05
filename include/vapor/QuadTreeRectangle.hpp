@@ -139,6 +139,18 @@ public:
     root->get_payload_contains(_nodes, x,y,payloads);
  }
 
+ //! Return informational statistics about the current tree
+ //!
+ //! This method returns stats about the tree
+ //!
+ //! \param[out] payload_histo Returns a histogram in the form of a vector
+ //! that gives a count of the number of payloads. For example,
+ //! the ith element of \p payload_histo provides the count of nodes
+ //! that contain i number of payloads. 
+ //!
+ //! \param[out] level_histo Returns a histogram in the form of a vector
+ //! that gives a count of cells at each level in the tree.
+ //
  void GetStats(
 	std::vector <size_t> &payload_histo, std::vector <size_t> &level_histo
  ) const {
