@@ -1067,6 +1067,7 @@ QuadTreeRectangle<float, size_t> *CurvilinearGrid::_makeQuadTreeRectangle() cons
 	}
 	}
 
+#ifdef	DEBUG
 	vector <size_t> payload_histo;
 	vector <size_t> level_histo;
 	qtr->GetStats(payload_histo, level_histo);
@@ -1080,6 +1081,7 @@ QuadTreeRectangle<float, size_t> *CurvilinearGrid::_makeQuadTreeRectangle() cons
 		cout << "	" << i << " " << level_histo[i] << endl;
 	}
 	cout << endl;
+#endif
 	
 
 	return(qtr);
