@@ -65,6 +65,11 @@ set (SRCS
 	VolumeIsoSubtabs.cpp
 	VolumeSubtabs.cpp
     VaporWidgets.cpp
+	ParamsWidgets.cpp
+	TFEditor.cpp
+	TFEditor.h
+	TFFunctionEditor.cpp
+	TFFunctionEditor.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -137,6 +142,7 @@ set (SRCS
 	VizSelectCombo.h
 	WireFrameEventRouter.h
     VaporWidgets.h
+	ParamsWidgets.h
 )
 
 set (UIS 
@@ -159,6 +165,7 @@ set (UIS
 	ImageAppearanceGUI.ui
 	ImageGeometryGUI.ui
 	ImageVariablesGUI.ui
+	TransformTableGUI.ui
 	TwoDVariablesGUI.ui
 	TwoDAppearanceGUI.ui
 	TwoDGeometryGUI.ui

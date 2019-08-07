@@ -9,6 +9,7 @@ void VolumeVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Rende
     VAssert(vp);
     
     _variablesWidget->Update(dataMgr, paramsMgr, params);
+    tf->Update(dataMgr, paramsMgr, params);
 }
 
 VolumeAppearanceSubtab::VolumeAppearanceSubtab(QWidget* parent) {

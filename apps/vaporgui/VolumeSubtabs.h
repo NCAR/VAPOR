@@ -7,6 +7,7 @@
 #include "Flags.h"
 #include <vapor/MapperFunction.h>
 #include <vapor/VolumeParams.h>
+#include <TFEditor.h>
 
 namespace VAPoR {
 	class ControlExec;
@@ -26,6 +27,7 @@ public:
 			(VariableFlags)(SCALAR),
 			(DimFlags)(THREED)
 		);
+        ((QVBoxLayout*)layout())->insertWidget(1, tf = new TFEditor);
 	}
 
 	void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
@@ -34,6 +36,7 @@ private slots:
     
 private:
     VAPoR::VolumeParams *_volumeParams;
+    TFEditor *tf;
 };
 
 class VolumeAppearanceSubtab : public QWidget, public Ui_VolumeAppearanceGUI {
