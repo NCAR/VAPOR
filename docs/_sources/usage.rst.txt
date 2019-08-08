@@ -12,9 +12,11 @@ If any feature in Vapor is not sufficienty self describing in the application, t
 
 .. raw:: html
 
-    <iframe width="560" height="315" src="https://youtu.be/CtXHdI4WUDE" frameborder="0" allowfullscreen></iframe>
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/CtXHdI4WUDE" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 .. _renderers:
+
+|
 
 The Renderers
 -------------
