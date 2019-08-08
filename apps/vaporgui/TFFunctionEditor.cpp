@@ -20,8 +20,8 @@ TFFunctionEditor::TFFunctionEditor()
 {
     this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
     
-    _controlPoints.Add(vec2(50,50));
-    _controlPoints.Add(vec2(70,40));
+    _controlPoints.Add(vec2(0.2,0.5));
+    _controlPoints.Add(vec2(0.5,0.8));
 }
 
 void TFFunctionEditor::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
@@ -46,13 +46,10 @@ void TFFunctionEditor::paintEvent(QPaintEvent* event)
         ControlPointList &cp = _controlPoints;
         const int N = cp.Size();
         
-        
-        p.drawLine(QLine(0, cp[0].y, cp[0].x, cp[0].y));
-        
         for (auto it = cp.BeginLines(); it != cp.EndLines(); ++it) {
             vec2 a = it.a();
             vec2 b = it.b();
-            p.drawLine(QLine(QPoint(a.x, a.y), QPoint(b.x, b.y)));
+            p.drawLine(QNDCToPixel(a), QNDCToPixel(b));
             
 //            vec2 a = cp[i];
 //            vec2 b = cp[i+1];
@@ -63,8 +60,6 @@ void TFFunctionEditor::paintEvent(QPaintEvent* event)
 //            p.drawEllipse(qvec2(isect), 2, 2);
         }
         
-        p.drawLine(QLine(cp[N-1].x, cp[N-1].y, width(), cp[N-1].y));
-        
         
         
         QPen pen(Qt::darkGray, 0.8);
@@ -74,7 +69,7 @@ void TFFunctionEditor::paintEvent(QPaintEvent* event)
         p.setBrush(brush);
         
         for (auto it = cp.BeginPoints(); it != cp.EndPoints(); ++it)
-            p.drawEllipse(QPointF((*it).x, (*it).y), CONTROL_POINT_RADIUS, CONTROL_POINT_RADIUS);
+            p.drawEllipse(QNDCToPixel(*it), CONTROL_POINT_RADIUS, CONTROL_POINT_RADIUS);
         
     }
 }
@@ -83,9 +78,10 @@ void TFFunctionEditor::mousePressEvent(QMouseEvent *event)
 {
     vec2 mouse(event->posF().x(), event->posF().y());
     for (int i = 0; i < _controlPoints.Size(); i++) {
-        if (glm::distance(mouse, _controlPoints[i]) <= CONTROL_POINT_RADIUS) {
+        const vec2 controlPixel = NDCToPixel(_controlPoints[i]);
+        if (glm::distance(mouse, controlPixel) <= CONTROL_POINT_RADIUS) {
             _draggedID = i;
-            _dragOffset = _controlPoints[i] - mouse;
+            _dragOffset = controlPixel - mouse;
             break;
         }
     }
@@ -106,12 +102,13 @@ void TFFunctionEditor::mouseMoveEvent(QMouseEvent *event)
     
     if (_draggedID >= 0) {
         vec2 newPos = mouse + _dragOffset;
-        newPos = glm::clamp(
-                            newPos,
+        vec2 newVal = PixelToNDC(newPos);
+        newVal = glm::clamp(
+                            newVal,
                             vec2(i>0?cp[i-1].x:0, 0),
-                            vec2(i<N-1?cp[i+1].x:width(), height()));
+                            vec2(i<N-1?cp[i+1].x:1, 1));
         
-        _controlPoints[_draggedID] = newPos;
+        _controlPoints[_draggedID] = newVal;
     }
     update();
 }
@@ -143,34 +140,42 @@ void TFFunctionEditor::mouseDoubleClickEvent(QMouseEvent *event)
     vec2 mouse = qvec2(event->pos());
     ControlPointList &cp = _controlPoints;
     
-    if (dist(vec2(0, cp[0].y), cp[0], mouse) <= CONTROL_POINT_RADIUS)
-        cp.Add(project(vec2(0, cp[0].y), cp[0], mouse), 0);
-    
-    for (int i = 0; i < cp.Size()-1; i++) {
-        if (dist(cp[i], cp[i+1], mouse) <= CONTROL_POINT_RADIUS) {
-            cp.Add(project(cp[i], cp[i+1], mouse), i+1);
+    for (auto it = cp.BeginLines(); it != cp.EndLines(); ++it) {
+        const vec2 a = NDCToPixel(it.a());
+        const vec2 b = NDCToPixel(it.b());
+        
+        if (dist(a, b, mouse) <= CONTROL_POINT_RADIUS) {
+            cp.Add(PixelToNDC(project(a, b, mouse)), it);
             break;
         }
     }
     
-    if (dist(cp[cp.Size()-1], vec2(0, cp[cp.Size()-1].y), mouse) <= CONTROL_POINT_RADIUS)
-        cp.Add(project(cp[cp.Size()-1], vec2(0, cp[cp.Size()-1].y), mouse), cp.Size()-1);
-    
     update();
 }
 
-QPointF TFFunctionEditor::NDCToPixel(const glm::vec2 &v) const
+glm::vec2 TFFunctionEditor::NDCToPixel(const glm::vec2 &v) const
 {
-    return QPointF(v.x * width(), v.y * height());
+    return vec2(v.x * width(), (1.0f - v.y) * height());
 }
 
-glm::vec2 TFFunctionEditor::PixelToNDC(const QPointF &p) const
+QPointF TFFunctionEditor::QNDCToPixel(const glm::vec2 &v) const
+{
+    const vec2 p = NDCToPixel(v);
+    return QPointF(p.x, p.y);
+}
+
+glm::vec2 TFFunctionEditor::PixelToNDC(const glm::vec2 &p) const
 {
     float width = QWidget::width();
     float height = QWidget::height();
     VAssert(width != 0 && height != 0);
     
-    return vec2(p.x() / width, p.y() / height);
+    return vec2(p.x / width, 1.0f - p.y / height);
+}
+
+glm::vec2 TFFunctionEditor::PixelToNDC(const QPointF &p) const
+{
+    return PixelToNDC(vec2(p.x(), p.y()));
 }
 
 
