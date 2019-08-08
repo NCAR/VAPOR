@@ -4,7 +4,7 @@
 Downloads
 =========
 
-If you are looking for our legacy version of Vapor 2.6, follow :ref:`this link <vapor2>` to the bottom of the page.
+.. note:: If you are looking for our legacy version of Vapor 2.6, follow :ref:`this link <vapor2>` to the bottom of the page.
 
 Current Release: Vapor 3.1.0
 ----------------------------
