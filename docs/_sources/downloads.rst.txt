@@ -168,6 +168,19 @@ Sample Data
 
 **Coming soon**
 
+
++--------------+-------+-------------------+-----------+
+| Dataset      | Model | Grid Resolution   | File Size |
++--------------+-------+-------------------+-----------+
+| DUKU_        | WRF   | 181 x 166 x 35    | 734 MB    |
++--------------+-------+-------------------+-----------+
+| Kauffman_    | ROMS  | 226 x 642 x 43    | 495 MB    |
++--------------+-------+-------------------+-----------+
+
+.. _DUKU: https://dashrepo.ucar.edu/dataset/VAPOR_Sample_Data/file/dukuSample.tar.gz
+
+.. _Kauffman: https://dashrepo.ucar.edu/dataset/VAPOR_Sample_Data/file/kauffmanSample.tar.gz
+
 |
 
 .. _vapor2:
