@@ -6,15 +6,9 @@ using std::vector;
 using glm::vec2;
 using glm::clamp;
 
-vec2 qvec2(const QPoint &qp)
-{
-    return vec2(qp.x(), qp.y());
-}
-
-QPointF qvec2(const vec2 &v)
-{
-    return QPointF(v.x, v.y);
-}
+vec2 qvec2(const QPoint &qp)  { return vec2(qp.x(), qp.y()); }
+vec2 qvec2(const QPointF &qp) { return vec2(qp.x(), qp.y()); }
+QPointF qvec2(const vec2 &v) { return QPointF(v.x, v.y); }
 
 vec2 Project(vec2 a, vec2 b, vec2 p)
 {
@@ -93,49 +87,52 @@ void TFFunctionEditor::paintEvent(QPaintEvent* event)
 
 void TFFunctionEditor::mousePressEvent(QMouseEvent *event)
 {
-    vec2 mouse(event->posF().x(), event->posF().y());
-    for (int i = 0; i < _controlPoints.Size(); i++) {
-        const vec2 controlPixel = NDCToPixel(_controlPoints[i]);
-        if (glm::distance(mouse, controlPixel) <= CONTROL_POINT_RADIUS) {
-            _draggedID = i;
-            _dragOffset = controlPixel - mouse;
-            break;
-        }
+    vec2 mouse = qvec2(event->posF());
+    auto it = findSelectedControlPoint(mouse);
+    
+    if (it != _controlPoints.EndPoints()) {
+        _draggedControl = it;
+        _dragOffset = NDCToPixel(*it) - mouse;
+        _isDraggingControl = true;
     }
 }
 
 void TFFunctionEditor::mouseReleaseEvent(QMouseEvent *event)
 {
-    _draggedID = -1;
+    _isDraggingControl = false;
 }
 
 void TFFunctionEditor::mouseMoveEvent(QMouseEvent *event)
 {
     vec2 mouse = qvec2(event->pos());
     m = mouse;
-    const int i = _draggedID;
-    ControlPointList &cp = _controlPoints;
-    const int N = cp.Size();
+//    const int i = _draggedID;
+//    ControlPointList &cp = _controlPoints;
+//    const int N = cp.Size();
     
-    if (_draggedID >= 0) {
-        vec2 newPos = mouse + _dragOffset;
-        vec2 newVal = PixelToNDC(newPos);
-        newVal = glm::clamp(
-                            newVal,
-                            vec2(i>0?cp[i-1].x:0, 0),
-                            vec2(i<N-1?cp[i+1].x:1, 1));
+    if (_isDraggingControl) {
+        const auto &it = _draggedControl;
+        vec2 newVal = glm::clamp(
+                            PixelToNDC(mouse + _dragOffset),
+                            vec2(it.IsFirst() ? 0 : (*(it-1)).x, 0),
+                            vec2(it.IsLast() ? 1 : (*(it+1)).x, 1));
         
-        _controlPoints[_draggedID] = newVal;
+        *_draggedControl = newVal;
     }
     update();
 }
 
 void TFFunctionEditor::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    printf("Double click\n");
-    
     vec2 mouse = qvec2(event->pos());
     ControlPointList &cp = _controlPoints;
+    
+    auto controlPointIt = findSelectedControlPoint(mouse);
+    if (controlPointIt != cp.EndPoints()) {
+        cp.Remove(controlPointIt);
+        update();
+        return;
+    }
     
     for (auto it = cp.BeginLines(); it != cp.EndLines(); ++it) {
         const vec2 a = NDCToPixel(it.a());
@@ -148,6 +145,20 @@ void TFFunctionEditor::mouseDoubleClickEvent(QMouseEvent *event)
     }
     
     update();
+}
+
+bool TFFunctionEditor::controlPointContainsPixel(const vec2 &cp, const vec2 &pixel) const
+{
+    return glm::distance(pixel, NDCToPixel(cp)) <= CONTROL_POINT_RADIUS;
+}
+
+ControlPointList::PointIterator TFFunctionEditor::findSelectedControlPoint(const glm::vec2 &mouse)
+{
+    const auto end = _controlPoints.EndPoints();
+    for (auto it = _controlPoints.BeginPoints(); it != end; ++it)
+        if (controlPointContainsPixel(*it, mouse))
+            return it;
+    return end;
 }
 
 glm::vec2 TFFunctionEditor::NDCToPixel(const glm::vec2 &v) const
