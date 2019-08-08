@@ -16,6 +16,31 @@ QPointF qvec2(const vec2 &v)
     return QPointF(v.x, v.y);
 }
 
+vec2 Project(vec2 a, vec2 b, vec2 p)
+{
+    vec2 n = glm::normalize(b-a);
+    float t = glm::dot(n, p-a);
+    
+    return n * t + a;
+}
+
+float DistanceToLine(vec2 a, vec2 b, vec2 p)
+{
+    vec2 n = glm::normalize(b-a);
+    float t = glm::dot(n, p-a);
+    
+    if (t < 0) return glm::distance(a, p);
+    if (t > glm::distance(a, b)) return glm::distance(b, p);
+    
+    vec2 projection = n * t + a;
+    return glm::distance(projection, p);
+}
+
+
+
+
+
+
 TFFunctionEditor::TFFunctionEditor()
 {
     this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
@@ -34,6 +59,7 @@ QSize TFFunctionEditor::minimumSizeHint() const
 }
 
 #define CONTROL_POINT_RADIUS (4.0f)
+#define PADDING (CONTROL_POINT_RADIUS + 1.0f)
 
 void TFFunctionEditor::paintEvent(QPaintEvent* event)
 {
@@ -44,20 +70,11 @@ void TFFunctionEditor::paintEvent(QPaintEvent* event)
     
     if (_controlPoints.Size()) {
         ControlPointList &cp = _controlPoints;
-        const int N = cp.Size();
         
         for (auto it = cp.BeginLines(); it != cp.EndLines(); ++it) {
-            vec2 a = it.a();
-            vec2 b = it.b();
-            p.drawLine(QNDCToPixel(a), QNDCToPixel(b));
+            p.drawLine(QNDCToPixel(it.a()), QNDCToPixel(it.b()));
             
-//            vec2 a = cp[i];
-//            vec2 b = cp[i+1];
-//
-//            vec2 n = glm::normalize(b-a);
-//            float t = glm::dot(n, m-a);
-//            vec2 isect = n * t + a;
-//            p.drawEllipse(qvec2(isect), 2, 2);
+            p.drawEllipse(qvec2(Project(NDCToPixel(it.a()), NDCToPixel(it.b()), m)), 2, 2);
         }
         
         
@@ -113,26 +130,6 @@ void TFFunctionEditor::mouseMoveEvent(QMouseEvent *event)
     update();
 }
 
-vec2 project(vec2 a, vec2 b, vec2 p)
-{
-    vec2 n = glm::normalize(b-a);
-    float t = glm::dot(n, p-a);
-    
-    return n * t + a;
-}
-
-float dist(vec2 a, vec2 b, vec2 p)
-{
-    vec2 n = glm::normalize(b-a);
-    float t = glm::dot(n, p-a);
-    
-    if (t < 0) return glm::distance(a, p);
-    if (t > glm::distance(a, b)) return glm::distance(b, p);
-    
-    vec2 projection = n * t + a;
-    return glm::distance(projection, p);
-}
-
 void TFFunctionEditor::mouseDoubleClickEvent(QMouseEvent *event)
 {
     printf("Double click\n");
@@ -144,8 +141,8 @@ void TFFunctionEditor::mouseDoubleClickEvent(QMouseEvent *event)
         const vec2 a = NDCToPixel(it.a());
         const vec2 b = NDCToPixel(it.b());
         
-        if (dist(a, b, mouse) <= CONTROL_POINT_RADIUS) {
-            cp.Add(PixelToNDC(project(a, b, mouse)), it);
+        if (DistanceToLine(a, b, mouse) <= CONTROL_POINT_RADIUS) {
+            cp.Add(PixelToNDC(Project(a, b, mouse)), it);
             break;
         }
     }
@@ -155,7 +152,7 @@ void TFFunctionEditor::mouseDoubleClickEvent(QMouseEvent *event)
 
 glm::vec2 TFFunctionEditor::NDCToPixel(const glm::vec2 &v) const
 {
-    return vec2(v.x * width(), (1.0f - v.y) * height());
+    return vec2(PADDING + v.x * (width()-2*PADDING), PADDING + (1.0f - v.y) * (height()-2*PADDING));
 }
 
 QPointF TFFunctionEditor::QNDCToPixel(const glm::vec2 &v) const
@@ -170,7 +167,7 @@ glm::vec2 TFFunctionEditor::PixelToNDC(const glm::vec2 &p) const
     float height = QWidget::height();
     VAssert(width != 0 && height != 0);
     
-    return vec2(p.x / width, 1.0f - p.y / height);
+    return vec2((p.x - PADDING) / (width-2*PADDING), 1.0f - (p.y - PADDING) / (height-2*PADDING));
 }
 
 glm::vec2 TFFunctionEditor::PixelToNDC(const QPointF &p) const
