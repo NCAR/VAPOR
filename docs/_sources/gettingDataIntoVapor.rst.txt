@@ -36,6 +36,9 @@ The VDC data format allows users to render their data at different levels of com
 
 With VDC, users can configure their renderers quickly at low fidelity, and then turn off compression for their final renderings.  Being able to interact with your data becomes important when rendering takes many seconds, minutes, or even hours to complete.
 
+.. toctree::
+    referenceDocumentation.rst
+
 Using the Command Line Tools
 ''''''''''''''''''''''''''''
 
