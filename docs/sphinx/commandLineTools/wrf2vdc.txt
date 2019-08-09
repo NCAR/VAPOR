@@ -1,0 +1,13 @@
+Usage: wrf2vdc wrffiles... master.nc
+    OPTION      NUM_ARGS    DEFAULT    
+    ------      --------    -------    
+    -help       0           false      
+        Print this message and exit 
+    -nthreads   1           0          
+        Specify number of execution threads 0 => use number of cores 
+    -numts      1           -1         
+        Number of timesteps to be included in the VDC. Default (-1) includes 
+        all timesteps. 
+    -vars       1           ""         
+        Colon delimited list of 3D variable names (compressed) to be included 
+        in the VDC 
