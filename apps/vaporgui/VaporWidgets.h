@@ -1,26 +1,49 @@
 #ifndef VAPORWIDGETS_H 
 #define VAPORWIDGETS_H 
 
-class QWidget;
+class QDir;
 class QLabel;
+class QWidget;
+class QSlider;
+class QSpinBox;
 class QComboBox;
 class QCheckBox;
-class QPushButton;
 class QLineEdit;
-class QSlider;
+class QPushButton;
 class QSpacerItem;
 class QHBoxLayout;
 class QVBoxLayout;
-class QSpinBox;
 class QDoubleSpinBox;
 
 #include <cmath>
 #include <QTabWidget>
+#include <QFileDialog>
+
+class VaporWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    VaporWidget( QWidget* parent = 0 );
+    
+    template <class T>
+    void Update( T value );
+
+    //template <class T>
+    //T GetValue() const;
+    virtual int GetValue();
+
+private slots:
+    virtual void _validateAndEmit() = 0;
+
+signals:
+    void _valueChanged();
+};
 
 //
 // ====================================
 //
-class VaporWidget : public QWidget
+class VaporLine : public VaporWidget
 {
     Q_OBJECT
 
@@ -28,12 +51,19 @@ public:
     void SetLabelText( const std::string& text );
     void SetLabelText( const QString& text );
 
+    template <class T>
+    void Update( T labelText );
+
+    //template <class T>
+    //T GetValue() const;
+    virtual int GetValue() { return 0; }
+
 protected:
-    VaporWidget( 
+    VaporLine( 
         QWidget* parent,
         const std::string& labelText
     );
-    VaporWidget( 
+    VaporLine( 
         QWidget* parent,
         const QString& labelText
     );
@@ -41,12 +71,15 @@ protected:
     QLabel*      _label;
     QSpacerItem* _spacer;
     QHBoxLayout* _layout;
+
+protected slots:
+    virtual void _validateAndEmit();
 };
 
 //
 // ====================================
 //
-class VSpinBox : public VaporWidget
+class VSpinBox : public VaporLine
 {
     Q_OBJECT
 
@@ -54,31 +87,40 @@ public:
     VSpinBox(
         QWidget* parent, 
         const std::string& labelText = "Label",
+        int min = 0,
+        int max = 100,
         int defaultValue = 0 
     );
 
+    template <class T>
+    void Update( T value );
+   
+    //template <class T> 
+    //T GetValue() const;
+    virtual int GetValue() { return 1; }
+
     void SetMaximum( int maximum );
     void SetMinimum( int minimum );
-    void SetValue( int value );
-    int GetValue() const;
-
-signals:
-    void _valueChanged();
 
 protected:
     QSpinBox* _spinBox;
 
-private slots:
-    void _changed();
-
 private:
+    int _min;
+    int _max;
     int _value;
+
+protected slots:
+    virtual void _validateAndEmit();
 };
 
+
+
+/*
 //
 // ====================================
 //
-class VDoubleSpinBox : public VaporWidget
+class VDoubleSpinBox : public VaporLine
 {
     Q_OBJECT
 
@@ -96,7 +138,7 @@ public:
     double GetValue() const;
 
 signals:
-    void _valueChanged();
+    void _emitValueChanged();
 
 protected:
     QDoubleSpinBox* _spinBox;
@@ -112,7 +154,7 @@ private:
 //
 // ====================================
 //
-class VLineEdit : public VaporWidget
+class VLineEdit : public VaporLine
 {
     Q_OBJECT
 
@@ -155,7 +197,7 @@ private:
 //   Thus this widget uses an internal variable to keep the actual value in float.
 // ====================================
 //
-class VSlider : public VaporWidget
+class VSlider : public VaporLine
 {
     Q_OBJECT
 
@@ -168,8 +210,8 @@ public:
     float GetCurrentValue() const;
 
 signals:
-    /* This signal is emitted representing the entire widget */
-    void  _valueChanged();
+    // This signal is emitted representing the entire widget
+    void  _emitValueChanged();
 
 private slots:
     void  _respondQSliderReleased();    // emit signal
@@ -214,9 +256,9 @@ private:
     VSlider        *_minSlider, *_maxSlider;
     QVBoxLayout*    _layout;
 
-    /* In case _minSlider is changed, adjust _maxSlider if necessary. */
+    // In case _minSlider is changed, adjust _maxSlider if necessary.
     void  _adjustMaxToMin();    
-    /* In case _maxSlider is changed, adjust _minSlider if necessary. */
+    // In case _maxSlider is changed, adjust _minSlider if necessary.
     void  _adjustMinToMax();
 };
 
@@ -232,9 +274,9 @@ class VGeometry : public QTabWidget
     Q_OBJECT
 
 public:
-    /* Constructor for 2D or 3D geometries. 
-       Four floating point values imply a 2D geometry, while Six floating point 
-       values imply a 3D geometry. All other numbers are illegal. */
+    // Constructor for 2D or 3D geometries. 
+    //   Four floating point values imply a 2D geometry, while Six floating point 
+    //   values imply a 3D geometry. All other numbers are illegal.
     VGeometry( 
         QWidget* parent, 
         int dim, 
@@ -244,12 +286,12 @@ public:
 
     ~VGeometry();
 
-    /* Adjust the dimension and/or value ranges through this function.
-       Argument range must contain 4 or 6 values organized in the following order:
-       xmin, xmax, ymin, ymax, (zmin, zmax).                                    */
+    // Adjust the dimension and/or value ranges through this function.
+    //   Argument range must contain 4 or 6 values organized in the following order:
+    //   xmin, xmax, ymin, ymax, (zmin, zmax).                                    
     void  SetDimAndRange( int dim, const std::vector<float>& range );
-    /* The number of incoming values MUST match the current dimensionality. 
-       I.e., 4 values for 2D widgets, and 6 values for 3D widgets.       */
+    // The number of incoming values MUST match the current dimensionality. 
+    //   I.e., 4 values for 2D widgets, and 6 values for 3D widgets.       
     void  SetCurrentValues( const std::vector<float>& vals );
     void  GetCurrentValues( std::vector<float>& vals ) const;
 
@@ -269,7 +311,7 @@ private:
 //
 // ====================================
 //
-class VPushButton : public VaporWidget
+class VPushButton : public VaporLine
 {
     Q_OBJECT
 
@@ -297,7 +339,7 @@ private slots:
 //
 // ====================================
 //
-class VComboBox : public VaporWidget
+class VComboBox : public VaporLine
 {
     Q_OBJECT
 
@@ -327,7 +369,7 @@ signals:
 //
 // ====================================
 //
-class VCheckBox : public VaporWidget
+class VCheckBox : public VaporLine
 {
     Q_OBJECT
 
@@ -456,5 +498,5 @@ public:
         int index = 0
     );
 };
-
+*/
 #endif // VAPORWIDGETS_H
