@@ -1,4 +1,5 @@
-#include <QGLWidget>
+#include <QWidget>
+#include <QFrame>
 #include <vapor/RenderParams.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/VAssert.h>
@@ -75,12 +76,13 @@ public:
     
     void Remove(const PointIterator &point) {
         VAssert(point.i >= 0 && point.i < _points.size());
-        if (Size() > 1)
+        if (Size() > 2) // VAPoR::MapperFunc cannot handle less than 2
             _points.erase(_points.begin() + point.i);
     }
     
     int Size() const { return _points.size(); }
     int SizeLines() const { return Size() + 1; }
+    void Resize(int n) { _points.resize(n); }
     
     PointIterator BeginPoints() { return PointIterator(this, 0); }
     PointIterator EndPoints()   { return PointIterator(this, Size()); }
@@ -88,7 +90,7 @@ public:
     LineIterator EndLines()   { return LineIterator(this, SizeLines()); }
 };
 
-class TFFunctionEditor : public QWidget {
+class TFFunctionEditor : public QFrame {
     Q_OBJECT
     
 public:
@@ -107,11 +109,14 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent *event);
     
 private:
+    VAPoR::RenderParams *_renderParams = nullptr;
     ControlPointList _controlPoints;
     bool _isDraggingControl = false;
     ControlPointList::PointIterator _draggedControl;
     glm::vec2 _dragOffset;
     glm::vec2 m;
+    
+    void opacityChanged();
     
     bool controlPointContainsPixel(const glm::vec2 &cp, const glm::vec2 &pixel) const;
     ControlPointList::PointIterator findSelectedControlPoint(const glm::vec2 &mouse);
