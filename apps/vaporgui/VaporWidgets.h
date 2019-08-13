@@ -31,7 +31,7 @@ public:
 
     //template <class T>
     //T GetValue() const;
-    virtual int GetValue();
+    virtual int GetValue() {return -1;}
 
 private slots:
     virtual void _validateAndEmit() = 0;
