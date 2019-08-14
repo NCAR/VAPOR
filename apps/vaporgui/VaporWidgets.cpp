@@ -99,7 +99,7 @@ VSpinBox::VSpinBox(
     _layout->addWidget( _spinBox );
 
     connect( _spinBox, SIGNAL( editingFinished() ),
-        this, SLOT( _validate() ) );
+        this, SLOT( _validateAndEmit() ) );
 }
 
 void VSpinBox::Update( int value ) {
