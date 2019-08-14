@@ -25,11 +25,22 @@ VaporWidget::VaporWidget(
     QWidget( parent )
 {}
 
-template <class T>
-void VaporWidget::Update( T value ) {}
+void VaporWidget::GetValue( int& value ) {
+    value = -1;
+}
 
-//template <class T>
-//T GetValue() { return nullptr; }
+void VaporWidget::GetValue( double& value ) {
+    value = -1.f;
+}
+
+void VaporWidget::GetValue( std::string& value ) {
+    value = "";
+}
+
+void VaporWidget::GetValue( std::vector<double>& value ) {
+    std::vector<double> rvalue = {};
+    value = rvalue;
+}
 
 VaporLine::VaporLine(
     QWidget* parent,
@@ -56,32 +67,15 @@ VaporLine::VaporLine(
     setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
 }
 
-VaporLine::VaporLine(
-        QWidget* parent,
-        const QString& labelText
-    ) : VaporLine( parent, labelText.toStdString() )
-{}
-
-template<>
-void VaporLine::Update<const std::string&>( const std::string& labelText ) {
+void VaporLine::Update( const std::string& labelText ) {
     SetLabelText( labelText );
 }
-
-//template<>
-//std::string VaporLine::GetValue()< std::string > const {
-//    return _label->text().toStdString();
-//}
 
 void VaporLine::_validateAndEmit() {};
 
 void VaporLine::SetLabelText( const std::string& text )
 {
     _label->setText( QString::fromStdString( text ) );
-}
-
-void VaporLine::SetLabelText( const QString& text )
-{
-    _label->setText( text );
 }
 
 VSpinBox::VSpinBox(
@@ -108,8 +102,7 @@ VSpinBox::VSpinBox(
         this, SLOT( _validate() ) );
 }
 
-template <>
-void VSpinBox::Update<int>( int value ) {
+void VSpinBox::Update( int value ) {
      if ( value != _value &&
           value <= _max   &&
           value >= _min   ) 
@@ -119,10 +112,9 @@ void VSpinBox::Update<int>( int value ) {
     }
 }
 
-//template<>
-//int VSpinBox::GetValue()< int > const {
-//    return _value;
-//}
+void VSpinBox::GetValue( int& value ) {
+    value = 1;
+}
 
 void VSpinBox::_validateAndEmit() {
     double newValue = _spinBox->value();

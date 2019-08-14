@@ -38,12 +38,16 @@ void PSpinBox::Update( VAPoR::ParamsBase* params ) {
     VAssert( params != nullptr );
     _params = params;
 
-    int value = (int)_params->GetValueDouble( _tag, 0 );
+    int value;
+    _vaporWidget->GetValue( value );
+    cout << "SpinBox Value " << value << endl;
+    //int value = (int)_params->GetValueDouble( _tag, 0 );
     //_vaporWidget->Update<int>( value );
 }
 
 void PSpinBox::_updateParams() {
-    int value = _vaporWidget->GetValue();
+    int value;
+    _vaporWidget->GetValue( value );
     cout << "SpinBox Value " << value << endl;
     //_params->SetValueDouble( _tag, _description, value );
 }

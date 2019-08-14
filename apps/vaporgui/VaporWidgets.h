@@ -26,12 +26,15 @@ class VaporWidget : public QWidget
 public:
     VaporWidget( QWidget* parent = 0 );
     
-    template <class T>
-    void Update( T value );
+    virtual void Update( int                        value ) {};
+    virtual void Update( double                     value ) {};
+    virtual void Update( const std::string&         value ) {};
+    virtual void Update( const std::vector<double>& value ) {};
 
-    //template <class T>
-    //T GetValue() const;
-    virtual int GetValue() {return -1;}
+    virtual void GetValue( int&                 value );
+    virtual void GetValue( double&              value );
+    virtual void GetValue( std::string&         value );
+    virtual void GetValue( std::vector<double>& value );
 
 private slots:
     virtual void _validateAndEmit() = 0;
@@ -48,24 +51,16 @@ class VaporLine : public VaporWidget
     Q_OBJECT
 
 public:
+    virtual void Update( const std::string& labelText );
+
     void SetLabelText( const std::string& text );
-    void SetLabelText( const QString& text );
 
-    template <class T>
-    void Update( T labelText );
-
-    //template <class T>
-    //T GetValue() const;
     virtual int GetValue() { return 0; }
 
 protected:
     VaporLine( 
         QWidget* parent,
         const std::string& labelText
-    );
-    VaporLine( 
-        QWidget* parent,
-        const QString& labelText
     );
 
     QLabel*      _label;
@@ -92,12 +87,8 @@ public:
         int defaultValue = 0 
     );
 
-    template <class T>
-    void Update( T value );
-   
-    //template <class T> 
-    //T GetValue() const;
-    virtual int GetValue() { return 1; }
+    virtual void Update( int value );
+    virtual void GetValue( int& value );
 
     void SetMaximum( int maximum );
     void SetMinimum( int minimum );
