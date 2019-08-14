@@ -16,6 +16,7 @@
 #include "SliceEventRouter.h"
 #include "EventRouter.h"
 #include "ParamsWidgets.h"
+#include "VaporWidgets.h"
 
 using namespace VAPoR;
 
@@ -31,30 +32,84 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
                     : QTabWidget(parent),
 	                    RenderEventRouter( ce, SliceParams::GetClassType())
 {
-    _testTab = new QWidget(this);
-    _testTab->setLayout( new QVBoxLayout );
-    QScrollArea* sa = new QScrollArea(this);
+    _testTab = new QWidget;
+    QVBoxLayout* layout = new QVBoxLayout;
 
-    _sb = new PSpinBox(
-        this,
+    _psb = new PSpinBox(
+        _testTab,
         "testTag",
         "testDesc",
-        "testLabel",
+        "PSpinBox",
         0, 100, 5
     );
-    _testTab->layout()->addWidget( _sb );
+    layout->addWidget( _psb );
+    _psb2 = new PSpinBox(
+        _testTab,
+        "testTag",
+        "testDesc",
+        "PSpinBox2",
+        0, 100, 5
+    );
+    layout->addWidget( _psb2 );
 
+    _vsb = new VSpinBox(
+        _testTab,
+        "VSpinBox",
+        0, 100, 5
+    );
+    layout->addWidget( _vsb );
 
+    _psl = new PSlider(
+        _testTab,
+        "sliderTag",
+        "sliderDesc",
+        "PSlider1",
+        0, 100, 33
+    );
+    layout->addWidget( _psl );
+
+    _psl2 = new PSlider(
+        _testTab,
+        "sliderTag",
+        "sliderDesc",
+        "PSlider2",
+        0, 100, 33
+    );
+    layout->addWidget( _psl2 );
+
+    VaporLine* line = new VaporLine( 
+        _testTab, 
+        "VaporLine" 
+    );
+    layout->addWidget( line );
+  
+    _prange = new PRange(
+        _testTab,
+        "prangeTag",
+        "prangeDesc",
+        0, 200,
+        "PRangeMin",
+        "PRangeMax"
+    );    
+    layout->addWidget( _prange );
+
+ 
+ 
+    _testTab->setLayout( layout );
+    _testTab->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
+    _testTab->adjustSize();
+    QScrollArea* sa = new QScrollArea(this);
 	sa->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    sa->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
     sa->setWidget( _testTab );
-    sa->adjustSize();
+	sa->setWidgetResizable(true);
     addTab( sa, "ParamsWidgets" );
 
 
 
 
 
-
+    // Default subtabs
 
 	_variables = new SliceVariablesSubtab(this);
 	QScrollArea *qsvar = new QScrollArea(this);
@@ -144,6 +199,13 @@ void SliceEventRouter::GetWebHelp(
 }
 
 void SliceEventRouter::_updateTab(){
+
+    ParamsBase* params = GetActiveParams();
+    _psb->Update( params );
+    _psb2->Update( params );
+    _psl->Update( params );
+    _psl2->Update( params );
+    _prange->Update( params );
 
 	// The variable tab updates itself:
 	//
