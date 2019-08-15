@@ -55,7 +55,7 @@ void GLColorbarWidget::setColormap(ColorMap *colormap)
 {
   _colormap = colormap;
   vector<double> cps = colormap->GetControlPoints();
-  VAssert(cps.size()>0);
+  //VAssert(cps.size()>0);
   _updateTexture = true;
 }
 

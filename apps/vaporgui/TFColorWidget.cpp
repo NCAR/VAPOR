@@ -118,8 +118,11 @@ void TFColorWidget::mouseDoubleClickEvent(QMouseEvent *event) {
     vec2 mouse = qvec2(event->pos());
     ColorMap *cm = getColormap();
     int selectedId = findSelectedControlPoint(mouse);
-    if (selectedId >= 0)
+    if (selectedId >= 0) {
         cm->deleteControlPoint(selectedId);
+        update();
+        return;
+    }
     
     float newVal = valueForControlX(mouse.x);
     if (newVal >= 0 && newVal <= 1)

@@ -347,7 +347,7 @@ int ColorMap::addNormControlPoint(float normValue, Color color)
 void ColorMap::deleteControlPoint(int index)
 {
   vector<double> cps = GetControlPoints();
-  if (index >= 0 && index < cps.size()/4 && cps.size() > 4)
+  if (index >= 0 && index < cps.size()/4)
   {
 	cps.erase(cps.begin()+4*index, cps.begin()+4*index+4);
    
