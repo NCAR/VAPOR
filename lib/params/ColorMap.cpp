@@ -330,7 +330,7 @@ int ColorMap::addNormControlPoint(float normValue, Color color)
    
   vector<double> cps = GetControlPoints();
   //Find the insertion point:
-  int indx = leftIndex(normValue)*4;
+  int indx = (leftIndex(normValue)+1)*4;
   cps.insert(cps.begin()+indx++, color.hue());
   cps.insert(cps.begin()+indx++, color.sat());
   cps.insert(cps.begin()+indx++, color.val());
@@ -437,6 +437,11 @@ ColorMap::Color ColorMap::colorNormalized(float nv) const
   // Find the bounding control points
   //
   int index = leftIndex(nv);
+    
+    if (index < 0)
+        return controlPointColor(0);
+    if (index >= numControlPoints()-1)
+        return controlPointColor(numControlPoints()-1);
 
   VAssert(index>=0 && index*4+7< cps.size());
   double leftVal = cps[4*index +3];
@@ -499,30 +504,19 @@ ColorMap::Color ColorMap::colorNormalized(float nv) const
 // binary search , find the index of the largest control point <= val
 // Requires that control points are increasing. 
 //
-// Developed by Alan Norton. 
+// Not developed by Alan Norton.
 //----------------------------------------------------------------------------
 int ColorMap::leftIndex(float val) const
 {
-  vector<double> cps = GetControlPoints();
-  int left = 0;
-  int right = cps.size()/4 -1;
-
-  //
-  // Iterate, keeping left to the left of ctrl point
-  //
-  while (right-left > 1)
-  {
-    int mid = left+ (right-left)/2;
-	if (cps[mid*4+3] > val)
-    {
-      right = mid;
-    }
-    else 
-    {
-      left = mid;
-    }
-  }
-  return left;
+    int n = numControlPoints();
+    if (n == 0)
+        return -1;
+    
+    for (int i = 0; i < n; i++)
+        if (controlPointValueNormalized(i) > val)
+            return i-1;
+    
+    return n-1;
 }
 
 
