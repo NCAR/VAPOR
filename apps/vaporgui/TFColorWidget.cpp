@@ -14,11 +14,7 @@ void TFColorWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr,
 {
     _renderParams = rp;
     _paramsMgr = paramsMgr;
-    MapperFunction *mf = rp->GetMapperFunc(rp->GetVariableName());
-    ColorMap *cm = mf->GetColorMap();
-//    cm->color(<#float value#>)
-    this->setContentsMargins(10, 10, 10, 10);
-    this->setStyleSheet("padding: 10px;");
+    update();
 }
 
 QSize TFColorWidget::minimumSizeHint() const
@@ -42,12 +38,12 @@ void TFColorWidget::paintEvent(QPaintEvent* event)
         
         ColorMap *cm = rp->GetMapperFunc(rp->GetVariableName())->GetColorMap();
         
-        printf("============= %i Controls ==============\n", cm->numControlPoints());
-        for (int i = 0; i < cm->numControlPoints(); i++) {
-            float rgb[3];
-            cm->controlPointColor(i).toRGB(rgb);
-            printf("[%i] %0.2f (%0.1f, %0.1f, %0.1f)\n", i, cm->controlPointValueNormalized(i), rgb[0], rgb[1], rgb[2]);
-        }
+//        printf("============= %i Controls ==============\n", cm->numControlPoints());
+//        for (int i = 0; i < cm->numControlPoints(); i++) {
+//            float rgb[3];
+//            cm->controlPointColor(i).toRGB(rgb);
+//            printf("[%i] %0.2f (%0.1f, %0.1f, %0.1f)\n", i, cm->controlPointValueNormalized(i), rgb[0], rgb[1], rgb[2]);
+//        }
         
         int nSamples = width()-PADDING*2;
         unsigned char buf[nSamples*3];
@@ -69,12 +65,8 @@ void TFColorWidget::paintEvent(QPaintEvent* event)
         p.setBrush(brush);
         
         for (int i = 0; i < cm->numControlPoints(); i++) {
-//            printf("cp[%i] = %f\n", i, cm->controlPointValueNormalized(i));
             p.drawEllipse(controlQPositionForValue(cm->controlPointValueNormalized(i)), CONTROL_POINT_RADIUS, CONTROL_POINT_RADIUS);
         }
-        
-//        for (auto it = cp.BeginPoints(); it != cp.EndPoints(); ++it)
-//            p.drawEllipse(QNDCToPixel(*it), CONTROL_POINT_RADIUS, CONTROL_POINT_RADIUS);
     }
 }
 
