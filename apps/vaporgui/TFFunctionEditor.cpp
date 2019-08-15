@@ -8,9 +8,9 @@ using std::vector;
 using glm::vec2;
 using glm::clamp;
 
-vec2 qvec2(const QPoint &qp)  { return vec2(qp.x(), qp.y()); }
-vec2 qvec2(const QPointF &qp) { return vec2(qp.x(), qp.y()); }
-QPointF qvec2(const vec2 &v) { return QPointF(v.x, v.y); }
+static vec2 qvec2(const QPoint &qp)  { return vec2(qp.x(), qp.y()); }
+static vec2 qvec2(const QPointF &qp) { return vec2(qp.x(), qp.y()); }
+static QPointF qvec2(const vec2 &v) { return QPointF(v.x, v.y); }
 
 vec2 Project(vec2 a, vec2 b, vec2 p)
 {
@@ -97,7 +97,7 @@ void TFFunctionEditor::paintEvent(QPaintEvent* event)
         QBrush brush(QColor(0xFA, 0xFA, 0xFA));
         p.setBrush(brush);
         
-        for (auto it = cp.BeginPoints(); it != cp.EndPoints(); ++it)
+        for (auto it = --cp.EndPoints(); it != --cp.BeginPoints(); --it)
             p.drawEllipse(QNDCToPixel(*it), CONTROL_POINT_RADIUS, CONTROL_POINT_RADIUS);
         
     }

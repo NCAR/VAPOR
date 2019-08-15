@@ -231,17 +231,18 @@ void ColorMap::controlPointColor(int index, Color color)
 	SetControlPoints(cps);
 }
 
+float ColorMap::controlPointValueNormalized(int index) const
+{
+    vector<double> cps = GetControlPoints();
+    return (float)cps[4*index+3];
+}
+
 //----------------------------------------------------------------------------
 // Return the control point's value (in data coordinates).
 //---------------------------------------------------------------------------- 
 float ColorMap::controlPointValue(int index) const
 {
-	vector<double> cps = GetControlPoints();
-	if (index+4 > cps.size()*4) return(0.0);	// no-op
-
-	float norm = (float)cps[4*index+3];
-
-	return (norm * (maxValue() - minValue()) + minValue());
+	return (controlPointValueNormalized(index) * (maxValue() - minValue()) + minValue());
 }
 
 //----------------------------------------------------------------------------
@@ -284,19 +285,24 @@ void  ColorMap::controlPointValue(int index, float value)
 //----------------------------------------------------------------------------
 void ColorMap::addControlPointAt(float value)
 {
-  Color c = color(value);
-
   float nv = (value - minValue()) / (maxValue() - minValue());
+  addNormControlPointAt(nv);
+}
 
-  vector<double> cps = GetControlPoints();
-  //Find the insertion point:
-  int indx = leftIndex(nv)*4+4;
-  cps.insert(cps.begin()+indx++, c.hue());
-  cps.insert(cps.begin()+indx++, c.sat());
-  cps.insert(cps.begin()+indx++, c.val());
-  cps.insert(cps.begin()+indx, nv);
-  
-  SetControlPoints(cps);
+int ColorMap::addNormControlPointAt(float nv)
+{
+    Color c = colorNormalized(nv);
+    
+    vector<double> cps = GetControlPoints();
+    //Find the insertion point:
+    int indx = leftIndex(nv)*4+4;
+    cps.insert(cps.begin()+indx++, c.hue());
+    cps.insert(cps.begin()+indx++, c.sat());
+    cps.insert(cps.begin()+indx++, c.val());
+    cps.insert(cps.begin()+indx, nv);
+    
+    SetControlPoints(cps);
+    return indx/4;
 }
 
 //----------------------------------------------------------------------------
@@ -319,7 +325,7 @@ void ColorMap::addControlPointAt(float value, Color color)
 //----------------------------------------------------------------------------
 // Add a new control point to the colormap.
 //----------------------------------------------------------------------------
-void ColorMap::addNormControlPoint(float normValue, Color color)
+int ColorMap::addNormControlPoint(float normValue, Color color)
 {
    
   vector<double> cps = GetControlPoints();
@@ -331,6 +337,8 @@ void ColorMap::addNormControlPoint(float normValue, Color color)
   cps.insert(cps.begin()+indx, normValue);
   
   SetControlPoints(cps);
+    
+  return indx/4;
 }
 
 //----------------------------------------------------------------------------
@@ -411,17 +419,19 @@ ColorMap::Color ColorMap::getDivergingColor(float ratio, float index) const {
 	return Color(hsvOutput[0], hsvOutput[1], hsvOutput[2]);
 }
 
+ColorMap::Color ColorMap::color(float value) const
+{
+    float nv = (value - minValue()) / (maxValue() - minValue());
+    return colorNormalized(nv);
+}
+
 //----------------------------------------------------------------------------
 // Interpolate a color at the value (data coordinates)
 //
 // Developed by Alan Norton. 
 //----------------------------------------------------------------------------
-ColorMap::Color ColorMap::color(float value) const
+ColorMap::Color ColorMap::colorNormalized(float nv) const
 {
-  //
-  // normalize the value
-  // 
-  float nv = (value - minValue()) / (maxValue() - minValue());
   vector<double> cps = GetControlPoints();
   //
   // Find the bounding control points

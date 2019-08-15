@@ -70,6 +70,8 @@ set (SRCS
 	TFEditor.h
 	TFFunctionEditor.cpp
 	TFFunctionEditor.h
+	TFColorWidget.cpp
+	TFColorWidget.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
