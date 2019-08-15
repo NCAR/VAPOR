@@ -30,7 +30,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cstdio>
 #include <algorithm>
 #include <vapor/MyBase.h>
@@ -154,7 +154,7 @@ bool Statistics::Update()
     NewVarCombo->setCurrentIndex( 0 );
 
     // Update "Remove a Variable"
-    assert( enabledVars.size() == _validStats.GetVariableCount() );
+    VAssert( enabledVars.size() == _validStats.GetVariableCount() );
     std::sort( enabledVars.begin(), enabledVars.end() );
     RemoveVarCombo->blockSignals( true );
     RemoveVarCombo->clear();
@@ -230,7 +230,7 @@ void Statistics::_updateStatsTable()
     GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
                     (_controlExec->GetParamsMgr()->GetParams( GUIStateParams::GetClassType() ));
     std::string currentDatasetName = guiParams->GetStatsDatasetName();
-    assert( currentDatasetName != "" );
+    VAssert( currentDatasetName != "" );
     StatisticsParams* statsParams = dynamic_cast<StatisticsParams*>(_controlExec->GetParamsMgr()->
                       GetAppRenderParams(currentDatasetName, StatisticsParams::GetClassType()));
 
@@ -255,13 +255,13 @@ void Statistics::_updateStatsTable()
     // Update Statistics Table: cells
     QBrush brush(QColor(255,0,0));
     std::vector<std::string> enabledVars = statsParams->GetAuxVariableNames();
-    assert( enabledVars.size() == _validStats.GetVariableCount() );
+    VAssert( enabledVars.size() == _validStats.GetVariableCount() );
     VariablesTable->setRowCount( enabledVars.size() );
     int numberOfDigits = 3;
     for( int row = 0; row < enabledVars.size(); row++ )
     {
-        float m3[3], median, stddev;
-        long   count;
+        float m3[3]{0.0f, 0.0f, 0.0f}, median = 0.0f, stddev = 0.0f;
+        long   count = 0;
         _validStats.GetCount(   enabledVars[row], &count );
         _validStats.Get3MStats( enabledVars[row], m3 );
         _validStats.GetMedian(  enabledVars[row], &median );
@@ -469,14 +469,14 @@ void Statistics::_updateButtonClicked()
     for( int i = 0; i < _validStats.GetVariableCount(); i++ )
     {
         std::string varname = _validStats.GetVariableName(i);
-        long   count;
+        long   count = 0;
         _validStats.GetCount(   varname, &count );
         if( count == -1 )
         {
             _calc3M( varname );
             _updateStatsTable();
         }
-        float m3[3], median, stddev;
+        float m3[3]{0.0f, 0.0f, 0.0f}, median = 0.0f, stddev = 0.0f;
         _validStats.Get3MStats( varname, m3 );
         _validStats.GetMedian ( varname, &median );
         _validStats.GetStddev ( varname, &stddev );
@@ -502,7 +502,7 @@ void Statistics::_updateButtonClicked()
 
 void Statistics::_minTSChanged( int val )
 {
-    assert( val >= 0 );
+    VAssert( val >= 0 );
 
     // Initialize pointers
     GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
@@ -534,7 +534,7 @@ void Statistics::_minTSChanged( int val )
 
 void Statistics::_maxTSChanged( int val )
 {
-    assert( val >= 0 );
+    VAssert( val >= 0 );
 
     // Initialize pointers
     GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
@@ -567,7 +567,7 @@ void Statistics::_maxTSChanged( int val )
 
 void Statistics::_newCalcChanged( int index )
 {
-    assert( index > 0 );
+    VAssert( index > 0 );
 
     // Initialize pointers
     GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
@@ -600,7 +600,7 @@ void Statistics::_newCalcChanged( int index )
 
 void Statistics::_removeCalcChanged( int index )
 {
-    assert( index > 0 );
+    VAssert( index > 0 );
 
     // Initialize pointers
     GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
@@ -670,7 +670,7 @@ void Statistics::_newVarChanged( int index )
 
 void Statistics::_removeVarChanged( int index )
 {
-    assert( index > 0 );
+    VAssert( index > 0 );
 
     // Initialize pointers
     GUIStateParams* guiParams = dynamic_cast<GUIStateParams*>
@@ -689,7 +689,7 @@ void Statistics::_removeVarChanged( int index )
             rmIdx = i;
             break;
         }
-    assert( rmIdx != -1 );
+    VAssert( rmIdx != -1 );
     vars.erase( vars.begin() + rmIdx );
     statsParams->SetAuxVariableNames( vars );
 
@@ -908,12 +908,12 @@ bool Statistics::ValidStats::AddVariable( std::string& newVar )
     for( int i = 0; i < 5; i++ )
     {
         _values[i].push_back( std::nan("1") );
-        assert( _values[i].size() == _variables.size() );
+        VAssert( _values[i].size() == _variables.size() );
     }
     _count.push_back( -1 );
     if( _count.size() != _variables.size() )
         std::cerr << "_count.size() = " << _count.size() << ",  _variables.size() = " << _variables.size() << std::endl;
-    assert( _count.size() == _variables.size() );
+    VAssert( _count.size() == _variables.size() );
     return true;
 }
 
@@ -927,10 +927,10 @@ bool Statistics::ValidStats::RemoveVariable( std::string& varname )
     for( int i = 0; i < 5; i++ )
     {
         _values[i].erase( _values[i].begin() + rmIdx );
-        assert( _values[i].size() == _variables.size() );
+        VAssert( _values[i].size() == _variables.size() );
     }
     _count.erase( _count.begin() + rmIdx );
-    assert( _count.size() == _variables.size() );
+    VAssert( _count.size() == _variables.size() );
     return true;
 }
 

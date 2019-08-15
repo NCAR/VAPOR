@@ -3,7 +3,7 @@
 
 #include <cmath>
 #include <iostream>
-#include <cassert>
+#include "vapor/VAssert.h"
 
 QSliderEdit::QSliderEdit(QWidget *parent) :
     QWidget(parent),

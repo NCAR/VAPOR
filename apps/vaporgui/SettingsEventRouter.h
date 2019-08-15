@@ -84,14 +84,12 @@ private slots:
 	void _saveSettings();
 	void _setSessionPath();
 	void _setMetadataPath();
-	void _setImagePath();
 	void _setTFPath();
 	void _setFlowPath();
 	void _setPythonPath();
 
 	void _chooseSessionPath();
 	void _chooseMetadataPath();
-	void _chooseImagePath();
 	void _chooseTFPath();
 	void _chooseFlowPath();
 	void _choosePythonPath();

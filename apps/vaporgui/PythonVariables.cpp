@@ -39,6 +39,10 @@ PythonVariables::PythonVariables(
 {
     setupUi(this);
 
+
+    _importScriptButton->hide();
+    _exportScriptButton->hide();
+
     setWindowTitle("Derived variables with Python");
 
     _script      = "";
@@ -981,7 +985,7 @@ int PythonVariables::_checkForDuplicateNames(
 void PythonVariables::InitControlExec(
     VAPoR::ControlExec* ce
 ) {
-    assert(ce);
+    VAssert(ce);
     _controlExec = ce;
 }
 

@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <vector>
 #include <cmath>
-#include <cassert>
+#include "vapor/VAssert.h"
 #ifdef WIN32
 #include <tiff/tiffio.h>
 #else
@@ -66,15 +66,22 @@ Visualizer::Visualizer(
 	
 	
 	_renderers.clear();
+	_renderersToDestroy.clear();
 
     MyBase::SetDiagMsg("Visualizer::Visualizer() end");
 }
 
 Visualizer::~Visualizer()
 {
+
+#ifdef	VAPOR_3_1_0
+	// Can't call renderer destructors because these free OpenGL resources that
+	// may require the OpenGL context to be current :-(
+	//
 	for (int i = 0; i< _renderers.size(); i++)
 		delete _renderers[i];
     _renderers.clear();
+#endif
     
     if (_vizFeatures)
         delete _vizFeatures;
@@ -131,7 +138,7 @@ void Visualizer::_applyDatasetTransformsForRenderer(Renderer *r) {
 	VAPoR::ViewpointParams* vpParams = getActiveViewpointParams();
 	vector<double> scales, rotations, translations, origin;
 	Transform *t = vpParams->GetTransform(datasetName);
-	assert(t);
+	VAssert(t);
 	scales = t->GetScales();
 	rotations = t->GetRotations();
 	translations = t->GetTranslations();
@@ -158,6 +165,14 @@ int Visualizer::paintEvent(bool fast)
 
 	//Do not proceed if there is no DataMgr
 	if (! _dataStatus->GetDataMgrNames().size()) return(0);
+    
+    // Do not proceed with invalid viewport
+    // This can occur sometimes on Qt startup
+    int viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    if (viewport[2] - viewport[0] <= 0) return 0;
+    if (viewport[3] - viewport[1] <= 0) return 0;
+    
 	
     _clearFramebuffer();
 
@@ -169,6 +184,10 @@ int Visualizer::paintEvent(bool fast)
 	glEnable(GL_DEPTH_TEST);
 	glEnable (GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    //Draw the domain frame and other in-scene features
+    _vizFeatures->InScenePaint(_getCurrentTimestep());
+    GL_ERR_BREAK();
     
     _deleteFlaggedRenderers();
     if (_initializeNewRenderers() < 0)
@@ -182,7 +201,9 @@ int Visualizer::paintEvent(bool fast)
 		if (_renderers[i]->IsGLInitialized()) {
             _applyDatasetTransformsForRenderer(_renderers[i]);
             
+//            void *t = _glManager->BeginTimer();
 			int myrc = _renderers[i]->paintGL(fast);
+//            printf("%s: %f\n", _renderers[i]->GetMyName().c_str(), _glManager->EndTimer(t));
             GL_ERR_BREAK();
             if (myrc < 0)
                 rc = -1;
@@ -193,17 +214,13 @@ int Visualizer::paintEvent(bool fast)
         if (myrc < 0)
             rc = -1;
 	}
-
-  
-    //Draw the domain frame and other in-scene features
-    _vizFeatures->InScenePaint(_getCurrentTimestep());
-    GL_ERR_BREAK();
+    
     _vizFeatures->DrawText();
     GL_ERR_BREAK();
 	_renderColorbars(_getCurrentTimestep());
     GL_ERR_BREAK();
 
-    // _glManager->ShowDepthBuffer();
+//    _glManager->ShowDepthBuffer();
     
 	glFlush();
 	
@@ -252,7 +269,7 @@ int Visualizer::InitializeGL(GLManager *glManager)
 
 	// glewExperimental = GL_TRUE;
 	GLenum err = glewInit();
-	assert(GLManager::CheckError());
+	VAssert(GLManager::CheckError());
 	if (GLEW_OK != err) {
 		MyBase::SetErrMsg("Error: Unable to initialize GLEW");
 		return -1;
@@ -266,10 +283,13 @@ int Visualizer::InitializeGL(GLManager *glManager)
 }
 
 // Move to back of rendering list
-void Visualizer::MoveRendererToFront(Renderer* ren)
+void Visualizer::MoveRendererToFront(string renderType, string renderName)
 {
+    Renderer *ren = _getRenderer(renderType, renderName);
+    if (! ren) return;
+
     auto it = std::find(_renderers.begin(), _renderers.end(), ren);
-    assert(it != _renderers.end());
+    VAssert(it != _renderers.end());
     _renderers.erase(it);
     _renderers.push_back(ren);
 }
@@ -282,16 +302,73 @@ void Visualizer::MoveRenderersOfTypeToFront(const std::string &type)
         if (*it == firstRendererMoved)
             break;
         if ((*it)->GetMyType() == type) {
-            MoveRendererToFront(*it);
+            MoveRendererToFront((*it)->GetMyType(), (*it)->GetMyName());
             if (firstRendererMoved == nullptr)
                 firstRendererMoved = *it;
         }
     }
 }
 
-void Visualizer::InsertRenderer(Renderer* ren)
-{
-    _renderers.push_back(ren);
+int Visualizer::CreateRenderer(string dataSetName, string renderType, string renderName) {
+
+	if (HasRenderer(renderType, renderName)) return(0);
+
+	Renderer *ren = RendererFactory::Instance()->CreateInstance(
+		_paramsMgr, _winName, dataSetName, renderType, renderName,
+		_dataStatus->GetDataMgr(dataSetName)
+	);
+
+	if (! ren) {
+		SetErrMsg("Invalid renderer of type \"%s\"",renderType.c_str());
+		return(-1);
+	}
+
+	_renderers.push_back(ren);
+	return(0);
+}
+
+
+void Visualizer::DestroyRenderer(
+	string renderType, string renderName, bool haveOpenGLContext
+) {
+	Renderer *ren = _getRenderer(renderType, renderName);
+	if (! ren) return;
+
+	_renderers.erase(std::find(_renderers.begin(), _renderers.end(), ren));
+
+	// If we have an active OpenGL context destroy the renderer immediately. Else
+	// queue for later destruction
+	//
+	if (haveOpenGLContext) {
+		delete ren;
+		return;
+	}
+
+	// Don't add to queue if already there
+	//
+    for (auto it = _renderersToDestroy.begin(); it != _renderersToDestroy.end(); ++it) {
+		if (*it == ren) return;
+	}
+
+	_renderersToDestroy.push_back(ren);
+	 
+}
+
+void Visualizer::DestroyAllRenderers(bool hasOpenGLContext) {
+
+	vector <Renderer *> renderersCopy = _renderers;
+
+    for (auto it = renderersCopy.begin(); it != renderersCopy.end(); ++it) {
+		Renderer *ren = *it;
+		DestroyRenderer(ren->GetMyType(), ren->GetMyName(), hasOpenGLContext);
+	}
+}
+
+bool Visualizer::HasRenderer(
+	string renderType, string renderName
+) const {
+
+	return(_getRenderer(renderType, renderName) != nullptr);
 }
 
 void Visualizer::ClearRenderCache() {
@@ -300,10 +377,10 @@ void Visualizer::ClearRenderCache() {
 	}
 }
 
-Renderer* Visualizer::GetRenderer(string type, string instance) const {
+Renderer* Visualizer::_getRenderer(string type, string instance) const {
 
-	for (int i=0; i<_renderers.size(); i++) {
-		Renderer *ren = _renderers[i];
+    for (auto it = _renderers.begin(); it != _renderers.end(); ++it) {
+		Renderer *ren = *it;
 		if (ren->GetMyType() == type && ren->GetMyName() == instance) {
 			return(ren);
 		}
@@ -314,7 +391,7 @@ Renderer* Visualizer::GetRenderer(string type, string instance) const {
 int Visualizer::_configureLighting(){
 	const ViewpointParams* vpParams = getActiveViewpointParams();
 	size_t nLights = vpParams->getNumLights();
-    assert(nLights <= 1);
+    VAssert(nLights <= 1);
     LegacyGL *lgl = _glManager->legacy;
 
 	float lightDir[4];
@@ -573,20 +650,20 @@ bool Visualizer::_getPixelData(unsigned char* data) const
 
 void Visualizer::_deleteFlaggedRenderers()
 {
-    assert(_insideGLContext);
-    vector<Renderer *> renderersCopy = _renderers;
-    for (auto it = renderersCopy.begin(); it != renderersCopy.end(); ++it) {
-        if ((*it)->IsFlaggedForDeletion()) {
-            _renderers.erase(std::find(_renderers.begin(), _renderers.end(), *it));
-            delete *it;
-        }
+    VAssert(_insideGLContext);
+
+    for (auto it = _renderersToDestroy.begin(); it != _renderersToDestroy.end(); ++it) {
+
+		Renderer *ren = *it;
+		if (ren) delete ren;
     }
+	_renderersToDestroy.clear();
 }
 
 
 int Visualizer::_initializeNewRenderers()
 {
-    assert(_insideGLContext);
+    VAssert(_insideGLContext);
     for (Renderer *r : _renderers) {
         if (!r->IsGLInitialized() && r->initializeGL(_glManager) < 0) {
             MyBase::SetErrMsg("Failed to initialize renderer %s", r->GetInstanceName().c_str());
@@ -600,7 +677,7 @@ int Visualizer::_initializeNewRenderers()
 
 void Visualizer::_clearFramebuffer()
 {
-    assert(_insideGLContext);
+    VAssert(_insideGLContext);
     double clr[3];
     getActiveAnnotationParams()->GetBackgroundColor(clr);
     
@@ -643,7 +720,7 @@ void Visualizer::_incrementPath(string& s){
     }
 	//Find digits (before .tif or .jpg)
 	size_t lastpos = s1.find_last_not_of("0123456789");
-	assert(lastpos < s1.length());
+	VAssert(lastpos < s1.length());
 	string s2 = s1.substr(lastpos+1);
 	int val = stol(s2);
 	//Convert val+1 to a string, with leading zeroes, of same length as s2.
