@@ -27,7 +27,8 @@ void TFHistogramWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *params
     _renderParams = rp;
     _dataMgr = dataMgr;
     
-    _histo.reset(width());
+    if (_histo.getNumBins() != width())
+        _histo.reset(width());
     if (_histo.PopulateIfNeeded(dataMgr, rp) < 0)
         MSG_ERR("Failed to populate histogram");
 }
@@ -54,10 +55,20 @@ void TFHistogramWidget::paintEvent(QPaintEvent* event)
     
     p.fillRect(rect(), Qt::gray);
     
-//    h.Populate(_dataMgr, _renderParams);
+    QPolygonF graph;
+    graph.push_back(QPointF(0,0));
+    
     for (int i = 0; i < _histo.getNumBins(); i++) {
-        p.fillRect(i, 0, 1, _histo.getBinSizeNormalized(i)*height(), Qt::black);
+//        p.fillRect(i, 0, 1, _histo.getBinSizeNormalized(i)*height(), Qt::black);
+        float bin = _histo.getBinSizeNormalized(i)*height();
+        graph.push_back(QPointF(i, bin));
+        graph.push_back(QPointF(i, bin));
     }
+    
+    graph.push_back(QPointF(_histo.getNumBins()-1,0));
+    
+    p.setBrush(QBrush(Qt::black));
+    p.drawPolygon(graph);
 }
 
 //void TFFunctionEditor::mousePressEvent(QMouseEvent *event)
