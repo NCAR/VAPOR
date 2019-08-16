@@ -22,6 +22,8 @@
 #define HISTO_H
 #include <vapor/MyBase.h>
 #include <vapor/StructuredGrid.h>
+#include <vapor/RenderParams.h>
+#include <vapor/DataMgr.h>
 
 
 class Histo{
@@ -44,6 +46,8 @@ public:
 	
 	int getTimestepOfUpdate() {return _timestepOfUpdate;}
 	string getVarnameOfUpdate() {return _varnameOfUpdate;}
+    
+    int Populate(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp);
 	
 private:
 	
@@ -56,6 +60,11 @@ private:
 
 	int _timestepOfUpdate;
 	string _varnameOfUpdate;
+    
+    void populateIteratingHistogram(const VAPoR::Grid *grid, const int stride);
+    void populateSamplingHistogram(const VAPoR::Grid *grid, const vector<double> &minExts, const vector<double> &maxExts);
+    int calculateStride(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const;
+    bool shouldUseSampling(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const;
 };
 
 #endif //HISTO_H
