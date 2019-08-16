@@ -1,6 +1,6 @@
 #include "vapor/GeoTIFWriter.h"
 #include "vapor/Proj4StringParser.h"
-#include <cassert>
+#include "vapor/VAssert.h"
 
 #ifdef WIN32
 #include <geotiff/geo_normalize.h>
@@ -31,9 +31,9 @@ GeoTIFWriter::~GeoTIFWriter()
 
 int GeoTIFWriter::Write(const unsigned char *buffer, const unsigned int width, const unsigned int height)
 {
-    assert(_hasTiePoint);
-    assert(_hasPixelScale);
-    assert(_geoTiffWasConfigured);
+    VAssert(_hasTiePoint);
+    VAssert(_hasPixelScale);
+    VAssert(_geoTiffWasConfigured);
     
     GTIFWriteKeys(gtif);
     return TIFWriter::Write(buffer, width, height);

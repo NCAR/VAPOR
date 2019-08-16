@@ -100,7 +100,7 @@ int BarbRenderer::_initializeGL(){
 void BarbRenderer::_saveCacheParams()
 {
 	BarbParams* p = dynamic_cast<BarbParams*>(GetActiveParams());
-	assert(p);
+	VAssert(p);
     _cacheParams.fieldVarNames = p->GetFieldVariableNames();
     _cacheParams.heightVarName = p->GetHeightVariableName();
     _cacheParams.colorVarName = p->GetColorMapVariableName();
@@ -132,7 +132,7 @@ void BarbRenderer::_saveCacheParams()
 bool BarbRenderer::_isCacheDirty() const
 {
 	BarbParams* p = dynamic_cast<BarbParams*>(GetActiveParams());
-	assert(p);
+	VAssert(p);
     if (_cacheParams.fieldVarNames != p->GetFieldVariableNames()) return true;
     if (_cacheParams.heightVarName != p->GetHeightVariableName()) return true;
     if (_cacheParams.colorVarName != p->GetColorMapVariableName()) return true;
@@ -183,7 +183,7 @@ void BarbRenderer::_recalculateScales(
 	int ts
 ) {
 	BarbParams* bParams = dynamic_cast<BarbParams*>(GetActiveParams());
-	assert(bParams);
+	VAssert(bParams);
 
 	vector <string> varnames = bParams->GetFieldVariableNames();
 	bool recalculateScales = bParams->GetNeedToRecalculateScales();
@@ -207,7 +207,7 @@ int BarbRenderer::_getVectorVarGrids(
 	std::vector<VAPoR::Grid*> &varData
 ) {
 	BarbParams* bParams = dynamic_cast<BarbParams*>(GetActiveParams());
-	assert(bParams);
+	VAssert(bParams);
 
 	vector <string> varnames = bParams->GetFieldVariableNames();
 	if (! VariableExists(ts, varnames, refLevel, lod, true)) {
@@ -233,7 +233,7 @@ void BarbRenderer::_getGridRequirements(
 	std::vector<double> &maxExts
 ) const {
 	BarbParams* bParams = dynamic_cast<BarbParams*>(GetActiveParams());
-	assert(bParams);
+	VAssert(bParams);
 
 	ts = bParams->GetCurrentTimestep();
 
@@ -275,6 +275,9 @@ int BarbRenderer::_getVarGrid(
 int BarbRenderer::_paintGL(bool) {
     int rc = 0;
     
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    
     // _saveCacheParams();
     
 	// Set up the variable data required, while determining data 
@@ -294,7 +297,7 @@ int BarbRenderer::_paintGL(bool) {
 	}
 
 	BarbParams* bParams = dynamic_cast<BarbParams*>(GetActiveParams());
-	assert(bParams);
+	VAssert(bParams);
 
     // Get height variable
 	string heightVar = bParams->GetHeightVariableName();
@@ -440,7 +443,7 @@ void BarbRenderer::_drawBarb(
     float startPoint[3];
     memcpy(startPoint, startPoint_, sizeof(float)*3);
     
-	assert(variableData.size() == 5);
+	VAssert(variableData.size() == 5);
     MatrixManager *mm = _glManager->matrixManager;
 
 	float endPoint[3];
@@ -506,7 +509,7 @@ void BarbRenderer::_drawBarb(
 	vcross(uVec, dirVec, bVec);
 	
 	BarbParams* bParams = dynamic_cast<BarbParams*>(GetActiveParams());
-	assert(bParams);
+	VAssert(bParams);
 
 	float radius = bParams->GetLineThickness() * _maxThickness;
 	
@@ -603,7 +606,7 @@ void BarbRenderer::_setUpLightingAndColor() {
 	
 	float fcolor[3];
 	BarbParams* bParams = dynamic_cast<BarbParams*>(GetActiveParams());
-	assert(bParams);
+	VAssert(bParams);
 	bParams->GetConstantColor(fcolor);
 	if (nLights == 0) {
         lgl->DisableLighting();
@@ -623,7 +626,7 @@ void BarbRenderer::_reFormatExtents(
 ) const {
 	rakeExts.clear();
 	BarbParams* bParams = dynamic_cast<BarbParams*>(GetActiveParams());
-	assert(bParams);
+	VAssert(bParams);
 	vector<double> rMinExtents, rMaxExtents;
     
 	bParams->GetBox()->GetExtents(rMinExtents, rMaxExtents);
@@ -643,7 +646,7 @@ void BarbRenderer::_makeRakeGrid(
 ) const {
 	rakeGrid.clear();
 	BarbParams* bParams = dynamic_cast<BarbParams*>(GetActiveParams());
-	assert(bParams);
+	VAssert(bParams);
 	vector<long> longGrid = bParams->GetGrid();
 
 	rakeGrid.push_back((int)longGrid[X]);
@@ -657,7 +660,7 @@ float BarbRenderer::_getHeightOffset(
 	float yCoord, 
 	bool& missing
 ) const {
-	assert(heightVar);	
+	VAssert(heightVar);	
 	float missingVal = heightVar->GetMissingValue();
 	float offset = heightVar->GetValue(xCoord, yCoord, 0.f);
 	if (offset == missingVal) {
@@ -693,14 +696,14 @@ void BarbRenderer::_getDirection(
 
 bool BarbRenderer::_makeCLUT(float clut[1024]) const {
 	BarbParams* bParams = dynamic_cast<BarbParams*>(GetActiveParams());
-	assert(bParams);
+	VAssert(bParams);
 	string colorVar = bParams->GetColorMapVariableName();
 	bool doColorMapping = !bParams->UseSingleColor() && !colorVar.empty();
 
 	if (doColorMapping) {
 		MapperFunction* tf = 0;
 		tf = (MapperFunction*)bParams->GetMapperFunc(colorVar);
-		assert(tf);
+		VAssert(tf);
 		tf->makeLut(clut);
 	}
 	return doColorMapping;
@@ -737,7 +740,7 @@ void BarbRenderer::_makeStartAndEndPoint(
 	float direction[3]
 ) {
 	BarbParams* bParams = dynamic_cast<BarbParams*>(GetActiveParams());
-	assert(bParams);
+	VAssert(bParams);
 	float length = bParams->GetLengthScale() * _vectorScaleFactor;
 
 	vector<double> scales = _getScales();
@@ -881,10 +884,10 @@ bool BarbRenderer::_getColorMapping(float val, const float clut[256*4]) {
 
 	MapperFunction* tf=0;
 	BarbParams* bParams = dynamic_cast<BarbParams*>(GetActiveParams());
-	assert(bParams);
+	VAssert(bParams);
    	string colorVar = bParams->GetColorMapVariableName();
 	tf = (MapperFunction*)bParams->GetMapperFunc(colorVar);
-	assert(tf);
+	VAssert(tf);
 
 	float mappedColor[4] = {0.,0.,0.,0.};
 	//Use the transfer function to map the data:
@@ -903,13 +906,13 @@ double BarbRenderer::_getDomainHypotenuse(
 	std::vector <string> varNames;
 	
 	BarbParams* p = dynamic_cast<BarbParams*>(GetActiveParams());
-	assert(p);
+	VAssert(p);
     varNames = p->GetFieldVariableNames();
 
 	bool status = DataMgrUtils::GetExtents(
 		_dataMgr, ts, varNames, minExts, maxExts, axes
 	);
-	assert(status);
+	VAssert(status);
 
 	if (varNames[0] == "" &&
 		varNames[1] == "" &&
@@ -932,7 +935,7 @@ void BarbRenderer::_setDefaultLengthAndThicknessScales(
 	const std::vector<VAPoR::Grid*> &varData, 
 	const BarbParams* bParams
 ) {
-	assert(varData.size() >= 3);
+	VAssert(varData.size() >= 3);
 
 	_maxValue = 0;
 

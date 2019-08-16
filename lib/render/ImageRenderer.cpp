@@ -34,8 +34,8 @@ namespace
 //
 void conform( GLfloat *verts, int nx, int ny) 
 {
- 	assert(nx>=2);
- 	assert(ny>=2);
+ 	VAssert(nx>=2);
+ 	VAssert(ny>=2);
 
 	// x values
 	//
@@ -272,7 +272,7 @@ unsigned char *ImageRenderer::_getTexture( DataMgr* dataMgr)
 		int rc = _reinit(imgFileName, times);
 		if(rc<0) return(NULL);
 	}
-	assert(_geoImage);
+	VAssert(_geoImage);
 
 	// Get the ROI for the displayed image in PCS coordinates of 
 	// the data
@@ -496,8 +496,8 @@ unsigned char *ImageRenderer::_getImage(  GeoImage *geoimage,
                                           GLsizei &width, 
                                           GLsizei &height) const 
 {
-	assert(geoimage);
-	assert(pcsExtentsDataVec.size() >= 4);
+	VAssert(geoimage);
+	VAssert(pcsExtentsDataVec.size() >= 4);
 
 	// Initialize out params
 	//

@@ -20,7 +20,7 @@
 //		Supports mouse event reporting.
 //
 #include <vapor/glutil.h>	// Must be included first!!!
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <QResizeEvent>
 #include <QFocusEvent>
 #include <QMouseEvent>
@@ -226,7 +226,7 @@ void VizWin::_setUpProjMatrix() {
         mm->Ortho(-s*w, s*w, -s, s, nearDist, farDist);
     } else {
         double fov = vParams->GetFOV();
-        mm->Perspective(fov, w, nearDist, farDist);
+        mm->Perspective(glm::radians(fov), w, nearDist, farDist);
     }
 
 	double pMatrix[16];
@@ -346,7 +346,7 @@ void VizWin::_mousePressEventNavigate(QMouseEvent* e)
 
 	double posvec[3], upvec[3], dirvec[3];
 	bool status = vParams->ReconstructCamera(m, posvec, upvec, dirvec);
-	assert(status);
+	VAssert(status);
 
 	// Set trackball from current ViewpointParams matrix;
 	//
@@ -459,7 +459,10 @@ void VizWin::_mouseReleaseEventNavigate(QMouseEvent*e) {
  */
 void VizWin::mouseReleaseEvent(QMouseEvent*e)
 {
-	if (_buttonNum == 0) return;
+	if (_buttonNum == 0) {
+        _mouseClicked = false;
+        return;
+    }
 
 	_mouseClicked = false;
 

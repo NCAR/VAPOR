@@ -1,4 +1,4 @@
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <sstream>
 #include <cfloat>
 #include "vapor/VDC.h"
@@ -36,7 +36,7 @@ void _compute_bs(
 		}
 	}
 
-	assert(ndims == bs.size());
+	VAssert(ndims == bs.size());
 }
 
 void _compute_periodic(
@@ -202,7 +202,7 @@ int VDC::DefineDimension(string name, size_t length) {
 }
 
 int VDC::DefineDimension(string name, size_t length, int axis) {
-	assert(axis >= 0 && axis <= 3);
+	VAssert(axis >= 0 && axis <= 3);
 
 	int rc = DefineDimension(name, length);
 
@@ -291,7 +291,7 @@ vector <string> VDC::_GetDataVarDimNames(
 	string mesh = dvar.GetMeshName();
 
 	map <string, Mesh>::const_iterator itr = _meshes.find(mesh);
-	assert(itr != _meshes.end());
+	VAssert(itr != _meshes.end());
 
 	dim_names = itr->second.GetDimNames();
 
@@ -302,10 +302,10 @@ vector <string> VDC::_GetDataVarDimNames(
 
 	std::map <string, DC::CoordVar>::const_iterator itr1;
 	itr1 = _coordVars.find(time_coord_var);
-	assert(itr1 != _coordVars.end());
+	VAssert(itr1 != _coordVars.end());
 
 	vector <string> dimvec = _GetCoordVarDimNames(itr1->second, time_varying);
-	assert(dimvec.size() == 1);
+	VAssert(dimvec.size() == 1);
 
 	dim_names.push_back(dimvec[0]);
 
@@ -341,7 +341,7 @@ int VDC::_DefineImplicitCoordVars(
 		}
 
 		int axis = itr->second.GetAxis();
-		assert (axis >=0 && axis <= 3);
+		VAssert (axis >=0 && axis <= 3);
 
 		coord_vars_out[axis] = name;
 	}
@@ -452,7 +452,7 @@ int VDC::DefineCoordVarUniform(
 	);
 	if (rc<0) return(-1);
 
-	assert(_coordVars.find(varname) != _coordVars.end());
+	VAssert(_coordVars.find(varname) != _coordVars.end());
 
 	_coordVars[varname].SetUniform(true);
 
@@ -493,7 +493,7 @@ void VDC::_DefineMesh(
 	vector <string> dim_names, 
 	vector <string> coord_vars
 ) {
-	assert(dim_names.size() == coord_vars.size());
+	VAssert(dim_names.size() == coord_vars.size());
 
 	_meshes[meshname] = DC::Mesh(meshname, dim_names, coord_vars);
 }
@@ -533,7 +533,7 @@ int VDC::_DefineDataVar(
 	for (int i=0; i<dim_names.size(); i++) {
 		Dimension dimension;
 		VDC::getDimension(dim_names[i], dimension);
-		assert(! dimension.GetName().empty());
+		VAssert(! dimension.GetName().empty());
 		dimensions.push_back(dimension);
 	}
 
@@ -751,7 +751,7 @@ bool VDC::getAtt(
 
 	if (varname.empty() && (_atts.find(attname) != _atts.end())) {
 		map <string, Attribute>::const_iterator itr = _atts.find(attname);
-		assert(itr != _atts.end());
+		VAssert(itr != _atts.end());
 		const Attribute &attr = itr->second;
 		attr.GetValues(values);
 	} else if (_dataVars.find(varname) != _dataVars.end()) {
@@ -788,7 +788,7 @@ bool VDC::getAtt(
 
 	if (varname.empty() && (_atts.find(attname) != _atts.end())) {
 		map <string, Attribute>::const_iterator itr = _atts.find(attname);
-		assert(itr != _atts.end());
+		VAssert(itr != _atts.end());
 		const Attribute &attr = itr->second;
 		attr.GetValues(values);
 	} else if (_dataVars.find(varname) != _dataVars.end()) {
@@ -824,7 +824,7 @@ bool VDC::getAtt(
 
 	if (varname.empty() && (_atts.find(attname) != _atts.end())) {
 		map <string, Attribute>::const_iterator itr = _atts.find(attname);
-		assert(itr != _atts.end());
+		VAssert(itr != _atts.end());
 		const Attribute &attr = itr->second;
 		attr.GetValues(values);
 	} else if (_dataVars.find(varname) != _dataVars.end()) {
@@ -1041,7 +1041,7 @@ int VDC::EndDefine() {
 
 		vector <DC::Dimension> dimensions;
 		bool ok = GetVarDimensions(_newUniformVars[i], false, dimensions);
-		assert(ok);
+		VAssert(ok);
 
 		if (dimensions.size() != 1) continue;
 
@@ -1177,8 +1177,8 @@ bool VDC::_valid_dims(
 	const vector <DC::Dimension> &dims1,
 	const vector <size_t> &bs1
 ) const {
-	assert(dims0.size() == bs0.size());
-	assert(dims1.size() == bs1.size());
+	VAssert(dims0.size() == bs0.size());
+	VAssert(dims1.size() == bs1.size());
 
 	for (int i=0; i<dims0.size(); i++) {
 
@@ -1223,7 +1223,7 @@ bool VDC::_valid_mask_var(
 	//
 	vector <DC::Dimension> mdimensions;
 	bool ok = GetVarDimensions(maskvar, false, mdimensions);
-	assert(ok);
+	VAssert(ok);
 
 	while (dimensions.size() > mdimensions.size()) dimensions.pop_back();
 	while (bs.size() > mdimensions.size()) bs.pop_back();
@@ -1306,7 +1306,7 @@ bool VDC::_ValidDefineDataVar(
 		int axis = -1;
 		for (int i=0; i<coord_vars.size(); i++) {
 			itr = _coordVars.find(coord_vars[i]);	
-			assert(itr != _coordVars.end());	// already checked for existance
+			VAssert(itr != _coordVars.end());	// already checked for existance
 			if (itr->second.GetAxis() <= axis) {
 				SetErrMsg("Dimensions must be ordered X, Y, Z, T");
 				return(false);

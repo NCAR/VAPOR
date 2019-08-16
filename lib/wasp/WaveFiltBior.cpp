@@ -21,7 +21,7 @@
  */
 
 #include <cmath>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <vapor/WaveFiltBior.h>
 
 using namespace VAPoR;
@@ -320,7 +320,7 @@ void WaveFiltBior::_analysis_initialize (int member)
       break;
 
   default:
-		assert(pFilterCoef != NULL);
+		VAssert(pFilterCoef != NULL);
   };
 
   wrev(pFilterCoef, _lowDecomFilCoef, _filterLength);
@@ -404,7 +404,7 @@ void WaveFiltBior::_synthesis_initialize (int member)
       break;
 
   default:
-		assert(pFilterCoef != NULL);
+		VAssert(pFilterCoef != NULL);
   };
 
   verbatim_copy(pFilterCoef, _lowReconFilCoef, _filterLength);

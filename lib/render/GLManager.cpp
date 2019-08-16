@@ -1,8 +1,13 @@
 #include "vapor/glutil.h"
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
+#include "vapor/STLUtils.h"
+#include <chrono>
 
 using namespace VAPoR;
+using namespace std::chrono;
+
+GLManager::Vendor GLManager::_cachedVendor = Vendor::Unknown;
 
 GLManager::GLManager()
 :
@@ -10,7 +15,9 @@ shaderManager(new ShaderManager),
 fontManager(new FontManager(this)),
 matrixManager(new MatrixManager),
 legacy(new LegacyGL(this))
-{}
+{
+    _queryVendor();
+}
 
 GLManager::~GLManager()
 {
@@ -49,6 +56,23 @@ void GLManager::PixelCoordinateSystemPop()
     mm->MatrixModeModelView();
 }
 
+GLManager::Vendor GLManager::GetVendor()
+{
+    return _cachedVendor;
+}
+
+void GLManager::_queryVendor()
+{
+    string vendorString((const char *)glGetString(GL_VERSION));
+    vendorString = STLUtils::ToLower(vendorString);
+
+    if      (STLUtils::Contains(vendorString, "intel"))  _cachedVendor =  Vendor::Intel;
+    else if (STLUtils::Contains(vendorString, "nvidia")) _cachedVendor =  Vendor::Nvidia;
+    else if (STLUtils::Contains(vendorString, "amd"))    _cachedVendor =  Vendor::AMD;
+    else if (STLUtils::Contains(vendorString, "mesa"))   _cachedVendor =  Vendor::Mesa;
+    else _cachedVendor = Vendor::Other;
+}
+
 void GLManager::GetGLVersion(int *major, int *minor)
 {
     // Only >=3.0 guarentees glGetIntegerv
@@ -67,14 +91,23 @@ void GLManager::GetGLVersion(int *major, int *minor)
     }
 }
 
+int GLManager::GetGLSLVersion()
+{
+    int major, minor;
+    GetGLVersion(&major, &minor);
+    
+    // This does not work for < OpenGL 3.3 but we do not support it anyway
+    return 100*major + 10*minor;
+}
+
 bool GLManager::IsCurrentOpenGLVersionSupported()
 {
     int major, minor;
     GetGLVersion(&major, &minor);
     
-    int version = major * 100 + minor;
+    int version = major*100 + minor;
     
-	if (version >= 401)
+	if (version >= 303)
         return true;
     
     Wasp::MyBase::SetErrMsg("OpenGL Version \"%s\" is too low and is not supported", glGetString(GL_VERSION));
@@ -144,3 +177,25 @@ void GLManager::ShowDepthBuffer()
     glBindVertexArray(0);
 }
 #endif
+
+void *GLManager::BeginTimer()
+{
+    glFinish();
+    auto start = new chrono::time_point<chrono::high_resolution_clock>;
+    *start = chrono::high_resolution_clock::now();
+    return start;
+}
+
+double GLManager::EndTimer(void *startTime)
+{
+    VAssert(startTime);
+    auto start = (chrono::time_point<chrono::high_resolution_clock>*)startTime;
+    
+    glFinish();
+    auto stop = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::microseconds>(stop - *start);
+    
+    delete start;
+    
+    return (double)duration.count() / 1000000.0;
+}

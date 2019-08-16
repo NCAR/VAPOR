@@ -41,7 +41,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cstdio>
 
 #include <vapor/CFuncs.h>
@@ -180,9 +180,9 @@ float resample_grid_point(
 	yi =  (int) rint((y-start) * (double) N);
 	zi =  (int) rint((z-start) * (double) N);
 
-	assert(xi >= 0 && xi < N);
-	assert(yi >= 0 && yi < N);
-	assert(zi >= 0 && zi < N);
+	VAssert(xi >= 0 && xi < N);
+	VAssert(yi >= 0 && yi < N);
+	VAssert(zi >= 0 && zi < N);
 
 	return(grid[zi*N*N + yi*N + xi]);
 }
@@ -340,7 +340,7 @@ int main(int argc, char **argv) {
 
 	// The dimensions of the base level AMR mesh specified in blocks (cells)
 	size_t basedim = (N / CellDim) >> NLevels;
-	assert (basedim >=5);	// we' going to refine the boundaries twice
+	VAssert (basedim >=5);	// we' going to refine the boundaries twice
 	size_t basedimv[3] = {basedim,basedim,basedim};
 
 	// User coordinate system extents. Can be set to anything
