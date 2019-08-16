@@ -74,6 +74,8 @@ set (SRCS
 	TFColorWidget.h
 	QRangeSlider.cpp
 	QRangeSlider.h
+	TFHistogramWidget.cpp
+	TFHistogramWidget.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h

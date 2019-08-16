@@ -25,24 +25,16 @@ using namespace Wasp;
 #define REQUIRED_SAMPLE_SIZE 1000000
 #define SAMPLE_RATE 30
 
-Histo::Histo(
-	int numberBins, 
-	float mnData, 
-	float mxData, 
-	string var,
-	int ts
-){
-	_numBins = numberBins;
-	_minData = mnData;
-	_maxData = mxData;
-    if( _maxData < _minData )
-        _maxData = _minData;
-    _range = _maxData - _minData;
-	_binArray = new long[_numBins];
-	reset(numberBins);
+Histo::Histo(int numberBins, float mnData, float mxData, string var, int ts)
+{
+    setProperties(mnData, mxData, var, ts);
+    reset(numberBins);
+}
 
-	_varnameOfUpdate = var;
-	_timestepOfUpdate = ts;
+Histo::Histo(int numberBins)
+{
+    autoSetProperties = true;
+    reset(numberBins);
 }
 
 Histo::Histo(
@@ -68,42 +60,6 @@ Histo::Histo(
     _varnameOfUpdate = histo->_varnameOfUpdate;
     _timestepOfUpdate = histo->_timestepOfUpdate;
 }
-
-#ifdef	VAPOR3_0_0_ALPHA
-Histo::Histo(const StructuredGrid *rg, const double exts[6], const float range[2]) {
-	_binArray = new int[256];
-	_minData = range[0];
-	_maxData = range[1];
-	_numBins = 256;
-	reset();
-
-	unsigned int qv;	// quantized value
-	float v;
-	vector <double> point;
-	StructuredGrid::ConstIterator itr;
-	StructuredGrid::ConstIterator enditr = rg->end();
-	for (itr = rg->begin(); itr!=enditr; ++itr) {
-		v = *itr;
-		if (v == rg->GetMissingValue()) continue;
-		itr.GetUserCoordinates(point);
-		bool isIn = true;
-		for (int j = 0; j<point.size(); j++){
-			if (point[j]>exts[j+3] || point[j] < exts[j]) isIn = false;
-		}
-		if (!isIn) continue;
-		if (v<range[0]) qv=0;
-		else if (v>range[1]) qv=255;
-		else qv = (unsigned int) rint((v-range[0])/(range[1]-range[0]) * 255);
-
-		_binArray[qv]++;
-		if (qv > 0 && qv < 255 && _binArray[qv] > _maxBinSize) {
-			_maxBinSize = _binArray[qv];
-			_largestBin = qv;
-		}
-	}
-	
-}
-#endif
 	
 Histo::~Histo(){
 	if (_binArray) delete [] _binArray;
@@ -117,7 +73,7 @@ void Histo::reset(int newNumBins) {
 	for (int i = 0; i< _numBins; i++) _binArray[i] = 0;
 	_numBelow = 0;
 	_numAbove = 0;
-	_maxBinSize = 0;
+	_maxBinSize = -1;
 }
 
 void Histo::reset(int newNumBins, float mnData, float mxData)
@@ -147,24 +103,31 @@ void Histo::addToBin(float val) {
 	}
 }
 	
-int Histo::getMaxBinSize()
+long Histo::getMaxBinSize()
 {
-    int maxBinSize = 0;
-    for( int i = 0; i < _numBins; i++ )
-    {
-        maxBinSize = maxBinSize > _binArray[i] ? maxBinSize : _binArray[i] ; 
-    }
-    
-    return maxBinSize;
+    if (_maxBinSize == -1) // For legacy purposes. Can remove with new TF Editor
+        calculateMaxBinSize();
+    return _maxBinSize;
 }
 
-int Histo::Populate(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp)
+float Histo::getBinSizeNormalized(int bin) const
+{
+    return getBinSize(bin) / (float)_maxBinSize;
+}
+
+int Histo::Populate(VAPoR::DataMgr *dm, VAPoR::RenderParams *rp)
 {
     size_t ts    = rp->GetCurrentTimestep();
     int refLevel = rp->GetRefinementLevel();
     int lod      = rp->GetCompressionLevel();
     vector<double> minExts, maxExts;
     rp->GetBox()->GetExtents(minExts, maxExts);
+    
+    if (autoSetProperties) {
+        std::string varname = rp->GetVariableName();
+        MapperFunction *mf = rp->GetMapperFunc(varname);
+        setProperties(mf->getMinMapValue(), mf->getMaxMapValue(), varname, ts);
+    }
     
     Grid *grid;
     DataMgrUtils::GetGrids(dm, ts, rp->GetVariableName(), minExts, maxExts, true, &refLevel, &lod, &grid);
@@ -178,6 +141,8 @@ int Histo::Populate(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp)
         populateSamplingHistogram(grid, minExts, maxExts);
     else
         populateIteratingHistogram(grid, calculateStride(dm, rp));
+    
+    calculateMaxBinSize();
     
     delete grid;
     return 0;
@@ -282,4 +247,27 @@ bool Histo::shouldUseSampling(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp)
     if (nDims == 3)
         return true;
     return false;
+}
+
+void Histo::setProperties(float mnData, float mxData, string var, int ts)
+{
+    _minData = mnData;
+    _maxData = mxData;
+    if( _maxData < _minData )
+        _maxData = _minData;
+    _range = _maxData - _minData;
+    
+    _varnameOfUpdate = var;
+    _timestepOfUpdate = ts;
+}
+
+void Histo::calculateMaxBinSize()
+{
+    int maxBinSize = 0;
+    for( int i = 0; i < _numBins; i++ )
+    {
+        maxBinSize = maxBinSize > _binArray[i] ? maxBinSize : _binArray[i] ;
+    }
+    
+    _maxBinSize = maxBinSize;
 }

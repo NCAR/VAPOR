@@ -29,42 +29,40 @@
 class Histo{
 public:
 	Histo(int numberBins, float mnData, float mxData, string var, int ts);
+    Histo(int numberBins);
     Histo(const Histo* histo);
-#ifdef	VAPOR3_0_0_ALPHA
-	//Special constructor for unsigned char data:
-	//
-	Histo(const VAPoR::StructuredGrid *rg, const double exts[6], const float range[2]);
-#endif
 	~Histo();
 	void reset(int newNumBins = -1);
 	void reset(int newNumBins, float mnData, float mxData);
 	void addToBin(float val);	
-	int getMaxBinSize(); 
-	int getBinSize(int posn) {return _binArray[posn];}
+	long getMaxBinSize();
+	long getBinSize(int posn) const {return _binArray[posn];}
+    float getBinSizeNormalized(int bin) const;
 	float getMinData(){return _minData;}
 	float getMaxData(){return _maxData;}
 	
 	int getTimestepOfUpdate() {return _timestepOfUpdate;}
 	string getVarnameOfUpdate() {return _varnameOfUpdate;}
     
-    int Populate(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp);
+    int Populate(VAPoR::DataMgr *dm, VAPoR::RenderParams *rp);
 	
 private:
-	
-	Histo() {}
-	long* _binArray;
+	long* _binArray = nullptr;
 	long _numBelow, _numAbove;
-	int  _numBins;
+	int  _numBins = 0;
 	float _minData, _maxData, _range;
-	long _maxBinSize;
+	long _maxBinSize = -1;
 
 	int _timestepOfUpdate;
 	string _varnameOfUpdate;
+    bool autoSetProperties = false;
     
     void populateIteratingHistogram(const VAPoR::Grid *grid, const int stride);
     void populateSamplingHistogram(const VAPoR::Grid *grid, const vector<double> &minExts, const vector<double> &maxExts);
     int calculateStride(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const;
     bool shouldUseSampling(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const;
+    void setProperties(float mnData, float mxData, string var, int ts);
+    void calculateMaxBinSize();
 };
 
 #endif //HISTO_H

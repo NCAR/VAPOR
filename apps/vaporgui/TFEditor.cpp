@@ -2,6 +2,7 @@
 #include <QBoxLayout>
 #include <QLabel>
 #include "TFFunctionEditor.h"
+#include "TFHistogramWidget.h"
 #include "TFColorWidget.h"
 #include "QRangeSlider.h"
 
@@ -13,6 +14,7 @@ TFEditor::TFEditor()
     layout->setSpacing(0);
     _tab()->setLayout(layout);
     layout->addWidget(tff = new TFFunctionEditor);
+    layout->addWidget(tfh = new TFHistogramWidget);
     layout->addWidget(colorWidget = new TFColorWidget);
     layout->addWidget(range = new QRangeSlider);
 }
@@ -20,6 +22,7 @@ TFEditor::TFEditor()
 void TFEditor::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
 {
     tff->Update(dataMgr, paramsMgr, rParams);
+    tfh->Update(dataMgr, paramsMgr, rParams);
     colorWidget->Update(dataMgr, paramsMgr, rParams);
 }
 
