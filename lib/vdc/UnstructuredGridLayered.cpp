@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cmath>
 #include <time.h>
 #ifdef  Darwin
@@ -52,11 +52,11 @@ UnstructuredGridLayered::UnstructuredGridLayered(
 	_zug(zug) 
 {
 
-	assert(xug.GetDimensions().size() == 1);
-	assert(yug.GetDimensions().size() == 1);
-	assert(zug.GetDimensions().size() == 2);
+	VAssert(xug.GetDimensions().size() == 1);
+	VAssert(yug.GetDimensions().size() == 1);
+	VAssert(zug.GetDimensions().size() == 2);
 
-	assert(location == NODE);
+	VAssert(location == NODE);
 
 }
 
@@ -72,24 +72,6 @@ vector <size_t> UnstructuredGridLayered::GetCoordDimensions(size_t dim) const {
     }
 	else {
         return(vector <size_t> (1,1));
-    }
-}
-
-float UnstructuredGridLayered::GetUserCoordinate(
-	std::vector <size_t> &index, size_t dim
-) const {
-    if (dim == 0) {
-        return(_ug2d.GetUserCoordinate(index, dim));
-    }
-    else if (dim == 1) {
-        return(_ug2d.GetUserCoordinate(index, dim));
-    }
-    else if (dim == 2) {
-		ClampIndex(vector<size_t> (1,GetDimensions()[2]), index);
-		return(_zug.AccessIndex(index));
-    }
-	else {
-        return(0.0);
     }
 }
 
@@ -154,23 +136,21 @@ void UnstructuredGridLayered::GetEnclosingRegion(
 	vector <double> cMaxu = maxu;
 	ClampCoord(cMaxu);
 
-	assert(0 && "Not implemented");
+	VAssert(0 && "Not implemented");
 }
 
 void UnstructuredGridLayered::GetUserCoordinates(
-	const std::vector <size_t> &indices,
-	std::vector <double> &coords
+    const size_t indices[],
+    double coords[]
 ) const {
 
-    vector <size_t> cIndices = indices;
-    ClampIndex(cIndices);
+    size_t cIndices[2];
+    ClampIndex(indices, cIndices);
 
-	coords.clear();
-
-	vector <size_t> indices2d = {cIndices[0]};
+	size_t indices2d[] = {cIndices[0]};
 	_ug2d.GetUserCoordinates(indices2d, coords);
 
-	coords.push_back(_zug.AccessIndex(cIndices));
+	coords[2] = _zug.GetValueAtIndex(cIndices);
 }
 
 void UnstructuredGridLayered::GetIndices(
@@ -219,7 +199,7 @@ bool UnstructuredGridLayered::_insideGrid(
     std::vector <double> &lambda,
 	float zwgt[2]
 ) const {
-	assert (_location == NODE);
+	VAssert (_location == NODE);
 
 	cindices.clear();
 	nodes2D.clear();
@@ -238,7 +218,7 @@ bool UnstructuredGridLayered::_insideGrid(
 	);
 	if (! status) return (status);
 
-	assert(lambda.size() == nodes.size());
+	VAssert(lambda.size() == nodes.size());
 	for (int i=0; i<nodes.size(); i++) {
 		nodes2D.push_back(nodes[i][0]);
 	}
@@ -262,7 +242,7 @@ bool UnstructuredGridLayered::_insideGrid(
 
 	if (rc != 0) return(false);
 
-	assert(k>=0 && k<nz);
+	VAssert(k>=0 && k<nz);
 	cindices.push_back(k);
 
 	float z = cCoords[2];
@@ -438,7 +418,7 @@ void UnstructuredGridLayered::ConstCoordItrULayered::next() {
 }
 
 void UnstructuredGridLayered::ConstCoordItrULayered::next(const long &offset) {
-	assert(offset >= 0);
+	VAssert(offset >= 0);
 
 	long offset2D = offset % _nElements2D;
 

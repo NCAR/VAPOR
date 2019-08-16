@@ -213,30 +213,37 @@ int WireFrameRenderer::_buildCache()
     Grid::ConstCellIterator end = grid->ConstCellEnd();
     
     float defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
-	vector <vector<size_t> > nodes;
-	vector <double> coord;
+
+    size_t maxNodes = grid->GetMaxVertexPerCell();
+    size_t nodeDim = grid->GetNodeDimensions().size();
+	size_t *nodes = (size_t*)alloca(sizeof(size_t) * maxNodes * nodeDim);
+
+	size_t coordDim = grid->GetGeometryDim();
+	double *coord = (double*)alloca(sizeof(double) * coordDim);
+
     for (; it != end; ++it)
     {
-        grid->GetCellNodes(*it, nodes);
+		int numNodes;
+        grid->GetCellNodes((*it).data(), nodes, numNodes);
         
-        for (int i = 0; i < nodes.size(); i++)
+        for (int i = 0; i < numNodes; i++)
         {
-            grid->GetUserCoordinates(nodes[i], coord);
+            grid->GetUserCoordinates(&nodes[i*nodeDim], coord);
             
             coordsArray[3*i+0] = coord[0];
             coordsArray[3*i+1] = coord[1];
             
-            if (coord.size() == 3) {
+            if (coordDim == 3) {
                 coordsArray[3*i+2] = coord[2];
             }
             else if (heightGrid) {
-                coordsArray[3*i+2] = heightGrid->AccessIndex(nodes[i]);
+                coordsArray[3*i+2] = heightGrid->GetValueAtIndex(&nodes[i*nodeDim]);
             }
             else {
                 coordsArray[3*i+2] = defaultZ;
             }
             
-            float dataValue = grid->AccessIndex(nodes[i]);
+            float dataValue = grid->GetValueAtIndex(&nodes[i*nodeDim]);
             if (dataValue == mv) {
                 colorsArray[4*i+0] = 0.0;
                 colorsArray[4*i+1] = 0.0;
@@ -268,7 +275,7 @@ int WireFrameRenderer::_buildCache()
             }
         }
         
-        _drawCell(vertices, indices, coordsArray, colorsArray, nodes.size(), layered);
+        _drawCell(vertices, indices, coordsArray, colorsArray, numNodes, layered);
     }
     
     
@@ -292,7 +299,6 @@ int WireFrameRenderer::_buildCache()
 
 int WireFrameRenderer::_paintGL(bool fast)
 {
-    
     int rc = 0;
     if (_isCacheDirty())
         rc = _buildCache();
@@ -305,7 +311,9 @@ int WireFrameRenderer::_paintGL(bool fast)
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     glBindVertexArray(_VAO);
     
-    // glLineWidth(1);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
     glDrawElements(GL_LINES, _nIndices, GL_UNSIGNED_INT, 0);
     

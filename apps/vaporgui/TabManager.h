@@ -282,7 +282,7 @@ private:
  QWidget* _getTabWidget(string tabName) const;
 
  GUIStateParams *_getStateParams() const {
-	assert(_controlExec != NULL);
+	VAssert(_controlExec != NULL);
 	VAPoR::ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 	return ((GUIStateParams *)
 		paramsMgr->GetParams(GUIStateParams::GetClassType())

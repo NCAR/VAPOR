@@ -75,6 +75,8 @@ public:
 	float getOpacity();
 	void RefreshHistogram();
     void SetAutoUpdateParamChanged(bool changed);
+    bool IsOpacitySupported() const;
+    void SetOpacitySupported(bool value);
     bool IsOpacityIntegrated() const;
     void SetOpacityIntegrated(bool value);
 
@@ -89,6 +91,7 @@ private slots:
 	void setColorInterpolation(int index);
 	void emitTFChange();
 	void opacitySliderChanged(int value);
+    void opacitySliderReleased();
 
 	void setSingleColor();
 	void setUsingSingleColor(int checkState);
@@ -161,7 +164,9 @@ private:
 	bool _secondaryHistoRangeChanged;
 	bool _mainHistoNeedsRefresh;
 	bool _secondaryHistoNeedsRefresh;
+    bool _isOpacitySupported;
     bool _isOpacityIntegrated;
+    bool _wasOpacitySliderReleased;
 
 	bool _discreteColormap;
 	bool _textChanged;

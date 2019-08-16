@@ -16,7 +16,7 @@ set (CMAKE_OSX_DEPLOYMENT_TARGET 10.9)
 set (VERSION_MAJOR 3)
 set (VERSION_MINOR 1)
 set (VERSION_MICRO 0)
-set (VERSION_RC RC0)
+set (VERSION_RC )
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
 	get_git_head_revision (GIT_REFSPEC VERSION_COMMIT)
 	execute_process (
@@ -125,6 +125,9 @@ if (WIN32)
 	set (INSTALL_SHARE_DIR share)
 	set (INSTALL_INCLUDE_DIR include/vapor)
 elseif (APPLE)
+
+    list (APPEND CMAKE_PREFIX_PATH "/Users/pearse/Qt5_12/5.12.1/clang_64/lib/cmake") 
+
 	# if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	if (DIST_INSTALLER)
 		set (CMAKE_INSTALL_PREFIX /Applications)
@@ -140,6 +143,9 @@ elseif (APPLE)
 	endif ()
 	set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
 else ()
+
+    list (APPEND CMAKE_PREFIX_PATH "${QTDIR}/lib/cmake")
+
 	if (DIST_INSTALLER)
 		set (INSTALL_BIN_DIR lib)
 	else ()
@@ -226,7 +232,7 @@ endif (WIN32)
 
 if (APPLE)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
-		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib)
+		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib ${QTDIR}/*.dylib)
 		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${PYTHONPATH})
 		install (
 			FILES ${INSTALL_LIBS}

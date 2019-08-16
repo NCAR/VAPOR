@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cerrno>
 #include <cctype>
 #include <string>
@@ -88,7 +88,7 @@ void	MyBase::_SetErrMsg(
 //#endif
 	if (!*msgbuf) {
 		*msgbuf = new char[alloc_size];
-		assert(*msgbuf != NULL);
+		VAssert(*msgbuf != NULL);
 		*msgbufsz = alloc_size;
 	}
 
@@ -121,7 +121,7 @@ void	MyBase::_SetErrMsg(
 		} else {
 			if (*msgbuf) delete [] *msgbuf;
 			*msgbuf = new char[*msgbufsz + alloc_size];
-			assert(*msgbuf != NULL);
+			VAssert(*msgbuf != NULL);
 			*msgbufsz += alloc_size;
 		}
 	}

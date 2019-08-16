@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <iostream>
-#include <cassert>
 #include <cmath>
 #include <cfloat>
 #include "vapor/utils.h"
 #include "vapor/LayeredGrid.h"
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
-#include <vapor/LegacyVectorMath.h>
+#include "vapor/LegacyVectorMath.h"
+#include "vapor/VAssert.h"
 
 using namespace std;
 using namespace VAPoR;
@@ -16,9 +16,9 @@ void LayeredGrid::_layeredGrid(
     const vector <double> &maxu,
 	const RegularGrid &rg
 ) {
-	assert(GetDimensions().size() == 3);
-	assert(minu.size() == maxu.size());
-	assert(minu.size() == 2);
+	VAssert(GetDimensions().size() == 3);
+	VAssert(minu.size() == maxu.size());
+	VAssert(minu.size() == 2);
 
 
 	_minu.clear();
@@ -73,27 +73,6 @@ vector <size_t> LayeredGrid::GetCoordDimensions(size_t dim) const {
 	}
 }
 
-float LayeredGrid::GetUserCoordinate(
-	vector <size_t> &index, size_t dim
-) const {
-	if (dim == 0) {
-		ClampIndex(vector<size_t> (1,GetDimensions()[0]), index);
-        return(index[0] * _delta[0] + _minu[0]);
-	}
-	else if (dim == 1) {
-		ClampIndex(vector<size_t> (1,GetDimensions()[1]), index);
-        return(index[0] * _delta[1] + _minu[1]);
-	}
-	else if (dim == 2) {
-        return(_rg.AccessIndex(index));
-	}
-	else {
-		return(0.0);
-	}
-}
-
-
-
 void LayeredGrid::GetUserExtents(
     vector <double> &minu, vector <double> &maxu
 ) const {
@@ -114,7 +93,7 @@ void LayeredGrid::GetBoundingBox(
 	vector <size_t> cMax = max;
 	ClampIndex(cMax);
 
-	assert(cMin.size() == cMax.size());
+	VAssert(cMin.size() == cMax.size());
 
 	minu.clear();
 	maxu.clear();
@@ -123,16 +102,16 @@ void LayeredGrid::GetBoundingBox(
 	// Get extents of horizontal dimensions. Note: also get vertical 
 	// dimension, but it's bogus for layered grid.
 	//
-	GetUserCoordinates(cMin, minu);
-	GetUserCoordinates(cMax, maxu);
+	Grid::GetUserCoordinates(cMin, minu);
+	Grid::GetUserCoordinates(cMax, maxu);
 
 	// Initialize min and max coordinates of varying dimension with 
 	// coordinates of "first" and "last" grid point. Coordinates of 
 	// varying dimension are stored as values of a scalar function
 	// sampling the coordinate space.
 	//
-	float mincoord = _rg.AccessIndex(cMin);
-	float maxcoord = _rg.AccessIndex(cMax);
+	float mincoord = _rg.GetValueAtIndex(cMin);
+	float maxcoord = _rg.GetValueAtIndex(cMax);
 
 	// Now find the extreme values of the varying dimension's coordinates
 	//
@@ -168,8 +147,8 @@ void    LayeredGrid::GetEnclosingRegion(
 	vector <double> cMaxu = maxu;
 	ClampCoord(cMaxu);
 
-	assert(cMinu.size() == cMaxu.size());
-	assert(cMinu.size() == 3);
+	VAssert(cMinu.size() == cMaxu.size());
+	VAssert(cMinu.size() == 3);
 
 	min.clear();
 	max.clear();
@@ -178,7 +157,7 @@ void    LayeredGrid::GetEnclosingRegion(
 	// Get coords for non-varying dimension AND varying dimension. 
 	//
 	for (int i=0; i<2; i++) {
-		assert(cMinu[i] <= cMaxu[i]);
+		VAssert(cMinu[i] <= cMaxu[i]);
 		double u = cMinu[i];
 		if (u < cMinu[i]) {
 			u = cMinu[i];
@@ -244,14 +223,14 @@ float LayeredGrid::GetValueNearestNeighbor (
 	vector <size_t> indices;
 	GetIndices(coords, indices);
 
-	return(AccessIndex(indices));
+	return(GetValueAtIndex(indices));
 }
 
 
 float LayeredGrid::GetValueLinear (
 	const std::vector <double> &coords
 ) const {
-	assert(coords.size() == 3);
+	VAssert(coords.size() == 3);
 
 	vector <size_t> dims = GetDimensions();
 
@@ -272,8 +251,8 @@ float LayeredGrid::GetValueLinear (
 	// Get user coordinates of cell containing point
 	//
 	vector <double> coords0, coords1;
-	GetUserCoordinates(indices0, coords0);
-	GetUserCoordinates(indices1, coords1);
+	Grid::GetUserCoordinates(indices0, coords0);
+	Grid::GetUserCoordinates(indices1, coords1);
 
 	size_t i0 = indices0[0];
 	size_t j0 = indices0[1];
@@ -401,20 +380,16 @@ void LayeredGrid::SetInterpolationOrder(int order) {
 }
 
 void LayeredGrid::GetUserCoordinates(
-	const std::vector <size_t> &indices,
-	std::vector <double> &coords
+	const size_t indices[],
+	double coords[]
 ) const {
 
-    vector <size_t> cIndices = indices;
-    ClampIndex(cIndices); 
+    size_t cIndices[3];
+    ClampIndex(indices, cIndices); 
 	
-	assert(cIndices.size() == 3);
-	coords.clear();
-
 	// First get coordinates of non-varying (horizontal) dimensions
 	//
 	vector <size_t> dims = GetDimensions();
-	assert(cIndices.size() == dims.size());
 
 	for (int i=0; i<2; i++) {
 		size_t index = cIndices[i];
@@ -423,13 +398,12 @@ void LayeredGrid::GetUserCoordinates(
 			index = dims[i] - 1;
 		}
 
-		coords.push_back(cIndices[i] * _delta[i] + _minu[i]);
+		coords[i] = cIndices[i] * _delta[i] + _minu[i];
 	}
 
 	// Now get coordinates of varying dimension
 	//
-	float v = _rg.AccessIndex(cIndices);
-	coords.push_back(v);
+	coords[2] = _rg.GetValueAtIndex(cIndices);
 }
 
 void LayeredGrid::GetIndices(
@@ -466,7 +440,7 @@ void LayeredGrid::GetIndices(
 			);
 		}
 
-		assert(indices[i]<dims[i]);
+		VAssert(indices[i]<dims[i]);
 
 		double wgt = 0.0;
 
@@ -541,7 +515,7 @@ bool LayeredGrid::GetIndicesCell(
 			);
 		}
 
-		assert(indices[i]<dims[i]);
+		VAssert(indices[i]<dims[i]);
 	}
 
 	// Now find index for layered grid
@@ -557,7 +531,7 @@ bool LayeredGrid::GetIndicesCell(
 
 
 bool LayeredGrid::InsideGrid(const std::vector <double> &coords) const {
-	assert(coords.size() == 3);
+	VAssert(coords.size() == 3);
 
 	// Clamp coordinates on periodic boundaries to reside within the 
 	// grid extents (vary-dimensions can not have periodic boundaries)
@@ -673,7 +647,7 @@ void LayeredGrid::_getBilinearWeights(const vector <double> &coords,
 
 	vector <size_t> indices0;
 	bool found = GetIndicesCell(coords, indices0);
-	assert(found);
+	VAssert(found);
 
 	vector <size_t> indices1 = indices0;
 	if (indices0[0] != dims[0]-1) {
@@ -684,8 +658,8 @@ void LayeredGrid::_getBilinearWeights(const vector <double> &coords,
 	}
 
 	vector <double> coords0, coords1;
-	GetUserCoordinates(indices0, coords0);
-	GetUserCoordinates(indices1, coords1);
+	Grid::GetUserCoordinates(indices0, coords0);
+	Grid::GetUserCoordinates(indices1, coords1);
 	double x = coords[0];
 	double y = coords[1];
 	double x0 = coords0[0];
@@ -902,9 +876,9 @@ int LayeredGrid::_bsearchKIndexCell(
 	vector <double> v3;
 	vector <double> pt;
 
-	GetUserCoordinates(v1idx, v1);
-	GetUserCoordinates(v2idx, v2);
-	GetUserCoordinates(v3idx, v3);
+	Grid::GetUserCoordinates(v1idx, v1);
+	Grid::GetUserCoordinates(v2idx, v2);
+	Grid::GetUserCoordinates(v3idx, v3);
 
 	// Coordinates of point we're looking for. X & Y are meaningless. Just
 	// use first triangle vertex.
