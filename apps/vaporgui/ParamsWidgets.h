@@ -8,6 +8,7 @@
 #include <QTabWidget>
 #include <QPushButton>
 #include <vapor/ParamsBase.h>
+#include <cassert>
 
 class ParamsWidget : public QWidget {
     Q_OBJECT
