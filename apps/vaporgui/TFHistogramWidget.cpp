@@ -37,6 +37,7 @@ QSize TFHistogramWidget::minimumSizeHint() const
 
 void TFHistogramWidget::paintEvent(QPaintEvent* event)
 {
+    printf("PAINT\n");
     QFrame::paintEvent(event);
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
@@ -85,68 +86,3 @@ glm::vec2 TFHistogramWidget::PixelToNDC(const QPointF &p) const
 {
     return PixelToNDC(vec2(p.x(), p.y()));
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-TFFunctionEditor::TFFunctionEditor()
-{
-    this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-    this->setMinimumHeight(100);
-}
-
-void TFFunctionEditor::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
-{
-    this->setMaximumSize(width()-1, height()-1);
-    this->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-    
-    updateGL();
-}
-
-void TFFunctionEditor::paintGL()
-{
-    bool swapped = false;
-    if (!swapped) {
-//        swapBuffers();
-        swapped = true;
-    }
-    printf("%s\n", glGetString(GL_VERSION));
-    glClearColor(1, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    glColor3f(0, 0, 1);
-    glBegin(GL_QUADS);
-    glVertex2f(0, 0);
-    glVertex2f(1, 0);
-    glVertex2f(1, 1);
-    glVertex2f(0, 1);
-    glEnd();
-}
-
-void TFFunctionEditor::resizeGL(int w, int h)
-{
-//    swapBuffers();
-}
-*/
