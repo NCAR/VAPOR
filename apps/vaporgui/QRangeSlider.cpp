@@ -29,7 +29,6 @@ void QRangeSlider::paintEvent(QPaintEvent* event)
     
     paintTrack(p);
     
-    printf("Last Select = %i\n", _lastSelectedControl);
     int drawId = (_lastSelectedControl + 1) % 2;
     paintHandle(p, drawId);
     drawId = (drawId + 1) % 2;
