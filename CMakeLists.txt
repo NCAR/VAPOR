@@ -143,6 +143,9 @@ elseif (APPLE)
 	endif ()
 	set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
 else ()
+
+    list (APPEND CMAKE_PREFIX_PATH "${QTDIR}/lib/cmake")
+
 	if (DIST_INSTALLER)
 		set (INSTALL_BIN_DIR lib)
 	else ()
