@@ -43,7 +43,6 @@ QSize TFHistogramWidget::minimumSizeHint() const
 
 void TFHistogramWidget::paintEvent(QPaintEvent* event)
 {
-    printf("PAINT\n");
     QFrame::paintEvent(event);
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
@@ -59,7 +58,6 @@ void TFHistogramWidget::paintEvent(QPaintEvent* event)
     graph.push_back(QPointF(0,0));
     
     for (int i = 0; i < _histo.getNumBins(); i++) {
-//        p.fillRect(i, 0, 1, _histo.getBinSizeNormalized(i)*height(), Qt::black);
         float bin = _histo.getBinSizeNormalized(i)*height();
         graph.push_back(QPointF(i, bin));
         graph.push_back(QPointF(i, bin));
