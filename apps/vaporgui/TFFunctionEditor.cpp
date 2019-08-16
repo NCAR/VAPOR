@@ -112,6 +112,8 @@ void TFFunctionEditor::mousePressEvent(QMouseEvent *event)
         _draggedControl = it;
         _dragOffset = NDCToPixel(*it) - mouse;
         _isDraggingControl = true;
+    } else {
+        event->ignore();
     }
 }
 
@@ -138,8 +140,10 @@ void TFFunctionEditor::mouseMoveEvent(QMouseEvent *event)
                             vec2(it.IsLast() ? 1 : (*(it+1)).x, 1));
         
         *_draggedControl = newVal;
+        update();
+    } else {
+        event->ignore();
     }
-    update();
 }
 
 void TFFunctionEditor::mouseDoubleClickEvent(QMouseEvent *event)

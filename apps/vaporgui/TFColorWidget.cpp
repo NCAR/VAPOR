@@ -81,14 +81,18 @@ void TFColorWidget::mousePressEvent(QMouseEvent *event) {
             _draggingControlID = i;
             _dragOffset = controlPositionForValue(value) - mouse;
             _paramsMgr->BeginSaveStateGroup("Colormap modification");
-            break;
+            return;
         }
     }
+    
+    event->ignore();
 }
 
 void TFColorWidget::mouseReleaseEvent(QMouseEvent *event) {
     if (_isDraggingControl)
         _paramsMgr->EndSaveStateGroup();
+    else
+        event->ignore();
     _isDraggingControl = false;
 }
 
@@ -103,6 +107,8 @@ void TFColorWidget::mouseMoveEvent(QMouseEvent *event) {
         cm->deleteControlPoint(_draggingControlID);
         _draggingControlID = cm->addNormControlPoint(newVal, c);
         update();
+    } else {
+        event->ignore();
     }
 }
 
