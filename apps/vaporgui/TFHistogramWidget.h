@@ -6,6 +6,7 @@
 #include <vapor/ParamsMgr.h>
 #include <vapor/VAssert.h>
 #include <glm/glm.hpp>
+#include "Histo.h"
 
 class TFHistogramWidget : public QFrame {
     Q_OBJECT
@@ -28,6 +29,7 @@ protected:
 private:
     VAPoR::DataMgr *_dataMgr = nullptr;
     VAPoR::RenderParams *_renderParams = nullptr;
+    Histo _histo;
     
     glm::vec2 NDCToPixel(const glm::vec2 &v) const;
     QPointF   QNDCToPixel(const glm::vec2 &v) const;
