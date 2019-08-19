@@ -286,8 +286,7 @@ MainForm::MainForm(
     //
     _tabDockWindow = new QDockWidget(this);
     addDockWidget(Qt::LeftDockWidgetArea, _tabDockWindow);
-    _tabDockWindow->setFeatures(
-        QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    _tabDockWindow->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 
     // Register additional params with the ParamsMgr
     //
@@ -1959,11 +1958,6 @@ void MainForm::_setProj4String(string proj4String) {
     }
 
     _App->installEventFilter(this);
-}
-
-bool MainForm::event(QEvent *e) {
-
-    return QWidget::event(e);
 }
 
 bool MainForm::eventFilter(QObject *obj, QEvent *event) {
