@@ -1,0 +1,26 @@
+Usage: wasp2raw [options] netcdffile datafile
+    OPTION      NUM_ARGS    DEFAULT    
+    ------      --------    -------    
+    -count      1           ""         
+        Colon-delimited NetCDF style count coordinate vector 
+    -debug      0           false      
+        Enable diagnostic 
+    -help       0           false      
+        Print this message and exit 
+    -level      1           -1         
+        Multiresolution refinement level. Zero implies coarsest resolution 
+    -lod        1           -1         
+        Compression levels saved. 0 => coarsest, 1 => next refinement, etc. -1 
+        => all levels defined by the netcdf file 
+    -nthreads   1           0          
+        Number of execution threads. 0 => use number of cores 
+    -start      1           ""         
+        Colon-delimited NetCDF style start coordinate vector 
+    -type       1           float32    
+        Primitive type of output data 
+    -varname    1           var1       
+        Name of variable 
+
+Copyright 2007 The National Center for Atmospheric Research
+
+Version: 3.1.0 (2019-08-05T21:04:24Z) www.vapor.ucar.edu
