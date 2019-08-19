@@ -175,8 +175,8 @@ FlowRenderer::_paintGL( bool fast )
             std::vector<flow::Particle> seeds;
             _genSeedsXY( seeds, _timestamps.at(0) );
             // Note on UseSeedParticles(): this is the only function that resets
-            // all the streams inside of an Advection class.
-            // It should immediately followed by a function to set its periodicity
+            //   all the streams inside of an Advection class.
+            //   It should immediately be followed by a function to set its periodicity
             _advection.UseSeedParticles( seeds );
             _updatePeriodicity( &_advection );
             if( _2ndAdvection )     // bi-directional advection
@@ -576,13 +576,66 @@ FlowRenderer::_genSeedsXY( std::vector<flow::Particle>& seeds, float timeVal ) c
 }
 
 
-/* int
-FlowRenderer::_genSeedRakeUniform( std::vector<flow::Particle>& seeds, 
-                                   float timeVal ) const
+int
+FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds, 
+                                    float timeVal ) const
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
-    auto rakeRange     = params->GetRake();
-} */
+
+    /* retrieve rake from params */
+    auto rake = params->GetRake();
+    VAssert( rake.size() == 6 );
+    for( int i = 0; i < 3; i++ )
+        VAssert( rake[i*2+1] >= rake[i*2] );
+
+    /* retrieve uniform seed numbers from params */
+    auto rakeSeeds = params->GetRakeNumOfSeeds();
+    VAssert( rakeSeeds.size() == 4 ); 
+    for( int i = 0; i < 3; i++ )
+        VAssert( rakeSeeds[i] > 0 );
+
+    /* Create arrays that contain X, Y, and Z coordinates */
+    float xStart, yStart, zStart;
+    float xStep = 0.0f, yStep = 0.0f, zStep = 0.0f;
+    if( rakeSeeds[0] > 1 )
+    {
+        xStart = rake[0];
+        xStep  = (rake[1] - rake[0]) / float( rakeSeeds[0] - 1 );
+    }
+    else    // only 1 seed, place it in the middle.
+        xStart = rake[0] + 0.5f * (rake[1] - rake[0]);
+
+    if( rakeSeeds[1] > 1 )  
+    {
+        yStart = rake[2];
+        yStep  = (rake[3] - rake[2]) / float( rakeSeeds[1] - 1 );
+    }
+    else                    
+        yStart = rake[2] + 0.5f * (rake[3] - rake[2]);
+
+    if( rakeSeeds[2] > 1 )  
+    {
+        zStart = rake[4];
+        zStep  = (rake[5] - rake[4]) / float( rakeSeeds[2] - 1 );
+    }
+    else                    
+        zStart = rake[4] + 0.5f * (rake[5] - rake[4]);
+
+    /* Populate the list of seeds */
+    seeds.resize( rakeSeeds[0] * rakeSeeds[1] * rakeSeeds[2] );
+    int idx = 0;
+    for( int z = 0; z < rakeSeeds[2]; z++ )
+        for( int y = 0; y < rakeSeeds[1]; y++ )
+            for( int x = 0; x < rakeSeeds[0]; x++ )
+            {
+                seeds[idx].location.x = xStart + float(x) * xStep;
+                seeds[idx].location.y = yStart + float(y) * yStep;
+                seeds[idx].location.z = zStart + float(z) * zStep;
+                seeds[idx].time       = timeVal;
+            }
+
+    return 0;
+}
 
 
 int
