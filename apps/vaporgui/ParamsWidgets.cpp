@@ -162,3 +162,44 @@ void PRange::_updateParams() {
     _params->SetValueDoubleVec( _tag, _description, value );
     emit _valueChanged();
 }
+
+PGeometry::PGeometry(
+    QWidget* parent,
+    const std::string& tag,
+    const std::string& description,
+    std::vector<double>& range,
+    std::vector<std::string>& labels
+) :
+    ParamsWidget(
+        parent,
+        tag,
+        description
+    )
+{
+    VAssert( range.size() == labels.size() );
+
+    _vaporWidget = new VGeometry( parent, range, labels );
+    layout()->addWidget( _vaporWidget );
+
+    connect( _vaporWidget, SIGNAL( _valueChanged() ),
+        this, SLOT( _updateParams() ) );
+}
+
+void PGeometry::Update( VAPoR::ParamsBase* params ) {
+    VAssert( params != nullptr );
+    _params = params;
+
+    std::vector<double> values = _params->GetValueDoubleVec( _tag );
+    _vaporWidget->Update( values );
+}
+
+void PGeometry::GetValue( std::vector<double>& values ) const {
+    _vaporWidget->GetValue( values );
+}
+
+void PGeometry::_updateParams() {
+    std::vector<double> values;
+    _vaporWidget->GetValue( values );
+    _params->SetValueDoubleVec( _tag, _description, values );
+    emit _valueChanged();
+}

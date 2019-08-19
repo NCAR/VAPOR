@@ -59,7 +59,7 @@ public:
  PSlider* _psl;
  PSlider* _psl2;
  PRange* _prange;
-
+ PGeometry* _pgeometry;
 
 protected:
  void _updateTab();

@@ -120,4 +120,28 @@ signals:
         
 };
 
+class PGeometry : public ParamsWidget
+{
+    Q_OBJECT
+
+public:
+    PGeometry(
+        QWidget* parent,
+        const std::string& tag,
+        const std::string& description,
+        std::vector<double>& range,
+        std::vector<std::string>& labels
+    );
+
+    void Update( VAPoR::ParamsBase* params ) override;
+
+    void GetValue( std::vector<double>& values ) const override;
+
+protected slots:
+    void _updateParams() override;
+
+signals:
+    void _valueChanged();
+};
+
 #endif

@@ -38,15 +38,16 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
     _psb = new PSpinBox(
         _testTab,
         "testTag",
-        "testDesc",
+        "testDescription",
         "PSpinBox",
         0, 100, 5
     );
     layout->addWidget( _psb );
+
     _psb2 = new PSpinBox(
         _testTab,
         "testTag",
-        "testDesc",
+        "testDescription",
         "PSpinBox2",
         0, 100, 5
     );
@@ -62,7 +63,7 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
     _psl = new PSlider(
         _testTab,
         "sliderTag",
-        "sliderDesc",
+        "sliderDescription",
         "PSlider1",
         0, 100, 33
     );
@@ -71,27 +72,41 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
     _psl2 = new PSlider(
         _testTab,
         "sliderTag",
-        "sliderDesc",
+        "sliderDescription",
         "PSlider2",
         0, 100, 33
     );
     layout->addWidget( _psl2 );
 
-    VaporLine* line = new VaporLine( 
+    VLine* line = new VLine( 
         _testTab, 
-        "VaporLine" 
+        "VLine" 
     );
     layout->addWidget( line );
   
     _prange = new PRange(
         _testTab,
         "prangeTag",
-        "prangeDesc",
+        "prangeDescription",
         0, 200,
         "PRangeMin",
         "PRangeMax"
     );    
     layout->addWidget( _prange );
+
+    QTabWidget* tabWidget = new QTabWidget( this );
+    std::vector<double> range = { 0., 0., 0., 1000., 1000., 1000. };
+    std::vector<std::string> labels = { "X min", "X max", "Y min", "Y max", "Z min", "Z max"};
+    _pgeometry = new PGeometry(
+        nullptr,
+        "pgeometryTag",
+        "pgeometryDescription",
+        range,
+        labels
+    );
+    //layout->addWidget( _pgeometry );
+    tabWidget->addTab( _pgeometry, "Geometry" );
+    layout->addWidget( tabWidget );
 
  
  
@@ -206,6 +221,7 @@ void SliceEventRouter::_updateTab(){
     _psl->Update( params );
     _psl2->Update( params );
     _prange->Update( params );
+    _pgeometry->Update( params );
 
 	// The variable tab updates itself:
 	//
