@@ -124,11 +124,12 @@ public:
 	return("ColorMapParams");
  }
 
-private:
+public:
  static const string _controlPointsTag; 
  static const string _interpTypeTag;
  static const string _useWhitespaceTag;
  static const string _dataBoundsTag;
+private:
 
  int leftIndex(float val) const;
  

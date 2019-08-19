@@ -35,7 +35,7 @@ void TFHistogramWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *params
 
 QSize TFHistogramWidget::minimumSizeHint() const
 {
-    return QSize(100, 100);
+    return QSize(100, 30);
 }
 
 #define CONTROL_POINT_RADIUS (4.0f)

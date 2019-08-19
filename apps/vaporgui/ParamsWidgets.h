@@ -7,6 +7,7 @@
 #include <QGroupBox>
 #include <QTabWidget>
 #include <QPushButton>
+#include <QComboBox>
 #include <vapor/ParamsBase.h>
 #include <cassert>
 
@@ -73,6 +74,22 @@ public:
     
 private slots:
     void valueChangedSlot();
+};
+
+
+
+
+class ParamsWidgetDropdown : public ParamsWidget {
+    Q_OBJECT
+    
+    QComboBox *_box = nullptr;
+    
+public:
+    ParamsWidgetDropdown(const std::string &tag, const std::vector<std::string> &items, const std::string &label = "");
+    void Update(VAPoR::ParamsBase *p);
+    
+private slots:
+    void indexChangedSlot(int index);
 };
 
 

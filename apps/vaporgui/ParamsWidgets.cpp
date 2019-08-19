@@ -118,6 +118,40 @@ void ParamsWidgetFloat::valueChangedSlot()
 
 
 
+ParamsWidgetDropdown::ParamsWidgetDropdown(const std::string &tag, const std::vector<std::string> &items, const std::string &labelText)
+: ParamsWidget(tag, labelText)
+{
+    _box = new QComboBox();
+    connect(_box, SIGNAL(currentIndexChanged(int)), this, SLOT(indexChangedSlot(int)));
+    
+    _box->blockSignals(true);
+    for (string item : items)
+        _box->addItem(QString::fromStdString(item));
+    _box->blockSignals(false);
+    
+    layout()->addWidget(_box);
+}
+
+void ParamsWidgetDropdown::Update(VAPoR::ParamsBase *p)
+{
+    _params = p;
+//    _box->setText(QString::number(p->GetValueDouble(_tag, false)));
+    _box->blockSignals(true);
+    _box->setCurrentIndex(p->GetValueLong(_tag, 0));
+    _box->blockSignals(false);
+}
+
+void ParamsWidgetDropdown::indexChangedSlot(int index)
+{
+    printf("INDEX CHANGE\n");
+    if (_params)
+        _params->SetValueLong(_tag, _tag, index);
+}
+
+
+
+
+
 ParamsWidgetColor::ParamsWidgetColor(const std::string &tag, const std::string &label)
 : ParamsWidget(tag, label)
 {

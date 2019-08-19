@@ -3,6 +3,7 @@
 #include <QTabWidget>
 #include <vapor/RenderParams.h>
 #include <vapor/ParamsMgr.h>
+#include "ParamsWidgets.h"
 
 class TFFunctionEditor;
 class TFColorWidget;
@@ -23,5 +24,6 @@ private:
     TFHistogramWidget *tfh;
     TFColorWidget *colorWidget;
     QRangeSlider *range;
+    ParamsWidgetDropdown *colorMapTypeDropdown;
     QWidget *_tab() const;
 };
