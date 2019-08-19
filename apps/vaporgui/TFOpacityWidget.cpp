@@ -66,7 +66,7 @@ void TFOpacityWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMg
 
 QSize TFOpacityWidget::minimumSizeHint() const
 {
-    return QSize(100, 100);
+    return QSize(100, 75);
 }
 
 #define CONTROL_POINT_RADIUS (4.0f)
