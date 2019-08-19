@@ -5,7 +5,7 @@
 #include <vapor/ParamsMgr.h>
 #include "ParamsWidgets.h"
 
-class TFFunctionEditor;
+class TFOpacityWidget;
 class TFColorWidget;
 class TFHistogramWidget;
 class QRangeSlider;
@@ -20,7 +20,7 @@ public:
     
 private:
     
-    TFFunctionEditor *tff;
+    TFOpacityWidget *tff;
     TFHistogramWidget *tfh;
     TFColorWidget *colorWidget;
     QRangeSlider *range;

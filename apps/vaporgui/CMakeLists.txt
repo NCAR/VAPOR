@@ -68,8 +68,8 @@ set (SRCS
 	ParamsWidgets.cpp
 	TFEditor.cpp
 	TFEditor.h
-	TFFunctionEditor.cpp
-	TFFunctionEditor.h
+	TFOpacityWidget.cpp
+	TFOpacityWidget.h
 	TFColorWidget.cpp
 	TFColorWidget.h
 	QRangeSlider.cpp

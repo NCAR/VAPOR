@@ -1,4 +1,4 @@
-#include "TFFunctionEditor.h"
+#include "TFOpacityWidget.h"
 #include <QPaintEvent>
 #include <QPainter>
 #include <glm/glm.hpp>
@@ -37,7 +37,7 @@ float DistanceToLine(vec2 a, vec2 b, vec2 p)
 
 
 
-TFFunctionEditor::TFFunctionEditor()
+TFOpacityWidget::TFOpacityWidget()
 {
     this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
     this->setFrameStyle(QFrame::Box);
@@ -46,7 +46,7 @@ TFFunctionEditor::TFFunctionEditor()
     _controlPoints.Add(vec2(0.5,0.8));
 }
 
-void TFFunctionEditor::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
+void TFOpacityWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
 {
     _renderParams = rp;
     
@@ -64,7 +64,7 @@ void TFFunctionEditor::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsM
     }
 }
 
-QSize TFFunctionEditor::minimumSizeHint() const
+QSize TFOpacityWidget::minimumSizeHint() const
 {
     return QSize(100, 100);
 }
@@ -72,7 +72,7 @@ QSize TFFunctionEditor::minimumSizeHint() const
 #define CONTROL_POINT_RADIUS (4.0f)
 #define PADDING (CONTROL_POINT_RADIUS + 1.0f)
 
-void TFFunctionEditor::paintEvent(QPaintEvent* event)
+void TFOpacityWidget::paintEvent(QPaintEvent* event)
 {
     QFrame::paintEvent(event);
     QPainter p(this);
@@ -103,7 +103,7 @@ void TFFunctionEditor::paintEvent(QPaintEvent* event)
     }
 }
 
-void TFFunctionEditor::mousePressEvent(QMouseEvent *event)
+void TFOpacityWidget::mousePressEvent(QMouseEvent *event)
 {
     vec2 mouse = qvec2(event->posF());
     auto it = findSelectedControlPoint(mouse);
@@ -117,14 +117,14 @@ void TFFunctionEditor::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void TFFunctionEditor::mouseReleaseEvent(QMouseEvent *event)
+void TFOpacityWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     if (_isDraggingControl)
         opacityChanged();
     _isDraggingControl = false;
 }
 
-void TFFunctionEditor::mouseMoveEvent(QMouseEvent *event)
+void TFOpacityWidget::mouseMoveEvent(QMouseEvent *event)
 {
     vec2 mouse = qvec2(event->pos());
     m = mouse;
@@ -146,7 +146,7 @@ void TFFunctionEditor::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-void TFFunctionEditor::mouseDoubleClickEvent(QMouseEvent *event)
+void TFOpacityWidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
     vec2 mouse = qvec2(event->pos());
     ControlPointList &cp = _controlPoints;
@@ -172,7 +172,7 @@ void TFFunctionEditor::mouseDoubleClickEvent(QMouseEvent *event)
     }
 }
 
-void TFFunctionEditor::opacityChanged()
+void TFOpacityWidget::opacityChanged()
 {
     MapperFunction *mf = _renderParams->GetMapperFunc(_renderParams->GetVariableName());
     int n = mf->getNumOpacityMaps();
@@ -188,12 +188,12 @@ void TFFunctionEditor::opacityChanged()
     om->SetControlPoints(cp);
 }
 
-bool TFFunctionEditor::controlPointContainsPixel(const vec2 &cp, const vec2 &pixel) const
+bool TFOpacityWidget::controlPointContainsPixel(const vec2 &cp, const vec2 &pixel) const
 {
     return glm::distance(pixel, NDCToPixel(cp)) <= CONTROL_POINT_RADIUS;
 }
 
-ControlPointList::PointIterator TFFunctionEditor::findSelectedControlPoint(const glm::vec2 &mouse)
+ControlPointList::PointIterator TFOpacityWidget::findSelectedControlPoint(const glm::vec2 &mouse)
 {
     const auto end = _controlPoints.EndPoints();
     for (auto it = _controlPoints.BeginPoints(); it != end; ++it)
@@ -202,18 +202,18 @@ ControlPointList::PointIterator TFFunctionEditor::findSelectedControlPoint(const
     return end;
 }
 
-glm::vec2 TFFunctionEditor::NDCToPixel(const glm::vec2 &v) const
+glm::vec2 TFOpacityWidget::NDCToPixel(const glm::vec2 &v) const
 {
     return vec2(PADDING + v.x * (width()-2*PADDING), PADDING + (1.0f - v.y) * (height()-2*PADDING));
 }
 
-QPointF TFFunctionEditor::QNDCToPixel(const glm::vec2 &v) const
+QPointF TFOpacityWidget::QNDCToPixel(const glm::vec2 &v) const
 {
     const vec2 p = NDCToPixel(v);
     return QPointF(p.x, p.y);
 }
 
-glm::vec2 TFFunctionEditor::PixelToNDC(const glm::vec2 &p) const
+glm::vec2 TFOpacityWidget::PixelToNDC(const glm::vec2 &p) const
 {
     float width = QWidget::width();
     float height = QWidget::height();
@@ -222,7 +222,7 @@ glm::vec2 TFFunctionEditor::PixelToNDC(const glm::vec2 &p) const
     return vec2((p.x - PADDING) / (width-2*PADDING), 1.0f - (p.y - PADDING) / (height-2*PADDING));
 }
 
-glm::vec2 TFFunctionEditor::PixelToNDC(const QPointF &p) const
+glm::vec2 TFOpacityWidget::PixelToNDC(const QPointF &p) const
 {
     return PixelToNDC(vec2(p.x(), p.y()));
 }
