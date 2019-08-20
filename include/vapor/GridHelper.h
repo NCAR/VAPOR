@@ -21,7 +21,7 @@ class VDF_API GridHelper : public Wasp::MyBase {
 
 public:
 
- GridHelper(size_t max_size = 10) : _kdtreeCache(max_size) {}
+ GridHelper(size_t max_size = 10) : _qtrCache(max_size) {}
 
  ~GridHelper();
 
@@ -157,7 +157,7 @@ private:
   size_t _max_size;
  };
 
- lru_cache<string, KDTreeRG> _kdtreeCache;
+ lru_cache<string, QuadTreeRectangle<float, size_t> > _qtrCache;
 
 
  RegularGrid *_make_grid_regular(
@@ -296,16 +296,14 @@ UnstructuredGridLayered *_make_grid_unstructured_layered(
 	const std::vector <std::vector <string>> &cdimnames
  ) const;
 
- const KDTreeRG *_getKDTree2D(
-    size_t ts,
-    int level,
-    int lod,
-    const vector <DC::CoordVar> &cvarsinfo,
-    const Grid &xg,
-    const Grid &yg,
-    const vector <size_t> &bmin,
-    const vector <size_t> &bmax
- );
+ string _getQuadTreeRectangleKey(
+	size_t ts,
+	int level,
+	int lod,
+	const vector <DC::CoordVar> &cvarsinfo,
+	const vector <size_t> &bmin,
+	const vector <size_t> &bmax
+ ) const;
 
 
 };
