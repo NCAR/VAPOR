@@ -24,6 +24,9 @@ public slots:
 protected:
     void paintEvent(QPaintEvent *event);
     bool isUsingNormalizedValue() const;
+    bool isUsingMappedValue() const;
+    float toMappedValue(float normalized) const;
+    float toNormalizedValue(float mapped) const;
     
 private:
     QLineEdit *_locationEdit;
@@ -32,4 +35,6 @@ private:
     
     int _opacityId = -1;
     int _colorId = -1;
+    float _min = 0;
+    float _max = 1;
 };
