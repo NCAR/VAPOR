@@ -103,17 +103,24 @@ void TFOpacityWidget::drawControl(QPainter &p, glm::vec2 ndc, bool selected) con
     QBrush brush(QColor(0xfa, 0xfa, 0xfa));
     float radius = CONTROL_POINT_RADIUS;
     
-    if (selected) {
-        pen.setColor(Qt::black);
-        pen.setWidth(1.5);
-        
-        brush.setColor(Qt::white);
-    }
+//    if (selected) {
+//        pen.setColor(Qt::black);
+//        pen.setWidth(1.5);
+//
+//        brush.setColor(Qt::white);
+//    }
     
     p.setBrush(brush);
     p.setPen(pen);
     
     p.drawEllipse(QNDCToPixel(ndc), radius, radius);
+    
+    if (selected) {
+        p.setPen(Qt::NoPen);
+        p.setBrush(QBrush(Qt::black));
+        radius *= 0.38;
+        p.drawEllipse(QNDCToPixel(ndc), radius, radius);
+    }
 }
 
 void TFOpacityWidget::mousePressEvent(QMouseEvent *event)
