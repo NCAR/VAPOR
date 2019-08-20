@@ -2,6 +2,7 @@
 #include <QBoxLayout>
 #include <QLabel>
 #include <QPainter>
+#include <vapor/RenderParams.h>
 
 TFControlPointWidget::TFControlPointWidget()
 {
@@ -26,7 +27,7 @@ TFControlPointWidget::TFControlPointWidget()
     this->setDisabled(true);
 }
 
-void TFControlPointWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
+void TFControlPointWidget::Update(VAPoR::RenderParams *rParams)
 {
     if (_opacityId >= 0) {
         float value;

@@ -35,7 +35,7 @@ void TFEditor::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPo
     tfh->Update(dataMgr, paramsMgr, rParams);
     colorWidget->Update(dataMgr, paramsMgr, rParams);
     colorMapTypeDropdown->Update(rParams->GetMapperFunc(rParams->GetVariableName())->GetColorMap());
-    controlPointWidget->Update(dataMgr, paramsMgr, rParams);
+    controlPointWidget->Update(rParams);
 }
 
 QWidget *TFEditor::_tab() const
