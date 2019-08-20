@@ -68,6 +68,8 @@ void TFControlPointWidget::DeselectControlPoint()
     this->setDisabled(true);
     _opacityId = -1;
     _colorId = -1;
+    _locationEdit->clear();
+    _valueEdit->clear();
 }
 
 void TFControlPointWidget::paintEvent(QPaintEvent *event)
