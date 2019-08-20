@@ -10,7 +10,6 @@
 #include <vapor/LayeredGrid.h>
 #include <vapor/CurvilinearGrid.h>
 #include <vapor/UnstructuredGrid2D.h>
-#include <vapor/KDTreeRG.h>
 #include <vapor/UDUnitsClass.h>
 #include <vapor/GridHelper.h>
 #include <vapor/DerivedVarMgr.h>

@@ -2,8 +2,8 @@
 #include <cstring>
 #include <vector>
 #include <vapor/common.h>
-#ifndef _VAPOR_UTILS_H_
-#define _VAPOR_UTILS_H_
+
+#pragma once
 
 namespace Wasp {
 
@@ -61,6 +61,8 @@ class COMMON_API SmartBuf {
 //! address specified by \p coords
 //
 COMMON_API size_t LinearizeCoords(
+    const size_t *coords, const size_t *dims, int n);
+COMMON_API size_t LinearizeCoords(
     const std::vector<size_t> &coords, const std::vector<size_t> &dims);
 
 //! Linearize multi-dimensional coordinates
@@ -77,6 +79,11 @@ COMMON_API size_t LinearizeCoords(
 //!
 //! \retval offset The offset from the first element of the array to the
 //! address specified by \p coords
+COMMON_API size_t LinearizeCoords(
+    const size_t *coords,
+    const size_t *min,
+    const size_t *max,
+    int n);
 COMMON_API size_t LinearizeCoords(
     const std::vector<size_t> &coords,
     const std::vector<size_t> &min,
@@ -109,12 +116,18 @@ COMMON_API size_t VProduct(const std::vector<size_t> &a);
 
 //! Vectorize a coordinate offset. Inverse of VectorizeLinearize
 //!
+COMMON_API void VectorizeCoords(
+    size_t offset,
+    const size_t *min, const size_t *max,
+    size_t *coords, int n);
 COMMON_API std::vector<size_t> VectorizeCoords(
     size_t offset,
     const std::vector<size_t> &min, const std::vector<size_t> &max);
 
 //! Vectorize a coordinate offset. Inverse of VectorizeLinearize
 //!
+COMMON_API void VectorizeCoords(
+    size_t offset, const size_t *dims, size_t *coords, int n);
 COMMON_API std::vector<size_t> VectorizeCoords(
     size_t offset, const std::vector<size_t> &dims);
 
@@ -147,5 +160,3 @@ COMMON_API int BinarySearchRange(
     size_t &i);
 
 }; // namespace Wasp
-
-#endif

@@ -3,7 +3,7 @@
 #include <vapor/common.h>
 #include <vapor/Grid.h>
 #include <vapor/RegularGrid.h>
-#include <vapor/KDTreeRG.h>
+#include <vapor/QuadTreeRectangle.hpp>
 
 namespace VAPoR {
 //! \class CurvilinearGrid
@@ -60,10 +60,10 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
     //! values specify the Y user coordinates.
     //! \param[in] zcoords  A 1D vector whose size matches that of the K
     //! dimension of this class, and whose values specify the Z user coordinates.
-    //! \param[in] kdtree A KDTreeRG instance that contains a KD tree
-    //! that may be used to find the nearest grid vertex to a given point
-    //! expressed in user coordintes. The offsets returned by \p kdtree will
-    //! be used as indeces into \p xrg and \p yrg.
+    //! \param[in] qtr A QuadTreeRectangle instance that contains a quad tree
+    //! that may be used to find the cell(s) containing a given point
+    //! expressed in user coordintes. if \p qtr is NULL the class will
+    //! generate its own QuadTreeRectangle instance.
     //!
     //!
     //! \sa RegularGrid()
@@ -75,7 +75,7 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
         const RegularGrid &xrg,
         const RegularGrid &yrg,
         const std::vector<double> &zcoords,
-        const KDTreeRG *kdtree);
+        const QuadTreeRectangle<float, size_t> *qtr);
 
     //! \copydoc StructuredGrid::StructuredGrid()
     //!
@@ -105,10 +105,10 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
     //! \param[in] zrg A 3D RegularGrid instance whose
     //! I, J, K dimensionality matches that of this class instance, and whose
     //! values specify the Z user coordinates.
-    //! \param[in] kdtree A KDTreeRG instance that contains a KD tree
-    //! that may be used to find the nearest grid vertex to a given point
-    //! expressed in user coordintes. The offsets returned by \p kdtree will
-    //! be used as indeces into \p xrg and \p yrg.
+    //! \param[in] qtr A QuadTreeRectangle instance that contains a quad tree
+    //! that may be used to find the cell(s) containing a given point
+    //! expressed in user coordintes. if \p qtr is NULL the class will
+    //! generate its own QuadTreeRectangle instance.
     //!
     //!
     //! \sa RegularGrid()
@@ -120,7 +120,7 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
         const RegularGrid &xrg,
         const RegularGrid &yrg,
         const RegularGrid &zrg,
-        const KDTreeRG *kdtree);
+        const QuadTreeRectangle<float, size_t> *qtr);
 
     //! \copydoc StructuredGrid::StructuredGrid()
     //!
@@ -145,10 +145,10 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
     //! \param[in] yrg A 2D RegularGrid instance whose
     //! I and J dimensionality matches that of this class instance, and whose
     //! values specify the Y user coordinates.
-    //! \param[in] kdtree A KDTreeRG instance that contains a KD tree
-    //! that may be used to find the nearest grid vertex to a given point
-    //! expressed in user coordintes. The offsets returned by \p kdtree will
-    //! be used as indeces into \p xrg and \p yrg.
+    //! \param[in] qtr A QuadTreeRectangle instance that contains a quad tree
+    //! that may be used to find the cell(s) containing a given point
+    //! expressed in user coordintes. if \p qtr is NULL the class will
+    //! generate its own QuadTreeRectangle instance.
     //!
     //!
     //! \sa RegularGrid()
@@ -159,10 +159,17 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
         const std::vector<float *> &blks,
         const RegularGrid &xrg,
         const RegularGrid &yrg,
-        const KDTreeRG *kdtree);
+        const QuadTreeRectangle<float, size_t> *qtr);
 
     CurvilinearGrid() = default;
-    virtual ~CurvilinearGrid() = default;
+    virtual ~CurvilinearGrid() {
+        if (_qtrOwner && _qtr)
+            delete _qtr;
+    }
+
+    const QuadTreeRectangle<float, size_t> *GetQuadTreeRectangle() const {
+        return (_qtr);
+    }
 
     static std::string GetClassType() {
         return ("Curvilinear");
@@ -297,21 +304,26 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
     std::vector<double> _zcoords;
     mutable std::vector<double> _minu;
     mutable std::vector<double> _maxu;
-    const KDTreeRG *_kdtree;
     RegularGrid _xrg;
     RegularGrid _yrg;
     RegularGrid _zrg;
     bool _terrainFollowing;
+    const QuadTreeRectangle<float, size_t> *_qtr;
+    bool _qtrOwner;
 
     void _curvilinearGrid(
         const RegularGrid &xrg,
         const RegularGrid &yrg,
         const RegularGrid &zrg,
         const std::vector<double> &zcoords,
-        const KDTreeRG *kdtree);
+        const QuadTreeRectangle<float, size_t> *qtr);
 
     void _GetUserExtents(
         std::vector<double> &minu, std::vector<double> &maxu) const;
+
+    bool _insideFace(
+        const std::vector<size_t> &face, double pt[2],
+        double lambda[4]) const;
 
     bool _insideGrid(
         double x, double y, double z,
@@ -333,6 +345,8 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
         double x, double y, double z,
         const size_t &i, const size_t &j, size_t &k,
         double zwgt[2]) const;
+
+    QuadTreeRectangle<float, size_t> *_makeQuadTreeRectangle() const;
 };
 }; // namespace VAPoR
 #endif

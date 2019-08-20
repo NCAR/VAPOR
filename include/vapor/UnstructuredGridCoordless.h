@@ -6,7 +6,7 @@
 #include <memory>
 #include <vapor/common.h>
 #include <vapor/UnstructuredGrid.h>
-#include <vapor/KDTreeRG.h>
+#include <vapor/QuadTreeRectangle.hpp>
 
 #ifdef WIN32
 #pragma warning(disable : 4661 4251) // needed for template class
@@ -36,9 +36,11 @@ class VDF_API UnstructuredGridCoordless : public UnstructuredGrid {
         const int *faceOnFace,
         Location location, // node,face, edge
         size_t maxVertexPerFace,
-        size_t maxFacePerVertex) : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, topology_dimension,
-                                                    vertexOnFace, faceOnVertex, faceOnFace, location,
-                                                    maxVertexPerFace, maxFacePerVertex) {}
+        size_t maxFacePerVertex,
+        long nodeOffset,
+        long cellOffset) : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, topology_dimension,
+                                            vertexOnFace, faceOnVertex, faceOnFace, location,
+                                            maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset) {}
 
     UnstructuredGridCoordless() = default;
     virtual ~UnstructuredGridCoordless() = default;
