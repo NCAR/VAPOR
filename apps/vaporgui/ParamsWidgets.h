@@ -94,11 +94,12 @@ private slots:
 
 
 
-
+class QColorWidget;
 class ParamsWidgetColor : public ParamsWidget {
     Q_OBJECT
     
-    QPushButton *_button = nullptr;
+//    QPushButton *_button = nullptr;
+    QColorWidget *_color = nullptr;
     
 public:
     ParamsWidgetColor(const std::string &tag, const std::string &label = "");
@@ -109,7 +110,8 @@ public:
     
     
 private slots:
-    void pressed();
+//    void pressed();
+    void colorChanged(QColor color);
 };
 
 

@@ -151,14 +151,19 @@ void ParamsWidgetDropdown::indexChangedSlot(int index)
 
 
 
+#include "QColorWidget.h"
 
 ParamsWidgetColor::ParamsWidgetColor(const std::string &tag, const std::string &label)
 : ParamsWidget(tag, label)
 {
-    _button = new QPushButton("Select");
-    connect(_button, SIGNAL(clicked()), this, SLOT(pressed()));
+//    _button = new QPushButton("Select");
+//    connect(_button, SIGNAL(clicked()), this, SLOT(pressed()));
     
-    layout()->addWidget(_button);
+    _color = new QColorWidget;
+    connect(_color, SIGNAL(colorChanged(QColor)), this, SLOT(colorChanged(QColor)));
+    
+//    layout()->addWidget(_button);
+    layout()->addWidget(_color);
 }
 
 void ParamsWidgetColor::Update(VAPoR::ParamsBase *p)
@@ -166,20 +171,28 @@ void ParamsWidgetColor::Update(VAPoR::ParamsBase *p)
     _params = p;
     
     QColor color = VectorToQColor(p->GetValueDoubleVec(_tag));
-    QString style = "background-color: " + color.name() + "; ";
-    if (color.valueF() > 0.6)
-        style += "color: black;";
-    else
-        style += "color: white;";
+//    QString style = "background-color: " + color.name() + "; ";
+//    if (color.valueF() > 0.6)
+//        style += "color: black;";
+//    else
+//        style += "color: white;";
     
-    _button->setStyleSheet(style);
+//    _button->setStyleSheet(style);
+    
+    _color->setColor(color);
 }
 
-void ParamsWidgetColor::pressed()
+//void ParamsWidgetColor::pressed()
+//{
+//    QColor newColor = QColorDialog::getColor();
+//    if (_params)
+//        _params->SetValueDoubleVec(_tag, _tag, QColorToVector(newColor));
+//}
+
+void ParamsWidgetColor::colorChanged(QColor color)
 {
-    QColor newColor = QColorDialog::getColor();
     if (_params)
-        _params->SetValueDoubleVec(_tag, _tag, QColorToVector(newColor));
+        _params->SetValueDoubleVec(_tag, _tag, QColorToVector(color));
 }
 
 QColor ParamsWidgetColor::VectorToQColor(const std::vector<double> &v)

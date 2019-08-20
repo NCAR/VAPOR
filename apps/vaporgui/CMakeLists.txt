@@ -78,6 +78,8 @@ set (SRCS
 	TFHistogramWidget.h
 	TFControlPointWidget.cpp
 	TFControlPointWidget.h
+	QColorWidget.cpp
+	QColorWidget.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h

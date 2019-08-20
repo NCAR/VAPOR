@@ -7,6 +7,7 @@
 #include "TFControlPointWidget.h"
 #include "QRangeSlider.h"
 #include <vapor/ColorMap.h>
+//#include "QColorWidget.h"
 
 static ParamsWidgetColor *c;
 
@@ -25,6 +26,7 @@ TFEditor::TFEditor()
     layout->addWidget(range = new QRangeSlider);
     layout->addWidget(colorMapTypeDropdown = new ParamsWidgetDropdown(VAPoR::ColorMap::_interpTypeTag, {"Linear", "Discrete", "Diverging"}, "Color Interpolation"));
     layout->addWidget(c = new ParamsWidgetColor("test"));
+//    layout->addWidget(new QColorWidget);
     
 //    this->setStyleSheet(R"(QWidget:hover:!pressed {border: 1px solid red;})");
     
