@@ -180,8 +180,10 @@ void TFOpacityWidget::mouseDoubleClickEvent(QMouseEvent *event)
 void TFOpacityWidget::opacityChanged()
 {
     MapperFunction *mf = _renderParams->GetMapperFunc(_renderParams->GetVariableName());
-    int n = mf->getNumOpacityMaps();
-    printf("# opacity maps = %i\n", n);
+    
+    // TODO Multiple opacity maps?
+//    int n = mf->getNumOpacityMaps();
+//    printf("# opacity maps = %i\n", n);
     
     OpacityMap *om = mf->GetOpacityMap(0);
     
