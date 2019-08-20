@@ -9,6 +9,7 @@ class TFOpacityWidget;
 class TFColorWidget;
 class TFHistogramWidget;
 class QRangeSlider;
+class TFControlPointWidget;
 
 class TFEditor : public QTabWidget {
     Q_OBJECT
@@ -25,5 +26,6 @@ private:
     TFColorWidget *colorWidget;
     QRangeSlider *range;
     ParamsWidgetDropdown *colorMapTypeDropdown;
+    TFControlPointWidget *controlPointWidget;
     QWidget *_tab() const;
 };
