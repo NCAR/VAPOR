@@ -106,6 +106,7 @@ public:
     
 protected:
     void paintEvent(QPaintEvent* event);
+    void drawControl(QPainter &p, glm::vec2 ndc, bool selected = false) const;
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);

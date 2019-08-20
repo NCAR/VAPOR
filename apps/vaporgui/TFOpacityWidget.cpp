@@ -51,8 +51,9 @@ void TFOpacityWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMg
     _renderParams = rp;
     
     MapperFunction *mf = rp->GetMapperFunc(rp->GetVariableName());
-    int n = mf->getNumOpacityMaps();
-    printf("# opacity maps = %i\n", n);
+    // TODO Multiple opacity maps?
+    //    int n = mf->getNumOpacityMaps();
+    //    printf("# opacity maps = %i\n", n);
     
     OpacityMap *om = mf->GetOpacityMap(0);
     
@@ -91,16 +92,27 @@ void TFOpacityWidget::paintEvent(QPaintEvent* event)
 //            p.drawEllipse(qvec2(Project(NDCToPixel(it.a()), NDCToPixel(it.b()), m)), 2, 2);
         }
         
-        QPen pen(Qt::darkGray, 0.8);
-        pen.setWidth(0.5);
-        p.setPen(pen);
-        QBrush brush(QColor(0xFA, 0xFA, 0xFA));
-        p.setBrush(brush);
-        
         for (auto it = --cp.EndPoints(); it != --cp.BeginPoints(); --it)
-            p.drawEllipse(QNDCToPixel(*it), CONTROL_POINT_RADIUS, CONTROL_POINT_RADIUS);
-        
+            drawControl(p, *it, it.Index() == _selectedControl);
     }
+}
+
+void TFOpacityWidget::drawControl(QPainter &p, glm::vec2 ndc, bool selected) const
+{
+    QPen pen(Qt::darkGray, 0.5);
+    QBrush brush(QColor(0xfa, 0xfa, 0xfa));
+    
+    if (selected) {
+        pen.setColor(Qt::black);
+        pen.setWidth(1.5);
+        
+        brush.setColor(Qt::white);
+    }
+    
+    p.setBrush(brush);
+    p.setPen(pen);
+    
+    p.drawEllipse(QNDCToPixel(ndc), CONTROL_POINT_RADIUS, CONTROL_POINT_RADIUS);
 }
 
 void TFOpacityWidget::mousePressEvent(QMouseEvent *event)
@@ -181,10 +193,6 @@ void TFOpacityWidget::opacityChanged()
 {
     MapperFunction *mf = _renderParams->GetMapperFunc(_renderParams->GetVariableName());
     
-    // TODO Multiple opacity maps?
-//    int n = mf->getNumOpacityMaps();
-//    printf("# opacity maps = %i\n", n);
-    
     OpacityMap *om = mf->GetOpacityMap(0);
     
     vector<double> cp(_controlPoints.Size() * 2);
@@ -237,76 +245,13 @@ glm::vec2 TFOpacityWidget::PixelToNDC(const QPointF &p) const
 void TFOpacityWidget::selectControlPoint(ControlPointList::PointIterator it)
 {
     _selectedControl = it.Index();
+    update();
     emit ControlPointSelected(it.Index());
 }
 
 void TFOpacityWidget::DeselectControlPoint()
 {
     _selectedControl = -1;
+    update();
     emit ControlPointDeselected();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-TFFunctionEditor::TFFunctionEditor()
-{
-    this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-    this->setMinimumHeight(100);
-}
-
-void TFFunctionEditor::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
-{
-    this->setMaximumSize(width()-1, height()-1);
-    this->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-    
-    updateGL();
-}
-
-void TFFunctionEditor::paintGL()
-{
-    bool swapped = false;
-    if (!swapped) {
-//        swapBuffers();
-        swapped = true;
-    }
-    printf("%s\n", glGetString(GL_VERSION));
-    glClearColor(1, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    glColor3f(0, 0, 1);
-    glBegin(GL_QUADS);
-    glVertex2f(0, 0);
-    glVertex2f(1, 0);
-    glVertex2f(1, 1);
-    glVertex2f(0, 1);
-    glEnd();
-}
-
-void TFFunctionEditor::resizeGL(int w, int h)
-{
-//    swapBuffers();
-}
-*/
