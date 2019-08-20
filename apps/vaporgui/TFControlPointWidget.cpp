@@ -36,7 +36,7 @@ void TFControlPointWidget::Update(VAPoR::RenderParams *rParams)
     _max = rParams->GetMapperFunc(rParams->GetVariableName())->getMaxMapValue();
     
     ((QDoubleValidator*)_locationEdit->validator())->setRange(_min, _max);
-    ((QDoubleValidator*)_locationEdit->validator())->setDecimals(2);
+//    ((QDoubleValidator*)_locationEdit->validator())->setDecimals(2);
     
     if (_opacityId >= 0) {
         float value;
