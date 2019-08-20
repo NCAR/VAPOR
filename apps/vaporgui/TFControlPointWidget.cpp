@@ -92,7 +92,6 @@ bool TFControlPointWidget::isUsingMappedValue() const
 
 float TFControlPointWidget::toMappedValue(float normalized) const
 {
-    printf("%f -> %f\n", _min, _max);
     return normalized * (_max - _min) + _min;
 }
 
