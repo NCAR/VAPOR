@@ -12,6 +12,12 @@ class TFControlPointWidget : public QWidget {
     Q_OBJECT
     
 public:
+    
+    enum ValueFormat {
+        Mapped = 0,
+        Percent = 1
+    };
+    
     TFControlPointWidget();
     
     void Update(VAPoR::RenderParams *rParams);
@@ -29,12 +35,17 @@ protected:
     float toNormalizedValue(float mapped) const;
     
 private:
-    QLineEdit *_locationEdit;
-    QComboBox *_locationEditType;
     QLineEdit *_valueEdit;
+    QComboBox *_valueEditType;
+    QLineEdit *_opacityEdit;
     
     int _opacityId = -1;
     int _colorId = -1;
+    VAPoR::RenderParams *_params;
     float _min = 0;
     float _max = 1;
+    float _value;
+    
+private slots:
+    void valueEditTypeChanged(int);
 };

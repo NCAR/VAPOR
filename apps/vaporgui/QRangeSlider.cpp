@@ -15,7 +15,7 @@ QRangeSlider::QRangeSlider(Qt::Orientation orientation)
     _value[0] = 0;
     _position[1] = 99;
     _value[1] = 99;
-    this->setTracking(false);
+    this->setTracking(true);
 }
 
 QSize QRangeSlider::minimumSizeHint() const

@@ -11,31 +11,34 @@ TFControlPointWidget::TFControlPointWidget()
     layout->setSpacing(0);
     layout->setMargin(0);
     this->setLayout(layout);
-    layout->addWidget(_locationEdit = new QLineEdit, 30);
-    layout->addWidget(_locationEditType = new QComboBox, 20);
-    layout->addStretch(20);
     layout->addWidget(_valueEdit = new QLineEdit, 30);
+    layout->addWidget(_valueEditType = new QComboBox, 20);
+    layout->addStretch(20);
+    layout->addWidget(_opacityEdit = new QLineEdit, 30);
     
-    _locationEdit->setValidator(new QDoubleValidator);
+    _valueEdit->setValidator(new QDoubleValidator);
     
-    _locationEditType->blockSignals(true);
-    _locationEditType->setMinimumSize(30, 10);
-    _locationEditType->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    _locationEditType->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-    _locationEditType->addItem("%");
-    _locationEditType->addItem("data");
-    _locationEditType->blockSignals(false);
+    _valueEditType->blockSignals(true);
+    _valueEditType->setMinimumSize(30, 10);
+    _valueEditType->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    _valueEditType->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    _valueEditType->addItem("data");
+    _valueEditType->addItem("%");
+    _valueEditType->blockSignals(false);
     
-//    this->setStyleSheet(R"(QWidget:hover:!pressed {border: 1px solid red;})");
+    connect(_valueEditType, SIGNAL(currentIndexChanged(int)), this, SLOT(valueEditTypeChanged(int)));
+    
     this->setDisabled(true);
 }
 
 void TFControlPointWidget::Update(VAPoR::RenderParams *rParams)
 {
+    _params = rParams;
+    
     _min = rParams->GetMapperFunc(rParams->GetVariableName())->getMinMapValue();
     _max = rParams->GetMapperFunc(rParams->GetVariableName())->getMaxMapValue();
     
-    ((QDoubleValidator*)_locationEdit->validator())->setRange(_min, _max);
+    ((QDoubleValidator*)_valueEdit->validator())->setRange(_min, _max);
 //    ((QDoubleValidator*)_locationEdit->validator())->setDecimals(2);
     
     if (_opacityId >= 0) {
@@ -44,8 +47,10 @@ void TFControlPointWidget::Update(VAPoR::RenderParams *rParams)
         value = rParams->GetMapperFunc(rParams->GetVariableName())->GetOpacityMap(0)->controlPointValueNormalized(_opacityId);
         if (isUsingMappedValue())
             value = toMappedValue(value);
-        _locationEdit->setText(QString::number(value * 100));
-        _valueEdit->setText(QString::number(rParams->GetMapperFunc(rParams->GetVariableName())->GetOpacityMap(0)->controlPointOpacity(_opacityId)));
+        else
+            value *= 100;
+        _valueEdit->setText(QString::number(value));
+        _opacityEdit->setText(QString::number(rParams->GetMapperFunc(rParams->GetVariableName())->GetOpacityMap(0)->controlPointOpacity(_opacityId)));
     }
 }
 
@@ -68,8 +73,8 @@ void TFControlPointWidget::DeselectControlPoint()
     this->setDisabled(true);
     _opacityId = -1;
     _colorId = -1;
-    _locationEdit->clear();
     _valueEdit->clear();
+    _opacityEdit->clear();
 }
 
 void TFControlPointWidget::paintEvent(QPaintEvent *event)
@@ -84,12 +89,12 @@ void TFControlPointWidget::paintEvent(QPaintEvent *event)
 
 bool TFControlPointWidget::isUsingNormalizedValue() const
 {
-    return _locationEditType->currentIndex() == 0;
+    return _valueEditType->currentIndex() == ValueFormat::Percent;
 }
 
 bool TFControlPointWidget::isUsingMappedValue() const
 {
-    return _locationEditType->currentIndex() == 1;
+    return _valueEditType->currentIndex() == ValueFormat::Mapped;
 }
 
 float TFControlPointWidget::toMappedValue(float normalized) const
@@ -103,4 +108,9 @@ float TFControlPointWidget::toNormalizedValue(float mapped) const
         return 0;
     
     return (mapped - _min) / (_max - _min);
+}
+
+void TFControlPointWidget::valueEditTypeChanged(int)
+{
+    
 }
