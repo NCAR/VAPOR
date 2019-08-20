@@ -19,7 +19,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include "PlotParams.h"
 
 using namespace VAPoR;

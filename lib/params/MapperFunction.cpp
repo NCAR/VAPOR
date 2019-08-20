@@ -25,7 +25,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <algorithm>
 #include <vapor/MapperFunction.h>
 #include <vapor/ColorMap.h>
@@ -463,7 +463,7 @@ void MapperFunction::hsvToRgb(float* hsv, float* rgb)
 			rgb[0] = hsv[2];
 			rgb[2] = b;
 			break;
-		default: assert(0);
+		default: VAssert(0);
 	}
 	return;
 

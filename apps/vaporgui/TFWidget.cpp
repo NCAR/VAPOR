@@ -30,7 +30,6 @@
 #include "RenderEventRouter.h"
 #include "vapor/RenderParams.h"
 #include "vapor/TwoDDataParams.h"
-#include "vapor/DVRParams.h"
 #include "vapor/ResourcePath.h"
 #include "TFWidget.h"
 #include "ErrorReporter.h"
@@ -65,7 +64,9 @@ TFWidget::TFWidget(QWidget* parent)
 	_mainHistoRangeChanged		= false;
 	_secondaryHistoRangeChanged = false;
 	_discreteColormap 			= false;
+    _isOpacitySupported         = true;
 	_isOpacityIntegrated        = false;
+    _wasOpacitySliderReleased = false;
 	_mainVarName	  			= "";
 	_secondaryVarName 			= "";
 
@@ -84,6 +85,9 @@ TFWidget::TFWidget(QWidget* parent)
     _secondaryMaxSliderEdit->SetLabel( QString::fromAscii("Max") );
     _secondaryMaxSliderEdit->SetIntType(false);
     _secondaryMaxSliderEdit->SetExtents(0.f, 1.f);
+        
+        _opacitySlider->setRange(0, 1000);
+        _secondaryOpacitySlider->setRange(0, 1000);
 
 	_cLevel = 0;
 	_refLevel = 0;
@@ -118,13 +122,17 @@ void TFWidget::configureSecondaryTransferFunction() {
         if (_tabWidget->count() < 2) 
             _tabWidget->insertTab(1, _secondaryTFE, "Color Mapped VARIABLE");
 		
+        _tabWidget->setTabEnabled(1, false);
         _mappingFrame->setColorMapping(false);
+        _mappingFrame->setOpacityMapping(false);
 		_whitespaceFrame->hide();
 		_colorInterpolationFrame->hide();
 		_loadSaveFrame->hide();
 	    adjustSize();
     }
     else {
+        _mappingFrame->setColorMapping(true);
+        _mappingFrame->setOpacityMapping(true);
         _tabWidget->removeTab(1);
 		_whitespaceFrame->show();
 		_colorInterpolationFrame->show();
@@ -144,8 +152,10 @@ void TFWidget::Reinit(TFFlags flags) {
     else
         _mappingFrame->setIsolineSliders(false);
 
-    if (_flags & SAMPLING)
+    if (_flags & SAMPLING) {
         _mappingFrame->SetIsSampling(true);
+        _secondaryMappingFrame->SetIsSampling(true);
+    }
 
 	configureSecondaryTransferFunction();
 	configureConstantColorControls();
@@ -190,7 +200,7 @@ void TFWidget::loadTF() {
 	sP->SetTFDir(fileName);
 
 	MapperFunction *tf = _rParams->GetMapperFunc(varname);
-	assert(tf);
+	VAssert(tf);
     
     float cachedMin = tf->getMinMapValue();
     float cachedMax = tf->getMaxMapValue();
@@ -199,6 +209,8 @@ void TFWidget::loadTF() {
     for (int i=0; i<numOpacityMaps; i++) {
         controlPoints.push_back(tf->GetOpacityMap(i)->GetControlPoints());
     }
+    float opacityScale = tf->getOpacityScale();
+
 
 	_paramsMgr->BeginSaveStateGroup("Loading Transfer Function from file");
  
@@ -208,14 +220,18 @@ void TFWidget::loadTF() {
 	}
     else {
         bool loadTF3DataRange = _loadTFDialog->GetLoadTF3DataRange();
-        if ( loadTF3DataRange == false )
+        if ( loadTF3DataRange == false ) {
+            // Ignore values in the file.  Load values from current session.
             tf->setMinMaxMapValue(cachedMin, cachedMax);
+        }
 
         bool loadTF3Opacity = _loadTFDialog->GetLoadTF3OpacityMap();
         if ( loadTF3Opacity == false ) {
+            // Ignore values in the file.  Load values from current session.
             for (int i=0; i<numOpacityMaps; i++) {
                 tf->GetOpacityMap(i)->SetControlPoints(controlPoints[i]);
             }
+            tf->setOpacityScale( opacityScale );
         }
     }
     
@@ -266,7 +282,7 @@ void TFWidget::saveTF() {
 	if (varname.empty()) return;
 
 	MapperFunction *tf = _rParams->GetMapperFunc(varname);
-	assert(tf);
+	VAssert(tf);
 
 	int rc = tf->SaveToFile(s.toStdString());
 	if (rc<0) {
@@ -313,7 +329,7 @@ void TFWidget::getVariableRange(
 		return;
     }
 	
-    assert(rangev.size() == 2);
+    VAssert(rangev.size() == 2);
 
 	range[0] = rangev[0];
 	range[1] = rangev[1];
@@ -327,7 +343,7 @@ void TFWidget::calculateStride( string varName ) {
     std::vector<size_t> dimsAtLevel;
 	int ref = _rParams->GetRefinementLevel();
     int rc = _dataMgr->GetDimLensAtLevel(varName, ref, dimsAtLevel);
-    assert(rc>=0);
+    VAssert(rc>=0);
 
     long size = 1;
     for (int i=0; i<dimsAtLevel.size(); i++)
@@ -343,12 +359,15 @@ void TFWidget::calculateStride( string varName ) {
 float TFWidget::getOpacity()
 {
 	bool mainTF = true;
-	if (_flags & COLORMAP_VAR_IS_IN_TF2)
+	if (_flags & COLORMAP_VAR_IS_IN_TF2 &&
+	    !_rParams->UseSingleColor()
+    ) {
 		mainTF = false;
+    }
 	string varName = getTFVariableName(mainTF);
 
 	MapperFunction *tf = _rParams->GetMapperFunc(varName);
-	assert(tf);
+	VAssert(tf);
 
 	return tf->getOpacityScale();
 }
@@ -444,6 +463,7 @@ void TFWidget::updateSecondarySliders() {
 	_secondaryMinSliderEdit->SetValue(values[0]);
 	_secondaryMaxSliderEdit->SetExtents(range[0], range[1]);
 	_secondaryMaxSliderEdit->SetValue(values[1]);
+    _secondaryOpacitySlider->setValue(convertOpacityToSliderValue(getOpacity()));
 
     _secondaryMinLabel->setText(QString::number(range[0]));
     _secondaryMaxLabel->setText(QString::number(range[1]));
@@ -525,9 +545,9 @@ void TFWidget::Update(DataMgr *dataMgr,
 					RenderParams *rParams,
                     bool internalUpdate) {
 
-	assert(paramsMgr);
-	assert(dataMgr);
-	assert(rParams);
+	VAssert(paramsMgr);
+	VAssert(dataMgr);
+	VAssert(rParams);
 
 	_paramsMgr = paramsMgr;
 	_dataMgr = dataMgr;
@@ -733,8 +753,19 @@ void TFWidget::updateConstColor() {
 
 	_useConstColorCheckbox->blockSignals(true);
 	bool useSingleColor = _rParams->UseSingleColor();
-	if (useSingleColor) _useConstColorCheckbox->setCheckState(Qt::Checked);
-	else _useConstColorCheckbox->setCheckState(Qt::Unchecked);
+	if (useSingleColor) {
+        _useConstColorCheckbox->setCheckState(Qt::Checked);
+        if (_isOpacitySupported)
+            _opacitySlider->show();
+    }
+	else {
+        _useConstColorCheckbox->setCheckState(Qt::Unchecked);
+
+	    if (_flags & COLORMAP_VAR_IS_IN_TF2) {
+            _opacitySlider->hide(); 
+        }
+    }
+
 	_useConstColorCheckbox->blockSignals(false);
 
 	string varName;
@@ -786,8 +817,10 @@ void TFWidget::connectWidgets() {
 		this, SLOT(setRange()));
 	connect(_mappingFrame, SIGNAL(endChange()),
 		this, SLOT(setRange()));
-	connect(_opacitySlider, SIGNAL(valueChanged(int)),
-		this, SLOT(opacitySliderChanged(int)));
+    connect(_opacitySlider, SIGNAL(valueChanged(int)),
+        this, SLOT(opacitySliderChanged(int)));
+    connect(_opacitySlider, SIGNAL(sliderReleased()),
+            this, SLOT(opacitySliderReleased()));
 	connect(_colorSelectButton, SIGNAL(pressed()),
 		this, SLOT(setSingleColor()));
 	connect(_useConstColorCheckbox, SIGNAL(stateChanged(int)),
@@ -797,8 +830,10 @@ void TFWidget::connectWidgets() {
     //
 	connect(_secondaryMappingFrame, SIGNAL(endChange()),
 		this, SLOT(setSecondaryRange()));
-	connect(_secondaryOpacitySlider, SIGNAL(valueChanged(int)),
-		this, SLOT(opacitySliderChanged(int)));
+    connect(_secondaryOpacitySlider, SIGNAL(valueChanged(int)),
+        this, SLOT(opacitySliderChanged(int)));
+    connect(_secondaryOpacitySlider, SIGNAL(sliderReleased()),
+            this, SLOT(opacitySliderReleased()));
 	connect(_updateSecondaryHistoButton, SIGNAL(pressed()), 
 		this, SLOT(updateSecondaryMappingFrame()));
     connect(_autoUpdateSecondaryHistoCheckbox, SIGNAL(stateChanged(int)),
@@ -822,15 +857,27 @@ void TFWidget::emitTFChange() {
 }
 
 void TFWidget::opacitySliderChanged(int value)
-{
+{   
+    if (!_wasOpacitySliderReleased) return;
+    _wasOpacitySliderReleased = false;
+    
 	bool mainTF = true;
-	if (COLORMAP_VAR_IS_IN_TF2)
+	if (COLORMAP_VAR_IS_IN_TF2 &&
+	    !_rParams->UseSingleColor() 
+    ) {
 		mainTF = false;
+    }
 	string varName = getTFVariableName(mainTF);
 	MapperFunction *tf = _rParams->GetMapperFunc(varName);
-	assert(tf);
-	tf->setOpacityScale(convertSliderValueToOpacity(value));
-	emit emitChange();
+	VAssert(tf);
+    tf->setOpacityScale(convertSliderValueToOpacity(value));
+
+    emit emitChange();
+}
+
+void TFWidget::opacitySliderReleased()
+{
+    _wasOpacitySliderReleased = true;
 }
 
 void TFWidget::setRange() {
@@ -925,13 +972,18 @@ void TFWidget::setSingleColor() {
 void TFWidget::setUsingSingleColor(int state) {
 	if (state > 0) {
 		 _rParams->SetUseSingleColor(true);
-		if (_flags & COLORMAP_VAR_IS_IN_TF2)
-			_secondaryTFE->setEnabled(false);
+		if (_flags & COLORMAP_VAR_IS_IN_TF2) {
+            _tabWidget->setTabEnabled(1, false);
+            _opacitySlider->hide(); 
+        }
 	}
 	else {
 		_rParams->SetUseSingleColor(false);
-		if (_flags & COLORMAP_VAR_IS_IN_TF2)
-			_secondaryTFE->setEnabled(true);
+		if (_flags & COLORMAP_VAR_IS_IN_TF2) {
+            _tabWidget->setTabEnabled(1, true);
+            if (_isOpacitySupported)
+                _opacitySlider->show();
+        }
 	}
 }
 
@@ -1024,20 +1076,19 @@ MapperFunction* TFWidget::getMainMapperFunction() {
 	bool mainTF = true;
 	string varname = getTFVariableName(mainTF);
 	MapperFunction *mf = _rParams->GetMapperFunc(varname);
-	assert(mf);
+	VAssert(mf);
 	return mf;
 }
 
 MapperFunction* TFWidget::getSecondaryMapperFunction() {
 	string varname = _rParams->GetColorMapVariableName();
 	MapperFunction *mf = _rParams->GetMapperFunc(varname);
-	assert(mf);
+	VAssert(mf);
 	return mf;
 }
 
 string TFWidget::getTFVariableName(bool mainTF=true) {
 	string varname;
-
 	if (mainTF==true) {
 		if (_flags & COLORMAP_VAR_IS_IN_TF2){
 			varname = _rParams->GetVariableName();
@@ -1056,17 +1107,37 @@ string TFWidget::getTFVariableName(bool mainTF=true) {
 int TFWidget::convertOpacityToSliderValue(float opacity) const
 {
     if (IsOpacityIntegrated())
-        return 100 * sqrtf(opacity);
+        return 1000 * powf(opacity, 1/4.f);
     else
-        return 100 * opacity;
+        return 1000 * opacity;
 }
 
 float TFWidget::convertSliderValueToOpacity(int value) const
 {
     if (IsOpacityIntegrated())
-        return powf(value/100.f, 2);
+        return powf(value/1000.f, 4);
     else
-        return value/100.f;
+        return value/1000.f;
+}
+
+bool TFWidget::IsOpacitySupported() const
+{
+    return _isOpacitySupported;
+}
+
+void TFWidget::SetOpacitySupported(bool value)
+{
+    if (!value && !_opacitySlider->isHidden()) {
+        _opacitySlider->hide(); 
+    }
+    if ( value &&  
+        _opacitySlider->isHidden() && 
+        _isOpacitySupported) {
+            _opacitySlider->show();
+    }
+    _mappingFrame->setOpacityMapping(value);
+    
+    _isOpacitySupported = value;
 }
 
 bool TFWidget::IsOpacityIntegrated() const

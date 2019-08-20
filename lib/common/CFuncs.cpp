@@ -2,7 +2,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cassert>
 #include <cerrno>
 #include <stack>
 #include <sys/types.h>

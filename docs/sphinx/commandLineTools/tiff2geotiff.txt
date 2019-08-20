@@ -1,0 +1,58 @@
+usage: tiff2geotiff [options] input... output
+where options are:
+ -g file	install GeoTIFF metadata from <file>
+ -4 proj4_str	install GeoTIFF metadata from proj4 string
+ -e file	install positioning info from ESRI Worldfile <file>
+ -a		append to output instead of overwriting
+ -m file	Specify filename with multiple timestamps and image placement info:
+			Each line of file has date/timestamp, and 8 floats;
+			first four are lon/lat corners of plot area,
+			second four are relative positions of plot corners in page.
+			This option requires option -4
+ -M file   Specify filename with multiple timestamps, w/o georeferencing:
+			Each line of file has date/timestamp only
+			Option -4 must not be specified.
+ -n llx lly urx ury
+			Install longitude/latitude extents;
+			Four lon and lat values must in quotes in the order:
+			lower-left longitude, lower-left latitude,
+			upper-right longitute, upper-right latitude
+			This option requires option -4
+			Option '-m' overrides this option
+ -o offset	set initial directory offset
+ -p contig	pack samples contiguously (e.g. RGBRGB...)
+ -p separate	store samples separately (e.g. RRR...GGG...BBB...)
+ -s		write output in strips
+ -t		write output in tiles
+ -i		ignore read errors
+ -d		truncate 8 bitspersample to 4bitspersample
+
+ -r #		make each strip have no more than # rows
+ -w #		set output tile width (pixels)
+ -l #		set output tile length (pixels)
+
+ -f lsb2msb	force lsb-to-msb FillOrder for output
+ -f msb2lsb	force msb-to-lsb FillOrder for output
+
+ -c lzw[:opts]	compress output with Lempel-Ziv & Welch encoding
+ -c zip[:opts]	compress output with deflate encoding
+ -c jpeg[:opts]compress output with JPEG encoding
+ -c packbits	compress output with packbits encoding
+ -c g3[:opts]	compress output with CCITT Group 3 encoding
+ -c g4		compress output with CCITT Group 4 encoding
+ -c none	use no compression algorithm on output
+
+Group 3 options:
+ 1d		use default CCITT Group 3 1D-encoding
+ 2d		use optional CCITT Group 3 2D-encoding
+ fill		byte-align EOL codes
+For example, -c g3:2d:fill to get G3-2D-encoded data with byte-aligned EOLs
+
+JPEG options:
+ #		set compression quality level (0-100, default 75)
+ r		output color image as RGB rather than YCbCr
+For example, -c jpeg:r:50 to get JPEG-encoded RGB data with 50% comp. quality
+
+LZW and deflate options:
+ #		set predictor value
+For example, -c lzw:2 to get LZW-encoded data with horizontal differencing

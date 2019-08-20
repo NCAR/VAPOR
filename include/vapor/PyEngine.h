@@ -1,5 +1,5 @@
 #include <vector>
-#include <Python.h>
+#include <vapor/MyPython.h>
 #include <vapor/DataMgr.h>
 #include <vapor/DC.h>
 
@@ -27,7 +27,7 @@ public:
  //! variables created by this class will be managed.
  //
  PyEngine(DataMgr *dataMgr) {
-	assert(dataMgr != NULL);
+	VAssert(dataMgr != NULL);
 	_dataMgr = dataMgr;
  }
 

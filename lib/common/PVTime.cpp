@@ -43,7 +43,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cerrno>
 #include <ctime>
 #include <vapor/PVTime.h>

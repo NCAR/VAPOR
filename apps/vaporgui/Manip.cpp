@@ -19,7 +19,7 @@
 #include <iterator>
 #include <iomanip>
 #include <iostream>
-#include <cassert>
+#include "vapor/VAssert.h"
 #include <cmath>
 
 #include "Manip.h"
@@ -103,10 +103,10 @@ void TranslateStretchManip::transformMatrix(VAPoR::Transform* transform, std::ve
 	vector <double> rotations    = transform->GetRotations();
 	vector <double> scales       = transform->GetScales();
 	vector <double> origin      = transform->GetOrigin();
-	assert(translations.size() == 3); 
-	assert(rotations.size()	   == 3); 
-	assert(scales.size()       == 3); 
-	assert(origin.size()	   == 3);
+	VAssert(translations.size() == 3); 
+	VAssert(rotations.size()	   == 3); 
+	VAssert(scales.size()       == 3); 
+	VAssert(origin.size()	   == 3);
     
     mm->Scale(1/parentScales[0], 1/parentScales[1], 1/parentScales[2]);
     
@@ -145,7 +145,7 @@ void TranslateStretchManip::Update(
 
     double minv[16];
     int rc = minvert(_modelViewMatrix, minv);
-	assert(rc >= 0);
+	VAssert(rc >= 0);
 
 	_cameraPosition[X] = minv[12];
 	_cameraPosition[Y] = minv[13];
@@ -569,7 +569,6 @@ bool TranslateStretchManip::pixelToVector(
 		strHandleMid[0],strHandleMid[1], strHandleMid[2], _modelViewMatrix, 
 		_projectionMatrix, viewport,&screenx,&screeny, &screenz
 	);
-    double screen[3] = {screenx, screeny, screenz};
 	//Obtain the coords of a point in view:
 	bool success = (0 != gluUnProject(
 		(GLdouble)winCoords[0],
@@ -670,8 +669,8 @@ void TranslateStretchManip::deScaleExtents(double extents[8][3]) const {
 	vector <double> dmScales	   = _dmTransform->GetScales();
 	vector <double> rpScales	   = _rpTransform->GetScales();
 
-	assert(rpScales.size()  == 3);
-	assert(dmScales.size()  == 3);
+	VAssert(rpScales.size()  == 3);
+	VAssert(dmScales.size()  == 3);
 
 	double size, midpoint, min, max;
 
@@ -716,8 +715,8 @@ void TranslateStretchManip::deScaleExtents(double* extents) const {
 	vector <double> dmScales	   = _dmTransform->GetScales();
 	vector <double> rpScales	   = _rpTransform->GetScales();
 
-	assert(rpScales.size()  == 3);
-	assert(dmScales.size()  == 3);
+	VAssert(rpScales.size()  == 3);
+	VAssert(dmScales.size()  == 3);
 
 	double size, midpoint;
 	for (int i=0; i<3; i++) {
