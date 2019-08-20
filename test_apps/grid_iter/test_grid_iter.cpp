@@ -12,7 +12,6 @@
 #include <vapor/LayeredGrid.h>
 #include <vapor/CurvilinearGrid.h>
 #include <vapor/StretchedGrid.h>
-#include <vapor/KDTreeRG.h>
 #include <vapor/FileUtils.h>
 
 using namespace Wasp;
@@ -209,8 +208,6 @@ VAPoR::CurvilinearGrid *make_curvilinear_grid() {
         }
     }
 
-    KDTreeRG *kdtree = new KDTreeRG(*xrg, *yrg);
-
     vector<double> zcoords;
     for (int k = 0; k < opt.dims[2]; k++) {
         double z = (opt.maxu[2] - opt.minu[2]) / (opt.dims[2] - 1) * k + opt.minu[2];
@@ -222,7 +219,7 @@ VAPoR::CurvilinearGrid *make_curvilinear_grid() {
     vector<double> minu2d = {opt.minu[0], opt.minu[1]};
     vector<double> maxu2d = {opt.maxu[0], opt.maxu[1]};
     CurvilinearGrid *cg = new CurvilinearGrid(
-        opt.dims, opt.bs, blks, *xrg, *yrg, zcoords, kdtree);
+        opt.dims, opt.bs, blks, *xrg, *yrg, zcoords, NULL);
 
     return (cg);
 }
@@ -259,8 +256,6 @@ VAPoR::CurvilinearGrid *make_curvilinear_terrain_grid() {
         }
     }
 
-    KDTreeRG *kdtree = new KDTreeRG(*xrg, *yrg);
-
     vector<float *> zblks = alloc_blocks(bs, dims);
 
     RegularGrid *zrg = new RegularGrid(
@@ -282,7 +277,7 @@ VAPoR::CurvilinearGrid *make_curvilinear_terrain_grid() {
     vector<double> minu2d = {opt.minu[0], opt.minu[1]};
     vector<double> maxu2d = {opt.maxu[0], opt.maxu[1]};
     CurvilinearGrid *cg = new CurvilinearGrid(
-        opt.dims, opt.bs, blks, *xrg, *yrg, *zrg, kdtree);
+        opt.dims, opt.bs, blks, *xrg, *yrg, *zrg, NULL);
 
     return (cg);
 }

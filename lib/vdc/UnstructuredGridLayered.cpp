@@ -31,21 +31,24 @@ UnstructuredGridLayered::UnstructuredGridLayered(
     Location location, // node,face, edge
     size_t maxVertexPerFace,
     size_t maxFacePerVertex,
+    long nodeOffset,
+    long cellOffset,
     const UnstructuredGridCoordless &xug,
     const UnstructuredGridCoordless &yug,
     const UnstructuredGridCoordless &zug,
-    const KDTreeRG *kdtree) : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, 3,
-                                               vertexOnFace, faceOnVertex, faceOnFace, location,
-                                               maxVertexPerFace, maxFacePerVertex),
-                              _ug2d(
-                                  vector<size_t>{vertexDims[0]},
-                                  vector<size_t>{faceDims[0]},
-                                  edgeDims.size() ? vector<size_t>{edgeDims[0]} : vector<size_t>(),
-                                  vector<size_t>{bs[0]},
-                                  vector<float *>(), vertexOnFace, faceOnVertex, faceOnFace, location,
-                                  maxVertexPerFace, maxFacePerVertex, xug, yug,
-                                  UnstructuredGridCoordless(), kdtree),
-                              _zug(zug) {
+    const QuadTreeRectangle<float, size_t> *qtr) : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, 3,
+                                                                    vertexOnFace, faceOnVertex, faceOnFace, location,
+                                                                    maxVertexPerFace, maxFacePerVertex,
+                                                                    nodeOffset, cellOffset),
+                                                   _ug2d(
+                                                       vector<size_t>{vertexDims[0]},
+                                                       vector<size_t>{faceDims[0]},
+                                                       edgeDims.size() ? vector<size_t>{edgeDims[0]} : vector<size_t>(),
+                                                       vector<size_t>{bs[0]},
+                                                       vector<float *>(), vertexOnFace, faceOnVertex, faceOnFace, location,
+                                                       maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset, xug, yug,
+                                                       UnstructuredGridCoordless(), qtr),
+                                                   _zug(zug) {
 
     VAssert(xug.GetDimensions().size() == 1);
     VAssert(yug.GetDimensions().size() == 1);
