@@ -19,10 +19,10 @@ TFEditor::TFEditor()
 //    layout->setSpacing(0);
     layout->setMargin(12);
     _tab()->setLayout(layout);
-    layout->addWidget(controlPointWidget = new TFControlPointWidget);
     layout->addWidget(tff = new TFOpacityWidget);
     layout->addWidget(tfh = new TFHistogramWidget);
     layout->addWidget(colorWidget = new TFColorWidget);
+    layout->addWidget(controlPointWidget = new TFControlPointWidget);
     layout->addWidget(range = new QRangeSlider);
     layout->addWidget(colorMapTypeDropdown = new ParamsWidgetDropdown(VAPoR::ColorMap::_interpTypeTag, {"Linear", "Discrete", "Diverging"}, "Color Interpolation"));
     layout->addWidget(c = new ParamsWidgetColor("test"));
