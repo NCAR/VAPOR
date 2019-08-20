@@ -488,7 +488,7 @@ public:
         void   SetNodeFaceVar(std::string node_face_var)
         {
             if (_mtype == STRUCTURED) return;
-            _node_face_var = _node_face_var;
+            _node_face_var = node_face_var;
         }
 
         //! Set the name of the optional edge dimension

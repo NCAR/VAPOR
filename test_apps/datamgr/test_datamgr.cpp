@@ -313,6 +313,7 @@ void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts)
 
     cout << setprecision(16) << "User time: " << timecoords[ts] << endl;
     cout << endl;
+    delete g;
 }
 
 int main(int argc, char **argv)

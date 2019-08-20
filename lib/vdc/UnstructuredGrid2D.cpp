@@ -22,15 +22,22 @@ using namespace VAPoR;
 UnstructuredGrid2D::UnstructuredGrid2D(const std::vector<size_t> &vertexDims, const std::vector<size_t> &faceDims, const std::vector<size_t> &edgeDims, const std::vector<size_t> &bs,
                                        const std::vector<float *> &blks, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                                        Location location,    // node,face, edge
-                                       size_t maxVertexPerFace, size_t maxFacePerVertex, const UnstructuredGridCoordless &xug, const UnstructuredGridCoordless &yug,
-                                       const UnstructuredGridCoordless &zug, const KDTreeRG *kdtree)
-: UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, 2, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex), _xug(xug), _yug(yug), _zug(zug), _kdtree(kdtree)
+                                       size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset, const UnstructuredGridCoordless &xug, const UnstructuredGridCoordless &yug,
+                                       const UnstructuredGridCoordless &zug, const QuadTreeRectangle<float, size_t> *qtr)
+: UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, 2, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset), _xug(xug), _yug(yug),
+  _zug(zug), _qtr(qtr)
 {
     VAssert(xug.GetDimensions() == GetDimensions());
     VAssert(yug.GetDimensions() == GetDimensions());
     VAssert(zug.GetDimensions() == GetDimensions() || zug.GetDimensions().size() == 0);
 
     VAssert(location == NODE);
+
+    _qtrOwner = false;
+    if (!_qtr) {
+        _qtr = _makeQuadTreeRectangle();
+        _qtrOwner = true;
+    }
 }
 
 vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
@@ -138,7 +145,29 @@ void UnstructuredGrid2D::GetIndices(const std::vector<double> &coords, std::vect
     vector<double> cCoords = coords;
     ClampCoord(cCoords);
 
-    _kdtree->Nearest(cCoords, indices);
+    double *       lambda = new double[_maxVertexPerFace];
+    int            nlambda;
+    size_t         face;
+    vector<size_t> nodes;
+
+    bool ok = _insideGrid(cCoords, face, nodes, lambda, nlambda);
+    if (!ok) {
+        // Ugh. Should be returning an invalid index (or false status)
+        //
+        indices.push_back(0);
+        delete[] lambda;
+        return;
+    }
+
+    // Largest lambda value corresponds to closest vertex on face
+    //
+    int maxindx = lambda[0];
+    for (int i = 1; i < nlambda; i++) {
+        if (lambda[i] > lambda[maxindx]) maxindx = i;
+    }
+    indices.push_back(nodes[maxindx]);
+    delete[] lambda;
+    return;
 }
 
 bool UnstructuredGrid2D::GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &cindices, std::vector<std::vector<size_t>> &nodes, std::vector<double> &lambdav) const
@@ -199,11 +228,34 @@ float UnstructuredGrid2D::GetValueNearestNeighbor(const std::vector<double> &coo
     vector<double> cCoords = coords;
     ClampCoord(cCoords);
 
-    vector<size_t> vertex_indices;
-    _kdtree->Nearest(cCoords, vertex_indices);
-    VAssert(vertex_indices.size() == 1);
+    double *       lambda = new double[_maxVertexPerFace];
+    int            nlambda;
+    size_t         face;
+    vector<size_t> nodes;
 
-    return (GetValueAtIndex(vertex_indices));
+    // See if point is inside any cells (faces)
+    //
+    bool inside = _insideGrid(cCoords, face, nodes, lambda, nlambda);
+
+    if (!inside) {
+        delete[] lambda;
+        return (GetMissingValue());
+    }
+    VAssert(face < GetCellDimensions()[0]);
+
+    const int *ptr = _vertexOnFace + (face * _maxVertexPerFace);
+
+    int maxindx = lambda[0];
+    for (int i = 1; i < nlambda; i++) {
+        if (lambda[i] > lambda[maxindx]) maxindx = i;
+    }
+
+    long  offset = GetNodeOffset();
+    float value = AccessIJK(*ptr + maxindx + offset);
+
+    delete[] lambda;
+
+    return ((float)value);
 }
 
 float UnstructuredGrid2D::GetValueLinear(const std::vector<double> &coords) const
@@ -227,16 +279,12 @@ float UnstructuredGrid2D::GetValueLinear(const std::vector<double> &coords) cons
         delete[] lambda;
         return (GetMissingValue());
     }
+
+    VAssert(nodes.size() == nlambda);
     VAssert(face < GetCellDimensions()[0]);
 
-    const int *ptr = _vertexOnFace + (face * _maxVertexPerFace);
-
     double value = 0;
-    long   offset = GetNodeOffset();
-    for (int i = 0; i < nlambda; i++) {
-        value += AccessIJK(*ptr + offset, 0, 0) * lambda[i];
-        ptr++;
-    }
+    for (int i = 0; i < nodes.size(); i++) { value += AccessIJK(nodes[i], 0, 0) * lambda[i]; }
 
     delete[] lambda;
 
@@ -345,30 +393,16 @@ bool UnstructuredGrid2D::_insideGridNodeCentered(const vector<double> &coords, s
 
     double pt[] = {coords[0], coords[1]};
 
-    // Find the indices for the nearest grid point in the plane
+    // Find the indices for the faces that might contain the point
     //
-    vector<size_t> vertex_indices;
-    _kdtree->Nearest(coords, vertex_indices);
-    VAssert(vertex_indices.size() == 1);
+    vector<size_t> face_indices;
+    _qtr->GetPayloadContained(pt[0], pt[1], face_indices);
 
-    vector<size_t> dims = GetDimensions();
-    VAssert(vertex_indices[0] < dims[0]);
-
-    const int *ptr = _faceOnVertex + (vertex_indices[0] * _maxFacePerVertex);
-    long       offset = GetCellOffset();
-
-    for (int i = 0; i < _maxFacePerVertex; i++) {
-        if (*ptr == GetMissingID()) break;
-        if (*ptr == GetBoundaryID()) continue;
-
-        long face = *ptr + offset;
-        if (face < 0) break;
-
-        if (_insideFace(face, pt, nodes, lambda, nlambda)) {
-            face_index = face;
+    for (int i = 0; i < face_indices.size(); i++) {
+        if (_insideFace(face_indices[i], pt, nodes, lambda, nlambda)) {
+            face_index = face_indices[i];
             return (true);
         }
-        ptr++;
     }
 
     return (false);
@@ -404,9 +438,61 @@ bool UnstructuredGrid2D::_insideFace(size_t face, double pt[2], vector<size_t> &
         return (false);
     }
 
+    if (!Grid::PointInsideBoundingRectangle(pt, verts, nlambda)) {
+        delete[] verts;
+        return (false);
+    }
+
     bool ret = WachspressCoords2D(verts, pt, nlambda, lambda);
 
     delete[] verts;
 
     return ret;
+}
+
+QuadTreeRectangle<float, size_t> *UnstructuredGrid2D::_makeQuadTreeRectangle() const
+{
+    size_t  maxNodes = GetMaxVertexPerCell();
+    size_t  nodeDim = GetNodeDimensions().size();
+    size_t *nodes = new size_t[maxNodes * nodeDim];
+
+    size_t coordDim = GetGeometryDim();
+    VAssert(coordDim == 2);
+
+    vector<double> minu, maxu;
+    GetUserExtents(minu, maxu);
+
+    const vector<size_t> &dims = GetDimensions();
+    size_t                reserve_size = dims[0];
+
+    QuadTreeRectangle<float, size_t> *qtr = new QuadTreeRectangle<float, size_t>((float)minu[0], (float)minu[1], (float)maxu[0], (float)maxu[1], 16, reserve_size);
+
+    double                  coords[2];
+    Grid::ConstCellIterator it = ConstCellBegin();
+    Grid::ConstCellIterator end = ConstCellEnd();
+    for (; it != end; ++it) {
+        const vector<size_t> &cell = *it;
+        VAssert(cell.size() == 1);
+        int numNodes;
+        GetCellNodes(cell.data(), nodes, numNodes);
+        if (numNodes < 2) continue;
+
+        GetUserCoordinates(&nodes[0], coords);
+        float left = (float)coords[0];
+        float right = (float)coords[0];
+        float top = (float)coords[1];
+        float bottom = (float)coords[1];
+        for (int i = 1; i < numNodes; i++) {
+            GetUserCoordinates(&nodes[i * nodeDim], coords);
+            if (coords[0] < left) left = coords[0];
+            if (coords[0] > right) right = coords[0];
+            if (coords[1] < top) top = coords[1];
+            if (coords[1] > bottom) bottom = coords[1];
+        }
+        qtr->Insert(left, top, right, bottom, cell[0]);
+    }
+
+    delete[] nodes;
+
+    return (qtr);
 }

@@ -19,7 +19,7 @@ namespace VAPoR {
 
 class VDF_API GridHelper : public Wasp::MyBase {
 public:
-    GridHelper(size_t max_size = 10) : _kdtreeCache(max_size) {}
+    GridHelper(size_t max_size = 10) : _qtrCache(max_size) {}
 
     ~GridHelper();
 
@@ -111,7 +111,7 @@ private:
         size_t                                     _max_size;
     };
 
-    lru_cache<string, KDTreeRG> _kdtreeCache;
+    lru_cache<string, QuadTreeRectangle<float, size_t>> _qtrCache;
 
     RegularGrid *_make_grid_regular(const std::vector<size_t> &dims, const std::vector<float *> &blkvec, const std::vector<size_t> &bs, const std::vector<size_t> &bmin, const std::vector<size_t> &bmax
 
@@ -152,7 +152,7 @@ private:
 
     bool _isCurvilinear(const DC::Mesh &m, const std::vector<DC::CoordVar> &cvarsinfo, const std::vector<std::vector<string>> &cdimnames) const;
 
-    const KDTreeRG *_getKDTree2D(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const Grid &xg, const Grid &yg, const vector<size_t> &bmin, const vector<size_t> &bmax);
+    string _getQuadTreeRectangleKey(size_t ts, int level, int lod, const vector<DC::CoordVar> &cvarsinfo, const vector<size_t> &bmin, const vector<size_t> &bmax) const;
 };
 
 };    // namespace VAPoR

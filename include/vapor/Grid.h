@@ -579,7 +579,41 @@ public:
     virtual void SetMinAbs(const std::vector<size_t> &minAbs)
     {
         VAssert(minAbs.size() == GetDimensions().size());
-        _minAbs = _minAbs;
+        _minAbs = minAbs;
+    }
+
+    //! Test whether a point is contained in a bounding rectangle
+    //!
+    //! This static method checks to see if a 2D point \p pt is contained
+    //! in the smallest rectangle that bounds the list of 2D points (vertices)
+    //! given by \p verts. If \p pt is inside or on the boundary of the bounding
+    //! rectangle true is returned, otherwise false
+    //!
+    //! \param[in] pt A two-element array of point coordinates
+    //! \param[in] verts An array of dimensions \p n * 2 containing
+    //! a list of \p points.
+    //! \param[in] n The number of 2D points in \p verts
+    //!
+    //! \retval status Returns true if \pt is inside or on the bounding rectangle
+    //! of \p verts. False otherwise.
+    //
+    static bool PointInsideBoundingRectangle(const double pt[], const double verts[], int n)
+    {
+        VAssert(n > 2);
+
+        double left = verts[0];
+        double right = verts[0];
+        double top = verts[1];
+        double bottom = verts[1];
+
+        for (int i = 1; i < n; i++) {
+            if (verts[i * 2 + 0] < left) left = verts[i * 2 + 0];
+            if (verts[i * 2 + 0] > right) right = verts[i * 2 + 0];
+            if (verts[i * 2 + 1] < top) top = verts[i * 2 + 1];
+            if (verts[i * 2 + 1] > bottom) bottom = verts[i * 2 + 1];
+        }
+
+        return ((left <= pt[0]) && (right >= pt[0]) && (top <= pt[1]) && (bottom >= pt[1]));
     }
 
     VDF_API friend std::ostream &operator<<(std::ostream &o, const Grid &g);

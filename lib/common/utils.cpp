@@ -20,69 +20,91 @@ void *SmartBuf::Alloc(size_t size)
 // convert tuple of multi-dimensional coordinates, 'coord', for a space
 // with min and max bounds to a linear offset from 'min'
 //
-size_t Wasp::LinearizeCoords(const vector<size_t> &coords, const vector<size_t> &min, const vector<size_t> &max)
+size_t Wasp::LinearizeCoords(const size_t *coords, const size_t *min, const size_t *max, int n)
 {
     size_t offset = 0;
 
-    VAssert(min.size() == max.size());
-    VAssert(min.size() == max.size());
-
-    for (int i = 0; i < coords.size(); i++) {
+    for (int i = 0; i < n; i++) {
         VAssert(coords[i] >= min[i]);
         VAssert(coords[i] <= max[i]);
     }
 
     size_t factor = 1;
-    for (int i = 0; i < coords.size(); i++) {
+    for (int i = 0; i < n; i++) {
         offset += factor * (coords[i] - min[i]);
         factor *= max[i] - min[i] + 1;
     }
     return (offset);
 }
 
-size_t Wasp::LinearizeCoords(const vector<size_t> &coords, const vector<size_t> &dims)
+size_t Wasp::LinearizeCoords(const std::vector<size_t> &coords, const std::vector<size_t> &dims)
 {
     VAssert(coords.size() == dims.size());
+    return (LinearizeCoords(coords.data(), dims.data(), coords.size()));
+}
 
-    vector<size_t> min(dims.size());
-    vector<size_t> max(dims.size());
+size_t Wasp::LinearizeCoords(const size_t *coords, const size_t *dims, int n)
+{
+    size_t min[n];
+    size_t max[n];
 
-    for (int i = 0; i < dims.size(); i++) {
+    for (int i = 0; i < n; i++) {
         min[i] = 0;
         max[i] = dims[i] - 1;
     }
 
-    return (Wasp::LinearizeCoords(coords, min, max));
+    return (Wasp::LinearizeCoords(coords, min, max, n));
 }
 
-vector<size_t> Wasp::VectorizeCoords(size_t offset, const vector<size_t> &min, const vector<size_t> &max)
+size_t Wasp::LinearizeCoords(const std::vector<size_t> &coords, const std::vector<size_t> &min, const std::vector<size_t> &max)
 {
-    VAssert(min.size() == max.size());
+    VAssert(coords.size() == min.size());
+    VAssert(coords.size() == max.size());
+    return (LinearizeCoords(coords.data(), min.data(), max.data(), coords.size()));
+}
 
-    vector<size_t> coords(min.size());
-
+void Wasp::VectorizeCoords(size_t offset, const size_t *min, const size_t *max, size_t *coords, int n)
+{
     size_t factor = 1;
-    for (int i = 0; i < coords.size(); i++) {
+    for (int i = 0; i < n; i++) {
         VAssert(min[i] <= max[i]);
         coords[i] = (offset % (factor * (max[i] - min[i] + 1))) / factor;
         offset = offset - coords[i] * factor;
         factor *= (max[i] - min[i] + 1);
     }
     VAssert(offset == 0);
-
-    return (coords);
 }
 
-vector<size_t> Wasp::VectorizeCoords(size_t offset, const vector<size_t> &dims)
+std::vector<size_t> Wasp::VectorizeCoords(size_t offset, const std::vector<size_t> &min, const std::vector<size_t> &max)
 {
-    vector<size_t> min(dims.size());
-    vector<size_t> max(dims.size());
-    for (int i = 0; i < dims.size(); i++) {
+    VAssert(min.size() == max.size());
+
+    size_t coords[min.size()];
+    VectorizeCoords(offset, min.data(), max.data(), coords, min.size());
+    std::vector<size_t> coordsvec(min.size(), 0);
+    for (int i = 0; i < min.size(); i++) coordsvec[i] = coords[i];
+    return (coordsvec);
+}
+
+void Wasp::VectorizeCoords(size_t offset, const size_t *dims, size_t *coords, int n)
+{
+    size_t min[n];
+    size_t max[n];
+    for (int i = 0; i < n; i++) {
         min[i] = 0;
         max[i] = dims[i] - 1;
     }
 
-    return (Wasp::VectorizeCoords(offset, min, max));
+    Wasp::VectorizeCoords(offset, min, max, coords, n);
+}
+
+std::vector<size_t> Wasp::VectorizeCoords(size_t offset, const std::vector<size_t> &dims)
+{
+    size_t coords[dims.size()];
+    VectorizeCoords(offset, dims.data(), coords, dims.size());
+    std::vector<size_t> coordsvec(dims.size(), 0);
+    for (int i = 0; i < dims.size(); i++) coordsvec[i] = coords[i];
+    return (coordsvec);
 }
 
 vector<size_t> Wasp::IncrementCoords(const vector<size_t> &min, const vector<size_t> &max, vector<size_t> counter, int dim)

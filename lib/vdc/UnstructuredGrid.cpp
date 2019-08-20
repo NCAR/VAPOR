@@ -21,7 +21,7 @@ using namespace VAPoR;
 UnstructuredGrid::UnstructuredGrid(const std::vector<size_t> &vertexDims, const std::vector<size_t> &faceDims, const std::vector<size_t> &edgeDims, const std::vector<size_t> &bs,
                                    const std::vector<float *> &blks, size_t topology_dimension, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                                    Location location,    // node,face, edge
-                                   size_t maxVertexPerFace, size_t maxFacePerVertex)
+                                   size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset)
 : Grid(location == NODE ? vertexDims : (location == CELL ? faceDims : edgeDims), bs, blks, topology_dimension)
 {
     VAssert(vertexDims.size() == 1 || vertexDims.size() == 2);
@@ -48,6 +48,9 @@ UnstructuredGrid::UnstructuredGrid(const std::vector<size_t> &vertexDims, const 
     _maxFacePerVertex = maxFacePerVertex;
     _missingID = -1;
     _boundaryID = -2;
+
+    Grid::SetNodeOffset(nodeOffset);
+    Grid::SetCellOffset(cellOffset);
 }
 
 bool UnstructuredGrid::GetCellNodes(const size_t cindices[], size_t nodes[], int &n) const
@@ -73,6 +76,8 @@ bool UnstructuredGrid::GetCellNodes(const size_t cindices[], size_t nodes[], int
         }
     } else {    // layered case
 
+        // Bottom layer
+        //
         for (int i = 0; i < _maxVertexPerFace; i++, ptr++) {
             if (*ptr == GetMissingID() || *ptr + offset < 0) break;
             if (*ptr == GetBoundaryID()) continue;

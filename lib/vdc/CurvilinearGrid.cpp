@@ -5,28 +5,33 @@
 #include <cfloat>
 #include <vapor/utils.h>
 #include <vapor/CurvilinearGrid.h>
-#include <vapor/KDTreeRG.h>
+#include <vapor/QuadTreeRectangle.hpp>
 #include <vapor/vizutil.h>
 
 using namespace std;
 using namespace VAPoR;
 
-void CurvilinearGrid::_curvilinearGrid(const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg, const vector<double> &zcoords, const KDTreeRG *kdtree)
+void CurvilinearGrid::_curvilinearGrid(const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg, const vector<double> &zcoords, const QuadTreeRectangle<float, size_t> *qtr)
 {
     _zcoords.clear();
     _minu.clear();
     _maxu.clear();
-    _kdtree = kdtree;
     _xrg = xrg;
     _yrg = yrg;
     _zrg = zrg;
-    _terrainFollowing = false;
 
     _zcoords = zcoords;
+
+    _qtr = qtr;
+    _qtrOwner = false;
+    if (!_qtr) {
+        _qtr = _makeQuadTreeRectangle();
+        _qtrOwner = true;
+    }
 }
 
 CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const vector<double> &zcoords,
-                                 const KDTreeRG *kdtree)
+                                 const QuadTreeRectangle<float, size_t> *qtr)
 : StructuredGrid(dims, bs, blks)
 {
     VAssert(dims.size() == 2 || dims.size() == 3);
@@ -37,14 +42,14 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     //
     VAssert(xrg.GetDimensions().size() == 2);
     VAssert(yrg.GetDimensions().size() == 2);
-    VAssert(kdtree->GetDimensions().size() == 2);
     VAssert(zcoords.size() == 0 || zcoords.size() == dims[2]);
 
-    _curvilinearGrid(xrg, yrg, RegularGrid(), zcoords, kdtree);
+    _terrainFollowing = false;
+    _curvilinearGrid(xrg, yrg, RegularGrid(), zcoords, qtr);
 }
 
 CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg,
-                                 const KDTreeRG *kdtree)
+                                 const QuadTreeRectangle<float, size_t> *qtr)
 : StructuredGrid(dims, bs, blks)
 {
     VAssert(dims.size() == 3);
@@ -56,14 +61,13 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     VAssert(xrg.GetDimensions().size() == 2);
     VAssert(yrg.GetDimensions().size() == 2);
     VAssert(zrg.GetDimensions().size() == 3);
-    VAssert(kdtree->GetDimensions().size() == 2);
-
-    _curvilinearGrid(xrg, yrg, zrg, vector<double>(), kdtree);
 
     _terrainFollowing = true;
+    _curvilinearGrid(xrg, yrg, zrg, vector<double>(), qtr);
 }
 
-CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const KDTreeRG *kdtree)
+CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg,
+                                 const QuadTreeRectangle<float, size_t> *qtr)
 : StructuredGrid(dims, bs, blks)
 {
     VAssert(dims.size() == 2);
@@ -74,9 +78,9 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
     //
     VAssert(xrg.GetDimensions().size() == 2);
     VAssert(yrg.GetDimensions().size() == 2);
-    VAssert(kdtree->GetDimensions().size() == 2);
 
-    _curvilinearGrid(xrg, yrg, RegularGrid(), vector<double>(), kdtree);
+    _terrainFollowing = false;
+    _curvilinearGrid(xrg, yrg, RegularGrid(), vector<double>(), qtr);
 }
 
 vector<size_t> CurvilinearGrid::GetCoordDimensions(size_t dim) const
@@ -340,19 +344,13 @@ void CurvilinearGrid::GetIndices(const std::vector<double> &coords, std::vector<
 {
     indices.clear();
 
-    // Clamp coordinates on periodic boundaries to grid extents
+    bool found = GetIndicesCell(coords, indices);
+    if (found) return;
+
+    // Ugh. Should be returning an invalid index (or false status)
     //
-    vector<double> cCoords = coords;
-    ClampCoord(cCoords);
-
-    // First get horizontal coordinates, which are on curvilinear grid
-    //
-    vector<double> coords2D = {cCoords[0], cCoords[1]};
-    _kdtree->Nearest(coords2D, indices);
-
-    if (GetGeometryDim() < 3) return;
-
-    return (_getIndicesHelper(coords, indices));
+    indices.clear();
+    for (int i = 0; i < GetGeometryDim(); i++) { indices.push_back(0); }
 }
 
 bool CurvilinearGrid::GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const
@@ -763,6 +761,42 @@ bool CurvilinearGrid::_insideGridHelperTerrain(double x, double y, double z, con
     return (true);
 }
 
+bool CurvilinearGrid::_insideFace(const vector<size_t> &face, double pt[2], double lambda[4]) const
+{
+    double verts[12];    // space for 4 vertices with 3D user coordinates
+    size_t nodes[24];    // space for 8 nodes with 3D integer coordinates
+    int    n;
+
+    size_t gDim = GetGeometryDim();
+
+    bool ok = GetCellNodes(face.data(), nodes, n);
+    VAssert(ok);
+
+    // For 3D data GetCellNodes returns 3D cells. We only need the 2D
+    // bottom face (all cells in a vertical column have same horizontal
+    // coordinates
+    // for layered 3D data)
+    //
+    if (gDim > 2) n /= 2;
+    VAssert(n == 4);
+
+    // Get X and Y coordinates for each vertex making up the face
+    //
+    for (int i = 0; i < n; i++) {
+        // The nodes have a 3D index, but we're only interested
+        // in the X & Y user coordinates returned - the Z coordinate
+        // returned in verts gets overwritten each loop iteration
+        //
+        GetUserCoordinates(&nodes[i * gDim], &verts[i * 2]);
+    }
+
+    if (!Grid::PointInsideBoundingRectangle(pt, verts, 4)) { return (false); }
+
+    bool ret = WachspressCoords2D(verts, pt, 4, lambda);
+
+    return ret;
+}
+
 // Search for a point inside the grid. If the point is inside return true,
 // and provide the Wachspress weights/coordinates for the point within
 // the XY quadrilateral cell containing the point in XY, and the linear
@@ -776,54 +810,28 @@ bool CurvilinearGrid::_insideGrid(double x, double y, double z, size_t &i, size_
     for (int l = 0; l < 2; l++) zwgt[l] = 0.0;
     i = j = k = 0;
 
-    vector<float> coordu;
-    coordu.push_back(x);
-    coordu.push_back(y);
+    const vector<size_t> &dims = StructuredGrid::GetDimensions();
+    size_t                dims2d[] = {dims[0], dims[1]};
 
-    // Find the indeces for the nearest grid point in the horizontal plane
+    // Find the indices for the faces that might contain the point
     //
-    vector<size_t> indices;
-    _kdtree->Nearest(coordu, indices);
-    VAssert(indices.size() == 2);
+    vector<size_t> face_indices;
+    _qtr->GetPayloadContained(x, y, face_indices);
 
-    vector<size_t> dims = StructuredGrid::GetDimensions();
-
-    // Now visit each quadrilateral that shares a vertex with the returned
-    // grid indeces. Use Wachspress coordinates to determine if point is
-    // inside a quad.
-    //
-    // First handle boundary cases
-    //
-    size_t i0 = (indices[0] > 0) ? indices[0] - 1 : 0;
-    size_t i1 = (indices[0] < dims[0] - 1) ? indices[0] : dims[0] - 2;
-    size_t j0 = (indices[1] > 0) ? indices[1] - 1 : 0;
-    size_t j1 = (indices[1] < dims[1] - 1) ? indices[1] : dims[1] - 2;
-
-    // Now walk the surrounding quads. If found (inside==true),
-    // i and J are set to horizontal indices.
-    //
-    bool   inside = false;
-    double pt[] = {x, y};
-    double verts[8];
-    for (int jj = j0; jj <= j1 && !inside; jj++) {
-        for (int ii = i0; ii <= i1 && !inside; ii++) {
-            verts[0] = _xrg.AccessIJK(ii, jj, 0);
-            verts[1] = _yrg.AccessIJK(ii, jj, 0);
-            verts[2] = _xrg.AccessIJK(ii + 1, jj, 0);
-            verts[3] = _yrg.AccessIJK(ii + 1, jj, 0);
-            verts[4] = _xrg.AccessIJK(ii + 1, jj + 1, 0);
-            verts[5] = _yrg.AccessIJK(ii + 1, jj + 1, 0);
-            verts[6] = _xrg.AccessIJK(ii, jj + 1, 0);
-            verts[7] = _yrg.AccessIJK(ii, jj + 1, 0);
-            inside = VAPoR::WachspressCoords2D(verts, pt, 4, lambda);
-            if (inside) {
-                i = ii;
-                j = jj;
-            }
+    bool           inside = false;
+    double         pt[] = {x, y};
+    vector<size_t> face(2, 0);
+    for (int ii = 0; ii < face_indices.size(); ii++) {
+        Wasp::VectorizeCoords(face_indices[ii], dims2d, face.data(), 2);
+        if (_insideFace(face, pt, lambda)) {
+            i = face[0];
+            j = face[1];
+            inside = true;
+            break;
         }
     }
 
-    if (!inside) { return (false); }
+    if (!inside) return (false);
 
     if (GetGeometryDim() == 2) {
         zwgt[0] = 1.0;
@@ -832,8 +840,64 @@ bool CurvilinearGrid::_insideGrid(double x, double y, double z, size_t &i, size_
     }
 
     if (_terrainFollowing) {
-        return (_insideGridHelperTerrain(x, y, z, i, j, k, zwgt));
+        return (_insideGridHelperTerrain(x, y, z, face[0], face[1], k, zwgt));
     } else {
         return (_insideGridHelperStretched(z, k, zwgt));
     }
+}
+
+QuadTreeRectangle<float, size_t> *CurvilinearGrid::_makeQuadTreeRectangle() const
+{
+    vector<double> minu, maxu;
+    GetUserExtents(minu, maxu);
+
+    const vector<size_t> &dims = GetDimensions();
+    const vector<size_t>  dims2d = {dims[0], dims[1]};
+    size_t                reserve_size = dims2d[0] * dims2d[1];
+
+    QuadTreeRectangle<float, size_t> *qtr = new QuadTreeRectangle<float, size_t>((float)minu[0], (float)minu[1], (float)maxu[0], (float)maxu[1], 16, reserve_size);
+
+    // Loop over horizontal dimensions only - the grid, if 3D, is layered.
+    // There are dims2d[i]-1 cells (faces) along each dimension.
+    //
+    float coords[2];
+    for (size_t j = 0; j < dims2d[1] - 1; j++) {
+        for (size_t i = 0; i < dims2d[0] - 1; i++) {
+            // Find bounding rectangle for each cell
+            //
+            float left = std::numeric_limits<float>::max();
+            float right = std::numeric_limits<float>::lowest();
+            float top = std::numeric_limits<float>::max();
+            float bottom = std::numeric_limits<float>::lowest();
+            for (size_t jj = 0; jj < 2; jj++) {
+                for (size_t ii = 0; ii < 2; ii++) {
+                    coords[0] = _xrg.AccessIJK(i + ii, j + jj);
+                    coords[1] = _yrg.AccessIJK(i + ii, j + jj);
+                    if (coords[0] < left) left = coords[0];
+                    if (coords[0] > right) right = coords[0];
+                    if (coords[1] < top) top = coords[1];
+                    if (coords[1] > bottom) bottom = coords[1];
+                }
+            }
+
+            // face index is index of first node in the face
+            //
+            vector<size_t> face = {i, j};
+            qtr->Insert(left, top, right, bottom, Wasp::LinearizeCoords(face, dims2d));
+        }
+    }
+
+#ifdef DEBUG
+    vector<size_t> payload_histo;
+    vector<size_t> level_histo;
+    qtr->GetStats(payload_histo, level_histo);
+    cout << "Payload histo" << endl;
+    for (int i = 0; i < payload_histo.size(); i++) { cout << "	" << i << " " << payload_histo[i] << endl; }
+
+    cout << "Level histo" << endl;
+    for (int i = 0; i < level_histo.size(); i++) { cout << "	" << i << " " << level_histo[i] << endl; }
+    cout << endl;
+#endif
+
+    return (qtr);
 }

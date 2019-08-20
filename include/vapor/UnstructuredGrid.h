@@ -107,11 +107,17 @@ public:
     //!
     //! \param[in] maxVertexPerFace The maxium number of nodes that a face
     //! may have.
+    //!
+    //! \param[in] nodeOffset The offset from zero for the first element
+    //! in \p vertexOnFace
+    //!
+    //! \param[in] cellOffset The offset from zero for the first element
+    //! in \p faceOnVertex or \p faceOnFace
     //
     UnstructuredGrid(const std::vector<size_t> &vertexDims, const std::vector<size_t> &faceDims, const std::vector<size_t> &edgeDims, const std::vector<size_t> &bs, const std::vector<float *> &blks,
                      size_t topology_dimension, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                      Location location,    // node,face, edge
-                     size_t maxVertexPerFace, size_t maxFacePerVertex
+                     size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset
 
     );
 
@@ -166,6 +172,11 @@ public:
         VAssert(coords.size() >= GetGeometryDim());
         while (coords.size() > GetGeometryDim()) { coords.pop_back(); }
     }
+
+    // A no-op for unstructured grids. Needs to be set in the constuctor :-(
+    //
+    virtual void SetNodeOffset(long offset) override {}
+    virtual void SetCellOffset(long offset) override {}
 
     /////////////////////////////////////////////////////////////////////////////
     //
