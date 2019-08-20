@@ -1315,7 +1315,6 @@ void LoadTFDialog::buttonChecked() {
     }
 
     _fileDialog->selectFile( path + "//" + file );
-    cout << path.toStdString() << endl;
 }
 
 void LoadTFDialog::buttonDoubleClicked() {
