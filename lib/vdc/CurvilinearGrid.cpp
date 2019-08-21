@@ -3,6 +3,7 @@
 #include "vapor/VAssert.h"
 #include <cmath>
 #include <cfloat>
+#include <limits>
 #include <vapor/utils.h>
 #include <vapor/CurvilinearGrid.h>
 #include <vapor/QuadTreeRectangle.hpp>
