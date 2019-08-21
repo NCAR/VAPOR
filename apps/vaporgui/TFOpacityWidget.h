@@ -7,6 +7,8 @@
 #include <vapor/VAssert.h>
 #include <glm/glm.hpp>
 
+class TFControlPointWidget;
+
 class ControlPointList {
 public:
     class PointIterator {
@@ -63,13 +65,19 @@ public:
         return _points[i];
     }
     
-    void Add(const glm::vec2 &v) {
-        _points.push_back(v);
+    int Add(const glm::vec2 &v)
+    {
+        for (int i = 0; i < _points.size(); i++)
+            if (_points[i].x > v.x)
+                return Add(v, i);
+        
+        return Add(v, 0);
     }
     
-    void Add(const glm::vec2 &v, const int i) {
+    int Add(const glm::vec2 &v, const int i) {
         VAssert(i >= 0 && i <= _points.size());
         _points.insert(_points.begin()+i, v);
+        return i;
     }
     
     void Add(const glm::vec2 &v, const LineIterator &line) {
@@ -103,6 +111,7 @@ public:
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     
     QSize minimumSizeHint() const;
+    TFControlPointWidget *GetInfoWidget() const;
     
 protected:
     void paintEvent(QPaintEvent* event);
@@ -121,6 +130,7 @@ private:
     glm::vec2 _dragOffset;
     glm::vec2 m;
     int _selectedControl = -1;
+    TFControlPointWidget *_infoWidget = nullptr;
     
     void opacityChanged();
     
@@ -140,4 +150,7 @@ signals:
     
 public slots:
     void DeselectControlPoint();
+    
+private slots:
+    void SelectedControlChanged(float value, float opacity);
 };

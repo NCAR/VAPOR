@@ -2,6 +2,7 @@
 #include <QPaintEvent>
 #include <QPainter>
 #include <glm/glm.hpp>
+#include "TFControlPointWidget.h"
 
 using namespace VAPoR;
 using std::vector;
@@ -44,6 +45,9 @@ TFOpacityWidget::TFOpacityWidget()
     _controlPoints.Add(vec2(0,0));
     _controlPoints.Add(vec2(0.2,0.5));
     _controlPoints.Add(vec2(0.5,0.8));
+    
+    _infoWidget = new TFControlPointWidget;
+    connect(_infoWidget, SIGNAL(ControlPointChanged(float, float)), this, SLOT(SelectedControlChanged(float, float)));
 }
 
 void TFOpacityWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
@@ -68,6 +72,11 @@ void TFOpacityWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMg
 QSize TFOpacityWidget::minimumSizeHint() const
 {
     return QSize(100, 75);
+}
+
+TFControlPointWidget *TFOpacityWidget::GetInfoWidget() const
+{
+    return _infoWidget;
 }
 
 #define CONTROL_POINT_RADIUS (4.0f)
@@ -164,6 +173,7 @@ void TFOpacityWidget::mouseMoveEvent(QMouseEvent *event)
                             vec2(it.IsLast() ? 1 : (*(it+1)).x, 1));
         
         *_draggedControl = newVal;
+        _infoWidget->SetControlPoint(newVal.x, newVal.y);
         update();
     } else {
         event->ignore();
@@ -253,6 +263,7 @@ glm::vec2 TFOpacityWidget::PixelToNDC(const QPointF &p) const
 void TFOpacityWidget::selectControlPoint(ControlPointList::PointIterator it)
 {
     _selectedControl = it.Index();
+    _infoWidget->SetControlPoint((*it).x, (*it).y);
     update();
     emit ControlPointSelected(it.Index());
 }
@@ -260,6 +271,19 @@ void TFOpacityWidget::selectControlPoint(ControlPointList::PointIterator it)
 void TFOpacityWidget::DeselectControlPoint()
 {
     _selectedControl = -1;
+    _infoWidget->DeselectControlPoint();
     update();
     emit ControlPointDeselected();
+}
+
+void TFOpacityWidget::SelectedControlChanged(float value, float opacity)
+{
+    assert(_selectedControl >= 0);
+    assert(value >= 0 && value <= 1);
+    assert(opacity >= 0 && opacity <= 1);
+    
+    _controlPoints.Remove(_controlPoints.BeginPoints() + _selectedControl);
+    _selectedControl = _controlPoints.Add(vec2(value, opacity));
+    
+    opacityChanged();
 }

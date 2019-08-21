@@ -17,6 +17,7 @@ TFControlPointWidget::TFControlPointWidget()
     layout->addWidget(_opacityEdit = new QLineEdit, 30);
     
     _valueEdit->setValidator(new QDoubleValidator);
+    _opacityEdit->setValidator(new QDoubleValidator(0, 1, 10));
     
     _valueEditType->blockSignals(true);
     _valueEditType->setMinimumSize(30, 10);
@@ -27,54 +28,65 @@ TFControlPointWidget::TFControlPointWidget()
     _valueEditType->blockSignals(false);
     
     connect(_valueEditType, SIGNAL(currentIndexChanged(int)), this, SLOT(valueEditTypeChanged(int)));
+    connect(_valueEdit, SIGNAL(returnPressed()), this, SLOT(valueEditChanged()));
+    connect(_opacityEdit, SIGNAL(returnPressed()), this, SLOT(opacityEditChanged()));
     
     this->setDisabled(true);
 }
 
 void TFControlPointWidget::Update(VAPoR::RenderParams *rParams)
 {
-    _params = rParams;
+    if (!rParams)
+        return;
     
     _min = rParams->GetMapperFunc(rParams->GetVariableName())->getMinMapValue();
     _max = rParams->GetMapperFunc(rParams->GetVariableName())->getMaxMapValue();
     
     ((QDoubleValidator*)_valueEdit->validator())->setRange(_min, _max);
-//    ((QDoubleValidator*)_locationEdit->validator())->setDecimals(2);
-    
-    if (_opacityId >= 0) {
-        float value;
-
-        value = rParams->GetMapperFunc(rParams->GetVariableName())->GetOpacityMap(0)->controlPointValueNormalized(_opacityId);
-        if (isUsingMappedValue())
-            value = toMappedValue(value);
-        else
-            value *= 100;
-        _valueEdit->setText(QString::number(value));
-        _opacityEdit->setText(QString::number(rParams->GetMapperFunc(rParams->GetVariableName())->GetOpacityMap(0)->controlPointOpacity(_opacityId)));
-    }
 }
 
-void TFControlPointWidget::SelectOpacityControlPoint(int index)
-{
-    this->setEnabled(true);
-    _opacityId = index;
-    _colorId = -1;
-}
+//void TFControlPointWidget::SelectOpacityControlPoint(int index)
+//{
+//    this->setEnabled(true);
+//    _opacityId = index;
+//    _colorId = -1;
+//    Update(_params);
+//}
 
-void TFControlPointWidget::SelectColorControlPoint(int index)
-{
-    this->setEnabled(true);
-    _opacityId = -1;
-    _colorId = index;
-}
+//void TFControlPointWidget::SelectColorControlPoint(int index)
+//{
+//    this->setEnabled(true);
+//    _opacityId = -1;
+//    _colorId = index;
+//    Update(_params);
+//}
 
 void TFControlPointWidget::DeselectControlPoint()
 {
     this->setDisabled(true);
-    _opacityId = -1;
-    _colorId = -1;
+//    _opacityId = -1;
+//    _colorId = -1;
     _valueEdit->clear();
     _opacityEdit->clear();
+}
+
+void TFControlPointWidget::SetNormalizedValue(float value)
+{
+    _value = value;
+    updateValue();
+}
+
+void TFControlPointWidget::SetOpacity(float opacity)
+{
+    _opacity = opacity;
+    updateOpacity();
+}
+
+void TFControlPointWidget::SetControlPoint(float value, float opacity)
+{
+    this->setEnabled(true);
+    SetNormalizedValue(value);
+    SetOpacity(opacity);
 }
 
 void TFControlPointWidget::paintEvent(QPaintEvent *event)
@@ -85,6 +97,27 @@ void TFControlPointWidget::paintEvent(QPaintEvent *event)
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
     
     QWidget::paintEvent(event);
+}
+
+void TFControlPointWidget::updateValue()
+{
+    if (!isEnabled())
+        return;
+    
+    float value = _value;
+    if (isUsingMappedValue())
+        value = toMappedValue(value);
+    else
+        value *= 100;
+    _valueEdit->setText(QString::number(value));
+}
+
+void TFControlPointWidget::updateOpacity()
+{
+    if (!isEnabled())
+        return;
+    
+    _opacityEdit->setText(QString::number(_opacity));
 }
 
 bool TFControlPointWidget::isUsingNormalizedValue() const
@@ -110,7 +143,33 @@ float TFControlPointWidget::toNormalizedValue(float mapped) const
     return (mapped - _min) / (_max - _min);
 }
 
+float TFControlPointWidget::getValueFromEdit() const
+{
+    float value = _valueEdit->text().toFloat();
+    if (isUsingMappedValue())
+        return toNormalizedValue(value);
+    else
+        return value / 100.f;
+}
+
+float TFControlPointWidget::getOpacityFromEdit() const
+{
+    return _opacityEdit->text().toFloat();
+}
+
 void TFControlPointWidget::valueEditTypeChanged(int)
 {
-    
+    updateValue();
+}
+
+void TFControlPointWidget::valueEditChanged()
+{
+    _value = getValueFromEdit();
+    ControlPointChanged(_value, _opacity);
+}
+
+void TFControlPointWidget::opacityEditChanged()
+{
+    _opacity = getOpacityFromEdit();
+    ControlPointChanged(_value, _opacity);
 }
