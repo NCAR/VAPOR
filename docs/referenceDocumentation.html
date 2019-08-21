@@ -185,427 +185,427 @@
 <h1>Reference Documentation<a class="headerlink" href="#reference-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="cf2vdc">
 <h2>cf2vdc<a class="headerlink" href="#cf2vdc" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">cf2vdc</span> <span class="n">cffiles</span><span class="o">...</span> <span class="n">master</span><span class="o">.</span><span class="n">nc</span>
-    <span class="n">OPTION</span>      <span class="n">NUM_ARGS</span>    <span class="n">DEFAULT</span>    
-    <span class="o">------</span>      <span class="o">--------</span>    <span class="o">-------</span>    
-    <span class="o">-</span><span class="n">help</span>       <span class="mi">0</span>           <span class="n">false</span>      
-        <span class="n">Print</span> <span class="n">this</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span> 
-    <span class="o">-</span><span class="n">nthreads</span>   <span class="mi">1</span>           <span class="mi">0</span>          
-        <span class="n">Specify</span> <span class="n">number</span> <span class="n">of</span> <span class="n">execution</span> <span class="n">threads</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">use</span> <span class="n">number</span> <span class="n">of</span> <span class="n">cores</span> 
-    <span class="o">-</span><span class="n">numts</span>      <span class="mi">1</span>           <span class="o">-</span><span class="mi">1</span>         
-        <span class="n">Number</span> <span class="n">of</span> <span class="n">timesteps</span> <span class="n">to</span> <span class="n">be</span> <span class="n">included</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">VDC</span><span class="o">.</span> <span class="n">Default</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="n">includes</span> 
-        <span class="nb">all</span> <span class="n">timesteps</span><span class="o">.</span> 
-    <span class="o">-</span><span class="nb">vars</span>       <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>         
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="mi">3</span><span class="n">D</span> <span class="n">variable</span> <span class="n">names</span> <span class="p">(</span><span class="n">compressed</span><span class="p">)</span> <span class="n">to</span> <span class="n">be</span> <span class="n">included</span> 
-        <span class="ow">in</span> <span class="n">the</span> <span class="n">VDC</span> 
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Usage: cf2vdc cffiles... master.nc
+    OPTION      NUM_ARGS    DEFAULT    
+    ------      --------    -------    
+    -help       0           false      
+        Print this message and exit 
+    -nthreads   1           0          
+        Specify number of execution threads 0 =&gt; use number of cores 
+    -numts      1           -1         
+        Number of timesteps to be included in the VDC. Default (-1) includes 
+        all timesteps. 
+    -vars       1           &quot;&quot;         
+        Colon delimited list of 3D variable names (compressed) to be included 
+        in the VDC 
 </pre></div>
 </div>
 </div>
 <div class="section" id="cfvdccreate">
 <h2>cfvdccreate<a class="headerlink" href="#cfvdccreate" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">cfvdccreate</span> <span class="n">cf_files</span><span class="o">...</span> <span class="n">master</span><span class="o">.</span><span class="n">nc</span>
-    <span class="n">OPTION</span>       <span class="n">NUM_ARGS</span>    <span class="n">DEFAULT</span>         
-    <span class="o">------</span>       <span class="o">--------</span>    <span class="o">-------</span>         
-    <span class="o">-</span><span class="n">bs</span>          <span class="mi">1</span>           <span class="mi">64</span><span class="p">:</span><span class="mi">64</span><span class="p">:</span><span class="mi">64</span>        
-        <span class="n">Internal</span> <span class="n">storage</span> <span class="n">blocking</span> <span class="n">factor</span> <span class="n">expressed</span> <span class="ow">in</span> <span class="n">grid</span> <span class="n">points</span> <span class="p">(</span><span class="n">NX</span><span class="p">:</span><span class="n">NY</span><span class="p">:</span><span class="n">NZ</span><span class="p">)</span> 
-    <span class="o">-</span><span class="n">cratios</span>     <span class="mi">1</span>           <span class="mi">1</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">100</span><span class="p">:</span><span class="mi">500</span>    
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">compression</span> <span class="n">ratios</span><span class="o">.</span> <span class="k">for</span> <span class="mi">3</span><span class="n">D</span> <span class="n">variables</span><span class="o">.</span> <span class="n">The</span> <span class="n">default</span> 
-        <span class="ow">is</span> <span class="mi">1</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">100</span><span class="p">:</span><span class="mf">500.</span> <span class="n">The</span> <span class="n">maximum</span> <span class="n">compression</span> <span class="n">ratio</span> <span class="ow">is</span> <span class="n">wavelet</span> <span class="ow">and</span> <span class="n">block</span> 
-        <span class="n">size</span> <span class="n">dependent</span><span class="o">.</span> 
-    <span class="o">-</span><span class="n">dimension</span>   <span class="mi">1</span>           <span class="mi">512</span><span class="n">x512x512</span>     
-        <span class="n">Data</span> <span class="n">volume</span> <span class="n">dimensions</span> <span class="n">expressed</span> <span class="ow">in</span> <span class="n">grid</span> <span class="n">points</span> <span class="p">(</span><span class="n">NXxNYxNZ</span><span class="p">)</span> 
-    <span class="o">-</span><span class="n">force</span>       <span class="mi">0</span>           <span class="n">false</span>           
-        <span class="n">Create</span> <span class="n">a</span> <span class="n">new</span> <span class="n">VDC</span> <span class="n">master</span> <span class="n">file</span> <span class="n">even</span> <span class="k">if</span> <span class="n">a</span> <span class="n">VDC</span> <span class="n">data</span> <span class="n">directory</span> <span class="n">already</span> 
-        <span class="n">exists</span><span class="o">.</span> <span class="n">Results</span> <span class="n">may</span> <span class="n">be</span> <span class="n">undefined</span> <span class="k">if</span> <span class="n">settings</span> <span class="n">between</span> <span class="n">the</span> <span class="n">new</span> <span class="n">master</span> 
-        <span class="n">file</span> <span class="ow">and</span> <span class="n">old</span> <span class="n">data</span> <span class="n">directory</span> <span class="n">do</span> <span class="ow">not</span> <span class="n">match</span><span class="o">.</span> 
-    <span class="o">-</span><span class="n">help</span>        <span class="mi">0</span>           <span class="n">false</span>           
-        <span class="n">Print</span> <span class="n">this</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span> 
-    <span class="o">-</span><span class="n">nthreads</span>    <span class="mi">1</span>           <span class="mi">0</span>               
-        <span class="n">Specify</span> <span class="n">number</span> <span class="n">of</span> <span class="n">execution</span> <span class="n">threads</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">use</span> <span class="n">number</span> <span class="n">of</span> <span class="n">cores</span> 
-    <span class="o">-</span><span class="nb">vars</span>        <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>              
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="mi">3</span><span class="n">D</span> <span class="n">variable</span> <span class="n">names</span> <span class="p">(</span><span class="n">compressed</span><span class="p">)</span> <span class="n">to</span> <span class="n">be</span> <span class="n">included</span> 
-        <span class="ow">in</span> <span class="n">the</span> <span class="n">VDC</span> 
-    <span class="o">-</span><span class="n">wname</span>       <span class="mi">1</span>           <span class="n">bior4</span><span class="o">.</span><span class="mi">4</span>         
-        <span class="n">Wavelet</span> <span class="n">family</span> <span class="n">used</span> <span class="k">for</span> <span class="n">compression</span> <span class="n">Valid</span> <span class="n">values</span> <span class="n">are</span> <span class="n">bior1</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="n">bior1</span><span class="o">.</span><span class="mi">3</span><span class="p">,</span> 
-        <span class="n">bior1</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="n">bior2</span><span class="o">.</span><span class="mi">2</span><span class="p">,</span> <span class="n">bior2</span><span class="o">.</span><span class="mi">4</span> <span class="p">,</span><span class="n">bior2</span><span class="o">.</span><span class="mi">6</span><span class="p">,</span> <span class="n">bior2</span><span class="o">.</span><span class="mi">8</span><span class="p">,</span> <span class="n">bior3</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="n">bior3</span><span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="n">bior3</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> 
-        <span class="n">bior3</span><span class="o">.</span><span class="mi">7</span><span class="p">,</span> <span class="n">bior3</span><span class="o">.</span><span class="mi">9</span><span class="p">,</span> <span class="n">bior4</span><span class="o">.</span><span class="mi">4</span> 
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Usage: cfvdccreate cf_files... master.nc
+    OPTION       NUM_ARGS    DEFAULT         
+    ------       --------    -------         
+    -bs          1           64:64:64        
+        Internal storage blocking factor expressed in grid points (NX:NY:NZ) 
+    -cratios     1           1:10:100:500    
+        Colon delimited list compression ratios. for 3D variables. The default 
+        is 1:10:100:500. The maximum compression ratio is wavelet and block 
+        size dependent. 
+    -dimension   1           512x512x512     
+        Data volume dimensions expressed in grid points (NXxNYxNZ) 
+    -force       0           false           
+        Create a new VDC master file even if a VDC data directory already 
+        exists. Results may be undefined if settings between the new master 
+        file and old data directory do not match. 
+    -help        0           false           
+        Print this message and exit 
+    -nthreads    1           0               
+        Specify number of execution threads 0 =&gt; use number of cores 
+    -vars        1           &quot;&quot;              
+        Colon delimited list of 3D variable names (compressed) to be included 
+        in the VDC 
+    -wname       1           bior4.4         
+        Wavelet family used for compression Valid values are bior1.1, bior1.3, 
+        bior1.5, bior2.2, bior2.4 ,bior2.6, bior2.8, bior3.1, bior3.3, bior3.5, 
+        bior3.7, bior3.9, bior4.4 
 </pre></div>
 </div>
 </div>
 <div class="section" id="ncdf2wasp">
 <h2>ncdf2wasp<a class="headerlink" href="#ncdf2wasp" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">ncdf2wasp</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="n">netcdffile</span> <span class="n">waspfile</span>
-    <span class="n">OPTION</span>       <span class="n">NUM_ARGS</span>    <span class="n">DEFAULT</span>         
-    <span class="o">------</span>       <span class="o">--------</span>    <span class="o">-------</span>         
-    <span class="o">-</span><span class="n">bs</span>          <span class="mi">1</span>           <span class="mi">64</span><span class="p">:</span><span class="mi">64</span><span class="p">:</span><span class="mi">64</span>        
-        <span class="n">Internal</span> <span class="n">storage</span> <span class="n">blocking</span> <span class="n">factor</span> <span class="n">expressed</span> <span class="ow">in</span> <span class="n">grid</span> <span class="n">points</span> <span class="p">(</span><span class="n">NZ</span><span class="p">:</span><span class="n">NY</span><span class="p">:</span><span class="n">NX</span><span class="p">)</span> 
-        <span class="k">for</span> <span class="mi">3</span><span class="n">D</span> <span class="n">variables</span> 
-    <span class="o">-</span><span class="n">bs2d</span>        <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>              
-        <span class="n">Internal</span> <span class="n">storage</span> <span class="n">blocking</span> <span class="n">factor</span> <span class="n">expressed</span> <span class="ow">in</span> <span class="n">grid</span> <span class="n">points</span> <span class="p">(</span><span class="n">NZ</span><span class="p">:</span><span class="n">NY</span><span class="p">:</span><span class="n">NX</span><span class="p">)</span> 
-        <span class="k">for</span> <span class="mi">2</span><span class="n">D</span> <span class="n">variables</span><span class="o">.</span> <span class="n">If</span> <span class="n">empty</span> <span class="n">the</span> <span class="mi">2</span><span class="n">D</span> <span class="n">blocking</span> <span class="n">factor</span> <span class="n">uses</span> <span class="n">the</span> <span class="n">fastest</span> 
-        <span class="n">varying</span> <span class="n">dimensions</span> <span class="n">of</span> <span class="n">the</span> <span class="mi">3</span><span class="n">D</span> <span class="n">blocking</span> <span class="n">factor</span> 
-    <span class="o">-</span><span class="n">cratios</span>     <span class="mi">1</span>           <span class="mi">500</span><span class="p">:</span><span class="mi">100</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">1</span>    
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">compression</span> <span class="n">ratios</span> <span class="k">for</span> <span class="mi">3</span><span class="n">D</span> <span class="n">variables</span><span class="o">.</span> <span class="n">The</span> 
-        <span class="n">default</span> <span class="ow">is</span> <span class="mi">500</span><span class="p">:</span><span class="mi">100</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mf">1.</span> <span class="n">The</span> <span class="n">maximum</span> <span class="n">compression</span> <span class="n">ratio</span> <span class="ow">is</span> <span class="n">wavelet</span> <span class="ow">and</span> 
-        <span class="n">block</span> <span class="n">size</span> <span class="n">dependent</span><span class="o">.</span> 
-    <span class="o">-</span><span class="n">cratios2d</span>   <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>              
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">compression</span> <span class="n">ratios</span> <span class="k">for</span> <span class="mi">2</span><span class="n">D</span> <span class="n">variables</span><span class="o">.</span> <span class="n">If</span> <span class="n">empty</span> 
-        <span class="n">the</span> <span class="mi">2</span><span class="n">D</span> <span class="n">compression</span> <span class="n">ratio</span> <span class="n">vector</span> <span class="ow">is</span> <span class="n">calculated</span> <span class="kn">from</span> <span class="nn">the</span> <span class="mi">3</span><span class="n">D</span> <span class="n">compression</span> 
-        <span class="n">vector</span><span class="o">.</span> 
-    <span class="o">-</span><span class="n">debug</span>       <span class="mi">0</span>           <span class="n">false</span>           
-        <span class="n">Enable</span> <span class="n">diagnostic</span> 
-    <span class="o">-</span><span class="n">help</span>        <span class="mi">0</span>           <span class="n">false</span>           
-        <span class="n">Print</span> <span class="n">this</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span> 
-    <span class="o">-</span><span class="n">lod</span>         <span class="mi">1</span>           <span class="o">-</span><span class="mi">1</span>              
-        <span class="n">Compression</span> <span class="n">levels</span> <span class="n">saved</span><span class="o">.</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">coarsest</span><span class="p">,</span> <span class="mi">1</span> <span class="o">=&gt;</span> <span class="nb">next</span> <span class="n">refinement</span><span class="p">,</span> <span class="n">etc</span><span class="o">.</span> <span class="o">-</span><span class="mi">1</span> 
-        <span class="o">=&gt;</span> <span class="nb">all</span> <span class="n">levels</span> <span class="n">defined</span> <span class="n">by</span> <span class="n">the</span> <span class="n">netcdf</span> <span class="n">file</span> 
-    <span class="o">-</span><span class="n">nthreads</span>    <span class="mi">1</span>           <span class="mi">0</span>               
-        <span class="n">Specify</span> <span class="n">number</span> <span class="n">of</span> <span class="n">execution</span> <span class="n">threads</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">use</span> <span class="n">number</span> <span class="n">of</span> <span class="n">cores</span> 
-    <span class="o">-</span><span class="n">quiet</span>       <span class="mi">0</span>           <span class="n">false</span>           
-        <span class="n">Operate</span> <span class="n">quietly</span> 
-    <span class="o">-</span><span class="n">varname</span>     <span class="mi">1</span>           <span class="n">var1</span>            
-        <span class="n">Name</span> <span class="n">of</span> <span class="n">variable</span> 
-    <span class="o">-</span><span class="n">wname</span>       <span class="mi">1</span>           <span class="n">bior4</span><span class="o">.</span><span class="mi">4</span>         
-        <span class="n">Wavelet</span> <span class="n">family</span> <span class="n">used</span> <span class="k">for</span> <span class="n">compression</span> <span class="n">Valid</span> <span class="n">values</span> <span class="n">are</span> <span class="n">bior1</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="n">bior1</span><span class="o">.</span><span class="mi">3</span><span class="p">,</span> 
-        <span class="n">bior1</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="n">bior2</span><span class="o">.</span><span class="mi">2</span><span class="p">,</span> <span class="n">bior2</span><span class="o">.</span><span class="mi">4</span> <span class="p">,</span><span class="n">bior2</span><span class="o">.</span><span class="mi">6</span><span class="p">,</span> <span class="n">bior2</span><span class="o">.</span><span class="mi">8</span><span class="p">,</span> <span class="n">bior3</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="n">bior3</span><span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="n">bior3</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> 
-        <span class="n">bior3</span><span class="o">.</span><span class="mi">7</span><span class="p">,</span> <span class="n">bior3</span><span class="o">.</span><span class="mi">9</span><span class="p">,</span> <span class="n">bior4</span><span class="o">.</span><span class="mi">4</span> 
-    <span class="o">-</span><span class="n">xdimnames</span>   <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>              
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">dimension</span> <span class="n">names</span> <span class="n">to</span> <span class="n">exclude</span> <span class="kn">from</span> <span class="nn">compression.</span> 
-    <span class="o">-</span><span class="n">xvarnames</span>   <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>              
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">variable</span> <span class="n">names</span> <span class="n">to</span> <span class="n">exclude</span> <span class="kn">from</span> <span class="nn">compression.</span> 
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Usage: ncdf2wasp [options] netcdffile waspfile
+    OPTION       NUM_ARGS    DEFAULT         
+    ------       --------    -------         
+    -bs          1           64:64:64        
+        Internal storage blocking factor expressed in grid points (NZ:NY:NX) 
+        for 3D variables 
+    -bs2d        1           &quot;&quot;              
+        Internal storage blocking factor expressed in grid points (NZ:NY:NX) 
+        for 2D variables. If empty the 2D blocking factor uses the fastest 
+        varying dimensions of the 3D blocking factor 
+    -cratios     1           500:100:10:1    
+        Colon delimited list of compression ratios for 3D variables. The 
+        default is 500:100:10:1. The maximum compression ratio is wavelet and 
+        block size dependent. 
+    -cratios2d   1           &quot;&quot;              
+        Colon delimited list of compression ratios for 2D variables. If empty 
+        the 2D compression ratio vector is calculated from the 3D compression 
+        vector. 
+    -debug       0           false           
+        Enable diagnostic 
+    -help        0           false           
+        Print this message and exit 
+    -lod         1           -1              
+        Compression levels saved. 0 =&gt; coarsest, 1 =&gt; next refinement, etc. -1 
+        =&gt; all levels defined by the netcdf file 
+    -nthreads    1           0               
+        Specify number of execution threads 0 =&gt; use number of cores 
+    -quiet       0           false           
+        Operate quietly 
+    -varname     1           var1            
+        Name of variable 
+    -wname       1           bior4.4         
+        Wavelet family used for compression Valid values are bior1.1, bior1.3, 
+        bior1.5, bior2.2, bior2.4 ,bior2.6, bior2.8, bior3.1, bior3.3, bior3.5, 
+        bior3.7, bior3.9, bior4.4 
+    -xdimnames   1           &quot;&quot;              
+        Colon delimited list of dimension names to exclude from compression. 
+    -xvarnames   1           &quot;&quot;              
+        Colon delimited list of variable names to exclude from compression. 
 
-<span class="n">Copyright</span> <span class="mi">2007</span> <span class="n">The</span> <span class="n">National</span> <span class="n">Center</span> <span class="k">for</span> <span class="n">Atmospheric</span> <span class="n">Research</span>
+Copyright 2007 The National Center for Atmospheric Research
 
-<span class="n">Version</span><span class="p">:</span> <span class="mf">3.1</span><span class="o">.</span><span class="mi">0</span> <span class="p">(</span><span class="mi">2019</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">05</span><span class="n">T21</span><span class="p">:</span><span class="mi">04</span><span class="p">:</span><span class="mi">24</span><span class="n">Z</span><span class="p">)</span> <span class="n">www</span><span class="o">.</span><span class="n">vapor</span><span class="o">.</span><span class="n">ucar</span><span class="o">.</span><span class="n">edu</span>
+Version: 3.1.0 (2019-08-05T21:04:24Z) www.vapor.ucar.edu
 </pre></div>
 </div>
 </div>
 <div class="section" id="raw2vdc">
 <h2>raw2vdc<a class="headerlink" href="#raw2vdc" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">raw2vdc</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="n">vdcFile</span> <span class="n">rawDataFile</span>
-    <span class="n">OPTION</span>       <span class="n">NUM_ARGS</span>    <span class="n">DEFAULT</span>    
-    <span class="o">------</span>       <span class="o">--------</span>    <span class="o">-------</span>    
-    <span class="o">-</span><span class="n">debug</span>       <span class="mi">0</span>           <span class="n">false</span>      
-        <span class="n">Enable</span> <span class="n">diagnostic</span> 
-    <span class="o">-</span><span class="n">help</span>        <span class="mi">0</span>           <span class="n">false</span>      
-        <span class="n">Print</span> <span class="n">this</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span> 
-    <span class="o">-</span><span class="n">lod</span>         <span class="mi">1</span>           <span class="o">-</span><span class="mi">1</span>         
-        <span class="n">Compression</span> <span class="n">levels</span> <span class="n">saved</span><span class="o">.</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">coarsest</span><span class="p">,</span> <span class="mi">1</span> <span class="o">=&gt;</span> <span class="nb">next</span> <span class="n">refinement</span><span class="p">,</span> <span class="n">etc</span><span class="o">.</span> <span class="o">-</span><span class="mi">1</span> 
-        <span class="o">=&gt;</span> <span class="nb">all</span> <span class="n">levels</span> <span class="n">defined</span> <span class="n">by</span> <span class="n">the</span> <span class="n">netcdf</span> <span class="n">file</span> 
-    <span class="o">-</span><span class="n">nthreads</span>    <span class="mi">1</span>           <span class="mi">0</span>          
-        <span class="n">Specify</span> <span class="n">number</span> <span class="n">of</span> <span class="n">execution</span> <span class="n">threads</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">use</span> <span class="n">number</span> <span class="n">of</span> <span class="n">cores</span> 
-    <span class="o">-</span><span class="n">swapbytes</span>   <span class="mi">0</span>           <span class="n">false</span>      
-        <span class="n">Swap</span> <span class="nb">bytes</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">as</span> <span class="n">they</span> <span class="n">are</span> <span class="n">read</span> <span class="kn">from</span> <span class="nn">disk</span> 
-    <span class="o">-</span><span class="n">ts</span>          <span class="mi">1</span>           <span class="mi">0</span>          
-        <span class="n">Specify</span> <span class="n">time</span> <span class="n">step</span> <span class="n">offset</span> 
-    <span class="o">-</span><span class="nb">type</span>        <span class="mi">1</span>           <span class="n">float32</span>    
-        <span class="n">Primitive</span> <span class="nb">type</span> <span class="n">of</span> <span class="nb">input</span> <span class="n">data</span> 
-    <span class="o">-</span><span class="n">varname</span>     <span class="mi">1</span>           <span class="n">var1</span>       
-        <span class="n">Name</span> <span class="n">of</span> <span class="n">variable</span> 
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Usage: raw2vdc [options] vdcFile rawDataFile
+    OPTION       NUM_ARGS    DEFAULT    
+    ------       --------    -------    
+    -debug       0           false      
+        Enable diagnostic 
+    -help        0           false      
+        Print this message and exit 
+    -lod         1           -1         
+        Compression levels saved. 0 =&gt; coarsest, 1 =&gt; next refinement, etc. -1 
+        =&gt; all levels defined by the netcdf file 
+    -nthreads    1           0          
+        Specify number of execution threads 0 =&gt; use number of cores 
+    -swapbytes   0           false      
+        Swap bytes in data as they are read from disk 
+    -ts          1           0          
+        Specify time step offset 
+    -type        1           float32    
+        Primitive type of input data 
+    -varname     1           var1       
+        Name of variable 
 
-<span class="n">Copyright</span> <span class="mi">2007</span> <span class="n">The</span> <span class="n">National</span> <span class="n">Center</span> <span class="k">for</span> <span class="n">Atmospheric</span> <span class="n">Research</span>
+Copyright 2007 The National Center for Atmospheric Research
 
-<span class="n">Version</span><span class="p">:</span> <span class="mf">3.1</span><span class="o">.</span><span class="mi">0</span> <span class="p">(</span><span class="mi">2019</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">05</span><span class="n">T21</span><span class="p">:</span><span class="mi">04</span><span class="p">:</span><span class="mi">24</span><span class="n">Z</span><span class="p">)</span> <span class="n">www</span><span class="o">.</span><span class="n">vapor</span><span class="o">.</span><span class="n">ucar</span><span class="o">.</span><span class="n">edu</span>
+Version: 3.1.0 (2019-08-05T21:04:24Z) www.vapor.ucar.edu
 </pre></div>
 </div>
 </div>
 <div class="section" id="raw2wasp">
 <h2>raw2wasp<a class="headerlink" href="#raw2wasp" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">raw2wasp</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="n">netcdffile</span> <span class="n">datafile</span>
-    <span class="n">OPTION</span>      <span class="n">NUM_ARGS</span>    <span class="n">DEFAULT</span>    
-    <span class="o">------</span>      <span class="o">--------</span>    <span class="o">-------</span>    
-    <span class="o">-</span><span class="n">debug</span>      <span class="mi">0</span>           <span class="n">false</span>      
-        <span class="n">Enable</span> <span class="n">diagnostic</span> 
-    <span class="o">-</span><span class="n">help</span>       <span class="mi">0</span>           <span class="n">false</span>      
-        <span class="n">Print</span> <span class="n">this</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span> 
-    <span class="o">-</span><span class="n">lod</span>        <span class="mi">1</span>           <span class="o">-</span><span class="mi">1</span>         
-        <span class="n">Compression</span> <span class="n">levels</span> <span class="n">saved</span><span class="o">.</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">coarsest</span><span class="p">,</span> <span class="mi">1</span> <span class="o">=&gt;</span> <span class="nb">next</span> <span class="n">refinement</span><span class="p">,</span> <span class="n">etc</span><span class="o">.</span> <span class="o">-</span><span class="mi">1</span> 
-        <span class="o">=&gt;</span> <span class="nb">all</span> <span class="n">levels</span> <span class="n">defined</span> <span class="n">by</span> <span class="n">the</span> <span class="n">netcdf</span> <span class="n">file</span> 
-    <span class="o">-</span><span class="n">nthreads</span>   <span class="mi">1</span>           <span class="mi">0</span>          
-        <span class="n">Specify</span> <span class="n">number</span> <span class="n">of</span> <span class="n">execution</span> <span class="n">threads</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">use</span> <span class="n">number</span> <span class="n">of</span> <span class="n">cores</span> 
-    <span class="o">-</span><span class="nb">type</span>       <span class="mi">1</span>           <span class="n">float32</span>    
-        <span class="n">Primitive</span> <span class="nb">type</span> <span class="n">of</span> <span class="nb">input</span> <span class="n">data</span> 
-    <span class="o">-</span><span class="n">varname</span>    <span class="mi">1</span>           <span class="n">var1</span>       
-        <span class="n">Name</span> <span class="n">of</span> <span class="n">variable</span> 
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Usage: raw2wasp [options] netcdffile datafile
+    OPTION      NUM_ARGS    DEFAULT    
+    ------      --------    -------    
+    -debug      0           false      
+        Enable diagnostic 
+    -help       0           false      
+        Print this message and exit 
+    -lod        1           -1         
+        Compression levels saved. 0 =&gt; coarsest, 1 =&gt; next refinement, etc. -1 
+        =&gt; all levels defined by the netcdf file 
+    -nthreads   1           0          
+        Specify number of execution threads 0 =&gt; use number of cores 
+    -type       1           float32    
+        Primitive type of input data 
+    -varname    1           var1       
+        Name of variable 
 
-<span class="n">Copyright</span> <span class="mi">2007</span> <span class="n">The</span> <span class="n">National</span> <span class="n">Center</span> <span class="k">for</span> <span class="n">Atmospheric</span> <span class="n">Research</span>
+Copyright 2007 The National Center for Atmospheric Research
 
-<span class="n">Version</span><span class="p">:</span> <span class="mf">3.1</span><span class="o">.</span><span class="mi">0</span> <span class="p">(</span><span class="mi">2019</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">05</span><span class="n">T21</span><span class="p">:</span><span class="mi">04</span><span class="p">:</span><span class="mi">24</span><span class="n">Z</span><span class="p">)</span> <span class="n">www</span><span class="o">.</span><span class="n">vapor</span><span class="o">.</span><span class="n">ucar</span><span class="o">.</span><span class="n">edu</span>
+Version: 3.1.0 (2019-08-05T21:04:24Z) www.vapor.ucar.edu
 </pre></div>
 </div>
 </div>
 <div class="section" id="tiff2geotiff">
 <h2>tiff2geotiff<a class="headerlink" href="#tiff2geotiff" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">tiff2geotiff</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="nb">input</span><span class="o">...</span> <span class="n">output</span>
-<span class="n">where</span> <span class="n">options</span> <span class="n">are</span><span class="p">:</span>
- <span class="o">-</span><span class="n">g</span> <span class="n">file</span>	<span class="n">install</span> <span class="n">GeoTIFF</span> <span class="n">metadata</span> <span class="kn">from</span> <span class="o">&lt;</span><span class="n">file</span><span class="o">&gt;</span>
- <span class="o">-</span><span class="mi">4</span> <span class="n">proj4_str</span>	<span class="n">install</span> <span class="n">GeoTIFF</span> <span class="n">metadata</span> <span class="kn">from</span> <span class="nn">proj4</span> <span class="n">string</span>
- <span class="o">-</span><span class="n">e</span> <span class="n">file</span>	<span class="n">install</span> <span class="n">positioning</span> <span class="n">info</span> <span class="kn">from</span> <span class="nn">ESRI</span> <span class="n">Worldfile</span> <span class="o">&lt;</span><span class="n">file</span><span class="o">&gt;</span>
- <span class="o">-</span><span class="n">a</span>		<span class="n">append</span> <span class="n">to</span> <span class="n">output</span> <span class="n">instead</span> <span class="n">of</span> <span class="n">overwriting</span>
- <span class="o">-</span><span class="n">m</span> <span class="n">file</span>	<span class="n">Specify</span> <span class="n">filename</span> <span class="k">with</span> <span class="n">multiple</span> <span class="n">timestamps</span> <span class="ow">and</span> <span class="n">image</span> <span class="n">placement</span> <span class="n">info</span><span class="p">:</span>
-			<span class="n">Each</span> <span class="n">line</span> <span class="n">of</span> <span class="n">file</span> <span class="n">has</span> <span class="n">date</span><span class="o">/</span><span class="n">timestamp</span><span class="p">,</span> <span class="ow">and</span> <span class="mi">8</span> <span class="n">floats</span><span class="p">;</span>
-			<span class="n">first</span> <span class="n">four</span> <span class="n">are</span> <span class="n">lon</span><span class="o">/</span><span class="n">lat</span> <span class="n">corners</span> <span class="n">of</span> <span class="n">plot</span> <span class="n">area</span><span class="p">,</span>
-			<span class="n">second</span> <span class="n">four</span> <span class="n">are</span> <span class="n">relative</span> <span class="n">positions</span> <span class="n">of</span> <span class="n">plot</span> <span class="n">corners</span> <span class="ow">in</span> <span class="n">page</span><span class="o">.</span>
-			<span class="n">This</span> <span class="n">option</span> <span class="n">requires</span> <span class="n">option</span> <span class="o">-</span><span class="mi">4</span>
- <span class="o">-</span><span class="n">M</span> <span class="n">file</span>   <span class="n">Specify</span> <span class="n">filename</span> <span class="k">with</span> <span class="n">multiple</span> <span class="n">timestamps</span><span class="p">,</span> <span class="n">w</span><span class="o">/</span><span class="n">o</span> <span class="n">georeferencing</span><span class="p">:</span>
-			<span class="n">Each</span> <span class="n">line</span> <span class="n">of</span> <span class="n">file</span> <span class="n">has</span> <span class="n">date</span><span class="o">/</span><span class="n">timestamp</span> <span class="n">only</span>
-			<span class="n">Option</span> <span class="o">-</span><span class="mi">4</span> <span class="n">must</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">specified</span><span class="o">.</span>
- <span class="o">-</span><span class="n">n</span> <span class="n">llx</span> <span class="n">lly</span> <span class="n">urx</span> <span class="n">ury</span>
-			<span class="n">Install</span> <span class="n">longitude</span><span class="o">/</span><span class="n">latitude</span> <span class="n">extents</span><span class="p">;</span>
-			<span class="n">Four</span> <span class="n">lon</span> <span class="ow">and</span> <span class="n">lat</span> <span class="n">values</span> <span class="n">must</span> <span class="ow">in</span> <span class="n">quotes</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">order</span><span class="p">:</span>
-			<span class="n">lower</span><span class="o">-</span><span class="n">left</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">lower</span><span class="o">-</span><span class="n">left</span> <span class="n">latitude</span><span class="p">,</span>
-			<span class="n">upper</span><span class="o">-</span><span class="n">right</span> <span class="n">longitute</span><span class="p">,</span> <span class="n">upper</span><span class="o">-</span><span class="n">right</span> <span class="n">latitude</span>
-			<span class="n">This</span> <span class="n">option</span> <span class="n">requires</span> <span class="n">option</span> <span class="o">-</span><span class="mi">4</span>
-			<span class="n">Option</span> <span class="s1">&#39;-m&#39;</span> <span class="n">overrides</span> <span class="n">this</span> <span class="n">option</span>
- <span class="o">-</span><span class="n">o</span> <span class="n">offset</span>	<span class="nb">set</span> <span class="n">initial</span> <span class="n">directory</span> <span class="n">offset</span>
- <span class="o">-</span><span class="n">p</span> <span class="n">contig</span>	<span class="n">pack</span> <span class="n">samples</span> <span class="n">contiguously</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">RGBRGB</span><span class="o">...</span><span class="p">)</span>
- <span class="o">-</span><span class="n">p</span> <span class="n">separate</span>	<span class="n">store</span> <span class="n">samples</span> <span class="n">separately</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="n">RRR</span><span class="o">...</span><span class="n">GGG</span><span class="o">...</span><span class="n">BBB</span><span class="o">...</span><span class="p">)</span>
- <span class="o">-</span><span class="n">s</span>		<span class="n">write</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">strips</span>
- <span class="o">-</span><span class="n">t</span>		<span class="n">write</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">tiles</span>
- <span class="o">-</span><span class="n">i</span>		<span class="n">ignore</span> <span class="n">read</span> <span class="n">errors</span>
- <span class="o">-</span><span class="n">d</span>		<span class="n">truncate</span> <span class="mi">8</span> <span class="n">bitspersample</span> <span class="n">to</span> <span class="mi">4</span><span class="n">bitspersample</span>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>usage: tiff2geotiff [options] input... output
+where options are:
+ -g file	install GeoTIFF metadata from &lt;file&gt;
+ -4 proj4_str	install GeoTIFF metadata from proj4 string
+ -e file	install positioning info from ESRI Worldfile &lt;file&gt;
+ -a		append to output instead of overwriting
+ -m file	Specify filename with multiple timestamps and image placement info:
+			Each line of file has date/timestamp, and 8 floats;
+			first four are lon/lat corners of plot area,
+			second four are relative positions of plot corners in page.
+			This option requires option -4
+ -M file   Specify filename with multiple timestamps, w/o georeferencing:
+			Each line of file has date/timestamp only
+			Option -4 must not be specified.
+ -n llx lly urx ury
+			Install longitude/latitude extents;
+			Four lon and lat values must in quotes in the order:
+			lower-left longitude, lower-left latitude,
+			upper-right longitute, upper-right latitude
+			This option requires option -4
+			Option &#39;-m&#39; overrides this option
+ -o offset	set initial directory offset
+ -p contig	pack samples contiguously (e.g. RGBRGB...)
+ -p separate	store samples separately (e.g. RRR...GGG...BBB...)
+ -s		write output in strips
+ -t		write output in tiles
+ -i		ignore read errors
+ -d		truncate 8 bitspersample to 4bitspersample
 
- <span class="o">-</span><span class="n">r</span> <span class="c1">#		make each strip have no more than # rows</span>
- <span class="o">-</span><span class="n">w</span> <span class="c1">#		set output tile width (pixels)</span>
- <span class="o">-</span><span class="n">l</span> <span class="c1">#		set output tile length (pixels)</span>
+ -r #		make each strip have no more than # rows
+ -w #		set output tile width (pixels)
+ -l #		set output tile length (pixels)
 
- <span class="o">-</span><span class="n">f</span> <span class="n">lsb2msb</span>	<span class="n">force</span> <span class="n">lsb</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">msb</span> <span class="n">FillOrder</span> <span class="k">for</span> <span class="n">output</span>
- <span class="o">-</span><span class="n">f</span> <span class="n">msb2lsb</span>	<span class="n">force</span> <span class="n">msb</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">lsb</span> <span class="n">FillOrder</span> <span class="k">for</span> <span class="n">output</span>
+ -f lsb2msb	force lsb-to-msb FillOrder for output
+ -f msb2lsb	force msb-to-lsb FillOrder for output
 
- <span class="o">-</span><span class="n">c</span> <span class="n">lzw</span><span class="p">[:</span><span class="n">opts</span><span class="p">]</span>	<span class="n">compress</span> <span class="n">output</span> <span class="k">with</span> <span class="n">Lempel</span><span class="o">-</span><span class="n">Ziv</span> <span class="o">&amp;</span> <span class="n">Welch</span> <span class="n">encoding</span>
- <span class="o">-</span><span class="n">c</span> <span class="nb">zip</span><span class="p">[:</span><span class="n">opts</span><span class="p">]</span>	<span class="n">compress</span> <span class="n">output</span> <span class="k">with</span> <span class="n">deflate</span> <span class="n">encoding</span>
- <span class="o">-</span><span class="n">c</span> <span class="n">jpeg</span><span class="p">[:</span><span class="n">opts</span><span class="p">]</span><span class="n">compress</span> <span class="n">output</span> <span class="k">with</span> <span class="n">JPEG</span> <span class="n">encoding</span>
- <span class="o">-</span><span class="n">c</span> <span class="n">packbits</span>	<span class="n">compress</span> <span class="n">output</span> <span class="k">with</span> <span class="n">packbits</span> <span class="n">encoding</span>
- <span class="o">-</span><span class="n">c</span> <span class="n">g3</span><span class="p">[:</span><span class="n">opts</span><span class="p">]</span>	<span class="n">compress</span> <span class="n">output</span> <span class="k">with</span> <span class="n">CCITT</span> <span class="n">Group</span> <span class="mi">3</span> <span class="n">encoding</span>
- <span class="o">-</span><span class="n">c</span> <span class="n">g4</span>		<span class="n">compress</span> <span class="n">output</span> <span class="k">with</span> <span class="n">CCITT</span> <span class="n">Group</span> <span class="mi">4</span> <span class="n">encoding</span>
- <span class="o">-</span><span class="n">c</span> <span class="n">none</span>	<span class="n">use</span> <span class="n">no</span> <span class="n">compression</span> <span class="n">algorithm</span> <span class="n">on</span> <span class="n">output</span>
+ -c lzw[:opts]	compress output with Lempel-Ziv &amp; Welch encoding
+ -c zip[:opts]	compress output with deflate encoding
+ -c jpeg[:opts]compress output with JPEG encoding
+ -c packbits	compress output with packbits encoding
+ -c g3[:opts]	compress output with CCITT Group 3 encoding
+ -c g4		compress output with CCITT Group 4 encoding
+ -c none	use no compression algorithm on output
 
-<span class="n">Group</span> <span class="mi">3</span> <span class="n">options</span><span class="p">:</span>
- <span class="mi">1</span><span class="n">d</span>		<span class="n">use</span> <span class="n">default</span> <span class="n">CCITT</span> <span class="n">Group</span> <span class="mi">3</span> <span class="mi">1</span><span class="n">D</span><span class="o">-</span><span class="n">encoding</span>
- <span class="mi">2</span><span class="n">d</span>		<span class="n">use</span> <span class="n">optional</span> <span class="n">CCITT</span> <span class="n">Group</span> <span class="mi">3</span> <span class="mi">2</span><span class="n">D</span><span class="o">-</span><span class="n">encoding</span>
- <span class="n">fill</span>		<span class="n">byte</span><span class="o">-</span><span class="n">align</span> <span class="n">EOL</span> <span class="n">codes</span>
-<span class="n">For</span> <span class="n">example</span><span class="p">,</span> <span class="o">-</span><span class="n">c</span> <span class="n">g3</span><span class="p">:</span><span class="mi">2</span><span class="n">d</span><span class="p">:</span><span class="n">fill</span> <span class="n">to</span> <span class="n">get</span> <span class="n">G3</span><span class="o">-</span><span class="mi">2</span><span class="n">D</span><span class="o">-</span><span class="n">encoded</span> <span class="n">data</span> <span class="k">with</span> <span class="n">byte</span><span class="o">-</span><span class="n">aligned</span> <span class="n">EOLs</span>
+Group 3 options:
+ 1d		use default CCITT Group 3 1D-encoding
+ 2d		use optional CCITT Group 3 2D-encoding
+ fill		byte-align EOL codes
+For example, -c g3:2d:fill to get G3-2D-encoded data with byte-aligned EOLs
 
-<span class="n">JPEG</span> <span class="n">options</span><span class="p">:</span>
- <span class="c1">#		set compression quality level (0-100, default 75)</span>
- <span class="n">r</span>		<span class="n">output</span> <span class="n">color</span> <span class="n">image</span> <span class="k">as</span> <span class="n">RGB</span> <span class="n">rather</span> <span class="n">than</span> <span class="n">YCbCr</span>
-<span class="n">For</span> <span class="n">example</span><span class="p">,</span> <span class="o">-</span><span class="n">c</span> <span class="n">jpeg</span><span class="p">:</span><span class="n">r</span><span class="p">:</span><span class="mi">50</span> <span class="n">to</span> <span class="n">get</span> <span class="n">JPEG</span><span class="o">-</span><span class="n">encoded</span> <span class="n">RGB</span> <span class="n">data</span> <span class="k">with</span> <span class="mi">50</span><span class="o">%</span> <span class="n">comp</span><span class="o">.</span> <span class="n">quality</span>
+JPEG options:
+ #		set compression quality level (0-100, default 75)
+ r		output color image as RGB rather than YCbCr
+For example, -c jpeg:r:50 to get JPEG-encoded RGB data with 50% comp. quality
 
-<span class="n">LZW</span> <span class="ow">and</span> <span class="n">deflate</span> <span class="n">options</span><span class="p">:</span>
- <span class="c1">#		set predictor value</span>
-<span class="n">For</span> <span class="n">example</span><span class="p">,</span> <span class="o">-</span><span class="n">c</span> <span class="n">lzw</span><span class="p">:</span><span class="mi">2</span> <span class="n">to</span> <span class="n">get</span> <span class="n">LZW</span><span class="o">-</span><span class="n">encoded</span> <span class="n">data</span> <span class="k">with</span> <span class="n">horizontal</span> <span class="n">differencing</span>
+LZW and deflate options:
+ #		set predictor value
+For example, -c lzw:2 to get LZW-encoded data with horizontal differencing
 </pre></div>
 </div>
 </div>
 <div class="section" id="vdc2raw">
 <h2>vdc2raw<a class="headerlink" href="#vdc2raw" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">vdc2raw</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="n">vdcmaster</span> <span class="n">datafile</span>
-    <span class="n">OPTION</span>      <span class="n">NUM_ARGS</span>    <span class="n">DEFAULT</span>    
-    <span class="o">------</span>      <span class="o">--------</span>    <span class="o">-------</span>    
-    <span class="o">-</span><span class="n">debug</span>      <span class="mi">0</span>           <span class="n">false</span>      
-        <span class="n">Enable</span> <span class="n">debugging</span> 
-    <span class="o">-</span><span class="n">help</span>       <span class="mi">0</span>           <span class="n">false</span>      
-        <span class="n">Print</span> <span class="n">this</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span> 
-    <span class="o">-</span><span class="n">level</span>      <span class="mi">1</span>           <span class="o">-</span><span class="mi">1</span>         
-        <span class="n">Multiresolution</span> <span class="n">refinement</span> <span class="n">level</span><span class="o">.</span> <span class="n">Zero</span> <span class="n">implies</span> <span class="n">coarsest</span> <span class="n">resolution</span> 
-    <span class="o">-</span><span class="n">lod</span>        <span class="mi">1</span>           <span class="o">-</span><span class="mi">1</span>         
-        <span class="n">Compression</span> <span class="n">level</span> <span class="n">of</span> <span class="n">detail</span><span class="o">.</span> <span class="n">Zero</span> <span class="n">implies</span> <span class="n">coarsest</span> <span class="n">approximation</span> 
-    <span class="o">-</span><span class="n">nthreads</span>   <span class="mi">1</span>           <span class="mi">0</span>          
-        <span class="n">Number</span> <span class="n">of</span> <span class="n">execution</span> <span class="n">threads</span> <span class="p">(</span><span class="mi">0</span><span class="o">=&gt;</span><span class="c1"># processors) </span>
-    <span class="o">-</span><span class="n">quiet</span>      <span class="mi">0</span>           <span class="n">false</span>      
-        <span class="n">Operate</span> <span class="n">quietly</span> 
-    <span class="o">-</span><span class="n">ts</span>         <span class="mi">1</span>           <span class="mi">0</span>          
-        <span class="n">Timestep</span> <span class="n">of</span> <span class="n">data</span> <span class="n">file</span> <span class="n">starting</span> <span class="kn">from</span> <span class="mi">0</span> 
-    <span class="o">-</span><span class="nb">type</span>       <span class="mi">1</span>           <span class="n">float32</span>    
-        <span class="n">Primitive</span> <span class="nb">type</span> <span class="n">of</span> <span class="n">output</span> <span class="n">data</span> 
-    <span class="o">-</span><span class="n">varname</span>    <span class="mi">1</span>           <span class="n">var1</span>       
-        <span class="n">Name</span> <span class="n">of</span> <span class="n">variable</span> 
-    <span class="o">-</span><span class="n">xregion</span>    <span class="mi">1</span>           <span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span>      
-        <span class="n">X</span> <span class="n">dimension</span> <span class="n">subregion</span> <span class="n">bounds</span> <span class="p">(</span><span class="nb">min</span><span class="p">:</span><span class="nb">max</span><span class="p">)</span> 
-    <span class="o">-</span><span class="n">yregion</span>    <span class="mi">1</span>           <span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span>      
-        <span class="n">Y</span> <span class="n">dimension</span> <span class="n">subregion</span> <span class="n">bounds</span> <span class="p">(</span><span class="nb">min</span><span class="p">:</span><span class="nb">max</span><span class="p">)</span> 
-    <span class="o">-</span><span class="n">zregion</span>    <span class="mi">1</span>           <span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span>      
-        <span class="n">Z</span> <span class="n">dimension</span> <span class="n">subregion</span> <span class="n">bounds</span> <span class="p">(</span><span class="nb">min</span><span class="p">:</span><span class="nb">max</span><span class="p">)</span> 
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Usage: vdc2raw [options] vdcmaster datafile
+    OPTION      NUM_ARGS    DEFAULT    
+    ------      --------    -------    
+    -debug      0           false      
+        Enable debugging 
+    -help       0           false      
+        Print this message and exit 
+    -level      1           -1         
+        Multiresolution refinement level. Zero implies coarsest resolution 
+    -lod        1           -1         
+        Compression level of detail. Zero implies coarsest approximation 
+    -nthreads   1           0          
+        Number of execution threads (0=&gt;# processors) 
+    -quiet      0           false      
+        Operate quietly 
+    -ts         1           0          
+        Timestep of data file starting from 0 
+    -type       1           float32    
+        Primitive type of output data 
+    -varname    1           var1       
+        Name of variable 
+    -xregion    1           -1:-1      
+        X dimension subregion bounds (min:max) 
+    -yregion    1           -1:-1      
+        Y dimension subregion bounds (min:max) 
+    -zregion    1           -1:-1      
+        Z dimension subregion bounds (min:max) 
 
-<span class="n">Copyright</span> <span class="mi">2007</span> <span class="n">The</span> <span class="n">National</span> <span class="n">Center</span> <span class="k">for</span> <span class="n">Atmospheric</span> <span class="n">Research</span>
+Copyright 2007 The National Center for Atmospheric Research
 
-<span class="n">Version</span><span class="p">:</span> <span class="mf">3.1</span><span class="o">.</span><span class="mi">0</span> <span class="p">(</span><span class="mi">2019</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">05</span><span class="n">T21</span><span class="p">:</span><span class="mi">04</span><span class="p">:</span><span class="mi">24</span><span class="n">Z</span><span class="p">)</span> <span class="n">www</span><span class="o">.</span><span class="n">vapor</span><span class="o">.</span><span class="n">ucar</span><span class="o">.</span><span class="n">edu</span>
+Version: 3.1.0 (2019-08-05T21:04:24Z) www.vapor.ucar.edu
 </pre></div>
 </div>
 </div>
 <div class="section" id="vdccreate">
 <h2>vdccreate<a class="headerlink" href="#vdccreate" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">vdccreate</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="n">master</span><span class="o">.</span><span class="n">nc</span>
-    <span class="n">OPTION</span>        <span class="n">NUM_ARGS</span>    <span class="n">DEFAULT</span>         
-    <span class="o">------</span>        <span class="o">--------</span>    <span class="o">-------</span>         
-    <span class="o">-</span><span class="n">bs</span>           <span class="mi">1</span>           <span class="mi">64</span><span class="p">:</span><span class="mi">64</span><span class="p">:</span><span class="mi">64</span>        
-        <span class="n">Internal</span> <span class="n">storage</span> <span class="n">blocking</span> <span class="n">factor</span> <span class="n">expressed</span> <span class="ow">in</span> <span class="n">grid</span> <span class="n">points</span> <span class="p">(</span><span class="n">NX</span><span class="p">:</span><span class="n">NY</span><span class="p">:</span><span class="n">NZ</span><span class="p">)</span> 
-    <span class="o">-</span><span class="n">cratios</span>      <span class="mi">1</span>           <span class="mi">500</span><span class="p">:</span><span class="mi">100</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">1</span>    
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">compression</span> <span class="n">ratios</span><span class="o">.</span> <span class="n">The</span> <span class="n">default</span> <span class="ow">is</span> <span class="mi">500</span><span class="p">:</span><span class="mi">100</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mf">1.</span> 
-        <span class="n">The</span> <span class="n">maximum</span> <span class="n">compression</span> <span class="n">ratio</span> <span class="ow">is</span> <span class="n">wavelet</span> <span class="ow">and</span> <span class="n">block</span> <span class="n">size</span> <span class="n">dependent</span><span class="o">.</span> 
-    <span class="o">-</span><span class="n">dimension</span>    <span class="mi">1</span>           <span class="mi">512</span><span class="n">x512x512</span>     
-        <span class="n">Data</span> <span class="n">volume</span> <span class="n">dimensions</span> <span class="n">expressed</span> <span class="ow">in</span> <span class="n">grid</span> <span class="n">points</span> <span class="p">(</span><span class="n">NXxNYxNZ</span><span class="p">)</span> 
-    <span class="o">-</span><span class="n">extents</span>      <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>              
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="mi">6</span><span class="o">-</span><span class="n">element</span> <span class="n">vector</span> <span class="n">specifying</span> <span class="n">domain</span> <span class="n">extents</span> <span class="ow">in</span> <span class="n">user</span> 
-        <span class="n">coordinates</span> <span class="p">(</span><span class="n">X0</span><span class="p">:</span><span class="n">Y0</span><span class="p">:</span><span class="n">Z0</span><span class="p">:</span><span class="n">X1</span><span class="p">:</span><span class="n">Y1</span><span class="p">:</span><span class="n">Z1</span><span class="p">)</span> 
-    <span class="o">-</span><span class="n">force</span>        <span class="mi">0</span>           <span class="n">false</span>           
-        <span class="n">Create</span> <span class="n">a</span> <span class="n">new</span> <span class="n">VDC</span> <span class="n">master</span> <span class="n">file</span> <span class="n">even</span> <span class="k">if</span> <span class="n">a</span> <span class="n">VDC</span> <span class="n">data</span> <span class="n">directory</span> <span class="n">already</span> 
-        <span class="n">exists</span><span class="o">.</span> <span class="n">Results</span> <span class="n">may</span> <span class="n">be</span> <span class="n">undefined</span> <span class="k">if</span> <span class="n">settings</span> <span class="n">between</span> <span class="n">the</span> <span class="n">new</span> <span class="n">master</span> 
-        <span class="n">file</span> <span class="ow">and</span> <span class="n">old</span> <span class="n">data</span> <span class="n">directory</span> <span class="n">do</span> <span class="ow">not</span> <span class="n">match</span><span class="o">.</span> 
-    <span class="o">-</span><span class="n">help</span>         <span class="mi">0</span>           <span class="n">false</span>           
-        <span class="n">Print</span> <span class="n">this</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span> 
-    <span class="o">-</span><span class="n">ncvars2dxy</span>   <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>              
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="mi">2</span><span class="n">D</span> <span class="n">XY</span><span class="o">-</span><span class="n">plane</span> <span class="n">variable</span> <span class="n">names</span> <span class="p">(</span><span class="ow">not</span> <span class="n">compressed</span><span class="p">)</span> <span class="n">to</span> 
-        <span class="n">be</span> <span class="n">included</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">VDC</span> 
-    <span class="o">-</span><span class="n">ncvars2dxz</span>   <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>              
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="mi">3</span><span class="n">D</span> <span class="n">XZ</span><span class="o">-</span><span class="n">plane</span> <span class="n">variable</span> <span class="n">names</span> <span class="p">(</span><span class="ow">not</span> <span class="n">compressed</span><span class="p">)</span> <span class="n">to</span> 
-        <span class="n">be</span> <span class="n">included</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">VDC</span> 
-    <span class="o">-</span><span class="n">ncvars2dyz</span>   <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>              
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="mi">3</span><span class="n">D</span> <span class="n">YZ</span><span class="o">-</span><span class="n">plane</span> <span class="n">variable</span> <span class="n">names</span> <span class="p">(</span><span class="ow">not</span> <span class="n">compressed</span><span class="p">)</span> <span class="n">to</span> 
-        <span class="n">be</span> <span class="n">included</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">VDC</span> 
-    <span class="o">-</span><span class="n">ncvars3d</span>     <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>              
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="mi">3</span><span class="n">D</span> <span class="n">variable</span> <span class="n">names</span> <span class="p">(</span><span class="ow">not</span> <span class="n">compressed</span><span class="p">)</span> <span class="n">to</span> <span class="n">be</span> 
-        <span class="n">included</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">VDC</span> 
-    <span class="o">-</span><span class="n">nthreads</span>     <span class="mi">1</span>           <span class="mi">0</span>               
-        <span class="n">Specify</span> <span class="n">number</span> <span class="n">of</span> <span class="n">execution</span> <span class="n">threads</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">use</span> <span class="n">number</span> <span class="n">of</span> <span class="n">cores</span> 
-    <span class="o">-</span><span class="n">numts</span>        <span class="mi">1</span>           <span class="mi">1</span>               
-        <span class="n">Number</span> <span class="n">of</span> <span class="n">timesteps</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">data</span> <span class="nb">set</span> 
-    <span class="o">-</span><span class="n">vars2dxy</span>     <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>              
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="mi">2</span><span class="n">D</span> <span class="n">XY</span><span class="o">-</span><span class="n">plane</span> <span class="n">variable</span> <span class="n">names</span> <span class="p">(</span><span class="n">compressed</span><span class="p">)</span> <span class="n">to</span> <span class="n">be</span> 
-        <span class="n">included</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">VDC</span> 
-    <span class="o">-</span><span class="n">vars2dxz</span>     <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>              
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="mi">3</span><span class="n">D</span> <span class="n">XZ</span><span class="o">-</span><span class="n">plane</span> <span class="n">variable</span> <span class="n">names</span> <span class="p">(</span><span class="n">compressed</span><span class="p">)</span> <span class="n">to</span> <span class="n">be</span> 
-        <span class="n">included</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">VDC</span> 
-    <span class="o">-</span><span class="n">vars2dyz</span>     <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>              
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="mi">3</span><span class="n">D</span> <span class="n">YZ</span><span class="o">-</span><span class="n">plane</span> <span class="n">variable</span> <span class="n">names</span> <span class="p">(</span><span class="n">compressed</span><span class="p">)</span> <span class="n">to</span> <span class="n">be</span> 
-        <span class="n">included</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">VDC</span> 
-    <span class="o">-</span><span class="n">vars3d</span>       <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>              
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="mi">3</span><span class="n">D</span> <span class="n">variable</span> <span class="n">names</span> <span class="p">(</span><span class="n">compressed</span><span class="p">)</span> <span class="n">to</span> <span class="n">be</span> <span class="n">included</span> 
-        <span class="ow">in</span> <span class="n">the</span> <span class="n">VDC</span> 
-    <span class="o">-</span><span class="n">wname</span>        <span class="mi">1</span>           <span class="n">bior4</span><span class="o">.</span><span class="mi">4</span>         
-        <span class="n">Wavelet</span> <span class="n">family</span> <span class="n">used</span> <span class="k">for</span> <span class="n">compression</span> <span class="n">Valid</span> <span class="n">values</span> <span class="n">are</span> <span class="n">bior1</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="n">bior1</span><span class="o">.</span><span class="mi">3</span><span class="p">,</span> 
-        <span class="n">bior1</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="n">bior2</span><span class="o">.</span><span class="mi">2</span><span class="p">,</span> <span class="n">bior2</span><span class="o">.</span><span class="mi">4</span> <span class="p">,</span><span class="n">bior2</span><span class="o">.</span><span class="mi">6</span><span class="p">,</span> <span class="n">bior2</span><span class="o">.</span><span class="mi">8</span><span class="p">,</span> <span class="n">bior3</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="n">bior3</span><span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="n">bior3</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> 
-        <span class="n">bior3</span><span class="o">.</span><span class="mi">7</span><span class="p">,</span> <span class="n">bior3</span><span class="o">.</span><span class="mi">9</span><span class="p">,</span> <span class="n">bior4</span><span class="o">.</span><span class="mi">4</span> 
-    <span class="o">-</span><span class="n">xtype</span>        <span class="mi">1</span>           <span class="nb">float</span>           
-        <span class="n">External</span> <span class="n">data</span> <span class="nb">type</span> <span class="n">representation</span><span class="o">.</span> <span class="n">Valid</span> <span class="n">values</span> <span class="n">are</span> <span class="n">uint8</span> <span class="n">int8</span> <span class="n">int16</span> 
-        <span class="n">int32</span> <span class="n">int64</span> <span class="nb">float</span> <span class="n">double</span> 
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Usage: vdccreate [options] master.nc
+    OPTION        NUM_ARGS    DEFAULT         
+    ------        --------    -------         
+    -bs           1           64:64:64        
+        Internal storage blocking factor expressed in grid points (NX:NY:NZ) 
+    -cratios      1           500:100:10:1    
+        Colon delimited list compression ratios. The default is 500:100:10:1. 
+        The maximum compression ratio is wavelet and block size dependent. 
+    -dimension    1           512x512x512     
+        Data volume dimensions expressed in grid points (NXxNYxNZ) 
+    -extents      1           &quot;&quot;              
+        Colon delimited 6-element vector specifying domain extents in user 
+        coordinates (X0:Y0:Z0:X1:Y1:Z1) 
+    -force        0           false           
+        Create a new VDC master file even if a VDC data directory already 
+        exists. Results may be undefined if settings between the new master 
+        file and old data directory do not match. 
+    -help         0           false           
+        Print this message and exit 
+    -ncvars2dxy   1           &quot;&quot;              
+        Colon delimited list of 2D XY-plane variable names (not compressed) to 
+        be included in the VDC 
+    -ncvars2dxz   1           &quot;&quot;              
+        Colon delimited list of 3D XZ-plane variable names (not compressed) to 
+        be included in the VDC 
+    -ncvars2dyz   1           &quot;&quot;              
+        Colon delimited list of 3D YZ-plane variable names (not compressed) to 
+        be included in the VDC 
+    -ncvars3d     1           &quot;&quot;              
+        Colon delimited list of 3D variable names (not compressed) to be 
+        included in the VDC 
+    -nthreads     1           0               
+        Specify number of execution threads 0 =&gt; use number of cores 
+    -numts        1           1               
+        Number of timesteps in the data set 
+    -vars2dxy     1           &quot;&quot;              
+        Colon delimited list of 2D XY-plane variable names (compressed) to be 
+        included in the VDC 
+    -vars2dxz     1           &quot;&quot;              
+        Colon delimited list of 3D XZ-plane variable names (compressed) to be 
+        included in the VDC 
+    -vars2dyz     1           &quot;&quot;              
+        Colon delimited list of 3D YZ-plane variable names (compressed) to be 
+        included in the VDC 
+    -vars3d       1           &quot;&quot;              
+        Colon delimited list of 3D variable names (compressed) to be included 
+        in the VDC 
+    -wname        1           bior4.4         
+        Wavelet family used for compression Valid values are bior1.1, bior1.3, 
+        bior1.5, bior2.2, bior2.4 ,bior2.6, bior2.8, bior3.1, bior3.3, bior3.5, 
+        bior3.7, bior3.9, bior4.4 
+    -xtype        1           float           
+        External data type representation. Valid values are uint8 int8 int16 
+        int32 int64 float double 
 </pre></div>
 </div>
 </div>
 <div class="section" id="vdcdump">
 <h2>vdcdump<a class="headerlink" href="#vdcdump" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">vdcdump</span> <span class="n">vdcmaster</span><span class="o">.</span><span class="n">nc</span>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Usage: vdcdump vdcmaster.nc
 </pre></div>
 </div>
 </div>
 <div class="section" id="wasp2ncdf">
 <h2>wasp2ncdf<a class="headerlink" href="#wasp2ncdf" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">wasp2ncdf</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="n">waspfile</span> <span class="n">ncdffile</span>
-    <span class="n">OPTION</span>       <span class="n">NUM_ARGS</span>    <span class="n">DEFAULT</span>    
-    <span class="o">------</span>       <span class="o">--------</span>    <span class="o">-------</span>    
-    <span class="o">-</span><span class="n">debug</span>       <span class="mi">0</span>           <span class="n">false</span>      
-        <span class="n">Enable</span> <span class="n">diagnostic</span> 
-    <span class="o">-</span><span class="n">help</span>        <span class="mi">0</span>           <span class="n">false</span>      
-        <span class="n">Print</span> <span class="n">this</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span> 
-    <span class="o">-</span><span class="n">lod</span>         <span class="mi">1</span>           <span class="o">-</span><span class="mi">1</span>         
-        <span class="n">Compression</span> <span class="n">levels</span> <span class="n">saved</span><span class="o">.</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">coarsest</span><span class="p">,</span> <span class="mi">1</span> <span class="o">=&gt;</span> <span class="nb">next</span> <span class="n">refinement</span><span class="p">,</span> <span class="n">etc</span><span class="o">.</span> <span class="o">-</span><span class="mi">1</span> 
-        <span class="o">=&gt;</span> <span class="nb">all</span> <span class="n">levels</span> <span class="n">defined</span> <span class="n">by</span> <span class="n">the</span> <span class="n">netcdf</span> <span class="n">file</span> 
-    <span class="o">-</span><span class="n">nthreads</span>    <span class="mi">1</span>           <span class="mi">0</span>          
-        <span class="n">Specify</span> <span class="n">number</span> <span class="n">of</span> <span class="n">execution</span> <span class="n">threads</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">use</span> <span class="n">number</span> <span class="n">of</span> <span class="n">cores</span> 
-    <span class="o">-</span><span class="n">quiet</span>       <span class="mi">0</span>           <span class="n">false</span>      
-        <span class="n">Operate</span> <span class="n">quietly</span> 
-    <span class="o">-</span><span class="n">varname</span>     <span class="mi">1</span>           <span class="n">var1</span>       
-        <span class="n">Name</span> <span class="n">of</span> <span class="n">variable</span> 
-    <span class="o">-</span><span class="n">xvarnames</span>   <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>         
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">variable</span> <span class="n">names</span> <span class="n">to</span> <span class="n">exclude</span> <span class="kn">from</span> <span class="nn">compression.</span> 
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Usage: wasp2ncdf [options] waspfile ncdffile
+    OPTION       NUM_ARGS    DEFAULT    
+    ------       --------    -------    
+    -debug       0           false      
+        Enable diagnostic 
+    -help        0           false      
+        Print this message and exit 
+    -lod         1           -1         
+        Compression levels saved. 0 =&gt; coarsest, 1 =&gt; next refinement, etc. -1 
+        =&gt; all levels defined by the netcdf file 
+    -nthreads    1           0          
+        Specify number of execution threads 0 =&gt; use number of cores 
+    -quiet       0           false      
+        Operate quietly 
+    -varname     1           var1       
+        Name of variable 
+    -xvarnames   1           &quot;&quot;         
+        Colon delimited list of variable names to exclude from compression. 
 
-<span class="n">Copyright</span> <span class="mi">2007</span> <span class="n">The</span> <span class="n">National</span> <span class="n">Center</span> <span class="k">for</span> <span class="n">Atmospheric</span> <span class="n">Research</span>
+Copyright 2007 The National Center for Atmospheric Research
 
-<span class="n">Version</span><span class="p">:</span> <span class="mf">3.1</span><span class="o">.</span><span class="mi">0</span> <span class="p">(</span><span class="mi">2019</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">05</span><span class="n">T21</span><span class="p">:</span><span class="mi">04</span><span class="p">:</span><span class="mi">24</span><span class="n">Z</span><span class="p">)</span> <span class="n">www</span><span class="o">.</span><span class="n">vapor</span><span class="o">.</span><span class="n">ucar</span><span class="o">.</span><span class="n">edu</span>
+Version: 3.1.0 (2019-08-05T21:04:24Z) www.vapor.ucar.edu
 </pre></div>
 </div>
 </div>
 <div class="section" id="wasp2raw">
 <h2>wasp2raw<a class="headerlink" href="#wasp2raw" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">wasp2raw</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span> <span class="n">netcdffile</span> <span class="n">datafile</span>
-    <span class="n">OPTION</span>      <span class="n">NUM_ARGS</span>    <span class="n">DEFAULT</span>    
-    <span class="o">------</span>      <span class="o">--------</span>    <span class="o">-------</span>    
-    <span class="o">-</span><span class="n">count</span>      <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>         
-        <span class="n">Colon</span><span class="o">-</span><span class="n">delimited</span> <span class="n">NetCDF</span> <span class="n">style</span> <span class="n">count</span> <span class="n">coordinate</span> <span class="n">vector</span> 
-    <span class="o">-</span><span class="n">debug</span>      <span class="mi">0</span>           <span class="n">false</span>      
-        <span class="n">Enable</span> <span class="n">diagnostic</span> 
-    <span class="o">-</span><span class="n">help</span>       <span class="mi">0</span>           <span class="n">false</span>      
-        <span class="n">Print</span> <span class="n">this</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span> 
-    <span class="o">-</span><span class="n">level</span>      <span class="mi">1</span>           <span class="o">-</span><span class="mi">1</span>         
-        <span class="n">Multiresolution</span> <span class="n">refinement</span> <span class="n">level</span><span class="o">.</span> <span class="n">Zero</span> <span class="n">implies</span> <span class="n">coarsest</span> <span class="n">resolution</span> 
-    <span class="o">-</span><span class="n">lod</span>        <span class="mi">1</span>           <span class="o">-</span><span class="mi">1</span>         
-        <span class="n">Compression</span> <span class="n">levels</span> <span class="n">saved</span><span class="o">.</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">coarsest</span><span class="p">,</span> <span class="mi">1</span> <span class="o">=&gt;</span> <span class="nb">next</span> <span class="n">refinement</span><span class="p">,</span> <span class="n">etc</span><span class="o">.</span> <span class="o">-</span><span class="mi">1</span> 
-        <span class="o">=&gt;</span> <span class="nb">all</span> <span class="n">levels</span> <span class="n">defined</span> <span class="n">by</span> <span class="n">the</span> <span class="n">netcdf</span> <span class="n">file</span> 
-    <span class="o">-</span><span class="n">nthreads</span>   <span class="mi">1</span>           <span class="mi">0</span>          
-        <span class="n">Number</span> <span class="n">of</span> <span class="n">execution</span> <span class="n">threads</span><span class="o">.</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">use</span> <span class="n">number</span> <span class="n">of</span> <span class="n">cores</span> 
-    <span class="o">-</span><span class="n">start</span>      <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>         
-        <span class="n">Colon</span><span class="o">-</span><span class="n">delimited</span> <span class="n">NetCDF</span> <span class="n">style</span> <span class="n">start</span> <span class="n">coordinate</span> <span class="n">vector</span> 
-    <span class="o">-</span><span class="nb">type</span>       <span class="mi">1</span>           <span class="n">float32</span>    
-        <span class="n">Primitive</span> <span class="nb">type</span> <span class="n">of</span> <span class="n">output</span> <span class="n">data</span> 
-    <span class="o">-</span><span class="n">varname</span>    <span class="mi">1</span>           <span class="n">var1</span>       
-        <span class="n">Name</span> <span class="n">of</span> <span class="n">variable</span> 
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Usage: wasp2raw [options] netcdffile datafile
+    OPTION      NUM_ARGS    DEFAULT    
+    ------      --------    -------    
+    -count      1           &quot;&quot;         
+        Colon-delimited NetCDF style count coordinate vector 
+    -debug      0           false      
+        Enable diagnostic 
+    -help       0           false      
+        Print this message and exit 
+    -level      1           -1         
+        Multiresolution refinement level. Zero implies coarsest resolution 
+    -lod        1           -1         
+        Compression levels saved. 0 =&gt; coarsest, 1 =&gt; next refinement, etc. -1 
+        =&gt; all levels defined by the netcdf file 
+    -nthreads   1           0          
+        Number of execution threads. 0 =&gt; use number of cores 
+    -start      1           &quot;&quot;         
+        Colon-delimited NetCDF style start coordinate vector 
+    -type       1           float32    
+        Primitive type of output data 
+    -varname    1           var1       
+        Name of variable 
 
-<span class="n">Copyright</span> <span class="mi">2007</span> <span class="n">The</span> <span class="n">National</span> <span class="n">Center</span> <span class="k">for</span> <span class="n">Atmospheric</span> <span class="n">Research</span>
+Copyright 2007 The National Center for Atmospheric Research
 
-<span class="n">Version</span><span class="p">:</span> <span class="mf">3.1</span><span class="o">.</span><span class="mi">0</span> <span class="p">(</span><span class="mi">2019</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">05</span><span class="n">T21</span><span class="p">:</span><span class="mi">04</span><span class="p">:</span><span class="mi">24</span><span class="n">Z</span><span class="p">)</span> <span class="n">www</span><span class="o">.</span><span class="n">vapor</span><span class="o">.</span><span class="n">ucar</span><span class="o">.</span><span class="n">edu</span>
+Version: 3.1.0 (2019-08-05T21:04:24Z) www.vapor.ucar.edu
 </pre></div>
 </div>
 </div>
 <div class="section" id="waspcreate">
 <h2>waspcreate<a class="headerlink" href="#waspcreate" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="wrf2vdc">
 <h2>wrf2vdc<a class="headerlink" href="#wrf2vdc" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">wrf2vdc</span> <span class="n">wrffiles</span><span class="o">...</span> <span class="n">master</span><span class="o">.</span><span class="n">nc</span>
-    <span class="n">OPTION</span>      <span class="n">NUM_ARGS</span>    <span class="n">DEFAULT</span>    
-    <span class="o">------</span>      <span class="o">--------</span>    <span class="o">-------</span>    
-    <span class="o">-</span><span class="n">help</span>       <span class="mi">0</span>           <span class="n">false</span>      
-        <span class="n">Print</span> <span class="n">this</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span> 
-    <span class="o">-</span><span class="n">nthreads</span>   <span class="mi">1</span>           <span class="mi">0</span>          
-        <span class="n">Specify</span> <span class="n">number</span> <span class="n">of</span> <span class="n">execution</span> <span class="n">threads</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">use</span> <span class="n">number</span> <span class="n">of</span> <span class="n">cores</span> 
-    <span class="o">-</span><span class="n">numts</span>      <span class="mi">1</span>           <span class="o">-</span><span class="mi">1</span>         
-        <span class="n">Number</span> <span class="n">of</span> <span class="n">timesteps</span> <span class="n">to</span> <span class="n">be</span> <span class="n">included</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">VDC</span><span class="o">.</span> <span class="n">Default</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="n">includes</span> 
-        <span class="nb">all</span> <span class="n">timesteps</span><span class="o">.</span> 
-    <span class="o">-</span><span class="nb">vars</span>       <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>         
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="mi">3</span><span class="n">D</span> <span class="n">variable</span> <span class="n">names</span> <span class="p">(</span><span class="n">compressed</span><span class="p">)</span> <span class="n">to</span> <span class="n">be</span> <span class="n">included</span> 
-        <span class="ow">in</span> <span class="n">the</span> <span class="n">VDC</span> 
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Usage: wrf2vdc wrffiles... master.nc
+    OPTION      NUM_ARGS    DEFAULT    
+    ------      --------    -------    
+    -help       0           false      
+        Print this message and exit 
+    -nthreads   1           0          
+        Specify number of execution threads 0 =&gt; use number of cores 
+    -numts      1           -1         
+        Number of timesteps to be included in the VDC. Default (-1) includes 
+        all timesteps. 
+    -vars       1           &quot;&quot;         
+        Colon delimited list of 3D variable names (compressed) to be included 
+        in the VDC 
 </pre></div>
 </div>
 </div>
 <div class="section" id="wrfvdccreate">
 <h2>wrfvdccreate<a class="headerlink" href="#wrfvdccreate" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">wrfvdccreate</span> <span class="n">wrf_file1</span> <span class="n">wrf_file2</span> <span class="o">...</span> <span class="n">master</span><span class="o">.</span><span class="n">nc</span>
-    <span class="n">OPTION</span>      <span class="n">NUM_ARGS</span>    <span class="n">DEFAULT</span>         
-    <span class="o">------</span>      <span class="o">--------</span>    <span class="o">-------</span>         
-    <span class="o">-</span><span class="n">bs</span>         <span class="mi">1</span>           <span class="mi">64</span><span class="p">:</span><span class="mi">64</span><span class="p">:</span><span class="mi">64</span>        
-        <span class="n">Internal</span> <span class="n">storage</span> <span class="n">blocking</span> <span class="n">factor</span> <span class="n">expressed</span> <span class="ow">in</span> <span class="n">grid</span> <span class="n">points</span> <span class="p">(</span><span class="n">NX</span><span class="p">:</span><span class="n">NY</span><span class="p">:</span><span class="n">NZ</span><span class="p">)</span> 
-    <span class="o">-</span><span class="n">cratios</span>    <span class="mi">1</span>           <span class="mi">1</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">100</span><span class="p">:</span><span class="mi">500</span>    
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">compression</span> <span class="n">ratios</span><span class="o">.</span> <span class="k">for</span> <span class="mi">3</span><span class="n">D</span> <span class="n">variables</span><span class="o">.</span> <span class="n">The</span> <span class="n">default</span> 
-        <span class="ow">is</span> <span class="mi">1</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">100</span><span class="p">:</span><span class="mf">500.</span> <span class="n">The</span> <span class="n">maximum</span> <span class="n">compression</span> <span class="n">ratio</span> <span class="ow">is</span> <span class="n">wavelet</span> <span class="ow">and</span> <span class="n">block</span> 
-        <span class="n">size</span> <span class="n">dependent</span><span class="o">.</span> 
-    <span class="o">-</span><span class="n">force</span>      <span class="mi">0</span>           <span class="n">false</span>           
-        <span class="n">Create</span> <span class="n">a</span> <span class="n">new</span> <span class="n">VDC</span> <span class="n">master</span> <span class="n">file</span> <span class="n">even</span> <span class="k">if</span> <span class="n">a</span> <span class="n">VDC</span> <span class="n">data</span> <span class="n">directory</span> <span class="n">already</span> 
-        <span class="n">exists</span><span class="o">.</span> <span class="n">Results</span> <span class="n">may</span> <span class="n">be</span> <span class="n">undefined</span> <span class="k">if</span> <span class="n">settings</span> <span class="n">between</span> <span class="n">the</span> <span class="n">new</span> <span class="n">master</span> 
-        <span class="n">file</span> <span class="ow">and</span> <span class="n">old</span> <span class="n">data</span> <span class="n">directory</span> <span class="n">do</span> <span class="ow">not</span> <span class="n">match</span><span class="o">.</span> 
-    <span class="o">-</span><span class="n">help</span>       <span class="mi">0</span>           <span class="n">false</span>           
-        <span class="n">Print</span> <span class="n">this</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span> 
-    <span class="o">-</span><span class="n">nthreads</span>   <span class="mi">1</span>           <span class="mi">0</span>               
-        <span class="n">Specify</span> <span class="n">number</span> <span class="n">of</span> <span class="n">execution</span> <span class="n">threads</span> <span class="mi">0</span> <span class="o">=&gt;</span> <span class="n">use</span> <span class="n">number</span> <span class="n">of</span> <span class="n">cores</span> 
-    <span class="o">-</span><span class="nb">vars</span>       <span class="mi">1</span>           <span class="s2">&quot;&quot;</span>              
-        <span class="n">Colon</span> <span class="n">delimited</span> <span class="nb">list</span> <span class="n">of</span> <span class="mi">3</span><span class="n">D</span> <span class="n">variable</span> <span class="n">names</span> <span class="p">(</span><span class="n">compressed</span><span class="p">)</span> <span class="n">to</span> <span class="n">be</span> <span class="n">included</span> 
-        <span class="ow">in</span> <span class="n">the</span> <span class="n">VDC</span> 
-    <span class="o">-</span><span class="n">wname</span>      <span class="mi">1</span>           <span class="n">bior4</span><span class="o">.</span><span class="mi">4</span>         
-        <span class="n">Wavelet</span> <span class="n">family</span> <span class="n">used</span> <span class="k">for</span> <span class="n">compression</span> <span class="n">Valid</span> <span class="n">values</span> <span class="n">are</span> <span class="n">bior1</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="n">bior1</span><span class="o">.</span><span class="mi">3</span><span class="p">,</span> 
-        <span class="n">bior1</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="n">bior2</span><span class="o">.</span><span class="mi">2</span><span class="p">,</span> <span class="n">bior2</span><span class="o">.</span><span class="mi">4</span> <span class="p">,</span><span class="n">bior2</span><span class="o">.</span><span class="mi">6</span><span class="p">,</span> <span class="n">bior2</span><span class="o">.</span><span class="mi">8</span><span class="p">,</span> <span class="n">bior3</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="n">bior3</span><span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="n">bior3</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> 
-        <span class="n">bior3</span><span class="o">.</span><span class="mi">7</span><span class="p">,</span> <span class="n">bior3</span><span class="o">.</span><span class="mi">9</span><span class="p">,</span> <span class="n">bior4</span><span class="o">.</span><span class="mi">4</span> 
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Usage: wrfvdccreate wrf_file1 wrf_file2 ... master.nc
+    OPTION      NUM_ARGS    DEFAULT         
+    ------      --------    -------         
+    -bs         1           64:64:64        
+        Internal storage blocking factor expressed in grid points (NX:NY:NZ) 
+    -cratios    1           1:10:100:500    
+        Colon delimited list compression ratios. for 3D variables. The default 
+        is 1:10:100:500. The maximum compression ratio is wavelet and block 
+        size dependent. 
+    -force      0           false           
+        Create a new VDC master file even if a VDC data directory already 
+        exists. Results may be undefined if settings between the new master 
+        file and old data directory do not match. 
+    -help       0           false           
+        Print this message and exit 
+    -nthreads   1           0               
+        Specify number of execution threads 0 =&gt; use number of cores 
+    -vars       1           &quot;&quot;              
+        Colon delimited list of 3D variable names (compressed) to be included 
+        in the VDC 
+    -wname      1           bior4.4         
+        Wavelet family used for compression Valid values are bior1.1, bior1.3, 
+        bior1.5, bior2.2, bior2.4 ,bior2.6, bior2.8, bior3.1, bior3.3, bior3.5, 
+        bior3.7, bior3.9, bior4.4 
 </pre></div>
 </div>
 </div>
