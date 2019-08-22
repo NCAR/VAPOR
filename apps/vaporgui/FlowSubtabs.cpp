@@ -333,13 +333,24 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
 void 
 FlowSeedingSubtab::_rakeBiasVariableChanged( int idx )
 {
-    std::cout << "new variable is: " << _rakeBiasVariable->GetItemText( idx ) << std::endl;
+    // idx is always a valid value, since it's returned by the GUI
+    if( _rakeBiasVariable->GetCurrentIndex() != idx )
+    {
+        _rakeBiasVariable->SetIndex( idx );
+        _params->SetRakeBiasVariable( _rakeBiasVariable->GetCurrentText() );
+    }
 }
     
 void 
 FlowSeedingSubtab::_rakeBiasStrengthChanged()
 {
-    std::cout << "new strength is: " << _rakeBiasStrength->GetCurrentValue( ) << std::endl;
+    // The value returned from the GUI is always valid
+    auto strenGUI  = _rakeBiasStrength->GetCurrentValue();
+    if(  strenGUI != _params->GetRakeBiasStrength() )
+    {
+        _rakeBiasStrength->SetCurrentValue( strenGUI );
+        _params->SetRakeBiasStrength( strenGUI );
+    }
 }
 
 void
