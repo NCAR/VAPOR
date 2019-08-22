@@ -34,7 +34,8 @@ float DistanceToLine(vec2 a, vec2 b, vec2 p)
 }
 
 
-
+#define CONTROL_POINT_RADIUS (4.0f)
+#define PADDING (CONTROL_POINT_RADIUS + 1.0f)
 
 
 
@@ -85,9 +86,6 @@ TFOpacityInfoWidget *TFOpacityWidget::GetInfoWidget() const
     return _infoWidget;
 }
 
-#define CONTROL_POINT_RADIUS (4.0f)
-#define PADDING (CONTROL_POINT_RADIUS + 1.0f)
-
 void TFOpacityWidget::paintEvent(QPaintEvent* event)
 {
     QFrame::paintEvent(event);
@@ -108,33 +106,7 @@ void TFOpacityWidget::paintEvent(QPaintEvent* event)
         }
         
         for (auto it = --cp.EndPoints(); it != --cp.BeginPoints(); --it)
-            drawControl(p, *it, it.Index() == _selectedControl);
-    }
-}
-
-void TFOpacityWidget::drawControl(QPainter &p, glm::vec2 ndc, bool selected) const
-{
-    QPen pen(Qt::darkGray, 0.5);
-    QBrush brush(QColor(0xfa, 0xfa, 0xfa));
-    float radius = CONTROL_POINT_RADIUS;
-    
-//    if (selected) {
-//        pen.setColor(Qt::black);
-//        pen.setWidth(1.5);
-//
-//        brush.setColor(Qt::white);
-//    }
-    
-    p.setBrush(brush);
-    p.setPen(pen);
-    
-    p.drawEllipse(QNDCToPixel(ndc), radius, radius);
-    
-    if (selected) {
-        p.setPen(Qt::NoPen);
-        p.setBrush(QBrush(Qt::black));
-        radius *= 0.38;
-        p.drawEllipse(QNDCToPixel(ndc), radius, radius);
+            drawControl(p, QNDCToPixel(*it), it.Index() == _selectedControl);
     }
 }
 

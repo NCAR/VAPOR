@@ -1,7 +1,6 @@
 #pragma once
 
-#include <QWidget>
-#include <QFrame>
+#include "TFMapWidget.h"
 #include <vapor/RenderParams.h>
 #include <vapor/ParamsMgr.h>
 #include <vapor/VAssert.h>
@@ -9,7 +8,7 @@
 
 class TFColorInfoWidget;
 
-class TFColorWidget : public QFrame {
+class TFColorWidget : public TFMapWidget {
     Q_OBJECT
     
 public:

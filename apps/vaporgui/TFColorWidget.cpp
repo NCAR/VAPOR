@@ -55,13 +55,6 @@ void TFColorWidget::paintEvent(QPaintEvent* event)
         
         ColorMap *cm = rp->GetMapperFunc(rp->GetVariableName())->GetColorMap();
         
-//        printf("============= %i Controls ==============\n", cm->numControlPoints());
-//        for (int i = 0; i < cm->numControlPoints(); i++) {
-//            float rgb[3];
-//            cm->controlPointColor(i).toRGB(rgb);
-//            printf("[%i] %0.2f (%0.1f, %0.1f, %0.1f)\n", i, cm->controlPointValueNormalized(i), rgb[0], rgb[1], rgb[2]);
-//        }
-        
         int nSamples = width()-PADDING*2;
         unsigned char buf[nSamples*3];
         float rgb[3];
@@ -75,14 +68,8 @@ void TFColorWidget::paintEvent(QPaintEvent* event)
         
         p.drawImage(QRect(PADDING, PADDING, width()-PADDING*2, height()-PADDING*2), image);
         
-        QPen pen(Qt::darkGray, 0.8);
-        pen.setWidth(0.5);
-        p.setPen(pen);
-        QBrush brush(QColor(0xFA, 0xFA, 0xFA));
-        p.setBrush(brush);
-        
         for (int i = 0; i < cm->numControlPoints(); i++) {
-            p.drawEllipse(controlQPositionForValue(cm->controlPointValueNormalized(i)), CONTROL_POINT_RADIUS, CONTROL_POINT_RADIUS);
+            drawControl(p, controlQPositionForValue(cm->controlPointValueNormalized(i)));
         }
     }
 }

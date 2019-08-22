@@ -84,6 +84,8 @@ set (SRCS
 	TFColorInfoWidget.h
 	TFOpacityInfoWidget.cpp
 	TFOpacityInfoWidget.h
+	TFMapWidget.cpp
+	TFMapWidget.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
