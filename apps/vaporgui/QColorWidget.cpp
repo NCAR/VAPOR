@@ -26,6 +26,7 @@ void QColorWidget::setColor(const QColor &color)
     QPalette pal = palette();
 //    pal.setColor(QPalette::Background, color);
     pal.setColor(QPalette::Base, color);
+    pal.setColor(QPalette::Disabled, QPalette::Base, Qt::white);
     setAutoFillBackground(true);
     setPalette(pal);
 }
@@ -47,7 +48,12 @@ void QColorWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void QColorWidget::enterEvent(QEvent *event)
 {
-    QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
+    if (isEnabled()) {
+        QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
+        setToolTip(_color.name());
+    } else {
+        setToolTip("");
+    }
 }
 
 void QColorWidget::leaveEvent(QEvent *event)
