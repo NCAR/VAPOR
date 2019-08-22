@@ -4,7 +4,7 @@
 #include "TFOpacityWidget.h"
 #include "TFHistogramWidget.h"
 #include "TFColorWidget.h"
-#include "TFControlPointWidget.h"
+#include "TFOpacityControlPointWidget.h"
 #include "QRangeSlider.h"
 #include <vapor/ColorMap.h>
 //#include "QColorWidget.h"

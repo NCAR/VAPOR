@@ -80,6 +80,10 @@ set (SRCS
 	TFControlPointWidget.h
 	QColorWidget.cpp
 	QColorWidget.h
+	# TFColorControlPointWidget.cpp
+	# TFColorControlPointWidget.h
+	TFOpacityControlPointWidget.cpp
+	TFOpacityControlPointWidget.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h

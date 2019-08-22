@@ -14,8 +14,10 @@ TFControlPointWidget::TFControlPointWidget()
     layout->addWidget(_valueEdit = new QLineEdit, 30);
     layout->addWidget(_valueEditType = new QComboBox, 20);
     layout->addStretch(20);
+    layout->addWidget(_opacityEdit = new QLineEdit, 30);
     
     _valueEdit->setValidator(new QDoubleValidator);
+    _opacityEdit->setValidator(new QDoubleValidator(0, 1, 10));
     
     _valueEditType->blockSignals(true);
     _valueEditType->setMinimumSize(30, 10);
@@ -27,6 +29,7 @@ TFControlPointWidget::TFControlPointWidget()
     
     connect(_valueEditType, SIGNAL(currentIndexChanged(int)), this, SLOT(valueEditTypeChanged(int)));
     connect(_valueEdit, SIGNAL(returnPressed()), this, SLOT(valueEditChanged()));
+    connect(_opacityEdit, SIGNAL(returnPressed()), this, SLOT(opacityEditChanged()));
     
     this->setDisabled(true);
 }
@@ -64,12 +67,26 @@ void TFControlPointWidget::DeselectControlPoint()
 //    _opacityId = -1;
 //    _colorId = -1;
     _valueEdit->clear();
+    _opacityEdit->clear();
 }
 
 void TFControlPointWidget::SetNormalizedValue(float value)
 {
     _value = value;
     updateValue();
+}
+
+void TFControlPointWidget::SetOpacity(float opacity)
+{
+    _opacity = opacity;
+    updateOpacity();
+}
+
+void TFControlPointWidget::SetControlPoint(float value, float opacity)
+{
+    this->setEnabled(true);
+    SetNormalizedValue(value);
+    SetOpacity(opacity);
 }
 
 void TFControlPointWidget::paintEvent(QPaintEvent *event)
@@ -93,6 +110,14 @@ void TFControlPointWidget::updateValue()
     else
         value *= 100;
     _valueEdit->setText(QString::number(value));
+}
+
+void TFControlPointWidget::updateOpacity()
+{
+    if (!isEnabled())
+        return;
+    
+    _opacityEdit->setText(QString::number(_opacity));
 }
 
 bool TFControlPointWidget::isUsingNormalizedValue() const
@@ -127,6 +152,11 @@ float TFControlPointWidget::getValueFromEdit() const
         return value / 100.f;
 }
 
+float TFControlPointWidget::getOpacityFromEdit() const
+{
+    return _opacityEdit->text().toFloat();
+}
+
 void TFControlPointWidget::valueEditTypeChanged(int)
 {
     updateValue();
@@ -135,5 +165,11 @@ void TFControlPointWidget::valueEditTypeChanged(int)
 void TFControlPointWidget::valueEditChanged()
 {
     _value = getValueFromEdit();
-    controlPointChanged();
+    ControlPointChanged(_value, _opacity);
+}
+
+void TFControlPointWidget::opacityEditChanged()
+{
+    _opacity = getOpacityFromEdit();
+    ControlPointChanged(_value, _opacity);
 }
