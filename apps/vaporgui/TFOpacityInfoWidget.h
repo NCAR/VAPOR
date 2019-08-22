@@ -7,11 +7,11 @@ namespace VAPoR {
     class RenderParams;
 }
 
-class TFOpacityControlPointWidget : public TFInfoWidget {
+class TFOpacityInfoWidget : public TFInfoWidget {
     Q_OBJECT
     
 public:
-    TFOpacityControlPointWidget();
+    TFOpacityInfoWidget();
     
     void Update(VAPoR::RenderParams *rParams);
     

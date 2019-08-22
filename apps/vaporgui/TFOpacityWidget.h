@@ -7,7 +7,7 @@
 #include <vapor/VAssert.h>
 #include <glm/glm.hpp>
 
-class TFOpacityControlPointWidget;
+class TFOpacityInfoWidget;
 
 class ControlPointList {
 public:
@@ -111,7 +111,7 @@ public:
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     
     QSize minimumSizeHint() const;
-    TFOpacityControlPointWidget *GetInfoWidget() const;
+    TFOpacityInfoWidget *GetInfoWidget() const;
     
 protected:
     void paintEvent(QPaintEvent* event);
@@ -130,7 +130,7 @@ private:
     glm::vec2 _dragOffset;
     glm::vec2 m;
     int _selectedControl = -1;
-    TFOpacityControlPointWidget *_infoWidget = nullptr;
+    TFOpacityInfoWidget *_infoWidget = nullptr;
     
     void opacityChanged();
     

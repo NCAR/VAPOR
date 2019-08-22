@@ -2,7 +2,7 @@
 #include <QPaintEvent>
 #include <QPainter>
 #include <glm/glm.hpp>
-#include "TFOpacityControlPointWidget.h"
+#include "TFOpacityInfoWidget.h"
 
 using namespace VAPoR;
 using std::vector;
@@ -46,7 +46,7 @@ TFOpacityWidget::TFOpacityWidget()
     _controlPoints.Add(vec2(0.2,0.5));
     _controlPoints.Add(vec2(0.5,0.8));
     
-    _infoWidget = new TFOpacityControlPointWidget;
+    _infoWidget = new TFOpacityInfoWidget;
     connect(_infoWidget, SIGNAL(ControlPointChanged(float, float)), this, SLOT(SelectedControlChanged(float, float)));
 }
 
@@ -74,7 +74,7 @@ QSize TFOpacityWidget::minimumSizeHint() const
     return QSize(100, 75);
 }
 
-TFOpacityControlPointWidget *TFOpacityWidget::GetInfoWidget() const
+TFOpacityInfoWidget *TFOpacityWidget::GetInfoWidget() const
 {
     return _infoWidget;
 }
