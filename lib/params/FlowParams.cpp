@@ -13,6 +13,8 @@ const std::string FlowParams::_needFlowlineOutputTag = "needFlowlineOutputTag";
 const std::string FlowParams::_periodicTag           = "periodicTag";
 const std::string FlowParams::_rakeTag               = "rakeTag";
 const std::string FlowParams::_rakeNumOfSeedsTag     = "rakeNumOfSeedsTag";
+const std::string FlowParams::_rakeBiasVariable      = "rakeBiasVariable";
+const std::string FlowParams::_rakeBiasStrength      = "rakeBiasStrength";
 
 static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
 
@@ -212,4 +214,31 @@ FlowParams::GetRakeNumOfSeeds() const
     auto num = GetValueLongVec( _rakeNumOfSeedsTag, tmp );
     VAssert( num.size() == 4 );
     return num;
+}
+    
+std::string         
+FlowParams::GetRakeBiasVariable() const
+{
+    std::string empty;
+    return GetValueString( _rakeBiasVariable, empty );
+}
+
+void                
+FlowParams::SetRakeBiasVariable( const std::string& varname )
+{
+    SetValueString( _rakeBiasVariable, "which variable to bias with", varname );
+}
+
+
+float               
+FlowParams::GetRakeBiasStrength() const
+{
+    // return -1 as an obvious invalid value. Valid values are greater than 0
+    return float(GetValueDouble( _rakeBiasStrength, -1.0 ));
+}
+
+void                
+FlowParams::SetRakeBiasStrength( float strength )
+{
+    SetValueDouble( _rakeBiasStrength, "bias strength", strength );
 }

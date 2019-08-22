@@ -225,6 +225,121 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     connect( _rakeYNum, SIGNAL( _editingFinished() ), this, SLOT( _rakeNumOfSeedsChanged() ) );
     connect( _rakeZNum, SIGNAL( _editingFinished() ), this, SLOT( _rakeNumOfSeedsChanged() ) );
     connect( _rakeTotalNum, SIGNAL( _editingFinished() ), this, SLOT( _rakeNumOfSeedsChanged() ) );
+
+    _rakeBiasVariable = new VComboBox( this, "Random Bias Variable" );
+    _rakeBiasStrength = new VSlider(   this, "Random Bias Strength", 1.0f, 10.0f );
+    _layout->addWidget( _rakeBiasVariable );
+    _layout->addWidget( _rakeBiasStrength );
+    connect( _rakeBiasVariable, SIGNAL( _indexChanged(int) ), this, SLOT( _rakeBiasVariableChanged(int) ) );
+    connect( _rakeBiasStrength, SIGNAL( _valueChanged() ),    this, SLOT( _rakeBiasStrengthChanged()    ) );
+}
+
+void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
+                                VAPoR::ParamsMgr    *paramsMgr,
+                                VAPoR::RenderParams *params )
+{
+    _params = dynamic_cast<VAPoR::FlowParams*>(params);
+    VAssert( _params );
+
+    /* Update seed generation mode combo */
+    long idx = _params->GetSeedGenMode();
+    if( idx >= 0 && idx < _seedGenMode->GetNumOfItems() )
+        _seedGenMode->SetIndex( idx );
+    else
+        _seedGenMode->SetIndex( 0 );
+
+    /* Update flow direction combo */
+    idx = _params->GetFlowDirection();
+    if( idx >= 0 && idx < _flowDirection->GetNumOfItems() )
+        _flowDirection->SetIndex( idx );
+    else
+        _flowDirection->SetIndex( 0 );
+
+    /* Update rake range */
+    std::vector<double> minExt, maxExt;
+    std::vector<int>    axes;
+    VAPoR::DataMgrUtils::GetExtents( dataMgr, 
+                                     _params->GetCurrentTimestep(), 
+                                     _params->GetFieldVariableNames(),         
+                                     minExt, 
+                                     maxExt, 
+                                     axes  );
+    VAssert( minExt.size() == 3 && maxExt.size() == 3 );
+    std::vector<float> range;
+    for( int i = 0; i < 3; i++ )
+    {
+        range.push_back( float(minExt[i]) );
+        range.push_back( float(maxExt[i]) );
+    }
+    _rake->SetDimAndRange( 3, range );
+
+    /* Update rake values */
+    auto rakeVals = _params->GetRake();
+    /* In case the user hasn't set the rake, set the current value to be the rake extents,
+       plus update the params.  Otherwise, apply the actual rake values. */
+    if( std::isnan( rakeVals[0] ) )
+    {
+        _rake->SetCurrentValues( range );
+        _params->SetRake( range );
+    }
+    else
+    {
+        _rake->SetCurrentValues( rakeVals );
+    }
+
+    /* Update rake random bias variable and strength */
+    if( _rakeBiasVariable->GetNumOfItems() < 1 )    // Not filled with variables yet
+    {
+        auto varNames3d = dataMgr->GetDataVarNames( 3 );
+        for( int i = 0; i < varNames3d.size(); i++ )
+            _rakeBiasVariable->AddOption( varNames3d[i], i );
+        _rakeBiasVariable->SetIndex( 0 );           // Set the 1st variable name
+    }
+    auto varParams = _params->GetRakeBiasVariable();
+    if(  varParams.empty() )    // The variable isn't set by the user yet. Let's set it!
+    {
+        auto varDefault = _rakeBiasVariable->GetCurrentText();
+        _params->SetRakeBiasVariable( varDefault );
+    }
+    else                        // Find the variable and set it in the GUI! 
+    {
+        for( int i = 0; i < _rakeBiasVariable->GetNumOfItems(); i++ )
+        {
+            auto varName = _rakeBiasVariable->GetItemText( i );
+            if(  varName.compare( varParams ) == 0 )
+            {
+                _rakeBiasVariable->SetIndex( i );
+                break;
+            }
+        }
+    }
+
+    auto strenParams = _params->GetRakeBiasStrength();
+    if(  strenParams < 0 )  // Strength isn't set by the user yet. Let's set it to 1.0!
+    {
+        _params->SetRakeBiasStrength( 1.0f );
+        _rakeBiasStrength->SetCurrentValue( 1.0f );
+    }
+    else
+        _rakeBiasStrength->SetCurrentValue( strenParams );
+
+    /* Update input and output file names */
+    if( !_params->GetSeedInputFilename().empty() ) 
+        _fileReader->SetPath( _params->GetSeedInputFilename() );
+    if( !_params->GetFlowlineOutputFilename().empty() ) 
+        _fileWriter->SetPath( _params->GetFlowlineOutputFilename() );
+}
+    
+void 
+FlowSeedingSubtab::_rakeBiasVariableChanged( int idx )
+{
+    std::cout << "new variable is: " << _rakeBiasVariable->GetItemText( idx ) << std::endl;
+}
+    
+void 
+FlowSeedingSubtab::_rakeBiasStrengthChanged()
+{
+    std::cout << "new strength is: " << _rakeBiasStrength->GetCurrentValue( ) << std::endl;
 }
 
 void
@@ -299,65 +414,6 @@ void
 FlowSeedingSubtab::_outputButtonClicked( )
 {
     _params->SetNeedFlowlineOutput( true );
-}
-
-void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
-                                VAPoR::ParamsMgr    *paramsMgr,
-                                VAPoR::RenderParams *params )
-{
-    _params = dynamic_cast<VAPoR::FlowParams*>(params);
-    VAssert( _params );
-
-    /* Update seed generation mode combo */
-    long idx = _params->GetSeedGenMode();
-    if( idx >= 0 && idx < _seedGenMode->GetNumOfItems() )
-        _seedGenMode->SetIndex( idx );
-    else
-        _seedGenMode->SetIndex( 0 );
-
-    /* Update flow direction combo */
-    idx = _params->GetFlowDirection();
-    if( idx >= 0 && idx < _flowDirection->GetNumOfItems() )
-        _flowDirection->SetIndex( idx );
-    else
-        _flowDirection->SetIndex( 0 );
-
-    /* Update rake range */
-    std::vector<double> minExt, maxExt;
-    std::vector<int>    axes;
-    VAPoR::DataMgrUtils::GetExtents( dataMgr, 
-                                     _params->GetCurrentTimestep(), 
-                                     _params->GetFieldVariableNames(),         
-                                     minExt, 
-                                     maxExt, 
-                                     axes  );
-    VAssert( minExt.size() == 3 && maxExt.size() == 3 );
-    std::vector<float> range;
-    for( int i = 0; i < 3; i++ )
-    {
-        range.push_back( float(minExt[i]) );
-        range.push_back( float(maxExt[i]) );
-    }
-    _rake->SetDimAndRange( 3, range );
-
-    /* Update rake values */
-    auto rakeVals = _params->GetRake();
-    /* In case the user hasn't set the rake, set the current value to be the rake extents,
-       plus update the params.
-       Otherwise, apply the actual rake values. */
-    if( std::isnan( rakeVals[0] ) )
-    {
-        _rake->SetCurrentValues( range );
-        _params->SetRake( range );
-    }
-    else
-        _rake->SetCurrentValues( rakeVals );
-
-    /* Update input and output file names */
-    if( !_params->GetSeedInputFilename().empty() ) 
-        _fileReader->SetPath( _params->GetSeedInputFilename() );
-    if( !_params->GetFlowlineOutputFilename().empty() ) 
-        _fileWriter->SetPath( _params->GetFlowlineOutputFilename() );
 }
 
 void

@@ -302,6 +302,7 @@ public:
     );
     int         GetCurrentIndex() const;
     std::string GetCurrentText() const;
+    std::string GetItemText( int index ) const;
     void        AddOption( const std::string& option, int index=0 );
     void        RemoveOption( int index );
     void        SetIndex( int index );

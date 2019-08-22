@@ -80,6 +80,12 @@ public:
     std::vector<long>   GetRakeNumOfSeeds() const;
     void                SetRakeNumOfSeeds( const std::vector<long>& );
 
+    std::string         GetRakeBiasVariable() const;
+    void                SetRakeBiasVariable( const std::string& );
+
+    float               GetRakeBiasStrength() const;
+    void                SetRakeBiasStrength( float );
+
 protected:
 
     static const std::string    _isSteadyTag;
@@ -93,6 +99,8 @@ protected:
     static const std::string    _periodicTag;
     static const std::string    _rakeTag;
     static const std::string    _rakeNumOfSeedsTag;
+    static const std::string    _rakeBiasVariable;
+    static const std::string    _rakeBiasStrength;
 
 };
 

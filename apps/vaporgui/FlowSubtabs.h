@@ -119,6 +119,8 @@ private slots:
 
     void _rakeGeometryChanged();
     void _rakeNumOfSeedsChanged();
+    void _rakeBiasVariableChanged( int );
+    void _rakeBiasStrengthChanged();
 
 private:
     VAPoR::FlowParams*      _params;
@@ -133,6 +135,8 @@ private:
     /* Rake related widgets */
     VGeometry*              _rake;
     VLineEdit              *_rakeXNum, *_rakeYNum, *_rakeZNum, *_rakeTotalNum;
+    VComboBox*              _rakeBiasVariable;
+    VSlider*                _rakeBiasStrength;
 
     /* Helper functions */
     
