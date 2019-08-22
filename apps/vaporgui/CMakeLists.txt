@@ -80,8 +80,8 @@ set (SRCS
 	TFInfoWidget.h
 	QColorWidget.cpp
 	QColorWidget.h
-	# TFColorControlPointWidget.cpp
-	# TFColorControlPointWidget.h
+	TFColorInfoWidget.cpp
+	TFColorInfoWidget.h
 	TFOpacityInfoWidget.cpp
 	TFOpacityInfoWidget.h
 

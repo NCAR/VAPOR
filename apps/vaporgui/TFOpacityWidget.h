@@ -107,6 +107,7 @@ class TFOpacityWidget : public QFrame {
 public:
     
     TFOpacityWidget();
+    ~TFOpacityWidget();
     
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     

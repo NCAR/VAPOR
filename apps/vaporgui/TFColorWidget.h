@@ -7,14 +7,19 @@
 #include <vapor/VAssert.h>
 #include <glm/glm.hpp>
 
+class TFColorInfoWidget;
+
 class TFColorWidget : public QFrame {
     Q_OBJECT
     
 public:
+    TFColorWidget();
+    ~TFColorWidget();
     
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     
     QSize minimumSizeHint() const;
+    TFColorInfoWidget *GetInfoWidget() const;
     
 protected:
     void paintEvent(QPaintEvent* event);
@@ -30,6 +35,7 @@ private:
     int _draggingControlID;
     glm::vec2 _dragOffset;
     glm::vec2 m;
+    TFColorInfoWidget *_infoWidget;
     
     void opacityChanged();
     

@@ -5,6 +5,7 @@
 #include "TFHistogramWidget.h"
 #include "TFColorWidget.h"
 #include "TFOpacityInfoWidget.h"
+#include "TFColorInfoWidget.h"
 #include "QRangeSlider.h"
 #include <vapor/ColorMap.h>
 //#include "QColorWidget.h"
@@ -23,6 +24,7 @@ TFEditor::TFEditor()
     layout->addWidget(tfh = new TFHistogramWidget);
     layout->addWidget(colorWidget = new TFColorWidget);
     layout->addWidget(controlPointWidget = tff->GetInfoWidget());
+    layout->addWidget(colorInfo = colorWidget->GetInfoWidget());
     layout->addWidget(range = new QRangeSlider);
     layout->addWidget(colorMapTypeDropdown = new ParamsWidgetDropdown(VAPoR::ColorMap::_interpTypeTag, {"Linear", "Discrete", "Diverging"}, "Color Interpolation"));
     layout->addWidget(c = new ParamsWidgetColor("test"));
@@ -41,6 +43,7 @@ void TFEditor::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPo
     colorWidget->Update(dataMgr, paramsMgr, rParams);
     colorMapTypeDropdown->Update(rParams->GetMapperFunc(rParams->GetVariableName())->GetColorMap());
     controlPointWidget->Update(rParams);
+    colorInfo->Update(rParams);
     c->Update(rParams);
 }
 

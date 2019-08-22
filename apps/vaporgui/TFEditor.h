@@ -27,5 +27,6 @@ private:
     QRangeSlider *range;
     ParamsWidgetDropdown *colorMapTypeDropdown;
     TFInfoWidget *controlPointWidget;
+    TFInfoWidget *colorInfo;
     QWidget *_tab() const;
 };

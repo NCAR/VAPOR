@@ -1,6 +1,7 @@
 #include "TFColorWidget.h"
 #include <QPainter>
 #include <QMouseEvent>
+#include "TFColorInfoWidget.h"
 
 using namespace VAPoR;
 using glm::vec2;
@@ -9,6 +10,17 @@ using std::vector;
 static vec2 qvec2(const QPoint &qp)  { return vec2(qp.x(), qp.y()); }
 static vec2 qvec2(const QPointF &qp) { return vec2(qp.x(), qp.y()); }
 static QPointF qvec2(const vec2 &v) { return QPointF(v.x, v.y); }
+
+TFColorWidget::TFColorWidget()
+{
+    _infoWidget = new TFColorInfoWidget;
+}
+
+TFColorWidget::~TFColorWidget()
+{
+    if (!_infoWidget->parent())
+        delete _infoWidget;
+}
 
 void TFColorWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
 {
@@ -20,6 +32,11 @@ void TFColorWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr,
 QSize TFColorWidget::minimumSizeHint() const
 {
     return QSize(100, 30);
+}
+
+TFColorInfoWidget *TFColorWidget::GetInfoWidget() const
+{
+    return _infoWidget;
 }
 
 #define CONTROL_POINT_RADIUS (4.0f)

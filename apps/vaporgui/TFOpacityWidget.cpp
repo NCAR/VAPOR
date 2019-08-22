@@ -50,6 +50,12 @@ TFOpacityWidget::TFOpacityWidget()
     connect(_infoWidget, SIGNAL(ControlPointChanged(float, float)), this, SLOT(SelectedControlChanged(float, float)));
 }
 
+TFOpacityWidget::~TFOpacityWidget()
+{
+    if (!_infoWidget->parent())
+        delete _infoWidget;
+}
+
 void TFOpacityWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
 {
     _renderParams = rp;
