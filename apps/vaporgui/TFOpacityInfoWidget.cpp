@@ -7,7 +7,7 @@
 
 TFOpacityInfoWidget::TFOpacityInfoWidget()
 {
-    ((QBoxLayout*)layout())->addWidget(_opacityEdit = new QLineEdit, 30);
+    ((QBoxLayout*)layout())->addWidget(_opacityEdit = new QLineEdit, 30, Qt::AlignRight);
     
     _opacityEdit->setValidator(new QDoubleValidator(0, 1, 6));
     connect(_opacityEdit, SIGNAL(returnPressed()), this, SLOT(opacityEditChanged()));

@@ -5,9 +5,10 @@
 #include <QDoubleValidator>
 #include <vapor/RenderParams.h>
 
+
 TFColorInfoWidget::TFColorInfoWidget()
 {
-    ((QBoxLayout*)layout())->addWidget(_colorEdit = new QColorWidget, 30);
+    ((QBoxLayout*)layout())->addWidget(_colorEdit = new QColorWidget, 30, Qt::AlignRight);
     
     connect(_colorEdit, SIGNAL(returnPressed()), this, SLOT(opacityEditChanged()));
 }
