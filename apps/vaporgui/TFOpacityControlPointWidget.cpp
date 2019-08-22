@@ -15,14 +15,14 @@ TFOpacityControlPointWidget::TFOpacityControlPointWidget()
 
 void TFOpacityControlPointWidget::Update(VAPoR::RenderParams *rParams)
 {
-    TFControlPointWidget::Update(rParams);
+    TFInfoWidget::Update(rParams);
     if (!rParams)
         return;
 }
 
 void TFOpacityControlPointWidget::DeselectControlPoint()
 {
-    TFControlPointWidget::DeselectControlPoint();
+    TFInfoWidget::DeselectControlPoint();
     _opacityEdit->clear();
 }
 

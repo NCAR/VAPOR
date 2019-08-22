@@ -1,11 +1,11 @@
-#include "TFControlPointWidget.h"
+#include "TFInfoWidget.h"
 #include <QBoxLayout>
 #include <QLabel>
 #include <QPainter>
 #include <QDoubleValidator>
 #include <vapor/RenderParams.h>
 
-TFControlPointWidget::TFControlPointWidget()
+TFInfoWidget::TFInfoWidget()
 {
     QBoxLayout *layout = new QHBoxLayout;
     layout->setSpacing(0);
@@ -31,7 +31,7 @@ TFControlPointWidget::TFControlPointWidget()
     this->setDisabled(true);
 }
 
-void TFControlPointWidget::Update(VAPoR::RenderParams *rParams)
+void TFInfoWidget::Update(VAPoR::RenderParams *rParams)
 {
     if (!rParams)
         return;
@@ -58,7 +58,7 @@ void TFControlPointWidget::Update(VAPoR::RenderParams *rParams)
 //    Update(_params);
 //}
 
-void TFControlPointWidget::DeselectControlPoint()
+void TFInfoWidget::DeselectControlPoint()
 {
     this->setDisabled(true);
 //    _opacityId = -1;
@@ -66,13 +66,13 @@ void TFControlPointWidget::DeselectControlPoint()
     _valueEdit->clear();
 }
 
-void TFControlPointWidget::SetNormalizedValue(float value)
+void TFInfoWidget::SetNormalizedValue(float value)
 {
     _value = value;
     updateValue();
 }
 
-void TFControlPointWidget::paintEvent(QPaintEvent *event)
+void TFInfoWidget::paintEvent(QPaintEvent *event)
 {
     QStyleOption opt;
     opt.init(this);
@@ -82,7 +82,7 @@ void TFControlPointWidget::paintEvent(QPaintEvent *event)
     QWidget::paintEvent(event);
 }
 
-void TFControlPointWidget::updateValue()
+void TFInfoWidget::updateValue()
 {
     if (!isEnabled())
         return;
@@ -95,22 +95,22 @@ void TFControlPointWidget::updateValue()
     _valueEdit->setText(QString::number(value));
 }
 
-bool TFControlPointWidget::isUsingNormalizedValue() const
+bool TFInfoWidget::isUsingNormalizedValue() const
 {
     return _valueEditType->currentIndex() == ValueFormat::Percent;
 }
 
-bool TFControlPointWidget::isUsingMappedValue() const
+bool TFInfoWidget::isUsingMappedValue() const
 {
     return _valueEditType->currentIndex() == ValueFormat::Mapped;
 }
 
-float TFControlPointWidget::toMappedValue(float normalized) const
+float TFInfoWidget::toMappedValue(float normalized) const
 {
     return normalized * (_max - _min) + _min;
 }
 
-float TFControlPointWidget::toNormalizedValue(float mapped) const
+float TFInfoWidget::toNormalizedValue(float mapped) const
 {
     if (_max == _min)
         return 0;
@@ -118,7 +118,7 @@ float TFControlPointWidget::toNormalizedValue(float mapped) const
     return (mapped - _min) / (_max - _min);
 }
 
-float TFControlPointWidget::getValueFromEdit() const
+float TFInfoWidget::getValueFromEdit() const
 {
     float value = _valueEdit->text().toFloat();
     if (isUsingMappedValue())
@@ -127,12 +127,12 @@ float TFControlPointWidget::getValueFromEdit() const
         return value / 100.f;
 }
 
-void TFControlPointWidget::valueEditTypeChanged(int)
+void TFInfoWidget::valueEditTypeChanged(int)
 {
     updateValue();
 }
 
-void TFControlPointWidget::valueEditChanged()
+void TFInfoWidget::valueEditChanged()
 {
     _value = getValueFromEdit();
     controlPointChanged();

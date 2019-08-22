@@ -8,7 +8,7 @@ namespace VAPoR {
     class RenderParams;
 }
 
-class TFControlPointWidget : public QWidget {
+class TFInfoWidget : public QWidget {
     Q_OBJECT
     
 public:
@@ -18,7 +18,7 @@ public:
         Percent = 1
     };
     
-    TFControlPointWidget();
+    TFInfoWidget();
     
     void Update(VAPoR::RenderParams *rParams);
     

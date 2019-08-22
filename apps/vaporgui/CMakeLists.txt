@@ -76,8 +76,8 @@ set (SRCS
 	QRangeSlider.h
 	TFHistogramWidget.cpp
 	TFHistogramWidget.h
-	TFControlPointWidget.cpp
-	TFControlPointWidget.h
+	TFInfoWidget.cpp
+	TFInfoWidget.h
 	QColorWidget.cpp
 	QColorWidget.h
 	# TFColorControlPointWidget.cpp

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "TFControlPointWidget.h"
+#include "TFInfoWidget.h"
 #include <QLineEdit>
 
 namespace VAPoR {
     class RenderParams;
 }
 
-class TFOpacityControlPointWidget : public TFControlPointWidget {
+class TFOpacityControlPointWidget : public TFInfoWidget {
     Q_OBJECT
     
 public:
