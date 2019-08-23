@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include <Histo.h>
 #include "ErrorReporter.h"
+#include <vapor/RenderParams.h>
+#include <vapor/ParamsMgr.h>
 
 using namespace VAPoR;
 using std::vector;

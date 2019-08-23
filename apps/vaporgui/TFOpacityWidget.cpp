@@ -2,6 +2,8 @@
 #include <QPaintEvent>
 #include <QPainter>
 #include <glm/glm.hpp>
+#include <vapor/RenderParams.h>
+#include <vapor/ParamsMgr.h>
 #include "TFOpacityInfoWidget.h"
 
 using namespace VAPoR;

@@ -1,6 +1,8 @@
 #include "TFColorWidget.h"
 #include <QPainter>
 #include <QMouseEvent>
+#include <vapor/RenderParams.h>
+#include <vapor/ParamsMgr.h>
 #include "TFColorInfoWidget.h"
 
 using namespace VAPoR;

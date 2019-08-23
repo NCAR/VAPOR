@@ -1,8 +1,6 @@
 #pragma once
 
 #include "TFMapWidget.h"
-#include <vapor/RenderParams.h>
-#include <vapor/ParamsMgr.h>
 #include <vapor/VAssert.h>
 #include <glm/glm.hpp>
 
