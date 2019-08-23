@@ -33,5 +33,5 @@ public slots:
     void DeselectControlPoint();
     
 private slots:
-    void opacityEditChanged();
+    void colorEditChanged();
 };

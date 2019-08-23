@@ -138,13 +138,10 @@ private:
     void selectControlPoint(ControlPointList::PointIterator it);
     
 signals:
-    void ControlPointSelected(int index);
     void ControlPointDeselected();
-    void InfoSetControlPoint(float value, float opacity);
+    void UpdateInfo(float value, float opacity);
     
 public slots:
     void DeselectControlPoint();
-    
-private slots:
-    void SelectedControlChanged(float value, float opacity);
+    void UpdateFromInfo(float value, float opacity);
 };
