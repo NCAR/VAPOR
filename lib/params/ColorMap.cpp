@@ -87,7 +87,7 @@ ColorMap::Color::Color(const Color &c) :
 //----------------------------------------------------------------------------
 // Return the rgb components of the color (0.0 ... 1.0)
 //----------------------------------------------------------------------------
-void ColorMap::Color::toRGB(float *rgb)
+void ColorMap::Color::toRGB(float *rgb) const
 {
 
   /*	

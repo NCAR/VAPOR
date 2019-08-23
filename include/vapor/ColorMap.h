@@ -28,16 +28,16 @@ public:
   Color(double h, double s, double v);
   Color(const Color &color);
 
-  void toRGB(float *rgb);
+  void toRGB(float *rgb) const;
 
   void  hue(float h) { _hue = h; }
-  float hue()        { return _hue; }
+  float hue() const  { return _hue; }
 
   void  sat(float s) { _sat = s; }
-  float sat()        { return _sat; }
+  float sat() const  { return _sat; }
 
   void  val(float v) { _val = v; }
-  float val()        { return _val; }
+  float val() const  { return _val; }
 
  private:
 
