@@ -28,12 +28,9 @@ TFEditor::TFEditor()
     layout->addWidget(range = new QRangeSlider);
     layout->addWidget(colorMapTypeDropdown = new ParamsWidgetDropdown(VAPoR::ColorMap::_interpTypeTag, {"Linear", "Discrete", "Diverging"}, "Color Interpolation"));
     layout->addWidget(c = new ParamsWidgetColor("test"));
-//    layout->addWidget(new QColorWidget);
     
 //    this->setStyleSheet(R"(QWidget:hover:!pressed {border: 1px solid red;})");
     
-//    connect(tff, SIGNAL(ControlPointSelected(int)), controlPointWidget, SLOT(SelectOpacityControlPoint(int)));
-//    connect(tff, SIGNAL(ControlPointDeselected()), controlPointWidget, SLOT(DeselectControlPoint()));
 }
 
 void TFEditor::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
