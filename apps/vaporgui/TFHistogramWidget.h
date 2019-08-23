@@ -16,7 +16,7 @@ public:
     
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     
-    TFInfoWidget *CreateInfoWidget() { return nullptr; }
+    TFInfoWidget *CreateInfoWidget();
     QSize minimumSizeHint() const;
     
 protected:
