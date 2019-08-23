@@ -640,7 +640,7 @@ FlowRenderer::_genSeedsRakeRandom( std::vector<flow::Particle>& seeds,
     for( int i = 0; i < 3; i++ )
         VAssert( rake[i*2+1] >= rake[i*2] );
 
-    /* retrieve uniform seed numbers from params */
+    /* retrieve random seed numbers from params */
     auto rakeSeeds = params->GetRakeNumOfSeeds();
     VAssert( rakeSeeds.size() == 4 ); 
     auto totalNumOfSeeds = rakeSeeds[3];    // We only need the 4th value for random seeds
@@ -661,6 +661,133 @@ FlowRenderer::_genSeedsRakeRandom( std::vector<flow::Particle>& seeds,
         seeds[i].time       = timeVal;
     }
 
+    return 0;
+}
+
+
+int
+FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds, 
+                                         float timeVal ) const
+{
+    FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
+
+    /* retrieve rake from params */
+    auto rake = params->GetRake();
+    VAssert( rake.size() == 6 );
+    for( int i = 0; i < 3; i++ )
+        VAssert( rake[i*2+1] >= rake[i*2] );
+    std::vector<double> rakeExtMin, rakeExtMax;
+    for( int i = 0; i < 3; i++ )
+    {
+        rakeExtMin.push_back( rake[ i*2   ] );
+        rakeExtMax.push_back( rake[ i*2+1 ] );
+    }
+
+    /* retrieve bias variable and strength from params */
+    auto biasVar   = params->GetRakeBiasVariable();
+    auto biasStren = params->GetRakeBiasStrength();
+
+    /* retrieve random seed numbers from params */
+    auto rakeSeeds = params->GetRakeNumOfSeeds();
+    VAssert( rakeSeeds.size() == 4 ); 
+    auto totalNumOfSeeds = rakeSeeds[3];    // We only need the 4th value for random seeds
+    
+    /* request a grid representing the rake area */
+    Grid* grid = _dataMgr->GetVariable( params->GetCurrentTimestep(),
+                                        biasVar,
+                                        params->GetRefinementLevel(),
+                                        params->GetCompressionLevel(),
+                                        rakeExtMin,
+                                        rakeExtMax );
+    if( grid == nullptr )
+    {
+        MyBase::SetErrMsg("Not able to get a grid!");
+        return flow::GRID_ERROR;
+    }
+
+    /* Find the bias variable range of this rake area */
+    float rakeMin = 0.0f, rakeMax = 0.0f; 
+    auto itr    = grid->cbegin();
+    auto endItr = grid->cend();
+    if( grid->HasMissingData() )
+    {
+        float mv = grid->GetMissingValue();
+        for( ; itr != endItr; ++itr )   // initialize rakeMin and rakeMax
+        {
+            if( *itr != mv )
+            {
+                rakeMin = std::abs(*itr);
+                rakeMax = std::abs(*itr);
+                break;
+            }
+        }
+        for( ; itr != endItr; ++itr )   // find the min and max
+        {
+            if( *itr != mv )
+            {
+                float v = std::abs(*itr);
+                rakeMin = rakeMin < v ? rakeMin : v;
+                rakeMax = rakeMax > v ? rakeMax : v;
+            }
+        }
+    }
+    else
+    {
+        rakeMin = std::abs(*itr);
+        rakeMax = std::abs(*itr);
+        for( ; itr != endItr; ++itr )   // find the min and max
+        {
+            float v = std::abs(*itr);
+            rakeMin = rakeMin < v ? rakeMin : v;
+            rakeMax = rakeMax > v ? rakeMax : v;
+        }
+    }
+    if( rakeMin == 0.0f && rakeMax == 0.0f )    // All are missing values in the rake
+    {
+        delete grid;
+        return _genSeedsRakeRandom( seeds, timeVal );  // Use random seeds
+    }
+
+    /* Scale rakeMin and rakeMax so every possible value has some probability */
+    float probMin = rakeMin - (rakeMax - rakeMin) * 0.05f;
+    float probMax = rakeMax + (rakeMax - rakeMin) * 0.05f;
+    float probLen = probMax - probMin;
+
+    /* 
+     * The bias strategy is:
+     * we generate uniform random seeds in the rake, but for each seed, we decide 
+     * if to discard it based on a probability function. This process terminates
+     * when sufficient amount of seeds are generated.
+     */
+    
+    /* Create three uniform distributions in 3 dimensions */
+    std::random_device rd;  //Will be used to obtain a seed for the random number engine
+    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    std::uniform_real_distribution<float> distX( rake[0], rake[1] );
+    std::uniform_real_distribution<float> distY( rake[2], rake[3] );
+    std::uniform_real_distribution<float> distZ( rake[4], rake[5] );
+    /* Create a uniform distribution between 0.0 and 1.0 */
+    std::uniform_real_distribution<float> zeroOne( 0.0f, 1.0f );
+
+    int seedIdx = 0;
+    seeds.resize( totalNumOfSeeds );
+    while( seedIdx < totalNumOfSeeds )
+    {
+        const std::vector<double> cand{ distX(gen), distY(gen), distZ(gen) };   // generate a random seed
+        float seedVal = grid->GetValue( cand );
+        float prob    = std::abs(seedVal) / probLen;    // prob is a value between 0.0 and 1.0;
+        prob          = std::pow( prob, biasStren );    // prob is scaled by a strength.
+        if( zeroOne(gen) < prob )   // keep this seed
+        {
+            seeds[seedIdx].location.x = cand[0];
+            seeds[seedIdx].location.y = cand[1];
+            seeds[seedIdx].location.z = cand[2];
+            seeds[seedIdx].time       = timeVal;
+            seedIdx++;
+        }
+    }
+
+    delete grid;
     return 0;
 }
 
