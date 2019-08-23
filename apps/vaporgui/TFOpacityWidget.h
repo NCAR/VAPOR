@@ -106,9 +106,10 @@ public:
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     
     QSize minimumSizeHint() const;
-    TFInfoWidget *CreateInfoWidget();
+    void Deactivate();
     
 protected:
+    TFInfoWidget *createInfoWidget();
     void paintEvent(QPaintEvent* event);
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);

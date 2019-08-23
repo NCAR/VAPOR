@@ -4,6 +4,14 @@
 #define CONTROL_POINT_RADIUS (4.0f)
 #define PADDING (CONTROL_POINT_RADIUS + 1.0f)
 
+TFInfoWidget *TFMapWidget::GetInfoWidget()
+{
+    if (!_infoWidget)
+        _infoWidget = createInfoWidget();
+    
+    return _infoWidget;
+}
+
 void TFMapWidget::drawControl(QPainter &p, const QPointF &pos, bool selected) const
 {
     QPen pen(Qt::darkGray, 0.5);

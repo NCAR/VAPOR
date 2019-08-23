@@ -53,17 +53,14 @@ TFMapsGroup::TFMapsGroup()
     layout->setMargin(0);
     setLayout(layout);
     
-    _maps.push_back(new TFOpacityWidget);
-    _maps.push_back(new TFHistogramWidget);
-    _maps.push_back(new TFColorWidget);
-    
-    for (auto map : _maps)
-        layout->addWidget(map);
+    add(new TFOpacityWidget);
+    add(new TFHistogramWidget);
+    add(new TFColorWidget);
 }
 
 void TFMapsGroup::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
 {
-    for (auto &map : _maps)
+    for (auto map : _maps)
         map->Update(dataMgr, paramsMgr, rParams);
 }
 
@@ -71,12 +68,29 @@ TFMapsInfoGroup *TFMapsGroup::CreateInfoGroup()
 {
     TFMapsInfoGroup *infos = new TFMapsInfoGroup;
     
-    for (auto &map : _maps) {
-        infos->addWidget(map->CreateInfoWidget());
+    for (auto map : _maps) {
+        infos->add(map);
     }
     
     return infos;
 }
+
+void TFMapsGroup::add(TFMapWidget *map)
+{
+    _maps.push_back(map);
+    layout()->addWidget(map);
+    connect(map, SIGNAL(Activated(TFMapWidget*)), this, SLOT(mapActivated(TFMapWidget*)));
+}
+
+void TFMapsGroup::mapActivated(TFMapWidget *activatedMap)
+{
+    for (auto map : _maps)
+        if (map != activatedMap)
+            map->Deactivate();
+}
+
+
+
 
 TFMapsInfoGroup::TFMapsInfoGroup()
 {
@@ -86,4 +100,17 @@ TFMapsInfoGroup::TFMapsInfoGroup()
 void TFMapsInfoGroup::Update(VAPoR::RenderParams *rParams)
 {
     
+}
+
+void TFMapsInfoGroup::add(TFMapWidget *map)
+{
+    TFInfoWidget *info = map->GetInfoWidget();
+    _infos.push_back(info);
+    addWidget(info);
+    connect(map, SIGNAL(Activated(TFMapWidget*)), this, SLOT(mapActivated(TFMapWidget*)));
+}
+
+void TFMapsInfoGroup::mapActivated(TFMapWidget *activatedMap)
+{
+    setCurrentWidget(activatedMap->GetInfoWidget());
 }

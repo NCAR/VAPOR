@@ -1,8 +1,11 @@
 #include "TFHistogramInfoWidget.h"
 #include <vapor/RenderParams.h>
+#include <QLabel>
+#include <QBoxLayout>
 
 TFHistogramInfoWidget::TFHistogramInfoWidget()
 {
+    ((QBoxLayout*)layout())->addWidget(new QLabel, 30, Qt::AlignRight);
     _valueEdit->setReadOnly(true);
 }
 
