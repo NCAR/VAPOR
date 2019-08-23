@@ -31,6 +31,7 @@ public:
 protected:
     void paintEvent(QPaintEvent *event);
     void updateValue();
+    void updateValueEditValidator();
     bool isUsingNormalizedValue() const;
     bool isUsingMappedValue() const;
     float toMappedValue(float normalized) const;

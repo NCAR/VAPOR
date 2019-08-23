@@ -39,7 +39,7 @@ void TFInfoWidget::Update(VAPoR::RenderParams *rParams)
     _min = rParams->GetMapperFunc(rParams->GetVariableName())->getMinMapValue();
     _max = rParams->GetMapperFunc(rParams->GetVariableName())->getMaxMapValue();
     
-    ((QDoubleValidator*)_valueEdit->validator())->setRange(_min, _max);
+    updateValueEditValidator();
 }
 
 //void TFControlPointWidget::SelectOpacityControlPoint(int index)
@@ -95,6 +95,14 @@ void TFInfoWidget::updateValue()
     _valueEdit->setText(QString::number(value));
 }
 
+void TFInfoWidget::updateValueEditValidator()
+{
+    if (isUsingMappedValue())
+        ((QDoubleValidator*)_valueEdit->validator())->setRange(_min, _max);
+    else
+        ((QDoubleValidator*)_valueEdit->validator())->setRange(0, 100);
+}
+
 bool TFInfoWidget::isUsingNormalizedValue() const
 {
     return _valueEditType->currentIndex() == ValueFormat::Percent;
@@ -130,6 +138,7 @@ float TFInfoWidget::getValueFromEdit() const
 void TFInfoWidget::valueEditTypeChanged(int)
 {
     updateValue();
+    updateValueEditValidator();
 }
 
 void TFInfoWidget::valueEditChanged()
