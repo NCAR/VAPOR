@@ -16,9 +16,7 @@ public:
     void Update(VAPoR::RenderParams *rParams);
     
 public:
-    void DeselectControlPoint();
     void SetOpacity(float opacity);
-    void SetControlPoint(float value, float opacity);
     
 protected:
     void updateOpacity();
@@ -33,6 +31,10 @@ private:
     
 signals:
     void ControlPointChanged(float value, float opacity);
+    
+public slots:
+    void SetControlPoint(float value, float opacity);
+    void DeselectControlPoint();
     
 private slots:
     void opacityEditChanged();

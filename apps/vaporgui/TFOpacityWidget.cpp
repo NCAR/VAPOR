@@ -43,18 +43,6 @@ TFOpacityWidget::TFOpacityWidget()
 {
     this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
     this->setFrameStyle(QFrame::Box);
-    _controlPoints.Add(vec2(0,0));
-    _controlPoints.Add(vec2(0.2,0.5));
-    _controlPoints.Add(vec2(0.5,0.8));
-    
-    _infoWidget = new TFOpacityInfoWidget;
-    connect(_infoWidget, SIGNAL(ControlPointChanged(float, float)), this, SLOT(SelectedControlChanged(float, float)));
-}
-
-TFOpacityWidget::~TFOpacityWidget()
-{
-    if (!_infoWidget->parent())
-        delete _infoWidget;
 }
 
 void TFOpacityWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
@@ -81,9 +69,14 @@ QSize TFOpacityWidget::minimumSizeHint() const
     return QSize(100, 75);
 }
 
-TFOpacityInfoWidget *TFOpacityWidget::GetInfoWidget() const
+TFInfoWidget *TFOpacityWidget::CreateInfoWidget()
 {
-    return _infoWidget;
+    TFOpacityInfoWidget *info = new TFOpacityInfoWidget;
+    connect(info, SIGNAL(ControlPointChanged(float, float)), this, SLOT(SelectedControlChanged(float, float)));
+    connect(this, SIGNAL(InfoSetControlPoint(float, float)), info, SLOT(SetControlPoint(float, float)));
+    connect(this, SIGNAL(ControlPointDeselected()), info, SLOT(DeselectControlPoint()));
+    
+    return info;
 }
 
 void TFOpacityWidget::paintEvent(QPaintEvent* event)
@@ -151,7 +144,7 @@ void TFOpacityWidget::mouseMoveEvent(QMouseEvent *event)
                             vec2(it.IsLast() ? 1 : (*(it+1)).x, 1));
         
         *_draggedControl = newVal;
-        _infoWidget->SetControlPoint(newVal.x, newVal.y);
+        emit InfoSetControlPoint(newVal.x, newVal.y);
         update();
     } else {
         event->ignore();
@@ -241,15 +234,14 @@ glm::vec2 TFOpacityWidget::PixelToNDC(const QPointF &p) const
 void TFOpacityWidget::selectControlPoint(ControlPointList::PointIterator it)
 {
     _selectedControl = it.Index();
-    _infoWidget->SetControlPoint((*it).x, (*it).y);
     update();
+    emit InfoSetControlPoint((*it).x, (*it).y);
     emit ControlPointSelected(it.Index());
 }
 
 void TFOpacityWidget::DeselectControlPoint()
 {
     _selectedControl = -1;
-    _infoWidget->DeselectControlPoint();
     update();
     emit ControlPointDeselected();
 }

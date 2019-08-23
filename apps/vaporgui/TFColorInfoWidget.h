@@ -17,9 +17,7 @@ public:
     void Update(VAPoR::RenderParams *rParams);
     
 public:
-    void DeselectControlPoint();
     void SetColor(const QColor &color);
-    void SetControlPoint(float value, const QColor &color);
     
 protected:
     void controlPointChanged();
@@ -29,6 +27,10 @@ private:
     
 signals:
     void ControlPointChanged(float value, QColor color);
+    
+public slots:
+    void SetControlPoint(float value, const QColor &color);
+    void DeselectControlPoint();
     
 private slots:
     void opacityEditChanged();

@@ -10,7 +10,7 @@ TFColorInfoWidget::TFColorInfoWidget()
 {
     ((QBoxLayout*)layout())->addWidget(_colorEdit = new QColorWidget, 30, Qt::AlignRight);
     
-    connect(_colorEdit, SIGNAL(returnPressed()), this, SLOT(opacityEditChanged()));
+    connect(_colorEdit, SIGNAL(colorChanged(QColor)), this, SLOT(opacityEditChanged()));
 }
 
 void TFColorInfoWidget::Update(VAPoR::RenderParams *rParams)
