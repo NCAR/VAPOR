@@ -42,27 +42,9 @@ void TFInfoWidget::Update(VAPoR::RenderParams *rParams)
     updateValueEditValidator();
 }
 
-//void TFControlPointWidget::SelectOpacityControlPoint(int index)
-//{
-//    this->setEnabled(true);
-//    _opacityId = index;
-//    _colorId = -1;
-//    Update(_params);
-//}
-
-//void TFControlPointWidget::SelectColorControlPoint(int index)
-//{
-//    this->setEnabled(true);
-//    _opacityId = -1;
-//    _colorId = index;
-//    Update(_params);
-//}
-
 void TFInfoWidget::DeselectControlPoint()
 {
     this->setDisabled(true);
-//    _opacityId = -1;
-//    _colorId = -1;
     _valueEdit->clear();
 }
 
