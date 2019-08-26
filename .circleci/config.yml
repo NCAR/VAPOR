@@ -11,7 +11,9 @@ jobs:
       - run:
           name: cmake and make
           command: |
-            cd /VAPOR/build
+            cd /VAPOR
+            git pull
+            cd build
             cmake ..
             make
 
