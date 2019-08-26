@@ -174,9 +174,27 @@ void FlowAppearanceSubtab::Update(  VAPoR::DataMgr *dataMgr,
 //
 FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
 {
-    _seedGenMode = new VComboBox( this, "Seed Generation Mode" );
     /* Index numbers are in agreement with what's in FlowRenderer.h */
-    _seedGenMode->AddOption( "Programatically", 0 );
+    _flowDirection = new VComboBox( this, "Steady Flow Direction" );
+    _flowDirection->AddOption( "Forward", 0 );
+    _flowDirection->AddOption( "Backward", 1 );
+    _flowDirection->AddOption( "Bi-Directional", 2 );
+    _layout->addWidget( _flowDirection );
+    connect( _flowDirection, SIGNAL(_indexChanged(int)), this, SLOT( _flowDirectionChanged(int) ) );
+    _seedGenMode = new VComboBox( this, "Seed Generation Mode" );
+
+    /* The following two widgets are able to output a file of current flow lines */
+    _fileWriter = new VFileWriter( this, "Output Flow Lines" );
+    _fileWriter->SetFileFilter( QString::fromAscii("*.txt") );
+    _layout->addWidget( _fileWriter );
+    connect( _fileWriter, SIGNAL( _pathChanged() ), this, SLOT( _fileWriterChanged() ) );
+
+    _outputButton = new QPushButton( "Output Flow Lines", this );
+    _layout->addWidget( _outputButton );
+    connect( _outputButton, SIGNAL( clicked() ), this, SLOT( _outputButtonClicked() ) );
+
+    /* Index numbers are in agreement with what's in FlowRenderer.h */
+    _seedGenMode->AddOption( "From a Built In Function", 0 );
     _seedGenMode->AddOption( "From a List",     1 );
     _seedGenMode->AddOption( "From a Rake, Uniformly",  2 );
     _seedGenMode->AddOption( "From a Rake, Randomly",   3 );
@@ -188,23 +206,6 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     _fileReader->SetFileFilter( QString::fromAscii("*.txt") );
     _layout->addWidget( _fileReader );
     connect( _fileReader, SIGNAL( _pathChanged() ), this, SLOT( _fileReaderChanged() ) );
-
-    _flowDirection = new VComboBox( this, "Steady Flow Direction" );
-    /* Index numbers are in agreement with what's in FlowRenderer.h */
-    _flowDirection->AddOption( "Forward", 0 );
-    _flowDirection->AddOption( "Backward", 1 );
-    _flowDirection->AddOption( "Bi-Directional", 2 );
-    _layout->addWidget( _flowDirection );
-    connect( _flowDirection, SIGNAL(_indexChanged(int)), this, SLOT( _flowDirectionChanged(int) ) );
-
-    _fileWriter = new VFileWriter( this, "Output Flow Lines" );
-    _fileWriter->SetFileFilter( QString::fromAscii("*.txt") );
-    _layout->addWidget( _fileWriter );
-    connect( _fileWriter, SIGNAL( _pathChanged() ), this, SLOT( _fileWriterChanged() ) );
-
-    _outputButton = new QPushButton( "Output Flow Lines", this );
-    _layout->addWidget( _outputButton );
-    connect( _outputButton, SIGNAL( clicked() ), this, SLOT( _outputButtonClicked() ) );
 
     /* Set up the Rake selector */
     std::vector<float> geoRange = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0}; // temporary range
@@ -241,19 +242,26 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _params = dynamic_cast<VAPoR::FlowParams*>(params);
     VAssert( _params );
 
-    /* Update seed generation mode combo */
-    long idx = _params->GetSeedGenMode();
-    if( idx >= 0 && idx < _seedGenMode->GetNumOfItems() )
-        _seedGenMode->SetIndex( idx );
-    else
-        _seedGenMode->SetIndex( 0 );
-
     /* Update flow direction combo */
-    idx = _params->GetFlowDirection();
-    if( idx >= 0 && idx < _flowDirection->GetNumOfItems() )
-        _flowDirection->SetIndex( idx );
+    long dir  = _params->GetFlowDirection();
+    if(  dir >= 0 && dir < _flowDirection->GetNumOfItems() )
+        _flowDirection->SetIndex( dir );
     else
-        _flowDirection->SetIndex( 0 );
+    {
+        _flowDirection->SetIndex(  0 );
+        _params->SetFlowDirection( 0 ); // use 0 as the default option
+    }
+
+    /* Update seed generation mode combo */
+    long genMod = _params->GetSeedGenMode();
+    if( genMod >= 0 && genMod < _seedGenMode->GetNumOfItems() )
+        _seedGenMode->SetIndex( genMod );
+    else
+    {
+        _seedGenMode->SetIndex(  0 );
+        _params->SetSeedGenMode( 0 ); // use 0 as the default option
+    }
+    _hideShowWidgets();
 
     /* Update rake range */
     std::vector<double> minExt, maxExt;
@@ -328,6 +336,68 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
         _fileReader->SetPath( _params->GetSeedInputFilename() );
     if( !_params->GetFlowlineOutputFilename().empty() ) 
         _fileWriter->SetPath( _params->GetFlowlineOutputFilename() );
+}
+    
+void 
+FlowSeedingSubtab::_hideShowWidgets()
+{
+    long genMod = _params->GetSeedGenMode();
+    // genMod must be valid at this point
+    if( genMod == 0 )       // Built-in function mode
+    {
+        _rake->hide();
+        _rakeXNum->hide();
+        _rakeYNum->hide();
+        _rakeZNum->hide();
+        _rakeTotalNum->hide();
+        _rakeBiasVariable->hide();
+        _rakeBiasStrength->hide();
+        _fileReader->hide();
+    }
+    else if( genMod == 1 )  // From a list mode
+    {
+        _rake->hide();
+        _rakeXNum->hide();
+        _rakeYNum->hide();
+        _rakeZNum->hide();
+        _rakeTotalNum->hide();
+        _rakeBiasVariable->hide();
+        _rakeBiasStrength->hide();
+        _fileReader->show();
+    }
+    else if( genMod == 2 )  // From a rake, uniform mode
+    {
+        _rake->show();
+        _rakeXNum->show();
+        _rakeYNum->show();
+        _rakeZNum->show();
+        _rakeTotalNum->hide();
+        _rakeBiasVariable->hide();
+        _rakeBiasStrength->hide();
+        _fileReader->hide();
+    }
+    else if( genMod == 3 )  // From a rake, random mode
+    {
+        _rake->show();
+        _rakeXNum->hide();
+        _rakeYNum->hide();
+        _rakeZNum->hide();
+        _rakeTotalNum->show();
+        _rakeBiasVariable->hide();
+        _rakeBiasStrength->hide();
+        _fileReader->hide();
+    }
+    else if( genMod == 4 )  // From a rake, random with bias
+    {
+        _rake->show();
+        _rakeXNum->hide();
+        _rakeYNum->hide();
+        _rakeZNum->hide();
+        _rakeTotalNum->show();
+        _rakeBiasVariable->show();
+        _rakeBiasStrength->show();
+        _fileReader->hide();
+    }
 }
     
 void 
