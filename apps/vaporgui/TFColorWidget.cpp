@@ -50,7 +50,7 @@ void TFColorWidget::paintEvent(QPaintEvent* event)
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
     
-    p.fillRect(0, 0, width(), height(), Qt::gray);
+    p.fillRect(rect(), Qt::gray);
     
     if (_renderParams) {
         RenderParams *rp = _renderParams;
