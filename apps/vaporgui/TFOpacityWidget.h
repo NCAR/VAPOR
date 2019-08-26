@@ -75,9 +75,10 @@ public:
         return i;
     }
     
-    void Add(const glm::vec2 &v, const LineIterator &line) {
+    int Add(const glm::vec2 &v, const LineIterator &line) {
         VAssert(line.i >= 0 && line.i <= _points.size());
         _points.insert(_points.begin() + line.i, v);
+        return line.i;
     }
     
     void Remove(const PointIterator &point) {

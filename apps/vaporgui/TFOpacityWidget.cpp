@@ -178,7 +178,8 @@ void TFOpacityWidget::mouseDoubleClickEvent(QMouseEvent *event)
         const vec2 b = NDCToPixel(it.b());
         
         if (DistanceToLine(a, b, mouse) <= GetControlPointRadius()) {
-            cp.Add(PixelToNDC(Project(a, b, mouse)), it);
+            int index = cp.Add(PixelToNDC(Project(a, b, mouse)), it);
+            selectControlPoint(cp.BeginPoints() + index);
             opacityChanged();
             update();
             return;
