@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QFrame>
+#include <glm/glm.hpp>
 
 namespace VAPoR {
     class DataMgr;
@@ -21,6 +22,16 @@ public:
 protected:
     void drawControl(QPainter &p, const QPointF &pos, bool selected = false) const;
     virtual TFInfoWidget *createInfoWidget() = 0;
+    
+    glm::vec2 NDCToPixel(const glm::vec2 &v) const;
+    QPointF   NDCToQPixel(const glm::vec2 &v) const;
+    QPointF   NDCToQPixel(float x, float y) const;
+    glm::vec2 PixelToNDC(const QPointF &p) const;
+    glm::vec2 PixelToNDC(const glm::vec2 &p) const;
+    QRectF    PaddedRect() const;
+    
+    int GetPadding() const;
+    int GetControlPointRadius() const;
     
 private:
     TFInfoWidget *_infoWidget = nullptr;

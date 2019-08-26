@@ -100,33 +100,3 @@ void TFHistogramWidget::mouseMoveEvent(QMouseEvent *event)
 }
 
 //void TFHistogramWidget::mouseDoubleClickEvent(QMouseEvent *event)
-
-glm::vec2 TFHistogramWidget::NDCToPixel(const glm::vec2 &v) const
-{
-    return vec2(PADDING + v.x * (width()-2*PADDING), PADDING + (1.0f - v.y) * (height()-2*PADDING));
-}
-
-QPointF TFHistogramWidget::NDCToQPixel(const glm::vec2 &v) const
-{
-    const vec2 p = NDCToPixel(v);
-    return QPointF(p.x, p.y);
-}
-
-QPointF TFHistogramWidget::NDCToQPixel(float x, float y) const
-{
-    return NDCToQPixel(vec2(x, y));
-}
-
-glm::vec2 TFHistogramWidget::PixelToNDC(const glm::vec2 &p) const
-{
-    float width = QWidget::width();
-    float height = QWidget::height();
-    VAssert(width != 0 && height != 0);
-    
-    return vec2((p.x - PADDING) / (width-2*PADDING), 1.0f - (p.y - PADDING) / (height-2*PADDING));
-}
-
-glm::vec2 TFHistogramWidget::PixelToNDC(const QPointF &p) const
-{
-    return PixelToNDC(vec2(p.x(), p.y()));
-}

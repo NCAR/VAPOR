@@ -57,7 +57,7 @@ void TFColorWidget::paintEvent(QPaintEvent* event)
         
         ColorMap *cm = rp->GetMapperFunc(rp->GetVariableName())->GetColorMap();
         
-        int nSamples = width()-PADDING*2;
+        int nSamples = width()-GetPadding()*2;
         unsigned char buf[nSamples*3];
         float rgb[3];
         for (int i = 0; i < nSamples; i++) {
@@ -68,7 +68,7 @@ void TFColorWidget::paintEvent(QPaintEvent* event)
         }
         QImage image(buf, nSamples, 1, QImage::Format::Format_RGB888);
         
-        p.drawImage(QRect(PADDING, PADDING, width()-PADDING*2, height()-PADDING*2), image);
+        p.drawImage(PaddedRect(), image);
         
         for (int i = 0; i < cm->numControlPoints(); i++) {
             drawControl(p, controlQPositionForValue(cm->controlPointValueNormalized(i)), i == _selectedId);
@@ -195,7 +195,7 @@ int TFColorWidget::findSelectedControlPoint(const glm::vec2 &mouse) const
 
 bool TFColorWidget::controlPointContainsPixel(float cp, const vec2 &pixel) const
 {
-    return glm::distance(pixel, controlPositionForValue(cp)) <= CONTROL_POINT_RADIUS;
+    return glm::distance(pixel, controlPositionForValue(cp)) <= GetControlPointRadius();
 }
 
 QPointF TFColorWidget::controlQPositionForValue(float value) const
@@ -206,17 +206,17 @@ QPointF TFColorWidget::controlQPositionForValue(float value) const
 
 glm::vec2 TFColorWidget::controlPositionForValue(float value) const
 {
-    return vec2(value * (width()-PADDING*2) + PADDING, height()/2.f);
+    return vec2(controlXForValue(value), height()/2.f);
 }
 
 float TFColorWidget::controlXForValue(float value) const
 {
-    return value * (width()-PADDING*2) + PADDING;
+    return NDCToPixel(vec2(value, 0.f)).x;
 }
 
 float TFColorWidget::valueForControlX(float position) const
 {
-    return (position - PADDING) / (width()-PADDING*2);
+    return PixelToNDC(vec2(position, 0.f)).x;
 }
 
 QColor TFColorWidget::VColorToQColor(const ColorMap::Color &c)

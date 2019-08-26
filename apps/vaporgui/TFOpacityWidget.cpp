@@ -100,13 +100,13 @@ void TFOpacityWidget::paintEvent(QPaintEvent* event)
         ControlPointList &cp = _controlPoints;
         
         for (auto it = cp.BeginLines(); it != cp.EndLines(); ++it) {
-            p.drawLine(QNDCToPixel(it.a()), QNDCToPixel(it.b()));
+            p.drawLine(NDCToQPixel(it.a()), NDCToQPixel(it.b()));
             
 //            p.drawEllipse(qvec2(Project(NDCToPixel(it.a()), NDCToPixel(it.b()), m)), 2, 2);
         }
         
         for (auto it = --cp.EndPoints(); it != --cp.BeginPoints(); --it)
-            drawControl(p, QNDCToPixel(*it), it.Index() == _selectedControl);
+            drawControl(p, NDCToQPixel(*it), it.Index() == _selectedControl);
     }
 }
 
@@ -177,7 +177,7 @@ void TFOpacityWidget::mouseDoubleClickEvent(QMouseEvent *event)
         const vec2 a = NDCToPixel(it.a());
         const vec2 b = NDCToPixel(it.b());
         
-        if (DistanceToLine(a, b, mouse) <= CONTROL_POINT_RADIUS) {
+        if (DistanceToLine(a, b, mouse) <= GetControlPointRadius()) {
             cp.Add(PixelToNDC(Project(a, b, mouse)), it);
             opacityChanged();
             update();
@@ -202,7 +202,7 @@ void TFOpacityWidget::opacityChanged()
 
 bool TFOpacityWidget::controlPointContainsPixel(const vec2 &cp, const vec2 &pixel) const
 {
-    return glm::distance(pixel, NDCToPixel(cp)) <= CONTROL_POINT_RADIUS;
+    return glm::distance(pixel, NDCToPixel(cp)) <= GetControlPointRadius();
 }
 
 ControlPointList::PointIterator TFOpacityWidget::findSelectedControlPoint(const glm::vec2 &mouse)
@@ -212,31 +212,6 @@ ControlPointList::PointIterator TFOpacityWidget::findSelectedControlPoint(const 
         if (controlPointContainsPixel(*it, mouse))
             return it;
     return end;
-}
-
-glm::vec2 TFOpacityWidget::NDCToPixel(const glm::vec2 &v) const
-{
-    return vec2(PADDING + v.x * (width()-2*PADDING), PADDING + (1.0f - v.y) * (height()-2*PADDING));
-}
-
-QPointF TFOpacityWidget::QNDCToPixel(const glm::vec2 &v) const
-{
-    const vec2 p = NDCToPixel(v);
-    return QPointF(p.x, p.y);
-}
-
-glm::vec2 TFOpacityWidget::PixelToNDC(const glm::vec2 &p) const
-{
-    float width = QWidget::width();
-    float height = QWidget::height();
-    VAssert(width != 0 && height != 0);
-    
-    return vec2((p.x - PADDING) / (width-2*PADDING), 1.0f - (p.y - PADDING) / (height-2*PADDING));
-}
-
-glm::vec2 TFOpacityWidget::PixelToNDC(const QPointF &p) const
-{
-    return PixelToNDC(vec2(p.x(), p.y()));
 }
 
 void TFOpacityWidget::selectControlPoint(ControlPointList::PointIterator it)
