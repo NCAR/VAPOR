@@ -45,6 +45,9 @@ TFInfoWidget *TFHistogramWidget::createInfoWidget()
 {
     TFHistogramInfoWidget *info = new TFHistogramInfoWidget;
     
+    connect(this, SIGNAL(UpdateInfo(float)), info, SLOT(SetControlPoint(float)));
+//    connect(this, SIGNAL(InfoDeselected()), info, SLOT(Deselect()));
+    
     return info;
 }
 
@@ -82,10 +85,19 @@ void TFHistogramWidget::paintEvent(QPaintEvent* event)
 void TFHistogramWidget::mousePressEvent(QMouseEvent *event)
 {
     emit Activated(this);
+    emit UpdateInfo(PixelToNDC(event->pos()).x);
 }
 
-//void TFHistogramWidget::mouseReleaseEvent(QMouseEvent *event)
-//void TFHistogramWidget::mouseMoveEvent(QMouseEvent *event)
+void TFHistogramWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+//    emit InfoDeselected();
+}
+
+void TFHistogramWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    emit UpdateInfo(PixelToNDC(event->pos()).x);
+}
+
 //void TFHistogramWidget::mouseDoubleClickEvent(QMouseEvent *event)
 
 glm::vec2 TFHistogramWidget::NDCToPixel(const glm::vec2 &v) const

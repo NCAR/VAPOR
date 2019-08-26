@@ -17,4 +17,5 @@ public:
     
 public slots:
     void SetControlPoint(float value);
+    void Deselect();
 };

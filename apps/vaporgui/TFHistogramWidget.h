@@ -23,8 +23,8 @@ protected:
     TFInfoWidget *createInfoWidget();
     void paintEvent(QPaintEvent* event);
     void mousePressEvent(QMouseEvent *event);
-//    void mouseReleaseEvent(QMouseEvent *event);
-//    void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
 //    void mouseDoubleClickEvent(QMouseEvent *event);
     
 private:
@@ -36,4 +36,8 @@ private:
     QPointF   QNDCToPixel(const glm::vec2 &v) const;
     glm::vec2 PixelToNDC(const QPointF &p) const;
     glm::vec2 PixelToNDC(const glm::vec2 &p) const;
+    
+signals:
+    void InfoDeselected();
+    void UpdateInfo(float value);
 };
