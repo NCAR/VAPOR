@@ -99,7 +99,8 @@ TFMapsInfoGroup::TFMapsInfoGroup()
 
 void TFMapsInfoGroup::Update(VAPoR::RenderParams *rParams)
 {
-    
+    for (auto info : _infos)
+        info->Update(rParams);
 }
 
 void TFMapsInfoGroup::add(TFMapWidget *map)
