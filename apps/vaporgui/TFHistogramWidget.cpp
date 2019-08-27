@@ -8,6 +8,7 @@
 #include "ErrorReporter.h"
 #include <vapor/RenderParams.h>
 #include <vapor/ParamsMgr.h>
+#include <math.h>
 
 using namespace VAPoR;
 using std::vector;
@@ -73,6 +74,9 @@ void TFHistogramWidget::paintEvent(QPaintEvent* event)
     int nBins = _histo.getNumBins();
     for (int i = 0; i < nBins; i++) {
         float bin = _histo.getBinSizeNormalized(i);
+        if (isnan(bin)) {
+            printf("NAN\n");
+        }
         graph.push_back(NDCToQPixel(i/(float)nBins, bin));
         graph.push_back(NDCToQPixel(i/(float)nBins, bin));
     }

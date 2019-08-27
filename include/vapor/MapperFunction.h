@@ -317,7 +317,7 @@ public:
 	);
  }
 
-private:
+public:
 	
  //
  // XML tags
@@ -330,6 +330,7 @@ private:
  static const string _autoUpdateHistoTag;
  static const string _secondaryVarMapperTag;
 
+private:
  //
  // Size of lookup table.  Always 1<<8 currently!
  //

@@ -117,6 +117,36 @@ void ParamsWidgetFloat::valueChangedSlot()
 
 
 
+#include "QRangeSliderTextCombo.h"
+ParamsWidgetRange::ParamsWidgetRange(const std::string &tag, const std::string &labelText)
+: ParamsWidget(tag, labelText)
+{
+    _range = new QRangeSliderTextCombo;
+    connect(_range, SIGNAL(editingFinished()), this, SLOT(valueChangedSlot()));
+    
+    layout()->addWidget(_range);
+}
+
+void ParamsWidgetRange::Update(VAPoR::ParamsBase *p)
+{
+    _params = p;
+//    _range->setText(QString::number(p->GetValueDouble(_tag, false)));
+}
+
+ParamsWidgetRange *ParamsWidgetRange::SetRange(float min, float max)
+{
+    _range->SetRange(min, max);
+    return this;
+}
+
+void ParamsWidgetRange::valueChangedSlot()
+{
+//    if (_params)
+//        _params->SetValueDouble(_tag, _tag, _lineEdit->text().toDouble());
+}
+
+
+
 
 ParamsWidgetDropdown::ParamsWidgetDropdown(const std::string &tag, const std::vector<std::string> &items, const std::string &labelText)
 : ParamsWidget(tag, labelText)

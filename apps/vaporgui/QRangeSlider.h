@@ -11,9 +11,10 @@ public:
     QRangeSlider();
     QRangeSlider(Qt::Orientation orientation);
     QSize minimumSizeHint() const;
+    void SetValue(float min, float max);
     
 signals:
-    void valueChanged(int min, int max);
+    void ValueChanged(float min, float max);
     
 protected:
     void paintEvent(QPaintEvent* event);

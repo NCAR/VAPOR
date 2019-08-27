@@ -11,6 +11,7 @@ class TFOpacityWidget;
 class TFColorWidget;
 class TFHistogramWidget;
 class QRangeSlider;
+class QRangeSliderTextCombo;
 class TFInfoWidget;
 class TFMapsGroup;
 class TFMapWidget;
@@ -25,12 +26,17 @@ public:
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     
 private:
-    
-    QRangeSlider *range;
+    VAPoR::RenderParams *_rParams;
+    QRangeSliderTextCombo *range;
     ParamsWidgetDropdown *colorMapTypeDropdown;
     TFMapsGroup *_maps;
     TFMapsInfoGroup *_mapsInfo;
     QWidget *_tab() const;
+    
+    void _getDataRange(VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams, float *min, float *max) const;
+    
+private slots:
+    void _rangeChanged(float left, float right);
 };
 
 

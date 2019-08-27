@@ -22,7 +22,6 @@
 using namespace VAPoR;
 using namespace Wasp;
 
-#define REQUIRED_SAMPLE_SIZE 1000000
 #define SAMPLE_RATE 30
 
 Histo::Histo(int numberBins, float mnData, float mxData, string var, int ts)
@@ -120,6 +119,8 @@ int Histo::getNumBins() const
 
 float Histo::getBinSizeNormalized(int bin) const
 {
+    if (_maxBinSize == 0)
+        return 0;
     return getBinSize(bin) / (float)_maxBinSize;
 }
 
@@ -188,6 +189,7 @@ int Histo::PopulateIfNeeded(VAPoR::DataMgr *dm, VAPoR::RenderParams *rp)
     if (!NeedsUpdate(dm, rp))
         return 0;
     
+    reset(_numBins);
     return Populate(dm, rp);
 }
 
@@ -265,21 +267,7 @@ void Histo::populateSamplingHistogram(const Grid *grid, const vector<double> &mi
 
 int Histo::calculateStride(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const
 {
-    std::string varname = rp->GetVariableName();
-    std::vector<size_t> dimsAtLevel;
-    int ref = rp->GetRefinementLevel();
-    int rc = dm->GetDimLensAtLevel(varname, ref, dimsAtLevel);
-    VAssert(rc>=0);
-    
-    long size = 1;
-    for (int i=0; i<dimsAtLevel.size(); i++)
-        size *= dimsAtLevel[i];
-    
-    int stride = 1;
-    if (size > REQUIRED_SAMPLE_SIZE)
-        stride = 1 + size / REQUIRED_SAMPLE_SIZE;
-    
-    return stride;
+    return dm->GetDefaultMetaInfoStride(rp->GetVariableName(), rp->GetRefinementLevel());
 }
 
 bool Histo::shouldUseSampling(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const

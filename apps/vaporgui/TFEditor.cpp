@@ -7,6 +7,7 @@
 #include "TFOpacityInfoWidget.h"
 #include "TFColorInfoWidget.h"
 #include "QRangeSlider.h"
+#include "QRangeSliderTextCombo.h"
 #include <vapor/ColorMap.h>
 //#include "QColorWidget.h"
 
@@ -22,9 +23,11 @@ TFEditor::TFEditor()
     _tab()->setLayout(layout);
     layout->addWidget(_maps = new TFMapsGroup);
     layout->addWidget(_mapsInfo = _maps->CreateInfoGroup());
-    layout->addWidget(range = new QRangeSlider);
+    layout->addWidget(range = new QRangeSliderTextCombo);
     layout->addWidget(colorMapTypeDropdown = new ParamsWidgetDropdown(VAPoR::ColorMap::_interpTypeTag, {"Linear", "Discrete", "Diverging"}, "Color Interpolation"));
     layout->addWidget(c = new ParamsWidgetColor("test"));
+    
+    connect(range, SIGNAL(ValueChanged(float, float)), this, SLOT(_rangeChanged(float, float)));
     
 //    this->setStyleSheet(R"(QWidget:hover:!pressed {border: 1px solid red;})");
     
@@ -32,15 +35,35 @@ TFEditor::TFEditor()
 
 void TFEditor::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
 {
+    _rParams = rParams;
     colorMapTypeDropdown->Update(rParams->GetMapperFunc(rParams->GetVariableName())->GetColorMap());
     _maps->Update(dataMgr, paramsMgr, rParams);
     _mapsInfo->Update(rParams);
     c->Update(rParams);
+    
+    float min, max;
+    _getDataRange(dataMgr, rParams, &min, &max);
+    range->SetRange(min, max);
+    vector<double> mapperRange = rParams->GetMapperFunc(rParams->GetVariableName())->getMinMaxMapValue();
+    range->SetValue(mapperRange[0], mapperRange[1]);
 }
 
 QWidget *TFEditor::_tab() const
 {
     return this->widget(0);
+}
+
+void TFEditor::_getDataRange(VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *min, float *max) const
+{
+    std::vector<double> range;
+    d->GetDataRange(r->GetCurrentTimestep(), r->GetVariableName(), r->GetRefinementLevel(), r->GetCompressionLevel(), d->GetDefaultMetaInfoStride(r->GetVariableName(), r->GetRefinementLevel()), range);
+    *min = range[0];
+    *max = range[1];
+}
+
+void TFEditor::_rangeChanged(float left, float right)
+{
+    _rParams->GetMapperFunc(_rParams->GetVariableName())->setMinMaxMapValue(left, right);
 }
 
 

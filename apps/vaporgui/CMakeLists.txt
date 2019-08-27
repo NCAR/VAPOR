@@ -88,6 +88,8 @@ set (SRCS
 	TFMapWidget.h
 	TFHistogramInfoWidget.cpp
 	TFHistogramInfoWidget.h
+	QRangeSliderTextCombo.cpp
+	QRangeSliderTextCombo.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h

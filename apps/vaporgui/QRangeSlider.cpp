@@ -4,6 +4,8 @@
 #include <QMouseEvent>
 #include <QBitmap>
 
+#define QT_STOPS 1000000000
+
 QRangeSlider::QRangeSlider()
 : QRangeSlider(Qt::Orientation::Horizontal)
 {}
@@ -13,14 +15,24 @@ QRangeSlider::QRangeSlider(Qt::Orientation orientation)
 {
     _position[0] = 0;
     _value[0] = 0;
-    _position[1] = 99;
-    _value[1] = 99;
+    _position[1] = QT_STOPS-1;
+    _value[1] = QT_STOPS-1;
+    this->setRange(0, QT_STOPS);
     this->setTracking(true);
 }
 
 QSize QRangeSlider::minimumSizeHint() const
 {
     return QSlider::minimumSizeHint();
+}
+
+void QRangeSlider::SetValue(float min, float max)
+{
+    _position[0] = min * (QT_STOPS-1);
+    _value[0] = min * (QT_STOPS-1);
+    _position[1] = max * (QT_STOPS-1);
+    _value[1] = max * (QT_STOPS-1);
+    update();
 }
 
 void QRangeSlider::paintEvent(QPaintEvent* event)
@@ -105,7 +117,7 @@ void QRangeSlider::mouseReleaseEvent(QMouseEvent *event)
         _value[_grabbedControl] = value();
         _position[_grabbedControl] = sliderPosition();
         _grabbedControl = -1;
-        emit valueChanged(_value[0], _value[1]);
+        emit ValueChanged(_value[0]/(float)QT_STOPS, _value[1]/(float)QT_STOPS);
     }
 }
 
