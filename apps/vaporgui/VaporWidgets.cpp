@@ -270,10 +270,15 @@ VSlider::SetRange( float min, float max )
     _max = max;
 
     /* keep the old _currentVal if it's still within the range.
-       Otherwise, re-assign the middle point to _currentVal */
-    if( _currentVal < min ||  _currentVal > max )
+       Otherwise, re-assign the max or min value to _currentVal */
+    if( _currentVal < min )
     {
-        _currentVal   = (min + max) / 2.0f;
+        _currentVal = min;
+        _qedit->setText( QString::number( _currentVal, 'f', 3 ) );
+    }
+    else if( _currentVal > max )
+    {
+        _currentVal = max;
         _qedit->setText( QString::number( _currentVal, 'f', 3 ) );
     }
 
