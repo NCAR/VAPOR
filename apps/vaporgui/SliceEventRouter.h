@@ -10,7 +10,6 @@
 #include "RenderEventRouter.h"
 #include "VariablesWidget.h"
 #include "SliceSubtabs.h"
-#include "ParamsWidgets.h"
 
 QT_USE_NAMESPACE
 
@@ -52,14 +51,6 @@ public:
  }
  string GetType() const {return GetClassType(); }
 
- QWidget*  _testTab;
- PSpinBox* _psb;
- PSpinBox* _psb2;
- VSpinBox* _vsb;
- PSlider* _psl;
- PSlider* _psl2;
- PRange* _prange;
- PGeometry* _pgeometry;
 
 protected:
  void _updateTab();

@@ -1,7 +1,5 @@
 #include "SliceSubtabs.h"
 
-#include "ParamsWidgets.h"
-
 #define MIN_SAMPLES 1 
 #define MAX_SAMPLES 2000
 #define MIN_QUALITY 1
