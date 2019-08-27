@@ -10,21 +10,83 @@ License and Citation
 License
 _______
 
-Visualization and Analysis Platform for Ocean, Atmosphere, and Solar Researchers
-Terms of Use
-
 PLEASE READ THIS SOFTWARE LICENSE AGREEMENT ("LICENSE") CAREFULLY BEFORE DOWNLOADING THE SOFTWARE. BY DOWNLOADING THE SOFTWARE, YOU ARE AGREEING TO BE BOUND BY THE TERMS OF THIS LICENSE. IF YOU DO NOT AGREE TO THE TERMS OF THIS LICENSE, YOU ARE NOT AUTHORIZED TO DOWNLOAD THIS SOFTWARE.
 
-Copyright (c) 2015 the University Corporation for Atmospheric Research (“UCAR”). All rights reserved.
+Vapor 3 is released under the permissive :ref:`Apache v2.0 license<apachev2License>`.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+Third Party Software
+--------------------
+Vapor 3 makes use of the third party software listed below.  In addition to the license above, users agree to the licenses outlined by the following libraries, frameworks, and source files:
 
-Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-Neither UCAR nor its contributors may be used to endorse or promote you, your institution or products derived from this software without specific prior written permission.
-THIS SOFTWARE IS PROVIDED BY UCAR AND ANY CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL UCAR OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++---------------------------------+---------------------------------------+
+| Library/Framework               | License                               |
++---------------------------------+---------------------------------------+
+| GLEW                            | :ref:`Custom <glewLicense>`           |
++---------------------------------+---------------------------------------+
+| IrrXML                          | :ref:`Custom <irrXMLLicense>`         |
++---------------------------------+---------------------------------------+
+| OpenImageDenoise                | :ref:`Apache v2.0 <apachev2License>`  |
++---------------------------------+---------------------------------------+
+| assimp                          | :ref:`Custom <assimpLicense>`         |
++---------------------------------+---------------------------------------+
+| embree                          | :ref:`Apache v2.0 <apachev2License>`  |
++---------------------------------+---------------------------------------+
+| Freetype                        | :ref:`Custom <freetypeLicense>`       |
++---------------------------------+---------------------------------------+
+| geotiff                         | :ref:`Custom <geotiffLicense>`        |
++---------------------------------+---------------------------------------+
+| glfw3                           | :ref:`Custom <glfw3License>`          |
++---------------------------------+---------------------------------------+
+| h5bzip2                         | :ref:`Custom <hdf5License>`           |
++---------------------------------+---------------------------------------+
+| hdf5                            | :ref:`Custom <hdf5License>`           |
++---------------------------------+---------------------------------------+
+| jpeg                            | :ref:`Custom <jpegLicense>`           |
++---------------------------------+---------------------------------------+
+| Microsoft Redistributable dll's | :ref:`Custom <microsoftLicense>`      |
++---------------------------------+---------------------------------------+
+| netCDF                          | :ref:`Custom <netcdfLicense>`         |
++---------------------------------+---------------------------------------+
+| NSIS                            | :ref:`CPL v1 <nsisLicense>`           |
++---------------------------------+---------------------------------------+
+| ospray                          | :ref:`Apache v2.0 <apachev2License>`  |
++---------------------------------+---------------------------------------+
+| png                             | :ref:`Custom <libpngLicense>`         |
++---------------------------------+---------------------------------------+
+| proj                            | :ref:`MIT <projLicense>`              |
++---------------------------------+---------------------------------------+
+| python                          | :ref:`python <pythonLicense>`         |
++---------------------------------+---------------------------------------+
+| Qt                              | :ref:`LGPL v3 <lgplv3License>`        |
++---------------------------------+---------------------------------------+
+| sqlite3                         | :ref:`Public Domain <sqlite3License>` |
++---------------------------------+---------------------------------------+
+| SZIP (szlib)                    | :ref:`HDF License <hdf5License>`      |
++---------------------------------+---------------------------------------+
+| TBB (threading)                 | :ref:`Apache v2.0 <apachev2License>`  |
++---------------------------------+---------------------------------------+
+| tiff                            | :ref:`Custom <tiffLicense>`           |
++---------------------------------+---------------------------------------+
+| udunits                         | :ref:`Custom <udunitsLicense>`        |
++---------------------------------+---------------------------------------+
+| Source code                     |                                       |
++---------------------------------+---------------------------------------+
+| patchelf                        | :ref:`Custom <patchelfLicense>`       |
++---------------------------------+---------------------------------------+
+| nanoflann.hpp                   | :ref:`Custom <nanoflannLicense>`      |
++---------------------------------+---------------------------------------+
+| SWT (wavelets)                  | :ref:`GPL v2.1 <swtLicense>`          |
++---------------------------------+---------------------------------------+
+| Trackball.cpp                   | :ref:`LGPL v2 <lgplv2License>`        |
++---------------------------------+---------------------------------------+
+| geodesic.h                      | :ref:`MIT <mitLicense>`               |
++---------------------------------+---------------------------------------+
+| geo_ctrans.h                    | :ref:`MIT <mitLicense>`               |
++---------------------------------+---------------------------------------+
+| GetGitRevisionDescription.cmake | :ref:`Boost V1 <boostLicense>`        |
++---------------------------------+---------------------------------------+
 
-Downloading:
-BY DOWNLOADING THE SOFTWARE, YOU ARE AGREEING TO BE BOUND BY THE TERMS OF THIS LICENSE. IF YOU DO NOT AGREE TO THE TERMS OF THIS LICENSE, YOU ARE NOT AUTHORIZED TO DOWNLOAD THIS SOFTWARE.
+
 
 .. _citation:
 
