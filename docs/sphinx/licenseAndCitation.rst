@@ -38,35 +38,21 @@ We request:
 
 ::
 
-    Clyne, J., Mininni, P., Norton, A., and Rast, M. "Interactive desktop analysis of high resolution simulations:
-     application to turbulent plume dynamics and current sheet formation", New Journal of Physics 9 (2007) 301.
+    Li, Shaomeng; Jaroszynski, Stanislaw; Pearse, Scott; Orf, Leigh; Clyne, John. 2019. "VAPOR: A Visualization Package Tailored to Analyze Simulation Data in Earth System Science." *Atmosphere* 10, no. 9: 488. 
 
-    @article{clyne2007interactive,
-      title={Interactive desktop analysis of high resolution simulations: application to turbulent plume dynamics and current sheet formation},
-      author={Clyne, John and Mininni, Pablo and Norton, Alan and Rast, Mark},
-      journal={New Journal of Physics},
-      volume={9},
-      number={8},
-      pages={301},
-      year={2007},
-      publisher={IOP Publishing}
+    @Article{atmos10090488,
+    AUTHOR = {Li, Shaomeng and Jaroszynski, Stanislaw and Pearse, Scott and Orf, Leigh and Clyne, John},
+    TITLE = {VAPOR: A Visualization Package Tailored to Analyze Simulation Data in Earth System Science},
+    JOURNAL = {Atmosphere},
+    VOLUME = {10},
+    YEAR = {2019},
+    NUMBER = {9},
+    ARTICLE-NUMBER = {488},
+    URL = {https://www.mdpi.com/2073-4433/10/9/488},
+    ISSN = {2073-4433},
+    DOI = {10.3390/atmos10090488}
     }
 
-    Clyne, J. and Rast, M. "A prototype discovery environment for analyzing and visualizing terascale turbulent fluid flow simulations", in proceedings of Visualization and Data Analysis 2005, pp. 284-294, January 2005.
-    @inproceedings{clyne2005prototype,
-      title={A prototype discovery environment for analyzing and visualizing terascale turbulent fluid flow simulations},
-      author={Clyne, John and Rast, Mark},
-      booktitle={Electronic Imaging 2005},
-      pages={284--294},
-      year={2005},
-      organization={International Society for Optics and Photonics}
-    }
-
-or
-
-::
-
-    www.vapor.ucar.edu
 
 For presentations, posters, etc:
 We suggest:
