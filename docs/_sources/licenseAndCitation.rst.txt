@@ -26,6 +26,14 @@ THIS SOFTWARE IS PROVIDED BY UCAR AND ANY CONTRIBUTORS "AS IS" AND ANY EXPRESS O
 Downloading:
 BY DOWNLOADING THE SOFTWARE, YOU ARE AGREEING TO BE BOUND BY THE TERMS OF THIS LICENSE. IF YOU DO NOT AGREE TO THE TERMS OF THIS LICENSE, YOU ARE NOT AUTHORIZED TO DOWNLOAD THIS SOFTWARE.
 
+Vapor 3 makes use of the third party libraries listed below.  In addition to the license above, users agree to the licenses outlined by the following libraries:
+
++--------------------+-----------------------------------+
+| Library            | License                           |
++--------------------+-----------------------------------+
+| GLEW               | :ref:`Modified BSD <GLEWLicense>` |
++--------------------+-----------------------------------+
+
 .. _citation:
 
 Citation
