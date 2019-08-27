@@ -234,8 +234,9 @@ if (APPLE)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib)
 		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${PYTHONPATH})
+		file (GLOB INSTALL_OSPRAY "/Users/stas/Documents/ospray-test/external/ospray/lib/*.dylib")
 		install (
-			FILES ${INSTALL_LIBS}
+			FILES ${INSTALL_LIBS} ${INSTALL_OSPRAY} 
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
