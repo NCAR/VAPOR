@@ -4,6 +4,9 @@
 
 .. highlight:: none
 
+Freetype License
+----------------
+
                     The FreeType Project LICENSE
                     ----------------------------
 
