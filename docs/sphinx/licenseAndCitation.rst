@@ -36,9 +36,9 @@ VAPOR is developed as an Open Source application by the National Center for Atmo
 For journal articles, proceedings, etc
 We request:
 
-::
-
     Li, Shaomeng; Jaroszynski, Stanislaw; Pearse, Scott; Orf, Leigh; Clyne, John. 2019. "VAPOR: A Visualization Package Tailored to Analyze Simulation Data in Earth System Science." *Atmosphere* 10, no. 9: 488. 
+
+::
 
     @Article{atmos10090488,
     AUTHOR = {Li, Shaomeng and Jaroszynski, Stanislaw and Pearse, Scott and Orf, Leigh and Clyne, John},
