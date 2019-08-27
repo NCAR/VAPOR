@@ -4,7 +4,8 @@
 
 .. highlight:: none
 
-
+PNG License
+___________
 
 COPYRIGHT NOTICE, DISCLAIMER, and LICENSE
 =========================================
