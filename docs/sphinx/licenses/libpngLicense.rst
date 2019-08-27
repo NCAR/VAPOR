@@ -1,3 +1,11 @@
+.. _libpngLicense:
+
+.. literalinclude::
+
+.. highlight:: none
+
+
+
 COPYRIGHT NOTICE, DISCLAIMER, and LICENSE
 =========================================
 

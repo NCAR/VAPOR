@@ -6,7 +6,7 @@
 #include <memory>
 #include <vapor/common.h>
 #include <vapor/UnstructuredGrid.h>
-#include <vapor/KDTreeRG.h>
+#include <vapor/QuadTreeRectangle.hpp>
 
 
 #ifdef WIN32
@@ -39,11 +39,13 @@ public:
 	const int *faceOnFace,
 	Location location,	// node,face, edge
 	size_t maxVertexPerFace,
-	size_t maxFacePerVertex
+	size_t maxFacePerVertex,
+	long nodeOffset,
+	long cellOffset
  ) : UnstructuredGrid(
 		vertexDims, faceDims, edgeDims, bs, blks, topology_dimension,
 		vertexOnFace, faceOnVertex, faceOnFace, location,
-		maxVertexPerFace, maxFacePerVertex
+		maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset
 	)
 	{}
 

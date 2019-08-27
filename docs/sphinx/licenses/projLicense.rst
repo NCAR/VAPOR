@@ -1,3 +1,12 @@
+.. _projLicense:
+
+.. literalinclude::
+
+.. highlight:: none
+
+Proj License
+------------
+
 All source, data files and other contents of the PROJ.4 package are 
 available under the following terms.  Note that the PROJ 4.3 and earlier
 was "public domain" as is common with US government work, but apparently

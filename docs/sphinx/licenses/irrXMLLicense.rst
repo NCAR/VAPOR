@@ -1,4 +1,12 @@
+.. _irrXMLLicense:
+
+.. literalinclude::
+
+.. highlight:: none
+
 irrXML License
+--------------
+
 The license of irrXML is based on the zlib/libpng license, only the name and the authors name have been replaced. Even though this license does not require you to mention that you are using the Irrlicht Engine in your product, an acknowledgement would be highly appreciated.
 
 

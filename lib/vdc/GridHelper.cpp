@@ -2,6 +2,7 @@
 #include <sstream>
 #include <vector>
 #include <map>
+#include <vapor/QuadTreeRectangle.hpp>
 #include <vapor/GridHelper.h>
 using namespace Wasp;
 using namespace VAPoR;
@@ -136,18 +137,17 @@ using namespace VAPoR;
 using namespace Wasp;
 
 
-const KDTreeRG *GridHelper::_getKDTree2D(
+
+string GridHelper::_getQuadTreeRectangleKey(
 	size_t ts,
 	int level,
 	int lod,
     const vector <DC::CoordVar> &cvarsinfo, 
-	const Grid &xg,
-	const Grid &yg,
 	const vector <size_t> &bmin,
 	const vector <size_t> &bmax
-) {
+) const {
+
 	VAssert(cvarsinfo.size() >= 2);
-	VAssert(xg.GetDimensions() == yg.GetDimensions());
 
 	vector <string> varnames;
 	for (int i=0; i<cvarsinfo.size(); i++) {
@@ -161,9 +161,7 @@ const KDTreeRG *GridHelper::_getKDTree2D(
 		}
 	}
 
-	if (! time_varying) {
-		ts = 0;
-	}
+	if (! time_varying) ts = 0;
 
     ostringstream oss;
 
@@ -177,20 +175,7 @@ const KDTreeRG *GridHelper::_getKDTree2D(
 	oss << ":";
 	oss << vector_to_string(bmax);
 
-	string key = oss.str();
-
-	KDTreeRG *kdtree = _kdtreeCache.get(key);
-	if (kdtree) {
-		return(kdtree);
-	}
-
-	kdtree = new KDTreeRG(xg, yg);
-	
-	KDTreeRG *oldkdtree = _kdtreeCache.put(key, kdtree);
-	if (oldkdtree) {
-		delete oldkdtree;
-	}
-	return(kdtree);
+	return(oss.str());
 }
 
 RegularGrid *GridHelper::_make_grid_regular(
@@ -404,10 +389,16 @@ CurvilinearGrid *GridHelper::_make_grid_curvilinear(
 	RegularGrid xrg(dims2d, bs2d, xcblkptrs, minu2d, maxu2d);
 	RegularGrid yrg(dims2d, bs2d, ycblkptrs, minu2d, maxu2d);
 
-	const KDTreeRG *kdtree = _getKDTree2D(
-		ts, level, lod, cvarsinfo, xrg, yrg, bmin, bmax
+	string qtr_key = _getQuadTreeRectangleKey(
+		ts, level, lod, cvarsinfo, bmin, bmax
 	);
 
+	// Try to get the QuadTreeRectangle from the cache. If one
+	// does not exist the UnstructuredGrid2D will make one
+	//
+	const QuadTreeRectangle<float, size_t> *qtr = _qtrCache.get(qtr_key);
+
+	CurvilinearGrid *g;
 	if (dims.size() == 3 && cvarsinfo[2].GetDimNames().size() == 3) {
 
 		// Terrain following vertical
@@ -422,9 +413,7 @@ CurvilinearGrid *GridHelper::_make_grid_curvilinear(
 
 		RegularGrid zrg(dims, bs, zcblkptrs, minu, maxu);
 
-		return (new CurvilinearGrid(
-			dims, bs, blkptrs, xrg, yrg, zrg, kdtree
-		));
+		g = new CurvilinearGrid(dims, bs, blkptrs, xrg, yrg, zrg, qtr);
 
 	}
 	else if (dims.size() == 3 && cvarsinfo[2].GetDimNames().size() == 1) {
@@ -434,19 +423,29 @@ CurvilinearGrid *GridHelper::_make_grid_curvilinear(
 		vector <double> zcoords;
 		for (int i=0; i<dims[2]; i++) zcoords.push_back(blkvec[3][i]);
 
-		return (new CurvilinearGrid(
-			dims, bs, blkptrs, xrg, yrg, zcoords, kdtree
-		));
+		g = new CurvilinearGrid(dims, bs, blkptrs, xrg, yrg, zcoords, qtr);
 	}
 	else {
 
 		// 2D
 		//
-		return (new CurvilinearGrid(
-			dims, bs, blkptrs, xrg, yrg, vector <double> (), kdtree
-		));
-
+		g = new CurvilinearGrid(
+			dims, bs, blkptrs, xrg, yrg, vector <double> (), qtr
+		);
 	}
+
+	// No QuadTreeRectangle in cache. So make a copy of the one created
+	// by UnstructuredGrid2D() and cache it for later use
+	//
+	if (! qtr) {
+		qtr = new QuadTreeRectangle<float,size_t>(*(g->GetQuadTreeRectangle()));
+		QuadTreeRectangle<float, size_t> *oldqtr = _qtrCache.put(
+			qtr_key, (QuadTreeRectangle<float,size_t> *) qtr
+		);
+		if (oldqtr) delete oldqtr;
+	}
+
+	return(g);
 }
 
 
@@ -535,33 +534,47 @@ UnstructuredGrid2D *GridHelper::_make_grid_unstructured2d(
 	UnstructuredGridCoordless xug(
 		vertexDims, faceDims, edgeDims, bs, xcblkptrs, 2,
 		vertexOnFace, faceOnVertex, faceOnFace, location,
-		maxVertexPerFace, maxFacePerVertex
+		maxVertexPerFace, maxFacePerVertex,
+		vertexOffset, faceOffset
 	);
-	xug.SetNodeOffset(vertexOffset);
-	xug.SetCellOffset(faceOffset);
 
 	UnstructuredGridCoordless yug(
 		vertexDims, faceDims, edgeDims, bs, ycblkptrs, 2,
 		vertexOnFace, faceOnVertex, faceOnFace, location,
-		maxVertexPerFace, maxFacePerVertex
+		maxVertexPerFace, maxFacePerVertex,
+		vertexOffset, faceOffset
 	);
-	yug.SetNodeOffset(vertexOffset);
-	yug.SetCellOffset(faceOffset);
 
 	UnstructuredGridCoordless zug;
 
-	const KDTreeRG *kdtree = _getKDTree2D(
-		ts, level, lod, cvarsinfo, xug, yug, bmin, bmax
+	string qtr_key = _getQuadTreeRectangleKey(
+		ts, level, lod, cvarsinfo, bmin, bmax
 	);
+
+	// Try to get the QuadTreeRectangle from the cache. If one
+	// does not exist the UnstructuredGrid2D will make one
+	//
+	const QuadTreeRectangle<float, size_t> *qtr = _qtrCache.get(qtr_key);
 
 	UnstructuredGrid2D *g = new UnstructuredGrid2D(
 		vertexDims, faceDims, edgeDims, bs, blkptrs, 
 		vertexOnFace, faceOnVertex, faceOnFace, location,
 		maxVertexPerFace, maxFacePerVertex,
-		xug, yug, zug, kdtree
+		vertexOffset, faceOffset,
+		xug, yug, zug, qtr
 	);
-	g->SetNodeOffset(vertexOffset);
-	g->SetCellOffset(faceOffset);
+
+	// No QuadTreeRectangle in cache. So make a copy of the one created
+	// by UnstructuredGrid2D() and cache it for later use
+	//
+	if (! qtr) {
+		qtr = new QuadTreeRectangle<float,size_t>(*(g->GetQuadTreeRectangle()));
+		QuadTreeRectangle<float, size_t> *oldqtr = _qtrCache.put(
+			qtr_key, (QuadTreeRectangle<float,size_t> *) qtr
+		);
+		if (oldqtr) delete oldqtr;
+	}
+
 
 	return(g);
 }
@@ -671,39 +684,50 @@ UnstructuredGridLayered *GridHelper::_make_grid_unstructured_layered(
 	UnstructuredGridCoordless xug(
 		vertexDims1D, faceDims1D, edgeDims1D, bs1d, xcblkptrs, 2,
 		vertexOnFace, faceOnVertex, faceOnFace, location,
-		maxVertexPerFace, maxFacePerVertex
+		maxVertexPerFace, maxFacePerVertex,
+		vertexOffset, faceOffset
 	);
-	xug.SetNodeOffset(vertexOffset);
-	xug.SetCellOffset(faceOffset);
 
 	UnstructuredGridCoordless yug(
 		vertexDims1D, faceDims1D, edgeDims1D, bs1d, ycblkptrs, 2,
 		vertexOnFace, faceOnVertex, faceOnFace, location,
-		maxVertexPerFace, maxFacePerVertex
+		maxVertexPerFace, maxFacePerVertex,
+		vertexOffset, faceOffset
 	);
-	yug.SetNodeOffset(vertexOffset);
-	yug.SetCellOffset(faceOffset);
 
 	UnstructuredGridCoordless zug(
 		vertexDims, faceDims, edgeDims, bs, zcblkptrs, 3,
 		vertexOnFace, faceOnVertex, faceOnFace, location,
-		maxVertexPerFace, maxFacePerVertex
+		maxVertexPerFace, maxFacePerVertex,
+		vertexOffset, faceOffset
 	);
-	zug.SetNodeOffset(vertexOffset);
-	zug.SetCellOffset(faceOffset);
 
-	const KDTreeRG *kdtree = _getKDTree2D(
-		ts, level, lod, cvarsinfo, xug, yug, bmin, bmax
+	string qtr_key = _getQuadTreeRectangleKey(
+		ts, level, lod, cvarsinfo, bmin, bmax
 	);
+
+	// Try to get the QuadTreeRectangle from the cache. If one
+	// does not exist the UnstructuredGrid2D will make one
+	//
+	const QuadTreeRectangle<float, size_t> *qtr = _qtrCache.get(qtr_key);
 
 	UnstructuredGridLayered *g = new UnstructuredGridLayered(
 		vertexDims, faceDims, edgeDims, bs, blkptrs, 
 		vertexOnFace, faceOnVertex, faceOnFace, location,
-		maxVertexPerFace, maxFacePerVertex,
-		xug, yug, zug, kdtree
+		maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset,
+		xug, yug, zug, qtr
 	);
-	g->SetNodeOffset(vertexOffset);
-	g->SetCellOffset(faceOffset);
+
+	// No QuadTreeRectangle in cache. So make a copy of the one created
+	// by UnstructuredGrid2D() and cache it for later use
+	//
+	if (! qtr) {
+		qtr = new QuadTreeRectangle<float,size_t>(*(g->GetQuadTreeRectangle()));
+		QuadTreeRectangle<float, size_t> *oldqtr = _qtrCache.put(
+			qtr_key, (QuadTreeRectangle<float,size_t> *) qtr
+		);
+		if (oldqtr) delete oldqtr;
+	}
 
 	return(g);
 }
@@ -861,10 +885,10 @@ UnstructuredGrid *GridHelper::MakeGridUnstructured(
 
 
 GridHelper::~GridHelper() {
-	KDTreeRG *kdtree;
 
-	while ((kdtree = _kdtreeCache.remove_lru()) != NULL) {
-		delete kdtree;
+	QuadTreeRectangle<float, size_t> *qtr;
+	while ((qtr = _qtrCache.remove_lru()) != NULL) {
+		delete qtr;
 	}
 }
 

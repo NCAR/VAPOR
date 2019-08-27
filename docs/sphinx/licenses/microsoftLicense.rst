@@ -1,3 +1,14 @@
+.. _microsoftLicense:
+
+.. literalinclude::
+
+.. highlight:: none
+
+
+Microsoft License
+-----------------
+
+
 MICROSOFT PRE-RELEASE SOFTWARE LICENSE TERMS
 
 MICROSOFT VISUAL STUDIO 2015 PRODUCT FAMILY PRE-RELEASE SOFTWARE

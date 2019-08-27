@@ -1,3 +1,12 @@
+.. _glfw3License:
+
+.. literalinclude::
+
+.. highlight:: none
+
+GLFW License
+------------
+
 Copyright © 2002-2006 Marcus Geelnard
 
 Copyright © 2006-2019 Camilla Löwy

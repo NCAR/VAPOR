@@ -1,3 +1,13 @@
+.. _hdf5License:
+
+.. literalinclude::
+
+.. highlight:: none
+
+HDF5 License
+------------
+
+
 Copyright Notice and License Terms for 
 HDF5 (Hierarchical Data Format 5) Software Library and Utilities
 -----------------------------------------------------------------------------

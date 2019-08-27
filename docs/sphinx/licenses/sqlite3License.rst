@@ -1,3 +1,13 @@
+.. _sqlite3License:
+
+.. literalinclude::
+
+.. highlight:: none
+
+SQLite License
+--------------
+
+
 SQLite Is Public Domain
 
 SQLite is in the

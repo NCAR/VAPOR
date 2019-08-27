@@ -1,3 +1,12 @@
+.. _lgplv3License:
+
+.. literalinclude::
+
+.. highlight:: none
+
+LGPL v3 License
+---------------
+
 GNU LESSER GENERAL PUBLIC LICENSE
 Version 3, 29 June 2007
 

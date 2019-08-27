@@ -1,3 +1,14 @@
+.. _lgplv2License:
+
+.. literalinclude::
+
+.. highlight:: none
+
+
+LGPL v2 License
+---------------
+
+
                   GNU LESSER GENERAL PUBLIC LICENSE
                        Version 2.1, February 1999
 

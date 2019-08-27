@@ -1,5 +1,12 @@
-	libgeotiff Licensing
-	====================
+.. _geotiffLicense:
+
+.. literalinclude::
+
+.. highlight:: none
+
+
+libgeotiff Licensing
+====================
 
 All the source code in this toolkit are either in the public domain, or under 
 an X style license.  In any event it is all considered to be free to use

@@ -1,3 +1,12 @@
+.. _netcdfLicense:
+
+.. literalinclude::
+
+.. highlight:: none
+
+NetCDF License
+--------------
+
 Copyright 1993-2017 University Corporation for Atmospheric Research/Unidata
 Portions of this software were developed by the Unidata Program at the University Corporation for Atmospheric Research.
 

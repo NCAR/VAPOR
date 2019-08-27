@@ -1,3 +1,12 @@
+.. _assimpLicense:
+
+.. literalinclude::
+
+.. highlight:: none
+
+Assimp License
+--------------
+
 LICENSE
 Assimp is released as Open Source under the terms of a 3-clause BSD license.
 

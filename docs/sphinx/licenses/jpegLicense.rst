@@ -1,3 +1,14 @@
+.. _jpegLicense:
+
+.. literalinclude::
+
+.. highlight:: none
+
+
+JPEG License
+------------
+
+
 LICENSE TERMS (ships as a part of the libjpeg package in the README file)
 =============
 

@@ -1,3 +1,13 @@
+.. _pythonLicense:
+
+.. literalinclude::
+
+.. highlight:: none
+
+Python License
+--------------
+
+
 Terms and conditions for accessing or otherwise using Python
 PSF LICENSE AGREEMENT FOR PYTHON 3.7.4
 1. This LICENSE AGREEMENT is between the Python Software Foundation ("PSF"), and

@@ -31,14 +31,17 @@ UnstructuredGridLayered::UnstructuredGridLayered(
 	Location location,  // node,face, edge
 	size_t maxVertexPerFace,
 	size_t maxFacePerVertex,
+	long nodeOffset,
+	long cellOffset,
     const UnstructuredGridCoordless &xug,
     const UnstructuredGridCoordless &yug,
     const UnstructuredGridCoordless &zug,
-	const KDTreeRG *kdtree
+	const QuadTreeRectangle<float, size_t> *qtr
 ) : UnstructuredGrid(
         vertexDims, faceDims, edgeDims, bs, blks, 3,
         vertexOnFace, faceOnVertex, faceOnFace, location,
-        maxVertexPerFace, maxFacePerVertex
+        maxVertexPerFace, maxFacePerVertex,
+		nodeOffset, cellOffset
     ), 
 	_ug2d(
 		vector <size_t> {vertexDims[0]}, 
@@ -46,8 +49,8 @@ UnstructuredGridLayered::UnstructuredGridLayered(
 		edgeDims.size() ? vector <size_t> {edgeDims[0]} : vector <size_t> (), 
 		vector <size_t> {bs[0]},
 		vector <float *> (), vertexOnFace, faceOnVertex, faceOnFace, location, 
-		maxVertexPerFace, maxFacePerVertex, xug, yug, 
-		UnstructuredGridCoordless(), kdtree
+		maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset, xug, yug, 
+		UnstructuredGridCoordless(), qtr
 	),
 	_zug(zug) 
 {

@@ -1,3 +1,12 @@
+.. _nsisLicense:
+
+.. literalinclude::
+
+.. highlight:: none
+
+NSIS License
+------------
+
 Applicable licenses
 All NSIS source code, plug-ins, documentation, examples, header files and graphics, with the exception of the compression modules and where otherwise noted, are licensed under the zlib/libpng license.
 The zlib compression module for NSIS is licensed under the zlib/libpng license.

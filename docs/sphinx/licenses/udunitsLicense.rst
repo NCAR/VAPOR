@@ -1,3 +1,14 @@
+.. _udunitsLicense:
+
+.. literalinclude::
+
+.. highlight:: none
+
+
+UDUnits License
+---------------
+
+
 Copyright 2014 University Corporation for Atmospheric Research and contributors.
 All rights reserved.
 

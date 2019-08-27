@@ -4,7 +4,7 @@
 Downloads
 =========
 
-If you are looking for our legacy version of Vapor 2.6, follow :ref:`this link <vapor2>` to the bottom of the page.
+.. note:: If you are looking for our legacy version of Vapor 2.6, follow :ref:`this link <vapor2>` to the bottom of the page.
 
 Current Release: Vapor 3.1.0
 ----------------------------
@@ -167,6 +167,19 @@ Sample Data
 -----------
 
 **Coming soon**
+
+
++--------------+-------+-------------------+-----------+
+| Dataset      | Model | Grid Resolution   | File Size |
++--------------+-------+-------------------+-----------+
+| DUKU_        | WRF   | 181 x 166 x 35    | 734 MB    |
++--------------+-------+-------------------+-----------+
+| Kauffman_    | ROMS  | 226 x 642 x 43    | 495 MB    |
++--------------+-------+-------------------+-----------+
+
+.. _DUKU: https://dashrepo.ucar.edu/dataset/VAPOR_Sample_Data/file/dukuSample.tar.gz
+
+.. _Kauffman: https://dashrepo.ucar.edu/dataset/VAPOR_Sample_Data/file/kauffmanSample.tar.gz
 
 |
 

@@ -1,3 +1,9 @@
+.. _freetypeLicense:
+
+.. literalinclude::
+
+.. highlight:: none
+
                     The FreeType Project LICENSE
                     ----------------------------
 

@@ -1,4 +1,15 @@
-   GNU GENERAL PUBLIC LICENSE
+.. _swtLicense:
+
+.. literalinclude::
+
+.. highlight:: none
+
+
+SWT License
+-----------
+
+
+            GNU GENERAL PUBLIC LICENSE
 		       Version 2, June 1991
 
  Copyright (C) 1989, 1991 Free Software Foundation, Inc.,
