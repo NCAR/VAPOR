@@ -171,10 +171,37 @@ FlowRenderer::_paintGL( bool fast )
 
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
-        if( _cache_seedGenMode == 0 )
+        /* Read seeds from a file is a special case, so we put it up front */
+        if( _cache_seedGenMode == 1 )
+        {
+            rv = _advection.InputStreamsGnuplot( params->GetSeedInputFilename() );
+            if( rv != 0 )
+            {
+                MyBase::SetErrMsg("Input seed list wrong!");
+                return flow::FILE_ERROR;
+            }
+            if( _2ndAdvection )     // bi-directional advection
+            {
+                _2ndAdvection->InputStreamsGnuplot( params->GetSeedInputFilename() );
+                _updatePeriodicity( _2ndAdvection ); 
+            }
+        }
+        else 
         {
             std::vector<flow::Particle> seeds;
-            _genSeedsXY( seeds, _timestamps.at(0) );
+            if( _cache_seedGenMode == 0 )       // Generate seeds from a built-in function
+                _genSeedsXY( seeds, _timestamps.at(0) );
+            else if( _cache_seedGenMode == 2 )  // Seeds from a rake, uniformly
+                _genSeedsRakeUniform( seeds, _timestamps.at(0) );
+
+            /* diagnose seeds */
+            /*std::cout << "Total number of seeds: " << seeds.size() << std::endl;
+            auto s = seeds.front();
+            printf("front seed: (%f, %f, %f)\n", s.location.x, s.location.y, s.location.z );
+            s = seeds.back();
+            printf("back seed: (%f, %f, %f)\n", s.location.x, s.location.y, s.location.z );
+            */
+
             // Note on UseSeedParticles(): this is the only function that resets
             //   all the streams inside of an Advection class.
             //   It should immediately be followed by a function to set its periodicity
@@ -185,17 +212,6 @@ FlowRenderer::_paintGL( bool fast )
                 _2ndAdvection->UseSeedParticles( seeds );
                 _updatePeriodicity( _2ndAdvection ); 
             }
-        }
-        else if( _cache_seedGenMode == 1 )
-        {
-            rv = _advection.InputStreamsGnuplot( params->GetSeedInputFilename() );
-            if( rv != 0 )
-            {
-                MyBase::SetErrMsg("Input seed list wrong!");
-                return flow::FILE_ERROR;
-            }
-            if( _2ndAdvection )     // bi-directional advection
-                _2ndAdvection->InputStreamsGnuplot( params->GetSeedInputFilename() );
         }
 
         _advectionComplete = false;
@@ -308,8 +324,7 @@ FlowRenderer::_renderFromAnAdvection( const flow::Advection* adv,
         for( size_t s = 0; s < numOfStreams; s++ )
         {
             const auto& stream = adv->GetStreamAt( s );
-            size_t totalPart   = 0;
-            for( size_t i = 0; i < stream.size() && totalPart <= numOfPart; i++ )
+            for( size_t i = 0; i < stream.size() && i < numOfPart; i++ )
             {
                 const auto& p = stream[i];
                 _particleHelper1( vec, p, singleColor );
@@ -582,6 +597,7 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds,
                                     float timeVal ) const
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
+    VAssert( params );
 
     /* retrieve rake from params */
     auto rake = params->GetRake();
@@ -614,14 +630,15 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds,
     /* Populate the list of seeds */
     seeds.resize( rakeSeeds[0] * rakeSeeds[1] * rakeSeeds[2] );
     int idx = 0;
-    for( int z = 0; z < rakeSeeds[2]; z++ )
-        for( int y = 0; y < rakeSeeds[1]; y++ )
-            for( int x = 0; x < rakeSeeds[0]; x++ )
+    for( int k = 0; k < rakeSeeds[2]; k++ )
+        for( int j = 0; j < rakeSeeds[1]; j++ )
+            for( int i = 0; i < rakeSeeds[0]; i++ )
             {
-                seeds[idx].location.x = start[0] + float(x) * step[0];
-                seeds[idx].location.y = start[1] + float(y) * step[1];
-                seeds[idx].location.z = start[2] + float(z) * step[2];
+                seeds[idx].location.x = start[0] + float(i) * step[0];
+                seeds[idx].location.y = start[1] + float(j) * step[1];
+                seeds[idx].location.z = start[2] + float(k) * step[2];
                 seeds[idx].time       = timeVal;
+                idx++;
             }
 
     return 0;
