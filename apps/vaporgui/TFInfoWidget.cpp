@@ -50,6 +50,7 @@ void TFInfoWidget::DeselectControlPoint()
 
 void TFInfoWidget::SetNormalizedValue(float value)
 {
+    value = value<0?0:value>1?1:value;
     _value = value;
     updateValue();
 }
