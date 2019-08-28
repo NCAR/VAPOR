@@ -198,6 +198,8 @@ FlowRenderer::_paintGL( bool fast )
                 _genSeedsXY( seeds, _timestamps.at(0) );
             else if( _cache_seedGenMode == 2 )  // Seeds from a rake, uniformly
                 _genSeedsRakeUniform( seeds, _timestamps.at(0) );
+            else if( _cache_seedGenMode == 3 )  // Seeds from a rake, randomly
+                _genSeedsRakeRandom( seeds, _timestamps.at(0) );
 
             /* diagnose seeds */
             /*std::cout << "Total number of seeds: " << seeds.size() << std::endl;
