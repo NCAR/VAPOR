@@ -66,16 +66,16 @@ public:
 
     /* 
      * 6 values to represent a rake in this particular order: 
-     *   xmin, xmax, ymin, ymax, zmin, zmax 
-     *   If the rake wasn't set by users, it returns a vector containing nans.
+     * xmin, xmax, ymin, ymax, zmin, zmax 
+     * If the rake wasn't set by users, it returns a vector containing nans.
      */
     std::vector<float>  GetRake() const;
     void                SetRake( const std::vector<float>& );
 
     /*
      * 4 values to represent the number of seeds inside of a rake:
-     *   The first 3 values are for uniform seeding, with num of seeds in X, Y, Z direction.
-     *   The 4th value is for random seeding, which specifies the number of total seeds in the rake.
+     * The first 3 values are for uniform seeding, with num of seeds in X, Y, Z direction.
+     * The 4th value is for random seeding, which specifies the number of total seeds in the rake.
      */
     std::vector<long>   GetRakeNumOfSeeds() const;
     void                SetRakeNumOfSeeds( const std::vector<long>& );
