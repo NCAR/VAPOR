@@ -73,6 +73,11 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
     _cache_flowDirection    = 0;
     for( int i = 0; i < 3; i++ )
         _cache_periodic[i] = false;
+    for( int i = 0; i < 6; i++ )
+        _cache_rake[i] = 0.0f;
+    for( int i = 0; i < 4; i++ )
+        _cache_rakeNumOfSeeds[i] = 1;
+    _cache_rakeBiasStrength = 1.0f;
 
     _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
     _colorStatus            = FlowStatus::SIMPLE_OUTOFDATE;
@@ -417,9 +422,12 @@ void
 FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
 {
     /* 
+     * This function servers two purposes:
+     * 1) update the cached parameters, and 2) determine if the advection is out of date.
+     * 
      * Strategy:
      * First, compare parameters that if changed, they would put both steady and unsteady
-     *   streams out of date.
+     * streams out of date.
      * Second, branch into steady and unsteady cases, and deal with them separately.
      */
 
@@ -482,17 +490,68 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
 
     // Check periodicity
     // If periodicity changes along any dimension, then the entire stream is out of date
-    const auto& peri = params->GetPeriodic();
+    const auto peri = params->GetPeriodic();
     if( ( _cache_periodic[0] != peri.at(0) ) ||
         ( _cache_periodic[1] != peri.at(1) ) ||
         ( _cache_periodic[2] != peri.at(2) )  )
     {
         for( int i = 0; i < 3; i++ )
             _cache_periodic[i] = peri[i];
+
         _colorStatus              = FlowStatus::SIMPLE_OUTOFDATE;
         _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
     }
-    
+
+    // Check the rake defined by 6 extents.
+    // We update these parameters anyway, and decide if the advection is out of date in rake mode.
+    const auto rake = params->GetRake();
+    bool diff = false;
+    for( int i = 0; i < 6; i++ )
+        if( _cache_rake[i] != rake.at(i) )
+        {
+            diff = true;
+            break;
+        }
+    if( diff )
+    {
+        for( int i = 0; i < 6; i++ )
+            _cache_rake[i] = rake[i];
+
+        // Mark out-of-date if we're currently using the rake mode
+        if( _cache_seedGenMode >= 2 && _cache_seedGenMode <= 4 )
+        {
+            _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
+            _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+        }
+    }
+
+    // Check the uniform number of seeds in the rake 
+    const auto rakeNumOfSeeds = params->GetRakeNumOfSeeds();
+    if( ( _cache_rakeNumOfSeeds[0] != rakeNumOfSeeds[0] ) ||
+        ( _cache_rakeNumOfSeeds[1] != rakeNumOfSeeds[1] ) ||
+        ( _cache_rakeNumOfSeeds[2] != rakeNumOfSeeds[2] )  )
+    {
+        for( int i = 0; i < 3; i++ )
+            _cache_rakeNumOfSeeds[i] = rakeNumOfSeeds[i];
+
+        if( _cache_seedGenMode == 2 )   // Uniformly generate seeds mode
+        {
+            _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
+            _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+        }
+    }
+
+    // Check the rrandom number of seeds in the rake 
+    if( _cache_rakeNumOfSeeds[3] != rakeNumOfSeeds[3] )
+    {
+        _cache_rakeNumOfSeeds[3] = rakeNumOfSeeds[3];
+
+        if( _cache_seedGenMode == 3 || _cache_seedGenMode == 4 )
+        {
+            _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
+            _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+        }
+    }
 
     /* 
      * Now we branch into steady and unsteady cases, and treat them separately 
