@@ -200,6 +200,8 @@ FlowRenderer::_paintGL( bool fast )
                 _genSeedsRakeUniform( seeds, _timestamps.at(0) );
             else if( _cache_seedGenMode == 3 )  // Seeds from a rake, randomly
                 _genSeedsRakeRandom( seeds, _timestamps.at(0) );
+            else if( _cache_seedGenMode == 4 )  // Seeds from a rake, biased
+                _genSeedsRakeRandomBiased( seeds, _timestamps.at(0) );
 
             /* diagnose seeds */
             /*std::cout << "Total number of seeds: " << seeds.size() << std::endl;
@@ -543,12 +545,28 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         }
     }
 
-    // Check the rrandom number of seeds in the rake 
+    // Check the random number of seeds in the rake 
     if( _cache_rakeNumOfSeeds[3] != rakeNumOfSeeds[3] )
     {
         _cache_rakeNumOfSeeds[3] = rakeNumOfSeeds[3];
 
         if( _cache_seedGenMode == 3 || _cache_seedGenMode == 4 )
+        {
+            _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
+            _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+        }
+    }
+
+    // Check the bias variable and bias strength
+    const auto rakeBiasVariable = params->GetRakeBiasVariable();
+    const auto rakeBiasStrength = params->GetRakeBiasStrength();
+    if( _cache_rakeBiasStrength != rakeBiasStrength        ||
+        _cache_rakeBiasVariable.compare( rakeBiasVariable) != 0 )
+    {
+        _cache_rakeBiasVariable = rakeBiasVariable;
+        _cache_rakeBiasStrength = rakeBiasStrength;
+        
+        if( _cache_seedGenMode == 4 )
         {
             _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
             _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
@@ -825,11 +843,7 @@ FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds,
         delete grid;
         return _genSeedsRakeRandom( seeds, timeVal );  // Use random seeds
     }
-
-    /* Scale rakeMin and rakeMax so every possible value has some probability */
-    float probMin = rakeMin - (rakeMax - rakeMin) * 0.05f;
-    float probMax = rakeMax + (rakeMax - rakeMin) * 0.05f;
-    float probLen = probMax - probMin;
+    float rakeRange1o = 1.0f / (rakeMax - rakeMin);
 
     /* 
      * The bias strategy is:
@@ -853,8 +867,9 @@ FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds,
     {
         const std::vector<double> cand{ distX(gen), distY(gen), distZ(gen) };   // generate a random seed
         float seedVal = grid->GetValue( cand );
-        float prob    = std::abs(seedVal) / probLen;    // prob is a value between 0.0 and 1.0;
+        float prob    = std::abs(std::abs(seedVal) - rakeMin) * rakeRange1o;    // prob is a value between 0.0 and 1.0;
         prob          = std::pow( prob, biasStren );    // prob is scaled by a strength.
+        prob          = prob > 0.01f ? prob : 0.01f;    // prob has to be bigger than 0.01
         if( zeroOne(gen) < prob )   // keep this seed
         {
             seeds[seedIdx].location.x = cand[0];
