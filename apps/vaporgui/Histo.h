@@ -22,6 +22,7 @@
 #define HISTO_H
 #include <string>
 #include <vector>
+#include <climits>
 #include <vapor/MyBase.h>
 #include <vapor/StructuredGrid.h>
 #include <vapor/RenderParams.h>
