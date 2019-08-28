@@ -65,6 +65,10 @@ protected:
     long                _cache_steadyNumOfSteps;
     size_t              _cache_currentTS;
     bool                _cache_periodic[3];
+    float               _cache_rake[6];
+    long                _cache_rakeNumOfSeeds[4];
+    std::string         _cache_rakeBiasVariable;
+    float               _cache_rakeBiasStrength;
 
     // A few different modes to generate advection seeds:
     //   0 - programmatical
