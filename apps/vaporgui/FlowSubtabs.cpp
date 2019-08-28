@@ -63,6 +63,10 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
 
     int numOfSteps = _params->GetSteadyNumOfSteps();
     _steadyNumOfSteps->SetEditText( QString::number( numOfSteps ) );
+    if( isSteady )
+        _steadyNumOfSteps->show();
+    else
+        _steadyNumOfSteps->hide();
 
     auto bools = _params->GetPeriodic();
     _periodicX->SetCheckState( bools[0] );
@@ -251,6 +255,11 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
         _flowDirection->SetIndex(  0 );
         _params->SetFlowDirection( 0 ); // use 0 as the default option
     }
+    bool isSteady = _params->GetIsSteady();
+    if(  isSteady )
+        _flowDirection->show();
+    else
+        _flowDirection->hide();
 
     /* Update seed generation mode combo */
     long genMod = _params->GetSeedGenMode();
