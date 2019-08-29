@@ -190,6 +190,9 @@ void TFOpacityWidget::mouseDoubleClickEvent(QMouseEvent *event)
 
 void TFOpacityWidget::opacityChanged()
 {
+    if (!_renderParams)
+        return;
+    
     MapperFunction *mf = _renderParams->GetMapperFunc(_renderParams->GetVariableName());
     
     OpacityMap *om = mf->GetOpacityMap(0);

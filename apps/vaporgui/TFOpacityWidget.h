@@ -66,7 +66,7 @@ public:
             if (_points[i].x > v.x)
                 return Add(v, i);
         
-        return Add(v, 0);
+        return Add(v, Size());
     }
     
     int Add(const glm::vec2 &v, const int i) {
