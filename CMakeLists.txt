@@ -256,6 +256,11 @@ if (UNIX AND NOT APPLE)
 	if (BUILD_GUI)
 		set (EXTRA_LIBS_SEARCH ${EXTRA_LIBS_SEARCH} quadmath)
 	endif ()
+
+	message( ${EXTRA_LIBS_SEARCH} )
+	message( ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+
 	if (DIST_INSTALLER)
 		add_custom_target (
 			linuxpreinstall
@@ -269,7 +274,9 @@ if (UNIX AND NOT APPLE)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		if (EXISTS ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt)
 			file (STRINGS ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt INSTALL_LIBS)
+			message( ${INSTALL_LIBS} )
 		endif ()
+
 		install (
 			FILES ${INSTALL_LIBS}
 			DESTINATION ${INSTALL_LIB_DIR}
@@ -278,6 +285,22 @@ if (UNIX AND NOT APPLE)
 		install (
 			DIRECTORY ${THIRD_PARTY_LIB_DIR}/python2.7
 			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
+		install (
+			FILES /home/scott/Qt5_12_4/5.12.4/gcc_64/plugins/platforms/libqxcb.so
+			DESTINATION ${INSTALL_LIB_DIR}/platforms
+			COMPONENT Dependencies
+			)
+		file (GLOB XCBQPA_FILES /home/scott/Qt5_12_4/5.12.4/gcc_64/lib/libQt5XcbQpa*)
+		install (
+			FILES ${XCBQPA_FILES}
+			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
+		install (
+			DIRECTORY /home/scott/Qt5_12_4/5.12.4/gcc_64/plugins/xcbglintegrations
+			DESTINATION ${INSTALL_LIB_DIR}/plugins
 			COMPONENT Dependencies
 			)
 	endif (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)

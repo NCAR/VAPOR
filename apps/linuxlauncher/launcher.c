@@ -38,9 +38,16 @@ int main(int argc, char **argv)
 		oldLibPath = "";
 	char *newLibPath = malloc(strlen(oldLibPath) + strlen(path) + 2);
 	strcpy(newLibPath, path);
+	
+	char *qtPluginPath = malloc(strlen(newLibPath) + 7);
+	strcpy(qtPluginPath, newLibPath);
+	strcat(qtPluginPath, "/plugins");
+
 	strcat(newLibPath, ":");
 	strcat(newLibPath, oldLibPath);
 	setenv("LD_LIBRARY_PATH", newLibPath, 1);
+	setenv("QT_PLUGIN_PATH", qtPluginPath, 1);
+		printf("QT_PLUGIN_PATH=%s\n", qtPluginPath);
 #ifndef NDEBUG
 	if (debug)
 		printf("LD_LIBRARY_PATH=%s\n", newLibPath);
