@@ -64,6 +64,7 @@ void TFOpacityWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMg
         _controlPoints[i/2].y = cp[i];
         _controlPoints[i/2].x = cp[i+1];
     }
+    update();
 }
 
 QSize TFOpacityWidget::minimumSizeHint() const

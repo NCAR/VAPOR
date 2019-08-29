@@ -35,6 +35,8 @@ void TFHistogramWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *params
         _histo.reset(width());
     if (_histo.PopulateIfNeeded(dataMgr, rp) < 0)
         MSG_ERR("Failed to populate histogram");
+    
+    update();
 }
 
 QSize TFHistogramWidget::minimumSizeHint() const
