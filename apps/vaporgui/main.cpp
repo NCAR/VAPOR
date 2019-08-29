@@ -110,11 +110,6 @@ if (getenv("VAPOR_DEBUG"))
     //
     setlocale(LC_ALL, "C");
 	
-	// Set path for Qt to look for its plugins. 
-	//
-    QString filePath = GetResourcePath("plugins").c_str();
-    QStringList filePaths(filePath);
-    QCoreApplication::setLibraryPaths(filePaths);
 //For Mac and Linux, set the PYTHONHOME in this app
 #ifndef WIN32
 
