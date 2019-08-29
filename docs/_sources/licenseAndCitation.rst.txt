@@ -53,7 +53,7 @@ Vapor 3 makes use of the third party software listed below.  In addition to the 
 +---------------------------------+---------------------------------------+
 | png                             | :ref:`Custom <libpngLicense>`         |
 +---------------------------------+---------------------------------------+
-| proj                            | :ref:`MIT <projLicense>`              |
+| proj                            | :ref:`Custom <projLicense>`           |
 +---------------------------------+---------------------------------------+
 | python                          | :ref:`python <pythonLicense>`         |
 +---------------------------------+---------------------------------------+
