@@ -23,18 +23,21 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
     _velocityMltp = new VLineEdit( this, "Velocity Multiplier", "1.0" );
     _layout->addWidget( _velocityMltp );
 
-    _steady = new VCheckBox( this, "Use Steady Flow" );
-    _layout->addWidget( _steady );
-
-    _steadyNumOfSteps = new VLineEdit( this, "Steady Integration Steps", "100" );
-    _layout->addWidget( _steadyNumOfSteps);
-
     _periodicX = new VCheckBox( this, "Particles periodic in X" );
     _layout->addWidget( _periodicX );
     _periodicY = new VCheckBox( this, "Particles periodic in Y" );
     _layout->addWidget( _periodicY );
     _periodicZ = new VCheckBox( this, "Particles periodic in Z" );
     _layout->addWidget( _periodicZ );
+
+    _steady = new VCheckBox( this, "Use Steady Flow" );
+    _layout->addWidget( _steady );
+
+    _steadyNumOfSteps = new VLineEdit( this, "Steady Integration Steps", "100" );
+    _layout->addWidget( _steadyNumOfSteps);
+
+    // Initialize 
+    //_unsteadyPastNumOfTimeSteps = new VSlider( this, "Display Past Num. of Time Steps", 1.0f, 2.0f );
 
     connect( _steady,           SIGNAL( _checkboxClicked() ), this, SLOT( _steadyGotClicked() ) );
     connect( _velocityMltp,     SIGNAL( _editingFinished() ), this, SLOT( _velocityMultiplierChanged() ) );

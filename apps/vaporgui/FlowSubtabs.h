@@ -57,14 +57,15 @@ private:
 
     VLineEdit*          _velocityMltp;
 
-    VCheckBox*          _steady;
-
-    VLineEdit*          _steadyNumOfSteps;
-
     VCheckBox*          _periodicX;
     VCheckBox*          _periodicY;
     VCheckBox*          _periodicZ;
+
+    VCheckBox*          _steady;
+
+    VLineEdit*          _steadyNumOfSteps;
     
+    //VSlider*            _unsteadyPastNumOfTimeSteps;
 
 private slots:
     // Respond to user input
@@ -72,6 +73,7 @@ private slots:
     void _velocityMultiplierChanged();
     void _steadyNumOfStepsChanged();
     void _periodicClicked();
+    //void _unsteadyPastNumOfTimeStepsChanged();
 };
 
 //
