@@ -10,21 +10,83 @@ License and Citation
 License
 _______
 
-Visualization and Analysis Platform for Ocean, Atmosphere, and Solar Researchers
-Terms of Use
-
 PLEASE READ THIS SOFTWARE LICENSE AGREEMENT ("LICENSE") CAREFULLY BEFORE DOWNLOADING THE SOFTWARE. BY DOWNLOADING THE SOFTWARE, YOU ARE AGREEING TO BE BOUND BY THE TERMS OF THIS LICENSE. IF YOU DO NOT AGREE TO THE TERMS OF THIS LICENSE, YOU ARE NOT AUTHORIZED TO DOWNLOAD THIS SOFTWARE.
 
-Copyright (c) 2015 the University Corporation for Atmospheric Research (“UCAR”). All rights reserved.
+Vapor 3 is released under the permissive :ref:`Apache v2.0 license<apachev2License>`.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+Third Party Software
+--------------------
+Vapor 3 makes use of the third party software listed below.  In addition to the license above, users agree to the licenses outlined by the following libraries, frameworks, and source files:
 
-Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-Neither UCAR nor its contributors may be used to endorse or promote you, your institution or products derived from this software without specific prior written permission.
-THIS SOFTWARE IS PROVIDED BY UCAR AND ANY CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL UCAR OR ANY CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++---------------------------------+---------------------------------------+
+| Library/Framework               | License                               |
++---------------------------------+---------------------------------------+
+| GLEW                            | :ref:`Custom <glewLicense>`           |
++---------------------------------+---------------------------------------+
+| IrrXML                          | :ref:`Custom <irrXMLLicense>`         |
++---------------------------------+---------------------------------------+
+| OpenImageDenoise                | :ref:`Apache v2.0 <apachev2License>`  |
++---------------------------------+---------------------------------------+
+| assimp                          | :ref:`Custom <assimpLicense>`         |
++---------------------------------+---------------------------------------+
+| embree                          | :ref:`Apache v2.0 <apachev2License>`  |
++---------------------------------+---------------------------------------+
+| Freetype                        | :ref:`Custom <freetypeLicense>`       |
++---------------------------------+---------------------------------------+
+| geotiff                         | :ref:`Custom <geotiffLicense>`        |
++---------------------------------+---------------------------------------+
+| glfw3                           | :ref:`Custom <glfw3License>`          |
++---------------------------------+---------------------------------------+
+| h5bzip2                         | :ref:`Custom <hdf5License>`           |
++---------------------------------+---------------------------------------+
+| hdf5                            | :ref:`Custom <hdf5License>`           |
++---------------------------------+---------------------------------------+
+| jpeg                            | :ref:`Custom <jpegLicense>`           |
++---------------------------------+---------------------------------------+
+| Microsoft Redistributable dll's | :ref:`Custom <microsoftLicense>`      |
++---------------------------------+---------------------------------------+
+| netCDF                          | :ref:`Custom <netcdfLicense>`         |
++---------------------------------+---------------------------------------+
+| NSIS                            | :ref:`CPL v1 <nsisLicense>`           |
++---------------------------------+---------------------------------------+
+| ospray                          | :ref:`Apache v2.0 <apachev2License>`  |
++---------------------------------+---------------------------------------+
+| png                             | :ref:`Custom <libpngLicense>`         |
++---------------------------------+---------------------------------------+
+| proj                            | :ref:`Custom <projLicense>`           |
++---------------------------------+---------------------------------------+
+| python                          | :ref:`python <pythonLicense>`         |
++---------------------------------+---------------------------------------+
+| Qt                              | :ref:`LGPL v3 <lgplv3License>`        |
++---------------------------------+---------------------------------------+
+| sqlite3                         | :ref:`Public Domain <sqlite3License>` |
++---------------------------------+---------------------------------------+
+| SZIP (szlib)                    | :ref:`HDF License <hdf5License>`      |
++---------------------------------+---------------------------------------+
+| TBB (threading)                 | :ref:`Apache v2.0 <apachev2License>`  |
++---------------------------------+---------------------------------------+
+| tiff                            | :ref:`Custom <tiffLicense>`           |
++---------------------------------+---------------------------------------+
+| udunits                         | :ref:`Custom <udunitsLicense>`        |
++---------------------------------+---------------------------------------+
+| Source code                     |                                       |
++---------------------------------+---------------------------------------+
+| patchelf                        | :ref:`Custom <patchelfLicense>`       |
++---------------------------------+---------------------------------------+
+| nanoflann.hpp                   | :ref:`Custom <nanoflannLicense>`      |
++---------------------------------+---------------------------------------+
+| SWT (wavelets)                  | :ref:`GPL v2.1 <swtLicense>`          |
++---------------------------------+---------------------------------------+
+| Trackball.cpp                   | :ref:`LGPL v2 <lgplv2License>`        |
++---------------------------------+---------------------------------------+
+| geodesic.h                      | :ref:`MIT <mitLicense>`               |
++---------------------------------+---------------------------------------+
+| geo_ctrans.h                    | :ref:`MIT <mitLicense>`               |
++---------------------------------+---------------------------------------+
+| GetGitRevisionDescription.cmake | :ref:`Boost V1 <boostLicense>`        |
++---------------------------------+---------------------------------------+
 
-Downloading:
-BY DOWNLOADING THE SOFTWARE, YOU ARE AGREEING TO BE BOUND BY THE TERMS OF THIS LICENSE. IF YOU DO NOT AGREE TO THE TERMS OF THIS LICENSE, YOU ARE NOT AUTHORIZED TO DOWNLOAD THIS SOFTWARE.
+
 
 .. _citation:
 
@@ -36,37 +98,23 @@ VAPOR is developed as an Open Source application by the National Center for Atmo
 For journal articles, proceedings, etc
 We request:
 
-::
-
-    Clyne, J., Mininni, P., Norton, A., and Rast, M. "Interactive desktop analysis of high resolution simulations:
-     application to turbulent plume dynamics and current sheet formation", New Journal of Physics 9 (2007) 301.
-
-    @article{clyne2007interactive,
-      title={Interactive desktop analysis of high resolution simulations: application to turbulent plume dynamics and current sheet formation},
-      author={Clyne, John and Mininni, Pablo and Norton, Alan and Rast, Mark},
-      journal={New Journal of Physics},
-      volume={9},
-      number={8},
-      pages={301},
-      year={2007},
-      publisher={IOP Publishing}
-    }
-
-    Clyne, J. and Rast, M. "A prototype discovery environment for analyzing and visualizing terascale turbulent fluid flow simulations", in proceedings of Visualization and Data Analysis 2005, pp. 284-294, January 2005.
-    @inproceedings{clyne2005prototype,
-      title={A prototype discovery environment for analyzing and visualizing terascale turbulent fluid flow simulations},
-      author={Clyne, John and Rast, Mark},
-      booktitle={Electronic Imaging 2005},
-      pages={284--294},
-      year={2005},
-      organization={International Society for Optics and Photonics}
-    }
-
-or
+    Li, Shaomeng; Jaroszynski, Stanislaw; Pearse, Scott; Orf, Leigh; Clyne, John. 2019. "VAPOR: A Visualization Package Tailored to Analyze Simulation Data in Earth System Science." *Atmosphere* 10, no. 9: 488. 
 
 ::
 
-    www.vapor.ucar.edu
+    @Article{atmos10090488,
+    AUTHOR = {Li, Shaomeng and Jaroszynski, Stanislaw and Pearse, Scott and Orf, Leigh and Clyne, John},
+    TITLE = {VAPOR: A Visualization Package Tailored to Analyze Simulation Data in Earth System Science},
+    JOURNAL = {Atmosphere},
+    VOLUME = {10},
+    YEAR = {2019},
+    NUMBER = {9},
+    ARTICLE-NUMBER = {488},
+    URL = {https://www.mdpi.com/2073-4433/10/9/488},
+    ISSN = {2073-4433},
+    DOI = {10.3390/atmos10090488}
+    }
+
 
 For presentations, posters, etc:
 We suggest:

@@ -63,6 +63,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/DerivedVar.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DerivedVarMgr.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DCUtils.h
+	${PROJECT_SOURCE_DIR}/include/vapor/QuadTreeRectangle.hpp
 )
 
 add_library (vdc SHARED ${SRC} ${HEADERS})

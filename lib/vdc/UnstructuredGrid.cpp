@@ -30,7 +30,9 @@ UnstructuredGrid::UnstructuredGrid(
 	const int *faceOnFace,
 	Location location,  // node,face, edge
 	size_t maxVertexPerFace,
-	size_t maxFacePerVertex
+	size_t maxFacePerVertex,
+	long nodeOffset,
+	long cellOffset
 ) : Grid(
 		location == NODE ? vertexDims : 
 		(location == CELL ? faceDims : edgeDims), 
@@ -61,6 +63,9 @@ UnstructuredGrid::UnstructuredGrid(
 	_maxFacePerVertex = maxFacePerVertex;
 	_missingID = -1;
 	_boundaryID = -2;
+
+	Grid::SetNodeOffset(nodeOffset);
+	Grid::SetCellOffset(cellOffset);
 }
 
 
@@ -92,6 +97,8 @@ bool UnstructuredGrid::GetCellNodes(
 	}
 	else {	// layered case
 
+		// Bottom layer
+		//
 		for (int i=0; i<_maxVertexPerFace; i++, ptr++) {
 			if (*ptr == GetMissingID() || *ptr + offset < 0) break;
 			if (*ptr == GetBoundaryID()) continue;
