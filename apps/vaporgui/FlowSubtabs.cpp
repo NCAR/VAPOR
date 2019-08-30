@@ -36,12 +36,13 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
     _steadyNumOfSteps = new VLineEdit( this, "Steady Integration Steps", "100" );
     _layout->addWidget( _steadyNumOfSteps);
 
-    _unsteadyPastNumOfTimeSteps = new VIntSlider( this, "Display Past Num. of Time Steps", 1, 2 );
-    _layout->addWidget( _unsteadyPastNumOfTimeSteps );
+    _pastNumOfTimeSteps = new VIntSlider( this, "Display Past Num. of Time Steps", 1, 2 );
+    _layout->addWidget( _pastNumOfTimeSteps );
 
     connect( _steady,           SIGNAL( _checkboxClicked() ), this, SLOT( _steadyGotClicked() ) );
     connect( _velocityMltp,     SIGNAL( _editingFinished() ), this, SLOT( _velocityMultiplierChanged() ) );
     connect( _steadyNumOfSteps, SIGNAL( _editingFinished() ), this, SLOT( _steadyNumOfStepsChanged() ) );
+    connect( _pastNumOfTimeSteps,SIGNAL(_valueChanged(int) ), this, SLOT( _pastNumOfTimeStepsChanged(int) ));
 
     connect( _periodicX,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodicClicked() ) );
     connect( _periodicY,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodicClicked() ) );
@@ -73,16 +74,27 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _steadyNumOfSteps->SetEditText( QString::number( numOfSteps ) );
 
     int totalNumOfTimeSteps = dataMgr->GetNumTimeSteps();
-    _unsteadyPastNumOfTimeSteps->SetRange( 1, totalNumOfTimeSteps );
+    _pastNumOfTimeSteps->SetRange( 1, totalNumOfTimeSteps );
+    int valParams = _params->GetPastNumOfTimeSteps();
+    if( valParams < 1 )     // initial value, we need to set it!
+    {
+        _params->SetPastNumOfTimeSteps( totalNumOfTimeSteps );
+        _pastNumOfTimeSteps->SetCurrentValue( totalNumOfTimeSteps );
+    }
+    else
+    {
+        _pastNumOfTimeSteps->SetCurrentValue( valParams );
+    }
+
     if( isSteady )
     {
         _steadyNumOfSteps->show();
-        _unsteadyPastNumOfTimeSteps->hide();
+        _pastNumOfTimeSteps->hide();
     }
     else
     {
         _steadyNumOfSteps->hide();
-        _unsteadyPastNumOfTimeSteps->show();
+        _pastNumOfTimeSteps->show();
     }
 }
     
@@ -160,6 +172,16 @@ FlowVariablesSubtab::_steadyNumOfStepsChanged()
     else
         _steadyNumOfSteps->SetEditText( QString::number( oldval ) );
 }
+
+void 
+FlowVariablesSubtab::_pastNumOfTimeStepsChanged( int newVal )
+{
+    if( newVal != _params->GetPastNumOfTimeSteps() )
+    {
+        _params->SetPastNumOfTimeSteps( newVal );
+    }
+}
+
 
 //
 //================================

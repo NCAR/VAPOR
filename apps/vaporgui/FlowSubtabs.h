@@ -65,7 +65,7 @@ private:
 
     VLineEdit*          _steadyNumOfSteps;
     
-    VIntSlider*         _unsteadyPastNumOfTimeSteps;
+    VIntSlider*         _pastNumOfTimeSteps;
 
 private slots:
     // Respond to user input
@@ -73,7 +73,7 @@ private slots:
     void _velocityMultiplierChanged();
     void _steadyNumOfStepsChanged();
     void _periodicClicked();
-    //void _unsteadyPastNumOfTimeStepsChanged();
+    void _pastNumOfTimeStepsChanged( int );
 };
 
 //
