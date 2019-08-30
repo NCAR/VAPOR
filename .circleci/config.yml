@@ -20,7 +20,8 @@ jobs:
     docker:
       - image: sgpearse/vapor3-ubuntu16:latest
     steps:
-      - restore_cache: cache-{{ .Environment.CIRCLE_SHA1 }}
+      - restore_cache: 
+          key: cache-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: Running tests
           command: |
