@@ -36,8 +36,8 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
     _steadyNumOfSteps = new VLineEdit( this, "Steady Integration Steps", "100" );
     _layout->addWidget( _steadyNumOfSteps);
 
-    // Initialize 
-    //_unsteadyPastNumOfTimeSteps = new VSlider( this, "Display Past Num. of Time Steps", 1.0f, 2.0f );
+    _unsteadyPastNumOfTimeSteps = new VIntSlider( this, "Display Past Num. of Time Steps", 1, 2 );
+    _layout->addWidget( _unsteadyPastNumOfTimeSteps );
 
     connect( _steady,           SIGNAL( _checkboxClicked() ), this, SLOT( _steadyGotClicked() ) );
     connect( _velocityMltp,     SIGNAL( _editingFinished() ), this, SLOT( _velocityMultiplierChanged() ) );
@@ -64,17 +64,26 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     auto mltp = _params->GetVelocityMultiplier();
     _velocityMltp->SetEditText( QString::number( mltp, 'f', 3 ) );
 
-    int numOfSteps = _params->GetSteadyNumOfSteps();
-    _steadyNumOfSteps->SetEditText( QString::number( numOfSteps ) );
-    if( isSteady )
-        _steadyNumOfSteps->show();
-    else
-        _steadyNumOfSteps->hide();
-
     auto bools = _params->GetPeriodic();
     _periodicX->SetCheckState( bools[0] );
     _periodicY->SetCheckState( bools[1] );
     _periodicZ->SetCheckState( bools[2] );
+
+    int numOfSteps = _params->GetSteadyNumOfSteps();
+    _steadyNumOfSteps->SetEditText( QString::number( numOfSteps ) );
+
+    int totalNumOfTimeSteps = dataMgr->GetNumTimeSteps();
+    _unsteadyPastNumOfTimeSteps->SetRange( 1, totalNumOfTimeSteps );
+    if( isSteady )
+    {
+        _steadyNumOfSteps->show();
+        _unsteadyPastNumOfTimeSteps->hide();
+    }
+    else
+    {
+        _steadyNumOfSteps->hide();
+        _unsteadyPastNumOfTimeSteps->show();
+    }
 }
     
 void 

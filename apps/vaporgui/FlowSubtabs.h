@@ -65,7 +65,7 @@ private:
 
     VLineEdit*          _steadyNumOfSteps;
     
-    //VSlider*            _unsteadyPastNumOfTimeSteps;
+    VIntSlider*         _unsteadyPastNumOfTimeSteps;
 
 private slots:
     // Respond to user input
