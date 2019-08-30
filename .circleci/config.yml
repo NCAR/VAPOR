@@ -16,19 +16,19 @@ jobs:
       - save_cache:
           key: cache-{{ .Environment.CIRCLE_SHA1 }}
           paths: /VAPOR
-    test:
-      docker:
-        - image: sgpearse/vapor3-ubuntu16:latest
-      steps:
-        - restore_cache: cache-{{ .Environment.CIRCLE_SHA1 }}
-        - run:
-            name: Running tests
-            command: |
-              cd /
-              /VAPOR/build/bin/vaporversion > /version.txt
-        - store_artifacts:
-            path: /version.txt
-            destination: vapor-version-info
+  test:
+    docker:
+      - image: sgpearse/vapor3-ubuntu16:latest
+    steps:
+      - restore_cache: cache-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+          name: Running tests
+          command: |
+            cd /
+            /VAPOR/build/bin/vaporversion > /version.txt
+      - store_artifacts:
+          path: /version.txt
+          destination: vapor-version-info
 
 workflows:
   version: 2
