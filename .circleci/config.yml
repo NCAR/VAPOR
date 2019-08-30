@@ -9,7 +9,6 @@ jobs:
           name: cmake and make
           command: |
             cd /VAPOR
-            git pull
             cd build
             cmake ..
             make
