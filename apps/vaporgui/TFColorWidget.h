@@ -8,22 +8,23 @@
 
 class TFColorInfoWidget;
 
-class TFColorWidget : public TFMapWidget {
+class TFColorMap : public TFMap {
     Q_OBJECT
     
 public:
-    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
+    TFColorMap(TFMapWidget *parent);
+    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) override;
     
-    QSize minimumSizeHint() const;
-    void Deactivate();
+    QSize minimumSizeHint() const override;
+    void Deactivate() override;
     
 protected:
-    TFInfoWidget *createInfoWidget();
-    void paintEvent(QPaintEvent* event);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void mouseDoubleClickEvent(QMouseEvent *event);
+    TFInfoWidget *createInfoWidget() override;
+    void paintEvent(QPainter &p) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
     
 private:
     VAPoR::ParamsMgr *_paramsMgr = nullptr;
@@ -57,4 +58,9 @@ signals:
 public slots:
     void DeselectControlPoint();
     void UpdateFromInfo(float value, QColor color);
+};
+
+class TFColorWidget : public TFMapWidget {
+public:
+    TFColorWidget();
 };

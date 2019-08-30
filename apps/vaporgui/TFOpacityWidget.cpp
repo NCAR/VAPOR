@@ -39,15 +39,10 @@ float DistanceToLine(vec2 a, vec2 b, vec2 p)
 #define CONTROL_POINT_RADIUS (4.0f)
 #define PADDING (CONTROL_POINT_RADIUS + 1.0f)
 
+TFOpacityMap::TFOpacityMap(TFMapWidget *parent)
+: TFMap(parent) {}
 
-
-TFOpacityWidget::TFOpacityWidget()
-{
-    this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-    this->setFrameStyle(QFrame::Box);
-}
-
-void TFOpacityWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
+void TFOpacityMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
 {
     _renderParams = rp;
     
@@ -67,17 +62,17 @@ void TFOpacityWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMg
     update();
 }
 
-QSize TFOpacityWidget::minimumSizeHint() const
+QSize TFOpacityMap::minimumSizeHint() const
 {
     return QSize(100, 75);
 }
 
-void TFOpacityWidget::Deactivate()
+void TFOpacityMap::Deactivate()
 {
     DeselectControlPoint();
 }
 
-TFInfoWidget *TFOpacityWidget::createInfoWidget()
+TFInfoWidget *TFOpacityMap::createInfoWidget()
 {
     TFOpacityInfoWidget *info = new TFOpacityInfoWidget;
     connect(info, SIGNAL(ControlPointChanged(float, float)), this, SLOT(UpdateFromInfo(float, float)));
@@ -87,11 +82,8 @@ TFInfoWidget *TFOpacityWidget::createInfoWidget()
     return info;
 }
 
-void TFOpacityWidget::paintEvent(QPaintEvent* event)
+void TFOpacityMap::paintEvent(QPainter &p)
 {
-    QFrame::paintEvent(event);
-    QPainter p(this);
-    p.setRenderHint(QPainter::Antialiasing);
 //    p.setViewport(10, 10, 30, 30);
 //    p.setWindow(10, 10, 30, 30);
     
@@ -111,7 +103,7 @@ void TFOpacityWidget::paintEvent(QPaintEvent* event)
     }
 }
 
-void TFOpacityWidget::mousePressEvent(QMouseEvent *event)
+void TFOpacityMap::mousePressEvent(QMouseEvent *event)
 {
     emit Activated(this);
     vec2 mouse = qvec2(event->posF());
@@ -129,7 +121,7 @@ void TFOpacityWidget::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void TFOpacityWidget::mouseReleaseEvent(QMouseEvent *event)
+void TFOpacityMap::mouseReleaseEvent(QMouseEvent *event)
 {
     if (_isDraggingControl)
         if (*_draggedControl != _controlStartValue)
@@ -137,7 +129,7 @@ void TFOpacityWidget::mouseReleaseEvent(QMouseEvent *event)
     _isDraggingControl = false;
 }
 
-void TFOpacityWidget::mouseMoveEvent(QMouseEvent *event)
+void TFOpacityMap::mouseMoveEvent(QMouseEvent *event)
 {
     vec2 mouse = qvec2(event->pos());
     m = mouse;
@@ -160,7 +152,7 @@ void TFOpacityWidget::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-void TFOpacityWidget::mouseDoubleClickEvent(QMouseEvent *event)
+void TFOpacityMap::mouseDoubleClickEvent(QMouseEvent *event)
 {
     vec2 mouse = qvec2(event->pos());
     ControlPointList &cp = _controlPoints;
@@ -188,7 +180,7 @@ void TFOpacityWidget::mouseDoubleClickEvent(QMouseEvent *event)
     }
 }
 
-void TFOpacityWidget::opacityChanged()
+void TFOpacityMap::opacityChanged()
 {
     if (!_renderParams)
         return;
@@ -205,12 +197,12 @@ void TFOpacityWidget::opacityChanged()
     om->SetControlPoints(cp);
 }
 
-bool TFOpacityWidget::controlPointContainsPixel(const vec2 &cp, const vec2 &pixel) const
+bool TFOpacityMap::controlPointContainsPixel(const vec2 &cp, const vec2 &pixel) const
 {
     return glm::distance(pixel, NDCToPixel(cp)) <= GetControlPointRadius();
 }
 
-ControlPointList::PointIterator TFOpacityWidget::findSelectedControlPoint(const glm::vec2 &mouse)
+ControlPointList::PointIterator TFOpacityMap::findSelectedControlPoint(const glm::vec2 &mouse)
 {
     const auto end = _controlPoints.EndPoints();
     for (auto it = _controlPoints.BeginPoints(); it != end; ++it)
@@ -219,21 +211,21 @@ ControlPointList::PointIterator TFOpacityWidget::findSelectedControlPoint(const 
     return end;
 }
 
-void TFOpacityWidget::selectControlPoint(ControlPointList::PointIterator it)
+void TFOpacityMap::selectControlPoint(ControlPointList::PointIterator it)
 {
     _selectedControl = it.Index();
     update();
     emit UpdateInfo((*it).x, (*it).y);
 }
 
-void TFOpacityWidget::DeselectControlPoint()
+void TFOpacityMap::DeselectControlPoint()
 {
     _selectedControl = -1;
     update();
     emit ControlPointDeselected();
 }
 
-void TFOpacityWidget::UpdateFromInfo(float value, float opacity)
+void TFOpacityMap::UpdateFromInfo(float value, float opacity)
 {
     assert(_selectedControl >= 0);
     assert(value >= 0 && value <= 1);
@@ -243,4 +235,14 @@ void TFOpacityWidget::UpdateFromInfo(float value, float opacity)
     _selectedControl = _controlPoints.Add(vec2(value, opacity));
     
     opacityChanged();
+}
+
+
+
+TFOpacityWidget::TFOpacityWidget()
+{
+    this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+    this->setFrameStyle(QFrame::Box);
+    
+    _map = new TFOpacityMap(this);
 }

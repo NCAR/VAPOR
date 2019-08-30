@@ -9,7 +9,7 @@
 
 class TFOpacityWidget;
 class TFColorWidget;
-class TFHistogramWidget;
+class TFHistogramMap;
 class QRangeSlider;
 class QRangeSliderTextCombo;
 class TFInfoWidget;

@@ -13,24 +13,27 @@ static vec2 qvec2(const QPoint &qp)  { return vec2(qp.x(), qp.y()); }
 static vec2 qvec2(const QPointF &qp) { return vec2(qp.x(), qp.y()); }
 static QPointF qvec2(const vec2 &v) { return QPointF(v.x, v.y); }
 
-void TFColorWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
+TFColorMap::TFColorMap(TFMapWidget *parent)
+: TFMap(parent) {}
+
+void TFColorMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
 {
     _renderParams = rp;
     _paramsMgr = paramsMgr;
     update();
 }
 
-QSize TFColorWidget::minimumSizeHint() const
+QSize TFColorMap::minimumSizeHint() const
 {
     return QSize(100, 30);
 }
 
-void TFColorWidget::Deactivate()
+void TFColorMap::Deactivate()
 {
     DeselectControlPoint();
 }
 
-TFInfoWidget *TFColorWidget::createInfoWidget()
+TFInfoWidget *TFColorMap::createInfoWidget()
 {
     TFColorInfoWidget *info = new TFColorInfoWidget;
     
@@ -44,12 +47,8 @@ TFInfoWidget *TFColorWidget::createInfoWidget()
 #define CONTROL_POINT_RADIUS (4.0f)
 #define PADDING (CONTROL_POINT_RADIUS + 1.0f)
 
-void TFColorWidget::paintEvent(QPaintEvent* event)
+void TFColorMap::paintEvent(QPainter &p)
 {
-    QFrame::paintEvent(event);
-    QPainter p(this);
-    p.setRenderHint(QPainter::Antialiasing);
-    
     p.fillRect(rect(), Qt::gray);
     
     if (_renderParams) {
@@ -76,7 +75,7 @@ void TFColorWidget::paintEvent(QPaintEvent* event)
     }
 }
 
-void TFColorWidget::mousePressEvent(QMouseEvent *event)
+void TFColorMap::mousePressEvent(QMouseEvent *event)
 {
     emit Activated(this);
     ColorMap *cm = getColormap();
@@ -100,7 +99,7 @@ void TFColorWidget::mousePressEvent(QMouseEvent *event)
     update();
 }
 
-void TFColorWidget::mouseReleaseEvent(QMouseEvent *event) {
+void TFColorMap::mouseReleaseEvent(QMouseEvent *event) {
     if (_isDraggingControl)
         _paramsMgr->EndSaveStateGroup();
     else
@@ -108,7 +107,7 @@ void TFColorWidget::mouseReleaseEvent(QMouseEvent *event) {
     _isDraggingControl = false;
 }
 
-void TFColorWidget::mouseMoveEvent(QMouseEvent *event) {
+void TFColorMap::mouseMoveEvent(QMouseEvent *event) {
     vec2 mouse = qvec2(event->pos());
     
     if (_isDraggingControl) {
@@ -122,7 +121,7 @@ void TFColorWidget::mouseMoveEvent(QMouseEvent *event) {
     }
 }
 
-void TFColorWidget::mouseDoubleClickEvent(QMouseEvent *event) {
+void TFColorMap::mouseDoubleClickEvent(QMouseEvent *event) {
     vec2 mouse = qvec2(event->pos());
     ColorMap *cm = getColormap();
     int selectedId = findSelectedControlPoint(mouse);
@@ -140,7 +139,7 @@ void TFColorWidget::mouseDoubleClickEvent(QMouseEvent *event) {
     update();
 }
 
-void TFColorWidget::moveControlPoint(int *index, float value, const VAPoR::ColorMap::Color &c)
+void TFColorMap::moveControlPoint(int *index, float value, const VAPoR::ColorMap::Color &c)
 {
     ColorMap *cm = getColormap();
     
@@ -148,19 +147,19 @@ void TFColorWidget::moveControlPoint(int *index, float value, const VAPoR::Color
     *index = cm->addNormControlPoint(value, c);
 }
 
-void TFColorWidget::moveControlPoint(int *index, float value)
+void TFColorMap::moveControlPoint(int *index, float value)
 {
     ColorMap *cm = getColormap();
     ColorMap::Color c = cm->controlPointColor(_draggingControlID);
     moveControlPoint(index, value, c);
 }
 
-ColorMap *TFColorWidget::getColormap() const
+ColorMap *TFColorMap::getColormap() const
 {
     return _renderParams->GetMapperFunc(_renderParams->GetVariableName())->GetColorMap();
 }
 
-void TFColorWidget::selectControlPoint(int index)
+void TFColorMap::selectControlPoint(int index)
 {
     _selectedId = index;
     ColorMap *cm = getColormap();
@@ -171,19 +170,19 @@ void TFColorWidget::selectControlPoint(int index)
     UpdateInfo(value, VColorToQColor(vColor));
 }
 
-void TFColorWidget::DeselectControlPoint()
+void TFColorMap::DeselectControlPoint()
 {
     _selectedId = -1;
     emit ControlPointDeselected();
     update();
 }
 
-void TFColorWidget::UpdateFromInfo(float value, QColor color)
+void TFColorMap::UpdateFromInfo(float value, QColor color)
 {
     moveControlPoint(&_selectedId, value, QColorToVColor(color));
 }
 
-int TFColorWidget::findSelectedControlPoint(const glm::vec2 &mouse) const
+int TFColorMap::findSelectedControlPoint(const glm::vec2 &mouse) const
 {
     const ColorMap *cm = getColormap();
     const int n = cm->numControlPoints();
@@ -193,42 +192,48 @@ int TFColorWidget::findSelectedControlPoint(const glm::vec2 &mouse) const
     return -1;
 }
 
-bool TFColorWidget::controlPointContainsPixel(float cp, const vec2 &pixel) const
+bool TFColorMap::controlPointContainsPixel(float cp, const vec2 &pixel) const
 {
     return glm::distance(pixel, controlPositionForValue(cp)) <= GetControlPointRadius();
 }
 
-QPointF TFColorWidget::controlQPositionForValue(float value) const
+QPointF TFColorMap::controlQPositionForValue(float value) const
 {
     const vec2 v = controlPositionForValue(value);
     return QPointF(v.x, v.y);
 }
 
-glm::vec2 TFColorWidget::controlPositionForValue(float value) const
+glm::vec2 TFColorMap::controlPositionForValue(float value) const
 {
     return vec2(controlXForValue(value), height()/2.f);
 }
 
-float TFColorWidget::controlXForValue(float value) const
+float TFColorMap::controlXForValue(float value) const
 {
     return NDCToPixel(vec2(value, 0.f)).x;
 }
 
-float TFColorWidget::valueForControlX(float position) const
+float TFColorMap::valueForControlX(float position) const
 {
     return PixelToNDC(vec2(position, 0.f)).x;
 }
 
-QColor TFColorWidget::VColorToQColor(const ColorMap::Color &c)
+QColor TFColorMap::VColorToQColor(const ColorMap::Color &c)
 {
     float rgb[3];
     c.toRGB(rgb);
     return QColor(rgb[0]*255, rgb[1]*255, rgb[2]*255);
 }
 
-ColorMap::Color TFColorWidget::QColorToVColor(const QColor &c)
+ColorMap::Color TFColorMap::QColorToVColor(const QColor &c)
 {
     double h, s, v;
     c.getHsvF(&h, &s, &v);
     return ColorMap::Color(h, s, v);
+}
+
+
+TFColorWidget::TFColorWidget()
+{
+    _map = new TFColorMap(this);
 }
