@@ -2,6 +2,8 @@
 Reference Documentation
 =======================
 
+.. highlight:: none
+
 cf2vdc
 ------
 .. literalinclude:: commandlineTools/cf2vdc.txt
