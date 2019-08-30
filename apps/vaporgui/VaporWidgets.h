@@ -182,9 +182,43 @@ private:
     QLineEdit*  _qedit;
 };
 
+
 //
 // ====================================
-// VRange combines two VSliders, 
+// VIntSlider does not do the floating point interpolation as VSlider does.
+// The min and max and current value of this widget is completely contained by qslider.
+// ====================================
+//
+class VIntSlider : public VaporWidget
+{
+    Q_OBJECT
+
+public:
+    VIntSlider( QWidget* parent, const std::string& label, int min, int max );
+   ~VIntSlider();
+
+    void SetRange( int min, int max );
+    void SetCurrentValue( int val );
+    int  GetCurrentValue() const;
+
+signals:
+    void _valueChanged( int newVal );
+
+private slots:
+    void  _respondQSliderReleased();    // emit signal
+    void  _respondQSliderMoved(int);    // sync qSlider and qLineEdit
+    void  _respondQLineEdit();          // emit signal
+
+private:
+    QSlider*    _qslider;
+    QLineEdit*  _qedit;
+};
+
+
+
+//
+// ====================================
+// VRange which combines two VSliders, 
 // representing the min and max values of a range.
 // ====================================
 //

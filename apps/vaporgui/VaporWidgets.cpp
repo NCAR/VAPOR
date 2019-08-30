@@ -361,6 +361,113 @@ VSlider::_respondQLineEdit()
 //
 // ====================================
 //
+VIntSlider::VIntSlider( QWidget* parent, const std::string& label, int min, int max )
+          : VaporWidget( parent, label )
+{
+    VAssert( min <= max );
+    
+    _qslider = new QSlider( this );
+    _qslider->setOrientation( Qt::Horizontal );
+    /* QSlider will have its range in integers from min to max. */
+    _qslider->setMinimum( min );
+    _qslider->setMaximum( max );
+    connect( _qslider, SIGNAL( sliderReleased() ), this, SLOT( _respondQSliderReleased() ) );
+    connect( _qslider, SIGNAL( sliderMoved(int) ), this, SLOT( _respondQSliderMoved(int) ) );
+    _layout->addWidget( _qslider );
+        
+    _qedit = new QLineEdit( this );
+    connect( _qedit, SIGNAL( editingFinished() ), this, SLOT( _respondQLineEdit() ) );
+    _layout->addWidget( _qedit );
+
+    /* update widget display, displaying the middle between min and max */
+    int mid = (min + max) / 2;
+    _qslider->setValue( mid );
+    _qedit->setText( QString::number( mid ) );
+}
+
+VIntSlider::~VIntSlider() {}
+
+void
+VIntSlider::SetRange( int newMin, int newMax )
+{
+    VAssert( newMin <= newMax );
+
+    // Directly give newMin and newMax to the slider.
+    // It depends on QT what value to hold after these setters.
+    _qslider->setMinimum( newMin );
+    _qslider->setMaximum( newMax );
+
+    // Query the current value in _qslider and assign to _qedit
+    _qedit->setText( QString::number( _qslider->value() ) );
+}
+
+void
+VIntSlider::SetCurrentValue( int val )
+{
+    /* Only respond if val is within range */
+    if( val >= _qslider->minimum() && val <= _qslider->maximum() )
+    {
+        _qslider->setValue( val );
+        _qedit->setText( QString::number( val ) );
+    }
+}
+
+int
+VIntSlider::GetCurrentValue() const
+{
+    return _qslider->value();
+}
+
+void
+VIntSlider::_respondQSliderReleased()
+{
+    /* QSlider is always giving a valid value, so no need to validate range */
+    int newval     = _qslider->value();
+    _qedit->setText( QString::number( newval ) );
+    
+    emit _valueChanged( newval );
+}
+
+void
+VIntSlider::_respondQSliderMoved( int newPos )
+{
+    /* QSlider is always at a valid position, so no need to validate range */
+    _qedit->setText( QString::number( newPos ) );
+}
+
+void
+VIntSlider::_respondQLineEdit()
+{
+    std::string newtext = _qedit->text().toStdString();
+    int  newval;
+
+    try
+    {
+        newval = std::stoi( newtext );
+    }
+    catch ( const std::invalid_argument& e )
+    {
+        _qedit->setText( QString::number( _qslider->value() ));
+        return;
+    }
+
+    /* Now validate the input is within range */
+    if( newval < _qslider->minimum() || newval > _qslider->maximum() )
+    {
+        _qedit->setText( QString::number( _qslider->value() ));
+        return;
+    }
+
+    /* Now update _qslider, and emit signal */
+    _qslider->setValue( newval );
+
+    emit _valueChanged( newval );
+}
+
+
+//
+// ====================================
+//
 
 VGeometry::VGeometry( QWidget* parent, int dim, const std::vector<float>& range )
          : QWidget( parent )
