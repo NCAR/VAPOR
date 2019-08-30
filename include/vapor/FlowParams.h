@@ -86,6 +86,9 @@ public:
     float               GetRakeBiasStrength() const;
     void                SetRakeBiasStrength( float );
 
+    int                 GetPastNumOfTimeSteps() const;
+    void                SetPastNumOfTimeSteps( int );
+
 protected:
 
     static const std::string    _isSteadyTag;
@@ -101,6 +104,7 @@ protected:
     static const std::string    _rakeNumOfSeedsTag;
     static const std::string    _rakeBiasVariable;
     static const std::string    _rakeBiasStrength;
+    static const std::string    _pastNumOfTimeSteps;
 
 };
 

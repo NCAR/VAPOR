@@ -15,6 +15,7 @@ const std::string FlowParams::_rakeTag               = "rakeTag";
 const std::string FlowParams::_rakeNumOfSeedsTag     = "rakeNumOfSeedsTag";
 const std::string FlowParams::_rakeBiasVariable      = "rakeBiasVariable";
 const std::string FlowParams::_rakeBiasStrength      = "rakeBiasStrength";
+const std::string FlowParams::_pastNumOfTimeSteps    = "pastNumOfTimeSteps";
 
 static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
 
@@ -241,4 +242,17 @@ void
 FlowParams::SetRakeBiasStrength( float strength )
 {
     SetValueDouble( _rakeBiasStrength, "bias strength", strength );
+}
+
+int
+FlowParams::GetPastNumOfTimeSteps() const
+{
+    // return -1 as an obvious invalid value. Valid values are greater than 0
+    return int(GetValueLong( _pastNumOfTimeSteps, -1 ));
+}
+
+void 
+FlowParams::SetPastNumOfTimeSteps( int val )
+{
+    SetValueLong( _pastNumOfTimeSteps, "how many past time steps to render", val );
 }
