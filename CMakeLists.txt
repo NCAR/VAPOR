@@ -195,7 +195,6 @@ if (WIN32)
 
 	if (GENERATE_FULL_INSTALLER)
 		set (DLL_DIR "C:/vaporwin64deps2015/vapordlls")
-		#file (GLOB WIN_INSTALL_DLLS ${DLL_DIR}/*.dll ${QTDIR}/bin/*.dll C:\\Qt\\5.12.3\\msvc2017_64\\plugins\\platforms\\*.dll)
 		file (GLOB WIN_INSTALL_DLLS ${DLL_DIR}/*.dll ${QTDIR}/bin/*.dll)
 		install (
 			FILES ${WIN_INSTALL_DLLS}
@@ -257,9 +256,6 @@ if (UNIX AND NOT APPLE)
 		set (EXTRA_LIBS_SEARCH ${EXTRA_LIBS_SEARCH} quadmath)
 	endif ()
 
-	message( ${EXTRA_LIBS_SEARCH} )
-	message( ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
 
 	if (DIST_INSTALLER)
 		add_custom_target (
@@ -274,7 +270,6 @@ if (UNIX AND NOT APPLE)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		if (EXISTS ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt)
 			file (STRINGS ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt INSTALL_LIBS)
-			message( ${INSTALL_LIBS} )
 		endif ()
 
 		install (
@@ -285,22 +280,6 @@ if (UNIX AND NOT APPLE)
 		install (
 			DIRECTORY ${THIRD_PARTY_LIB_DIR}/python2.7
 			DESTINATION ${INSTALL_LIB_DIR}
-			COMPONENT Dependencies
-			)
-		install (
-			FILES /home/scott/Qt5_12_4/5.12.4/gcc_64/plugins/platforms/libqxcb.so
-			DESTINATION ${INSTALL_LIB_DIR}/platforms
-			COMPONENT Dependencies
-			)
-		file (GLOB XCBQPA_FILES /home/scott/Qt5_12_4/5.12.4/gcc_64/lib/libQt5XcbQpa*)
-		install (
-			FILES ${XCBQPA_FILES}
-			DESTINATION ${INSTALL_LIB_DIR}
-			COMPONENT Dependencies
-			)
-		install (
-			DIRECTORY /home/scott/Qt5_12_4/5.12.4/gcc_64/plugins/xcbglintegrations
-			DESTINATION ${INSTALL_LIB_DIR}/plugins
 			COMPONENT Dependencies
 			)
 	endif (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)

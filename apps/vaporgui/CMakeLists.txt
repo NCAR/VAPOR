@@ -230,7 +230,6 @@ endif()
 target_link_libraries (
     vapor common vdc wasp render params jpeg ${GLEW} 
     tiff geotiff assimp Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::DBus 
-    /home/scott/Qt5_12_4/5.12.4/gcc_64/lib/libQt5XcbQpa.so
     python${PYTHONVERSION}
 )
 
