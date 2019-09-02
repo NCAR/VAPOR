@@ -74,12 +74,12 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _steadyNumOfSteps->SetEditText( QString::number( numOfSteps ) );
 
     int totalNumOfTimeSteps = dataMgr->GetNumTimeSteps();
-    _pastNumOfTimeSteps->SetRange( 1, totalNumOfTimeSteps );
+    _pastNumOfTimeSteps->SetRange( 0, totalNumOfTimeSteps - 1 );
     int valParams = _params->GetPastNumOfTimeSteps();
-    if( valParams < 1 )     // initial value, we need to set it!
+    if( valParams < 0 )     // initial value, we need to set it!
     {
-        _params->SetPastNumOfTimeSteps( totalNumOfTimeSteps );
-        _pastNumOfTimeSteps->SetCurrentValue( totalNumOfTimeSteps );
+        _params->SetPastNumOfTimeSteps( totalNumOfTimeSteps - 1 );
+        _pastNumOfTimeSteps->SetCurrentValue( totalNumOfTimeSteps - 1 );
     }
     else
     {

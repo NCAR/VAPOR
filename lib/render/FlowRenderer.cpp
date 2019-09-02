@@ -347,6 +347,14 @@ FlowRenderer::_renderFromAnAdvection( const flow::Advection* adv,
     }
     else    // Unsteady flow (only occurs with forward direction)
     {
+        // First calculate the starting time stamp
+        int pastNumOfTimeSteps = params->GetPastNumOfTimeSteps();
+        double startingTime;
+        if( _cache_currentTS - pastNumOfTimeSteps > 0 )
+            startingTime = _timestamps[ _cache_currentTS - pastNumOfTimeSteps ];
+        else
+            startingTime = _timestamps[0];
+
         std::vector<float> vec;
         for( size_t s = 0; s < numOfStreams; s++ )
         {
@@ -357,8 +365,11 @@ FlowRenderer::_renderFromAnAdvection( const flow::Advection* adv,
                 if( p.time > _timestamps.at( _cache_currentTS ) )
                     break;
 
-                _particleHelper1( vec, p, singleColor );
+                // Only start this stream if the current time stamp passes startingTime
+                if( p.time >= startingTime )
+                    _particleHelper1( vec, p, singleColor );
             }   // Finish processing a stream
+
             if( !vec.empty() )
             {
                 _drawALineSeg( vec.data(), vec.size() / 4, singleColor );

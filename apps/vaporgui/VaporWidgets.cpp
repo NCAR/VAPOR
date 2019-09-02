@@ -170,7 +170,7 @@ VRange::~VRange() {}
 void
 VRange::SetRange( float min, float max )
 {
-    VAssert( max > min );
+    VAssert( max >= min );
     _minSlider->SetRange( min, max );
     _maxSlider->SetRange( min, max );
 }
