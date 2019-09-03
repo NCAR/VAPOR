@@ -2153,6 +2153,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
     
     if (event->type() == ParamsIntermediateChangeEvent)
     {
+        // Rendering the GUI becomes a bottleneck
 //        _tabMgr->Update();
         
         // force visualizer redraw
