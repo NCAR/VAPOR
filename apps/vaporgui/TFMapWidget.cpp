@@ -113,38 +113,43 @@ int TFMap::GetControlPointRadius() const
 
 TFMapWidget::TFMapWidget(TFMap *map)
 {
-    _map = map;
+    AddMap(map);
 }
 
 void TFMapWidget::AddMap(TFMap *map)
 {
-    VAssert(0);
+    if (std::find(_maps.begin(), _maps.end(), map) == _maps.end())
+        _maps.push_back(map);
 }
 
 TFInfoWidget *TFMapWidget::GetInfoWidget()
 {
-    if (_map)
-        return _map->GetInfoWidget();
+    if (_maps.size())
+        return _maps[0]->GetInfoWidget();
     return nullptr;
 }
 
 void TFMapWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
 {
-    if (_map)
-        _map->Update(dataMgr, paramsMgr, rParams);
+    for (auto map : _maps)
+        map->Update(dataMgr, paramsMgr, rParams);
 }
 
 void TFMapWidget::Deactivate()
 {
-    if (_map)
-        _map->Deactivate();
+    for (auto map : _maps)
+        map->Deactivate();
 }
 
 QSize TFMapWidget::minimumSizeHint() const
 {
-    if (_map)
-        return _map->minimumSizeHint();
-    return QSize(0, 0);
+    QSize max(0, 0);
+    for (auto map : _maps) {
+        QSize s = map->minimumSizeHint();
+        max.setWidth (std::max(max.width(),  s.width()));
+        max.setHeight(std::max(max.height(), s.height()));
+    }
+    return max;
 }
 
 void TFMapWidget::paintEvent(QPaintEvent* event)
@@ -152,36 +157,49 @@ void TFMapWidget::paintEvent(QPaintEvent* event)
     QFrame::paintEvent(event);
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
-    if (_map)
-        _map->paintEvent(p);
+    
+    for (int i = _maps.size() - 1; i >= 0; i--)
+        _maps[i]->paintEvent(p);
 }
 
 void TFMapWidget::mousePressEvent(QMouseEvent *event)
 {
-    if (_map)
-        _map->mousePressEvent(event);
+    for (auto map : _maps) {
+        map->mousePressEvent(event);
+        if (event->isAccepted())
+            break;
+    }
 }
 
 void TFMapWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (_map)
-        _map->mouseReleaseEvent(event);
+    for (auto map : _maps) {
+        map->mouseReleaseEvent(event);
+        if (event->isAccepted())
+            break;
+    }
 }
 
 void TFMapWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    if (_map)
-        _map->mouseMoveEvent(event);
+    for (auto map : _maps) {
+        map->mouseMoveEvent(event);
+        if (event->isAccepted())
+            break;
+    }
 }
 
 void TFMapWidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    if (_map)
-        _map->mouseDoubleClickEvent(event);
+    for (auto map : _maps) {
+        map->mouseDoubleClickEvent(event);
+        if (event->isAccepted())
+            break;
+    }
 }
 
 void TFMapWidget::resizeEvent(QResizeEvent *event)
 {
-    if (_map)
-        _map->resize(event->size().width(), event->size().height());
+    for (auto map : _maps)
+        map->resize(event->size().width(), event->size().height());
 }

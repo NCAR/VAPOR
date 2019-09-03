@@ -75,7 +75,9 @@ TFMapsGroup::TFMapsGroup()
     layout->setMargin(0);
     setLayout(layout);
     
-    add(new TFOpacityWidget);
+    TFMapWidget *o;
+    add(o= new TFOpacityWidget);
+    o->AddMap(new TFColorMap(o));
     add(new TFHistogramWidget);
     add(new TFColorWidget);
 }
