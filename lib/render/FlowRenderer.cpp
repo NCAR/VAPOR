@@ -283,6 +283,7 @@ FlowRenderer::_paintGL( bool fast )
         {
             for( int i = 1; i <= _cache_currentTS; i++ )
             {
+                deltaT = (_timestamps.at(i) - _timestamps.at(i-1)) / 10.f;  // Update deltaT
                 rv = _advection.AdvectTillTime( &_velocityField, deltaT, _timestamps.at(i) );
             }
         }

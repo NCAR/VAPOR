@@ -197,14 +197,14 @@ Advection::AdvectTillTime( Field* velocity, float deltaT, float targetT, ADVECTI
             if( s.size() > 2 )  // If there are at least 3 particles in the stream, 
             {                   // we also adjust *dt*
                 float mindt = deltaT / 20.0f,   maxdt = deltaT * 20.0f;
+                maxdt = glm::min( maxdt, targetT - p0.time );
                 const auto& past1 = s[ s.size()-2 ];
                 const auto& past2 = s[ s.size()-3 ];
                 if( (!past1.IsSpecial()) && (!past2.IsSpecial()) )
                 {
                     dt  = p0.time - past1.time;     // step size used by last integration
                     dt *= _calcAdjustFactor( past2, past1, p0 );
-                    dt  = dt < maxdt ? dt : maxdt ;
-                    dt  = dt > mindt ? dt : mindt ;
+                    dt  = glm::clamp( dt, mindt, maxdt );
                 }
             }
 
