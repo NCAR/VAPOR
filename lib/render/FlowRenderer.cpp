@@ -203,14 +203,6 @@ FlowRenderer::_paintGL( bool fast )
             else if( _cache_seedGenMode == 4 )  // Seeds from a rake, biased
                 _genSeedsRakeRandomBiased( seeds, _timestamps.at(0) );
 
-            /* diagnose seeds */
-            /*std::cout << "Total number of seeds: " << seeds.size() << std::endl;
-            auto s = seeds.front();
-            printf("front seed: (%f, %f, %f)\n", s.location.x, s.location.y, s.location.z );
-            s = seeds.back();
-            printf("back seed: (%f, %f, %f)\n", s.location.x, s.location.y, s.location.z );
-            */
-
             // Note on UseSeedParticles(): this is the only function that resets
             //   all the streams inside of an Advection class.
             //   It should immediately be followed by a function to set its periodicity
