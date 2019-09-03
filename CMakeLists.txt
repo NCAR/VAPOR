@@ -124,6 +124,9 @@ if (WIN32)
 	set (INSTALL_LIB_DIR .)
 	set (INSTALL_SHARE_DIR share)
 	set (INSTALL_INCLUDE_DIR include/vapor)
+    
+	#list (APPEND CMAKE_PREFIX_PATH "C:\\Qt5_12_4\\5.12.4\\msvc2015_64\\lib\\cmake")
+
 elseif (APPLE)
 
     list (APPEND CMAKE_PREFIX_PATH "/Users/pearse/Qt5_12/5.12.1/clang_64/lib/cmake") 
