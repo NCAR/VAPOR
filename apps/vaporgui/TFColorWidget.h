@@ -62,5 +62,5 @@ public slots:
 
 class TFColorWidget : public TFMapWidget {
 public:
-    TFColorWidget();
+    TFColorWidget() : TFMapWidget(new TFColorMap(this)) {}
 };

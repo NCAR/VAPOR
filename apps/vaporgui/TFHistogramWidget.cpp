@@ -99,8 +99,3 @@ void TFHistogramMap::mouseMoveEvent(QMouseEvent *event)
 }
 
 //void TFHistogramWidget::mouseDoubleClickEvent(QMouseEvent *event)
-
-TFHistogramWidget::TFHistogramWidget()
-{
-    _map = new TFHistogramMap(this);
-}

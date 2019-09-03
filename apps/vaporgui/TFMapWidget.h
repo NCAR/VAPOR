@@ -2,6 +2,7 @@
 
 #include <QFrame>
 #include <glm/glm.hpp>
+#include <vector>
 
 namespace VAPoR {
     class DataMgr;
@@ -63,6 +64,8 @@ class TFMapWidget : public QFrame {
     Q_OBJECT
     
 public:
+    TFMapWidget(TFMap *map);
+    void AddMap(TFMap *map);
     TFInfoWidget *GetInfoWidget();
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     void Deactivate();

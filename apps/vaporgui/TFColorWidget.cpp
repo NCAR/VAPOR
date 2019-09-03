@@ -231,9 +231,3 @@ ColorMap::Color TFColorMap::QColorToVColor(const QColor &c)
     c.getHsvF(&h, &s, &v);
     return ColorMap::Color(h, s, v);
 }
-
-
-TFColorWidget::TFColorWidget()
-{
-    _map = new TFColorMap(this);
-}

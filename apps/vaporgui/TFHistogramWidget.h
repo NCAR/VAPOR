@@ -38,5 +38,5 @@ signals:
 
 class TFHistogramWidget : public TFMapWidget {
 public:
-    TFHistogramWidget();
+    TFHistogramWidget() : TFMapWidget(new TFHistogramMap(this)) {}
 };

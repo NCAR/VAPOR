@@ -240,9 +240,8 @@ void TFOpacityMap::UpdateFromInfo(float value, float opacity)
 
 
 TFOpacityWidget::TFOpacityWidget()
+: TFMapWidget(new TFOpacityMap(this))
 {
     this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
     this->setFrameStyle(QFrame::Box);
-    
-    _map = new TFOpacityMap(this);
 }
