@@ -1198,7 +1198,10 @@ string LoadTFDialog::GetSelectedFile() const {
 
 void LoadTFDialog::SetMapperFunction( const VAPoR::MapperFunction *fn ) {
     assert( fn );
-    _mapperFnCopy = make_unique<VAPoR::MapperFunction>(*fn);
+    //_mapperFnCopy = make_unique<VAPoR::MapperFunction>(*fn);
+
+    _mapperFnCopy = std::unique_ptr<VAPoR::MapperFunction>(new VAPoR::MapperFunction(*fn));
+
     BuildColormapButtons();
 }
 
