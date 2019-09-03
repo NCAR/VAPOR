@@ -151,6 +151,18 @@ bool QRangeSlider::doesHandleContainPixel(int handle, const QPoint &pixel) const
     return selected == QStyle::SC_SliderHandle;
 }
 
+bool QRangeSlider::doesGrooveContainPixel(const QPoint &pixel) const
+{
+    QStyleOptionSlider option;
+    initStyleOption(&option);
+    option.sliderValue    = _value[0];
+    option.sliderPosition = _position[0];
+    
+    QStyle::SubControl selected = style()->hitTestComplexControl(QStyle::CC_Slider, &option, pixel, this);
+    
+    return selected == QStyle::SC_SliderGroove;
+}
+
 bool QRangeSlider::isSliderDown(int i) const
 {
     return _grabbedControl == i;
