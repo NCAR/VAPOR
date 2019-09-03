@@ -116,6 +116,7 @@ public:
     void mouseDoubleClickEvent(QMouseEvent *event) override;
     
 private:
+    VAPoR::ParamsMgr *_paramsMgr = nullptr;
     VAPoR::RenderParams *_renderParams = nullptr;
     ControlPointList _controlPoints;
     bool _isDraggingControl = false;
