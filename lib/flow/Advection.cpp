@@ -104,13 +104,13 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
 
         const auto& past0 = s.back();
         float dt = deltaT;
-        float mindt = deltaT / 20.0f,   maxdt = deltaT * 50.0f;
         if( s.size() > 2 )  // If there are at least 3 particles in the stream and
         {                   // neither is a separator, we also adjust *dt*
             const auto& past1 = s[ s.size()-2 ];
             const auto& past2 = s[ s.size()-3 ];
             if( (!past1.IsSpecial()) && (!past2.IsSpecial()) )
             {
+                float mindt = deltaT / 20.0f,   maxdt = deltaT * 20.0f;
                 dt  = past0.time - past1.time;     // step size used by last integration
                 dt *= _calcAdjustFactor( past2, past1, past0 );
                 if( dt > 0 )    // integrate forward 
@@ -194,17 +194,17 @@ Advection::AdvectTillTime( Field* velocity, float deltaT, float targetT, ADVECTI
             }
 
             float dt = deltaT;
-            float mindt = deltaT / 20.0f,   maxdt = deltaT * 50.0f;
             if( s.size() > 2 )  // If there are at least 3 particles in the stream, 
             {                   // we also adjust *dt*
+                float mindt = deltaT / 20.0f,   maxdt = deltaT * 20.0f;
                 const auto& past1 = s[ s.size()-2 ];
                 const auto& past2 = s[ s.size()-3 ];
                 if( (!past1.IsSpecial()) && (!past2.IsSpecial()) )
                 {
                     dt  = p0.time - past1.time;     // step size used by last integration
+                    dt *= _calcAdjustFactor( past2, past1, p0 );
                     dt  = dt < maxdt ? dt : maxdt ;
                     dt  = dt > mindt ? dt : mindt ;
-                    dt *= _calcAdjustFactor( past2, past1, p0 );
                 }
             }
 
