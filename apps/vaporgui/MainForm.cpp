@@ -331,6 +331,10 @@ MainForm::MainForm(
 	_paramsMgr->RegisterStateChangeCB(
 		std::bind(&MainForm::_stateChangeCB,this)
 	);
+    _paramsMgr->RegisterIntermediateStateChangeCB([this]() {
+        QEvent *event = new QEvent(ParamsIntermediateChangeEvent);
+        QApplication::postEvent(this, event);
+    });
 	_paramsMgr->RegisterStateChangeFlag( &_stateChangeFlag );
 
 	// Set Defaults from startup file
@@ -2146,6 +2150,20 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 		return(false);
 
 	}
+    
+    if (event->type() == ParamsIntermediateChangeEvent)
+    {
+//        _tabMgr->Update();
+        
+        // force visualizer redraw
+        //
+        _vizWinMgr->Update(true);
+        
+        update();
+        
+        return(false);
+        
+    }
 
 
 	// Pass event on to target

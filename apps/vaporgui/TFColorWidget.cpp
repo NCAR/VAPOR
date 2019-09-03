@@ -115,6 +115,7 @@ void TFColorMap::mouseMoveEvent(QMouseEvent *event) {
         
         moveControlPoint(&_draggingControlID, newVal);
         selectControlPoint(_draggingControlID);
+        _paramsMgr->IntermediateChange();
         update();
     } else {
         event->ignore();

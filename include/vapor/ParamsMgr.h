@@ -468,6 +468,10 @@ public:
  void EndSaveStateGroup() {
 	_ssave.EndGroup();
  };
+    
+    void IntermediateChange() {
+        _ssave.IntermediateChange();
+    }
 
  void SetSaveStateEnabled( bool enabled) {
 	_ssave.SetEnabled(enabled);
@@ -523,6 +527,10 @@ public:
  void RegisterStateChangeCB(std::function<void()> callback) {
 	_ssave.RegisterStateChangeCB(callback);
  }
+    
+    void RegisterIntermediateStateChangeCB(std::function<void()> callback) {
+        _ssave.RegisterIntermediateStateChangeCB(callback);
+    }
 
  //! Reinit state saving
  //!
@@ -572,6 +580,7 @@ private:
   void Save(const XmlNode *node, string description);
   void BeginGroup(string descripion);
   void EndGroup();
+  void IntermediateChange();
 
   void SetEnabled(bool onOff) {
 	if (! _groups.empty()) return;	// Can't change inside group
@@ -603,6 +612,9 @@ private:
   void RegisterStateChangeCB(std::function<void()> callback) {
 	_stateChangeCBs.push_back(callback);
   }
+     void RegisterIntermediateStateChangeCB(std::function<void()> callback) {
+         _intermediateStateChangeCBs.push_back(callback);
+     }
 
  private:
 
@@ -617,9 +629,11 @@ private:
 
   std::vector <bool *> _stateChangeFlags;
   std::vector <std::function<void()> >_stateChangeCBs;
+  std::vector <std::function<void()> >_intermediateStateChangeCBs;
 
   void cleanStack(int maxN, std::deque <std::pair <string, XmlNode *>> &s);
   void emitStateChange();
+  void emitIntermediateStateChange();
    
  };
  

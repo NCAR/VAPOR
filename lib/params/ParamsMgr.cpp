@@ -1341,6 +1341,11 @@ void ParamsMgr::PMgrStateSave::EndGroup() {
 	emitStateChange();
 }
 
+void ParamsMgr::PMgrStateSave::IntermediateChange()
+{
+    emitIntermediateStateChange();
+}
+
 const XmlNode *ParamsMgr::PMgrStateSave::GetTop(
 	string &description
 ) const {
@@ -1431,4 +1436,10 @@ void ParamsMgr::PMgrStateSave::emitStateChange() {
 	for (int i=0; i<_stateChangeCBs.size(); i++) {
 		_stateChangeCBs[i]();
 	}
+}
+
+void ParamsMgr::PMgrStateSave::emitIntermediateStateChange()
+{
+    for (auto func : _intermediateStateChangeCBs)
+        func();
 }
