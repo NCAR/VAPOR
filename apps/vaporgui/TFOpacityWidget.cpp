@@ -123,9 +123,11 @@ void TFOpacityMap::mousePressEvent(QMouseEvent *event)
 
 void TFOpacityMap::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (_isDraggingControl)
+    if (_isDraggingControl) {
         if (*_draggedControl != _controlStartValue)
             opacityChanged();
+    } else
+        event->ignore();
     _isDraggingControl = false;
 }
 
@@ -178,6 +180,8 @@ void TFOpacityMap::mouseDoubleClickEvent(QMouseEvent *event)
             return;
         }
     }
+    
+    event->ignore();
 }
 
 void TFOpacityMap::opacityChanged()
