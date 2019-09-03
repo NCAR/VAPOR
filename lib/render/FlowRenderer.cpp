@@ -352,13 +352,19 @@ FlowRenderer::_renderFromAnAdvection( const flow::Advection* adv,
             const auto& stream = adv->GetStreamAt( s );
             for( const auto& p : stream )
             {
-                // Finish this stream once we go beyond the current TS
-                if( p.time > _timestamps.at( _cache_currentTS ) )
-                    break;
-
-                // Only start this stream if the current time stamp passes startingTime
-                if( p.time >= startingTime )
+                if( p.IsSpecial() ) // If p is a separator, directly send it to the helper function
+                {
                     _particleHelper1( vec, p, singleColor );
+                }
+                else                // Otherwise, examine its timestamp to decide how to handle
+                {   // Finish this stream once we go beyond the current TS
+                    if( p.time > _timestamps.at( _cache_currentTS ) )
+                        break;
+
+                    // Only start this stream if the current time stamp passes startingTime
+                    if( p.time >= startingTime )
+                        _particleHelper1( vec, p, singleColor );
+                }
             }   // Finish processing a stream
 
             if( !vec.empty() )
@@ -377,14 +383,14 @@ FlowRenderer::_particleHelper1( std::vector<float>&     vec,
                                 const flow::Particle&   p, 
                                 bool                    singleColor ) const
 {
-    if( !p.IsSpecial() )    // p isn't a separator
+    if( !p.IsSpecial() )        // p isn't a separator
     {
         vec.push_back( p.location.x );
         vec.push_back( p.location.y );
         vec.push_back( p.location.z );
         vec.push_back( p.value );
     }
-    else                    // p is a separator
+    else if( vec.size() > 0 )   // p is a separator and vec is non-empty
     {
         _drawALineSeg( vec.data(), vec.size() / 4, singleColor );
         vec.clear();
