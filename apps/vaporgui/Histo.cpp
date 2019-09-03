@@ -272,9 +272,8 @@ int Histo::calculateStride(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) co
 
 bool Histo::shouldUseSampling(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const
 {
-    // TODO does DC::GetNumDimensions include the time dimension?
+    // TODO how does this handle with unstructured grids?
     int nDims = dm->GetNumDimensions(rp->GetVariableName());
-    printf("nDims = %i\n", nDims);
     if (nDims == 3)
         return true;
     return false;
