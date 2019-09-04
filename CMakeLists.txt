@@ -129,7 +129,7 @@ if (WIN32)
 
 elseif (APPLE)
 
-    list (APPEND CMAKE_PREFIX_PATH "/Users/pearse/Qt5_12_4/5.12.4/clang_64/lib/cmake") 
+#    list (APPEND CMAKE_PREFIX_PATH "/Users/pearse/Qt5_12_4/5.12.4/clang_64/lib/cmake") 
 
 	# if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	if (DIST_INSTALLER)
@@ -235,7 +235,7 @@ endif (WIN32)
 if (APPLE)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		#file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib ${QTDIR}/lib/*.la)
-		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib ${QTDIR}/lib/*.framework)
+		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
 		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${PYTHONPATH} ${QTDIR}/lib/*.framework)
 		install (
 			FILES ${INSTALL_LIBS}

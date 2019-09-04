@@ -2,18 +2,21 @@
 if (APPLE)
 	set (THIRD_PARTY_DIR /glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64)
 
-        #set (CMAKE_PREFIX_PATH   "/Users/pearse/Qt5_12/5.12.1/clang_64/lib/cmake")
-	set (QTDIR               "/Users/pearse/Qt5_12_4/5.12.4/clang_64" )
-        set (Qt5_DIR             "/Users/pearse/Qt5_12_4/5.12.4/clang_64/lib/cmake/Qt5"     )
-        set (Qt5Core_DIR         "/Users/pearse/Qt5_12_4/5.12.4/clang_64/lib/cmake/Qt5Core" )
-        set (QT_QMAKE_EXECUTABLE "/Users/pearse/Qt5_12_4/5.12.4/clang_64/bin/qmake"         )
+    set (QTDIR               /Users/pearse/Qt5_12_4/5.12.4/clang_64 )
+    set (CMAKE_PREFIX_PATH   ${QTDIR}/lib/cmake                     )
+
+    #set (Qt5_DIR             /Users/pearse/Qt5_12_4/5.12.4/clang_64/lib/cmake/Qt5     )
+    #set (Qt5Core_DIR         /Users/pearse/Qt5_12_4/5.12.4/clang_64/lib/cmake/Qt5Core )
+    #set (QT_QMAKE_EXECUTABLE /Users/pearse/Qt5_12_4/5.12.4/clang_64/bin/qmake         )
+
 elseif (UNIX AND NOT APPLE)
 	set (THIRD_PARTY_DIR /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64)
     
-        set (QTDIR                /usr/local/VAPOR-Deps/2019-Aug/Qt5_12_4/5.12.4/gcc_64)
-        set (CMAKE_PREFIX_PATH    ${QTDIR}/lib/cmake )
-        set (Qt5Core_DIR          ${QTDIR}/lib/cmake/Qt5Core )
-        set (QT_QMAKE_EXECUTABLE  ${QTDIR}/gcc_64/bin/qmake )
+    set (QTDIR                /usr/local/VAPOR-Deps/2019-Aug/Qt5_12_4/5.12.4/gcc_64)
+    set (CMAKE_PREFIX_PATH    ${QTDIR}/lib/cmake )
+    set (Qt5Core_DIR          ${QTDIR}/lib/cmake/Qt5Core )
+    set (QT_QMAKE_EXECUTABLE  ${QTDIR}/gcc_64/bin/qmake )
+
 else ()
 	set (THIRD_PARTY_DIR    C:/Vapor3rdParty2015)
         set (QTDIR              ${THIRD_PARTY_DIR}/Qt5_12_4/5.12.4/msvc2015_64)
