@@ -93,7 +93,7 @@ QString TFEditor::_createStylesheet() const
     stylesheet +=
     R"(
     QTabWidget::right-corner {
-    top: -5px;
+    top: -3px;
     right: 5px;
     }
     )";
