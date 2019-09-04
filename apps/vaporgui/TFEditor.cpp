@@ -9,6 +9,7 @@
 #include "QRangeSlider.h"
 #include "QRangeSliderTextCombo.h"
 #include <vapor/ColorMap.h>
+#include <vapor/ResourcePath.h>
 
 TFEditor::TFEditor()
 {
@@ -58,7 +59,7 @@ TFEditor::TFEditor()
     layout->setContentsMargins(left, 0, right, bottom);
 #endif
 #endif
-    _tool->setIcon(QIcon("/Users/stas/Downloads/gear2.png"));
+    _tool->setIcon(QIcon(QString::fromStdString(GetSharePath("images/gear.png"))));
     _tool->setIconSize(QSize(13, 13));
     _tool->setCursor(QCursor(Qt::PointingHandCursor));
     setStyleSheet(QString::fromStdString(stylesheet));
