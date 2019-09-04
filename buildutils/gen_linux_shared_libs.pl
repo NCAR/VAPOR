@@ -27,6 +27,7 @@ my @libs;
 foreach (split(/\n/, $ldd)) {
 	chomp;
 	push @libs, $1 if m/=> (\/glade\S+\.so\S*)/;
+	push @libs, $1 if m/=> (\/usr\/local\/VAPOR-Deps\S+\.so\S*)/;
 
 	foreach my $e (@extras) {
 		push @libs, $1 if m/.*$e.*=> (\/.+.so\S*)/;

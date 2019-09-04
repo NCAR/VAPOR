@@ -124,6 +124,9 @@ if (WIN32)
 	set (INSTALL_LIB_DIR .)
 	set (INSTALL_SHARE_DIR share)
 	set (INSTALL_INCLUDE_DIR include/vapor)
+    
+	#list (APPEND CMAKE_PREFIX_PATH "C:\\Qt5_12_4\\5.12.4\\msvc2015_64\\lib\\cmake")
+
 elseif (APPLE)
 
     list (APPEND CMAKE_PREFIX_PATH "/Users/pearse/Qt5_12_4/5.12.4/clang_64/lib/cmake") 
@@ -195,7 +198,6 @@ if (WIN32)
 
 	if (GENERATE_FULL_INSTALLER)
 		set (DLL_DIR "C:/vaporwin64deps2015/vapordlls")
-		#file (GLOB WIN_INSTALL_DLLS ${DLL_DIR}/*.dll ${QTDIR}/bin/*.dll C:\\Qt\\5.12.3\\msvc2017_64\\plugins\\platforms\\*.dll)
 		file (GLOB WIN_INSTALL_DLLS ${DLL_DIR}/*.dll ${QTDIR}/bin/*.dll)
 		install (
 			FILES ${WIN_INSTALL_DLLS}
@@ -257,6 +259,8 @@ if (UNIX AND NOT APPLE)
 	if (BUILD_GUI)
 		set (EXTRA_LIBS_SEARCH ${EXTRA_LIBS_SEARCH} quadmath)
 	endif ()
+
+
 	if (DIST_INSTALLER)
 		add_custom_target (
 			linuxpreinstall
@@ -271,6 +275,7 @@ if (UNIX AND NOT APPLE)
 		if (EXISTS ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt)
 			file (STRINGS ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt INSTALL_LIBS)
 		endif ()
+
 		install (
 			FILES ${INSTALL_LIBS}
 			DESTINATION ${INSTALL_LIB_DIR}

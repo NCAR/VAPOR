@@ -205,29 +205,7 @@ set (UIS
 
 source_group (UIs FILES ${UIS})
 
-#find_package(Qt4 REQUIRED)
-#find_package(Qt5Core REQUIRED)
-#find_package(Qt5Gui REQUIRED)
-#find_package(Qt5OpenGL REQUIRED)
-
-# Pre 3/25
-#find_package(Qt5Widgets CONFIG REQUIRED)
-#find_package(Qt5 REQUIRED
-#    Core 
-#    Widgets 
-#    OpenGL 
-#    Gui 
-#)
-
-find_package(Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt5 REQUIRED COMPONENTS OpenGL)
-find_package(Qt5 REQUIRED COMPONENTS Core)
-find_package(Qt5 REQUIRED COMPONENTS Gui)
-
-#find_library(Qt5 REQUIRED COMPONENTS Widgets)
-#find_library(Qt5 REQUIRED COMPONENTS OpenGL)
-#find_library(Qt5 REQUIRED COMPONENTS Core)
-#find_library(Qt5 REQUIRED COMPONENTS Gui)
+find_package(Qt5 REQUIRED COMPONENTS Core OpenGL Widgets Gui DBus )
 
 set (CMAKE_AUTOUIC ON) # This needs to appear before adding sources to work properly
 set (CMAKE_AUTOMOC ON)
@@ -249,16 +227,12 @@ else ()
 	add_executable (vapor ${SRCS} ${UIS})
 endif()
 
-# target_link_libraries (vapor common vdc wasp render params m jpeg dl util GLEW tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL)
-#target_link_libraries (vapor common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL python${PYTHONVERSION})
-
-# Pre 3/25
-#target_link_libraries (vapor common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp QtCore QtGui QtOpenGL Widgets  python${PYTHONVERSION})
 target_link_libraries (
     vapor common vdc wasp render params jpeg ${GLEW} 
-    tiff geotiff assimp Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui 
+    tiff geotiff assimp Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::DBus 
     python${PYTHONVERSION}
 )
+
 
 if (APPLE)
 	find_library (CORESERVICES CoreServices)
