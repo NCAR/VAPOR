@@ -46,6 +46,18 @@ private slots:
 
 
 
+class SettingsMenu : public QToolButton {
+    Q_OBJECT
+    
+public:
+    SettingsMenu();
+    
+protected:
+    void paintEvent(QPaintEvent* event);
+};
+
+
+
 class TFMapsGroup : public QWidget {
     Q_OBJECT
     

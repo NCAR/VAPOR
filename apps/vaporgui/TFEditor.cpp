@@ -1,6 +1,7 @@
 #include "TFEditor.h"
 #include <QBoxLayout>
 #include <QLabel>
+#include <QMenu>
 #include "TFOpacityWidget.h"
 #include "TFHistogramWidget.h"
 #include "TFColorWidget.h"
@@ -16,21 +17,26 @@ TFEditor::TFEditor()
     addTab(new QWidget(this), "Transfer Function");
     
     QVBoxLayout *layout = new QVBoxLayout;
-//    layout->setSpacing(0);
     layout->setMargin(12);
     _tab()->setLayout(layout);
     
-    _tool = new QToolButton(this);
+    _tool = new SettingsMenu;
     setCornerWidget(_tool);
-    _tool->setIcon(QIcon(QString::fromStdString(GetSharePath("images/gear-dropdown1.png"))));
-    _tool->setIconSize(QSize(18, 18));
-    _tool->setCursor(QCursor(Qt::PointingHandCursor));
     setStyleSheet(_createStylesheet());
     
     layout->addWidget(_maps = new TFMapsGroup);
     layout->addWidget(_mapsInfo = _maps->CreateInfoGroup());
     layout->addWidget(range = new QRangeSliderTextCombo);
     layout->addWidget(colorMapTypeDropdown = new ParamsWidgetDropdown(VAPoR::ColorMap::_interpTypeTag, {"Linear", "Discrete", "Diverging"}, "Color Interpolation"));
+    
+    
+    QMenu *menu = new QMenu;
+    menu->addAction("Save Colormap");
+    menu->addAction("Load Colormap");
+    menu->addAction("Save Transfer Function");
+    menu->addAction("Load Transfer Function");
+    menu->addAction("Auto Update Histogram")->setCheckable(true);
+    _tool->setMenu(menu);
     
     connect(range, SIGNAL(ValueChanged(float, float)), this, SLOT(_rangeChanged(float, float)));
     
@@ -104,6 +110,28 @@ QString TFEditor::_createStylesheet() const
 void TFEditor::_rangeChanged(float left, float right)
 {
     _rParams->GetMapperFunc(_rParams->GetVariableName())->setMinMaxMapValue(left, right);
+}
+
+
+#include <QStylePainter>
+SettingsMenu::SettingsMenu()
+{
+    setIcon(QIcon(QString::fromStdString(GetSharePath("images/gear-dropdown1.png"))));
+    setIconSize(QSize(18, 18));
+    setCursor(QCursor(Qt::PointingHandCursor));
+    setPopupMode(QToolButton::InstantPopup);
+}
+
+void SettingsMenu::paintEvent(QPaintEvent* event)
+{
+    // This function is overridden to prevent Qt from drawing its own dropdown arrow
+    QStylePainter p(this);
+    
+    QStyleOptionToolButton option;
+    initStyleOption(&option);
+    option.subControls = QStyle::SC_ToolButton;
+    option.features = QStyleOptionToolButton::None;
+    p.drawComplexControl(QStyle::CC_ToolButton, option);
 }
 
 
