@@ -89,6 +89,7 @@ include_directories (${THIRD_PARTY_INC_DIR})
 include_directories (${THIRD_PARTY_INC_DIR}/freetype2)
 link_directories (${THIRD_PARTY_LIB_DIR})
 list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
+list (APPEND CMAKE_PREFIX_PATH ${QTDIR}/lib/cmake)
 list (APPEND CMAKE_PROGRAM_PATH ${QTDIR}/bin)
 include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION})
 if (WIN32)
@@ -125,11 +126,7 @@ if (WIN32)
 	set (INSTALL_SHARE_DIR share)
 	set (INSTALL_INCLUDE_DIR include/vapor)
     
-	#list (APPEND CMAKE_PREFIX_PATH "C:\\Qt5_12_4\\5.12.4\\msvc2015_64\\lib\\cmake")
-
 elseif (APPLE)
-
-#    list (APPEND CMAKE_PREFIX_PATH "/Users/pearse/Qt5_12_4/5.12.4/clang_64/lib/cmake") 
 
 	# if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	if (DIST_INSTALLER)
@@ -147,7 +144,6 @@ elseif (APPLE)
 	set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
 else ()
 
-    list (APPEND CMAKE_PREFIX_PATH "${QTDIR}/lib/cmake")
 
 	if (DIST_INSTALLER)
 		set (INSTALL_BIN_DIR lib)
@@ -247,7 +243,19 @@ if (APPLE)
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
-	endif ()
+        file (GLOB COCOA_LIBS ${QTDIR}/plugins/platforms/libqcocoa.dylib)
+	    install (
+            FILES ${COCOA_LIBS}
+            DESTINATION ${INSTALL_BIN_DIR}/platforms
+            COMPONENT Dependencies
+            )
+        file (GLOB STYLE_LIBS ${QTDIR}/plugins/styles/libqmacstyle.dylib)
+	    install (
+            FILES ${STYLE_LIBS}
+            DESTINATION ${INSTALL_BIN_DIR}/styles
+            COMPONENT Dependencies
+            )
+    endif ()
 	set (CPACK_BINARY_DRAGNDROP ON)
 endif (APPLE)
 
