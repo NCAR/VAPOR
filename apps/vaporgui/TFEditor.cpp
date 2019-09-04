@@ -33,8 +33,10 @@ TFEditor::TFEditor()
     QMenu *menu = new QMenu;
     menu->addAction("Save Colormap");
     menu->addAction("Load Colormap");
+    menu->addSeparator();
     menu->addAction("Save Transfer Function");
     menu->addAction("Load Transfer Function");
+    menu->addSeparator();
     menu->addAction("Auto Update Histogram")->setCheckable(true);
     QAction *test = new QAction("TEST", this);
     test->setCheckable(true);
