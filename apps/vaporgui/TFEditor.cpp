@@ -77,20 +77,14 @@ void TFEditor::_getDataRange(VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *m
 
 QString TFEditor::_createStylesheet() const
 {
-    std::string stylesheet = R"(
-    QToolButton {
-    border: none;
-        background-color: none;
-    padding: 0px;
-    }
-    )";
+    std::string stylesheet;
     
 #if defined(Darwin)
     stylesheet +=
     R"(
     QTabWidget::right-corner {
-    top: 24px;
-    right: 3px;
+        top: 24px;
+        right: 3px;
     }
     )";
 #elif defined(WIN32)
@@ -99,11 +93,12 @@ QString TFEditor::_createStylesheet() const
     stylesheet +=
     R"(
     QTabWidget::right-corner {
-    top: -3px;
-    right: 5px;
+        top: -3px;
+        right: 5px;
     }
     )";
 #endif
+    
     return QString::fromStdString(stylesheet);
 }
 
@@ -120,6 +115,12 @@ SettingsMenu::SettingsMenu()
     setIconSize(QSize(18, 18));
     setCursor(QCursor(Qt::PointingHandCursor));
     setPopupMode(QToolButton::InstantPopup);
+    
+    setStyleSheet(
+        "border: none;"
+        "background-color: none;"
+        "padding: 0px;"
+    );
 }
 
 void SettingsMenu::paintEvent(QPaintEvent* event)
