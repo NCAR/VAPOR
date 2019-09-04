@@ -45,13 +45,6 @@ using namespace TFWidget_;
 #define CANCEL -1
 #define ACCEPT  0
 
-// std::make_unique is not available until C++14 :(
-//
-template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args) {
-    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
-
 string TFWidget::_nDimsTag = "ActiveDimension";
 
 TFWidget::TFWidget(QWidget* parent) 
