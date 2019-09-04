@@ -22,8 +22,8 @@ TFEditor::TFEditor()
     
     _tool = new QToolButton(this);
     setCornerWidget(_tool);
-    _tool->setIcon(QIcon(QString::fromStdString(GetSharePath("images/gear.png"))));
-    _tool->setIconSize(QSize(13, 13));
+    _tool->setIcon(QIcon(QString::fromStdString(GetSharePath("images/gear-dropdown1.png"))));
+    _tool->setIconSize(QSize(18, 18));
     _tool->setCursor(QCursor(Qt::PointingHandCursor));
     setStyleSheet(_createStylesheet());
     
@@ -83,8 +83,8 @@ QString TFEditor::_createStylesheet() const
     stylesheet +=
     R"(
     QTabWidget::right-corner {
-    top: 20px;
-    right: 5px;
+    top: 24px;
+    right: 3px;
     }
     )";
 #elif defined(WIN32)
