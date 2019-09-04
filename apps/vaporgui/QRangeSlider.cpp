@@ -105,7 +105,21 @@ void QRangeSlider::mousePressEvent(QMouseEvent *event)
             _lastSelectedControl = id;
             setValue(_value[id]);
             QSlider::mousePressEvent(event);
-            break;
+            return;
+        }
+    }
+    
+    if (doesGrooveContainPixel(event->pos())) {
+        setValue(-QT_STOPS);
+        QSlider::mousePressEvent(event);
+        int selectedPosition = sliderPosition();
+        
+        if (selectedPosition > _position[0] && selectedPosition < _position[1]) {
+            _grabbedBar = true;
+            _grabbedBarStartPosition = selectedPosition;
+            _grabbedBarPosition = selectedPosition;
+            _grabbedBarControlStartPositions[0] = _position[0];
+            _grabbedBarControlStartPositions[1] = _position[1];
         }
     }
 }
@@ -113,12 +127,12 @@ void QRangeSlider::mousePressEvent(QMouseEvent *event)
 void QRangeSlider::mouseReleaseEvent(QMouseEvent *event)
 {
     QSlider::mouseReleaseEvent(event);
-    if (_grabbedControl >= 0) {
-        _value[_grabbedControl] = value();
-        _position[_grabbedControl] = sliderPosition();
-        _grabbedControl = -1;
+    
+    if (_grabbedControl >= 0 || _grabbedBar)
         emit ValueChanged(_value[0]/(float)QT_STOPS, _value[1]/(float)QT_STOPS);
-    }
+    
+    _grabbedControl = -1;
+    _grabbedBar = false;
 }
 
 void QRangeSlider::mouseMoveEvent(QMouseEvent *event)
@@ -137,7 +151,28 @@ void QRangeSlider::mouseMoveEvent(QMouseEvent *event)
         _value[_grabbedControl] = value();
         _position[_grabbedControl] = sliderPosition();
         
-        emit ValueChangedIntermediate(_value[0]/(float)QT_STOPS, _value[1]/(float)QT_STOPS);
+        if (hasTracking())
+            emit ValueChangedIntermediate(_value[0]/(float)QT_STOPS, _value[1]/(float)QT_STOPS);
+    }
+    
+    if (_grabbedBar) {
+        setValue(_grabbedBarPosition);
+        QSlider::mouseMoveEvent(event);
+        
+        _grabbedBarPosition = sliderPosition();
+        
+        int diff = _grabbedBarPosition - _grabbedBarStartPosition;
+        
+        for (int i = 0; i < 2; i++) {
+            _position[i] = _grabbedBarControlStartPositions[i] + diff;
+            _position[i] = _position[i] < 0 ? 0 : _position[i];
+            _position[i] = _position[i] > QT_STOPS-1 ? QT_STOPS-1 : _position[i];
+            if (hasTracking())
+                _value[i] = _position[i];
+        }
+
+        if (hasTracking())
+            emit ValueChangedIntermediate(_value[0]/(float)QT_STOPS, _value[1]/(float)QT_STOPS);
     }
 }
 

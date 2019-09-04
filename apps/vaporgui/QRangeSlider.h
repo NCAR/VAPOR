@@ -31,6 +31,11 @@ private:
     int _grabbedControl = -1;
     int _lastSelectedControl = 0;
     
+    bool _grabbedBar = false;
+    int _grabbedBarPosition;
+    int _grabbedBarStartPosition;
+    int _grabbedBarControlStartPositions[2];
+    
     void paintHandle(QStylePainter &p, int i);
     void paintTrack(QStylePainter &p);
     bool doesHandleContainPixel(int handle, const QPoint &pixel) const;
