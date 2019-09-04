@@ -27,7 +27,7 @@ jobs:
       - run:
           name: Checking for warnings
           command: |
-            echo 'git branch'
+            git branch
             /VAPOR/test_apps/circleTests/checkForWarnings.sh
   testVersion:
     docker:
