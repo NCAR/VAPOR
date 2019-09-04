@@ -13,8 +13,8 @@ jobs:
             cmake ..
             make &> buildResults.txt
       - store_artifacts:
-        path: /buildResults.txt
-        destination: build-results
+          path: /buildResults.txt
+          destination: build-results
       - save_cache:
           key: cache-{{ .Environment.CIRCLE_SHA1 }}
           paths: /VAPOR
