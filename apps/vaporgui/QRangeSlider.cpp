@@ -136,6 +136,8 @@ void QRangeSlider::mouseMoveEvent(QMouseEvent *event)
         
         _value[_grabbedControl] = value();
         _position[_grabbedControl] = sliderPosition();
+        
+        emit ValueChangedIntermediate(_value[0]/(float)QT_STOPS, _value[1]/(float)QT_STOPS);
     }
 }
 

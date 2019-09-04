@@ -14,6 +14,7 @@ public:
     void SetValue(float min, float max);
     
 signals:
+    void ValueChangedIntermediate(float min, float max);
     void ValueChanged(float min, float max);
     
 protected:

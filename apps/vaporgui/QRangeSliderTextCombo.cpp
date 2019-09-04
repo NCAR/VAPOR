@@ -19,6 +19,7 @@ QRangeSliderTextCombo::QRangeSliderTextCombo()
     SetValue(0, 1);
     
     connect(_slider, SIGNAL(ValueChanged(float, float)), this, SLOT(sliderChanged(float, float)));
+    connect(_slider, SIGNAL(ValueChangedIntermediate(float, float)), this, SLOT(sliderChangedIntermediate(float, float)));
     connect(_leftText, SIGNAL(returnPressed()), this, SLOT(leftTextChanged()));
     connect(_rightText, SIGNAL(returnPressed()), this, SLOT(rightTextChanged()));
 }
@@ -37,8 +38,7 @@ void QRangeSliderTextCombo::SetValue(float left, float right)
 {
     _left = left;
     _right = right;
-    _leftText->setText(QString::number(left));
-    _rightText->setText(QString::number(right));
+    setTextboxes(left, right);
     _slider->SetValue((left-_min)/(_max-_min), (right-_min)/(_max-_min));
 }
 
@@ -47,6 +47,19 @@ void QRangeSliderTextCombo::setValidator(QLineEdit *edit, QValidator *validator)
     const QValidator *toDelete = edit->validator();
     edit->setValidator(validator);
     if (toDelete) delete toDelete;
+}
+
+void QRangeSliderTextCombo::setTextboxes(float left, float right)
+{
+    _leftText->setText(QString::number(left));
+    _rightText->setText(QString::number(right));
+}
+
+void QRangeSliderTextCombo::sliderChangedIntermediate(float leftNorm, float rightNorm)
+{
+    float left = (_max-_min)*leftNorm + _min;
+    float right = (_max-_min)*rightNorm + _min;
+    setTextboxes(left, right);
 }
 
 void QRangeSliderTextCombo::sliderChanged(float leftNorm, float rightNorm)

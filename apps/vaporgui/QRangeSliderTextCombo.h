@@ -19,8 +19,10 @@ public:
     
 private:
     void setValidator(QLineEdit *edit, QValidator *validator);
+    void setTextboxes(float left, float right);
     
 private slots:
+    void sliderChangedIntermediate(float min, float max);
     void sliderChanged(float min, float max);
     void leftTextChanged();
     void rightTextChanged();
