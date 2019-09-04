@@ -257,7 +257,7 @@ FlowRenderer::_paintGL( bool fast )
             if( params->GetFlowDirection() == 1 )   // backward integration
                 deltaT *= -1.0f;
             int numOfSteps = params->GetSteadyNumOfSteps();
-            for( size_t i = _advection.GetMaxNumOfSteps(); i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
+            for( int i = _advection.GetMaxNumOfSteps(); i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
             {
                 rv = _advection.AdvectOneStep( &_velocityField, deltaT );
             }
@@ -268,8 +268,7 @@ FlowRenderer::_paintGL( bool fast )
                 assert( deltaT > 0.0f );
                 float   deltaT2 = deltaT * -1.0f;
                 rv = flow::ADVECT_HAPPENED;
-                for( size_t i = _2ndAdvection->GetMaxNumOfSteps(); 
-                            i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
+                for( int i = _2ndAdvection->GetMaxNumOfSteps(); i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
                 {
                     rv = _2ndAdvection->AdvectOneStep( &_velocityField, deltaT2 );
                 }

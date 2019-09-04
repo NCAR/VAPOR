@@ -41,6 +41,9 @@ public:
     //   Otherwise, it will overwrite values anyway.
     int CalculateParticleValues(     Field* scalarField, bool skipNonZero );
     int CalculateParticleProperties( Field* scalarField  );
+    // Calculates the stream length to every particle. 
+    //   Results will be saved at the "value" field of every particle.
+    int CalculateStreamLength();
 
     // Reset all particle values to zero
     void ResetParticleValues( );
@@ -55,7 +58,7 @@ public:
     const  std::vector<Particle>& GetStreamAt( size_t i ) const;
 
     // Retrieve the maximum number of steps
-    size_t GetMaxNumOfSteps() const;
+    int GetMaxNumOfSteps() const;
 
     //
     // Output a file that could be plotted by gnuplot
@@ -84,7 +87,7 @@ private:
     std::vector< std::vector<Particle> >    _streams;
     const float _lowerAngle,    _upperAngle;    // Thresholds for step size adjustment
     float       _lowerAngleCos, _upperAngleCos; // Cosine values of the threshold angles
-    std::vector<size_t>         _separatorCount;// how many separators does each stream have.
+    std::vector<int>            _separatorCount;// how many separators does each stream have.
                                                 // This is used to know how many steps are there in a stream.
 
     // Advection methods here could assume all input is valid.
