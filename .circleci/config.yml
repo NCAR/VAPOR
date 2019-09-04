@@ -13,7 +13,7 @@ jobs:
             cmake ..
             make &> buildResults.txt
       - store_artifacts:
-          path: /buildResults.txt
+          path: /VAPOR/build/buildResults.txt
           destination: build-results
       - save_cache:
           key: cache-{{ .Environment.CIRCLE_SHA1 }}
@@ -27,7 +27,9 @@ jobs:
       - run:
           name: Checking for warnings
           command: |
-            git branch
+            ls /VAPOR
+            ls /VAPOR/test_apps
+            ls /VAPOR/test_apps/circleTests
             /VAPOR/test_apps/circleTests/checkForWarnings.sh
   testVersion:
     docker:
