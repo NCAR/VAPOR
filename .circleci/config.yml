@@ -11,11 +11,24 @@ jobs:
             cd /VAPOR
             cd build
             cmake ..
-            make
+            make &> buildResults.txt
+      - store_artifacts:
+        path: /buildResults.txt
+        destination: build-results
       - save_cache:
           key: cache-{{ .Environment.CIRCLE_SHA1 }}
           paths: /VAPOR
-  test:
+  checkWarnings:
+    docker:
+      - image: sgpearse/vapor3-ubuntu16:latest
+    steps:
+      - restore_cache: 
+          key: cache-{{ .Environment.CIRCLE_SHA1 }}
+      - run:
+        name: Checking for warnings
+        command: |
+          /VAPOR/.circleci/checkForWarnings.sh
+  testVersion:
     docker:
       - image: sgpearse/vapor3-ubuntu16:latest
     steps:
@@ -34,4 +47,4 @@ workflows:
   build:
     jobs:
       - build
-      - test
+      - testVersion
