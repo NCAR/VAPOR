@@ -7,6 +7,8 @@
 #include "ParamsWidgets.h"
 #include <vector>
 
+#include <QToolButton>
+
 class TFOpacityWidget;
 class TFColorWidget;
 class TFHistogramMap;
@@ -25,12 +27,17 @@ public:
     
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     
+protected:
+    void mousePressEvent(QMouseEvent *event);
+    void resizeEvent(QResizeEvent * event);
+    
 private:
     VAPoR::RenderParams *_rParams;
     QRangeSliderTextCombo *range;
     ParamsWidgetDropdown *colorMapTypeDropdown;
     TFMapsGroup *_maps;
     TFMapsInfoGroup *_mapsInfo;
+    QToolButton *_tool;
     
     QWidget *_tab() const;
     void _updateMappingRangeControl(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);

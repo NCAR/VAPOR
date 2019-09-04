@@ -18,6 +18,51 @@ TFEditor::TFEditor()
 //    layout->setSpacing(0);
     layout->setMargin(12);
     _tab()->setLayout(layout);
+    
+    std::string stylesheet = R"(
+    QToolButton {
+        border: none;
+        background-color: none;
+        padding: 0px;
+    }
+    )";
+    
+    _tool = new QToolButton(this);
+#define ABSOLUTE 0
+#define CORNER 1
+#if ABSOLUTE
+#else
+#if CORNER
+    setCornerWidget(_tool);
+    
+    stylesheet +=
+    R"(
+    QTabWidget::right-corner {
+        top: 20px;
+        right: 5px;
+    }
+    )";
+#else
+    QHBoxLayout *l2 = new QHBoxLayout;
+    QWidget *w = new QWidget;
+    w->setLayout(l2);
+    l2->setMargin(0);
+    l2->setAlignment(Qt::AlignRight);
+    l2->addWidget(_tool);
+//    layout->setAlignment(Qt::AlignRight);
+//    layout->addWidget(tool);
+    layout->addWidget(w);
+    
+    int left, top, right, bottom;
+    layout->getContentsMargins(&left, &top, &right, &bottom);
+    layout->setContentsMargins(left, 0, right, bottom);
+#endif
+#endif
+    _tool->setIcon(QIcon("/Users/stas/Downloads/gear2.png"));
+    _tool->setIconSize(QSize(13, 13));
+    _tool->setCursor(QCursor(Qt::PointingHandCursor));
+    setStyleSheet(QString::fromStdString(stylesheet));
+    
     layout->addWidget(_maps = new TFMapsGroup);
     layout->addWidget(_mapsInfo = _maps->CreateInfoGroup());
     layout->addWidget(range = new QRangeSliderTextCombo);
@@ -36,6 +81,24 @@ void TFEditor::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPo
     _maps->Update(dataMgr, paramsMgr, rParams);
     _mapsInfo->Update(rParams);
     _updateMappingRangeControl(dataMgr, paramsMgr, rParams);
+}
+
+void TFEditor::mousePressEvent(QMouseEvent *event)
+{
+    printf("CLICK\n");
+}
+
+#include <QResizeEvent>
+void TFEditor::resizeEvent(QResizeEvent *event)
+{
+    QTabWidget::resizeEvent(event);
+#if ABSOLUTE
+    _tool->move(event->size().width() - _tool->size().width() - 5, 15);
+#endif
+    
+#define PR(r) printf("%s = %i, %i, %i, %i\n", #r, r.x(), r.y(), r.width(), r.height())
+    QRect geom = tabBar()->geometry();
+    PR(geom);
 }
 
 QWidget *TFEditor::_tab() const
