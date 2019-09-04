@@ -48,9 +48,9 @@ workflows:
   build:
     jobs:
       - build
-      - checkWarnings
+      - checkWarnings:
           requires:
             - build
-      - testVersion
+      - testVersion:
           requires:
             - build
