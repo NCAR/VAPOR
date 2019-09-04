@@ -173,7 +173,6 @@ void ParamsWidgetDropdown::Update(VAPoR::ParamsBase *p)
 
 void ParamsWidgetDropdown::indexChangedSlot(int index)
 {
-    printf("INDEX CHANGE\n");
     if (_params)
         _params->SetValueLong(_tag, _tag, index);
 }
