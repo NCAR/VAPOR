@@ -36,6 +36,9 @@ TFEditor::TFEditor()
     menu->addAction("Save Transfer Function");
     menu->addAction("Load Transfer Function");
     menu->addAction("Auto Update Histogram")->setCheckable(true);
+    QAction *test = new QAction("TEST", this);
+    test->setCheckable(true);
+    menu->addAction(test);
     _tool->setMenu(menu);
     
     connect(range, SIGNAL(ValueChanged(float, float)), this, SLOT(_rangeChanged(float, float)));
