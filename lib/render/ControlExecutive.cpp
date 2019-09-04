@@ -384,6 +384,10 @@ int ControlExec::openDataHelper(bool reportErrs)
             }
         }
     }
+
+    // Rebuild from params database
+    //
+    _calcEngineMgr->ReinitFromState();
     return (0);
 }
 
