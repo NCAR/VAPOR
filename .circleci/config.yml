@@ -19,8 +19,6 @@ jobs:
           key: cache-{{ .Environment.CIRCLE_SHA1 }}
           paths: /VAPOR
   checkWarnings:
-    requires:
-      - build
     docker:
       - image: sgpearse/vapor3-ubuntu16:latest
     steps:
@@ -32,8 +30,6 @@ jobs:
             echo 'git branch'
             /VAPOR/test_apps/circleTests/checkForWarnings.sh
   testVersion:
-    requires:
-      - build
     docker:
       - image: sgpearse/vapor3-ubuntu16:latest
     steps:
@@ -53,4 +49,8 @@ workflows:
     jobs:
       - build
       - checkWarnings
+          requires:
+            - build
       - testVersion
+          requires:
+            - build
