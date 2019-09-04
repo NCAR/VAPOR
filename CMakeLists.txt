@@ -280,11 +280,33 @@ if (UNIX AND NOT APPLE)
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
+
 		install (
 			DIRECTORY ${THIRD_PARTY_LIB_DIR}/python2.7
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
+
+		install (
+			DIRECTORY ${QTDIR}/plugins/xcbglintegrations
+			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
+
+		install (
+			FILES ${QTDIR}/plugins/platforms/libqxcb.so
+			DESTINATION ${INSTALL_LIB_DIR}/platforms
+			COMPONENT Dependencies
+			)
+
+		file (GLOB XCBQPA_FILES ${QTDIR}/lib/libQt5XcbQpa.*)
+		install (
+			FILES ${XCBQPA_FILES}
+			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
+
+
 	endif (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 endif (UNIX AND NOT APPLE)
 
