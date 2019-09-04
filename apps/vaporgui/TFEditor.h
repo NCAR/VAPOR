@@ -27,10 +27,6 @@ public:
     
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     
-protected:
-    void mousePressEvent(QMouseEvent *event);
-    void resizeEvent(QResizeEvent * event);
-    
 private:
     VAPoR::RenderParams *_rParams;
     QRangeSliderTextCombo *range;
@@ -42,6 +38,7 @@ private:
     QWidget *_tab() const;
     void _updateMappingRangeControl(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     void _getDataRange(VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams, float *min, float *max) const;
+    QString _createStylesheet() const;
     
 private slots:
     void _rangeChanged(float left, float right);

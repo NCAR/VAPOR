@@ -20,49 +20,12 @@ TFEditor::TFEditor()
     layout->setMargin(12);
     _tab()->setLayout(layout);
     
-    std::string stylesheet = R"(
-    QToolButton {
-        border: none;
-        background-color: none;
-        padding: 0px;
-    }
-    )";
-    
     _tool = new QToolButton(this);
-#define ABSOLUTE 0
-#define CORNER 1
-#if ABSOLUTE
-#else
-#if CORNER
     setCornerWidget(_tool);
-    
-    stylesheet +=
-    R"(
-    QTabWidget::right-corner {
-        top: 20px;
-        right: 5px;
-    }
-    )";
-#else
-    QHBoxLayout *l2 = new QHBoxLayout;
-    QWidget *w = new QWidget;
-    w->setLayout(l2);
-    l2->setMargin(0);
-    l2->setAlignment(Qt::AlignRight);
-    l2->addWidget(_tool);
-//    layout->setAlignment(Qt::AlignRight);
-//    layout->addWidget(tool);
-    layout->addWidget(w);
-    
-    int left, top, right, bottom;
-    layout->getContentsMargins(&left, &top, &right, &bottom);
-    layout->setContentsMargins(left, 0, right, bottom);
-#endif
-#endif
     _tool->setIcon(QIcon(QString::fromStdString(GetSharePath("images/gear.png"))));
     _tool->setIconSize(QSize(13, 13));
     _tool->setCursor(QCursor(Qt::PointingHandCursor));
-    setStyleSheet(QString::fromStdString(stylesheet));
+    setStyleSheet(_createStylesheet());
     
     layout->addWidget(_maps = new TFMapsGroup);
     layout->addWidget(_mapsInfo = _maps->CreateInfoGroup());
@@ -82,24 +45,6 @@ void TFEditor::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPo
     _maps->Update(dataMgr, paramsMgr, rParams);
     _mapsInfo->Update(rParams);
     _updateMappingRangeControl(dataMgr, paramsMgr, rParams);
-}
-
-void TFEditor::mousePressEvent(QMouseEvent *event)
-{
-    printf("CLICK\n");
-}
-
-#include <QResizeEvent>
-void TFEditor::resizeEvent(QResizeEvent *event)
-{
-    QTabWidget::resizeEvent(event);
-#if ABSOLUTE
-    _tool->move(event->size().width() - _tool->size().width() - 5, 15);
-#endif
-    
-#define PR(r) printf("%s = %i, %i, %i, %i\n", #r, r.x(), r.y(), r.width(), r.height())
-    QRect geom = tabBar()->geometry();
-    PR(geom);
 }
 
 QWidget *TFEditor::_tab() const
@@ -122,6 +67,38 @@ void TFEditor::_getDataRange(VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *m
     d->GetDataRange(r->GetCurrentTimestep(), r->GetVariableName(), r->GetRefinementLevel(), r->GetCompressionLevel(), d->GetDefaultMetaInfoStride(r->GetVariableName(), r->GetRefinementLevel()), range);
     *min = range[0];
     *max = range[1];
+}
+
+QString TFEditor::_createStylesheet() const
+{
+    std::string stylesheet = R"(
+    QToolButton {
+    border: none;
+        background-color: none;
+    padding: 0px;
+    }
+    )";
+    
+#if defined(Darwin)
+    stylesheet +=
+    R"(
+    QTabWidget::right-corner {
+    top: 20px;
+    right: 5px;
+    }
+    )";
+#elif defined(WIN32)
+#error style missing for windows
+#else
+    stylesheet +=
+    R"(
+    QTabWidget::right-corner {
+    top: -5px;
+    right: 5px;
+    }
+    )";
+#endif
+    return QString::fromStdString(stylesheet);
 }
 
 void TFEditor::_rangeChanged(float left, float right)
