@@ -47,4 +47,5 @@ workflows:
   build:
     jobs:
       - build
+      - checkWarnings
       - testVersion
