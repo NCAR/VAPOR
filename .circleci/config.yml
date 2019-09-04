@@ -27,6 +27,7 @@ jobs:
       - run:
           name: Checking for warnings
           command: |
+            ls /VAPOR/.circleci
             /VAPOR/.circleci/checkForWarnings.sh
   testVersion:
     docker:
