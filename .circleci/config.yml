@@ -31,6 +31,10 @@ jobs:
             cd /VAPOR
             git branch
             echo ''
+            echo $CIRCLE_TAG
+            echo ''
+            echo $CIRCLE_BRANCH
+            echo ''
             ls /VAPOR
             echo ''
             ls /VAPOR/test_apps
