@@ -17,7 +17,7 @@ jobs:
           destination: build-results
       - persist_to_workspace:
           root: /
-          paths: /VAPOR
+          paths: VAPOR
   checkWarnings:
     docker:
       - image: sgpearse/vapor3-ubuntu16:latest
