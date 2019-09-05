@@ -211,7 +211,7 @@ FlowParams::SetRakeNumOfSeeds( const std::vector<long>& num )
 std::vector<long>
 FlowParams::GetRakeNumOfSeeds() const
 {
-    const std::vector<long> tmp( 4, 1 );
+    const std::vector<long> tmp( 4, 5 );
     auto num = GetValueLongVec( _rakeNumOfSeedsTag, tmp );
     VAssert( num.size() == 4 );
     return num;
