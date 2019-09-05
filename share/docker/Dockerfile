@@ -102,8 +102,8 @@ RUN cd / \
     && cp site_files/site.NCAR site.local \
     && mkdir build
 
-RUN cd /VAPOR/build \
-    && export CMAKE_CXX_COMPILER=g++ \
-    && cmake .. && make
+#RUN cd /VAPOR/build \
+#    && export CMAKE_CXX_COMPILER=g++ \
+#    && cmake .. && make
 
 WORKDIR /VAPOR
