@@ -27,6 +27,7 @@ jobs:
       - run:
           name: Checking for warnings
           command: |
+            cd /VAPOR
             git branch
             echo ''
             ls /VAPOR
