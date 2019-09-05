@@ -9,6 +9,7 @@ jobs:
           name: cmake and make
           command: |
             cd /VAPOR
+            git branch
             cd build
             cmake ..
             make &> buildResults.txt
