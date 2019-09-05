@@ -33,6 +33,8 @@ jobs:
             echo ''
             ls /VAPOR/test_apps/circleTests
             echo ''
+            git branch
+            echo ''
             /VAPOR/test_apps/circleTests/checkForWarnings.sh
   testVersion:
     docker:
