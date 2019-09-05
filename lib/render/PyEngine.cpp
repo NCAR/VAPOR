@@ -706,8 +706,10 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size
     // on the same mesh (they have same dimensions)
     //
     vector<vector<size_t>> outputVarDims;
+    vector<size_t>         minAbs(min.size(), 0);
     if (inputVarDims.size()) {
         outputVarDims.push_back(inputVarDims[0]);
+        minAbs = variables[0]->GetMinAbs();
     } else {
         outputVarDims.push_back(Dims(min, max));
     }
@@ -742,7 +744,16 @@ int PyEngine::DerivedPythonVar::_readRegionSubset(int fd, const std::vector<size
         return (-1);
     }
 
-    copy_region(outputVarArrays[0], region, min, max, outputVarDims[0]);
+    // The min and max coordinates input to this method are relative to
+    // the entire domain. We need to correct them by substracting off the
+    // origin of the ROI contained in the Grid objects
+    //
+    vector<size_t> min_roi, max_roi;
+    for (int i = 0; i < min.size(); i++) {
+        min_roi.push_back(min[i] - minAbs[i]);
+        max_roi.push_back(max[i] - minAbs[i]);
+    }
+    copy_region(outputVarArrays[0], region, min_roi, max_roi, outputVarDims[0]);
 
     DataMgrUtils::UnlockGrids(_dataMgr, variables);
     free_arrays(inputVarArrays, outputVarArrays);
