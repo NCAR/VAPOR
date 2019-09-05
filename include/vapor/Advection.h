@@ -41,9 +41,6 @@ public:
     //   Otherwise, it will overwrite values anyway.
     int CalculateParticleValues(     Field* scalarField, bool skipNonZero );
     int CalculateParticleProperties( Field* scalarField  );
-    // Calculates the stream length to every particle. 
-    //   Results will be saved at the "value" field of every particle.
-    int CalculateStreamLength();
 
     // Reset all particle values to zero
     void ResetParticleValues( );
