@@ -368,7 +368,7 @@ Advection::OutputStreamsGnuplot( const std::string& filename, bool append ) cons
         return FILE_ERROR;
 
     std::fprintf( f, "%s\n",   "# This file could be plotted by Gnuplot using the following command:");
-    std::fprintf( f, "%s\n\n", "# splot "filename" u 1:2:3 w lines ");
+    std::fprintf( f, "%s\n\n", "# splot output_filename u 1:2:3 w lines ");
     std::fprintf( f, "%s\n",   "# X-position      Y-position      Z-position     Time     Value" );
     for( const auto& s : _streams )
     {
