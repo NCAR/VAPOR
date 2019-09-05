@@ -10,6 +10,7 @@ jobs:
           command: |
             cd /VAPOR
             git checkout $CIRCLE_BRANCH
+            git pull
             cd build
             cmake ..
             make &> buildResults.txt
