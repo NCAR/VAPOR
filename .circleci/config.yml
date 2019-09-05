@@ -27,13 +27,13 @@ jobs:
       - run:
           name: Checking for warnings
           command: |
+            git branch
+            echo ''
             ls /VAPOR
             echo ''
             ls /VAPOR/test_apps
             echo ''
             ls /VAPOR/test_apps/circleTests
-            echo ''
-            git branch
             echo ''
             /VAPOR/test_apps/circleTests/checkForWarnings.sh
   testVersion:
