@@ -804,9 +804,10 @@ string DataMgr::GetTimeCoordVarName() const {
         return (cvars[0]);
 
     cvars = _dc->GetTimeCoordVarNames();
-    VAssert(cvars.size());
+    if (!cvars.empty())
+        return (cvars[0]);
 
-    return (cvars[0]);
+    return ("");
 }
 
 bool DataMgr::GetVarCoordVars(
@@ -1478,7 +1479,7 @@ Grid *DataMgr::_getVariable(
     // mesh subset contained in g. In general, gmin<=min
     //
     vector<size_t> gmin, gmax;
-    map_blk_to_vox(bsvec[0], roi_dims, bminvec[0], bmaxvec[0], gmin, gmax);
+    map_blk_to_vox(bsvec[0], dimsvec[0], bminvec[0], bmaxvec[0], gmin, gmax);
     rg->SetMinAbs(gmin);
 
     //
