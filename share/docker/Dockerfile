@@ -85,25 +85,30 @@ RUN fileid="0B0dQMtxB89M0azF5RW1RSE5qcTg" \
     "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
     -o ${filename}
 
+# Debug info - Make sure 3rd party libs are downloaded
 RUN ls -lrth /glade/p/VAST/VAPOR/third-party/apps-2017
-          
+  
+# Unpack        
 RUN tar xf /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64_Ubuntu16.04.tar.xz \
            -C /glade/p/VAST/VAPOR/third-party/apps-2017
 
+# Update 3rd party libraries with glm
 RUN git clone https://github.com/g-truc/glm.git \
     /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/glm
 
 RUN mv /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/glm/glm/* \
     /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/glm
 
+# Pull github repo
 RUN cd / \
     && git clone https://github.com/NCAR/VAPOR.git \
     && cd VAPOR \
     && cp site_files/site.NCAR site.local \
     && mkdir build
 
-#RUN cd /VAPOR/build \
-#    && export CMAKE_CXX_COMPILER=g++ \
-#    && cmake .. && make
+# Build in Docker Image to speed up build on CircleCI
+RUN cd /VAPOR/build \
+    && export CMAKE_CXX_COMPILER=g++ \
+    && cmake .. && make
 
 WORKDIR /VAPOR
