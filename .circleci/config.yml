@@ -28,8 +28,11 @@ jobs:
           name: Checking for warnings
           command: |
             ls /VAPOR
+            echo ''
             ls /VAPOR/test_apps
+            echo ''
             ls /VAPOR/test_apps/circleTests
+            echo ''
             /VAPOR/test_apps/circleTests/checkForWarnings.sh
   testVersion:
     docker:
