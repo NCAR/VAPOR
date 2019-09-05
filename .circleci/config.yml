@@ -18,6 +18,7 @@ jobs:
       - persist_to_workspace:
           root: /
           paths: VAPOR
+
   checkWarnings:
     docker:
       - image: sgpearse/vapor3-ubuntu16:latest
@@ -41,6 +42,7 @@ jobs:
             ls /VAPOR/test_apps/circleTests
             echo ''
             /VAPOR/test_apps/circleTests/checkForWarnings.sh
+
   testVersion:
     docker:
       - image: sgpearse/vapor3-ubuntu16:latest
