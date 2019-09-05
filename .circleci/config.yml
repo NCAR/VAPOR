@@ -13,6 +13,7 @@ jobs:
             cd build
             cmake ..
             make &> buildResults.txt
+            ls ../test_apps
       - store_artifacts:
           path: /VAPOR/build/buildResults.txt
           destination: build-results
