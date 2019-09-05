@@ -24,6 +24,7 @@ jobs:
     steps:
       - restore_cache: 
           key: cache-{{ .Environment.CIRCLE_SHA1 }}
+      - checkout
       - run:
           name: Checking for warnings
           command: |
