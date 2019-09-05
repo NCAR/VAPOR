@@ -82,7 +82,7 @@ RendererBase::RendererBase(
 // Destructor
 RendererBase::~RendererBase()
 {
-   
+    int a = 100;  // Here's a warning on Ubuntu 16
 }
 
 void RendererBase::FlagForDeletion()

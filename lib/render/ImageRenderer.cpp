@@ -250,6 +250,8 @@ int ImageRenderer::GetMesh( DataMgr *dataMgr,
 	nindices = _nindices;
 	nverts = _nverts;
 
+    float a = /* 2.0 */;    // Here's an error on Ubuntu 16
+
 	return(0);
 }
 
