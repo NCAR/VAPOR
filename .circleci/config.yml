@@ -15,16 +15,15 @@ jobs:
       - store_artifacts:
           path: /VAPOR/build/buildResults.txt
           destination: build-results
-      - save_cache:
-          key: cache-{{ .Environment.CIRCLE_SHA1 }}
+      - persist_to_workspace:
+          root: /
           paths: /VAPOR
   checkWarnings:
     docker:
       - image: sgpearse/vapor3-ubuntu16:latest
     steps:
-      - restore_cache: 
-          key: cache-{{ .Environment.CIRCLE_SHA1 }}
-      - checkout
+      - attach_workspace: 
+          key: /
       - run:
           name: Checking for warnings
           command: |
@@ -46,9 +45,8 @@ jobs:
     docker:
       - image: sgpearse/vapor3-ubuntu16:latest
     steps:
-      - restore_cache: 
-          key: cache-{{ .Environment.CIRCLE_SHA1 }}
-      - checkout
+      - attach_workspace: 
+          key: /
       - run:
           name: Running tests
           command: |
