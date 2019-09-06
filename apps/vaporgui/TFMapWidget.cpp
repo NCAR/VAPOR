@@ -32,9 +32,23 @@ void TFMap::mouseDoubleClickEvent(QMouseEvent *event) { event->ignore(); }
 
 void TFMap::drawControl(QPainter &p, const QPointF &pos, bool selected) const
 {
+    float radius = CONTROL_POINT_RADIUS;
+    
+    if (selected) {
+        QRadialGradient gradient(0.5, 0.5, 0.4);
+        gradient.setCoordinateMode(QGradient::ObjectBoundingMode);
+        gradient.setColorAt(0, QColor(0, 0, 0, 100));
+        gradient.setColorAt(1, Qt::transparent);
+        QBrush shadowBrush(gradient);
+    
+    
+        p.setPen(Qt::NoPen);
+        p.setBrush(shadowBrush);
+        p.drawEllipse(pos, radius*2, radius*2);
+    }
+    
     QPen pen(Qt::darkGray, 0.5);
     QBrush brush(QColor(0xfa, 0xfa, 0xfa));
-    float radius = CONTROL_POINT_RADIUS;
     
     //    if (selected) {
     //        pen.setColor(Qt::black);
