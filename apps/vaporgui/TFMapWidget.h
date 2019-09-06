@@ -50,8 +50,8 @@ protected:
     QPointF   NDCToQPixel(float x, float y) const;
     glm::vec2 PixelToNDC(const QPointF &p) const;
     glm::vec2 PixelToNDC(const glm::vec2 &p) const;
-    QRectF    PaddedRect() const;
-    QRectF    rect() const;
+    QRect     paddedRect() const;
+    QRect     rect() const;
     
     int GetPadding() const;
     int GetControlPointRadius() const;

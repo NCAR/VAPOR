@@ -90,6 +90,8 @@ set (SRCS
 	TFHistogramInfoWidget.h
 	QRangeSliderTextCombo.cpp
 	QRangeSliderTextCombo.h
+	QPaintUtils.cpp
+	QPaintUtils.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h

@@ -9,6 +9,7 @@
 #include <vapor/RenderParams.h>
 #include <vapor/ParamsMgr.h>
 #include <math.h>
+#include "QPaintUtils.h"
 
 using namespace VAPoR;
 using std::vector;
@@ -54,6 +55,8 @@ TFInfoWidget *TFHistogramMap::createInfoWidget()
 #define CONTROL_POINT_RADIUS (4.0f)
 #define PADDING (CONTROL_POINT_RADIUS + 1.0f)
 
+#include <QPicture>
+
 void TFHistogramMap::paintEvent(QPainter &p)
 {
     p.fillRect(rect(), Qt::lightGray);
@@ -78,8 +81,18 @@ void TFHistogramMap::paintEvent(QPainter &p)
     
     graph.push_back(NDCToQPixel(1,0));
     
-    p.setBrush(QBrush(Qt::black));
-    p.drawPolygon(graph);
+    
+    QPicture picture;
+    QPainter pp(&picture);
+    pp.setRenderHint(QPainter::Antialiasing);
+    
+    pp.setPen(Qt::NoPen);
+    pp.setBrush(QBrush(QColor(56, 128, 255)));
+    pp.drawPolygon(graph);
+    pp.end();
+    QPaintUtils::DropShadow(p, picture, 10, QColor(56,128,255, 150));
+    p.drawPicture(0, 0, picture);
+    QPaintUtils::InnerShadow(p, picture, 10, QColor(0,0,0, 100));
 }
 
 void TFHistogramMap::mousePressEvent(QMouseEvent *event)

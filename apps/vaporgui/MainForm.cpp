@@ -2160,7 +2160,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
         //
         _vizWinMgr->Update(true);
         
-        update();
+//        update();
         
         return(false);
         

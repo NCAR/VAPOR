@@ -107,14 +107,14 @@ glm::vec2 TFMap::PixelToNDC(const QPointF &p) const
     return PixelToNDC(vec2(p.x(), p.y()));
 }
 
-QRectF TFMap::PaddedRect() const
+QRect TFMap::paddedRect() const
 {
-    return QRectF(PADDING, PADDING, width()-PADDING*2, height()-PADDING*2);
+    return QRect(PADDING, PADDING, width()-PADDING*2, height()-PADDING*2);
 }
 
-QRectF TFMap::rect() const
+QRect TFMap::rect() const
 {
-    return QRectF(0, 0, width(), height());
+    return QRect(0, 0, width(), height());
 }
 
 int TFMap::GetPadding() const
