@@ -262,7 +262,7 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     connect( _rakeTotalNum, SIGNAL( _editingFinished() ), this, SLOT( _rakeNumOfSeedsChanged() ) );
 
     _rakeBiasVariable = new VComboBox( this, "Random Bias Variable" );
-    _rakeBiasStrength = new VSlider(   this, "Random Bias Strength", 1.0f, 10.0f );
+    _rakeBiasStrength = new VSlider(   this, "Random Bias Strength", -10.0f, 10.0f );
     _layout->addWidget( _rakeBiasVariable );
     _layout->addWidget( _rakeBiasStrength );
     connect( _rakeBiasVariable, SIGNAL( _indexChanged(int) ), this, SLOT( _rakeBiasVariableChanged(int) ) );
@@ -368,14 +368,7 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
         }
     }
 
-    auto strenParams = _params->GetRakeBiasStrength();
-    if(  strenParams < 0 )  // Strength isn't set by the user yet. Let's set it to 1.0!
-    {
-        _params->SetRakeBiasStrength( 1.0f );
-        _rakeBiasStrength->SetCurrentValue( 1.0f );
-    }
-    else
-        _rakeBiasStrength->SetCurrentValue( strenParams );
+    _rakeBiasStrength->SetCurrentValue( _params->GetRakeBiasStrength() );
 
     /* Update input and output file names */
     if( !_params->GetSeedInputFilename().empty() ) 

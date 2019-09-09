@@ -234,8 +234,7 @@ FlowParams::SetRakeBiasVariable( const std::string& varname )
 float               
 FlowParams::GetRakeBiasStrength() const
 {
-    // return -1 as an obvious invalid value. Valid values are greater than 0
-    return float(GetValueDouble( _rakeBiasStrength, -1.0 ));
+    return float(GetValueDouble( _rakeBiasStrength, 0.0f ));
 }
 
 void                
