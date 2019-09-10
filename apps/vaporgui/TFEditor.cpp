@@ -18,7 +18,7 @@
 
 using namespace Wasp;
 using namespace VAPoR;
-
+#include <algorithm>
 TFEditor::TFEditor()
 {
     addTab(new QWidget(this), "Transfer Function");
@@ -44,6 +44,7 @@ TFEditor::TFEditor()
     QMenu *builtinColormapMenu = new QMenu("Load Built-In Colormap");
     string builtinPath = GetSharePath("palettes");
     auto fileNames = FileUtils::ListFiles(builtinPath);
+    std::sort(fileNames.begin(), fileNames.end());
     for (int i = 0; i < fileNames.size(); i++) {
         
         string path = FileUtils::JoinPaths({builtinPath, fileNames[i]});
