@@ -17,6 +17,8 @@ namespace TFWidget_ {
     class CustomFileDialog;
 }
 
+class VPushButtonWithDoubleClick;
+
 //    V - Composition
 //    # - Association
 //
@@ -207,31 +209,50 @@ class TFWidget_::LoadTFDialog : public QDialog {
         bool GetLoadTF3OpacityMap() const;
         bool GetLoadTF3DataRange() const;
         string GetSelectedFile() const;
+        void SetMapperFunction( const VAPoR::MapperFunction *fn );
+
+    public slots:
+        void BuildColormapButtons();
 
     private slots:
         void accept();
         void reject();
         void setLoadOpacity();
         void setLoadBounds();
+        void buttonChecked();
+        void buttonDoubleClicked();
+        void checkSelectedColorButton( const QString& );
 
     private:
         void initializeLayout();
         void configureLayout();
         void connectWidgets();
+        void rebuildWidgets();
+        VPushButtonWithDoubleClick* makeButton( 
+            const QString& path,
+            const QString& file
+        );
 
         CustomFileDialog*   _fileDialog;
         QFrame*             _checkboxFrame;
         QFrame*             _fileDialogFrame;
+        QFrame*             _colormapButtonFrame;
         QVBoxLayout*        _mainLayout;
         QHBoxLayout*        _checkboxLayout;
         QVBoxLayout*        _fileDialogLayout;
+        QGridLayout*        _colormapButtonLayout;
         QTabWidget*         _fileDialogTab;
         QTabWidget*         _loadOptionTab;
+        QTabWidget*         _colormapButtonTab;
         QSpacerItem*        _optionSpacer1;
         QSpacerItem*        _optionSpacer2;
         QSpacerItem*        _optionSpacer3;
         QCheckBox*          _loadOpacityMapCheckbox;
         QCheckBox*          _loadDataBoundsCheckbox;
+        QButtonGroup*       _buttonGroup;
+
+        std::unique_ptr<VAPoR::MapperFunction> _mapperFnCopy;
+        QDir _myDir;
 
         bool _loadOpacityMap;
         bool _loadDataBounds;

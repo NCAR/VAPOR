@@ -13,6 +13,7 @@
 #include <QDoubleValidator>
 #include <QSpacerItem>
 #include <QHBoxLayout>
+#include <QPushButton>
 
 #include <iostream>
 #include "vapor/VAssert.h"
@@ -276,4 +277,3 @@ bool VFileWriter::_isFileOperable( const std::string& filePath ) const {
 
     return operable;
 }
-
