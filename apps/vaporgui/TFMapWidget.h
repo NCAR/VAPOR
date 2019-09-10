@@ -67,6 +67,7 @@ class TFMapWidget : public QFrame {
     
 public:
     TFMapWidget(TFMap *map);
+    ~TFMapWidget();
     void AddMap(TFMap *map);
     TFInfoWidget *GetInfoWidget();
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
