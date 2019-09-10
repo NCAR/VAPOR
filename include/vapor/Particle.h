@@ -32,9 +32,9 @@ public:
 
     // Constructor and destructor
     Particle();
-    Particle( const glm::vec3& loc, float t );
-    Particle( const float* loc, float t );
-    Particle( float x, float y, float z, float t );
+    Particle( const glm::vec3& loc, float t, float val = 0.0f );
+    Particle( const float* loc, float t, float val = 0.0f );
+    Particle( float x, float y, float z, float t, float val = 0.0f );
    ~Particle();
 
     void  AttachProperty  (  float v );

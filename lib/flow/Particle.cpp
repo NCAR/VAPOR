@@ -9,29 +9,29 @@ Particle::Particle()
     value = 0.0f;
 }
 
-Particle::Particle( const glm::vec3& loc, float t )
+Particle::Particle( const glm::vec3& loc, float t, float val )
 {
     location = loc;
     time     = t;
-    value    = 0.0f;
+    value    = val;
 }
 
-Particle::Particle( const float* loc, float t )
+Particle::Particle( const float* loc, float t, float val )
 {
     location.x = loc[0];
     location.y = loc[1];
     location.z = loc[2];
     time       = t;
-    value      = 0.0f;
+    value      = val;
 }
 
-Particle::Particle( float x, float y, float z, float t )
+Particle::Particle( float x, float y, float z, float t, float val )
 {
     location.x = x;
     location.y = y;
     location.z = z;
     time       = t;
-    value      = 0.0f;
+    value      = val;
 }
 
 Particle::~Particle( )
