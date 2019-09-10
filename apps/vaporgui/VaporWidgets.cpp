@@ -14,8 +14,8 @@
 #include <QValidator>
 #include <QSpacerItem>
 #include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QSpinBox>
+#include <QPushButton>
 
 #include <iostream>
 #include "vapor/VAssert.h"
@@ -860,38 +860,4 @@ bool VFileWriter::_isFileOperable( const std::string& filePath ) const {
     QString qFilePath = QString::fromStdString( filePath );
     operable = FileOperationChecker::FileGoodToWrite( qFilePath );
     return operable;
-}
-
-VTabWidget::VTabWidget(
-    QWidget* parent,
-    const std::string& firstTabName
-) : QTabWidget( parent ) 
-{
-    AddTab( firstTabName );
-}
-
-void VTabWidget::AddTab(
-    const std::string& tabName
-) {
-    QWidget* container = new QWidget;
-    QVBoxLayout* layout = new QVBoxLayout;
-    layout->setSpacing(0);
-    layout->setContentsMargins( 0, 0, 0, 0 );
-    container->setLayout(layout);
-    
-    addTab( container, QString::fromStdString(tabName) );
-}
-
-void VTabWidget::DeleteTab(
-    int index
-) {
-    removeTab( index );
-}
-
-void VTabWidget::AddWidget(
-    QWidget* inputWidget,
-    int index
-) {
-    QWidget* target = widget(index);
-    target->layout()->addWidget( inputWidget );
 }

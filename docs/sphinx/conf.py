@@ -29,7 +29,7 @@ print sphinx_rtd_theme.__file__
 # -- Project information -----------------------------------------------------
 
 project = 'Vapor'
-copyright = 'Copyright 2019 University Corporation for Atmospheric Research'
+copyright = '2019 University Corporation for Atmospheric Research'
 author = 'John Clyne, Scott Pearse, Samuel Li, Stanislaw Jaroszynski'
 
 # The short X.Y version

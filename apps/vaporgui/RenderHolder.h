@@ -19,7 +19,7 @@ namespace VAPoR {
 	class ParamsMgr;
 }
 
-class QPushButtonWithDoubleClick : public QPushButton {
+/*class VPushButtonWithDoubleClick : public QPushButton {
     Q_OBJECT
     using QPushButton::QPushButton;
     void mouseDoubleClickEvent(QMouseEvent * e) {
@@ -28,7 +28,7 @@ class QPushButtonWithDoubleClick : public QPushButton {
     
 signals:
     void doubleClicked();
-};
+};*/
 
 class NewRendererDialog : public QDialog, public Ui_NewRendererDialog {
 
