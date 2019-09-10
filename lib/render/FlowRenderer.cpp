@@ -339,7 +339,7 @@ FlowRenderer::_renderFromAnAdvection( const flow::Advection* adv,
             }   // Finish processing a stream
             if( !vec.empty() )
             {
-                _drawALineSeg( vec.data(), vec.size() / 4, singleColor );
+                _drawALineStrip( vec.data(), vec.size() / 4, singleColor );
                 vec.clear();
             }
         }   // Finish processing all streams
@@ -375,7 +375,7 @@ FlowRenderer::_renderFromAnAdvection( const flow::Advection* adv,
 
             if( !vec.empty() )
             {
-                _drawALineSeg( vec.data(), vec.size() / 4, singleColor );
+                _drawALineStrip( vec.data(), vec.size() / 4, singleColor );
                 vec.clear();
             }
         }   // Finish processing all streams
@@ -398,14 +398,14 @@ FlowRenderer::_particleHelper1( std::vector<float>&     vec,
     }
     else if( vec.size() > 0 )   // p is a separator and vec is non-empty
     {
-        _drawALineSeg( vec.data(), vec.size() / 4, singleColor );
+        _drawALineStrip( vec.data(), vec.size() / 4, singleColor );
         vec.clear();
     }
 }
 
 
 int
-FlowRenderer::_drawALineSeg( const float* buf, size_t numOfParts, bool singleColor ) const
+FlowRenderer::_drawALineStrip( const float* buf, size_t numOfParts, bool singleColor ) const
 {
     // Make some OpenGL function calls
     glm::mat4 modelview  = _glManager->matrixManager->GetModelViewMatrix();
@@ -414,10 +414,10 @@ FlowRenderer::_drawALineSeg( const float* buf, size_t numOfParts, bool singleCol
     _shader->SetUniform("MV", modelview);
     _shader->SetUniform("Projection", projection);
     _shader->SetUniform("colorMapRange", glm::make_vec3(_colorMapRange));
-    _shader->SetUniform( "singleColor", int(singleColor) );
+    _shader->SetUniform("singleColor", int(singleColor) );
 
     glActiveTexture( GL_TEXTURE0 + _colorMapTexOffset );
-    glBindTexture( GL_TEXTURE_1D,  _colorMapTexId );
+    glBindTexture(   GL_TEXTURE_1D,  _colorMapTexId );
     _shader->SetUniform("colorMapTexture", _colorMapTexOffset);
 
     glBindVertexArray( _vertexArrayId );
