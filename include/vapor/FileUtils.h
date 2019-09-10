@@ -29,6 +29,7 @@ COMMON_API bool Exists(const std::string &path);
 COMMON_API bool IsRegularFile(const std::string &path);
 COMMON_API bool IsDirectory(const std::string &path);
 COMMON_API FileType GetFileType(const std::string &path);
+COMMON_API std::vector<std::string> ListFiles(const std::string &path);
     
 //! @code JoinPaths({"home", "a/b"}); @endcode
 COMMON_API std::string JoinPaths(std::initializer_list<std::string> paths);
