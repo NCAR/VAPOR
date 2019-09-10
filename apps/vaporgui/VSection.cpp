@@ -18,10 +18,10 @@ QVBoxLayout *VSection::layout() const
 
 void VSection::setMenu(QMenu *menu)
 {
-    VSectionSettingsMenuButton *menuButton = (VSectionSettingsMenuButton*)QTabWidget::cornerWidget();
+    SettingsMenuButton *menuButton = (SettingsMenuButton*)QTabWidget::cornerWidget();
     
     if (!menuButton) {
-        menuButton = new VSectionSettingsMenuButton;
+        menuButton = new SettingsMenuButton;
         QTabWidget::setCornerWidget(menuButton);
     }
     
@@ -73,7 +73,7 @@ QString VSection::_createStylesheet() const
 
 
 
-VSectionSettingsMenuButton::VSectionSettingsMenuButton()
+VSection::SettingsMenuButton::SettingsMenuButton()
 {
     setIcon(QIcon(QString::fromStdString(Wasp::GetSharePath("images/gear-dropdown1.png"))));
     setIconSize(QSize(18, 18));
@@ -87,7 +87,7 @@ VSectionSettingsMenuButton::VSectionSettingsMenuButton()
                   );
 }
 
-void VSectionSettingsMenuButton::paintEvent(QPaintEvent* event)
+void VSection::SettingsMenuButton::paintEvent(QPaintEvent* event)
 {
     // This function is overridden to prevent Qt from drawing its own dropdown arrow
     QStylePainter p(this);
