@@ -366,6 +366,13 @@ public:
     int dim,
     bool secondaryColormapVariable
 );
+    
+    virtual bool HasIsoValues() const { return false; }
+    virtual vector<double> GetIsoValues(const string &variable) { VAssert(0); return {}; }
+    virtual void SetIsoValues(const string &variable, const vector<double> &values) { VAssert(0); }
+    
+    vector<double> GetIsoValues() { return GetIsoValues(GetVariableName()); }
+    void SetIsoValues(const vector<double> &values) { SetIsoValues(GetVariableName(), values); }
 	
  void InitBox();
 protected:
