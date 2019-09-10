@@ -807,7 +807,7 @@ FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds,
     /* retrieve random seed numbers from params */
     auto rakeSeeds = params->GetRakeNumOfSeeds();
     VAssert( rakeSeeds.size() == 4 ); 
-    auto totalNumOfSeeds = rakeSeeds[3];    // We only need the 4th value for random seeds
+    auto numOfSeedsNeeded = rakeSeeds[3];    // We only need the 4th value for random seeds
     
     /* request a grid representing the rake area */
     Grid* grid = _dataMgr->GetVariable( params->GetCurrentTimestep(),
@@ -822,89 +822,78 @@ FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds,
         return flow::GRID_ERROR;
     }
 
-    /* Find the bias variable range of this rake area */
-    float rakeMin = 0.0f, rakeMax = 0.0f; 
-    auto itr    = grid->cbegin();
-    auto endItr = grid->cend();
-    if( grid->HasMissingData() )
-    {
-        float mv = grid->GetMissingValue();
-        for( ; itr != endItr; ++itr )   // initialize rakeMin and rakeMax
-        {
-            if( *itr != mv )
-            {
-                rakeMin = std::abs(*itr);
-                rakeMax = std::abs(*itr);
-                break;
-            }
-        }
-        for( ; itr != endItr; ++itr )   // find the min and max
-        {
-            if( *itr != mv )
-            {
-                float v = std::abs(*itr);
-                rakeMin = rakeMin < v ? rakeMin : v;
-                rakeMax = rakeMax > v ? rakeMax : v;
-            }
-        }
-    }
-    else
-    {
-        rakeMin = std::abs(*itr);
-        rakeMax = std::abs(*itr);
-        for( ; itr != endItr; ++itr )   // find the min and max
-        {
-            float v = std::abs(*itr);
-            rakeMin = rakeMin < v ? rakeMin : v;
-            rakeMax = rakeMax > v ? rakeMax : v;
-        }
-    }
-    if( rakeMin == 0.0f && rakeMax == 0.0f )    // All are missing values in the rake
-    {
-        delete grid;
-        return _genSeedsRakeRandom( seeds, timeVal );  // Use random seeds
-    }
-    float rakeRange1o = 1.0f / (rakeMax - rakeMin);
-
     /* 
      * The bias strategy is:
-     * we generate uniform random seeds in the rake, but for each seed, we decide 
-     * if to discard it based on a probability function. This process terminates
-     * when sufficient amount of seeds are generated.
+     * We generate more random seeds than needed, and then sort them.
+     * The first batch of these seeds are used as the final seeds.
      */
+
     
     /* Create three uniform distributions in 3 dimensions */
-    int randSeed;
+    int procID;     // The current process ID
 #ifdef WIN32
-    randSeed = GetCurrentProcessId();        
+    procID = GetCurrentProcessId();        
 #else
-    randSeed = ::getpid();
+    procID = ::getpid();
 #endif
-    std::mt19937 gen(randSeed); //Standard mersenne_twister_engine seeded with randSeed
+    std::mt19937 gen(procID);   //Standard mersenne_twister engine 
     std::uniform_real_distribution<float> distX( rake[0], rake[1] );
     std::uniform_real_distribution<float> distY( rake[2], rake[3] );
     std::uniform_real_distribution<float> distZ( rake[4], rake[5] );
-    /* Create a uniform distribution between 0.0 and 1.0 */
-    std::uniform_real_distribution<float> zeroOne( 0.0f, 1.0f );
 
-    int seedIdx = 0;
-    seeds.resize( totalNumOfSeeds );
-    while( seedIdx < totalNumOfSeeds )
+    // Now we generate many seeds.
+    // We test missing values in case 1) the bias variable does have missing values, and 2)
+    // the rake extents are outside of the bias variable.
+    // Thus, we only keep random seeds that are falling on non-missing-value locations.
+    seeds.clear();
+    glm::vec3 loc;
+    std::vector<double> locD( 3 );
+    // This is the total number of seeds to generate, based on the bias strength.
+    long numOfSeedsToGen = numOfSeedsNeeded * long(std::abs( biasStren ) + 1.0f);   
+    long numOfTrials = 0;
+    // Note: in the case that too many random seeds fall on missing values, we set a limit of
+    // 10 times numOfSeedsToGen. 
+    long numOfTrialLimit = 10 * numOfSeedsToGen;
+    float val, mv = grid->GetMissingValue();
+    while( numOfTrials < numOfTrialLimit && seeds.size() < numOfSeedsToGen )
     {
-        const std::vector<double> cand{ distX(gen), distY(gen), distZ(gen) };   // generate a random seed
-        float seedVal = grid->GetValue( cand );
-        float prob    = std::abs(std::abs(seedVal) - rakeMin) * rakeRange1o;    // prob is a value between 0.0 and 1.0;
-        prob          = std::pow( prob, biasStren );    // prob is scaled by a strength.
-        prob          = prob > 0.01f ? prob : 0.01f;    // prob has to be bigger than 0.01
-        if( zeroOne(gen) < prob )   // keep this seed
+        loc.x = distX(gen);     locD[0] = loc.x;
+        loc.y = distY(gen);     locD[1] = loc.y;
+        loc.z = distZ(gen);     locD[2] = loc.z;
+        val   = grid->GetValue( locD );
+        if( val != mv )
         {
-            seeds[seedIdx].location.x = cand[0];
-            seeds[seedIdx].location.y = cand[1];
-            seeds[seedIdx].location.z = cand[2];
-            seeds[seedIdx].time       = timeVal;
-            seedIdx++;
+            seeds.emplace_back( loc, timeVal, val );
         }
+        numOfTrials++;
     }
+    
+    // If we reach numOfTrialLimit without collecting enough seeds, bail.
+    if( numOfTrials == numOfTrialLimit && seeds.size() < numOfSeedsNeeded )
+    {
+        delete grid;
+        seeds.clear();
+        return flow::GRID_ERROR;
+    }
+
+    // How we sort all seeds based on their values
+    auto ascLambda = [](const flow::Particle& p1, const flow::Particle& p2) -> bool 
+    {
+        return p1.value < p2.value;
+    };
+    auto desLambda = [](const flow::Particle& p1, const flow::Particle& p2) -> bool 
+    {
+        return p2.value < p1.value;
+    };
+    if( biasStren < 0 )
+        std::partial_sort( seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), ascLambda );
+    else
+        std::partial_sort( seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), desLambda );
+    
+    // We only take first chunck of seeds that we need, and reset the value field of each particle
+    seeds.resize( numOfSeedsNeeded );
+    for( auto& e : seeds )
+        e.value = 0.0f;
 
     delete grid;
     return 0;
