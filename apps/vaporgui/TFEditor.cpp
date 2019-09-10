@@ -19,6 +19,8 @@
 using namespace Wasp;
 using namespace VAPoR;
 
+#include <vapor/GLManager.h>
+
 TFEditor::TFEditor()
 {
     addTab(new QWidget(this), "Transfer Function");
@@ -54,6 +56,56 @@ TFEditor::TFEditor()
     test->setCheckable(true);
     menu->addAction(test);
     _tool->setMenu(menu);
+    
+    ParamsBase::StateSave stateSave;
+    MapperFunction mf(&stateSave);
+    
+    QMenu *builtin = new QMenu("Load Builtin Colormap");
+    string builtinPath = GetSharePath("palettes");
+    auto fileNames = FileUtils::ListFiles(builtinPath);
+    for (int i = 0; i < fileNames.size(); i++) {
+        
+        string path = FileUtils::JoinPaths({builtinPath, fileNames[i]});
+        mf.LoadColormapFromFile(path);
+        ColorMap *cm = mf.GetColorMap();
+        
+        int nSamples = 64;
+        unsigned char buf[nSamples*3];
+        float rgb[3];
+        for (int i = 0; i < nSamples; i++) {
+            cm->colorNormalized(i/(float)nSamples).toRGB(rgb);
+            buf[i*3+0] = rgb[0]*255;
+            buf[i*3+1] = rgb[1]*255;
+            buf[i*3+2] = rgb[2]*255;
+        }
+        QImage image(buf, nSamples, 1, QImage::Format::Format_RGB888);
+        
+        
+        QAction *item = new ColorMapMenuItem(QPixmap::fromImage(image).scaled(nSamples, 20));
+        connect(item, SIGNAL(triggered()), this, SLOT(_test()));
+        builtin->addAction(item);
+//        builtin->addAction(QPixmap::fromImage(image).scaled(nSamples, 20), "test");
+    }
+    
+    builtin->setStyleSheet(R"(
+                       
+                           QPushButton {
+                               icon-size: 50px 15px;
+                               padding: 0px;
+                               margin: 0px;
+                           background: none;
+                           border: none;
+                           }
+                           QPushButton::hover {
+                           background: #aaa;
+                           }
+
+                           
+//icon-size: 100% 100%;
+                           
+                           )");
+    
+    menu->addMenu(builtin);
     
     connect(range, SIGNAL(ValueChanged(float, float)), this, SLOT(_rangeChanged(float, float)));
     
@@ -123,6 +175,11 @@ QString TFEditor::_createStylesheet() const
 void TFEditor::_rangeChanged(float left, float right)
 {
     _rParams->GetMapperFunc(_rParams->GetVariableName())->setMinMaxMapValue(left, right);
+}
+
+void TFEditor::_test()
+{
+    printf("TEST\n");
 }
 
 void TFEditor::_loadColormap()
@@ -212,6 +269,43 @@ void SettingsMenu::paintEvent(QPaintEvent* event)
     option.features = QStyleOptionToolButton::None;
     p.drawComplexControl(QStyle::CC_ToolButton, option);
 }
+
+
+
+ColorMapMenuItem::ColorMapMenuItem(const QIcon &icon)
+: QWidgetAction(nullptr)
+{
+    QPushButton *button = new QPushButton;
+    button->setIcon(icon);
+    button->setFixedSize(QSize(60, 25));
+    connect(button, SIGNAL(clicked()), this, SLOT(trigger()));
+    connect(button, SIGNAL(clicked()), this, SLOT(_pressed()));
+    setDefaultWidget(button);
+}
+
+void ColorMapMenuItem::CloseMenu(QAction *action)
+{
+    if (!action)
+        return;
+    
+    QList<QWidget *> menus = action->associatedWidgets();
+    
+    for (QWidget *widget : menus) {
+        QMenu *menu = dynamic_cast<QMenu *>(widget);
+        if (!menu) continue;
+        if (menu->isHidden()) continue;
+        
+        menu->hide();
+        CloseMenu(menu->menuAction());
+    }
+}
+
+void ColorMapMenuItem::_pressed()
+{
+    CloseMenu(this);
+}
+
+
 
 
 

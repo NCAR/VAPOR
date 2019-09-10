@@ -43,6 +43,7 @@ private:
     
 private slots:
     void _rangeChanged(float left, float right);
+    void _test();
     void _loadColormap();
     void _loadTransferFunction();
     void _saveTransferFunction();
@@ -60,6 +61,19 @@ protected:
     void paintEvent(QPaintEvent* event);
 };
 
+
+
+
+#include <QWidgetAction>
+class ColorMapMenuItem : public QWidgetAction {
+    Q_OBJECT
+    
+public:
+    ColorMapMenuItem(const QIcon &icon);
+    static void CloseMenu(QAction *action);
+private slots:
+    void _pressed();
+};
 
 
 class TFMapsGroup : public QWidget {
