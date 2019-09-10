@@ -71,6 +71,8 @@ public:
  //! \param[in] path Path of input file
  //
  int LoadFromFile(string path);
+    
+ int LoadColormapFromFile(string path);
 
  // Get static string identifier for this params class
  //
