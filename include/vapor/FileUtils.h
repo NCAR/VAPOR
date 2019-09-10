@@ -2,6 +2,7 @@
 
 #include <vapor/common.h>
 #include <string>
+#include <vector>
 #include <initializer_list>
 
 namespace Wasp {
