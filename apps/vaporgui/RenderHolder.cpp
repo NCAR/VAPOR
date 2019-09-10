@@ -31,6 +31,7 @@
 #include "VizSelectCombo.h"
 #include "ErrorReporter.h"
 #include "RenderHolder.h"
+#include "VaporWidgets.h"
 #include <SettingsParams.h>
 #include <vapor/VolumeRenderer.h>
 #include <vapor/VolumeIsoRenderer.h>
@@ -83,7 +84,7 @@ void NewRendererDialog::_createButtons()
 
 QPushButton *NewRendererDialog::_createButton(QIcon icon, QString name, int index)
 {
-    QPushButton *button = new QPushButtonWithDoubleClick(name, this);
+    QPushButton *button = new VPushButtonWithDoubleClick(name, this);
     button->setIconSize(QSize(50, 50));
     button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     button->setLayoutDirection(Qt::RightToLeft);

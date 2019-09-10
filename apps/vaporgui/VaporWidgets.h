@@ -1,11 +1,16 @@
 #ifndef VAPORWIDGETS_H
 #define VAPORWIDGETS_H
 
+// Some classes cannot be forward declared due to nested name specifiers,
+// such as QFileDialog::FileMode
+#include <QDir>
+#include <QFileDialog>
+#include <QPushButton>
+
 class QWidget;
 class QLabel;
 class QComboBox;
 class QCheckBox;
-class QPushButton;
 class QLineEdit;
 class QDoubleValidator;
 class QSpacerItem;
@@ -129,6 +134,15 @@ public:
 
 private:
     virtual bool _isFileOperable(const std::string &filePath) const;
+};
+
+class VPushButtonWithDoubleClick : public QPushButton {
+    Q_OBJECT
+    using QPushButton::QPushButton;
+    void mouseDoubleClickEvent(QMouseEvent *e) { emit doubleClicked(); }
+
+signals:
+    void doubleClicked();
 };
 
 #endif    // VAPORWIDGETS_H
