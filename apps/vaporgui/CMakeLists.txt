@@ -92,6 +92,8 @@ set (SRCS
 	QRangeSliderTextCombo.h
 	QPaintUtils.cpp
 	QPaintUtils.h
+	VSection.cpp
+	VSection.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h

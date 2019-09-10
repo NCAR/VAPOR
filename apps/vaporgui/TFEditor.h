@@ -6,6 +6,7 @@
 #include <vapor/ParamsMgr.h>
 #include "ParamsWidgets.h"
 #include <vector>
+#include "VSection.h"
 
 #include <QToolButton>
 
@@ -19,7 +20,7 @@ class TFMapsGroup;
 class TFMapWidget;
 class TFMapsInfoGroup;
 
-class TFEditor : public QTabWidget {
+class TFEditor : public VSection {
     Q_OBJECT
     
 public:
@@ -34,12 +35,9 @@ private:
     ParamsWidgetDropdown *colorMapTypeDropdown;
     TFMapsGroup *_maps;
     TFMapsInfoGroup *_mapsInfo;
-    QToolButton *_tool;
     
-    QWidget *_tab() const;
     void _updateMappingRangeControl(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     void _getDataRange(VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams, float *min, float *max) const;
-    QString _createStylesheet() const;
     
 private slots:
     void _rangeChanged(float left, float right);
@@ -52,15 +50,6 @@ private slots:
 
 
 
-class SettingsMenu : public QToolButton {
-    Q_OBJECT
-    
-public:
-    SettingsMenu();
-    
-protected:
-    void paintEvent(QPaintEvent* event);
-};
 
 
 
