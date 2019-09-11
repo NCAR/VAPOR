@@ -20,6 +20,7 @@ QRangeSliderTextCombo::QRangeSliderTextCombo()
     
     connect(_slider, SIGNAL(ValueChanged(float, float)), this, SLOT(sliderChanged(float, float)));
     connect(_slider, SIGNAL(ValueChangedIntermediate(float, float)), this, SLOT(sliderChangedIntermediate(float, float)));
+    connect(_slider, SIGNAL(ValueChangedBegin()), this, SIGNAL(ValueChangedBegin()));
     connect(_leftText, SIGNAL(returnPressed()), this, SLOT(leftTextChanged()));
     connect(_rightText, SIGNAL(returnPressed()), this, SLOT(rightTextChanged()));
 }
@@ -60,6 +61,7 @@ void QRangeSliderTextCombo::sliderChangedIntermediate(float leftNorm, float righ
     float left = (_max-_min)*leftNorm + _min;
     float right = (_max-_min)*rightNorm + _min;
     setTextboxes(left, right);
+    emit ValueChangedIntermediate(left, right);
 }
 
 void QRangeSliderTextCombo::sliderChanged(float leftNorm, float rightNorm)

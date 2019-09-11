@@ -61,6 +61,8 @@ TFEditor::TFEditor()
     
     
     connect(range, SIGNAL(ValueChanged(float, float)), this, SLOT(_rangeChanged(float, float)));
+    connect(range, SIGNAL(ValueChangedBegin()), this, SLOT(_rangeChangedBegin()));
+    connect(range, SIGNAL(ValueChangedIntermediate(float, float)), this, SLOT(_rangeChangedIntermediate(float, float)));
     
 //    this->setStyleSheet(R"(QWidget:hover:!pressed {border: 1px solid red;})");
     
@@ -93,9 +95,21 @@ void TFEditor::_getDataRange(VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *m
     *max = range[1];
 }
 
+void TFEditor::_rangeChangedBegin()
+{
+    _paramsMgr->BeginSaveStateGroup("Change tf mapping range");
+}
+
+void TFEditor::_rangeChangedIntermediate(float left, float right)
+{
+    _rParams->GetMapperFunc(_rParams->GetVariableName())->setMinMaxMapValue(left, right);
+    _maps->histo->update();
+}
+
 void TFEditor::_rangeChanged(float left, float right)
 {
     _rParams->GetMapperFunc(_rParams->GetVariableName())->setMinMaxMapValue(left, right);
+    _paramsMgr->EndSaveStateGroup();
 }
 
 void TFEditor::_test()
@@ -289,7 +303,7 @@ TFMapsGroup::TFMapsGroup()
     TFMapWidget *o;
     add(o= new TFOpacityWidget);
     o->AddMap(new TFColorMap(o));
-    add(new TFHistogramWidget);
+    add(histo = new TFHistogramWidget);
     add(new TFColorWidget);
 }
 

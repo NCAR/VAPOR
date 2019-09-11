@@ -42,9 +42,11 @@ public:
 	long getMaxBinSize();
     int getNumBins() const;
 	long getBinSize(int posn) const {return _binArray[posn];}
-    float getBinSizeNormalized(int bin) const;
-	float getMinData(){return _minData;}
-	float getMaxData(){return _maxData;}
+    float getNormalizedBinSize(int bin) const;
+    float getNormalizedBinSizeForValue(float v) const;
+    float getNormalizedBinSizeForNormalizedValue(float v) const;
+	float getMinMapData(){return _minMapData;}
+	float getMaxMapData(){return _maxMapData;}
 	
 	int getTimestepOfUpdate() {return _timestepOfUpdate;}
 	string getVarnameOfUpdate() {return _varnameOfUpdate;}
@@ -54,10 +56,14 @@ public:
     int PopulateIfNeeded(VAPoR::DataMgr *dm, VAPoR::RenderParams *rp);
 	
 private:
-	long* _binArray = nullptr;
-	long _numBelow, _numAbove;
+	unsigned int* _binArray = nullptr;
+    unsigned int* _below = nullptr;
+    unsigned int* _above = nullptr;
+    int _nBinsBelow = 0, _nBinsAbove = 0;
+	long _numSamplesBelow, _numSamplesAbove;
 	int  _numBins = 0;
-	float _minData, _maxData, _range;
+	float _minMapData, _maxMapData, _range;
+    float _minData, _maxData;
 	long _maxBinSize = -1;
     
     int _refLevel = INT_MIN, _lod = INT_MIN;
@@ -74,6 +80,7 @@ private:
     bool shouldUseSampling(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const;
     void setProperties(float mnData, float mxData, string var, int ts);
     void calculateMaxBinSize();
+    void _getDataRange(VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *min, float *max) const;
 };
 
 #endif //HISTO_H

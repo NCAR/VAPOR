@@ -13,6 +13,7 @@
 class TFOpacityWidget;
 class TFColorWidget;
 class TFHistogramMap;
+class TFHistogramWidget;
 class QRangeSlider;
 class QRangeSliderTextCombo;
 class TFInfoWidget;
@@ -41,6 +42,8 @@ private:
     void _getDataRange(VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams, float *min, float *max) const;
     
 private slots:
+    void _rangeChangedBegin();
+    void _rangeChangedIntermediate(float left, float right);
     void _rangeChanged(float left, float right);
     void _test();
     void _loadColormap(std::string path);
@@ -88,6 +91,8 @@ public:
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     
     TFMapsInfoGroup *CreateInfoGroup();
+    
+    TFHistogramWidget *histo;
     
 private:
     void add(TFMapWidget *map);

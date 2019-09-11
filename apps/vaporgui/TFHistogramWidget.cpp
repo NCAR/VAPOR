@@ -69,15 +69,25 @@ void TFHistogramMap::paintEvent(QPainter &p)
     QPolygonF graph;
     graph.push_back(NDCToQPixel(0,0));
     
-    int nBins = _histo.getNumBins();
-    for (int i = 0; i < nBins; i++) {
-        float bin = _histo.getBinSizeNormalized(i);
-        if (isnan(bin)) {
-            printf("NAN\n");
-        }
-        graph.push_back(NDCToQPixel(i/(float)nBins, bin));
-        graph.push_back(NDCToQPixel(i/(float)nBins, bin));
+    vector<double> mapRange = _renderParams->GetMapperFunc(_renderParams->GetVariableName())->getMinMaxMapValue();
+    int nSamples = (width()-GetPadding()*2) / 2;
+    
+    for (int i = 0; i < nSamples; i++) {
+        float value = (i/(float)nSamples)*(mapRange[1]-mapRange[0])+mapRange[0];
+        float bin = _histo.getNormalizedBinSizeForValue(value);
+        printf("bin = %f\n", bin);
+        graph.push_back(NDCToQPixel(i/(float)nSamples, bin));
     }
+    
+//    int nBins = _histo.getNumBins();
+//    for (float i = 0; i < 1; i += 1.0f/nBins) {
+//        float bin = _histo.getNormalizedBinSizeForNormalizedValue(i - 0.5);
+//        if (isnan(bin)) {
+//            printf("NAN\n");
+//        }
+//        graph.push_back(NDCToQPixel(i, bin));
+//        graph.push_back(NDCToQPixel((i+1/(float)nBins), bin));
+//    }
     
     graph.push_back(NDCToQPixel(1,0));
     

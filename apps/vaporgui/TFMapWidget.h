@@ -32,6 +32,7 @@ public:
     int width() const { return _width; }
     int height() const { return _height; }
     void resize(int width, int height);
+    void update();
     
     virtual void paintEvent(QPainter &p) = 0;
     virtual void mousePressEvent      (QMouseEvent *event);
@@ -42,8 +43,6 @@ public:
 protected:
     void drawControl(QPainter &p, const QPointF &pos, bool selected = false) const;
     virtual TFInfoWidget *createInfoWidget() = 0;
-    
-    void update();
     
     glm::vec2 NDCToPixel(const glm::vec2 &v) const;
     QPointF   NDCToQPixel(const glm::vec2 &v) const;

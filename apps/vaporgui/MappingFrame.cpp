@@ -679,10 +679,10 @@ int MappingFrame::histoValue(const QPoint &p)
   QPoint pos = mapFromParent(p);
  
   float x = xWorldToData(xViewToWorld(pos.x()));
-  if (_histogram->getMaxData() <= _histogram->getMinData()) 
+  if (_histogram->getMaxMapData() <= _histogram->getMinMapData()) 
     return 0;
-  float ind = (x - _histogram->getMinData())
-    / (_histogram->getMaxData() - _histogram->getMinData());
+  float ind = (x - _histogram->getMinMapData())
+    / (_histogram->getMaxMapData() - _histogram->getMinMapData());
 
   if (ind < 0.f || ind >= 1.f)
   {
@@ -1358,16 +1358,16 @@ int MappingFrame::drawHistogram() {
 	glBegin(GL_QUADS);
     {
       glTexCoord2f(0.0f, 0.0f);
-      glVertex2f(xDataToWorld(_histogram->getMinData()), 0.0);
+      glVertex2f(xDataToWorld(_histogram->getMinMapData()), 0.0);
       
       glTexCoord2f(0.0f, 1.0f);
-      glVertex2f(xDataToWorld(_histogram->getMinData()), 1.0);
+      glVertex2f(xDataToWorld(_histogram->getMinMapData()), 1.0);
       
       glTexCoord2f(1.0f, 1.0f);
-      glVertex2f(xDataToWorld(_histogram->getMaxData()), 1.0);
+      glVertex2f(xDataToWorld(_histogram->getMaxMapData()), 1.0);
       
       glTexCoord2f(1.0f, 0.0f); 
-      glVertex2f(xDataToWorld(_histogram->getMaxData()), 0.0); 
+      glVertex2f(xDataToWorld(_histogram->getMaxMapData()), 0.0); 
     }
 	glEnd();
 
