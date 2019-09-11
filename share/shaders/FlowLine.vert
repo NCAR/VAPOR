@@ -7,11 +7,11 @@ uniform mat4 MV;
 uniform mat4 Projection;
 
 out float scalarV;
-out vec4  vertClip;
+out vec3  vertModel;
 
 void main(void)
 {
-    vertClip    = Projection * MV * vec4( vertInfo.xyz, 1.0 );
+    gl_Position = Projection * MV * vec4( vertInfo.xyz, 1.0 );
     scalarV     = vertInfo.w;
-    gl_Position = vertClip;
+    vertModel   = vertInfo.xyz;
 }
