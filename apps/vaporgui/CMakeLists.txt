@@ -94,6 +94,8 @@ set (SRCS
 	QPaintUtils.h
 	VSection.cpp
 	VSection.h
+	VLineItem.cpp
+	VLineItem.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
