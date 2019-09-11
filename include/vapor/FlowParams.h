@@ -89,6 +89,9 @@ public:
     int                 GetPastNumOfTimeSteps() const;
     void                SetPastNumOfTimeSteps( int );
 
+    int                 GetSeedInjInterval() const;
+    void                SetSeedInjInterval( int );
+
 protected:
 
     static const std::string    _isSteadyTag;
@@ -105,6 +108,7 @@ protected:
     static const std::string    _rakeBiasVariable;
     static const std::string    _rakeBiasStrength;
     static const std::string    _pastNumOfTimeSteps;
+    static const std::string    _seedInjInterval;
 
 };
 

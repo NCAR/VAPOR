@@ -2,7 +2,7 @@
 
 using namespace VAPoR;
 
-const std::string FlowParams::_isSteadyTag = "isSteadyTag";
+const std::string FlowParams::_isSteadyTag           = "isSteadyTag";
 const std::string FlowParams::_velocityMultiplierTag = "velocityMultiplierTag";
 const std::string FlowParams::_steadyNumOfStepsTag   = "steadyNumOfStepsTag";
 const std::string FlowParams::_seedGenModeTag        = "seedGenModeTag";
@@ -16,6 +16,7 @@ const std::string FlowParams::_rakeNumOfSeedsTag     = "rakeNumOfSeedsTag";
 const std::string FlowParams::_rakeBiasVariable      = "rakeBiasVariable";
 const std::string FlowParams::_rakeBiasStrength      = "rakeBiasStrength";
 const std::string FlowParams::_pastNumOfTimeSteps    = "pastNumOfTimeSteps";
+const std::string FlowParams::_seedInjInterval       = "seedInjInterval";
 
 static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
 
@@ -254,4 +255,17 @@ void
 FlowParams::SetPastNumOfTimeSteps( int val )
 {
     SetValueLong( _pastNumOfTimeSteps, "how many past time steps to render", val );
+}
+
+int
+FlowParams::GetSeedInjInterval() const
+{
+    // return -1 as an obvious invalid value. Valid values are greater than 0
+    return int(GetValueLong( _seedInjInterval, -1 ));
+}
+
+void 
+FlowParams::SetSeedInjInterval( int val )
+{
+    SetValueLong( _seedInjInterval, "What's the interval of injecting seeds into an unsteady flow advection", val );
 }
