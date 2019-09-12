@@ -473,6 +473,13 @@ bool is_int(std::string str)
     return str.find_first_not_of("0123456789") == std::string::npos;
 }
 
+template<class T> void _sanitizeFloats(T *buffer, size_t n)
+{
+    for (size_t i = 0; i < n; i++) {
+        if (isnan(buffer[i])) buffer[i] = INFINITY;
+    }
+}
+
 };    // namespace
 
 DataMgr::DataMgr(string format, size_t mem_size, int nthreads)
@@ -2904,24 +2911,32 @@ int DataMgr::_openVariableRead(size_t ts, string varname, int level, int lod)
 
 template<class T> int DataMgr::_readRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
 {
+    int         rc = 0;
     DerivedVar *derivedVar = _getDerivedVar(_openVarName);
     if (derivedVar) {
         VAssert((std::is_same<T, float>::value) == true);
-        return (derivedVar->ReadRegionBlock(fd, min, max, (float *)region));
+        rc = derivedVar->ReadRegionBlock(fd, min, max, (float *)region);
+    } else {
+        rc = _dc->ReadRegionBlock(fd, min, max, region);
     }
 
-    return (_dc->ReadRegionBlock(fd, min, max, region));
+    _sanitizeFloats(region, Wasp::VProduct(Wasp::Dims(min, max)));
+    return (rc);
 }
 
 template<class T> int DataMgr::_readRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, T *region)
 {
+    int         rc = 0;
     DerivedVar *derivedVar = _getDerivedVar(_openVarName);
     if (derivedVar) {
         VAssert((std::is_same<T, float>::value) == true);
-        return (derivedVar->ReadRegion(fd, min, max, (float *)region));
+        rc = derivedVar->ReadRegion(fd, min, max, (float *)region);
+    } else {
+        rc = _dc->ReadRegion(fd, min, max, region);
     }
 
-    return (_dc->ReadRegion(fd, min, max, region));
+    _sanitizeFloats(region, Wasp::VProduct(Wasp::Dims(min, max)));
+    return (rc);
 }
 
 int DataMgr::_closeVariable(int fd)
