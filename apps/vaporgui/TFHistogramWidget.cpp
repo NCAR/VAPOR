@@ -70,24 +70,20 @@ void TFHistogramMap::paintEvent(QPainter &p)
     graph.push_back(NDCToQPixel(0,0));
     
     vector<double> mapRange = _renderParams->GetMapperFunc(_renderParams->GetVariableName())->getMinMaxMapValue();
-    int nSamples = (width()-GetPadding()*2) / 2;
     
-    for (int i = 0; i < nSamples; i++) {
-        float value = (i/(float)nSamples)*(mapRange[1]-mapRange[0])+mapRange[0];
-        float bin = _histo.getNormalizedBinSizeForValue(value);
-        printf("bin = %f\n", bin);
-        graph.push_back(NDCToQPixel(i/(float)nSamples, bin));
+    int startBin = _histo.getBinIndexForValue(mapRange[0]);
+    int endBin = _histo.getBinIndexForValue(mapRange[1]);
+    int stride = 1;
+    while ((endBin - startBin)/stride >= 2 * (width() - GetPadding()*2))
+        stride *= 2;
+    printf("Nbins = %i\n", endBin-startBin);
+    
+    for (int i = startBin; i < endBin; i += stride) {
+        float bin = _histo.getNormalizedBinSize(i);
+        bin = Min(1.0f, bin);
+        
+        graph.push_back(NDCToQPixel((i-startBin)/(float)(endBin-startBin), bin));
     }
-    
-//    int nBins = _histo.getNumBins();
-//    for (float i = 0; i < 1; i += 1.0f/nBins) {
-//        float bin = _histo.getNormalizedBinSizeForNormalizedValue(i - 0.5);
-//        if (isnan(bin)) {
-//            printf("NAN\n");
-//        }
-//        graph.push_back(NDCToQPixel(i, bin));
-//        graph.push_back(NDCToQPixel((i+1/(float)nBins), bin));
-//    }
     
     graph.push_back(NDCToQPixel(1,0));
     

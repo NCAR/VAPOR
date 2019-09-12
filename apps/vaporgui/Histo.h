@@ -41,10 +41,11 @@ public:
 	void addToBin(float val);	
 	long getMaxBinSize();
     int getNumBins() const;
-	long getBinSize(int posn) const {return _binArray[posn];}
+    long getBinSize(int index) const;
     float getNormalizedBinSize(int bin) const;
     float getNormalizedBinSizeForValue(float v) const;
     float getNormalizedBinSizeForNormalizedValue(float v) const;
+    int getBinIndexForValue(float v);
 	float getMinMapData(){return _minMapData;}
 	float getMaxMapData(){return _maxMapData;}
 	
