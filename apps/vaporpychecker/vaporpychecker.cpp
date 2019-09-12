@@ -50,7 +50,7 @@ string pyErr() {
 	}
 
 	PyObject *output = PyObject_GetAttrString(catcher,"value");
-	return(PyString_AsString(output));
+	return(_PyUnicode_AsString(output));
 }
 
 int	main(int argc, char **argv) {
