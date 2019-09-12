@@ -54,8 +54,9 @@ TFEditor::TFEditor()
     menu->addAction("Load Transfer Function", this, SLOT(_loadTransferFunction()));
     menu->addSeparator();
     menu->addAction("Auto Update Histogram")->setCheckable(true);
-    QAction *histogramDynamicScalingAction = menu->addAction("Histogram Dynamic Scaling");
+    QAction *histogramDynamicScalingAction = menu->addAction("Histogram Dynamic Scaling", this, SLOT(_histogramDynamicScalingToggled(bool)));
     histogramDynamicScalingAction->setCheckable(true);
+    histogramDynamicScalingAction->setChecked(_maps->histo->DynamicScaling);
     QAction *test = new QAction("TEST", this);
     test->setCheckable(true);
     menu->addAction(test);
@@ -187,6 +188,11 @@ void TFEditor::_saveTransferFunction()
         MSG_ERR("Failed to save transfer function");
 }
 
+void TFEditor::_histogramDynamicScalingToggled(bool on)
+{
+    _maps->histo->DynamicScaling = on;
+}
+
 
 
 
@@ -305,7 +311,9 @@ TFMapsGroup::TFMapsGroup()
     TFMapWidget *o;
     add(o= new TFOpacityWidget);
     o->AddMap(new TFColorMap(o));
-    add(histo = new TFHistogramWidget);
+    auto histoWidget = new TFHistogramWidget;
+    histo = (TFHistogramMap *)histoWidget->GetMaps()[0];
+    add(histoWidget);
     add(new TFColorWidget);
 }
 
