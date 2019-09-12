@@ -41,7 +41,7 @@ bool StructuredGrid::GetCellNodes(const size_t cindices[], size_t nodes[], int &
     //
     vector<size_t> indices;
 
-    if (dims.size() == 2) {
+    if (dims.size() == 2 || (dims.size() == 3 && dims[2] < 2)) {
         nodes[0] = cCindices[0];
         nodes[1] = cCindices[1];
 
@@ -55,7 +55,7 @@ bool StructuredGrid::GetCellNodes(const size_t cindices[], size_t nodes[], int &
         nodes[7] = cCindices[1] + 1;
         n = 4;
 
-    } else if (dims.size() == 3 && dims[2] > 1) {
+    } else if (dims.size() == 3) {
         nodes[0] = cCindices[0];
         nodes[1] = cCindices[1];
         nodes[2] = cCindices[2];
