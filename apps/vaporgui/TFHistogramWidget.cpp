@@ -76,11 +76,15 @@ void TFHistogramMap::paintEvent(QPainter &p)
     int stride = 1;
     while ((endBin - startBin)/stride >= 2 * (width() - GetPadding()*2))
         stride *= 2;
-    printf("Nbins = %i\n", endBin-startBin);
+    
+    float maxBin;
+    if (DynamicScaling)
+        maxBin = _histo.getMaxBinSizeBetweenIndices(startBin, endBin);
+    else
+        maxBin = _histo.getMaxBinSize();
     
     for (int i = startBin; i < endBin; i += stride) {
-        float bin = _histo.getNormalizedBinSize(i);
-        bin = Min(1.0f, bin);
+        float bin = _histo.getBinSize(i) / maxBin;
         
         graph.push_back(NDCToQPixel((i-startBin)/(float)(endBin-startBin), bin));
     }

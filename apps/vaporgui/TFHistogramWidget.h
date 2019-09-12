@@ -10,6 +10,7 @@ class TFHistogramMap : public TFMap {
     Q_OBJECT
     
 public:
+    bool DynamicScaling = true;
     
     TFHistogramMap(TFMapWidget *parent);
     

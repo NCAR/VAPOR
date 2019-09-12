@@ -39,9 +39,10 @@ public:
 	void reset(int newNumBins = -1);
 	void reset(int newNumBins, float mnData, float mxData);
 	void addToBin(float val);	
-	long getMaxBinSize();
+	int getMaxBinSize();
+    int getMaxBinSizeBetweenIndices(const int start, const int end) const;
     int getNumBins() const;
-    long getBinSize(int index) const;
+    int getBinSize(int index) const;
     float getNormalizedBinSize(int bin) const;
     float getNormalizedBinSizeForValue(float v) const;
     float getNormalizedBinSizeForNormalizedValue(float v) const;

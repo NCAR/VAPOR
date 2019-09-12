@@ -132,11 +132,35 @@ void Histo::addToBin(float val) {
 	}
 }
 	
-long Histo::getMaxBinSize()
+int Histo::getMaxBinSize()
 {
     if (_maxBinSize == -1) // For legacy purposes. Can remove with new TF Editor
         calculateMaxBinSize();
-    return _maxBinSize;
+    if (_maxBinSize == 0)
+        return 1;
+    else
+        return _maxBinSize;
+}
+
+int Histo::getMaxBinSizeBetweenIndices(const int start, const int end) const
+{
+    int maxBin = 0;
+    
+    if (start < 0)
+        for (int i = max(0, start+_nBinsBelow); i < min(end+_nBinsBelow, _nBinsBelow); i++)
+            maxBin = maxBin < _below[i] ? _below[i] : maxBin;
+    
+    for (int i = max(start, 0); i < min(end, _numBins); i++)
+        maxBin = maxBin < _binArray[i] ? _binArray[i] : maxBin;
+    
+    if (end >= _numBins)
+        for (int i = max(start-_numBins, 0); i < min(end-_numBins, _nBinsAbove); i++)
+            maxBin = maxBin < _above[i] ? _above[i] : maxBin;
+    
+    if (maxBin == 0)
+        return 1;
+    else
+        return maxBin;
 }
 
 int Histo::getNumBins() const
@@ -144,7 +168,7 @@ int Histo::getNumBins() const
     return _numBins;
 }
 
-long Histo::getBinSize(int index) const
+int Histo::getBinSize(int index) const
 {
     if (index < 0) {
         index += _nBinsBelow;

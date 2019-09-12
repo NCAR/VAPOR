@@ -54,6 +54,8 @@ TFEditor::TFEditor()
     menu->addAction("Load Transfer Function", this, SLOT(_loadTransferFunction()));
     menu->addSeparator();
     menu->addAction("Auto Update Histogram")->setCheckable(true);
+    QAction *histogramDynamicScalingAction = menu->addAction("Histogram Dynamic Scaling");
+    histogramDynamicScalingAction->setCheckable(true);
     QAction *test = new QAction("TEST", this);
     test->setCheckable(true);
     menu->addAction(test);
