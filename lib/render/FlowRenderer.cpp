@@ -84,7 +84,8 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
         _cache_rake[i] = 0.0f;
     for( int i = 0; i < 4; i++ )
         _cache_rakeNumOfSeeds[i] = 1;
-    _cache_rakeBiasStrength = 1.0f;
+    _cache_rakeBiasStrength = 0;
+    _cache_seedInjInterval  = 0;
 
     _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
     _colorStatus            = FlowStatus::SIMPLE_OUTOFDATE;
@@ -643,9 +644,13 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
             if( _cache_currentTS     < params->GetCurrentTimestep() )
             {
                 if( _colorStatus    == FlowStatus::UPTODATE )
+                {
                     _colorStatus     = FlowStatus::TIME_STEP_OOD;
+                }
                 if( _velocityStatus == FlowStatus::UPTODATE )
+                {
                     _velocityStatus  = FlowStatus::TIME_STEP_OOD;
+                }
             }
             _cache_currentTS        = params->GetCurrentTimestep();
             _cache_steadyNumOfSteps = params->GetSteadyNumOfSteps();
@@ -655,6 +660,13 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
             _cache_isSteady         = false;
             _cache_steadyNumOfSteps = params->GetSteadyNumOfSteps();
             _cache_currentTS        = params->GetCurrentTimestep();
+            _colorStatus            = FlowStatus::SIMPLE_OUTOFDATE;
+            _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
+        }
+
+        if( _cache_seedInjInterval != params->GetSeedInjInterval() )
+        {
+            _cache_seedInjInterval  = params->GetSeedInjInterval();
             _colorStatus            = FlowStatus::SIMPLE_OUTOFDATE;
             _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
         }
