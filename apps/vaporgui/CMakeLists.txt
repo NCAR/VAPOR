@@ -88,6 +88,8 @@ set (SRCS
 	TFMapWidget.h
 	TFHistogramInfoWidget.cpp
 	TFHistogramInfoWidget.h
+	TFIsoValueWidget.cpp
+	TFIsoValueWidget.h
 	QRangeSliderTextCombo.cpp
 	QRangeSliderTextCombo.h
 	QPaintUtils.cpp

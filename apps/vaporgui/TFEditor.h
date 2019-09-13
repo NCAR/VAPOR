@@ -21,6 +21,7 @@ class TFMapsGroup;
 class TFMapWidget;
 class TFMap;
 class TFMapsInfoGroup;
+class TFIsoValueWidget;
 
 class TFEditor : public VSection {
     Q_OBJECT
@@ -37,6 +38,7 @@ private:
     ParamsWidgetDropdown *colorMapTypeDropdown;
     TFMapsGroup *_maps;
     TFMapsInfoGroup *_mapsInfo;
+    TFIsoValueWidget *_iso;
     
     void _updateMappingRangeControl(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     void _getDataRange(VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams, float *min, float *max) const;

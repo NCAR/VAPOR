@@ -74,7 +74,8 @@ void TFHistogramMap::paintEvent(QPainter &p)
     int startBin = _histo.getBinIndexForValue(mapRange[0]);
     int endBin = _histo.getBinIndexForValue(mapRange[1]);
     int stride = 1;
-    while ((endBin - startBin)/stride >= 2 * (width() - GetPadding()*2))
+    QMargins padding = GetPadding();
+    while ((endBin - startBin)/stride >= 2 * (width() - (padding.left()+padding.right())))
         stride *= 2;
     
     float maxBin;

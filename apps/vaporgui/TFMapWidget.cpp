@@ -78,7 +78,8 @@ void TFMap::update()
 
 glm::vec2 TFMap::NDCToPixel(const glm::vec2 &v) const
 {
-    return vec2(PADDING + v.x * (width()-2*PADDING), PADDING + (1.0f - v.y) * (height()-2*PADDING));
+    const QRect p = paddedRect();
+    return vec2(p.x() + v.x * p.width(), p.y() + (1.0f - v.y) * p.height());
 }
 
 QPointF TFMap::NDCToQPixel(const glm::vec2 &v) const
@@ -109,7 +110,8 @@ glm::vec2 TFMap::PixelToNDC(const QPointF &p) const
 
 QRect TFMap::paddedRect() const
 {
-    return QRect(PADDING, PADDING, width()-PADDING*2, height()-PADDING*2);
+    const QMargins p = GetPadding();
+    return QRect(p.left(), p.top(), width()-(p.left()+p.right()), height()-(p.top()+p.bottom()));
 }
 
 QRect TFMap::rect() const
@@ -117,9 +119,9 @@ QRect TFMap::rect() const
     return QRect(0, 0, width(), height());
 }
 
-int TFMap::GetPadding() const
+QMargins TFMap::GetPadding() const
 {
-    return PADDING;
+    return QMargins(PADDING, PADDING, PADDING, PADDING);
 }
 
 int TFMap::GetControlPointRadius() const
@@ -195,17 +197,20 @@ void TFMapWidget::_mapActivated(TFMap *who)
     emit Activated(this);
 }
 
+#include <vapor/GLManager.h>
 void TFMapWidget::paintEvent(QPaintEvent* event)
 {
     QFrame::paintEvent(event);
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
     
+    void *s = VAPoR::GLManager::BeginTimer();
     for (int i = _maps.size() - 1; i >= 0; i--) {
         p.save();
         _maps[i]->paintEvent(p);
         p.restore();
     }
+    printf("Paint took %fs\n", VAPoR::GLManager::EndTimer(s));
 }
 
 void TFMapWidget::mousePressEvent(QMouseEvent *event)

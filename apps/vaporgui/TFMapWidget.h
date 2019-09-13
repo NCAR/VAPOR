@@ -52,7 +52,7 @@ protected:
     QRect     paddedRect() const;
     QRect     rect() const;
     
-    int GetPadding() const;
+    virtual QMargins GetPadding() const;
     int GetControlPointRadius() const;
     
 signals:
