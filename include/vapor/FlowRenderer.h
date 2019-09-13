@@ -135,6 +135,10 @@ protected:
     // Color the last particle in a stream
     int  _colorLastParticle();
 
+    void _dupSeedsNewTime( std::vector<flow::Particle>& seeds,
+                           size_t  firstN,                      // First N particles to duplicate
+                           float   newTime )   const;           // New time to assign to particles
+
 
 #ifndef WIN32
     double _getElapsedSeconds( const struct timeval* begin, const struct timeval* end ) const;
