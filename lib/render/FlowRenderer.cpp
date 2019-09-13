@@ -203,13 +203,13 @@ FlowRenderer::_paintGL( bool fast )
         {
             std::vector<flow::Particle> seeds;
             if( _cache_seedGenMode == 0 )       // Generate seeds from a built-in function
-                _genSeedsXY( seeds, _timestamps.at(0) );
+                _genSeedsXY( seeds );
             else if( _cache_seedGenMode == 2 )  // Seeds from a rake, uniformly
-                _genSeedsRakeUniform( seeds, _timestamps.at(0) );
+                _genSeedsRakeUniform( seeds );
             else if( _cache_seedGenMode == 3 )  // Seeds from a rake, randomly
-                _genSeedsRakeRandom( seeds, _timestamps.at(0) );
+                _genSeedsRakeRandom( seeds );
             else if( _cache_seedGenMode == 4 )  // Seeds from a rake, biased
-                _genSeedsRakeRandomBiased( seeds, _timestamps.at(0) );
+                _genSeedsRakeRandomBiased( seeds );
 
             // Note on UseSeedParticles(): this is the only function that resets
             //   all the streams inside of an Advection class.
@@ -675,7 +675,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
 
 
 int
-FlowRenderer::_genSeedsXY( std::vector<flow::Particle>& seeds, float timeVal ) const
+FlowRenderer::_genSeedsXY( std::vector<flow::Particle>& seeds ) const
 {
     int numX = 4, numY = 4;
     std::vector<double>  extMin, extMax;
@@ -685,6 +685,7 @@ FlowRenderer::_genSeedsXY( std::vector<flow::Particle>& seeds, float timeVal ) c
     float stepY = (extMax[1] - extMin[1]) / (numY + 1.0f);
     float stepZ = extMin[2] + (extMax[2] - extMin[2]) / 4.0f;
 
+    float timeVal = _timestamps.at(0);
     seeds.resize( numX * numY );
     for( int y = 0; y < numY; y++ )
         for( int x = 0; x < numX; x++ )
@@ -701,8 +702,7 @@ FlowRenderer::_genSeedsXY( std::vector<flow::Particle>& seeds, float timeVal ) c
 
 
 int
-FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds, 
-                                    float timeVal ) const
+FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
     VAssert( params );
@@ -736,26 +736,28 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds,
     }
 
     /* Populate the list of seeds */
-    seeds.resize( rakeSeeds[0] * rakeSeeds[1] * rakeSeeds[2] );
-    int idx = 0;
+    float timeVal = _timestamps.at(0);
+    glm::vec3 loc;
+    seeds.clear();
     for( int k = 0; k < rakeSeeds[2]; k++ )
         for( int j = 0; j < rakeSeeds[1]; j++ )
             for( int i = 0; i < rakeSeeds[0]; i++ )
             {
-                seeds[idx].location.x = start[0] + float(i) * step[0];
-                seeds[idx].location.y = start[1] + float(j) * step[1];
-                seeds[idx].location.z = start[2] + float(k) * step[2];
-                seeds[idx].time       = timeVal;
-                idx++;
+                loc.x = start[0] + float(i) * step[0];
+                loc.y = start[1] + float(j) * step[1];
+                loc.z = start[2] + float(k) * step[2];
+                seeds.emplace_back( loc, timeVal );
             }
+
+    /* If in unsteady case and there are multiple seed injections, we insert more seeds */
+    // TODO
 
     return 0;
 }
 
 
 int
-FlowRenderer::_genSeedsRakeRandom( std::vector<flow::Particle>& seeds, 
-                                   float timeVal ) const
+FlowRenderer::_genSeedsRakeRandom( std::vector<flow::Particle>& seeds ) const
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
 
@@ -784,6 +786,7 @@ FlowRenderer::_genSeedsRakeRandom( std::vector<flow::Particle>& seeds,
     std::uniform_real_distribution<float> distY( rake[2], rake[3] );
     std::uniform_real_distribution<float> distZ( rake[4], rake[5] );
 
+    float timeVal = _timestamps.at(0);
     seeds.resize( totalNumOfSeeds );
     for( long i = 0; i < totalNumOfSeeds; i++ )
     {
@@ -798,8 +801,7 @@ FlowRenderer::_genSeedsRakeRandom( std::vector<flow::Particle>& seeds,
 
 
 int
-FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds, 
-                                         float timeVal ) const
+FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds ) const
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
 
@@ -863,6 +865,7 @@ FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds,
     seeds.clear();
     glm::vec3 loc;
     std::vector<double> locD( 3 );
+    float timeVal = _timestamps.at(0);
     // This is the total number of seeds to generate, based on the bias strength.
     long numOfSeedsToGen = numOfSeedsNeeded * long(std::abs( biasStren ) + 1.0f);   
     long numOfTrials = 0;
