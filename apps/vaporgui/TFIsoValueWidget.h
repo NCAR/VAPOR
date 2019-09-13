@@ -22,7 +22,9 @@ protected:
     TFInfoWidget *createInfoWidget() override;
     void paintEvent(QPainter &p) override;
     void drawControl(QPainter &p, const QPointF &pos, bool selected = false) const;
-    float GetControlPointHeight() const;
+    float GetControlPointTriangleHeight() const;
+    float GetControlPointSquareHeight() const;
+    QRect GetControlPointArea(const QPoint &p) const;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -36,16 +38,18 @@ private:
     int _selectedId = -1;
     glm::vec2 _dragOffset;
     glm::vec2 m;
+    std::vector<float> _isoValues;
     
     bool controlPointContainsPixel(const glm::vec2 &cp, const glm::vec2 &pixel) const;
     
-    void moveControlPoint(int *index, float value, const VAPoR::ColorMap::Color &c);
+    int addControlPoint(float value);
+    void deleteControlPoint(int i);
     void moveControlPoint(int *index, float value);
     VAPoR::ColorMap *getColormap() const;
     void selectControlPoint(int index);
     int findSelectedControlPoint(const glm::vec2 &mouse) const;
     bool controlPointContainsPixel(float cp, const glm::vec2 &pixel) const;
-    QPointF controlQPositionForValue(float value) const;
+    QPoint controlQPositionForValue(float value) const;
     glm::vec2 controlPositionForValue(float value) const;
     float controlXForValue(float value) const;
     float valueForControlX(float position) const;

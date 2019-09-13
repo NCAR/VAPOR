@@ -73,8 +73,8 @@ void TFIsoValueMap::paintEvent(QPainter &p)
         
         p.drawImage(paddedRect(), image);
         
-        for (int i = 0; i < cm->numControlPoints(); i++) {
-            drawControl(p, controlQPositionForValue(cm->controlPointValueNormalized(i)), i == _selectedId);
+        for (int i = 0; i < _isoValues.size(); i++) {
+            drawControl(p, controlQPositionForValue(_isoValues[i]), i == _selectedId);
         }
     }
 }
@@ -82,7 +82,8 @@ void TFIsoValueMap::paintEvent(QPainter &p)
 void TFIsoValueMap::drawControl(QPainter &p, const QPointF &pos, bool selected) const
 {
     float r = CONTROL_POINT_RADIUS;
-    float t = 2*r*0.618;
+    float t = GetControlPointTriangleHeight();
+    float s = GetControlPointSquareHeight();
     
     QPen pen(Qt::darkGray, 0.5);
     QBrush brush(QColor(0xfa, 0xfa, 0xfa));
@@ -94,21 +95,37 @@ void TFIsoValueMap::drawControl(QPainter &p, const QPointF &pos, bool selected) 
     QPolygonF graph;
     graph.push_back(pos + QPointF( 0,  0));
     graph.push_back(pos + QPointF(-r,  t));
-    graph.push_back(pos + QPointF(-r,  t+r*1.618));
-    graph.push_back(pos + QPointF( r,  t+r*1.618));
+    graph.push_back(pos + QPointF(-r,  t+s));
+    graph.push_back(pos + QPointF( r,  t+s));
     graph.push_back(pos + QPointF( r,  t));
     
     p.drawPolygon(graph);
 }
 
+float TFIsoValueMap::GetControlPointTriangleHeight() const
+{
+    return GetControlPointRadius() * 2 * 0.618;
+}
+
+float TFIsoValueMap::GetControlPointSquareHeight() const
+{
+    return GetControlPointRadius() * 1.618;
+}
+
+QRect TFIsoValueMap::GetControlPointArea(const QPoint &p) const
+{
+    float h = GetControlPointSquareHeight() + GetControlPointTriangleHeight();
+    float r = GetControlPointRadius();
+    return QRect(p-QPoint(r, 0), p+QPoint(r, h));
+}
+
 void TFIsoValueMap::mousePressEvent(QMouseEvent *event)
 {
     emit Activated(this);
-    ColorMap *cm = getColormap();
     vec2 mouse(event->pos().x(), event->pos().y());
     
-    for (int i = 0; i < cm->numControlPoints(); i++) {
-        float value = cm->controlPointValueNormalized(i);
+    for (int i = 0; i < _isoValues.size(); i++) {
+        float value = _isoValues[i];
         if (controlPointContainsPixel(value, mouse)) {
             _isDraggingControl = true;
             _draggingControlID = i;
@@ -153,7 +170,7 @@ void TFIsoValueMap::mouseDoubleClickEvent(QMouseEvent *event) {
     ColorMap *cm = getColormap();
     int selectedId = findSelectedControlPoint(mouse);
     if (selectedId >= 0) {
-        cm->deleteControlPoint(selectedId);
+        deleteControlPoint(selectedId);
         DeselectControlPoint();
         update();
         return;
@@ -161,24 +178,32 @@ void TFIsoValueMap::mouseDoubleClickEvent(QMouseEvent *event) {
     
     float newVal = valueForControlX(mouse.x);
     if (newVal >= 0 && newVal <= 1)
-        selectControlPoint(cm->addNormControlPointAt(newVal));
+        selectControlPoint(addControlPoint(newVal));
     
     update();
 }
 
-void TFIsoValueMap::moveControlPoint(int *index, float value, const VAPoR::ColorMap::Color &c)
+int TFIsoValueMap::addControlPoint(float value)
 {
-    ColorMap *cm = getColormap();
-    
-    cm->deleteControlPoint(*index);
-    *index = cm->addNormControlPoint(value, c);
+    for (int i = 0; i < _isoValues.size(); i++) {
+        if (value < _isoValues[i]) {
+            _isoValues.insert(_isoValues.begin()+i, value);
+            return i;
+        }
+    }
+    _isoValues.push_back(value);
+    return _isoValues.size()-1;
+}
+
+void TFIsoValueMap::deleteControlPoint(int i)
+{
+    _isoValues.erase(_isoValues.begin() + i);
 }
 
 void TFIsoValueMap::moveControlPoint(int *index, float value)
 {
-    ColorMap *cm = getColormap();
-    ColorMap::Color c = cm->controlPointColor(_draggingControlID);
-    moveControlPoint(index, value, c);
+    deleteControlPoint(*index);
+    *index = addControlPoint(value);
 }
 
 ColorMap *TFIsoValueMap::getColormap() const
@@ -206,33 +231,32 @@ void TFIsoValueMap::DeselectControlPoint()
 
 void TFIsoValueMap::UpdateFromInfo(float value, QColor color)
 {
-    moveControlPoint(&_selectedId, value, QColorToVColor(color));
+//    moveControlPoint(&_selectedId, value, QColorToVColor(color));
 }
 
 int TFIsoValueMap::findSelectedControlPoint(const glm::vec2 &mouse) const
 {
-    const ColorMap *cm = getColormap();
-    const int n = cm->numControlPoints();
-    for (int i = 0; i < n; i++)
-        if (controlPointContainsPixel(cm->controlPointValueNormalized(i), mouse))
+    for (int i = 0; i < _isoValues.size(); i++)
+        if (controlPointContainsPixel(_isoValues[i], mouse))
             return i;
     return -1;
 }
 
-bool TFIsoValueMap::controlPointContainsPixel(float cp, const vec2 &pixel) const
+bool TFIsoValueMap::controlPointContainsPixel(float cp, const vec2 &p) const
 {
-    return glm::distance(pixel, controlPositionForValue(cp)) <= GetControlPointRadius();
+    QRect rect = GetControlPointArea(controlQPositionForValue(cp));
+    return rect.contains(QPoint(p.x, p.y));
 }
 
-QPointF TFIsoValueMap::controlQPositionForValue(float value) const
+QPoint TFIsoValueMap::controlQPositionForValue(float value) const
 {
     const vec2 v = controlPositionForValue(value);
-    return QPointF(v.x, v.y);
+    return QPoint(v.x, v.y);
 }
 
 glm::vec2 TFIsoValueMap::controlPositionForValue(float value) const
 {
-    return vec2(controlXForValue(value), height()/2.f);
+    return vec2(controlXForValue(value), 0);
 }
 
 float TFIsoValueMap::controlXForValue(float value) const
