@@ -311,10 +311,9 @@ TFMapsGroup::TFMapsGroup()
     
     TFMapWidget *o;
     add(o= new TFOpacityWidget);
-    o->AddMap(new TFColorMap(o));
-    auto histoWidget = new TFHistogramWidget;
-    histo = (TFHistogramMap *)histoWidget->GetMaps()[0];
-    add(histoWidget);
+    histo = new TFHistogramMap(o);
+    o->AddMap(histo);
+    add(new TFIsoValueWidget);
     add(new TFColorWidget);
 }
 
@@ -367,6 +366,7 @@ void TFMapsInfoGroup::add(TFMapWidget *mapWidget)
 {
     for (TFMap *map : mapWidget->GetMaps()) {
         TFInfoWidget *info = map->GetInfoWidget();
+        if (!info) continue;
         _infos.push_back(info);
         addWidget(info);
         connect(map, SIGNAL(Activated(TFMap*)), this, SLOT(mapActivated(TFMap*)));

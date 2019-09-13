@@ -25,7 +25,7 @@ void TFIsoValueMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr,
 
 QSize TFIsoValueMap::minimumSizeHint() const
 {
-    return QSize(100, 30);
+    return GetControlPointArea(QPoint(0,0)).size();
 }
 
 void TFIsoValueMap::Deactivate()
@@ -45,43 +45,30 @@ TFInfoWidget *TFIsoValueMap::createInfoWidget()
     return nullptr;
 }
 
-#define CONTROL_POINT_RADIUS (4.0f)
-#define PADDING (CONTROL_POINT_RADIUS + 1.0f)
-
 void TFIsoValueMap::paintEvent(QPainter &p)
 {
     //     243 245 249
     p.fillRect(rect(), Qt::lightGray);
-    QPaintUtils::BoxDropShadow(p, paddedRect(), 10, QColor(0,0,0,120));
     
     if (_renderParams) {
         RenderParams *rp = _renderParams;
         
-        ColorMap *cm = rp->GetMapperFunc(rp->GetVariableName())->GetColorMap();
-        
-        
-        int nSamples = paddedRect().width();
-        unsigned char buf[nSamples*3];
-        float rgb[3];
-        for (int i = 0; i < nSamples; i++) {
-            cm->colorNormalized(i/(float)nSamples).toRGB(rgb);
-            buf[i*3+0] = rgb[0]*255;
-            buf[i*3+1] = rgb[1]*255;
-            buf[i*3+2] = rgb[2]*255;
-        }
-        QImage image(buf, nSamples, 1, QImage::Format::Format_RGB888);
-        
-        p.drawImage(paddedRect(), image);
-        
         for (int i = 0; i < _isoValues.size(); i++) {
             drawControl(p, controlQPositionForValue(_isoValues[i]), i == _selectedId);
+        }
+        
+        if (_isoValues.size() == 0) {
+            QFont font = getFont();
+            font.setPixelSize(rect().height());
+            p.setFont(font);
+            p.drawText(rect(), Qt::AlignCenter, "doubleclick to add isovalues");
         }
     }
 }
 
 void TFIsoValueMap::drawControl(QPainter &p, const QPointF &pos, bool selected) const
 {
-    float r = CONTROL_POINT_RADIUS;
+    float r = GetControlPointRadius();
     float t = GetControlPointTriangleHeight();
     float s = GetControlPointSquareHeight();
     
@@ -181,6 +168,13 @@ void TFIsoValueMap::mouseDoubleClickEvent(QMouseEvent *event) {
         selectControlPoint(addControlPoint(newVal));
     
     update();
+}
+
+QMargins TFIsoValueMap::GetPadding() const
+{
+    QMargins m = TFMap::GetPadding();
+    m.setTop(0);
+    return m;
 }
 
 int TFIsoValueMap::addControlPoint(float value)

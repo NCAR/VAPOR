@@ -29,6 +29,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;
+    QMargins GetPadding() const override;
     
 private:
     VAPoR::ParamsMgr *_paramsMgr = nullptr;
