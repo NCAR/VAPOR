@@ -87,6 +87,15 @@ void TFIsoValueMap::drawControl(QPainter &p, const QPointF &pos, bool selected) 
     graph.push_back(pos + QPointF( r,  t));
     
     p.drawPolygon(graph);
+    
+    if (selected) {
+        if (selected) {
+            p.setPen(Qt::NoPen);
+            p.setBrush(QBrush(Qt::black));
+            r *= 0.38;
+            p.drawEllipse(pos + QPointF(0, t + (s/3)), r, r);
+        }
+    }
 }
 
 float TFIsoValueMap::GetControlPointTriangleHeight() const
