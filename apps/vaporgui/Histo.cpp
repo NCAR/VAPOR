@@ -183,6 +183,14 @@ int Histo::getBinSize(int index) const
         return _binArray[index];
 }
 
+int Histo::getBinSize(int index, int stride) const
+{
+    int max = 0;
+    for (int i = index; i < index + stride; i++)
+        max = std::max(max, getBinSize(i));
+    return max;
+}
+
 float Histo::getNormalizedBinSize(int bin) const
 {
     if (_maxBinSize == 0)

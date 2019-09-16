@@ -86,7 +86,7 @@ void TFHistogramMap::paintEvent(QPainter &p)
         maxBin = _histo.getMaxBinSize();
     
     for (int i = startBin; i < endBin; i += stride) {
-        float bin = _histo.getBinSize(i) / maxBin;
+        float bin = _histo.getBinSize(i, stride) / maxBin;
         
         graph.push_back(NDCToQPixel((i-startBin)/(float)(endBin-startBin), bin));
     }

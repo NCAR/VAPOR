@@ -43,6 +43,7 @@ public:
     int getMaxBinSizeBetweenIndices(const int start, const int end) const;
     int getNumBins() const;
     int getBinSize(int index) const;
+    int getBinSize(int index, int stride) const;
     float getNormalizedBinSize(int bin) const;
     float getNormalizedBinSizeForValue(float v) const;
     float getNormalizedBinSizeForNormalizedValue(float v) const;
