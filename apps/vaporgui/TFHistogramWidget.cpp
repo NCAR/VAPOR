@@ -77,6 +77,7 @@ void TFHistogramMap::paintEvent(QPainter &p)
     QMargins padding = GetPadding();
     while ((endBin - startBin)/stride >= 2 * (width() - (padding.left()+padding.right())))
         stride *= 2;
+    startBin -= startBin % stride;
     
     float maxBin;
     if (DynamicScaling)
