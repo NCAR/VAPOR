@@ -4,6 +4,7 @@
 #include <vapor/RenderParams.h>
 #include <vapor/ParamsMgr.h>
 #include "QPaintUtils.h"
+#include "TFIsoValueInfoWidget.h"
 
 using namespace VAPoR;
 using glm::vec2;
@@ -35,14 +36,13 @@ void TFIsoValueMap::Deactivate()
 
 TFInfoWidget *TFIsoValueMap::createInfoWidget()
 {
-//    TFIsoValueInfoWidget *info = new TFIsoValueInfoWidget;
-//
-//    connect(this, SIGNAL(ControlPointDeselected()), info, SLOT(DeselectControlPoint()));
-//    connect(this, SIGNAL(UpdateInfo(float, QColor)), info, SLOT(SetControlPoint(float, QColor)));
-//    connect(info, SIGNAL(ControlPointChanged(float, QColor)), this, SLOT(UpdateFromInfo(float, QColor)));
-//
-//    return info;
-    return nullptr;
+    TFIsoValueInfoWidget *info = new TFIsoValueInfoWidget;
+
+    connect(this, SIGNAL(ControlPointDeselected()), info, SLOT(Deselect()));
+    connect(this, SIGNAL(UpdateInfo(float)), info, SLOT(SetControlPoint(float)));
+    connect(info, SIGNAL(ControlPointChanged(float)), this, SLOT(UpdateFromInfo(float)));
+
+    return info;
 }
 
 void TFIsoValueMap::paintEvent(QPainter &p)
@@ -213,9 +213,12 @@ void TFIsoValueMap::DeselectControlPoint()
     update();
 }
 
-void TFIsoValueMap::UpdateFromInfo(float value, QColor color)
+void TFIsoValueMap::UpdateFromInfo(float value)
 {
-//    moveControlPoint(&_selectedId, value, QColorToVColor(color));
+    if (_selectedId >= 0 && _selectedId < _isoValues.size()) {
+        moveControlPoint(&_selectedId, value);
+        
+    }
 }
 
 int TFIsoValueMap::findSelectedControlPoint(const glm::vec2 &mouse) const

@@ -90,6 +90,8 @@ set (SRCS
 	TFHistogramInfoWidget.h
 	TFIsoValueWidget.cpp
 	TFIsoValueWidget.h
+	TFIsoValueInfoWidget.cpp
+	TFIsoValueInfoWidget.h
 	QRangeSliderTextCombo.cpp
 	QRangeSliderTextCombo.h
 	QPaintUtils.cpp

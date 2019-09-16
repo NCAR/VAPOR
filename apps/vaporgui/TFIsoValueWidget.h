@@ -60,7 +60,7 @@ signals:
     
     public slots:
     void DeselectControlPoint();
-    void UpdateFromInfo(float value, QColor color);
+    void UpdateFromInfo(float value);
 };
 
 class TFIsoValueWidget : public TFMapWidget {
