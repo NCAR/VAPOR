@@ -6,6 +6,7 @@
 #include "ui_VolumeIsoAnnotationGUI.h"
 
 #include "vapor/VolumeIsoParams.h"
+#include "TFEditor.h"
 
 namespace VAPoR 
 {
@@ -25,6 +26,8 @@ public:
         setupUi(this);
         _variablesWidget->Reinit( (VariableFlags)(SCALAR | COLOR),
                                   (DimFlags)(THREED) );
+        
+        ((QVBoxLayout*)layout())->insertWidget(0, tf = new TFEditor);
     }
 
     void Update(VAPoR::DataMgr *dataMgr,
@@ -35,6 +38,7 @@ private slots:
 
 private:
     VAPoR::VolumeIsoParams* _isoParams;
+    TFEditor *tf;
 };
 
 

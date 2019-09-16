@@ -13,6 +13,7 @@ void VolumeIsoVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Re
     // _castingModeComboBox->setCurrentIndex( mode - 1 );
     
     _variablesWidget->Update(dataMgr, paramsMgr, params);
+    tf->Update(dataMgr, paramsMgr, params);
 }
 
 VolumeIsoAppearanceSubtab::VolumeIsoAppearanceSubtab(QWidget* parent) 
