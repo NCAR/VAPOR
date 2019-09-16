@@ -46,7 +46,6 @@ private:
     int addControlPoint(float value);
     void deleteControlPoint(int i);
     void moveControlPoint(int *index, float value);
-    VAPoR::ColorMap *getColormap() const;
     void selectControlPoint(int index);
     int findSelectedControlPoint(const glm::vec2 &mouse) const;
     bool controlPointContainsPixel(float cp, const glm::vec2 &pixel) const;
@@ -55,12 +54,9 @@ private:
     float controlXForValue(float value) const;
     float valueForControlX(float position) const;
     
-    static QColor VColorToQColor(const VAPoR::ColorMap::Color &c);
-    static VAPoR::ColorMap::Color QColorToVColor(const QColor &c);
-    
 signals:
     void ControlPointDeselected();
-    void UpdateInfo(float value, QColor color);
+    void UpdateInfo(float value);
     
     public slots:
     void DeselectControlPoint();

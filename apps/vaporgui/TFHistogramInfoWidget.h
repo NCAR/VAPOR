@@ -13,8 +13,6 @@ class TFHistogramInfoWidget : public TFInfoWidget {
 public:
     TFHistogramInfoWidget();
     
-    void Update(VAPoR::RenderParams *rParams);
-    
 public slots:
     void SetControlPoint(float value);
     void Deselect();
