@@ -210,19 +210,14 @@ void TFMapWidget::_mapActivated(TFMap *who)
 void TFMapWidget::_showContextMenu(const QPoint &qp)
 {
     vec2 p(qp.x(), qp.y());
-    QMenu contextMenu("Context Menu", this);
+    QMenu menu("Context Menu", this);
     
     for (auto map : _maps) {
-        auto actions = map->GetActionsForLocation(p);
-        if (!actions.isEmpty()) {
-            contextMenu.addActions(actions);
-            contextMenu.addSeparator();
-        }
-        for (auto act : actions)
-            act->setParent(&contextMenu);
+        map->PopulateContextMenu(&menu, p);
+        menu.addSeparator();;
     }
     
-    contextMenu.exec(mapToGlobal(qp));
+    menu.exec(mapToGlobal(qp));
 }
 
 #include <vapor/GLManager.h>

@@ -74,21 +74,14 @@ void TFOpacityMap::Deactivate()
     DeselectControlPoint();
 }
 
-QList<QAction *> TFOpacityMap::GetActionsForLocation(const glm::vec2 &p)
+void TFOpacityMap::PopulateContextMenu(QMenu *menu, const glm::vec2 &p)
 {
-    QList<QAction *> actions;
     auto selected = findSelectedControlPoint(p);
-    if (selected != _controlPoints.EndPoints()) {
-        QAction *deleteControl = new QAction("Delete control point", nullptr);
-        connect(deleteControl, SIGNAL(triggered()), this, SLOT(menuDeleteSelectedControlPoint()));
-        actions.push_back(deleteControl);
-    } else {
-        QAction *addControl = new QAction("Add control point", nullptr);
-        connect(addControl, SIGNAL(triggered()), this, SLOT(menuAddControlPoint()));
-        actions.push_back(addControl);
-        addControl->setProperty("location", QVariant(qvec2(PixelToNDC(p))));
-    }
-    return actions;
+    
+    if (selected != _controlPoints.EndPoints())
+        menu->addAction("Delete control point", this, SLOT(menuDeleteSelectedControlPoint()));
+    else
+        menu->addAction("Add control point", this, SLOT(menuAddControlPoint()))->setProperty("location", QVariant(qvec2(PixelToNDC(p))));
 }
 
 TFInfoWidget *TFOpacityMap::createInfoWidget()

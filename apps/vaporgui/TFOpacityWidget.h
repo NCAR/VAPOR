@@ -107,7 +107,7 @@ public:
     
     QSize minimumSizeHint() const override;
     void Deactivate() override;
-    QList<QAction *> GetActionsForLocation(const glm::vec2 &p) override;
+    void PopulateContextMenu(QMenu *menu, const glm::vec2 &p) override;
     
 protected:
     TFInfoWidget *createInfoWidget() override;
