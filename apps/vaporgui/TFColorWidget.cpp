@@ -34,6 +34,16 @@ void TFColorMap::Deactivate()
     DeselectControlPoint();
 }
 
+void TFColorMap::PopulateContextMenu(QMenu *menu, const glm::vec2 &p)
+{
+    int selected = findSelectedControlPoint(p);
+    
+    if (selected != -1)
+        menu->addAction("Delete control point", this, SLOT(menuDeleteSelectedControlPoint()));
+    else
+        menu->addAction("Add control point", this, SLOT(menuAddControlPoint()))->setProperty("value", QVariant(valueForControlX(p.x)));
+}
+
 TFInfoWidget *TFColorMap::createInfoWidget()
 {
     TFColorInfoWidget *info = new TFColorInfoWidget;
@@ -128,20 +138,15 @@ void TFColorMap::mouseMoveEvent(QMouseEvent *event) {
 
 void TFColorMap::mouseDoubleClickEvent(QMouseEvent *event) {
     vec2 mouse = qvec2(event->pos());
-    ColorMap *cm = getColormap();
     int selectedId = findSelectedControlPoint(mouse);
     if (selectedId >= 0) {
-        cm->deleteControlPoint(selectedId);
-        DeselectControlPoint();
-        update();
+        deleteControlPoint(selectedId);
         return;
     }
     
     float newVal = valueForControlX(mouse.x);
     if (newVal >= 0 && newVal <= 1)
-        selectControlPoint(cm->addNormControlPointAt(newVal));
-    
-    update();
+        addControlPoint(newVal);
 }
 
 void TFColorMap::moveControlPoint(int *index, float value, const VAPoR::ColorMap::Color &c)
@@ -157,6 +162,20 @@ void TFColorMap::moveControlPoint(int *index, float value)
     ColorMap *cm = getColormap();
     ColorMap::Color c = cm->controlPointColor(_draggingControlID);
     moveControlPoint(index, value, c);
+}
+
+void TFColorMap::deleteControlPoint(int index)
+{
+    if (index == _selectedId)
+        DeselectControlPoint();
+    getColormap()->deleteControlPoint(index);
+    update();
+}
+
+void TFColorMap::addControlPoint(float value)
+{
+    selectControlPoint(getColormap()->addNormControlPointAt(value));
+    update();
 }
 
 ColorMap *TFColorMap::getColormap() const
@@ -185,6 +204,20 @@ void TFColorMap::DeselectControlPoint()
 void TFColorMap::UpdateFromInfo(float value, QColor color)
 {
     moveControlPoint(&_selectedId, value, QColorToVColor(color));
+}
+
+void TFColorMap::menuDeleteSelectedControlPoint()
+{
+    const ColorMap *cm = getColormap();
+    if (_selectedId >= 0 && _selectedId < cm->numControlPoints())
+        deleteControlPoint(_selectedId);
+}
+
+void TFColorMap::menuAddControlPoint()
+{
+    QVariant value = sender()->property("value");
+    if (value.isValid())
+        addControlPoint(value.toFloat());
 }
 
 int TFColorMap::findSelectedControlPoint(const glm::vec2 &mouse) const

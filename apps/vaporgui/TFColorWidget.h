@@ -17,6 +17,7 @@ public:
     
     QSize minimumSizeHint() const override;
     void Deactivate() override;
+    void PopulateContextMenu(QMenu *menu, const glm::vec2 &p) override;
     
 protected:
     TFInfoWidget *createInfoWidget() override;
@@ -39,6 +40,8 @@ private:
     
     void moveControlPoint(int *index, float value, const VAPoR::ColorMap::Color &c);
     void moveControlPoint(int *index, float value);
+    void deleteControlPoint(int index);
+    void addControlPoint(float value);
     VAPoR::ColorMap *getColormap() const;
     void selectControlPoint(int index);
     int findSelectedControlPoint(const glm::vec2 &mouse) const;
@@ -58,6 +61,10 @@ signals:
 public slots:
     void DeselectControlPoint();
     void UpdateFromInfo(float value, QColor color);
+    
+private slots:
+    void menuDeleteSelectedControlPoint();
+    void menuAddControlPoint();
 };
 
 class TFColorWidget : public TFMapWidget {
