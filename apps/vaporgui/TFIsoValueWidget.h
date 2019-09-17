@@ -40,6 +40,7 @@ private:
     glm::vec2 _dragOffset;
     glm::vec2 m;
     std::vector<float> _isoValues;
+    bool _equidistantIsoValues = true;
     
     bool controlPointContainsPixel(const glm::vec2 &cp, const glm::vec2 &pixel) const;
     

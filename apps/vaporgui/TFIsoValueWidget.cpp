@@ -120,17 +120,16 @@ void TFIsoValueMap::mousePressEvent(QMouseEvent *event)
     emit Activated(this);
     vec2 mouse(event->pos().x(), event->pos().y());
     
-    for (int i = 0; i < _isoValues.size(); i++) {
-        float value = _isoValues[i];
-        if (controlPointContainsPixel(value, mouse)) {
-            _isDraggingControl = true;
-            _draggingControlID = i;
-            selectControlPoint(i);
-            update();
-            _dragOffset = controlPositionForValue(value) - mouse;
-            _paramsMgr->BeginSaveStateGroup("Colormap modification");
-            return;
-        }
+    int selectedId = findSelectedControlPoint(mouse);
+    if (selectedId >= 0) {
+        float value = _isoValues[selectedId];
+        _isDraggingControl = true;
+        _draggingControlID = selectedId;
+        selectControlPoint(selectedId);
+        update();
+        _dragOffset = controlPositionForValue(value) - mouse;
+        _paramsMgr->BeginSaveStateGroup("Colormap modification");
+        return;
     }
     
     DeselectControlPoint();
@@ -204,8 +203,23 @@ void TFIsoValueMap::deleteControlPoint(int i)
 
 void TFIsoValueMap::moveControlPoint(int *index, float value)
 {
-    deleteControlPoint(*index);
-    *index = addControlPoint(value);
+    if (_equidistantIsoValues) {
+        if (*index == 0) {
+            const float initialValue = _isoValues[0];
+            const float diff = value - initialValue;
+            for (float &v : _isoValues)
+                v += diff;
+        } else {
+            const float baseValue = _isoValues[0];
+            const float initialValue = _isoValues[*index];
+            const float scale = (value-baseValue)/(initialValue-baseValue);
+            for (float &v : _isoValues)
+                v = baseValue + (v - baseValue) * scale;
+        }
+    } else {
+        deleteControlPoint(*index);
+        *index = addControlPoint(value);
+    }
 }
 
 void TFIsoValueMap::selectControlPoint(int index)
@@ -232,7 +246,7 @@ void TFIsoValueMap::UpdateFromInfo(float value)
 
 int TFIsoValueMap::findSelectedControlPoint(const glm::vec2 &mouse) const
 {
-    for (int i = 0; i < _isoValues.size(); i++)
+    for (int i = _isoValues.size()-1; i >= 0 ; i--)
         if (controlPointContainsPixel(_isoValues[i], mouse))
             return i;
     return -1;
