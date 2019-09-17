@@ -166,6 +166,8 @@ void TFColorMap::moveControlPoint(int *index, float value)
 
 void TFColorMap::deleteControlPoint(int index)
 {
+    if (_isDraggingControl && _draggingControlID == index)
+        _paramsMgr->EndSaveStateGroup();
     if (index == _selectedId)
         DeselectControlPoint();
     getColormap()->deleteControlPoint(index);
