@@ -3,6 +3,7 @@
 #include <QResizeEvent>
 #include <QMenu>
 #include <vapor/VAssert.h>
+#include <vapor/ParamsMgr.h>
 
 using glm::vec2;
 
@@ -137,6 +138,28 @@ int TFMap::GetControlPointRadius() const
     return CONTROL_POINT_RADIUS;
 }
 
+void TFMap::BeginSaveStateGroup(VAPoR::ParamsMgr *paramsMgr, const std::string &description)
+{
+    assert(!_insideSaveStateGroup);
+    paramsMgr->BeginSaveStateGroup(description);
+    _insideSaveStateGroup = true;
+}
+
+void TFMap::EndSaveStateGroup(VAPoR::ParamsMgr *paramsMgr)
+{
+    assert(_insideSaveStateGroup);
+    paramsMgr->EndSaveStateGroup();
+    _insideSaveStateGroup = false;
+}
+
+void TFMap::CancelSaveStateGroup(VAPoR::ParamsMgr *paramsMgr)
+{
+    if (_insideSaveStateGroup)
+        paramsMgr->EndSaveStateGroup();
+    _insideSaveStateGroup = false;
+}
+
+
 
 
 
@@ -240,6 +263,9 @@ void TFMapWidget::paintEvent(QPaintEvent* event)
 
 void TFMapWidget::mousePressEvent(QMouseEvent *event)
 {
+    if (event->button() == Qt::RightButton)
+        return; // Reserved for context menu
+    
     for (auto map : _maps) {
         event->accept();
         map->mousePressEvent(event);
@@ -250,6 +276,9 @@ void TFMapWidget::mousePressEvent(QMouseEvent *event)
 
 void TFMapWidget::mouseReleaseEvent(QMouseEvent *event)
 {
+    if (event->button() == Qt::RightButton)
+        return; // Reserved for context menu
+    
     for (auto map : _maps) {
         event->accept();
         map->mouseReleaseEvent(event);
@@ -260,6 +289,9 @@ void TFMapWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void TFMapWidget::mouseMoveEvent(QMouseEvent *event)
 {
+    if (event->button() == Qt::RightButton)
+        return; // Reserved for context menu
+    
     for (auto map : _maps) {
         event->accept();
         map->mouseMoveEvent(event);
@@ -270,6 +302,9 @@ void TFMapWidget::mouseMoveEvent(QMouseEvent *event)
 
 void TFMapWidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
+    if (event->button() == Qt::RightButton)
+        return; // Reserved for context menu
+    
     for (auto map : _maps) {
         event->accept();
         map->mouseDoubleClickEvent(event);

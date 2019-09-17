@@ -21,6 +21,7 @@ class TFMap : public QObject {
     TFInfoWidget *_infoWidget = nullptr;
     int _width = 0;
     int _height = 0;
+    bool _insideSaveStateGroup = false;
     
 public:
     TFMap(TFMapWidget *parent);
@@ -57,6 +58,10 @@ protected:
     
     virtual QMargins GetPadding() const;
     int GetControlPointRadius() const;
+    
+    void BeginSaveStateGroup(VAPoR::ParamsMgr *paramsMgr, const std::string &description="");
+    void EndSaveStateGroup(VAPoR::ParamsMgr *paramsMgr);
+    void CancelSaveStateGroup(VAPoR::ParamsMgr *paramsMgr);
     
 signals:
     void Activated(TFMap *who);

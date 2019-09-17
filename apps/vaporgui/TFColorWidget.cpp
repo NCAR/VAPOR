@@ -103,7 +103,7 @@ void TFColorMap::mousePressEvent(QMouseEvent *event)
             selectControlPoint(i);
             update();
             _dragOffset = controlPositionForValue(value) - mouse;
-            _paramsMgr->BeginSaveStateGroup("Colormap modification");
+            BeginSaveStateGroup(_paramsMgr, "Colormap modification");
             return;
         }
     }
@@ -115,7 +115,7 @@ void TFColorMap::mousePressEvent(QMouseEvent *event)
 
 void TFColorMap::mouseReleaseEvent(QMouseEvent *event) {
     if (_isDraggingControl)
-        _paramsMgr->EndSaveStateGroup();
+        EndSaveStateGroup(_paramsMgr);
     else
         event->ignore();
     _isDraggingControl = false;
@@ -166,8 +166,6 @@ void TFColorMap::moveControlPoint(int *index, float value)
 
 void TFColorMap::deleteControlPoint(int index)
 {
-    if (_isDraggingControl && _draggingControlID == index)
-        _paramsMgr->EndSaveStateGroup();
     if (index == _selectedId)
         DeselectControlPoint();
     getColormap()->deleteControlPoint(index);
