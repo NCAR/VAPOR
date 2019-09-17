@@ -1,6 +1,7 @@
 #include "TFMapWidget.h"
 #include <QPainter>
 #include <QResizeEvent>
+#include <QMenu>
 #include <vapor/VAssert.h>
 
 using glm::vec2;
@@ -142,6 +143,8 @@ int TFMap::GetControlPointRadius() const
 TFMapWidget::TFMapWidget(TFMap *map)
 {
     AddMap(map);
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(_showContextMenu(const QPoint &)));
 }
 
 TFMapWidget::~TFMapWidget()
@@ -204,6 +207,24 @@ void TFMapWidget::_mapActivated(TFMap *who)
     emit Activated(this);
 }
 
+void TFMapWidget::_showContextMenu(const QPoint &qp)
+{
+    vec2 p(qp.x(), qp.y());
+    QMenu contextMenu("Context Menu", this);
+    
+    for (auto map : _maps) {
+        auto actions = map->GetActionsForLocation(p);
+        if (!actions.isEmpty()) {
+            contextMenu.addActions(actions);
+            contextMenu.addSeparator();
+        }
+        for (auto act : actions)
+            act->setParent(&contextMenu);
+    }
+    
+    contextMenu.exec(mapToGlobal(qp));
+}
+
 #include <vapor/GLManager.h>
 void TFMapWidget::paintEvent(QPaintEvent* event)
 {
@@ -211,13 +232,13 @@ void TFMapWidget::paintEvent(QPaintEvent* event)
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
     
-    void *s = VAPoR::GLManager::BeginTimer();
+//    void *s = VAPoR::GLManager::BeginTimer();
     for (int i = _maps.size() - 1; i >= 0; i--) {
         p.save();
         _maps[i]->paintEvent(p);
         p.restore();
     }
-    printf("Paint took %fs\n", VAPoR::GLManager::EndTimer(s));
+//    printf("Paint took %fs\n", VAPoR::GLManager::EndTimer(s));
 }
 
 void TFMapWidget::mousePressEvent(QMouseEvent *event)

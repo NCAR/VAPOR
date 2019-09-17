@@ -107,7 +107,9 @@ public:
     
     QSize minimumSizeHint() const override;
     void Deactivate() override;
+    QList<QAction *> GetActionsForLocation(const glm::vec2 &p) override;
     
+protected:
     TFInfoWidget *createInfoWidget() override;
     void paintEvent(QPainter &p) override;
     void mousePressEvent(QMouseEvent *event) override;
@@ -132,6 +134,8 @@ private:
     ControlPointList::PointIterator findSelectedControlPoint(const glm::vec2 &mouse);
     
     void selectControlPoint(ControlPointList::PointIterator it);
+    void deleteControlPoint(ControlPointList::PointIterator it);
+    void addControlPoint(const glm::vec2 &ndc);
     
 signals:
     void ControlPointDeselected();
@@ -140,6 +144,10 @@ signals:
 public slots:
     void DeselectControlPoint();
     void UpdateFromInfo(float value, float opacity);
+    
+private slots:
+    void menuDeleteSelectedControlPoint();
+    void menuAddControlPoint();
 };
 
 class TFOpacityWidget : public TFMapWidget {

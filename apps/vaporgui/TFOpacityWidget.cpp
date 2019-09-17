@@ -5,6 +5,7 @@
 #include <vapor/RenderParams.h>
 #include <vapor/ParamsMgr.h>
 #include "TFOpacityInfoWidget.h"
+#include <QAction>
 
 using namespace VAPoR;
 using std::vector;
@@ -71,6 +72,23 @@ QSize TFOpacityMap::minimumSizeHint() const
 void TFOpacityMap::Deactivate()
 {
     DeselectControlPoint();
+}
+
+QList<QAction *> TFOpacityMap::GetActionsForLocation(const glm::vec2 &p)
+{
+    QList<QAction *> actions;
+    auto selected = findSelectedControlPoint(p);
+    if (selected != _controlPoints.EndPoints()) {
+        QAction *deleteControl = new QAction("Delete control point", nullptr);
+        connect(deleteControl, SIGNAL(triggered()), this, SLOT(menuDeleteSelectedControlPoint()));
+        actions.push_back(deleteControl);
+    } else {
+        QAction *addControl = new QAction("Add control point", nullptr);
+        connect(addControl, SIGNAL(triggered()), this, SLOT(menuAddControlPoint()));
+        actions.push_back(addControl);
+        addControl->setProperty("location", QVariant(qvec2(PixelToNDC(p))));
+    }
+    return actions;
 }
 
 TFInfoWidget *TFOpacityMap::createInfoWidget()
@@ -166,10 +184,7 @@ void TFOpacityMap::mouseDoubleClickEvent(QMouseEvent *event)
     
     auto controlPointIt = findSelectedControlPoint(mouse);
     if (controlPointIt != cp.EndPoints()) {
-        cp.Remove(controlPointIt);
-        update();
-        opacityChanged();
-        DeselectControlPoint();
+        deleteControlPoint(controlPointIt);
         return;
     }
     
@@ -178,10 +193,7 @@ void TFOpacityMap::mouseDoubleClickEvent(QMouseEvent *event)
         const vec2 b = NDCToPixel(it.b());
         
         if (DistanceToLine(a, b, mouse) <= GetControlPointRadius()) {
-            int index = cp.Add(PixelToNDC(Project(a, b, mouse)), it);
-            selectControlPoint(cp.BeginPoints() + index);
-            update();
-            opacityChanged();
+            addControlPoint(PixelToNDC(Project(a, b, mouse)));
             return;
         }
     }
@@ -225,6 +237,36 @@ void TFOpacityMap::selectControlPoint(ControlPointList::PointIterator it)
     _selectedControl = it.Index();
     update();
     emit UpdateInfo((*it).x, (*it).y);
+}
+
+void TFOpacityMap::deleteControlPoint(ControlPointList::PointIterator it)
+{
+    _controlPoints.Remove(it);
+    update();
+    opacityChanged();
+    DeselectControlPoint();
+}
+
+void TFOpacityMap::addControlPoint(const glm::vec2 &ndc)
+{
+    ControlPointList &cp = _controlPoints;
+    int index = cp.Add(ndc);
+    selectControlPoint(cp.BeginPoints() + index);
+    update();
+    opacityChanged();
+}
+
+void TFOpacityMap::menuDeleteSelectedControlPoint()
+{
+    if (_selectedControl >= 0 && _selectedControl < _controlPoints.Size())
+        deleteControlPoint(_controlPoints.BeginPoints() + _selectedControl);
+}
+
+void TFOpacityMap::menuAddControlPoint()
+{
+    QVariant location = sender()->property("location");
+    if (location.isValid())
+        addControlPoint(qvec2(location.toPointF()));
 }
 
 void TFOpacityMap::DeselectControlPoint()
