@@ -35,6 +35,9 @@ public:
     int height() const { return _height; }
     void resize(int width, int height);
     void update();
+    QRect     paddedRect() const;
+    QRect     rect() const;
+    const QFont getFont() const;
     
     virtual void paintEvent(QPainter &p) = 0;
     virtual void mousePressEvent      (QMouseEvent *event);
@@ -51,9 +54,6 @@ protected:
     QPointF   NDCToQPixel(float x, float y) const;
     glm::vec2 PixelToNDC(const QPointF &p) const;
     glm::vec2 PixelToNDC(const glm::vec2 &p) const;
-    QRect     paddedRect() const;
-    QRect     rect() const;
-    const QFont getFont() const;
     
     virtual QMargins GetPadding() const;
     int GetControlPointRadius() const;

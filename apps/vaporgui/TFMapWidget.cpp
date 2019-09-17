@@ -77,6 +77,24 @@ void TFMap::update()
         _parent->update();
 }
 
+QRect TFMap::paddedRect() const
+{
+    const QMargins p = GetPadding();
+    return QRect(p.left(), p.top(), width()-(p.left()+p.right()), height()-(p.top()+p.bottom()));
+}
+
+QRect TFMap::rect() const
+{
+    return QRect(0, 0, width(), height());
+}
+
+const QFont TFMap::getFont() const
+{
+    if (_parent)
+        return _parent->font();
+    return QFont();
+}
+
 glm::vec2 TFMap::NDCToPixel(const glm::vec2 &v) const
 {
     const QRect p = paddedRect();
@@ -107,24 +125,6 @@ glm::vec2 TFMap::PixelToNDC(const glm::vec2 &p) const
 glm::vec2 TFMap::PixelToNDC(const QPointF &p) const
 {
     return PixelToNDC(vec2(p.x(), p.y()));
-}
-
-QRect TFMap::paddedRect() const
-{
-    const QMargins p = GetPadding();
-    return QRect(p.left(), p.top(), width()-(p.left()+p.right()), height()-(p.top()+p.bottom()));
-}
-
-QRect TFMap::rect() const
-{
-    return QRect(0, 0, width(), height());
-}
-
-const QFont TFMap::getFont() const
-{
-    if (_parent)
-        return _parent->font();
-    return QFont();
 }
 
 QMargins TFMap::GetPadding() const
@@ -213,8 +213,10 @@ void TFMapWidget::_showContextMenu(const QPoint &qp)
     QMenu menu("Context Menu", this);
     
     for (auto map : _maps) {
-        map->PopulateContextMenu(&menu, p);
-        menu.addSeparator();;
+        if (map->paddedRect().contains(qp)) {
+            map->PopulateContextMenu(&menu, p);
+            menu.addSeparator();
+        }
     }
     
     menu.exec(mapToGlobal(qp));

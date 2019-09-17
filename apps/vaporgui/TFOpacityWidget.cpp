@@ -137,7 +137,6 @@ void TFOpacityMap::mousePressEvent(QMouseEvent *event)
 void TFOpacityMap::mouseReleaseEvent(QMouseEvent *event)
 {
     if (_isDraggingControl) {
-//        if (*_draggedControl != _controlStartValue)
         opacityChanged();
         _paramsMgr->EndSaveStateGroup();
     } else
@@ -234,6 +233,10 @@ void TFOpacityMap::selectControlPoint(ControlPointList::PointIterator it)
 
 void TFOpacityMap::deleteControlPoint(ControlPointList::PointIterator it)
 {
+    if (_isDraggingControl && _draggedControl == it) {
+        _paramsMgr->EndSaveStateGroup();
+        _isDraggingControl = false;
+    }
     _controlPoints.Remove(it);
     update();
     opacityChanged();

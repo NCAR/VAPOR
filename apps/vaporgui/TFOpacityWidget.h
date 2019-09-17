@@ -71,7 +71,8 @@ public:
     
     int Add(const glm::vec2 &v, const int i) {
         VAssert(i >= 0 && i <= _points.size());
-        _points.insert(_points.begin()+i, v);
+        glm::vec2 vClamped = glm::clamp(v, glm::vec2(0,0), glm::vec2(1,1));
+        _points.insert(_points.begin()+i, vClamped);
         return i;
     }
     
