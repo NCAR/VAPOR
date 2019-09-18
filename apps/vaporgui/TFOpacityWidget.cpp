@@ -74,14 +74,17 @@ void TFOpacityMap::Deactivate()
     DeselectControlPoint();
 }
 
+#define PROPERTY_INDEX ("index")
+#define PROPERTY_LOCATION ("location")
+
 void TFOpacityMap::PopulateContextMenu(QMenu *menu, const glm::vec2 &p)
 {
     auto selected = findSelectedControlPoint(p);
     
     if (selected != _controlPoints.EndPoints())
-        menu->addAction("Delete control point", this, SLOT(menuDeleteSelectedControlPoint()));
+        menu->addAction("Delete control point", this, SLOT(menuDeleteSelectedControlPoint()))->setProperty(PROPERTY_INDEX, QVariant(selected.Index()));
     else
-        menu->addAction("Add control point", this, SLOT(menuAddControlPoint()))->setProperty("location", QVariant(qvec2(PixelToNDC(p))));
+        menu->addAction("Add control point", this, SLOT(menuAddControlPoint()))->setProperty(PROPERTY_LOCATION, QVariant(qvec2(PixelToNDC(p))));
 }
 
 TFInfoWidget *TFOpacityMap::createInfoWidget()
@@ -254,13 +257,17 @@ void TFOpacityMap::addControlPoint(const glm::vec2 &ndc)
 
 void TFOpacityMap::menuDeleteSelectedControlPoint()
 {
-    if (_selectedControl >= 0 && _selectedControl < _controlPoints.Size())
-        deleteControlPoint(_controlPoints.BeginPoints() + _selectedControl);
+    QVariant indexVariant = sender()->property(PROPERTY_INDEX);
+    if (indexVariant.isValid()) {
+        int index = indexVariant.toInt();
+        if (index >= 0 && index < _controlPoints.Size())
+            deleteControlPoint(_controlPoints.BeginPoints() + index);
+    }
 }
 
 void TFOpacityMap::menuAddControlPoint()
 {
-    QVariant location = sender()->property("location");
+    QVariant location = sender()->property(PROPERTY_LOCATION);
     if (location.isValid())
         addControlPoint(qvec2(location.toPointF()));
 }

@@ -34,14 +34,17 @@ void TFColorMap::Deactivate()
     DeselectControlPoint();
 }
 
+#define PROPERTY_INDEX ("index")
+#define PROPERTY_VALUE ("value")
+
 void TFColorMap::PopulateContextMenu(QMenu *menu, const glm::vec2 &p)
 {
     int selected = findSelectedControlPoint(p);
     
     if (selected != -1)
-        menu->addAction("Delete control point", this, SLOT(menuDeleteSelectedControlPoint()));
+        menu->addAction("Delete control point", this, SLOT(menuDeleteSelectedControlPoint()))->setProperty(PROPERTY_INDEX, selected);
     else
-        menu->addAction("Add control point", this, SLOT(menuAddControlPoint()))->setProperty("value", QVariant(valueForControlX(p.x)));
+        menu->addAction("Add control point", this, SLOT(menuAddControlPoint()))->setProperty(PROPERTY_VALUE, QVariant(valueForControlX(p.x)));
 }
 
 TFInfoWidget *TFColorMap::createInfoWidget()
@@ -209,13 +212,17 @@ void TFColorMap::UpdateFromInfo(float value, QColor color)
 void TFColorMap::menuDeleteSelectedControlPoint()
 {
     const ColorMap *cm = getColormap();
-    if (_selectedId >= 0 && _selectedId < cm->numControlPoints())
-        deleteControlPoint(_selectedId);
+    QVariant valueVariant = sender()->property(PROPERTY_INDEX);
+    if (valueVariant.isValid()) {
+        int index = valueVariant.toInt();
+        if (index >= 0 && index < cm->numControlPoints())
+            deleteControlPoint(index);
+    }
 }
 
 void TFColorMap::menuAddControlPoint()
 {
-    QVariant value = sender()->property("value");
+    QVariant value = sender()->property(PROPERTY_VALUE);
     if (value.isValid())
         addControlPoint(value.toFloat());
 }

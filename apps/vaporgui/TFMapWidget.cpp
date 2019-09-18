@@ -236,7 +236,7 @@ void TFMapWidget::_showContextMenu(const QPoint &qp)
     QMenu menu("Context Menu", this);
     
     for (auto map : _maps) {
-        if (map->paddedRect().contains(qp)) {
+        if (map->rect().contains(qp)) {
             map->PopulateContextMenu(&menu, p);
             menu.addSeparator();
         }
