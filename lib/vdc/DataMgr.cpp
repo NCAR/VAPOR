@@ -545,7 +545,7 @@ template <class T>
 void _sanitizeFloats(T *buffer, size_t n) {
     for (size_t i = 0; i < n; i++) {
         if (isnan(buffer[i]))
-            buffer[i] = INFINITY;
+            buffer[i] = std::numeric_limits<T>::infinity();
     }
 }
 
