@@ -3,8 +3,24 @@
 #include <QStyleOptionSlider>
 #include <QMouseEvent>
 #include <QBitmap>
+#include <QProxyStyle>
 
 #define QT_STOPS 1000000000
+
+// Dragging the selected region currently requires AbsoluteSetButtons to be enabled
+// For some OS styles, such as linux, this is disabled by default so we need to manually enable it
+class QForceAbsoluteSetButtonsEnabledStyle : public QProxyStyle
+{
+public:
+    using QProxyStyle::QProxyStyle;
+    
+    int styleHint(QStyle::StyleHint hint, const QStyleOption *option = 0, const QWidget *widget = 0, QStyleHintReturn *returnData = 0) const
+    {
+        if (hint == QStyle::SH_Slider_AbsoluteSetButtons)
+            return Qt::LeftButton;
+        return QProxyStyle::styleHint(hint, option, widget, returnData);
+    }
+};
 
 QRangeSlider::QRangeSlider()
 : QRangeSlider(Qt::Orientation::Horizontal)
@@ -19,6 +35,7 @@ QRangeSlider::QRangeSlider(Qt::Orientation orientation)
     _value[1] = QT_STOPS-1;
     this->setRange(0, QT_STOPS);
     this->setTracking(true);
+    this->QSlider::setStyle(new QForceAbsoluteSetButtonsEnabledStyle(style()));
 }
 
 QSize QRangeSlider::minimumSizeHint() const
