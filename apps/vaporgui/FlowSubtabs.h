@@ -55,7 +55,10 @@ private:
     VAPoR::FlowParams*  _params;
     VariablesWidget*    _variablesWidget;
 
-    VLineEdit*          _velocityMltp;
+    VLineEdit*          _velocityMltp;  // Note on this widget: its name and associated functions
+                                        // use the name "velocity multiplier," while it displays
+                                        // "Field Scale Factor." They'll need to be reconciled 
+                                        // before the final merge.
 
     VCheckBox*          _periodicX;
     VCheckBox*          _periodicY;
