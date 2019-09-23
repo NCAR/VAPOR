@@ -128,7 +128,7 @@ void TFIsoValueMap::mousePressEvent(QMouseEvent *event)
         selectControlPoint(selectedId);
         update();
         _dragOffset = controlPositionForValue(value) - mouse;
-        _paramsMgr->BeginSaveStateGroup("Colormap modification");
+        _paramsMgr->BeginSaveStateGroup("IsoValue modification");
         return;
     }
     
