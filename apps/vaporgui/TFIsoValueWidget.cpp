@@ -21,6 +21,7 @@ void TFIsoValueMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr,
 {
     _renderParams = rp;
     _paramsMgr = paramsMgr;
+    loadFromParams(rp);
     update();
 }
 
@@ -153,6 +154,7 @@ void TFIsoValueMap::mouseMoveEvent(QMouseEvent *event) {
         
         moveControlPoint(&_draggingControlID, newVal);
         selectControlPoint(_draggingControlID);
+        saveToParams(_renderParams);
         update();
         _paramsMgr->IntermediateChange();
     } else {
@@ -182,6 +184,39 @@ QMargins TFIsoValueMap::GetPadding() const
     QMargins m = TFMap::GetPadding();
     m.setTop(0);
     return m;
+}
+
+void TFIsoValueMap::saveToParams(VAPoR::RenderParams *rp) const
+{
+    if (!rp) return;
+    if (!rp->HasIsoValues()) return;
+    assert(rp->HasIsoValues());
+    
+    const float min = getDataRangeMin();
+    const float max = getDataRangeMax();
+    
+    vector<double> values(_isoValues.size());
+    for (int i = 0; i < values.size(); i++)
+         values[i] = _isoValues[i] * (max-min) + min;
+    rp->SetIsoValues(values);
+}
+
+void TFIsoValueMap::loadFromParams(VAPoR::RenderParams *rp)
+{
+    if (!rp) return;
+    if (!rp->HasIsoValues()) return;
+    assert(rp->HasIsoValues());
+    
+    const float min = getDataRangeMin();
+    const float max = getDataRangeMax();
+    
+    vector<double> newValues = rp->GetIsoValues();
+    if (newValues.size() != _isoValues.size()) {
+        DeselectControlPoint();
+        _isoValues.resize(newValues.size());
+    }
+    for (int i = 0; i < newValues.size(); i++)
+        _isoValues[i] = (newValues[i]-min)/(max-min);
 }
 
 int TFIsoValueMap::addControlPoint(float value)
@@ -277,4 +312,16 @@ float TFIsoValueMap::controlXForValue(float value) const
 float TFIsoValueMap::valueForControlX(float position) const
 {
     return PixelToNDC(vec2(position, 0.f)).x;
+}
+
+float TFIsoValueMap::getDataRangeMin() const
+{
+    if (!_renderParams) return 0;
+    return _renderParams->GetMapperFunc(_renderParams->GetVariableName())->getMinMapValue();
+}
+
+float TFIsoValueMap::getDataRangeMax() const
+{
+    if (!_renderParams) return 1;
+    return _renderParams->GetMapperFunc(_renderParams->GetVariableName())->getMaxMapValue();
 }

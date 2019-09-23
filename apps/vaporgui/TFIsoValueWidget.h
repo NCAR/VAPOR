@@ -40,10 +40,12 @@ private:
     glm::vec2 _dragOffset;
     glm::vec2 m;
     std::vector<float> _isoValues;
-    bool _equidistantIsoValues = true;
+    bool _equidistantIsoValues = false;
     
     bool controlPointContainsPixel(const glm::vec2 &cp, const glm::vec2 &pixel) const;
     
+    void saveToParams(VAPoR::RenderParams *rp) const;
+    void loadFromParams(VAPoR::RenderParams *rp);
     int addControlPoint(float value);
     void deleteControlPoint(int i);
     void moveControlPoint(int *index, float value);
@@ -54,6 +56,8 @@ private:
     glm::vec2 controlPositionForValue(float value) const;
     float controlXForValue(float value) const;
     float valueForControlX(float position) const;
+    float getDataRangeMin() const;
+    float getDataRangeMax() const;
     
 signals:
     void ControlPointDeselected();
