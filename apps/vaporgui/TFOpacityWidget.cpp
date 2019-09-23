@@ -240,10 +240,15 @@ void TFOpacityMap::deleteControlPoint(ControlPointList::PointIterator it)
         _paramsMgr->EndSaveStateGroup();
         _isDraggingControl = false;
     }
+    
+    if (_selectedControl == it.Index())
+        DeselectControlPoint();
+    else if (_selectedControl > it.Index())
+        _selectedControl--;
+    
     _controlPoints.Remove(it);
     update();
     opacityChanged();
-    DeselectControlPoint();
 }
 
 void TFOpacityMap::addControlPoint(const glm::vec2 &ndc)
