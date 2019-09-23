@@ -64,21 +64,20 @@ private:
     VCheckBox*          _periodicY;
     VCheckBox*          _periodicZ;
 
-    VCheckBox*          _steady;
-
-    VLineEdit*          _steadyNumOfSteps;
-    
-    VIntSlider*         _pastNumOfTimeSteps;
-    VIntSlider*         _seedInjInterval;
+    //VCheckBox*          _steady;
+    //VLineEdit*          _steadyNumOfSteps;
+    //VIntSlider*         _pastNumOfTimeSteps;
+    //VIntSlider*         _seedInjInterval;
 
 private slots:
     // Respond to user input
-    void _steadyGotClicked();
     void _velocityMultiplierChanged();
-    void _steadyNumOfStepsChanged();
     void _periodicClicked();
-    void _pastNumOfTimeStepsChanged( int );
-    void _seedInjIntervalChanged( int );
+
+    //void _steadyGotClicked();
+    //void _steadyNumOfStepsChanged();
+    //void _pastNumOfTimeStepsChanged( int );
+    //void _seedInjIntervalChanged( int );
 };
 
 //
@@ -128,10 +127,20 @@ private slots:
     void _rakeBiasVariableChanged( int );
     void _rakeBiasStrengthChanged();
 
+    void _steadyGotClicked();
+    void _steadyNumOfStepsChanged();
+    void _pastNumOfTimeStepsChanged( int );
+    void _seedInjIntervalChanged( int );
+
 private:
     VAPoR::FlowParams*      _params;
 
     /* Add some QT widgets */
+    VCheckBox*              _steady;
+    VLineEdit*              _steadyNumOfSteps;
+    VIntSlider*             _pastNumOfTimeSteps;
+    VIntSlider*             _seedInjInterval;
+
     VComboBox*              _seedGenMode;
     VFileReader*            _fileReader;
     VFileWriter*            _fileWriter;
@@ -142,6 +151,8 @@ private:
     VLineEdit              *_rakeXNum, *_rakeYNum, *_rakeZNum, *_rakeTotalNum;
     VComboBox*              _rakeBiasVariable;
     VSlider*                _rakeBiasStrength;
+
+    QFrame                  *_hline1, *_hline2;     // horizontal lines
 
     /* Helper functions */
     void _hideShowWidgets(); // hide and show widgets based on the current seed generation mode.
