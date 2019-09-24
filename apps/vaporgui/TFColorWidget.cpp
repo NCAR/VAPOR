@@ -8,6 +8,7 @@
 #include "TFColorInfoWidget.h"
 #include "TFUtils.h"
 #include "QPaintUtils.h"
+#include "ParamsMenuItems.h"
 
 using namespace VAPoR;
 using glm::vec2;
@@ -18,7 +19,15 @@ static vec2 qvec2(const QPointF &qp) { return vec2(qp.x(), qp.y()); }
 static QPointF qvec2(const vec2 &v) { return QPointF(v.x, v.y); }
 
 TFColorMap::TFColorMap(TFMapWidget *parent)
-: TFMap(parent) {}
+: TFMap(parent) {
+    _colorInterpolationMenu = new ParamsDropdownMenuItem(
+        this,
+        VAPoR::ColorMap::_interpTypeTag,
+        {"Linear", "Discrete", "Diverging"},
+        {TFInterpolator::linear, TFInterpolator::discrete, TFInterpolator::diverging},
+        "Color Interpolation"
+    );
+}
 
 void TFColorMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
 {
@@ -27,6 +36,7 @@ void TFColorMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VA
     
     _renderParams = rp;
     _paramsMgr = paramsMgr;
+    _colorInterpolationMenu->Update(rp->GetMapperFunc(rp->GetVariableName())->GetColorMap());
     update();
     
     if (rp && _selectedId > -1)
@@ -58,6 +68,8 @@ void TFColorMap::PopulateContextMenu(QMenu *menu, const glm::vec2 &p)
 
 void TFColorMap::PopulateSettingsMenu(QMenu *menu) const
 {
+    menu->addAction(_colorInterpolationMenu);
+    menu->addSeparator();
     menu->addAction("Save Colormap", this, SLOT(menuSave()));
     menu->addAction("Load Colormap", this, SLOT(menuLoad()));
     

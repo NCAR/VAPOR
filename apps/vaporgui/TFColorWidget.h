@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 
 class TFColorInfoWidget;
+class ParamsDropdownMenuItem;
 
 class TFColorMap : public TFMap {
     Q_OBJECT
@@ -31,6 +32,7 @@ protected:
 private:
     VAPoR::ParamsMgr *_paramsMgr = nullptr;
     VAPoR::RenderParams *_renderParams = nullptr;
+    ParamsDropdownMenuItem *_colorInterpolationMenu;
     bool _isDraggingControl = false;
     int _draggingControlID;
     int _selectedId = -1;

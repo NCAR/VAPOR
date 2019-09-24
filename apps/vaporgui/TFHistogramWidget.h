@@ -5,7 +5,8 @@
 #include <vapor/VAssert.h>
 #include "Histo.h"
 #include "TFMapWidget.h"
-#include "ParamsMenuItems.h"
+
+class ParamsDropdownMenuItem;
 
 class TFHistogramMap : public TFMap {
     Q_OBJECT

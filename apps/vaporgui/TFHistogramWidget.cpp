@@ -11,6 +11,7 @@
 #include <vapor/ParamsMgr.h>
 #include <math.h>
 #include "QPaintUtils.h"
+#include "ParamsMenuItems.h"
 
 using namespace VAPoR;
 using std::vector;

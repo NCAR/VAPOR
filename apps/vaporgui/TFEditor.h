@@ -40,7 +40,6 @@ private:
     VAPoR::RenderParams *_rParams = nullptr;
     VAPoR::ParamsMgr *_paramsMgr = nullptr;
     TFMappingRangeSelector *range;
-    ParamsWidgetDropdown *colorMapTypeDropdown;
     TFMapsGroup *_maps;
     TFMapsInfoGroup *_mapsInfo;
 };
