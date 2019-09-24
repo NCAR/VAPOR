@@ -1,3 +1,5 @@
+#pragma once
+
 #include "QRangeSlider.h"
 #include <QLineEdit>
 #include <QWidget>
