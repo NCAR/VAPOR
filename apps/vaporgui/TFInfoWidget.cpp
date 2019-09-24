@@ -15,7 +15,7 @@ TFInfoWidget::TFInfoWidget()
     layout->addWidget(new VLineItem("Data Value", _valueEdit = new QLineEdit));
     _valueEditType = new QComboBox;
     
-    _valueEdit->setValidator(new QDoubleValidator);
+    _valueEdit->setValidator(new QDoubleValidator(__FLT_MIN__, __FLT_MAX__, 7));
     
     _valueEditType->blockSignals(true);
     _valueEditType->setMinimumSize(30, 10);
@@ -80,6 +80,7 @@ void TFInfoWidget::updateValue()
 
 void TFInfoWidget::updateValueEditValidator()
 {
+    printf("N Decimals = %i\n", ((QDoubleValidator*)_valueEdit->validator())->decimals());
     if (isUsingMappedValue())
         ((QDoubleValidator*)_valueEdit->validator())->setRange(_min, _max);
     else

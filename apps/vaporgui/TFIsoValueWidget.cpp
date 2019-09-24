@@ -23,6 +23,9 @@ void TFIsoValueMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr,
     _paramsMgr = paramsMgr;
     loadFromParams(rp);
     update();
+    
+    if (_selectedId > -1)
+        UpdateInfo(_isoValues[_selectedId]);
 }
 
 QSize TFIsoValueMap::minimumSizeHint() const
@@ -275,7 +278,8 @@ void TFIsoValueMap::UpdateFromInfo(float value)
 {
     if (_selectedId >= 0 && _selectedId < _isoValues.size()) {
         moveControlPoint(&_selectedId, value);
-        
+        update();
+        saveToParams(_renderParams);
     }
 }
 

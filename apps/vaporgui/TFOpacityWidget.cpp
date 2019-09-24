@@ -62,6 +62,9 @@ void TFOpacityMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, 
         _controlPoints[i/2].x = cp[i+1];
     }
     update();
+    
+    if (_selectedControl > -1)
+        UpdateInfo(_controlPoints[_selectedControl].x, _controlPoints[_selectedControl].y);
 }
 
 QSize TFOpacityMap::minimumSizeHint() const

@@ -22,6 +22,9 @@ void TFColorMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VA
     _renderParams = rp;
     _paramsMgr = paramsMgr;
     update();
+    
+    if (rp && _selectedId > -1)
+        UpdateInfo(getColormap()->controlPointValueNormalized(_selectedId), VColorToQColor(getColormap()->controlPointColor(_selectedId)));
 }
 
 QSize TFColorMap::minimumSizeHint() const
