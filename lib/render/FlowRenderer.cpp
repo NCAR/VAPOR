@@ -164,7 +164,17 @@ FlowRenderer::_paintGL( bool fast )
 
     if( params->GetNeedFlowlineOutput() )
     {
-        rv = _advection.OutputStreamsGnuplot( params->GetFlowlineOutputFilename() );
+        // In case of steady flow, output the number of particles that 
+        // equals to the advection steps plus one.
+        // In the case of unsteady flow, output particles that are up to 
+        // the advection time step.
+        rv = _advection.OutputStreamsGnuplot( params->GetFlowlineOutputFilename(),
+                                              std::numeric_limits<size_t>::max() ); 
+        //if( params->GetIsSteady() )
+        //{
+        //    rv = _advection.OutputStreamsGnuplot( params->GetFlowlineOutputFilename(),
+        //                                          params->GetSteadyNumOfSteps() + 1 );
+        //}
         if( rv != 0 )
         {
                 MyBase::SetErrMsg("Output flow lines wrong!");
@@ -172,7 +182,14 @@ FlowRenderer::_paintGL( bool fast )
         }
         if( _2ndAdvection )     // bi-directional advection
         {
-            rv = _2ndAdvection->OutputStreamsGnuplot( params->GetFlowlineOutputFilename(), true );
+            rv = _2ndAdvection->OutputStreamsGnuplot( params->GetFlowlineOutputFilename(), 
+                                                      std::numeric_limits<size_t>::max(),
+                                                      true                              );
+            if( rv != 0 )
+            {
+                    MyBase::SetErrMsg("Output flow lines wrong!");
+                    return flow::FILE_ERROR;
+            }
         }
 
         params->SetNeedFlowlineOutput( false );

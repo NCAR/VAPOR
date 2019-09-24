@@ -69,7 +69,10 @@ public:
     //     An optional 4th column is used to indicate time.
     //     The rest columns are omitted.
     //
-    int  OutputStreamsGnuplot( const std::string& filename, bool append = false ) const;
+    // Params: maxPart sets the maximum number of particles to write output to file
+    //         even if a stream might contain more particles.
+    //
+    int  OutputStreamsGnuplot( const std::string& filename, size_t maxPart, bool append = false ) const;
     int  InputStreamsGnuplot(  const std::string& filename );
 
     // Query properties (most are properties of the velocity field)

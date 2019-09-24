@@ -350,7 +350,7 @@ Advection::_calcAdjustFactor( const Particle& p2, const Particle& p1,
 }
 
 int
-Advection::OutputStreamsGnuplot( const std::string& filename, bool append ) const
+Advection::OutputStreamsGnuplot( const std::string& filename, size_t maxPart, bool append ) const
 {
     if( filename.empty() )
         return FILE_ERROR;
@@ -370,13 +370,20 @@ Advection::OutputStreamsGnuplot( const std::string& filename, bool append ) cons
     std::fprintf( f, "%s\n",   "# This file could be plotted by Gnuplot using the following command:");
     std::fprintf( f, "%s\n\n", "# splot output_filename u 1:2:3 w lines ");
     std::fprintf( f, "%s\n",   "# X-position      Y-position      Z-position     Time     Value" );
+
     for( const auto& s : _streams )
     {
-        for( const auto& p : s )
+        // Either output all the particles in this stream, 
+        // or only up to a certain number of particles.
+        size_t numPart = maxPart < s.size() ? maxPart : s.size();
+        for( size_t i = 0; i < numPart; i++ )
         {
+            const auto& p = s[i];
             if( !p.IsSpecial() )
+            {
                 std::fprintf( f, "%f, %f, %f, %f, %f\n", p.location.x, p.location.y, 
-                p.location.z, p.time, p.value );
+                              p.location.z, p.time, p.value );
+            }
         }
         std::fprintf( f, "\n\n" );
     }
