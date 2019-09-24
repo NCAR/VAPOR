@@ -54,8 +54,8 @@ public:
     size_t GetNumberOfStreams() const;
     const  std::vector<Particle>& GetStreamAt( size_t i ) const;
 
-    // Retrieve the maximum number of steps
-    int GetMaxNumOfSteps() const;
+    // Retrieve the maximum number of particles in any stream
+    int GetMaxNumOfPart() const;
 
     //
     // Output a file that could be plotted by gnuplot
@@ -72,7 +72,16 @@ public:
     // Params: maxPart sets the maximum number of particles to write output to file
     //         even if a stream might contain more particles.
     //
-    int  OutputStreamsGnuplot( const std::string& filename, size_t maxPart, bool append = false ) const;
+    int  OutputStreamsGnuplotMaxPart( const  std::string& filename, 
+                                      size_t maxPart, 
+                                      bool   append = false ) const;
+    //
+    // Params: maxTime sets the maximum number of particles to write output to file
+    //         even if a stream might contain more particles.
+    //
+    int  OutputStreamsGnuplotMaxTime( const std::string& filename, 
+                                      float time, 
+                                      bool  append = false ) const;
     int  InputStreamsGnuplot(  const std::string& filename );
 
     // Query properties (most are properties of the velocity field)
@@ -114,6 +123,11 @@ private:
     // Returns the value after adjustment.
     float       _applyPeriodic( float val, float min, float max ) const;
 
+    // Prepares an std::FILE object and writes the header.
+    // Upon success, this function returns a pointer pointing to a valid FILE object.
+    // Upon failure, this function returns a nullptr.  In this case,
+    // the caller of this function will need to close this file object.
+    std::FILE*  _prepareFileWrite( const std::string& filename, bool append ) const;
 };
 };
 

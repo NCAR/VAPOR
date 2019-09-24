@@ -168,23 +168,42 @@ FlowRenderer::_paintGL( bool fast )
         // equals to the advection steps plus one.
         // In the case of unsteady flow, output particles that are up to 
         // the advection time step.
-        rv = _advection.OutputStreamsGnuplot( params->GetFlowlineOutputFilename(),
-                                              std::numeric_limits<size_t>::max() ); 
-        //if( params->GetIsSteady() )
-        //{
-        //    rv = _advection.OutputStreamsGnuplot( params->GetFlowlineOutputFilename(),
-        //                                          params->GetSteadyNumOfSteps() + 1 );
-        //}
+        if( params->GetIsSteady() )
+        {
+            rv = _advection.OutputStreamsGnuplotMaxPart( 
+                                params->GetFlowlineOutputFilename(),
+                                params->GetSteadyNumOfSteps() + 1,
+                                false );
+        }
+        else
+        {
+            rv = _advection.OutputStreamsGnuplotMaxTime( 
+                                params->GetFlowlineOutputFilename(),
+                                _timestamps.at( params->GetCurrentTimestep() ),
+                                false );
+        }
         if( rv != 0 )
         {
                 MyBase::SetErrMsg("Output flow lines wrong!");
                 return flow::FILE_ERROR;
         }
+
         if( _2ndAdvection )     // bi-directional advection
         {
-            rv = _2ndAdvection->OutputStreamsGnuplot( params->GetFlowlineOutputFilename(), 
-                                                      std::numeric_limits<size_t>::max(),
-                                                      true                              );
+            if( params->GetIsSteady() )
+            {
+                rv = _2ndAdvection->OutputStreamsGnuplotMaxPart( 
+                                        params->GetFlowlineOutputFilename(), 
+                                        params->GetSteadyNumOfSteps() + 1,                    
+                                        true );
+            }
+            else
+            {
+                rv = _2ndAdvection->OutputStreamsGnuplotMaxTime(
+                                        params->GetFlowlineOutputFilename(),
+                                        _timestamps.at( params->GetCurrentTimestep() ),
+                                        true );
+            }
             if( rv != 0 )
             {
                     MyBase::SetErrMsg("Output flow lines wrong!");
@@ -277,10 +296,11 @@ FlowRenderer::_paintGL( bool fast )
         if( params->GetIsSteady() )
         {
             /* If the advection is single-directional */
-            if( params->GetFlowDirection() == 1 )   // backward integration
+            if( params->GetFlowDirection() == 1 )           // backward integration
                 deltaT *= -1.0f;
             int numOfSteps = params->GetSteadyNumOfSteps();
-            for( int i = _advection.GetMaxNumOfSteps(); i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
+            for( int i = _advection.GetMaxNumOfPart() - 1;  // existing number of advection steps 
+                 i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
             {
                 rv = _advection.AdvectOneStep( &_velocityField, deltaT );
             }
@@ -291,7 +311,8 @@ FlowRenderer::_paintGL( bool fast )
                 assert( deltaT > 0.0f );
                 float   deltaT2 = deltaT * -1.0f;
                 rv = flow::ADVECT_HAPPENED;
-                for( int i = _2ndAdvection->GetMaxNumOfSteps(); i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
+                for( int i = _2ndAdvection->GetMaxNumOfPart() - 1; 
+                     i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
                 {
                     rv = _2ndAdvection->AdvectOneStep( &_velocityField, deltaT2 );
                 }
