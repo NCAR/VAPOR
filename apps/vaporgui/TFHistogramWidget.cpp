@@ -22,15 +22,7 @@ using glm::clamp;
 TFHistogramMap::TFHistogramMap(TFMapWidget *parent)
 : TFMap(parent)
 {
-    _scalingActions[Linear] = new QAction("Linear", this);
-    _scalingActions[Logarithmic] = new QAction("Logarithmic", this);
-    _scalingActions[Boolean] = new QAction("Boolean", this);
-    for (int i = 0; i < ScalingTypeCount; i++) {
-        _scalingActions[i]->setCheckable(true);
-        connect(_scalingActions[i], SIGNAL(triggered()), this, SLOT(_menuSetScalingType()));
-    }
-    
-    scalingMenu = new ParamsDropdownMenuItem(SCALING_TAG, {"Linear", "Logarithmic", "Boolean"}, {}, "Histogram Scaling");
+    _scalingMenu = new ParamsDropdownMenuItem(this, SCALING_TAG, {"Linear", "Logarithmic", "Boolean"}, {}, "Histogram Scaling");
 }
 
 void TFHistogramMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
@@ -43,11 +35,7 @@ void TFHistogramMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr
     if (_histo.PopulateIfNeeded(dataMgr, rp) < 0)
         MSG_ERR("Failed to populate histogram");
     
-    for (int i = 0; i < ScalingTypeCount; i++)
-        _scalingActions[i]->setChecked(false);
-    _scalingActions[_getScalingType()]->setChecked(true);
-    
-    scalingMenu->Update(rp);
+    _scalingMenu->Update(rp);
     update();
 }
 
@@ -58,15 +46,11 @@ QSize TFHistogramMap::minimumSizeHint() const
 
 void TFHistogramMap::PopulateSettingsMenu(QMenu *menu) const
 {
-    QMenu *scalingModeMenu = menu->addMenu("Histogram scaling mode");
-    for (int i = 0; i < ScalingTypeCount; i++)
-        scalingModeMenu->addAction(_scalingActions[i]);
+    menu->addAction(_scalingMenu);
     
     QAction *histogramDynamicScalingAction = menu->addAction("Histogram Dynamic Scaling", this, SLOT(_menuDynamicScalingToggled(bool)));
     histogramDynamicScalingAction->setCheckable(true);
     histogramDynamicScalingAction->setChecked(_dynamicScaling);
-    
-    menu->addAction(scalingMenu);
 }
 
 TFInfoWidget *TFHistogramMap::createInfoWidget()
@@ -173,16 +157,6 @@ TFHistogramMap::ScalingType TFHistogramMap::_getScalingType() const
         type = Linear;
     
     return type;
-}
-
-void TFHistogramMap::_menuSetScalingType()
-{
-    if (!_renderParams)
-        return;
-    
-    for (int i = 0; i < ScalingTypeCount; i++)
-        if (sender() == _scalingActions[i])
-            _renderParams->SetValueLong(SCALING_TAG, SCALING_TAG, i);
 }
 
 void TFHistogramMap::_menuDynamicScalingToggled(bool on)

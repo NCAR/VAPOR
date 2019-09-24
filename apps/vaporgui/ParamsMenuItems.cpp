@@ -4,8 +4,8 @@
 
 using namespace VAPoR;
 
-ParamsMenuItem::ParamsMenuItem(const std::string &tag, const std::string &label)
-: QAction(nullptr)
+ParamsMenuItem::ParamsMenuItem(QObject *parent, const std::string &tag, const std::string &label)
+: QAction(parent)
 {
     assert(!tag.empty());
     _tag = tag;
@@ -17,8 +17,8 @@ ParamsMenuItem::ParamsMenuItem(const std::string &tag, const std::string &label)
 }
 
 
-ParamsDropdownMenuItem::ParamsDropdownMenuItem(const std::string &tag, const std::vector<std::string> &items, const std::vector<int> &itemValues, const std::string &labelText)
-: ParamsMenuItem(tag, labelText)
+ParamsDropdownMenuItem::ParamsDropdownMenuItem(QObject *parent, const std::string &tag, const std::vector<std::string> &items, const std::vector<int> &itemValues, const std::string &labelText)
+: ParamsMenuItem(parent, tag, labelText)
 {
     QMenu *menu = new QMenu;
     
