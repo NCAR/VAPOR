@@ -72,11 +72,10 @@ protected:
     int                 _cache_seedInjInterval;
 
     // A few different modes to generate advection seeds:
-    //   0 - programmatical
-    //   1 - reading a list of seeds
-    //   2 - uniformly generate 
-    //   3 - randomly generate
-    //   4 - randomly generate with bias
+    //   0 - uniformly generate 
+    //   1 - randomly generate
+    //   2 - randomly generate with bias
+    //   3 - reading a list of seeds
     long                _cache_seedGenMode;
     std::string         _cache_seedInputFilename;
 

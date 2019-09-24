@@ -185,7 +185,7 @@ FlowRenderer::_paintGL( bool fast )
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
         /* Read seeds from a file is a special case, so we put it up front */
-        if( _cache_seedGenMode == 1 )
+        if( _cache_seedGenMode == 3 )
         {
             rv = _advection.InputStreamsGnuplot( params->GetSeedInputFilename() );
             if( rv != 0 )
@@ -202,13 +202,11 @@ FlowRenderer::_paintGL( bool fast )
         else 
         {
             std::vector<flow::Particle> seeds;
-            if( _cache_seedGenMode == 0 )       // Generate seeds from a built-in function
-                _genSeedsXY( seeds );
-            else if( _cache_seedGenMode == 2 )  // Seeds from a rake, uniformly
+            if( _cache_seedGenMode == 0 )       // Seeds from a rake, uniformly
                 _genSeedsRakeUniform( seeds );
-            else if( _cache_seedGenMode == 3 )  // Seeds from a rake, randomly
+            else if( _cache_seedGenMode == 1 )  // Seeds from a rake, randomly
                 _genSeedsRakeRandom( seeds );
-            else if( _cache_seedGenMode == 4 )  // Seeds from a rake, biased
+            else if( _cache_seedGenMode == 2 )  // Seeds from a rake, randomly and biased
                 _genSeedsRakeRandomBiased( seeds );
 
             // Note on UseSeedParticles(): this is the only function that resets
@@ -466,7 +464,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     {
         _cache_seedInputFilename  = params->GetSeedInputFilename();
         // we only update status if the current seed generation mode IS seed list.
-        if( _cache_seedGenMode   == 1 )
+        if( _cache_seedGenMode   == 3 ) // Seeds from a list mode
         {
             _velocityStatus     = FlowStatus::SIMPLE_OUTOFDATE;
             _colorStatus        = FlowStatus::SIMPLE_OUTOFDATE;
@@ -539,8 +537,8 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         for( int i = 0; i < 6; i++ )
             _cache_rake[i] = rake[i];
 
-        // Mark out-of-date if we're currently using the rake mode
-        if( _cache_seedGenMode >= 2 && _cache_seedGenMode <= 4 )
+        // Mark out-of-date if we're currently using any mode that involves a rake
+        if( _cache_seedGenMode < 3 )
         {
             _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
             _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
@@ -556,7 +554,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         for( int i = 0; i < 3; i++ )
             _cache_rakeNumOfSeeds[i] = rakeNumOfSeeds[i];
 
-        if( _cache_seedGenMode == 2 )   // Uniformly generate seeds mode
+        if( _cache_seedGenMode == 0 )   // Uniformly generate seeds mode
         {
             _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
             _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
@@ -568,7 +566,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     {
         _cache_rakeNumOfSeeds[3] = rakeNumOfSeeds[3];
 
-        if( _cache_seedGenMode == 3 || _cache_seedGenMode == 4 )
+        if( _cache_seedGenMode == 1 || _cache_seedGenMode == 2 )    // Random and random with bias mode
         {
             _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
             _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
@@ -584,7 +582,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         _cache_rakeBiasVariable = rakeBiasVariable;
         _cache_rakeBiasStrength = rakeBiasStrength;
         
-        if( _cache_seedGenMode == 4 )
+        if( _cache_seedGenMode == 2 )   // Random with bias mode
         {
             _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
             _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
