@@ -31,6 +31,7 @@ public:
     virtual void Deactivate() = 0;
     virtual QSize minimumSizeHint() const = 0;
     virtual void PopulateContextMenu(QMenu *menu, const glm::vec2 &p) {}
+    virtual void PopulateSettingsMenu(QMenu *menu) const {}
     
     int width() const { return _width; }
     int height() const { return _height; }

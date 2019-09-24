@@ -3,6 +3,7 @@
 #include <QPaintEvent>
 #include <vapor/DataMgr.h>
 #include <QPainter>
+#include <QPicture>
 #include <glm/glm.hpp>
 #include <Histo.h>
 #include "ErrorReporter.h"
@@ -17,9 +18,6 @@ using glm::vec2;
 using glm::clamp;
 
 #define SCALING_TAG "HistogramScalingTag"
-#define SCALING_LINEAR 0
-#define SCALING_LOG 1
-#define SCALING_BOOL 2
 
 static vec2 qvec2(const QPoint &qp)  { return vec2(qp.x(), qp.y()); }
 static vec2 qvec2(const QPointF &qp) { return vec2(qp.x(), qp.y()); }
@@ -27,7 +25,16 @@ static QPointF qvec2(const vec2 &v) { return QPointF(v.x, v.y); }
 
 
 TFHistogramMap::TFHistogramMap(TFMapWidget *parent)
-: TFMap(parent) {}
+: TFMap(parent)
+{
+    _scalingActions[Linear] = new QAction("Linear", this);
+    _scalingActions[Logarithmic] = new QAction("Logarithmic", this);
+    _scalingActions[Boolean] = new QAction("Boolean", this);
+    for (int i = 0; i < ScalingTypeCount; i++) {
+        _scalingActions[i]->setCheckable(true);
+        connect(_scalingActions[i], SIGNAL(triggered()), this, SLOT(_setScalingTypeAction()));
+    }
+}
 
 void TFHistogramMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
 {
@@ -39,12 +46,23 @@ void TFHistogramMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr
     if (_histo.PopulateIfNeeded(dataMgr, rp) < 0)
         MSG_ERR("Failed to populate histogram");
     
+    for (int i = 0; i < ScalingTypeCount; i++)
+        _scalingActions[i]->setChecked(false);
+    _scalingActions[_getScalingType()]->setChecked(true);
+    
     update();
 }
 
 QSize TFHistogramMap::minimumSizeHint() const
 {
     return QSize(100, 40);
+}
+
+void TFHistogramMap::PopulateSettingsMenu(QMenu *menu) const
+{
+    QMenu *scalingModeMenu = menu->addMenu("Histogram scaling mode");
+    for (int i = 0; i < ScalingTypeCount; i++)
+        scalingModeMenu->addAction(_scalingActions[i]);
 }
 
 TFInfoWidget *TFHistogramMap::createInfoWidget()
@@ -56,11 +74,6 @@ TFInfoWidget *TFHistogramMap::createInfoWidget()
     
     return info;
 }
-
-#define CONTROL_POINT_RADIUS (4.0f)
-#define PADDING (CONTROL_POINT_RADIUS + 1.0f)
-
-#include <QPicture>
 
 void TFHistogramMap::paintEvent(QPainter &p)
 {
@@ -151,5 +164,19 @@ TFHistogramMap::ScalingType TFHistogramMap::_getScalingType() const
     if (!_renderParams)
         return ScalingType::Linear;
     
-    return (ScalingType)_renderParams->GetValueLong(SCALING_TAG, (int)ScalingType::Linear);
+    ScalingType type = (ScalingType)_renderParams->GetValueLong(SCALING_TAG, (int)ScalingType::Linear);
+    if (type >= ScalingTypeCount || type < 0)
+        type = Linear;
+    
+    return type;
+}
+
+void TFHistogramMap::_setScalingTypeAction()
+{
+    if (!_renderParams)
+        return;
+    
+    for (int i = 0; i < ScalingTypeCount; i++)
+        if (sender() == _scalingActions[i])
+            _renderParams->SetValueLong(SCALING_TAG, SCALING_TAG, i);
 }

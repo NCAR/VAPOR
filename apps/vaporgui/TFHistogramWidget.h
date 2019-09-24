@@ -9,21 +9,22 @@
 class TFHistogramMap : public TFMap {
     Q_OBJECT
     
-    enum class ScalingType {
+    enum ScalingType {
         Linear=0,
-        Logarithmic=1,
-        Boolean=2
+        Logarithmic,
+        Boolean,
+        ScalingTypeCount
     };
     
 public:
     bool DynamicScaling = true;
     
     TFHistogramMap(TFMapWidget *parent);
-    
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     
     QSize minimumSizeHint() const;
     void Deactivate() {}
+    void PopulateSettingsMenu(QMenu *menu) const;
     
 protected:
     TFInfoWidget *createInfoWidget();
@@ -37,8 +38,12 @@ private:
     VAPoR::DataMgr *_dataMgr = nullptr;
     VAPoR::RenderParams *_renderParams = nullptr;
     Histo _histo;
+    QAction *_scalingActions[ScalingTypeCount];
     
     ScalingType _getScalingType() const;
+    
+private slots:
+    void _setScalingTypeAction();
     
 signals:
     void InfoDeselected();
