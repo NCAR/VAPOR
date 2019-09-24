@@ -16,6 +16,11 @@ using std::vector;
 using glm::vec2;
 using glm::clamp;
 
+#define SCALING_TAG "HistogramScalingTag"
+#define SCALING_LINEAR 0
+#define SCALING_LOG 1
+#define SCALING_BOOL 2
+
 static vec2 qvec2(const QPoint &qp)  { return vec2(qp.x(), qp.y()); }
 static vec2 qvec2(const QPointF &qp) { return vec2(qp.x(), qp.y()); }
 static QPointF qvec2(const vec2 &v) { return QPointF(v.x, v.y); }
@@ -85,8 +90,23 @@ void TFHistogramMap::paintEvent(QPainter &p)
     else
         maxBin = _histo.getMaxBinSize();
     
+    ScalingType scaling = _getScalingType();
+    
     for (int i = startBin; i < endBin; i += stride) {
-        float bin = _histo.getBinSize(i, stride) / maxBin;
+        float bin = _histo.getBinSize(i, stride);
+        
+        switch (scaling) {
+            default:
+            case ScalingType::Linear:
+                bin /= maxBin;
+                break;
+            case ScalingType::Logarithmic:
+                bin = logf(bin) / logf(maxBin);
+                break;
+            case ScalingType::Boolean:
+                bin = bin > 0 ? 1 : 0;
+                break;
+        }
         
         graph.push_back(NDCToQPixel((i-startBin)/(float)(endBin-startBin), bin));
     }
@@ -124,3 +144,11 @@ void TFHistogramMap::mouseMoveEvent(QMouseEvent *event)
 }
 
 //void TFHistogramWidget::mouseDoubleClickEvent(QMouseEvent *event)
+
+TFHistogramMap::ScalingType TFHistogramMap::_getScalingType() const
+{
+    if (!_renderParams)
+        return ScalingType::Linear;
+    
+    return (ScalingType)_renderParams->GetValueLong(SCALING_TAG, (int)ScalingType::Linear);
+}

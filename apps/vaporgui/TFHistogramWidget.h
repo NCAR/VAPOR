@@ -9,6 +9,12 @@
 class TFHistogramMap : public TFMap {
     Q_OBJECT
     
+    enum class ScalingType {
+        Linear=0,
+        Logarithmic=1,
+        Boolean=2
+    };
+    
 public:
     bool DynamicScaling = true;
     
@@ -31,6 +37,8 @@ private:
     VAPoR::DataMgr *_dataMgr = nullptr;
     VAPoR::RenderParams *_renderParams = nullptr;
     Histo _histo;
+    
+    ScalingType _getScalingType() const;
     
 signals:
     void InfoDeselected();
