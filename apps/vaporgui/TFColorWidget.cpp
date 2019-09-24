@@ -341,6 +341,46 @@ ColorMap::Color TFColorMap::QColorToVColor(const QColor &c)
 #include <vapor/STLUtils.h>
 #include <QPushButton>
 
+std::map<std::string, QIcon> ColorMapMenuItem::icons;
+
+QIcon ColorMapMenuItem::getCachedIcon(const std::string &path)
+{
+    auto it = icons.find(path);
+    if (it != icons.end())
+        return it->second;
+    
+    ParamsBase::StateSave stateSave;
+    MapperFunction mf(&stateSave);
+    
+    mf.LoadColormapFromFile(path);
+    ColorMap *cm = mf.GetColorMap();
+    
+    QSize size = getIconSize();
+    int nSamples = size.width();
+    unsigned char buf[nSamples*3];
+    float rgb[3];
+    for (int i = 0; i < nSamples; i++) {
+        cm->colorNormalized(i/(float)nSamples).toRGB(rgb);
+        buf[i*3+0] = rgb[0]*255;
+        buf[i*3+1] = rgb[1]*255;
+        buf[i*3+2] = rgb[2]*255;
+    }
+    QImage image(buf, nSamples, 1, QImage::Format::Format_RGB888);
+    
+    icons[path] = QIcon(QPixmap::fromImage(image).scaled(size.width(), size.height()));
+    return icons[path];
+}
+
+QSize ColorMapMenuItem::getIconSize()
+{
+    return QSize(50, 15);
+}
+
+QSize ColorMapMenuItem::getIconPadding()
+{
+    return QSize(10, 10);
+}
+
 ColorMapMenuItem::ColorMapMenuItem(const std::string &path)
 : QWidgetAction(nullptr), _path(path)
 {

@@ -32,6 +32,12 @@ void TFMap::mouseReleaseEvent    (QMouseEvent *event) { event->ignore(); }
 void TFMap::mouseMoveEvent       (QMouseEvent *event) { event->ignore(); }
 void TFMap::mouseDoubleClickEvent(QMouseEvent *event) { event->ignore(); }
 
+void TFMap::update()
+{
+    if (_parent)
+        _parent->update();
+}
+
 void TFMap::drawControl(QPainter &p, const QPointF &pos, bool selected) const
 {
     float radius = CONTROL_POINT_RADIUS;
@@ -70,12 +76,6 @@ void TFMap::drawControl(QPainter &p, const QPointF &pos, bool selected) const
         radius *= 0.38;
         p.drawEllipse(pos, radius, radius);
     }
-}
-
-void TFMap::update()
-{
-    if (_parent)
-        _parent->update();
 }
 
 QRect TFMap::paddedRect() const

@@ -96,6 +96,6 @@ public:
 signals:
     void triggered(std::string colormapPath);
     
-    private slots:
+private slots:
     void _clicked();
 };

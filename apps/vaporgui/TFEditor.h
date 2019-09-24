@@ -2,8 +2,6 @@
 
 #include <QTabWidget>
 #include <QStackedWidget>
-#include <vapor/RenderParams.h>
-#include <vapor/ParamsMgr.h>
 #include "ParamsWidgets.h"
 #include <vector>
 #include "VSection.h"
@@ -22,6 +20,13 @@ class TFMapWidget;
 class TFMap;
 class TFMapsInfoGroup;
 class TFIsoValueWidget;
+class TFMappingRangeSelector;
+
+namespace VAPoR {
+    class DataMgr;
+    class ParamsMgr;
+    class RenderParams;
+}
 
 class TFEditor : public VSection {
     Q_OBJECT
@@ -34,18 +39,10 @@ public:
 private:
     VAPoR::RenderParams *_rParams = nullptr;
     VAPoR::ParamsMgr *_paramsMgr = nullptr;
-    QRangeSliderTextCombo *range;
+    TFMappingRangeSelector *range;
     ParamsWidgetDropdown *colorMapTypeDropdown;
     TFMapsGroup *_maps;
     TFMapsInfoGroup *_mapsInfo;
-    
-    void _updateMappingRangeControl(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
-    void _getDataRange(VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams, float *min, float *max) const;
-    
-private slots:
-    void _rangeChangedBegin();
-    void _rangeChangedIntermediate(float left, float right);
-    void _rangeChanged(float left, float right);
 };
 
 
