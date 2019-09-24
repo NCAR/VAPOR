@@ -27,7 +27,7 @@ TFHistogramMap::TFHistogramMap(TFMapWidget *parent)
     _scalingActions[Boolean] = new QAction("Boolean", this);
     for (int i = 0; i < ScalingTypeCount; i++) {
         _scalingActions[i]->setCheckable(true);
-        connect(_scalingActions[i], SIGNAL(triggered()), this, SLOT(_setScalingTypeAction()));
+        connect(_scalingActions[i], SIGNAL(triggered()), this, SLOT(_menuSetScalingType()));
     }
 }
 
@@ -58,6 +58,10 @@ void TFHistogramMap::PopulateSettingsMenu(QMenu *menu) const
     QMenu *scalingModeMenu = menu->addMenu("Histogram scaling mode");
     for (int i = 0; i < ScalingTypeCount; i++)
         scalingModeMenu->addAction(_scalingActions[i]);
+    
+    QAction *histogramDynamicScalingAction = menu->addAction("Histogram Dynamic Scaling", this, SLOT(_menuDynamicScalingToggled(bool)));
+    histogramDynamicScalingAction->setCheckable(true);
+    histogramDynamicScalingAction->setChecked(_dynamicScaling);
 }
 
 TFInfoWidget *TFHistogramMap::createInfoWidget()
@@ -93,7 +97,7 @@ void TFHistogramMap::paintEvent(QPainter &p)
     startBin -= startBin % stride;
     
     float maxBin;
-    if (DynamicScaling)
+    if (_dynamicScaling)
         maxBin = _histo.getMaxBinSizeBetweenIndices(startBin, endBin);
     else
         maxBin = _histo.getMaxBinSize();
@@ -166,7 +170,7 @@ TFHistogramMap::ScalingType TFHistogramMap::_getScalingType() const
     return type;
 }
 
-void TFHistogramMap::_setScalingTypeAction()
+void TFHistogramMap::_menuSetScalingType()
 {
     if (!_renderParams)
         return;
@@ -174,4 +178,9 @@ void TFHistogramMap::_setScalingTypeAction()
     for (int i = 0; i < ScalingTypeCount; i++)
         if (sender() == _scalingActions[i])
             _renderParams->SetValueLong(SCALING_TAG, SCALING_TAG, i);
+}
+
+void TFHistogramMap::_menuDynamicScalingToggled(bool on)
+{
+    _dynamicScaling = on;
 }

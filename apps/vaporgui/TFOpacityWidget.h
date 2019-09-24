@@ -109,6 +109,7 @@ public:
     QSize minimumSizeHint() const override;
     void Deactivate() override;
     void PopulateContextMenu(QMenu *menu, const glm::vec2 &p) override;
+    void PopulateSettingsMenu(QMenu *menu) const override;
     
 protected:
     TFInfoWidget *createInfoWidget() override;
@@ -149,6 +150,8 @@ public slots:
 private slots:
     void menuDeleteSelectedControlPoint();
     void menuAddControlPoint();
+    void menuLoad();
+    void menuSave();
 };
 
 class TFOpacityWidget : public TFMapWidget {

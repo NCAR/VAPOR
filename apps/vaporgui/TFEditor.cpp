@@ -33,34 +33,8 @@ TFEditor::TFEditor()
         "Color Interpolation")
     );
     
-    QMenu *builtinColormapMenu = new QMenu("Load Built-In Colormap");
-    string builtinPath = GetSharePath("palettes");
-    auto fileNames = FileUtils::ListFiles(builtinPath);
-    std::sort(fileNames.begin(), fileNames.end());
-    for (int i = 0; i < fileNames.size(); i++) {
-        
-        string path = FileUtils::JoinPaths({builtinPath, fileNames[i]});
-        
-        QAction *item = new ColorMapMenuItem(path);
-        connect(item, SIGNAL(triggered(std::string)), this, SLOT(_loadColormap(std::string)));
-        builtinColormapMenu->addAction(item);
-    }
-    
     QMenu *menu = new QMenu;
-    menu->addAction("Save Colormap", this, SLOT(_saveTransferFunction()));
-    menu->addAction("Load Colormap", this, SLOT(_loadColormap()));
-    menu->addMenu(builtinColormapMenu);
-    menu->addSeparator();
-    menu->addAction("Save Transfer Function", this, SLOT(_saveTransferFunction()));
-    menu->addAction("Load Transfer Function", this, SLOT(_loadTransferFunction()));
-    menu->addSeparator();
-    menu->addAction("Auto Update Histogram")->setCheckable(true);
-    QAction *histogramDynamicScalingAction = menu->addAction("Histogram Dynamic Scaling", this, SLOT(_histogramDynamicScalingToggled(bool)));
-    histogramDynamicScalingAction->setCheckable(true);
-    histogramDynamicScalingAction->setChecked(_maps->histo->DynamicScaling);
-    QAction *test = new QAction("TEST", this);
-    test->setCheckable(true);
-    menu->addAction(test);
+    _maps->histo->PopulateSettingsMenu(menu);
     setMenu(menu);
     
     
@@ -117,94 +91,6 @@ void TFEditor::_rangeChanged(float left, float right)
     _paramsMgr->EndSaveStateGroup();
 }
 
-void TFEditor::_test()
-{
-    printf("TEST\n");
-}
-
-void TFEditor::_loadColormap(std::string path)
-{
-    printf("%s(\"%s\")\n", __func__, path.c_str());
-    if (!_rParams)
-        return;
-    
-    MapperFunction *tf = _rParams->GetMapperFunc(_rParams->GetVariableName());
-    int rc = tf->LoadColormapFromFile(path);
-    
-    if (rc < 0)
-        MSG_ERR("Failed to load transfer function");
-}
-
-void TFEditor::_loadColormap()
-{
-    SettingsParams *sp = (SettingsParams*)_paramsMgr->GetParams(SettingsParams::GetClassType());
-    
-    QString qDefaultDirectory = QString::fromStdString(sp->GetTFDir());
-    QString qSelectedPath = QFileDialog::getOpenFileName(nullptr, "Select a .tf3 file", qDefaultDirectory, "Vapor Transfer Function (*.tf3)");
-    if (qSelectedPath.isNull())
-        return;
-    
-    string selectedPath = qSelectedPath.toStdString();
-    sp->SetTFDir(FileUtils::Dirname(selectedPath));
-    
-    _loadColormap(selectedPath);
-}
-
-void TFEditor::_loadTransferFunction()
-{
-    SettingsParams *sp = (SettingsParams*)_paramsMgr->GetParams(SettingsParams::GetClassType());
-    
-    QString qDefaultDirectory = QString::fromStdString(sp->GetTFDir());
-    QString qSelectedPath = QFileDialog::getOpenFileName(nullptr, "Select a .tf3 file", qDefaultDirectory, "Vapor Transfer Function (*.tf3)");
-    if (qSelectedPath.isNull())
-        return;
-    
-    string selectedPath = qSelectedPath.toStdString();
-    sp->SetTFDir(FileUtils::Dirname(selectedPath));
-    
-    MapperFunction *tf = _rParams->GetMapperFunc(_rParams->GetVariableName());
-    
-    int rc = tf->LoadFromFile(selectedPath);
-    
-    if (rc < 0)
-        MSG_ERR("Failed to load transfer function");
-}
-
-void TFEditor::_saveTransferFunction()
-{
-    SettingsParams *sp = (SettingsParams*)_paramsMgr->GetParams(SettingsParams::GetClassType());
-    
-    QString qDefaultDirectory = QString::fromStdString(sp->GetTFDir());
-    QString qSelectedPath = QFileDialog::getSaveFileName(nullptr, "Select a .tf3 file", qDefaultDirectory, "Vapor Transfer Function (*.tf3)");
-    if (qSelectedPath.isNull())
-        return;
-    
-    string selectedPath = qSelectedPath.toStdString();
-    sp->SetTFDir(FileUtils::Dirname(selectedPath));
-    
-    MapperFunction *tf = _rParams->GetMapperFunc(_rParams->GetVariableName());
-    
-    int rc = tf->SaveToFile(selectedPath);
-    
-    if (rc < 0)
-        MSG_ERR("Failed to save transfer function");
-}
-
-void TFEditor::_histogramDynamicScalingToggled(bool on)
-{
-    _maps->histo->DynamicScaling = on;
-}
-
-
-
-
-
-
-
-
-
-
-
 std::map<std::string, QIcon> ColorMapMenuItem::icons;
 
 QIcon ColorMapMenuItem::getCachedIcon(const std::string &path)
@@ -243,59 +129,6 @@ QSize ColorMapMenuItem::getIconSize()
 QSize ColorMapMenuItem::getIconPadding()
 {
     return QSize(10, 10);
-}
-
-#include <vapor/STLUtils.h>
-
-ColorMapMenuItem::ColorMapMenuItem(const std::string &path)
-: QWidgetAction(nullptr), _path(path)
-{
-    QPushButton *button = new QPushButton;
-    setDefaultWidget(button);
-    
-    button->setIcon(getCachedIcon(path));
-    button->setFixedSize(getIconSize() + getIconPadding());
-    connect(button, SIGNAL(clicked()), this, SLOT(_clicked()));
-    
-    string name = STLUtils::Split(FileUtils::Basename(path), ".")[0];
-    button->setToolTip(QString::fromStdString(name));
-    
-    button->setStyleSheet(R"(
-                           QPushButton {
-                                icon-size: 50px 15px;
-                                padding: 0px;
-                                margin: 0px;
-                                background: none;
-                                border: none;
-                           }
-                           QPushButton::hover {
-                                background: #aaa;
-                           }
-                           )");
-}
-
-void ColorMapMenuItem::CloseMenu(QAction *action)
-{
-    if (!action)
-        return;
-    
-    QList<QWidget *> menus = action->associatedWidgets();
-    
-    for (QWidget *widget : menus) {
-        QMenu *menu = dynamic_cast<QMenu *>(widget);
-        if (!menu) continue;
-        if (menu->isHidden()) continue;
-        
-        menu->hide();
-        CloseMenu(menu->menuAction());
-    }
-}
-
-void ColorMapMenuItem::_clicked()
-{
-    trigger();
-    emit triggered(_path);
-    CloseMenu(this);
 }
 
 

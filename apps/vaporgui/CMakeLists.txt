@@ -92,6 +92,8 @@ set (SRCS
 	TFIsoValueWidget.h
 	TFIsoValueInfoWidget.cpp
 	TFIsoValueInfoWidget.h
+	TFUtils.cpp
+	TFUtils.h
 	QRangeSliderTextCombo.cpp
 	QRangeSliderTextCombo.h
 	QPaintUtils.cpp

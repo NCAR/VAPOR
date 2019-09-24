@@ -18,6 +18,7 @@ public:
     QSize minimumSizeHint() const override;
     void Deactivate() override;
     void PopulateContextMenu(QMenu *menu, const glm::vec2 &p) override;
+    void PopulateSettingsMenu(QMenu *menu) const override;
     
 protected:
     TFInfoWidget *createInfoWidget() override;
@@ -65,9 +66,36 @@ public slots:
 private slots:
     void menuDeleteSelectedControlPoint();
     void menuAddControlPoint();
+    void menuLoad();
+    void menuSave();
+    void menuLoadBuiltin(std::string path);
 };
 
 class TFColorWidget : public TFMapWidget {
 public:
     TFColorWidget() : TFMapWidget(new TFColorMap(this)) {}
+};
+
+
+
+#include <QWidgetAction>
+class ColorMapMenuItem : public QWidgetAction {
+    Q_OBJECT
+    
+    static std::map<std::string, QIcon> icons;
+    static QIcon getCachedIcon(const std::string &path);
+    static QSize getIconSize();
+    static QSize getIconPadding();
+    
+    const std::string _path;
+    
+public:
+    ColorMapMenuItem(const std::string &path);
+    static void CloseMenu(QAction *action);
+    
+signals:
+    void triggered(std::string colormapPath);
+    
+    private slots:
+    void _clicked();
 };
