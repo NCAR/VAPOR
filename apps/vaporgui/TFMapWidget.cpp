@@ -246,7 +246,7 @@ void TFMapWidget::_showContextMenu(const QPoint &qp)
     menu.exec(mapToGlobal(qp));
 }
 
-#include <vapor/GLManager.h>
+//#include <vapor/GLManager.h>
 void TFMapWidget::paintEvent(QPaintEvent* event)
 {
     QFrame::paintEvent(event);

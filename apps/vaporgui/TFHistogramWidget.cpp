@@ -19,11 +19,6 @@ using glm::clamp;
 
 #define SCALING_TAG "HistogramScalingTag"
 
-static vec2 qvec2(const QPoint &qp)  { return vec2(qp.x(), qp.y()); }
-static vec2 qvec2(const QPointF &qp) { return vec2(qp.x(), qp.y()); }
-static QPointF qvec2(const vec2 &v) { return QPointF(v.x, v.y); }
-
-
 TFHistogramMap::TFHistogramMap(TFMapWidget *parent)
 : TFMap(parent)
 {
