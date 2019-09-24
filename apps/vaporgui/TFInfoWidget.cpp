@@ -80,11 +80,14 @@ void TFInfoWidget::updateValue()
 
 void TFInfoWidget::updateValueEditValidator()
 {
-    printf("N Decimals = %i\n", ((QDoubleValidator*)_valueEdit->validator())->decimals());
+    // If the number of decimals are not specified for setRange
+    // it resets them to zero. (in Qt4 at least)
+    
+    QDoubleValidator *v = (QDoubleValidator *)_valueEdit->validator();
     if (isUsingMappedValue())
-        ((QDoubleValidator*)_valueEdit->validator())->setRange(_min, _max);
+        v->setRange(_min, _max, v->decimals());
     else
-        ((QDoubleValidator*)_valueEdit->validator())->setRange(0, 100);
+        v->setRange(0, 100, v->decimals());
 }
 
 bool TFInfoWidget::isUsingNormalizedValue() const
