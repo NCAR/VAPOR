@@ -66,6 +66,8 @@ set (SRCS
 	VolumeSubtabs.cpp
     VaporWidgets.cpp
 	ParamsWidgets.cpp
+	ParamsMenuItems.cpp
+	ParamsMenuItems.h
 	TFEditor.cpp
 	TFEditor.h
 	TFOpacityWidget.cpp
