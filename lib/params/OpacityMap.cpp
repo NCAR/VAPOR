@@ -382,6 +382,9 @@ float OpacityMap::opacityDataAtNorm(float nv) const
       // Find the bounding control points
       //
       int index = leftControlIndex(nv);
+      if (numControlPoints() == 1)
+          return controlPointOpacity(index);
+        
       double val0 = cps[2*index+1];
 	  double val1 = cps[2*index+3];
 

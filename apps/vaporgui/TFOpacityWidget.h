@@ -84,7 +84,7 @@ public:
     
     void Remove(const PointIterator &point) {
         VAssert(point.i >= 0 && point.i < _points.size());
-        if (Size() > 2) // VAPoR::MapperFunc cannot handle less than 2
+        if (Size() > 1)
             _points.erase(_points.begin() + point.i);
     }
     
