@@ -54,11 +54,19 @@ TFMapInfoGroupWidget *TFMapGroupWidget::CreateInfoGroup()
     return infos;
 }
 
-void TFMapGroupWidget::add(TFMapWidget *map)
+void TFMapGroupWidget::add(TFMapWidget *mapWidget)
 {
-    _maps.push_back(map);
-    layout()->addWidget(map);
-    connect(map, SIGNAL(Activated(TFMapWidget*)), this, SLOT(mapActivated(TFMapWidget*)));
+    _maps.push_back(mapWidget);
+    layout()->addWidget(mapWidget);
+    connect(mapWidget, SIGNAL(Activated(TFMapWidget*)), this, SLOT(mapActivated(TFMapWidget*)));
+}
+
+void TFMapGroupWidget::add(TFMap *map)
+{
+    TFMapWidget *mapWidget = new TFMapWidget(map);
+    _maps.push_back(mapWidget);
+    layout()->addWidget(mapWidget);
+    connect(mapWidget, SIGNAL(Activated(TFMapWidget*)), this, SLOT(mapActivated(TFMapWidget*)));
 }
 
 void TFMapGroupWidget::mapActivated(TFMapWidget *activatedMap)
