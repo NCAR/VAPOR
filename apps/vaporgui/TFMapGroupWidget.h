@@ -28,18 +28,43 @@ namespace VAPoR {
     class RenderParams;
 }
 
-class TFEditor : public VSection {
+
+class TFMapsGroup : public QWidget {
     Q_OBJECT
     
-public:
-    TFEditor();
+    std::vector<TFMapWidget*> _maps;
     
+public:
+    TFMapsGroup();
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     
+    TFMapsInfoGroup *CreateInfoGroup();
+    
+    TFHistogramMap *histo;
+    
 private:
-    VAPoR::RenderParams *_rParams = nullptr;
-    VAPoR::ParamsMgr *_paramsMgr = nullptr;
-    TFMappingRangeSelector *range;
-    TFMapsGroup *_maps;
-    TFMapsInfoGroup *_mapsInfo;
+    void add(TFMapWidget *map);
+    
+private slots:
+    void mapActivated(TFMapWidget *map);
+};
+
+
+
+class TFMapsInfoGroup : public QStackedWidget {
+    Q_OBJECT
+    
+    std::vector<TFInfoWidget*> _infos;
+    
+public:
+    TFMapsInfoGroup();
+    void Update(VAPoR::RenderParams *rParams);
+    
+    friend class TFMapsGroup;
+    
+private:
+    void add(TFMapWidget *map);
+    
+private slots:
+    void mapActivated(TFMap *map);
 };

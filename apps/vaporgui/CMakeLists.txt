@@ -88,6 +88,8 @@ set (SRCS
 	TFOpacityInfoWidget.h
 	TFMapWidget.cpp
 	TFMapWidget.h
+	TFMapGroupWidget.cpp
+	TFMapGroupWidget.h
 	TFHistogramInfoWidget.cpp
 	TFHistogramInfoWidget.h
 	TFIsoValueWidget.cpp
