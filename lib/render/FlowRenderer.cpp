@@ -931,7 +931,7 @@ FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds ) co
     std::vector<double> locD( 3 );
     float timeVal = _timestamps.at(0);
     // This is the total number of seeds to generate, based on the bias strength.
-    long numOfSeedsToGen = numOfSeedsNeeded * long(std::abs( biasStren ) + 1.0f);   
+    long numOfSeedsToGen = long( numOfSeedsNeeded * (std::abs( biasStren ) + 1.0f) );   
     long numOfTrials = 0;
     // Note: in the case that too many random seeds fall on missing values, we set a limit of
     // 10 times numOfSeedsToGen. 
@@ -950,7 +950,7 @@ FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds ) co
         numOfTrials++;
     }
 
-    delete grid;
+    delete grid;    // Delete the temporary grid 
     
     // If we reach numOfTrialLimit without collecting enough seeds, bail.
     if( numOfTrials == numOfTrialLimit && seeds.size() < numOfSeedsNeeded )
