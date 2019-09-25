@@ -195,7 +195,7 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     connect( _rakeTotalNum, SIGNAL( _editingFinished() ), this, SLOT( _rakeNumOfSeedsChanged() ) );
 
     _rakeBiasVariable = new VComboBox( this, "Random Bias Variable" );
-    _rakeBiasStrength = new VSlider(   this, "Random Bias Strength", -10.0f, 10.0f );
+    _rakeBiasStrength = new VSlider(   this, "Random Bias Strength", -5.0f, 5.0f );
     _layout->addWidget( _rakeBiasVariable );
     _layout->addWidget( _rakeBiasStrength );
     connect( _rakeBiasVariable, SIGNAL( _indexChanged(int) ), this, SLOT( _rakeBiasVariableChanged(int) ) );

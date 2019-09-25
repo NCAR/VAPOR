@@ -84,7 +84,7 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
         _cache_rake[i] = 0.0f;
     for( int i = 0; i < 4; i++ )
         _cache_rakeNumOfSeeds[i] = 1;
-    _cache_rakeBiasStrength = 0;
+    _cache_rakeBiasStrength = 0.0f;
     _cache_seedInjInterval  = 0;
 
     _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
@@ -217,6 +217,9 @@ FlowRenderer::_paintGL( bool fast )
     _updateFlowCacheAndStates( params );
     _velocityField.UpdateParams( params );
     _colorField.UpdateParams( params );
+
+    _printFlowStatus( "velocity status: ",  _velocityStatus );
+    _printFlowStatus( "color status:    ",  _colorStatus );
 
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
@@ -710,32 +713,6 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
 }
 
 
-int
-FlowRenderer::_genSeedsXY( std::vector<flow::Particle>& seeds ) const
-{
-    int numX = 4, numY = 4;
-    std::vector<double>  extMin, extMax;
-    FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
-    params->GetBox()->GetExtents( extMin, extMax );
-    float stepX = (extMax[0] - extMin[0]) / (numX + 1.0f);
-    float stepY = (extMax[1] - extMin[1]) / (numY + 1.0f);
-    float stepZ = extMin[2] + (extMax[2] - extMin[2]) / 4.0f;
-
-    float timeVal = _timestamps.at(0);
-    seeds.resize( numX * numY );
-    for( int y = 0; y < numY; y++ )
-        for( int x = 0; x < numX; x++ )
-        {
-            int idx = y * numX + x;
-            seeds[idx].location.x = extMin[0] + (x+1.0f) * stepX;
-            seeds[idx].location.y = extMin[1] + (y+1.0f) * stepY;
-            seeds[idx].location.z = stepZ ;
-            seeds[idx].time       = timeVal;
-        }
-
-    return 0;
-}
-
 void
 FlowRenderer::_dupSeedsNewTime( std::vector<flow::Particle>& seeds, 
                                 size_t firstN, float newTime ) const
@@ -1082,6 +1059,19 @@ FlowRenderer::_updatePeriodicity( flow::Advection* advc )
         advc->SetZPeriodicity( true, minxyz.z, maxxyz.z );
     else
         advc->SetZPeriodicity( false );
+}
+
+void
+FlowRenderer::_printFlowStatus( const std::string& prefix, FlowStatus stat ) const
+{
+    std::cout << prefix << " :  ";
+    if( stat == FlowStatus::SIMPLE_OUTOFDATE )
+        std::cout << "simple out-of-date";
+    else if( stat == FlowStatus::TIME_STEP_OOD )
+        std::cout << "time step out-of-date";
+    else if( stat == FlowStatus::UPTODATE )
+        std::cout << "up to date";
+    std::cout << std::endl;
 }
 
 #ifndef WIN32

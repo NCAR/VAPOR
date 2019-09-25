@@ -68,7 +68,7 @@ protected:
     float               _cache_rake[6];
     long                _cache_rakeNumOfSeeds[4];
     std::string         _cache_rakeBiasVariable;
-    int                 _cache_rakeBiasStrength;
+    float               _cache_rakeBiasStrength;
     int                 _cache_seedInjInterval;
 
     // A few different modes to generate advection seeds:
@@ -101,7 +101,7 @@ protected:
     //
     // Member functions
     //
-    int  _genSeedsXY(               std::vector<flow::Particle>& seeds ) const;
+    void _printFlowStatus( const std::string& prefix, FlowStatus stat  ) const;
     int  _genSeedsRakeUniform(      std::vector<flow::Particle>& seeds ) const;
     int  _genSeedsRakeRandom(       std::vector<flow::Particle>& seeds ) const;
     int  _genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds ) const;
