@@ -24,7 +24,7 @@ class TFMap : public QObject {
     bool _insideSaveStateGroup = false;
     
 public:
-    TFMap(TFMapWidget *parent);
+    TFMap(TFMapWidget *parent = nullptr);
     
     TFInfoWidget *GetInfoWidget();
     virtual void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) = 0;
@@ -45,6 +45,8 @@ public:
     virtual void mouseReleaseEvent    (QMouseEvent *event);
     virtual void mouseMoveEvent       (QMouseEvent *event);
     virtual void mouseDoubleClickEvent(QMouseEvent *event);
+    
+    friend class TFMapWidget;
     
 public slots:
     void update();

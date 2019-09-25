@@ -10,6 +10,8 @@
 
 class TFOpacityWidget;
 class TFColorWidget;
+class TFOpacityMap;
+class TFColorMap;
 class TFHistogramMap;
 class TFHistogramWidget;
 class QRangeSlider;
@@ -42,4 +44,8 @@ private:
     TFMappingRangeSelector *range;
     TFMapGroupWidget *_maps;
     TFMapInfoGroupWidget *_mapsInfo;
+    
+    TFOpacityMap *_opacityMap;
+    TFHistogramMap *_histogramMap;
+    TFColorMap *_colorMap;
 };

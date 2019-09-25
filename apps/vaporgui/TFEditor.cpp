@@ -25,13 +25,25 @@ using namespace VAPoR;
 TFEditor::TFEditor()
 : VSection("Transfer Function")
 {
-    layout()->addWidget(_maps = new TFMapGroupWidget);
+    _maps = new TFMapGroupWidget;
+    _opacityMap = new TFOpacityMap(nullptr);
+    _histogramMap = new TFHistogramMap(nullptr);
+    _colorMap = new TFColorMap(nullptr);
+    
+    _maps->Add({_opacityMap, _histogramMap});
+    _maps->Add(_colorMap);
+    
+    layout()->addWidget(_maps);
     layout()->addWidget(_mapsInfo = _maps->CreateInfoGroup());
     layout()->addWidget(range = new TFMappingRangeSelector);
-    connect(range, SIGNAL(ValueChangedIntermediate(float, float)), _maps->histo, SLOT(update()));
+    connect(range, SIGNAL(ValueChangedIntermediate(float, float)), _histogramMap, SLOT(update()));
     
     QMenu *menu = new QMenu;
-    _maps->histo->PopulateSettingsMenu(menu);
+    _colorMap->PopulateSettingsMenu(menu);
+    menu->addSeparator();
+    _opacityMap->PopulateSettingsMenu(menu);
+    menu->addSeparator();
+    _histogramMap->PopulateSettingsMenu(menu);
     setMenu(menu);
     
 //    this->setStyleSheet(R"(QWidget:hover:!pressed {border: 1px solid red;})");

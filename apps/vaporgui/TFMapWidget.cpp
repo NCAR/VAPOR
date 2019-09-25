@@ -180,6 +180,7 @@ TFMapWidget::~TFMapWidget()
 void TFMapWidget::AddMap(TFMap *map)
 {
     if (std::find(_maps.begin(), _maps.end(), map) == _maps.end()) {
+        map->_parent = this;
         _maps.push_back(map);
         connect(map, SIGNAL(Activated(TFMap*)), this, SLOT(_mapActivated(TFMap*)));
     }
