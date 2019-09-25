@@ -909,7 +909,6 @@ FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds ) co
      * We generate more random seeds than needed, and then sort them.
      * The first batch of these seeds are used as the final seeds.
      */
-
     
     /* Create three uniform distributions in 3 dimensions */
     int procID;     // The current process ID
@@ -993,7 +992,8 @@ FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds ) co
     return 0;
 }
 
-
+/* Note on Sept 25th 2019:
+ * This function isn't called anywhere, so comment it out for now 
 int
 FlowRenderer::_getAGrid( const FlowParams* params, 
                          int               timestep,
@@ -1019,6 +1019,7 @@ FlowRenderer::_getAGrid( const FlowParams* params,
         return 0;
     }
 }
+*/
     
 void
 FlowRenderer::_prepareColormap( FlowParams* params )
