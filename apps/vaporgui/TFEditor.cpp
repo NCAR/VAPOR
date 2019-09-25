@@ -25,7 +25,7 @@ using namespace VAPoR;
 TFEditor::TFEditor()
 : VSection("Transfer Function")
 {
-    layout()->addWidget(_maps = new TFMapsGroup);
+    layout()->addWidget(_maps = new TFMapGroupWidget);
     layout()->addWidget(_mapsInfo = _maps->CreateInfoGroup());
     layout()->addWidget(range = new TFMappingRangeSelector);
     connect(range, SIGNAL(ValueChangedIntermediate(float, float)), _maps->histo, SLOT(update()));

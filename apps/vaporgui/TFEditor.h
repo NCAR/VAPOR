@@ -15,10 +15,10 @@ class TFHistogramWidget;
 class QRangeSlider;
 class QRangeSliderTextCombo;
 class TFInfoWidget;
-class TFMapsGroup;
+class TFMapGroupWidget;
 class TFMapWidget;
 class TFMap;
-class TFMapsInfoGroup;
+class TFMapInfoGroupWidget;
 class TFIsoValueWidget;
 class TFMappingRangeSelector;
 
@@ -40,6 +40,6 @@ private:
     VAPoR::RenderParams *_rParams = nullptr;
     VAPoR::ParamsMgr *_paramsMgr = nullptr;
     TFMappingRangeSelector *range;
-    TFMapsGroup *_maps;
-    TFMapsInfoGroup *_mapsInfo;
+    TFMapGroupWidget *_maps;
+    TFMapInfoGroupWidget *_mapsInfo;
 };

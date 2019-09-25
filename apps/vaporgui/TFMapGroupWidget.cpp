@@ -22,7 +22,7 @@
 using namespace Wasp;
 using namespace VAPoR;
 
-TFMapsGroup::TFMapsGroup()
+TFMapGroupWidget::TFMapGroupWidget()
 {
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setSpacing(0);
@@ -37,15 +37,15 @@ TFMapsGroup::TFMapsGroup()
     add(new TFColorWidget);
 }
 
-void TFMapsGroup::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
+void TFMapGroupWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
 {
     for (auto map : _maps)
         map->Update(dataMgr, paramsMgr, rParams);
 }
 
-TFMapsInfoGroup *TFMapsGroup::CreateInfoGroup()
+TFMapInfoGroupWidget *TFMapGroupWidget::CreateInfoGroup()
 {
-    TFMapsInfoGroup *infos = new TFMapsInfoGroup;
+    TFMapInfoGroupWidget *infos = new TFMapInfoGroupWidget;
     
     for (auto map : _maps) {
         infos->add(map);
@@ -54,14 +54,14 @@ TFMapsInfoGroup *TFMapsGroup::CreateInfoGroup()
     return infos;
 }
 
-void TFMapsGroup::add(TFMapWidget *map)
+void TFMapGroupWidget::add(TFMapWidget *map)
 {
     _maps.push_back(map);
     layout()->addWidget(map);
     connect(map, SIGNAL(Activated(TFMapWidget*)), this, SLOT(mapActivated(TFMapWidget*)));
 }
 
-void TFMapsGroup::mapActivated(TFMapWidget *activatedMap)
+void TFMapGroupWidget::mapActivated(TFMapWidget *activatedMap)
 {
     for (auto map : _maps)
         if (map != activatedMap)
@@ -71,18 +71,18 @@ void TFMapsGroup::mapActivated(TFMapWidget *activatedMap)
 
 
 
-TFMapsInfoGroup::TFMapsInfoGroup()
+TFMapInfoGroupWidget::TFMapInfoGroupWidget()
 {
     
 }
 
-void TFMapsInfoGroup::Update(VAPoR::RenderParams *rParams)
+void TFMapInfoGroupWidget::Update(VAPoR::RenderParams *rParams)
 {
     for (auto info : _infos)
         info->Update(rParams);
 }
 
-void TFMapsInfoGroup::add(TFMapWidget *mapWidget)
+void TFMapInfoGroupWidget::add(TFMapWidget *mapWidget)
 {
     for (TFMap *map : mapWidget->GetMaps()) {
         TFInfoWidget *info = map->GetInfoWidget();
@@ -93,7 +93,7 @@ void TFMapsInfoGroup::add(TFMapWidget *mapWidget)
     }
 }
 
-void TFMapsInfoGroup::mapActivated(TFMap *activatedMap)
+void TFMapInfoGroupWidget::mapActivated(TFMap *activatedMap)
 {
     setCurrentWidget(activatedMap->GetInfoWidget());
 }
