@@ -1,32 +1,21 @@
 #pragma once
 
-#include <QTabWidget>
+#include <QWidget>
 #include <QStackedWidget>
-#include "ParamsWidgets.h"
 #include <vector>
-#include "VSection.h"
 
-#include <QToolButton>
-
-class TFOpacityWidget;
-class TFColorWidget;
-class TFHistogramMap;
-class TFHistogramWidget;
-class QRangeSlider;
-class QRangeSliderTextCombo;
 class TFInfoWidget;
-class TFMapGroupWidget;
 class TFMapWidget;
 class TFMap;
 class TFMapInfoGroupWidget;
-class TFIsoValueWidget;
-class TFMappingRangeSelector;
 
 namespace VAPoR {
     class DataMgr;
     class ParamsMgr;
     class RenderParams;
 }
+
+
 
 
 class TFMapGroupWidget : public QWidget {
@@ -50,13 +39,14 @@ private slots:
 
 
 
+
+
 class TFMapInfoGroupWidget : public QStackedWidget {
     Q_OBJECT
     
     std::vector<TFInfoWidget*> _infos;
     
 public:
-    TFMapInfoGroupWidget();
     void Update(VAPoR::RenderParams *rParams);
     
     friend class TFMapGroupWidget;

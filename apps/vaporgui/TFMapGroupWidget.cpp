@@ -1,26 +1,7 @@
 #include "TFMapGroupWidget.h"
-#include "TFEditor.h"
+#include "TFMapWidget.h"
+#include "TFInfoWidget.h"
 #include <QBoxLayout>
-#include <QLabel>
-#include <QMenu>
-#include <QFileDialog>
-#include "TFOpacityWidget.h"
-#include "TFHistogramWidget.h"
-#include "TFColorWidget.h"
-#include "TFOpacityInfoWidget.h"
-#include "TFColorInfoWidget.h"
-#include "TFMappingRangeSelector.h"
-#include <vapor/ColorMap.h>
-#include <vapor/ResourcePath.h>
-#include <vapor/FileUtils.h>
-#include <vapor/RenderParams.h>
-#include <vapor/ParamsMgr.h>
-#include "SettingsParams.h"
-#include "ErrorReporter.h"
-#include "TFIsoValueWidget.h"
-
-using namespace Wasp;
-using namespace VAPoR;
 
 TFMapGroupWidget::TFMapGroupWidget()
 {
@@ -83,10 +64,10 @@ void TFMapGroupWidget::mapActivated(TFMapWidget *activatedMap)
 
 
 
-TFMapInfoGroupWidget::TFMapInfoGroupWidget()
-{
-    
-}
+
+
+
+
 
 void TFMapInfoGroupWidget::Update(VAPoR::RenderParams *rParams)
 {
