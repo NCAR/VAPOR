@@ -136,14 +136,20 @@ void TFOpacityMap::mousePressEvent(QMouseEvent *event)
     emit Activated(this);
     vec2 mouse = qvec2(event->posF());
     auto it = findSelectedControlPoint(mouse);
+    auto lineIt = findSelectedControlLine(mouse);
     
     if (it != _controlPoints.EndPoints()) {
         _draggedControl = it;
         _dragOffset = NDCToPixel(*it) - mouse;
         _isDraggingControl = true;
-        _controlStartValue = *it;
         selectControlPoint(it);
         _paramsMgr->BeginSaveStateGroup("Move opacity control point");
+    } else if (lineIt != _controlPoints.EndLines()) {
+        _draggedLine = lineIt;
+        _dragOffset = NDCToPixel(lineIt.a()) - mouse;
+        _dragOffsetB = NDCToPixel(lineIt.b()) - mouse;
+        _isDraggingLine = true;
+        _paramsMgr->BeginSaveStateGroup("Move opacity control line");
     } else {
         DeselectControlPoint();
         event->ignore();
@@ -152,12 +158,13 @@ void TFOpacityMap::mousePressEvent(QMouseEvent *event)
 
 void TFOpacityMap::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (_isDraggingControl) {
+    if (_isDraggingControl || _isDraggingLine) {
         opacityChanged();
         _paramsMgr->EndSaveStateGroup();
     } else
         event->ignore();
     _isDraggingControl = false;
+    _isDraggingLine = false;
 }
 
 void TFOpacityMap::mouseMoveEvent(QMouseEvent *event)
@@ -180,6 +187,19 @@ void TFOpacityMap::mouseMoveEvent(QMouseEvent *event)
         update();
         opacityChanged();
         _paramsMgr->IntermediateChange();
+    } else if(_isDraggingLine) {
+        auto &it = _draggedLine;
+        it.setA(glm::clamp(
+                                 PixelToNDC(mouse + _dragOffset),
+                                 vec2(it.IsFirst() ? 0 : (it-1).a().x, 0),
+                                 vec2(it.IsLast() ? 1 : (it+1).b().x, 1)));
+        it.setB(glm::clamp(
+                               PixelToNDC(mouse + _dragOffsetB),
+                               vec2(it.IsFirst() ? 0 : (it-1).a().x, 0),
+                               vec2(it.IsLast() ? 1 : (it+1).b().x, 1)));
+        update();
+        opacityChanged();
+        _paramsMgr->IntermediateChange();
     } else {
         event->ignore();
     }
@@ -196,14 +216,12 @@ void TFOpacityMap::mouseDoubleClickEvent(QMouseEvent *event)
         return;
     }
     
-    for (auto it = cp.BeginLines(); it != cp.EndLines(); ++it) {
-        const vec2 a = NDCToPixel(it.a());
-        const vec2 b = NDCToPixel(it.b());
-        
-        if (DistanceToLine(a, b, mouse) <= GetControlPointRadius()) {
-            addControlPoint(PixelToNDC(Project(a, b, mouse)));
-            return;
-        }
+    auto controlLineIt = findSelectedControlLine(mouse);
+    if (controlLineIt != cp.EndLines()) {
+        const vec2 a = NDCToPixel(controlLineIt.a());
+        const vec2 b = NDCToPixel(controlLineIt.b());
+        addControlPoint(PixelToNDC(Project(a, b, mouse)));
+        return;
     }
     
     event->ignore();
@@ -240,6 +258,21 @@ ControlPointList::PointIterator TFOpacityMap::findSelectedControlPoint(const glm
     return end;
 }
 
+ControlPointList::LineIterator TFOpacityMap::findSelectedControlLine(const glm::vec2 &mouse)
+{
+    ControlPointList &cp = _controlPoints;
+    const float radius = GetControlPointRadius();
+    
+    for (auto it = cp.BeginLines(); it != cp.EndLines(); ++it) {
+        const vec2 a = NDCToPixel(it.a());
+        const vec2 b = NDCToPixel(it.b());
+        
+        if (DistanceToLine(a, b, mouse) <= radius)
+            return it;
+    }
+    return cp.EndLines();
+}
+
 void TFOpacityMap::selectControlPoint(ControlPointList::PointIterator it)
 {
     _selectedControl = it.Index();
@@ -249,9 +282,10 @@ void TFOpacityMap::selectControlPoint(ControlPointList::PointIterator it)
 
 void TFOpacityMap::deleteControlPoint(ControlPointList::PointIterator it)
 {
-    if (_isDraggingControl && _draggedControl == it) {
+    if (_isDraggingControl || _isDraggingLine) {
         _paramsMgr->EndSaveStateGroup();
         _isDraggingControl = false;
+        _isDraggingLine = false;
     }
     
     if (_selectedControl == it.Index())
