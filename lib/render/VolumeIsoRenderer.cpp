@@ -65,8 +65,10 @@ void VolumeIsoRenderer::_setShaderUniforms(const ShaderProgram *shader, const bo
     
     vector<double> isoValuesD = vp->GetIsoValues();
     vector<float> isoValues(isoValuesD.begin(), isoValuesD.end());
-    vector<bool> enabledIsoValues = vp->GetEnabledIsoValues();
-    shader->SetUniformArray("isoValue", 4, isoValues.data());
+    vector<bool> enabledIsoValues(4, false);
+    for (int i = 0; i < isoValues.size(); i++)
+        enabledIsoValues[i] = true;
+    shader->SetUniformArray("isoValue", isoValues.size(), isoValues.data());
     shader->SetUniform("isoEnabled[0]", (bool)enabledIsoValues[0]);
     shader->SetUniform("isoEnabled[1]", (bool)enabledIsoValues[1]);
     shader->SetUniform("isoEnabled[2]", (bool)enabledIsoValues[2]);

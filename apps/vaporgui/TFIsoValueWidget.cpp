@@ -36,6 +36,22 @@ void TFIsoValueMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr,
         UpdateInfo(_isoValues[_selectedId]);
 }
 
+#define PROPERTY_INDEX ("index")
+#define PROPERTY_VALUE ("value")
+
+void TFIsoValueMap::PopulateContextMenu(QMenu *menu, const glm::vec2 &p)
+{
+    int selectedId = findSelectedControlPoint(p);
+    if (selectedId != -1)
+        menu->addAction("Delete control point", this, SLOT(menuDeleteControlPoint()))->setProperty(PROPERTY_INDEX, selectedId);
+    else {
+        QAction *action = menu->addAction("Add control point", this, SLOT(menuAddControlPoint()));
+        action->setProperty(PROPERTY_VALUE, QVariant(valueForControlX(p.x)));
+        if (_isoValues.size() >= 4)
+            action->setDisabled(true);
+    }
+}
+
 QSize TFIsoValueMap::minimumSizeHint() const
 {
     return GetControlPointArea(QPoint(0,0)).size();
@@ -63,8 +79,6 @@ void TFIsoValueMap::paintEvent(QPainter &p)
     p.fillRect(rect(), Qt::lightGray);
     
     if (_renderParams) {
-        RenderParams *rp = _renderParams;
-        
         for (int i = 0; i < _isoValues.size(); i++) {
             drawControl(p, controlQPositionForValue(_isoValues[i]), i == _selectedId);
         }
@@ -178,16 +192,16 @@ void TFIsoValueMap::mouseDoubleClickEvent(QMouseEvent *event) {
     int selectedId = findSelectedControlPoint(mouse);
     if (selectedId >= 0) {
         deleteControlPoint(selectedId);
-        DeselectControlPoint();
-        update();
         return;
     }
     
-    float newVal = valueForControlX(mouse.x);
-    if (newVal >= 0 && newVal <= 1)
-        selectControlPoint(addControlPoint(newVal));
-    
-    update();
+    if (_isoValues.size() < 4) {
+        float newVal = valueForControlX(mouse.x);
+        if (newVal >= 0 && newVal <= 1) {
+            int newId = addControlPoint(newVal);
+        }
+        return;
+    }
 }
 
 QMargins TFIsoValueMap::GetPadding() const
@@ -232,19 +246,34 @@ void TFIsoValueMap::loadFromParams(VAPoR::RenderParams *rp)
 
 int TFIsoValueMap::addControlPoint(float value)
 {
+    if (_isoValues.size() >= 4)
+        return;
+    
+    int index = -1;
     for (int i = 0; i < _isoValues.size(); i++) {
         if (value < _isoValues[i]) {
             _isoValues.insert(_isoValues.begin()+i, value);
-            return i;
+            index = i;
+            break;
         }
     }
-    _isoValues.push_back(value);
-    return _isoValues.size()-1;
+    if (index == -1) {
+        _isoValues.push_back(value);
+        index = _isoValues.size()-1;
+    }
+    saveToParams(_renderParams);
+    selectControlPoint(index);
+    update();
+    return index;
 }
 
 void TFIsoValueMap::deleteControlPoint(int i)
 {
+    if (i == _selectedId)
+        DeselectControlPoint();
     _isoValues.erase(_isoValues.begin() + i);
+    update();
+    saveToParams(_renderParams);
 }
 
 void TFIsoValueMap::moveControlPoint(int *index, float value)
@@ -272,7 +301,7 @@ void TFIsoValueMap::selectControlPoint(int index)
 {
     _selectedId = index;
     float value = _isoValues[index];
-    UpdateInfo(value);
+    emit UpdateInfo(value);
 }
 
 void TFIsoValueMap::DeselectControlPoint()
@@ -336,4 +365,23 @@ float TFIsoValueMap::getDataRangeMax() const
 {
     if (!_renderParams) return 1;
     return _renderParams->GetMapperFunc(_renderParams->GetVariableName())->getMaxMapValue();
+}
+
+void TFIsoValueMap::menuDeleteControlPoint()
+{
+    emit Activated(this);
+    QVariant valueVariant = sender()->property(PROPERTY_INDEX);
+    if (valueVariant.isValid()) {
+        int index = valueVariant.toInt();
+        if (index >= 0 && index < _isoValues.size())
+            deleteControlPoint(index);
+    }
+}
+
+void TFIsoValueMap::menuAddControlPoint()
+{
+    emit Activated(this);
+    QVariant value = sender()->property(PROPERTY_VALUE);
+    if (value.isValid())
+        addControlPoint(value.toFloat());
 }

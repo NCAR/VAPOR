@@ -596,9 +596,11 @@ bool MappingFrame::Update(DataMgr *dataMgr,
 		setIsolineSliders(isovals);
 		
 		int size = isovals.size();
-		double start = xDataToWorld(isovals[0]);
-		double end = xDataToWorld(isovals[size-1]);
-		_contourRangeSlider->setDomain(start, end);
+        if (size > 0) {
+            double start = xDataToWorld(isovals[0]);
+            double end = xDataToWorld(isovals[size-1]);
+            _contourRangeSlider->setDomain(start, end);
+        }
 	}
 
 	_domainSlider->setDomain(
@@ -1480,8 +1482,15 @@ int MappingFrame::drawIsolineSliders()
 	std::vector<bool> enabledIsoValues(_isolineSliders.size(), true);
 	VolumeIsoParams* vp = dynamic_cast<VolumeIsoParams*>(_rParams);
     
-	if (vp != NULL)
-        enabledIsoValues = vp->GetEnabledIsoValues();
+    if (vp != NULL) {
+        for (int i = 0; i < enabledIsoValues.size(); i++) {
+            if (i < _isolineSliders.size()) {
+                enabledIsoValues[i] = true;
+            } else {
+                enabledIsoValues[i] = false;
+            }
+        }
+    }
 
 	for (int i = 0; i<_isolineSliders.size(); i++){
 		if (enabledIsoValues[i]==true) {

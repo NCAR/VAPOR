@@ -118,6 +118,8 @@ void VolumeIsoAppearanceSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _specularWidget->SetValue (_params->GetPhongSpecular());
     _shininessWidget->SetValue(_params->GetPhongShininess());
 
+    /*
+     
     // Get the value range
     std::vector<double> valueRanged;
 	bool errEnabled = MyBase::EnableErrMsg(false);
@@ -162,6 +164,7 @@ void VolumeIsoAppearanceSubtab::Update( VAPoR::DataMgr      *dataMgr,
         _isoWidget3->SetExtents( valueRange[0], valueRange[1] );
         _isoWidget3->SetValue  ( isoValues[3] );
     }
+     */
 }
 
 void VolumeIsoAppearanceSubtab::on__castingModeComboBox_currentIndexChanged(const QString &text)
@@ -215,60 +218,4 @@ void VolumeIsoAppearanceSubtab::on__defaultLightingButton_clicked( bool checked 
     _params->SetPhongDiffuse  (_params->GetDefaultPhongDiffuse());
     _params->SetPhongSpecular (_params->GetDefaultPhongSpecular());
     _params->SetPhongShininess(_params->GetDefaultPhongShininess());
-}
-    
-void VolumeIsoAppearanceSubtab::on__isoValueCheckbox0_toggled( bool checked )
-{
-    std::vector<bool> enabled = _params->GetEnabledIsoValues();
-    enabled[0] = checked;
-    _params->SetEnabledIsoValues(enabled);
-}
-    
-void VolumeIsoAppearanceSubtab::on__isoValueCheckbox1_toggled( bool checked )
-{
-    std::vector<bool> enabled = _params->GetEnabledIsoValues();
-    enabled[1] = checked;
-    _params->SetEnabledIsoValues(enabled);
-}
-    
-void VolumeIsoAppearanceSubtab::on__isoValueCheckbox2_toggled( bool checked )
-{
-    std::vector<bool> enabled = _params->GetEnabledIsoValues();
-    enabled[2] = checked;
-    _params->SetEnabledIsoValues(enabled);
-}
-    
-void VolumeIsoAppearanceSubtab::on__isoValueCheckbox3_toggled( bool checked )
-{
-    std::vector<bool> enabled = _params->GetEnabledIsoValues();
-    enabled[3] = checked;
-    _params->SetEnabledIsoValues(enabled);
-}
-    
-void VolumeIsoAppearanceSubtab::on__isoWidget0_valueChanged( double val )
-{
-    std::vector<double> vals = _params->GetIsoValues();
-    vals[0] = val;
-    _params->SetIsoValues(vals);
-}
-    
-void VolumeIsoAppearanceSubtab::on__isoWidget1_valueChanged( double val )
-{
-    std::vector<double> vals = _params->GetIsoValues();
-    vals[1] = val;
-    _params->SetIsoValues(vals);
-}
-    
-void VolumeIsoAppearanceSubtab::on__isoWidget2_valueChanged( double val )
-{
-    std::vector<double> vals = _params->GetIsoValues();
-    vals[2] = val;
-    _params->SetIsoValues(vals);
-}
-    
-void VolumeIsoAppearanceSubtab::on__isoWidget3_valueChanged( double val )
-{
-    std::vector<double> vals = _params->GetIsoValues();
-    vals[3] = val;
-    _params->SetIsoValues(vals);
 }
