@@ -8,6 +8,7 @@ class TFMappingRangeSelector;
 class TFOpacityMap;
 class TFHistogramMap;
 class TFColorMap;
+class TFIsoValueMap;
 
 namespace VAPoR {
     class DataMgr;
@@ -31,4 +32,5 @@ private:
     TFOpacityMap *_opacityMap;
     TFHistogramMap *_histogramMap;
     TFColorMap *_colorMap;
+    TFIsoValueMap *_isoMap;
 };

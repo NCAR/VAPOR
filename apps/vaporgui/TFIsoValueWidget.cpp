@@ -19,6 +19,11 @@ TFIsoValueMap::TFIsoValueMap(TFMapWidget *parent)
 
 void TFIsoValueMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
 {
+    if (!rp->HasIsoValues()) {
+        hide();
+        return;
+    }
+    
     if (rp != _renderParams)
         DeselectControlPoint();
     
