@@ -23,11 +23,16 @@ class TFMap : public QObject {
     int _height = 0;
     bool _insideSaveStateGroup = false;
     
+    VAPoR::DataMgr *_dataMgr;
+    VAPoR::ParamsMgr *_paramsMgr;
+    VAPoR::RenderParams *_renderParams;
+    
 public:
     TFMap(TFMapWidget *parent = nullptr);
     
     TFInfoWidget *GetInfoWidget();
-    virtual void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) = 0;
+    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
+    bool HasValidParams() const;
     virtual void Deactivate() = 0;
     virtual QSize minimumSizeHint() const = 0;
     virtual void PopulateContextMenu(QMenu *menu, const glm::vec2 &p) {}
@@ -36,6 +41,7 @@ public:
     int width() const { return _width; }
     int height() const { return _height; }
     void resize(int width, int height);
+    bool isLargeEnoughToPaint() const;
     QRect     paddedRect() const;
     QRect     rect() const;
     const QFont getFont() const;
@@ -54,6 +60,12 @@ public slots:
     void hide();
     
 protected:
+    virtual void paramsUpdate() = 0;
+    
+    VAPoR::DataMgr      *getDataMgr()      const { return _dataMgr; }
+    VAPoR::ParamsMgr    *getParamsMgr()    const { return _paramsMgr; }
+    VAPoR::RenderParams *getRenderParams() const { return _renderParams; }
+    
     void drawControl(QPainter &p, const QPointF &pos, bool selected = false) const;
     virtual TFInfoWidget *createInfoWidget() = 0;
     

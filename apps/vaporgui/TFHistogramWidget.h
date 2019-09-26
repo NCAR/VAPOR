@@ -20,13 +20,13 @@ class TFHistogramMap : public TFMap {
     
 public:
     TFHistogramMap(TFMapWidget *parent = nullptr);
-    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     
     QSize minimumSizeHint() const;
     void Deactivate() {}
     void PopulateSettingsMenu(QMenu *menu) const;
     
 protected:
+    void paramsUpdate();
     TFInfoWidget *createInfoWidget();
     void paintEvent(QPainter &p);
     void mousePressEvent(QMouseEvent *event);

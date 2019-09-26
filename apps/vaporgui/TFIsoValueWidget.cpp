@@ -17,19 +17,14 @@ static QPointF qvec2(const vec2 &v) { return QPointF(v.x, v.y); }
 TFIsoValueMap::TFIsoValueMap(TFMapWidget *parent)
 : TFMap(parent) {}
 
-void TFIsoValueMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
+void TFIsoValueMap::paramsUpdate()
 {
-    if (!rp->HasIsoValues()) {
+    if (!getRenderParams()->HasIsoValues()) {
         hide();
         return;
     }
     
-    if (rp != _renderParams)
-        DeselectControlPoint();
-    
-    _renderParams = rp;
-    _paramsMgr = paramsMgr;
-    loadFromParams(rp);
+    loadFromParams(getRenderParams());
     update();
     
     if (_selectedId > -1)
@@ -78,7 +73,7 @@ void TFIsoValueMap::paintEvent(QPainter &p)
     //     243 245 249
     p.fillRect(rect(), Qt::lightGray);
     
-    if (_renderParams) {
+    if (getRenderParams()) {
         for (int i = 0; i < _isoValues.size(); i++) {
             drawControl(p, controlQPositionForValue(_isoValues[i]), i == _selectedId);
         }
@@ -154,7 +149,7 @@ void TFIsoValueMap::mousePressEvent(QMouseEvent *event)
         selectControlPoint(selectedId);
         update();
         _dragOffset = controlPositionForValue(value) - mouse;
-        _paramsMgr->BeginSaveStateGroup("IsoValue modification");
+        getParamsMgr()->BeginSaveStateGroup("IsoValue modification");
         return;
     }
     
@@ -165,7 +160,7 @@ void TFIsoValueMap::mousePressEvent(QMouseEvent *event)
 
 void TFIsoValueMap::mouseReleaseEvent(QMouseEvent *event) {
     if (_isDraggingControl)
-        _paramsMgr->EndSaveStateGroup();
+        getParamsMgr()->EndSaveStateGroup();
     else
         event->ignore();
     _isDraggingControl = false;
@@ -179,9 +174,9 @@ void TFIsoValueMap::mouseMoveEvent(QMouseEvent *event) {
         
         moveControlPoint(&_draggingControlID, newVal);
         selectControlPoint(_draggingControlID);
-        saveToParams(_renderParams);
+        saveToParams(getRenderParams());
         update();
-        _paramsMgr->IntermediateChange();
+        getParamsMgr()->IntermediateChange();
     } else {
         event->ignore();
     }
@@ -198,7 +193,7 @@ void TFIsoValueMap::mouseDoubleClickEvent(QMouseEvent *event) {
     if (_isoValues.size() < 4) {
         float newVal = valueForControlX(mouse.x);
         if (newVal >= 0 && newVal <= 1) {
-            int newId = addControlPoint(newVal);
+            addControlPoint(newVal);
         }
         return;
     }
@@ -261,7 +256,7 @@ int TFIsoValueMap::addControlPoint(float value)
         _isoValues.push_back(value);
         index = _isoValues.size()-1;
     }
-    saveToParams(_renderParams);
+    saveToParams(getRenderParams());
     selectControlPoint(index);
     update();
     return index;
@@ -273,7 +268,7 @@ void TFIsoValueMap::deleteControlPoint(int i)
         DeselectControlPoint();
     _isoValues.erase(_isoValues.begin() + i);
     update();
-    saveToParams(_renderParams);
+    saveToParams(getRenderParams());
 }
 
 void TFIsoValueMap::moveControlPoint(int *index, float value)
@@ -316,7 +311,7 @@ void TFIsoValueMap::UpdateFromInfo(float value)
     if (_selectedId >= 0 && _selectedId < _isoValues.size()) {
         moveControlPoint(&_selectedId, value);
         update();
-        saveToParams(_renderParams);
+        saveToParams(getRenderParams());
     }
 }
 
@@ -357,14 +352,14 @@ float TFIsoValueMap::valueForControlX(float position) const
 
 float TFIsoValueMap::getDataRangeMin() const
 {
-    if (!_renderParams) return 0;
-    return _renderParams->GetMapperFunc(_renderParams->GetVariableName())->getMinMapValue();
+    if (!getRenderParams()) return 0;
+    return getRenderParams()->GetMapperFunc(getRenderParams()->GetVariableName())->getMinMapValue();
 }
 
 float TFIsoValueMap::getDataRangeMax() const
 {
-    if (!_renderParams) return 1;
-    return _renderParams->GetMapperFunc(_renderParams->GetVariableName())->getMaxMapValue();
+    if (!getRenderParams()) return 1;
+    return getRenderParams()->GetMapperFunc(getRenderParams()->GetVariableName())->getMaxMapValue();
 }
 
 void TFIsoValueMap::menuDeleteControlPoint()

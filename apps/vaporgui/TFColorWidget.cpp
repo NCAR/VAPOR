@@ -29,20 +29,6 @@ TFColorMap::TFColorMap(TFMapWidget *parent)
     );
 }
 
-void TFColorMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
-{
-    if (rp != _renderParams)
-        DeselectControlPoint();
-    
-    _renderParams = rp;
-    _paramsMgr = paramsMgr;
-    _colorInterpolationMenu->Update(rp->GetMapperFunc(rp->GetVariableName())->GetColorMap());
-    update();
-    
-    if (rp && _selectedId > -1)
-        UpdateInfo(getColormap()->controlPointValueNormalized(_selectedId), VColorToQColor(getColormap()->controlPointColor(_selectedId)));
-}
-
 QSize TFColorMap::minimumSizeHint() const
 {
     return QSize(100, 30);
@@ -87,6 +73,17 @@ void TFColorMap::PopulateSettingsMenu(QMenu *menu) const
     }
 }
 
+void TFColorMap::paramsUpdate()
+{
+    RenderParams *rp = getRenderParams();
+    
+    _colorInterpolationMenu->Update(rp->GetMapperFunc(rp->GetVariableName())->GetColorMap());
+    update();
+    
+    if (_selectedId > -1)
+        UpdateInfo(getColormap()->controlPointValueNormalized(_selectedId), VColorToQColor(getColormap()->controlPointColor(_selectedId)));
+}
+
 TFInfoWidget *TFColorMap::createInfoWidget()
 {
     TFColorInfoWidget *info = new TFColorInfoWidget;
@@ -107,28 +104,26 @@ void TFColorMap::paintEvent(QPainter &p)
     p.fillRect(rect(), Qt::lightGray);
     QPaintUtils::BoxDropShadow(p, paddedRect(), 10, QColor(0,0,0,120));
     
-    if (_renderParams) {
-        RenderParams *rp = _renderParams;
-        
-        ColorMap *cm = rp->GetMapperFunc(rp->GetVariableName())->GetColorMap();
-        
-        QMargins padding = GetPadding();
-        int nSamples = width()-(padding.left()+padding.right());
-        unsigned char buf[nSamples*3];
-        float rgb[3];
-        for (int i = 0; i < nSamples; i++) {
-            cm->colorNormalized(i/(float)nSamples).toRGB(rgb);
-            buf[i*3+0] = rgb[0]*255;
-            buf[i*3+1] = rgb[1]*255;
-            buf[i*3+2] = rgb[2]*255;
-        }
-        QImage image(buf, nSamples, 1, QImage::Format::Format_RGB888);
-        
-        p.drawImage(paddedRect(), image);
-        
-        for (int i = 0; i < cm->numControlPoints(); i++) {
-            drawControl(p, controlQPositionForValue(cm->controlPointValueNormalized(i)), i == _selectedId);
-        }
+    RenderParams *rp = getRenderParams();
+    
+    ColorMap *cm = rp->GetMapperFunc(rp->GetVariableName())->GetColorMap();
+    
+    QMargins padding = GetPadding();
+    int nSamples = width()-(padding.left()+padding.right());
+    unsigned char buf[nSamples*3];
+    float rgb[3];
+    for (int i = 0; i < nSamples; i++) {
+        cm->colorNormalized(i/(float)nSamples).toRGB(rgb);
+        buf[i*3+0] = rgb[0]*255;
+        buf[i*3+1] = rgb[1]*255;
+        buf[i*3+2] = rgb[2]*255;
+    }
+    QImage image(buf, nSamples, 1, QImage::Format::Format_RGB888);
+    
+    p.drawImage(paddedRect(), image);
+    
+    for (int i = 0; i < cm->numControlPoints(); i++) {
+        drawControl(p, controlQPositionForValue(cm->controlPointValueNormalized(i)), i == _selectedId);
     }
 }
 
@@ -146,7 +141,7 @@ void TFColorMap::mousePressEvent(QMouseEvent *event)
             selectControlPoint(i);
             update();
             _dragOffset = controlPositionForValue(value) - mouse;
-            BeginSaveStateGroup(_paramsMgr, "Colormap modification");
+            BeginSaveStateGroup(getParamsMgr(), "Colormap modification");
             return;
         }
     }
@@ -158,7 +153,7 @@ void TFColorMap::mousePressEvent(QMouseEvent *event)
 
 void TFColorMap::mouseReleaseEvent(QMouseEvent *event) {
     if (_isDraggingControl)
-        EndSaveStateGroup(_paramsMgr);
+        EndSaveStateGroup(getParamsMgr());
     else
         event->ignore();
     _isDraggingControl = false;
@@ -173,7 +168,7 @@ void TFColorMap::mouseMoveEvent(QMouseEvent *event) {
         moveControlPoint(&_draggingControlID, newVal);
         selectControlPoint(_draggingControlID);
         update();
-        _paramsMgr->IntermediateChange();
+        getParamsMgr()->IntermediateChange();
     } else {
         event->ignore();
     }
@@ -225,7 +220,8 @@ void TFColorMap::addControlPoint(float value)
 
 ColorMap *TFColorMap::getColormap() const
 {
-    return _renderParams->GetMapperFunc(_renderParams->GetVariableName())->GetColorMap();
+    RenderParams *rp = getRenderParams();
+    return rp->GetMapperFunc(rp->GetVariableName())->GetColorMap();
 }
 
 void TFColorMap::selectControlPoint(int index)
@@ -273,21 +269,21 @@ void TFColorMap::menuAddControlPoint()
 
 void TFColorMap::menuLoad()
 {
-    RenderParams *rp = _renderParams;
+    RenderParams *rp = getRenderParams();
     if (!rp) return;
-    TFUtils::LoadColormap(_paramsMgr, rp->GetMapperFunc(rp->GetVariableName()));
+    TFUtils::LoadColormap(getParamsMgr(), rp->GetMapperFunc(rp->GetVariableName()));
 }
 
 void TFColorMap::menuSave()
 {
-    RenderParams *rp = _renderParams;
+    RenderParams *rp = getRenderParams();
     if (!rp) return;
-    TFUtils::SaveTransferFunction(_paramsMgr, rp->GetMapperFunc(rp->GetVariableName()));
+    TFUtils::SaveTransferFunction(getParamsMgr(), rp->GetMapperFunc(rp->GetVariableName()));
 }
 
 void TFColorMap::menuLoadBuiltin(std::string path)
 {
-    RenderParams *rp = _renderParams;
+    RenderParams *rp = getRenderParams();
     if (!rp) return;
     TFUtils::LoadColormap(rp->GetMapperFunc(rp->GetVariableName()), path);
 }

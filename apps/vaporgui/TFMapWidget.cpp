@@ -21,10 +21,38 @@ TFInfoWidget *TFMap::GetInfoWidget()
     return _infoWidget;
 }
 
+void TFMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
+{
+    if (_renderParams != rParams)
+        Deactivate();
+    
+    _dataMgr = dataMgr;
+    _paramsMgr = paramsMgr;
+    _renderParams = rParams;
+    
+    if (HasValidParams())
+        paramsUpdate();
+}
+
+bool TFMap::HasValidParams() const
+{
+    return _dataMgr && _paramsMgr && _renderParams;
+}
+
 void TFMap::resize(int width, int height)
 {
     _width = width;
     _height = height;
+}
+
+bool TFMap::isLargeEnoughToPaint() const
+{
+    QMargins p = GetPadding();
+    if (_width - (p.left() + p.right()) <= 0)
+        return false;
+    if (_height - (p.top() + p.bottom()) <= 0)
+        return false;
+    return true;
 }
 
 void TFMap::mousePressEvent      (QMouseEvent *event) { event->ignore(); }
@@ -249,7 +277,7 @@ void TFMapWidget::_showContextMenu(const QPoint &qp)
     QMenu menu("Context Menu", this);
     
     for (auto map : _maps) {
-        if (map->rect().contains(qp)) {
+        if (map->HasValidParams() && map->rect().contains(qp)) {
             map->PopulateContextMenu(&menu, p);
             menu.addSeparator();
             map->PopulateSettingsMenu(&menu);
@@ -269,6 +297,8 @@ void TFMapWidget::paintEvent(QPaintEvent* event)
     
 //    void *s = VAPoR::GLManager::BeginTimer();
     for (int i = _maps.size() - 1; i >= 0; i--) {
+        if (!_maps[i]->HasValidParams() || !_maps[i]->isLargeEnoughToPaint())
+            continue;
         p.save();
         _maps[i]->paintEvent(p);
         p.restore();
@@ -282,6 +312,8 @@ void TFMapWidget::mousePressEvent(QMouseEvent *event)
         return; // Reserved for context menu
     
     for (auto map : _maps) {
+        if (!map->HasValidParams())
+            continue;
         event->accept();
         map->mousePressEvent(event);
         if (event->isAccepted())
@@ -295,6 +327,8 @@ void TFMapWidget::mouseReleaseEvent(QMouseEvent *event)
         return; // Reserved for context menu
     
     for (auto map : _maps) {
+        if (!map->HasValidParams())
+            continue;
         event->accept();
         map->mouseReleaseEvent(event);
         if (event->isAccepted())
@@ -308,6 +342,8 @@ void TFMapWidget::mouseMoveEvent(QMouseEvent *event)
         return; // Reserved for context menu
     
     for (auto map : _maps) {
+        if (!map->HasValidParams())
+            continue;
         event->accept();
         map->mouseMoveEvent(event);
         if (event->isAccepted())
@@ -321,6 +357,8 @@ void TFMapWidget::mouseDoubleClickEvent(QMouseEvent *event)
         return; // Reserved for context menu
     
     for (auto map : _maps) {
+        if (!map->HasValidParams())
+            continue;
         event->accept();
         map->mouseDoubleClickEvent(event);
         if (event->isAccepted())
@@ -330,6 +368,7 @@ void TFMapWidget::mouseDoubleClickEvent(QMouseEvent *event)
 
 void TFMapWidget::resizeEvent(QResizeEvent *event)
 {
-    for (auto map : _maps)
+    for (auto map : _maps) {
         map->resize(event->size().width(), event->size().height());
+    }
 }

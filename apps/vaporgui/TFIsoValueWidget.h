@@ -13,13 +13,13 @@ class TFIsoValueMap : public TFMap {
     
 public:
     TFIsoValueMap(TFMapWidget *parent = nullptr);
-    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) override;
     void PopulateContextMenu(QMenu *menu, const glm::vec2 &p);
     
     QSize minimumSizeHint() const override;
     void Deactivate() override;
     
 protected:
+    void paramsUpdate() override;
     TFInfoWidget *createInfoWidget() override;
     void paintEvent(QPainter &p) override;
     void drawControl(QPainter &p, const QPointF &pos, bool selected = false) const;
@@ -33,8 +33,6 @@ protected:
     QMargins GetPadding() const override;
     
 private:
-    VAPoR::ParamsMgr *_paramsMgr = nullptr;
-    VAPoR::RenderParams *_renderParams = nullptr;
     bool _isDraggingControl = false;
     int _draggingControlID;
     int _selectedId = -1;

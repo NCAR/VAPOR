@@ -26,20 +26,6 @@ TFHistogramMap::TFHistogramMap(TFMapWidget *parent)
     _scalingMenu = new ParamsDropdownMenuItem(this, SCALING_TAG, {"Linear", "Logarithmic", "Boolean"}, {}, "Histogram Scaling");
 }
 
-void TFHistogramMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rp)
-{
-    _renderParams = rp;
-    _dataMgr = dataMgr;
-    
-    if (_histo.getNumBins() != width())
-        _histo.reset(width());
-    if (_histo.PopulateIfNeeded(dataMgr, rp) < 0)
-        MSG_ERR("Failed to populate histogram");
-    
-    _scalingMenu->Update(rp);
-    update();
-}
-
 QSize TFHistogramMap::minimumSizeHint() const
 {
     return QSize(100, 40);
@@ -54,6 +40,20 @@ void TFHistogramMap::PopulateSettingsMenu(QMenu *menu) const
     histogramDynamicScalingAction->setChecked(_dynamicScaling);
 }
 
+void TFHistogramMap::paramsUpdate()
+{
+    if (width() == 0)
+        return;
+    
+    if (_histo.getNumBins() != width())
+        _histo.reset(width());
+    if (_histo.PopulateIfNeeded(getDataMgr(), getRenderParams()) < 0)
+        MSG_ERR("Failed to populate histogram");
+    
+    _scalingMenu->Update(getRenderParams());
+    update();
+}
+
 TFInfoWidget *TFHistogramMap::createInfoWidget()
 {
     TFHistogramInfoWidget *info = new TFHistogramInfoWidget;
@@ -66,6 +66,9 @@ TFInfoWidget *TFHistogramMap::createInfoWidget()
 
 void TFHistogramMap::paintEvent(QPainter &p)
 {
+    if (width() == 0)
+        return;
+    
     p.fillRect(rect(), Qt::lightGray);
     
 //    QMatrix m;
@@ -76,7 +79,7 @@ void TFHistogramMap::paintEvent(QPainter &p)
     QPolygonF graph;
     graph.push_back(NDCToQPixel(0,0));
     
-    vector<double> mapRange = _renderParams->GetMapperFunc(_renderParams->GetVariableName())->getMinMaxMapValue();
+    vector<double> mapRange = getRenderParams()->GetMapperFunc(getRenderParams()->GetVariableName())->getMinMaxMapValue();
     
     int startBin = _histo.getBinIndexForValue(mapRange[0]);
     int endBin = _histo.getBinIndexForValue(mapRange[1]);
@@ -150,10 +153,10 @@ void TFHistogramMap::mouseMoveEvent(QMouseEvent *event)
 
 TFHistogramMap::ScalingType TFHistogramMap::_getScalingType() const
 {
-    if (!_renderParams)
+    if (!getRenderParams())
         return ScalingType::Linear;
     
-    ScalingType type = (ScalingType)_renderParams->GetValueLong(SCALING_TAG, (int)ScalingType::Linear);
+    ScalingType type = (ScalingType)getRenderParams()->GetValueLong(SCALING_TAG, (int)ScalingType::Linear);
     if (type >= ScalingTypeCount || type < 0)
         type = Linear;
     
