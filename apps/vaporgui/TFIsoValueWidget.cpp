@@ -277,10 +277,10 @@ void TFIsoValueMap::moveControlPoint(int *index, float value)
                 v += diff;
         } else {
             const float baseValue = _isoValues[0];
-            const float initialValue = _isoValues[*index];
-            const float scale = (value-baseValue)/(initialValue-baseValue);
-            for (float &v : _isoValues)
-                v = baseValue + (v - baseValue) * scale;
+            float spacing = (value - baseValue) / (float)(*index);
+            spacing = std::max(spacing, 0.f);
+            for (int i = 1; i < _isoValues.size(); i++)
+                _isoValues[i] = baseValue + spacing * i;
         }
     } else {
         deleteControlPoint(*index);

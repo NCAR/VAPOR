@@ -13,7 +13,7 @@ class TFIsoValueMap : public TFMap {
     
 public:
     TFIsoValueMap(TFMapWidget *parent = nullptr);
-    void PopulateContextMenu(QMenu *menu, const glm::vec2 &p);
+    void PopulateContextMenu(QMenu *menu, const glm::vec2 &p) override;
     
     QSize minimumSizeHint() const override;
     void Deactivate() override;
