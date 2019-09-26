@@ -11,10 +11,10 @@ TFEditor::TFEditor()
 : VSection("Transfer Function")
 {
     _maps = new TFMapGroupWidget;
-    _opacityMap = new TFOpacityMap(nullptr);
-    _histogramMap = new TFHistogramMap(nullptr);
-    _colorMap = new TFColorMap(nullptr);
-    _isoMap = new TFIsoValueMap(nullptr);
+    _opacityMap = new TFOpacityMap;
+    _histogramMap = new TFHistogramMap;
+    _colorMap = new TFColorMap;
+    _isoMap = new TFIsoValueMap;
     
     _maps->Add({_opacityMap, _histogramMap});
     _maps->Add(_isoMap);

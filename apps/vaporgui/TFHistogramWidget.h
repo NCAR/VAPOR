@@ -19,7 +19,7 @@ class TFHistogramMap : public TFMap {
     };
     
 public:
-    TFHistogramMap(TFMapWidget *parent);
+    TFHistogramMap(TFMapWidget *parent = nullptr);
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     
     QSize minimumSizeHint() const;

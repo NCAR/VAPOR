@@ -13,7 +13,7 @@ class TFColorMap : public TFMap {
     Q_OBJECT
     
 public:
-    TFColorMap(TFMapWidget *parent);
+    TFColorMap(TFMapWidget *parent = nullptr);
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) override;
     
     QSize minimumSizeHint() const override;

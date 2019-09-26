@@ -113,7 +113,7 @@ class TFOpacityMap : public TFMap {
     Q_OBJECT
     
 public:
-    TFOpacityMap(TFMapWidget *parent);
+    TFOpacityMap(TFMapWidget *parent = nullptr);
     
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) override;
     

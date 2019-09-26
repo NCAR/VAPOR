@@ -12,7 +12,7 @@ class TFIsoValueMap : public TFMap {
     Q_OBJECT
     
 public:
-    TFIsoValueMap(TFMapWidget *parent);
+    TFIsoValueMap(TFMapWidget *parent = nullptr);
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) override;
     
     QSize minimumSizeHint() const override;
