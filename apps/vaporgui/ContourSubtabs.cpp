@@ -1,9 +1,12 @@
 #include "ContourSubtabs.h"
+#include "TFEditor.h"
 
 ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget* parent) {
 	setupUi(this);
 
 	_TFWidget->Reinit((TFFlags)(CONSTANT_COLOR | ISOLINES));
+    
+    ((QVBoxLayout*)layout())->insertWidget(0, _tfEditor = new TFEditor);
 
 	_lineWidthCombo = new Combo(lineWidthEdit, lineWidthSlider);
 	_countCombo = new Combo(contourCountEdit, contourCountSlider, true);
