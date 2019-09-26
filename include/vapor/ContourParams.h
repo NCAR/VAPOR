@@ -89,6 +89,9 @@ public:
  bool GetLockToTF() const; 
 
  bool HasIsoValues() const { return true; }
+    vector<double> GetIsoValues(const string &variable);
+    void SetIsoValues(const string &variable, const vector<double> &values);
+    
  vector<double> GetContourValues(const string &varName);
  void SetContourValues(const string &varName, const vector<double> &vals);
 

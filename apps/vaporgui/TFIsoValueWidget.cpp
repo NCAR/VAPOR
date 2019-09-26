@@ -70,7 +70,6 @@ TFInfoWidget *TFIsoValueMap::createInfoWidget()
 
 void TFIsoValueMap::paintEvent(QPainter &p)
 {
-    //     243 245 249
     p.fillRect(rect(), Qt::lightGray);
     
     if (getRenderParams()) {
@@ -241,9 +240,6 @@ void TFIsoValueMap::loadFromParams(VAPoR::RenderParams *rp)
 
 int TFIsoValueMap::addControlPoint(float value)
 {
-    if (_isoValues.size() >= 4)
-        return;
-    
     int index = -1;
     for (int i = 0; i < _isoValues.size(); i++) {
         if (value < _isoValues[i]) {
