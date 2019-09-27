@@ -54,9 +54,9 @@ public:
 	int getTimestepOfUpdate() {return _timestepOfUpdate;}
 	string getVarnameOfUpdate() {return _varnameOfUpdate;}
     
-    int Populate(VAPoR::DataMgr *dm, VAPoR::RenderParams *rp);
-    bool NeedsUpdate(VAPoR::DataMgr *dm, VAPoR::RenderParams *rp);
-    int PopulateIfNeeded(VAPoR::DataMgr *dm, VAPoR::RenderParams *rp);
+    int Populate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::RenderParams *rp);
+    bool NeedsUpdate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::RenderParams *rp);
+    int PopulateIfNeeded(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::RenderParams *rp);
 	
 private:
 	unsigned int* _binArray = nullptr;
@@ -79,11 +79,11 @@ private:
     
     void populateIteratingHistogram(const VAPoR::Grid *grid, const int stride);
     void populateSamplingHistogram(const VAPoR::Grid *grid, const vector<double> &minExts, const vector<double> &maxExts);
-    int calculateStride(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const;
-    bool shouldUseSampling(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const;
+    int calculateStride(const std::string &varName, VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const;
+    bool shouldUseSampling(const std::string &varName, VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const;
     void setProperties(float mnData, float mxData, string var, int ts);
     void calculateMaxBinSize();
-    void _getDataRange(VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *min, float *max) const;
+    void _getDataRange(const std::string &varName, VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *min, float *max) const;
 };
 
 #endif //HISTO_H

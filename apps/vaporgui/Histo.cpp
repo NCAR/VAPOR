@@ -229,7 +229,7 @@ int Histo::getBinIndexForValue(float v)
     return (v-_minMapData)/_range * _numBins;
 }
 
-int Histo::Populate(VAPoR::DataMgr *dm, VAPoR::RenderParams *rp)
+int Histo::Populate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::RenderParams *rp)
 {
     size_t ts    = rp->GetCurrentTimestep();
     int refLevel = rp->GetRefinementLevel();
@@ -238,9 +238,8 @@ int Histo::Populate(VAPoR::DataMgr *dm, VAPoR::RenderParams *rp)
     rp->GetBox()->GetExtents(minExts, maxExts);
     
     if (autoSetProperties) {
-        std::string varname = rp->GetVariableName();
-        MapperFunction *mf = rp->GetMapperFunc(varname);
-        setProperties(mf->getMinMapValue(), mf->getMaxMapValue(), varname, ts);
+        MapperFunction *mf = rp->GetMapperFunc(varName);
+        setProperties(mf->getMinMapValue(), mf->getMaxMapValue(), varName, ts);
         _minExts = minExts;
         _maxExts = maxExts;
         _lod = lod;
@@ -251,7 +250,7 @@ int Histo::Populate(VAPoR::DataMgr *dm, VAPoR::RenderParams *rp)
     if (_below) delete [] _below; _below = nullptr;
     if (_above) delete [] _above; _above = nullptr;
     
-    _getDataRange(dm, rp, &_minData, &_maxData);
+    _getDataRange(varName, dm, rp, &_minData, &_maxData);
     
     _nBinsBelow = std::min(10000.0f, _numBins/(_maxMapData-_minMapData) * (_minMapData-_minData));
     _nBinsAbove = std::min(10000.0f, _numBins/(_maxMapData-_minMapData) * (_maxData-_maxMapData));
@@ -264,17 +263,17 @@ int Histo::Populate(VAPoR::DataMgr *dm, VAPoR::RenderParams *rp)
     
     
     Grid *grid;
-    int rc = DataMgrUtils::GetGrids(dm, ts, rp->GetVariableName(), minExts, maxExts, true, &refLevel, &lod, &grid);
+    int rc = DataMgrUtils::GetGrids(dm, ts, varName, minExts, maxExts, true, &refLevel, &lod, &grid);
     
     if (rc < 0)
         return -1;
     
     grid->SetInterpolationOrder(1);
     
-    if (shouldUseSampling(dm, rp))
+    if (shouldUseSampling(varName, dm, rp))
         populateSamplingHistogram(grid, minExts, maxExts);
     else
-        populateIteratingHistogram(grid, calculateStride(dm, rp));
+        populateIteratingHistogram(grid, calculateStride(varName, dm, rp));
     
     calculateMaxBinSize();
     _populated = true;
@@ -283,13 +282,12 @@ int Histo::Populate(VAPoR::DataMgr *dm, VAPoR::RenderParams *rp)
     return 0;
 }
 
-bool Histo::NeedsUpdate(VAPoR::DataMgr *dm, VAPoR::RenderParams *rp)
+bool Histo::NeedsUpdate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::RenderParams *rp)
 {
     if (!dm || !rp) return false;
     if (!_populated) return true;
     
-    std::string varname = rp->GetVariableName();
-    MapperFunction *mf = rp->GetMapperFunc(varname);
+    MapperFunction *mf = rp->GetMapperFunc(varName);
     vector<double> minExts, maxExts;
     rp->GetBox()->GetExtents(minExts, maxExts);
     
@@ -297,7 +295,7 @@ bool Histo::NeedsUpdate(VAPoR::DataMgr *dm, VAPoR::RenderParams *rp)
     if (_maxMapData != mf->getMaxMapValue()) return true;
     if (_refLevel != rp->GetRefinementLevel()) return true;
     if (_lod != rp->GetCompressionLevel()) return true;
-    if (_varnameOfUpdate != varname) return true;
+    if (_varnameOfUpdate != varName) return true;
     if (_timestepOfUpdate != rp->GetCurrentTimestep()) return true;
     if (_minExts != minExts) return true;
     if (_maxExts != maxExts) return true;
@@ -305,13 +303,13 @@ bool Histo::NeedsUpdate(VAPoR::DataMgr *dm, VAPoR::RenderParams *rp)
     return false;
 }
 
-int Histo::PopulateIfNeeded(VAPoR::DataMgr *dm, VAPoR::RenderParams *rp)
+int Histo::PopulateIfNeeded(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::RenderParams *rp)
 {
-    if (!NeedsUpdate(dm, rp))
+    if (!NeedsUpdate(varName, dm, rp))
         return 0;
     
     reset(_numBins);
-    return Populate(dm, rp);
+    return Populate(varName, dm, rp);
 }
 
 void Histo::populateIteratingHistogram(const Grid *grid, const int stride)
@@ -386,15 +384,15 @@ void Histo::populateSamplingHistogram(const Grid *grid, const vector<double> &mi
 #undef Y
 #undef Z
 
-int Histo::calculateStride(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const
+int Histo::calculateStride(const std::string &varName, VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const
 {
-    return dm->GetDefaultMetaInfoStride(rp->GetVariableName(), rp->GetRefinementLevel());
+    return dm->GetDefaultMetaInfoStride(varName, rp->GetRefinementLevel());
 }
 
-bool Histo::shouldUseSampling(VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const
+bool Histo::shouldUseSampling(const std::string &varName, VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const
 {
     // TODO how does this handle with unstructured grids?
-    int nDims = dm->GetNumDimensions(rp->GetVariableName());
+    int nDims = dm->GetNumDimensions(varName);
     if (nDims == 3)
         return true;
     return false;
@@ -423,10 +421,10 @@ void Histo::calculateMaxBinSize()
     _maxBinSize = maxBinSize;
 }
 
-void Histo::_getDataRange(VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *min, float *max) const
+void Histo::_getDataRange(const std::string &varName, VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *min, float *max) const
 {
     std::vector<double> range;
-    d->GetDataRange(r->GetCurrentTimestep(), r->GetVariableName(), r->GetRefinementLevel(), r->GetCompressionLevel(), d->GetDefaultMetaInfoStride(r->GetVariableName(), r->GetRefinementLevel()), range);
+    d->GetDataRange(r->GetCurrentTimestep(), varName, r->GetRefinementLevel(), r->GetCompressionLevel(), d->GetDefaultMetaInfoStride(varName, r->GetRefinementLevel()), range);
     *min = range[0];
     *max = range[1];
 }
