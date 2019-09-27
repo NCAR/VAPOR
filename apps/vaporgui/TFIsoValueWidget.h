@@ -12,6 +12,8 @@ class TFIsoValueMap : public TFMap {
     Q_OBJECT
     
 public:
+    bool BottomPadding = false;
+    
     TFIsoValueMap(TFMapWidget *parent = nullptr);
     void PopulateContextMenu(QMenu *menu, const glm::vec2 &p) override;
     

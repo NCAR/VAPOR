@@ -50,7 +50,10 @@ void TFIsoValueMap::PopulateContextMenu(QMenu *menu, const glm::vec2 &p)
 
 QSize TFIsoValueMap::minimumSizeHint() const
 {
-    return GetControlPointArea(QPoint(0,0)).size();
+    QSize s = GetControlPointArea(QPoint(0,0)).size();
+    if (BottomPadding)
+        s.setHeight(s.height() + GetControlPointRadius());
+    return s;
 }
 
 void TFIsoValueMap::Deactivate()
