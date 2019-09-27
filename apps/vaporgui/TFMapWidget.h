@@ -23,9 +23,9 @@ class TFMap : public QObject {
     int _height = 0;
     bool _insideSaveStateGroup = false;
     
-    VAPoR::DataMgr *_dataMgr;
-    VAPoR::ParamsMgr *_paramsMgr;
-    VAPoR::RenderParams *_renderParams;
+    VAPoR::DataMgr *_dataMgr = nullptr;
+    VAPoR::ParamsMgr *_paramsMgr = nullptr;
+    VAPoR::RenderParams *_renderParams = nullptr;
     
 public:
     TFMap(TFMapWidget *parent = nullptr);
