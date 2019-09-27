@@ -1,3 +1,4 @@
+#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H 1
 
 #include <iostream>
 #include <proj_api.h>
@@ -6,7 +7,6 @@
 
 using namespace VAPoR;
 using namespace Wasp;
-
 
 Proj4API::Proj4API() {
 	_pjSrc = NULL;

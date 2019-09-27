@@ -91,7 +91,7 @@ link_directories (${THIRD_PARTY_LIB_DIR})
 list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
 list (APPEND CMAKE_PREFIX_PATH ${QTDIR}/lib/cmake)
 list (APPEND CMAKE_PROGRAM_PATH ${QTDIR}/bin)
-include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION})
+include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}m)
 if (WIN32)
 	include_directories (${PYTHONPATH}/Lib/site-packages/numpy/core/include)
 else ()
@@ -104,7 +104,6 @@ endif ()
 find_library(NETCDF netcdf)
 find_library(UDUNITS2 udunits2)
 find_library(PROJ proj)
-find_library(FTGL ftgl)
 find_library(FREETYPE freetype)
 find_library(GEOTIFF geotiff)
 find_library(JPEG jpeg)
@@ -290,7 +289,7 @@ if (UNIX AND NOT APPLE)
 			)
 
 		install (
-			DIRECTORY ${THIRD_PARTY_LIB_DIR}/python2.7
+			DIRECTORY ${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)

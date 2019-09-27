@@ -86,7 +86,7 @@ int MyPython::Initialize() {
 		MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
 #else
 		struct STAT64 statbuf;
-		if (STAT64((m_pyHome + "/lib/python2.7").c_str(), &statbuf) >= 0) {
+		if (STAT64((m_pyHome + "/lib/python3.6m").c_str(), &statbuf) >= 0) {
 			// N.B. the string passed to Py_SetPythonHome() must be
 			// maintained in static storage :-(. However, the python
 			// documentation promisses that it's value will not be changed
@@ -95,7 +95,11 @@ int MyPython::Initialize() {
 			// The above comment might no longer be relevant
 			//
 
-			Py_SetPythonHome((char *) m_pyHome.c_str());
+			std::wstring wStringPyHome = std::wstring( m_pyHome.begin(), m_pyHome.end() );
+			const wchar_t* wCharPyHome = wStringPyHome.c_str();
+			wchar_t* nonConstCopy = const_cast<wchar_t*>(wCharPyHome);
+
+			Py_SetPythonHome( nonConstCopy );
 
 			MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
 		}
@@ -225,11 +229,13 @@ string MyPython::PyErr() {
 	}
 
 	PyObject *output = PyObject_GetAttrString(catcher,"value");
-	char *s = PyString_AsString(output);
+	//char *s = PyString_AsString(output);
+	char *s = PyBytes_AS_STRING(output);
 
 	// Erase the string
 	//
-	PyObject *eStr = PyString_FromString("");
+	//PyObject *eStr = PyString_FromString("");
+	PyObject *eStr = PyBytes_FromString("");
 	PyObject_SetAttrString(catcher, "value", eStr);
     Py_DECREF(eStr);
 
@@ -252,11 +258,11 @@ string MyPython::PyOut() {
 	}
 
 	PyObject *output = PyObject_GetAttrString(catcher,"value");
-	char *s = PyString_AsString(output);
+	char *s = PyBytes_AS_STRING(output);
 
 	// Erase the string
 	//
-	PyObject *eStr = PyString_FromString("");
+	PyObject *eStr = PyBytes_FromString("");
 	PyObject_SetAttrString(catcher, "value", eStr);
     Py_DECREF(eStr);
 
