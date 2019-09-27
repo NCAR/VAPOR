@@ -52,6 +52,11 @@ public:
         return m_list.size();
     }
 
+    void clear() 
+    {
+        m_list.clear();        
+    }
+
     bool empty() const
     {
         return m_list.empty();
