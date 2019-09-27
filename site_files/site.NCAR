@@ -44,7 +44,7 @@ elseif (WIN32)
 	#set (PYTHONDIR ${THIRD_PARTY_DIR}/python${PYTHONVERSION})
 	#set (PYTHONPATH ${PYTHONDIR})
 	set (PYTHONVERSION 36)
-	set (PYTHONDIR C:\2019-Aug\Python36)
+	set (PYTHONDIR C:/2019-Aug/Python36)
 	set (PYTHONPATH ${PYTHONDIR})
 endif ()
 
