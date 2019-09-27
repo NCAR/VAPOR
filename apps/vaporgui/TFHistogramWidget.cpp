@@ -28,7 +28,8 @@ TFHistogramMap::TFHistogramMap(TFMapWidget *parent)
 
 QSize TFHistogramMap::minimumSizeHint() const
 {
-    return QSize(100, 40);
+//    return QSize(100, 40);
+    return QSize(100, 75);
 }
 
 void TFHistogramMap::PopulateSettingsMenu(QMenu *menu) const

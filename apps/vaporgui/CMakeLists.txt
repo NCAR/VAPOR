@@ -70,6 +70,8 @@ set (SRCS
 	ParamsMenuItems.h
 	TFEditor.cpp
 	TFEditor.h
+	TFEditorIsoSurface.cpp
+	TFEditorIsoSurface.h
 	TFOpacityWidget.cpp
 	TFOpacityWidget.h
 	TFColorWidget.cpp
