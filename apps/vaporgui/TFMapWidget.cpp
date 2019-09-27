@@ -78,6 +78,14 @@ void TFMap::hide()
         _parent->hide();
 }
 
+std::string TFMap::getVariableName() const
+{
+    if (UsingColormapVariable)
+        return _renderParams->GetColorMapVariableName();
+    else
+        return _renderParams->GetVariableName();
+}
+
 void TFMap::drawControl(QPainter &p, const QPointF &pos, bool selected) const
 {
     float radius = CONTROL_POINT_RADIUS;

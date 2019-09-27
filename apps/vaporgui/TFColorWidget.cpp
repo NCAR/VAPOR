@@ -75,9 +75,7 @@ void TFColorMap::PopulateSettingsMenu(QMenu *menu) const
 
 void TFColorMap::paramsUpdate()
 {
-    RenderParams *rp = getRenderParams();
-    
-    _colorInterpolationMenu->Update(rp->GetMapperFunc(rp->GetVariableName())->GetColorMap());
+    _colorInterpolationMenu->Update(getColormap());
     update();
     
     if (_selectedId > -1)
@@ -106,7 +104,7 @@ void TFColorMap::paintEvent(QPainter &p)
     
     RenderParams *rp = getRenderParams();
     
-    ColorMap *cm = rp->GetMapperFunc(rp->GetVariableName())->GetColorMap();
+    ColorMap *cm = rp->GetMapperFunc(getVariableName())->GetColorMap();
     
     QMargins padding = GetPadding();
     int nSamples = width()-(padding.left()+padding.right());
@@ -220,8 +218,7 @@ void TFColorMap::addControlPoint(float value)
 
 ColorMap *TFColorMap::getColormap() const
 {
-    RenderParams *rp = getRenderParams();
-    return rp->GetMapperFunc(rp->GetVariableName())->GetColorMap();
+    return getRenderParams()->GetMapperFunc(getVariableName())->GetColorMap();
 }
 
 void TFColorMap::selectControlPoint(int index)
@@ -271,21 +268,21 @@ void TFColorMap::menuLoad()
 {
     RenderParams *rp = getRenderParams();
     if (!rp) return;
-    TFUtils::LoadColormap(getParamsMgr(), rp->GetMapperFunc(rp->GetVariableName()));
+    TFUtils::LoadColormap(getParamsMgr(), rp->GetMapperFunc(getVariableName()));
 }
 
 void TFColorMap::menuSave()
 {
     RenderParams *rp = getRenderParams();
     if (!rp) return;
-    TFUtils::SaveTransferFunction(getParamsMgr(), rp->GetMapperFunc(rp->GetVariableName()));
+    TFUtils::SaveTransferFunction(getParamsMgr(), rp->GetMapperFunc(getVariableName()));
 }
 
 void TFColorMap::menuLoadBuiltin(std::string path)
 {
     RenderParams *rp = getRenderParams();
     if (!rp) return;
-    TFUtils::LoadColormap(rp->GetMapperFunc(rp->GetVariableName()), path);
+    TFUtils::LoadColormap(rp->GetMapperFunc(getVariableName()), path);
 }
 
 int TFColorMap::findSelectedControlPoint(const glm::vec2 &mouse) const

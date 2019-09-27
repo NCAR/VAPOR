@@ -30,6 +30,10 @@ TFEditorIsoSurface::TFEditorIsoSurface()
     _histogramMap2 = new TFHistogramMap;
     _colorMap2 = new TFColorMap;
     
+    _opacityMap2->UsingColormapVariable = true;
+    _histogramMap2->UsingColormapVariable = true;
+    _colorMap2->UsingColormapVariable = true;
+    
     _maps2->Add({_opacityMap2, _histogramMap2});
     _maps2->Add(_colorMap2);
     
@@ -37,6 +41,7 @@ TFEditorIsoSurface::TFEditorIsoSurface()
     layout()->addWidget(_mapsInfo2 = _maps2->CreateInfoGroup());
     layout()->addWidget(range2 = new TFMappingRangeSelector);
     connect(range2, SIGNAL(ValueChangedIntermediate(float, float)), _histogramMap2, SLOT(update()));
+    range2->UsingColormapVariable = true;
     
     QMenu *menu = new QMenu;
     _colorMap2->PopulateSettingsMenu(menu);

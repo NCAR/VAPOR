@@ -75,7 +75,7 @@ void TFOpacityMap::PopulateSettingsMenu(QMenu *menu) const
 
 void TFOpacityMap::paramsUpdate()
 {
-    MapperFunction *mf = getRenderParams()->GetMapperFunc(getRenderParams()->GetVariableName());
+    MapperFunction *mf = getRenderParams()->GetMapperFunc(getVariableName());
     // TODO Multiple opacity maps?
     //    int n = mf->getNumOpacityMaps();
     //    printf("# opacity maps = %i\n", n);
@@ -226,7 +226,7 @@ void TFOpacityMap::opacityChanged()
     if (!getRenderParams())
         return;
     
-    MapperFunction *mf = getRenderParams()->GetMapperFunc(getRenderParams()->GetVariableName());
+    MapperFunction *mf = getRenderParams()->GetMapperFunc(getVariableName());
     
     OpacityMap *om = mf->GetOpacityMap(0);
     
@@ -324,14 +324,14 @@ void TFOpacityMap::menuLoad()
 {
     RenderParams *rp = getRenderParams();
     if (!rp) return;
-    TFUtils::LoadTransferFunction(getParamsMgr(), rp->GetMapperFunc(rp->GetVariableName()));
+    TFUtils::LoadTransferFunction(getParamsMgr(), rp->GetMapperFunc(getVariableName()));
 }
 
 void TFOpacityMap::menuSave()
 {
     RenderParams *rp = getRenderParams();
     if (!rp) return;
-    TFUtils::SaveTransferFunction(getParamsMgr(), rp->GetMapperFunc(rp->GetVariableName()));
+    TFUtils::SaveTransferFunction(getParamsMgr(), rp->GetMapperFunc(getVariableName()));
 }
 
 void TFOpacityMap::DeselectControlPoint()

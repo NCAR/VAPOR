@@ -18,16 +18,24 @@ void TFMappingRangeSelector::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *p
     _getDataRange(dataMgr, rParams, &min, &max);
     SetRange(min, max);
     
-    vector<double> mapperRange = rParams->GetMapperFunc(rParams->GetVariableName())->getMinMaxMapValue();
+    vector<double> mapperRange = rParams->GetMapperFunc(_getVariableName())->getMinMaxMapValue();
     SetValue(mapperRange[0], mapperRange[1]);
 }
 
 void TFMappingRangeSelector::_getDataRange(VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *min, float *max) const
 {
     std::vector<double> range;
-    d->GetDataRange(r->GetCurrentTimestep(), r->GetVariableName(), r->GetRefinementLevel(), r->GetCompressionLevel(), d->GetDefaultMetaInfoStride(r->GetVariableName(), r->GetRefinementLevel()), range);
+    d->GetDataRange(r->GetCurrentTimestep(), _getVariableName(), r->GetRefinementLevel(), r->GetCompressionLevel(), d->GetDefaultMetaInfoStride(_getVariableName(), r->GetRefinementLevel()), range);
     *min = range[0];
     *max = range[1];
+}
+
+std::string TFMappingRangeSelector::_getVariableName() const
+{
+    if (UsingColormapVariable)
+        return _rParams->GetColorMapVariableName();
+    else
+        return _rParams->GetVariableName();
 }
 
 void TFMappingRangeSelector::_rangeChangedBegin()
@@ -41,7 +49,7 @@ void TFMappingRangeSelector::_rangeChangedIntermediate(float left, float right)
 {
     if (!_rParams || !_paramsMgr) return;
     
-    _rParams->GetMapperFunc(_rParams->GetVariableName())->setMinMaxMapValue(left, right);
+    _rParams->GetMapperFunc(_getVariableName())->setMinMaxMapValue(left, right);
     
 //    _maps->histo->update();
     
@@ -52,6 +60,6 @@ void TFMappingRangeSelector::_rangeChanged(float left, float right)
 {
     if (!_rParams || !_paramsMgr) return;
     
-    _rParams->GetMapperFunc(_rParams->GetVariableName())->setMinMaxMapValue(left, right);
+    _rParams->GetMapperFunc(_getVariableName())->setMinMaxMapValue(left, right);
     _paramsMgr->EndSaveStateGroup();
 }

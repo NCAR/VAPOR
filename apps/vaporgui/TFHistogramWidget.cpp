@@ -77,7 +77,7 @@ void TFHistogramMap::paintEvent(QPainter &p)
     QPolygonF graph;
     graph.push_back(NDCToQPixel(0,0));
     
-    vector<double> mapRange = getRenderParams()->GetMapperFunc(getRenderParams()->GetVariableName())->getMinMaxMapValue();
+    vector<double> mapRange = getRenderParams()->GetMapperFunc(getVariableName())->getMinMaxMapValue();
     
     int startBin = _histo.getBinIndexForValue(mapRange[0]);
     int endBin = _histo.getBinIndexForValue(mapRange[1]);

@@ -28,6 +28,8 @@ class TFMap : public QObject {
     VAPoR::RenderParams *_renderParams = nullptr;
     
 public:
+    bool UsingColormapVariable = false;
+    
     TFMap(TFMapWidget *parent = nullptr);
     
     TFInfoWidget *GetInfoWidget();
@@ -65,6 +67,7 @@ protected:
     VAPoR::DataMgr      *getDataMgr()      const { return _dataMgr; }
     VAPoR::ParamsMgr    *getParamsMgr()    const { return _paramsMgr; }
     VAPoR::RenderParams *getRenderParams() const { return _renderParams; }
+    std::string getVariableName() const;
     
     void drawControl(QPainter &p, const QPointF &pos, bool selected = false) const;
     virtual TFInfoWidget *createInfoWidget() = 0;
