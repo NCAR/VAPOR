@@ -1,12 +1,13 @@
 //-----------------------------------------------------------------------------
-// This is an implementation of a LRU cache for VAPOR.
-// It behaves in a similar style to std containers, and follows std container
-// naming conventions. 
-// The API of this class is inspired by the API of std::map.
-// 
-// When used in VAPOR to cache large data structures (e.g., grids, quadtrees),
-// this instances of this cache is expected to keep ownership of those large structures.
-// I.e., the Value field in this cache is expected to be of type std::unique_ptr<>.
+// This is an implementation of a LRU cache that keeps unique pointers 
+// pointing to big structures (e.g., grids, quadtrees).
+//
+// Given this design, this cache is expected to keep the ownership of these 
+// structures once they're put in the cache, and all other codes will only
+// have read-only access to the structures in the cache.
+//
+// This implementation follows std container conventions in terms of behaviors,
+// API, and names.
 //
 // Author: Samuel Li
 // Date  : 9/26/2019
