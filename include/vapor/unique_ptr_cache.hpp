@@ -3,8 +3,11 @@
 // pointing to big structures (e.g., grids, quadtrees).
 //
 // Given this design, this cache is expected to keep the ownership of these 
-// structures once they're put in the cache, and all other codes will only
-// have read-only access to the structures in the cache.
+// structures once they're put in the cache, and all other codes will not
+// need to manage these structures.
+//
+// All structures stored in this cache are const qualified, so once a
+// structures is in, there is no more modifications.
 //
 // This implementation follows std container conventions in terms of naming.
 //
@@ -28,8 +31,6 @@ template <typename Key, typename BigObj>
 class unique_ptr_cache
 {
 public:
-    using const_iterator = typename std::list<std::pair<Key, BigObj>>::const_iterator;
-
     // Constructor with the max size specified
     unique_ptr_cache( size_t size )
       : m_max_size( size > 1 ? size : 1 )   // cache max size has to be at least one 
@@ -96,7 +97,7 @@ public:
     // BigObj, while the old BigObj is properly destroyed.
     // (Pass by value and move idiom on Key)
     //
-    void insert( Key key, BigObj* ptr )
+    void insert( Key key, const BigObj* ptr )
     {
         // Remove the old BigObj if it exists.
         for( auto it = m_list.cbegin(); it != m_list.cend(); ++it )
@@ -106,7 +107,7 @@ public:
         }
 
         // Should use make_unique<> in c++14. CentOS7 prevents it as of 2019.
-        std::unique_ptr<BigObj> tmp( ptr );
+        std::unique_ptr<const BigObj> tmp( ptr );
 
         // Create a new pair at the front of the list
         m_list.emplace_front( std::move(key), std::move(tmp) );
@@ -115,7 +116,7 @@ public:
     }
 
 private:
-    using list_type = std::list< std::pair<Key, std::unique_ptr<BigObj>> >;
+    using list_type = std::list< std::pair<Key, std::unique_ptr<const BigObj>> >;
     const size_t        m_max_size;
     list_type           m_list;
 
