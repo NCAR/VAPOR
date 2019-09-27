@@ -4,20 +4,7 @@
 using namespace flow;
 
 // Constructor
-VaporField::VaporField() : _recentGridLimit( 12 )
-{
-    _datamgr = nullptr;
-    _params  = nullptr;
-}
-
-VaporField::VaporField(int limit) : _recentGridLimit( limit )
-{
-    _datamgr = nullptr;
-    _params  = nullptr;
-}
-
-// Destructor
-VaporField::~VaporField()
+VaporField::VaporField( size_t cache_limit )
 { }
 
 
@@ -409,6 +396,7 @@ VaporField::_getAGrid( size_t               timestep,
                        std::string&         varName,
                        const VAPoR::Grid**  gridpp  )
 {
+#if 0
     // First check if we have the requested grid in our cache
     std::vector<double>           extMin, extMax;
     _params->GetBox()->GetExtents( extMin, extMax );
@@ -440,6 +428,7 @@ VaporField::_getAGrid( size_t               timestep,
                                 extMin, extMax, _datamgr );
     if( _recentGrids.size() > _recentGridLimit )
         _recentGrids.pop_back();
+#endif
 
     return 0;
 }
@@ -459,6 +448,7 @@ VaporField::_paramsToString(  size_t currentTS,               const std::string&
     return oss.str();
 }
 
+#if 0
 // RichGrid Constructor
 VaporField::RichGrid::RichGrid( const VAPoR::Grid* g, 
                                 size_t currentTS,
@@ -500,3 +490,4 @@ VaporField::RichGrid::equals( size_t currentTS, const std::string& var,
     else
         return false;
 }
+#endif
