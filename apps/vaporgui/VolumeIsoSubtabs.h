@@ -26,8 +26,6 @@ public:
         setupUi(this);
         _variablesWidget->Reinit( (VariableFlags)(SCALAR | COLOR),
                                   (DimFlags)(THREED) );
-        
-        ((QVBoxLayout*)layout())->insertWidget(0, tf = new TFEditorIsoSurface);
     }
 
     void Update(VAPoR::DataMgr *dataMgr,
@@ -38,7 +36,6 @@ private slots:
 
 private:
     VAPoR::VolumeIsoParams* _isoParams;
-    TFEditorIsoSurface *tf;
 };
 
 
@@ -66,7 +63,7 @@ private slots:
 
 private:
     VAPoR::VolumeIsoParams* _params;
-
+    TFEditorIsoSurface *_tfe;
 }; 
 
 
