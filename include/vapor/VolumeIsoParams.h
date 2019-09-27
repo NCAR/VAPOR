@@ -28,6 +28,9 @@ protected:
     
 private:
     void _init();
+    
+public:
+    static const std::string UseColormapVariableTag;
 };
     
 };

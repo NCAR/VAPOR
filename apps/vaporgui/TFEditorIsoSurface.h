@@ -1,6 +1,7 @@
 #pragma once
 
 #include "VSection.h"
+#include "ParamsWidgets.h"
 
 class TFMapGroupWidget;
 class TFMapInfoGroupWidget;
@@ -32,6 +33,8 @@ private:
     TFHistogramMap *_histogramMap;
     TFIsoValueMap *_isoMap;
     
+    ParamsWidgetCheckbox *_colormappedVariableCheckbox;
+    ParamsWidgetColor *_constantColorSelector;
     
     TFMapGroupWidget *_maps2;
     TFMapInfoGroupWidget *_mapsInfo2;
