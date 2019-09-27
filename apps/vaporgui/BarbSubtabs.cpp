@@ -1,6 +1,7 @@
 #include <cmath>
 #include "BarbSubtabs.h"
 #include "vapor/BarbParams.h"
+#include "TFEditor.h"
 
 #define X 0
 #define Y 1
@@ -58,6 +59,7 @@ BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget* parent) {
 	_TFWidget->Reinit(
 		(TFFlags)(CONSTANT_COLOR | COLORMAP_VAR_IS_IN_TF1)
 	);
+    verticalLayout->insertWidget(0, _tfe = new TFEditor);
 
 	_xDimCombo = new Combo(xDimEdit, xDimSlider, true);
 	_yDimCombo = new Combo(yDimEdit, yDimSlider, true);
@@ -121,6 +123,7 @@ void BarbAppearanceSubtab::Update(VAPoR::DataMgr* dataMgr,
 	_bParams = (VAPoR::BarbParams*)bParams;
 	_paramsMgr = paramsMgr;
 	_TFWidget->Update(dataMgr, paramsMgr, bParams);
+    _tfe->Update(dataMgr, paramsMgr, bParams);
 
 	vector<long> grid = _bParams->GetGrid();
 	_xDimCombo->Update(COUNT_MIN, COUNT_MAX, grid[X]);

@@ -36,7 +36,7 @@ void TFMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::
 
 bool TFMap::HasValidParams() const
 {
-    return _dataMgr && _paramsMgr && _renderParams;
+    return _dataMgr && _paramsMgr && _renderParams && _dataMgr->VariableExists(_renderParams->GetCurrentTimestep(), getVariableName());
 }
 
 void TFMap::resize(int width, int height)
