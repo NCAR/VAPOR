@@ -14,13 +14,6 @@ TFColorInfoWidget::TFColorInfoWidget()
     connect(_colorEdit, SIGNAL(colorChanged(QColor)), this, SLOT(colorEditChanged()));
 }
 
-void TFColorInfoWidget::Update(VAPoR::RenderParams *rParams)
-{
-    TFInfoWidget::Update(rParams);
-    if (!rParams)
-        return;
-}
-
 void TFColorInfoWidget::DeselectControlPoint()
 {
     TFInfoWidget::DeselectControlPoint();

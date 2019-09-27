@@ -55,6 +55,7 @@ void TFHistogramMap::paramsUpdate()
 TFInfoWidget *TFHistogramMap::createInfoWidget()
 {
     TFHistogramInfoWidget *info = new TFHistogramInfoWidget;
+    info->UsingColormapVariable = this->UsingColormapVariable;
     
     connect(this, SIGNAL(UpdateInfo(float)), info, SLOT(SetControlPoint(float)));
 //    connect(this, SIGNAL(InfoDeselected()), info, SLOT(Deselect()));

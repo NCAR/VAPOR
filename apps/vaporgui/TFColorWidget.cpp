@@ -85,6 +85,7 @@ void TFColorMap::paramsUpdate()
 TFInfoWidget *TFColorMap::createInfoWidget()
 {
     TFColorInfoWidget *info = new TFColorInfoWidget;
+    info->UsingColormapVariable = this->UsingColormapVariable;
     
     connect(this, SIGNAL(ControlPointDeselected()), info, SLOT(DeselectControlPoint()));
     connect(this, SIGNAL(UpdateInfo(float, QColor)), info, SLOT(SetControlPoint(float, QColor)));

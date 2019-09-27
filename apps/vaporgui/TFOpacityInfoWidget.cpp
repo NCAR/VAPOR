@@ -14,13 +14,6 @@ TFOpacityInfoWidget::TFOpacityInfoWidget()
     connect(_opacityEdit, SIGNAL(returnPressed()), this, SLOT(opacityEditChanged()));
 }
 
-void TFOpacityInfoWidget::Update(VAPoR::RenderParams *rParams)
-{
-    TFInfoWidget::Update(rParams);
-    if (!rParams)
-        return;
-}
-
 void TFOpacityInfoWidget::DeselectControlPoint()
 {
     TFInfoWidget::DeselectControlPoint();

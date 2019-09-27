@@ -13,8 +13,6 @@ class TFOpacityInfoWidget : public TFInfoWidget {
 public:
     TFOpacityInfoWidget();
     
-    void Update(VAPoR::RenderParams *rParams);
-    
 public:
     void SetOpacity(float opacity);
     

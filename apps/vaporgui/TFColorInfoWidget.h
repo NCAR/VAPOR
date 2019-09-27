@@ -13,10 +13,6 @@ class TFColorInfoWidget : public TFInfoWidget {
     
 public:
     TFColorInfoWidget();
-    
-    void Update(VAPoR::RenderParams *rParams);
-    
-public:
     void SetColor(const QColor &color);
     
 protected:

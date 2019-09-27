@@ -36,8 +36,14 @@ void TFInfoWidget::Update(VAPoR::RenderParams *rParams)
     if (!rParams)
         return;
     
-    _min = rParams->GetMapperFunc(rParams->GetVariableName())->getMinMapValue();
-    _max = rParams->GetMapperFunc(rParams->GetVariableName())->getMaxMapValue();
+    string variableName;
+    if (UsingColormapVariable)
+        variableName = rParams->GetColorMapVariableName();
+    else
+        variableName = rParams->GetVariableName();
+    
+    _min = rParams->GetMapperFunc(variableName)->getMinMapValue();
+    _max = rParams->GetMapperFunc(variableName)->getMaxMapValue();
     
     updateValueEditValidator();
 }
