@@ -81,12 +81,22 @@ void TFMapInfoGroupWidget::add(TFMapWidget *mapWidget)
         TFInfoWidget *info = map->GetInfoWidget();
         if (!info) continue;
         _infos.push_back(info);
-        addWidget(info);
+        
+        // Qt::StackedLayout does not support alignment so we need to wrap
+        // the info widget in another widget with a box layout.
+        QWidget *box = new QWidget;
+        QVBoxLayout *layout = new QVBoxLayout;
+        layout->setMargin(0);
+        layout->setAlignment(Qt::AlignTop);
+        layout->addWidget(info);
+        box->setLayout(layout);
+        addWidget(box);
+        
         connect(map, SIGNAL(Activated(TFMap*)), this, SLOT(mapActivated(TFMap*)));
     }
 }
 
 void TFMapInfoGroupWidget::mapActivated(TFMap *activatedMap)
 {
-    setCurrentWidget(activatedMap->GetInfoWidget());
+    setCurrentWidget((QWidget*)(activatedMap->GetInfoWidget()->parent()));
 }

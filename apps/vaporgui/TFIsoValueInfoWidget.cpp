@@ -3,11 +3,6 @@
 #include <QLabel>
 #include <QBoxLayout>
 
-TFIsoValueInfoWidget::TFIsoValueInfoWidget()
-{
-    layout()->addWidget(new QLabel);
-}
-
 void TFIsoValueInfoWidget::controlPointChanged()
 {
     emit ControlPointChanged(this->getValueFromEdit());
