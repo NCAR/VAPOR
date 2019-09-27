@@ -67,6 +67,32 @@ public:
     };
 
     // 
+    // This wrapper class wraps a grid and a data manager pointer to ensure
+    // the grid is properly destroyed.
+    //
+    class GridWrapper
+    {
+    private:
+        const VAPoR::Grid*  gridPtr;
+        VAPoR::DataMgr*     mgr;
+    public:
+        GridWrapper( const VAPoR::Grid* gp, VAPoR::DataMgr* mp )
+            : gridPtr( gp ), mgr( mp )
+        {}   
+        // Rule of 3
+        GridWrapper(            const GridWrapper& ) = delete;
+        GridWrapper& operator=( const GridWrapper& ) = delete;
+       ~GridWrapper()
+        {
+            if( mgr && gridPtr )
+            {
+                mgr->UnlockGrid( gridPtr );
+                delete gridPtr;
+            }
+        }
+    };
+
+    // 
     // Returns the intersection domain of 3 velocity variables
     //
     void GetFirstStepVelocityIntersection( glm::vec3& minxyz, glm::vec3& maxxyz );
@@ -85,6 +111,9 @@ protected:
     // Member functions
     template< typename T > 
     size_t _binarySearch( const std::vector<T>& vec, T val, size_t begin, size_t end ) const;
+
+    std::string _paramsToString(  size_t currentTS, const std::string& var, int refLevel, 
+            int compLevel, const std::vector<double>& min, const std::vector<double>& max ) const;
 
     // Are the following member variables pointers set?
     //  1) _datamgr and 2) _params
