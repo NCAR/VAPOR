@@ -7,45 +7,50 @@
 // have read-only access to the structures in the cache.
 //
 // This implementation follows std container conventions in terms of behaviors,
-// API, and names.
+// names, and API. (Special thanks to std::map )
 //
 // Author: Samuel Li
 // Date  : 9/26/2019
 //-----------------------------------------------------------------------------
 
-#ifndef VAPOR_CACHE_H
-#define VAPOR_CACHE_H
+#ifndef UNIQUE_PTR_CACHE_H
+#define UNIQUE_PTR_CACHE_H
 
 #include <cstddef>
 #include <list>
 #include <utility>
+#include <memory>
 
 //namespace VAPoR
 //{
 
 // Note : Key must support == operator
-// Note2: Don't instantiate this class with reference typenames. 
-template <typename Key, typename Value>
-class vapor_cache
+template <typename Key, typename BigObj>
+class unique_ptr_cache
 {
 public:
-    using const_iterator = typename std::list<std::pair<Key, Value>>::const_iterator;
+    using const_iterator = typename std::list<std::pair<Key, BigObj>>::const_iterator;
 
-    // Constructor with the size limit specified
-    vapor_cache( size_t size )
-      : m_size_limit( size > 1 ? size : 1 )   // cache size limit has to be at least one 
+    // Constructor with the max size specified
+    unique_ptr_cache( size_t size )
+      : m_max_size( size > 1 ? size : 1 )   // cache max size has to be at least one 
     { }
     
     // Given that this cache is intended to be used to keep unique pointers,
     // we don't want to allow any type of copy constructors, so delete them.
-    vapor_cache( const vapor_cache& )             = delete;
-    vapor_cache( const vapor_cache&& )            = delete;
-    vapor_cache& operator=( const vapor_cache& )  = delete;
-    vapor_cache& operator=( const vapor_cache&& ) = delete;
+    unique_ptr_cache( const unique_ptr_cache& )             = delete;
+    unique_ptr_cache( const unique_ptr_cache&& )            = delete;
+    unique_ptr_cache& operator=( const unique_ptr_cache& )  = delete;
+    unique_ptr_cache& operator=( const unique_ptr_cache&& ) = delete;
+
+    size_t max_size() const
+    {
+        return m_max_size;
+    }
 
     size_t size() const
     {
-        return m_size_limit;
+        return m_list.size();
     }
 
     bool empty() const
@@ -71,7 +76,10 @@ public:
         for( auto it = m_list.cbegin(); it != m_list.cend(); ++it )
         { 
             if( it->first == key )
+            {
+                m_list.splice( m_list.cbegin(), m_list, it );
                 return it;
+            }
         }
         return m_list.cend();
     }
@@ -81,12 +89,39 @@ public:
         return m_list.cend();
     }
 
+    //
+    // Inserts to the head of the cache a key and a raw pointer pointing to a BigObj.
+    // Upon success, this class takes ownership of the BigObj and the old raw pointer 
+    // shall not be used anymore.
+    // In the case of the key already exists, the new BigObj takes place of the old 
+    // BigObj, while the old BigObj is properly destroyed.
+    // (Pass by value and move idiom on Key)
+    //
+    void insert( Key key, BigObj* ptr )
+    {
+        // Remove the old BigObj if it exists.
+        for( auto it = m_list.cbegin(); it != m_list.cend(); ++it )
+        { 
+            if( it->first == key )
+                m_list.erase( it );
+        }
+
+        // Should use make_unique<> in c++14. CentOS7 prevents it as of 2019.
+        std::unique_ptr<BigObj> tmp( ptr );
+
+        // Create a new pair at the front of the list
+        m_list.emplace_front( std::move(key), std::move(tmp) );
+        if( m_list.size() > m_max_size )
+            m_list.pop_back();
+    }
+
 
 private:
-    const size_t m_size_limit;
-    std::list< std::pair<Key, Value> > m_list;
+    using list_type = std::list< std::pair<Key, std::unique_ptr<BigObj>> >;
+    const size_t        m_max_size;
+    list_type           m_list;
 
-};  // end of class VaporCache
+};  // end of class unique_ptr_cache
 
 //}   // end of namespace VAPoR
 
