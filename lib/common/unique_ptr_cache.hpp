@@ -6,8 +6,7 @@
 // structures once they're put in the cache, and all other codes will only
 // have read-only access to the structures in the cache.
 //
-// This implementation follows std container conventions in terms of behaviors,
-// names, and API. (Special thanks to std::map )
+// This implementation follows std container conventions in terms of naming.
 //
 // Author: Samuel Li
 // Date  : 9/26/2019
@@ -21,8 +20,8 @@
 #include <utility>
 #include <memory>
 
-//namespace VAPoR
-//{
+namespace VAPoR
+{
 
 // Note : Key must support == operator
 template <typename Key, typename BigObj>
@@ -69,24 +68,19 @@ public:
         return false;
     }
 
-    // Upon the existance of Key, returns a const iterator pointing to that pair. 
-    // Upon non-existance of Key, returns a const iterator pointing to m_list.cend();
-    const_iterator find( const Key& key ) const
+    // Upon the existance of Key, returns a const pointer pointing to BigObj
+    // Upon non-existance of Key, return a nullptr
+    const BigObj*  find( const Key& key )
     {
         for( auto it = m_list.cbegin(); it != m_list.cend(); ++it )
         { 
             if( it->first == key )
             {
                 m_list.splice( m_list.cbegin(), m_list, it );
-                return it;
+                return (it->second).get();
             }
         }
-        return m_list.cend();
-    }
-
-    const_iterator cend() const
-    {
-        return m_list.cend();
+        return nullptr; // Not finding the key! Return nullptr
     }
 
     //
@@ -115,7 +109,6 @@ public:
             m_list.pop_back();
     }
 
-
 private:
     using list_type = std::list< std::pair<Key, std::unique_ptr<BigObj>> >;
     const size_t        m_max_size;
@@ -123,6 +116,6 @@ private:
 
 };  // end of class unique_ptr_cache
 
-//}   // end of namespace VAPoR
+}   // end of namespace VAPoR
 
 #endif
