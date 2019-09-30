@@ -81,17 +81,55 @@ private:
 
 	} _cacheParams;
 
+	class DrawList {
+	public:
+		DrawList(size_t maxEntries, size_t maxLinesPerVertex) :
+			_drawList(
+				maxEntries*maxLinesPerVertex, std::numeric_limits<size_t>::max()
+			),
+			_maxEntries(maxEntries),
+			_maxLinesPerVertex(maxLinesPerVertex)
+		 {}	
+
+		bool InList(size_t idx0, size_t idx1) {
+			VAssert(idx0 < _maxEntries);
+			VAssert(idx1 < _maxEntries);
+
+			if (idx1 < idx0) {
+				size_t tmp = idx0;
+				idx0 = idx1;
+				idx1 = tmp;
+			}
+
+			for (int i = 0; i<_maxLinesPerVertex; i++) {
+				if (_drawList[idx0*_maxLinesPerVertex+i] == idx1) {
+					return(true);
+				}
+				if (_drawList[idx0*_maxLinesPerVertex+i] == std::numeric_limits<size_t>::max()) {
+					_drawList[idx0*_maxLinesPerVertex+i] = idx1;
+					return(false);
+				}
+			}
+			return(false);
+		}
+	private:
+		vector<size_t> _drawList;
+		size_t _maxEntries;
+		size_t _maxLinesPerVertex;
+	};
+
 	int  _buildCache();
 	bool _isCacheDirty() const;
 	void _saveCacheParams();
 	void _drawCell(
-            vector<VertexData> &vertices,
-            vector<unsigned int> &indices,
-			const float *verts,
-			const float *colors,
-			int n,
-			bool layered
-			);
+		const size_t *cellNodeIndices,
+		int n,
+		bool layered,
+		const std::vector <size_t> &nodeMap,
+		size_t invalidIndex,
+		std::vector<unsigned int> &indices,
+		DrawList &drawList
+	) const;
 
   void _clearCache() {
 	_cacheParams.varName.clear();

@@ -48,6 +48,7 @@ static RendererRegistrar<WireFrameRenderer> registrar(
 	WireFrameRenderer::GetClassType(), WireFrameParams::GetClassType()
 );
 
+
 WireFrameRenderer::WireFrameRenderer(
 	const ParamsMgr* pm, string winName,
 	string dataSetName, string instName,
@@ -114,26 +115,27 @@ bool WireFrameRenderer::_isCacheDirty() const
 }
 
 void WireFrameRenderer::_drawCell(
-    vector<VertexData> &vertices,
-    vector<unsigned int> &indices,
-	const float *verts,
-	const float *colors,
+	const size_t *cellNodeIndices,
 	int n,
-	bool layered
-) {
-    int baseIndex = vertices.size();
-    for (int i = 0; i < n; i++) {
-        vertices.push_back({
-            verts[3*i], verts[3*i+1], verts[3*i+2],
-            colors[4*i], colors[4*i+1], colors[4*i+2], colors[4*i+3]
-        });
-    }
+	bool layered,
+	const vector <size_t> &nodeMap,
+	size_t invalidIndex,
+    vector<unsigned int> &indices,
+	DrawList &drawList
+) const {
 
 	int count = layered ? n/2 : n;
 	for (int i=0; i<count; i++) {
-		// indices[i] = i;
-        indices.push_back(baseIndex + i);
-        indices.push_back(baseIndex + ((i+1)%count));
+		size_t idx0 = nodeMap[cellNodeIndices[i]];
+		VAssert(idx0 != invalidIndex);
+
+		size_t idx1 = nodeMap[cellNodeIndices[(i+1)%count]];
+		VAssert(idx1 != invalidIndex);
+
+		if (drawList.InList(idx0,idx1)) continue;
+
+        indices.push_back(idx0);
+        indices.push_back(idx1);
 	}
 
 	if (! layered) return;
@@ -141,18 +143,31 @@ void WireFrameRenderer::_drawCell(
 	// if layered the coordinates are ordered bottom face first, then top face
 	//
 	for (int i=0; i<count; i++) {
-		// indices[i] = i + count;
-        indices.push_back(baseIndex + i + count);
-        indices.push_back(baseIndex + ((i+1)%count) + count);
+		size_t idx0 = nodeMap[cellNodeIndices[i+count]];
+		VAssert(idx0 != invalidIndex);
+
+		size_t idx1 = nodeMap[cellNodeIndices[((i+1)%count)+count]];
+		VAssert(idx1 != invalidIndex);
+
+		if (drawList.InList(idx0,idx1)) continue;
+
+        indices.push_back(idx0);
+        indices.push_back(idx1);
 	}
     
 	// Now draw edges between top and bottom face
 	//
 	for (int i=0; i<count; i++) {
-		// indices[2*i+0] = i;
-		// indices[2*i+1] = i + count;
-        indices.push_back(baseIndex + i);
-        indices.push_back(baseIndex + i + count);
+		size_t idx0 = nodeMap[cellNodeIndices[i]];
+		VAssert(idx0 != invalidIndex);
+
+		size_t idx1 = nodeMap[cellNodeIndices[i+count]];
+		VAssert(idx1 != invalidIndex);
+
+		if (drawList.InList(idx0,idx1)) continue;
+
+        indices.push_back(idx0);
+        indices.push_back(idx1);
 	}
 }
 
@@ -186,115 +201,144 @@ int WireFrameRenderer::_buildCache()
         }
     }
     
-    vector<VertexData> vertices;
-    vector<unsigned int> indices;
-    
-    double mv = grid->GetMissingValue();
-    
-#if 0    // VAPOR_3_1_0
-    
-    // Performance of the bounding box version of the Cell iterator
-    // is too slow. So we render the entire grid and use clipping planes
-    // to restrict the displayed region
-    //
-    Grid::ConstCellIterator it = grid->ConstCellBegin(
-                                                      _cacheParams.boxMin, _cacheParams.boxMax
-                                                      );
-#else
-    Grid::ConstCellIterator it = grid->ConstCellBegin();
-#endif
-    
-    
-    size_t nverts = grid->GetMaxVertexPerCell();
-    bool layered = grid->GetTopologyDim() == 3;
-    
-    float *coordsArray = new float[nverts*3];
-    float *colorsArray = new float[nverts*4];
-    Grid::ConstCellIterator end = grid->ConstCellEnd();
-    
-    float defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
+    Grid::ConstNodeIterator nitr = grid->ConstNodeBegin();
+    Grid::ConstNodeIterator nend = grid->ConstNodeEnd();
 
-    size_t maxNodes = grid->GetMaxVertexPerCell();
-    size_t nodeDim = grid->GetNodeDimensions().size();
-	size_t *nodes = (size_t*)alloca(sizeof(size_t) * maxNodes * nodeDim);
+	double mv = grid->GetMissingValue();
+	float defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
+	size_t numNodes = Wasp::VProduct(grid->GetDimensions());
+	size_t invalidIndex = std::numeric_limits<size_t>::max();
+	vector <size_t> nodeMap(numNodes, invalidIndex);
 
-	size_t coordDim = grid->GetGeometryDim();
-	double *coord = (double*)alloca(sizeof(double) * coordDim);
+	vector<VertexData> vertices;
+	vertices.reserve(numNodes);
 
-    for (; it != end; ++it)
-    {
-		int numNodes;
-        grid->GetCellNodes((*it).data(), nodes, numNodes);
-        
-        for (int i = 0; i < numNodes; i++)
-        {
-            grid->GetUserCoordinates(&nodes[i*nodeDim], coord);
-            
-            coordsArray[3*i+0] = coord[0];
-            coordsArray[3*i+1] = coord[1];
-            
-            if (coordDim == 3) {
-                coordsArray[3*i+2] = coord[2];
-            }
-            else if (heightGrid) {
-                coordsArray[3*i+2] = heightGrid->GetValueAtIndex(&nodes[i*nodeDim]);
-            }
-            else {
-                coordsArray[3*i+2] = defaultZ;
-            }
-            
-            float dataValue = grid->GetValueAtIndex(&nodes[i*nodeDim]);
-            if (dataValue == mv) {
-                colorsArray[4*i+0] = 0.0;
-                colorsArray[4*i+1] = 0.0;
-                colorsArray[4*i+2] = 0.0;
-                colorsArray[4*i+3] = 0.0;
-            }
-            else if (_cacheParams.useSingleColor) {
-                colorsArray[4*i+0] = _cacheParams.constantColor[0];
-                colorsArray[4*i+1] = _cacheParams.constantColor[1];
-                colorsArray[4*i+2] = _cacheParams.constantColor[2];
-                colorsArray[4*i+3] = _cacheParams.constantOpacity;
-            }
-            else {
-                size_t n = _cacheParams.tf_lut.size() >> 2;
-                int index = (dataValue - _cacheParams.tf_minmax[0]) /
-                (_cacheParams.tf_minmax[1] - _cacheParams.tf_minmax[0]) *
-                (n - 1);
-                if (index < 0) {
-                    index = 0;
-                }
-                if (index >= n) {
-                    index = n-1;
-                }
-                colorsArray[4*i+0] = _cacheParams.tf_lut[4*index+0];
-                colorsArray[4*i+1] = _cacheParams.tf_lut[4*index+1];
-                colorsArray[4*i+2] = _cacheParams.tf_lut[4*index+2];
-                colorsArray[4*i+3] = _cacheParams.tf_lut[4*index+3];
-                
-            }
-        }
-        
-        _drawCell(vertices, indices, coordsArray, colorsArray, numNodes, layered);
-    }
-    
-    
-    delete [] coordsArray;
-    delete [] colorsArray;
-    
-    if (grid) delete grid;
-    if (heightGrid) delete heightGrid;
-    
-    _nIndices = indices.size();
-    glBindVertexArray(_VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexData), vertices.data(), GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_DYNAMIC_DRAW);
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    return 0;
+	size_t count = 0;
+	for (; nitr != nend; ++nitr) {
+		size_t index = Wasp::LinearizeCoords(*nitr, grid->GetDimensions());
+		nodeMap[index] = vertices.size();
+	
+		double coord[3];
+		grid->GetUserCoordinates((*nitr).data(), coord);
+			
+		if (grid->GetGeometryDim() < 3) {
+			if (heightGrid) {
+				coord[2] = heightGrid->GetValueAtIndex(*nitr);
+			}
+			else {
+				coord[2] = defaultZ;
+			}
+		}
+			
+		float dataValue = grid->GetValueAtIndex((*nitr).data());
+		float color[4];
+
+		if (dataValue == mv) {
+			color[0] = 0.0;
+			color[1] = 0.0;
+			color[2] = 0.0;
+			color[3] = 0.0;
+		}
+		else if (_cacheParams.useSingleColor) {
+			color[0] = _cacheParams.constantColor[0];
+			color[1] = _cacheParams.constantColor[1];
+			color[2] = _cacheParams.constantColor[2];
+			color[3] = _cacheParams.constantOpacity;
+		}
+		else {
+			size_t n = _cacheParams.tf_lut.size() >> 2;
+			int index = (dataValue - _cacheParams.tf_minmax[0]) /
+			(_cacheParams.tf_minmax[1] - _cacheParams.tf_minmax[0]) *
+			(n - 1);
+			if (index < 0) {
+				index = 0;
+			}
+			if (index >= n) {
+				index = n-1;
+			}
+			color[0] = _cacheParams.tf_lut[4*index+0];
+			color[1] = _cacheParams.tf_lut[4*index+1];
+			color[2] = _cacheParams.tf_lut[4*index+2];
+			color[3] = _cacheParams.tf_lut[4*index+3];
+				
+		}
+		
+		vertices.push_back({
+			(float) coord[0], (float) coord[1], (float) coord[2],
+			color[1], color[1], color[2], color[3]
+		});
+		count++;
+	}
+cout << "vertices count size " << vertices.size() << " " << vertices.size() * sizeof(vertices[0]) << endl;
+cout << "nodeMap count size " << nodeMap.size() << " " << nodeMap.size() * sizeof(nodeMap[0]) << endl;
+	VAssert(count == numNodes);
+
+	glBindVertexArray(_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexData), vertices.data(), GL_DYNAMIC_DRAW);
+	vertices.resize(0);
+	vertices.shrink_to_fit();
+
+
+	Grid::ConstCellIterator it = grid->ConstCellBegin();
+	Grid::ConstCellIterator end = grid->ConstCellEnd();
+
+	bool layered = grid->GetTopologyDim() == 3;
+	size_t maxVertsPerCell = grid->GetMaxVertexPerCell();
+	vector <size_t> cellNodeIndices(maxVertsPerCell*grid->GetDimensions().size());
+	vector <size_t> cellNodeIndicesLinear(maxVertsPerCell);
+	size_t numCells = Wasp::VProduct(grid->GetCellDimensions());
+	size_t maxLineIndices = numCells * 
+		(layered ? maxVertsPerCell / 2 * 3 : maxVertsPerCell * 2);
+
+	vector<unsigned int> indices;
+	indices.reserve(maxLineIndices);
+
+
+size_t cellCount = 0;
+	{
+		DrawList drawList(numNodes, 10);
+		for (; it != end; ++it)
+		{
+			int numNodes;
+			grid->GetCellNodes((*it).data(), cellNodeIndices.data(), numNodes);
+
+			for (int i=0; i<numNodes; i++) {
+				int ndim = grid->GetDimensions().size();
+				cellNodeIndicesLinear[i] = Wasp::LinearizeCoords(
+					cellNodeIndices.data()+(i*ndim),
+					grid->GetDimensions().data(), 
+					ndim
+				);
+			}
+			
+			_drawCell(
+				cellNodeIndicesLinear.data(), numNodes, layered, nodeMap,
+				invalidIndex, indices, drawList
+			);
+	cellCount++;
+		}
+	}
+cout << "indices count size " << indices.size() << " " << indices.size() * sizeof(indices[0]) << endl;
+cout << "cell count " << cellCount << endl;
+
+	nodeMap.resize(0);
+	nodeMap.shrink_to_fit();
+
+
+	if (grid) delete grid;
+	if (heightGrid) delete heightGrid;
+
+
+	_nIndices = indices.size();
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_DYNAMIC_DRAW);
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	return 0;
+
 }
 
 int WireFrameRenderer::_paintGL(bool fast)
