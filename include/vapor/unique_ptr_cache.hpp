@@ -7,9 +7,9 @@
 // need to manage these structures.
 //
 // All structures stored in this cache are const qualified, so once a
-// structures is in, there is no more modifications.
+// structure is put in this cache, there is no more modification to this structure.
 //
-// This implementation follows std container conventions in terms of naming.
+// This implementation follows std container naming conventions.
 //
 // Author: Samuel Li
 // Date  : 9/26/2019
@@ -99,14 +99,14 @@ public:
     //
     void insert( Key key, const BigObj* ptr )
     {
-        // Remove the old BigObj if it exists.
+        // Remove the old BigObj if the same key already exists.
         for( auto it = m_list.cbegin(); it != m_list.cend(); ++it )
         { 
             if( it->first == key )
                 m_list.erase( it );
         }
 
-        // Should use make_unique<> in c++14. CentOS7 prevents it as of 2019.
+        // Should have used make_unique<> in C++14. GCC-4.8 in CentOS7 prevents it as of 2019.
         std::unique_ptr<const BigObj> tmp( ptr );
 
         // Create a new pair at the front of the list

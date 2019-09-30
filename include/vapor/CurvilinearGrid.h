@@ -167,11 +167,8 @@ public:
  );
 
  CurvilinearGrid() = default;
- virtual ~CurvilinearGrid() {
-	if (_qtr) {
-		_qtr = nullptr;	// qtr is a C++ shared pointer
-	}
- }
+ 
+ virtual ~CurvilinearGrid() { } 
 
  const QuadTreeRectangle<float, size_t> * GetQuadTreeRectangle() const {
     return(_qtr);

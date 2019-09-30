@@ -49,9 +49,7 @@ public:
  );
 
  UnstructuredGrid2D() = default;
- virtual ~UnstructuredGrid2D() {
-	if (_qtr) _qtr = nullptr;
- }
+ virtual ~UnstructuredGrid2D() { }
 
  const QuadTreeRectangle<float, size_t> * GetQuadTreeRectangle() const {
 	return(_qtr);
