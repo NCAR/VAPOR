@@ -81,8 +81,19 @@ private:
 
 	} _cacheParams;
 
+	// Helper class to keep track of which cell edges have been drawn so
+	// we can avoid duplicate draws.
+	//
 	class DrawList {
 	public:
+
+		// maxEntries is the maximum number of unique cell nodes. 
+		// maxLinesPerVertex is the *expected* max valence (degree) of any
+		// node (vertex). If a node has more than maxLinesPerVertex edges
+		// only the first maxLinesPerVertex edges will be recorded in
+		// DrawList. Hence, queries to edges with DrawList::InList will
+		// return false once maxLinesPerVertex has been exceeded
+		//
 		DrawList(size_t maxEntries, size_t maxLinesPerVertex) :
 			_drawList(
 				maxEntries*maxLinesPerVertex, std::numeric_limits<size_t>::max()
@@ -117,6 +128,14 @@ private:
 		size_t _maxEntries;
 		size_t _maxLinesPerVertex;
 	};
+
+	void  _buildCacheVertices(
+		const Grid *grid, const Grid *heightGrid, vector <size_t> &nodeMap
+	) const;
+
+	size_t _buildCacheConnectivity(
+		const Grid *grid, const vector <size_t> &nodeMap
+	) const;
 
 	int  _buildCache();
 	bool _isCacheDirty() const;
