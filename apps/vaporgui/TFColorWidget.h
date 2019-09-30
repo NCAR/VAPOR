@@ -8,6 +8,7 @@
 
 class TFColorInfoWidget;
 class ParamsDropdownMenuItem;
+class ParamsCheckboxMenuItem;
 
 class TFColorMap : public TFMap {
     Q_OBJECT
@@ -31,6 +32,7 @@ protected:
     
 private:
     ParamsDropdownMenuItem *_colorInterpolationMenu;
+    ParamsCheckboxMenuItem *_colorInterpolationWhitepointAction;
     bool _isDraggingControl = false;
     int _draggingControlID;
     int _selectedId = -1;

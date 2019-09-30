@@ -27,6 +27,8 @@ TFColorMap::TFColorMap(TFMapWidget *parent)
         {TFInterpolator::linear, TFInterpolator::discrete, TFInterpolator::diverging},
         "Color Interpolation"
     );
+    _colorInterpolationWhitepointAction = new ParamsCheckboxMenuItem(this, ColorMap::_useWhitespaceTag, "Add Whitespace");
+    _colorInterpolationMenu->menu()->addAction(_colorInterpolationWhitepointAction);
 }
 
 QSize TFColorMap::minimumSizeHint() const
@@ -76,6 +78,8 @@ void TFColorMap::PopulateSettingsMenu(QMenu *menu) const
 void TFColorMap::paramsUpdate()
 {
     _colorInterpolationMenu->Update(getColormap());
+    _colorInterpolationWhitepointAction->Update(getColormap());
+    _colorInterpolationWhitepointAction->setEnabled(getColormap()->GetInterpType() == TFInterpolator::diverging);
     update();
     
     if (_selectedId > -1)

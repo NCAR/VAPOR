@@ -78,6 +78,11 @@ void TFMap::hide()
         _parent->hide();
 }
 
+VAPoR::MapperFunction *TFMap::getMapperFunction() const
+{
+    return _renderParams->GetMapperFunc(getVariableName());
+}
+
 std::string TFMap::getVariableName() const
 {
     if (UsingColormapVariable)
