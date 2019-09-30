@@ -203,6 +203,8 @@ int WireFrameRenderer::_buildCache()
     
     Grid::ConstNodeIterator nitr = grid->ConstNodeBegin();
     Grid::ConstNodeIterator nend = grid->ConstNodeEnd();
+    Grid::ConstCoordItr coordItr = grid->ConstCoordBegin();
+    Grid::ConstCoordItr coordEnd = grid->ConstCoordEnd();
 
 	double mv = grid->GetMissingValue();
 	float defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
@@ -214,14 +216,18 @@ int WireFrameRenderer::_buildCache()
 	vertices.reserve(numNodes);
 
 	size_t count = 0;
-	for (; nitr != nend; ++nitr) {
+	for (; nitr != nend; ++nitr, ++coordItr) {
 		size_t index = Wasp::LinearizeCoords(*nitr, grid->GetDimensions());
 		nodeMap[index] = vertices.size();
 	
 		double coord[3];
-		grid->GetUserCoordinates((*nitr).data(), coord);
-			
-		if (grid->GetGeometryDim() < 3) {
+		coord[0] = (*coordItr)[0];
+		coord[1] = (*coordItr)[1];
+
+		if (grid->GetGeometryDim() > 2) {
+			coord[2] = (*coordItr)[2];
+		}
+		else {
 			if (heightGrid) {
 				coord[2] = heightGrid->GetValueAtIndex(*nitr);
 			}
