@@ -4,6 +4,12 @@
 
 using namespace VAPoR;
 
+
+// ******************************
+//        ParamsMenuItem
+// ******************************
+
+
 ParamsMenuItem::ParamsMenuItem(QObject *parent, const std::string &tag, const std::string &label)
 : QAction(parent)
 {
@@ -15,6 +21,36 @@ ParamsMenuItem::ParamsMenuItem(QObject *parent, const std::string &tag, const st
     
     setText(QString::fromStdString(_label));
 }
+
+
+// ******************************
+//     ParamsCheckboxMenuItem
+// ******************************
+
+
+ParamsCheckboxMenuItem::ParamsCheckboxMenuItem(QObject *parent, const std::string &tag, const std::string &label)
+: ParamsMenuItem(parent, tag, label)
+{
+    this->setCheckable(true);
+    connect(this, SIGNAL(toggled(bool)), this, SLOT(wasToggled(bool)));
+}
+
+void ParamsCheckboxMenuItem::Update(VAPoR::ParamsBase *p)
+{
+    _params = p;
+    setChecked(p->GetValueLong(_tag, 0));
+}
+
+void ParamsCheckboxMenuItem::wasToggled(bool b)
+{
+    if (_params)
+        _params->SetValueLong(_tag, _tag, b);
+}
+
+
+// ******************************
+//     ParamsDropdownMenuItem
+// ******************************
 
 
 ParamsDropdownMenuItem::ParamsDropdownMenuItem(QObject *parent, const std::string &tag, const std::vector<std::string> &items, const std::vector<int> &itemValues, const std::string &labelText)

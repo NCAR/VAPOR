@@ -10,6 +10,11 @@ namespace VAPoR {
 }
 
 
+// ******************************
+//        ParamsMenuItem
+// ******************************
+
+
 class ParamsMenuItem : public QAction {
     Q_OBJECT
     
@@ -22,6 +27,28 @@ protected:
     std::string _tag;
     std::string _label;
 };
+
+
+// ******************************
+//     ParamsCheckboxMenuItem
+// ******************************
+
+
+class ParamsCheckboxMenuItem : public ParamsMenuItem {
+    Q_OBJECT
+    
+public:
+    ParamsCheckboxMenuItem(QObject *parent, const std::string &tag, const std::string &label = "");
+    void Update(VAPoR::ParamsBase *p);
+    
+private slots:
+    void wasToggled(bool b);
+};
+
+
+// ******************************
+//     ParamsDropdownMenuItem
+// ******************************
 
 
 class ParamsDropdownMenuItem : public ParamsMenuItem {
