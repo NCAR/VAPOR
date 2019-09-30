@@ -44,10 +44,10 @@ public:
     float GetSamplingMultiplier() const;
     void SetSamplingMultiplier(float d);
     
-    void SetIsoValues(std::vector<double> values);
-    std::vector<double> GetIsoValues() const;
-    vector<double> GetIsoValues(const string &variable) { return GetIsoValues(); }
-    void SetIsoValues(const string &variable, const vector<double> &values) { SetIsoValues(values); }
+    using RenderParams::SetIsoValues;
+    using RenderParams::GetIsoValues;
+    vector<double> GetIsoValues(const string &variable);
+    void SetIsoValues(const string &variable, const vector<double> &values);
     
     void  SetLightingEnabled(bool v);
     bool  GetLightingEnabled() const;
