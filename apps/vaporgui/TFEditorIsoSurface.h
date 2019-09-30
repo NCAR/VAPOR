@@ -43,4 +43,6 @@ private:
     TFOpacityMap *_opacityMap2;
     TFHistogramMap *_histogramMap2;
     TFColorMap *_colorMap2;
+    
+    QList<QAction *> _colormappedMenuSettings;
 };
