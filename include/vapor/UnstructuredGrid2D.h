@@ -45,7 +45,7 @@ public:
 	const UnstructuredGridCoordless &xug,
 	const UnstructuredGridCoordless &yug,
 	const UnstructuredGridCoordless &zug,
-	std::shared_ptr<const QuadTreeRectangle<float, size_t> > qtr
+	const QuadTreeRectangle<float, size_t> * qtr
  );
 
  UnstructuredGrid2D() = default;
@@ -53,7 +53,7 @@ public:
 	if (_qtr) _qtr = nullptr;
  }
 
- std::shared_ptr <const QuadTreeRectangle<float, size_t> >GetQuadTreeRectangle() const {
+ const QuadTreeRectangle<float, size_t> * GetQuadTreeRectangle() const {
 	return(_qtr);
  }
 
@@ -189,7 +189,7 @@ private:
  UnstructuredGridCoordless _xug;
  UnstructuredGridCoordless _yug;
  UnstructuredGridCoordless _zug;
- std::shared_ptr<const QuadTreeRectangle<float, size_t> > _qtr;
+ const QuadTreeRectangle<float, size_t> * _qtr;
 
  bool _insideGrid(
 	const std::vector <double> &coords,
@@ -219,7 +219,7 @@ private:
 	double *lambda, int &nlambda
  ) const;
 
- std::shared_ptr<QuadTreeRectangle<float, size_t> >_makeQuadTreeRectangle() const;
+ const QuadTreeRectangle<float, size_t> * _makeQuadTreeRectangle() const;
 
 
 };

@@ -36,7 +36,7 @@ UnstructuredGridLayered::UnstructuredGridLayered(
     const UnstructuredGridCoordless &xug,
     const UnstructuredGridCoordless &yug,
     const UnstructuredGridCoordless &zug,
-	std::shared_ptr <const QuadTreeRectangle<float, size_t> >qtr
+	const QuadTreeRectangle<float, size_t> * qtr
 ) : UnstructuredGrid(
         vertexDims, faceDims, edgeDims, bs, blks, 3,
         vertexOnFace, faceOnVertex, faceOnFace, location,

@@ -36,7 +36,7 @@ UnstructuredGrid2D::UnstructuredGrid2D(
     const UnstructuredGridCoordless &xug,
     const UnstructuredGridCoordless &yug,
     const UnstructuredGridCoordless &zug,
-	std::shared_ptr <const QuadTreeRectangle<float, size_t> > qtr
+	const QuadTreeRectangle<float, size_t> * qtr
 ) : UnstructuredGrid(
 		vertexDims, faceDims, edgeDims, bs, blks, 2,
 		vertexOnFace, faceOnVertex, faceOnFace, location, 
@@ -556,7 +556,7 @@ bool UnstructuredGrid2D::_insideFace(
 	return ret;
 }
 
-std::shared_ptr <QuadTreeRectangle<float, size_t> >UnstructuredGrid2D::_makeQuadTreeRectangle() const {
+ const QuadTreeRectangle<float, size_t> * UnstructuredGrid2D::_makeQuadTreeRectangle() const {
 
 	size_t maxNodes = GetMaxVertexPerCell();
 	size_t nodeDim = GetNodeDimensions().size();
@@ -571,11 +571,11 @@ std::shared_ptr <QuadTreeRectangle<float, size_t> >UnstructuredGrid2D::_makeQuad
 	const vector <size_t> &dims = GetDimensions();
 	size_t reserve_size = dims[0];
 
-	std::shared_ptr <QuadTreeRectangle<float, size_t> >qtr = 
-		std::make_shared <QuadTreeRectangle<float, size_t>>(
+    // This structure will be handed to and owned by a unique_ptr_cache,
+    // thus nobody needs to manually do the cleanup after this creation. 
+	QuadTreeRectangle<float, size_t> * qtr = new QuadTreeRectangle<float, size_t>(
 			(float) minu[0], (float) minu[1], (float) maxu[0], (float) maxu[1], 
-			16, reserve_size
-		);
+			16, reserve_size );
 
 	double coords[2];
 	Grid::ConstCellIterator it = ConstCellBegin();

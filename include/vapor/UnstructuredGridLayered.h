@@ -44,13 +44,13 @@ public:
 	const UnstructuredGridCoordless &xug,
 	const UnstructuredGridCoordless &yug,
 	const UnstructuredGridCoordless &zug,
-	std::shared_ptr<const QuadTreeRectangle<float, size_t> >qtr
+	const QuadTreeRectangle<float, size_t> * qtr
  );
 
  UnstructuredGridLayered() = default;
  virtual ~UnstructuredGridLayered() = default;
 
- std::shared_ptr<const QuadTreeRectangle<float, size_t> >GetQuadTreeRectangle() const {
+ const QuadTreeRectangle<float, size_t> * GetQuadTreeRectangle() const {
 	return(_ug2d.GetQuadTreeRectangle());
  }
 

@@ -11,6 +11,7 @@
 #include <vapor/StretchedGrid.h>
 #include <vapor/UnstructuredGrid2D.h>
 #include <vapor/UnstructuredGridLayered.h>
+#include "vapor/unique_ptr_cache.hpp"
 
 #ifndef	GRIDMGR_H
 #define GRIDMGR_H
@@ -86,6 +87,7 @@ public:
 
 private:
 
+#if 0
  template<typename key_t, typename value_t>
  class lru_cache {
  public:
@@ -157,8 +159,11 @@ private:
   std::unordered_map<key_t, list_iterator_t> _cache_items_map;
   size_t _max_size;
  };
+#endif
 
- lru_cache<string, std::shared_ptr<const QuadTreeRectangle<float, size_t> > > _qtrCache;
+    using cacheType = unique_ptr_cache< std::string, QuadTreeRectangle<float, size_t> >;
+    cacheType   _qtrCache;
+ //lru_cache<string, std::shared_ptr<const QuadTreeRectangle<float, size_t> > > _qtrCache;
 
 
  RegularGrid *_make_grid_regular(
