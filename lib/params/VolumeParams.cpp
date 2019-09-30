@@ -1,8 +1,8 @@
 
-#include <string>
 #include <vapor/VolumeParams.h>
 #include <vapor/STLUtils.h>
-
+#include <string>
+#include <cassert>
 
 using namespace Wasp;
 using namespace VAPoR;

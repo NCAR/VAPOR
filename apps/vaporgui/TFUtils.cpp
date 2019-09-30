@@ -5,6 +5,7 @@
 #include "SettingsParams.h"
 #include "ErrorReporter.h"
 #include <QFileDialog>
+#include <cassert>
 
 void TFUtils::LoadColormap(VAPoR::MapperFunction *tf, const std::string &path)
 {
