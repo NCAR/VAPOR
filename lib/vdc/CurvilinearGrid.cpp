@@ -1028,9 +1028,8 @@ bool CurvilinearGrid::_insideGrid(
 
     // This structure will be handed to and owned by a unique_ptr_cache,
     // thus nobody needs to manually do the cleanup after this creation. 
-	QuadTreeRectangle<float, size_t> * qtr = new QuadTreeRectangle<float, size_t> (
-			(float) minu[0], (float) minu[1], (float) maxu[0], (float) maxu[1], 
-			16, reserve_size );
+	auto * qtr = new QuadTreeRectangle<float, size_t> ( (float) minu[0], (float) minu[1], 
+                     (float) maxu[0], (float) maxu[1], 16, reserve_size );
 
 
 	// Loop over horizontal dimensions only - the grid, if 3D, is layered.
