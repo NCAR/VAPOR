@@ -121,8 +121,12 @@ void LegacyGL::Vertex2f(float x, float y)
     Vertex3f(x, y, 0);
 }
 
+extern bool PRINT_VERTS;
+
 void LegacyGL::Vertex3f(float x, float y, float z)
 {
+//    if (PRINT_VERTS)
+//    printf("V(%f, %f, %f)\n", x, y, z);
     VAssert(_insideBeginEndBlock);
     _vertices.push_back({
         x, y, z,
