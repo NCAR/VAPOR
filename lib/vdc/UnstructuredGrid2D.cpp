@@ -36,7 +36,7 @@ UnstructuredGrid2D::UnstructuredGrid2D(
     const UnstructuredGridCoordless &xug,
     const UnstructuredGridCoordless &yug,
     const UnstructuredGridCoordless &zug,
-	const QuadTreeRectangle<float, size_t> *qtr
+	std::shared_ptr <const QuadTreeRectangle<float, size_t> > qtr
 ) : UnstructuredGrid(
 		vertexDims, faceDims, edgeDims, bs, blks, 2,
 		vertexOnFace, faceOnVertex, faceOnFace, location, 
@@ -53,10 +53,8 @@ UnstructuredGrid2D::UnstructuredGrid2D(
 
 	VAssert(location == NODE);
 
-	_qtrOwner = false;
 	if (! _qtr) {
 		_qtr = _makeQuadTreeRectangle();
-		_qtrOwner = true;
 	}
 
 }
@@ -558,7 +556,7 @@ bool UnstructuredGrid2D::_insideFace(
 	return ret;
 }
 
-QuadTreeRectangle<float, size_t> *UnstructuredGrid2D::_makeQuadTreeRectangle() const {
+std::shared_ptr <QuadTreeRectangle<float, size_t> >UnstructuredGrid2D::_makeQuadTreeRectangle() const {
 
 	size_t maxNodes = GetMaxVertexPerCell();
 	size_t nodeDim = GetNodeDimensions().size();
@@ -573,8 +571,8 @@ QuadTreeRectangle<float, size_t> *UnstructuredGrid2D::_makeQuadTreeRectangle() c
 	const vector <size_t> &dims = GetDimensions();
 	size_t reserve_size = dims[0];
 
-	QuadTreeRectangle<float, size_t> *qtr = 
-		new QuadTreeRectangle<float, size_t>(
+	std::shared_ptr <QuadTreeRectangle<float, size_t> >qtr = 
+		std::make_shared <QuadTreeRectangle<float, size_t>>(
 			(float) minu[0], (float) minu[1], (float) maxu[0], (float) maxu[1], 
 			16, reserve_size
 		);
