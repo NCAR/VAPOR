@@ -84,15 +84,15 @@ class VDF_API GridHelper : public Wasp::MyBase {
     template <typename key_t, typename value_t>
     class lru_cache {
       public:
-        typedef typename std::pair<key_t, value_t *> key_value_pair_t;
+        typedef typename std::pair<key_t, value_t> key_value_pair_t;
         typedef typename std::list<key_value_pair_t>::iterator list_iterator_t;
 
         lru_cache() : _max_size(10) {}
 
         lru_cache(size_t max_size) : _max_size(max_size) {}
 
-        value_t *put(const key_t &key, value_t *value) {
-            value_t *rvalue = NULL;
+        value_t put(const key_t &key, value_t value) {
+            value_t rvalue = NULL;
             auto it = _cache_items_map.find(key);
             _cache_items_list.push_front(key_value_pair_t(key, value));
             if (it != _cache_items_map.end()) {
@@ -112,7 +112,7 @@ class VDF_API GridHelper : public Wasp::MyBase {
             return (rvalue);
         }
 
-        value_t *get(const key_t &key) {
+        value_t get(const key_t &key) {
             auto it = _cache_items_map.find(key);
             if (it == _cache_items_map.end())
                 return (NULL);
@@ -122,13 +122,14 @@ class VDF_API GridHelper : public Wasp::MyBase {
             return it->second->second;
         }
 
-        value_t *remove_lru() {
+        value_t remove_lru() {
             if (!_cache_items_map.size())
                 return (NULL);
 
             auto last = _cache_items_list.end();
             last--;
-            value_t *rvalue = last->second;
+            value_t rvalue = last->second;
+            last->second = nullptr; // necessary for delete?
             _cache_items_map.erase(last->first);
             _cache_items_list.pop_back();
             return (rvalue);
@@ -146,7 +147,7 @@ class VDF_API GridHelper : public Wasp::MyBase {
         size_t _max_size;
     };
 
-    lru_cache<string, QuadTreeRectangle<float, size_t>> _qtrCache;
+    lru_cache<string, std::shared_ptr<const QuadTreeRectangle<float, size_t>>> _qtrCache;
 
     RegularGrid *_make_grid_regular(
         const std::vector<size_t> &dims,

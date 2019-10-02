@@ -42,15 +42,15 @@ class VDF_API UnstructuredGrid2D : public UnstructuredGrid {
         const UnstructuredGridCoordless &xug,
         const UnstructuredGridCoordless &yug,
         const UnstructuredGridCoordless &zug,
-        const QuadTreeRectangle<float, size_t> *qtr);
+        std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr);
 
     UnstructuredGrid2D() = default;
     virtual ~UnstructuredGrid2D() {
-        if (_qtrOwner && _qtr)
-            delete _qtr;
+        if (_qtr)
+            _qtr = nullptr;
     }
 
-    const QuadTreeRectangle<float, size_t> *GetQuadTreeRectangle() const {
+    std::shared_ptr<const QuadTreeRectangle<float, size_t>> GetQuadTreeRectangle() const {
         return (_qtr);
     }
 
@@ -169,8 +169,7 @@ class VDF_API UnstructuredGrid2D : public UnstructuredGrid {
     UnstructuredGridCoordless _xug;
     UnstructuredGridCoordless _yug;
     UnstructuredGridCoordless _zug;
-    const QuadTreeRectangle<float, size_t> *_qtr;
-    bool _qtrOwner;
+    std::shared_ptr<const QuadTreeRectangle<float, size_t>> _qtr;
 
     bool _insideGrid(
         const std::vector<double> &coords,
@@ -195,7 +194,7 @@ class VDF_API UnstructuredGrid2D : public UnstructuredGrid {
         std::vector<size_t> &node_indices,
         double *lambda, int &nlambda) const;
 
-    QuadTreeRectangle<float, size_t> *_makeQuadTreeRectangle() const;
+    std::shared_ptr<QuadTreeRectangle<float, size_t>> _makeQuadTreeRectangle() const;
 };
 }; // namespace VAPoR
 
