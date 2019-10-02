@@ -41,12 +41,12 @@ class VDF_API UnstructuredGridLayered : public UnstructuredGrid {
         const UnstructuredGridCoordless &xug,
         const UnstructuredGridCoordless &yug,
         const UnstructuredGridCoordless &zug,
-        const QuadTreeRectangle<float, size_t> *qtr);
+        std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr);
 
     UnstructuredGridLayered() = default;
     virtual ~UnstructuredGridLayered() = default;
 
-    const QuadTreeRectangle<float, size_t> *GetQuadTreeRectangle() const {
+    std::shared_ptr<const QuadTreeRectangle<float, size_t>> GetQuadTreeRectangle() const {
         return (_ug2d.GetQuadTreeRectangle());
     }
 
