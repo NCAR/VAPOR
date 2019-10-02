@@ -85,9 +85,6 @@ protected:
     cacheType                   _recentGrids;
 
     // Member functions
-    template< typename T > 
-    size_t _binarySearch( const std::vector<T>& vec, T val, size_t begin, size_t end ) const;
-
     std::string _paramsToString(  size_t currentTS, const std::string& var, int refLevel, 
             int compLevel, const std::vector<double>& min, const std::vector<double>& max ) const;
 

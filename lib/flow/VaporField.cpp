@@ -357,31 +357,10 @@ VaporField::LocateTimestamp( float time, size_t& floor ) const
         return TIME_ERROR;
     else
     {
-        floor = _binarySearch( _timestamps, time, 0, _timestamps.size() - 1 );
+        auto it = std::upper_bound( _timestamps.cbegin(), _timestamps.cend(), time );
+        floor = --it - _timestamps.cbegin();
         return 0;
     }
-}
-
-
-template<typename T> size_t
-VaporField::_binarySearch( const  std::vector<T>& vec, T val, 
-                           size_t begin, size_t end        ) const
-{
-    if( begin + 1 == end )
-    {
-        if( val == vec[end] )
-            return end;
-        else
-            return begin;
-    }
-
-    size_t middle = begin + (end - begin) / 2;
-    if( val == vec[middle] )
-        return middle;
-    else if( val < vec[middle] )
-        return _binarySearch( vec, val, begin, middle );
-    else
-        return _binarySearch( vec, val, middle, end );
 }
 
 
