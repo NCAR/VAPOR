@@ -62,8 +62,8 @@ public:
     void Update(VAPoR::ParamsBase *p);
     
 private:
-    int getValueForIndex(int index) const;
-    int getIndexForValue(int value) const;
+    int _getValueForIndex(int index) const;
+    int _getIndexForValue(int value) const;
     
 private slots:
     void itemSelected();
