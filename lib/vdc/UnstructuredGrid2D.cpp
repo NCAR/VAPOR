@@ -23,7 +23,7 @@ UnstructuredGrid2D::UnstructuredGrid2D(const std::vector<size_t> &vertexDims, co
                                        const std::vector<float *> &blks, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                                        Location location,    // node,face, edge
                                        size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset, const UnstructuredGridCoordless &xug, const UnstructuredGridCoordless &yug,
-                                       const UnstructuredGridCoordless &zug, const QuadTreeRectangle<float, size_t> *qtr)
+                                       const UnstructuredGridCoordless &zug, std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr)
 : UnstructuredGrid(vertexDims, faceDims, edgeDims, bs, blks, 2, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, nodeOffset, cellOffset), _xug(xug), _yug(yug),
   _zug(zug), _qtr(qtr)
 {
@@ -33,11 +33,7 @@ UnstructuredGrid2D::UnstructuredGrid2D(const std::vector<size_t> &vertexDims, co
 
     VAssert(location == NODE);
 
-    _qtrOwner = false;
-    if (!_qtr) {
-        _qtr = _makeQuadTreeRectangle();
-        _qtrOwner = true;
-    }
+    if (!_qtr) { _qtr = _makeQuadTreeRectangle(); }
 }
 
 vector<size_t> UnstructuredGrid2D::GetCoordDimensions(size_t dim) const
@@ -450,7 +446,7 @@ bool UnstructuredGrid2D::_insideFace(size_t face, double pt[2], vector<size_t> &
     return ret;
 }
 
-QuadTreeRectangle<float, size_t> *UnstructuredGrid2D::_makeQuadTreeRectangle() const
+std::shared_ptr<QuadTreeRectangle<float, size_t>> UnstructuredGrid2D::_makeQuadTreeRectangle() const
 {
     size_t  maxNodes = GetMaxVertexPerCell();
     size_t  nodeDim = GetNodeDimensions().size();
@@ -465,7 +461,7 @@ QuadTreeRectangle<float, size_t> *UnstructuredGrid2D::_makeQuadTreeRectangle() c
     const vector<size_t> &dims = GetDimensions();
     size_t                reserve_size = dims[0];
 
-    QuadTreeRectangle<float, size_t> *qtr = new QuadTreeRectangle<float, size_t>((float)minu[0], (float)minu[1], (float)maxu[0], (float)maxu[1], 16, reserve_size);
+    std::shared_ptr<QuadTreeRectangle<float, size_t>> qtr = std::make_shared<QuadTreeRectangle<float, size_t>>((float)minu[0], (float)minu[1], (float)maxu[0], (float)maxu[1], 16, reserve_size);
 
     double                  coords[2];
     Grid::ConstCellIterator it = ConstCellBegin();

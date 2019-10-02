@@ -69,7 +69,7 @@ public:
     //! \sa RegularGrid()
     //
     CurvilinearGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg,
-                    const std::vector<double> &zcoords, const QuadTreeRectangle<float, size_t> *qtr);
+                    const std::vector<double> &zcoords, std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr);
 
     //! \copydoc StructuredGrid::StructuredGrid()
     //!
@@ -108,7 +108,7 @@ public:
     //! \sa RegularGrid()
     //
     CurvilinearGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg,
-                    const QuadTreeRectangle<float, size_t> *qtr);
+                    std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr);
 
     //! \copydoc StructuredGrid::StructuredGrid()
     //!
@@ -142,15 +142,17 @@ public:
     //! \sa RegularGrid()
     //
     CurvilinearGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg,
-                    const QuadTreeRectangle<float, size_t> *qtr);
+                    std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr);
 
     CurvilinearGrid() = default;
     virtual ~CurvilinearGrid()
     {
-        if (_qtrOwner && _qtr) delete _qtr;
+        if (_qtr) {
+            _qtr = nullptr;    // qtr is a C++ shared pointer
+        }
     }
 
-    const QuadTreeRectangle<float, size_t> *GetQuadTreeRectangle() const { return (_qtr); }
+    std::shared_ptr<const QuadTreeRectangle<float, size_t>> GetQuadTreeRectangle() const { return (_qtr); }
 
     static std::string GetClassType() { return ("Curvilinear"); }
     std::string        GetType() const override { return (GetClassType()); }
@@ -254,17 +256,16 @@ protected:
     virtual float GetValueLinear(const std::vector<double> &coords) const override;
 
 private:
-    std::vector<double>                     _zcoords;
-    mutable std::vector<double>             _minu;
-    mutable std::vector<double>             _maxu;
-    RegularGrid                             _xrg;
-    RegularGrid                             _yrg;
-    RegularGrid                             _zrg;
-    bool                                    _terrainFollowing;
-    const QuadTreeRectangle<float, size_t> *_qtr;
-    bool                                    _qtrOwner;
+    std::vector<double>                                     _zcoords;
+    mutable std::vector<double>                             _minu;
+    mutable std::vector<double>                             _maxu;
+    RegularGrid                                             _xrg;
+    RegularGrid                                             _yrg;
+    RegularGrid                                             _zrg;
+    bool                                                    _terrainFollowing;
+    std::shared_ptr<const QuadTreeRectangle<float, size_t>> _qtr;
 
-    void _curvilinearGrid(const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg, const std::vector<double> &zcoords, const QuadTreeRectangle<float, size_t> *qtr);
+    void _curvilinearGrid(const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg, const std::vector<double> &zcoords, std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr);
 
     void _GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const;
 
@@ -280,7 +281,7 @@ private:
 
     bool _insideGridHelperTerrain(double x, double y, double z, const size_t &i, const size_t &j, size_t &k, double zwgt[2]) const;
 
-    QuadTreeRectangle<float, size_t> *_makeQuadTreeRectangle() const;
+    std::shared_ptr<QuadTreeRectangle<float, size_t>> _makeQuadTreeRectangle() const;
 };
 };    // namespace VAPoR
 #endif

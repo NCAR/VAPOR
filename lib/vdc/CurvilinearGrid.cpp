@@ -12,7 +12,8 @@
 using namespace std;
 using namespace VAPoR;
 
-void CurvilinearGrid::_curvilinearGrid(const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg, const vector<double> &zcoords, const QuadTreeRectangle<float, size_t> *qtr)
+void CurvilinearGrid::_curvilinearGrid(const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg, const vector<double> &zcoords,
+                                       std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr)
 {
     _zcoords.clear();
     _minu.clear();
@@ -24,15 +25,11 @@ void CurvilinearGrid::_curvilinearGrid(const RegularGrid &xrg, const RegularGrid
     _zcoords = zcoords;
 
     _qtr = qtr;
-    _qtrOwner = false;
-    if (!_qtr) {
-        _qtr = _makeQuadTreeRectangle();
-        _qtrOwner = true;
-    }
+    if (!_qtr) { _qtr = _makeQuadTreeRectangle(); }
 }
 
 CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const vector<double> &zcoords,
-                                 const QuadTreeRectangle<float, size_t> *qtr)
+                                 std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr)
 : StructuredGrid(dims, bs, blks)
 {
     VAssert(dims.size() == 2 || dims.size() == 3);
@@ -50,7 +47,7 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
 }
 
 CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg,
-                                 const QuadTreeRectangle<float, size_t> *qtr)
+                                 std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr)
 : StructuredGrid(dims, bs, blks)
 {
     VAssert(dims.size() == 3);
@@ -68,7 +65,7 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
 }
 
 CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg,
-                                 const QuadTreeRectangle<float, size_t> *qtr)
+                                 std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr)
 : StructuredGrid(dims, bs, blks)
 {
     VAssert(dims.size() == 2);
@@ -847,7 +844,7 @@ bool CurvilinearGrid::_insideGrid(double x, double y, double z, size_t &i, size_
     }
 }
 
-QuadTreeRectangle<float, size_t> *CurvilinearGrid::_makeQuadTreeRectangle() const
+std::shared_ptr<QuadTreeRectangle<float, size_t>> CurvilinearGrid::_makeQuadTreeRectangle() const
 {
     vector<double> minu, maxu;
     GetUserExtents(minu, maxu);
@@ -856,7 +853,7 @@ QuadTreeRectangle<float, size_t> *CurvilinearGrid::_makeQuadTreeRectangle() cons
     const vector<size_t>  dims2d = {dims[0], dims[1]};
     size_t                reserve_size = dims2d[0] * dims2d[1];
 
-    QuadTreeRectangle<float, size_t> *qtr = new QuadTreeRectangle<float, size_t>((float)minu[0], (float)minu[1], (float)maxu[0], (float)maxu[1], 16, reserve_size);
+    std::shared_ptr<QuadTreeRectangle<float, size_t>> qtr = std::make_shared<QuadTreeRectangle<float, size_t>>((float)minu[0], (float)minu[1], (float)maxu[0], (float)maxu[1], 16, reserve_size);
 
     // Loop over horizontal dimensions only - the grid, if 3D, is layered.
     // There are dims2d[i]-1 cells (faces) along each dimension.
