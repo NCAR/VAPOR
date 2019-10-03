@@ -17,6 +17,7 @@
 #include <GL/gl.h>
 #endif
 
+#include <utility>
 #include <vapor/DataMgr.h>
 #include <vapor/utils.h>
 #include <vapor/Renderer.h>
@@ -107,9 +108,7 @@ private:
 			VAssert(idx1 < _maxEntries);
 
 			if (idx1 < idx0) {
-				size_t tmp = idx0;
-				idx0 = idx1;
-				idx1 = tmp;
+				std::swap( idx1, idx0 );
 			}
 
 			for (int i = 0; i<_maxLinesPerVertex; i++) {
