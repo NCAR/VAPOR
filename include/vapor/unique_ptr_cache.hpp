@@ -103,7 +103,10 @@ public:
         for( auto it = m_list.cbegin(); it != m_list.cend(); ++it )
         { 
             if( it->first == key )
+            {
                 m_list.erase( it );
+                break;  // There's at most one existing key, so OK to break here.
+            }
         }
 
         // Should have used make_unique<> in C++14. GCC-4.8 in CentOS7 prevents it as of 2019.
@@ -117,8 +120,8 @@ public:
 
 private:
     using list_type = std::list< std::pair<Key, std::unique_ptr<const BigObj>> >;
-    const size_t        m_max_size;
-    list_type           m_list;
+    list_type         m_list;
+    const size_t      m_max_size;
 
 };  // end of class unique_ptr_cache
 
