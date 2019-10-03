@@ -969,34 +969,6 @@ FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds ) co
     return 0;
 }
 
-/* Note on Sept 25th 2019:
- * This function isn't called anywhere, so comment it out for now 
-int
-FlowRenderer::_getAGrid( const FlowParams* params, 
-                         int               timestep,
-                         std::string&      varName,
-                         Grid**            gridpp  ) const
-{
-    std::vector<double>           extMin, extMax;
-    params->GetBox()->GetExtents( extMin, extMax );
-    Grid* grid = _dataMgr->GetVariable( timestep,
-                                        varName,
-                                        params->GetRefinementLevel(),
-                                        params->GetCompressionLevel(),
-                                        extMin,
-                                        extMax );
-    if( grid == nullptr )
-    {
-        MyBase::SetErrMsg("Not able to get a grid!");
-        return flow::GRID_ERROR;
-    }
-    else
-    {
-        *gridpp = grid;
-        return 0;
-    }
-}
-*/
     
 void
 FlowRenderer::_prepareColormap( FlowParams* params )
