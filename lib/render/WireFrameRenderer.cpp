@@ -141,8 +141,11 @@ void WireFrameRenderer::_drawCell(
 		//
 		if (drawList.InList(idx0,idx1)) continue;
 
-        indices.push_back(idx0);
-        indices.push_back(idx1);
+		// check for overflow
+		//
+		if ((unsigned int) idx0 < 0 || (unsigned int) idx1 < 0) continue;
+        indices.push_back((unsigned int) idx0);
+        indices.push_back((unsigned int) idx1);
 	}
 
 	if (! layered) return;
@@ -158,8 +161,11 @@ void WireFrameRenderer::_drawCell(
 
 		if (drawList.InList(idx0,idx1)) continue;
 
-        indices.push_back(idx0);
-        indices.push_back(idx1);
+		// check for overflow
+		//
+		if ((unsigned int) idx0 < 0 || (unsigned int) idx1 < 0) continue;
+        indices.push_back((unsigned int) idx0);
+        indices.push_back((unsigned int) idx1);
 	}
     
 	// Now draw edges between top and bottom face
@@ -173,8 +179,11 @@ void WireFrameRenderer::_drawCell(
 
 		if (drawList.InList(idx0,idx1)) continue;
 
-        indices.push_back(idx0);
-        indices.push_back(idx1);
+		// check for overflow
+		//
+		if ((unsigned int) idx0 < 0 || (unsigned int) idx1 < 0) continue;
+        indices.push_back((unsigned int) idx0);
+        indices.push_back((unsigned int) idx1);
 	}
 }
 
