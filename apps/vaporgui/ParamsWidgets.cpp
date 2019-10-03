@@ -5,6 +5,7 @@
 #include <QIntValidator>
 #include <QEvent>
 #include <QColorDialog>
+#include "QColorWidget.h"
 
 using namespace VAPoR;
 
@@ -117,36 +118,6 @@ void ParamsWidgetFloat::valueChangedSlot()
 
 
 
-#include "QRangeSliderTextCombo.h"
-ParamsWidgetRange::ParamsWidgetRange(const std::string &tag, const std::string &labelText)
-: ParamsWidget(tag, labelText)
-{
-    _range = new QRangeSliderTextCombo;
-    connect(_range, SIGNAL(editingFinished()), this, SLOT(valueChangedSlot()));
-    
-    layout()->addWidget(_range);
-}
-
-void ParamsWidgetRange::Update(VAPoR::ParamsBase *p)
-{
-    _params = p;
-//    _range->setText(QString::number(p->GetValueDouble(_tag, false)));
-}
-
-ParamsWidgetRange *ParamsWidgetRange::SetRange(float min, float max)
-{
-    _range->SetRange(min, max);
-    return this;
-}
-
-void ParamsWidgetRange::valueChangedSlot()
-{
-//    if (_params)
-//        _params->SetValueDouble(_tag, _tag, _lineEdit->text().toDouble());
-}
-
-
-
 
 ParamsWidgetDropdown::ParamsWidgetDropdown(const std::string &tag, const std::vector<std::string> &items, const std::vector<int> &itemValues, const std::string &labelText)
 : ParamsWidget(tag, labelText)
@@ -204,18 +175,12 @@ int ParamsWidgetDropdown::getIndexForValue(int value) const
 
 
 
-#include "QColorWidget.h"
 
 ParamsWidgetColor::ParamsWidgetColor(const std::string &tag, const std::string &label)
 : ParamsWidget(tag, label)
 {
-//    _button = new QPushButton("Select");
-//    connect(_button, SIGNAL(clicked()), this, SLOT(pressed()));
-    
     _color = new QColorWidget;
     connect(_color, SIGNAL(colorChanged(QColor)), this, SLOT(colorChanged(QColor)));
-    
-//    layout()->addWidget(_button);
     layout()->addWidget(_color);
 }
 
@@ -224,23 +189,8 @@ void ParamsWidgetColor::Update(VAPoR::ParamsBase *p)
     _params = p;
     
     QColor color = VectorToQColor(p->GetValueDoubleVec(_tag));
-//    QString style = "background-color: " + color.name() + "; ";
-//    if (color.valueF() > 0.6)
-//        style += "color: black;";
-//    else
-//        style += "color: white;";
-    
-//    _button->setStyleSheet(style);
-    
     _color->setColor(color);
 }
-
-//void ParamsWidgetColor::pressed()
-//{
-//    QColor newColor = QColorDialog::getColor();
-//    if (_params)
-//        _params->SetValueDoubleVec(_tag, _tag, QColorToVector(newColor));
-//}
 
 void ParamsWidgetColor::colorChanged(QColor color)
 {

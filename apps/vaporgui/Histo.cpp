@@ -252,8 +252,13 @@ int Histo::Populate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::Rende
     
     _getDataRange(varName, dm, rp, &_minData, &_maxData);
     
-    _nBinsBelow = std::min(10000.0f, _numBins/(_maxMapData-_minMapData) * (_minMapData-_minData));
-    _nBinsAbove = std::min(10000.0f, _numBins/(_maxMapData-_minMapData) * (_maxData-_maxMapData));
+    if (_maxMapData-_minMapData > __FLT_EPSILON__) {
+        _nBinsBelow = std::min(10000.0f, _numBins/(_maxMapData-_minMapData) * (_minMapData-_minData));
+        _nBinsAbove = std::min(10000.0f, _numBins/(_maxMapData-_minMapData) * (_maxData-_maxMapData));
+    } else {
+        _nBinsAbove = 0;
+        _nBinsBelow = 0;
+    }
         
     
     if (_nBinsBelow > 0) _below = new unsigned int[_nBinsBelow];
@@ -333,6 +338,7 @@ void Histo::populateIteratingHistogram(const Grid *grid, const int stride)
 void Histo::populateSamplingHistogram(const Grid *grid, const vector<double> &minExts, const vector<double> &maxExts)
 {
     VAssert(grid);
+    VAssert(minExts.size() == 3 && maxExts.size() == 3);
     
     double dx = (maxExts[X]-minExts[X]) / SAMPLE_RATE;
     double dy = (maxExts[Y]-minExts[Y]) / SAMPLE_RATE;
@@ -386,7 +392,7 @@ void Histo::populateSamplingHistogram(const Grid *grid, const vector<double> &mi
 
 int Histo::calculateStride(const std::string &varName, VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const
 {
-    return dm->GetDefaultMetaInfoStride(varName, rp->GetRefinementLevel());
+    return DataMgrUtils::GetDefaultMetaInfoStride(dm, varName, rp->GetRefinementLevel());
 }
 
 bool Histo::shouldUseSampling(const std::string &varName, VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const
@@ -424,7 +430,7 @@ void Histo::calculateMaxBinSize()
 void Histo::_getDataRange(const std::string &varName, VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *min, float *max) const
 {
     std::vector<double> range;
-    d->GetDataRange(r->GetCurrentTimestep(), varName, r->GetRefinementLevel(), r->GetCompressionLevel(), d->GetDefaultMetaInfoStride(varName, r->GetRefinementLevel()), range);
+    d->GetDataRange(r->GetCurrentTimestep(), varName, r->GetRefinementLevel(), r->GetCompressionLevel(), DataMgrUtils::GetDefaultMetaInfoStride(d, varName, r->GetRefinementLevel()), range);
     *min = range[0];
     *max = range[1];
 }

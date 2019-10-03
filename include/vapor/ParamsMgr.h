@@ -469,6 +469,8 @@ public:
 	_ssave.EndGroup();
  };
     
+    //! Call callbacks registered for intermediate changes. These are changes inside of Save State Groups that
+    //! the rendering should still be updated to show.
     void IntermediateChange() {
         _ssave.IntermediateChange();
     }
@@ -528,6 +530,8 @@ public:
 	_ssave.RegisterStateChangeCB(callback);
  }
     
+    //! Intermediate changes are changes inside of Save State Groups that
+    //! the rendering should still be updated to show.
     void RegisterIntermediateStateChangeCB(std::function<void()> callback) {
         _ssave.RegisterIntermediateStateChangeCB(callback);
     }

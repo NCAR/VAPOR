@@ -460,9 +460,6 @@ std::vector <size_t> GetCRatios(string varname) const;
     size_t ts, string varname, int level,
     int lod, size_t stride, std::vector <double> &range
  ) ;
-    
- 
- int GetDefaultMetaInfoStride(std::string varname, int refinementLevel);
 
  
  //! \copydoc DC::GetDimLensAtLevel()

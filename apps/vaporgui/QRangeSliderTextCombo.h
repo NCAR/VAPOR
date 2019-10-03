@@ -4,6 +4,10 @@
 #include <QLineEdit>
 #include <QWidget>
 
+//! \class QRangeSliderTextCombo
+//! Combines a QRangeSlider with two text inputs that represent the values of
+//! the min/max sliders. The two are automatically synced.
+
 class QRangeSliderTextCombo : public QWidget {
     Q_OBJECT
     
