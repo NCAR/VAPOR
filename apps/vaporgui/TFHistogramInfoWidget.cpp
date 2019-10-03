@@ -5,7 +5,6 @@
 
 TFHistogramInfoWidget::TFHistogramInfoWidget()
 {
-//    layout()->addWidget(new QLabel);
     _valueEdit->setReadOnly(true);
 }
 

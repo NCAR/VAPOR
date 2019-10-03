@@ -70,11 +70,6 @@ void TFHistogramMap::paintEvent(QPainter &p)
     
     p.fillRect(rect(), Qt::lightGray);
     
-//    QMatrix m;
-//    m.translate(PADDING, height());
-//    m.scale((width()-PADDING*2)/(float)_histo.getNumBins(), -1);
-//    p.setMatrix(m);
-    
     QPolygonF graph;
     graph.push_back(NDCToQPixel(0,0));
     

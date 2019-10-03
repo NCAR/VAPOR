@@ -392,7 +392,7 @@ void Histo::populateSamplingHistogram(const Grid *grid, const vector<double> &mi
 
 int Histo::calculateStride(const std::string &varName, VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const
 {
-    return dm->GetDefaultMetaInfoStride(varName, rp->GetRefinementLevel());
+    return DataMgrUtils::GetDefaultMetaInfoStride(dm, varName, rp->GetRefinementLevel());
 }
 
 bool Histo::shouldUseSampling(const std::string &varName, VAPoR::DataMgr *dm, const VAPoR::RenderParams *rp) const
@@ -430,7 +430,7 @@ void Histo::calculateMaxBinSize()
 void Histo::_getDataRange(const std::string &varName, VAPoR::DataMgr *d, VAPoR::RenderParams *r, float *min, float *max) const
 {
     std::vector<double> range;
-    d->GetDataRange(r->GetCurrentTimestep(), varName, r->GetRefinementLevel(), r->GetCompressionLevel(), d->GetDefaultMetaInfoStride(varName, r->GetRefinementLevel()), range);
+    d->GetDataRange(r->GetCurrentTimestep(), varName, r->GetRefinementLevel(), r->GetCompressionLevel(), DataMgrUtils::GetDefaultMetaInfoStride(d, varName, r->GetRefinementLevel()), range);
     *min = range[0];
     *max = range[1];
 }

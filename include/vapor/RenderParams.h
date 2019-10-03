@@ -367,6 +367,7 @@ public:
     bool secondaryColormapVariable
 );
     
+    //! This should be overriden by params for renderes that support iso values to return true.
     virtual bool HasIsoValues() const { return false; }
     virtual vector<double> GetIsoValues(const string &variable) { VAssert(0); return {}; }
     virtual void SetIsoValues(const string &variable, const vector<double> &values) { VAssert(0); }

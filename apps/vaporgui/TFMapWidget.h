@@ -15,6 +15,12 @@ namespace VAPoR {
 class TFInfoWidget;
 class TFMapWidget;
 
+//! \class TFMap
+//! A widget for editing a transfer function mapped value, for example opacity or color.
+//! They are not QWidgets because of limitations in Qt which do not allow widgets to be
+//! stacked on top of another with passthrough mouse events. Because of this, TFMapWidget
+//! manually holds TFMaps and manages such events.
+
 class TFMap : public QObject {
     Q_OBJECT
     
@@ -90,6 +96,9 @@ protected:
 signals:
     void Activated(TFMap *who);
 };
+
+//! \class TFMapWidget
+//! Wrap a TFMap(s) in a QWidget
 
 class TFMapWidget : public QFrame {
     Q_OBJECT

@@ -9,6 +9,10 @@ namespace VAPoR {
     class RenderParams;
 }
 
+//! \class TFInfoWidget
+//! The TFInfoWidget displays details and allow users to manually edit values for the control
+//! points used by the TFMapWidget
+
 class TFInfoWidget : public QWidget {
     Q_OBJECT
     

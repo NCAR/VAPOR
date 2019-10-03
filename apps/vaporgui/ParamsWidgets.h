@@ -11,10 +11,16 @@
 #include <vapor/ParamsBase.h>
 #include <cassert>
 
+//! \class ParamsWidget
+//! Provedes a GUI element that is synced with the Params database
+//! The parameter tag that it is linked to is passed in the constructor and the
+//! relevant params node is set in the update method.
+
 class ParamsWidget : public QWidget {
     Q_OBJECT
     
 public:
+    //! \param[in] label will be set to tag by default
     ParamsWidget(const std::string &tag, const std::string &label = "");
     virtual void Update(VAPoR::ParamsBase *p) = 0;
     

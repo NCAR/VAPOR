@@ -7,6 +7,12 @@
 
 #include <QToolButton>
 
+//! \class VSection
+//! Represents a section/group to be used in the sidebar.
+//! Provides a consistent layout which is not supposed to be changed
+//! Provides a settings menu that is intended to provide extra options for the parameters that are
+//! shown within this section, for example resetting to default values.
+
 class VSection : public QTabWidget {
     Q_OBJECT
     

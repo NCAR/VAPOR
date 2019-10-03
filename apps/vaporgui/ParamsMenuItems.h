@@ -14,6 +14,8 @@ namespace VAPoR {
 //        ParamsMenuItem
 // ******************************
 
+//! \class ParamsMenuItem
+//! Provides the same functionality as ParamsWidget except inside of a QMenu
 
 class ParamsMenuItem : public QAction {
     Q_OBJECT
