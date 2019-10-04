@@ -43,7 +43,7 @@ ModelRenderer::ModelRenderer(const ParamsMgr* pm, string winName,
 : Renderer(pm, winName, dataSetName, ModelParams::GetClassType(),
            ModelRenderer::GetClassType(), instName, dataMgr)
 {
-    const string path = "/Users/stas/Downloads/Windmill/nrel5MW-small.stl";
+    const string path = "/Users/stasj/Developer/data/Rotating_Box.dae";
     
     assert(FileUtils::Exists(path));
     scene = importer.ReadFile(path, aiProcessPreset_TargetRealtime_Quality);
@@ -91,12 +91,15 @@ int ModelRenderer::_paintGL(bool fast)
     printf("Model Max = [%f, %f, %f]\n", max.x, max.y, max.z);
     
     lgl->Begin(GL_LINES);
+    lgl->Color3f(1, 0, 0);
     lgl->Vertex3f(min.x, min.y, min.z);
     lgl->Vertex3f(max.x, min.y, min.z);
     
+    lgl->Color3f(0, 1, 0);
     lgl->Vertex3f(min.x, min.y, min.z);
     lgl->Vertex3f(min.x, max.y, min.z);
     
+    lgl->Color3f(0, 0, 1);
     lgl->Vertex3f(min.x, min.y, min.z);
     lgl->Vertex3f(min.x, min.y, max.z);
     lgl->End();
@@ -111,7 +114,7 @@ int ModelRenderer::_initializeGL()
 
 void ModelRenderer::renderNode(const aiNode *nd)
 {
-//    LegacyGL *lgl = _glManager->legacy;
+    LegacyGL *lgl = _glManager->legacy;
 //    MatrixManager *mm = _glManager->matrixManager;
     
     aiMatrix4x4 m = nd->mTransformation;
@@ -132,8 +135,7 @@ void ModelRenderer::renderNode(const aiNode *nd)
                 case 3:  mode = GL_TRIANGLES; break;
                 default: mode = GL_POINTS;    assert(0);
             }
-            mode = GL_POINTS;
-//            lgl->Begin(GL_POINTS);
+            lgl->Begin(mode);
             
             for (int v = 0; v < face->mNumIndices; v++) {
                 n++;
@@ -141,10 +143,10 @@ void ModelRenderer::renderNode(const aiNode *nd)
                 const glm::vec3 gv(vertex.x, vertex.y, vertex.z);
                 min = glm::min(min, gv);
                 max = glm::max(max, gv);
-//                lgl->Vertex3fv(&mesh->mVertices[face->mIndices[v]].x);
+                lgl->Vertex3fv(&mesh->mVertices[face->mIndices[v]].x);
             }
             
-//            lgl->End();
+            lgl->End();
         }
     }
     
