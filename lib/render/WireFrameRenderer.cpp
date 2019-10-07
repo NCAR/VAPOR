@@ -120,32 +120,29 @@ bool WireFrameRenderer::_isCacheDirty() const
 // by multiple cells
 //
 void WireFrameRenderer::_drawCell(
-	const size_t *cellNodeIndices,
+	const GLuint *cellNodeIndices,
 	int n,
 	bool layered,
-	const vector <size_t> &nodeMap,
-	size_t invalidIndex,
+	const vector <GLuint> &nodeMap,
+	GLuint invalidIndex,
     vector<unsigned int> &indices,
 	DrawList &drawList
 ) const {
 
 	int count = layered ? n/2 : n;
 	for (int i=0; i<count; i++) {
-		size_t idx0 = nodeMap[cellNodeIndices[i]];
+		GLuint idx0 = nodeMap[cellNodeIndices[i]];
 		VAssert(idx0 != invalidIndex);
 
-		size_t idx1 = nodeMap[cellNodeIndices[(i+1)%count]];
+		GLuint idx1 = nodeMap[cellNodeIndices[(i+1)%count]];
 		VAssert(idx1 != invalidIndex);
 
 		// Don't draw line segment if it's already been drawn
 		//
 		if (drawList.InList(idx0,idx1)) continue;
 
-		// check for overflow
-		//
-		if ((unsigned int) idx0 < 0 || (unsigned int) idx1 < 0) continue;
-        indices.push_back((unsigned int) idx0);
-        indices.push_back((unsigned int) idx1);
+        indices.push_back(idx0);
+        indices.push_back(idx1);
 	}
 
 	if (! layered) return;
@@ -153,37 +150,31 @@ void WireFrameRenderer::_drawCell(
 	// if layered the coordinates are ordered bottom face first, then top face
 	//
 	for (int i=0; i<count; i++) {
-		size_t idx0 = nodeMap[cellNodeIndices[i+count]];
+		GLuint idx0 = nodeMap[cellNodeIndices[i+count]];
 		VAssert(idx0 != invalidIndex);
 
-		size_t idx1 = nodeMap[cellNodeIndices[((i+1)%count)+count]];
+		GLuint idx1 = nodeMap[cellNodeIndices[((i+1)%count)+count]];
 		VAssert(idx1 != invalidIndex);
 
 		if (drawList.InList(idx0,idx1)) continue;
 
-		// check for overflow
-		//
-		if ((unsigned int) idx0 < 0 || (unsigned int) idx1 < 0) continue;
-        indices.push_back((unsigned int) idx0);
-        indices.push_back((unsigned int) idx1);
+        indices.push_back(idx0);
+        indices.push_back(idx1);
 	}
     
 	// Now draw edges between top and bottom face
 	//
 	for (int i=0; i<count; i++) {
-		size_t idx0 = nodeMap[cellNodeIndices[i]];
+		GLuint idx0 = nodeMap[cellNodeIndices[i]];
 		VAssert(idx0 != invalidIndex);
 
-		size_t idx1 = nodeMap[cellNodeIndices[i+count]];
+		GLuint idx1 = nodeMap[cellNodeIndices[i+count]];
 		VAssert(idx1 != invalidIndex);
 
 		if (drawList.InList(idx0,idx1)) continue;
 
-		// check for overflow
-		//
-		if ((unsigned int) idx0 < 0 || (unsigned int) idx1 < 0) continue;
-        indices.push_back((unsigned int) idx0);
-        indices.push_back((unsigned int) idx1);
+        indices.push_back(idx0);
+        indices.push_back(idx1);
 	}
 }
 
@@ -193,7 +184,7 @@ void WireFrameRenderer::_drawCell(
 //
 void WireFrameRenderer::_buildCacheVertices(
 	const Grid *grid, const Grid *heightGrid,
-	vector <size_t> &nodeMap
+	vector <GLuint> &nodeMap
 ) const {
     
 
@@ -274,6 +265,13 @@ void WireFrameRenderer::_buildCacheVertices(
 		// Create an entry in nodeMap
 		//
 		size_t index = Wasp::LinearizeCoords(*nodeItr, grid->GetDimensions());
+
+		if (vertices.size() > std::numeric_limits<GLuint>::max()) {
+#ifndef	NDEBUG
+			MyBase::SetDiagMsg("WireFrameRenderer() : exceeded numeric limits");
+#endif
+			continue;
+		}
 		nodeMap[index] = vertices.size();
 
 		vertices.push_back({
@@ -295,7 +293,7 @@ void WireFrameRenderer::_buildCacheVertices(
 //
 size_t WireFrameRenderer::_buildCacheConnectivity(
 	const Grid *grid,
-	const vector <size_t> &nodeMap
+	const vector <GLuint> &nodeMap
 ) const {
 
 
@@ -304,7 +302,7 @@ size_t WireFrameRenderer::_buildCacheConnectivity(
 	bool layered = grid->GetTopologyDim() == 3;
 	size_t maxVertsPerCell = grid->GetMaxVertexPerCell();
 	vector <size_t> cellNodeIndices(maxVertsPerCell*grid->GetDimensions().size());
-	vector <size_t> cellNodeIndicesLinear(maxVertsPerCell);
+	vector <GLuint> cellNodeIndicesLinear(maxVertsPerCell);
 
 	size_t numCells = Wasp::VProduct(grid->GetCellDimensions());
 	size_t maxLineIndices = numCells * 
@@ -334,11 +332,21 @@ size_t WireFrameRenderer::_buildCacheConnectivity(
 
 			for (int i=0; i<numNodes; i++) {
 				int ndim = grid->GetDimensions().size();
-				cellNodeIndicesLinear[i] = Wasp::LinearizeCoords(
+				size_t idx = Wasp::LinearizeCoords(
 					cellNodeIndices.data()+(i*ndim),
 					grid->GetDimensions().data(), 
 					ndim
 				);
+
+				if (idx > std::numeric_limits<GLuint>::max()) {
+#ifndef	NDEBUG
+					MyBase::SetDiagMsg(
+						"WireFrameRenderer() : exceeded numeric limits"
+					);
+#endif
+					continue;
+				}
+				cellNodeIndicesLinear[i] = idx;
 			}
 			
 			_drawCell(
@@ -389,8 +397,8 @@ int WireFrameRenderer::_buildCache()
 
 
 	size_t numNodes = Wasp::VProduct(grid->GetDimensions());
-	size_t invalidIndex = std::numeric_limits<size_t>::max();
-	vector <size_t> nodeMap(numNodes, invalidIndex);
+	GLuint invalidIndex = std::numeric_limits<GLuint>::max();
+	vector <GLuint> nodeMap(numNodes, invalidIndex);
 
 	_buildCacheVertices(grid, heightGrid, nodeMap);
 

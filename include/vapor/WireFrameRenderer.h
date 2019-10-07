@@ -95,15 +95,15 @@ private:
 		// DrawList. Hence, queries to edges with DrawList::InList will
 		// return false once maxLinesPerVertex has been exceeded
 		//
-		DrawList(size_t maxEntries, size_t maxLinesPerVertex) :
+		DrawList(GLuint maxEntries, size_t maxLinesPerVertex) :
 			_drawList(
-				maxEntries*maxLinesPerVertex, std::numeric_limits<size_t>::max()
+				maxEntries*maxLinesPerVertex, std::numeric_limits<GLuint>::max()
 			),
 			_maxEntries(maxEntries),
 			_maxLinesPerVertex(maxLinesPerVertex)
 		 {}	
 
-		bool InList(size_t idx0, size_t idx1) {
+		bool InList(GLuint idx0, GLuint idx1) {
 			VAssert(idx0 < _maxEntries);
 			VAssert(idx1 < _maxEntries);
 
@@ -115,7 +115,7 @@ private:
 				if (_drawList[idx0*_maxLinesPerVertex+i] == idx1) {
 					return(true);
 				}
-				if (_drawList[idx0*_maxLinesPerVertex+i] == std::numeric_limits<size_t>::max()) {
+				if (_drawList[idx0*_maxLinesPerVertex+i] == std::numeric_limits<GLuint>::max()) {
 					_drawList[idx0*_maxLinesPerVertex+i] = idx1;
 					return(false);
 				}
@@ -123,28 +123,28 @@ private:
 			return(false);
 		}
 	private:
-		vector<size_t> _drawList;
+		vector<GLuint> _drawList;
 		size_t _maxEntries;
 		size_t _maxLinesPerVertex;
 	};
 
 	void  _buildCacheVertices(
-		const Grid *grid, const Grid *heightGrid, vector <size_t> &nodeMap
+		const Grid *grid, const Grid *heightGrid, vector <GLuint> &nodeMap
 	) const;
 
 	size_t _buildCacheConnectivity(
-		const Grid *grid, const vector <size_t> &nodeMap
+		const Grid *grid, const vector <GLuint> &nodeMap
 	) const;
 
 	int  _buildCache();
 	bool _isCacheDirty() const;
 	void _saveCacheParams();
 	void _drawCell(
-		const size_t *cellNodeIndices,
+		const GLuint *cellNodeIndices,
 		int n,
 		bool layered,
-		const std::vector <size_t> &nodeMap,
-		size_t invalidIndex,
+		const std::vector <GLuint> &nodeMap,
+		GLuint invalidIndex,
 		std::vector<unsigned int> &indices,
 		DrawList &drawList
 	) const;
