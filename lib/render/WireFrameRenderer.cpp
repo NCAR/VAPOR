@@ -278,7 +278,7 @@ void WireFrameRenderer::_buildCacheVertices(
 
 		vertices.push_back({
 			(float) coord[0], (float) coord[1], (float) coord[2],
-			color[1], color[1], color[2], color[3]
+			color[0], color[1], color[2], color[3]
 		});
 	}
 
