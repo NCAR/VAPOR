@@ -125,7 +125,8 @@ private:
 	private:
 		vector<GLuint> _drawList;
 		size_t _maxEntries;
-		size_t _maxLinesPerVertex;
+        const size_t _maxEntries;
+		const size_t _maxLinesPerVertex;
 	};
 
 	void  _buildCacheVertices(
