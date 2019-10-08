@@ -30,6 +30,11 @@
 #include <vapor/LegacyGL.h>
 #include <vapor/FileUtils.h>
 #include <assimp/postprocess.h>
+#include <assimp/version.h>
+
+#warning vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+#warning Third party libraries updated to assimp v5. need to restore assimp_backup and remove assimp.5.*
+#warning ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 using namespace VAPoR;
 
@@ -43,11 +48,17 @@ ModelRenderer::ModelRenderer(const ParamsMgr* pm, string winName,
 : Renderer(pm, winName, dataSetName, ModelParams::GetClassType(),
            ModelRenderer::GetClassType(), instName, dataMgr)
 {
-    const string path = "/Users/stasj/Developer/data/Rotating_Box.dae";
+    printf("ASSIMP %i.%i.%i\n", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision());
+    
+    const string path = "/Users/stasj/Developer/data/Rotating_Box_Color.dae";
     
     assert(FileUtils::Exists(path));
     scene = importer.ReadFile(path, aiProcessPreset_TargetRealtime_Quality);
-    printf("Importer diag: %s\n", importer.GetErrorString());
+    if (!scene) {
+        printf("Importer ERROR: %s\n", importer.GetErrorString());
+        exit(1);
+    }
+    printf("Animations[%i]\n", scene->mNumAnimations);
 }
 
 ModelRenderer::~ModelRenderer()
@@ -69,10 +80,21 @@ int ModelRenderer::_paintGL(bool fast)
     mm->MatrixModeModelView();
     
 //    LegacyGL *lgl = _glManager->legacy;
-    lgl->DisableLighting();
+    lgl->EnableLighting();
     lgl->DisableTexture();
     
+    ViewpointParams *viewpointParams = _paramsMgr->GetViewpointParams(_winName);
+    Viewpoint *viewpoint = viewpointParams->getCurrentViewpoint();
+    double m[16];
+    double cameraPos[3], cameraUp[3], cameraDir[3];
+    _glManager->matrixManager->GetDoublev(MatrixManager::Mode::ModelView, m);
+    viewpoint->ReconstructCamera(m, cameraPos, cameraUp, cameraDir);
+    
     lgl->Color3f(1, 1, 1);
+    float lightDir[3] = {(float)cameraDir[0], (float)cameraDir[1], (float)cameraDir[2]};
+    lgl->LightDirectionfv(lightDir);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
     
     min.x = FLT_MAX;
     min.y = FLT_MAX;
@@ -89,6 +111,9 @@ int ModelRenderer::_paintGL(bool fast)
     
     printf("Model Min = [%f, %f, %f]\n", min.x, min.y, min.z);
     printf("Model Max = [%f, %f, %f]\n", max.x, max.y, max.z);
+    
+    lgl->DisableLighting();
+    return rc;
     
     lgl->Begin(GL_LINES);
     lgl->Color3f(1, 0, 0);
@@ -112,19 +137,100 @@ int ModelRenderer::_initializeGL()
     return 0;
 }
 
+const aiNodeAnim* FindNodeAnim(const aiAnimation* pAnimation, const string NodeName)
+{
+    for (uint i = 0 ; i < pAnimation->mNumChannels ; i++) {
+        const aiNodeAnim* pNodeAnim = pAnimation->mChannels[i];
+        
+        if (string(pNodeAnim->mNodeName.data) == NodeName) {
+            return pNodeAnim;
+        }
+    }
+    
+    return NULL;
+}
+
+uint FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+    assert(pNodeAnim->mNumRotationKeys > 0);
+
+    for (uint i = 0 ; i < pNodeAnim->mNumRotationKeys - 1 ; i++) {
+        if (AnimationTime < (float)pNodeAnim->mRotationKeys[i + 1].mTime) {
+            return i;
+        }
+    }
+
+    assert(0);
+}
+
+void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+    if (pNodeAnim->mNumRotationKeys == 1) {
+        Out = pNodeAnim->mRotationKeys[0].mValue;
+        return;
+    }
+
+    uint RotationIndex = FindRotation(AnimationTime, pNodeAnim);
+    uint NextRotationIndex = (RotationIndex + 1);
+    assert(NextRotationIndex < pNodeAnim->mNumRotationKeys);
+    float DeltaTime = pNodeAnim->mRotationKeys[NextRotationIndex].mTime - pNodeAnim->mRotationKeys[RotationIndex].mTime;
+    float Factor = (AnimationTime - (float)pNodeAnim->mRotationKeys[RotationIndex].mTime) / DeltaTime;
+    assert(Factor >= 0.0f && Factor <= 1.0f);
+    const aiQuaternion& StartRotationQ = pNodeAnim->mRotationKeys[RotationIndex].mValue;
+    const aiQuaternion& EndRotationQ = pNodeAnim->mRotationKeys[NextRotationIndex].mValue;
+    aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
+    Out = Out.Normalize();
+}
+
 void ModelRenderer::renderNode(const aiNode *nd)
 {
+    ModelParams *mp = (ModelParams*)GetActiveParams();
+    float animationTime = mp->GetValueDouble("animation_time", 0);
+    animationTime += 0.006;
+    if (animationTime >= 1) animationTime = 0;
+    mp->SetValueDouble("animation_time", "", animationTime);
+    printf("animationTime = %f\n", animationTime);
+    
     LegacyGL *lgl = _glManager->legacy;
-//    MatrixManager *mm = _glManager->matrixManager;
+    MatrixManager *mm = _glManager->matrixManager;
     
-    aiMatrix4x4 m = nd->mTransformation;
-    m.Transpose();
+    aiMatrix4x4 m;
+    if (mp->GetValueLong("apply_node_trans", 0))
+        m = nd->mTransformation;
+    if (mp->GetValueLong("transpose_node_trans", 0))
+        m.Transpose();
     
-//    mm->PushMatrix();
-//    mm->SetCurrentMatrix(mm->GetCurrentMatrix() * glm::make_mat4((float*)&m));
+    
+    const string NodeName(nd->mName.data);
+    const aiAnimation* animation = nullptr;
+    const aiNodeAnim *nodeAnim = nullptr;
+    if (scene->HasAnimations()) {
+        animation = scene->mAnimations[0];
+        nodeAnim = FindNodeAnim(animation, NodeName);
+        animationTime *= animation->mDuration;
+    }
+    
+    aiMatrix4x4 rotM;
+    if (nodeAnim) {
+        aiQuaternion rotQ;
+        CalcInterpolatedRotation(rotQ, animationTime, nodeAnim);
+        rotM = aiMatrix4x4(rotQ.GetMatrix());
+        if (mp->GetValueLong("transpose_rot_trans", 0))
+            rotM.Transpose();
+    }
+    
+    
+    
+    
+    mm->PushMatrix();
+    mm->SetCurrentMatrix(mm->GetCurrentMatrix() * glm::make_mat4((float*)&m) * glm::make_mat4((float*)&rotM));
     
     for (int m = 0; m < nd->mNumMeshes; m++) {
         const aiMesh *mesh = scene->mMeshes[nd->mMeshes[m]];
+        if (mesh->HasNormals())
+            lgl->EnableLighting();
+        else
+            lgl->DisableLighting();
         
         for (int f = 0; f < mesh->mNumFaces; f++) {
             const aiFace *face = &mesh->mFaces[f];
@@ -143,6 +249,10 @@ void ModelRenderer::renderNode(const aiNode *nd)
                 const glm::vec3 gv(vertex.x, vertex.y, vertex.z);
                 min = glm::min(min, gv);
                 max = glm::max(max, gv);
+                if (mesh->GetNumColorChannels() > 0)
+                    lgl->Color3fv (&mesh->mColors[0][face->mIndices[v]].r);
+                if (mesh->HasNormals())
+                    lgl->Normal3fv(&mesh->mNormals[face->mIndices[v]].x);
                 lgl->Vertex3fv(&mesh->mVertices[face->mIndices[v]].x);
             }
             
@@ -153,5 +263,5 @@ void ModelRenderer::renderNode(const aiNode *nd)
     for (int c = 0; c < nd->mNumChildren; c++)
         renderNode(nd->mChildren[c]);
     
-//    mm->PopMatrix();
+    mm->PopMatrix();
 }

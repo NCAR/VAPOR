@@ -17,27 +17,27 @@ namespace VAPoR {
 
 class SpacingCombo;
 class TFEditor;
+class VSection;
+class ParamsWidget;
 
 class ModelVariablesSubtab : public QWidget, public Ui_ModelVariablesGUI {
 
 	Q_OBJECT
 
 public:
-	ModelVariablesSubtab(QWidget* parent) {
-		setupUi(this);
-		_variablesWidget->Reinit(
-			(VariableFlags)(SCALAR | HEIGHT),
-			(DimFlags)(TWOD)
-		);
-	}
+    ModelVariablesSubtab(QWidget* parent);
 
 	void Update(
 		VAPoR::DataMgr *dataMgr,
 		VAPoR::ParamsMgr *paramsMgr,
 		VAPoR::RenderParams *rParams
-	) {
-		_variablesWidget->Update(dataMgr, paramsMgr, rParams);
-	}
+                );
+    
+private:
+    VSection *_modelSettings;
+    vector<ParamsWidget *> _pw;
+    
+    void addPW(ParamsWidget *w);
 };
 
 class ModelAppearanceSubtab : public QWidget, public Ui_ModelAppearanceGUI {
