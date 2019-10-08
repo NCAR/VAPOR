@@ -88,15 +88,16 @@ include_directories ("${PROJECT_SOURCE_DIR}/include")
 include_directories (${THIRD_PARTY_INC_DIR})
 include_directories (${THIRD_PARTY_INC_DIR}/freetype2)
 link_directories (${THIRD_PARTY_LIB_DIR})
+link_directories (${PYTHONPATH})
 list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
 list (APPEND CMAKE_PREFIX_PATH ${QTDIR}/lib/cmake)
 list (APPEND CMAKE_PROGRAM_PATH ${QTDIR}/bin)
 if (WIN32)
-	include_directories (C:/2019-Aug/Python${PYTHONVERSION}/include)
-	include_directories (${PYTHONPATH}/Lib/site-packages/numpy/core/include/numpy)
+	include_directories (${THIRD_PARTY_DIR}/Python${PYTHONVERSION}/include)
+	include_directories (${NUMPY_INCLUDE_DIR})
 	get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 	foreach(dir ${dirs})
-		message(STATUS "dir='${dir}'")
+		message(STATUS "dir='${dir}'\n")
 	endforeach()
 else ()
 	include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}m)
@@ -108,11 +109,11 @@ endif ()
 
 find_library(NETCDF netcdf)
 find_library(UDUNITS2 udunits2)
-find_library(PROJ proj)
+find_library(PROJ proj_6_1)
 find_library(FREETYPE freetype)
 find_library(GEOTIFF geotiff)
 find_library(JPEG jpeg)
-find_library(TIFF tiff)
+find_library(TIFF libtiff)
 
 if (BUILD_VDC)
 	find_package (OpenGL REQUIRED)
@@ -129,7 +130,6 @@ if (WIN32)
 	set (INSTALL_LIB_DIR .)
 	set (INSTALL_SHARE_DIR share)
 	set (INSTALL_INCLUDE_DIR include/vapor)
-    
 elseif (APPLE)
 
 	# if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -147,8 +147,6 @@ elseif (APPLE)
 	endif ()
 	set (CMAKE_INSTALL_RPATH "@executable_path/../lib")
 else ()
-
-
 	if (DIST_INSTALLER)
 		set (INSTALL_BIN_DIR lib)
 	else ()
@@ -168,6 +166,9 @@ add_subdirectory (include)
 add_subdirectory (share)
 add_subdirectory (scripts)
 add_subdirectory (test_apps)
+
+
+
 
 ###############################################################################
 #                            CPack Installation                               #
@@ -197,10 +198,22 @@ if (WIN32)
 	configure_file ("${PRE_UNINSTALL_LOCAL_PATH}.in" "${PRE_UNINSTALL_PATH}" @ONLY)
 
 	if (GENERATE_FULL_INSTALLER)
-		set (DLL_DIR "C:/vaporwin64deps2015/vapordlls")
+		set (DLL_DIR ${THIRD_PARTY_DIR}/dll)
 		file (GLOB WIN_INSTALL_DLLS ${DLL_DIR}/*.dll ${QTDIR}/bin/*.dll)
+message( "QTDIR            " ${QTDIR})
+message( "DLL DIR          " ${DLL_DIR})
+message( "WIN INSTALL DLLS " ${WIN_INSTALL_DLLS} )
+message( "INSTALL BIN DIR  " ${INSTALL_BIN_DIR} )
+message( "PYTHONPATH       " ${PYTHONPATH})
+message( "INSTALL LIB DIR  " ${INSTALL_LIB_DIR})
+
 		install (
 			FILES ${WIN_INSTALL_DLLS}
+			DESTINATION ${INSTALL_BIN_DIR}
+			COMPONENT Dependencies
+			)
+		install (
+			FILES ${PYTHONPATH}/python36.dll
 			DESTINATION ${INSTALL_BIN_DIR}
 			COMPONENT Dependencies
 			)

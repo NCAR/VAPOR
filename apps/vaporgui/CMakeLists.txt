@@ -227,11 +227,20 @@ else ()
 	add_executable (vapor ${SRCS} ${UIS})
 endif()
 
-target_link_libraries (
-    vapor common vdc wasp render params jpeg ${GLEW} 
-    tiff geotiff assimp Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::DBus 
-    python${PYTHONVERSION}m
-)
+if (WIN32)
+	target_link_libraries (
+    		vapor common vdc wasp render params jpeg ${GLEW} 
+    		libtiff geotiff assimp-vc140-mt Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::DBus 
+    		python${PYTHONVERSION}
+	)
+else ()
+	target_link_libraries (
+    		vapor common vdc wasp render params jpeg ${GLEW} 
+    		libtiff geotiff assimp Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::DBus 
+    		python${PYTHONVERSION}m
+	)
+endif()
+
 
 
 if (APPLE)

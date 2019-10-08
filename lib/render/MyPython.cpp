@@ -71,18 +71,24 @@ int MyPython::Initialize() {
 	if (m_isInitialized) return (0);
 
 	m_pyHome.clear();
-	char *s = getenv("VAPOR_PYTHONHOME");
+	char* s = getenv("VAPOR3_HOME");
+
 	if (s) m_pyHome = s;
 
 	if (m_pyHome.empty()) {
-		// On windows use VAPOR_HOME/lib/python2.7; VAPOR_HOME works 
-		// on Linux and Mac
 		m_pyHome = GetPythonDir();
 	}
-
+	
 	if (! m_pyHome.empty()) {
 #ifdef WIN32
-		Py_SetPythonHome((char *) m_pyHome.c_str());
+		std::string pythonPath = m_pyHome + "\\Python36;";
+		pythonPath = pythonPath + m_pyHome + "\\Python36\\Lib;";
+		pythonPath = pythonPath + m_pyHome + "\\Python36\\Lib\\site-packages";
+		_putenv_s("PYTHONPATH", pythonPath.c_str());
+
+		std::wstring widestr = std::wstring(m_pyHome.begin(), m_pyHome.end());
+		const wchar_t* widecstr = widestr.c_str();
+		Py_SetPythonHome((wchar_t*)widecstr);
 		MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
 #else
 		struct STAT64 statbuf;
