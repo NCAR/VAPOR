@@ -106,16 +106,27 @@ bool WireFrameRenderer::_isCacheDirty() const
     return false;
 }
 
-void WireFrameRenderer::_drawCell(vector<VertexData> &vertices, vector<unsigned int> &indices, const float *verts, const float *colors, int n, bool layered)
+//
+// Generate wireframe line drawing list of line segments for a single
+// cell. Make use of drawList to avoid drawing line segments shared
+// by multiple cells
+//
+void WireFrameRenderer::_drawCell(const GLuint *cellNodeIndices, int n, bool layered, const vector<GLuint> &nodeMap, GLuint invalidIndex, vector<unsigned int> &indices, DrawList &drawList) const
 {
-    int baseIndex = vertices.size();
-    for (int i = 0; i < n; i++) { vertices.push_back({verts[3 * i], verts[3 * i + 1], verts[3 * i + 2], colors[4 * i], colors[4 * i + 1], colors[4 * i + 2], colors[4 * i + 3]}); }
-
     int count = layered ? n / 2 : n;
     for (int i = 0; i < count; i++) {
-        // indices[i] = i;
-        indices.push_back(baseIndex + i);
-        indices.push_back(baseIndex + ((i + 1) % count));
+        GLuint idx0 = nodeMap[cellNodeIndices[i]];
+        VAssert(idx0 != invalidIndex);
+
+        GLuint idx1 = nodeMap[cellNodeIndices[(i + 1) % count]];
+        VAssert(idx1 != invalidIndex);
+
+        // Don't draw line segment if it's already been drawn
+        //
+        if (drawList.InList(idx0, idx1)) continue;
+
+        indices.push_back(idx0);
+        indices.push_back(idx1);
     }
 
     if (!layered) return;
@@ -123,19 +134,179 @@ void WireFrameRenderer::_drawCell(vector<VertexData> &vertices, vector<unsigned 
     // if layered the coordinates are ordered bottom face first, then top face
     //
     for (int i = 0; i < count; i++) {
-        // indices[i] = i + count;
-        indices.push_back(baseIndex + i + count);
-        indices.push_back(baseIndex + ((i + 1) % count) + count);
+        GLuint idx0 = nodeMap[cellNodeIndices[i + count]];
+        VAssert(idx0 != invalidIndex);
+
+        GLuint idx1 = nodeMap[cellNodeIndices[((i + 1) % count) + count]];
+        VAssert(idx1 != invalidIndex);
+
+        if (drawList.InList(idx0, idx1)) continue;
+
+        indices.push_back(idx0);
+        indices.push_back(idx1);
     }
 
     // Now draw edges between top and bottom face
     //
     for (int i = 0; i < count; i++) {
-        // indices[2*i+0] = i;
-        // indices[2*i+1] = i + count;
-        indices.push_back(baseIndex + i);
-        indices.push_back(baseIndex + i + count);
+        GLuint idx0 = nodeMap[cellNodeIndices[i]];
+        VAssert(idx0 != invalidIndex);
+
+        GLuint idx1 = nodeMap[cellNodeIndices[i + count]];
+        VAssert(idx1 != invalidIndex);
+
+        if (drawList.InList(idx0, idx1)) continue;
+
+        indices.push_back(idx0);
+        indices.push_back(idx1);
     }
+}
+
+// Generate list of vertices shared by all line segments, and populate
+// 'nodeMap': a map from a node's Grid index to its offset in the
+// list of vertices.
+//
+void WireFrameRenderer::_buildCacheVertices(const Grid *grid, const Grid *heightGrid, vector<GLuint> &nodeMap) const
+{
+    double mv = grid->GetMissingValue();
+    float  defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
+    size_t numNodes = Wasp::VProduct(grid->GetDimensions());
+
+    // Pre-allocate vertices vector upfront for better performance
+    //
+    vector<VertexData> vertices;
+    vertices.reserve(numNodes);
+
+    // Visit each grid node. For each node store node's coordinates and
+    // assigned color in 'vertices'. Create 'nodeMap': mapping from a
+    // grid node's index to its offset in 'vertices'
+    //
+    Grid::ConstNodeIterator nodeItr = grid->ConstNodeBegin();
+    Grid::ConstNodeIterator nodeEnd = grid->ConstNodeEnd();
+    Grid::ConstCoordItr     coordItr = grid->ConstCoordBegin();
+    Grid::ConstCoordItr     coordEnd = grid->ConstCoordEnd();
+    for (; nodeItr != nodeEnd; ++nodeItr, ++coordItr) {
+        // Get current node's coordinates
+        //
+        double coord[3];
+        coord[0] = (*coordItr)[0];
+        coord[1] = (*coordItr)[1];
+
+        if (grid->GetGeometryDim() > 2) {
+            coord[2] = (*coordItr)[2];
+        } else {
+            if (heightGrid) {
+                coord[2] = heightGrid->GetValueAtIndex(*nodeItr);
+            } else {
+                coord[2] = defaultZ;
+            }
+        }
+
+        // Get current node's color
+        //
+        float dataValue = grid->GetValueAtIndex((*nodeItr).data());
+        float color[4];
+
+        if (dataValue == mv) {
+            color[0] = 0.0;
+            color[1] = 0.0;
+            color[2] = 0.0;
+            color[3] = 0.0;
+        } else if (_cacheParams.useSingleColor) {
+            color[0] = _cacheParams.constantColor[0];
+            color[1] = _cacheParams.constantColor[1];
+            color[2] = _cacheParams.constantColor[2];
+            color[3] = _cacheParams.constantOpacity;
+        } else {
+            size_t n = _cacheParams.tf_lut.size() >> 2;
+            int    index = (dataValue - _cacheParams.tf_minmax[0]) / (_cacheParams.tf_minmax[1] - _cacheParams.tf_minmax[0]) * (n - 1);
+            if (index < 0) { index = 0; }
+            if (index >= n) { index = n - 1; }
+            color[0] = _cacheParams.tf_lut[4 * index + 0];
+            color[1] = _cacheParams.tf_lut[4 * index + 1];
+            color[2] = _cacheParams.tf_lut[4 * index + 2];
+            color[3] = _cacheParams.tf_lut[4 * index + 3];
+        }
+
+        // Create an entry in nodeMap
+        //
+        size_t index = Wasp::LinearizeCoords(*nodeItr, grid->GetDimensions());
+
+        if (vertices.size() > std::numeric_limits<GLuint>::max()) {
+#ifndef NDEBUG
+            MyBase::SetDiagMsg("WireFrameRenderer() : exceeded numeric limits");
+#endif
+            continue;
+        }
+        nodeMap[index] = vertices.size();
+
+        vertices.push_back({(float)coord[0], (float)coord[1], (float)coord[2], color[0], color[1], color[2], color[3]});
+    }
+
+    glBindVertexArray(_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexData), vertices.data(), GL_DYNAMIC_DRAW);
+}
+
+//
+// Generate connectivity list for line segments joining cell nodes.
+//
+size_t WireFrameRenderer::_buildCacheConnectivity(const Grid *grid, const vector<GLuint> &nodeMap) const
+{
+    size_t         invalidIndex = std::numeric_limits<size_t>::max();
+    size_t         numNodes = Wasp::VProduct(grid->GetDimensions());
+    bool           layered = grid->GetTopologyDim() == 3;
+    size_t         maxVertsPerCell = grid->GetMaxVertexPerCell();
+    vector<size_t> cellNodeIndices(maxVertsPerCell * grid->GetDimensions().size());
+    vector<GLuint> cellNodeIndicesLinear(maxVertsPerCell);
+
+    size_t numCells = Wasp::VProduct(grid->GetCellDimensions());
+    size_t maxLineIndices = numCells * (layered ? maxVertsPerCell / 2 * 3 : maxVertsPerCell * 2);
+
+    // Pre-allocate memory for (much) better performance.
+    //
+    vector<unsigned int> indices;
+    indices.reserve(maxLineIndices);
+
+    {
+        // drawList keeps track of line segments that have already been
+        // drawn so that we can avoid duplicates. Avoiding duplicates
+        // reduces the memory requirements substantially
+        //
+        DrawList drawList(numNodes, 10);
+
+        // Loop over cells, drawing edges of each cell
+        //
+        Grid::ConstCellIterator cellItr = grid->ConstCellBegin();
+        Grid::ConstCellIterator cellEnd = grid->ConstCellEnd();
+        for (; cellItr != cellEnd; ++cellItr) {
+            int numNodes;
+            grid->GetCellNodes((*cellItr).data(), cellNodeIndices.data(), numNodes);
+
+            for (int i = 0; i < numNodes; i++) {
+                int    ndim = grid->GetDimensions().size();
+                size_t idx = Wasp::LinearizeCoords(cellNodeIndices.data() + (i * ndim), grid->GetDimensions().data(), ndim);
+
+                if (idx > std::numeric_limits<GLuint>::max()) {
+#ifndef NDEBUG
+                    MyBase::SetDiagMsg("WireFrameRenderer() : exceeded numeric limits");
+#endif
+                    continue;
+                }
+                cellNodeIndicesLinear[i] = idx;
+            }
+
+            _drawCell(cellNodeIndicesLinear.data(), numNodes, layered, nodeMap, invalidIndex, indices, drawList);
+        }
+    }
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_DYNAMIC_DRAW);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    return (indices.size());
 }
 
 int WireFrameRenderer::_buildCache()
@@ -157,99 +328,16 @@ int WireFrameRenderer::_buildCache()
         }
     }
 
-    vector<VertexData>   vertices;
-    vector<unsigned int> indices;
+    size_t         numNodes = Wasp::VProduct(grid->GetDimensions());
+    GLuint         invalidIndex = std::numeric_limits<GLuint>::max();
+    vector<GLuint> nodeMap(numNodes, invalidIndex);
 
-    double mv = grid->GetMissingValue();
+    _buildCacheVertices(grid, heightGrid, nodeMap);
 
-#if 0    // VAPOR_3_1_0
-    
-    // Performance of the bounding box version of the Cell iterator
-    // is too slow. So we render the entire grid and use clipping planes
-    // to restrict the displayed region
-    //
-    Grid::ConstCellIterator it = grid->ConstCellBegin(
-                                                      _cacheParams.boxMin, _cacheParams.boxMax
-                                                      );
-#else
-    Grid::ConstCellIterator it = grid->ConstCellBegin();
-#endif
-
-    size_t nverts = grid->GetMaxVertexPerCell();
-    bool   layered = grid->GetTopologyDim() == 3;
-
-    float *                 coordsArray = new float[nverts * 3];
-    float *                 colorsArray = new float[nverts * 4];
-    Grid::ConstCellIterator end = grid->ConstCellEnd();
-
-    float defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
-
-    size_t  maxNodes = grid->GetMaxVertexPerCell();
-    size_t  nodeDim = grid->GetNodeDimensions().size();
-    size_t *nodes = (size_t *)alloca(sizeof(size_t) * maxNodes * nodeDim);
-
-    size_t  coordDim = grid->GetGeometryDim();
-    double *coord = (double *)alloca(sizeof(double) * coordDim);
-
-    for (; it != end; ++it) {
-        int numNodes;
-        grid->GetCellNodes((*it).data(), nodes, numNodes);
-
-        for (int i = 0; i < numNodes; i++) {
-            grid->GetUserCoordinates(&nodes[i * nodeDim], coord);
-
-            coordsArray[3 * i + 0] = coord[0];
-            coordsArray[3 * i + 1] = coord[1];
-
-            if (coordDim == 3) {
-                coordsArray[3 * i + 2] = coord[2];
-            } else if (heightGrid) {
-                coordsArray[3 * i + 2] = heightGrid->GetValueAtIndex(&nodes[i * nodeDim]);
-            } else {
-                coordsArray[3 * i + 2] = defaultZ;
-            }
-
-            float dataValue = grid->GetValueAtIndex(&nodes[i * nodeDim]);
-            if (dataValue == mv) {
-                colorsArray[4 * i + 0] = 0.0;
-                colorsArray[4 * i + 1] = 0.0;
-                colorsArray[4 * i + 2] = 0.0;
-                colorsArray[4 * i + 3] = 0.0;
-            } else if (_cacheParams.useSingleColor) {
-                colorsArray[4 * i + 0] = _cacheParams.constantColor[0];
-                colorsArray[4 * i + 1] = _cacheParams.constantColor[1];
-                colorsArray[4 * i + 2] = _cacheParams.constantColor[2];
-                colorsArray[4 * i + 3] = _cacheParams.constantOpacity;
-            } else {
-                size_t n = _cacheParams.tf_lut.size() >> 2;
-                int    index = (dataValue - _cacheParams.tf_minmax[0]) / (_cacheParams.tf_minmax[1] - _cacheParams.tf_minmax[0]) * (n - 1);
-                if (index < 0) { index = 0; }
-                if (index >= n) { index = n - 1; }
-                colorsArray[4 * i + 0] = _cacheParams.tf_lut[4 * index + 0];
-                colorsArray[4 * i + 1] = _cacheParams.tf_lut[4 * index + 1];
-                colorsArray[4 * i + 2] = _cacheParams.tf_lut[4 * index + 2];
-                colorsArray[4 * i + 3] = _cacheParams.tf_lut[4 * index + 3];
-            }
-        }
-
-        _drawCell(vertices, indices, coordsArray, colorsArray, numNodes, layered);
-    }
-
-    delete[] coordsArray;
-    delete[] colorsArray;
+    _nIndices = _buildCacheConnectivity(grid, nodeMap);
 
     if (grid) delete grid;
     if (heightGrid) delete heightGrid;
-
-    _nIndices = indices.size();
-    glBindVertexArray(_VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexData), vertices.data(), GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_DYNAMIC_DRAW);
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     return 0;
 }
 
