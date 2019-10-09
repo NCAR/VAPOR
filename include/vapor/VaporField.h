@@ -49,8 +49,8 @@ public:
     class GridWrapper
     {
     private:
-        const VAPoR::Grid*  gridPtr;
-        VAPoR::DataMgr*     mgr;
+        const VAPoR::Grid*  const  gridPtr;
+        VAPoR::DataMgr*     const  mgr;     // The pointer itself cannot be changed
     public:
         GridWrapper( const VAPoR::Grid* gp, VAPoR::DataMgr* mp )
                    : gridPtr( gp ), mgr( mp )
@@ -68,6 +68,11 @@ public:
                 delete gridPtr;
             }
         }
+
+        const VAPoR::Grid* grid() const
+        {
+            return gridPtr;
+        }
     };
 
     // 
@@ -82,7 +87,7 @@ private:
     std::vector<float>          _timestamps;    // in ascending order
     VAPoR::DataMgr*             _datamgr = nullptr;   
     const VAPoR::FlowParams*    _params  = nullptr;
-    using cacheType = VAPoR::unique_ptr_cache< std::string, VAPoR::Grid >;
+    using cacheType = VAPoR::unique_ptr_cache< std::string, GridWrapper >;
     cacheType                   _recentGrids;
 
     // Member functions
