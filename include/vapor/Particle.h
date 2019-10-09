@@ -26,16 +26,16 @@ enum ERROR_CODE
 class Particle
 {
 public:
-    glm::vec3                 location;
-    float                     time;
-    float                     value;
+    glm::vec3   location { 0.0f, 0.0f, 0.0f };
+    float       time     = 0.0f;
+    float       value    = 0.0f;
 
-    // Constructor and destructor
-    Particle();
+    // Constructors.
+    // This class complies with rule of zero.
+    Particle() = default;
     Particle( const glm::vec3& loc, float t, float val = 0.0f );
     Particle( const float* loc, float t, float val = 0.0f );
     Particle( float x, float y, float z, float t, float val = 0.0f );
-   ~Particle();
 
     void  AttachProperty  (  float v );
     // This function will throw an exception when idx is out of bound
@@ -48,7 +48,9 @@ public:
     bool  IsSpecial() const; 
 
 private:
-    std::forward_list<float>  _properties;  // Forward_list takes only 8 bytes, whereas a vector takes 24 bytes!
+    std::forward_list<float>  _properties;  
+    // Note on the choice of using a forward_list:
+    // Forward_list takes 8 bytes, whereas a vector or list take 24 bytes!
 };
 
 };
