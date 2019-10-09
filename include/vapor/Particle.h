@@ -23,7 +23,8 @@ enum ERROR_CODE
     SIZE_MISMATCH        = -7
 };
 
-class Particle
+// Particle is not expected to serve as a base class.
+class Particle final
 {
 public:
     glm::vec3   location { 0.0f, 0.0f, 0.0f };
