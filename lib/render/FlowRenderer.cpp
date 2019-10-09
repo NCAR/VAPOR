@@ -1,8 +1,5 @@
 #include "vapor/glutil.h"
 #include "vapor/FlowRenderer.h"
-#include "vapor/SteadyVAPORVelocity.h"
-#include "vapor/UnsteadyVAPORVelocity.h"
-#include "vapor/SteadyVAPORScalar.h"
 #include "vapor/Particle.h"
 #include <iostream>
 #include <cstring>
