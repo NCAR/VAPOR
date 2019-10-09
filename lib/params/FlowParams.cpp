@@ -164,7 +164,7 @@ void
 FlowParams::SetPeriodic( const std::vector<bool>& bools )
 {
     std::vector<long> longs( 3, 0 );
-    for( int i = 0; i < 3; i++ )
+    for( int i = 0; i < 3 && i < bools.size(); i++ )
         if( bools[i] )
             longs[i] = 1;
 
