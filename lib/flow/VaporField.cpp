@@ -365,7 +365,7 @@ VaporField::LocateTimestamp( float time, size_t& floor ) const
 
 
 int
-VaporField::GetNumberOfTimesteps()
+VaporField::GetNumberOfTimesteps() const
 {
     return _timestamps.size();
 }

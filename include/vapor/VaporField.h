@@ -27,7 +27,7 @@ public:
     virtual int  GetScalar(    float time, const glm::vec3& pos,    // input 
                                float& val,                          // output
                                bool checkInsideVolume = true )      override;
-    virtual int  GetNumberOfTimesteps()                             override;
+    virtual int  GetNumberOfTimesteps()                      const  override;
 
     //
     // Functions for interaction with VAPOR components
