@@ -28,7 +28,7 @@ namespace VAPoR
 
 // Note : Key must support == operator
 template <typename Key, typename BigObj>
-class unique_ptr_cache
+class unique_ptr_cache final
 {
 public:
     // Constructor with the max size specified
