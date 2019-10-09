@@ -11,7 +11,7 @@
 
 namespace flow
 {
-class VaporField : public Field
+class VaporField final : public Field
 {
 public:
     VaporField( size_t cacheLimit );
@@ -19,15 +19,15 @@ public:
     //
     // Functions from class Field
     //
-    virtual bool InsideVolumeVelocity( float time, const glm::vec3& pos );
-    virtual bool InsideVolumeScalar(   float time, const glm::vec3& pos );
-    virtual int  GetVelocity(  float time, const glm::vec3& pos,     // input 
-                               glm::vec3& vel ,                      // output
-                               bool checkInsideVolume = true );
-    virtual int  GetScalar(    float time, const glm::vec3& pos,     // input 
-                               float& val,                           // output
-                               bool checkInsideVolume = true );
-    virtual int  GetNumberOfTimesteps() ;
+    virtual bool InsideVolumeVelocity( float time, const glm::vec3& pos ) override;
+    virtual bool InsideVolumeScalar(   float time, const glm::vec3& pos ) override;
+    virtual int  GetVelocity(  float time, const glm::vec3& pos,    // input 
+                               glm::vec3& vel ,                     // output
+                               bool checkInsideVolume = true )      override;
+    virtual int  GetScalar(    float time, const glm::vec3& pos,    // input 
+                               float& val,                          // output
+                               bool checkInsideVolume = true )      override;
+    virtual int  GetNumberOfTimesteps()                             override;
 
     //
     // Functions for interaction with VAPOR components
@@ -53,11 +53,13 @@ public:
         VAPoR::DataMgr*     mgr;
     public:
         GridWrapper( const VAPoR::Grid* gp, VAPoR::DataMgr* mp )
-            : gridPtr( gp ), mgr( mp )
+                   : gridPtr( gp ), mgr( mp )
         {}   
-        // Rule of 3
-        GridWrapper(            const GridWrapper& ) = delete;
-        GridWrapper& operator=( const GridWrapper& ) = delete;
+        // Rule of five
+        GridWrapper(            const GridWrapper&  ) = delete;
+        GridWrapper& operator=( const GridWrapper&  ) = delete;
+        GridWrapper(            const GridWrapper&& ) = delete;
+        GridWrapper& operator=( const GridWrapper&& ) = delete;
        ~GridWrapper()
         {
             if( mgr && gridPtr )
@@ -73,14 +75,13 @@ public:
     //
     void GetFirstStepVelocityIntersection( glm::vec3& minxyz, glm::vec3& maxxyz );
 
-protected:
-   
+
+private:
+
     // Member variables
     std::vector<float>          _timestamps;    // in ascending order
     VAPoR::DataMgr*             _datamgr = nullptr;   
     const VAPoR::FlowParams*    _params  = nullptr;
-
-    // Keep copies of recent grids.
     using cacheType = VAPoR::unique_ptr_cache< std::string, VAPoR::Grid >;
     cacheType                   _recentGrids;
 
@@ -88,7 +89,7 @@ protected:
     std::string _paramsToString(  size_t currentTS, const std::string& var, int refLevel, 
             int compLevel, const std::vector<double>& min, const std::vector<double>& max ) const;
 
-    // Are the following member variables pointers set?
+    // Are the following member pointers set?
     //  1) _datamgr and 2) _params
     bool _isReady() const;
 

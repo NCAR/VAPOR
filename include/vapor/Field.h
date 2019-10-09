@@ -13,9 +13,10 @@ namespace flow
 class Field
 {
 public:
-    // Constructor and destructor
-    Field();
-    virtual ~Field();
+    // Constructor and destructor. 
+    // This class complies with rule of zero.
+    Field() = default;
+    virtual ~Field() = default;
 
     // 
     // If a given position at a given time is inside of this field
@@ -45,7 +46,7 @@ public:
                               bool checkInsideVolume = true ) = 0;
 
     // Class members
-    bool            IsSteady;
+    bool            IsSteady = false;
     std::string     ScalarName;
     std::string     VelocityNames[3];
 };
