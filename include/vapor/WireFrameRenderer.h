@@ -116,7 +116,6 @@ class RENDER_API WireFrameRenderer : public Renderer {
 
       private:
         vector<GLuint> _drawList;
-        size_t _maxEntries;
         const size_t _maxEntries;
         const size_t _maxLinesPerVertex;
     };
