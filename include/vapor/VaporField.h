@@ -101,7 +101,7 @@ private:
     // In the case of failing to generate a requested grid, nullptr will be returned.
     // This failure will also be recorded to MyBase.
     const VAPoR::Grid* _getAGrid( size_t              timestep,   // Input
-                                  std::string&        varName );  // Input
+                                  const std::string&  varName );  // Input
 };
 };
 

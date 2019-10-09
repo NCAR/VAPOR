@@ -20,7 +20,7 @@ VaporField::InsideVolumeVelocity( float time, const glm::vec3& pos )
     if( IsSteady )
     {
         size_t currentTS = _params->GetCurrentTimestep();
-        for( auto v : VelocityNames )   // cannot use reference here...
+        for( auto& v : VelocityNames )
             if( !v.empty() )
             {
                 grid = _getAGrid( currentTS, v );
@@ -41,7 +41,7 @@ VaporField::InsideVolumeVelocity( float time, const glm::vec3& pos )
         if( rv != 0 ) return false;
 
         // Second test if pos is inside of time step "floor"
-        for( auto v : VelocityNames )   // cannot use references...
+        for( auto& v : VelocityNames )
             if( !v.empty() )
             {
                 grid = _getAGrid( floor, v );
@@ -53,7 +53,7 @@ VaporField::InsideVolumeVelocity( float time, const glm::vec3& pos )
         // If time is larger than _timestamps[floor], we also need to test _timestamps[floor+1]
         if( time > _timestamps[floor] )
         {
-            for( auto v : VelocityNames )   // cannot use references
+            for( auto& v : VelocityNames )
                 if( !v.empty() )
                 {
                     grid = _getAGrid( floor + 1, v );
@@ -72,7 +72,7 @@ bool
 VaporField::InsideVolumeScalar( float time, const glm::vec3& pos )
 {
     if( ScalarName.empty() )
-        return false
+        return false;
 
     std::string scalarname = ScalarName;    // const requirement...
     const std::vector<double> coords{ pos.x, pos.y, pos.z };
@@ -126,7 +126,7 @@ VaporField::GetFirstStepVelocityIntersection( glm::vec3& minxyz, glm::vec3& maxx
 
     for( int i = 0; i < 3; i++ )
     {
-        auto varname = VelocityNames[i];
+        auto& varname = VelocityNames[i];
         grid = _getAGrid( 0, varname );
         VAssert( grid );
         grid->GetUserExtents( min[i], max[i] );
@@ -165,7 +165,7 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity,
         size_t currentTS = _params->GetCurrentTimestep();
         for( int i = 0; i < 3; i++ )
         {
-            auto varname = VelocityNames[i];
+            auto& varname = VelocityNames[i];
             grid = _getAGrid( currentTS, varname );
             VAssert( grid );
             velocity[i] = grid->GetValue( coords );
@@ -192,7 +192,7 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity,
         glm::vec3 floorVelocity, ceilVelocity;
         for( int i = 0; i < 3; i++ )
         {
-            auto varname = VelocityNames[i];
+            auto& varname = VelocityNames[i];
             grid = _getAGrid( floorTS, varname );
             VAssert( grid );
             floorVelocity[i] = grid->GetValue( coords );
@@ -210,9 +210,11 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity,
             velocity = floorVelocity * mult; 
         else
         {
+            // We need to make sure there aren't duplicate time stamps 
+            VAssert( _timestamps[floorTS+1] > _timestamps[floorTS] );
             for( int i = 0; i < 3; i++ )
             {
-                auto varname = VelocityNames[i];
+                auto& varname = VelocityNames[i];
                 grid = _getAGrid( floorTS + 1, varname );
                 VAssert( grid );
                 ceilVelocity[i] = grid->GetValue( coords );
@@ -374,7 +376,7 @@ VaporField::GetNumberOfTimesteps() const
 
 const VAPoR::Grid*
 VaporField::_getAGrid( size_t               timestep,
-                       std::string&         varName )
+                       const std::string&   varName )
 {
     // First check if we have the requested grid in our cache.
     // If it exists, return the grid directly.
