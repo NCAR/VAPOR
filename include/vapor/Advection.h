@@ -87,10 +87,10 @@ public:
     // Query properties (most are properties of the velocity field)
     int  CheckReady() const;
 
-    // Specify periodicity on each dimension
-    void  SetXPeriodicity( bool, float min = 0.0f, float max = 0.0f );
-    void  SetYPeriodicity( bool, float min = 0.0f, float max = 0.0f );
-    void  SetZPeriodicity( bool, float min = 0.0f, float max = 0.0f );
+    // Specify periodicity, and periodic bounds on each dimension
+    void  SetXPeriodicity( bool, float min, float max );
+    void  SetYPeriodicity( bool, float min, float max );
+    void  SetZPeriodicity( bool, float min, float max );
 
 private:
     std::vector< std::vector<Particle> >    _streams;

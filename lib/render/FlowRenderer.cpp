@@ -1013,17 +1013,17 @@ FlowRenderer::_updatePeriodicity( flow::Advection* advc )
     if( _cache_periodic[0] )
         advc->SetXPeriodicity( true, minxyz.x, maxxyz.x );
     else
-        advc->SetXPeriodicity( false );
+        advc->SetXPeriodicity( false, 0.0f, 1.0f );
 
     if( _cache_periodic[1] )
         advc->SetYPeriodicity( true, minxyz.y, maxxyz.y );
     else
-        advc->SetYPeriodicity( false );
+        advc->SetYPeriodicity( false, 0.0f, 1.0f );
 
     if( _cache_periodic[2] )
         advc->SetZPeriodicity( true, minxyz.z, maxxyz.z );
     else
-        advc->SetZPeriodicity( false );
+        advc->SetZPeriodicity( false, 0.0f, 1.0f );
 }
 
 void
