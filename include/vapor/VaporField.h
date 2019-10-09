@@ -89,14 +89,14 @@ private:
     std::string _paramsToString(  size_t currentTS, const std::string& var, int refLevel, 
             int compLevel, const std::vector<double>& min, const std::vector<double>& max ) const;
 
-    // Are the following member pointers set?
-    //  1) _datamgr and 2) _params
+    // Are the following member pointers set? 1) _datamgr, 2) _params
     bool _isReady() const;
 
     // _getAGrid will use _params to retrieve/generate grids. 
-    int  _getAGrid( size_t              timestep,   // Input
-                    std::string&        varName,    // Input
-                    const VAPoR::Grid** gridpp  );  // Output
+    // In the case of failing to generate a requested grid, nullptr will be returned.
+    // This failure will also be recorded to MyBase.
+    const VAPoR::Grid* _getAGrid( size_t              timestep,   // Input
+                                  std::string&        varName );  // Input
 };
 };
 
