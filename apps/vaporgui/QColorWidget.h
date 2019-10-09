@@ -5,6 +5,10 @@
 
 class QStylePainter;
 
+//! \class QColorWidget
+//!
+//! Displays a color and allows the user to modify said color
+
 class QColorWidget : public QLineEdit {
     Q_OBJECT
     
