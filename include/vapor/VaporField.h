@@ -19,15 +19,15 @@ public:
     //
     // Functions from class Field
     //
-    virtual bool InsideVolumeVelocity( float time, const glm::vec3& pos ) override;
-    virtual bool InsideVolumeScalar(   float time, const glm::vec3& pos ) override;
+    virtual bool InsideVolumeVelocity( float time, const glm::vec3& pos ) const override;
+    virtual bool InsideVolumeScalar(   float time, const glm::vec3& pos ) const override;
     virtual int  GetVelocity(  float time, const glm::vec3& pos,    // input 
                                glm::vec3& vel ,                     // output
-                               bool checkInsideVolume = true )      override;
+                               bool checkInsideVolume = true )      const override;
     virtual int  GetScalar(    float time, const glm::vec3& pos,    // input 
                                float& val,                          // output
-                               bool checkInsideVolume = true )      override;
-    virtual int  GetNumberOfTimesteps()                      const  override;
+                               bool checkInsideVolume = true )      const override;
+    virtual int  GetNumberOfTimesteps()                             const override;
 
     //
     // Functions for interaction with VAPOR components
@@ -88,7 +88,7 @@ private:
     VAPoR::DataMgr*             _datamgr = nullptr;   
     const VAPoR::FlowParams*    _params  = nullptr;
     using cacheType = VAPoR::unique_ptr_cache< std::string, GridWrapper >;
-    cacheType                   _recentGrids;
+    mutable cacheType           _recentGrids;
 
     // Member functions
     std::string _paramsToString(  size_t currentTS, const std::string& var, int refLevel, 
@@ -100,8 +100,8 @@ private:
     // _getAGrid will use _params to retrieve/generate grids. 
     // In the case of failing to generate a requested grid, nullptr will be returned.
     // This failure will also be recorded to MyBase.
-    const VAPoR::Grid* _getAGrid( size_t              timestep,   // Input
-                                  const std::string&  varName );  // Input
+    const VAPoR::Grid* _getAGrid( size_t              timestep,
+                                  const std::string&  varName ) const ;
 };
 };
 

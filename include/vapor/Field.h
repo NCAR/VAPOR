@@ -15,14 +15,14 @@ class Field
 public:
     // Constructor and destructor. 
     // This class complies with rule of zero.
-    Field() = default;
+    Field()          = default;
     virtual ~Field() = default;
 
     // 
     // If a given position at a given time is inside of this field
     //
-    virtual bool InsideVolumeVelocity( float time, const glm::vec3& pos ) = 0;
-    virtual bool InsideVolumeScalar(   float time, const glm::vec3& pos ) = 0;
+    virtual bool InsideVolumeVelocity( float time, const glm::vec3& pos ) const = 0;
+    virtual bool InsideVolumeScalar(   float time, const glm::vec3& pos ) const = 0;
 
     //
     // Retrieve the number of time steps in this field
@@ -35,7 +35,7 @@ public:
     //  
     virtual int  GetScalar(  float time, const glm::vec3& pos,  // input 
                              float& val,                        // output
-                             bool checkInsideVolume = true ) = 0;
+                             bool checkInsideVolume = true ) const = 0;
 
     //
     // Get the velocity value at a certain position, at a certain time.
@@ -43,7 +43,7 @@ public:
     //  
     virtual int  GetVelocity( float time, const glm::vec3& pos, // input 
                               glm::vec3& vel,                   // output
-                              bool checkInsideVolume = true ) = 0;
+                              bool checkInsideVolume = true ) const = 0;
 
     // Class members
     bool            IsSteady = false;

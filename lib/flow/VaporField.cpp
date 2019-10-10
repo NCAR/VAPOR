@@ -10,7 +10,7 @@ VaporField::VaporField( size_t cache_limit )
 
 
 bool
-VaporField::InsideVolumeVelocity( float time, const glm::vec3& pos )
+VaporField::InsideVolumeVelocity( float time, const glm::vec3& pos ) const
 {
     const std::vector<double> coords{ pos.x, pos.y, pos.z };
     const VAPoR::Grid* grid = nullptr;
@@ -69,7 +69,7 @@ VaporField::InsideVolumeVelocity( float time, const glm::vec3& pos )
 
 
 bool
-VaporField::InsideVolumeScalar( float time, const glm::vec3& pos )
+VaporField::InsideVolumeScalar( float time, const glm::vec3& pos ) const
 {
     if( ScalarName.empty() )
         return false;
@@ -146,7 +146,7 @@ VaporField::GetFirstStepVelocityIntersection( glm::vec3& minxyz, glm::vec3& maxx
 
 int
 VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity,
-                         bool  checkInsideVolume )
+                         bool  checkInsideVolume ) const
 {
     const std::vector<double> coords{ pos.x, pos.y, pos.z };
     const VAPoR::Grid* grid = nullptr;
@@ -239,7 +239,7 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity,
 
 int
 VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar,
-                       bool  checkInsideVolume )
+                       bool  checkInsideVolume ) const
 {
     if( ScalarName.empty() )
         return NO_FIELD_YET;
@@ -331,11 +331,12 @@ void
 VaporField::UpdateParams( const VAPoR::FlowParams* p )
 {
     _params = p;
+
     // Update properties of this Field
     IsSteady = p->GetIsSteady();
     ScalarName = p->GetColorMapVariableName();
     auto velNames = p->GetFieldVariableNames();
-    for( int i = 0; i < 3; i++ )
+    for( int i = 0; i < 3 && i < velNames.size(); i++ )
         VelocityNames[i] = velNames.at(i);
 }
 
@@ -375,8 +376,7 @@ VaporField::GetNumberOfTimesteps() const
 
 
 const VAPoR::Grid*
-VaporField::_getAGrid( size_t               timestep,
-                       const std::string&   varName )
+VaporField::_getAGrid( size_t timestep, const std::string& varName ) const
 {
     // First check if we have the requested grid in our cache.
     // If it exists, return the grid directly.
