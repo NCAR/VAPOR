@@ -69,24 +69,27 @@ public:
         for( auto it = m_list.cbegin(); it != m_list.cend(); ++it )
         {
             if( it->first == key )
+            {
+                // Move this element to the list head
+                m_list.splice( m_list.cbegin(), m_list, it );
                 return true;
+            }
         }
         return false;
     }
 
     // Upon the existance of Key, returns a const pointer pointing to BigObj
     // Upon non-existance of Key, return a nullptr
-    const BigObj*  find( const Key& key ) const
+    const BigObj* find( const Key& key ) const
     {
-        for( auto it = m_list.cbegin(); it != m_list.cend(); ++it )
-        { 
-            if( it->first == key )
-            {
-                m_list.splice( m_list.cbegin(), m_list, it );
-                return (it->second).get();
-            }
+        // We found the key, and now the pair is at the beginning of the list
+        if( this->contains( key ) )
+        {
+            // Get a raw pointer from the unique_ptr
+            return (m_list.cbegin()->second).get();
         }
-        return nullptr; // Not finding the key! Return nullptr
+        else
+            return nullptr;
     }
 
     //
