@@ -215,6 +215,62 @@ std::vector<double> ParamsWidgetColor::QColorToVector(const QColor &c)
 
 
 
+#include <QFileDialog>
+ParamsWidgetFile::ParamsWidgetFile(const std::string &tag, const std::string &label)
+: ParamsWidget(tag, label)
+{
+    _button = new QPushButton;
+    _button->setText("Select");
+    connect(_button, SIGNAL(clicked()), this, SLOT(_buttonClicked()));
+    layout()->addWidget(_button);
+    
+    _pathTexbox = new QLineEdit;
+    _pathTexbox->setReadOnly(true);
+    layout()->addWidget(_pathTexbox);
+}
+
+void ParamsWidgetFile::Update(VAPoR::ParamsBase *p)
+{
+    _params = p;
+    _pathTexbox->setText(QString::fromStdString(p->GetValueString(_tag, "<empty>")));
+}
+
+void ParamsWidgetFile::_buttonClicked()
+{
+    if (!_params)
+        return;
+    
+    QString qSelectedPath = QFileDialog::getOpenFileName(nullptr, "Select a file", "", "All Files (*)");
+    if (qSelectedPath.isNull())
+        return;
+    
+    _params->SetValueString(_tag, _tag, qSelectedPath.toStdString());
+}
+
+
+
+
+/*
+ParamsWidgetTextLabel::ParamsWidgetTextLabel(const std::string &tag, const std::string &label)
+: ParamsWidget(tag, label)
+{
+    _textLabel = new QLabel;
+    layout()->addWidget(_textLabel);
+    this->setSizePolicy(QSizePolicy::Maximum, this->sizePolicy().verticalPolicy());
+}
+
+void ParamsWidgetTextLabel::Update(VAPoR::ParamsBase *p)
+{
+    _params = p;
+    QString text = QString::fromStdString(p->GetValueString(_tag, "<empty>"));
+    QFontMetrics metrics(_textLabel->font());
+    QString elidedText = metrics.elidedText(text, Qt::ElideRight, _textLabel->maximumWidth());
+    _textLabel->setText(elidedText);
+}
+*/
+
+
+
 
 ParamsWidgetGroup::ParamsWidgetGroup(const std::string &title)
 : QGroupBox(title.c_str())

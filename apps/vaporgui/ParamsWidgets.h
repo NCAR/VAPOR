@@ -8,6 +8,7 @@
 #include <QTabWidget>
 #include <QPushButton>
 #include <QComboBox>
+#include <QLabel>
 #include <vapor/ParamsBase.h>
 #include <cassert>
 
@@ -122,6 +123,38 @@ public:
 private slots:
     void colorChanged(QColor color);
 };
+
+
+
+
+class ParamsWidgetFile : public ParamsWidget {
+    Q_OBJECT
+    
+    QPushButton *_button = nullptr;
+    QLineEdit *_pathTexbox;
+    
+public:
+    ParamsWidgetFile(const std::string &tag, const std::string &label = "");
+    void Update(VAPoR::ParamsBase *p);
+    
+private slots:
+    void _buttonClicked();
+};
+
+
+
+/*
+ Placeholder. Does not currently work due to layout issues
+class ParamsWidgetTextLabel : public ParamsWidget {
+    Q_OBJECT
+    
+    QLabel *_textLabel = nullptr;
+    
+public:
+    ParamsWidgetTextLabel(const std::string &tag, const std::string &label = "");
+    void Update(VAPoR::ParamsBase *p);
+};
+ */
 
 
 
