@@ -159,7 +159,7 @@ int MyPython::Initialize() {
 	//
 	int rc = PyRun_SimpleString(stdErr.c_str());
 	if (rc<0) {
-		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
+		MyBase::SetErrMsg("1PyRun_SimpleString() : %s", PyErr().c_str());
 		return(-1);
 	}
 
@@ -181,7 +181,7 @@ int MyPython::Initialize() {
 	//
 	rc = PyRun_SimpleString(stdOut.c_str());
 	if (rc<0) {
-		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
+		MyBase::SetErrMsg("2PyRun_SimpleString() : %s", PyErr().c_str());
 		return(-1);
 	}
 
@@ -195,7 +195,7 @@ int MyPython::Initialize() {
 	"	raise\n";
 	rc = PyRun_SimpleString(importMPL.c_str());
 	if (rc<0) {
-		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
+		MyBase::SetErrMsg("3PyRun_SimpleString() : %s", PyErr().c_str());
 		return(-1);
 	}
 
@@ -205,7 +205,7 @@ int MyPython::Initialize() {
     path = "sys.path.append('" + path + "')\n";
     rc = PyRun_SimpleString( path.c_str() );
 	if (rc<0) {
-		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
+		MyBase::SetErrMsg("4PyRun_SimpleString() : %s", PyErr().c_str());
 		return(-1);
 	}
 
