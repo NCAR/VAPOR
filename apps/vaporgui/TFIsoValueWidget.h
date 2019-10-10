@@ -18,7 +18,7 @@ public:
     void PopulateContextMenu(QMenu *menu, const glm::vec2 &p) override;
     
     QSize minimumSizeHint() const override;
-    void Deactivate() override;
+    void LostFocus() override;
     
     void SetEquidistantIsoValues(bool b) { _equidistantIsoValues = b; }
     

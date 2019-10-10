@@ -49,7 +49,7 @@ QSize TFOpacityMap::minimumSizeHint() const
     return QSize(100, 75);
 }
 
-void TFOpacityMap::Deactivate()
+void TFOpacityMap::LostFocus()
 {
     DeselectControlPoint();
 }
