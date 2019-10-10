@@ -34,7 +34,10 @@ private slots:
     void rightTextChanged();
     
 signals:
+    //! User began to change the value.
     void ValueChangedBegin();
+    //! User finalized changing the value.
     void ValueChanged(float min, float max);
+    //! User changed the value but they have not finalized it.
     void ValueChangedIntermediate(float min, float max);
 };

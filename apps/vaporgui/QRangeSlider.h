@@ -4,6 +4,8 @@
 
 class QStylePainter;
 
+//! \class QRangeSlider
+//! It is the same as a QSlider except it has two independent slider controls
 class QRangeSlider : public QSlider {
     Q_OBJECT
     
@@ -15,8 +17,11 @@ public:
     void setStyle(QStyle *style) = delete;
     
 signals:
+    //! User began to change the value.
     void ValueChangedBegin();
+    //! User changed the value but they have not finalized it.
     void ValueChangedIntermediate(float min, float max);
+    //! User finalized changing the value.
     void ValueChanged(float min, float max);
     
 protected:

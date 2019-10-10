@@ -89,7 +89,7 @@ void TFHistogramMap::paintEvent(QPainter &p)
     else
         maxBin = _histo.getMaxBinSize();
     
-    const float logMaxBin = maxBin == 0 ? 1 : logf(maxBin);
+    const float logMaxBin = maxBin == 1 ? 1 : logf(maxBin);
     ScalingType scaling = _getScalingType();
     
     for (int i = startBin; i < endBin; i += stride) {
