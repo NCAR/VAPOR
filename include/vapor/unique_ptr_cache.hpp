@@ -76,7 +76,7 @@ public:
 
     // Upon the existance of Key, returns a const pointer pointing to BigObj
     // Upon non-existance of Key, return a nullptr
-    const BigObj*  find( const Key& key )
+    const BigObj*  find( const Key& key ) const
     {
         for( auto it = m_list.cbegin(); it != m_list.cend(); ++it )
         { 
@@ -120,8 +120,8 @@ public:
 
 private:
     using list_type = std::list< std::pair<Key, std::unique_ptr<const BigObj>> >;
-    list_type         m_list;
-    const size_t      m_max_size;
+    mutable list_type   m_list;
+    const   size_t      m_max_size;
 
 };  // end of class unique_ptr_cache
 
