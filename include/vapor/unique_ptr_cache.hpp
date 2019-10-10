@@ -70,8 +70,10 @@ public:
         {
             if( it->first == key )
             {
-                // Move this element to the list head
-                m_list.splice( m_list.cbegin(), m_list, it );
+                // Move the current element to the list head if it's not already there
+                if( it != m_list.cbegin() )
+                    m_list.splice( m_list.cbegin(), m_list, it );
+
                 return true;
             }
         }
@@ -102,7 +104,7 @@ public:
     //
     void insert( Key key, const BigObj* ptr )
     {
-        // Remove the old BigObj if the same key already exists.
+        // Remove the old pair if the same key already exists.
         for( auto it = m_list.cbegin(); it != m_list.cend(); ++it )
         { 
             if( it->first == key )
@@ -117,6 +119,7 @@ public:
 
         // Create a new pair at the front of the list
         m_list.emplace_front( std::move(key), std::move(tmp) );
+
         if( m_list.size() > m_max_size )
             m_list.pop_back();
     }
