@@ -36,7 +36,7 @@ QSize TFColorMap::minimumSizeHint() const
     return QSize(100, 30);
 }
 
-void TFColorMap::Deactivate()
+void TFColorMap::LostFocus()
 {
     DeselectControlPoint();
 }

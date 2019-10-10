@@ -35,6 +35,7 @@ class TFMap : public QObject {
     VAPoR::RenderParams *_renderParams = nullptr;
     
 public:
+    //! Used by the TFEditorIsoSurface to edit the colormapped variable
     bool UsingColormapVariable = false;
     
     TFMap(TFMapWidget *parent = nullptr);
@@ -42,19 +43,23 @@ public:
     TFInfoWidget *GetInfoWidget();
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     bool HasValidParams() const;
-    virtual void Deactivate() = 0;
+    virtual void LostFocus() = 0;
     virtual QSize minimumSizeHint() const = 0;
+    //! (Right-click menu)
     virtual void PopulateContextMenu(QMenu *menu, const glm::vec2 &p) {}
     virtual void PopulateSettingsMenu(QMenu *menu) const {}
     
     int width() const { return _width; }
     int height() const { return _height; }
     void resize(int width, int height);
+    //! Sometimes Qt tries painting a 0 sized widget
     bool isLargeEnoughToPaint() const;
+    //! Returns the rect of the internal padded area
     QRect     paddedRect() const;
     QRect     rect() const;
     const QFont getFont() const;
     
+    //! These map to the QWidget counterparts
     virtual void paintEvent(QPainter &p) = 0;
     virtual void mousePressEvent      (QMouseEvent *event);
     virtual void mouseReleaseEvent    (QMouseEvent *event);
@@ -64,6 +69,7 @@ public:
     friend class TFMapWidget;
     
 public slots:
+    //! These map to the QWidget counterparts
     void update();
     void show();
     void hide();
@@ -94,6 +100,7 @@ protected:
     void CancelSaveStateGroup(VAPoR::ParamsMgr *paramsMgr);
     
 signals:
+    //! Emittend when focus was gained
     void Activated(TFMap *who);
 };
 

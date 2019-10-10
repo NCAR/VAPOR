@@ -24,7 +24,7 @@ TFInfoWidget *TFMap::GetInfoWidget()
 void TFMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
 {
     if (_renderParams != rParams)
-        Deactivate();
+        LostFocus();
     
     _dataMgr = dataMgr;
     _paramsMgr = paramsMgr;
@@ -261,7 +261,7 @@ void TFMapWidget::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, V
 void TFMapWidget::Deactivate()
 {
     for (auto map : _maps)
-        map->Deactivate();
+        map->LostFocus();
 }
 
 QSize TFMapWidget::minimumSizeHint() const
@@ -279,7 +279,7 @@ void TFMapWidget::_mapActivated(TFMap *who)
 {
     for (auto map : _maps)
         if (map != who)
-            map->Deactivate();
+            map->LostFocus();
     
     emit Activated(this);
 }

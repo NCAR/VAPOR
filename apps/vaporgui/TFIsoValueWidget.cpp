@@ -56,7 +56,7 @@ QSize TFIsoValueMap::minimumSizeHint() const
     return s;
 }
 
-void TFIsoValueMap::Deactivate()
+void TFIsoValueMap::LostFocus()
 {
     DeselectControlPoint();
 }

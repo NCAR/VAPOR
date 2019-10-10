@@ -76,12 +76,8 @@ void ParamsDropdownMenuItem::Update(VAPoR::ParamsBase *p)
 {
     _params = p;
     
-    for (int i = 0; i < _items.size(); i++)
-        _items[i]->setChecked(false);
-    
     int value = p->GetValueLong(_tag, 0);
-    
-    _items[_getIndexForValue(value)]->setChecked(true);
+    _selectIndex(_getIndexForValue(value));
 }
 
 void ParamsDropdownMenuItem::itemSelected()
@@ -99,7 +95,19 @@ void ParamsDropdownMenuItem::itemSelected()
     
     VAssert(index != -1);
     
+    _selectIndex(index);
     _params->SetValueLong(_tag, _tag, _getValueForIndex(index));
+}
+
+void ParamsDropdownMenuItem::_selectIndex(int index)
+{
+    assert(index >= 0 && index < _items.size());
+    if (!(index >= 0 && index < _items.size()))
+        return;
+    
+    for (int i = 0; i < _items.size(); i++)
+        _items[i]->setChecked(false);
+    _items[index]->setChecked(true);
 }
 
 int ParamsDropdownMenuItem::_getValueForIndex(int index) const

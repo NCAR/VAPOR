@@ -64,6 +64,7 @@ public:
     void Update(VAPoR::ParamsBase *p);
     
 private:
+    void _selectIndex(int index);
     int _getValueForIndex(int index) const;
     int _getIndexForValue(int value) const;
     
