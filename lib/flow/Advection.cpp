@@ -90,7 +90,8 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
             }
             else
                 continue;   // skip this particle, since it's out of the volume
-        }
+
+        }   // end of if condition
 
         const auto& past0 = s.back();
         float dt = deltaT;
@@ -111,7 +112,7 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
         }
 
         Particle p1;
-        int rv;
+        int rv = 0;
         switch (method)
         {
             case ADVECTION_METHOD::EULER:
@@ -124,11 +125,12 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
         else            // Advection successful, keep the new particle.
         {
             happened = true;
-            s.push_back( p1 );
+            s.push_back( std::move(p1) );
         }
 
         streamIdx++;
-    }
+
+    }   // end of for loop
 
     if( happened )
         return ADVECT_HAPPENED;
@@ -155,7 +157,7 @@ Advection::AdvectTillTime( Field* velocity, float deltaT, float targetT, ADVECTI
             if( !velocity->InsideVolumeVelocity( p0.time, p0.location ) )
             {
                 bool locChanged = false;
-                auto itr = s.end(); --itr;  // last element
+                auto itr = s.end(); --itr;  // pointing to the last element
                 auto loc = itr->location;
                 for( int i = 0; i < 3; i++ )
                 {
@@ -166,22 +168,23 @@ Advection::AdvectTillTime( Field* velocity, float deltaT, float targetT, ADVECTI
                     } 
                 }
                 if( !locChanged )   // no dimension is periodic
-                    break;
+                    break;          // break the while loop
 
                 // See if the new location is inside of the volume
-                if( velocity->InsideVolumeVelocity( p0.time, loc ) )
+                if( velocity->InsideVolumeVelocity( itr->time, loc ) )
                 {
                     itr->location = loc;
-                    p0 = *itr;
+                    p0 = *itr;  // p0 is equal to the wrapped particle
                     
                     Particle separator;
                     separator.SetSpecial( true );
-                    s.insert( itr, separator );
+                    s.insert( itr, std::move(separator) );
                     _separatorCount[streamIdx]++;
                 }
                 else 
-                    break;
-            }
+                    break;  // break the while loop
+
+            }   // Finish of the if condition
 
             float dt = deltaT;
             if( s.size() > 2 )  // If there are at least 3 particles in the stream, 
@@ -199,7 +202,7 @@ Advection::AdvectTillTime( Field* velocity, float deltaT, float targetT, ADVECTI
             }
 
             Particle p1;
-            int rv;
+            int rv = 0;
             switch (method)
             {
                 case ADVECTION_METHOD::EULER:
@@ -215,10 +218,12 @@ Advection::AdvectTillTime( Field* velocity, float deltaT, float targetT, ADVECTI
             {
                 happened = true;
                 s.push_back( p1 );
-                p0 = p1;
+                p0 = std::move( p1 );
             }
         }   // Finish the while loop to advect one particle to a time
+
         streamIdx++;
+
     }   // Finish the for loop to advect all particles to a time
 
     if( happened )
@@ -240,6 +245,7 @@ Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
     for( size_t i = 0; i < mostSteps; i++ )
     {
         for( auto& s : _streams )
+        {
             if( i < s.size() )
             {
                 auto& p = s[i];
@@ -251,9 +257,10 @@ Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
                     continue;
                 float value;
                 int rv = scalar->GetScalar( p.time, p.location, value, false );
-                assert( rv == 0 );
-                p.value = value;
+                if( rv == 0 )       // The end of a stream could be outside of the volume,
+                    p.value = value;// so let's only color it when the return value is 0.
             }
+        }
     }
 
     return 0;
@@ -271,14 +278,16 @@ Advection::CalculateParticleProperties( Field* scalar )
     for( size_t i = 0; i < mostSteps; i++ )
     {
         for( auto& s : _streams )
+        {
             if( i < s.size() )
             {
                 auto& p = s[i];
                 float value;
                 int rv = scalar->GetScalar( p.time, p.location, value, false );
-                assert( rv == 0 );
-                p.AttachProperty( value );
+                if( rv == 0 )   // A particle could be out of the volume, so we only
+                    p.AttachProperty( value );  // attach property when returns 0.
             }
+        }
     }
 
     return 0;
@@ -290,7 +299,8 @@ Advection::_advectEuler( Field* velocity, const Particle& p0, float dt, Particle
 {
     glm::vec3 v0;
     int rv  = velocity->GetVelocity( p0.time, p0.location, v0, false );
-    assert( rv == 0 );
+    if( rv != 0 )
+        return rv;
     p1.location = p0.location + dt * v0;
     p1.time     = p0.time + dt;
     return 0;
@@ -303,7 +313,8 @@ Advection::_advectRK4( Field* velocity, const Particle& p0, float dt, Particle& 
     float dt2 = dt * 0.5f;
     int rv;
     rv = velocity->GetVelocity( p0.time,       p0.location,            k1, false );
-    assert( rv == 0 );
+    if( rv != 0 )
+        return rv;
     rv = velocity->GetVelocity( p0.time + dt2, p0.location + dt2 * k1, k2, false );
     if( rv != 0 )
         return rv;
@@ -365,27 +376,27 @@ Advection::_prepareFileWrite( const std::string& filename, bool append ) const
 }
 
 int
-Advection::OutputStreamsGnuplotMaxPart( const std::string& filename, 
-                                        size_t maxPart, 
-                                        bool append ) const
+Advection::OutputStreamsGnuplotMaxPart( const std::string&  filename, 
+                                        size_t              maxPart, 
+                                        bool                append ) const
 {
     std::FILE* f = _prepareFileWrite( filename, append );
     if( f == nullptr )
         return FILE_ERROR;
 
-    size_t numPart;
     for( const auto& s : _streams )
     {
         // Either output all the particles in this stream, 
         // or only up to a certain number of particles.
-        numPart = maxPart < s.size() ? maxPart : s.size();
-        for( size_t i = 0; i < numPart; i++ )
+        size_t numPart = 0;
+        for( size_t i = 0; i < s.size() && numPart < maxPart; i++ )
         {
             const auto& p = s[i];
             if( !p.IsSpecial() )
             {
                 std::fprintf( f, "%f, %f, %f, %f, %f\n", p.location.x, p.location.y, 
                               p.location.z, p.time, p.value );
+                numPart++;
             }
         }
         std::fprintf( f, "\n\n" );
@@ -503,15 +514,16 @@ Advection::GetStreamAt( size_t i ) const
     return _streams.at(i);
 }
 
-int
+size_t
 Advection::GetMaxNumOfPart() const
 {
-    int max = 0;
-    int idx = 0;
+    size_t max = 0;
+    size_t idx = 0;
     for( const auto& s : _streams )
     {
-        int num = s.size() - _separatorCount[idx];
-        max = max > num ? max : num;
+        size_t num = s.size() - _separatorCount[idx];
+        if( num > max )
+            max = num;
         idx++;
     }
     return max;
@@ -566,11 +578,15 @@ Advection::SetZPeriodicity( bool isPeri, float min, float max )
 float
 Advection::_applyPeriodic( float val, float min, float max ) const
 {
+    if( min >= max )    // ill params, return val
+        return val;
+    else if( val >= min && val <= max ) // nothing needs to change
+        return val;
+
+    // Let's do some serious work
     float span = max - min;
     float pval = val;
-    if( val >= min && val <= max )
-        return pval;
-    else if( val < min )
+    if( val < min )
     {
         while( pval < min )
             pval += span;
