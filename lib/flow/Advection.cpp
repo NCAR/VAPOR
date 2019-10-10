@@ -13,14 +13,8 @@ Advection::Advection() : _lowerAngle( 3.0f ), _upperAngle( 15.0f )
     for( int i = 0; i < 3; i++ )
     {
         _isPeriodic[i]     = false;
-        _periodicBounds[i] = glm::vec2( 0.0f );
     }
 }
-
-// Destructor;
-Advection::~Advection()
-{ }
-
 
 void
 Advection::UseSeedParticles( const std::vector<Particle>& seeds )

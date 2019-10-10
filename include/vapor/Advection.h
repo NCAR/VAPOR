@@ -13,7 +13,7 @@
 
 namespace flow
 {
-class Advection
+class Advection final
 {
 public:
     enum class ADVECTION_METHOD
@@ -24,10 +24,9 @@ public:
 
     // Constructor and destructor
     Advection();
-   ~Advection();
 
     //
-    // Major action function
+    // Major action functions
     //
     // Advect one step as long as the particle is within spatial and temporal boundary
     int  AdvectOneStep(  Field* velocityField, float deltaT, 
@@ -35,6 +34,7 @@ public:
     // Advect as many steps as necessary to reach a certain time: targetT.
     int  AdvectTillTime( Field* velocityField, float deltaT, float targetT,
                          ADVECTION_METHOD method = ADVECTION_METHOD::RK4 );
+
     // Retrieve field values of a particle based on its location, and put the result in
     // the "value" field or the "properties" field of a particle
     //   If "skipNonZero" is true, then this function only overwrites zeros.
@@ -94,10 +94,16 @@ public:
 
 private:
     std::vector< std::vector<Particle> >    _streams;
-    const float _lowerAngle,    _upperAngle;    // Thresholds for step size adjustment
-    float       _lowerAngleCos, _upperAngleCos; // Cosine values of the threshold angles
-    std::vector<int>            _separatorCount;// how many separators does each stream have.
-                                                // This is used to know how many steps are there in a stream.
+    const float _lowerAngle,    _upperAngle;            // Thresholds for step size adjustment
+    float       _lowerAngleCos, _upperAngleCos;         // Cosine values of the threshold angles
+    std::vector<int>            _separatorCount;        // how many separators does each stream have.
+                                // Useful to determine how many steps are there in a stream.
+    // If the advection is performed in a periodic fashion along one or more dimensions.
+    // These variables are **not** intended to be decided by Advection, but by someone
+    // who's more knowledgeable about the field.
+    bool                        _isPeriodic[3];         // is it periodic in X, Y, Z dimensions ?
+    glm::vec2                   _periodicBounds[3];     // periodic boundaries in X, Y, Z dimensions
+
 
     // Advection methods here could assume all input is valid.
     int _advectEuler( Field*, const Particle&, float deltaT, // Input
@@ -113,15 +119,10 @@ private:
                              const Particle& past1, 
                              const Particle& current ) const;
 
-    // If the advection is performed in a periodic fashion along one or more dimensions.
-    // These variables are **not** intended to be decided by Advection, but by someone
-    // who's more knowledgeable about the field.
-    bool        _isPeriodic[3];         // is it periodic in X, Y, Z dimensions ?
-    glm::vec2   _periodicBounds[3];     // periodic boundaries in X, Y, Z dimensions
 
     // Adjust input "val" according to the bound specified by min and max.
     // Returns the value after adjustment.
-    float       _applyPeriodic( float val, float min, float max ) const;
+    float _applyPeriodic( float val, float min, float max ) const;
 
     // Prepares an std::FILE object and writes the header.
     // Upon success, this function returns a pointer pointing to a valid FILE object.
