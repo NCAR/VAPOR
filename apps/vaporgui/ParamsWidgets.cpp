@@ -242,9 +242,15 @@ void ParamsWidgetFile::_buttonClicked()
     if (!_params)
         return;
     
-    QString defaultPath = QString::fromStdString(Wasp::FileUtils::Dirname(_params->GetValueString(_tag, "")));
+    string defaultPath;
+    string selectedFile = _params->GetValueString(_tag, "");
     
-    QString qSelectedPath = QFileDialog::getOpenFileName(nullptr, "Select a file", defaultPath, "All Files (*)");
+    if (Wasp::FileUtils::Exists(selectedFile))
+        defaultPath = Wasp::FileUtils::Dirname(selectedFile);
+    else
+        defaultPath = Wasp::FileUtils::HomeDir();
+    
+    QString qSelectedPath = QFileDialog::getOpenFileName(nullptr, "Select a file", QString::fromStdString(defaultPath), "All Files (*)");
     if (qSelectedPath.isNull())
         return;
     
