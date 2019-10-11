@@ -6,6 +6,7 @@
 #include <random>
 
 #ifdef WIN32
+    #include <Windows.h>
     #include <Processthreadsapi.h>
 #else
     #include <sys/types.h>
