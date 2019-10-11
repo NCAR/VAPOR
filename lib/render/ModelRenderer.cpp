@@ -230,16 +230,12 @@ void ModelRenderer::renderNode(const aiNode *nd)
         else
             lgl->DisableLighting();
         
+        lgl->Begin(GL_TRIANGLES);
         for (int f = 0; f < mesh->mNumFaces; f++) {
             const aiFace *face = &mesh->mFaces[f];
-            int mode;
-            switch (face->mNumIndices) {
-                case 1:  mode = GL_POINTS;    break;
-                case 2:  mode = GL_LINES;     break;
-                case 3:  mode = GL_TRIANGLES; break;
-                default: mode = GL_POINTS;    assert(0);
-            }
-            lgl->Begin(mode);
+            
+            if (face->mNumIndices != 3)
+                continue;
             
             for (int v = 0; v < face->mNumIndices; v++) {
                 n++;
@@ -253,9 +249,8 @@ void ModelRenderer::renderNode(const aiNode *nd)
                     lgl->Normal3fv(&mesh->mNormals[face->mIndices[v]].x);
                 lgl->Vertex3fv(&mesh->mVertices[face->mIndices[v]].x);
             }
-            
-            lgl->End();
         }
+        lgl->End();
     }
     
     for (int c = 0; c < nd->mNumChildren; c++)
@@ -274,7 +269,10 @@ int ModelRenderer::loadFile(const std::string &path)
     if (importer.GetScene())
         importer.FreeScene();
     
-    scene = importer.ReadFile(path, aiProcessPreset_TargetRealtime_Quality);
+    scene = importer.ReadFile(path,
+                              aiProcessPreset_TargetRealtime_Quality |
+                              aiProcess_Triangulate
+                              );
     
     if (!scene) {
         MyBase::SetErrMsg("3D File Error: %s", importer.GetErrorString());
