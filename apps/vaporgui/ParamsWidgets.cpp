@@ -216,6 +216,8 @@ std::vector<double> ParamsWidgetColor::QColorToVector(const QColor &c)
 
 
 #include <QFileDialog>
+#include <vapor/FileUtils.h>
+
 ParamsWidgetFile::ParamsWidgetFile(const std::string &tag, const std::string &label)
 : ParamsWidget(tag, label)
 {
@@ -240,7 +242,9 @@ void ParamsWidgetFile::_buttonClicked()
     if (!_params)
         return;
     
-    QString qSelectedPath = QFileDialog::getOpenFileName(nullptr, "Select a file", "", "All Files (*)");
+    QString defaultPath = QString::fromStdString(Wasp::FileUtils::Dirname(_params->GetValueString(_tag, "")));
+    
+    QString qSelectedPath = QFileDialog::getOpenFileName(nullptr, "Select a file", defaultPath, "All Files (*)");
     if (qSelectedPath.isNull())
         return;
     
