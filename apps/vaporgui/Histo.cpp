@@ -111,12 +111,14 @@ void Histo::addToBin(float val) {
     if (val < _minMapData) {
         _numSamplesBelow++;
         if (_below) {
+            assert(_minMapData-_minData > 0);
             int index = (val-_minData)/(_minMapData-_minData) * _nBinsBelow;
             _below[index]++;
         }
     } else if (val > _maxMapData) {
         _numSamplesAbove++;
         if (_above) {
+            assert(_maxData-_maxMapData > 0);
             int index = (val-_maxMapData)/(_maxData-_maxMapData) * _nBinsAbove;
             _above[index]++;
         }
