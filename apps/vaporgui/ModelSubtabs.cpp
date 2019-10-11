@@ -16,6 +16,7 @@ ModelVariablesSubtab::ModelVariablesSubtab(QWidget* parent) {
     addPW(new ParamsWidgetCheckbox("transpose_node_trans"));
     addPW(new ParamsWidgetCheckbox("transpose_rot_trans"));
     addPW(new ParamsWidgetFloat("animation_time"));
+    addPW(new ParamsWidgetFile("file"));
 }
 
 void ModelVariablesSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)

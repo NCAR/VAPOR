@@ -49,16 +49,6 @@ ModelRenderer::ModelRenderer(const ParamsMgr* pm, string winName,
            ModelRenderer::GetClassType(), instName, dataMgr)
 {
     printf("ASSIMP %i.%i.%i\n", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision());
-    
-    const string path = "/Users/stasj/Developer/data/Rotating_Box_Color.dae";
-    
-    assert(FileUtils::Exists(path));
-    scene = importer.ReadFile(path, aiProcessPreset_TargetRealtime_Quality);
-    if (!scene) {
-        printf("Importer ERROR: %s\n", importer.GetErrorString());
-        exit(1);
-    }
-    printf("Animations[%i]\n", scene->mNumAnimations);
 }
 
 ModelRenderer::~ModelRenderer()
@@ -69,12 +59,20 @@ bool PRINT_VERTS = false;
 
 int ModelRenderer::_paintGL(bool fast)
 {
-    LegacyGL *lgl = _glManager->legacy;
+    RenderParams *rp = GetActiveParams();
+    int rc = 0;
+    const std::string file = rp->GetValueString("file", "/Users/stasj/Developer/data/Rotating_Box_Color.dae");
     
+    if (file != _cachedFile)
+        rc = loadFile(file);
+    if (rc < 0)
+        return rc;
+    _cachedFile = file;
+    
+    LegacyGL *lgl = _glManager->legacy;
     
 //    if (fast)
 //        return 0;
-    int rc = 0;
     
     MatrixManager *mm = _glManager->matrixManager;
     mm->MatrixModeModelView();
@@ -264,4 +262,23 @@ void ModelRenderer::renderNode(const aiNode *nd)
         renderNode(nd->mChildren[c]);
     
     mm->PopMatrix();
+}
+
+int ModelRenderer::loadFile(const std::string &path)
+{
+    if (!FileUtils::Exists(path)) {
+        MyBase::SetErrMsg("File not found \"%s\"", path.c_str());
+        return -1;
+    }
+    
+    if (importer.GetScene())
+        importer.FreeScene();
+    
+    scene = importer.ReadFile(path, aiProcessPreset_TargetRealtime_Quality);
+    
+    if (!scene) {
+        MyBase::SetErrMsg("3D File Error: %s", importer.GetErrorString());
+        return -1;
+    }
+    return 0;
 }
