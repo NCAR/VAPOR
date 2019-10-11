@@ -11,6 +11,13 @@
 
 #include <vapor/glutil.h> // Must be included first!!!
 
+// MSVC contains macros for the min() and max() fuction signatures, which
+// makes havoc when we use things like std::numeric_limits::max().  Setting
+// NOMINMAX removes those macros
+#ifdef WIN32
+#define NOMINMAX
+#endif
+
 #ifdef Darwin
 #include <OpenGL/gl.h>
 #else
@@ -97,7 +104,7 @@ private:
 		//
 		DrawList(GLuint maxEntries, size_t maxLinesPerVertex) :
 			_drawList(
-				maxEntries*maxLinesPerVertex, std::numeric_limits<GLuint>::max()
+				maxEntries*maxLinesPerVertex, (std::numeric_limits<GLuint>::max)()
 			),
 			_maxEntries(maxEntries),
 			_maxLinesPerVertex(maxLinesPerVertex)
@@ -115,7 +122,7 @@ private:
 				if (_drawList[idx0*_maxLinesPerVertex+i] == idx1) {
 					return(true);
 				}
-				if (_drawList[idx0*_maxLinesPerVertex+i] == std::numeric_limits<GLuint>::max()) {
+				if (_drawList[idx0*_maxLinesPerVertex+i] == (std::numeric_limits<GLuint>::max)()) {
 					_drawList[idx0*_maxLinesPerVertex+i] = idx1;
 					return(false);
 				}

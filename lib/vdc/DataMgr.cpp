@@ -547,9 +547,16 @@ bool is_int(std::string str) {
 
 template <class T>
 void _sanitizeFloats(T *buffer, size_t n) {
-	for (size_t i=0; i<n; i++) {
+	for (size_t i = 0; i < n; i++) {
 		if (isnan(buffer[i])) buffer[i] = std::numeric_limits<T>::infinity();
 	}
+}
+
+// MSVC has a bug where isnan() is not overloaded for integral types.
+// This function specializes the template to bypass this bug.
+template <>
+void _sanitizeFloats(int *buffer, size_t n) {
+	return;
 }
 
 };

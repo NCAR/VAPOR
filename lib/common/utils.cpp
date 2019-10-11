@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <vapor/utils.h>
 
+#define MAXCOORDS 4
+
 using namespace std;
 using namespace Wasp;
 
@@ -50,8 +52,9 @@ size_t Wasp::LinearizeCoords(
 size_t Wasp::LinearizeCoords(
 	const size_t *coords, const size_t *dims, int n
 ) {
-	size_t* min = new size_t[n];
-	size_t* max = new size_t[n];
+	VAssert(n <= MAXCOORDS);
+	size_t* min = new size_t[MAXCOORDS];
+	size_t* max = new size_t[MAXCOORDS];
 	
 	for (int i=0; i<n; i++) {
 		min[i] = 0;
@@ -123,9 +126,9 @@ void Wasp::VectorizeCoords(
     const size_t *dims,
     size_t *coords, int n
 ) {
-	
-	size_t* min = new size_t[n];
-	size_t* max = new size_t[n];
+	VAssert(n <= MAXCOORDS);
+	size_t* min = new size_t[MAXCOORDS];
+	size_t* max = new size_t[MAXCOORDS];
 	for (int i=0; i<n; i++) {
 		min[i] = 0;
 		max[i] = dims[i]-1;
