@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <vapor/utils.h>
 
+#define MAXCOORDS 4
+
 using namespace std;
 using namespace Wasp;
 
@@ -50,15 +52,27 @@ size_t Wasp::LinearizeCoords(
 size_t Wasp::LinearizeCoords(
 	const size_t *coords, const size_t *dims, int n
 ) {
-	size_t min[n];
-	size_t max[n];
+	VAssert(n <= MAXCOORDS);
+	size_t* min = new size_t[MAXCOORDS];
+	size_t* max = new size_t[MAXCOORDS];
 	
 	for (int i=0; i<n; i++) {
 		min[i] = 0;
 		max[i] = dims[i]-1;
 	}
 
-	return(Wasp::LinearizeCoords(coords, min, max, n));
+	size_t returnVal = Wasp::LinearizeCoords(coords, min, max, n);
+
+	if (min != nullptr) {
+		delete[] min;
+		min = nullptr;
+	}
+	if (max != nullptr) {
+		delete[] max;
+		max = nullptr;
+	}
+
+	return( returnVal );
 }
 
 size_t Wasp::LinearizeCoords(
@@ -96,10 +110,14 @@ std::vector <size_t> Wasp::VectorizeCoords(
 ) {
 	VAssert (min.size() == max.size());
 
-	size_t coords[min.size()];
+	size_t* coords = new size_t[min.size()];
 	VectorizeCoords(offset, min.data(), max.data(), coords, min.size());
 	std::vector <size_t> coordsvec(min.size(),0);
 	for (int i=0; i<min.size(); i++) coordsvec[i] = coords[i];
+	if (coords != nullptr) {
+		delete [] coords;
+		coords = nullptr;
+	}
 	return(coordsvec);
 }
 
@@ -108,24 +126,37 @@ void Wasp::VectorizeCoords(
     const size_t *dims,
     size_t *coords, int n
 ) {
-	
-	size_t min[n];
-	size_t max[n];
+	VAssert(n <= MAXCOORDS);
+	size_t* min = new size_t[MAXCOORDS];
+	size_t* max = new size_t[MAXCOORDS];
 	for (int i=0; i<n; i++) {
 		min[i] = 0;
 		max[i] = dims[i]-1;
 	}
 
 	Wasp::VectorizeCoords(offset, min, max, coords, n);
+
+	if (min != nullptr) {
+		delete[] min;
+		min = nullptr;
+	}
+	if (max != nullptr) {
+		delete[] max;
+		max = nullptr;
+	}
 }
 
 std::vector <size_t> Wasp::VectorizeCoords(
 	size_t offset, const std::vector <size_t> &dims
 ) {
-	size_t coords[dims.size()];
+	size_t* coords = new size_t[dims.size()];
 	VectorizeCoords(offset, dims.data(), coords, dims.size());
 	std::vector <size_t> coordsvec(dims.size(),0);
 	for (int i=0; i<dims.size(); i++) coordsvec[i] = coords[i];
+	if (coords != nullptr) {
+		delete[] coords;
+		coords = nullptr;
+	}
 	return(coordsvec);
 }
 
