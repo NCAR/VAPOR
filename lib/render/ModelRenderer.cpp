@@ -61,7 +61,7 @@ int ModelRenderer::_paintGL(bool fast)
 {
     RenderParams *rp = GetActiveParams();
     int rc = 0;
-    const std::string file = rp->GetValueString("file", "/Users/stasj/Developer/data/Rotating_Box_Color.dae");
+    const std::string file = rp->GetValueString("file", "");
     
     if (file != _cachedFile)
         rc = loadFile(file);
@@ -193,7 +193,7 @@ void ModelRenderer::renderNode(const aiNode *nd)
     MatrixManager *mm = _glManager->matrixManager;
     
     aiMatrix4x4 m;
-    if (mp->GetValueLong("apply_node_trans", 0))
+    if (mp->GetValueLong("apply_node_trans", 0) && nd != scene->mRootNode)
         m = nd->mTransformation;
     if (mp->GetValueLong("transpose_node_trans", 0))
         m.Transpose();
