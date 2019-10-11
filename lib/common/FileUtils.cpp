@@ -10,6 +10,8 @@
 #include <direct.h>
 #else
 #include <libgen.h>
+#include <pwd.h>
+#include <unistd.h>
 #endif
 
 using namespace Wasp;
@@ -47,6 +49,18 @@ string FileUtils::ReadFileToString(const string &path)
     } else {
         return "";
     }
+}
+
+std::string FileUtils::HomeDir()
+{
+#ifdef WIN32
+#error FileUtils::HomeDir not implemented
+    return "";
+#else
+    const struct passwd *pw = getpwuid(getuid());
+    const char *homeDir = pw->pw_dir;
+    return string(homeDir);
+#endif
 }
 
 std::string FileUtils::Basename(const std::string &path)
