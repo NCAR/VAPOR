@@ -29,6 +29,7 @@
 #include <vapor/GLManager.h>
 #include <vapor/LegacyGL.h>
 #include <vapor/FileUtils.h>
+#include <vapor/XmlNode.h>
 #include <assimp/postprocess.h>
 #include <assimp/version.h>
 
@@ -57,11 +58,50 @@ ModelRenderer::~ModelRenderer()
 
 bool PRINT_VERTS = false;
 
+void printSpacing(int depth) {
+    for (int i = 0; i < depth; i++)
+        printf("  ");
+}
+
+void printNode(XmlNode *n, int depth=0)
+{
+    printSpacing(depth);
+    printf("<%s", n->Tag().c_str());
+    for (auto attr : n->Attrs())
+        printf(" %s=\"%s\"", attr.first.c_str(), attr.second.c_str());
+    
+    if (n->GetNumChildren() == 0) {
+        printf(" />\n");
+        return;
+    }
+    printf("> [%i]\n", n->GetNumChildren());
+    
+    for (int i = 0; i < n->GetNumChildren(); i++)
+        printNode(n->GetChild(i), depth+1);
+    
+    printSpacing(depth);
+    printf("</%s>\n", n->Tag().c_str());
+}
+
 int ModelRenderer::_paintGL(bool fast)
 {
     RenderParams *rp = GetActiveParams();
     int rc = 0;
     const std::string file = rp->GetValueString("file", "");
+    
+    if (FileUtils::Extension(file) == "vms" && FileUtils::Exists(file)) {
+        XmlParser parser;
+        XmlNode node;
+        rc = parser.LoadFromFile(&node, file);
+        if (rc < 0) return rc;
+        
+        printf("Me ==============================\n");
+        printNode(&node);
+        printf("<< ==============================\n");
+        std::cout << node << std::endl;
+        
+        return 0;
+    }
     
     if (file != _cachedFile)
         rc = loadFile(file);
