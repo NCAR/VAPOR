@@ -65,7 +65,7 @@ Particle::ClearProperties()
 int
 Particle::GetNumOfProperties() const
 {
-    return int(_nProperties);
+    return (_nProperties);
 }
 
 void
