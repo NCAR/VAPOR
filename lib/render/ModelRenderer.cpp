@@ -141,11 +141,13 @@ int ModelRenderer::_paintGL(bool fast)
     _model.Render(_glManager);
     printf("N Verts = %li\n", n);
     
+    min = _model.BoundsMin();
+    max = _model.BoundsMax();
+    
     printf("Model Min = [%f, %f, %f]\n", min.x, min.y, min.z);
     printf("Model Max = [%f, %f, %f]\n", max.x, max.y, max.z);
     
     lgl->DisableLighting();
-    return rc;
     
     lgl->Begin(GL_LINES);
     lgl->Color3f(1, 0, 0);
@@ -174,13 +176,8 @@ void ModelRenderer::Model::renderNode(GLManager *gl, const aiNode *nd)
     LegacyGL *lgl = gl->legacy;
     MatrixManager *mm = gl->matrixManager;
     
-    aiMatrix4x4 m;
-    if (nd != _scene->mRootNode)
-        m = nd->mTransformation;
-    m.Transpose();
-    
     mm->PushMatrix();
-    mm->SetCurrentMatrix(mm->GetCurrentMatrix() * glm::make_mat4((float*)&m));
+    mm->SetCurrentMatrix(mm->GetCurrentMatrix() * getMatrix(nd));
     
     for (int m = 0; m < nd->mNumMeshes; m++) {
         const aiMesh *mesh = _scene->mMeshes[nd->mMeshes[m]];
@@ -197,10 +194,6 @@ void ModelRenderer::Model::renderNode(GLManager *gl, const aiNode *nd)
                 continue;
             
             for (int v = 0; v < face->mNumIndices; v++) {
-                const aiVector3D &vertex = mesh->mVertices[face->mIndices[v]];
-                const glm::vec3 gv(vertex.x, vertex.y, vertex.z);
-                min = glm::min(min, gv);
-                max = glm::max(max, gv);
                 if (mesh->GetNumColorChannels() > 0)
                     lgl->Color3fv (&mesh->mColors[0][face->mIndices[v]].r);
                 if (mesh->HasNormals())
@@ -215,6 +208,43 @@ void ModelRenderer::Model::renderNode(GLManager *gl, const aiNode *nd)
         renderNode(gl, nd->mChildren[c]);
     
     mm->PopMatrix();
+}
+
+void ModelRenderer::Model::calculateBounds(const aiNode *nd, glm::mat4 transform)
+{
+    transform *= getMatrix(nd);
+    
+    for (int m = 0; m < nd->mNumMeshes; m++) {
+        const aiMesh *mesh = _scene->mMeshes[nd->mMeshes[m]];
+        
+        for (int f = 0; f < mesh->mNumFaces; f++) {
+            const aiFace *face = &mesh->mFaces[f];
+            
+            if (face->mNumIndices != 3)
+                continue;
+            
+            for (int v = 0; v < face->mNumIndices; v++) {
+                glm::vec3 gv = glm::make_vec3(&mesh->mVertices[face->mIndices[v]].x);
+                gv = transform * glm::vec4(gv, 1.0f);
+                _min = glm::min(_min, gv);
+                _max = glm::max(_max, gv);
+            }
+        }
+    }
+    
+    for (int c = 0; c < nd->mNumChildren; c++)
+        calculateBounds(nd->mChildren[c], transform);
+}
+
+glm::mat4 ModelRenderer::Model::getMatrix(const aiNode *nd)
+{
+    // Ignore root transform. This is created by assimp to change the up axis
+    if (nd == _scene->mRootNode)
+        return glm::identity<glm::mat4>();
+    
+    aiMatrix4x4 m = nd->mTransformation;
+    m.Transpose();
+    return glm::make_mat4((float*)&m);
 }
 
 void ModelRenderer::Model::Render(GLManager *gl)
@@ -243,6 +273,15 @@ int ModelRenderer::Model::Load(const std::string &path)
         MyBase::SetErrMsg("3D File Error: %s", _importer.GetErrorString());
         return -1;
     }
+    
+    _min.x = FLT_MAX;
+    _min.y = FLT_MAX;
+    _min.z = FLT_MAX;
+    _max.x = FLT_MIN;
+    _max.y = FLT_MIN;
+    _max.z = FLT_MIN;
+    calculateBounds(_scene->mRootNode);
+    
     return 0;
 }
 

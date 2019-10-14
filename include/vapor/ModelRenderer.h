@@ -73,14 +73,18 @@ private:
         Assimp::Importer _importer;
         const aiScene *_scene;
         std::string _path;
+        glm::vec3 _min, _max;
         
         void renderNode(GLManager *gl, const aiNode *nd);
+        void calculateBounds(const aiNode *nd, glm::mat4 transform = glm::mat4(1.0f));
+        glm::mat4 getMatrix(const aiNode *nd);
         
     public:
-        glm::vec3 min, max;
         
         void Render(GLManager *gl);
         int Load(const std::string &path);
+        glm::vec3 BoundsMin() const { return _min; }
+        glm::vec3 BoundsMax() const { return _max; }
     };
  
     Model _model;
