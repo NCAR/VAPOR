@@ -100,7 +100,7 @@ int ModelRenderer::_paintGL(bool fast)
     }
     
     if (file != _cachedFile)
-        rc = loadFile(file);
+        rc = _model.Load(file);
     if (rc < 0)
         return rc;
     _cachedFile = file;
@@ -138,7 +138,7 @@ int ModelRenderer::_paintGL(bool fast)
     max.z = FLT_MIN;
     
     n = 0;
-    renderNode(scene->mRootNode);
+    _model.Render(_glManager);
     printf("N Verts = %li\n", n);
     
     printf("Model Min = [%f, %f, %f]\n", min.x, min.y, min.z);
@@ -169,13 +169,13 @@ int ModelRenderer::_initializeGL()
     return 0;
 }
 
-void ModelRenderer::renderNode(const aiNode *nd)
+void ModelRenderer::Model::renderNode(GLManager *gl, const aiNode *nd)
 {
-    LegacyGL *lgl = _glManager->legacy;
-    MatrixManager *mm = _glManager->matrixManager;
+    LegacyGL *lgl = gl->legacy;
+    MatrixManager *mm = gl->matrixManager;
     
     aiMatrix4x4 m;
-    if (nd != scene->mRootNode)
+    if (nd != _scene->mRootNode)
         m = nd->mTransformation;
     m.Transpose();
     
@@ -183,7 +183,7 @@ void ModelRenderer::renderNode(const aiNode *nd)
     mm->SetCurrentMatrix(mm->GetCurrentMatrix() * glm::make_mat4((float*)&m));
     
     for (int m = 0; m < nd->mNumMeshes; m++) {
-        const aiMesh *mesh = scene->mMeshes[nd->mMeshes[m]];
+        const aiMesh *mesh = _scene->mMeshes[nd->mMeshes[m]];
         if (mesh->HasNormals())
             lgl->EnableLighting();
         else
@@ -197,7 +197,6 @@ void ModelRenderer::renderNode(const aiNode *nd)
                 continue;
             
             for (int v = 0; v < face->mNumIndices; v++) {
-                n++;
                 const aiVector3D &vertex = mesh->mVertices[face->mIndices[v]];
                 const glm::vec3 gv(vertex.x, vertex.y, vertex.z);
                 min = glm::min(min, gv);
@@ -213,29 +212,37 @@ void ModelRenderer::renderNode(const aiNode *nd)
     }
     
     for (int c = 0; c < nd->mNumChildren; c++)
-        renderNode(nd->mChildren[c]);
+        renderNode(gl, nd->mChildren[c]);
     
     mm->PopMatrix();
 }
 
-int ModelRenderer::loadFile(const std::string &path)
+void ModelRenderer::Model::Render(GLManager *gl)
+{
+    gl->legacy->DisableTexture();
+    
+    renderNode(gl, _scene->mRootNode);
+}
+
+int ModelRenderer::Model::Load(const std::string &path)
 {
     if (!FileUtils::Exists(path)) {
         MyBase::SetErrMsg("File not found \"%s\"", path.c_str());
         return -1;
     }
     
-    if (importer.GetScene())
-        importer.FreeScene();
+    if (_importer.GetScene())
+        _importer.FreeScene();
     
-    scene = importer.ReadFile(path,
+    _scene = _importer.ReadFile(path,
                               aiProcessPreset_TargetRealtime_Quality |
                               aiProcess_Triangulate
                               );
     
-    if (!scene) {
-        MyBase::SetErrMsg("3D File Error: %s", importer.GetErrorString());
+    if (!_scene) {
+        MyBase::SetErrMsg("3D File Error: %s", _importer.GetErrorString());
         return -1;
     }
     return 0;
 }
+
