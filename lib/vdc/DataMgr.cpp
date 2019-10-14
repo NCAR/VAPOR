@@ -1608,7 +1608,7 @@ cout << "DataMgr::GetVariableExtents() : hardcode lod and level" << endl;
 	values.clear();
 	for (int i=0; i<min.size(); i++) values.push_back(min[i]);
 	for (int i=0; i<max.size(); i++) values.push_back(max[i]);
-	_varInfoCacheDouble.Set(ts, cvars, level, 0, key, values);
+	_varInfoCacheDouble.Set(ts, cvars, level, lod, key, values);
 
 	return(0);
 }
