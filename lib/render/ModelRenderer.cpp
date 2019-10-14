@@ -56,8 +56,6 @@ ModelRenderer::~ModelRenderer()
 {
 }
 
-bool PRINT_VERTS = false;
-
 void printSpacing(int depth) {
     for (int i = 0; i < depth; i++)
         printf("  ");
@@ -140,9 +138,7 @@ int ModelRenderer::_paintGL(bool fast)
     max.z = FLT_MIN;
     
     n = 0;
-    PRINT_VERTS = true;
     renderNode(scene->mRootNode);
-    PRINT_VERTS = false;
     printf("N Verts = %li\n", n);
     
     printf("Model Min = [%f, %f, %f]\n", min.x, min.y, min.z);
