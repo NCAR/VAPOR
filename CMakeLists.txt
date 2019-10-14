@@ -38,6 +38,7 @@ if (APPLE)
 	add_definitions (-DDarwin)
 elseif (WIN32)
 	add_definitions (-DWIN32)
+	add_definitions (-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=True)
 endif()
 
 # compiler warning flags
