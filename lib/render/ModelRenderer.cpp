@@ -133,19 +133,10 @@ int ModelRenderer::_paintGL(bool fast)
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     
-    min.x = FLT_MAX;
-    min.y = FLT_MAX;
-    min.z = FLT_MAX;
-    max.x = FLT_MIN;
-    max.y = FLT_MIN;
-    max.z = FLT_MIN;
-    
-    n = 0;
     _model.Render(_glManager);
-    printf("N Verts = %li\n", n);
     
-    min = _model.BoundsMin();
-    max = _model.BoundsMax();
+    glm::vec3 min = _model.BoundsMin();
+    glm::vec3 max = _model.BoundsMax();
     
     printf("Model Min = [%f, %f, %f]\n", min.x, min.y, min.z);
     printf("Model Max = [%f, %f, %f]\n", max.x, max.y, max.z);
@@ -279,12 +270,8 @@ int ModelRenderer::Model::Load(const std::string &path)
         return -1;
     }
     
-    _min.x = FLT_MAX;
-    _min.y = FLT_MAX;
-    _min.z = FLT_MAX;
-    _max.x = FLT_MIN;
-    _max.y = FLT_MIN;
-    _max.z = FLT_MIN;
+    _min = glm::vec3(FLT_MAX);
+    _max = glm::vec3(FLT_MIN);
     calculateBounds(_scene->mRootNode);
     
     return 0;
