@@ -1,5 +1,3 @@
-include (GenerateExportHeader)
-
 set (SRC
 	Particle.cpp
 	Advection.cpp
@@ -14,8 +12,6 @@ set (HEADERS
 )
 
 add_library (flow SHARED ${SRC} ${HEADERS})
-
-GENERATE_EXPORT_HEADER( flow )
 
 target_link_libraries ( flow  PUBLIC vdc params )
 
