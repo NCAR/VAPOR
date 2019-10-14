@@ -52,13 +52,15 @@ protected:
     Texture2D        _depthTexture;
     Framebuffer      _framebuffer;
 
-    int    _nChunks;
-    double _lastRenderTime;
-    bool   _lastRenderWasFast;
-    int    _originalViewport[4];
-    int    _framebufferSize[2];
-    float  _framebufferRatio;
-    float  _previousFramebufferRatio;
+    int                 _nChunks;
+    double              _lastRenderTime;
+    bool                _lastRenderWasFast;
+    int                 _originalViewport[4];
+    int                 _framebufferSize[2];
+    float               _framebufferRatio;
+    float               _previousFramebufferRatio;
+    std::vector<double> _dataMinExt;
+    std::vector<double> _dataMaxExt;
 
     struct Cache {
         std::string var = "";
@@ -74,6 +76,9 @@ protected:
         std::vector<float>  constantColor;
 
         std::string algorithmName = "";
+
+        std::vector<double> minExt;
+        std::vector<double> maxExt;
 
         bool needsUpdate;
     } _cache;

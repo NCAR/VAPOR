@@ -359,9 +359,12 @@ MapperFunction *RenderParams::GetMapperFunc(string varname)
     int    level = 0;
     int    lod = 0;
     if (_dataMgr->VariableExists(ts, varname, level, lod)) {
+        vector<double> minExt, maxExt;
+        _Box->GetExtents(minExt, maxExt);
+
         vector<double> range;
         bool           prev = EnableErrMsg(false);    // no error handling
-        int            rc = _dataMgr->GetDataRange(ts, varname, level, lod, _stride, range);
+        int            rc = _dataMgr->GetDataRange(ts, varname, level, lod, minExt, maxExt, range);
         if (rc < 0) { range = {0.0, 1.0}; }
         EnableErrMsg(prev);
         tf.setMinMaxMapValue(range[0], range[1]);

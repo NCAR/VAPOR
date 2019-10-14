@@ -120,7 +120,10 @@ void ContourAppearanceSubtab::GetContourBounds(double &min, double &max)
     int            lod = _cParams->GetCompressionLevel();
     vector<double> minMax(2, 0);
 
-    _dataMgr->GetDataRange(ts, varname, level, lod, 1, minMax);
+    vector<double> minExt, maxExt;
+    _cParams->GetBox()->GetExtents(minExt, maxExt);
+
+    _dataMgr->GetDataRange(ts, varname, level, lod, minExt, maxExt, minMax);
     min = minMax[0];
     max = minMax[1];
 }

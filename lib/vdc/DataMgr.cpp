@@ -908,20 +908,6 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector
     rc = _lod_correction(varname, lod);
     if (rc < 0) return (NULL);
 
-    // Make sure variable dimensions match extents specification
-    //
-    vector<string> coord_vars;
-    bool           ok = GetVarCoordVars(varname, true, coord_vars);
-    if (!ok) {
-        SetErrMsg("Failed to get coordinate variables for variable \"%s\"", varname.c_str());
-        return (NULL);
-    }
-
-    while (min.size() > coord_vars.size()) {
-        min.pop_back();
-        max.pop_back();
-    }
-
     //
     // Find the coordinates in voxels of the grid that contains
     // the axis aligned bounding box specified in user coordinates
@@ -1365,11 +1351,22 @@ int DataMgr::GetVariableExtents(size_t ts, string varname, int level, vector<dou
     return (0);
 }
 
-int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, size_t stride, vector<double> &range)
+int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<double> &range)
 {
     SetDiagMsg("DataMgr::GetDataRange(%d,%s)", ts, varname.c_str());
 
-    range.clear();
+    vector<double> min, max;
+    int            rc = GetVariableExtents(ts, varname, level, min, max);
+    if (rc < 0) return (-1);
+
+    return (GetDataRange(ts, varname, level, lod, min, max, range));
+}
+
+int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, vector<double> min, vector<double> max, vector<double> &range)
+{
+    SetDiagMsg("DataMgr::GetDataRange(%d,%s)", ts, varname.c_str());
+
+    range = {0.0, 0.0};
 
     int rc = _level_correction(varname, level);
     if (rc < 0) return (-1);
@@ -1377,11 +1374,21 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, size_t 
     rc = _lod_correction(varname, lod);
     if (rc < 0) return (-1);
 
+    //
+    // Find the coordinates in voxels of the grid that contains
+    // the axis aligned bounding box specified in user coordinates
+    // by min and max
+    //
+    vector<size_t> min_ui, max_ui;
+    rc = _find_bounding_grid(ts, varname, level, lod, min, max, min_ui, max_ui);
+    if (rc < 0) return (-1);
+
     // See if we've already cache'd it.
     //
     ostringstream oss;
     oss << "VariableRange";
-    if (stride > 1) { oss << stride; }
+    oss << vector_to_string(min_ui);
+    oss << vector_to_string(max_ui);
     string key = oss.str();
 
     if (_varInfoCacheDouble.Get(ts, varname, level, lod, key, range)) {
@@ -1389,44 +1396,13 @@ int DataMgr::GetDataRange(size_t ts, string varname, int level, int lod, size_t 
         return (0);
     }
 
-    const Grid *sg = DataMgr::GetVariable(ts, varname, level, lod, false);
+    const Grid *sg = DataMgr::GetVariable(ts, varname, level, lod, min_ui, max_ui, false);
     if (!sg) return (-1);
 
-    //
-    // Have to calculate range
-    //
+    float range_f[2];
+    sg->GetRange(range_f);
+    range = {range_f[0], range_f[1]};
 
-    range.clear();
-    range.push_back(0.0);
-    range.push_back(0.0);
-    float               mv = sg->GetMissingValue();
-    Grid::ConstIterator itr = sg->cbegin();
-    Grid::ConstIterator enditr = sg->cend();
-
-    while (*itr == mv) ++itr;
-    if (itr != enditr) {
-        range[0] = range[1] = *itr;
-        ++itr;
-    }
-
-    if (stride > 1) {
-        for (; itr != enditr;) {
-            float v = *itr;
-            if (v != mv) {
-                if (v < range[0]) range[0] = v;
-                if (v > range[1]) range[1] = v;
-            }
-            itr += stride;
-        }
-    } else {
-        for (; itr != enditr; ++itr) {
-            float v = *itr;
-            if (v != mv) {
-                if (v < range[0]) range[0] = v;
-                if (v > range[1]) range[1] = v;
-            }
-        }
-    }
     delete sg;
 
     _varInfoCacheDouble.Set(ts, varname, level, lod, key, range);
@@ -2536,6 +2512,13 @@ int DataMgr::_find_bounding_grid(size_t ts, string varname, int level, int lod, 
 
     bool ok = _get_coord_vars(varname, scvars, tcvar);
     if (!ok) return (-1);
+
+    // Make sure variable dimensions match extents specification
+    //
+    while (min.size() > scvars.size()) {
+        min.pop_back();
+        max.pop_back();
+    }
 
     size_t hash_ts = 0;
     for (int i = 0; i < scvars.size(); i++) {
