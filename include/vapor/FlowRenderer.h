@@ -17,7 +17,7 @@
 namespace VAPoR 
 {
 
-class RENDER_API FlowRenderer : public Renderer
+class RENDER_API FlowRenderer final : public Renderer
 {
 public:
 
@@ -27,25 +27,47 @@ public:
                    std::string&      instName, 
                    DataMgr*          dataMgr);
 
-    virtual ~FlowRenderer();
+    // Rule of five
+    ~FlowRenderer();
+    FlowRenderer( const FlowRenderer& )             = delete;
+    FlowRenderer( const FlowRenderer&& )            = delete;
+    FlowRenderer& operator=( const FlowRenderer& )  = delete;
+    FlowRenderer& operator=( const FlowRenderer&& ) = delete;
 
     static std::string GetClassType()
     {
         return ("Flow");
     }
+    
+private:
 
+    // Define two enums for this class use only
     enum class FlowStatus
     {
         SIMPLE_OUTOFDATE,   // When variable name or compression is out of date,
         TIME_STEP_OOD,      // Existing particles are good, but need to advect more
         UPTODATE            // Everything is up-to-date
     };
+    // The following two enums are stored in params, so we use a native format
+    // which is long in this case to avoid casting error.
+    enum class SeedGenMode : long   
+    {
+        UNIFORM     = 0,
+        RANDOM      = 1,
+        RANDOM_BIAS = 2,
+        LIST        = 3
+    };
+    enum class FlowDir : long
+    {
+        FORWARD     = 0,
+        BACKWARD    = 1,
+        BI_DIR      = 2
+    };
 
-protected:
     // C++ stuff: pure virtual functions from Renderer
-    int  _initializeGL();
-    int  _paintGL( bool fast );
-    void _clearCache() {};
+    int  _initializeGL()        override;
+    int  _paintGL( bool fast )  override;
+    void _clearCache()          override {};
 
     // Member variables
     flow::Advection     _advection;
@@ -54,49 +76,40 @@ protected:
     std::vector<float>  _colorMap;
     std::vector<double> _timestamps;
     float               _colorMapRange[3];   // min, max, and their diff
-    bool                _advectionComplete;
-    bool                _coloringComplete;
 
-    // A few variables to keep the current advection states
-    int                 _cache_refinementLevel;
-    int                 _cache_compressionLevel;
-    float               _cache_velocityMltp;
-    bool                _cache_isSteady;
-    long                _cache_steadyNumOfSteps;
-    size_t              _cache_currentTS;
-    bool                _cache_periodic[3];
-    float               _cache_rake[6];
-    long                _cache_rakeNumOfSeeds[4];
+    bool                _advectionComplete          = false;
+    bool                _coloringComplete           = false;
+
+    // A few variables to keep the current advection states.
+    // Some of them are initialized to be at an illegal state.
+    int                 _cache_refinementLevel      = 0;;
+    int                 _cache_compressionLevel     = 0;;
+    float               _cache_velocityMltp         = 1.0;;
+    bool                _cache_isSteady             = false;
+    long                _cache_steadyNumOfSteps     = 0;
+    size_t              _cache_currentTS            = 0;
+    bool                _cache_periodic[3]          { false, false, false };
+    float               _cache_rake[6]              { 0.f, 0.f, 0.f, 0.f, 0.f, 0.f };
+    long                _cache_rakeNumOfSeeds[4]    { 1, 1, 1, 1 };
     std::string         _cache_rakeBiasVariable;
-    float               _cache_rakeBiasStrength;
-    int                 _cache_seedInjInterval;
-
-    // A few different modes to generate advection seeds:
-    //   0 - uniformly generate 
-    //   1 - randomly generate
-    //   2 - randomly generate with bias
-    //   3 - reading a list of seeds
-    long                _cache_seedGenMode;
+    float               _cache_rakeBiasStrength     = 0.0f;
+    int                 _cache_seedInjInterval      = 0;
+    SeedGenMode         _cache_seedGenMode          = SeedGenMode::UNIFORM;
     std::string         _cache_seedInputFilename;
-
-    // A few different ways to integrate a flow line in steady mode:
-    //   0 - forward
-    //   1 - backward
-    //   2 - bi-directional
-    long                _cache_flowDirection;
+    FlowDir             _cache_flowDir              = FlowDir::FORWARD;
+    FlowStatus          _velocityStatus             = FlowStatus::SIMPLE_OUTOFDATE;
+    FlowStatus          _colorStatus                = FlowStatus::SIMPLE_OUTOFDATE;
 
     // This Advection class is only used in bi-directional advection mode 
-    flow::Advection*    _2ndAdvection;
+    std::unique_ptr<flow::Advection> _2ndAdvection;
 
-    FlowStatus          _velocityStatus;
-    FlowStatus          _colorStatus;
 
     // Member variables for OpenGL
     const  GLint        _colorMapTexOffset;
-    ShaderProgram*      _shader;
-    GLuint              _vertexArrayId; 
-    GLuint              _vertexBufferId; 
-    GLuint              _colorMapTexId;
+    ShaderProgram*      _shader             = nullptr;
+    GLuint              _vertexArrayId      = 0; 
+    GLuint              _vertexBufferId     = 0; 
+    GLuint              _colorMapTexId      = 0;
 
     //
     // Member functions

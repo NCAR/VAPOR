@@ -1,3 +1,9 @@
+# Note on building VDC only:
+# These packages from Ubuntu repo are required to build VAPOR with only VDC enabled:
+# (tested on Ubuntu 18.04)
+# 
+# libnetcdf-dev,  libudunits2-dev,  libproj-dev
+
 cmake_minimum_required (VERSION 3.1)
 project (VAPOR3)
 

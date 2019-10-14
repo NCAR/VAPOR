@@ -6,7 +6,7 @@
 #include <random>
 
 #ifdef WIN32
-	#include <Windows.h>
+    #include <Windows.h>
     #include <Processthreadsapi.h>
 #else
     #include <sys/types.h>
@@ -19,28 +19,6 @@ using namespace VAPoR;
 
 static RendererRegistrar<FlowRenderer> registrar( FlowRenderer::GetClassType(), 
                                                   FlowParams::GetClassType() );
-
-GLenum glCheckError_(const char *file, int line)
-{
-    GLenum errorCode;
-    while ((errorCode = glGetError()) != GL_NO_ERROR)
-    {
-        std::string error;
-        switch (errorCode)
-        {
-            case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
-            case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
-            case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
-            case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
-            case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
-            case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
-            case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
-        }
-        std::cout << error << " | " << file << " (" << line << ")" << std::endl;
-    }
-    return errorCode;
-}
-#define glCheckError() glCheckError_(__FILE__, __LINE__)
 
 
 // Constructor
@@ -59,39 +37,7 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
             _velocityField     ( 6 ),
             _colorField        ( 2 ),
             _colorMapTexOffset ( 0 )
-{ 
-    // Initialize OpenGL states
-    _shader         = nullptr;
-    _vertexArrayId  = 0;
-    _vertexBufferId = 0;
-    _colorMapTexId  = 0;
-
-    // Initialize advection states
-    _cache_currentTS        = -1;
-    _cache_refinementLevel  = -2;
-    _cache_compressionLevel = -2;
-    _cache_isSteady         = false;
-    _cache_steadyNumOfSteps = 0;
-    _cache_velocityMltp     = 1.0;
-    _cache_seedGenMode      = 0;
-    _cache_flowDirection    = 0;
-    for( int i = 0; i < 3; i++ )
-        _cache_periodic[i] = false;
-    for( int i = 0; i < 6; i++ )
-        _cache_rake[i] = 0.0f;
-    for( int i = 0; i < 4; i++ )
-        _cache_rakeNumOfSeeds[i] = 1;
-    _cache_rakeBiasStrength = 0.0f;
-    _cache_seedInjInterval  = 0;
-
-    _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
-    _colorStatus            = FlowStatus::SIMPLE_OUTOFDATE;
-
-    _advectionComplete      = false;
-    _coloringComplete       = false;
-
-    _2ndAdvection           = nullptr;
-}
+{ }
 
 // Destructor
 FlowRenderer::~FlowRenderer()
@@ -112,12 +58,6 @@ FlowRenderer::~FlowRenderer()
     {
         glDeleteTextures( 1, &_colorMapTexId );
         _colorMapTexId = 0;
-    }
-
-    if( _2ndAdvection )
-    {
-        delete _2ndAdvection;
-        _2ndAdvection = nullptr;
     }
 }
 
@@ -218,7 +158,7 @@ FlowRenderer::_paintGL( bool fast )
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
         /* Read seeds from a file is a special case, so we put it up front */
-        if( _cache_seedGenMode == 3 )
+        if( _cache_seedGenMode == SeedGenMode::LIST )
         {
             rv = _advection.InputStreamsGnuplot( params->GetSeedInputFilename() );
             if( rv != 0 )
@@ -229,17 +169,17 @@ FlowRenderer::_paintGL( bool fast )
             if( _2ndAdvection )     // bi-directional advection
             {
                 _2ndAdvection->InputStreamsGnuplot( params->GetSeedInputFilename() );
-                _updatePeriodicity( _2ndAdvection ); 
+                _updatePeriodicity( _2ndAdvection.get() ); 
             }
         }
         else 
         {
             std::vector<flow::Particle> seeds;
-            if( _cache_seedGenMode == 0 )       // Seeds from a rake, uniformly
+            if( _cache_seedGenMode      == SeedGenMode::UNIFORM )
                 _genSeedsRakeUniform( seeds );
-            else if( _cache_seedGenMode == 1 )  // Seeds from a rake, randomly
+            else if( _cache_seedGenMode == SeedGenMode::RANDOM )
                 _genSeedsRakeRandom( seeds );
-            else if( _cache_seedGenMode == 2 )  // Seeds from a rake, randomly and biased
+            else if( _cache_seedGenMode == SeedGenMode::RANDOM_BIAS )
                 _genSeedsRakeRandomBiased( seeds );
 
             // Note on UseSeedParticles(): this is the only function that resets
@@ -250,7 +190,7 @@ FlowRenderer::_paintGL( bool fast )
             if( _2ndAdvection )     // bi-directional advection
             {
                 _2ndAdvection->UseSeedParticles( seeds );
-                _updatePeriodicity( _2ndAdvection ); 
+                _updatePeriodicity( _2ndAdvection.get() ); 
             }
         }
 
@@ -344,7 +284,7 @@ FlowRenderer::_paintGL( bool fast )
     _renderFromAnAdvection( &_advection, params, fast );
     /* If the advection is bi-directional */
     if( _2ndAdvection )
-        _renderFromAnAdvection( _2ndAdvection, params, fast );
+        _renderFromAnAdvection( _2ndAdvection.get(), params, fast );
     _restoreGLState();
 
     return 0;
@@ -487,9 +427,9 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
      */
 
     // Check seed generation mode
-    if( _cache_seedGenMode != params->GetSeedGenMode() )
+    if( _cache_seedGenMode != static_cast<SeedGenMode>(params->GetSeedGenMode()) )
     {
-        _cache_seedGenMode  = params->GetSeedGenMode();
+        _cache_seedGenMode  = static_cast<SeedGenMode>(params->GetSeedGenMode());
         _velocityStatus     = FlowStatus::SIMPLE_OUTOFDATE;
         _colorStatus        = FlowStatus::SIMPLE_OUTOFDATE;
     }
@@ -499,7 +439,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     {
         _cache_seedInputFilename  = params->GetSeedInputFilename();
         // we only update status if the current seed generation mode IS seed list.
-        if( _cache_seedGenMode   == 3 ) // Seeds from a list mode
+        if( _cache_seedGenMode  == SeedGenMode::LIST ) 
         {
             _velocityStatus     = FlowStatus::SIMPLE_OUTOFDATE;
             _colorStatus        = FlowStatus::SIMPLE_OUTOFDATE;
@@ -573,7 +513,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
             _cache_rake[i] = rake[i];
 
         // Mark out-of-date if we're currently using any mode that involves a rake
-        if( _cache_seedGenMode < 3 )
+        if( _cache_seedGenMode != SeedGenMode::LIST )
         {
             _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
             _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
@@ -589,7 +529,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         for( int i = 0; i < 3; i++ )
             _cache_rakeNumOfSeeds[i] = rakeNumOfSeeds[i];
 
-        if( _cache_seedGenMode == 0 )   // Uniformly generate seeds mode
+        if( _cache_seedGenMode == SeedGenMode::UNIFORM )
         {
             _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
             _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
@@ -601,7 +541,8 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     {
         _cache_rakeNumOfSeeds[3] = rakeNumOfSeeds[3];
 
-        if( _cache_seedGenMode == 1 || _cache_seedGenMode == 2 )    // Random and random with bias mode
+        if( _cache_seedGenMode == SeedGenMode::RANDOM || 
+            _cache_seedGenMode == SeedGenMode::RANDOM_BIAS )
         {
             _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
             _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
@@ -617,7 +558,7 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         _cache_rakeBiasVariable = rakeBiasVariable;
         _cache_rakeBiasStrength = rakeBiasStrength;
         
-        if( _cache_seedGenMode == 2 )   // Random with bias mode
+        if( _cache_seedGenMode == SeedGenMode::RANDOM_BIAS )
         {
             _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
             _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
@@ -656,18 +597,15 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
             _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
         }
 
-        if( _cache_flowDirection   != params->GetFlowDirection() )
+        if( _cache_flowDir    != static_cast<FlowDir>(params->GetFlowDirection()) )
         {
-            _colorStatus            = FlowStatus::SIMPLE_OUTOFDATE;
-            _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
-            _cache_flowDirection    = params->GetFlowDirection();
-            if( _cache_flowDirection == 2 && !_2ndAdvection )
-                _2ndAdvection = new flow::Advection();
-            if( _cache_flowDirection != 2 && _2ndAdvection )
-            {
-                delete _2ndAdvection;
-                _2ndAdvection = nullptr;
-            }
+            _cache_flowDir     = static_cast<FlowDir>(params->GetFlowDirection());
+            _colorStatus       = FlowStatus::SIMPLE_OUTOFDATE;
+            _velocityStatus    = FlowStatus::SIMPLE_OUTOFDATE;
+            if( _cache_flowDir == FlowDir::BI_DIR )
+                _2ndAdvection.reset( new flow::Advection() );
+            else
+                _2ndAdvection.reset( nullptr );
         }
     }
     else  // in case of unsteady flow

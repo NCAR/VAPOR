@@ -53,6 +53,10 @@ private:
     std::forward_list<float>  _properties;  
     // Note on the choice of using a forward_list:
     // Forward_list takes 8 bytes, whereas a vector or list take 24 bytes!
+    int                       _nProperties = 0;
+    // Note on the property counter: since forward_list doesn't have a .size()
+    // of itself, we keep a counter by ourselves.
+    // Also, we consider an unsigned short type is big enough for this use case.
 };
 
 };

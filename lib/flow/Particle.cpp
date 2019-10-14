@@ -38,45 +38,34 @@ Particle::AttachProperty( float v )
         ++itr;
     }
     _properties.insert_after( itr, v );
+    _nProperties++;
 }
 
 float
 Particle::RetrieveProperty( int idx ) const
 {
-    if( idx < 0 )
+    if( idx < 0 || idx > _nProperties )
         throw std::out_of_range( "flow::Particle" );
 
     auto itr = _properties.cbegin();
     for( int i = 0; i < idx; i++ )
     {
-        if( itr == _properties.cend() )
-            throw std::out_of_range( "flow::Particle" );
-        else
-            ++itr;
+        ++itr;
     }
-
-    if( itr == _properties.cend() )
-        throw std::out_of_range( "flow::Particle" );
-    else
-        return *itr;
+    return *itr;
 }
 
 void
 Particle::ClearProperties()
 {
     _properties.clear();
+    _nProperties = 0;
 }
 
 int
 Particle::GetNumOfProperties() const
 {
-    int count = 0;
-    for( const auto& x : _properties )
-    {
-        (void) x;
-        count++;
-    }
-    return count;
+    return (_nProperties);
 }
 
 void
