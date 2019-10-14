@@ -85,6 +85,7 @@ private:
         int Load(const std::string &path);
         glm::vec3 BoundsMin() const { return _min; }
         glm::vec3 BoundsMax() const { return _max; }
+        glm::vec3 Center() const { return (_min + _max) / 2.f; }
     };
  
     Model _model;

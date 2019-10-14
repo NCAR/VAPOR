@@ -99,11 +99,14 @@ int ModelRenderer::_paintGL(bool fast)
         return 0;
     }
     
-    if (file != _cachedFile)
+    if (file != _cachedFile) {
         rc = _model.Load(file);
-    if (rc < 0)
-        return rc;
-    _cachedFile = file;
+        if (rc < 0)
+            return rc;
+        _cachedFile = file;
+        glm::vec3 center = _model.Center();
+        rp->GetTransform()->SetOrigin({center.x, center.y, center.z});
+    }
     
     LegacyGL *lgl = _glManager->legacy;
     
@@ -181,6 +184,8 @@ void ModelRenderer::Model::renderNode(GLManager *gl, const aiNode *nd)
     
     for (int m = 0; m < nd->mNumMeshes; m++) {
         const aiMesh *mesh = _scene->mMeshes[nd->mMeshes[m]];
+        const bool hasNormals = mesh->HasNormals();
+        const bool hasColor = mesh->GetNumColorChannels() > 0;
         if (mesh->HasNormals())
             lgl->EnableLighting();
         else
@@ -194,9 +199,9 @@ void ModelRenderer::Model::renderNode(GLManager *gl, const aiNode *nd)
                 continue;
             
             for (int v = 0; v < face->mNumIndices; v++) {
-                if (mesh->GetNumColorChannels() > 0)
+                if (hasColor)
                     lgl->Color3fv (&mesh->mColors[0][face->mIndices[v]].r);
-                if (mesh->HasNormals())
+                if (hasNormals)
                     lgl->Normal3fv(&mesh->mNormals[face->mIndices[v]].x);
                 lgl->Vertex3fv(&mesh->mVertices[face->mIndices[v]].x);
             }
