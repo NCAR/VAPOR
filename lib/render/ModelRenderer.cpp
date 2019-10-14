@@ -32,6 +32,7 @@
 #include <vapor/XmlNode.h>
 #include <assimp/postprocess.h>
 #include <assimp/version.h>
+#include <vapor/VAssert.h>
 
 #warning vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 #warning Third party libraries updated to assimp v5. need to restore assimp_backup and remove assimp.5.*
@@ -100,11 +101,11 @@ int ModelRenderer::_paintGL(bool fast)
     }
     
     if (file != _cachedFile) {
-        rc = _model.Load(file);
+        rc = _scene.Load(file);
         if (rc < 0)
             return rc;
         _cachedFile = file;
-        glm::vec3 center = _model.Center();
+        glm::vec3 center = _scene.Center();
         rp->GetTransform()->SetOrigin({center.x, center.y, center.z});
     }
     
@@ -133,8 +134,10 @@ int ModelRenderer::_paintGL(bool fast)
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     
-    _model.Render(_glManager);
+    _scene.Render(_glManager, 0);
+    lgl->DisableLighting();
     
+    /*
     glm::vec3 min = _model.BoundsMin();
     glm::vec3 max = _model.BoundsMax();
     
@@ -156,6 +159,7 @@ int ModelRenderer::_paintGL(bool fast)
     lgl->Vertex3f(min.x, min.y, min.z);
     lgl->Vertex3f(min.x, min.y, max.z);
     lgl->End();
+     */
     
     return rc;
 }
@@ -277,3 +281,64 @@ int ModelRenderer::Model::Load(const std::string &path)
     return 0;
 }
 
+int ModelRenderer::Scene::Load(const std::string &path)
+{
+    _keyframes.clear();
+    _models.clear();
+    
+    if (FileUtils::Extension(path) == "vms") {
+        
+    } else {
+        Model *model = new Model;
+        int rc = model->Load(path);
+        if (rc < 0)
+            return rc;
+        _models[path] = unique_ptr<Model>(model);
+        
+        ModelInstance defaultInstance;
+        defaultInstance.path = path;
+        _keyframes[0] = {defaultInstance};
+    }
+    
+    return 0;
+}
+
+void ModelRenderer::Scene::Render(GLManager *gl, const int ts)
+{
+    MatrixManager *mm = gl->matrixManager;
+    const vector<ModelInstance> instances = getInstances(ts);
+    
+    for (const auto &instance : instances) {
+        mm->PushMatrix();
+        mm->Translate(instance.translation.x, instance.translation.y, instance.translation.z);
+        _models[instance.path]->Render(gl);
+        mm->PopMatrix();
+    }
+}
+
+glm::vec3 ModelRenderer::Scene::Center() const
+{
+    glm::vec3 accum(0.f);
+    for (const auto & it: _models)
+        accum += it.second->Center();
+    if (!_models.empty())
+        accum /= (float)_models.size();
+    return accum;
+}
+
+std::vector<ModelRenderer::Scene::ModelInstance> ModelRenderer::Scene::getInstances(const int ts) const
+{
+    VAssert(ts >= 0);
+    int lastValidFrame = -1;
+    for (auto frame : _keyframes) {
+        const int frameTime = frame.first;
+        if (frameTime == ts)
+            return frame.second;
+        if (frameTime < ts && frameTime > lastValidFrame)
+            lastValidFrame = frameTime;
+    }
+    if (lastValidFrame != -1)
+        return _keyframes.at(lastValidFrame);
+    else
+        return vector<ModelInstance>();
+}

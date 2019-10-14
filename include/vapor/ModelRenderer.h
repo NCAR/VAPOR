@@ -36,6 +36,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
+#include <memory>
+
 namespace VAPoR {
 
 class DataMgr;
@@ -72,7 +74,6 @@ private:
     class Model {
         Assimp::Importer _importer;
         const aiScene *_scene;
-        std::string _path;
         glm::vec3 _min, _max;
         
         void renderNode(GLManager *gl, const aiNode *nd);
@@ -81,18 +82,39 @@ private:
         
     public:
         
+        ~Model() {
+            printf("Deleting Model!\n");
+            
+        }
         void Render(GLManager *gl);
         int Load(const std::string &path);
         glm::vec3 BoundsMin() const { return _min; }
         glm::vec3 BoundsMax() const { return _max; }
         glm::vec3 Center() const { return (_min + _max) / 2.f; }
     };
- 
-    Model _model;
-    std::string _cachedFile;
     
-    glm::vec3 min, max;
-    long n;
+    class Scene {
+        struct ModelInstance {
+            std::string path;
+            glm::vec3 translation = glm::vec3(0.f);
+            glm::vec3 rotation = glm::vec3(0.f);
+            glm::vec3 scale = glm::vec3(1.f);
+        };
+        
+        std::map<int, std::vector<ModelInstance>> _keyframes;
+        std::map<std::string, std::unique_ptr<Model>> _models;
+        
+    public:
+        int Load(const std::string &path);
+        void Render(GLManager *gl, const int ts = 0);
+        glm::vec3 Center() const;
+        
+    private:
+        std::vector<ModelInstance> getInstances(const int ts) const;
+    };
+ 
+    Scene _scene;
+    std::string _cachedFile;
     
     void _renderNode(const aiNode *node);
 };
