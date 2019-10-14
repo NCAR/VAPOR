@@ -1541,7 +1541,7 @@ int DerivedCoordVar_Staggered::GetDimLensAtLevel(
 	bs_at_level.clear();
 
 	vector <size_t> dummy;
-	int rc = _dc->GetDimLensAtLevel(_inName, -1, dims_at_level, dummy);
+	int rc = _dc->GetDimLensAtLevel(_inName, level, dims_at_level, dummy);
 	if (rc<0) return(-1);
 
 	dims_at_level[_stagDim] += 1;
@@ -1554,7 +1554,7 @@ int DerivedCoordVar_Staggered::OpenVariableRead(
     size_t ts, int level, int lod
 ) {
 
-	int fd = _dc->OpenVariableRead(ts, _inName, -1, lod);
+	int fd = _dc->OpenVariableRead(ts, _inName, level, lod);
 	if (fd<0) return(fd);
 
 	DC::FileTable::FileObject *f = new DC::FileTable::FileObject(
@@ -1593,7 +1593,7 @@ int DerivedCoordVar_Staggered::ReadRegion(
 	}
 
 	vector <size_t> dims, dummy;
-	int rc = GetDimLensAtLevel(-1, dims, dummy);
+	int rc = GetDimLensAtLevel(f->GetLevel(), dims, dummy);
 	if (rc<0) return(-1);
 
 	vector <size_t> inMin = min;
@@ -1740,7 +1740,7 @@ int DerivedCoordVar_UnStaggered::GetDimLensAtLevel(
 	dims_at_level.clear();
 	bs_at_level.clear();
 
-	int rc = _dc->GetDimLensAtLevel(_inName, -1, dims_at_level, bs_at_level);
+	int rc = _dc->GetDimLensAtLevel(_inName, level, dims_at_level, bs_at_level);
 	if (rc<0) return(-1);
 
 	dims_at_level[_stagDim] -= 1;
@@ -1753,7 +1753,7 @@ int DerivedCoordVar_UnStaggered::OpenVariableRead(
     size_t ts, int level, int lod
 ) {
 
-	int fd = _dc->OpenVariableRead(ts, _inName, -1, lod);
+	int fd = _dc->OpenVariableRead(ts, _inName, level, lod);
 	if (fd<0) return(fd);
 
 	DC::FileTable::FileObject *f = new DC::FileTable::FileObject(
@@ -1792,7 +1792,7 @@ int DerivedCoordVar_UnStaggered::ReadRegion(
 	}
 
 	vector <size_t> dims, dummy;
-	int rc = GetDimLensAtLevel(-1, dims, dummy);
+	int rc = GetDimLensAtLevel(f->GetLevel(), dims, dummy);
 	if (rc<0) return(-1);
 
 	vector <size_t> inMin = min;
@@ -1941,9 +1941,9 @@ int DerivedCoordVarStandardWRF_Terrain::Initialize() {
 	}
 		
     _coordVarInfo = DC::CoordVar(
-        _derivedVarName, "m", DC::XType::FLOAT,
-        vector <bool> (3, false), 2, false,
-        dimnames, timeDimName
+        _derivedVarName, "m", DC::XType::FLOAT, dvarInfo.GetWName(),
+        dvarInfo.GetCRatios(), vector <bool> (3, false), 
+        dimnames, timeDimName, 2, false
 	);
 
     return(0);
@@ -1971,7 +1971,7 @@ int DerivedCoordVarStandardWRF_Terrain::GetDimLensAtLevel(
 	bs_at_level.clear();
 
 	vector <size_t> dummy;
-	int rc = _dc->GetDimLensAtLevel(_PHVar, -1, dims_at_level, dummy);
+	int rc = _dc->GetDimLensAtLevel(_PHVar, level, dims_at_level, bs_at_level);
 	if (rc<0) return(-1);
 
 	if (_derivedVarName == "Elevation") {
@@ -1994,7 +1994,7 @@ int DerivedCoordVarStandardWRF_Terrain::GetDimLensAtLevel(
 
 	// No blocking
 	//
-	bs_at_level = vector <size_t> (dims_at_level.size(), 1);
+//	bs_at_level = vector <size_t> (dims_at_level.size(), 1);
 
 	return(0);
 }
@@ -2037,7 +2037,7 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
 	// same grid as the W component of velocity
 	//
 	vector <size_t> wDims, dummy;
-	int rc = _dc->GetDimLensAtLevel(_PHVar, -1, wDims, dummy);
+	int rc = _dc->GetDimLensAtLevel(_PHVar, f->GetLevel(), wDims, dummy);
 	if (rc<0) return(-1);
 
 	// coordinates of "W" grid.
@@ -2083,7 +2083,7 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
 
 	float *buf1 = new float[nElements];
 	rc = _getVar(
-		_dc, f->GetTS(), _PHVar, -1, f->GetLOD(),
+		_dc, f->GetTS(), _PHVar, f->GetLevel(), f->GetLOD(),
 		wMin, wMax, buf1
 	);
 	if (rc<0) {
@@ -2093,7 +2093,7 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
 
 	float *buf2 = new float[nElements];
 	rc = _getVar(
-		_dc, f->GetTS(), _PHBVar, -1, f->GetLOD(),
+		_dc, f->GetTS(), _PHBVar, f->GetLevel(), f->GetLOD(),
 		wMin, wMax, buf2
 	);
 	if (rc<0) {
