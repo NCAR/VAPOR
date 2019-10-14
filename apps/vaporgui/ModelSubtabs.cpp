@@ -12,10 +12,6 @@ ModelVariablesSubtab::ModelVariablesSubtab(QWidget* parent) {
     layout()->setContentsMargins(0, 10, 0, 0);
     layout()->addWidget(_modelSettings = new VSection("Model"));
     
-    addPW(new ParamsWidgetCheckbox("apply_node_trans"));
-    addPW(new ParamsWidgetCheckbox("transpose_node_trans"));
-    addPW(new ParamsWidgetCheckbox("transpose_rot_trans"));
-    addPW(new ParamsWidgetFloat("animation_time"));
     addPW(new ParamsWidgetFile("file"));
 }
 

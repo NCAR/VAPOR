@@ -74,7 +74,7 @@ void printNode(XmlNode *n, int depth=0)
         printf(" />\n");
         return;
     }
-    printf("> [%i]\n", n->GetNumChildren());
+    printf(">\n");
     
     for (int i = 0; i < n->GetNumChildren(); i++)
         printNode(n->GetChild(i), depth+1);
@@ -95,10 +95,8 @@ int ModelRenderer::_paintGL(bool fast)
         rc = parser.LoadFromFile(&node, file);
         if (rc < 0) return rc;
         
-        printf("Me ==============================\n");
+        printf("==============================\n");
         printNode(&node);
-        printf("<< ==============================\n");
-        std::cout << node << std::endl;
         
         return 0;
     }
@@ -175,93 +173,18 @@ int ModelRenderer::_initializeGL()
     return 0;
 }
 
-const aiNodeAnim* FindNodeAnim(const aiAnimation* pAnimation, const string NodeName)
-{
-    for (uint i = 0 ; i < pAnimation->mNumChannels ; i++) {
-        const aiNodeAnim* pNodeAnim = pAnimation->mChannels[i];
-        
-        if (string(pNodeAnim->mNodeName.data) == NodeName) {
-            return pNodeAnim;
-        }
-    }
-    
-    return NULL;
-}
-
-uint FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim)
-{
-    assert(pNodeAnim->mNumRotationKeys > 0);
-
-    for (uint i = 0 ; i < pNodeAnim->mNumRotationKeys - 1 ; i++) {
-        if (AnimationTime < (float)pNodeAnim->mRotationKeys[i + 1].mTime) {
-            return i;
-        }
-    }
-
-    assert(0);
-}
-
-void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
-{
-    if (pNodeAnim->mNumRotationKeys == 1) {
-        Out = pNodeAnim->mRotationKeys[0].mValue;
-        return;
-    }
-
-    uint RotationIndex = FindRotation(AnimationTime, pNodeAnim);
-    uint NextRotationIndex = (RotationIndex + 1);
-    assert(NextRotationIndex < pNodeAnim->mNumRotationKeys);
-    float DeltaTime = pNodeAnim->mRotationKeys[NextRotationIndex].mTime - pNodeAnim->mRotationKeys[RotationIndex].mTime;
-    float Factor = (AnimationTime - (float)pNodeAnim->mRotationKeys[RotationIndex].mTime) / DeltaTime;
-    assert(Factor >= 0.0f && Factor <= 1.0f);
-    const aiQuaternion& StartRotationQ = pNodeAnim->mRotationKeys[RotationIndex].mValue;
-    const aiQuaternion& EndRotationQ = pNodeAnim->mRotationKeys[NextRotationIndex].mValue;
-    aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
-    Out = Out.Normalize();
-}
-
 void ModelRenderer::renderNode(const aiNode *nd)
 {
-    ModelParams *mp = (ModelParams*)GetActiveParams();
-    float animationTime = mp->GetValueDouble("animation_time", 0);
-    animationTime += 0.006;
-    if (animationTime >= 1) animationTime = 0;
-    mp->SetValueDouble("animation_time", "", animationTime);
-    printf("animationTime = %f\n", animationTime);
-    
     LegacyGL *lgl = _glManager->legacy;
     MatrixManager *mm = _glManager->matrixManager;
     
     aiMatrix4x4 m;
-    if (mp->GetValueLong("apply_node_trans", 0) && nd != scene->mRootNode)
+    if (nd != scene->mRootNode)
         m = nd->mTransformation;
-    if (mp->GetValueLong("transpose_node_trans", 0))
-        m.Transpose();
-    
-    
-    const string NodeName(nd->mName.data);
-    const aiAnimation* animation = nullptr;
-    const aiNodeAnim *nodeAnim = nullptr;
-    if (scene->HasAnimations()) {
-        animation = scene->mAnimations[0];
-        nodeAnim = FindNodeAnim(animation, NodeName);
-        animationTime *= animation->mDuration;
-    }
-    
-    aiMatrix4x4 rotM;
-    if (nodeAnim) {
-        aiQuaternion rotQ;
-        CalcInterpolatedRotation(rotQ, animationTime, nodeAnim);
-        rotM = aiMatrix4x4(rotQ.GetMatrix());
-        if (mp->GetValueLong("transpose_rot_trans", 0))
-            rotM.Transpose();
-    }
-    
-    
-    
+    m.Transpose();
     
     mm->PushMatrix();
-    mm->SetCurrentMatrix(mm->GetCurrentMatrix() * glm::make_mat4((float*)&m) * glm::make_mat4((float*)&rotM));
+    mm->SetCurrentMatrix(mm->GetCurrentMatrix() * glm::make_mat4((float*)&m));
     
     for (int m = 0; m < nd->mNumMeshes; m++) {
         const aiMesh *mesh = scene->mMeshes[nd->mMeshes[m]];
