@@ -21,7 +21,6 @@
 //			and append the volume to an existing
 //			Vapor Data Collection
 //
-
 #include <iostream>
 #include <cstdlib>
 #include <cstring>

@@ -11,13 +11,6 @@
 
 #include <vapor/glutil.h> // Must be included first!!!
 
-// MSVC contains macros for the min() and max() fuction signatures, which
-// makes havoc when we use things like std::numeric_limits::max().  Setting
-// NOMINMAX removes those macros
-#ifdef WIN32
-#define NOMINMAX
-#endif
-
 #ifdef Darwin
 #include <OpenGL/gl.h>
 #else
