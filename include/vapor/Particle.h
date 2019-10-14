@@ -10,7 +10,7 @@
 
 namespace flow
 {
-enum ERROR_CODE
+enum FLOW_ERROR_CODE    // these enum values are available in the flow namespace.
 {
     ADVECT_HAPPENED      =  1,
     SUCCESS              =  0,
