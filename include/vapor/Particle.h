@@ -38,6 +38,11 @@ public:
     Particle( const float* loc, float t, float val = 0.0f );
     Particle( float x, float y, float z, float t, float val = 0.0f );
 
+    //
+    // The "property" field allows the user to keep one or more arbitrary values that
+    // are associated with this particle. It's up to the user to keep a record on 
+    // what these values at each index stand for.
+    //
     void  AttachProperty  (  float v );
     // This function will throw an exception when idx is out of bound
     float RetrieveProperty(  int idx ) const;
