@@ -48,31 +48,6 @@ ModelRenderer::ModelRenderer(const ParamsMgr* pm, string winName,
            ModelRenderer::GetClassType(), instName, dataMgr)
 {}
 
-static void printSpacing(int depth) {
-    for (int i = 0; i < depth; i++)
-        printf("  ");
-}
-
-static void printNode(XmlNode *n, int depth=0)
-{
-    printSpacing(depth);
-    printf("<%s", n->Tag().c_str());
-    for (auto attr : n->Attrs())
-        printf(" %s=\"%s\"", attr.first.c_str(), attr.second.c_str());
-    
-    if (n->GetNumChildren() == 0) {
-        printf(" />\n");
-        return;
-    }
-    printf(">\n");
-    
-    for (int i = 0; i < n->GetNumChildren(); i++)
-        printNode(n->GetChild(i), depth+1);
-    
-    printSpacing(depth);
-    printf("</%s>\n", n->Tag().c_str());
-}
-
 int ModelRenderer::_paintGL(bool fast)
 {
     RenderParams *rp = GetActiveParams();
