@@ -48,21 +48,6 @@ private:
         TIME_STEP_OOD,      // Existing particles are good, but need to advect more
         UPTODATE            // Everything is up-to-date
     };
-    // The following two enums are stored in params, so we use a native format
-    // which is long in this case to avoid casting error.
-    enum class SeedGenMode : long   
-    {
-        UNIFORM     = 0,
-        RANDOM      = 1,
-        RANDOM_BIAS = 2,
-        LIST        = 3
-    };
-    enum class FlowDir : long
-    {
-        FORWARD     = 0,
-        BACKWARD    = 1,
-        BI_DIR      = 2
-    };
 
     // C++ stuff: pure virtual functions from Renderer
     int  _initializeGL()        override;
@@ -94,7 +79,7 @@ private:
     std::string         _cache_rakeBiasVariable;
     float               _cache_rakeBiasStrength     = 0.0f;
     int                 _cache_seedInjInterval      = 0;
-    SeedGenMode         _cache_seedGenMode          = SeedGenMode::UNIFORM;
+    FlowSeedMode        _cache_seedGenMode          = FlowSeedMode::UNIFORM;
     std::string         _cache_seedInputFilename;
     FlowDir             _cache_flowDir              = FlowDir::FORWARD;
     FlowStatus          _velocityStatus             = FlowStatus::SIMPLE_OUTOFDATE;
