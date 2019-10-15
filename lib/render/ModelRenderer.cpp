@@ -136,8 +136,6 @@ int ModelRenderer::_initializeGL()
 
 void ModelRenderer::Model::renderNode(GLManager *gl, const aiNode *nd) const
 {
-    static int c = 0;
-    printf("node %i\n", c++);
     LegacyGL *lgl = gl->legacy;
     MatrixManager *mm = gl->matrixManager;
     
