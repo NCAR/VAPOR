@@ -344,7 +344,7 @@ VaporField::UpdateParams( const VAPoR::FlowParams* p )
 int
 VaporField::LocateTimestamp( float time, size_t& floor ) const
 {
-    if( _timestamps.size() == 0 )
+    if( _timestamps.empty() )
         return TIME_ERROR;
     if( _timestamps.size() == 1 )
     {
