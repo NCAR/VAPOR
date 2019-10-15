@@ -67,7 +67,6 @@
 //#include "NavigationEventRouter.h"
 //#include "AnnotationEventRouter.h"
 //#include "AnimationEventRouter.h"
-#include "MappingFrame.h"
 #include "BannerGUI.h"
 #include "Statistics.h"
 #include "PythonVariables.h"

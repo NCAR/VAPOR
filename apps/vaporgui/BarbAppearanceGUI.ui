@@ -391,12 +391,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TFWidget</class>
-   <extends>QWidget</extends>
-   <header>TFWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>QSliderEdit</class>
    <extends>QWidget</extends>
    <header location="global">QSliderEdit.h</header>

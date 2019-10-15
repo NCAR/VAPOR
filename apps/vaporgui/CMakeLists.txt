@@ -3,10 +3,7 @@ set (SRCS
 	RenderEventRouter.cpp
 	RenderHolder.cpp
 	ImageFrame.cpp
-	ControlPointEditor.cpp
-	DomainWidget.cpp
 	GLWidget.cpp
-	OpacityWidget.cpp
 	ErrorReporter.cpp
 	Histo.cpp
 	ColorbarWidget.cpp
@@ -14,7 +11,6 @@ set (SRCS
 	VizSelectCombo.cpp
 	AnnotationEventRouter.cpp
 	AnimationEventRouter.cpp
-	MappingFrame.cpp
 	HelloEventRouter.cpp
 	NavigationEventRouter.cpp
 	TwoDDataEventRouter.cpp
@@ -23,7 +19,6 @@ set (SRCS
 	Statistics.cpp
 	Plot.cpp
 	helloSubtabs.cpp
-	TFWidget.cpp
 	VariablesWidget.cpp
 	GeometryWidget.cpp
 	CopyRegionWidget.cpp
@@ -40,7 +35,6 @@ set (SRCS
 	VizWinMgr.cpp
 	TabManager.cpp
 	TrackBall.cpp
-	GLColorbarWidget.cpp
 	ImageEventRouter.cpp
 	ContourEventRouter.cpp
     SliceEventRouter.cpp
@@ -154,18 +148,14 @@ set (SRCS
 	BarbEventRouter.h
 	Combo.h
 	ContourEventRouter.h
-	ControlPointEditor.h
 	CopyRegionWidget.h
-	DomainWidget.h
 	FileOperationChecker.h
-	GLColorbarWidget.h
 	GUIStateParams.h
 	GeometryWidget.h
 	ImageEventRouter.h
 	ImageEventRouter.h
 	ImageFrame.h
 	ImageFrame.h
-	MappingFrame.h
 	MouseModeParams.h
 	PlotParams.h
     PythonVariablesParams.h
@@ -176,13 +166,13 @@ set (SRCS
 	SettingsEventRouter.h
 	SettingsParams.h
 	StatisticsParams.h
-	TFWidget.h
 	TabManager.h
 	VariablesWidget.h
 	VizSelectCombo.h
 	WireFrameEventRouter.h
     VaporWidgets.h
 	ParamsWidgets.h
+	Flags.h
 )
 
 set (UIS 
@@ -227,11 +217,9 @@ set (UIS
 	plotWindow.ui
 	firstTimeUser.ui
     PythonVariablesGUI.ui
-	TFWidgetGUI.ui
 	GeometryWidgetGUI.ui
 	ColorbarWidgetGUI.ui
 	FidelityWidgetGUI.ui
-	ControlPointEditorBase.ui
 	StretchFactorTableGUI.ui
 	OrientationAnglesGUI.ui
 	CopyRegionWidgetGUI.ui
