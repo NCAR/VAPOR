@@ -545,12 +545,18 @@ bool is_int(std::string str) {
 	return str.find_first_not_of("0123456789") == std::string::npos;
 }
 
-template <class T>
+
+template< typename T, std::enable_if_t<std::is_floating_point<T>::value, int> = 0 >
 void _sanitizeFloats(T *buffer, size_t n) {
-	for (size_t i=0; i<n; i++) {
-		if (isnan(buffer[i])) buffer[i] = std::numeric_limits<T>::infinity();
+	for (size_t i = 0; i < n; i++) {
+		if (std::isnan(buffer[i])) buffer[i] = std::numeric_limits<T>::infinity();
 	}
 }
+
+// MSVC has a bug where isnan() is not overloaded for integral types.
+// This function specializes the template to bypass this bug.
+template< typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0 >
+void _sanitizeFloats(T *buffer, size_t n) {}
 
 };
 
@@ -3495,7 +3501,7 @@ int DataMgr::_readRegion(
 	else {
 		rc = _dc->ReadRegion(fd, min, max, region);
 	}
-
+	
 	_sanitizeFloats(region, Wasp::VProduct(Wasp::Dims(min, max)));
 	return(rc);
 }
