@@ -29,6 +29,7 @@
 #include <vapor/GLManager.h>
 #include <vapor/LegacyGL.h>
 #include <vapor/FileUtils.h>
+#include <vapor/STLUtils.h>
 #include <vapor/XmlNode.h>
 #include <assimp/postprocess.h>
 #include <assimp/version.h>
@@ -88,18 +89,6 @@ int ModelRenderer::_paintGL(bool fast)
     int rc = 0;
     const std::string file = rp->GetValueString("file", "");
     
-    if (FileUtils::Extension(file) == "vms" && FileUtils::Exists(file)) {
-        XmlParser parser;
-        XmlNode node;
-        rc = parser.LoadFromFile(&node, file);
-        if (rc < 0) return rc;
-        
-        printf("==============================\n");
-        printNode(&node);
-        
-        return 0;
-    }
-    
     if (file != _cachedFile) {
         rc = _scene.Load(file);
         if (rc < 0)
@@ -134,32 +123,8 @@ int ModelRenderer::_paintGL(bool fast)
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     
-    _scene.Render(_glManager, 0);
+    _scene.Render(_glManager, rp->GetCurrentTimestep());
     lgl->DisableLighting();
-    
-    /*
-    glm::vec3 min = _model.BoundsMin();
-    glm::vec3 max = _model.BoundsMax();
-    
-    printf("Model Min = [%f, %f, %f]\n", min.x, min.y, min.z);
-    printf("Model Max = [%f, %f, %f]\n", max.x, max.y, max.z);
-    
-    lgl->DisableLighting();
-    
-    lgl->Begin(GL_LINES);
-    lgl->Color3f(1, 0, 0);
-    lgl->Vertex3f(min.x, min.y, min.z);
-    lgl->Vertex3f(max.x, min.y, min.z);
-    
-    lgl->Color3f(0, 1, 0);
-    lgl->Vertex3f(min.x, min.y, min.z);
-    lgl->Vertex3f(min.x, max.y, min.z);
-    
-    lgl->Color3f(0, 0, 1);
-    lgl->Vertex3f(min.x, min.y, min.z);
-    lgl->Vertex3f(min.x, min.y, max.z);
-    lgl->End();
-     */
     
     return rc;
 }
@@ -169,8 +134,10 @@ int ModelRenderer::_initializeGL()
     return 0;
 }
 
-void ModelRenderer::Model::renderNode(GLManager *gl, const aiNode *nd)
+void ModelRenderer::Model::renderNode(GLManager *gl, const aiNode *nd) const
 {
+    static int c = 0;
+    printf("node %i\n", c++);
     LegacyGL *lgl = gl->legacy;
     MatrixManager *mm = gl->matrixManager;
     
@@ -236,7 +203,7 @@ void ModelRenderer::Model::calculateBounds(const aiNode *nd, glm::mat4 transform
         calculateBounds(nd->mChildren[c], transform);
 }
 
-glm::mat4 ModelRenderer::Model::getMatrix(const aiNode *nd)
+glm::mat4 ModelRenderer::Model::getMatrix(const aiNode *nd) const
 {
     // Ignore root transform. This is created by assimp to change the up axis
     if (nd == _scene->mRootNode)
@@ -247,11 +214,32 @@ glm::mat4 ModelRenderer::Model::getMatrix(const aiNode *nd)
     return glm::make_mat4((float*)&m);
 }
 
-void ModelRenderer::Model::Render(GLManager *gl)
+void ModelRenderer::Model::Render(GLManager *gl) const
 {
+    gl->legacy->Color3f(1, 1, 1);
     gl->legacy->DisableTexture();
-    
+    VAssert(_scene);
     renderNode(gl, _scene->mRootNode);
+}
+
+void ModelRenderer::Model::DrawBoundingBox(GLManager *gl) const
+{
+    LegacyGL *lgl = gl->legacy;
+    lgl->DisableLighting();
+    
+    lgl->Begin(GL_LINES);
+    lgl->Color3f(1, 0, 0);
+    lgl->Vertex3f(_min.x, _min.y, _min.z);
+    lgl->Vertex3f(_max.x, _min.y, _min.z);
+    
+    lgl->Color3f(0, 1, 0);
+    lgl->Vertex3f(_min.x, _min.y, _min.z);
+    lgl->Vertex3f(_min.x, _max.y, _min.z);
+    
+    lgl->Color3f(0, 0, 1);
+    lgl->Vertex3f(_min.x, _min.y, _min.z);
+    lgl->Vertex3f(_min.x, _min.y, _max.z);
+    lgl->End();
 }
 
 int ModelRenderer::Model::Load(const std::string &path)
@@ -285,33 +273,39 @@ int ModelRenderer::Scene::Load(const std::string &path)
 {
     _keyframes.clear();
     _models.clear();
+    _instances.clear();
     
-    if (FileUtils::Extension(path) == "vms") {
-        
-    } else {
-        Model *model = new Model;
-        int rc = model->Load(path);
-        if (rc < 0)
-            return rc;
-        _models[path] = unique_ptr<Model>(model);
-        
-        ModelInstance defaultInstance;
-        defaultInstance.path = path;
-        _keyframes[0] = {defaultInstance};
-    }
+    int rc;
+    if (FileUtils::Extension(path) == "vms")
+        rc = loadSceneFile(path);
+    else
+        rc = createSceneFromModelFile(path);
     
-    return 0;
+    return rc;
 }
 
 void ModelRenderer::Scene::Render(GLManager *gl, const int ts)
 {
     MatrixManager *mm = gl->matrixManager;
-    const vector<ModelInstance> instances = getInstances(ts);
+    const vector<ModelInstance> &keyframe = getInstances(ts);
     
-    for (const auto &instance : instances) {
+    for (const auto &instance : keyframe) {
         mm->PushMatrix();
-        mm->Translate(instance.translation.x, instance.translation.y, instance.translation.z);
-        _models[instance.path]->Render(gl);
+        const glm::vec3 translate = instance.translate;
+        const glm::vec3 rotate = instance.rotate;
+        const glm::vec3 scale = instance.scale;
+        const glm::vec3 origin = instance.origin;
+        
+        
+        mm->Translate(translate.x, translate.y, translate.z);
+        mm->Translate(origin.x, origin[1], origin[2]);
+        mm->Rotate(glm::radians(rotate.x), 1, 0, 0);
+        mm->Rotate(glm::radians(rotate.y), 0, 1, 0);
+        mm->Rotate(glm::radians(rotate.z), 0, 0, 1);
+        mm->Scale(scale.x, scale.y, scale.z);
+        mm->Translate(-origin.x, -origin.y, -origin.z);
+        
+        _models[instance.file]->Render(gl);
         mm->PopMatrix();
     }
 }
@@ -341,4 +335,235 @@ std::vector<ModelRenderer::Scene::ModelInstance> ModelRenderer::Scene::getInstan
         return _keyframes.at(lastValidFrame);
     else
         return vector<ModelInstance>();
+}
+
+int ModelRenderer::Scene::createSceneFromModelFile(const std::string &path)
+{
+    Model *model = new Model;
+    int rc = model->Load(path);
+    if (rc < 0)
+        return rc;
+    _models[path] = unique_ptr<Model>(model);
+    
+    ModelInstance defaultInstance;
+    defaultInstance.file = path;
+    _keyframes[0] = {defaultInstance};
+    
+    return 0;
+}
+
+#define TAG_INSTANCE "instance_"
+#define TAG_TIME "time_"
+
+int ModelRenderer::Scene::loadSceneFile(const std::string &sceneFilePath)
+{
+    XmlNode root;
+    XmlParser xmlParser;
+    int rc = xmlParser.LoadFromFile(&root, sceneFilePath);
+    if (rc < 0) return rc;
+    
+    for (int i = 0; i < root.GetNumChildren(); i++) {
+        XmlNode *node = root.GetChild(i);
+        
+        if (STLUtils::BeginsWith(node->Tag(), TAG_INSTANCE)) {
+            ModelInstance instance;
+            rc = handleInstanceNode(node, &instance);
+        }
+        else if (STLUtils::BeginsWith(node->Tag(), TAG_TIME)) {
+            rc = handleTimeNode(node);
+        }
+        else {
+            MyBase::SetErrMsg("Unknown tag \"%s\"", node->Tag().c_str());
+            rc = -1;
+        }
+        
+        if (rc < 0)
+            break;
+    }
+    
+    if (rc < 0) return rc;
+    
+    for (const ModelInstance &instance : _instances) {
+        if (!isModelCached(instance.file)) {
+            string filePath = instance.file;
+            if (!FileUtils::IsPathAbsolute(filePath))
+                filePath = FileUtils::JoinPaths({FileUtils::Dirname(sceneFilePath), filePath});
+            
+            Model *model = new Model;
+            int rc = model->Load(filePath);
+            if (rc < 0)
+                return rc;
+            _models[instance.file] = unique_ptr<Model>(model);
+        }
+    }
+    
+    return rc;
+}
+
+int ModelRenderer::Scene::handleInstanceNode(XmlNode *node, ModelInstance *instance)
+{
+    string name = node->Tag();
+    if (name == TAG_INSTANCE) {
+        MyBase::SetErrMsg("Invalid instance \"%s\"", node->Tag().c_str());
+        return -1;
+    }
+    
+    instance->name = name;
+    if (node->Attrs().find("file") != node->Attrs().end())
+        instance->file = node->Attrs()["file"];
+    
+    if (node->HasChild("translate"))
+        if (handleVectorNode(node->GetChild("translate"), &instance->translate) < 0)
+            return -1;
+    if (node->HasChild("rotate"))
+        if (handleVectorNode(node->GetChild("rotate"), &instance->rotate) < 0)
+            return -1;
+    if (node->HasChild("scale"))
+        if (handleVectorNode(node->GetChild("scale"), &instance->scale) < 0)
+            return -1;
+    if (node->HasChild("origin")) {
+        if (handleVectorNode(node->GetChild("origin"), &instance->origin) < 0)
+            return -1;
+    } else if (doesInstanceExist(instance->name)) {
+        instance->origin = getInitInstance(instance->name).origin;
+    }
+    
+    if (doesInstanceExist(instance->name)) {
+        if (!instance->file.empty()) {
+            MyBase::SetErrMsg("Instance \"%s\" file specified more than once", node->Tag().c_str());
+            return -1;
+        } else {
+            
+            instance->file = getInitInstance(instance->name).file;
+        }
+    } else {
+        if (instance->file.empty()) {
+            MyBase::SetErrMsg("Instance \"%s\" defined without an associated file", node->Tag().c_str());
+            return -1;
+        }
+        
+        _instances.push_back(*instance);
+    }
+    
+    return 0;
+}
+
+int ModelRenderer::Scene::handleTimeNode(XmlNode *node)
+{
+    int rc = 0;
+    int ts;
+    string tsString = node->Tag().substr(strlen(TAG_TIME));
+    
+    if (tsString.empty() || parseIntString(tsString, &ts)) {
+        MyBase::SetErrMsg("Invalid time tag \"%s\"", node->Tag().c_str());
+        return -1;
+    }
+    
+    vector<ModelInstance> instances;
+    
+    for (int i = 0; i < node->GetNumChildren(); i++) {
+        XmlNode *child = node->GetChild(i);
+        
+        if (STLUtils::BeginsWith(child->Tag(), TAG_INSTANCE)) {
+            ModelInstance instance;
+            rc = handleInstanceNode(child, &instance);
+            if (rc < 0) break;
+            
+            instances.push_back(instance);
+        }
+        else {
+            MyBase::SetErrMsg("Unknown tag \"%s\"", node->Tag().c_str());
+            rc = -1;
+        }
+        if (rc < 0)
+            break;
+    }
+    
+    _keyframes[ts] = instances;
+    return rc;
+}
+
+int ModelRenderer::Scene::handleVectorNode(XmlNode *node, glm::vec3 *v)
+{
+    int rc = 0;
+    rc -= handleFloatAttribute(node, "x", &v->x);
+    rc -= handleFloatAttribute(node, "y", &v->y);
+    rc -= handleFloatAttribute(node, "z", &v->z);
+    return rc;
+}
+
+int ModelRenderer::Scene::handleFloatAttribute(XmlNode *node, const std::string &name, float *f)
+{
+    if (node->Attrs().find(name) == node->Attrs().end())
+        return 0;
+    
+    string valueString = node->Attrs()[name];
+    size_t charsRead;
+    try {
+        *f = std::stof(valueString, &charsRead);
+    }
+    catch (invalid_argument) {
+        MyBase::SetErrMsg("Invalid float attribute %s=\"%s\"", name.c_str(), valueString.c_str());
+        return -1;
+    }
+    catch (out_of_range) {
+        MyBase::SetErrMsg("Float attribute out of range %s=\"%s\"", name.c_str(), valueString.c_str());
+        return -1;
+    }
+    
+    if (charsRead != valueString.size()) {
+        MyBase::SetErrMsg("Invalid float attribute %s=\"%s\"", name.c_str(), valueString.c_str());
+        return -1;
+    }
+    
+    return 0;
+}
+
+int ModelRenderer::Scene::parseIntString(const std::string &str, int *i) const
+{
+    size_t charsRead;
+    try {
+        *i = std::stof(str, &charsRead);
+    }
+    catch (invalid_argument) {
+        MyBase::SetErrMsg("Invalid integer \"%s\"", str.c_str());
+        return -1;
+    }
+    catch (out_of_range) {
+        MyBase::SetErrMsg("Integer out of range \"%s\"", str.c_str());
+        return -1;
+    }
+    
+    if (charsRead != str.size()) {
+        MyBase::SetErrMsg("Invalid integer \"%s\"", str.c_str());
+        return -1;
+    }
+    
+    return 0;
+}
+
+ModelRenderer::Scene::ModelInstance ModelRenderer::Scene::getInitInstance(const std::string &name) const
+{
+    assert(doesInstanceExist(name));
+    
+    for (const ModelInstance &inst : _instances)
+        if (inst.name == name)
+            return inst;
+    return ModelInstance();
+}
+
+bool ModelRenderer::Scene::doesInstanceExist(const std::string &name) const
+{
+    for (const ModelInstance &instance : _instances)
+        if (instance.name == name)
+            return true;
+    return false;
+}
+
+bool ModelRenderer::Scene::isModelCached(const std::string &file) const
+{
+    for (const auto &it : _models)
+        if (it.first == file)
+            return true;
+    return false;
 }

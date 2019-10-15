@@ -37,6 +37,7 @@
 #include <assimp/scene.h>
 
 #include <memory>
+#include <string>
 
 namespace VAPoR {
 
@@ -76,17 +77,13 @@ private:
         const aiScene *_scene;
         glm::vec3 _min, _max;
         
-        void renderNode(GLManager *gl, const aiNode *nd);
+        void renderNode(GLManager *gl, const aiNode *nd) const;
         void calculateBounds(const aiNode *nd, glm::mat4 transform = glm::mat4(1.0f));
-        glm::mat4 getMatrix(const aiNode *nd);
+        glm::mat4 getMatrix(const aiNode *nd) const;
         
     public:
-        
-        ~Model() {
-            printf("Deleting Model!\n");
-            
-        }
-        void Render(GLManager *gl);
+        void Render(GLManager *gl) const;
+        void DrawBoundingBox(GLManager *gl) const;
         int Load(const std::string &path);
         glm::vec3 BoundsMin() const { return _min; }
         glm::vec3 BoundsMax() const { return _max; }
@@ -95,12 +92,15 @@ private:
     
     class Scene {
         struct ModelInstance {
-            std::string path;
-            glm::vec3 translation = glm::vec3(0.f);
-            glm::vec3 rotation = glm::vec3(0.f);
+            std::string name;
+            std::string file;
+            glm::vec3 translate = glm::vec3(0.f);
+            glm::vec3 rotate = glm::vec3(0.f);
             glm::vec3 scale = glm::vec3(1.f);
+            glm::vec3 origin = glm::vec3(0.f);
         };
         
+        std::vector<ModelInstance> _instances;
         std::map<int, std::vector<ModelInstance>> _keyframes;
         std::map<std::string, std::unique_ptr<Model>> _models;
         
@@ -111,6 +111,16 @@ private:
         
     private:
         std::vector<ModelInstance> getInstances(const int ts) const;
+        int createSceneFromModelFile(const std::string &path);
+        int loadSceneFile(const std::string &path);
+        int handleInstanceNode(XmlNode *node, ModelInstance *instance);
+        int handleTimeNode(XmlNode *node);
+        int handleVectorNode(XmlNode *node, glm::vec3 *v);
+        int handleFloatAttribute(XmlNode *node, const std::string &name, float *f);
+        int parseIntString(const std::string &str, int *i) const;
+        ModelInstance getInitInstance(const std::string &name) const;
+        bool doesInstanceExist(const std::string &name) const;
+        bool isModelCached(const std::string &file) const;
     };
  
     Scene _scene;
