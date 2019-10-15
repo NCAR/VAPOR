@@ -12,7 +12,7 @@ ModelVariablesSubtab::ModelVariablesSubtab(QWidget* parent) {
     layout()->setContentsMargins(0, 10, 0, 0);
     layout()->addWidget(_modelSettings = new VSection("Model"));
     
-    addPW(new ParamsWidgetFile("file"));
+    addPW(new ParamsWidgetFile("Model/Scene File"));
 }
 
 void ModelVariablesSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
