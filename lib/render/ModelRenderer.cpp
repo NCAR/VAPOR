@@ -81,7 +81,7 @@ int ModelRenderer::_paintGL(bool fast)
 {
     RenderParams *rp = GetActiveParams();
     int rc = 0;
-    const std::string file = rp->GetValueString("file", "");
+    const std::string file = rp->GetValueString(ModelParams::FileTag, "");
     
     if (file != _cachedFile) {
         rc = _scene.Load(file);

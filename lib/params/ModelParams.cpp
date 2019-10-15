@@ -6,6 +6,7 @@
 using namespace Wasp;
 using namespace VAPoR;
 
+const std::string ModelParams::FileTag = "FileTag";
 
 //
 // Register class with object factory!!!

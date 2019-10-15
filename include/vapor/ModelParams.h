@@ -7,6 +7,8 @@ namespace VAPoR {
 
 class PARAMS_API ModelParams : public RenderParams {
 public:
+    
+    static const std::string FileTag;
 
  ModelParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave);
  ModelParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, std::string classType);
