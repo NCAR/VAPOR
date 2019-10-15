@@ -35,10 +35,6 @@
 #include <assimp/version.h>
 #include <vapor/VAssert.h>
 
-#warning vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-#warning Third party libraries updated to assimp v5. need to restore assimp_backup and remove assimp.5.*
-#warning ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 using namespace VAPoR;
 
 static RendererRegistrar<ModelRenderer> registrar(
@@ -50,9 +46,7 @@ ModelRenderer::ModelRenderer(const ParamsMgr* pm, string winName,
                                  DataMgr* dataMgr)
 : Renderer(pm, winName, dataSetName, ModelParams::GetClassType(),
            ModelRenderer::GetClassType(), instName, dataMgr)
-{
-    printf("ASSIMP %i.%i.%i\n", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision());
-}
+{}
 
 ModelRenderer::~ModelRenderer()
 {
@@ -91,8 +85,10 @@ int ModelRenderer::_paintGL(bool fast)
     
     if (file != _cachedFile) {
         rc = _scene.Load(file);
-        if (rc < 0)
+        if (rc < 0) {
+            _cachedFile = "";
             return rc;
+        }
         _cachedFile = file;
         glm::vec3 center = _scene.Center();
         rp->GetTransform()->SetOrigin({center.x, center.y, center.z});
@@ -100,13 +96,9 @@ int ModelRenderer::_paintGL(bool fast)
     
     LegacyGL *lgl = _glManager->legacy;
     
-//    if (fast)
-//        return 0;
-    
     MatrixManager *mm = _glManager->matrixManager;
     mm->MatrixModeModelView();
     
-//    LegacyGL *lgl = _glManager->legacy;
     lgl->EnableLighting();
     lgl->DisableTexture();
     
