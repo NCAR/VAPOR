@@ -5,6 +5,7 @@
 #include <QBitmap>
 #include <QProxyStyle>
 
+// An arbitrary large number as the number of stops for a continuous qslider
 #define QT_STOPS 1000000000
 
 // Dragging the selected region currently requires AbsoluteSetButtons to be enabled

@@ -46,7 +46,6 @@ class TwoDAppearanceSubtab : public QWidget, public Ui_TwoDAppearanceGUI {
 public:
 	TwoDAppearanceSubtab(QWidget* parent) {
 		setupUi(this);
-		_TFWidget->Reinit((TFFlags)(0));
         verticalLayout->insertWidget(0, _tfe = new TFEditor);
 	}
 
@@ -55,7 +54,6 @@ public:
 		VAPoR::ParamsMgr *paramsMgr,
 		VAPoR::RenderParams *rParams
 	) {
-		_TFWidget->Update(dataMgr, paramsMgr, rParams);
         _tfe->Update(dataMgr, paramsMgr, rParams);
 	}
 };

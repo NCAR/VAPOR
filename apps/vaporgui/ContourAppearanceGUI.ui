@@ -358,25 +358,6 @@
     </widget>
    </item>
    <item>
-    <widget class="TFWidget" name="_TFWidget" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>484</height>
-      </size>
-     </property>
-     <property name="toolTip">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -390,18 +371,9 @@
     </spacer>
    </item>
   </layout>
-  <zorder>_TFWidget</zorder>
   <zorder>line_3</zorder>
   <zorder>tabWidget</zorder>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>TFWidget</class>
-   <extends>QWidget</extends>
-   <header>TFWidget.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -35,7 +35,6 @@
 #endif
 
 class ColorbarSettings;
-class MappingFrame;
 
 //!
 //! \class EventRouter

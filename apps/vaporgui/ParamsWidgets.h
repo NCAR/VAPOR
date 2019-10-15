@@ -132,10 +132,12 @@ class ParamsWidgetFile : public ParamsWidget {
     
     QPushButton *_button = nullptr;
     QLineEdit *_pathTexbox;
+    QString _fileTypeFilter = "All Files (*)";
     
 public:
     ParamsWidgetFile(const std::string &tag, const std::string &label = "");
     void Update(VAPoR::ParamsBase *p);
+    ParamsWidgetFile *SetFileTypeFilter(const std::string &filter);
     
 private slots:
     void _buttonClicked();

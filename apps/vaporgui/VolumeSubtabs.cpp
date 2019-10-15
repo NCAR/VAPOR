@@ -15,8 +15,6 @@ void VolumeVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Rende
 
 VolumeAppearanceSubtab::VolumeAppearanceSubtab(QWidget* parent) {
     setupUi(this);
-    _TFWidget->SetOpacityIntegrated(true);
-    _TFWidget->Reinit((TFFlags)(SAMPLING));
     verticalLayout->insertWidget(0, _tfe = new TFEditor);
     
     _densitySlider = new QSliderEdit();
@@ -60,7 +58,6 @@ void VolumeAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *p
     _params = vp;
     VAssert(vp);
     
-    _TFWidget->Update(dataMgr, paramsMgr, rParams);
     _tfe->Update(dataMgr, paramsMgr, rParams);
     
     

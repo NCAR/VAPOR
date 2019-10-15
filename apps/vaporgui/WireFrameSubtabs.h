@@ -46,8 +46,6 @@ class WireFrameAppearanceSubtab : public QWidget, public Ui_WireFrameAppearanceG
 public:
 	WireFrameAppearanceSubtab(QWidget* parent) {
 		setupUi(this);
-        _TFWidget->SetOpacitySupported(false);
-		_TFWidget->Reinit((TFFlags)(CONSTANT_COLOR));
         verticalLayout->insertWidget(0, _tfe = new TFEditor);
 	}
 
@@ -56,7 +54,6 @@ public:
 		VAPoR::ParamsMgr *paramsMgr,
 		VAPoR::RenderParams *rParams
 	) {
-		_TFWidget->Update(dataMgr, paramsMgr, rParams);
         _tfe->Update(dataMgr, paramsMgr, rParams);
 	}
 };
