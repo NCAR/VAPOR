@@ -38,14 +38,7 @@ ModelEventRouter::ModelEventRouter(
 	_variables->adjustSize();
 	qsvar->setWidget(_variables);
 	qsvar->setWidgetResizable(true);
-	addTab(qsvar, "Variables");
-
-	_appearance = new ModelAppearanceSubtab(this);
-	QScrollArea* qsapp = new QScrollArea(this);
-	qsapp->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	qsapp->setWidget(_appearance);
-	qsapp->setWidgetResizable(true);
-	addTab(qsapp,"Appearance");
+	addTab(qsvar, "Model");
 
 	_geometry = new ModelGeometrySubtab(this);
 	QScrollArea *qsgeo = new QScrollArea(this);
@@ -53,24 +46,8 @@ ModelEventRouter::ModelEventRouter(
 	qsgeo->setWidget(_geometry);
 	qsgeo->setWidgetResizable(true);
 	addTab(qsgeo, "Geometry");
-
-	_annotation = new ModelAnnotationSubtab(this);
-	QScrollArea *qsAnnotation = new QScrollArea(this);
-	qsAnnotation->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	qsAnnotation->setWidget(_annotation);
-	qsAnnotation->setWidgetResizable(true);
-	addTab(qsAnnotation, "Annotation");
 }
 
-//Destructor does nothing 
-ModelEventRouter::~ModelEventRouter(){
-	if (_variables) delete _variables;
-#ifdef VAPOR3_0_0_ALPHA
-	if (_image) delete _image; 
-#endif
-	if (_geometry) delete _geometry;
-	if (_appearance) delete _appearance;
-}
 
 void ModelEventRouter::GetWebHelp(
     vector <pair <string, string> > &help
@@ -111,20 +88,8 @@ void ModelEventRouter::_updateTab(){
 		_controlExec->GetParamsMgr(),
 		GetActiveParams()
 	);
-
-	_appearance->Update(
-		GetActiveDataMgr(),
-		_controlExec->GetParamsMgr(),
-		GetActiveParams()
-	);
 	
 	_geometry->Update(
-		_controlExec->GetParamsMgr(),
-		GetActiveDataMgr(),
-		GetActiveParams()
-	);
-
-	_annotation->Update(
 		_controlExec->GetParamsMgr(),
 		GetActiveDataMgr(),
 		GetActiveParams()

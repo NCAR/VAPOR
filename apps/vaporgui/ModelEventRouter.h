@@ -38,7 +38,6 @@ public:
     ModelEventRouter(
         QWidget *parent, VAPoR::ControlExec *ce
     );
-	~ModelEventRouter();
 
 	virtual void hookUpTab() {}
 
@@ -78,6 +77,4 @@ private:
 
 	ModelVariablesSubtab *_variables;
 	ModelGeometrySubtab *_geometry;
-	ModelAppearanceSubtab *_appearance;
-	ModelAnnotationSubtab *_annotation;
 };
