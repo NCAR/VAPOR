@@ -90,7 +90,7 @@ class RENDER_API WireFrameRenderer : public Renderer {
         // return false once maxLinesPerVertex has been exceeded
         //
         DrawList(GLuint maxEntries, size_t maxLinesPerVertex) : _drawList(
-                                                                    maxEntries * maxLinesPerVertex, std::numeric_limits<GLuint>::max()),
+                                                                    maxEntries * maxLinesPerVertex, (std::numeric_limits<GLuint>::max)()),
                                                                 _maxEntries(maxEntries),
                                                                 _maxLinesPerVertex(maxLinesPerVertex) {}
 
@@ -106,7 +106,7 @@ class RENDER_API WireFrameRenderer : public Renderer {
                 if (_drawList[idx0 * _maxLinesPerVertex + i] == idx1) {
                     return (true);
                 }
-                if (_drawList[idx0 * _maxLinesPerVertex + i] == std::numeric_limits<GLuint>::max()) {
+                if (_drawList[idx0 * _maxLinesPerVertex + i] == (std::numeric_limits<GLuint>::max)()) {
                     _drawList[idx0 * _maxLinesPerVertex + i] = idx1;
                     return (false);
                 }
