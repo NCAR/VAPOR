@@ -59,8 +59,6 @@ public:
 							string instName,
 							DataMgr* dataMgr);
 
-	virtual ~ModelRenderer();
-
 	static string GetClassType() {
 		return("Model");
 	}
