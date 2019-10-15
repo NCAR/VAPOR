@@ -237,6 +237,12 @@ void ParamsWidgetFile::Update(VAPoR::ParamsBase *p)
     _pathTexbox->setText(QString::fromStdString(p->GetValueString(_tag, "<empty>")));
 }
 
+ParamsWidgetFile *ParamsWidgetFile::SetFileTypeFilter(const std::string &filter)
+{
+    _fileTypeFilter = QString::fromStdString(filter);
+    return this;
+}
+
 void ParamsWidgetFile::_buttonClicked()
 {
     if (!_params)
@@ -250,7 +256,7 @@ void ParamsWidgetFile::_buttonClicked()
     else
         defaultPath = Wasp::FileUtils::HomeDir();
     
-    QString qSelectedPath = QFileDialog::getOpenFileName(nullptr, "Select a file", QString::fromStdString(defaultPath), "All Files (*)");
+    QString qSelectedPath = QFileDialog::getOpenFileName(nullptr, "Select a file", QString::fromStdString(defaultPath), _fileTypeFilter);
     if (qSelectedPath.isNull())
         return;
     
