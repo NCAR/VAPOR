@@ -140,9 +140,9 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
 
     /* Index numbers are in agreement with what's in FlowRenderer.h */
     _flowDirection = new VComboBox( this, "Steady Flow Direction" );
-    _flowDirection->AddOption( "Forward", 0 );
-    _flowDirection->AddOption( "Backward", 1 );
-    _flowDirection->AddOption( "Bi-Directional", 2 );
+    _flowDirection->AddOption( "Forward",        static_cast<int>(FlowDir::FORWARD) );
+    _flowDirection->AddOption( "Backward",       static_cast<int>(FlowDir::BACKWARD) );
+    _flowDirection->AddOption( "Bi-Directional", static_cast<int>(FlowDir::BI_DIR) );
     _layout->addWidget( _flowDirection );
     connect( _flowDirection, SIGNAL(_indexChanged(int)), this, SLOT( _flowDirectionChanged(int) ) );
     _seedGenMode = new VComboBox( this, "Seed Generation Mode" );
@@ -243,7 +243,7 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     }
 
     /* Update flow direction combo */
-    long dir  = _params->GetFlowDirection();
+    auto dir  = _params->GetFlowDirection();
     if(  dir >= 0 && dir < _flowDirection->GetNumOfItems() )
         _flowDirection->SetIndex( dir );
     else

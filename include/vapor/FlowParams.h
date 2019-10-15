@@ -27,6 +27,8 @@ enum class FlowDir : int
     BI_DIR      = 2 
 }; 
 
+
+
 class PARAMS_API FlowParams : public RenderParams 
 {
 public:
@@ -73,8 +75,8 @@ public:
     void   SetNeedFlowlineOutput( bool );
     bool   GetNeedFlowlineOutput( ) const;
 
-    long   GetFlowDirection() const;
-    void   SetFlowDirection( long );
+    int    GetFlowDirection() const;
+    void   SetFlowDirection( int );
 
     std::string GetSeedInputFilename() const;
     void        SetSeedInputFilename( const std::string& ) ;
@@ -141,6 +143,13 @@ private:
         { static_cast<int>( FlowSeedMode::LIST),        "LIST"          }
     };
 
+    const std::vector< std::pair<int, std::string> > _dir2Str =
+    {
+        { static_cast<int>( FlowDir::FORWARD ),         ""              }, // default value
+        { static_cast<int>( FlowDir::FORWARD ),         "FORWARD"       },
+        { static_cast<int>( FlowDir::BACKWARD ),        "BACKWARD"      },
+        { static_cast<int>( FlowDir::BI_DIR),           "BI_DIRECTIONAL"} 
+    };
 };
 
 }
