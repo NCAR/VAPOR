@@ -133,11 +133,8 @@ void ModelEventRouter::_updateTab(){
 
 string ModelEventRouter::_getDescription() const {
 	return (
-	"Displays "
-    "a series of user defined contours along a two dimensional plane within the "
-    "user's domain.\n\nModels may hae constant coloration, or may be colored "
-    "according to a secondary variable.\n\nModels may be displaced by a height "
-    "variable.\n\n "
+	"Allows the import of 3D model files as well as more complex scenes that "
+    "can be modified per timestep by using .vms files"
 	);
 
 }

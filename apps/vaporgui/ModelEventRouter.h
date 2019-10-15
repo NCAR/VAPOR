@@ -60,10 +60,10 @@ protected:
 	virtual string _getDescription() const;
 
 	virtual string _getSmallIconImagePath() const {
-		return("Models_small.png");
+		return("Model_small.png");
 	}
 	virtual string _getIconImagePath() const {
-		return("Models.png");
+		return("Model.png");
 	}
 	
 private:
