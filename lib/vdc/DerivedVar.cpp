@@ -4,6 +4,7 @@
 #include <vapor/UDUnitsClass.h>
 #include <vapor/NetCDFCollection.h>
 #include <vapor/utils.h>
+#include <vapor/WASP.h>
 #include <vapor/DerivedVar.h>
 
 using namespace VAPoR;
@@ -1970,20 +1971,20 @@ int DerivedCoordVarStandardWRF_Terrain::GetDimLensAtLevel(
 	dims_at_level.clear();
 	bs_at_level.clear();
 
-	vector <size_t> dummy;
-	int rc = _dc->GetDimLensAtLevel(_PHVar, level, dims_at_level, bs_at_level);
+	vector <size_t> dims, bs;
+	int rc = _dc->GetDimLensAtLevel(_PHVar, -1, dims, bs);
 	if (rc<0) return(-1);
 
 	if (_derivedVarName == "Elevation") {
-		dims_at_level[2]--;
+		dims[2]--;
 	}
 	else if (_derivedVarName == "ElevationU") {
-		dims_at_level[0]++;
-		dims_at_level[2]--;
+		dims[0]++;
+		dims[2]--;
 	}
 	else if (_derivedVarName == "ElevationV") {
-		dims_at_level[1]++;
-		dims_at_level[2]--;
+		dims[1]++;
+		dims[2]--;
 	}
 	else if (_derivedVarName == "ElevationW") {
 	}
@@ -1991,6 +1992,13 @@ int DerivedCoordVarStandardWRF_Terrain::GetDimLensAtLevel(
 		SetErrMsg("Invalid variable name: %s", _derivedVarName.c_str());
 		return(-1);
 	}
+
+int nlevels = _dc->GetNumRefLevels(_PHVar);
+if (level < 0) level = nlevels + level;
+
+WASP::InqDimsAtLevel(
+	_coordVarInfo.GetWName(), level, dims, bs, dims_at_level, bs_at_level
+);
 
 	// No blocking
 	//
@@ -2040,6 +2048,12 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
 	int rc = _dc->GetDimLensAtLevel(_PHVar, f->GetLevel(), wDims, dummy);
 	if (rc<0) return(-1);
 
+	vector <size_t> myDims;
+	rc = DerivedCoordVarStandardWRF_Terrain::GetDimLensAtLevel(
+		f->GetLevel(), myDims, dummy
+	);
+	if (rc<0) return(-1);
+
 	// coordinates of "W" grid.
 	//
 	vector <size_t> wMin = min;
@@ -2049,10 +2063,19 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
 	// coordinates of base (Elevation) grid.
 	//
 	if (varname == "Elevation") {
-		wMax[2] += 1;
+
+		// In general myDims[2] != wDims[2]. However, for multiresolution
+		// data the two can be equal
+		//
+		if (myDims[2] != wDims[2]) {
+			wMax[2] += 1;
+		}
+
 	}
 	else if (varname == "ElevationU") {
-		wMax[2] += 1;
+		if (myDims[2] != wDims[2]) {
+			wMax[2] += 1;
+		}
 
 		if (min[0] > 0) {
 			wMin[0] -= 1;
@@ -2062,7 +2085,9 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
 		}
 	}
 	else if (varname == "ElevationV") {
-		wMax[2] += 1;
+		if (myDims[2] != wDims[2]) {
+			wMax[2] += 1;
+		}
 
 		if (min[1] > 0) {
 			wMin[1] -= 1;
@@ -2076,7 +2101,9 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
 	//
 	vector <size_t> bMin = wMin;
 	vector <size_t> bMax = wMax;
-	bMax[2] -= 1;
+	if (myDims[2] != wDims[2]) {
+		bMax[2] -= 1;
+	}
 
 	size_t nElements = std::max(numElements(wMin, wMax), numElements(min, max));
 
