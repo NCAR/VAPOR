@@ -1967,6 +1967,8 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
     // Only update the GUI if the Params state has changed
     //
     if (event->type() == ParamsChangeEvent::type()) {
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
         if (_stats) {
             _stats->Update();
         }
@@ -1985,6 +1987,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
         update();
 
+        QApplication::restoreOverrideCursor();
         return (false);
     }
 
