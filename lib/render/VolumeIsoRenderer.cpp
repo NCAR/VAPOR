@@ -23,8 +23,11 @@ VolumeIsoRenderer::VolumeIsoRenderer(const ParamsMgr *pm, std::string &winName, 
 {
     // An ugly fix but I don't think we have a mechanism for this
     if (_needToSetDefaultAlgorithm()) {
-        VolumeParams *vp = (VolumeParams *)GetActiveParams();
-        Grid *        grid = _dataMgr->GetVariable(vp->GetCurrentTimestep(), vp->GetVariableName(), vp->GetRefinementLevel(), vp->GetCompressionLevel());
+        VolumeParams * vp = (VolumeParams *)GetActiveParams();
+        vector<double> minExt, maxExt;
+        vp->GetBox()->GetExtents(minExt, maxExt);
+
+        Grid *grid = _dataMgr->GetVariable(vp->GetCurrentTimestep(), vp->GetVariableName(), vp->GetRefinementLevel(), vp->GetCompressionLevel(), minExt, maxExt);
         if (grid) {
             string algorithmName = _getDefaultAlgorithmForGrid(grid);
             vp->SetAlgorithm(algorithmName);

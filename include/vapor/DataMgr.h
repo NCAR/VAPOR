@@ -423,16 +423,21 @@ public:
     //!
     //! This method finds the minimum and maximum value of a variable
     //!
-    //! \param[in] stride Stride between successive grid points. If set to
-    //! one every grid point the variable is sampled on will be used to compute
-    //! the range. If greater than one specifies stride between successive
-    //! grid points used in calculation.
-    //!
     //! \param[out] range A two element vector containing the minimum and maximum
     //! value, respectively, for the variable \p varname at the specified
     //! time step, lod, etc.
     //
-    int GetDataRange(size_t ts, string varname, int level, int lod, size_t stride, std::vector<double> &range);
+    int GetDataRange(size_t ts, string varname, int level, int lod, std::vector<double> &range);
+
+    //! Compute min and max value of a variable within a specified ROI
+    //!
+    //! This method finds the minimum and maximum value of a variable within
+    //! the region of interest (ROI) specified by \p min and \p max. Note, the
+    //! results returned by this method are equivalent to calling the
+    //! Grid::GetRange() method on a grid returned by DataMgr::GetVariable
+    //! using the same arguments provided here.
+    //
+    int GetDataRange(size_t ts, string varname, int level, int lod, vector<double> min, vector<double> max, std::vector<double> &range);
 
     //! \copydoc DC::GetDimLensAtLevel()
     //!

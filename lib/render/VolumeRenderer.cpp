@@ -40,8 +40,11 @@ VolumeRenderer::VolumeRenderer(const ParamsMgr *pm, std::string &winName, std::s
     _previousFramebufferRatio = 1;
 
     if (_needToSetDefaultAlgorithm()) {
-        VolumeParams *vp = (VolumeParams *)GetActiveParams();
-        Grid *        grid = _dataMgr->GetVariable(vp->GetCurrentTimestep(), vp->GetVariableName(), vp->GetRefinementLevel(), vp->GetCompressionLevel());
+        VolumeParams * vp = (VolumeParams *)GetActiveParams();
+        vector<double> minExt, maxExt;
+        vp->GetBox()->GetExtents(minExt, maxExt);
+
+        Grid *grid = _dataMgr->GetVariable(vp->GetCurrentTimestep(), vp->GetVariableName(), vp->GetRefinementLevel(), vp->GetCompressionLevel(), minExt, maxExt);
         if (grid) {
             string algorithmName = _getDefaultAlgorithmForGrid(grid);
             vp->SetAlgorithm(algorithmName);
@@ -349,20 +352,30 @@ int VolumeRenderer::_initializeAlgorithm()
 
 int VolumeRenderer::_loadData()
 {
-    VolumeParams *RP = (VolumeParams *)GetActiveParams();
+    VolumeParams * RP = (VolumeParams *)GetActiveParams();
+    vector<double> minExt, maxExt;
+    RP->GetBox()->GetExtents(minExt, maxExt);
+
     CheckCache(_cache.var, RP->GetVariableName());
     CheckCache(_cache.ts, RP->GetCurrentTimestep());
     CheckCache(_cache.refinement, RP->GetRefinementLevel());
     CheckCache(_cache.compression, RP->GetCompressionLevel());
+    CheckCache(_cache.minExt, minExt);
+    CheckCache(_cache.maxExt, maxExt);
     if (!_cache.needsUpdate) return 0;
 
-    Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.var, _cache.refinement, _cache.compression);
+    Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.var, _cache.refinement, _cache.compression, _cache.minExt, _cache.maxExt);
     if (!grid) return -1;
 
     if (dynamic_cast<const UnstructuredGrid *>(grid)) {
         MyBase::SetErrMsg("Unstructured grids are not supported by this renderer");
         return -1;
     }
+
+    // Actual min and max extents of returned grid, which are in general
+    // larger than requested extents.
+    //
+    grid->GetUserExtents(_dataMinExt, _dataMaxExt);
 
     if (_needToSetDefaultAlgorithm()) {
         RP->SetAlgorithm(_getDefaultAlgorithmForGrid(grid));
@@ -386,7 +399,7 @@ int VolumeRenderer::_loadSecondaryData()
     if (!_cache.needsUpdate) return 0;
 
     if (_cache.useColorMapVar) {
-        Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.colorMapVar, _cache.refinement, _cache.compression);
+        Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.colorMapVar, _cache.refinement, _cache.compression, _cache.minExt, _cache.maxExt);
         if (!grid) return -1;
         int ret = _algorithm->LoadSecondaryData(grid);
         delete grid;
@@ -453,14 +466,10 @@ glm::vec3 VolumeRenderer::_getVolumeScales() const
 
 void VolumeRenderer::_getExtents(glm::vec3 *dataMin, glm::vec3 *dataMax, glm::vec3 *userMin, glm::vec3 *userMax) const
 {
-    VolumeParams * vp = (VolumeParams *)GetActiveParams();
-    vector<double> dMinExts, dMaxExts;
-    vp->GetBox()->GetExtents(dMinExts, dMaxExts);
-    *userMin = vec3(dMinExts[0], dMinExts[1], dMinExts[2]);
-    *userMax = vec3(dMaxExts[0], dMaxExts[1], dMaxExts[2]);
-    _dataMgr->GetVariableExtents(_cache.ts, _cache.var, _cache.refinement, dMinExts, dMaxExts);
-    *dataMin = vec3(dMinExts[0], dMinExts[1], dMinExts[2]);
-    *dataMax = vec3(dMaxExts[0], dMaxExts[1], dMaxExts[2]);
+    *userMin = vec3(_cache.minExt[0], _cache.minExt[1], _cache.minExt[2]);
+    *userMax = vec3(_cache.maxExt[0], _cache.maxExt[1], _cache.maxExt[2]);
+    *dataMin = vec3(_dataMinExt[0], _dataMinExt[1], _dataMinExt[2]);
+    *dataMax = vec3(_dataMaxExt[0], _dataMaxExt[1], _dataMaxExt[2]);
 
     // Moving domain allows area outside of data to be selected
     *userMin = glm::max(*userMin, *dataMin);

@@ -289,8 +289,11 @@ void TFWidget::getVariableRange(float range[2], float values[2], bool secondaryV
 
     if (!_dataMgr->VariableExists(ts, varName, ref, cmp)) return;
 
+    vector<double> minExt, maxExt;
+    _rParams->GetBox()->GetExtents(minExt, maxExt);
+
     vector<double> rangev;
-    int            rc = _dataMgr->GetDataRange(ts, varName, ref, cmp, _stride, rangev);
+    int            rc = _dataMgr->GetDataRange(ts, varName, ref, cmp, minExt, maxExt, rangev);
 
     if (rc < 0) {
         MSG_ERR("Error loading variable");
