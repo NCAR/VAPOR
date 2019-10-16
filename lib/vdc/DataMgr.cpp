@@ -1572,8 +1572,8 @@ int DataMgr::GetVariableExtents(
 	min.clear();
 	max.clear();
 
-//level = 0;
-int lod = -1;
+level = 0;
+int lod = 0;
 int rc = _lod_correction(varname, lod);
 if (rc<0) return(-1);
 cout << "DataMgr::GetVariableExtents() : hardcode lod and level" << endl;
