@@ -1,7 +1,6 @@
 #include "ParamsWidgets.h"
 #include <QLabel>
 #include <QHBoxLayout>
-#include <QSpacerItem>
 #include <QIntValidator>
 #include <QEvent>
 #include <QColorDialog>
@@ -22,10 +21,10 @@ ParamsWidget::ParamsWidget(const std::string &tag, const std::string &label)
     this->setLayout(layout);
     
     QLabel *labelWidget = new QLabel(_label.c_str());
-    QSpacerItem *spacer = new QSpacerItem(108, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+    _spacer = new QSpacerItem(108, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
     
     layout->addWidget(labelWidget);
-    layout->addItem(spacer);
+    layout->addItem(_spacer);
 }
 
 
@@ -221,14 +220,18 @@ std::vector<double> ParamsWidgetColor::QColorToVector(const QColor &c)
 ParamsWidgetFile::ParamsWidgetFile(const std::string &tag, const std::string &label)
 : ParamsWidget(tag, label)
 {
+#warning _spacer is a hack. Will be refactored
+    _spacer->changeSize(0, 0, QSizePolicy::Minimum, QSizePolicy::Minimum);
+    
     _button = new QPushButton;
     _button->setText("Select");
     connect(_button, SIGNAL(clicked()), this, SLOT(_buttonClicked()));
-    layout()->addWidget(_button);
     
     _pathTexbox = new QLineEdit;
     _pathTexbox->setReadOnly(true);
+    
     layout()->addWidget(_pathTexbox);
+    layout()->addWidget(_button);
 }
 
 void ParamsWidgetFile::Update(VAPoR::ParamsBase *p)
