@@ -11,6 +11,7 @@
 #include <QLabel>
 #include <vapor/ParamsBase.h>
 #include <cassert>
+#include <QSpacerItem>
 
 //! \class ParamsWidget
 //! Provedes a GUI element that is synced with the Params database
@@ -29,6 +30,7 @@ protected:
     VAPoR::ParamsBase *_params = nullptr;
     std::string _tag;
     std::string _label;
+    QSpacerItem *_spacer;
 };
 
 
