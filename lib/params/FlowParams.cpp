@@ -99,16 +99,28 @@ FlowParams::SetSteadyNumOfSteps( long i )
     SetValueLong( _steadyNumOfStepsTag, "num of steps for a steady integration", i );
 }
 
-long
-FlowParams::GetSeedGenMode() const
+int FlowParams::GetSeedGenMode() const
 {
-    return GetValueLong( _seedGenModeTag, 0 );
+    auto val = GetValueString( _seedGenModeTag, "" );
+    for( const auto& e : _seed2Str )
+    {
+        if( val == e.second )
+            return e.first;
+    }
+    return 0;
 }
 
-void
-FlowParams::SetSeedGenMode( long i )
+void FlowParams::SetSeedGenMode( int i )
 {
-    SetValueLong( _seedGenModeTag, "which mode do we use to generate seeds", i );
+    for( const auto& e : _seed2Str )
+    {
+        if( i == e.first )
+        {
+            SetValueString( _seedGenModeTag, "which way to generate seeds", e.second );
+            return;
+        }
+    }
+    SetValueString( _seedGenModeTag, "which way to generate seeds", "" );
 }
 
 std::string
@@ -135,16 +147,28 @@ FlowParams::SetFlowlineOutputFilename( const std::string& name )
     SetValueString( _flowlineOutputFilenameTag, "filename for output flow lines", name ); 
 }
 
-long
-FlowParams::GetFlowDirection() const
+int FlowParams::GetFlowDirection() const
 {
-    return GetValueLong( _flowDirectionTag, 0 );
+    auto val = GetValueString( _flowDirectionTag, "" );
+    for( const auto& e : _dir2Str )
+    {
+        if( val == e.second )
+            return e.first;
+    }
+    return 0;
 }
 
-void
-FlowParams::SetFlowDirection( long i )
+void FlowParams::SetFlowDirection( int i )
 {
-    SetValueLong( _flowDirectionTag, "does flow integration go forward, backward, or bi-directional", i );
+    for( const auto& e : _dir2Str )
+    {
+        if( i == e.first )
+        {
+            SetValueString( _flowDirectionTag, "flow direction", e.second );
+            return;
+        }
+    }
+    SetValueString( _flowDirectionTag, "flow direction", "" );
 }
 
 std::vector<bool> 

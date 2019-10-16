@@ -3,14 +3,37 @@
 
 #include <vapor/RenderParams.h>
 #include <vapor/DataMgr.h>
+#include <vector>
+#include <utility>
 
 namespace VAPoR 
 {
+
+//
+// These two enums are used across params, GUI, and renderer.
+// Note: use static_cast to cast between them and int types.
+//
+enum class FlowSeedMode : int   
+{   
+    UNIFORM     = 0,
+    RANDOM      = 1,
+    RANDOM_BIAS = 2,
+    LIST        = 3 
+};  
+enum class FlowDir : int
+{   
+    FORWARD     = 0,
+    BACKWARD    = 1,
+    BI_DIR      = 2 
+}; 
+
+
 
 class PARAMS_API FlowParams : public RenderParams 
 {
 public:
 
+    // Constructors
     FlowParams( DataMgr*                 dataManager, 
                 ParamsBase::StateSave*   stateSave );
     FlowParams( DataMgr*                 dataManager, 
@@ -46,14 +69,14 @@ public:
     long   GetSteadyNumOfSteps() const;
     void   SetSteadyNumOfSteps( long );
 
-    long   GetSeedGenMode() const;
-    void   SetSeedGenMode( long );
+    int    GetSeedGenMode() const;
+    void   SetSeedGenMode( int );
 
     void   SetNeedFlowlineOutput( bool );
     bool   GetNeedFlowlineOutput( ) const;
 
-    long   GetFlowDirection() const;
-    void   SetFlowDirection( long );
+    int    GetFlowDirection() const;
+    void   SetFlowDirection( int );
 
     std::string GetSeedInputFilename() const;
     void        SetSeedInputFilename( const std::string& ) ;
@@ -92,7 +115,7 @@ public:
     int                 GetSeedInjInterval() const;
     void                SetSeedInjInterval( int );
 
-protected:
+private:
 
     static const std::string    _isSteadyTag;
     static const std::string    _velocityMultiplierTag;
@@ -110,6 +133,23 @@ protected:
     static const std::string    _pastNumOfTimeSteps;
     static const std::string    _seedInjInterval;
 
+    // maps between ints and "human readable" strings
+    const std::vector< std::pair<int, std::string> > _seed2Str = 
+    {
+        { static_cast<int>( FlowSeedMode::UNIFORM ),    ""              },  // default value
+        { static_cast<int>( FlowSeedMode::UNIFORM ),    "UNIFORM"       },
+        { static_cast<int>( FlowSeedMode::RANDOM),      "RANDOM"        },
+        { static_cast<int>( FlowSeedMode::RANDOM_BIAS), "RANDOM_BIAS"   },
+        { static_cast<int>( FlowSeedMode::LIST),        "LIST"          }
+    };
+
+    const std::vector< std::pair<int, std::string> > _dir2Str =
+    {
+        { static_cast<int>( FlowDir::FORWARD ),         ""              }, // default value
+        { static_cast<int>( FlowDir::FORWARD ),         "FORWARD"       },
+        { static_cast<int>( FlowDir::BACKWARD ),        "BACKWARD"      },
+        { static_cast<int>( FlowDir::BI_DIR),           "BI_DIRECTIONAL"} 
+    };
 };
 
 }

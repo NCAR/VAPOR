@@ -36,7 +36,7 @@ VaporField::InsideVolumeVelocity( float time, const glm::vec3& pos ) const
             return false;
 
         // Then locate the 2 time steps
-        size_t floor;
+        size_t floor = 0;
         int rv  = LocateTimestamp( time, floor );
         if( rv != 0 ) return false;
 
@@ -95,7 +95,7 @@ VaporField::InsideVolumeScalar( float time, const glm::vec3& pos ) const
             return false;
 
         // Then locate the 2 time steps
-        size_t floor;
+        size_t floor = 0;
         int rv  = LocateTimestamp( time, floor );
         if( rv != 0 ) return false;
 
@@ -184,7 +184,7 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity,
             return TIME_ERROR;
 
         // Then we locate the floor time step
-        size_t floorTS;
+        size_t floorTS = 0;
         int rv  = LocateTimestamp( time, floorTS );
         VAssert( rv == 0 );
 
@@ -270,7 +270,7 @@ VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar,
             return TIME_ERROR;
 
         // Then we locate the floor time step
-        size_t floorTS;
+        size_t floorTS = 0;
         int rv  = LocateTimestamp( time, floorTS );
         VAssert( rv == 0 );
         grid = _getAGrid( floorTS, scalarname );
@@ -344,7 +344,7 @@ VaporField::UpdateParams( const VAPoR::FlowParams* p )
 int
 VaporField::LocateTimestamp( float time, size_t& floor ) const
 {
-    if( _timestamps.size() == 0 )
+    if( _timestamps.empty() )
         return TIME_ERROR;
     if( _timestamps.size() == 1 )
     {

@@ -66,13 +66,14 @@ public:
     // Key must support == operator.
     bool contains( const Key& key ) const
     {
-        for( auto it = m_list.cbegin(); it != m_list.cend(); ++it )
+        // (Should use const iterator here, but gcc-4.8 on CentOS7 doesn't support...)
+        for( auto it = m_list.begin(); it != m_list.end(); ++it )
         {
             if( it->first == key )
             {
                 // Move the current element to the list head if it's not already there
-                if( it != m_list.cbegin() )
-                    m_list.splice( m_list.cbegin(), m_list, it );
+                if( it != m_list.begin() )
+                    m_list.splice( m_list.begin(), m_list, it );
 
                 return true;
             }
@@ -105,7 +106,8 @@ public:
     void insert( Key key, const BigObj* ptr )
     {
         // Remove the old pair if the same key already exists.
-        for( auto it = m_list.cbegin(); it != m_list.cend(); ++it )
+        // (Should use const iterator here, but gcc-4.8 on CentOS7 doesn't support...)
+        for( auto it = m_list.begin(); it != m_list.end(); ++it )
         { 
             if( it->first == key )
             {
