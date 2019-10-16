@@ -307,13 +307,16 @@ void TFWidget::getVariableRange(
 
 	if (! _dataMgr->VariableExists(ts, varName, ref, cmp)) return;
 
+	vector<double> minExt, maxExt;
+	_rParams->GetBox()->GetExtents(minExt, maxExt);
+
 	vector <double> rangev;
 	int rc = _dataMgr->GetDataRange(
         ts, 
         varName, 
         ref, 
         cmp,
-        _stride, 
+		minExt, maxExt,
         rangev
     );
 

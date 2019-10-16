@@ -117,13 +117,17 @@ void VolumeIsoAppearanceSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _specularWidget->SetValue (_params->GetPhongSpecular());
     _shininessWidget->SetValue(_params->GetPhongShininess());
 
+	vector<double> minExt, maxExt;
+	_params->GetBox()->GetExtents(minExt, maxExt);
+
     // Get the value range
     std::vector<double> valueRanged;
 	bool errEnabled = MyBase::EnableErrMsg(false);
     int rc = dataMgr->GetDataRange( params->GetCurrentTimestep(),
                            params->GetVariableName(),
                            params->GetRefinementLevel(),
-                           params->GetCompressionLevel(), 1,
+                           params->GetCompressionLevel(), 
+                           minExt, maxExt,
                            valueRanged );
 	MyBase::EnableErrMsg(errEnabled);
 
