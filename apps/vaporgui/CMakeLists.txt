@@ -235,8 +235,6 @@ set (UIS
 	VolumeIsoAppearanceGUI.ui
 	VolumeIsoGeometryGUI.ui
 	VolumeIsoVariablesGUI.ui
-	ModelAnnotationGUI.ui
-	ModelAppearanceGUI.ui
 	ModelGeometryGUI.ui
 	ModelVariablesGUI.ui
 	
