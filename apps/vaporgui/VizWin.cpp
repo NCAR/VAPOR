@@ -45,6 +45,7 @@
 #include "vapor/LegacyGL.h"
 #include "vapor/FileUtils.h"
 #include "vapor/Visualizer.h"
+#include <vapor/FlowParams.h>
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
 
@@ -538,7 +539,22 @@ void VizWin::_setNewExtents() {
 	std::vector<double> pllc, purc;
 	box->GetExtents(pllc, purc);
 
-	box->SetExtents(llc, urc);
+    if (_manipFlowSeedFlag) {
+        FlowParams *fp = dynamic_cast<FlowParams*>(rParams);
+        if (fp) {
+            // Sam's box format: xmin, xmax, ymin, ymax, zmin, zmax
+            vector<float> b(6);
+            b[0] = llc[0];
+            b[2] = llc[1];
+            b[4] = llc[2];
+            b[1] = urc[0];
+            b[3] = urc[1];
+            b[5] = urc[2];
+            fp->SetRake(b);
+        }
+    } else {
+        box->SetExtents(llc, urc);
+    }
 }
 
 /* 
@@ -767,6 +783,8 @@ VAPoR::Transform* VizWin::_getDataMgrTransform() const {
     return t;
 }
 
+
+
 void VizWin::updateManip(bool initialize) {
 
 	std::vector<double> minExts(3,numeric_limits<double>::max());
@@ -782,8 +800,29 @@ void VizWin::updateManip(bool initialize) {
 		urc = maxExts;
 	}
 	else {
-		VAPoR::Box* box = rParams->GetBox();
-		box->GetExtents(llc, urc);
+        _manipFlowSeedFlag = false;
+        if (rParams->GetName() == FlowParams::GetClassType()) {
+            FlowParams *fp = dynamic_cast<FlowParams*>(rParams);
+            VAssert(fp);
+            
+            if (fp->IsSeedTabActive())
+                _manipFlowSeedFlag = true;
+        }
+        if (_manipFlowSeedFlag) {
+            FlowParams *fp = dynamic_cast<FlowParams*>(rParams);
+            VAssert(fp);
+            
+            // Sam's box format: xmin, xmax, ymin, ymax, zmin, zmax
+            vector<float> b = fp->GetRake();
+            llc.resize(3);
+            urc.resize(3);
+            llc[0] = b[0]; urc[0] = b[1];
+            llc[1] = b[2]; urc[1] = b[3];
+            llc[2] = b[4]; urc[2] = b[5];
+        } else {
+            VAPoR::Box* box = rParams->GetBox();
+            box->GetExtents(llc, urc);
+        }
 	}
 
 	bool constrain = true;
