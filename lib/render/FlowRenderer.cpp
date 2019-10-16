@@ -739,7 +739,7 @@ FlowRenderer::_genSeedsRakeRandom( std::vector<flow::Particle>& seeds ) const
        reproducible during this run                                                */
     int randSeed;
 #ifdef WIN32
-    randSeed = GetCurrentProcessId();        
+    randSeed = GetCurrentProcessId();
 #else
     randSeed = ::getpid();
 #endif
@@ -822,7 +822,7 @@ FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds ) co
     /* Create three uniform distributions in 3 dimensions */
     int procID;     // The current process ID
 #ifdef WIN32
-    procID = GetCurrentProcessId();        
+    procID = GetCurrentProcessId();
 #else
     procID = ::getpid();
 #endif

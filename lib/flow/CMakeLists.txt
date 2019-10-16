@@ -15,6 +15,8 @@ add_library (flow SHARED ${SRC} ${HEADERS})
 
 target_link_libraries ( flow  PUBLIC vdc params )
 
+add_definitions (-DFLOW_EXPORTS)
+
 install (
 	TARGETS flow
 	DESTINATION ${INSTALL_LIB_DIR}

@@ -11,7 +11,7 @@
 
 namespace flow
 {
-class VaporField final : public Field
+class FLOW_API VaporField final : public Field
 {
 public:
     VaporField( size_t cache_limit );
@@ -46,7 +46,7 @@ public:
     // This wrapper class wraps a grid and a data manager pointer to ensure
     // the grid is properly destroyed.
     //
-    class GridWrapper final
+    class FLOW_API GridWrapper final
     {
     private:
         const VAPoR::Grid*  const  gridPtr;
