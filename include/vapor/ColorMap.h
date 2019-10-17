@@ -24,16 +24,16 @@ class PARAMS_API ColorMap : public ParamsBase {
         Color(double h, double s, double v);
         Color(const Color &color);
 
-        void toRGB(float *rgb);
+        void toRGB(float *rgb) const;
 
         void hue(float h) { _hue = h; }
-        float hue() { return _hue; }
+        float hue() const { return _hue; }
 
         void sat(float s) { _sat = s; }
-        float sat() { return _sat; }
+        float sat() const { return _sat; }
 
         void val(float v) { _val = v; }
-        float val() { return _val; }
+        float val() const { return _val; }
 
       private:
         float _hue;
@@ -59,27 +59,31 @@ class PARAMS_API ColorMap : public ParamsBase {
         return (TFInterpolator::type)GetValueLong(_interpTypeTag, defaultv);
     }
     void SetInterpType(TFInterpolator::type t);
-    void SetUseWhitespace(int state);
-    int GetUseWhitespace() const;
+    void SetUseWhitespace(bool enabled);
+    bool GetUseWhitespace() const;
 
-    int numControlPoints() {
+    int numControlPoints() const {
         return (int)(GetControlPoints().size() / 4);
     }
 
     Color controlPointColor(int index) const;
     void controlPointColor(int index, Color color);
 
-    float controlPointValue(int index) const;       // Data Coordinates
+    float controlPointValue(int index) const; // Data Coordinates
+    float controlPointValueNormalized(int index) const;
     void controlPointValue(int index, float value); // Data Coordinates
+    void controlPointValueNormalized(int index, float value);
 
     void addControlPointAt(float value);
+    int addNormControlPointAt(float value);
     void addControlPointAt(float value, Color color);
-    void addNormControlPoint(float normValue, Color color);
+    int addNormControlPoint(float normValue, Color color);
     void deleteControlPoint(int index);
 
     void move(int index, float delta);
 
     Color color(float value) const;
+    Color colorNormalized(float nv) const;
     Color getDivergingColor(float ratio, float index) const;
     Color getCorrectiveDivergingColor(float ratio, float index) const;
 
@@ -111,12 +115,13 @@ class PARAMS_API ColorMap : public ParamsBase {
         return ("ColorMapParams");
     }
 
-  private:
+  public:
     static const string _controlPointsTag;
     static const string _interpTypeTag;
     static const string _useWhitespaceTag;
     static const string _dataBoundsTag;
 
+  private:
     int leftIndex(float val) const;
 };
 

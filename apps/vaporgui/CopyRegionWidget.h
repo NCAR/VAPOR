@@ -2,6 +2,7 @@
 #define COPYREGIONWIDGET_H
 
 #include "ui_CopyRegionWidgetGUI.h"
+#include <vapor/Box.h>
 
 namespace VAPoR {
 class RenderParams;

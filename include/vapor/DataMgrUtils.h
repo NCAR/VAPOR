@@ -231,6 +231,9 @@ VDF_API bool GetExtents(
     vector<int> &axes,
     int refLevel = -1);
 
+//! Used by the histo for calculating some meta data.
+VDF_API int GetDefaultMetaInfoStride(DataMgr *dataMgr, std::string varname, int refinementLevel);
+
 #ifdef VAPOR3_0_0_ALPHA
 
 //! Determine the size of a voxel in user coordinates, along a specific dimension,
