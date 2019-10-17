@@ -10,8 +10,8 @@
 
 #include <QLineEdit>
 
+#include "TFEditor.h"
 #include "VariablesWidget.h"
-#include "TFWidget.h"
 #include "GeometryWidget.h"
 #include "CopyRegionWidget.h"
 #include "TransformTable.h"
@@ -81,7 +81,7 @@ public:
 
 private:
     VAPoR::FlowParams *_params;
-    TFWidget *         _TFWidget;
+    TFEditor *         _TFEditor;
 };
 
 //
