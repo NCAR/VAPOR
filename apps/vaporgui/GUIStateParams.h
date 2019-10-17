@@ -137,8 +137,8 @@ public:
  std::string    GetPlotDatasetName() const ;
  void           SetPlotDatasetName(std::string& name);
     
-    bool IsSeedTabActive() const;
-    void SetSeedTabActive(bool b);
+    bool IsFlowSeedTabActive() const;
+    void SetFlowSeedTabActive(bool b);
 
  void SetProjectionString(string proj4String) {
 	SetValueString(m_proj4StringTag,"Set Proj4 projection string", proj4String);
@@ -228,7 +228,7 @@ private:
  static const string m_plotDatasetNameTag;
  static const string m_proj4StringTag;
  static const string m_openDataSetsTag;
- static const string _isSeedTabActiveTag;
+ static const string _isFlowSeedTabActiveTag;
 
  MouseModeParams *m_mouseModeParams;
 

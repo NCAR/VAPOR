@@ -804,7 +804,7 @@ void VizWin::updateManip(bool initialize) {
         if (rParams->GetName() == FlowParams::GetClassType()) {
             GUIStateParams *gp = (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
             
-            if (gp->IsSeedTabActive())
+            if (gp->IsFlowSeedTabActive())
                 _manipFlowSeedFlag = true;
         }
         if (_manipFlowSeedFlag) {

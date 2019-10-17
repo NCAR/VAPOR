@@ -136,7 +136,7 @@ void FlowEventRouter::_updateTab(){
     
     // Sync selected tab with GUIStateParams
     GUIStateParams *gp = (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
-    if (gp->IsSeedTabActive()) {
+    if (gp->IsFlowSeedTabActive()) {
         if (currentWidget() != _seedingTab) {
             blockSignals(true);
             setCurrentWidget(_seedingTab);

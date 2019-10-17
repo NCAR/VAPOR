@@ -375,7 +375,7 @@ void FlowSeedingSubtab::_selectedTabChanged(int index)
     
     GUIStateParams *gp = (GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType());
     
-    gp->SetSeedTabActive(widget == this);
+    gp->SetFlowSeedTabActive(widget == this);
 }
 
 void 
