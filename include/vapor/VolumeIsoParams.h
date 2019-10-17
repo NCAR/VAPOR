@@ -21,11 +21,16 @@ public:
     virtual double GetDefaultPhongAmbient()   const { return 0.2; }
     virtual string GetDefaultAlgorithmName() const;
     
+    bool HasIsoValues() const { return true; }
+    
 protected:
     virtual bool GetUseSingleColorDefault() const { return true; }
     
 private:
     void _init();
+    
+public:
+    static const std::string UseColormapVariableTag;
 };
     
 };
