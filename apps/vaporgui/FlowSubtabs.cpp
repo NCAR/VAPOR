@@ -85,10 +85,9 @@ void FlowVariablesSubtab::_velocityMultiplierChanged() {
 //================================
 //
 FlowAppearanceSubtab::FlowAppearanceSubtab(QWidget *parent) : QVaporSubtab(parent) {
-    _TFWidget = new TFWidget(this);
-    _TFWidget->Reinit((TFFlags)(SAMPLING | CONSTANT_COLOR));
+    _TFEditor = new TFEditor;
 
-    _layout->addWidget(_TFWidget, 0, 0);
+    _layout->addWidget(_TFEditor, 0, 0);
 
     _params = NULL;
 }
@@ -99,7 +98,7 @@ void FlowAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr,
     _params = dynamic_cast<VAPoR::FlowParams *>(rParams);
     assert(_params);
 
-    _TFWidget->Update(dataMgr, paramsMgr, rParams);
+    _TFEditor->Update(dataMgr, paramsMgr, rParams);
 }
 
 //

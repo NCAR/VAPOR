@@ -10,8 +10,8 @@
 
 #include <QLineEdit>
 
+#include "TFEditor.h"
 #include "VariablesWidget.h"
-#include "TFWidget.h"
 #include "GeometryWidget.h"
 #include "CopyRegionWidget.h"
 #include "TransformTable.h"
@@ -89,7 +89,7 @@ class FlowAppearanceSubtab : public QVaporSubtab {
 
   private:
     VAPoR::FlowParams *_params;
-    TFWidget *_TFWidget;
+    TFEditor *_TFEditor;
 };
 
 //
