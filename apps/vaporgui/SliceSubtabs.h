@@ -16,6 +16,8 @@ class ParamsMgr;
 class DataMgr;
 }    // namespace VAPoR
 
+class TFEditor;
+
 class SliceVariablesSubtab : public QWidget, public Ui_SliceVariablesGUI {
     Q_OBJECT
 
@@ -44,6 +46,7 @@ private slots:
 
 private:
     VAPoR::SliceParams *_params;
+    TFEditor *          _tfe;
 };
 
 class SliceGeometrySubtab : public QWidget, public Ui_SliceGeometryGUI {

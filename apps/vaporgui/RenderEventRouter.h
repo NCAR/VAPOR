@@ -22,7 +22,6 @@
 #define RENDEREREVENTROUTER_H
 
 #include "EventRouter.h"
-class MappingFrame;
 
 namespace VAPoR {
 class ControlExec;
@@ -163,11 +162,6 @@ public:
     //! bounds.
     //! By default does nothing
     virtual void fitToView() {}
-
-    //! Virtual method identifies the MappingFrame associated with an EventRouter.
-    //! Must be implemented in every EventRouter with a MappingFrame
-    //! \retval MappingFrame* is MappingFrame associated with the EventRouter
-    virtual MappingFrame *getMappingFrame() { return NULL; }
 
     //! Virtual method identifies the ColorbarWidget associated with an EventRouter.
     //! Must be implemented in every EventRouter with a MappingFrame

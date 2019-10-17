@@ -40,18 +40,17 @@ VolumeIsoRenderer::VolumeIsoRenderer(const ParamsMgr *pm, std::string &winName, 
 
 VolumeIsoRenderer::~VolumeIsoRenderer() {}
 
-bool VolumeIsoRenderer::_usingColorMapData() const { return !GetActiveParams()->UseSingleColor(); }
+bool VolumeIsoRenderer::_usingColorMapData() const { return GetActiveParams()->GetValueLong(VolumeIsoParams::UseColormapVariableTag, false); }
 
 void VolumeIsoRenderer::_setShaderUniforms(const ShaderProgram *shader, const bool fast) const
 {
     VolumeRenderer::_setShaderUniforms(shader, fast);
 
-    VolumeIsoParams *vp = (VolumeIsoParams *)GetActiveParams();
-
-    vector<double> isoValuesD = vp->GetIsoValues();
+    vector<double> isoValuesD = GetActiveParams()->GetIsoValues();
     vector<float>  isoValues(isoValuesD.begin(), isoValuesD.end());
-    vector<bool>   enabledIsoValues = vp->GetEnabledIsoValues();
-    shader->SetUniformArray("isoValue", 4, isoValues.data());
+    vector<bool>   enabledIsoValues(4, false);
+    for (int i = 0; i < isoValues.size(); i++) enabledIsoValues[i] = true;
+    shader->SetUniformArray("isoValue", isoValues.size(), isoValues.data());
     shader->SetUniform("isoEnabled[0]", (bool)enabledIsoValues[0]);
     shader->SetUniform("isoEnabled[1]", (bool)enabledIsoValues[1]);
     shader->SetUniform("isoEnabled[2]", (bool)enabledIsoValues[2]);

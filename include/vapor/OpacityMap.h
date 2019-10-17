@@ -34,6 +34,7 @@ public:
     virtual ~OpacityMap();
     void clear();
 
+    float opacityDataAtNorm(float nv) const;
     float opacityData(float value) const;
     bool  inDataBounds(float value) const;
 
@@ -61,7 +62,7 @@ public:
     double GetPhase() const { return GetValueDouble(_phaseTag, 2 * M_PI); }
     void   SetPhase(double phase);
 
-    int numControlPoints() { return (int)GetControlPoints().size() / 2; }
+    int numControlPoints() const { return (int)GetControlPoints().size() / 2; }
 
     void addNormControlPoint(float normv, float opacity);    // Normalized Coords
     void addControlPoint(float value, float opacity);        // Data Coordinates
@@ -71,7 +72,9 @@ public:
     float controlPointOpacity(int index) const;
     void  controlPointOpacity(int index, float opacity);
 
-    float controlPointValue(int index) const;           // Data Coordinates
+    float controlPointValueNormalized(int index) const;
+    float controlPointValue(int index) const;    // Data Coordinates
+    void  controlPointValueNormalized(int index, float nv);
     void  controlPointValue(int index, float value);    // Data Coordinates
 
     void setOpaque();

@@ -6,6 +6,7 @@
 #include "ui_WireFrameGeometryGUI.h"
 #include "ui_WireFrameAnnotationGUI.h"
 #include "Flags.h"
+#include "TFEditor.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -30,15 +31,16 @@ public:
 class WireFrameAppearanceSubtab : public QWidget, public Ui_WireFrameAppearanceGUI {
     Q_OBJECT
 
+    TFEditor *_tfe;
+
 public:
     WireFrameAppearanceSubtab(QWidget *parent)
     {
         setupUi(this);
-        _TFWidget->SetOpacitySupported(false);
-        _TFWidget->Reinit((TFFlags)(CONSTANT_COLOR));
+        verticalLayout->insertWidget(0, _tfe = new TFEditor);
     }
 
-    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _TFWidget->Update(dataMgr, paramsMgr, rParams); }
+    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _tfe->Update(dataMgr, paramsMgr, rParams); }
 };
 
 class WireFrameGeometrySubtab : public QWidget, public Ui_WireFrameGeometryGUI {

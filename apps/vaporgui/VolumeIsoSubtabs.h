@@ -6,6 +6,7 @@
 #include "ui_VolumeIsoAnnotationGUI.h"
 
 #include "vapor/VolumeIsoParams.h"
+#include "TFEditorIsoSurface.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -51,18 +52,9 @@ private slots:
     void on__shininessWidget_valueChanged(int value);
     void on__defaultLightingButton_clicked(bool checked);
 
-    void on__isoValueCheckbox0_toggled(bool);
-    void on__isoValueCheckbox1_toggled(bool);
-    void on__isoValueCheckbox2_toggled(bool);
-    void on__isoValueCheckbox3_toggled(bool);
-
-    void on__isoWidget0_valueChanged(double);
-    void on__isoWidget1_valueChanged(double);
-    void on__isoWidget2_valueChanged(double);
-    void on__isoWidget3_valueChanged(double);
-
 private:
     VAPoR::VolumeIsoParams *_params;
+    TFEditorIsoSurface *    _tfe;
 };
 
 class VolumeIsoGeometrySubtab : public QWidget, public Ui_VolumeIsoGeometryGUI {

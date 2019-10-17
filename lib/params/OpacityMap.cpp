@@ -203,10 +203,12 @@ void OpacityMap::controlPointOpacity(int index, float opacity)
     SetControlPoints(cps);
 }
 
+float OpacityMap::controlPointValue(int index) const { return (controlPointValueNormalized(index) * (maxValue() - minValue()) + minValue()); }
+
 //----------------------------------------------------------------------------
 // Return the control point's value (in data coordinates).
 //----------------------------------------------------------------------------
-float OpacityMap::controlPointValue(int index) const
+float OpacityMap::controlPointValueNormalized(int index) const
 {
     if (index < 0) { return minValue(); }
     vector<double> cps = GetControlPoints();
@@ -214,18 +216,22 @@ float OpacityMap::controlPointValue(int index) const
 
     float norm = cps[2 * index + 1];
 
-    return (norm * (maxValue() - minValue()) + minValue());
+    return norm;
+}
+
+void OpacityMap::controlPointValue(int index, float value)
+{
+    float nv = (value - minValue()) / (maxValue() - minValue());
+    controlPointValueNormalized(index, nv);
 }
 
 //----------------------------------------------------------------------------
 // Set the control point's value (in data coordinates).
 //----------------------------------------------------------------------------
-void OpacityMap::controlPointValue(int index, float value)
+void OpacityMap::controlPointValueNormalized(int index, float nv)
 {
     vector<double> cps = GetControlPoints();
     if (index < 0 || index * 2 >= cps.size()) { return; }
-
-    float nv = (value - minValue()) / (maxValue() - minValue());
 
     float minVal = 0.0;
     float maxVal = 1.0;
@@ -264,23 +270,30 @@ void OpacityMap::SetFreq(double freq) { SetValueDouble(_freqTag, "Set Opac Freq"
 //----------------------------------------------------------------------------
 void OpacityMap::SetPhase(double p) { SetValueDouble(_phaseTag, "Set Opac Phase", denormSinePhase(p)); }
 
+float OpacityMap::opacityData(float value) const
+{
+    float nv = (value - minValue()) / (maxValue() - minValue());
+    return opacityDataAtNorm(nv);
+}
+
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-float OpacityMap::opacityData(float value) const
+float OpacityMap::opacityDataAtNorm(float nv) const
 {
-    float          nv = (value - minValue()) / (maxValue() - minValue());
     vector<double> cps = GetControlPoints();
-    if (value < minValue()) { nv = 0; }
+    if (nv < 0.0) { nv = 0; }
 
-    if (value > maxValue()) { nv = 1.0; }
+    if (nv > 1.0) { nv = 1.0; }
     OpacityMap::Type _type = GetType();
     switch (_type) {
     case CONTROL_POINT: {
         //
         // Find the bounding control points
         //
-        int    index = leftControlIndex(nv);
+        int index = leftControlIndex(nv);
+        if (numControlPoints() == 1) return controlPointOpacity(index);
+
         double val0 = cps[2 * index + 1];
         double val1 = cps[2 * index + 3];
 

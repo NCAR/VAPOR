@@ -339,6 +339,24 @@ bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, const vector<st
     return (true);
 }
 
+// This is an arbitrary number and method for determening a default that I just moved from elsewhere
+#define REQUIRED_SAMPLE_SIZE 1000000
+
+int DataMgrUtils::GetDefaultMetaInfoStride(DataMgr *dataMgr, std::string varname, int refinementLevel)
+{
+    std::vector<size_t> dimsAtLevel;
+    int                 rc = dataMgr->GetDimLensAtLevel(varname, refinementLevel, dimsAtLevel);
+    VAssert(rc >= 0);
+
+    long size = 1;
+    for (int i = 0; i < dimsAtLevel.size(); i++) size *= dimsAtLevel[i];
+
+    int stride = 1;
+    if (size > REQUIRED_SAMPLE_SIZE) stride = 1 + size / REQUIRED_SAMPLE_SIZE;
+
+    return stride;
+}
+
 #ifdef VAPOR3_0_0_ALPHA
 // Map corners of box to voxels.
 void DataMgrUtils::mapBoxToVox(Box *box, string varname, int refLevel, int lod, int timestep, size_t voxExts[6])
