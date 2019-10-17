@@ -33,7 +33,6 @@ public:
     Histo(int numberBins, float mnData, float mxData, string var, int ts);
     Histo(int numberBins);
     Histo();
-    Histo(const Histo *histo);
     ~Histo();
     void  reset(int newNumBins = -1);
     void  reset(int newNumBins, float mnData, float mxData);

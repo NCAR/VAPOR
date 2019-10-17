@@ -39,38 +39,6 @@ Histo::Histo(int numberBins)
 
 Histo::Histo() : Histo(0) {}
 
-Histo::Histo(const Histo *histo)
-{
-    _numBins = histo->_numBins;
-
-    _minMapData = histo->_minMapData;
-    _maxMapData = histo->_maxMapData;
-    if (_maxMapData < _minMapData) _maxMapData = _minMapData;
-    _range = _maxMapData - _minMapData;
-
-    _binArray = new unsigned int[_numBins];
-    for (int i = 0; i < _numBins; i++) _binArray[i] = histo->_binArray[i];
-
-    _nBinsBelow = histo->_nBinsBelow;
-    _nBinsAbove = histo->_nBinsAbove;
-    if (_nBinsBelow > 0) {
-        _below = new unsigned int[_nBinsBelow];
-        memcpy(_below, histo->_below, _nBinsBelow * sizeof(*_below));
-    }
-    if (_nBinsAbove > 0) {
-        _above = new unsigned int[_nBinsAbove];
-        memcpy(_above, histo->_above, _nBinsAbove * sizeof(*_above));
-    }
-
-    _numSamplesBelow = histo->_numSamplesBelow;
-    _numSamplesAbove = histo->_numSamplesAbove;
-
-    _maxBinSize = histo->_maxBinSize;
-
-    _varnameOfUpdate = histo->_varnameOfUpdate;
-    _timestepOfUpdate = histo->_timestepOfUpdate;
-}
-
 Histo::~Histo()
 {
     if (_binArray) delete[] _binArray;
