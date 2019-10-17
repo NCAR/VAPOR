@@ -114,9 +114,6 @@ public:
 
     int                 GetSeedInjInterval() const;
     void                SetSeedInjInterval( int );
-    
-    bool                IsSeedTabActive() const;
-    void                SetSeedTabActive( bool );
 
 private:
 
@@ -135,7 +132,6 @@ private:
     static const std::string    _rakeBiasStrength;
     static const std::string    _pastNumOfTimeSteps;
     static const std::string    _seedInjInterval;
-    static const std::string    _isSeedTabActiveTag;
 
     // maps between ints and "human readable" strings
     const std::vector< std::pair<int, std::string> > _seed2Str = 

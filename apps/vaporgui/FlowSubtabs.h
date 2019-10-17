@@ -130,6 +130,7 @@ private slots:
 
 private:
     VAPoR::FlowParams*      _params;
+    VAPoR::ParamsMgr *      _paramsMgr;
 
     /* Add some QT widgets */
     VCheckBox*              _steady;

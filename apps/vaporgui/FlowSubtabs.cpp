@@ -211,6 +211,7 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
                                 VAPoR::RenderParams *params )
 {
     _params = dynamic_cast<VAPoR::FlowParams*>(params);
+    _paramsMgr = paramsMgr;
     VAssert( _params );
 
     bool isSteady = _params->GetIsSteady();
@@ -363,7 +364,7 @@ FlowSeedingSubtab::_seedInjIntervalChanged( int newVal )
 #include <QScrollArea>
 void FlowSeedingSubtab::_selectedTabChanged(int index)
 {
-    if (!_params)
+    if (!_paramsMgr)
         return;
     
     const QTabWidget *parent = dynamic_cast<QTabWidget*>(sender());
@@ -372,7 +373,9 @@ void FlowSeedingSubtab::_selectedTabChanged(int index)
     VAssert(area);
     const QWidget *widget = area->widget();
     
-    _params->SetSeedTabActive(widget == this);
+    GUIStateParams *gp = (GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+    
+    gp->SetSeedTabActive(widget == this);
 }
 
 void 

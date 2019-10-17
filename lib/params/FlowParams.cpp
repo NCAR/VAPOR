@@ -17,7 +17,6 @@ const std::string FlowParams::_rakeBiasVariable      = "rakeBiasVariable";
 const std::string FlowParams::_rakeBiasStrength      = "rakeBiasStrength";
 const std::string FlowParams::_pastNumOfTimeSteps    = "pastNumOfTimeSteps";
 const std::string FlowParams::_seedInjInterval       = "seedInjInterval";
-const std::string FlowParams::_isSeedTabActiveTag       = "isSeedTabActiveTag";
 
 
 static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
@@ -296,14 +295,4 @@ void
 FlowParams::SetSeedInjInterval( int val )
 {
     SetValueLong( _seedInjInterval, "What's the interval of injecting seeds into an unsteady flow advection", val );
-}
-
-bool FlowParams::IsSeedTabActive() const
-{
-    return GetValueLong(_isSeedTabActiveTag, false);
-}
-
-void FlowParams::SetSeedTabActive(bool b)
-{
-    SetValueLong(_isSeedTabActiveTag, _isSeedTabActiveTag, b);
 }
