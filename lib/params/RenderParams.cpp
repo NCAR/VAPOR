@@ -80,6 +80,8 @@ void RenderParams::SetDefaultVariables(int dim = 3, bool secondaryColormapVariab
     vector<string> fieldVarNames(3, "");
     fieldVarNames[0] = _findVarStartingWithLetter(varnames, 'u');
     fieldVarNames[1] = _findVarStartingWithLetter(varnames, 'v');
+    if (dim == 3) fieldVarNames[2] = _findVarStartingWithLetter(varnames, 'w');
+
     SetFieldVariableNames(fieldVarNames);
 
     string colorVar = varname;
