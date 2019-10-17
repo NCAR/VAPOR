@@ -83,9 +83,10 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
 
                 Particle separator;
                 separator.SetSpecial( true );
-                auto citr = s.cend();
-                --citr;      // insert before the last element, p0
-                s.insert( citr, std::move(separator) );
+                auto itr = s.end(); // Should use const iterator here, 
+                                    // but gcc-4.8 on CentOS7 doesn't support...
+                --itr;      // insert before the last element, p0
+                s.insert( itr, std::move(separator) );
                 _separatorCount[streamIdx]++;
             }
             else
