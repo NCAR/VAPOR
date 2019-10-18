@@ -338,8 +338,10 @@ int ModelRenderer::Scene::loadSceneFile(const std::string &sceneFilePath)
             rc = -1;
         }
         
-        if (rc < 0)
+        if (rc < 0) {
+            MyBase::SetErrMsg("%s ->", root.Tag().c_str());
             break;
+        }
     }
     
     if (rc < 0) return rc;
@@ -433,11 +435,13 @@ int ModelRenderer::Scene::handleTimeNode(XmlNode *node)
             instances.push_back(instance);
         }
         else {
-            MyBase::SetErrMsg("Unknown tag \"%s\"", node->Tag().c_str());
+            MyBase::SetErrMsg("Unknown tag \"%s\"", child->Tag().c_str());
             rc = -1;
         }
-        if (rc < 0)
+        if (rc < 0) {
+            MyBase::SetErrMsg("%s ->", node->Tag().c_str());
             break;
+        }
     }
     
     _keyframes[ts] = instances;
