@@ -246,6 +246,9 @@ namespace DataMgrUtils {
 	int refLevel = -1
  );
 
+//! Used by the histo for calculating some meta data.
+    VDF_API int GetDefaultMetaInfoStride(DataMgr *dataMgr, std::string varname, int refinementLevel);
+
 #ifdef	VAPOR3_0_0_ALPHA
 
 

@@ -22,12 +22,11 @@
 #endif
 
 
-#include "RenderEventRouter.h"
 #include <QFileDialog>
 #include <vapor/ResourcePath.h>
 #include <vapor/DataMgrUtils.h>
 #include "ErrorReporter.h"
-#include "MappingFrame.h"
+#include "RenderEventRouter.h"
 #include <vapor/Renderer.h>
 #include <vapor/DataStatus.h>
 
@@ -89,14 +88,7 @@ string RenderEventRouter::GetIconImagePath() const {
 
 
 void RenderEventRouter::setEditorDirty() {
-	RenderParams *rParams = GetActiveParams();
-	
-	MappingFrame *mp = getMappingFrame();
-	if (!mp) return;
-
-	mp->Update(GetActiveDataMgr(),
-		_controlExec->GetParamsMgr(),
-		rParams);
+	#warning What is this? I had to delete the code here and it didn't match the doxygen
 }
 
 

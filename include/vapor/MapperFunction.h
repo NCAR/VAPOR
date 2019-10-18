@@ -71,6 +71,8 @@ public:
  //! \param[in] path Path of input file
  //
  int LoadFromFile(string path);
+    
+ int LoadColormapFromFile(string path);
 
  // Get static string identifier for this params class
  //
@@ -317,7 +319,7 @@ public:
 	);
  }
 
-private:
+public:
 	
  //
  // XML tags
@@ -330,6 +332,7 @@ private:
  static const string _autoUpdateHistoTag;
  static const string _secondaryVarMapperTag;
 
+private:
  //
  // Size of lookup table.  Always 1<<8 currently!
  //
