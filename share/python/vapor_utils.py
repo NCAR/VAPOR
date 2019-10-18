@@ -719,7 +719,7 @@ def DivFinDiff(M,N,P,dx,dy,dz,order=6):
 
     """
 
-        return deriv_findiff(P,0,dz,order) + \
+    return deriv_findiff(P,0,dz,order) + \
         deriv_findiff(N,1,dy,order) + deriv_findiff(M,2,dx,order)
 
 
