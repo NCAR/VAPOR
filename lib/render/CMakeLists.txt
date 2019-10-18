@@ -20,6 +20,7 @@ set (SRC
 	AnnotationRenderer.cpp
 	jfilewrite.cpp
 	RayCaster.cpp
+	FlowRenderer.cpp
 	ControlExecutive.cpp
 	ContourRenderer.cpp
     SliceRenderer.cpp
@@ -85,6 +86,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/IResourceManager.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TextLabel.h
 	${PROJECT_SOURCE_DIR}/include/vapor/RayCaster.h
+	${PROJECT_SOURCE_DIR}/include/vapor/FlowRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/PyEngine.h
 	${PROJECT_SOURCE_DIR}/include/vapor/CalcEngineMgr.h
 	${PROJECT_SOURCE_DIR}/include/vapor/GeoTIFWriter.h
@@ -109,7 +111,7 @@ set (HEADERS
 
 add_library (render SHARED ${SRC} ${HEADERS})
 
-target_link_libraries (render PUBLIC common vdc params ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} python${PYTHONVERSION} ${GLEW} ${OPENGL_LIBRARIES} ${ASSIMP})
+target_link_libraries (render PUBLIC common vdc params flow ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} python${PYTHONVERSION} ${GLEW} ${OPENGL_LIBRARIES} ${ASSIMP})
 
 if (UNIX AND NOT APPLE)
 	target_link_libraries (render PUBLIC GLU)

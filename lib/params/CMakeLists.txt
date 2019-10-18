@@ -25,6 +25,7 @@ set (SRC
 	WireFrameParams.cpp
     SliceParams.cpp
 	DatasetsParams.cpp
+	FlowParams.cpp
 	VolumeParams.cpp
 	VolumeIsoParams.cpp
 	ModelParams.cpp
@@ -56,6 +57,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/DatasetsParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/SliceParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/RayCasterParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/FlowParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeIsoParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ModelParams.h
