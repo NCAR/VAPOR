@@ -113,7 +113,7 @@ void TFColorMap::paintEvent(QPainter &p)
     
     QMargins padding = GetPadding();
     int nSamples = width()-(padding.left()+padding.right());
-    unsigned char buf[nSamples*3];
+    unsigned char buf[3];
     float rgb[3];
     for (int i = 0; i < nSamples; i++) {
         cm->colorNormalized(i/(float)nSamples).toRGB(rgb);
@@ -372,7 +372,7 @@ QIcon ColorMapMenuItem::getCachedIcon(const std::string &path)
     
     QSize size = getIconSize();
     int nSamples = size.width();
-    unsigned char buf[nSamples*3];
+    unsigned char buf[3];
     float rgb[3];
     for (int i = 0; i < nSamples; i++) {
         cm->colorNormalized(i/(float)nSamples).toRGB(rgb);

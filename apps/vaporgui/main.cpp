@@ -71,7 +71,7 @@ FILE *OpenLog(string path_var) {
 	return(fp);
 }
 
-#warning Qt4 uses deprecated OSX calls which pollute the console with warnings
+//#warning Qt4 uses deprecated OSX calls which pollute the console with warnings
 #if defined(Darwin) && !defined(NDEBUG)
 //#ifdef DEBUG
 #include <unistd.h>

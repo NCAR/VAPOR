@@ -2,7 +2,7 @@
 #include <string.h>
 #include <algorithm>
 #include <sys/stat.h>
-#include <dirent.h>
+//#include <dirent.h>
 #include <vapor/MyBase.h>
 
 #ifdef WIN32
@@ -54,7 +54,7 @@ string FileUtils::ReadFileToString(const string &path)
 std::string FileUtils::HomeDir()
 {
 #ifdef WIN32
-#error FileUtils::HomeDir not implemented
+//#error FileUtils::HomeDir not implemented
     return "";
 #else
     const struct passwd *pw = getpwuid(getuid());
@@ -189,7 +189,8 @@ FileType FileUtils::GetFileType(const std::string &path)
 
 std::vector<std::string> FileUtils::ListFiles(const std::string &path)
 {
-    DIR *dir = opendir(path.c_str());
+	return{"FileUtils::ListFiles() is broken"};
+	/*    DIR *dir = opendir(path.c_str());
     if (!dir)
         return {};
     
@@ -206,7 +207,7 @@ std::vector<std::string> FileUtils::ListFiles(const std::string &path)
     }
     
     closedir(dir);
-    return fileNames;
+    return fileNames;*/
 }
 
 std::string FileUtils::JoinPaths(std::initializer_list<std::string> paths)

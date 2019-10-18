@@ -88,7 +88,7 @@ string RenderEventRouter::GetIconImagePath() const {
 
 
 void RenderEventRouter::setEditorDirty() {
-	#warning What is this? I had to delete the code here and it didn't match the doxygen
+//	#warning What is this? I had to delete the code here and it didn't match the doxygen
 }
 
 

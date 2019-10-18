@@ -14,8 +14,12 @@ TFInfoWidget::TFInfoWidget()
     this->setLayout(layout);
     layout->addWidget(new VLineItem("Data Value", _valueEdit = new QLineEdit));
     _valueEditType = new QComboBox;
-    
-    _valueEdit->setValidator(new QDoubleValidator(__FLT_MIN__, __FLT_MAX__, 7));
+
+#ifdef WIN32
+    _valueEdit->setValidator(new QDoubleValidator(FLT_MIN, FLT_MAX, 7));
+#else
+	_valueEdit->setValidator(new QDoubleValidator(__FLT_MIN__, __FLT_MAX__, 7));
+#endif
     
     _valueEditType->blockSignals(true);
     _valueEditType->setMinimumSize(30, 10);
