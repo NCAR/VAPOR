@@ -151,7 +151,12 @@ FlowRenderer::_paintGL( bool fast )
         params->SetNeedFlowlineOutput( false );
     }
 
-    _updateFlowCacheAndStates( params );
+    if( _updateFlowCacheAndStates( params ) != 0 )
+    {
+        MyBase::SetErrMsg("Parameters not ready!");
+        return flow::PARAMS_ERROR;
+    }
+
     _velocityField.UpdateParams( params );
     _colorField.UpdateParams( params );
 
@@ -413,8 +418,7 @@ FlowRenderer::_drawALineStrip( const float* buf, size_t numOfParts, bool singleC
     return 0;
 }
 
-void
-FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
+int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
 {
     /* 
      * This function servers two purposes:
@@ -450,13 +454,26 @@ FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     // If names not the same, entire stream is out of date
     // Note: variable names are kept in VaporFields.
     std::vector<std::string> varnames = params->GetFieldVariableNames();
+    for( const auto& e : varnames )
+    {
+        if( e.empty() )
+        {
+            MyBase::SetErrMsg("Missing variables for 3D flow advection!");
+            return flow::PARAMS_ERROR;
+        }
+    }
     if( ( varnames.at(0) != _velocityField.VelocityNames[0] ) ||
         ( varnames.at(1) != _velocityField.VelocityNames[1] ) ||
         ( varnames.at(2) != _velocityField.VelocityNames[2] ) )
+    {
         _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    }
+
     std::string colorVarName = params->GetColorMapVariableName();
     if( colorVarName != _colorField.ScalarName )
+    {
         _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    }
 
     // Check compression parameters
     // If these parameters not the same, entire stream is out of date
