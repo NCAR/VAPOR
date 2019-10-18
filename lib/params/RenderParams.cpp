@@ -83,6 +83,9 @@ void RenderParams::SetDefaultVariables(
 	vector <string> fieldVarNames(3, "");
 	fieldVarNames[0] = _findVarStartingWithLetter(varnames, 'u');
 	fieldVarNames[1] = _findVarStartingWithLetter(varnames, 'v');
+    if (dim == 3)
+        fieldVarNames[2] = _findVarStartingWithLetter(varnames, 'w');
+
 	SetFieldVariableNames(fieldVarNames);
 
     string colorVar = varname;
@@ -405,6 +408,8 @@ MapperFunction* RenderParams::GetMapperFunc(string varname) {
 	int level = 0;
 	int lod = 0;
 	if (_dataMgr->VariableExists(ts,varname, level, lod)) {
+		vector<double> minExt, maxExt;
+		_Box->GetExtents(minExt, maxExt);
 
 		vector <double> range;
 		bool prev = EnableErrMsg(false);	// no error handling
@@ -413,7 +418,7 @@ MapperFunction* RenderParams::GetMapperFunc(string varname) {
             varname, 
             level,
             lod,
-            _stride,
+			minExt, maxExt,
             range
         );
 		if (rc<0) {

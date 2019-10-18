@@ -17,7 +17,7 @@ void CurvilinearGrid::_curvilinearGrid(
 	const RegularGrid &yrg,
 	const RegularGrid &zrg,
 	const vector <double> &zcoords,
-	const QuadTreeRectangle<float, size_t> *qtr
+	std::shared_ptr <const QuadTreeRectangle<float, size_t> > qtr
 ) {
 	_zcoords.clear();
 	_minu.clear();
@@ -29,10 +29,8 @@ void CurvilinearGrid::_curvilinearGrid(
 	_zcoords = zcoords;
 
 	_qtr = qtr;
-	_qtrOwner = false;
 	if (! _qtr) {
 		_qtr = _makeQuadTreeRectangle();
-		_qtrOwner = true;
 	}
 
 }
@@ -44,7 +42,7 @@ CurvilinearGrid::CurvilinearGrid(
 	const RegularGrid &xrg,
 	const RegularGrid &yrg,
 	const vector <double> &zcoords,
-	const QuadTreeRectangle<float, size_t> *qtr
+	std::shared_ptr <const QuadTreeRectangle<float, size_t> >qtr
  ) : StructuredGrid(dims, bs, blks) {
 
 	VAssert(dims.size() == 2 || dims.size() == 3);
@@ -68,7 +66,7 @@ CurvilinearGrid::CurvilinearGrid(
 	const RegularGrid &xrg,
 	const RegularGrid &yrg,
 	const RegularGrid &zrg,
-	const QuadTreeRectangle<float, size_t> *qtr
+	std::shared_ptr <const QuadTreeRectangle<float, size_t> >qtr
  ) : StructuredGrid(dims, bs, blks) {
 
 	VAssert(dims.size() == 3);
@@ -92,7 +90,7 @@ CurvilinearGrid::CurvilinearGrid(
 	const vector <float *> &blks,
 	const RegularGrid &xrg,
 	const RegularGrid &yrg,
-	const QuadTreeRectangle<float, size_t> *qtr
+	std::shared_ptr <const QuadTreeRectangle<float, size_t> >qtr
  ) : StructuredGrid(dims, bs, blks) {
 
 	VAssert(dims.size() == 2);
@@ -943,7 +941,7 @@ bool CurvilinearGrid::_insideFace(
 	// coordinates
 	// for layered 3D data)
 	//
-	if (gDim > 2) n /= 2;
+	if (gDim > 2 && n == 8) n /= 2;
 	VAssert(n == 4);
 
 	// Get X and Y coordinates for each vertex making up the face
@@ -1019,7 +1017,7 @@ bool CurvilinearGrid::_insideGrid(
 	}
 }
 
-QuadTreeRectangle<float, size_t> *CurvilinearGrid::_makeQuadTreeRectangle() const {
+std::shared_ptr <QuadTreeRectangle<float, size_t> >CurvilinearGrid::_makeQuadTreeRectangle() const {
 
 	vector <double> minu, maxu;
 	GetUserExtents(minu, maxu);
@@ -1028,8 +1026,8 @@ QuadTreeRectangle<float, size_t> *CurvilinearGrid::_makeQuadTreeRectangle() cons
 	const vector <size_t> dims2d = {dims[0], dims[1]};
 	size_t reserve_size = dims2d[0] * dims2d[1];
 
-	QuadTreeRectangle<float, size_t> *qtr = 
-		new QuadTreeRectangle<float, size_t>(
+	std::shared_ptr <QuadTreeRectangle<float, size_t> >qtr = 
+		std::make_shared <QuadTreeRectangle<float, size_t> >(
 			(float) minu[0], (float) minu[1], (float) maxu[0], (float) maxu[1], 
 			16, reserve_size
 		);

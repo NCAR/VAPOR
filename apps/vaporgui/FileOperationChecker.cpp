@@ -96,6 +96,7 @@ FileOperationChecker::FileGoodToWrite( const QString& filename )
         if( f )     // able to write
         {
             std::fclose( f );
+            std::remove( filename.toAscii() );
             return true;
         }
         else
