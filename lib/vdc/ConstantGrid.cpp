@@ -13,12 +13,6 @@ float ConstantGrid::GetValue(const std::vector <double> &coords) const
 {
     return _value;
 }
-    
-std::vector<size_t> ConstantGrid::_dummyVec() const
-{
-    std::vector<size_t> tmp;
-    return tmp;
-}
 
 std::string ConstantGrid::GetType() const
 {
@@ -26,7 +20,7 @@ std::string ConstantGrid::GetType() const
     return type;
 }
     
-// Any location is inside of a constant grid.
+// Any location is considered inside of a constant grid.
 bool ConstantGrid::InsideGrid(const std::vector <double> &coords) const
 {
     return true;
@@ -34,7 +28,8 @@ bool ConstantGrid::InsideGrid(const std::vector <double> &coords) const
 
 std::vector<size_t> ConstantGrid::GetCoordDimensions(size_t) const
 {
-    return( _dummyVec() );
+    std::vector<size_t> tmp;
+    return tmp;
 }
     
 
