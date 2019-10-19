@@ -1,9 +1,15 @@
 #ifndef CONSTANTGRID_H
 #define CONSTANTGRID_H
 
-/* This class represents a constant value.
-
-   It implements pure virtual functions of the Grid class in the simplest possible fashion.
+/* 
+ * This class represents a constant field. That means,
+ * querying values from any location of this field will return that constant value. 
+ *
+ * It also implements pure virtual functions of the Grid class in the simplest possible fashion,
+ * but those functions do not perform any calculation, and should not be used.
+ *
+ * Finally, a DataMgr would not return a ConstantGrid at any occasion; rather, this 
+ * class is supposed to be created and used locally by its user.
  */
 
 #include "vapor/Grid.h"
@@ -28,6 +34,7 @@ public:
     // Pure virtual functions from Grid class.
     //
     std::string GetType() const override;
+    // Will always return true. Any location is considered inside of a constant grid.
     bool InsideGrid(const std::vector <double> &coords) const override;
 
     // 
@@ -72,8 +79,6 @@ protected:
 
 private:
     const float _value;
-    
-    std::vector<size_t> _dummyVec() const;
 
 };  // end ConstantGrid class
 };  // end VAPoR namespace
