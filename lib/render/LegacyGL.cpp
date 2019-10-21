@@ -224,7 +224,7 @@ void LegacyGL::DisableLighting() { _lightingEnabled = false; }
 void LegacyGL::LightDirectionfv(const float *f)
 {
     glm::vec3 dir = glm::make_vec3(f);
-    dir = _glManager->matrixManager->GetModelViewMatrix() * glm::vec4(dir, 0.f);
+//    dir = _glManager->matrixManager->GetModelViewMatrix() * glm::vec4(dir, 0.f);
     _lightDir[0] = dir.x;
     _lightDir[1] = dir.y;
     _lightDir[2] = dir.z;

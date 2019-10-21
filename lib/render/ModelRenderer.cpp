@@ -257,9 +257,8 @@ void ModelRenderer::Scene::Render(GLManager *gl, const int ts)
         const glm::vec3 scale = instance.scale;
         const glm::vec3 origin = instance.origin;
         
-        
         mm->Translate(translate.x, translate.y, translate.z);
-        mm->Translate(origin.x, origin[1], origin[2]);
+        mm->Translate(origin.x, origin.y, origin.z);
         mm->Rotate(glm::radians(rotate.x), 1, 0, 0);
         mm->Rotate(glm::radians(rotate.y), 0, 1, 0);
         mm->Rotate(glm::radians(rotate.z), 0, 0, 1);
