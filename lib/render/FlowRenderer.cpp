@@ -454,14 +454,6 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     // If names not the same, entire stream is out of date
     // Note: variable names are kept in VaporFields.
     std::vector<std::string> varnames = params->GetFieldVariableNames();
-    for( const auto& e : varnames )
-    {
-        if( e.empty() )
-        {
-            MyBase::SetErrMsg("Missing variables for 3D flow advection!");
-            return flow::PARAMS_ERROR;
-        }
-    }
     if( ( varnames.at(0) != _velocityField.VelocityNames[0] ) ||
         ( varnames.at(1) != _velocityField.VelocityNames[1] ) ||
         ( varnames.at(2) != _velocityField.VelocityNames[2] ) )
@@ -659,6 +651,8 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
             _velocityStatus         = FlowStatus::SIMPLE_OUTOFDATE;
         }
     }
+
+    return 0;
 }
 
 

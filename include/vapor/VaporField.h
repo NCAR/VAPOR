@@ -11,6 +11,11 @@
 
 namespace flow
 {
+//
+//  Note on variable names in a VaporField:
+//  If a variable name is an empty string, then this variable is still valid, 
+//  but contains all zero values in it.
+//
 class FLOW_API VaporField final : public Field
 {
 public:
