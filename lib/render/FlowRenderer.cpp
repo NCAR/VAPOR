@@ -208,6 +208,7 @@ FlowRenderer::_paintGL( bool fast )
         _velocityStatus = FlowStatus::UPTODATE;
     }
 
+
     if( !params->UseSingleColor() )
     {
         if( _colorStatus == FlowStatus::SIMPLE_OUTOFDATE )
@@ -459,6 +460,9 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         ( varnames.at(2) != _velocityField.VelocityNames[2] ) )
     {
         _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+        // When new velocity variables are selected, new particles will be generated,
+        // so we should declare color status out of date too.
+        _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
     }
 
     std::string colorVarName = params->GetColorMapVariableName();
@@ -511,11 +515,13 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     const auto rake = params->GetRake();
     bool diff = false;
     for( int i = 0; i < 6; i++ )
+    {
         if( _cache_rake[i] != rake.at(i) )
         {
             diff = true;
             break;
         }
+    }
     if( diff )
     {
         for( int i = 0; i < 6; i++ )
