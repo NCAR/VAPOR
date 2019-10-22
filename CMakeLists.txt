@@ -98,6 +98,14 @@ link_directories (${PYTHONPATH})
 list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
 list (APPEND CMAKE_PREFIX_PATH ${QTDIR}/lib/cmake)
 list (APPEND CMAKE_PROGRAM_PATH ${QTDIR}/bin)
+
+message( "QTDIR            " ${QTDIR})
+message( "DLL DIR          " ${DLL_DIR})
+message( "WIN INSTALL DLLS " ${WIN_INSTALL_DLLS} )
+message( "INSTALL BIN DIR  " ${INSTALL_BIN_DIR} )
+message( "PYTHONPATH       " ${PYTHONPATH})
+message( "INSTALL LIB DIR  " ${INSTALL_LIB_DIR})
+
 if (WIN32)
 	include_directories (${THIRD_PARTY_DIR}/Python${PYTHONVERSION}/include)
 	include_directories (${NUMPY_INCLUDE_DIR})
@@ -106,8 +114,16 @@ if (WIN32)
 		message(STATUS "dir='${dir}'\n")
 	endforeach()
 else ()
-	include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}m)
-	include_directories (${PYTHONPATH}/site-packages/numpy/core/include)
+	#include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION})
+	include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION})
+
+    # I'm not sure why we only have include files for python3.6, and not python3.6m.
+    # 
+	include_directories (${THIRD_PARTY_LIB_DIR}/python3.6/site-packages/numpy/core/include)
+	message ("extra python dir for numpy " ${THIRD_PARTY_LIB_DIR}/python3.6/site-packages/numpy/core/include)
+
+    message( "Python Include Dir " ${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION})
+	#include_directories (${PYTHONPATH}/site-packages/numpy/core/include)
 endif ()
 if (BUILD_VDC)
 	link_directories (${PYTHONPATH}/lib-dynload)
@@ -212,12 +228,6 @@ if (WIN32)
 	if (GENERATE_FULL_INSTALLER)
 		set (DLL_DIR ${THIRD_PARTY_DIR}/dll)
 		file (GLOB WIN_INSTALL_DLLS ${DLL_DIR}/*.dll ${QTDIR}/bin/*.dll)
-message( "QTDIR            " ${QTDIR})
-message( "DLL DIR          " ${DLL_DIR})
-message( "WIN INSTALL DLLS " ${WIN_INSTALL_DLLS} )
-message( "INSTALL BIN DIR  " ${INSTALL_BIN_DIR} )
-message( "PYTHONPATH       " ${PYTHONPATH})
-message( "INSTALL LIB DIR  " ${INSTALL_LIB_DIR})
 
 		install (
 			FILES ${WIN_INSTALL_DLLS}
