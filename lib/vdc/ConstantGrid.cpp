@@ -1,3 +1,5 @@
+#include <limits>
+
 #include "vapor/ConstantGrid.h"
 
 using VAPoR::ConstantGrid;
@@ -29,8 +31,13 @@ std::string ConstantGrid::GetType() const
     std::string type( "ConstantGrid" );
     return type;
 }
+
+void ConstantGrid::GetUserExtents( std::vector<double> &minu, std::vector<double> &maxu) const
+{
+    minu.resize(3, std::numeric_limits<double>::min() );
+    maxu.resize(3, std::numeric_limits<double>::max() );
+}
     
-// Any location is considered inside of a constant grid.
 bool ConstantGrid::InsideGrid(const std::vector <double> &coords) const
 {
     return true;
