@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <expat.h>
 #include <vapor/XmlNode.h>
+#include <vapor/STLUtils.h>
 
 using namespace VAPoR;
 using namespace Wasp;
@@ -345,7 +346,7 @@ void XmlNode::SetElementStringVec(
 
     string s;
     for (int i = 0; i < strvec.size(); i++) {
-        s.append(strvec[i]);
+        s.append(STLUtils::ReplaceAll(strvec[i], " ", "\\ "));
         if (i < strvec.size() - 1)
             s.append(" ");
     }
@@ -394,8 +395,9 @@ const string &XmlNode::GetElementString(const string &tag) const {
 void XmlNode::GetElementStringVec(const string &tag, vector<string> &vec) const {
 
     string s = XmlNode::GetElementString(tag);
-
     StrToWordVec(s, vec);
+    for (string &e : vec)
+        e = STLUtils::ReplaceAll(e, "\\ ", " ");
 }
 
 bool XmlNode::HasElementString(const string &tag) const {
