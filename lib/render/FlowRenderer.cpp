@@ -21,7 +21,7 @@ static RendererRegistrar<FlowRenderer> registrar(FlowRenderer::GetClassType(), F
 
 // Constructor
 FlowRenderer::FlowRenderer(const ParamsMgr *pm, std::string &winName, std::string &dataSetName, std::string &instName, DataMgr *dataMgr)
-: Renderer(pm, winName, dataSetName, FlowParams::GetClassType(), FlowRenderer::GetClassType(), instName, dataMgr), _velocityField(6), _colorField(2), _colorMapTexOffset(0)
+: Renderer(pm, winName, dataSetName, FlowParams::GetClassType(), FlowRenderer::GetClassType(), instName, dataMgr), _velocityField(7), _colorField(2), _colorMapTexOffset(0)
 {
 }
 
@@ -110,7 +110,11 @@ int FlowRenderer::_paintGL(bool fast)
         params->SetNeedFlowlineOutput(false);
     }
 
-    _updateFlowCacheAndStates(params);
+    if (_updateFlowCacheAndStates(params) != 0) {
+        MyBase::SetErrMsg("Parameters not ready!");
+        return flow::PARAMS_ERROR;
+    }
+
     _velocityField.UpdateParams(params);
     _colorField.UpdateParams(params);
 
@@ -326,7 +330,7 @@ int FlowRenderer::_drawALineStrip(const float *buf, size_t numOfParts, bool sing
     return 0;
 }
 
-void FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
+int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
 {
     /*
      * This function servers two purposes:
@@ -359,10 +363,15 @@ void FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
     // If names not the same, entire stream is out of date
     // Note: variable names are kept in VaporFields.
     std::vector<std::string> varnames = params->GetFieldVariableNames();
-    if ((varnames.at(0) != _velocityField.VelocityNames[0]) || (varnames.at(1) != _velocityField.VelocityNames[1]) || (varnames.at(2) != _velocityField.VelocityNames[2]))
+    if ((varnames.at(0) != _velocityField.VelocityNames[0]) || (varnames.at(1) != _velocityField.VelocityNames[1]) || (varnames.at(2) != _velocityField.VelocityNames[2])) {
         _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+        // When new velocity variables are selected, new particles will be generated,
+        // so we should declare color status out of date too.
+        _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    }
+
     std::string colorVarName = params->GetColorMapVariableName();
-    if (colorVarName != _colorField.ScalarName) _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    if (colorVarName != _colorField.ScalarName) { _colorStatus = FlowStatus::SIMPLE_OUTOFDATE; }
 
     // Check compression parameters
     // If these parameters not the same, entire stream is out of date
@@ -400,11 +409,12 @@ void FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
     // We update these parameters anyway, and decide if the advection is out of date in rake mode.
     const auto rake = params->GetRake();
     bool       diff = false;
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 6; i++) {
         if (_cache_rake[i] != rake.at(i)) {
             diff = true;
             break;
         }
+    }
     if (diff) {
         for (int i = 0; i < 6; i++) _cache_rake[i] = rake[i];
 
@@ -509,6 +519,8 @@ void FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
             _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
         }
     }
+
+    return 0;
 }
 
 void FlowRenderer::_dupSeedsNewTime(std::vector<flow::Particle> &seeds, size_t firstN, float newTime) const

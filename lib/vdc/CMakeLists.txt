@@ -1,6 +1,7 @@
 set (SRC
 	BlkMemMgr.cpp
 	Grid.cpp
+	ConstantGrid.cpp
 	StructuredGrid.cpp
 	RegularGrid.cpp
 	StretchedGrid.cpp
@@ -36,6 +37,7 @@ set (SRC
 set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/BlkMemMgr.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Grid.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ConstantGrid.h
 	${PROJECT_SOURCE_DIR}/include/vapor/StructuredGrid.h
 	${PROJECT_SOURCE_DIR}/include/vapor/RegularGrid.h
 	${PROJECT_SOURCE_DIR}/include/vapor/StretchedGrid.h
