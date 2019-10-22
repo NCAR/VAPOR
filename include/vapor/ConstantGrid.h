@@ -29,6 +29,8 @@ public:
     // Additional ones could be added when needed.
     //
     float GetValue(const std::vector <double> &coords) const override;
+    float GetValueNearestNeighbor( const std::vector <double> &coords) const override;
+    float GetValueLinear( const std::vector <double> &coords) const override;
 
     //
     // Pure virtual functions from Grid class.
@@ -37,9 +39,10 @@ public:
     // Will always return true. Any location is considered inside of a constant grid.
     bool InsideGrid(const std::vector <double> &coords) const override;
 
+private:
     // 
     // The following methods does nothing and return meaningless values.
-    // Do not touch.
+    // Do not use!
     // 
     std::vector<size_t> GetCoordDimensions(size_t) const override;
     size_t GetGeometryDim() const override;                
@@ -69,15 +72,8 @@ public:
     ConstCoordItr ConstCoordBegin() const override;
     ConstCoordItr ConstCoordEnd() const override;
 
-protected:
-    // 
-    // The following methods does nothing and return meaningless values.
-    // Do not touch.
-    // 
-    float GetValueNearestNeighbor( const std::vector <double> &coords) const override;
-    float GetValueLinear( const std::vector <double> &coords) const override;
 
-private:
+    // Private data member that holds this constant value.
     const float _value;
 
 };  // end ConstantGrid class

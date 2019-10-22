@@ -13,6 +13,16 @@ float ConstantGrid::GetValue(const std::vector <double> &coords) const
 {
     return _value;
 }
+    
+float ConstantGrid::GetValueNearestNeighbor( const std::vector <double> &coords) const
+{
+    return _value;
+}
+    
+float ConstantGrid::GetValueLinear( const std::vector <double> &coords) const 
+{
+    return _value;
+}
 
 std::string ConstantGrid::GetType() const
 {
@@ -91,14 +101,4 @@ VAPoR::Grid::ConstCoordItr ConstantGrid::ConstCoordBegin() const
 VAPoR::Grid::ConstCoordItr ConstantGrid::ConstCoordEnd() const
 {
     return VAPoR::Grid::ConstCoordItr();
-}
-    
-float ConstantGrid::GetValueNearestNeighbor( const std::vector <double> &coords) const
-{
-    return 0.0f;
-}
-    
-float ConstantGrid::GetValueLinear( const std::vector <double> &coords) const 
-{
-    return 0.0f;
 }
