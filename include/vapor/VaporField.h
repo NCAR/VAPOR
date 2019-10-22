@@ -11,6 +11,11 @@
 
 namespace flow
 {
+//
+//  Note on variable names in a VaporField:
+//  If a variable name is an empty string, then this variable is still valid, 
+//  but contains all zero values in it.
+//
 class FLOW_API VaporField final : public Field
 {
 public:
@@ -89,6 +94,7 @@ private:
     const VAPoR::FlowParams*    _params  = nullptr;
     using cacheType = VAPoR::unique_ptr_cache< std::string, GridWrapper >;
     mutable cacheType           _recentGrids;
+    const std::string           _constantGridZero = "ConstantGrid with zeros";
 
     // Member functions
     std::string _paramsToString(  size_t currentTS, const std::string& var, int refLevel, 
