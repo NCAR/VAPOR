@@ -178,24 +178,14 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity,
     const float mult = _params->GetVelocityMultiplier();
     glm::vec3 missingV; // stores missing values for 3 velocity variables
 
-    // Create a constant grid in case it will be used for empty variables.
-    const VAPoR::ConstantGrid cgrid( 0.0f );
-
     if( IsSteady )
     {
         size_t currentTS = _params->GetCurrentTimestep();
         for( int i = 0; i < 3; i++ )
         {
             const auto& varname = VelocityNames[i];
-            if( varname.empty() )
-            {
-                grid = &cgrid;
-            }
-            else
-            {
-                grid = _getAGrid( currentTS, varname );
-                VAssert( grid );
-            }
+            grid = _getAGrid( currentTS, varname );
+            VAssert( grid );
             velocity[i] = grid->GetValue( coords );
             missingV[i] = grid->GetMissingValue();
         }
@@ -221,15 +211,8 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity,
         for( int i = 0; i < 3; i++ )
         {
             const auto& varname = VelocityNames[i];
-            if( varname.empty() )
-            {
-                grid = &cgrid;
-            }
-            else
-            {
-                grid = _getAGrid( floorTS, varname );
-                VAssert( grid );
-            }
+            grid = _getAGrid( floorTS, varname );
+            VAssert( grid );
             floorVelocity[i] = grid->GetValue( coords );
             missingV[i]      = grid->GetMissingValue();
         }
@@ -251,15 +234,8 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity,
             for( int i = 0; i < 3; i++ )
             {
                 const auto& varname = VelocityNames[i];
-                if( varname.empty() )
-                {
-                    grid = &cgrid;
-                }
-                else
-                {
-                    grid = _getAGrid( floorTS + 1, varname );
-                    VAssert( grid );
-                }
+                grid = _getAGrid( floorTS + 1, varname );
+                VAssert( grid );
                 ceilVelocity[i] = grid->GetValue( coords );
                 missingV[i]     = grid->GetMissingValue();
             }
@@ -436,10 +412,22 @@ VaporField::_getAGrid( size_t timestep, const std::string& varName ) const
         return _recentGrids.find( key )->grid();
     }
 
-    // There's no such grid in our cache! Let's ask for it from the data manager,
-    // and then keep it in our cache!
-    VAPoR::Grid* grid = _datamgr->GetVariable( timestep, varName, refLevel, compLevel,
-                                               extMin, extMax, true );
+    //
+    // There's no such grid in our cache! 
+    // Let's ask for it from the data manager, or create it by ourselves if a 
+    // ConstantGrid is required, and then keep it in our cache!
+    //
+    VAPoR::Grid* grid = nullptr;
+    if( key == _constantGridZero )
+    {
+        grid = new VAPoR::ConstantGrid( 0.0f );
+    }
+    else
+    {
+        grid = _datamgr->GetVariable( timestep, varName, refLevel, compLevel,
+                                      extMin, extMax, true );
+    }
+
     if( grid == nullptr )
     {
         Wasp::MyBase::SetErrMsg("Not able to get a grid!");
@@ -460,13 +448,22 @@ VaporField::_paramsToString(  size_t currentTS,               const std::string&
                               int refLevel,                   int compLevel, 
                               const std::vector<double>& min, const std::vector<double>& max ) const
 {
-    std::string space( "  " );
-    std::ostringstream oss;
-    oss << currentTS << space << var << space << refLevel << space << compLevel << space ;
-    for( size_t i = 0; i < min.size(); i++ )
-        oss << min[i] << space;
-    for( size_t i = 0; i < max.size(); i++ )
-        oss << max[i] << space;
-    return oss.str();
+    // In case of an empty variable name, we generate a string that represents a
+    // ConstantGrid with zeros, no matter what other parameters are.
+    if( var.empty() )
+    {
+        return _constantGridZero;
+    }
+    else
+    {
+        std::string space( "  " );
+        std::ostringstream oss;
+        oss << currentTS << space << var << space << refLevel << space << compLevel << space ;
+        for( size_t i = 0; i < min.size(); i++ )
+            oss << min[i] << space;
+        for( size_t i = 0; i < max.size(); i++ )
+            oss << max[i] << space;
+        return oss.str();
+    }
 }
 

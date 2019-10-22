@@ -34,6 +34,8 @@ std::string ConstantGrid::GetType() const
 
 void ConstantGrid::GetUserExtents( std::vector<double> &minu, std::vector<double> &maxu) const
 {
+    // We have to make an assumption on the dimensionality of the ConstantGrid here.
+    // Let's assume it's 3D.
     minu.resize(3, std::numeric_limits<double>::min() );
     maxu.resize(3, std::numeric_limits<double>::max() );
 }
