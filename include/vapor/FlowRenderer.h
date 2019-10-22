@@ -107,7 +107,7 @@ class RENDER_API FlowRenderer final : public Renderer {
     void _restoreGLState() const;
 
     // Update values of _cache_* and _state_* member variables.
-    void _updateFlowCacheAndStates(const FlowParams *);
+    int _updateFlowCacheAndStates(const FlowParams *);
 
     void _updatePeriodicity(flow::Advection *advc);
 
