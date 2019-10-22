@@ -35,3 +35,15 @@ std::string STLUtils::Join(const std::vector<std::string> &parts, const std::str
     for (; itr != parts.end(); ++itr) whole += delimeter + *itr;
     return whole;
 }
+
+std::string STLUtils::ReplaceAll(std::string source, const std::string &oldSegment, const std::string &newSegment)
+{
+    size_t start = 0;
+
+    size_t index;
+    while ((index = source.find(oldSegment, start)) != string::npos) {
+        source.replace(index, oldSegment.length(), newSegment);
+        start = index + newSegment.length();
+    }
+    return source;
+}
