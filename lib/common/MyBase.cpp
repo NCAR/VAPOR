@@ -251,8 +251,12 @@ void Wasp::StrToWordVec(const string &s, vector<string> &v) {
             tmp.erase(0, 1);
 
         int index = 0;
-        while (index < tmp.length() && !isspace(tmp[index]))
+        while (index < tmp.length()) {
+            if (isspace(tmp[index]))
+                if (index == 0 || tmp[index - 1] != '\\')
+                    break;
             index++;
+        }
 
         if (index) {
             string word = tmp.substr(0, index);

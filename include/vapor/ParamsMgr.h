@@ -446,6 +446,12 @@ class PARAMS_API ParamsMgr : public MyBase {
         _ssave.EndGroup();
     };
 
+    //! Call callbacks registered for intermediate changes. These are changes inside of Save State Groups that
+    //! the rendering should still be updated to show.
+    void IntermediateChange() {
+        _ssave.IntermediateChange();
+    }
+
     void SetSaveStateEnabled(bool enabled) {
         _ssave.SetEnabled(enabled);
     }
@@ -501,6 +507,12 @@ class PARAMS_API ParamsMgr : public MyBase {
         _ssave.RegisterStateChangeCB(callback);
     }
 
+    //! Intermediate changes are changes inside of Save State Groups that
+    //! the rendering should still be updated to show.
+    void RegisterIntermediateStateChangeCB(std::function<void()> callback) {
+        _ssave.RegisterIntermediateStateChangeCB(callback);
+    }
+
     //! Reinit state saving
     //!
     //!
@@ -546,6 +558,7 @@ class PARAMS_API ParamsMgr : public MyBase {
         void Save(const XmlNode *node, string description);
         void BeginGroup(string descripion);
         void EndGroup();
+        void IntermediateChange();
 
         void SetEnabled(bool onOff) {
             if (!_groups.empty())
@@ -578,6 +591,9 @@ class PARAMS_API ParamsMgr : public MyBase {
         void RegisterStateChangeCB(std::function<void()> callback) {
             _stateChangeCBs.push_back(callback);
         }
+        void RegisterIntermediateStateChangeCB(std::function<void()> callback) {
+            _intermediateStateChangeCBs.push_back(callback);
+        }
 
       private:
         bool _enabled;
@@ -591,9 +607,11 @@ class PARAMS_API ParamsMgr : public MyBase {
 
         std::vector<bool *> _stateChangeFlags;
         std::vector<std::function<void()>> _stateChangeCBs;
+        std::vector<std::function<void()>> _intermediateStateChangeCBs;
 
         void cleanStack(int maxN, std::deque<std::pair<string, XmlNode *>> &s);
         void emitStateChange();
+        void emitIntermediateStateChange();
     };
 
     map<string, DataMgr *> _dataMgrMap;

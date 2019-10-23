@@ -35,7 +35,8 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
     bool isContainer() const { return true; }
     void Update(VAPoR::ParamsMgr *paramsMgr,
                 VAPoR::DataMgr *dataMgr,
-                VAPoR::RenderParams *rParams);
+                VAPoR::RenderParams *rParams,
+                VAPoR::Box *box = nullptr);
 
   signals:
     void valueChanged();
@@ -79,6 +80,7 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
     VAPoR::ParamsMgr *_paramsMgr;
     VAPoR::DataMgr *_dataMgr;
     VAPoR::RenderParams *_rParams;
+    VAPoR::Box *_box;
 
     Combo *_minXCombo;
     Combo *_maxXCombo;
