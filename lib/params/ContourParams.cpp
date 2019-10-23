@@ -80,7 +80,11 @@ bool ContourParams::usingVariable(const std::string &varname)
     return (varname.compare(GetVariableName()) == 0);
 }
 
-vector<double> ContourParams::GetContourValues(string varName)
+vector<double> ContourParams::GetIsoValues(const string &variable) { return GetContourValues(variable); }
+
+void ContourParams::SetIsoValues(const string &variable, const vector<double> &values) { SetContourValues(variable, values); }
+
+vector<double> ContourParams::GetContourValues(const string &varName)
 {
     Contours *c = (Contours *)_contours->GetParams(varName);
     if (c == NULL) {
@@ -90,7 +94,7 @@ vector<double> ContourParams::GetContourValues(string varName)
     return c->GetContourValues();
 }
 
-void ContourParams::SetContourValues(string varName, vector<double> vals)
+void ContourParams::SetContourValues(const string &varName, const vector<double> &vals)
 {
     Contours *c = (Contours *)_contours->GetParams(varName);
     if (c == NULL) {

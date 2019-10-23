@@ -82,9 +82,12 @@ public:
 
     bool GetLockToTF() const;
 
-    vector<double> GetContourValues(string varName);
+    bool           HasIsoValues() const { return true; }
+    vector<double> GetIsoValues(const string &variable);
+    void           SetIsoValues(const string &variable, const vector<double> &values);
 
-    void SetContourValues(string varName, vector<double> vals);
+    vector<double> GetContourValues(const string &varName);
+    void           SetContourValues(const string &varName, const vector<double> &vals);
 
     // Get static string identifier for this params class
     //

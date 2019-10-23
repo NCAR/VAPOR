@@ -36,13 +36,10 @@ public:
     float                     GetSamplingMultiplier() const;
     void                      SetSamplingMultiplier(float d);
 
-    double GetIsoValue() const;
-    void   SetIsoValue(double isoValue);
-
-    void                SetIsoValues(std::vector<double> values);
-    std::vector<double> GetIsoValues() const;
-    void                SetEnabledIsoValues(std::vector<bool> mask);
-    std::vector<bool>   GetEnabledIsoValues() const;
+    using RenderParams::GetIsoValues;
+    using RenderParams::SetIsoValues;
+    vector<double> GetIsoValues(const string &variable);
+    void           SetIsoValues(const string &variable, const vector<double> &values);
 
     void  SetLightingEnabled(bool v);
     bool  GetLightingEnabled() const;
@@ -71,7 +68,6 @@ private:
     static const std::string _algorithmTag;
     static const std::string _algorithmWasManuallySetByUserTag;
     static const std::string _samplingRateMultiplierTag;
-    static const std::string _isoValueTag;
     static const std::string _isoValuesTag;
     static const std::string _enabledIsoValuesTag;
     static const std::string _lightingEnabledTag;

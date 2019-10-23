@@ -179,7 +179,21 @@ int MapperFunction::LoadFromFile(string path)
     //
     delete newTF;
 
+    _ssave->Save(_node, "Load transfer function from file");
+
     return (0);
+}
+
+int MapperFunction::LoadColormapFromFile(string path)
+{
+    MapperFunction temp = *this;
+    int            rc = temp.LoadFromFile(path);
+    if (rc < 0) return rc;
+
+    *m_colorMap = *temp.GetColorMap();
+    m_colorMap->SetParent(this);
+
+    return rc;
 }
 
 //----------------------------------------------------------------------------

@@ -80,6 +80,8 @@ void RenderParams::SetDefaultVariables(int dim = 3, bool secondaryColormapVariab
     vector<string> fieldVarNames(3, "");
     fieldVarNames[0] = _findVarStartingWithLetter(varnames, 'u');
     fieldVarNames[1] = _findVarStartingWithLetter(varnames, 'v');
+    if (dim == 3) fieldVarNames[2] = _findVarStartingWithLetter(varnames, 'w');
+
     SetFieldVariableNames(fieldVarNames);
 
     string colorVar = varname;
@@ -478,7 +480,12 @@ string RenderParams::GetColorMapVariableName() const
     return (varname);
 }
 
-bool RenderParams::UseSingleColor() const { return GetValueLong(_useSingleColorTag, GetUseSingleColorDefault()); }
+bool RenderParams::UseSingleColor() const
+{
+    // Not used
+    return false;
+    return GetValueLong(_useSingleColorTag, GetUseSingleColorDefault());
+}
 
 void RenderParams::SetUseSingleColor(bool val) { SetValueLong(_useSingleColorTag, "enable/disable use single color", (long)val); }
 

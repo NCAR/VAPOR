@@ -54,9 +54,9 @@ GeometryWidget::GeometryWidget(QWidget *parent) : QWidget(parent), Ui_GeometryWi
 {
     setupUi(this);
 
-    _paramsMgr = NULL;
-    _dataMgr = NULL;
-    _rParams = NULL;
+    _paramsMgr = nullptr;
+    _dataMgr = nullptr;
+    _rParams = nullptr;
 
     _minXCombo = new Combo(_minXEdit, _minXSlider);
     _maxXCombo = new Combo(_maxXEdit, _maxXSlider);
@@ -166,8 +166,7 @@ void GeometryWidget::reinitBoxToPlanarAxis(int planarAxis, QSliderEdit *slider)
 
     minExt[planarAxis] = average;
     maxExt[planarAxis] = average;
-    Box *box = _rParams->GetBox();
-    box->SetExtents(minExt, maxExt);
+    _box->SetExtents(minExt, maxExt);
 }
 
 void GeometryWidget::adjustLayoutTo2D()
@@ -201,41 +200,41 @@ GeometryWidget::~GeometryWidget()
 {
     if (_minXCombo) {
         delete _minXCombo;
-        _minXCombo = NULL;
+        _minXCombo = nullptr;
     }
     if (_maxXCombo) {
         delete _maxXCombo;
-        _maxXCombo = NULL;
+        _maxXCombo = nullptr;
     }
     if (_xRangeCombo) {
         delete _xRangeCombo;
-        _xRangeCombo = NULL;
+        _xRangeCombo = nullptr;
     }
 
     if (_minYCombo) {
         delete _minYCombo;
-        _minYCombo = NULL;
+        _minYCombo = nullptr;
     }
     if (_maxYCombo) {
         delete _maxYCombo;
-        _maxYCombo = NULL;
+        _maxYCombo = nullptr;
     }
     if (_yRangeCombo) {
         delete _yRangeCombo;
-        _yRangeCombo = NULL;
+        _yRangeCombo = nullptr;
     }
 
     if (_minZCombo) {
         delete _minZCombo;
-        _minZCombo = NULL;
+        _minZCombo = nullptr;
     }
     if (_maxZCombo) {
         delete _maxZCombo;
-        _maxZCombo = NULL;
+        _maxZCombo = nullptr;
     }
     if (_zRangeCombo) {
         delete _zRangeCombo;
-        _zRangeCombo = NULL;
+        _zRangeCombo = nullptr;
     }
 }
 
@@ -332,9 +331,8 @@ void GeometryWidget::updateBoxCombos(std::vector<double> &minFullExt, std::vecto
 
     // Get current user selected extents
     //
-    Box *               box = _rParams->GetBox();
     std::vector<double> minExt, maxExt;
-    box->GetExtents(minExt, maxExt);
+    _box->GetExtents(minExt, maxExt);
 
     // Force the user extents to be within the domain extents
     //
@@ -361,7 +359,7 @@ void GeometryWidget::updateBoxCombos(std::vector<double> &minFullExt, std::vecto
     }
 }
 
-void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams *rParams)
+void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams *rParams, Box *box)
 {
     VAssert(paramsMgr);
     VAssert(dataMgr);
@@ -370,6 +368,12 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
     _paramsMgr = paramsMgr;
     _dataMgr = dataMgr;
     _rParams = rParams;
+
+    if (box != nullptr)
+        _box = box;
+    else
+        _box = _rParams->GetBox();
+    VAssert(_box);
 
     // Get current domain extents
     //
@@ -382,7 +386,7 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
     if (_geometryFlags & PLANAR) {
         _planeComboBox->blockSignals(true);
 
-        int rParamsOrientation = _rParams->GetBox()->GetOrientation();
+        int rParamsOrientation = _box->GetOrientation();
         _planeComboBox->setCurrentIndex(rParamsOrientation);
 
         bool reinit = false;
@@ -427,12 +431,11 @@ void GeometryWidget::setRange(double min, double max, int dimension)
     }
 
     std::vector<double> minExt, maxExt;
-    Box *               box = _rParams->GetBox();
 
-    box->GetExtents(minExt, maxExt);
+    _box->GetExtents(minExt, maxExt);
     minExt[dimension] = min;
     maxExt[dimension] = max;
-    box->SetExtents(minExt, maxExt);
+    _box->SetExtents(minExt, maxExt);
 
     emit valueChanged();
 }
