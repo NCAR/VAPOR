@@ -268,6 +268,7 @@ if (WIN32)
 endif (WIN32)
 
 if (APPLE)
+    message ( "We should be building a .dmg.....")
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
 		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${PYTHONPATH} ${QTDIR}/lib/*.framework)

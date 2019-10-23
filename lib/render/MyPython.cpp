@@ -92,7 +92,9 @@ int MyPython::Initialize() {
 		MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
 #else
 		struct STAT64 statbuf;
-		if (STAT64((m_pyHome + "/lib/python3.6m").c_str(), &statbuf) >= 0) {
+        cout << "m_pyHome " << m_pyHome << endl;
+		if (STAT64((m_pyHome + "/lib/python3.6").c_str(), &statbuf) >= 0) {
+        cout << "weird test passed?" << endl;
 			// N.B. the string passed to Py_SetPythonHome() must be
 			// maintained in static storage :-(. However, the python
 			// documentation promisses that it's value will not be changed
@@ -101,10 +103,18 @@ int MyPython::Initialize() {
 			// The above comment might no longer be relevant
 			//
 
+            
+		std::string pythonPath = m_pyHome + "/lib/python3.6:";
+		pythonPath = pythonPath + m_pyHome + "/lib/python3.6/site-packages";
+		//pythonPath = pythonPath + m_pyHome + "/bin";
+        cout << "PYTHONPATH " << pythonPath << endl;
+		setenv("PYTHONPATH", pythonPath.c_str(), 1);
+        //m_pyHome = m_pyHome + "/lib";
 			std::wstring wStringPyHome = std::wstring( m_pyHome.begin(), m_pyHome.end() );
 			const wchar_t* wCharPyHome = wStringPyHome.c_str();
 			wchar_t* nonConstCopy = const_cast<wchar_t*>(wCharPyHome);
 
+            wcout << "SetPythonHome " << wStringPyHome << endl;
 			Py_SetPythonHome( nonConstCopy );
 
 			MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
@@ -159,7 +169,7 @@ int MyPython::Initialize() {
 	//
 	int rc = PyRun_SimpleString(stdErr.c_str());
 	if (rc<0) {
-		MyBase::SetErrMsg("1PyRun_SimpleString() : %s", PyErr().c_str());
+		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
 		return(-1);
 	}
 
@@ -181,7 +191,7 @@ int MyPython::Initialize() {
 	//
 	rc = PyRun_SimpleString(stdOut.c_str());
 	if (rc<0) {
-		MyBase::SetErrMsg("2PyRun_SimpleString() : %s", PyErr().c_str());
+		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
 		return(-1);
 	}
 
@@ -195,9 +205,10 @@ int MyPython::Initialize() {
 	"	raise\n";
 	rc = PyRun_SimpleString(importMPL.c_str());
 	if (rc<0) {
-		MyBase::SetErrMsg("3PyRun_SimpleString() : %s", PyErr().c_str());
+		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
 		return(-1);
 	}
+
 
 	// Add vapor modules to search path
 	//
@@ -205,7 +216,7 @@ int MyPython::Initialize() {
     path = "sys.path.append('" + path + "')\n";
     rc = PyRun_SimpleString( path.c_str() );
 	if (rc<0) {
-		MyBase::SetErrMsg("4PyRun_SimpleString() : %s", PyErr().c_str());
+		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
 		return(-1);
 	}
 
