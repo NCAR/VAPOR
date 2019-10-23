@@ -3,10 +3,7 @@ set (SRCS
 	RenderEventRouter.cpp
 	RenderHolder.cpp
 	ImageFrame.cpp
-	ControlPointEditor.cpp
-	DomainWidget.cpp
 	GLWidget.cpp
-	OpacityWidget.cpp
 	ErrorReporter.cpp
 	Histo.cpp
 	ColorbarWidget.cpp
@@ -14,7 +11,6 @@ set (SRCS
 	VizSelectCombo.cpp
 	AnnotationEventRouter.cpp
 	AnimationEventRouter.cpp
-	MappingFrame.cpp
 	HelloEventRouter.cpp
 	NavigationEventRouter.cpp
 	TwoDDataEventRouter.cpp
@@ -23,7 +19,6 @@ set (SRCS
 	Statistics.cpp
 	Plot.cpp
 	helloSubtabs.cpp
-	TFWidget.cpp
 	VariablesWidget.cpp
 	GeometryWidget.cpp
 	CopyRegionWidget.cpp
@@ -40,7 +35,6 @@ set (SRCS
 	VizWinMgr.cpp
 	TabManager.cpp
 	TrackBall.cpp
-	GLColorbarWidget.cpp
 	ImageEventRouter.cpp
 	ContourEventRouter.cpp
     SliceEventRouter.cpp
@@ -60,15 +54,63 @@ set (SRCS
 	Combo.cpp
 	windowsUtils.cpp
 	Manip.cpp
+    FlowEventRouter.cpp
+    FlowSubtabs.cpp
 	VolumeEventRouter.cpp
 	VolumeIsoEventRouter.cpp
 	VolumeIsoSubtabs.cpp
 	VolumeSubtabs.cpp
     VaporWidgets.cpp
+	ParamsWidgets.cpp
+	ParamsMenuItems.cpp
+	ParamsMenuItems.h
+	TFEditor.cpp
+	TFEditor.h
+	TFEditorIsoSurface.cpp
+	TFEditorIsoSurface.h
+	TFOpacityWidget.cpp
+	TFOpacityWidget.h
+	TFColorWidget.cpp
+	TFColorWidget.h
+	QRangeSlider.cpp
+	QRangeSlider.h
+	TFHistogramWidget.cpp
+	TFHistogramWidget.h
+	TFInfoWidget.cpp
+	TFInfoWidget.h
+	QColorWidget.cpp
+	QColorWidget.h
+	TFColorInfoWidget.cpp
+	TFColorInfoWidget.h
+	TFOpacityInfoWidget.cpp
+	TFOpacityInfoWidget.h
+	TFMapWidget.cpp
+	TFMapWidget.h
+	TFMapGroupWidget.cpp
+	TFMapGroupWidget.h
+	TFHistogramInfoWidget.cpp
+	TFHistogramInfoWidget.h
+	TFIsoValueWidget.cpp
+	TFIsoValueWidget.h
+	TFIsoValueInfoWidget.cpp
+	TFIsoValueInfoWidget.h
+	TFUtils.cpp
+	TFUtils.h
+	TFMappingRangeSelector.cpp
+	TFMappingRangeSelector.h
+	QRangeSliderTextCombo.cpp
+	QRangeSliderTextCombo.h
+	QPaintUtils.cpp
+	QPaintUtils.h
+	VSection.cpp
+	VSection.h
+	VLineItem.cpp
+	VLineItem.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
 	WireFrameSubtabs.h
+    FlowSubtabs.h
 	Statistics.h
 	Plot.h
     PythonVariables.h
@@ -106,21 +148,17 @@ set (SRCS
 	AnnotationEventRouter.h
 	BannerGUI.h
 	BarbEventRouter.h
-	BarbEventRouter.h
+	FlowEventRouter.h
 	Combo.h
 	ContourEventRouter.h
-	ControlPointEditor.h
 	CopyRegionWidget.h
-	DomainWidget.h
 	FileOperationChecker.h
-	GLColorbarWidget.h
 	GUIStateParams.h
 	GeometryWidget.h
 	ImageEventRouter.h
 	ImageEventRouter.h
 	ImageFrame.h
 	ImageFrame.h
-	MappingFrame.h
 	MouseModeParams.h
 	PlotParams.h
     PythonVariablesParams.h
@@ -131,12 +169,13 @@ set (SRCS
 	SettingsEventRouter.h
 	SettingsParams.h
 	StatisticsParams.h
-	TFWidget.h
 	TabManager.h
 	VariablesWidget.h
 	VizSelectCombo.h
 	WireFrameEventRouter.h
     VaporWidgets.h
+	ParamsWidgets.h
+	Flags.h
 )
 
 set (UIS 
@@ -159,6 +198,7 @@ set (UIS
 	ImageAppearanceGUI.ui
 	ImageGeometryGUI.ui
 	ImageVariablesGUI.ui
+	TransformTableGUI.ui
 	TwoDVariablesGUI.ui
 	TwoDAppearanceGUI.ui
 	TwoDGeometryGUI.ui
@@ -180,11 +220,9 @@ set (UIS
 	plotWindow.ui
 	firstTimeUser.ui
     PythonVariablesGUI.ui
-	TFWidgetGUI.ui
 	GeometryWidgetGUI.ui
 	ColorbarWidgetGUI.ui
 	FidelityWidgetGUI.ui
-	ControlPointEditorBase.ui
 	StretchFactorTableGUI.ui
 	OrientationAnglesGUI.ui
 	CopyRegionWidgetGUI.ui
