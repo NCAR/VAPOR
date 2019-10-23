@@ -287,7 +287,12 @@ void VariablesWidget::setDefaultVectorVar(
 		defaultVars.push_back(defaultVar);
 		defaultVar = findVarStartingWithLetter(vars, 'v');
 		defaultVars.push_back(defaultVar);
-		defaultVars.push_back("");
+        if (_dimFlags & THREED) {
+		    defaultVar = findVarStartingWithLetter(vars, 'w');
+		    defaultVars.push_back(defaultVar);
+        }
+		else
+            defaultVars.push_back("");
 		_rParams->SetFieldVariableNames(defaultVars);
 	}
 } 
@@ -387,12 +392,11 @@ void VariablesWidget::updateScalarCombo() {
 
 void VariablesWidget::updateVectorCombo() {
 	if (_variableFlags & VECTOR) {
-		vector <string> setVarsReq = _rParams->GetFieldVariableNames();
-		
-		VAssert(setVarsReq.size() == 3);
-		
-		vector <string> setVars;
-		vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
+        vector <string> setVarsReq = _rParams->GetFieldVariableNames();
+        VAssert(setVarsReq.size() == 3);
+
+        vector <string> setVars;
+        vector<string> vars = _dataMgr->GetDataVarNames(_activeDim);
 	
 		// If our vector variables are empty, choose some defaults	
 		if (setVarsReq[0] == "" && 
@@ -491,6 +495,8 @@ void VariablesWidget::Update(
 	_dataMgr = dataMgr;
 	_paramsMgr = paramsMgr;
 	_rParams = rParams;
+	
+    vector <string> setVarsReq = _rParams->GetFieldVariableNames();
 
 	updateCombos();
 

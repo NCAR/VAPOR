@@ -1,4 +1,6 @@
 #include "VolumeSubtabs.h"
+#include "TFEditor.h"
+#include "QSliderEdit.h"
 
 using namespace VAPoR;
 
@@ -13,8 +15,13 @@ void VolumeVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Rende
 
 VolumeAppearanceSubtab::VolumeAppearanceSubtab(QWidget* parent) {
     setupUi(this);
-    _TFWidget->SetOpacityIntegrated(true);
-    _TFWidget->Reinit((TFFlags)(SAMPLING));
+    verticalLayout->insertWidget(0, _tfe = new TFEditor);
+    
+    _densitySlider = new QSliderEdit();
+    _densitySlider->SetLabel("Volume Density");
+    _densitySlider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    connect(_densitySlider, SIGNAL(valueChanged(double)), this, SLOT(_densitySlider_valueChanged(double)));
+    _raytracingFrame->layout()->addWidget(_densitySlider);
     
     _params = nullptr;
     
@@ -51,7 +58,7 @@ void VolumeAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *p
     _params = vp;
     VAssert(vp);
     
-    _TFWidget->Update(dataMgr, paramsMgr, rParams);
+    _tfe->Update(dataMgr, paramsMgr, rParams);
     
     
     
@@ -80,6 +87,10 @@ void VolumeAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *p
     _samplingRateComboBox->blockSignals(false);
     
     
+    MapperFunction *tf = vp->GetMapperFunc(vp->GetVariableName());
+    float opacityValue = powf(tf->getOpacityScale(), 1/4.f);
+    _densitySlider->SetValue(opacityValue);
+    
     
     // ---------------------------
     // Lighting Parameters
@@ -90,6 +101,12 @@ void VolumeAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *p
     _diffuseWidget->SetValue  (_params->GetPhongDiffuse());
     _specularWidget->SetValue (_params->GetPhongSpecular());
     _shininessWidget->SetValue(_params->GetPhongShininess());
+}
+
+void VolumeAppearanceSubtab::_densitySlider_valueChanged(double v)
+{
+    MapperFunction *tf = _params->GetMapperFunc(_params->GetVariableName());
+    tf->setOpacityScale(powf(v, 4));
 }
 
 void VolumeAppearanceSubtab::on__castingModeComboBox_currentIndexChanged(const QString &text)

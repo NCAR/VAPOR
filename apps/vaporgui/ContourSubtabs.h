@@ -17,6 +17,7 @@ namespace VAPoR {
 }
 
 class SpacingCombo;
+class TFEditor;
 
 class ContourVariablesSubtab : public QWidget, public Ui_ContourVariablesGUI {
 
@@ -67,6 +68,7 @@ private:
 	Combo* _countCombo;
 	Combo* _cMinCombo;
 	Combo* _spacingCombo;
+    TFEditor *_tfEditor;
 
 private slots:
 	void SetContourValues(int numContours, double contourMin, double spacing); 
