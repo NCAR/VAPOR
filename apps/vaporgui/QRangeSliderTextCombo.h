@@ -26,6 +26,7 @@ class QRangeSliderTextCombo : public QWidget {
   private:
     void setValidator(QLineEdit *edit, QValidator *validator);
     void setTextboxes(float left, float right);
+    float getRange() const;
 
   private slots:
     void sliderChangedIntermediate(float min, float max);
