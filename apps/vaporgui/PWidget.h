@@ -18,7 +18,7 @@ class PWidget : public QWidget {
     const std::string _tag;
     
 public:
-    PWidget(const std::string &tag);
+    PWidget(const std::string &tag, QWidget *widget);
     void Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr = nullptr, VAPoR::DataMgr *dataMgr = nullptr);
     const std::string &GetTag() const;
     

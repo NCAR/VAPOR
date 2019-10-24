@@ -9,5 +9,11 @@ class PCheckbox : public PWidget {
     QCheckBox *_qcheckbox;
     
 public:
-    PCheckbox(const std::string &tag, const std::string &label);
+    PCheckbox(const std::string &tag, const std::string &label="");
+
+protected:
+    void update() const;
+    
+private slots:
+    void checkboxStateChanged(int state);
 };
