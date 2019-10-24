@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QWidget>
+#include <QLayoutItem>
 #include <string>
 
 //! \class VLineItem
@@ -11,5 +12,7 @@ class VLineItem : public QWidget {
     Q_OBJECT
     
 public:
-    VLineItem(std::string label, QWidget *rightWidget);
+    VLineItem(const std::string &label, QLayoutItem *centerItem, QWidget *rightWidget);
+    VLineItem(const std::string &label, QWidget *centerWidget, QWidget *rightWidget);
+    VLineItem(const std::string &label, QWidget *rightWidget);
 };

@@ -106,6 +106,10 @@ set (SRCS
 	VSection.h
 	VLineItem.cpp
 	VLineItem.h
+	PWidget.cpp
+	PWidget.h
+	PCheckbox.cpp
+	PCheckbox.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
