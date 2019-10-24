@@ -110,6 +110,9 @@ set (SRCS
 	PWidget.h
 	PCheckbox.cpp
 	PCheckbox.h
+	PDoubleInput.cpp
+	PDoubleInput.h
+	VaporWidgetsFwd.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h

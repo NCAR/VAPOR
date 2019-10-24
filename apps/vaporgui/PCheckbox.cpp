@@ -4,7 +4,9 @@
 
 PCheckbox::PCheckbox(const std::string &tag, const std::string &label)
 : PWidget(tag, new VLineItem(label==""?tag:label, _qcheckbox = new QCheckBox))
-{}
+{
+    connect(_qcheckbox, SIGNAL(stateChanged(int)), this, SLOT(checkboxStateChanged(int)));
+}
 
 void PCheckbox::update() const
 {
