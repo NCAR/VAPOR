@@ -68,11 +68,11 @@ MyPython *MyPython::Instance() {
 }
 
 int MyPython::Initialize() {
+cout << "int MyPython::Initialize() { " << m_isInitialized << endl;
 	if (m_isInitialized) return (0);
 
 	m_pyHome.clear();
 	char *s = getenv("VAPOR3_HOME");
-    //char *s = getenv("VAPOR_PYTHONHOME");
 	if (s) m_pyHome = s;
 
 	if (m_pyHome.empty()) {
@@ -102,9 +102,14 @@ int MyPython::Initialize() {
 			//Py_SetPythonHome((char *) m_pyHome.c_str());
 			//Py_SetPythonHome( nonConstPyHome );
 			//Py_SetPythonHome( wCharPyHome );
+
+            //std::string pythonPath = "/usr/local/VAPOR-Deps/2019-Aug/lib/python3.6/site-packages";
+            //pythonPath = pythonPath + ":/usr/local/VAPOR-Deps/2019-Aug/lib/python3.6";
+            //setenv("PYTHONPATH", pythonPath.c_str(), 1);
             
             cout << "MyPython.cpp setting python home to " << m_pyHome << endl;
-            wchar_t pyHome[FILENAME_MAX+1];
+            //wchar_t pyHome[FILENAME_MAX+1];
+            wchar_t pyHome[512];
             mbstowcs(pyHome, m_pyHome.c_str(), m_pyHome.length()+1);
 			Py_SetPythonHome( pyHome );
 
@@ -127,7 +132,9 @@ int MyPython::Initialize() {
 
     // This is dependent on the environmental variable PYTHONHOME which is
     // set in vaporgui/main.cpp
+    cout << "           -Z" << endl;
 	Py_Initialize();
+    cout << "           Z" << endl;
 
 #ifdef	VAPOR3_0_0
 	if (pyIntFailed) {
@@ -156,9 +163,11 @@ int MyPython::Initialize() {
 	"catchErr = CatchErr()\n"
 	"sys.stderr = catchErr\n";
 
+        cout << "           -A" << endl;
 	// Catch stderr from Python to a string.
 	//
 	int rc = PyRun_SimpleString(stdErr.c_str());
+        cout << "           A" << endl;
 	if (rc<0) {
 		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
 		return(-1);
@@ -181,6 +190,7 @@ int MyPython::Initialize() {
 	// Catch stdout from Python to a string.
 	//
 	rc = PyRun_SimpleString(stdOut.c_str());
+        cout << "           B" << endl;
 	if (rc<0) {
 		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
 		return(-1);
@@ -195,6 +205,7 @@ int MyPython::Initialize() {
 	"	print >> sys.stderr, \'Failed to import matplotlib\'\n"
 	"	raise\n";
 	rc = PyRun_SimpleString(importMPL.c_str());
+        cout << "           C" << endl;
 	if (rc<0) {
 		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
 		return(-1);
@@ -205,6 +216,7 @@ int MyPython::Initialize() {
     std::string path = Wasp::GetSharePath("python");
     path = "sys.path.append('" + path + "')\n";
     rc = PyRun_SimpleString( path.c_str() );
+        cout << "           D" << endl;
 	if (rc<0) {
 		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
 		return(-1);
