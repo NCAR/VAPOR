@@ -103,19 +103,34 @@ int MyPython::Initialize() {
 			// The above comment might no longer be relevant
 			//
 
+        // Not setting PythonPath causes Py_Initialize() to fail at line 147
             
-		std::string pythonPath = m_pyHome + "/lib/python3.6:";
-		pythonPath = pythonPath + m_pyHome + "/lib/python3.6/site-packages";
-		//pythonPath = pythonPath + m_pyHome + "/bin";
-        cout << "PYTHONPATH " << pythonPath << endl;
+		// These three break at MyPython.cpp:211, when importing matplotlib
+        //
+        /*std::string pythonPath = m_pyHome + "/lib/python3.6:";
+		pythonPath = pythonPath + m_pyHome + "/lib/python3.6/site-packages:";
+		pythonPath = pythonPath + m_pyHome + "/bin";*/
+        m_pyHome = "/usr/local/VAPOR-Deps/2019-Aug";
+        std::string pythonPath = m_pyHome + "/lib/python3.6:";
+		pythonPath = pythonPath + m_pyHome + "/lib/python3.6/site-packages:";
+		pythonPath = pythonPath + m_pyHome + "/bin";
+        cout << "pythonPath " << pythonPath << endl;
+        
+        /*std::string pythonPath = m_pyHome + "/lib/python3.6:";
+		pythonPath = pythonPath + m_pyHome + "/lib/python3.6/site-packages";*/
+
+        //cout << "PYTHONPATH " << pythonPath << endl;
 		setenv("PYTHONPATH", pythonPath.c_str(), 1);
         //m_pyHome = m_pyHome + "/lib";
+            
+            // Jump through hoops to get a non-constant wchar_t* to pass into Py_SetPythonHome()
+            //
 			std::wstring wStringPyHome = std::wstring( m_pyHome.begin(), m_pyHome.end() );
 			const wchar_t* wCharPyHome = wStringPyHome.c_str();
-			wchar_t* nonConstCopy = const_cast<wchar_t*>(wCharPyHome);
+			wchar_t* nonConstPyHome = const_cast<wchar_t*>(wCharPyHome);
 
             wcout << "SetPythonHome " << wStringPyHome << endl;
-			Py_SetPythonHome( nonConstCopy );
+			Py_SetPythonHome( nonConstPyHome );
 
 			MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
 		}
@@ -247,7 +262,8 @@ string MyPython::PyErr() {
 
 	PyObject *output = PyObject_GetAttrString(catcher,"value");
 	//char *s = PyString_AsString(output);
-	char *s = PyBytes_AS_STRING(output);
+	//char *s = PyBytes_AS_STRING(output);
+	char *s = PyBytes_AsString(output);
 
 	// Erase the string
 	//

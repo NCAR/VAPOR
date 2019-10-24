@@ -276,7 +276,8 @@ else ()
 	target_link_libraries (
     		vapor common vdc wasp render params jpeg ${GLEW} 
     		tiff geotiff assimp Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::DBus 
-    		python${PYTHONVERSION}
+    		#python${PYTHONVERSION}
+    		python3.6m
 	)
 endif()
 
