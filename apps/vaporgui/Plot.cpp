@@ -710,7 +710,7 @@ void Plot::_invokePython( const QString&                              outFile,
     Wasp::MyPython::Instance()->Initialize();
     VAssert( Py_IsInitialized() );
 
-    pName   = PyString_FromString( "plot" );
+    pName   = PyBytes_FromString( "plot" );
     pModule = PyImport_Import( pName );
 
     if( pModule == NULL )
@@ -725,7 +725,7 @@ void Plot::_invokePython( const QString&                              outFile,
         pArgs   = PyTuple_New(6);
 
         // Set the 1st argument: output file name
-        pValue  = PyString_FromString( outFile.toAscii() );
+        pValue  = PyBytes_FromString( outFile.toAscii() );
         PyTuple_SetItem( pArgs, 0, pValue );            // pValue is stolen!
 
         // Set the 2nd argument: variable names
@@ -733,7 +733,7 @@ void Plot::_invokePython( const QString&                              outFile,
         VAssert( pListOfStrings );
         for( int i = 0; i < enabledVars.size(); i++ )
         {
-            pValue = PyString_FromString( enabledVars[i].c_str() );
+            pValue = PyBytes_FromString( enabledVars[i].c_str() );
             int rt = PyList_SetItem( pListOfStrings, i, pValue );   // pValue is stolen!
             VAssert( rt == 0 );
         }
@@ -766,11 +766,11 @@ void Plot::_invokePython( const QString&                              outFile,
         PyTuple_SetItem( pArgs, 3, pListOfFloats );
 
         // Set the 5th argument: X axis label
-        pValue  = PyString_FromString( xLabel.c_str() ); 
+        pValue  = PyBytes_FromString( xLabel.c_str() ); 
         PyTuple_SetItem( pArgs, 4, pValue );
 
         // Set the 6th argument: Y axis label
-        pValue  = PyString_FromString( yLabel.c_str() ); 
+        pValue  = PyBytes_FromString( yLabel.c_str() ); 
         PyTuple_SetItem( pArgs, 5, pValue );
 
         pValue  = PyObject_CallObject( pFunc, pArgs );
