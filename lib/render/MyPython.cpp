@@ -71,30 +71,24 @@ int MyPython::Initialize() {
 	if (m_isInitialized) return (0);
 
 	m_pyHome.clear();
-	char* s = getenv("VAPOR3_HOME");
-
+	char *s = getenv("VAPOR3_HOME");
+    //char *s = getenv("VAPOR_PYTHONHOME");
 	if (s) m_pyHome = s;
 
 	if (m_pyHome.empty()) {
+		// On windows use VAPOR_HOME/lib/python2.7; VAPOR_HOME works 
+		// on Linux and Mac
 		m_pyHome = GetPythonDir();
 	}
-	
+
 	if (! m_pyHome.empty()) {
 #ifdef WIN32
-		std::string pythonPath = m_pyHome + "\\Python36;";
-		pythonPath = pythonPath + m_pyHome + "\\Python36\\Lib;";
-		pythonPath = pythonPath + m_pyHome + "\\Python36\\Lib\\site-packages";
-		_putenv_s("PYTHONPATH", pythonPath.c_str());
-
-		std::wstring widestr = std::wstring(m_pyHome.begin(), m_pyHome.end());
-		const wchar_t* widecstr = widestr.c_str();
-		Py_SetPythonHome((wchar_t*)widecstr);
+		Py_SetPythonHome((char *) m_pyHome.c_str());
 		MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
 #else
 		struct STAT64 statbuf;
-        cout << "m_pyHome " << m_pyHome << endl;
 		if (STAT64((m_pyHome + "/lib/python3.6").c_str(), &statbuf) >= 0) {
-        cout << "weird test passed?" << endl;
+		//if (STAT64((m_pyHome + "/lib/python2.7").c_str(), &statbuf) >= 0) {
 			// N.B. the string passed to Py_SetPythonHome() must be
 			// maintained in static storage :-(. However, the python
 			// documentation promisses that it's value will not be changed
@@ -102,35 +96,17 @@ int MyPython::Initialize() {
 			// It's also important to use forward slashes even on Windows.
 			// The above comment might no longer be relevant
 			//
-
-        // Not setting PythonPath causes Py_Initialize() to fail at line 147
+            //std::wstring wStringPyHome = std::wstring( m_pyHome.begin(), m_pyHome.end() );
+            //const wchar_t* wCharPyHome = wStringPyHome.c_str();
+            //wchar_t* nonConstPyHome = const_cast<wchar_t*>(wCharPyHome);
+			//Py_SetPythonHome((char *) m_pyHome.c_str());
+			//Py_SetPythonHome( nonConstPyHome );
+			//Py_SetPythonHome( wCharPyHome );
             
-		// These three break at MyPython.cpp:211, when importing matplotlib
-        //
-        /*std::string pythonPath = m_pyHome + "/lib/python3.6:";
-		pythonPath = pythonPath + m_pyHome + "/lib/python3.6/site-packages:";
-		pythonPath = pythonPath + m_pyHome + "/bin";*/
-        m_pyHome = "/usr/local/VAPOR-Deps/2019-Aug";
-        std::string pythonPath = m_pyHome + "/lib/python3.6:";
-		pythonPath = pythonPath + m_pyHome + "/lib/python3.6/site-packages:";
-		pythonPath = pythonPath + m_pyHome + "/bin";
-        cout << "pythonPath " << pythonPath << endl;
-        
-        /*std::string pythonPath = m_pyHome + "/lib/python3.6:";
-		pythonPath = pythonPath + m_pyHome + "/lib/python3.6/site-packages";*/
-
-        //cout << "PYTHONPATH " << pythonPath << endl;
-		setenv("PYTHONPATH", pythonPath.c_str(), 1);
-        //m_pyHome = m_pyHome + "/lib";
-            
-            // Jump through hoops to get a non-constant wchar_t* to pass into Py_SetPythonHome()
-            //
-			std::wstring wStringPyHome = std::wstring( m_pyHome.begin(), m_pyHome.end() );
-			const wchar_t* wCharPyHome = wStringPyHome.c_str();
-			wchar_t* nonConstPyHome = const_cast<wchar_t*>(wCharPyHome);
-
-            wcout << "SetPythonHome " << wStringPyHome << endl;
-			Py_SetPythonHome( nonConstPyHome );
+            cout << "MyPython.cpp setting python home to " << m_pyHome << endl;
+            wchar_t pyHome[FILENAME_MAX+1];
+            mbstowcs(pyHome, m_pyHome.c_str(), m_pyHome.length()+1);
+			Py_SetPythonHome( pyHome );
 
 			MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
 		}
@@ -224,7 +200,6 @@ int MyPython::Initialize() {
 		return(-1);
 	}
 
-
 	// Add vapor modules to search path
 	//
     std::string path = Wasp::GetSharePath("python");
@@ -262,7 +237,6 @@ string MyPython::PyErr() {
 
 	PyObject *output = PyObject_GetAttrString(catcher,"value");
 	//char *s = PyString_AsString(output);
-	//char *s = PyBytes_AS_STRING(output);
 	char *s = PyBytes_AsString(output);
 
 	// Erase the string
@@ -291,7 +265,7 @@ string MyPython::PyOut() {
 	}
 
 	PyObject *output = PyObject_GetAttrString(catcher,"value");
-	char *s = PyBytes_AS_STRING(output);
+	char *s = PyBytes_AsString(output);
 
 	// Erase the string
 	//

@@ -259,6 +259,7 @@ int PyEngine::Initialize() {
 	if(PyArray_API == NULL) {
 		import_array1(-1)
 	}
+
 	return(0);
 }
 
@@ -468,7 +469,7 @@ int PyEngine::Calculate(
 
     if (!retObj){
 		SetErrMsg(
-			"PyRun_String() : %s", MyPython::Instance()->PyErr().c_str()
+			"foo PyRun_String() : %s", MyPython::Instance()->PyErr().c_str()
 		);
 		_cleanupDict(mainDict, inputVarNames);
 		return -1;
@@ -492,7 +493,7 @@ void PyEngine::_cleanupDict(PyObject *mainDict, vector <string> keynames) {
 
 
 	for (int i=0; i<keynames.size(); i++) {
-		PyObject *key = PyUnicode_FromString(keynames[i].c_str());
+		PyObject *key = PyBytes_FromString(keynames[i].c_str());
 		if (! key) continue;
 		if (PyDict_Contains(mainDict,key))  {
 			PyObject_DelItem(mainDict,key);
