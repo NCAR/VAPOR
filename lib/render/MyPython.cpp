@@ -86,7 +86,8 @@ int MyPython::Initialize() {
 		MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
 #else
 		struct STAT64 statbuf;
-		if (STAT64((m_pyHome + "/lib/python2.7").c_str(), &statbuf) >= 0) {
+		//if (STAT64((m_pyHome + "/lib/python2.7").c_str(), &statbuf) >= 0) {
+		if (STAT64((m_pyHome + "/lib/python3.6").c_str(), &statbuf) >= 0) {
 			// N.B. the string passed to Py_SetPythonHome() must be
 			// maintained in static storage :-(. However, the python
 			// documentation promisses that it's value will not be changed
@@ -94,11 +95,16 @@ int MyPython::Initialize() {
 			// It's also important to use forward slashes even on Windows.
 			// The above comment might no longer be relevant
 			//
-            std::wstring wStringPyHome = std::wstring( m_pyHome.begin(), m_pyHome.end() );
+
+/*            std::wstring wStringPyHome = std::wstring( m_pyHome.begin(), m_pyHome.end() );
             const wchar_t* wCharPyHome = wStringPyHome.c_str();
             wchar_t* nonConstPyHome = const_cast<wchar_t*>(wCharPyHome);
 			//Py_SetPythonHome((char *) m_pyHome.c_str());
-			Py_SetPythonHome( nonConstPyHome );
+			Py_SetPythonHome( nonConstPyHome );*/
+
+            wchar_t pyHome[512];
+            mbstowcs(pyHome, m_pyHome.c_str(), m_pyHome.length()+1);
+            Py_SetPythonHome( pyHome );
 
 			MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
 		}
