@@ -1576,17 +1576,19 @@ Grid *DataMgr::GetVariable(
 }
 
 int DataMgr::GetVariableExtents(
-    size_t ts, string varname, int level,
+    size_t ts, string varname, int level, int lod,
     vector <double> &min , vector <double> &max
 ) {
+	SetDiagMsg(
+		"DataMgr::GetVariableExtents(%d, %s, %d, %d)",
+		ts,varname.c_str(), level, lod
+	);
+
 	min.clear();
 	max.clear();
 
-level = 0;
-int lod = 0;
-int rc = _lod_correction(varname, lod);
-if (rc<0) return(-1);
-cout << "DataMgr::GetVariableExtents() : hardcode lod and level" << endl;
+	int rc = _lod_correction(varname, lod);
+	if (rc<0) return(-1);
 
 	rc = _level_correction(varname, level);
 	if (rc<0) return(-1);
@@ -1633,7 +1635,7 @@ int DataMgr::GetDataRange(
 	SetDiagMsg("DataMgr::GetDataRange(%d,%s)", ts, varname.c_str());
 
     vector <double> min, max;
-	int rc = GetVariableExtents(ts, varname, level, min, max);
+	int rc = GetVariableExtents(ts, varname, level, lod, min, max);
 	if (rc<0) return(-1);
 
 	return(GetDataRange(ts, varname, level, lod, min, max, range));

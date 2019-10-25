@@ -319,9 +319,10 @@ bool DataMgrUtils::GetExtents(
 	DataMgr *dataMgr,
 	size_t timestep, 
 	string varname, 
+	int refLevel,
+	int lod,
 	vector <double>& minExts, 
-	vector <double>& maxExts,
-	int refLevel
+	vector <double>& maxExts
 ) {
 	minExts.clear();
 	maxExts.clear();
@@ -350,7 +351,7 @@ bool DataMgrUtils::GetExtents(
 
 	bool errEnabled = MyBase::EnableErrMsg(false);
 	int rc = dataMgr->GetVariableExtents(
-		timestep, varname, refLevel, minExts, maxExts
+		timestep, varname, refLevel, lod, minExts, maxExts
 	);
 	MyBase::EnableErrMsg(errEnabled);
 
@@ -363,10 +364,11 @@ bool DataMgrUtils::GetExtents(
 	DataMgr *dataMgr,
 	size_t timestep, 
 	const vector <string> &varnames, 
+	int refLevel,
+	int lod,
 	vector <double>& minExts, 
 	vector <double>& maxExts,
-	vector <int> &axes,
-	int refLevel
+	vector <int> &axes
 ) {
 	minExts.clear();
 	maxExts.clear();
@@ -394,7 +396,8 @@ bool DataMgrUtils::GetExtents(
 		vector <int> varAxes;
 
 		bool status = DataMgrUtils::GetExtents(
-			dataMgr, timestep, varnames[i], varMinExts, varMaxExts, refLevel
+			dataMgr, timestep, varnames[i], refLevel, lod, 
+			varMinExts, varMaxExts
 		);
 		if (! status) continue;
 
