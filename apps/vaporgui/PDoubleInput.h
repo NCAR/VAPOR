@@ -1,9 +1,9 @@
 #pragma once
 
-#include "PWidget.h"
+#include "PLineItem.h"
 #include "VaporWidgetsFwd.h"
 
-class PDoubleInput : public PWidget {
+class PDoubleInput : public PLineItem {
     Q_OBJECT
     
     VDoubleInput *_doubleInput;

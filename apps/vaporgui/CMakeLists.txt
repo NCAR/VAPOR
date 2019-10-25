@@ -113,6 +113,8 @@ set (SRCS
 	PDoubleInput.cpp
 	PDoubleInput.h
 	VaporWidgetsFwd.h
+	PLineItem.cpp
+	PLineItem.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h

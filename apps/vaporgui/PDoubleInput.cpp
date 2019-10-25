@@ -3,7 +3,7 @@
 #include <vapor/ParamsBase.h>
 
 PDoubleInput::PDoubleInput(const std::string &tag, const std::string &label)
-: PWidget(tag, new VLineItem(label==""?tag:label, _doubleInput = new VDoubleInput))
+: PLineItem(tag, _doubleInput = new VDoubleInput, label)
 {
 //    connect(_doubleInput, SIGNAL(ValueChanged(double)), this, SLOT(doubleInputValueChanged(double)));
 }
