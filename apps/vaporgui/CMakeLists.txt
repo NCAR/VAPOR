@@ -115,6 +115,8 @@ set (SRCS
 	VaporWidgetsFwd.h
 	PLineItem.cpp
 	PLineItem.h
+	PEnumDropdown.cpp
+	PEnumDropdown.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h

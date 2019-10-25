@@ -1,6 +1,7 @@
 #include "PDoubleInput.h"
 #include "VLineItem.h"
 #include <vapor/ParamsBase.h>
+#include <QLineEdit>
 
 PDoubleInput::PDoubleInput(const std::string &tag, const std::string &label)
 : PLineItem(tag, _doubleInput = new VDoubleInput, label)
