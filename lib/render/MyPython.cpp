@@ -235,12 +235,11 @@ string MyPython::PyErr() {
 
 	PyObject *output = PyObject_GetAttrString(catcher,"value");
 	//char *s = PyString_AsString(output);
-	char *s = PyBytes_AsString(output);
+	char *s = PyUnicode_AsUTF8(output);
 
 	// Erase the string
 	//
-	//PyObject *eStr = PyString_FromString("");
-	PyObject *eStr = PyBytes_FromString("");
+	PyObject *eStr = PyUnicode_FromString("");
 	PyObject_SetAttrString(catcher, "value", eStr);
     Py_DECREF(eStr);
 
@@ -263,11 +262,11 @@ string MyPython::PyOut() {
 	}
 
 	PyObject *output = PyObject_GetAttrString(catcher,"value");
-	char *s = PyBytes_AsString(output);
+	char *s = PyUnicode_AsUTF8(output);
 
 	// Erase the string
 	//
-	PyObject *eStr = PyBytes_FromString("");
+	PyObject *eStr = PyUnicode_FromString("");
 	PyObject_SetAttrString(catcher, "value", eStr);
     Py_DECREF(eStr);
 
