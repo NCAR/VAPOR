@@ -83,7 +83,13 @@ cout << "int MyPython::Initialize() { " << m_isInitialized << endl;
 
 	if (! m_pyHome.empty()) {
 #ifdef WIN32
-		Py_SetPythonHome((char *) m_pyHome.c_str());
+		std::string pythonPath = m_pyHome + "\\Python36;";
+		pythonPath = pythonPath + m_pyHome + "\\Python36\\Lib;";
+		pythonPath = pythonPath + m_pyHome +  "\\Python36\\Lib\\site-packages";
+		_putenv_s("PYTHONPATH", pythonPath.c_str());
+		std::wstring widestr = std::wstring(m_pyHome.begin(), m_pyHome.end());
+		const wchar_t* widecstr = widestr.c_str();
+		Py_SetPythonHome((wchar_t*)widecstr);
 		MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
 #else
 		struct STAT64 statbuf;
