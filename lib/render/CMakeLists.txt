@@ -109,8 +109,7 @@ set (HEADERS
 
 add_library (render SHARED ${SRC} ${HEADERS})
 
-#target_link_libraries (render PUBLIC common vdc params flow ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} python${PYTHONVERSION} ${GLEW} ${OPENGL_LIBRARIES})
-target_link_libraries (render PUBLIC common vdc params flow ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} python3.6m ${GLEW} ${OPENGL_LIBRARIES})
+target_link_libraries (render PUBLIC common vdc params flow ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} python${PYTHONVERSION}m ${GLEW} ${OPENGL_LIBRARIES})
 
 if (UNIX AND NOT APPLE)
 	target_link_libraries (render PUBLIC GLU)
