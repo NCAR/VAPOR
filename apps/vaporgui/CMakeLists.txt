@@ -117,6 +117,8 @@ set (SRCS
 	PLineItem.h
 	PEnumDropdown.cpp
 	PEnumDropdown.h
+	PColorSelector.cpp
+	PColorSelector.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
