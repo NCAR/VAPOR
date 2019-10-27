@@ -44,6 +44,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : QTabWidget(
     qsseed->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     qsseed->setWidget(_seeding);
     qsseed->setWidgetResizable(true);
+    _seedingTab = qsseed;
     addTab(qsseed, "Flow Settings");
 
     _geometry = new FlowGeometrySubtab(this);
@@ -90,6 +91,22 @@ void FlowEventRouter::_updateTab()
     _seeding->Update(GetActiveDataMgr(), _controlExec->GetParamsMgr(), GetActiveParams());
     _geometry->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
     _annotation->Update(_controlExec->GetParamsMgr(), GetActiveDataMgr(), GetActiveParams());
+
+    // Sync selected tab with GUIStateParams
+    GUIStateParams *gp = (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
+    if (gp->IsFlowSeedTabActive()) {
+        if (currentWidget() != _seedingTab) {
+            blockSignals(true);
+            setCurrentWidget(_seedingTab);
+            blockSignals(false);
+        }
+    } else {
+        if (currentWidget() == _seedingTab) {
+            blockSignals(true);
+            setCurrentIndex(0);
+            blockSignals(false);
+        }
+    }
 }
 
 string FlowEventRouter::_getDescription() const { return ("Displays steady or unsteady flow trajectories through the user's domain.\n"); }

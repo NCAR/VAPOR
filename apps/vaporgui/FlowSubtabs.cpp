@@ -183,11 +183,15 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget *parent) : QVaporSubtab(parent)
     _layout->addWidget(_rakeBiasStrength);
     connect(_rakeBiasVariable, SIGNAL(_indexChanged(int)), this, SLOT(_rakeBiasVariableChanged(int)));
     connect(_rakeBiasStrength, SIGNAL(_valueChanged()), this, SLOT(_rakeBiasStrengthChanged()));
+
+    VAssert(parent);
+    connect(parent, SIGNAL(currentChanged(int)), this, SLOT(_selectedTabChanged(int)));
 }
 
 void FlowSeedingSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *params)
 {
     _params = dynamic_cast<VAPoR::FlowParams *>(params);
+    _paramsMgr = paramsMgr;
     VAssert(_params);
 
     bool isSteady = _params->GetIsSteady();
@@ -306,6 +310,22 @@ void FlowSeedingSubtab::_pastNumOfTimeStepsChanged(int newVal)
 void FlowSeedingSubtab::_seedInjIntervalChanged(int newVal)
 {
     if (newVal != _params->GetSeedInjInterval()) { _params->SetSeedInjInterval(newVal); }
+}
+
+#include <QScrollArea>
+void FlowSeedingSubtab::_selectedTabChanged(int index)
+{
+    if (!_paramsMgr) return;
+
+    const QTabWidget *parent = dynamic_cast<QTabWidget *>(sender());
+    VAssert(parent);
+    const QScrollArea *area = dynamic_cast<QScrollArea *>(parent->widget(index));
+    VAssert(area);
+    const QWidget *widget = area->widget();
+
+    GUIStateParams *gp = (GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+
+    gp->SetFlowSeedTabActive(widget == this);
 }
 
 void FlowSeedingSubtab::_steadyNumOfStepsChanged()
