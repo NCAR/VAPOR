@@ -39,6 +39,7 @@ const string GUIStateParams::m_statsDatasetNameTag = "StatsDatasetNameTag";
 const string GUIStateParams::m_plotDatasetNameTag = "PlotDatasetNameTag";
 const string GUIStateParams::m_proj4StringTag = "Proj4StringTag";
 const string GUIStateParams::m_openDataSetsTag = "OpenDataSetsTag";
+const string GUIStateParams::_isFlowSeedTabActiveTag = "_isSeedTabActiveTag";
 const string GUIStateParams::DataSetParam::m_dataSetPathsTag = "DataSetPathsTag";
 const string GUIStateParams::DataSetParam::m_dataSetFormatTag = "DataSetFormatTag";
 
@@ -335,4 +336,14 @@ std::string GUIStateParams::GetPlotDatasetName() const
 void GUIStateParams::SetPlotDatasetName(std::string& name)
 {
     SetValueString(m_plotDatasetNameTag, "Name of the active data set in Plot", name);
+}
+
+bool GUIStateParams::IsFlowSeedTabActive() const
+{
+    return GetValueLong(_isFlowSeedTabActiveTag, false);
+}
+
+void GUIStateParams::SetFlowSeedTabActive(bool b)
+{
+    SetValueLong(_isFlowSeedTabActiveTag, _isFlowSeedTabActiveTag, b);
 }
