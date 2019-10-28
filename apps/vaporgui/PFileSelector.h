@@ -18,7 +18,7 @@ public:
     PFileSelector *SetFileTypeFilter(const std::string &filter);
     
 protected:
-    void update() const;
+    void updateGUI() const override;
         
 private slots:
     void buttonClicked();

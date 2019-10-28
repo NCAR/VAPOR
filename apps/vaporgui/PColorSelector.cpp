@@ -24,7 +24,7 @@ std::vector<double> PColorSelector::QColorToVector(const QColor &c)
     return v;
 }
 
-void PColorSelector::update() const
+void PColorSelector::updateGUI() const
 {
     QColor color = VectorToQColor(getParams()->GetValueDoubleVec(GetTag()));
     _colorWidget->setColor(color);

@@ -8,7 +8,7 @@ PCheckbox::PCheckbox(const std::string &tag, const std::string &label)
     connect(_qcheckbox, SIGNAL(stateChanged(int)), this, SLOT(checkboxStateChanged(int)));
 }
 
-void PCheckbox::update() const
+void PCheckbox::updateGUI() const
 {
     bool on = getParams()->GetValueLong(GetTag(), 0);
     _qcheckbox->setChecked(on);
