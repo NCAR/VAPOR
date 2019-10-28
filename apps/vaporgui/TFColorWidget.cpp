@@ -67,10 +67,10 @@ void TFColorMap::PopulateSettingsMenu(QMenu *menu) const
     std::sort(fileNames.begin(), fileNames.end());
     for (int i = 0; i < fileNames.size(); i++) {
         
-        // Ignore hidden files
-        if (fileNames[i][0] == '.') continue;
- 
         string path = FileUtils::JoinPaths({builtinPath, fileNames[i]});
+        
+        if (FileUtils::Extension(path) != ".tf3")
+            continue;
         
         QAction *item = new ColorMapMenuItem(path);
         connect(item, SIGNAL(triggered(std::string)), this, SLOT(menuLoadBuiltin(std::string)));
