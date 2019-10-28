@@ -8,6 +8,7 @@
 PFileSelector::PFileSelector(const std::string &tag, const std::string &label)
 : PLineItem(tag, _pathTexbox = new QLineEdit, _button = new QPushButton("Select"))
 {
+    _pathTexbox->setReadOnly(true);
     connect(_button, SIGNAL(clicked()), this, SLOT(buttonClicked()));
 }
 
