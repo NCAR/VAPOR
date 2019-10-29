@@ -35,7 +35,7 @@ jobs:
 
   build_centos7_v2:
     docker:
-      - image: centos7
+      - image: centos:centos7
 
     steps:
       - run:
