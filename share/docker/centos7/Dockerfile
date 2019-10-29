@@ -6,11 +6,6 @@ MAINTAINER The CentOS Project <cloud-ops@centos.org>
 
 CMD [ "/bin/bash" ]
 
-#################################
-#                               #
-# Vapor configuration and build #
-#                               #
-#################################
 
 RUN yum -y clean all \
     && yum -y clean metadata \

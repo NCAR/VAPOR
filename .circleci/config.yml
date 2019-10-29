@@ -33,6 +33,30 @@ jobs:
             cmake ..
             make
 
+  build_centos7_v2:
+    docker:
+      - image: centos7
+
+    steps:
+       yum -y clean all 
+       yum -y clean metadata 
+       yum -y update
+       yum -y install epel-release 
+       yum -y install cmake3 
+       yum -y install make 
+       yum -y install tar 
+       yum -y install gcc-c++ 
+       yum -y install curl 
+       yum -y install xz-devel 
+       yum -y install git 
+       yum -y install freeglut-devel 
+       yum -y install expat-devel 
+       yum -y install libquadmath-devel 
+       yum -y install python3-pip 
+       yum -y install libXrender-devel 
+       yum -y install libSM-devel 
+       yum -y install fontconfig-devel 
+       pip3 install gdown
 
   build_centos7:
     docker:
@@ -89,4 +113,4 @@ workflows:
     jobs:
       - build_ubuntu16
       - build_ubuntu18
-      - build_centos7
+      - build_centos7v2
