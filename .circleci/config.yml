@@ -40,7 +40,7 @@ jobs:
     steps:
       - run:
           name: install dependencies
-          command:
+          command: |
             yum -y clean all 
             yum -y clean metadata 
             yum -y update
