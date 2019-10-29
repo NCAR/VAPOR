@@ -59,4 +59,6 @@ RUN export CMAKE_CXX_COMPILER=g++ && \
     cmake3 .. && \
     make 
 
+RUN bin/vaporpychecker
+
 WORKDIR /VAPOR
