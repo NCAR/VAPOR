@@ -31,6 +31,9 @@ RUN yum -y install freeglut-devel
 RUN yum -y install expat-devel
 RUN yum -y install libquadmath-devel
 RUN yum -y install python3-pip
+RUN yum -y install libXrender-devel
+RUN yum -y install libSM-devel
+RUN yum -y install fontconfig-devel
 RUN pip3 install gdown
 
 RUN mkdir -p /glade/p/VAST/VAPOR/third-party
@@ -57,8 +60,8 @@ RUN mkdir /VAPOR/build
 RUN export CMAKE_CXX_COMPILER=g++ && \
     cd /VAPOR/build && \
     cmake3 .. && \
-    make 
+    make && pwd && ls && ls bin
 
-RUN bin/vaporpychecker
+RUN /VAPOR/build/bin/vaporpychecker
 
 WORKDIR /VAPOR
