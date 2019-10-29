@@ -116,4 +116,4 @@ workflows:
     jobs:
       - build_ubuntu16
       - build_ubuntu18
-      - build_centos7v2
+      - build_centos7_v2
