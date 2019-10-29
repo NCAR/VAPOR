@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  build_ubuntu:
     docker:
       - image: sgpearse/vapor3-ubuntu16:latest
 
@@ -17,6 +17,22 @@ jobs:
             cmake ..
             make
 
+  build_centos:
+    docker:
+      - image: sgpearse/vapor3-centos7:latest
+
+    steps:
+      - checkout
+
+      - run:
+          name: cmake and make
+          command: |
+            cd /VAPOR
+            git pull
+            cd build
+            cmake ..
+            make  
+
   printTime:
     docker:
       - image: sgpearse/vapor3-ubuntu:latest
@@ -30,4 +46,4 @@ workflows:
   version: 2
   build:
     jobs:
-      - build
+      - build_ubuntu
