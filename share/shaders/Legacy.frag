@@ -24,7 +24,7 @@ void main() {
 			normal = -fNormal;
 
         float diffuse = max(dot(normal, -lightDir), 0.0);
-        color.rgb *= diffuse + 0.2;
+        color.rgb *= max(diffuse, 0.2f);
     }
     fragment = color;
 }

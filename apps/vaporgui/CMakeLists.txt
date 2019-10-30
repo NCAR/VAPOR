@@ -106,6 +106,10 @@ set (SRCS
 	VSection.h
 	VLineItem.cpp
 	VLineItem.h
+	ModelEventRouter.cpp
+	ModelEventRouter.h
+	ModelSubtabs.cpp
+	ModelSubtabs.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -234,6 +238,8 @@ set (UIS
 	VolumeIsoAppearanceGUI.ui
 	VolumeIsoGeometryGUI.ui
 	VolumeIsoVariablesGUI.ui
+	ModelGeometryGUI.ui
+	ModelVariablesGUI.ui
 	
 	QSliderEdit.ui
 	QRange.ui

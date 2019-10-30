@@ -15,7 +15,8 @@ uniform mat4 MV;
 
 void main() {
     gl_Position = P * MV * vec4(vPos, 1.0f);
-    fNormal = mat3(transpose(inverse(MV))) * vNormal;
+//    fNormal = mat3(transpose(inverse(MV))) * vNormal;
+    fNormal = vNormal;
     fColor = vColor;
 	fTextureCoords = vTextureCoords;
 }
