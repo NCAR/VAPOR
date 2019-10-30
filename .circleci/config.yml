@@ -50,14 +50,16 @@ jobs:
             make
 
 
-  build_osx: # runs not using `Workflows` must have a `build` job as entry point
-    macos:  # indicate that we are using the macOS executor
-      xcode: "11.1.0" # indicate our selected version of Xcode
-    steps: # a series of commands to run
-      - checkout  # pull down code from your version control system.
+  build_osx:
+    macos:
+      xcode: "11.1.0"
+    steps:
+      - checkout
       - run:
           name: Install cmake
-          command: brew install cmake
+          command: |
+            brew install cmake
+            ls /VAPOR
 
 
   printTime:
