@@ -287,22 +287,22 @@ Creating a 3D Scene
 .vms XML layout 
 """""""""""""""
 
-A .vms file must have a top-level node called “scene”. Everything else is a child of this node. 
+A .vms file must have a top-level node called ``scene``. Everything else is a child of this node. 
 
 Instances 
 """""""""
 
-Every model displayed in the scene is called an “instance”. The associate tag is called “instance_<name>”. Any time you add an “instance_<name>” tag with a new <name>, you create a new instance. When creating a new instance, you need to specify the file from which to load the 3D model data for that instance. This is done with the attribute ``file`` within the instance tag. You can optionally transform the instance by adding child Transformation nodes. While instances can be created outside of a timestep, they will only be displayed if they are referenced inside a timestep.
+Every model displayed in the scene is called an ``instance``. The associate tag is called ``instance_<name>``. Any time you add an ``instance_<name>`` tag with a new <name>, you create a new instance. When creating a new instance, you need to specify the file from which to load the 3D model data for that instance. This is done with the attribute ``file`` within the instance tag. You can optionally transform the instance by adding child Transformation nodes. While instances can be created outside of a timestep, they will only be displayed if they are referenced inside a timestep.
 
 Time
 """"
 
-The “time_<timestep #>” tag represents a timestep. The <timestep #> is an integer representing the timestep as it appears in the vapor timestep selector. Time nodes can contain instances which will be displayed during the referenced timestep. When rendering, the most recent valid timestep is rendered. For example, if you want to have the same scene displayed for every timestep, create a single time_0 tag and create your instances inside of it. If you want to stop rendering after a certain timestep, N, create an empty tag time_N.
+The ``time_<timestep #>`` tag represents a timestep. The ``<timestep #>`` is an integer representing the timestep as it appears in the vapor timestep selector. Time nodes can contain instances which will be displayed during the referenced timestep. When rendering, the most recent valid timestep is rendered. For example, if you want to have the same scene displayed for every timestep, create a single ``time_0`` tag and create your instances inside of it. If you want to stop rendering after a certain timestep, <N>, create an empty tag ``time_N``.
 
 Transformations
 """""""""""""""
 
-There are 4 transformation tags: translate, rotate, scale, and origin. Each tag results in the same transformation as Vapor’s renderer/dataset transform settings. Each transformation tag has three possible attributes: x, y, and z. The rotate x, y, and z values rotate round the corresponding axis by the value given in degrees. If an origin is specified when creating a new instance, that origin will be used for all subsequent transformations of that instance unless otherwise specified.
+There are 4 transformation tags: ``translate``, ``rotate``, ``scale``, and ``origin``. Each tag results in the same transformation as Vapor’s renderer/dataset transform settings. Each transformation tag has three possible attributes: ``x``, ``y``, and ``z``. The rotate ``x``, ``y``, and ``z`` values rotate round the corresponding axis by the value given in degrees. If an origin is specified when creating a new instance, that origin will be used for all subsequent transformations of that instance unless otherwise specified.
 
 
 .vms File Example
