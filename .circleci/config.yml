@@ -57,7 +57,7 @@ jobs:
       - checkout  # pull down code from your version control system.
       - run:
           name: Install cmake
-          command: brew install cmake3
+          command: brew install cmake
 
 
   printTime:
