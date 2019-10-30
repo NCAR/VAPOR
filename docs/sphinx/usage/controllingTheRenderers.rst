@@ -287,7 +287,12 @@ Creating a 3D Scene
 .vms XML layout 
 """""""""""""""
 
-A .vms file must have a top-level node called “scene”. Everything else is a child of this node. Instances Every model displayed in the scene is called an “instance”. The associate tag is called “instance_<name>”. Any time you add an “instance_<name>” tag with a new <name>, you create a new instance. When creating a new instance, you need to specify the file from which to load the 3D model data for that instance. This is done with the attribute “file” within the instance tag. You can optionally transform the instance by adding child Transformation nodes. While instances can be created outside of a timestep, they will only be displayed if they are referenced inside a timestep.
+A .vms file must have a top-level node called “scene”. Everything else is a child of this node. 
+
+Instances 
+"""""""""
+
+Every model displayed in the scene is called an “instance”. The associate tag is called “instance_<name>”. Any time you add an “instance_<name>” tag with a new <name>, you create a new instance. When creating a new instance, you need to specify the file from which to load the 3D model data for that instance. This is done with the attribute ``file`` within the instance tag. You can optionally transform the instance by adding child Transformation nodes. While instances can be created outside of a timestep, they will only be displayed if they are referenced inside a timestep.
 
 Time
 """"
