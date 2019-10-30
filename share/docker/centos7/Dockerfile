@@ -34,7 +34,8 @@ RUN mkdir -p /glade/p/VAST/VAPOR/third-party
 RUN gdown https://drive.google.com/uc?id=1_JdUuiy_iQUuIDoPyBn2pupBTz-LS4pM \
     && mv /apps-2017-Centos7.tar.xz /glade/p/VAST/VAPOR/third-party \
     && tar xf /glade/p/VAST/VAPOR/third-party/apps-2017-Centos7.tar.xz \
-           -C /glade/p/VAST/VAPOR/third-party
+           -C /glade/p/VAST/VAPOR/third-party \
+    && chown -R root:root /glade
 
 RUN ls /glade/p/VAST/VAPOR/third-party/apps-2017
 

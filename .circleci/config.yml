@@ -19,7 +19,7 @@ jobs:
 
   build_ubuntu18:
     docker:
-      - image: sgpearse/vapor3-ubuntu16:latest
+      - image: sgpearse/vapor3-ubuntu18:latest
 
     steps:
       - checkout
@@ -116,4 +116,5 @@ workflows:
     jobs:
       - build_ubuntu16
       - build_ubuntu18
+      - build_centos7
       - build_centos7_v2
