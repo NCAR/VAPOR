@@ -125,8 +125,6 @@ extern bool PRINT_VERTS;
 
 void LegacyGL::Vertex3f(float x, float y, float z)
 {
-//    if (PRINT_VERTS)
-//    printf("V(%f, %f, %f)\n", x, y, z);
     VAssert(_insideBeginEndBlock);
     _vertices.push_back({
         x, y, z,
@@ -224,6 +222,7 @@ void LegacyGL::DisableLighting() { _lightingEnabled = false; }
 void LegacyGL::LightDirectionfv(const float *f)
 {
     glm::vec3 dir = glm::make_vec3(f);
+// mimic legacy setlightdirectionfv
 //    dir = _glManager->matrixManager->GetModelViewMatrix() * glm::vec4(dir, 0.f);
     _lightDir[0] = dir.x;
     _lightDir[1] = dir.y;
