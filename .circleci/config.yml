@@ -69,13 +69,13 @@ jobs:
       - checkout
 
       - run:
-          name: cmake and make
+          name: cmake3 and make
           command: |
             cd /VAPOR
             git pull
             cd build
-            cmake ..
-            make  
+            cmake3 ..
+            make
 
 
   build_osx: # runs not using `Workflows` must have a `build` job as entry point
