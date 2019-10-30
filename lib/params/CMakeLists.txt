@@ -28,6 +28,7 @@ set (SRC
 	FlowParams.cpp
 	VolumeParams.cpp
 	VolumeIsoParams.cpp
+	ModelParams.cpp
 )
 
 set (HEADERS
@@ -59,6 +60,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/FlowParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeIsoParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ModelParams.h
 )
 
 add_library (params SHARED ${SRC} ${HEADERS})
