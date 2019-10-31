@@ -61,7 +61,7 @@ jobs:
             sudo mkdir -p /glade/p/VAST/VAPOR/third-party
             sudo chmod -R 777 /glade/p/VAST/VAPOR/third-party
             cd /glade/p/VAST/VAPOR/third-party
-            gdown https://drive.google.com/https://drive.google.com/open?id=1JHl6kHkBvbd17BUC-9nvWZupjyWfwyw7
+            gdown https://drive.google.com/open?id=1JHl6kHkBvbd17BUC-9nvWZupjyWfwyw7
             tar xf Darwin_x86_64_2018-05-21.tar.xz
       - checkout
       - run:
