@@ -59,6 +59,7 @@ jobs:
           name: Install cmake
           command: |
             brew install cmake
+      - run:
           name: make VAPOR
           command: |
             mkdir build
