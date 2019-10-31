@@ -57,8 +57,7 @@ jobs:
       - run:
           name: foo
           command: |
-            sudo chown -R user: /
-            mkdir -p /glade/p/VAST/VAPOR/third-party
+            sudo mkdir -p /glade/p/VAST/VAPOR/third-party
       - checkout
       - run:
           name: Install cmake
