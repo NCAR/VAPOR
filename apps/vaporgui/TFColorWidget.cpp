@@ -64,7 +64,7 @@ void TFColorMap::PopulateSettingsMenu(QMenu *menu) const {
 
         string path = FileUtils::JoinPaths({builtinPath, fileNames[i]});
 
-        if (FileUtils::Extension(path) != ".tf3")
+        if (FileUtils::Extension(path) != "tf3")
             continue;
 
         QAction *item = new ColorMapMenuItem(path);
