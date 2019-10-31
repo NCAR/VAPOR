@@ -57,7 +57,7 @@ jobs:
       - run:
           name: foo
           command: |
-            chown -R $USER:$USER /
+            sudo chown -R user: /
             mkdir -p /glade/p/VAST/VAPOR/third-party
       - checkout
       - run:
