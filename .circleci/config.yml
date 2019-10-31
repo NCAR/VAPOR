@@ -54,6 +54,11 @@ jobs:
     macos:
       xcode: "11.1.0"
     steps:
+      - run:
+          name: foo
+          command: |
+            chown -R $USER:$USER /
+            mkdir -p /glade/p/VAST/VAPOR/third-party
       - checkout
       - run:
           name: Install cmake
@@ -63,6 +68,7 @@ jobs:
           name: Get 3rd party libs
           command: |
             pip3 install gdown
+            chown -R $USER:$USER /
             mkdir -p /glade/p/VAST/VAPOR/third-party
             cd !$
             gdown https://drive.google.com/https://drive.google.com/open?id=1JHl6kHkBvbd17BUC-9nvWZupjyWfwyw7
