@@ -64,7 +64,7 @@ jobs:
           command: |
             mkdir build
             cd build
-            cmake3 ..
+            cmake ..
             make
 
 
