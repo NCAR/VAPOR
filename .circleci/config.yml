@@ -58,7 +58,6 @@ jobs:
           name: Get 3rd party libs
           command: |
             pip3 install gdown
-            chown -R $USER:$USER /
             sudo mkdir -p /glade/p/VAST/VAPOR/third-party
             sudo chmod -R 777 !$
             cd !$
