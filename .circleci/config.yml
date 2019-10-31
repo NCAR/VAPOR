@@ -59,9 +59,12 @@ jobs:
           name: Install cmake
           command: |
             brew install cmake
-            ls .
-            ls /
-            ls ~/
+          name: make VAPOR
+          command: |
+            mkdir build
+            cd build
+            cmake3 ..
+            make
 
 
   printTime:
