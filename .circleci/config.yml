@@ -58,16 +58,16 @@ jobs:
           name: Get 3rd party libs
           command: |
             pip3 install gdown
-            sudo mkdir -p /glade/p/VAST/VAPOR/third-party
-            sudo chmod -R 777 /glade/p/VAST/VAPOR/third-party
-            cd /glade/p/VAST/VAPOR/third-party
+            sudo mkdir -p /glade/p/VAST/VAPOR/third-party/apps-2017
+            sudo chmod -R 777 /glade/p/VAST/VAPOR/third-party/apps-2017
+            cd /glade/p/VAST/VAPOR/third-party/apps-2017
             gdown https://drive.google.com/uc?id=1JHl6kHkBvbd17BUC-9nvWZupjyWfwyw7
       - run:
           name: Extract 3rd party libs
           command: |
-            cd /glade/p/VAST/VAPOR/third-party
+            cd /glade/p/VAST/VAPOR/third-party/apps-2017
             tar xf Darwin_x86_64_2018-05-21.tar.xz -C /glade/p/VAST/VAPOR/third-party
-            ls /glade/p/VAST/VAPOR/third-party
+            ls /glade/p/VAST/VAPOR/third-party/apps-2017
       - checkout
       - run:
           name: Install cmake
