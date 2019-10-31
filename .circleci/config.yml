@@ -33,6 +33,30 @@ jobs:
             cmake ..
             make
 
+  build_ubuntu18_2019:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+
+    steps:
+      - checkout
+      - run:
+          name: checkout 3rdPartyLibs
+          command: |
+            git checkout 3rdPartyLibs
+      - run:
+          name: get 2019 libs
+          command:
+            mkdir -p /usr/local/VAPOR-Deps
+
+      - run:
+          name: cmake and make
+          command: |
+            cd /VAPOR
+            git pull
+            cd build
+            cmake ..
+            make
+
   build_centos7:
     docker:
       - image: sgpearse/vapor3-centos7:latest
@@ -68,6 +92,7 @@ jobs:
             cd /glade/p/VAST/VAPOR/third-party/apps-2017
             tar xf Darwin_x86_64_2018-05-21.tar.xz -C /glade/p/VAST/VAPOR/third-party/apps-2017
             ls /glade/p/VAST/VAPOR/third-party/apps-2017
+            ls /glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64
       - checkout
       - run:
           name: Install cmake
@@ -76,6 +101,7 @@ jobs:
       - run:
           name: make VAPOR
           command: |
+            cp site_files/site.NCAR site.local
             mkdir build
             cd build
             cmake ..
