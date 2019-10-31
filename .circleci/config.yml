@@ -73,7 +73,6 @@ jobs:
           name: Install cmake
           command: |
             brew install cmake
-            
       - run:
           name: make VAPOR
           command: |
@@ -81,6 +80,11 @@ jobs:
             cd build
             cmake ..
             make
+      - run:
+          name: Test python
+          command: |
+            bin/vaporpychecker
+
 
 
   printTime:
