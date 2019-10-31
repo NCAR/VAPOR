@@ -62,6 +62,8 @@ jobs:
             sudo chmod -R 777 /glade/p/VAST/VAPOR/third-party
             cd /glade/p/VAST/VAPOR/third-party
             gdown https://drive.google.com/uc?id=1JHl6kHkBvbd17BUC-9nvWZupjyWfwyw7
+      - run:
+          name: Extract 3rd party libs
             tar xf Darwin_x86_64_2018-05-21.tar.xz
             ls /glade/p/VAST/VAPOR/third-party
       - checkout
