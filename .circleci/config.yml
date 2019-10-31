@@ -66,7 +66,7 @@ jobs:
           name: Extract 3rd party libs
           command: |
             cd /glade/p/VAST/VAPOR/third-party/apps-2017
-            tar xf Darwin_x86_64_2018-05-21.tar.xz -C /glade/p/VAST/VAPOR/third-party
+            tar xf Darwin_x86_64_2018-05-21.tar.xz -C /glade/p/VAST/VAPOR/third-party/apps-2017
             ls /glade/p/VAST/VAPOR/third-party/apps-2017
       - checkout
       - run:
