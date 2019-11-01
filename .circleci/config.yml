@@ -117,7 +117,7 @@ jobs:
       - run:
           name: Test python
           command: |
-            bin/vaporpychecker
+            build/bin/vaporpychecker
 
 
 
