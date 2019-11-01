@@ -99,8 +99,8 @@ jobs:
           name: Get GLM
           command: |
             cd /
-            git clone https://github.com/g-truc/glm.git
-            mv glm/glm /glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64/include
+            sudo git clone https://github.com/g-truc/glm.git
+            sudo mv glm/glm /glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64/include
       - checkout
       - run:
           name: Install cmake
