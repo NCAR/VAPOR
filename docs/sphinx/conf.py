@@ -175,7 +175,6 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
-
 # -- Options for Epub output -------------------------------------------------
 
 # Bibliographic Dublin Core info.

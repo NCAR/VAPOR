@@ -46,6 +46,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce)
     qsseed->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     qsseed->setWidget(_seeding);
     qsseed->setWidgetResizable(true);
+    _seedingTab = qsseed;
     addTab(qsseed, "Flow Settings");
 
     _geometry = new FlowGeometrySubtab(this);
@@ -118,6 +119,22 @@ void FlowEventRouter::_updateTab() {
         _controlExec->GetParamsMgr(),
         GetActiveDataMgr(),
         GetActiveParams());
+
+    // Sync selected tab with GUIStateParams
+    GUIStateParams *gp = (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
+    if (gp->IsFlowSeedTabActive()) {
+        if (currentWidget() != _seedingTab) {
+            blockSignals(true);
+            setCurrentWidget(_seedingTab);
+            blockSignals(false);
+        }
+    } else {
+        if (currentWidget() == _seedingTab) {
+            blockSignals(true);
+            setCurrentIndex(0);
+            blockSignals(false);
+        }
+    }
 }
 
 string FlowEventRouter::_getDescription() const {
