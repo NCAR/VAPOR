@@ -95,6 +95,11 @@ jobs:
             tar xf Darwin_x86_64_2018-05-21.tar.xz -C /glade/p/VAST/VAPOR/third-party/apps-2017
             ls /glade/p/VAST/VAPOR/third-party/apps-2017
             ls -lrth /glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64
+      - run:
+          name: Get GLM
+          command: |
+            git clone https://github.com/g-truc/glm.git
+            mv glm/glm /glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64/include
       - checkout
       - run:
           name: Install cmake
