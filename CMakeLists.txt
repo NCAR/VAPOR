@@ -114,6 +114,7 @@ find_library(FREETYPE freetype)
 find_library(GEOTIFF geotiff)
 find_library(JPEG jpeg)
 find_library(TIFF tiff)
+find_library(ASSIMP assimp)
 
 if (BUILD_VDC)
 	find_package (OpenGL REQUIRED)

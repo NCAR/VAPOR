@@ -69,6 +69,7 @@ class FlowEventRouter : public QTabWidget, public RenderEventRouter {
     FlowGeometrySubtab *_geometry;
     FlowAppearanceSubtab *_appearance;
     FlowSeedingSubtab *_seeding;
+    QWidget *_seedingTab;
     FlowAnnotationSubtab *_annotation;
 };
 

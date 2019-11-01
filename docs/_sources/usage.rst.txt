@@ -19,6 +19,7 @@ If any feature in Vapor is not sufficienty self describing in the application, t
 .. toctree::
     :maxdepth: 1
 
+    usage/renderers.rst
     usage/controllingTheRenderers.rst
     usage/navigationSettings.rst
     usage/globalSettings.rst
