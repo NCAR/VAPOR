@@ -85,7 +85,7 @@ jobs:
             sudo mkdir -p /glade/p/VAST/VAPOR/third-party/apps-2017
             sudo chmod -R 777 /glade/p/VAST/VAPOR/third-party/apps-2017
             cd /glade/p
-            ln -s VAST DASG
+            sudo ln -s VAST DASG
             cd /glade/p/VAST/VAPOR/third-party/apps-2017
             gdown https://drive.google.com/uc?id=1JHl6kHkBvbd17BUC-9nvWZupjyWfwyw7
       - run:
