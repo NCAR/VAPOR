@@ -115,14 +115,15 @@ if (WIN32)
 	endforeach()
 else ()
 	#include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION})
-	include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION})
+	include_directories (${THIRD_PARTY_INC_DIR}/python3.6m)
 
     # I'm not sure why we only have include files for python3.6, and not python3.6m.
     # 
 	include_directories (${THIRD_PARTY_LIB_DIR}/python3.6/site-packages/numpy/core/include)
 	message ("extra python dir for numpy " ${THIRD_PARTY_LIB_DIR}/python3.6/site-packages/numpy/core/include)
 
-    message( "Python Include Dir " ${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION})
+    #message( "Python Include Dir " ${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION})
+    message( "Python Include Dir " ${THIRD_PARTY_INC_DIR}/python3.6m)
 	#include_directories (${PYTHONPATH}/site-packages/numpy/core/include)
 endif ()
 if (BUILD_VDC)
@@ -268,6 +269,7 @@ if (WIN32)
 endif (WIN32)
 
 if (APPLE)
+    message ( "We should be building a .dmg.....")
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
 		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${PYTHONPATH} ${QTDIR}/lib/*.framework)
@@ -329,7 +331,8 @@ if (UNIX AND NOT APPLE)
 			)
 
 		install (
-			DIRECTORY ${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}
+			#DIRECTORY ${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}
+			DIRECTORY ${THIRD_PARTY_LIB_DIR}/python3.6
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)

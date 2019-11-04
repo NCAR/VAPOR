@@ -68,31 +68,33 @@ MyPython *MyPython::Instance() {
 }
 
 int MyPython::Initialize() {
+cout << "int MyPython::Initialize() { " << m_isInitialized << endl;
 	if (m_isInitialized) return (0);
 
 	m_pyHome.clear();
-	char* s = getenv("VAPOR3_HOME");
-
+	char *s = getenv("VAPOR3_HOME");
 	if (s) m_pyHome = s;
 
 	if (m_pyHome.empty()) {
+		// On windows use VAPOR_HOME/lib/python2.7; VAPOR_HOME works 
+		// on Linux and Mac
 		m_pyHome = GetPythonDir();
 	}
-	
+
 	if (! m_pyHome.empty()) {
 #ifdef WIN32
 		std::string pythonPath = m_pyHome + "\\Python36;";
 		pythonPath = pythonPath + m_pyHome + "\\Python36\\Lib;";
-		pythonPath = pythonPath + m_pyHome + "\\Python36\\Lib\\site-packages";
+		pythonPath = pythonPath + m_pyHome +  "\\Python36\\Lib\\site-packages";
 		_putenv_s("PYTHONPATH", pythonPath.c_str());
-
 		std::wstring widestr = std::wstring(m_pyHome.begin(), m_pyHome.end());
 		const wchar_t* widecstr = widestr.c_str();
 		Py_SetPythonHome((wchar_t*)widecstr);
 		MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
 #else
 		struct STAT64 statbuf;
-		if (STAT64((m_pyHome + "/lib/python3.6m").c_str(), &statbuf) >= 0) {
+		//if (STAT64((m_pyHome + "/lib/python2.7").c_str(), &statbuf) >= 0) {
+		if (STAT64((m_pyHome + "/lib/python3.6").c_str(), &statbuf) >= 0) {
 			// N.B. the string passed to Py_SetPythonHome() must be
 			// maintained in static storage :-(. However, the python
 			// documentation promisses that it's value will not be changed
@@ -100,12 +102,23 @@ int MyPython::Initialize() {
 			// It's also important to use forward slashes even on Windows.
 			// The above comment might no longer be relevant
 			//
+            //std::wstring wStringPyHome = std::wstring( m_pyHome.begin(), m_pyHome.end() );
+            //const wchar_t* wCharPyHome = wStringPyHome.c_str();
+            //wchar_t* nonConstPyHome = const_cast<wchar_t*>(wCharPyHome);
+			//Py_SetPythonHome((char *) m_pyHome.c_str());
+			//Py_SetPythonHome( nonConstPyHome );
+			//Py_SetPythonHome( wCharPyHome );
 
-			std::wstring wStringPyHome = std::wstring( m_pyHome.begin(), m_pyHome.end() );
-			const wchar_t* wCharPyHome = wStringPyHome.c_str();
-			wchar_t* nonConstCopy = const_cast<wchar_t*>(wCharPyHome);
-
-			Py_SetPythonHome( nonConstCopy );
+            std::string pythonPath = "/usr/local/VAPOR-Deps/2019-Aug/lib/python3.6/site-packages";
+            pythonPath = pythonPath + ":/usr/local/VAPOR-Deps/2019-Aug/lib/python3.6";
+            pythonPath = pythonPath + ":/usr/local/VAPOR-Deps/2019-Aug/lib";
+            setenv("PYTHONPATH", pythonPath.c_str(), 1);
+            
+            cout << "MyPython.cpp setting python home to " << m_pyHome << endl;
+            //wchar_t pyHome[FILENAME_MAX+1];
+            wchar_t pyHome[512];
+            mbstowcs(pyHome, m_pyHome.c_str(), m_pyHome.length()+1);
+			Py_SetPythonHome( pyHome );
 
 			MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
 		}
@@ -126,7 +139,9 @@ int MyPython::Initialize() {
 
     // This is dependent on the environmental variable PYTHONHOME which is
     // set in vaporgui/main.cpp
+    cout << "           -Z" << endl;
 	Py_Initialize();
+    cout << "           Z" << endl;
 
 #ifdef	VAPOR3_0_0
 	if (pyIntFailed) {
@@ -155,11 +170,13 @@ int MyPython::Initialize() {
 	"catchErr = CatchErr()\n"
 	"sys.stderr = catchErr\n";
 
+        cout << "           -A" << endl;
 	// Catch stderr from Python to a string.
 	//
 	int rc = PyRun_SimpleString(stdErr.c_str());
+        cout << "           A" << endl;
 	if (rc<0) {
-		MyBase::SetErrMsg("1PyRun_SimpleString() : %s", PyErr().c_str());
+		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
 		return(-1);
 	}
 
@@ -180,8 +197,9 @@ int MyPython::Initialize() {
 	// Catch stdout from Python to a string.
 	//
 	rc = PyRun_SimpleString(stdOut.c_str());
+        cout << "           B" << endl;
 	if (rc<0) {
-		MyBase::SetErrMsg("2PyRun_SimpleString() : %s", PyErr().c_str());
+		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
 		return(-1);
 	}
 
@@ -194,8 +212,9 @@ int MyPython::Initialize() {
 	"	print >> sys.stderr, \'Failed to import matplotlib\'\n"
 	"	raise\n";
 	rc = PyRun_SimpleString(importMPL.c_str());
+        cout << "           C" << endl;
 	if (rc<0) {
-		MyBase::SetErrMsg("3PyRun_SimpleString() : %s", PyErr().c_str());
+		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
 		return(-1);
 	}
 
@@ -204,8 +223,9 @@ int MyPython::Initialize() {
     std::string path = Wasp::GetSharePath("python");
     path = "sys.path.append('" + path + "')\n";
     rc = PyRun_SimpleString( path.c_str() );
+        cout << "           D" << endl;
 	if (rc<0) {
-		MyBase::SetErrMsg("4PyRun_SimpleString() : %s", PyErr().c_str());
+		MyBase::SetErrMsg("PyRun_SimpleString() : %s", PyErr().c_str());
 		return(-1);
 	}
 
@@ -236,12 +256,11 @@ string MyPython::PyErr() {
 
 	PyObject *output = PyObject_GetAttrString(catcher,"value");
 	//char *s = PyString_AsString(output);
-	char *s = PyBytes_AS_STRING(output);
+	char *s = PyUnicode_AsUTF8(output);
 
 	// Erase the string
 	//
-	//PyObject *eStr = PyString_FromString("");
-	PyObject *eStr = PyBytes_FromString("");
+	PyObject *eStr = PyUnicode_FromString("");
 	PyObject_SetAttrString(catcher, "value", eStr);
     Py_DECREF(eStr);
 
@@ -264,11 +283,11 @@ string MyPython::PyOut() {
 	}
 
 	PyObject *output = PyObject_GetAttrString(catcher,"value");
-	char *s = PyBytes_AS_STRING(output);
+	char *s = PyUnicode_AsUTF8(output);
 
 	// Erase the string
 	//
-	PyObject *eStr = PyBytes_FromString("");
+	PyObject *eStr = PyUnicode_FromString("");
 	PyObject_SetAttrString(catcher, "value", eStr);
     Py_DECREF(eStr);
 

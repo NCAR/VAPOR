@@ -469,7 +469,7 @@ int PyEngine::Calculate(
 
     if (!retObj){
 		SetErrMsg(
-			"PyRun_String() : %s", MyPython::Instance()->PyErr().c_str()
+			"foo PyRun_String() : %s", MyPython::Instance()->PyErr().c_str()
 		);
 		_cleanupDict(mainDict, inputVarNames);
 		return -1;

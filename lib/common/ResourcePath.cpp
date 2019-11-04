@@ -1,3 +1,4 @@
+#include <iostream>
 #include <vapor/ResourcePath.h>
 #include <vapor/CMakeConfig.h>
 #include <vapor/FileUtils.h>
@@ -101,7 +102,7 @@ std::string Wasp::GetSharePath(const std::string &name)
 #ifdef WIN32
 #define PYTHON_INSTALLED_PATH ("python" + string(PYTHON_VERSION))
 #else
-#define PYTHON_INSTALLED_PATH ("lib/python" + string(PYTHON_VERSION))
+#define PYTHON_INSTALLED_PATH ("lib/python3.6")//" + string(PYTHON_VERSION))
 #endif
 
 std::string Wasp::GetPythonPath()
@@ -121,9 +122,15 @@ std::string Wasp::GetPythonDir()
 #endif
     
     string path = GetResourcePath("");
-    
+
+    string exists = FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH});
+    cout << "ResourcePath.cpp PIP    " << PYTHON_INSTALLED_PATH << endl;
+    cout << "ResourcePath.cpp path   " << path << endl;
+    cout << "ResourcePath.cpp exists " << exists << endl;
+
+    //if (!FileUtils::Exists( exists ))
     if (!FileUtils::Exists(FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH})))
         path = string(PYTHON_DIR);
-
+    cout << "ResourcePath.cpp setting PYTHONDIR to " << path << endl;
     return path;
 }

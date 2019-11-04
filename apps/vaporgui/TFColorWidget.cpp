@@ -67,6 +67,9 @@ void TFColorMap::PopulateSettingsMenu(QMenu *menu) const
     std::sort(fileNames.begin(), fileNames.end());
     for (int i = 0; i < fileNames.size(); i++) {
         
+        // Ignore hidden files
+        if (fileNames[i][0] == '.') continue;
+ 
         string path = FileUtils::JoinPaths({builtinPath, fileNames[i]});
         
         QAction *item = new ColorMapMenuItem(path);
@@ -372,7 +375,7 @@ QIcon ColorMapMenuItem::getCachedIcon(const std::string &path)
     
     QSize size = getIconSize();
     int nSamples = size.width();
-    unsigned char buf[3];
+    unsigned char buf[150];
     float rgb[3];
     for (int i = 0; i < nSamples; i++) {
         cm->colorNormalized(i/(float)nSamples).toRGB(rgb);
