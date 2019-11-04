@@ -106,6 +106,8 @@ set (SRCS
 	VSection.h
 	VLineItem.cpp
 	VLineItem.h
+    VComboBox.cpp
+    VComboBox.h
 	PWidget.cpp
 	PWidget.h
 	PCheckbox.cpp
