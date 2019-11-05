@@ -83,18 +83,28 @@ cout << "int MyPython::Initialize() { " << m_isInitialized << endl;
 
 	if (! m_pyHome.empty()) {
 //#ifdef WIN32
-		std::string pythonPath = m_pyHome + "\\Python36;";
-		pythonPath = pythonPath + m_pyHome + "\\Python36\\Lib;";
-		pythonPath = pythonPath + m_pyHome +  "\\Python36\\Lib\\site-packages";
 #ifdef WIN32
+		std::string pythonPath = m_pyHome + "\\Python36:";
+		pythonPath = pythonPath + m_pyHome + "\\Python36\\Lib:";
+		pythonPath = pythonPath + m_pyHome +  "\\Python36\\Lib\\site-packages";
 		_putenv_s("PYTHONPATH", pythonPath.c_str());
-#else
-		setenv("PYTHONPATH", pythonPath.c_str(), 1);
-#endif
 		std::wstring widestr = std::wstring(m_pyHome.begin(), m_pyHome.end());
 		const wchar_t* widecstr = widestr.c_str();
 		Py_SetPythonHome((wchar_t*)widecstr);
 		MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
+#else
+		cout << "m_pyHome " << m_pyHome << endl;
+		std::string pythonPath = m_pyHome + "/lib/python3.6/site-packages:";
+		pythonPath = pythonPath + m_pyHome + "/lib/python3.6:";
+		pythonPath = pythonPath + m_pyHome +  "/lib";
+		setenv("PYTHONPATH", pythonPath.c_str(), 1);
+	// Does ubuntu need this?	
+		m_pyHome = m_pyHome + "/lib";
+		std::wstring widestr = std::wstring(m_pyHome.begin(), m_pyHome.end());
+		const wchar_t* widecstr = widestr.c_str();
+		Py_SetPythonHome((wchar_t*)widecstr);
+#endif
+cout << "pythonPath " << pythonPath << endl;
 //#endif
 	}
 
