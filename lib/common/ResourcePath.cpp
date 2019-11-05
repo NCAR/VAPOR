@@ -124,13 +124,9 @@ std::string Wasp::GetPythonDir()
     string path = GetResourcePath("");
 
     string exists = FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH});
-    cout << "ResourcePath.cpp PIP    " << PYTHON_INSTALLED_PATH << endl;
-    cout << "ResourcePath.cpp path   " << path << endl;
-    cout << "ResourcePath.cpp exists " << exists << endl;
 
     //if (!FileUtils::Exists( exists ))
     if (!FileUtils::Exists(FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH})))
         path = string(PYTHON_DIR);
-    cout << "ResourcePath.cpp setting PYTHONDIR to " << path << endl;
     return path;
 }
