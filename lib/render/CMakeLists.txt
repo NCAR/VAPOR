@@ -50,6 +50,7 @@ set (SRC
 	VolumeCellTraversal.cpp
 	Texture.cpp
 	Framebuffer.cpp
+	ModelRenderer.cpp
 )
 
 set (HEADERS
@@ -105,6 +106,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeCellTraversal.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Texture.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Framebuffer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ModelRenderer.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})
