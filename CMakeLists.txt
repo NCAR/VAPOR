@@ -296,8 +296,10 @@ if (APPLE)
             DESTINATION ${INSTALL_BIN_DIR}/styles
             COMPONENT Dependencies
             )
+        message ( "                 Hmm ok we did not install, but we did build..." )
     endif ()
 	set (CPACK_BINARY_DRAGNDROP ON)
+    message ( "                 Exiting the CPACK section for Apple..." )
 endif (APPLE)
 
 if (UNIX AND NOT APPLE)
