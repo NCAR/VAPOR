@@ -357,6 +357,7 @@ void VolumeRenderer::_initializeFramebuffer(bool fast)
     fbSize /= _framebufferRatio;
     _framebuffer.SetSize(fbSize.x, fbSize.y);
     
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &_originalFramebuffer);
     _framebuffer.MakeRenderTarget();
     glClearColor(0, 0, 0, 0);
     glDepthMask(true);
@@ -366,6 +367,7 @@ void VolumeRenderer::_initializeFramebuffer(bool fast)
 int VolumeRenderer::_renderFramebufferToDisplay()
 {
     _framebuffer.UnBind();
+    glBindFramebuffer(GL_FRAMEBUFFER, _originalFramebuffer);
     _restoreOriginalViewport();
     SmartShaderProgram framebufferShader = _glManager->shaderManager->GetShader("Framebuffer");
     if (!framebufferShader.IsValid())
