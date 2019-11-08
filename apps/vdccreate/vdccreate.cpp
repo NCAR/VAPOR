@@ -18,6 +18,10 @@ struct opt_t {
     std::vector<size_t>         cratios;
     string                      wname;
     string                      xtype;
+    string                      xcoords;
+    string                      ycoords;
+    string                      zcoords;
+    string                      tcoords;
     int                         numts;
     int                         nthreads;
     std::vector<string>         vars3d;
@@ -49,6 +53,18 @@ OptionParser::OptDescRec_T set_opts[] = {{"dimension", 1, "512x512x512",
                                          {"xtype", 1, "float",
                                           "External data type representation. "
                                           "Valid values are uint8 int8 int16 int32 int64 float double"},
+                                         {"xcoords", 1, "",
+                                          "Path to a file containing a whitespace "
+                                          "delineated list of monotonically increasing X-axis user coordinates."},
+                                         {"ycoords", 1, "",
+                                          "Path to a file containing a whitespace "
+                                          "delineated list of monotonically increasing Y-axis user coordinates."},
+                                         {"zcoords", 1, "",
+                                          "Path to a file containing a whitespace "
+                                          "delineated list of monotonically increasing Z-axis user coordinates."},
+                                         {"tcoords", 1, "",
+                                          "Path to a file containing a whitespace "
+                                          "delineated list of monotonically increasing T-axis (time) user coordinates."},
                                          {"numts", 1, "1", "Number of timesteps in the data set"},
                                          {"nthreads", 1, "0",
                                           "Specify number of execution threads "
@@ -100,6 +116,10 @@ OptionParser::Option_T get_options[] = {{"dimension", Wasp::CvtToDimension3D, &o
                                         {"cratios", Wasp::CvtToSize_tVec, &opt.cratios, sizeof(opt.cratios)},
                                         {"wname", Wasp::CvtToCPPStr, &opt.wname, sizeof(opt.wname)},
                                         {"xtype", Wasp::CvtToCPPStr, &opt.xtype, sizeof(opt.xtype)},
+                                        {"xcoords", Wasp::CvtToCPPStr, &opt.xcoords, sizeof(opt.xcoords)},
+                                        {"ycoords", Wasp::CvtToCPPStr, &opt.ycoords, sizeof(opt.ycoords)},
+                                        {"zcoords", Wasp::CvtToCPPStr, &opt.zcoords, sizeof(opt.zcoords)},
+                                        {"tcoords", Wasp::CvtToCPPStr, &opt.tcoords, sizeof(opt.tcoords)},
                                         {"numts", Wasp::CvtToInt, &opt.numts, sizeof(opt.numts)},
                                         {"nthreads", Wasp::CvtToInt, &opt.nthreads, sizeof(opt.nthreads)},
                                         {"vars3d", Wasp::CvtToStrVec, &opt.vars3d, sizeof(opt.vars3d)},
@@ -118,7 +138,7 @@ OptionParser::Option_T get_options[] = {{"dimension", Wasp::CvtToDimension3D, &o
 
 string ProgName;
 
-void set_coord(VDCNetCDF &vdc, string dimname, size_t dimlen, float min, float max)
+void set_coord_uniform(VDCNetCDF &vdc, string dimname, size_t dimlen, float min, float max)
 {
     VAssert(dimlen >= 1);
 
@@ -132,7 +152,13 @@ void set_coord(VDCNetCDF &vdc, string dimname, size_t dimlen, float min, float m
     if (rc < 0) exit(1);
 }
 
-void set_coords(VDCNetCDF &vdc, const vector<float> &extents, const vector<string> &dimnames, const vector<size_t> &dimlens)
+void set_coord_stretched(VDCNetCDF &vdc, string dimname, const vector<float> &coords)
+{
+    int rc = vdc.PutVar(0, dimname, -1, coords.data());
+    if (rc < 0) exit(1);
+}
+
+void set_coords_uniform(VDCNetCDF &vdc, const vector<float> &extents, const vector<string> &dimnames, const vector<size_t> &dimlens)
 {
     if (!extents.size()) return;
 
@@ -140,9 +166,9 @@ void set_coords(VDCNetCDF &vdc, const vector<float> &extents, const vector<strin
     VAssert(dimnames.size() == 4);
     VAssert(dimlens.size() == 4);
 
-    set_coord(vdc, dimnames[0], dimlens[0], extents[0], extents[3]);
-    set_coord(vdc, dimnames[1], dimlens[1], extents[1], extents[4]);
-    set_coord(vdc, dimnames[2], dimlens[2], extents[2], extents[5]);
+    set_coord_uniform(vdc, dimnames[0], dimlens[0], extents[0], extents[3]);
+    set_coord_uniform(vdc, dimnames[1], dimlens[1], extents[1], extents[4]);
+    set_coord_uniform(vdc, dimnames[2], dimlens[2], extents[2], extents[5]);
 }
 
 DC::XType parseXType(string xTypeStr)
@@ -158,6 +184,44 @@ DC::XType parseXType(string xTypeStr)
     if (xTypeStr == "double") return (DC::XType::DOUBLE);
 
     return (DC::XType::INVALID);
+}
+
+int read_float_vec(string path, size_t n, vector<float> &vec)
+{
+    ifstream fin(path.c_str());
+    if (!fin) {
+        MyBase::SetErrMsg("Error opening file %s", path.c_str());
+        return (-1);
+    }
+
+    vec.clear();
+
+    float f;
+    while (fin >> f && vec.size() < n) { vec.push_back(f); }
+    if (fin.bad()) {
+        MyBase::SetErrMsg("Error reading file %s", path.c_str());
+        return (-1);
+    }
+
+    fin.close();
+
+    // Make sure values are monotonic and increasing
+    //
+    bool mono = true;
+    for (int i = 0; i < (int)vec.size() - 1; i++) {
+        if (vec[i] > vec[i + 1]) mono = false;
+    }
+    if (!mono) {
+        MyBase::SetErrMsg("Sequence contained in %s must be monotonic", path.c_str());
+        return (-1);
+    }
+
+    if (vec.size() != n) {
+        MyBase::SetErrMsg("Short read file %s", path.c_str());
+        return (-1);
+    }
+
+    return (0);
 }
 
 int main(int argc, char **argv)
@@ -216,6 +280,24 @@ int main(int argc, char **argv)
     int    rc = vdc.Initialize(master, vector<string>(), VDC::W, opt.bs, chunksize);
     if (rc < 0) exit(1);
 
+    vector<float> xcoords, ycoords, zcoords, tcoords;
+    if (!opt.xcoords.empty()) {
+        rc = read_float_vec(opt.xcoords, opt.dim.nx, xcoords);
+        if (rc < 0) exit(1);
+    }
+    if (!opt.ycoords.empty()) {
+        rc = read_float_vec(opt.ycoords, opt.dim.nx, ycoords);
+        if (rc < 0) exit(1);
+    }
+    if (!opt.zcoords.empty()) {
+        rc = read_float_vec(opt.zcoords, opt.dim.nx, zcoords);
+        if (rc < 0) exit(1);
+    }
+    if (!opt.tcoords.empty()) {
+        rc = read_float_vec(opt.tcoords, opt.dim.nx, tcoords);
+        if (rc < 0) exit(1);
+    }
+
     vector<string> dimnames;
     dimnames.push_back("Nx");
     dimnames.push_back("Ny");
@@ -234,6 +316,12 @@ int main(int argc, char **argv)
     rc = vdc.DefineDimension(dimnames[1], dimlens[1], 1);
     rc = vdc.DefineDimension(dimnames[2], dimlens[2], 2);
     rc = vdc.DefineDimension(dimnames[3], dimlens[3], 3);
+    if (rc < 0) exit(1);
+
+    if (!opt.xcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[0], vector<string>{dimnames[0]}, "", "", 0, DC::XType::FLOAT, false); }
+    if (!opt.ycoords.empty()) { rc = vdc.DefineCoordVar(dimnames[1], vector<string>{dimnames[1]}, "", "", 1, DC::XType::FLOAT, false); }
+    if (!opt.zcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[2], vector<string>{dimnames[2]}, "", "", 2, DC::XType::FLOAT, false); }
+    if (!opt.tcoords.empty()) { rc = vdc.DefineCoordVar(dimnames[3], vector<string>(), "", dimnames[3], 3, DC::XType::FLOAT, false); }
 
     rc = vdc.SetCompressionBlock(opt.wname, opt.cratios);
     if (rc < 0) exit(1);
@@ -278,5 +366,16 @@ int main(int argc, char **argv)
 
     vdc.EndDefine();
 
-    set_coords(vdc, opt.extents, dimnames, dimlens);
+    // Set coordinates to be uniform (e.g. a regular grid)
+    //
+    set_coords_uniform(vdc, opt.extents, dimnames, dimlens);
+
+    // Handle any stretched dimensions
+    //
+    if (xcoords.size()) { set_coord_stretched(vdc, dimnames[0], xcoords); }
+    if (ycoords.size()) { set_coord_stretched(vdc, dimnames[1], ycoords); }
+    if (zcoords.size()) { set_coord_stretched(vdc, dimnames[2], zcoords); }
+    if (tcoords.size()) { set_coord_stretched(vdc, dimnames[3], tcoords); }
+
+    return (0);
 }
