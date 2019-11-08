@@ -125,9 +125,12 @@ private slots:
     void _steadyNumOfStepsChanged();
     void _pastNumOfTimeStepsChanged( int );
     void _seedInjIntervalChanged( int );
+    
+    void _selectedTabChanged(int index);
 
 private:
     VAPoR::FlowParams*      _params;
+    VAPoR::ParamsMgr *      _paramsMgr;
 
     /* Add some QT widgets */
     VCheckBox*              _steady;

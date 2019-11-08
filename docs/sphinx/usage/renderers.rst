@@ -79,4 +79,13 @@ Displays a wireframe of the mesh for the selected variable
     :align: center
     :figclass: align-center
 
+Model Renderer
+______________
+
+The Model Renderer can display 3D geometry files within the Vapor scene.  This is commonly used for rendering models of wind turbines or cityscapes in Large Eddy Simulations.
+
+.. figure:: ../../_images/Model.png
+    :align: center
+    :figclass: align-center
+
 |

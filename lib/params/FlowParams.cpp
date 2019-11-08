@@ -18,6 +18,7 @@ const std::string FlowParams::_rakeBiasStrength      = "rakeBiasStrength";
 const std::string FlowParams::_pastNumOfTimeSteps    = "pastNumOfTimeSteps";
 const std::string FlowParams::_seedInjInterval       = "seedInjInterval";
 
+
 static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
 
 // Constructor

@@ -135,6 +135,7 @@ find_library(UDUNITS2 udunits2)
 find_library(FREETYPE freetype)
 find_library(GEOTIFF geotiff)
 find_library(JPEG jpeg)
+find_library(ASSIMP assimp)
 
 if (WIN32)
     find_library(TIFF libtiff)
@@ -295,8 +296,10 @@ if (APPLE)
             DESTINATION ${INSTALL_BIN_DIR}/styles
             COMPONENT Dependencies
             )
+        message ( "                 Hmm ok we did not install, but we did build..." )
     endif ()
 	set (CPACK_BINARY_DRAGNDROP ON)
+    message ( "                 Exiting the CPACK section for Apple..." )
 endif (APPLE)
 
 if (UNIX AND NOT APPLE)
