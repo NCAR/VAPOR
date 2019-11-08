@@ -81,11 +81,15 @@ bool ShouldRenderSample(const vec3 sampleSTR)
 float GetDepthBuffer()
 {
     if (readDepthBuffer) {
-        float depth = texture(sceneDepth, ST).r;
-        return depth * 2 - 1; // back to NDC
+        return texture(sceneDepth, ST).r;
     } else {
         return 1;
     }
+}
+
+float GetDepthBufferNDC()
+{
+    return GetDepthBuffer() * 2 - 1;
 }
 
 float PhongLighting(vec3 normal, vec3 viewDir)
@@ -146,7 +150,7 @@ void BlendToBack(inout vec4 accum, vec4 color)
 void GetRayParameters(out vec3 eye, out vec3 dir, out vec3 normal, OUT float maxT)
 {
 	vec2 screen = ST*2-1;
-    vec4 world = inverse(MVP) * vec4(screen, GetDepthBuffer(), 1);
+    vec4 world = inverse(MVP) * vec4(screen, GetDepthBufferNDC(), 1);
     if (mapOrthoMode) {
         eye = vec3(world.xy, cameraPos.z);
     } else {
