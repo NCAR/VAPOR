@@ -489,7 +489,7 @@ public:
     }
 
 private:
-    class PARAMS_API PMgrStateSave : public ParamsBase::StateSave {
+    class PMgrStateSave : public ParamsBase::StateSave {
     public:
         PMgrStateSave(int stackSize = 100);
         ~PMgrStateSave();
