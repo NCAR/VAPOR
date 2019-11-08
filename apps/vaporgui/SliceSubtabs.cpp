@@ -1,5 +1,7 @@
 #include "SliceSubtabs.h"
 #include "TFEditor.h"
+#include "VLineItem.h"
+#include "VComboBox.h"
 
 #define MIN_SAMPLES 1 
 #define MAX_SAMPLES 2000
@@ -28,6 +30,10 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
 	QComboBox* refinementCombo = _variablesWidget->_fidelityWidget->refinementCombo;
 	connect(refinementCombo, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(_setDefaultSampleRate()));
+
+    std::vector<std::string> values = {"foo", "bar", "baz"};
+    VLineItem* le = new VLineItem("Test", new VComboBox2(values));
+    layout()->addWidget(le);
 }
 
 void SliceVariablesSubtab::Update(
