@@ -236,7 +236,7 @@ string ParamsBase::GetValueString(
     if (!_node->HasElementString(tag))
         return (defaultVal);
 
-    string v = _node->GetElementString(tag);
+    string v = GetValueStringVec(tag)[0];
     if (v == "NULL") {
         v = "";
     }
