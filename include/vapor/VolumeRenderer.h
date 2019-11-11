@@ -71,6 +71,7 @@ protected:
     double _lastRenderTime;
     bool _lastRenderWasFast;
     int _originalViewport[4];
+    int _originalFramebuffer;
     int _framebufferSize[2];
     float _framebufferRatio;
     float _previousFramebufferRatio;
