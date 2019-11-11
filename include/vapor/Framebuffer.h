@@ -39,6 +39,7 @@ public:
     void        Bind();
     void        UnBind();
     void        SetSize(int width, int height);
+    void        GetSize(int *width, int *height) const;
     int         MakeRenderTarget();
     void        EnableDepthBuffer();
 

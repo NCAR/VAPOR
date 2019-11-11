@@ -49,6 +49,8 @@
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
 
+#include "VSection.h"
+
 using namespace VAPoR;
 
 namespace {
@@ -72,6 +74,17 @@ NavigationEventRouter::NavigationEventRouter(QWidget *parent, ControlExec *ce) :
     latLonCheckbox->setEnabled(false);
     stereoSeparationEdit->setEnabled(false);
     adjustSize();
+
+    verticalLayout->setSpacing(15);
+
+    VSection *framebufferSection = new VSection("Framebuffer Settings");
+    verticalLayout->insertWidget(verticalLayout->count() - 1, framebufferSection);
+
+    framebufferSection->layout()->addWidget(_useCustomFramebufferCheckbox = new ParamsWidgetCheckbox(ViewpointParams::UseCustomFramebufferTag, "Use Custom Output Size"));
+    framebufferSection->layout()->addWidget(_customFramebufferWidth = new ParamsWidgetNumber(ViewpointParams::CustomFramebufferWidthTag, "Output Width (px)"));
+    framebufferSection->layout()->addWidget(_customFramebufferHeight = new ParamsWidgetNumber(ViewpointParams::CustomFramebufferHeightTag, "Output Height (px)"));
+    _customFramebufferWidth->SetRange(1, 16384);
+    _customFramebufferHeight->SetRange(1, 16384);
 }
 
 NavigationEventRouter::~NavigationEventRouter() {}
@@ -513,6 +526,13 @@ void NavigationEventRouter::_updateTab()
     updateLightChanged();
     updateTransforms();
     updateProjections();
+
+    VAPoR::ViewpointParams *vp = _getActiveParams();
+    _useCustomFramebufferCheckbox->Update(vp);
+    _customFramebufferWidth->Update(vp);
+    _customFramebufferHeight->Update(vp);
+    _customFramebufferWidth->setEnabled(vp->GetValueLong(ViewpointParams::UseCustomFramebufferTag, 0));
+    _customFramebufferHeight->setEnabled(vp->GetValueLong(ViewpointParams::UseCustomFramebufferTag, 0));
 }
 
 void NavigationEventRouter::CenterSubRegion()

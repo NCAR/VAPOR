@@ -196,6 +196,47 @@ void VizWin::_setUpProjMatrix()
 
     size_t width, height;
     vParams->GetWindowSize(width, height);
+    int wWidth = width;
+    int wHeight = height;
+
+    if (vParams->GetValueLong(ViewpointParams::UseCustomFramebufferTag, 0)) {
+        width = vParams->GetValueLong(ViewpointParams::CustomFramebufferWidthTag, 0);
+        height = vParams->GetValueLong(ViewpointParams::CustomFramebufferHeightTag, 0);
+        if (width == 0) width = 1;
+        if (height == 0) height = 1;
+
+        int maxSize;
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);
+        if (width > maxSize) {
+            width = maxSize;
+            vParams->SetValueLong(ViewpointParams::CustomFramebufferWidthTag, ViewpointParams::CustomFramebufferWidthTag, width);
+            MSG_ERR("Selected width is larger than your OpenGL implementation supports");
+        }
+        if (height > maxSize) {
+            height = maxSize;
+            vParams->SetValueLong(ViewpointParams::CustomFramebufferHeightTag, ViewpointParams::CustomFramebufferHeightTag, height);
+            MSG_ERR("Selected height is larger than your OpenGL implementation supports");
+        }
+
+        float fa = width / (float)height;
+        float wa = wWidth / (float)wHeight;
+
+        if (fa >= wa) {
+            int x = 0;
+            int y = (wHeight / 2) - (wHeight / fa / 2);
+            int w = wWidth;
+            int h = wHeight / fa;
+            glViewport(x, y, w, h);
+        } else {
+            int x = (wWidth / 2) - (wWidth * fa / 2);
+            int y = 0;
+            int w = wWidth * fa;
+            int h = wHeight;
+            glViewport(x, y, w, h);
+        }
+    } else {
+        glViewport(0, 0, width, height);
+    }
 
     mm->MatrixModeProjection();
     mm->LoadIdentity();

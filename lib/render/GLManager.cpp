@@ -125,6 +125,7 @@ void GLManager::ShowDepthBuffer()
     static float        data[] = {BL, BL, 0, 0, 1, BL, 1, 0, BL, 1, 0, 1,
 
                            BL, 1,  0, 1, 1, BL, 1, 0, 1,  1, 1, 1};
+    // Since this is just for debugging purposes, initialized stays false to support use in multiple contexts
     if (!initialized) {
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
