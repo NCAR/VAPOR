@@ -106,8 +106,15 @@ set (SRCS
 	VSection.h
 	VLineItem.cpp
 	VLineItem.h
+    VContainer.h
     VComboBox.cpp
     VComboBox.h
+    VSpinBox.cpp
+    VSpinBox.h
+    VCheckBox.cpp
+    VCheckBox.h
+    VLineEdit.cpp
+    VLineEdit.h
 	PWidget.cpp
 	PWidget.h
 	PCheckbox.cpp

@@ -7,6 +7,11 @@
 #include "ui_SliceAnnotationGUI.h"
 #include "Flags.h"
 
+#include "VComboBox.h"
+#include "VSpinBox.h"
+#include "VLineEdit.h"
+#include "VCheckBox.h"
+
 #include <vapor/SliceParams.h>
 
 namespace VAPoR {
@@ -33,8 +38,16 @@ public:
 
 private slots:
     void _setDefaultSampleRate();
+    void _vcbChanged( std::string value ) { cout << "vcb changed to " << value << endl; }
+    void _vsbChanged( int value ) { cout << "vsb changed to " << value << endl; }
+    void _vcbChanged( bool value ) { cout << "vcb changed to " << value << endl; }
+    void _vleChanged( std::string value ) { cout << "vle changed to " << value << endl; }
 
 private:
+    VComboBox2* _vcb;
+    VSpinBox2* _vsb;
+    VCheckBox2* _vchb;
+    VLineEdit2* _vle;
     VAPoR::SliceParams* _params;
 };
 

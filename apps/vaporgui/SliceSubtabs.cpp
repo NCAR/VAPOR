@@ -1,7 +1,6 @@
 #include "SliceSubtabs.h"
 #include "TFEditor.h"
 #include "VLineItem.h"
-#include "VComboBox.h"
 
 #define MIN_SAMPLES 1 
 #define MAX_SAMPLES 2000
@@ -32,8 +31,25 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
 		this, SLOT(_setDefaultSampleRate()));
 
     std::vector<std::string> values = {"foo", "bar", "baz"};
-    VLineItem* le = new VLineItem("Test", new VComboBox2(values));
-    layout()->addWidget(le);
+    _vcb = new VComboBox2(values);
+    layout()->addWidget( new VLineItem("Test", _vcb ));
+    connect( _vcb, SIGNAL( ValueChanged( std::string )),
+        this, SLOT( _vcbChanged( std::string )));
+
+    _vsb = new VSpinBox2( 0, 5 );
+    layout()->addWidget( new VLineItem("SpinBox", _vsb ) );
+    connect( _vsb, SIGNAL( ValueChanged( int )),
+        this, SLOT( _vsbChanged( int )));
+
+    _vchb = new VCheckBox2( false );
+    layout()->addWidget( new VLineItem("CheckBox", _vchb ) );
+    connect( _vchb, SIGNAL( ValueChanged( bool )),
+        this, SLOT( _vcbChanged( bool )));
+   
+    _vle = new VLineEdit2( "lineEidt" ); 
+    layout()->addWidget( new VLineItem("LineEdit", _vle ) );
+    connect( _vle, SIGNAL( ValueChanged( std::string )),
+        this, SLOT( _vleChanged( std::string )));
 }
 
 void SliceVariablesSubtab::Update(

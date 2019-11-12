@@ -2,10 +2,21 @@
 #include <QHBoxLayout>
 #include <QLabel>
 
+#define LEFT_MARGIN 10
+#define TOP_MARGIN 0
+#define RIGHT_MARGIN 10
+#define BOTTOM_MARGIN  0
+
 VLineItem::VLineItem(const std::string &label, QLayoutItem *centerItem, QWidget *rightWidget)
 {
     setLayout(new QHBoxLayout);
-    layout()->setMargin(0);
+    layout()->setContentsMargins(
+        LEFT_MARGIN,
+        TOP_MARGIN,
+        RIGHT_MARGIN,
+        BOTTOM_MARGIN
+    );
+    //layout()->setMargin(0);
     
     layout()->addWidget(new QLabel(label.c_str()));
     layout()->addItem(centerItem);
