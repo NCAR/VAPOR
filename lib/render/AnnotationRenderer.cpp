@@ -473,8 +473,8 @@ void AnnotationRenderer::_calculateDomainExtents(
 			m_paramsMgr, m_winName, names[i], _currentTimestep, 
             dataMgrMinExts, dataMgrMaxExts
         );
-		assert(dataMgrMinExts.size() == 3);
-		assert(dataMgrMaxExts.size() == 3);
+		VAssert(dataMgrMinExts.size() == 3);
+		VAssert(dataMgrMaxExts.size() == 3);
 
         ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
         Transform* transform = vpParams->GetTransform(names[i]);
