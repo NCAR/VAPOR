@@ -37,6 +37,14 @@ FlowEventRouter::FlowEventRouter( QWidget *parent, ControlExec *ce)
 	qsvar->setWidgetResizable(true);
 	addTab(qsvar, "Variables");
 
+    _seeding = new FlowSeedingSubtab(this);
+    QScrollArea *qsseed = new QScrollArea(this);
+	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_seeding->adjustSize();
+	qsseed->setWidget(_seeding);
+	qsseed->setWidgetResizable(true);
+	addTab(qsseed, "Seeding");
+
 	_appearance = new FlowAppearanceSubtab(this);
 	QScrollArea* qsapp = new QScrollArea(this);
 	qsapp->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

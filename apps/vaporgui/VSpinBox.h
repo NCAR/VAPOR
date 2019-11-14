@@ -22,7 +22,6 @@ private:
     QSpinBox* _spinBox;
 
 public slots:
-    void emitSpinBoxChanged( int value ) {};
     void emitSpinBoxChanged();
 
 signals:

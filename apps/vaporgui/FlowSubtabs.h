@@ -18,6 +18,15 @@
 #include "ColorbarWidget.h"
 #include "VaporWidgets.h"
 
+class VSection;
+class VComboBox2;
+class VSpinBox2;
+class VDoubleSpinBox2;
+class VCheckBox2;
+class VSliderEdit2;
+class VFileWriter2;
+class VFileReader2;
+
 namespace VAPoR {
 	class ControlExec;
 	class RenderParams;
@@ -74,6 +83,67 @@ private slots:
 
 };
 
+class FlowSeedingSubtab : public QVaporSubtab {
+    Q_OBJECT
+
+public:
+    FlowSeedingSubtab( QWidget* parent );
+
+    void Update(
+		VAPoR::DataMgr *dataMgr,
+		VAPoR::ParamsMgr *paramsMgr,
+		VAPoR::RenderParams *rParams
+	);
+
+private slots:
+    void _seedReaderChanged();
+    void _flowWriterChanged();
+    void _flowDirectionChanged( int newIdx );
+
+    void _rakeGeometryChanged();
+    void _rakeNumOfSeedsChanged();
+    void _rakeBiasVariableChanged( int );
+    void _rakeBiasStrengthChanged();
+
+    void _steadyGotClicked();
+    void _steadyNumOfStepsChanged();
+    void _pastNumOfTimeStepsChanged( int );
+    void _seedInjIntervalChanged( int );
+    
+    void _selectedTabChanged(int index);
+
+private:
+    VAPoR::FlowParams* _params;
+    
+    VSection*    _flowIntegrationSettings;
+        VCheckBox2*      _xPeriodicityCheckBox;
+        VCheckBox2*      _yPeriodicityCheckBox;
+        VCheckBox2*      _zPeriodicityCheckBox;
+        // unsteady
+        VComboBox2*      _integrationTypeCombo;
+        VSliderEdit2*    _injectionStartSliderEdit;
+        VSliderEdit2*    _injectionEndSliderEdit;
+        VSliderEdit2*    _lifespanSliderEdit;
+        VSliderEdit2*    _intervalSliderEdit;
+        VDoubleSpinBox2* _multiplierSpinBox;
+        // steady
+        VDoubleSpinBox2* _integrationLengthSpinBox;
+        VComboBox2*      _integraitonDirectionCombo;
+
+    VSection*    _seedDistributionSettings;
+        VComboBox2*   _distributionTypeCombo;
+        // from file
+        VFileReader*  _seedFileReader;
+        // gridded
+        VSpinBox2*    _numXSpinBox;
+        VSpinBox2*    _numYSpinBox;
+        VSpinBox2*    _numZSpinBox;
+        // random
+        VSpinBox2*   _numRandomSpinBox;
+        VComboBox2*   _biasVariableCombo;
+        VSliderEdit2* _biasWeightSliderEdit;
+};
+
 //
 //================================
 //
@@ -98,7 +168,7 @@ private:
 //
 //================================
 //
-class FlowSeedingSubtab : public QVaporSubtab {
+/*class FlowSeedingSubtab : public QVaporSubtab {
 
 	Q_OBJECT
 
@@ -110,8 +180,6 @@ public:
 		          VAPoR::RenderParams*    rParams );
 
 private slots:
-    /* Respond to user input */
-    void _seedGenModeChanged( int newIdx );
     void _fileReaderChanged();
     void _fileWriterChanged();
     void _flowDirectionChanged( int newIdx );
@@ -132,7 +200,6 @@ private:
     VAPoR::FlowParams*      _params;
     VAPoR::ParamsMgr *      _paramsMgr;
 
-    /* Add some QT widgets */
     VCheckBox*              _steady;
     VLineEdit*              _steadyNumOfSteps;
     VIntSlider*             _pastNumOfTimeSteps;
@@ -143,7 +210,6 @@ private:
     VFileWriter*            _fileWriter;
     VComboBox*              _flowDirection;
 
-    /* Rake related widgets */
     VGeometry*              _rake;
     VLineEdit              *_rakeXNum, *_rakeYNum, *_rakeZNum, *_rakeTotalNum;
     VComboBox*              _rakeBiasVariable;
@@ -151,9 +217,8 @@ private:
 
     QFrame                  *_hline1, *_hline2;     // horizontal lines
 
-    /* Helper functions */
     void _hideShowWidgets(); // hide and show widgets based on the current seed generation mode.
-};
+};*/
 
 //
 //================================

@@ -20,7 +20,7 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
                                 (DimFlags)(THREED) );
     _layout->addWidget( _variablesWidget, 0, 0 );
 
-    _velocityMltp = new VLineEdit( this, "Field Scale Factor", "1.0" );
+/*    _velocityMltp = new VLineEdit( this, "Field Scale Factor", "1.0" );
     _layout->addWidget( _velocityMltp );
 
     _periodicX = new VCheckBox( this, "Particles periodic in X" );
@@ -33,7 +33,7 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
     connect( _velocityMltp,     SIGNAL( _editingFinished() ), this, SLOT( _velocityMultiplierChanged() ) );
     connect( _periodicX,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodicClicked() ) );
     connect( _periodicY,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodicClicked() ) );
-    connect( _periodicZ,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodicClicked() ) );
+    connect( _periodicZ,        SIGNAL( _checkboxClicked() ), this, SLOT( _periodicClicked() ) );*/
 }
 
 void 
@@ -45,18 +45,18 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     assert(_params);
     _variablesWidget->Update(dataMgr, paramsMgr, rParams);
 
-    // Update custom widgets
+    /*// Update custom widgets
     auto mltp = _params->GetVelocityMultiplier();
     _velocityMltp->SetEditText( QString::number( mltp, 'f', 3 ) );
 
     auto bools = _params->GetPeriodic();
     _periodicX->SetCheckState( bools[0] );
     _periodicY->SetCheckState( bools[1] );
-    _periodicZ->SetCheckState( bools[2] );
+    _periodicZ->SetCheckState( bools[2] );*/
 }
     
 void 
-FlowVariablesSubtab::_periodicClicked()
+FlowSeedingSubtab::_periodicClicked()
 {
     std::vector<bool> bools( 3, false );
     bools[0] = _periodicX->GetCheckState();
@@ -66,7 +66,7 @@ FlowVariablesSubtab::_periodicClicked()
 }
 
 void
-FlowVariablesSubtab::_velocityMultiplierChanged()
+FlowSeedingSubtab::_velocityMultiplierChanged()
 {
     double newval, oldval;
     oldval = _params->GetVelocityMultiplier();
@@ -124,16 +124,16 @@ void FlowAppearanceSubtab::Update(  VAPoR::DataMgr *dataMgr,
 FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
 {
     _steady = new VCheckBox( this, "Use Steady Flow" );
-    _layout->addWidget( _steady );
+    //_layout->addWidget( _steady );
     connect( _steady, SIGNAL( _checkboxClicked() ), this, SLOT( _steadyGotClicked() ) );
     _steadyNumOfSteps = new VLineEdit( this, "Steady Integration Steps", "100" );
-    _layout->addWidget( _steadyNumOfSteps);
+    //_layout->addWidget( _steadyNumOfSteps);
     connect( _steadyNumOfSteps, SIGNAL( _editingFinished() ), this, SLOT( _steadyNumOfStepsChanged() ) );
     _pastNumOfTimeSteps = new VIntSlider( this, "Display Past Num. of Time Steps", 1, 2 );
-    _layout->addWidget( _pastNumOfTimeSteps );
+    //_layout->addWidget( _pastNumOfTimeSteps );
     connect( _pastNumOfTimeSteps,SIGNAL(_valueChanged(int) ), this, SLOT( _pastNumOfTimeStepsChanged(int) ));
     _seedInjInterval = new VIntSlider( this, "Seed Injection Interval", 0, 1 );
-    _layout->addWidget( _seedInjInterval );
+    //_layout->addWidget( _seedInjInterval );
 
     connect( _seedInjInterval,  SIGNAL(_valueChanged(int)  ), this, SLOT( _seedInjIntervalChanged(int) ));
 
@@ -142,28 +142,28 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     _flowDirection->AddOption( "Forward",        static_cast<int>(FlowDir::FORWARD) );
     _flowDirection->AddOption( "Backward",       static_cast<int>(FlowDir::BACKWARD) );
     _flowDirection->AddOption( "Bi-Directional", static_cast<int>(FlowDir::BI_DIR) );
-    _layout->addWidget( _flowDirection );
+    //_layout->addWidget( _flowDirection );
     connect( _flowDirection, SIGNAL(_indexChanged(int)), this, SLOT( _flowDirectionChanged(int) ) );
     _seedGenMode = new VComboBox( this, "Seed Generation Mode" );
 
     _hline1 = new QFrame(this);
     _hline1->setFrameShape( QFrame::HLine );
-    _layout->addWidget( _hline1 );
+    //_layout->addWidget( _hline1 );
 
     /* The following two widgets deal with flow line output and seed point input */
     _fileWriter = new VFileWriter( this, "Output Flow Lines" );
     _fileWriter->SetFileFilter( QString::fromAscii("*.txt") );
-    _layout->addWidget( _fileWriter );
+    //_layout->addWidget( _fileWriter );
     connect( _fileWriter, SIGNAL( _pathChanged() ), this, SLOT( _fileWriterChanged() ) );
    
     _fileReader = new VFileReader( this, "Input Seed File" );
     _fileReader->SetFileFilter( QString::fromAscii("*.txt") );
-    _layout->addWidget( _fileReader );
+    //_layout->addWidget( _fileReader );
     connect( _fileReader, SIGNAL( _pathChanged() ), this, SLOT( _fileReaderChanged() ) );
 
     _hline2 = new QFrame(this);
     _hline2->setFrameShape( QFrame::HLine );
-    _layout->addWidget( _hline2 );
+    //_layout->addWidget( _hline2 );
 
     /* Index numbers are in agreement with what's in FlowRenderer.h */
     _seedGenMode->AddOption( "From a Rake, Uniformly", static_cast<int>(FlowSeedMode::UNIFORM) );
@@ -171,13 +171,13 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     _seedGenMode->AddOption( "From a Rake, Randomly with Bias", 
                              static_cast<int>(FlowSeedMode::RANDOM_BIAS) );
     _seedGenMode->AddOption( "From a List",            static_cast<int>(FlowSeedMode::LIST) );
-    _layout->addWidget( _seedGenMode );
+    //_layout->addWidget( _seedGenMode );
     connect( _seedGenMode, SIGNAL( _indexChanged(int) ), this, SLOT( _seedGenModeChanged(int) ) );
 
     /* Set up the Rake selector */
     std::vector<float> geoRange = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0}; // temporary range
     _rake = new VGeometry( this, 3, geoRange );
-    _layout->addWidget( _rake );
+    //_layout->addWidget( _rake );
     connect( _rake, SIGNAL( _geometryChanged() ), this, SLOT( _rakeGeometryChanged() ) );
 
     /* Set up rake seed number controls */
@@ -185,10 +185,10 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     _rakeYNum     = new VLineEdit( this, "Num. of Seeds in Y",  "1" );
     _rakeZNum     = new VLineEdit( this, "Num. of Seeds in Z",  "1" );
     _rakeTotalNum = new VLineEdit( this, "Total Num. of Seeds", "1" );
-    _layout->addWidget( _rakeXNum );
-    _layout->addWidget( _rakeYNum );
-    _layout->addWidget( _rakeZNum );
-    _layout->addWidget( _rakeTotalNum );
+    //_layout->addWidget( _rakeXNum );
+    //_layout->addWidget( _rakeYNum );
+    //_layout->addWidget( _rakeZNum );
+    //_layout->addWidget( _rakeTotalNum );
     connect( _rakeXNum, SIGNAL( _editingFinished() ), this, SLOT( _rakeNumOfSeedsChanged() ) );
     connect( _rakeYNum, SIGNAL( _editingFinished() ), this, SLOT( _rakeNumOfSeedsChanged() ) );
     connect( _rakeZNum, SIGNAL( _editingFinished() ), this, SLOT( _rakeNumOfSeedsChanged() ) );
@@ -196,8 +196,8 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
 
     _rakeBiasVariable = new VComboBox( this, "Random Bias Variable" );
     _rakeBiasStrength = new VSlider(   this, "Random Bias Strength", -5.0f, 5.0f );
-    _layout->addWidget( _rakeBiasVariable );
-    _layout->addWidget( _rakeBiasStrength );
+    //_layout->addWidget( _rakeBiasVariable );
+    //_layout->addWidget( _rakeBiasStrength );
     connect( _rakeBiasVariable, SIGNAL( _indexChanged(int) ), this, SLOT( _rakeBiasVariableChanged(int) ) );
     connect( _rakeBiasStrength, SIGNAL( _valueChanged() ),    this, SLOT( _rakeBiasStrengthChanged()    ) );
     
