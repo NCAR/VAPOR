@@ -72,12 +72,12 @@ private:
   void wheelEvent(QWheelEvent*) {}
 
  //! VariablesWidget is used as Variables tab
- FlowVariablesSubtab  *_variables;
- FlowGeometrySubtab   *_geometry;
- FlowAppearanceSubtab *_appearance;
- FlowSeedingSubtab    *_seeding;
-    QWidget *_seedingTab;
- FlowAnnotationSubtab *_annotation;
+ FlowVariablesSubtab   *_variables;
+ FlowGeometrySubtab    *_geometry;
+ FlowAppearanceSubtab  *_appearance;
+ FlowSeedingSubtab     *_seeding;
+ FlowIntegrationSubtab *_integration;
+ FlowAnnotationSubtab  *_annotation;
 
 };
 

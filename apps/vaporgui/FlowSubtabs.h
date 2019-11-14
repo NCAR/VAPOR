@@ -10,23 +10,6 @@
 
 #include <QLineEdit>
 
-#include "TFEditor.h"
-#include "VariablesWidget.h"
-#include "GeometryWidget.h"
-#include "CopyRegionWidget.h"
-#include "TransformTable.h"
-#include "ColorbarWidget.h"
-#include "VaporWidgets.h"
-
-class VSection;
-class VComboBox2;
-class VSpinBox2;
-class VDoubleSpinBox2;
-class VCheckBox2;
-class VSliderEdit2;
-class VFileWriter2;
-class VFileReader2;
-
 namespace VAPoR {
 	class ControlExec;
 	class RenderParams;
@@ -34,8 +17,21 @@ namespace VAPoR {
 	class DataMgr;
 }
 
-using VAPoR::FlowSeedMode;
-using VAPoR::FlowDir;
+class VariablesWidget;
+class TFEditor;
+class GeometryWidget;
+class CopyRegionWidget;
+class TransformTable;
+class ColorbarWidget;
+class VFileReader;
+class VFileWriter;
+class VPushButton;
+class VCheckBox;
+class VComboBox;
+class VLineEdit;
+class VSpinBox;
+class VTabWidget;
+class QSliderEdit;
 
 class QVaporSubtab : public QWidget {
     Q_OBJECT
@@ -67,81 +63,29 @@ private:
     VAPoR::FlowParams*  _params;
     VariablesWidget*    _variablesWidget;
 
-    VLineEdit*          _velocityMltp;  // Note on this widget: its name and associated functions
-                                        // use the name "velocity multiplier," while it displays
-                                        // "Field Scale Factor." They'll need to be reconciled 
-                                        // before the final merge.
+/*
+    // Sam's attempt to add more widgets
+    //   TODO: add validator/mask so that only numerical input 
+    //   between 0.001 and 1000 are valid.
+    QLineEdit*          _velocityMltp;
+
+    VCheckBox*          _steady;
+
+    // Sam's attempt to add more widgets
+    //   TODO: add validator/mask so that only positive integers are accepted
+    QLineEdit*          _steadyNumOfSteps;
 
     VCheckBox*          _periodicX;
     VCheckBox*          _periodicY;
     VCheckBox*          _periodicZ;
-
+    
 private slots:
     // Respond to user input
-    void _velocityMultiplierChanged();
-    void _periodicClicked();
-
-};
-
-class FlowSeedingSubtab : public QVaporSubtab {
-    Q_OBJECT
-
-public:
-    FlowSeedingSubtab( QWidget* parent );
-
-    void Update(
-		VAPoR::DataMgr *dataMgr,
-		VAPoR::ParamsMgr *paramsMgr,
-		VAPoR::RenderParams *rParams
-	);
-
-private slots:
-    void _seedReaderChanged();
-    void _flowWriterChanged();
-    void _flowDirectionChanged( int newIdx );
-
-    void _rakeGeometryChanged();
-    void _rakeNumOfSeedsChanged();
-    void _rakeBiasVariableChanged( int );
-    void _rakeBiasStrengthChanged();
-
     void _steadyGotClicked();
+    void _velocityMultiplierChanged();
     void _steadyNumOfStepsChanged();
-    void _pastNumOfTimeStepsChanged( int );
-    void _seedInjIntervalChanged( int );
-    
-    void _selectedTabChanged(int index);
-
-private:
-    VAPoR::FlowParams* _params;
-    
-    VSection*    _flowIntegrationSettings;
-        VCheckBox2*      _xPeriodicityCheckBox;
-        VCheckBox2*      _yPeriodicityCheckBox;
-        VCheckBox2*      _zPeriodicityCheckBox;
-        // unsteady
-        VComboBox2*      _integrationTypeCombo;
-        VSliderEdit2*    _injectionStartSliderEdit;
-        VSliderEdit2*    _injectionEndSliderEdit;
-        VSliderEdit2*    _lifespanSliderEdit;
-        VSliderEdit2*    _intervalSliderEdit;
-        VDoubleSpinBox2* _multiplierSpinBox;
-        // steady
-        VDoubleSpinBox2* _integrationLengthSpinBox;
-        VComboBox2*      _integraitonDirectionCombo;
-
-    VSection*    _seedDistributionSettings;
-        VComboBox2*   _distributionTypeCombo;
-        // from file
-        VFileReader*  _seedFileReader;
-        // gridded
-        VSpinBox2*    _numXSpinBox;
-        VSpinBox2*    _numYSpinBox;
-        VSpinBox2*    _numZSpinBox;
-        // random
-        VSpinBox2*   _numRandomSpinBox;
-        VComboBox2*   _biasVariableCombo;
-        VSliderEdit2* _biasWeightSliderEdit;
+    void _periodicClicked();
+*/
 };
 
 //
@@ -162,63 +106,108 @@ public:
 
 private:
     VAPoR::FlowParams* _params;
+   
+    VTabWidget*  _streamlineAppearanceTab; 
+    VComboBox*   _shapeCombo;
+    VComboBox*   _colorCombo;
+    VSpinBox*    _lengthSpinBox;
+    QSliderEdit* _smoothnessSliderEdit;
+    VSpinBox*    _sizeSpinBox;
+
     TFEditor*   _TFEditor;
 };
 
 //
 //================================
 //
-/*class FlowSeedingSubtab : public QVaporSubtab {
+class FlowSeedingSubtab : public QVaporSubtab {
 
 	Q_OBJECT
 
 public:
 	FlowSeedingSubtab(QWidget* parent);
 
-	void Update ( VAPoR::DataMgr*         dataMgr,
-		          VAPoR::ParamsMgr*       paramsMgr,
-		          VAPoR::RenderParams*    rParams );
+	void Update(
+		VAPoR::DataMgr *dataMgr,
+		VAPoR::ParamsMgr *paramsMgr,
+		VAPoR::RenderParams *rParams
+	);
 
 private slots:
-    void _fileReaderChanged();
-    void _fileWriterChanged();
-    void _flowDirectionChanged( int newIdx );
-
-    void _rakeGeometryChanged();
-    void _rakeNumOfSeedsChanged();
-    void _rakeBiasVariableChanged( int );
-    void _rakeBiasStrengthChanged();
-
-    void _steadyGotClicked();
-    void _steadyNumOfStepsChanged();
-    void _pastNumOfTimeStepsChanged( int );
-    void _seedInjIntervalChanged( int );
-    
-    void _selectedTabChanged(int index);
+    void _seedInputFileChanged();
+    void _configureRakeType();
+//    void _seedGenModeChanged( int newIdx );
+    void _exportGeometryPathChanged();
+    void _seedpointReaderPathChanged();
+    void _exportButtonClicked();
 
 private:
+    VAPoR::DataMgr*         _dataMgr;
+    VAPoR::ParamsMgr*       _paramsMgr;
     VAPoR::FlowParams*      _params;
-    VAPoR::ParamsMgr *      _paramsMgr;
 
-    VCheckBox*              _steady;
-    VLineEdit*              _steadyNumOfSteps;
-    VIntSlider*             _pastNumOfTimeSteps;
-    VIntSlider*             _seedInjInterval;
+    GeometryWidget*         _geometryWidget;
 
-    VComboBox*              _seedGenMode;
-    VFileReader*            _fileReader;
-    VFileWriter*            _fileWriter;
-    VComboBox*              _flowDirection;
+    VTabWidget*             _seedSettingsTab;
+    VComboBox*              _distributionCombo;
+    VSpinBox*               _randomCountSpinBox;
+    VComboBox*              _biasVariableCombo;
+    QSliderEdit*            _biasSliderEdit;
+    VSpinBox*               _xDistributionSpinBox;
+    VSpinBox*               _yDistributionSpinBox;
+    VSpinBox*               _zDistributionSpinBox;
+    VFileReader*            _seedpointFileReader;
+    VFileWriter*            _exportGeometryWriter;
+    VPushButton*            _exportGeometryButton;    
+    QPushButton*            _outputButton;
+};
 
-    VGeometry*              _rake;
-    VLineEdit              *_rakeXNum, *_rakeYNum, *_rakeZNum, *_rakeTotalNum;
-    VComboBox*              _rakeBiasVariable;
-    VSlider*                _rakeBiasStrength;
+//
+//================================
+//
+class FlowIntegrationSubtab: public QVaporSubtab {
 
-    QFrame                  *_hline1, *_hline2;     // horizontal lines
+	Q_OBJECT
 
-    void _hideShowWidgets(); // hide and show widgets based on the current seed generation mode.
-};*/
+public:
+	FlowIntegrationSubtab(QWidget* parent);
+
+	void Update(
+		VAPoR::DataMgr *dataMgr,
+		VAPoR::ParamsMgr *paramsMgr,
+		VAPoR::RenderParams *rParams
+	);
+
+protected slots:
+    void _configureIntegrationType();
+
+private slots:
+    void _multiplierChanged();
+    void _integrationDirectionChanged();
+    void _integrationLengthChanged();
+    void _periodicityChanged();
+
+private:
+    void _initialize();
+
+    VAPoR::DataMgr*         _dataMgr;
+    VAPoR::ParamsMgr*       _paramsMgr;
+    VAPoR::FlowParams*      _params;
+    VTabWidget*             _integrationSettingsTab;
+    VLineEdit*              _integrationLengthEdit;
+    VComboBox*              _integrationTypeCombo;
+    VComboBox*              _directionCombo;
+    VCheckBox*              _periodicBoundaryComboX;
+    VCheckBox*              _periodicBoundaryComboY;
+    VCheckBox*              _periodicBoundaryComboZ;
+    VLineEdit*              _multiplierLineEdit;
+    VSpinBox*               _startSpinBox;
+    VSpinBox*               _endSpinBox;
+    VSpinBox*               _lifespanSpinBox;
+    VSpinBox*               _intervalSpinBox;
+
+    bool                    _initialized;
+};
 
 //
 //================================
@@ -237,7 +226,7 @@ public:
 	); 
 
 private:
-    VAPoR::FlowParams*      _params;
+    VAPoR::FlowParams*     _params;
     GeometryWidget*         _geometryWidget;
     CopyRegionWidget*       _copyRegionWidget;
     TransformTable*         _transformTable;
