@@ -119,6 +119,10 @@ set (SRCS
     VSlider.h
     VSliderEdit.cpp
     VSliderEdit.h
+    VPushButton.cpp
+    VPushButton.h
+    VFileSelector.cpp
+    VFileSelector.h
 	PWidget.cpp
 	PWidget.h
 	PCheckbox.cpp

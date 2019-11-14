@@ -24,9 +24,10 @@ VSlider2::VSlider2( double min, double max )
 }
 
 void VSlider2::SetValue( double value ) {
-    std::cout << std::endl << "Slider::SetValue " << value << std::endl;
-    if ( value > _maxValid || value < _minValid )
-        return;
+    if ( value > _maxValid)
+        value = _maxValid;
+    if ( value < _minValid)
+        value = _minValid;
 
     if ( _isInt ) {
         // Nudge value to nearest whole number
@@ -61,7 +62,9 @@ void VSlider2::SetRange( double min, double max ) {
 
 double VSlider2::GetValue() const {
     double value = _stepSize * _slider->value() + _minValid;
-    if (_isInt) value = round(value);
+    
+    if (_isInt) 
+        value = round(value);
 
     return value;
 }
@@ -74,7 +77,7 @@ void VSlider2::emitSliderChanged() {
     double value = GetValue();
 
     // Nudge the current value to nearest whole number if we are of nt type,
-    // done through the SetValue() method.
+    // which is done in the SetValue() method.
     if (_isInt) {
         SetValue( value );
     }

@@ -31,7 +31,7 @@ public slots:
     void emitLineEditValueChanged( const std::string& value );
 
     void emitSliderValueChanged( double value );
-    void emitSliderValueChangedIntermediate();
+    void emitSliderValueChangedIntermediate( double value );
 
 signals:
     void ValueChanged( double value );

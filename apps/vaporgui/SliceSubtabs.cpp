@@ -58,10 +58,30 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     connect( _vs, SIGNAL( ValueChanged( double ) ),
         this, SLOT( _vsChanged( double ) ) );
 
-    _vse = new VSliderEdit( -10.0, 15.0, 5.0 );
+    _vse = new VSliderEdit( -10.0, 150000000.0, 5.0 );
     layout()->addWidget( new VLineItem("SliderEdit", _vse ) );;
     connect( _vse, SIGNAL( ValueChanged( double ) ),
         this, SLOT( _vseChanged( double ) ) );
+    connect( _vse, SIGNAL( ValueChangedIntermediate( double ) ),
+        this, SLOT( _vseChangedIntermediate( double ) ) );
+
+    _pb = new VPushButton2("myButton");
+    layout()->addWidget( new VLineItem(" buuuutton", _pb));
+    connect( _pb, SIGNAL( ButtonClicked() ),
+        this, SLOT( _bChanged() ) );
+
+    _fr = new VFileReader2("fr");
+    layout()->addWidget( new VLineItem("frline", _fr) );
+    connect( _fr, SIGNAL( ValueChanged( const std::string& ) ),
+        this, SLOT( _frChanged() ) );
+    _fw = new VFileWriter2("fw");
+    layout()->addWidget( new VLineItem("fwline", _fw) );
+    connect( _fw, SIGNAL( ValueChanged( const std::string& val ) ),
+        this, SLOT( _fwChanged() ) );
+    _ds = new VDirSelector("ds");
+    layout()->addWidget( new VLineItem("dsline", _ds) );
+    connect( _fw, SIGNAL( ValueChanged( const std::string& val ) ),
+        this, SLOT( _dsChanged() ) );
 }
 
 void SliceVariablesSubtab::Update(
