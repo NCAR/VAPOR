@@ -37,26 +37,20 @@ FlowEventRouter::FlowEventRouter( QWidget *parent, ControlExec *ce)
 	qsvar->setWidgetResizable(true);
 	addTab(qsvar, "Variables");
 
-    _integration = new FlowIntegrationSubtab(this);
-    QScrollArea* qsinteg = new QScrollArea(this);
-	qsinteg->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	qsinteg->setWidget(_integration);
-	qsinteg->setWidgetResizable(true);
-	addTab(qsinteg,"Integration");
-
-	_seeding = new FlowSeedingSubtab(this);
-	QScrollArea* qsseed = new QScrollArea(this);
-	qsseed->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	qsseed->setWidget(_seeding);
-	qsseed->setWidgetResizable(true);
-	addTab(qsseed,"Seeding");
-
 	_appearance = new FlowAppearanceSubtab(this);
 	QScrollArea* qsapp = new QScrollArea(this);
 	qsapp->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	qsapp->setWidget(_appearance);
 	qsapp->setWidgetResizable(true);
 	addTab(qsapp,"Appearance");
+
+	_seeding = new FlowSeedingSubtab(this);
+	QScrollArea* qsseed = new QScrollArea(this);
+	qsseed->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	qsseed->setWidget(_seeding);
+	qsseed->setWidgetResizable(true);
+    _seedingTab = qsseed;
+	addTab(qsseed,"Flow Settings");
 
 	_geometry = new FlowGeometrySubtab(this);
 	QScrollArea *qsgeo = new QScrollArea(this);
@@ -124,11 +118,6 @@ void FlowEventRouter::_updateTab(){
 		_controlExec->GetParamsMgr(),
 		GetActiveParams()
 	);
-	_integration->Update(
-		GetActiveDataMgr(),
-		_controlExec->GetParamsMgr(),
-		GetActiveParams()
-    );
 	_seeding->Update(
 		GetActiveDataMgr(),
 		_controlExec->GetParamsMgr(),
@@ -144,6 +133,22 @@ void FlowEventRouter::_updateTab(){
 		GetActiveDataMgr(),
 		GetActiveParams()
 	);
+    
+    // Sync selected tab with GUIStateParams
+    GUIStateParams *gp = (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
+    if (gp->IsFlowSeedTabActive()) {
+        if (currentWidget() != _seedingTab) {
+            blockSignals(true);
+            setCurrentWidget(_seedingTab);
+            blockSignals(false);
+        }
+    } else {
+        if (currentWidget() == _seedingTab) {
+            blockSignals(true);
+            setCurrentIndex(0);
+            blockSignals(false);
+        }
+    }
 }
 
 string FlowEventRouter::_getDescription() const {
