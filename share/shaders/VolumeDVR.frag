@@ -50,8 +50,7 @@ void main(void)
             
             vec3 hit = eye + dir * t;
             vec3 dataSTR = (hit - dataBoundsMin) / (dataBoundsMax-dataBoundsMin);
-            float dataNorm = (texture(data, dataSTR).r - LUTMin) / (LUTMax - LUTMin);
-            vec4 color = texture(LUT, dataNorm);
+            vec4 color = GetColorForNormalizedCoord(dataSTR);
             vec3 normal = GetNormal(dataSTR);
 			
             color.rgb *= PhongLighting(normal, rayLightingNormal);
