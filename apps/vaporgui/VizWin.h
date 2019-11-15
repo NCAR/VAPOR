@@ -150,6 +150,7 @@ private:
 		VAPoR::DataMgr* dataMgr,
 		int timestep,
 		int refLevel,
+		int lod,
 		std::vector<double> &minExts,
 		std::vector<double> &maxExts);
 	string _getCurrentDataMgrName() const;
