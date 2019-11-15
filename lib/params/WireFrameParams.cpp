@@ -50,4 +50,6 @@ bool WireFrameParams::usingVariable(const std::string &varname) {
 //Set everything to default values
 void WireFrameParams::_init() {
     SetDiagMsg("WireFrameParams::_init()");
+
+    SetFieldVariableNames(vector<string>());
 }

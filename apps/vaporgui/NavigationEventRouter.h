@@ -24,6 +24,7 @@
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
 #include "ui_NavigationTab.h"
+#include "ParamsWidgets.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -71,6 +72,10 @@ class NavigationEventRouter : public QWidget, public Ui_NavigationTab, public Ev
     virtual void _updateTab();
 
   private:
+    ParamsWidgetCheckbox *_useCustomFramebufferCheckbox;
+    ParamsWidgetNumber *_customFramebufferWidth;
+    ParamsWidgetNumber *_customFramebufferHeight;
+
     NavigationEventRouter() {}
 
     virtual void wheelEvent(QWheelEvent *) {}
