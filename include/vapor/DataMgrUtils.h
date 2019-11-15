@@ -195,9 +195,10 @@ VDF_API bool GetExtents(
     DataMgr *dataMgr,
     size_t timestep,
     string varname,
+    int refLevel,
+    int lod,
     vector<double> &minExts,
-    vector<double> &maxExts,
-    int refLevel = -1);
+    vector<double> &maxExts);
 
 //! Get coordinate extents for one or more variables.
 //!
@@ -226,10 +227,11 @@ VDF_API bool GetExtents(
     DataMgr *dataMgr,
     size_t timestep,
     const vector<string> &varnames,
+    int refLevel,
+    int lod,
     vector<double> &minExts,
     vector<double> &maxExts,
-    vector<int> &axes,
-    int refLevel = -1);
+    vector<int> &axes);
 
 //! Used by the histo for calculating some meta data.
 VDF_API int GetDefaultMetaInfoStride(DataMgr *dataMgr, std::string varname, int refinementLevel);

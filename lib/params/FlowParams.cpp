@@ -27,6 +27,7 @@ FlowParams::FlowParams(DataMgr *dataManager,
                    stateSave,
                    FlowParams::GetClassType(),
                    3 /* max dim */) {
+    SetVariableName("");
     SetDiagMsg("FlowParams::FlowParams() this=%p", this);
 }
 
