@@ -61,7 +61,7 @@ void VaporWidget::SetLabelText( const QString& text )
     _label->setText( text );
 }
 
-VSpinBox::VSpinBox(
+VSpinBoxOld::VSpinBoxOld(
         QWidget *parent,
         const std::string& labelText,
         int defaultValue
@@ -78,7 +78,7 @@ VSpinBox::VSpinBox(
         this, SLOT( _changed() ) );
 }
 
-void VSpinBox::_changed(){
+void VSpinBoxOld::_changed(){
     double newValue = _spinBox->value();
     if ( newValue != _value ) {
         _value = newValue;
@@ -86,23 +86,23 @@ void VSpinBox::_changed(){
     }
 }
 
-void VSpinBox::SetMaximum( int maximum ) {
+void VSpinBoxOld::SetMaximum( int maximum ) {
     _spinBox->setMaximum( maximum );
 }
 
-void VSpinBox::SetMinimum( int minimum ) {
+void VSpinBoxOld::SetMinimum( int minimum ) {
     _spinBox->setMinimum( minimum );
 }
 
-void VSpinBox::SetValue( int value ) {
+void VSpinBoxOld::SetValue( int value ) {
     _spinBox->setValue( value );
 }
 
-int VSpinBox::GetValue() const {
+int VSpinBoxOld::GetValue() const {
     return _value;
 }
 
-VDoubleSpinBox::VDoubleSpinBox(
+VDoubleSpinBoxOld::VDoubleSpinBoxOld(
         QWidget *parent,
         const std::string& labelText,
         double defaultValue
@@ -119,7 +119,7 @@ VDoubleSpinBox::VDoubleSpinBox(
         this, SLOT( _changed() ) );
 }
 
-void VDoubleSpinBox::_changed() {
+void VDoubleSpinBoxOld::_changed() {
     double newValue = _spinBox->value();
     if ( newValue != _value ) {
         _value = newValue;
@@ -127,23 +127,23 @@ void VDoubleSpinBox::_changed() {
     }
 }
 
-void VDoubleSpinBox::SetMaximum( double maximum ) {
+void VDoubleSpinBoxOld::SetMaximum( double maximum ) {
     _spinBox->setMaximum( maximum );
 }
 
-void VDoubleSpinBox::SetMinimum( double minimum ) {
+void VDoubleSpinBoxOld::SetMinimum( double minimum ) {
     _spinBox->setMinimum( minimum );
 }
 
-void VDoubleSpinBox::SetValue( double value ) {
+void VDoubleSpinBoxOld::SetValue( double value ) {
     _spinBox->setValue( value );
 }
 
-void VDoubleSpinBox::SetDecimals( int decimals ) {
+void VDoubleSpinBoxOld::SetDecimals( int decimals ) {
     _spinBox->setDecimals( decimals );
 }
 
-double VDoubleSpinBox::GetValue() const {
+double VDoubleSpinBoxOld::GetValue() const {
     return _value;
 }
 
@@ -156,8 +156,8 @@ VRange::VRange( QWidget* parent, float min, float max, const std::string& minLab
 {
     _layout    = new QVBoxLayout(this);
 
-    _minSlider = new VSlider( this, minLabel, min, max );
-    _maxSlider = new VSlider( this, maxLabel, min, max );
+    _minSlider = new VSliderOld( this, minLabel, min, max );
+    _maxSlider = new VSliderOld( this, maxLabel, min, max );
     connect( _minSlider, SIGNAL( _valueChanged() ), this, SLOT( _respondMinSlider() ) );
     connect( _maxSlider, SIGNAL( _valueChanged() ), this, SLOT( _respondMaxSlider() ) );
 
@@ -233,7 +233,7 @@ VRange::_respondMaxSlider()
 //
 // ====================================
 //
-VSlider::VSlider( QWidget* parent, const std::string& label, float min, float max )
+VSliderOld::VSliderOld( QWidget* parent, const std::string& label, float min, float max )
        : VaporWidget( parent, label )
 {
     _min = min;
@@ -260,10 +260,10 @@ VSlider::VSlider( QWidget* parent, const std::string& label, float min, float ma
     _qedit->setText( QString::number( _currentVal, 'f', 3 ) );
 }
 
-VSlider::~VSlider() {}
+VSliderOld::~VSliderOld() {}
 
 void
-VSlider::SetRange( float min, float max )
+VSliderOld::SetRange( float min, float max )
 {
     VAssert( min < max );
     _min = min;
@@ -288,7 +288,7 @@ VSlider::SetRange( float min, float max )
 }
 
 void
-VSlider::SetCurrentValue( float val )
+VSliderOld::SetCurrentValue( float val )
 {
     /* Only respond if val is within range */
     if( val >= _min && val <= _max )
@@ -301,13 +301,13 @@ VSlider::SetCurrentValue( float val )
 }
 
 float
-VSlider::GetCurrentValue() const
+VSliderOld::GetCurrentValue() const
 {
     return _currentVal;
 }
 
 void
-VSlider::_respondQSliderReleased()
+VSliderOld::_respondQSliderReleased()
 {
     /* QSlider is always giving a valid value, so no need to validate range */
     int newvalI    = _qslider->value();
@@ -319,7 +319,7 @@ VSlider::_respondQSliderReleased()
 }
 
 void
-VSlider::_respondQSliderMoved( int newPos )
+VSliderOld::_respondQSliderMoved( int newPos )
 {
     /* QSlider is always at a valid position, so no need to validate range */
     float percent   = (float)newPos / 100.0f;
@@ -328,7 +328,7 @@ VSlider::_respondQSliderMoved( int newPos )
 }
 
 void
-VSlider::_respondQLineEdit()
+VSliderOld::_respondQLineEdit()
 {
     std::string newtext = _qedit->text().toStdString();
     float   newval;
@@ -361,7 +361,7 @@ VSlider::_respondQLineEdit()
 //
 // ====================================
 //
-VIntSlider::VIntSlider( QWidget* parent, const std::string& label, int min, int max )
+VIntSliderOld::VIntSliderOld( QWidget* parent, const std::string& label, int min, int max )
           : VaporWidget( parent, label )
 {
     VAssert( min <= max );
@@ -385,10 +385,10 @@ VIntSlider::VIntSlider( QWidget* parent, const std::string& label, int min, int 
     _qedit->setText( QString::number( mid ) );
 }
 
-VIntSlider::~VIntSlider() {}
+VIntSliderOld::~VIntSliderOld() {}
 
 void
-VIntSlider::SetRange( int newMin, int newMax )
+VIntSliderOld::SetRange( int newMin, int newMax )
 {
     VAssert( newMin <= newMax );
 
@@ -402,7 +402,7 @@ VIntSlider::SetRange( int newMin, int newMax )
 }
 
 void
-VIntSlider::SetCurrentValue( int val )
+VIntSliderOld::SetCurrentValue( int val )
 {
     /* Only respond if val is within range */
     if( val >= _qslider->minimum() && val <= _qslider->maximum() )
@@ -413,13 +413,13 @@ VIntSlider::SetCurrentValue( int val )
 }
 
 int
-VIntSlider::GetCurrentValue() const
+VIntSliderOld::GetCurrentValue() const
 {
     return _qslider->value();
 }
 
 void
-VIntSlider::_respondQSliderReleased()
+VIntSliderOld::_respondQSliderReleased()
 {
     /* QSlider is always giving a valid value, so no need to validate range */
     int newval     = _qslider->value();
@@ -429,14 +429,14 @@ VIntSlider::_respondQSliderReleased()
 }
 
 void
-VIntSlider::_respondQSliderMoved( int newPos )
+VIntSliderOld::_respondQSliderMoved( int newPos )
 {
     /* QSlider is always at a valid position, so no need to validate range */
     _qedit->setText( QString::number( newPos ) );
 }
 
 void
-VIntSlider::_respondQLineEdit()
+VIntSliderOld::_respondQLineEdit()
 {
     std::string newtext = _qedit->text().toStdString();
     int  newval;
@@ -559,7 +559,7 @@ VGeometry::_respondChanges()
 //
 // ====================================
 //
-VLineEdit::VLineEdit(
+VLineEditOld::VLineEditOld(
         QWidget *parent,
         const std::string& labelText,
         const std::string& editText
@@ -577,24 +577,24 @@ VLineEdit::VLineEdit(
         this, SLOT( _relaySignal() ) );
 }
 
-VLineEdit::~VLineEdit() { }
+VLineEditOld::~VLineEditOld() { }
 
-void VLineEdit::SetEditText( const std::string& text )
+void VLineEditOld::SetEditText( const std::string& text )
 {
     SetEditText(QString::fromStdString( text ) );
 }
 
-void VLineEdit::SetEditText( const QString& text )
+void VLineEditOld::SetEditText( const QString& text )
 {
     _edit->setText( text );
     _text = _edit->text().toStdString();
 }
 
-std::string VLineEdit::GetEditText() const {
+std::string VLineEditOld::GetEditText() const {
     return _text;
 }
 
-void VLineEdit::_relaySignal() {
+void VLineEditOld::_relaySignal() {
     QString text = _edit->text();
     _edit->setText( text );
     _text = text.toStdString();    
@@ -606,7 +606,7 @@ void VLineEdit::_relaySignal() {
 // ====================================
 //
 
-VPushButton::VPushButton(
+VPushButtonOld::VPushButtonOld(
         QWidget *parent,
         const std::string& labelText,
         const std::string& buttonText
@@ -622,21 +622,21 @@ VPushButton::VPushButton(
         this, SLOT( _buttonPressed() ) );
 }
 
-void VPushButton::SetButtonText( const std::string& text )
+void VPushButtonOld::SetButtonText( const std::string& text )
 {
     SetButtonText(QString::fromStdString( text ) );
 }
 
-void VPushButton::SetButtonText( const QString& text )
+void VPushButtonOld::SetButtonText( const QString& text )
 {
     _button->setText( text );
 }
 
-void VPushButton::_buttonPressed() {
+void VPushButtonOld::_buttonPressed() {
     emit _pressed();
 }
 
-VComboBox::VComboBox(
+VComboBoxOld::VComboBoxOld(
         QWidget *parent,
         const std::string& labelText
     ) :
@@ -649,40 +649,40 @@ VComboBox::VComboBox(
         this, SLOT( _userIndexChanged(int) ) );
 }
 
-void VComboBox::_userIndexChanged(int index) {
+void VComboBoxOld::_userIndexChanged(int index) {
     emit _indexChanged(index);
 }
 
-int VComboBox::GetNumOfItems() const
+int VComboBoxOld::GetNumOfItems() const
 {
     return _combo->count();
 }
 
-int VComboBox::GetCurrentIndex() const {
+int VComboBoxOld::GetCurrentIndex() const {
     return _combo->currentIndex();
 }
 
-std::string VComboBox::GetCurrentText() const {
+std::string VComboBoxOld::GetCurrentText() const {
     return _combo->currentText().toStdString();
 }
 
-std::string VComboBox::GetItemText( int index) const {
+std::string VComboBoxOld::GetItemText( int index) const {
     return _combo->itemText(index).toStdString();
 }
 
-void VComboBox::AddOption( const std::string& option, int index) {
+void VComboBoxOld::AddOption( const std::string& option, int index) {
     _combo->insertItem( index, QString::fromStdString(option) );
 }
 
-void VComboBox::RemoveOption( int index=0 ) {
+void VComboBoxOld::RemoveOption( int index=0 ) {
     _combo->removeItem( index ) ;
 }
 
-void VComboBox::SetIndex( int index ) {
+void VComboBoxOld::SetIndex( int index ) {
     _combo->setCurrentIndex( index );
 }
 
-VCheckBox::VCheckBox(
+VCheckBoxOld::VCheckBoxOld(
         QWidget *parent,
         const std::string& labelText
     ) :
@@ -697,32 +697,32 @@ VCheckBox::VCheckBox(
         this, SLOT( _userClickedCheckbox() ) );
 }
 
-bool VCheckBox::GetCheckState() const {
+bool VCheckBoxOld::GetCheckState() const {
     if ( _checkbox->checkState() == Qt::Checked)
         return true;
     else
         return false;
 }
 
-void VCheckBox::SetCheckState( bool checkState ) {
+void VCheckBoxOld::SetCheckState( bool checkState ) {
     if ( checkState )
         _checkbox->setCheckState( Qt::Checked );
     else
         _checkbox->setCheckState( Qt::Unchecked );
 }
 
-void VCheckBox::_userClickedCheckbox() {
+void VCheckBoxOld::_userClickedCheckbox() {
     emit _checkboxClicked();
 }
 
-VFileSelector::VFileSelector(
+VFileSelectorOld::VFileSelectorOld(
         QWidget *parent,
         const std::string& labelText,
         const std::string& buttonText,
         const std::string& filePath,
         QFileDialog::FileMode fileMode
     ) :
-    VPushButton(parent, labelText, buttonText),
+    VPushButtonOld(parent, labelText, buttonText),
     _filePath( filePath )
 {
     _lineEdit = new QLineEdit(this);
@@ -749,15 +749,15 @@ VFileSelector::VFileSelector(
         this, SLOT( _setPathFromLineEdit() ) );
 }
 
-std::string VFileSelector::GetPath() const {
+std::string VFileSelectorOld::GetPath() const {
     return _filePath;
 }
 
-void VFileSelector::SetPath( const QString& path) {
+void VFileSelectorOld::SetPath( const QString& path) {
     SetPath( path.toStdString() );
 }
 
-void VFileSelector::SetPath( const std::string& path ) {
+void VFileSelectorOld::SetPath( const std::string& path ) {
     if ( path.empty() )
         return;
 
@@ -772,15 +772,15 @@ void VFileSelector::SetPath( const std::string& path ) {
     _lineEdit->setText( QString::fromStdString(path) );
 }
 
-void VFileSelector::SetFileFilter( const QString& filter ) {
+void VFileSelectorOld::SetFileFilter( const QString& filter ) {
     _fileDialog->setNameFilter( filter );
 }
 
-void VFileSelector::SetFileFilter( const std::string& filter) {
+void VFileSelectorOld::SetFileFilter( const std::string& filter) {
     _fileDialog->setNameFilter( QString::fromStdString(filter) );
 }
 
-void VFileSelector::_openFileDialog() {
+void VFileSelectorOld::_openFileDialog() {
 
     if (_fileDialog->exec() != QDialog::Accepted) {
         _button->setDown(false);
@@ -801,19 +801,19 @@ void VFileSelector::_openFileDialog() {
     emit _pathChanged();
 }
 
-void VFileSelector::_setPathFromLineEdit() {
+void VFileSelectorOld::_setPathFromLineEdit() {
     QString filePath = _lineEdit->text();
     SetPath( filePath.toStdString() );
     emit _pathChanged();
 }
 
-VFileReader::VFileReader(
+VFileReaderOld::VFileReaderOld(
         QWidget *parent,
         const std::string& labelText,
         const std::string& buttonText,
         const std::string& filePath
     ) : 
-    VFileSelector(
+    VFileSelectorOld(
         parent,
         labelText,
         buttonText,
@@ -822,7 +822,7 @@ VFileReader::VFileReader(
     ) 
 {}
 
-bool VFileReader::_isFileOperable( const std::string& filePath ) const {
+bool VFileReaderOld::_isFileOperable( const std::string& filePath ) const {
     bool operable = false;
     if ( _fileMode == QFileDialog::FileMode::ExistingFile ) {
         operable = FileOperationChecker::FileGoodToRead( 
@@ -836,13 +836,13 @@ bool VFileReader::_isFileOperable( const std::string& filePath ) const {
     return operable;
 }
 
-VFileWriter::VFileWriter(
+VFileWriterOld::VFileWriterOld(
         QWidget *parent,
         const std::string& labelText,
         const std::string& buttonText,
         const std::string& filePath
     ) : 
-    VFileSelector(
+    VFileSelectorOld(
         parent,
         labelText,
         buttonText,
@@ -855,7 +855,7 @@ VFileWriter::VFileWriter(
     _fileDialog->setFileMode( _fileMode );
 }
 
-bool VFileWriter::_isFileOperable( const std::string& filePath ) const {
+bool VFileWriterOld::_isFileOperable( const std::string& filePath ) const {
     bool operable = false;
     QString qFilePath = QString::fromStdString( filePath );
     operable = FileOperationChecker::FileGoodToWrite( qFilePath );

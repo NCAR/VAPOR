@@ -1,6 +1,6 @@
 #include "VDoubleSpinBox.h"
 
-VDoubleSpinBox2::VDoubleSpinBox2( double min, double max )
+VDoubleSpinBox::VDoubleSpinBox( double min, double max )
 : VContainer( this )
 {
     _spinBox = new QDoubleSpinBox;
@@ -13,20 +13,20 @@ VDoubleSpinBox2::VDoubleSpinBox2( double min, double max )
 }
 
 
-void VSpinBox2::SetValue( double value ) {
+void VSpinBox::SetValue( double value ) {
     _spinBox->blockSignals(true);
     _spinBox->setValue( value );
     _spinBox->blockSignals(false);
 }
 
-void VSpinBox2::SetRange( double min, double max ) {
+void VSpinBox::SetRange( double min, double max ) {
     _spinBox->setRange( min, max );
 }
 
-double VSpinBox2::GetValue() const {
+double VSpinBox::GetValue() const {
     return _spinBox->value();
 }
 
-void VSpinBox2::emitSpinBoxChanged() {
+void VSpinBox::emitSpinBoxChanged() {
     emit ValueChanged( GetValue() );
 }

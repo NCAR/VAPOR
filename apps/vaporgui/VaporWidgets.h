@@ -51,12 +51,12 @@ protected:
 //
 // ====================================
 //
-class VSpinBox : public VaporWidget
+class VSpinBoxOldOld : public VaporWidget
 {
     Q_OBJECT
 
 public:
-    VSpinBox(
+    VSpinBoxOldOld(
         QWidget* parent, 
         const std::string& labelText = "Label",
         int defaultValue = 0 
@@ -83,12 +83,12 @@ private:
 //
 // ====================================
 //
-class VDoubleSpinBox : public VaporWidget
+class VDoubleSpinBoxOld : public VaporWidget
 {
     Q_OBJECT
 
 public:
-    VDoubleSpinBox(
+    VDoubleSpinBoxOld(
         QWidget* parent, 
         const std::string& labelText = "Label",
         double defaultValue = 0.f
@@ -117,17 +117,17 @@ private:
 //
 // ====================================
 //
-class VLineEdit : public VaporWidget
+class VLineEditOld : public VaporWidget
 {
     Q_OBJECT
 
 public:
-    VLineEdit(
+    VLineEditOld(
         QWidget* parent, 
         const std::string& labelText = "Label",
         const std::string& editText = ""
     );
-    ~VLineEdit();
+    ~VLineEditOld();
 
     void SetEditText( const std::string& text );
     void SetEditText( const QString& text );
@@ -160,13 +160,13 @@ private:
 //   Thus this widget uses an internal variable to keep the actual value in float.
 // ====================================
 //
-class VSlider : public VaporWidget
+class VSliderOld : public VaporWidget
 {
     Q_OBJECT
 
 public:
-    VSlider( QWidget* parent, const std::string& label, float min, float max );
-    ~VSlider();
+    VSliderOld( QWidget* parent, const std::string& label, float min, float max );
+    ~VSliderOld();
 
     void  SetRange( float min, float max );
     void  SetCurrentValue( float val );
@@ -190,17 +190,17 @@ private:
 
 //
 // ====================================
-// VIntSlider does not do the floating point interpolation as VSlider does.
+// VIntSliderOld does not do the floating point interpolation as VSlider does.
 // The min and max and current value of this widget is completely contained by qslider.
 // ====================================
 //
-class VIntSlider : public VaporWidget
+class VIntSliderOld : public VaporWidget
 {
     Q_OBJECT
 
 public:
-    VIntSlider( QWidget* parent, const std::string& label, int min, int max );
-   ~VIntSlider();
+    VIntSliderOld( QWidget* parent, const std::string& label, int min, int max );
+   ~VIntSliderOld();
 
     void SetRange( int min, int max );
     void SetCurrentValue( int val );
@@ -250,7 +250,7 @@ private slots:
     void  _respondMaxSlider();
 
 private:
-    VSlider        *_minSlider, *_maxSlider;
+    VSliderOld        *_minSlider, *_maxSlider;
     QVBoxLayout*    _layout;
 
     /* In case _minSlider is changed, adjust _maxSlider if necessary. */
@@ -302,12 +302,12 @@ private:
 //
 // ====================================
 //
-class VPushButton : public VaporWidget
+class VPushButtonOld : public VaporWidget
 {
     Q_OBJECT
 
 public:
-    VPushButton(
+    VPushButtonOld(
         QWidget* parent, 
         const std::string& labelText = "Label",
         const std::string& buttonText = "Button"
@@ -330,12 +330,12 @@ private slots:
 //
 // ====================================
 //
-class VComboBox : public VaporWidget
+class VComboBoxOld : public VaporWidget
 {
     Q_OBJECT
 
 public:
-    VComboBox(
+    VComboBoxOld(
         QWidget* parent,
         const std::string& labelText = "Label"
     );
@@ -361,12 +361,12 @@ signals:
 //
 // ====================================
 //
-class VCheckBox : public VaporWidget
+class VCheckBoxOld : public VaporWidget
 {
     Q_OBJECT
 
 public:
-    VCheckBox(
+    VCheckBoxOld(
         QWidget* parent,
         const std::string& labelText = "Label"
     );
@@ -387,7 +387,7 @@ signals:
 //
 // ====================================
 //
-class VFileSelector : public VPushButton
+class VFileSelectorOld : public VPushButtonOld
 {
     Q_OBJECT
 
@@ -399,7 +399,7 @@ public:
     std::string GetPath() const;
 
 protected:
-    VFileSelector(
+    VFileSelectorOld(
         QWidget* parent,
         const std::string& labelText = "Label",
         const std::string& buttonText = "Select",
@@ -428,12 +428,12 @@ private:
 //
 // ====================================
 //
-class VFileReader : public VFileSelector
+class VFileReaderOld : public VFileSelectorOld
 {
     Q_OBJECT
 
 public:
-    VFileReader(
+    VFileReaderOld(
         QWidget* parent,
         const std::string& labelText = "Label",
         const std::string& buttonText = "Select",
@@ -448,12 +448,12 @@ private:
 //
 // ====================================
 //
-class VFileWriter : public VFileSelector
+class VFileWriterOld : public VFileSelectorOld
 {
     Q_OBJECT
 
 public:
-    VFileWriter(
+    VFileWriterOld(
         QWidget* parent,
         const std::string& labelText = "Label",
         const std::string& buttonText = "Select",
@@ -464,7 +464,7 @@ private:
     virtual bool _isFileOperable( const std::string& filePath ) const;
 };
 
-class VPushButtonWithDoubleClick : public QPushButton {
+class VPushButtonOldWithDoubleClickOld : public QPushButton {
     Q_OBJECT
     using QPushButton::QPushButton;
     void mouseDoubleClickEvent(QMouseEvent * e) {

@@ -1,6 +1,6 @@
 #include "VCheckBox.h"
 
-VCheckBox2::VCheckBox2( bool checked )
+VCheckBox::VCheckBox( bool checked )
 : VContainer( this )
 {
     _checkBox = new QCheckBox;
@@ -14,16 +14,16 @@ VCheckBox2::VCheckBox2( bool checked )
 
 // Stas thinks that we should have setValues and setValue instead of Update
 //
-void VCheckBox2::SetValue( bool checked ) {
+void VCheckBox::SetValue( bool checked ) {
     _checkBox->blockSignals(true);
     _checkBox->setChecked( checked );
     _checkBox->blockSignals(false);
 }
 
-bool VCheckBox2::GetValue() const {
+bool VCheckBox::GetValue() const {
     return _checkBox->isChecked();
 }
 
-void VCheckBox2::emitCheckBoxChanged( bool checked ) {
+void VCheckBox::emitCheckBoxChanged( bool checked ) {
     emit ValueChanged( checked );
 }

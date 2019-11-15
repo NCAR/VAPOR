@@ -6,10 +6,10 @@
 
 #include "VContainer.h"
 
-class VPushButton2;
-class VLineEdit2;
+class VPushButton;
+class VLineEdit;
 
-class VFileSelector2 : public VContainer {
+class VFileSelector : public VContainer {
     Q_OBJECT
 
 public:
@@ -17,14 +17,14 @@ public:
     bool SetValue( const std::string& file );
 
 protected:
-    VFileSelector2(
+    VFileSelector(
         const std::string& buttonText,
         const std::string& defaultPath,
         const std::string& filter
     );
 
-    VLineEdit2*           _lineEdit;
-    VPushButton2*         _pushButton;
+    VLineEdit*           _lineEdit;
+    VPushButton*         _pushButton;
 
     std::string           _filePath;
     std::string           _filter;
@@ -45,11 +45,11 @@ signals:
 //
 //
 //
-class VFileReader2 : public VFileSelector2 {
+class VFileReader : public VFileSelector {
     Q_OBJECT
 
 public:
-    VFileReader2(
+    VFileReader(
         const std::string& buttonText = "Select",
         const std::string& defaultPath = QDir::homePath().toStdString(),
         const std::string& filter = ""
@@ -63,11 +63,11 @@ private:
 //
 //
 //
-class VFileWriter2 : public VFileSelector2 {
+class VFileWriter : public VFileSelector {
     Q_OBJECT
 
 public:
-    VFileWriter2(
+    VFileWriter(
         const std::string& buttonText = "Select",
         const std::string& defaultPath = QDir::homePath().toStdString(),
         const std::string& filter = ""
@@ -81,7 +81,7 @@ private:
 //
 //
 //
-class VDirSelector : public VFileSelector2 {
+class VDirSelector : public VFileSelector {
     Q_OBJECT
 
 public:

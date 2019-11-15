@@ -7,11 +7,11 @@
 
 #include "VContainer.h"
 
-class VPushButton2 : public VContainer {
+class VPushButton : public VContainer {
     Q_OBJECT
 
 public:
-    VPushButton2( const std::string& buttonText = "Select" );
+    VPushButton( const std::string& buttonText = "Select" );
 
 private:
     QPushButton* _pushButton;

@@ -60,7 +60,6 @@ set (SRCS
 	VolumeIsoEventRouter.cpp
 	VolumeIsoSubtabs.cpp
 	VolumeSubtabs.cpp
-    VaporWidgets.cpp
 	ParamsWidgets.cpp
 	ParamsMenuItems.cpp
 	ParamsMenuItems.h
@@ -121,6 +120,7 @@ set (SRCS
     VSliderEdit.h
     VPushButton.cpp
     VPushButton.h
+    VPushButtonWithDoubleClick.h
     VFileSelector.cpp
     VFileSelector.h
 	PWidget.cpp
@@ -205,7 +205,6 @@ set (SRCS
 	VariablesWidget.h
 	VizSelectCombo.h
 	WireFrameEventRouter.h
-    VaporWidgets.h
 	ParamsWidgets.h
 	Flags.h
 )

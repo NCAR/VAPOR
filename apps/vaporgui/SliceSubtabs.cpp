@@ -31,27 +31,27 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
 		this, SLOT(_setDefaultSampleRate()));
 
     std::vector<std::string> values = {"foo", "bar", "baz"};
-    _vcb = new VComboBox2(values);
+    _vcb = new VComboBox(values);
     layout()->addWidget( new VLineItem("Test", _vcb ));
     connect( _vcb, SIGNAL( ValueChanged( std::string )),
         this, SLOT( _vcbChanged( std::string )));
 
-    _vsb = new VSpinBox2( 0, 5 );
+    _vsb = new VSpinBox( 0, 5 );
     layout()->addWidget( new VLineItem("SpinBox", _vsb ) );
     connect( _vsb, SIGNAL( ValueChanged( int )),
         this, SLOT( _vsbChanged( int )));
 
-    _vchb = new VCheckBox2( false );
+    _vchb = new VCheckBox( false );
     layout()->addWidget( new VLineItem("CheckBox", _vchb ) );
     connect( _vchb, SIGNAL( ValueChanged( bool )),
         this, SLOT( _vcbChanged( bool )));
    
-    _vle = new VLineEdit2( "lineEidt" ); 
+    _vle = new VLineEdit( "lineEidt" ); 
     layout()->addWidget( new VLineItem("LineEdit", _vle ) );
     connect( _vle, SIGNAL( ValueChanged( std::string )),
         this, SLOT( _vleChanged( std::string )));
 
-    _vs = new VSlider2( -10.0, 15.0 );
+    _vs = new VSlider( -10.0, 15.0 );
     layout()->addWidget( new VLineItem("Slider", _vs ) );
     connect( _vs, SIGNAL( ValueChangedIntermediate( double ) ),
         this, SLOT( _vsChangedIntermediate( double ) ) );
@@ -65,16 +65,16 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     connect( _vse, SIGNAL( ValueChangedIntermediate( double ) ),
         this, SLOT( _vseChangedIntermediate( double ) ) );
 
-    _pb = new VPushButton2("myButton");
+    _pb = new VPushButton("myButton");
     layout()->addWidget( new VLineItem(" buuuutton", _pb));
     connect( _pb, SIGNAL( ButtonClicked() ),
         this, SLOT( _bChanged() ) );
 
-    _fr = new VFileReader2("fr");
+    _fr = new VFileReader("fr");
     layout()->addWidget( new VLineItem("frline", _fr) );
     connect( _fr, SIGNAL( ValueChanged( const std::string& ) ),
         this, SLOT( _frChanged() ) );
-    _fw = new VFileWriter2("fw");
+    _fw = new VFileWriter("fw");
     layout()->addWidget( new VLineItem("fwline", _fw) );
     connect( _fw, SIGNAL( ValueChanged( const std::string& val ) ),
         this, SLOT( _fwChanged() ) );

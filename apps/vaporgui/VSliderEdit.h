@@ -3,8 +3,8 @@
 #include <string>
 #include "VContainer.h"
 
-class VSlider2;
-class VLineEdit2;
+class VSlider;
+class VLineEdit;
 
 class VSliderEdit : public VContainer {
     Q_OBJECT
@@ -20,8 +20,8 @@ public:
     double GetValue() const;
 
 private:
-    VLineEdit2* _lineEdit;
-    VSlider2*   _slider;
+    VLineEdit* _lineEdit;
+    VSlider*   _slider;
     double     _minValid;
     double     _maxValid;
     double     _value;

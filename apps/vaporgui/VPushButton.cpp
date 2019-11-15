@@ -1,6 +1,6 @@
 #include "VPushButton.h"
 
-VPushButton2::VPushButton2(
+VPushButton::VPushButton(
     const std::string& buttonText
 ) : VContainer( this )
 {
@@ -11,6 +11,6 @@ VPushButton2::VPushButton2(
         this, SLOT( emitButtonClicked() ) );
 }
 
-void VPushButton2::emitButtonClicked() {
+void VPushButton::emitButtonClicked() {
     emit ButtonClicked();
 }

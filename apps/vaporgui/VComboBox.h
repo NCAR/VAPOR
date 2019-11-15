@@ -4,13 +4,15 @@
 #include <QComboBox>
 #include "VContainer.h"
 
-class VComboBox2 : public VContainer {
+class VComboBox : public VContainer {
     Q_OBJECT
 
 public:
-    VComboBox2( const std::vector<std::string> &values );
+    VComboBox( const std::vector<std::string> &values );
 
     void SetOptions( const std::vector<std::string> &values );
+    void SetIndex( int index );
+    void SetValue( const std::string& value );
 
     int GetCurrentIndex() const;
     std::string GetCurrentString() const;

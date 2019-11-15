@@ -22,11 +22,11 @@ public:
     VSection(const std::string &title);
     QVBoxLayout *layout() const;
     void setMenu(QMenu *menu);
-    
+    void AddWidget( QWidget* widget, int index=0 );    
     
     void setLayout(QLayout *layout) = delete;
     int addTab(QWidget *page, const QString &label) = delete;
-    QWidget *widget(int index) const = delete;
+    //QWidget *widget(int index) const = delete;
     void setCornerWidget(QWidget *widget, Qt::Corner corner) = delete;
     QWidget *cornerWidget() const = delete;
     

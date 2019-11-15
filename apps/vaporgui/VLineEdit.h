@@ -7,11 +7,11 @@
 
 #include "VContainer.h"
 
-class VLineEdit2 : public VContainer {
+class VLineEdit : public VContainer {
     Q_OBJECT
 
 public:
-    VLineEdit2( const std::string& value = "");
+    VLineEdit( const std::string& value = "");
 
     void SetValue( const std::string& value );
 

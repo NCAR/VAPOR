@@ -9,8 +9,8 @@ VSliderEdit::VSliderEdit( double min, double max, double value )
 : VContainer( this ),
   _isIntType( false )
 {
-    _lineEdit = new VLineEdit2();
-    _slider = new VSlider2();
+    _lineEdit = new VLineEdit();
+    _slider = new VSlider();
 
     SetRange( min, max );
     SetValue( value );

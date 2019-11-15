@@ -7,11 +7,11 @@
 
 #include "VContainer.h"
 
-class VSlider2 : public VContainer {
+class VSlider : public VContainer {
     Q_OBJECT
 
 public:
-    VSlider2( double min=0, double max=1 );
+    VSlider( double min=0, double max=1 );
 
     void SetValue( double value );
     void SetRange( double min, double max );

@@ -42,7 +42,7 @@ public:
 
 private slots:
     void _setDefaultSampleRate();
-    void _vcbChanged( std::string value ) { cout << "vcb changed to " << value << endl; }
+    /*void _vcbChanged( std::string value ) { cout << "vcb changed to " << value << endl; }
     void _vsbChanged( int value ) { cout << "vsb changed to " << value << endl; }
     void _vcbChanged( bool value ) { _vse->SetIntType( value ); _vs->SetIntType( value ); cout << "vcb changed to " << value << endl; }
     void _vleChanged( std::string value ) { cout << "vle changed to " << value << endl; }
@@ -53,18 +53,31 @@ private slots:
     void _bChanged() { cout << "button pushed" << endl; }
     void _frChanged() { cout << "frChanged " << _fr->GetValue() << endl; } 
     void _fwChanged() { cout << "fwChanged " << _fw->GetValue() << endl; }
-    void _dsChanged() { cout << "dsChanged " << _fw->GetValue() << endl; }
+    void _dsChanged() { cout << "dsChanged " << _fw->GetValue() << endl; }*/
+    
+    void _vcbChanged( std::string value ) {};
+    void _vsbChanged( int value ) {};
+    void _vcbChanged( bool value ) {};
+    void _vleChanged( std::string value ) {};
+    void _vsChangedIntermediate( double value ) { };
+    void _vsChanged( double value ) { };
+    void _vseChanged( double value ) { };
+    void _vseChangedIntermediate( double value ) { };
+    void _bChanged() { };
+    void _frChanged() { };
+    void _fwChanged() { };
+    void _dsChanged() { };
 
 private:
-    VComboBox2* _vcb;
-    VSpinBox2* _vsb;
-    VCheckBox2* _vchb;
-    VLineEdit2* _vle;
-    VSlider2* _vs;
+    VComboBox* _vcb;
+    VSpinBox* _vsb;
+    VCheckBox* _vchb;
+    VLineEdit* _vle;
+    VSlider* _vs;
     VSliderEdit* _vse;
-    VPushButton2* _pb;
-    VFileReader2* _fr;
-    VFileWriter2* _fw;
+    VPushButton* _pb;
+    VFileReader* _fr;
+    VFileWriter* _fw;
     VDirSelector* _ds;
 
     VAPoR::SliceParams* _params;

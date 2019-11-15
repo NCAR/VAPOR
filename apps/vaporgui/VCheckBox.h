@@ -7,11 +7,11 @@
 
 #include "VContainer.h"
 
-class VCheckBox2 : public VContainer {
+class VCheckBox : public VContainer {
     Q_OBJECT
 
 public:
-    VCheckBox2( bool value );
+    VCheckBox( bool value );
 
     void SetValue( bool value );
 

@@ -7,11 +7,11 @@
 
 #include "VContainer.h"
 
-class VDoubleSpinBox2 : public VContainer {
+class VDoubleSpinBox : public VContainer {
     Q_OBJECT
 
 public:
-    VDoubleSpinBox2( double min, double max);
+    VDoubleSpinBox( double min, double max);
 
     void SetValue( double value );
     void SetRange( double min, double max );

@@ -31,7 +31,8 @@
 #include "VizSelectCombo.h"
 #include "ErrorReporter.h"
 #include "RenderHolder.h"
-#include "VaporWidgets.h"
+//#include "VaporWidgets.h"
+#include "VPushButtonWithDoubleClick.h"
 #include <SettingsParams.h>
 #include <vapor/VolumeRenderer.h>
 #include <vapor/VolumeIsoRenderer.h>

@@ -16,7 +16,15 @@
 #include "CopyRegionWidget.h"
 #include "TransformTable.h"
 #include "ColorbarWidget.h"
-#include "VaporWidgets.h"
+
+class VLineEdit;
+class VCheckBox;
+class VComboBox;
+class VSlider;
+class VSliderEdit;
+class VFileReader;
+class VFileWriter;
+class VGeometry;
 
 namespace VAPoR {
 	class ControlExec;
@@ -58,19 +66,19 @@ private:
     VAPoR::FlowParams*  _params;
     VariablesWidget*    _variablesWidget;
 
-    VLineEdit*          _velocityMltp;  // Note on this widget: its name and associated functions
+/*    VLineEdit*          _velocityMltp;  // Note on this widget: its name and associated functions
                                         // use the name "velocity multiplier," while it displays
                                         // "Field Scale Factor." They'll need to be reconciled 
                                         // before the final merge.
 
     VCheckBox*          _periodicX;
     VCheckBox*          _periodicY;
-    VCheckBox*          _periodicZ;
+    VCheckBox*          _periodicZ;*/
 
 private slots:
     // Respond to user input
-    void _velocityMultiplierChanged();
-    void _periodicClicked();
+/*    void _velocityMultiplierChanged();
+    void _periodicClicked();*/
 
 };
 
@@ -110,8 +118,10 @@ public:
 		          VAPoR::RenderParams*    rParams );
 
 private slots:
-    /* Respond to user input */
-    void _seedGenModeChanged( int newIdx );
+    void _configureIntegrationType( const std::string& value );
+    void _integrationLengthChanged( int value );
+    // Respond to user input 
+    /*void _seedGenModeChanged( int newIdx );
     void _fileReaderChanged();
     void _fileWriterChanged();
     void _flowDirectionChanged( int newIdx );
@@ -126,33 +136,57 @@ private slots:
     void _pastNumOfTimeStepsChanged( int );
     void _seedInjIntervalChanged( int );
     
-    void _selectedTabChanged(int index);
+    void _selectedTabChanged(int index);*/
 
 private:
     VAPoR::FlowParams*      _params;
     VAPoR::ParamsMgr *      _paramsMgr;
 
-    /* Add some QT widgets */
+    VSection*               _integrationSection;
+    VComboBox*              _flowTypeComboBox;
+
+// Steady flow options    
+    VSliderEdit*            _integrationLengthSliderEdit;
+VSliderEdit*            _steadyNumOfSteps;
+   
+    VComboBox*              _directionCombo;
+VComboBox*              _flowDirection;
+    
+VSliderEdit*            _pastNumOfTimeSteps;
+VSliderEdit*            _seedInjInterval;
+
+VComboBox*              _seedGenMode;
+VFileReader*            _fileReader;
+VFileWriter*            _fileWriter;
+
+// Rake related widgets
+VGeometry*              _rake;
+VLineEdit              *_rakeXNum, *_rakeYNum, *_rakeZNum, *_rakeTotalNum;
+VComboBox*              _rakeBiasVariable;
+VSliderEdit*            _rakeBiasStrength;
+
+/*    // Add some QT widgets 
     VCheckBox*              _steady;
     VLineEdit*              _steadyNumOfSteps;
-    VIntSlider*             _pastNumOfTimeSteps;
-    VIntSlider*             _seedInjInterval;
+    VSliderEdit*            _pastNumOfTimeSteps;
+    VSliderEdit*            _seedInjInterval;
 
     VComboBox*              _seedGenMode;
     VFileReader*            _fileReader;
     VFileWriter*            _fileWriter;
     VComboBox*              _flowDirection;
 
-    /* Rake related widgets */
+    // Rake related widgets
     VGeometry*              _rake;
     VLineEdit              *_rakeXNum, *_rakeYNum, *_rakeZNum, *_rakeTotalNum;
     VComboBox*              _rakeBiasVariable;
-    VSlider*                _rakeBiasStrength;
+    VSliderEdit*            _rakeBiasStrength;
 
     QFrame                  *_hline1, *_hline2;     // horizontal lines
 
-    /* Helper functions */
+    // Helper functions
     void _hideShowWidgets(); // hide and show widgets based on the current seed generation mode.
+*/
 };
 
 //
