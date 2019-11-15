@@ -2,6 +2,7 @@
 #include "vapor/DataMgrUtils.h"
 
 #include "VComboBox.h"
+#include "VCheckBox.h"
 #include "VLineItem.h"
 #include "VSliderEdit.h"
 
@@ -61,15 +62,15 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _periodicZ->SetCheckState( bools[2] );*/
 }
     
-/*void 
-FlowVariablesSubtab::_periodicClicked()
+void 
+FlowSeedingSubtab::_periodicClicked()
 {
     std::vector<bool> bools( 3, false );
-    bools[0] = _periodicX->GetCheckState();
-    bools[1] = _periodicY->GetCheckState();
-    bools[2] = _periodicZ->GetCheckState();
+    bools[0] = _periodicXCheckBox->GetValue();
+    bools[1] = _periodicYCheckBox->GetValue();
+    bools[2] = _periodicZCheckBox->GetValue();
     _params->SetPeriodic( bools );
-}*/
+}
 
 /*void
 FlowVariablesSubtab::_velocityMultiplierChanged()
@@ -133,21 +134,74 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     layout()->addWidget( _integrationSection );
 
     std::vector<std::string> values = {"Steady", "Unsteady"};
-    _flowTypeComboBox = new VComboBox(values);
-    _integrationSection->AddWidget( new VLineItem("Integration type", _flowTypeComboBox ));
-    connect( _flowTypeComboBox, SIGNAL( ValueChanged( std::string )),
-        this, SLOT( _configureIntegrationType( std::string )));
+    _flowTypeCombo = new VComboBox(values);
+    _integrationSection->AddWidget( new VLineItem("Flow type", _flowTypeCombo ));
+    connect( _flowTypeCombo, SIGNAL( ValueChanged( std::string )),
+        this, SLOT( _configureFlowType( std::string )));
 
+    // Steady flow options
+    //
     values = { "Forward", "Backward", "Bi-Directional" };
-    _flowDirection = new VComboBox(values);
+    _steadyDirectionCombo = new VComboBox(values);
+    _integrationSection->AddWidget( new VLineItem("Flow direction", _steadyDirectionCombo) );
+    connect( _steadyDirectionCombo, SIGNAL( ValueChanged( std::string )),
+        this, SLOT( _flowDirectionChanged( std::string ) ) );
 
-    _integrationLengthSliderEdit = new VSliderEdit();
-    _integrationLengthSliderEdit->SetIntType(true);
-    connect( _integrationLengthSliderEdit, SIGNAL( ValueChanged( double ) ),
-        this, SLOT( _integrationLengthChanged(int) ) );
+    _steadyLengthSliderEdit = new VSliderEdit();
+    _steadyLengthSliderEdit->SetIntType(true);
+    connect( _steadyLengthSliderEdit, SIGNAL( ValueChanged( double ) ),
+        this, SLOT( _steadyLengthChanged(int) ) );
     _integrationSection->AddWidget( 
-        new VLineItem("Integration length", _integrationLengthSliderEdit)
-    );
+        new VLineItem("Pathline length", _steadyLengthSliderEdit));
+
+    // Unsteady flow options
+    //
+    _unsteadyLengthSliderEdit = new VSliderEdit();
+    _unsteadyLengthSliderEdit->SetIntType(true);
+    _integrationSection->AddWidget( 
+        new VLineItem("Streamline length", _unsteadyLengthSliderEdit));
+    connect( _unsteadyLengthSliderEdit, SIGNAL( ValueChanged( double ) ),
+        this, SLOT( _unsteadyLengthChanged( int ) ) );
+
+    _injIntervalSliderEdit = new VSliderEdit();
+    _injIntervalSliderEdit->SetIntType(true);
+    _integrationSection->AddWidget(
+        new VLineItem("Seeding interval", _injIntervalSliderEdit));
+    connect( _injIntervalSliderEdit,  SIGNAL( ValueChanged( double )  ), 
+        this, SLOT( _seedInjIntervalChanged(int) ));
+
+    _unsteadyStartSliderEdit= new VSliderEdit();
+    _unsteadyStartSliderEdit->SetIntType(true);
+    _integrationSection->AddWidget(
+        new VLineItem("Seeding start time interval - NOOP", _unsteadyStartSliderEdit));
+
+    _unsteadyEndSliderEdit = new VSliderEdit();
+    _unsteadyEndSliderEdit->SetIntType(true);
+    _integrationSection->AddWidget(
+        new VLineItem("Seeding end time - NOOP", _unsteadyEndSliderEdit));
+
+    _injIntervalSliderEdit = new VSliderEdit();
+    _injIntervalSliderEdit->SetIntType(true);
+    _integrationSection->AddWidget(
+        new VLineItem("Seed lifetime - NOOP", _unsteadyLifetimeSliderEdit));
+
+    // Periodicity Checkboxes
+    //
+    _periodicXCheckBox = new VCheckBox();
+    connect( _periodicXCheckBox, SIGNAL( ValueChanged( bool )),
+        this, SLOT( _periodicClicked() ) );
+    _integrationSection->AddWidget( 
+        new VLineItem("X axis periodicity", _periodicXCheckBox));
+    _periodicYCheckBox = new VCheckBox();
+    connect( _periodicYCheckBox, SIGNAL( ValueChanged( bool )),
+        this, SLOT( _periodicClicked() ) );
+    _integrationSection->AddWidget( 
+        new VLineItem("Y axis periodicity", _periodicYCheckBox));
+    _periodicZCheckBox = new VCheckBox();
+    connect( _periodicZCheckBox, SIGNAL( ValueChanged( bool )),
+        this, SLOT( _periodicClicked() ) );
+    _integrationSection->AddWidget( 
+        new VLineItem("Z axis periodicity", _periodicZCheckBox));
 
 }
 /*    _steady = new VCheckBox( this, "Use Steady Flow" );
@@ -241,16 +295,64 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _paramsMgr = paramsMgr;
     VAssert( _params );
 
+
+    // Update integration tab
+    //
     bool isSteady = _params->GetIsSteady();
     if ( isSteady )
-        _flowTypeComboBox->SetValue( "Steady" );
+        _flowTypeCombo->SetValue( "Steady" );
     else
-        _flowTypeComboBox->SetValue( "Unsteady" );
+        _flowTypeCombo->SetValue( "Unsteady" );
+
+    // Steady flow direction combo
+    int dir = _params->GetFlowDirection();
+    if(  dir >= 0 && dir < _steadyDirectionCombo->GetCount() )
+        _steadyDirectionCombo->SetIndex( dir );
+    else
+    {
+        _steadyDirectionCombo->SetIndex( 0 );
+        _params->SetFlowDirection( 0 ); // use 0 as the default option
+    }
+
+    // Steady flow integration length (flowNumOfSteps)
+    int steadyNumOfSteps = _params->GetSteadyNumOfSteps();
+    _steadyLengthSliderEdit->SetValue( steadyNumOfSteps );
+    int numTS = dataMgr->GetNumTimeSteps();
+    _steadyLengthSliderEdit->SetRange( 0, numTS-1 );
+   
+    // Periodicity checkboxes 
+    auto bools = _params->GetPeriodic();
+    _periodicXCheckBox->SetValue( bools[0] );
+    _periodicYCheckBox->SetValue( bools[1] );
+    _periodicZCheckBox->SetValue( bools[2] );
+
+    // Unsteady flow integration length
+    _unsteadyLengthSliderEdit->SetRange( 0, numTS - 1 );
+    int valParams = _params->GetPastNumOfTimeSteps();
+    if( valParams < 0 )     // initial value, we need to set it to all time steps!
+    {
+        _unsteadyLengthSliderEdit->SetValue( numTS - 1 );
+        _params->SetPastNumOfTimeSteps( numTS - 1 );
+    }
+    else
+    {
+        _unsteadyLengthSliderEdit->SetValue( valParams );
+    }
+
+    // Seed injection interval
+    _injIntervalSliderEdit->SetRange(0, numTS - 1 );
+    int injIntv = _params->GetSeedInjInterval();
+    if( injIntv < 0 )       // initial value, we set it to 0
+    {
+        _injIntervalSliderEdit->SetValue( 0 );
+        _params->SetSeedInjInterval( 0 );
+    }
+    else
+    {
+        _injIntervalSliderEdit->SetValue( injIntv );
+    }
+
     
-    int steadyNumOfSteps    = _params->GetSteadyNumOfSteps();
-    _integrationLengthSliderEdit->SetValue( steadyNumOfSteps );
-
-
 }
 /*
     int steadyNumOfSteps    = _params->GetSteadyNumOfSteps();
@@ -382,7 +484,7 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
 
 
 void 
-FlowSeedingSubtab::_integrationLengthChanged( int newVal )
+FlowSeedingSubtab::_unsteadyLengthChanged( int newVal )
 {
     if( newVal != _params->GetPastNumOfTimeSteps() )
     {
@@ -421,46 +523,33 @@ void FlowSeedingSubtab::_selectedTabChanged(int index)
 }
 */
 
-/*
+
 void 
-FlowSeedingSubtab::_steadyNumOfStepsChanged()
+FlowSeedingSubtab::_steadyLengthChanged( int newval )
 {
-    int newval, oldval;
+    int oldval;
     oldval = (int)_params->GetSteadyNumOfSteps();
-    try
-    {
-        newval = std::stoi( _steadyNumOfSteps->GetEditText() );
-    }
-    catch ( const std::invalid_argument& e )
-    {
-        std::cerr << "bad input: " << _steadyNumOfSteps->GetEditText() << std::endl;
-        _steadyNumOfSteps->SetEditText( QString::number( oldval ) );
-        return;
-    }
 
     if( newval >= 0 )    // in the valid range
     {
-        // std::stoi() would convert "383aaa" without throwing an exception.
-        //   We set the correct text based on the number identified.    
-        _steadyNumOfSteps->SetEditText( QString::number( newval ) );
         // Only write back to _params if newval is different from ldval 
         if( newval != oldval )
             _params->SetSteadyNumOfSteps( newval );
     }
     else
-        _steadyNumOfSteps->SetEditText( QString::number( oldval ) );
+        _steadyLengthSliderEdit->SetValue( oldval );
 }
-*/
 
-void FlowSeedingSubtab::_configureIntegrationType ( const std::string& value ) {
+
+void FlowSeedingSubtab::_configureFlowType ( const std::string& value ) {
     bool isSteady = true;
     if ( value == "Steady" ) {
     //    _startSpinBox->hide();
     //    _endSpinBox->hide();
     //    _lifespanSpinBox->hide();
     //    _intervalSpinBox->hide();
-    //    _directionCombo->show();
-    //    _integrationLengthEdit->show();
+        _steadyDirectionCombo->Show();
+        _steadyLengthSliderEdit->Show();
     }
     else {
         isSteady = false;
@@ -468,15 +557,15 @@ void FlowSeedingSubtab::_configureIntegrationType ( const std::string& value ) {
      //   _endSpinBox->show();
      //   _lifespanSpinBox->show();
      //   _intervalSpinBox->show();
-     //   _directionCombo->hide();
-     //   _integrationLengthEdit->hide();
+        _steadyDirectionCombo->Hide();
+        _steadyLengthSliderEdit->Hide();
     }
     
-    if (verbose) std::cout << "Integration combo changed to " << value << endl;
+    if (verbose) std::cout << "Flow combo changed to " << value << endl;
 
     if ( _params != nullptr ) {
         _params->SetIsSteady( isSteady );
-        if (verbose) std::cout << "Integration params changed to " << _params->GetIsSteady() << endl;
+        if (verbose) std::cout << "Flow params changed to " << _params->GetIsSteady() << endl;
     }
 
     if (verbose) std::cout << std::endl;
@@ -678,13 +767,14 @@ FlowSeedingSubtab::_fileWriterChanged()
 }
 */
 
-/*
+
 void
-FlowSeedingSubtab::_flowDirectionChanged( int newIdx )
+FlowSeedingSubtab::_flowDirectionChanged()
 {
-    _params->SetFlowDirection( newIdx );
+    int index = _steadyDirectionCombo->GetCurrentIndex();
+    _params->SetFlowDirection( index );
 }
-*/
+
 
 //
 //================================

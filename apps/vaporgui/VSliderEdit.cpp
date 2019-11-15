@@ -37,7 +37,10 @@ void VSliderEdit::SetValue( double value ) {
     if (value < _minValid) value = _minValid;
     if (value > _maxValid) value = _maxValid;
 
-    _lineEdit->SetValue( std::to_string( value ) );
+    if (_isIntType)
+        _lineEdit->SetValue( std::to_string( (int)value ) );
+    else
+        _lineEdit->SetValue( std::to_string( value ) );
     _slider->SetValue( value );
     _value = value;
 }
@@ -71,7 +74,6 @@ void VSliderEdit::emitLineEditValueChanged( const std::string& value ) {
     // If we can't convert the _lineEdit text to a double,
     // then revert to the previous value.
     catch (...) {
-        std::cout << "CATCH!" << std::endl;
         SetValue( _value );
     }
 }
@@ -82,6 +84,9 @@ void VSliderEdit::emitSliderValueChanged( double value ) {
 }
 
 void VSliderEdit::emitSliderValueChangedIntermediate( double value ) {
-    std::cout << "esvci " << value << " " << std::endl;
+    if (_isIntType)
+        _lineEdit->SetValue( std::to_string( (int)value ) );
+    else
+        _lineEdit->SetValue( std::to_string( value ) );
     emit ValueChangedIntermediate( value );
 }

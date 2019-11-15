@@ -118,13 +118,15 @@ public:
 		          VAPoR::RenderParams*    rParams );
 
 private slots:
-    void _configureIntegrationType( const std::string& value );
-    void _integrationLengthChanged( int value );
+    void _configureFlowType( const std::string& value );
+    void _unsteadyLengthChanged( int value );
+    void _flowDirectionChanged();
+    void _periodicClicked();
+    void _steadyLengthChanged( int value );
     // Respond to user input 
     /*void _seedGenModeChanged( int newIdx );
     void _fileReaderChanged();
     void _fileWriterChanged();
-    void _flowDirectionChanged( int newIdx );
 
     void _rakeGeometryChanged();
     void _rakeNumOfSeedsChanged();
@@ -132,7 +134,6 @@ private slots:
     void _rakeBiasStrengthChanged();
 
     void _steadyGotClicked();
-    void _steadyNumOfStepsChanged();
     void _pastNumOfTimeStepsChanged( int );
     void _seedInjIntervalChanged( int );
     
@@ -143,14 +144,23 @@ private:
     VAPoR::ParamsMgr *      _paramsMgr;
 
     VSection*               _integrationSection;
-    VComboBox*              _flowTypeComboBox;
+    VComboBox*              _flowTypeCombo;
 
 // Steady flow options    
-    VSliderEdit*            _integrationLengthSliderEdit;
-VSliderEdit*            _steadyNumOfSteps;
-   
-    VComboBox*              _directionCombo;
-VComboBox*              _flowDirection;
+    VSliderEdit*            _steadyLengthSliderEdit;
+    VComboBox*              _steadyDirectionCombo;
+
+// Unsteady flow options
+    VSliderEdit*            _unsteadyLengthSliderEdit;
+    VSliderEdit*            _injIntervalSliderEdit;
+    VSliderEdit*            _unsteadyStartSliderEdit;
+    VSliderEdit*            _unsteadyEndSliderEdit;
+    VSliderEdit*            _unsteadyLifetimeSliderEdit;
+
+// Universal integration options
+    VCheckBox*              _periodicXCheckBox;
+    VCheckBox*              _periodicYCheckBox;
+    VCheckBox*              _periodicZCheckBox;
     
 VSliderEdit*            _pastNumOfTimeSteps;
 VSliderEdit*            _seedInjInterval;

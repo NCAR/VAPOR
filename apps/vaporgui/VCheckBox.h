@@ -11,7 +11,7 @@ class VCheckBox : public VContainer {
     Q_OBJECT
 
 public:
-    VCheckBox( bool value );
+    VCheckBox( bool value=false );
 
     void SetValue( bool value );
 
