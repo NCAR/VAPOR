@@ -20,9 +20,9 @@ endif()
 set (CMAKE_OSX_DEPLOYMENT_TARGET 10.9)
 
 set (VERSION_MAJOR 3)
-set (VERSION_MINOR 1)
+set (VERSION_MINOR 2)
 set (VERSION_MICRO 0)
-set (VERSION_RC )
+set (VERSION_RC alpha)
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
 	get_git_head_revision (GIT_REFSPEC VERSION_COMMIT)
 	execute_process (
