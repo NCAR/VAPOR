@@ -9,6 +9,7 @@ const std::string RayCasterParams::_sampleMultiplierTag = "SampleMultiplierTag";
 
 RayCasterParams::RayCasterParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave, std::string classType) : RenderParams(dataManager, stateSave, classType, 3 /* max dim */)
 {
+    SetFieldVariableNames(vector<string>());
     SetDiagMsg("RayCasterParams::RayCasterParams() this=%p", this);
 }
 

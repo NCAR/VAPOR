@@ -177,13 +177,8 @@ void NavigationEventRouter::_performAutoStretching(string dataSetName)
         if (scales[yDimension] != 1.f) continue;
         if (scales[zDimension] != 1.f) continue;
 
-        DataMgr *           dm = ds->GetDataMgr(dataSetName);
-        std::vector<string> varNames = dm->GetDataVarNames(3);
-
-        if (varNames.empty()) { std::vector<string> varNames = dm->GetDataVarNames(2); }
-        if (varNames.empty()) return;
-
-        DataMgrUtils::GetExtents(dm, 0, varNames[0], minExt, maxExt);
+        size_t ts = GetCurrentTimeStep();
+        ds->GetActiveExtents(paramsMgr, winNames[i], dataSetName, ts, minExt, maxExt);
 
         vector<float> range;
         float         maxRange = 0.0;
@@ -382,10 +377,7 @@ void NavigationEventRouter::updateTransforms()
                 vector<double> origin;
                 DataStatus *   dataStatus = _controlExec->GetDataStatus();
 
-                size_t           local_ts = dataStatus->MapGlobalToLocalTimeStep(names[j], ts);
-                DataMgr *        dataMgr = dataStatus->GetDataMgr(names[j]);
-                std::vector<int> axes;
-                DataMgrUtils::GetExtents(dataMgr, local_ts, string(), minExts, maxExts, -1);
+                dataStatus->GetActiveExtents(paramsMgr, winNames[i], names[j], ts, minExts, maxExts);
 
                 origin.resize(minExts.size());
                 for (int k = 0; k < minExts.size(); k++) origin[k] = minExts[k] + (maxExts[k] - minExts[k]) * 0.5;

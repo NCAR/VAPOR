@@ -153,7 +153,7 @@ void ContourParams::_init()
     if (!_dataMgr->VariableExists(0, varname, 0, 0)) return;
 
     vector<double> minExt, maxExt;
-    int            rc = _dataMgr->GetVariableExtents(0, varname, 0, minExt, maxExt);
+    int            rc = _dataMgr->GetVariableExtents(0, varname, 0, 0, minExt, maxExt);
 
     float rgb[] = {1., 1., 1.};
     SetConstantColor(rgb);

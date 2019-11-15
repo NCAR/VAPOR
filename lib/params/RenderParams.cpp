@@ -129,7 +129,7 @@ void RenderParams::InitBox()
     if (!_dataMgr->VariableExists(0, varname, 0, 0)) return;
 
     bool prev = EnableErrMsg(false);    // no error handling
-    rc = _dataMgr->GetVariableExtents(0, varname, 0, minExt, maxExt);
+    rc = _dataMgr->GetVariableExtents(0, varname, 0, 0, minExt, maxExt);
     if (rc < 0) {
         minExt = {0.0, 0.0, 0.0};
         maxExt = {1.0, 1.0, 1.0};

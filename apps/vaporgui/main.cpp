@@ -105,7 +105,7 @@ int           main(int argc, char **argv)
 #endif
 
 #if defined(Darwin) && !defined(NDEBUG)
-    HideSTDERR();
+    if (!getenv("VAPOR_DEBUG")) { HideSTDERR(); }
 #endif
 
     QApplication a(argc, argv, true);
