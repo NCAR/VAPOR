@@ -219,6 +219,7 @@ int SliceRenderer::_resetBoxCache() {
         _cacheParams.ts,
         _cacheParams.varName,
         _cacheParams.refinementLevel,
+		_cacheParams.compressionLevel,
         _cacheParams.domainMin,
         _cacheParams.domainMax
     );

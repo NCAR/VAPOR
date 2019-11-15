@@ -751,6 +751,7 @@ void VizWin::_getUnionOfFieldVarExtents(
 	DataMgr* dataMgr,
 	int timeStep,
 	int refLevel,
+	int lod,
 	std::vector<double> &minExts,
 	std::vector<double> &maxExts) {
 	
@@ -761,7 +762,7 @@ void VizWin::_getUnionOfFieldVarExtents(
 		if (varName == "") 
 			continue;
 
-		dataMgr->GetVariableExtents(timeStep, varName, refLevel,
+		dataMgr->GetVariableExtents(timeStep, varName, refLevel, lod,
 			tmpMin, tmpMax);
 
 		if (minExts.size() == 0) {
@@ -789,6 +790,7 @@ void VizWin::_getActiveExtents(
 	if (rParams == NULL) return;
 
 	int refLevel = rParams->GetRefinementLevel();
+	int lod = rParams->GetCompressionLevel();
 	string varName = rParams->GetVariableName();
 	vector<string> fieldVars = rParams->GetFieldVariableNames();
 
@@ -804,12 +806,12 @@ void VizWin::_getActiveExtents(
 	
 	if (fieldVars[0]=="" && fieldVars[1]=="" && fieldVars[2]=="") {
 		dataMgr->GetVariableExtents(
-			timeStep, varName, refLevel, minExts, maxExts
+			timeStep, varName, refLevel, lod, minExts, maxExts
 		);
 	}
 	else {
 		_getUnionOfFieldVarExtents(rParams, dataMgr, timeStep, 
-			refLevel, minExts, maxExts
+			refLevel, lod, minExts, maxExts
 		);
 	}
 }
