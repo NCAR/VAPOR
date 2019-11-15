@@ -20,6 +20,8 @@ ImageParams::ImageParams(DataMgr *dataManager,
                    stateSave,
                    ImageParams::GetClassType(),
                    2) {
+    SetVariableName("");
+    SetFieldVariableNames(vector<string>());
     SetDiagMsg("ImageParams::ImageParams() this=%p", this);
 }
 

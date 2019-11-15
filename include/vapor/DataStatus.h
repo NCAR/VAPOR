@@ -66,11 +66,6 @@ class PARAMS_API DataStatus {
 
     vector<string> GetDataMgrNames() const;
 
-    void GetExtents(
-        size_t ts,
-        const map<string, vector<string>> &varnames,
-        vector<double> &minExt, vector<double> &maxExt) const;
-
     //! Get domain extents for all active variables
     //!
     //! This method returns the union of the domain extents for
@@ -196,8 +191,19 @@ class PARAMS_API DataStatus {
     //! Determine the maximum refinement level present for a variable at a timestep
 
   private:
-    map<string, vector<string>> getFirstVars(
-        const vector<string> &dataSetNames) const;
+    typedef struct {
+        std::vector<string> varnames;
+        int refLevel;
+        int compLevel;
+    } var_info_t;
+
+    void _getExtents(
+        size_t ts,
+        const map<string, std::vector<var_info_t>> &variables,
+        vector<double> &minExt, vector<double> &maxExt) const;
+
+    map<string, vector<var_info_t>> _getFirstVars(
+        string dataSetName) const;
 
     void reset_time();
     void reset_time_helper();

@@ -14,6 +14,7 @@ RayCasterParams::RayCasterParams(DataMgr *dataManager,
                    stateSave,
                    classType,
                    3 /* max dim */) {
+    SetFieldVariableNames(vector<string>());
     SetDiagMsg("RayCasterParams::RayCasterParams() this=%p", this);
 }
 
