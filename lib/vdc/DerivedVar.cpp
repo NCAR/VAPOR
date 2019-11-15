@@ -4,6 +4,7 @@
 #include <vapor/UDUnitsClass.h>
 #include <vapor/NetCDFCollection.h>
 #include <vapor/utils.h>
+#include <vapor/WASP.h>
 #include <vapor/DerivedVar.h>
 
 using namespace VAPoR;
@@ -1447,7 +1448,7 @@ int DerivedCoordVar_Staggered::GetDimLensAtLevel(
     bs_at_level.clear();
 
     vector<size_t> dummy;
-    int rc = _dc->GetDimLensAtLevel(_inName, -1, dims_at_level, dummy);
+    int rc = _dc->GetDimLensAtLevel(_inName, level, dims_at_level, dummy);
     if (rc < 0)
         return (-1);
 
@@ -1460,7 +1461,7 @@ int DerivedCoordVar_Staggered::GetDimLensAtLevel(
 int DerivedCoordVar_Staggered::OpenVariableRead(
     size_t ts, int level, int lod) {
 
-    int fd = _dc->OpenVariableRead(ts, _inName, -1, lod);
+    int fd = _dc->OpenVariableRead(ts, _inName, level, lod);
     if (fd < 0)
         return (fd);
 
@@ -1497,7 +1498,7 @@ int DerivedCoordVar_Staggered::ReadRegion(
     }
 
     vector<size_t> dims, dummy;
-    int rc = GetDimLensAtLevel(-1, dims, dummy);
+    int rc = GetDimLensAtLevel(f->GetLevel(), dims, dummy);
     if (rc < 0)
         return (-1);
 
@@ -1637,7 +1638,7 @@ int DerivedCoordVar_UnStaggered::GetDimLensAtLevel(
     dims_at_level.clear();
     bs_at_level.clear();
 
-    int rc = _dc->GetDimLensAtLevel(_inName, -1, dims_at_level, bs_at_level);
+    int rc = _dc->GetDimLensAtLevel(_inName, level, dims_at_level, bs_at_level);
     if (rc < 0)
         return (-1);
 
@@ -1650,7 +1651,7 @@ int DerivedCoordVar_UnStaggered::GetDimLensAtLevel(
 int DerivedCoordVar_UnStaggered::OpenVariableRead(
     size_t ts, int level, int lod) {
 
-    int fd = _dc->OpenVariableRead(ts, _inName, -1, lod);
+    int fd = _dc->OpenVariableRead(ts, _inName, level, lod);
     if (fd < 0)
         return (fd);
 
@@ -1687,7 +1688,7 @@ int DerivedCoordVar_UnStaggered::ReadRegion(
     }
 
     vector<size_t> dims, dummy;
-    int rc = GetDimLensAtLevel(-1, dims, dummy);
+    int rc = GetDimLensAtLevel(f->GetLevel(), dims, dummy);
     if (rc < 0)
         return (-1);
 
@@ -1823,9 +1824,9 @@ int DerivedCoordVarStandardWRF_Terrain::Initialize() {
     }
 
     _coordVarInfo = DC::CoordVar(
-        _derivedVarName, "m", DC::XType::FLOAT,
-        vector<bool>(3, false), 2, false,
-        dimnames, timeDimName);
+        _derivedVarName, "m", DC::XType::FLOAT, dvarInfo.GetWName(),
+        dvarInfo.GetCRatios(), vector<bool>(3, false),
+        dimnames, timeDimName, 2, false);
 
     return (0);
 }
@@ -1848,28 +1849,35 @@ int DerivedCoordVarStandardWRF_Terrain::GetDimLensAtLevel(
     dims_at_level.clear();
     bs_at_level.clear();
 
-    vector<size_t> dummy;
-    int rc = _dc->GetDimLensAtLevel(_PHVar, -1, dims_at_level, dummy);
+    vector<size_t> dims, bs;
+    int rc = _dc->GetDimLensAtLevel(_PHVar, -1, dims, bs);
     if (rc < 0)
         return (-1);
 
     if (_derivedVarName == "Elevation") {
-        dims_at_level[2]--;
+        dims[2]--;
     } else if (_derivedVarName == "ElevationU") {
-        dims_at_level[0]++;
-        dims_at_level[2]--;
+        dims[0]++;
+        dims[2]--;
     } else if (_derivedVarName == "ElevationV") {
-        dims_at_level[1]++;
-        dims_at_level[2]--;
+        dims[1]++;
+        dims[2]--;
     } else if (_derivedVarName == "ElevationW") {
     } else {
         SetErrMsg("Invalid variable name: %s", _derivedVarName.c_str());
         return (-1);
     }
 
+    int nlevels = _dc->GetNumRefLevels(_PHVar);
+    if (level < 0)
+        level = nlevels + level;
+
+    WASP::InqDimsAtLevel(
+        _coordVarInfo.GetWName(), level, dims, bs, dims_at_level, bs_at_level);
+
     // No blocking
     //
-    bs_at_level = vector<size_t>(dims_at_level.size(), 1);
+    //	bs_at_level = vector <size_t> (dims_at_level.size(), 1);
 
     return (0);
 }
@@ -1909,7 +1917,13 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
     // same grid as the W component of velocity
     //
     vector<size_t> wDims, dummy;
-    int rc = _dc->GetDimLensAtLevel(_PHVar, -1, wDims, dummy);
+    int rc = _dc->GetDimLensAtLevel(_PHVar, f->GetLevel(), wDims, dummy);
+    if (rc < 0)
+        return (-1);
+
+    vector<size_t> myDims;
+    rc = DerivedCoordVarStandardWRF_Terrain::GetDimLensAtLevel(
+        f->GetLevel(), myDims, dummy);
     if (rc < 0)
         return (-1);
 
@@ -1921,9 +1935,18 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
     // coordinates of base (Elevation) grid.
     //
     if (varname == "Elevation") {
-        wMax[2] += 1;
+
+        // In general myDims[2] != wDims[2]. However, for multiresolution
+        // data the two can be equal
+        //
+        if (myDims[2] != wDims[2]) {
+            wMax[2] += 1;
+        }
+
     } else if (varname == "ElevationU") {
-        wMax[2] += 1;
+        if (myDims[2] != wDims[2]) {
+            wMax[2] += 1;
+        }
 
         if (min[0] > 0) {
             wMin[0] -= 1;
@@ -1932,7 +1955,9 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
             wMax[0] -= 1;
         }
     } else if (varname == "ElevationV") {
-        wMax[2] += 1;
+        if (myDims[2] != wDims[2]) {
+            wMax[2] += 1;
+        }
 
         if (min[1] > 0) {
             wMin[1] -= 1;
@@ -1946,13 +1971,15 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
     //
     vector<size_t> bMin = wMin;
     vector<size_t> bMax = wMax;
-    bMax[2] -= 1;
+    if (myDims[2] != wDims[2]) {
+        bMax[2] -= 1;
+    }
 
     size_t nElements = std::max(numElements(wMin, wMax), numElements(min, max));
 
     float *buf1 = new float[nElements];
     rc = _getVar(
-        _dc, f->GetTS(), _PHVar, -1, f->GetLOD(),
+        _dc, f->GetTS(), _PHVar, f->GetLevel(), f->GetLOD(),
         wMin, wMax, buf1);
     if (rc < 0) {
         delete[] buf1;
@@ -1961,7 +1988,7 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
 
     float *buf2 = new float[nElements];
     rc = _getVar(
-        _dc, f->GetTS(), _PHBVar, -1, f->GetLOD(),
+        _dc, f->GetTS(), _PHBVar, f->GetLevel(), f->GetLOD(),
         wMin, wMax, buf2);
     if (rc < 0) {
         delete[] buf1;
