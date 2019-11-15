@@ -27,6 +27,7 @@
 #include <vapor/ParamsMgr.h>
 #include <vapor/Renderer.h>
 #include <vapor/AnnotationRenderer.h>
+#include <vapor/Framebuffer.h>
 
 namespace VAPoR {
 
@@ -194,7 +195,7 @@ private:
 
     void _deleteFlaggedRenderers();
     int  _initializeNewRenderers();
-    void _clearFramebuffer();
+    void _clearActiveFramebuffer(float r, float g, float b) const;
     void _applyDatasetTransformsForRenderer(Renderer *r);
 
     int _getCurrentTimestep() const;
@@ -217,6 +218,10 @@ private:
 
     vector<Renderer *> _renderers;
     vector<Renderer *> _renderersToDestroy;
+
+    Framebuffer  _framebuffer;
+    unsigned int _screenQuadVAO;
+    unsigned int _screenQuadVBO;
 };
 
 };    // namespace VAPoR

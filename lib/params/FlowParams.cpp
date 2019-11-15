@@ -23,6 +23,7 @@ static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
 // Constructor
 FlowParams::FlowParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave) : RenderParams(dataManager, stateSave, FlowParams::GetClassType(), 3 /* max dim */)
 {
+    SetVariableName("");
     SetDiagMsg("FlowParams::FlowParams() this=%p", this);
 }
 

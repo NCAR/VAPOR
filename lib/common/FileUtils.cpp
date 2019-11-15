@@ -2,7 +2,6 @@
 #include <string.h>
 #include <algorithm>
 #include <sys/stat.h>
-#include <dirent.h>
 #include <vapor/MyBase.h>
 
 #ifdef WIN32
@@ -12,6 +11,7 @@
     #include <libgen.h>
     #include <pwd.h>
     #include <unistd.h>
+    #include <dirent.h>
 #endif
 
 using namespace Wasp;
@@ -163,6 +163,10 @@ FileType FileUtils::GetFileType(const std::string &path)
 
 std::vector<std::string> FileUtils::ListFiles(const std::string &path)
 {
+#ifdef WIN32
+    #error FileUtils::ListFiles not implemented
+    return vector<string>{};
+#else
     DIR *dir = opendir(path.c_str());
     if (!dir) return {};
 
@@ -180,6 +184,7 @@ std::vector<std::string> FileUtils::ListFiles(const std::string &path)
 
     closedir(dir);
     return fileNames;
+#endif
 }
 
 std::string FileUtils::JoinPaths(std::initializer_list<std::string> paths)

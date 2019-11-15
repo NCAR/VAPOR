@@ -424,8 +424,9 @@ void VGeometry::SetDimAndRange(int dim, const std::vector<float> &range)
 void VGeometry::SetCurrentValues(const std::vector<float> &vals)
 {
     VAssert(vals.size() == _dim * 2);
-    for (int i = 0; i < _dim; i++) VAssert(vals[i * 2] < vals[i * 2 + 1]);
 
+    /* VRange widgets will adjust itself if new values violate
+       range constraints, i.e., low > high.                   */
     /* VRange widgets will only respond to values within their ranges */
     _xrange->SetCurrentValLow(vals[0]);
     _xrange->SetCurrentValHigh(vals[1]);

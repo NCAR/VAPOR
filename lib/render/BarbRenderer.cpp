@@ -790,7 +790,7 @@ double BarbRenderer::_getDomainHypotenuse(size_t ts) const
     VAssert(p);
     varNames = p->GetFieldVariableNames();
 
-    bool status = DataMgrUtils::GetExtents(_dataMgr, ts, varNames, minExts, maxExts, axes);
+    bool status = DataMgrUtils::GetExtents(_dataMgr, ts, varNames, 0, 0, minExts, maxExts, axes);
     VAssert(status);
 
     if (varNames[0] == "" && varNames[1] == "" && varNames[2] == "") return 0.0;

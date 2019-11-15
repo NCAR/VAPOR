@@ -56,6 +56,8 @@ void TwoDDataParams::_init()
     SetVariableName(varname);
     SetColorMapVariableName(varname);
 
+    SetFieldVariableNames(vector<string>());
+
     // Initialize 2D box
     //
     if (varname.empty()) return;
@@ -63,7 +65,7 @@ void TwoDDataParams::_init()
     if (!_dataMgr->VariableExists(0, varname, 0, 0)) return;
 
     vector<double> minExt, maxExt;
-    int            rc = _dataMgr->GetVariableExtents(0, varname, 0, minExt, maxExt);
+    int            rc = _dataMgr->GetVariableExtents(0, varname, 0, 0, minExt, maxExt);
 
     // Crap. No error handling from constructor. Need Initialization()
     // method.

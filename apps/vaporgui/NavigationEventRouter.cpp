@@ -49,6 +49,8 @@
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
 
+#include "VSection.h"
+
 using namespace VAPoR;
 
 namespace {
@@ -72,6 +74,17 @@ NavigationEventRouter::NavigationEventRouter(QWidget *parent, ControlExec *ce) :
     latLonCheckbox->setEnabled(false);
     stereoSeparationEdit->setEnabled(false);
     adjustSize();
+
+    verticalLayout->setSpacing(15);
+
+    VSection *framebufferSection = new VSection("Framebuffer Settings");
+    verticalLayout->insertWidget(verticalLayout->count() - 1, framebufferSection);
+
+    framebufferSection->layout()->addWidget(_useCustomFramebufferCheckbox = new ParamsWidgetCheckbox(ViewpointParams::UseCustomFramebufferTag, "Use Custom Output Size"));
+    framebufferSection->layout()->addWidget(_customFramebufferWidth = new ParamsWidgetNumber(ViewpointParams::CustomFramebufferWidthTag, "Output Width (px)"));
+    framebufferSection->layout()->addWidget(_customFramebufferHeight = new ParamsWidgetNumber(ViewpointParams::CustomFramebufferHeightTag, "Output Height (px)"));
+    _customFramebufferWidth->SetRange(1, 16384);
+    _customFramebufferHeight->SetRange(1, 16384);
 }
 
 NavigationEventRouter::~NavigationEventRouter() {}
@@ -164,13 +177,8 @@ void NavigationEventRouter::_performAutoStretching(string dataSetName)
         if (scales[yDimension] != 1.f) continue;
         if (scales[zDimension] != 1.f) continue;
 
-        DataMgr *           dm = ds->GetDataMgr(dataSetName);
-        std::vector<string> varNames = dm->GetDataVarNames(3);
-
-        if (varNames.empty()) { std::vector<string> varNames = dm->GetDataVarNames(2); }
-        if (varNames.empty()) return;
-
-        DataMgrUtils::GetExtents(dm, 0, varNames[0], minExt, maxExt);
+        size_t ts = GetCurrentTimeStep();
+        ds->GetActiveExtents(paramsMgr, winNames[i], dataSetName, ts, minExt, maxExt);
 
         vector<float> range;
         float         maxRange = 0.0;
@@ -369,10 +377,7 @@ void NavigationEventRouter::updateTransforms()
                 vector<double> origin;
                 DataStatus *   dataStatus = _controlExec->GetDataStatus();
 
-                size_t           local_ts = dataStatus->MapGlobalToLocalTimeStep(names[j], ts);
-                DataMgr *        dataMgr = dataStatus->GetDataMgr(names[j]);
-                std::vector<int> axes;
-                DataMgrUtils::GetExtents(dataMgr, local_ts, string(), minExts, maxExts, -1);
+                dataStatus->GetActiveExtents(paramsMgr, winNames[i], names[j], ts, minExts, maxExts);
 
                 origin.resize(minExts.size());
                 for (int k = 0; k < minExts.size(); k++) origin[k] = minExts[k] + (maxExts[k] - minExts[k]) * 0.5;
@@ -513,6 +518,13 @@ void NavigationEventRouter::_updateTab()
     updateLightChanged();
     updateTransforms();
     updateProjections();
+
+    VAPoR::ViewpointParams *vp = _getActiveParams();
+    _useCustomFramebufferCheckbox->Update(vp);
+    _customFramebufferWidth->Update(vp);
+    _customFramebufferHeight->Update(vp);
+    _customFramebufferWidth->setEnabled(vp->GetValueLong(ViewpointParams::UseCustomFramebufferTag, 0));
+    _customFramebufferHeight->setEnabled(vp->GetValueLong(ViewpointParams::UseCustomFramebufferTag, 0));
 }
 
 void NavigationEventRouter::CenterSubRegion()

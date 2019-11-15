@@ -196,6 +196,47 @@ void VizWin::_setUpProjMatrix()
 
     size_t width, height;
     vParams->GetWindowSize(width, height);
+    int wWidth = width;
+    int wHeight = height;
+
+    if (vParams->GetValueLong(ViewpointParams::UseCustomFramebufferTag, 0)) {
+        width = vParams->GetValueLong(ViewpointParams::CustomFramebufferWidthTag, 0);
+        height = vParams->GetValueLong(ViewpointParams::CustomFramebufferHeightTag, 0);
+        if (width == 0) width = 1;
+        if (height == 0) height = 1;
+
+        int maxSize;
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);
+        if (width > maxSize) {
+            width = maxSize;
+            vParams->SetValueLong(ViewpointParams::CustomFramebufferWidthTag, ViewpointParams::CustomFramebufferWidthTag, width);
+            MSG_ERR("Selected width is larger than your OpenGL implementation supports");
+        }
+        if (height > maxSize) {
+            height = maxSize;
+            vParams->SetValueLong(ViewpointParams::CustomFramebufferHeightTag, ViewpointParams::CustomFramebufferHeightTag, height);
+            MSG_ERR("Selected height is larger than your OpenGL implementation supports");
+        }
+
+        float fa = width / (float)height;
+        float wa = wWidth / (float)wHeight;
+
+        if (fa >= wa) {
+            int x = 0;
+            int y = (wHeight / 2) - (wHeight / fa / 2);
+            int w = wWidth;
+            int h = wHeight / fa;
+            glViewport(x, y, w, h);
+        } else {
+            int x = (wWidth / 2) - (wWidth * fa / 2);
+            int y = 0;
+            int w = wWidth * fa;
+            int h = wHeight;
+            glViewport(x, y, w, h);
+        }
+    } else {
+        glViewport(0, 0, width, height);
+    }
 
     mm->MatrixModeProjection();
     mm->LoadIdentity();
@@ -641,7 +682,7 @@ string VizWin::_getCurrentDataMgrName() const
     return dataSetName;
 }
 
-void VizWin::_getUnionOfFieldVarExtents(RenderParams *rParams, DataMgr *dataMgr, int timeStep, int refLevel, std::vector<double> &minExts, std::vector<double> &maxExts)
+void VizWin::_getUnionOfFieldVarExtents(RenderParams *rParams, DataMgr *dataMgr, int timeStep, int refLevel, int lod, std::vector<double> &minExts, std::vector<double> &maxExts)
 {
     vector<string> fieldVars = rParams->GetFieldVariableNames();
     for (int i = 0; i < 3; i++) {
@@ -649,7 +690,7 @@ void VizWin::_getUnionOfFieldVarExtents(RenderParams *rParams, DataMgr *dataMgr,
         string              varName = fieldVars[i];
         if (varName == "") continue;
 
-        dataMgr->GetVariableExtents(timeStep, varName, refLevel, tmpMin, tmpMax);
+        dataMgr->GetVariableExtents(timeStep, varName, refLevel, lod, tmpMin, tmpMax);
 
         if (minExts.size() == 0) {
             for (int j = 0; j < 3; j++) {
@@ -671,6 +712,7 @@ void VizWin::_getActiveExtents(std::vector<double> &minExts, std::vector<double>
     if (rParams == NULL) return;
 
     int            refLevel = rParams->GetRefinementLevel();
+    int            lod = rParams->GetCompressionLevel();
     string         varName = rParams->GetVariableName();
     vector<string> fieldVars = rParams->GetFieldVariableNames();
 
@@ -683,9 +725,9 @@ void VizWin::_getActiveExtents(std::vector<double> &minExts, std::vector<double>
     DataMgr *   dataMgr = dataStatus->GetDataMgr(dataMgrName);
 
     if (fieldVars[0] == "" && fieldVars[1] == "" && fieldVars[2] == "") {
-        dataMgr->GetVariableExtents(timeStep, varName, refLevel, minExts, maxExts);
+        dataMgr->GetVariableExtents(timeStep, varName, refLevel, lod, minExts, maxExts);
     } else {
-        _getUnionOfFieldVarExtents(rParams, dataMgr, timeStep, refLevel, minExts, maxExts);
+        _getUnionOfFieldVarExtents(rParams, dataMgr, timeStep, refLevel, lod, minExts, maxExts);
     }
 }
 

@@ -271,17 +271,8 @@ void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts)
     if (opt.tgetvalue) { test_get_value(g); }
 
     vector<double> rvec;
-    datamgr.GetDataRange(ts, vname, opt.level, opt.lod, 1, rvec);
-    cout << "Data Range (stride==1): [" << rvec[0] << ", " << rvec[1] << "]" << endl;
-
-    datamgr.GetDataRange(ts, vname, opt.level, opt.lod, 2, rvec);
-    cout << "Data Range (stride==2): [" << rvec[0] << ", " << rvec[1] << "]" << endl;
-
-    datamgr.GetDataRange(ts, vname, opt.level, opt.lod, 4, rvec);
-    cout << "Data Range (stride==4): [" << rvec[0] << ", " << rvec[1] << "]" << endl;
-
-    datamgr.GetDataRange(ts, vname, opt.level, opt.lod, 8, rvec);
-    cout << "Data Range (stride==8): [" << rvec[0] << ", " << rvec[1] << "]" << endl;
+    datamgr.GetDataRange(ts, vname, opt.level, opt.lod, rvec);
+    cout << "Data Range: [" << rvec[0] << ", " << rvec[1] << "]" << endl;
 
     vector<size_t> dims = g->GetDimensions();
     cout << "Grid dimensions: [ ";

@@ -785,6 +785,8 @@ void Plot::_updateExtents()
 {
     VAPoR::DataMgr *         currentDmgr = this->_getCurrentDataMgr();
     VAPoR::PlotParams *      plotParams = this->_getCurrentPlotParams();
+    int                      refinementLevel = plotParams->GetRefinementLevel();
+    int                      compressLevel = plotParams->GetCompressionLevel();
     std::vector<std::string> enabledVars = plotParams->GetAuxVariableNames();
 
     // Retrieve extents of all variables at 3 different time steps.
@@ -796,17 +798,17 @@ void Plot::_updateExtents()
     TSToExamine.push_back(plotParams->GetMinMaxTS().at(1));
 
     // TSToExamine[0] definitely needs to be evaluated.
-    VAPoR::DataMgrUtils::GetExtents(currentDmgr, TSToExamine[0], enabledVars, min, max, axes);
+    VAPoR::DataMgrUtils::GetExtents(currentDmgr, TSToExamine[0], enabledVars, refinementLevel, compressLevel, min, max, axes);
 
     // TSToExamine[1] and TSToExamine[2] are evaluated only when not duplicate
     if (TSToExamine[1] != TSToExamine[0]) {
-        VAPoR::DataMgrUtils::GetExtents(currentDmgr, TSToExamine[1], enabledVars, minT1, maxT1, axes);
+        VAPoR::DataMgrUtils::GetExtents(currentDmgr, TSToExamine[1], enabledVars, refinementLevel, compressLevel, minT1, maxT1, axes);
     } else {
         minT1 = min;
         maxT1 = max;
     }
     if ((TSToExamine[2] != TSToExamine[1]) && (TSToExamine[2] != TSToExamine[0])) {
-        VAPoR::DataMgrUtils::GetExtents(currentDmgr, TSToExamine[2], enabledVars, minT2, maxT2, axes);
+        VAPoR::DataMgrUtils::GetExtents(currentDmgr, TSToExamine[2], enabledVars, refinementLevel, compressLevel, minT2, maxT2, axes);
     } else {
         minT2 = min;
         maxT2 = max;

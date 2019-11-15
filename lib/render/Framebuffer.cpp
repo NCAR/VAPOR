@@ -80,6 +80,12 @@ void Framebuffer::SetSize(int width, int height)
     }
 }
 
+void Framebuffer::GetSize(int *width, int *height) const
+{
+    *width = _width;
+    *height = _height;
+}
+
 int Framebuffer::MakeRenderTarget()
 {
     Bind();

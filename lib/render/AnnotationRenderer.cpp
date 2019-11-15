@@ -387,17 +387,10 @@ void AnnotationRenderer::_calculateDomainExtents(std::vector<double> &domainExte
     vector<string> names = m_paramsMgr->GetDataMgrNames();
     for (int i = 0; i < names.size(); i++) {
         std::vector<double> dataMgrMinExts, dataMgrMaxExts;
-        size_t              local_ts = m_dataStatus->MapGlobalToLocalTimeStep(names[i], _currentTimestep);
-        DataMgr *           dataMgr = m_dataStatus->GetDataMgr(names[i]);
-        std::vector<int>    axes;
-        DataMgrUtils::GetExtents(dataMgr, local_ts, string(), dataMgrMinExts, dataMgrMaxExts, -1);
 
-        if (dataMgrMinExts.size() < 2 || dataMgrMaxExts.size() < 2) continue;
-
-        // If the DataMgr has only 2D variables, we still need to define
-        // a z coordinate for its domain.  Specify it to 0.f.
-        if (dataMgrMinExts.size() == 2) dataMgrMinExts.push_back(0.f);
-        if (dataMgrMaxExts.size() == 2) dataMgrMaxExts.push_back(0.f);
+        m_dataStatus->GetActiveExtents(m_paramsMgr, m_winName, names[i], _currentTimestep, dataMgrMinExts, dataMgrMaxExts);
+        VAssert(dataMgrMinExts.size() == 3);
+        VAssert(dataMgrMaxExts.size() == 3);
 
         ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
         Transform *      transform = vpParams->GetTransform(names[i]);

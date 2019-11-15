@@ -133,9 +133,9 @@ private:
     string              _getCurrentMouseMode() const;
     void                _setNewExtents();
     void                _getActiveExtents(std::vector<double> &minExts, std::vector<double> &maxExts);
-    void                _getUnionOfFieldVarExtents(VAPoR::RenderParams *rParams, VAPoR::DataMgr *dataMgr, int timestep, int refLevel, std::vector<double> &minExts, std::vector<double> &maxExts);
-    string              _getCurrentDataMgrName() const;
-    VAPoR::Transform *  _getDataMgrTransform() const;
+    void   _getUnionOfFieldVarExtents(VAPoR::RenderParams *rParams, VAPoR::DataMgr *dataMgr, int timestep, int refLevel, int lod, std::vector<double> &minExts, std::vector<double> &maxExts);
+    string _getCurrentDataMgrName() const;
+    VAPoR::Transform *_getDataMgrTransform() const;
 
     void                 _getNearFarDist(const double posVec[3], const double dirVec[3], double &boxNear, double &boxFar) const;
     VAPoR::RenderParams *_getRenderParams();

@@ -172,7 +172,7 @@ int SliceRenderer::_resetBoxCache()
     VAssert(p);
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 
-    int rc = _dataMgr->GetVariableExtents(_cacheParams.ts, _cacheParams.varName, _cacheParams.refinementLevel, _cacheParams.domainMin, _cacheParams.domainMax);
+    int rc = _dataMgr->GetVariableExtents(_cacheParams.ts, _cacheParams.varName, _cacheParams.refinementLevel, _cacheParams.compressionLevel, _cacheParams.domainMin, _cacheParams.domainMax);
     if (rc < 0) {
         SetErrMsg("Unable to determine domain extents for %s", _cacheParams.varName.c_str());
         return rc;

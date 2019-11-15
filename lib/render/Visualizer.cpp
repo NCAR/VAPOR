@@ -42,6 +42,7 @@
 #include <vapor/common.h>
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
+#include <vapor/ShaderManager.h>
 
 #include "vapor/ImageWriter.h"
 #include "vapor/GeoTIFWriter.h"
@@ -78,6 +79,9 @@ Visualizer::~Visualizer()
 #endif
 
     if (_vizFeatures) delete _vizFeatures;
+
+    if (_screenQuadVAO) glDeleteVertexArrays(1, &_screenQuadVAO);
+    if (_screenQuadVBO) glDeleteBuffers(1, &_screenQuadVBO);
 }
 
 int Visualizer::resizeGL(int wid, int ht) { return 0; }
@@ -158,10 +162,25 @@ int Visualizer::paintEvent(bool fast)
     // This can occur sometimes on Qt startup
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
-    if (viewport[2] - viewport[0] <= 0) return 0;
-    if (viewport[3] - viewport[1] <= 0) return 0;
+    if (viewport[2] <= 0) return 0;
+    if (viewport[3] <= 0) return 0;
 
-    _clearFramebuffer();
+    _clearActiveFramebuffer(0.3, 0.3, 0.3);
+
+    int fbWidth = viewport[2];
+    int fbHeight = viewport[3];
+
+    ViewpointParams *vp = getActiveViewpointParams();
+    if (vp->GetValueLong(ViewpointParams::UseCustomFramebufferTag, 0)) {
+        fbWidth = vp->GetValueLong(ViewpointParams::CustomFramebufferWidthTag, 0);
+        fbHeight = vp->GetValueLong(ViewpointParams::CustomFramebufferHeightTag, 0);
+    }
+    _framebuffer.SetSize(fbWidth, fbHeight);
+    _framebuffer.MakeRenderTarget();
+
+    double clr[3];
+    getActiveAnnotationParams()->GetBackgroundColor(clr);
+    _clearActiveFramebuffer(clr[0], clr[1], clr[2]);
 
     _loadMatricesFromViewpointParams();
     if (_configureLighting()) return -1;
@@ -222,6 +241,22 @@ int Visualizer::paintEvent(bool fast)
     GL_ERR_BREAK();
     if (CheckGLError()) return -1;
 
+    _framebuffer.UnBind();
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+    glBindVertexArray(_screenQuadVAO);
+    SmartShaderProgram shader = _glManager->shaderManager->GetSmartShader("Framebuffer");
+    if (!shader.IsValid()) return -1;
+    shader->SetSampler("colorBuffer", *_framebuffer.GetColorTexture());
+    shader->SetSampler("depthBuffer", *_framebuffer.GetDepthTexture());
+
+    glDepthFunc(GL_LEQUAL);
+    glDepthMask(true);
+    glEnable(GL_DEPTH_TEST);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+    glDepthFunc(GL_LESS);
+
     _insideGLContext = false;
     return rc;
 }
@@ -257,6 +292,22 @@ int Visualizer::InitializeGL(GLManager *glManager)
     }
 
     if (GetVendor() == MESA) { SetErrMsg("GL Vendor String is MESA.\nGraphics drivers may need to be reinstalled"); }
+
+    _framebuffer.EnableDepthBuffer();
+    _framebuffer.Generate();
+
+    static float data[] = {-1, -1, 0, 0, 1, -1, 1, 0, -1, 1, 0, 1,
+
+                           -1, 1,  0, 1, 1, -1, 1, 0, 1,  1, 1, 1};
+    glGenVertexArrays(1, &_screenQuadVAO);
+    glGenBuffers(1, &_screenQuadVBO);
+    glBindVertexArray(_screenQuadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, _screenQuadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), NULL);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
 
     return 0;
 }
@@ -445,8 +496,9 @@ int Visualizer::_captureImage(std::string path)
     if (FileUtils::Extension(path) == "") path += ".png";
 
     ViewpointParams *vpParams = getActiveViewpointParams();
-    size_t           width, height;
-    vpParams->GetWindowSize(width, height);
+    int              width, height;
+    //	vpParams->GetWindowSize(width, height);
+    _framebuffer.GetSize(&width, &height);
 
     bool geoTiffOutput = vpParams->GetProjectionType() == ViewpointParams::MapOrthographic && (FileUtils::Extension(path) == "tif" || FileUtils::Extension(path) == "tiff");
 
@@ -557,15 +609,16 @@ bool Visualizer::_getPixelData(unsigned char *data) const
 {
     ViewpointParams *vpParams = getActiveViewpointParams();
 
-    size_t width, height;
-    vpParams->GetWindowSize(width, height);
+    int width, height;
+    //	vpParams->GetWindowSize(width, height);
+    _framebuffer.GetSize(&width, &height);
 
     // Must clear previous errors first.
     while (glGetError() != GL_NO_ERROR)
         ;
 
-    glReadBuffer(GL_BACK);
-    glDisable(GL_SCISSOR_TEST);
+    //	glReadBuffer(GL_BACK);
+    //	glDisable(GL_SCISSOR_TEST);
 
     // Calling pack alignment ensures that we can grab the any size window
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -612,14 +665,12 @@ int Visualizer::_initializeNewRenderers()
     return 0;
 }
 
-void Visualizer::_clearFramebuffer()
+void Visualizer::_clearActiveFramebuffer(float r, float g, float b) const
 {
     VAssert(_insideGLContext);
-    double clr[3];
-    getActiveAnnotationParams()->GetBackgroundColor(clr);
 
     glDepthMask(GL_TRUE);
-    glClearColor(clr[0], clr[1], clr[2], 1.f);
+    glClearColor(r, g, b, 1.f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 }
 
