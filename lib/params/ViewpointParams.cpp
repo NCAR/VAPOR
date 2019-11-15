@@ -45,6 +45,9 @@ double VAPoR::ViewpointParams::_defaultSpecularExp = 20.f;
 using namespace VAPoR;
 using namespace Wasp;
 
+const string ViewpointParams::UseCustomFramebufferTag    = "UseCustomFramebuffer";
+const string ViewpointParams::CustomFramebufferWidthTag  = "CustomFramebufferWidth";
+const string ViewpointParams::CustomFramebufferHeightTag = "CustomFramebufferHeight";
 
 const string ViewpointParams::_viewPointsTag = "Viewpoints";
 const string ViewpointParams::_transformsTag = "Transforms";
@@ -188,7 +191,9 @@ void ViewpointParams::_init() {
 
 	SetWindowSize(100,100);
 
-	
+    SetValueLong(UseCustomFramebufferTag, UseCustomFramebufferTag, false);
+    SetValueLong(CustomFramebufferWidthTag, CustomFramebufferWidthTag, 1920);
+    SetValueLong(CustomFramebufferHeightTag, CustomFramebufferHeightTag, 1080);
 }
 
 Transform* ViewpointParams::GetTransform(string dataSetName) {
