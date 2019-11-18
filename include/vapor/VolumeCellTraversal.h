@@ -58,7 +58,7 @@ class VolumeCellTraversal : public VolumeRegular {
 
   protected:
     int _getHeuristicBBLevels() const;
-    std::string _addDefinitionsToShader(std::string shaderName) const;
+    virtual std::string _addDefinitionsToShader(std::string shaderName) const;
 };
 
 //! \class VolumeCellTraversalIso

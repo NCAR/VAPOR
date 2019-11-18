@@ -15,7 +15,7 @@ class ParamsMgr;
 class DataMgr;
 } // namespace VAPoR
 
-class TFEditor;
+class TFEditorVolume;
 class QSliderEdit;
 
 class VolumeVariablesSubtab : public QWidget, public Ui_VolumeVariablesGUI {
@@ -26,7 +26,7 @@ class VolumeVariablesSubtab : public QWidget, public Ui_VolumeVariablesGUI {
     VolumeVariablesSubtab(QWidget *parent) {
         setupUi(this);
         _variablesWidget->Reinit(
-            (VariableFlags)(SCALAR),
+            (VariableFlags)(SCALAR | COLOR),
             (DimFlags)(THREED));
     }
 
@@ -63,7 +63,7 @@ class VolumeAppearanceSubtab : public QWidget, public Ui_VolumeAppearanceGUI {
 
   private:
     VAPoR::VolumeParams *_params;
-    TFEditor *_tfe;
+    TFEditorVolume *_tfe;
     QSliderEdit *_densitySlider;
 };
 
