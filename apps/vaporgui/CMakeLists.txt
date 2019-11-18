@@ -123,6 +123,7 @@ set (SRCS
     VPushButtonWithDoubleClick.h
     VFileSelector.cpp
     VFileSelector.h
+    VFrame.h
 	PWidget.cpp
 	PWidget.h
 	PCheckbox.cpp

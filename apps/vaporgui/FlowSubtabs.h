@@ -17,6 +17,12 @@
 #include "TransformTable.h"
 #include "ColorbarWidget.h"
 
+#define UNSTEADY    "Pathline"
+#define STEADY      "Streamline"
+#define GRIDDED     "Gridded"
+#define LISTOFSEEDS "List of seeds"
+#define RANDOM      "Random"
+
 class VLineEdit;
 class VCheckBox;
 class VComboBox;
@@ -25,6 +31,8 @@ class VSliderEdit;
 class VFileReader;
 class VFileWriter;
 class VGeometry;
+class VFrame;
+class VSpinBox;
 
 namespace VAPoR {
 	class ControlExec;
@@ -118,11 +126,13 @@ public:
 		          VAPoR::RenderParams*    rParams );
 
 private slots:
-    void _configureFlowType( const std::string& value );
-    void _unsteadyLengthChanged( int value );
+    void _configureFlowType( const std::string& value = STEADY );
+    void _configureSeedType( const std::string& value = GRIDDED );
+    void _streamlineLengthChanged( int value );
     void _flowDirectionChanged();
     void _periodicClicked();
-    void _steadyLengthChanged( int value );
+    void _pathlineLengthChanged( int value );
+    void _velocityMultiplierChanged( const std::string& );
     // Respond to user input 
     /*void _seedGenModeChanged( int newIdx );
     void _fileReaderChanged();
@@ -140,28 +150,62 @@ private slots:
     void _selectedTabChanged(int index);*/
 
 private:
+    void _createIntegrationSection();
+    void _createSeedingSection();
+
     VAPoR::FlowParams*      _params;
     VAPoR::ParamsMgr *      _paramsMgr;
 
+// Integration options
+//
     VSection*               _integrationSection;
     VComboBox*              _flowTypeCombo;
 
-// Steady flow options    
-    VSliderEdit*            _steadyLengthSliderEdit;
-    VComboBox*              _steadyDirectionCombo;
+//  Pathline integration options
+    VFrame*                 _pathlineWidgetFrame;
+    VSliderEdit*            _pathlineLengthSliderEdit;
+    VComboBox*              _pathlineDirectionCombo;
 
-// Unsteady flow options
-    VSliderEdit*            _unsteadyLengthSliderEdit;
-    VSliderEdit*            _injIntervalSliderEdit;
-    VSliderEdit*            _unsteadyStartSliderEdit;
-    VSliderEdit*            _unsteadyEndSliderEdit;
-    VSliderEdit*            _unsteadyLifetimeSliderEdit;
+//  Streamline integration options
+    VFrame*                 _streamlineWidgetFrame;
+    VSliderEdit*            _streamlineLengthSliderEdit;
+    VSliderEdit*            _streamlineInjIntervalSliderEdit;
+    VSliderEdit*            _streamlineStartSliderEdit;
+    VSliderEdit*            _streamlineEndSliderEdit;
+    VSliderEdit*            _streamlineLifetimeSliderEdit;
 
-// Universal integration options
+//  Universal integration options
     VCheckBox*              _periodicXCheckBox;
     VCheckBox*              _periodicYCheckBox;
     VCheckBox*              _periodicZCheckBox;
-    
+    VLineEdit*              _velocityMultiplierLineEdit;
+   
+// Seed distribution options
+// 
+    VSection*               _seedDistributionSection;
+    VComboBox*              _seedTypeCombo;
+
+//  Gridded seed distribution
+    VFrame*                 _griddedSeedsFrame;
+    VSpinBox*               _xSeedSpinBox;
+    VSpinBox*               _ySeedSpinBox;
+    VSpinBox*               _zSeedSpinBox;
+    VSliderEdit*            _xSeedSliderEdit;
+    VSliderEdit*            _ySeedSliderEdit;
+    VSliderEdit*            _zSeedSliderEdit;
+
+//  Seeds read from a text file
+    VFrame*                 _listOfSeedsFrame;
+    VFileReader*            _listOfSeedsFileReader;
+
+//  Random seed distribution 
+    VFrame*                 _randomSeedsFrame;
+    VSpinBox*               _randomSeedSpinBox;
+    VComboBox*              _biasVariableComboBox;
+    VSliderEdit*            _biasWeightSpinBox;
+
+    VFileWriter*            _exportGeometryFileWriter;
+
 VSliderEdit*            _pastNumOfTimeSteps;
 VSliderEdit*            _seedInjInterval;
 
