@@ -2,7 +2,6 @@
 #include <string.h>
 #include <algorithm>
 #include <sys/stat.h>
-//#include <dirent.h>
 #include <vapor/MyBase.h>
 
 #ifdef WIN32
@@ -12,6 +11,7 @@
 #include <libgen.h>
 #include <pwd.h>
 #include <unistd.h>
+#include <dirent.h>
 #endif
 
 using namespace Wasp;
@@ -54,8 +54,7 @@ string FileUtils::ReadFileToString(const string &path)
 std::string FileUtils::HomeDir()
 {
 #ifdef WIN32
-//#error FileUtils::HomeDir not implemented
-    return "";
+    return string(getenv("USERPROFILE"));
 #else
     const struct passwd *pw = getpwuid(getuid());
     const char *homeDir = pw->pw_dir;
@@ -189,8 +188,26 @@ FileType FileUtils::GetFileType(const std::string &path)
 
 std::vector<std::string> FileUtils::ListFiles(const std::string &path)
 {
-	return{"FileUtils::ListFiles() is broken"};
-	/*    DIR *dir = opendir(path.c_str());
+#ifdef WIN32
+	WIN32_FIND_DATA find;
+	HANDLE h;
+	vector<string> fileNames;
+	string searchPath = path + "\\*";
+
+	h = FindFirstFile(searchPath.c_str(), &find);
+	if (h != INVALID_HANDLE_VALUE) {
+		do {
+			const string name(find.cFileName);
+			if (name == ".") continue;
+			if (name == "..") continue;
+			fileNames.push_back(name);
+		} while (FindNextFile(h, &find));
+	}
+
+	FindClose(h);
+    return fileNames;
+#else
+    DIR *dir = opendir(path.c_str());
     if (!dir)
         return {};
     
@@ -207,7 +224,8 @@ std::vector<std::string> FileUtils::ListFiles(const std::string &path)
     }
     
     closedir(dir);
-    return fileNames;*/
+    return fileNames;
+#endif
 }
 
 std::string FileUtils::JoinPaths(std::initializer_list<std::string> paths)
