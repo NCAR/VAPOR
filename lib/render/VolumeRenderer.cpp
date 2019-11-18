@@ -97,6 +97,7 @@ int VolumeRenderer::_initializeGL()
     _framebuffer.EnableDepthBuffer();
     _framebuffer.Generate();
     _LUTTexture.Generate();
+    _LUT2Texture.Generate();
     _depthTexture.Generate();
 
     return 0;
@@ -181,12 +182,18 @@ void VolumeRenderer::_setShaderUniforms(const ShaderProgram *shader, const bool 
     shader->SetUniform("scales", extScales);
 
     shader->SetUniform("density", (float)_cache.tf->getOpacityScale());
-    shader->SetUniform("LUTMin", (float)_cache.mapRange[0]);
-    shader->SetUniform("LUTMax", (float)_cache.mapRange[1]);
+    shader->SetUniform("LUTMin", (float)_cache.tf->getMinMapValue());
+    shader->SetUniform("LUTMax", (float)_cache.tf->getMaxMapValue());
     shader->SetUniform("mapOrthoMode", viewpointParams->GetProjectionType() == ViewpointParams::MapOrthographic);
 
     shader->SetSampler("LUT", _LUTTexture);
     shader->SetSampler("sceneDepth", _depthTexture);
+
+    if (_cache.useColorMapVar) {
+        shader->SetUniform("LUTMin2", (float)_cache.tf2->getMinMapValue());
+        shader->SetUniform("LUTMax2", (float)_cache.tf2->getMaxMapValue());
+        shader->SetSampler("LUT2", _LUT2Texture);
+    }
 
     shader->SetUniform("fast", fast);
 
@@ -294,7 +301,7 @@ bool VolumeRenderer::_shouldUseChunkedRender(bool fast) const
 bool VolumeRenderer::_usingColorMapData() const
 {
     // Overriden by VolumeIsoRenderer
-    return false;
+    return GetActiveParams()->GetValueLong(VAPoR::VolumeParams::UseColormapVariableTag, false);
 }
 
 void VolumeRenderer::_saveOriginalViewport() { glGetIntegerv(GL_VIEWPORT, _originalViewport); }
@@ -425,30 +432,29 @@ void VolumeRenderer::_getLUTFromTF(const MapperFunction *tf, float *LUT) const
 
 void VolumeRenderer::_loadTF()
 {
-    VolumeParams *  vp = (VolumeParams *)GetActiveParams();
-    MapperFunction *tf;
-    if (_cache.useColorMapVar) {
-        tf = vp->GetMapperFunc(_cache.colorMapVar);
-    } else {
-        tf = vp->GetMapperFunc(_cache.var);
-        vector<float> constantColor = vp->GetConstantColor();
-        constantColor.push_back(tf->getOpacityScale());
-        CheckCache(_cache.constantColor, constantColor);
-    }
+    VolumeParams *vp = (VolumeParams *)GetActiveParams();
 
-    if (_cache.tf && *_cache.tf != *tf) _cache.needsUpdate = true;
+    vector<float> constantColor = vp->GetConstantColor();
+    constantColor.push_back(vp->GetMapperFunc(_cache.var)->getOpacityScale());
+    CheckCache(_cache.constantColor, constantColor);
+
+    _loadTF(&_LUTTexture, vp->GetMapperFunc(_cache.var), &_cache.tf);
+
+    if (_cache.useColorMapVar) { _loadTF(&_LUT2Texture, vp->GetMapperFunc(_cache.colorMapVar), &_cache.tf2); }
+}
+
+void VolumeRenderer::_loadTF(Texture1D *texture, MapperFunction *tf, MapperFunction **cacheTF)
+{
+    if (!*cacheTF || **cacheTF != *tf) _cache.needsUpdate = true;
 
     if (!_cache.needsUpdate) return;
 
-    if (_cache.tf) delete _cache.tf;
-    _cache.tf = new MapperFunction(*tf);
-    _cache.mapRange = tf->getMinMaxMapValue();
+    if (*cacheTF) delete *cacheTF;
+    *cacheTF = new MapperFunction(*tf);
 
     float *LUT = new float[4 * 256];
     _getLUTFromTF(tf, LUT);
-
-    _LUTTexture.TexImage(GL_RGBA8, 256, 0, 0, GL_RGBA, GL_FLOAT, LUT);
-
+    texture->TexImage(GL_RGBA8, 256, 0, 0, GL_RGBA, GL_FLOAT, LUT);
     delete[] LUT;
 }
 
