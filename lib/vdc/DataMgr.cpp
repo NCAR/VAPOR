@@ -3557,7 +3557,11 @@ int DataMgr::_getLatlonExtents(
         SetErrMsg("Invalid variable reference : %s", varname.c_str());
         return (-1);
     }
-    VAssert(dims.size() >= 1 && dims.size() <= 2);
+    if (!(dims.size() == 1 || dims.size() == 2)) {
+        SetErrMsg(
+            "Unsupported variable dimension for variable \"%s\"", varname.c_str());
+        return (-1);
+    }
 
     float *buf = new float[VProduct(dims)];
 

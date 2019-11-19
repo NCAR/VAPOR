@@ -260,7 +260,7 @@ void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts) {
         maxu = opt.maxu;
     } else {
         int rc = datamgr.GetVariableExtents(
-            ts, vname, opt.level, minu, maxu);
+            ts, vname, opt.level, opt.lod, minu, maxu);
         if (rc < 0)
             exit(1);
     }
