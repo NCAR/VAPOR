@@ -8,7 +8,12 @@ class VFrame : public QFrame {
 public:
     VFrame() {
         setLayout( new QVBoxLayout );
-        setContentsMargins( 0, 0, 0, 0 );
+        layout()->setContentsMargins( 0, 0, 0, 0 );
+        layout()->setSpacing( 0 );
         setFrameStyle( QFrame::NoFrame );
+    }
+
+    void addWidget( QWidget* widget) {
+        layout()->addWidget(widget);
     }
 };

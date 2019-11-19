@@ -8,6 +8,7 @@
 #include "VLineItem.h"
 #include "VSliderEdit.h"
 #include "VLineEdit.h"
+#include "VFileSelector.h"
 
 #define verbose     1
 
@@ -102,13 +103,55 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
 
 void FlowSeedingSubtab::_createSeedingSection() {
     _seedDistributionSection = new VSection("Seed Distribution Settings");
-    layout()->addWidget( _integrationSection );
+    layout()->addWidget( _seedDistributionSection );
 
     std::vector<std::string> values = {GRIDDED, RANDOM, LISTOFSEEDS};
     _seedTypeCombo = new VComboBox(values);
     _seedDistributionSection->AddWidget( new VLineItem("Seed distribution type", _seedTypeCombo ));
     connect( _seedTypeCombo, SIGNAL( ValueChanged( std::string )),
         this, SLOT( _configureSeedType( std::string )));
+
+    // Gridded seed selection
+    _griddedSeedsFrame = new VFrame();
+    _seedDistributionSection->AddWidget( _griddedSeedsFrame );
+
+    _xSeedSliderEdit = new VSliderEdit();
+    _xSeedSliderEdit->SetIntType(true);
+    _griddedSeedsFrame->addWidget( new VLineItem( "X axis seeds", _xSeedSliderEdit ) );
+    //connect
+    _ySeedSliderEdit = new VSliderEdit();
+    _ySeedSliderEdit->SetIntType(true);
+    _griddedSeedsFrame->addWidget( new VLineItem("Y axis seeds", _ySeedSliderEdit ) );
+    //connect
+    _zSeedSliderEdit = new VSliderEdit();
+    _zSeedSliderEdit->SetIntType(true);
+    _griddedSeedsFrame->addWidget( new VLineItem("Z axis seeds", _zSeedSliderEdit ) );
+    //connect
+
+    // List of seeds selection
+    _listOfSeedsFrame = new VFrame();
+    _seedDistributionSection->AddWidget( _listOfSeedsFrame );
+    
+    _listOfSeedsFileReader = new VFileReader();
+    _listOfSeedsFrame->addWidget( new VLineItem("List of seeds file", _listOfSeedsFileReader ) );
+    //connect
+
+    // Random distribution selection
+    _randomSeedsFrame = new VFrame();
+    _seedDistributionSection->AddWidget( _randomSeedsFrame );
+    
+    _randomSeedSpinBox = new VSpinBox( 0, 100000 );
+    _randomSeedsFrame->addWidget( new VLineItem("Number of random seeds", _randomSeedSpinBox ) );
+    // connect
+
+    _biasVariableComboBox = new VComboBox( std::vector<std::string>() );
+    _randomSeedsFrame->addWidget( new VLineItem( "Bias variable", _biasVariableComboBox ) );
+    // connect
+
+    _biasWeightSliderEdit = new VSliderEdit();
+    _randomSeedsFrame->addWidget( new VLineItem( "Bias weight", _biasWeightSliderEdit ) );
+
+    _configureSeedType( GRIDDED );
 }
 
 void FlowSeedingSubtab::_createIntegrationSection() {

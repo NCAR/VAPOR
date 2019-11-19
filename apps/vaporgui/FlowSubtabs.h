@@ -202,7 +202,7 @@ private:
     VFrame*                 _randomSeedsFrame;
     VSpinBox*               _randomSeedSpinBox;
     VComboBox*              _biasVariableComboBox;
-    VSliderEdit*            _biasWeightSpinBox;
+    VSliderEdit*            _biasWeightSliderEdit;
 
     VFileWriter*            _exportGeometryFileWriter;
 
