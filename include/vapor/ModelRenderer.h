@@ -100,9 +100,10 @@ private:
         
         std::vector<ModelInstance> _instances;
         std::map<int, std::vector<ModelInstance>> _keyframes;
-        std::map<std::string, std::unique_ptr<Model>> _models;
+        std::map<std::string, Model*> _models;
         
     public:
+        ~Scene();
         int Load(const std::string &path);
         void Render(GLManager *gl, const int ts = 0);
         glm::vec3 Center() const;
