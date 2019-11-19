@@ -368,6 +368,8 @@ int VolumeCellTraversal::_getHeuristicBBLevels() const {
 }
 
 std::string VolumeCellTraversal::_addDefinitionsToShader(std::string shaderName) const {
+    shaderName = VolumeRegular::_addDefinitionsToShader(shaderName);
+
     if (_useHighPrecisionTriangleRoutine)
         shaderName += ":USE_INTEL_TRI_ISECT";
 
@@ -437,5 +439,4 @@ ShaderProgram *VolumeCellTraversalIso::GetShader() const {
 
 void VolumeCellTraversalIso::SetUniforms(const ShaderProgram *shader) const {
     VolumeCellTraversal::SetUniforms(shader);
-    shader->SetUniform("useColormapData", _hasSecondData);
 }
