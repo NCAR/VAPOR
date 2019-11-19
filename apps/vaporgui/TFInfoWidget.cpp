@@ -6,6 +6,11 @@
 #include <vapor/RenderParams.h>
 #include <VLineItem.h>
 
+#ifndef __FLT_MIN__
+    #define __FLT_MIN__ FLT_MIN
+    #define __FLT_MAX__ FLT_MAX
+#endif
+
 TFInfoWidget::TFInfoWidget()
 {
     QBoxLayout *layout = new QVBoxLayout;

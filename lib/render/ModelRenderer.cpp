@@ -212,8 +212,14 @@ int ModelRenderer::Model::Load(const std::string &path)
     return 0;
 }
 
+ModelRenderer::Scene::~Scene()
+{
+    for (auto it : _models) delete it.second;
+}
+
 int ModelRenderer::Scene::Load(const std::string &path)
 {
+    for (auto it : _models) delete it.second;
     _keyframes.clear();
     _models.clear();
     _instances.clear();
@@ -280,7 +286,7 @@ int ModelRenderer::Scene::createSceneFromModelFile(const std::string &path)
     Model *model = new Model;
     int    rc = model->Load(path);
     if (rc < 0) return rc;
-    _models[path] = unique_ptr<Model>(model);
+    _models[path] = model;
 
     ModelInstance defaultInstance;
     defaultInstance.file = path;
@@ -328,7 +334,7 @@ int ModelRenderer::Scene::loadSceneFile(const std::string &sceneFilePath)
             Model *model = new Model;
             int    rc = model->Load(filePath);
             if (rc < 0) return rc;
-            _models[instance.file] = unique_ptr<Model>(model);
+            _models[instance.file] = model;
         }
     }
 
