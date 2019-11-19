@@ -22,9 +22,9 @@ class TFEditor : public VSection {
 public:
     TFEditor();
 
-    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
+    virtual void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
-private:
+protected:
     TFMapGroupWidget *      _maps;
     TFMapInfoGroupWidget *  _mapsInfo;
     TFMappingRangeSelector *range;

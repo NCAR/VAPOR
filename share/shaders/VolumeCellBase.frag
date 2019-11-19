@@ -256,7 +256,8 @@ vec4 GetAverageColorForCoordIndex(ivec3 coordIndex)
 
 vec4 GetColorAtCoord(vec3 coord)
 {
-    return GetColorForNormalizedData(NormalizeData(GetDataCoordinateSpace(coord)));
+    // return GetColorForNormalizedData(NormalizeData(GetDataCoordinateSpace(coord)));
+    return GetColorForNormalizedCoord(coord/coordDimsF);
 }
 
 vec3 GetNormalAtCoord(vec3 coord)
