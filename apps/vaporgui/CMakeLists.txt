@@ -110,6 +110,8 @@ set (SRCS
 	ModelEventRouter.h
 	ModelSubtabs.cpp
 	ModelSubtabs.h
+	TFEditorVolume.cpp
+	TFEditorVolume.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h

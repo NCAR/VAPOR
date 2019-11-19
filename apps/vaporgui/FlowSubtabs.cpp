@@ -213,6 +213,8 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _paramsMgr = paramsMgr;
     VAssert( _params );
 
+	int refLevel = _params->GetRefinementLevel();
+	int lod = _params->GetCompressionLevel();
     bool isSteady = _params->GetIsSteady();
     _steady->SetCheckState( isSteady );
     int steadyNumOfSteps    = _params->GetSteadyNumOfSteps();
@@ -273,6 +275,7 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     VAPoR::DataMgrUtils::GetExtents( dataMgr, 
                                      _params->GetCurrentTimestep(), 
                                      _params->GetFieldVariableNames(),         
+                                     refLevel, lod,
                                      minExt, 
                                      maxExt, 
                                      axes  );

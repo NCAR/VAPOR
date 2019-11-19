@@ -88,9 +88,6 @@ string RenderEventRouter::GetIconImagePath() const {
 
 
 void RenderEventRouter::setEditorDirty() {
-#ifndef WIN32
-//	#warning What is this? I had to delete the code here and it didn't match the doxygen
-#endif
 }
 
 

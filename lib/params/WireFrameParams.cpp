@@ -59,5 +59,7 @@ bool WireFrameParams::usingVariable(const std::string& varname) {
 void WireFrameParams::_init() {
 	SetDiagMsg("WireFrameParams::_init()");
 
+	SetFieldVariableNames(vector <string> ());
+
 }
 

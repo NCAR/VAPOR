@@ -125,10 +125,16 @@ double Renderer::_getDefaultZ(
 	DataMgr *dataMgr, size_t ts
 ) const {
 	
+	const RenderParams *rParams = GetActiveParams();
+	int refLevel = rParams->GetRefinementLevel();
+	int lod = rParams->GetCompressionLevel();
+
 	vector <double> minExts;
 	vector <double> maxExts;
 
-	bool status = DataMgrUtils::GetExtents(dataMgr, ts, "", minExts, maxExts);
+	bool status = DataMgrUtils::GetExtents(
+		dataMgr, ts, "", refLevel, lod, minExts, maxExts
+	);
 	VAssert(status);
 
 	return(minExts.size() == 3 ? minExts[2] : 0.0); 
