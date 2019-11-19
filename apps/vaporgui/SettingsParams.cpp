@@ -85,7 +85,6 @@ SettingsParams::SettingsParams(
 
 	_settingsPath = QDir::homePath().toStdString();
     _settingsPath += "/";
-	//_settingsPath += QDir::separator().toAscii();
 	_settingsPath += SettingsFile;
 
 	// Try to get settings params from .settings file
@@ -104,7 +103,6 @@ SettingsParams::SettingsParams(
 {
 	_settingsPath = QDir::homePath().toStdString();
     _settingsPath += "/";
-	//_settingsPath += QDir::separator().toAscii();
 	_settingsPath += SettingsFile;
 
 	// If node isn't tagged correctly we correct the tag and reinitialize
@@ -127,7 +125,6 @@ SettingsParams::SettingsParams(
 ) : ParamsBase(new ParamsBase::StateSave, _classType) {
 	_settingsPath = QDir::homePath().toStdString();
     _settingsPath += "/";
-	//_settingsPath += QDir::separator().toAscii();
 	_settingsPath += SettingsFile;
 	_init();
 }
@@ -137,7 +134,6 @@ SettingsParams &SettingsParams::operator=( const SettingsParams& rhs ) {
 	
 	_settingsPath = QDir::homePath().toStdString();
     _settingsPath += "/";
-	//_settingsPath += QDir::separator().toAscii();
 	_settingsPath += SettingsFile;
 
 	return (*this);
