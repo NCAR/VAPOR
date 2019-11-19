@@ -67,9 +67,6 @@ void TFColorMap::PopulateSettingsMenu(QMenu *menu) const
     std::sort(fileNames.begin(), fileNames.end());
     for (int i = 0; i < fileNames.size(); i++) {
         
-        // Ignore hidden files
-        if (fileNames[i][0] == '.') continue;
- 
         string path = FileUtils::JoinPaths({builtinPath, fileNames[i]});
         
         if (FileUtils::Extension(path) != "tf3")
@@ -388,9 +385,9 @@ QIcon ColorMapMenuItem::getCachedIcon(const std::string &path)
         buf[i*3+2] = rgb[2]*255;
     }
     QImage image(buf, nSamples, 1, QImage::Format::Format_RGB888);
-	delete[] buf;
-    
     icons[path] = QIcon(QPixmap::fromImage(image).scaled(size.width(), size.height()));
+    
+    delete[] buf;
     return icons[path];
 }
 
@@ -412,7 +409,7 @@ ColorMapMenuItem::ColorMapMenuItem(const std::string &path)
     
     button->setIcon(getCachedIcon(path));
     button->setFixedSize(getIconSize() + getIconPadding());
-    connect(button, SIGNAL(clicked()), this, SLOT(_clicked()));
+    button->installEventFilter(this);
     
     string name = STLUtils::Split(FileUtils::Basename(path), ".")[0];
     button->setToolTip(QString::fromStdString(name));
@@ -431,6 +428,7 @@ ColorMapMenuItem::ColorMapMenuItem(const std::string &path)
                           )");
 }
 
+// Manually riggering an action does not close the menu so it has to be done manually.
 void ColorMapMenuItem::CloseMenu(QAction *action)
 {
     if (!action)
@@ -448,9 +446,13 @@ void ColorMapMenuItem::CloseMenu(QAction *action)
     }
 }
 
-void ColorMapMenuItem::_clicked()
+bool ColorMapMenuItem::eventFilter(QObject *obj, QEvent *event)
 {
-    trigger();
-    emit triggered(_path);
-    CloseMenu(this);
+    if (event->type() == QEvent::MouseButtonRelease) {
+        trigger();
+        emit triggered(_path);
+        CloseMenu(this);
+        return true;
+    }
+    return QObject::eventFilter(obj, event);
 }
