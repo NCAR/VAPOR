@@ -216,7 +216,6 @@ string MyPython::PyErr() {
 	}
 
 	PyObject *output = PyObject_GetAttrString(catcher,"value");
-	//char *s = PyString_AsString(output);
 	char *s = PyUnicode_AsUTF8(output);
 
 	// Erase the string
