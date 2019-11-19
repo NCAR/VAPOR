@@ -47,6 +47,7 @@ namespace VAPoR {
         bool _hasMissingData2;
         
         int _loadDataDirect(const Grid *grid, Texture3D *dataTexture, Texture3D *missingTexture, bool *hasMissingData);
+        virtual std::string _addDefinitionsToShader(std::string shaderName) const;
     };
     
     

@@ -87,6 +87,9 @@ private:
     static const std::string _phongDiffuseTag;
     static const std::string _phongSpecularTag;
     static const std::string _phongShininessTag;
+    
+public:
+    static const std::string UseColormapVariableTag;
 };
     
 };
