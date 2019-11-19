@@ -93,9 +93,9 @@ public:
     ColorMapMenuItem(const std::string &path);
     static void CloseMenu(QAction *action);
 
+protected:
+    bool eventFilter(QObject *obj, QEvent *event);
+
 signals:
     void triggered(std::string colormapPath);
-
-private slots:
-    void _clicked();
 };
