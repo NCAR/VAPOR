@@ -99,13 +99,6 @@ list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
 list (APPEND CMAKE_PREFIX_PATH ${QTDIR}/lib/cmake)
 list (APPEND CMAKE_PROGRAM_PATH ${QTDIR}/bin)
 
-message( "QTDIR            " ${QTDIR})
-message( "DLL DIR          " ${DLL_DIR})
-message( "WIN INSTALL DLLS " ${WIN_INSTALL_DLLS} )
-message( "INSTALL BIN DIR  " ${INSTALL_BIN_DIR} )
-message( "PYTHONPATH       " ${PYTHONPATH})
-message( "INSTALL LIB DIR  " ${INSTALL_LIB_DIR})
-
 if (WIN32)
 	include_directories (${THIRD_PARTY_DIR}/Python${PYTHONVERSION}/include)
 	include_directories (${NUMPY_INCLUDE_DIR})
@@ -120,11 +113,6 @@ else ()
     # I'm not sure why we only have include files for python3.6, and not python3.6m.
     # 
 	include_directories (${THIRD_PARTY_LIB_DIR}/python3.6/site-packages/numpy/core/include)
-	message ("extra python dir for numpy " ${THIRD_PARTY_LIB_DIR}/python3.6/site-packages/numpy/core/include)
-
-    #message( "Python Include Dir " ${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION})
-    message( "Python Include Dir " ${THIRD_PARTY_INC_DIR}/python3.6m)
-	#include_directories (${PYTHONPATH}/site-packages/numpy/core/include)
 endif ()
 if (BUILD_VDC)
 	link_directories (${PYTHONPATH}/lib-dynload)
@@ -274,7 +262,6 @@ if (WIN32)
 endif (WIN32)
 
 if (APPLE)
-    message ( "We should be building a .dmg.....")
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
 		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${PYTHONPATH} ${QTDIR}/lib/*.framework)
@@ -300,10 +287,8 @@ if (APPLE)
             DESTINATION ${INSTALL_BIN_DIR}/styles
             COMPONENT Dependencies
             )
-        message ( "                 Hmm ok we did not install, but we did build..." )
     endif ()
 	set (CPACK_BINARY_DRAGNDROP ON)
-    message ( "                 Exiting the CPACK section for Apple..." )
 endif (APPLE)
 
 if (UNIX AND NOT APPLE)
