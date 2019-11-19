@@ -83,8 +83,8 @@ int MyPython::Initialize() {
 	if (! m_pyHome.empty()) {
 //#ifdef WIN32
 #ifdef WIN32
-		std::string pythonPath = m_pyHome + "\\Python36:";
-		pythonPath = pythonPath + m_pyHome + "\\Python36\\Lib:";
+		std::string pythonPath = m_pyHome + "\\Python36;";
+		pythonPath = pythonPath + m_pyHome + "\\Python36\\Lib;";
 		pythonPath = pythonPath + m_pyHome +  "\\Python36\\Lib\\site-packages";
 		_putenv_s("PYTHONPATH", pythonPath.c_str());
 		std::wstring widestr = std::wstring(m_pyHome.begin(), m_pyHome.end());
