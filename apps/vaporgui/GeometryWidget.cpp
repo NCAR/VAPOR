@@ -301,14 +301,15 @@ bool GeometryWidget::getAuxiliaryExtents(
 		vector<int> axes;
 		int ts    = _rParams->GetCurrentTimestep();
 		int level = _rParams->GetRefinementLevel();
+		int lod = _rParams->GetCompressionLevel();
 		int rc = DataMgrUtils::GetExtents(
 			_dataMgr, 
 			ts, 
 			auxVarNames, 
+			level, lod,
 			minFullExts, 
 			maxFullExts,
-			axes,
-			level
+			axes
 		);
 
 		if (rc<0) {
@@ -333,14 +334,16 @@ bool GeometryWidget::getVectorExtents(
 	std::vector<int> axes;
 	int ts    = _rParams->GetCurrentTimestep();
 	int level = _rParams->GetRefinementLevel();
+	int lod = _rParams->GetCompressionLevel();
 	int rc = DataMgrUtils::GetExtents(
 		_dataMgr, 
 		ts, 
 		varNames, 
+		level,
+		lod,
 		minFullExts, 
 		maxFullExts,
-		axes,
-		level
+		axes
 	);
 	
 	if (rc<0) {
@@ -356,6 +359,7 @@ bool GeometryWidget::getVariableExtents(
 
 	size_t ts = _rParams->GetCurrentTimestep();
 	int level = _rParams->GetRefinementLevel();
+	int lod = _rParams->GetCompressionLevel();
 	string varName = _rParams->GetVariableName();
 
 	// If no variable name set find one.
@@ -372,7 +376,7 @@ bool GeometryWidget::getVariableExtents(
 		if (varName.empty()) return(false);
 	}
 	int rc = _dataMgr->GetVariableExtents(ts, varName, 
-						level, minFullExts, maxFullExts);
+						level, lod, minFullExts, maxFullExts);
 	if (rc<0) {
 		MyBase::SetErrMsg("Error: DataMgr could "
 			"not return valid values from GetVariableExtents()");

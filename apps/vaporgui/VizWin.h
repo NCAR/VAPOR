@@ -137,6 +137,7 @@ private:
 	int _buttonNum; // currently pressed button (0=none, 1=left,2=mid, 3=right)
 	bool _navigateFlag;
 	bool _manipFlag;
+    bool _manipFlowSeedFlag = false;
 	Trackball *_trackBall;
 
 	std::vector<double> _getScreenCoords(QMouseEvent* e) const;
@@ -149,6 +150,7 @@ private:
 		VAPoR::DataMgr* dataMgr,
 		int timestep,
 		int refLevel,
+		int lod,
 		std::vector<double> &minExts,
 		std::vector<double> &maxExts);
 	string _getCurrentDataMgrName() const;

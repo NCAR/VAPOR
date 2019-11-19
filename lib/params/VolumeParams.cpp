@@ -25,6 +25,7 @@ const std::string VolumeParams::_phongAmbientTag = "PhongAmbientTag";
 const std::string VolumeParams::_phongDiffuseTag = "PhongDiffuseTag";
 const std::string VolumeParams::_phongSpecularTag = "PhongSpecularTag";
 const std::string VolumeParams::_phongShininessTag = "PhongShininessTag";
+const std::string VolumeParams::UseColormapVariableTag = "UseColormapVariable";
 
 VolumeParams::VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave)
 : RenderParams(dataMgr, ssave, VolumeParams::GetClassType(), 3)
@@ -167,5 +168,7 @@ void VolumeParams::Register(const std::string &name, Type type)
 //Set everything to default values
 void VolumeParams::_init() {
 	SetDiagMsg("VolumeParams::_init()");
+
+	SetFieldVariableNames(vector <string> ());
 }
 

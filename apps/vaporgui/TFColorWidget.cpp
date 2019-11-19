@@ -69,7 +69,7 @@ void TFColorMap::PopulateSettingsMenu(QMenu *menu) const
         
         string path = FileUtils::JoinPaths({builtinPath, fileNames[i]});
         
-        if (FileUtils::Extension(path) != ".tf3")
+        if (FileUtils::Extension(path) != "tf3")
             continue;
         
         QAction *item = new ColorMapMenuItem(path);
@@ -116,7 +116,7 @@ void TFColorMap::paintEvent(QPainter &p)
     
     QMargins padding = GetPadding();
     int nSamples = width()-(padding.left()+padding.right());
-    unsigned char buf[nSamples*3];
+    unsigned char *buf = new unsigned char[nSamples*3];
     float rgb[3];
     for (int i = 0; i < nSamples; i++) {
         cm->colorNormalized(i/(float)nSamples).toRGB(rgb);
@@ -131,6 +131,7 @@ void TFColorMap::paintEvent(QPainter &p)
     for (int i = 0; i < cm->numControlPoints(); i++) {
         drawControl(p, controlQPositionForValue(cm->controlPointValueNormalized(i)), i == _selectedId);
     }
+	delete[] buf;
 }
 
 void TFColorMap::mousePressEvent(QMouseEvent *event)
@@ -375,7 +376,7 @@ QIcon ColorMapMenuItem::getCachedIcon(const std::string &path)
     
     QSize size = getIconSize();
     int nSamples = size.width();
-    unsigned char buf[nSamples*3];
+    unsigned char *buf = new unsigned char[nSamples*3];
     float rgb[3];
     for (int i = 0; i < nSamples; i++) {
         cm->colorNormalized(i/(float)nSamples).toRGB(rgb);
@@ -384,8 +385,9 @@ QIcon ColorMapMenuItem::getCachedIcon(const std::string &path)
         buf[i*3+2] = rgb[2]*255;
     }
     QImage image(buf, nSamples, 1, QImage::Format::Format_RGB888);
-    
     icons[path] = QIcon(QPixmap::fromImage(image).scaled(size.width(), size.height()));
+    
+    delete[] buf;
     return icons[path];
 }
 
@@ -407,7 +409,7 @@ ColorMapMenuItem::ColorMapMenuItem(const std::string &path)
     
     button->setIcon(getCachedIcon(path));
     button->setFixedSize(getIconSize() + getIconPadding());
-    connect(button, SIGNAL(clicked()), this, SLOT(_clicked()));
+    button->installEventFilter(this);
     
     string name = STLUtils::Split(FileUtils::Basename(path), ".")[0];
     button->setToolTip(QString::fromStdString(name));
@@ -426,6 +428,7 @@ ColorMapMenuItem::ColorMapMenuItem(const std::string &path)
                           )");
 }
 
+// Manually riggering an action does not close the menu so it has to be done manually.
 void ColorMapMenuItem::CloseMenu(QAction *action)
 {
     if (!action)
@@ -443,9 +446,13 @@ void ColorMapMenuItem::CloseMenu(QAction *action)
     }
 }
 
-void ColorMapMenuItem::_clicked()
+bool ColorMapMenuItem::eventFilter(QObject *obj, QEvent *event)
 {
-    trigger();
-    emit triggered(_path);
-    CloseMenu(this);
+    if (event->type() == QEvent::MouseButtonRelease) {
+        trigger();
+        emit triggered(_path);
+        CloseMenu(this);
+        return true;
+    }
+    return QObject::eventFilter(obj, event);
 }
