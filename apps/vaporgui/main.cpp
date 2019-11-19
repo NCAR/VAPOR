@@ -71,7 +71,9 @@ FILE *OpenLog(string path_var) {
 	return(fp);
 }
 
+#ifndef WIN32
 #warning Qt4 uses deprecated OSX calls which pollute the console with warnings
+#endif
 #if defined(Darwin) && !defined(NDEBUG)
 //#ifdef DEBUG
 #include <unistd.h>
