@@ -336,9 +336,9 @@ QIcon ColorMapMenuItem::getCachedIcon(const std::string &path)
         buf[i * 3 + 2] = rgb[2] * 255;
     }
     QImage image(buf, nSamples, 1, QImage::Format::Format_RGB888);
-    delete[] buf;
-
     icons[path] = QIcon(QPixmap::fromImage(image).scaled(size.width(), size.height()));
+
+    delete[] buf;
     return icons[path];
 }
 
