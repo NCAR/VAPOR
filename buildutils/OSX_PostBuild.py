@@ -1,12 +1,10 @@
-# A tool to change the locations of the dependencies, referenced by our shared
-# libraries.  The locations of these dependencies are hard-coded into the 
-# libraries when they are linked with ld.  By default, this hard-coded value
-# is the build directory of the library, which ends up being an invalid location
-# after we deploy on a client's machine.  By changing this hard-coded directory
-# to reference @rpath, the libraries can search for their dependencies, relative
-# to their current location.
+# On OSX, ld builds libraries that contain hard coded path to their dependencies.
+# After installation on a client machiene, these paths become invalid unless we 
+# modify them to reference @rpath.  This script adds @rpath!
+
+
+# This script uses the following OSX tools:
 #
-# Useful tools on OSX:
 # otool -L <target-library>
 #   Lists dependent libraries on <target-library>
 # 
@@ -30,15 +28,18 @@ changeLibraryIDCommand  = "/usr/bin/install_name_tool -id "
 executable = stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH
 
 def modifyPath( filename, changeFileID):
+
+    # ask otool for a list of our target library's reference paths
     output = subprocess.check_output("otool -L " + filename, shell=True)
     output = output.decode("utf-8")
+
     for line in output.splitlines():  
 
-        # remove indentations and other characters
+        # remove indentations and colons
         line = line.replace("\t", "")
         line = line.replace(":", "")
 
-        # remove library description
+        # remove library description that otool reports to us
         # such as /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1252.250.1)
         #                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         line = line.split()[0]
@@ -73,12 +74,6 @@ def fixLibsInDir( directory, changeFileID ):
             filename = '/'.join(path) + '/' + file
             if os.path.isfile(filename) and os.access(filename, os.X_OK) and "dylib" in filename:
                 modifyPath( filename, changeFileID )
-
-# fix executables built from our source repository, such as vapor or wrf2vdc
-#fixLibsInDir( executable_dir, False )
-
-# fix libraries built from our source repository, such as librender.dylib
-#fixLibsInDir( vaporLibrary_dir, False )
 
 # for changing rpath of our third-party libraries, such as libjpeg.dylib
 fixLibsInDir( thirdParty_dir, True )
