@@ -125,7 +125,6 @@ std::string Wasp::GetPythonDir()
 
     string exists = FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH});
 
-    //if (!FileUtils::Exists( exists ))
     if (!FileUtils::Exists(FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH})))
         path = string(PYTHON_DIR);
     return path;
