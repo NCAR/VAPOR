@@ -777,7 +777,7 @@ FlowSeedingSubtab::_rakeBiasStrengthChanged()
 }
 */
 
-/*
+
 void
 FlowSeedingSubtab::_rakeNumOfSeedsChanged()
 {
@@ -832,7 +832,7 @@ FlowSeedingSubtab::_rakeNumOfSeedsChanged()
         _params->SetRakeNumOfSeeds( newVal );
     }
 }
-*/
+
 
 /*
 void
@@ -845,13 +845,13 @@ FlowSeedingSubtab::_rakeGeometryChanged()
 }
 */
 
-/*
+
 void
 FlowSeedingSubtab::_seedGenModeChanged( int newIdx )
 {
     _params->SetSeedGenMode( newIdx );
 }
-*/
+
 
 /*
 void
