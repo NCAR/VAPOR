@@ -86,7 +86,7 @@ void VolumeParams::SetAlgorithmWasManuallySetByUser(bool v) {
 }
 
 std::vector<float> VolumeParams::GetSamplingRateMultiples() {
-    return {1, 2, 3, 4};
+    return {1, 2, 4, 8, 16};
 }
 
 float VolumeParams::GetSamplingMultiplier() const {
