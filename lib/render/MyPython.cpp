@@ -16,6 +16,7 @@
 //	Description:	
 //
 #include <iostream>
+#include <algorithm>
 #include <cstdlib>
 #include <csignal>
 #include <cstdlib>
@@ -26,6 +27,7 @@
 #include <unistd.h>
 #endif
 
+#include <vapor/CMakeConfig.h>
 #include <vapor/ResourcePath.h>
 #include <vapor/MyPython.h>
 #include "vapor/VAssert.h"
