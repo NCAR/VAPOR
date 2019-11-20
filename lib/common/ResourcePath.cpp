@@ -112,8 +112,6 @@ std::string Wasp::GetPythonPath()
 
 std::string Wasp::GetPythonDir()
 {
-    cout << "WASP::GetPythonPath PYTHON_INSTALLED_PATH " << PYTHON_INSTALLED_PATH << endl;
-
 #ifdef WIN32
 	return GetPythonPath();
 #endif
