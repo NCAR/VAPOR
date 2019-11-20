@@ -116,6 +116,8 @@ public:
  float maxValue() const {
 	return(GetDataBounds()[1]);
  }
+    
+    void Reverse();
 
 
  // Get static string identifier for this params class
