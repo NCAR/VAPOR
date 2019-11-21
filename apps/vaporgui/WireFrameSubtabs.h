@@ -47,6 +47,7 @@ public:
 	WireFrameAppearanceSubtab(QWidget* parent) {
 		setupUi(this);
         verticalLayout->insertWidget(0, _tfe = new TFEditor);
+        _tfe->SetShowOpacityMap(false);
 	}
 
 	void Update(
