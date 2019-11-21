@@ -20,13 +20,13 @@ VSliderEdit::VSliderEdit( double min, double max, double value )
     layout()->addWidget(_lineEdit);
 
     connect( _lineEdit, SIGNAL( ValueChanged( const std::string& ) ),
-        this, SLOT( emitLineEditValueChanged( const std::string& ) ) );
+        this, SLOT( _lineEditChanged( const std::string& ) ) );
 
     connect( _slider, SIGNAL( ValueChanged(double) ),
-        this, SLOT( emitSliderValueChanged(double) ) );
+        this, SLOT( _sliderChanged(double) ) );
 
     connect( _slider, SIGNAL( ValueChangedIntermediate(double) ),
-        this, SLOT( emitSliderValueChangedIntermediate(double) ) );
+        this, SLOT( _sliderChangedIntermediate(double) ) );
 }
 
 double VSliderEdit::GetValue() const {
@@ -67,9 +67,10 @@ void VSliderEdit::SetIntType( bool type ) {
     SetValue( _value );
 }
 
-void VSliderEdit::emitLineEditValueChanged( const std::string& value ) {
+void VSliderEdit::_lineEditChanged( const std::string& value ) {
     try {
-        double newValue = stod( value );//_lineEdit->GetValue());
+        double newValue = stod( value );
+        std::cout << "LineEdit stod(value) = " << newValue << std::endl;
         SetValue( newValue );
         emit ValueChanged( _value );
     }
@@ -80,12 +81,12 @@ void VSliderEdit::emitLineEditValueChanged( const std::string& value ) {
     }
 }
 
-void VSliderEdit::emitSliderValueChanged( double value ) {
+void VSliderEdit::_sliderChanged( double value ) {
     SetValue( value );
     emit ValueChanged( _value );
 }
 
-void VSliderEdit::emitSliderValueChangedIntermediate( double value ) {
+void VSliderEdit::_sliderChangedIntermediate( double value ) {
     if (_isIntType)
         _lineEdit->SetValue( std::to_string( (int)value ) );
     else

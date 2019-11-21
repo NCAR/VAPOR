@@ -15,22 +15,18 @@ public:
 
     void SetValue( double value );
     void SetRange( double min, double max );
-    void SetIntType( bool isInt );
 
     double GetValue() const;
 
 private:
-    void _adjustValue( double& value ) const;
-
     QSlider* _slider;
     double _minValid;
     double _maxValid;
     double _stepSize;
-    bool _isInt;
 
-public slots:
-    void emitSliderChanged();
-    void emitSliderChangedIntermediate( int position );
+private slots:
+    void _sliderChanged();
+    void _sliderChangedIntermediate( int position );
 
 signals:
     void ValueChanged( double value );

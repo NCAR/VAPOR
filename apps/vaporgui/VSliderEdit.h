@@ -27,11 +27,11 @@ private:
     double     _value;
     bool       _isIntType;
 
-public slots:
-    void emitLineEditValueChanged( const std::string& value );
+private slots:
+    void _lineEditChanged( const std::string& value );
 
-    void emitSliderValueChanged( double value );
-    void emitSliderValueChangedIntermediate( double value );
+    void _sliderChanged( double value );
+    void _sliderChangedIntermediate( double value );
 
 signals:
     void ValueChanged( double value );

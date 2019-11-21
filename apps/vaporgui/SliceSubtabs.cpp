@@ -57,13 +57,6 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
         this, SLOT( _vsChangedIntermediate( double ) ) );
     connect( _vs, SIGNAL( ValueChanged( double ) ),
         this, SLOT( _vsChanged( double ) ) );
-    _vs = new VSlider( -10.0, 15.0 );
-    _vs->SetIntType(true);
-    layout()->addWidget( new VLineItem("IntSlider", _vs ) );
-    connect( _vs, SIGNAL( ValueChangedIntermediate( double ) ),
-        this, SLOT( _vsChangedIntermediate( double ) ) );
-    connect( _vs, SIGNAL( ValueChanged( double ) ),
-        this, SLOT( _vsChanged( double ) ) );
 
     _vse = new VSliderEdit( -10.0, 1500.0, 5.0 );
     layout()->addWidget( new VLineItem("SliderEdit", _vse ) );;
