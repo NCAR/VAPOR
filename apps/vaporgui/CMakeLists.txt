@@ -136,6 +136,9 @@ set (SRCS
 	VolumeIsoEventRouter.h
 	VolumeSubtabs.h
 	VolumeIsoSubtabs.h
+	HelloEventRouter.h
+    SliceEventRouter.h
+	TwoDDataEventRouter.h
 
 	MainForm.h
 	VizWinMgr.h
