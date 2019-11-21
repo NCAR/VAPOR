@@ -71,6 +71,7 @@ class TFColorMap : public TFMap {
     void menuLoad();
     void menuSave();
     void menuLoadBuiltin(std::string path);
+    void menuReverse();
 };
 
 class TFColorWidget : public TFMapWidget {

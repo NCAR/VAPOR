@@ -109,6 +109,8 @@ class PARAMS_API ColorMap : public ParamsBase {
         return (GetDataBounds()[1]);
     }
 
+    void Reverse();
+
     // Get static string identifier for this params class
     //
     static string GetClassType() {
