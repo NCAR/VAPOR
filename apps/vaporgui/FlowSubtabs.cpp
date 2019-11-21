@@ -97,8 +97,8 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
 {
     _params = nullptr;
 
-    _createIntegrationSection();
     _createSeedingSection();
+    _createIntegrationSection();
 }
 
 void FlowSeedingSubtab::_createSeedingSection() {
@@ -135,30 +135,30 @@ void FlowSeedingSubtab::_createSeedingSection() {
         this, SLOT( _rakeNumOfSeedsChanged() ) );
 
     // List of seeds selection
-    _listOfSeedsFrame = new VFrame();
-    _seedDistributionSection->AddWidget( _listOfSeedsFrame );
+    //_listOfSeedsFrame = new VFrame();
+    //_seedDistributionSection->AddWidget( _listOfSeedsFrame );
     
-    _listOfSeedsFileReader = new VFileReader();
-    _listOfSeedsFrame->addWidget( new VLineItem("List of seeds file", _listOfSeedsFileReader ) );
-    //connect
+    _listOfSeedsFileReader = new VFileReader("Read seeds from file");
+    _seedDistributionSection->AddWidget( _listOfSeedsFileReader );
+    //_listOfSeedsFrame->addWidget( new VLineItem("List of seeds file", _listOfSeedsFileReader ) );
+    connect( _listOfSeedsFileReader, SIGNAL( ValueChanged( const std::string& ) ),
+        this, SLOT( _seedListFileChanged( const std::string& ) ) );
 
     // Random distribution selection
     _randomSeedsFrame = new VFrame();
     _seedDistributionSection->AddWidget( _randomSeedsFrame );
     
-    //_randomSeedSpinBox = new VSpinBox( 0, 100000 );
-    //_randomSeedsFrame->addWidget( new VLineItem("Number of random seeds", _randomSeedSpinBox ) );
     _randomSeedsSliderEdit = new VSliderEdit();
     _randomSeedsFrame->addWidget( new VLineItem("Seed count", _randomSeedsSliderEdit ) );
     connect( _randomSeedsSliderEdit, SIGNAL( ValueChanged( double ) ),
         this, SLOT( _rakeNumOfSeedsChanged() ) );
 
+    _biasWeightSliderEdit = new VSliderEdit();
+    _randomSeedsFrame->addWidget( new VLineItem( "Bias weight", _biasWeightSliderEdit ) );
+
     _biasVariableComboBox = new VComboBox( std::vector<std::string>() );
     _randomSeedsFrame->addWidget( new VLineItem( "Bias variable", _biasVariableComboBox ) );
     // connect
-
-    _biasWeightSliderEdit = new VSliderEdit();
-    _randomSeedsFrame->addWidget( new VLineItem( "Bias weight", _biasWeightSliderEdit ) );
 
     _configureSeedType( GRIDDED_STRING );
 }
@@ -702,21 +702,21 @@ void FlowSeedingSubtab::_configureFlowType ( const std::string& value ) {
 void FlowSeedingSubtab::_configureSeedType( const std::string& value ) {
     if ( value == GRIDDED_STRING ) {
         _griddedSeedsFrame->show();
-        _listOfSeedsFrame->hide();
+        _listOfSeedsFileReader->hide();
         _randomSeedsFrame->hide();
         if ( _params != nullptr ) 
             _params->SetSeedGenMode( (int)VAPoR::FlowSeedMode::UNIFORM );
     }
     else if ( value == LIST_STRING ) {
         _griddedSeedsFrame->hide();
-        _listOfSeedsFrame->show();
+        _listOfSeedsFileReader->show();
         _randomSeedsFrame->hide();
         if ( _params != nullptr ) 
             _params->SetSeedGenMode( (int)VAPoR::FlowSeedMode::LIST );
     }
     else if ( value == RANDOM_STRING ) {
         _griddedSeedsFrame->hide();
-        _listOfSeedsFrame->hide();
+        _listOfSeedsFileReader->hide();
         _randomSeedsFrame->show();
         if ( _params != nullptr ) 
             _params->SetSeedGenMode( (int)VAPoR::FlowSeedMode::RANDOM);
@@ -836,6 +836,7 @@ FlowSeedingSubtab::_rakeNumOfSeedsChanged()
     _params->SetRakeNumOfSeeds( seedsVector );
     std::cout << "_rakeNumOfSeedsChanged to " << _params->GetRakeNumOfSeeds()[0] << " " << _params->GetRakeNumOfSeeds()[1] << " " << _params->GetRakeNumOfSeeds()[2] << " " << _params->GetRakeNumOfSeeds()[3] << std::endl;
 }
+
 /*
     // These fields should ALWAYS contain legal values, even when not in use.
     //   That's why we validate every one of them!                          
@@ -889,6 +890,13 @@ FlowSeedingSubtab::_rakeNumOfSeedsChanged()
     }
 }*/
 
+void 
+FlowSeedingSubtab::_seedListFileChanged( const std::string& value ) {
+    std::cout << "_params->SetSeedInputFilename( value ) to " << value << endl;
+    _params->SetSeedInputFilename( value );
+    std::cout << "_params->GetSeedInputFilename()        to " << _params->GetSeedInputFilename() << endl;
+
+}
 
 /*
 void

@@ -138,13 +138,14 @@ public:
 private slots:
     void _configureFlowType( const std::string& value = STEADY_STRING );
     void _configureSeedType( const std::string& value = GRIDDED_STRING );
-    void _streamlineLengthChanged( int value );
+    void _streamlineLengthChanged( int length );
     void _flowDirectionChanged();
     void _periodicClicked();
-    void _pathlineLengthChanged( int value );
-    void _velocityMultiplierChanged( const std::string& );
+    void _pathlineLengthChanged( int length );
+    void _velocityMultiplierChanged( const std::string& multiplier );
     void _rakeNumOfSeedsChanged();
     void _seedGenModeChanged( int newIdx );
+    void _seedListFileChanged( const std::string& file );
     // Respond to user input 
     /*void _fileReaderChanged();
     void _fileWriterChanged();

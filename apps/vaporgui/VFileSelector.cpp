@@ -49,6 +49,7 @@ bool VFileSelector::SetValue( const std::string& file ) {
     }
 
     _lineEdit->SetValue( _filePath );
+    _lineEdit->setToolTip( QString::fromStdString(_filePath) );
     return success;
 }
 
