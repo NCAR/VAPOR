@@ -71,6 +71,7 @@ private slots:
     void menuLoad();
     void menuSave();
     void menuLoadBuiltin(std::string path);
+    void menuReverse();
 };
 
 class TFColorWidget : public TFMapWidget {

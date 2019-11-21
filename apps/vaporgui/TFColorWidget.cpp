@@ -46,6 +46,7 @@ void TFColorMap::PopulateContextMenu(QMenu *menu, const glm::vec2 &p)
 void TFColorMap::PopulateSettingsMenu(QMenu *menu) const
 {
     menu->addAction(_colorInterpolationMenu);
+    menu->addAction("Reverse Colormap", this, SLOT(menuReverse()));
     menu->addSeparator();
     menu->addAction("Save Colormap", this, SLOT(menuSave()));
     menu->addAction("Load Colormap", this, SLOT(menuLoad()));
@@ -270,6 +271,16 @@ void TFColorMap::menuLoadBuiltin(std::string path)
     RenderParams *rp = getRenderParams();
     if (!rp) return;
     TFUtils::LoadColormap(rp->GetMapperFunc(getVariableName()), path);
+}
+
+void TFColorMap::menuReverse()
+{
+    RenderParams *rp = getRenderParams();
+    if (!rp) return;
+    MapperFunction *tf = rp->GetMapperFunc(getVariableName());
+    ColorMap *      cm = tf->GetColorMap();
+
+    cm->Reverse();
 }
 
 int TFColorMap::findSelectedControlPoint(const glm::vec2 &mouse) const
