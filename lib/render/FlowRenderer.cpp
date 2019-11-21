@@ -220,6 +220,9 @@ int FlowRenderer::_paintGL(bool fast)
         _coloringComplete = true;
     }
 
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(true);
+
     _prepareColormap(params);
     _renderFromAnAdvection(&_advection, params, fast);
     /* If the advection is bi-directional */
