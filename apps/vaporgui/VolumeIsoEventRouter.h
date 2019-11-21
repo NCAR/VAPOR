@@ -38,7 +38,6 @@ public:
  VolumeIsoEventRouter(
 	QWidget *parent, VAPoR::ControlExec *ce
  );
- ~VolumeIsoEventRouter();
 
  void GetWebHelp(
 	vector <pair <string, string> > &help

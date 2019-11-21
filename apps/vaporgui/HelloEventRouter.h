@@ -40,9 +40,6 @@ public:
         QWidget *parent, VAPoR::ControlExec *ce
     );
 
-	virtual ~HelloEventRouter();
-
-
 	//! \copydoc RenderEventRouter::hookUpTab()
 	virtual void hookUpTab();
 
