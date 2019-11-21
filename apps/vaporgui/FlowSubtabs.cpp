@@ -105,7 +105,7 @@ void FlowSeedingSubtab::_createSeedingSection() {
     _seedDistributionSection = new VSection("Seed Distribution Settings");
     layout()->addWidget( _seedDistributionSection );
 
-    std::vector<std::string> values = {GRIDDED, RANDOM, LISTOFSEEDS};
+    std::vector<std::string> values = {GRIDDED_STRING, RANDOM_STRING, LIST_STRING};
     _seedTypeCombo = new VComboBox(values);
     _seedDistributionSection->AddWidget( new VLineItem("Seed distribution type", _seedTypeCombo ));
     connect( _seedTypeCombo, SIGNAL( ValueChanged( std::string )),
@@ -151,14 +151,14 @@ void FlowSeedingSubtab::_createSeedingSection() {
     _biasWeightSliderEdit = new VSliderEdit();
     _randomSeedsFrame->addWidget( new VLineItem( "Bias weight", _biasWeightSliderEdit ) );
 
-    _configureSeedType( GRIDDED );
+    _configureSeedType( GRIDDED_STRING );
 }
 
 void FlowSeedingSubtab::_createIntegrationSection() {
     _integrationSection = new VSection("Flow Integration Settings");
     layout()->addWidget( _integrationSection );
 
-    std::vector<std::string> values = {STEADY, UNSTEADY};
+    std::vector<std::string> values = {STEADY_STRING, UNSTEADY_STRING};
     _flowTypeCombo = new VComboBox(values);
     _integrationSection->AddWidget( new VLineItem("Flow type", _flowTypeCombo ));
     connect( _flowTypeCombo, SIGNAL( ValueChanged( std::string )),
@@ -289,9 +289,9 @@ void FlowSeedingSubtab::_createIntegrationSection() {
 
     // Index numbers are in agreement with what's in FlowRenderer.h
     _seedGenMode->AddOption( "From a Rake, Uniformly", static_cast<int>(FlowSeedMode::UNIFORM) );
-    _seedGenMode->AddOption( "From a Rake, Randomly",  static_cast<int>(FlowSeedMode::RANDOM) );
+    _seedGenMode->AddOption( "From a Rake, Randomly",  static_cast<int>(FlowSeedMode::RANDOM_STRING) );
     _seedGenMode->AddOption( "From a Rake, Randomly with Bias", 
-                             static_cast<int>(FlowSeedMode::RANDOM_BIAS) );
+                             static_cast<int>(FlowSeedMode::RANDOM_STRING_BIAS) );
     _seedGenMode->AddOption( "From a List",            static_cast<int>(FlowSeedMode::LIST) );
     _layout->addWidget( _seedGenMode );
     connect( _seedGenMode, SIGNAL( _indexChanged(int) ), this, SLOT( _seedGenModeChanged(int) ) );
@@ -340,9 +340,9 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     //
     bool isSteady = _params->GetIsSteady();
     if ( isSteady )
-        _flowTypeCombo->SetValue( STEADY );
+        _flowTypeCombo->SetValue( STEADY_STRING );
     else
-        _flowTypeCombo->SetValue( UNSTEADY );
+        _flowTypeCombo->SetValue( UNSTEADY_STRING );
 
     // Steady flow direction combo
     int dir = _params->GetFlowDirection();
@@ -626,7 +626,7 @@ FlowSeedingSubtab::_pathlineLengthChanged( int newval )
 
 void FlowSeedingSubtab::_configureFlowType ( const std::string& value ) {
     bool isSteady = true;
-    if ( value == UNSTEADY ) {
+    if ( value == UNSTEADY_STRING ) {
         isSteady = false;
         _streamlineLengthSliderEdit->Show();
         _streamlineInjIntervalSliderEdit->Show();
@@ -659,17 +659,17 @@ void FlowSeedingSubtab::_configureFlowType ( const std::string& value ) {
 }
 
 void FlowSeedingSubtab::_configureSeedType( const std::string& value ) {
-    if ( value == GRIDDED ) {
+    if ( value == GRIDDED_STRING ) {
         _griddedSeedsFrame->show();
         _listOfSeedsFrame->hide();
         _randomSeedsFrame->hide();
     }
-    else if ( value == LISTOFSEEDS ) {
+    else if ( value == LIST_STRING ) {
         _griddedSeedsFrame->hide();
         _listOfSeedsFrame->show();
         _randomSeedsFrame->hide();
     }
-    else if ( value == RANDOM ) {
+    else if ( value == RANDOM_STRING ) {
         _griddedSeedsFrame->hide();
         _listOfSeedsFrame->hide();
         _randomSeedsFrame->show();
@@ -716,7 +716,7 @@ FlowSeedingSubtab::_hideShowWidgets()
         _rakeBiasVariable->hide();
         _rakeBiasStrength->hide();
     }
-    else if( genMod == static_cast<int>(FlowSeedMode::RANDOM) )
+    else if( genMod == static_cast<int>(FlowSeedMode::RANDOM_STRING) )
     {
         _rake->show();
         _rakeXNum->hide();
@@ -726,7 +726,7 @@ FlowSeedingSubtab::_hideShowWidgets()
         _rakeBiasVariable->hide();
         _rakeBiasStrength->hide();
     }
-    else if( genMod == static_cast<int>(FlowSeedMode::RANDOM_BIAS) )
+    else if( genMod == static_cast<int>(FlowSeedMode::RANDOM_STRING_BIAS) )
     {
         _rake->show();
         _rakeXNum->hide();
@@ -781,6 +781,10 @@ FlowSeedingSubtab::_rakeBiasStrengthChanged()
 void
 FlowSeedingSubtab::_rakeNumOfSeedsChanged()
 {
+    if ( _params->GetSeedGenMode() == (int)VAPoR::FlowSeedMode::RANDOM ) {
+        std::cout << "RANDOM" << std::endl;
+    }
+/*
     // These fields should ALWAYS contain legal values, even when not in use.
     //   That's why we validate every one of them!                          
     
@@ -830,7 +834,7 @@ FlowSeedingSubtab::_rakeNumOfSeedsChanged()
     if( diff )
     {
         _params->SetRakeNumOfSeeds( newVal );
-    }
+    }*/
 }
 
 

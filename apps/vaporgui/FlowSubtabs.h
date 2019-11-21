@@ -17,11 +17,11 @@
 #include "TransformTable.h"
 #include "ColorbarWidget.h"
 
-#define UNSTEADY    "Pathline"
-#define STEADY      "Streamline"
-#define GRIDDED     "Gridded"
-#define LISTOFSEEDS "List of seeds"
-#define RANDOM      "Random"
+#define UNSTEADY_STRING    "Pathline"
+#define STEADY_STRING      "Streamline"
+#define GRIDDED_STRING     "Gridded"
+#define LIST_STRING        "List of seeds"
+#define RANDOM_STRING      "Random"
 
 class VLineEdit;
 class VCheckBox;
@@ -126,16 +126,17 @@ public:
 		          VAPoR::RenderParams*    rParams );
 
 private slots:
-    void _configureFlowType( const std::string& value = STEADY );
-    void _configureSeedType( const std::string& value = GRIDDED );
+    void _configureFlowType( const std::string& value = STEADY_STRING );
+    void _configureSeedType( const std::string& value = GRIDDED_STRING );
     void _streamlineLengthChanged( int value );
     void _flowDirectionChanged();
     void _periodicClicked();
     void _pathlineLengthChanged( int value );
     void _velocityMultiplierChanged( const std::string& );
+    void _rakeNumOfSeedsChanged();
+    void _seedGenModeChanged( int newIdx );
     // Respond to user input 
-    /*void _seedGenModeChanged( int newIdx );
-    void _fileReaderChanged();
+    /*void _fileReaderChanged();
     void _fileWriterChanged();
 
     void _rakeGeometryChanged();
