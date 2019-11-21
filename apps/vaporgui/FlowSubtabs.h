@@ -17,11 +17,21 @@
 #include "TransformTable.h"
 #include "ColorbarWidget.h"
 
-#define UNSTEADY_STRING    "Pathline"
-#define STEADY_STRING      "Streamline"
+#define UNSTEADY_STRING    "Pathlines"
+#define STEADY_STRING      "Streamlines"
 #define GRIDDED_STRING     "Gridded"
 #define LIST_STRING        "List of seeds"
 #define RANDOM_STRING      "Random"
+
+#define MIN_AXIS_SEEDS   1
+#define MAX_AXIS_SEEDS   1000
+#define MIN_RANDOM_SEEDS 1
+#define MAX_RANODM_SEEDS 1000000
+
+#define X            0
+#define Y            1
+#define Z            2
+#define RANDOM_INDEX 4
 
 class VLineEdit;
 class VCheckBox;
@@ -153,6 +163,8 @@ private slots:
 private:
     void _createIntegrationSection();
     void _createSeedingSection();
+    void _updateSteadyFlowWidgets( VAPoR::DataMgr* dataMgr);
+    void _updateUnsteadyFlowWidgets( VAPoR::DataMgr* dataMgr);
 
     VAPoR::FlowParams*      _params;
     VAPoR::ParamsMgr *      _paramsMgr;
@@ -201,7 +213,8 @@ private:
 
 //  Random seed distribution 
     VFrame*                 _randomSeedsFrame;
-    VSpinBox*               _randomSeedSpinBox;
+    //VSpinBox*               _randomSeedSpinBox;
+    VSliderEdit*            _randomSeedsSliderEdit;
     VComboBox*              _biasVariableComboBox;
     VSliderEdit*            _biasWeightSliderEdit;
 

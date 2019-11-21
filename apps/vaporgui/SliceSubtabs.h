@@ -75,6 +75,7 @@ private:
     VLineEdit* _vle;
     VSlider* _vs;
     VSliderEdit* _vse;
+    VSliderEdit* _vsei;
     VPushButton* _pb;
     VFileReader* _fr;
     VFileWriter* _fw;

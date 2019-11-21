@@ -31,8 +31,6 @@ void VLineEdit::SetValue( const std::string& value ) {
     else
         _value = value;
 
-    std::cout << "VLineEdit::SetValue " << value << std::endl;
-
     _lineEdit->blockSignals(true);
     _lineEdit->setText( QString::fromStdString(_value) );
     _lineEdit->blockSignals(false);

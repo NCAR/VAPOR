@@ -1,6 +1,7 @@
 #include <cmath>
 #include <iostream>
 
+#include "vapor/VAssert.h"
 #include "VSliderEdit.h"
 #include "VSlider.h"
 #include "VLineEdit.h"
@@ -51,7 +52,7 @@ void VSliderEdit::SetRange( double min, double max ){
         max = round(max);
     }
 
-    if (min >= max) max = min;
+    VAssert(min < max);
     if (_value < min) _value = min;
     if (_value > max) _value = max;
    
