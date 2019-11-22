@@ -193,6 +193,11 @@ int MapperFunction::LoadColormapFromFile(string path)
     *m_colorMap = *temp.GetColorMap();
     m_colorMap->SetParent(this);
 
+    // Apparently the colormap stores its own copy of the mapping range.
+    // This could be solved differently but the fact that this
+    // is a valid solution is amusing.
+    setMinMaxMapValue(getMinMapValue(), getMaxMapValue());
+
     return rc;
 }
 
