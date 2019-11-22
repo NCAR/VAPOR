@@ -23,6 +23,7 @@ public:
     TFEditor();
 
     virtual void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
+    void         SetShowOpacityMap(bool b);
 
 protected:
     TFMapGroupWidget *      _maps;

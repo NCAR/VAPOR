@@ -38,6 +38,7 @@ public:
     {
         setupUi(this);
         verticalLayout->insertWidget(0, _tfe = new TFEditor);
+        _tfe->SetShowOpacityMap(false);
     }
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _tfe->Update(dataMgr, paramsMgr, rParams); }
