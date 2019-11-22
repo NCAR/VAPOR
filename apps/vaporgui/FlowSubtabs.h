@@ -146,14 +146,14 @@ private slots:
     void _rakeNumOfSeedsChanged();
     void _seedGenModeChanged( int newIdx );
     void _seedListFileChanged( const std::string& file );
+    void _biasVariableChanged( const std::string& variable );
+    void _biasStrengthChanged( double bias );
     // Respond to user input 
     /*void _fileReaderChanged();
     void _fileWriterChanged();
 
     void _rakeGeometryChanged();
     void _rakeNumOfSeedsChanged();
-    void _rakeBiasVariableChanged( int );
-    void _rakeBiasStrengthChanged();
 
     void _steadyGotClicked();
     void _pastNumOfTimeStepsChanged( int );

@@ -105,6 +105,7 @@ set (SRCS
 	VSection.h
 	VLineItem.cpp
 	VLineItem.h
+    VContainer.cpp
     VContainer.h
     VComboBox.cpp
     VComboBox.h

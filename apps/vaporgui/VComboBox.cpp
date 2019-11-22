@@ -1,10 +1,14 @@
 #include "VComboBox.h"
 
-
 VComboBox::VComboBox( const std::vector<std::string> &values )
 : VContainer( this )
 {
     _combo = new QComboBox;
+
+    // Disable scroll wheel
+    //
+    _combo->installEventFilter(new MouseWheelWidgetAdjustmentGuard(_combo));
+
     layout()->addWidget(_combo);
     SetOptions( values );
 
