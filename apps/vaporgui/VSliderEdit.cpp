@@ -70,7 +70,6 @@ void VSliderEdit::SetIntType( bool type ) {
 void VSliderEdit::_lineEditChanged( const std::string& value ) {
     try {
         double newValue = stod( value );
-        std::cout << "LineEdit stod(value) = " << newValue << std::endl;
         SetValue( newValue );
         emit ValueChanged( _value );
     }
@@ -82,8 +81,6 @@ void VSliderEdit::_lineEditChanged( const std::string& value ) {
 }
 
 void VSliderEdit::_sliderChanged( double value ) {
-std::cout << "void VSliderEdit::_sliderChanged( double value ) { " << value << std::endl;
-    
     SetValue( value );
     emit ValueChanged( _value );
 }

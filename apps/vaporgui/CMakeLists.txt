@@ -125,6 +125,8 @@ set (SRCS
     VFileSelector.cpp
     VFileSelector.h
     VFrame.h
+    VGeometry2.cpp
+    VGeometry2.h
 	PWidget.cpp
 	PWidget.h
 	PCheckbox.cpp
