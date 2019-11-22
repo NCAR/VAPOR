@@ -178,45 +178,6 @@ void UnstructuredGrid2D::GetUserCoordinates(
 	
 }
 
-void UnstructuredGrid2D::GetIndices(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
-) const {
-
-	indices.clear();
-
-	// Clamp coordinates on periodic boundaries to grid extents
-	//
-	vector <double> cCoords = coords;
-	ClampCoord(cCoords);
-
-	double *lambda = new double[_maxVertexPerFace];
-	int nlambda;
-	size_t face;
-	vector <size_t> nodes;
-
-	bool ok = _insideGrid(cCoords, face, nodes, lambda, nlambda);
-	if (! ok) {
-
-		// Ugh. Should be returning an invalid index (or false status)
-		//
-		indices.push_back(0);
-		delete [] lambda;
-		return;
-	}
-
-	// Largest lambda value corresponds to closest vertex on face
-	//
-	int maxindx = lambda[0];
-	for (int i=1; i<nlambda; i++) {
-		if (lambda[i] > lambda[maxindx]) maxindx = i;
-	}
-	indices.push_back(nodes[maxindx]);
-	delete [] lambda;
-	return;
-	
-}
-
 bool UnstructuredGrid2D::GetIndicesCell(
 	const std::vector <double> &coords,
 	std::vector <size_t> &cindices,

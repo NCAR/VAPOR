@@ -101,8 +101,11 @@ void StretchedGrid::GetBoundingBox(
 
 	minu[0] = _xcoords[cMin[0]];
 	maxu[0] = _xcoords[cMax[0]];
+	if (minu[0] > maxu[0]) std::swap(minu[0], maxu[0]);
+
 	minu[1] = _ycoords[cMin[1]];
 	maxu[1] = _ycoords[cMax[1]];
+	if (minu[1] > maxu[1]) std::swap(minu[1], maxu[1]);
 
 	// We're done if 2D grid
 	//
@@ -110,6 +113,7 @@ void StretchedGrid::GetBoundingBox(
 
 	minu[2] = _zcoords[cMin[2]];
 	maxu[2] = _zcoords[cMax[2]];
+	if (minu[2] > maxu[2]) std::swap(minu[2], maxu[2]);
 }
 
 
@@ -210,56 +214,6 @@ void StretchedGrid::GetUserCoordinates(
 
 	if (GetGeometryDim() > 2) {
 		coords[2] = _zcoords[cIndices[2]];
-	}
-}
-
-void StretchedGrid::GetIndices(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
-) const {
-	indices.clear();
-
-	// Clamp coordinates on periodic boundaries to grid extents
-	//
-	vector <double> cCoords = coords;
-	ClampCoord(cCoords);
-
-	size_t i;
-	int rc = Wasp::BinarySearchRange(_xcoords, cCoords[0], i);
-	if (rc < 0) {
-		indices.push_back(0);
-	}
-	else if (rc > 0) {
-		indices.push_back(i);
-	}
-	else {
-		indices.push_back(GetDimensions()[0] - 1);
-	}
-
-	size_t j;
-	rc = Wasp::BinarySearchRange(_ycoords, cCoords[1], j);
-	if (rc < 0) {
-		indices.push_back(0);
-	}
-	else if (rc > 0) {
-		indices.push_back(j);
-	}
-	else {
-		indices.push_back(GetDimensions()[1] - 1);
-	}
-
-	if (cCoords.size() == 2) return;
-
-	size_t k;
-	rc = Wasp::BinarySearchRange(_zcoords, cCoords[2], k);
-	if (rc < 0) {
-		indices.push_back(0);
-	}
-	else if (rc > 0) {
-		indices.push_back(k);
-	}
-	else {
-		indices.push_back(GetDimensions()[2] - 1);
 	}
 }
 
@@ -523,16 +477,12 @@ bool StretchedGrid::_insideGrid(
 	}
 	i = j = k = 0;
 
-	int rc  = Wasp::BinarySearchRange(_xcoords, x, i);
-
-	if (rc != 0) return(false);
+	if (! Wasp::BinarySearchRange(_xcoords, x, i)) return(false);
 
 	xwgt[0] = 1.0 - (x - _xcoords[i]) / (_xcoords[i+1] - _xcoords[i]);
 	xwgt[1] = 1.0 - xwgt[0];
 
-	rc  = Wasp::BinarySearchRange(_ycoords, y, j);
-
-	if (rc != 0) return(false);
+	if (! Wasp::BinarySearchRange(_ycoords, y, j)) return(false);
 
 	ywgt[0] = 1.0 - (y - _ycoords[j]) / (_ycoords[j+1] - _ycoords[j]);
 	ywgt[1] = 1.0 - ywgt[0];
@@ -546,9 +496,7 @@ bool StretchedGrid::_insideGrid(
 	// Now verify that Z coordinate of point is in grid, and find
 	// its interpolation weights if so.
 	//
-	rc  = Wasp::BinarySearchRange(_zcoords, z, k);
-
-	if (rc != 0) return(false);
+	if (! Wasp::BinarySearchRange(_zcoords, z, k)) return(false);
 
 	zwgt[0] = 1.0 - (z - _zcoords[k]) / (_zcoords[k+1] - _zcoords[k]);
 	zwgt[1] = 1.0 - zwgt[0];

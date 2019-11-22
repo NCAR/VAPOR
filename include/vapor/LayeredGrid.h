@@ -134,13 +134,6 @@ public:
 	z = coords[2];
  }
 
- //! \copydoc Grid::GetIndices()
- //!
- void GetIndices(
-    const std::vector <double> &coords,
-    std::vector <size_t> &indices
- ) const override;
-
  //! \copydoc Grid::GetIndicesCell
  //!
  virtual bool GetIndicesCell(
@@ -331,6 +324,12 @@ private:
  
  int _bsearchKIndexCell(
 	size_t i, size_t j, double z, size_t &k
+ ) const;
+
+ bool _getCellAndWeights(
+    const double coords[3],
+    size_t indices0[3],
+    double wgts[3]
  ) const;
 
 };

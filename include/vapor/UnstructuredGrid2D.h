@@ -85,11 +85,6 @@ public:
 	double coords[]
  ) const override;
   
- void GetIndices(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
- ) const override;
-
  bool GetIndicesCell(
 	const std::vector <double> &coords,
 	std::vector <size_t> &indices

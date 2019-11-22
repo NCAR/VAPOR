@@ -320,48 +320,6 @@ void RegularGrid::GetUserCoordinates(
 	}
 }
 
-void RegularGrid::GetIndices(
-    const std::vector <double> &coords,
-    std::vector <size_t> &indices
-) const {
-	indices.clear();
-
-	std::vector <double> clampedCoords = coords;
-	ClampCoord(clampedCoords);
-
-	vector <size_t> dims = GetDimensions();
-
-	vector <double> wgts;
-	
-	for (int i=0; i<clampedCoords.size(); i++) {
-		indices.push_back(0);
-	
-		if (clampedCoords[i] < _minu[i]) {
-			indices[i] = 0;
-			continue;
-		}
-		if (clampedCoords[i] > _maxu[i]) {
-			indices[i] = dims[i]-1;
-			continue;
-		}
-
-		if (_delta[i] != 0.0) {
-			indices[i] = (size_t) floor (
-				(clampedCoords[i]-_minu[i]) / _delta[i]
-			);
-		}
-
-		VAssert(indices[i]<dims[i]);
-
-		double wgt = 0.0;
-
-		if (_delta[0] != 0.0) {
-			wgt = ((clampedCoords[i]-_minu[i]) - (indices[i]*_delta[i])) /
-				_delta[i];
-		}
-		if (wgt > 0.5) indices[i] += 1;
-	}
-}
 
 bool RegularGrid::GetIndicesCell(
     const std::vector <double> &coords,

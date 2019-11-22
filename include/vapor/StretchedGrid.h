@@ -108,13 +108,6 @@ public:
 	double coords[]
  ) const override;
 
- // \copydoc GetGrid::GetIndices()
- //
- virtual void GetIndices(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
- ) const override;
-
  //! \copydoc Grid::GetIndicesCell
  //!
  virtual bool GetIndicesCell(

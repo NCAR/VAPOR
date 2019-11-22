@@ -369,63 +369,6 @@ void CurvilinearGrid::GetUserCoordinates(
 
 }
 
-void CurvilinearGrid::_getIndicesHelper(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
-) const {
-
-	VAssert(coords.size() == 3);
-	VAssert(indices.size() == 2);
-
-
-	int rc;
-	size_t kFound = 0;
-	if (_terrainFollowing) {
-		vector <double> zcoords;
-
-		size_t nz = GetDimensions()[2];
-		size_t i = indices[0];
-		size_t j = indices[1];
-		for (int k=0; k<nz; k++) {
-			zcoords.push_back(_zrg.AccessIJK(i,j,k));
-		}
-
-		rc = Wasp::BinarySearchRange(zcoords, coords[2], kFound);
-	}
-	else {
-		rc = Wasp::BinarySearchRange(_zcoords, coords[2], kFound);
-	}
-
-	
-	if (rc < 0) {
-		indices.push_back(0);
-	}
-	else if (rc > 0) {
-		indices.push_back(GetDimensions()[2] - 1);
-	}
-	else {
-		indices.push_back(kFound);
-	}
-}
-
-void CurvilinearGrid::GetIndices(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
-) const {
-	indices.clear();
-
-
-	bool found = GetIndicesCell(coords, indices);
-	if (found) return;
-
-	// Ugh. Should be returning an invalid index (or false status)
-	//
-	indices.clear();
-	for (int i=0; i<GetGeometryDim(); i++)  {
-		indices.push_back(0);
-	}
-	
-}
 
 bool CurvilinearGrid::GetIndicesCell(
 	const std::vector <double> &coords,
@@ -824,12 +767,9 @@ bool CurvilinearGrid::_insideGridHelperStretched(
 	// Now verify that Z coordinate of point is in grid, and find
 	// its interpolation weights if so.
 	//
-	int rc;
 	size_t kFound = 0;
 
-	rc = Wasp::BinarySearchRange(_zcoords, z, kFound);
-
-	if (rc != 0) return(false);
+	if (! Wasp::BinarySearchRange(_zcoords, z, kFound)) return(false);
 
 	k = kFound;
 	zwgt[0] = 1.0 - (z - _zcoords[k]) / (_zcoords[k+1] - _zcoords[k]);
@@ -907,8 +847,7 @@ bool CurvilinearGrid::_insideGridHelperTerrain(
 		zcoords.push_back(zk);
 	}
 
-	int rc = Wasp::BinarySearchRange(zcoords, z, k);
-	if (rc != 0) return(false);	// Must be above or below grid
+	if (! Wasp::BinarySearchRange(zcoords, z, k)) return(false);
 
 	VAssert(k < nz-1);
 

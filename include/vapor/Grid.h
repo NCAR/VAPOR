@@ -404,24 +404,6 @@ public:
 	size_t i, size_t j, size_t k, double &x, double &y, double &z
  ) const;
 
-
- //! Return the closest grid point to the specified user coordinates
- //!
- //! This method returns the indices of the grid point closest to
- //! the specified user coordinates based on Euclidean distance. If any 
- //! of the input coordinates correspond to periodic dimensions the 
- //! the coordinate(s) are first re-mapped to lie inside the grid
- //! extents as returned by GetUserExtents()
- //!
- //! \param[in] coords User coordinates of grid point with indices
- //! given by \p indices.
- //! \param[out] indices Array of grid indices. 
- //!
- virtual void GetIndices(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
- ) const = 0;
-
  //! Return the indices of the cell containing the
  //! specified user coordinates
  //!

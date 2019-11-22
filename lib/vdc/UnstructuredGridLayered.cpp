@@ -156,44 +156,6 @@ void UnstructuredGridLayered::GetUserCoordinates(
 	coords[2] = _zug.GetValueAtIndex(cIndices);
 }
 
-void UnstructuredGridLayered::GetIndices(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
-) const {
-
-	indices.clear();
-
-	// Clamp coordinates on periodic boundaries to grid extents
-	//
-	vector <double> cCoords = coords;
-	ClampCoord(cCoords);
-
-	vector <double> coords2D = {cCoords[0], cCoords[1]};
-	_ug2d.GetIndices(coords2D, indices);
-
-	int rc;
-	size_t kFound = 0;
-	vector <double> zcoords;
-
-	size_t nz = GetDimensions()[1];
-	for (int j=0; j<nz; j++) {
-		zcoords.push_back(_zug.AccessIJK(indices[0], j));
-	}
-
-	rc = Wasp::BinarySearchRange(zcoords, coords[2], kFound);
-
-
-	if (rc < 0) {
-		indices.push_back(0);
-	}
-	else if (rc > 0) {
-		indices.push_back(GetDimensions()[1] - 1);
-	}
-	else {
-		indices.push_back(kFound);
-    }
-
-}
 
 bool UnstructuredGridLayered::_insideGrid(
 	const std::vector <double> &coords,
@@ -241,9 +203,7 @@ bool UnstructuredGridLayered::_insideGrid(
 	}
 
 	size_t k;
-	int rc = Wasp::BinarySearchRange(zcoords, cCoords[2], k);
-
-	if (rc != 0) return(false);
+	if (! Wasp::BinarySearchRange(zcoords, cCoords[2], k)) return(false);
 
 	VAssert(k>=0 && k<nz);
 	cindices.push_back(k);
