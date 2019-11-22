@@ -17,22 +17,6 @@
 #include "TransformTable.h"
 #include "ColorbarWidget.h"
 
-#define UNSTEADY_STRING    "Pathlines"
-#define STEADY_STRING      "Streamlines"
-#define GRIDDED_STRING     "Gridded"
-#define LIST_STRING        "List of seeds"
-#define RANDOM_STRING      "Random"
-
-#define MIN_AXIS_SEEDS   1
-#define MAX_AXIS_SEEDS   1000
-#define MIN_RANDOM_SEEDS 1
-#define MAX_RANODM_SEEDS 1000000
-
-#define X            0
-#define Y            1
-#define Z            2
-#define RANDOM_INDEX 4
-
 class VLineEdit;
 class VCheckBox;
 class VComboBox;
@@ -136,8 +120,8 @@ public:
 		          VAPoR::RenderParams*    rParams );
 
 private slots:
-    void _configureFlowType( const std::string& value = STEADY_STRING );
-    void _configureSeedType( const std::string& value = GRIDDED_STRING );
+    void _configureFlowType( const std::string& value );
+    void _configureSeedType( const std::string& value );
     void _streamlineLengthChanged( int length );
     void _flowDirectionChanged();
     void _periodicClicked();

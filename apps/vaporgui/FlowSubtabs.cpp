@@ -12,6 +12,22 @@
 
 #define verbose     1
 
+#define UNSTEADY_STRING    "Pathlines"
+#define STEADY_STRING      "Streamlines"
+#define GRIDDED_STRING     "Gridded"
+#define LIST_STRING        "List of seeds"
+#define RANDOM_STRING      "Random"
+
+#define MIN_AXIS_SEEDS      1
+#define MAX_AXIS_SEEDS      1000
+#define MIN_RANDOM_SEEDS    1
+#define MAX_RANDOM_SEEDS    1000000
+
+#define X                   0
+#define Y                   1
+#define Z                   2
+#define RANDOM_INDEX        4
+
 QVaporSubtab::QVaporSubtab(QWidget* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
@@ -146,7 +162,8 @@ void FlowSeedingSubtab::_createSeedingSection() {
     _randomSeedsFrame = new VFrame();
     _seedDistributionSection->AddWidget( _randomSeedsFrame );
     
-    _randomSeedsSliderEdit = new VSliderEdit();
+    _randomSeedsSliderEdit = new VSliderEdit( MIN_RANDOM_SEEDS, MAX_RANDOM_SEEDS );
+    _randomSeedsSliderEdit->SetIntType( true );
     _randomSeedsFrame->addWidget( new VLineItem("Seed count", _randomSeedsSliderEdit ) );
     connect( _randomSeedsSliderEdit, SIGNAL( ValueChanged( double ) ),
         this, SLOT( _rakeNumOfSeedsChanged() ) );
@@ -247,7 +264,7 @@ void FlowSeedingSubtab::_createIntegrationSection() {
     _integrationSection->AddWidget( 
         new VLineItem("Velocity multiplier", _velocityMultiplierLineEdit));
 
-    _configureFlowType();
+    _configureFlowType(STEADY_STRING);
 }
 /*    _steady = new VCheckBox( this, "Use Steady Flow" );
     _layout->addWidget( _steady );
@@ -382,6 +399,7 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
 
     // Random and Gridded # seeds
     std::vector<long> seedVec = _params->GetRakeNumOfSeeds();
+    cout << "getting seeds " << seedVec[X] << " " << seedVec[Y] << " " << seedVec[Z] << " " << seedVec[RANDOM_INDEX] << endl;
     _xSeedSliderEdit->SetValue( seedVec[X] );
     _ySeedSliderEdit->SetValue( seedVec[Y] );
     _zSeedSliderEdit->SetValue( seedVec[Z] );
@@ -709,7 +727,7 @@ void FlowSeedingSubtab::_configureFlowType ( const std::string& value ) {
     if (verbose) std::cout << std::endl;
 }
 
-void FlowSeedingSubtab::_configureSeedType( const std::string& value ) {
+void FlowSeedingSubtab::_configureSeedType( const std::string& value) {
     if ( value == GRIDDED_STRING ) {
         _griddedSeedsFrame->show();
         _listOfSeedsFrame->hide();
@@ -823,12 +841,13 @@ void
 FlowSeedingSubtab::_rakeNumOfSeedsChanged()
 {
     std::vector<long> seedsVector(4, (long)1.0);
-    seedsVector[0] = _xSeedSliderEdit->GetValue();
-    seedsVector[1] = _ySeedSliderEdit->GetValue();
-    seedsVector[2] = _zSeedSliderEdit->GetValue();
-    seedsVector[3] = _randomSeedsSliderEdit->GetValue();
+    seedsVector[X] = _xSeedSliderEdit->GetValue();
+    seedsVector[Y] = _ySeedSliderEdit->GetValue();
+    seedsVector[Z] = _zSeedSliderEdit->GetValue();
+    seedsVector[RANDOM_INDEX] = _randomSeedsSliderEdit->GetValue();
+    std::cout << "_rakeNumOfSeedsChanged from " << seedsVector[0] << " " << seedsVector[1] << " " << seedsVector[2] << " " << seedsVector[3] << std::endl;
     _params->SetRakeNumOfSeeds( seedsVector );
-    std::cout << "_rakeNumOfSeedsChanged to " << _params->GetRakeNumOfSeeds()[0] << " " << _params->GetRakeNumOfSeeds()[1] << " " << _params->GetRakeNumOfSeeds()[2] << " " << _params->GetRakeNumOfSeeds()[3] << std::endl;
+    std::cout << "_rakeNumOfSeedsChanged to   " << _params->GetRakeNumOfSeeds()[0] << " " << _params->GetRakeNumOfSeeds()[1] << " " << _params->GetRakeNumOfSeeds()[2] << " " << _params->GetRakeNumOfSeeds()[3] << std::endl;
 }
 
 /*

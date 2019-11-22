@@ -25,11 +25,13 @@ VSlider::VSlider( double min, double max )
 }
 
 void VSlider::SetValue( double value ) {
+    std::cout << "in SetValue() " << value << std::endl;
     if (value > _maxValid) value = _maxValid;
     if (value < _minValid) value = _minValid;
 
     //value = (value-_minValid) / (_maxValid - _minValid);
-    value = value/_stepSize;
+    value = (value-_minValid)/_stepSize;
+    std::cout << "SetValue() " << value << std::endl;
     _slider->blockSignals(true);
     _slider->setValue( value );
     _slider->blockSignals(false);
