@@ -298,7 +298,7 @@ public:
  //! \param[out] min Integer coordinates of minimum coorner
  //! \param[out] max Integer coordinates of maximum coorner
  //!
- virtual void    GetEnclosingRegion(
+ virtual bool    GetEnclosingRegion(
 	const std::vector <double> &minu, const std::vector <double> &maxu,
 	std::vector <size_t> &min, std::vector <size_t> &max
  ) const = 0;

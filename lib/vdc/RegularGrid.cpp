@@ -264,40 +264,6 @@ void RegularGrid::GetBoundingBox(
 	Grid::GetUserCoordinates(cMax, maxu);
 }
 
-void    RegularGrid::GetEnclosingRegion(
-	const std::vector <double> &minu, const std::vector <double> &maxu,
-	std::vector <size_t> &min, std::vector <size_t> &max
-) const {
-
-	vector <double> cMinu = minu;
-	ClampCoord(cMinu);
-
-	vector <double> cMaxu = maxu;
-	ClampCoord(cMaxu);
-
-	VAssert(cMinu.size() == cMaxu.size());
-
-	min.clear();
-	max.clear();
-
-	for (int i=0; i<cMinu.size(); i++) {
-		VAssert(cMinu[i] <= cMaxu[i]);
-		double u = cMinu[i]; 
-		if (u < cMinu[i]) {
-			u = cMinu[i];
-		}
-		size_t index = (u - _minu[i]) / _delta[i];
-		min.push_back(index);
-
-		u = cMaxu[i]; 
-		if (u > cMaxu[i]) {
-			u = cMaxu[i];
-		}
-		index = (u - _maxu[i]) / _delta[i];
-		max.push_back(index);
-	}
-
-}
 
 void RegularGrid::GetUserCoordinates(
 	const size_t indices[],

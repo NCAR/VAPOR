@@ -86,6 +86,7 @@ public:
  };
 
 
+
  //! \copydoc Grid::GetCellNodes()
  //!
  virtual bool GetCellNodes(
@@ -108,6 +109,11 @@ public:
 	std::vector <std::vector <size_t> > &cells
  ) const override;
 
+ virtual bool    GetEnclosingRegion(
+    const std::vector <double> &minu, const std::vector <double> &maxu,
+    std::vector <size_t> &min, std::vector <size_t> &max
+ ) const override;
+
  size_t GetMaxVertexPerFace() const override {
 	return(4);
  };
@@ -117,8 +123,6 @@ public:
  };
 
  virtual void ClampCoord(std::vector <double> &coords) const override;
-
-
 
 
  

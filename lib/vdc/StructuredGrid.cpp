@@ -191,6 +191,32 @@ bool StructuredGrid::GetNodeCells(
 
 }
 
+bool    StructuredGrid::GetEnclosingRegion(
+	const std::vector <double> &minu, const std::vector <double> &maxu,
+	std::vector <size_t> &min, std::vector <size_t> &max
+) const {
+	VAssert(minu.size() == maxu.size());
+
+	if (! GetIndicesCell(minu,  min)) return(false);
+	if (! GetIndicesCell(maxu,  max)) return(false);
+	for (int i=0; i<max.size(); i++) {
+		max[i] += 1;
+	}
+
+	// For curvilinear grids it's possible that minu and maxu components 
+	// are swapped
+	//
+	vector <double> newMinu, newMaxu;
+	GetUserCoordinates(min, newMinu);
+	GetUserCoordinates(max, newMaxu);
+
+	for (int i=0; i<min.size(); i++) {
+		if (newMinu > newMaxu) std::swap(min[i], max[i]);
+	}
+
+	return(true);
+};
+
 void StructuredGrid::ClampCoord(std::vector <double> &coords) const {
 	VAssert(coords.size() >= GetGeometryDim());
 
@@ -223,6 +249,7 @@ void StructuredGrid::ClampCoord(std::vector <double> &coords) const {
 
 	}
 }
+
 
 namespace VAPoR {
 std::ostream &operator<<(std::ostream &o, const StructuredGrid &sg)

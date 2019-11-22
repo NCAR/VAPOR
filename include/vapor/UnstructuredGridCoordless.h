@@ -74,11 +74,12 @@ public:
 	minu.clear(); maxu.clear();
  }
 
- void GetEnclosingRegion(
+ bool GetEnclosingRegion(
 	const std::vector <double> &, const std::vector <double> &,
 	std::vector <size_t> &min, std::vector <size_t> &max
  ) const override {
 	min.clear(); max.clear();
+	return(false);
  }
 
 

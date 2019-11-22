@@ -93,14 +93,6 @@ public:
 	std::vector <double> &minu, std::vector <double> &maxu
  ) const override;
 
- // \copydoc GetGrid::GetEnclosingRegion()
- //
- virtual void    GetEnclosingRegion(
-	const std::vector <double> &minu, const std::vector <double> &maxu,
-	std::vector <size_t> &min, std::vector <size_t> &max
- ) const override;
-
-
  // \copydoc GetGrid::GetUserCoordinates()
  //
  virtual void GetUserCoordinates(
@@ -217,7 +209,6 @@ private:
 	double xwgt[2], double ywgt[2], double zwgt[2]
  ) const;
 
- virtual void _getMinCellExtents(std::vector <double> &minCellExtents) const; 
 
 };
 };

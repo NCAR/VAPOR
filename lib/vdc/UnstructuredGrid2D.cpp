@@ -148,7 +148,7 @@ void UnstructuredGrid2D::GetBoundingBox(
 	
 }
 
-void UnstructuredGrid2D::GetEnclosingRegion(
+bool UnstructuredGrid2D::GetEnclosingRegion(
     const vector <double> &minu, const vector <double> &maxu,
     vector <size_t> &min, vector <size_t> &max
 ) const {
@@ -160,6 +160,7 @@ void UnstructuredGrid2D::GetEnclosingRegion(
 	ClampCoord(cMaxu);
 
 	VAssert(0 && "Not implemented");
+	return(true);
 }
 
 void UnstructuredGrid2D::GetUserCoordinates(

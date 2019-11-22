@@ -128,7 +128,7 @@ void UnstructuredGridLayered::GetBoundingBox(
 
 }
 
-void UnstructuredGridLayered::GetEnclosingRegion(
+bool UnstructuredGridLayered::GetEnclosingRegion(
     const vector <double> &minu, const vector <double> &maxu,
     vector <size_t> &min, vector <size_t> &max
 ) const {
@@ -140,6 +140,7 @@ void UnstructuredGridLayered::GetEnclosingRegion(
 	ClampCoord(cMaxu);
 
 	VAssert(0 && "Not implemented");
+	return(true);
 }
 
 void UnstructuredGridLayered::GetUserCoordinates(
