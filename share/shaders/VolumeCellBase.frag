@@ -287,7 +287,7 @@ bool IntersectRayCellFace(vec3 o, vec3 d, float rt0, ivec3 cellIndex, ivec3 face
 
 vec3 GetTriangleNormal(vec3 v0, vec3 v1, vec3 v2)
 {
-    return cross(v1-v0, v2-v0);
+    return normalize(cross(v1-v0, v2-v0));
 }
 
 vec3 GetCellFaceNormal(ivec3 cellIndex, ivec3 face)
@@ -381,8 +381,9 @@ bool ShouldRenderCell(const ivec3 cellIndex)
 
 bool IsRayEnteringCell(vec3 d, ivec3 cellIndex, ivec3 face)
 {
-    vec3 n = GetCellFaceNormal(cellIndex, face);
-    return dot(d, n) < 0;
+    // vec3 n = GetCellFaceNormal(cellIndex, face);
+    // return dot(d, n) < 0;
+    return true; // Ignore winding order
 }
 
 void GetSideCellBBox(ivec3 cellIndex, int sideID, int fastDim, int slowDim, OUT vec3 bmin, OUT vec3 bmax)
