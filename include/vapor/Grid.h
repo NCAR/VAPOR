@@ -346,6 +346,13 @@ public:
  //
  bool HasMissingData() const { return (_hasMissing); };
 
+ //! Return true if mesh primitives have counter clockwise winding
+ //! order. 
+ //
+ virtual bool HasCCW() const {
+	return(true);
+ }
+
  //! Return the interpolation order to be used during function reconstruction
  //!
  //! This method returns the order of the interpolation method that will
@@ -1257,6 +1264,7 @@ protected:
  ) const {
 	ClampCellIndex(indices.data(), cIndices);
  }
+
 
 
 

@@ -124,6 +124,7 @@ public:
 
  virtual void ClampCoord(std::vector <double> &coords) const override;
 
+ virtual bool HasCCW() const override;
 
  
  VDF_API friend std::ostream &operator<<(std::ostream &o, const StructuredGrid &sg);
