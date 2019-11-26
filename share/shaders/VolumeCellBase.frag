@@ -295,7 +295,13 @@ vec3 GetCellFaceNormal(ivec3 cellIndex, ivec3 face)
     vec3 v0, v1, v2, v3;
     GetFaceVertices(cellIndex, face, v0, v1, v2, v3);
     
-    return (GetTriangleNormal(v0, v1, v2) + GetTriangleNormal(v0, v2, v3)) / 2.0f;
+    vec3 normal = (GetTriangleNormal(v0, v1, v2) + GetTriangleNormal(v0, v2, v3)) / 2.0f;
+    
+#ifdef INVERT_GRID_COORD_SYS_HAND
+    normal = -normal;
+#endif
+    
+    return normal;
 }
 
 bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, bool allowThinCells, OUT ivec3 exitFace, OUT vec3 exitCoord, OUT float t1)
@@ -381,9 +387,8 @@ bool ShouldRenderCell(const ivec3 cellIndex)
 
 bool IsRayEnteringCell(vec3 d, ivec3 cellIndex, ivec3 face)
 {
-    // vec3 n = GetCellFaceNormal(cellIndex, face);
-    // return dot(d, n) < 0;
-    return true; // Ignore winding order
+    vec3 n = GetCellFaceNormal(cellIndex, face);
+    return dot(d, n) < 0;
 }
 
 void GetSideCellBBox(ivec3 cellIndex, int sideID, int fastDim, int slowDim, OUT vec3 bmin, OUT vec3 bmax)
