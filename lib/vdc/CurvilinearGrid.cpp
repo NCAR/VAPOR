@@ -889,32 +889,48 @@ bool CurvilinearGrid::_insideGridHelperTerrain(
 		if (! inside) return(false);
 	}
 
+	float z0, z1;
 
-	// Find k index of cell containing z. Already know i and j indices
+	// Check cached z values from last search first
 	//
-	vector <double> zcoords;
-
-	size_t nz = GetDimensions()[2];
-	for (int kk=0; kk<nz; kk++) {
-
-		// Interpolate Z coordinate across triangle
-		//
-		float zk = 
-			_zrg.AccessIJK(iv[0], jv[0], kk) * lambda[0] +
-			_zrg.AccessIJK(iv[1], jv[1], kk) * lambda[1] +
-			_zrg.AccessIJK(iv[2], jv[2], kk) * lambda[2];
-
-		zcoords.push_back(zk);
+	if (((z-_insideGridCache.z0) * (z-_insideGridCache.z1)) < 0.0) {
+		k = _insideGridCache.k;
+		z0 = _insideGridCache.z0;
+		z1 = _insideGridCache.z1;
 	}
+	else {
+		 
 
-	int rc = Wasp::BinarySearchRange(zcoords, z, k);
-	if (rc != 0) return(false);	// Must be above or below grid
+		// Find k index of cell containing z. Already know i and j indices
+		//
+		vector <double> zcoords;
 
-	VAssert(k < nz-1);
+		size_t nz = GetDimensions()[2];
+		for (int kk=0; kk<nz; kk++) {
 
-	float z0 = zcoords[k];
-	float z1 = zcoords[k+1];
+			// Interpolate Z coordinate across triangle
+			//
+			float zk = 
+				_zrg.AccessIJK(iv[0], jv[0], kk) * lambda[0] +
+				_zrg.AccessIJK(iv[1], jv[1], kk) * lambda[1] +
+				_zrg.AccessIJK(iv[2], jv[2], kk) * lambda[2];
 
+			zcoords.push_back(zk);
+		}
+
+		int rc = Wasp::BinarySearchRange(zcoords, z, k);
+		if (rc != 0) return(false);	// Must be above or below grid
+
+		VAssert(k < nz-1);
+
+		z0 = zcoords[k];
+		z1 = zcoords[k+1];
+
+		_insideGridCache.k = k;
+		_insideGridCache.z0 = z0;
+		_insideGridCache.z1 = z1;
+
+	}
 
 	zwgt[0] = 1.0 - (z - z0) / (z1 - z0);
 	zwgt[1] = 1.0 - zwgt[0];
