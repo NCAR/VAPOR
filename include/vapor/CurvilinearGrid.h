@@ -209,26 +209,12 @@ public:
 	std::vector <double> &minu, std::vector <double> &maxu
  ) const override;
 
- // \copydoc GetGrid::GetEnclosingRegion()
- //
- virtual void    GetEnclosingRegion(
-	const std::vector <double> &minu, const std::vector <double> &maxu,
-	std::vector <size_t> &min, std::vector <size_t> &max
- ) const override;
-
 
  // \copydoc GetGrid::GetUserCoordinates()
  //
  virtual void GetUserCoordinates(
 	const size_t indices[],
 	double coords[]
- ) const override;
-
- // \copydoc GetGrid::GetIndices()
- //
- virtual void GetIndices(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
  ) const override;
 
  //! \copydoc Grid::GetIndicesCell
@@ -356,11 +342,6 @@ private:
 	double x, double y, double z,
 	size_t &i, size_t &j, size_t &k,
 	double lambda[4], double zwgt[2]
- ) const;
-
- void    _getEnclosingRegionHelper(
-	const std::vector <double> &minu, const std::vector <double> &maxu,
-	std::vector <size_t> &min, std::vector <size_t> &max
  ) const;
 
  void _getIndicesHelper(

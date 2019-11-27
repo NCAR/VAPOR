@@ -68,14 +68,16 @@ void TFMap::update()
 
 void TFMap::show()
 {
+    _hidden = false;
     if (_parent)
-        _parent->show();
+        _parent->showMap(this);
 }
 
 void TFMap::hide()
 {
+    _hidden = true;
     if (_parent)
-        _parent->hide();
+        _parent->hideMap(this);
 }
 
 VAPoR::MapperFunction *TFMap::getMapperFunction() const
@@ -275,6 +277,22 @@ QSize TFMapWidget::minimumSizeHint() const
     return max;
 }
 
+void TFMapWidget::showMap(TFMap *map)
+{
+    map->_hidden = false;
+    show();
+}
+
+void TFMapWidget::hideMap(TFMap *map)
+{
+    map->_hidden = true;
+    int nHidden = 0;
+    for (TFMap *m : _maps)
+        if (m->_hidden) nHidden++;
+    if (nHidden == _maps.size())
+        hide();
+}
+
 void TFMapWidget::_mapActivated(TFMap *who)
 {
     for (auto map : _maps)
@@ -310,7 +328,7 @@ void TFMapWidget::paintEvent(QPaintEvent* event)
     
 //    void *s = VAPoR::GLManager::BeginTimer();
     for (int i = _maps.size() - 1; i >= 0; i--) {
-        if (!_maps[i]->HasValidParams() || !_maps[i]->isLargeEnoughToPaint())
+        if (!_maps[i]->HasValidParams() || !_maps[i]->isLargeEnoughToPaint() || _maps[i]->_hidden)
             continue;
         p.save();
         _maps[i]->paintEvent(p);

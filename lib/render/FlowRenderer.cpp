@@ -285,6 +285,9 @@ FlowRenderer::_paintGL( bool fast )
             rv = _2ndAdvection->CalculateParticleValues( &_colorField, true );
         _coloringComplete = true;
     }
+    
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(true);
 
     _prepareColormap( params );
     _renderFromAnAdvection( &_advection, params, fast );
