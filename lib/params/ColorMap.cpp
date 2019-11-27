@@ -425,7 +425,9 @@ ColorMap::Color ColorMap::color(float value) const
     return colorNormalized(nv);
 }
 
-static void lab2lch(const float lab[3], float lch[3])
+namespace {
+
+void lab2lch(const float lab[3], float lch[3])
 {
     const float l = lab[0];
     const float a = lab[1];
@@ -439,7 +441,7 @@ static void lab2lch(const float lab[3], float lch[3])
     lch[2] = h;
 }
 
-static void lch2lab(const float lch[3], float lab[3])
+void lch2lab(const float lch[3], float lab[3])
 {
     const float l = lch[0];
     const float c = lch[1];
@@ -452,16 +454,18 @@ static void lch2lab(const float lch[3], float lab[3])
     lab[2] = sinf(h) * c;
 }
 
-static void clamp(float &v, const float min, const float max)
+void clamp(float &v, const float min, const float max)
 {
     if (v < min) v = min;
     if (v > max) v = max;
 }
 
-static void clamp3(float c[3], const vector<float> &min, const vector<float> &max)
+void clamp3(float c[3], const vector<float> &min, const vector<float> &max)
 {
     for (int i = 0; i < 3; i++)
         clamp(c[i], min[i], max[i]);
+}
+
 }
 
 
