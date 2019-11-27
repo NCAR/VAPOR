@@ -27,6 +27,16 @@ uniform sampler1D LUT;
 uniform sampler2D sceneDepth;
 uniform sampler3D missingMask;
 
+uniform bool useColormapData;
+#ifdef USE_SECOND_DATA
+uniform bool hasMissingData2;
+uniform sampler3D data2;
+uniform sampler3D missingMask2;
+uniform sampler1D LUT2;
+uniform float LUTMin2;
+uniform float LUTMax2;
+#endif
+
 bool readDepthBuffer = true;
 
 
@@ -69,6 +79,13 @@ bool DoesSampleHaveMissingData(vec3 dataSTR)
 {
     return texture(missingMask, dataSTR).r > 0;
 }
+
+#ifdef USE_SECOND_DATA
+bool DoesSampleHaveMissingData2(vec3 dataSTR)
+{
+    return texture(missingMask2, dataSTR).r > 0;
+}
+#endif
 
 bool ShouldRenderSample(const vec3 sampleSTR)
 {
@@ -123,6 +140,27 @@ vec3 GetNormal(vec3 p)
     if (l == 0)
         return vec3(0);
     return v/l;
+}
+
+vec4 GetColorForNormalizedCoord(vec3 sampleSTR)
+{
+    float value = texture(data, sampleSTR).r;
+    float valueNorm = (value - LUTMin) / (LUTMax - LUTMin);
+    vec4 color = texture(LUT, valueNorm);
+    
+#ifdef USE_SECOND_DATA
+    if (useColormapData) {
+        if (hasMissingData2)
+            if (DoesSampleHaveMissingData2(sampleSTR))
+                    return vec4(0);
+
+        float value2 = texture(data2, sampleSTR).r;
+        float value2Norm = (value2 - LUTMin2) / (LUTMax2 - LUTMin2);
+        color.rgb = texture(LUT2, value2Norm).rgb;
+    }
+#endif
+    
+    return color;
 }
 
 float CalculateDepth(vec3 pos)
