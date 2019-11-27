@@ -349,7 +349,7 @@ public:
  //! Return true if mesh primitives have counter clockwise winding
  //! order. 
  //
- virtual bool HasCCW() const {
+ virtual bool HasInvertedCoordinateSystemHandiness() const {
 	return(true);
  }
 

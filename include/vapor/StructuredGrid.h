@@ -124,7 +124,9 @@ public:
 
  virtual void ClampCoord(std::vector <double> &coords) const override;
 
- virtual bool HasCCW() const override;
+ //! \copydoc Grid::HasInvertedCoordinateSystemHandiness()
+ //!
+ virtual bool HasInvertedCoordinateSystemHandiness() const override;
 
  
  VDF_API friend std::ostream &operator<<(std::ostream &o, const StructuredGrid &sg);

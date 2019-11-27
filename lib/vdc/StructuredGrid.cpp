@@ -252,7 +252,7 @@ void StructuredGrid::ClampCoord(std::vector <double> &coords) const {
 	}
 }
 
-bool StructuredGrid::HasCCW() const {
+bool StructuredGrid::HasInvertedCoordinateSystemHandiness() const {
 	const vector <size_t> &dims = GetDimensions();
 
 	if (dims.size() < 2) return(true);	// Arbitrary
