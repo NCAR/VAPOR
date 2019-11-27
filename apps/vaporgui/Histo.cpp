@@ -25,6 +25,10 @@ using namespace Wasp;
 
 #define SAMPLE_RATE 30
 
+#ifndef __FLT_EPSILON__
+    #define __FLT_EPSILON__ FLT_EPSILON
+#endif
+
 Histo::Histo(int numberBins, float mnData, float mxData, string var, int ts)
 {
     setProperties(mnData, mxData, var, ts);

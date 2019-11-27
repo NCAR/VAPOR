@@ -1,5 +1,5 @@
 #include "VolumeSubtabs.h"
-#include "TFEditor.h"
+#include "TFEditorVolume.h"
 #include "QSliderEdit.h"
 
 using namespace VAPoR;
@@ -16,7 +16,7 @@ void VolumeVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Rende
 VolumeAppearanceSubtab::VolumeAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
-    verticalLayout->insertWidget(0, _tfe = new TFEditor);
+    verticalLayout->insertWidget(0, _tfe = new TFEditorVolume);
 
     _densitySlider = new QSliderEdit();
     _densitySlider->SetLabel("Volume Density");

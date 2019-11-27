@@ -40,3 +40,11 @@ void TFEditor::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPo
     _mapsInfo->Update(rParams);
     range->Update(dataMgr, paramsMgr, rParams);
 }
+
+void TFEditor::SetShowOpacityMap(bool b)
+{
+    if (b)
+        _opacityMap->show();
+    else
+        _opacityMap->hide();
+}

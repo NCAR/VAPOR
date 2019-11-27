@@ -87,7 +87,7 @@ void UnstructuredGridLayered::GetBoundingBox(const vector<size_t> &min, const ve
     maxu.push_back(range[1]);
 }
 
-void UnstructuredGridLayered::GetEnclosingRegion(const vector<double> &minu, const vector<double> &maxu, vector<size_t> &min, vector<size_t> &max) const
+bool UnstructuredGridLayered::GetEnclosingRegion(const vector<double> &minu, const vector<double> &maxu, vector<size_t> &min, vector<size_t> &max) const
 {
     vector<double> cMinu = minu;
     ClampCoord(cMinu);
@@ -96,6 +96,7 @@ void UnstructuredGridLayered::GetEnclosingRegion(const vector<double> &minu, con
     ClampCoord(cMaxu);
 
     VAssert(0 && "Not implemented");
+    return (true);
 }
 
 void UnstructuredGridLayered::GetUserCoordinates(const size_t indices[], double coords[]) const
@@ -107,36 +108,6 @@ void UnstructuredGridLayered::GetUserCoordinates(const size_t indices[], double 
     _ug2d.GetUserCoordinates(indices2d, coords);
 
     coords[2] = _zug.GetValueAtIndex(cIndices);
-}
-
-void UnstructuredGridLayered::GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const
-{
-    indices.clear();
-
-    // Clamp coordinates on periodic boundaries to grid extents
-    //
-    vector<double> cCoords = coords;
-    ClampCoord(cCoords);
-
-    vector<double> coords2D = {cCoords[0], cCoords[1]};
-    _ug2d.GetIndices(coords2D, indices);
-
-    int            rc;
-    size_t         kFound = 0;
-    vector<double> zcoords;
-
-    size_t nz = GetDimensions()[1];
-    for (int j = 0; j < nz; j++) { zcoords.push_back(_zug.AccessIJK(indices[0], j)); }
-
-    rc = Wasp::BinarySearchRange(zcoords, coords[2], kFound);
-
-    if (rc < 0) {
-        indices.push_back(0);
-    } else if (rc > 0) {
-        indices.push_back(GetDimensions()[1] - 1);
-    } else {
-        indices.push_back(kFound);
-    }
 }
 
 bool UnstructuredGridLayered::_insideGrid(const std::vector<double> &coords, std::vector<size_t> &cindices, std::vector<size_t> &nodes2D, std::vector<double> &lambda, float zwgt[2]) const
@@ -174,9 +145,7 @@ bool UnstructuredGridLayered::_insideGrid(const std::vector<double> &coords, std
     }
 
     size_t k;
-    int    rc = Wasp::BinarySearchRange(zcoords, cCoords[2], k);
-
-    if (rc != 0) return (false);
+    if (!Wasp::BinarySearchRange(zcoords, cCoords[2], k)) return (false);
 
     VAssert(k >= 0 && k < nz);
     cindices.push_back(k);

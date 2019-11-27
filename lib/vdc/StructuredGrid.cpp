@@ -3,6 +3,8 @@
 #include "vapor/VAssert.h"
 #include <cmath>
 #include <time.h>
+#include <glm/glm.hpp>
+
 #ifdef Darwin
     #include <mach/mach_time.h>
 #endif
@@ -175,6 +177,28 @@ bool StructuredGrid::GetNodeCells(const std::vector<size_t> &indices, std::vecto
     return (true);
 }
 
+bool StructuredGrid::GetEnclosingRegion(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const
+{
+    VAssert(minu.size() == maxu.size());
+
+    if (!GetIndicesCell(minu, min)) return (false);
+    if (!GetIndicesCell(maxu, max)) return (false);
+    for (int i = 0; i < max.size(); i++) { max[i] += 1; }
+
+    // For curvilinear grids it's possible that minu and maxu components
+    // are swapped
+    //
+    vector<double> newMinu, newMaxu;
+    GetUserCoordinates(min, newMinu);
+    GetUserCoordinates(max, newMaxu);
+
+    for (int i = 0; i < min.size(); i++) {
+        if (newMinu > newMaxu) std::swap(min[i], max[i]);
+    }
+
+    return (true);
+};
+
 void StructuredGrid::ClampCoord(std::vector<double> &coords) const
 {
     VAssert(coords.size() >= GetGeometryDim());
@@ -203,6 +227,40 @@ void StructuredGrid::ClampCoord(std::vector<double> &coords) const
             while (coords[i] > maxu[i]) coords[i] -= maxu[i] - minu[i];
         }
     }
+}
+
+bool StructuredGrid::HasInvertedCoordinateSystemHandiness() const
+{
+    const vector<size_t> &dims = GetDimensions();
+
+    if (dims.size() < 2) return (true);    // Arbitrary
+
+    size_t vi0[] = {0, 0, 0};
+    size_t vi1[] = {1, 0, 0};
+    size_t vi2[] = {0, 1, 0};
+
+    double v0[3], v1[3], v2[3];
+
+    GetUserCoordinates(vi0, v0);
+    GetUserCoordinates(vi1, v1);
+    GetUserCoordinates(vi2, v2);
+
+    glm::vec3 glm_v0(v0[0], v0[1], v0[2]);
+    glm::vec3 glm_v1(v1[0], v1[1], v1[2]);
+    glm::vec3 glm_v2(v2[0], v2[1], v2[2]);
+
+    glm::vec3 c2d = glm::cross(glm_v1 - glm_v0, glm_v2 - glm_v0);
+
+    // CCW if Z component of cross product is positive
+    //
+    if (dims.size() == 2) return (c2d[2] >= 0.0);
+
+    size_t vi3[] = {0, 0, 1};
+    double v3[3];
+
+    GetUserCoordinates(vi3, v3);
+
+    return (c2d[2] * (v3[2] - v0[2]) >= 0.0);
 }
 
 namespace VAPoR {

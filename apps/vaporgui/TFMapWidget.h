@@ -29,6 +29,7 @@ class TFMap : public QObject {
     int           _width = 0;
     int           _height = 0;
     bool          _insideSaveStateGroup = false;
+    bool          _hidden = false;
 
     VAPoR::DataMgr *     _dataMgr = nullptr;
     VAPoR::ParamsMgr *   _paramsMgr = nullptr;
@@ -121,6 +122,8 @@ public:
     void                 Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     void                 Deactivate();
     QSize                minimumSizeHint() const override;
+    void                 showMap(TFMap *map);
+    void                 hideMap(TFMap *map);
 
 signals:
     void Activated(TFMapWidget *who);

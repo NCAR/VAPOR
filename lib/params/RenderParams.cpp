@@ -109,24 +109,28 @@ void RenderParams::InitBox()
 {
     int            rc;
     vector<double> minExt, maxExt;
-    string         varname = GetVariableName();
 
-    // If no variable name set find one.
     //
-    if (varname.empty()) {
-        vector<string> varNames;
-        for (int dim = 3; dim > 1; dim--) {
-            varNames = _dataMgr->GetDataVarNames(dim);
-            if (!varNames.empty()) {
-                varname = varNames[0];
-                break;
-            }
+    // Initialize box with bounds of a single variable. First check
+    // variable returned by GetVariableName(). If not available,
+    // look for others
+    //
+    vector<string> varNames;
+    varNames.push_back(GetVariableName());
+    for (int dim = 3; dim > 1; dim--) {
+        vector<string> v = _dataMgr->GetDataVarNames(dim);
+        varNames.insert(varNames.end(), v.begin(), v.end());
+    }
+
+    string varname;
+    for (auto it = varNames.begin(); it != varNames.end(); ++it) {
+        if (_dataMgr->VariableExists(0, *it, 0, 0)) {
+            varname = *it;
+            break;
         }
     }
 
     if (varname.empty()) return;
-
-    if (!_dataMgr->VariableExists(0, varname, 0, 0)) return;
 
     bool prev = EnableErrMsg(false);    // no error handling
     rc = _dataMgr->GetVariableExtents(0, varname, 0, 0, minExt, maxExt);

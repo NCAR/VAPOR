@@ -192,7 +192,9 @@ std::vector<double> ParamsWidgetColor::QColorToVector(const QColor &c)
 
 ParamsWidgetFile::ParamsWidgetFile(const std::string &tag, const std::string &label) : ParamsWidget(tag, label)
 {
-#warning _spacer is a hack. Will be refactored
+#ifndef WIN32
+    #warning _spacer is a hack. Will be refactored
+#endif
     _spacer->changeSize(0, 0, QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     _button = new QPushButton;

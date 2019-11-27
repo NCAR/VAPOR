@@ -146,6 +146,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     if (VolumeRegular::LoadData(grid) < 0) return -1;
 
     _useHighPrecisionTriangleRoutine = _needsHighPrecisionTriangleRoutine(grid);
+    _gridHasInvertedCoordinateSystemHandiness = !grid->HasInvertedCoordinateSystemHandiness();
 
     vector<size_t> dims = grid->GetDimensions();
     const int      w = dims[0], h = dims[1], d = dims[2];
@@ -355,7 +356,11 @@ int VolumeCellTraversal::_getHeuristicBBLevels() const
 
 std::string VolumeCellTraversal::_addDefinitionsToShader(std::string shaderName) const
 {
+    shaderName = VolumeRegular::_addDefinitionsToShader(shaderName);
+
     if (_useHighPrecisionTriangleRoutine) shaderName += ":USE_INTEL_TRI_ISECT";
+
+    if (_gridHasInvertedCoordinateSystemHandiness) shaderName += ":INVERT_GRID_COORD_SYS_HAND";
 
     GLManager::Vendor vendor = GLManager::GetVendor();
 
@@ -414,8 +419,4 @@ bool VolumeCellTraversal::_need32BitForCoordinates(const Grid *grid)
 
 ShaderProgram *VolumeCellTraversalIso::GetShader() const { return _glManager->shaderManager->GetShader(_addDefinitionsToShader("VolumeCellIso")); }
 
-void VolumeCellTraversalIso::SetUniforms(const ShaderProgram *shader) const
-{
-    VolumeCellTraversal::SetUniforms(shader);
-    shader->SetUniform("useColormapData", _hasSecondData);
-}
+void VolumeCellTraversalIso::SetUniforms(const ShaderProgram *shader) const { VolumeCellTraversal::SetUniforms(shader); }

@@ -81,8 +81,11 @@ void StretchedGrid::GetBoundingBox(const std::vector<size_t> &min, const std::ve
 
     minu[0] = _xcoords[cMin[0]];
     maxu[0] = _xcoords[cMax[0]];
+    if (minu[0] > maxu[0]) std::swap(minu[0], maxu[0]);
+
     minu[1] = _ycoords[cMin[1]];
     maxu[1] = _ycoords[cMax[1]];
+    if (minu[1] > maxu[1]) std::swap(minu[1], maxu[1]);
 
     // We're done if 2D grid
     //
@@ -90,83 +93,7 @@ void StretchedGrid::GetBoundingBox(const std::vector<size_t> &min, const std::ve
 
     minu[2] = _zcoords[cMin[2]];
     maxu[2] = _zcoords[cMax[2]];
-}
-
-void StretchedGrid::GetEnclosingRegion(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const
-{
-    vector<double> cMinu = minu;
-    ClampCoord(cMinu);
-
-    vector<double> cMaxu = maxu;
-    ClampCoord(cMaxu);
-
-    VAssert(cMinu.size() == cMaxu.size());
-
-    // Initialize voxels coords to full grid
-    //
-    vector<size_t> dims = GetDimensions();
-    for (int i = 0; i < dims.size(); i++) {
-        min[i] = 0;
-        max[i] = dims[i] - 1;
-    }
-
-    float xmin = cMinu[0];
-    int   imin = min[0];
-    bool  outside = true;
-    for (int i = 0; i < _xcoords.size() && outside; i++) {
-        if (_xcoords[i] < xmin) outside = false;
-        if (outside) imin = i;
-    }
-    min[0] = imin;
-
-    float xmax = cMaxu[0];
-    int   imax = max[0];
-    outside = true;
-    for (int i = _xcoords.size() - 1; i >= min[0] && outside; i--) {
-        if (_xcoords[i] > xmax) outside = false;
-        if (outside) imax = i;
-    }
-    max[0] = imax;
-
-    float ymin = cMinu[1];
-    int   jmin = min[1];
-    outside = true;
-    for (int j = 0; j < _ycoords.size() && outside; j++) {
-        if (_ycoords[j] < ymin) outside = false;
-        if (outside) jmin = j;
-    }
-    min[1] = jmin;
-
-    float ymax = cMaxu[1];
-    int   jmax = max[1];
-    outside = true;
-    for (int j = _ycoords.size() - 1; j >= min[1] && outside; j--) {
-        if (_ycoords[j] > ymax) outside = false;
-        if (outside) jmax = j;
-    }
-    max[1] = jmax;
-
-    if (dims.size() < 3) return;    // 2D => we're done.
-
-    // Finally, get Z
-    //
-    float zmin = cMinu[2];
-    int   kmin = min[2];
-    outside = true;
-    for (int k = 0; k < _zcoords.size() && outside; k++) {
-        if (_zcoords[k] < zmin) outside = false;
-        if (outside) kmin = k;
-    }
-    min[2] = kmin;
-
-    float zmax = cMaxu[2];
-    int   kmax = max[2];
-    outside = true;
-    for (int k = _zcoords.size() - 1; k >= min[2] && outside; k--) {
-        if (_zcoords[k] > zmax) outside = false;
-        if (outside) kmax = k;
-    }
-    max[2] = kmax;
+    if (minu[2] > maxu[2]) std::swap(minu[2], maxu[2]);
 }
 
 void StretchedGrid::GetUserCoordinates(const size_t indices[], double coords[]) const
@@ -180,48 +107,6 @@ void StretchedGrid::GetUserCoordinates(const size_t indices[], double coords[]) 
     coords[1] = _ycoords[cIndices[1]];
 
     if (GetGeometryDim() > 2) { coords[2] = _zcoords[cIndices[2]]; }
-}
-
-void StretchedGrid::GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const
-{
-    indices.clear();
-
-    // Clamp coordinates on periodic boundaries to grid extents
-    //
-    vector<double> cCoords = coords;
-    ClampCoord(cCoords);
-
-    size_t i;
-    int    rc = Wasp::BinarySearchRange(_xcoords, cCoords[0], i);
-    if (rc < 0) {
-        indices.push_back(0);
-    } else if (rc > 0) {
-        indices.push_back(i);
-    } else {
-        indices.push_back(GetDimensions()[0] - 1);
-    }
-
-    size_t j;
-    rc = Wasp::BinarySearchRange(_ycoords, cCoords[1], j);
-    if (rc < 0) {
-        indices.push_back(0);
-    } else if (rc > 0) {
-        indices.push_back(j);
-    } else {
-        indices.push_back(GetDimensions()[1] - 1);
-    }
-
-    if (cCoords.size() == 2) return;
-
-    size_t k;
-    rc = Wasp::BinarySearchRange(_zcoords, cCoords[2], k);
-    if (rc < 0) {
-        indices.push_back(0);
-    } else if (rc > 0) {
-        indices.push_back(k);
-    } else {
-        indices.push_back(GetDimensions()[2] - 1);
-    }
 }
 
 bool StretchedGrid::GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const
@@ -449,16 +334,12 @@ bool StretchedGrid::_insideGrid(double x, double y, double z, size_t &i, size_t 
     }
     i = j = k = 0;
 
-    int rc = Wasp::BinarySearchRange(_xcoords, x, i);
-
-    if (rc != 0) return (false);
+    if (!Wasp::BinarySearchRange(_xcoords, x, i)) return (false);
 
     xwgt[0] = 1.0 - (x - _xcoords[i]) / (_xcoords[i + 1] - _xcoords[i]);
     xwgt[1] = 1.0 - xwgt[0];
 
-    rc = Wasp::BinarySearchRange(_ycoords, y, j);
-
-    if (rc != 0) return (false);
+    if (!Wasp::BinarySearchRange(_ycoords, y, j)) return (false);
 
     ywgt[0] = 1.0 - (y - _ycoords[j]) / (_ycoords[j + 1] - _ycoords[j]);
     ywgt[1] = 1.0 - ywgt[0];
@@ -472,60 +353,10 @@ bool StretchedGrid::_insideGrid(double x, double y, double z, size_t &i, size_t 
     // Now verify that Z coordinate of point is in grid, and find
     // its interpolation weights if so.
     //
-    rc = Wasp::BinarySearchRange(_zcoords, z, k);
-
-    if (rc != 0) return (false);
+    if (!Wasp::BinarySearchRange(_zcoords, z, k)) return (false);
 
     zwgt[0] = 1.0 - (z - _zcoords[k]) / (_zcoords[k + 1] - _zcoords[k]);
     zwgt[1] = 1.0 - zwgt[0];
 
     return (true);
-}
-
-void StretchedGrid::_getMinCellExtents(vector<double> &minCellExtents) const
-{
-    minCellExtents.clear();
-
-    vector<size_t> dims = StructuredGrid::GetDimensions();
-
-    // Find minimum cell extents along X
-    //
-    float minx = _xcoords[1] - _xcoords[0];
-    float x0 = _xcoords[0];
-    for (int i = 1; i < dims[0]; i++) {
-        float x1 = _xcoords[i];
-
-        if ((x1 - x0) < minx) minx = x1 - x0;
-
-        x1 = x0;
-    }
-    minCellExtents.push_back(minx);
-
-    // Find minimum cell extents along Y
-    //
-    float miny = _ycoords[1] - _ycoords[0];
-    float y0 = _ycoords[0];
-    for (int j = 1; j < dims[1]; j++) {
-        float y1 = _ycoords[j];
-
-        if ((y1 - y0) < miny) miny = y1 - y0;
-
-        y1 = y0;
-    }
-    minCellExtents.push_back(miny);
-
-    if (dims.size() < 3 || dims[2] < 2) return;
-
-    // Find minimum cell extents along Z
-    //
-    float minz = _zcoords[1] - _zcoords[0];
-    float z0 = _zcoords[0];
-    for (int k = 1; k < dims[2]; k++) {
-        float z1 = _zcoords[k];
-
-        if ((z1 - z0) < minz) minz = z1 - z0;
-
-        z1 = z0;
-    }
-    minCellExtents.push_back(minz);
 }

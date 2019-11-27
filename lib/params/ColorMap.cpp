@@ -485,3 +485,23 @@ vector<double> ColorMap::GetDataBounds() const
 
     return (bounds);
 }
+
+void ColorMap::Reverse()
+{
+    auto           old = GetControlPoints();
+    vector<double> cps;
+
+    for (int i = numControlPoints() - 1; i >= 0; i--) {
+        double r = old[i * 4 + 0];
+        double g = old[i * 4 + 1];
+        double b = old[i * 4 + 2];
+        double v = old[i * 4 + 3];
+
+        cps.push_back(r);
+        cps.push_back(g);
+        cps.push_back(b);
+        cps.push_back(1.0 - v);
+    }
+
+    SetControlPoints(cps);
+}
