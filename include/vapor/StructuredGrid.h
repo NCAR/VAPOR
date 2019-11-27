@@ -102,6 +102,10 @@ class VDF_API StructuredGrid : public Grid {
         const std::vector<size_t> &indices,
         std::vector<std::vector<size_t>> &cells) const override;
 
+    virtual bool GetEnclosingRegion(
+        const std::vector<double> &minu, const std::vector<double> &maxu,
+        std::vector<size_t> &min, std::vector<size_t> &max) const override;
+
     size_t GetMaxVertexPerFace() const override {
         return (4);
     };
@@ -111,6 +115,10 @@ class VDF_API StructuredGrid : public Grid {
     };
 
     virtual void ClampCoord(std::vector<double> &coords) const override;
+
+    //! \copydoc Grid::HasInvertedCoordinateSystemHandiness()
+    //!
+    virtual bool HasInvertedCoordinateSystemHandiness() const override;
 
     VDF_API friend std::ostream &operator<<(std::ostream &o, const StructuredGrid &sg);
 

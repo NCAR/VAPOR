@@ -101,12 +101,6 @@ class VDF_API LayeredGrid : public StructuredGrid {
         const std::vector<size_t> &min, const std::vector<size_t> &max,
         std::vector<double> &minu, std::vector<double> &maxu) const override;
 
-    //! \copydoc Grid::GetEnclosingRegion()
-    //!
-    virtual void GetEnclosingRegion(
-        const std::vector<double> &minu, const std::vector<double> &maxu,
-        std::vector<size_t> &min, std::vector<size_t> &max) const override;
-
     //! \copydoc Grid::GetUserCoordinates()
     //!
     virtual void GetUserCoordinates(
@@ -123,12 +117,6 @@ class VDF_API LayeredGrid : public StructuredGrid {
         y = coords[1];
         z = coords[2];
     }
-
-    //! \copydoc Grid::GetIndices()
-    //!
-    void GetIndices(
-        const std::vector<double> &coords,
-        std::vector<size_t> &indices) const override;
 
     //! \copydoc Grid::GetIndicesCell
     //!
@@ -309,6 +297,11 @@ class VDF_API LayeredGrid : public StructuredGrid {
 
     int _bsearchKIndexCell(
         size_t i, size_t j, double z, size_t &k) const;
+
+    bool _getCellAndWeights(
+        const double coords[3],
+        size_t indices0[3],
+        double wgts[3]) const;
 };
 }; // namespace VAPoR
 #endif
