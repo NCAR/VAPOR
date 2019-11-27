@@ -190,18 +190,28 @@ void Wasp::Transpose(const float *a, float *b, int s1, int s2) {
     Wasp::Transpose(a, b, 0, s1, s1, 0, s2, s2);
 }
 
-int Wasp::BinarySearchRange(
+bool Wasp::BinarySearchRange(
     const vector<double> &sorted,
     double x,
     size_t &i) {
     i = 0;
 
+    if (sorted.size() < 2)
+        return (false);
+
     // See if above or below the array
     //
-    if (x < sorted[0])
-        return (-1);
-    if (x > sorted[sorted.size() - 1])
-        return (1);
+    if (sorted[0] < sorted[1]) { // increasing
+        if (x < sorted[0])
+            return (false);
+        if (x > sorted[sorted.size() - 1])
+            return (false);
+    } else { // decreasing
+        if (x > sorted[0])
+            return (false);
+        if (x < sorted[sorted.size() - 1])
+            return (false);
+    }
 
     // Binary search for starting index of cell containing x
     //
@@ -228,5 +238,5 @@ int Wasp::BinarySearchRange(
         }
     }
     i = i0;
-    return (0);
+    return (true);
 }
