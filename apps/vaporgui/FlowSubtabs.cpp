@@ -1,5 +1,4 @@
 #include "FlowSubtabs.h"
-#include "ErrorReporter.h"
 #include "vapor/DataMgrUtils.h"
 
 QVaporSubtab::QVaporSubtab(QWidget *parent) : QWidget(parent) {
@@ -255,10 +254,7 @@ void FlowSeedingSubtab::Update(VAPoR::DataMgr *dataMgr,
                                     minExt,
                                     maxExt,
                                     axes);
-    if (minExt.size() != 3 || maxExt.size() != 3) {
-        MSG_ERR("Flow integration variables need to be three dimensional!");
-        return;
-    }
+    VAssert(minExt.size() == 3 && maxExt.size() == 3);
     std::vector<float> range;
     for (int i = 0; i < 3; i++) {
         range.push_back(float(minExt[i]));

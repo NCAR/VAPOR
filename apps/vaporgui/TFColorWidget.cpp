@@ -52,6 +52,7 @@ void TFColorMap::PopulateContextMenu(QMenu *menu, const glm::vec2 &p) {
 
 void TFColorMap::PopulateSettingsMenu(QMenu *menu) const {
     menu->addAction(_colorInterpolationMenu);
+    menu->addAction("Reverse Colormap", this, SLOT(menuReverse()));
     menu->addSeparator();
     menu->addAction("Save Colormap", this, SLOT(menuSave()));
     menu->addAction("Load Colormap", this, SLOT(menuLoad()));
@@ -108,7 +109,7 @@ void TFColorMap::paintEvent(QPainter &p) {
 
     QMargins padding = GetPadding();
     int nSamples = width() - (padding.left() + padding.right());
-    unsigned char buf[nSamples * 3];
+    unsigned char *buf = new unsigned char[nSamples * 3];
     float rgb[3];
     for (int i = 0; i < nSamples; i++) {
         cm->colorNormalized(i / (float)nSamples).toRGB(rgb);
@@ -123,6 +124,7 @@ void TFColorMap::paintEvent(QPainter &p) {
     for (int i = 0; i < cm->numControlPoints(); i++) {
         drawControl(p, controlQPositionForValue(cm->controlPointValueNormalized(i)), i == _selectedId);
     }
+    delete[] buf;
 }
 
 void TFColorMap::mousePressEvent(QMouseEvent *event) {
@@ -274,6 +276,16 @@ void TFColorMap::menuLoadBuiltin(std::string path) {
     TFUtils::LoadColormap(rp->GetMapperFunc(getVariableName()), path);
 }
 
+void TFColorMap::menuReverse() {
+    RenderParams *rp = getRenderParams();
+    if (!rp)
+        return;
+    MapperFunction *tf = rp->GetMapperFunc(getVariableName());
+    ColorMap *cm = tf->GetColorMap();
+
+    cm->Reverse();
+}
+
 int TFColorMap::findSelectedControlPoint(const glm::vec2 &mouse) const {
     const ColorMap *cm = getColormap();
     const int n = cm->numControlPoints();
@@ -334,7 +346,7 @@ QIcon ColorMapMenuItem::getCachedIcon(const std::string &path) {
 
     QSize size = getIconSize();
     int nSamples = size.width();
-    unsigned char buf[nSamples * 3];
+    unsigned char *buf = new unsigned char[nSamples * 3];
     float rgb[3];
     for (int i = 0; i < nSamples; i++) {
         cm->colorNormalized(i / (float)nSamples).toRGB(rgb);
@@ -343,8 +355,9 @@ QIcon ColorMapMenuItem::getCachedIcon(const std::string &path) {
         buf[i * 3 + 2] = rgb[2] * 255;
     }
     QImage image(buf, nSamples, 1, QImage::Format::Format_RGB888);
-
     icons[path] = QIcon(QPixmap::fromImage(image).scaled(size.width(), size.height()));
+
+    delete[] buf;
     return icons[path];
 }
 
@@ -363,7 +376,7 @@ ColorMapMenuItem::ColorMapMenuItem(const std::string &path)
 
     button->setIcon(getCachedIcon(path));
     button->setFixedSize(getIconSize() + getIconPadding());
-    connect(button, SIGNAL(clicked()), this, SLOT(_clicked()));
+    button->installEventFilter(this);
 
     string name = STLUtils::Split(FileUtils::Basename(path), ".")[0];
     button->setToolTip(QString::fromStdString(name));
@@ -382,6 +395,7 @@ ColorMapMenuItem::ColorMapMenuItem(const std::string &path)
                           )");
 }
 
+// Manually riggering an action does not close the menu so it has to be done manually.
 void ColorMapMenuItem::CloseMenu(QAction *action) {
     if (!action)
         return;
@@ -400,8 +414,12 @@ void ColorMapMenuItem::CloseMenu(QAction *action) {
     }
 }
 
-void ColorMapMenuItem::_clicked() {
-    trigger();
-    emit triggered(_path);
-    CloseMenu(this);
+bool ColorMapMenuItem::eventFilter(QObject *obj, QEvent *event) {
+    if (event->type() == QEvent::MouseButtonRelease) {
+        trigger();
+        emit triggered(_path);
+        CloseMenu(this);
+        return true;
+    }
+    return QObject::eventFilter(obj, event);
 }

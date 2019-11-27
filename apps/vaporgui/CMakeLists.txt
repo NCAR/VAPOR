@@ -110,6 +110,8 @@ set (SRCS
 	ModelEventRouter.h
 	ModelSubtabs.cpp
 	ModelSubtabs.h
+	TFEditorVolume.cpp
+	TFEditorVolume.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
@@ -256,6 +258,8 @@ set (CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if (APPLE)
 	set (SRCS ${SRCS} core_profile_attributes.mm)
+	set (MACOSX_BUNDLE_GUI_IDENTIFIER Vapor3)
+	set (MACOSX_BUNDLE_LONG_VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}.${VERSION_RC})
 	set (MACOSX_BUNDLE_ICON_FILE VAPOR.icns)
 	set (MACOSX_BUNDLE_ICON_FILE_PATH ${CMAKE_SOURCE_DIR}/share/images/VAPOR.icns)
 	set_source_files_properties(${MACOSX_BUNDLE_ICON_FILE_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
