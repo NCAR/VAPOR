@@ -724,6 +724,25 @@ int DCWRF::_GetProj4String(NetCDFCollection *ncdfc, float radius, int map_proj, 
     return (0);
 }
 
+bool DCWRF::_isIdealized(NetCDFCollection *ncdfc) const
+{
+    // Version 4.0 of WRF introduced "IDEAL_CASE" attribute.
+    // For earlier versions we look for hints
+    //
+    vector<long> l;
+    ncdfc->GetAtt("", "IDEAL_CASE", l);
+    if (l.size() && l[0] != 0) return (true);
+
+    string s;
+    ncdfc->GetAtt("", "MAP_PROJ_CHAR", s);
+    if (Wasp::StrCmpNoCase(s, "Cartesian") == 0) return (true);
+
+    ncdfc->GetAtt("", "SIMULATION_INITIALIZATION_TYPE", s);
+    if (Wasp::StrCmpNoCase(s, "IDEALIZED DATA") == 0) return (true);
+
+    return (false);
+}
+
 //
 // Set up map projection stuff
 //
@@ -731,6 +750,8 @@ int DCWRF::_InitProjection(NetCDFCollection *ncdfc, float radius)
 {
     _proj4String.clear();
     _mapProj = 0;
+
+    if (_isIdealized(ncdfc)) return (0);
 
     vector<long> ivalues;
     ncdfc->GetAtt("", "MAP_PROJ", ivalues);
@@ -746,7 +767,68 @@ int DCWRF::_InitProjection(NetCDFCollection *ncdfc, float radius)
     return (0);
 }
 
-DerivedCoordVar_Staggered *DCWRF::_makeDerivedHorizontal(NetCDFCollection *ncdfc, string name, string &timeDimName, vector<string> &spaceDimNames)
+DerivedCoordVar_CF2D *DCWRF::_makeDerivedHorizontalIdealized(NetCDFCollection *ncdfc, string name, string &timeDimName, vector<string> &spaceDimNames)
+{
+    timeDimName.clear();
+    spaceDimNames.clear();
+
+    timeDimName = ncdfc->GetTimeDimName(name);
+    spaceDimNames = ncdfc->GetSpatialDimNames(name);
+    reverse(spaceDimNames.begin(), spaceDimNames.end());
+
+    vector<size_t> dimLens = ncdfc->GetSpatialDims(name);
+    reverse(dimLens.begin(), dimLens.end());
+    VAssert(dimLens.size() == 2);
+
+    vector<float> data;
+    data.resize(dimLens[0] * dimLens[1]);
+
+    string units = "km";
+    float  offset = 0.0;
+    int    axis = 0;
+    if (name == "XLONG") {
+        axis = 0;
+        offset = _dx / 2.0;
+    } else if (name == "XLAT") {
+        axis = 1;
+        offset = _dy / 2.0;
+    } else if (name == "XLONG_U") {
+        axis = 0;
+        offset = 0.0;
+    } else if (name == "XLAT_U") {
+        axis = 1;
+        offset = _dy / 2.0;
+    } else if (name == "XLONG_V") {
+        axis = 0;
+        offset = _dx / 2.0;
+    } else if (name == "XLAT_V") {
+        axis = 1;
+        offset = 0.0;
+    } else {
+        return (NULL);
+    }
+
+    if (axis == 0) {
+        for (size_t j = 0; j < dimLens[1]; j++) {
+            for (size_t i = 0; i < dimLens[0]; i++) { data[j * dimLens[0] + i] = i * _dx + offset; }
+        }
+    } else {
+        for (size_t j = 0; j < dimLens[1]; j++) {
+            for (size_t i = 0; i < dimLens[0]; i++) { data[j * dimLens[0] + i] = j * _dy + offset; }
+        }
+    }
+
+    DerivedCoordVar_CF2D *derivedVar = new DerivedCoordVar_CF2D(name, spaceDimNames, dimLens, axis, units, data);
+
+    int rc = derivedVar->Initialize();
+    if (rc < 0) return (NULL);
+
+    _dvm.AddCoordVar(derivedVar);
+
+    return (derivedVar);
+}
+
+DerivedCoordVar_Staggered *DCWRF::_makeDerivedHorizontalStaggered(NetCDFCollection *ncdfc, string name, string &timeDimName, vector<string> &spaceDimNames)
 {
     timeDimName.clear();
     spaceDimNames.clear();
@@ -798,25 +880,32 @@ int DCWRF::_InitHorizontalCoordinatesHelper(NetCDFCollection *ncdfc, string name
 {
     VAssert(axis == 0 || axis == 1);
 
-    DerivedCoordVar_Staggered *derivedVar = NULL;
+    DerivedVar *derivedVar = NULL;
 
     string         timeDimName;
     vector<string> spaceDimNames;
 
-    // Ugh. Older WRF files don't have coordinate variables for
-    // staggered dimensions, so we need to derive them.
-    //
-    if (ncdfc->VariableExists(name)) {
+    string units;
+    if (ncdfc->VariableExists(name) && !_proj4String.empty()) {
         timeDimName = ncdfc->GetTimeDimName(name);
 
         spaceDimNames = ncdfc->GetSpatialDimNames(name);
         reverse(spaceDimNames.begin(), spaceDimNames.end());
-    } else {
-        derivedVar = _makeDerivedHorizontal(ncdfc, name, timeDimName, spaceDimNames);
+        units = axis == 0 ? "degrees_east" : "degrees_north";
+    } else if (ncdfc->VariableExists(name) && _proj4String.empty()) {
+        // For idealized case we need to synthesize Cartesian coordinates
+        //
+        derivedVar = _makeDerivedHorizontalIdealized(ncdfc, name, timeDimName, spaceDimNames);
         if (!derivedVar) return (-1);
+        units = "km";
+    } else {
+        // Ugh. Older WRF files don't have coordinate variables for
+        // staggered dimensions, so we need to derive them.
+        //
+        derivedVar = _makeDerivedHorizontalStaggered(ncdfc, name, timeDimName, spaceDimNames);
+        if (!derivedVar) return (-1);
+        units = axis == 0 ? "degrees_east" : "degrees_north";
     }
-
-    string units = axis == 0 ? "degrees_east" : "degrees_north";
 
     // Finally, add the variable to _coordVarsMap. Probably don't
     // need to do this here. Could do this when we process native WRF

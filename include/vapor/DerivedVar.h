@@ -235,6 +235,48 @@ private:
 };
 
 //!
+//! \class DerivedCoordVar_CF2D
+//!
+//! \brief Derived 2D CF conventions coordinate variable . Coordinates
+//! are provided by \p data, whose length must be dimlens[0] * dimLens[1]
+//!
+//! \author John Clyne
+//! \date   Februrary, 2018
+//!
+//!
+class VDF_API DerivedCoordVar_CF2D : public DerivedCoordVar {
+public:
+    DerivedCoordVar_CF2D(string derivedVarName, std::vector<string> dimNames, std::vector<size_t> dimLens, int axis, string units, const vector<float> &data);
+    virtual ~DerivedCoordVar_CF2D() {}
+
+    virtual int Initialize();
+
+    virtual bool GetBaseVarInfo(DC::BaseVar &var) const;
+
+    virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
+
+    virtual std::vector<string> GetInputs() const { return (std::vector<string>()); }
+
+    virtual int GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const;
+
+    virtual int OpenVariableRead(size_t ts, int level = 0, int lod = 0);
+
+    virtual int CloseVariable(int fd);
+
+    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
+
+    virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
+
+    virtual bool VariableExists(size_t ts, int reflevel, int lod) const;
+
+private:
+    std::vector<string> _dimNames;
+    std::vector<size_t> _dimLens;
+    std::vector<float>  _data;
+    DC::CoordVar        _coordVarInfo;
+};
+
+//!
 //! \class DerivedCoordVar_WRFTime
 //!
 //! \brief Derived WRF Time coordinate variable
