@@ -287,7 +287,7 @@ bool IntersectRayCellFace(vec3 o, vec3 d, float rt0, ivec3 cellIndex, ivec3 face
 
 vec3 GetTriangleNormal(vec3 v0, vec3 v1, vec3 v2)
 {
-    return cross(v1-v0, v2-v0);
+    return normalize(cross(v1-v0, v2-v0));
 }
 
 vec3 GetCellFaceNormal(ivec3 cellIndex, ivec3 face)
@@ -295,7 +295,13 @@ vec3 GetCellFaceNormal(ivec3 cellIndex, ivec3 face)
     vec3 v0, v1, v2, v3;
     GetFaceVertices(cellIndex, face, v0, v1, v2, v3);
     
-    return (GetTriangleNormal(v0, v1, v2) + GetTriangleNormal(v0, v2, v3)) / 2.0f;
+    vec3 normal = (GetTriangleNormal(v0, v1, v2) + GetTriangleNormal(v0, v2, v3)) / 2.0f;
+    
+#ifdef INVERT_GRID_COORD_SYS_HAND
+    normal = -normal;
+#endif
+    
+    return normal;
 }
 
 bool FindCellExit(vec3 origin, vec3 dir, float t0, ivec3 currentCell, ivec3 entranceFace, bool allowThinCells, OUT ivec3 exitFace, OUT vec3 exitCoord, OUT float t1)
