@@ -218,33 +218,6 @@ void RegularGrid::GetBoundingBox(const vector<size_t> &min, const vector<size_t>
     Grid::GetUserCoordinates(cMax, maxu);
 }
 
-void RegularGrid::GetEnclosingRegion(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const
-{
-    vector<double> cMinu = minu;
-    ClampCoord(cMinu);
-
-    vector<double> cMaxu = maxu;
-    ClampCoord(cMaxu);
-
-    VAssert(cMinu.size() == cMaxu.size());
-
-    min.clear();
-    max.clear();
-
-    for (int i = 0; i < cMinu.size(); i++) {
-        VAssert(cMinu[i] <= cMaxu[i]);
-        double u = cMinu[i];
-        if (u < cMinu[i]) { u = cMinu[i]; }
-        size_t index = (u - _minu[i]) / _delta[i];
-        min.push_back(index);
-
-        u = cMaxu[i];
-        if (u > cMaxu[i]) { u = cMaxu[i]; }
-        index = (u - _maxu[i]) / _delta[i];
-        max.push_back(index);
-    }
-}
-
 void RegularGrid::GetUserCoordinates(const size_t indices[], double coords[]) const
 {
     size_t cIndices[3];
@@ -258,40 +231,6 @@ void RegularGrid::GetUserCoordinates(const size_t indices[], double coords[]) co
         if (index >= dims[i]) { index = dims[i] - 1; }
 
         coords[i] = cIndices[i] * _delta[i] + _minu[i];
-    }
-}
-
-void RegularGrid::GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const
-{
-    indices.clear();
-
-    std::vector<double> clampedCoords = coords;
-    ClampCoord(clampedCoords);
-
-    vector<size_t> dims = GetDimensions();
-
-    vector<double> wgts;
-
-    for (int i = 0; i < clampedCoords.size(); i++) {
-        indices.push_back(0);
-
-        if (clampedCoords[i] < _minu[i]) {
-            indices[i] = 0;
-            continue;
-        }
-        if (clampedCoords[i] > _maxu[i]) {
-            indices[i] = dims[i] - 1;
-            continue;
-        }
-
-        if (_delta[i] != 0.0) { indices[i] = (size_t)floor((clampedCoords[i] - _minu[i]) / _delta[i]); }
-
-        VAssert(indices[i] < dims[i]);
-
-        double wgt = 0.0;
-
-        if (_delta[0] != 0.0) { wgt = ((clampedCoords[i] - _minu[i]) - (indices[i] * _delta[i])) / _delta[i]; }
-        if (wgt > 0.5) indices[i] += 1;
     }
 }
 

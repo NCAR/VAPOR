@@ -275,7 +275,7 @@ public:
     //! \param[out] min Integer coordinates of minimum coorner
     //! \param[out] max Integer coordinates of maximum coorner
     //!
-    virtual void GetEnclosingRegion(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const = 0;
+    virtual bool GetEnclosingRegion(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const = 0;
 
     //! Return the value of the \a missing_value parameter
     //!
@@ -313,6 +313,11 @@ public:
     //! GetMissingValue() whenever operations are performed on them.
     //
     bool HasMissingData() const { return (_hasMissing); };
+
+    //! Return true if mesh primitives have counter clockwise winding
+    //! order.
+    //
+    virtual bool HasInvertedCoordinateSystemHandiness() const { return (true); }
 
     //! Return the interpolation order to be used during function reconstruction
     //!
@@ -359,20 +364,6 @@ public:
     virtual void GetUserCoordinates(size_t i, double &x, double &y, double &z) const;
     virtual void GetUserCoordinates(size_t i, size_t j, double &x, double &y, double &z) const;
     virtual void GetUserCoordinates(size_t i, size_t j, size_t k, double &x, double &y, double &z) const;
-
-    //! Return the closest grid point to the specified user coordinates
-    //!
-    //! This method returns the indices of the grid point closest to
-    //! the specified user coordinates based on Euclidean distance. If any
-    //! of the input coordinates correspond to periodic dimensions the
-    //! the coordinate(s) are first re-mapped to lie inside the grid
-    //! extents as returned by GetUserExtents()
-    //!
-    //! \param[in] coords User coordinates of grid point with indices
-    //! given by \p indices.
-    //! \param[out] indices Array of grid indices.
-    //!
-    virtual void GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const = 0;
 
     //! Return the indices of the cell containing the
     //! specified user coordinates

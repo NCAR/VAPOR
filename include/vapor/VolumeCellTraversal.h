@@ -52,6 +52,7 @@ private:
     int  _coordDims[3];
     int  _BBLevels;
     bool _useHighPrecisionTriangleRoutine;
+    bool _gridHasInvertedCoordinateSystemHandiness;
 
     bool        _needsHighPrecisionTriangleRoutine(const Grid *grid);
     static bool _need32BitForCoordinates(const Grid *grid);

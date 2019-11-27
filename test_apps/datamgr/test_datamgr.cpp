@@ -274,6 +274,8 @@ void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts)
     datamgr.GetDataRange(ts, vname, opt.level, opt.lod, rvec);
     cout << "Data Range: [" << rvec[0] << ", " << rvec[1] << "]" << endl;
 
+    cout << "Cell face has CCW winding order : " << g->HasCCW() << endl;
+
     vector<size_t> dims = g->GetDimensions();
     cout << "Grid dimensions: [ ";
     for (int i = 0; i < dims.size(); i++) { cout << dims[i] << " "; }

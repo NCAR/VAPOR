@@ -146,152 +146,6 @@ void CurvilinearGrid::GetBoundingBox(const std::vector<size_t> &min, const std::
     }
 }
 
-void CurvilinearGrid::_getEnclosingRegionHelper(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const
-{
-    VAssert(minu.size() == 3);
-    VAssert(minu.size() == maxu.size());
-    VAssert(min.size() == 3);
-    VAssert(min.size() == max.size());
-
-    if (_terrainFollowing) {
-        vector<size_t> dims = GetDimensions();
-
-        float zmin = minu[2];
-        int   kmin = min[2];
-        bool  outside = true;
-        for (int k = 0; k < dims[2] && outside; k++) {
-            for (int j = min[1]; j <= max[1] && outside; j++) {
-                for (int i = min[0]; i <= max[0] && outside; i++) {
-                    float z = _zrg.AccessIJK(i, j, k);
-
-                    if (!(z > zmin)) outside = false;
-                }
-            }
-
-            if (outside) kmin = k;
-        }
-        min[2] = kmin;
-
-        float zmax = maxu[2];
-        int   kmax = max[2];
-        outside = true;
-        for (int k = dims[2] - 1; k >= 0 && outside; k--) {
-            for (int j = min[1]; j <= max[1] && outside; j++) {
-                for (int i = min[0]; i <= max[0] && outside; i++) {
-                    float z = _zrg.AccessIJK(i, j, k);
-
-                    if (!(z < zmax)) outside = false;
-                }
-            }
-            if (outside) kmax = k;
-        }
-        max[2] = kmax;
-
-    } else {
-        float zmin = minu[2];
-        int   kmin = min[2];
-        bool  outside = true;
-        for (int k = 0; k < _zcoords.size() && outside; k++) {
-            if (_zcoords[k] < zmin) outside = false;
-            if (outside) kmin = k;
-        }
-        min[2] = kmin;
-
-        float zmax = maxu[2];
-        int   kmax = max[2];
-        outside = true;
-        for (int k = _zcoords.size() - 1; k >= min[2] && outside; k--) {
-            if (_zcoords[k] > zmax) outside = false;
-            if (outside) kmax = k;
-        }
-        max[2] = kmax;
-    }
-}
-
-void CurvilinearGrid::GetEnclosingRegion(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const
-{
-    // Clamp coordinates on periodic boundaries to grid extents
-    //
-    vector<double> cMinu = minu;
-    ClampCoord(cMinu);
-
-    vector<double> cMaxu = maxu;
-    ClampCoord(cMaxu);
-
-    VAssert(cMinu.size() == cMaxu.size());
-
-    // Initialize voxels coords to full grid
-    //
-    vector<size_t> dims = GetDimensions();
-    for (int i = 0; i < dims.size(); i++) {
-        min[i] = 0;
-        max[i] = dims[i] - 1;
-    }
-
-    // Now shrink min and max to the smallest box containing the region
-    //
-
-    // Find min and max X voxel
-    //
-    float xmin = cMinu[0];
-    int   imin = min[0];
-    bool  outside = true;
-    for (int i = 0; i < dims[0] && outside; i++) {
-        for (int j = 0; j < dims[1] && outside; j++) {
-            float x = _xrg.AccessIJK(i, j, 0);
-
-            if (!(x > xmin)) { outside = false; }
-        }
-        if (outside) { imin = i; }
-    }
-    min[0] = imin;
-
-    float xmax = cMaxu[0];
-    int   imax = max[0];
-    outside = true;
-    for (int i = dims[0] - 1; i >= 0 && outside; i--) {
-        for (int j = 0; j < dims[1] && outside; j++) {
-            float x = _xrg.AccessIJK(i, j, 0);
-
-            if (!(x < xmax)) { outside = false; }
-        }
-        if (outside) { imax = i; }
-    }
-    max[0] = imax;
-
-    // Find min and max Y voxel
-    //
-    float ymin = cMinu[1];
-    int   jmin = min[1];
-    outside = true;
-    for (int j = 0; j < dims[1] && outside; j++) {
-        for (int i = min[0]; i <= max[0] && outside; i++) {
-            float y = _yrg.AccessIJK(i, j, 0);
-
-            if (!(y > ymin)) outside = false;
-        }
-        if (outside) jmin = j;
-    }
-    min[1] = jmin;
-
-    float ymax = cMaxu[1];
-    int   jmax = max[1];
-    outside = true;
-    for (int j = dims[1] - 1; j >= 0 && outside; j--) {
-        for (int i = min[0]; i <= max[0] && outside; i++) {
-            float y = _yrg.AccessIJK(i, j, 0);
-
-            if (!(y < ymax)) outside = false;
-        }
-        if (outside) jmax = j;
-    }
-    max[1] = jmax;
-
-    if (GetGeometryDim() < 3) return;    // 2D => we're done.
-
-    _getEnclosingRegionHelper(cMinu, cMaxu, min, max);
-}
-
 void CurvilinearGrid::GetUserCoordinates(const size_t indices[], double coords[]) const
 {
     size_t cIndices[3];
@@ -307,48 +161,6 @@ void CurvilinearGrid::GetUserCoordinates(const size_t indices[], double coords[]
     } else {
         coords[2] = _zcoords[cIndices[2]];
     }
-}
-
-void CurvilinearGrid::_getIndicesHelper(const std::vector<double> &coords, std::vector<size_t> &indices) const
-{
-    VAssert(coords.size() == 3);
-    VAssert(indices.size() == 2);
-
-    int    rc;
-    size_t kFound = 0;
-    if (_terrainFollowing) {
-        vector<double> zcoords;
-
-        size_t nz = GetDimensions()[2];
-        size_t i = indices[0];
-        size_t j = indices[1];
-        for (int k = 0; k < nz; k++) { zcoords.push_back(_zrg.AccessIJK(i, j, k)); }
-
-        rc = Wasp::BinarySearchRange(zcoords, coords[2], kFound);
-    } else {
-        rc = Wasp::BinarySearchRange(_zcoords, coords[2], kFound);
-    }
-
-    if (rc < 0) {
-        indices.push_back(0);
-    } else if (rc > 0) {
-        indices.push_back(GetDimensions()[2] - 1);
-    } else {
-        indices.push_back(kFound);
-    }
-}
-
-void CurvilinearGrid::GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const
-{
-    indices.clear();
-
-    bool found = GetIndicesCell(coords, indices);
-    if (found) return;
-
-    // Ugh. Should be returning an invalid index (or false status)
-    //
-    indices.clear();
-    for (int i = 0; i < GetGeometryDim(); i++) { indices.push_back(0); }
 }
 
 bool CurvilinearGrid::GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const
@@ -686,12 +498,9 @@ bool CurvilinearGrid::_insideGridHelperStretched(double z, size_t &k, double zwg
     // Now verify that Z coordinate of point is in grid, and find
     // its interpolation weights if so.
     //
-    int    rc;
     size_t kFound = 0;
 
-    rc = Wasp::BinarySearchRange(_zcoords, z, kFound);
-
-    if (rc != 0) return (false);
+    if (!Wasp::BinarySearchRange(_zcoords, z, kFound)) return (false);
 
     k = kFound;
     zwgt[0] = 1.0 - (z - _zcoords[k]) / (_zcoords[k + 1] - _zcoords[k]);
@@ -745,8 +554,7 @@ bool CurvilinearGrid::_insideGridHelperTerrain(double x, double y, double z, con
         zcoords.push_back(zk);
     }
 
-    int rc = Wasp::BinarySearchRange(zcoords, z, k);
-    if (rc != 0) return (false);    // Must be above or below grid
+    if (!Wasp::BinarySearchRange(zcoords, z, k)) return (false);
 
     VAssert(k < nz - 1);
 

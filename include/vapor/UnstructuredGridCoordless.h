@@ -52,18 +52,14 @@ public:
         maxu.clear();
     }
 
-    void GetEnclosingRegion(const std::vector<double> &, const std::vector<double> &, std::vector<size_t> &min, std::vector<size_t> &max) const override
+    bool GetEnclosingRegion(const std::vector<double> &, const std::vector<double> &, std::vector<size_t> &min, std::vector<size_t> &max) const override
     {
         min.clear();
         max.clear();
+        return (false);
     }
 
     virtual void GetUserCoordinates(const size_t indices[], double coords[]) const override {}
-
-    void GetIndices(const std::vector<double> &, std::vector<size_t> &indices) const override
-    {
-        for (int i = 0; i < GetDimensions().size(); i++) { indices.push_back(0); }
-    }
 
     bool GetIndicesCell(const std::vector<double> &, std::vector<size_t> &indices) const override { return (false); }
 

@@ -113,113 +113,27 @@ void LayeredGrid::GetBoundingBox(const vector<size_t> &min, const vector<size_t>
     maxu[2] = maxcoord;
 }
 
-void LayeredGrid::GetEnclosingRegion(const vector<double> &minu, const vector<double> &maxu, vector<size_t> &min, vector<size_t> &max) const
+bool LayeredGrid::_getCellAndWeights(const double coords[3], size_t indices0[3], double wgts[3]) const
 {
-    vector<double> cMinu = minu;
-    ClampCoord(cMinu);
-
-    vector<double> cMaxu = maxu;
-    ClampCoord(cMaxu);
-
-    VAssert(cMinu.size() == cMaxu.size());
-    VAssert(cMinu.size() == 3);
-
-    min.clear();
-    max.clear();
-
+    // Get the indecies of the cell containing the point. No raw pointer
+    // version of GetIndicesCell()
     //
-    // Get coords for non-varying dimension AND varying dimension.
-    //
-    for (int i = 0; i < 2; i++) {
-        VAssert(cMinu[i] <= cMaxu[i]);
-        double u = cMinu[i];
-        if (u < cMinu[i]) { u = cMinu[i]; }
-        size_t index = (u - _minu[i]) / _delta[i];
-        min.push_back(index);
+    vector<double> coordsv = {coords[0], coords[1], coords[2]};
+    vector<size_t> indices0v;
+    if (!GetIndicesCell(coordsv, indices0v)) return (false);
+    VAssert(indices0v.size() == 3);
 
-        u = cMaxu[i];
-        if (u > cMaxu[i]) { u = cMaxu[i]; }
-        index = (u - _maxu[i]) / _delta[i];
-        max.push_back(index);
+    size_t indices1[3];
+    for (int i = 0; i < 3; i++) {
+        indices0[i] = indices0v[i];
+        indices1[i] = indices0v[i] + 1;
     }
-
-    // we have the correct results
-    // for X and Y dimensions, Now need to do the varying axis
-    //
-
-    min.push_back(0.0);
-    max.push_back(0.0);
-    vector<size_t> dims = GetDimensions();
-
-    bool   done;
-    double z;
-    //
-    // first do max, then min
-    //
-    done = false;
-    for (int k = 0; k < dims[2] && !done; k++) {
-        done = true;
-        max[2] = k;
-        for (int j = min[1]; j <= max[1] && done; j++) {
-            for (int i = min[0]; i <= max[0] && done; i++) {
-                z = _rg.AccessIJK(i, j, k);    // get Z coordinate
-                if (z < cMaxu[2]) { done = false; }
-            }
-        }
-    }
-    done = false;
-    for (int k = dims[2] - 1; k >= 0 && !done; k--) {
-        done = true;
-        min[2] = k;
-        for (int j = min[1]; j <= max[1] && done; j++) {
-            for (int i = min[0]; i <= max[0] && done; i++) {
-                z = _rg.AccessIJK(i, j, k);    // get Z coordinate
-                if (z > cMinu[2]) { done = false; }
-            }
-        }
-    }
-}
-
-float LayeredGrid::GetValueNearestNeighbor(const std::vector<double> &coords) const
-{
-    // Get the indecies of the nearest grid point
-    //
-    vector<size_t> indices;
-    GetIndices(coords, indices);
-
-    return (GetValueAtIndex(indices));
-}
-
-float LayeredGrid::GetValueLinear(const std::vector<double> &coords) const
-{
-    VAssert(coords.size() == 3);
-
-    vector<size_t> dims = GetDimensions();
-
-    // Get the indecies of the cell containing the point
-    //
-    vector<size_t> indices0;
-    bool           found = GetIndicesCell(coords, indices0);
-    if (!found) return (GetMissingValue());
-
-    vector<size_t> indices1 = indices0;
-
-    indices1[0] += 1;
-    indices1[1] += 1;
-    indices1[2] += 1;
 
     // Get user coordinates of cell containing point
     //
-    vector<double> coords0, coords1;
-    Grid::GetUserCoordinates(indices0, coords0);
-    Grid::GetUserCoordinates(indices1, coords1);
-
-    size_t i0 = indices0[0];
-    size_t j0 = indices0[1];
-    size_t k0 = indices0[2];
-    size_t i1 = indices1[0];
-    size_t j1 = indices1[1];
-    size_t k1 = indices1[2];
+    double coords0[3], coords1[3];
+    GetUserCoordinates(indices0, coords0);
+    GetUserCoordinates(indices1, coords1);
 
     double x = coords[0];
     double y = coords[1];
@@ -235,27 +149,64 @@ float LayeredGrid::GetValueLinear(const std::vector<double> &coords) const
     // Calculate interpolation weights. We always interpolate along
     // the varying dimension last (the kwgt)
     //
-    double iwgt, jwgt, kwgt;
-    z0 = _interpolateVaryingCoord(i0, j0, k0, x, y);
-    z1 = _interpolateVaryingCoord(i0, j0, k1, x, y);
+    z0 = _interpolateVaryingCoord(indices0[0], indices0[1], indices0[2], x, y);
+    z1 = _interpolateVaryingCoord(indices0[0], indices0[1], indices1[2], x, y);
 
     if (x1 != x0)
-        iwgt = fabs((x - x0) / (x1 - x0));
+        wgts[0] = fabs((x - x0) / (x1 - x0));
     else
-        iwgt = 0.0;
+        wgts[0] = 0.0;
     if (y1 != y0)
-        jwgt = fabs((y - y0) / (y1 - y0));
+        wgts[1] = fabs((y - y0) / (y1 - y0));
     else
-        jwgt = 0.0;
+        wgts[1] = 0.0;
     if (z1 != z0)
-        kwgt = fabs((z - z0) / (z1 - z0));
+        wgts[2] = fabs((z - z0) / (z1 - z0));
     else
-        kwgt = 0.0;
+        wgts[2] = 0.0;
+
+    return (true);
+}
+
+float LayeredGrid::GetValueNearestNeighbor(const std::vector<double> &coords) const
+{
+    VAssert(coords.size() == 3);
+
+    size_t indices[3];
+    double wgts[3];
+    bool   found = _getCellAndWeights(coords.data(), indices, wgts);
+    if (!found) return (GetMissingValue());
+
+    if (wgts[0] > 0.5) indices[0] += 1;
+    if (wgts[1] > 0.5) indices[1] += 1;
+    if (wgts[2] > 0.5) indices[2] += 1;
+
+    return (AccessIJK(indices[0], indices[1], indices[2]));
+}
+
+float LayeredGrid::GetValueLinear(const std::vector<double> &coords) const
+{
+    VAssert(coords.size() == 3);
+
+    size_t indices0[3];
+    double wgts[3];
+    bool   found = _getCellAndWeights(coords.data(), indices0, wgts);
+    if (!found) return (GetMissingValue());
+
+    size_t i0 = indices0[0];
+    size_t j0 = indices0[1];
+    size_t k0 = indices0[2];
+    size_t i1 = indices0[0] + 1;
+    size_t j1 = indices0[1] + 1;
+    size_t k1 = indices0[2] + 1;
 
     //
     // perform tri-linear interpolation
     //
     double p0, p1, p2, p3, p4, p5, p6, p7;
+    double iwgt = wgts[0];
+    double jwgt = wgts[1];
+    double kwgt = wgts[2];
 
     p0 = AccessIJK(i0, j0, k0);
     if (p0 == GetMissingValue()) return (GetMissingValue());
@@ -317,7 +268,7 @@ float LayeredGrid::GetValue(const std::vector<double> &coords) const
 
     if (!LayeredGrid::InsideGrid(clampedCoords)) return (GetMissingValue());
 
-    vector<size_t> dims = GetDimensions();
+    const vector<size_t> &dims = GetDimensions();
 
     // Figure out interpolation order
     //
@@ -361,69 +312,6 @@ void LayeredGrid::GetUserCoordinates(const size_t indices[], double coords[]) co
     // Now get coordinates of varying dimension
     //
     coords[2] = _rg.GetValueAtIndex(cIndices);
-}
-
-void LayeredGrid::GetIndices(const std::vector<double> &coords, std::vector<size_t> &indices) const
-{
-    indices.clear();
-
-    std::vector<double> clampedCoords = coords;
-    ClampCoord(clampedCoords);
-
-    vector<size_t> dims = GetDimensions();
-
-    vector<double> wgts;
-
-    // Get the two horizontal offsets
-    //
-    for (int i = 0; i < 2; i++) {
-        indices.push_back(0);
-
-        if (clampedCoords[i] < _minu[i]) {
-            indices[i] = 0;
-            continue;
-        }
-        if (clampedCoords[i] > _maxu[i]) {
-            indices[i] = dims[i] - 1;
-            continue;
-        }
-
-        if (_delta[i] != 0.0) { indices[i] = (size_t)floor((clampedCoords[i] - _minu[i]) / _delta[i]); }
-
-        VAssert(indices[i] < dims[i]);
-
-        double wgt = 0.0;
-
-        if (_delta[0] != 0.0) { wgt = ((clampedCoords[i] - _minu[i]) - (indices[i] * _delta[i])) / _delta[i]; }
-        if (wgt > 0.5) indices[i] += 1;
-    }
-
-    // At this point the ij indecies are correct for the non-varying
-    // dimensions. We only need to find the index for the varying dimension
-    //
-    size_t k0;
-    int    rc = _bsearchKIndexCell(indices[0], indices[1], clampedCoords[2], k0);
-
-    // _bsearchKIndexCell returns non-zero value if point is outside of the
-    // vertical column  (negative number if below, positive if above);
-    //
-    if (rc != 0) {
-        if (rc < 0) {
-            indices.push_back(0);
-            return;
-        } else {
-            indices.push_back(dims[2] - 1);
-            return;
-        }
-    }
-
-    double z0 = _interpolateVaryingCoord(indices[0], indices[1], k0, clampedCoords[0], clampedCoords[1]);
-    double z1 = _interpolateVaryingCoord(indices[0], indices[1], k0 + 1, clampedCoords[0], clampedCoords[1]);
-    if (fabs(clampedCoords[2] - z0) < fabs(clampedCoords[2] - z1)) {
-        indices.push_back(k0);
-    } else {
-        indices.push_back(k0 + 1);
-    }
 }
 
 bool LayeredGrid::GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const

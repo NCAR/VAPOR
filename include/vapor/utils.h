@@ -131,10 +131,11 @@ COMMON_API void Transpose(const float *a, float *b, int p1, int m1, int s1, int 
 //
 COMMON_API void Transpose(const float *a, float *b, int s1, int s2);
 
-// Perform a binary search in a sorted 1D vector of values for the
-// entry that it closest to 'x'. Return the offset 'i' of 'x' in
-// 'sorted'
+// Perform a binary search in a sorted (increasing or decreasing) 1D
+// vector of values for the
+// intervale that contains 'x'. Return the offset 'i' of start of the
+// interval containing 'x' in 'sorted'.
 //
-COMMON_API int BinarySearchRange(const std::vector<double> &sorted, double x, size_t &i);
+COMMON_API bool BinarySearchRange(const std::vector<double> &sorted, double x, size_t &i);
 
 };    // namespace Wasp
