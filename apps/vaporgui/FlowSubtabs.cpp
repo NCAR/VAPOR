@@ -87,7 +87,7 @@ void FlowVariablesSubtab::_velocityMultiplierChanged()
 //
 FlowAppearanceSubtab::FlowAppearanceSubtab(QWidget *parent) : QVaporSubtab(parent)
 {
-    _TFEditor = new TFEditor;
+    _TFEditor = new TFEditor(true);
 
     _layout->addWidget(_TFEditor, 0, 0);
 

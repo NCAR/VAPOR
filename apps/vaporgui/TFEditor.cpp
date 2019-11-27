@@ -6,13 +6,18 @@
 #include "TFColorWidget.h"
 #include "TFIsoValueWidget.h"
 
-TFEditor::TFEditor() : VSection("Transfer Function")
+TFEditor::TFEditor(bool usingColormapVariable) : VSection("Transfer Function")
 {
     _maps = new TFMapGroupWidget;
     _opacityMap = new TFOpacityMap;
     _histogramMap = new TFHistogramMap;
     _colorMap = new TFColorMap;
     _isoMap = new TFIsoValueMap;
+
+    _opacityMap->UsingColormapVariable = usingColormapVariable;
+    _histogramMap->UsingColormapVariable = usingColormapVariable;
+    _colorMap->UsingColormapVariable = usingColormapVariable;
+    _isoMap->UsingColormapVariable = usingColormapVariable;
 
     _maps->Add({_opacityMap, _histogramMap});
     _maps->Add(_isoMap);

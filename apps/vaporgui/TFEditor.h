@@ -20,7 +20,7 @@ class TFEditor : public VSection {
     Q_OBJECT
 
 public:
-    TFEditor();
+    TFEditor(bool usingColormapVariable = false);
 
     virtual void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     void         SetShowOpacityMap(bool b);
