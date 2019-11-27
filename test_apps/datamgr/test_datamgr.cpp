@@ -260,7 +260,7 @@ void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts) {
         maxu = opt.maxu;
     } else {
         int rc = datamgr.GetVariableExtents(
-            ts, vname, opt.level, minu, maxu);
+            ts, vname, opt.level, opt.lod, minu, maxu);
         if (rc < 0)
             exit(1);
     }
@@ -299,6 +299,8 @@ void process(FILE *fp, DataMgr &datamgr, string vname, int loop, int ts) {
     vector<double> rvec;
     datamgr.GetDataRange(ts, vname, opt.level, opt.lod, rvec);
     cout << "Data Range: [" << rvec[0] << ", " << rvec[1] << "]" << endl;
+
+    cout << "Cell face has CCW winding order : " << g->HasInvertedCoordinateSystemHandiness() << endl;
 
     vector<size_t> dims = g->GetDimensions();
     cout << "Grid dimensions: [ ";
