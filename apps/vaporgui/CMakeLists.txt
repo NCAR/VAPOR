@@ -258,7 +258,7 @@ set (CMAKE_AUTORCC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set (ASSIMP_LIB assimp)
-set (PYTHON_LIB python${PYTHONVERSION})
+set (PYTHON_LIB python${PYTHONVERSION}m)
 set (TIFF_LIB tiff)
 
 if (APPLE)
@@ -270,7 +270,7 @@ if (APPLE)
 	set (INSTALL_BIN_DIR ".")
 elseif (WIN32)
     set (ASSIMP_LIB assimp-vc140-mt)
-    set (PYTHON_LIB ${PYTHON_LIB}m)
+    set (PYTHON_LIB python${PYTHONVERSION})
     set (TIFF_LIB libtiff)
 
 	set (WINDOWS_ICON_PATH "${CMAKE_SOURCE_DIR}/share/images/vapor-win-icon.ico")
