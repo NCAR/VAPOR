@@ -37,8 +37,7 @@ INCLUDEPATH += . \
 	../../include \
 	../../../apps/vaporgui/misc \
 	../../../apps/vaporgui/guis \
-	../../../apps/vaporgui/main \
-	../../../apps/vaporgui/render \
+	../../../apps/vaporgui/main
 
 MOC_DIR = ../../../apps/vaporgui/moc
 
