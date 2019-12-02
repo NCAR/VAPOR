@@ -366,10 +366,8 @@ int TFInterpolator::rgb2srgb(float rgb[3], float srgb[3])
         else
             val = val * 12.92;
         val = val * 255.0;
-        if ((val - floor(val)) > .5)
-            val = ceil(val);
-        else
-            val = floor(val);
+        //		if ((val-floor(val)) > .5) val = ceil(val);
+        //		else val = floor(val);
         srgb[i] = val;
     }
 

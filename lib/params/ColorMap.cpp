@@ -359,6 +359,48 @@ ColorMap::Color ColorMap::color(float value) const
     return colorNormalized(nv);
 }
 
+namespace {
+
+void lab2lch(const float lab[3], float lch[3])
+{
+    const float l = lab[0];
+    const float a = lab[1];
+    const float b = lab[2];
+
+    const float c = sqrtf(a * a + b * b);
+    const float h = fmod((atan2f(b, a) / (2 * M_PI) * 360 + 360), 360.f);
+
+    lch[0] = l;
+    lch[1] = c;
+    lch[2] = h;
+}
+
+void lch2lab(const float lch[3], float lab[3])
+{
+    const float l = lch[0];
+    const float c = lch[1];
+    float       h = lch[2];
+
+    h = h / 360.f * 2 * M_PI;
+
+    lab[0] = l;
+    lab[1] = cosf(h) * c;
+    lab[2] = sinf(h) * c;
+}
+
+void clamp(float &v, const float min, const float max)
+{
+    if (v < min) v = min;
+    if (v > max) v = max;
+}
+
+void clamp3(float c[3], const vector<float> &min, const vector<float> &max)
+{
+    for (int i = 0; i < 3; i++) clamp(c[i], min[i], max[i]);
+}
+
+}    // namespace
+
 //----------------------------------------------------------------------------
 // Interpolate a color at the value (data coordinates)
 //
@@ -401,6 +443,110 @@ ColorMap::Color ColorMap::colorNormalized(float nv) const
                                                   cps[4 * index + 6], ratio);
 
             return Color(h, s, v);
+        } else if (itype == TFInterpolator::linearRGB) {
+            Color a(cps[4 * index + 0 + 0], cps[4 * index + 1 + 0], cps[4 * index + 2 + 0]);
+            Color b(cps[4 * index + 0 + 4], cps[4 * index + 1 + 4], cps[4 * index + 2 + 4]);
+            float aRGB[3], bRGB[3];
+            a.toRGB(aRGB);
+            b.toRGB(bRGB);
+
+            float rgb[3];
+            for (int i = 0; i < 3; i++) rgb[i] = aRGB[i] + (bRGB[i] - aRGB[i]) * ratio;
+
+            float hsv[3];
+            TFInterpolator::rgb2hsv(rgb, hsv);
+            hsv[0] /= 360.f;
+            return Color(hsv[0], hsv[1], hsv[2]);
+        } else if (itype == TFInterpolator::linearLAB) {
+            Color a(cps[4 * index + 0 + 0], cps[4 * index + 1 + 0], cps[4 * index + 2 + 0]);
+            Color b(cps[4 * index + 0 + 4], cps[4 * index + 1 + 4], cps[4 * index + 2 + 4]);
+            float aRGB[3], bRGB[3];
+            a.toRGB(aRGB);
+            b.toRGB(bRGB);
+
+            float aSRGB[3], bSRGB[3], rgb[3];
+            for (int i = 0; i < 3; i++) {
+                aRGB[i] *= 100;
+                bRGB[i] *= 100;
+            }
+            TFInterpolator::rgb2srgb(aRGB, aSRGB);
+            TFInterpolator::rgb2srgb(bRGB, bSRGB);
+
+            float aLAB[3], bLAB[3], lab[3];
+            TFInterpolator::srgb2lab(aSRGB, aLAB);
+            TFInterpolator::srgb2lab(bSRGB, bLAB);
+            clamp3(aLAB, {0, -110, -110}, {100, 110, 110});
+            clamp3(bLAB, {0, -110, -110}, {100, 110, 110});
+
+            for (int i = 0; i < 3; i++) lab[i] = aLAB[i] + (bLAB[i] - aLAB[i]) * ratio;
+
+            float srgb[3];
+            TFInterpolator::lab2srgb(lab, srgb);
+            TFInterpolator::srgb2rgb(srgb, rgb);
+            for (int i = 0; i < 3; i++) rgb[i] /= 100.f;
+            clamp3(rgb, {0, 0, 0}, {1, 1, 1});
+
+            float hsv[3];
+            TFInterpolator::rgb2hsv(rgb, hsv);
+            hsv[0] /= 360.f;
+
+            return Color(hsv[0], hsv[1], hsv[2]);
+        } else if (itype == TFInterpolator::linearLCH) {
+            Color a(cps[4 * index + 0 + 0], cps[4 * index + 1 + 0], cps[4 * index + 2 + 0]);
+            Color b(cps[4 * index + 0 + 4], cps[4 * index + 1 + 4], cps[4 * index + 2 + 4]);
+            float aRGB[3], bRGB[3];
+            a.toRGB(aRGB);
+            b.toRGB(bRGB);
+
+            float rgb[3];
+            float hsv[3];
+
+            float aSRGB[3], bSRGB[3];
+            for (int i = 0; i < 3; i++) {
+                aRGB[i] *= 100;
+                bRGB[i] *= 100;
+            }
+            TFInterpolator::rgb2srgb(aRGB, aSRGB);
+            TFInterpolator::rgb2srgb(bRGB, bSRGB);
+
+            float aLAB[3], bLAB[3];
+            TFInterpolator::srgb2lab(aSRGB, aLAB);
+            TFInterpolator::srgb2lab(bSRGB, bLAB);
+            clamp3(aLAB, {0, -110, -110}, {100, 110, 110});
+            clamp3(bLAB, {0, -110, -110}, {100, 110, 110});
+
+            float aLCH[3], bLCH[3], lch[3];
+            lab2lch(aLAB, aLCH);
+            lab2lch(bLAB, bLCH);
+            clamp3(aLCH, {0, 0, 0}, {100, 140, 360});
+            clamp3(bLCH, {0, 0, 0}, {100, 140, 360});
+
+            for (int i = 0; i < 2; i++) lch[i] = aLCH[i] + (bLCH[i] - aLCH[i]) * ratio;
+
+            float h, ah = aLCH[2], bh = bLCH[2];
+            if (fabsf(bh - ah) > 180) {
+                if (bh > ah)
+                    ah += 360;
+                else
+                    bh += 360;
+            }
+            h = ah + (bh - ah) * ratio;
+
+            lch[2] = h;
+
+            float lab[3];
+            lch2lab(lch, lab);
+            clamp3(lab, {0, -110, -110}, {100, 110, 110});
+
+            float srgb[3];
+            TFInterpolator::lab2srgb(lab, srgb);
+            TFInterpolator::srgb2rgb(srgb, rgb);
+            for (int i = 0; i < 3; i++) rgb[i] /= 100.f;
+            clamp3(rgb, {0, 0, 0}, {1, 1, 1});
+            TFInterpolator::rgb2hsv(rgb, hsv);
+            hsv[0] /= 360.f;
+
+            return Color(hsv[0], hsv[1], hsv[2]);
         } else if (itype == TFInterpolator::discrete) {
             if (ratio < .5) {
                 float h = cps[4 * index];
