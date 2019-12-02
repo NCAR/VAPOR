@@ -85,12 +85,6 @@ string RenderEventRouter::GetIconImagePath() const {
     return (GetSharePath("images/" + imageName));
 }
 
-
-
-void RenderEventRouter::setEditorDirty() {
-}
-
-
 #ifdef	VAPOR3_0_0_ALPHA
 float RenderEventRouter::CalcCurrentValue(const double point[3] ){
 	RenderParams *rParams = GetActiveParams();
