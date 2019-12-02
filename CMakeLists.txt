@@ -115,6 +115,7 @@ if (BUILD_VDC)
 	link_directories (${PYTHONPATH}/lib-dynload)
 endif ()
 
+find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 find_library(NETCDF netcdf)
 find_library(UDUNITS2 udunits2)
 find_library(FREETYPE freetype)
