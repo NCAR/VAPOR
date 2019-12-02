@@ -257,6 +257,10 @@ set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 
+set (ASSIMP_LIB assimp)
+set (PYTHON_LIB python${PYTHONVERSION})
+set (TIFF_LIB tiff)
+
 if (APPLE)
 	set (SRCS ${SRCS} core_profile_attributes.mm)
 	set (MACOSX_BUNDLE_ICON_FILE VAPOR.icns)
@@ -265,6 +269,10 @@ if (APPLE)
 	add_executable (vapor MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE_PATH} ${SRCS} ${UIS})
 	set (INSTALL_BIN_DIR ".")
 elseif (WIN32)
+    set (ASSIMP_LIB assimp-vc140-mt)
+    set (PYTHON_LIB ${PYTHON_LIB}m)
+    set (TIFF_LIB libtiff)
+
 	set (WINDOWS_ICON_PATH "${CMAKE_SOURCE_DIR}/share/images/vapor-win-icon.ico")
 	configure_file (vapor.rc.in ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
 	add_executable (vapor WIN32 ${SRCS} ${UIS} ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
@@ -272,20 +280,11 @@ else ()
 	add_executable (vapor ${SRCS} ${UIS})
 endif()
 
-if (WIN32)
-	target_link_libraries (
-    		vapor common vdc wasp render params jpeg ${GLEW} 
-    		libtiff geotiff assimp-vc140-mt Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::DBus 
-    		python${PYTHONVERSION}
-	)
-else ()
-	target_link_libraries (
-    		vapor common vdc wasp render params jpeg ${GLEW} 
-    		tiff geotiff assimp Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::DBus 
-    		python${PYTHONVERSION}m
-	)
-endif()
-
+target_link_libraries (
+        vapor common vdc wasp render params jpeg ${GLEW} 
+        ${TIFF_LIB} geotiff ${ASSIMP_LIB} Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::DBus 
+        ${PYTHON_LIB}
+)
 
 if (APPLE)
 	find_library (CORESERVICES CoreServices)
