@@ -92,7 +92,7 @@ FileOperationChecker::FileGoodToWrite( const QString& filename )
     // In case this file does not exist
     if( !fileInfo.exists() )
     {
-        std::FILE* f = std::fopen( filename.toLocal8Bit(), "w" );
+        std::FILE* f = std::fopen( filename.toLatin1(), "w" );
         if( f )     // able to write
         {
             std::fclose( f );

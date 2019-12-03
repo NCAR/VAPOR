@@ -128,7 +128,6 @@ bool VaporTable::GetAutoResizeHeight() const {
 void VaporTable::StretchToColumn(int column) {
     QHeaderView *headerView = new QHeaderView(Qt::Horizontal, _table);
     _table->setHorizontalHeader(headerView);
-    //headerView->setResizeMode(column, QHeaderView::Stretch);
     headerView->setSectionResizeMode(QHeaderView::Stretch);
 }
 

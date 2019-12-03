@@ -104,22 +104,32 @@ if (WIN32)
 	include_directories (${NUMPY_INCLUDE_DIR})
 	get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 else ()
-	#include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION})
-	include_directories (${THIRD_PARTY_INC_DIR}/python3.6m)
+	include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}m)
 
     # I'm not sure why we only have include files for python3.6, and not python3.6m.
     # 
-	include_directories (${THIRD_PARTY_LIB_DIR}/python3.6/site-packages/numpy/core/include)
+	include_directories (${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}/site-packages/numpy/core/include)
 endif ()
 if (BUILD_VDC)
 	link_directories (${PYTHONPATH}/lib-dynload)
 endif ()
 
+find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 find_library(NETCDF netcdf)
 find_library(UDUNITS2 udunits2)
 find_library(FREETYPE freetype)
 find_library(GEOTIFF geotiff)
 find_library(JPEG jpeg)
+
+if (BUILD_GUI)
+	find_package (OpenGL REQUIRED)
+	include_directories (${OPENGL_INCLUDE_DIRS})
+	if (WIN32)
+		find_library (GLEW glew32)
+	else ()
+		find_library (GLEW GLEW)
+	endif ()
+endif ()
 
 if (WIN32)
 	find_library(ASSIMP assimp-vc140-mt)
@@ -130,16 +140,6 @@ else ()
     find_library(TIFF tiff)
     find_library(PROJ proj)
 endif()
-
-if (BUILD_VDC)
-	find_package (OpenGL REQUIRED)
-	include_directories (${OPENGL_INCLUDE_DIRS})
-	if (WIN32)
-		find_library (GLEW glew32)
-	else ()
-		find_library (GLEW GLEW)
-	endif ()
-endif ()
 
 if (WIN32)
 	set (INSTALL_BIN_DIR .)
@@ -223,7 +223,7 @@ if (WIN32)
 			COMPONENT Dependencies
 			)
 		install (
-			FILES ${PYTHONPATH}/python36.dll
+			FILES ${PYTHONPATH}/python${PYTHONVERSION}.dll
 			DESTINATION ${INSTALL_BIN_DIR}
 			COMPONENT Dependencies
 			)
@@ -317,8 +317,7 @@ if (UNIX AND NOT APPLE)
 			)
 
 		install (
-			#DIRECTORY ${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}
-			DIRECTORY ${THIRD_PARTY_LIB_DIR}/python3.6
+			DIRECTORY ${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
