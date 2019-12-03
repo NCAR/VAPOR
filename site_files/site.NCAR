@@ -1,61 +1,35 @@
-set (APPLE_THIRD_PARTY_DIR "/glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64")
-set (LINUX_THIRD_PARTY_DIR "/glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64")
-set (WINDOWS_THIRD_PARTY_DIR "C:/Vapor3rdParty2015")
-
-
-if (HOSTNAME MATCHES "yslogin[0-9]+" OR HOSTNAME MATCHES "geyser[0-9]+" OR HOSTNAME MATCHES "caldera[0-9]+")
-	set (ON_GEYSER_OR_CALDERA TRUE)
-else ()
-	set (ON_GEYSER_OR_CALDERA FALSE)
-endif ()
-
-
-# This file is only read if on an NCAR build system
-if (APPLE AND NOT EXISTS "${APPLE_THIRD_PARTY_DIR}")
-	return ()
-elseif (UNIX AND NOT APPLE AND NOT EXISTS "${LINUX_THIRD_PARTY_DIR}" AND NOT ${ON_GEYSER_OR_CALDERA})
-	return ()
-elseif (WIN32 AND NOT EXISTS "${WINDOWS_THIRD_PARTY_DIR}")
-	return ()
-endif ()
-
-
 if (APPLE)
-	set (THIRD_PARTY_DIR "${APPLE_THIRD_PARTY_DIR}")
+    set (THIRD_PARTY_DIR     /usr/local/VAPOR-Deps/2019-Aug			           )
+    set (QTDIR               /usr/local/VAPOR-Deps/2019-Aug/Qt/5.12.4/clang_64 )
+    set (CMAKE_PREFIX_PATH   ${QTDIR}/lib/cmake                                )
+    list (APPEND CMAKE_PREFIX_PATH ${QTDIR}/lib/cmake                          )
 elseif (UNIX AND NOT APPLE)
-	set (THIRD_PARTY_DIR "${LINUX_THIRD_PARTY_DIR}")
+    set (THIRD_PARTY_DIR     /usr/local/VAPOR-Deps/2019-Aug			     )
+    set (QTDIR                /usr/local/VAPOR-Deps/2019-Aug/Qt/5.12.4/gcc_64)
+    set (CMAKE_PREFIX_PATH    ${QTDIR}/lib/cmake )
+    set (Qt5Core_DIR          ${QTDIR}/lib/cmake/Qt5Core )
+    set (QT_QMAKE_EXECUTABLE  ${QTDIR}/gcc_64/bin/qmake )
 else ()
-	set (THIRD_PARTY_DIR "${WINDOWS_THIRD_PARTY_DIR}")
+	set (THIRD_PARTY_DIR    C:/2019-Aug)
+    set (QTDIR              ${THIRD_PARTY_DIR}/Qt5_12_4/5.12.4/msvc2015_64)
+    set (CMAKE_PREFIX_PATH  ${QTDIR}/lib/cmake/Qt5) 
 endif ()
 
-# Yellowstone and Geyser configuration
-# --------------------------------------------------------------------------------
-cmake_host_system_information(RESULT HOSTNAME QUERY HOSTNAME)
-if (${ON_GEYSER_OR_CALDERA})
-	set (THIRD_PARTY_DIR /glade/p/VAST/VAPOR/third-party/apps-2014/Linux_x86_64)
-endif ()
-# --------------------------------------------------------------------------------
+set (THIRD_PARTY_LIB_DIR "${THIRD_PARTY_DIR}/lib")
 
 if (UNIX)
-	set (THIRD_PARTY_LIB_DIR "${THIRD_PARTY_DIR}/lib")
-	set (QTDIR ${THIRD_PARTY_DIR})
-	set (PYTHONVERSION 2.7)
+	set (PYTHONVERSION 3.6)
 	set (PYTHONDIR ${THIRD_PARTY_DIR})
 	set (PYTHONPATH ${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION})
 elseif (WIN32)
-	set (THIRD_PARTY_LIB_DIR "${THIRD_PARTY_DIR}/releaseLib64")
-	set (QTDIR "C:/Qt-2015/4.8.7v2")
-	set (PYTHONVERSION 27)
-	set (PYTHONDIR ${THIRD_PARTY_DIR}/python${PYTHONVERSION})
-	set (PYTHONPATH ${PYTHONDIR})
+	set (PYTHONVERSION 36)
+	set (PYTHONPATH ${THIRD_PARTY_DIR}/Python${PYTHONVERSION})
 endif ()
 
 set (THIRD_PARTY_INC_DIR "${THIRD_PARTY_DIR}/include")
 
 if (WIN32)
-	set (THIRD_PARTY_LIB_DIR "${THIRD_PARTY_DIR}/releaseLib64")
 	set (NUMPY_INCLUDE_DIR "${PYTHONPATH}/Lib/site-packages/numpy/core/include")
 else ()
 	set (NUMPY_INCLUDE_DIR "${PYTHONPATH}/site-packages/numpy/core/include")
 endif ()
-
