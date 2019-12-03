@@ -35,8 +35,6 @@ class HelloEventRouter : public QTabWidget, public RenderEventRouter {
 public:
     HelloEventRouter(QWidget *parent, VAPoR::ControlExec *ce);
 
-    virtual ~HelloEventRouter();
-
     //! \copydoc RenderEventRouter::hookUpTab()
     virtual void hookUpTab();
 

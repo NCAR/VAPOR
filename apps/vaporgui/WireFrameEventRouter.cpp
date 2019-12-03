@@ -54,13 +54,6 @@ WireFrameEventRouter::WireFrameEventRouter(QWidget *parent, ControlExec *ce) : Q
     addTab(qsAnnotation, "Annotation");
 }
 
-WireFrameEventRouter::~WireFrameEventRouter()
-{
-    if (_variables) delete _variables;
-    if (_geometry) delete _geometry;
-    if (_appearance) delete _appearance;
-}
-
 void WireFrameEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 {
     help.clear();

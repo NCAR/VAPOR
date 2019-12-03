@@ -52,13 +52,6 @@ VolumeIsoEventRouter::VolumeIsoEventRouter(QWidget *parent, ControlExec *ce) : Q
     addTab(qsAnnotation, "Annotation");
 }
 
-VolumeIsoEventRouter::~VolumeIsoEventRouter()
-{
-    if (_variables) delete _variables;
-    if (_geometry) delete _geometry;
-    if (_appearance) delete _appearance;
-}
-
 void VolumeIsoEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 {
     help.clear();

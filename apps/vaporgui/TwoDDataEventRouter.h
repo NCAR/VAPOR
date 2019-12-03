@@ -34,7 +34,6 @@ class TwoDDataEventRouter : public QTabWidget, public RenderEventRouter {
 
 public:
     TwoDDataEventRouter(QWidget *parent, VAPoR::ControlExec *ce);
-    ~TwoDDataEventRouter();
 
     void GetWebHelp(vector<pair<string, string>> &help) const;
 

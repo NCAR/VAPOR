@@ -55,17 +55,6 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : QTabW
     addTab(qsAnnotation, "Annotation");
 }
 
-// Destructor does nothing
-ContourEventRouter::~ContourEventRouter()
-{
-    if (_variables) delete _variables;
-#ifdef VAPOR3_0_0_ALPHA
-    if (_image) delete _image;
-#endif
-    if (_geometry) delete _geometry;
-    if (_appearance) delete _appearance;
-}
-
 void ContourEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 {
     help.clear();

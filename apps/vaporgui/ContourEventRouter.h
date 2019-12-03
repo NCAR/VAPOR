@@ -34,7 +34,6 @@ class ContourEventRouter : public QTabWidget, public RenderEventRouter {
 
 public:
     ContourEventRouter(QWidget *parent, VAPoR::ControlExec *ce);
-    ~ContourEventRouter();
 
     virtual void hookUpTab() {}
 

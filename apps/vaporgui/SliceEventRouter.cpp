@@ -73,14 +73,6 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : QTabWidge
 #endif
 }
 
-SliceEventRouter::~SliceEventRouter()
-{
-    if (_variables) delete _variables;
-    if (_geometry) delete _geometry;
-    if (_appearance) delete _appearance;
-    if (_annotation) delete _annotation;
-}
-
 void SliceEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 {
     help.clear();

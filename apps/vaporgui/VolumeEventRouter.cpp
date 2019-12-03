@@ -52,13 +52,6 @@ VolumeEventRouter::VolumeEventRouter(QWidget *parent, ControlExec *ce) : QTabWid
     addTab(qsAnnotation, "Annotation");
 }
 
-VolumeEventRouter::~VolumeEventRouter()
-{
-    if (_variables) delete _variables;
-    if (_geometry) delete _geometry;
-    if (_appearance) delete _appearance;
-}
-
 void VolumeEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 {
     help.clear();

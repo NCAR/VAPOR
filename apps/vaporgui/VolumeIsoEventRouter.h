@@ -34,7 +34,6 @@ class VolumeIsoEventRouter : public QTabWidget, public RenderEventRouter {
 
 public:
     VolumeIsoEventRouter(QWidget *parent, VAPoR::ControlExec *ce);
-    ~VolumeIsoEventRouter();
 
     void GetWebHelp(vector<pair<string, string>> &help) const;
 
