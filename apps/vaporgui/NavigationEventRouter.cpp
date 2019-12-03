@@ -536,9 +536,9 @@ void NavigationEventRouter::updateProjections() {
 }
 
 void NavigationEventRouter::resizeProjTable() {
-    datasetProjectionTable->horizontalHeader()->setResizeMode(
+    datasetProjectionTable->horizontalHeader()->setSectionResizeMode(
         0, QHeaderView::Stretch);
-    datasetProjectionTable->verticalHeader()->setResizeMode(
+    datasetProjectionTable->verticalHeader()->setSectionResizeMode(
         QHeaderView::Stretch);
     datasetProjectionTable->verticalHeader()->hide();
     datasetProjectionTable->resizeRowsToContents();
