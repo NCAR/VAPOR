@@ -210,7 +210,11 @@ int Histo::Populate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::Rende
 
     _getDataRange(varName, dm, rp, &_minData, &_maxData);
 
+#ifdef WIN32
+    if (_maxMapData - _minMapData > FLT_EPSILON) {
+#else
     if (_maxMapData - _minMapData > __FLT_EPSILON__) {
+#endif
         _nBinsBelow = std::min(10000.0f, _numBins / (_maxMapData - _minMapData) * (_minMapData - _minData));
         _nBinsAbove = std::min(10000.0f, _numBins / (_maxMapData - _minMapData) * (_maxData - _maxMapData));
     } else {

@@ -1,3 +1,4 @@
+#include <QButtonGroup>
 #include "SliceSubtabs.h"
 #include "TFEditor.h"
 
@@ -47,7 +48,7 @@ SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget *parent)
     setupUi(this);
     verticalLayout->insertWidget(0, _tfe = new TFEditor);
 
-    _sampleRateWidget->SetLabel(QString::fromAscii("Quality"));
+    _sampleRateWidget->SetLabel(QString("Quality"));
     _sampleRateWidget->SetIntType(true);
     _sampleRateWidget->SetExtents(MIN_QUALITY, MAX_QUALITY);
 

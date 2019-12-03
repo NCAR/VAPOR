@@ -30,7 +30,7 @@
 #include <QMouseEvent>
 #include <QHBoxLayout>
 
-ImageFrame::ImageFrame(QWidget *parent, Qt::WFlags f) : QFrame(parent, f)
+ImageFrame::ImageFrame(QWidget *parent, Qt::WindowFlags f) : QFrame(parent, f)
 {
 #ifdef CRAP
     setFocusPolicy(Qt::StrongFocus);

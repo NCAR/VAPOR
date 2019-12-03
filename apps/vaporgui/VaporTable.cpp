@@ -19,6 +19,9 @@
 #include <iostream>
 #include "vapor/VAssert.h"
 #include <stdlib.h>
+#include <QHeaderView>
+#include <QHBoxLayout>
+#include <QCheckBox>
 #include "VaporTable.h"
 
 namespace {
@@ -47,7 +50,7 @@ VaporTable::VaporTable(QTableWidget *table, bool lastRowIsCheckboxes, bool lastC
 
     SetVerticalHeaderWidth(100);
 
-    _table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    _table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 
 // Clear current table, then generate table of rows x columns
@@ -104,7 +107,7 @@ void VaporTable::StretchToColumn(int column)
 {
     QHeaderView *headerView = new QHeaderView(Qt::Horizontal, _table);
     _table->setHorizontalHeader(headerView);
-    headerView->setResizeMode(column, QHeaderView::Stretch);
+    headerView->setSectionResizeMode(QHeaderView::Stretch);
 }
 
 void VaporTable::ShowToolTips(bool showOrHide) { _showToolTips = showOrHide; }
@@ -333,7 +336,7 @@ void VaporTable::setHorizontalHeader(std::vector<std::string> header)
 
     _table->resizeColumnsToContents();
     _table->setHorizontalHeaderLabels(list);
-    _table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    _table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     QTableWidgetItem *headerItem;
     for (int i = 0; i < size; i++) {
@@ -362,7 +365,7 @@ void VaporTable::setVerticalHeader(std::vector<std::string> header)
 
     _table->setVerticalHeaderLabels(list);
     _table->resizeRowsToContents();
-    _table->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    _table->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     QTableWidgetItem *headerItem;
     for (int i = 0; i < size; i++) {

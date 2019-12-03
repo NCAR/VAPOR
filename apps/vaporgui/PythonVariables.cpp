@@ -417,10 +417,10 @@ bool PythonVariables::_getFilePath(QString &filePath, bool operation)
     }
 
     string      pythonPath = Wasp::GetSharePath("python");
-    QFileDialog fileDialog(this, "Import Python script from file", QString::fromStdString(pythonPath), QString::fromAscii("Python file (*.py)"));
+    QFileDialog fileDialog(this, "Import Python script from file", QString::fromStdString(pythonPath), QString("Python file (*.py)"));
 
     fileDialog.setAcceptMode(acceptMode);
-    fileDialog.setDefaultSuffix(QString::fromAscii("py"));
+    fileDialog.setDefaultSuffix(QString("py"));
     fileDialog.setFileMode(fileMode);
     if (fileDialog.exec() != QDialog::Accepted) return false;
 

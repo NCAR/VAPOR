@@ -39,8 +39,6 @@ QString VSection::_createStylesheet() const
     right: 3px;
     }
     )";
-#elif defined(WIN32)
-    #error style missing for windows
 #else
     stylesheet +=
         R"(

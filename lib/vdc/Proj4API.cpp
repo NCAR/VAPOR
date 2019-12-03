@@ -1,3 +1,4 @@
+#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H 1
 
 #include <iostream>
 #include <proj_api.h>
