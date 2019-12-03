@@ -43,7 +43,7 @@ set (VERSION_STRING_FULL ${VERSION_STRING}.${VERSION_COMMIT})
 if (APPLE)
 	add_definitions (-DDarwin)
 elseif (WIN32)
-	add_definitions (-DWIN32)
+	add_definitions (-DWIN32 -DNOMINMAX)
 endif()
 
 # compiler warning flags
