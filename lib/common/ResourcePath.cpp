@@ -97,12 +97,15 @@ std::string Wasp::GetSharePath(const std::string &name)
     return GetResourcePath("share/" + name);
 }
 
-
 #ifdef WIN32
 #define PYTHON_INSTALLED_PATH ("python" + string(PYTHON_VERSION))
 #else
 #define PYTHON_INSTALLED_PATH ("lib/python" + string(PYTHON_VERSION))
 #endif
+
+std::string Wasp::GetPythonVersion() {
+	return std::string(PYTHON_VERSION);
+}
 
 std::string Wasp::GetPythonPath()
 {
@@ -121,9 +124,10 @@ std::string Wasp::GetPythonDir()
 #endif
     
     string path = GetResourcePath("");
-    
+
+    string exists = FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH});
+
     if (!FileUtils::Exists(FileUtils::JoinPaths({path, PYTHON_INSTALLED_PATH})))
         path = string(PYTHON_DIR);
-
     return path;
 }
