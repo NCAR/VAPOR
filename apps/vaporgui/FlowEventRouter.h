@@ -36,7 +36,6 @@ public:
  FlowEventRouter(
 	QWidget *parent, VAPoR::ControlExec *ce
  );
- ~FlowEventRouter();
 
  void GetWebHelp(
 	vector <pair <string, string> > &help
