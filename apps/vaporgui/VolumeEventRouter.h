@@ -36,7 +36,6 @@ class VolumeEventRouter : public QTabWidget, public RenderEventRouter {
   public:
     VolumeEventRouter(
         QWidget *parent, VAPoR::ControlExec *ce);
-    ~VolumeEventRouter();
 
     void GetWebHelp(
         vector<pair<string, string>> &help) const;

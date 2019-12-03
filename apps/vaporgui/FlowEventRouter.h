@@ -33,7 +33,6 @@ class FlowEventRouter : public QTabWidget, public RenderEventRouter {
   public:
     FlowEventRouter(
         QWidget *parent, VAPoR::ControlExec *ce);
-    ~FlowEventRouter();
 
     void GetWebHelp(
         vector<pair<string, string>> &help) const;

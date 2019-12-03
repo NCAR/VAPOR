@@ -37,7 +37,6 @@ class WireFrameEventRouter : public QTabWidget, public RenderEventRouter {
   public:
     WireFrameEventRouter(
         QWidget *parent, VAPoR::ControlExec *ce);
-    ~WireFrameEventRouter();
 
     void GetWebHelp(
         vector<pair<string, string>> &help) const;
