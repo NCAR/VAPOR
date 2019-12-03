@@ -17,6 +17,7 @@ QT_USE_NAMESPACE
 namespace VAPoR {
 	class ControlExec;
 	class ParamsMgr;
+    class DataStatus;
 }
 
 /*class VPushButtonWithDoubleClick : public QPushButton {
@@ -39,25 +40,34 @@ public:
 	std::vector<string> rendererNames,
 	std::vector<string> descriptions,
 	std::vector<string> iconPaths,
-	std::vector<string> smallIconPaths);
+	std::vector<string> smallIconPaths,
+    std::vector<bool> dim2DSupport,
+    std::vector<bool> dim3DSupport);
 
  std::string GetSelectedRenderer() {return _selectedRenderer;}
+    void InitializeDataSources(VAPoR::DataStatus *dataStatus);
 
 private slots:
  void _buttonChecked();
  void _buttonDoubleClicked();
+ void _showRelevantRenderers();
 
 private:
  void _createButtons();
  void _setUpImage(std::string imageName, QLabel *label);
- void _uncheckAllButtons();
- void _initializeDataSources();
+    void _uncheckAllButtons();
+    void _selectFirstValidRenderer();
  QPushButton* _createButton(QIcon icon, QString name, int index);
 
  std::vector<string> _rendererNames;
  std::vector<string> _descriptions;
  std::vector<string> _iconPaths;
  std::vector<string> _smallIconPaths;
+ std::vector<bool> _dim2DSupport;
+ std::vector<bool> _dim3DSupport;
+ std::vector<QPushButton*> _buttons;
+    
+    VAPoR::DataStatus *_dataStatus;
 
  std::string _selectedRenderer;
  QMessageBox* _msgBox;
@@ -103,7 +113,9 @@ public:
 	const std::vector <string> &widgetNames,
 	const std::vector <string> &descriptions,
 	const std::vector <string> &iconPaths,
-	const std::vector <string> &smallIconPaths
+	const std::vector <string> &smallIconPaths,
+    const std::vector <bool>   &dim2DSupport,
+    const std::vector <bool>   &dim3DSupport
  );
 
  virtual ~RenderHolder() {}

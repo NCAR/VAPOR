@@ -36,6 +36,7 @@ public:
     return GetClassType();
   }
 
+    virtual DimFlags GetDimFlags() const { return (DimFlags)(DimFlags::TWOD | DimFlags::THREED); }
 
 protected:
  void _updateTab();
