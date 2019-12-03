@@ -40,7 +40,6 @@ public:
     ContourEventRouter(
         QWidget *parent, VAPoR::ControlExec *ce
     );
-	~ContourEventRouter();
 
 	virtual void hookUpTab() {}
 
