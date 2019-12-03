@@ -221,7 +221,7 @@ ParamsWidgetFile::ParamsWidgetFile(const std::string &tag, const std::string &la
 : ParamsWidget(tag, label)
 {
 #ifndef WIN32
-#warning _spacer is a hack. Will be refactored
+//#warning _spacer is a hack. Will be refactored
 #endif
     _spacer->changeSize(0, 0, QSizePolicy::Minimum, QSizePolicy::Minimum);
     
