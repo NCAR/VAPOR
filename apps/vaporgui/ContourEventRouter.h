@@ -54,6 +54,8 @@ public:
 	}
 
 	string GetType() const {return GetClassType(); }
+    
+    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
 
 protected:
 	virtual void _initializeTab();

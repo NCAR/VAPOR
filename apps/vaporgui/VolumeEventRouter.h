@@ -48,6 +48,8 @@ public:
 	 return(VAPoR::VolumeRenderer::GetClassType());
  }
  string GetType() const {return GetClassType(); }
+    
+    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
 
 
 protected:
