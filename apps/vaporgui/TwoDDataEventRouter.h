@@ -50,6 +50,7 @@ public:
  }
  string GetType() const {return GetClassType(); }
 
+    
 
 protected:
  void _updateTab();
@@ -61,6 +62,8 @@ protected:
  virtual string _getIconImagePath() const {
 	return("TwoDData.png");
  }
+    
+    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
 
 private:
 

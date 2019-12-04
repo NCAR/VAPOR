@@ -506,6 +506,11 @@ void VariablesWidget::Update(
         orientationFrame->hide();
 }
 
+DimFlags VariablesWidget::GetDimFlags() const
+{
+    return _dimFlags;
+}
+
 string VariablesWidget::findVarStartingWithLetter(
     vector<string> searchVars,
     char letter
