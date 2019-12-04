@@ -57,6 +57,8 @@ class TwoDDataEventRouter : public QTabWidget, public RenderEventRouter {
         return ("TwoDData.png");
     }
 
+    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
+
   private:
     TwoDDataEventRouter() {}
 

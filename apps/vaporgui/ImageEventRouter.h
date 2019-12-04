@@ -31,6 +31,8 @@ class ImageEventRouter : public QTabWidget, public RenderEventRouter {
         return GetClassType();
     }
 
+    virtual DimFlags GetDimFlags() const { return (DimFlags)(DimFlags::TWOD | DimFlags::THREED); }
+
   protected:
     void _updateTab();
     virtual string _getDescription() const;
