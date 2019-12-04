@@ -314,13 +314,6 @@ void RenderHolder::_showIntelDriverWarning(const string &rendererType)
 void RenderHolder::_showNewRendererDialog() {
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 	vector <string> dataSetNames = paramsMgr->GetDataMgrNames();
-    
-    DataMgr *dm = _controlExec->GetDataStatus()->GetDataMgr(dataSetNames[0]);
-    auto vars = dm->GetDataVarNames();
-    int d2 = dm->GetDataVarNames(2).size();
-    int d3 = dm->GetDataVarNames(3).size();
-    printf("3D Vars: %i\n", d3);
-    printf("2D Vars: %i\n", d2);
 	
 	_initializeNewRendererDialog(dataSetNames);
 	if (_newRendererDialog->exec() != QDialog::Accepted) {
