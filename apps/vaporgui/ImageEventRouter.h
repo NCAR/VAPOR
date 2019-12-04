@@ -26,6 +26,8 @@ public:
     static std::string GetClassType() { return (VAPoR::ImageRenderer::GetClassType()); }
     std::string        GetType() const { return GetClassType(); }
 
+    virtual DimFlags GetDimFlags() const { return (DimFlags)(DimFlags::TWOD | DimFlags::THREED); }
+
 protected:
     void           _updateTab();
     virtual string _getDescription() const;

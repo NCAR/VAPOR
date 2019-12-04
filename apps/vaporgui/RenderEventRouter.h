@@ -22,6 +22,7 @@
 #define RENDEREREVENTROUTER_H
 
 #include "EventRouter.h"
+#include "Flags.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -184,13 +185,18 @@ public:
 
     //! Return a brief (3 or 4 sentence description of the renderer
     //!
-    virtual string GetDescription() const { return (_getDescription()); }
+    string GetDescription() const { return (_getDescription()); }
 
     //! Return the path name of a raster file containing an icon for
     //! the renderer
     //!
-    virtual string GetSmallIconImagePath() const;
-    virtual string GetIconImagePath() const;
+    string GetSmallIconImagePath() const;
+    string GetIconImagePath() const;
+
+    bool Supports2DVariables() const { return GetDimFlags() & DimFlags::TWOD; }
+    bool Supports3DVariables() const { return GetDimFlags() & DimFlags::THREED; }
+
+    virtual DimFlags GetDimFlags() const = 0;
 
 protected:
     RenderEventRouter() {}

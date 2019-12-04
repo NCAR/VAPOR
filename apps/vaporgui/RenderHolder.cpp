@@ -35,6 +35,7 @@
 #include <SettingsParams.h>
 #include <vapor/VolumeRenderer.h>
 #include <vapor/VolumeIsoRenderer.h>
+#include <vapor/DataStatus.h>
 
 using namespace VAPoR;
 
@@ -44,7 +45,8 @@ const string DuplicateInStr = "Duplicate in:";
 
 CBWidget::CBWidget(QWidget *parent, QString text) : QWidget(parent), QTableWidgetItem(text){};
 
-NewRendererDialog::NewRendererDialog(QWidget *parent, std::vector<string> rendererNames, std::vector<string> descriptions, std::vector<string> iconPaths, std::vector<string> smallIconPaths)
+NewRendererDialog::NewRendererDialog(QWidget *parent, std::vector<string> rendererNames, std::vector<string> descriptions, std::vector<string> iconPaths, std::vector<string> smallIconPaths,
+                                     std::vector<bool> dim2DSupport, std::vector<bool> dim3DSupport)
 : QDialog(parent), Ui_NewRendererDialog()
 {
     setupUi(this);
@@ -53,17 +55,21 @@ NewRendererDialog::NewRendererDialog(QWidget *parent, std::vector<string> render
     _descriptions = descriptions;
     _iconPaths = iconPaths;
     _smallIconPaths = smallIconPaths;
+    _dim2DSupport = dim2DSupport;
+    _dim3DSupport = dim3DSupport;
 
     rendererNameEdit->setValidator(new QRegExpValidator(QRegExp("[a-zA-Z0-9_]{1,64}")));
     dataMgrCombo->clear();
 
-    _initializeDataSources();
     _createButtons();
+
+    connect(dataMgrCombo, SIGNAL(activated(int)), this, SLOT(_showRelevantRenderers()));
 };
 
 void NewRendererDialog::_createButtons()
 {
     int size = _rendererNames.size();
+    _buttons.clear();
     for (int i = 0; i < size; i++) {
         QString      iconPath = QString::fromStdString(_smallIconPaths[i]);
         QIcon        icon(iconPath);
@@ -71,6 +77,7 @@ void NewRendererDialog::_createButtons()
         QPushButton *button = _createButton(icon, name, i);
 
         buttonHolderGridLayout->addWidget(button, i, 0);
+        _buttons.push_back(button);
 
         QPixmap thumbnail(_smallIconPaths[i].c_str());
         QLabel *label = new QLabel();
@@ -96,10 +103,48 @@ QPushButton *NewRendererDialog::_createButton(QIcon icon, QString name, int inde
     return button;
 }
 
-void NewRendererDialog::_initializeDataSources()
+void NewRendererDialog::InitializeDataSources(VAPoR::DataStatus *dataStatus)
 {
+    _dataStatus = dataStatus;
+    const vector<string> datasets = dataStatus->GetDataMgrNames();
+
+    dataMgrCombo->blockSignals(true);
     dataMgrCombo->clear();
-    for (int i = 0; i < _rendererNames.size(); i++) { dataMgrCombo->addItem(QString::fromStdString(_rendererNames[i])); }
+    for (int i = 0; i < datasets.size(); i++) { dataMgrCombo->addItem(QString::fromStdString(datasets[i])); }
+    dataMgrCombo->blockSignals(false);
+
+    _showRelevantRenderers();
+}
+
+void NewRendererDialog::_showRelevantRenderers()
+{
+    const string datasetName = dataMgrCombo->currentText().toStdString();
+    DataMgr *    dm = _dataStatus->GetDataMgr(datasetName);
+    VAssert(dm);
+
+    bool has2D = dm->GetDataVarNames(2).size();
+    bool has3D = dm->GetDataVarNames(3).size();
+
+    for (int i = 0; i < _buttons.size(); i++) {
+        if ((has2D && _dim2DSupport[i]) || (has3D && _dim3DSupport[i])) {
+            _buttons[i]->setEnabled(true);
+            _buttons[i]->setToolTip("");
+        } else {
+            _buttons[i]->setEnabled(false);
+            _buttons[i]->setToolTip(QString::fromStdString("Dataset \"" + datasetName + "\" has no " + (has2D ? "3D" : "2D") + " data"));
+        }
+    }
+    _selectFirstValidRenderer();
+}
+
+void NewRendererDialog::_selectFirstValidRenderer()
+{
+    for (int i = 0; i < _buttons.size(); i++) {
+        if (_buttons[i]->isEnabled()) {
+            _buttons[i]->click();
+            return;
+        }
+    }
 }
 
 void NewRendererDialog::_setUpImage(std::string imageName, QLabel *label)
@@ -149,7 +194,7 @@ void NewRendererDialog::_uncheckAllButtons()
 }
 
 RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce, const vector<QWidget *> &widgets, const vector<string> &widgetNames, const vector<string> &descriptions, const vector<string> &iconPaths,
-                           const vector<string> &smallIconPaths)
+                           const vector<string> &smallIconPaths, const vector<bool> &dim2DSupport, const vector<bool> &dim3DSupport)
 : QWidget(parent), Ui_LeftPanel()
 {
     VAssert(widgets.size() == widgetNames.size());
@@ -160,7 +205,7 @@ RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce, const vector<QWidge
 
     _controlExec = ce;
     //_newRendererDialog = new NewRendererDialog(this, ce);
-    _newRendererDialog = new NewRendererDialog(this, widgetNames, descriptions, iconPaths, smallIconPaths);
+    _newRendererDialog = new NewRendererDialog(this, widgetNames, descriptions, iconPaths, smallIconPaths, dim2DSupport, dim3DSupport);
     _vaporTable = new VaporTable(tableWidget, false, true);
     _vaporTable->Reinit((VaporTable::ValidatorFlags)(0), (VaporTable::MutabilityFlags)(VaporTable::IMMUTABLE), (VaporTable::HighlightFlags)(VaporTable::ROWS));
     _vaporTable->ShowToolTips(true);
@@ -193,11 +238,7 @@ void RenderHolder::_initializeSplitter()
     mainSplitter->setSizes(proportions);
 }
 
-void RenderHolder::_initializeNewRendererDialog(vector<string> datasetNames)
-{
-    _newRendererDialog->dataMgrCombo->clear();
-    for (int i = 0; i < datasetNames.size(); i++) { _newRendererDialog->dataMgrCombo->addItem(QString::fromStdString(datasetNames[i])); }
-}
+void RenderHolder::_initializeNewRendererDialog(vector<string> datasetNames) { _newRendererDialog->InitializeDataSources(_controlExec->GetDataStatus()); }
 
 void RenderHolder::_showIntelDriverWarning(const string &rendererType)
 {
