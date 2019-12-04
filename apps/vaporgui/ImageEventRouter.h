@@ -23,7 +23,6 @@ Q_OBJECT
 
 public: 
   ImageEventRouter( QWidget* parent, VAPoR::ControlExec* ce);
-  ~ImageEventRouter();
 
   void GetWebHelp ( vector <pair <string, string> > &help) const;
 
