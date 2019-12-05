@@ -116,19 +116,19 @@ void FlowSeedingSubtab::_createSeedingSection( QWidget* parent ) {
     _xSeedSliderEdit->SetIntType(true);
     _xSeedSliderEdit->SetRange( MIN_AXIS_SEEDS, MAX_AXIS_SEEDS );
     _griddedSeedsFrame->addWidget( new VLineItem( "X axis seeds", _xSeedSliderEdit ) );
-    connect( _xSeedSliderEdit, SIGNAL( ValueChanged( double ) ),
+    connect( _xSeedSliderEdit, SIGNAL( ValueChanged( int ) ),
         this, SLOT( _rakeNumOfSeedsChanged() ) );
     _ySeedSliderEdit = new VSliderEdit();
     _ySeedSliderEdit->SetIntType(true);
     _ySeedSliderEdit->SetRange( MIN_AXIS_SEEDS, MAX_AXIS_SEEDS );
     _griddedSeedsFrame->addWidget( new VLineItem("Y axis seeds", _ySeedSliderEdit ) );
-    connect( _ySeedSliderEdit, SIGNAL( ValueChanged( double ) ),
+    connect( _ySeedSliderEdit, SIGNAL( ValueChanged( int ) ),
         this, SLOT( _rakeNumOfSeedsChanged() ) );
     _zSeedSliderEdit = new VSliderEdit();
     _zSeedSliderEdit->SetIntType(true);
     _zSeedSliderEdit->SetRange( MIN_AXIS_SEEDS, MAX_AXIS_SEEDS );
     _griddedSeedsFrame->addWidget( new VLineItem("Z axis seeds", _zSeedSliderEdit ) );
-    connect( _zSeedSliderEdit, SIGNAL( ValueChanged( double ) ),
+    connect( _zSeedSliderEdit, SIGNAL( ValueChanged( int ) ),
         this, SLOT( _rakeNumOfSeedsChanged() ) );
 
     // Rake selector
@@ -152,7 +152,7 @@ void FlowSeedingSubtab::_createSeedingSection( QWidget* parent ) {
     _randomSeedsSliderEdit = new VSliderEdit( MIN_RANDOM_SEEDS, MAX_RANDOM_SEEDS );
     _randomSeedsSliderEdit->SetIntType( true );
     _randomSeedsFrame->addWidget( new VLineItem("Seed count", _randomSeedsSliderEdit ) );
-    connect( _randomSeedsSliderEdit, SIGNAL( ValueChanged( double ) ),
+    connect( _randomSeedsSliderEdit, SIGNAL( ValueChanged( int ) ),
         this, SLOT( _rakeNumOfSeedsChanged() ) );
 
     _biasWeightSliderEdit = new VSliderEdit(-1, 1, 0);
