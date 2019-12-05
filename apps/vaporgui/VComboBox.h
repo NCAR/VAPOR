@@ -26,4 +26,5 @@ public slots:
 
 signals:
     void ValueChanged( std::string value );
+    void ValueChanged( int index );
 };

@@ -84,11 +84,11 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
         this, SLOT( _frChanged() ) );
     _fw = new VFileWriter("fw");
     layout()->addWidget( new VLineItem("fwline", _fw) );
-    connect( _fw, SIGNAL( ValueChanged( const std::string& val ) ),
+    connect( _fw, SIGNAL( ValueChanged( const std::string& ) ),
         this, SLOT( _fwChanged() ) );
     _ds = new VDirSelector("ds");
     layout()->addWidget( new VLineItem("dsline", _ds) );
-    connect( _fw, SIGNAL( ValueChanged( const std::string& val ) ),
+    connect( _ds, SIGNAL( ValueChanged( const std::string& ) ),
         this, SLOT( _dsChanged() ) );
 }
 

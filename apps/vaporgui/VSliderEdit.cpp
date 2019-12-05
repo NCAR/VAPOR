@@ -71,7 +71,10 @@ void VSliderEdit::_lineEditChanged( const std::string& value ) {
     try {
         double newValue = stod( value );
         SetValue( newValue );
-        emit ValueChanged( _value );
+        if (_isIntType)
+            emit ValueChanged( (int)_value );
+        else 
+            emit ValueChanged( _value );
     }
     // If we can't convert the _lineEdit text to a double,
     // then revert to the previous value.
@@ -82,13 +85,19 @@ void VSliderEdit::_lineEditChanged( const std::string& value ) {
 
 void VSliderEdit::_sliderChanged( double value ) {
     SetValue( value );
-    emit ValueChanged( _value );
+    if (_isIntType)
+        emit ValueChanged( (int)_value );
+    else
+        emit ValueChanged( _value );
 }
 
 void VSliderEdit::_sliderChangedIntermediate( double value ) {
-    if (_isIntType)
+    if (_isIntType) {
         _lineEdit->SetValue( std::to_string( (int)value ) );
-    else
+        emit ValueChangedIntermediate( (int)value );
+    }
+    else {
         _lineEdit->SetValue( std::to_string( value ) );
-    emit ValueChangedIntermediate( value );
+        emit ValueChangedIntermediate( value );
+    }
 }

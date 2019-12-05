@@ -59,4 +59,5 @@ int VComboBox::GetCount() const {
 
 void VComboBox::emitComboChanged( QString value ) {
     emit ValueChanged( value.toStdString() );
+    emit ValueChanged( _combo->currentIndex() );
 }

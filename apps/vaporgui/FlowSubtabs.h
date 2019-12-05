@@ -130,8 +130,10 @@ private slots:
     void _streamlineEndTimeChanged( int endTime );
     void _streamlineLifetimeChanged( int lifeTime );
 
-    void _pathlineDirectionChanged();
+    void _pathlineDirectionChanged( int index );
     void _pathlineLengthChanged( int length );
+
+    void _seedInjIntervalChanged( int interval );
 
     void _periodicClicked();
     void _velocityMultiplierChanged( const std::string& multiplier );
@@ -143,6 +145,8 @@ private slots:
     void _biasStrengthChanged( double bias );
 
     void _rakeGeometryChanged( const std::vector<float>& range );
+
+    void _selectedTabChanged( int index );
 
 private:
     void _createIntegrationSection();

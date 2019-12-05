@@ -11,6 +11,8 @@
 #include "VFileSelector.h"
 #include "VGeometry2.h"
 
+#include <QScrollArea>
+
 #define verbose     1
 
 #define UNSTEADY_STRING    "Pathlines"
@@ -23,6 +25,8 @@
 #define MAX_AXIS_SEEDS      1000
 #define MIN_RANDOM_SEEDS    1
 #define MAX_RANDOM_SEEDS    1000000
+
+#define MAX_PATHLINE_LENGTH 10000
 
 #define X                   0
 #define Y                   1
@@ -130,7 +134,7 @@ void FlowSeedingSubtab::_createSeedingSection() {
     // Rake selector
     _rakeWidget = new VGeometry2();
     _seedDistributionSection->layout()->addWidget( _rakeWidget );
-    connect( _rakeWidget, SIGNAL( _ValueChanged( const std::vector<float>& ) ),
+    connect( _rakeWidget, SIGNAL( ValueChanged( const std::vector<float>& ) ),
         this, SLOT( _rakeGeometryChanged( const std::vector<float>& ) ) );
 
     // List of seeds selection
@@ -154,7 +158,7 @@ void FlowSeedingSubtab::_createSeedingSection() {
     _biasWeightSliderEdit = new VSliderEdit(-1, 1, 0);
     _randomSeedsFrame->addWidget( new VLineItem( "Bias weight", _biasWeightSliderEdit ) );
     connect( _biasWeightSliderEdit, SIGNAL( ValueChanged( double ) ),
-        this, SLOT( _biasWeightChanged( double ) ) );
+        this, SLOT( _biasStrengthChanged( double ) ) );
 
     _biasVariableComboBox = new VComboBox( std::vector<std::string>() );
     _randomSeedsFrame->addWidget( new VLineItem( "Bias variable", _biasVariableComboBox ) );
@@ -181,14 +185,14 @@ void FlowSeedingSubtab::_createIntegrationSection() {
 
     values = { "Forward", "Backward", "Bi-Directional" };
     _pathlineDirectionCombo = new VComboBox(values);
-    connect( _pathlineDirectionCombo, SIGNAL( ValueChanged( std::string )),
-        this, SLOT( _pathlineDirectionChanged( std::string ) ) );
+    connect( _pathlineDirectionCombo, SIGNAL( ValueChanged( int )),
+        this, SLOT( _pathlineDirectionChanged( int ) ) );
     _pathlineFrame->addWidget( new VLineItem("Flow direction", _pathlineDirectionCombo) );
 
     _pathlineLengthSliderEdit = new VSliderEdit();
     _pathlineLengthSliderEdit->SetIntType(true);
-    connect( _pathlineLengthSliderEdit, SIGNAL( ValueChanged( double ) ),
-        this, SLOT( _pathlineLengthChanged(int) ) );
+    connect( _pathlineLengthSliderEdit, SIGNAL( ValueChanged( int ) ),
+        this, SLOT( _pathlineLengthChanged( int ) ) );
     _pathlineFrame->addWidget( new VLineItem("Pathline length", _pathlineLengthSliderEdit));
 
     // Unsteady flow options
@@ -198,35 +202,35 @@ void FlowSeedingSubtab::_createIntegrationSection() {
 
     _streamlineLengthSliderEdit = new VSliderEdit();
     _streamlineLengthSliderEdit->SetIntType(true);
-    connect( _streamlineLengthSliderEdit, SIGNAL( ValueChanged( double ) ),
+    connect( _streamlineLengthSliderEdit, SIGNAL( ValueChanged( int ) ),
         this, SLOT( _streamlineLengthChanged( int ) ) );
     _streamlineFrame->addWidget( 
         new VLineItem("Streamline length", _streamlineLengthSliderEdit));
 
     _streamlineStartSliderEdit= new VSliderEdit();
     _streamlineStartSliderEdit->SetIntType(true);
-    connect( _streamlineStartSliderEdit, SIGNAL( ValueChanged( double ) ),
+    connect( _streamlineStartSliderEdit, SIGNAL( ValueChanged( int ) ),
         this, SLOT( _streamlineStartTimeChanged( int ) ) );
     _streamlineFrame->addWidget(
         new VLineItem("Injection start time - NOOP", _streamlineStartSliderEdit));
 
     _streamlineEndSliderEdit = new VSliderEdit();
     _streamlineEndSliderEdit->SetIntType(true);
-    connect( _streamlineEndSliderEdit, SIGNAL( ValueChanged( double ) ),
+    connect( _streamlineEndSliderEdit, SIGNAL( ValueChanged( int ) ),
         this, SLOT( _streamlineEndTimeChanged( int ) ) );
     _streamlineFrame->addWidget(
         new VLineItem("Injection end time - NOOP", _streamlineEndSliderEdit));
     
     _streamlineInjIntervalSliderEdit = new VSliderEdit();
     _streamlineInjIntervalSliderEdit->SetIntType(true);
-    connect( _streamlineInjIntervalSliderEdit,  SIGNAL( ValueChanged( double ) ), 
+    connect( _streamlineInjIntervalSliderEdit,  SIGNAL( ValueChanged( int ) ), 
         this, SLOT( _seedInjIntervalChanged(int) ));
     _streamlineFrame->addWidget(
         new VLineItem("Injection interval - NOOP", _streamlineInjIntervalSliderEdit));
 
     _streamlineLifetimeSliderEdit = new VSliderEdit();
     _streamlineLifetimeSliderEdit->SetIntType(true);
-    connect( _streamlineLifetimeSliderEdit,  SIGNAL( ValueChanged( double ) ), 
+    connect( _streamlineLifetimeSliderEdit,  SIGNAL( ValueChanged( int ) ), 
         this, SLOT( _streamlineLifetimeChanged(int) ) );
     _streamlineFrame->addWidget(
         new VLineItem("Seed lifetime - NOOP", _streamlineLifetimeSliderEdit) );
@@ -335,7 +339,19 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
         range.push_back( float(maxExt[i]) );
     }
     _rakeWidget->SetRange( range );
-    _rakeWidget->SetValue( _params->GetRake() );
+#warning FlowSubtabs GUI is currently initializing FlowParams rake values
+    auto rakeVals = _params->GetRake();
+    /* In case the user hasn't set the rake, set the current value to be the rake extents,
+       plus update the params.  Otherwise, apply the actual rake values.*/
+    if( std::isnan( rakeVals[0] ) )
+    {
+        _rakeWidget->SetValue( range );
+        _params->SetRake( range );
+    }
+    else
+    {
+        _rakeWidget->SetValue( rakeVals );
+    }
 }
 
 void FlowSeedingSubtab::_updateSteadyFlowWidgets( VAPoR::DataMgr* dataMgr ) {
@@ -584,19 +600,24 @@ FlowSeedingSubtab::_streamlineLengthChanged( int newVal )
 void 
 FlowSeedingSubtab::_pathlineLengthChanged( int newval )
 {
-    int oldval;
+    _params->SetSteadyNumOfSteps( newval );
+   /*int oldval;
     oldval = (int)_params->GetSteadyNumOfSteps();
 
     if( newval >= 0 )    // in the valid range
     {
         // Only write back to _params if newval is different from ldval 
-        if( newval != oldval )
+        if( newvalInt != oldval )
             _params->SetSteadyNumOfSteps( newval );
     }
     else
-        _pathlineLengthSliderEdit->SetValue( oldval );
+        _pathlineLengthSliderEdit->SetValue( oldval );*/
 }
 
+void
+FlowSeedingSubtab::_seedInjIntervalChanged( int interval ) {
+    _params->SetSeedInjInterval( interval );
+}
 
 void FlowSeedingSubtab::_configureFlowType ( const std::string& value ) {
     bool isSteady = true;
@@ -776,7 +797,22 @@ FlowSeedingSubtab::_rakeGeometryChanged( const std::vector<float>& range )
     _params->SetRake( range );
 }
 
+void
+FlowSeedingSubtab::_selectedTabChanged(int index)
+{
+    if (!_paramsMgr)
+        return;
 
+    const QTabWidget *parent = dynamic_cast<QTabWidget*>(sender());
+    VAssert(parent);
+    const QScrollArea *area = dynamic_cast<QScrollArea*>(parent->widget(index));
+    VAssert(area);
+    const QWidget *widget = area->widget();
+
+    GUIStateParams *gp = (GUIStateParams *)_paramsMgr->GetParams(GUIStateParams::GetClassType());
+
+    gp->SetFlowSeedTabActive(widget == this);
+}
 
 void
 FlowSeedingSubtab::_seedGenModeChanged( int newIdx )
@@ -785,9 +821,8 @@ FlowSeedingSubtab::_seedGenModeChanged( int newIdx )
 }
 
 void
-FlowSeedingSubtab::_pathlineDirectionChanged()
+FlowSeedingSubtab::_pathlineDirectionChanged( int index )
 {
-    int index = _pathlineDirectionCombo->GetCurrentIndex();
     _params->SetFlowDirection( index );
 }
 

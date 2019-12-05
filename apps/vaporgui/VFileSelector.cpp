@@ -89,9 +89,7 @@ std::string VFileReader::_launchFileDialog() {
 
 bool VFileReader::_isFileOperable( const std::string& filePath ) const {
     bool operable = false;
-    operable = FileOperationChecker::FileGoodToRead(
-        QString::fromStdString( filePath ) 
-    );
+    operable = FileOperationChecker::FileGoodToRead( QString::fromStdString( filePath ) );
     return operable;
 }
 
@@ -107,9 +105,7 @@ VFileWriter::VFileWriter(
 
 bool VFileWriter::_isFileOperable( const std::string& filePath) const {
     bool operable = false;
-    operable = FileOperationChecker::FileGoodToWrite(
-        QString::fromStdString( filePath ) 
-    );
+    operable = FileOperationChecker::FileGoodToWrite( QString::fromStdString( filePath ) );
     return operable;
 }
 
