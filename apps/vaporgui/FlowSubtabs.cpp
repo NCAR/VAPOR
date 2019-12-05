@@ -130,6 +130,8 @@ void FlowSeedingSubtab::_createSeedingSection() {
     // Rake selector
     _rakeWidget = new VGeometry2();
     _seedDistributionSection->layout()->addWidget( _rakeWidget );
+    connect( _rakeWidget, SIGNAL( _ValueChanged( const std::vector<float>& ) ),
+        this, SLOT( _rakeGeometryChanged( const std::vector<float>& ) ) );
 
     // List of seeds selection
     _listOfSeedsFileReader = new VFileReader();
@@ -313,6 +315,27 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _ySeedSliderEdit->SetValue( seedVec[Y] );
     _zSeedSliderEdit->SetValue( seedVec[Z] );
     _randomSeedsSliderEdit->SetValue( seedVec[RANDOM_INDEX] );
+
+    // Update rake
+    std::vector<double> minExt, maxExt;
+    std::vector<int>    axes;
+    VAPoR::DataMgrUtils::GetExtents( dataMgr, 
+                                     _params->GetCurrentTimestep(), 
+                                     _params->GetFieldVariableNames(),         
+                                     _params->GetRefinementLevel(),         
+                                     _params->GetCompressionLevel(),         
+                                     minExt, 
+                                     maxExt, 
+                                     axes  );
+    VAssert( minExt.size() == 3 && maxExt.size() == 3 );
+    std::vector<float> range;
+    for( int i = 0; i < 3; i++ )
+    {
+        range.push_back( float(minExt[i]) );
+        range.push_back( float(maxExt[i]) );
+    }
+    _rakeWidget->SetRange( range );
+    _rakeWidget->SetValue( _params->GetRake() );
 }
 
 void FlowSeedingSubtab::_updateSteadyFlowWidgets( VAPoR::DataMgr* dataMgr ) {
@@ -741,16 +764,18 @@ FlowSeedingSubtab::_seedListFileChanged( const std::string& value ) {
 
 }
 
-/*
+
 void
-FlowSeedingSubtab::_rakeGeometryChanged()
+FlowSeedingSubtab::_rakeGeometryChanged( const std::vector<float>& range )
 {
-    std::vector<float> range;
-    _rake->GetCurrentValues( range );
+    cout << " FlowSeedingSubtab::_rakeGeometryChanged() " << endl;
+    cout << "       " << range[0] << " " << range[1] << endl;
+    cout << "       " << range[2] << " " << range[3] << endl;
+    cout << "       " << range[4] << " " << range[5] << endl;
     VAssert( range.size() == 6 );
     _params->SetRake( range );
 }
-*/
+
 
 
 void

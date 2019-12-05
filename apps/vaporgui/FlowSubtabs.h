@@ -142,6 +142,8 @@ private slots:
     void _biasVariableChanged( const std::string& variable );
     void _biasStrengthChanged( double bias );
 
+    void _rakeGeometryChanged( const std::vector<float>& range );
+
 private:
     void _createIntegrationSection();
     void _createSeedingSection();

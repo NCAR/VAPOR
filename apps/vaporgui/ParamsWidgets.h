@@ -18,12 +18,12 @@
 //! The parameter tag that it is linked to is passed in the constructor and the
 //! relevant params node is set in the update method.
 
-class ParamsWidgetOld : public QWidget {
+class ParamsWidget : public QWidget {
     Q_OBJECT
     
 public:
     //! \param[in] label will be set to tag by default
-    ParamsWidgetOld(const std::string &tag, const std::string &label = "");
+    ParamsWidget(const std::string &tag, const std::string &label = "");
     virtual void Update(VAPoR::ParamsBase *p) = 0;
     
 protected:
@@ -36,7 +36,7 @@ protected:
 
 
 
-class ParamsWidgetCheckbox : public ParamsWidgetOld {
+class ParamsWidgetCheckbox : public ParamsWidget {
     Q_OBJECT
     
     QCheckBox *_checkBox = nullptr;
@@ -52,7 +52,7 @@ private slots:
 
 
 
-class ParamsWidgetNumber : public ParamsWidgetOld {
+class ParamsWidgetNumber : public ParamsWidget {
     Q_OBJECT
     
     QLineEdit *_lineEdit = nullptr;
@@ -70,7 +70,7 @@ private slots:
 
 
 
-class ParamsWidgetFloat : public ParamsWidgetOld {
+class ParamsWidgetFloat : public ParamsWidget {
     Q_OBJECT
     
     QLineEdit *_lineEdit = nullptr;
@@ -88,7 +88,7 @@ private slots:
 
 
 
-class ParamsWidgetDropdown : public ParamsWidgetOld {
+class ParamsWidgetDropdown : public ParamsWidget {
     Q_OBJECT
     
     QComboBox *_box = nullptr;
@@ -109,7 +109,7 @@ private slots:
 
 
 class QColorWidget;
-class ParamsWidgetColor : public ParamsWidgetOld {
+class ParamsWidgetColor : public ParamsWidget {
     Q_OBJECT
     
     QColorWidget *_color = nullptr;
@@ -129,7 +129,7 @@ private slots:
 
 
 
-class ParamsWidgetFile : public ParamsWidgetOld {
+class ParamsWidgetFile : public ParamsWidget {
     Q_OBJECT
     
     QPushButton *_button = nullptr;
@@ -182,10 +182,10 @@ class ParamsWidgetTabGroup : public QTabWidget {
     Q_OBJECT
     
     QWidget *_tab() const;
-    std::vector<ParamsWidgetOld *> _widgets;
+    std::vector<ParamsWidget *> _widgets;
     
 public:
     ParamsWidgetTabGroup(const std::string &title);
     void Update(VAPoR::ParamsBase *p);
-    void Add(ParamsWidgetOld *widget);
+    void Add(ParamsWidget *widget);
 };
