@@ -24,6 +24,7 @@
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
 #include "ui_NavigationTab.h"
+#include "ParamsWidgets.h"
 
 
 namespace VAPoR {
@@ -64,6 +65,9 @@ public:
 	return("Viewpoint");
  }
  string GetType() const {return GetClassType(); }
+    
+    virtual bool Supports2DVariables() const { return true; }
+    virtual bool Supports3DVariables() const { return false; }
 
  virtual void updateTab();
 
@@ -77,6 +81,10 @@ protected:
 	virtual void _confirmText() {};
 	virtual void _updateTab();
 private:
+    ParamsWidgetCheckbox *_useCustomFramebufferCheckbox;
+    ParamsWidgetNumber *_customFramebufferWidth;
+    ParamsWidgetNumber *_customFramebufferHeight;
+    
 	NavigationEventRouter() {}
 
 	virtual void wheelEvent(QWheelEvent*) {}

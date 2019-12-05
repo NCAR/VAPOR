@@ -20,11 +20,12 @@ class TFEditor : public VSection {
     Q_OBJECT
     
 public:
-    TFEditor();
+    TFEditor(bool usingColormapVariable = false);
     
-    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
+    virtual void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
+    void SetShowOpacityMap(bool b);
     
-private:
+protected:
     TFMapGroupWidget *_maps;
     TFMapInfoGroupWidget *_mapsInfo;
     TFMappingRangeSelector *range;

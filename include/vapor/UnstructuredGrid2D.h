@@ -75,7 +75,7 @@ public:
     std::vector <double> &minu, std::vector <double> &maxu
  ) const override;
 
- void GetEnclosingRegion(
+ bool GetEnclosingRegion(
 	const std::vector <double> &minu, const std::vector <double> &maxu,
 	std::vector <size_t> &min, std::vector <size_t> &max
  ) const override;
@@ -85,11 +85,6 @@ public:
 	double coords[]
  ) const override;
   
- void GetIndices(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
- ) const override;
-
  bool GetIndicesCell(
 	const std::vector <double> &coords,
 	std::vector <size_t> &indices

@@ -55,11 +55,11 @@ private:
     const std::vector<size_t>& GetCellDimensions() const override;
     void GetBoundingBox( const std::vector <size_t> &min, const std::vector <size_t> &max,
       std::vector <double> &minu, std::vector <double> &maxu) const override {}
-    void GetEnclosingRegion( const std::vector <double> &minu, const std::vector <double> &maxu,
-      std::vector <size_t> &min, std::vector <size_t> &max ) const override {}
+	bool    GetEnclosingRegion(
+		const std::vector <double> &minu, const std::vector <double> &maxu,
+		std::vector <size_t> &min, std::vector <size_t> &max
+	) const override {return(false);}
     virtual void GetUserCoordinates( const size_t indices[], double coords[]) const override {}       
-    void GetIndices( const std::vector <double> &coords,
-      std::vector <size_t> &indices) const override {}
     bool GetIndicesCell( const std::vector <double> &coords,
       std::vector <size_t> &indices) const override;           
     bool GetCellNodes( const size_t cindices[], size_t nodes[], int &n) const override;

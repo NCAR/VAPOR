@@ -155,9 +155,9 @@ vector <string> DataStatus::GetDataMgrNames() const {
 	return(names);
 }
 
-void DataStatus::GetExtents(
+void DataStatus::_getExtents(
 	size_t ts, 
-	const map <string, vector <string>> &varMap,
+	const map <string, vector <var_info_t>> &varMap,
 	vector <double> &minExts, vector <double> &maxExts
 ) const {
 	minExts.resize(3, 0.0);
@@ -168,7 +168,7 @@ void DataStatus::GetExtents(
     vector <double> tmpMinExts(3, std::numeric_limits<double>::max());
     vector <double> tmpMaxExts(3, std::numeric_limits<double>::lowest());
 
-	map <string, vector <string>>::const_iterator itr;
+	map <string, vector <var_info_t>>::const_iterator itr;
 	for (itr = varMap.begin(); itr != varMap.end(); ++itr) {
 		string dataSetName = itr->first;
 
@@ -177,25 +177,31 @@ void DataStatus::GetExtents(
 
 		size_t local_ts = MapGlobalToLocalTimeStep(dataSetName, ts);
 
-		const vector <string> &varnames = itr->second;
+		const vector <var_info_t> &variables = itr->second;
 
-		vector <double> minVExts, maxVExts;
-		vector <int> axes;
-		bool status = DataMgrUtils::GetExtents(
-			dataMgr, local_ts, varnames, minVExts, maxVExts, axes
-		);
-		if (! status) continue;
+		for (auto it = variables.begin(); it!=variables.end(); ++it) {
 
-		print_extents(dataSetName, minVExts, maxVExts);
+			const var_info_t &var = *it;
 
-		for (int i=0; i<axes.size(); i++) {
-			int axis = axes[i];
+			vector <double> minVExts, maxVExts;
+			vector <int> axes;
+			bool status = DataMgrUtils::GetExtents(
+				dataMgr, local_ts, var.varnames, var.refLevel, var.compLevel,
+				minVExts, maxVExts, axes
+			);
+			if (! status) continue;
 
-			if (minVExts[i] < tmpMinExts[axis]) {
-				tmpMinExts[axis] = minVExts[i];
-			}
-			if (maxVExts[i] > tmpMaxExts[axis]) {
-				tmpMaxExts[axis] = maxVExts[i];
+			print_extents(dataSetName, minVExts, maxVExts);
+
+			for (int i=0; i<axes.size(); i++) {
+				int axis = axes[i];
+
+				if (minVExts[i] < tmpMinExts[axis]) {
+					tmpMinExts[axis] = minVExts[i];
+				}
+				if (maxVExts[i] > tmpMaxExts[axis]) {
+					tmpMaxExts[axis] = maxVExts[i];
+				}
 			}
 		}
 	}
@@ -214,52 +220,55 @@ void DataStatus::GetExtents(
     return;
 }
 
-map <string, vector <string>> DataStatus::getFirstVars(
-	const vector <string> &dataSetNames
+map <string, vector <DataStatus::var_info_t>> DataStatus::_getFirstVars(
+	string dataSetName
 ) const {
-	map <string, vector <string>> defaultVars;
+	map <string, vector <var_info_t>> defaultVars;
 
-	for (int i=0; i<dataSetNames.size(); i++) {
-		DataMgr *dataMgr = GetDataMgr(dataSetNames[i]);
+		DataMgr *dataMgr = GetDataMgr(dataSetName);
 		vector <string> varnames;
 		for (int dim=3; dim>1; dim--) {
 			varnames = dataMgr->GetDataVarNames(dim);
 			if (varnames.size()) {
-				vector <string> oneVar(1, varnames[0]);
-				defaultVars[dataSetNames[i]] = oneVar;
+				var_info_t var;
+				var.varnames = vector <string> (1, varnames[0]);
+				var.refLevel = 0;
+				var.compLevel = 0;
+				defaultVars[dataSetName] = vector <var_info_t>(1,var);
 				break;
 			}
 		}
-	}
 	return(defaultVars);
 }
 
 void DataStatus::GetActiveExtents(
-	const ParamsMgr *paramsMgr, string winName, string datasetName, size_t ts,
+	const ParamsMgr *paramsMgr, string winName, string dataSetName, size_t ts,
 	vector <double> &minExts, vector <double> &maxExts
 ) const {
 
-	vector <string> dataSetNames = GetDataMgrNames();
-	
-	map <string, vector <string>> varMap;
-
-	bool foundOne = false;
+	map <string, vector <var_info_t>> varMap;
 
 	vector <RenderParams *> rParams;
-	paramsMgr->GetRenderParams(winName, datasetName, rParams);
+	paramsMgr->GetRenderParams(winName, dataSetName, rParams);
 
-	vector <string> varnames;
+	vector <var_info_t> variables;
 	for (int j=0; j<rParams.size(); j++) {
 		if (! rParams[j]->IsEnabled()) continue;
 		string varname = rParams[j]->GetVariableName();
+		var_info_t var;
+		var.refLevel = rParams[j]->GetRefinementLevel();
+		var.compLevel = rParams[j]->GetCompressionLevel();
+
 		if (! varname.empty()) {
-			varnames.push_back(varname);
+			var.varnames.push_back(varname);
+			variables.push_back(var);
 		}
 
 		vector <string> fvarnames = rParams[j]->GetFieldVariableNames();
 		for (int k=0; k<fvarnames.size(); k++) {
 			if (! fvarnames[k].empty()) {
-				varnames.push_back(fvarnames[k]);
+				var.varnames.push_back(fvarnames[k]);
+				variables.push_back(var);
 			}
 		}
 
@@ -267,22 +276,21 @@ void DataStatus::GetActiveExtents(
         for (int k=0; k<auxVarNames.size(); k++) 
         {
             if (! auxVarNames[k].empty()) 
-                varnames.push_back(auxVarNames[k]);
+				var.varnames.push_back(auxVarNames[k]);
+				variables.push_back(var);
         }
 	}
-	if (varnames.size()) {
-		foundOne = true;
+	if (variables.size()) {
+		varMap[dataSetName] = variables;
 	}
-	varMap[datasetName] = varnames;
-
-	// If we didn't find any enabled variable use the first variables
-	// found in each data set
-	//
-	if (! foundOne) {
-		varMap = getFirstVars(dataSetNames);
+	else {
+		// If we didn't find any enabled variable use the first variables
+		// found in each data set
+		//
+		varMap = _getFirstVars(dataSetName);
 	}
 
-	GetExtents(ts, varMap, minExts, maxExts);
+	_getExtents(ts, varMap, minExts, maxExts);
 }
 
 void DataStatus::GetActiveExtents(

@@ -1,9 +1,8 @@
 version: 2
 jobs:
-  build:
+  build_ubuntu16:
     docker:
       - image: sgpearse/vapor3-ubuntu16:latest
-
 
     steps:
       - checkout
@@ -16,6 +15,111 @@ jobs:
             cd build
             cmake ..
             make
+
+
+  build_ubuntu18:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+
+    steps:
+      - checkout
+
+      - run:
+          name: cmake and make
+          command: |
+            cd /VAPOR
+            git pull
+            cd build
+            cmake ..
+            make
+
+  build_ubuntu18_2019:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+
+    steps:
+      - checkout
+      - run:
+          name: checkout 3rdPartyLibs
+          command: |
+            git checkout 3rdPartyLibs
+      - run:
+          name: get 2019 libs
+          command:
+            mkdir -p /usr/local/VAPOR-Deps
+
+      - run:
+          name: cmake and make
+          command: |
+            cd /VAPOR
+            git pull
+            cd build
+            cmake ..
+            make
+
+  build_centos7:
+    docker:
+      - image: sgpearse/vapor3-centos7:latest
+
+    steps:
+      - checkout
+
+      - run:
+          name: cmake3 and make
+          command: |
+            cd /VAPOR
+            git pull
+            cd build
+            cmake3 ..
+            make
+
+
+  build_osx:
+    macos:
+      xcode: "11.1.0"
+    steps:
+      - run:
+          name: Get 3rd party libs
+          command: |
+            pip3 install gdown
+            sudo mkdir -p /glade/p/VAST/VAPOR/third-party/apps-2017
+            sudo chmod -R 777 /glade/p/VAST/VAPOR/third-party/apps-2017
+            cd /glade/p
+            sudo ln -s VAST DASG
+            cd /glade/p/VAST/VAPOR/third-party/apps-2017
+            gdown https://drive.google.com/uc?id=1JHl6kHkBvbd17BUC-9nvWZupjyWfwyw7
+      - run:
+          name: Extract 3rd party libs
+          command: |
+            cd /glade/p/VAST/VAPOR/third-party/apps-2017
+            tar xf Darwin_x86_64_2018-05-21.tar.xz -C /glade/p/VAST/VAPOR/third-party/apps-2017
+            ls /glade/p/VAST/VAPOR/third-party/apps-2017
+            ls -lrth /glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64
+      - run:
+          name: Get GLM
+          command: |
+            cd /
+            sudo git clone https://github.com/g-truc/glm.git
+            sudo mv glm/glm /glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64/include
+      - checkout
+      - run:
+          name: Install cmake
+          command: |
+            brew install cmake
+      - run:
+          name: make VAPOR
+          command: |
+            cp site_files/site.NCAR site.local
+            mkdir build
+            cd build
+            cmake ..
+            make
+      - run:
+          name: Test python
+          command: |
+            build/bin/vaporpychecker
+
+
 
   printTime:
     docker:
@@ -30,4 +134,7 @@ workflows:
   version: 2
   build:
     jobs:
-      - build
+      - build_ubuntu16
+      - build_ubuntu18
+      - build_centos7
+      - build_osx
