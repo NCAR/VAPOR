@@ -21,6 +21,10 @@ void main(void)
 
 	float s = (texel.x - minLUTValue) / (maxLUTValue - minLUTValue);
 	vec4 color = texture(colormap, s);
-
-	fragColor = vec4(color.rgb, color.a * constantOpacity);
+    float alpha = color.a * constantOpacity;
+    
+	fragColor = vec4(color.rgb, alpha);
+    
+    if (alpha < 0.001)
+        discard;
 }
