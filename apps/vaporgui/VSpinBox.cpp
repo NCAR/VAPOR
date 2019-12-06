@@ -8,7 +8,6 @@ VSpinBox::VSpinBox( int min, int max )
     SetValue( min );
     layout()->addWidget(_spinBox);
 
-    //connect( _spinBox, SIGNAL( valueChanged( int ) ),
     connect( _spinBox, SIGNAL( editingFinished() ),
         this, SLOT( emitSpinBoxChanged() ) );
 }
@@ -28,7 +27,6 @@ int VSpinBox::GetValue() const {
     return _spinBox->value();
 }
 
-//void VSpinBox::emitSpinBoxChanged( int value ) {
 void VSpinBox::emitSpinBoxChanged() {
     emit ValueChanged( GetValue() );
 }
