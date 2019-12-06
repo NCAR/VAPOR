@@ -16,6 +16,8 @@ public:
     std::string GetValue() const;
     bool SetValue( const std::string& file );
 
+     void HideLineEdit( bool hide );
+
 protected:
     VFileSelector(
         const std::string& buttonText,

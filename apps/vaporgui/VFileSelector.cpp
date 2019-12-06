@@ -68,6 +68,13 @@ void VFileSelector::SetPathFromLineEdit( const std::string& file ) {
         emit ValueChanged( _filePath );
 }
 
+void VFileSelector::HideLineEdit( bool hide ) {
+    if ( hide )
+        _lineEdit->hide();
+    else
+        _lineEdit->show();
+}
+
 //
 //
 //
