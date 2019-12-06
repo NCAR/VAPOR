@@ -198,9 +198,13 @@ private:
 
     int _GetProj4String(NetCDFCollection *ncdfc, float radius, int map_proj, string &projstring);
 
+    bool _isIdealized(NetCDFCollection *ncdfc) const;
+
     int _InitProjection(NetCDFCollection *ncdfc, float radius);
 
-    DerivedCoordVar_Staggered *_makeDerivedHorizontal(NetCDFCollection *ncdfc, string name, string &timeDimName, vector<string> &spaceDimNames);
+    DerivedCoordVar_CF2D *_makeDerivedHorizontalIdealized(NetCDFCollection *ncdfc, string name, string &timeDimName, vector<string> &spaceDimNames);
+
+    DerivedCoordVar_Staggered *_makeDerivedHorizontalStaggered(NetCDFCollection *ncdfc, string name, string &timeDimName, vector<string> &spaceDimNames);
 
     int _InitHorizontalCoordinatesHelper(NetCDFCollection *ncdfc, string name, int axis);
 

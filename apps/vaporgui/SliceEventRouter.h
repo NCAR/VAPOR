@@ -34,13 +34,14 @@ class SliceEventRouter : public QTabWidget, public RenderEventRouter {
 
 public:
     SliceEventRouter(QWidget *parent, VAPoR::ControlExec *ce);
-    ~SliceEventRouter();
 
     void GetWebHelp(vector<pair<string, string>> &help) const;
 
     //
     static string GetClassType() { return (VAPoR::SliceRenderer::GetClassType()); }
     string        GetType() const { return GetClassType(); }
+
+    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
 
 protected:
     void           _updateTab();

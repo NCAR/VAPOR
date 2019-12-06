@@ -28,22 +28,22 @@ VolumeIsoAppearanceSubtab::VolumeIsoAppearanceSubtab(QWidget *parent)
     _samplingRateComboBox->blockSignals(false);
 
     // Set up lighting parameter widgets
-    _ambientWidget->SetLabel(QString::fromAscii("Ambient"));
+    _ambientWidget->SetLabel(QString("Ambient"));
     _ambientWidget->SetDecimals(2);
     _ambientWidget->SetExtents(0.0, 1.0);
     _ambientWidget->SetIntType(false);
 
-    _diffuseWidget->SetLabel(QString::fromAscii("Diffuse"));
+    _diffuseWidget->SetLabel(QString("Diffuse"));
     _diffuseWidget->SetDecimals(2);
     _diffuseWidget->SetExtents(0.0, 1.0);
     _diffuseWidget->SetIntType(false);
 
-    _specularWidget->SetLabel(QString::fromAscii("Specular"));
+    _specularWidget->SetLabel(QString("Specular"));
     _specularWidget->SetDecimals(2);
     _specularWidget->SetExtents(0.0, 1.0);
     _specularWidget->SetIntType(false);
 
-    _shininessWidget->SetLabel(QString::fromAscii("Shininess"));
+    _shininessWidget->SetLabel(QString("Shininess"));
     _shininessWidget->SetExtents(1.0, 100.0);
     _shininessWidget->SetIntType(true);
 }

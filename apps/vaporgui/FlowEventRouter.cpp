@@ -62,8 +62,6 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : QTabWidget(
     addTab(qsAnnotation, "Annotations");
 }
 
-FlowEventRouter::~FlowEventRouter() {}
-
 void FlowEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 {
     help.clear();

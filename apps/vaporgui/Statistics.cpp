@@ -136,7 +136,7 @@ bool Statistics::Update()
     NewVarCombo->blockSignals(true);
     NewVarCombo->clear();
     NewVarCombo->blockSignals(false);
-    NewVarCombo->addItem(QString::fromAscii("Add a Variable"));
+    NewVarCombo->addItem(QString("Add a Variable"));
     for (std::vector<std::string>::iterator it = availVars.begin(); it != availVars.end(); ++it) { NewVarCombo->addItem(QString::fromStdString(*it)); }
     NewVarCombo->setCurrentIndex(0);
 
@@ -145,7 +145,7 @@ bool Statistics::Update()
     std::sort(enabledVars.begin(), enabledVars.end());
     RemoveVarCombo->blockSignals(true);
     RemoveVarCombo->clear();
-    RemoveVarCombo->addItem(QString::fromAscii("Remove a Variable"));
+    RemoveVarCombo->addItem(QString("Remove a Variable"));
     for (int i = 0; i < enabledVars.size(); i++) { RemoveVarCombo->addItem(QString::fromStdString(enabledVars[i])); }
     RemoveVarCombo->setCurrentIndex(0);
     RemoveVarCombo->blockSignals(false);
@@ -158,28 +158,28 @@ bool Statistics::Update()
     RemoveCalcCombo->blockSignals(true);
     NewCalcCombo->clear();
     RemoveCalcCombo->clear();
-    NewCalcCombo->addItem(QString::fromAscii("Add a Calculation"));
-    RemoveCalcCombo->addItem(QString::fromAscii("Remove a Calculation"));
+    NewCalcCombo->addItem(QString("Add a Calculation"));
+    RemoveCalcCombo->addItem(QString("Remove a Calculation"));
     if (statsParams->GetMinEnabled())
-        RemoveCalcCombo->addItem(QString::fromAscii("Min"));
+        RemoveCalcCombo->addItem(QString("Min"));
     else
-        NewCalcCombo->addItem(QString::fromAscii("Min"));
+        NewCalcCombo->addItem(QString("Min"));
     if (statsParams->GetMaxEnabled())
-        RemoveCalcCombo->addItem(QString::fromAscii("Max"));
+        RemoveCalcCombo->addItem(QString("Max"));
     else
-        NewCalcCombo->addItem(QString::fromAscii("Max"));
+        NewCalcCombo->addItem(QString("Max"));
     if (statsParams->GetMeanEnabled())
-        RemoveCalcCombo->addItem(QString::fromAscii("Mean"));
+        RemoveCalcCombo->addItem(QString("Mean"));
     else
-        NewCalcCombo->addItem(QString::fromAscii("Mean"));
+        NewCalcCombo->addItem(QString("Mean"));
     if (statsParams->GetMedianEnabled())
-        RemoveCalcCombo->addItem(QString::fromAscii("Median"));
+        RemoveCalcCombo->addItem(QString("Median"));
     else
-        NewCalcCombo->addItem(QString::fromAscii("Median"));
+        NewCalcCombo->addItem(QString("Median"));
     if (statsParams->GetStdDevEnabled())
-        RemoveCalcCombo->addItem(QString::fromAscii("StdDev"));
+        RemoveCalcCombo->addItem(QString("StdDev"));
     else
-        NewCalcCombo->addItem(QString::fromAscii("StdDev"));
+        NewCalcCombo->addItem(QString("StdDev"));
     NewCalcCombo->setCurrentIndex(0);
     RemoveCalcCombo->setCurrentIndex(0);
     NewCalcCombo->blockSignals(false);
@@ -228,7 +228,7 @@ void Statistics::_updateStatsTable()
     if (statsParams->GetStdDevEnabled()) header << "StdDev";
     VariablesTable->setColumnCount(header.size());
     VariablesTable->setHorizontalHeaderLabels(header);
-    VariablesTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    VariablesTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     // Update Statistics Table: cells
     QBrush                   brush(QColor(255, 0, 0));
@@ -246,7 +246,7 @@ void Statistics::_updateStatsTable()
 
         VariablesTable->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(enabledVars[row])));
         if (count == -1) {
-            VariablesTable->setItem(row, 1, new QTableWidgetItem(QString::fromAscii("??")));
+            VariablesTable->setItem(row, 1, new QTableWidgetItem(QString("??")));
             VariablesTable->item(row, 1)->setForeground(brush);
         } else
             VariablesTable->setItem(row, 1, new QTableWidgetItem(QString::number(count)));
@@ -256,7 +256,7 @@ void Statistics::_updateStatsTable()
             if (!std::isnan(m3[0])) {
                 VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[0], 'g', numberOfDigits)));
             } else {
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString("??")));
                 VariablesTable->item(row, column)->setForeground(brush);
             }
             column++;
@@ -265,7 +265,7 @@ void Statistics::_updateStatsTable()
             if (!std::isnan(m3[1]))
                 VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[1], 'g', numberOfDigits)));
             else {
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString("??")));
                 VariablesTable->item(row, column)->setForeground(brush);
             }
             column++;
@@ -274,7 +274,7 @@ void Statistics::_updateStatsTable()
             if (!std::isnan(m3[2]))
                 VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(m3[2], 'g', numberOfDigits)));
             else {
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString("??")));
                 VariablesTable->item(row, column)->setForeground(brush);
             }
             column++;
@@ -283,7 +283,7 @@ void Statistics::_updateStatsTable()
             if (!std::isnan(median))
                 VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(median, 'g', numberOfDigits)));
             else {
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString("??")));
                 VariablesTable->item(row, column)->setForeground(brush);
             }
             column++;
@@ -292,7 +292,7 @@ void Statistics::_updateStatsTable()
             if (!std::isnan(stddev))
                 VariablesTable->setItem(row, column, new QTableWidgetItem(QString::number(stddev, 'g', numberOfDigits)));
             else {
-                VariablesTable->setItem(row, column, new QTableWidgetItem(QString::fromAscii("??")));
+                VariablesTable->setItem(row, column, new QTableWidgetItem(QString("??")));
                 VariablesTable->item(row, column)->setForeground(brush);
             }
             column++;

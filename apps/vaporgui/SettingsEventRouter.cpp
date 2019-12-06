@@ -191,9 +191,8 @@ bool SettingsEventRouter::_confirmFileExist(QString &qfilename)
 void SettingsEventRouter::_chooseAutoSaveFile()
 {
     SettingsParams *sParams = (SettingsParams *)GetActiveParams();
-    QFileDialog     fileDialog(_autoSaveFileButton, QString::fromAscii("Select auso-save VAPOR session file"), QString::fromStdString(sParams->GetAutoSaveSessionFile()),
-                           QString::fromAscii("Vapor 3 Session Files (*.vs3)"));
-    fileDialog.setDefaultSuffix(QString::fromAscii("vs3"));
+    QFileDialog fileDialog(_autoSaveFileButton, QString("Select auso-save VAPOR session file"), QString::fromStdString(sParams->GetAutoSaveSessionFile()), QString("Vapor 3 Session Files (*.vs3)"));
+    fileDialog.setDefaultSuffix(QString("vs3"));
     fileDialog.setOption(QFileDialog::DontConfirmOverwrite);
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fileDialog.exec() != QDialog::Accepted) return;

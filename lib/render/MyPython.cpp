@@ -16,6 +16,7 @@
 //	Description:
 //
 #include <iostream>
+#include <algorithm>
 #include <cstdlib>
 #include <csignal>
 #include <cstdlib>
@@ -71,7 +72,7 @@ int MyPython::Initialize()
     if (m_isInitialized) return (0);
 
     m_pyHome.clear();
-    char *s = getenv("VAPOR_PYTHONHOME");
+    char *s = getenv("VAPOR3_HOME");
     if (s) m_pyHome = s;
 
     if (m_pyHome.empty()) {
@@ -82,23 +83,16 @@ int MyPython::Initialize()
 
     if (!m_pyHome.empty()) {
 #ifdef WIN32
-        Py_SetPythonHome((char *)m_pyHome.c_str());
+        std::string version = GetPythonVersion();
+        version.erase(std::remove(version.begin(), version.end(), '.'), version.end());
+        std::string pythonPath = m_pyHome + "\\Python" + version + ";";
+        pythonPath = pythonPath + m_pyHome + "\\Python" + version + "\\Lib;";
+        pythonPath = pythonPath + m_pyHome + "\\Python" + version + "\\Lib\\site-packages";
+        _putenv_s("PYTHONPATH", pythonPath.c_str());
+        std::wstring   widestr = std::wstring(m_pyHome.begin(), m_pyHome.end());
+        const wchar_t *widecstr = widestr.c_str();
+        Py_SetPythonHome((wchar_t *)widecstr);
         MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
-#else
-        struct STAT64 statbuf;
-        if (STAT64((m_pyHome + "/lib/python2.7").c_str(), &statbuf) >= 0) {
-            // N.B. the string passed to Py_SetPythonHome() must be
-            // maintained in static storage :-(. However, the python
-            // documentation promisses that it's value will not be changed
-            //
-            // It's also important to use forward slashes even on Windows.
-            // The above comment might no longer be relevant
-            //
-
-            Py_SetPythonHome((char *)m_pyHome.c_str());
-
-            MyBase::SetDiagMsg("Setting PYTHONHOME in the vaporgui app to %s\n", m_pyHome.c_str());
-        }
 #endif
     }
 
@@ -216,11 +210,11 @@ string MyPython::PyErr()
     if (!catcher) { return ("Failed to initialize Python error catcher!!!"); }
 
     PyObject *output = PyObject_GetAttrString(catcher, "value");
-    char *    s = PyString_AsString(output);
+    char *    s = PyUnicode_AsUTF8(output);
 
     // Erase the string
     //
-    PyObject *eStr = PyString_FromString("");
+    PyObject *eStr = PyUnicode_FromString("");
     PyObject_SetAttrString(catcher, "value", eStr);
     Py_DECREF(eStr);
 
@@ -239,11 +233,11 @@ string MyPython::PyOut()
     if (!catcher) { return (""); }
 
     PyObject *output = PyObject_GetAttrString(catcher, "value");
-    char *    s = PyString_AsString(output);
+    char *    s = PyUnicode_AsUTF8(output);
 
     // Erase the string
     //
-    PyObject *eStr = PyString_FromString("");
+    PyObject *eStr = PyUnicode_FromString("");
     PyObject_SetAttrString(catcher, "value", eStr);
     Py_DECREF(eStr);
 

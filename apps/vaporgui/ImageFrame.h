@@ -37,7 +37,7 @@ class QWidget;
 class ImageFrame : public QFrame {
     Q_OBJECT
 public:
-    ImageFrame(QWidget *parent = 0, Qt::WFlags f = 0);
+    ImageFrame(QWidget *parent = 0, Qt::WindowFlags f = 0);
 #ifdef VAPOR3_0_0_ALPHA
     virtual ~ImageFrame();
 

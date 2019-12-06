@@ -418,7 +418,7 @@ int PyEngine::Calculate(const string &script, vector<string> inputVarNames, vect
 void PyEngine::_cleanupDict(PyObject *mainDict, vector<string> keynames)
 {
     for (int i = 0; i < keynames.size(); i++) {
-        PyObject *key = PyString_FromString(keynames[i].c_str());
+        PyObject *key = PyUnicode_FromString(keynames[i].c_str());
         if (!key) continue;
         if (PyDict_Contains(mainDict, key)) { PyObject_DelItem(mainDict, key); }
         Py_DECREF(key);

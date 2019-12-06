@@ -38,7 +38,7 @@ string pyErr()
     }
 
     PyObject *output = PyObject_GetAttrString(catcher, "value");
-    return (PyString_AsString(output));
+    return (PyUnicode_AsUTF8(output));
 }
 
 int main(int argc, char **argv)
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
                                "except: \n"
                                "	print >> sys.stderr, \'Failed to import sys\'\n"
                                "	raise\n"
-                               "print sys.path\n";
+                               "print(sys.path)\n";
 
     rc = PyRun_SimpleString(printSysPath.c_str());
     if (rc < 0) {
@@ -92,7 +92,7 @@ int main(int argc, char **argv)
                                       "except: \n"
                                       "	print >> sys.stderr, \'Failed to import site\'\n"
                                       "	raise\n"
-                                      "print os.path.dirname(site.__file__)\n";
+                                      "print(os.path.dirname(site.__file__))\n";
 
     rc = PyRun_SimpleString(printSiteModulePath.c_str());
     if (rc < 0) {
@@ -107,7 +107,7 @@ int main(int argc, char **argv)
                                             "except: \n"
                                             "	print >> sys.stderr, \'Failed to import matplotlib\'\n"
                                             "	raise\n"
-                                            "print os.path.dirname(matplotlib.__file__)\n";
+                                            "print(os.path.dirname(matplotlib.__file__))\n";
 
     rc = PyRun_SimpleString(printMatplotlibModulePath.c_str());
     if (rc < 0) {

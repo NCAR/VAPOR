@@ -120,7 +120,7 @@ void TFOpacityMap::paintEvent(QPainter &p)
 void TFOpacityMap::mousePressEvent(QMouseEvent *event)
 {
     emit Activated(this);
-    vec2 mouse = qvec2(event->posF());
+    vec2 mouse = qvec2(event->localPos());
     auto it = findSelectedControlPoint(mouse);
     auto lineIt = findSelectedControlLine(mouse);
 

@@ -227,7 +227,7 @@ void SliceRenderer::_resetTextureCoordinates()
 
 std::vector<double> SliceRenderer::_calculateDeltas() const
 {
-    int    sampleRate = _cacheParams.textureSampleRate;
+    int    sampleRate = _textureSideSize;
     double dx = (_cacheParams.domainMax[X] - _cacheParams.domainMin[X]) / (1 + sampleRate);
     double dy = (_cacheParams.domainMax[Y] - _cacheParams.domainMin[Y]) / (1 + sampleRate);
     double dz = (_cacheParams.domainMax[Z] - _cacheParams.domainMin[Z]) / (1 + sampleRate);
@@ -400,8 +400,8 @@ bool SliceRenderer::_isDataCacheDirty() const
     // change along its perimeter, then we will just reconfigure the texture
     // coordinates via _resetBoxCache in our _paintGL routine.
     box->GetExtents(min, max);
-    int constantAxis = _getConstantAxis();
-    if (min[constantAxis] != _cacheParams.boxMin[constantAxis]) return true;
+    if (min != _cacheParams.boxMin) return true;
+    if (max != _cacheParams.boxMax) return true;
 
     return false;
 }

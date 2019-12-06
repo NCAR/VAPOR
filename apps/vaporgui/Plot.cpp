@@ -51,13 +51,13 @@ Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent
     myFidelityWidget->Reinit((VariableFlags)AUXILIARY);
     spaceTimeTab->setCurrentIndex(0);    // default to load space tab
 
-    timeTabSinglePoint->SetMainLabel(QString::fromAscii("Select one data point in space:"));
-    timeTabTimeRange->SetMainLabel(QString::fromAscii("Select the minimum and maximum time steps:"));
+    timeTabSinglePoint->SetMainLabel(QString("Select one data point in space:"));
+    timeTabTimeRange->SetMainLabel(QString("Select the minimum and maximum time steps:"));
     timeTabTimeRange->SetIntType(true);
 
-    spaceTabP1->SetMainLabel(QString::fromAscii("Select spatial location of Point 1"));
-    spaceTabP2->SetMainLabel(QString::fromAscii("Select spatial location of Point 2"));
-    spaceTabTimeSelector->SetLabel(QString::fromAscii("T"));
+    spaceTabP1->SetMainLabel(QString("Select spatial location of Point 1"));
+    spaceTabP2->SetMainLabel(QString("Select spatial location of Point 2"));
+    spaceTabTimeSelector->SetLabel(QString("T"));
     spaceTabTimeSelector->SetIntType(true);
 
     // set widget extents
@@ -84,7 +84,7 @@ Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent
     // Create widgets for the plot window
     _plotDialog = new QDialog(this);
     _plotLabel = new QLabel(this);
-    _plotLabel->setText(QString::fromAscii("  Plot is on disk:  "));
+    _plotLabel->setText(QString("  Plot is on disk:  "));
     _plotPathEdit = new QLineEdit(this);
     _plotPathEdit->setReadOnly(true);
     _plotPathEdit->setTextMargins(6, 0, 6, 0);
@@ -158,7 +158,7 @@ void Plot::Update()
     newVarCombo->blockSignals(true);
     newVarCombo->clear();
     newVarCombo->blockSignals(false);
-    newVarCombo->addItem(QString::fromAscii("Add a Variable"));
+    newVarCombo->addItem(QString("Add a Variable"));
     for (std::vector<std::string>::iterator it = availVars.begin(); it != availVars.end(); ++it) newVarCombo->addItem(QString::fromStdString(*it));
     newVarCombo->setCurrentIndex(0);
 
@@ -167,7 +167,7 @@ void Plot::Update()
     removeVarCombo->blockSignals(true);
     removeVarCombo->clear();
     removeVarCombo->blockSignals(false);
-    removeVarCombo->addItem(QString::fromAscii("Remove a Variable"));
+    removeVarCombo->addItem(QString("Remove a Variable"));
     for (int i = 0; i < enabledVars.size(); i++) removeVarCombo->addItem(QString::fromStdString(enabledVars[i]));
     removeVarCombo->setCurrentIndex(0);
 
@@ -177,7 +177,7 @@ void Plot::Update()
     header << "Enabled Variables";
     variablesTable->setColumnCount(header.size());
     variablesTable->setHorizontalHeaderLabels(header);
-    variablesTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    variablesTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     variablesTable->horizontalHeader()->setFixedHeight(30);
     variablesTable->verticalHeader()->setFixedWidth(30);
 
@@ -537,7 +537,7 @@ void Plot::_spaceTabPlotClicked()
     // Call python routines.
     QTemporaryFile file;
     if (file.open()) {
-        QString filename = file.fileName() + QString::fromAscii(".png");
+        QString filename = file.fileName() + QString(".png");
 
         _invokePython(filename, enabledVars, sequences, xValues, xLabel, yLabel);
 
@@ -595,7 +595,7 @@ void Plot::_timeTabPlotClicked()
     // Call python routines.
     QTemporaryFile file;
     if (file.open()) {
-        QString filename = file.fileName() + QString::fromAscii(".png");
+        QString filename = file.fileName() + QString(".png");
 
         const std::string xLabel = "Time Steps";
         _invokePython(filename, enabledVars, sequences, xValues, xLabel, yLabel);
@@ -624,7 +624,7 @@ void Plot::_invokePython(const QString &outFile, const std::vector<std::string> 
     Wasp::MyPython::Instance()->Initialize();
     VAssert(Py_IsInitialized());
 
-    pName = PyString_FromString("plot");
+    pName = PyUnicode_FromString("plot");
     pModule = PyImport_Import(pName);
 
     if (pModule == NULL) {
@@ -637,14 +637,14 @@ void Plot::_invokePython(const QString &outFile, const std::vector<std::string> 
         pArgs = PyTuple_New(6);
 
         // Set the 1st argument: output file name
-        pValue = PyString_FromString(outFile.toAscii());
+        pValue = PyUnicode_FromString(outFile.toLocal8Bit());
         PyTuple_SetItem(pArgs, 0, pValue);    // pValue is stolen!
 
         // Set the 2nd argument: variable names
         PyObject *pListOfStrings = PyList_New(enabledVars.size());
         VAssert(pListOfStrings);
         for (int i = 0; i < enabledVars.size(); i++) {
-            pValue = PyString_FromString(enabledVars[i].c_str());
+            pValue = PyUnicode_FromString(enabledVars[i].c_str());
             int rt = PyList_SetItem(pListOfStrings, i, pValue);    // pValue is stolen!
             VAssert(rt == 0);
         }
@@ -675,11 +675,11 @@ void Plot::_invokePython(const QString &outFile, const std::vector<std::string> 
         PyTuple_SetItem(pArgs, 3, pListOfFloats);
 
         // Set the 5th argument: X axis label
-        pValue = PyString_FromString(xLabel.c_str());
+        pValue = PyUnicode_FromString(xLabel.c_str());
         PyTuple_SetItem(pArgs, 4, pValue);
 
         // Set the 6th argument: Y axis label
-        pValue = PyString_FromString(yLabel.c_str());
+        pValue = PyUnicode_FromString(yLabel.c_str());
         PyTuple_SetItem(pArgs, 5, pValue);
 
         pValue = PyObject_CallObject(pFunc, pArgs);

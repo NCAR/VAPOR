@@ -87,7 +87,7 @@ void FlowVariablesSubtab::_velocityMultiplierChanged()
 //
 FlowAppearanceSubtab::FlowAppearanceSubtab(QWidget *parent) : QVaporSubtab(parent)
 {
-    _TFEditor = new TFEditor;
+    _TFEditor = new TFEditor(true);
 
     _layout->addWidget(_TFEditor, 0, 0);
 
@@ -136,12 +136,12 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget *parent) : QVaporSubtab(parent)
 
     /* The following two widgets deal with flow line output and seed point input */
     _fileWriter = new VFileWriter(this, "Output Flow Lines");
-    _fileWriter->SetFileFilter(QString::fromAscii("*.txt"));
+    _fileWriter->SetFileFilter(QString("*.txt"));
     _layout->addWidget(_fileWriter);
     connect(_fileWriter, SIGNAL(_pathChanged()), this, SLOT(_fileWriterChanged()));
 
     _fileReader = new VFileReader(this, "Input Seed File");
-    _fileReader->SetFileFilter(QString::fromAscii("*.txt"));
+    _fileReader->SetFileFilter(QString("*.txt"));
     _layout->addWidget(_fileReader);
     connect(_fileReader, SIGNAL(_pathChanged()), this, SLOT(_fileReaderChanged()));
 

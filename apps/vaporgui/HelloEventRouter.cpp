@@ -51,12 +51,6 @@ HelloEventRouter::HelloEventRouter(QWidget *parent, ControlExec *ce) : QTabWidge
     addTab(qsgeom, "Geometry");
 }
 
-// Destructor does nothing
-HelloEventRouter::~HelloEventRouter()
-{
-    delete _variables;
-    delete _appearance;
-}
 /**********************************************************
  * Whenever a new Hellotab is created all the connections between widgets and slots are made
  ************************************************************/

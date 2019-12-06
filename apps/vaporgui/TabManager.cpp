@@ -579,6 +579,8 @@ void TabManager::_initRenderHolder()
     vector<string>    descriptions;
     vector<string>    iconPaths;
     vector<string>    smallIconPaths;
+    vector<bool>      dim2dSupport;
+    vector<bool>      dim3dSupport;
 
     for (int i = 0; i < _subTabWidgets[_renderersTabName].size(); i++) {
         string tag = _subTabNames[_renderersTabName][i];
@@ -591,9 +593,12 @@ void TabManager::_initRenderHolder()
         descriptions.push_back(re->GetDescription());
         iconPaths.push_back(re->GetIconImagePath());
         smallIconPaths.push_back(re->GetSmallIconImagePath());
+
+        dim2dSupport.push_back(re->Supports2DVariables());
+        dim3dSupport.push_back(re->Supports3DVariables());
     }
 
-    _renderHolder = new RenderHolder(this, _controlExec, widgets, widgetNames, descriptions, iconPaths, smallIconPaths);
+    _renderHolder = new RenderHolder(this, _controlExec, widgets, widgetNames, descriptions, iconPaths, smallIconPaths, dim2dSupport, dim3dSupport);
 
     connect(_renderHolder, SIGNAL(activeChanged(string, string, string)), this, SLOT(_setActive(string, string, string)));
     connect(_renderHolder, SIGNAL(newRendererSignal(string, string, string)), this, SLOT(_newRenderer(string, string, string)));

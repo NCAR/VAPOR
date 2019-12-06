@@ -20,12 +20,13 @@ class ImageEventRouter : public QTabWidget, public RenderEventRouter {
 
 public:
     ImageEventRouter(QWidget *parent, VAPoR::ControlExec *ce);
-    ~ImageEventRouter();
 
     void GetWebHelp(vector<pair<string, string>> &help) const;
 
     static std::string GetClassType() { return (VAPoR::ImageRenderer::GetClassType()); }
     std::string        GetType() const { return GetClassType(); }
+
+    virtual DimFlags GetDimFlags() const { return (DimFlags)(DimFlags::TWOD | DimFlags::THREED); }
 
 protected:
     void           _updateTab();

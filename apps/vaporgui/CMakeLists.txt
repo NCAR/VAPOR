@@ -31,7 +31,7 @@ set (SRCS
 	SettingsParams.cpp
 	main.cpp
 	MainForm.cpp
-	VizWin.cpp
+    VizWin.cpp
 	VizWinMgr.cpp
 	TabManager.cpp
 	TrackBall.cpp
@@ -120,14 +120,14 @@ set (SRCS
 	Statistics.h
 	Plot.h
     PythonVariables.h
-	BarbSubtabs.h
-	ColorbarWidget.h
-	OrientationAngles.h
-	TransformTable.h
+    BarbSubtabs.h
+    ColorbarWidget.h
+    OrientationAngles.h
+    TransformTable.h
 	ImageSubtabs.h
 	ContourSubtabs.h
     SliceSubtabs.h
-	VaporTable.h
+    VaporTable.h 
 	FidelityWidget.h
 	QSliderEdit.h
 	QRange.h
@@ -136,6 +136,9 @@ set (SRCS
 	VolumeIsoEventRouter.h
 	VolumeSubtabs.h
 	VolumeIsoSubtabs.h
+	HelloEventRouter.h
+    SliceEventRouter.h
+	TwoDDataEventRouter.h
 
 	MainForm.h
 	VizWinMgr.h
@@ -147,8 +150,8 @@ set (SRCS
 	VizWin.h
 	Core3_2_context.h
 	TrackBall.h
-	Manip.h
-	NavigationEventRouter.h
+    Manip.h 
+    NavigationEventRouter.h
 	AnimationEventRouter.h
 	AnimationParams.h
 	AnnotationEventRouter.h
@@ -250,11 +253,16 @@ set (UIS
 
 source_group (UIs FILES ${UIS})
 
-find_package(Qt4 REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS Core OpenGL Widgets Gui DBus )
+
 set (CMAKE_AUTOUIC ON) # This needs to appear before adding sources to work properly
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
+
+set (ASSIMP_LIB assimp)
+set (PYTHON_LIB python${PYTHONVERSION}m)
+set (TIFF_LIB tiff)
 
 if (APPLE)
 	set (SRCS ${SRCS} core_profile_attributes.mm)
@@ -266,6 +274,10 @@ if (APPLE)
 	add_executable (vapor MACOSX_BUNDLE ${MACOSX_BUNDLE_ICON_FILE_PATH} ${SRCS} ${UIS})
 	set (INSTALL_BIN_DIR ".")
 elseif (WIN32)
+    set (ASSIMP_LIB assimp-vc140-mt)
+    set (PYTHON_LIB python${PYTHONVERSION})
+    set (TIFF_LIB libtiff)
+
 	set (WINDOWS_ICON_PATH "${CMAKE_SOURCE_DIR}/share/images/vapor-win-icon.ico")
 	configure_file (vapor.rc.in ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
 	add_executable (vapor WIN32 ${SRCS} ${UIS} ${CMAKE_CURRENT_BINARY_DIR}/vaporgui.rc)
@@ -273,8 +285,11 @@ else ()
 	add_executable (vapor ${SRCS} ${UIS})
 endif()
 
-# target_link_libraries (vapor common vdc wasp render params m jpeg dl util GLEW tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL)
-target_link_libraries (vapor common vdc wasp render params jpeg ${GLEW} tiff geotiff assimp Qt4::QtCore Qt4::QtGui Qt4::QtOpenGL python${PYTHONVERSION})
+target_link_libraries (
+        vapor common vdc wasp render params jpeg ${GLEW} 
+        ${TIFF_LIB} geotiff ${ASSIMP_LIB} Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::DBus 
+        ${PYTHON_LIB}
+)
 
 if (APPLE)
 	find_library (CORESERVICES CoreServices)

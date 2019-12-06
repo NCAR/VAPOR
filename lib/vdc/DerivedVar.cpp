@@ -938,6 +938,78 @@ bool DerivedCoordVar_CF1D::VariableExists(size_t ts, int reflevel, int lod) cons
 
 //////////////////////////////////////////////////////////////////////////////
 //
+//	DerivedCoordVar_CF2D
+//
+//////////////////////////////////////////////////////////////////////////////
+
+DerivedCoordVar_CF2D::DerivedCoordVar_CF2D(string derivedVarName, vector<string> dimNames, vector<size_t> dimLens, int axis, string units, const vector<float> &data) : DerivedCoordVar(derivedVarName)
+{
+    VAssert(dimNames.size() == 2);
+    VAssert(dimLens.size() == 2);
+    VAssert(dimLens[0] * dimLens[1] <= data.size());
+
+    _dimNames = dimNames;
+    _dimLens = dimLens;
+    _data = data;
+
+    _coordVarInfo = DC::CoordVar(_derivedVarName, units, DC::XType::FLOAT, vector<bool>(2, false), axis, false, dimNames, "");
+}
+
+int DerivedCoordVar_CF2D::Initialize() { return (0); }
+
+bool DerivedCoordVar_CF2D::GetBaseVarInfo(DC::BaseVar &var) const
+{
+    var = _coordVarInfo;
+    return (true);
+}
+
+bool DerivedCoordVar_CF2D::GetCoordVarInfo(DC::CoordVar &cvar) const
+{
+    cvar = _coordVarInfo;
+    return (true);
+}
+
+int DerivedCoordVar_CF2D::GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
+{
+    dims_at_level.clear();
+    bs_at_level.clear();
+
+    dims_at_level = _dimLens;
+
+    // No blocking
+    //
+    bs_at_level = vector<size_t>(dims_at_level.size(), 1);
+
+    return (0);
+}
+
+int DerivedCoordVar_CF2D::OpenVariableRead(size_t ts, int level, int lod) { return (0); }
+
+int DerivedCoordVar_CF2D::CloseVariable(int fd) { return (0); }
+
+int DerivedCoordVar_CF2D::ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
+{
+    VAssert(min.size() == 2);
+    VAssert(max.size() == 2);
+
+    float *regptr = region;
+    for (size_t j = min[1]; j <= max[1]; j++) {
+        for (size_t i = min[0]; i <= max[0]; i++) { *regptr++ = (float)_data[j * _dimLens[0] + i]; }
+    }
+
+    return (0);
+}
+
+bool DerivedCoordVar_CF2D::VariableExists(size_t ts, int reflevel, int lod) const
+{
+    if (reflevel != 0) return (false);
+    if (lod != 0) return (false);
+
+    return (true);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//
 //	DerivedCoordVar_WRFTime
 //
 //////////////////////////////////////////////////////////////////////////////

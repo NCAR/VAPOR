@@ -45,13 +45,14 @@ class FlowVariablesSubtab : public QVaporSubtab {
     Q_OBJECT
 
 public:
+    VariablesWidget *_variablesWidget;
+
     FlowVariablesSubtab(QWidget *parent);
 
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
 private:
     VAPoR::FlowParams *_params;
-    VariablesWidget *  _variablesWidget;
 
     VLineEdit *_velocityMltp;    // Note on this widget: its name and associated functions
                                  // use the name "velocity multiplier," while it displays

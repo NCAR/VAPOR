@@ -73,14 +73,6 @@ TwoDDataEventRouter::TwoDDataEventRouter(QWidget *parent, ControlExec *ce) : QTa
 #endif
 }
 
-TwoDDataEventRouter::~TwoDDataEventRouter()
-{
-    if (_variables) delete _variables;
-    if (_geometry) delete _geometry;
-    if (_appearance) delete _appearance;
-    if (_annotation) delete _annotation;
-}
-
 void TwoDDataEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 {
     help.clear();
