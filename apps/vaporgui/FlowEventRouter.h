@@ -33,7 +33,6 @@ class FlowEventRouter : public QTabWidget, public RenderEventRouter {
   public:
     FlowEventRouter(
         QWidget *parent, VAPoR::ControlExec *ce);
-    ~FlowEventRouter();
 
     void GetWebHelp(
         vector<pair<string, string>> &help) const;
@@ -43,6 +42,8 @@ class FlowEventRouter : public QTabWidget, public RenderEventRouter {
         return (VAPoR::FlowRenderer::GetClassType());
     }
     string GetType() const { return GetClassType(); }
+
+    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
 
   protected:
     void _updateTab();

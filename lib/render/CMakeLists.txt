@@ -111,7 +111,13 @@ set (HEADERS
 
 add_library (render SHARED ${SRC} ${HEADERS})
 
-target_link_libraries (render PUBLIC common vdc params flow ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} python${PYTHONVERSION} ${GLEW} ${OPENGL_LIBRARIES} ${ASSIMP})
+if (WIN32)
+    set (PYTHON_LIB_DIR python${PYTHONVERSION})
+else ()
+    set (PYTHON_LIB_DIR python${PYTHONVERSION}m)
+endif()
+
+target_link_libraries (render PUBLIC common vdc params flow ${FTGL} ${FREETYPE} ${GEOTIFF} ${JPEG} ${TIFF} ${PYTHON_LIB_DIR} ${GLEW} ${OPENGL_LIBRARIES} ${ASSIMP})
 
 if (UNIX AND NOT APPLE)
 	target_link_libraries (render PUBLIC GLU)

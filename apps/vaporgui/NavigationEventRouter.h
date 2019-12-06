@@ -59,6 +59,9 @@ class NavigationEventRouter : public QWidget, public Ui_NavigationTab, public Ev
     }
     string GetType() const { return GetClassType(); }
 
+    virtual bool Supports2DVariables() const { return true; }
+    virtual bool Supports3DVariables() const { return false; }
+
     virtual void updateTab();
 
     void LoadDataNotify(string dataSetName);

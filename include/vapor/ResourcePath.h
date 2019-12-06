@@ -11,6 +11,10 @@ COMMON_API std::string GetSharePath(const std::string &name);
 //! e.g. /home/lib/python2.7
 COMMON_API std::string GetPythonPath();
 
+//! Returns python version
+//! e.g. 3.6
+COMMON_API std::string GetPythonVersion();
+
 //! Returns python home
 //! e.g. if python if installed in /home/lib/python2.7
 //! this will return /home on Linux/Mac but it will return

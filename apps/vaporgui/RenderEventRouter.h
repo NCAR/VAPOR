@@ -22,6 +22,7 @@
 #define RENDEREREVENTROUTER_H
 
 #include "EventRouter.h"
+#include "Flags.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -148,16 +149,6 @@ class RenderEventRouter : public EventRouter {
     //
     virtual void sessionLoadTF(string name) {}
 
-    //! Method to indicate that a transfer function has changed
-    //! so the tab display must be refreshed.  Used in all tabs
-    //! with RenderParams and that have a transfer function.
-    //! If ParamsBase * argument is null, uses default params.
-    //! Must be reimplemented if there is more than one MappingFrame in the tab.
-    //!
-    //! \param[in] RenderParams* is the Params that owns the Transfer Function
-    //
-    virtual void setEditorDirty();
-
 #ifdef VAPOR3_0_0_ALPHA
     //! Method used to indicate that the mapping bounds have changed,
     //! in the transfer function editor, requiring update of the display.
@@ -204,15 +195,20 @@ class RenderEventRouter : public EventRouter {
 
     //! Return a brief (3 or 4 sentence description of the renderer
     //!
-    virtual string GetDescription() const {
+    string GetDescription() const {
         return (_getDescription());
     }
 
     //! Return the path name of a raster file containing an icon for
     //! the renderer
     //!
-    virtual string GetSmallIconImagePath() const;
-    virtual string GetIconImagePath() const;
+    string GetSmallIconImagePath() const;
+    string GetIconImagePath() const;
+
+    bool Supports2DVariables() const { return GetDimFlags() & DimFlags::TWOD; }
+    bool Supports3DVariables() const { return GetDimFlags() & DimFlags::THREED; }
+
+    virtual DimFlags GetDimFlags() const = 0;
 
   protected:
     RenderEventRouter() {}
