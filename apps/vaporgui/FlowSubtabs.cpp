@@ -24,7 +24,7 @@
 #define MIN_AXIS_SEEDS      1
 #define MAX_AXIS_SEEDS      1000
 #define MIN_RANDOM_SEEDS    1
-#define MAX_RANDOM_SEEDS    1000000
+#define MAX_RANDOM_SEEDS    1000
 
 #define MAX_PATHLINE_LENGTH 10000
 
