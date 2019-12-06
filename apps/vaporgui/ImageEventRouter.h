@@ -23,7 +23,6 @@ Q_OBJECT
 
 public: 
   ImageEventRouter( QWidget* parent, VAPoR::ControlExec* ce);
-  ~ImageEventRouter();
 
   void GetWebHelp ( vector <pair <string, string> > &help) const;
 
@@ -36,6 +35,7 @@ public:
     return GetClassType();
   }
 
+    virtual DimFlags GetDimFlags() const { return (DimFlags)(DimFlags::TWOD | DimFlags::THREED); }
 
 protected:
  void _updateTab();

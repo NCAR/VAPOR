@@ -65,6 +65,8 @@ public:
 	VAPoR::ParamsMgr *paramsMgr,
 	VAPoR::RenderParams *rParams
  );
+    
+    DimFlags GetDimFlags() const;
  
 protected slots:
  //! Respond to selecting the single (primary) variable of field 
