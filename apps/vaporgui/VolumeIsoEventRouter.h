@@ -38,7 +38,6 @@ public:
  VolumeIsoEventRouter(
 	QWidget *parent, VAPoR::ControlExec *ce
  );
- ~VolumeIsoEventRouter();
 
  void GetWebHelp(
 	vector <pair <string, string> > &help
@@ -50,6 +49,7 @@ public:
  }
  string GetType() const {return GetClassType(); }
 
+    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
 
 protected:
  void _updateTab();

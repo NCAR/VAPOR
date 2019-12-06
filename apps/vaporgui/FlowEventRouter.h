@@ -36,7 +36,6 @@ public:
  FlowEventRouter(
 	QWidget *parent, VAPoR::ControlExec *ce
  );
- ~FlowEventRouter();
 
  void GetWebHelp(
 	vector <pair <string, string> > &help
@@ -47,6 +46,8 @@ public:
 	 return(VAPoR::FlowRenderer::GetClassType());
  }
  string GetType() const {return GetClassType(); }
+    
+    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
 
 
 protected:
