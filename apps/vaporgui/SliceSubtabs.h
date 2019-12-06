@@ -35,18 +35,6 @@ private slots:
     void _setDefaultSampleRate();
 
 private:
-    VComboBox* _vcb;
-    VSpinBox* _vsb;
-    VCheckBox* _vchb;
-    VLineEdit* _vle;
-    VSlider* _vs;
-    VSliderEdit* _vse;
-    VSliderEdit* _vsei;
-    VPushButton* _pb;
-    VFileReader* _fr;
-    VFileWriter* _fw;
-    VDirSelector* _ds;
-
     VAPoR::SliceParams* _params;
 };
 
