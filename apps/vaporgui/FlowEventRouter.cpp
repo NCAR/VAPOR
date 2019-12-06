@@ -135,14 +135,12 @@ void FlowEventRouter::_updateTab(){
     GUIStateParams *gp = (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
     if (gp->IsFlowSeedTabActive()) {
         if (currentWidget() != _seedingTab) {
-            cout << "A" << endl;
             blockSignals(true);
             setCurrentWidget(_seedingTab);
             blockSignals(false);
         }
     } else {
         if (currentWidget() == _seedingTab) {
-            cout << "B" << endl;
             blockSignals(true);
             setCurrentIndex(1);
             blockSignals(false);
