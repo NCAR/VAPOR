@@ -30,66 +30,6 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
 	QComboBox* refinementCombo = _variablesWidget->_fidelityWidget->refinementCombo;
 	connect(refinementCombo, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(_setDefaultSampleRate()));
-
-    std::vector<std::string> values = {"foo", "bar", "baz"};
-    _vcb = new VComboBox(values);
-    layout()->addWidget( new VLineItem("Test", _vcb ));
-    connect( _vcb, SIGNAL( ValueChanged( std::string )),
-        this, SLOT( _vcbChanged( std::string )));
-
-    _vsb = new VSpinBox( 0, 5 );
-    layout()->addWidget( new VLineItem("SpinBox", _vsb ) );
-    connect( _vsb, SIGNAL( ValueChanged( int )),
-        this, SLOT( _vsbChanged( int )));
-
-    _vchb = new VCheckBox( false );
-    layout()->addWidget( new VLineItem("CheckBox", _vchb ) );
-    connect( _vchb, SIGNAL( ValueChanged( bool )),
-        this, SLOT( _vcbChanged( bool )));
-   
-    _vle = new VLineEdit( "lineEidt" ); 
-    layout()->addWidget( new VLineItem("LineEdit", _vle ) );
-    connect( _vle, SIGNAL( ValueChanged( std::string )),
-        this, SLOT( _vleChanged( std::string )));
-
-    _vs = new VSlider( -10.0, 15.0 );
-    layout()->addWidget( new VLineItem("Slider", _vs ) );
-    connect( _vs, SIGNAL( ValueChangedIntermediate( double ) ),
-        this, SLOT( _vsChangedIntermediate( double ) ) );
-    connect( _vs, SIGNAL( ValueChanged( double ) ),
-        this, SLOT( _vsChanged( double ) ) );
-
-    _vse = new VSliderEdit( -10.0, 1500.0, 5.0 );
-    layout()->addWidget( new VLineItem("SliderEdit", _vse ) );;
-    connect( _vse, SIGNAL( ValueChanged( double ) ),
-        this, SLOT( _vseChanged( double ) ) );
-    connect( _vse, SIGNAL( ValueChangedIntermediate( double ) ),
-        this, SLOT( _vseChangedIntermediate( double ) ) );
-    _vsei = new VSliderEdit( -10.0, 1500.0, 5.0 );
-    _vsei->SetIntType(true);
-    layout()->addWidget( new VLineItem("IntSliderEdit", _vsei ) );;
-    connect( _vsei, SIGNAL( ValueChanged( double ) ),
-        this, SLOT( _vseChanged( double ) ) );
-    connect( _vse, SIGNAL( ValueChangedIntermediate( double ) ),
-        this, SLOT( _vseChangedIntermediate( double ) ) );
-
-    _pb = new VPushButton("myButton");
-    layout()->addWidget( new VLineItem(" buuuutton", _pb));
-    connect( _pb, SIGNAL( ButtonClicked() ),
-        this, SLOT( _bChanged() ) );
-
-    _fr = new VFileReader("fr");
-    layout()->addWidget( new VLineItem("frline", _fr) );
-    connect( _fr, SIGNAL( ValueChanged( const std::string& ) ),
-        this, SLOT( _frChanged() ) );
-    _fw = new VFileWriter("fw");
-    layout()->addWidget( new VLineItem("fwline", _fw) );
-    connect( _fw, SIGNAL( ValueChanged( const std::string& ) ),
-        this, SLOT( _fwChanged() ) );
-    _ds = new VDirSelector("ds");
-    layout()->addWidget( new VLineItem("dsline", _ds) );
-    connect( _ds, SIGNAL( ValueChanged( const std::string& ) ),
-        this, SLOT( _dsChanged() ) );
 }
 
 void SliceVariablesSubtab::Update(

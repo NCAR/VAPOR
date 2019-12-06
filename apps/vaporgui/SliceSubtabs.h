@@ -7,15 +7,6 @@
 #include "ui_SliceAnnotationGUI.h"
 #include "Flags.h"
 
-#include "VComboBox.h"
-#include "VSpinBox.h"
-#include "VLineEdit.h"
-#include "VCheckBox.h"
-#include "VSlider.h"
-#include "VSliderEdit.h"
-#include "VPushButton.h"
-#include "VFileSelector.h"
-
 #include <vapor/SliceParams.h>
 
 namespace VAPoR {
@@ -42,31 +33,6 @@ public:
 
 private slots:
     void _setDefaultSampleRate();
-    /*void _vcbChanged( std::string value ) { cout << "vcb changed to " << value << endl; }
-    void _vsbChanged( int value ) { cout << "vsb changed to " << value << endl; }
-    void _vcbChanged( bool value ) { _vse->SetIntType( value ); _vs->SetIntType( value ); cout << "vcb changed to " << value << endl; }
-    void _vleChanged( std::string value ) { cout << "vle changed to " << value << endl; }
-    void _vsChangedIntermediate( double value ) { cout << "vle intermediately changed to " << value << endl; }
-    void _vsChanged( double value ) { cout << "vs changed to " << value << endl; }
-    void _vseChanged( double value ) { cout << "vse changed to " << value << endl; }
-    void _vseChangedIntermediate( double value ) { cout << "vse interm. changed to " << value << endl; }
-    void _bChanged() { cout << "button pushed" << endl; }
-    void _frChanged() { cout << "frChanged " << _fr->GetValue() << endl; } 
-    void _fwChanged() { cout << "fwChanged " << _fw->GetValue() << endl; }
-    void _dsChanged() { cout << "dsChanged " << _fw->GetValue() << endl; }*/
-    
-    void _vcbChanged( std::string value ) {};
-    void _vsbChanged( int value ) {};
-    void _vcbChanged( bool value ) {};
-    void _vleChanged( std::string value ) {};
-    void _vsChangedIntermediate( double value ) { };
-    void _vsChanged( double value ) { };
-    void _vseChanged( double value ) { };
-    void _vseChangedIntermediate( double value ) { };
-    void _bChanged() { };
-    void _frChanged() { };
-    void _fwChanged() { };
-    void _dsChanged() { };
 
 private:
     VComboBox* _vcb;
