@@ -299,6 +299,12 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
     bool _terrainFollowing;
     std::shared_ptr<const QuadTreeRectangle<float, size_t>> _qtr;
 
+    mutable struct {
+        size_t k = 0;
+        float z0 = 0.0;
+        float z1 = 0.0;
+    } _insideGridCache;
+
     void _curvilinearGrid(
         const RegularGrid &xrg,
         const RegularGrid &yrg,

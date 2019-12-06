@@ -36,7 +36,6 @@ class VolumeIsoEventRouter : public QTabWidget, public RenderEventRouter {
   public:
     VolumeIsoEventRouter(
         QWidget *parent, VAPoR::ControlExec *ce);
-    ~VolumeIsoEventRouter();
 
     void GetWebHelp(
         vector<pair<string, string>> &help) const;
@@ -46,6 +45,8 @@ class VolumeIsoEventRouter : public QTabWidget, public RenderEventRouter {
         return (VAPoR::VolumeIsoRenderer::GetClassType());
     }
     string GetType() const { return GetClassType(); }
+
+    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
 
   protected:
     void _updateTab();

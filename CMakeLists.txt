@@ -43,7 +43,7 @@ set (VERSION_STRING_FULL ${VERSION_STRING}.${VERSION_COMMIT})
 if (APPLE)
 	add_definitions (-DDarwin)
 elseif (WIN32)
-	add_definitions (-DWIN32)
+	add_definitions (-DWIN32 -DNOMINMAX)
 endif()
 
 # compiler warning flags
@@ -94,29 +94,34 @@ include_directories ("${PROJECT_SOURCE_DIR}/include")
 include_directories (${THIRD_PARTY_INC_DIR})
 include_directories (${THIRD_PARTY_INC_DIR}/freetype2)
 link_directories (${THIRD_PARTY_LIB_DIR})
+link_directories (${PYTHONPATH})
 list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
+list (APPEND CMAKE_PREFIX_PATH ${QTDIR}/lib/cmake)
 list (APPEND CMAKE_PROGRAM_PATH ${QTDIR}/bin)
-include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION})
+
 if (WIN32)
-	include_directories (${PYTHONPATH}/Lib/site-packages/numpy/core/include)
+	include_directories (${THIRD_PARTY_DIR}/Python${PYTHONVERSION}/include)
+	include_directories (${NUMPY_INCLUDE_DIR})
+	get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 else ()
-	include_directories (${PYTHONPATH}/site-packages/numpy/core/include)
+	include_directories (${THIRD_PARTY_INC_DIR}/python${PYTHONVERSION}m)
+
+    # I'm not sure why we only have include files for python3.6, and not python3.6m.
+    # 
+	include_directories (${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}/site-packages/numpy/core/include)
 endif ()
 if (BUILD_VDC)
 	link_directories (${PYTHONPATH}/lib-dynload)
 endif ()
 
+find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 find_library(NETCDF netcdf)
 find_library(UDUNITS2 udunits2)
-find_library(PROJ proj)
-find_library(FTGL ftgl)
 find_library(FREETYPE freetype)
 find_library(GEOTIFF geotiff)
 find_library(JPEG jpeg)
-find_library(TIFF tiff)
-find_library(ASSIMP assimp)
 
-if (BUILD_VDC)
+if (BUILD_GUI)
 	find_package (OpenGL REQUIRED)
 	include_directories (${OPENGL_INCLUDE_DIRS})
 	if (WIN32)
@@ -127,11 +132,22 @@ if (BUILD_VDC)
 endif ()
 
 if (WIN32)
+	find_library(ASSIMP assimp-vc140-mt)
+    find_library(TIFF libtiff)
+    find_library(PROJ proj_6_1)
+else ()
+	find_library(ASSIMP assimp)
+    find_library(TIFF tiff)
+    find_library(PROJ proj)
+endif()
+
+if (WIN32)
 	set (INSTALL_BIN_DIR .)
 	set (INSTALL_LIB_DIR .)
 	set (INSTALL_SHARE_DIR share)
 	set (INSTALL_INCLUDE_DIR include/vapor)
 elseif (APPLE)
+
 	# if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	if (DIST_INSTALLER)
 		set (CMAKE_INSTALL_PREFIX /Applications)
@@ -167,6 +183,9 @@ add_subdirectory (share)
 add_subdirectory (scripts)
 add_subdirectory (test_apps)
 
+
+
+
 ###############################################################################
 #                            CPack Installation                               #
 ###############################################################################
@@ -193,12 +212,18 @@ if (WIN32)
 	set (PRE_UNINSTALL_LOCAL_PATH "buildutils/NSIS.preUnInstall.ini")
 	set (PRE_UNINSTALL_PATH "${CMAKE_CURRENT_BINARY_DIR}/${PRE_UNINSTALL_LOCAL_PATH}")
 	configure_file ("${PRE_UNINSTALL_LOCAL_PATH}.in" "${PRE_UNINSTALL_PATH}" @ONLY)
-
+	
 	if (GENERATE_FULL_INSTALLER)
-		set (DLL_DIR "C:/vaporwin64deps2015/vapordlls")
-		file (GLOB WIN_INSTALL_DLLS ${DLL_DIR}/*.dll ${QTDIR}/bin/*.dll)
+		set (LIB_DIR ${THIRD_PARTY_DIR}/lib)
+		file (GLOB WIN_INSTALL_DLLS ${LIB_DIR}/*.dll ${QTDIR}/bin/*.dll)
+
 		install (
 			FILES ${WIN_INSTALL_DLLS}
+			DESTINATION ${INSTALL_BIN_DIR}
+			COMPONENT Dependencies
+			)
+		install (
+			FILES ${PYTHONPATH}/python${PYTHONVERSION}.dll
 			DESTINATION ${INSTALL_BIN_DIR}
 			COMPONENT Dependencies
 			)
@@ -207,6 +232,10 @@ if (WIN32)
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
+		install(FILES
+			${QTDIR}/plugins/platforms/qwindows.dll
+			DESTINATION platforms
+		)
 	endif (GENERATE_FULL_INSTALLER)
 
 	set (CPACK_NSIS_MODIFY_PATH OFF)
@@ -228,8 +257,8 @@ endif (WIN32)
 
 if (APPLE)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
-		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib)
-		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${PYTHONPATH})
+		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
+		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${PYTHONPATH} ${QTDIR}/lib/*.framework)
 		install (
 			FILES ${INSTALL_LIBS}
 			DESTINATION ${INSTALL_LIB_DIR}
@@ -240,7 +269,19 @@ if (APPLE)
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
-	endif ()
+        file (GLOB COCOA_LIBS ${QTDIR}/plugins/platforms/libqcocoa.dylib)
+	    install (
+            FILES ${COCOA_LIBS}
+            DESTINATION ${INSTALL_BIN_DIR}/platforms
+            COMPONENT Dependencies
+            )
+        file (GLOB STYLE_LIBS ${QTDIR}/plugins/styles/libqmacstyle.dylib)
+	    install (
+            FILES ${STYLE_LIBS}
+            DESTINATION ${INSTALL_BIN_DIR}/styles
+            COMPONENT Dependencies
+            )
+    endif ()
 	set (CPACK_BINARY_DRAGNDROP ON)
 endif (APPLE)
 
@@ -252,6 +293,8 @@ if (UNIX AND NOT APPLE)
 	if (BUILD_GUI)
 		set (EXTRA_LIBS_SEARCH ${EXTRA_LIBS_SEARCH} quadmath)
 	endif ()
+
+
 	if (DIST_INSTALLER)
 		add_custom_target (
 			linuxpreinstall
@@ -266,16 +309,39 @@ if (UNIX AND NOT APPLE)
 		if (EXISTS ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt)
 			file (STRINGS ${CMAKE_BINARY_DIR}/LinuxInstallLibs.txt INSTALL_LIBS)
 		endif ()
+
 		install (
 			FILES ${INSTALL_LIBS}
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
+
 		install (
-			DIRECTORY ${THIRD_PARTY_LIB_DIR}/python2.7
+			DIRECTORY ${THIRD_PARTY_LIB_DIR}/python${PYTHONVERSION}
 			DESTINATION ${INSTALL_LIB_DIR}
 			COMPONENT Dependencies
 			)
+
+		install (
+			DIRECTORY ${QTDIR}/plugins/xcbglintegrations
+			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
+
+		install (
+			FILES ${QTDIR}/plugins/platforms/libqxcb.so
+			DESTINATION ${INSTALL_LIB_DIR}/platforms
+			COMPONENT Dependencies
+			)
+
+		file (GLOB XCBQPA_FILES ${QTDIR}/lib/libQt5XcbQpa.*)
+		install (
+			FILES ${XCBQPA_FILES}
+			DESTINATION ${INSTALL_LIB_DIR}
+			COMPONENT Dependencies
+			)
+
+
 	endif (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 endif (UNIX AND NOT APPLE)
 

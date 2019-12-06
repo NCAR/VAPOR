@@ -49,6 +49,8 @@ class ModelEventRouter : public QTabWidget, public RenderEventRouter {
 
     string GetType() const { return GetClassType(); }
 
+    virtual DimFlags GetDimFlags() const { return (DimFlags)(DimFlags::TWOD | DimFlags::THREED); }
+
   protected:
     virtual void _initializeTab();
     virtual void _updateTab();
