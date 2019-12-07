@@ -71,6 +71,9 @@ public:
 	//! Returns an ordered list of the variable's netCDF dimension names.
 	//! 
 	std::vector <string> GetDimNames() const {return(_dimnames); };
+	void SetDimNames(const std::vector <string> dimnames) {
+		_dimnames = dimnames;
+	}
 
 	//! Return the netCDF external data type for an attribute
 	//!
