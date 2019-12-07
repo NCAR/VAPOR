@@ -600,6 +600,39 @@ private:
         double *            _timecoords;
     };
 
+    class DerivedVarTimeFromMem : public NetCDFCollection::DerivedVar {
+    public:
+        DerivedVarTimeFromMem(string name, string units, string timeDimName, const std::vector<double> times);
+
+        virtual int                 Open(size_t ts);
+        virtual int                 ReadSlice(float *slice, int);
+        virtual int                 Read(float *buf, int);
+        virtual int                 SeekSlice(int offset, int whence, int fd) { return (0); }
+        virtual int                 Close(int) { return (0); };
+        virtual bool                TimeVarying() const { return (true); };
+        virtual std::vector<size_t> GetSpatialDims() const { return (std::vector<size_t>()); }
+        virtual std::vector<string> GetSpatialDimNames() const { return (std::vector<string>()); }
+        virtual size_t              GetTimeDim() const { return (_times.size()); }
+        virtual string              GetTimeDimName() const { return (_timeDimName); };
+        virtual bool                GetMissingValue(double &mv) const
+        {
+            mv = 0.0;
+            return (false);
+        }
+        virtual void GetAtt(string name, string &values) const
+        {
+            values.clear();
+            if (name == "units") values = _units;
+        }
+
+    private:
+        size_t              _ts;
+        string              _name;
+        string              _units;
+        string              _timeDimName;
+        std::vector<double> _times;
+    };
+
     class DerivedVar_vertStag : public NetCDFCollection::DerivedVar {
     public:
         DerivedVar_vertStag(NetCDFCFCollection *ncdfcf, string unstagVar, string stagDimName);
