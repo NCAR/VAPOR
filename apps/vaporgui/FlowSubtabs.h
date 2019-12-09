@@ -28,6 +28,7 @@ class VGeometry;
 class VFrame;
 class VSpinBox;
 class VGeometry2;
+class VPushButton;
 
 namespace VAPoR {
 	class ControlExec;
@@ -110,13 +111,13 @@ private slots:
     void _configureFlowType( const std::string& value );
     void _configureSeedType( const std::string& value );
 
-    void _streamlineLengthChanged( int length );
-    void _streamlineStartTimeChanged( int startTime );
-    void _streamlineEndTimeChanged( int endTime );
-    void _streamlineLifetimeChanged( int lifeTime );
+    void _pathlineLengthChanged( int length );
+    void _pathlineStartTimeChanged( int startTime );
+    void _pathlineEndTimeChanged( int endTime );
+    void _pathlineLifetimeChanged( int lifeTime );
 
-    void _pathlineDirectionChanged( int index );
-    void _pathlineSamplesChanged( int length );
+    void _streamlineDirectionChanged( int index );
+    void _streamlineSamplesChanged( int length );
 
     void _seedInjIntervalChanged( int interval );
 
@@ -131,15 +132,15 @@ private slots:
 
     void _rakeGeometryChanged( const std::vector<float>& range );
 
-    void _geometryWriterFileChanged( const std::string& file );
+    void _geometryWriterClicked();
 
     void _selectedTabChanged( int index );
 
 private:
     void _createIntegrationSection();
     void _createSeedingSection( QWidget* parent );
-    void _updateSteadyFlowWidgets( VAPoR::DataMgr* dataMgr);
-    void _updateUnsteadyFlowWidgets( VAPoR::DataMgr* dataMgr);
+    void _updateStreamlineWidgets( VAPoR::DataMgr* dataMgr);
+    void _updatePathlineWidgets( VAPoR::DataMgr* dataMgr);
 
     VAPoR::FlowParams*      _params;
     VAPoR::ParamsMgr *      _paramsMgr;
@@ -148,18 +149,18 @@ private:
     VSection*               _integrationSection;
     VComboBox*              _flowTypeCombo;
 
-    //  Pathline integration options
-    VFrame*                 _pathlineFrame;
-    VSliderEdit*            _pathlineSamplesSliderEdit;
-    VComboBox*              _pathlineDirectionCombo;
-
     //  Streamline integration options
     VFrame*                 _streamlineFrame;
-    VSliderEdit*            _streamlineLengthSliderEdit;
-    VSliderEdit*            _streamlineInjIntervalSliderEdit;
-    VSliderEdit*            _streamlineStartSliderEdit;
-    VSliderEdit*            _streamlineEndSliderEdit;
-    VSliderEdit*            _streamlineLifetimeSliderEdit;
+    VSliderEdit*            _streamlineSamplesSliderEdit;
+    VComboBox*              _streamlineDirectionCombo;
+
+    //  Pathline integration options
+    VFrame*                 _pathlineFrame;
+    VSliderEdit*            _pathlineLengthSliderEdit;
+    VSliderEdit*            _pathlineInjIntervalSliderEdit;
+    VSliderEdit*            _pathlineStartSliderEdit;
+    VSliderEdit*            _pathlineEndSliderEdit;
+    VSliderEdit*            _pathlineLifetimeSliderEdit;
 
     //  Universal integration options
     VCheckBox*              _periodicXCheckBox;
@@ -194,8 +195,8 @@ private:
     VComboBox*              _biasVariableComboBox;
     VSliderEdit*            _biasWeightSliderEdit;
 
-    VFileWriter*            _geometryWriter;
-    VFrame*                 _geometryWriterFrame;
+    VFileWriter*            _geometryWriterSelector;
+    VPushButton*            _geometryWriterExecutor;
     VSection*               _geometryWriterSection;
 };
 
