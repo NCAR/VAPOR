@@ -59,42 +59,22 @@ RUN apt-get update \
 # https://stackoverflow.com/questions/31170869/cmake-could-not-find-opengl-in-ubuntu
     && apt-get install -y freeglut3-dev \
 # Aren't we supposed to be distributing libexpat in our third-party tar???
-    && apt-get install -y libexpat1-dev
+    && apt-get install -y libexpat1-dev \
+    && apt-get install -y libglib2.0-0 \
+    && apt-get install -y libdbus-1-3
 
-RUN cd / && \
-    mkdir glade        && cd glade       && \
-    mkdir p            && cd p           && \
-    mkdir VAST         && cd VAST        && \
-    mkdir VAPOR        && cd VAPOR       && \
-    mkdir third-party  && cd third-party && \
-    mkdir apps-2017    && cd apps-2017
-
-# It seems that its not feasible to curl from google docs, so
-# the docker image is currentl pulling a file down from my laptop.
-# We need another host for our third party libraries (github!)
-#ADD Linux_x86_64_Ubuntu16.04.tar.xz /glade/p/VAST/VAPOR/third-party/apps-2017
-RUN curl -L -o \
-    /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64_Ubuntu16.04.tar.xz \
-    "https://drive.google.com/open?id=0B0dQMtxB89M0azF5RW1RSE5qcTg"
+RUN mkdir -p /usr/local/VAPOR-Deps
 
 #Hack to download a file from google drive
-RUN fileid="0B0dQMtxB89M0azF5RW1RSE5qcTg" \
-    && filename="/glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64_Ubuntu16.04.tar.xz" \
+RUN fileid="1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd" \
+    && filename="/usr/local/VAPOR-Deps/2019-Aug-Ubuntu.tar.xz" \
     && curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null \
     && curl -Lb ./cookie \
     "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
     -o ${filename}
 
-RUN ls -lrth /glade/p/VAST/VAPOR/third-party/apps-2017
-          
-RUN tar xf /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64_Ubuntu16.04.tar.xz \
-           -C /glade/p/VAST/VAPOR/third-party/apps-2017
-
-RUN git clone https://github.com/g-truc/glm.git \
-    /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/glm
-
-RUN mv /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/glm/glm/* \
-    /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/glm
+RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-Ubuntu.tar.xz \ 
+           -C /usr/local/VAPOR-Deps
 
 RUN cd / \
     && git clone https://github.com/NCAR/VAPOR.git \
