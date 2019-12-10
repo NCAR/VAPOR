@@ -46,6 +46,9 @@ QSize QRangeSlider::minimumSizeHint() const
 
 void QRangeSlider::SetValue(float min, float max)
 {
+    _isOutOfBounds[0] = false;
+    _isOutOfBounds[1] = false;
+    
     if (min < 0 || min > 1) {
         _isOutOfBounds[0] = true;
         _outOfBoundValue[0] = min;
@@ -186,6 +189,7 @@ void QRangeSlider::mouseMoveEvent(QMouseEvent *event)
         
         _value[_grabbedControl] = value();
         _position[_grabbedControl] = sliderPosition();
+        _isOutOfBounds[_grabbedControl] = false;
         
         if (hasTracking())
             emitValueChanged(true);
@@ -203,6 +207,7 @@ void QRangeSlider::mouseMoveEvent(QMouseEvent *event)
             _position[i] = _grabbedBarControlStartPositions[i] + diff;
             _position[i] = _position[i] < 0 ? 0 : _position[i];
             _position[i] = _position[i] > QT_STOPS-1 ? QT_STOPS-1 : _position[i];
+            _isOutOfBounds[i] = false;
             if (hasTracking())
                 _value[i] = _position[i];
         }
