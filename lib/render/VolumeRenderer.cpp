@@ -182,7 +182,7 @@ int VolumeRenderer::_paintGL(bool fast)
 
 std::string VolumeRenderer::_getColorbarVariableName() const
 {
-    VolumeParams *vp = (VolumeParams *)GetActiveParams();
+    VolumeParams *vp = dynamic_cast<VolumeParams *>GetActiveParams();
     if (vp->GetValueLong(VolumeParams::UseColormapVariableTag, 0))
         return vp->GetColorMapVariableName();
     else
