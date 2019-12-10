@@ -377,7 +377,6 @@ vector<double> MapperFunction::getMinMaxMapValue() const {
 vector<double> MapperFunction::GetCustomMappingSliderRange() const
 {
     vector<double> defaultv(2, 0);
-    assert(IsUsingCustomMappingSliderRange());
     return GetValueDoubleVec(CustomMappingSliderRangeTag, defaultv);
 }
 
@@ -388,7 +387,6 @@ bool MapperFunction::IsUsingCustomMappingSliderRange() const
 
 void MapperFunction::SetCustomMappingSliderRange(const vector<double> &range)
 {
-    assert(IsUsingCustomMappingSliderRange());
     return SetValueDoubleVec(CustomMappingSliderRangeTag, CustomMappingSliderRangeTag, range);
 }
 

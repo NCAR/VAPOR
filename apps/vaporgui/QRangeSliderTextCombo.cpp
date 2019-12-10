@@ -59,7 +59,6 @@ void QRangeSliderTextCombo::SetValue(float left, float right)
 
 void QRangeSliderTextCombo::AllowCustomRange()
 {
-    assert(!_allowCustomRange);
     if (_allowCustomRange)
         return;
     

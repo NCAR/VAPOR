@@ -24,6 +24,8 @@ public:
     
     void SetRange(float min, float max);
     void SetValue(float left, float right);
+    
+    //! Allows the user to input values outside of the range and allows them to change the range.
     void AllowCustomRange();
     
 private:

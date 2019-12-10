@@ -154,9 +154,11 @@ public:
  //! \return minimum and maximum as a 2-vector of doubles
  vector<double> getMinMaxMapValue() const;
     
+    //! Returns size 2 vector of the users custom slider range. Used by TFMappingRangeSelector
     vector<double> GetCustomMappingSliderRange() const;
     bool IsUsingCustomMappingSliderRange() const;
     
+    //! Set the size 2 vector of the users custom slider range. Used by TFMappingRangeSelector
     void SetCustomMappingSliderRange(const vector<double> &range);
     void SetUsingCustomMappingSliderRange(bool b);
 
