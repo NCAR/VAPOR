@@ -245,6 +245,8 @@ void QRangeSlider::swapSliders()
 {
     std::swap(_value[0], _value[1]);
     std::swap(_position[0], _position[1]);
+    std::swap(_isOutOfBounds[0], _isOutOfBounds[1]);
+    std::swap(_outOfBoundValue[0], _outOfBoundValue[1]);
     _lastSelectedControl = (_lastSelectedControl+1) % 2;
     switch (_grabbedControl) {
         case  0: _grabbedControl = 1; break;
