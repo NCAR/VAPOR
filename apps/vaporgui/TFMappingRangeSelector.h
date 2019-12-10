@@ -7,6 +7,7 @@ namespace VAPoR {
 class DataMgr;
 class ParamsMgr;
 class RenderParams;
+class MapperFunction;
 } // namespace VAPoR
 
 class TFMappingRangeSelector : public QRangeSliderTextCombo {
@@ -24,9 +25,12 @@ class TFMappingRangeSelector : public QRangeSliderTextCombo {
 
     void _getDataRange(VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams, float *min, float *max) const;
     std::string _getVariableName() const;
+    VAPoR::MapperFunction *_getTF() const;
 
   private slots:
     void _rangeChangedBegin();
     void _rangeChangedIntermediate(float left, float right);
     void _rangeChanged(float left, float right);
+    void _sliderRangeChanged(float left, float right);
+    void _sliderRangeResetToDefaultRequested();
 };
