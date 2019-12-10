@@ -16,23 +16,25 @@
 
 #define verbose     1
 
-#define UNSTEADY_STRING    "Pathlines"
-#define STEADY_STRING      "Streamlines"
-#define GRIDDED_STRING     "Gridded"
-#define LIST_STRING        "List of seeds"
-#define RANDOM_STRING      "Random"
+namespace {
+    const std::string UNSTEADY_STRING  = "Pathlines";
+    const std::string STEADY_STRING    = "Streamlines";
+    const std::string GRIDDED_STRING   = "Gridded";
+    const std::string LIST_STRING      = "List of seeds";
+    const std::string RANDOM_STRING    = "Random";
 
-#define MIN_AXIS_SEEDS      1
-#define MAX_AXIS_SEEDS      1000
-#define MIN_RANDOM_SEEDS    1
-#define MAX_RANDOM_SEEDS    1000
+    const int MIN_AXIS_SEEDS           = 1;
+    const int MAX_AXIS_SEEDS           = 1000;
+    const int MIN_RANDOM_SEEDS         = 1;
+    const int MAX_RANDOM_SEEDS         = 1000;
 
-#define MAX_PATHLINE_LENGTH 10000
+    const int MAX_PATHLINE_LENGTH      = 10000;
 
-#define X                   0
-#define Y                   1
-#define Z                   2
-#define RANDOM_INDEX        3
+    const int X                        = 0;
+    const int Y                        = 1;
+    const int Z                        = 2;
+    const int RANDOM_INDEX             = 3;
+}
 
 QVaporSubtab::QVaporSubtab(QWidget* parent) : QWidget(parent)
 {
