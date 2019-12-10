@@ -83,6 +83,9 @@ void TFHistogramMap::paintEvent(QPainter &p)
         stride *= 2;
     startBin -= startBin % stride;
     
+    if (_histo.getRange() < FLT_EPSILON || (mapRange[1]-mapRange[0])/_histo.getRange() > 10000)
+        return;
+    
     float maxBin;
     if (_dynamicScaling)
         maxBin = _histo.getMaxBinSizeBetweenIndices(startBin, endBin);

@@ -153,6 +153,12 @@ public:
  //! Obtain min and max mapping (histo) values
  //! \return minimum and maximum as a 2-vector of doubles
  vector<double> getMinMaxMapValue() const;
+    
+    vector<double> GetCustomMappingSliderRange() const;
+    bool IsUsingCustomMappingSliderRange() const;
+    
+    void SetCustomMappingSliderRange(const vector<double> &range);
+    void SetUsingCustomMappingSliderRange(bool b);
 
  //! Create an opacity map for this transfer function
  //! \param[in] type of opacity map
@@ -331,6 +337,8 @@ public:
  static const string _opacityMapTag;
  static const string _autoUpdateHistoTag;
  static const string _secondaryVarMapperTag;
+ static const string CustomMappingSliderRangeTag;
+ static const string IsUsingCustomMappingSliderRangeTag;
 
 private:
  //

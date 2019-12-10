@@ -46,6 +46,16 @@ QSize QRangeSlider::minimumSizeHint() const
 
 void QRangeSlider::SetValue(float min, float max)
 {
+    if (min < 0 || min > 1) {
+        _isOutOfBounds[0] = true;
+        _outOfBoundValue[0] = min;
+        min = 0;
+    }
+    if (max < 0 || max > 1) {
+        _isOutOfBounds[1] = true;
+        _outOfBoundValue[1] = max;
+        max = 1;
+    }
     _position[0] = min * (QT_STOPS-1);
     _value[0] = min * (QT_STOPS-1);
     _position[1] = max * (QT_STOPS-1);
@@ -73,6 +83,9 @@ void QRangeSlider::paintHandle(QStylePainter &p, int i)
     option.subControls = QStyle::SC_SliderHandle;
     option.sliderValue = _value[i];
     option.sliderPosition = _position[i];
+    if (_isOutOfBounds[i]) {
+        option.state &= ~QStyle::State_Enabled;
+    }
     if (isSliderDown(i)) {
         option.activeSubControls = QStyle::SC_SliderHandle;
         option.state |= QStyle::State_Sunken;
@@ -85,6 +98,7 @@ void QRangeSlider::paintTrack(QStylePainter &p)
     QStyleOptionSlider option;
     this->initStyleOption( &option );
     
+    option.sliderPosition = 0;
     option.subControls = QStyle::SC_SliderGroove;
     p.drawComplexControl(QStyle::CC_Slider, option);
     
@@ -121,6 +135,7 @@ void QRangeSlider::mousePressEvent(QMouseEvent *event)
         if (doesHandleContainPixel(id, event->pos())) {
             _grabbedControl = id;
             _lastSelectedControl = id;
+            _isOutOfBounds[id] = false;
             setValue(_value[id]);
             QSlider::mousePressEvent(event);
             emit ValueChangedBegin();
@@ -139,6 +154,7 @@ void QRangeSlider::mousePressEvent(QMouseEvent *event)
             _grabbedBarPosition = selectedPosition;
             _grabbedBarControlStartPositions[0] = _position[0];
             _grabbedBarControlStartPositions[1] = _position[1];
+            _isOutOfBounds[0] = _isOutOfBounds[1] = false;
             emit ValueChangedBegin();
         }
     }
@@ -149,7 +165,7 @@ void QRangeSlider::mouseReleaseEvent(QMouseEvent *event)
     QSlider::mouseReleaseEvent(event);
     
     if (_grabbedControl >= 0 || _grabbedBar)
-        emit ValueChanged(_value[0]/(float)QT_STOPS, _value[1]/(float)QT_STOPS);
+        emitValueChanged();
     
     _grabbedControl = -1;
     _grabbedBar = false;
@@ -172,7 +188,7 @@ void QRangeSlider::mouseMoveEvent(QMouseEvent *event)
         _position[_grabbedControl] = sliderPosition();
         
         if (hasTracking())
-            emit ValueChangedIntermediate(_value[0]/(float)QT_STOPS, _value[1]/(float)QT_STOPS);
+            emitValueChanged(true);
     }
     
     if (_grabbedBar) {
@@ -192,7 +208,7 @@ void QRangeSlider::mouseMoveEvent(QMouseEvent *event)
         }
 
         if (hasTracking())
-            emit ValueChangedIntermediate(_value[0]/(float)QT_STOPS, _value[1]/(float)QT_STOPS);
+            emitValueChanged(true);
     }
 }
 
@@ -235,4 +251,15 @@ void QRangeSlider::swapSliders()
         case  1: _grabbedControl = 0; break;
         case -1: break;
     }
+}
+
+void QRangeSlider::emitValueChanged(bool intermediate)
+{
+    float left  = _isOutOfBounds[0] ? _outOfBoundValue[0] : _value[0]/(float)QT_STOPS;
+    float right = _isOutOfBounds[1] ? _outOfBoundValue[1] : _value[1]/(float)QT_STOPS;
+    
+    if (intermediate)
+        emit ValueChangedIntermediate(left, right);
+    else
+        emit ValueChanged(left, right);
 }
