@@ -1,5 +1,6 @@
 #include "FlowSubtabs.h"
 #include "vapor/DataMgrUtils.h"
+#include "ErrorReporter.h"
 
 #include "VFrame.h"
 #include "VSpinBox.h"
@@ -433,7 +434,7 @@ FlowSeedingSubtab::_velocityMultiplierChanged( const std::string& value )
     }
     catch ( const std::invalid_argument& e )
     {
-        std::cerr << "bad input: " << _velocityMultiplierLineEdit->GetValue() << std::endl;
+        MSG_ERR( "Bad input: " + value );
         _velocityMultiplierLineEdit->SetValue( std::to_string( oldval ) );
         return;
     }
@@ -455,19 +456,16 @@ FlowSeedingSubtab::_velocityMultiplierChanged( const std::string& value )
 void 
 FlowSeedingSubtab::_pathlineStartTimeChanged( int newVal )
 {
-    std::cout << "No params function for pathline injection start time" << std::endl;
 }
 
 void 
 FlowSeedingSubtab::_pathlineEndTimeChanged( int newVal )
 {
-    std::cout << "No params function for pathline injection end time" << std::endl;
 }
 
 void 
 FlowSeedingSubtab::_pathlineLifetimeChanged( int newVal )
 {
-    std::cout << "No params function for pathline injection lifetime" << std::endl;
 }
 
 void 
@@ -588,7 +586,8 @@ FlowSeedingSubtab::_selectedTabChanged(int index)
 void
 FlowSeedingSubtab::_seedGenModeChanged( int newIdx )
 {
-#warning FlowSeedingSubtab::_seedGenModeChanged() has a hack to get around numeric values representing seed generation modes
+    // This is a hack to get around numeric values representing seed generation modes
+    // 
     if (newIdx > 0)
         newIdx++;
     _params->SetSeedGenMode( newIdx );
