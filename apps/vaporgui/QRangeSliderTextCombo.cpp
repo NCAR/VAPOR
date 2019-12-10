@@ -67,7 +67,7 @@ void QRangeSliderTextCombo::AllowCustomRange()
     
     QAction *newMinAction     = new QAction("Set as new min", this);
     QAction *newMaxAction     = new QAction("Set as new max", this);
-    QAction *resetRangeAction = new QAction("Reset to default", this);
+    QAction *resetRangeAction = new QAction("Reset range to default", this);
     QObject::connect(newMinAction,     &QAction::triggered, this, &QRangeSliderTextCombo::makeLeftValueNewMin);
     QObject::connect(newMaxAction,     &QAction::triggered, this, &QRangeSliderTextCombo::makeRightValueNewMax);
     QObject::connect(resetRangeAction, &QAction::triggered, this, &QRangeSliderTextCombo::RangeDefaultRequested);

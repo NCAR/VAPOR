@@ -394,7 +394,6 @@ void MapperFunction::SetCustomMappingSliderRange(const vector<double> &range)
 
 void MapperFunction::SetUsingCustomMappingSliderRange(bool b)
 {
-    printf("%s = %s\n", __func__, b?"true":"false");
     SetValueLong(IsUsingCustomMappingSliderRangeTag, IsUsingCustomMappingSliderRangeTag, b);
 }
 
