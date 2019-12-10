@@ -29,15 +29,16 @@ RUN yum -y install epel-release \
     && yum -y install fontconfig-devel \
     && pip3 install gdown
 
-RUN mkdir -p /glade/p/VAST/VAPOR/third-party
+RUN mkdir -p /usr/local/VAPOR-Deps
 
-RUN gdown https://drive.google.com/uc?id=1_JdUuiy_iQUuIDoPyBn2pupBTz-LS4pM \
-    && mv /apps-2017-Centos7.tar.xz /glade/p/VAST/VAPOR/third-party \
-    && tar xf /glade/p/VAST/VAPOR/third-party/apps-2017-Centos7.tar.xz \
-           -C /glade/p/VAST/VAPOR/third-party \
-    && chown -R root:root /glade
+#RUN gdown https://drive.google.com/uc?id=1_JdUuiy_iQUuIDoPyBn2pupBTz-LS4pM \
+RUN gdown https://drive.google.com/uc?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0
+RUN ls -lrth
+RUN mv 2019-Aug-CentOS.tar.xz /usr/local/VAPOR-Deps
+RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz -C /usr/local/VAPOR-Deps
+RUN chown -R root:root /usr
 
-RUN ls /glade/p/VAST/VAPOR/third-party/apps-2017
+RUN ls /usr/local/VAPOR-Deps
 
 #RUN git clone https://github.com/g-truc/glm.git \
 #    /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/glm
