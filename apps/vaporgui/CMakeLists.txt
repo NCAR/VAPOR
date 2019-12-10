@@ -133,7 +133,6 @@ set (SRCS
 	PCheckbox.h
 	PDoubleInput.cpp
 	PDoubleInput.h
-	VaporWidgetsFwd.h
 	PLineItem.cpp
 	PLineItem.h
 	PEnumDropdown.cpp
