@@ -333,10 +333,18 @@ bool DataMgrUtils::GetExtents(
 	if (varname.empty()) {
 		vector <string> varnames;
 		for (int ndim = 3; ndim > 0; ndim--) {
-			varnames = dataMgr->GetDataVarNames(ndim);
-			if (! varnames.empty()) break;
+			vector <string> v = dataMgr->GetDataVarNames(ndim);
+			varnames.insert(varnames.end(), v.begin(), v.end());
 		}
-		varname = varnames.size() ? varnames[0] : "";
+
+		// Find a variable that is present at requested time step.
+		//
+		for (int i=0; i<varnames.size(); i++) {
+			if (dataMgr->VariableExists(timestep,varnames[i], refLevel, lod)){
+				varname = varnames[i];
+				break;
+			}
+		}
 	}
 	if (varname.empty()) return (false);
 
