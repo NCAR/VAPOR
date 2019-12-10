@@ -3,6 +3,7 @@
 #include <QDoubleValidator>
 #include <vapor/VAssert.h>
 #include <cfloat>
+#include <QAction>
 
 QRangeSliderTextCombo::QRangeSliderTextCombo()
 {
@@ -31,6 +32,12 @@ void QRangeSliderTextCombo::SetRange(float min, float max)
     VAssert(_max >= _min);
     _min = min;
     _max = max;
+
+    if (_allowCustomRange) {
+        min = -FLT_MAX;
+        max = FLT_MAX;
+    }
+
     setValidator(_leftText, new QDoubleValidator(min, max, 100));
     setValidator(_rightText, new QDoubleValidator(min, max, 100));
     SetValue(_left, _right);
@@ -38,12 +45,36 @@ void QRangeSliderTextCombo::SetRange(float min, float max)
 
 void QRangeSliderTextCombo::SetValue(float left, float right)
 {
-    left = std::max(_min, left);
-    right = std::min(_max, right);
+    if (left > right) std::swap(left, right);
+    if (!_allowCustomRange) {
+        left = std::max(_min, left);
+        right = std::min(_max, right);
+    }
     _left = left;
     _right = right;
     setTextboxes(left, right);
     _slider->SetValue((left - _min) / (_max - _min), (right - _min) / (_max - _min));
+}
+
+void QRangeSliderTextCombo::AllowCustomRange()
+{
+    if (_allowCustomRange) return;
+
+    _allowCustomRange = true;
+
+    QAction *newMinAction = new QAction("Set as new min", this);
+    QAction *newMaxAction = new QAction("Set as new max", this);
+    QAction *resetRangeAction = new QAction("Reset range to default", this);
+    QObject::connect(newMinAction, &QAction::triggered, this, &QRangeSliderTextCombo::makeLeftValueNewMin);
+    QObject::connect(newMaxAction, &QAction::triggered, this, &QRangeSliderTextCombo::makeRightValueNewMax);
+    QObject::connect(resetRangeAction, &QAction::triggered, this, &QRangeSliderTextCombo::RangeDefaultRequested);
+
+    _leftText->setContextMenuPolicy(Qt::ActionsContextMenu);
+    _rightText->setContextMenuPolicy(Qt::ActionsContextMenu);
+    _leftText->addAction(newMinAction);
+    _rightText->addAction(newMaxAction);
+    _leftText->addAction(resetRangeAction);
+    _rightText->addAction(resetRangeAction);
 }
 
 void QRangeSliderTextCombo::setValidator(QLineEdit *edit, QValidator *validator)
@@ -96,4 +127,16 @@ void QRangeSliderTextCombo::rightTextChanged()
     float right = _rightText->text().toDouble();
     SetValue(_left, right);
     emit ValueChanged(_left, _right);
+}
+
+void QRangeSliderTextCombo::makeLeftValueNewMin()
+{
+    SetRange(_left, _max);
+    emit RangeChanged(_min, _max);
+}
+
+void QRangeSliderTextCombo::makeRightValueNewMax()
+{
+    SetRange(_min, _right);
+    emit RangeChanged(_min, _max);
 }

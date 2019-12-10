@@ -32,10 +32,12 @@ protected:
     //    void mouseDoubleClickEvent(QMouseEvent *event);
 
 private:
-    int _position[2];
-    int _value[2];
-    int _grabbedControl = -1;
-    int _lastSelectedControl = 0;
+    int   _position[2];
+    int   _value[2];
+    bool  _isOutOfBounds[2] = {false};
+    float _outOfBoundValue[2];
+    int   _grabbedControl = -1;
+    int   _lastSelectedControl = 0;
 
     bool _grabbedBar = false;
     int  _grabbedBarPosition;
@@ -48,4 +50,5 @@ private:
     bool doesGrooveContainPixel(const QPoint &pixel) const;
     bool isSliderDown(int i) const;
     void swapSliders();
+    void emitValueChanged(bool intermediate = false);
 };

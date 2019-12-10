@@ -42,6 +42,8 @@ const string MapperFunction::_opacityMapsTag = "OpacityMaps";
 const string MapperFunction::_opacityMapTag = "OpacityMap";
 const string MapperFunction::_autoUpdateHistoTag = "AutoUpdateHisto";
 const string MapperFunction::_secondaryVarMapperTag = "SecondaryVarMapper";
+const string MapperFunction::CustomMappingSliderRangeTag = "CustomMappingSliderRange";
+const string MapperFunction::IsUsingCustomMappingSliderRangeTag = "IsUsingCustomMappingSliderRange";
 
 //
 // Register class with object factory!!!
@@ -332,6 +334,18 @@ vector<double> MapperFunction::getMinMaxMapValue() const
     if (bounds.size() != 2) bounds = defaultv;
     return (bounds);
 }
+
+vector<double> MapperFunction::GetCustomMappingSliderRange() const
+{
+    vector<double> defaultv(2, 0);
+    return GetValueDoubleVec(CustomMappingSliderRangeTag, defaultv);
+}
+
+bool MapperFunction::IsUsingCustomMappingSliderRange() const { return GetValueLong(IsUsingCustomMappingSliderRangeTag, false); }
+
+void MapperFunction::SetCustomMappingSliderRange(const vector<double> &range) { return SetValueDoubleVec(CustomMappingSliderRangeTag, CustomMappingSliderRangeTag, range); }
+
+void MapperFunction::SetUsingCustomMappingSliderRange(bool b) { SetValueLong(IsUsingCustomMappingSliderRangeTag, IsUsingCustomMappingSliderRangeTag, b); }
 
 //----------------------------------------------------------------------------
 //

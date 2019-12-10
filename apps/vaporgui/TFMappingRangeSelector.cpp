@@ -5,9 +5,13 @@
 
 TFMappingRangeSelector::TFMappingRangeSelector()
 {
+    AllowCustomRange();
+
     connect(this, SIGNAL(ValueChanged(float, float)), this, SLOT(_rangeChanged(float, float)));
     connect(this, SIGNAL(ValueChangedBegin()), this, SLOT(_rangeChangedBegin()));
     connect(this, SIGNAL(ValueChangedIntermediate(float, float)), this, SLOT(_rangeChangedIntermediate(float, float)));
+    connect(this, SIGNAL(RangeChanged(float, float)), this, SLOT(_sliderRangeChanged(float, float)));
+    connect(this, SIGNAL(RangeDefaultRequested()), this, SLOT(_sliderRangeResetToDefaultRequested()));
 }
 
 void TFMappingRangeSelector::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
@@ -18,7 +22,13 @@ void TFMappingRangeSelector::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *p
     if (!dataMgr->VariableExists(rParams->GetCurrentTimestep(), _getVariableName())) return;
 
     float min, max;
-    _getDataRange(dataMgr, rParams, &min, &max);
+    if (_getTF()->IsUsingCustomMappingSliderRange()) {
+        auto range = _getTF()->GetCustomMappingSliderRange();
+        min = range[0];
+        max = range[1];
+    } else {
+        _getDataRange(dataMgr, rParams, &min, &max);
+    }
     SetRange(min, max);
 
     vector<double> mapperRange = rParams->GetMapperFunc(_getVariableName())->getMinMaxMapValue();
@@ -43,6 +53,8 @@ std::string TFMappingRangeSelector::_getVariableName() const
     else
         return _rParams->GetVariableName();
 }
+
+VAPoR::MapperFunction *TFMappingRangeSelector::_getTF() const { return _rParams->GetMapperFunc(_getVariableName()); }
 
 void TFMappingRangeSelector::_rangeChangedBegin()
 {
@@ -69,3 +81,13 @@ void TFMappingRangeSelector::_rangeChanged(float left, float right)
     _rParams->GetMapperFunc(_getVariableName())->setMinMaxMapValue(left, right);
     _paramsMgr->EndSaveStateGroup();
 }
+
+void TFMappingRangeSelector::_sliderRangeChanged(float left, float right)
+{
+    _paramsMgr->BeginSaveStateGroup("Enable custom tf slider range");
+    _getTF()->SetUsingCustomMappingSliderRange(true);
+    _getTF()->SetCustomMappingSliderRange({left, right});
+    _paramsMgr->EndSaveStateGroup();
+}
+
+void TFMappingRangeSelector::_sliderRangeResetToDefaultRequested() { _getTF()->SetUsingCustomMappingSliderRange(false); }

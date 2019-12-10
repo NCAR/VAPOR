@@ -136,6 +136,14 @@ public:
     //! \return minimum and maximum as a 2-vector of doubles
     vector<double> getMinMaxMapValue() const;
 
+    //! Returns size 2 vector of the users custom slider range. Used by TFMappingRangeSelector
+    vector<double> GetCustomMappingSliderRange() const;
+    bool           IsUsingCustomMappingSliderRange() const;
+
+    //! Set the size 2 vector of the users custom slider range. Used by TFMappingRangeSelector
+    void SetCustomMappingSliderRange(const vector<double> &range);
+    void SetUsingCustomMappingSliderRange(bool b);
+
     //! Create an opacity map for this transfer function
     //! \param[in] type of opacity map
     virtual OpacityMap *createOpacityMap(OpacityMap::Type type = OpacityMap::CONTROL_POINT);
@@ -276,6 +284,8 @@ public:
     static const string _opacityMapTag;
     static const string _autoUpdateHistoTag;
     static const string _secondaryVarMapperTag;
+    static const string CustomMappingSliderRangeTag;
+    static const string IsUsingCustomMappingSliderRangeTag;
 
 private:
     //

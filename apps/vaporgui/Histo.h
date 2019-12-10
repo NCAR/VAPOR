@@ -48,6 +48,7 @@ public:
     int   getBinIndexForValue(float v);
     float getMinMapData() { return _minMapData; }
     float getMaxMapData() { return _maxMapData; }
+    float getRange() { return _range; }
 
     int    getTimestepOfUpdate() { return _timestepOfUpdate; }
     string getVarnameOfUpdate() { return _varnameOfUpdate; }
