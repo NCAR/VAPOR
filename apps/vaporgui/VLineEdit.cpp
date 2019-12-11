@@ -10,6 +10,7 @@
 
 VLineEdit::VLineEdit( const std::string& value )
 : VContainer( this ),
+  _menu( nullptr ),
   _value( value ),
   _isDouble( false ),
   _scientific( false ),
