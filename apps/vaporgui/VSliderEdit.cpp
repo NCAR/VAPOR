@@ -7,7 +7,7 @@
 #include "VLineEdit.h"
 
 VSliderEdit::VSliderEdit( double min, double max, double value )
-: VContainer( this ),
+: VContainer(),
   _isIntType( false )
 {
     _lineEdit = new VLineEdit();

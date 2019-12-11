@@ -1,7 +1,7 @@
 #include "VDoubleSpinBox.h"
 
 VDoubleSpinBox::VDoubleSpinBox( double min, double max )
-: VContainer( this )
+: VContainer()
 {
     _spinBox = new QDoubleSpinBox;
     SetRange( min, max );

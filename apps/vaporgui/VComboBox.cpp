@@ -1,7 +1,7 @@
 #include "VComboBox.h"
 
 VComboBox::VComboBox( const std::vector<std::string> &values )
-: VContainer( this )
+: VContainer()
 {
     _combo = new QComboBox;
 

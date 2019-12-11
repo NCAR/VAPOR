@@ -1,7 +1,7 @@
 #include "VCheckBox.h"
 
 VCheckBox::VCheckBox( bool checked )
-: VContainer( this )
+: VContainer()
 {
     _checkBox = new QCheckBox;
     SetValue( checked );

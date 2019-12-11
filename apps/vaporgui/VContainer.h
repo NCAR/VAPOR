@@ -8,17 +8,17 @@
 #include "VLineItem.h"
 
 namespace {
-    int LEFT_MARGIN 0
-    int TOP_MARGIN 0
-    int RIGHT_MARGIN 0
-    int BOTTOM_MARGIN  0
+    int LEFT_MARGIN   = 0;
+    int TOP_MARGIN    = 0;
+    int RIGHT_MARGIN  = 0;
+    int BOTTOM_MARGIN = 0;
 }
 
 class VContainer : public QWidget {
     Q_OBJECT
 
 protected:
-    VContainer( QWidget* containee );
+    VContainer();
 };
 
 // Helper object for disabling the mouse scroll-wheel on a given widget.

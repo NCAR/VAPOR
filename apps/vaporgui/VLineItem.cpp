@@ -3,10 +3,10 @@
 #include <QLabel>
 
 namespace {
-    int LEFT_MARGIN    0
-    int TOP_MARGIN     0
-    int RIGHT_MARGIN   0
-    int BOTTOM_MARGIN  0
+    int LEFT_MARGIN   = 0;
+    int TOP_MARGIN    = 0;
+    int RIGHT_MARGIN  = 0;
+    int BOTTOM_MARGIN = 0;
 }
 
 VLineItem::VLineItem(const std::string &label, QLayoutItem *centerItem, QWidget *rightWidget)

@@ -1,7 +1,7 @@
 #include "VSpinBox.h"
 
 VSpinBox::VSpinBox( int min, int max )
-: VContainer( this )
+: VContainer()
 {
     _spinBox = new QSpinBox;
     SetRange( min, max );

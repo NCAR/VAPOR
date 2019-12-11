@@ -2,7 +2,7 @@
 
 VPushButton::VPushButton(
     const std::string& buttonText
-) : VContainer( this )
+) : VContainer()
 {
     _pushButton = new QPushButton( QString::fromStdString( buttonText ) );
     layout()->addWidget(_pushButton);

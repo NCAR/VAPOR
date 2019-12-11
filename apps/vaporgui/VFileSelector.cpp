@@ -12,7 +12,7 @@ VFileSelector::VFileSelector(
     const std::string& buttonText,
     const std::string& defaultPath,
     const std::string& filter = ""
-) : VContainer( this ),
+) : VContainer(),
     _filePath( defaultPath ),
     _filter( filter )
 {

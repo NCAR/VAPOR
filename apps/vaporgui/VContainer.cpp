@@ -3,7 +3,7 @@
 
 #include "VContainer.h"
 
-VContainer::VContainer( QWidget* containee ) 
+VContainer::VContainer() 
 : QWidget() 
 {
     QHBoxLayout* layout = new QHBoxLayout;
