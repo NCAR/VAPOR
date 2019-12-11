@@ -311,6 +311,12 @@ void Renderer::getLocalContainingRegion(float regMin[3], float regMax[3])
 }
 #endif
 
+std::string Renderer::_getColorbarVariableName() const
+{
+    RenderParams *rParams = GetActiveParams();
+    return rParams->GetVariableName();
+}
+
 int Renderer::makeColorbarTexture()
 {
     if (_colorbarTexture) delete _colorbarTexture;
@@ -319,7 +325,7 @@ int Renderer::makeColorbarTexture()
     ColorbarPbase *cbpb = rParams->GetColorbarPbase();
     if (!cbpb) return -1;
 
-    MapperFunction *mf = rParams->GetMapperFunc(rParams->GetVariableName());
+    MapperFunction *mf = rParams->GetMapperFunc(_getColorbarVariableName());
     if (!mf) return -1;
 
     _colorbarTexture = new unsigned char[_imgWid * _imgHgt * 3];

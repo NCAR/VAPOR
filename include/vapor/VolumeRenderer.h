@@ -21,6 +21,8 @@ protected:
     int  _paintGL(bool fast);
     void _clearCache(){};
 
+    virtual std::string _getColorbarVariableName() const;
+
     virtual void        _setShaderUniforms(const ShaderProgram *shader, const bool fast) const;
     void                _drawScreenQuad();
     void                _drawScreenQuadChuncked();
