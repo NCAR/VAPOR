@@ -59,7 +59,6 @@ void VFileSelector::OpenFileDialog() {
     std::string file = _launchFileDialog();
     if ( SetValue( file ) ) {
         emit ValueChanged( _filePath );
-        std::cout << "VFileSelector " << _filePath << std::endl;
     } 
 }
 
