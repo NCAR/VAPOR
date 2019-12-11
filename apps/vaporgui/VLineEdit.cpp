@@ -6,12 +6,14 @@
 #include <QMenu>
 
 #include "VLineEdit.h"
+#include "ErrorReporter.h"
 
 VLineEdit::VLineEdit( const std::string& value )
 : VContainer( this ),
   _value( value ),
   _isDouble( false ),
   _scientific( false ),
+  _menuEnabled( false ),
   _decDigits( 4 )
 {
     _lineEdit = new QLineEdit;
@@ -20,8 +22,9 @@ VLineEdit::VLineEdit( const std::string& value )
 
     connect( _lineEdit, SIGNAL( editingFinished() ),
         this, SLOT( emitLineEditChanged() ) );
+}
 
-    // Qt is currently crashing if QMenu is given a parent
+void VLineEdit::UseMenu() {
     _menu = new QMenu();
     
     SpinBoxAction* decimalAction = new SpinBoxAction(tr("Decimal digits"), _decDigits);
@@ -53,13 +56,15 @@ void VLineEdit::SetValue( const std::string& value ) {
             dValue = std::stod( value );
         }
         catch (...) {
-            std::cerr << "VLineEDit::SetValue failed to set value of " << value << std::endl;
+            MSG_ERR("VLineEDit::SetValue failed to set value of " + value );
         }
 
         std::stringstream stream;
-        stream << std::fixed << std::setprecision( _decDigits );
-        if (_scientific)
-            stream << std::scientific;
+        if (_menuEnabled) {
+            stream << std::fixed << std::setprecision( _decDigits );
+            if (_scientific)
+                stream << std::scientific;
+        }
         stream << dValue << std::endl;
         _value = stream.str();
     }
@@ -87,13 +92,15 @@ void VLineEdit::emitLineEditChanged() {
 }
 
 void VLineEdit::ShowContextMenu( const QPoint& pos ) {
-    QPoint globalPos = _lineEdit->mapToGlobal(pos);
+    if ( !_menuEnabled )
+        return;
 
-    QAction* selectedItem = _menu->exec(globalPos);
-    if (selectedItem)
-        std::cout << "Booga" << std::endl;
-    else
-        std::cout << "no Booga" << std::endl;
+    QPoint globalPos = _lineEdit->mapToGlobal(pos);
+    _menu->exec(globalPos);
+
+    //QAction* selectedItem = _menu->exec(globalPos);
+    //if (selectedItem)
+    //else
 }
 
 void VLineEdit::_decimalDigitsChanged( int value ) {

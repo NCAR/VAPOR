@@ -7,6 +7,11 @@
 
 #include "VContainer.h"
 
+//! class VCheckBox
+//!
+//! Wraps a QCheckBox and provides vaporgui's standard setter/getter functions
+//! and signals.
+
 class VCheckBox : public VContainer {
     Q_OBJECT
 

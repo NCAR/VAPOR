@@ -11,6 +11,11 @@
 
 #include "VContainer.h"
 
+//! class VLineEdit
+//! Wraps a QLineEdit with vaporgui's standard setter/getter functions.
+//! Handles string and double types, as well as precision and display of
+//! double values.
+
 class VLineEdit : public VContainer {
     Q_OBJECT
 
@@ -24,12 +29,16 @@ public:
 
     void SetIsDouble( bool isDouble );
 
+    void UseMenu();
+
 private:
     QLineEdit*  _lineEdit;
     QMenu*      _menu;
     std::string _value;
+
     bool        _isDouble;
     bool        _scientific;
+    bool        _menuEnabled;
     int         _decDigits;
 
 public slots:

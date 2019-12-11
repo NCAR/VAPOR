@@ -3,6 +3,13 @@
 #include <QWidget>
 #include "QRangeSliderTextCombo.h"
 
+
+//! class VGeometry2
+//!
+//! Wraps three QRangeSliderCombo objects and provides vaporgui's standard 
+//! setter/getter functions and signals.  This is used to select a 2D or 3D 
+//! region within Vapor's scene.
+
 class VGeometry2 : public QWidget
 {
     Q_OBJECT

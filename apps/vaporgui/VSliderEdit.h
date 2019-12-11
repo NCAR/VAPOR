@@ -6,6 +6,11 @@
 class VSlider;
 class VLineEdit;
 
+//! class VSliderEdit
+//!
+//! Wraps a VSlider and a VLineEdit for selecting a numeric value within a
+//! defined range.  Allows for integer and double value types.  This class
+//! also provides vaporgui's standard setter/getter functions and signals.
 class VSliderEdit : public VContainer {
     Q_OBJECT
 
