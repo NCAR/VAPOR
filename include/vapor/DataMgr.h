@@ -231,7 +231,7 @@ public:
 	timecoords = _timeCoordinates;
  };
 
- std::vector <double> GetTimeCoordinates() const {
+ const std::vector <double> &GetTimeCoordinates() const {
 	return(_timeCoordinates);
  };
 

@@ -462,6 +462,30 @@ int DataMgrUtils::GetDefaultMetaInfoStride(DataMgr *dataMgr, std::string varname
             return stride;
 }
 
+string DataMgrUtils::GetFirstExistingVariable(
+	DataMgr *dataMgr, int level, int lod, int ndim
+) {
+	size_t numTS = dataMgr->GetTimeCoordinates().size();
+	for (size_t ts = 0; ts<numTS; ts++) {
+		string varname = GetFirstExistingVariable(dataMgr, ts, level, lod,ndim);
+		if (! varname.empty()) return(varname);
+	}
+	return("");
+		
+}
+
+string DataMgrUtils::GetFirstExistingVariable(
+	DataMgr *dataMgr, size_t ts, int level, int lod, int ndim
+) {
+	vector <string> varnames = dataMgr->GetDataVarNames(ndim);
+	for (int i=0; i<varnames.size(); i++) {
+		if (dataMgr->VariableExists(ts, varnames[i], level, lod)) {
+			return(varnames[i]);
+		}
+	}
+	return("");
+}
+
 #ifdef	VAPOR3_0_0_ALPHA
 //Map corners of box to voxels.  
 void DataMgrUtils::mapBoxToVox(
