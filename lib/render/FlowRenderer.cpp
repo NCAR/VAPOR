@@ -53,6 +53,10 @@ FlowRenderer::~FlowRenderer()
     }
 }
 
+std::string FlowRenderer::_getColorbarVariableName() const
+{
+    return GetActiveParams()->GetColorMapVariableName();
+}
 
 int
 FlowRenderer::_initializeGL()
