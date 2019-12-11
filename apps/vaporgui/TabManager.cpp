@@ -78,6 +78,7 @@ TabManager::TabManager(QWidget *parent, ControlExec *ce)
 
 void TabManager::SetActiveRenderer(string activeViz, string renderClass, string renderInst)
 {
+cout << "TabManager::SetActiveRenderer " << activeViz << " " << renderClass << " " << renderInst << endl;
     if (renderClass.empty() || renderInst.empty()) {
         HideRenderWidgets();
         return;

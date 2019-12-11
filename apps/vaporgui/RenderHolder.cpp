@@ -390,6 +390,8 @@ void RenderHolder::_deleteRenderer() {
 	);
 	VAssert(rc == 0);
 
+    cout << "RenderHolder removing " << activeViz << " " << dataSetName << " " << rendererType << " " << rendererName << endl;
+
 	_controlExec->RemoveRenderer(
 		activeViz, dataSetName, rendererType, rendererName, false
 	);
