@@ -2,10 +2,12 @@
 #include <QHBoxLayout>
 #include <QLabel>
 
-#define LEFT_MARGIN    0
-#define TOP_MARGIN     0
-#define RIGHT_MARGIN   0
-#define BOTTOM_MARGIN  0
+namespace {
+    int LEFT_MARGIN    0
+    int TOP_MARGIN     0
+    int RIGHT_MARGIN   0
+    int BOTTOM_MARGIN  0
+}
 
 VLineItem::VLineItem(const std::string &label, QLayoutItem *centerItem, QWidget *rightWidget)
 {

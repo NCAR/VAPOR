@@ -7,18 +7,16 @@
 
 #include "VLineItem.h"
 
-#define LEFT_MARGIN 0
-#define TOP_MARGIN 0
-#define RIGHT_MARGIN 0
-#define BOTTOM_MARGIN  0
+namespace {
+    int LEFT_MARGIN 0
+    int TOP_MARGIN 0
+    int RIGHT_MARGIN 0
+    int BOTTOM_MARGIN  0
+}
 
 class VContainer : public QWidget {
     Q_OBJECT
 
-public:
-    void Hide(); 
-    void Show();
-    
 protected:
     VContainer( QWidget* containee );
 };

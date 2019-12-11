@@ -9,7 +9,7 @@
 #include "ErrorReporter.h"
 
 VLineEdit::VLineEdit( const std::string& value )
-: VContainer( this ),
+: VContainer(),
   _menu( nullptr ),
   _value( value ),
   _isDouble( false ),
