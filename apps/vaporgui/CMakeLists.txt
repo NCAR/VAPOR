@@ -121,7 +121,7 @@ set (SRCS
     VSliderEdit.h
     VPushButton.cpp
     VPushButton.h
-    VPushButtonWithDoubleClick.h
+    QPushButtonWithDoubleClick.h
     VFileSelector.cpp
     VFileSelector.h
     VFrame.h
