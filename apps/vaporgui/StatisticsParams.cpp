@@ -26,7 +26,6 @@
 
 using namespace VAPoR;
 
-const string StatisticsParams::_minTSTag = "MinTS";
 const string StatisticsParams::_maxTSTag = "MaxTS";
 const string StatisticsParams::_autoUpdateTag = "AutoUpdate";
 const string StatisticsParams::_minEnabledTag = "MinEnabled";
@@ -54,10 +53,6 @@ StatisticsParams::~StatisticsParams() { MyBase::SetDiagMsg("StatisticsParams::~S
 bool StatisticsParams::GetAutoUpdateEnabled() { return (GetValueLong(_autoUpdateTag, (long)false)); }
 
 void StatisticsParams::SetAutoUpdateEnabled(bool val) { SetValueLong(_autoUpdateTag, "if we want stats auto-update", (long)val); }
-
-int StatisticsParams::GetCurrentMinTS() const { return (int)(GetValueDouble(_minTSTag, 0.0)); }
-
-void StatisticsParams::SetCurrentMinTS(int ts) { SetValueDouble(_minTSTag, "Minimum selected timestep for statistics", (double)ts); }
 
 int StatisticsParams::GetCurrentMaxTS() const { return (int)(GetValueDouble(_maxTSTag, 0.0)); }
 
