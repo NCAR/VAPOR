@@ -17,11 +17,11 @@ VSlider::VSlider( double min, double max )
     SetValue( (max-min) / 2 );
     layout()->addWidget(_slider);
 
-    connect( _slider, SIGNAL( sliderMoved( int ) ),
-        this, SLOT( _sliderChangedIntermediate( int ) ) );
-    
-    connect( _slider, SIGNAL( sliderReleased() ),
-        this, SLOT( _sliderChanged() ) );
+    connect( _slider, &QSlider::sliderMoved,
+        this, &VSlider::_sliderChangedIntermediate );
+
+    connect( _slider, &QSlider::sliderReleased,
+        this, &VSlider::_sliderChanged );
 }
 
 void VSlider::SetValue( double value ) {
@@ -42,9 +42,16 @@ void VSlider::SetRange( double min, double max ) {
     _maxValid = max;
 }
 
-double VSlider::GetValue() const {
+double VSlider::GetValue( bool released = false ) const {
     int sliderVal = _slider->value();
-    
+
+    // QSlider likes to report its value+1 when the mouse is released,
+    // so undo that adjustment here
+    //if ( released )
+    //    sliderVal--;
+
+    std::cout << "Slider val " << sliderVal << std::endl;   
+ 
     // Return min/max values if the slider is at the end.
     // note - Qt does not move the sliders to positions 0, 1, 99, or 100 until
     // the mouse is released.  
@@ -58,11 +65,12 @@ double VSlider::GetValue() const {
 }
 
 void VSlider::_sliderChanged() {
-    double value = GetValue();
+    double value = GetValue( true );
     emit ValueChanged( value );
 }
 
 void VSlider::_sliderChangedIntermediate( int position ) {
     double value = GetValue();
+    std::cout << "VSlider:: " << value << std::endl;
     emit ValueChangedIntermediate( value );
 }

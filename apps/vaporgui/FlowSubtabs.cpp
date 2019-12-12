@@ -107,8 +107,8 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
     _geometryWriterSection->layout()->addWidget( new VLineItem("Target file", _geometryWriterSelector) );
     _geometryWriterExecutor = new VPushButton("Write to file");
     _geometryWriterSection->layout()->addWidget( new VLineItem("", _geometryWriterExecutor) );
-    connect( _geometryWriterExecutor, SIGNAL( ButtonClicked() ),
-        this, SLOT( _geometryWriterClicked() ) );
+    connect( _geometryWriterExecutor, &VPushButton::ButtonClicked,
+        this, &FlowSeedingSubtab::_geometryWriterClicked );
     layout()->addWidget( _geometryWriterSection );
 }
 
@@ -119,8 +119,8 @@ void FlowSeedingSubtab::_createSeedingSection( QWidget* parent ) {
     std::vector<std::string> values = {GRIDDED_STRING, RANDOM_STRING, LIST_STRING};
     _seedTypeCombo = new VComboBox(values);
     _seedDistributionSection->layout()->addWidget( new VLineItem("Seed distribution type", _seedTypeCombo ));
-    connect( _seedTypeCombo, SIGNAL( ValueChanged( std::string )),
-        this, SLOT( _configureSeedType( std::string )));
+    connect( _seedTypeCombo, &VComboBox::ValueChanged,
+        this, &FlowSeedingSubtab::_configureSeedType );
 
     // Gridded seed selection
     _griddedSeedsFrame = new VFrame();
@@ -130,25 +130,25 @@ void FlowSeedingSubtab::_createSeedingSection( QWidget* parent ) {
     _xSeedSliderEdit->SetIntType(true);
     _xSeedSliderEdit->SetRange( MIN_AXIS_SEEDS, MAX_AXIS_SEEDS );
     _griddedSeedsFrame->addWidget( new VLineItem( "X axis seeds", _xSeedSliderEdit ) );
-    connect( _xSeedSliderEdit, SIGNAL( ValueChanged( int ) ),
-        this, SLOT( _rakeNumOfSeedsChanged() ) );
+    connect( _xSeedSliderEdit, &VSliderEdit::ValueChangedInt,
+        this, &FlowSeedingSubtab::_rakeNumOfSeedsChanged );
     _ySeedSliderEdit = new VSliderEdit();
     _ySeedSliderEdit->SetIntType(true);
     _ySeedSliderEdit->SetRange( MIN_AXIS_SEEDS, MAX_AXIS_SEEDS );
     _griddedSeedsFrame->addWidget( new VLineItem("Y axis seeds", _ySeedSliderEdit ) );
-    connect( _ySeedSliderEdit, SIGNAL( ValueChanged( int ) ),
-        this, SLOT( _rakeNumOfSeedsChanged() ) );
+    connect( _ySeedSliderEdit, &VSliderEdit::ValueChangedInt,
+        this, &FlowSeedingSubtab::_rakeNumOfSeedsChanged );
     _zSeedSliderEdit = new VSliderEdit();
     _zSeedSliderEdit->SetIntType(true);
     _zSeedSliderEdit->SetRange( MIN_AXIS_SEEDS, MAX_AXIS_SEEDS );
     _griddedSeedsFrame->addWidget( new VLineItem("Z axis seeds", _zSeedSliderEdit ) );
-    connect( _zSeedSliderEdit, SIGNAL( ValueChanged( int ) ),
-        this, SLOT( _rakeNumOfSeedsChanged() ) );
+    connect( _zSeedSliderEdit, &VSliderEdit::ValueChangedInt,
+        this, &FlowSeedingSubtab::_rakeNumOfSeedsChanged );
 
     // List of seeds selection
     _listOfSeedsFileReader = new VFileReader();
-    connect( _listOfSeedsFileReader, SIGNAL( ValueChanged( const std::string& ) ),
-        this, SLOT( _seedListFileChanged( const std::string& ) ) );
+    connect( _listOfSeedsFileReader, &VFileReader::ValueChanged,
+        this, &FlowSeedingSubtab::_seedListFileChanged );
     _listOfSeedsFrame = new VFrame();
     _listOfSeedsFrame->addWidget( new VLineItem("List of seeds file", _listOfSeedsFileReader ) );
     _seedDistributionSection->layout()->addWidget( _listOfSeedsFrame );
@@ -160,26 +160,26 @@ void FlowSeedingSubtab::_createSeedingSection( QWidget* parent ) {
     _randomSeedsSliderEdit = new VSliderEdit( MIN_RANDOM_SEEDS, MAX_RANDOM_SEEDS );
     _randomSeedsSliderEdit->SetIntType( true );
     _randomSeedsFrame->addWidget( new VLineItem("Seed count", _randomSeedsSliderEdit ) );
-    connect( _randomSeedsSliderEdit, SIGNAL( ValueChanged( int ) ),
-        this, SLOT( _rakeNumOfSeedsChanged() ) );
+    connect( _randomSeedsSliderEdit, &VSliderEdit::ValueChanged,
+        this, &FlowSeedingSubtab::_rakeNumOfSeedsChanged );
 
     _biasWeightSliderEdit = new VSliderEdit(-1, 1, 0);
     _randomSeedsFrame->addWidget( new VLineItem( "Bias weight", _biasWeightSliderEdit ) );
-    connect( _biasWeightSliderEdit, SIGNAL( ValueChanged( double ) ),
-        this, SLOT( _biasStrengthChanged( double ) ) );
+    connect( _biasWeightSliderEdit, &VSliderEdit::ValueChanged,
+        this, &FlowSeedingSubtab::_biasStrengthChanged );
 
     _biasVariableComboBox = new VComboBox( std::vector<std::string>() );
     _randomSeedsFrame->addWidget( new VLineItem( "Bias variable", _biasVariableComboBox ) );
-    connect( _biasVariableComboBox, SIGNAL( ValueChanged( const std::string& ) ),
-        this, SLOT( _biasVariableChanged( const std::string& ) ) );
+    connect( _biasVariableComboBox, &VComboBox::ValueChanged,
+        this, &FlowSeedingSubtab::_biasVariableChanged );
     
     // Rake selector
     _rakeRegionSection = new VSection("Rake Region");
     layout()->addWidget( _rakeRegionSection );
     _rakeWidget = new VGeometry2();
     _rakeRegionSection->layout()->addWidget( _rakeWidget );
-    connect( _rakeWidget, SIGNAL( ValueChanged( const std::vector<float>& ) ),
-        this, SLOT( _rakeGeometryChanged( const std::vector<float>& ) ) );
+    connect( _rakeWidget, &VGeometry2::ValueChanged,
+        this, &FlowSeedingSubtab::_rakeGeometryChanged );
 
     VAssert(parent);
     connect(parent, SIGNAL(currentChanged(int)), this, SLOT(_selectedTabChanged(int)));
@@ -195,8 +195,8 @@ void FlowSeedingSubtab::_createIntegrationSection() {
     //
     std::vector<std::string> values = {STEADY_STRING, UNSTEADY_STRING};
     _flowTypeCombo = new VComboBox(values);
-    connect( _flowTypeCombo, SIGNAL( ValueChanged( std::string )),
-        this, SLOT( _configureFlowType( std::string )));
+    connect( _flowTypeCombo, &VComboBox::ValueChanged,
+        this, &FlowSeedingSubtab::_configureFlowType );
     _integrationSection->layout()->addWidget( new VLineItem("Flow type", _flowTypeCombo ));
 
     _streamlineFrame = new VFrame();
@@ -204,14 +204,14 @@ void FlowSeedingSubtab::_createIntegrationSection() {
 
     values = { "Forward", "Backward", "Bi-Directional" };
     _streamlineDirectionCombo = new VComboBox(values);
-    connect( _streamlineDirectionCombo, SIGNAL( ValueChanged( int )),
-        this, SLOT( _streamlineDirectionChanged( int ) ) );
+    connect( _streamlineDirectionCombo, &VComboBox::IndexChanged,
+        this, &FlowSeedingSubtab::_streamlineDirectionChanged );
     _streamlineFrame->addWidget( new VLineItem("Flow direction", _streamlineDirectionCombo) );
 
     _streamlineSamplesSliderEdit = new VSliderEdit();
     _streamlineSamplesSliderEdit->SetIntType(true);
-    connect( _streamlineSamplesSliderEdit, SIGNAL( ValueChanged( int ) ),
-        this, SLOT( _streamlineSamplesChanged( int ) ) );
+    connect( _streamlineSamplesSliderEdit, &VSliderEdit::ValueChangedInt,
+        this, &FlowSeedingSubtab::_streamlineSamplesChanged );
     _streamlineFrame->addWidget( new VLineItem("Integration steps", _streamlineSamplesSliderEdit));
 
     // Unsteady flow options
@@ -221,34 +221,34 @@ void FlowSeedingSubtab::_createIntegrationSection() {
 
     _pathlineLengthSliderEdit = new VSliderEdit();
     _pathlineLengthSliderEdit->SetIntType(true);
-    connect( _pathlineLengthSliderEdit, SIGNAL( ValueChanged( int ) ),
-        this, SLOT( _pathlineLengthChanged( int ) ) );
+    connect( _pathlineLengthSliderEdit, &VSliderEdit::ValueChangedInt,
+        this, &FlowSeedingSubtab::_pathlineLengthChanged );
     _pathlineFrame->addWidget( new VLineItem("Streamline length", _pathlineLengthSliderEdit));
 
     _pathlineStartSliderEdit= new VSliderEdit();
     _pathlineStartSliderEdit->SetIntType(true);
-    connect( _pathlineStartSliderEdit, SIGNAL( ValueChanged( int ) ),
-        this, SLOT( _pathlineStartTimeChanged( int ) ) );
+    connect( _pathlineStartSliderEdit, &VSliderEdit::ValueChangedInt,
+        this, &FlowSeedingSubtab::_pathlineStartTimeChanged );
     _pathlineFrame->addWidget( new VLineItem("Injection start time", _pathlineStartSliderEdit));
     _pathlineStartSliderEdit->setEnabled(false);
 
     _pathlineEndSliderEdit = new VSliderEdit();
     _pathlineEndSliderEdit->SetIntType(true);
-    connect( _pathlineEndSliderEdit, SIGNAL( ValueChanged( int ) ),
-        this, SLOT( _pathlineEndTimeChanged( int ) ) );
+    connect( _pathlineEndSliderEdit, &VSliderEdit::ValueChangedInt,
+        this, &FlowSeedingSubtab::_pathlineEndTimeChanged );
     _pathlineFrame->addWidget( new VLineItem("Injection end time", _pathlineEndSliderEdit));
     _pathlineEndSliderEdit->setEnabled(false);
     
     _pathlineInjIntervalSliderEdit = new VSliderEdit();
     _pathlineInjIntervalSliderEdit->SetIntType(true);
-    connect( _pathlineInjIntervalSliderEdit,  SIGNAL( ValueChanged( int ) ), 
-        this, SLOT( _seedInjIntervalChanged(int) ));
+    connect( _pathlineInjIntervalSliderEdit,  &VSliderEdit::ValueChangedInt, 
+        this, &FlowSeedingSubtab::_seedInjIntervalChanged );
     _pathlineFrame->addWidget( new VLineItem("Injection interval", _pathlineInjIntervalSliderEdit));
 
     _pathlineLifetimeSliderEdit = new VSliderEdit();
     _pathlineLifetimeSliderEdit->SetIntType(true);
-    connect( _pathlineLifetimeSliderEdit,  SIGNAL( ValueChanged( int ) ), 
-        this, SLOT( _pathlineLifetimeChanged(int) ) );
+    connect( _pathlineLifetimeSliderEdit,  &VSliderEdit::ValueChangedInt, 
+        this, &FlowSeedingSubtab::_pathlineLifetimeChanged );
     _pathlineFrame->addWidget( new VLineItem("Seed lifetime", _pathlineLifetimeSliderEdit) );
     _pathlineLifetimeSliderEdit->setEnabled(false);
 
@@ -257,23 +257,23 @@ void FlowSeedingSubtab::_createIntegrationSection() {
     _velocityMultiplierLineEdit = new VLineEdit();
     _velocityMultiplierLineEdit->SetIsDouble( true );
     _velocityMultiplierLineEdit->UseDoubleMenu();
-    connect( _velocityMultiplierLineEdit, SIGNAL( ValueChanged( const std::string& ) ),
-        this, SLOT( _velocityMultiplierChanged( const std::string& ) ) );
+    connect( _velocityMultiplierLineEdit, &VLineEdit::ValueChanged,
+        this, &FlowSeedingSubtab::_velocityMultiplierChanged );
     _integrationSection->layout()->addWidget( new VLineItem("Vector field  multiplier", _velocityMultiplierLineEdit));
 
     // Periodicity Checkboxes
     //
     _periodicXCheckBox = new VCheckBox();
-    connect( _periodicXCheckBox, SIGNAL( ValueChanged( bool )),
-        this, SLOT( _periodicClicked() ) );
+    connect( _periodicXCheckBox, &VCheckBox::ValueChanged,
+        this, &FlowSeedingSubtab::_periodicClicked);
     _integrationSection->layout()->addWidget( new VLineItem("X axis periodicity", _periodicXCheckBox));
     _periodicYCheckBox = new VCheckBox();
-    connect( _periodicYCheckBox, SIGNAL( ValueChanged( bool )),
-        this, SLOT( _periodicClicked() ) );
+    connect( _periodicYCheckBox, &VCheckBox::ValueChanged,
+        this, &FlowSeedingSubtab::_periodicClicked);
     _integrationSection->layout()->addWidget( new VLineItem("Y axis periodicity", _periodicYCheckBox));
     _periodicZCheckBox = new VCheckBox();
-    connect( _periodicZCheckBox, SIGNAL( ValueChanged( bool )),
-        this, SLOT( _periodicClicked() ) );
+    connect( _periodicZCheckBox, &VCheckBox::ValueChanged,
+        this, &FlowSeedingSubtab::_periodicClicked);
     _integrationSection->layout()->addWidget( new VLineItem("Z axis periodicity", _periodicZCheckBox));
 
     _configureFlowType(STEADY_STRING);

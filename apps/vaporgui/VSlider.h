@@ -21,7 +21,8 @@ public:
     void SetValue( double value );
     void SetRange( double min, double max );
 
-    double GetValue() const;
+    double GetValue( bool released ) const;
+
 
 private:
     QSlider* _slider;
