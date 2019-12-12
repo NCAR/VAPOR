@@ -7,6 +7,11 @@
 
 #include "VContainer.h"
 
+//! class VSpinBox
+//!
+//! Wraps a QDoubleSpinBox and provides vaporgui's standard setter/getter 
+//! functions and signals.
+
 class VDoubleSpinBox : public VContainer {
     Q_OBJECT
 

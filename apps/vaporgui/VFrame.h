@@ -2,6 +2,11 @@
 
 #include <QWidget>
 
+
+//! \class VFrame
+//!
+//! A simple class that sets a layout, spacing, and margin
+//! policy onto a QFrame for consistency throughout the application.
 class VFrame : public QFrame {
     Q_OBJECT
     

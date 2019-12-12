@@ -7,6 +7,11 @@
 
 #include "VContainer.h"
 
+//! \class VPushButton
+//!
+//! Wraps a QPushButton with vaporgui's VContainer, so that
+//! the QPushButton follows correct size policy
+
 class VPushButton : public VContainer {
     Q_OBJECT
 

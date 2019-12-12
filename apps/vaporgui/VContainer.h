@@ -7,6 +7,12 @@
 
 #include "VLineItem.h"
 
+//! \class VContainer
+//!
+//! A simple wrapper class for one or more VWidgets.
+//! Sets a standard layout and margin policy, and protects
+//! against unwanted mouse scroll whell events.
+
 class VContainer : public QWidget {
     Q_OBJECT
 

@@ -11,7 +11,8 @@
 
 #include "VContainer.h"
 
-//! class VLineEdit
+//! \class VLineEdit
+//!
 //! Wraps a QLineEdit with vaporgui's standard setter/getter functions.
 //! Handles string and double types, as well as precision and display of
 //! double values.
