@@ -171,7 +171,7 @@ int main(int argc, char **argv)
 
     float *slice = new float[nelements];
 
-    FILE *fp = fopen(datafile.c_str(), "r");
+    FILE *fp = fopen(datafile.c_str(), "rb");
     if (!fp) {
         MyBase::SetErrMsg("fopen(%s) : %M", datafile.c_str());
         exit(1);
