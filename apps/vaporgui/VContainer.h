@@ -18,6 +18,12 @@ class VContainer : public QWidget {
 
 protected:
     VContainer();
+
+private:
+    static const int _LEFT_MARGIN;
+    static const int _TOP_MARGIN;
+    static const int _RIGHT_MARGIN;
+    static const int _BOTTOM_MARGIN;
 };
 
 // Helper object for disabling the mouse scroll-wheel on a given widget.

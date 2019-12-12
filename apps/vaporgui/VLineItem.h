@@ -15,4 +15,10 @@ public:
     VLineItem(const std::string &label, QLayoutItem *centerItem, QWidget *rightWidget);
     VLineItem(const std::string &label, QWidget *centerWidget, QWidget *rightWidget);
     VLineItem(const std::string &label, QWidget *rightWidget);
+
+private:
+    static const int _LEFT_MARGIN;
+    static const int _TOP_MARGIN;
+    static const int _BOTTOM_MARGIN;
+    static const int _RIGHT_MARGIN;
 };
