@@ -80,19 +80,32 @@ void Histo::reset(int newNumBins, float mnData, float mxData)
 
 void Histo::addToBin(float val)
 {
+    // The additional checks below are because
+    // 1. The data min/max are imperfect, e.g. calculated max is 1 but E value of 1.1
+    // 2. Float precision errors, e.g.
+    //    >  Range is 0 - 1, outer range is -1 - 2
+    //    >  val = -0.00000000001 so it is below
+    //    >  -0.00000000001 - -1 = -1
+    //    >  0 - -1 = 1
+    //    >  1 * array size = out of bounds
+
     if (val < _minMapData) {
         _numSamplesBelow++;
         if (_below) {
             assert(_minMapData - _minData > 0);
             int index = (val - _minData) / (_minMapData - _minData) * _nBinsBelow;
-            _below[index]++;
+
+            if (index >= _nBinsBelow) index = _nBinsBelow - 1;
+            if (index >= 0) _below[index]++;
         }
     } else if (val > _maxMapData) {
         _numSamplesAbove++;
         if (_above) {
             assert(_maxData - _maxMapData > 0);
             int index = (val - _maxMapData) / (_maxData - _maxMapData) * _nBinsAbove;
-            _above[index]++;
+
+            if (index < 0) index = 0;
+            if (index < _nBinsAbove) _above[index]++;
         }
     } else {
         int intVal = 0;
@@ -100,7 +113,9 @@ void Histo::addToBin(float val)
             intVal = 0;
         else
             intVal = (int)((val - _minMapData) / _range * (float)_numBins);
-        intVal = intVal < _numBins ? intVal : _numBins - 1;
+
+        if (intVal < 0) intVal = 0;
+        if (intVal >= _numBins) intVal = _numBins - 1;
         _binArray[intVal]++;
     }
 }
