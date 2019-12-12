@@ -28,7 +28,7 @@ private:
     QComboBox* _combo;
 
 public slots:
-    void emitComboChanged( QString value);
+    void emitComboChanged( const QString &value);
 
 signals:
     void ValueChanged( std::string value );

@@ -21,16 +21,16 @@ VLineEdit::VLineEdit( const std::string& value )
     SetValue( _value );
     layout()->addWidget(_lineEdit);
 
-    connect( _lineEdit, SIGNAL( editingFinished() ),
-        this, SLOT( emitLineEditChanged() ) );
+    connect( _lineEdit, &QLineEdit::editingFinished,
+        this, &VLineEdit::emitLineEditChanged);
 }
 
 void VLineEdit::UseDoubleMenu() {
     _menuEnabled = true;
 
     _lineEdit->setContextMenuPolicy( Qt::CustomContextMenu );
-    connect( _lineEdit, SIGNAL( customContextMenuRequested( const QPoint& ) ),
-        this, SLOT( ShowContextMenu( const QPoint& ) ) );
+    connect( _lineEdit, &QLineEdit::customContextMenuRequested,
+        this, &VLineEdit::ShowContextMenu );
 }
 
 void VLineEdit::SetValue( const std::string& value ) {
@@ -83,13 +83,13 @@ void VLineEdit::ShowContextMenu( const QPoint& pos ) {
     QMenu menu;
     
     SpinBoxAction* decimalAction = new SpinBoxAction(tr("Decimal digits"), _decDigits);
-    connect( decimalAction, SIGNAL( editingFinished( int ) ),
-        this, SLOT( _decimalDigitsChanged( int ) ) );
+    connect( decimalAction, &SpinBoxAction::editingFinished,
+        this, &VLineEdit::_decimalDigitsChanged );
     menu.addAction(decimalAction);
 
     CheckBoxAction* checkBoxAction = new CheckBoxAction(tr("Scientific"), _scientific);
-    connect( checkBoxAction, SIGNAL( clicked( bool ) ),
-        this, SLOT( _scientificClicked( bool ) ) );
+    connect( checkBoxAction, &CheckBoxAction::clicked,
+        this, &VLineEdit::_scientificClicked );
     menu.addAction(checkBoxAction);
 
     QPoint globalPos = _lineEdit->mapToGlobal(pos);

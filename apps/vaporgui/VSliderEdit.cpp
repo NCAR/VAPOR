@@ -86,7 +86,6 @@ void VSliderEdit::_lineEditChanged( const std::string& value ) {
 void VSliderEdit::_sliderChanged( double value ) {
     SetValue( value );
     if (_isIntType) {
-        std::cout << "_sliderChanged " << (int)_value << std::endl;
         emit ValueChangedInt( (int)_value );
     }
     else
@@ -95,7 +94,6 @@ void VSliderEdit::_sliderChanged( double value ) {
 
 void VSliderEdit::_sliderChangedIntermediate( double value ) {
     if (_isIntType) {
-        std::cout << "_sliderChangedInt " << (int)value << std::endl;
         _lineEdit->SetValue( std::to_string( (int)value ) );
         emit ValueChangedIntIntermediate( (int)value );
     }

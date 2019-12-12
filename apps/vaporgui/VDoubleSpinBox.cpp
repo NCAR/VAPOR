@@ -8,8 +8,8 @@ VDoubleSpinBox::VDoubleSpinBox( double min, double max )
     SetValue( min );
     layout()->addWidget(_spinBox);
 
-    connect( _spinBox, SIGNAL( editingFinished() ),
-        this, SLOT( emitSpinBoxChanged() ) );
+    connect( _spinBox, &QDoubleSpinBox::editingFinished,
+        this, &VDoubleSpinBox::emitSpinBoxChanged;
 }
 
 

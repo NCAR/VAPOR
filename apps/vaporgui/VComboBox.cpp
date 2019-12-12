@@ -12,6 +12,8 @@ VComboBox::VComboBox( const std::vector<std::string> &values )
     layout()->addWidget(_combo);
     SetOptions( values );
 
+    // We are forced to used SIGNAL/SLOT macros here because there are two
+    // signatures for QComboBox::currentIndexChanged
     connect( _combo, SIGNAL( currentIndexChanged( QString ) ),
         this, SLOT( emitComboChanged( QString ) ) );
 }
@@ -57,7 +59,7 @@ int VComboBox::GetCount() const {
     return _combo->count();
 }
 
-void VComboBox::emitComboChanged( QString value ) {
+void VComboBox::emitComboChanged( const QString &value ) {
     emit ValueChanged( value.toStdString() );
     emit IndexChanged( _combo->currentIndex() );
 }

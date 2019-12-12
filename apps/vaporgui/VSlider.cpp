@@ -45,13 +45,6 @@ void VSlider::SetRange( double min, double max ) {
 double VSlider::GetValue( bool released = false ) const {
     int sliderVal = _slider->value();
 
-    // QSlider likes to report its value+1 when the mouse is released,
-    // so undo that adjustment here
-    //if ( released )
-    //    sliderVal--;
-
-    std::cout << "Slider val " << sliderVal << std::endl;   
- 
     // Return min/max values if the slider is at the end.
     // note - Qt does not move the sliders to positions 0, 1, 99, or 100 until
     // the mouse is released.  
@@ -71,6 +64,5 @@ void VSlider::_sliderChanged() {
 
 void VSlider::_sliderChangedIntermediate( int position ) {
     double value = GetValue();
-    std::cout << "VSlider:: " << value << std::endl;
     emit ValueChangedIntermediate( value );
 }

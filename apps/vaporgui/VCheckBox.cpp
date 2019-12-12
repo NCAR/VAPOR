@@ -7,8 +7,8 @@ VCheckBox::VCheckBox( bool checked )
     SetValue( checked );
     layout()->addWidget(_checkBox);
 
-    connect( _checkBox, SIGNAL( clicked( bool ) ),
-        this, SLOT( emitCheckBoxChanged( bool ) ) );
+    connect( _checkBox, &QCheckBox::clicked,
+        this, &VCheckBox::emitCheckBoxChanged );
 }
 
 

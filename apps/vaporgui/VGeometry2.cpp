@@ -21,24 +21,24 @@ VGeometry2::VGeometry2() : QWidget()
 
     QHBoxLayout* xLayout = new QHBoxLayout;
     _xRange = new QRangeSliderTextCombo();
-    connect( _xRange, SIGNAL( ValueChanged( float, float ) ),
-        this, SLOT( _xRangeChanged( float, float ) ) );
+    connect( _xRange, &QRangeSliderTextCombo::ValueChanged,
+        this, &VGeometry2::_xRangeChanged );
     xLayout->addWidget( new QLabel("X") );
     xLayout->addWidget( _xRange );
     layout->addLayout(xLayout);
     
     QHBoxLayout* yLayout = new QHBoxLayout;
     _yRange = new QRangeSliderTextCombo();
-    connect( _yRange, SIGNAL( ValueChanged( float, float ) ),
-        this, SLOT( _yRangeChanged( float, float ) ) );
+    connect( _yRange, &QRangeSliderTextCombo::ValueChanged,
+        this, &VGeometry2::_yRangeChanged );
     yLayout->addWidget( new QLabel("Y") );
     yLayout->addWidget( _yRange );
     layout->addLayout( yLayout );
     
     QHBoxLayout* zLayout = new QHBoxLayout;
     _zRange = new QRangeSliderTextCombo();
-    connect( _zRange, SIGNAL( ValueChanged( float, float ) ),
-        this, SLOT( _zRangeChanged( float, float ) ) );
+    connect( _zRange, &QRangeSliderTextCombo::ValueChanged,
+        this, &VGeometry2::_zRangeChanged );
     zLayout->addWidget( new QLabel("Z") );
     zLayout->addWidget( _zRange );
     layout->addLayout( zLayout );

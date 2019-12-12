@@ -69,8 +69,8 @@ public:
         layout->addWidget (_spinBox);
         widget->setLayout (layout);
 
-        //connect( _spinBox, SIGNAL( editingFinished() ),
-        //    this, SLOT( spinBoxChanged() ) );
+        // We need to use SIGNAL/SLOT macros here because the arguments
+        // of the signal and slot do not match
         connect( _spinBox, SIGNAL( valueChanged( int ) ),
             this, SLOT( spinBoxChanged() ) );
 
@@ -108,8 +108,8 @@ public:
         layout->addWidget (_checkBox);
         widget->setLayout (layout);
 
-        connect( _checkBox, SIGNAL( clicked( bool ) ),
-            this, SLOT( checkBoxChanged( bool ) ) );
+        connect( _checkBox, &QCheckBox::clicked,
+            this, &CheckBoxAction::checkBoxChanged );
 
         setDefaultWidget(widget);
     }
