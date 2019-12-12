@@ -423,13 +423,6 @@ void AnnotationRenderer::InScenePaint(size_t ts)
 
     vector<string> names = m_paramsMgr->GetDataMgrNames();
     Transform *    t = vpParams->GetTransform(names[0]);
-    if (names.size()) {
-        Transform *tmp;
-        for (int i = 0; i < names.size(); i++) {
-            tmp = vpParams->GetTransform(names[i]);
-            if (tmp->GetScales()[Z] < t->GetScales()[Z]) *t = *tmp;
-        }
-    }
     applyTransform(t);
 
     double mvMatrix[16];
