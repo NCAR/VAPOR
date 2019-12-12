@@ -32,7 +32,7 @@ void VComboBox::SetOptions( const std::vector<std::string> &values)
 }
 
 void VComboBox::SetIndex( int index ) {
-    if (index > _combo->count()) 
+    if (index >= _combo->count()) 
         return;
 
     _combo->blockSignals(true);
