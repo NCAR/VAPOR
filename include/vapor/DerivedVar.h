@@ -439,7 +439,7 @@ public:
  virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
 
  virtual std::vector <string> GetInputs() const {
-	return(std::vector <string> ());
+	return(std::vector <string> {_wrfTimeVar});
  }
 
  virtual int GetDimLensAtLevel(
@@ -512,7 +512,7 @@ public:
  virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
 
  virtual std::vector <string> GetInputs() const {
-	return(std::vector <string> ());
+	return(std::vector <string> {_nativeTimeVar});
  }
 
  virtual int GetDimLensAtLevel(
@@ -574,7 +574,7 @@ public:
  virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
 
  virtual std::vector <string> GetInputs() const {
-	return(std::vector <string> ());
+	return(std::vector <string> {_inName});
  }
 
  virtual int GetDimLensAtLevel(
@@ -635,7 +635,7 @@ public:
  virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
 
  virtual std::vector <string> GetInputs() const {
-	return(std::vector <string> ());
+	return(std::vector <string> {_inName});
  }
 
  virtual int GetDimLensAtLevel(
@@ -698,7 +698,7 @@ public:
  virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
 
  virtual std::vector <string> GetInputs() const {
-	return(std::vector <string> ());
+	return(std::vector <string> {"PH", "PHB"});
  }
 
  virtual int GetDimLensAtLevel(
