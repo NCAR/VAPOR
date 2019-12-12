@@ -333,7 +333,10 @@ void RenderHolder::_deleteRenderer()
     // Get the currently selected renderer.
     //
     string rendererName, rendererType, dataSetName;
-    _getRowInfo(_currentRow, rendererName, rendererType, dataSetName);
+
+    rendererName = _getActiveRendererInst();
+    int row = _getRow(rendererName);
+    _getRowInfo(row, rendererName, rendererType, dataSetName);
 
     ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
     paramsMgr->BeginSaveStateGroup("Delete renderer");
