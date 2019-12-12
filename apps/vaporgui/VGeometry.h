@@ -15,7 +15,6 @@ public:
        values imply a 3D geometry. All other numbers are illegal. */
     VGeometry( QWidget* parent, int dim, const std::vector<float>& range );
 
-    ~VGeometry();
 
     /* Adjust the dimension and/or value ranges through this function.
        Argument range must contain 4 or 6 values organized in the following order:
