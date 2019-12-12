@@ -21,7 +21,7 @@ public:
     void SetValue( double value );
     void SetRange( double min, double max );
 
-    double GetValue( bool released ) const;
+    double GetValue( bool released = false ) const;
 
 
 private:

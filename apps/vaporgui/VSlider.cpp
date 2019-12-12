@@ -7,7 +7,10 @@
 #define NUM_STEPS 100
 
 VSlider::VSlider( double min, double max )
-: VContainer()
+: VContainer(),
+    _minValid(0.0),
+    _maxValid(0.0),
+    _stepSize(1.0)
 {
     _slider = new QSlider;
     _slider->setOrientation( Qt::Horizontal );
@@ -38,11 +41,14 @@ void VSlider::SetRange( double min, double max ) {
     VAssert( min <= max );
 
     _stepSize = ( max - min ) / NUM_STEPS;
+    if ( _stepSize <= 0 )
+        _stepSize = 1;
+
     _minValid = min;
     _maxValid = max;
 }
 
-double VSlider::GetValue( bool released = false ) const {
+double VSlider::GetValue( bool released ) const {
     int sliderVal = _slider->value();
 
     // Return min/max values if the slider is at the end.
