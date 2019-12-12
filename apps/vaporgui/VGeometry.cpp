@@ -29,7 +29,6 @@ VGeometry::VGeometry( QWidget* parent, int dim, const std::vector<float>& range 
     _layout->addWidget( _zrange );
 }
 
-VGeometry::~VGeometry() {}
 
 void
 VGeometry::SetDimAndRange( int dim, const std::vector<float>& range )
