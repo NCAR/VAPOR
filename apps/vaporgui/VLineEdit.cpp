@@ -10,7 +10,7 @@
 
 VLineEdit::VLineEdit( const std::string& value )
 : VContainer(),
-  _menu( nullptr ),
+  //_menu( nullptr ),
   _value( value ),
   _isDouble( false ),
   _scientific( false ),
@@ -26,27 +26,11 @@ VLineEdit::VLineEdit( const std::string& value )
 }
 
 void VLineEdit::UseDoubleMenu() {
-    _menu = new QMenu();
-    
-    SpinBoxAction* decimalAction = new SpinBoxAction(tr("Decimal digits"), _decDigits);
-    connect( decimalAction, SIGNAL( editingFinished( int ) ),
-        this, SLOT( _decimalDigitsChanged( int ) ) );
-    _menu->addAction(decimalAction);
+    _menuEnabled = true;
 
-    CheckBoxAction* checkBoxAction = new CheckBoxAction(tr("Scientific"), _scientific);
-    connect( checkBoxAction, SIGNAL( clicked( bool ) ),
-        this, SLOT( _scientificClicked( bool ) ) );
-    _menu->addAction(checkBoxAction);
-    
     _lineEdit->setContextMenuPolicy( Qt::CustomContextMenu );
     connect( _lineEdit, SIGNAL( customContextMenuRequested( const QPoint& ) ),
         this, SLOT( ShowContextMenu( const QPoint& ) ) );
-}
-
-VLineEdit::~VLineEdit() {
-    // Qt is currently crashing if QMenu is given a parent, so delete it here
-    // 
-    if (_menu != nullptr) delete _menu;
 }
 
 void VLineEdit::SetValue( const std::string& value ) {
@@ -96,12 +80,20 @@ void VLineEdit::ShowContextMenu( const QPoint& pos ) {
     if ( !_menuEnabled )
         return;
 
-    QPoint globalPos = _lineEdit->mapToGlobal(pos);
-    _menu->exec(globalPos);
+    QMenu menu;
+    
+    SpinBoxAction* decimalAction = new SpinBoxAction(tr("Decimal digits"), _decDigits);
+    connect( decimalAction, SIGNAL( editingFinished( int ) ),
+        this, SLOT( _decimalDigitsChanged( int ) ) );
+    menu.addAction(decimalAction);
 
-    //QAction* selectedItem = _menu->exec(globalPos);
-    //if (selectedItem)
-    //else
+    CheckBoxAction* checkBoxAction = new CheckBoxAction(tr("Scientific"), _scientific);
+    connect( checkBoxAction, SIGNAL( clicked( bool ) ),
+        this, SLOT( _scientificClicked( bool ) ) );
+    menu.addAction(checkBoxAction);
+
+    QPoint globalPos = _lineEdit->mapToGlobal(pos);
+    menu.exec(globalPos);
 }
 
 void VLineEdit::_decimalDigitsChanged( int value ) {

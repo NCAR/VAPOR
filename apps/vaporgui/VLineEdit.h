@@ -22,8 +22,6 @@ class VLineEdit : public VContainer {
 public:
     VLineEdit( const std::string& value = "");
 
-    ~VLineEdit();
-
     void SetValue( const std::string& value );
     std::string GetValue() const;
 
@@ -33,9 +31,8 @@ public:
 
 private:
     QLineEdit*  _lineEdit;
-    QMenu*      _menu;
-    std::string _value;
 
+    std::string _value;
     bool        _isDouble;
     bool        _scientific;
     bool        _menuEnabled;
