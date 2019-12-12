@@ -124,7 +124,6 @@ private slots:
     void _periodicClicked();
     void _velocityMultiplierChanged( const std::string& multiplier );
 
-    void _seedGenModeChanged( int newIdx );
     void _rakeNumOfSeedsChanged();
     void _seedListFileChanged( const std::string& file );
     void _biasVariableChanged( const std::string& variable );
@@ -157,10 +156,10 @@ private:
     //  Pathline integration options
     VFrame*                 _pathlineFrame;
     VSliderEdit*            _pathlineLengthSliderEdit;
-    VSliderEdit*            _pathlineInjIntervalSliderEdit;
+    /*VSliderEdit*            _pathlineInjIntervalSliderEdit;
     VSliderEdit*            _pathlineStartSliderEdit;
     VSliderEdit*            _pathlineEndSliderEdit;
-    VSliderEdit*            _pathlineLifetimeSliderEdit;
+    VSliderEdit*            _pathlineLifetimeSliderEdit;*/
 
     //  Universal integration options
     VCheckBox*              _periodicXCheckBox;
