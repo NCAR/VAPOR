@@ -220,24 +220,26 @@ void DataStatus::_getExtents(
     return;
 }
 
-map <string, vector <DataStatus::var_info_t>> DataStatus::_getFirstVars(
-	string dataSetName
+map <string, vector <DataStatus::var_info_t>> DataStatus::_getFirstVar(
+	string dataSetName, size_t &ts
 ) const {
 	map <string, vector <var_info_t>> defaultVars;
 
-		DataMgr *dataMgr = GetDataMgr(dataSetName);
-		vector <string> varnames;
-		for (int dim=3; dim>1; dim--) {
-			varnames = dataMgr->GetDataVarNames(dim);
-			if (varnames.size()) {
-				var_info_t var;
-				var.varnames = vector <string> (1, varnames[0]);
-				var.refLevel = 0;
-				var.compLevel = 0;
-				defaultVars[dataSetName] = vector <var_info_t>(1,var);
-				break;
-			}
+	DataMgr *dataMgr = GetDataMgr(dataSetName);
+	for (int dim=3; dim>1; dim--) {
+		string varname;
+		bool ok = DataMgrUtils::GetFirstExistingVariable(
+			dataMgr, 0, 0, dim, varname, ts
+		);
+		if (ok) {
+			var_info_t var;
+			var.varnames = vector <string> (1, varname);
+			var.refLevel = 0;
+			var.compLevel = 0;
+			defaultVars[dataSetName] = vector <var_info_t>(1,var);
+			break;
 		}
+	}
 	return(defaultVars);
 }
 
@@ -287,7 +289,9 @@ void DataStatus::GetActiveExtents(
 		// If we didn't find any enabled variable use the first variables
 		// found in each data set
 		//
-		varMap = _getFirstVars(dataSetName);
+		size_t l_ts;
+		varMap = _getFirstVar(dataSetName, l_ts);
+		ts = l_ts;
 	}
 
 	_getExtents(ts, varMap, minExts, maxExts);
