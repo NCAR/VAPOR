@@ -4,9 +4,10 @@ VComboBox::VComboBox( const std::vector<std::string> &values )
 : VContainer()
 {
     _combo = new QComboBox;
-
+	
     // Disable scroll wheel
     //
+	_combo->setFocusPolicy( Qt::StrongFocus );
     _combo->installEventFilter(new MouseWheelWidgetAdjustmentGuard(_combo));
 
     layout()->addWidget(_combo);
