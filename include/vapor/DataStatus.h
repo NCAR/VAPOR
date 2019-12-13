@@ -216,8 +216,8 @@ private:
 		vector <double> &minExt, vector <double> &maxExt
 	) const;
 	
-	map <string, vector <var_info_t>> _getFirstVars(
-		string dataSetName
+	map <string, vector <var_info_t>> _getFirstVar(
+		string dataSetName, size_t &ts
 	) const;
 
 	void reset_time();
