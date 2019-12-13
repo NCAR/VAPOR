@@ -480,8 +480,13 @@ void VariablesWidget::Update(
 
     _fidelityWidget->Update(_dataMgr, _paramsMgr, _rParams);
 
-    if (_activeDim == THREED)
+    if (_activeDim == THREEDIMS) {
         orientationFrame->hide();
+        heightVariableFrame->hide();
+    } else {
+        if (_variableFlags & HEIGHT)
+            heightVariableFrame->show();
+    }
 }
 
 DimFlags VariablesWidget::GetDimFlags() const {
