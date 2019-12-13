@@ -4,7 +4,7 @@
 #include <vapor/VAssert.h>
 #include "VSlider.h"
 
-#define NUM_STEPS 100
+#define NUM_STEPS 2000000000
 
 VSlider::VSlider( double min, double max )
 : VContainer(),
@@ -48,7 +48,7 @@ void VSlider::SetRange( double min, double max ) {
     _maxValid = max;
 }
 
-double VSlider::GetValue( bool released ) const {
+double VSlider::GetValue() const {
     int sliderVal = _slider->value();
 
     // Return min/max values if the slider is at the end.
