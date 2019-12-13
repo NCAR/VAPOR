@@ -44,8 +44,6 @@ void VSlider::SetRange( double min, double max ) {
     VAssert( min <= max );
 
     _stepSize = ( max - min ) / NUM_STEPS;
-//    if ( _stepSize <= 0 )
-//        _stepSize = 1;
 
     _minValid = min;
     _maxValid = max;
