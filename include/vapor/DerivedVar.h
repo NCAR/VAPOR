@@ -395,7 +395,7 @@ class VDF_API DerivedCoordVar_WRFTime : public DerivedCoordVar {
     virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
 
     virtual std::vector<string> GetInputs() const {
-        return (std::vector<string>());
+        return (std::vector<string>{_wrfTimeVar});
     }
 
     virtual int GetDimLensAtLevel(
@@ -461,7 +461,7 @@ class VDF_API DerivedCoordVar_TimeInSeconds : public DerivedCoordVar {
     virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
 
     virtual std::vector<string> GetInputs() const {
-        return (std::vector<string>());
+        return (std::vector<string>{_nativeTimeVar});
     }
 
     virtual int GetDimLensAtLevel(
@@ -515,7 +515,7 @@ class VDF_API DerivedCoordVar_Staggered : public DerivedCoordVar {
     virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
 
     virtual std::vector<string> GetInputs() const {
-        return (std::vector<string>());
+        return (std::vector<string>{_inName});
     }
 
     virtual int GetDimLensAtLevel(
@@ -567,7 +567,7 @@ class VDF_API DerivedCoordVar_UnStaggered : public DerivedCoordVar {
     virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
 
     virtual std::vector<string> GetInputs() const {
-        return (std::vector<string>());
+        return (std::vector<string>{_inName});
     }
 
     virtual int GetDimLensAtLevel(
@@ -618,7 +618,7 @@ class VDF_API DerivedCoordVarStandardWRF_Terrain : public DerivedCFVertCoordVar 
     virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
 
     virtual std::vector<string> GetInputs() const {
-        return (std::vector<string>());
+        return (std::vector<string>{"PH", "PHB"});
     }
 
     virtual int GetDimLensAtLevel(
