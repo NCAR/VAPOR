@@ -86,8 +86,12 @@ void QRangeSliderTextCombo::setValidator(QLineEdit *edit, QValidator *validator)
 
 void QRangeSliderTextCombo::setTextboxes(float left, float right)
 {
-    _leftText->setText(QString::number(left));
-    _rightText->setText(QString::number(right));
+    QString qLeft = QString::number(left);
+    _leftText->setText(qLeft);
+    _leftText->setToolTip(qLeft);
+    QString qRight = QString::number(right);
+    _rightText->setText(qRight);
+    _rightText->setToolTip(qRight);
 }
 
 float QRangeSliderTextCombo::getRange() const

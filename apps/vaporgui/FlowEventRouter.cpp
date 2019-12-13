@@ -32,20 +32,20 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : QTabWidget(
     qsvar->setWidgetResizable(true);
     addTab(qsvar, "Variables");
 
-    _appearance = new FlowAppearanceSubtab(this);
-    QScrollArea *qsapp = new QScrollArea(this);
-    qsapp->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    qsapp->setWidget(_appearance);
-    qsapp->setWidgetResizable(true);
-    addTab(qsapp, "Appearance");
-
     _seeding = new FlowSeedingSubtab(this);
     QScrollArea *qsseed = new QScrollArea(this);
     qsseed->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     qsseed->setWidget(_seeding);
     qsseed->setWidgetResizable(true);
     _seedingTab = qsseed;
-    addTab(qsseed, "Flow Settings");
+    addTab(qsseed, "Seeding");
+
+    _appearance = new FlowAppearanceSubtab(this);
+    QScrollArea *qsapp = new QScrollArea(this);
+    qsapp->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    qsapp->setWidget(_appearance);
+    qsapp->setWidgetResizable(true);
+    addTab(qsapp, "Appearance");
 
     _geometry = new FlowGeometrySubtab(this);
     QScrollArea *qsgeo = new QScrollArea(this);
@@ -101,7 +101,7 @@ void FlowEventRouter::_updateTab()
     } else {
         if (currentWidget() == _seedingTab) {
             blockSignals(true);
-            setCurrentIndex(0);
+            setCurrentIndex(1);
             blockSignals(false);
         }
     }

@@ -20,17 +20,6 @@ class ParamsMgr;
 class DataStatus;
 }    // namespace VAPoR
 
-/*class VPushButtonWithDoubleClick : public QPushButton {
-    Q_OBJECT
-    using QPushButton::QPushButton;
-    void mouseDoubleClickEvent(QMouseEvent * e) {
-        emit doubleClicked();
-    }
-
-signals:
-    void doubleClicked();
-};*/
-
 class NewRendererDialog : public QDialog, public Ui_NewRendererDialog {
     Q_OBJECT
 

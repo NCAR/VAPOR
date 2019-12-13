@@ -16,7 +16,19 @@
 #include "CopyRegionWidget.h"
 #include "TransformTable.h"
 #include "ColorbarWidget.h"
-#include "VaporWidgets.h"
+
+class VLineEdit;
+class VCheckBox;
+class VComboBox;
+class VSlider;
+class VSliderEdit;
+class VFileReader;
+class VFileWriter;
+class VGeometry;
+class VFrame;
+class VIntSpinBox;
+class VGeometry2;
+class VPushButton;
 
 namespace VAPoR {
 class ControlExec;
@@ -53,20 +65,6 @@ public:
 
 private:
     VAPoR::FlowParams *_params;
-
-    VLineEdit *_velocityMltp;    // Note on this widget: its name and associated functions
-                                 // use the name "velocity multiplier," while it displays
-                                 // "Field Scale Factor." They'll need to be reconciled
-                                 // before the final merge.
-
-    VCheckBox *_periodicX;
-    VCheckBox *_periodicY;
-    VCheckBox *_periodicZ;
-
-private slots:
-    // Respond to user input
-    void _velocityMultiplierChanged();
-    void _periodicClicked();
 };
 
 //
@@ -97,49 +95,95 @@ public:
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
 private slots:
-    /* Respond to user input */
-    void _seedGenModeChanged(int newIdx);
-    void _fileReaderChanged();
-    void _fileWriterChanged();
-    void _flowDirectionChanged(int newIdx);
+    void _configureFlowType(const std::string &value);
+    void _configureSeedType(const std::string &value);
 
-    void _rakeGeometryChanged();
+    void _pathlineLengthChanged(int length);
+    void _pathlineStartTimeChanged(int startTime);
+    void _pathlineEndTimeChanged(int endTime);
+    void _pathlineLifetimeChanged(int lifeTime);
+
+    void _streamlineDirectionChanged(int index);
+    void _streamlineSamplesChanged(int length);
+
+    void _seedInjIntervalChanged(int interval);
+
+    void _periodicClicked();
+    void _velocityMultiplierChanged(const std::string &multiplier);
+
     void _rakeNumOfSeedsChanged();
-    void _rakeBiasVariableChanged(int);
-    void _rakeBiasStrengthChanged();
+    void _seedListFileChanged(const std::string &file);
+    void _biasVariableChanged(const std::string &variable);
+    void _biasStrengthChanged(double bias);
 
-    void _steadyGotClicked();
-    void _steadyNumOfStepsChanged();
-    void _pastNumOfTimeStepsChanged(int);
-    void _seedInjIntervalChanged(int);
+    void _rakeGeometryChanged(const std::vector<float> &range);
+
+    void _geometryWriterClicked();
 
     void _selectedTabChanged(int index);
 
 private:
+    void _createIntegrationSection();
+    void _createSeedingSection(QWidget *parent);
+    void _updateStreamlineWidgets(VAPoR::DataMgr *dataMgr);
+    void _updatePathlineWidgets(VAPoR::DataMgr *dataMgr);
+
     VAPoR::FlowParams *_params;
     VAPoR::ParamsMgr * _paramsMgr;
 
-    /* Add some QT widgets */
-    VCheckBox * _steady;
-    VLineEdit * _steadyNumOfSteps;
-    VIntSlider *_pastNumOfTimeSteps;
-    VIntSlider *_seedInjInterval;
+    // Integration options
+    VSection * _integrationSection;
+    VComboBox *_flowTypeCombo;
 
-    VComboBox *  _seedGenMode;
-    VFileReader *_fileReader;
-    VFileWriter *_fileWriter;
-    VComboBox *  _flowDirection;
+    //  Streamline integration options
+    VFrame *     _streamlineFrame;
+    VSliderEdit *_streamlineSamplesSliderEdit;
+    VComboBox *  _streamlineDirectionCombo;
 
-    /* Rake related widgets */
-    VGeometry *_rake;
-    VLineEdit *_rakeXNum, *_rakeYNum, *_rakeZNum, *_rakeTotalNum;
-    VComboBox *_rakeBiasVariable;
-    VSlider *  _rakeBiasStrength;
+    //  Pathline integration options
+    VFrame *     _pathlineFrame;
+    VSliderEdit *_pathlineLengthSliderEdit;
+    /*VSliderEdit*            _pathlineInjIntervalSliderEdit;
+    VSliderEdit*            _pathlineStartSliderEdit;
+    VSliderEdit*            _pathlineEndSliderEdit;
+    VSliderEdit*            _pathlineLifetimeSliderEdit;*/
 
-    QFrame *_hline1, *_hline2;    // horizontal lines
+    //  Universal integration options
+    VCheckBox *_periodicXCheckBox;
+    VCheckBox *_periodicYCheckBox;
+    VCheckBox *_periodicZCheckBox;
+    VLineEdit *_velocityMultiplierLineEdit;
 
-    /* Helper functions */
-    void _hideShowWidgets();    // hide and show widgets based on the current seed generation mode.
+    // Seed distribution options
+    VSection * _seedDistributionSection;
+    VComboBox *_seedTypeCombo;
+
+    //  Gridded seed distribution
+    VFrame *     _griddedSeedsFrame;
+    VIntSpinBox *_xSeedSpinBox;
+    VIntSpinBox *_ySeedSpinBox;
+    VIntSpinBox *_zSeedSpinBox;
+    VSliderEdit *_xSeedSliderEdit;
+    VSliderEdit *_ySeedSliderEdit;
+    VSliderEdit *_zSeedSliderEdit;
+
+    //  Rake region selection
+    VSection *  _rakeRegionSection;
+    VGeometry2 *_rakeWidget;
+
+    //  Seeds read from a text file
+    VFrame *     _listOfSeedsFrame;
+    VFileReader *_listOfSeedsFileReader;
+
+    //  Random seed distribution
+    VFrame *     _randomSeedsFrame;
+    VSliderEdit *_randomSeedsSliderEdit;
+    VComboBox *  _biasVariableComboBox;
+    VSliderEdit *_biasWeightSliderEdit;
+
+    VFileWriter *_geometryWriterSelector;
+    VPushButton *_geometryWriterExecutor;
+    VSection *   _geometryWriterSection;
 };
 
 //
