@@ -64,7 +64,7 @@ double VSlider::GetValue() const {
 }
 
 void VSlider::_sliderChanged() {
-    double value = GetValue( true );
+    double value = GetValue();
     emit ValueChanged( value );
 }
 
