@@ -281,6 +281,8 @@ protected:
 	//! Obtain current texture for the renderer colorbar.  This is an array of 3x256x256 bytes.
 	//! \return 0 if successful
 	int makeColorbarTexture();
+    
+    virtual std::string _getColorbarVariableName() const;
 
 	
 
