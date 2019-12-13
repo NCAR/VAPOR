@@ -13,20 +13,20 @@ VDoubleSpinBox::VDoubleSpinBox( double min, double max )
 }
 
 
-void VSpinBox::SetValue( double value ) {
+void VDoubleSpinBox::SetValue( double value ) {
     _spinBox->blockSignals(true);
     _spinBox->setValue( value );
     _spinBox->blockSignals(false);
 }
 
-void VSpinBox::SetRange( double min, double max ) {
+void VDoubleSpinBox::SetRange( double min, double max ) {
     _spinBox->setRange( min, max );
 }
 
-double VSpinBox::GetValue() const {
+double VDoubleSpinBox::GetValue() const {
     return _spinBox->value();
 }
 
-void VSpinBox::emitSpinBoxChanged() {
+void VDoubleSpinBox::emitSpinBoxChanged() {
     emit ValueChanged( GetValue() );
 }

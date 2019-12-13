@@ -1,6 +1,6 @@
-#include "VSpinBox.h"
+#include "VIntSpinBox.h"
 
-VSpinBox::VSpinBox( int min, int max )
+VIntSpinBox::VIntSpinBox( int min, int max )
 : VContainer()
 {
     _spinBox = new QSpinBox;
@@ -9,24 +9,24 @@ VSpinBox::VSpinBox( int min, int max )
     layout()->addWidget(_spinBox);
 
     connect( _spinBox, &QSpinBox::editingFinished,
-        this, &VSpinBox::emitSpinBoxChanged );
+        this, &VIntSpinBox::emitSpinBoxChanged );
 }
 
 
-void VSpinBox::SetValue( int value ) {
+void VIntSpinBox::SetValue( int value ) {
     _spinBox->blockSignals(true);
     _spinBox->setValue( value );
     _spinBox->blockSignals(false);
 }
 
-void VSpinBox::SetRange( int min, int max ) {
+void VIntSpinBox::SetRange( int min, int max ) {
     _spinBox->setRange( min, max );
 }
 
-int VSpinBox::GetValue() const {
+int VIntSpinBox::GetValue() const {
     return _spinBox->value();
 }
 
-void VSpinBox::emitSpinBoxChanged() {
+void VIntSpinBox::emitSpinBoxChanged() {
     emit ValueChanged( GetValue() );
 }

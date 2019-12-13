@@ -7,16 +7,16 @@
 
 #include "VContainer.h"
 
-//! class VSpinBox
+//! class VIntSpinBox
 //!
 //! Wraps a QSpinBox and provides vaporgui's standard setter/getter functions
 //! and signals.
 
-class VSpinBox : public VContainer {
+class VIntSpinBox : public VContainer {
     Q_OBJECT
 
 public:
-    VSpinBox( int min, int max);
+    VIntSpinBox( int min, int max);
 
     void SetValue( int value );
     void SetRange( int min, int max );

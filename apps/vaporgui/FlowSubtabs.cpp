@@ -3,7 +3,7 @@
 #include "ErrorReporter.h"
 
 #include "VFrame.h"
-#include "VSpinBox.h"
+#include "VIntSpinBox.h"
 #include "VComboBox.h"
 #include "VCheckBox.h"
 #include "VLineItem.h"

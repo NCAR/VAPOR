@@ -109,8 +109,8 @@ set (SRCS
     VContainer.h
     VComboBox.cpp
     VComboBox.h
-    VSpinBox.cpp
-    VSpinBox.h
+    VIntSpinBox.cpp
+    VIntSpinBox.h
     VCheckBox.cpp
     VCheckBox.h
     VLineEdit.cpp
