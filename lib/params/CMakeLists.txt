@@ -61,6 +61,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeIsoParams.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ModelParams.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Transform.h
 )
 
 add_library (params SHARED ${SRC} ${HEADERS})
