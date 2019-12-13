@@ -23,7 +23,6 @@ public:
     QVBoxLayout *layout() const;
     void setMenu(QMenu *menu);
     
-    
     void setLayout(QLayout *layout) = delete;
     int addTab(QWidget *page, const QString &label) = delete;
     QWidget *widget(int index) const = delete;
