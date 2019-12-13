@@ -258,13 +258,13 @@ bool DataMgrUtils::GetExtents(DataMgr *dataMgr, size_t timestep, string varname,
     // dimensionality
     //
     if (varname.empty()) {
-        vector<string> varnames;
         for (int ndim = 3; ndim > 0; ndim--) {
-            varnames = dataMgr->GetDataVarNames(ndim);
-            if (!varnames.empty()) break;
+            bool ok = DataMgrUtils::GetFirstExistingVariable(dataMgr, timestep, refLevel, lod, ndim, varname);
+
+            if (ok) break;
         }
-        varname = varnames.size() ? varnames[0] : "";
     }
+
     if (varname.empty()) return (false);
 
     if (refLevel == -1) {
@@ -355,6 +355,34 @@ int DataMgrUtils::GetDefaultMetaInfoStride(DataMgr *dataMgr, std::string varname
     if (size > REQUIRED_SAMPLE_SIZE) stride = 1 + size / REQUIRED_SAMPLE_SIZE;
 
     return stride;
+}
+
+bool DataMgrUtils::GetFirstExistingVariable(DataMgr *dataMgr, int level, int lod, int ndim, string &varname, size_t &ts)
+{
+    varname.clear();
+    ts = 0;
+    size_t numTS = dataMgr->GetTimeCoordinates().size();
+    for (size_t l_ts = 0; l_ts < numTS; l_ts++) {
+        bool ok = GetFirstExistingVariable(dataMgr, l_ts, level, lod, ndim, varname);
+        if (ok) {
+            ts = l_ts;
+            return (true);
+        }
+    }
+    return (false);
+}
+
+bool DataMgrUtils::GetFirstExistingVariable(DataMgr *dataMgr, size_t ts, int level, int lod, int ndim, string &varname)
+{
+    varname.clear();
+    vector<string> varnames = dataMgr->GetDataVarNames(ndim);
+    for (int i = 0; i < varnames.size(); i++) {
+        if (dataMgr->VariableExists(ts, varnames[i], level, lod)) {
+            varname = varnames[i];
+            return (true);
+        }
+    }
+    return (false);
 }
 
 #ifdef VAPOR3_0_0_ALPHA

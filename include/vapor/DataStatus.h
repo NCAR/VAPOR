@@ -178,7 +178,7 @@ private:
 
     void _getExtents(size_t ts, const map<string, std::vector<var_info_t>> &variables, vector<double> &minExt, vector<double> &maxExt) const;
 
-    map<string, vector<var_info_t>> _getFirstVars(string dataSetName) const;
+    map<string, vector<var_info_t>> _getFirstVar(string dataSetName, size_t &ts) const;
 
     void reset_time();
     void reset_time_helper();

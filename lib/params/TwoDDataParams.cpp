@@ -2,6 +2,7 @@
 #include <string>
 #include <vapor/RenderParams.h>
 #include <vapor/TwoDDataParams.h>
+#include <vapor/DataMgrUtils.h>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -47,33 +48,7 @@ void TwoDDataParams::_init()
 {
     SetDiagMsg("TwoDDataParams::_init()");
 
-    // Only 2D variables supported. Override base class
+    // Necessary?
     //
-    vector<string> varnames = _dataMgr->GetDataVarNames(2);
-    string         varname;
-
-    if (!varnames.empty()) varname = varnames[0];
-    SetVariableName(varname);
-    SetColorMapVariableName(varname);
-
     SetFieldVariableNames(vector<string>());
-
-    // Initialize 2D box
-    //
-    if (varname.empty()) return;
-
-    if (!_dataMgr->VariableExists(0, varname, 0, 0)) return;
-
-    vector<double> minExt, maxExt;
-    int            rc = _dataMgr->GetVariableExtents(0, varname, 0, 0, minExt, maxExt);
-
-    // Crap. No error handling from constructor. Need Initialization()
-    // method.
-    //
-    VAssert(rc >= 0);
-    VAssert(minExt.size() == maxExt.size() && minExt.size() == 2);
-
-    GetBox()->SetExtents(minExt, maxExt);
-    GetBox()->SetPlanar(true);
-    GetBox()->SetOrientation(Box::XY);
 }

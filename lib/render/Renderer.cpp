@@ -113,7 +113,7 @@ double Renderer::_getDefaultZ(DataMgr *dataMgr, size_t ts) const
     vector<double> maxExts;
 
     bool status = DataMgrUtils::GetExtents(dataMgr, ts, "", refLevel, lod, minExts, maxExts);
-    VAssert(status);
+    if (!status) return (0.0);
 
     return (minExts.size() == 3 ? minExts[2] : 0.0);
 }

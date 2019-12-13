@@ -487,6 +487,8 @@ template<typename T, enable_if_t<std::is_floating_point<T>::value, int> = 0> voi
 // This function specializes the template to bypass this bug.
 template<typename T, enable_if_t<std::is_integral<T>::value, int> = 0> void _sanitizeFloats(T *buffer, size_t n) {}
 
+template<typename T> bool contains(const vector<T> &v, T element) { return (find(v.begin(), v.end(), element) != v.end()); }
+
 };    // namespace
 
 DataMgr::DataMgr(string format, size_t mem_size, int nthreads)
@@ -689,6 +691,8 @@ vector<string> DataMgr::GetDataVarNames(int ndim) const
 {
     VAssert(_dc);
 
+    if (_dataVarNamesCache[ndim].size()) { return (_dataVarNamesCache[ndim]); }
+
     vector<string> vars = _dc->GetDataVarNames(ndim);
     vector<string> derived_vars = _getDataVarNamesDerived(ndim);
     vars.insert(vars.end(), derived_vars.begin(), derived_vars.end());
@@ -705,6 +709,8 @@ vector<string> DataMgr::GetDataVarNames(int ndim) const
 
         validVars.push_back(vars[i]);
     }
+
+    _dataVarNamesCache[ndim] = validVars;
     return (validVars);
 }
 
@@ -1451,11 +1457,14 @@ int DataMgr::GetDimLensAtLevel(string varname, int level, std::vector<size_t> &d
     return (0);
 }
 
-vector<string> DataMgr::_get_var_dependencies(string varname) const
+vector<string> DataMgr::_get_var_dependencies_1(string varname) const
 {
-    vector<string> varnames = {varname};
+    vector<string> varnames;
 
-    // No dependencies
+    DerivedVar *derivedVar = _getDerivedVar(varname);
+    if (derivedVar) { varnames = derivedVar->GetInputs(); }
+
+    // No more dependencies if not a data variable
     //
     if (!_isDataVar(varname)) return (varnames);
 
@@ -1483,7 +1492,33 @@ vector<string> DataMgr::_get_var_dependencies(string varname) const
         if (!edge_face_var.empty()) varnames.push_back(edge_face_var);
     }
 
+    sort(varnames.begin(), varnames.end());
+    varnames.erase(unique(varnames.begin(), varnames.end()), varnames.end());
     return (varnames);
+}
+
+vector<string> DataMgr::_get_var_dependencies_all(vector<string> varnames, vector<string> dependencies) const
+{
+    // Recursively look for all of a variable's dependencies, handing any
+    // cycles in the dependency graph
+    //
+    vector<string> new_varnames;
+    for (int i = 0; i < varnames.size(); i++) {
+        vector<string> new_dependencies = _get_var_dependencies_1(varnames[i]);
+
+        for (int j = 0; j < new_dependencies.size(); j++) {
+            // Avoid cycles by not adding variable names that are already
+            // in the dependencies vector
+            //
+            if (!contains(dependencies, new_dependencies[j])) {
+                dependencies.push_back(new_dependencies[j]);
+                new_varnames.push_back(new_dependencies[j]);
+            }
+        }
+    }
+
+    if (new_varnames.size()) { return (_get_var_dependencies_all(new_varnames, dependencies)); }
+    return (dependencies);
 }
 
 bool DataMgr::VariableExists(size_t ts, string varname, int level, int lod) const
@@ -1507,57 +1542,46 @@ bool DataMgr::VariableExists(size_t ts, string varname, int level, int lod) cons
     EnableErrMsg(enabled);
 
     string         key = "VariableExists";
-    vector<size_t> dummy;
-    if (_varInfoCacheSize_T.Get(ts, varname, level, lod, key, dummy)) { return (true); }
+    vector<size_t> found;
+    if (_varInfoCacheSize_T.Get(ts, varname, level, lod, key, found)) { return (found[0]); }
 
-    // If a data variable need to test for existance of all coordinate
-    // variables
     //
-    vector<string> varnames = _get_var_dependencies(varname);
+    // Recursively find all variable dependencies needed by this
+    // varible. E.g. coordinate variables, input for derived variables,
+    // auxillary variables
+    //
+    vector<string> varnames = _get_var_dependencies_all(vector<string>({varname}), vector<string>());
+    varnames.insert(varnames.begin(), varname);
 
-    // Separate native and derived variables. Derived variables are
-    // recursively tested
+    // Now check for the existence of the variable and all of its
+    // dependencies, updating variable existence cache in process
     //
-    vector<string> native_vars;
-    vector<string> derived_vars;
     for (int i = 0; i < varnames.size(); i++) {
+        if (_varInfoCacheSize_T.Get(ts, varnames[i], level, lod, key, found)) {
+            if (found[0])
+                continue;
+            else
+                return (false);
+        }
+
         if (DataMgr::IsVariableNative(varnames[i])) {
-            native_vars.push_back(varnames[i]);
+            bool exists = _dc->VariableExists(ts, varnames[i], level, lod);
+            if (!exists) {
+                _varInfoCacheSize_T.Set(ts, varnames[i], level, lod, key, vector<size_t>({0}));
+                return (false);
+            }
         } else {
-            derived_vars.push_back(varnames[i]);
+            DerivedVar *derivedVar = _getDerivedVar(varnames[i]);
+            if (!derivedVar) {
+                _varInfoCacheSize_T.Set(ts, varnames[i], level, lod, key, vector<size_t>({0}));
+                return (false);
+            }
         }
     }
 
-    // Check native variables
+    // Cache found results for later.
     //
-    vector<size_t> exists_vec;
-    for (int i = 0; i < native_vars.size(); i++) {
-        if (_varInfoCacheSize_T.Get(ts, native_vars[i], level, lod, key, exists_vec)) { continue; }
-        bool exists = _dc->VariableExists(ts, native_vars[i], level, lod);
-        if (exists) {
-            _varInfoCacheSize_T.Set(ts, native_vars[i], level, lod, key, exists_vec);
-        } else {
-            return (false);
-        }
-    }
-
-    // Check derived variables
-    //
-    for (int i = 0; i < derived_vars.size(); i++) {
-        DerivedVar *derivedVar = _getDerivedVar(derived_vars[i]);
-        if (!derivedVar) return (false);
-
-        vector<string> ivars = derivedVar->GetInputs();
-
-        //
-        // Recursively test existence of all dependencies
-        //
-        for (int i = 0; i < ivars.size(); i++) {
-            if (!VariableExists(ts, ivars[i], level, lod)) return (false);
-        }
-    }
-
-    _varInfoCacheSize_T.Set(ts, varname, level, lod, key, exists_vec);
+    for (int i = 0; i < varnames.size(); i++) { _varInfoCacheSize_T.Set(ts, varnames[i], level, lod, key, vector<size_t>({1})); }
     return (true);
 }
 
@@ -1583,6 +1607,16 @@ int DataMgr::AddDerivedVar(DerivedDataVar *derivedVar)
     }
     _dvm.AddDataVar(derivedVar);
 
+    //
+    // Clear variable name cache
+    //
+    for (auto itr = _dataVarNamesCache.begin(); itr != _dataVarNamesCache.end(); ++itr) {
+        vector<string> &ref = itr->second;
+        ref.clear();
+    }
+
+    _varInfoCacheSize_T.Purge(vector<string>({varname}));
+
     return (0);
 }
 
@@ -1593,6 +1627,16 @@ void DataMgr::RemoveDerivedVar(string varname)
     _dvm.RemoveVar(_dvm.GetVar(varname));
 
     _free_var(varname);
+
+    //
+    // Clear variable name cache
+    //
+    for (auto itr = _dataVarNamesCache.begin(); itr != _dataVarNamesCache.end(); ++itr) {
+        vector<string> &ref = itr->second;
+        ref.clear();
+    }
+
+    _varInfoCacheSize_T.Purge(vector<string>({varname}));
 }
 
 void DataMgr::Clear()
