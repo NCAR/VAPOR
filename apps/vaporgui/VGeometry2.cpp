@@ -80,7 +80,6 @@ void VGeometry2::GetValue(std::vector<float> &vals) const { vals = _values; }
 
 void VGeometry2::_xRangeChanged(float min, float max)
 {
-    std::cout << "VGeometry2::_xRangeChanged " << min << " " << max << std::endl;
     VAssert(min >= _range[XMIN]);
     VAssert(max <= _range[XMAX]);
 
