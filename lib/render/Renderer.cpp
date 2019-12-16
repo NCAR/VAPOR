@@ -122,7 +122,8 @@ double Renderer::_getDefaultZ(
 
     bool status = DataMgrUtils::GetExtents(
         dataMgr, ts, "", refLevel, lod, minExts, maxExts);
-    VAssert(status);
+    if (!status)
+        return (0.0);
 
     return (minExts.size() == 3 ? minExts[2] : 0.0);
 }
@@ -330,6 +331,11 @@ void Renderer::getLocalContainingRegion(float regMin[3], float regMax[3]) {
 }
 #endif
 
+std::string Renderer::_getColorbarVariableName() const {
+    RenderParams *rParams = GetActiveParams();
+    return rParams->GetVariableName();
+}
+
 int Renderer::makeColorbarTexture() {
 
     if (_colorbarTexture)
@@ -340,7 +346,7 @@ int Renderer::makeColorbarTexture() {
     if (!cbpb)
         return -1;
 
-    MapperFunction *mf = rParams->GetMapperFunc(rParams->GetVariableName());
+    MapperFunction *mf = rParams->GetMapperFunc(_getColorbarVariableName());
     if (!mf)
         return -1;
 

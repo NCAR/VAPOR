@@ -79,6 +79,7 @@ int NetCDFCFCollection::_Initialize(
     int rc = NetCDFCollection::Initialize(files, tv, tv);
     if (rc < 0)
         return (-1);
+
     return (0);
 }
 
@@ -114,10 +115,13 @@ int NetCDFCFCollection::Initialize(
     // make a distinction between "coordinate variable" and
     // "auxiliary coordinate variable".
     //
-    // First look for "coordinate variables", which are 1D and have
+    // First look for "coordinate variables", which are 1D in space
+    // or 1D in time and have
     // the same name as their one dimension
     //
-    vector<string> vars = NetCDFCollection::GetVariableNames(1, false);
+    vector<string> vars = NetCDFCollection::GetVariableNames(1, true);
+    vector<string> tcvars = NetCDFCollection::GetVariableNames(1, false);
+    vars.insert(vars.end(), tcvars.begin(), tcvars.end());
     for (int i = 0; i < vars.size(); i++) {
 
         NetCDFSimple::Variable varinfo;
@@ -143,10 +147,14 @@ int NetCDFCFCollection::Initialize(
     v = NetCDFCollection::GetVariableNames(4, false);
     vars.insert(vars.end(), v.begin(), v.end());
 
+    string timeDimName;
     for (int i = 0; i < vars.size(); i++) {
 
         NetCDFSimple::Variable varinfo;
         (void)NetCDFCollection::GetVariableInfo(vars[i], varinfo);
+
+        if (!GetTimeDimName(vars[i]).empty())
+            timeDimName = GetTimeDimName(vars[i]);
 
         vector<string> coordattr = _GetCoordAttrs(varinfo);
         if (!coordattr.size())
@@ -180,8 +188,6 @@ int NetCDFCFCollection::Initialize(
         string stagVar = "Z3P1";
         NetCDFCFCollection::InstallDerivedCoordVar(
             stagVar, derived_var, 2);
-
-        _derivedVarsMap[stagVar] = derived_var;
     }
 
     //
@@ -213,6 +219,20 @@ int NetCDFCFCollection::Initialize(
         } else if (_IsTimeCoordVar(varinfo)) {
             _timeCoordVars.push_back(cvars[i]);
         }
+    }
+
+    //
+    // If a time dimension exists but no time coordinate variable
+    // we derive one. The is messed up. The base class, NetCDFCollection,
+    // may not contain a NetCDF time coordinate variable, but it does
+    // sythesize a list of user times
+    //
+    if (_timeCoordVars.empty() && !timeDimName.empty()) {
+        DerivedVarTimeFromMem *derived_var = new DerivedVarTimeFromMem(
+            timeDimName, "seconds", timeDimName, GetTimes());
+
+        NetCDFCFCollection::InstallDerivedCoordVar(
+            timeDimName, derived_var, 3);
     }
 
     string mvattname;
@@ -669,8 +689,6 @@ int NetCDFCFCollection::InstallStandardVerticalConverter(
 
     NetCDFCFCollection::InstallDerivedCoordVar(newvar, derived_var, 2);
 
-    _derivedVarsMap[newvar] = derived_var;
-
     return (0);
 }
 
@@ -710,8 +728,6 @@ int NetCDFCFCollection::InstallStandardTimeConverter(
     NetCDFCFCollection::UninstallStandardTimeConverter(newvar);
 
     NetCDFCFCollection::InstallDerivedCoordVar(newvar, derived_var, 3);
-
-    _derivedVarsMap[newvar] = derived_var;
 
     return (0);
 }
@@ -760,6 +776,8 @@ void NetCDFCFCollection::InstallDerivedCoordVar(
     default:
         break;
     }
+
+    _derivedVarsMap[varname] = derivedVar;
 }
 
 void NetCDFCFCollection::RemoveDerivedVar(string varname) {
@@ -974,13 +992,17 @@ bool NetCDFCFCollection::_IsCoordinateVar(
     string varname = varinfo.GetName();
     vector<string> dimnames = varinfo.GetDimNames();
 
-    if (dimnames.size() != 1)
-        return (false);
+    // A CF "coordinate variable" is a 1D variable whose name matches
+    // its dimension name. Here we also allow a variable with 1 spatial
+    // dimension and 1 time dimension
+    //
+    if (dimnames.size() == 1 && varname == dimnames[0])
+        return (true);
 
-    if (varname.compare(dimnames[0]) != 0)
-        return (false);
+    if (dimnames.size() == 2 && IsTimeVarying(varname) && varname == dimnames[1])
+        return (true);
 
-    return (true);
+    return (false);
 }
 
 vector<string> NetCDFCFCollection::_GetCoordAttrs(
@@ -2423,6 +2445,39 @@ int NetCDFCFCollection::DerivedVarTime::ReadSlice(
 int NetCDFCFCollection::DerivedVarTime::SeekSlice(
     int offset, int whence, int) {
     return (0);
+}
+
+NetCDFCFCollection::DerivedVarTimeFromMem::DerivedVarTimeFromMem(
+    string name, string units, string timeDimName,
+    const std::vector<double> times) : DerivedVar(NULL) {
+
+    _ts = 0;
+
+    _name = name;
+    _units = units;
+    _timeDimName = timeDimName;
+    _times = times;
+}
+
+int NetCDFCFCollection::DerivedVarTimeFromMem::Open(size_t ts) {
+
+    if (ts >= _times.size())
+        ts = 0;
+    _ts = ts;
+
+    return (0);
+}
+
+int NetCDFCFCollection::DerivedVarTimeFromMem::Read(
+    float *buf, int) {
+    *buf = _times[_ts];
+    return (0);
+}
+
+int NetCDFCFCollection::DerivedVarTimeFromMem::ReadSlice(
+    float *slice, int) {
+    *slice = _times[_ts];
+    return (1);
 }
 
 NetCDFCFCollection::DerivedVar_vertStag::DerivedVar_vertStag(
