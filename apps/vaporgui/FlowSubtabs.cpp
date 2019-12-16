@@ -1,5 +1,6 @@
 #include "FlowSubtabs.h"
 #include "vapor/DataMgrUtils.h"
+#include "vapor/Box.h"
 #include "ErrorReporter.h"
 
 #include "VFrame.h"
@@ -52,7 +53,7 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
 {
     _variablesWidget = new VariablesWidget(this);
     _variablesWidget->Reinit(   (VariableFlags)(VECTOR | COLOR),
-                                (DimFlags)(THREED) );
+                                (DimFlags)( TWOD | THREED ) );
     _layout->addWidget( _variablesWidget, 0, 0 );
 }
 
@@ -319,7 +320,11 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
         _seedTypeCombo->SetValue( LIST_STRING );
 
     // Random rake values
-    std::vector< std::string > vars = dataMgr->GetDataVarNames(3);  // Do we support 2D flow?
+    VAPoR::Box* box = _params->GetBox();
+    int dimension = 3;
+    if ( box->GetOrientation() != VAPoR::Box::Orientation::XYZ )
+        dimension = 2;
+    std::vector< std::string > vars = dataMgr->GetDataVarNames(dimension);
     _biasVariableComboBox->SetOptions( vars );
     std::string var = _params->GetRakeBiasVariable();
     if(  var.empty() )    // The variable isn't set by the user yet. Let's set it!
@@ -351,9 +356,9 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
                                      minExt, 
                                      maxExt, 
                                      axes  );
-    VAssert( minExt.size() == 3 && maxExt.size() == 3 );
+    VAssert( minExt.size() <= 3 && maxExt.size() <= 3 );
     std::vector<float> range;
-    for( int i = 0; i < 3; i++ )
+    for( int i = 0; i < axes.size(); i++ )
     {
         range.push_back( float(minExt[i]) );
         range.push_back( float(maxExt[i]) );
@@ -369,6 +374,11 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     }
     else
     {
+        // If our axis size is 2, resize the rake to be of size 4.  This tells
+        // VGeometry that it's working with 2d variables, not 3d
+        if (axes.size() == 2)
+            rakeVals.resize(4);
+
         _rakeWidget->SetValue( rakeVals );
     }
 }
@@ -571,7 +581,7 @@ FlowSeedingSubtab::_seedListFileChanged( const std::string& value ) {
 void
 FlowSeedingSubtab::_rakeGeometryChanged( const std::vector<float>& range )
 {
-    VAssert( range.size() == 6 );
+    VAssert( range.size() == 6 || range.size() == 4 );
     _params->SetRake( range );
 }
 
