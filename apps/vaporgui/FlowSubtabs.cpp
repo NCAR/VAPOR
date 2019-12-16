@@ -151,7 +151,7 @@ void FlowSeedingSubtab::_createSeedingSection(QWidget *parent) {
     _randomSeedsSliderEdit = new VSliderEdit(MIN_RANDOM_SEEDS, MAX_RANDOM_SEEDS);
     _randomSeedsSliderEdit->SetIntType(true);
     _randomSeedsFrame->addWidget(new VLineItem("Seed count", _randomSeedsSliderEdit));
-    connect(_randomSeedsSliderEdit, &VSliderEdit::ValueChanged,
+    connect(_randomSeedsSliderEdit, &VSliderEdit::ValueChangedInt,
             this, &FlowSeedingSubtab::_rakeNumOfSeedsChanged);
 
     _biasWeightSliderEdit = new VSliderEdit(-1, 1, 0);
