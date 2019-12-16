@@ -53,7 +53,7 @@ TFInfoWidget *TFHistogramMap::createInfoWidget() {
     info->UsingColormapVariable = this->UsingColormapVariable;
 
     connect(this, SIGNAL(UpdateInfo(float)), info, SLOT(SetControlPoint(float)));
-    //    connect(this, SIGNAL(InfoDeselected()), info, SLOT(Deselect()));
+    connect(this, SIGNAL(InfoDeselected()), info, SLOT(Deselect()));
 
     return info;
 }
@@ -76,6 +76,10 @@ void TFHistogramMap::paintEvent(QPainter &p) {
     while ((endBin - startBin) / stride >= 2 * (width() - (padding.left() + padding.right())))
         stride *= 2;
     startBin -= startBin % stride;
+
+    // Prevents an edge case where the current range is very far from the computed one
+    if (_histo.getRange() < FLT_EPSILON || (mapRange[1] - mapRange[0]) / _histo.getRange() > 10000)
+        return;
 
     float maxBin;
     if (_dynamicScaling)
@@ -126,7 +130,7 @@ void TFHistogramMap::mousePressEvent(QMouseEvent *event) {
 }
 
 void TFHistogramMap::mouseReleaseEvent(QMouseEvent *event) {
-    //    emit InfoDeselected();
+    emit InfoDeselected();
 }
 
 void TFHistogramMap::mouseMoveEvent(QMouseEvent *event) {

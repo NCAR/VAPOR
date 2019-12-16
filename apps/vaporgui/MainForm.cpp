@@ -287,6 +287,7 @@ MainForm::MainForm(
     _tabDockWindow = new QDockWidget(this);
     addDockWidget(Qt::LeftDockWidgetArea, _tabDockWindow);
     _tabDockWindow->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    _tabDockWindow->setFeatures(QDockWidget::NoDockWidgetFeatures);
 
     // Register additional params with the ParamsMgr
     //

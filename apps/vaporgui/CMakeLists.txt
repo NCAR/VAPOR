@@ -60,7 +60,6 @@ set (SRCS
 	VolumeIsoEventRouter.cpp
 	VolumeIsoSubtabs.cpp
 	VolumeSubtabs.cpp
-    VaporWidgets.cpp
 	ParamsWidgets.cpp
 	ParamsMenuItems.cpp
 	ParamsMenuItems.h
@@ -106,6 +105,42 @@ set (SRCS
 	VSection.h
 	VLineItem.cpp
 	VLineItem.h
+    VContainer.cpp
+    VContainer.h
+    VComboBox.cpp
+    VComboBox.h
+    VIntSpinBox.cpp
+    VIntSpinBox.h
+    VCheckBox.cpp
+    VCheckBox.h
+    VLineEdit.cpp
+    VLineEdit.h
+    VSlider.cpp
+    VSlider.h
+    VSliderEdit.cpp
+    VSliderEdit.h
+    VPushButton.cpp
+    VPushButton.h
+    QPushButtonWithDoubleClick.h
+    VFileSelector.cpp
+    VFileSelector.h
+    VFrame.h
+    VGeometry2.cpp
+    VGeometry2.h
+	PWidget.cpp
+	PWidget.h
+	PCheckbox.cpp
+	PCheckbox.h
+	PDoubleInput.cpp
+	PDoubleInput.h
+	PLineItem.cpp
+	PLineItem.h
+	PEnumDropdown.cpp
+	PEnumDropdown.h
+	PColorSelector.cpp
+	PColorSelector.h
+	PFileSelector.cpp
+	PFileSelector.h
 	ModelEventRouter.cpp
 	ModelEventRouter.h
 	ModelSubtabs.cpp
@@ -182,7 +217,6 @@ set (SRCS
 	VariablesWidget.h
 	VizSelectCombo.h
 	WireFrameEventRouter.h
-    VaporWidgets.h
 	ParamsWidgets.h
 	Flags.h
 )
