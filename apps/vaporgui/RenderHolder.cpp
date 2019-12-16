@@ -31,7 +31,7 @@
 #include "VizSelectCombo.h"
 #include "ErrorReporter.h"
 #include "RenderHolder.h"
-#include "VaporWidgets.h"
+#include "QPushButtonWithDoubleClick.h"
 #include <SettingsParams.h>
 #include <vapor/VolumeRenderer.h>
 #include <vapor/VolumeIsoRenderer.h>
@@ -100,7 +100,7 @@ QPushButton* NewRendererDialog::_createButton(
 		QString name, 
 		int index) 
 {
-	QPushButton *button = new VPushButtonWithDoubleClick(name, this);
+	QPushButton *button = new QPushButtonWithDoubleClick(name, this);
 	button->setIconSize(QSize(50,50));
 	button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 	button->setLayoutDirection(Qt::RightToLeft);
@@ -257,6 +257,7 @@ void RenderHolder::_makeConnections() {
 		dupCombo, SIGNAL(activated(int)),
 		this, SLOT(_copyInstanceTo(int))
 	);
+    connect(_newRendererDialog, &NewRendererDialog::accepted, this, &RenderHolder::_newRendererDialogAccepted);
 }
 
 void RenderHolder::_initializeSplitter() {
@@ -316,9 +317,13 @@ void RenderHolder::_showNewRendererDialog() {
 	vector <string> dataSetNames = paramsMgr->GetDataMgrNames();
 	
 	_initializeNewRendererDialog(dataSetNames);
-	if (_newRendererDialog->exec() != QDialog::Accepted) {
-		return;
-	}
+    _newRendererDialog->open();
+}
+
+void RenderHolder::_newRendererDialogAccepted()
+{
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+    vector <string> dataSetNames = paramsMgr->GetDataMgrNames();
 
 	string rendererType = _newRendererDialog->GetSelectedRenderer();
     _showIntelDriverWarning(rendererType);
@@ -380,7 +385,10 @@ void RenderHolder::_deleteRenderer() {
 	// Get the currently selected renderer.
 	//
 	string rendererName, rendererType, dataSetName;
-	_getRowInfo(_currentRow, rendererName, rendererType, dataSetName);
+
+    rendererName = _getActiveRendererInst();
+    int row = _getRow(rendererName);
+    _getRowInfo(row, rendererName, rendererType, dataSetName);
 
 	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
 	paramsMgr->BeginSaveStateGroup("Delete renderer");

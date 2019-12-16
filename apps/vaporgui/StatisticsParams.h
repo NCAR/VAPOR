@@ -34,9 +34,8 @@ public:
     bool GetAutoUpdateEnabled();
     void SetAutoUpdateEnabled(bool state);
 
-    int GetCurrentMinTS() const;
-    void SetCurrentMinTS(int ts);
-
+    // Note: we'll use the Get/SetCurrentTimestep() from RendererParams to 
+    // represent the min timestep, MinTS, so we only need to keep track of MaxTS.
     int GetCurrentMaxTS() const;
     void SetCurrentMaxTS(int ts);
 
@@ -71,7 +70,6 @@ public:
     }
 
 private:
-    static const string _minTSTag;
     static const string _maxTSTag;
     static const string _autoUpdateTag;
     static const string _minEnabledTag;
