@@ -3051,7 +3051,7 @@ int DataMgr::_getLatlonExtents(string varname, bool lonflag, float &min, float &
 
     float *buf = new float[VProduct(dims)];
 
-    rc = _getVar(varname, 0, 0, buf);
+    rc = _getVar(0, varname, 0, 0, buf);
     if (rc < 0) return (-1);
 
     //
