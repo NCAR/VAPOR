@@ -52,7 +52,7 @@ TFInfoWidget *TFHistogramMap::createInfoWidget()
     info->UsingColormapVariable = this->UsingColormapVariable;
 
     connect(this, SIGNAL(UpdateInfo(float)), info, SLOT(SetControlPoint(float)));
-    //    connect(this, SIGNAL(InfoDeselected()), info, SLOT(Deselect()));
+    connect(this, SIGNAL(InfoDeselected()), info, SLOT(Deselect()));
 
     return info;
 }
@@ -121,10 +121,7 @@ void TFHistogramMap::mousePressEvent(QMouseEvent *event)
     emit UpdateInfo(PixelToNDC(event->pos()).x);
 }
 
-void TFHistogramMap::mouseReleaseEvent(QMouseEvent *event)
-{
-    //    emit InfoDeselected();
-}
+void TFHistogramMap::mouseReleaseEvent(QMouseEvent *event) { emit InfoDeselected(); }
 
 void TFHistogramMap::mouseMoveEvent(QMouseEvent *event) { emit UpdateInfo(PixelToNDC(event->pos()).x); }
 
