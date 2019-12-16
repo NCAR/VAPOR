@@ -29,6 +29,9 @@ public:
 
     static std::string GetClassType() { return ("Flow"); }
 
+protected:
+    virtual std::string _getColorbarVariableName() const override;
+
 private:
     // Define two enums for this class use only
     enum class FlowStatus {

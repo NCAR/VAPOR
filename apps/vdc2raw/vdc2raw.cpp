@@ -215,7 +215,7 @@ int main(int argc, char **argv)
     string vdcmaster = argv[1];
     string datafile = argv[2];
 
-    FILE *fp = fopen(datafile.c_str(), "w");
+    FILE *fp = fopen(datafile.c_str(), "wb");
     if (!fp) {
         MyBase::SetErrMsg("Could not open file \"%s\" : %M", datafile.c_str());
         exit(1);

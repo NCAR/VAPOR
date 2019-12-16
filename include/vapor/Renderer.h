@@ -258,6 +258,8 @@ protected:
     //! \return 0 if successful
     int makeColorbarTexture();
 
+    virtual std::string _getColorbarVariableName() const;
+
     //! All OpenGL rendering is performed in the pure virtual paintGL method.
     virtual int _paintGL(bool fast) = 0;
 

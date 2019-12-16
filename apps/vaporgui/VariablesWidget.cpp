@@ -437,7 +437,12 @@ void VariablesWidget::Update(const DataMgr *dataMgr, ParamsMgr *paramsMgr, Rende
 
     _fidelityWidget->Update(_dataMgr, _paramsMgr, _rParams);
 
-    if (_activeDim == THREED) orientationFrame->hide();
+    if (_activeDim == THREEDIMS) {
+        orientationFrame->hide();
+        heightVariableFrame->hide();
+    } else {
+        if (_variableFlags & HEIGHT) heightVariableFrame->show();
+    }
 }
 
 DimFlags VariablesWidget::GetDimFlags() const { return _dimFlags; }

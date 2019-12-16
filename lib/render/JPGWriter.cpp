@@ -11,7 +11,7 @@ std::vector<std::string> JPGWriter::GetFileExtensions() { return {"jpg", "jpeg"}
 
 JPGWriter::JPGWriter(const std::string &path) : ImageWriter(path), fp(nullptr), Quality(DefaultQuality)
 {
-    fp = fopen(path.c_str(), "w");
+    fp = fopen(path.c_str(), "wb");
     if (fp) opened = true;
 }
 

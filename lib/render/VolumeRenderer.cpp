@@ -146,9 +146,18 @@ int VolumeRenderer::_paintGL(bool fast)
     return ret;
 }
 
+std::string VolumeRenderer::_getColorbarVariableName() const
+{
+    VolumeParams *vp = dynamic_cast<VolumeParams *>(GetActiveParams());
+    if (vp->GetValueLong(VolumeParams::UseColormapVariableTag, 0))
+        return vp->GetColorMapVariableName();
+    else
+        return vp->GetVariableName();
+}
+
 void VolumeRenderer::_setShaderUniforms(const ShaderProgram *shader, const bool fast) const
 {
-    VolumeParams *   vp = (VolumeParams *)GetActiveParams();
+    VolumeParams *   vp = dynamic_cast<VolumeParams *>(GetActiveParams());
     ViewpointParams *viewpointParams = _paramsMgr->GetViewpointParams(_winName);
     Viewpoint *      viewpoint = viewpointParams->getCurrentViewpoint();
     double           m[16];

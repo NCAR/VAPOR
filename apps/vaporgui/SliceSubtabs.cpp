@@ -1,6 +1,7 @@
 #include <QButtonGroup>
 #include "SliceSubtabs.h"
 #include "TFEditor.h"
+#include "VLineItem.h"
 
 #define MIN_SAMPLES         1
 #define MAX_SAMPLES         2000

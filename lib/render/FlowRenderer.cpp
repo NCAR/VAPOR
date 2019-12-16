@@ -5,14 +5,6 @@
 #include <cstring>
 #include <random>
 
-#ifdef WIN32
-    #include <Windows.h>
-    #include <Processthreadsapi.h>
-#else
-    #include <sys/types.h>
-    #include <unistd.h>
-#endif
-
 #define GL_ERROR -20
 
 using namespace VAPoR;
@@ -43,6 +35,8 @@ FlowRenderer::~FlowRenderer()
         _colorMapTexId = 0;
     }
 }
+
+std::string FlowRenderer::_getColorbarVariableName() const { return GetActiveParams()->GetColorMapVariableName(); }
 
 int FlowRenderer::_initializeGL()
 {
@@ -602,15 +596,9 @@ int FlowRenderer::_genSeedsRakeRandom(std::vector<flow::Particle> &seeds) const
     auto totalNumOfSeeds = rakeSeeds[3];    // We only need the 4th value for random seeds
 
     /* Create three uniform distributions in 3 dimensions */
-    /* Use the current process ID as the engine seed, so that the generated seeds are
-       reproducible during this run                                                */
-    int randSeed;
-#ifdef WIN32
-    randSeed = GetCurrentProcessId();
-#else
-    randSeed = ::getpid();
-#endif
-    std::mt19937                          gen(randSeed);    // Standard mersenne_twister_engine seeded with randSeed
+    /* Use a fixed value for the generator seed.          */
+    unsigned int                          randSeed = 32;
+    std::mt19937                          gen(randSeed);    // Standard mersenne_twister_engine
     std::uniform_real_distribution<float> distX(rake[0], rake[1]);
     std::uniform_real_distribution<float> distY(rake[2], rake[3]);
     std::uniform_real_distribution<float> distZ(rake[4], rake[5]);
@@ -672,12 +660,7 @@ int FlowRenderer::_genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) 
      */
 
     /* Create three uniform distributions in 3 dimensions */
-    int procID;    // The current process ID
-#ifdef WIN32
-    procID = GetCurrentProcessId();
-#else
-    procID = ::getpid();
-#endif
+    unsigned int                          procID = 32;
     std::mt19937                          gen(procID);    // Standard mersenne_twister engine
     std::uniform_real_distribution<float> distX(rake[0], rake[1]);
     std::uniform_real_distribution<float> distY(rake[2], rake[3]);

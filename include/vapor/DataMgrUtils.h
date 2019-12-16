@@ -194,6 +194,42 @@ VDF_API bool GetExtents(DataMgr *dataMgr, size_t timestep, const vector<string> 
 //! Used by the histo for calculating some meta data.
 VDF_API int GetDefaultMetaInfoStride(DataMgr *dataMgr, std::string varname, int refinementLevel);
 
+//! Find the first variable that exists
+//!
+//! This function searches a data collection looking over all
+//! time steps and variable names for the first available
+//! variable it can find with a given dimension \p ndim, refinement level
+//! \p level, and level of detail \p lod. A variable is "available" if
+//! DataMgr::VariableExists() returns true
+//!
+//! \param[in] ndim Number of spatial dimensions
+//!
+//! \param[out] varname Returns the name of the first variable found
+//! \param[out] ts Returns the time step of the first variable found
+//! \retval status Returns true if a variable is found, false otherwise
+//!
+//! \sa DataMgr::VariableExists()
+//
+bool GetFirstExistingVariable(DataMgr *dataMgr, int level, int lod, int ndim, string &varname, size_t &ts);
+
+//! Find the first variable that exists at a given time step
+//!
+//! This function searches a data collection looking over all
+//! variable names for the first available
+//! variable it can find with a given dimension \p ndim, time step \p ts,
+//! refinement level
+//! \p level, and level of detail \p lod. A variable is "available" if
+//! DataMgr::VariableExists() returns true
+//!
+//! \param[in] ndim Number of spatial dimensions
+//!
+//! \param[out] varname Returns the name of the first variable found
+//! \retval status Returns true if a variable is found, false otherwise
+//!
+//! \sa DataMgr::VariableExists()
+//
+bool GetFirstExistingVariable(DataMgr *dataMgr, size_t ts, int level, int lod, int ndim, string &varname);
+
 #ifdef VAPOR3_0_0_ALPHA
 
 //! Determine the size of a voxel in user coordinates, along a specific dimension,

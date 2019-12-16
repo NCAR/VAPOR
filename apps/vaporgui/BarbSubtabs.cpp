@@ -42,7 +42,7 @@ void BarbGeometrySubtab::Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dat
 BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
-    verticalLayout->insertWidget(0, _tfe = new TFEditor);
+    verticalLayout->insertWidget(0, _tfe = new TFEditor(true));
 
     _xDimCombo = new Combo(xDimEdit, xDimSlider, true);
     _yDimCombo = new Combo(yDimEdit, yDimSlider, true);

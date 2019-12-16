@@ -223,7 +223,7 @@ public:
     //!
     void GetTimeCoordinates(std::vector<double> &timecoords) const { timecoords = _timeCoordinates; };
 
-    std::vector<double> GetTimeCoordinates() const { return (_timeCoordinates); };
+    const std::vector<double> &GetTimeCoordinates() const { return (_timeCoordinates); };
 
     //! Get time coordinate var name
     //!
@@ -638,6 +638,8 @@ private:
         std::map<string, std::vector<C>> _cache;
     };
 
+    mutable std::map<size_t, std::vector<string>> _dataVarNamesCache;
+
     string _format;
     int    _nthreads;
     size_t _mem_size;
@@ -680,7 +682,14 @@ private:
 
     std::map<string, BlkExts> _blkExtsCache;
 
-    std::vector<string> _get_var_dependencies(string varname) const;
+    // Get the immediate variable dependencies of a variable
+    //
+    std::vector<string> _get_var_dependencies_1(string varname) const;
+
+    // Recursively get all of the dependencies of a list of variables.
+    // Handles cycles in the dependency graph
+    //
+    std::vector<string> _get_var_dependencies_all(std::vector<string> varnames, std::vector<string> dependencies) const;
 
     // Return true if native data has a transformable horizontal coordinate
     //

@@ -93,7 +93,7 @@ int PNGWriter::Write(const unsigned char *buffer, const unsigned int width, cons
     png_infop   info_ptr = NULL;
     png_bytep   row = NULL;
 
-    fp = fopen(file, "w");
+    fp = fopen(file, "wb");
     if (!fp) return -1;
 
     png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);

@@ -126,7 +126,7 @@ private:
     void _updateStatsTable();
 
     // calculations should put results in _validStats directly.
-    bool _calc3M(std::string);
+    bool _calc3M(std::string);    // min, max, mean
     bool _calcMedian(std::string);
     bool _calcStddev(std::string);
 };
