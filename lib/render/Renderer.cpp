@@ -121,7 +121,7 @@ int RendererBase::initializeGL(GLManager *glManager) {
 	return(0);
 }
 
-double Renderer::_getDefaultZ(
+double Renderer::GetDefaultZ(
 	DataMgr *dataMgr, size_t ts
 ) const {
 	

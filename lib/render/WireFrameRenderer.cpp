@@ -189,7 +189,7 @@ void WireFrameRenderer::_buildCacheVertices(
     
 
 	double mv = grid->GetMissingValue();
-	float defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
+	float defaultZ = GetDefaultZ(_dataMgr, _cacheParams.ts);
 	size_t numNodes = Wasp::VProduct(grid->GetDimensions());
 
 	// Pre-allocate vertices vector upfront for better performance
