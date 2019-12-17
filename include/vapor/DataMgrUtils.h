@@ -210,7 +210,7 @@ VDF_API int GetDefaultMetaInfoStride(DataMgr *dataMgr, std::string varname, int 
 //!
 //! \sa DataMgr::VariableExists()
 //
-bool GetFirstExistingVariable(DataMgr *dataMgr, int level, int lod, int ndim, string &varname, size_t &ts);
+VDF_API bool GetFirstExistingVariable(DataMgr *dataMgr, int level, int lod, int ndim, string &varname, size_t &ts);
 
 //! Find the first variable that exists at a given time step
 //!
@@ -228,7 +228,7 @@ bool GetFirstExistingVariable(DataMgr *dataMgr, int level, int lod, int ndim, st
 //!
 //! \sa DataMgr::VariableExists()
 //
-bool GetFirstExistingVariable(DataMgr *dataMgr, size_t ts, int level, int lod, int ndim, string &varname);
+VDF_API bool GetFirstExistingVariable(DataMgr *dataMgr, size_t ts, int level, int lod, int ndim, string &varname);
 
 #ifdef VAPOR3_0_0_ALPHA
 
