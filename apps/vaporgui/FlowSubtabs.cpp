@@ -356,7 +356,15 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
                                      minExt, 
                                      maxExt, 
                                      axes  );
-    VAssert( minExt.size() <= 3 && maxExt.size() <= 3 );
+    
+    // If there are no valid extents to set the rake with, just return
+    //
+    int minSize = minExt.size();
+    int maxSize = maxExt.size();
+    if ( (minSize != 3 && minSize != 2 )
+      && (maxSize != 3 && maxSize != 2 ) )
+        return;
+        
     std::vector<float> range;
     for( int i = 0; i < axes.size(); i++ )
     {
