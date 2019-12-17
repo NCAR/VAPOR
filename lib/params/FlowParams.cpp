@@ -197,20 +197,19 @@ FlowParams::SetPeriodic( const std::vector<bool>& bools )
     SetValueLongVec( _periodicTag, "any axis is periodic", longs );
 }
 
-std::vector<float>
-FlowParams::GetRake() const
+std::vector<float> FlowParams::GetRake() const
 {
-    const long rakeSize = 6;
     std::vector<double> tmp(6, std::nan("1") );
     auto doubles = GetValueDoubleVec( _rakeTag, tmp );
-    VAssert( doubles.size() == rakeSize );
+    const auto rakesize = doubles.size();
+    VAssert( rakesize == 6 || rakesize == 4 );
 
-    std::vector<float> floats( rakeSize, 0.0f );
+    std::vector<float> floats( rakesize, 0.0f );
     if( std::isnan( doubles[0] ) )
         floats[0] = std::nan("1");
     else
     {
-        for( int i = 0; i < rakeSize; i++ )
+        for( int i = 0; i < rakesize; i++ )
             floats[i] = float(doubles[i]);
     }
     return floats;
@@ -219,10 +218,10 @@ FlowParams::GetRake() const
 void
 FlowParams::SetRake( const std::vector<float>& rake )
 {
-    const long rakeSize = 6;
-    VAssert( rake.size() == rakeSize );
-    std::vector<double> doubles(rakeSize, 0.0);
-    for( int i = 0; i < rakeSize; i++ )
+    const auto rakesize = rake.size();
+    VAssert( rakesize == 4 || rakesize == 6 );
+    std::vector<double> doubles(rakesize, 0.0);
+    for( int i = 0; i < rakesize; i++ )
         doubles[i] = rake[i];
         
     SetValueDoubleVec( _rakeTag, "rake boundaries", doubles );
