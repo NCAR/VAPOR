@@ -1,6 +1,6 @@
 #include "QRangeSliderTextCombo.h"
 #include <QBoxLayout>
-#include <QDoubleValidator>
+#include "VDoubleValidator.h"
 #include <vapor/VAssert.h>
 #include <cfloat>
 #include <QAction>
@@ -23,8 +23,8 @@ QRangeSliderTextCombo::QRangeSliderTextCombo()
     connect(_slider, SIGNAL(ValueChanged(float, float)), this, SLOT(sliderChanged(float, float)));
     connect(_slider, SIGNAL(ValueChangedIntermediate(float, float)), this, SLOT(sliderChangedIntermediate(float, float)));
     connect(_slider, SIGNAL(ValueChangedBegin()), this, SIGNAL(ValueChangedBegin()));
-    connect(_leftText, SIGNAL(returnPressed()), this, SLOT(leftTextChanged()));
-    connect(_rightText, SIGNAL(returnPressed()), this, SLOT(rightTextChanged()));
+    connect(_leftText, SIGNAL(editingFinished()), this, SLOT(leftTextChanged()));
+    connect(_rightText, SIGNAL(editingFinished()), this, SLOT(rightTextChanged()));
 }
 
 void QRangeSliderTextCombo::SetRange(float min, float max)
@@ -38,8 +38,8 @@ void QRangeSliderTextCombo::SetRange(float min, float max)
         max = FLT_MAX;
     }
     
-    setValidator(_leftText, new QDoubleValidator(min, max, 100));
-    setValidator(_rightText, new QDoubleValidator(min, max, 100));
+    setValidator(_leftText, new VDoubleValidator(min, max, 100));
+    setValidator(_rightText, new VDoubleValidator(min, max, 100));
     SetValue(_left, _right);
 }
 
