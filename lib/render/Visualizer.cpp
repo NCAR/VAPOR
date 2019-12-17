@@ -676,8 +676,6 @@ captureImageEnd:
 
 bool Visualizer::_getPixelData(unsigned char* data) const
 {
-	ViewpointParams* vpParams = getActiveViewpointParams();
-
 	int width, height;
 //	vpParams->GetWindowSize(width, height);
     _framebuffer.GetSize(&width, &height);
