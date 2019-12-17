@@ -33,7 +33,7 @@ void TFEditorVolume::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr
 {
     _maps->Update(dataMgr, paramsMgr, rParams);
     _mapsInfo->Update(rParams);
-    range->Update(dataMgr, paramsMgr, rParams);
+    _range->Update(dataMgr, paramsMgr, rParams);
     _colormappedVariableCheckbox->Update(rParams);
 
     bool useColormappedVar = rParams->GetValueLong(VAPoR::VolumeParams::UseColormapVariableTag, false);
