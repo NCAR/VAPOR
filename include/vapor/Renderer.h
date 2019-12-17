@@ -139,7 +139,7 @@ class RENDER_API Renderer : public RendererBase {
     //! for applying a height value to 2D renderers.
     //! \param[in] dataMgr Current (valid) dataMgr
     //! \retval default height value for current dataset
-    double _getDefaultZ(DataMgr *dataMgr, size_t ts) const;
+    double GetDefaultZ(DataMgr *dataMgr, size_t ts) const;
 
     //! All OpenGL rendering is performed in the paintGL method.
     //! This invokes _paintGL on the renderer subclass
