@@ -4,7 +4,6 @@ class QDoubleValidator;
 class QComboBox;
 class QLineEdit;
 
-typedef QDoubleValidator VDoubleValidator; // QDoubleValidator is buggy
 typedef QLineEdit VDoubleInput;
 typedef QLineEdit VIntegerInput;
 

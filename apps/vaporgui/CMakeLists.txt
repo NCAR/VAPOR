@@ -147,6 +147,8 @@ set (SRCS
 	ModelSubtabs.h
 	TFEditorVolume.cpp
 	TFEditorVolume.h
+	VDoubleValidator.cpp
+	VDoubleValidator.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
