@@ -67,7 +67,6 @@ void ModelEventRouter::GetWebHelp(
 
 void ModelEventRouter::_initializeTab() {
     _updateTab();
-    ModelParams *rParams = (ModelParams *)GetActiveParams();
 }
 
 void ModelEventRouter::_updateTab() {
