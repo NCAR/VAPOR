@@ -14,9 +14,7 @@ using namespace VAPoR;
 using glm::vec2;
 using std::vector;
 
-static vec2    qvec2(const QPoint &qp) { return vec2(qp.x(), qp.y()); }
-static vec2    qvec2(const QPointF &qp) { return vec2(qp.x(), qp.y()); }
-static QPointF qvec2(const vec2 &v) { return QPointF(v.x, v.y); }
+static vec2 qvec2(const QPoint &qp) { return vec2(qp.x(), qp.y()); }
 
 TFColorMap::TFColorMap(TFMapWidget *parent) : TFMap(parent)
 {

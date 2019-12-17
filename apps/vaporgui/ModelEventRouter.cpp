@@ -53,11 +53,7 @@ void ModelEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
                                                           "http://www.vapor.ucar.edu/docs/vapor-gui-help/ModelAppearance"));
 }
 
-void ModelEventRouter::_initializeTab()
-{
-    _updateTab();
-    ModelParams *rParams = (ModelParams *)GetActiveParams();
-}
+void ModelEventRouter::_initializeTab() { _updateTab(); }
 
 void ModelEventRouter::_updateTab()
 {
