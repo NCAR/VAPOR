@@ -28,7 +28,7 @@ class TFEditor : public VSection {
   protected:
     TFMapGroupWidget *_maps;
     TFMapInfoGroupWidget *_mapsInfo;
-    TFMappingRangeSelector *range;
+    TFMappingRangeSelector *_range;
 
     TFOpacityMap *_opacityMap;
     TFHistogramMap *_histogramMap;
