@@ -23,8 +23,8 @@ QRangeSliderTextCombo::QRangeSliderTextCombo()
     connect(_slider, SIGNAL(ValueChanged(float, float)), this, SLOT(sliderChanged(float, float)));
     connect(_slider, SIGNAL(ValueChangedIntermediate(float, float)), this, SLOT(sliderChangedIntermediate(float, float)));
     connect(_slider, SIGNAL(ValueChangedBegin()), this, SIGNAL(ValueChangedBegin()));
-    connect(_leftText, SIGNAL(returnPressed()), this, SLOT(leftTextChanged()));
-    connect(_rightText, SIGNAL(returnPressed()), this, SLOT(rightTextChanged()));
+    connect(_leftText, SIGNAL(editingFinished()), this, SLOT(leftTextChanged()));
+    connect(_rightText, SIGNAL(editingFinished()), this, SLOT(rightTextChanged()));
 }
 
 void QRangeSliderTextCombo::SetRange(float min, float max)
