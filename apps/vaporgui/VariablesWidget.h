@@ -67,6 +67,9 @@ public:
  );
     
     DimFlags GetDimFlags() const;
+
+ void ShowZVectorVar() const;
+ void HideZVectorVar() const;
  
 protected slots:
  //! Respond to selecting the single (primary) variable of field 

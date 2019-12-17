@@ -65,6 +65,21 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _params = dynamic_cast<VAPoR::FlowParams*>(rParams);
     assert(_params);
     _variablesWidget->Update(dataMgr, paramsMgr, rParams);
+
+    std::vector<double> minExt, maxExt;
+    std::vector<int> axes;
+    VAPoR::DataMgrUtils::GetExtents( dataMgr, 
+                                     _params->GetCurrentTimestep(), 
+                                     _params->GetFieldVariableNames(),         
+                                     _params->GetRefinementLevel(),         
+                                     _params->GetCompressionLevel(),         
+                                     minExt, 
+                                     maxExt, 
+                                     axes  );
+    if ( axes.size() != 3 )
+        _variablesWidget->HideZVectorVar();
+    else
+        _variablesWidget->ShowZVectorVar();
 }
     
 

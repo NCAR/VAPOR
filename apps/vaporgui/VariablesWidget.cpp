@@ -144,6 +144,14 @@ void VariablesWidget::collapseColorVarSettings() {
     colorVariableFrame->hide();
 }
 
+void VariablesWidget::ShowZVectorVar() const {
+    _zFieldVarFrame->show();
+}
+
+void VariablesWidget::HideZVectorVar() const {
+    _zFieldVarFrame->hide();
+}
+
 void VariablesWidget::setVarName(const QString& qname){
 	VAssert(_rParams);
 
