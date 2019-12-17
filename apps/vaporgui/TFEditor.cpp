@@ -15,11 +15,13 @@ TFEditor::TFEditor(bool usingColormapVariable)
     _histogramMap = new TFHistogramMap;
     _colorMap = new TFColorMap;
     _isoMap = new TFIsoValueMap;
+    _range = new TFMappingRangeSelector;
     
     _opacityMap->UsingColormapVariable = usingColormapVariable;
     _histogramMap->UsingColormapVariable = usingColormapVariable;
     _colorMap->UsingColormapVariable = usingColormapVariable;
     _isoMap->UsingColormapVariable = usingColormapVariable;
+    _range->UsingColormapVariable = usingColormapVariable;
     
     _maps->Add({_opacityMap, _histogramMap});
     _maps->Add(_isoMap);
@@ -27,8 +29,8 @@ TFEditor::TFEditor(bool usingColormapVariable)
     
     layout()->addWidget(_maps);
     layout()->addWidget(_mapsInfo = _maps->CreateInfoGroup());
-    layout()->addWidget(range = new TFMappingRangeSelector);
-    connect(range, SIGNAL(ValueChangedIntermediate(float, float)), _histogramMap, SLOT(update()));
+    layout()->addWidget(_range);
+    connect(_range, SIGNAL(ValueChangedIntermediate(float, float)), _histogramMap, SLOT(update()));
     
     QMenu *menu = new QMenu;
     _colorMap->PopulateSettingsMenu(menu);
@@ -46,7 +48,7 @@ void TFEditor::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPo
 {
     _maps->Update(dataMgr, paramsMgr, rParams);
     _mapsInfo->Update(rParams);
-    range->Update(dataMgr, paramsMgr, rParams);
+    _range->Update(dataMgr, paramsMgr, rParams);
 }
 
 void TFEditor::SetShowOpacityMap(bool b)
