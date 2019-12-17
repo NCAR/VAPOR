@@ -226,32 +226,6 @@ void FlowSeedingSubtab::_createIntegrationSection() {
         this, &FlowSeedingSubtab::_pathlineLengthChanged );
     _pathlineFrame->addWidget( new VLineItem("Streamline length", _pathlineLengthSliderEdit));
 
-    /*_pathlineStartSliderEdit= new VSliderEdit();
-    _pathlineStartSliderEdit->SetIntType(true);
-    connect( _pathlineStartSliderEdit, &VSliderEdit::ValueChangedInt,
-        this, &FlowSeedingSubtab::_pathlineStartTimeChanged );
-    _pathlineFrame->addWidget( new VLineItem("Injection start time", _pathlineStartSliderEdit));
-    _pathlineStartSliderEdit->setEnabled(false);
-
-    _pathlineEndSliderEdit = new VSliderEdit();
-    _pathlineEndSliderEdit->SetIntType(true);
-    connect( _pathlineEndSliderEdit, &VSliderEdit::ValueChangedInt,
-        this, &FlowSeedingSubtab::_pathlineEndTimeChanged );
-    _pathlineFrame->addWidget( new VLineItem("Injection end time", _pathlineEndSliderEdit));
-    _pathlineEndSliderEdit->setEnabled(false);
-    
-    _pathlineInjIntervalSliderEdit = new VSliderEdit();
-    _pathlineInjIntervalSliderEdit->SetIntType(true);
-    connect( _pathlineInjIntervalSliderEdit,  &VSliderEdit::ValueChangedInt, 
-        this, &FlowSeedingSubtab::_seedInjIntervalChanged );
-    _pathlineFrame->addWidget( new VLineItem("Injection interval", _pathlineInjIntervalSliderEdit));
-
-    _pathlineLifetimeSliderEdit = new VSliderEdit();
-    _pathlineLifetimeSliderEdit->SetIntType(true);
-    connect( _pathlineLifetimeSliderEdit,  &VSliderEdit::ValueChangedInt, 
-        this, &FlowSeedingSubtab::_pathlineLifetimeChanged );
-    _pathlineFrame->addWidget( new VLineItem("Seed lifetime", _pathlineLifetimeSliderEdit) );
-    _pathlineLifetimeSliderEdit->setEnabled(false);*/
 
     // Universal options: Velocity multiplier and periodicity checkboxes
     //    
@@ -288,6 +262,12 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _paramsMgr = paramsMgr;
     VAssert( _params );
 
+    // Find out we're operating on 2D or 3D variables
+    auto box = _params->GetBox();
+    int  dim = 3;
+    if ( box->GetOrientation() != VAPoR::Box::Orientation::XYZ )
+        dim  = 2;
+
     // Update integration tab
     //
     bool isSteady = _params->GetIsSteady();
@@ -304,6 +284,10 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _periodicXCheckBox->SetValue( bools[X] );
     _periodicYCheckBox->SetValue( bools[Y] );
     _periodicZCheckBox->SetValue( bools[Z] );
+    if( dim == 2 )
+        _periodicZCheckBox->hide();
+    else
+        _periodicZCheckBox->show();
 
     // Velocity multiplier
     auto mltp = _params->GetVelocityMultiplier();
@@ -320,11 +304,7 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
         _seedTypeCombo->SetValue( LIST_STRING );
 
     // Random rake values
-    VAPoR::Box* box = _params->GetBox();
-    int dimension = 3;
-    if ( box->GetOrientation() != VAPoR::Box::Orientation::XYZ )
-        dimension = 2;
-    std::vector< std::string > vars = dataMgr->GetDataVarNames(dimension);
+    std::vector< std::string > vars = dataMgr->GetDataVarNames( dim );
     _biasVariableComboBox->SetOptions( vars );
     std::string var = _params->GetRakeBiasVariable();
     if(  var.empty() )    // The variable isn't set by the user yet. Let's set it!
@@ -343,6 +323,10 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _xSeedSliderEdit->SetValue( seedVec[X] );
     _ySeedSliderEdit->SetValue( seedVec[Y] );
     _zSeedSliderEdit->SetValue( seedVec[Z] );
+    if( dim == 2 )
+        _zSeedSliderEdit->hide();
+    else
+        _zSeedSliderEdit->show();
     _randomSeedsSliderEdit->SetValue( seedVec[RANDOM_INDEX] );
 
     // Update rake
@@ -423,21 +407,6 @@ void FlowSeedingSubtab::_updatePathlineWidgets( VAPoR::DataMgr* dataMgr) {
     {
         _pathlineLengthSliderEdit->SetValue( valParams );
     }
-
-    /*
-    // Seed injection interval
-    _pathlineInjIntervalSliderEdit->SetRange(0, numTS - 1 );
-    int injIntv = _params->GetSeedInjInterval();
-    if( injIntv < 0 )       // initial value, we set it to 0
-    {
-        _pathlineInjIntervalSliderEdit->SetValue( 0 );
-        _params->SetSeedInjInterval( 0 );
-    }
-    else
-    {
-        _pathlineInjIntervalSliderEdit->SetValue( injIntv );
-    }
-    */
 }
 
 void 
