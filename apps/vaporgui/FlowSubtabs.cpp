@@ -164,7 +164,7 @@ void FlowSeedingSubtab::_createSeedingSection( QWidget* parent ) {
     connect( _randomSeedsSliderEdit, &VSliderEdit::ValueChanged,
         this, &FlowSeedingSubtab::_rakeNumOfSeedsChanged );
 
-    _biasWeightSliderEdit = new VSliderEdit(-1, 1, 0);
+    _biasWeightSliderEdit = new VSliderEdit(-10.0, 10.0, 0.0);
     _randomSeedsFrame->addWidget( new VLineItem( "Bias weight", _biasWeightSliderEdit ) );
     connect( _biasWeightSliderEdit, &VSliderEdit::ValueChanged,
         this, &FlowSeedingSubtab::_biasStrengthChanged );
@@ -335,7 +335,7 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     else
         _biasVariableComboBox->SetValue( var );
     
-    double bias = _params->GetRakeBiasStrength();
+    auto bias = _params->GetRakeBiasStrength();
     _biasWeightSliderEdit->SetValue( bias );
 
     // Random and Gridded # seeds
