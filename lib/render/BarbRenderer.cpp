@@ -570,10 +570,10 @@ void BarbRenderer::_reFormatExtents(vector<float> &rakeExts) const
 
     rakeExts.push_back(rMinExtents[X]);
     rakeExts.push_back(rMinExtents[Y]);
-    rakeExts.push_back(planar ? _getDefaultZ(_dataMgr, bParams->GetCurrentTimestep()) : rMinExtents[Z]);
+    rakeExts.push_back(planar ? GetDefaultZ(_dataMgr, bParams->GetCurrentTimestep()) : rMinExtents[Z]);
     rakeExts.push_back(rMaxExtents[X]);
     rakeExts.push_back(rMaxExtents[Y]);
-    rakeExts.push_back(planar ? _getDefaultZ(_dataMgr, bParams->GetCurrentTimestep()) : rMaxExtents[Z]);
+    rakeExts.push_back(planar ? GetDefaultZ(_dataMgr, bParams->GetCurrentTimestep()) : rMaxExtents[Z]);
 }
 
 void BarbRenderer::_makeRakeGrid(vector<int> &rakeGrid) const

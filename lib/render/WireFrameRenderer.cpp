@@ -169,7 +169,7 @@ void WireFrameRenderer::_drawCell(const GLuint *cellNodeIndices, int n, bool lay
 void WireFrameRenderer::_buildCacheVertices(const Grid *grid, const Grid *heightGrid, vector<GLuint> &nodeMap) const
 {
     double mv = grid->GetMissingValue();
-    float  defaultZ = _getDefaultZ(_dataMgr, _cacheParams.ts);
+    float  defaultZ = GetDefaultZ(_dataMgr, _cacheParams.ts);
     size_t numNodes = Wasp::VProduct(grid->GetDimensions());
 
     // Pre-allocate vertices vector upfront for better performance
