@@ -16,6 +16,9 @@
 <ColorInterpolationType Type="Long">
   4 
 </ColorInterpolationType>
+<UseWhitespace Type="Long">
+  1
+</UseWhitespace>
 <ColorMapControlPoints Type="Double">
   0.5933147668838501 0.7607843279838562 0.9137254953384399 0 0.1142061278223991 0.8627451062202454 0.6784313917160034 0.9900000095367432 
 </ColorMapControlPoints>
