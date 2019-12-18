@@ -85,6 +85,11 @@ public:
     //
     void GetFirstStepVelocityIntersection( glm::vec3& minxyz, glm::vec3& maxxyz );
 
+    // 
+    // Set the default Z value when there isn't a Z component present
+    //
+    void SetDefaultZ( float );
+
 
 private:
 
@@ -93,8 +98,10 @@ private:
     VAPoR::DataMgr*             _datamgr = nullptr;   
     const VAPoR::FlowParams*    _params  = nullptr;
     using cacheType = VAPoR::unique_ptr_cache< std::string, GridWrapper >;
-    mutable cacheType           _recentGrids;
+    mutable cacheType           _recentGrids;   // so this variable can be 
+                                                // modified by a const function.
     const std::string           _constantGridZero = "ConstantGrid with zeros";
+    float                       _defaultZ = 0.0f;
 
     // Member functions
     std::string _paramsToString(  size_t currentTS, const std::string& var, int refLevel, 

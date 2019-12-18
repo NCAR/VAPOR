@@ -389,15 +389,18 @@ VaporField::LocateTimestamp( float time, size_t& floor ) const
 }
 
 
-int
-VaporField::GetNumberOfTimesteps() const
+int VaporField::GetNumberOfTimesteps() const
 {
     return _timestamps.size();
 }
+    
+void VaporField::SetDefaultZ( float dz )
+{
+    _defaultZ = dz;
+}
 
 
-const VAPoR::Grid*
-VaporField::_getAGrid( size_t timestep, const std::string& varName ) const
+const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& varName ) const
 {
     // First check if we have the requested grid in our cache.
     // If it exists, return the grid directly.
