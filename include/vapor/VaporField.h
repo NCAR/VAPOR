@@ -86,9 +86,15 @@ public:
     void GetFirstStepVelocityIntersection( glm::vec3& minxyz, glm::vec3& maxxyz );
 
     // 
-    // Set the default Z value when there isn't a Z component present
+    // Sets the default Z value when there isn't a Z component present
     //
     void SetDefaultZ( float );
+
+    //
+    // Returns the number of empty velocity variable names.
+    // It is 3 when the object is newly created, or is used to represent a scalar field
+    // 
+    int GetNumOfEmptyVelocityNames() const;
 
 
 private:
