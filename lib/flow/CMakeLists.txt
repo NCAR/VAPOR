@@ -1,6 +1,7 @@
 set (SRC
 	Particle.cpp
 	Advection.cpp
+	Field.cpp
 	VaporField.cpp
 )
 

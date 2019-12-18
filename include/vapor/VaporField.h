@@ -90,12 +90,6 @@ public:
     //
     void SetDefaultZ( float );
 
-    //
-    // Returns the number of empty velocity variable names.
-    // It is 3 when the object is newly created, or is used to represent a scalar field
-    // 
-    int GetNumOfEmptyVelocityNames() const;
-
 
 private:
 

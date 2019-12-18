@@ -398,16 +398,6 @@ void VaporField::SetDefaultZ( float dz )
 {
     _defaultZ = dz;
 }
-    
-int VaporField::GetNumOfEmptyVelocityNames() const
-{
-    int counter = 0;
-    for( const auto &e : VelocityNames )
-        if( e.empty() )
-            counter++;
-    
-    return counter;
-}
 
 
 const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& varName ) const
