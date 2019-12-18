@@ -47,8 +47,8 @@ public:
 
     // Class members
     bool            IsSteady = false;
-    std::string     ScalarName;
-    std::string     VelocityNames[3];
+    std::string     ScalarName = "";
+    std::string     VelocityNames[3]{"", "", ""};
 };
 };
 
