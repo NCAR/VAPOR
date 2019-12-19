@@ -65,23 +65,6 @@ FILE *OpenLog(string path_var)
     return (fp);
 }
 
-// Keep this code for future debugging
-// Use this if Qt starts cluttering the console with random errors
-/*#if defined(Darwin) && !defined(NDEBUG)
-//#ifdef DEBUG
-#include <unistd.h>
-int _savedSTDERR;
-void HideSTDERR()
-{
-    _savedSTDERR = dup(STDERR_FILENO);
-    freopen("/dev/null", "w", stderr);
-}
-void RestoreSTDERR()
-{
-    dup2(_savedSTDERR, STDERR_FILENO);
-}
-#endif*/
-
 QApplication *app;
 int           main(int argc, char **argv)
 {

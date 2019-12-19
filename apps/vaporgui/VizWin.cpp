@@ -49,6 +49,7 @@
 #include <vapor/FlowParams.h>
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
+#include "hide_std_error_util.h"
 
 using namespace VAPoR;
 
@@ -630,7 +631,9 @@ void VizWin::Render(bool fast)
 #endif
     }
 
+    HideSTDERR();
     swapBuffers();
+    RestoreSTDERR();
 
     rc = CheckGLErrorMsg("VizWindowPaintGL");
     if (rc < 0) { MSG_ERR("OpenGL error"); }
