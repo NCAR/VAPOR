@@ -149,6 +149,8 @@ set (SRCS
 	TFEditorVolume.h
 	VDoubleValidator.cpp
 	VDoubleValidator.h
+	hide_std_error_util.cpp
+	hide_std_error_util.h
 
 	# Need to include all files that request .ui files
 	TwoDSubtabs.h
