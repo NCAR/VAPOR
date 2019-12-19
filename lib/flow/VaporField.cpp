@@ -357,8 +357,14 @@ VaporField::UpdateParams( const VAPoR::FlowParams* p )
     IsSteady = p->GetIsSteady();
     ScalarName = p->GetColorMapVariableName();
     auto velNames = p->GetFieldVariableNames();
-    for( int i = 0; i < 3 && i < velNames.size(); i++ )
-        VelocityNames[i] = velNames.at(i);
+    //for( int i = 0; i < 3 && i < velNames.size(); i++ )
+    for( int i = 0; i < 3; i++ )
+    {
+        if( i < velNames.size() )
+            VelocityNames[i] = velNames.at(i);
+        else
+            VelocityNames[i] = "";  // make sure it keeps an empty string,
+    }                               // instead of whatever left from before.
 }
 
 
@@ -389,15 +395,18 @@ VaporField::LocateTimestamp( float time, size_t& floor ) const
 }
 
 
-int
-VaporField::GetNumberOfTimesteps() const
+int VaporField::GetNumberOfTimesteps() const
 {
     return _timestamps.size();
 }
+    
+void VaporField::SetDefaultZ( float dz )
+{
+    _defaultZ = dz;
+}
 
 
-const VAPoR::Grid*
-VaporField::_getAGrid( size_t timestep, const std::string& varName ) const
+const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& varName ) const
 {
     // First check if we have the requested grid in our cache.
     // If it exists, return the grid directly.
