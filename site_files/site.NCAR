@@ -33,3 +33,14 @@ if (WIN32)
 else ()
 	set (NUMPY_INCLUDE_DIR "${PYTHONPATH}/site-packages/numpy/core/include")
 endif ()
+
+
+cmake_host_system_information(RESULT HOSTNAME QUERY HOSTNAME)
+if (HOSTNAME MATCHES "cisl-garibaldi")
+	if (BUILD_GUI)
+		set (EXTRA_LIBS_SEARCH ${EXTRA_LIBS_SEARCH} dbus)
+	endif ()
+endif ()
+
+
+
