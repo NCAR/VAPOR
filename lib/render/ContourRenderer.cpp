@@ -158,7 +158,7 @@ int ContourRenderer::_buildCache()
     }
     
 	double mv = grid->GetMissingValue();
-    float Z0 = _getDefaultZ(_dataMgr, _cacheParams.ts);
+    float Z0 = GetDefaultZ(_dataMgr, _cacheParams.ts);
 
     Grid::ConstCellIterator it = grid->ConstCellBegin(
 		_cacheParams.boxMin, _cacheParams.boxMax

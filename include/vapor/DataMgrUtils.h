@@ -267,7 +267,7 @@ namespace DataMgrUtils {
  //!
  //! \sa DataMgr::VariableExists()
  //
- bool GetFirstExistingVariable(
+ VDF_API bool GetFirstExistingVariable(
     DataMgr *dataMgr, int level, int lod, int ndim, string &varname, size_t &ts
  );
 
@@ -287,7 +287,7 @@ namespace DataMgrUtils {
  //!
  //! \sa DataMgr::VariableExists()
  //
- bool GetFirstExistingVariable(
+ VDF_API bool GetFirstExistingVariable(
     DataMgr *dataMgr, size_t ts, int level, int lod, int ndim, string &varname
  );
 
