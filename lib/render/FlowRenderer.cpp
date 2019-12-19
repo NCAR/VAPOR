@@ -539,26 +539,26 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         }
     }
 
-    // Check the uniform number of seeds in the rake 
-    const auto rakeNumOfSeeds = params->GetRakeNumOfSeeds();
-    if( ( _cache_rakeNumOfSeeds[0] != rakeNumOfSeeds[0] ) ||
-        ( _cache_rakeNumOfSeeds[1] != rakeNumOfSeeds[1] ) ||
-        ( _cache_rakeNumOfSeeds[2] != rakeNumOfSeeds[2] )  )
+    // Check the gridded  number of seeds in the rake 
+    const auto gridNumOfSeeds = params->GetGridNumOfSeeds();
+    for( int i = 0; i < gridNumOfSeeds.size(); i++ )
     {
-        for( int i = 0; i < 3; i++ )
-            _cache_rakeNumOfSeeds[i] = rakeNumOfSeeds[i];
-
-        if( _cache_seedGenMode == FlowSeedMode::UNIFORM )
+        if( _cache_rakeNumOfSeeds[i] != gridNumOfSeeds[i] )
         {
-            _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
-            _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+            _cache_rakeNumOfSeeds[i] = gridNumOfSeeds[i];
+            if( _cache_seedGenMode == FlowSeedMode::UNIFORM )
+            {
+                _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
+                _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+            }
         }
     }
 
     // Check the random number of seeds in the rake 
-    if( _cache_rakeNumOfSeeds[3] != rakeNumOfSeeds[3] )
+    const auto randNumOfSeeds = params->GetRandomNumOfSeeds();
+    if( _cache_rakeNumOfSeeds[3] != randNumOfSeeds )
     {
-        _cache_rakeNumOfSeeds[3] = rakeNumOfSeeds[3];
+        _cache_rakeNumOfSeeds[3] = randNumOfSeeds;
 
         if( _cache_seedGenMode == FlowSeedMode::RANDOM || 
             _cache_seedGenMode == FlowSeedMode::RANDOM_BIAS )
@@ -698,19 +698,17 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
     for( int i = 0; i < dim; i++ )
         VAssert( rake[i*2+1] >= rake[i*2] );
 
-// TODO: update the seed retrieving mechanism.
-
     /* retrieve seed numbers from params */
-    auto rakeSeeds = params->GetRakeNumOfSeeds();
-    VAssert( rakeSeeds.size() == 4 ); 
+    const auto gridNumOfSeeds = params->GetGridNumOfSeeds();
+    VAssert( gridNumOfSeeds.size() == 4 ); 
     for( int i = 0; i < dim; i++ )    // we only need first 3 values for unifrm seeds
-        VAssert( rakeSeeds[i] > 0 );
+        VAssert( gridNumOfSeeds[i] > 0 );
 
     /* Create arrays that contain X, Y, and Z coordinates */
     float start[3], step[3];
     for( int i = 0; i < dim; i++ )    // for each of the X, Y, Z dimensions
     {
-        if( rakeSeeds[i] == 1 )     // one seed in this dimension
+        if( gridNumOfSeeds[i] == 1 )     // one seed in this dimension
         {
             start[i] = rake[i*2] + 0.5f * (rake[i*2+1] - rake[i*2]);
             step[i]  = 0.0f;
@@ -718,7 +716,7 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
         else                        // more than one seed in this dimension
         {
             start[i] = rake[i*2];
-            step[i]  = (rake[i*2+1] - rake[i*2]) / float(rakeSeeds[i] - 1);
+            step[i]  = (rake[i*2+1] - rake[i*2]) / float(gridNumOfSeeds[i] - 1);
         }
     }
     if( dim == 2 )  // put default Z values
@@ -731,9 +729,12 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
     float timeVal = _timestamps.at(0);  // Default time value
     glm::vec3 loc;
     seeds.clear();
-    for( int k = 0; k < rakeSeeds[2]; k++ )
-        for( int j = 0; j < rakeSeeds[1]; j++ )
-            for( int i = 0; i < rakeSeeds[0]; i++ )
+    long seedsZ;
+    if( dim == 2 )  seedsZ = 1;
+    else            seedsZ = gridNumOfSeeds[2];
+    for( long k = 0; k < seedsZ; k++ )
+        for( long j = 0; j < gridNumOfSeeds[1]; j++ )
+            for( long i = 0; i < gridNumOfSeeds[0]; i++ )
             {
                 loc.x = start[0] + float(i) * step[0];
                 loc.y = start[1] + float(j) * step[1];
@@ -772,9 +773,7 @@ FlowRenderer::_genSeedsRakeRandom( std::vector<flow::Particle>& seeds ) const
         VAssert( rake[i*2+1] >= rake[i*2] );
 
     /* retrieve random seed numbers from params */
-    auto rakeSeeds = params->GetRakeNumOfSeeds();
-    VAssert( rakeSeeds.size() == 4 ); 
-    auto totalNumOfSeeds = rakeSeeds[3];    // We only need the 4th value for random seeds
+    auto totalNumOfSeeds = params->GetRandomNumOfSeeds();
     
     /* Create three uniform distributions in 3 dimensions */
     /* Use a fixed value for the generator seed.          */
@@ -832,9 +831,7 @@ FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds ) co
     auto biasStren = params->GetRakeBiasStrength();
 
     /* retrieve random seed numbers from params */
-    auto rakeSeeds = params->GetRakeNumOfSeeds();
-    VAssert( rakeSeeds.size() == 4 ); 
-    auto numOfSeedsNeeded = rakeSeeds[3];    // We only need the 4th value for random seeds
+    auto numOfSeedsNeeded = params->GetRandomNumOfSeeds();
     
     /* request a grid representing the rake area */
     Grid* grid = _dataMgr->GetVariable( params->GetCurrentTimestep(),

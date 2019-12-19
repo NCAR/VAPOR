@@ -319,14 +319,16 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _biasWeightSliderEdit->SetValue( bias );
 
     // Random and Gridded # seeds
-    std::vector<long> seedVec = _params->GetRakeNumOfSeeds();
+    std::vector<long> seedVec = _params->GetGridNumOfSeeds();
     _xSeedSliderEdit->SetValue( seedVec[X] );
     _ySeedSliderEdit->SetValue( seedVec[Y] );
-    _zSeedSliderEdit->SetValue( seedVec[Z] );
-    if( dim == 2 )
-        _zSeedSliderEdit->hide();
-    else
+    if( dim == 3 )
+    {
+        _zSeedSliderEdit->SetValue( seedVec[Z] );
         _zSeedSliderEdit->show();
+    }
+    else
+        _zSeedSliderEdit->hide();
     _randomSeedsSliderEdit->SetValue( seedVec[RANDOM_INDEX] );
 
     // Update rake
@@ -541,12 +543,15 @@ FlowSeedingSubtab::_biasStrengthChanged( double strength )
 void
 FlowSeedingSubtab::_rakeNumOfSeedsChanged()
 {
-    std::vector<long> seedsVector(4, (long)1.0);
+    // Scott TODO: this widget needs to know if VariablesWidget is in 2D or 3D
+    // mode, and writes back to the params a vector of size 2 or 3.
+    std::vector<long> seedsVector(3, 1);
     seedsVector[X] = _xSeedSliderEdit->GetValue();
     seedsVector[Y] = _ySeedSliderEdit->GetValue();
     seedsVector[Z] = _zSeedSliderEdit->GetValue();
-    seedsVector[RANDOM_INDEX] = _randomSeedsSliderEdit->GetValue();
-    _params->SetRakeNumOfSeeds( seedsVector );
+    _params->SetGridNumOfSeeds( seedsVector );
+
+    _params->SetRandomNumOfSeeds( _randomSeedsSliderEdit->GetValue() );
 }
 
 void 

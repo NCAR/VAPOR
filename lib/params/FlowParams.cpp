@@ -2,21 +2,22 @@
 
 using namespace VAPoR;
 
-const std::string FlowParams::_isSteadyTag           = "isSteadyTag";
-const std::string FlowParams::_velocityMultiplierTag = "velocityMultiplierTag";
-const std::string FlowParams::_steadyNumOfStepsTag   = "steadyNumOfStepsTag";
-const std::string FlowParams::_seedGenModeTag        = "seedGenModeTag";
-const std::string FlowParams::_seedInputFilenameTag  = "seedInputFilenameTag";
-const std::string FlowParams::_flowlineOutputFilenameTag  = "flowlineOutputFilenameTag";
-const std::string FlowParams::_flowDirectionTag      = "flowDirectionTag";
-const std::string FlowParams::_needFlowlineOutputTag = "needFlowlineOutputTag";
-const std::string FlowParams::_periodicTag           = "periodicTag";
-const std::string FlowParams::_rakeTag               = "rakeTag";
-const std::string FlowParams::_rakeNumOfSeedsTag     = "rakeNumOfSeedsTag";
-const std::string FlowParams::_rakeBiasVariable      = "rakeBiasVariable";
-const std::string FlowParams::_rakeBiasStrength      = "rakeBiasStrength";
-const std::string FlowParams::_pastNumOfTimeSteps    = "pastNumOfTimeSteps";
-const std::string FlowParams::_seedInjInterval       = "seedInjInterval";
+const std::string FlowParams::_isSteadyTag           = "IsSteadyTag";
+const std::string FlowParams::_velocityMultiplierTag = "VelocityMultiplierTag";
+const std::string FlowParams::_steadyNumOfStepsTag   = "SteadyNumOfStepsTag";
+const std::string FlowParams::_seedGenModeTag        = "SeedGenModeTag";
+const std::string FlowParams::_seedInputFilenameTag  = "SeedInputFilenameTag";
+const std::string FlowParams::_flowlineOutputFilenameTag = "FlowlineOutputFilenameTag";
+const std::string FlowParams::_flowDirectionTag      = "FlowDirectionTag";
+const std::string FlowParams::_needFlowlineOutputTag = "NeedFlowlineOutputTag";
+const std::string FlowParams::_periodicTag           = "PeriodicTag";
+const std::string FlowParams::_rakeTag               = "RakeTag";
+const std::string FlowParams::_rakeBiasVariable      = "RakeBiasVariable";
+const std::string FlowParams::_rakeBiasStrength      = "RakeBiasStrength";
+const std::string FlowParams::_pastNumOfTimeSteps    = "PastNumOfTimeSteps";
+const std::string FlowParams::_seedInjInterval       = "SeedInjInterval";
+const std::string FlowParams::_gridNumOfSeedsTag     = "GridNumOfSeeds";
+const std::string FlowParams::_randomNumOfSeedsTag   = "RandomNumOfSeeds";
 
 
 static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
@@ -173,13 +174,13 @@ void FlowParams::SetFlowDirection( int i )
     SetValueString( _flowDirectionTag, "flow direction", "" );
 }
 
-std::vector<bool> 
-FlowParams::GetPeriodic() const
+std::vector<bool> FlowParams::GetPeriodic() const
 {
     std::vector<long> tmp( 3, 0 );
     auto longs = GetValueLongVec( _periodicTag, tmp );
-    std::vector<bool> bools( 3, false );
-    for( int i = 0; i < 3; i++ )
+    VAssert( longs.size() == 3 || longs.size() == 2 );
+    std::vector<bool> bools( longs.size(), false );
+    for( int i = 0; i < bools.size(); i++ )
         if( longs[i] != 0 )
             bools[i] = true;
 
@@ -189,8 +190,9 @@ FlowParams::GetPeriodic() const
 void              
 FlowParams::SetPeriodic( const std::vector<bool>& bools )
 {
-    std::vector<long> longs( 3, 0 );
-    for( int i = 0; i < 3 && i < bools.size(); i++ )
+    VAssert( bools.size() == 3 || bools.size() == 2 );
+    std::vector<long> longs( bools.size(), 0 );
+    for( int i = 0; i < bools.size(); i++ )
         if( bools[i] )
             longs[i] = 1;
 
@@ -227,20 +229,30 @@ FlowParams::SetRake( const std::vector<float>& rake )
     SetValueDoubleVec( _rakeTag, "rake boundaries", doubles );
 }
 
-void
-FlowParams::SetRakeNumOfSeeds( const std::vector<long>& num )
+std::vector<long> FlowParams::GetGridNumOfSeeds() const
 {
-    VAssert( num.size() == 4 );
-    SetValueLongVec( _rakeNumOfSeedsTag, "rake num of seeds", num );
+    // Default: 5 along each of the three dimensions.
+    const std::vector<long> tmp( 3, 5 );
+    auto num = GetValueLongVec( _gridNumOfSeedsTag, tmp );
+    VAssert( num.size() == 3 || num.size() == 2 );
+    return num;
 }
 
-std::vector<long>
-FlowParams::GetRakeNumOfSeeds() const
+void FlowParams::SetGridNumOfSeeds( const std::vector<long>& num )
 {
-    const std::vector<long> tmp( 4, 5 );
-    auto num = GetValueLongVec( _rakeNumOfSeedsTag, tmp );
-    VAssert( num.size() == 4 );
-    return num;
+    VAssert( num.size() == 3 || num.size() == 2 );
+    SetValueLongVec( _gridNumOfSeedsTag, "grid num of seeds", num );
+}
+    
+long FlowParams::GetRandomNumOfSeeds() const
+{
+    return GetValueLong( _randomNumOfSeedsTag, 5 );
+}
+
+void FlowParams::SetRandomNumOfSeeds( long num )
+{
+    VAssert( num >= 0 );
+    SetValueLong( _randomNumOfSeedsTag, "random num of seeds", num );
 }
     
 std::string         
