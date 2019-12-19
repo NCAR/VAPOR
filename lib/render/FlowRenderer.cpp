@@ -700,8 +700,9 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
 
     /* retrieve seed numbers from params */
     const auto gridNumOfSeeds = params->GetGridNumOfSeeds();
-    VAssert( gridNumOfSeeds.size() == 4 ); 
-    for( int i = 0; i < dim; i++ )    // we only need first 3 values for unifrm seeds
+    cout << gridNumOfSeeds.size() << " " << dim << endl;
+    VAssert( gridNumOfSeeds.size() == dim );
+    for( int i = 0; i < dim; i++ )
         VAssert( gridNumOfSeeds[i] > 0 );
 
     /* Create arrays that contain X, Y, and Z coordinates */
@@ -753,9 +754,6 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
                 _dupSeedsNewTime( seeds, firstN, _timestamps.at(ts) );
             }
     }
-std::cout << "_genSeedsRakeUniform(): " << std::endl;
-for( const auto &e : seeds )
-    printf("(%f, %f, %f, %f)\n", e.location.x, e.location.y, e.location.z, e.time );
 
     return 0;
 }
