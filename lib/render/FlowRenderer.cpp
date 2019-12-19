@@ -156,6 +156,11 @@ FlowRenderer::_paintGL( bool fast )
     _velocityField.UpdateParams( params );
     _colorField.UpdateParams( params );
 
+    // In case there's no variable selected, meaning that all the velocity variable
+    // names are empty strings, then the paint routine aborts.
+    if( _velocityField.GetNumOfEmptyVelocityNames() == 3 )
+        return 0;
+
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
         /* Read seeds from a file is a special case, so we put it up front */
@@ -676,21 +681,34 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
     VAssert( params );
 
+    /* Find out we're operating on 2D or 3D variables */
+    int  dim = 0; 
+    // Assume all the selected velocity variables have the same dimensionality
+    for( const auto &e : _velocityField.VelocityNames )
+        if( !e.empty() )
+        {
+            dim = _dataMgr->GetNumDimensions( e );
+            break;
+        }
+    VAssert( dim == 3 || dim == 2 );
+
     /* retrieve rake from params */
     auto rake = params->GetRake();
-    VAssert( rake.size() == 6 );
-    for( int i = 0; i < 3; i++ )
+    VAssert( rake.size() == 6 || rake.size() == 4 );
+    for( int i = 0; i < dim; i++ )
         VAssert( rake[i*2+1] >= rake[i*2] );
+
+// TODO: update the seed retrieving mechanism.
 
     /* retrieve seed numbers from params */
     auto rakeSeeds = params->GetRakeNumOfSeeds();
     VAssert( rakeSeeds.size() == 4 ); 
-    for( int i = 0; i < 3; i++ )    // we only need first 3 values for unifrm seeds
+    for( int i = 0; i < dim; i++ )    // we only need first 3 values for unifrm seeds
         VAssert( rakeSeeds[i] > 0 );
 
     /* Create arrays that contain X, Y, and Z coordinates */
     float start[3], step[3];
-    for( int i = 0; i < 3; i++ )    // for each of the X, Y, Z dimensions
+    for( int i = 0; i < dim; i++ )    // for each of the X, Y, Z dimensions
     {
         if( rakeSeeds[i] == 1 )     // one seed in this dimension
         {
@@ -702,6 +720,11 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
             start[i] = rake[i*2];
             step[i]  = (rake[i*2+1] - rake[i*2]) / float(rakeSeeds[i] - 1);
         }
+    }
+    if( dim == 2 )  // put default Z values
+    {
+        start[2] = Renderer::GetDefaultZ( _dataMgr, params->GetCurrentTimestep() );
+        step[2]  = 0.0f;
     }
 
     /* Populate the list of seeds */
@@ -729,6 +752,9 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
                 _dupSeedsNewTime( seeds, firstN, _timestamps.at(ts) );
             }
     }
+std::cout << "_genSeedsRakeUniform(): " << std::endl;
+for( const auto &e : seeds )
+    printf("(%f, %f, %f, %f)\n", e.location.x, e.location.y, e.location.z, e.time );
 
     return 0;
 }
