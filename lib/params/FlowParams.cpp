@@ -176,9 +176,12 @@ void FlowParams::SetFlowDirection( int i )
 
 std::vector<bool> FlowParams::GetPeriodic() const
 {
-    std::vector<long> tmp( 3, 0 );
-    auto longs = GetValueLongVec( _periodicTag, tmp );
-    VAssert( longs.size() == 3 || longs.size() == 2 );
+    //std::vector<long> tmp( 3, 0 );
+    auto longs = GetValueLongVec( _periodicTag );//, tmp );
+    if ( longs.size() != 3 && longs.size() != 2 ) {
+        std::vector<long> tmp( 3, 0 );
+        longs = tmp;
+    }
     std::vector<bool> bools( longs.size(), false );
     for( int i = 0; i < bools.size(); i++ )
         if( longs[i] != 0 )
@@ -201,10 +204,13 @@ FlowParams::SetPeriodic( const std::vector<bool>& bools )
 
 std::vector<float> FlowParams::GetRake() const
 {
-    std::vector<double> tmp(6, std::nan("1") );
-    auto doubles = GetValueDoubleVec( _rakeTag, tmp );
-    const auto rakesize = doubles.size();
-    VAssert( rakesize == 6 || rakesize == 4 );
+    auto doubles = GetValueDoubleVec( _rakeTag );//, tmp );
+    auto rakesize = doubles.size();
+    if ( rakesize != 6 && rakesize != 4 ) {
+        std::vector<double> tmp(6, std::nan("1") );
+        doubles = tmp;
+        rakesize = doubles.size();
+    }
 
     std::vector<float> floats( rakesize, 0.0f );
     if( std::isnan( doubles[0] ) )
@@ -231,11 +237,15 @@ FlowParams::SetRake( const std::vector<float>& rake )
 
 std::vector<long> FlowParams::GetGridNumOfSeeds() const
 {
-    // Default: 5 along each of the three dimensions.
-    const std::vector<long> tmp( 3, 5 );
-    auto num = GetValueLongVec( _gridNumOfSeedsTag, tmp );
-    VAssert( num.size() == 3 || num.size() == 2 );
-    return num;
+    //auto num = GetValueLongVec( _gridNumOfSeedsTag, tmp );
+    auto num = GetValueLongVec( _gridNumOfSeedsTag );
+    if ( num.size() == 3 || num.size() == 2 )
+        return num;
+    else {
+        // Default: 5 along each of the three dimensions.
+        const std::vector<long> tmp( 3, 5 );
+        return tmp;
+    }
 }
 
 void FlowParams::SetGridNumOfSeeds( const std::vector<long>& num )

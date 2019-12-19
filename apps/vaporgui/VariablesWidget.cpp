@@ -144,11 +144,17 @@ void VariablesWidget::collapseColorVarSettings() {
     colorVariableFrame->hide();
 }
 
-void VariablesWidget::ShowZVectorVar() const {
+void VariablesWidget::Configure3DFieldVars() const {
+    dimensionCombo->blockSignals(true);
+    dimensionCombo->setCurrentIndex( 1 );
+    dimensionCombo->blockSignals(false);
     _zFieldVarFrame->show();
 }
 
-void VariablesWidget::HideZVectorVar() const {
+void VariablesWidget::Configure2DFieldVars() const {
+    dimensionCombo->blockSignals(true);
+    dimensionCombo->setCurrentIndex( 0 );
+    dimensionCombo->blockSignals(false);
     _zFieldVarFrame->hide();
 }
 
@@ -261,6 +267,8 @@ void VariablesWidget::setVariableDims(int index){
 	// Need to referesh variable list if dimension changes
 	//
 	updateCombos();
+
+    emit _dimensionalityChanged( _activeDim );
 }
 
 void VariablesWidget::setDefaultVariables() {

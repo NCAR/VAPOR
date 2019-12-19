@@ -35,7 +35,9 @@ namespace {
     const int X                        = 0;
     const int Y                        = 1;
     const int Z                        = 2;
-    const int RANDOM_INDEX             = 3;
+
+    const int Z_RAKE_MIN               = 4;
+    const int Z_RAKE_MAX               = 5;
 }
 
 QVaporSubtab::QVaporSubtab(QWidget* parent) : QWidget(parent)
@@ -55,6 +57,9 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
     _variablesWidget->Reinit(   (VariableFlags)(VECTOR | COLOR),
                                 (DimFlags)( TWOD | THREED ) );
     _layout->addWidget( _variablesWidget, 0, 0 );
+
+    connect( _variablesWidget, &VariablesWidget::_dimensionalityChanged,
+        this, &FlowVariablesSubtab::_dimensionalityChanged );
 }
 
 void 
@@ -64,24 +69,25 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
 {
     _params = dynamic_cast<VAPoR::FlowParams*>(rParams);
     assert(_params);
-    _variablesWidget->Update(dataMgr, paramsMgr, rParams);
+    
+    _paramsMgr = paramsMgr;
 
-    std::vector<double> minExt, maxExt;
-    std::vector<int> axes;
-    VAPoR::DataMgrUtils::GetExtents( dataMgr, 
-                                     _params->GetCurrentTimestep(), 
-                                     _params->GetFieldVariableNames(),         
-                                     _params->GetRefinementLevel(),         
-                                     _params->GetCompressionLevel(),         
-                                     minExt, 
-                                     maxExt, 
-                                     axes  );
-    if ( axes.size() != 3 )
-        _variablesWidget->HideZVectorVar();
+    GUIStateParams *gp = dynamic_cast<GUIStateParams*>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
+    int nDims = gp->GetFlowDimensionality();
+    if (nDims == 2)
+        _variablesWidget->Configure2DFieldVars();
     else
-        _variablesWidget->ShowZVectorVar();
+        _variablesWidget->Configure3DFieldVars();
+    
+    _variablesWidget->Update(dataMgr, paramsMgr, rParams);
 }
     
+void FlowVariablesSubtab::_dimensionalityChanged( int nDims ) const {
+    GUIStateParams *gp = dynamic_cast<GUIStateParams*>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
+    gp->SetFlowDimensionality( nDims );
+
+    
+}
 
 //
 //================================
@@ -108,7 +114,13 @@ void FlowAppearanceSubtab::Update(  VAPoR::DataMgr *dataMgr,
 //
 //================================
 //
-FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : QVaporSubtab(parent)
+FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) : 
+    QVaporSubtab(parent),
+    _numDims(-1),               // Initial value.  Will be configured during Update().
+    _oldZRakeNumSeeds(5),
+    _oldZRakeMin(FLT_MIN),
+    _oldZRakeMax(FLT_MAX),
+    _oldZPeriodicity(false)
 {
     _params = nullptr;
 
@@ -157,7 +169,8 @@ void FlowSeedingSubtab::_createSeedingSection( QWidget* parent ) {
     _zSeedSliderEdit = new VSliderEdit();
     _zSeedSliderEdit->SetIntType(true);
     _zSeedSliderEdit->SetRange( MIN_AXIS_SEEDS, MAX_AXIS_SEEDS );
-    _griddedSeedsFrame->addWidget( new VLineItem("Z axis seeds", _zSeedSliderEdit ) );
+    _zSeedLine =  new VLineItem("Z axis seeds", _zSeedSliderEdit);
+    _griddedSeedsFrame->addWidget( _zSeedLine );
     connect( _zSeedSliderEdit, &VSliderEdit::ValueChangedInt,
         this, &FlowSeedingSubtab::_rakeNumOfSeedsChanged );
 
@@ -262,9 +275,10 @@ void FlowSeedingSubtab::_createIntegrationSection() {
         this, &FlowSeedingSubtab::_periodicClicked);
     _integrationSection->layout()->addWidget( new VLineItem("Y axis periodicity", _periodicYCheckBox));
     _periodicZCheckBox = new VCheckBox();
+    _zPeriodicityLine = new VLineItem("Z axis periodicity", _periodicZCheckBox);
     connect( _periodicZCheckBox, &VCheckBox::ValueChanged,
         this, &FlowSeedingSubtab::_periodicClicked);
-    _integrationSection->layout()->addWidget( new VLineItem("Z axis periodicity", _periodicZCheckBox));
+    _integrationSection->layout()->addWidget( _zPeriodicityLine );
 
     _configureFlowType(STEADY_STRING);
 }
@@ -277,11 +291,14 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _paramsMgr = paramsMgr;
     VAssert( _params );
 
-    // Find out we're operating on 2D or 3D variables
-    auto box = _params->GetBox();
-    int  dim = 3;
-    if ( box->GetOrientation() != VAPoR::Box::Orientation::XYZ )
-        dim  = 2;
+    _updateRake( dataMgr );
+
+    GUIStateParams *gp = dynamic_cast<GUIStateParams*>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
+    int newDims = gp->GetFlowDimensionality();
+    if ( _numDims != newDims ) {
+        _numDims = newDims;
+        _resizeFlowParamsVectors();
+    }
 
     // Update integration tab
     //
@@ -298,11 +315,20 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     auto bools = _params->GetPeriodic();
     _periodicXCheckBox->SetValue( bools[X] );
     _periodicYCheckBox->SetValue( bools[Y] );
-    _periodicZCheckBox->SetValue( bools[Z] );
-    if( dim == 2 )
-        _periodicZCheckBox->hide();
-    else
-        _periodicZCheckBox->show();
+    if ( _numDims == 3 ) {
+        VAssert( bools.size() == 3 );
+        _periodicZCheckBox->SetValue( bools[Z] );
+    }
+    
+    // Find out we're operating on 2D or 3D variables
+    if( _numDims == 2 ) {
+        _zPeriodicityLine->hide();
+        _zSeedLine->hide();
+    }
+    else {
+        _zPeriodicityLine->show();
+        _zSeedLine->show();
+    }
 
     // Velocity multiplier
     auto mltp = _params->GetVelocityMultiplier();
@@ -319,7 +345,7 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
         _seedTypeCombo->SetValue( LIST_STRING );
 
     // Random rake values
-    std::vector< std::string > vars = dataMgr->GetDataVarNames( dim );
+    std::vector< std::string > vars = dataMgr->GetDataVarNames( _numDims );
     _biasVariableComboBox->SetOptions( vars );
     std::string var = _params->GetRakeBiasVariable();
     if(  var.empty() )    // The variable isn't set by the user yet. Let's set it!
@@ -334,19 +360,24 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _biasWeightSliderEdit->SetValue( bias );
 
     // Random and Gridded # seeds
+    //std::vector<long> seedVec = _params->GetGridNumOfSeeds();
     std::vector<long> seedVec = _params->GetGridNumOfSeeds();
     _xSeedSliderEdit->SetValue( seedVec[X] );
     _ySeedSliderEdit->SetValue( seedVec[Y] );
-    if( dim == 3 )
-    {
+    if( _numDims == 3 ) {
+        VAssert( seedVec.size() == 3 );
         _zSeedSliderEdit->SetValue( seedVec[Z] );
-        _zSeedSliderEdit->show();
     }
-    else
-        _zSeedSliderEdit->hide();
-    _randomSeedsSliderEdit->SetValue( seedVec[RANDOM_INDEX] );
 
-    // Update rake
+    _randomSeedsSliderEdit->SetValue( _params->GetRandomNumOfSeeds() );
+
+    auto rakeSeeds = _params->GetGridNumOfSeeds();
+    auto rakeRegion = _params->GetRake();
+    auto periodicity = _params->GetPeriodic();
+    auto fieldvars = _params->GetFieldVariableNames();
+}
+
+void FlowSeedingSubtab::_updateRake( VAPoR::DataMgr* dataMgr ) {
     std::vector<double> minExt, maxExt;
     std::vector<int>    axes;
     VAPoR::DataMgrUtils::GetExtents( dataMgr, 
@@ -362,8 +393,9 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     //
     int minSize = minExt.size();
     int maxSize = maxExt.size();
-    if ( (minSize != 3 && minSize != 2 )
-      && (maxSize != 3 && maxSize != 2 ) )
+    if ( minSize != 3 && minSize != 2 )
+        return;
+    if ( maxSize != 3 && maxSize != 2 )
         return;
         
     std::vector<float> range;
@@ -380,16 +412,59 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     {
         _rakeWidget->SetValue( range );
         _params->SetRake( range );
+       
+        // Initialize _oldZRakeMin and Max along with the rake 
+        //
+        if (range.size() == 6) {
+            _oldZRakeMin = range[Z_RAKE_MIN];
+            _oldZRakeMax = range[Z_RAKE_MAX];
+        }
     }
     else
     {
-        // If our axis size is 2, resize the rake to be of size 4.  This tells
-        // VGeometry that it's working with 2d variables, not 3d
-        if (axes.size() == 2)
-            rakeVals.resize(4);
-
         _rakeWidget->SetValue( rakeVals );
     }
+}
+
+void FlowSeedingSubtab::_resizeFlowParamsVectors() {
+
+    auto rakeSeeds = _params->GetGridNumOfSeeds();
+    auto rakeRegion = _params->GetRake();
+    auto periodicity = _params->GetPeriodic();
+
+    // Going from 3d vectors to 2d vectors.
+    // Save the values we remove for restoration later on.
+    if ( _numDims == 2 ) {  
+        _oldZRakeNumSeeds = rakeSeeds[Z];
+        rakeSeeds.resize(2);
+
+        _oldZRakeMin = rakeRegion[Z_RAKE_MIN];
+        _oldZRakeMax = rakeRegion[Z_RAKE_MAX];
+        rakeRegion.resize(4);
+
+        _oldZPeriodicity = periodicity[Z];
+        periodicity.resize(2);
+    }
+    // Going from 2D vectors to 3D vectors.
+    // Restore previously saved values.
+    else {  
+        periodicity.resize(3);
+        periodicity[Z] = _oldZPeriodicity;
+
+        for (int i=0; i<6; i++)
+        rakeRegion.resize(6);
+        rakeRegion[Z_RAKE_MIN] = _oldZRakeMin;
+        rakeRegion[Z_RAKE_MAX] = _oldZRakeMax;
+
+        rakeSeeds.resize(3);
+        rakeSeeds[Z] = _oldZRakeNumSeeds;
+    }
+
+    _paramsMgr->BeginSaveStateGroup("Resizing flow params vectors");
+    _params->SetGridNumOfSeeds( rakeSeeds );
+    _params->SetRake( rakeRegion );
+    _params->SetPeriodic( periodicity );
+    _paramsMgr->EndSaveStateGroup();
 }
 
 void FlowSeedingSubtab::_updateStreamlineWidgets( VAPoR::DataMgr* dataMgr ) {
@@ -429,10 +504,12 @@ void FlowSeedingSubtab::_updatePathlineWidgets( VAPoR::DataMgr* dataMgr) {
 void 
 FlowSeedingSubtab::_periodicClicked()
 {
-    std::vector<bool> bools( 3, false );
+    std::vector<bool> bools( 2, false );
     bools[0] = _periodicXCheckBox->GetValue();
     bools[1] = _periodicYCheckBox->GetValue();
-    bools[2] = _periodicZCheckBox->GetValue();
+    if (_numDims == 3)
+        bools.push_back(_periodicZCheckBox->GetValue());
+
     _params->SetPeriodic( bools );
 }
 
@@ -560,13 +637,16 @@ FlowSeedingSubtab::_rakeNumOfSeedsChanged()
 {
     // Scott TODO: this widget needs to know if VariablesWidget is in 2D or 3D
     // mode, and writes back to the params a vector of size 2 or 3.
-    std::vector<long> seedsVector(3, 1);
+    std::vector<long> seedsVector(2, 1);
     seedsVector[X] = _xSeedSliderEdit->GetValue();
     seedsVector[Y] = _ySeedSliderEdit->GetValue();
-    seedsVector[Z] = _zSeedSliderEdit->GetValue();
-    _params->SetGridNumOfSeeds( seedsVector );
+    if ( _numDims == 3 )
+        seedsVector.push_back(_zSeedSliderEdit->GetValue());
 
+    _paramsMgr->BeginSaveStateGroup("Number of flow seeds changed");
+    _params->SetGridNumOfSeeds( seedsVector );
     _params->SetRandomNumOfSeeds( _randomSeedsSliderEdit->GetValue() );
+    _paramsMgr->EndSaveStateGroup();
 }
 
 void 

@@ -17,7 +17,6 @@
 #include "TransformTable.h"
 #include "ColorbarWidget.h"
 
-class VLineItem;
 class VLineEdit;
 class VCheckBox;
 class VComboBox;
@@ -27,9 +26,8 @@ class VFileReader;
 class VFileWriter;
 class VGeometry;
 class VFrame;
-class VIntSpinBox;
+class VSpinBox;
 class VGeometry2;
-class VPushButton;
 
 namespace VAPoR {
 	class ControlExec;
@@ -71,10 +69,21 @@ public:
 
 private:
     VAPoR::FlowParams*  _params;
-    VAPoR::ParamsMgr*   _paramsMgr;
+
+/*    VLineEdit*          _velocityMltp;  // Note on this widget: its name and associated functions
+                                        // use the name "velocity multiplier," while it displays
+                                        // "Field Scale Factor." They'll need to be reconciled 
+                                        // before the final merge.
+
+    VCheckBox*          _periodicX;
+    VCheckBox*          _periodicY;
+    VCheckBox*          _periodicZ;*/
 
 private slots:
-    void _dimensionalityChanged( int nDims ) const;
+    // Respond to user input
+/*    void _velocityMultiplierChanged();
+    void _periodicClicked();*/
+
 };
 
 //
@@ -116,19 +125,20 @@ private slots:
     void _configureFlowType( const std::string& value );
     void _configureSeedType( const std::string& value );
 
-    void _pathlineLengthChanged( int length );
-    void _pathlineStartTimeChanged( int startTime );
-    void _pathlineEndTimeChanged( int endTime );
-    void _pathlineLifetimeChanged( int lifeTime );
+    void _streamlineLengthChanged( int length );
+    void _streamlineStartTimeChanged( int startTime );
+    void _streamlineEndTimeChanged( int endTime );
+    void _streamlineLifetimeChanged( int lifeTime );
 
-    void _streamlineDirectionChanged( int index );
-    void _streamlineSamplesChanged( int length );
+    void _pathlineDirectionChanged( int index );
+    void _pathlineLengthChanged( int length );
 
     void _seedInjIntervalChanged( int interval );
 
     void _periodicClicked();
     void _velocityMultiplierChanged( const std::string& multiplier );
 
+    void _seedGenModeChanged( int newIdx );
     void _rakeNumOfSeedsChanged();
     void _seedListFileChanged( const std::string& file );
     void _biasVariableChanged( const std::string& variable );
@@ -136,79 +146,104 @@ private slots:
 
     void _rakeGeometryChanged( const std::vector<float>& range );
 
-    void _geometryWriterClicked();
-
-    void _selectedTabChanged( int index );
+    void _selectedTabChangewd( int index );
 
 private:
-    int _numDims;
-    int _oldZRakeNumSeeds;
-    float _oldZRakeMin;
-    float _oldZRakeMax;
-    bool _oldZPeriodicity;
-
-    void _resizeFlowParamsVectors();
     void _createIntegrationSection();
-    void _createSeedingSection( QWidget* parent );
-    void _updateStreamlineWidgets( VAPoR::DataMgr* dataMgr);
-    void _updatePathlineWidgets( VAPoR::DataMgr* dataMgr);
-    void _updateRake( VAPoR::DataMgr* dataMgr );
+    void _createSeedingSection();
+    void _updateSteadyFlowWidgets( VAPoR::DataMgr* dataMgr);
+    void _updateUnsteadyFlowWidgets( VAPoR::DataMgr* dataMgr);
 
     VAPoR::FlowParams*      _params;
     VAPoR::ParamsMgr *      _paramsMgr;
 
-    // Integration options
+// Integration options
+//
     VSection*               _integrationSection;
     VComboBox*              _flowTypeCombo;
 
-    //  Streamline integration options
-    VFrame*                 _streamlineFrame;
-    VSliderEdit*            _streamlineSamplesSliderEdit;
-    VComboBox*              _streamlineDirectionCombo;
-
-    //  Pathline integration options
+//  Pathline integration options
     VFrame*                 _pathlineFrame;
     VSliderEdit*            _pathlineLengthSliderEdit;
-    /*VSliderEdit*            _pathlineInjIntervalSliderEdit;
-    VSliderEdit*            _pathlineStartSliderEdit;
-    VSliderEdit*            _pathlineEndSliderEdit;
-    VSliderEdit*            _pathlineLifetimeSliderEdit;*/
+    VComboBox*              _pathlineDirectionCombo;
 
-    //  Universal integration options
+//  Streamline integration options
+    VFrame*                 _streamlineFrame;
+    VSliderEdit*            _streamlineLengthSliderEdit;
+    VSliderEdit*            _streamlineInjIntervalSliderEdit;
+    VSliderEdit*            _streamlineStartSliderEdit;
+    VSliderEdit*            _streamlineEndSliderEdit;
+    VSliderEdit*            _streamlineLifetimeSliderEdit;
+
+//  Universal integration options
     VCheckBox*              _periodicXCheckBox;
     VCheckBox*              _periodicYCheckBox;
     VCheckBox*              _periodicZCheckBox;
-    VLineItem*              _zPeriodicityLine;
     VLineEdit*              _velocityMultiplierLineEdit;
    
-    // Seed distribution options
+// Seed distribution options
+// 
     VSection*               _seedDistributionSection;
     VComboBox*              _seedTypeCombo;
 
-    //  Gridded seed distribution
+//  Gridded seed distribution
     VFrame*                 _griddedSeedsFrame;
+    VSpinBox*               _xSeedSpinBox;
+    VSpinBox*               _ySeedSpinBox;
+    VSpinBox*               _zSeedSpinBox;
     VSliderEdit*            _xSeedSliderEdit;
     VSliderEdit*            _ySeedSliderEdit;
     VSliderEdit*            _zSeedSliderEdit;
-    VLineItem*              _zSeedLine;
-
-    //  Rake region selection
-    VSection*               _rakeRegionSection;
     VGeometry2*             _rakeWidget;
 
-    //  Seeds read from a text file
+//  Seeds read from a text file
     VFrame*                 _listOfSeedsFrame;
     VFileReader*            _listOfSeedsFileReader;
 
-    //  Random seed distribution 
+//  Random seed distribution 
     VFrame*                 _randomSeedsFrame;
+    //VSpinBox*               _randomSeedSpinBox;
     VSliderEdit*            _randomSeedsSliderEdit;
     VComboBox*              _biasVariableComboBox;
     VSliderEdit*            _biasWeightSliderEdit;
 
-    VFileWriter*            _geometryWriterSelector;
-    VPushButton*            _geometryWriterExecutor;
-    VSection*               _geometryWriterSection;
+    VFileWriter*            _exportGeometryFileWriter;
+
+VSliderEdit*            _pastNumOfTimeSteps;
+VSliderEdit*            _seedInjInterval;
+
+VComboBox*              _seedGenMode;
+VFileReader*            _fileReader;
+VFileWriter*            _fileWriter;
+
+// Rake related widgets
+VGeometry*              _rake;
+VLineEdit              *_rakeXNum, *_rakeYNum, *_rakeZNum, *_rakeTotalNum;
+VComboBox*              _rakeBiasVariable;
+VSliderEdit*            _rakeBiasStrength;
+
+/*    // Add some QT widgets 
+    VCheckBox*              _steady;
+    VLineEdit*              _steadyNumOfSteps;
+    VSliderEdit*            _pastNumOfTimeSteps;
+    VSliderEdit*            _seedInjInterval;
+
+    VComboBox*              _seedGenMode;
+    VFileReader*            _fileReader;
+    VFileWriter*            _fileWriter;
+    VComboBox*              _flowDirection;
+
+    // Rake related widgets
+    VGeometry*              _rake;
+    VLineEdit              *_rakeXNum, *_rakeYNum, *_rakeZNum, *_rakeTotalNum;
+    VComboBox*              _rakeBiasVariable;
+    VSliderEdit*            _rakeBiasStrength;
+
+    QFrame                  *_hline1, *_hline2;     // horizontal lines
+
+    // Helper functions
+    void _hideShowWidgets(); // hide and show widgets based on the current seed generation mode.
+*/
 };
 
 //
