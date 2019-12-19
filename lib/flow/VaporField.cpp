@@ -357,7 +357,6 @@ VaporField::UpdateParams( const VAPoR::FlowParams* p )
     IsSteady = p->GetIsSteady();
     ScalarName = p->GetColorMapVariableName();
     auto velNames = p->GetFieldVariableNames();
-    //for( int i = 0; i < 3 && i < velNames.size(); i++ )
     for( int i = 0; i < 3; i++ )
     {
         if( i < velNames.size() )
