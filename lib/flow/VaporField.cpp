@@ -24,13 +24,10 @@ VaporField::InsideVolumeVelocity( float time, const glm::vec3& pos ) const
         size_t currentTS = _params->GetCurrentTimestep();
         for( auto& v : VelocityNames )
         {
-            if( !v.empty() )
-            {
-                grid = _getAGrid( currentTS, v );
-                VAssert( grid );
-                if( !grid->InsideGrid( coords ) )
-                    return false;
-            }
+            grid = _getAGrid( currentTS, v );
+            VAssert( grid );
+            if( !grid->InsideGrid( coords ) )
+                return false;
         }
     }
     else    // we check two time steps
@@ -48,26 +45,22 @@ VaporField::InsideVolumeVelocity( float time, const glm::vec3& pos ) const
         // Then test if pos is inside of time step "floor"
         for( auto& v : VelocityNames )
         {
-            if( !v.empty() )
-            {
-                grid = _getAGrid( floor, v );
-                VAssert( grid );
-                if( !grid->InsideGrid( coords ) )
-                    return false;
-            }
+            grid = _getAGrid( floor, v );
+            VAssert( grid );
+            if( !grid->InsideGrid( coords ) )
+                return false;
         }
 
         // If time is larger than _timestamps[floor], we also need to test _timestamps[floor+1]
         if( time > _timestamps[floor] )
         {
             for( auto& v : VelocityNames )
-                if( !v.empty() )
-                {
-                    grid = _getAGrid( floor + 1, v );
-                    VAssert( grid );
-                    if( !grid->InsideGrid( coords ) )
-                        return false;
-                }
+            {
+                grid = _getAGrid( floor + 1, v );
+                VAssert( grid );
+                if( !grid->InsideGrid( coords ) )
+                    return false;
+            }
         }
     }
 
