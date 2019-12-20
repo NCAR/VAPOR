@@ -365,7 +365,7 @@ class PARAMS_API RenderParams : public ParamsBase {
     vector<double> GetIsoValues() { return GetIsoValues(GetVariableName()); }
     void SetIsoValues(const vector<double> &values) { SetIsoValues(GetVariableName(), values); }
 
-    void InitBox();
+    bool InitBox(int ndim);
 
   protected:
     DataMgr *_dataMgr;
