@@ -19,6 +19,11 @@ GrownGrid::~GrownGrid()
     }
 }
     
+
+float GrownGrid::GetDefaultZ() const
+{
+    return _defaultZ;
+}
     
 float GrownGrid::GetValue(const std::vector <double> &coords) const
 {
