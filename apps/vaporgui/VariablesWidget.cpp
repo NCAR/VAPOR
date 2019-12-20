@@ -201,7 +201,7 @@ void VariablesWidget::setVariableDims(int index)
 
     _paramsMgr->BeginSaveStateGroup("Set variable dimensions");
     setDefaultVariables();
-    _rParams->InitBox();
+    _rParams->InitBox(_activeDim);
     _paramsMgr->EndSaveStateGroup();
 
     // Need to referesh variable list if dimension changes
