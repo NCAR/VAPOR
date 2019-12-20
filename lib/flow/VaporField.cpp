@@ -417,7 +417,23 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
                                        extMin, extMax );
     if( _recentGrids.contains( key ) )
     {
-        return _recentGrids.find( key )->grid();
+        auto grid = _recentGrids.find( key )->grid();
+
+        // If the resulting grid is a ConstantGrid, we must test if
+        // the grid contains the up-to-date _defaultZ value
+        if( key == _constantGridDefaultZ )
+        {
+            auto cgrid = dynamic_cast<const VAPoR::ConstantGrid*>( grid );
+            float oldValue   = cgrid->GetConstantValue();
+            if( oldValue    != _defaultZ )
+            {   // Create a new ConstantGrid to overwrite the old one.
+                auto newgrid = new VAPoR::ConstantGrid( _defaultZ );
+                // _recentGrids.insert() overwrites the old object under the same key.
+                _recentGrids.insert( key, new GridWrapper( newgrid, _datamgr ) );
+                grid = newgrid;   
+            }
+        }
+        return grid;
     }
 
     //
@@ -426,9 +442,9 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
     // ConstantGrid is required, and then keep it in our cache!
     //
     VAPoR::Grid* grid = nullptr;
-    if( key == _constantGridZero )
+    if( key == _constantGridDefaultZ )
     {
-        grid = new VAPoR::ConstantGrid( 0.0f );
+        grid = new VAPoR::ConstantGrid( _defaultZ );
     }
     else
     {
@@ -460,7 +476,7 @@ VaporField::_paramsToString(  size_t currentTS,               const std::string&
     // ConstantGrid with zeros, no matter what other parameters are.
     if( var.empty() )
     {
-        return _constantGridZero;
+        return _constantGridDefaultZ;
     }
     else
     {

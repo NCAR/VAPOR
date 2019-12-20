@@ -100,7 +100,7 @@ private:
     using cacheType = VAPoR::unique_ptr_cache< std::string, GridWrapper >;
     mutable cacheType           _recentGrids;   // so this variable can be 
                                                 // modified by a const function.
-    const std::string           _constantGridZero = "ConstantGrid with zeros";
+    const std::string           _constantGridDefaultZ = "ConstantGrid with defaultZ value";
     float                       _defaultZ = 0.0f;
 
     // Member functions
