@@ -119,7 +119,7 @@ void RenderParams::_init() {
     SetConstantOpacity(1.0);
 }
 
-void RenderParams::InitBox() {
+bool RenderParams::InitBox(int ndim) {
     vector<double> minExt, maxExt;
 
     //
@@ -131,13 +131,13 @@ void RenderParams::InitBox() {
     size_t ts = 0;
     if (!_dataMgr->VariableExists(ts, varname, 0, 0)) {
         bool ok = DataMgrUtils::GetFirstExistingVariable(
-            _dataMgr, 0, 0, _maxDim, varname, ts);
+            _dataMgr, 0, 0, ndim, varname, ts);
         if (!ok)
             varname = "";
     }
 
     if (varname.empty())
-        return;
+        return (false);
 
     int rc = _dataMgr->GetVariableExtents(ts, varname, 0, 0, minExt, maxExt);
     VAssert(rc >= 0);
@@ -155,6 +155,7 @@ void RenderParams::InitBox() {
 
     _Box->SetExtents(minExt, maxExt);
     _Box->SetPlanar(planar);
+    return (true);
 }
 
 RenderParams::RenderParams(
@@ -174,7 +175,7 @@ RenderParams::RenderParams(
 
     _Box = new Box(ssave);
     _Box->SetParent(this);
-    InitBox();
+    (void)InitBox(_maxDim);
 
     _Colorbar = new ColorbarPbase(ssave);
     _Colorbar->SetParent(this);
