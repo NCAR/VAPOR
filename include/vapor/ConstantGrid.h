@@ -28,7 +28,8 @@ public:
     // Useful functions of ConstantGrid.
     // Additional ones could be added when needed.
     //
-    // The following three GetValue methods all return the constant value of this grid.
+    // The following four GetValue methods all return the constant value of this grid.
+    float GetConstantValue() const;
     float GetValue(const std::vector <double> &coords) const override;
     float GetValueNearestNeighbor( const std::vector <double> &coords) const override;
     float GetValueLinear( const std::vector <double> &coords) const override;
