@@ -190,7 +190,7 @@ void FlowSeedingSubtab::_createSeedingSection( QWidget* parent ) {
     _randomSeedsSliderEdit->SetIntType( true );
     _randomSeedsFrame->addWidget( new VLineItem("Seed count", _randomSeedsSliderEdit ) );
     connect( _randomSeedsSliderEdit, &VSliderEdit::ValueChangedInt,
-        this, &FlowSeedingSubtab::_rakeNumOfSeedsChanged );
+        this, &FlowSeedingSubtab::_randomNumOfSeedsChanged );
 
     _biasWeightSliderEdit = new VSliderEdit(-10.0, 10.0, 0.0);
     _randomSeedsFrame->addWidget( new VLineItem( "Bias weight", _biasWeightSliderEdit ) );
@@ -635,8 +635,6 @@ FlowSeedingSubtab::_biasStrengthChanged( double strength )
 void
 FlowSeedingSubtab::_rakeNumOfSeedsChanged()
 {
-    // Scott TODO: this widget needs to know if VariablesWidget is in 2D or 3D
-    // mode, and writes back to the params a vector of size 2 or 3.
     std::vector<long> seedsVector(2, 1);
     seedsVector[X] = _xSeedSliderEdit->GetValue();
     seedsVector[Y] = _ySeedSliderEdit->GetValue();
@@ -645,8 +643,11 @@ FlowSeedingSubtab::_rakeNumOfSeedsChanged()
 
     _paramsMgr->BeginSaveStateGroup("Number of flow seeds changed");
     _params->SetGridNumOfSeeds( seedsVector );
-    _params->SetRandomNumOfSeeds( _randomSeedsSliderEdit->GetValue() );
     _paramsMgr->EndSaveStateGroup();
+}
+
+void FlowSeedingSubtab::_randomNumOfSeedsChanged() {
+    _params->SetRandomNumOfSeeds( _randomSeedsSliderEdit->GetValue() );
 }
 
 void 

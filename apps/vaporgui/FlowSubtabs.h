@@ -130,6 +130,7 @@ private slots:
     void _velocityMultiplierChanged( const std::string& multiplier );
 
     void _rakeNumOfSeedsChanged();
+    void _randomNumOfSeedsChanged();
     void _seedListFileChanged( const std::string& file );
     void _biasVariableChanged( const std::string& variable );
     void _biasStrengthChanged( double bias );
