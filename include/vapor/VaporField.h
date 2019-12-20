@@ -109,7 +109,7 @@ private:
     using cacheType = VAPoR::unique_ptr_cache< std::string, GridWrapper >;
     mutable cacheType           _recentGrids;   // so this variable can be 
                                                 // modified by a const function.
-    const std::string           _constantGridDefaultZ = "ConstantGrid with defaultZ value";
+    const std::string           _constantGridDefaultZ = "ConstantGrid with defaultZ value: ";
     float                       _defaultZ = 0.0f;
 
     // Member functions
@@ -122,6 +122,9 @@ private:
     // _getAGrid will use _params to retrieve/generate grids. 
     // In the case of failing to generate a requested grid, nullptr will be returned.
     // This failure will also be recorded to MyBase.
+    // Note 1: If a variable name is empty, we then return a ConstantField.
+    // Note 2: If a variable is essentially 2D, we then grow it to be 3D 
+    //         and return a GrownGrid.
     const VAPoR::Grid* _getAGrid( size_t              timestep,
                                   const std::string&  varName ) const ;
 };
