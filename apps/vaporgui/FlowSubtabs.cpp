@@ -303,6 +303,9 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     // Update integration tab
     //
     bool isSteady = _params->GetIsSteady();
+    std::string flowType = isSteady ? STEADY_STRING : UNSTEADY_STRING;
+    _configureFlowType( flowType );
+    
     if ( isSteady )
         _flowTypeCombo->SetValue( STEADY_STRING );
     else
