@@ -156,10 +156,13 @@ FlowRenderer::_paintGL( bool fast )
     _velocityField.UpdateParams( params );
     _colorField.UpdateParams( params );
 
-    // In case there's no variable selected, meaning that all the velocity variable
-    // names are empty strings, then the paint routine aborts.
-    if( _velocityField.GetNumOfEmptyVelocityNames() == 3 )
-        return 0;
+    // In case there's 0 or 1 variable selected, meaning that more than one the velocity 
+    // variable names are empty strings, then the paint routine aborts.
+    if( _velocityField.GetNumOfEmptyVelocityNames() > 1 )
+    {
+        MyBase::SetErrMsg("Please provide at least 2 field variables for advection!");
+        return flow::PARAMS_ERROR;
+    }
 
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
@@ -681,9 +684,11 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
     VAssert( params );
 
-    /* Find out we're operating on 2D or 3D variables */
+    /* 
+     * Find out we're operating on 2D or 3D variables
+     * Assume all the selected velocity variables have the same dimensionality
+     */
     int  dim = 0; 
-    // Assume all the selected velocity variables have the same dimensionality
     for( const auto &e : _velocityField.VelocityNames )
         if( !e.empty() )
         {
@@ -694,13 +699,12 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
 
     /* retrieve rake from params */
     auto rake = params->GetRake();
-    VAssert( rake.size() == 6 || rake.size() == 4 );
+    VAssert( rake.size() == dim * 2 );
     for( int i = 0; i < dim; i++ )
         VAssert( rake[i*2+1] >= rake[i*2] );
 
     /* retrieve seed numbers from params */
     const auto gridNumOfSeeds = params->GetGridNumOfSeeds();
-    cout << gridNumOfSeeds.size() << " " << dim << endl;
     VAssert( gridNumOfSeeds.size() == dim );
     for( int i = 0; i < dim; i++ )
         VAssert( gridNumOfSeeds[i] > 0 );
@@ -733,6 +737,8 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
     long seedsZ;
     if( dim == 2 )  seedsZ = 1;
     else            seedsZ = gridNumOfSeeds[2];
+    // Reserve enough space at the beginning for performance considerations
+    seeds.reserve( seedsZ * gridNumOfSeeds[1] * gridNumOfSeeds[2] );
     for( long k = 0; k < seedsZ; k++ )
         for( long j = 0; j < gridNumOfSeeds[1]; j++ )
             for( long i = 0; i < gridNumOfSeeds[0]; i++ )
@@ -762,6 +768,8 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
 int
 FlowRenderer::_genSeedsRakeRandom( std::vector<flow::Particle>& seeds ) const
 {
+#if 0
+    // TODO: evaluate if it's easy to completely remove this function.
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
 
     /* retrieve rake from params */
@@ -802,26 +810,40 @@ FlowRenderer::_genSeedsRakeRandom( std::vector<flow::Particle>& seeds ) const
                 _dupSeedsNewTime( seeds, firstN, _timestamps.at(ts) );
             }
     }
+#endif
 
     return 0;
 }
 
 
-int
-FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds ) const
+int FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds ) const
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
 
+    /* 
+     * Find out we're operating on 2D or 3D variables.
+     * Note: Assume all the selected velocity variables have the same dimensionality
+     */
+    int  dim = 0; 
+    for( const auto &e : _velocityField.VelocityNames )
+        if( !e.empty() )
+        {
+            dim = _dataMgr->GetNumDimensions( e );
+            break;
+        }
+    VAssert( dim == 3 || dim == 2 );
+
     /* retrieve rake from params */
     auto rake = params->GetRake();
-    VAssert( rake.size() == 6 );
-    for( int i = 0; i < 3; i++ )
+    VAssert( rake.size() == dim * 2 );
+    for( int i = 0; i < dim; i++ )
         VAssert( rake[i*2+1] >= rake[i*2] );
-    std::vector<double> rakeExtMin, rakeExtMax;
-    for( int i = 0; i < 3; i++ )
+    std::vector<double> rakeExtMin( dim, 0 );
+    std::vector<double> rakeExtMax( dim, 0 );
+    for( int i = 0; i < dim; i++ )
     {
-        rakeExtMin.push_back( rake[ i*2   ] );
-        rakeExtMax.push_back( rake[ i*2+1 ] );
+        rakeExtMin[i] = rake[ i*2   ];
+        rakeExtMax[i] = rake[ i*2+1 ] ;
     }
 
     /* retrieve bias variable and strength from params */
@@ -855,7 +877,6 @@ FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds ) co
     std::mt19937 gen(procID);   //Standard mersenne_twister engine 
     std::uniform_real_distribution<float> distX( rake[0], rake[1] );
     std::uniform_real_distribution<float> distY( rake[2], rake[3] );
-    std::uniform_real_distribution<float> distZ( rake[4], rake[5] );
 
     // Now we generate many seeds.
     // We test missing values in case 1) the bias variable does have missing values, and 2)
@@ -868,21 +889,38 @@ FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds ) co
     // This is the total number of seeds to generate, based on the bias strength.
     long numOfSeedsToGen = long( numOfSeedsNeeded * (std::abs( biasStren ) + 1.0f) );   
     long numOfTrials = 0;
+    seeds.reserve( numOfSeedsToGen );   // For performance reasons
     // Note: in the case that too many random seeds fall on missing values, we set a limit of
     // 10 times numOfSeedsToGen. 
     long numOfTrialLimit = 10 * numOfSeedsToGen;
     float val, mv = grid->GetMissingValue();
-    while( numOfTrials < numOfTrialLimit && seeds.size() < numOfSeedsToGen )
+    if( dim == 3 )
     {
-        loc.x = distX(gen);     locD[0] = loc.x;
-        loc.y = distY(gen);     locD[1] = loc.y;
-        loc.z = distZ(gen);     locD[2] = loc.z;
-        val   = grid->GetValue( locD );
-        if( val != mv )
+        std::uniform_real_distribution<float> distZ( rake[4], rake[5] );
+        while( numOfTrials < numOfTrialLimit && seeds.size() < numOfSeedsToGen )
         {
-            seeds.emplace_back( loc, timeVal, val );
+            loc.x = distX(gen);     locD[0] = loc.x;
+            loc.y = distY(gen);     locD[1] = loc.y;
+            loc.z = distZ(gen);     locD[2] = loc.z;
+            val   = grid->GetValue( locD );
+            if( val != mv )
+                seeds.emplace_back( loc, timeVal, val );
+            numOfTrials++;
         }
-        numOfTrials++;
+    }
+    else    // dim == 2
+    {
+        const auto dfz = Renderer::GetDefaultZ(_dataMgr, params->GetCurrentTimestep());
+        while( numOfTrials < numOfTrialLimit && seeds.size() < numOfSeedsToGen )
+        {
+            loc.x = distX(gen);     locD[0] = loc.x;
+            loc.y = distY(gen);     locD[1] = loc.y;
+            loc.z = dfz;            locD[2] = dfz;
+            val   = grid->GetValue( locD );
+            if( val != mv )
+                seeds.emplace_back( loc, timeVal, val );
+            numOfTrials++;
+        }
     }
 
     delete grid;    // Delete the temporary grid 
