@@ -9,7 +9,7 @@
  * It also implements pure virtual functions of the Grid class in the simplest possible fashion,
  * but those functions do not perform any calculation, and should not be used.
  *
- * Finally, a DataMgr would not return a ConstantGrid at any occasion; rather, this 
+ * Finally, a DataMgr would not return a GrownGrid at any occasion; rather, this 
  * class is supposed to be created and used locally by its user.
  */
 
@@ -18,7 +18,7 @@
 
 namespace VAPoR
 {
-class VDF_API GrownGrid : public Grid
+class VDF_API GrownGrid final: public Grid 
 {
 public:
 
@@ -28,18 +28,17 @@ public:
     //       and GrownGrid will take ownership of the 2D grid afterwards.
     //       I.e., GrownGrid will be responsible deleting the underlying 2D grid.
     GrownGrid( const VAPoR::Grid* gp, VAPoR::DataMgr* mp, float z );
-   ~GrownGrid();
+    virtual ~GrownGrid();
 
     //
     // Useful functions of GrownGrid.
     // Additional ones could be added when needed.
     //
-    float GetValue(const std::vector <double> &coords) const override;
-    void GetUserExtents( std::vector <double> &minu, std::vector <double> &maxu ) const override;
-    bool InsideGrid(const std::vector <double> &coords) const override;
-
-
     std::string GetType() const override;
+    float GetValue(const std::vector <double> &coords) const override;
+    void GetUserExtents( std::vector <double> &minu, 
+                         std::vector <double> &maxu ) const override;
+    bool InsideGrid(const std::vector <double> &coords) const override;
 
 private:
     //

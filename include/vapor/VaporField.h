@@ -67,10 +67,19 @@ public:
         GridWrapper& operator=( const GridWrapper&& ) = delete;
        ~GridWrapper()
         {
-            if( mgr && gridPtr )
+            if( gridPtr )
             {
-                mgr->UnlockGrid( gridPtr );
-                delete gridPtr;
+                if( gridPtr->GetType() == "GrownGrid" )
+                    delete gridPtr; // GrownGrid can unlock itself...
+                else
+                {
+                    if( mgr )
+                    {
+                        mgr->UnlockGrid( gridPtr );
+                        delete gridPtr;
+                    }
+                }
+                
             }
         }
 
