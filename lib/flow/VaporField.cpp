@@ -407,7 +407,7 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
     // 3) query a 2D grid and grow it to be a GrownGrid.
     //
     VAPoR::Grid* grid = nullptr;
-    if( key == _constantGridDefaultZ )
+    if( key.find(_constantGridDefaultZ) != std::string::npos ) // need a ConstantGrid
     {
         grid = new VAPoR::ConstantGrid( _defaultZ );
     }
