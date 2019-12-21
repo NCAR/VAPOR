@@ -377,11 +377,6 @@ int VaporField::GetNumberOfTimesteps() const
 {
     return _timestamps.size();
 }
-    
-void VaporField::SetDefaultZ( float dz )
-{
-    _defaultZ = dz;
-}
 
 
 const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& varName ) const
@@ -409,7 +404,7 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
     VAPoR::Grid* grid = nullptr;
     if( key.find(_constantGridDefaultZ) != std::string::npos ) // need a ConstantGrid
     {
-        grid = new VAPoR::ConstantGrid( _defaultZ );
+        grid = new VAPoR::ConstantGrid( DefaultZ );
     }
     else
     {
@@ -434,7 +429,7 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
     }
     else if( dim == 2 )
     {
-        VAPoR::GrownGrid* ggrid = new VAPoR::GrownGrid( grid, _datamgr, _defaultZ );
+        VAPoR::GrownGrid* ggrid = new VAPoR::GrownGrid( grid, _datamgr, DefaultZ );
         _recentGrids.insert( key, new GridWrapper(ggrid, _datamgr) );
         return ggrid;
     }
@@ -453,7 +448,7 @@ VaporField::_paramsToString(  size_t currentTS,               const std::string&
 {
     std::ostringstream oss;
     std::string space( "  " );
-    oss << _defaultZ << space;
+    oss << DefaultZ << space;
 
     // In case of an empty variable name, we generate a string that represents a
     // ConstantGrid with zeros, no matter what other parameters are.

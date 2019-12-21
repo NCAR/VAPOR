@@ -95,9 +95,9 @@ public:
     void GetFirstStepVelocityIntersection( glm::vec3& minxyz, glm::vec3& maxxyz );
 
     // 
-    // Sets the default Z value when there isn't a Z component present
+    // Store the default Z value when there isn't a Z component present
     //
-    void SetDefaultZ( float );
+    float DefaultZ = 0.0f;
 
 
 private:
@@ -110,7 +110,6 @@ private:
     mutable cacheType           _recentGrids;   // so this variable can be 
                                                 // modified by a const function.
     const std::string           _constantGridDefaultZ = "ConstantGrid with defaultZ value: ";
-    float                       _defaultZ = 0.0f;
 
     // Member functions
     std::string _paramsToString(  size_t currentTS, const std::string& var, int refLevel, 
