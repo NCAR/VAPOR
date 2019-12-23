@@ -176,8 +176,7 @@ void FlowParams::SetFlowDirection( int i )
 
 std::vector<bool> FlowParams::GetPeriodic() const
 {
-    //std::vector<long> tmp( 3, 0 );
-    auto longs = GetValueLongVec( _periodicTag );//, tmp );
+    auto longs = GetValueLongVec( _periodicTag );
     if ( longs.size() != 3 && longs.size() != 2 ) {
         std::vector<long> tmp( 3, 0 );
         longs = tmp;
@@ -204,7 +203,7 @@ FlowParams::SetPeriodic( const std::vector<bool>& bools )
 
 std::vector<float> FlowParams::GetRake() const
 {
-    auto doubles = GetValueDoubleVec( _rakeTag );//, tmp );
+    auto doubles = GetValueDoubleVec( _rakeTag );
     auto rakesize = doubles.size();
     if ( rakesize != 6 && rakesize != 4 ) {
         std::vector<double> tmp(6, std::nan("1") );
@@ -237,7 +236,6 @@ FlowParams::SetRake( const std::vector<float>& rake )
 
 std::vector<long> FlowParams::GetGridNumOfSeeds() const
 {
-    //auto num = GetValueLongVec( _gridNumOfSeedsTag, tmp );
     auto num = GetValueLongVec( _gridNumOfSeedsTag );
     if ( num.size() == 3 || num.size() == 2 )
         return num;
