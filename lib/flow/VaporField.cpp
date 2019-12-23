@@ -397,8 +397,8 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
     //
     // There's no such grid in our cache! 
     // Let's do one of the three and then keep it in the cache.
-    // 1) ask for it from the data manager,
-    // 2) create it by ourselves if a ConstantGrid is required, or
+    // 1) create it by ourselves if a ConstantGrid is required, or
+    // 2) ask for it from the data manager,
     // 3) query a 2D grid and grow it to be a GrownGrid.
     //
     VAPoR::Grid* grid = nullptr;
@@ -422,7 +422,7 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
     // where its ownership is kept.
     // We also make it become a GrownGrid if it's 2D in nature.
     int dim = _datamgr->GetNumDimensions( varName );
-    if( dim == 3 )
+    if( dim == 3 || dim == 0 )  // dim == 0 happens when varName is empty.
     {
         _recentGrids.insert( key, new GridWrapper(grid, _datamgr) );
         return grid;
