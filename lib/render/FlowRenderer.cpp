@@ -95,6 +95,8 @@ FlowRenderer::_paintGL( bool fast )
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
     int rv;     // return value
 
+    _velocityField.DefaultZ = Renderer::GetDefaultZ( _dataMgr, params->GetCurrentTimestep() );
+
     if( params->GetNeedFlowlineOutput() )
     {
         // In case of steady flow, output the number of particles that 
@@ -178,7 +180,7 @@ FlowRenderer::_paintGL( bool fast )
             if( _2ndAdvection )     // bi-directional advection
             {
                 _2ndAdvection->InputStreamsGnuplot( params->GetSeedInputFilename() );
-                _updatePeriodicity( _2ndAdvection.get() ); 
+                _updateAdvectionPeriodicity( _2ndAdvection.get() ); 
             }
         }
         else 
@@ -195,11 +197,11 @@ FlowRenderer::_paintGL( bool fast )
             //   all the streams inside of an Advection class.
             //   It should immediately be followed by a function to set its periodicity
             _advection.UseSeedParticles( seeds );
-            _updatePeriodicity( &_advection );
+            _updateAdvectionPeriodicity( &_advection );
             if( _2ndAdvection )     // bi-directional advection
             {
                 _2ndAdvection->UseSeedParticles( seeds );
-                _updatePeriodicity( _2ndAdvection.get() ); 
+                _updateAdvectionPeriodicity( _2ndAdvection.get() ); 
             }
         }
 
@@ -461,6 +463,7 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     // Check variable names
     // If names not the same, entire stream is out of date
     // Note: variable names are kept in VaporFields.
+    // Note: RenderParams always returns arrays of size 3 here.
     std::vector<std::string> varnames = params->GetFieldVariableNames();
     if( ( varnames.at(0) != _velocityField.VelocityNames[0] ) ||
         ( varnames.at(1) != _velocityField.VelocityNames[1] ) ||
@@ -505,64 +508,81 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
 
     // Check periodicity
     // If periodicity changes along any dimension, then the entire stream is out of date
-    const auto peri = params->GetPeriodic();
-    if( ( _cache_periodic[0] != peri.at(0) ) ||
-        ( _cache_periodic[1] != peri.at(1) ) ||
-        ( _cache_periodic[2] != peri.at(2) )  )
-    {
-        for( int i = 0; i < 3; i++ )
-            _cache_periodic[i] = peri[i];
-
-        _colorStatus              = FlowStatus::SIMPLE_OUTOFDATE;
-        _velocityStatus           = FlowStatus::SIMPLE_OUTOFDATE;
-    }
-
-    // Check the rake defined by 6 extents.
-    // We update these parameters anyway, and decide if the advection is out of date in rake mode.
-    const auto rake = params->GetRake();
+    // Note: FlowParams return a vector of size either 2 or 3.
     bool diff = false;
-    for( int i = 0; i < 6; i++ )
+    const auto peri  = params->GetPeriodic();
+    if( peri.size() != _cache_periodic.size() )
+        diff = true;
+    else
     {
-        if( _cache_rake[i] != rake.at(i) )
-        {
-            diff = true;
-            break;
-        }
+        for( int i = 0; i < peri.size(); i++ )
+            if( peri[i] != _cache_periodic[i] )
+            {
+                diff = true;
+                break;
+            }
     }
     if( diff )
     {
-        for( int i = 0; i < 6; i++ )
-            _cache_rake[i] = rake[i];
+        _cache_periodic = peri;
+        _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
+        _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    }
 
-        // Mark out-of-date if we're currently using any mode that involves a rake
+    // Check the rake defined by 6 or 4 extents.
+    // We update these parameters anyway, and decide if the advection is out of date in rake mode.
+    diff = false;
+    const auto rake  = params->GetRake();
+    if( rake.size() != _cache_rake.size() )
+        diff = true;
+    else
+    {
+        for( int i = 0; i < rake.size(); i++ )
+            if( rake[i] != _cache_rake[i] )
+            {
+                diff = true;
+                break;
+            }
+    }
+    if( diff )
+    {
+        _cache_rake = rake;
         if( _cache_seedGenMode != FlowSeedMode::LIST )
+        { // Mark out-of-date if we're currently using any mode that involves a rake
+            _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
+            _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+        }
+    }
+
+    // Check the gridded number of seeds in the rake 
+    diff = false;
+    const auto gridNOS  = params->GetGridNumOfSeeds();
+    if( gridNOS.size() != _cache_gridNumOfSeeds.size() )
+        diff = true;
+    else
+    {
+        for( int i = 0; i < gridNOS.size(); i++ )
+            if( gridNOS[i] != _cache_gridNumOfSeeds[i] )
+            {
+                diff = true;
+                break;
+            }
+    }
+    if( diff )
+    {
+        _cache_gridNumOfSeeds   = gridNOS;
+        if( _cache_seedGenMode == FlowSeedMode::UNIFORM )
         {
             _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
             _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
         }
     }
 
-    // Check the gridded  number of seeds in the rake 
-    const auto gridNumOfSeeds = params->GetGridNumOfSeeds();
-    for( int i = 0; i < gridNumOfSeeds.size(); i++ )
+    // Check the random num of seeds
+    const auto randNOS = params->GetRandomNumOfSeeds();
+    if( randNOS != _cache_randNumOfSeeds )
     {
-        if( _cache_rakeNumOfSeeds[i] != gridNumOfSeeds[i] )
-        {
-            _cache_rakeNumOfSeeds[i] = gridNumOfSeeds[i];
-            if( _cache_seedGenMode == FlowSeedMode::UNIFORM )
-            {
-                _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
-                _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
-            }
-        }
-    }
-
-    // Check the random number of seeds in the rake 
-    const auto randNumOfSeeds = params->GetRandomNumOfSeeds();
-    if( _cache_rakeNumOfSeeds[3] != randNumOfSeeds )
-    {
-        _cache_rakeNumOfSeeds[3] = randNumOfSeeds;
-
+        _cache_randNumOfSeeds   = randNOS;
         if( _cache_seedGenMode == FlowSeedMode::RANDOM || 
             _cache_seedGenMode == FlowSeedMode::RANDOM_BIAS )
         {
@@ -684,44 +704,25 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
     VAssert( params );
 
-    /* 
-     * Find out we're operating on 2D or 3D variables
-     * Assume all the selected velocity variables have the same dimensionality
-     */
-    int  dim = 0; 
-    for( const auto &e : _velocityField.VelocityNames )
-        if( !e.empty() )
-        {
-            dim = _dataMgr->GetNumDimensions( e );
-            break;
-        }
-    VAssert( dim == 3 || dim == 2 );
-
-    /* retrieve rake from params */
-    auto rake = params->GetRake();
-    VAssert( rake.size() == dim * 2 );
-    for( int i = 0; i < dim; i++ )
-        VAssert( rake[i*2+1] >= rake[i*2] );
-
-    /* retrieve seed numbers from params */
-    const auto gridNumOfSeeds = params->GetGridNumOfSeeds();
-    VAssert( gridNumOfSeeds.size() == dim );
-    for( int i = 0; i < dim; i++ )
-        VAssert( gridNumOfSeeds[i] > 0 );
+    /* sanity check: rake extents and uniform seed numbers match dims */
+    int dim = _cache_gridNumOfSeeds.size();
+    VAssert( _cache_rake.size() == dim * 2 );
 
     /* Create arrays that contain X, Y, and Z coordinates */
     float start[3], step[3];
     for( int i = 0; i < dim; i++ )    // for each of the X, Y, Z dimensions
     {
-        if( gridNumOfSeeds[i] == 1 )     // one seed in this dimension
+        if( _cache_gridNumOfSeeds[i] == 1 )     // one seed in this dimension
         {
-            start[i] = rake[i*2] + 0.5f * (rake[i*2+1] - rake[i*2]);
+            start[i] = _cache_rake[i*2] + 
+                       0.5f * (_cache_rake[i*2+1] - _cache_rake[i*2]);
             step[i]  = 0.0f;
         }
         else                        // more than one seed in this dimension
         {
-            start[i] = rake[i*2];
-            step[i]  = (rake[i*2+1] - rake[i*2]) / float(gridNumOfSeeds[i] - 1);
+            start[i] = _cache_rake[i*2];
+            step[i]  = (_cache_rake[i*2+1] - _cache_rake[i*2]) / 
+                       float(_cache_gridNumOfSeeds[i] - 1);
         }
     }
     if( dim == 2 )  // put default Z values
@@ -736,12 +737,12 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
     seeds.clear();
     long seedsZ;
     if( dim == 2 )  seedsZ = 1;
-    else            seedsZ = gridNumOfSeeds[2];
+    else            seedsZ = _cache_gridNumOfSeeds[2];
     // Reserve enough space at the beginning for performance considerations
-    seeds.reserve( seedsZ * gridNumOfSeeds[1] * gridNumOfSeeds[2] );
+    seeds.reserve( seedsZ * _cache_gridNumOfSeeds[1] * _cache_gridNumOfSeeds[2] );
     for( long k = 0; k < seedsZ; k++ )
-        for( long j = 0; j < gridNumOfSeeds[1]; j++ )
-            for( long i = 0; i < gridNumOfSeeds[0]; i++ )
+        for( long j = 0; j < _cache_gridNumOfSeeds[1]; j++ )
+            for( long i = 0; i < _cache_gridNumOfSeeds[0]; i++ )
             {
                 loc.x = start[0] + float(i) * step[0];
                 loc.y = start[1] + float(j) * step[1];
@@ -749,7 +750,8 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
                 seeds.emplace_back( loc, timeVal );
             }
 
-    /* If in unsteady case and there are multiple seed injections, we insert more seeds */
+    /* If in unsteady case and there are multiple seed injections, 
+       we insert more seeds */
     if( !_cache_isSteady && _cache_seedInjInterval > 0 )
     {
         size_t firstN = seeds.size();
@@ -768,6 +770,7 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
 int
 FlowRenderer::_genSeedsRakeRandom( std::vector<flow::Particle>& seeds ) const
 {
+std::cerr << "random seed generation called!!" << std::endl;
 #if 0
     // TODO: evaluate if it's easy to completely remove this function.
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
@@ -820,42 +823,21 @@ int FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds 
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
 
-    /* 
-     * Find out we're operating on 2D or 3D variables.
-     * Note: Assume all the selected velocity variables have the same dimensionality
-     */
-    int  dim = 0; 
-    for( const auto &e : _velocityField.VelocityNames )
-        if( !e.empty() )
-        {
-            dim = _dataMgr->GetNumDimensions( e );
-            break;
-        }
-    VAssert( dim == 3 || dim == 2 );
-
-    /* retrieve rake from params */
-    auto rake = params->GetRake();
-    VAssert( rake.size() == dim * 2 );
-    for( int i = 0; i < dim; i++ )
-        VAssert( rake[i*2+1] >= rake[i*2] );
+    VAssert( _cache_rake.size() == 6 || _cache_rake.size() == 4 );
+    int dim = _cache_rake.size() / 2;
     std::vector<double> rakeExtMin( dim, 0 );
     std::vector<double> rakeExtMax( dim, 0 );
     for( int i = 0; i < dim; i++ )
     {
-        rakeExtMin[i] = rake[ i*2   ];
-        rakeExtMax[i] = rake[ i*2+1 ] ;
+        rakeExtMin[i] = _cache_rake[ i*2   ];
+        rakeExtMax[i] = _cache_rake[ i*2+1 ] ;
     }
 
-    /* retrieve bias variable and strength from params */
-    auto biasVar   = params->GetRakeBiasVariable();
-    auto biasStren = params->GetRakeBiasStrength();
-
-    /* retrieve random seed numbers from params */
-    auto numOfSeedsNeeded = params->GetRandomNumOfSeeds();
+    const auto numOfSeedsNeeded = _cache_randNumOfSeeds;
     
     /* request a grid representing the rake area */
     Grid* grid = _dataMgr->GetVariable( params->GetCurrentTimestep(),
-                                        biasVar,
+                                        _cache_rakeBiasVariable,
                                         params->GetRefinementLevel(),
                                         params->GetCompressionLevel(),
                                         rakeExtMin,
@@ -875,28 +857,28 @@ int FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds 
     /* Create three uniform distributions in 3 dimensions */
     unsigned int procID = 32;
     std::mt19937 gen(procID);   //Standard mersenne_twister engine 
-    std::uniform_real_distribution<float> distX( rake[0], rake[1] );
-    std::uniform_real_distribution<float> distY( rake[2], rake[3] );
+    std::uniform_real_distribution<float> distX( _cache_rake[0], _cache_rake[1] );
+    std::uniform_real_distribution<float> distY( _cache_rake[2], _cache_rake[3] );
 
     // Now we generate many seeds.
     // We test missing values in case 1) the bias variable does have missing values, and 2)
     // the rake extents are outside of the bias variable.
     // Thus, we only keep random seeds that are falling on non-missing-value locations.
-    seeds.clear();
     glm::vec3 loc;
     std::vector<double> locD( 3 );
     float timeVal = _timestamps.at(0);
     // This is the total number of seeds to generate, based on the bias strength.
-    long numOfSeedsToGen = long( numOfSeedsNeeded * (std::abs( biasStren ) + 1.0f) );   
+    long numOfSeedsToGen = long( numOfSeedsNeeded * (std::abs(_cache_rakeBiasStrength) + 1.0f) );   
     long numOfTrials = 0;
+    seeds.clear();
     seeds.reserve( numOfSeedsToGen );   // For performance reasons
-    // Note: in the case that too many random seeds fall on missing values, we set a limit of
-    // 10 times numOfSeedsToGen. 
+    // Note: in the case that too many random seeds fall on missing values, 
+    // we set a limit of 10 times numOfSeedsToGen. 
     long numOfTrialLimit = 10 * numOfSeedsToGen;
     float val, mv = grid->GetMissingValue();
     if( dim == 3 )
     {
-        std::uniform_real_distribution<float> distZ( rake[4], rake[5] );
+        std::uniform_real_distribution<float> distZ( _cache_rake[4], _cache_rake[5] );
         while( numOfTrials < numOfTrialLimit && seeds.size() < numOfSeedsToGen )
         {
             loc.x = distX(gen);     locD[0] = loc.x;
@@ -941,7 +923,7 @@ int FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds 
     {
         return p2.value < p1.value;
     };
-    if( biasStren < 0 )
+    if( _cache_rakeBiasStrength < 0 )
         std::partial_sort( seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), ascLambda );
     else
         std::partial_sort( seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), desLambda );
@@ -1008,7 +990,7 @@ FlowRenderer::_restoreGLState() const
 }
 
 void
-FlowRenderer::_updatePeriodicity( flow::Advection* advc )
+FlowRenderer::_updateAdvectionPeriodicity( flow::Advection* advc )
 {
     glm::vec3 minxyz, maxxyz;
     _velocityField.GetFirstStepVelocityIntersection( minxyz, maxxyz );
@@ -1023,10 +1005,15 @@ FlowRenderer::_updatePeriodicity( flow::Advection* advc )
     else
         advc->SetYPeriodicity( false, 0.0f, 1.0f );
 
-    if( _cache_periodic[2] )
-        advc->SetZPeriodicity( true, minxyz.z, maxxyz.z );
-    else
+    if( _cache_periodic.size() == 2 )
         advc->SetZPeriodicity( false, 0.0f, 1.0f );
+    else
+    {
+        if( _cache_periodic[2] )
+            advc->SetZPeriodicity( true, minxyz.z, maxxyz.z );
+        else
+            advc->SetZPeriodicity( false, 0.0f, 1.0f );
+    }
 }
 
 void
