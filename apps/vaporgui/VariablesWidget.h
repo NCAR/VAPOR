@@ -68,8 +68,8 @@ public:
     
     DimFlags GetDimFlags() const;
 
- void ShowZVectorVar() const;
- void HideZVectorVar() const;
+ void Configure2DFieldVars() const;
+ void Configure3DFieldVars() const;
  
 protected slots:
  //! Respond to selecting the single (primary) variable of field 
@@ -147,6 +147,9 @@ private:
 
  VariableFlags _variableFlags;
  DimFlags _dimFlags;
+
+signals:
+    void _dimensionalityChanged( int nDims );
 
 };
 
