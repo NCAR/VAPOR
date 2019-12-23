@@ -205,16 +205,16 @@ std::vector<float> FlowParams::GetRake() const
 {
     auto doubles = GetValueDoubleVec( _rakeTag );
     auto rakesize = doubles.size();
-    if ( rakesize != 6 && rakesize != 4 ) {
-        std::vector<double> tmp(6, std::nan("1") );
-        doubles = tmp;
-        rakesize = doubles.size();
+
+    if ( rakesize != 6 && rakesize != 4 ) 
+    {
+        // Six NANs represent the initial state
+        std::vector<float> tmp(6, std::nan("1") );
+        return tmp;
     }
 
-    std::vector<float> floats( rakesize, 0.0f );
-    if( std::isnan( doubles[0] ) )
-        floats[0] = std::nan("1");
-    else
+    std::vector<float> floats( rakesize, std::nan("1") );
+    if( !std::isnan( doubles[0] ) )
     {
         for( int i = 0; i < rakesize; i++ )
             floats[i] = float(doubles[i]);
