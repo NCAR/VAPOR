@@ -235,11 +235,13 @@ FlowRenderer::_paintGL( bool fast )
     if( !_advectionComplete )
     {
         float deltaT = 0.05;          // For only 1 timestep case
-        if( !params->GetIsSteady() )
-        {
-            VAssert( _timestamps.size() > 1 )
+        if( _timestamps.size() > 1 )
             deltaT *= _timestamps[1] - _timestamps[0];
-        }
+        //if( !params->GetIsSteady() )
+        //{
+        //    VAssert( _timestamps.size() > 1 );
+        //    deltaT *= _timestamps[1] - _timestamps[0];
+        //}
 
         rv = flow::ADVECT_HAPPENED;
 
@@ -385,6 +387,7 @@ FlowRenderer::_particleHelper1( std::vector<float>&     vec,
     {
         vec.push_back( p.location.x );
         vec.push_back( p.location.y );
+        //vec.push_back( 0.0f );
         vec.push_back( p.location.z );
         vec.push_back( p.value );
     }
@@ -418,6 +421,10 @@ FlowRenderer::_drawALineStrip( const float* buf, size_t numOfParts, bool singleC
     glBindVertexArray( _vertexArrayId );
     glEnableVertexAttribArray( 0 );
     glBindBuffer( GL_ARRAY_BUFFER, _vertexBufferId );
+    // Note: 2D flow won't even draw a line that I hand coded to be within the domain.
+    // Will need to figure out what's going on in 2D mode.
+    //float buf2[] = {0.f, 4000000.f, 30.87f, 0.0f, 0.f, 5000000.f, 30.87f, 0.0f};
+    ////glBufferData( GL_ARRAY_BUFFER, sizeof(float) * 4 * 2, buf2, GL_STREAM_DRAW );
     glBufferData( GL_ARRAY_BUFFER, sizeof(float) * 4 * numOfParts, buf, GL_STREAM_DRAW );
     glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0 );
     glDrawArrays( GL_LINE_STRIP, 0, numOfParts );
@@ -742,7 +749,7 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
     if( dim == 2 )  seedsZ = 1;
     else            seedsZ = _cache_gridNumOfSeeds[2];
     // Reserve enough space at the beginning for performance considerations
-    seeds.reserve( seedsZ * _cache_gridNumOfSeeds[1] * _cache_gridNumOfSeeds[2] );
+    seeds.reserve( seedsZ * _cache_gridNumOfSeeds[1] * _cache_gridNumOfSeeds[0] );
     for( long k = 0; k < seedsZ; k++ )
         for( long j = 0; j < _cache_gridNumOfSeeds[1]; j++ )
             for( long i = 0; i < _cache_gridNumOfSeeds[0]; i++ )
