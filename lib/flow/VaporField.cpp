@@ -391,7 +391,18 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
                                        extMin, extMax );
     if( _recentGrids.contains( key ) )
     {
-        return (_recentGrids.find( key )->grid());
+        const VAPoR::Grid* grid = _recentGrids.find( key )->grid();
+        // Is this a GrownGrid? 
+        const VAPoR::GrownGrid* ggrid = dynamic_cast<const VAPoR::GrownGrid*>(grid);
+        if( ggrid == nullptr )
+            return grid;
+        else    // Need to test if the DefaultZ value has changed.
+        {
+            if( ggrid->GetDefaultZ() == this->DefaultZ )    // DefaultZ is the same! 
+                return grid;
+            // If DefaultZ has changed, a new GrownGrid will be constructed 
+            // with the new DefaultZ value.
+        }
     }
 
     //
@@ -402,9 +413,9 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
     // 3) query a 2D grid and grow it to be a GrownGrid.
     //
     VAPoR::Grid* grid = nullptr;
-    if( key.find(_constantGridDefaultZ) != std::string::npos ) // need a ConstantGrid
+    if( key == _constantGridZero )  // need a ConstantGrid
     {
-        grid = new VAPoR::ConstantGrid( DefaultZ );
+        grid = new VAPoR::ConstantGrid( 0.0f );
     }
     else
     {
@@ -446,18 +457,16 @@ VaporField::_paramsToString(  size_t currentTS,               const std::string&
                               int refLevel,                   int compLevel, 
                               const std::vector<double>& min, const std::vector<double>& max ) const
 {
-    std::ostringstream oss;
-    std::string space( "  " );
-    oss << DefaultZ << space;
-
     // In case of an empty variable name, we generate a string that represents a
     // ConstantGrid with zeros, no matter what other parameters are.
     if( var.empty() )
     {
-        return (_constantGridDefaultZ + oss.str());
+        return _constantGridZero;
     }
     else
     {
+        std::ostringstream oss;
+        std::string space( "  " );
         oss << currentTS << space << var << space << refLevel << space << compLevel << space ;
         for( size_t i = 0; i < min.size(); i++ )
             oss << min[i] << space;

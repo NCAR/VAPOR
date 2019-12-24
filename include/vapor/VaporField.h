@@ -95,7 +95,9 @@ public:
     void GetFirstStepVelocityIntersection( glm::vec3& minxyz, glm::vec3& maxxyz );
 
     // 
-    // Store the default Z value when there isn't a Z component present
+    // Store the default Z value for variables that are 2D grids in nature.
+    // In this case, a 3D one-layer "GrownGrid" is created with 
+    // the 3rd dimension being DefaultZ.
     //
     float DefaultZ = 0.0f;
 
@@ -109,7 +111,7 @@ private:
     using cacheType = VAPoR::unique_ptr_cache< std::string, GridWrapper >;
     mutable cacheType           _recentGrids;   // so this variable can be 
                                                 // modified by a const function.
-    const std::string           _constantGridDefaultZ = "ConstantGrid with defaultZ value: ";
+    const std::string           _constantGridZero = "ConstantGrid with zeros";
 
     // Member functions
     std::string _paramsToString(  size_t currentTS, const std::string& var, int refLevel, 
