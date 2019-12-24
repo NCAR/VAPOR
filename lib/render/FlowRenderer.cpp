@@ -26,7 +26,7 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
                       FlowRenderer::GetClassType(),
                       instName,
                       dataMgr ),
-            _velocityField     ( 7 ),
+            _velocityField     ( 8 ),
             _colorField        ( 2 ),
             _colorMapTexOffset ( 0 )
 { }
@@ -235,8 +235,11 @@ FlowRenderer::_paintGL( bool fast )
     if( !_advectionComplete )
     {
         float deltaT = 0.05;          // For only 1 timestep case
-        if( _timestamps.size() > 1 )  // For multiple timestep case
+        if( !params->GetIsSteady() )
+        {
+            VAssert( _timestamps.size() > 1 )
             deltaT *= _timestamps[1] - _timestamps[0];
+        }
 
         rv = flow::ADVECT_HAPPENED;
 
