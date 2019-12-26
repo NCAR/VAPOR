@@ -910,11 +910,12 @@ int FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds 
     else    // dim == 2
     {
         const auto dfz = Renderer::GetDefaultZ(_dataMgr, params->GetCurrentTimestep());
+        loc.z   =  dfz;            
+        locD[2] =  dfz;
         while( numOfTrials < numOfTrialLimit && seeds.size() < numOfSeedsToGen )
         {
             loc.x = distX(gen);     locD[0] = loc.x;
             loc.y = distY(gen);     locD[1] = loc.y;
-            loc.z = dfz;            locD[2] = dfz;
             val   = grid->GetValue( locD );
             if( val != mv )
                 seeds.emplace_back( loc, timeVal, val );
