@@ -340,11 +340,11 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     // Update seeding tab
     //
     int mode = _params->GetSeedGenMode();
-    if ( mode == (int)VAPoR::FlowSeedMode::UNIFORM )
+    if ( mode == static_cast<int>(VAPoR::FlowSeedMode::UNIFORM ) )
         _seedTypeCombo->SetValue( GRIDDED_STRING );
-    else if ( mode == (int)VAPoR::FlowSeedMode::RANDOM  )
+    else if ( mode == static_cast<int>(VAPoR::FlowSeedMode::RANDOM  ) )
         _seedTypeCombo->SetValue( RANDOM_STRING );
-    else if ( mode == (int)VAPoR::FlowSeedMode::LIST    )
+    else if ( mode == static_cast<int>(VAPoR::FlowSeedMode::LIST    ) )
         _seedTypeCombo->SetValue( LIST_STRING );
 
     // Random rake values
@@ -602,7 +602,7 @@ void FlowSeedingSubtab::_configureSeedType( const std::string& value) {
         _randomSeedsFrame->hide();
         _rakeRegionSection->show();
         if ( _params != nullptr ) 
-            _params->SetSeedGenMode( (int)VAPoR::FlowSeedMode::UNIFORM );
+            _params->SetSeedGenMode( static_cast<int>(VAPoR::FlowSeedMode::UNIFORM ) );
     }
     else if ( value == LIST_STRING ) {
         _griddedSeedsFrame->hide();
@@ -610,7 +610,7 @@ void FlowSeedingSubtab::_configureSeedType( const std::string& value) {
         _randomSeedsFrame->hide();
         _rakeRegionSection->hide();
         if ( _params != nullptr ) 
-            _params->SetSeedGenMode( (int)VAPoR::FlowSeedMode::LIST );
+            _params->SetSeedGenMode( static_cast<int>(VAPoR::FlowSeedMode::LIST ) );
     }
     else if ( value == RANDOM_STRING ) {
         _griddedSeedsFrame->hide();
@@ -618,7 +618,7 @@ void FlowSeedingSubtab::_configureSeedType( const std::string& value) {
         _randomSeedsFrame->show();
         _rakeRegionSection->show();
         if ( _params != nullptr ) 
-            _params->SetSeedGenMode( (int)VAPoR::FlowSeedMode::RANDOM_BIAS);
+            _params->SetSeedGenMode( static_cast<int>(VAPoR::FlowSeedMode::RANDOM_BIAS ) );
     }
 }
 
