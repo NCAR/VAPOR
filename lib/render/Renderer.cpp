@@ -723,21 +723,13 @@ void Renderer::GetClippingPlanes( float planes[24] ) const
     std::vector<double> minExts, maxExts;
     rParams->GetBox()->GetExtents(minExts, maxExts);
     VAssert(minExts.size() == maxExts.size());
-    VAssert(minExts.size() > 0 && minExts.size() < 4);
+    VAssert(minExts.size() == 2 || minExts.size() == 3);
 
-    int orientation = rParams->GetBox()->GetOrientation();
-
-    if (minExts.size() == 3 || orientation != 0)
-    {
-        x0Plane[3] = float(-minExts[0]);
-        x1Plane[3] = float(maxExts[0]);
-    }
-    if (minExts.size() == 3 || orientation != 1)
-    {
-        y0Plane[3] = float(-minExts[1]);
-        y1Plane[3] = float(maxExts[1]);
-    }
-    if (minExts.size() == 3 || orientation != 2)
+    x0Plane[3] = float(-minExts[0]);
+    x1Plane[3] = float(maxExts[0]);
+    y0Plane[3] = float(-minExts[1]);
+    y1Plane[3] = float(maxExts[1]);
+    if (minExts.size() == 3 )
     {
         z0Plane[3] = float(-minExts[2]);
         z1Plane[3] = float(maxExts[2]);
