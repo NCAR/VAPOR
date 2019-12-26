@@ -428,10 +428,6 @@ FlowRenderer::_drawALineStrip( const float* buf, size_t numOfParts, bool singleC
     glBindVertexArray( _vertexArrayId );
     glEnableVertexAttribArray( 0 );
     glBindBuffer( GL_ARRAY_BUFFER, _vertexBufferId );
-    // Note: 2D flow won't even draw a line that I hand coded to be within the domain.
-    // Will need to figure out what's going on in 2D mode.
-    //float buf2[] = {0.f, 4000000.f, 30.87f, 0.0f, 0.f, 5000000.f, 30.87f, 0.0f};
-    ////glBufferData( GL_ARRAY_BUFFER, sizeof(float) * 4 * 2, buf2, GL_STREAM_DRAW );
     glBufferData( GL_ARRAY_BUFFER, sizeof(float) * 4 * numOfParts, buf, GL_STREAM_DRAW );
     glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0 );
     glDrawArrays( GL_LINE_STRIP, 0, numOfParts );
@@ -787,36 +783,43 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
 int
 FlowRenderer::_genSeedsRakeRandom( std::vector<flow::Particle>& seeds ) const
 {
-std::cerr << "random seed generation called!!" << std::endl;
-#if 0
-    // TODO: evaluate if it's easy to completely remove this function.
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
 
-    /* retrieve rake from params */
-    auto rake = params->GetRake();
-    VAssert( rake.size() == 6 );
-    for( int i = 0; i < 3; i++ )
-        VAssert( rake[i*2+1] >= rake[i*2] );
-
-    /* retrieve random seed numbers from params */
-    auto totalNumOfSeeds = params->GetRandomNumOfSeeds();
+    VAssert( _cache_rake.size() == 6 || _cache_rake.size() == 4 );
+    int dim = _cache_rake.size() / 2;
+    for( int i = 0; i < dim; i++ )
+        VAssert( _cache_rake[i*2+1] >= _cache_rake[i*2] );
     
-    /* Create three uniform distributions in 3 dimensions */
+    /* Create uniform distributions along 2 or 3 dimensions */
     /* Use a fixed value for the generator seed.          */
     unsigned int randSeed = 32;
     std::mt19937 gen(randSeed); //Standard mersenne_twister_engine 
-    std::uniform_real_distribution<float> distX( rake[0], rake[1] );
-    std::uniform_real_distribution<float> distY( rake[2], rake[3] );
-    std::uniform_real_distribution<float> distZ( rake[4], rake[5] );
+    std::uniform_real_distribution<float> distX( _cache_rake[0], _cache_rake[1] );
+    std::uniform_real_distribution<float> distY( _cache_rake[2], _cache_rake[3] );
 
     float timeVal = _timestamps.at(0);
-    seeds.resize( totalNumOfSeeds );
-    for( long i = 0; i < totalNumOfSeeds; i++ )
+    seeds.resize( _cache_randNumOfSeeds );
+    if( dim  == 3 )
     {
-        seeds[i].location.x = distX(gen);
-        seeds[i].location.y = distY(gen);
-        seeds[i].location.z = distZ(gen);
-        seeds[i].time       = timeVal;
+        std::uniform_real_distribution<float> distZ( _cache_rake[4], _cache_rake[5] );
+        for( long i = 0; i < _cache_randNumOfSeeds; i++ )
+        {
+            seeds[i].location.x = distX(gen);
+            seeds[i].location.y = distY(gen);
+            seeds[i].location.z = distZ(gen);
+            seeds[i].time       = timeVal;
+        }
+    }
+    else
+    {
+        const float dfz = Renderer::GetDefaultZ(_dataMgr, params->GetCurrentTimestep());
+        for( long i = 0; i < _cache_randNumOfSeeds; i++ )
+        {
+            seeds[i].location.x = distX(gen);
+            seeds[i].location.y = distY(gen);
+            seeds[i].location.z = dfz;
+            seeds[i].time       = timeVal;
+        }
     }
 
     /* If in unsteady case and there are multiple seed injections, we insert more seeds */
@@ -830,7 +833,6 @@ std::cerr << "random seed generation called!!" << std::endl;
                 _dupSeedsNewTime( seeds, firstN, _timestamps.at(ts) );
             }
     }
-#endif
 
     return 0;
 }
@@ -842,6 +844,8 @@ int FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds 
 
     VAssert( _cache_rake.size() == 6 || _cache_rake.size() == 4 );
     int dim = _cache_rake.size() / 2;
+    for( int i = 0; i < dim; i++ )
+        VAssert( _cache_rake[i*2+1] >= _cache_rake[i*2] );
     std::vector<double> rakeExtMin( dim, 0 );
     std::vector<double> rakeExtMax( dim, 0 );
     for( int i = 0; i < dim; i++ )

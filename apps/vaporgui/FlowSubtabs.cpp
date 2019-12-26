@@ -24,6 +24,7 @@ namespace {
     const std::string GRIDDED_STRING   = "Gridded";
     const std::string LIST_STRING      = "List of seeds";
     const std::string RANDOM_STRING    = "Random";
+    const std::string RANDOM_BIAS_STR  = "Random w/ Bias";
 
     const int MIN_AXIS_SEEDS           = 1;
     const int MAX_AXIS_SEEDS           = 50;
@@ -144,7 +145,7 @@ void FlowSeedingSubtab::_createSeedingSection( QWidget* parent ) {
     _seedDistributionSection = new VSection("Seed Distribution Settings");
     layout()->addWidget( _seedDistributionSection );
 
-    std::vector<std::string> values = {GRIDDED_STRING, RANDOM_STRING, LIST_STRING};
+    std::vector<std::string> values = {GRIDDED_STRING, RANDOM_STRING, RANDOM_BIAS_STR, LIST_STRING};
     _seedTypeCombo = new VComboBox(values);
     _seedDistributionSection->layout()->addWidget( new VLineItem("Seed distribution type", _seedTypeCombo ));
     connect( _seedTypeCombo, &VComboBox::ValueChanged,
@@ -188,17 +189,17 @@ void FlowSeedingSubtab::_createSeedingSection( QWidget* parent ) {
     
     _randomSeedsSliderEdit = new VSliderEdit( MIN_RANDOM_SEEDS, MAX_RANDOM_SEEDS );
     _randomSeedsSliderEdit->SetIntType( true );
-    _randomSeedsFrame->addWidget( new VLineItem("Seed count", _randomSeedsSliderEdit ) );
+    _randomSeedsFrame->addWidget( new VLineItem("Seed count", _randomSeedsSliderEdit ) ); // 1st widget
     connect( _randomSeedsSliderEdit, &VSliderEdit::ValueChangedInt,
         this, &FlowSeedingSubtab::_randomNumOfSeedsChanged );
 
     _biasWeightSliderEdit = new VSliderEdit(-10.0, 10.0, 0.0);
-    _randomSeedsFrame->addWidget( new VLineItem( "Bias weight", _biasWeightSliderEdit ) );
+    _randomSeedsFrame->addWidget( new VLineItem( "Bias weight", _biasWeightSliderEdit ) ); // 2nd widget
     connect( _biasWeightSliderEdit, &VSliderEdit::ValueChanged,
         this, &FlowSeedingSubtab::_biasStrengthChanged );
 
     _biasVariableComboBox = new VComboBox( std::vector<std::string>() );
-    _randomSeedsFrame->addWidget( new VLineItem( "Bias variable", _biasVariableComboBox ) );
+    _randomSeedsFrame->addWidget( new VLineItem( "Bias variable", _biasVariableComboBox ) ); // 3rd widget
     connect( _biasVariableComboBox, &VComboBox::ValueChanged,
         this, &FlowSeedingSubtab::_biasVariableChanged );
     
@@ -344,6 +345,8 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
         _seedTypeCombo->SetValue( GRIDDED_STRING );
     else if ( mode == static_cast<int>(VAPoR::FlowSeedMode::RANDOM  ) )
         _seedTypeCombo->SetValue( RANDOM_STRING );
+    else if ( mode == static_cast<int>(VAPoR::FlowSeedMode::RANDOM_BIAS  ) )
+        _seedTypeCombo->SetValue( RANDOM_BIAS_STR );
     else if ( mode == static_cast<int>(VAPoR::FlowSeedMode::LIST    ) )
         _seedTypeCombo->SetValue( LIST_STRING );
 
@@ -615,8 +618,20 @@ void FlowSeedingSubtab::_configureSeedType( const std::string& value) {
     else if ( value == RANDOM_STRING ) {
         _griddedSeedsFrame->hide();
         _listOfSeedsFrame->hide();
-        _randomSeedsFrame->show();
         _rakeRegionSection->show();
+        _randomSeedsFrame->show();
+        _randomSeedsFrame->hideChildAtIdx(1);   // bias strength
+        _randomSeedsFrame->hideChildAtIdx(2);   // bias variable 
+        if ( _params != nullptr ) 
+            _params->SetSeedGenMode( static_cast<int>(VAPoR::FlowSeedMode::RANDOM ) );
+    }
+    else if ( value == RANDOM_BIAS_STR ) {
+        _griddedSeedsFrame->hide();
+        _listOfSeedsFrame->hide();
+        _rakeRegionSection->show();
+        _randomSeedsFrame->show();
+        _randomSeedsFrame->showChildAtIdx(1);   // bias strength
+        _randomSeedsFrame->showChildAtIdx(2);   // bias variable 
         if ( _params != nullptr ) 
             _params->SetSeedGenMode( static_cast<int>(VAPoR::FlowSeedMode::RANDOM_BIAS ) );
     }

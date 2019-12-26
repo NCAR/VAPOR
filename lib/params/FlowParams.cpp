@@ -254,7 +254,7 @@ void FlowParams::SetGridNumOfSeeds( const std::vector<long>& num )
     
 long FlowParams::GetRandomNumOfSeeds() const
 {
-    return GetValueLong( _randomNumOfSeedsTag, 5 );
+    return GetValueLong( _randomNumOfSeedsTag, 50 );
 }
 
 void FlowParams::SetRandomNumOfSeeds( long num )
