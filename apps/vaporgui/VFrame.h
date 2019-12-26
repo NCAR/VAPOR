@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QWidget>
+#include <QFrame>
 
 
 //! \class VFrame
@@ -11,14 +12,7 @@ class VFrame : public QFrame {
     Q_OBJECT
     
 public:
-    VFrame() {
-        setLayout( new QVBoxLayout );
-        layout()->setContentsMargins( 0, 0, 0, 0 );
-        layout()->setSpacing( 12 );
-        setFrameStyle( QFrame::NoFrame );
-    }
+    VFrame(); 
 
-    void addWidget( QWidget* widget) {
-        layout()->addWidget(widget);
-    }
+    void addWidget( QWidget* widget);
 };
