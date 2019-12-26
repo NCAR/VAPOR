@@ -50,6 +50,7 @@
 #include <vapor/FlowParams.h>
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
+#include "hide_std_error_util.h"
 
 using namespace VAPoR;
 
@@ -245,14 +246,14 @@ void VizWin::_setUpProjMatrix() {
         
         if (fa >= wa) {
             int x = 0;
-            int y = (wHeight/2)-(wHeight/fa/2);
+            int y = (wHeight/2)-(wHeight/fa*wa/2);
             int w = wWidth;
-            int h = wHeight/fa;
+            int h = wHeight/fa*wa;
             glViewport(x, y, w, h);
         } else {
-            int x = (wWidth/2)-(wWidth*fa/2);
+            int x = (wWidth/2)-(wWidth*fa/wa/2);
             int y = 0;
-            int w = wWidth*fa;
+            int w = wWidth*fa/wa;
             int h = wHeight;
             glViewport(x, y, w, h);
         }
@@ -683,7 +684,9 @@ void VizWin::Render(bool fast) {
 #endif
     }
 	
+    HideSTDERR();
 	swapBuffers();
+    RestoreSTDERR();
     
 	rc = CheckGLErrorMsg("VizWindowPaintGL");
 	if (rc < 0) {
