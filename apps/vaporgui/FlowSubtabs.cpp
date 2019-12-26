@@ -26,9 +26,9 @@ namespace {
     const std::string RANDOM_STRING    = "Random";
 
     const int MIN_AXIS_SEEDS           = 1;
-    const int MAX_AXIS_SEEDS           = 1000;
+    const int MAX_AXIS_SEEDS           = 50;
     const int MIN_RANDOM_SEEDS         = 1;
-    const int MAX_RANDOM_SEEDS         = 1000;
+    const int MAX_RANDOM_SEEDS         = 500;
 
     const int MAX_PATHLINE_LENGTH      = 10000;
 

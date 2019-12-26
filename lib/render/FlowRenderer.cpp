@@ -237,11 +237,6 @@ FlowRenderer::_paintGL( bool fast )
         float deltaT = 0.05;          // For only 1 timestep case
         if( _timestamps.size() > 1 )
             deltaT *= _timestamps[1] - _timestamps[0];
-        //if( !params->GetIsSteady() )
-        //{
-        //    VAssert( _timestamps.size() > 1 );
-        //    deltaT *= _timestamps[1] - _timestamps[0];
-        //}
 
         rv = flow::ADVECT_HAPPENED;
 
