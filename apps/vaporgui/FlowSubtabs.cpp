@@ -31,7 +31,7 @@ namespace {
     const int MIN_RANDOM_SEEDS         = 1;
     const int MAX_RANDOM_SEEDS         = 500;
 
-    const int MAX_PATHLINE_LENGTH      = 10000;
+    const int MAX_PATHLINE_LENGTH      = 5000;
 
     const int X                        = 0;
     const int Y                        = 1;
@@ -253,7 +253,14 @@ void FlowSeedingSubtab::_createIntegrationSection() {
     _pathlineLengthSliderEdit->SetIntType(true);
     connect( _pathlineLengthSliderEdit, &VSliderEdit::ValueChangedInt,
         this, &FlowSeedingSubtab::_pathlineLengthChanged );
-    _pathlineFrame->addWidget( new VLineItem("Display Past Num. of Time Steps", _pathlineLengthSliderEdit));
+    _pathlineFrame->addWidget( new VLineItem("Display Past No. Time Steps", _pathlineLengthSliderEdit));
+
+    _pathlineInjInterval = new VSliderEdit();
+    _pathlineInjInterval->SetIntType( true );
+    connect( _pathlineInjInterval, &VSliderEdit::ValueChangedInt,
+             this, &FlowSeedingSubtab::_seedInjIntervalChanged );
+    _pathlineFrame->addWidget( new VLineItem("Inject Seeds Every No. Time Steps", _pathlineInjInterval) );
+//  TODO: keep working on this widget
 
 
     // Universal options: Velocity multiplier and periodicity checkboxes
@@ -493,7 +500,7 @@ void FlowSeedingSubtab::_updateStreamlineWidgets( VAPoR::DataMgr* dataMgr ) {
 void FlowSeedingSubtab::_updatePathlineWidgets( VAPoR::DataMgr* dataMgr) {
     int numTS = dataMgr->GetNumTimeSteps();
 
-    // Unsteady flow integration length
+    // Unsteady flow display past number of time steps
     _pathlineLengthSliderEdit->SetRange( 1, numTS - 1 );
     int valParams = _params->GetPastNumOfTimeSteps();
     if( valParams < 0 )     // initial value, we need to set it to all time steps!
@@ -505,6 +512,19 @@ void FlowSeedingSubtab::_updatePathlineWidgets( VAPoR::DataMgr* dataMgr) {
     {
         _pathlineLengthSliderEdit->SetValue( valParams );
     }
+
+    // Unsteady seed injection interval
+    _pathlineInjInterval->SetRange( 0, numTS - 1 );
+    int injIntv = _params->GetSeedInjInterval();
+    if( injIntv < 0 )       // initial value, we set it to 0
+    {   
+        _pathlineInjInterval->SetValue( 0 );
+        _params->SetSeedInjInterval( 0 );
+    }   
+    else
+    {   
+        _pathlineInjInterval->SetValue( injIntv );
+    }  
 }
 
 void 
@@ -581,7 +601,7 @@ FlowSeedingSubtab::_streamlineSamplesChanged( int newval )
 void
 FlowSeedingSubtab::_seedInjIntervalChanged( int interval ) 
 {
-    if( interval != _params->GetSeedInjInterval( interval ) )
+    if( interval != _params->GetSeedInjInterval() )
         _params->SetSeedInjInterval( interval );
 }
 

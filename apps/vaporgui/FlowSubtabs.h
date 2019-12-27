@@ -170,8 +170,8 @@ private:
     //  Pathline integration options
     VFrame*                 _pathlineFrame;
     VSliderEdit*            _pathlineLengthSliderEdit;
-    /*VSliderEdit*            _pathlineInjIntervalSliderEdit;
-    VSliderEdit*            _pathlineStartSliderEdit;
+    VSliderEdit*            _pathlineInjInterval;
+    /*VSliderEdit*            _pathlineStartSliderEdit;
     VSliderEdit*            _pathlineEndSliderEdit;
     VSliderEdit*            _pathlineLifetimeSliderEdit;*/
 
