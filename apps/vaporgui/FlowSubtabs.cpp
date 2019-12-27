@@ -253,7 +253,7 @@ void FlowSeedingSubtab::_createIntegrationSection() {
     _pathlineLengthSliderEdit->SetIntType(true);
     connect( _pathlineLengthSliderEdit, &VSliderEdit::ValueChangedInt,
         this, &FlowSeedingSubtab::_pathlineLengthChanged );
-    _pathlineFrame->addWidget( new VLineItem("Streamline length", _pathlineLengthSliderEdit));
+    _pathlineFrame->addWidget( new VLineItem("Display Past Num. of Time Steps", _pathlineLengthSliderEdit));
 
 
     // Universal options: Velocity multiplier and periodicity checkboxes
@@ -494,7 +494,7 @@ void FlowSeedingSubtab::_updatePathlineWidgets( VAPoR::DataMgr* dataMgr) {
     int numTS = dataMgr->GetNumTimeSteps();
 
     // Unsteady flow integration length
-    _pathlineLengthSliderEdit->SetRange( 0, numTS - 1 );
+    _pathlineLengthSliderEdit->SetRange( 1, numTS - 1 );
     int valParams = _params->GetPastNumOfTimeSteps();
     if( valParams < 0 )     // initial value, we need to set it to all time steps!
     {
@@ -567,18 +567,22 @@ FlowSeedingSubtab::_pathlineLifetimeChanged( int newVal )
 void 
 FlowSeedingSubtab::_pathlineLengthChanged( int newVal )
 {
-    _params->SetPastNumOfTimeSteps( newVal );
+    if( newVal != _params->GetPastNumOfTimeSteps() )
+        _params->SetPastNumOfTimeSteps( newVal );
 }
 
 void 
 FlowSeedingSubtab::_streamlineSamplesChanged( int newval )
 {
-    _params->SetSteadyNumOfSteps( newval );
+    if( newval != _params->GetSteadyNumOfSteps() )
+        _params->SetSteadyNumOfSteps( newval );
 }
 
 void
-FlowSeedingSubtab::_seedInjIntervalChanged( int interval ) {
-    _params->SetSeedInjInterval( interval );
+FlowSeedingSubtab::_seedInjIntervalChanged( int interval ) 
+{
+    if( interval != _params->GetSeedInjInterval( interval ) )
+        _params->SetSeedInjInterval( interval );
 }
 
 void FlowSeedingSubtab::_configureFlowType ( const std::string& value ) {
