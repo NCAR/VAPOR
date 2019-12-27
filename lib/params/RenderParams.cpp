@@ -478,12 +478,7 @@ string RenderParams::GetColorMapVariableName() const
     return (varname);
 }
 
-bool RenderParams::UseSingleColor() const
-{
-    // Not used
-    return false;
-    return GetValueLong(_useSingleColorTag, GetUseSingleColorDefault());
-}
+bool RenderParams::UseSingleColor() const { return GetValueLong(_useSingleColorTag, GetUseSingleColorDefault()); }
 
 void RenderParams::SetUseSingleColor(bool val) { SetValueLong(_useSingleColorTag, "enable/disable use single color", (long)val); }
 
