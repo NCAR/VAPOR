@@ -260,8 +260,6 @@ void FlowSeedingSubtab::_createIntegrationSection() {
     connect( _pathlineInjInterval, &VSliderEdit::ValueChangedInt,
              this, &FlowSeedingSubtab::_seedInjIntervalChanged );
     _pathlineFrame->addWidget( new VLineItem("Inject Seeds Every No. Time Steps", _pathlineInjInterval) );
-//  TODO: keep working on this widget
-
 
     // Universal options: Velocity multiplier and periodicity checkboxes
     //    
