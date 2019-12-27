@@ -729,10 +729,19 @@ void Renderer::GetClippingPlanes( float planes[24] ) const
     x1Plane[3] = float(maxExts[0]);
     y0Plane[3] = float(-minExts[1]);
     y1Plane[3] = float(maxExts[1]);
-    if (minExts.size() == 3 )
+    if (minExts.size() == 3 )   // Fill normal Z extents
     {
         z0Plane[3] = float(-minExts[2]);
         z1Plane[3] = float(maxExts[2]);
+    }
+    else    // Fill a thin layer around DefaultZ
+    {
+        const auto dfz = this->GetDefaultZ( _dataMgr, rParams->GetCurrentTimestep() );
+        const auto z1  = dfz * 1.0001; 
+        const auto z2  = dfz * 0.9999;
+        z0Plane[3]     = -std::min( z1, z2 );
+        z1Plane[3]     =  std::max( z1, z2 );
+
     }
 
     size_t planeSize = sizeof(x0Plane);
