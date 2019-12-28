@@ -192,10 +192,14 @@ void DataStatus::_getExtents(
 			if (! status) continue;
             
             if (minVExts.size() == 2) {
-                double z = DataMgrUtils::Get2DRendererDefaultZ(dataMgr, ts, var.refLevel, var.compLevel);
-                minVExts.push_back(z);
-                maxVExts.push_back(z);
-                axes.push_back(2);
+                bool has3D = !dataMgr->GetDataVarNames(3).empty();
+                
+                if (has3D) {
+                    double z = DataMgrUtils::Get2DRendererDefaultZ(dataMgr, ts, var.refLevel, var.compLevel);
+                    minVExts.push_back(z);
+                    maxVExts.push_back(z);
+                    axes.push_back(2);
+                }
             }
 
 			print_extents(dataSetName, minVExts, maxVExts);
