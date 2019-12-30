@@ -545,8 +545,6 @@ string RenderParams::GetColorMapVariableName() const {
 }
 
 bool RenderParams::UseSingleColor() const {
-    // Not used
-    return false;
     return GetValueLong(_useSingleColorTag, GetUseSingleColorDefault());
 }
 
