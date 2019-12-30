@@ -585,22 +585,19 @@ FlowSeedingSubtab::_pathlineLifetimeChanged( int newVal )
 void 
 FlowSeedingSubtab::_pathlineLengthChanged( int newVal )
 {
-    if( newVal != _params->GetPastNumOfTimeSteps() )
-        _params->SetPastNumOfTimeSteps( newVal );
+    _params->SetPastNumOfTimeSteps( newVal );
 }
 
 void 
 FlowSeedingSubtab::_streamlineSamplesChanged( int newval )
 {
-    if( newval != _params->GetSteadyNumOfSteps() )
-        _params->SetSteadyNumOfSteps( newval );
+    _params->SetSteadyNumOfSteps( newval );
 }
 
 void
 FlowSeedingSubtab::_seedInjIntervalChanged( int interval ) 
 {
-    if( interval != _params->GetSeedInjInterval() )
-        _params->SetSeedInjInterval( interval );
+    _params->SetSeedInjInterval( interval );
 }
 
 void FlowSeedingSubtab::_configureFlowType ( const std::string& value ) {
