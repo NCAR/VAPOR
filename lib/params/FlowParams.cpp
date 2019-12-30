@@ -87,7 +87,8 @@ FlowParams::GetVelocityMultiplier() const
 void 
 FlowParams::SetVelocityMultiplier( double coeff )
 {
-    SetValueDouble( _velocityMultiplierTag, "Field Scale Factor", coeff );
+    if( float(coeff) != float( GetVelocityMultiplier() ) )
+        SetValueDouble( _velocityMultiplierTag, "Field Scale Factor", coeff );
 }
 
 long
@@ -99,7 +100,8 @@ FlowParams::GetSteadyNumOfSteps() const
 void
 FlowParams::SetSteadyNumOfSteps( long i )
 {
-    SetValueLong( _steadyNumOfStepsTag, "num of steps for a steady integration", i );
+    if( i != GetSteadyNumOfSteps() )
+        SetValueLong( _steadyNumOfStepsTag, "num of steps for a steady integration", i );
 }
 
 int FlowParams::GetSeedGenMode() const
