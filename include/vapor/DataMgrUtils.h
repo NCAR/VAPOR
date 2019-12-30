@@ -236,6 +236,12 @@ VDF_API bool GetExtents(
 //! Used by the histo for calculating some meta data.
 VDF_API int GetDefaultMetaInfoStride(DataMgr *dataMgr, std::string varname, int refinementLevel);
 
+//! Get default z value at the base of the domain.  Useful
+//! for applying a height value to 2D renderers.
+//! \param[in] dataMgr Current (valid) dataMgr
+//! \retval default height value for current dataset
+VDF_API double Get2DRendererDefaultZ(DataMgr *dataMgr, size_t ts, int refLevel, int lod);
+
 //! Find the first variable that exists
 //!
 //! This function searches a data collection looking over all
