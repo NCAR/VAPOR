@@ -357,6 +357,17 @@ int DataMgrUtils::GetDefaultMetaInfoStride(DataMgr *dataMgr, std::string varname
     return stride;
 }
 
+double DataMgrUtils::Get2DRendererDefaultZ(DataMgr *dataMgr, size_t ts, int refLevel, int lod)
+{
+    vector<double> minExts;
+    vector<double> maxExts;
+
+    bool status = DataMgrUtils::GetExtents(dataMgr, ts, "", refLevel, lod, minExts, maxExts);
+    if (!status) return (0.0);
+
+    return (minExts.size() == 3 ? minExts[2] : 0.0);
+}
+
 bool DataMgrUtils::GetFirstExistingVariable(DataMgr *dataMgr, int level, int lod, int ndim, string &varname, size_t &ts)
 {
     varname.clear();
