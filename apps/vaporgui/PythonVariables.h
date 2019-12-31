@@ -17,7 +17,6 @@
 // QObjects do not support nested classes, so use a namespace
 //
 namespace PythonVariables_ {
-class Fader;
 class NewItemDialog;
 class OpenAndDeleteDialog;
 
@@ -58,16 +57,11 @@ private slots:
     void _findEnabledCoordinateVariables(const std::vector<string> variables, const std::vector<bool> variablesEnabled);
     void _coordinatesCheckboxClicked(int state);
 
-    void _deleteSaveFader();
-    void _deleteTestFader();
-
 private:
     const QColor *_background;
 
     VAPoR::ControlExec *_controlExec;
 
-    PythonVariables_::Fader *              _saveFader;
-    PythonVariables_::Fader *              _testFader;
     PythonVariables_::NewItemDialog *      _newItemDialog;
     PythonVariables_::OpenAndDeleteDialog *_openAndDeleteDialog;
 
@@ -111,34 +105,13 @@ private:
     void _updateOutputVarTable(){};
     void _updatePythonScript(){};
 
-    void _fadeTestLabel(bool fadeIn);
-    void _fadeSaveLabel(bool fadeIn);
+    void _showTestLabel(bool fadeIn);
+    void _showSaveLabel(bool fadeIn);
 
     void _reset();
 };
 
 namespace PythonVariables_ {
-
-class Fader : public QThread {
-    Q_OBJECT
-
-public:
-    Fader(bool fadeIn, QColor background, QColor textColor, QObject *parent = 0);
-
-    virtual void run();
-
-signals:
-    void cycle(int r, int g, int b);
-    void faderDone();
-
-private:
-    bool   _fadeIn;
-    QColor _textColor;
-    QColor _background;
-
-private slots:
-    void _fade();
-};
 
 class NewItemDialog : public QDialog {
     Q_OBJECT

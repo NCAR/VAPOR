@@ -45,9 +45,6 @@ PythonVariables::PythonVariables(QWidget *parent) : QDialog(parent), Ui_PythonVa
     _scriptName = "";
     _dataMgrName = "";
 
-    _saveFader = nullptr;
-    _testFader = nullptr;
-
     _newItemDialog = new ::NewItemDialog(this);
     _openAndDeleteDialog = new ::OpenAndDeleteDialog(this);
 
@@ -173,47 +170,40 @@ void PythonVariables::Update(bool internalUpdate)
 
     if (_justSaved && internalUpdate) {
         bool fadeIn = false;
-        _fadeTestLabel(fadeIn);
-        _fadeSaveLabel(fadeIn);
+        _showTestLabel(fadeIn);
+        _showSaveLabel(fadeIn);
         _justSaved = false;
     }
 }
 
-void PythonVariables::_fadeTestLabel(bool fadeIn)
+void PythonVariables::_showTestLabel(bool show)
 {
-    if (_testFader != nullptr) return;
-
-    QColor background = palette().color(QWidget::backgroundRole());
-
     QColor textColor;
-    if (fadeIn)
+    if (show)
         textColor = QColor(0, 0, 255);
     else
         textColor = _scriptTestLabel->palette().color(QPalette::WindowText);
 
-    _testFader = new Fader(fadeIn, background, textColor);
+    QPalette labelPalette = _scriptTestLabel->palette();
+    labelPalette.setColor(_scriptTestLabel->foregroundRole(), textColor);
+    _scriptTestLabel->setPalette(labelPalette);
 
-    connect(_testFader, SIGNAL(cycle(int, int, int)), this, SLOT(_updateTestLabelColor(int, int, int)));
-    connect(_testFader, SIGNAL(faderDone()), this, SLOT(_deleteTestFader()));
-    _testFader->start(QThread::IdlePriority);
+    return;
 }
 
-void PythonVariables::_fadeSaveLabel(bool fadeIn)
+void PythonVariables::_showSaveLabel(bool show)
 {
-    if (_saveFader != nullptr) return;
-
-    QColor background = palette().color(QWidget::backgroundRole());
-
     QColor textColor;
-    if (fadeIn)
+    if (show)
         textColor = QColor(0, 0, 255);
     else
         textColor = _scriptSaveLabel->palette().color(QPalette::WindowText);
-    _saveFader = new Fader(fadeIn, background, textColor);
 
-    connect(_saveFader, SIGNAL(cycle(int, int, int)), this, SLOT(_updateSaveLabelColor(int, int, int)));
-    connect(_saveFader, SIGNAL(faderDone()), this, SLOT(_deleteSaveFader()));
-    _saveFader->start(QThread::IdlePriority);
+    QPalette labelPalette = _scriptSaveLabel->palette();
+    labelPalette.setColor(_scriptSaveLabel->foregroundRole(), textColor);
+    _scriptSaveLabel->setPalette(labelPalette);
+
+    return;
 }
 
 void PythonVariables::_connectWidgets()
@@ -514,7 +504,7 @@ void PythonVariables::_testScript()
     }
 
     bool fadeIn = true;
-    _fadeTestLabel(fadeIn);
+    _showTestLabel(fadeIn);
 
     _justSaved = true;
 }
@@ -533,7 +523,7 @@ void PythonVariables::_saveScript()
     }
 
     bool fadeIn = true;
-    _fadeSaveLabel(fadeIn);
+    _showSaveLabel(fadeIn);
     _justSaved = true;
 }
 
@@ -559,7 +549,7 @@ void PythonVariables::_closeScript()
 void PythonVariables::_saveToSession()
 {
     bool fadeIn = true;
-    _fadeSaveLabel(fadeIn);
+    _showSaveLabel(fadeIn);
     _justSaved = true;
 }
 
@@ -585,24 +575,6 @@ void PythonVariables::_updateLabelColor(int r, int g, int b, QLabel *label)
     QPalette labelPalette = label->palette();
     labelPalette.setColor(label->foregroundRole(), newColor);
     label->setPalette(labelPalette);
-}
-
-void PythonVariables::_deleteTestFader()
-{
-    if (_testFader != nullptr) {
-        _testFader->wait();
-        delete _testFader;
-        _testFader = nullptr;
-    }
-}
-
-void PythonVariables::_deleteSaveFader()
-{
-    if (_saveFader != nullptr) {
-        _saveFader->wait();
-        delete _saveFader;
-        _saveFader = nullptr;
-    }
 }
 
 void PythonVariables::_coordInputVarChanged(int row, int col)
@@ -800,8 +772,8 @@ void PythonVariables::_scriptChanged()
     _script = _scriptEdit->toPlainText().toStdString();
 
     bool fadeIn = false;
-    _fadeTestLabel(fadeIn);
-    _fadeSaveLabel(fadeIn);
+    _showTestLabel(fadeIn);
+    _showSaveLabel(fadeIn);
 }
 
 void PythonVariables::_makeInputTableValues(std::vector<string> &tableValuesCoords, std::vector<string> &tableValues2D, std::vector<string> &tableValues3D, std::vector<string> &summaryValues) const
@@ -876,62 +848,6 @@ void PythonVariables::ShowMe()
     show();
     raise();
     activateWindow();
-}
-
-Fader::Fader(bool fadeIn, QColor background, QColor textColor, QObject *parent) : QThread(parent)
-{
-    _fadeIn = fadeIn;
-    _textColor = textColor;
-    _background = background;
-}
-
-void Fader::run() { _fade(); }
-
-void Fader::_fade()
-{
-    int cycles = 20;
-
-    QColor startColor = _background;
-    QColor endColor = _textColor;
-    if (!_fadeIn) {
-        startColor = _textColor;
-        endColor = _background;
-    }
-
-    int startRed = startColor.red();
-    int endRed = endColor.red();
-    int redIncrement = (endRed - startRed) / cycles;
-
-    int startGreen = startColor.green();
-    int endGreen = endColor.green();
-    int greenIncrement = (endGreen - startGreen) / cycles;
-
-    int startBlue = startColor.blue();
-    int endBlue = endColor.blue();
-    int blueIncrement = (endBlue - startBlue) / cycles;
-
-    clock_t startTime = clock();
-    double  secondsPassed = 0.f;
-    double  secondsToDelay = .05;
-    bool    flag = true;
-    int     counter = 0;
-
-    while (flag) {
-        secondsPassed = (clock() - startTime) / (float)CLOCKS_PER_SEC;
-        if (secondsPassed >= secondsToDelay) {
-            int  newRed = startRed + redIncrement * counter;
-            int  newGreen = startGreen + greenIncrement * counter;
-            int  newBlue = startBlue + blueIncrement * counter;
-            emit cycle(newRed, newGreen, newBlue);
-            startTime = clock();
-            counter++;
-        }
-        if (counter > cycles) flag = false;
-    }
-
-    emit cycle(endRed, endGreen, endBlue);
-
-    emit faderDone();
 }
 
 NewItemDialog::NewItemDialog(QWidget *parent) : QDialog(parent)
