@@ -43,7 +43,7 @@ using namespace VAPoR;
 #pragma pack(push, 4)
 struct ContourRenderer::VertexData {
     float x, y, z;
-    float r, g, b, a;
+    float v;
 };
 #pragma pack(pop)
 
@@ -73,17 +73,9 @@ void ContourRenderer::_saveCacheParams()
     _cacheParams.ts = p->GetCurrentTimestep();
     _cacheParams.level = p->GetRefinementLevel();
     _cacheParams.lod = p->GetCompressionLevel();
-    _cacheParams.useSingleColor = p->UseSingleColor();
     _cacheParams.lineThickness = p->GetLineThickness();
-    p->GetConstantColor(_cacheParams.constantColor);
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
     _cacheParams.contourValues = p->GetContourValues(_cacheParams.varName);
-    
-    MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
-    _cacheParams.opacity = tf->getOpacityScale();
-    _cacheParams.contourColors.resize(_cacheParams.contourValues.size()*3);
-    for (int i = 0; i < _cacheParams.contourValues.size(); i++)
-        tf->rgbValue(_cacheParams.contourValues[i], &_cacheParams.contourColors[i*3]);
 }
 
 bool ContourRenderer::_isCacheDirty() const
@@ -94,7 +86,6 @@ bool ContourRenderer::_isCacheDirty() const
     if (_cacheParams.ts      != p->GetCurrentTimestep()) return true;
     if (_cacheParams.level   != p->GetRefinementLevel()) return true;
     if (_cacheParams.lod     != p->GetCompressionLevel()) return true;
-    if (_cacheParams.useSingleColor != p->UseSingleColor()) return true;
     if (_cacheParams.lineThickness != p->GetLineThickness()) return true;
     
     vector<double> min, max, contourValues;
@@ -104,17 +95,6 @@ bool ContourRenderer::_isCacheDirty() const
     if (_cacheParams.boxMin != min) return true;
     if (_cacheParams.boxMax != max) return true;
     if (_cacheParams.contourValues != contourValues) return true;
-    
-    float constantColor[3];
-    p->GetConstantColor(constantColor);
-    if (memcmp(_cacheParams.constantColor, constantColor, sizeof(constantColor))) return true;
-    
-    MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
-    vector<float> contourColors(_cacheParams.contourValues.size()*3);
-    for (int i = 0; i < _cacheParams.contourValues.size(); i++)
-        tf->rgbValue(_cacheParams.contourValues[i], &contourColors[i*3]);
-    if (_cacheParams.contourColors != contourColors) return true;
-    if (_cacheParams.opacity != tf->getOpacityScale()) return true;
     
     return false;
 }
@@ -131,17 +111,7 @@ int ContourRenderer::_buildCache()
     {
         return 0;
     }
-    MapperFunction *tf = cParams->GetMapperFunc(_cacheParams.varName);
     vector<double> contours = cParams->GetContourValues(_cacheParams.varName);
-    float (*contourColors)[4] = new float[contours.size()][4];
-    if (!_cacheParams.useSingleColor)
-        for (int i = 0; i < contours.size(); i++)
-            tf->rgbValue(contours[i], contourColors[i]);
-    else
-        for (int i = 0; i < contours.size(); i++)
-            memcpy(contourColors[i], _cacheParams.constantColor, sizeof(_cacheParams.constantColor));
-    for (int i = 0; i < contours.size(); i++)
-        contourColors[i][3] = _cacheParams.opacity;
     
     Grid *grid = _dataMgr->GetVariable(_cacheParams.ts, _cacheParams.varName,
                                        _cacheParams.level, _cacheParams.lod,
@@ -198,7 +168,7 @@ int ContourRenderer::_buildCache()
             {
                 if (a == numNodes)
                     a = 0;
-                double contour = contours[ci];
+                float contour = contours[ci];
                 
                 if ((values[a] <= contour && values[b] <= contour)
                     || (values[a] > contour && values[b] > contour))
@@ -221,10 +191,7 @@ int ContourRenderer::_buildCache()
                 
                 vertices.push_back({
                     v[0], v[1], v[2],
-                    contourColors[ci][0],
-                    contourColors[ci][1],
-                    contourColors[ci][2],
-                    contourColors[ci][3]
+                    contour
                 });
                 
             }
@@ -238,7 +205,6 @@ int ContourRenderer::_buildCache()
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     
-    delete [] contourColors;
     return 0;
 }
 
@@ -248,14 +214,25 @@ int ContourRenderer::_paintGL(bool)
     if (_isCacheDirty())
         rc = _buildCache();
     
+    RenderParams *rp = GetActiveParams();
+    MapperFunction *tf = rp->GetMapperFunc(rp->GetVariableName());
+    float lut[4*256];
+    tf->makeLut(lut);
+    _lutTexture.TexImage(GL_RGBA8, 256, 0, 0, GL_RGBA, GL_FLOAT, lut);
+    
     ShaderProgram *shader = _glManager->shaderManager->GetShader("Contour");
     if (shader == nullptr)
         return -1;
     shader->Bind();
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
-    glBindVertexArray(_VAO);
+    shader->SetUniform("minLUTValue", tf->getMinMapValue());
+    shader->SetUniform("maxLUTValue", tf->getMaxMapValue());
+    shader->SetSampler("colormap", _lutTexture);
     
     // glLineWidth(_cacheParams.lineThickness);
+    glDepthMask(true);
+    glEnable(GL_DEPTH_TEST);
+    glBindVertexArray(_VAO);
     glDrawArrays(GL_LINES, 0, _nVertices);
     
     glBindVertexArray(0);
@@ -272,9 +249,11 @@ int ContourRenderer::_initializeGL()
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), NULL);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(struct VertexData, r));
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(struct VertexData, v));
     glEnableVertexAttribArray(1);
     glBindVertexArray(0);
+    
+    _lutTexture.Generate();
 
     return 0;
 }
