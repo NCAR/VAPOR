@@ -34,6 +34,7 @@
 #include <vapor/Renderer.h>
 #include <vapor/ContourParams.h>
 #include <vapor/ShaderProgram.h>
+#include <vapor/Texture.h>
 
 namespace VAPoR {
 
@@ -59,6 +60,7 @@ public:
 
 private:
     GLuint       _VAO, _VBO;
+    Texture1D    _lutTexture;
     unsigned int _nVertices;
 
     struct VertexData;
@@ -68,13 +70,9 @@ private:
         size_t         ts;
         int            level;
         int            lod;
-        bool           useSingleColor;
-        float          constantColor[3];
         double         lineThickness;
-        double         opacity;
         vector<double> boxMin, boxMax;
         vector<double> contourValues;
-        vector<float>  contourColors;
     } _cacheParams;
 
     int  _buildCache();

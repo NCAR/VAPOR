@@ -40,7 +40,8 @@ using namespace VAPoR;
 #pragma pack(push, 4)
 struct WireFrameRenderer::VertexData {
     float x, y, z;
-    float r, g, b, a;
+    float v;
+    float missing;
 };
 #pragma pack(pop)
 
@@ -67,16 +68,7 @@ void WireFrameRenderer::_saveCacheParams()
     _cacheParams.ts = p->GetCurrentTimestep();
     _cacheParams.level = p->GetRefinementLevel();
     _cacheParams.lod = p->GetCompressionLevel();
-    _cacheParams.useSingleColor = p->UseSingleColor();
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
-
-    MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
-    tf->makeLut(_cacheParams.tf_lut);
-
-    _cacheParams.tf_minmax = tf->getMinMaxMapValue();
-
-    _cacheParams.constantColor = p->GetConstantColor();
-    _cacheParams.constantOpacity = p->GetConstantOpacity();
 }
 
 bool WireFrameRenderer::_isCacheDirty() const
@@ -87,15 +79,6 @@ bool WireFrameRenderer::_isCacheDirty() const
     if (_cacheParams.ts != p->GetCurrentTimestep()) return true;
     if (_cacheParams.level != p->GetRefinementLevel()) return true;
     if (_cacheParams.lod != p->GetCompressionLevel()) return true;
-    if (_cacheParams.useSingleColor != p->UseSingleColor()) return true;
-    if (_cacheParams.constantColor != p->GetConstantColor()) return true;
-    if (_cacheParams.constantOpacity != p->GetConstantOpacity()) return true;
-
-    MapperFunction *tf = p->GetMapperFunc(_cacheParams.varName);
-    vector<float>   tf_lut;
-    tf->makeLut(tf_lut);
-    if (_cacheParams.tf_lut != tf_lut) return (true);
-    if (_cacheParams.tf_minmax != tf->getMinMaxMapValue()) return (true);
 
     vector<double> min, max;
     p->GetBox()->GetExtents(min, max);
@@ -202,31 +185,7 @@ void WireFrameRenderer::_buildCacheVertices(const Grid *grid, const Grid *height
             }
         }
 
-        // Get current node's color
-        //
         float dataValue = grid->GetValueAtIndex((*nodeItr).data());
-        float color[4];
-
-        if (dataValue == mv) {
-            color[0] = 0.0;
-            color[1] = 0.0;
-            color[2] = 0.0;
-            color[3] = 0.0;
-        } else if (_cacheParams.useSingleColor) {
-            color[0] = _cacheParams.constantColor[0];
-            color[1] = _cacheParams.constantColor[1];
-            color[2] = _cacheParams.constantColor[2];
-            color[3] = _cacheParams.constantOpacity;
-        } else {
-            size_t n = _cacheParams.tf_lut.size() >> 2;
-            int    index = (dataValue - _cacheParams.tf_minmax[0]) / (_cacheParams.tf_minmax[1] - _cacheParams.tf_minmax[0]) * (n - 1);
-            if (index < 0) { index = 0; }
-            if (index >= n) { index = n - 1; }
-            color[0] = _cacheParams.tf_lut[4 * index + 0];
-            color[1] = _cacheParams.tf_lut[4 * index + 1];
-            color[2] = _cacheParams.tf_lut[4 * index + 2];
-            color[3] = _cacheParams.tf_lut[4 * index + 3];
-        }
 
         // Create an entry in nodeMap
         //
@@ -240,7 +199,7 @@ void WireFrameRenderer::_buildCacheVertices(const Grid *grid, const Grid *height
         }
         nodeMap[index] = vertices.size();
 
-        vertices.push_back({(float)coord[0], (float)coord[1], (float)coord[2], color[0], color[1], color[2], color[3]});
+        vertices.push_back({(float)coord[0], (float)coord[1], (float)coord[2], dataValue, mv == dataValue ? 1.f : 0.f});
     }
 
     glBindVertexArray(_VAO);
@@ -346,11 +305,20 @@ int WireFrameRenderer::_paintGL(bool fast)
     int rc = 0;
     if (_isCacheDirty()) rc = _buildCache();
 
+    RenderParams *  rp = GetActiveParams();
+    MapperFunction *tf = rp->GetMapperFunc(rp->GetVariableName());
+    float           lut[4 * 256];
+    tf->makeLut(lut);
+    _lutTexture.TexImage(GL_RGBA8, 256, 0, 0, GL_RGBA, GL_FLOAT, lut);
+
     SmartShaderProgram shader = _glManager->shaderManager->GetSmartShader("Wireframe");
     if (!shader.IsValid()) return -1;
 
     EnableClipToBox(_glManager->shaderManager->GetShader("Wireframe"));
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
+    shader->SetUniform("minLUTValue", tf->getMinMapValue());
+    shader->SetUniform("maxLUTValue", tf->getMaxMapValue());
+    shader->SetSampler("colormap", _lutTexture);
     glBindVertexArray(_VAO);
 
     glEnable(GL_DEPTH_TEST);
@@ -374,8 +342,13 @@ int WireFrameRenderer::_initializeGL()
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), NULL);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void *)offsetof(struct VertexData, r));
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void *)offsetof(struct VertexData, v));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void *)offsetof(struct VertexData, missing));
+    glEnableVertexAttribArray(2);
     glBindVertexArray(0);
+
+    _lutTexture.Generate();
+
     return 0;
 }

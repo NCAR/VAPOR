@@ -1,8 +1,16 @@
 #version 330 core
 
-in vec4 fColor;
+uniform sampler1D colormap;
+uniform float minLUTValue;
+uniform float maxLUTValue;
+
+in float fValue;
 out vec4 FragColor;
 
 void main() {
-    FragColor = fColor;
+    //FragColor = fColor;
+    
+    float s = (fValue - minLUTValue) / (maxLUTValue - minLUTValue);
+    vec4 color = texture(colormap, s);
+    FragColor = color;
 }
