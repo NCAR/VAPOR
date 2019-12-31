@@ -75,7 +75,9 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
 
     GUIStateParams *gp = dynamic_cast<GUIStateParams*>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
     int nDims = gp->GetFlowDimensionality();
-    if (nDims == 2)
+    bool no3DVars = dataMgr->GetDataVarNames(3).size() ? false : true;
+
+    if (nDims == 2 || no3DVars )
         _variablesWidget->Configure2DFieldVars();
     else
         _variablesWidget->Configure3DFieldVars();
@@ -305,7 +307,6 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
         _numDims = newDims;
         _resizeFlowParamsVectors();
     }
-
     // Update integration tab
     //
     bool isSteady = _params->GetIsSteady();
@@ -381,11 +382,20 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     }
 
     _randomSeedsSliderEdit->SetValue( _params->GetRandomNumOfSeeds() );
+//    _blockUnblockSignals( false );
 
-    auto rakeSeeds = _params->GetGridNumOfSeeds();
-    auto rakeRegion = _params->GetRake();
-    auto periodicity = _params->GetPeriodic();
-    auto fieldvars = _params->GetFieldVariableNames();
+}
+
+void FlowSeedingSubtab::_blockUnblockSignals( bool block ) {
+    QList<QWidget *> widgetList = this->findChildren<QWidget *>();
+    QList<QWidget *>::const_iterator widgetIter (widgetList.begin());
+    QList<QWidget *>::const_iterator lastWidget (widgetList.end());
+
+    while ( widgetIter !=  lastWidget)
+    {
+        (*widgetIter)->blockSignals( block );
+        ++widgetIter;
+    }
 }
 
 void FlowSeedingSubtab::_updateRake( VAPoR::DataMgr* dataMgr ) {
@@ -399,14 +409,16 @@ void FlowSeedingSubtab::_updateRake( VAPoR::DataMgr* dataMgr ) {
                                      minExt, 
                                      maxExt, 
                                      axes  );
-    
+   for ( int i=0; i<_params->GetFieldVariableNames().size(); i++) {
+        std::cout << _params->GetFieldVariableNames()[i] << std::endl;
+    }
     // If there are no valid extents to set the rake with, just return
     //
     int minSize = minExt.size();
     int maxSize = maxExt.size();
     if ( minSize != 3 && minSize != 2 )
         return;
-    if ( maxSize != 3 && maxSize != 2 )
+    else if ( maxSize != 3 && maxSize != 2 )
         return;
         
     std::vector<float> range;
@@ -442,6 +454,11 @@ void FlowSeedingSubtab::_resizeFlowParamsVectors() {
     auto rakeSeeds = _params->GetGridNumOfSeeds();
     auto rakeRegion = _params->GetRake();
     auto periodicity = _params->GetPeriodic();
+
+    cout << "Resizing rake " << endl;
+    for (int i=0; i<rakeRegion.size(); i++) {
+        std::cout << "    " << rakeRegion[i] << endl;
+    }
 
     // Going from 3d vectors to 2d vectors.
     // Save the values we remove for restoration later on.

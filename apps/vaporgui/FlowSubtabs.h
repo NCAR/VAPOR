@@ -148,6 +148,7 @@ private:
     float _oldZRakeMax;
     bool _oldZPeriodicity;
 
+    void _blockUnblockSignals( bool block );
     void _resizeFlowParamsVectors();
     void _createIntegrationSection();
     void _createSeedingSection( QWidget* parent );

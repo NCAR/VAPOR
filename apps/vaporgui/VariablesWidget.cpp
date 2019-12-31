@@ -144,17 +144,21 @@ void VariablesWidget::collapseColorVarSettings() {
     colorVariableFrame->hide();
 }
 
-void VariablesWidget::Configure3DFieldVars() const {
-    dimensionCombo->blockSignals(true);
+//void VariablesWidget::Configure3DFieldVars() const {
+void VariablesWidget::Configure3DFieldVars() {
+    /*dimensionCombo->blockSignals(true);
     dimensionCombo->setCurrentIndex( 1 );
-    dimensionCombo->blockSignals(false);
+    dimensionCombo->blockSignals(false);*/
+    setVariableDims(1);
     _zFieldVarFrame->show();
 }
 
-void VariablesWidget::Configure2DFieldVars() const {
-    dimensionCombo->blockSignals(true);
+//void VariablesWidget::Configure2DFieldVars() const {
+void VariablesWidget::Configure2DFieldVars() {
+    /*dimensionCombo->blockSignals(true);
     dimensionCombo->setCurrentIndex( 0 );
-    dimensionCombo->blockSignals(false);
+    dimensionCombo->blockSignals(false);*/
+    setVariableDims(0);
     _zFieldVarFrame->hide();
 }
 
@@ -243,7 +247,8 @@ void VariablesWidget::set2DOrientation(const QString& orientation) {
 
 // This takes the dropdown menu index, not the dimension
 void VariablesWidget::setVariableDims(int index){
-	VAssert(_rParams);
+	if ( _rParams == nullptr ) return;
+
 	if (! ((_dimFlags & TWOD) && (_dimFlags & THREED)) ) return;
 	VAssert(index >= 0 && index <= 1);
 

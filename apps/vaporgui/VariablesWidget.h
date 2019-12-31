@@ -68,8 +68,8 @@ public:
     
     DimFlags GetDimFlags() const;
 
- void Configure2DFieldVars() const;
- void Configure3DFieldVars() const;
+ void Configure2DFieldVars();
+ void Configure3DFieldVars();
  
 protected slots:
  //! Respond to selecting the single (primary) variable of field 

@@ -587,14 +587,30 @@ void VizWin::_setNewExtents() {
         FlowParams *fp = dynamic_cast<FlowParams*>(rParams);
         if (fp) {
             // Sam's box format: xmin, xmax, ymin, ymax, zmin, zmax
-            vector<float> b(6);
-            b[0] = llc[0];
-            b[2] = llc[1];
-            b[4] = llc[2];
-            b[1] = urc[0];
-            b[3] = urc[1];
-            b[5] = urc[2];
-            fp->SetRake(b);
+	        ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+            GUIStateParams *gp = dynamic_cast<GUIStateParams*>(paramsMgr->GetParams(GUIStateParams::GetClassType()));
+            int dims = gp->GetFlowDimensionality();
+
+            if (dims == 3) {                // 3D flow renderer
+                vector<float> b(6);
+                b[0] = llc[0];
+                b[2] = llc[1];
+                b[4] = llc[2];
+                b[1] = urc[0];
+                b[3] = urc[1];
+                b[5] = urc[2];
+                fp->SetRake(b);
+            }
+            else if (dims == 2) {           // 2D flow renderer
+                vector<float> b(4);
+                b[0] = llc[0];
+                b[2] = llc[1];
+                //b[4] = llc[2];
+                b[1] = urc[0];
+                b[3] = urc[1];
+                //b[5] = urc[2];
+                fp->SetRake(b);
+            }
         }
     } else {
         box->SetExtents(llc, urc);

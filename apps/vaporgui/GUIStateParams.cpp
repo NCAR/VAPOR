@@ -351,7 +351,7 @@ void GUIStateParams::SetFlowSeedTabActive(bool b)
 
 int GUIStateParams::GetFlowDimensionality() const
 {
-    return GetValueLong(_flowDimensionalityTag, 3);
+    return GetValueLong(_flowDimensionalityTag, -1);
 }
 
 void GUIStateParams::SetFlowDimensionality(int nDims)

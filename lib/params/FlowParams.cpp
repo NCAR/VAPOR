@@ -227,11 +227,16 @@ std::vector<float> FlowParams::GetRake() const
 void
 FlowParams::SetRake( const std::vector<float>& rake )
 {
+std::cout << "FlowParams::SetRake( const std::vector<float>& rake )" << std::endl;
     const auto rakesize = rake.size();
     VAssert( rakesize == 4 || rakesize == 6 );
     std::vector<double> doubles(rakesize, 0.0);
-    for( int i = 0; i < rakesize; i++ )
+    std::cout << "    ";
+    for( int i = 0; i < rakesize; i++ ) {
         doubles[i] = rake[i];
+        std::cout << rake[i] << " ";
+    }
+    std::cout << std::endl;
         
     SetValueDoubleVec( _rakeTag, "rake boundaries", doubles );
 }
