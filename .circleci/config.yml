@@ -123,7 +123,6 @@ jobs:
   printTime:
     docker:
       - image: sgpearse/vapor3-ubuntu:latest
-
     steps:
       - run:
         name: Print the Current Time

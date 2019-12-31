@@ -33,6 +33,8 @@ RUN fileid="1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd" \
 RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-Ubuntu.tar.xz \ 
            -C /usr/local/VAPOR-Deps
 
+RUN chown -R root:root /root 
+
 RUN cd / \
     && git clone https://github.com/NCAR/VAPOR.git \
     && cd VAPOR \
