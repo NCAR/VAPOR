@@ -303,7 +303,7 @@ void PythonVariables::_newScript() {
         if (scriptName == "")
             return;
 
-        _controlExec->MakeStringConformant(scriptName);
+        scriptName = _controlExec->MakeStringConformant(scriptName);
 
         _reset();
         _scriptName = scriptName;
