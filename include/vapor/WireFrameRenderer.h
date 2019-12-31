@@ -21,6 +21,7 @@
 #include <vapor/DataMgr.h>
 #include <vapor/utils.h>
 #include <vapor/Renderer.h>
+#include <vapor/Texture.h>
 
 namespace VAPoR {
 
@@ -60,6 +61,7 @@ class RENDER_API WireFrameRenderer : public Renderer {
   private:
     GLuint _VAO, _VBO, _EBO;
     unsigned int _nIndices;
+    Texture1D _lutTexture;
 
     struct VertexData;
     struct {
@@ -68,11 +70,6 @@ class RENDER_API WireFrameRenderer : public Renderer {
         size_t ts;
         int level;
         int lod;
-        bool useSingleColor;
-        std::vector<float> constantColor;
-        float constantOpacity;
-        std::vector<float> tf_lut;
-        std::vector<double> tf_minmax;
         std::vector<double> boxMin, boxMax;
 
     } _cacheParams;
