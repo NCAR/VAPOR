@@ -16,7 +16,6 @@ jobs:
             cmake ..
             make
 
-
   build_ubuntu18:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
