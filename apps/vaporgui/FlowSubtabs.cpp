@@ -499,7 +499,7 @@ void FlowSeedingSubtab::_updatePathlineWidgets( VAPoR::DataMgr* dataMgr) {
     int numTS = dataMgr->GetNumTimeSteps();
 
     // Unsteady flow display past number of time steps
-    _pathlineLengthSliderEdit->SetRange( 1, numTS - 1 );
+    _pathlineLengthSliderEdit->SetRange( 0, numTS - 1 );
     int valParams = _params->GetPastNumOfTimeSteps();
     if( valParams < 0 )     // initial value, we need to set it to all time steps!
     {
