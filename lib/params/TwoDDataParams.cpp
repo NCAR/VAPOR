@@ -20,17 +20,7 @@ TwoDDataParams::TwoDDataParams(
 }
 
 TwoDDataParams::TwoDDataParams(
-    DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node, 2) {
-    SetDiagMsg("TwoDDataParams::TwoDDataParams() this=%p", this);
-
-    // If node isn't tagged correctly we correct the tag and reinitialize
-    // from scratch;
-    //
-    if (node->GetTag() != TwoDDataParams::GetClassType()) {
-        node->SetTag(TwoDDataParams::GetClassType());
-        _init();
-    }
-}
+    DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node, 2) {}
 
 TwoDDataParams::~TwoDDataParams() {
     SetDiagMsg("TwoDDataParams::~TwoDDataParams() this=%p", this);
