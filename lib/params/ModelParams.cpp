@@ -25,18 +25,7 @@ ModelParams::ModelParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, std::st
     _init();
 }
 
-ModelParams::ModelParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node, 3)
-{
-    SetDiagMsg("ModelParams::ModelParams() this=%p", this);
-
-    // If node isn't tagged correctly we correct the tag and reinitialize
-    // from scratch;
-    //
-    if (node->GetTag() != ModelParams::GetClassType()) {
-        node->SetTag(ModelParams::GetClassType());
-        _init();
-    }
-}
+ModelParams::ModelParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node, 3) {}
 
 ModelParams::~ModelParams() { SetDiagMsg("ModelParams::~ModelParams() this=%p", this); }
 

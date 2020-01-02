@@ -38,18 +38,7 @@ VolumeParams::VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, std::
     _init();
 }
 
-VolumeParams::VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node, 3)
-{
-    SetDiagMsg("VolumeParams::VolumeParams() this=%p", this);
-
-    // If node isn't tagged correctly we correct the tag and reinitialize
-    // from scratch;
-    //
-    if (node->GetTag() != VolumeParams::GetClassType()) {
-        node->SetTag(VolumeParams::GetClassType());
-        _init();
-    }
-}
+VolumeParams::VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node, 3) {}
 
 VolumeParams::~VolumeParams() { SetDiagMsg("VolumeParams::~VolumeParams() this=%p", this); }
 

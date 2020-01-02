@@ -82,14 +82,6 @@ AnnotationParams::AnnotationParams(ParamsBase::StateSave *ssave) : ParamsBase(ss
 
 AnnotationParams::AnnotationParams(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node)
 {
-    // If node isn't tagged correctly we correct the tag and reinitialize
-    // from scratch;
-    //
-    if (node->GetTag() != AnnotationParams::GetClassType()) {
-        node->SetTag(AnnotationParams::GetClassType());
-        _init();
-    }
-
     if (node->HasChild(_axisAnnotationsTag)) {
         _axisAnnotations = new ParamsContainer(ssave, node->GetChild(_axisAnnotationsTag));
     } else {

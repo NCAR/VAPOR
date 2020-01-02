@@ -31,18 +31,7 @@ BarbParams::BarbParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave) : RenderP
     _init();
 }
 
-BarbParams::BarbParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node)
-{
-    SetDiagMsg("BarbParams::BarbParams() this=%p", this);
-
-    // If node isn't tagged correctly we correct the tag and reinitialize
-    // from scratch;
-    //
-    if (node->GetTag() != BarbParams::GetClassType()) {
-        node->SetTag(BarbParams::GetClassType());
-        _init();
-    }
-}
+BarbParams::BarbParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node) {}
 
 BarbParams::~BarbParams() { SetDiagMsg("BarbParams::~BarbParams() this=%p", this); }
 

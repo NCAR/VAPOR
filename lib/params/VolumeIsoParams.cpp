@@ -17,18 +17,7 @@ VolumeIsoParams::VolumeIsoParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave)
     _init();
 }
 
-VolumeIsoParams::VolumeIsoParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : VolumeParams(dataMgr, ssave, node)
-{
-    SetDiagMsg("VolumeIsoParams::VolumeIsoParams() this=%p", this);
-
-    // If node isn't tagged correctly we correct the tag and reinitialize
-    // from scratch;
-    //
-    if (node->GetTag() != VolumeIsoParams::GetClassType()) {
-        node->SetTag(VolumeIsoParams::GetClassType());
-        _init();
-    }
-}
+VolumeIsoParams::VolumeIsoParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : VolumeParams(dataMgr, ssave, node) {}
 
 VolumeIsoParams::~VolumeIsoParams() { SetDiagMsg("VolumeIsoParams::~VolumeIsoParams() this=%p", this); }
 

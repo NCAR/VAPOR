@@ -38,11 +38,6 @@ DatasetsParams::DatasetsParams(ParamsBase::StateSave *ssave, XmlNode *node) : Pa
 {
     SetDiagMsg("DatasetsParams::DatasetsParams() this=%p", this);
 
-    // If node isn't tagged correctly we correct the tag and reinitialize
-    // from scratch;
-    //
-    if (node->GetTag() != DatasetsParams::GetClassType()) { node->SetTag(DatasetsParams::GetClassType()); }
-
     if (node->HasChild(_datasetsTag)) {
         _datasets = new ParamsContainer(ssave, node->GetChild(_datasetsTag));
     } else {

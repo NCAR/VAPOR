@@ -18,18 +18,7 @@ WireFrameParams::WireFrameParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave)
     _init();
 }
 
-WireFrameParams::WireFrameParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node, 3)
-{
-    SetDiagMsg("WireFrameParams::WireFrameParams() this=%p", this);
-
-    // If node isn't tagged correctly we correct the tag and reinitialize
-    // from scratch;
-    //
-    if (node->GetTag() != WireFrameParams::GetClassType()) {
-        node->SetTag(WireFrameParams::GetClassType());
-        _init();
-    }
-}
+WireFrameParams::WireFrameParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node, 3) {}
 
 WireFrameParams::~WireFrameParams() { SetDiagMsg("WireFrameParams::~WireFrameParams() this=%p", this); }
 

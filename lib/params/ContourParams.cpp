@@ -35,11 +35,6 @@ ContourParams::ContourParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, Xml
 {
     SetDiagMsg("ContourParams::ContourParams() this=%p", this);
 
-    // If node isn't tagged correctly we correct the tag and reinitialize
-    // from scratch;
-    //
-    if (node->GetTag() != ContourParams::GetClassType()) { node->SetTag(ContourParams::GetClassType()); }
-
     if (node->HasChild(_contoursTag)) {
         _contours = new ParamsContainer(ssave, node->GetChild(_contoursTag));
     } else {
