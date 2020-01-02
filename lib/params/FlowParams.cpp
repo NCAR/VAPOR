@@ -233,7 +233,7 @@ FlowParams::SetRake( const std::vector<float>& rake )
     for( int i = 0; i < rakesize; i++ ) {
         doubles[i] = rake[i];
     }
-        
+cout << "SetRake " << endl; 
     SetValueDoubleVec( _rakeTag, "rake boundaries", doubles );
 }
 
