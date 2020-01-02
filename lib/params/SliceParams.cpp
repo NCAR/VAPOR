@@ -38,17 +38,7 @@ SliceParams::SliceParams(
 
 SliceParams::SliceParams(
 	DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node
-) : RenderParams(dataMgr, ssave, node, THREED) {
-	SetDiagMsg("SliceParams::SliceParams() this=%p", this);
-
-	// If node isn't tagged correctly we correct the tag and reinitialize
-	// from scratch;
-	//
-	if (node->GetTag() != SliceParams::GetClassType()) {
-		node->SetTag(SliceParams::GetClassType());
-		_init();
-	}
-}
+) : RenderParams(dataMgr, ssave, node, THREED) {}
 
 SliceParams::~SliceParams() {
 	SetDiagMsg("SliceParams::~SliceParams() this=%p", this);
