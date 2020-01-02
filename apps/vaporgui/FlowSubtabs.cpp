@@ -409,9 +409,6 @@ void FlowSeedingSubtab::_updateRake( VAPoR::DataMgr* dataMgr ) {
                                      minExt, 
                                      maxExt, 
                                      axes  );
-   for ( int i=0; i<_params->GetFieldVariableNames().size(); i++) {
-        std::cout << _params->GetFieldVariableNames()[i] << std::endl;
-    }
     // If there are no valid extents to set the rake with, just return
     //
     int minSize = minExt.size();
@@ -454,11 +451,6 @@ void FlowSeedingSubtab::_resizeFlowParamsVectors() {
     auto rakeSeeds = _params->GetGridNumOfSeeds();
     auto rakeRegion = _params->GetRake();
     auto periodicity = _params->GetPeriodic();
-
-    cout << "Resizing rake " << endl;
-    for (int i=0; i<rakeRegion.size(); i++) {
-        std::cout << "    " << rakeRegion[i] << endl;
-    }
 
     // Going from 3d vectors to 2d vectors.
     // Save the values we remove for restoration later on.
