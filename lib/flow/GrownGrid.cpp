@@ -1,4 +1,4 @@
-#include "vapor/GrownGrid.h"
+#include "GrownGrid.h"
 
 using VAPoR::GrownGrid;
 

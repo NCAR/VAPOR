@@ -3,6 +3,7 @@ set (SRC
 	Advection.cpp
 	Field.cpp
 	VaporField.cpp
+    GrownGrid.cpp
 )
 
 set (HEADERS
@@ -10,6 +11,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/Particle.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Field.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VaporField.h
+    GrownGrid.h
 )
 
 add_library (flow SHARED ${SRC} ${HEADERS})

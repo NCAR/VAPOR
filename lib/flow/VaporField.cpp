@@ -2,7 +2,7 @@
 
 #include "vapor/VaporField.h"
 #include "vapor/ConstantGrid.h"
-#include "vapor/GrownGrid.h"
+#include "GrownGrid.h"
 
 using namespace flow;
 
