@@ -48,13 +48,7 @@ ImageParams::ImageParams( DataMgr*                dataManager,
                             stateSave, 
                             node,
                             2 )
-{
-  SetDiagMsg("ImageParams::ImageParams() this=%p", this);
-  if( node->GetTag() != ImageParams::GetClassType() )
-  {
-    node->SetTag( ImageParams::GetClassType() );
-  }
-}
+{}
 
 ImageParams::~ImageParams()
 {

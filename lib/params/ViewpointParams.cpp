@@ -93,15 +93,6 @@ ViewpointParams::ViewpointParams(
     ParamsBase::StateSave *ssave, XmlNode *node
 ) : ParamsBase(ssave, node)
 {
-
-	// If node isn't tagged correctly we correct the tag and reinitialize
-	// from scratch;
-	//
-	if (node->GetTag() != ViewpointParams::GetClassType()) {
-		node->SetTag(ViewpointParams::GetClassType());
-		_init();
-	}
-
 	if (node->HasChild(_viewPointsTag)) {
 		m_VPs = new ParamsContainer(ssave,node->GetChild(_viewPointsTag));
 	}
