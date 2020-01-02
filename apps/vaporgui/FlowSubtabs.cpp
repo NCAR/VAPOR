@@ -255,13 +255,22 @@ void FlowSeedingSubtab::_createIntegrationSection() {
     _pathlineLengthSliderEdit->SetIntType(true);
     connect( _pathlineLengthSliderEdit, &VSliderEdit::ValueChangedInt,
         this, &FlowSeedingSubtab::_pathlineLengthChanged );
-    _pathlineFrame->addWidget( new VLineItem("Display Past No. Time Steps", _pathlineLengthSliderEdit));
+    VLineItem* lengthLE = new VLineItem("Streamline length", _pathlineLengthSliderEdit);
+    QString lengthTip = "Controls the length of the streamlines.  The units for this parameter\n"
+                      "are timesteps.  A streamline with a length of 3 will display a line\n"
+                      "that traverses the current timestep, as well as where the streamline\n" 
+                      "was in the previous two timesteps.";
+    lengthLE->setToolTip( lengthTip );
+    _pathlineFrame->addWidget( lengthLE );
 
     _pathlineInjInterval = new VSliderEdit();
     _pathlineInjInterval->SetIntType( true );
     connect( _pathlineInjInterval, &VSliderEdit::ValueChangedInt,
              this, &FlowSeedingSubtab::_seedInjIntervalChanged );
-    _pathlineFrame->addWidget( new VLineItem("Inject Seeds Every No. Time Steps", _pathlineInjInterval) );
+    VLineItem* injectionLE = new VLineItem("Injection interval", _pathlineInjInterval);
+    QString injectionTip = "Controls the frequency that seeds are injected into the scene.";
+    injectionLE->setToolTip( injectionTip );
+    _pathlineFrame->addWidget( injectionLE );
 
     // Universal options: Velocity multiplier and periodicity checkboxes
     //    
