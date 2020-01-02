@@ -405,21 +405,10 @@ FlowRenderer::_drawALineStrip( const float* buf, size_t numOfParts, bool singleC
     _shader->SetUniform("Projection", projection);
     _shader->SetUniform("colorMapRange", glm::make_vec3(_colorMapRange));
     _shader->SetUniform("singleColor", int(singleColor) );
-    float planes[ 24 ];             // 6 planes, each with 4 elements
-    Renderer::GetClippingPlanes( planes );
-    // In case of 2D rendering, the Z plane values (plaines[16] - planes[23])
-    // specify -0 to 0. We do a surgery so it specifies a very thin layer.
-    /*if( planes[19] == -0.0f || planes[23] == 0.0f )
-    {
-        FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
-        VAssert( params );
-        const auto dfz = Renderer::GetDefaultZ( _dataMgr, params->GetCurrentTimestep() );
-        const auto z1  = dfz * 1.0001; 
-        const auto z2  = dfz * 0.9999;
-        planes[19]     = -std::min( z1, z2 );
-        planes[23]     =  std::max( z1, z2 );
-    }*/
-    _shader->SetUniformArray("clipPlanes", 6, (glm::vec4*)planes);
+    //float planes[ 24 ];             // 6 planes, each with 4 elements
+    //Renderer::GetClippingPlanes( planes );
+    //_shader->SetUniformArray("clipPlanes", 6, (glm::vec4*)planes);
+    Renderer::EnableClipToBox( _shader, 0.01 );
 
     glActiveTexture( GL_TEXTURE0 + _colorMapTexOffset );
     glBindTexture(   GL_TEXTURE_1D,  _colorMapTexId );
