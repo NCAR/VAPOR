@@ -268,7 +268,8 @@ void FlowSeedingSubtab::_createIntegrationSection() {
     connect( _pathlineInjInterval, &VSliderEdit::ValueChangedInt,
              this, &FlowSeedingSubtab::_seedInjIntervalChanged );
     VLineItem* injectionLE = new VLineItem("Injection interval", _pathlineInjInterval);
-    QString injectionTip = "Controls the frequency that seeds are injected into the scene in terms of inject in every XX number of time steps.";
+    QString injectionTip = "Controls the period in which seeds are injected into the scene.\n"
+                           "For example, a value of 3 will inject seeds every 3 time steps.";
     injectionLE->setToolTip( injectionTip );
     _pathlineFrame->addWidget( injectionLE );
 
