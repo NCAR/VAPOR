@@ -64,9 +64,7 @@ public:
 	return scale;
  }
 
- void SetScales(const vector<double> scale) {
-	SetValueDoubleVec(_scaleTag, "Set scale transform", scale);
- }
+    void SetScales(const vector<double> scale);
 
  vector<double> GetOrigin() const;
  void SetOrigin(const vector<double> origin);
