@@ -816,7 +816,7 @@ void NavigationEventRouter::AlignView(int axis) {
 			case(5): dirvec[0] = -1.f; break;
 			case(6): dirvec[1] = -1.f; upvec[1]=0.f; upvec[0] = 1.f; break;
 			case(7): dirvec[2] = -1.f; break;
-			default: VAssert(0);
+			default: return;
 		}
 	}
 	
