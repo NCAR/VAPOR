@@ -117,7 +117,7 @@ private:
     // Update values of _cache_* and _state_* member variables.
     int _updateFlowCacheAndStates( const FlowParams* );
 
-    void _updateAdvectionPeriodicity( flow::Advection* advc );
+    int _updateAdvectionPeriodicity( flow::Advection* advc );
 
     // A function to populate particle properties.
     // If useAsColor == true, then this calculated property will be stored in a field

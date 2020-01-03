@@ -126,8 +126,7 @@ VaporField::InsideVolumeScalar( float time, const glm::vec3& pos ) const
     return true;
 }
 
-void
-VaporField::GetFirstStepVelocityIntersection( glm::vec3& minxyz, glm::vec3& maxxyz )
+int VaporField::GetVelocityIntersection( size_t ts, glm::vec3& minxyz, glm::vec3& maxxyz )
 {
     const VAPoR::Grid* grid = nullptr;
     std::vector<double> min[3], max[3];
@@ -135,8 +134,14 @@ VaporField::GetFirstStepVelocityIntersection( glm::vec3& minxyz, glm::vec3& maxx
     // For each velocity variables
     for( int i = 0; i < 3; i++ )
     {
-        grid = _getAGrid( 0, VelocityNames[i] );
-        grid->GetUserExtents( min[i], max[i] );
+        grid = _getAGrid( ts, VelocityNames[i] );
+        if( grid == nullptr )
+        {
+            Wasp::MyBase::SetErrMsg("Vector field not available at requested time step!");
+            return GRID_ERROR;
+        }
+        else
+            grid->GetUserExtents( min[i], max[i] );
     }
 
     minxyz = glm::vec3 ( min[0][0], min[0][1], min[0][2] );
@@ -149,6 +154,8 @@ VaporField::GetFirstStepVelocityIntersection( glm::vec3& minxyz, glm::vec3& maxx
         xyz    = glm::vec3( max[i][0], max[i][1], max[i][2] );
         maxxyz = glm::min(  maxxyz, xyz );
     }
+
+    return 0;
 }
 
 int

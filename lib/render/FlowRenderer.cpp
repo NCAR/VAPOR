@@ -177,10 +177,21 @@ FlowRenderer::_paintGL( bool fast )
                 MyBase::SetErrMsg("Input seed list wrong!");
                 return flow::FILE_ERROR;
             }
+            rv = _updateAdvectionPeriodicity( &_advection ); 
+            if( rv != 0 )
+            {
+                MyBase::SetErrMsg("Update Advection Periodicity failed!");
+                return flow::GRID_ERROR;
+            }
             if( _2ndAdvection )     // bi-directional advection
             {
                 _2ndAdvection->InputStreamsGnuplot( params->GetSeedInputFilename() );
-                _updateAdvectionPeriodicity( _2ndAdvection.get() ); 
+                rv = _updateAdvectionPeriodicity( _2ndAdvection.get() ); 
+                if( rv != 0 )
+                {
+                    MyBase::SetErrMsg("Update Advection Periodicity failed!");
+                    return flow::GRID_ERROR;
+                }
             }
         }
         else 
@@ -197,11 +208,21 @@ FlowRenderer::_paintGL( bool fast )
             //   all the streams inside of an Advection class.
             //   It should immediately be followed by a function to set its periodicity
             _advection.UseSeedParticles( seeds );
-            _updateAdvectionPeriodicity( &_advection );
+            rv = _updateAdvectionPeriodicity( &_advection );
+            if( rv != 0 )
+            {
+                MyBase::SetErrMsg("Update Advection Periodicity failed!");
+                return flow::GRID_ERROR;
+            }
             if( _2ndAdvection )     // bi-directional advection
             {
                 _2ndAdvection->UseSeedParticles( seeds );
-                _updateAdvectionPeriodicity( _2ndAdvection.get() ); 
+                rv = _updateAdvectionPeriodicity( _2ndAdvection.get() ); 
+                if( rv != 0 )
+                {
+                    MyBase::SetErrMsg("Update Advection Periodicity failed!");
+                    return flow::GRID_ERROR;
+                }
             }
         }
 
@@ -1000,11 +1021,12 @@ FlowRenderer::_restoreGLState() const
     glBindTexture( GL_TEXTURE_1D, 0 );
 }
 
-void
-FlowRenderer::_updateAdvectionPeriodicity( flow::Advection* advc )
+int FlowRenderer::_updateAdvectionPeriodicity( flow::Advection* advc )
 {
     glm::vec3 minxyz, maxxyz;
-    _velocityField.GetFirstStepVelocityIntersection( minxyz, maxxyz );
+    int rv = _velocityField.GetVelocityIntersection( _cache_currentTS, minxyz, maxxyz );
+    if( rv != 0 )
+        return rv;
 
     if( _cache_periodic[0] )
         advc->SetXPeriodicity( true, minxyz.x, maxxyz.x );
@@ -1025,6 +1047,8 @@ FlowRenderer::_updateAdvectionPeriodicity( flow::Advection* advc )
         else
             advc->SetZPeriodicity( false, 0.0f, 1.0f );
     }
+
+    return 0;
 }
 
 void

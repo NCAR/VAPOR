@@ -90,9 +90,10 @@ public:
     };
 
     // 
-    // Returns the intersection domain of 3 velocity variables
+    // Returns the intersection domain of 3 velocity variables at a specific time step.
+    // It returns non-zeros upon failure.
     //
-    void GetFirstStepVelocityIntersection( glm::vec3& minxyz, glm::vec3& maxxyz );
+    int GetVelocityIntersection( size_t ts, glm::vec3& minxyz, glm::vec3& maxxyz );
 
     // 
     // Store the default Z value for variables that are 2D grids in nature.
