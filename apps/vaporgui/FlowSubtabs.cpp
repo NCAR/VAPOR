@@ -77,7 +77,8 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     int nDims = gp->GetFlowDimensionality();
     bool no3DVars = dataMgr->GetDataVarNames(3).size() ? false : true;
 
-    // If dimensionality has changed, tell _variablesWidget to adjust to 2DFlow.
+    // If dimensionality has changed, tell _variablesWidget to adjust itself for 2DFlow,
+    // and update GUIStateParams to the new dimension.
     //
     // Note: We don't want the variables-widget making this call because this is
     // not always our desired behavior.  
@@ -88,6 +89,7 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     // with, we need to configure these two different cases externally, which is what's
     // being done here.
     if (nDims != _variablesWidget->GetActiveDimension() ) {
+        gp->SetFlowDimensionality( _variablesWidget->GetActiveDimension() );
         if (nDims == 2 || no3DVars )
             _variablesWidget->Configure2DFieldVars();
         else
