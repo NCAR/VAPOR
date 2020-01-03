@@ -145,12 +145,16 @@ void VariablesWidget::collapseColorVarSettings() {
 }
 
 void VariablesWidget::Configure3DFieldVars() {
+    blockSignals( true );
     setVariableDims(1);
+    blockSignals( false );
     _zFieldVarFrame->show();
 }
 
 void VariablesWidget::Configure2DFieldVars() {
+    blockSignals( true );
     setVariableDims(0);
+    blockSignals( false );
     _zFieldVarFrame->hide();
 }
 

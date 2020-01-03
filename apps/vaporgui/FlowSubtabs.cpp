@@ -77,6 +77,16 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     int nDims = gp->GetFlowDimensionality();
     bool no3DVars = dataMgr->GetDataVarNames(3).size() ? false : true;
 
+    // If dimensionality has changed, tell _variablesWidget to adjust to 2DFlow.
+    //
+    // Note: We don't want the variables-widget making this call because this is
+    // not always our desired behavior.  
+    //
+    // The barb renderer can operate on three two-dimensional variables.  
+    // However the flow renderer operates on two two-dimensional variables.
+    // Since the VariablesWidget has no information on what renderer it is working
+    // with, we need to configure these two different cases externally, which is what's
+    // being done here.
     if (nDims != _variablesWidget->GetActiveDimension() ) {
         if (nDims == 2 || no3DVars )
             _variablesWidget->Configure2DFieldVars();
@@ -90,7 +100,10 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
 void FlowVariablesSubtab::_dimensionalityChanged( int nDims ) const {
     GUIStateParams *gp = dynamic_cast<GUIStateParams*>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
     gp->SetFlowDimensionality( nDims );
-
+    if (nDims == 2 )
+        _variablesWidget->Configure2DFieldVars();
+    else
+        _variablesWidget->Configure3DFieldVars();
     
 }
 
@@ -257,10 +270,10 @@ void FlowSeedingSubtab::_createIntegrationSection() {
     _pathlineLengthSliderEdit->SetIntType(true);
     connect( _pathlineLengthSliderEdit, &VSliderEdit::ValueChangedInt,
         this, &FlowSeedingSubtab::_pathlineLengthChanged );
-    VLineItem* lengthLE = new VLineItem("Streamline length", _pathlineLengthSliderEdit);
-    QString lengthTip = "Controls the length of the streamlines.  The units for this parameter\n"
-                      "are timesteps.  A streamline with a length of 3 will display a line\n"
-                      "that traverses the current timestep, as well as where the streamline\n" 
+    VLineItem* lengthLE = new VLineItem("Pathline length", _pathlineLengthSliderEdit);
+    QString lengthTip = "Controls the length of the pathlines.  The units for this parameter\n"
+                      "are timesteps.  A pathline with a length of 3 will display a line\n"
+                      "that traverses the current timestep, as well as where the pathline\n" 
                       "was in the previous two timesteps.";
     lengthLE->setToolTip( lengthTip );
     _pathlineFrame->addWidget( lengthLE );
