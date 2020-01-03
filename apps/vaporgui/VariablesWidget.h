@@ -66,7 +66,9 @@ public:
 	VAPoR::RenderParams *rParams
  );
     
-    DimFlags GetDimFlags() const;
+ DimFlags GetDimFlags() const;
+
+ int GetActiveDimension() const;
 
  void Configure2DFieldVars();
  void Configure3DFieldVars();

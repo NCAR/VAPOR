@@ -144,22 +144,18 @@ void VariablesWidget::collapseColorVarSettings() {
     colorVariableFrame->hide();
 }
 
-//void VariablesWidget::Configure3DFieldVars() const {
 void VariablesWidget::Configure3DFieldVars() {
-    /*dimensionCombo->blockSignals(true);
-    dimensionCombo->setCurrentIndex( 1 );
-    dimensionCombo->blockSignals(false);*/
     setVariableDims(1);
     _zFieldVarFrame->show();
 }
 
-//void VariablesWidget::Configure2DFieldVars() const {
 void VariablesWidget::Configure2DFieldVars() {
-    /*dimensionCombo->blockSignals(true);
-    dimensionCombo->setCurrentIndex( 0 );
-    dimensionCombo->blockSignals(false);*/
     setVariableDims(0);
     _zFieldVarFrame->hide();
+}
+
+int VariablesWidget::GetActiveDimension() const {
+    return _activeDim;
 }
 
 void VariablesWidget::setVarName(const QString& qname){

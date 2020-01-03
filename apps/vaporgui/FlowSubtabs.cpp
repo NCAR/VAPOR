@@ -77,10 +77,12 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     int nDims = gp->GetFlowDimensionality();
     bool no3DVars = dataMgr->GetDataVarNames(3).size() ? false : true;
 
-    if (nDims == 2 || no3DVars )
-        _variablesWidget->Configure2DFieldVars();
-    else
-        _variablesWidget->Configure3DFieldVars();
+    if (nDims != _variablesWidget->GetActiveDimension() ) {
+        if (nDims == 2 || no3DVars )
+            _variablesWidget->Configure2DFieldVars();
+        else
+            _variablesWidget->Configure3DFieldVars();
+    }
     
     _variablesWidget->Update(dataMgr, paramsMgr, rParams);
 }
