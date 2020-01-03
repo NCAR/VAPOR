@@ -30,10 +30,13 @@ RUN fileid="1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd" \
     "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
     -o ${filename}
 
+RUN chmod -R 777 /usr
+
 RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-Ubuntu.tar.xz \ 
     -C /usr/local/VAPOR-Deps \
     && chown -R root:root /root 
 
+RUN chmod -R 777 /usr
 
 RUN cd / \
     && git clone https://github.com/NCAR/VAPOR.git \
