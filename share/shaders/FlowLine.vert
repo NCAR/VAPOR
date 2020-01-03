@@ -6,8 +6,8 @@ layout(location = 0) in vec4 vertInfo;
 uniform mat4 MV;
 uniform mat4 Projection;
 
-uniform vec4 clippingPlanes[6]; // new line
-out float gl_ClipDistance[6]; // new line
+uniform vec4 clippingPlanes[6];
+out float gl_ClipDistance[6];
 
 out float scalarV;
 out vec3  vertModel;
@@ -18,6 +18,6 @@ void main(void)
     scalarV     = vertInfo.w;
     vertModel   = vertInfo.xyz;
 
-	for (int i = 0; i < 6; i++) // new line
-		gl_ClipDistance[i] = dot(vec4(vertModel, 1.0), clippingPlanes[i]); // new line
+	for (int i = 0; i < 6; i++)
+		gl_ClipDistance[i] = dot(vec4(vertModel, 1.0), clippingPlanes[i]);
 }
