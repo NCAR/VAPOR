@@ -56,17 +56,7 @@ RegionParams::RegionParams(
 RegionParams::RegionParams(
 	ParamsBase::StateSave *ssave, XmlNode *node
 ) : ParamsBase(ssave, node) {
-
-	// If node isn't tagged correctly we correct the tag and reinitialize
-	// from scratch;
-	//
-	if (node->GetTag() != RegionParams::GetClassType()) {
-		node->SetTag(RegionParams::GetClassType());
-		_init();
-	}
-
-
-
+    
 	if (node->HasChild(Box::GetClassType())) {
 		m_Box = new Box(ssave,node->GetChild(Box::GetClassType()));
 	}
