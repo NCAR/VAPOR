@@ -783,7 +783,7 @@ void NavigationEventRouter::AlignView(int axis) {
             dirvec[2] = -1.f;
             break;
         default:
-            VAssert(0);
+            return;
         }
     }
 
