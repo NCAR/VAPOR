@@ -63,6 +63,10 @@ Transform::~Transform()
 	MyBase::SetDiagMsg("Transform::~Transform() this=%p", this);
 }
 
+void Transform::SetScales(const vector<double> scale) {
+   SetValueDoubleVec(_scaleTag, "Set scale transform", scale);
+}
+
 vector<double> Transform::GetOrigin() const {
 	vector <double> defaultv(3,0.0);
 	vector<double> origin = GetValueDoubleVec(_originTag, defaultv);
