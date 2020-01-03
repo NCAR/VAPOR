@@ -125,7 +125,7 @@ bool Statistics::Update()
     UpdateCheckbox->blockSignals(false);
 
     // Update "Add a Variable"
-    std::vector<std::string> availVars = currentDmgr->GetDataVarNames(2);
+    std::vector<std::string> availVars = currentDmgr->GetDataVarNames();
     for (int i = 0; i < enabledVars.size(); i++)
         for (int rmIdx = 0; rmIdx < availVars.size(); rmIdx++)
             if (availVars[rmIdx] == enabledVars[i]) {
