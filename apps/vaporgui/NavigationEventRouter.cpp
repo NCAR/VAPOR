@@ -188,9 +188,11 @@ void NavigationEventRouter::_performAutoStretching(string dataSetName)
             range.push_back(r);
         }
 
+        if (fabs(maxRange) <= FLT_EPSILON) maxRange = 1.0;
+
         vector<double> scale(range.size(), 1.0);
         for (int i = 0; i < range.size(); i++) {
-            if (range[i] < (maxRange / 10.0)) { scale[i] = maxRange / (10.0 * range[i]); }
+            if (range[i] < (maxRange / 10.0) && fabs(range[i]) > FLT_EPSILON) { scale[i] = maxRange / (10.0 * range[i]); }
         }
 
         transform->SetScales(scale);

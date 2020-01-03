@@ -184,7 +184,9 @@ void Renderer::EnableClipToBox(ShaderProgram *shader, float haloFrac) const
     int orientation = rParams->GetBox()->GetOrientation();
 
     for (int i = 0; i < minExts.size(); i++) {
-        float halo = (maxExts[i] - minExts[i]) * haloFrac;
+        double range = maxExts[i] - minExts[i];
+        if (fabs(range) <= FLT_EPSILON) range = 1.0;
+        float halo = range * haloFrac;
         minExts[i] -= halo;
         maxExts[i] += halo;
     }
