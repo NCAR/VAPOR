@@ -88,12 +88,16 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     // Since the VariablesWidget has no information on what renderer it is working
     // with, we need to configure these two different cases externally, which is what's
     // being done here.
-    if (nDims != _variablesWidget->GetActiveDimension() ) {
-        gp->SetFlowDimensionality( _variablesWidget->GetActiveDimension() );
-        if (nDims == 2 || no3DVars )
+    if ( no3DVars ) {
+            _variablesWidget->Configure2DFieldVars();
+            gp->SetFlowDimensionality( _variablesWidget->GetActiveDimension() );
+    }
+    else if (nDims != _variablesWidget->GetActiveDimension() ) {
+        if (nDims == 2 )
             _variablesWidget->Configure2DFieldVars();
         else
             _variablesWidget->Configure3DFieldVars();
+        gp->SetFlowDimensionality( _variablesWidget->GetActiveDimension() );
     }
     
     _variablesWidget->Update(dataMgr, paramsMgr, rParams);
