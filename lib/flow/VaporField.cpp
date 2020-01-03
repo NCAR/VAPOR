@@ -223,7 +223,7 @@ VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity,
             for( int i = 0; i < 3; i++ )
             {
                 grid = _getAGrid( floorTS + 1, VelocityNames[i] );
-                if( grid == nullptr );
+                if( grid == nullptr )
                     return GRID_ERROR;
                 ceilVelocity[i] = grid->GetValue( coords );
                 missingV[i]     = grid->GetMissingValue();
@@ -264,7 +264,7 @@ VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar,
     {
         size_t currentTS = _params->GetCurrentTimestep();
         grid = _getAGrid( currentTS, ScalarName );
-        if( grid == nullptr );
+        if( grid == nullptr )
             return GRID_ERROR;
         float gridV = grid->GetValue( coords );
         if( gridV  == grid->GetMissingValue() )
@@ -283,7 +283,7 @@ VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar,
         int rv  = LocateTimestamp( time, floorTS );
         VAssert( rv == 0 );
         grid = _getAGrid( floorTS, ScalarName );
-        if( grid == nullptr );
+        if( grid == nullptr )
             return GRID_ERROR;
         float floorScalar = grid->GetValue( coords );
         if( floorScalar  == grid->GetMissingValue() )
@@ -297,7 +297,7 @@ VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar,
         else
         {
             grid = _getAGrid( floorTS + 1, ScalarName );
-            if( grid == nullptr );
+            if( grid == nullptr )
                 return GRID_ERROR;
             float ceilScalar = grid->GetValue( coords );
             if( ceilScalar  == grid->GetMissingValue() )
