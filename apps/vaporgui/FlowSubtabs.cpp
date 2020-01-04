@@ -593,7 +593,7 @@ FlowSeedingSubtab::_velocityMultiplierChanged( const std::string& value )
         return;
     }
 
-    if( newval >= 0.001 && newval <= 1000.0 )   // in the valid range
+    if( newval > 0.0 && newval <= 1000000.0 )   // in the valid range
     {
         // std::stod() would convert "3.83aaa" without throwing an exception.
         // We set the correct text based on the number identified.

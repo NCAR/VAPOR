@@ -426,9 +426,6 @@ FlowRenderer::_drawALineStrip( const float* buf, size_t numOfParts, bool singleC
     _shader->SetUniform("Projection", projection);
     _shader->SetUniform("colorMapRange", glm::make_vec3(_colorMapRange));
     _shader->SetUniform("singleColor", int(singleColor) );
-    //float planes[ 24 ];             // 6 planes, each with 4 elements
-    //Renderer::GetClippingPlanes( planes );
-    //_shader->SetUniformArray("clipPlanes", 6, (glm::vec4*)planes);
     Renderer::EnableClipToBox( _shader, 0.01 );
 
     glActiveTexture( GL_TEXTURE0 + _colorMapTexOffset );
