@@ -66,7 +66,12 @@ public:
 	VAPoR::RenderParams *rParams
  );
     
-    DimFlags GetDimFlags() const;
+ DimFlags GetDimFlags() const;
+
+ int GetActiveDimension() const;
+
+ void Configure2DFieldVars();
+ void Configure3DFieldVars();
  
 protected slots:
  //! Respond to selecting the single (primary) variable of field 
@@ -144,6 +149,9 @@ private:
 
  VariableFlags _variableFlags;
  DimFlags _dimFlags;
+
+signals:
+    void _dimensionalityChanged( int nDims );
 
 };
 

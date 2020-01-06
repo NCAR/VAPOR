@@ -666,7 +666,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QFrame" name="frame_3">
+           <widget class="QFrame" name="_zFieldVarFrame">
             <property name="frameShape">
              <enum>QFrame::NoFrame</enum>
             </property>

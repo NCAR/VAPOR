@@ -144,6 +144,24 @@ void VariablesWidget::collapseColorVarSettings() {
     colorVariableFrame->hide();
 }
 
+void VariablesWidget::Configure3DFieldVars() {
+    blockSignals( true );
+    setVariableDims(1);
+    blockSignals( false );
+    _zFieldVarFrame->show();
+}
+
+void VariablesWidget::Configure2DFieldVars() {
+    blockSignals( true );
+    setVariableDims(0);
+    blockSignals( false );
+    _zFieldVarFrame->hide();
+}
+
+int VariablesWidget::GetActiveDimension() const {
+    return _activeDim;
+}
+
 void VariablesWidget::setVarName(const QString& qname){
 	VAssert(_rParams);
 
@@ -229,7 +247,8 @@ void VariablesWidget::set2DOrientation(const QString& orientation) {
 
 // This takes the dropdown menu index, not the dimension
 void VariablesWidget::setVariableDims(int index){
-	VAssert(_rParams);
+	if ( _rParams == nullptr ) return;
+
 	if (! ((_dimFlags & TWOD) && (_dimFlags & THREED)) ) return;
 	VAssert(index >= 0 && index <= 1);
 
@@ -253,6 +272,8 @@ void VariablesWidget::setVariableDims(int index){
 	// Need to referesh variable list if dimension changes
 	//
 	updateCombos();
+
+    emit _dimensionalityChanged( _activeDim );
 }
 
 void VariablesWidget::setDefaultVariables() {
