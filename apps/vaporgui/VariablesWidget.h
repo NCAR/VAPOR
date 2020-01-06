@@ -62,6 +62,11 @@ class VariablesWidget : public QWidget, public Ui_VariablesWidgetGUI {
 
     DimFlags GetDimFlags() const;
 
+    int GetActiveDimension() const;
+
+    void Configure2DFieldVars();
+    void Configure3DFieldVars();
+
   protected slots:
     //! Respond to selecting the single (primary) variable of field
     void setVarName(const QString &);
@@ -135,6 +140,9 @@ class VariablesWidget : public QWidget, public Ui_VariablesWidgetGUI {
 
     VariableFlags _variableFlags;
     DimFlags _dimFlags;
+
+  signals:
+    void _dimensionalityChanged(int nDims);
 };
 
 #endif //VARIABLESWIDGET_H

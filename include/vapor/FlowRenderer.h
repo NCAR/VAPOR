@@ -73,9 +73,10 @@ class RENDER_API FlowRenderer final : public Renderer {
     bool _cache_isSteady = false;
     long _cache_steadyNumOfSteps = 0;
     size_t _cache_currentTS = 0;
-    bool _cache_periodic[3]{false, false, false};
-    float _cache_rake[6]{0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
-    long _cache_rakeNumOfSeeds[4]{1, 1, 1, 1};
+    std::vector<bool> _cache_periodic{false, false, false};
+    std::vector<float> _cache_rake{0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+    std::vector<long> _cache_gridNumOfSeeds{5, 5, 5};
+    long _cache_randNumOfSeeds = 5;
     std::string _cache_rakeBiasVariable;
     float _cache_rakeBiasStrength = 0.0f;
     int _cache_seedInjInterval = 0;
@@ -112,7 +113,7 @@ class RENDER_API FlowRenderer final : public Renderer {
     // Update values of _cache_* and _state_* member variables.
     int _updateFlowCacheAndStates(const FlowParams *);
 
-    void _updatePeriodicity(flow::Advection *advc);
+    int _updateAdvectionPeriodicity(flow::Advection *advc);
 
     // A function to populate particle properties.
     // If useAsColor == true, then this calculated property will be stored in a field
