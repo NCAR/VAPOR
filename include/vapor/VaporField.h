@@ -62,9 +62,15 @@ public:
         GridWrapper &operator=(const GridWrapper &&) = delete;
         ~GridWrapper()
         {
-            if (mgr && gridPtr) {
-                mgr->UnlockGrid(gridPtr);
-                delete gridPtr;
+            if (gridPtr) {
+                if (gridPtr->GetType() == "GrownGrid")
+                    delete gridPtr;    // GrownGrid can unlock itself...
+                else {
+                    if (mgr) {
+                        mgr->UnlockGrid(gridPtr);
+                        delete gridPtr;
+                    }
+                }
             }
         }
 
@@ -72,9 +78,17 @@ public:
     };
 
     //
-    // Returns the intersection domain of 3 velocity variables
+    // Returns the intersection domain of 3 velocity variables at a specific time step.
+    // It returns non-zeros upon failure.
     //
-    void GetFirstStepVelocityIntersection(glm::vec3 &minxyz, glm::vec3 &maxxyz);
+    int GetVelocityIntersection(size_t ts, glm::vec3 &minxyz, glm::vec3 &maxxyz);
+
+    //
+    // Store the default Z value for variables that are 2D grids in nature.
+    // In this case, a 3D one-layer "GrownGrid" is created with
+    // the 3rd dimension being DefaultZ.
+    //
+    float DefaultZ = 0.0f;
 
 private:
     // Member variables
@@ -82,7 +96,8 @@ private:
     VAPoR::DataMgr *         _datamgr = nullptr;
     const VAPoR::FlowParams *_params = nullptr;
     using cacheType = VAPoR::unique_ptr_cache<std::string, GridWrapper>;
-    mutable cacheType _recentGrids;
+    mutable cacheType _recentGrids;    // so this variable can be
+                                       // modified by a const function.
     const std::string _constantGridZero = "ConstantGrid with zeros";
 
     // Member functions
@@ -94,6 +109,9 @@ private:
     // _getAGrid will use _params to retrieve/generate grids.
     // In the case of failing to generate a requested grid, nullptr will be returned.
     // This failure will also be recorded to MyBase.
+    // Note 1: If a variable name is empty, we then return a ConstantField.
+    // Note 2: If a variable is essentially 2D, we then grow it to be 3D
+    //         and return a GrownGrid.
     const VAPoR::Grid *_getAGrid(size_t timestep, const std::string &varName) const;
 };
 };    // namespace flow

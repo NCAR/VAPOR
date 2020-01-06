@@ -1,44 +1,41 @@
-#ifndef CONSTANTGRID_H
-#define CONSTANTGRID_H
+#ifndef GROWNGRID_H
+#define GROWNGRID_H
 
 /*
- * This class represents a constant field. That means,
- * querying values from any location of this field will return that constant value.
+ * This class represents an essentially 2D grid, but grown to appear like 3D.
+ * It does so by containing a 2D grid in the XY plain, and inserting a fixed value
+ * in the Z dimension in a handful of "useful" functions.
  *
  * It also implements pure virtual functions of the Grid class in the simplest possible fashion,
  * but those functions do not perform any calculation, and should not be used.
  *
- * Finally, a DataMgr would not return a ConstantGrid at any occasion; rather, this
+ * Finally, a DataMgr would not return a GrownGrid at any occasion; rather, this
  * class is supposed to be created and used locally by its user.
  */
 
 #include "vapor/Grid.h"
+#include "vapor/DataMgr.h"
 
 namespace VAPoR {
-
-class VDF_API ConstantGrid : public Grid {
+class VDF_API GrownGrid final : public Grid {
 public:
-    // The constant value is specified via the constructor
-    ConstantGrid(float v);
+    // Constructor: pass in the 2D grid to be managed, the data manager that will
+    // later be used to destroy the grid, and the default Z value to be used.
+    // Note: the passed in 2D grid should be queried with the "lock" option on,
+    //       and GrownGrid will take ownership of the 2D grid afterwards.
+    //       I.e., GrownGrid will be responsible deleting the underlying 2D grid.
+    GrownGrid(const VAPoR::Grid *gp, VAPoR::DataMgr *mp, float z);
+    virtual ~GrownGrid();
 
     //
-    // Useful functions of ConstantGrid.
+    // Useful functions of GrownGrid.
     // Additional ones could be added when needed.
     //
-    // The following four GetValue methods all return the constant value of this grid.
-    float GetConstantValue() const;
-    float GetValue(const std::vector<double> &coords) const override;
-    float GetValueNearestNeighbor(const std::vector<double> &coords) const override;
-    float GetValueLinear(const std::vector<double> &coords) const override;
-
-    // This version of ConstantGrid is considered to have infinity extents,
-    // so the following method will return numerical mins and maxes.
-    // Note: other flavors of ConstantGrids may have specific user extents.
-    virtual void GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const override;
-    // Similarly, this will always return true.
-    virtual bool InsideGrid(const std::vector<double> &coords) const override;
-
+    float       GetDefaultZ() const;
     std::string GetType() const override;
+    float       GetValue(const std::vector<double> &coords) const override;
+    void        GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const override;
+    bool        InsideGrid(const std::vector<double> &coords) const override;
 
 private:
     //
@@ -46,6 +43,8 @@ private:
     // They do nothing and return meaningless values.
     // Do not use!
     //
+    float                      GetValueNearestNeighbor(const std::vector<double> &coords) const override;
+    float                      GetValueLinear(const std::vector<double> &coords) const override;
     std::vector<size_t>        GetCoordDimensions(size_t) const override;
     size_t                     GetGeometryDim() const override;
     const std::vector<size_t> &GetNodeDimensions() const override;
@@ -64,8 +63,10 @@ private:
     ConstCoordItr ConstCoordEnd() const override;
 
     // Private data member that holds this constant value.
-    const float _value;
+    const VAPoR::Grid *const _grid2d;
+    VAPoR::DataMgr *const    _dataMgr;    // The pointer itself cannot be changed
+    const float              _defaultZ, _minZ, _maxZ;
 
-};    // end ConstantGrid class
+};    // end GrownGrid class
 };    // namespace VAPoR
 #endif

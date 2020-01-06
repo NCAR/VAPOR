@@ -56,6 +56,7 @@ public:
     std::string GetFlowlineOutputFilename() const;
     void        SetFlowlineOutputFilename(const std::string &);
 
+    // Note: this result vector could be of size 2 or 3.
     std::vector<bool> GetPeriodic() const;
     void              SetPeriodic(const std::vector<bool> &);
 
@@ -63,18 +64,27 @@ public:
      * 6 values to represent a rake in this particular order:
      * xmin, xmax, ymin, ymax, zmin, zmax
      * If the rake wasn't set by users, it returns a vector containing nans.
+     * If it represents a 2D area, then it will contain the first 4 elements.
      */
     std::vector<float> GetRake() const;
     void               SetRake(const std::vector<float> &);
 
     /*
-     * 4 values to represent the number of seeds inside of a rake:
-     * The first 3 values are for uniform seeding, with num of seeds in X, Y, Z direction.
-     * The 4th value is for random seeding, which specifies the number of total seeds in the rake.
+     *This result vector could be of size 2 or 3.
      */
-    std::vector<long> GetRakeNumOfSeeds() const;
-    void              SetRakeNumOfSeeds(const std::vector<long> &);
+    std::vector<long> GetGridNumOfSeeds() const;
+    void              SetGridNumOfSeeds(const std::vector<long> &);
 
+    /*
+     * 3 or 2 values to represent the number of seeds inside of a rake
+     * in the gridded seed generation mode.
+     */
+    long GetRandomNumOfSeeds() const;
+    void SetRandomNumOfSeeds(long);
+
+    /*
+     * The number of seeds in the random seed generation mode.
+     */
     std::string GetRakeBiasVariable() const;
     void        SetRakeBiasVariable(const std::string &);
 
@@ -98,11 +108,12 @@ private:
     static const std::string _needFlowlineOutputTag;
     static const std::string _periodicTag;
     static const std::string _rakeTag;
-    static const std::string _rakeNumOfSeedsTag;
     static const std::string _rakeBiasVariable;
     static const std::string _rakeBiasStrength;
     static const std::string _pastNumOfTimeSteps;
     static const std::string _seedInjInterval;
+    static const std::string _gridNumOfSeedsTag;
+    static const std::string _randomNumOfSeedsTag;
 
     // maps between ints and "human readable" strings
     const std::vector<std::pair<int, std::string>> _seed2Str = {{static_cast<int>(FlowSeedMode::UNIFORM), ""},    // default value

@@ -6,6 +6,8 @@ using VAPoR::ConstantGrid;
 
 ConstantGrid::ConstantGrid(float v) : _value(v) {}
 
+float ConstantGrid::GetConstantValue() const { return _value; }
+
 float ConstantGrid::GetValue(const std::vector<double> &coords) const { return _value; }
 
 float ConstantGrid::GetValueNearestNeighbor(const std::vector<double> &coords) const { return _value; }

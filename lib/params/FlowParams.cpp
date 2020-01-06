@@ -2,21 +2,22 @@
 
 using namespace VAPoR;
 
-const std::string FlowParams::_isSteadyTag = "isSteadyTag";
-const std::string FlowParams::_velocityMultiplierTag = "velocityMultiplierTag";
-const std::string FlowParams::_steadyNumOfStepsTag = "steadyNumOfStepsTag";
-const std::string FlowParams::_seedGenModeTag = "seedGenModeTag";
-const std::string FlowParams::_seedInputFilenameTag = "seedInputFilenameTag";
-const std::string FlowParams::_flowlineOutputFilenameTag = "flowlineOutputFilenameTag";
-const std::string FlowParams::_flowDirectionTag = "flowDirectionTag";
-const std::string FlowParams::_needFlowlineOutputTag = "needFlowlineOutputTag";
-const std::string FlowParams::_periodicTag = "periodicTag";
-const std::string FlowParams::_rakeTag = "rakeTag";
-const std::string FlowParams::_rakeNumOfSeedsTag = "rakeNumOfSeedsTag";
-const std::string FlowParams::_rakeBiasVariable = "rakeBiasVariable";
-const std::string FlowParams::_rakeBiasStrength = "rakeBiasStrength";
-const std::string FlowParams::_pastNumOfTimeSteps = "pastNumOfTimeSteps";
-const std::string FlowParams::_seedInjInterval = "seedInjInterval";
+const std::string FlowParams::_isSteadyTag = "IsSteadyTag";
+const std::string FlowParams::_velocityMultiplierTag = "VelocityMultiplierTag";
+const std::string FlowParams::_steadyNumOfStepsTag = "SteadyNumOfStepsTag";
+const std::string FlowParams::_seedGenModeTag = "SeedGenModeTag";
+const std::string FlowParams::_seedInputFilenameTag = "SeedInputFilenameTag";
+const std::string FlowParams::_flowlineOutputFilenameTag = "FlowlineOutputFilenameTag";
+const std::string FlowParams::_flowDirectionTag = "FlowDirectionTag";
+const std::string FlowParams::_needFlowlineOutputTag = "NeedFlowlineOutputTag";
+const std::string FlowParams::_periodicTag = "PeriodicTag";
+const std::string FlowParams::_rakeTag = "RakeTag";
+const std::string FlowParams::_rakeBiasVariable = "RakeBiasVariable";
+const std::string FlowParams::_rakeBiasStrength = "RakeBiasStrength";
+const std::string FlowParams::_pastNumOfTimeSteps = "PastNumOfTimeSteps";
+const std::string FlowParams::_seedInjInterval = "SeedInjInterval";
+const std::string FlowParams::_gridNumOfSeedsTag = "GridNumOfSeeds";
+const std::string FlowParams::_randomNumOfSeedsTag = "RandomNumOfSeeds";
 
 static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
 
@@ -109,10 +110,13 @@ void FlowParams::SetFlowDirection(int i)
 
 std::vector<bool> FlowParams::GetPeriodic() const
 {
-    std::vector<long> tmp(3, 0);
-    auto              longs = GetValueLongVec(_periodicTag, tmp);
-    std::vector<bool> bools(3, false);
-    for (int i = 0; i < 3; i++)
+    auto longs = GetValueLongVec(_periodicTag);
+    if (longs.size() != 3 && longs.size() != 2) {
+        std::vector<long> tmp(3, 0);
+        longs = tmp;
+    }
+    std::vector<bool> bools(longs.size(), false);
+    for (int i = 0; i < bools.size(); i++)
         if (longs[i] != 0) bools[i] = true;
 
     return bools;
@@ -120,8 +124,9 @@ std::vector<bool> FlowParams::GetPeriodic() const
 
 void FlowParams::SetPeriodic(const std::vector<bool> &bools)
 {
-    std::vector<long> longs(3, 0);
-    for (int i = 0; i < 3 && i < bools.size(); i++)
+    VAssert(bools.size() == 3 || bools.size() == 2);
+    std::vector<long> longs(bools.size(), 0);
+    for (int i = 0; i < bools.size(); i++)
         if (bools[i]) longs[i] = 1;
 
     SetValueLongVec(_periodicTag, "any axis is periodic", longs);
@@ -129,42 +134,55 @@ void FlowParams::SetPeriodic(const std::vector<bool> &bools)
 
 std::vector<float> FlowParams::GetRake() const
 {
-    const long          rakeSize = 6;
-    std::vector<double> tmp(6, std::nan("1"));
-    auto                doubles = GetValueDoubleVec(_rakeTag, tmp);
-    VAssert(doubles.size() == rakeSize);
+    auto doubles = GetValueDoubleVec(_rakeTag);
+    auto rakesize = doubles.size();
 
-    std::vector<float> floats(rakeSize, 0.0f);
-    if (std::isnan(doubles[0]))
-        floats[0] = std::nan("1");
-    else {
-        for (int i = 0; i < rakeSize; i++) floats[i] = float(doubles[i]);
+    if (rakesize != 6 && rakesize != 4) {
+        // Six NANs represent the initial state
+        std::vector<float> tmp(6, std::nan("1"));
+        return tmp;
+    }
+
+    std::vector<float> floats(rakesize, std::nan("1"));
+    if (!std::isnan(doubles[0])) {
+        for (int i = 0; i < rakesize; i++) floats[i] = float(doubles[i]);
     }
     return floats;
 }
 
 void FlowParams::SetRake(const std::vector<float> &rake)
 {
-    const long rakeSize = 6;
-    VAssert(rake.size() == rakeSize);
-    std::vector<double> doubles(rakeSize, 0.0);
-    for (int i = 0; i < rakeSize; i++) doubles[i] = rake[i];
-
+    const auto rakesize = rake.size();
+    VAssert(rakesize == 4 || rakesize == 6);
+    std::vector<double> doubles(rakesize, 0.0);
+    for (int i = 0; i < rakesize; i++) { doubles[i] = rake[i]; }
     SetValueDoubleVec(_rakeTag, "rake boundaries", doubles);
 }
 
-void FlowParams::SetRakeNumOfSeeds(const std::vector<long> &num)
+std::vector<long> FlowParams::GetGridNumOfSeeds() const
 {
-    VAssert(num.size() == 4);
-    SetValueLongVec(_rakeNumOfSeedsTag, "rake num of seeds", num);
+    auto num = GetValueLongVec(_gridNumOfSeedsTag);
+    if (num.size() == 3 || num.size() == 2)
+        return num;
+    else {
+        // Default: 5 along each of the three dimensions.
+        const std::vector<long> tmp(3, 5);
+        return tmp;
+    }
 }
 
-std::vector<long> FlowParams::GetRakeNumOfSeeds() const
+void FlowParams::SetGridNumOfSeeds(const std::vector<long> &num)
 {
-    const std::vector<long> tmp(4, 5);
-    auto                    num = GetValueLongVec(_rakeNumOfSeedsTag, tmp);
-    VAssert(num.size() == 4);
-    return num;
+    VAssert(num.size() == 3 || num.size() == 2);
+    SetValueLongVec(_gridNumOfSeedsTag, "grid num of seeds", num);
+}
+
+long FlowParams::GetRandomNumOfSeeds() const { return GetValueLong(_randomNumOfSeedsTag, 50); }
+
+void FlowParams::SetRandomNumOfSeeds(long num)
+{
+    VAssert(num >= 0);
+    SetValueLong(_randomNumOfSeedsTag, "random num of seeds", num);
 }
 
 std::string FlowParams::GetRakeBiasVariable() const

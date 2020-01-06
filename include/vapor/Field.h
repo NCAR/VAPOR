@@ -43,10 +43,16 @@ public:
                             glm::vec3 &vel,                      // output
                             bool       checkInsideVolume = true) const = 0;
 
+    //
+    // Returns the number of empty velocity variable names.
+    // It is 3 when the object is newly created, or is used to represent a scalar field
+    //
+    int GetNumOfEmptyVelocityNames() const;
+
     // Class members
     bool        IsSteady = false;
-    std::string ScalarName;
-    std::string VelocityNames[3];
+    std::string ScalarName = "";
+    std::string VelocityNames[3]{"", "", ""};
 };
 };    // namespace flow
 

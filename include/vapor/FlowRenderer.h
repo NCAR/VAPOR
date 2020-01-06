@@ -64,20 +64,21 @@ private:
     ;
     float _cache_velocityMltp = 1.0;
     ;
-    bool         _cache_isSteady = false;
-    long         _cache_steadyNumOfSteps = 0;
-    size_t       _cache_currentTS = 0;
-    bool         _cache_periodic[3]{false, false, false};
-    float        _cache_rake[6]{0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
-    long         _cache_rakeNumOfSeeds[4]{1, 1, 1, 1};
-    std::string  _cache_rakeBiasVariable;
-    float        _cache_rakeBiasStrength = 0.0f;
-    int          _cache_seedInjInterval = 0;
-    FlowSeedMode _cache_seedGenMode = FlowSeedMode::UNIFORM;
-    std::string  _cache_seedInputFilename;
-    FlowDir      _cache_flowDir = FlowDir::FORWARD;
-    FlowStatus   _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
-    FlowStatus   _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    bool               _cache_isSteady = false;
+    long               _cache_steadyNumOfSteps = 0;
+    size_t             _cache_currentTS = 0;
+    std::vector<bool>  _cache_periodic{false, false, false};
+    std::vector<float> _cache_rake{0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+    std::vector<long>  _cache_gridNumOfSeeds{5, 5, 5};
+    long               _cache_randNumOfSeeds = 5;
+    std::string        _cache_rakeBiasVariable;
+    float              _cache_rakeBiasStrength = 0.0f;
+    int                _cache_seedInjInterval = 0;
+    FlowSeedMode       _cache_seedGenMode = FlowSeedMode::UNIFORM;
+    std::string        _cache_seedInputFilename;
+    FlowDir            _cache_flowDir = FlowDir::FORWARD;
+    FlowStatus         _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    FlowStatus         _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
 
     // This Advection class is only used in bi-directional advection mode
     std::unique_ptr<flow::Advection> _2ndAdvection;
@@ -106,7 +107,7 @@ private:
     // Update values of _cache_* and _state_* member variables.
     int _updateFlowCacheAndStates(const FlowParams *);
 
-    void _updatePeriodicity(flow::Advection *advc);
+    int _updateAdvectionPeriodicity(flow::Advection *advc);
 
     // A function to populate particle properties.
     // If useAsColor == true, then this calculated property will be stored in a field

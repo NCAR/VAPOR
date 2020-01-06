@@ -541,14 +541,27 @@ void VizWin::_setNewExtents()
         FlowParams *fp = dynamic_cast<FlowParams *>(rParams);
         if (fp) {
             // Sam's box format: xmin, xmax, ymin, ymax, zmin, zmax
-            vector<float> b(6);
-            b[0] = llc[0];
-            b[2] = llc[1];
-            b[4] = llc[2];
-            b[1] = urc[0];
-            b[3] = urc[1];
-            b[5] = urc[2];
-            fp->SetRake(b);
+            ParamsMgr *     paramsMgr = _controlExec->GetParamsMgr();
+            GUIStateParams *gp = dynamic_cast<GUIStateParams *>(paramsMgr->GetParams(GUIStateParams::GetClassType()));
+            int             dims = gp->GetFlowDimensionality();
+
+            if (dims == 3) {    // 3D flow renderer
+                vector<float> b(6);
+                b[0] = llc[0];
+                b[2] = llc[1];
+                b[4] = llc[2];
+                b[1] = urc[0];
+                b[3] = urc[1];
+                b[5] = urc[2];
+                fp->SetRake(b);
+            } else if (dims == 2) {    // 2D flow renderer
+                vector<float> b(4);
+                b[0] = llc[0];
+                b[2] = llc[1];
+                b[1] = urc[0];
+                b[3] = urc[1];
+                fp->SetRake(b);
+            }
         }
     } else {
         box->SetExtents(llc, urc);
@@ -761,9 +774,9 @@ void VizWin::updateManip(bool initialize)
         urc = maxExts;
     } else {
         _manipFlowSeedFlag = false;
-        if (rParams->GetName() == FlowParams::GetClassType()) {
-            GUIStateParams *gp = (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
+        GUIStateParams *gp = (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
 
+        if (rParams->GetName() == FlowParams::GetClassType()) {
             if (gp->IsFlowSeedTabActive()) _manipFlowSeedFlag = true;
         }
         if (_manipFlowSeedFlag) {
@@ -772,6 +785,25 @@ void VizWin::updateManip(bool initialize)
 
             // Sam's box format: xmin, xmax, ymin, ymax, zmin, zmax
             vector<float> b = fp->GetRake();
+
+            // If the flow renderer is 2d, add z extents or the Manip will break
+            if (b.size() == 4) {
+                DataStatus *dataStatus = _controlExec->GetDataStatus();
+                string      dataMgrName = _getCurrentDataMgrName();
+                DataMgr *   dataMgr = dataStatus->GetDataMgr(dataMgrName);
+
+                ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
+                AnimationParams *p = (AnimationParams *)paramsMgr->GetParams(AnimationParams::GetClassType());
+                size_t           ts = p->GetCurrentTimestep();
+                string           inst, winName, dataSetName;
+
+                int    refLevel = rParams->GetRefinementLevel();
+                int    lod = rParams->GetCompressionLevel();
+                double defaultZ = VAPoR::DataMgrUtils::Get2DRendererDefaultZ(dataMgr, ts, refLevel, lod);
+                b.push_back(defaultZ);
+                b.push_back(defaultZ);
+            }
+
             llc.resize(3);
             urc.resize(3);
             llc[0] = b[0];
@@ -796,5 +828,6 @@ void VizWin::updateManip(bool initialize)
     _manip->Update(llc, urc, minExts, maxExts, rpTransform, dmTransform, constrain);
 
     if (!initialize) _manip->Render();
+
     GL_ERR_BREAK();
 }

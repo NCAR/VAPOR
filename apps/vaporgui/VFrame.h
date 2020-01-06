@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QWidget>
+#include <QFrame>
+#include <forward_list>
 
 //! \class VFrame
 //!
@@ -10,13 +12,19 @@ class VFrame : public QFrame {
     Q_OBJECT
 
 public:
-    VFrame()
-    {
-        setLayout(new QVBoxLayout);
-        layout()->setContentsMargins(0, 0, 0, 0);
-        layout()->setSpacing(12);
-        setFrameStyle(QFrame::NoFrame);
-    }
+    VFrame();
 
-    void addWidget(QWidget *widget) { layout()->addWidget(widget); }
+    void addWidget(QWidget *widget);
+
+    int getNumOfChildWidgets() const;
+
+    // The following two methods control if a child is shown or hidden.
+    // If a child widget is the ith added to this VFrame, then idx should be i-1.
+    // It returns 0 upon success, and 1 upon failure (e.g. invalid index).
+    int hideChildAtIdx(int idx);
+    int showChildAtIdx(int idx);
+
+private:
+    std::forward_list<QWidget *> _child_widgets;
+    int                          _num_of_children = 0;
 };

@@ -40,6 +40,7 @@ const string GUIStateParams::m_plotDatasetNameTag = "PlotDatasetNameTag";
 const string GUIStateParams::m_proj4StringTag = "Proj4StringTag";
 const string GUIStateParams::m_openDataSetsTag = "OpenDataSetsTag";
 const string GUIStateParams::_isFlowSeedTabActiveTag = "_isSeedTabActiveTag";
+const string GUIStateParams::_flowDimensionalityTag = "_flowDimensionalityTag";
 const string GUIStateParams::DataSetParam::m_dataSetPathsTag = "DataSetPathsTag";
 const string GUIStateParams::DataSetParam::m_dataSetFormatTag = "DataSetFormatTag";
 
@@ -252,3 +253,15 @@ void GUIStateParams::SetPlotDatasetName(std::string &name) { SetValueString(m_pl
 bool GUIStateParams::IsFlowSeedTabActive() const { return GetValueLong(_isFlowSeedTabActiveTag, false); }
 
 void GUIStateParams::SetFlowSeedTabActive(bool b) { SetValueLong(_isFlowSeedTabActiveTag, _isFlowSeedTabActiveTag, b); }
+
+int GUIStateParams::GetFlowDimensionality() const { return GetValueLong(_flowDimensionalityTag, -1); }
+
+void GUIStateParams::SetFlowDimensionality(int nDims)
+{
+    if (nDims > 3)
+        nDims = 3;
+    else if (nDims < 2)
+        nDims = 2;
+
+    SetValueLong(_flowDimensionalityTag, _flowDimensionalityTag, nDims);
+}

@@ -17,6 +17,7 @@
 #include "TransformTable.h"
 #include "ColorbarWidget.h"
 
+class VLineItem;
 class VLineEdit;
 class VCheckBox;
 class VComboBox;
@@ -65,6 +66,10 @@ public:
 
 private:
     VAPoR::FlowParams *_params;
+    VAPoR::ParamsMgr * _paramsMgr;
+
+private slots:
+    void _dimensionalityChanged(int nDims) const;
 };
 
 //
@@ -112,6 +117,7 @@ private slots:
     void _velocityMultiplierChanged(const std::string &multiplier);
 
     void _rakeNumOfSeedsChanged();
+    void _randomNumOfSeedsChanged();
     void _seedListFileChanged(const std::string &file);
     void _biasVariableChanged(const std::string &variable);
     void _biasStrengthChanged(double bias);
@@ -123,10 +129,19 @@ private slots:
     void _selectedTabChanged(int index);
 
 private:
+    int   _numDims;
+    int   _oldZRakeNumSeeds;
+    float _oldZRakeMin;
+    float _oldZRakeMax;
+    bool  _oldZPeriodicity;
+
+    void _blockUnblockSignals(bool block);
+    void _resizeFlowParamsVectors();
     void _createIntegrationSection();
     void _createSeedingSection(QWidget *parent);
     void _updateStreamlineWidgets(VAPoR::DataMgr *dataMgr);
     void _updatePathlineWidgets(VAPoR::DataMgr *dataMgr);
+    void _updateRake(VAPoR::DataMgr *dataMgr);
 
     VAPoR::FlowParams *_params;
     VAPoR::ParamsMgr * _paramsMgr;
@@ -143,8 +158,8 @@ private:
     //  Pathline integration options
     VFrame *     _pathlineFrame;
     VSliderEdit *_pathlineLengthSliderEdit;
-    /*VSliderEdit*            _pathlineInjIntervalSliderEdit;
-    VSliderEdit*            _pathlineStartSliderEdit;
+    VSliderEdit *_pathlineInjInterval;
+    /*VSliderEdit*            _pathlineStartSliderEdit;
     VSliderEdit*            _pathlineEndSliderEdit;
     VSliderEdit*            _pathlineLifetimeSliderEdit;*/
 
@@ -152,6 +167,7 @@ private:
     VCheckBox *_periodicXCheckBox;
     VCheckBox *_periodicYCheckBox;
     VCheckBox *_periodicZCheckBox;
+    VLineItem *_zPeriodicityLine;
     VLineEdit *_velocityMultiplierLineEdit;
 
     // Seed distribution options
@@ -160,12 +176,10 @@ private:
 
     //  Gridded seed distribution
     VFrame *     _griddedSeedsFrame;
-    VIntSpinBox *_xSeedSpinBox;
-    VIntSpinBox *_ySeedSpinBox;
-    VIntSpinBox *_zSeedSpinBox;
     VSliderEdit *_xSeedSliderEdit;
     VSliderEdit *_ySeedSliderEdit;
     VSliderEdit *_zSeedSliderEdit;
+    VLineItem *  _zSeedLine;
 
     //  Rake region selection
     VSection *  _rakeRegionSection;
