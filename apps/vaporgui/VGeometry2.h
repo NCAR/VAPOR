@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QLabel>
 #include <QWidget>
 #include "QRangeSliderTextCombo.h"
 
@@ -34,4 +35,5 @@ private:
     std::vector<float> _values;
     std::vector<float> _range;
     QRangeSliderTextCombo *_xRange, *_yRange, *_zRange;
+    QLabel* _zLabel;
 };
