@@ -32,13 +32,29 @@ RUN yum -y install epel-release \
 RUN mkdir -p /usr/local/VAPOR-Deps
 
 #RUN gdown https://drive.google.com/uc?id=1_JdUuiy_iQUuIDoPyBn2pupBTz-LS4pM \
-RUN gdown https://drive.google.com/uc?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0
-RUN ls -lrth
-RUN mv 2019-Aug-CentOS.tar.xz /usr/local/VAPOR-Deps
-RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz -C /usr/local/VAPOR-Deps
-RUN chown -R root:root /usr
+#RUN gdown https://drive.google.com/uc?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0
+#RUN ls -lrth
+#RUN mv 2019-Aug-CentOS.tar.xz /usr/local/VAPOR-Deps
+#RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz -C /usr/local/VAPOR-Deps
+#RUN chown -R root:root /usr
 
-RUN ls /usr/local/VAPOR-Deps
+#RUN ls /usr/local/VAPOR-Deps
+
+#Hack to download a file from google drive
+RUN fileid="1e7F3kDoKctBmB3NOF4dES2395oScb9_0" \
+    && filename="/usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz" \
+    && curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null \
+    && curl -Lb ./cookie \
+    "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
+    -o ${filename}
+
+RUN ls -lrth /usr/local/VAPOR-Deps/
+
+RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz \
+    -C /usr/local/VAPOR-Deps
+
+RUN chown -R root:root /usr
+RUN chmod -R 777 /usr
 
 #RUN git clone https://github.com/g-truc/glm.git \
 #    /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/glm
