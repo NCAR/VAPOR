@@ -28,8 +28,8 @@ RUN fileid="1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd" \
     && curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null \
     && curl -Lb ./cookie \
     "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
-    -o ${filename}\
-    && chown -R root:root /root 
+    -o ${filename}
+#    && chown -R root:root /
 
 RUN chmod -R 777 /usr
 
@@ -37,7 +37,7 @@ RUN ls -lrth /usr/local/VAPOR-Deps/
 
 RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-Ubuntu.tar.xz \ 
     -C /usr/local/VAPOR-Deps \
-    && chown -R root:root /root 
+    && chown -R root:root /
 
 RUN chmod -R 777 /usr
 
