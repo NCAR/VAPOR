@@ -9,6 +9,10 @@ ConstantGrid::ConstantGrid(float v)
 
 {}
 
+float ConstantGrid::GetConstantValue() const {
+    return _value;
+}
+
 float ConstantGrid::GetValue(const std::vector<double> &coords) const {
     return _value;
 }

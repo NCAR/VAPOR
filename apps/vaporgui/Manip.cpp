@@ -134,6 +134,7 @@ void TranslateStretchManip::Update(
     VAPoR::Transform *rpTransform,
     VAPoR::Transform *dmTransform,
     bool constrain) {
+
     MatrixManager *mm = _glManager->matrixManager;
     mm->GetDoublev(MatrixManager::Mode::Projection, _projectionMatrix);
     mm->GetDoublev(MatrixManager::Mode::ModelView, _modelViewMatrix);
