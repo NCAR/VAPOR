@@ -29,7 +29,6 @@ RUN fileid="1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd" \
     && curl -Lb ./cookie \
     "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
     -o ${filename}
-#    && chown -R root:root /
 
 RUN chmod -R 777 /usr
 
