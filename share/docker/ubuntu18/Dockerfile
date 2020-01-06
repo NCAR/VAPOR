@@ -37,7 +37,7 @@ RUN ls -lrth /usr/local/VAPOR-Deps/
 
 RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-Ubuntu.tar.xz \ 
     -C /usr/local/VAPOR-Deps \
-    && chown -R root:root /
+    && chown -R root:root /usr
 
 RUN chmod -R 777 /usr
 
