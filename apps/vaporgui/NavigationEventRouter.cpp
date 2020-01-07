@@ -66,7 +66,7 @@ NavigationEventRouter::NavigationEventRouter(
 {
 	setupUi(this);
 
-    /*futureFeaturesTab->hide();
+    futureFeaturesTab->hide();
 	
     // Not implemented
 	//
@@ -76,13 +76,12 @@ NavigationEventRouter::NavigationEventRouter(
 	rotCenterLon->setEnabled(false);
 	stereoCombo->setEnabled(false);
 	latLonCheckbox->setEnabled(false);
-	stereoSeparationEdit->setEnabled(false);*/
+	stereoSeparationEdit->setEnabled(false);
     adjustSize();
     
     verticalLayout->setSpacing(15);
     
     VSection *framebufferSection = new VSection("Framebuffer Settings");
-    //framebufferSection->SetSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
     verticalLayout->insertWidget(verticalLayout->count()-1, framebufferSection);
     
     framebufferSection->layout()->addWidget(_useCustomFramebufferCheckbox = new ParamsWidgetCheckbox(ViewpointParams::UseCustomFramebufferTag, "Use Custom Output Size"));
@@ -694,7 +693,6 @@ void NavigationEventRouter::_updateTab(){
     _customFramebufferHeight->Update(vp);
     _customFramebufferWidth-> setEnabled(vp->GetValueLong(ViewpointParams::UseCustomFramebufferTag, 0));
     _customFramebufferHeight->setEnabled(vp->GetValueLong(ViewpointParams::UseCustomFramebufferTag, 0));
-    adjustSize();
 }
 
 void NavigationEventRouter::CenterSubRegion(){
