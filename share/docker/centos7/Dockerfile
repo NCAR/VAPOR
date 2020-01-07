@@ -14,7 +14,7 @@ RUN yum -y clean all \
 RUN yum -y install epel-release \
     && yum -y install cmake3 \
     && yum -y install make \
-    && yum -y install tar \
+    && yum -y install bsdtar \
     && yum -y install gcc-c++ \
     && yum -y install curl \
     && yum -y install xz-devel \
@@ -50,8 +50,7 @@ RUN fileid="1e7F3kDoKctBmB3NOF4dES2395oScb9_0" \
 
 RUN ls -lrth /usr/local/VAPOR-Deps/
 
-RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz \
-    -C /usr/local/VAPOR-Deps
+RUN bsdtar -xf /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz -C /usr/local/VAPOR-Deps
 
 RUN chown -R root:root /usr
 RUN chmod -R 777 /usr
