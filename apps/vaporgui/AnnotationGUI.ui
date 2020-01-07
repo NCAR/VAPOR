@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>418</width>
+    <width>470</width>
     <height>1100</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+   <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>418</width>
-    <height>800</height>
+    <height>0</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>418</width>
-    <height>2200</height>
+    <width>16777215</width>
+    <height>16777215</height>
    </size>
   </property>
   <property name="baseSize">
@@ -47,7 +47,7 @@
    <item>
     <widget class="QTabWidget" name="_axisAnnotationTab">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+      <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -56,6 +56,12 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="tab">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <attribute name="title">
        <string>Axis Annotations</string>
       </attribute>
@@ -88,6 +94,12 @@
          </property>
          <item>
           <widget class="QLabel" name="label">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Axis annotations enabled</string>
            </property>
@@ -128,6 +140,12 @@
          </property>
          <item>
           <widget class="QLabel" name="label_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Annotate with lat/lon values</string>
            </property>
@@ -165,6 +183,12 @@
          </property>
          <item>
           <widget class="QLabel" name="label_3">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Axis/Text color</string>
            </property>
@@ -185,6 +209,12 @@
          </item>
          <item>
           <widget class="QLineEdit" name="axisColorEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="maximumSize">
             <size>
              <width>25</width>
@@ -215,6 +245,12 @@
          </property>
          <item>
           <widget class="QLabel" name="label_9">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Text background color</string>
            </property>
@@ -235,6 +271,12 @@
          </item>
          <item>
           <widget class="QLineEdit" name="axisBackgroundColorEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="maximumSize">
             <size>
              <width>25</width>
@@ -265,6 +307,12 @@
          </property>
          <item>
           <widget class="QLabel" name="label_4">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Text size</string>
            </property>
@@ -285,6 +333,12 @@
          </item>
          <item>
           <widget class="QSlider" name="axisTextSizeSlider">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>125</width>
@@ -304,6 +358,12 @@
          </item>
          <item>
           <widget class="QLineEdit" name="axisTextSizeEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>125</width>
@@ -336,6 +396,12 @@
          </property>
          <item>
           <widget class="QLabel" name="label_5">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Digits</string>
            </property>
@@ -356,6 +422,12 @@
          </item>
          <item>
           <widget class="QSlider" name="axisDigitsSlider">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>125</width>
@@ -375,6 +447,12 @@
          </item>
          <item>
           <widget class="QLineEdit" name="axisDigitsEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>125</width>
@@ -410,6 +488,12 @@
          </property>
          <item>
           <widget class="QLabel" name="label_6">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Tic width</string>
            </property>
@@ -430,6 +514,12 @@
          </item>
          <item>
           <widget class="QSlider" name="ticWidthSlider">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>125</width>
@@ -449,6 +539,12 @@
          </item>
          <item>
           <widget class="QLineEdit" name="ticWidthEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>125</width>
@@ -474,7 +570,7 @@
        <item>
         <widget class="QTableWidget" name="axisAnnotationTable">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -497,6 +593,12 @@
          </property>
          <item>
           <widget class="QLabel" name="label_7">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>75</width>
@@ -516,6 +618,12 @@
          </item>
          <item>
           <widget class="QComboBox" name="xTicOrientationCombo">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <item>
             <property name="text">
              <string>Y</string>
@@ -530,6 +638,12 @@
          </item>
          <item>
           <widget class="QComboBox" name="yTicOrientationCombo">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <item>
             <property name="text">
              <string>X</string>
@@ -544,6 +658,12 @@
          </item>
          <item>
           <widget class="QComboBox" name="zTicOrientationCombo">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <item>
             <property name="text">
              <string>X</string>
@@ -565,6 +685,12 @@
          </property>
          <item>
           <widget class="QLabel" name="label_10">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Copy region from renderer</string>
            </property>
@@ -591,7 +717,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="copyRegionCombo"/>
+          <widget class="QComboBox" name="copyRegionCombo">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -602,7 +735,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget_3">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+      <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -611,6 +744,12 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="tab_4">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <attribute name="title">
        <string>Time Annotation</string>
       </attribute>
@@ -634,6 +773,12 @@
         <layout class="QHBoxLayout">
          <item>
           <widget class="QLabel" name="textLabel1_5">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Annotation type</string>
            </property>
@@ -664,7 +809,7 @@
          <item>
           <widget class="QComboBox" name="_timeCombo">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -718,6 +863,12 @@
          </property>
          <item>
           <widget class="QLabel" name="label_19">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Text size</string>
            </property>
@@ -738,6 +889,12 @@
          </item>
          <item>
           <widget class="QLineEdit" name="_timeSizeEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>125</width>
@@ -775,6 +932,12 @@
            </property>
            <item>
             <widget class="QLabel" name="textLabel2_8">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="toolTip">
               <string>Specify lower-left coordinate of time annotation relative to visualizer size</string>
              </property>
@@ -811,6 +974,12 @@
            </property>
            <item>
             <widget class="QLabel" name="label_17">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="text">
               <string>X</string>
              </property>
@@ -831,6 +1000,12 @@
            </item>
            <item>
             <widget class="QLineEdit" name="_timeLLXEdit">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="maximumSize">
               <size>
                <width>125</width>
@@ -857,6 +1032,12 @@
            </property>
            <item>
             <widget class="QLabel" name="label_18">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="text">
               <string>Y</string>
              </property>
@@ -877,6 +1058,12 @@
            </item>
            <item>
             <widget class="QLineEdit" name="_timeLLYEdit">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="maximumSize">
               <size>
                <width>125</width>
@@ -928,6 +1115,12 @@
          </item>
          <item>
           <widget class="QLineEdit" name="_timeColorEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="maximumSize">
             <size>
              <width>25</width>
@@ -955,7 +1148,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget_2">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+      <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -964,6 +1157,12 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="tab_3">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <attribute name="title">
        <string>3D Geometry</string>
       </attribute>
@@ -1001,6 +1200,12 @@
            </property>
            <item>
             <widget class="QLabel" name="label_16">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="text">
               <string>Display full domain bounds</string>
              </property>
@@ -1047,6 +1252,12 @@
            </property>
            <item>
             <widget class="QLabel" name="textLabel2_2_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimumSize">
               <size>
                <width>150</width>
@@ -1085,6 +1296,12 @@
            </item>
            <item>
             <widget class="QLineEdit" name="domainColorEdit">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimumSize">
               <size>
                <width>25</width>
@@ -1132,6 +1349,12 @@
          </property>
          <item>
           <widget class="QLabel" name="textLabel2_3">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>150</width>
@@ -1167,6 +1390,12 @@
          </item>
          <item>
           <widget class="QLineEdit" name="backgroundColorEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>25</width>
@@ -1220,6 +1449,12 @@
            </property>
            <item>
             <widget class="QLabel" name="textLabel2_6">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimumSize">
               <size>
                <width>150</width>
@@ -1258,6 +1493,12 @@
            </item>
            <item>
             <widget class="QLineEdit" name="regionColorEdit">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimumSize">
               <size>
                <width>25</width>
@@ -1308,7 +1549,7 @@
    <item>
     <widget class="QTabWidget" name="_orientationArrowTab">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+      <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -1317,6 +1558,12 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="tab_2">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <attribute name="title">
        <string>Orientation Arrows</string>
       </attribute>
@@ -1346,6 +1593,12 @@
          </property>
          <item>
           <widget class="QLabel" name="label_14">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Show arrows (XYZ/RGB)</string>
            </property>
@@ -1380,6 +1633,12 @@
          </property>
          <item>
           <widget class="QLabel" name="label_11">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>X Origin</string>
            </property>
@@ -1400,6 +1659,12 @@
          </item>
          <item>
           <widget class="QLineEdit" name="_arrowXEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>125</width>
@@ -1429,6 +1694,12 @@
          </property>
          <item>
           <widget class="QLabel" name="label_12">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Y Origin</string>
            </property>
@@ -1449,6 +1720,12 @@
          </item>
          <item>
           <widget class="QLineEdit" name="_arrowYEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>125</width>
@@ -1478,6 +1755,12 @@
          </property>
          <item>
           <widget class="QLabel" name="label_13">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Z Origin</string>
            </property>
@@ -1498,6 +1781,12 @@
          </item>
          <item>
           <widget class="QLineEdit" name="_arrowZEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>125</width>

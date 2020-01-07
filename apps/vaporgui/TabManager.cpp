@@ -398,7 +398,6 @@ void TabManager::_createAllDefaultTabs()
     // Install built-in tabs
     //
     parent = _getTabWidget(_navigationTabName);
-
     er = new AnnotationEventRouter(parent, _controlExec);
     _installTab(_navigationTabName, er->GetType(), er);
 
@@ -495,6 +494,7 @@ void TabManager::_installWidgets()
             string tab = _tabNames[i];
 
             QScrollArea *myScrollArea = new QScrollArea(_tabWidgets[tab]);
+            myScrollArea->setWidgetResizable(true);
 
             string      subTabName = _subTabNames[tab][j];
             QTabWidget *qtw = (QTabWidget *)_tabWidgets[tab];
