@@ -32,8 +32,6 @@
 #include "TabManager.h"
 #include <vapor/DataStatus.h>
 
-#include "SliceEventRouter.h"
-
 using namespace VAPoR;
 
 const string TabManager::_renderersTabName = "Renderers";
@@ -446,7 +444,6 @@ void TabManager::_createAllDefaultTabs() {
 	// Install built-in tabs
 	//
 	parent = _getTabWidget(_navigationTabName);
-
 	er = new AnnotationEventRouter(parent, _controlExec);
 	_installTab(_navigationTabName, er->GetType(), er);
 	
@@ -518,13 +515,6 @@ void TabManager::_installTab(
 	_registerEventRouter(subTabName, eRouter);
 	eRouter->hookUpTab();
 	QWidget* tabWidget = dynamic_cast<QWidget*> (eRouter);
-    //tabWidget->setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Ignored);
-    cout << "tab/subtabName " << tabName << " " << subTabName << endl;
-    cout << tabWidget->sizeHint().width() << endl;
-/*QList<QWidget*> list = this->findChildren<QWidget*>();
-foreach(QWidget*w, list) {
-    w->setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Ignored);
-}*/
 	VAssert(tabWidget);
 	if (subTabName != SettingsParams::GetClassType()) {
 		tabWidget->setEnabled(false);
@@ -580,17 +570,8 @@ void TabManager::_installWidgets() {
 
 		string subTabName = _subTabNames[tab][j];
 		QTabWidget* qtw = (QTabWidget*) _tabWidgets[tab];
-
-        //myScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        //_subTabWidgets[tab][j]->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        //qtw->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-		
 		qtw->addTab(myScrollArea, QString::fromStdString(subTabName));
 		myScrollArea->setWidget(_subTabWidgets[tab][j]);
-		
-        //QPushButton* foo = new QPushButton();
-        //_subTabWidgets[tab][j]->layout()->addWidget( foo );
-	
 	}
 	}
 
