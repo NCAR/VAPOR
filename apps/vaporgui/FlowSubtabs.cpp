@@ -72,8 +72,6 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     assert(_params);
     
     _paramsMgr = paramsMgr;
-    
-    _variablesWidget->Update(dataMgr, paramsMgr, rParams);
 
     GUIStateParams *gp = dynamic_cast<GUIStateParams*>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
     int nDims = gp->GetFlowDimensionality();
@@ -91,8 +89,8 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     // with, we need to configure these two different cases externally, which is what's
     // being done here.
     if ( no3DVars ) {
-        _variablesWidget->Configure2DFieldVars();
-        gp->SetFlowDimensionality( _variablesWidget->GetActiveDimension() );
+            _variablesWidget->Configure2DFieldVars();
+            gp->SetFlowDimensionality( _variablesWidget->GetActiveDimension() );
     }
     else if (nDims != _variablesWidget->GetActiveDimension() ) {
         if (nDims == 2 )
@@ -101,12 +99,14 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
             _variablesWidget->Configure3DFieldVars();
         gp->SetFlowDimensionality( _variablesWidget->GetActiveDimension() );
     }
+    
+    _variablesWidget->Update(dataMgr, paramsMgr, rParams);
 }
     
 void FlowVariablesSubtab::_dimensionalityChanged( int nDims ) const {
     GUIStateParams *gp = dynamic_cast<GUIStateParams*>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
     gp->SetFlowDimensionality( nDims );
-    if (nDims == 2 ) 
+    if (nDims == 2 )
         _variablesWidget->Configure2DFieldVars();
     else
         _variablesWidget->Configure3DFieldVars();
