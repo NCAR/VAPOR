@@ -105,10 +105,6 @@ jobs:
             cd build
             cmake ..
             make
-      - run:
-          name: Test python
-          command: |
-            build/bin/vaporpychecker
 
 
   printTime:
