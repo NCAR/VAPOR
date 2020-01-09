@@ -40,7 +40,8 @@ VGeometry2::VGeometry2() : QWidget()
     _zRange = new QRangeSliderTextCombo();
     connect( _zRange, &QRangeSliderTextCombo::ValueChanged,
         this, &VGeometry2::_zRangeChanged );
-    zLayout->addWidget( new QLabel("Z") );
+    _zLabel = new QLabel("Z");
+    zLayout->addWidget( _zLabel );
     zLayout->addWidget( _zRange );
     layout->addLayout( zLayout );
 }
@@ -56,10 +57,13 @@ void VGeometry2::SetRange( const std::vector<float>& range ) {
     
     if ( dim == 3 ) {
         _zRange->show();
+        _zLabel->show();
         _zRange->SetRange( _range[ZMIN], _range[ZMAX] );
     }
-    else
+    else {
         _zRange->hide();
+        _zLabel->hide();
+    }
 }
     
 void VGeometry2::SetValue( const std::vector<float>& vals ) {
