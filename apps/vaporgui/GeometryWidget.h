@@ -47,6 +47,9 @@ class GeometryWidget : public QWidget, public Ui_GeometryWidgetGUI {
     void adjustLayoutToPlanar(int plane, bool reinit = true);
 
   private:
+    void _resetBoxIfNeeded(
+        const std::vector<double> &minExt,
+        const std::vector<double> &maxExt);
     void adjustLayoutTo2D();
     void adjustLayoutToPlanarXY(bool reinit);
     void adjustLayoutToPlanarXZ(bool reinit);
