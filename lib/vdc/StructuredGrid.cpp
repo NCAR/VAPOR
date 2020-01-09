@@ -25,7 +25,10 @@ StructuredGrid::StructuredGrid(const vector<size_t> &dims, const vector<size_t> 
     VAssert(bs.size() == 2 || bs.size() == 3);
 
     _cellDims = Grid::GetDimensions();
-    for (int i = 0; i < _cellDims.size(); i++) { _cellDims[i]--; }
+    for (int i = 0; i < _cellDims.size(); i++) {
+        _cellDims[i]--;
+        if (_cellDims[i] < 1) _cellDims[i] = 1;
+    }
 }
 
 bool StructuredGrid::GetCellNodes(const size_t cindices[], size_t nodes[], int &n) const
@@ -43,7 +46,7 @@ bool StructuredGrid::GetCellNodes(const size_t cindices[], size_t nodes[], int &
     //
     vector<size_t> indices;
 
-    if (dims.size() == 2 || (dims.size() == 3 && dims[2] < 2)) {
+    if (dims.size() == 2) {
         nodes[0] = cCindices[0];
         nodes[1] = cCindices[1];
 
@@ -90,6 +93,14 @@ bool StructuredGrid::GetCellNodes(const size_t cindices[], size_t nodes[], int &
         nodes[22] = cCindices[1] + 1;
         nodes[23] = cCindices[2] + 1;
         n = 8;
+    }
+
+    // Handle dims[i] == 1
+    //
+    for (int j = 0; j < n; j++) {
+        for (int i = 0; i < dims.size(); i++) {
+            if (nodes[j * dims.size() + i] >= dims[i]) { nodes[j * dims.size() + i] -= 1; }
+        }
     }
 
     return (true);

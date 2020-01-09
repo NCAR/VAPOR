@@ -383,6 +383,16 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
     std::vector<double> minFullExt, maxFullExt;
     getFullExtents(minFullExt, maxFullExt);
 
+    // If the current box lies entirely outside of the current variable's domain,
+    // reset the box to be equal to the current variable's domain.
+    //
+    // E.g. - In the cannonical Katrina WRF dataset, the variable TSLB lies entirely
+    // outside the region of the variable P.  When we change from P to TSLB, we need
+    // to reset the box to TSLB's extents.
+    //
+    // https://github.com/NCAR/VAPOR/issues/1375
+    _resetBoxIfNeeded(minFullExt, maxFullExt);
+
     updateRangeLabels(minFullExt, maxFullExt);
     updateBoxCombos(minFullExt, maxFullExt);
 
@@ -396,6 +406,29 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
         adjustLayoutToPlanar(rParamsOrientation, reinit);
 
         _planeComboBox->blockSignals(false);
+    }
+}
+
+void GeometryWidget::_resetBoxIfNeeded(const std::vector<double> &minFullExt, const std::vector<double> &maxFullExt)
+{
+    std::vector<double> boxMin, boxMax;
+    _box->GetExtents(boxMin, boxMax);
+
+    // If the box extents are of a different dimensionality than the extents
+    // of the currently active variable, reset the box to the variable extents
+    //
+    if (boxMin.size() != minFullExt.size() || boxMax.size() != maxFullExt.size()) {
+        _box->SetExtents(minFullExt, maxFullExt);
+        return;
+    }
+
+    // Now check to see if the box is entirely outside of the variable's extents
+    //
+    for (int i = 0; i < minFullExt.size(); i++) {
+        if (boxMax[i] < minFullExt[i] || boxMin[i] > maxFullExt[i]) {
+            _box->SetExtents(minFullExt, maxFullExt);
+            return;
+        }
     }
 }
 
