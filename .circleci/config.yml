@@ -83,7 +83,6 @@ jobs:
           command: |
             pip3 install gdown
             sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod -R 777 /usr
             cd /usr/local/VAPOR-Deps
             gdown https://drive.google.com/uc?id=1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ
       - run:
