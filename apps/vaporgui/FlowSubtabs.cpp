@@ -68,6 +68,8 @@ void FlowVariablesSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *para
 
     _paramsMgr = paramsMgr;
 
+    _variablesWidget->Update(dataMgr, paramsMgr, rParams);
+
     GUIStateParams *gp = dynamic_cast<GUIStateParams *>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
     int             nDims = gp->GetFlowDimensionality();
     bool            no3DVars = dataMgr->GetDataVarNames(3).size() ? false : true;
@@ -93,8 +95,6 @@ void FlowVariablesSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *para
             _variablesWidget->Configure3DFieldVars();
         gp->SetFlowDimensionality(_variablesWidget->GetActiveDimension());
     }
-
-    _variablesWidget->Update(dataMgr, paramsMgr, rParams);
 }
 
 void FlowVariablesSubtab::_dimensionalityChanged(int nDims) const
