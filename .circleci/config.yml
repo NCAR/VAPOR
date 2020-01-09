@@ -66,6 +66,7 @@ jobs:
       - run:
           name: cmake3 and make
           command: |
+            ls -lrth /usr/local/VAPOR-Deps
             cd /VAPOR
             git pull
             cd build
