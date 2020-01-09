@@ -60,11 +60,8 @@ public:
  //! Does nothing since no text boxes.
  virtual void confirmText() {}
 
- virtual void Update(
-	const VAPoR::DataMgr *dataMgr,
-	VAPoR::ParamsMgr *paramsMgr,
-	VAPoR::RenderParams *rParams
- );
+ virtual void Update(const VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
+ void SetParams(const VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     
  DimFlags GetDimFlags() const;
 
