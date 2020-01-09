@@ -149,6 +149,11 @@ void VariablesWidget::Configure3DFieldVars() {
     setVariableDims(1);
     blockSignals( false );
     _zFieldVarFrame->show();
+
+    if (_rParams != nullptr &&
+        _dataMgr != nullptr &&
+        _paramsMgr != nullptr )
+        Update( _dataMgr, _paramsMgr, _rParams );
 }
 
 void VariablesWidget::Configure2DFieldVars() {
@@ -156,6 +161,11 @@ void VariablesWidget::Configure2DFieldVars() {
     setVariableDims(0);
     blockSignals( false );
     _zFieldVarFrame->hide();
+
+    if (_rParams != nullptr &&
+        _dataMgr != nullptr &&
+        _paramsMgr != nullptr )
+        Update( _dataMgr, _paramsMgr, _rParams );
 }
 
 int VariablesWidget::GetActiveDimension() const {
