@@ -18,7 +18,7 @@
 
 namespace VAPoR
 {
-class VDF_API GrownGrid final: public Grid 
+class FLOW_API GrownGrid final: public Grid 
 {
 public:
 

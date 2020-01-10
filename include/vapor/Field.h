@@ -7,10 +7,11 @@
 
 #include <glm/glm.hpp>
 #include <string>
+#include <vapor/common.h>
 
 namespace flow
 {
-class Field
+class FLOW_API Field
 {
 public:
     // Constructor and destructor. 
