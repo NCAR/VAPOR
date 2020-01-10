@@ -43,6 +43,7 @@ BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
     verticalLayout->insertWidget(0, _tfe = new TFEditor(true));
+    _tfe->SetShowOpacityMap(false);
 
     _xDimCombo = new Combo(xDimEdit, xDimSlider, true);
     _yDimCombo = new Combo(yDimEdit, yDimSlider, true);
