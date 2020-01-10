@@ -17,7 +17,7 @@
 #include "vapor/DataMgr.h"
 
 namespace VAPoR {
-class VDF_API GrownGrid final : public Grid {
+class FLOW_API GrownGrid final : public Grid {
 public:
     // Constructor: pass in the 2D grid to be managed, the data manager that will
     // later be used to destroy the grid, and the default Z value to be used.
