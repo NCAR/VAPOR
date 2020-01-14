@@ -206,11 +206,21 @@ std::vector<float> FlowParams::GetRake() const
     auto doubles = GetValueDoubleVec( _rakeTag );
     auto rakesize = doubles.size();
 
+    // If the rakesize isn't correct, then it isn't initialized yet.
+    // Let's use the values stored in _Box to initialize the rake.
     if ( rakesize != 6 && rakesize != 4 ) 
     {
-        // Six NANs represent the initial state
-        std::vector<float> tmp(6, std::nan("1") );
-        return tmp;
+        std::vector<double> minext, maxext;
+        auto box = RenderParams::GetBox();
+        box->GetExtents( minext, maxext );
+        std::vector<float> floats( minext.size() * 2 );
+        for( int i = 0; i < minext.size(); i++ )
+        {
+            floats[i*2]   = minext[i];
+            floats[i*2+1] = maxext[i];
+        }
+        VAssert( floats.size() == 4 || floats.size() == 6 );
+        return floats;
     }
 
     std::vector<float> floats( rakesize, std::nan("1") );
@@ -227,10 +237,8 @@ FlowParams::SetRake( const std::vector<float>& rake )
 {
     const auto rakesize = rake.size();
     VAssert( rakesize == 4 || rakesize == 6 );
-    std::vector<double> doubles(rakesize, 0.0);
-    for( int i = 0; i < rakesize; i++ ) {
-        doubles[i] = rake[i];
-    }
+    std::vector<double> doubles(rakesize);
+    std::copy( rake.cbegin(), rake.cend(), doubles.begin() );
     SetValueDoubleVec( _rakeTag, "rake boundaries", doubles );
 }
 
