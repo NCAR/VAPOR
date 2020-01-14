@@ -387,8 +387,10 @@ Advection::OutputStreamsGnuplotMaxPart( const std::string&  filename,
     if( f == nullptr )
         return FILE_ERROR;
 
+    int idx = 0;
     for( const auto& s : _streams )
     {
+        std::fprintf( f, "# Flow line index = %d\n", idx++ );
         // Either output all the particles in this stream, 
         // or only up to a certain number of particles.
         size_t numPart = 0;
@@ -418,8 +420,10 @@ Advection::OutputStreamsGnuplotMaxTime( const  std::string& filename,
     if( f == nullptr )
         return FILE_ERROR;
 
+    int idx = 0;
     for( const auto& s : _streams )
     {
+        std::fprintf( f, "# Flow line index = %d\n", idx++ );
         for( const auto& p : s )
         {
             if( p.time > timeStamp )
