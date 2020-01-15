@@ -330,8 +330,7 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _paramsMgr = paramsMgr;
     VAssert( _params );
 
-    //_updateRake( dataMgr );
-    _rakeWidget->SetValue( _params->GetRake() );
+    _updateRake( dataMgr );
 
     GUIStateParams *gp = dynamic_cast<GUIStateParams*>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
     int newDims = gp->GetFlowDimensionality();
