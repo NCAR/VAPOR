@@ -309,8 +309,8 @@ std::FILE *Advection::_prepareFileWrite(const std::string &filename, bool append
     if (f == nullptr) return nullptr;
 
     std::fprintf(f, "%s\n", "# This file could be plotted by Gnuplot using the following command:");
-    std::fprintf(f, "%s\n\n", "# splot output_filename u 1:2:3 w lines ");
-    std::fprintf(f, "%s\n\n", "# X-position      Y-position      Z-position     Time     Value");
+    std::fprintf(f, "%s\n\n", "# splot output_filename u 2:3:4 w lines ");
+    std::fprintf(f, "%s\n\n", "# ID,   X-position,    Y-position,    Z-position,    Time,   Value");
 
     return f;
 }
@@ -320,6 +320,7 @@ int Advection::OutputStreamsGnuplotMaxPart(const std::string &filename, size_t m
     std::FILE *f = _prepareFileWrite(filename, append);
     if (f == nullptr) return FILE_ERROR;
 
+    int idx = 0;
     for (const auto &s : _streams) {
         // Either output all the particles in this stream,
         // or only up to a certain number of particles.
@@ -327,11 +328,12 @@ int Advection::OutputStreamsGnuplotMaxPart(const std::string &filename, size_t m
         for (size_t i = 0; i < s.size() && numPart < maxPart; i++) {
             const auto &p = s[i];
             if (!p.IsSpecial()) {
-                std::fprintf(f, "%f, %f, %f, %f, %f\n", p.location.x, p.location.y, p.location.z, p.time, p.value);
+                std::fprintf(f, "%d, %f, %f, %f, %f, %f\n", idx, p.location.x, p.location.y, p.location.z, p.time, p.value);
                 numPart++;
             }
         }
         std::fprintf(f, "\n\n");
+        idx++;
     }
     std::fclose(f);
 
@@ -343,13 +345,15 @@ int Advection::OutputStreamsGnuplotMaxTime(const std::string &filename, float ti
     std::FILE *f = _prepareFileWrite(filename, append);
     if (f == nullptr) return FILE_ERROR;
 
+    int idx = 0;
     for (const auto &s : _streams) {
         for (const auto &p : s) {
             if (p.time > timeStamp) break;    // finish this current stream
 
-            if (!p.IsSpecial()) { std::fprintf(f, "%f, %f, %f, %f, %f\n", p.location.x, p.location.y, p.location.z, p.time, p.value); }
+            if (!p.IsSpecial()) { std::fprintf(f, "%d, %f, %f, %f, %f, %f\n", idx, p.location.x, p.location.y, p.location.z, p.time, p.value); }
         }
         std::fprintf(f, "\n\n");
+        idx++;
     }
     std::fclose(f);
 
