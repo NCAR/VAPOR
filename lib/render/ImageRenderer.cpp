@@ -483,7 +483,7 @@ int ImageRenderer::_getMeshDisplaced(DataMgr *dataMgr, GLsizei width, GLsizei he
 
     int rc;
     if (myParams->GetIsGeoRef()) {
-        double defaultZ = minBox.size() > 2 ? minBox[2] : 0.0;
+        double defaultZ = GetDefaultZ(dataMgr, myParams->GetCurrentTimestep());
         rc = _getMeshDisplacedGeo(dataMgr, hgtGrid, width, height, defaultZ);
     } else {
         rc = _getMeshDisplacedNoGeo(dataMgr, hgtGrid, width, height, minBox, maxBox);
