@@ -538,7 +538,7 @@ void PythonVariables::_testScript() {
 	}
 
     msgBox.setText("Test passed.");
-	msgBox.exec();
+    msgBox.exec();
 }
 
 
@@ -565,7 +565,7 @@ void PythonVariables::_saveScript() {
 
     QMessageBox msgBox;
     msgBox.setText("Script saved to session.");
-	msgBox.exec();
+    msgBox.exec();
 }
 
 std::vector<string> PythonVariables::_buildInputVars() const {
