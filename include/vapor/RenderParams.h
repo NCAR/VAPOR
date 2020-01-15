@@ -404,7 +404,6 @@ private:
  static const string _fieldVariableNamesTag;
  static const string _auxVariableNamesTag;
  static const string _distribVariableNamesTag;
- static const string _useSingleColorTag;
  static const string _constantColorTag;
  static const string _constantOpacityTag;
  static const string _CompressionLevelTag;
@@ -417,6 +416,9 @@ private:
 	std::vector<string> searchVars,
 	char letter
  );
+    
+public:
+    static const string _useSingleColorTag;
 };
 
 

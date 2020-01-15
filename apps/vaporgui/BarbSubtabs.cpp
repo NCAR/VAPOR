@@ -56,7 +56,7 @@ void BarbGeometrySubtab::Update(
 
 BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget* parent) {
 	setupUi(this);
-    verticalLayout->insertWidget(0, _tfe = new TFEditor(true));
+    verticalLayout->insertWidget(1, _tfe = new TFEditor(true));
     _tfe->SetShowOpacityMap(false);
 
 	_xDimCombo = new Combo(xDimEdit, xDimSlider, true);
@@ -69,6 +69,8 @@ BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget* parent) {
 	_zDimSelector->SetLabel( QString("Z Dimension") );
 	_zDimSelector->SetIntType( true );
 	_zDimSelector->SetExtents(COUNT_MIN, COUNT_MAX);
+    
+    this->tab->layout()->addWidget(_colorByVarCheckbox = new ParamsWidgetCheckbox(VAPoR::RenderParams::_useSingleColorTag, "Use Single Color"));
 
 	connect(_xDimCombo, SIGNAL(valueChanged(int)), this,
 		SLOT(xDimChanged(int)));
@@ -121,6 +123,8 @@ void BarbAppearanceSubtab::Update(VAPoR::DataMgr* dataMgr,
 	_bParams = (VAPoR::BarbParams*)bParams;
 	_paramsMgr = paramsMgr;
     _tfe->Update(dataMgr, paramsMgr, bParams);
+    _colorByVarCheckbox->Update(bParams);
+    _tfe->setVisible(!bParams->UseSingleColor());
 
 	vector<long> grid = _bParams->GetGrid();
 	_xDimCombo->Update(COUNT_MIN, COUNT_MAX, grid[X]);
