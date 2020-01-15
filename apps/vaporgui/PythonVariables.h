@@ -43,8 +43,6 @@ private slots:
     void _testScript();
     void _saveScript();
     void _closeScript();
-    void _updateSaveLabelColor(int r, int g, int b);
-    void _updateTestLabelColor(int r, int g, int b);
 
     void _createNewVariable();
     void _deleteVariable();
@@ -101,12 +99,6 @@ private:
 
     void _updateNewItemDialog();
     void _updateLabelColor(int r, int g, int b, QLabel *label);
-    void _updateInputVarTable(){};
-    void _updateOutputVarTable(){};
-    void _updatePythonScript(){};
-
-    void _showTestLabel(bool fadeIn);
-    void _showSaveLabel(bool fadeIn);
 
     void _reset();
 };
