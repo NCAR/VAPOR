@@ -205,6 +205,7 @@ void FlowSeedingSubtab::_createSeedingSection( QWidget* parent ) {
     _listOfSeedsFrame = new VFrame();
     _listOfSeedsFrame->addWidget( new VLineItem("List of seeds file", _listOfSeedsFileReader ) );
     _seedDistributionSection->layout()->addWidget( _listOfSeedsFrame );
+    _listOfSeedsFrame->setToolTip("Tool tip for Sam!");
 
     // Random distribution selection
     _randomSeedsFrame = new VFrame();
