@@ -460,6 +460,13 @@ void FlowSeedingSubtab::_updateRake( VAPoR::DataMgr* dataMgr ) {
 
     auto rakeVals = _params->GetRake();
     _rakeWidget->SetValue( rakeVals );
+
+    cout << "Range " << endl;
+    for (int i=0; i<range.size(); i++ )
+        cout << "    " << range[i] << " " << endl;
+    cout << "valus " << endl;
+    for (int i=0; i<rakeVals.size(); i++ )
+        cout << "    " << rakeVals[i] << " " << endl;
 }
 
 void FlowSeedingSubtab::_resizeFlowParamsVectors() {
