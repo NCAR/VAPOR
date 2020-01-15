@@ -330,7 +330,8 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     _paramsMgr = paramsMgr;
     VAssert( _params );
 
-    _updateRake( dataMgr );
+    //_updateRake( dataMgr );
+    _rakeWidget->SetValue( _params->GetRake() );
 
     GUIStateParams *gp = dynamic_cast<GUIStateParams*>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
     int newDims = gp->GetFlowDimensionality();
@@ -455,26 +456,11 @@ void FlowSeedingSubtab::_updateRake( VAPoR::DataMgr* dataMgr ) {
         range.push_back( float(minExt[i]) );
         range.push_back( float(maxExt[i]) );
     }
+
     _rakeWidget->SetRange( range );
+
     auto rakeVals = _params->GetRake();
-    /* In case the user hasn't set the rake, set the current value to be the rake extents,
-       plus update the params.  Otherwise, apply the actual rake values.*/
-    if( std::isnan( rakeVals[0] ) )
-    {
-        _rakeWidget->SetValue( range );
-        _params->SetRake( range );
-       
-        // Initialize _oldZRakeMin and Max along with the rake 
-        //
-        if (range.size() == 6) {
-            _oldZRakeMin = range[Z_RAKE_MIN];
-            _oldZRakeMax = range[Z_RAKE_MAX];
-        }
-    }
-    else
-    {
-        _rakeWidget->SetValue( rakeVals );
-    }
+    _rakeWidget->SetValue( rakeVals );
 }
 
 void FlowSeedingSubtab::_resizeFlowParamsVectors() {
