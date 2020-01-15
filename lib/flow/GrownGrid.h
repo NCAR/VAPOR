@@ -65,7 +65,7 @@ private:
     // Private data member that holds this constant value.
     const VAPoR::Grid *const _grid2d;
     VAPoR::DataMgr *const    _dataMgr;    // The pointer itself cannot be changed
-    const float              _defaultZ, _minZ, _maxZ;
+    const float              _defaultZ;
 
 };    // end GrownGrid class
 };    // namespace VAPoR

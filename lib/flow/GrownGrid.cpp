@@ -3,10 +3,7 @@
 using VAPoR::GrownGrid;
 
 // Constructor
-GrownGrid::GrownGrid(const VAPoR::Grid *gp, VAPoR::DataMgr *mp, float z)
-: _grid2d(gp), _dataMgr(mp), _defaultZ(z), _minZ(z > 0.0f ? z * 0.99999f : z * 1.00001f), _maxZ(z > 0.0f ? z * 1.00001f : z * 0.99999f)
-{
-}
+GrownGrid::GrownGrid(const VAPoR::Grid *gp, VAPoR::DataMgr *mp, float z) : _grid2d(gp), _dataMgr(mp), _defaultZ(z) {}
 
 // Destructor
 GrownGrid::~GrownGrid()
@@ -36,11 +33,9 @@ void GrownGrid::GetUserExtents(std::vector<double> &minu, std::vector<double> &m
 
 bool GrownGrid::InsideGrid(const std::vector<double> &coords) const
 {
-    if (coords.size() < 3) return false;
-    if (coords[2] < _minZ || coords[2] > _maxZ) return false;
-    if (!_grid2d->InsideGrid(coords)) return false;
-
-    return true;
+    // Note that we don't use defaultZ to decide if a position is inside of
+    // a grid or not.
+    return (_grid2d->InsideGrid(coords));
 }
 
 //
