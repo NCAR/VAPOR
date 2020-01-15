@@ -180,12 +180,6 @@ void MainForm::_initMembers() {
 	_vizToolBar = NULL;
 	_animationToolBar = NULL;
 
-	/*_webTabHelpMenu = NULL;
-	_webBasicHelpMenu = NULL;
-	_webPreferencesHelpMenu = NULL;
-	_webPythonHelpMenu = NULL;
-	_webVisualizationHelpMenu = NULL;*/
-
 	_dataMenu = NULL;
 	_closeVDCMenu = NULL;
 	_importMenu = NULL;
@@ -1805,8 +1799,6 @@ void MainForm::setActiveEventRouter(string type) {
 	//
 	vector <pair <string, string> >help;
 	_tabMgr->GetWebHelp(type, help);
-
-	//buildWebTabHelpMenu(help);
 }
 
 void MainForm::_setProj4String(string proj4String) {
