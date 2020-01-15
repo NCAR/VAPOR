@@ -372,8 +372,8 @@ Advection::_prepareFileWrite( const std::string& filename, bool append ) const
         return nullptr;
 
     std::fprintf( f, "%s\n",   "# This file could be plotted by Gnuplot using the following command:");
-    std::fprintf( f, "%s\n\n", "# splot output_filename u 1:2:3 w lines ");
-    std::fprintf( f, "%s\n\n", "# X-position      Y-position      Z-position     Time     Value" );
+    std::fprintf( f, "%s\n\n", "# splot output_filename u 2:3:4 w lines ");
+    std::fprintf( f, "%s\n\n", "# ID    X-position      Y-position      Z-position     Time     Value" );
 
     return f;
 }
@@ -390,7 +390,6 @@ Advection::OutputStreamsGnuplotMaxPart( const std::string&  filename,
     int idx = 0;
     for( const auto& s : _streams )
     {
-        std::fprintf( f, "# Flow line index = %d\n", idx++ );
         // Either output all the particles in this stream, 
         // or only up to a certain number of particles.
         size_t numPart = 0;
@@ -399,12 +398,13 @@ Advection::OutputStreamsGnuplotMaxPart( const std::string&  filename,
             const auto& p = s[i];
             if( !p.IsSpecial() )
             {
-                std::fprintf( f, "%f, %f, %f, %f, %f\n", p.location.x, p.location.y, 
-                              p.location.z, p.time, p.value );
+                std::fprintf( f, "%d, %f, %f, %f, %f, %f\n", idx, p.location.x, 
+                              p.location.y, p.location.z, p.time, p.value );
                 numPart++;
             }
         }
         std::fprintf( f, "\n\n" );
+        idx++;
     }
     std::fclose( f );
     
@@ -423,7 +423,6 @@ Advection::OutputStreamsGnuplotMaxTime( const  std::string& filename,
     int idx = 0;
     for( const auto& s : _streams )
     {
-        std::fprintf( f, "# Flow line index = %d\n", idx++ );
         for( const auto& p : s )
         {
             if( p.time > timeStamp )
@@ -431,11 +430,12 @@ Advection::OutputStreamsGnuplotMaxTime( const  std::string& filename,
 
             if( !p.IsSpecial() )
             {
-                std::fprintf( f, "%f, %f, %f, %f, %f\n", p.location.x, p.location.y, 
-                              p.location.z, p.time, p.value );
+                std::fprintf( f, "%d, %f, %f, %f, %f, %f\n", idx, p.location.x, 
+                              p.location.y, p.location.z, p.time, p.value );
             }
         }
         std::fprintf( f, "\n\n" );
+        idx++;
     }
     std::fclose( f );
 
