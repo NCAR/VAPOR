@@ -54,14 +54,6 @@ PythonVariables::PythonVariables(
 
     _justSaved = false;
 
-    QColor background = palette().color(QWidget::backgroundRole());
-    QPalette labelPalette = _scriptSaveLabel->palette();
-    labelPalette.setColor(_scriptSaveLabel->foregroundRole(), background);
-    _scriptSaveLabel->setPalette(labelPalette);
-    labelPalette = _scriptTestLabel->palette();
-    labelPalette.setColor(_scriptTestLabel->foregroundRole(), background);
-    _scriptTestLabel->setPalette(labelPalette);
-
     string pythonImagePath = Wasp::GetSharePath(
 		string("images") + string("/PythonLogo.png")
 	);
@@ -195,43 +187,8 @@ void PythonVariables::Update(bool internalUpdate) {
     _3DInputVarTable->blockSignals(false);
     _summaryTable->blockSignals(false);
     _outputVarTable->blockSignals(false);
-
-    if (_justSaved && internalUpdate) {
-        bool fadeIn = false;
-        _showTestLabel(fadeIn);
-        _showSaveLabel(fadeIn);
-        _justSaved = false;
-    }
 }
     
-void PythonVariables::_showTestLabel(bool show) {
-    QColor textColor;
-    if (show) 
-        textColor = QColor(0, 0, 255);
-    else
-        textColor = _scriptTestLabel->palette().color(QPalette::WindowText);
-    
-    QPalette labelPalette = _scriptTestLabel->palette();
-    labelPalette.setColor(_scriptTestLabel->foregroundRole(), textColor);
-    _scriptTestLabel->setPalette(labelPalette);
-
-    return;
-}
-
-void PythonVariables::_showSaveLabel(bool show) {
-    QColor textColor;
-    if (show) 
-        textColor = QColor(0, 0, 255);
-    else
-        textColor = _scriptSaveLabel->palette().color(QPalette::WindowText);
-    
-    QPalette labelPalette = _scriptSaveLabel->palette();
-    labelPalette.setColor(_scriptSaveLabel->foregroundRole(), textColor);
-    _scriptSaveLabel->setPalette(labelPalette);
-
-    return;
-}
-
 void PythonVariables::_connectWidgets() {
     connect(_newScriptButton, SIGNAL(clicked()),
         this, SLOT(_newScript()));
@@ -573,19 +530,15 @@ void PythonVariables::_testScript() {
 	string s = _controlExec->GetFunctionStdout(
 		_scriptType, _dataMgrName, _scriptName
 	);
+	QMessageBox msgBox;
 	if (! s.empty()) {
-		QMessageBox msgBox;
 		msgBox.setText("Script output:");
 		msgBox.setInformativeText(s.c_str());
 		msgBox.exec();
 	}
 
-    bool fadeIn = true;
-    _showTestLabel(fadeIn);
-
-	
-
-    _justSaved = true;
+    msgBox.setText("Test passed.");
+    msgBox.exec();
 }
 
 
@@ -610,9 +563,9 @@ void PythonVariables::_saveScript() {
         return;
     }
 
-    bool fadeIn = true;
-    _showSaveLabel(fadeIn);
-    _justSaved = true;
+    QMessageBox msgBox;
+    msgBox.setText("Script saved to session.");
+    msgBox.exec();
 }
 
 std::vector<string> PythonVariables::_buildInputVars() const {
@@ -632,33 +585,6 @@ std::vector<string> PythonVariables::_buildInputVars() const {
 void PythonVariables::_closeScript() {
     _reset();
     close();
-}
-
-void PythonVariables::_saveToSession() {
-    bool fadeIn = true;
-    _showSaveLabel(fadeIn);
-    _justSaved = true;
-}
-
-void PythonVariables::_updateSaveLabelColor(int r, int g, int b) {
-    QColor newColor = QColor(r, g, b);
-    QPalette labelPalette = _scriptSaveLabel->palette();
-    labelPalette.setColor(_scriptSaveLabel->foregroundRole(), newColor);
-    _scriptSaveLabel->setPalette(labelPalette);
-}
-
-void PythonVariables::_updateTestLabelColor(int r, int g, int b) {
-    QColor newColor = QColor(r, g, b);
-    QPalette labelPalette = _scriptTestLabel->palette();
-    labelPalette.setColor(_scriptTestLabel->foregroundRole(), newColor);
-    _scriptTestLabel->setPalette(labelPalette);
-}
-
-void PythonVariables::_updateLabelColor(int r, int g, int b, QLabel* label) {
-    QColor newColor = QColor(r, g, b);
-    QPalette labelPalette = label->palette();
-    labelPalette.setColor(label->foregroundRole(), newColor);
-    label->setPalette(labelPalette);
 }
 
 void PythonVariables::_coordInputVarChanged(int row, int col) {
@@ -877,10 +803,6 @@ void PythonVariables::_deleteVariable() {
 
 void PythonVariables::_scriptChanged() {
     _script = _scriptEdit->toPlainText().toStdString();
-    
-    bool fadeIn = false;
-    _showTestLabel(fadeIn);
-    _showSaveLabel(fadeIn);
 }
 
 void PythonVariables::_makeInputTableValues(
