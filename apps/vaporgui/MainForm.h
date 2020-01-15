@@ -78,6 +78,7 @@ protected:
 private:
     static const QEvent::Type ParamsChangeEvent;
     static const QEvent::Type ParamsIntermediateChangeEvent;
+    static const std::string _documentationURL;
 
  QMdiArea* _mdiArea;
  QApplication* _App;
@@ -111,12 +112,6 @@ private:
  QToolBar *_vizToolBar;
  QToolBar *_animationToolBar;
 
- QMenu *_webTabHelpMenu;
- QMenu *_webBasicHelpMenu;
- QMenu *_webPreferencesHelpMenu;
- QMenu *_webPythonHelpMenu;
- QMenu *_webVisualizationHelpMenu;
-
  // Submenus under the File menu:
  //
  QMenu* _dataMenu;
@@ -136,6 +131,7 @@ private:
  QAction* _helpAboutAction;
  QAction* _whatsThisAction;
  QAction* _installCLIToolsAction;
+ QAction* _webDocumentationAction;
 
  // Data menu
  //
@@ -232,11 +228,6 @@ private:
  void addMouseModes();
  void setMouseMode(int newMode) {_modeCombo->setCurrentIndex(newMode);}
  void showCitationReminder();
- void buildWebTabHelpMenu(std::vector<QAction*>* actions);
- void buildWebTabHelpMenu(
-	const vector <pair <string, string> > &help
- );
- void buildWebHelpMenus();
 
  void stopAnimCapture(string vizName){
 	if (vizName == _capturingAnimationVizName) endAnimCapture();
@@ -357,8 +348,8 @@ private slots:
 
  //animation toolbar:
  void _setTimeStep();
- 
- void launchWebHelp(QAction*);
+
+ void launchWebDocs() const; 
  void modeChange(int);
  void setInteractiveRefLevel(int);
  void loadStartingPrefs();
