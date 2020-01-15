@@ -373,7 +373,7 @@ Advection::_prepareFileWrite( const std::string& filename, bool append ) const
 
     std::fprintf( f, "%s\n",   "# This file could be plotted by Gnuplot using the following command:");
     std::fprintf( f, "%s\n\n", "# splot output_filename u 2:3:4 w lines ");
-    std::fprintf( f, "%s\n\n", "# ID    X-position      Y-position      Z-position     Time     Value" );
+    std::fprintf( f, "%s\n\n", "# ID,   X-position,    Y-position,    Z-position,    Time,   Value" );
 
     return f;
 }
