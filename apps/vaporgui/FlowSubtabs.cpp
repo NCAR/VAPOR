@@ -187,6 +187,10 @@ void FlowSeedingSubtab::_createSeedingSection(QWidget *parent)
     _listOfSeedsFrame = new VFrame();
     _listOfSeedsFrame->addWidget(new VLineItem("List of seeds file", _listOfSeedsFileReader));
     _seedDistributionSection->layout()->addWidget(_listOfSeedsFrame);
+    _listOfSeedsFrame->setToolTip("A text file that contains all the seeds.\n\
+Each line of this file specifies a seed location and time as comma separated X, Y, Z, T values,\n\
+where T is optional.\n\
+Any line that is empty or starts with a # is not considered as input.");
 
     // Random distribution selection
     _randomSeedsFrame = new VFrame();
