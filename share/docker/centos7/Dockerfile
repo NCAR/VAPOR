@@ -14,7 +14,7 @@ RUN yum -y clean all \
 RUN yum -y install epel-release \
     && yum -y install cmake3 \
     && yum -y install make \
-    && yum -y install tar \
+    && yum -y install bsdtar \
     && yum -y install gcc-c++ \
     && yum -y install curl \
     && yum -y install xz-devel \
@@ -29,21 +29,22 @@ RUN yum -y install epel-release \
     && yum -y install fontconfig-devel \
     && pip3 install gdown
 
-RUN mkdir -p /glade/p/VAST/VAPOR/third-party
+RUN mkdir -p /usr/local/VAPOR-Deps
 
-RUN gdown https://drive.google.com/uc?id=1_JdUuiy_iQUuIDoPyBn2pupBTz-LS4pM \
-    && mv /apps-2017-Centos7.tar.xz /glade/p/VAST/VAPOR/third-party \
-    && tar xf /glade/p/VAST/VAPOR/third-party/apps-2017-Centos7.tar.xz \
-           -C /glade/p/VAST/VAPOR/third-party \
-    && chown -R root:root /glade
+#Hack to download a file from google drive
+RUN fileid="1e7F3kDoKctBmB3NOF4dES2395oScb9_0" \
+    && filename="/usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz" \
+    && curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null \
+    && curl -Lb ./cookie \
+    "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
+    -o ${filename}
 
-RUN ls /glade/p/VAST/VAPOR/third-party/apps-2017
+RUN ls -lrth /usr/local/VAPOR-Deps/
 
-#RUN git clone https://github.com/g-truc/glm.git \
-#    /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/glm
+RUN bsdtar -xf /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz -C /usr/local/VAPOR-Deps
 
-#RUN mv /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/glm/glm/* \
-#    /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/include/glm
+RUN chown -R root:root /usr
+RUN chmod -R 777 /usr
 
 RUN git clone https://github.com/NCAR/VAPOR.git \
     && cp /VAPOR/site_files/site.NCAR /VAPOR/site.local \
