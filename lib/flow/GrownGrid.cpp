@@ -27,6 +27,10 @@ std::string GrownGrid::GetType() const {
     return type;
 }
 
+float GrownGrid::GetMissingValue() const {
+    return _grid2d->GetMissingValue();
+}
+
 void GrownGrid::GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const {
     _grid2d->GetUserExtents(minu, maxu);
     if (minu.size() < 3)
