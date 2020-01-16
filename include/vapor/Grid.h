@@ -304,7 +304,7 @@ class VDF_API Grid {
     //! value of the sampled or reconstructed function is unknown at a
     //! particular point.
     //!
-    float GetMissingValue() const { return (_missingValue); };
+    virtual float GetMissingValue() const;
 
     //! Set the missing value indicator
     //!

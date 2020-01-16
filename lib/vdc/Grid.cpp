@@ -56,6 +56,10 @@ Grid::Grid(
     _blks = blks;
 }
 
+float Grid::GetMissingValue() const {
+    return (_missingValue);
+}
+
 float Grid::GetValueAtIndex(const size_t indices[3]) const {
     float *fptr = GetValueAtIndex(_blks, indices);
     if (!fptr)
