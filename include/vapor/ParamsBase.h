@@ -100,6 +100,11 @@ public:
 
     ParamsBase &operator=(const ParamsBase &rhs);
 
+    //! Explicit delete the two flavors of move constructor,
+    //! so they ain't called accidentally.
+    ParamsBase(ParamsBase &&) = delete;
+    ParamsBase &operator=(ParamsBase &) = delete;
+
     //! Equivalence operator
     //
     bool operator==(const ParamsBase &rhs) const { return (_ssave == rhs._ssave && *_node == *(rhs._node)); }
