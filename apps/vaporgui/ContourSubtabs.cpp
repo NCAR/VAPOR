@@ -8,12 +8,10 @@ ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget *parent)
 
     ((QVBoxLayout *)layout())->insertWidget(0, _tfEditor = new TFEditor);
 
-    _lineWidthCombo = new Combo(lineWidthEdit, lineWidthSlider);
     _countCombo = new Combo(contourCountEdit, contourCountSlider, true);
     _cMinCombo = new Combo(contourMinEdit, contourMinSlider);
     _spacingCombo = new Combo(contourSpacingEdit, contourSpacingSlider);
 
-    connect(_lineWidthCombo, SIGNAL(valueChanged(double)), this, SLOT(SetLineThickness(double)));
     connect(_countCombo, SIGNAL(valueChanged(int)), this, SLOT(SetContourCount(int)));
     connect(_cMinCombo, SIGNAL(valueChanged(double)), this, SLOT(SetContourMinimum(double)));
     connect(_spacingCombo, SIGNAL(valueChanged(double)), this, SLOT(SetContourSpacing(double)));
@@ -24,11 +22,6 @@ void ContourAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *
     _cParams = (VAPoR::ContourParams *)rParams;
     _dataMgr = dataMgr;
     _paramsMgr = paramsMgr;
-
-    double  lineWidth = _cParams->GetLineThickness();
-    GLfloat lineWidthRange[2] = {0.f, 0.f};
-    glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, lineWidthRange);
-    _lineWidthCombo->Update(lineWidthRange[0], lineWidthRange[1], lineWidth);
 
     double count = _cParams->GetContourCount();
     _countCombo->Update(1, 50, count);
