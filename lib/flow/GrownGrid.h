@@ -37,9 +37,10 @@ public:
     float GetDefaultZ() const;
     std::string GetType() const override;
     float GetValue(const std::vector <double> &coords) const override;
-    void GetUserExtents( std::vector <double> &minu, 
-                         std::vector <double> &maxu ) const override;
-    bool InsideGrid(const std::vector <double> &coords) const override;
+    void  GetUserExtents( std::vector <double> &minu, 
+                          std::vector <double> &maxu ) const override;
+    bool  InsideGrid(const std::vector <double> &coords) const override;
+    float GetMissingValue() const override;
 
 private:
     //
