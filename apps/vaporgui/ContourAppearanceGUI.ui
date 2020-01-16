@@ -289,70 +289,6 @@
          </item>
         </layout>
        </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,1,1">
-         <property name="spacing">
-          <number>10</number>
-         </property>
-         <property name="leftMargin">
-          <number>5</number>
-         </property>
-         <property name="rightMargin">
-          <number>10</number>
-         </property>
-         <item>
-          <widget class="QLabel" name="label">
-           <property name="minimumSize">
-            <size>
-             <width>30</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Line Width</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSlider" name="lineWidthSlider">
-           <property name="minimumSize">
-            <size>
-             <width>124</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>150</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lineWidthEdit">
-           <property name="minimumSize">
-            <size>
-             <width>100</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>100</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
       </layout>
      </widget>
     </widget>
@@ -371,8 +307,6 @@
     </spacer>
    </item>
   </layout>
-  <zorder>line_3</zorder>
-  <zorder>tabWidget</zorder>
  </widget>
  <resources/>
  <connections/>
