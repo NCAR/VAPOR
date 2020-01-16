@@ -352,6 +352,7 @@ void Statistics::showMe()
     show();
     raise();
     activateWindow();
+    update();
 }
 
 int Statistics::initControlExec(ControlExec* ce) 

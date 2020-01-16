@@ -2193,8 +2193,12 @@ void MainForm::installCLITools(){
 }
 
 void MainForm::launchStats(){
-    if (!_stats) 
+    if (!_stats) {
         _stats = new Statistics(this);
+        cout << "new stats" << endl;
+    }
+    else 
+        cout << "old stats" << endl;
 	if (_controlExec) 
     {
 		_stats->initControlExec(_controlExec);
