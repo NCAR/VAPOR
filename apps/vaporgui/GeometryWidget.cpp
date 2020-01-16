@@ -480,15 +480,14 @@ void GeometryWidget::_resetBoxIfNeeded(
 
     // We need to ensure that there is an active variable to base
     // our new extents off of.  If there is no active variable, return.
-	if( _varFlags & AUXILIARY )  
-	{
-	    if ( _rParams->GetAuxVariableNames().empty() ) return;
-	}
-	else if (_varFlags & VECTOR) {	
-	    if ( _rParams->GetFieldVariableNames().empty() ) return;
-	}
-	else {
-	    if ( _rParams->GetVariableName().empty() ) return;
+    if( _varFlags & AUXILIARY )  {
+        if ( _rParams->GetAuxVariableNames().empty() ) return;
+    }
+    else if (_varFlags & VECTOR) {	
+        if ( _rParams->GetFieldVariableNames().empty() ) return;
+    }
+    else {
+        if ( _rParams->GetVariableName().empty() ) return;
     }
 
     std::vector<double> boxMin, boxMax;
