@@ -411,6 +411,16 @@ void GeometryWidget::Update(ParamsMgr *paramsMgr, DataMgr *dataMgr, RenderParams
 
 void GeometryWidget::_resetBoxIfNeeded(const std::vector<double> &minFullExt, const std::vector<double> &maxFullExt)
 {
+    // We need to ensure that there is an active variable to base
+    // our new extents off of.  If there is no active variable, return.
+    if (_varFlags & AUXILIARY) {
+        if (_rParams->GetAuxVariableNames().empty()) return;
+    } else if (_varFlags & VECTOR) {
+        if (_rParams->GetFieldVariableNames().empty()) return;
+    } else {
+        if (_rParams->GetVariableName().empty()) return;
+    }
+
     std::vector<double> boxMin, boxMax;
     _box->GetExtents(boxMin, boxMax);
 
