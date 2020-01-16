@@ -104,8 +104,6 @@ int Advection::AdvectOneStep(Field *velocity, float deltaT, ADVECTION_METHOD met
             continue;
         else    // Advection successful, keep the new particle.
         {
-            // printf("old: (%f, %f, %f),  new: (%f, %f, %f)\n", past0.location.x, past0.location.y,
-            //       past0.location.z, p1.location.x, p1.location.y, p1.location.z );
             happened = true;
             s.push_back(std::move(p1));
         }
