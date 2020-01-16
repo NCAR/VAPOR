@@ -32,6 +32,19 @@ FlowParams::FlowParams(   DataMgr*                 dataManager,
 {
 	SetVariableName("");
     SetDiagMsg("FlowParams::FlowParams() this=%p", this);
+
+    // At this point the base class is initialized, and the _Box is properly initialized
+    // to be the extents of the domain. Let's use that information to initialize the rake! 
+    std::vector<double> minext, maxext;
+    auto box = RenderParams::GetBox();
+    box->GetExtents( minext, maxext );
+    std::vector<float> floats( minext.size() * 2 );
+    for( int i = 0; i < minext.size(); i++ )
+    {
+        floats[i*2]   = minext[i];
+        floats[i*2+1] = maxext[i];
+    }
+    this->SetRake( floats );
 }
 
 FlowParams::FlowParams(   DataMgr*                dataManager, 
@@ -204,21 +217,8 @@ FlowParams::SetPeriodic( const std::vector<bool>& bools )
 std::vector<float> FlowParams::GetRake() const
 {
     auto doubles = GetValueDoubleVec( _rakeTag );
-    auto rakesize = doubles.size();
-
-    if ( rakesize != 6 && rakesize != 4 ) 
-    {
-        // Six NANs represent the initial state
-        std::vector<float> tmp(6, std::nan("1") );
-        return tmp;
-    }
-
-    std::vector<float> floats( rakesize, std::nan("1") );
-    if( !std::isnan( doubles[0] ) )
-    {
-        for( int i = 0; i < rakesize; i++ )
-            floats[i] = float(doubles[i]);
-    }
+    std::vector<float> floats( doubles.size() );
+    std::copy( doubles.cbegin(), doubles.cend(), floats.begin() );
     return floats;
 }
 
@@ -227,10 +227,8 @@ FlowParams::SetRake( const std::vector<float>& rake )
 {
     const auto rakesize = rake.size();
     VAssert( rakesize == 4 || rakesize == 6 );
-    std::vector<double> doubles(rakesize, 0.0);
-    for( int i = 0; i < rakesize; i++ ) {
-        doubles[i] = rake[i];
-    }
+    std::vector<double> doubles(rakesize);
+    std::copy( rake.cbegin(), rake.cend(), doubles.begin() );
     SetValueDoubleVec( _rakeTag, "rake boundaries", doubles );
 }
 
