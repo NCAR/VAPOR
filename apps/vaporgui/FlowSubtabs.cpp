@@ -349,14 +349,19 @@ void FlowSeedingSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *params
     // Update seeding tab
     //
     int mode = _params->GetSeedGenMode();
-    if (mode == static_cast<int>(VAPoR::FlowSeedMode::UNIFORM))
+    if (mode == static_cast<int>(VAPoR::FlowSeedMode::UNIFORM)) {
         _seedTypeCombo->SetValue(GRIDDED_STRING);
-    else if (mode == static_cast<int>(VAPoR::FlowSeedMode::RANDOM))
+        _configureSeedType(GRIDDED_STRING);
+    } else if (mode == static_cast<int>(VAPoR::FlowSeedMode::RANDOM)) {
         _seedTypeCombo->SetValue(RANDOM_STRING);
-    else if (mode == static_cast<int>(VAPoR::FlowSeedMode::RANDOM_BIAS))
+        _configureSeedType(RANDOM_STRING);
+    } else if (mode == static_cast<int>(VAPoR::FlowSeedMode::RANDOM_BIAS)) {
         _seedTypeCombo->SetValue(RANDOM_BIAS_STR);
-    else if (mode == static_cast<int>(VAPoR::FlowSeedMode::LIST))
+        _configureSeedType(RANDOM_BIAS_STR);
+    } else if (mode == static_cast<int>(VAPoR::FlowSeedMode::LIST)) {
         _seedTypeCombo->SetValue(LIST_STRING);
+        _configureSeedType(LIST_STRING);
+    }
 
     // Random rake values
     std::vector<std::string> vars = dataMgr->GetDataVarNames(_numDims);
