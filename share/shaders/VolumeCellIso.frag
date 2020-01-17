@@ -3,9 +3,12 @@
 #include VolumeCellBase.frag
 #include VolumeIsoInclude.frag
 
-void TestIsoSample(const vec3 hit, const vec3 dir, vec3 rayLightingNormal, float value, float dv, float ld, inout vec4 accum)
+void TestIsoSample(const vec3 rayLightingNormal, const float isoValue, const vec3 hit, const float dv, const float ld, const float t, const float lt, const float t0, const float t1, const vec3 entranceCoord, const vec3 exitCoord, inout vec4 accum)
 {
-    if ((ld < value && dv >= value) || (ld > value && dv <= value)) {
+    if ((ld < isoValue && dv >= isoValue) || (ld > isoValue && dv <= isoValue)) {
+        
+        float ti = mix(lt, t, (isoValue-ld)/(dv-ld));
+        vec3 hit = mix(entranceCoord, exitCoord, (ti-t0)/(t1-t0));
         
         vec3 isoSampleSTR = hit/coordDimsF;
         vec4 color = GetIsoSurfaceColor(isoSampleSTR);
@@ -14,39 +17,27 @@ void TestIsoSample(const vec3 hit, const vec3 dir, vec3 rayLightingNormal, float
         color.rgb *= PhongLighting(normal, rayLightingNormal);
         
         BlendToBack(accum, PremultiplyAlpha(color));
+        
+        if (accum.a > ALPHA_BREAK)
+            gl_FragDepth = CalculateDepth(hit);
     }
 }
 
-void RenderCellSmartSampling(const vec3 origin, const vec3 dir, vec3 rayLightingNormal, const vec3 entranceCoord, const vec3 exitCoord, const float tStart, const float tEnd, const float t0, const float t1, const float step, inout float ld, inout vec4 accum)
+void Sample(const float sampleT, const vec3 rayLightingNormal, const vec3 entranceCoord, const vec3 exitCoord, const float t0, const float t1, inout float ld, inout float lt, inout vec4 accum)
 {
-    vec3 hit = mix(entranceCoord, exitCoord, (tStart-t0)/(t1-t0));
-    float dv = GetDataCoordinateSpace(hit);
-    if (isoEnabled[0]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[0], dv, ld, accum);
-    if (isoEnabled[1]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[1], dv, ld, accum);
-    if (isoEnabled[2]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[2], dv, ld, accum);
-    if (isoEnabled[3]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[3], dv, ld, accum);
-    ld = dv;
-    if (accum.a > ALPHA_BREAK) {
-        gl_FragDepth = CalculateDepth(origin + dir*tStart);
+    if (accum.a > ALPHA_BREAK)
         return;
-    }
     
-    for (float t = step * (floor(tStart/step)+1); t < tEnd; t+= step) {
-        vec3 hit = mix(entranceCoord, exitCoord, (t-t0)/(t1-t0));
-        float dv = GetDataCoordinateSpace(hit);
-        
-        if (isoEnabled[0]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[0], dv, ld, accum);
-        if (isoEnabled[1]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[1], dv, ld, accum);
-        if (isoEnabled[2]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[2], dv, ld, accum);
-        if (isoEnabled[3]) TestIsoSample(hit, dir, rayLightingNormal, isoValue[3], dv, ld, accum);
-
-        ld = dv;
-        
-        if (accum.a > ALPHA_BREAK) {
-            gl_FragDepth = CalculateDepth(origin + dir*t);
-            return;
-        }
-    }
+    vec3 hit = mix(entranceCoord, exitCoord, (sampleT-t0)/(t1-t0));
+    float dv = GetDataCoordinateSpace(hit);
+    
+    if (isoEnabled[0]) TestIsoSample(rayLightingNormal, isoValue[0], hit, dv, ld, sampleT, lt, t0, t1, entranceCoord, exitCoord, accum);
+    if (isoEnabled[1]) TestIsoSample(rayLightingNormal, isoValue[1], hit, dv, ld, sampleT, lt, t0, t1, entranceCoord, exitCoord, accum);
+    if (isoEnabled[2]) TestIsoSample(rayLightingNormal, isoValue[2], hit, dv, ld, sampleT, lt, t0, t1, entranceCoord, exitCoord, accum);
+    if (isoEnabled[3]) TestIsoSample(rayLightingNormal, isoValue[3], hit, dv, ld, sampleT, lt, t0, t1, entranceCoord, exitCoord, accum);
+    
+    ld = dv;
+    lt = sampleT;
 }
 
 vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, OUT float t1)
@@ -56,7 +47,6 @@ vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float t
     ivec3 exitFace;
     vec3 exitCoord;
     bool hasNext = true;
-    float tStart = t0;
     ivec3 initialCell = currentCell;
     float unitDistanceScaled = unitDistance / length(dir * scales);
     float step = unitDistanceScaled/7/samplingRateMultiplier * GetSamplingNoise();
@@ -67,9 +57,14 @@ vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float t
     vec4 accum = vec4(0);
     float a = 0;
     
-    float null;
-    IntersectRayCellFace(origin, dir, -FLT_MAX, currentCell, entranceFace, null, entranceCoord);
-    float ld = GetDataCoordinateSpace(entranceCoord);
+    float lt;
+    IntersectRayCellFace(origin, dir, -FLT_MAX, currentCell, entranceFace, lt, entranceCoord);
+    FindNextCell(origin, dir, t0, currentCell, entranceFace, nextCell, exitFace, exitCoord, t1);
+    
+    tMin = min(tMin, t0);
+    vec3 hit = mix(entranceCoord, exitCoord, (tMin-t0)/(t1-t0));
+    float ld = GetDataCoordinateSpace(hit);
+    lt = tMin;
     
     while (hasNext) {
         if (t0 > tMax)
@@ -82,7 +77,10 @@ vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float t
             float tStart = max(t0, tMin);
 
 			if (ShouldRenderCell(currentCell)) {
-                RenderCellSmartSampling(origin, dir, rayLightingNormal, entranceCoord, exitCoord, tStart, tEnd, t0, t1, step, ld, accum);
+                Sample(tStart, rayLightingNormal, entranceCoord, exitCoord, t0, t1, ld, lt, accum);
+                
+                if (!hasNext || tMax <= t1)
+                    Sample(tEnd, rayLightingNormal, entranceCoord, exitCoord, t0, t1, ld, lt, accum);
             } else {
                 // Leaving missing value cell
                 ld = GetDataCoordinateSpace(exitCoord);
@@ -98,5 +96,6 @@ vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float t
         if (accum.a > ALPHA_BREAK || i > 4096)
             break;
     }
+    
     return accum;
 }
