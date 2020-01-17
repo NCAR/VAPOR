@@ -118,7 +118,7 @@ int Advection::AdvectOneStep(Field *velocity, float deltaT, ADVECTION_METHOD met
         return 0;
 }
 
-int Advection::AdvectTillTime(Field *velocity, float deltaT, float targetT, ADVECTION_METHOD method)
+int Advection::AdvectTillTime(Field *velocity, float startT, float deltaT, float targetT, ADVECTION_METHOD method)
 {
     int ready = CheckReady();
     if (ready != 0) return ready;
@@ -128,6 +128,9 @@ int Advection::AdvectTillTime(Field *velocity, float deltaT, float targetT, ADVE
     for (auto &s : _streams)    // Process one stream at a time
     {
         Particle p0 = s.back();    // Start from the last particle in this stream
+        if (p0.time < startT)      // Skip this stream if it didn't advance to startT
+            continue;
+
         while (p0.time < targetT) {
             // Check if the particle is inside of the volume.
             // Wrap it along periodic dimensions if applicable.
