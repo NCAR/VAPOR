@@ -2195,6 +2195,11 @@ void MainForm::installCLITools(){
 void MainForm::launchStats(){
     if (!_stats) {
         _stats = new Statistics(this);
+		connect( _stats, 
+			&QDialog::finished, 
+			this, 
+			&MainForm::_statsClosed
+		);
         cout << "new stats" << endl;
     }
     else 
@@ -2202,8 +2207,15 @@ void MainForm::launchStats(){
 	if (_controlExec) 
     {
 		_stats->initControlExec(_controlExec);
-	} 
-	_stats->showMe();   
+	}
+	_stats->showMe();
+}
+
+void MainForm::_statsClosed() {
+	if (_stats != nullptr) {
+		delete _stats;
+		_stats = nullptr;
+	}
 }
 
 void MainForm::launchPlotUtility(){
@@ -2212,23 +2224,40 @@ void MainForm::launchPlotUtility(){
         VAssert( _controlExec->GetDataStatus() );
         VAssert( _controlExec->GetParamsMgr()  );
         _plot = new Plot( _controlExec->GetDataStatus(), _controlExec->GetParamsMgr(), this);
+		connect( _plot, &QDialog::finished, this, &MainForm::_plotClosed);
     }
-    else
-    {
-        _plot->show();
-        _plot->activateWindow();
-        _plot->Update();
-    }
+    _plot->Update();
+	_plot->open();
+}
+
+void MainForm::_plotClosed() {
+	if (_plot != nullptr) {
+		delete _plot;
+		_plot = nullptr;
+	}
 }
 
 void MainForm::launchPythonVariables(){
-    if (!_pythonVariables) 
+    if (!_pythonVariables) {
         _pythonVariables = new PythonVariables(this);
+		connect( _pythonVariables, 
+			&QDialog::finished, 
+			this, 
+			&MainForm::_pythonClosed
+		);
+	}
 	if (_controlExec) 
     {
 		_pythonVariables->InitControlExec(_controlExec);
 	} 
 	_pythonVariables->ShowMe();   
+}
+
+void MainForm::_pythonClosed() {
+	if (_pythonVariables!= nullptr) {
+		delete _pythonVariables;
+		_pythonVariables = nullptr;
+	}
 }
 
 void MainForm::_setTimeStep()

@@ -349,10 +349,8 @@ void Statistics::_updateStatsTable()
 
 void Statistics::showMe()
 {
-    show();
-    raise();
-    activateWindow();
-    update();
+	open();
+	Update();
 }
 
 int Statistics::initControlExec(ControlExec* ce) 
