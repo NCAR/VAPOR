@@ -881,9 +881,7 @@ void PythonVariables::InitControlExec(
 
 void PythonVariables::ShowMe() {
     Update(true);
-    show();
-    raise();
-    activateWindow();
+    open();
 }
 
 NewItemDialog::NewItemDialog(
