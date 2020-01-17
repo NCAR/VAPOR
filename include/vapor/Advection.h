@@ -30,7 +30,8 @@ class FLOW_API Advection final {
     int AdvectOneStep(Field *velocityField, float deltaT,
                       ADVECTION_METHOD method = ADVECTION_METHOD::RK4);
     // Advect as many steps as necessary to reach a certain time: targetT.
-    int AdvectTillTime(Field *velocityField, float deltaT, float targetT,
+    // Note: it only considers particles that have already passed startT.
+    int AdvectTillTime(Field *velocityField, float startT, float deltaT, float targetT,
                        ADVECTION_METHOD method = ADVECTION_METHOD::RK4);
 
     // Retrieve field values of a particle based on its location, and put the result in
