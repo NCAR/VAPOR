@@ -301,6 +301,9 @@ class MainForm : public QMainWindow {
     string _getDataSetName(string file, bool promptToReplaceExistingDataset = true);
 
   private slots:
+    void _plotClosed();
+    void _statsClosed();
+    void _pythonClosed();
     void sessionOpen(QString qfileName = "");
     void fileSave();
     void fileSaveAs();
