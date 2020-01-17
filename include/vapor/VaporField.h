@@ -129,6 +129,7 @@ private:
     //         and return a GrownGrid.
     const VAPoR::Grid* _getAGrid( size_t              timestep,
                                   const std::string&  varName ) const ;
+
 };
 };
 
