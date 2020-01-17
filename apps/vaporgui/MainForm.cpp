@@ -2200,10 +2200,7 @@ void MainForm::launchStats(){
 			this, 
 			&MainForm::_statsClosed
 		);
-        cout << "new stats" << endl;
     }
-    else 
-        cout << "old stats" << endl;
 	if (_controlExec) 
     {
 		_stats->initControlExec(_controlExec);
@@ -2226,7 +2223,7 @@ void MainForm::launchPlotUtility(){
         _plot = new Plot( _controlExec->GetDataStatus(), _controlExec->GetParamsMgr(), this);
 		connect( _plot, &QDialog::finished, this, &MainForm::_plotClosed);
     }
-    _plot->Update();
+	_plot->Update();
 	_plot->open();
 }
 
