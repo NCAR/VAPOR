@@ -25,6 +25,7 @@
 #include <functional>
 #include <vapor/XmlNode.h>
 #include <vapor/ParamsBase.h>
+#include <vapor/STLUtils.h>
 
 
 using namespace VAPoR;
@@ -248,6 +249,8 @@ string ParamsBase::GetValueString(
 	if (! _node->HasElementString(tag)) return(defaultVal);
 
 	string v = _node->GetElementString(tag);
+    v = STLUtils::ReplaceAll(v, "\\ ", " ");
+    
 	if (v == "NULL") {
 		v = "";
 	}
