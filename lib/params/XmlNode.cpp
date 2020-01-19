@@ -711,8 +711,7 @@ std::ostream &operator<<(ostream &os, const VAPoR::XmlNode &node) {
 
         const vector<long> &v = plong->second;
 
-        os << "<" << tag << " Type=\"Long\">" << endl
-           << "  ";
+        os << "<" << tag << " Type=\"Long\">" << endl;
 
         for (i = 0; i < (int)v.size(); i++) {
             os << v[i] << " ";
@@ -725,8 +724,7 @@ std::ostream &operator<<(ostream &os, const VAPoR::XmlNode &node) {
     for (; pdouble != node._doublemap.end(); pdouble++) {
         const string &tag = pdouble->first;
 
-        os << "<" << tag << " Type=\"Double\">" << endl
-           << "  ";
+        os << "<" << tag << " Type=\"Double\">" << endl;
 
         const vector<double> &v = pdouble->second;
 
@@ -741,8 +739,7 @@ std::ostream &operator<<(ostream &os, const VAPoR::XmlNode &node) {
     for (; pstring != node._stringmap.end(); pstring++) {
         const string &tag = pstring->first;
 
-        os << "<" << tag << " Type=\"String\">" << endl
-           << "  ";
+        os << "<" << tag << " Type=\"String\">" << endl;
 
         string v = escapeStr(pstring->second);
 
