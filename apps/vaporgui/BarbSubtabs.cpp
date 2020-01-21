@@ -42,7 +42,7 @@ void BarbGeometrySubtab::Update(VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dat
 BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
-    verticalLayout->insertWidget(0, _tfe = new TFEditor(true));
+    verticalLayout->insertWidget(1, _tfe = new TFEditor(true));
     _tfe->SetShowOpacityMap(false);
 
     _xDimCombo = new Combo(xDimEdit, xDimSlider, true);
@@ -55,6 +55,10 @@ BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget *parent)
     _zDimSelector->SetLabel(QString("Z Dimension"));
     _zDimSelector->SetIntType(true);
     _zDimSelector->SetExtents(COUNT_MIN, COUNT_MAX);
+
+    this->tab->layout()->addWidget(_colorByVarCheckbox = new ParamsWidgetCheckbox(VAPoR::RenderParams::_useSingleColorTag, "Use Single Color"));
+    this->tab->layout()->addWidget(_constantColorSelector = new ParamsWidgetColor(VAPoR::RenderParams::_constantColorTag, "Constant Color"));
+    this->tab->layout()->setMargin(12);
 
     connect(_xDimCombo, SIGNAL(valueChanged(int)), this, SLOT(xDimChanged(int)));
     connect(_yDimCombo, SIGNAL(valueChanged(int)), this, SLOT(yDimChanged(int)));
@@ -101,6 +105,10 @@ void BarbAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *par
     _bParams = (VAPoR::BarbParams *)bParams;
     _paramsMgr = paramsMgr;
     _tfe->Update(dataMgr, paramsMgr, bParams);
+    _colorByVarCheckbox->Update(bParams);
+    _constantColorSelector->Update(bParams);
+    _tfe->setEnabled(!bParams->UseSingleColor());
+    _constantColorSelector->setEnabled(bParams->UseSingleColor());
 
     vector<long> grid = _bParams->GetGrid();
     _xDimCombo->Update(COUNT_MIN, COUNT_MAX, grid[X]);

@@ -5,6 +5,7 @@
 #include "ui_BarbVariablesGUI.h"
 #include "ui_BarbGeometryGUI.h"
 #include "ui_BarbAnnotationGUI.h"
+#include "ParamsWidgets.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -48,14 +49,16 @@ private:
     void _showZDimWidgets();
     bool _isVariable2D() const;
 
-    VAPoR::BarbParams *_bParams;
-    VAPoR::DataMgr *   _dataMgr;
-    VAPoR::ParamsMgr * _paramsMgr;
-    Combo *            _xDimCombo;
-    Combo *            _yDimCombo;
-    Combo *            _lengthCombo;
-    Combo *            _thicknessCombo;
-    TFEditor *         _tfe;
+    VAPoR::BarbParams *   _bParams;
+    VAPoR::DataMgr *      _dataMgr;
+    VAPoR::ParamsMgr *    _paramsMgr;
+    Combo *               _xDimCombo;
+    Combo *               _yDimCombo;
+    Combo *               _lengthCombo;
+    Combo *               _thicknessCombo;
+    TFEditor *            _tfe;
+    ParamsWidgetCheckbox *_colorByVarCheckbox;
+    ParamsWidgetColor *   _constantColorSelector;
 };
 
 class BarbGeometrySubtab : public QWidget, public Ui_BarbGeometryGUI {
