@@ -40,7 +40,14 @@ const string &Version::GetFullVersionString()
     return (_formatString);
 }
 
-const string Version::GetBuildHash() { return string(VERSION_COMMIT); }
+const string Version::GetBuildHash()
+{
+    string hash = string(VERSION_COMMIT);
+    if (hash.empty())
+        return "<debug>";
+    else
+        return hash;
+}
 
 int Version::Compare(int major, int minor, int minorminor)
 {
