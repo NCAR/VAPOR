@@ -161,6 +161,11 @@ void ErrorReporter::Report(string msg, Type severity, string details) {
             e->_log.pop_back();
         }
     }
+
+    const string sysInfo = GetSystemInformation();
+    details += "------------------\n";
+    details += sysInfo + "\n";
+
     box->setDetailedText(details.c_str());
 
     switch (severity) {
@@ -178,7 +183,7 @@ void ErrorReporter::Report(string msg, Type severity, string details) {
     }
 
     string logText;
-    logText = GetSystemInformation() + "\n";
+    logText = sysInfo + "\n";
     logText += "-------------------\n";
     logText += msg + "\n";
     logText += "-------------------\n";
