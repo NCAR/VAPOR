@@ -43,7 +43,11 @@ const string &Version::GetFullVersionString() {
 
 const string Version::GetBuildHash()
 {
-	return string(VERSION_COMMIT);
+    string hash = string(VERSION_COMMIT);
+    if (hash.empty())
+        return "<debug>";
+    else
+        return hash;
 }
 
 int Version::Compare(int major, int minor, int minorminor) {
