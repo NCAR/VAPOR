@@ -800,6 +800,51 @@ int DCWRF::_GetProj4String(
 	return(0);
 }
 
+// Check to see if the horizontal coordinates, XLONG and XLAT, are 
+// constant value. For simplicity, only check the
+// first two elements of each array.
+//
+// N.B. older WRF files (pre 4.x) don't have an attribute that identifies
+// the files as being "idealized"; for idealized cases the horizontal 
+// coordinates are initialized to constant values.
+//
+bool DCWRF::_isConstantHorizontalCoords(NetCDFCollection *ncdfc) const {
+
+
+	bool enabled = EnableErrMsg(false);
+
+	vector <string> coordVars = {"XLONG", "XLAT"};
+	for( const auto& c : coordVars ) {
+		size_t start[] = {0,0};
+		size_t count[] = {1,2};
+		float data[2];
+		
+		int fd = ncdfc->OpenRead(0, c);
+		if (fd<0) {
+			EnableErrMsg(enabled);
+			return(false);
+		}
+
+		int rc = ncdfc->Read(start, count, data, fd);
+		if (rc<0) {
+			EnableErrMsg(enabled);
+			return(false);
+		}
+
+		ncdfc->Close(fd);
+
+		if (data[0] != data[1]) {
+			EnableErrMsg(enabled);
+			return(false);
+		}
+	}
+
+	EnableErrMsg(enabled);
+
+	return(true);
+		
+}
+
 bool DCWRF::_isIdealized(NetCDFCollection *ncdfc) const {
 
 	// Version 4.0 of WRF introduced "IDEAL_CASE" attribute. 
@@ -815,6 +860,12 @@ bool DCWRF::_isIdealized(NetCDFCollection *ncdfc) const {
 
 	ncdfc->GetAtt("", "SIMULATION_INITIALIZATION_TYPE", s);
 	if (Wasp::StrCmpNoCase(s, "IDEALIZED DATA") == 0) return(true);
+
+	// Pre version 4.x WRF did not have an attribute to identify 
+	// idealized cases. However, these cases have constant valued 
+	// horizontal coordinates.
+	//
+	if (_isConstantHorizontalCoords(ncdfc)) return(true);
 
 	return(false);
 	
