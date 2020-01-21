@@ -68,6 +68,7 @@ private:
 	Combo* _thicknessCombo;
     TFEditor *_tfe;
     ParamsWidgetCheckbox *_colorByVarCheckbox;
+    ParamsWidgetColor *_constantColorSelector;
 };
 
 class BarbGeometrySubtab : public QWidget, public Ui_BarbGeometryGUI {
