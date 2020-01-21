@@ -664,10 +664,6 @@ public:
 	std::ostream &o, const Mesh &mesh
   );
 
-  friend std::ostream &operator<<(
-	std::ostream &o, const Mesh &mesh
-  );
-
  private:
   string _name;
   std::vector <string> _dim_names;
