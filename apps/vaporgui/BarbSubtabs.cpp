@@ -72,6 +72,7 @@ BarbAppearanceSubtab::BarbAppearanceSubtab(QWidget* parent) {
     
     this->tab->layout()->addWidget(_colorByVarCheckbox = new ParamsWidgetCheckbox(VAPoR::RenderParams::_useSingleColorTag, "Use Single Color"));
     this->tab->layout()->addWidget(_constantColorSelector = new ParamsWidgetColor(VAPoR::RenderParams::_constantColorTag, "Constant Color"));
+    this->tab->layout()->setMargin(12);
 
 	connect(_xDimCombo, SIGNAL(valueChanged(int)), this,
 		SLOT(xDimChanged(int)));
