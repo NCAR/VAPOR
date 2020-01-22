@@ -101,14 +101,14 @@ float GetDepthBuffer()
         float depth = texture(sceneDepth, ST).r;
         return depth * 2 - 1; // back to NDC
     } else {
-        return 1;
+        return 1.0;
     }
 }
 
 float PhongLighting(vec3 normal, vec3 viewDir)
 {
 	if (!lightingEnabled)
-		return 1;
+		return 1.0;
     
     vec3 lightDir = viewDir;
 
