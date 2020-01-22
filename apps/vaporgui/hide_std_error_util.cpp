@@ -11,10 +11,17 @@ static fpos_t pos;
 void HideSTDERR()
 {
 #ifndef WIN32
-    fflush( stderr );
-    fgetpos( stderr, &pos );
+    _savedSTDERR = -1;
+    if ( fflush( stderr ) != 0 )
+        return;
+    if ( fgetpos( stderr, &pos ) != 0 )
+        return;
 
-    _savedSTDERR = dup(STDERR_FILENO);
+    int rc = dup(STDERR_FILENO);
+    if (rc < 0)
+        return;
+    else
+        _savedSTDERR = rc;
 
     freopen( "/dev/null", "w", stderr );
 #endif
@@ -22,6 +29,9 @@ void HideSTDERR()
 void RestoreSTDERR()
 {
 #ifndef WIN32
+    if ( _savedSTDERR == -1 )
+        return;
+
     fflush( stderr );
 
     dup2(  _savedSTDERR, STDERR_FILENO );
