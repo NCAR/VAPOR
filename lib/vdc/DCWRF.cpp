@@ -17,6 +17,7 @@
 #include <vapor/DCUtils.h>
 #include <vapor/DCWRF.h>
 #include <vapor/DerivedVar.h>
+#include <vapor/utils.h>
 #include <netcdf.h>
 
 using namespace VAPoR;
@@ -814,10 +815,16 @@ bool DCWRF::_isConstantHorizontalCoords(NetCDFCollection *ncdfc) const {
 	bool enabled = EnableErrMsg(false);
 
 	vector <string> coordVars = {"XLONG", "XLAT"};
+	vector <float> data;
 	for( const auto& c : coordVars ) {
-		size_t start[] = {0,0};
-		size_t count[] = {1,2};
-		float data[2];
+
+		vector <size_t> dims = ncdfc->GetSpatialDims(c);
+		VAssert(dims.size() == 2);
+
+		vector <size_t> start = {0,0};
+		vector <size_t> count = {dims[0],dims[1]};
+
+		data.resize(Wasp::VProduct(dims));
 		
 		int fd = ncdfc->OpenRead(0, c);
 		if (fd<0) {
@@ -825,7 +832,7 @@ bool DCWRF::_isConstantHorizontalCoords(NetCDFCollection *ncdfc) const {
 			return(false);
 		}
 
-		int rc = ncdfc->Read(start, count, data, fd);
+		int rc = ncdfc->Read(start.data(), count.data(), data.data(), fd);
 		if (rc<0) {
 			EnableErrMsg(enabled);
 			return(false);
@@ -833,9 +840,11 @@ bool DCWRF::_isConstantHorizontalCoords(NetCDFCollection *ncdfc) const {
 
 		ncdfc->Close(fd);
 
-		if (data[0] != data[1]) {
-			EnableErrMsg(enabled);
-			return(false);
+		for (size_t i=0; i<Wasp::VProduct(dims)-1; i++) {
+			if (data[i] != data[i+1]) {
+				EnableErrMsg(enabled);
+				return(false);
+			}
 		}
 	}
 
