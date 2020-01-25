@@ -5,6 +5,7 @@
 #include "ui_BarbVariablesGUI.h"
 #include "ui_BarbGeometryGUI.h"
 #include "ui_BarbAnnotationGUI.h"
+#include "ParamsWidgets.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -66,6 +67,8 @@ private:
 	Combo* _lengthCombo;
 	Combo* _thicknessCombo;
     TFEditor *_tfe;
+    ParamsWidgetCheckbox *_colorByVarCheckbox;
+    ParamsWidgetColor *_constantColorSelector;
 };
 
 class BarbGeometrySubtab : public QWidget, public Ui_BarbGeometryGUI {

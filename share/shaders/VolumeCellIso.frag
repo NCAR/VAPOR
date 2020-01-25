@@ -3,7 +3,7 @@
 #include VolumeCellBase.frag
 #include VolumeIsoInclude.frag
 
-void TestIsoSample(const vec3 rayLightingNormal, const float isoValue, const vec3 hit, const float dv, const float ld, const float t, const float lt, const float t0, const float t1, const vec3 entranceCoord, const vec3 exitCoord, inout vec4 accum)
+void TestIsoSample(const vec3 rayLightingNormal, const float isoValue, const float dv, const float ld, const float t, const float lt, const float t0, const float t1, const vec3 entranceCoord, const vec3 exitCoord, inout vec4 accum)
 {
     if ((ld < isoValue && dv >= isoValue) || (ld > isoValue && dv <= isoValue)) {
         
@@ -23,21 +23,21 @@ void TestIsoSample(const vec3 rayLightingNormal, const float isoValue, const vec
     }
 }
 
-void Sample(const float sampleT, const vec3 rayLightingNormal, const vec3 entranceCoord, const vec3 exitCoord, const float t0, const float t1, inout float ld, inout float lt, inout vec4 accum)
+void SampleCell(const vec3 rayLightingNormal, const vec3 entranceCoord, const vec3 exitCoord, const float t0, const float t1, const float ts, const float te, inout vec4 accum)
 {
     if (accum.a > ALPHA_BREAK)
         return;
     
-    vec3 hit = mix(entranceCoord, exitCoord, (sampleT-t0)/(t1-t0));
-    float dv = GetDataCoordinateSpace(hit);
+    vec3 hitS = mix(entranceCoord, exitCoord, (ts-t0)/(t1-t0));
+    float ds = GetDataCoordinateSpace(hitS);
     
-    if (isoEnabled[0]) TestIsoSample(rayLightingNormal, isoValue[0], hit, dv, ld, sampleT, lt, t0, t1, entranceCoord, exitCoord, accum);
-    if (isoEnabled[1]) TestIsoSample(rayLightingNormal, isoValue[1], hit, dv, ld, sampleT, lt, t0, t1, entranceCoord, exitCoord, accum);
-    if (isoEnabled[2]) TestIsoSample(rayLightingNormal, isoValue[2], hit, dv, ld, sampleT, lt, t0, t1, entranceCoord, exitCoord, accum);
-    if (isoEnabled[3]) TestIsoSample(rayLightingNormal, isoValue[3], hit, dv, ld, sampleT, lt, t0, t1, entranceCoord, exitCoord, accum);
+    vec3 hitE = mix(entranceCoord, exitCoord, (te-t0)/(t1-t0));
+    float de = GetDataCoordinateSpace(hitE);
     
-    ld = dv;
-    lt = sampleT;
+    if (isoEnabled[0]) TestIsoSample(rayLightingNormal, isoValue[0], de, ds, te, ts, t0, t1, entranceCoord, exitCoord, accum);
+    if (isoEnabled[1]) TestIsoSample(rayLightingNormal, isoValue[1], de, ds, te, ts, t0, t1, entranceCoord, exitCoord, accum);
+    if (isoEnabled[2]) TestIsoSample(rayLightingNormal, isoValue[2], de, ds, te, ts, t0, t1, entranceCoord, exitCoord, accum);
+    if (isoEnabled[3]) TestIsoSample(rayLightingNormal, isoValue[3], de, ds, te, ts, t0, t1, entranceCoord, exitCoord, accum);
 }
 
 vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, OUT float t1)
@@ -61,11 +61,6 @@ vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float t
     IntersectRayCellFace(origin, dir, -FLT_MAX, currentCell, entranceFace, lt, entranceCoord);
     FindNextCell(origin, dir, t0, currentCell, entranceFace, nextCell, exitFace, exitCoord, t1);
     
-    tMin = min(tMin, t0);
-    vec3 hit = mix(entranceCoord, exitCoord, (tMin-t0)/(t1-t0));
-    float ld = GetDataCoordinateSpace(hit);
-    lt = tMin;
-    
     while (hasNext) {
         if (t0 > tMax)
             break;
@@ -76,15 +71,8 @@ vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float t
             float tEnd = min(t1, tMax);
             float tStart = max(t0, tMin);
 
-			if (ShouldRenderCell(currentCell)) {
-                Sample(tStart, rayLightingNormal, entranceCoord, exitCoord, t0, t1, ld, lt, accum);
-                
-                if (!hasNext || tMax <= t1)
-                    Sample(tEnd, rayLightingNormal, entranceCoord, exitCoord, t0, t1, ld, lt, accum);
-            } else {
-                // Leaving missing value cell
-                ld = GetDataCoordinateSpace(exitCoord);
-            }
+			if (ShouldRenderCell(currentCell))
+                SampleCell(rayLightingNormal, entranceCoord, exitCoord, t0, t1, tStart, tEnd, accum);
         }
         
         currentCell = nextCell;
