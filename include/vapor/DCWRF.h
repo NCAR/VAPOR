@@ -267,6 +267,8 @@ private:
 
  bool _isIdealized(NetCDFCollection *ncdfc) const;
 
+ bool _isWRFSFIRE(NetCDFCollection *ncdfc) const;
+
  int _InitProjection(NetCDFCollection *ncdfc, float radius); 
 
  DerivedCoordVar_CF2D * _makeDerivedHorizontalIdealized(
