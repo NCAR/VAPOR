@@ -17,6 +17,7 @@
 #include <vapor/DCUtils.h>
 #include <vapor/DCWRF.h>
 #include <vapor/DerivedVar.h>
+#include <vapor/utils.h>
 #include <netcdf.h>
 
 using namespace VAPoR;
@@ -800,6 +801,59 @@ int DCWRF::_GetProj4String(
 	return(0);
 }
 
+// Check to see if the horizontal coordinates, XLONG and XLAT, are 
+// constant value. For simplicity, only check the
+// first two elements of each array.
+//
+// N.B. older WRF files (pre 4.x) don't have an attribute that identifies
+// the files as being "idealized"; for idealized cases the horizontal 
+// coordinates are initialized to constant values.
+//
+bool DCWRF::_isConstantHorizontalCoords(NetCDFCollection *ncdfc) const {
+
+
+	bool enabled = EnableErrMsg(false);
+
+	vector <string> coordVars = {"XLONG", "XLAT"};
+	vector <float> data;
+	for( const auto& c : coordVars ) {
+
+		vector <size_t> dims = ncdfc->GetSpatialDims(c);
+		VAssert(dims.size() == 2);
+
+		vector <size_t> start = {0,0};
+		vector <size_t> count = {dims[0],dims[1]};
+
+		data.resize(Wasp::VProduct(dims));
+		
+		int fd = ncdfc->OpenRead(0, c);
+		if (fd<0) {
+			EnableErrMsg(enabled);
+			return(false);
+		}
+
+		int rc = ncdfc->Read(start.data(), count.data(), data.data(), fd);
+		if (rc<0) {
+			EnableErrMsg(enabled);
+			return(false);
+		}
+
+		ncdfc->Close(fd);
+
+		for (size_t i=0; i<Wasp::VProduct(dims)-1; i++) {
+			if (data[i] != data[i+1]) {
+				EnableErrMsg(enabled);
+				return(false);
+			}
+		}
+	}
+
+	EnableErrMsg(enabled);
+
+	return(true);
+		
+}
+
 bool DCWRF::_isIdealized(NetCDFCollection *ncdfc) const {
 
 	// Version 4.0 of WRF introduced "IDEAL_CASE" attribute. 
@@ -816,8 +870,21 @@ bool DCWRF::_isIdealized(NetCDFCollection *ncdfc) const {
 	ncdfc->GetAtt("", "SIMULATION_INITIALIZATION_TYPE", s);
 	if (Wasp::StrCmpNoCase(s, "IDEALIZED DATA") == 0) return(true);
 
+	// Pre version 4.x WRF did not have an attribute to identify 
+	// idealized cases. However, these cases have constant valued 
+	// horizontal coordinates.
+	//
+	if (_isConstantHorizontalCoords(ncdfc)) return(true);
+
 	return(false);
 	
+}
+bool DCWRF::_isWRFSFIRE(NetCDFCollection *ncdfc) const {
+	if (! ncdfc->VariableExists("FXLONG")) return(false);
+
+	if (! ncdfc->VariableExists("FXLAT")) return(false);
+
+	return(true);
 }
 
 //
@@ -830,6 +897,8 @@ int DCWRF::_InitProjection(
 	_mapProj = 0;
 
 	if (_isIdealized(ncdfc)) return(0);
+
+	if (_isWRFSFIRE(ncdfc)) return(0);
 
 	vector <long> ivalues;
 	ncdfc->GetAtt("", "MAP_PROJ", ivalues);
@@ -992,15 +1061,31 @@ int DCWRF::_InitHorizontalCoordinatesHelper(
 	vector <string> spaceDimNames;
 
 	string units;
+	if (_proj4String.empty() && _isWRFSFIRE(ncdfc)) {
+
+		// The WRF-SFIRE model units attribute say degrees, but it's 
+		// actually meters. Clever.
+		//
+		units = "meters";
+	}
+	else if (_proj4String.empty() && ! _isWRFSFIRE(ncdfc)) {
+		units = "km";
+	}
+	else {
+		units = axis == 0 ? "degrees_east" : "degrees_north";
+	}
+
 	if (ncdfc->VariableExists(name) && ! _proj4String.empty()) {
 
 		timeDimName = ncdfc->GetTimeDimName(name);
 
 		spaceDimNames = ncdfc->GetSpatialDimNames(name);
 		reverse(spaceDimNames.begin(), spaceDimNames.end());
-		units = axis == 0 ? "degrees_east" : "degrees_north";
 	}
-	else if (ncdfc->VariableExists(name) && _proj4String.empty()) {
+	else if (
+		ncdfc->VariableExists(name) && _proj4String.empty() && 
+		!_isWRFSFIRE(ncdfc)
+	) {
 
 		// For idealized case we need to synthesize Cartesian coordinates
 		//
@@ -1008,7 +1093,17 @@ int DCWRF::_InitHorizontalCoordinatesHelper(
 			ncdfc, name, timeDimName, spaceDimNames
 		);
 		if (! derivedVar) return(-1);
-		units = "km";
+	}
+	else if (
+		ncdfc->VariableExists(name) && _proj4String.empty() &&
+		_isWRFSFIRE(ncdfc)
+	) {
+
+		timeDimName = ncdfc->GetTimeDimName(name);
+
+		spaceDimNames = ncdfc->GetSpatialDimNames(name);
+		reverse(spaceDimNames.begin(), spaceDimNames.end());
+
 	}
 	else {
 		// Ugh. Older WRF files don't have coordinate variables for 
@@ -1018,7 +1113,6 @@ int DCWRF::_InitHorizontalCoordinatesHelper(
 			ncdfc, name, timeDimName, spaceDimNames
 		);
 		if (! derivedVar) return(-1);
-		units = axis == 0 ? "degrees_east" : "degrees_north";
 		
 	}
 
@@ -1083,6 +1177,17 @@ int DCWRF::_InitHorizontalCoordinates(
 	// "XLAT_V" coordinate, staggered
 	//
 	(void) _InitHorizontalCoordinatesHelper(ncdfc, "XLAT_V", 1);
+
+	if (_isWRFSFIRE(ncdfc)) {
+
+		// "FXLONG" coordinate, unstaggered
+		//
+		(void) _InitHorizontalCoordinatesHelper(ncdfc, "FXLONG", 0);
+
+		// "FXLAT" coordinate, staggered
+		//
+		(void) _InitHorizontalCoordinatesHelper(ncdfc, "FXLAT", 1);
+	}
 
 	return(0);
 }
@@ -1314,6 +1419,13 @@ bool DCWRF::_GetVarCoordinates(
 	) {
 		scoordvars.push_back("XLONG_V");
 		scoordvars.push_back("XLAT_V");
+	}
+	else if (
+		_isWRFSFIRE(ncdfc) && dimnames[0].compare("west_east_subgrid")==0 &&
+		dimnames[1].compare("south_north_subgrid")==0
+	) {
+		scoordvars.push_back("FXLONG");
+		scoordvars.push_back("FXLAT");
 	}
 	else {
 		return(false);
