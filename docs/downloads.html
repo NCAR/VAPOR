@@ -210,96 +210,23 @@
 <p>Vapor’s current master branch source code can be downloaded from <a class="reference external" href="https://github.com/NCAR/vapor">GitHub</a>.</p>
 <p><strong>Step 2 - Install Vapor’s third party libraries</strong></p>
 <p><em>Windows</em></p>
-<p>Untar the three files linked below into the root of your C:directory.</p>
+<p>Unzip the following file linked below into the root of your C:directory.</p>
 <blockquote>
-<div><p><a class="reference external" href="https://drive.google.com/a/ucar.edu/file/d/1CHUxsPZYrZPDVqRCT-1qtTEQtZfgTn7u/view?usp=sharing">vaporwin64deps2015.tar</a></p>
-<p><a class="reference external" href="https://drive.google.com/a/ucar.edu/file/d/1ZDK2pDu66XDVhJBpFogdqVgNFIMKsrtM/view?usp=sharing">Vapor3rdParty2015.tar</a></p>
-<p><a class="reference external" href="https://drive.google.com/a/ucar.edu/file/d/19RGYew30dH6T6zG3HzfWwck4RZNLXAhp/view?usp=sharing">Qt-2015.tar</a></p>
+<div><p><a class="reference external" href="https://drive.google.com/open?id=1sRlE06jSVrCScrt546G4UtI3hj93xV2W">2019-Aug-Win32.zip</a></p>
 </div></blockquote>
 <p><em>Linux and OSX</em></p>
 <p>If building on Linux or OSX, third party libraries are unable to be written to arbitrary directory locations.  If you choose do download the pre-built libraries, they must be unpacked in the following directories:</p>
-<p>OSX: /glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64/</p>
+<p>OSX: /usr/local/VAPOR-Deps/</p>
 <blockquote>
-<div><p><a class="reference external" href="https://drive.google.com/open?id=1JHl6kHkBvbd17BUC-9nvWZupjyWfwyw7">Link to OSX third-party libraries</a></p>
+<div><p><a class="reference external" href="https://drive.google.com/open?id=1kyDAzmK9zShrIcoAbned8YW9vn2j7lpe">Link to OSX third-party libraries</a></p>
 </div></blockquote>
-<p>Linux: /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/</p>
+<p>Linux: /usr/local/VAPOR-Deps/</p>
 <blockquote>
-<div><p><a class="reference external" href="https://drive.google.com/open?id=0B0dQMtxB89M0azF5RW1RSE5qcTg">Link to Ubuntu third-party libraries</a></p>
-<p><a class="reference external" href="https://drive.google.com/open?id=1_JdUuiy_iQUuIDoPyBn2pupBTz-LS4pM">Link to CentOS third-party libraries</a></p>
+<div><p><a class="reference external" href="https://drive.google.com/open?id=1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd">Link to Ubuntu third-party libraries</a></p>
+<p><a class="reference external" href="https://drive.google.com/open?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0">Link to CentOS third-party libraries</a></p>
 </div></blockquote>
 <p>Alternatively, you can build the libraries yourself and store them wherever you want.  If you choose to do this, you must also configure CMake to point to your custom directory.</p>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 21%" />
-<col style="width: 21%" />
-<col style="width: 58%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td colspan="3"><p><em>Vapor 3 was build with the following third party library configuration.</em></p></td>
-</tr>
-<tr class="row-even"><td><p>Library</p></td>
-<td><p>Version</p></td>
-<td><p>Configuration</p></td>
-</tr>
-<tr class="row-odd"><td><p>assimp</p></td>
-<td><p>3.3.1</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>freetype</p></td>
-<td><p>2.7.1</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>ftgl</p></td>
-<td><p>2.1.3-rc5</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>glew</p></td>
-<td><p>2.0.0</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>grib_api</p></td>
-<td><p>1.19.0</p></td>
-<td><p>Built with unreleased memory leak patches</p></td>
-</tr>
-<tr class="row-even"><td><p>hdf5</p></td>
-<td><p>1.10.0</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>jpeg</p></td>
-<td><p>9b</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>libgeotiff</p></td>
-<td><p>1.4.2</p></td>
-<td><p>–with-libtiff</p></td>
-</tr>
-<tr class="row-odd"><td><p>udunits</p></td>
-<td><p>2.2.20</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>netCDF</p></td>
-<td><p>4.4.1.1</p></td>
-<td><p>–enable-shared –disable-dap</p></td>
-</tr>
-<tr class="row-odd"><td><p>tiff</p></td>
-<td><p>4.0.7</p></td>
-<td><p>–enable-lzw –enable-jpeg –enable-old-jpeg</p></td>
-</tr>
-<tr class="row-even"><td><p>proj</p></td>
-<td><p>4.9.2</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>python</p></td>
-<td><p>2.7.13</p></td>
-<td><p>–enable-shared</p></td>
-</tr>
-<tr class="row-even"><td><p>Qt</p></td>
-<td><p>4.8.7</p></td>
-<td><p>-no-webkit -no-multimedia -no-script
--no-qt3support -opensource (-cocoa on Mac)</p></td>
-</tr>
-</tbody>
-</table>
+<p>Instructions for building these libraries on Windows can be found <a class="reference external" href="https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing">here</a>.</p>
 <p><strong>Step 3 - Set up your compiler</strong></p>
 <p>The following compilers are required to build Vapor.</p>
 <p>Ubuntu/CentOS - GCC 4.8.5 or higher
