@@ -6,25 +6,21 @@ Downloads
 
 .. note:: If you are looking for our legacy version of Vapor 2.6, follow :ref:`this link <vapor2>` to the bottom of the page.
 
-Current Release: Vapor 3.1.0
+Current Release: Vapor 3.2.0
 ----------------------------
 
-July 5, 2019
+January 31, 2020 
 
 `Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
 
-Release notes for VAPOR-3.1.0
+Release notes for VAPOR-3.2.0
 
     New Features:
 
-    - 3D Variable Support
-    - Direct Volume Renderer
-    - Isosurfaces
-    - Slice Renderer
-    - Wireframe Renderer
-    - Python variable engine
-    - Geotiff creation from Vapor renderings
-    - Support for MPAS-A and MOM6 models
+    - Flow Renderer
+    - Model Renderer
+    - New Transfer Function Editor
+    - Updated 3rd party libraries
 
 |
 
@@ -183,10 +179,35 @@ Sample Data
 
 |
 
+Previous Releases
+-----------------
+
+Vapor 3.1.0
+```````````
+
+July 5, 2019
+
+`Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
+
+Release notes for VAPOR-3.1.0
+
+    New Features:
+
+    - 3D Variable Support
+    - Direct Volume Renderer
+    - Isosurfaces
+    - Slice Renderer
+    - Wireframe Renderer
+    - Python variable engine
+    - Geotiff creation from Vapor renderings
+    - Support for MPAS-A and MOM6 models
+
+|
+
 .. _vapor2:
 
 Vapor 2
--------
+```````
 
 If you are interested in using Vapor 2, it can be `downloaded after filling out a short survey <https://forms.gle/ZLX7oZ7LYAVEEBH4A>`_.
 
