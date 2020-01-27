@@ -356,7 +356,7 @@ const VAPoR::Grid *VaporField::_getAGrid(size_t timestep, const std::string &var
     // 1) it will be properly deleted, and 2) it is stored in our cache
     // where its ownership is kept.
     // We also make it become a GrownGrid if it's 2D in nature.
-    int dim = _datamgr->GetNumDimensions(varName);
+    int dim = _datamgr->GetVarTopologyDim(varName);
     if (dim == 3 || dim == 0)    // dim == 0 happens when varName is empty.
     {
         _recentGrids.insert(key, new GridWrapper(grid, _datamgr));
