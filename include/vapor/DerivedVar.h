@@ -2,6 +2,7 @@
 #include <vapor/DC.h>
 #include <vapor/MyBase.h>
 #include <vapor/Proj4API.h>
+#include <vapor/UDUnitsClass.h>
 
 #ifndef _DERIVEDVAR_H_
 #define _DERIVEDVAR_H_
@@ -436,6 +437,11 @@ class VDF_API DerivedCoordVar_WRFTime : public DerivedCoordVar {
     float _p2si;
     size_t _ovr_ts;
     DC::CoordVar _coordVarInfo;
+
+    int _encodeTime(
+        UDUnits &udunits,
+        const vector<string> &timeStrings,
+        vector<double> &times) const;
 };
 
 //!
