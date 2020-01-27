@@ -125,8 +125,9 @@ Instructions for building these libraries on Windows can be found `here <https:/
  
 **Step 3 - Set up your compiler**
 
-The following compilers are required to build Vapor.
+The following compilers were used to build Vapor.
 
+OSX - LLVM 10.0.1 (clang-1001.0.46.4)
 Ubuntu/CentOS - GCC 4.8.5 or higher
 Windows - Microsoft Visual Studio 2015, version 14
 	
@@ -159,9 +160,6 @@ On Linux, run  *cmake <build_directory> && make linuxpreinstall && make installe
 Sample Data
 -----------
 
-**Coming soon**
-
-
 +--------------+-------+-------------------+-----------+
 | Dataset      | Model | Grid Resolution   | File Size |
 +--------------+-------+-------------------+-----------+
@@ -173,6 +171,10 @@ Sample Data
 .. _DUKU: https://dashrepo.ucar.edu/dataset/VAPOR_Sample_Data/file/dukuSample.tar.gz
 
 .. _Kauffman: https://dashrepo.ucar.edu/dataset/VAPOR_Sample_Data/file/kauffmanSample.tar.gz
+
+Optionally, users can download a 500 meter resolution image of NASA's BigBlueMarble for use in Vapor's Image Renderer.
+
+`BigBlueMarble.tar.gz <https://drive.google.com/open?id=1qIwh8ZJj67d85ktkjpgOVBAE-oMRi3rD>`_
 
 |
 

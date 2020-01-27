@@ -226,10 +226,62 @@
 <p><a class="reference external" href="https://drive.google.com/open?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0">Link to CentOS third-party libraries</a></p>
 </div></blockquote>
 <p>Alternatively, you can build the libraries yourself and store them wherever you want.  If you choose to do this, you must also configure CMake to point to your custom directory.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 79%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td colspan="2"><p><em>Vapor 3 was build with the following third party library configuration.</em></p></td>
+</tr>
+<tr class="row-even"><td><p>Library</p></td>
+<td><p>Version</p></td>
+</tr>
+<tr class="row-odd"><td><p>assimp</p></td>
+<td><p>4.1.0</p></td>
+</tr>
+<tr class="row-even"><td><p>freetype</p></td>
+<td><p>2.10.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>glew</p></td>
+<td><p>2.1.0</p></td>
+</tr>
+<tr class="row-even"><td><p>hdf5</p></td>
+<td><p>1.10.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>jpeg</p></td>
+<td><p>9c</p></td>
+</tr>
+<tr class="row-even"><td><p>libgeotiff</p></td>
+<td><p>1.5.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>udunits</p></td>
+<td><p>2.2.26</p></td>
+</tr>
+<tr class="row-even"><td><p>netCDF</p></td>
+<td><p>4.7.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>tiff</p></td>
+<td><p>4.0.10</p></td>
+</tr>
+<tr class="row-even"><td><p>proj</p></td>
+<td><p>6.1.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>python</p></td>
+<td><p>3.6.9</p></td>
+</tr>
+<tr class="row-even"><td><p>Qt</p></td>
+<td><p>5.12.4</p></td>
+</tr>
+</tbody>
+</table>
+<p>The source code for these libraries by be downloaded <a class="reference external" href="https://drive.google.com/open?id=1sWIV-Y66aFuDkC2oDnceIIUJDDH4puKI">here</a>.</p>
+<p>Instructions for building these libraries on UNIX can be found <a class="reference external" href="https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing">here</a>.</p>
 <p>Instructions for building these libraries on Windows can be found <a class="reference external" href="https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing">here</a>.</p>
 <p><strong>Step 3 - Set up your compiler</strong></p>
-<p>The following compilers are required to build Vapor.</p>
-<p>Ubuntu/CentOS - GCC 4.8.5 or higher
+<p>The following compilers were used to build Vapor.</p>
+<p>OSX - LLVM 10.0.1 (clang-1001.0.46.4)
+Ubuntu/CentOS - GCC 4.8.5 or higher
 Windows - Microsoft Visual Studio 2015, version 14</p>
 <p><strong>Step 4 - Configure CMake</strong></p>
 <p>CMake version 3.2 or higher is required on all platforms.  If you chose to build the third party libraries manually, CMake must be configured to point to those libraries wither with the CMake GUI (Windows) or the ccmake command (OSX and Linux).  Run either the GUI or ccmake on the directory where your source code resides to configure the build process.</p>
@@ -248,7 +300,6 @@ Windows - Microsoft Visual Studio 2015, version 14</p>
 </div>
 <div class="section" id="sample-data">
 <span id="sampledata"></span><h2>Sample Data<a class="headerlink" href="#sample-data" title="Permalink to this headline">¶</a></h2>
-<p><strong>Coming soon</strong></p>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 27%" />
@@ -274,6 +325,8 @@ Windows - Microsoft Visual Studio 2015, version 14</p>
 </tr>
 </tbody>
 </table>
+<p>Optionally, users can download a 500 meter resolution image of NASA’s BigBlueMarble for use in Vapor’s Image Renderer.</p>
+<p><a class="reference external" href="https://drive.google.com/open?id=1qIwh8ZJj67d85ktkjpgOVBAE-oMRi3rD">BigBlueMarble.tar.gz</a></p>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>

@@ -90,43 +90,44 @@ Alternatively, you can build the libraries yourself and store them wherever you 
 +-----------------+----------------------------------------------------------------+
 | *Vapor 3 was build with the following third party library configuration.*        |
 +-----------------+----------------------------------------------------------------+
-| Library         | Version         |
-+-----------------+-----------------+
-| assimp          | 3.3.1           |
-+-----------------+-----------------+
-| freetype        | 2.7.1           |
-+-----------------+-----------------+
-| ftgl            | 2.1.3-rc5       |
-+-----------------+-----------------+
-| glew            | 2.0.0           |
-+-----------------+-----------------+
-| grib_api        | 1.19.0          |
-+-----------------+-----------------+
-| hdf5            | 1.10.0          |
-+-----------------+-----------------+
-| jpeg            | 9b              |
-+-----------------+-----------------+
-| libgeotiff      | 1.4.2           |
-+-----------------+-----------------+
-| udunits         | 2.2.20          |
-+-----------------+-----------------+
-| netCDF          | 4.4.1.1         |
-+-----------------+-----------------+
-| tiff	          | 4.0.7           |
-+-----------------+-----------------+
-| proj            | 4.9.2           |
-+-----------------+-----------------+
-| python          | 2.7.13          |
-+-----------------+-----------------+
-| Qt              | 5.12.4          |
-+-----------------+-----------------+
+| Library         | Version                                                        |
++-----------------+----------------------------------------------------------------+
+| assimp          | 4.1.0                                                          |
++-----------------+----------------------------------------------------------------+
+| freetype        | 2.10.1                                                         |
++-----------------+----------------------------------------------------------------+
+| glew            | 2.1.0                                                          |
++-----------------+----------------------------------------------------------------+
+| hdf5            | 1.10.5                                                         |
++-----------------+----------------------------------------------------------------+
+| jpeg            | 9c                                                             |
++-----------------+----------------------------------------------------------------+
+| libgeotiff      | 1.5.1                                                          |
++-----------------+----------------------------------------------------------------+
+| udunits         | 2.2.26                                                         |
++-----------------+----------------------------------------------------------------+
+| netCDF          | 4.7.0                                                          |
++-----------------+----------------------------------------------------------------+
+| tiff	          | 4.0.10                                                         |
++-----------------+----------------------------------------------------------------+
+| proj            | 6.1.1                                                          |
++-----------------+----------------------------------------------------------------+
+| python          | 3.6.9                                                          |
++-----------------+----------------------------------------------------------------+
+| Qt              | 5.12.4                                                         |
++-----------------+----------------------------------------------------------------+
+
+The source code for these libraries by be downloaded `here <https://drive.google.com/open?id=1sWIV-Y66aFuDkC2oDnceIIUJDDH4puKI>`_.
+
+Instructions for building these libraries on UNIX can be found `here <https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing>`_.
 
 Instructions for building these libraries on Windows can be found `here <https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing>`_.
  
 **Step 3 - Set up your compiler**
 
-The following compilers are required to build Vapor.
+The following compilers were used to build Vapor.
 
+OSX - LLVM 10.0.1 (clang-1001.0.46.4)
 Ubuntu/CentOS - GCC 4.8.5 or higher
 Windows - Microsoft Visual Studio 2015, version 14
 	
@@ -159,9 +160,6 @@ On Linux, run  *cmake <build_directory> && make linuxpreinstall && make installe
 Sample Data
 -----------
 
-**Coming soon**
-
-
 +--------------+-------+-------------------+-----------+
 | Dataset      | Model | Grid Resolution   | File Size |
 +--------------+-------+-------------------+-----------+
@@ -173,6 +171,10 @@ Sample Data
 .. _DUKU: https://dashrepo.ucar.edu/dataset/VAPOR_Sample_Data/file/dukuSample.tar.gz
 
 .. _Kauffman: https://dashrepo.ucar.edu/dataset/VAPOR_Sample_Data/file/kauffmanSample.tar.gz
+
+Optionally, users can download a 500 meter resolution image of NASA's BigBlueMarble for use in Vapor's Image Renderer.
+
+`BigBlueMarble.tar.gz <https://drive.google.com/open?id=1qIwh8ZJj67d85ktkjpgOVBAE-oMRi3rD>`_
 
 |
 
