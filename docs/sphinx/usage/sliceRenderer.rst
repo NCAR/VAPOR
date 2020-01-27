@@ -1,7 +1,7 @@
 .. _sliceRenderer:
 
-Slice Renderer
-______________
+Slices 
+______
 
 The Slice Renderer displays an axis-aligned slice or cutting plane through a 3D variable.  Slices are sampled along the plane's axes according to a sampling rate defined by the user.
 

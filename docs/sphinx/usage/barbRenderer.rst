@@ -1,7 +1,7 @@
 .. _barbRenderer:
 
-Barb Renderer
-_____________
+Barbs
+_____
 
 The Barb Renderer displays an array of arrows with the users domain, with custom dimensions that are defined by the user in the X, Y, and Z axes.  The arrows represent a vector whose direction is determined by up to three user-defined variables. Barbs can have a constant color applied to them, or they may be colored according to an additional user-defined variable.
 

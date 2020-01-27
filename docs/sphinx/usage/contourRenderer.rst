@@ -1,7 +1,7 @@
 .. _contourRenderer:
 
-Contour Renderer
-________________
+Contours
+________
 
 Displays a series of user defined contours along a two dimensional plane within the user's domain.  Contours may have constant coloration.  Contours may be displaced by a height variable.
 

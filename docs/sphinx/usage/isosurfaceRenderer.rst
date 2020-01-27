@@ -1,7 +1,7 @@
 .. _isosurfaceRenderer:
 
-Isosurface Renderer
--------------------
+Isosurfaces
+-----------
 
 The Isosurface Renderer displays the user's 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.
 

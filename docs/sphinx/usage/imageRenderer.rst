@@ -1,7 +1,7 @@
 .. _imageRenderer:
 
-Image Renderer
-______________
+Georeferenced Image Renderer
+____________________________
 
 The Image Renderer displays a georeferenced image that is automatically reprojected and fit to the user's data, as long as the data contains georeference metadata.  The image renderer may be offset by a height variable to show bathymetry or mountainous terrain.
 

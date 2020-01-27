@@ -1,9 +1,9 @@
 .. _wireFrameRenderer:
 
-Wire Frame Renderer
-___________________
+Wire Frames
+___________
 
-The Wire Frame REnderer displays a wireframe of the mesh for the selected variable.
+The Wire Frame Renderer displays a wireframe of the mesh for the selected variable.
 
 .. raw:: html
 

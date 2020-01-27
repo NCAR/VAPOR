@@ -67,25 +67,21 @@ Vapor's current master branch source code can be downloaded from GitHub_.
 
 *Windows*
 
-Unzip the following file linked below into the root of your C:\ directory.
+Unzip the following file linked below into the root of your C:\\ directory.
 
-    `2019-Aug-Win32.zip <https://drive.google.com/open?id=1sRlE06jSVrCScrt546G4UtI3hj93xV2W>`_
+    `Windows third party libraries <https://drive.google.com/open?id=1sRlE06jSVrCScrt546G4UtI3hj93xV2W>`_
 
 *Linux and OSX*
 
-If building on Linux or OSX, third party libraries are unable to be written to arbitrary directory locations.  If you choose do download the pre-built libraries, they must be unpacked in the following directories:
+If building on Linux or OSX, the third party libraries must be placed in /usr/local/VAPOR-Deps/.
 
-OSX: /usr/local/VAPOR-Deps/
+    `OSX third-party libraries <https://drive.google.com/open?id=1kyDAzmK9zShrIcoAbned8YW9vn2j7lpe>`_
 
-    `Link to OSX third-party libraries <https://drive.google.com/open?id=1kyDAzmK9zShrIcoAbned8YW9vn2j7lpe>`_
+    `Ubuntu third-party libraries <https://drive.google.com/open?id=1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd>`_
 
-Linux: /usr/local/VAPOR-Deps/
+    `CentOS third-party libraries <https://drive.google.com/open?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0>`_
 
-    `Link to Ubuntu third-party libraries <https://drive.google.com/open?id=1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd>`_
-
-    `Link to CentOS third-party libraries <https://drive.google.com/open?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0>`_
-
-Alternatively, you can build the libraries yourself and store them wherever you want.  If you choose to do this, you must also configure CMake to point to your custom directory.
+.. note:: Alternatively, you can build the libraries yourself and store them wherever you want.  If you choose to do this, you must also configure CMake to point to your custom directory.  If you wish to go down this route, you may follow these build instructions for `Windows <https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing>`_ and `UNIX <https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing>`_.
 
 +-----------------+----------------------------------------------------------------+
 | *Vapor 3 was build with the following third party library configuration.*        |
@@ -119,10 +115,6 @@ Alternatively, you can build the libraries yourself and store them wherever you 
 
 The source code for these libraries by be downloaded `here <https://drive.google.com/open?id=1sWIV-Y66aFuDkC2oDnceIIUJDDH4puKI>`_.
 
-Instructions for building these libraries on UNIX can be found `here <https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing>`_.
-
-Instructions for building these libraries on Windows can be found `here <https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing>`_.
- 
 **Step 3 - Set up your compiler**
 
 The following compilers were used to build Vapor.
@@ -172,9 +164,7 @@ Sample Data
 
 .. _Kauffman: https://dashrepo.ucar.edu/dataset/VAPOR_Sample_Data/file/kauffmanSample.tar.gz
 
-Optionally, users can download a 500 meter resolution image of NASA's BigBlueMarble for use in Vapor's Image Renderer.
-
-`BigBlueMarble.tar.gz <https://drive.google.com/open?id=1qIwh8ZJj67d85ktkjpgOVBAE-oMRi3rD>`_
+.. note:: Users can download a 500 meter resolution image of NASA's `BigBlueMarble <https://drive.google.com/open?id=1qIwh8ZJj67d85ktkjpgOVBAE-oMRi3rD>`_ for use in Vapor's Image Renderer.
 
 |
 

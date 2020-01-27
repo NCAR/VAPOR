@@ -1,5 +1,5 @@
-Model Renderer
-______________
+3D Models
+_________
 
 The Model Renderer can display 3D geometry files within the Vapor scene.  This is commonly used for rendering models of wind turbines or cityscapes in Large Eddy Simulations.
 

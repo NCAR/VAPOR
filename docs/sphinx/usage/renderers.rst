@@ -14,12 +14,12 @@ Below, you can find descriptions of each Renderer and tutorials on how to use th
 .. toctree::
     :maxdepth: 1
 
-    twoDData
     contourRenderer
+    twoDData
     imageRenderer
-    flowRenderer
     volumeRenderer
     isosurfaceRenderer
+    flowRenderer
     sliceRenderer
     barbRenderer
     wireFrameRenderer

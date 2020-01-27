@@ -210,22 +210,21 @@
 <p>Vapor’s current master branch source code can be downloaded from <a class="reference external" href="https://github.com/NCAR/vapor">GitHub</a>.</p>
 <p><strong>Step 2 - Install Vapor’s third party libraries</strong></p>
 <p><em>Windows</em></p>
-<p>Unzip the following file linked below into the root of your C:directory.</p>
+<p>Unzip the following file linked below into the root of your C:\ directory.</p>
 <blockquote>
-<div><p><a class="reference external" href="https://drive.google.com/open?id=1sRlE06jSVrCScrt546G4UtI3hj93xV2W">2019-Aug-Win32.zip</a></p>
+<div><p><a class="reference external" href="https://drive.google.com/open?id=1sRlE06jSVrCScrt546G4UtI3hj93xV2W">Windows third party libraries</a></p>
 </div></blockquote>
 <p><em>Linux and OSX</em></p>
-<p>If building on Linux or OSX, third party libraries are unable to be written to arbitrary directory locations.  If you choose do download the pre-built libraries, they must be unpacked in the following directories:</p>
-<p>OSX: /usr/local/VAPOR-Deps/</p>
+<p>If building on Linux or OSX, the third party libraries must be placed in /usr/local/VAPOR-Deps/.</p>
 <blockquote>
-<div><p><a class="reference external" href="https://drive.google.com/open?id=1kyDAzmK9zShrIcoAbned8YW9vn2j7lpe">Link to OSX third-party libraries</a></p>
+<div><p><a class="reference external" href="https://drive.google.com/open?id=1kyDAzmK9zShrIcoAbned8YW9vn2j7lpe">OSX third-party libraries</a></p>
+<p><a class="reference external" href="https://drive.google.com/open?id=1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd">Ubuntu third-party libraries</a></p>
+<p><a class="reference external" href="https://drive.google.com/open?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0">CentOS third-party libraries</a></p>
 </div></blockquote>
-<p>Linux: /usr/local/VAPOR-Deps/</p>
-<blockquote>
-<div><p><a class="reference external" href="https://drive.google.com/open?id=1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd">Link to Ubuntu third-party libraries</a></p>
-<p><a class="reference external" href="https://drive.google.com/open?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0">Link to CentOS third-party libraries</a></p>
-</div></blockquote>
-<p>Alternatively, you can build the libraries yourself and store them wherever you want.  If you choose to do this, you must also configure CMake to point to your custom directory.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Alternatively, you can build the libraries yourself and store them wherever you want.  If you choose to do this, you must also configure CMake to point to your custom directory.  If you wish to go down this route, you may follow these build instructions for <a class="reference external" href="https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing">Windows</a> and <a class="reference external" href="https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing">UNIX</a>.</p>
+</div>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 21%" />
@@ -276,8 +275,6 @@
 </tbody>
 </table>
 <p>The source code for these libraries by be downloaded <a class="reference external" href="https://drive.google.com/open?id=1sWIV-Y66aFuDkC2oDnceIIUJDDH4puKI">here</a>.</p>
-<p>Instructions for building these libraries on UNIX can be found <a class="reference external" href="https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing">here</a>.</p>
-<p>Instructions for building these libraries on Windows can be found <a class="reference external" href="https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing">here</a>.</p>
 <p><strong>Step 3 - Set up your compiler</strong></p>
 <p>The following compilers were used to build Vapor.</p>
 <p>OSX - LLVM 10.0.1 (clang-1001.0.46.4)
@@ -325,8 +322,10 @@ Windows - Microsoft Visual Studio 2015, version 14</p>
 </tr>
 </tbody>
 </table>
-<p>Optionally, users can download a 500 meter resolution image of NASA’s BigBlueMarble for use in Vapor’s Image Renderer.</p>
-<p><a class="reference external" href="https://drive.google.com/open?id=1qIwh8ZJj67d85ktkjpgOVBAE-oMRi3rD">BigBlueMarble.tar.gz</a></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Users can download a 500 meter resolution image of NASA’s <a class="reference external" href="https://drive.google.com/open?id=1qIwh8ZJj67d85ktkjpgOVBAE-oMRi3rD">BigBlueMarble</a> for use in Vapor’s Image Renderer.</p>
+</div>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>

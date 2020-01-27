@@ -1,7 +1,7 @@
 .. _flowRenderer:
 
-Flow Renderer
-_____________
+Flow
+____
 
 .. raw:: html
 
