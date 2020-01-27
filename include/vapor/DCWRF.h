@@ -238,7 +238,11 @@ class VDF_API DCWRF : public VAPoR::DC {
     int _GetProj4String(
         NetCDFCollection *ncdfc, float radius, int map_proj, string &projstring);
 
+    bool _isConstantHorizontalCoords(NetCDFCollection *ncdfc) const;
+
     bool _isIdealized(NetCDFCollection *ncdfc) const;
+
+    bool _isWRFSFIRE(NetCDFCollection *ncdfc) const;
 
     int _InitProjection(NetCDFCollection *ncdfc, float radius);
 
