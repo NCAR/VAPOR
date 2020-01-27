@@ -1,6 +1,7 @@
 #include "vapor/VAssert.h"
 #include <sstream>
 #include <algorithm>
+#include <set>
 #include <vapor/UDUnitsClass.h>
 #include <vapor/NetCDFCollection.h>
 #include <vapor/utils.h>
@@ -1028,8 +1029,38 @@ DerivedCoordVar_WRFTime::DerivedCoordVar_WRFTime(string derivedVarName, NetCDFCo
     _coordVarInfo = DC::CoordVar(_derivedVarName, units, DC::XType::FLOAT, vector<bool>(), axis, false, vector<string>(), dimName);
 }
 
+int DerivedCoordVar_WRFTime::_encodeTime(UDUnits &udunits, const vector<string> &timeStrings, vector<double> &times) const
+{
+    times.clear();
+
+    for (int i = 0; i < timeStrings.size(); i++) {
+        const string &s = timeStrings[i];
+
+        const char *format6 = "%4d-%2d-%2d_%2d:%2d:%2d";
+        int         year, mon, mday, hour, min, sec;
+        int         rc = sscanf(s.data(), format6, &year, &mon, &mday, &hour, &min, &sec);
+        if (rc != 6) {
+            // Alternate date format
+            //
+            const char *format5 = "%4d-%5d_%2d:%2d:%2d";
+            rc = sscanf(s.data(), format5, &year, &mday, &hour, &min, &sec);
+            if (rc != 5) {
+                SetErrMsg("Unrecognized time stamp: %s", s.data());
+                return (-1);
+            }
+            mon = 1;
+        }
+
+        times.push_back(udunits.EncodeTime(year, mon, mday, hour, min, sec) * _p2si);
+    }
+    return (0);
+}
+
 int DerivedCoordVar_WRFTime::Initialize()
 {
+    _times.clear();
+    _timePerm.clear();
+
     // Use UDUnits for unit conversion
     //
     UDUnits udunits;
@@ -1040,6 +1071,7 @@ int DerivedCoordVar_WRFTime::Initialize()
     }
 
     size_t numTS = _ncdfc->GetNumTimeSteps();
+    if (numTS < 1) return (0);
 
     vector<size_t> dims = _ncdfc->GetSpatialDims(_wrfTimeVar);
     if (dims.size() != 1) {
@@ -1047,16 +1079,13 @@ int DerivedCoordVar_WRFTime::Initialize()
         return (-1);
     }
 
-    char *buf = new char[dims[0] + 1];
-    buf[dims[0]] = '\0';    // Null terminate
-
-    const char *format = "%4d-%2d-%2d_%2d:%2d:%2d";
-
     // Read all of the formatted time strings up front - it's a 1D array
     // so we can simply store the results in memory - and convert from
     // a formatted time string to seconds since the EPOCH
     //
-    _times.clear();
+    vector<string> timeStrings;
+    char *         buf = new char[dims[0] + 1];
+    buf[dims[0]] = '\0';
     for (size_t ts = 0; ts < numTS; ts++) {
         int fd = _ncdfc->OpenRead(ts, _wrfTimeVar);
         if (fd < 0) {
@@ -1068,24 +1097,41 @@ int DerivedCoordVar_WRFTime::Initialize()
         if (rc < 0) {
             SetErrMsg("Can't read time variable");
             _ncdfc->Close(fd);
+            delete[] buf;
             return (-1);
         }
         _ncdfc->Close(fd);
 
-        int year, mon, mday, hour, min, sec;
-        rc = sscanf(buf, format, &year, &mon, &mday, &hour, &min, &sec);
-        if (rc != 6) {
-            rc = sscanf(buf, "%4d-%5d_%2d:%2d:%2d", &year, &mday, &hour, &min, &sec);
-            mon = 1;
-            if (rc != 5) {
-                SetErrMsg("Unrecognized time stamp: %s", buf);
-                return (-1);
-            }
-        }
-
-        _times.push_back(udunits.EncodeTime(year, mon, mday, hour, min, sec) * _p2si);
+        timeStrings.push_back(buf);
     }
     delete[] buf;
+
+    // Encode time stamp string as double precision float
+    //
+    vector<double> timesD;
+    rc = _encodeTime(udunits, timeStrings, timesD);
+    if (rc < 0) return (rc);
+
+    // Convert to single precision because that's what the API supports
+    //
+    for (int i = 0; i < timesD.size(); i++) { _times.push_back((float)timesD[i]); }
+
+    // For high temporal resolution single precision may be insufficient:
+    // converting from double to single may result in non-unique values.
+    // Check to see that the number of unique values is the same for the
+    // double and float vectors. If not, change the year to 2000 to reduce
+    // the precision needed.
+    //
+    if (std::set<double>(timesD.begin(), timesD.end()).size() != std::set<double>(_times.begin(), _times.end()).size()) {
+        _times.clear();
+
+        for (int i = 0; i < timeStrings.size(); i++) { timeStrings[i].replace(0, 4, "2000"); }
+
+        rc = _encodeTime(udunits, timeStrings, timesD);
+        if (rc < 0) return (rc);
+
+        for (int i = 0; i < timesD.size(); i++) { _times.push_back((float)timesD[i]); }
+    }
 
     // The NetCDFCollection class doesn't handle the WRF time
     // variable. Hence, the time steps aren't sorted. Sort them now and
