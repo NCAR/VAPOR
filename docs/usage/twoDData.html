@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>The Renderers &mdash; Vapor 3.1.0 documentation</title>
+  <title>Two Dimensional Data Renderer &mdash; Vapor 3.1.0 documentation</title>
   
 
   
@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Two Dimensional Data Renderer" href="twoDData.html" />
-    <link rel="prev" title="Using Vapor 3" href="../usage.html" /> 
+    <link rel="next" title="Contour Renderer" href="contourRenderer.html" />
+    <link rel="prev" title="The Renderers" href="renderers.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,17 +86,24 @@
 <li class="toctree-l1"><a class="reference internal" href="../quickStartGuide.html">Quick Start Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gettingDataIntoVapor.html">Getting Data into Vapor3</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../usage.html">Using Vapor 3</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">The Renderers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="twoDData.html">Two Dimensional Data Renderer</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="renderers.html">The Renderers</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Two Dimensional Data Renderer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="contourRenderer.html">Contour Renderer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="imageRenderer.html">Image Renderer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="flowRenderer.html">Flow Renderer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="volumeRenderer.html">Volume Renderer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="isosurfaceRenderer.html">Isosurface Renderer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sliceRenderer.html">Slice Renderer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="barbRenderer.html">Barb Renderer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="wireFrameRenderer.html">Wire Frame Renderer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="modelRenderer.html">Model Renderer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="renderers.html#volume-renderer">Volume Renderer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="renderers.html#isosurfaces">Isosurfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="renderers.html#slices">Slices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="renderers.html#contours">Contours</a></li>
+<li class="toctree-l3"><a class="reference internal" href="renderers.html#barbs">Barbs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="renderers.html#two-dimensional-variables">Two Dimensional Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="renderers.html#georefernced-images">Georefernced Images</a></li>
+<li class="toctree-l3"><a class="reference internal" href="renderers.html#wireframes">Wireframes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="renderers.html#model-renderer">Model Renderer</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="controllingTheRenderers.html">Common Renderer Controls</a></li>
@@ -155,13 +162,15 @@
         
           <li><a href="../usage.html">Using Vapor 3</a> &raquo;</li>
         
-      <li>The Renderers</li>
+          <li><a href="renderers.html">The Renderers</a> &raquo;</li>
+        
+      <li>Two Dimensional Data Renderer</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/usage/renderers.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/usage/twoDData.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -174,28 +183,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="line-block" id="renderers">
-<div class="line"><br /></div>
-</div>
-<div class="section" id="the-renderers">
-<h1>The Renderers<a class="headerlink" href="#the-renderers" title="Permalink to this headline">¶</a></h1>
-<p>Vapor’s main utility comes from its suite of Renderers, each of wich display simulation data with color and opacity according to user-defined parameters.</p>
-<p>Renderers can be captured as still images or animations for analysis, pubication, and presentation.</p>
-<p>Below, you can find descriptions of each Renderer and tutorials on how to use them.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="twoDData.html">Two Dimensional Data Renderer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contourRenderer.html">Contour Renderer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="imageRenderer.html">Image Renderer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="flowRenderer.html">Flow Renderer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="volumeRenderer.html">Volume Renderer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="isosurfaceRenderer.html">Isosurface Renderer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sliceRenderer.html">Slice Renderer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="barbRenderer.html">Barb Renderer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="wireFrameRenderer.html">Wire Frame Renderer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modelRenderer.html">Model Renderer</a></li>
-</ul>
-</div>
+  <div class="section" id="two-dimensional-data-renderer">
+<span id="twoddata"></span><h1>Two Dimensional Data Renderer<a class="headerlink" href="#two-dimensional-data-renderer" title="Permalink to this headline">¶</a></h1>
+<p>Displays the user’s 2D data variables along the plane described by the source data file. These 2D variables may be offset by a height variable.</p>
 </div>
 
 
@@ -206,10 +196,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="twoDData.html" class="btn btn-neutral float-right" title="Two Dimensional Data Renderer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="contourRenderer.html" class="btn btn-neutral float-right" title="Contour Renderer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../usage.html" class="btn btn-neutral float-left" title="Using Vapor 3" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="renderers.html" class="btn btn-neutral float-left" title="The Renderers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
