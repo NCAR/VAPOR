@@ -134,7 +134,8 @@ int VaporField::GetVelocity(float time, const glm::vec3 &pos, glm::vec3 &velocit
 
     // Retrieve the missing value and velocity multiplier
     const float mult = _params->GetVelocityMultiplier();
-    glm::vec3   missingV;    // stores missing values for 3 velocity variables
+    glm::vec3   missingV(0.0f);    // stores missing values for 3 velocity variables
+    velocity = glm::vec3(0.0f);
 
     if (IsSteady) {
         size_t currentTS = _params->GetCurrentTimestep();
