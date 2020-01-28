@@ -87,6 +87,11 @@ BarbRenderer::BarbRenderer(
 BarbRenderer::~BarbRenderer() {
 }
 
+std::string BarbRenderer::_getColorbarVariableName() const {
+    RenderParams *rParams = GetActiveParams();
+    return rParams->GetColorMapVariableName();
+}
+
 // Totally unnecessary?
 //
 int BarbRenderer::_initializeGL() {

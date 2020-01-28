@@ -44,6 +44,9 @@ class RENDER_API BarbRenderer : public Renderer {
         return ("Barb");
     }
 
+  protected:
+    virtual std::string _getColorbarVariableName() const;
+
   private:
     vector<string> _fieldVariables; // old, used instead of _currentVarname
     double _vectorScaleFactor;
