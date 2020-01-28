@@ -144,7 +144,8 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget *parent) : QVaporSubtab(parent),
     //
     _geometryWriterSection = new VSection("Write Flowlines to File");
     layout()->addWidget(_geometryWriterSection);
-    _geometryWriterSelector = new VFileWriter();
+    string defaultPath = QDir::homePath().toStdString() + "/vaporFlow.txt";
+    _geometryWriterSelector = new VFileWriter("Select", defaultPath);
     _geometryWriterSection->layout()->addWidget(new VLineItem("Target file", _geometryWriterSelector));
     _geometryWriterExecutor = new VPushButton("Write to file");
     _geometryWriterSection->layout()->addWidget(new VLineItem("", _geometryWriterExecutor));
@@ -705,6 +706,13 @@ void FlowSeedingSubtab::_streamlineDirectionChanged(int index) {
 }
 
 void FlowSeedingSubtab::_geometryWriterClicked() {
+    bool enabled = _params->IsEnabled();
+    if (!enabled) {
+        MSG_ERR("The Flow renderer must be enabled to compute trajectories "
+                "before writing the anything to a file.");
+        return;
+    }
+
     std::string file = _geometryWriterSelector->GetValue();
 
     _paramsMgr->BeginSaveStateGroup("Write flowline geometry file");
