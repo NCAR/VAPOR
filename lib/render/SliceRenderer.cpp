@@ -231,12 +231,6 @@ int SliceRenderer::_resetBoxCache() {
         return rc;
     }
     
-    // Moving domain allows area outside of data to be selected
-    /*for (int i = 0; i < _cacheParams.boxMax.size(); i++) {
-        _cacheParams.boxMin[i] = max(_cacheParams.boxMin[i], _cacheParams.domainMin[i]);
-        _cacheParams.boxMax[i] = min(_cacheParams.boxMax[i], _cacheParams.domainMax[i]);
-    }*/
-    
     _setVertexPositions();
     _resetTextureCoordinates();
     return rc;
