@@ -3,7 +3,7 @@
 #include VolumeCellBase.frag
 #include VolumeIsoInclude.frag
 
-void TestIsoSample(const vec3 rayLightingNormal, const float isoValue, const float dv, const float ld, const float t, const float lt, const float t0, const float t1, const vec3 entranceCoord, const vec3 exitCoord, inout vec4 accum)
+void TestIsoSegment(const vec3 rayLightingNormal, const float isoValue, const float dv, const float ld, const float t, const float lt, const float t0, const float t1, const vec3 entranceCoord, const vec3 exitCoord, inout vec4 accum)
 {
     if ((ld < isoValue && dv >= isoValue) || (ld > isoValue && dv <= isoValue)) {
         
@@ -23,6 +23,14 @@ void TestIsoSample(const vec3 rayLightingNormal, const float isoValue, const flo
     }
 }
 
+void TestAllIsoSegment(const vec3 rayLightingNormal, const float dve, const float dvs, const float te, const float ts, const float t0, const float t1, const vec3 entranceCoord, const vec3 exitCoord, inout vec4 accum)
+{
+    if (isoEnabled[0]) TestIsoSegment(rayLightingNormal, isoValue[0], dve, dvs, te, ts, t0, t1, entranceCoord, exitCoord, accum);
+    if (isoEnabled[1]) TestIsoSegment(rayLightingNormal, isoValue[1], dve, dvs, te, ts, t0, t1, entranceCoord, exitCoord, accum);
+    if (isoEnabled[2]) TestIsoSegment(rayLightingNormal, isoValue[2], dve, dvs, te, ts, t0, t1, entranceCoord, exitCoord, accum);
+    if (isoEnabled[3]) TestIsoSegment(rayLightingNormal, isoValue[3], dve, dvs, te, ts, t0, t1, entranceCoord, exitCoord, accum);
+}
+
 void SampleCell(const vec3 rayLightingNormal, const vec3 entranceCoord, const vec3 exitCoord, const float t0, const float t1, const float ts, const float te, inout vec4 accum)
 {
     if (accum.a > ALPHA_BREAK)
@@ -31,13 +39,15 @@ void SampleCell(const vec3 rayLightingNormal, const vec3 entranceCoord, const ve
     vec3 hitS = mix(entranceCoord, exitCoord, (ts-t0)/(t1-t0));
     float ds = GetDataCoordinateSpace(hitS);
     
+    float tm = (te+ts)/2.0;
+    vec3 hitm = mix(entranceCoord, exitCoord, (tm-t0)/(t1-t0));
+    float dm = GetDataCoordinateSpace(hitm);
+    
     vec3 hitE = mix(entranceCoord, exitCoord, (te-t0)/(t1-t0));
     float de = GetDataCoordinateSpace(hitE);
     
-    if (isoEnabled[0]) TestIsoSample(rayLightingNormal, isoValue[0], de, ds, te, ts, t0, t1, entranceCoord, exitCoord, accum);
-    if (isoEnabled[1]) TestIsoSample(rayLightingNormal, isoValue[1], de, ds, te, ts, t0, t1, entranceCoord, exitCoord, accum);
-    if (isoEnabled[2]) TestIsoSample(rayLightingNormal, isoValue[2], de, ds, te, ts, t0, t1, entranceCoord, exitCoord, accum);
-    if (isoEnabled[3]) TestIsoSample(rayLightingNormal, isoValue[3], de, ds, te, ts, t0, t1, entranceCoord, exitCoord, accum);
+    TestAllIsoSegment(rayLightingNormal, dm, ds, tm, ts, t0, t1, entranceCoord, exitCoord, accum);
+    TestAllIsoSegment(rayLightingNormal, de, dm, te, tm, t0, t1, entranceCoord, exitCoord, accum);
 }
 
 vec4 Traverse(vec3 origin, vec3 dir, vec3 rayLightingNormal, float tMin, float tMax, float t0, ivec3 currentCell, ivec3 entranceFace, OUT float t1)
