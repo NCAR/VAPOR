@@ -392,6 +392,9 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
         _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
     }
 
+    /* Don't know why, but on MacOS 10.14.6 and Apple LLVM version 10.0.1 (clang-1001.0.46.4),
+       this comment fixes issue #2141. */
+
     std::string colorVarName = params->GetColorMapVariableName();
     if (colorVarName != _colorField.ScalarName) { _colorStatus = FlowStatus::SIMPLE_OUTOFDATE; }
 
