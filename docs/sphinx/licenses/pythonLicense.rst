@@ -2,8 +2,6 @@
 
 .. _pythonLicense:
 
-.. literalinclude::
-
 .. highlight:: none
 
 Python License

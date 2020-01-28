@@ -89,9 +89,12 @@
 <li class="toctree-l2 current"><a class="reference internal" href="renderers.html">The Renderers</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="contourRenderer.html">Contours</a></li>
 <li class="toctree-l3"><a class="reference internal" href="twoDData.html">Two Dimensional Data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="imageRenderer.html">Georeferenced Image Renderer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="imageRenderer.html">Image Renderer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="volumeRenderer.html">Volume Renderer</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Isosurfaces</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Isosurfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#special-controls">Special Controls</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="flowRenderer.html">Flow</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sliceRenderer.html">Slices</a></li>
 <li class="toctree-l3"><a class="reference internal" href="barbRenderer.html">Barbs</a></li>
@@ -178,8 +181,35 @@
             
   <div class="section" id="isosurfaces">
 <span id="isosurfacerenderer"></span><h1>Isosurfaces<a class="headerlink" href="#isosurfaces" title="Permalink to this headline">¶</a></h1>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/bhkmRjAHOpo" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe><div class="line-block">
+<div class="line"><br /></div>
+</div>
 <p>The Isosurface Renderer displays the user’s 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.</p>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/bhkmRjAHOpo" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+<p>This renderer contains all of Vapor’s standard renderer controls: the <a class="reference internal" href="controllingTheRenderers.html#variablestab"><span class="std std-ref">Variables</span></a>, <a class="reference internal" href="controllingTheRenderers.html#appearancetab"><span class="std std-ref">Appearance</span></a>, <a class="reference internal" href="controllingTheRenderers.html#geometrytab"><span class="std std-ref">Geometry</span></a>, and <a class="reference internal" href="controllingTheRenderers.html#annotationtab"><span class="std std-ref">Annotation</span></a> tabs.</p>
+<p>The Isosurface Renderer additionally has specialized controls in its Variables and Apparance tabs.</p>
+<div class="section" id="special-controls">
+<h2>Special Controls<a class="headerlink" href="#special-controls" title="Permalink to this headline">¶</a></h2>
+<p>The Isosurface Renderer’s Variables tab allows users to color the volume by a secondary variable.  This mans that the opacity of the volume can be controlled by a primary variable, and the color can bee attributed to a secondary variable.</p>
+<p>Under the Appearance tab, the Isosurface Renderer also allows users to modify its Raytracing and Lighting parameters.</p>
+<div class="section" id="raytracing-parameters">
+<h3>Raytracing Parameters<a class="headerlink" href="#raytracing-parameters" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p><em>Rendering Algorithm</em> - Defaults to either Curvilinear or Regular, depending on the topology of the current variable’s grid.  If using an older graphics card, the Isosurface Renderer may default to Rectilinear due to the increased complexity of the Curvilinear raytracer.</p>
+<p><em>Sampling Rate Multiplier</em> - The volume renderer takes samples along the projected camera rays to determine the volume density at a point and the multiplier increases the number of samples which can give a more accurate visualization in certain cases.</p>
+</div></blockquote>
+</div>
+<div class="section" id="lighting-parameters">
+<h3>Lighting Parameters<a class="headerlink" href="#lighting-parameters" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p><em>Apply Lighting</em> - Controls whether Vapor’s default light sources are emitted onto the volume during rendering.  The default lights are directional.</p>
+<p><em>Ambient</em> - Controls the amount of ambient light that is absorbed by the volume.  Ambient lights do not have a single directed source, and controls the overall brightness of the scene.</p>
+<p><em>Specular</em> - Controls the angle of reflection for incident light on the volume.  In general, if a volume is very specular, it will appear to have more detail and depth.  It will appear flatter with smaller Specular parameterization.</p>
+<p><em>Shininess</em> - Controls the overall reflection of light incident upon the volume.</p>
+</div></blockquote>
+<p>~</p>
+</div>
+</div>
+</div>
 
 
            </div>
