@@ -274,15 +274,6 @@ void SliceRenderer::_resetTextureCoordinates() {
     texMaxY = ( boxMax[yAxis] - domainMin[yAxis] ) / 
               ( domainMax[yAxis] - domainMin[yAxis] );
 
-    cout << texMinX << " " << texMinY << endl;
-    cout << texMaxX << " " << texMaxY << endl;
-    if ( texMinX < 0 ) texMinX = 0;
-    if ( texMinY < 0 ) texMinY = 0;
-    if ( texMaxX > 1 ) texMaxX = 1;
-    if ( texMaxY > 1 ) texMaxY = 1;
-    cout << "   " << texMinX << " " << texMinY << endl;
-    cout << "   " << texMaxX << " " << texMaxY << endl;
-
     _texCoords.clear();
     _texCoords = {
         texMinX, texMinY,
@@ -631,15 +622,23 @@ void SliceRenderer::_resetState() {
 }
 
 void SliceRenderer::_setVertexPositions() {
-    std::vector<double> min = _cacheParams.boxMin;
-    std::vector<double> max = _cacheParams.boxMax;
+    std::vector<double> trimmedMin(3, 0.f);
+    std::vector<double> trimmedMax(3, 1.f);
+
+    // If the box is outside of our domain, trim the vertex coordinates to be within
+    // the domain.
+    for (int i = 0; i < _cacheParams.boxMax.size(); i++) {
+        trimmedMin[i] = max(_cacheParams.boxMin[i], _cacheParams.domainMin[i]);
+        trimmedMax[i] = min(_cacheParams.boxMax[i], _cacheParams.domainMax[i]);
+    }
+
     int orientation = _cacheParams.orientation;
     if (orientation == XY)
-        _setXYVertexPositions(min, max);
+        _setXYVertexPositions(trimmedMin, trimmedMax);
     else if (orientation == XZ)
-        _setXZVertexPositions(min, max);
+        _setXZVertexPositions(trimmedMin, trimmedMax);
     else if (orientation == YZ)
-        _setYZVertexPositions(min, max);
+        _setYZVertexPositions(trimmedMin, trimmedMax);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexVBO);
     glBufferSubData(
