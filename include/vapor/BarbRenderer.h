@@ -47,6 +47,9 @@ namespace VAPoR {
 	static string GetClassType() {
 		return("Barb");
 	}
+      
+  protected:
+      virtual std::string _getColorbarVariableName() const;
 
   private:
 
