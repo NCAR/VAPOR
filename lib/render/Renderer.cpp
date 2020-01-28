@@ -516,7 +516,7 @@ void Renderer::renderColorbarText(ColorbarPbase* cbpb,
 			float llx, float lly, float urx, float ury) {
 
 	RenderParams *rParams = GetActiveParams();
-	MapperFunction* mf = rParams->GetMapperFunc(rParams->GetVariableName());
+	MapperFunction* mf = rParams->GetMapperFunc(_getColorbarVariableName());
 	float numEntries = mf->getNumEntries();
 
 	vector<double> bgc = cbpb->GetBackgroundColor();
