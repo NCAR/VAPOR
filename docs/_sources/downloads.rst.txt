@@ -20,6 +20,11 @@ Release notes for VAPOR-3.2.0
     - Flow Renderer
     - Model Renderer
     - New Transfer Function Editor
+    - Off screen rendering
+    - Performance optimization to Vapor's DataMgr class
+    - Added support for stretched grids to vdccreate
+    - Added ability to color Volume Renderings with a secondary variable
+    - Increased Volume Rendering sampling rate maximum setting
     - Updated 3rd party libraries
 
 |
