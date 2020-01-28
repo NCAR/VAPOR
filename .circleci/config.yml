@@ -107,14 +107,6 @@ jobs:
             make
 
 
-  printTime:
-    docker:
-      - image: sgpearse/vapor3-ubuntu:latest
-    steps:
-      - run:
-        name: Print the Current Time
-        command: date
-
 workflows:
   version: 2
   build:
