@@ -6,7 +6,7 @@
 #include "VSlider.h"
 #include "VLineEdit.h"
 
-VSliderEdit::VSliderEdit(double min, double max, double value) : VContainer(), _isIntType(false)
+VSliderEdit::VSliderEdit(double min, double max, double value) : VContainer(), _minValid(min), _maxValid(max), _value(value), _isIntType(false)
 {
     _lineEdit = new VLineEdit();
     _slider = new VSlider();
