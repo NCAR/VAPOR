@@ -231,15 +231,11 @@ int SliceRenderer::_resetBoxCache() {
         return rc;
     }
     
-    // Moving domains do not update Box classes as they change their extents,
-    // so our Box becomes invalid.  We need to store valid extents for efficient
-    // sampling - IE we don't want to sample outside of the domain.
-    for (int i = 0; i < _cacheParams.boxMax.size(); i++) {
+    // Moving domain allows area outside of data to be selected
+    /*for (int i = 0; i < _cacheParams.boxMax.size(); i++) {
         _cacheParams.boxMin[i] = max(_cacheParams.boxMin[i], _cacheParams.domainMin[i]);
         _cacheParams.boxMax[i] = min(_cacheParams.boxMax[i], _cacheParams.domainMax[i]);
-    }
-    // Now set our box to have valid extents, within the data domain
-    p->GetBox()->SetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
+    }*/
     
     _setVertexPositions();
     _resetTextureCoordinates();
@@ -277,6 +273,15 @@ void SliceRenderer::_resetTextureCoordinates() {
               ( domainMax[yAxis] - domainMin[yAxis] );
     texMaxY = ( boxMax[yAxis] - domainMin[yAxis] ) / 
               ( domainMax[yAxis] - domainMin[yAxis] );
+
+    cout << texMinX << " " << texMinY << endl;
+    cout << texMaxX << " " << texMaxY << endl;
+    if ( texMinX < 0 ) texMinX = 0;
+    if ( texMinY < 0 ) texMinY = 0;
+    if ( texMaxX > 1 ) texMaxX = 1;
+    if ( texMaxY > 1 ) texMaxY = 1;
+    cout << "   " << texMinX << " " << texMinY << endl;
+    cout << "   " << texMaxX << " " << texMaxY << endl;
 
     _texCoords.clear();
     _texCoords = {
