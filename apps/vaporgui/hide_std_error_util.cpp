@@ -6,7 +6,6 @@
 #endif
 
 static int _savedSTDERR;
-static int pos;
 
 void HideSTDERR()
 {
