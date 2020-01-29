@@ -435,7 +435,7 @@ int VaporField::CalcDeltaTFromCurrentTimeStep( float& delT ) const
                 counter++;
             }
 
-    // Let's find the maximum velocity on these sample locations
+    // Let's find the maximum velocity on these sampled locations
     float maxmag = 0.0;
     glm::vec3 vel;
     for( long i = 0; i < totalSamples; i++ )
