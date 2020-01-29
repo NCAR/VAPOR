@@ -5,8 +5,7 @@
     #include <stdio.h>
 #endif
 
-static int    _savedSTDERR;
-static fpos_t pos;
+static int _savedSTDERR;
 
 void HideSTDERR()
 {
