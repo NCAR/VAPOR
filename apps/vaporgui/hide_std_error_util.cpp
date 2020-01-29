@@ -6,7 +6,7 @@
 #endif
 
 static int _savedSTDERR;
-static fpos_t pos;
+static int pos;
 
 void HideSTDERR()
 {
