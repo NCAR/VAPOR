@@ -169,7 +169,6 @@ FlowRenderer::_paintGL( bool fast )
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
         /* First step is to re-calculate deltaT */
-        /* Read seeds from a file is a special case, so we put it up front */
         rv = _velocityField.CalcDeltaTFromCurrentTimeStep( _cache_deltaT );
         if( rv != 0 )
         {
@@ -177,6 +176,7 @@ FlowRenderer::_paintGL( bool fast )
             return rv;
         }
 
+        /* Read seeds from a file is a special case, so we put it up front */
         if( _cache_seedGenMode == FlowSeedMode::LIST )
         {
             rv = _advection.InputStreamsGnuplot( params->GetSeedInputFilename() );
