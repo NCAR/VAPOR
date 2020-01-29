@@ -1,7 +1,7 @@
 .. _twoDData:
 
 Two Dimensional Data
---------------------
+____________________
 
 .. raw:: html
 
@@ -9,9 +9,14 @@ Two Dimensional Data
 
 |
 
+Description
+-----------
+
 The Two Dimensional Data Rendedrer displays the user's 2D data variables along the plane described by the source data file.
 
-This renderer contains all of Vapor's standard renderer controls: the :ref:`Variables <variablesTab>`, :ref:`Appearance <appearanceTab>`, :ref:`Geometry <geometryTab>`, and :ref:`Annotation <annotationTab>` tabs.
+Basic Controls
+--------------
 
 Like the Contour and Image renderers, 2D variables may be offset by a height variable.
 
+This renderer contains all of Vapor's standard renderer controls: the :ref:`Variables <variablesTab>`, :ref:`Appearance <appearanceTab>`, :ref:`Geometry <geometryTab>`, and :ref:`Annotation <annotationTab>` tabs.

@@ -89,11 +89,16 @@
 <li class="toctree-l2 current"><a class="reference internal" href="renderers.html">The Renderers</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="contourRenderer.html">Contours</a></li>
 <li class="toctree-l3"><a class="reference internal" href="twoDData.html">Two Dimensional Data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="imageRenderer.html">Georeferenced Image Renderer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="imageRenderer.html">Image Renderer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="volumeRenderer.html">Volume Renderer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="isosurfaceRenderer.html">Isosurfaces</a></li>
 <li class="toctree-l3"><a class="reference internal" href="flowRenderer.html">Flow</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Slices</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Slices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#basic-controls">Basic Controls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specialized-controls">Specialized Controls</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="barbRenderer.html">Barbs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="wireFrameRenderer.html">Wire Frames</a></li>
 <li class="toctree-l3"><a class="reference internal" href="modelRenderer.html">3D Models</a></li>
@@ -178,8 +183,22 @@
             
   <div class="section" id="slices">
 <span id="slicerenderer"></span><h1>Slices<a class="headerlink" href="#slices" title="Permalink to this headline">¶</a></h1>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/cytoGmyCEDc" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe><div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>The Slice Renderer displays an axis-aligned slice or cutting plane through a 3D variable.  Slices are sampled along the plane’s axes according to a sampling rate defined by the user.</p>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/cytoGmyCEDc" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+</div>
+<div class="section" id="basic-controls">
+<h2>Basic Controls<a class="headerlink" href="#basic-controls" title="Permalink to this headline">¶</a></h2>
+<p>This renderer contains all of Vapor’s standard renderer controls: the <a class="reference internal" href="controllingTheRenderers.html#variablestab"><span class="std std-ref">Variables</span></a>, <a class="reference internal" href="controllingTheRenderers.html#appearancetab"><span class="std std-ref">Appearance</span></a>, <a class="reference internal" href="controllingTheRenderers.html#geometrytab"><span class="std std-ref">Geometry</span></a>, and <a class="reference internal" href="controllingTheRenderers.html#annotationtab"><span class="std std-ref">Annotation</span></a> tabs.</p>
+</div>
+<div class="section" id="specialized-controls">
+<h2>Specialized Controls<a class="headerlink" href="#specialized-controls" title="Permalink to this headline">¶</a></h2>
+<p>The Slice Renderer contains a <em>Quality</em> adjustment parameter in the Appearance tab.  This renderer operates by sampling data values along a plane.  The <em>Quality</em> parameter will increase the sampling rate used in generating the Slice.</p>
+</div>
+</div>
 
 
            </div>

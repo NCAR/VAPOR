@@ -9,14 +9,18 @@ ___________
 
 |
 
+Description
+-----------
+
 The Isosurface Renderer displays the user's 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.
+
+Basic Controls
+--------------
 
 This renderer contains all of Vapor's standard renderer controls: the :ref:`Variables <variablesTab>`, :ref:`Appearance <appearanceTab>`, :ref:`Geometry <geometryTab>`, and :ref:`Annotation <annotationTab>` tabs.
 
-The Isosurface Renderer additionally has specialized controls in its Variables and Apparance tabs.
-
-Special Controls
-----------------
+Specialized Controls
+--------------------
 
 The Isosurface Renderer's Variables tab allows users to color the volume by a secondary variable.  This mans that the opacity of the volume can be controlled by a primary variable, and the color can bee attributed to a secondary variable.
 

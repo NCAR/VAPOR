@@ -9,12 +9,23 @@ ____
 
 |
 
-The Flow Renderer uses Vapor's standard set of controls in addition to the Seeding tab: Variables, Appearance, Geometry, and Annotation.  In addition to these standard tabs is the Seeding tab.  The Seeding tab contains all controls unique to the Flow Renderer.
+Description
+-----------
+
+The Flow Renderer creates either *Streamlines* or *Pathlines* within a user's data domain.  *Streamlines* are time-invariant trajectories that follow the user's defined field variables.  *Pathlines* are time-variant, following trajectories of the user's field variables as time progresses.
+
+Basic Controls
+--------------
+
+The Flow Renderer uses Vapor's standard controls located in the :ref:`Variables <variablesTab>`, :ref:`Appearance <appear    anceTab>`, :ref:`Geometry <geometryTab>`, and :ref:`Annotation <annotationTab>` tabs.  In addition, the Flow renderer contains a Seeding tab, described below.
+
+Specialized Controls
+--------------------
 
 The Flow Renderer Seeding Tab contains four sets of parameters as follows:
 
 Integration Settings
---------------------
+********************
 
 
 **Flow type:** Specifies whether the Flow Renderer is advecting *Streamlines* or *Pathlines*.  
@@ -44,7 +55,7 @@ Both *Streamline* and *Pathline* integration contain the following parameters:
 **Axis Periodicity:** If the X, Y, or Z axes are periodic, flow lines that exit the domain along these axes will be re-inserted on the opposite side of the domain.  Flow lines will continue advecting from that point.
 
 Seed Distribution Settings
---------------------------
+**************************
 
 **Seed distribution type:** This parameter determines the way that the Flow Renderer places seeds within the scene.  The options are:
 
@@ -63,14 +74,14 @@ The following example would place a seed at (.5, .8, .25) at the first three tim
 
 
 Rake Region
------------
+***********
 
 If the Flow Renderer is using a Gridded, Random, or Random w/ Bias seed distribution, users may constrain the region of seed injection with the Flow Rake.  By default, the Rake is as large as the entire domain.  If there is a specific region of interest, users should constrain the Rake to only distribute seeds within that region.
 
 The Rake can be adjusted through the left-hand control panel by either moving the sliders corresponding to the desired axis, or typing explicit values.  Alternatively, the current Rake can be rendered and manipulated within the scene.  This is done by clicking on the Navigation drop-down menu at the top left of the application, and selecting "Region".  Users must be in the Seeding tab with the Region mode activated to show the Flow Rake within the scene.
 
 Write Flowlines to File
------------------------
+***********************
 
 Users may write the geometry of the currently rendered flow lines by selecting a text file, and clicking Write to file.  The data format of the file is a CSV containing values as follows::
 

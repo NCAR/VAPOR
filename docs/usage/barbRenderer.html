@@ -89,12 +89,17 @@
 <li class="toctree-l2 current"><a class="reference internal" href="renderers.html">The Renderers</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="contourRenderer.html">Contours</a></li>
 <li class="toctree-l3"><a class="reference internal" href="twoDData.html">Two Dimensional Data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="imageRenderer.html">Georeferenced Image Renderer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="imageRenderer.html">Image Renderer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="volumeRenderer.html">Volume Renderer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="isosurfaceRenderer.html">Isosurfaces</a></li>
 <li class="toctree-l3"><a class="reference internal" href="flowRenderer.html">Flow</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sliceRenderer.html">Slices</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Barbs</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Barbs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#basic-controls">Basic Controls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specialized-controls">Specialized Controls</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="wireFrameRenderer.html">Wire Frames</a></li>
 <li class="toctree-l3"><a class="reference internal" href="modelRenderer.html">3D Models</a></li>
 </ul>
@@ -178,9 +183,30 @@
             
   <div class="section" id="barbs">
 <span id="barbrenderer"></span><h1>Barbs<a class="headerlink" href="#barbs" title="Permalink to this headline">¶</a></h1>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/wcvpdoaWB1M" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe><div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>The Barb Renderer displays an array of arrows with the users domain, with custom dimensions that are defined by the user in the X, Y, and Z axes.  The arrows represent a vector whose direction is determined by up to three user-defined variables. Barbs can have a constant color applied to them, or they may be colored according to an additional user-defined variable.</p>
-<p>The Barb renderer may be offset by a height variable, if the barbs are referencing two-dimensional variables.</p>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/wcvpdoaWB1M" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+</div>
+<div class="section" id="basic-controls">
+<h2>Basic Controls<a class="headerlink" href="#basic-controls" title="Permalink to this headline">¶</a></h2>
+<p>This renderer contains all of Vapor’s standard renderer controls: the <a class="reference internal" href="controllingTheRenderers.html#variablestab"><span class="std std-ref">Variables</span></a>, <span class="xref std std-ref">Appearance</span>, <a class="reference internal" href="controllingTheRenderers.html#geometrytab"><span class="std std-ref">Geometry</span></a>, and <a class="reference internal" href="controllingTheRenderers.html#annotationtab"><span class="std std-ref">Annotation</span></a> tabs.</p>
+<p>The Barb Renderer can operate on either two-dimensional, or three-dimensional field variables.  This is defined in the Variables tab.</p>
+<p>The Barb Renderer may be offset by a height variable, if the barbs are referencing two-dimensional variables.</p>
+</div>
+<div class="section" id="specialized-controls">
+<h2>Specialized Controls<a class="headerlink" href="#specialized-controls" title="Permalink to this headline">¶</a></h2>
+<p>The Barb’s Appearance tab contains controls as follows:</p>
+<p><em>X Dimension</em> - Controls how many barbs to uniformly distribute along the X axis of the Barb Renderer’s region.</p>
+<p><em>Y Dimension</em> - Controls how many barbs to uniformly distribute along the Y axis of the Barb Renderer’s region.</p>
+<p><em>Z Dimension</em> - Controls how many barbs to uniformly distribute along the Z axis of the Barb Renderer’s region.  This field is only enabled when rendering barbs with 3D variables.</p>
+<p><em>Length Scale</em> - A unitless value that controls how long the barbs are.  This value is derived by the values of the field variables at the data set’s initial timestep, or the timestep at which <em>Recalculate Scales</em> is pressed.</p>
+<p><em>Thickness Scale</em> - A unitless value that controls how thick the barbs are.  This value is derived by the size of the data set’s domain.</p>
+<p><em>Recalculate Scales</em> - Recalculates the unitless values for <em>Length Scale</em> and <em>Thickness Scale</em> at the current timestep.</p>
+</div>
+</div>
 
 
            </div>

@@ -12,7 +12,6 @@ Renderers can be captured as still images or animations for analysis, pubication
 Below, you can find descriptions of each Renderer and tutorials on how to use them.
 
 .. toctree::
-    :maxdepth: 1
 
     contourRenderer
     twoDData
