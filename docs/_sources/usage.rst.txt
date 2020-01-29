@@ -20,7 +20,7 @@ If any feature in Vapor is not sufficienty self describing in the application, t
     :maxdepth: 1 
 
     usage/renderers.rst
-    usage/controllingTheRenderers.rst
+    usage/rendererControls.rst
     usage/navigationSettings.rst
     usage/globalSettings.rst
     usage/ancillaryTools.rst

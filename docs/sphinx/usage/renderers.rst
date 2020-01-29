@@ -5,7 +5,7 @@
 The Renderers
 -------------
 
-Vapor's main utility comes from its suite of Renderers, each of wich display simulation data with color and opacity according to user-defined parameters.  
+Vapor's main utility comes from its suite of Renderers, each of wich display simulation data with color and opacity according to user defined parameters.  
 
 Renderers can be captured as still images or animations for analysis, pubication, and presentation.  
 
