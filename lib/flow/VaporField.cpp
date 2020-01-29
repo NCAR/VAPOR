@@ -126,7 +126,7 @@ VaporField::InsideVolumeScalar( float time, const glm::vec3& pos ) const
     return true;
 }
 
-int VaporField::GetVelocityIntersection( size_t ts, glm::vec3& minxyz, glm::vec3& maxxyz )
+int VaporField::GetVelocityIntersection( size_t ts, glm::vec3& minxyz, glm::vec3& maxxyz ) const
 {
     const VAPoR::Grid* grid = nullptr;
     std::vector<double> min[3], max[3];
@@ -398,6 +398,66 @@ int VaporField::GetNumberOfTimesteps() const
 }
 
 
+int VaporField::CalcDeltaTFromCurrentTimeStep( float& delT ) const
+{
+    VAssert( _isReady() );
+    const auto currentTS = _params->GetCurrentTimestep();
+    const auto timestamp = _timestamps.at( currentTS );
+
+    // Let's find the intersection of 3 velocity components.
+    glm::vec3 minxyz( 0.0f ), maxxyz( 0.0f );
+    int rv = this->GetVelocityIntersection( currentTS, minxyz, maxxyz );
+    if( rv != 0 )
+        return rv;
+
+    // Let's make sure the max is greater than min
+    const auto invalid = glm::lessThan( maxxyz, minxyz );
+    if( glm::any( invalid ) )
+    {
+        Wasp::MyBase::SetErrMsg("One of the selected volume dimension is zero!");
+        return GRID_ERROR;
+    }
+
+    // Let's sample some locations along each dimension.
+    const long N = 10;   // Num of samples along each axis
+    const long totalSamples = N * N * N;
+    const glm::vec3 numOfSteps( float(N + 1) );
+    const glm::vec3 stepSizes = (maxxyz - minxyz) / numOfSteps;
+    glm::vec3 samples[ totalSamples ];
+    long counter = 0;
+    for( long z = 1; z <= N; z++ )
+        for( long y = 1; y <= N; y++ )
+            for( long x = 1; x <= N; x++ )
+            {
+                samples[counter].x = minxyz.x + stepSizes.x * float(x);
+                samples[counter].y = minxyz.y + stepSizes.y * float(y);
+                samples[counter].z = minxyz.z + stepSizes.z * float(z);
+                counter++;
+            }
+
+    // Let's find the maximum velocity on these sample locations
+    float maxmag = 0.0;
+    glm::vec3 vel;
+    for( long i = 0; i < totalSamples; i++ )
+    {
+        int rv  = this->GetVelocity( timestamp, samples[i], vel, false );
+        if( rv != 0 )
+            return rv;
+        auto mag = glm::length( vel );
+        if(  mag > maxmag )
+             maxmag = mag;
+    }
+
+    // Let's dictate that using the maximum velocity a particle needs 100 steps 
+    // to travel the entire space.
+    const float desiredNum = 100.0f;
+    const float actualNum  = glm::distance( minxyz, maxxyz ) / maxmag;
+    delT = actualNum / desiredNum;
+
+    return 0;
+}
+
+
 const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& varName ) const
 {
     // First check if we have the requested grid in our cache.
@@ -494,4 +554,3 @@ VaporField::_paramsToString(  size_t currentTS,               const std::string&
         return oss.str();
     }
 }
-
