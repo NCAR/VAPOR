@@ -14,8 +14,6 @@ void HideSTDERR()
     _savedSTDERR = -1;
     if ( fflush( stderr ) != 0 )
         return;
-    if ( fgetpos( stderr, &pos ) != 0 )
-        return;
 
     int rc = dup(STDERR_FILENO);
     if (rc < 0)
@@ -38,6 +36,5 @@ void RestoreSTDERR()
     close( _savedSTDERR );
 
     clearerr( stderr );
-    fsetpos( stderr, &pos );
 #endif
 }
