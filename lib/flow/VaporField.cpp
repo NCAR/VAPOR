@@ -438,7 +438,10 @@ int VaporField::CalcDeltaTFromCurrentTimeStep( float& delT ) const
     // Let's find the maximum velocity on these sampled locations
     // Note that we want the raw velocity, which will be the value
     // returned by GetVelocity() divided by the velocity multiplier.
-    const float mult1o = 1.0f / float(_params->GetVelocityMultiplier());
+    float mult =  _params->GetVelocityMultiplier();
+    if(   mult == 0.0f )
+          mult =  1.0f;
+    const float mult1o = 1.0f / mult;
     float maxmag = 0.0;
     glm::vec3 vel;
     for( long i = 0; i < totalSamples; i++ )
