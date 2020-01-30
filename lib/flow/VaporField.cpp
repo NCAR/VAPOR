@@ -345,18 +345,24 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(float &delT) const
             }
 
     // Let's find the maximum velocity on these sampled locations
-    float     maxmag = 0.0;
-    glm::vec3 vel;
+    // Note that we want the raw velocity, which will be the value
+    // returned by GetVelocity() divided by the velocity multiplier.
+    float mult = _params->GetVelocityMultiplier();
+    if (mult == 0.0f) mult = 1.0f;
+    const float mult1o = 1.0f / mult;
+    float       maxmag = 0.0;
+    glm::vec3   vel;
     for (long i = 0; i < totalSamples; i++) {
         int rv = this->GetVelocity(timestamp, samples[i], vel, false);
         if (rv != 0) return rv;
+        vel *= mult1o;    // Restore the raw velocity values
         auto mag = glm::length(vel);
         if (mag > maxmag) maxmag = mag;
     }
 
     // Let's dictate that using the maximum velocity FROM OUR SAMPLES
-    // a particle needs 1500 steps to travel the entire space.
-    const float desiredNum = 1500.0f;
+    // a particle needs 500 steps to travel the entire space.
+    const float desiredNum = 500.0f;
     const float actualNum = glm::distance(minxyz, maxxyz) / maxmag;
     delT = actualNum / desiredNum;
 
