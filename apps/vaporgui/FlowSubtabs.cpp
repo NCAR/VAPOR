@@ -379,8 +379,6 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     // Velocity multiplier
     double mltp = _params->GetVelocityMultiplier();
     _velocityMultiplierLineEdit->SetValue( mltp );
-    cout << "multiplier updating to " << mltp << endl;
-    //_velocityMultiplierLineEdit->SetValue( std::to_string( mltp ) );
 
     // Update seeding tab
     //
@@ -595,22 +593,22 @@ FlowSeedingSubtab::_velocityMultiplierChanged( const std::string& value )
 {
     double oldval = _params->GetVelocityMultiplier();
     double newval;
+    
     try
     {
+        // stod trips up on the character \n, so remove it if needed
+        //
         if (value.back() == '\n') {
             std::string tmp = value;
             tmp.pop_back();
             newval = std::stod( tmp );
-            std::cout << "pop endline" << std::endl;
         }
         else 
             newval = std::stod( value );
-        std::cout << "value/newval " << value << " / " << newval << std::endl;
     }
     catch ( const std::invalid_argument& e )
     {
-        MSG_ERR( "Bad input: " + value );
-        //_velocityMultiplierLineEdit->SetValue( std::to_string( oldval ) );
+        MSG_ERR( "Bad input to Velocity Multiplier: " + value );
         _velocityMultiplierLineEdit->SetValue( oldval );
         return;
     }
@@ -619,19 +617,13 @@ FlowSeedingSubtab::_velocityMultiplierChanged( const std::string& value )
     {
         // std::stod() would convert "3.83aaa" without throwing an exception.
         // We set the correct text based on the number identified.
-        //_velocityMultiplierLineEdit->SetValue( std::to_string(newval) ); 
         _velocityMultiplierLineEdit->SetValue( newval );
         // Only write back to _params if newval is different from oldval 
-        if( newval != oldval ) {
-            std::cout << "setting params to new " << newval << endl;
+        if( newval != oldval )
             _params->SetVelocityMultiplier( newval );
-        }
     }
-    else {
-        std::cout << "setting params to old " << oldval << endl;
+    else
         _velocityMultiplierLineEdit->SetValue( oldval );
-    }
-        //_velocityMultiplierLineEdit->SetValue( std::to_string( oldval ) );
 }
 
 
