@@ -81,7 +81,7 @@ public:
     // Returns the intersection domain of 3 velocity variables at a specific time step.
     // It returns non-zeros upon failure.
     //
-    int GetVelocityIntersection(size_t ts, glm::vec3 &minxyz, glm::vec3 &maxxyz);
+    int GetVelocityIntersection(size_t ts, glm::vec3 &minxyz, glm::vec3 &maxxyz) const;
 
     //
     // Store the default Z value for variables that are 2D grids in nature.
@@ -89,6 +89,12 @@ public:
     // the 3rd dimension being DefaultZ.
     //
     float DefaultZ = 0.0f;
+
+    //
+    // Calculate a default deltaT based on the velocity speed and domain size.
+    // It'll return 0 on success, and non-zero on error conditions.
+    //
+    int CalcDeltaTFromCurrentTimeStep(float &delT) const;
 
 private:
     // Member variables

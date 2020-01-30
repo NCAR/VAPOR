@@ -122,6 +122,13 @@ int FlowRenderer::_paintGL(bool fast)
     }
 
     if (_velocityStatus == FlowStatus::SIMPLE_OUTOFDATE) {
+        /* First step is to re-calculate deltaT */
+        rv = _velocityField.CalcDeltaTFromCurrentTimeStep(_cache_deltaT);
+        if (rv != 0) {
+            MyBase::SetErrMsg("Update deltaT failed!");
+            return rv;
+        }
+
         /* Read seeds from a file is a special case, so we put it up front */
         if (_cache_seedGenMode == FlowSeedMode::LIST) {
             rv = _advection.InputStreamsGnuplot(params->GetSeedInputFilename());
@@ -193,9 +200,7 @@ int FlowRenderer::_paintGL(bool fast)
     }
 
     if (!_advectionComplete) {
-        float deltaT = 0.05;    // For only 1 timestep case
-        if (_timestamps.size() > 1) deltaT *= _timestamps[1] - _timestamps[0];
-
+        float deltaT = _cache_deltaT;
         rv = flow::ADVECT_HAPPENED;
 
         /* Advection scheme 1: advect a maximum number of steps.
@@ -223,10 +228,7 @@ int FlowRenderer::_paintGL(bool fast)
         /* Advection scheme 2: advect to a certain timestamp.
          * This scheme is used for unsteady flow */
         else {
-            for (int i = 1; i <= _cache_currentTS; i++) {
-                deltaT = (_timestamps.at(i) - _timestamps.at(i - 1)) / 10.f;    // Update deltaT
-                rv = _advection.AdvectTillTime(&_velocityField, _timestamps.at(i - 1), deltaT, _timestamps.at(i));
-            }
+            for (int i = 1; i <= _cache_currentTS; i++) { rv = _advection.AdvectTillTime(&_velocityField, _timestamps.at(i - 1), deltaT, _timestamps.at(i)); }
         }
 
         _advectionComplete = true;

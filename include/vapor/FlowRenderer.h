@@ -71,14 +71,15 @@ private:
     std::vector<float> _cache_rake{0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
     std::vector<long>  _cache_gridNumOfSeeds{5, 5, 5};
     long               _cache_randNumOfSeeds = 5;
-    std::string        _cache_rakeBiasVariable;
-    float              _cache_rakeBiasStrength = 0.0f;
     int                _cache_seedInjInterval = 0;
+    float              _cache_rakeBiasStrength = 0.0f;
+    float              _cache_deltaT = 0.05f;
     FlowSeedMode       _cache_seedGenMode = FlowSeedMode::UNIFORM;
-    std::string        _cache_seedInputFilename;
     FlowDir            _cache_flowDir = FlowDir::FORWARD;
     FlowStatus         _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
     FlowStatus         _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    std::string        _cache_rakeBiasVariable;
+    std::string        _cache_seedInputFilename;
 
     // This Advection class is only used in bi-directional advection mode
     std::unique_ptr<flow::Advection> _2ndAdvection;
