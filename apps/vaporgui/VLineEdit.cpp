@@ -32,28 +32,25 @@ void VLineEdit::UseDoubleMenu() {
         this, &VLineEdit::ShowContextMenu );
 }
 
-void VLineEdit::SetValue( const std::string& value ) {
-    // see if value is a valid double
-    if (_isDouble) {
-        double dValue;
-        try {
-            dValue = std::stod( value );
-        }
-        catch (...) {
-            MSG_ERR("VLineEDit::SetValue failed to set value of " + value );
-        }
-
-        std::stringstream stream;
-        if (_menuEnabled) {
-            stream << std::fixed << std::setprecision( _decDigits );
-            if (_scientific)
-                stream << std::scientific;
-        }
-        stream << dValue << std::endl;
-        _value = stream.str();
+void VLineEdit::SetValue( double value ) {
+    VAssert( _isDouble );
+    
+    std::stringstream stream;
+    if (_menuEnabled) {
+        stream << std::fixed << std::setprecision( _decDigits );
+        if (_scientific)
+            stream << std::scientific;
     }
-    else
-        _value = value;
+    stream << value << std::endl;
+    _value = stream.str();
+    
+    _lineEdit->blockSignals(true);
+    _lineEdit->setText( QString::fromStdString(_value) );
+    _lineEdit->blockSignals(false);
+}
+
+void VLineEdit::SetValue( const std::string& value ) {
+    _value = value;
 
     _lineEdit->blockSignals(true);
     _lineEdit->setText( QString::fromStdString(_value) );
