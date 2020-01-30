@@ -496,19 +496,27 @@ void FlowSeedingSubtab::_resizeFlowParamsVectors() {
 
     // Going from 3d vectors to 2d vectors.
     // Save the values we remove for restoration later on.
+    int seedSize = rakeSeeds.size();
+    int periodicitySize = periodicity.size();
+    int regionSize = rakeRegion.size();
+    VAssert( seedSize == 3 || seedSize == 2 );
+    VAssert( periodicitySize == 3 || periodicitySize == 2 );
+    VAssert( regionSize == 6 || regionSize == 4 );
+
     if ( _numDims == 2 ) {  
-        if ( rakeSeeds.size() != 2 ) {
+
+        if ( seedSize == 3 ) {
             _oldZRakeNumSeeds = rakeSeeds[Z];
             rakeSeeds.resize(2);
         }
 
-        if ( rakeRegion.size() != 2 ) {
+        if ( regionSize == 6 ) {
             _oldZRakeMin = rakeRegion[Z_RAKE_MIN];
             _oldZRakeMax = rakeRegion[Z_RAKE_MAX];
             rakeRegion.resize(4);
         }
 
-        if ( periodicity.size() != 2 ) {
+        if ( periodicitySize == 3 ) {
             _oldZPeriodicity = periodicity[Z];
             periodicity.resize(2);
         }
@@ -516,18 +524,18 @@ void FlowSeedingSubtab::_resizeFlowParamsVectors() {
     // Going from 2D vectors to 3D vectors.
     // Restore previously saved values.
     else {
-        if ( periodicity.size() !=3 ) {
+        if ( periodicitySize == 2 ) {
             periodicity.resize(3);
             periodicity[Z] = _oldZPeriodicity;
         }
 
-        if ( rakeRegion.size() != 6 ) {
+        if ( regionSize == 4 ) {
             rakeRegion.resize(6);
             rakeRegion[Z_RAKE_MIN] = _oldZRakeMin;
             rakeRegion[Z_RAKE_MAX] = _oldZRakeMax;
         }
 
-        if ( rakeSeeds.size() != 3 ) {
+        if ( seedSize == 2 ) {
             rakeSeeds.resize(3);
             rakeSeeds[Z] = _oldZRakeNumSeeds;
         }
