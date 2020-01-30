@@ -410,7 +410,7 @@ int VaporField::CalcDeltaTFromCurrentTimeStep( float& delT ) const
     if( rv != 0 )
         return rv;
 
-    // Let's make sure the max is greater than min
+    // Let's make sure the max is greater than or equal to min
     const auto invalid = glm::lessThan( maxxyz, minxyz );
     if( glm::any( invalid ) )
     {
@@ -448,9 +448,9 @@ int VaporField::CalcDeltaTFromCurrentTimeStep( float& delT ) const
              maxmag = mag;
     }
 
-    // Let's dictate that using the maximum velocity a particle needs 100 steps 
-    // to travel the entire space.
-    const float desiredNum = 100.0f;
+    // Let's dictate that using the maximum velocity FROM OUR SAMPLES
+    // a particle needs 1500 steps to travel the entire space.
+    const float desiredNum = 1500.0f;
     const float actualNum  = glm::distance( minxyz, maxxyz ) / maxmag;
     delT = actualNum / desiredNum;
 
