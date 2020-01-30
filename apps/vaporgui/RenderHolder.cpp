@@ -217,6 +217,9 @@ RenderHolder::RenderHolder(
     //_newRendererDialog = new NewRendererDialog(this, ce);
     _newRendererDialog = new NewRendererDialog(
         this, widgetNames, descriptions, iconPaths, smallIconPaths, dim2DSupport, dim3DSupport);
+    // Remove [X] button from title bar to fix bug #2184
+    _newRendererDialog->setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
+
     _vaporTable = new VaporTable(tableWidget, false, true);
     _vaporTable->Reinit(
         (VaporTable::ValidatorFlags)(0),
