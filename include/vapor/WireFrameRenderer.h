@@ -56,6 +56,7 @@ private:
     GLuint       _VAO, _VBO, _EBO;
     unsigned int _nIndices;
     Texture1D    _lutTexture;
+    bool         _GPUOutOfMemory;
 
     struct VertexData;
     struct {
@@ -108,9 +109,9 @@ private:
         const size_t   _maxLinesPerVertex;
     };
 
-    void _buildCacheVertices(const Grid *grid, const Grid *heightGrid, vector<GLuint> &nodeMap) const;
+    void _buildCacheVertices(const Grid *grid, const Grid *heightGrid, vector<GLuint> &nodeMap, bool *GPUOutOfMemory) const;
 
-    size_t _buildCacheConnectivity(const Grid *grid, const vector<GLuint> &nodeMap) const;
+    size_t _buildCacheConnectivity(const Grid *grid, const vector<GLuint> &nodeMap, bool *GPUOutOfMemory) const;
 
     int  _buildCache();
     bool _isCacheDirty() const;
