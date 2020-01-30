@@ -23,6 +23,7 @@ class VLineEdit : public VContainer {
 public:
     VLineEdit(const std::string &value = "");
 
+    void        SetValue(double value);
     void        SetValue(const std::string &value);
     std::string GetValue() const;
 
