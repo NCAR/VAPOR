@@ -50,7 +50,7 @@ Pathline Settings
 
 Both *Streamline* and *Pathline* integration contain the following parameters:
 
-**Vector field multiplier:** Allows the user to multiply their vector field values by a scalar.  This is useful in the situation where the data domain and the vector field are in different units.  For example, if the data domain is in units of km, and the vector field is in units of m/s, the user may multiply their vector field by 1000 so that all units are congruent with eachother.
+**Vector field multiplier:** Allows the user to multiply their vector field values by a scalar.  This is useful in the situation where the data domain and the vector field are in different units.  For example, if the data domain is in units of km, and the vector field is in units of m/s, the user may multiply their vector field by 1000 so that all units are congruent with each other.
 
 **Axis Periodicity:** If the X, Y, or Z axes are periodic, flow lines that exit the domain along these axes will be re-inserted on the opposite side of the domain.  Flow lines will continue advecting from that point.
 

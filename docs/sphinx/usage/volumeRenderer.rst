@@ -19,7 +19,7 @@ Basic Controls
 
 This renderer contains all of Vapor's standard renderer controls: the :ref:`Variables <variablesTab>`, :ref:`Appearance <appearanceTab>`, :ref:`Geometry <geometryTab>`, and :ref:`Annotation <annotationTab>` tabs.
 
-The Volume Renderer additionally has specialized controls in its Variables and Apparance tabs.
+The Volume Renderer additionally has specialized controls in its Variables and Appearance tabs.
 
 Specialized Controls
 --------------------

@@ -12,7 +12,7 @@ ____________________
 Description
 -----------
 
-The Two Dimensional Data Rendedrer displays the user's 2D data variables along the plane described by the source data file.
+The Two Dimensional Data Renderer displays the user's 2D data variables along the plane described by the source data file.
 
 Basic Controls
 --------------

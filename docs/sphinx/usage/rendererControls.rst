@@ -33,7 +33,7 @@ Users that have converted their data into :ref:`VDC <vdc>` will have a fidelity 
 
 Appearance Tab
 ______________
-The appearance tab controls the color, opacity, and any renderer-specific parameters of your renderer.  Color and opacity are controlled by the Transfer Function.  Renderer-specific parameters will be grouped togheter within the Appearance Tab.  See the :ref:`Renderers <renderers>` section for more info on renderer-specific parameters.
+The appearance tab controls the color, opacity, and any renderer-specific parameters of your renderer.  Color and opacity are controlled by the Transfer Function.  Renderer-specific parameters will be grouped together within the Appearance Tab.  See the :ref:`Renderers <renderers>` section for more info on renderer-specific parameters.
 
 The Transfer Function consists of a `Probability Density Function (PDF) <https://en.wikipedia.org/wiki/Probability_density_function>`_ of your currently selected variable.  Underneath the PDF is a color bar that shows the colors that get applied to the values located directly above it.
 
