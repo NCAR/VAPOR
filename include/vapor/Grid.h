@@ -1277,7 +1277,7 @@ private:
  std::vector <float *> _blks;
  std::vector <bool> _periodic;	// periodicity of boundaries
  std::vector <size_t> _minAbs;	// Offset to start of grid 
- size_t _topologyDimension = 3;
+ size_t _topologyDimension = 0;
  float _missingValue       = std::numeric_limits<float>::infinity();
  bool _hasMissing          = false;
  int _interpolationOrder   = 0;	// Order of interpolation 
