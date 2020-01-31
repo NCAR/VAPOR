@@ -12,6 +12,8 @@
  * class is supposed to be created and used locally by its user.
  */
 
+#include <numeric>
+#include <cmath>
 #include "vapor/Grid.h"
 
 namespace VAPoR
@@ -42,6 +44,9 @@ public:
     // Similarly, this will always return true. 
     virtual bool InsideGrid(const std::vector <double> &coords) const override;
 
+    float GetMissingValue() const override {
+		return(INFINITY);
+	}
 
     std::string GetType() const override;
 
