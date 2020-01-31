@@ -168,6 +168,14 @@ FlowRenderer::_paintGL( bool fast )
 
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
+        /* First step is to re-calculate deltaT */
+        rv = _velocityField.CalcDeltaTFromCurrentTimeStep( _cache_deltaT );
+        if( rv != 0 )
+        {
+            MyBase::SetErrMsg("Update deltaT failed!");
+            return rv;
+        }
+
         /* Read seeds from a file is a special case, so we put it up front */
         if( _cache_seedGenMode == FlowSeedMode::LIST )
         {
@@ -255,10 +263,7 @@ FlowRenderer::_paintGL( bool fast )
 
     if( !_advectionComplete )
     {
-        float deltaT = 0.05;          // For only 1 timestep case
-        if( _timestamps.size() > 1 )
-            deltaT *= _timestamps[1] - _timestamps[0];
-
+        float deltaT = _cache_deltaT;
         rv = flow::ADVECT_HAPPENED;
 
         /* Advection scheme 1: advect a maximum number of steps.
@@ -296,7 +301,6 @@ FlowRenderer::_paintGL( bool fast )
         {
             for( int i = 1; i <= _cache_currentTS; i++ )
             {
-                deltaT = (_timestamps.at(i) - _timestamps.at(i-1)) / 10.f;  // Update deltaT
                 rv = _advection.AdvectTillTime( &_velocityField, _timestamps.at(i-1), 
                                                 deltaT, _timestamps.at(i) );
             }
@@ -495,6 +499,9 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         // so we should declare color status out of date too.
         _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
     }
+
+    /* Don't know why, but on MacOS 10.14.6 and Apple LLVM version 10.0.1 (clang-1001.0.46.4),
+       this comment fixes issue #2141. */
 
     std::string colorVarName = params->GetColorMapVariableName();
     if( colorVarName != _colorField.ScalarName )

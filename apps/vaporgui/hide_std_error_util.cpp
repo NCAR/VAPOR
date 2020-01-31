@@ -6,15 +6,12 @@
 #endif
 
 static int _savedSTDERR;
-static fpos_t pos;
 
 void HideSTDERR()
 {
 #ifndef WIN32
     _savedSTDERR = -1;
     if ( fflush( stderr ) != 0 )
-        return;
-    if ( fgetpos( stderr, &pos ) != 0 )
         return;
 
     int rc = dup(STDERR_FILENO);
@@ -38,6 +35,5 @@ void RestoreSTDERR()
     close( _savedSTDERR );
 
     clearerr( stderr );
-    fsetpos( stderr, &pos );
 #endif
 }

@@ -155,7 +155,8 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) :
     //
     _geometryWriterSection= new VSection("Write Flowlines to File");
     layout()->addWidget( _geometryWriterSection );
-    _geometryWriterSelector = new VFileWriter();
+    string defaultPath = QDir::homePath().toStdString() + "/vaporFlow.txt";
+    _geometryWriterSelector = new VFileWriter("Select", defaultPath);
     _geometryWriterSection->layout()->addWidget( new VLineItem("Target file", _geometryWriterSelector) );
     _geometryWriterExecutor = new VPushButton("Write to file");
     _geometryWriterSection->layout()->addWidget( new VLineItem("", _geometryWriterExecutor) );
@@ -376,8 +377,8 @@ void FlowSeedingSubtab::Update( VAPoR::DataMgr      *dataMgr,
     }
 
     // Velocity multiplier
-    auto mltp = _params->GetVelocityMultiplier();
-    _velocityMultiplierLineEdit->SetValue( std::to_string( mltp ) );
+    double mltp = _params->GetVelocityMultiplier();
+    _velocityMultiplierLineEdit->SetValue( mltp );
 
     // Update seeding tab
     //
@@ -495,30 +496,49 @@ void FlowSeedingSubtab::_resizeFlowParamsVectors() {
 
     // Going from 3d vectors to 2d vectors.
     // Save the values we remove for restoration later on.
+    int seedSize = rakeSeeds.size();
+    int periodicitySize = periodicity.size();
+    int regionSize = rakeRegion.size();
+    VAssert( seedSize == 3 || seedSize == 2 );
+    VAssert( periodicitySize == 3 || periodicitySize == 2 );
+    VAssert( regionSize == 6 || regionSize == 4 );
+
     if ( _numDims == 2 ) {  
-        _oldZRakeNumSeeds = rakeSeeds[Z];
-        rakeSeeds.resize(2);
 
-        _oldZRakeMin = rakeRegion[Z_RAKE_MIN];
-        _oldZRakeMax = rakeRegion[Z_RAKE_MAX];
-        rakeRegion.resize(4);
+        if ( seedSize == 3 ) {
+            _oldZRakeNumSeeds = rakeSeeds[Z];
+            rakeSeeds.resize(2);
+        }
 
-        _oldZPeriodicity = periodicity[Z];
-        periodicity.resize(2);
+        if ( regionSize == 6 ) {
+            _oldZRakeMin = rakeRegion[Z_RAKE_MIN];
+            _oldZRakeMax = rakeRegion[Z_RAKE_MAX];
+            rakeRegion.resize(4);
+        }
+
+        if ( periodicitySize == 3 ) {
+            _oldZPeriodicity = periodicity[Z];
+            periodicity.resize(2);
+        }
     }
     // Going from 2D vectors to 3D vectors.
     // Restore previously saved values.
-    else {  
-        periodicity.resize(3);
-        periodicity[Z] = _oldZPeriodicity;
+    else {
+        if ( periodicitySize == 2 ) {
+            periodicity.resize(3);
+            periodicity[Z] = _oldZPeriodicity;
+        }
 
-        for (int i=0; i<6; i++)
-        rakeRegion.resize(6);
-        rakeRegion[Z_RAKE_MIN] = _oldZRakeMin;
-        rakeRegion[Z_RAKE_MAX] = _oldZRakeMax;
+        if ( regionSize == 4 ) {
+            rakeRegion.resize(6);
+            rakeRegion[Z_RAKE_MIN] = _oldZRakeMin;
+            rakeRegion[Z_RAKE_MAX] = _oldZRakeMax;
+        }
 
-        rakeSeeds.resize(3);
-        rakeSeeds[Z] = _oldZRakeNumSeeds;
+        if ( seedSize == 2 ) {
+            rakeSeeds.resize(3);
+            rakeSeeds[Z] = _oldZRakeNumSeeds;
+        }
     }
 
     _paramsMgr->BeginSaveStateGroup("Resizing flow params vectors");
@@ -592,14 +612,23 @@ FlowSeedingSubtab::_velocityMultiplierChanged( const std::string& value )
 {
     double oldval = _params->GetVelocityMultiplier();
     double newval;
+    
     try
     {
-        newval = std::stod( value );
+        // stod trips up on the character \n, so remove it if needed
+        //
+        if (value.back() == '\n') {
+            std::string tmp = value;
+            tmp.pop_back();
+            newval = std::stod( tmp );
+        }
+        else 
+            newval = std::stod( value );
     }
     catch ( const std::invalid_argument& e )
     {
-        MSG_ERR( "Bad input: " + value );
-        _velocityMultiplierLineEdit->SetValue( std::to_string( oldval ) );
+        MSG_ERR( "Bad input to Velocity Multiplier: " + value );
+        _velocityMultiplierLineEdit->SetValue( oldval );
         return;
     }
 
@@ -607,13 +636,13 @@ FlowSeedingSubtab::_velocityMultiplierChanged( const std::string& value )
     {
         // std::stod() would convert "3.83aaa" without throwing an exception.
         // We set the correct text based on the number identified.
-        _velocityMultiplierLineEdit->SetValue( std::to_string(newval) ); 
+        _velocityMultiplierLineEdit->SetValue( newval );
         // Only write back to _params if newval is different from oldval 
         if( newval != oldval )
             _params->SetVelocityMultiplier( newval );
     }
     else
-        _velocityMultiplierLineEdit->SetValue( std::to_string( oldval ) );
+        _velocityMultiplierLineEdit->SetValue( oldval );
 }
 
 
@@ -774,6 +803,14 @@ FlowSeedingSubtab::_streamlineDirectionChanged( int index )
 }
 
 void FlowSeedingSubtab::_geometryWriterClicked() {
+    bool enabled = _params->IsEnabled();
+    if ( !enabled ) {
+        MSG_ERR( "The Flow renderer must be enabled to compute trajectories " \
+            "before writing the anything to a file." 
+        );
+        return;
+    }
+
     std::string file = _geometryWriterSelector->GetValue();
 
     _paramsMgr->BeginSaveStateGroup("Write flowline geometry file");
