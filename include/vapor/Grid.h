@@ -5,6 +5,7 @@
 #include <ostream>
 #include <vector>
 #include <string>
+#include <limits>
 #include "vapor/VAssert.h"
 #include <memory>
 #include <vapor/common.h>
@@ -1271,17 +1272,17 @@ protected:
 private:
 
  std::vector <size_t> _dims;	// dimensions of grid arrays
- std::vector <size_t> _bs;  // dimensions of each block
+ std::vector <size_t> _bs;      // dimensions of each block
  std::vector <size_t> _bdims;   // dimensions (specified in blocks) of ROI
  std::vector <float *> _blks;
  std::vector <bool> _periodic;	// periodicity of boundaries
  std::vector <size_t> _minAbs;	// Offset to start of grid 
- size_t _topologyDimension;
- float _missingValue;
- bool _hasMissing;
- int _interpolationOrder;	// Order of interpolation 
- long _nodeIDOffset;
- long _cellIDOffset;
+ size_t _topologyDimension = 3;
+ float _missingValue       = std::numeric_limits<float>::infinity();
+ bool _hasMissing          = false;
+ int _interpolationOrder   = 0;	// Order of interpolation 
+ long _nodeIDOffset        = 0;
+ long _cellIDOffset        = 0;
 
  virtual void _getUserCoordinatesHelper(
 	const std::vector <double> &coords, double &x, double &y, double &z
