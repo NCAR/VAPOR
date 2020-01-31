@@ -19,7 +19,8 @@ namespace VAPoR {
 class VDF_API ConstantGrid : public Grid {
 public:
     // The constant value is specified via the constructor
-    ConstantGrid(float v);
+    // It also requires specification of the dimentionality.
+    ConstantGrid(float v, size_t d);
 
     //
     // Useful functions of ConstantGrid.
@@ -39,6 +40,9 @@ public:
     virtual bool InsideGrid(const std::vector<double> &coords) const override;
 
     std::string GetType() const override;
+
+    // Overwrites the same function from Grid, which will always give you a zero.
+    virtual size_t GetTopologyDim() const override;
 
 private:
     //
@@ -64,7 +68,9 @@ private:
     ConstCoordItr ConstCoordEnd() const override;
 
     // Private data member that holds this constant value.
-    const float _value;
+    const float  _value;
+    const size_t _topologyDim;    // Not to be confused with _topologyDimension in
+                                  // the base Grid class, which is private to Grid.
 
 };    // end ConstantGrid class
 };    // namespace VAPoR

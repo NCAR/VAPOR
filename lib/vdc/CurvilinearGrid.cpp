@@ -640,9 +640,10 @@ bool CurvilinearGrid::_insideGrid(double x, double y, double z, size_t &i, size_
 
     bool           inside = false;
     double         pt[] = {x, y};
-    vector<size_t> face(2, 0);
+    vector<size_t> face(3, 0);
     for (int ii = 0; ii < face_indices.size(); ii++) {
         Wasp::VectorizeCoords(face_indices[ii], dims2d, face.data(), 2);
+        face[2] = 0;    // _insideFace expects 3D coordinates
         if (_insideFace(face, pt, lambda)) {
             i = face[0];
             j = face[1];

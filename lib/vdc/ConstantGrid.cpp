@@ -4,7 +4,7 @@
 
 using VAPoR::ConstantGrid;
 
-ConstantGrid::ConstantGrid(float v) : _value(v) {}
+ConstantGrid::ConstantGrid(float v, size_t d) : _value(v), _topologyDim(d) {}
 
 float ConstantGrid::GetConstantValue() const { return _value; }
 
@@ -20,12 +20,12 @@ std::string ConstantGrid::GetType() const
     return type;
 }
 
+size_t ConstantGrid::GetTopologyDim() const { return _topologyDim; }
+
 void ConstantGrid::GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const
 {
-    // We have to make an assumption on the dimensionality of the ConstantGrid here.
-    // Let's assume it's 3D.
-    minu.resize(3, std::numeric_limits<double>::min());
-    maxu.resize(3, std::numeric_limits<double>::max());
+    minu.resize(_topologyDim, std::numeric_limits<double>::min());
+    maxu.resize(_topologyDim, std::numeric_limits<double>::max());
 }
 
 bool ConstantGrid::InsideGrid(const std::vector<double> &coords) const { return true; }

@@ -403,7 +403,7 @@ const VAPoR::Grid *VaporField::_getAGrid(size_t timestep, const std::string &var
     VAPoR::Grid *grid = nullptr;
     if (key == _constantGridZero)    // need a ConstantGrid
     {
-        grid = new VAPoR::ConstantGrid(0.0f);
+        grid = new VAPoR::ConstantGrid(0.0f, 3);
     } else {
         grid = _datamgr->GetVariable(timestep, varName, refLevel, compLevel, extMin, extMax, true);
     }
