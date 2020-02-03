@@ -47,25 +47,25 @@ There are 4 transformation tags: ``translate``, ``rotate``, ``scale``, and ``ori
 .. code-block:: xml
 
     <scene>
-    <instance_blade file="turbine-blade.stl">
-        <origin z="90" />
-    </instance_blade>
-    <instance_tower file="turbine-tower.stl" />
-        <time_0>
-            <instance_blade1>
+        <instance_blade file="turbine-blade.stl">
+            <origin z="90" />
+        </instance_blade>
+        <instance_tower file="turbine-tower.stl" />
+            <time_0>
+                <instance_blade1>
+                    <translate x="420" y="300" z="0" />
+                </instance_blade1>
+                <instance_tower>
+                    <translate x="420" y="300" z="0" />
+                </instance_tower>
+        </time_0>
+        <time_1>
+            <instance_blade>
                 <translate x="420" y="300" z="0" />
-            </instance_blade1>
+                <rotate x="-72.6" />
+            </instance_blade>
             <instance_tower>
                 <translate x="420" y="300" z="0" />
             </instance_tower>
-    </time_0>
-    <time_1>
-        <instance_blade>
-            <translate x="420" y="300" z="0" />
-            <rotate x="-72.6" />
-        </instance_blade>
-        <instance_tower>
-            <translate x="420" y="300" z="0" />
-        </instance_tower>
-    </time_1>
+        </time_1>
     </scene>
