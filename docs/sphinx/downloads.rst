@@ -9,7 +9,7 @@ Downloads
 Current Release: Vapor 3.2.0
 ----------------------------
 
-January 31, 2020 
+February 3, 2020 
 
 `Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
 
