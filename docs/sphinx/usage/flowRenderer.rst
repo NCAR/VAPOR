@@ -67,7 +67,8 @@ Seed Distribution Settings
 
 *List of seeds:* A user may specify a list of seeds to be read from the renderer.  The file must contain lines of comma separated values that represent the locations of the seeds on the X, Y, and Z axes.  Users may optionally add a time value after the Z coordinate.  Empty lines are ignored, and lines beginning with the # character are comments.
 
-The following example would place a seed at (.5, .8, .25) at the first three timesteps of the data set.::
+The following example would place a seed at spatial location of (.5, .8, .25) 
+with timestamp .5.::
 
     # X, Y, Z, T
     .5, .8, .25, 0.5, .8, .25, 1.5, .8, .25, 2
