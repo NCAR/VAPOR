@@ -6,25 +6,26 @@ Downloads
 
 .. note:: If you are looking for our legacy version of Vapor 2.6, follow :ref:`this link <vapor2>` to the bottom of the page.
 
-Current Release: Vapor 3.1.0
+Current Release: Vapor 3.2.0
 ----------------------------
 
-July 5, 2019
+February 3, 2020 
 
 `Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
 
-Release notes for VAPOR-3.1.0
+Release notes for VAPOR-3.2.0
 
     New Features:
 
-    - 3D Variable Support
-    - Direct Volume Renderer
-    - Isosurfaces
-    - Slice Renderer
-    - Wireframe Renderer
-    - Python variable engine
-    - Geotiff creation from Vapor renderings
-    - Support for MPAS-A and MOM6 models
+    - Flow Renderer
+    - Model Renderer
+    - New Transfer Function Editor
+    - Off screen rendering
+    - Performance optimization to Vapor's DataMgr class
+    - Added support for stretched grids to vdccreate
+    - Added ability to color Volume Renderings with a secondary variable
+    - Increased Volume Rendering sampling rate maximum setting
+    - Updated 3rd party libraries
 
 |
 
@@ -71,69 +72,59 @@ Vapor's current master branch source code can be downloaded from GitHub_.
 
 *Windows*
 
-Untar the three files linked below into the root of your C:\ directory.
+Unzip the following file linked below into the root of your C:\\ directory.
 
-    `vaporwin64deps2015.tar <https://drive.google.com/a/ucar.edu/file/d/1CHUxsPZYrZPDVqRCT-1qtTEQtZfgTn7u/view?usp=sharing>`_
-
-    `Vapor3rdParty2015.tar <https://drive.google.com/a/ucar.edu/file/d/1ZDK2pDu66XDVhJBpFogdqVgNFIMKsrtM/view?usp=sharing>`_
-
-    `Qt-2015.tar <https://drive.google.com/a/ucar.edu/file/d/19RGYew30dH6T6zG3HzfWwck4RZNLXAhp/view?usp=sharing>`_
+    `Windows third party libraries <https://drive.google.com/open?id=1sRlE06jSVrCScrt546G4UtI3hj93xV2W>`_
 
 *Linux and OSX*
 
-If building on Linux or OSX, third party libraries are unable to be written to arbitrary directory locations.  If you choose do download the pre-built libraries, they must be unpacked in the following directories:
+If building on Linux or OSX, the third party libraries must be placed in /usr/local/VAPOR-Deps/.
 
-OSX: /glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64/
+    `OSX third-party libraries <https://drive.google.com/open?id=1kyDAzmK9zShrIcoAbned8YW9vn2j7lpe>`_
 
-    `Link to OSX third-party libraries <https://drive.google.com/open?id=1JHl6kHkBvbd17BUC-9nvWZupjyWfwyw7>`_
+    `Ubuntu third-party libraries <https://drive.google.com/open?id=1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd>`_
 
-Linux: /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/
+    `CentOS third-party libraries <https://drive.google.com/open?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0>`_
 
-    `Link to Ubuntu third-party libraries <https://drive.google.com/open?id=0B0dQMtxB89M0azF5RW1RSE5qcTg>`_
+.. note:: Alternatively, you can build the libraries yourself and store them wherever you want.  If you choose to do this, you must also configure CMake to point to your custom directory.  If you wish to go down this route, you may follow these build instructions for `Windows <https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing>`_ and `UNIX <https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing>`_.
 
-    `Link to CentOS third-party libraries <https://drive.google.com/open?id=1_JdUuiy_iQUuIDoPyBn2pupBTz-LS4pM>`_
-
-Alternatively, you can build the libraries yourself and store them wherever you want.  If you choose to do this, you must also configure CMake to point to your custom directory.
-
-+-----------------+-----------------+----------------------------------------------+
++-----------------+----------------------------------------------------------------+
 | *Vapor 3 was build with the following third party library configuration.*        |
-+-----------------+-----------------+----------------------------------------------+
-| Library         | Version         | Configuration                                |
-+-----------------+-----------------+----------------------------------------------+
-| assimp          | 3.3.1           |                                              |
-+-----------------+-----------------+----------------------------------------------+
-| freetype        | 2.7.1           |                                              |
-+-----------------+-----------------+----------------------------------------------+
-| ftgl            | 2.1.3-rc5       |                                              |
-+-----------------+-----------------+----------------------------------------------+
-| glew            | 2.0.0           |                                              |
-+-----------------+-----------------+----------------------------------------------+
-| grib_api        | 1.19.0          | Built with unreleased memory leak patches    |
-+-----------------+-----------------+----------------------------------------------+
-| hdf5            | 1.10.0          |                                              |
-+-----------------+-----------------+----------------------------------------------+
-| jpeg            | 9b              |                                              |
-+-----------------+-----------------+----------------------------------------------+
-| libgeotiff      | 1.4.2           | --with-libtiff                               |
-+-----------------+-----------------+----------------------------------------------+
-| udunits         | 2.2.20          |                                              |
-+-----------------+-----------------+----------------------------------------------+
-| netCDF          | 4.4.1.1         | --enable-shared --disable-dap                |
-+-----------------+-----------------+----------------------------------------------+
-| tiff	          | 4.0.7           | --enable-lzw --enable-jpeg --enable-old-jpeg |
-+-----------------+-----------------+----------------------------------------------+
-| proj            | 4.9.2           |                                              |
-+-----------------+-----------------+----------------------------------------------+
-| python          | 2.7.13          | --enable-shared                              |
-+-----------------+-----------------+----------------------------------------------+
-| Qt              | 4.8.7           | -no-webkit -no-multimedia -no-script         |
-|                 |                 | -no-qt3support -opensource (-cocoa on Mac)   |
-+-----------------+-----------------+----------------------------------------------+
- 	 
++-----------------+----------------------------------------------------------------+
+| Library         | Version                                                        |
++-----------------+----------------------------------------------------------------+
+| assimp          | 4.1.0                                                          |
++-----------------+----------------------------------------------------------------+
+| freetype        | 2.10.1                                                         |
++-----------------+----------------------------------------------------------------+
+| glew            | 2.1.0                                                          |
++-----------------+----------------------------------------------------------------+
+| hdf5            | 1.10.5                                                         |
++-----------------+----------------------------------------------------------------+
+| jpeg            | 9c                                                             |
++-----------------+----------------------------------------------------------------+
+| libgeotiff      | 1.5.1                                                          |
++-----------------+----------------------------------------------------------------+
+| udunits         | 2.2.26                                                         |
++-----------------+----------------------------------------------------------------+
+| netCDF          | 4.7.0                                                          |
++-----------------+----------------------------------------------------------------+
+| tiff	          | 4.0.10                                                         |
++-----------------+----------------------------------------------------------------+
+| proj            | 6.1.1                                                          |
++-----------------+----------------------------------------------------------------+
+| python          | 3.6.9                                                          |
++-----------------+----------------------------------------------------------------+
+| Qt              | 5.12.4                                                         |
++-----------------+----------------------------------------------------------------+
+
+The source code for these libraries by be downloaded `here <https://drive.google.com/open?id=1sWIV-Y66aFuDkC2oDnceIIUJDDH4puKI>`_.
+
 **Step 3 - Set up your compiler**
 
-The following compilers are required to build Vapor.
+The following compilers were used to build Vapor.
 
+OSX - LLVM 10.0.1 (clang-1001.0.46.4)
 Ubuntu/CentOS - GCC 4.8.5 or higher
 Windows - Microsoft Visual Studio 2015, version 14
 	
@@ -166,9 +157,6 @@ On Linux, run  *cmake <build_directory> && make linuxpreinstall && make installe
 Sample Data
 -----------
 
-**Coming soon**
-
-
 +--------------+-------+-------------------+-----------+
 | Dataset      | Model | Grid Resolution   | File Size |
 +--------------+-------+-------------------+-----------+
@@ -181,12 +169,39 @@ Sample Data
 
 .. _Kauffman: https://dashrepo.ucar.edu/dataset/VAPOR_Sample_Data/file/kauffmanSample.tar.gz
 
+.. note:: Users can download a 500 meter resolution image of NASA's `BigBlueMarble <https://drive.google.com/open?id=1qIwh8ZJj67d85ktkjpgOVBAE-oMRi3rD>`_ for use in Vapor's Image Renderer.
+
+|
+
+Previous Releases
+-----------------
+
+Vapor 3.1.0
+```````````
+
+July 5, 2019
+
+`Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
+
+Release notes for VAPOR-3.1.0
+
+    New Features:
+
+    - 3D Variable Support
+    - Direct Volume Renderer
+    - Isosurfaces
+    - Slice Renderer
+    - Wireframe Renderer
+    - Python variable engine
+    - Geotiff creation from Vapor renderings
+    - Support for MPAS-A and MOM6 models
+
 |
 
 .. _vapor2:
 
 Vapor 2
--------
+```````
 
 If you are interested in using Vapor 2, it can be `downloaded after filling out a short survey <https://forms.gle/ZLX7oZ7LYAVEEBH4A>`_.
 
