@@ -44,7 +44,7 @@ Streamline Settings
 Pathline Settings
 `````````````````
 
-**Pathline length:** Specifies the length of each individual pathline in the unit of timesteps. If set to 1, a pathline is comprised of a curve joining the points between the current timestep (t), and the point that the pathline traversed at the previous timestep (t-1). A value of 2 will comprise a curve joining the advection point at the current timestep (t), and the previous two timesteps (t-1 and t-2).
+**Pathline length:** Specifies the length of each individual pathline to be shown in the unit of timesteps. If set to 1, the trajectory of a particle travels from the previous timestep (t-1) to the current timestep (t) will be displayed. If set to 2, the trajectory of a particle travels from the past two timesteps (t-2 and t-1) to the current timestep (t) will be displayed.
 
 **Injection Interval:** This controls the frequency at which pathlines are injected into the scene.  A value of 0 will only inject pathlines at the initial time step of the data set.  A value of 1 will inject at every timestep, 2 will inject at every 2nd timestep, etc.
 
