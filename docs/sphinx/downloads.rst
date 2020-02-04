@@ -85,7 +85,7 @@ If building on Linux or OSX, third party libraries are unable to be written to a
 
 OSX: /glade/p/VAST/VAPOR/third-party/apps-2017/Darwin_x86_64/
 
-    `Link to OSX third-party libraries <https://drive.google.com/open?id=1JHl6kHkBvbd17BUC-9nvWZupjyWfwyw7>`_
+    `Link to OSX third-party libraries <https://drive.google.com/open?id=1cnDhEgcXOjpSiqgbaOUfP2WvS5HlRlRD>`_
 
 Linux: /glade/p/VAST/VAPOR/third-party/apps-2017/Linux_x86_64/
 
