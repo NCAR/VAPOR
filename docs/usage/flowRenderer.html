@@ -208,7 +208,7 @@
 </div>
 <div class="section" id="pathline-settings">
 <h4>Pathline Settings<a class="headerlink" href="#pathline-settings" title="Permalink to this headline">¶</a></h4>
-<p><strong>Pathline length:</strong> This specifies how many previous locations of a pathline to render along an advection path.  For example, if the Pathline length were set to 3, a pathline would render a line comprising its current position, and the previous 2 locations that the pathline traversed in time.</p>
+<p><strong>Pathline length:</strong> Specifies the length of each individual pathline.  If set to 1, a pathline is comprised of a line joining the points between the current timestep (t0), and the point that the pathline traversed at the previous timestep (t-1).  A value of 2 will comprise a line joining the advection point at the current timestep (t0), and the previous two timesteps (t-1 and t-2).</p>
 <p><strong>Injection Interval:</strong> This controls the frequency at which pathlines are injected into the scene.  A value of 0 will only inject pathlines at the initial time step of the data set.  A value of 1 will inject at every timestep, 2 will inject at every 2nd timestep, etc.</p>
 <p>Both <em>Streamline</em> and <em>Pathline</em> integration contain the following parameters:</p>
 <p><strong>Vector field multiplier:</strong> Allows the user to multiply their vector field values by a scalar.  This is useful in the situation where the data domain and the vector field are in different units.  For example, if the data domain is in units of km, and the vector field is in units of m/s, the user may multiply their vector field by 1000 so that all units are congruent with each other.</p>
@@ -222,7 +222,8 @@
 <p><em>Random:</em> Users select a number of seeds that will be randomly placed within the Flow Renderer’s Rake region.</p>
 <p><em>Random w/ bias:</em> Like a Random distribution, except that users also specify a bias variable that influences the random distribution.  If the bias is positive, the seed distribution will prefer regions where there are greater values of the selected variable.  If the bias is negative, the distribution will prefer regions where the variable is lesser in value.</p>
 <p><em>List of seeds:</em> A user may specify a list of seeds to be read from the renderer.  The file must contain lines of comma separated values that represent the locations of the seeds on the X, Y, and Z axes.  Users may optionally add a time value after the Z coordinate.  Empty lines are ignored, and lines beginning with the # character are comments.</p>
-<p>The following example would place a seed at (.5, .8, .25) at the first three timesteps of the data set.:</p>
+<p>The following example would place a seed at spatial location of (.5, .8, .25)
+with timestamp .5.:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># X, Y, Z, T</span>
 <span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="o">.</span><span class="mi">8</span><span class="p">,</span> <span class="o">.</span><span class="mi">25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">.</span><span class="mi">8</span><span class="p">,</span> <span class="o">.</span><span class="mi">25</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="o">.</span><span class="mi">8</span><span class="p">,</span> <span class="o">.</span><span class="mi">25</span><span class="p">,</span> <span class="mi">2</span>
 </pre></div>

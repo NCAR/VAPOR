@@ -44,7 +44,7 @@ Streamline Settings
 Pathline Settings
 `````````````````
 
-**Pathline length:** This specifies how many previous locations of a pathline to render along an advection path.  For example, if the Pathline length were set to 3, a pathline would render a line comprising its current position, and the previous 2 locations that the pathline traversed in time.
+**Pathline length:** Specifies the length of each individual pathline.  If set to 1, a pathline is comprised of a line joining the points between the current timestep (t0), and the point that the pathline traversed at the previous timestep (t-1).  A value of 2 will comprise a line joining the advection point at the current timestep (t0), and the previous two timesteps (t-1 and t-2).
 
 **Injection Interval:** This controls the frequency at which pathlines are injected into the scene.  A value of 0 will only inject pathlines at the initial time step of the data set.  A value of 1 will inject at every timestep, 2 will inject at every 2nd timestep, etc.
 
