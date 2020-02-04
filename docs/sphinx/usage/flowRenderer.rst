@@ -17,7 +17,7 @@ The Flow Renderer creates either *Streamlines* or *Pathlines* within a user's da
 Basic Controls
 --------------
 
-The Flow Renderer uses Vapor's standard controls located in the :ref:`Variables <variablesTab>`, :ref:`Appearance <appear    anceTab>`, :ref:`Geometry <geometryTab>`, and :ref:`Annotation <annotationTab>` tabs.  In addition, the Flow renderer contains a Seeding tab, described below.
+The Flow Renderer uses Vapor's standard controls located in the :ref:`Variables <variablesTab>`, :ref:`Appearance <appearanceTab>`, :ref:`Geometry <geometryTab>`, and :ref:`Annotation <annotationTab>` tabs.  In addition, the Flow renderer contains a Seeding tab, described below.
 
 Specialized Controls
 --------------------
@@ -44,7 +44,7 @@ Streamline Settings
 Pathline Settings
 `````````````````
 
-**Pathline length:** Specifies the length of each individual pathline.  If set to 1, a pathline is comprised of a line joining the points between the current timestep (t0), and the point that the pathline traversed at the previous timestep (t-1).  A value of 2 will comprise a line joining the advection point at the current timestep (t0), and the previous two timesteps (t-1 and t-2).
+**Pathline length:** Specifies the length of each individual pathline in the unit of timesteps. If set to 1, a pathline is comprised of a line joining the points between the current timestep (t), and the point that the pathline traversed at the previous timestep (t-1). A value of 2 will comprise a line joining the advection point at the current timestep (t), and the previous two timesteps (t-1 and t-2).
 
 **Injection Interval:** This controls the frequency at which pathlines are injected into the scene.  A value of 0 will only inject pathlines at the initial time step of the data set.  A value of 1 will inject at every timestep, 2 will inject at every 2nd timestep, etc.
 
