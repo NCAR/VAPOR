@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import matplotlib.axes
 
-pickleFile = "metrics.pkl"
+pickleFile = os.path.dirname(os.path.realpath(__file__)) + "/metrics.pkl"
 
 base  = "https://api.github.com"
 owner = "NCAR"
