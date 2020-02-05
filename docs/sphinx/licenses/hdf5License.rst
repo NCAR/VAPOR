@@ -1,3 +1,5 @@
+:orphan:
+
 .. _hdf5License:
 
 .. literalinclude::

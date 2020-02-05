@@ -1,3 +1,5 @@
+:orphan:
+
 .. _assimpLicense:
 
 .. literalinclude::

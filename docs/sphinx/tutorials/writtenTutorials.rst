@@ -1,5 +1,0 @@
-=================
-Written Tutorials
-=================
-
-Written tutorials

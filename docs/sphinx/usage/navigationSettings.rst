@@ -30,3 +30,8 @@ Finally, camera position and direction values are displayed here and may be chan
     :figclass: align-center
 
     The Viewpoint Tab, within the top-level Navigation tab
+
+Off Screen Rendering
+````````````````````
+
+Sometimes users will want to produce snapshots or animations at a higher resolution than their current display.  A rendering can be captured at 4k, or any user-defined resolution by modifying the **Framebuffer Settings** section of the Viewpoint tab.  Simply check the "User Custom Output Size" checkbox, and enter the width and height of the image sequence you would like to capture.

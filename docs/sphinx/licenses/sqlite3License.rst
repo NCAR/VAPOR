@@ -1,3 +1,5 @@
+:orphan:
+
 .. _sqlite3License:
 
 .. literalinclude::
