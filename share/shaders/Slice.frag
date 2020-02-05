@@ -24,4 +24,7 @@ void main(void)
 
     vec4  color = texture(colormap, normalized);
     fragColor = vec4(color.rgb, color.a*constantOpacity);
+    
+    if (color.a <  0.001)
+        discard;
 }
