@@ -71,7 +71,7 @@ The following example would place a seed at spatial location of (.5, .8, .25)
 with timestamp .5.::
 
     # X, Y, Z, T
-    .5, .8, .25, 0.5, .8, .25, 1.5, .8, .25, 2
+    .5, .8, .25, 0.5 
 
 
 Rake Region
