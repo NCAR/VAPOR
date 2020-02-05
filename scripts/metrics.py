@@ -1,4 +1,5 @@
 import os
+import sys
 import pickle
 import urllib
 import requests
@@ -15,8 +16,10 @@ owner = "NCAR"
 repo  = "VAPOR"
 tag   = "3.2.0"
 
-username = 'sgpearse'
-token = '61b4ea15715ab0a65281121d04f8db66ba3681b4'
+#username = 'sgpearse'
+#token = '61b4ea15715ab0a65281121d04f8db66ba3681b4'
+username = ''
+token = ''
 
 id_key = "id"
 downloads_key = "download_count"
@@ -33,14 +36,23 @@ operatingSystems = [
 def GetRepoIds( releaseIds ):
     query = '/'.join([base, "repos", owner, repo, "releases"])
 
-    myJson = requests.get( query, auth=(username, token) ).json()
+    r = requests.get( query, auth=(username, token) )
+    if r.status_code != 200:
+        print("\nRequest to https://api.github.com failed.  Have you set your username and token in this script?\n")
+        sys.exit(1)
+    myJson = r.json()
 
     for key in myJson:
         releaseIds.append( key[ id_key ] );
 
 def GetDownloadCount( releaseId ):
     query = '/'.join([base, "repos", owner, repo, "releases", str(releaseId)])
-    myJson = requests.get( query, auth=(username, token) ).json()
+
+    r = requests.get( query, auth=(username, token) )
+    if r.status_code != 200:
+        print("\nRequest to https://api.github.com failed.  Have you set your username and token in this script?\n")
+        sys.exit(1)
+    myJson = r.json()
 
     assetDownloads = {}    
     for asset in myJson["assets"]:    
