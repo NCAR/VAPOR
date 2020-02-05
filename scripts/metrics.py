@@ -16,8 +16,6 @@ owner = "NCAR"
 repo  = "VAPOR"
 tag   = "3.2.0"
 
-#username = 'sgpearse'
-#token = '61b4ea15715ab0a65281121d04f8db66ba3681b4'
 username = ''
 token = ''
 
