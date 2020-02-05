@@ -1,3 +1,5 @@
+:orphan:
+
 .. _glfw3License:
 
 .. literalinclude::

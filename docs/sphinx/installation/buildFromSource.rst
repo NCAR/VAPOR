@@ -1,5 +1,0 @@
-====================
-Building from source
-====================
-
-Instructions

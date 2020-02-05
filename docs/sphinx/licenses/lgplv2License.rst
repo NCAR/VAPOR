@@ -1,3 +1,5 @@
+:orphan:
+
 .. _lgplv2License:
 
 .. literalinclude::
