@@ -214,7 +214,7 @@ int ControlExec::ActivateRender(
 
 	rp->SetEnabled(on);
 	v->MoveRendererToFront(renderType, renderName);
-    v->MoveRenderersOfTypeToFront(VolumeIsoRenderer::GetClassType());
+//    v->MoveRenderersOfTypeToFront(VolumeIsoRenderer::GetClassType());
     v->MoveRenderersOfTypeToFront(VolumeRenderer::GetClassType());
 
 	_paramsMgr->EndSaveStateGroup();
@@ -276,7 +276,7 @@ int ControlExec::ActivateRender(
 
 	newRP->SetEnabled(on);
 	v->MoveRendererToFront(renderType, renderName);
-    v->MoveRenderersOfTypeToFront(VolumeIsoRenderer::GetClassType());
+//    v->MoveRenderersOfTypeToFront(VolumeIsoRenderer::GetClassType());
     v->MoveRenderersOfTypeToFront(VolumeRenderer::GetClassType());
 
 	_paramsMgr->EndSaveStateGroup();
