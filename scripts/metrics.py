@@ -4,7 +4,9 @@ import urllib
 import requests
 import collections
 import datetime
-import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+import matplotlib.axes
 
 pickleFile = "metrics.pkl"
 
@@ -13,7 +15,8 @@ owner = "NCAR"
 repo  = "VAPOR"
 tag   = "3.2.0"
 
-token = ''
+username = 'sgpearse'
+token = '61b4ea15715ab0a65281121d04f8db66ba3681b4'
 
 id_key = "id"
 downloads_key = "download_count"
@@ -27,19 +30,17 @@ operatingSystems = [
     'Other'
 ]
 
-def GetRepoIds( repoIds ):
+def GetRepoIds( releaseIds ):
     query = '/'.join([base, "repos", owner, repo, "releases"])
 
-    #myJson = requests.get( query ).json()
-    myJson = requests.get( query, auth=("sgpearse",token) ).json()
+    myJson = requests.get( query, auth=(username, token) ).json()
 
     for key in myJson:
-        repoIds.append( key[ id_key ] );
+        releaseIds.append( key[ id_key ] );
 
-def GetDownloadCount( repoId ):
-    query = '/'.join([base, "repos", owner, repo, "releases", str(repoId)])
-    #myJson = requests.get( query ).json()
-    myJson = requests.get( query, auth=("sgpearse",token) ).json()
+def GetDownloadCount( releaseId ):
+    query = '/'.join([base, "repos", owner, repo, "releases", str(releaseId)])
+    myJson = requests.get( query, auth=(username, token) ).json()
 
     assetDownloads = {}    
     for asset in myJson["assets"]:    
@@ -48,14 +49,16 @@ def GetDownloadCount( repoId ):
     return assetDownloads
 
 def SaveMetrics( metrics ):
-    fileMode = 'wb'
-    if os.path.getsize( pickleFile ) > 0:
-        fileMode = 'ab'
+    # Create pickle file if one does not exist
+    if not os.path.exists( pickleFile ):
+        open( pickleFile, 'w' ).close()
 
-    with open( pickleFile, fileMode ) as f:
+    with open( pickleFile, 'wb' ) as f:
         pickle.dump( metrics, f, pickle.HIGHEST_PROTOCOL)
 
 def LoadMetrics():
+    if not os.path.exists( pickleFile ):
+        return;
     if os.path.getsize( pickleFile ) <= 0:
         return;
 
@@ -69,7 +72,6 @@ def PlotOSCount( myMetrics ):
     for os in operatingSystems:
         osCounts[os] = []
     
-    CentOS = []
     dates = []
     for date in myMetrics:
         dates.append(date)
@@ -82,8 +84,24 @@ def PlotOSCount( myMetrics ):
                 if os in asset:
                     osCounts[os][-1] += numDownloaded
 
-    print(dates)
+    fig, ax = plt.subplots()
+    locator = ticker.MaxNLocator(nbins=8)
+    ax.xaxis.set_major_locator(locator)
+
+    totalDownloads = 0
+    for os in operatingSystems:
+        ax.plot(dates, osCounts[os], label=os)
+        totalDownloads += osCounts[os][-1]
+
+    print("Total downloads: " + str(totalDownloads))
     print(osCounts)
+
+    plt.title("Total downloads: " + str(totalDownloads) + "\nCollected on " + dates[-1])
+    #plt.legend(bbox_to_anchor=(.85, 1), loc='upper left', borderaxespad=0.)
+    plt.legend()
+    fig.autofmt_xdate()
+    
+    plt.show()
 
 def main():
     requests.get(base, auth=("sgpearse",token))
@@ -92,27 +110,20 @@ def main():
     if myMetrics is None:
         myMetrics = collections.defaultdict(dict)
 
-    date = datetime.datetime.today().strftime("%d-%m-%y %H:%M:%S")
+    date = datetime.datetime.today().strftime("%Y-%b-%d %H:%M:%S")
 
-    repoIds = []
-    GetRepoIds( repoIds )
+    releaseIds = []
+    GetRepoIds( releaseIds )
 
-    for repoId in repoIds:
-        assetDownloads = GetDownloadCount( repoId )
+    for releaseId in releaseIds:
+        assetDownloads = GetDownloadCount( releaseId )
         for asset in assetDownloads:
             value = assetDownloads[asset]
             myMetrics[date][asset] = value
 
-    PlotOSCount( myMetrics )
-
     SaveMetrics( myMetrics )
-    #print(myMetrics) 
+
+    PlotOSCount( myMetrics )
 
 if __name__ == "__main__":
     main()
- 
-'''
-print(os.path.basename(__file__))
-f = open(os.path.basename(__file__), 'a')
-f.write("foobarbaz\n")
-f.close()'''
