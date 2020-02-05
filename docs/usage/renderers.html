@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Common Renderer Controls" href="controllingTheRenderers.html" />
+    <link rel="next" title="Contours" href="contourRenderer.html" />
     <link rel="prev" title="Using Vapor 3" href="../usage.html" /> 
 </head>
 
@@ -87,19 +87,19 @@
 <li class="toctree-l1"><a class="reference internal" href="../gettingDataIntoVapor.html">Getting Data into Vapor3</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../usage.html">Using Vapor 3</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">The Renderers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#volume-renderer">Volume Renderer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#isosurfaces">Isosurfaces</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#slices">Slices</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#contours">Contours</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#barbs">Barbs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#two-dimensional-variables">Two Dimensional Variables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#georefernced-images">Georefernced Images</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#wireframes">Wireframes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#model-renderer">Model Renderer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contourRenderer.html">Contours</a></li>
+<li class="toctree-l3"><a class="reference internal" href="twoDData.html">Two Dimensional Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="imageRenderer.html">Image Renderer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="volumeRenderer.html">Volume Renderer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="isosurfaceRenderer.html">Isosurfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="flowRenderer.html">Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sliceRenderer.html">Slices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="barbRenderer.html">Barbs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="wireFrameRenderer.html">Wire Frames</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modelRenderer.html">3D Models</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="controllingTheRenderers.html">Common Renderer Controls</a></li>
-<li class="toctree-l2"><a class="reference internal" href="controllingTheRenderers.html#specialized-renderer-controls">Specialized Renderer Controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rendererControls.html">Basic Renderer Controls</a></li>
 <li class="toctree-l2"><a class="reference internal" href="navigationSettings.html">Navigation Settings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="globalSettings.html">Global Settings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ancillaryTools.html">Ancillary Tools</a></li>
@@ -178,72 +178,22 @@
 </div>
 <div class="section" id="the-renderers">
 <h1>The Renderers<a class="headerlink" href="#the-renderers" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="volume-renderer">
-<h2>Volume Renderer<a class="headerlink" href="#volume-renderer" title="Permalink to this headline">¶</a></h2>
-<p>Displays the user’s 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.</p>
-<div class="align-center figure">
-<img alt="../_images/DVR.png" src="../_images/DVR.png" />
-</div>
-</div>
-<div class="section" id="isosurfaces">
-<h2>Isosurfaces<a class="headerlink" href="#isosurfaces" title="Permalink to this headline">¶</a></h2>
-<p>Displays the user’s 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.</p>
-<div class="align-center figure">
-<img alt="../_images/IsoSurface.png" src="../_images/IsoSurface.png" />
-</div>
-</div>
-<div class="section" id="slices">
-<h2>Slices<a class="headerlink" href="#slices" title="Permalink to this headline">¶</a></h2>
-<p>Displays an axis-aligned slice or cutting plane through a 3D variable.  Slices are sampled along the plane’s axes according to a sampling rate defined by the user.</p>
-<div class="align-center figure">
-<img alt="../_images/Slice.png" src="../_images/Slice.png" />
-</div>
-</div>
-<div class="section" id="contours">
-<h2>Contours<a class="headerlink" href="#contours" title="Permalink to this headline">¶</a></h2>
-<p>Displays a series of user defined contours along a two dimensional plane within the user’s domain.  Contours may have constant coloration.  Contours may be displaced by a height variable.</p>
-<div class="align-center figure">
-<img alt="../_images/Contours.png" src="../_images/Contours.png" />
-</div>
-</div>
-<div class="section" id="barbs">
-<h2>Barbs<a class="headerlink" href="#barbs" title="Permalink to this headline">¶</a></h2>
-<p>Displays an array of arrows with the users domain, with custom dimensions that are defined by the user in the X, Y, and Z axes.  The arrows represent a vector whose direction is determined by up to three user-defined variables. Barbs can have a constant color applied to them, or they may be colored according to an additional user-defined variable.</p>
-<p>The Barb renderer may be offset by a height variable, if the barbs are referencing two-dimensional variables.</p>
-<div class="align-center figure">
-<img alt="../_images/Barbs.png" src="../_images/Barbs.png" />
-</div>
-</div>
-<div class="section" id="two-dimensional-variables">
-<h2>Two Dimensional Variables<a class="headerlink" href="#two-dimensional-variables" title="Permalink to this headline">¶</a></h2>
-<p>Displays the user’s 2D data variables along the plane described by the source data file. These 2D variables may be offset by a height variable.</p>
-<div class="align-center figure">
-<img alt="../_images/TwoDData.png" src="../_images/TwoDData.png" />
-</div>
-</div>
-<div class="section" id="georefernced-images">
-<h2>Georefernced Images<a class="headerlink" href="#georefernced-images" title="Permalink to this headline">¶</a></h2>
-<p>Displays a georeferenced image that is automatically reprojected and fit to the user’s data, as long as the data contains georeference metadata.  The image renderer may be offset by a height variable to show bathymetry or mountainous terrain.</p>
-<div class="align-center figure">
-<img alt="../_images/Image.png" src="../_images/Image.png" />
-</div>
-</div>
-<div class="section" id="wireframes">
-<h2>Wireframes<a class="headerlink" href="#wireframes" title="Permalink to this headline">¶</a></h2>
-<p>Displays a wireframe of the mesh for the selected variable</p>
-<div class="align-center figure">
-<img alt="../_images/WireFrame.png" src="../_images/WireFrame.png" />
-</div>
-</div>
-<div class="section" id="model-renderer">
-<h2>Model Renderer<a class="headerlink" href="#model-renderer" title="Permalink to this headline">¶</a></h2>
-<p>The Model Renderer can display 3D geometry files within the Vapor scene.  This is commonly used for rendering models of wind turbines or cityscapes in Large Eddy Simulations.</p>
-<div class="align-center figure">
-<img alt="../_images/Model.png" src="../_images/Model.png" />
-</div>
-<div class="line-block">
-<div class="line"><br /></div>
-</div>
+<p>Vapor’s main utility comes from its suite of Renderers, each of which display simulation data with color and opacity according to user defined parameters.</p>
+<p>Renderers can be captured as still images or animations for analysis, publication, and presentation.</p>
+<p>Below, you can find descriptions of each Renderer and tutorials on how to use them.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contourRenderer.html">Contours</a></li>
+<li class="toctree-l1"><a class="reference internal" href="twoDData.html">Two Dimensional Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="imageRenderer.html">Image Renderer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="volumeRenderer.html">Volume Renderer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="isosurfaceRenderer.html">Isosurfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flowRenderer.html">Flow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sliceRenderer.html">Slices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="barbRenderer.html">Barbs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wireFrameRenderer.html">Wire Frames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modelRenderer.html">3D Models</a></li>
+</ul>
 </div>
 </div>
 
@@ -255,7 +205,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="controllingTheRenderers.html" class="btn btn-neutral float-right" title="Common Renderer Controls" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="contourRenderer.html" class="btn btn-neutral float-right" title="Contours" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="../usage.html" class="btn btn-neutral float-left" title="Using Vapor 3" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

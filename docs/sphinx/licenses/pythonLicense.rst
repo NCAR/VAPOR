@@ -1,6 +1,6 @@
-.. _pythonLicense:
+:orphan:
 
-.. literalinclude::
+.. _pythonLicense:
 
 .. highlight:: none
 
