@@ -76,5 +76,5 @@ void main(void)
     }
         
     if (accum.a < ALPHA_DISCARD)
-        discard;
+        gl_FragDepth = GetDepthBuffer();
 }
