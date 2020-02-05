@@ -74,5 +74,5 @@ void main(void)
         fragColor = accum;
     }
     if (accum.a < ALPHA_DISCARD)
-        discard;
+        gl_FragDepth = GetDepthBuffer();
 }
