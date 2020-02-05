@@ -570,12 +570,15 @@ void main(void)
         
         if (accum.a < ALPHA_DISCARD) {
             // discard; // There is a bug on in the 2015 15" AMD MBP laptops where this does not work with larger(?) datasets
-            fragColor = vec4(0);
-            gl_FragDepth = 1;
+            //fragColor = vec4(0);
+            gl_FragDepth = GetDepthBuffer();
             return;
         }
         fragColor = accum;
         return;
     }
-    discard;
+    // discard;
+    
+    gl_FragDepth = GetDepthBuffer();
+    fragColor = vec4(0.f);
 }
