@@ -95,8 +95,8 @@ ________
 
 VAPOR is developed as an Open Source application by the National Center for Atmospheric Research, under the sponsorship of the National Science Foundation. Continued support for VAPOR is dependent on demonstrable evidence of the software's value to the scientific community. You are free to use VAPOR as permitted under the terms and conditions of the license. We kindly request, however, that you cite VAPOR in your publications and presentations. We suggest the following citations as appropriate:
 
-For journal articles, proceedings, etc
-We request:
+For journal articles, proceedings, etc.,
+we request:
 
     Li, Shaomeng; Jaroszynski, Stanislaw; Pearse, Scott; Orf, Leigh; Clyne, John. 2019. "VAPOR: A Visualization Package Tailored to Analyze Simulation Data in Earth System Science." *Atmosphere* 10, no. 9: 488. 
 
@@ -116,8 +116,8 @@ We request:
     }
 
 
-For presentations, posters, etc:
-We suggest:
+For presentations, posters, etc.,
+we suggest:
 
 ::
 

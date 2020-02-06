@@ -6,7 +6,7 @@ Using Vapor 3
 
 Vapor 3 is comprised of a set of tools called Renderers.  Each Renderer visualizes your data in different ways based on your specifications.
 
-We recommend that all users either watch our :ref:`Introductory Tutorial <introTutorial>` or work through the :ref:`quickStartGuide`.
+We recommend that all users start by working through the :ref:`quickStartGuide`, or watching the video tutorials in the guides for our renderers.
 
 If any feature in Vapor is not sufficienty self describing in the application, this is where to find elaboration.  Please :ref:`contact our team <contactAndContribute>` if you think you may have found a bug, usability issue, or you'd like to request an enhancement.
 
@@ -17,10 +17,10 @@ If any feature in Vapor is not sufficienty self describing in the application, t
 |
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 1 
 
     usage/renderers.rst
-    usage/controllingTheRenderers.rst
+    usage/rendererControls.rst
     usage/navigationSettings.rst
     usage/globalSettings.rst
     usage/ancillaryTools.rst
