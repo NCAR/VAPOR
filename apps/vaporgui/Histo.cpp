@@ -239,8 +239,14 @@ int Histo::Populate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::Rende
     }
     
     
-    if (_below) delete [] _below; _below = nullptr;
-    if (_above) delete [] _above; _above = nullptr;
+    if (_below) {
+        delete [] _below; 
+        _below = nullptr;
+    }
+    if (_above) 
+        delete [] _above; 
+        _above = nullptr;
+    }
     
     _getDataRange(varName, dm, rp, &_minData, &_maxData);
     
