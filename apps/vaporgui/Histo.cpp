@@ -1,20 +1,20 @@
 //************************************************************************
-//									*
-//		     Copyright (C)  2004				*
-//     University Corporation for Atmospheric Research			*
-//		     All Rights Reserved				*
-//									*
+//                                    *
+//             Copyright (C)  2004                *
+//     University Corporation for Atmospheric Research            *
+//             All Rights Reserved                *
+//                                    *
 //************************************************************************/
 //
-//	File:		Histo.cpp
+//    File:        Histo.cpp
 //
-//	Author:		Alan Norton
-//			National Center for Atmospheric Research
-//			PO 3000, Boulder, Colorado
+//    Author:        Alan Norton
+//            National Center for Atmospheric Research
+//            PO 3000, Boulder, Colorado
 //
-//	Date:		November 2004
+//    Date:        November 2004
 //
-//	Description:  Implementation of Histo class 
+//    Description:  Implementation of Histo class 
 //
 #include <vapor/MyBase.h>
 #include <vapor/DataMgrUtils.h>
@@ -42,28 +42,28 @@ Histo::Histo(int numberBins)
 }
 
 Histo::Histo() : Histo(0) {}
-	
+    
 Histo::~Histo(){
-	if (_binArray) delete [] _binArray;
+    if (_binArray) delete [] _binArray;
     if (_below) delete [] _below;
     if (_above) delete [] _above;
 }
 void Histo::reset(int newNumBins) {
-	if ( newNumBins != _numBins && newNumBins != -1 ) {
-		_numBins = newNumBins;
-		if (_binArray) delete [] _binArray;
-		_binArray = new unsigned int[_numBins];
+    if ( newNumBins != _numBins && newNumBins != -1 ) {
+        _numBins = newNumBins;
+        if (_binArray) delete [] _binArray;
+        _binArray = new unsigned int[_numBins];
         if (_below) delete [] _below;
         if (_above) delete [] _above;
         _below = nullptr;
         _above = nullptr;
-	}
-	for (int i = 0; i< _numBins; i++) _binArray[i] = 0;
+    }
+    for (int i = 0; i< _numBins; i++) _binArray[i] = 0;
     if (_below) memset(_below, 0, _nBinsBelow*sizeof(*_below));
     if (_above) memset(_above, 0, _nBinsAbove*sizeof(*_above));
-	_numSamplesBelow = 0;
-	_numSamplesAbove = 0;
-	_maxBinSize = -1;
+    _numSamplesBelow = 0;
+    _numSamplesAbove = 0;
+    _maxBinSize = -1;
     _populated = false;
 }
 
@@ -113,17 +113,17 @@ void Histo::addToBin(float val) {
     } else
     {
         int intVal = 0;
-		if (_range == 0.f ) 
+        if (_range == 0.f ) 
             intVal = 0;
-		else 
+        else 
             intVal = (int)((val - _minMapData) / _range * (float)_numBins );
         
         if (intVal < 0) intVal = 0;
         if (intVal >= _numBins) intVal = _numBins-1;
-		_binArray[intVal]++;
-	}
+        _binArray[intVal]++;
+    }
 }
-	
+    
 int Histo::getMaxBinSize()
 {
     if (_maxBinSize == -1) // For legacy purposes. Can remove with new TF Editor
@@ -243,7 +243,7 @@ int Histo::Populate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::Rende
         delete [] _below; 
         _below = nullptr;
     }
-    if (_above) 
+    if (_above) {
         delete [] _above; 
         _above = nullptr;
     }
@@ -253,7 +253,7 @@ int Histo::Populate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::Rende
 #ifdef WIN32
     if (_maxMapData-_minMapData > FLT_EPSILON) {
 #else
-	if (_maxMapData - _minMapData > __FLT_EPSILON__) {
+    if (_maxMapData - _minMapData > __FLT_EPSILON__) {
 #endif
         _nBinsBelow = std::min(10000.0f, _numBins/(_maxMapData-_minMapData) * (_minMapData-_minData));
         _nBinsAbove = std::min(10000.0f, _numBins/(_maxMapData-_minMapData) * (_maxData-_maxMapData));

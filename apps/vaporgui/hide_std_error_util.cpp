@@ -20,7 +20,9 @@ void HideSTDERR()
     else
         _savedSTDERR = rc;
 
-    freopen( "/dev/null", "w", stderr );
+    // assigning the result of frepoen to throwawayVar 
+    // supresses gcc compiler warnings about ignoring return values
+    FILE* throwawayVar = freopen( "/dev/null", "w", stderr );
 #endif
 }
 void RestoreSTDERR()
