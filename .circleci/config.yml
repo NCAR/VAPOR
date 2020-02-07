@@ -14,7 +14,19 @@ jobs:
             git pull
             cd build
             cmake ..
-            make
+            make &> /tmp/output.txt
+
+      - store_artifacts:
+          path: /tmp/output.txt
+
+      - run:
+          name: check for warnings
+          command: |
+            if grep -q warning /tmp/output.txt; then
+               exit 1
+            else
+               exit 0
+            fi
 
   build_ubuntu18:
     docker:
@@ -30,31 +42,19 @@ jobs:
             git pull
             cd build
             cmake ..
-            make
+            make &> /tmp/output.txt
 
-  build_ubuntu18_2019:
-    docker:
-      - image: sgpearse/vapor3-ubuntu18:latest
+      - store_artifacts:
+          path: /tmp/output.txt
 
-    steps:
-      - checkout
       - run:
-          name: checkout 3rdPartyLibs
+          name: check for warnings
           command: |
-            git checkout 3rdPartyLibs
-      - run:
-          name: get 2019 libs
-          command:
-            mkdir -p /usr/local/VAPOR-Deps
-
-      - run:
-          name: cmake and make
-          command: |
-            cd /VAPOR
-            git pull
-            cd build
-            cmake ..
-            make
+            if grep -q warning /tmp/output.txt; then
+               exit -1
+            else
+               exit 0
+            fi
 
   build_centos7:
     docker:
@@ -71,8 +71,19 @@ jobs:
             git pull
             cd build
             cmake3 ..
-            make
+            make &> /tmp/output.txt
 
+      - store_artifacts:
+          path: /tmp/output.txt
+
+      - run:
+          name: check for warnings
+          command: |
+            if grep -q warning /tmp/output.txt; then
+               exit 1
+            else
+               exit 0
+            fi
 
   build_osx:
     macos:
@@ -104,8 +115,19 @@ jobs:
             mkdir build
             cd build
             cmake ..
-            make
+            make &> /tmp/output.txt
 
+      - store_artifacts:
+          path: /tmp/output.txt
+
+      - run:
+          name: check for warnings
+          command: |
+            if grep -q warning /tmp/output.txt; then
+               exit 1
+            else
+               exit 0
+            fi
 
 workflows:
   version: 2
