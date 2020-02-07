@@ -20,10 +20,8 @@ void HideSTDERR()
     else
         _savedSTDERR = rc;
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-result"
-    freopen( "/dev/null", "w", stderr );
-#pragma GCC diagnostic pop
+    auto* tmp = freopen( "/dev/null", "w", stderr );
+    (void) tmp;
 #endif
 }
 void RestoreSTDERR()
