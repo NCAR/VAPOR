@@ -815,9 +815,16 @@ bool DCWRF::_isIdealized(NetCDFCollection *ncdfc) const {
 	//
 	if (_isConstantHorizontalCoords(ncdfc)) return(true);
 
+	if (_isWRFSFIRE(ncdfc) && 
+		_cen_lat == 0.0 && _cen_lon == 0.0 && 
+		_true_lat1 == 0.0 && _true_lat2 == 0.0) 
+	{
+		return(true);
+	}
+
 	return(false);
-	
 }
+
 bool DCWRF::_isWRFSFIRE(NetCDFCollection *ncdfc) const {
 	if (! ncdfc->VariableExists("FXLONG")) return(false);
 
@@ -836,8 +843,6 @@ int DCWRF::_InitProjection(
 	_mapProj = 0;
 
 	if (_isIdealized(ncdfc)) return(0);
-
-	if (_isWRFSFIRE(ncdfc)) return(0);
 
 	vector <long> ivalues;
 	ncdfc->GetAtt("", "MAP_PROJ", ivalues);
@@ -999,16 +1004,21 @@ int DCWRF::_InitHorizontalCoordinatesHelper(
 	string timeDimName;
 	vector <string> spaceDimNames;
 
+	//
+	// Set up coordinate units identifier
+	//
 	string units;
-	if (_proj4String.empty() && _isWRFSFIRE(ncdfc)) {
+	if (_proj4String.empty()) {
+		if (_isWRFSFIRE(ncdfc)) {
 
-		// The WRF-SFIRE model units attribute say degrees, but it's 
-		// actually meters. Clever.
-		//
-		units = "meters";
-	}
-	else if (_proj4String.empty() && ! _isWRFSFIRE(ncdfc)) {
-		units = "km";
+			// For *idealized* WRF-SFIRE model runs the 'units' attribute 
+			// say degrees, but it's actually meters. Clever.
+			//
+			units = "meters";
+		}
+		else {
+			units = "km";
+		}
 	}
 	else {
 		units = axis == 0 ? "degrees_east" : "degrees_north";
@@ -1038,6 +1048,9 @@ int DCWRF::_InitHorizontalCoordinatesHelper(
 		_isWRFSFIRE(ncdfc)
 	) {
 
+		// Idealized WRF-SFIRE cases do have coordinate variables that
+		// are already represented in meters
+		// 
 		timeDimName = ncdfc->GetTimeDimName(name);
 
 		spaceDimNames = ncdfc->GetSpatialDimNames(name);
