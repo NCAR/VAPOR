@@ -159,7 +159,6 @@ jobs:
           name: Get 3rd party libs
           command: |
             brew install ghr
-            ghr -t ${GITHUB_TOKEN} -u sgpearse -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -replace nightly ./tmp
 
 
 
