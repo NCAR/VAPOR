@@ -367,13 +367,13 @@ int VolumeCellTraversal::_getHeuristicBBLevels() const
 	
     if (levels == 12)
         return levels - 4;
-	if (levels >= 9)
-		return levels - 3;
-	if (levels >= 7)
-		return levels - 2;
-	if (levels >= 2)
-		return levels - 1;
-	return levels;
+    if (levels >= 9)
+        return levels - 3;
+    if (levels >= 7)
+        return levels - 2;
+    if (levels >= 2)
+        return levels - 1;
+    return levels;
 }
 
 std::string VolumeCellTraversal::_addDefinitionsToShader(std::string shaderName) const
