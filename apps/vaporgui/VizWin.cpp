@@ -368,7 +368,7 @@ void VizWin::_mousePressEventNavigate(QMouseEvent *e)
     // _trackBall->TrackballSetMatrix();	// needed?
 
     int trackballButtonNumber = _buttonNum;
-    if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic && _buttonNum == 1) trackballButtonNumber = 2;
+    if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic && _buttonNum == 1) { trackballButtonNumber = 2; }
 
     // Let trackball handle mouse events for navigation
     //

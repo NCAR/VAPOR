@@ -190,8 +190,9 @@ void GeometryWidget::Reinit(DimFlags dimFlags, VariableFlags varFlags, GeometryF
     if (_geometryFlags & PLANAR) {
         showOrientationOptions();
         adjustLayoutToPlanar(XY, false);
-    } else
+    } else {
         hideOrientationOptions();
+    }
 
     _minMaxTab->adjustSize();
 }
