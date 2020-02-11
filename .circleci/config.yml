@@ -29,13 +29,6 @@ jobs:
                exit 0
             fi
 
-  tag_nightly_build:
-    docker:
-      - image: sgpearse/vapor3-ubuntu18:latest
-
-    steps:
-      - checkout
-
   build_ubuntu18:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
@@ -76,6 +69,11 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
+            mv *.sh /tmp
+
+      - persist_to_workspace:
+          root: /
+          paths: tmp
 
       - store_artifacts:
           path: /VAPOR/build/VAPOR3-3.2.0-Linux.sh
@@ -153,12 +151,27 @@ jobs:
                exit 0
             fi
 
+  release_on_github:
+    macos:
+      xcode: "11.1.0"
+    steps:
+      - run:
+          name: Get 3rd party libs
+          command: |
+            brew install ghr
+            ghr -t ${GITHUB_TOKEN} -u sgpearse -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -replace nightly ./tmp
+
+
+
 workflows:
   version: 2
   build:
     jobs:
       - build_ubuntu18
       - build_ubuntu18_installer
+      - release_on_github:
+          requires:
+            - build_ubuntu18_installer
       - build_ubuntu16
       - build_centos7
       - build_osx
@@ -172,7 +185,7 @@ workflows:
                only:
                  - master
     jobs:
-      - tag_nightly_build
       - build_ubuntu18_installer:
+      - release_on_github:
           requires:
-            - tag_nightly_build
+            - build_ubuntu18_installer
