@@ -1,0 +1,26 @@
+#pragma once
+
+#include "PLineItem.h"
+#include <vector>
+//#include "VaporWidgetsFwd.h"
+
+class VComboBox;
+
+//! \class PStringDropdown same as PEnumDropdown except it sets the param
+//! to directly reflect the string in the drowdown.
+
+class PStringDropdown : public PLineItem {
+    Q_OBJECT
+    
+    VComboBox *_vComboBox;
+    
+public:
+    PStringDropdown(const std::string &tag, const std::vector<std::string> &items, const std::string &label = "");
+    void SetItems(const std::vector<std::string> &items) const;
+
+protected:
+    virtual void updateGUI() const override;
+    
+private slots:
+    void dropdownTextChanged(std::string text);
+};

@@ -10,6 +10,8 @@ namespace VAPoR {
 class TFIsoValueInfoWidget : public TFInfoWidget {
     Q_OBJECT
     
+    using TFInfoWidget::TFInfoWidget;
+    
 protected:
     void controlPointChanged();
     

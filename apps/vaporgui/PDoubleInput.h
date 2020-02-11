@@ -1,12 +1,14 @@
 #pragma once
 
 #include "PLineItem.h"
-#include "VaporWidgetsFwd.h"
+//#include "VaporWidgetsFwd.h"
+
+class VLineEdit;
 
 class PDoubleInput : public PLineItem {
     Q_OBJECT
     
-    VDoubleInput *_doubleInput;
+    VLineEdit *_doubleInput;
     
 public:
     PDoubleInput(const std::string &tag, const std::string &label="");
@@ -15,5 +17,5 @@ protected:
     void updateGUI() const override;
     
 private slots:
-    void doubleInputValueChanged(double v);
+    void doubleInputValueChanged(const std::string &v);
 };

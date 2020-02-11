@@ -22,9 +22,7 @@ public:
         Percent = 1
     };
     
-    bool UsingColormapVariable = false;
-    
-    TFInfoWidget();
+    TFInfoWidget(const std::string &variableNameTag);
     
     void Update(VAPoR::RenderParams *rParams);
     void DeselectControlPoint();
@@ -51,6 +49,7 @@ protected:
     
 protected:
     float _value;
+    const std::string _variableNameTag;
     
 private slots:
     void valueEditTypeChanged(int);

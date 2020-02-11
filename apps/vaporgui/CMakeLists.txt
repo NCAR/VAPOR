@@ -130,18 +130,40 @@ set (SRCS
     VGeometry2.h
 	PWidget.cpp
 	PWidget.h
+	PGroup.cpp
+	PGroup.h
+	PSection.cpp
+	PSection.h
 	PCheckbox.cpp
 	PCheckbox.h
 	PDoubleInput.cpp
 	PDoubleInput.h
+	PIntegerInput.cpp
+	PIntegerInput.h
+	PDisplay.cpp
+	PDisplay.h
 	PLineItem.cpp
 	PLineItem.h
 	PEnumDropdown.cpp
 	PEnumDropdown.h
+	PStringDropdown.cpp
+	PStringDropdown.h
 	PColorSelector.cpp
 	PColorSelector.h
 	PFileSelector.cpp
 	PFileSelector.h
+	PDynamicMixin.cpp
+	PDynamicMixin.h
+	PSliderEdit.cpp
+	PSliderEdit.h
+	PVariableSelector.cpp
+	PVariableSelector.h
+	PRegionSelector.cpp
+	PRegionSelector.h
+	ParamsWidgetDemo.cpp
+	ParamsWidgetDemo.h
+	PTFEditor.cpp
+	PTFEditor.h
 	ModelEventRouter.cpp
 	ModelEventRouter.h
 	ModelSubtabs.cpp

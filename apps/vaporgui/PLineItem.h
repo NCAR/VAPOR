@@ -6,6 +6,6 @@ class PLineItem : public PWidget {
     Q_OBJECT
     
 public:
-    PLineItem(const std::string &tag, QWidget *centerWidget, QWidget *rightWidget, const std::string &label = "");
-    PLineItem(const std::string &tag, QWidget *rightWidget, const std::string &label = "");
+    PLineItem(const std::string &tag, const std::string &label, QWidget *centerWidget, QWidget *rightWidget);
+    PLineItem(const std::string &tag, const std::string &label, QWidget *rightWidget);
 };

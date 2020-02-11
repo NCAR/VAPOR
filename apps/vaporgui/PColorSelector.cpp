@@ -4,7 +4,7 @@
 #include <vapor/ParamsBase.h>
 
 PColorSelector::PColorSelector(const std::string &tag, const std::string &label)
-: PLineItem(tag, _colorWidget = new QColorWidget)
+: PLineItem(tag, label, _colorWidget = new QColorWidget)
 {
     connect(_colorWidget, SIGNAL(colorChanged(QColor)), this, SLOT(colorChanged(QColor)));
 }
@@ -32,5 +32,5 @@ void PColorSelector::updateGUI() const
 
 void PColorSelector::colorChanged(QColor color)
 {
-    getParams()->SetValueDoubleVec(GetTag(), GetTag(), QColorToVector(color));
+    getParams()->SetValueDoubleVec(GetTag(), "", QColorToVector(color));
 }

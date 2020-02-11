@@ -1,6 +1,9 @@
 #include "PWidget.h"
 #include <vapor/VAssert.h>
+#include <vapor/ParamsBase.h>
+#include <vapor/ParamsMgr.h>
 #include <QHBoxLayout>
+#include "SettingsParams.h"
 
 PWidget::PWidget(const std::string &tag, QWidget *widget)
 : _tag(tag)
@@ -17,14 +20,31 @@ void PWidget::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAP
     _paramsMgr = paramsMgr;
     _dataMgr = dataMgr;
     
-    if (params) {
-        if (requireDataMgr()   && !dataMgr)   VAssert(!"Data manager required but missing");
-        if (requireParamsMgr() && !paramsMgr) VAssert(!"Params manager required but missing");
-        this->setDisabled(false);
-        updateGUI();
-    } else {
+    if (_dynamicUpdateInsideGroup)
+        return;
+    
+    if (params == nullptr) {
         this->setDisabled(true);
+        return;
     }
+    
+    if (_showBasedOnParam) {
+        int value = params->GetValueLong(_showBasedOnParamTag, 0);
+        setVisible(value == _showBasedOnParamValue);
+    } else {
+        setVisible(true);
+    }
+    
+    if (_enableBasedOnParam) {
+        int value = params->GetValueLong(_enableBasedOnParamTag, 0);
+        setEnabled(value == _enableBasedOnParamValue);
+    } else {
+        setEnabled(true);
+    }
+    
+    if (requireDataMgr()   && !dataMgr)   VAssert(!"Data manager required but missing");
+    if (requireParamsMgr() && !paramsMgr) VAssert(!"Params manager required but missing");
+    updateGUI();
 }
 
 const std::string &PWidget::GetTag() const
@@ -32,6 +52,77 @@ const std::string &PWidget::GetTag() const
     return _tag;
 }
 
+PWidget *PWidget::ShowBasedOnParam(const std::string &tag, int whenEqualTo)
+{
+    _showBasedOnParam      = true;
+    _showBasedOnParamTag   = tag;
+    _showBasedOnParamValue = whenEqualTo;
+    return this;
+}
+
+PWidget *PWidget::EnableBasedOnParam(const std::string &tag, int whenEqualTo)
+{
+    _enableBasedOnParam      = true;
+    _enableBasedOnParamTag   = tag;
+    _enableBasedOnParamValue = whenEqualTo;
+    return this;
+}
+
+PWidget *PWidget::SetTooltip(const std::string &text)
+{
+    QWidget::setToolTip(QString::fromStdString(text));
+    return this;
+}
+
 VAPoR::ParamsBase *PWidget::getParams()    const { return _params; }
 VAPoR::ParamsMgr  *PWidget::getParamsMgr() const { return _paramsMgr; }
 VAPoR::DataMgr    *PWidget::getDataMgr()   const { return _dataMgr; }
+
+SettingsParams    *PWidget::getSettingsParams() const
+{
+    VAssert(requireParamsMgr());
+    return (SettingsParams*)_paramsMgr->GetParams(SettingsParams::GetClassType());
+}
+
+void PWidget::setParamsDouble(double v)
+{
+    dynamicUpdateFinish();
+    _setParamsDouble(v);
+}
+
+void PWidget::setParamsLong(long v)
+{
+    dynamicUpdateFinish();
+    _setParamsLong(v);
+}
+
+void PWidget::setParamsString(const std::string &v)
+{
+    dynamicUpdateFinish();
+    _setParamsString(v);
+}
+
+double      PWidget::getParamsDouble() const { return _params->GetValueDouble(_tag, 0.0); }
+long        PWidget::getParamsLong()   const { return _params->GetValueLong(_tag, 0); }
+std::string PWidget::getParamsString() const { return _params->GetValueString(_tag, ""); }
+
+void PWidget::dynamicUpdateBegin()
+{
+    assert(_dynamicUpdateIsOn);
+    if (!_dynamicUpdateInsideGroup) {
+        getParams()->BeginGroup(GetTag() + " dynamic change");
+        _dynamicUpdateInsideGroup = true;
+    }
+}
+
+void PWidget::dynamicUpdateFinish()
+{
+    if (_dynamicUpdateIsOn && _dynamicUpdateInsideGroup) {
+        getParams()->EndGroup();
+        _dynamicUpdateInsideGroup = false;
+    }
+}
+
+void PWidget::_setParamsDouble(double v) { getParams()->SetValueDouble(GetTag(), "", v); }
+void PWidget::_setParamsLong(long v) { getParams()->SetValueLong(GetTag(), "", v); }
+void PWidget::_setParamsString(const std::string &v) { getParams()->SetValueString(GetTag(), "", v); }

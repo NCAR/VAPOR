@@ -1,12 +1,13 @@
 #pragma once
 
-#include "PWidget.h"
-#include <QCheckBox>
+#include "PLineItem.h"
 
-class PCheckbox : public PWidget {
+class VCheckBox;
+
+class PCheckbox : public PLineItem {
     Q_OBJECT
     
-    QCheckBox *_qcheckbox;
+    VCheckBox *_qcheckbox;
     
 public:
     PCheckbox(const std::string &tag, const std::string &label="");
@@ -15,5 +16,5 @@ protected:
     void updateGUI() const override;
     
 private slots:
-    void checkboxStateChanged(int state);
+    void checkboxStateChanged(bool on);
 };
