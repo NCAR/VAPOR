@@ -28,6 +28,13 @@ jobs:
                exit 0
             fi
 
+  tag_nightly_build:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+
+    steps:
+      - checkout
+
   build_ubuntu18:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
@@ -65,7 +72,7 @@ jobs:
           name: make installer
           command: |
             cd /VAPOR/build
-            cmake3 -DCMAKE_BUILD_TYPE:Release -DDIST_INSTALLER=ON ..
+            cmake -DCMAKE_BUILD_TYPE:Release -DDIST_INSTALLER=ON ..
             make
             make installer
 
@@ -154,6 +161,7 @@ workflows:
       - build_ubuntu16
       - build_centos7
       - build_osx
+
   nightly:
     triggers:
       - schedule:
@@ -164,6 +172,9 @@ workflows:
                  - master
     jobs:
       - build_ubuntu18
-      - build_ubuntu18_installer:
+      - tag_nightly_build:
           requires:
             - build_ubuntu18
+      - build_ubuntu18_installer:
+          requires:
+            - tag_nightly_build
