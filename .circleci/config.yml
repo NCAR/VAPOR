@@ -56,6 +56,22 @@ jobs:
                exit 0
             fi
 
+  build_ubuntu18_installer:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+
+    steps:
+      - run:
+          name: make installer
+          command: |
+            cd /VAPOR/build
+            cmake3 -DCMAKE_BUILD_TYPE:Release -DDIST_INSTALLER=ON ..
+            make
+            make installer
+
+      - store_artifacts:
+          path: /VAPOR/build/VAPOR3-*-Linux.sh
+
   build_centos7:
     docker:
       - image: sgpearse/vapor3-centos7:latest
@@ -134,6 +150,20 @@ workflows:
   build:
     jobs:
       - build_ubuntu18
+      - build_ubuntu18_installer
       - build_ubuntu16
       - build_centos7
       - build_osx
+  nightly:
+    triggers:
+      - schedule:
+           cron: "0 0 * * *" #nightly cron job
+           filters:
+             branches:
+               only:
+                 - master
+    jobs:
+      - build_ubuntu18
+      - build_ubuntu18_installer:
+          requires:
+            - build_ubuntu18
