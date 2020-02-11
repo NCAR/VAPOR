@@ -1,20 +1,20 @@
 //************************************************************************
-//									*
-//		     Copyright (C)  2004				*
-//     University Corporation for Atmospheric Research			*
-//		     All Rights Reserved				*
-//									*
+//                                    *
+//             Copyright (C)  2004                *
+//     University Corporation for Atmospheric Research            *
+//             All Rights Reserved                *
+//                                    *
 //************************************************************************/
 //
-//	File:		Histo.cpp
+//    File:        Histo.cpp
 //
-//	Author:		Alan Norton
-//			National Center for Atmospheric Research
-//			PO 3000, Boulder, Colorado
+//    Author:        Alan Norton
+//            National Center for Atmospheric Research
+//            PO 3000, Boulder, Colorado
 //
-//	Date:		November 2004
+//    Date:        November 2004
 //
-//	Description:  Implementation of Histo class
+//    Description:  Implementation of Histo class
 //
 #include <vapor/MyBase.h>
 #include <vapor/DataMgrUtils.h>
@@ -234,12 +234,14 @@ int Histo::Populate(const std::string &varName, VAPoR::DataMgr *dm, VAPoR::Rende
         _refLevel = refLevel;
     }
 
-    if (_below)
+    if (_below) {
         delete[] _below;
-    _below = nullptr;
-    if (_above)
+        _below = nullptr;
+    }
+    if (_above) {
         delete[] _above;
-    _above = nullptr;
+        _above = nullptr;
+    }
 
     _getDataRange(varName, dm, rp, &_minData, &_maxData);
 

@@ -308,9 +308,10 @@ size_t WireFrameRenderer::_buildCacheConnectivity(
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR)
+    while ((err = glGetError()) != GL_NO_ERROR) {
         if (err == GL_OUT_OF_MEMORY)
             *GPUOutOfMemory = true;
+    }
 
     return (indices.size());
 }
