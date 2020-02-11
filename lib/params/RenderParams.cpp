@@ -96,7 +96,7 @@ void RenderParams::SetDefaultVariables(
     if (dim == 3)
         fieldVarNames[2] = _findVarStartingWithLetter(varnames, 'w');
 
-	SetFieldVariableNames(fieldVarNames);
+    SetFieldVariableNames(fieldVarNames);
 
     string colorVar = varname;
     if (secondaryColormapVariable)

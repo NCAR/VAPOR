@@ -100,6 +100,6 @@ void MouseModeParams::SetCurrentMouseMode(string t) {
     if (itr == _modes.cend())
         t = GetNavigateModeName();
 
-	SetValueString(_currentMouseModeTag, "Set mouse mode", t);
+    SetValueString(_currentMouseModeTag, "Set mouse mode", t);
 }
 

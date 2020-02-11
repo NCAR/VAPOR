@@ -20,7 +20,8 @@ void HideSTDERR()
     else
         _savedSTDERR = rc;
 
-    freopen( "/dev/null", "w", stderr );
+    auto* tmp = freopen( "/dev/null", "w", stderr );
+    (void) tmp;
 #endif
 }
 void RestoreSTDERR()

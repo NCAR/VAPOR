@@ -290,7 +290,7 @@ void DataStatus::GetActiveExtents(
         {
             if (! auxVarNames[k].empty()) 
 				var.varnames.push_back(auxVarNames[k]);
-				variables.push_back(var);
+			variables.push_back(var);
         }
 	}
 	if (variables.size()) {
