@@ -196,6 +196,8 @@ class VDF_API DCWRF : public VAPoR::DC {
     float _dy;
     float _cen_lat;
     float _cen_lon;
+    float _true_lat1;
+    float _true_lat2;
     float _pole_lat;
     float _pole_lon;
     float _grav;
