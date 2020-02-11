@@ -29,15 +29,30 @@ bool mycompare(const pair<int, float>  &a, const pair<int, float>  &b) {
 	return(a.second < b.second);
 }
 #endif
+
+float read_scalar_float_attr(
+	NetCDFCollection *ncdfc,
+	string varname, string attrname, float default_value
+) {
+
+	vector <double> dvalues;
+	ncdfc->GetAtt(varname, attrname, dvalues);
+	if (dvalues.size() != 1) return(default_value);
+
+	return((float) dvalues[0]);
+}
+
 };
 
 DCWRF::DCWRF() {
 	_ncdfc = NULL;
 
-	_dx = -1.0;
-	_dy = -1.0;
+	_dx = 0.0;
+	_dy = 0.0;
 	_cen_lat = 0.0;
 	_cen_lon = 0.0;
+	_true_lat1 = 0.0;
+	_true_lat2 = 0.0;
 	_pole_lat = 90.0;
 	_pole_lon = 0.0;
 	_grav = 9.81;
@@ -507,53 +522,14 @@ int DCWRF::_InitAtts(
 	NetCDFCollection *ncdfc
 ) {
 
-	_dx = -1.0;
-	_dy = -1.0;
-	_cen_lat = 0.0;
-	_cen_lon = 0.0;
-	_pole_lat = 90.0;
-	_pole_lon = 0.0;
-	_grav = 9.81;
-	_radius = 0.0;
-	_p2si = 1.0;
-	
-
-	vector <double> dvalues;
-	ncdfc->GetAtt("", "DX", dvalues);
-	if (dvalues.size() != 1) {
-		SetErrMsg("Error reading required attribute : DX");
-		return(-1);
-	}
-	_dx = dvalues[0];
-
-	ncdfc->GetAtt("", "DY", dvalues);
-	if (dvalues.size() != 1) {
-		SetErrMsg("Error reading required attribute : DY");
-		return(-1);
-	}
-	_dy = dvalues[0];
-
-	ncdfc->GetAtt("", "CEN_LAT", dvalues);
-	if (dvalues.size() != 1) {
-		SetErrMsg("Error reading required attribute : CEN_LAT");
-		return(-1);
-	}
-	_cen_lat = dvalues[0];
-
-	ncdfc->GetAtt("", "CEN_LON", dvalues);
-	if (dvalues.size() != 1) {
-		SetErrMsg("Error reading required attribute : CEN_LON");
-		return(-1);
-	}
-	_cen_lon = dvalues[0];
-
-	ncdfc->GetAtt("", "POLE_LAT", dvalues);
-	if (dvalues.size() != 1) _pole_lat = 90.0;
-	else _pole_lat = dvalues[0];
-
-	ncdfc->GetAtt("", "POLE_LON", dvalues);
-	if (dvalues.size() != 1) _pole_lon = 0.0;
-	else _pole_lon = dvalues[0];
+	_dx = read_scalar_float_attr(ncdfc, "", "DX", _dx);
+	_dy = read_scalar_float_attr(ncdfc, "", "DY", _dy);
+	_cen_lat = read_scalar_float_attr(ncdfc, "", "CEN_LAT", _cen_lat);
+	_cen_lon = read_scalar_float_attr(ncdfc, "", "CEN_LON", _cen_lon);
+	_true_lat1 = read_scalar_float_attr(ncdfc, "", "TRUELAT1", _true_lat1);
+	_true_lat2 = read_scalar_float_attr(ncdfc, "", "TRUELAT2", _true_lat2);
+	_pole_lat = read_scalar_float_attr(ncdfc, "", "POLE_LAT", _pole_lat);
+	_pole_lon = read_scalar_float_attr(ncdfc, "", "POLE_LON", _pole_lon);
 
 	//
 	// "PlanetWRF" attributes
@@ -563,24 +539,15 @@ int DCWRF::_InitAtts(
 	// P2SI is the number of SI seconds in an planetary solar day
 	// divided by the number of SI seconds in an earth solar day
 	//
+	vector <double> dvalues;
 	ncdfc->GetAtt("", "G", dvalues);
 	if (dvalues.size() == 1) {
 
 		_grav = dvalues[0];
 
-		ncdfc->GetAtt("", "RADIUS", dvalues);
-		if (dvalues.size() != 1) {
-			SetErrMsg("Error reading required attribute : RADIUS");
-			return(-1);
-		}
-		_radius = dvalues[0];
+		_radius = read_scalar_float_attr(ncdfc, "", "RADIUS", _radius);
+		_p2si = read_scalar_float_attr(ncdfc, "", "P2SI", _p2si);
 
-		ncdfc->GetAtt("", "P2SI", dvalues);
-		if (dvalues.size() != 1) {
-			SetErrMsg("Error reading required attribute : P2SI");
-			return(-1);
-		}
-		_p2si = dvalues[0];
 	}
 
 	return(0);
@@ -617,20 +584,6 @@ int DCWRF::_GetProj4String(
 		}
 		float lon0 = dvalues[0];
 
-		ncdfc->GetAtt("", "TRUELAT1", dvalues);
-		if (dvalues.size() != 1) {
-			SetErrMsg("Error reading required attribute : TRUELAT1");
-			return(-1);
-		}
-		float lat1 = dvalues[0];
-
-		ncdfc->GetAtt("", "TRUELAT2", dvalues);
-		if (dvalues.size() != 1) {
-			SetErrMsg("Error reading required attribute : TRUELAT2");
-			return(-1);
-		}
-		float lat2 = dvalues[0];
-		
 		//Construct the projection string:
 		projstring = "+proj=lcc";
 		projstring += " +lon_0=";
@@ -640,12 +593,12 @@ int DCWRF::_GetProj4String(
 
 		projstring += " +lat_1=";
 		oss.str("");
-		oss << (double)lat1;
+		oss << (double) _true_lat1;
 		projstring += oss.str();
 
 		projstring += " +lat_2=";
 		oss.str("");
-		oss << (double)lat2;
+		oss << (double) _true_lat2;
 		projstring += oss.str();
 
 	break;
@@ -656,15 +609,8 @@ int DCWRF::_GetProj4String(
 
 		//Determine whether north or south pole (lat_ts is pos or neg)
 		
-		ncdfc->GetAtt("", "TRUELAT1", dvalues);
-		if (dvalues.size() != 1) {
-			SetErrMsg("Error reading required attribute : TRUELAT1");
-			return(-1);
-		}
-		float latts = dvalues[0];
-	
 		float lat0;
-		if (latts < 0.) lat0 = -90.0;
+		if (_true_lat1 < 0.) lat0 = -90.0;
 		else lat0 = 90.0;
 
 		projstring += " +lat_0=";
@@ -674,7 +620,7 @@ int DCWRF::_GetProj4String(
 
 		projstring += " +lat_ts=";
 		oss.str("");
-		oss << (double)latts;
+		oss << (double)_true_lat1;
 		projstring += oss.str();
 
 		ncdfc->GetAtt("", "STAND_LON", dvalues);
@@ -694,13 +640,6 @@ int DCWRF::_GetProj4String(
 
 	case(3): { //Mercator
 		
-		ncdfc->GetAtt("", "TRUELAT1", dvalues);
-		if (dvalues.size() != 1) {
-			SetErrMsg("Error reading required attribute : TRUELAT1");
-			return(-1);
-		}
-		float latts = dvalues[0];
-
 		ncdfc->GetAtt("", "STAND_LON", dvalues);
 		if (dvalues.size() != 1) {
 			SetErrMsg("Error reading required attribute : STAND_LON");
@@ -718,7 +657,7 @@ int DCWRF::_GetProj4String(
 		
 		projstring += " +lat_ts=";
 		oss.str("");
-		oss << (double)latts;
+		oss << (double) _true_lat1;
 		projstring += oss.str();
 
 	break;
