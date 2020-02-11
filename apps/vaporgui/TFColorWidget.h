@@ -21,6 +21,9 @@ class TFColorMap : public TFMap {
     void PopulateContextMenu(QMenu *menu, const glm::vec2 &p) override;
     void PopulateSettingsMenu(QMenu *menu) const override;
 
+  private:
+    void populateBuiltinColormapMenu(QMenu *menu, const std::string &builtinPath) const;
+
   protected:
     void paramsUpdate() override;
     TFInfoWidget *createInfoWidget() override;

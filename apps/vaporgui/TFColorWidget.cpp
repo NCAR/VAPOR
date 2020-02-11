@@ -57,10 +57,22 @@ void TFColorMap::PopulateSettingsMenu(QMenu *menu) const {
 
     QMenu *builtinColormapMenu = menu->addMenu("Load Built-In Colormap");
     string builtinPath = GetSharePath("palettes");
+
+    populateBuiltinColormapMenu(builtinColormapMenu, builtinPath);
+}
+
+void TFColorMap::populateBuiltinColormapMenu(QMenu *menu, const std::string &builtinPath) const {
     auto fileNames = FileUtils::ListFiles(builtinPath);
     std::sort(fileNames.begin(), fileNames.end());
-    for (int i = 0; i < fileNames.size(); i++) {
 
+    for (int i = 0; i < fileNames.size(); i++) {
+        string path = FileUtils::JoinPaths({builtinPath, fileNames[i]});
+
+        if (FileUtils::IsDirectory(path))
+            populateBuiltinColormapMenu(menu->addMenu(QString::fromStdString(fileNames[i])), path);
+    }
+
+    for (int i = 0; i < fileNames.size(); i++) {
         string path = FileUtils::JoinPaths({builtinPath, fileNames[i]});
 
         if (FileUtils::Extension(path) != "tf3")
@@ -68,7 +80,7 @@ void TFColorMap::PopulateSettingsMenu(QMenu *menu) const {
 
         QAction *item = new ColorMapMenuItem(path);
         connect(item, SIGNAL(triggered(std::string)), this, SLOT(menuLoadBuiltin(std::string)));
-        builtinColormapMenu->addAction(item);
+        menu->addAction(item);
     }
 }
 
