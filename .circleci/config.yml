@@ -60,8 +60,11 @@ jobs:
   build_ubuntu18_installer:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
+    working_directory: /tmp
 
     steps:
+      - checkout
+
       - run:
           name: make installer
           command: |
@@ -70,11 +73,11 @@ jobs:
             #make
             #make installer
             echo "test" > test.sh
-            mv *.sh /VAPOR
+            mv *.sh /tmp/VAPOR
 
       - persist_to_workspace:
-          root: /
-          paths: VAPOR/*.sh
+          root: VAPOR
+          paths: ./*.sh
 
       #- store_artifacts:
       #    path: /tmp/VAPOR3-3.2.0-Linux.sh
@@ -165,7 +168,7 @@ jobs:
       #      ls /VAPOR
       #      mkdir /VAPOR
       - attach_workspace:
-          at: /VAPOR
+          at: /tmp
       - run:
           name: list installers
           command: |
@@ -177,7 +180,7 @@ jobs:
       - run:
           name: push assets with ghr
           command: |
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete Nightly /VAPOR
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete Nightly /tmp/*.sh
 
 
 
