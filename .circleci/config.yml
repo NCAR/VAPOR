@@ -67,8 +67,9 @@ jobs:
           command: |
             cd /VAPOR/build
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
-            make
-            make installer
+            #make
+            #make installer
+            echo "test" > test.sh
             mv *.sh /VAPOR
 
       - persist_to_workspace:
@@ -158,6 +159,7 @@ jobs:
       - run:
           name: make workspace dir
           command: |
+            ls /VAPOR
             mkdir /VAPOR
       - attach_workspace:
           at: /VAPOR
