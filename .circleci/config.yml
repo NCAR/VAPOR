@@ -60,7 +60,7 @@ jobs:
   build_ubuntu18_installer:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
-    working_directory: /tmp
+    #working_directory: /tmp
 
     steps:
       - checkout
