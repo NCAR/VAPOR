@@ -169,16 +169,17 @@ jobs:
     macos:
       xcode: "11.1.0"
     steps:
-      - checkout
-      - run:
-          name: make workspace dir
-          command: |
-            ls /VAPOR
+      #- checkout
+      #- run:
+      #    name: make workspace dir
+      #    command: |
+      #      ls /VAPOR
       #    command: |
       #      ls /VAPOR
       #      mkdir /VAPOR
-      - attach_workspace:
-          at: /tmp
+      #- attach_workspace:
+      #    at: /tmp
+      - *attach_workspace
       - run:
           name: list installers
           command: |
