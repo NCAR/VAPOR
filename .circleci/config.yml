@@ -175,16 +175,16 @@ workflows:
       - build_centos7
       - build_osx
 
-  nightly:
-    triggers:
-      - schedule:
-           cron: "0 0 * * *" #nightly cron job
-           filters:
-             branches:
-               only:
-                 - master
-    jobs:
-      - build_ubuntu18_installer:
-      - release_on_github:
-          requires:
-            - build_ubuntu18_installer
+#  nightly:
+#    triggers:
+#      - schedule:
+#           cron: "0 0 * * *" #nightly cron job
+#           filters:
+#             branches:
+#               only:
+#                 - master
+#    jobs:
+#      - build_ubuntu18_installer:
+#      - release_on_github:
+#          requires:
+#            - build_ubuntu18_installer
