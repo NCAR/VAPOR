@@ -77,20 +77,15 @@ jobs:
           command: |
             cd /VAPOR/build
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
-            #make
-            #make installer
-            echo "test" > test.sh
+            make
+            make installer
             mkdir -p /tmp/workspace/installers
             mv *.sh /tmp/workspace/installers
-            #mv *.sh /tmp/VAPOR
 
       - persist_to_workspace:
           root: *workspace_root
           paths: 
             - installers
-
-      #- store_artifacts:
-      #    path: /tmp/VAPOR3-3.2.0-Linux.sh
 
   build_centos7:
     docker:
@@ -169,16 +164,6 @@ jobs:
     macos:
       xcode: "11.1.0"
     steps:
-      #- checkout
-      #- run:
-      #    name: make workspace dir
-      #    command: |
-      #      ls /VAPOR
-      #    command: |
-      #      ls /VAPOR
-      #      mkdir /VAPOR
-      #- attach_workspace:
-      #    at: /tmp
       - *attach_workspace
       - run:
           name: list workspace
