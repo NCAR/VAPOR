@@ -67,7 +67,6 @@ jobs:
   build_ubuntu18_installer:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
-    #working_directory: /tmp
 
     steps:
       - checkout
@@ -77,6 +76,53 @@ jobs:
           command: |
             cd /VAPOR/build
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
+            make
+            make installer
+            mkdir -p /tmp/workspace/installers
+            mv *.sh /tmp/workspace/installers
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths: 
+            - installers
+
+  build_ubuntu16_installer:
+    docker:
+      - image: sgpearse/vapor3-ubuntu16:latest
+
+    steps:
+      - checkout
+
+      - run:
+          name: make installer
+          command: |
+            cd /VAPOR/build
+            cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
+            make
+            make installer
+            mkdir -p /tmp/workspace/installers
+            mv *.sh /tmp/workspace/installers
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths: 
+            - installers
+
+  build_centos7_installer:
+    docker:
+      - image: sgpearse/vapor3-centos7:latest
+
+    steps:
+      - checkout
+
+      - run:
+          name: cmake3 and make
+          command: |
+            ls -lrth /usr/local/VAPOR-Deps
+            cd /VAPOR
+            git pull
+            cd build
+            cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
             mkdir -p /tmp/workspace/installers
@@ -185,8 +231,12 @@ workflows:
     jobs:
       #- build_ubuntu18
       - build_ubuntu18_installer
+      - build_ubuntu16_installer
+      - build_centos7_installer
       - release_on_github:
           requires:
+            - build_centos7_installer
+            - build_ubuntu16_installer
             - build_ubuntu18_installer
       #- build_ubuntu16
       #- build_centos7
