@@ -156,7 +156,7 @@ jobs:
     macos:
       xcode: "11.1.0"
     steps:
-      -checkout
+      - checkout
       #- run:
       #    name: make workspace dir
       #    command: |
