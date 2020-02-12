@@ -156,11 +156,12 @@ jobs:
     macos:
       xcode: "11.1.0"
     steps:
-      - run:
-          name: make workspace dir
-          command: |
-            ls /VAPOR
-            mkdir /VAPOR
+      -checkout
+      #- run:
+      #    name: make workspace dir
+      #    command: |
+      #      ls /VAPOR
+      #      mkdir /VAPOR
       - attach_workspace:
           at: /VAPOR
       - run:
