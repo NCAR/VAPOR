@@ -36,6 +36,28 @@ jobs:
                exit 0
             fi
 
+  build_ubuntu16_installer:
+    docker:
+      - image: sgpearse/vapor3-ubuntu16:latest
+
+    steps:
+      - checkout
+
+      - run:
+          name: make installer
+          command: |
+            cd /VAPOR/build
+            cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
+            make
+            make installer
+            mkdir -p /tmp/workspace/installers
+            mv *.sh /tmp/workspace/installers
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths: 
+            - installers
+
   build_ubuntu18:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
@@ -86,53 +108,6 @@ jobs:
           paths: 
             - installers
 
-  build_ubuntu16_installer:
-    docker:
-      - image: sgpearse/vapor3-ubuntu16:latest
-
-    steps:
-      - checkout
-
-      - run:
-          name: make installer
-          command: |
-            cd /VAPOR/build
-            cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
-            make
-            make installer
-            mkdir -p /tmp/workspace/installers
-            mv *.sh /tmp/workspace/installers
-
-      - persist_to_workspace:
-          root: *workspace_root
-          paths: 
-            - installers
-
-  build_centos7_installer:
-    docker:
-      - image: sgpearse/vapor3-centos7:latest
-
-    steps:
-      - checkout
-
-      - run:
-          name: cmake3 and make
-          command: |
-            ls -lrth /usr/local/VAPOR-Deps
-            cd /VAPOR
-            git pull
-            cd build
-            cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
-            make
-            make installer
-            mkdir -p /tmp/workspace/installers
-            mv *.sh /tmp/workspace/installers
-
-      - persist_to_workspace:
-          root: *workspace_root
-          paths: 
-            - installers
-
   build_centos7:
     docker:
       - image: sgpearse/vapor3-centos7:latest
@@ -161,6 +136,31 @@ jobs:
             else
                exit 0
             fi
+
+  build_centos7_installer:
+    docker:
+      - image: sgpearse/vapor3-centos7:latest
+
+    steps:
+      - checkout
+
+      - run:
+          name: cmake3 and make
+          command: |
+            ls -lrth /usr/local/VAPOR-Deps
+            cd /VAPOR
+            git pull
+            cd build
+            cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
+            make
+            make installer
+            mkdir -p /tmp/workspace/installers
+            mv *.sh /tmp/workspace/installers
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths: 
+            - installers
 
   build_osx:
     macos:
@@ -206,6 +206,46 @@ jobs:
                exit 0
             fi
 
+  build_osx_installer:
+    macos:
+      xcode: "11.1.0"
+    steps:
+      - run:
+          name: Get 3rd party libs
+          command: |
+            pip3 install gdown
+            sudo mkdir -p /usr/local/VAPOR-Deps
+            sudo chmod 777 /usr/local/VAPOR-Deps
+            cd /usr/local/VAPOR-Deps
+            gdown https://drive.google.com/uc?id=1kyDAzmK9zShrIcoAbned8YW9vn2j7lpe
+      - run:
+          name: Extract 3rd party libs
+          command: |
+            cd /usr/local/VAPOR-Deps
+            tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
+            ls /usr/local/VAPOR-Deps
+      - checkout
+      - run:
+          name: Install cmake
+          command: |
+            brew install cmake
+      - run:
+          name: make VAPOR
+          command: |
+            cp site_files/site.NCAR site.local
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
+            make
+            make installer
+            mkdir -p /tmp/workspace/installers
+            mv *.dmg /tmp/workspace/installers
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths: 
+            - installers
+
   release_on_github:
     macos:
       xcode: "11.1.0"
@@ -230,14 +270,16 @@ workflows:
   build:
     jobs:
       #- build_ubuntu18
-      - build_ubuntu18_installer
-      - build_ubuntu16_installer
-      - build_centos7_installer
+      #- build_ubuntu18_installer
+      #- build_ubuntu16_installer
+      #- build_centos7_installer
+      - build_osx_installer
       - release_on_github:
           requires:
-            - build_centos7_installer
-            - build_ubuntu16_installer
-            - build_ubuntu18_installer
+            - build_osx_installer
+            #- build_centos7_installer
+            #- build_ubuntu16_installer
+            #- build_ubuntu18_installer
       #- build_ubuntu16
       #- build_centos7
       #- build_osx
