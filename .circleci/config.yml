@@ -181,10 +181,6 @@ jobs:
       #    at: /tmp
       - *attach_workspace
       - run:
-          name: list installers
-          command: |
-            ls -lrth /VAPOR
-      - run:
           name: install ghr
           command: |
             brew install ghr
