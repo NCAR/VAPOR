@@ -1,5 +1,12 @@
 version: 2
 
+references:
+  workspace_root: &workspace_root
+    /tmp/workspace
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: *workspace_root
+
 jobs:
   build_ubuntu16:
     docker:
@@ -73,11 +80,14 @@ jobs:
             #make
             #make installer
             echo "test" > test.sh
-            mv *.sh /tmp/VAPOR
+            mkdir -p /tmp/workspace/installers
+            mv *.sh /tmp/workspace/installers
+            #mv *.sh /tmp/VAPOR
 
       - persist_to_workspace:
-          root: /VAPOR
-          paths: ./*.sh
+          root: *workspace_root
+          paths: 
+            - installers
 
       #- store_artifacts:
       #    path: /tmp/VAPOR3-3.2.0-Linux.sh
