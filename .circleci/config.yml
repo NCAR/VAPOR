@@ -69,12 +69,12 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
-            mkdir -p /tmp/installers
-            mv *.sh /tmp/installers
+            mkdir /installers
+            mv *.sh /installers/
 
       - persist_to_workspace:
           root: /
-          paths: tmp/installers/*.sh
+          paths: installers/*.sh
 
       #- store_artifacts:
       #    path: /tmp/VAPOR3-3.2.0-Linux.sh
@@ -157,11 +157,11 @@ jobs:
       xcode: "11.1.0"
     steps:
       - attach_workspace:
-          at: /tmp/installers
+          at: /installers
       - run:
           name: list installers
           command: |
-            ls -lrth /tmp/installers
+            ls -lrth /installers
       - run:
           name: install ghr
           command: |
@@ -169,7 +169,7 @@ jobs:
       - run:
           name: push assets with ghr
           command: |
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete Nightly /tmp/installers/
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete Nightly /installers
 
 
 
@@ -177,14 +177,14 @@ workflows:
   version: 2
   build:
     jobs:
-      - build_ubuntu18
+      #- build_ubuntu18
       - build_ubuntu18_installer
       - release_on_github:
           requires:
             - build_ubuntu18_installer
-      - build_ubuntu16
-      - build_centos7
-      - build_osx
+      #- build_ubuntu16
+      #- build_centos7
+      #- build_osx
 
 #  nightly:
 #    triggers:
