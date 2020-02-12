@@ -69,6 +69,7 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
+            mkdir -p /tmp/installers
             mv *.sh /tmp/installers
 
       - persist_to_workspace:
