@@ -76,7 +76,7 @@ jobs:
             mv *.sh /tmp/VAPOR
 
       - persist_to_workspace:
-          root: VAPOR
+          root: /VAPOR
           paths: ./*.sh
 
       #- store_artifacts:
