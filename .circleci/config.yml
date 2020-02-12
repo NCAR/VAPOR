@@ -69,12 +69,11 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
-            mkdir /installers
-            mv *.sh /installers/
+            mv *.sh /VAPOR
 
       - persist_to_workspace:
           root: /
-          paths: installers/*.sh
+          paths: VAPOR/*.sh
 
       #- store_artifacts:
       #    path: /tmp/VAPOR3-3.2.0-Linux.sh
@@ -157,11 +156,11 @@ jobs:
       xcode: "11.1.0"
     steps:
       - attach_workspace:
-          at: /installers
+          at: /VAPOR
       - run:
           name: list installers
           command: |
-            ls -lrth /installers
+            ls -lrth /VAPOR
       - run:
           name: install ghr
           command: |
@@ -169,7 +168,7 @@ jobs:
       - run:
           name: push assets with ghr
           command: |
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete Nightly /installers
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete Nightly /VAPOR
 
 
 
