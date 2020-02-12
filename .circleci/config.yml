@@ -69,11 +69,11 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
-            mv *.sh /tmp
+            mv *.sh /tmp/installers
 
       - persist_to_workspace:
           root: /
-          paths: tmp/*.sh
+          paths: tmp/installers/*.sh
 
       #- store_artifacts:
       #    path: /tmp/VAPOR3-3.2.0-Linux.sh
@@ -155,10 +155,13 @@ jobs:
     macos:
       xcode: "11.1.0"
     steps:
+      - attach_workspace:
+          at: /tmp/installers
       - run:
-          name: Get 3rd party libs
+          name: Release nightly
           command: |
             brew install ghr
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -replace Nightly /tmp/installers/
 
 
 
