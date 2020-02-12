@@ -76,7 +76,7 @@ jobs:
           paths: tmp
 
       - store_artifacts:
-          path: /VAPOR/build/VAPOR3-3.2.0-Linux.sh
+          path: /tmp/VAPOR3-3.2.0-Linux.sh
 
   build_centos7:
     docker:
