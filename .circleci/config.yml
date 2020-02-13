@@ -242,7 +242,7 @@ jobs:
             cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
-            for f in VAPOR3-*.dmg ; do mv "$f" "${f/Linux/Darwin-Nightly}" ; done
+            for f in VAPOR3-*.dmg ; do mv "$f" "${f/Darwin/Darwin-Nightly}" ; done
             mkdir -p /tmp/workspace/installers
             mv *.dmg /tmp/workspace/installers
 
@@ -284,7 +284,7 @@ workflows:
     triggers:
       - schedule:
            #cron: "0 0 * * *" #nightly cron job
-           cron: "51 * * * *"
+           cron: "30 * * * *"
            filters:
              branches:
                only:
