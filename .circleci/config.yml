@@ -235,7 +235,7 @@ jobs:
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
-            cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
+            cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
             mkdir -p /tmp/workspace/installers
