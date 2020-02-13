@@ -50,6 +50,7 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
+            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu16-Nightly}" ; done
             mkdir -p /tmp/workspace/installers
             mv *.sh /tmp/workspace/installers
 
@@ -100,6 +101,7 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
+            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu18-Nightly}" ; done
             mkdir -p /tmp/workspace/installers
             mv *.sh /tmp/workspace/installers
 
@@ -154,8 +156,10 @@ jobs:
             cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
+            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/CentOS7-Nightly}" ; done
             mkdir -p /tmp/workspace/installers
             mv *.sh /tmp/workspace/installers
+
 
       - persist_to_workspace:
           root: *workspace_root
@@ -241,6 +245,7 @@ jobs:
             mkdir -p /tmp/workspace/installers
             mv *.dmg /tmp/workspace/installers
 
+
       - persist_to_workspace:
           root: *workspace_root
           paths: 
@@ -269,17 +274,17 @@ workflows:
   version: 2
   build:
     jobs:
-      #- build_ubuntu18
-      #- build_ubuntu18_installer
-      #- build_ubuntu16_installer
-      #- build_centos7_installer
+      - build_ubuntu18_installer
+      - build_ubuntu16_installer
+      - build_centos7_installer
       - build_osx_installer
       - release_on_github:
           requires:
-            #- build_ubuntu16_installer
-            #- build_ubuntu18_installer
-            #- build_centos7_installer
+            - build_ubuntu16_installer
+            - build_ubuntu18_installer
+            - build_centos7_installer
             - build_osx_installer
+      #- build_ubuntu18
       #- build_ubuntu16
       #- build_centos7
       #- build_osx
