@@ -18,7 +18,8 @@ RUN apt-get update \
 # Aren't we supposed to be distributing libexpat in our third-party tar???
     && apt-get install -y libexpat1-dev \
     && apt-get install -y libglib2.0-0 \
-    && apt-get install -y libdbus-1-3
+    && apt-get install -y libdbus-1-3 \
+    && apt-get install -y valgrind
 
 RUN mkdir -p /usr/local/VAPOR-Deps
 
