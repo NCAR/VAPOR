@@ -284,11 +284,11 @@ workflows:
     triggers:
       - schedule:
            #cron: "0 0 * * *" #nightly cron job
-           cron: "48 * * * *"
+           cron: "51 * * * *"
            filters:
              branches:
                only:
-                 - master
+                 - nightly
     jobs:
       - build_ubuntu18_installer
       - build_ubuntu16_installer
