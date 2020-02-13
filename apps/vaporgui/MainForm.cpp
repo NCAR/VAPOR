@@ -1875,7 +1875,9 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
             _pythonVariables->Update();
         }
 
+		setUpdatesEnabled(false);
 		_tabMgr->Update();
+		setUpdatesEnabled(true); 
 
 		// force visualizer redraw
 		//
