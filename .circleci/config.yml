@@ -110,6 +110,26 @@ jobs:
           paths: 
             - installers
 
+  build_ubuntu18:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+
+    steps:
+      - checkout
+
+      - run:
+          name: cmake and make
+          command: |
+            cd /VAPOR
+            git pull
+            cd build
+            cmake -DCMAKE_BUILD_TYPE:String=Release ..
+            make
+            valgrind --leak-check=yes bin/vapor > /tmp/output.txt
+
+      - store_artifacts:
+          path: /tmp/output.txt
+
   build_centos7:
     docker:
       - image: sgpearse/vapor3-centos7:latest
@@ -276,14 +296,25 @@ workflows:
   build:
     jobs:
       - build_ubuntu18
-      - build_ubuntu16
-      - build_centos7
-      - build_osx
+      #- build_ubuntu16
+      #- build_centos7
+      #- build_osx
+
+  leak_check:
+    #triggers:
+    #  - schedule:
+    #       cron: "0 7 1 * *" #monthly cron job @ midnight MST, on the 1st
+    #       filters:
+    #         branches:
+    #           only:
+    #             - nightly
+    jobs:
+      - check_leaks_ubuntu18
 
   nightly:
     triggers:
       - schedule:
-           cron: "0 7 * * *" #nightly cron job @ midnight, MST
+           cron: "0 7 * * *" #nightly cron job @ midnight MST
            filters:
              branches:
                only:
