@@ -127,7 +127,8 @@ jobs:
             make
             #valgrind --leak-check=yes bin/vapor > /tmp/output.txt
             valgrind --leak-check=yes bin/vaporpychecker &> /tmp/vaporpychecker.txt
-            valgrind --leak-check=yes bin/vapor &> /tmp/vapor.txt
+            #valgrind --leak-check=yes bin/vapor &> /tmp/vapor.txt
+            bin/vapor &> /tmp/vapor.txt
 
       - store_artifacts:
           path: /tmp/*.txt
