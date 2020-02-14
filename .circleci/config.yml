@@ -126,7 +126,7 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE:String=Release ..
             make
             #valgrind --leak-check=yes bin/vapor > /tmp/output.txt
-            valgrind --leak-check=yes bin/vaporpychecker > /tmp/output.txt
+            valgrind --leak-check=yes bin/vaporpychecker &> /tmp/output.txt
 
       - store_artifacts:
           path: /tmp/output.txt
