@@ -110,7 +110,7 @@ jobs:
           paths: 
             - installers
 
-  check_leaks_ubuntu18:
+  check_leaks:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
 
@@ -125,7 +125,8 @@ jobs:
             cd build
             cmake -DCMAKE_BUILD_TYPE:String=Release ..
             make
-            valgrind --leak-check=yes bin/vapor > /tmp/output.txt
+            #valgrind --leak-check=yes bin/vapor > /tmp/output.txt
+            valgrind --leak-check=yes bin/vaporpychecker > /tmp/output.txt
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -309,7 +310,7 @@ workflows:
     #           only:
     #             - nightly
     jobs:
-      - check_leaks_ubuntu18
+      - check_leaks
 
   nightly:
     triggers:
