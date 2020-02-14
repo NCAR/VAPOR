@@ -110,7 +110,7 @@ jobs:
           paths: 
             - installers
 
-  build_ubuntu18:
+  check_leaks_ubuntu18:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
 
