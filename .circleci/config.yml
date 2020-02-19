@@ -288,7 +288,7 @@ jobs:
             brew install cmake
             sudo mkdir -p /VAPOR/build
             cd /VAPOR/build
-            cmake -DCMAKE_EXPORT_COMPILE_COMMANDS ..
+            cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=true ..
             /usr/local/opt/llvm/bin/clang-tidy -checks=* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
 
       - store_artifacts:
@@ -309,7 +309,7 @@ jobs:
       - run:
           name: push assets with ghr
           command: |
-            ghr -b "These installers are built every night with Vapor's current code base.  Caution: These installers are not necessarily stable, and have not been thuroughly tested.  If this is a problem our official releases can be found below." -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete Nightly /tmp/workspace/installers
+            ghr -b "These installers are built every night with Vapor's current code base.  Caution: These installers are not necessarily stable, and have not been thuroughly tested.  If this is a problem our official releases can be found below." -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -delete Nightly /tmp/workspace/installers
 
 
 
