@@ -282,7 +282,7 @@ jobs:
       - run:
           name: check MainForm.cpp
           command: |
-            sudo apt-get install clang-tidy
+            apt-get install clang-tidy
             clang-tidy -checks=* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
 
       - store_artifacts:
