@@ -285,10 +285,6 @@ jobs:
       - run:
           name: check MainForm.cpp
           command: |
-            #brew install llvm
-            #ln -s "$(brew --prefix llvm)/bin/clang-format" "/usr/local/bin/clang-format"
-            #ln -s "$(brew --prefix llvm)/bin/clang-tidy" "/usr/local/bin/clang-tidy"
-            #clang-tidy -checks=* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
             /usr/local/opt/llvm/bin/clang-tidy -checks=* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
 
       - store_artifacts:
