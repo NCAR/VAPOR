@@ -285,6 +285,7 @@ jobs:
       - run:
           name: check MainForm.cpp
           command: |
+            brew install cmake
             sudo mkdir -p /VAPOR/build
             cd /VAPOR/build
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS ..
