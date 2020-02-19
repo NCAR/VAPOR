@@ -22,7 +22,7 @@ jobs:
             git pull
             cd build
             cmake ..
-            make &> /tmp/output.txt
+            make -j7 make &>> /tmp/output.txt
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -48,7 +48,7 @@ jobs:
           command: |
             cd /VAPOR/build
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
-            make
+            make -j7
             make installer
             for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu16-Nightly}" ; done
             mkdir -p /tmp/workspace/installers
@@ -73,7 +73,7 @@ jobs:
             git pull
             cd build
             cmake ..
-            make &> /tmp/output.txt
+            make -j7 make &>> /tmp/output.txt
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -99,7 +99,7 @@ jobs:
           command: |
             cd /VAPOR/build
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
-            make
+            make -j7
             make installer
             for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu18-Nightly}" ; done
             mkdir -p /tmp/workspace/installers
@@ -148,7 +148,7 @@ jobs:
             git pull
             cd build
             cmake3 ..
-            make &> /tmp/output.txt
+            make -j7 make &>> /tmp/output.txt
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -219,7 +219,7 @@ jobs:
             mkdir build
             cd build
             cmake ..
-            make &> /tmp/output.txt
+            make -j7 make &>> /tmp/output.txt
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -275,6 +275,19 @@ jobs:
           paths: 
             - installers
 
+  clang_tidy:
+    docker:
+      - image: sgpearse/vapor3-ubuntu16:latest
+    steps:
+      - run:
+          name: check MainForm.cpp
+          command: |
+            sudo apt-get install clang-tidy
+            clang-tidy -checks=* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
+
+      - store_artifacts:
+            path: /tmp/tidy.txt
+
   release_on_github:
     macos:
       xcode: "11.1.0"
@@ -298,10 +311,11 @@ workflows:
   version: 2
   build:
     jobs:
-      - build_ubuntu18
+      #- build_ubuntu18
       #- build_ubuntu16
       #- build_centos7
       #- build_osx
+      - clang_tidy
 
   leak_check:
     #triggers:
@@ -312,7 +326,7 @@ workflows:
     #           only:
     #             - nightly
     jobs:
-      - check_leaks
+    #  - check_leaks
 
   nightly:
     triggers:
