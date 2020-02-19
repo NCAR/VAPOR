@@ -317,16 +317,16 @@ workflows:
       #- build_osx
       - clang_tidy
 
-  leak_check:
-    #triggers:
-    #  - schedule:
-    #       cron: "0 7 1 * *" #monthly cron job @ midnight MST, on the 1st
-    #       filters:
-    #         branches:
-    #           only:
-    #             - nightly
-    jobs:
-    #  - check_leaks
+#  leak_check:
+#    triggers:
+#      - schedule:
+#           cron: "0 7 1 * *" #monthly cron job @ midnight MST, on the 1st
+#           filters:
+#             branches:
+#               only:
+#                 - nightly
+#    jobs:
+#      - check_leaks
 
   nightly:
     triggers:
