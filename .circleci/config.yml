@@ -286,8 +286,8 @@ jobs:
           name: check MainForm.cpp
           command: |
             brew install cmake
-            sudo mkdir -p /VAPOR/build
-            cd /VAPOR/build
+            sudo mkdir build
+            cd build
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=true ..
             /usr/local/opt/llvm/bin/clang-tidy -checks=* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
 
