@@ -276,13 +276,18 @@ jobs:
             - installers
 
   clang_tidy:
-    docker:
-      - image: sgpearse/vapor3-ubuntu18:latest
+    #docker:
+    #  - image: sgpearse/vapor3-ubuntu18:latest
+    macos:
+      xcode: "11.1.0"
     steps:
+      - checkout
       - run:
           name: check MainForm.cpp
           command: |
-            apt-get install clang-tidy -y
+            brew install llvm
+            ln -s "$(brew --prefix llvm)/bin/clang-format" "/usr/local/bin/clang-format"
+            ln -s "$(brew --prefix llvm)/bin/clang-tidy" "/usr/local/bin/clang-tidy"
             clang-tidy -checks=* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
 
       - store_artifacts:
