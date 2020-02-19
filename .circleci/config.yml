@@ -285,10 +285,16 @@ jobs:
       - run:
           name: check MainForm.cpp
           command: |
-            brew install cmake
             sudo mkdir build
             cd build
+      - run:
+          name: CMake
+          command: |
+            brew install cmake
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=true ..
+      - run:
+          name: tidy
+          command: |
             /usr/local/opt/llvm/bin/clang-tidy -checks=* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
 
       - store_artifacts:
