@@ -277,12 +277,12 @@ jobs:
 
   clang_tidy:
     docker:
-      - image: sgpearse/vapor3-ubuntu16:latest
+      - image: sgpearse/vapor3-ubuntu18:latest
     steps:
       - run:
           name: check MainForm.cpp
           command: |
-            apt-get install clang-tidy
+            apt-get install clang-tidy -y
             clang-tidy -checks=* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
 
       - store_artifacts:

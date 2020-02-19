@@ -19,7 +19,8 @@ RUN apt-get update \
     && apt-get install -y libexpat1-dev \
     && apt-get install -y libglib2.0-0 \
     && apt-get install -y libdbus-1-3 \
-    && apt-get install -y valgrind
+    && apt-get install -y valgrind \
+    && apt-get install -y clang-tidy 
 
 RUN mkdir -p /usr/local/VAPOR-Deps
 
