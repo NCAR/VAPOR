@@ -285,7 +285,7 @@ jobs:
       - run:
           name: check MainForm.cpp
           command: |
-            mkdir -p /VAPOR/build
+            sudo mkdir -p /VAPOR/build
             cd /VAPOR/build
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS ..
             /usr/local/opt/llvm/bin/clang-tidy -checks=* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
