@@ -294,7 +294,7 @@ jobs:
       - run:
           name: tidy
           command: |
-            /usr/local/opt/llvm/bin/clang-tidy -checks=* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
+            clang-tidy -checks=* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
 
       - store_artifacts:
             path: /tmp/tidy.txt
@@ -367,7 +367,7 @@ workflows:
   nightly:
     triggers:
       - schedule:
-           cron: "0 7 * * FRI" #weekly cron job on Friday @ midnight MST
+           cron: "0 7 * * 5" #weekly cron job on Friday @ midnight MST
            filters:
              branches:
                only:
