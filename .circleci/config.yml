@@ -281,17 +281,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Go to build directory
-          command: |
-            cd /VAPOR/build
-      - run:
           name: CMake
           command: |
-            brew install cmake
+            cd /VAPOR/build
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=true ..
-      - run:
-          name: tidy
-          command: |
             clang-tidy -checks=* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
 
       - store_artifacts:
@@ -309,6 +302,10 @@ jobs:
           command: |
             sudo mkdir build
             cd build
+      - run:
+          name: CMake
+          command: |
+            brew install cmake
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=true ..
       - run:
           name: tidy
