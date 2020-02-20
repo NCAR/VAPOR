@@ -285,7 +285,7 @@ jobs:
           command: |
             cd /VAPOR/build
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=true ..
-            clang-tidy -checks=* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
+            clang-tidy -checks=cppcoreguidelines* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
 
       - store_artifacts:
             path: /tmp/tidy.txt
