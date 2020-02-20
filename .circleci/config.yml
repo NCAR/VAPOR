@@ -309,10 +309,6 @@ jobs:
           command: |
             sudo mkdir build
             cd build
-      - run:
-          name: CMake
-          command: |
-            brew install cmake
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=true ..
       - run:
           name: tidy
