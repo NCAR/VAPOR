@@ -283,9 +283,7 @@ jobs:
       - run:
           name: Go to build directory
           command: |
-            cd /VAPOR
-            mkdir build
-            cd build
+            cd /VAPOR/build
       - run:
           name: CMake
           command: |
