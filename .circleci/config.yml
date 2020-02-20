@@ -275,7 +275,31 @@ jobs:
           paths: 
             - installers
 
-  clang_tidy:
+  clang_tidy_ubuntu18:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+    steps:
+      - checkout
+      - run:
+          name: Go to build directory
+          command: |
+            cd /VAPOR
+            sudo mkdir build
+            cd build
+      - run:
+          name: CMake
+          command: |
+            brew install cmake
+            cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=true ..
+      - run:
+          name: tidy
+          command: |
+            /usr/local/opt/llvm/bin/clang-tidy -checks=* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
+
+      - store_artifacts:
+            path: /tmp/tidy.txt
+
+  clang_tidy_osx:
     #docker:
     #  - image: sgpearse/vapor3-ubuntu18:latest
     macos:
@@ -327,7 +351,7 @@ workflows:
       #- build_ubuntu16
       #- build_centos7
       #- build_osx
-      - clang_tidy
+      - clang_tidy_ubuntu18
 
 #  leak_check:
 #    triggers:
@@ -343,7 +367,7 @@ workflows:
   nightly:
     triggers:
       - schedule:
-           cron: "0 7 * * *" #nightly cron job @ midnight MST
+           cron: "0 7 * * FRI" #weekly cron job on Friday @ midnight MST
            filters:
              branches:
                only:
