@@ -269,6 +269,8 @@ jobs:
       - restore_cache:
           key: osxDeps-v4-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
 
+      - checkout
+
       - run:
           name: Get dependencies if not cached
           command: |
@@ -290,7 +292,6 @@ jobs:
 #            cd /usr/local/VAPOR-Deps
 #            tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
 #            ls /usr/local/VAPOR-Deps
-      - checkout
 #      - run:
 #          name: Install cmake
 #          command: |
@@ -388,9 +389,9 @@ workflows:
       #- build_ubuntu18
       #- build_ubuntu16
       #- build_centos7
-      #- build_osx
+      - build_osx
       #- build_win10
-      - build_osx_installer
+      #- build_osx_installer
       #- clang_tidy_ubuntu18
 
 #  leak_check:
