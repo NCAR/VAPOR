@@ -22,7 +22,7 @@ jobs:
             git pull
             cd build
             cmake ..
-            make -j7 make &>> /tmp/output.txt
+            make -j7 &> /tmp/output.txt
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -73,7 +73,7 @@ jobs:
             git pull
             cd build
             cmake ..
-            make -j7 make &>> /tmp/output.txt
+            make -j7 &> /tmp/output.txt
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -148,7 +148,7 @@ jobs:
             git pull
             cd build
             cmake3 ..
-            make -j7 make &>> /tmp/output.txt
+            make -j7 &> /tmp/output.txt
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -197,7 +197,7 @@ jobs:
           key: osxDeps-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
 
       - run:
-          name: Get 3rd party libs
+          name: Get 3rd party libs if not cached
           command: |
             export DEPS=/usr/local/VAPOR-Deps/2019-Aug-Darwin.tar.xz
             if [ ! -f $DEPS ]; then
@@ -225,7 +225,7 @@ jobs:
             mkdir build
             cd build
             cmake ..
-            make -j7 make &>> /tmp/output.txt
+            make -j7 &> /tmp/output.txt
 
       - save_cache:
           key: osxDeps-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
