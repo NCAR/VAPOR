@@ -197,8 +197,8 @@ jobs:
           name: Make VAPOR-Deps
           command: |
             sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod -R 777 /usr/local
-            sudo chown -R `whoami` /usr/local
+            sudo chmod -R 777 /usr/local/VAPOR-Deps
+            sudo chown -R `whoami` /usr/local/VAPOR-Deps
             
       - restore_cache:
           key: osxDeps-v2-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
