@@ -193,8 +193,8 @@ jobs:
     macos:
       xcode: "11.1.0"
     steps:
-      - restore_cache:
-          key: osxDeps-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+      #- restore_cache:
+      #    key: osxDeps-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
 
       - run:
           name: Get dependencies if not cached
@@ -372,7 +372,7 @@ workflows:
       #- build_ubuntu16
       #- build_centos7
       - build_osx
-      - build_osx_installer
+      #- build_osx_installer
       #- clang_tidy_ubuntu18
 
 #  leak_check:
