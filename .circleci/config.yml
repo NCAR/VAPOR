@@ -201,7 +201,7 @@ jobs:
             sudo chown -R `whoami` /usr/local/VAPOR-Deps
             
       - restore_cache:
-          key: osxDeps-v2-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+          key: osxDeps-v3-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
 
       - checkout
 
@@ -236,12 +236,12 @@ jobs:
             make -j7 &> /tmp/output.txt
 
       - save_cache:
-          key: osxDeps-v2-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+          key: osxDeps-v3-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
           paths: 
             - /VAPOR
             - /usr/local/VAPOR-Deps
             - /usr/local/lib/python3.7/site-packages/gdown
-            - /usr/local/Homebrew
+            - /usr/local/Cellar/cmake
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -266,7 +266,7 @@ jobs:
             sudo chmod -R 777 /usr/local/VAPOR-Deps
 
       - restore_cache:
-          key: osxDeps-v2-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+          key: osxDeps-v3-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
 
       - run:
           name: Get dependencies if not cached
