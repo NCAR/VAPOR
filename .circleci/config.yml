@@ -384,6 +384,7 @@ workflows:
       #- build_ubuntu16
       #- build_centos7
       - build_osx
+      - build_win10
       #- build_osx_installer
       #- clang_tidy_ubuntu18
 
