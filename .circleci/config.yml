@@ -199,7 +199,7 @@ jobs:
       - run:
           name: Get 3rd party libs
           command: |
-            export DEPS = /usr/local/VAPOR-Deps/2019-Aug-Darwin.tar.xz
+            export DEPS=/usr/local/VAPOR-Deps/2019-Aug-Darwin.tar.xz
             if [ ! -f $DEPS ]; then
                 pip3 install gdown
                 sudo mkdir -p /usr/local/VAPOR-Deps
