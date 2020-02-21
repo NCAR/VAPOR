@@ -196,6 +196,8 @@ jobs:
       #- restore_cache:
       #    key: osxDeps-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
 
+      - checkout
+
       - run:
           name: Get dependencies if not cached
           command: |
@@ -211,8 +213,6 @@ jobs:
                 #tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
                 #ls /usr/local/VAPOR-Deps
             #fi
-
-      - checkout
 
       #- run:
       #    name: Install cmake
