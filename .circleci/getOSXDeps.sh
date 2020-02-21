@@ -1,3 +1,7 @@
+#!/bin/bash
+
+set -eo pipefail
+
 pip3 install gdown
 sudo mkdir -p /usr/local/VAPOR-Deps
 sudo chmod 777 /usr/local/VAPOR-Deps
