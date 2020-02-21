@@ -193,25 +193,31 @@ jobs:
     macos:
       xcode: "11.1.0"
     steps:
+      - restore_cache:
+          key: osxDeps-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+
       - run:
           name: Get 3rd party libs
           command: |
-            pip3 install gdown
-            sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod 777 /usr/local/VAPOR-Deps
-            cd /usr/local/VAPOR-Deps
-            gdown https://drive.google.com/uc?id=1kyDAzmK9zShrIcoAbned8YW9vn2j7lpe
-      - run:
-          name: Extract 3rd party libs
-          command: |
-            cd /usr/local/VAPOR-Deps
-            tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
-            ls /usr/local/VAPOR-Deps
+            DEPS = /usr/local/VAPOR-Deps/2019-Aug-Darwin.tar.xz
+            if file -f "$DEPS"; then
+                pip3 install gdown
+                sudo mkdir -p /usr/local/VAPOR-Deps
+                sudo chmod 777 /usr/local/VAPOR-Deps
+                cd /usr/local/VAPOR-Deps
+                gdown https://drive.google.com/uc?id=1kyDAzmK9zShrIcoAbned8YW9vn2j7lpe
+                cd /usr/local/VAPOR-Deps
+                tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
+                ls /usr/local/VAPOR-Deps
+            fi
+
       - checkout
+
       - run:
           name: Install cmake
           command: |
             brew install cmake
+
       - run:
           name: make VAPOR
           command: |
@@ -220,6 +226,12 @@ jobs:
             cd build
             cmake ..
             make -j7 make &>> /tmp/output.txt
+
+      - save_cache:
+          key: osxDeps-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+          paths: 
+            - "/VAPOR"
+            - "/usr/local/VAPOR-Deps"
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -291,8 +303,6 @@ jobs:
             path: /tmp/tidy.txt
 
   clang_tidy_osx:
-    #docker:
-    #  - image: sgpearse/vapor3-ubuntu18:latest
     macos:
       xcode: "11.1.0"
     steps:
