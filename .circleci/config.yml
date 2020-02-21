@@ -201,7 +201,7 @@ jobs:
             sudo chown -R `whoami` /usr/local/VAPOR-Deps
             
       - restore_cache:
-          key: osxDeps-v3-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+          key: osxDeps-v4-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
 
       - checkout
 
@@ -232,16 +232,16 @@ jobs:
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
-            cmake ..
+            /usr/local/bin/cmake ..
             make -j7 &> /tmp/output.txt
 
       - save_cache:
-          key: osxDeps-v3-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+          key: osxDeps-v4-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
           paths: 
             - /VAPOR
             - /usr/local/VAPOR-Deps
             - /usr/local/lib/python3.7/site-packages/gdown
-            - /usr/local/Cellar/cmake
+            - /usr/local/bin/cmake
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -267,7 +267,7 @@ jobs:
             sudo chown -R `whoami` /usr/local/VAPOR-Deps
 
       - restore_cache:
-          key: osxDeps-v3-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+          key: osxDeps-v4-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
 
       - run:
           name: Get dependencies if not cached
@@ -301,7 +301,7 @@ jobs:
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
-            cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
+            /usr/local/bin/cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
             for f in VAPOR3-*.dmg ; do mv "$f" "${f/Darwin/Darwin-Nightly}" ; done
