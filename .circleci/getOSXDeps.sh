@@ -9,5 +9,5 @@ cd /usr/local/VAPOR-Deps
 gdown https://drive.google.com/uc?id=1kyDAzmK9zShrIcoAbned8YW9vn2j7lpe
 cd /usr/local/VAPOR-Deps
 tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
-ls /usr/local/VAPOR-Deps
+chmod -R 777 /usr/local/VAPOR-Deps
 brew install cmake

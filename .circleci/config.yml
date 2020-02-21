@@ -194,12 +194,12 @@ jobs:
       xcode: "11.1.0"
     steps:
       - run:
-          name: Make cache dirs
+          name: Make VAPOR-Deps
           command: |
             sudo mkdir -p /usr/local/VAPOR-Deps
             
       - restore_cache:
-          key: osxDeps-v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+          key: osxDeps-v2-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
 
       - checkout
 
@@ -234,7 +234,7 @@ jobs:
             make -j7 &> /tmp/output.txt
 
       - save_cache:
-          key: osxDeps-v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+          key: osxDeps-v2-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
           paths: 
             - /VAPOR
             - /usr/local/VAPOR-Deps
@@ -257,8 +257,13 @@ jobs:
     macos:
       xcode: "11.1.0"
     steps:
+      - run:
+          name: Make VAPOR-Deps
+          command: |
+            sudo mkdir -p /usr/local/VAPOR-Deps
+
       - restore_cache:
-          key: osxDeps-v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+          key: osxDeps-v2-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
 
       - run:
           name: Get dependencies if not cached
