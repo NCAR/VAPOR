@@ -274,7 +274,8 @@ jobs:
           command: |
             export DEPS=/usr/local/VAPOR-Deps/2019-Aug-Darwin.tar.xz
             if [ ! -f $DEPS ]; then
-                ./.circleci/getOSXDeps.sh
+                ~/project/.circleci/getOSXDeps.sh
+            fi
 #      - run:
 #          name: Get 3rd party libs
 #          command: |
