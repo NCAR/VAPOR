@@ -194,7 +194,7 @@ jobs:
       xcode: "11.1.0"
     steps:
       #- restore_cache:
-      #    key: osxDeps-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+      #    key: osxDeps-v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
 
       - checkout
 
@@ -229,10 +229,12 @@ jobs:
             make -j7 &> /tmp/output.txt
 
       - save_cache:
-          key: osxDeps-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+          key: osxDeps-v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
           paths: 
             - /VAPOR
             - /usr/local/VAPOR-Deps
+            - /usr/local/lib/python3.7/site-packages/gdown
+            - /usr/local/Homebrew
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -251,7 +253,7 @@ jobs:
       xcode: "11.1.0"
     steps:
       - restore_cache:
-          key: osxDeps-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+          key: osxDeps-v1-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
 
       - run:
           name: Get dependencies if not cached
