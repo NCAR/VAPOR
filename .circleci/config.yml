@@ -364,7 +364,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            @powershell -NoProfile -ExecutionPolicy unrestricted -Command "(iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))) >$null 2>&1"
+            #@powershell -NoProfile -ExecutionPolicy unrestricted -Command "(iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))) >$null 2>&1"
             choco install visualcpp-build-tools -version 14.0.25420.1 -y
             choco install python -y
             choco install git -y
