@@ -384,7 +384,7 @@ jobs:
             powershell Copy-Item C:\VAPOR\site_files\* -Destination C:\VAPOR
             mkdir build
             cd build
-            C:\\Program Files\\CMake\\bin\\cmake.exe -S "C:\\VAPOR", -B "C:\\VAPOR\\build" -DCMAKE_BUILD_TYPE:STRING=Release -G "Visual Studio 14 2015" -A x64
+            "C:\\Program Files\\CMake\\bin\\cmake.exe" -S "C:\\VAPOR", -B "C:\\VAPOR\\build" -DCMAKE_BUILD_TYPE:STRING=Release -G "Visual Studio 14 2015" -A x64
 
   build_win10_docker:
     docker:
