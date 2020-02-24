@@ -381,10 +381,10 @@ jobs:
       - run:
           name: Build Vapor
           command: |
-            Copy-Item C:\VAPOR\site_files\* -Destination C:\VAPOR
+            Copy-Item site_files\* -Destination .
             mkdir build
             cd build
-            & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\\VAPOR -B C:\\VAPOR\\build -DCMAKE_BUILD_TYPE:STRING=Release -G 'Visual Studio 14 2015' -A x64
+            & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DCMAKE_BUILD_TYPE:STRING=Release -G 'Visual Studio 14 2015' -A x64
 
   build_win10_docker:
     docker:
