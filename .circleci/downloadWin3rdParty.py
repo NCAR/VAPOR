@@ -5,4 +5,4 @@ gdown.download(url, output, quiet=False)
 
 import zipfile
 with zipfile.ZipFile("2019-Aug-Win32.zip", 'r') as zip_ref:
-    zip_ref.extractall(r'C:\')
+    zip_ref.extractall('C:\\')
