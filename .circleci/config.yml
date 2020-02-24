@@ -356,6 +356,38 @@ jobs:
             path: /tmp/tidy.txt
 
   build_win10:
+    executor: win/default
+    steps:
+      - run:
+          name: Install dependencies
+          command: |
+            @powershell -NoProfile -ExecutionPolicy unrestricted -Command "(iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))) >$null 2>&1"
+            choco install visualcpp-build-tools -version 14.0.25420.1 -y
+            choco install python -y
+            choco install git -y
+            choco install cmake -y
+            choco install nsis -y
+            python -m pip install gdown
+      - run:
+          name: Set up path
+          command: |
+            setx /M PATH "%PATH%;C:\Program Files (x86)\MSBuild\14.0\bin" 
+            msbuild -version
+      - run:
+          name: Get 3rd party libs
+          command: |
+            python downloadWin3rdParty.py
+            powershell Expand-Archive -LiteralPath C:\2019-Aug-Win32.zip -DestinationPath C:\
+      - checkout
+      - run:
+          name: Build Vapor
+          command: |
+            powershell Copy-Item C:\VAPOR\site_files\* -Destination C:\VAPOR
+            mkdir build
+            cd build
+            C:\\Program Files\\CMake\\bin\\cmake.exe -S "C:\\VAPOR", -B "C:\\VAPOR\\build" -DCMAKE_BUILD_TYPE:STRING=Release -G "Visual Studio 14 2015" -A x64
+
+  build_win10_docker:
     docker:
       - image: sgpearse/vapor3-win10:latest
     steps:
@@ -385,15 +417,15 @@ jobs:
 
 
 workflows:
-  version: 2
+  version: 2.1
   build:
     jobs:
       #- build_ubuntu18
       #- build_ubuntu16
       #- build_centos7
       #- build_osx
-      #- build_win10
-      - build_osx_installer
+      - build_win10
+      #- build_osx_installer
       #- clang_tidy_ubuntu18
 
 #  leak_check:
