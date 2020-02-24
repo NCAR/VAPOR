@@ -374,8 +374,9 @@ jobs:
             python -m pip install gdown
             setx /M PATH "%PATH%;C:\Program Files (x86)\MSBuild\14.0\bin" 
             msbuild -version
+            pwd
             python project/.circleci/downloadWin3rdParty.py
-            powershell Expand-Archive -LiteralPath C:\2019-Aug-Win32.zip -DestinationPath C:\
+            #powershell Expand-Archive -LiteralPath C:\2019-Aug-Win32.zip -DestinationPath C:\
       - run:
           name: Build Vapor
           command: |
