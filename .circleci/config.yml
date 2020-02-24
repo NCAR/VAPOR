@@ -358,14 +358,13 @@ jobs:
       - store_artifacts:
             path: /tmp/tidy.txt
 
-  build_win10:
+  build_win10_installer:
     executor: win/default
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
-            #@powershell -NoProfile -ExecutionPolicy unrestricted -Command "(iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))) >$null 2>&1"
             choco install visualcpp-build-tools -version 14.0.25420.1 -y
             choco install python -y
             choco install git -y
@@ -377,7 +376,6 @@ jobs:
             pwd
             ls
             python .circleci/downloadWin3rdParty.py
-            #powershell Expand-Archive -LiteralPath C:\2019-Aug-Win32.zip -DestinationPath C:\
       - run:
           name: Build Vapor
           command: |
@@ -385,6 +383,13 @@ jobs:
             mkdir build
             cd build
             & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DCMAKE_BUILD_TYPE:STRING=Release -G 'Visual Studio 14 2015' -A x64
+            Copy-Item C:\Users\circleci\project\build\*.exe -Destination /tmp/workspace/installers
+      
+      - persist_to_workspace:
+          root: *workspace_root
+          paths: 
+            - installers
+
 
   build_win10_docker:
     docker:
