@@ -309,6 +309,7 @@ jobs:
             for f in VAPOR3-*.dmg ; do mv "$f" "${f/Darwin/Darwin-Nightly}" ; done
             mkdir -p /tmp/workspace/installers
             mv *.dmg /tmp/workspace/installers
+          no_output_timeout: 30m
 
 
       - persist_to_workspace:
