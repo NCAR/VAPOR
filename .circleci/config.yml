@@ -371,14 +371,8 @@ jobs:
             choco install cmake -y
             choco install nsis -y
             python -m pip install gdown
-      #- run:
-      #    name: Set up path
-      #    command: |
             setx /M PATH "%PATH%;C:\Program Files (x86)\MSBuild\14.0\bin" 
             msbuild -version
-      #- run:
-      #    name: Get 3rd party libs
-      #    command: |
             python downloadWin3rdParty.py
             powershell Expand-Archive -LiteralPath C:\2019-Aug-Win32.zip -DestinationPath C:\
       - checkout
