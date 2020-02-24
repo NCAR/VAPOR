@@ -201,7 +201,7 @@ jobs:
             sudo chown -R `whoami` /usr/local/VAPOR-Deps
             
       - restore_cache:
-          key: osxDeps-v4-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+          key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
 
       - checkout
 
@@ -236,12 +236,13 @@ jobs:
             make -j7 &> /tmp/output.txt
 
       - save_cache:
-          key: osxDeps-v4-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+          key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
           paths: 
             - /VAPOR
             - /usr/local/VAPOR-Deps
             - /usr/local/lib/python3.7/site-packages/gdown
             - /usr/local/bin/cmake
+            - /usr/local/Cellar/cmake
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -267,7 +268,7 @@ jobs:
             sudo chown -R `whoami` /usr/local/VAPOR-Deps
 
       - restore_cache:
-          key: osxDeps-v4-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+          key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
 
       - checkout
 
