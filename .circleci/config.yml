@@ -383,6 +383,7 @@ jobs:
             mkdir build
             cd build
             & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DCMAKE_BUILD_TYPE:STRING=Release -G 'Visual Studio 14 2015' -A x64
+            msbuild C:\Users\circleci\project\build\PACKAGE.vcxproj /p:Configuration=Release /p:Platform=x64
             mkdir -p C:\Users\circleci\installers
             Copy-Item C:\Users\circleci\project\build\*.exe -Destination C:\Users\circleci\installers
       
