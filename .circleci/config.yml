@@ -386,7 +386,8 @@ jobs:
             msbuild C:\Users\circleci\project\build\PACKAGE.vcxproj /p:Configuration=Release /p:Platform=x64
             mkdir -p C:\Users\circleci\installers
             Copy-Item C:\Users\circleci\project\build\*.exe -Destination C:\Users\circleci\installers
-      
+          no_output_timeout: 45m
+
       - persist_to_workspace:
           #root: *workspace_root
           root: C:\Users\circleci
