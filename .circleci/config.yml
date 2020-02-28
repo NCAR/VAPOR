@@ -409,7 +409,7 @@ jobs:
     steps:
       - mkdir installers
       - cd installers
-      - echo $null >> foo.exe
+      - echo "foo" >> foo.exe
       - persist_to_workspace:
           paths:
             - installers
