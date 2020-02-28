@@ -410,13 +410,18 @@ jobs:
       - run:
           name: do the stuff
           command: |
-            New-Item -Name installers -ItemType directory
-            cd installers
+            #New-Item -Name installers -ItemType directory
+            mkdir -p /tmp/workspace/installers
+            cd /tmp/workspace/installers
             echo "foo" >> foo.exe
       - persist_to_workspace:
-          root: .
+          root: *workspace_root
           paths:
             - installers
+      #- persist_to_workspace:
+      #    root: *workspace_root
+      #    paths: 
+      #      - installers
 
   build_win10_docker:
     docker:
@@ -456,6 +461,9 @@ workflows:
       #- build_osx
       #- build_win10_installer
       - test_win10_workspace
+      #- release_on_github:
+      #    requires:
+      #      test_win10_workspace
       #- build_osx_installer
       #- clang_tidy_ubuntu18
 
