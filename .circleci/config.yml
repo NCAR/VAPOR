@@ -407,7 +407,9 @@ jobs:
   test_win10_workspace:
     executor: win/default
     steps:
-      - echo $null >> installers/foo.exe
+      - mkdir installers
+      - cd installers
+      - echo $null >> foo.exe
       - persist_to_workspace:
           paths:
             - installers
