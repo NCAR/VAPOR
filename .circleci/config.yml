@@ -392,15 +392,12 @@ jobs:
             cd build
             & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DCMAKE_BUILD_TYPE:STRING=Release -G 'Visual Studio 14 2015' -A x64
             msbuild C:\Users\circleci\project\build\PACKAGE.vcxproj /p:Configuration=Release /p:Platform=x64
-            #mkdir -p C:\Users\circleci\installers
-            mkdir -p /tmp/workspace
-            #Copy-Item C:\Users\circleci\project\build\*.exe -Destination C:\Users\circleci\installers
-            Copy-Item C:\Users\circleci\project\build\*.exe -Destination /tmp/workspace
+            mkdir -p C:\Users\circleci\project\tmp\workspace\installers
+            Copy-Item C:\Users\circleci\project\build\*.exe -Destination C:\Users\circleci\project\tmp\workspace\installers\VAPOR3-3.2.0-win64-Nightly.exe
           no_output_timeout: 45m
 
       - persist_to_workspace:
           root: *workspace_root
-          #root: C:\Users\circleci
           paths: 
             - installers
 
@@ -418,10 +415,6 @@ jobs:
           root: *workspace_root
           paths:
             - installers
-      #- persist_to_workspace:
-      #    root: *workspace_root
-      #    paths: 
-      #      - installers
 
   build_win10_docker:
     docker:
@@ -467,10 +460,10 @@ workflows:
       #- build_centos7
       #- build_osx
       #- build_win10_installer
-      - test_win10_workspace
-      - release_on_github:
-          requires:
-            - test_win10_workspace
+      #- test_win10_workspace
+      #- release_on_github:
+      #    requires:
+      #      - test_win10_workspace
       #- build_osx_installer
       #- clang_tidy_ubuntu18
 
@@ -499,9 +492,11 @@ workflows:
       - build_ubuntu16_installer
       - build_centos7_installer
       - build_osx_installer
+      - build_win10_installer
       - release_on_github:
           requires:
             - build_ubuntu16_installer
             - build_ubuntu18_installer
             - build_centos7_installer
             - build_osx_installer
+            - build_win10_installer
