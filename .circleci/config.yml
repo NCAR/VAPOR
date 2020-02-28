@@ -455,8 +455,7 @@ jobs:
             d="Caution: These installers are not necessarily stable, and have not been thuroughly tested."
             e="  If this is a problem our official releases can be found below."
             message="${a}${b}${c}${d}${e}"
-            ghr -b $message -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace Nightly /tmp/workspace/installers
-      #      ghr -b "These installers are built every night with Vapor's current code base.  Caution: These installers are not necessarily stable, and have not been thuroughly tested.  If this is a problem our official releases can be found below." -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -delete Nightly /tmp/workspace/installers
+            ghr -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace Nightly /tmp/workspace/installers
 
 
 
