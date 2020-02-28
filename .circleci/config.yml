@@ -441,14 +441,14 @@ jobs:
       - run:
           name: list workspace
           command: ls /tmp/workspace
-      - run:
-          name: install ghr
-          command: |
-            brew install ghr
-      - run:
-          name: push assets with ghr
-          command: |
-            ghr -b "These installers are built every night with Vapor's current code base.  Caution: These installers are not necessarily stable, and have not been thuroughly tested.  If this is a problem our official releases can be found below." -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -delete Nightly /tmp/workspace/installers
+      #- run:
+      #    name: install ghr
+      #    command: |
+      #      brew install ghr
+      #- run:
+      #    name: push assets with ghr
+      #    command: |
+      #      ghr -b "These installers are built every night with Vapor's current code base.  Caution: These installers are not necessarily stable, and have not been thuroughly tested.  If this is a problem our official releases can be found below." -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -delete Nightly /tmp/workspace/installers
 
 
 
@@ -460,10 +460,10 @@ workflows:
       #- build_centos7
       #- build_osx
       #- build_win10_installer
-      - test_win10_workspace
-      #- release_on_github:
-      #    requires:
-      #      test_win10_workspace
+      #- test_win10_workspace
+      - release_on_github:
+          requires:
+            test_win10_workspace
       #- build_osx_installer
       #- clang_tidy_ubuntu18
 
