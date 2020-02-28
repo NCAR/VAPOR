@@ -442,20 +442,20 @@ jobs:
           name: list workspace
           command: |
             ls /tmp/workspace/installers
-            #export message={ echo "Last built on "; echo `date +"%m-%d-%y"`; echo ". "; echo "These installers are built every night with Vapor's current code base.  Caution: These installers are not necessarily stable, and have not been thuroughly tested.  If this is a problem our official releases can be found below."; } | tr "\n" ""
+      - run:
+          name: install ghr
+          command: |
+            brew install ghr
+      - run:
+          name: push assets with ghr
+          command: |
             a="Last built on "
             b=`date +"%m-%d-%y"`
-            c=".  These installers are built every night with Vapor's current code base.  Caution: These installers are not necessarily stable, and have not been thuroughly tested.  If this is a problem our official releases can be found below."
-            message="${a}${b}${c}"
-            echo $message
-            #ghr -b "These installers are built every night with Vapor's current code base.  Caution: These installers ar    e not necessarily stable, and have not been thuroughly tested.  If this is a problem our official releases can be found b    elow." -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -dele    te Nightly /tmp/workspace/installers
-      #- run:
-      #    name: install ghr
-      #    command: |
-      #      brew install ghr
-      #- run:
-      #    name: push assets with ghr
-      #    command: |
+            c=".  These installers are built weekly with Vapor's current code base.  "
+            d="Caution: These installers are not necessarily stable, and have not been thuroughly tested."
+            e="  If this is a problem our official releases can be found below."
+            message="${a}${b}${c}${d}${e}"
+            ghr -b $message -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace Nightly /tmp/workspace/installers
       #      ghr -b "These installers are built every night with Vapor's current code base.  Caution: These installers are not necessarily stable, and have not been thuroughly tested.  If this is a problem our official releases can be found below." -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -delete Nightly /tmp/workspace/installers
 
 
