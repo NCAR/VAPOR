@@ -314,6 +314,14 @@ jobs:
             mv *.dmg /tmp/workspace/installers
           no_output_timeout: 30m
 
+      - save_cache:
+          key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+          paths: 
+            - /VAPOR
+            - /usr/local/VAPOR-Deps
+            - /usr/local/lib/python3.7/site-packages/gdown
+            - /usr/local/bin/cmake
+            - /usr/local/Cellar/cmake
 
       - persist_to_workspace:
           root: *workspace_root
@@ -384,13 +392,15 @@ jobs:
             cd build
             & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DCMAKE_BUILD_TYPE:STRING=Release -G 'Visual Studio 14 2015' -A x64
             msbuild C:\Users\circleci\project\build\PACKAGE.vcxproj /p:Configuration=Release /p:Platform=x64
-            mkdir -p C:\Users\circleci\installers
-            Copy-Item C:\Users\circleci\project\build\*.exe -Destination C:\Users\circleci\installers
+            #mkdir -p C:\Users\circleci\installers
+            mkdir -p /tmp/workspace
+            #Copy-Item C:\Users\circleci\project\build\*.exe -Destination C:\Users\circleci\installers
+            Copy-Item C:\Users\circleci\project\build\*.exe -Destination /tmp/workspace
           no_output_timeout: 45m
 
       - persist_to_workspace:
-          #root: *workspace_root
-          root: C:\Users\circleci
+          root: *workspace_root
+          #root: C:\Users\circleci
           paths: 
             - installers
 
