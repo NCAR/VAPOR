@@ -411,8 +411,8 @@ jobs:
           name: do the stuff
           command: |
             #New-Item -Name installers -ItemType directory
-            mkdir -p /tmp/workspace/installers
-            cd /tmp/workspace/installers
+            mkdir -p C:\Users\circleci\project\tmp\workspace\installers
+            cd C:\Users\circleci\project\tmp\workspace\installers
             echo "foo" >> foo.exe
       - persist_to_workspace:
           root: *workspace_root
