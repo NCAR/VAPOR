@@ -442,7 +442,7 @@ jobs:
       - run:
           name: push assets with ghr
           command: |
-            a="These installers are bult weekly.  Last built on "
+            a="These installers are built weekly.  Last built on "
             b=`date +"%m-%d-%y"`
             d="\nCaution: These installers may not be stable.\n"
             e="Official releases may be found below."
