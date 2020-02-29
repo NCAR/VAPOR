@@ -448,7 +448,7 @@ jobs:
             d="Caution: These installers are not necessarily stable, and have not been thuroughly tested."
             e="  If this is a problem our official releases can be found below."
             message="${a}${b}${c}${d}${e}"
-            ghr -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace Nightly /tmp/workspace/installers
+            ghr -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace Weekly /tmp/workspace/installers
 
 
 
@@ -466,6 +466,18 @@ workflows:
       #      - test_win10_workspace
       #- build_osx_installer
       #- clang_tidy_ubuntu18
+      - build_ubuntu18_installer
+      - build_ubuntu16_installer
+      - build_centos7_installer
+      - build_osx_installer
+      - build_win10_installer
+      - release_on_github:
+          requires:
+            - build_ubuntu16_installer
+            - build_ubuntu18_installer
+            - build_centos7_installer
+            - build_osx_installer
+            - build_win10_installer
 
 #  leak_check:
 #    triggers:
