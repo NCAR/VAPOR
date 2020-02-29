@@ -442,10 +442,10 @@ jobs:
       - run:
           name: push assets with ghr
           command: |
-            a="These installers are built weekly.  Last built on "
-            b=`date +"%m-%d-%y"`
-            d="\nCaution: These installers may not be stable.\n"
-            e="Official releases may be found below."
+            a=$'These installers are built weekly, and may not be stable.\n\n'
+            b=$'Official releases may be found below.\n\n'
+            c=$'Last built on '
+            d=`date +"%m-%d-%y"`
             message="${a}${b}${c}${d}${e}"
             ghr -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace Weekly /tmp/workspace/installers
 
