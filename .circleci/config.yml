@@ -203,13 +203,13 @@ jobs:
             sudo chmod -R 777 /usr/local/VAPOR-Deps
             sudo chown -R `whoami` /usr/local/VAPOR-Deps
             
-      - restore_cache:
-          key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+      #- restore_cache:
+      #    key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
 
       - checkout
 
       - run:
-          name: Get dependencies if not cached
+          name: Get dependencies 
           command: |
             export DEPS=/usr/local/VAPOR-Deps/2019-Aug-Darwin.tar.xz
             if [ ! -f $DEPS ]; then
@@ -238,14 +238,14 @@ jobs:
             /usr/local/bin/cmake ..
             make -j7 &> /tmp/output.txt
 
-      - save_cache:
-          key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
-          paths: 
-            - /VAPOR
-            - /usr/local/VAPOR-Deps
-            - /usr/local/lib/python3.7/site-packages/gdown
-            - /usr/local/bin/cmake
-            - /usr/local/Cellar/cmake
+      #- save_cache:
+      #    key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+      #    paths: 
+      #      - /VAPOR
+      #      - /usr/local/VAPOR-Deps
+      #      - /usr/local/lib/python3.7/site-packages/gdown
+      #      - /usr/local/bin/cmake
+      #      - /usr/local/Cellar/cmake
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -270,13 +270,13 @@ jobs:
             sudo chmod -R 777 /usr/local/VAPOR-Deps
             sudo chown -R `whoami` /usr/local/VAPOR-Deps
 
-      - restore_cache:
-          key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+      #- restore_cache:
+      #    key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
 
       - checkout
 
       - run:
-          name: Get dependencies if not cached
+          name: Get dependencies 
           command: |
             export DEPS=/usr/local/VAPOR-Deps/2019-Aug-Darwin.tar.xz
             if [ ! -f $DEPS ]; then
@@ -314,14 +314,14 @@ jobs:
             mv *.dmg /tmp/workspace/installers
           no_output_timeout: 30m
 
-      - save_cache:
-          key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
-          paths: 
-            - /VAPOR
-            - /usr/local/VAPOR-Deps
-            - /usr/local/lib/python3.7/site-packages/gdown
-            - /usr/local/bin/cmake
-            - /usr/local/Cellar/cmake
+      #- save_cache:
+      #    key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+      #    paths: 
+      #      - /VAPOR
+      #      - /usr/local/VAPOR-Deps
+      #      - /usr/local/lib/python3.7/site-packages/gdown
+      #      - /usr/local/bin/cmake
+      #      - /usr/local/Cellar/cmake
 
       - persist_to_workspace:
           root: *workspace_root
