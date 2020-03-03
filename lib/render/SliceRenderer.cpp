@@ -415,6 +415,25 @@ int SliceRenderer::_saveTextureData() {
     VAssert(grid);
 
     grid->SetInterpolationOrder(1);
+    std::vector<size_t> dims = grid->GetDimensions();
+    int mismatch=0;
+    double coords[3];
+    for (size_t k=0; k<dims[2]; k++) {
+    for (size_t j=0; j<dims[1]; j++) {
+    for (size_t i=0; i<dims[0]; i++) {
+
+        float trueValue   = grid->AccessIJK(i,j,k);
+        //grid->GetUserCoordinates( {i,j,k}, coords );
+        size_t indices[3] = {i,j,k};
+        grid->GetUserCoordinates( indices, coords );
+        float sampleValue = grid->GetValue( coords );
+        if ( trueValue != sampleValue ) mismatch++;
+
+    }
+    }
+    }
+   
+    cout << "MISMATCHES " << mismatch << endl; 
 
     _setVertexPositions();
 
