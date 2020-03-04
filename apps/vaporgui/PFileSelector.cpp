@@ -15,7 +15,7 @@ PFileSelector::PFileSelector(const std::string &tag, const std::string &label)
 
 void PFileSelector::updateGUI() const
 {
-    _pathTexbox->SetValue(getParams()->GetValueString(GetTag(), "<empty>"));
+    _pathTexbox->SetValue(getParamsString());
 }
 
 PFileSelector *PFileSelector::SetFileTypeFilter(const std::string &filter)
@@ -34,7 +34,7 @@ PFileSelector *PFileSelector::SetFileTypeFilter(const std::string &filter)
 void PFileSelector::buttonClicked()
 {
     string defaultPath;
-    string selectedFile = getParams()->GetValueString(GetTag(), "");
+    string selectedFile = getParamsString();
     
     if (_syncWithSettings) {
         // Too hardcoded in settings params to bother
@@ -49,7 +49,7 @@ void PFileSelector::buttonClicked()
     if (qSelectedPath.isNull())
         return;
     
-    getParams()->SetValueString(GetTag(), "", qSelectedPath.toStdString());
+    setParamsString(qSelectedPath.toStdString());
 }
 
 bool PFileSelector::requireParamsMgr() const

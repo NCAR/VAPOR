@@ -12,7 +12,7 @@ PDisplay::PDisplay(const std::string &tag, const std::string &label)
 
 void PStringDisplay::updateGUI() const
 {
-    std::string text = getParams()->GetValueString(GetTag(), "<empty>");
+    std::string text = getParamsString();
     _label->setText(QString::fromStdString(text));
 }
 
@@ -20,7 +20,7 @@ void PStringDisplay::updateGUI() const
 
 void PIntegerDisplay::updateGUI() const
 {
-    long value = getParams()->GetValueLong(GetTag(), 0);
+    long value = getParamsLong();
     _label->setText(QString::number(value));
 }
 
@@ -28,7 +28,7 @@ void PIntegerDisplay::updateGUI() const
 
 void PDoubleDisplay::updateGUI() const
 {
-    double value = getParams()->GetValueDouble(GetTag(), 0.0);
+    double value = getParamsDouble();
     _label->setText(QString::number(value));
 }
 
@@ -36,6 +36,6 @@ void PDoubleDisplay::updateGUI() const
 
 void PBooleanDisplay::updateGUI() const
 {
-    bool on = getParams()->GetValueLong(GetTag(), false);
+    bool on = getParamsLong();
     _label->setText(on ? "True" : "False");
 }

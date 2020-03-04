@@ -102,9 +102,29 @@ void PWidget::setParamsString(const std::string &v)
     _setParamsString(v);
 }
 
-double      PWidget::getParamsDouble() const { return _params->GetValueDouble(_tag, 0.0); }
-long        PWidget::getParamsLong()   const { return _params->GetValueLong(_tag, 0); }
-std::string PWidget::getParamsString() const { return _params->GetValueString(_tag, ""); }
+double      PWidget::getParamsDouble() const
+{
+    if (_usingHLI)
+        return _getterDouble(_params);
+    else
+        return _params->GetValueDouble(_tag, 0.0);
+}
+
+long        PWidget::getParamsLong()   const
+{
+    if (_usingHLI)
+        return _getterLong(_params);
+    else
+        return _params->GetValueLong(_tag, 0);
+}
+
+std::string PWidget::getParamsString() const
+{
+    if (_usingHLI)
+        return _getterString(_params);
+    else
+        return _params->GetValueString(_tag, "<empty>");
+}
 
 void PWidget::dynamicUpdateBegin()
 {
@@ -123,6 +143,26 @@ void PWidget::dynamicUpdateFinish()
     }
 }
 
-void PWidget::_setParamsDouble(double v) { getParams()->SetValueDouble(GetTag(), "", v); }
-void PWidget::_setParamsLong(long v) { getParams()->SetValueLong(GetTag(), "", v); }
-void PWidget::_setParamsString(const std::string &v) { getParams()->SetValueString(GetTag(), "", v); }
+void PWidget::_setParamsDouble(double v)
+{
+    if (_usingHLI)
+        _setterDouble(_params, v);
+    else
+        getParams()->SetValueDouble(GetTag(), "", v);
+}
+
+void PWidget::_setParamsLong(long v)
+{
+    if (_usingHLI)
+        _setterLong(_params, v);
+    else
+        getParams()->SetValueLong(GetTag(), "", v);
+}
+
+void PWidget::_setParamsString(const std::string &v)
+{
+    if (_usingHLI)
+        _setterString(_params, v);
+    else
+        getParams()->SetValueString(GetTag(), "", v);
+}

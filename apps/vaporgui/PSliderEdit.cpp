@@ -24,7 +24,7 @@ PDoubleSliderEdit::PDoubleSliderEdit(const std::string &tag, const std::string &
 
 void PDoubleSliderEdit::updateGUI() const
 {
-    double value = getParams()->GetValueDouble(GetTag(), 0);
+    double value = getParamsDouble();
     _sliderEdit->SetValue(value);
 }
 
@@ -50,7 +50,7 @@ PIntegerSliderEdit::PIntegerSliderEdit(const std::string &tag, const std::string
 
 void PIntegerSliderEdit::updateGUI() const
 {
-    int value = getParams()->GetValueLong(GetTag(), 0);
+    int value = getParamsLong();
     _sliderEdit->SetValue(value);
 }
 

@@ -3,8 +3,7 @@
 #include <vapor/ParamsBase.h>
 #include <vapor/ParamsMgr.h>
 #include <QVBoxLayout>
-#include <QLabel>
-#include "SettingsParams.h"
+#include "GUIStateParams.h"
 
 #include "PGroup.h"
 #include "PSection.h"
@@ -17,6 +16,8 @@
 #include "PColorSelector.h"
 #include "PEnumDropdown.h"
 #include "PStringDropdown.h"
+#include "PFileSelectorHLI.h"
+#include "PEnumDropdownHLI.h"
 
 ParamsWidgetDemo::ParamsWidgetDemo()
 {
@@ -58,6 +59,11 @@ ParamsWidgetDemo::ParamsWidgetDemo()
     section->Add(new PDoubleDisplay("demo_double", "PDoubleDisplay"));
     section->Add(new PStringDisplay("demo_path", "PStringDisplay"));
     section->Add(new PBooleanDisplay("demo_bool", "PBooleanDisplay"));
+    pg->Add(section);
+    
+    section = new PSection("High Level Interface");
+    section->Add(new_PDirectorySelectorHLI("Image Output Dir", &GUIStateParams::GetCurrentImagePath, &GUIStateParams::SetCurrentImagePath));
+    section->Add(new PEnumDropdownHLI<GUIStateParams>("Flow Dimensions", {"2", "3"}, {2, 3}, &GUIStateParams::GetFlowDimensionality, &GUIStateParams::SetFlowDimensionality));
     pg->Add(section);
 }
 

@@ -11,6 +11,7 @@ namespace VAPoR {
 
 class PDynamicMixin;
 class SettingsParams;
+template<class, typename> class PWidgetHLIBase;
 
 //! \class PWidget
 //! A Qt Widget that is automatically synced with the Params database.
@@ -36,6 +37,14 @@ class PWidget : public QWidget {
     
     bool _dynamicUpdateIsOn = false;
     bool _dynamicUpdateInsideGroup = false;
+    
+    bool _usingHLI = false;
+    std::function<void(void*, long)>               _setterLong;
+    std::function<long(void*)>                     _getterLong;
+    std::function<void(void*, double)>             _setterDouble;
+    std::function<double(void*)>                   _getterDouble;
+    std::function<void(void*, const std::string&)> _setterString;
+    std::function<std::string(void*)>       _getterString;
     
 public:
     PWidget(const std::string &tag, QWidget *widget);
@@ -72,4 +81,5 @@ private:
     void _setParamsString(const std::string &v);
     
     friend class PDynamicMixin;
+    template<class, typename> friend class PWidgetHLIBase;
 };

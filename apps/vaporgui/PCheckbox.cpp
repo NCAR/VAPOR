@@ -11,11 +11,12 @@ PCheckbox::PCheckbox(const std::string &tag, const std::string &label)
 
 void PCheckbox::updateGUI() const
 {
-    bool on = getParams()->GetValueLong(GetTag(), 0);
+    bool on = getParamsLong();
+    
     _qcheckbox->SetValue(on);
 }
 
 void PCheckbox::checkboxStateChanged(bool on)
 {
-    getParams()->SetValueLong(GetTag(), "", on);
+    setParamsLong(on);
 }

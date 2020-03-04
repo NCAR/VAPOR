@@ -10,10 +10,10 @@ class PEnumDropdown : public PLineItem {
     Q_OBJECT
     
     VComboBox *_vComboBox;
-    const std::vector<int> _enumMap;
+    const std::vector<long> _enumMap;
     
 public:
-    PEnumDropdown(const std::string &tag, const std::vector<std::string> &items, const std::vector<int> &itemValues = {}, const std::string &label = "");
+    PEnumDropdown(const std::string &tag, const std::vector<std::string> &items, const std::vector<long> &itemValues = {}, const std::string &label = "");
 
 protected:
     void updateGUI() const override;

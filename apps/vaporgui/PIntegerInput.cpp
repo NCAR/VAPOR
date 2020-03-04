@@ -17,11 +17,11 @@ PIntegerInput *PIntegerInput::SetRange(int min, int max)
 
 void PIntegerInput::updateGUI() const
 {
-    int value = getParams()->GetValueLong(GetTag(), 0);
+    int value = getParamsLong();
     _spinbox->SetValue(value);
 }
 
 void PIntegerInput::spinboxValueChanged(int i)
 {
-    getParams()->SetValueLong(GetTag(), "", i);
+    setParamsLong(i);
 }

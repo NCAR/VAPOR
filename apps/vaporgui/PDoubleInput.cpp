@@ -12,12 +12,12 @@ PDoubleInput::PDoubleInput(const std::string &tag, const std::string &label)
 
 void PDoubleInput::updateGUI() const
 {
-    double value = getParams()->GetValueDouble(GetTag(), 0);
+    double value = getParamsDouble();
     _doubleInput->SetValue(to_string(value));
 }
 
 void PDoubleInput::doubleInputValueChanged(const std::string &v)
 {
     double d = stod(v);
-    getParams()->SetValueDouble(GetTag(), "", d);
+    setParamsDouble(d);
 }
