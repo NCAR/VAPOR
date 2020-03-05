@@ -50,7 +50,6 @@ class PWidget : public QWidget {
 public:
     PWidget(const std::string &tag, QWidget *widget);
     void Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr = nullptr, VAPoR::DataMgr *dataMgr = nullptr);
-    const std::string &GetTag() const;
     
     PWidget *ShowBasedOnParam(const std::string &tag, int whenEqualTo = true);
     PWidget *EnableBasedOnParam(const std::string &tag, int whenEqualTo = true);
@@ -62,6 +61,7 @@ protected:
     virtual bool requireParamsMgr() const { return false; }
     virtual bool requireDataMgr()   const { return false; }
     
+    const std::string &getTag() const;
     VAPoR::ParamsBase *getParams() const;
     VAPoR::ParamsMgr  *getParamsMgr() const;
     VAPoR::DataMgr    *getDataMgr() const;

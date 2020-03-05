@@ -47,7 +47,7 @@ void PWidget::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAP
     updateGUI();
 }
 
-const std::string &PWidget::GetTag() const
+const std::string &PWidget::getTag() const
 {
     return _tag;
 }
@@ -130,7 +130,7 @@ void PWidget::dynamicUpdateBegin()
 {
     assert(_dynamicUpdateIsOn);
     if (!_dynamicUpdateInsideGroup) {
-        getParams()->BeginGroup(GetTag() + " dynamic change");
+        getParams()->BeginGroup(getTag() + " dynamic change");
         _dynamicUpdateInsideGroup = true;
     }
 }
@@ -148,7 +148,7 @@ void PWidget::_setParamsDouble(double v)
     if (_usingHLI)
         _setterDouble(_params, v);
     else
-        getParams()->SetValueDouble(GetTag(), "", v);
+        getParams()->SetValueDouble(getTag(), "", v);
 }
 
 void PWidget::_setParamsLong(long v)
@@ -156,7 +156,7 @@ void PWidget::_setParamsLong(long v)
     if (_usingHLI)
         _setterLong(_params, v);
     else
-        getParams()->SetValueLong(GetTag(), "", v);
+        getParams()->SetValueLong(getTag(), "", v);
 }
 
 void PWidget::_setParamsString(const std::string &v)
@@ -164,5 +164,5 @@ void PWidget::_setParamsString(const std::string &v)
     if (_usingHLI)
         _setterString(_params, v);
     else
-        getParams()->SetValueString(GetTag(), "", v);
+        getParams()->SetValueString(getTag(), "", v);
 }

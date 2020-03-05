@@ -26,11 +26,11 @@ std::vector<double> PColorSelector::QColorToVector(const QColor &c)
 
 void PColorSelector::updateGUI() const
 {
-    QColor color = VectorToQColor(getParams()->GetValueDoubleVec(GetTag()));
+    QColor color = VectorToQColor(getParams()->GetValueDoubleVec(getTag()));
     _colorWidget->setColor(color);
 }
 
 void PColorSelector::colorChanged(QColor color)
 {
-    getParams()->SetValueDoubleVec(GetTag(), "", QColorToVector(color));
+    getParams()->SetValueDoubleVec(getTag(), "", QColorToVector(color));
 }
