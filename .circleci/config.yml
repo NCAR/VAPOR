@@ -53,7 +53,7 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make -j7
             make installer
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu16-Nightly}" ; done
+            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu16-Weekly}" ; done
             mkdir -p /tmp/workspace/installers
             mv *.sh /tmp/workspace/installers
 
@@ -104,7 +104,7 @@ jobs:
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make -j7
             make installer
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu18-Nightly}" ; done
+            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu18-Weekly}" ; done
             mkdir -p /tmp/workspace/installers
             mv *.sh /tmp/workspace/installers
 
@@ -182,7 +182,7 @@ jobs:
             cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/CentOS7-Nightly}" ; done
+            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/CentOS7-Weekly}" ; done
             mkdir -p /tmp/workspace/installers
             mv *.sh /tmp/workspace/installers
 
@@ -309,7 +309,7 @@ jobs:
             /usr/local/bin/cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
-            for f in VAPOR3-*.dmg ; do mv "$f" "${f/Darwin/Darwin-Nightly}" ; done
+            for f in VAPOR3-*.dmg ; do mv "$f" "${f/Darwin/Darwin-Weekly}" ; done
             mkdir -p /tmp/workspace/installers
             mv *.dmg /tmp/workspace/installers
           no_output_timeout: 30m
@@ -393,7 +393,7 @@ jobs:
             & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DCMAKE_BUILD_TYPE:STRING=Release -G 'Visual Studio 14 2015' -A x64
             msbuild C:\Users\circleci\project\build\PACKAGE.vcxproj /p:Configuration=Release /p:Platform=x64
             mkdir -p C:\Users\circleci\project\tmp\workspace\installers
-            Copy-Item C:\Users\circleci\project\build\*.exe -Destination C:\Users\circleci\project\tmp\workspace\installers\VAPOR3-3.2.0-win64-Nightly.exe
+            Copy-Item C:\Users\circleci\project\build\*.exe -Destination C:\Users\circleci\project\tmp\workspace\installers\VAPOR3-3.2.0-win64-Weekly.exe
           no_output_timeout: 45m
 
       - persist_to_workspace:
