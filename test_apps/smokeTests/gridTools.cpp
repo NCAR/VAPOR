@@ -4,14 +4,15 @@
 #include <vector>
 #include <sstream>
 #include <cstdio>
-#include "vapor/VAssert.h"
 
 #include <vapor/CFuncs.h>
 #include <vapor/OptionParser.h>
 #include <vapor/DataMgr.h>
 #include <vapor/FileUtils.h>
 #include <vapor/utils.h>
-#include <vapor/GridHelper.h>
+
+#include "vapor/VAssert.h"
+#include "gridTools.h"
 
 #include <vapor/ConstantGrid.h>
 
@@ -34,50 +35,11 @@ namespace {
     std::vector< float* > Heap;
 }
 
-struct opt_t {
-    std::vector <size_t> dims;
-    std::vector <size_t> bs;
-    std::vector <float> extents;
-    double minValue;
-    double maxValue;
-    OptionParser::Boolean_T help;
-} opt;
+void DeleteHeap() {
+    for (size_t i=0; i<Heap.size(); i++)
+        delete [] Heap[i];
+}
 
-OptionParser::OptDescRec_T  set_opts[] = {
-    {
-        "dims", 1, "64x64x64",  "Data volume dimensions expressed in "
-        "grid points (NXxNYxNZ)"
-    },
-    {
-        "bs", 1, "64:64:64",
-        "Internal storage blocking factor expressed in grid points (NX:NY:NZ)"
-    },
-    {
-        "extents",  1,  "0:0:0:1:1:1",  "Colon delimited 6-element vector "
-        "specifying domain extents in user coordinates (X0:Y0:Z0:X1:Y1:Z1)"
-    },
-    {
-        "minValue", 1,"0", 
-        "The minimum data value to be assigned to cells in grid instances."
-    },
-    {
-        "maxValue", 1,"1", 
-        "The maximum data value to be assigned to cells in grid instances."
-    },
-    {"help",    0,  "", "Print this message and exit"},
-    {nullptr}
-};
-
-OptionParser::Option_T  get_options[] = {
-    {"dims", Wasp::CvtToSize_tVec, &opt.dims, sizeof(opt.dims)},
-    {"bs", Wasp::CvtToSize_tVec, &opt.bs, sizeof(opt.bs)},
-    {"extents", Wasp::CvtToFloatVec, &opt.extents, sizeof(opt.extents)},
-    {"minValue", Wasp::CvtToDouble, &opt.minValue, sizeof(opt.minValue)},
-    {"maxValue", Wasp::CvtToDouble, &opt.maxValue, sizeof(opt.maxValue)},
-    {"help", Wasp::CvtToBoolean, &opt.help, sizeof(opt.help)},
-    {nullptr}
-};
-    
 vector <float *> AllocateBlocks(
     const vector <size_t> &bs,
     const vector <size_t> &dims
@@ -108,8 +70,8 @@ vector <float *> AllocateBlocks(
     return(blks);
 }
 
-void MakeTriangle( Grid& grid, float minVal, float maxVal ) {
-    std::vector< size_t > dims = grid.GetDimensions();
+void MakeTriangle( Grid* grid, float minVal, float maxVal ) {
+    std::vector< size_t > dims = grid->GetDimensions();
     size_t x = dims[X];
     size_t y = dims[Y];
     size_t z = 1;
@@ -121,14 +83,14 @@ void MakeTriangle( Grid& grid, float minVal, float maxVal ) {
         for ( size_t j=0; j<y; j++ ) {
             for ( size_t i=0; i<x; i++ ) {
                 value = value==minVal ? maxVal : minVal;
-                grid.SetValueIJK( i, j, k, value );
+                grid->SetValueIJK( i, j, k, value );
             }
         }
     }
 }
 
-void MakeConstantField( Grid& grid, float value ) {
-    std::vector< size_t > dims = grid.GetDimensions();
+void MakeConstantField( Grid* grid, float value ) {
+    std::vector< size_t > dims = grid->GetDimensions();
     size_t x = dims[X];
     size_t y = dims[Y];
     size_t z = 1;
@@ -138,14 +100,14 @@ void MakeConstantField( Grid& grid, float value ) {
     for ( size_t k=0; k<z; k++ ) {
         for ( size_t j=0; j<y; j++ ) {
             for ( size_t i=0; i<x; i++ ) {
-                grid.SetValueIJK( i, j, k, value );
+                grid->SetValueIJK( i, j, k, value );
             }
         }
     }
 }
 
-void MakeRamp( Grid& grid, float minVal, float maxVal, size_t axis=X ) {
-    std::vector< size_t > dims = grid.GetDimensions();
+void MakeRamp( Grid* grid, float minVal, float maxVal, size_t axis=X ) {
+    std::vector< size_t > dims = grid->GetDimensions();
     size_t x = dims[X];
     size_t y = dims[Y];
     size_t z = 1;
@@ -162,7 +124,7 @@ void MakeRamp( Grid& grid, float minVal, float maxVal, size_t axis=X ) {
         for ( size_t j=0; j<y; j++ ) {
             value = axis==X ? minVal : value;  // reset value if we're ramping on X
             for ( size_t i=0; i<x; i++ ) {
-                grid.SetValueIJK( i, j, k, value );
+                grid->SetValueIJK( i, j, k, value );
                 value += xIncrement;
             }
             value += yIncrement;
@@ -171,18 +133,22 @@ void MakeRamp( Grid& grid, float minVal, float maxVal, size_t axis=X ) {
     }
 }
 
+void Foo(VAPoR::Grid* grid, double &rms, size_t &mv, size_t &d, bool nudge) {
+    cout << "foo " << rms << " " << mv << " " << d << endl;
+}
+
 void CompareIndexToCoords( 
-    Grid& grid, 
+    VAPoR::Grid* grid, 
     double &rms,                // Root Mean Square error
     size_t &numMissingValues,   // Counter for receiving MissingValue upon query
     size_t &disagreements,      // Counter for when AccessIJK() and GetValue() disagree
-    bool nudge=false 
+    bool nudge
 ) {
     rms   = 0.f;
     disagreements  = 0;
     numMissingValues = 0;
 
-    std::vector< size_t > dims = grid.GetDimensions();
+    std::vector< size_t > dims = grid->GetDimensions();
     size_t x = dims[X];
     size_t y = dims[Y];
     size_t z = 1;
@@ -198,7 +164,7 @@ void CompareIndexToCoords(
 
     if ( nudge == true ) {
         std::vector< double > minu, maxu;
-        grid.GetUserExtents( minu, maxu );
+        grid->GetUserExtents( minu, maxu );
         xNudge = FLT_MIN;//( maxu[X] - minu[X] ) / ( x*100 );
         yNudge = FLT_MIN;//( maxu[Y] - minu[Y] ) / ( y*100 );
         zNudge = FLT_MIN;//( maxu[Z] - minu[Z] ) / ( z*100 );
@@ -222,14 +188,14 @@ void CompareIndexToCoords(
 
                 size_t indices[3] = { i, j, k };
                 //float trueValue = grid.AccessIJK( i, j, k );
-                double trueValue = grid.GetValueAtIndex( {i,j,k} );
+                double trueValue = grid->GetValueAtIndex( {i,j,k} );
                 
                 double coords[3];
-                grid.GetUserCoordinates( indices, coords );
+                grid->GetUserCoordinates( indices, coords );
                 coords[X] += xNudge;
                 coords[Y] += yNudge;
                 coords[Z] += zNudge;
-                float sampleValue = grid.GetValue( coords );
+                float sampleValue = grid->GetValue( coords );
                 
                 double error = abs( sampleValue - trueValue );
 
@@ -240,7 +206,7 @@ void CompareIndexToCoords(
                 /*else cout << "         ";
                 cout << "     " << i << " " << j << " " << k << endl;//" " << xNudge << " " << yNudge << " " << zNudge << endl;*/
 
-                if (sampleValue == grid.GetMissingValue()) {
+                if (sampleValue == grid->GetMissingValue()) {
                     numMissingValues++;
                     continue;
                 }
@@ -259,6 +225,65 @@ void CompareIndexToCoords(
     rms = sqrt( sum / (x*y*z) );
 }
 
+void TestNodeIterator( const Grid *g, int& count, double& time ) {
+    Grid::ConstNodeIterator itr;
+    Grid::ConstNodeIterator enditr = g->ConstNodeEnd();
+
+    double t0 = Wasp::GetTime();
+    itr = g->ConstNodeBegin();
+
+    for ( ; itr!=enditr; ++itr) {
+        count++;
+    }
+    time = Wasp::GetTime() - t0;
+}
+
+// Taken from old test_datamgr.cpp
+//
+/*void test_get_value(
+    Grid *g
+) {
+    cout << "Get Value Test ------>" << endl;
+
+    g->SetInterpolationOrder(1);
+
+    Grid::ConstIterator itr = g->cbegin();
+    Grid::ConstIterator enditr = g->cend();
+
+    Grid::ConstCoordItr c_itr = g->ConstCoordBegin();
+    Grid::ConstCoordItr c_enditr = g->ConstCoordEnd();
+
+    const float epsilon = 0.000001;
+
+    float t0 = GetTime();
+    size_t ecount = 0;
+    for ( ; itr!=enditr; ++itr, ++c_itr) {
+        float v0 = *itr;
+
+        float v1 = g->GetValue(*c_itr);
+
+        if (v0 != v1) {
+            if (v0 == 0.0) {
+                if (abs(v1) > epsilon) {
+                    ecount ++;
+                    v1 = g->GetValue(*c_itr);
+                }
+            }
+            else {
+                if (abs((v1-v0)/v0) > epsilon) {
+                    ecount ++;
+                    v1 = g->GetValue(*c_itr);
+
+                }
+            }
+        }
+    }
+    cout << "error count: " << ecount << endl;
+    cout << "time: " << GetTime() - t0 << endl;
+    cout << endl;
+}*/
+
+
 void PrintStats( double rms, size_t numMissingValues, size_t disagreements ) {
     cout << "    RMS error:                                     " << rms << endl;
     cout << "    Missing value count:                           " << numMissingValues << endl;
@@ -266,53 +291,66 @@ void PrintStats( double rms, size_t numMissingValues, size_t disagreements ) {
     cout << endl;
 }
 
-void TestGrid( Grid &grid, float minVal, float maxVal ) {
+void TestGrid( 
+    Grid* grid, 
+    const std::vector<std::string> &tests, 
+    float minVal, 
+    float maxVal 
+) {
     double rms;
     size_t numMissingValues;
     size_t disagreements;
 
-    std::vector< size_t > dims = grid.GetDimensions();
+    std::vector< size_t > dims = grid->GetDimensions();
     size_t x = dims[X];
     size_t y = dims[Y];
     size_t z = 1;
     if ( dims.size() == 3 ) 
         z = dims[Z];
 
-    std::string type = grid.GetType();
+    std::string type = grid->GetType();
 
+    
     cout << "=======================================================" << endl << endl;
-    cout << type << " " << x << "x" << y << "x" << z << " Constant field RMS error:" << endl;
+    cout << type << " " << x << "x" << y << "x" << z << " Constant field:" << endl;
     MakeConstantField( grid, maxVal );
-    grid.SetInterpolationOrder( linear );
+    grid->SetInterpolationOrder( linear );
     CompareIndexToCoords( grid, rms, numMissingValues, disagreements );
     cout << "  linear:          " << endl;
     PrintStats( rms, numMissingValues, disagreements );
-    grid.SetInterpolationOrder( nearestNeighbor );
+    grid->SetInterpolationOrder( nearestNeighbor );
     CompareIndexToCoords( grid, rms, numMissingValues, disagreements );
     cout << "  nearestNeighbor: " << endl;
     PrintStats( rms, numMissingValues, disagreements );
-    
-    cout << type << " " << x << "x" << y << "x" << z << " Ramp up on Z axis RMS error:" << endl;
+  
+    cout << type << " " << x << "x" << y << "x" << z << " Ramp up on Z axis:" << endl;
     MakeRamp( grid, minVal, maxVal, Z);
-    grid.SetInterpolationOrder( linear );
+    grid->SetInterpolationOrder( linear );
     CompareIndexToCoords( grid, rms, numMissingValues, disagreements );
     cout << "  linear:          " << endl;
     PrintStats( rms, numMissingValues, disagreements );
-    grid.SetInterpolationOrder( nearestNeighbor );
+    grid->SetInterpolationOrder( nearestNeighbor );
     CompareIndexToCoords( grid, rms, numMissingValues, disagreements, true );
     cout << "  nearestNeighbor: " << endl;
     PrintStats( rms, numMissingValues, disagreements );
     
-    cout << type << " " << x << "x" << y << "x" << z << " Triangle signal RMS error:" << endl;
+    cout << type << " " << x << "x" << y << "x" << z << " Triangle signal:" << endl;
     MakeTriangle( grid, minVal, maxVal );
-    grid.SetInterpolationOrder( linear );
+    grid->SetInterpolationOrder( linear );
     CompareIndexToCoords( grid, rms, numMissingValues, disagreements);
     cout << "  linear:          " << endl;
     PrintStats( rms, numMissingValues, disagreements );
-    grid.SetInterpolationOrder( nearestNeighbor );
+    grid->SetInterpolationOrder( nearestNeighbor );
     CompareIndexToCoords( grid, rms, numMissingValues, disagreements, true );
     cout << "  nearestNeighbor: " << rms << endl;
     PrintStats( rms, numMissingValues, disagreements );
+
+    int count;
+    double time;
+    TestNodeIterator( grid, count, time );
+    cout << type << " Grid::ConstNodeIterator" << endl;
+    cout << "  Count: " << count << endl;;
+    cout << "  Time:  " << time << endl;
     cout << endl;
 }   
 
@@ -329,15 +367,15 @@ VAPoR::CurvilinearGrid* MakeCurvilinearTerrainGrid(
 
     std::vector <float *> xblks = AllocateBlocks(bs2d, dims2d);
     RegularGrid *xrg = new RegularGrid( dims2d, bs2d, xblks, minu2d, maxu2d );
-    MakeRamp(*xrg, minu[X], maxu[X], X);
+    MakeRamp(xrg, minu[X], maxu[X], X);
 
     std::vector <float *> yblks = AllocateBlocks(bs2d, dims2d);
     RegularGrid *yrg = new RegularGrid( dims2d, bs2d, yblks, minu2d, maxu2d );
-    MakeRamp(*yrg, minu[Y], maxu[Y], Y);
+    MakeRamp(yrg, minu[Y], maxu[Y], Y);
 
     std::vector <float *> zblks = AllocateBlocks(bs, dims);
     RegularGrid *zrg = new RegularGrid( dims, bs, zblks, minu, maxu );
-    MakeRamp(*zrg, minu[Z], maxu[Z], Z);
+    MakeRamp(zrg, minu[Z], maxu[Z], Z);
 
     std::vector <float *> blks = AllocateBlocks(bs, dims);
     CurvilinearGrid *cg = new CurvilinearGrid( dims, bs, blks, *xrg, *yrg, *zrg, NULL );
@@ -359,7 +397,7 @@ LayeredGrid* MakeLayeredGrid(
     std::vector< float* > zCoordBlocks = AllocateBlocks( bs, dims );
 
     RegularGrid rg( dims, bs, zCoordBlocks, minu, maxu );
-    MakeRamp( rg, minu[Z], maxu[Z], Z );
+    MakeRamp( &rg, minu[Z], maxu[Z], Z );
 
     std::vector< float* > dataBlocks = AllocateBlocks( bs, dims );
     LayeredGrid *lg = new LayeredGrid(dims, bs, dataBlocks, hminu, hmaxu, rg);
@@ -367,7 +405,7 @@ LayeredGrid* MakeLayeredGrid(
     return(lg);
 }
 
-StretchedGrid* MakeStretchedGrid(
+VAPoR::StretchedGrid* MakeStretchedGrid(
     const vector <size_t> &dims,
     const vector <size_t > &bs,
     const std::vector<double> &minu,
@@ -399,157 +437,3 @@ StretchedGrid* MakeStretchedGrid(
     StretchedGrid* sg = new StretchedGrid( dims, bs, blocks, xCoords, yCoords, zCoords );
     return sg;
 }
-
-void InitializeOptions( int argc, char **argv, OptionParser &op ) {
-    string  s;
-
-    std::string ProgName = FileUtils::LegacyBasename(argv[0]);
-
-    MyBase::SetErrMsgFilePtr(stderr);
-
-    if (op.AppendOptions(set_opts) < 0) {
-        cerr << ProgName << " : " << op.GetErrMsg();
-        exit(1);
-    }
-
-    if (op.ParseOptions(&argc, argv, get_options) < 0) {
-        cerr << ProgName << " : " << op.GetErrMsg();
-        exit(1);
-    }
-   
-    if (opt.extents.size() != 6 ) {
-        cerr << "The -extents flag must contain 6 elements if used" << endl;
-        op.PrintOptionHelp(stderr, 80, false);
-        exit(1);
-    }
-
-    if (opt.dims.size() != 3) {
-        cerr << "The -dims flag must contain 3 elements if used" << endl;
-        op.PrintOptionHelp(stderr);
-        exit(0);
-    }
-
-    if (opt.help) {
-        op.PrintOptionHelp(stderr);
-        exit(0);
-    }
-}
-
-
-int main( int argc, char** argv ) {
-    double t0 = Wasp::GetTime();
-
-    OptionParser op;
-    InitializeOptions( argc, argv, op );
-
-    std::cout << std::fixed << std::showpoint;
-    std::cout << std::setprecision(4);
-
-    std::vector< double > minu = { 
-        opt.extents[X], 
-        opt.extents[Y], 
-        opt.extents[Z] 
-    };
-    std::vector< double > maxu = { 
-        opt.extents[X+3], 
-        opt.extents[Y+3], 
-        opt.extents[Z+3] 
-    };
-
-    std::vector< size_t > bs2d = { opt.bs[X], opt.bs[Y] }; 
-    std::vector< double > minu2d = { minu[X], minu[Y] };
-    std::vector< double > maxu2d = { maxu[X], maxu[Y] };
-
-    std::vector< size_t > dims2d = { opt.dims[X], opt.dims[Y] };
-
-    // Test Regular Grid
-    std::vector< float* > rgBlks  = AllocateBlocks( opt.bs, opt.dims );
-    RegularGrid regularGrid = RegularGrid( opt.dims, opt.bs, rgBlks, minu, maxu );
-    TestGrid( regularGrid, opt.minValue, opt.maxValue );
-
-    // Test Stretched Grid
-    StretchedGrid* stretchedGrid = MakeStretchedGrid( opt.dims, opt.bs, minu, maxu );
-    TestGrid( *stretchedGrid, opt.minValue, opt.maxValue );
-    delete stretchedGrid;
-
-    // Test Layered Grid
-    LayeredGrid* layeredGrid = MakeLayeredGrid( opt.dims, opt.bs, minu, maxu );
-    TestGrid( *layeredGrid, opt.minValue, opt.maxValue );
-    delete layeredGrid;
-   
-    // Test Curvilinear Grid
-    CurvilinearGrid* curvilinearGrid;
-    curvilinearGrid = MakeCurvilinearTerrainGrid( opt.bs, minu, maxu, opt.dims);
-    TestGrid( *curvilinearGrid, opt.minValue, opt.maxValue );
-    delete curvilinearGrid;
-
-    double t1 = Wasp::GetTime();
-    cout << "Elapsed time: " << t1-t0 << endl;
-
-    for (size_t i=0; i<Heap.size(); i++)
-        delete [] Heap[i];
-}
-
-/*int main( int argc, char** argv ) {
-    double t0 = Wasp::GetTime();
-
-    OptionParser op;
-    InitializeOptions( argc, argv, op );
-    for (int i=0; i<opt.extents.size(); i++)
-        cout << opt.extents[i] << endl;
-
-    std::cout << std::fixed << std::showpoint;
-    std::cout << std::setprecision(2);
-
-    // User coordinates
-    double minExt = 0.0;//-FLT_MAX;
-    double maxExt = 1.0;// FLT_MAX;
-
-    //std::vector< size_t > bs   = { 4, 4, 4 };
-    std::vector< size_t > bs   = { 64, 64, 64 };
-    std::vector< double > minu( 3, minExt);
-    std::vector< double > maxu( 3, maxExt);
-
-    std::vector< size_t > bs2d = { bs[0], bs[1] }; 
-    std::vector< double > minu2d = { minu[0], minu[1] };
-    std::vector< double > maxu2d = { maxu[0], maxu[1] };
-
-    // Data value range
-    //float minVal = -FLT_MAX/2;
-    //float maxVal =  FLT_MAX/2;
-    float minVal = -1000;
-    float maxVal =  1000;
-
-    // Grid discretization
-    size_t x = 64;
-    size_t y = 64;
-    size_t z = 64;
-    std::vector< size_t > dims =   { x,  y,  z };
-    std::vector< size_t > dims2d = { x, y };
-
-    // Test Regular Grid
-    std::vector< float* > rgBlks  = AllocateBlocks( bs, dims );
-    RegularGrid regularGrid = RegularGrid( dims, bs, rgBlks, minu, maxu );
-    TestGrid( regularGrid, minVal, maxVal );
-
-    // Test Stretched Grid
-    StretchedGrid* stretchedGrid = MakeStretchedGrid( dims, bs, minu, maxu );
-    TestGrid( *stretchedGrid, minVal, maxVal );
-    delete stretchedGrid;
-
-    // Test Layered Grid
-    LayeredGrid* layeredGrid = MakeLayeredGrid( dims, bs, minu, maxu );
-    TestGrid( *layeredGrid, minVal, maxVal );
-    delete layeredGrid;
-   
-    // Test Curvilinear Grid
-    CurvilinearGrid* curvilinearGrid = MakeCurvilinearTerrainGrid( bs, minu, maxu, dims);
-    TestGrid( *curvilinearGrid, minVal, maxVal );
-    delete curvilinearGrid;
-
-    double t1 = Wasp::GetTime();
-    cout << "Elapsed time: " << t1-t0 << endl;
-
-    for (size_t i=0; i<Heap.size(); i++)
-        delete [] Heap[i];
-}*/
