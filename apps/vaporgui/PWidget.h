@@ -51,7 +51,10 @@ public:
     PWidget(const std::string &tag, QWidget *widget);
     void Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr = nullptr, VAPoR::DataMgr *dataMgr = nullptr);
     
+    //! tag must be a key referencing a long value in the Params Database. If the associated value is equal
+    //! to whenEqualTo, the current widget will be shown/enabled, and hidden/disabled otherwise.
     PWidget *ShowBasedOnParam(const std::string &tag, int whenEqualTo = true);
+    //! @copydoc PWidget::ShowBasedOnParam()
     PWidget *EnableBasedOnParam(const std::string &tag, int whenEqualTo = true);
     PWidget *SetTooltip(const std::string &text);
     void setToolTip(const QString &) = delete;

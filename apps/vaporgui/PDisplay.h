@@ -3,6 +3,10 @@
 #include "PWidget.h"
 #include <QLabel>
 
+//! @class PDisplay
+//! Creates a label that displays a value in the params database.
+//! Does not allow for editing of said value.
+
 class PDisplay : public PWidget {
     Q_OBJECT
     
