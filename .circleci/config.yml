@@ -447,6 +447,7 @@ jobs:
             c=$'Last built on '
             d=`date +"%m-%d-%y"`
             message="${a}${b}${c}${d}${e}"
+            echo $message
             ghr -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace Weekly /tmp/workspace/installers
 
 
