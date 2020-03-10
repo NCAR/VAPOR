@@ -87,13 +87,6 @@ int DataStatus::Open(
 
 	Close(name);
 
-    for (size_t i=0; i<files.size(); i++)
-        std::cout << "file " << i << " " << files[i] << endl;
-    for (size_t i=0; i<options.size(); i++)
-        std::cout << "opt  " << i << " " << options[i] << endl;
-    cout << "name " << name << endl;
-    cout << "form " << format << endl;
-
 	DataMgr *dataMgr = new DataMgr(format, _cacheSize, _nThreads);
 
 	// Ensure all data managers use the same proj4 string. Note, it's 
