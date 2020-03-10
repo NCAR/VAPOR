@@ -90,118 +90,6 @@ void InitializeOptions(
     }
 }
 
-/*void PrintDimensions( DataMgr &dataMgr ) {
-    vector <string> dimnames;
-    dimnames = dataMgr.GetDimensionNames();
-    cout << "Dimensions:" << endl;
-    for (int i=0; i<dimnames.size(); i++) {
-        DC::Dimension dimension;
-        dataMgr.GetDimension(dimnames[i], dimension);
-        cout << "\t" << dimension.GetName() << " = " << dimension.GetLength() << endl;
-        cout << "\t Time Varying: " << dimension.IsTimeVarying() << endl;
-    }
-    cout << endl;
-}
-
-void PrintMeshes( DataMgr &dataMgr, bool verbose=false ) {
-    vector <string> meshnames;
-    cout << "Meshes:" << endl;
-    meshnames = dataMgr.GetMeshNames();
-    for (int i=0; i<meshnames.size(); i++) {
-        cout << "\t" << meshnames[i] << endl;
-        if (verbose) {
-            DC::Mesh mesh;
-            dataMgr.GetMesh(meshnames[i], mesh);
-            cout << mesh;
-        }
-    }
-    cout << endl;
-}
-
-void PrintCoordVariables( DataMgr &dataMgr ) {
-    std::vector<std::string> coordVars = dataMgr.GetCoordVarNames();
-    for (int i=0; i<coordVars.size(); i++) {
-        cout << coordVars[i] << endl;
-    }
-    cout << endl;
-}
-
-void PrintTimeCoordinates( DataMgr &dataMgr ) {
-    std::vector<double> timeCoords = dataMgr.GetTimeCoordinates();
-    cout << "Time Coordinates:" << endl;
-    for (int i=0; i<timeCoords.size(); i++) {
-        cout << "\t" << timeCoords[i] << endl;
-    }
-    cout << endl;
-}
-
-void PrintVariables( 
-    DataMgr &dataMgr, 
-    bool verbose  = false,
-    bool testVars = false
- ) {
-    vector <string> vars;
-
-    for (int d=1; d<4; d++) {
-        cout << d << "D variables: " << endl;;
-        vars = dataMgr.GetDataVarNames(d);
-        for (int i=0; i<vars.size(); i++) {
-            cout << "  " << vars[i] << endl;
-            if (verbose) {
-                DC::DataVar datavar;
-                dataMgr.GetDataVarInfo(vars[i], datavar);
-                cout << datavar;// << endl;
-            }
-            //if (testVars) {
-            if (i==0) {
-                std::vector< double > minExt, maxExt;
-                dataMgr.GetVariableExtents( 0, vars[i], -1, -1, minExt, maxExt );
-                // Reduce extents to test
-                for (int i=0; i<minExt.size(); i++) {  
-                    minExt[i] /= 32.0;
-                    maxExt[i] /= 32.0;
-                }
-
-                Grid* grid = dataMgr.GetVariable( 0, vars[i], -1, -1, minExt, maxExt );
-                //double rms              =0;
-                //size_t numMissingValues =0;
-                //size_t disagreements    =0;
-                double rms;
-                size_t numMissingValues;
-                size_t disagreements;
-                //CompareIndexToCoords( grid, rms, numMissingValues, disagreements, false );
-                //CompareIndexToCoords( grid, rms, numMissingValues, disagreements );
-                Foo(grid, rms, numMissingValues, disagreements);
-                cout << "Grid test for variable " << vars[i] << ":" << endl;
-                //PrintStats( rms, numMissingValues, disagreements );
-            }
-            cout << endl;
-        }
-        cout << endl;
-    }
-}
-
-int TestWRF( 
-    std::vector< std::string > &files, 
-    std::vector< std::string > &options 
-) {
-    DataMgr dataMgr(opt.fileType, opt.memsize, opt.nthreads);
-    int rc = dataMgr.Initialize(files, options);
-    if (rc<0) {
-        cout << "Failed to intialize WRF DataMGR" << endl;
-        return -1;
-    }
-
-    PrintDimensions( dataMgr );
-    PrintMeshes( dataMgr );
-    PrintVariables( dataMgr);//, true );
-    //PrintVariables( dataMgr, true );
-    PrintCoordVariables( dataMgr );
-    PrintTimeCoordinates( dataMgr );
-
-    return 0;
-}*/
-
 int main( int argc, char** argv ) {
     double t0 = Wasp::GetTime();
 
@@ -216,7 +104,7 @@ int main( int argc, char** argv ) {
         cout << files[i] << endl;
     }
 
-    TestWRF( opt.fileType, opt.memsize, opt.nthreads, files, options );
+    TestDataMgr( opt.fileType, opt.memsize, opt.nthreads, files, options );
 
     cout << "Elapsed time: " << Wasp::GetTime() - t0 << endl;
 }

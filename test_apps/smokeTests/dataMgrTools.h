@@ -4,24 +4,33 @@
 
 #include <vapor/DataMgr.h>
 
-void PrintDimensions( VAPoR::DataMgr &dataMgr );
+void PrintDimensions( const VAPoR::DataMgr &dataMgr );
 
-void PrintMeshes( VAPoR::DataMgr &dataMgr, bool verbose=false );
+void PrintMeshes( const VAPoR::DataMgr &dataMgr, bool verbose=false );
 
-void PrintCoordVariables( VAPoR::DataMgr &dataMgr );
+void PrintCoordVariables( const VAPoR::DataMgr &dataMgr );
 
-void PrintTimeCoordinates( VAPoR::DataMgr &dataMgr );
+void PrintTimeCoordinates( const VAPoR::DataMgr &dataMgr );
 
 void PrintVariables(
-    VAPoR::DataMgr &dataMgr,
+    const VAPoR::DataMgr &dataMgr,
     bool verbose  = false,
     bool testVars = false
 );
 
-int TestWRF(
-    std::string& fileType,
+void PrintCompressionInfo(
+    const VAPoR::DataMgr& dataMgr,
+    const std::string& varname
+);
+
+void TestVariables(
+    VAPoR::DataMgr& dataMgr
+);
+
+int TestDataMgr(
+    const std::string& fileType,
     size_t memsize,
     size_t nthreads,
-    std::vector< std::string > &files,
-    std::vector< std::string > &options
+    const std::vector< std::string > &files,
+    const std::vector< std::string > &options
 );
