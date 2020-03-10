@@ -105,15 +105,10 @@ vector <float *> alloc_blocks(
 	const vector <size_t> &dims
 ) {
 
-    cout << endl;
-
-
 	size_t block_size = 1;
 	size_t nblocks = 1;
 
 	for (int i=0; i<bs.size(); i++) {
-    
-        cout << "bs[i] " << bs[i] << endl;
 
 		block_size *= bs[i];
 
@@ -121,27 +116,15 @@ vector <float *> alloc_blocks(
 		size_t nb = ((dims[i] - 1) / bs[i]) + 1;
 		
 		nblocks *= nb;
-        cout << "dims/bs " << i << " " << dims[i] << " " << bs[i] << endl;
-        cout << "nblocks/nb " << nblocks << " " << nb << endl;
 	}
 
-    cout << "nblocks/blick_size " << nblocks << " " << block_size << endl;
-
 	float *buf = new float[nblocks * block_size];
-
-    for (int i=0; i<nblocks*block_size; i++) {
-        cout << buf[i] << endl;
-    }
-
 	Heap.push_back(buf);
 
 	vector <float *> blks;
     for (int i=0; i<nblocks; i++) {
         blks.push_back(buf + i*block_size);
-        cout << i << " " << *blks[i] << endl;
     }
-
-    cout << endl;
 
 	return(blks);
 }
@@ -679,7 +662,7 @@ void test_roi_iterator() {
 int main(int argc, char **argv) {
 
 	OptionParser op;
-	//string	s;
+	string	s;
 
 	ProgName = FileUtils::LegacyBasename(argv[0]);
 

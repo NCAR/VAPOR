@@ -197,7 +197,7 @@ float Grid::GetValue(const std::vector <double> &coords) const {
 
     // Clamp coordinates on periodic boundaries to grid extents
     //
-    //ClampCoord(clampedCoords);
+    ClampCoord(clampedCoords);
 
 #ifdef	VAPOR3_0_0_ALPHA
     // At this point xyz should be within the grid bounds
