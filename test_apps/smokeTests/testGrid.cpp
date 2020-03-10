@@ -8,9 +8,7 @@
 
 #include <vapor/CFuncs.h>
 #include <vapor/OptionParser.h>
-//#include <vapor/DataMgr.h>
 #include <vapor/FileUtils.h>
-//#include <vapor/utils.h>
 #include "gridTools.h"
 
 #include <vapor/ConstantGrid.h>
