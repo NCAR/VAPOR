@@ -153,7 +153,7 @@ int TestDataMgr(
 
     PrintDimensions( dataMgr );
     PrintMeshes( dataMgr );
-    PrintVariables( dataMgr);//, true );
+    PrintVariables( dataMgr);
     TestVariables( dataMgr );
     PrintCoordVariables( dataMgr );
     PrintTimeCoordinates( dataMgr );
