@@ -1,3 +1,68 @@
+// This test exercises the RegularGrid, StretchedGrid, LayeredGrid,
+// and CurvilinearGrid classes.  These grids are created according to
+// a user-changable discretization, coordinate range, value range,
+// and block size.  
+//
+// The grids are then assigned values according to
+// three data patterns: a constant field, a linear ramp, and a triangle
+// signal.  
+// 
+// After values are assigned, values are gathered and compared
+// from the functions Grid::GetValue( {i, j, k} ) and Grid::AccessIJK(i,j,k).
+// RMS error is computed, along with counts for mismatches, and queries
+// that yield missing values. 
+//
+// This process is repeated once for linear interpolation, and once for
+// nearest-neighbor interpolation.
+//
+// Functions under test:
+//  LayeredGrid::LayeredGrid(
+//    const std::vector <size_t> &dims,
+//    const std::vector <size_t> &bs,
+//    const std::vector <float *> &blks,
+//    const std::vector <double> &minu,
+//    const std::vector <double> &maxu,
+//    const RegularGrid &rg
+//  )
+//  RegularGrid::RegularGrid(
+//    const std::vector <size_t> &dims,
+//    const std::vector <size_t> &bs,
+//    const std::vector <float *> &blks,
+//    const std::vector <double> &minu,
+//    const std::vector <double> &maxu
+//  )
+//  StretchedGrid::StretchedGrid(
+//    const std::vector <size_t> &dims,
+//    const std::vector <size_t> &bs,
+//    const std::vector <float *> &blks,
+//    const std::vector <double> &xcoords,
+//    const std::vector <double> &ycoords,
+//    const std::vector <double> &zcoords
+//  ) 
+//  CurvilinearGrid::CurvilinearGrid(
+//    const std::vector <size_t> &dims,
+//    const std::vector <size_t> &bs,
+//    const std::vector <float *> &blks,
+//    const RegularGrid &xrg,
+//    const RegularGrid &yrg,
+//    const RegularGrid &zrg,
+//    std::shared_ptr <const QuadTreeRectangle<float, size_t> > qtr
+//  )
+//  Grid::GetDimensions()
+//  Grid::SetValueIJK(size_t i, size_t j, size_t k, float v)
+//  Grid::GetUserExtents(
+//    std::vector <double> &minu, std::vector <double> &maxu
+//  )
+//  Grid::GetValueAtIndex(const size_t indices[3])
+//  Grid::GetUserCoordinates(
+//    const size_t indices[],
+//    double coords[]
+//  )
+//  Grid::GetValue(const std::vector <double> &coords)
+//  Grid::GetMissingValue()
+//  Grid::SetInterpolationOrder(int order)
+
+
 #include <iostream>
 #include <iomanip>
 #include <string>

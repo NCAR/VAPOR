@@ -1,3 +1,35 @@
+// This test exercises the following DataMgr functions, and prints their
+// results.  These results can be captured and compared to previous results
+// as part of an automated test for reviewing Pull Requests.
+//
+// Functions under test:
+// 
+//  DataMGr::DataMgr(string format, size_t mem_size, int nthreads = 0)
+//  DataMgr::GetDimensionNames()
+//  DataMgr::GetDimension( string dimname, DC:Dimension &dimension)
+//  DataMgr::GetMeshNames() 
+//  DataMgr::GetMesh(string meshname, DC::Mesh &mesh)
+//  DataMgr::GetDataVarNames(int ndim)
+//  DataMgr::GetCoordVarNames()
+//  DataMgr::GetTimeCoordinates()
+//  DataMgr::GetTimeCoordVarName()
+//  DataMgr::GetNumTimeSteps()
+//  DataMgr::GetDataVarInfo(string varname, VAPoR::DC::DataVar &datavar)
+//  DataMgr::GetNumRefLevels(string varname)
+//  DataMgr::GetCRatios(string varname)
+//  DataMgr::GetVariable(
+//    size_t ts, string varname, int level, int lod, bool lock=false
+//  )
+//  DataMgr::GetVariableExtents(
+//    size_t ts, string varname, int level, int lod,
+//    std::vector <double> &min , std::vector <double> &max
+//  )
+//  DataMgr::GetDimLens(string varname, std::vector <size_t> &dims)
+//  DataMgr::GetNumDimensions( string varname )
+//  DataMgr::GetVarTopologyDim( sting varname )
+//  DataMgr::GetMapProjection()
+
+
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -24,8 +56,6 @@ struct {
     int nthreads;
     OptionParser::Boolean_T nogeoxform;
     OptionParser::Boolean_T novertxform;
-    OptionParser::Boolean_T makeBaseline;
-    std::string baselineFile;
 } opt;
 
 OptionParser::OptDescRec_T  set_opts[] = {
@@ -35,10 +65,6 @@ OptionParser::OptDescRec_T  set_opts[] = {
         "0 => use number of cores"},
     {"nogeoxform",  0,  "", "Do not apply geographic transform (projection to PCS"},
     {"novertxform", 0,  "", "Do not apply to convert pressure, etc. to meters"},
-    {"makeBaseline", 0, "", "Make output of this test the new baseline that will "
-        "be used to compare future tests with"},
-    {"baselineFile", 0, "dataMgrTests.txt", "Specifies the file that will be "
-        "compared against the current test results"},
     {nullptr}
 };
 
@@ -48,8 +74,6 @@ OptionParser::Option_T get_options[] = {
     {"nthreads", Wasp::CvtToInt, &opt.nthreads, sizeof(opt.nthreads)},
     {"nogeoxform", Wasp::CvtToBoolean, &opt.nogeoxform, sizeof(opt.nogeoxform)},
     {"novertxform", Wasp::CvtToBoolean, &opt.novertxform, sizeof(opt.novertxform)},
-    {"makeBaseline", Wasp::CvtToBoolean, &opt.makeBaseline, sizeof(opt.makeBaseline)},
-    {"baselineFile", Wasp::CvtToCPPStr, &opt.baselineFile, sizeof(opt.baselineFile)},
     {nullptr}
 };
 

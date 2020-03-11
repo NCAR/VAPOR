@@ -6,7 +6,7 @@
 void PrintDimensions( const VAPoR::DataMgr &dataMgr ) {
     vector <string> dimnames;
     dimnames = dataMgr.GetDimensionNames();
-    cout << "Dimensions:" << endl;
+    cout << endl << "Dimensions:" << endl;
     for (int i=0; i<dimnames.size(); i++) {
         VAPoR::DC::Dimension dimension;
         dataMgr.GetDimension(dimnames[i], dimension);
@@ -32,6 +32,7 @@ void PrintMeshes( const VAPoR::DataMgr &dataMgr, bool verbose ) {
 }
 
 void PrintCoordVariables( const VAPoR::DataMgr &dataMgr ) {
+    cout << "Projection String:  " << dataMgr.GetMapProjection() << endl << endl;
     cout << "Coordinate Variables:" << endl;
     std::vector<std::string> coordVars = dataMgr.GetCoordVarNames();
     for (int i=0; i<coordVars.size(); i++) {
@@ -49,6 +50,10 @@ void PrintTimeCoordinates( const VAPoR::DataMgr &dataMgr ) {
     }
     std::cout.precision( oldPrecision );
     cout << endl;
+    cout << "Time coordinate variable name: ";
+    cout << dataMgr.GetTimeCoordVarName() << endl;
+    cout << "Number of time steps: ";
+    cout << dataMgr.GetNumTimeSteps() << endl;
 }
 
 void PrintCompressionInfo( 
