@@ -448,7 +448,9 @@ jobs:
             d=`date +"%m-%d-%y"`
             message="${a}${b}${c}${d}${e}"
             echo $message
-            ghr -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace Weekly /tmp/workspace/installers
+            ghrCommand = $'ghr debug -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace Weekly /tmp/workspace/installers'
+            echo $ghrCommand
+            $ghrCommand
 
 
 
@@ -456,7 +458,7 @@ workflows:
   build:
     jobs:
       #- build_ubuntu18
-      #- build_ubuntu16
+      - build_ubuntu16
       #- build_centos7
       #- build_osx
       #- build_win10_installer
@@ -465,16 +467,16 @@ workflows:
       #    requires:
       #      - test_win10_workspace
       #- clang_tidy_ubuntu18
-      #- build_ubuntu18_installer
+      - build_ubuntu18_installer
       #- build_ubuntu16_installer
       #- build_centos7_installer
       #- build_osx_installer
-      - build_win10_installer
+      #- build_win10_installer
       - release_on_github:
           requires:
-            - build_win10_installer
+      #      - build_win10_installer
       #      - build_ubuntu16_installer
-      #      - build_ubuntu18_installer
+            - build_ubuntu18_installer
       #      - build_centos7_installer
       #      - build_osx_installer
 
