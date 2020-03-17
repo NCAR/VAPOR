@@ -448,9 +448,7 @@ jobs:
             d=`date +"%m-%d-%y".`
             message="${a}${b}${c}${d}${e}"
             echo $message
-            ghrCommand=$'ghr -debug -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace Weekly /tmp/workspace/installers'
-            echo $ghrCommand
-            $ghrCommand
+            ghr -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace Weekly /tmp/workspace/installers
 
 
 
