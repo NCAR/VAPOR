@@ -444,7 +444,7 @@ jobs:
           command: |
             a=$'These installers are built weekly, and may not be stable.\n\n'
             b=$'Official releases may be found below.\n\n'
-            c=$'Last built on '
+            c="Last built on "
             d=`date +"%m-%d-%y".`
             message="${a}${b}${c}${d}${e}"
             echo $message
