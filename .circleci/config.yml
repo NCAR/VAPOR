@@ -431,10 +431,10 @@ jobs:
       xcode: "11.1.0"
     steps:
       - *attach_workspace
-      - run:
-          name: list workspace
-          command: |
-            ls /tmp/workspace/installers
+      #- run:
+      #    name: list workspace
+      #    command: |
+      #      ls /tmp/workspace/installers
       - run:
           name: install ghr
           command: |
