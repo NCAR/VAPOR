@@ -442,13 +442,13 @@ jobs:
       - run:
           name: push assets with ghr
           command: |
-            a=$'These installers are built weekly, and may not be stable.\n\n'
-            b=$'Official releases may be found below.\n\n'
-            c=$'Last built on '
+            a="These installers are built weekly, and may not be stable.\n\n"
+            b="Official releases may be found below.\n\n"
+            c="Last built on "
             d=`date +"%m-%d-%y"`
             message="${a}${b}${c}${d}${e}"
             echo $message
-            ghrCommand=$'ghr debug -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace Weekly /tmp/workspace/installers'
+            ghrCommand="ghr debug -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace Weekly /tmp/workspace/installers"
             echo $ghrCommand
             $ghrCommand
 
@@ -467,16 +467,17 @@ workflows:
       #    requires:
       #      - test_win10_workspace
       #- clang_tidy_ubuntu18
-      - build_ubuntu18_installer
+      #- build_ubuntu18_installer
       #- build_ubuntu16_installer
       #- build_centos7_installer
       #- build_osx_installer
       #- build_win10_installer
-      - release_on_github:
-          requires:
+      - release_on_github
+      #- release_on_github:
+      #    requires:
       #      - build_win10_installer
       #      - build_ubuntu16_installer
-            - build_ubuntu18_installer
+      #      - build_ubuntu18_installer
       #      - build_centos7_installer
       #      - build_osx_installer
 
