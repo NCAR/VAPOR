@@ -240,17 +240,24 @@ int main(int argc, char **argv)
 
     if (opt.xregion[0] == -1 && opt.xregion[1] == -1 && opt.yregion[0] == -1 && opt.yregion[1] == -1 && opt.zregion[0] == -1 && opt.zregion[1] == -1) {
         process_volume(opt.ts, opt.varname, opt.level, opt.lod, vdc, fp, dims, opt.type);
+
+        if (!opt.quiet) {
+            cout << "Wrote ";
+            for (int i = 0; i < dims.size(); i++) {
+                cout << dims[i];
+                if (i != dims.size() - 1) cout << "x";
+            }
+            cout << endl;
+        }
     } else {
         process_region(opt.ts, opt.varname, opt.level, opt.lod, vdc, fp, dims, opt.type, opt.xregion, opt.yregion, opt.zregion);
-    }
 
-    if (!opt.quiet) {
-        cout << "Wrote ";
-        for (int i = 0; i < dims.size(); i++) {
-            cout << dims[i];
-            if (i != dims.size() - 1) cout << "x";
+        if (!opt.quiet) {
+            cout << "Wrote ";
+            cout << (opt.xregion[1] - opt.xregion[0] + 1) << "x";
+            cout << (opt.yregion[1] - opt.yregion[0] + 1) << "x";
+            cout << (opt.zregion[1] - opt.zregion[0] + 1) << endl;
         }
-        cout << endl;
     }
 
     fclose(fp);
