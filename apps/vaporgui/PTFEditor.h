@@ -76,7 +76,11 @@ public:
     };
     
     PTFEditor(const std::string &tag, const std::set<Element> elements = {Default}, const std::string &label = "");
+    //! Behaves the same as PWidget::ShowBasedOnParam except shows/hides the opacity controls.
+    //! @copydoc PWidget::ShowBasedOnParam
     PTFEditor *ShowOpacityBasedOnParam(const std::string &tag, int value);
+    //! Behaves the same as PWidget::ShowBasedOnParam except shows/hides the colormap controls.
+    //! @copydoc PWidget::ShowBasedOnParam
     PTFEditor *ShowColormapBasedOnParam(const std::string &tag, int value);
     
 protected:
