@@ -44,8 +44,8 @@ CreateHLIBase( std::string, String );
 // My attempt at implementing this using purely function templates and no defines. Below is pretty close.
 // It works but requires too much specilization code so I stopped working on it for now.
 //
-/*
 
+#ifdef SAVED_FOR_LATER
 template <class Base, class Derived>
 void AssertInheritance()
 {
@@ -129,4 +129,4 @@ class PWidgetHLI2 : public PWidgetHLI<PW, T, P, Args...>
     
 //
 //};
-*/
+#endif
