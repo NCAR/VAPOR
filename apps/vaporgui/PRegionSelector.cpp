@@ -7,6 +7,8 @@
 PRegionSelector::PRegionSelector(const std::string &tag, const std::string &label)
 : PWidget(tag, _container = new QWidget)
 {
+    assert(!"This class is not finished. Do not use. Waiting on vgeometry selector to be fixed.");
+
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setMargin(0);
     _container->setLayout(layout);
