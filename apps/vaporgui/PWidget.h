@@ -49,6 +49,7 @@ class PWidget : public QWidget {
     
 public:
     PWidget(const std::string &tag, QWidget *widget);
+    //! Follows the Vapor GUI update function convention. Update the element.
     void Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr = nullptr, VAPoR::DataMgr *dataMgr = nullptr);
     
     //! tag must be a key referencing a long value in the Params Database. If the associated value is equal

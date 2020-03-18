@@ -4,6 +4,10 @@
 
 class VCheckBox;
 
+//! \class PCheckbox
+//! Creates a Qt Checkbox synced with the paramsdatabase using the PWidget interface.
+//! \copydoc PWidget
+
 class PCheckbox : public PLineItem {
     Q_OBJECT
     

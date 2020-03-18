@@ -6,6 +6,9 @@ class VPushButton;
 class VLineEdit;
 class QString;
 
+//! \class PFileSelector
+//! Creates a Qt text box and select button that allows users to pick a file path synced with the paramsdatabase using the PWidget interface.
+//! \copydoc PWidget
 
 class PFileSelector : public PLineItem {
     Q_OBJECT
@@ -18,6 +21,7 @@ class PFileSelector : public PLineItem {
     
 public:
     PFileSelector(const std::string &tag, const std::string &label="");
+    //! Sets the fileTypeFilter parameter in the QFileDialog popup functions.
     PFileSelector *SetFileTypeFilter(const std::string &filter);
 //    PFileSelector *UseDefaultPathSetting(const std::string &tag);
     
@@ -34,6 +38,10 @@ private slots:
 
 
 
+//! \class PFileOpenSelector
+//! A PFileSelector that provides an Open File dialog
+//! \copydoc PFileSelector
+
 class PFileOpenSelector : public PFileSelector {
     Q_OBJECT
 public:
@@ -42,6 +50,11 @@ protected:
     virtual QString selectPath(const std::string &defaultPath) const override;
 };
 
+
+//! \class PFileSaveSelector
+//! A PFileSelector that provides a Save File dialog
+//! \copydoc PFileSelector
+
 class PFileSaveSelector : public PFileSelector {
     Q_OBJECT
 public:
@@ -49,6 +62,11 @@ public:
 protected:
     virtual QString selectPath(const std::string &defaultPath) const override;
 };
+
+
+//! \class PDirectorySelector
+//! A PFileSelector that provides a  Select Directory dialog
+//! \copydoc PFileSelector
 
 class PDirectorySelector : public PFileSelector {
     Q_OBJECT

@@ -5,6 +5,10 @@
 
 class VIntSpinBox;
 
+//! \class PIntegerInput
+//! Creates a Qt text input for double values using a spinbox synced with the paramsdatabase using the PWidget interface.
+//! \copydoc PWidget
+
 class PIntegerInput : public PLineItem {
     Q_OBJECT
     
@@ -12,6 +16,7 @@ class PIntegerInput : public PLineItem {
     
 public:
     PIntegerInput(const std::string &tag, const std::string &label="");
+    //! @copydoc VIntSpinBox::SetRange
     PIntegerInput *SetRange(int min, int max);
 
 protected:

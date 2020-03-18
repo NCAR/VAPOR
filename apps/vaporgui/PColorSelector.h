@@ -4,6 +4,10 @@
 
 class QColorWidget;
 
+//! \class PColorSelector
+//! Creates a Qt Color Selector synced with the paramsdatabase using the PWidget interface.
+//! \copydoc PWidget
+
 class PColorSelector : public PLineItem {
     Q_OBJECT
     
@@ -12,11 +16,11 @@ class PColorSelector : public PLineItem {
 public:
     PColorSelector(const std::string &tag, const std::string &label="");
     
-    static QColor VectorToQColor(const std::vector<double> &v);
-    static std::vector<double> QColorToVector(const QColor &c);
-    
 protected:
     void updateGUI() const override;
+    
+    static QColor VectorToQColor(const std::vector<double> &v);
+    static std::vector<double> QColorToVector(const QColor &c);
         
 private slots:
     void colorChanged(QColor color);

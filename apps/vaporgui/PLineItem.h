@@ -2,6 +2,10 @@
 
 #include "PWidget.h"
 
+//! \class PLineItem
+//! Internal PWidget class. Standardizes PWidgets that take up a single line with a label, spacer, input.
+//! \copydoc PWidget
+
 class PLineItem : public PWidget {
     Q_OBJECT
     

@@ -5,6 +5,10 @@
 
 class VLineEdit;
 
+//! \class PDoubleInput
+//! Creates a Qt text input for double values synced with the paramsdatabase using the PWidget interface.
+//! \copydoc PWidget
+
 class PDoubleInput : public PLineItem {
     Q_OBJECT
     

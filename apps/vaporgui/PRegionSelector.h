@@ -4,6 +4,9 @@
 
 class QRangeSliderTextCombo;
 
+//! \class PRegionSelector
+//! Placeholder. Not in use
+//! Cannot ifdef out otherwise Qt MOC will fail.
 class PRegionSelector : public PWidget {
     Q_OBJECT
     

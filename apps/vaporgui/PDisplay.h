@@ -19,6 +19,9 @@ protected:
 
 
 
+//! @class PStringDisplay
+//! @copydoc PDisplay
+
 class PStringDisplay : public PDisplay {
     Q_OBJECT
     
@@ -30,6 +33,9 @@ protected:
 };
 
 
+
+//! @class PIntegerDisplay
+//! @copydoc PDisplay
 
 class PIntegerDisplay : public PDisplay {
     Q_OBJECT
@@ -43,6 +49,9 @@ protected:
 
 
 
+//! @class PDoubleDisplay
+//! @copydoc PDisplay
+
 class PDoubleDisplay : public PDisplay {
     Q_OBJECT
     
@@ -54,6 +63,9 @@ protected:
 };
 
 
+
+//! @class PBooleanDisplay
+//! @copydoc PDisplay
 
 class PBooleanDisplay : public PDisplay {
     Q_OBJECT

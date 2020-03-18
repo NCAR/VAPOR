@@ -1,5 +1,6 @@
 #pragma once
 
+//! Creates the framework for creating Params Widgets that use the Params Database high level interface.
 
 #define CreateHLIBase( T, LT ) \
 template <class P> class PWidgetHLIBase<P, T> { \

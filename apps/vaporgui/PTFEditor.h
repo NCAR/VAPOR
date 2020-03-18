@@ -16,6 +16,7 @@ class TFIsoValueWidget;
 
 //! \class PTFMapWidget
 //! Wrapper class that allows TFMapsWidgets to be used as PWidgets
+//! \copydoc TFMapsWidget
 
 template<typename T>
 class PTFMapWidget : public PWidget {
@@ -44,7 +45,8 @@ class TFMapInfoGroupWidget;
 class PStringDisplay;
 
 //! \class PTFEditor
-//! PWidget TFEditor
+//! PWidget wrapper for TFEditor
+//! \copydoc TFEditor
 
 class PTFEditor : public PWidget {
     Q_OBJECT;
