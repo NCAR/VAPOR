@@ -64,12 +64,12 @@ size_t size_of_type(string type) {
 		
 void    swapbytes(
 	void *vptr,
-	int size,
-	int	n
+	size_t size,
+	size_t	n
 ) {
 	unsigned char   *ucptr = (unsigned char *) vptr;
 	unsigned char   uc;
-	int             i,j;
+	size_t          i,j;
 
 	for (j=0; j<n; j++) {
 		for (i=0; i<size/2; i++) {
@@ -94,9 +94,9 @@ int read_data(
 	size_t element_sz = size_of_type(type);
 	unsigned char *buffer = (unsigned char *) smart_buf.Alloc(n * element_sz);
 	
-	int rc = fread(buffer, element_sz, n, fp);
+	size_t rc = fread(buffer, element_sz, n, fp);
 	if (rc != n) {
-		if (rc<0) { 
+		if (ferror(fp)!=0) { 
 			MyBase::SetErrMsg("Error reading input file : %M");
 		} else {
 			MyBase::SetErrMsg("Short read on input file");
