@@ -56,6 +56,7 @@ public:
     PWidget *ShowBasedOnParam(const std::string &tag, int whenEqualTo = true);
     //! @copydoc PWidget::ShowBasedOnParam()
     PWidget *EnableBasedOnParam(const std::string &tag, int whenEqualTo = true);
+    //! Sets the tooltip to the argument 'text'.
     PWidget *SetTooltip(const std::string &text);
     void setToolTip(const QString &) = delete;
     
