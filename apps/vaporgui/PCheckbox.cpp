@@ -4,16 +4,16 @@
 #include <vapor/ParamsBase.h>
 
 PCheckbox::PCheckbox(const std::string &tag, const std::string &label)
-: PLineItem(tag, label, _qcheckbox = new VCheckBox)
+: PLineItem(tag, label, _vcheckbox = new VCheckBox)
 {
-    connect(_qcheckbox, &VCheckBox::ValueChanged, this, &PCheckbox::checkboxStateChanged);
+    connect(_vcheckbox, &VCheckBox::ValueChanged, this, &PCheckbox::checkboxStateChanged);
 }
 
 void PCheckbox::updateGUI() const
 {
     bool on = getParamsLong();
     
-    _qcheckbox->SetValue(on);
+    _vcheckbox->SetValue(on);
 }
 
 void PCheckbox::checkboxStateChanged(bool on)

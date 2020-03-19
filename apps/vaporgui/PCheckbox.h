@@ -11,7 +11,7 @@ class VCheckBox;
 class PCheckbox : public PLineItem {
     Q_OBJECT
     
-    VCheckBox *_qcheckbox;
+    VCheckBox *_vcheckbox;
     
 public:
     PCheckbox(const std::string &tag, const std::string &label="");
