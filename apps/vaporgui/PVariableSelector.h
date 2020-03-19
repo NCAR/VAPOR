@@ -5,7 +5,8 @@
 class VCheckBox;
 
 //! \class PVariableSelector
-//! Allows the user to select variables. Automatically switches between 2D and 3D.
+//! Allows the user to select variables. Automatically switches between 2D and 3D
+//! based on the currently selected variable.
 //!
 //! Designed to be used with a RenderParams object.
 
