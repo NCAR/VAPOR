@@ -133,10 +133,6 @@ void MakeRamp( Grid* grid, float minVal, float maxVal, size_t axis=X ) {
     }
 }
 
-void Foo(VAPoR::Grid* grid, double &rms, size_t &mv, size_t &d, bool nudge) {
-    cout << "foo " << rms << " " << mv << " " << d << endl;
-}
-
 void CompareIndexToCoords( 
     VAPoR::Grid* grid, 
     double &rms,                // Root Mean Square error
@@ -165,13 +161,11 @@ void CompareIndexToCoords(
     if ( nudge == true ) {
         std::vector< double > minu, maxu;
         grid->GetUserExtents( minu, maxu );
-        xNudge = FLT_MIN;//( maxu[X] - minu[X] ) / ( x*100 );
-        yNudge = FLT_MIN;//( maxu[Y] - minu[Y] ) / ( y*100 );
-        zNudge = FLT_MIN;//( maxu[Z] - minu[Z] ) / ( z*100 );
         xNudge = ( maxu[X] - minu[X] ) / ( x*10 );
         yNudge = ( maxu[Y] - minu[Y] ) / ( y*10 );
         zNudge = ( maxu[Z] - minu[Z] ) / ( z*10 );
     }
+    cout << "                   " << xNudge << " " << yNudge << " " << zNudge << endl;
 
     double peak  = 0.f;
 
@@ -200,11 +194,8 @@ void CompareIndexToCoords(
                 double error = abs( sampleValue - trueValue );
 
                 if (error != 0) {
-                    //cout << "     !!  "; 
                     disagreements++;
                 }
-                /*else cout << "         ";
-                cout << "     " << i << " " << j << " " << k << endl;//" " << xNudge << " " << yNudge << " " << zNudge << endl;*/
 
                 if (sampleValue == grid->GetMissingValue()) {
                     numMissingValues++;
@@ -215,9 +206,6 @@ void CompareIndexToCoords(
                     peak = error;
                 sum += error*error;
 
-                /*(cout << i << ":" << j << ":" << k << endl;
-                cout << coords[0] << " " << coords[1] << " " << coords[2] << endl;*/
-                //cout << trueValue << " " << sampleValue << endl << endl;
             }
         }
     }
@@ -237,52 +225,6 @@ void TestNodeIterator( const Grid *g, int& count, double& time ) {
     }
     time = Wasp::GetTime() - t0;
 }
-
-// Taken from old test_datamgr.cpp
-//
-/*void test_get_value(
-    Grid *g
-) {
-    cout << "Get Value Test ------>" << endl;
-
-    g->SetInterpolationOrder(1);
-
-    Grid::ConstIterator itr = g->cbegin();
-    Grid::ConstIterator enditr = g->cend();
-
-    Grid::ConstCoordItr c_itr = g->ConstCoordBegin();
-    Grid::ConstCoordItr c_enditr = g->ConstCoordEnd();
-
-    const float epsilon = 0.000001;
-
-    float t0 = GetTime();
-    size_t ecount = 0;
-    for ( ; itr!=enditr; ++itr, ++c_itr) {
-        float v0 = *itr;
-
-        float v1 = g->GetValue(*c_itr);
-
-        if (v0 != v1) {
-            if (v0 == 0.0) {
-                if (abs(v1) > epsilon) {
-                    ecount ++;
-                    v1 = g->GetValue(*c_itr);
-                }
-            }
-            else {
-                if (abs((v1-v0)/v0) > epsilon) {
-                    ecount ++;
-                    v1 = g->GetValue(*c_itr);
-
-                }
-            }
-        }
-    }
-    cout << "error count: " << ecount << endl;
-    cout << "time: " << GetTime() - t0 << endl;
-    cout << endl;
-}*/
-
 
 void PrintStats( double rms, size_t numMissingValues, size_t disagreements ) {
     cout << "    RMS error:                                     " << rms << endl;
@@ -309,41 +251,52 @@ void TestGrid(
         z = dims[Z];
 
     std::string type = grid->GetType();
-
     
     cout << "=======================================================" << endl << endl;
-    cout << type << " " << x << "x" << y << "x" << z << " Constant field:" << endl;
-    MakeConstantField( grid, maxVal );
-    grid->SetInterpolationOrder( linear );
-    CompareIndexToCoords( grid, rms, numMissingValues, disagreements );
-    cout << "  linear:          " << endl;
-    PrintStats( rms, numMissingValues, disagreements );
-    grid->SetInterpolationOrder( nearestNeighbor );
-    CompareIndexToCoords( grid, rms, numMissingValues, disagreements );
-    cout << "  nearestNeighbor: " << endl;
-    PrintStats( rms, numMissingValues, disagreements );
+    if ( std::find( tests.begin(), tests.end(), "Constant" ) != tests.end() ) {
+        cout << type << " " << x << "x" << y << "x" << z << " Constant field:" << endl;
+        MakeConstantField( grid, maxVal );
+        grid->SetInterpolationOrder( linear );
+        CompareIndexToCoords( grid, rms, numMissingValues, disagreements );
+        cout << "  linear:          " << endl;
+        PrintStats( rms, numMissingValues, disagreements );
+        grid->SetInterpolationOrder( nearestNeighbor );
+        CompareIndexToCoords( grid, rms, numMissingValues, disagreements );
+        cout << "  nearestNeighbor: " << endl;
+        PrintStats( rms, numMissingValues, disagreements );
+    }
   
-    cout << type << " " << x << "x" << y << "x" << z << " Ramp up on Z axis:" << endl;
-    MakeRamp( grid, minVal, maxVal, Z);
-    grid->SetInterpolationOrder( linear );
-    CompareIndexToCoords( grid, rms, numMissingValues, disagreements );
-    cout << "  linear:          " << endl;
-    PrintStats( rms, numMissingValues, disagreements );
-    grid->SetInterpolationOrder( nearestNeighbor );
-    CompareIndexToCoords( grid, rms, numMissingValues, disagreements, true );
-    cout << "  nearestNeighbor: " << endl;
-    PrintStats( rms, numMissingValues, disagreements );
+    if ( std::find( tests.begin(), tests.end(), "Ramp" ) != tests.end() ) {
+        cout << type << " " << x << "x" << y << "x" << z << " Ramp up on Z axis:" << endl;
+        MakeRamp( grid, minVal, maxVal, Z);
+        grid->SetInterpolationOrder( linear );
+        CompareIndexToCoords( grid, rms, numMissingValues, disagreements );
+        cout << "  linear:          " << endl;
+        PrintStats( rms, numMissingValues, disagreements );
+        grid->SetInterpolationOrder( nearestNeighbor );
+        CompareIndexToCoords( grid, rms, numMissingValues, disagreements);//, true );
+        cout << "  nearestNeighbor:" << endl;
+        PrintStats( rms, numMissingValues, disagreements );
+        CompareIndexToCoords( grid, rms, numMissingValues, disagreements, true );
+        cout << "  nearestNeighbor (nudged):" << endl;
+        PrintStats( rms, numMissingValues, disagreements );
+    }
     
-    cout << type << " " << x << "x" << y << "x" << z << " Triangle signal:" << endl;
-    MakeTriangle( grid, minVal, maxVal );
-    grid->SetInterpolationOrder( linear );
-    CompareIndexToCoords( grid, rms, numMissingValues, disagreements);
-    cout << "  linear:          " << endl;
-    PrintStats( rms, numMissingValues, disagreements );
-    grid->SetInterpolationOrder( nearestNeighbor );
-    CompareIndexToCoords( grid, rms, numMissingValues, disagreements, true );
-    cout << "  nearestNeighbor: " << rms << endl;
-    PrintStats( rms, numMissingValues, disagreements );
+    if ( std::find( tests.begin(), tests.end(), "Triangle" ) != tests.end() ) {
+        cout << type << " " << x << "x" << y << "x" << z << " Triangle signal:" << endl;
+        MakeTriangle( grid, minVal, maxVal );
+        grid->SetInterpolationOrder( linear );
+        CompareIndexToCoords( grid, rms, numMissingValues, disagreements);
+        cout << "  linear:          " << endl;
+        PrintStats( rms, numMissingValues, disagreements );
+        grid->SetInterpolationOrder( nearestNeighbor );
+        CompareIndexToCoords( grid, rms, numMissingValues, disagreements);//, true );
+        cout << "  nearestNeighbor: " << rms << endl;
+        PrintStats( rms, numMissingValues, disagreements );
+        CompareIndexToCoords( grid, rms, numMissingValues, disagreements, true );
+        cout << "  nearestNeighbor (nudged): " << rms << endl;
+        PrintStats( rms, numMissingValues, disagreements );
+    }
 
     int count;
     double time;
