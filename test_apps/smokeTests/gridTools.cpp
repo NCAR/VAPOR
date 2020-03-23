@@ -165,7 +165,6 @@ void CompareIndexToCoords(
         yNudge = ( maxu[Y] - minu[Y] ) / ( y*10 );
         zNudge = ( maxu[Z] - minu[Z] ) / ( z*10 );
     }
-    cout << "                   " << xNudge << " " << yNudge << " " << zNudge << endl;
 
     double peak  = 0.f;
 
@@ -263,6 +262,9 @@ void TestGrid(
         grid->SetInterpolationOrder( nearestNeighbor );
         CompareIndexToCoords( grid, rms, numMissingValues, disagreements );
         cout << "  nearestNeighbor: " << endl;
+        PrintStats( rms, numMissingValues, disagreements );
+        CompareIndexToCoords( grid, rms, numMissingValues, disagreements );
+        cout << "  nearestNeighbor (nudged): " << endl;
         PrintStats( rms, numMissingValues, disagreements );
     }
   
