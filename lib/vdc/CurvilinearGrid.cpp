@@ -365,6 +365,27 @@ float CurvilinearGrid::GetValueNearestNeighbor(const std::vector<double> &coords
 
     if (!inside) return (GetMissingValue());
 
+    // Find closest point within face
+    //
+    double maxl = lambda[0];
+    int    maxidx = 0;
+    for (int idx = 1; idx < 4; idx++) {
+        if (lambda[idx] > maxl) {
+            maxl = lambda[idx];
+            maxidx = idx;
+        }
+    }
+    if (maxidx == 1) {
+        i++;
+    } else if (maxidx == 2) {
+        i++;
+        j++;
+    } else if (maxidx == 3) {
+        j++;
+    }
+
+    if (zwgt[1] > zwgt[0]) k++;
+
     return (AccessIJK(i, j, k));
 }
 

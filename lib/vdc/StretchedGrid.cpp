@@ -265,6 +265,10 @@ float StretchedGrid::GetValueNearestNeighbor(const std::vector<double> &coords) 
     double z = GetGeometryDim() == 3 ? cCoords[2] : 0.0;
     bool   inside = _insideGrid(x, y, z, i, j, k, xwgt, ywgt, zwgt);
 
+    if (xwgt[1] > xwgt[0]) i++;
+    if (ywgt[1] > ywgt[0]) j++;
+    if (zwgt[1] > zwgt[0]) k++;
+
     if (!inside) return (GetMissingValue());
 
     return (AccessIJK(i, j, k));
