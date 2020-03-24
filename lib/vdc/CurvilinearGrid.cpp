@@ -445,6 +445,31 @@ float CurvilinearGrid::GetValueNearestNeighbor(
 
 	if (! inside) return(GetMissingValue());
 
+	// insideGrid returns indices of cell containing point. Find closest
+	// cell vertex. For horizontal coordinates vertex with largest lambda
+	// value is closest. 
+	//
+	double maxl = lambda[0];
+	int maxidx = 0;
+	for (int idx=1; idx<4; idx++) {
+		if (lambda[idx] > maxl) {
+			maxl = lambda[idx];
+			maxidx = idx;
+		}
+	}
+	if (maxidx == 1) {
+		i++;
+	}
+	else if (maxidx == 2) {
+		i++;
+		j++;
+	}
+	else if (maxidx == 3) {
+		j++;
+	}
+
+	if (zwgt[1] > zwgt[0]) k++;
+
 	return(AccessIJK(i,j,k));
 }
 

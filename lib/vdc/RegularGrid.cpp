@@ -311,9 +311,13 @@ bool RegularGrid::GetIndicesCell(
 			indices[i] = (size_t) floor (
 				(clampedCoords[i]-_minu[i]) / _delta[i]
 			);
+
+			// Check if on the boundary.
+			//
+			if (indices[i] == dims[i]-1) indices[i]--;
 		}
 
-		VAssert(indices[i]<dims[i]);
+		VAssert(indices[i]<dims[i]-1);
 
 	}
 
