@@ -377,9 +377,13 @@ bool LayeredGrid::GetIndicesCell(
 			indices[i] = (size_t) floor (
 				(clampedCoords[i]-_minu[i]) / _delta[i]
 			);
+
+			// Edge case
+			//
+			if (indices[i] == dims[i]-1) indices[i]--;
 		}
 
-		VAssert(indices[i]<dims[i]);
+		VAssert(indices[i]<dims[i]-1);
 	}
 
 	// Now find index for layered grid
