@@ -75,11 +75,20 @@ jobs:
             cd /VAPOR
             git pull
             cd build
-            cmake ..
+            cmake -DBUILD_TEST_APPS=ON ..
             make -j7 &> /tmp/output.txt
 
+      - run:
+          name: Smoke test
+          command: |
+            /VAPOR/test_apps/smokeTests/smokeTests.py |
+            --makeBaseline=True |
+            --testDataRoot=/smokeTestData/smokeTestData
+            --binaryRoot=/VAPOR/build/bin
+          
+
       - store_artifacts:
-          path: /tmp/output.txt
+          path: /tmp
 
       - run:
           name: check for warnings
@@ -455,7 +464,7 @@ jobs:
 workflows:
   build:
     jobs:
-      #- build_ubuntu18
+      - build_ubuntu18
       #- build_ubuntu16
       #- build_centos7
       #- build_osx
@@ -465,18 +474,18 @@ workflows:
       #    requires:
       #      - test_win10_workspace
       #- clang_tidy_ubuntu18
-      - build_ubuntu18_installer
-      - build_ubuntu16_installer
-      - build_centos7_installer
-      - build_osx_installer
-      - build_win10_installer
-      - release_on_github:
-          requires:
-            - build_win10_installer
-            - build_ubuntu16_installer
-            - build_ubuntu18_installer
-            - build_centos7_installer
-            - build_osx_installer
+      #- build_ubuntu18_installer
+      #- build_ubuntu16_installer
+      #- build_centos7_installer
+      #- build_osx_installer
+      #- build_win10_installer
+      #- release_on_github:
+      #    requires:
+      #      - build_win10_installer
+      #      - build_ubuntu16_installer
+      #      - build_ubuntu18_installer
+      #      - build_centos7_installer
+      #      - build_osx_installer
 
 #  leak_check:
 #    triggers:
