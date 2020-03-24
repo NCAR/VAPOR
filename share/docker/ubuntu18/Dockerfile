@@ -49,8 +49,8 @@ RUN fileid="1w8CLOohQuVrhcDbmIyU68whvqaoiCx9t" \
     -o ${filename}
 RUN ls /
 RUN tar -xf /tmp/smokeTestData.tar.gz \ 
-    -C /smokeTestData
-RUN chown -R root:root /smokeTestData
+    -C /smokeTestData \
+    && chown -R root:root /root
 RUN chmod -R 777 /smokeTestData
 
 RUN cd / \

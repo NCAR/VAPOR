@@ -137,8 +137,7 @@ void CompareIndexToCoords(
     VAPoR::Grid* grid, 
     double &rms,                // Root Mean Square error
     size_t &numMissingValues,   // Counter for receiving MissingValue upon query
-    size_t &disagreements,      // Counter for when AccessIJK() and GetValue() disagree
-    bool nudge
+    size_t &disagreements      // Counter for when AccessIJK() and GetValue() disagree
 ) {
     rms   = 0.f;
     disagreements  = 0;
@@ -151,43 +150,17 @@ void CompareIndexToCoords(
     if ( dims.size() == 3 ) 
         z = dims[Z];
  
-    // Layered and Curvilinear grids have a bug where querying indices 
-    // for the precise location of a grid node will return the wrong indices,
-    // so we will nudge our coordinates for now.
-    double xNudge = 0;
-    double yNudge = 0;
-    double zNudge = 0;
-
-    if ( nudge == true ) {
-        std::vector< double > minu, maxu;
-        grid->GetUserExtents( minu, maxu );
-        xNudge = ( maxu[X] - minu[X] ) / ( x*10 );
-        yNudge = ( maxu[Y] - minu[Y] ) / ( y*10 );
-        zNudge = ( maxu[Z] - minu[Z] ) / ( z*10 );
-    }
-
     double peak  = 0.f;
-
     double sum     = 0;
     for ( size_t k=0; k<z; k++ ) {
-        if (k == z-1) zNudge *= -1;
-        else zNudge = abs(zNudge);
         for ( size_t j=0; j<y; j++ ) {
-            if (j == y-1) yNudge *= -1;
-            else yNudge = abs(yNudge);
             for ( size_t i=0; i<x; i++ ) {
-                if (i == x-1) xNudge *= -1;
-                else xNudge = abs(xNudge);
-
                 size_t indices[3] = { i, j, k };
                 //float trueValue = grid.AccessIJK( i, j, k );
                 double trueValue = grid->GetValueAtIndex( {i,j,k} );
                 
                 double coords[3];
                 grid->GetUserCoordinates( indices, coords );
-                coords[X] += xNudge;
-                coords[Y] += yNudge;
-                coords[Z] += zNudge;
                 float sampleValue = grid->GetValue( coords );
                 
                 double error = abs( sampleValue - trueValue );
@@ -263,9 +236,6 @@ void TestGrid(
         CompareIndexToCoords( grid, rms, numMissingValues, disagreements );
         cout << "  nearestNeighbor: " << endl;
         PrintStats( rms, numMissingValues, disagreements );
-        CompareIndexToCoords( grid, rms, numMissingValues, disagreements );
-        cout << "  nearestNeighbor (nudged): " << endl;
-        PrintStats( rms, numMissingValues, disagreements );
     }
   
     if ( std::find( tests.begin(), tests.end(), "Ramp" ) != tests.end() ) {
@@ -279,9 +249,6 @@ void TestGrid(
         CompareIndexToCoords( grid, rms, numMissingValues, disagreements);//, true );
         cout << "  nearestNeighbor:" << endl;
         PrintStats( rms, numMissingValues, disagreements );
-        CompareIndexToCoords( grid, rms, numMissingValues, disagreements, true );
-        cout << "  nearestNeighbor (nudged):" << endl;
-        PrintStats( rms, numMissingValues, disagreements );
     }
     
     if ( std::find( tests.begin(), tests.end(), "Triangle" ) != tests.end() ) {
@@ -294,9 +261,6 @@ void TestGrid(
         grid->SetInterpolationOrder( nearestNeighbor );
         CompareIndexToCoords( grid, rms, numMissingValues, disagreements);//, true );
         cout << "  nearestNeighbor: " << rms << endl;
-        PrintStats( rms, numMissingValues, disagreements );
-        CompareIndexToCoords( grid, rms, numMissingValues, disagreements, true );
-        cout << "  nearestNeighbor (nudged): " << rms << endl;
         PrintStats( rms, numMissingValues, disagreements );
     }
 
