@@ -240,10 +240,10 @@ void ParamsMgr::addDataMgrMerge(string dataSetName) {
 
 	delete windowsSep;
 
-	_initAppRenParams(dataSetName);
+	_createAppRenParams(dataSetName);
 }
 
-void ParamsMgr::_initAppRenParams(string dataSetName) {
+void ParamsMgr::_createAppRenParams(string dataSetName) {
 
 	// Deal with any application render Params registered by the application
 	//

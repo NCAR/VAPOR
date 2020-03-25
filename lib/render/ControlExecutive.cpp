@@ -196,7 +196,13 @@ int ControlExec::ActivateRender(
 			return -1;
 		}
 
-		int rc = v->CreateRenderer(dataSetName, renderType, renderName);
+		int rc = rp->Initialize();
+		if (rc < 0) {
+			SetErrMsg("Failed to initialize of type \"%s\"",renderType.c_str());
+			return(0);
+		}
+
+		rc = v->CreateRenderer(dataSetName, renderType, renderName);
 		if (rc<0) {
 			SetErrMsg("Invalid renderer of type \"%s\"",renderType.c_str());
 			_paramsMgr->EndSaveStateGroup();
@@ -544,6 +550,21 @@ int ControlExec::OpenData(
 	_paramsMgr->AddDataMgr(
 		dataSetName, _dataStatus->GetDataMgr(dataSetName)
 	);
+
+	// Need to call initializers for any registered application renderers
+	//
+	vector <RenderParams *> appRenderParams;
+	_paramsMgr->GetAppRenderParams(dataSetName, appRenderParams);
+	for (int i=0; i<appRenderParams.size(); i++) {
+		int rc = appRenderParams[i]->Initialize();
+		if (rc<0) {
+			SetErrMsg(
+				"Failure to initialize application renderer \"%s\"",
+				appRenderParams[i]->GetName().c_str()
+			);
+			return(-1);
+		}
+	}
 
 	// Re-initialize the ControlExec to match the new state
 	//

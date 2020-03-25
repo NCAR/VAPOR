@@ -61,6 +61,22 @@ public:
 
 	virtual ~RenderParams();
 
+	//! Initialize the class. 
+	//!
+	//! Must be called immediately after the constructor:
+	//!
+	//!  RenderParams(DataMgr *, ParamsBase::StateSave *, const string &, int maxdim);
+	//!
+	//! The results of 
+	//! calling any other methods before calling Initialize() are 
+	//! undefined.
+	//!
+	//! Subsequent calls to Initialize() after the first call are a no-op.
+	//!
+	//! \retval returns integer >= 0 on success, otherwise failure
+	//
+	virtual int Initialize();
+	
 
 	//! Determine if this params has been enabled for rendering
 	//!
@@ -375,7 +391,6 @@ public:
     vector<double> GetIsoValues() { return GetIsoValues(GetVariableName()); }
     void SetIsoValues(const vector<double> &values) { SetIsoValues(GetVariableName(), values); }
 	
- bool InitBox(int ndim);
 protected:
 	DataMgr *_dataMgr;
     int _maxDim;
@@ -391,6 +406,7 @@ private:
  Box *_Box;
  ColorbarPbase *_Colorbar;
  Transform *_transform;
+ bool _classInitialized;	//
 
  static const string _EnabledTag;
  static const string _histoScaleTag;
