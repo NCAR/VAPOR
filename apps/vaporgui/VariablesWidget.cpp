@@ -255,12 +255,14 @@ void VariablesWidget::setVariableDims(int index){
 	//_activeDim = index == 0 ? TWODIMS : THREEDIMS;
     if (index == 0) {
         _activeDim = TWODIMS;
+        _rParams->GetBox()->SetPlanar(true);
         _rParams->GetBox()->SetOrientation(VAPoR::Box::XY);
         //orientationFrame->show();
     }
     else {
         _activeDim = THREEDIMS;
         orientationFrame->hide();
+        _rParams->GetBox()->SetPlanar(false);
         _rParams->GetBox()->SetOrientation(VAPoR::Box::XYZ);
     }
 
