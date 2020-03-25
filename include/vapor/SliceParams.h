@@ -22,6 +22,8 @@ public:
 
  virtual ~SliceParams();
 
+ virtual int Initialize();
+
  // Get static string identifier for this params class
  //
  static string GetClassType() 

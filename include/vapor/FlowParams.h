@@ -42,6 +42,8 @@ public:
 
     virtual ~FlowParams();
 
+	virtual int Initialize();
+
     //
     // (Pure virtual methods from RenderParams)
     //

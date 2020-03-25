@@ -27,11 +27,6 @@ ImageParams::ImageParams( DataMgr*                dataManager,
   SetDiagMsg("ImageParams::ImageParams() this=%p", this);
 
 
-  // The image renderer behaves like a 2D renderer, but it doesn't operate
-  // on any data variables. Make sure the box is planar.
-  //
-  GetBox()->SetOrientation(VAPoR::Box::XY);
-  GetBox()->SetPlanar(true);
 }
 
 ImageParams::ImageParams( DataMgr*                dataManager, 
@@ -46,6 +41,20 @@ ImageParams::ImageParams( DataMgr*                dataManager,
 ImageParams::~ImageParams()
 {
   SetDiagMsg( "ImageParams::~ImageParams() this=%p", this );
+}
+
+int ImageParams::Initialize() {
+
+  int rc = RenderParams::Initialize();
+  if (rc<0) return(rc);
+	
+  // The image renderer behaves like a 2D renderer, but it doesn't operate
+  // on any data variables. Make sure the box is planar.
+  //
+  GetBox()->SetOrientation(VAPoR::Box::XY);
+  GetBox()->SetPlanar(true);
+
+  return(0);
 }
 
 std::string ImageParams::GetImagePath( ) const
