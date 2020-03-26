@@ -199,12 +199,6 @@ public:
 	//!
 	virtual void SetCompressionLevel(int val);
 
-	//! Pure virtual method indicates whether or not the object will render as opaque.
-	//! Important to support multiple transparent (nonoverlapping) objects in the scene
-	//! \retval bool true if all geometry is opaque.
-	virtual bool IsOpaque() const = 0;
-
-
 	//! Specify a stretch factor used in displaying histograms in 
 	//! mapper functions.
 	//! Can be ignored if there is no mapper function in the params.
@@ -368,12 +362,6 @@ public:
  }
 
 	void initializeBypassFlags();
-
-	//! Pure virtual method indicates if a particular variable name 
-	//! is currently used by the renderer.
-	//! \param[in] varname name of the variable
-	//!
-	virtual bool usingVariable(const std::string& varname) = 0;
 
  //! Set reasonable default variables
  //! \param[in] The dimension of the variables being set

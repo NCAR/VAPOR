@@ -89,20 +89,6 @@ public:
     SetValueLong( _orientationTag, "set orientation value", val );
   }
 
-
-  //
-  // (Pure virtual methods from RenderParams)
-  //
-  virtual bool IsOpaque() const override
-  { 
-    return false; 
-  }
-  virtual bool usingVariable(const std::string& varname) override
-  {
-    return false;   // since this class is for an image, not rendering a variable.
-  }
-
-
 private:
   static const std::string          _fileNameTag;
   static const std::string          _isGeoRefTag;

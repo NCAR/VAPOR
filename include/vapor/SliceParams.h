@@ -35,8 +35,6 @@ public:
 
  void SetSampleRate(int rate);
 
- bool IsOpaque() const;
-
  int  GetDefaultSampleRate() const;
 
  void SetCachedValues(std::vector<double> values);
@@ -46,7 +44,6 @@ public:
 private:
 
  void _init();
- bool usingVariable(const std::string& varname);
  std::vector<double> _cachedValues;
 
  static const string _sampleRateTag;

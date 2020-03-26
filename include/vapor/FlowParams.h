@@ -44,17 +44,6 @@ public:
 
 	virtual int Initialize() override;
 
-    //
-    // (Pure virtual methods from RenderParams)
-    //
-    virtual bool IsOpaque() const override
-    { 
-        return false; 
-    }
-    virtual bool usingVariable(const std::string& varname) override
-    {
-        return false;
-    }
 
     static std::string GetClassType() 
     {

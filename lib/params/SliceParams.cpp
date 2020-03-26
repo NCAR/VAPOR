@@ -84,18 +84,6 @@ int SliceParams::GetDefaultSampleRate() const {
     return sampleRate;
 }
 
-bool SliceParams::IsOpaque() const {
-    return true;
-}
-
-bool SliceParams::usingVariable(const std::string& varname) {
-    if ((varname.compare(GetHeightVariableName()) == 0)){
-        return(true);
-    }
-
-    return(varname.compare(GetVariableName()) == 0);
-}
-
 int SliceParams::GetSampleRate() const {
     int rate = (int)GetValueDouble(_sampleRateTag, MIN_DEFAULT_SAMPLERATE);
     return rate;
