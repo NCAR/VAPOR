@@ -22,7 +22,7 @@ public:
 
  virtual ~SliceParams();
 
- virtual int Initialize();
+ virtual int Initialize() override;
 
  // Get static string identifier for this params class
  //
@@ -55,4 +55,3 @@ private:
 };
 
 #endif 
-
