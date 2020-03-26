@@ -42,7 +42,7 @@ public:
 
     virtual ~FlowParams();
 
-	virtual int Initialize();
+	virtual int Initialize() override;
 
     //
     // (Pure virtual methods from RenderParams)
