@@ -19,7 +19,7 @@ public:
 
   virtual ~ImageParams();
 
-  virtual int Initialize();
+  virtual int Initialize() override;
 
   static std::string GetClassType() 
   {
