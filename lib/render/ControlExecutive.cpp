@@ -199,7 +199,7 @@ int ControlExec::ActivateRender(
 		int rc = rp->Initialize();
 		if (rc < 0) {
 			SetErrMsg("Failed to initialize of type \"%s\"",renderType.c_str());
-			return(0);
+			return(-1);
 		}
 
 		rc = v->CreateRenderer(dataSetName, renderType, renderName);
@@ -558,6 +558,8 @@ int ControlExec::OpenData(
 	for (int i=0; i<appRenderParams.size(); i++) {
 		int rc = appRenderParams[i]->Initialize();
 		if (rc<0) {
+			_dataStatus->Close(dataSetName);
+			_paramsMgr->RemoveDataMgr(dataSetName);
 			SetErrMsg(
 				"Failure to initialize application renderer \"%s\"",
 				appRenderParams[i]->GetName().c_str()
