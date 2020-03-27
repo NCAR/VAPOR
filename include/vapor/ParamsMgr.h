@@ -443,18 +443,9 @@ public:
  //!
  //! \sa ParamsMgr()
  //
- void GetAppRenderParams(string dataSetName, vector <RenderParams *> &appRenderParams) const {
-	appRenderParams.clear();
-	std::map <string, RenParamsContainer *>::const_iterator itr;
-	itr = _otherRenParams.find(dataSetName);
-	if (itr == _otherRenParams.cend()) return;
-	vector <string> v = itr->second->GetNames();
-	for (int i=0; i<v.size(); i++) {
-		if (itr->second->GetParams(v[i]))
-			appRenderParams.push_back(itr->second->GetParams(v[i]));
-	}
- }
-
+ void GetAppRenderParams(
+	string dataSetName, vector <RenderParams *> &appRenderParams
+ ) const;
  
  //! Save current state to a file
  //!
