@@ -76,7 +76,7 @@ dataMgrResultsFile = resultsDir + "dataMgrResults.txt"
 #
 
 def testGrid( grid, makeBaseline=False ):
-    print( "testing " + grid + " grid" )
+    print( "Testing " + grid + " grid" )
 
     programOutput  = subprocess.check_output( [ gridProgram, " -dims ", grid ] )
 
@@ -89,18 +89,14 @@ def testGrid( grid, makeBaseline=False ):
     outputFile.write( programOutput.decode("utf-8") )
     outputFile.close()
     
-    print( "  " + str(makeBaseline) + " " + outputFileName + " written\n" )
+    print( "  " + outputFileName + " written\n" )
 
     return outputFileName
 
 def testGrids( makeBaseline ):
-    if ( os.path.isfile(gridResultsFile) ):
-        print( gridResultsFile )
+    if ( makeBaseline ):
         diff = open( gridResultsFile, "w" )
     else:
-        print( "got here" )
-        makeBaseline = True
-        os.mkdir( resultsDir )
         diff = open( gridResultsFile, "a" )
 
     mismatches = 0
@@ -113,7 +109,7 @@ def testGrids( makeBaseline ):
         if ( makeBaseline ):
             continue
         
-        baselineFile = grid + "_baseline.txt"
+        baselineFile = resultsDir + grid + "_baseline.txt"
         baseline = open( baselineFile, "r" )
         results  = open( resultsFile, "r" )
 
@@ -128,11 +124,14 @@ def testGrids( makeBaseline ):
 
         baseline.close()
         results.close()
-    
-    print( "Summary file " + gridResultsFile + " written" )
     diff.close()
+   
+    if ( makeBaseline == False ):    
+        print( "Summary file " + gridResultsFile + " written" )
+        print( "  Grid tests resulted in " + str(mismatches) + " mismatches\n" )
+    else:
+        print( "Baseline files have been generated.  Re-run smokeTests.py to run comparions.\n" )
 
-    print( "  Grid tests resulted in " + str(mismatches) + " mismatches\n" )
     if ( mismatches > 0 ):
         return -1
     else:
@@ -153,25 +152,23 @@ def testDataMgr( dataMgrType, dataMgr, makeBaseline=False ):
     outputFile.write( programOutput.decode("utf-8") )
     outputFile.close()
     
-    print( "  " + outputFileName + " written" )
+    print( "  " + outputFileName + " written\n" )
 
     return outputFileName
 
 def testDataMgrs( makeBaseline ):
-    if ( os.path.isfile( dataMgrResultsFile ) ):
+    if ( makeBaseline ):
         diff = open( dataMgrResultsFile, "w" )
     else:
-        makeBaseline = True
         diff = open( dataMgrResultsFile, "a" )
     
     mismatches = 0
 
     for dataType, dataFile in dataMgrs.items():
-        #dataMgrFile = resultsDir + dataMgrFile
 
         # If we're making a baseline file, generate it, and then skip comparisons 
         if ( makeBaseline ):
-            resultsFile = testDataMgr( dataType, dataFile )
+            resultsFile = testDataMgr( dataType, dataFile, makeBaseline )
             continue
 
         resultsFile = testDataMgr( dataType, dataFile )
@@ -191,11 +188,14 @@ def testDataMgrs( makeBaseline ):
 
         baseline.close()
         results.close()
-    
-    print( dataMgrResultsFile + " written" )
     diff.close()
 
-    print( "    DataMgr tests resulted in " + str(mismatches) + " mismatches" )
+    if ( makeBaseline == False ):    
+        print( dataMgrResultsFile + " written" )
+        print( "    DataMgr tests resulted in " + str(mismatches) + " mismatches" )
+    else:
+        print( "Baseline files have been generated.  Re-run smokeTests.py to run comparions.\n" )
+
     if ( mismatches > 0 ):
         return -1
     else:
@@ -204,21 +204,27 @@ def testDataMgrs( makeBaseline ):
 def main():
     print()
     makeBaseline = args.makeBaseline
-    
-    #if ( os.path.isfile(gridResultsFile) ):
-     
+
+    if ( os.path.isdir( resultsDir ) == False ):    
+        os.mkdir( resultsDir )
 
     for grid in gridSizes:
         baselineFile = resultsDir + grid + "_baseline.txt"
-        if ( os.path.isfile( baselineFile ) ):
+        if ( os.path.isfile( baselineFile ) == False ):
             makeBaseline = True
-            print( "Warning: No grid baseline file found for the " + grid
-                + " grid.  Setting --makeBaseline to True." )
 
     for dataType, dataFile in dataMgrs.items():
-        print( dataType + " " + dataFile )
+        baselineFile = resultsDir + dataType + "_baseline.txt"
+        if ( os.path.isfile( baselineFile ) == False ):
+            makeBaseline = True
         continue
-    
+   
+    if ( args.makeBaseline == False and makeBaseline == True ): 
+        print( "Warning: Some or all baseline files were missing.  These files are needed " +
+              "as comparisons for the results of the current series of tests, versus a known " +
+              "working build (the baseline).   Setting --makeBaseline to True.\n"
+        )
+
     grid    = testGrids( makeBaseline )
     dataMgr = testDataMgrs( makeBaseline )
 
