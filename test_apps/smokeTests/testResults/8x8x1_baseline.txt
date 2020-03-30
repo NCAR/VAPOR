@@ -34,7 +34,7 @@ Regular 8x8x8 Triangle signal:
     AccessIJK() vs GetValue() disagreement count:  0
 
 Regular Grid::ConstNodeIterator
-  Count: 33219
+  Count: 33191
   Time:  0.0000
 
 =======================================================
@@ -73,7 +73,7 @@ Stretched 8x8x8 Triangle signal:
     AccessIJK() vs GetValue() disagreement count:  0
 
 Stretched Grid::ConstNodeIterator
-  Count: 33219
+  Count: 33191
   Time:  0.0000
 
 =======================================================
@@ -112,7 +112,7 @@ Layered 8x8x8 Triangle signal:
     AccessIJK() vs GetValue() disagreement count:  0
 
 Layered Grid::ConstNodeIterator
-  Count: 33219
+  Count: 33191
   Time:  0.0000
 
 =======================================================
@@ -154,4 +154,4 @@ Curvilinear Grid::ConstNodeIterator
   Count: 33278
   Time:  0.0000
 
-Elapsed time: 0.1632
+Elapsed time: 0.1673

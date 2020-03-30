@@ -78,6 +78,7 @@ dataMgrResultsFile = resultsDir + "dataMgrResults.txt"
 def testGrid( grid, makeBaseline=False ):
     print( "Testing " + grid + " grid" )
 
+    print( gridProgram + " -dims " + grid )
     programOutput  = subprocess.check_output( [ gridProgram, " -dims ", grid ] )
 
     if ( makeBaseline ):
