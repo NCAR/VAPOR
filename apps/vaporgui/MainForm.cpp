@@ -1889,11 +1889,13 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
             _pythonVariables->Update();
         }
 
+		setUpdatesEnabled(false);
 		_tabMgr->Update();
         
 #ifndef NDEBUG
         _paramsWidgetDemo->Update(GetStateParams(), _paramsMgr);
 #endif
+		setUpdatesEnabled(true); 
 
 		// force visualizer redraw
 		//

@@ -19,9 +19,6 @@ public:
  VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node);
  virtual ~VolumeParams();
 
- virtual bool IsOpaque() const;
-
- virtual bool usingVariable(const std::string& varname);
  virtual string GetDefaultAlgorithmName() const;
     
     virtual bool GetDefaultLightingEnabled() const { return true; }

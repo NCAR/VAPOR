@@ -42,17 +42,8 @@ public:
 
     virtual ~FlowParams();
 
-    //
-    // (Pure virtual methods from RenderParams)
-    //
-    virtual bool IsOpaque() const override
-    { 
-        return false; 
-    }
-    virtual bool usingVariable(const std::string& varname) override
-    {
-        return false;
-    }
+	virtual int Initialize() override;
+
 
     static std::string GetClassType() 
     {

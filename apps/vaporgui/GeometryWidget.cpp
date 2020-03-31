@@ -205,10 +205,11 @@ void GeometryWidget::Reinit(
         showOrientationOptions();
         adjustLayoutToPlanar(XY, false);
     }
-    else
+    else {
         hideOrientationOptions();
+    }
 
-	_minMaxTab->adjustSize();
+    _minMaxTab->adjustSize();
 }
 
 GeometryWidget::~GeometryWidget() {

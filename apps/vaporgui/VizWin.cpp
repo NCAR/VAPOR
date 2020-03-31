@@ -285,7 +285,7 @@ void VizWin::_setUpProjMatrix() {
     if (vParams->GetProjectionType() == ViewpointParams::MapOrthographic)
         vParams->SetOrthoProjectionSize(_trackBall->GetOrthoSize());
 
-	_controlExec->SetSaveStateEnabled(enabled);
+    _controlExec->SetSaveStateEnabled(enabled);
 
     mm->MatrixModeModelView();
 }
@@ -405,9 +405,9 @@ void VizWin::_mousePressEventNavigate(QMouseEvent* e)
     
 	// Let trackball handle mouse events for navigation
 	//
-	_trackBall->MouseOnTrackball(
-		0, trackballButtonNumber, e->x(), e->y(), width(), height()
-	);
+    _trackBall->MouseOnTrackball(
+        0, trackballButtonNumber, e->x(), e->y(), width(), height()
+    );
 
 	// Create a state saving group.
 	// Only save camera parameters after user release mouse
@@ -422,7 +422,7 @@ void VizWin::mousePressEvent(QMouseEvent* e) {
     if (_mouseClicked)
         return;
     
-	_buttonNum = 0;
+    _buttonNum = 0;
 	_mouseClicked = true;
 
 
@@ -431,13 +431,10 @@ void VizWin::mousePressEvent(QMouseEvent* e) {
 	else if (e->button()== Qt::LeftButton) _buttonNum = 1;
 	else if (e->button() == Qt::RightButton) _buttonNum = 3;
 	else if (e->button() == Qt::MidButton) _buttonNum = 2;
-	//If ctrl + left button is pressed, only respond in navigation mode
-	if (
-		(_buttonNum == 1) && 
-		((e->modifiers() & (Qt::ControlModifier|Qt::MetaModifier)))
-	) {
-		_buttonNum = 0;
-	}
+    
+    // ControlModifier means [command], not [control] apparently
+    if (e->button() == Qt::LeftButton && (e->modifiers() & Qt::ShiftModifier))
+        _buttonNum = 2;
 
 	if (_buttonNum == 0) {
 		_mouseClicked = true;	// mouse button is held

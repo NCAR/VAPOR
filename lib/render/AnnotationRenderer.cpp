@@ -512,7 +512,7 @@ void AnnotationRenderer::InScenePaint(size_t ts)
     if (vfParams->GetUseDomainFrame()) 
         drawDomainFrame(domainExtents);
 
-	vector<string> names = m_paramsMgr->GetDataMgrNames();
+    vector<string> names = m_paramsMgr->GetDataMgrNames();
     Transform* t = vpParams->GetTransform(names[0]);
 	applyTransform(t);
 
