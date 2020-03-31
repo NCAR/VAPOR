@@ -119,7 +119,7 @@ class TFOpacityMap : public TFMap {
     Q_OBJECT
 
   public:
-    TFOpacityMap(TFMapWidget *parent = nullptr);
+    TFOpacityMap(const std::string &variableNameTag, TFMapWidget *parent = nullptr);
 
     QSize minimumSizeHint() const override;
     void LostFocus() override;
@@ -172,6 +172,7 @@ class TFOpacityMap : public TFMap {
 };
 
 class TFOpacityWidget : public TFMapWidget {
+    Q_OBJECT
   public:
-    TFOpacityWidget();
+    TFOpacityWidget(const std::string &variableNameTag);
 };

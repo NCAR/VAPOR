@@ -6,7 +6,8 @@
 #include <vapor/RenderParams.h>
 #include "VLineItem.h"
 
-TFColorInfoWidget::TFColorInfoWidget() {
+TFColorInfoWidget::TFColorInfoWidget(const std::string &variableNameTag)
+    : TFInfoWidget(variableNameTag) {
     ((QBoxLayout *)layout())->addWidget(new VLineItem("Color", _colorEdit = new QColorWidget));
 
     connect(_colorEdit, SIGNAL(colorChanged(QColor)), this, SLOT(colorEditChanged()));
