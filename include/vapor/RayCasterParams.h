@@ -14,15 +14,6 @@ public:
     virtual ~RayCasterParams();
 
     //
-    // (Pure virtual methods from RenderParams)
-    //
-    virtual bool IsOpaque() const override { return false; }
-    virtual bool usingVariable(const std::string &varname) override
-    {
-        return false;    // since this class is for an image, not rendering a variable.
-    }
-
-    //
     //! Obtain current MapperFunction for the primary variable.
     //
     MapperFunction *GetMapperFunc();

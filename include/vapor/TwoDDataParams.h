@@ -24,13 +24,6 @@ public:
     virtual void Validate(int type);
 #endif
 
-    //! \copydoc RenderParams::IsOpaque()
-    virtual bool IsOpaque() const;
-
-    //!
-    //! \copydoc RenderParams::usingVariable()
-    virtual bool usingVariable(const std::string &varname);
-
     // Get static string identifier for this params class
     //
     static string GetClassType() { return ("TwoDDataParams"); }

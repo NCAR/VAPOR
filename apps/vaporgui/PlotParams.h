@@ -62,10 +62,6 @@ public:
 
     static string GetClassType() { return ("PlotParams"); }
 
-    // virtual functions required by RenderParams
-    virtual bool IsOpaque() const { return true; }
-    virtual bool usingVariable(const std::string &varname) { return false; }
-
 private:
     static const string _minMaxTSTag;
     static const string _p1Tag;            // point1 in space mode

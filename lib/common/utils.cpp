@@ -152,12 +152,12 @@ size_t Wasp::VProduct(const vector<size_t> &a)
 
 #define BLOCKSIZE 256
 
-void Wasp::Transpose(const float *a, float *b, int p1, int m1, int s1, int p2, int m2, int s2)
+void Wasp::Transpose(const float *a, float *b, size_t p1, size_t m1, size_t s1, size_t p2, size_t m2, size_t s2)
 {
-    int       I1, I2;
-    int       i1, i2;
-    int       q, r;
-    const int block = BLOCKSIZE;
+    size_t       I1, I2;
+    size_t       i1, i2;
+    size_t       q, r;
+    const size_t block = BLOCKSIZE;
     for (I2 = p2; I2 < p2 + m2; I2 += block)
         for (I1 = p1; I1 < p1 + m1; I1 += block)
             for (i2 = I2; i2 < min(I2 + block, p2 + m2); i2++)
@@ -168,7 +168,7 @@ void Wasp::Transpose(const float *a, float *b, int p1, int m1, int s1, int p2, i
                 }
 }
 
-void Wasp::Transpose(const float *a, float *b, int s1, int s2) { Wasp::Transpose(a, b, 0, s1, s1, 0, s2, s2); }
+void Wasp::Transpose(const float *a, float *b, size_t s1, size_t s2) { Wasp::Transpose(a, b, 0, s1, s1, 0, s2, s2); }
 
 bool Wasp::BinarySearchRange(const vector<double> &sorted, double x, size_t &i)
 {

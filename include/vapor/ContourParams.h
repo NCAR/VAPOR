@@ -33,13 +33,6 @@ public:
 
     void MakeNewContours(string varName);
 
-    //! \copydoc RenderParams::IsOpaque()
-    virtual bool IsOpaque() const;
-
-    //!
-    //! \copydoc RenderParams::usingVariable()
-    virtual bool usingVariable(const std::string &varname);
-
     //! Set the variable type being used by the barbs
     //!
     void SetVariables3D(bool val)

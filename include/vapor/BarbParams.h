@@ -31,13 +31,6 @@ public:
 
     void SetLengthScale(double val) { SetValueDouble(_lengthScaleTag, "Barb length", val); }
 
-    //! \copydoc RenderParams::IsOpaque()
-    virtual bool IsOpaque() const;
-
-    //!
-    //! \copydoc RenderParams::usingVariable()
-    virtual bool usingVariable(const std::string &varname);
-
     //! Determine the size of the discrete grid
     //! E.g. the grid on which barbs are placed.
     //! \retval vector<long> grid

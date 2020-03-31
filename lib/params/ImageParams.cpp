@@ -19,24 +19,25 @@ ImageParams::ImageParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave)
     SetVariableName("");
     SetFieldVariableNames(vector<string>());
     SetDiagMsg("ImageParams::ImageParams() this=%p", this);
-
-    //
-    // The image renderer behaves like a 2D renderer, but it doesn't operate
-    // on any data variables. If InitBox() fails to initialize using 2D
-    // data variables (because none are present in the data collection) try
-    // to initialize the Box using 3D variables
-    //
-    bool ok = InitBox(2);
-    if (!ok) {
-        InitBox(3);
-        GetBox()->SetOrientation(VAPoR::Box::XY);
-        GetBox()->SetPlanar(true);
-    }
 }
 
 ImageParams::ImageParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave, XmlNode *node) : RenderParams(dataManager, stateSave, node, 2) {}
 
 ImageParams::~ImageParams() { SetDiagMsg("ImageParams::~ImageParams() this=%p", this); }
+
+int ImageParams::Initialize()
+{
+    int rc = RenderParams::Initialize();
+    if (rc < 0) return (rc);
+
+    // The image renderer behaves like a 2D renderer, but it doesn't operate
+    // on any data variables. Make sure the box is planar.
+    //
+    GetBox()->SetOrientation(VAPoR::Box::XY);
+    GetBox()->SetPlanar(true);
+
+    return (0);
+}
 
 std::string ImageParams::GetImagePath() const
 {

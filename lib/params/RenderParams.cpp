@@ -114,8 +114,10 @@ void RenderParams::_init()
     SetConstantOpacity(1.0);
 }
 
-bool RenderParams::InitBox(int ndim)
+int RenderParams::Initialize()
 {
+    if (_classInitialized) return (0);
+
     vector<double> minExt, maxExt;
 
     //
@@ -126,14 +128,19 @@ bool RenderParams::InitBox(int ndim)
     string varname = GetVariableName();
     size_t ts = 0;
     if (!_dataMgr->VariableExists(ts, varname, 0, 0)) {
-        bool ok = DataMgrUtils::GetFirstExistingVariable(_dataMgr, 0, 0, ndim, varname, ts);
-        if (!ok) varname = "";
+        for (int ndim = 3; ndim > 0; ndim--) {
+            bool ok = DataMgrUtils::GetFirstExistingVariable(_dataMgr, 0, 0, ndim, varname, ts);
+            if (ok)
+                break;
+            else
+                varname = "";
+        }
     }
 
-    if (varname.empty()) return (false);
+    if (varname.empty()) return (0);
 
     int rc = _dataMgr->GetVariableExtents(ts, varname, 0, 0, minExt, maxExt);
-    VAssert(rc >= 0);
+    if (rc < 0) return (-1);
 
     VAssert(minExt.size() == maxExt.size() && (minExt.size() == 2 || minExt.size() == 3));
 
@@ -146,11 +153,18 @@ bool RenderParams::InitBox(int ndim)
 
     _Box->SetExtents(minExt, maxExt);
     _Box->SetPlanar(planar);
-    return (true);
+
+    vector<double> origin(minExt.size());
+    for (int i = 0; i < minExt.size(); i++) { origin[i] = minExt[i] + (maxExt[i] - minExt[i]) * 0.5; }
+    _transform->SetOrigin(origin);
+
+    _classInitialized = true;
+    return (0);
 }
 
 RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, const string &classname, int maxdim) : ParamsBase(ssave, classname)
 {
+    _classInitialized = false;
     _dataMgr = dataMgr;
     _maxDim = maxdim;
     _stride = 1;
@@ -164,26 +178,17 @@ RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, const
 
     _Box = new Box(ssave);
     _Box->SetParent(this);
-    (void)InitBox(_maxDim);
 
     _Colorbar = new ColorbarPbase(ssave);
     _Colorbar->SetParent(this);
 
     _transform = new Transform(ssave);
     _transform->SetParent(this);
-
-    vector<double> minExt;
-    vector<double> maxExt;
-    vector<double> origin;
-
-    _Box->GetExtents(minExt, maxExt);
-    origin.resize(minExt.size());
-    for (int i = 0; i < minExt.size(); i++) origin[i] = minExt[i] + (maxExt[i] - minExt[i]) * 0.5;
-    _transform->SetOrigin(origin);
 }
 
 RenderParams::RenderParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node, int maxdim) : ParamsBase(ssave, node)
 {
+    _classInitialized = true;
     _dataMgr = dataMgr;
     _maxDim = maxdim;
     _stride = 1;

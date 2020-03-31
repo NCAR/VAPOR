@@ -42,10 +42,6 @@ VolumeParams::VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNo
 
 VolumeParams::~VolumeParams() { SetDiagMsg("VolumeParams::~VolumeParams() this=%p", this); }
 
-bool VolumeParams::IsOpaque() const { return true; }
-
-bool VolumeParams::usingVariable(const std::string &varname) { return (varname.compare(GetVariableName()) == 0); }
-
 string VolumeParams::GetDefaultAlgorithmName() const { return "Regular"; }
 
 std::string VolumeParams::GetAlgorithm() const { return GetValueString(_algorithmTag, GetDefaultAlgorithmName()); }

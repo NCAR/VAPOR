@@ -23,15 +23,6 @@ TwoDDataParams::TwoDDataParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, X
 
 TwoDDataParams::~TwoDDataParams() { SetDiagMsg("TwoDDataParams::~TwoDDataParams() this=%p", this); }
 
-bool TwoDDataParams::IsOpaque() const { return true; }
-
-bool TwoDDataParams::usingVariable(const std::string &varname)
-{
-    if ((varname.compare(GetHeightVariableName()) == 0)) { return (true); }
-
-    return (varname.compare(GetVariableName()) == 0);
-}
-
 // Set everything to default values
 void TwoDDataParams::_init()
 {

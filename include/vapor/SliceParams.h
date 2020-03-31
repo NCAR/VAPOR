@@ -19,6 +19,8 @@ public:
 
     virtual ~SliceParams();
 
+    virtual int Initialize() override;
+
     // Get static string identifier for this params class
     //
     static string GetClassType() { return ("SliceParams"); }
@@ -26,8 +28,6 @@ public:
     int GetSampleRate() const;
 
     void SetSampleRate(int rate);
-
-    bool IsOpaque() const;
 
     int GetDefaultSampleRate() const;
 
@@ -37,7 +37,6 @@ public:
 
 private:
     void                _init();
-    bool                usingVariable(const std::string &varname);
     std::vector<double> _cachedValues;
 
     static const string _sampleRateTag;
