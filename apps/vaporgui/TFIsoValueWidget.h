@@ -14,13 +14,17 @@ class TFIsoValueMap : public TFMap {
 public:
     bool BottomPadding = false;
 
-    TFIsoValueMap(TFMapWidget *parent = nullptr);
+    TFIsoValueMap(const std::string &variableNameTag, TFMapWidget *parent = nullptr);
     void PopulateContextMenu(QMenu *menu, const glm::vec2 &p) override;
 
     QSize minimumSizeHint() const override;
     void  LostFocus() override;
 
-    void SetEquidistantIsoValues(bool b) { _equidistantIsoValues = b; }
+    TFIsoValueMap *SetEquidistantIsoValues(bool b)
+    {
+        _equidistantIsoValues = b;
+        return this;
+    }
 
 protected:
     void          paramsUpdate() override;
@@ -79,5 +83,5 @@ private slots:
 
 class TFIsoValueWidget : public TFMapWidget {
 public:
-    TFIsoValueWidget() : TFMapWidget(new TFIsoValueMap(this)) {}
+    TFIsoValueWidget(const std::string &variableNameTag) : TFMapWidget(new TFIsoValueMap(variableNameTag, this)) {}
 };

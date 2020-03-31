@@ -370,10 +370,7 @@ private:
     static const string _editBoundsTag;
     static const string _histoBoundsTag;
     static const string _cursorCoordsTag;
-    static const string _heightVariableNameTag;
-    static const string _colorMapVariableNameTag;
     static const string _terrainMapTag;
-    static const string _variableNameTag;
     static const string _fieldVariableNamesTag;
     static const string _auxVariableNamesTag;
     static const string _distribVariableNamesTag;
@@ -387,6 +384,9 @@ private:
     string _findVarStartingWithLetter(std::vector<string> searchVars, char letter);
 
 public:
+    static const string _variableNameTag;
+    static const string _colorMapVariableNameTag;
+    static const string _heightVariableNameTag;
     static const string _useSingleColorTag;
     static const string _constantColorTag;
 };

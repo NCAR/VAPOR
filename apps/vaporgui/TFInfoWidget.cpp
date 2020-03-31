@@ -11,7 +11,7 @@
     #define __FLT_MAX__ FLT_MAX
 #endif
 
-TFInfoWidget::TFInfoWidget()
+TFInfoWidget::TFInfoWidget(const std::string &variableNameTag) : _variableNameTag(variableNameTag)
 {
     QBoxLayout *layout = new QVBoxLayout;
     layout->setSpacing(12);
@@ -40,11 +40,7 @@ void TFInfoWidget::Update(VAPoR::RenderParams *rParams)
 {
     if (!rParams) return;
 
-    string variableName;
-    if (UsingColormapVariable)
-        variableName = rParams->GetColorMapVariableName();
-    else
-        variableName = rParams->GetVariableName();
+    string variableName = rParams->GetValueString(_variableNameTag, "");
 
     _min = rParams->GetMapperFunc(variableName)->getMinMapValue();
     _max = rParams->GetMapperFunc(variableName)->getMaxMapValue();

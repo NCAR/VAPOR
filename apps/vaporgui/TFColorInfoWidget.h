@@ -12,7 +12,7 @@ class TFColorInfoWidget : public TFInfoWidget {
     Q_OBJECT
 
 public:
-    TFColorInfoWidget();
+    TFColorInfoWidget(const std::string &variableNameTag);
     void SetColor(const QColor &color);
 
 protected:

@@ -76,6 +76,7 @@
 #include "FileOperationChecker.h"
 #include "windowsUtils.h"
 #include "MouseModeParams.h"
+#include "ParamsWidgetDemo.h"
 
 // Following shortcuts are provided:
 // CTRL_N: new session
@@ -394,6 +395,8 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
  */
 MainForm::~MainForm()
 {
+    if (_paramsWidgetDemo) _paramsWidgetDemo->close();
+
     if (_modeStatusWidget) delete _modeStatusWidget;
     if (_banner) delete _banner;
     if (_controlExec) delete _controlExec;
@@ -843,6 +846,15 @@ void MainForm::_createHelpMenu()
     connect(_webDocumentationAction, &QAction::triggered, this, &MainForm::launchWebDocs);
 }
 
+void MainForm::_createDeveloperMenu()
+{
+    _paramsWidgetDemo = new ParamsWidgetDemo;
+    //    _paramsWidgetDemo->setWindowFlags(_paramsWidgetDemo->windowFlags() & ~Qt::WA_QuitOnClose);
+
+    _developerMenu = menuBar()->addMenu("Developer");
+    _developerMenu->addAction("Show PWidget Demo", _paramsWidgetDemo, &QWidget::show);
+}
+
 void MainForm::createMenus()
 {
     // menubar
@@ -854,6 +866,9 @@ void MainForm::createMenus()
     _createToolsMenu();
     _createCaptureMenu();
     _createHelpMenu();
+#ifndef NDEBUG
+    _createDeveloperMenu();
+#endif
 }
 
 void MainForm::sessionOpenHelper(string fileName)
@@ -1079,7 +1094,7 @@ void MainForm::helpAbout()
                               "Web site: http://www.vapor.ucar.edu\n"
                               "Contact: vapor@ucar.edu\n"
                               "Version: "
-                            + string(Version::GetVersionString().c_str());
+                            + string(Version::GetFullVersionString().c_str());
 
     _banner = new BannerGUI(this, banner_file_name, -1, true, banner_text.c_str(), "http://www.vapor.ucar.edu");
 }
@@ -1530,6 +1545,10 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
 
         setUpdatesEnabled(false);
         _tabMgr->Update();
+
+#ifndef NDEBUG
+        _paramsWidgetDemo->Update(GetStateParams(), _paramsMgr);
+#endif
         setUpdatesEnabled(true);
 
         // force visualizer redraw
@@ -1549,6 +1568,10 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         // force visualizer redraw
         //
         _vizWinMgr->Update(true);
+
+#ifndef NDEBUG
+        _paramsWidgetDemo->Update(GetStateParams(), _paramsMgr);
+#endif
 
         //        update();
 

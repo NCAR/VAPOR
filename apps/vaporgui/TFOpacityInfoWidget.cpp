@@ -6,7 +6,7 @@
 #include <vapor/RenderParams.h>
 #include "VLineItem.h"
 
-TFOpacityInfoWidget::TFOpacityInfoWidget()
+TFOpacityInfoWidget::TFOpacityInfoWidget(const std::string &variableNameTag) : TFInfoWidget(variableNameTag)
 {
     ((QBoxLayout *)layout())->addWidget(new VLineItem("Opacity", _opacityEdit = new QLineEdit));
 

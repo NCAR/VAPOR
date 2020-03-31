@@ -3,7 +3,7 @@
 #include <QLabel>
 #include <QBoxLayout>
 
-TFHistogramInfoWidget::TFHistogramInfoWidget() { _valueEdit->setReadOnly(true); }
+TFHistogramInfoWidget::TFHistogramInfoWidget(const std::string &variableNameTag) : TFInfoWidget(variableNameTag) { _valueEdit->setReadOnly(true); }
 
 void TFHistogramInfoWidget::SetControlPoint(float value)
 {

@@ -30,6 +30,8 @@ public:
     // Note: VLineEdit does NOT support an integer type at this point.
     // When isDouble == false, it represents a string.
     void SetIsDouble(bool isDouble);
+    //! Sets the line edit to read-only based on the value of b
+    void SetReadOnly(bool b);
 
     void UseDoubleMenu();
 

@@ -21,4 +21,6 @@ private:
     static const int _TOP_MARGIN;
     static const int _BOTTOM_MARGIN;
     static const int _RIGHT_MARGIN;
+
+    VLineItem(const std::string &label);
 };

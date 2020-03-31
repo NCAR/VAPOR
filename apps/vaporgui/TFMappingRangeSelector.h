@@ -14,14 +14,13 @@ class TFMappingRangeSelector : public QRangeSliderTextCombo {
     Q_OBJECT
 
 public:
-    bool UsingColormapVariable;
-
-    TFMappingRangeSelector();
+    TFMappingRangeSelector(const std::string &variableNameTag);
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
 private:
     VAPoR::RenderParams *_rParams = nullptr;
     VAPoR::ParamsMgr *   _paramsMgr = nullptr;
+    const std::string &  _variableNameTag;
 
     void                   _getDataRange(VAPoR::DataMgr *dataMgr, VAPoR::RenderParams *rParams, float *min, float *max) const;
     std::string            _getVariableName() const;

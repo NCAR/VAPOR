@@ -12,7 +12,7 @@ using std::vector;
 
 static vec2 qvec2(const QPoint &qp) { return vec2(qp.x(), qp.y()); }
 
-TFIsoValueMap::TFIsoValueMap(TFMapWidget *parent) : TFMap(parent) {}
+TFIsoValueMap::TFIsoValueMap(const std::string &variableNameTag, TFMapWidget *parent) : TFMap(variableNameTag, parent) {}
 
 void TFIsoValueMap::paramsUpdate()
 {
@@ -55,8 +55,7 @@ void TFIsoValueMap::LostFocus() { DeselectControlPoint(); }
 
 TFInfoWidget *TFIsoValueMap::createInfoWidget()
 {
-    TFIsoValueInfoWidget *info = new TFIsoValueInfoWidget;
-    info->UsingColormapVariable = this->UsingColormapVariable;
+    TFIsoValueInfoWidget *info = new TFIsoValueInfoWidget(getVariableNameTag());
 
     connect(this, SIGNAL(ControlPointDeselected()), info, SLOT(Deselect()));
     connect(this, SIGNAL(UpdateInfo(float)), info, SLOT(SetControlPoint(float)));

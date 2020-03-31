@@ -24,22 +24,20 @@ class TFMapWidget;
 class TFMap : public QObject {
     Q_OBJECT
 
-    TFMapWidget * _parent = nullptr;
-    TFInfoWidget *_infoWidget = nullptr;
-    int           _width = 0;
-    int           _height = 0;
-    bool          _insideSaveStateGroup = false;
-    bool          _hidden = false;
+    const std::string _variableNameTag;
+    TFMapWidget *     _parent = nullptr;
+    TFInfoWidget *    _infoWidget = nullptr;
+    int               _width = 0;
+    int               _height = 0;
+    bool              _insideSaveStateGroup = false;
+    bool              _hidden = false;
 
     VAPoR::DataMgr *     _dataMgr = nullptr;
     VAPoR::ParamsMgr *   _paramsMgr = nullptr;
     VAPoR::RenderParams *_renderParams = nullptr;
 
 public:
-    //! Used by the TFEditorIsoSurface to edit the colormapped variable
-    bool UsingColormapVariable = false;
-
-    TFMap(TFMapWidget *parent = nullptr);
+    TFMap(const std::string &variableNameTag, TFMapWidget *parent = nullptr);
 
     TFInfoWidget *GetInfoWidget();
     void          Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
@@ -83,6 +81,7 @@ protected:
     VAPoR::RenderParams *  getRenderParams() const { return _renderParams; }
     VAPoR::MapperFunction *getMapperFunction() const;
     std::string            getVariableName() const;
+    const std::string &    getVariableNameTag() const;
 
     void                  drawControl(QPainter &p, const QPointF &pos, bool selected = false) const;
     virtual TFInfoWidget *createInfoWidget() = 0;
@@ -108,7 +107,7 @@ signals:
 //! \class TFMapWidget
 //! Wrap a TFMap(s) in a QWidget
 
-class TFMapWidget : public QFrame {
+class TFMapWidget : public QWidget {
     Q_OBJECT
 
     std::vector<TFMap *> _maps;

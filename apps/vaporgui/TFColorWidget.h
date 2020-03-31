@@ -14,7 +14,7 @@ class TFColorMap : public TFMap {
     Q_OBJECT
 
 public:
-    TFColorMap(TFMapWidget *parent = nullptr);
+    TFColorMap(const std::string &variableNameTag, TFMapWidget *parent = nullptr);
 
     QSize minimumSizeHint() const override;
     void  LostFocus() override;
@@ -78,8 +78,9 @@ private slots:
 };
 
 class TFColorWidget : public TFMapWidget {
+    Q_OBJECT
 public:
-    TFColorWidget() : TFMapWidget(new TFColorMap(this)) {}
+    TFColorWidget(const std::string &variableNameTag) : TFMapWidget(new TFColorMap(variableNameTag, this)) {}
 };
 
 #include <QWidgetAction>

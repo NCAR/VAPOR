@@ -55,6 +55,8 @@ std::string VLineEdit::GetValue() const { return _value; }
 
 void VLineEdit::SetIsDouble(bool isDouble) { _isDouble = isDouble; }
 
+void VLineEdit::SetReadOnly(bool b) { _lineEdit->setReadOnly(b); }
+
 void VLineEdit::emitLineEditChanged()
 {
     std::string value = _lineEdit->text().toStdString();

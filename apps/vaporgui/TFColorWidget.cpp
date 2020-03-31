@@ -16,7 +16,7 @@ using std::vector;
 
 static vec2 qvec2(const QPoint &qp) { return vec2(qp.x(), qp.y()); }
 
-TFColorMap::TFColorMap(TFMapWidget *parent) : TFMap(parent)
+TFColorMap::TFColorMap(const std::string &variableNameTag, TFMapWidget *parent) : TFMap(variableNameTag, parent)
 {
     _colorInterpolationMenu = new ParamsDropdownMenuItem(
         this, VAPoR::ColorMap::_interpTypeTag, {"Linear HSV", "Linear RGB", "Linear LAB", "Linear LCH", "Discrete", "Diverging"},
@@ -90,8 +90,7 @@ void TFColorMap::paramsUpdate()
 
 TFInfoWidget *TFColorMap::createInfoWidget()
 {
-    TFColorInfoWidget *info = new TFColorInfoWidget;
-    info->UsingColormapVariable = this->UsingColormapVariable;
+    TFColorInfoWidget *info = new TFColorInfoWidget(getVariableNameTag());
 
     connect(this, SIGNAL(ControlPointDeselected()), info, SLOT(DeselectControlPoint()));
     connect(this, SIGNAL(UpdateInfo(float, QColor)), info, SLOT(SetControlPoint(float, QColor)));

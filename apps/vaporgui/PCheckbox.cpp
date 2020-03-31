@@ -1,16 +1,18 @@
 #include "PCheckbox.h"
+#include "VCheckBox.h"
 #include "VLineItem.h"
 #include <vapor/ParamsBase.h>
 
-PCheckbox::PCheckbox(const std::string &tag, const std::string &label) : PWidget(tag, new VLineItem(label == "" ? tag : label, _qcheckbox = new QCheckBox))
+PCheckbox::PCheckbox(const std::string &tag, const std::string &label) : PLineItem(tag, label, _vcheckbox = new VCheckBox)
 {
-    connect(_qcheckbox, SIGNAL(stateChanged(int)), this, SLOT(checkboxStateChanged(int)));
+    connect(_vcheckbox, &VCheckBox::ValueChanged, this, &PCheckbox::checkboxStateChanged);
 }
 
 void PCheckbox::updateGUI() const
 {
-    bool on = getParams()->GetValueLong(GetTag(), 0);
-    _qcheckbox->setChecked(on);
+    bool on = getParamsLong();
+
+    _vcheckbox->SetValue(on);
 }
 
-void PCheckbox::checkboxStateChanged(int state) { getParams()->SetValueLong(GetTag(), GetTag(), state == Qt::CheckState::Checked); }
+void PCheckbox::checkboxStateChanged(bool on) { setParamsLong(on); }

@@ -10,8 +10,10 @@ class RenderParams;
 class TFHistogramInfoWidget : public TFInfoWidget {
     Q_OBJECT
 
+    using TFInfoWidget::TFInfoWidget;
+
 public:
-    TFHistogramInfoWidget();
+    TFHistogramInfoWidget(const std::string &variableNameTag);
 
 public slots:
     void SetControlPoint(float value);

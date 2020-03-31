@@ -68,6 +68,7 @@ public:
         virtual void Save(const XmlNode *node, string description) {}
         virtual void BeginGroup(string description) {}
         virtual void EndGroup() {}
+        virtual void IntermediateChange() {}
         virtual void SetEnabled(bool onOff) {}
         virtual bool GetEnabled() const { return (false); }
     };
@@ -131,6 +132,10 @@ public:
     void SetParent(ParamsBase *parent);
 
     XmlNode *GetNode() const { return _node; }
+
+    void BeginGroup(const string &description) { _ssave->BeginGroup(description); }
+    void EndGroup() { _ssave->EndGroup(); }
+    void IntermediateChange() { _ssave->IntermediateChange(); }
 
     virtual vector<long> GetValueLongVec(const string tag) const;
 

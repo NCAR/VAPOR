@@ -20,7 +20,10 @@ using std::vector;
 
 #define SCALING_TAG "HistogramScalingTag"
 
-TFHistogramMap::TFHistogramMap(TFMapWidget *parent) : TFMap(parent) { _scalingMenu = new ParamsDropdownMenuItem(this, SCALING_TAG, {"Linear", "Logarithmic", "Boolean"}, {}, "Histogram Scaling"); }
+TFHistogramMap::TFHistogramMap(const std::string &variableNameTag, TFMapWidget *parent) : TFMap(variableNameTag, parent)
+{
+    _scalingMenu = new ParamsDropdownMenuItem(this, SCALING_TAG, {"Linear", "Logarithmic", "Boolean"}, {}, "Histogram Scaling");
+}
 
 QSize TFHistogramMap::minimumSizeHint() const
 {
@@ -48,8 +51,7 @@ void TFHistogramMap::paramsUpdate()
 
 TFInfoWidget *TFHistogramMap::createInfoWidget()
 {
-    TFHistogramInfoWidget *info = new TFHistogramInfoWidget;
-    info->UsingColormapVariable = this->UsingColormapVariable;
+    TFHistogramInfoWidget *info = new TFHistogramInfoWidget(getVariableNameTag());
 
     connect(this, SIGNAL(UpdateInfo(float)), info, SLOT(SetControlPoint(float)));
     connect(this, SIGNAL(InfoDeselected()), info, SLOT(Deselect()));

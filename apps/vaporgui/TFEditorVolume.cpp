@@ -8,25 +8,23 @@
 #include "ParamsWidgets.h"
 #include <vapor/VolumeParams.h>
 
+using VAPoR::RenderParams;
+
 TFEditorVolume::TFEditorVolume() : TFEditor()
 {
     layout()->addWidget(_colormappedVariableCheckbox = new ParamsWidgetCheckbox(VAPoR::VolumeParams::UseColormapVariableTag, "Color by second variable"));
 
     _maps2 = new TFMapGroupWidget;
-    _histogramMap2 = new TFHistogramMap;
-    _colorMap2 = new TFColorMap;
-
-    _histogramMap2->UsingColormapVariable = true;
-    _colorMap2->UsingColormapVariable = true;
+    _histogramMap2 = new TFHistogramMap(RenderParams::_colorMapVariableNameTag);
+    _colorMap2 = new TFColorMap(RenderParams::_colorMapVariableNameTag);
 
     _maps2->Add(_histogramMap2);
     _maps2->Add(_colorMap2);
 
     layout()->addWidget(_maps2);
     layout()->addWidget(_mapsInfo2 = _maps2->CreateInfoGroup());
-    layout()->addWidget(range2 = new TFMappingRangeSelector);
+    layout()->addWidget(range2 = new TFMappingRangeSelector(RenderParams::_colorMapVariableNameTag));
     connect(range2, SIGNAL(ValueChangedIntermediate(float, float)), _histogramMap2, SLOT(update()));
-    range2->UsingColormapVariable = true;
 }
 
 void TFEditorVolume::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)

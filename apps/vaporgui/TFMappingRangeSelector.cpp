@@ -3,7 +3,7 @@
 #include <vapor/ParamsMgr.h>
 #include <vapor/DataMgrUtils.h>
 
-TFMappingRangeSelector::TFMappingRangeSelector()
+TFMappingRangeSelector::TFMappingRangeSelector(const std::string &variableNameTag) : _variableNameTag(variableNameTag)
 {
     AllowCustomRange();
 
@@ -46,13 +46,7 @@ void TFMappingRangeSelector::_getDataRange(VAPoR::DataMgr *d, VAPoR::RenderParam
     *max = range[1];
 }
 
-std::string TFMappingRangeSelector::_getVariableName() const
-{
-    if (UsingColormapVariable)
-        return _rParams->GetColorMapVariableName();
-    else
-        return _rParams->GetVariableName();
-}
+std::string TFMappingRangeSelector::_getVariableName() const { return _rParams->GetValueString(_variableNameTag, ""); }
 
 VAPoR::MapperFunction *TFMappingRangeSelector::_getTF() const { return _rParams->GetMapperFunc(_getVariableName()); }
 

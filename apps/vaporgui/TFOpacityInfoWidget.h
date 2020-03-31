@@ -11,7 +11,7 @@ class TFOpacityInfoWidget : public TFInfoWidget {
     Q_OBJECT
 
 public:
-    TFOpacityInfoWidget();
+    TFOpacityInfoWidget(const std::string &variableNameTag);
 
 public:
     void SetOpacity(float opacity);

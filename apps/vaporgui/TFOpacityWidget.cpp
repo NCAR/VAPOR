@@ -40,7 +40,7 @@ static float DistanceToLine(vec2 a, vec2 b, vec2 p)
 #define CONTROL_POINT_RADIUS (4.0f)
 #define PADDING              (CONTROL_POINT_RADIUS + 1.0f)
 
-TFOpacityMap::TFOpacityMap(TFMapWidget *parent) : TFMap(parent) {}
+TFOpacityMap::TFOpacityMap(const std::string &variableNameTag, TFMapWidget *parent) : TFMap(variableNameTag, parent) {}
 
 QSize TFOpacityMap::minimumSizeHint() const { return QSize(100, 75); }
 
@@ -87,8 +87,7 @@ void TFOpacityMap::paramsUpdate()
 
 TFInfoWidget *TFOpacityMap::createInfoWidget()
 {
-    TFOpacityInfoWidget *info = new TFOpacityInfoWidget;
-    info->UsingColormapVariable = this->UsingColormapVariable;
+    TFOpacityInfoWidget *info = new TFOpacityInfoWidget(getVariableNameTag());
 
     connect(info, SIGNAL(ControlPointChanged(float, float)), this, SLOT(UpdateFromInfo(float, float)));
     connect(this, SIGNAL(UpdateInfo(float, float)), info, SLOT(SetControlPoint(float, float)));
@@ -328,8 +327,8 @@ void TFOpacityMap::UpdateFromInfo(float value, float opacity)
     opacityChanged();
 }
 
-TFOpacityWidget::TFOpacityWidget() : TFMapWidget(new TFOpacityMap(this))
+TFOpacityWidget::TFOpacityWidget(const std::string &variableNameTag) : TFMapWidget(new TFOpacityMap(variableNameTag, this))
 {
     this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-    this->setFrameStyle(QFrame::Box);
+    // this->setFrameStyle(QFrame::Box);
 }

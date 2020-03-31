@@ -21,6 +21,7 @@ class TFEditor : public VSection {
 
 public:
     TFEditor(bool usingColormapVariable = false);
+    TFEditor(const std::string &tag);
 
     virtual void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     void         SetShowOpacityMap(bool b);

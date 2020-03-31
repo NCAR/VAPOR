@@ -10,6 +10,8 @@ class RenderParams;
 class TFIsoValueInfoWidget : public TFInfoWidget {
     Q_OBJECT
 
+    using TFInfoWidget::TFInfoWidget;
+
 protected:
     void controlPointChanged();
 

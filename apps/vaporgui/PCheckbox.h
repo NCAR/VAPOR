@@ -1,12 +1,17 @@
 #pragma once
 
-#include "PWidget.h"
-#include <QCheckBox>
+#include "PLineItem.h"
 
-class PCheckbox : public PWidget {
+class VCheckBox;
+
+//! \class PCheckbox
+//! Creates a Qt Checkbox synced with the paramsdatabase using the PWidget interface.
+//! \copydoc PWidget
+
+class PCheckbox : public PLineItem {
     Q_OBJECT
 
-    QCheckBox *_qcheckbox;
+    VCheckBox *_vcheckbox;
 
 public:
     PCheckbox(const std::string &tag, const std::string &label = "");
@@ -15,5 +20,5 @@ protected:
     void updateGUI() const override;
 
 private slots:
-    void checkboxStateChanged(int state);
+    void checkboxStateChanged(bool on);
 };

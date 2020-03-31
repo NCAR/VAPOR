@@ -1,17 +1,22 @@
 #include "PDoubleInput.h"
 #include "VLineItem.h"
 #include <vapor/ParamsBase.h>
-#include <QLineEdit>
+#include "VLineEdit.h"
 
-PDoubleInput::PDoubleInput(const std::string &tag, const std::string &label) : PLineItem(tag, _doubleInput = new VDoubleInput, label)
+PDoubleInput::PDoubleInput(const std::string &tag, const std::string &label) : PLineItem(tag, label, _doubleInput = new VLineEdit)
 {
-    //    connect(_doubleInput, SIGNAL(ValueChanged(double)), this, SLOT(doubleInputValueChanged(double)));
+    _doubleInput->SetIsDouble(true);
+    connect(_doubleInput, &VLineEdit::ValueChanged, this, &PDoubleInput::doubleInputValueChanged);
 }
 
 void PDoubleInput::updateGUI() const
 {
-    // double value = getParams()->GetValueDouble(GetTag(), 0);
-    // _doubleInput->SetValue(value);
+    double value = getParamsDouble();
+    _doubleInput->SetValue(to_string(value));
 }
 
-void PDoubleInput::doubleInputValueChanged(double v) { getParams()->SetValueDouble(GetTag(), GetTag(), v); }
+void PDoubleInput::doubleInputValueChanged(const std::string &v)
+{
+    double d = stod(v);
+    setParamsDouble(d);
+}

@@ -10,7 +10,7 @@ using glm::vec2;
 #define CONTROL_POINT_RADIUS (4.0f)
 #define PADDING              (CONTROL_POINT_RADIUS + 1.0f)
 
-TFMap::TFMap(TFMapWidget *parent) : _parent(parent) {}
+TFMap::TFMap(const std::string &variableNameTag, TFMapWidget *parent) : _variableNameTag(variableNameTag), _parent(parent) {}
 
 TFInfoWidget *TFMap::GetInfoWidget()
 {
@@ -21,6 +21,7 @@ TFInfoWidget *TFMap::GetInfoWidget()
 
 void TFMap::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
 {
+    assert(_parent);
     if (_renderParams != rParams) LostFocus();
 
     _dataMgr = dataMgr;
@@ -70,13 +71,9 @@ void TFMap::hide()
 
 VAPoR::MapperFunction *TFMap::getMapperFunction() const { return _renderParams->GetMapperFunc(getVariableName()); }
 
-std::string TFMap::getVariableName() const
-{
-    if (UsingColormapVariable)
-        return _renderParams->GetColorMapVariableName();
-    else
-        return _renderParams->GetVariableName();
-}
+std::string TFMap::getVariableName() const { return _renderParams->GetValueString(_variableNameTag, ""); }
+
+const std::string &TFMap::getVariableNameTag() const { return _variableNameTag; }
 
 void TFMap::drawControl(QPainter &p, const QPointF &pos, bool selected) const
 {
@@ -274,7 +271,7 @@ void TFMapWidget::_showContextMenu(const QPoint &qp)
 //#include <vapor/GLManager.h>
 void TFMapWidget::paintEvent(QPaintEvent *event)
 {
-    QFrame::paintEvent(event);
+    QWidget::paintEvent(event);
     QPainter p(this);
     p.setRenderHint(QPainter::Antialiasing);
 
