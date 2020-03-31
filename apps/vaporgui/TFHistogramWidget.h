@@ -19,7 +19,7 @@ class TFHistogramMap : public TFMap {
     };
     
 public:
-    TFHistogramMap(TFMapWidget *parent = nullptr);
+    TFHistogramMap(const std::string &variableNameTag, TFMapWidget *parent = nullptr);
     
     QSize minimumSizeHint() const;
     void LostFocus() {}
@@ -52,6 +52,7 @@ signals:
 };
 
 class TFHistogramWidget : public TFMapWidget {
+    Q_OBJECT
 public:
-    TFHistogramWidget() : TFMapWidget(new TFHistogramMap(this)) {}
+    TFHistogramWidget(const std::string &variableNameTag) : TFMapWidget(new TFHistogramMap(variableNameTag, this)) {}
 };
