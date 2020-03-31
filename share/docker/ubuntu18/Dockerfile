@@ -32,9 +32,9 @@ RUN fileid="1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd" \
 RUN chmod -R 777 /usr
 RUN chown -R root:root /usr
 RUN tar -xf /usr/local/VAPOR-Deps/2019-Aug-Ubuntu.tar.xz \ 
-    -C /usr/local/VAPOR-Deps
-
-#RUN chmod -R 777 /usr
+    -C /usr/local/VAPOR-Deps \
+    && chown -R root:root /usr
+RUN chmod -R 777 /usr
 
 #RUN ls -lrth /usr/local/VAPOR-Deps/2019-Aug
 
@@ -47,10 +47,9 @@ RUN fileid="1w8CLOohQuVrhcDbmIyU68whvqaoiCx9t" \
     && curl -Lb ./cookie \
     "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${fileid}" \
     -o ${filename}
-RUN ls /
 RUN tar -xf /tmp/smokeTestData.tar.gz \ 
     -C /smokeTestData \
-    && chown -R root:root /root
+    && chown -R root:root /smokeTestData
 RUN chmod -R 777 /smokeTestData
 
 RUN cd / \
