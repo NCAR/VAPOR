@@ -69,18 +69,6 @@ ContourParams::~ContourParams() {
     }
 }
 
-bool ContourParams::IsOpaque() const {
-    return true;
-}
-
-bool ContourParams::usingVariable(const std::string &varname) {
-    if ((varname.compare(GetHeightVariableName()) == 0)) {
-        return (true);
-    }
-
-    return (varname.compare(GetVariableName()) == 0);
-}
-
 vector<double> ContourParams::GetIsoValues(const string &variable) {
     return GetContourValues(variable);
 }

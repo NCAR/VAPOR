@@ -410,6 +410,20 @@ class PARAMS_API ParamsMgr : public MyBase {
         return (itr != _otherRenParams.cend() ? itr->second->GetParams(classType) : NULL);
     }
 
+    //! Optain any render paramers registered by the application for a given data set
+    //!
+    //! This method returns params that have been registered on the
+    //! ParamsMgr via RegisterAppParams() for the data set named
+    //! by \p dataSetName;
+    //!
+    //! \param[in] dataSetName
+    //! \param[out] appRenderParams a vector of application render params associated with \p dataSetName
+    //!
+    //! \sa ParamsMgr()
+    //
+    void GetAppRenderParams(
+        string dataSetName, vector<RenderParams *> &appRenderParams) const;
+
     //! Save current state to a file
     //!
     //! Save the current state of the parameter database to an XML file
@@ -641,7 +655,7 @@ class PARAMS_API ParamsMgr : public MyBase {
     static const string _windowsTag;
 
     void _init(std::vector<string> appParamNames, XmlNode *node);
-    void _initAppRenParams(string dataSetName);
+    void _createAppRenParams(string dataSetName);
     void _destroy();
 
     const map<string, map<string, RenParamsContainer *>> *getWinMap3(

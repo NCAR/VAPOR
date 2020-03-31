@@ -45,6 +45,14 @@ void SliceParams::_init() {
 
     SetFieldVariableNames(vector<string>());
 
+    SetSampleRate(MIN_DEFAULT_SAMPLERATE);
+}
+
+int SliceParams::Initialize() {
+    int rc = RenderParams::Initialize();
+    if (rc < 0)
+        return (rc);
+
     Box *box = GetBox();
     box->SetOrientation(XY);
 
@@ -55,7 +63,7 @@ void SliceParams::_init() {
     maxExt[Z] = average;
     box->SetExtents(minExt, maxExt);
 
-    SetSampleRate(MIN_DEFAULT_SAMPLERATE);
+    return (0);
 }
 
 int SliceParams::GetDefaultSampleRate() const {
@@ -69,18 +77,6 @@ int SliceParams::GetDefaultSampleRate() const {
         sampleRate = MIN_DEFAULT_SAMPLERATE;
 
     return sampleRate;
-}
-
-bool SliceParams::IsOpaque() const {
-    return true;
-}
-
-bool SliceParams::usingVariable(const std::string &varname) {
-    if ((varname.compare(GetHeightVariableName()) == 0)) {
-        return (true);
-    }
-
-    return (varname.compare(GetVariableName()) == 0);
 }
 
 int SliceParams::GetSampleRate() const {

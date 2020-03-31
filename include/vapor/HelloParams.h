@@ -19,14 +19,6 @@ class PARAMS_API HelloParams : public RenderParams {
 
     virtual ~HelloParams();
 
-    //! \copydoc RenderParams::IsOpaque()
-    virtual bool IsOpaque() const { return true; }
-
-    //! \copydoc RenderParams::usingVariable()
-    virtual bool usingVariable(const std::string &varname) {
-        return (GetVariableName() == varname);
-    }
-
     //! Determine line thickness in voxels
     //! \retval double line thickness
     double GetLineThickness() {

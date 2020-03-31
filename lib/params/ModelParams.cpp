@@ -32,14 +32,6 @@ ModelParams::~ModelParams() {
     SetDiagMsg("ModelParams::~ModelParams() this=%p", this);
 }
 
-bool ModelParams::IsOpaque() const {
-    return true;
-}
-
-bool ModelParams::usingVariable(const std::string &varname) {
-    return false;
-}
-
 //Set everything to default values
 void ModelParams::_init() {
     SetDiagMsg("ModelParams::_init()");

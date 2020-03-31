@@ -19,6 +19,8 @@ class PARAMS_API SliceParams : public RenderParams {
 
     virtual ~SliceParams();
 
+    virtual int Initialize() override;
+
     // Get static string identifier for this params class
     //
     static string GetClassType() {
@@ -29,8 +31,6 @@ class PARAMS_API SliceParams : public RenderParams {
 
     void SetSampleRate(int rate);
 
-    bool IsOpaque() const;
-
     int GetDefaultSampleRate() const;
 
     void SetCachedValues(std::vector<double> values);
@@ -39,7 +39,6 @@ class PARAMS_API SliceParams : public RenderParams {
 
   private:
     void _init();
-    bool usingVariable(const std::string &varname);
     std::vector<double> _cachedValues;
 
     static const string _sampleRateTag;

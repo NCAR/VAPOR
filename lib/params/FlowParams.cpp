@@ -30,18 +30,6 @@ FlowParams::FlowParams(DataMgr *dataManager,
                    3 /* max dim */) {
     SetVariableName("");
     SetDiagMsg("FlowParams::FlowParams() this=%p", this);
-
-    // At this point the base class is initialized, and the _Box is properly initialized
-    // to be the extents of the domain. Let's use that information to initialize the rake!
-    std::vector<double> minext, maxext;
-    auto box = RenderParams::GetBox();
-    box->GetExtents(minext, maxext);
-    std::vector<float> floats(minext.size() * 2);
-    for (int i = 0; i < minext.size(); i++) {
-        floats[i * 2] = minext[i];
-        floats[i * 2 + 1] = maxext[i];
-    }
-    this->SetRake(floats);
 }
 
 FlowParams::FlowParams(DataMgr *dataManager,
@@ -57,6 +45,30 @@ FlowParams::FlowParams(DataMgr *dataManager,
 // Destructor
 FlowParams::~FlowParams() {
     SetDiagMsg("FlowParams::~FlowParams() this=%p", this);
+}
+
+int FlowParams::Initialize() {
+
+    int rc = RenderParams::Initialize();
+    if (rc < 0)
+        return (rc);
+
+    // At this point the base class is initialized, and the _Box is
+    // properly initialized
+    // to be the extents of the domain. Let's use that information to
+    // initialize the rake!
+    //
+    std::vector<double> minext, maxext;
+    auto box = RenderParams::GetBox();
+    box->GetExtents(minext, maxext);
+    std::vector<float> floats(minext.size() * 2);
+    for (int i = 0; i < minext.size(); i++) {
+        floats[i * 2] = minext[i];
+        floats[i * 2 + 1] = maxext[i];
+    }
+    this->SetRake(floats);
+
+    return (0);
 }
 
 void FlowParams::SetIsSteady(bool steady) {

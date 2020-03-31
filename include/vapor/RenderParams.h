@@ -58,6 +58,22 @@ class PARAMS_API RenderParams : public ParamsBase {
 
     virtual ~RenderParams();
 
+    //! Initialize the class.
+    //!
+    //! Must be called immediately after the constructor:
+    //!
+    //!  RenderParams(DataMgr *, ParamsBase::StateSave *, const string &, int maxdim);
+    //!
+    //! The results of
+    //! calling any other methods before calling Initialize() are
+    //! undefined.
+    //!
+    //! Subsequent calls to Initialize() after the first call are a no-op.
+    //!
+    //! \retval returns integer >= 0 on success, otherwise failure
+    //
+    virtual int Initialize();
+
     //! Determine if this params has been enabled for rendering
     //!
     //! Default is false.
@@ -175,11 +191,6 @@ class PARAMS_API RenderParams : public ParamsBase {
     //! \param[in] val  compression level, 0 is most compressed
     //!
     virtual void SetCompressionLevel(int val);
-
-    //! Pure virtual method indicates whether or not the object will render as opaque.
-    //! Important to support multiple transparent (nonoverlapping) objects in the scene
-    //! \retval bool true if all geometry is opaque.
-    virtual bool IsOpaque() const = 0;
 
     //! Specify a stretch factor used in displaying histograms in
     //! mapper functions.
@@ -341,12 +352,6 @@ class PARAMS_API RenderParams : public ParamsBase {
 
     void initializeBypassFlags();
 
-    //! Pure virtual method indicates if a particular variable name
-    //! is currently used by the renderer.
-    //! \param[in] varname name of the variable
-    //!
-    virtual bool usingVariable(const std::string &varname) = 0;
-
     //! Set reasonable default variables
     //! \param[in] The dimension of the variables being set
     //! \param[in] Indicates whether we're using color mapped variables
@@ -365,8 +370,6 @@ class PARAMS_API RenderParams : public ParamsBase {
     vector<double> GetIsoValues() { return GetIsoValues(GetVariableName()); }
     void SetIsoValues(const vector<double> &values) { SetIsoValues(GetVariableName(), values); }
 
-    bool InitBox(int ndim);
-
   protected:
     DataMgr *_dataMgr;
     int _maxDim;
@@ -381,6 +384,7 @@ class PARAMS_API RenderParams : public ParamsBase {
     Box *_Box;
     ColorbarPbase *_Colorbar;
     Transform *_transform;
+    bool _classInitialized; //
 
     static const string _EnabledTag;
     static const string _histoScaleTag;

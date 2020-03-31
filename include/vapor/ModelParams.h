@@ -14,10 +14,6 @@ class PARAMS_API ModelParams : public RenderParams {
     ModelParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node);
     virtual ~ModelParams();
 
-    virtual bool IsOpaque() const;
-
-    virtual bool usingVariable(const std::string &varname);
-
     static string GetClassType() {
         return ("ModelParams");
     }

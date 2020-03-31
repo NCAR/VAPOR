@@ -140,7 +140,8 @@ COMMON_API std::vector<size_t> VectorizeCoords(
 //    s1,s2: size of entire matrix (row,col)
 //
 COMMON_API void Transpose(
-    const float *a, float *b, int p1, int m1, int s1, int p2, int m2, int s2);
+    const float *a, float *b, size_t p1, size_t m1, size_t s1,
+    size_t p2, size_t m2, size_t s2);
 
 //
 // blocked matrix Transpose single threaded
@@ -148,7 +149,7 @@ COMMON_API void Transpose(
 //   *b : pointer to output matrix
 //    s1,s2: size of entire matrix (row,col)
 //
-COMMON_API void Transpose(const float *a, float *b, int s1, int s2);
+COMMON_API void Transpose(const float *a, float *b, size_t s1, size_t s2);
 
 // Perform a binary search in a sorted (increasing or decreasing) 1D
 // vector of values for the
