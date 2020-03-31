@@ -51,14 +51,6 @@ VolumeParams::~VolumeParams() {
 
 }
 
-bool VolumeParams::IsOpaque() const {
-	return true;
-}
-
-bool VolumeParams::usingVariable(const std::string& varname) {
-	return(varname.compare(GetVariableName()) == 0);
-}
-
 string VolumeParams::GetDefaultAlgorithmName() const
 {
     return "Regular";
