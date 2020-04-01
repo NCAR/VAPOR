@@ -1,4 +1,5 @@
 #include <iostream>
+#include <functional>
 #include <vapor/DC.h>
 #include <vapor/MyBase.h>
 #include <vapor/Proj4API.h>
