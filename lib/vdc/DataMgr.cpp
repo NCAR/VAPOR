@@ -2584,6 +2584,8 @@ bool DataMgr::_hasVerticalXForm(
 	bool ok = _dc->GetMesh(meshname, m);
 	if (! ok) return(false);
 
+	if (m.GetDimNames().size() != 3) return(false);
+
 	vector <string> coordVars = m.GetCoordVars();
 	
 	bool hasVertCoord = false;
@@ -2616,7 +2618,8 @@ bool DataMgr::_hasVerticalXForm(
 
 	// Currently only support one vertical transform!!!
 	//
-	if (! DerivedCoordVarStandardWRF_Terrain::ValidFormula(formula_terms)) {
+	if (! DerivedCoordVarStandardWRF_Terrain::ValidFormula(formula_terms) &&
+		! DerivedCoordVarStandardOceanSCoordinateG2::ValidFormula(formula_terms)) {
 		return(false);
 	}
 
@@ -3856,10 +3859,19 @@ int DataMgr::_initVerticalCoordVars() {
 
 		VAssert (m.GetCoordVars().size() > 2);
 
-		DerivedCoordVarStandardWRF_Terrain *derivedVar = 
-			new DerivedCoordVarStandardWRF_Terrain(
+		DerivedCoordVar *derivedVar = NULL;
+
+		if (DerivedCoordVarStandardWRF_Terrain::ValidFormula(formula_terms)) {
+			derivedVar = new DerivedCoordVarStandardWRF_Terrain(
 				_dc, meshnames[i], formula_terms
 			);
+		}
+		if (DerivedCoordVarStandardOceanSCoordinateG2::ValidFormula(formula_terms)) {
+			derivedVar = new DerivedCoordVarStandardOceanSCoordinateG2(
+				_dc, meshnames[i], formula_terms
+			);
+		}
+		VAssert(derivedVar != NULL);
 
 		int rc = derivedVar->Initialize(); 
 		if (rc<0) {

@@ -231,6 +231,7 @@ bool parse_formula(
 
 	for (int i=0; i<tokens.size(); i+=2) {
 		parsed_terms[tokens[i]] = tokens[i+1];
+		if (parsed_terms[tokens[i]].empty()) return(false);
 	}
 	return(true);
 }
@@ -580,6 +581,33 @@ int DerivedVar::_getVar(
 
 	return(dc->CloseVariable(fd));
 }
+
+int DerivedVar::_getVarDestagger(
+	DC *dc, size_t ts, string varname, int level, int lod,
+    const vector <size_t> &min, const vector <size_t> &max, float *region,
+	int stagDim
+) const {
+
+	VAssert(stagDim >=0 && stagDim < max.size());
+	VAssert(min.size() == max.size());
+
+	vector <size_t> maxIn = max;
+	maxIn[stagDim]++;
+
+	vector <size_t> dimsIn;
+	for (int i=0; i<min.size(); i++) {
+		dimsIn.push_back(max[i]-min[i]+1);
+	}
+	vector <float> buf(vproduct(dimsIn));
+
+	int rc = _getVar(dc, ts, varname, level, lod, min, maxIn, buf.data());
+	if (rc<0) return(rc);
+
+	resampleToUnStaggered(buf.data(), min, maxIn, region, min, max, stagDim);
+
+	return(0);
+}
+	
 
 int DerivedVar::_getVarBlock(
 	DC *dc, size_t ts, string varname, int level, int lod,
@@ -2367,6 +2395,404 @@ bool DerivedCoordVarStandardWRF_Terrain::ValidFormula(string formula) {
 	if (itr == formulaMap.end()) return(false);
 
 	itr = formulaMap.find("PHB");
+	if (itr == formulaMap.end()) return(false);
+
+	return(true);
+}
+
+////////////////////////////////////////////////////////////////////////////// 
+//
+//	DerivedCoordVarStandardOceanSCoordinateG2
+//
+////////////////////////////////////////////////////////////////////////////// 
+
+DerivedCoordVarStandardOceanSCoordinateG2::DerivedCoordVarStandardOceanSCoordinateG2(
+	DC *dc, string mesh, string formula
+) : DerivedCFVertCoordVar(
+	"", dc, mesh, formula
+) {
+
+	_sVar.clear();
+	_CVar.clear();
+	_etaVar.clear();
+	_depthVar.clear();
+	_depth_cVar.clear();
+
+	_CVarMV = std::numeric_limits<double>::infinity();
+	_etaVarMV = std::numeric_limits<double>::infinity();
+	_depthVarMV = std::numeric_limits<double>::infinity();
+
+	_destaggerEtaXDim = false;
+	_destaggerEtaYDim = false;
+	_destaggerDepthXDim = false;
+	_destaggerDepthYDim = false;
+}
+
+int DerivedCoordVarStandardOceanSCoordinateG2::initialize_missing_values() {
+
+	DC::DataVar dataInfo;
+	bool status = _dc->GetDataVarInfo(_CVar, dataInfo);
+	if (! status) {
+		SetErrMsg("Invalid variable \"%s\"", _CVar.c_str());
+		return(-1);
+	}
+	_CVarMV = dataInfo.GetMissingValue();
+
+	status = _dc->GetDataVarInfo(_etaVar, dataInfo);
+	if (! status) {
+		SetErrMsg("Invalid variable \"%s\"", _etaVar.c_str());
+		return(-1);
+	}
+	_etaVarMV = dataInfo.GetMissingValue();
+
+	status = _dc->GetDataVarInfo(_depthVar, dataInfo);
+	if (! status) {
+		SetErrMsg("Invalid variable \"%s\"", _depthVar.c_str());
+		return(-1);
+	}
+	_depthVarMV = dataInfo.GetMissingValue();
+
+	return(0);
+}
+
+int DerivedCoordVarStandardOceanSCoordinateG2::initialize_stagger_flags() {
+
+	vector <size_t> derivedDims;
+	bool status = _dc->GetMeshDimLens(_mesh, derivedDims);
+	if (! status) {
+		SetErrMsg("Invalid mesh \"%s\"", _mesh.c_str());
+		return(-1);
+	}
+
+	vector <size_t> nativeDims;
+	int rc = _dc->GetDimLens(_etaVar, nativeDims);
+	if (rc<0) return(-1);
+
+	if (nativeDims[0] == derivedDims[0]-1) _destaggerEtaXDim = true;
+	if (nativeDims[1] == derivedDims[1]-1) _destaggerEtaYDim = true;
+
+	rc = _dc->GetDimLens(_depthVar, nativeDims);
+	if (rc<0) return(-1);
+
+	if (nativeDims[0] == derivedDims[0]-1) _destaggerDepthXDim = true;
+	if (nativeDims[1] == derivedDims[1]-1) _destaggerDepthYDim = true;
+	
+	return(0);
+}
+
+int DerivedCoordVarStandardOceanSCoordinateG2::Initialize() {
+
+	map <string, string> formulaMap;
+	if (! parse_formula(_formula, formulaMap)) {
+		SetErrMsg("Invalid conversion formula \"%s\"", _formula.c_str());
+		return(-1);
+	}
+
+	map <string, string>::const_iterator itr;
+	VAssert((itr = formulaMap.find("s")) != formulaMap.end());
+	_sVar = itr->second;
+
+	VAssert((itr = formulaMap.find("C")) != formulaMap.end());
+	_CVar = itr->second;
+
+	VAssert((itr = formulaMap.find("eta")) != formulaMap.end());
+	_etaVar = itr->second;
+
+	VAssert((itr = formulaMap.find("depth")) != formulaMap.end());
+	_depthVar = itr->second;
+
+	VAssert((itr = formulaMap.find("depth_c")) != formulaMap.end());
+	_depth_cVar = itr->second;
+
+	if (initialize_missing_values() < 0) return(-1);
+
+	if (initialize_stagger_flags() < 0) return(-1);
+
+	DC::DataVar etaInfo;
+	bool status = _dc->GetDataVarInfo(_etaVar, etaInfo);
+	if (! status) {
+		SetErrMsg("Invalid variable \"%s\"", _etaVar.c_str());
+		return(-1);
+	}
+
+	string timeCoordVar = etaInfo.GetTimeCoordVar();
+	string timeDimName;
+	if (! timeCoordVar.empty()) {
+		DC::CoordVar cvarInfo;
+		bool status = _dc->GetCoordVarInfo(timeCoordVar, cvarInfo);
+		if (! status) {
+			SetErrMsg("Invalid variable \"%s\"", timeCoordVar.c_str());
+			return(-1);
+		}
+		timeDimName = cvarInfo.GetTimeDimName();
+	}
+
+	_derivedVarName = "Z_" + _sVar;
+
+	vector <string> dimnames;
+	status = _dc->GetMeshDimNames(_mesh, dimnames);
+	if (! status) {
+		SetErrMsg("Invalid mesh \"%s\"", _mesh.c_str());
+		return(-1);
+	}
+	VAssert(dimnames.size() == 3);
+
+
+	// We're deriving a 3D varible from 1D and 2D varibles. We arbitarily
+	// use one of the 2D variables to configure metadata such as the
+	// available compression ratios
+	//
+    _coordVarInfo = DC::CoordVar(
+        _derivedVarName, "m", DC::XType::FLOAT, etaInfo.GetWName(),
+        etaInfo.GetCRatios(), vector <bool> (3, false), 
+        dimnames, timeDimName, 2, false
+	);
+
+    return(0);
+}
+
+bool DerivedCoordVarStandardOceanSCoordinateG2::GetBaseVarInfo(
+	DC::BaseVar &var
+) const {
+	var = _coordVarInfo;
+	return(true);
+}
+
+bool DerivedCoordVarStandardOceanSCoordinateG2::GetCoordVarInfo(
+	DC::CoordVar &cvar
+) const {
+	cvar = _coordVarInfo;
+	return(true);
+}
+
+vector <string> DerivedCoordVarStandardOceanSCoordinateG2::GetInputs() const {
+
+    map <string, string> formulaMap;
+    bool ok = parse_formula(_formula, formulaMap);
+	VAssert(ok);
+
+	vector <string> inputs;
+	for (auto it = formulaMap.begin(); it != formulaMap.end(); ++it) {
+		inputs.push_back(it->second);
+	}
+	return(inputs);
+}
+
+
+int DerivedCoordVarStandardOceanSCoordinateG2::GetDimLensAtLevel(
+    int level, std::vector <size_t> &dims_at_level,
+    std::vector <size_t> &bs_at_level
+) const {
+	dims_at_level.clear();
+	bs_at_level.clear();
+
+	vector <size_t> dims2d, bs2d;
+	int rc = _dc->GetDimLensAtLevel(_etaVar, -1, dims2d, bs2d);
+	if (rc<0) return(-1);
+
+	vector <size_t> dims1d, bs1d;
+	rc = _dc->GetDimLensAtLevel(_sVar, -1, dims1d, bs1d);
+	if (rc<0) return(-1);
+
+	vector <size_t> dims = {dims2d[0], dims2d[1], dims1d[0]};
+	vector <size_t> bs = {bs2d[0], bs2d[1], bs1d[0]};
+
+	int nlevels = _dc->GetNumRefLevels(_etaVar);
+	if (level < 0) level = nlevels + level;
+
+	WASP::InqDimsAtLevel(
+		_coordVarInfo.GetWName(), level, dims, bs, dims_at_level, bs_at_level
+	);
+
+	return(0);
+}
+
+int DerivedCoordVarStandardOceanSCoordinateG2::OpenVariableRead(
+    size_t ts, int level, int lod
+) {
+
+	DC::FileTable::FileObject *f = new DC::FileTable::FileObject(
+		ts, _derivedVarName, level, lod
+	);
+
+	return(_fileTable.AddEntry(f));
+}
+
+int DerivedCoordVarStandardOceanSCoordinateG2::CloseVariable(int fd) {
+	DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+	if (! f) {
+		SetErrMsg("Invalid file descriptor : %d", fd);
+		return(-1);
+	}
+
+	_fileTable.RemoveEntry(fd);
+	delete f;
+
+	return(0);
+}
+
+int DerivedCoordVarStandardOceanSCoordinateG2::ReadRegion(
+	int fd,
+    const vector <size_t> &min, const vector <size_t> &max, float *region
+) {
+
+	DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+	string varname = f->GetVarname();
+
+
+	vector <size_t> dims, dummy;
+	int rc = GetDimLensAtLevel(f->GetLevel(), dims, dummy);
+	if (rc<0) return(-1);
+
+	vector <float> s(dims[2]);
+	vector <size_t> myMin = {min[2]};
+	vector <size_t> myMax = {max[2]};
+	rc = _getVar(
+		_dc, f->GetTS(), _sVar, f->GetLevel(), f->GetLOD(),
+		myMin, myMax, s.data()
+	);
+	if (rc<0) return(rc);
+
+	vector <float> C(dims[2]);
+	myMin = {min[2]};
+	myMax = {max[2]};
+	rc = _getVar(
+		_dc, f->GetTS(), _CVar, f->GetLevel(), f->GetLOD(),
+		myMin, myMax, C.data()
+	);
+	if (rc<0) return(rc);
+
+	vector <float> eta(dims[0]*dims[1]);
+	myMin = {min[0], min[1]};
+	myMax = {max[0], max[1]};
+	if (_destaggerEtaXDim) {
+		rc = _getVarDestagger(
+			_dc, f->GetTS(), _etaVar, f->GetLevel(), f->GetLOD(),
+			myMin, myMax, eta.data(), 0
+		);
+	}
+	else if (_destaggerEtaYDim) {
+		rc = _getVarDestagger(
+			_dc, f->GetTS(), _etaVar, f->GetLevel(), f->GetLOD(),
+			myMin, myMax, eta.data(), 1
+		);
+	}
+	else {
+		rc = _getVar(
+			_dc, f->GetTS(), _etaVar, f->GetLevel(), f->GetLOD(),
+			myMin, myMax, eta.data()
+		);
+	}
+	if (rc<0) return(rc);
+
+	vector <float> depth(dims[0]*dims[1]);
+	myMin = {min[0], min[1]};
+	myMax = {max[0], max[1]};
+	if (_destaggerDepthXDim) {
+		rc = _getVarDestagger(
+			_dc, f->GetTS(), _depthVar, f->GetLevel(), f->GetLOD(),
+			myMin, myMax, depth.data(), 0
+		);
+	}
+	else if (_destaggerDepthYDim) {
+		rc = _getVarDestagger(
+			_dc, f->GetTS(), _depthVar, f->GetLevel(), f->GetLOD(),
+			myMin, myMax, depth.data(), 1
+		);
+	}
+	else {
+		rc = _getVar(
+			_dc, f->GetTS(), _depthVar, f->GetLevel(), f->GetLOD(),
+			myMin, myMax, depth.data()
+		);
+	}
+
+	float depth_c;
+	myMin = {};
+	myMax = {};
+	rc = _getVar(
+		_dc, f->GetTS(), _depth_cVar, f->GetLevel(), f->GetLOD(),
+		myMin, myMax, &depth_c
+	);
+
+	vector <size_t> rDims;
+	for (int i=0; i<3; i++) {
+		rDims.push_back(max[i]-min[i]+1);
+	}
+
+    for (size_t k=0; k<max[2]-min[2]+1; k++) {
+    for (size_t j=0; j<max[1]-min[1]+1; j++) {
+    for (size_t i=0; i<max[0]-min[0]+1; i++) {
+
+		if ((depth_c + depth.data()[j*rDims[0] + i]) == 0.0) {
+			region[k*rDims[0]*rDims[1] + j*rDims[0] + i] = 0.0;
+			continue;
+		}
+
+		// We are deriving coordinate values from data values, so missing
+		// values may be present
+		//
+		if (
+			C.data()[k] == _CVarMV ||
+			eta.data()[j*rDims[0]+i] == _etaVarMV ||
+			depth.data()[j*rDims[0]+i] == _depthVarMV
+		) {
+			region[k*rDims[0]*rDims[1] + j*rDims[0] + i] = 0.0;
+			continue;
+		}
+			
+		float tmp = (depth_c*s[k] + depth.data()[j*rDims[0]+i] * C[k]) / 
+			(depth_c + depth.data()[j*rDims[0]+i]);
+
+
+		region[k*rDims[0]*rDims[1] + j*rDims[0] + i] = 
+			eta.data()[j*rDims[0]+i] + 
+			(eta.data()[j*rDims[0]+i] + depth.data()[j*rDims[0]+i]) * tmp;
+
+    }
+	}
+	}
+
+	return(0);
+}
+
+bool DerivedCoordVarStandardOceanSCoordinateG2::VariableExists(
+	size_t ts,
+	int reflevel,
+	int lod
+) const {
+
+	return(
+		_dc->VariableExists(ts, _sVar, reflevel, lod) &&
+		_dc->VariableExists(ts, _CVar, reflevel, lod) &&
+		_dc->VariableExists(ts, _etaVar, reflevel, lod) &&
+		_dc->VariableExists(ts, _depthVar, reflevel, lod) &&
+		_dc->VariableExists(ts, _depth_cVar, reflevel, lod) 
+	);
+}
+
+bool DerivedCoordVarStandardOceanSCoordinateG2::ValidFormula(string formula) {
+
+	map <string, string> formulaMap;
+	if (! parse_formula(formula, formulaMap)) {
+		return(false);
+	}
+	map <string, string>::const_iterator itr;
+	itr = formulaMap.find("s");
+	if (itr == formulaMap.end()) return(false);
+
+	itr = formulaMap.find("C");
+	if (itr == formulaMap.end()) return(false);
+
+	itr = formulaMap.find("eta");
+	if (itr == formulaMap.end()) return(false);
+
+	itr = formulaMap.find("depth");
+	if (itr == formulaMap.end()) return(false);
+
+	itr = formulaMap.find("depth_c");
 	if (itr == formulaMap.end()) return(false);
 
 	return(true);

@@ -116,6 +116,12 @@ protected:
 	float *region
  ) const;
 
+ int _getVarDestagger(
+	DC *dc, size_t ts, string varname, int level, int lod,
+	const std::vector <size_t> &min, const std::vector <size_t> &max,
+	float *region, int stagDim
+ ) const;
+
  int _getVarBlock(
 	DC *dc, size_t ts, string varname, int level, int lod,
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
@@ -757,11 +763,82 @@ private:
  
 };
 
+class VDF_API DerivedCoordVarStandardOceanSCoordinateG2 : public DerivedCFVertCoordVar {
+public:
+ DerivedCoordVarStandardOceanSCoordinateG2(
+	DC *dc, string mesh, string formula
+ );
+ virtual ~DerivedCoordVarStandardOceanSCoordinateG2() {}
+
+ virtual int Initialize();
+
+ virtual bool GetBaseVarInfo(DC::BaseVar &var) const;
+
+ virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
+
+ virtual std::vector <string> GetInputs() const;
+
+ virtual int GetDimLensAtLevel(
+	int level, std::vector <size_t> &dims_at_level,
+	std::vector <size_t> &bs_at_level
+ ) const;
+
+ virtual size_t GetNumRefLevels() const {
+    return(_dc->GetNumRefLevels(_etaVar));
+ } 
+
+ virtual std::vector <size_t> GetCRatios() const {
+    return(_dc->GetCRatios(_etaVar));
+ }
+
+ virtual int OpenVariableRead(
+	size_t ts, int level=0, int lod=0
+ );
+
+ virtual int CloseVariable(int fd);
+ 
+ virtual int ReadRegionBlock(
+	int fd,
+	const std::vector <size_t> &min, const std::vector <size_t> &max,
+	float *region
+ ) {
+	return(ReadRegion(fd, min, max, region));
+ }
+
+ virtual int ReadRegion(
+	int fd,
+	const std::vector <size_t> &min, const std::vector <size_t> &max,
+	float *region
+ );
+
+ virtual bool VariableExists(
+	size_t ts,
+	int reflevel,
+	int lod
+ ) const;
+
+ static bool ValidFormula(string formula);
+
+private:
+ string _sVar;
+ string _CVar;
+ string _etaVar;
+ string _depthVar;
+ string _depth_cVar;
+ double _CVarMV;
+ double _etaVarMV;
+ double _depthVarMV;
+ bool _destaggerEtaXDim;
+ bool _destaggerEtaYDim;
+ bool _destaggerDepthXDim;
+ bool _destaggerDepthYDim;
+ DC::CoordVar _coordVarInfo;
+
+ int initialize_missing_values();
+ int initialize_stagger_flags();
+ 
+};
+
 };
 
 #endif
-
-
-
-
-
