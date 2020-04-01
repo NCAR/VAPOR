@@ -1,4 +1,4 @@
-# Welcome
+[![CircleCI](https://circleci.com/gh/NCAR/VAPOR.svg?style=svg)](https://circleci.com/gh/NCAR/VAPOR) 
 
 **VAPOR** is the **V**isualization and **A**nalysis **P**latform for **O**cean, Atmosphere, and Solar **R**esearchers.  VAPOR provides an interactive 3D visualization environment that can also produce animations and still frame images.  VAPOR runs on most UNIX and Windows systems equipped with modern 3D graphics cards.
 
