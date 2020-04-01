@@ -169,6 +169,8 @@ public:
 
  virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const = 0;
 
+ static bool ValidFormula(const vector <string> &required_terms,string formula);
+
 protected:
  DC *_dc;
  string _mesh;
@@ -820,6 +822,7 @@ public:
  static bool ValidFormula(string formula);
 
 private:
+ string _standard_name;
  string _sVar;
  string _CVar;
  string _etaVar;
@@ -836,6 +839,16 @@ private:
 
  int initialize_missing_values();
  int initialize_stagger_flags();
+ void compute_g1(
+	const vector <size_t> &min, const vector <size_t> &max,
+	const float *s, const float *C, const float *eta, const float *depth,
+	float depth_c, float *region
+ ) const;
+ void compute_g2(
+	const vector <size_t> &min, const vector <size_t> &max,
+	const float *s, const float *C, const float *eta, const float *depth,
+	float depth_c, float *region
+ ) const;
  
 };
 
