@@ -177,6 +177,75 @@ protected:
  string _formula;
 };
 
+
+//////////////////////////////////////////////////////////////////////////
+//
+// DerivedCFVertCoordVarFactory Class
+//
+/////////////////////////////////////////////////////////////////////////
+
+
+class PARAMS_API DerivedCFVertCoordVarFactory {
+public:
+ static DerivedCFVertCoordVarFactory *Instance() {
+	static DerivedCFVertCoordVarFactory instance;
+	return &instance;
+ }
+
+ void RegisterFactoryFunction(
+	string name,
+	function<DerivedCFVertCoordVar*(DC *, string, string)> classFactoryFunction) 
+ {
+
+	// register the class factory function
+	_factoryFunctionRegistry[name] = classFactoryFunction;
+ }
+
+ DerivedCFVertCoordVar *(CreateInstance(string standard_name, DC *, string, string));
+
+ vector <string> GetFactoryNames() const;
+
+private:
+ map<string, function<DerivedCFVertCoordVar * (DC *, string, string)>> _factoryFunctionRegistry;
+
+ DerivedCFVertCoordVarFactory() {}
+ DerivedCFVertCoordVarFactory(const DerivedCFVertCoordVarFactory &) { }
+ DerivedCFVertCoordVarFactory &operator=(const DerivedCFVertCoordVarFactory &) { return *this; }
+
+};
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// DerivedCFVertCoordVarFactoryRegistrar Class
+//
+// Register DerivedCFVertCoordVar derived class with:
+//
+//	static DerivedCFVertCoordVarFactoryRegistrar<class> registrar("standard_name");
+//
+// where 'class' is a class derived from 'DerivedCFVertCoordVar', and 
+// "standard_name" is the value of the CF "standard_name" attribute.
+//
+/////////////////////////////////////////////////////////////////////////
+
+template<class T>
+class DerivedCFVertCoordVarFactoryRegistrar {
+public:
+ DerivedCFVertCoordVarFactoryRegistrar(string standard_name) {
+
+	// register the class factory function 
+	//
+	DerivedCFVertCoordVarFactory::Instance()->RegisterFactoryFunction(
+		standard_name, [](DC *dc, string mesh, string formula) -> DerivedCFVertCoordVar * { 
+			return new T(dc, mesh, formula);
+	}
+	);
+ }
+};
+
+
+
+
 //!
 //! \class DerivedDataVar
 //!

@@ -2616,14 +2616,16 @@ bool DataMgr::_hasVerticalXForm(
 
 	if (formula_terms.empty()) return(false);
 
-	// Currently only support one vertical transform!!!
+	// Does a converter exist for this standard name?
 	//
-	if (! DerivedCoordVarStandardWRF_Terrain::ValidFormula(formula_terms) &&
-		! DerivedCoordVarStandardOceanSCoordinateG2::ValidFormula(formula_terms)) {
-		return(false);
+	vector <string> names = 
+		DerivedCFVertCoordVarFactory::Instance()->GetFactoryNames();
+
+	for (int i=0; i<names.size(); i++) {
+		if (standard_name == names[i]) return(true);
 	}
 
-	return(true);
+	return(false);
 }
 
 
@@ -3861,17 +3863,13 @@ int DataMgr::_initVerticalCoordVars() {
 
 		DerivedCoordVar *derivedVar = NULL;
 
-		if (DerivedCoordVarStandardWRF_Terrain::ValidFormula(formula_terms)) {
-			derivedVar = new DerivedCoordVarStandardWRF_Terrain(
-				_dc, meshnames[i], formula_terms
-			);
+		derivedVar = DerivedCFVertCoordVarFactory::Instance()->CreateInstance(
+			standard_name, _dc, meshnames[i], formula_terms
+		);
+		if (! derivedVar) {
+			SetErrMsg("Failed to initialize derived coord variable");
+			return(-1);
 		}
-		if (DerivedCoordVarStandardOceanSCoordinateG2::ValidFormula(formula_terms)) {
-			derivedVar = new DerivedCoordVarStandardOceanSCoordinateG2(
-				_dc, meshnames[i], formula_terms
-			);
-		}
-		VAssert(derivedVar != NULL);
 
 		int rc = derivedVar->Initialize(); 
 		if (rc<0) {
