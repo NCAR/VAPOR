@@ -33,7 +33,7 @@ VolumeAppearanceSubtab::VolumeAppearanceSubtab(QWidget* parent) {
     _pg->Add(rtp);
     rtp->Add(new PStringDropdownHLI<VolumeParams>("Raytracing Algorithm", VolumeParams::GetAlgorithmNames(VolumeParams::Type::DVR), &VolumeParams::GetAlgorithm, &VolumeParams::SetAlgorithmByUser));
     rtp->Add(new PEnumDropdown(VolumeParams::SamplingRateMultiplierTag, {"1x", "2x", "4x", "8x", "16x"}, {1, 2, 4, 8, 16}, "Sampling Rate Multiplier"));
-    rtp->Add((new PDoubleSliderEdit(VolumeParams::VolumeDensityTag, "Volume Density"))->EnableDynamicUpdate());
+    rtp->Add((new PDoubleSliderEdit(VolumeParams::VolumeDensityTag, "Volume Density"))->EnableDynamicUpdate()->SetTooltip("Changes the overall density or 'opacity' of the volume allowing for finer tuning of the transfer function."));
     rtp->Add(new PCheckbox(VolumeParams::UseColormapVariableTag, "Color by other variable"));
     rtp->Add((new PVariableSelector3D(RenderParams::_colorMapVariableNameTag))->ShowBasedOnParam(VolumeParams::UseColormapVariableTag));
     
