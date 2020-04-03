@@ -12,6 +12,7 @@ jobs:
           command: |
             cd /VAPOR
             git pull
+            git checkout $CIRCLE_BRANCH
             cd build
             cmake ..
             make &> /tmp/output.txt
@@ -40,6 +41,7 @@ jobs:
           command: |
             cd /VAPOR
             git pull
+            git checkout $CIRCLE_BRANCH
             cd build
             cmake ..
             make &> /tmp/output.txt
@@ -69,6 +71,7 @@ jobs:
             ls -lrth /usr/local/VAPOR-Deps
             cd /VAPOR
             git pull
+            git checkout $CIRCLE_BRANCH
             cd build
             cmake3 ..
             make &> /tmp/output.txt
