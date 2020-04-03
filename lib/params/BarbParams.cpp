@@ -50,18 +50,6 @@ void BarbParams::SetNeedToRecalculateScales(bool val) {
 	dval);
 }
 
-bool BarbParams::IsOpaque() const {
-	return true;
-}
-
-bool BarbParams::usingVariable(const std::string& varname) {
-	if ((varname.compare(GetHeightVariableName()) == 0)){
-		return(true);
-	}
-
-	return(varname.compare(GetVariableName()) == 0);
-}
-
 void BarbParams::_init() {
 	SetDiagMsg("BarbParams::_init()");
 

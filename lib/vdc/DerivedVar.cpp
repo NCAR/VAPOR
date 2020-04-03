@@ -237,30 +237,6 @@ bool parse_formula(
 }
 
 
-#define BLOCKSIZE 256
-
-void Transpose(
-    const float *a,float *b,int p1,int m1,int s1,int p2,int m2,int s2
-) {
-    int I1,I2;
-    int i1,i2;
-    int q,r;
-    const int block=BLOCKSIZE;
-    for(I2=p2;I2<p2+m2;I2+=block)
-      for(I1=p1;I1<p1+m1;I1+=block)
-    for(i2=I2;i2<min(I2+block,p2+m2);i2++)
-      for(i1=I1;i1<min(I1+block,p1+m1);i1++)
-        {
-          q=i2*s1+i1;
-          r=i1*s2+i2;
-          b[r]=a[q];
-        }
-}
-
-void Transpose(const float *a,float *b,int s1,int s2) {
-    Transpose(a,b,0,s1,s1,0,s2,s2);
-}
-
 // Transpose a 1D, 2D, or 3D array. For 1D 'a' is simply copied
 // to 'b'. Otherwise 'b' contains a permuted version of 'a' as follows:
 //
@@ -296,7 +272,7 @@ void transpose(
 	if (inDims.size() == 2) {
 		VAssert(axis == 1);
 
-		Transpose(a, b, inDims[0], inDims[1]);
+		Wasp::Transpose(a, b, inDims[0], inDims[1]);
 	}
 	else if (inDims.size() == 3) {
 		VAssert(axis == 1 || axis == 2);
@@ -306,7 +282,7 @@ void transpose(
 		const float *aptr = a;
 		float *bptr = b;
 		for (size_t i=0; i<inDims[2]; i++) {
-			Transpose(aptr, bptr, inDims[0], inDims[1]);
+			Wasp::Transpose(aptr, bptr, inDims[0], inDims[1]);
 			aptr += stride;
 			bptr += stride;
 		}
@@ -317,7 +293,7 @@ void transpose(
 
 			// We can treat 3D array as 2D in this case, linearizing X and Y
 			//
-			Transpose(b, a, inDims[0]*inDims[1], inDims[2]);
+			Wasp::Transpose(b, a, inDims[0]*inDims[1], inDims[2]);
 
 			// Ugh need to copy data from a back to b
 			//
