@@ -1545,7 +1545,7 @@ public:
  //!
  //! \sa DC::GetMesh(), DC::GetDimension()
  //
- virtual bool GetMeshDimLens(string mesh_name, std::vector<size_t> &dims) const;
+ virtual bool GetMeshDimLens(const string& mesh_name, std::vector<size_t> &dims) const;
 
  //! Return the ordered list of dimension names for a mesh
  //!
