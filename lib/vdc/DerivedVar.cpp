@@ -1999,21 +1999,21 @@ int DerivedCoordVarStandardOceanSCoordinate::initialize_missing_values()
         SetErrMsg("Invalid variable \"%s\"", _CVar.c_str());
         return (-1);
     }
-    _CVarMV = dataInfo.GetMissingValue();
+    if (dataInfo.GetHasMissing()) _CVarMV = dataInfo.GetHasMissing();
 
     status = _dc->GetDataVarInfo(_etaVar, dataInfo);
     if (!status) {
         SetErrMsg("Invalid variable \"%s\"", _etaVar.c_str());
         return (-1);
     }
-    _etaVarMV = dataInfo.GetMissingValue();
+    if (dataInfo.GetHasMissing()) _etaVarMV = dataInfo.GetHasMissing();
 
     status = _dc->GetDataVarInfo(_depthVar, dataInfo);
     if (!status) {
         SetErrMsg("Invalid variable \"%s\"", _depthVar.c_str());
         return (-1);
     }
-    _depthVarMV = dataInfo.GetMissingValue();
+    if (dataInfo.GetHasMissing()) _depthVarMV = dataInfo.GetHasMissing();
 
     return (0);
 }
@@ -2318,7 +2318,7 @@ void DerivedCoordVarStandardOceanSCoordinate::compute_g2(const vector<size_t> &m
                     continue;
                 }
 
-                float tmp = (depth_c * s[k] + depth[j * rDims[0] + i] * C[k]) / (depth_c + depth[j * rDims[0]]);
+                float tmp = (depth_c * s[k] + depth[j * rDims[0] + i] * C[k]) / (depth_c + depth[j * rDims[0] + i]);
 
                 region[k * rDims[0] * rDims[1] + j * rDims[0] + i] = eta[j * rDims[0] + i] + (eta[j * rDims[0] + i] + depth[j * rDims[0] + i]) * tmp;
             }
