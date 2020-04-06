@@ -24,10 +24,6 @@ PRegionSelector::PRegionSelector(const std::string &tag, const std::string &labe
     // connect(_qcheckbox, &VCheckBox::ValueChanged, this, &PRegionSelector::checkboxStateChanged);
 }
 
-void PRegionSelector::updateGUI() const
-{
-    bool on = getParams()->GetValueLong(getTag(), 0);
-    //_qcheckbox->SetValue(on);
-}
+void PRegionSelector::updateGUI() const {}
 
 void PRegionSelector::checkboxStateChanged(bool on) { getParams()->SetValueLong(getTag(), "", on); }

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <functional>
 #include <vapor/DC.h>
 #include <vapor/MyBase.h>
 #include <vapor/Proj4API.h>
@@ -15,6 +16,16 @@ class NetCDFCollection;
 //! \class DerivedVar
 //!
 //! \brief Derived variable abstract class
+//!
+//! This abstract base class defines an API for the internal creation of
+//! derived data and coordinate variables. Derived variables may be used
+//! to support the results of a data operator (e.g. computing wind speed
+//! from velocity component variables), creating of a dimensioned coordinate
+//! variable from a dimensionless one (e.g. supporting the CF conventions
+//! \a formula_terms attribute), resampling a variable to a different mesh (
+//! resampling a staggered variable to an unstaggered mesh), or
+//! conversion of units (e.g. converting formatted time strings to time
+//! in seconds).
 //!
 //! \author John Clyne
 //! \date    January, 2017
@@ -78,6 +89,8 @@ protected:
 
     int _getVar(DC *dc, size_t ts, string varname, int level, int lod, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) const;
 
+    int _getVarDestagger(DC *dc, size_t ts, string varname, int level, int lod, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region, int stagDim) const;
+
     int _getVarBlock(DC *dc, size_t ts, string varname, int level, int lod, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) const;
 };
 
@@ -115,10 +128,82 @@ public:
 
     virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const = 0;
 
+    //! validate that a CF conventions forumla string is syntactically correct
+    //!
+    //! This static method checks to see if \p formula contains a
+    //! syntactically valid  CF conventions formula string, typically
+    //! associated with the \a formula_terms attribute, and ensures
+    //! that all of required formula terms in \p required_terms
+    //! are present in the forumla string. If either of these conditions are
+    //! not met the method returns false, otherwise true is returned
+    //!
+    //! \param[in] required_terms : A vector of term names required to
+    //! be found in \p formula
+    //! \param[in] formula : A formatted CF formula string
+    //!
+    //! \sa http://cfconventions.org/
+    //!
+    static bool ValidFormula(const vector<string> &required_terms, string formula);
+
 protected:
     DC *   _dc;
     string _mesh;
     string _formula;
+};
+
+//////////////////////////////////////////////////////////////////////////
+//
+// DerivedCFVertCoordVarFactory Class
+//
+/////////////////////////////////////////////////////////////////////////
+
+class PARAMS_API DerivedCFVertCoordVarFactory {
+public:
+    static DerivedCFVertCoordVarFactory *Instance()
+    {
+        static DerivedCFVertCoordVarFactory instance;
+        return &instance;
+    }
+
+    void RegisterFactoryFunction(string name, function<DerivedCFVertCoordVar *(DC *, string, string)> classFactoryFunction)
+    {
+        // register the class factory function
+        _factoryFunctionRegistry[name] = classFactoryFunction;
+    }
+
+    DerivedCFVertCoordVar *(CreateInstance(string standard_name, DC *, string, string));
+
+    vector<string> GetFactoryNames() const;
+
+private:
+    map<string, function<DerivedCFVertCoordVar *(DC *, string, string)>> _factoryFunctionRegistry;
+
+    DerivedCFVertCoordVarFactory() {}
+    DerivedCFVertCoordVarFactory(const DerivedCFVertCoordVarFactory &) {}
+    DerivedCFVertCoordVarFactory &operator=(const DerivedCFVertCoordVarFactory &) { return *this; }
+};
+
+//////////////////////////////////////////////////////////////////////////
+//
+// DerivedCFVertCoordVarFactoryRegistrar Class
+//
+// Register DerivedCFVertCoordVar derived class with:
+//
+//	static DerivedCFVertCoordVarFactoryRegistrar<class> registrar("standard_name");
+//
+// where 'class' is a class derived from 'DerivedCFVertCoordVar', and
+// "standard_name" is the value of the CF "standard_name" attribute.
+//
+/////////////////////////////////////////////////////////////////////////
+
+template<class T> class DerivedCFVertCoordVarFactoryRegistrar {
+public:
+    DerivedCFVertCoordVarFactoryRegistrar(string standard_name)
+    {
+        // register the class factory function
+        //
+        DerivedCFVertCoordVarFactory::Instance()->RegisterFactoryFunction(standard_name, [](DC *dc, string mesh, string formula) -> DerivedCFVertCoordVar * { return new T(dc, mesh, formula); });
+    }
 };
 
 //!
@@ -472,6 +557,69 @@ private:
     string       _PHBVar;
     float        _grav;
     DC::CoordVar _coordVarInfo;
+};
+
+//! \class DerivedCoordVarStandardOceanSCoordinate
+//!
+//! \brief Convert a CF parameterless vertical coordinate to an Ocean
+//! s-coordinate, generic form 1 or 2
+//!
+//! This derived class converts a dimensionless sigma coordinate variable
+//! to either a Ocean s-coordinate, generic form 1 or 2
+//!
+//! \sa http://cfconventions.org/
+//
+class VDF_API DerivedCoordVarStandardOceanSCoordinate : public DerivedCFVertCoordVar {
+public:
+    DerivedCoordVarStandardOceanSCoordinate(DC *dc, string mesh, string formula);
+    virtual ~DerivedCoordVarStandardOceanSCoordinate() {}
+
+    virtual int Initialize();
+
+    virtual bool GetBaseVarInfo(DC::BaseVar &var) const;
+
+    virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
+
+    virtual std::vector<string> GetInputs() const;
+
+    virtual int GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const;
+
+    virtual size_t GetNumRefLevels() const { return (_dc->GetNumRefLevels(_etaVar)); }
+
+    virtual std::vector<size_t> GetCRatios() const { return (_dc->GetCRatios(_etaVar)); }
+
+    virtual int OpenVariableRead(size_t ts, int level = 0, int lod = 0);
+
+    virtual int CloseVariable(int fd);
+
+    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
+
+    virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
+
+    virtual bool VariableExists(size_t ts, int reflevel, int lod) const;
+
+    static bool ValidFormula(string formula);
+
+private:
+    string       _standard_name;
+    string       _sVar;
+    string       _CVar;
+    string       _etaVar;
+    string       _depthVar;
+    string       _depth_cVar;
+    double       _CVarMV;
+    double       _etaVarMV;
+    double       _depthVarMV;
+    bool         _destaggerEtaXDim;
+    bool         _destaggerEtaYDim;
+    bool         _destaggerDepthXDim;
+    bool         _destaggerDepthYDim;
+    DC::CoordVar _coordVarInfo;
+
+    int  initialize_missing_values();
+    int  initialize_stagger_flags();
+    void compute_g1(const vector<size_t> &min, const vector<size_t> &max, const float *s, const float *C, const float *eta, const float *depth, float depth_c, float *region) const;
+    void compute_g2(const vector<size_t> &min, const vector<size_t> &max, const float *s, const float *C, const float *eta, const float *depth, float depth_c, float *region) const;
 };
 
 };    // namespace VAPoR

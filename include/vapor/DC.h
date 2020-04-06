@@ -1324,6 +1324,26 @@ public:
     //!
     virtual bool GetMesh(string mesh_name, DC::Mesh &mesh) const { return (getMesh(mesh_name, mesh)); }
 
+    //! Return the ordered list of dimensions for a mesh
+    //!
+    //! This method is a convenience function that returns the ordered
+    //! vector of dimension lengths for the mesh named \p mesh. If \p mesh
+    //! is unknown, or invalid false is returned.
+    //!
+    //! \sa DC::GetMesh(), DC::GetDimension()
+    //
+    virtual bool GetMeshDimLens(const string &mesh_name, std::vector<size_t> &dims) const;
+
+    //! Return the ordered list of dimension names for a mesh
+    //!
+    //! This method is a convenience function that returns the ordered
+    //! vector of dimension names for the mesh named \p mesh. If \p mesh
+    //! is unknown, or invalid false is returned.
+    //!
+    //! \sa DC::GetMesh(), DC::GetDimension()
+    //
+    virtual bool GetMeshDimNames(const string &mesh_name, std::vector<string> &dimnames) const;
+
     //! Return a coordinate variable's definition
     //!
     //! Return a reference to a DC::CoordVar object describing
