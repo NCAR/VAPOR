@@ -2431,18 +2431,18 @@ bool DerivedCoordVarStandardWRF_Terrain::ValidFormula(string formula) {
 
 ////////////////////////////////////////////////////////////////////////////// 
 //
-//	DerivedCoordVarStandardOceanSCoordinateG2
+//	DerivedCoordVarStandardOceanSCoordinate
 //
 ////////////////////////////////////////////////////////////////////////////// 
 
 //
 // Register class with object factory!!!
 //
-static DerivedCFVertCoordVarFactoryRegistrar<DerivedCoordVarStandardOceanSCoordinateG2> registrar_ocean_s_coordinate_g1("ocean_s_coordinate_g1");
+static DerivedCFVertCoordVarFactoryRegistrar<DerivedCoordVarStandardOceanSCoordinate> registrar_ocean_s_coordinate_g1("ocean_s_coordinate_g1");
 
-static DerivedCFVertCoordVarFactoryRegistrar<DerivedCoordVarStandardOceanSCoordinateG2> registrar_ocean_s_coordinate_g2("ocean_s_coordinate_g2");
+static DerivedCFVertCoordVarFactoryRegistrar<DerivedCoordVarStandardOceanSCoordinate> registrar_ocean_s_coordinate_g2("ocean_s_coordinate_g2");
 
-DerivedCoordVarStandardOceanSCoordinateG2::DerivedCoordVarStandardOceanSCoordinateG2(
+DerivedCoordVarStandardOceanSCoordinate::DerivedCoordVarStandardOceanSCoordinate(
 	DC *dc, string mesh, string formula
 ) : DerivedCFVertCoordVar(
 	"", dc, mesh, formula
@@ -2465,7 +2465,7 @@ DerivedCoordVarStandardOceanSCoordinateG2::DerivedCoordVarStandardOceanSCoordina
 	_destaggerDepthYDim = false;
 }
 
-int DerivedCoordVarStandardOceanSCoordinateG2::initialize_missing_values() {
+int DerivedCoordVarStandardOceanSCoordinate::initialize_missing_values() {
 
 	DC::DataVar dataInfo;
 	bool status = _dc->GetDataVarInfo(_CVar, dataInfo);
@@ -2492,7 +2492,7 @@ int DerivedCoordVarStandardOceanSCoordinateG2::initialize_missing_values() {
 	return(0);
 }
 
-int DerivedCoordVarStandardOceanSCoordinateG2::initialize_stagger_flags() {
+int DerivedCoordVarStandardOceanSCoordinate::initialize_stagger_flags() {
 
 	vector <size_t> derivedDims;
 	bool status = _dc->GetMeshDimLens(_mesh, derivedDims);
@@ -2517,7 +2517,7 @@ int DerivedCoordVarStandardOceanSCoordinateG2::initialize_stagger_flags() {
 	return(0);
 }
 
-int DerivedCoordVarStandardOceanSCoordinateG2::Initialize() {
+int DerivedCoordVarStandardOceanSCoordinate::Initialize() {
 
 	map <string, string> formulaMap;
 	if (! parse_formula(_formula, formulaMap)) {
@@ -2611,21 +2611,21 @@ int DerivedCoordVarStandardOceanSCoordinateG2::Initialize() {
     return(0);
 }
 
-bool DerivedCoordVarStandardOceanSCoordinateG2::GetBaseVarInfo(
+bool DerivedCoordVarStandardOceanSCoordinate::GetBaseVarInfo(
 	DC::BaseVar &var
 ) const {
 	var = _coordVarInfo;
 	return(true);
 }
 
-bool DerivedCoordVarStandardOceanSCoordinateG2::GetCoordVarInfo(
+bool DerivedCoordVarStandardOceanSCoordinate::GetCoordVarInfo(
 	DC::CoordVar &cvar
 ) const {
 	cvar = _coordVarInfo;
 	return(true);
 }
 
-vector <string> DerivedCoordVarStandardOceanSCoordinateG2::GetInputs() const {
+vector <string> DerivedCoordVarStandardOceanSCoordinate::GetInputs() const {
 
     map <string, string> formulaMap;
     bool ok = parse_formula(_formula, formulaMap);
@@ -2639,7 +2639,7 @@ vector <string> DerivedCoordVarStandardOceanSCoordinateG2::GetInputs() const {
 }
 
 
-int DerivedCoordVarStandardOceanSCoordinateG2::GetDimLensAtLevel(
+int DerivedCoordVarStandardOceanSCoordinate::GetDimLensAtLevel(
     int level, std::vector <size_t> &dims_at_level,
     std::vector <size_t> &bs_at_level
 ) const {
@@ -2667,7 +2667,7 @@ int DerivedCoordVarStandardOceanSCoordinateG2::GetDimLensAtLevel(
 	return(0);
 }
 
-int DerivedCoordVarStandardOceanSCoordinateG2::OpenVariableRead(
+int DerivedCoordVarStandardOceanSCoordinate::OpenVariableRead(
     size_t ts, int level, int lod
 ) {
 
@@ -2678,7 +2678,7 @@ int DerivedCoordVarStandardOceanSCoordinateG2::OpenVariableRead(
 	return(_fileTable.AddEntry(f));
 }
 
-int DerivedCoordVarStandardOceanSCoordinateG2::CloseVariable(int fd) {
+int DerivedCoordVarStandardOceanSCoordinate::CloseVariable(int fd) {
 	DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
 
 	if (! f) {
@@ -2692,7 +2692,7 @@ int DerivedCoordVarStandardOceanSCoordinateG2::CloseVariable(int fd) {
 	return(0);
 }
 
-int DerivedCoordVarStandardOceanSCoordinateG2::ReadRegion(
+int DerivedCoordVarStandardOceanSCoordinate::ReadRegion(
 	int fd,
     const vector <size_t> &min, const vector <size_t> &max, float *region
 ) {
@@ -2794,7 +2794,7 @@ int DerivedCoordVarStandardOceanSCoordinateG2::ReadRegion(
 	return(0);
 }
 
-bool DerivedCoordVarStandardOceanSCoordinateG2::VariableExists(
+bool DerivedCoordVarStandardOceanSCoordinate::VariableExists(
 	size_t ts,
 	int reflevel,
 	int lod
@@ -2809,14 +2809,14 @@ bool DerivedCoordVarStandardOceanSCoordinateG2::VariableExists(
 	);
 }
 
-bool DerivedCoordVarStandardOceanSCoordinateG2::ValidFormula(string formula) {
+bool DerivedCoordVarStandardOceanSCoordinate::ValidFormula(string formula) {
 
 	return(DerivedCFVertCoordVar::ValidFormula(
 		vector <string> {"s", "C", "eta", "depth", "depth_c"}, formula
 	));
 }
 
-void DerivedCoordVarStandardOceanSCoordinateG2::compute_g1(
+void DerivedCoordVarStandardOceanSCoordinate::compute_g1(
 	const vector <size_t> &min, const vector <size_t> &max,
 	const float *s, const float *C, const float *eta, const float *depth,
 	float depth_c, float *region
@@ -2859,7 +2859,7 @@ void DerivedCoordVarStandardOceanSCoordinateG2::compute_g1(
 	}
 }
 
-void DerivedCoordVarStandardOceanSCoordinateG2::compute_g2(
+void DerivedCoordVarStandardOceanSCoordinate::compute_g2(
 	const vector <size_t> &min, const vector <size_t> &max,
 	const float *s, const float *C, const float *eta, const float *depth,
 	float depth_c, float *region

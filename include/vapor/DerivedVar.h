@@ -17,6 +17,16 @@ class NetCDFCollection;
 //!
 //! \brief Derived variable abstract class
 //!
+//! This abstract base class defines an API for the internal creation of
+//! derived data and coordinate variables. Derived variables may be used
+//! to support the results of a data operator (e.g. computing wind speed
+//! from velocity component variables), creating of a dimensioned coordinate
+//! variable from a dimensionless one (e.g. supporting the CF conventions
+//! \a formula_terms attribute), resampling a variable to a different mesh (
+//! resampling a staggered variable to an unstaggered mesh), or 
+//! conversion of units (e.g. converting formatted time strings to time
+//! in seconds).
+//!
 //! \author John Clyne
 //! \date    January, 2017
 //!
@@ -170,6 +180,21 @@ public:
 
  virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const = 0;
 
+ //! validate that a CF conventions forumla string is syntactically correct
+ //!
+ //! This static method checks to see if \p formula contains a 
+ //! syntactically valid  CF conventions formula string, typically 
+ //! associated with the \a formula_terms attribute, and ensures
+ //! that all of required formula terms in \p required_terms 
+ //! are present in the forumla string. If either of these conditions are
+ //! not met the method returns false, otherwise true is returned
+ //!
+ //! \param[in] required_terms : A vector of term names required to 
+ //! be found in \p formula
+ //! \param[in] formula : A formatted CF formula string
+ //!
+ //! \sa http://cfconventions.org/
+ //!
  static bool ValidFormula(const vector <string> &required_terms,string formula);
 
 protected:
@@ -835,12 +860,23 @@ private:
  
 };
 
-class VDF_API DerivedCoordVarStandardOceanSCoordinateG2 : public DerivedCFVertCoordVar {
+
+//! \class DerivedCoordVarStandardOceanSCoordinate
+//!
+//! \brief Convert a CF parameterless vertical coordinate to an Ocean
+//! s-coordinate, generic form 1 or 2
+//!
+//! This derived class converts a dimensionless sigma coordinate variable
+//! to either a Ocean s-coordinate, generic form 1 or 2
+//!
+//! \sa http://cfconventions.org/
+//
+class VDF_API DerivedCoordVarStandardOceanSCoordinate : public DerivedCFVertCoordVar {
 public:
- DerivedCoordVarStandardOceanSCoordinateG2(
+ DerivedCoordVarStandardOceanSCoordinate(
 	DC *dc, string mesh, string formula
  );
- virtual ~DerivedCoordVarStandardOceanSCoordinateG2() {}
+ virtual ~DerivedCoordVarStandardOceanSCoordinate() {}
 
  virtual int Initialize();
 
