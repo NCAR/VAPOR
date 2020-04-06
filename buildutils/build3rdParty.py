@@ -7,7 +7,7 @@ import glob
 import distro
 from collections import OrderedDict
 
-InstallationDir = "/home/pearse/2019-Aug-test2"
+InstallationDir = "/usr/local/VAPOR-Deps/2019-Aug-test2"
 BuildDir = r'build/'
 #InstallationDir = "/home/pearse/2019-Aug-src"
 CCompiler = "gcc"
@@ -104,7 +104,7 @@ Libraries = OrderedDict( [
         "--prefix=INSTALLATION_DIR "
         "&& MAKE_EXE "
         "&& MAKE_EXE install"),
-    ("proj", 
+    ("proj",
         "CMAKE_EXE "
         "-DEXE_SQLITE3=INSTALLATION_DIR/bin/sqlite3 " 
         "-DSQLITE3_INCLUDE_DIR=INSTALLATION_DIR/include "
@@ -112,6 +112,7 @@ Libraries = OrderedDict( [
         "-DPROJ_COMPILER_NAME=CPP_COMPILER "
         "-DCMAKE_INSTALL_PREFIX=INSTALLATION_DIR "
         ".. "
+        "&& unzip ../../../proj-datumgrid-1.8.zip -d data "
         "&& MAKE_EXE "
         "&& MAKE_EXE install "),
     ("libgeotiff",
@@ -148,10 +149,12 @@ Libraries = OrderedDict( [
         "&& INSTALLATION_DIR/bin/pip3 install "
         "--upgrade "
         "--target INSTALLATION_DIR/lib/python3.6/site-packages numpy scipy matplotlib") ,
+])
+Libraries = OrderedDict( [
     ("qt",
 	    "rm -rf build/qt "
         "&& git clone git://code.qt.io/qt/qt5.git build/qt"
-        "&& cd qt5 "
+        "&& cd build/qt "
         "&& git checkout QT_VERSION "
         "&& perl init-repository "
         "&& ../qt5/configure "
@@ -162,7 +165,8 @@ Libraries = OrderedDict( [
         "-opensource "
         "-nomake examples "
         "-nomake tests "
-        "&& make ")
+        "&& make "
+        "&& make install")
     ]
 )
 
