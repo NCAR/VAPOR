@@ -7,25 +7,26 @@ import glob
 import distro
 from collections import OrderedDict
 
-InstallationDir = "/home/pearse/2019-Aug-test"
+InstallationDir = "/home/pearse/2019-Aug-test2"
 BuildDir = r'build/'
 #InstallationDir = "/home/pearse/2019-Aug-src"
 CCompiler = "gcc"
 CppCompiler = "g++"
 CMake = "cmake"
 Make = "make"
+QtVersion = "5.13.2"
 
+'''("zlib", 
+"CMAKE_EXE "
+"CC=C_COMPILER "
+"CXX=CPP_COMPILER "
+"-DCMAKE_INSTALL_PREFIX=INSTALLATION_DIR "
+"-DCMAKE_BUILD_TYPE=Release "
+".. "
+"&& MAKE_EXE "
+"&& MAKE_EXE install"),'''
 Libraries = OrderedDict( [
     ("assimp", 
-        "CMAKE_EXE "
-        "CC=C_COMPILER "
-        "CXX=CPP_COMPILER "
-        "-DCMAKE_INSTALL_PREFIX=INSTALLATION_DIR "
-        "-DCMAKE_BUILD_TYPE=Release "
-        ".. "
-        "&& MAKE_EXE "
-        "&& MAKE_EXE install"),
-    ("zlib", 
         "CMAKE_EXE "
         "CC=C_COMPILER "
         "CXX=CPP_COMPILER "
@@ -147,13 +148,11 @@ Libraries = OrderedDict( [
         "&& INSTALLATION_DIR/bin/pip3 install "
         "--upgrade "
         "--target INSTALLATION_DIR/lib/python3.6/site-packages numpy scipy matplotlib") ,
-])
-Libraries = OrderedDict( [
     ("qt",
 	    "rm -rf build/qt "
         "&& git clone git://code.qt.io/qt/qt5.git build/qt"
         "&& cd qt5 "
-        "&& git checkout 5.12.4 "
+        "&& git checkout QT_VERSION "
         "&& perl init-repository "
         "&& ../qt5/configure "
         "-prefix INSTALLATION_DIR/Qt "
@@ -262,6 +261,7 @@ def formatBuildCommand( command, lib ):
     command = command.replace( "C_COMPILER"      , CCompiler )
     command = command.replace( "CPP_COMPILER"    , CppCompiler )
     command = command.replace( "INSTALLATION_DIR", InstallationDir )
+    command = command.replace( "QT_VERSION", QtVersion )
 
     if ( lib == "proj" ):
         sqlitePath = glob.glob( InstallationDir + "/lib/" + sqliteLib )[0]
