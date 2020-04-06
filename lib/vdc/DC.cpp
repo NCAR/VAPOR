@@ -1136,7 +1136,7 @@ bool DC::GetMeshDimLens(const string& mesh_name, std::vector<size_t> &dims) cons
 	return(true);
 }
 
-bool DC::GetMeshDimNames(string mesh_name, std::vector<string> &dimnames) const {
+bool DC::GetMeshDimNames(const string& mesh_name, std::vector<string> &dimnames) const {
 	dimnames.clear();
 
 	DC::Mesh mesh;
