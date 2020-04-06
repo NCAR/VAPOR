@@ -1,20 +1,22 @@
 import os
+import sys
 import platform
 import subprocess
 import argparse
 import glob
 import distro
+from collections import OrderedDict
 
-InstallationDir = "/usr/local/VAPOR-Deps/2019-Aug-test2"
-#InstallationDir = "/home/pearse/2019-Aug-test"
+InstallationDir = "/home/pearse/2019-Aug-test"
+BuildDir = r'build/'
 #InstallationDir = "/home/pearse/2019-Aug-src"
 CCompiler = "gcc"
 CppCompiler = "g++"
 CMake = "cmake"
 Make = "make"
 
-Libraries = {
-    "assimp" : 
+Libraries = OrderedDict( [
+    ("assimp", 
         "CMAKE_EXE "
         "CC=C_COMPILER "
         "CXX=CPP_COMPILER "
@@ -22,8 +24,8 @@ Libraries = {
         "-DCMAKE_BUILD_TYPE=Release "
         ".. "
         "&& MAKE_EXE "
-        "&& MAKE_EXE install",
-    "zlib" :
+        "&& MAKE_EXE install"),
+    ("zlib", 
         "CMAKE_EXE "
         "CC=C_COMPILER "
         "CXX=CPP_COMPILER "
@@ -31,8 +33,8 @@ Libraries = {
         "-DCMAKE_BUILD_TYPE=Release "
         ".. "
         "&& MAKE_EXE "
-        "&& MAKE_EXE install",
-    "szip" :
+        "&& MAKE_EXE install"),
+    ("szip", 
         "rm -rf /tmp/szlib "
         "&& git clone https://github.com/taqu/szlib.git /tmp/szlib "
         "&& mv /tmp/szlib/szlib.h INSTALLATION_DIR/include "
@@ -43,8 +45,8 @@ Libraries = {
         "./configure "
         "--prefix=INSTALLATION_DIR "
         "&& MAKE_EXE "
-        "&& MAKE_EXE install",
-    "hdf5" :
+        "&& MAKE_EXE install"),
+    ("hdf5",
         "CC=C_COMPILER "
         "CXX=CPP_COMPILER "
         "LDFLAGS=-LINSTALLATION_DIR/lib "
@@ -53,8 +55,8 @@ Libraries = {
         "--prefix=INSTALLATION_DIR "
         "--with-szlib=INSTALLATION_DIR "
         "&& MAKE_EXE "
-        "&& MAKE_EXE install",
-    "netcdf" :
+        "&& MAKE_EXE install"),
+    ("netcdf", 
         "CC=C_COMPILER "
         "CXX=CPP_COMPILER "
         "LDFLAGS=-LINSTALLATION_DIR/lib "
@@ -63,29 +65,29 @@ Libraries = {
         "--prefix=INSTALLATION_DIR "
         "--disable-dap "
         "&& MAKE_EXE "
-        "&& MAKE_EXE install",
-    "udunits" : 
+        "&& MAKE_EXE install"),
+    ("udunits", 
         "CC=C_COMPILER "
         "CXX=CPP_COMPILER "
         "./configure "
         "--prefix=INSTALLATION_DIR "
         "&& MAKE_EXE "
-        "&& MAKE_EXE install",
-    "freetype" :
+        "&& MAKE_EXE install"),
+    ("freetype",
         "CC=C_COMPILER "
         "CXX=CPP_COMPILER "
         "./configure "
         "--prefix=INSTALLATION_DIR "
         "&& MAKE_EXE "
-        "&& MAKE_EXE install",
-    "jpeg" :
+        "&& MAKE_EXE install"),
+    ("jpeg", 
         "CC=C_COMPILER "
         "CXX=CPP_COMPILER "
         "./configure "
         "--prefix=INSTALLATION_DIR "
         "&& MAKE_EXE "
-        "&& MAKE_EXE install",
-    "tiff" :
+        "&& MAKE_EXE install"),
+    ("tiff", 
         "CC=C_COMPILER "
         "CXX=CPP_COMPILER "
         "LDFLAGS=-LINSTALLATION_DIR/lib "
@@ -94,14 +96,14 @@ Libraries = {
         "--prefix=INSTALLATION_DIR "
         "--disable-dap"
         "&& MAKE_EXE "
-        "&& MAKE_EXE install",
-    "sqlite" :
+        "&& MAKE_EXE install"),
+    ("sqlite", 
         "CC=C_COMPILER " "CXX=CPP_COMPILER "
         "./configure "
         "--prefix=INSTALLATION_DIR "
         "&& MAKE_EXE "
-        "&& MAKE_EXE install",
-    "proj" :
+        "&& MAKE_EXE install"),
+    ("proj", 
         "CMAKE_EXE "
         "-DEXE_SQLITE3=INSTALLATION_DIR/bin/sqlite3 " 
         "-DSQLITE3_INCLUDE_DIR=INSTALLATION_DIR/include "
@@ -110,8 +112,8 @@ Libraries = {
         "-DCMAKE_INSTALL_PREFIX=INSTALLATION_DIR "
         ".. "
         "&& MAKE_EXE "
-        "&& MAKE_EXE install ",
-    "libgeotiff" :
+        "&& MAKE_EXE install "),
+    ("libgeotiff",
         "CC=C_COMPILER "
         "CXX=CPP_COMPILER "
         "LDFLAGS=-LINSTALLATION_DIR/lib "
@@ -121,15 +123,15 @@ Libraries = {
         "--with-zlib=yes "
         "--with-jpeg=yes "
         "&& MAKE_EXE "
-        "&& MAKE_EXE install",
-    "glew" :
+        "&& MAKE_EXE install"),
+    ("glew",
         "sed -i 's:GLEW_DEST ?= /usr:GLEW_DEST ?= INSTALLATION_DIR:' Makefile "
         "&& sed -i 's:GLEW_PREFIX ?= /usr:GLEW_PREFIX ?= INSTALLATION_DIR:' Makefile "
         "&& sed -i 's:LIBDIR = $(GLEW_DEST)/lib64:LIBDIR = $(GLEW_DEST)/lib:' config/Makefile.linux "
         "&& sed -i 's:GLEW_DEST = /usr/local:GLEW_DEST = INSTALLATION_DIR:' config/Makefile.darwin "
         "&& make "
-        "&& make install",
-    "Python" :
+        "&& make install"),
+    ("Python",
         "CPPFLAGS=\"-IINSTALLATION_DIR/include\" "
         "LDFLAGS=\"-LINSTALLATION_DIR/lib -Wl,-rpath,INSTALLATION_DIR/lib\" "
         "CC=C_COMPILER "
@@ -144,13 +146,12 @@ Libraries = {
         "&& INSTALLATION_DIR/bin/pip3 install --upgrade pip "
         "&& INSTALLATION_DIR/bin/pip3 install "
         "--upgrade "
-        "--target INSTALLATION_DIR/lib/python3.6/site-packages numpy scipy matplotlib",
-}
-
-Libraries = {
-    "qt":
-	"rm -rf qt "
-        "&& git clone git://code.qt.io/qt/qt5.git "
+        "--target INSTALLATION_DIR/lib/python3.6/site-packages numpy scipy matplotlib") ,
+])
+Libraries = OrderedDict( [
+    ("qt",
+	    "rm -rf build/qt "
+        "&& git clone git://code.qt.io/qt/qt5.git build/qt"
         "&& cd qt5 "
         "&& git checkout 5.12.4 "
         "&& perl init-repository "
@@ -162,9 +163,9 @@ Libraries = {
         "-opensource "
         "-nomake examples "
         "-nomake tests "
-        "&& make "
-	"&& make install"
-}
+        "&& make ")
+    ]
+)
 
 def checkDarwinPythonDeps():
     formulae = [ "xz", "zlib", "openssl" ]
@@ -232,6 +233,8 @@ def unpack( tarball ):
         command = "tar -xvf "
     command += tarball
 
+    command += " -C " + BuildDir
+
     print( "Unpacking " + tarball )
     print( "  " + command )
     subprocess.call( [ command ], shell=True )
@@ -267,6 +270,9 @@ def formatBuildCommand( command, lib ):
     return command
 
 def buildLibrary( lib, command ):
+    global BuildDir
+    buildDir = BuildDir
+   # os.makedirs( buildDir, exist_ok=True )
 
     files = glob.glob( lib+"*" )
     print( lib )
@@ -274,7 +280,6 @@ def buildLibrary( lib, command ):
     # We don't want zip, exe, or dos files, just tar
     if ( len(files) > 0 ):
         tarball = ""
-        print("tarball0:    " +tarball )
         for f in files:
             if ( f.find( "zip" ) == -1 and \
                  f.find( "exe" ) == -1 and \
@@ -283,21 +288,18 @@ def buildLibrary( lib, command ):
                     #libdir = f
                     tarball = f
                     break
-        print ("TARBALL " + tarball )   
-        if ( tarball != "" ):
-            unpack( tarball )
+
+        unpack( tarball )
      
-            libDir = os.path.splitext( tarball )[0]
+        libDir = os.path.splitext( tarball )[0]
         
-            # Remove .tar if it wasn't removed from libDir above
-            if ( os.path.splitext( libDir )[-1] == '.tar' ):
-                libDir = os.path.splitext( libDir )[0]
-            buildDir = libDir
-        else:
-            buildDir = lib
+        # Remove .tar if it wasn't removed from libDir above
+        if ( os.path.splitext( libDir )[-1] == '.tar' ):
+            libDir = os.path.splitext( libDir )[0]
+        buildDir += libDir
     else:
         os.makedirs( lib, exist_ok=True )
-        buildDir = lib
+        buildDir += lib
     
     if ( command.find( "CMAKE" ) != -1 ):
         buildDir += r'/build'
@@ -307,8 +309,10 @@ def buildLibrary( lib, command ):
 
     print ("buildDir: " + buildDir )
     print ("command:  " + command )
+   
+    os.makedirs( buildDir, exist_ok=True )
     
-    f = open( lib+".txt", "w")
+    f = open( buildDir + r'/' + lib + ".txt", "w")
     f.flush()
     p = subprocess.Popen( command, cwd=buildDir, stdout=f, stderr=f, shell=True )
     output = p.communicate()  # this makes us wait for Popen to finish
@@ -350,6 +354,7 @@ parser.add_argument(
 )
 
 def main():
+
     subprocess.call( [ "rm -rf *.txt" ], shell=True )
     subprocess.call( [ "rm -rf qt" ], shell=True )
 
@@ -357,7 +362,6 @@ def main():
 
     for lib, command in Libraries.items():
         buildLibrary( lib, command )
-    #print( assimp )
 
 if __name__ == "__main__":
     main();
