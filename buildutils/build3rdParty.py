@@ -157,7 +157,7 @@ Libraries = OrderedDict( [
 Libraries = OrderedDict( [
     ("qt",
 	    "rm -rf build/qt "
-        "&& git clone git://code.qt.io/qt/qt5.git build/qt"
+        "&& git clone git://code.qt.io/qt/qt5.git build/qt "
         "&& cd build/qt "
         "&& git checkout QT_VERSION "
         "&& perl init-repository "
@@ -168,9 +168,9 @@ Libraries = OrderedDict( [
         "-developer-build "
         "-opensource "
         "-nomake examples "
-        "-nomake tests "
-        "&& make "
-        "&& make install")
+        "-nomake tests ")
+        #"&& make "
+        #"&& make install")
     ]
 )
 
