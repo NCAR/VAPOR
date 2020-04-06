@@ -1068,8 +1068,8 @@ class VDF_API DataMgr : public Wasp::MyBase {
         string meshname, string &standard_name, string &formula_terms) const;
 
     bool _hasVerticalXForm(string meshname) const {
-        string dummy;
-        return (_hasVerticalXForm(meshname, dummy, dummy));
+        string standard_name, formula_terms;
+        return (_hasVerticalXForm(meshname, standard_name, formula_terms));
     }
 
     // Hide public DC::GetDimLensAtLevel by making it private
