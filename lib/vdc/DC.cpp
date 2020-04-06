@@ -1117,7 +1117,7 @@ vector <int> DC::FileTable::GetEntries() const {
 	return(fds);
 }
 
-bool DC::GetMeshDimLens(string mesh_name, std::vector<size_t> &dims) const {
+bool DC::GetMeshDimLens(const string& mesh_name, std::vector<size_t> &dims) const {
 	dims.clear();
 
 	DC::Mesh mesh;
@@ -1136,7 +1136,7 @@ bool DC::GetMeshDimLens(string mesh_name, std::vector<size_t> &dims) const {
 	return(true);
 }
 
-bool DC::GetMeshDimNames(string mesh_name, std::vector<string> &dimnames) const {
+bool DC::GetMeshDimNames(const string& mesh_name, std::vector<string> &dimnames) const {
 	dimnames.clear();
 
 	DC::Mesh mesh;

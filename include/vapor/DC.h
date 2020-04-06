@@ -1545,7 +1545,7 @@ public:
  //!
  //! \sa DC::GetMesh(), DC::GetDimension()
  //
- virtual bool GetMeshDimLens(string mesh_name, std::vector<size_t> &dims) const;
+ virtual bool GetMeshDimLens(const string& mesh_name, std::vector<size_t> &dims) const;
 
  //! Return the ordered list of dimension names for a mesh
  //!
@@ -1555,7 +1555,7 @@ public:
  //!
  //! \sa DC::GetMesh(), DC::GetDimension()
  //
- virtual bool GetMeshDimNames(string mesh_name, std::vector<string> &dimnames) const;
+ virtual bool GetMeshDimNames(const string& mesh_name, std::vector<string> &dimnames) const;
 
 
  //! Return a coordinate variable's definition
