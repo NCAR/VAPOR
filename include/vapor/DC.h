@@ -1555,7 +1555,7 @@ public:
  //!
  //! \sa DC::GetMesh(), DC::GetDimension()
  //
- virtual bool GetMeshDimNames(string mesh_name, std::vector<string> &dimnames) const;
+ virtual bool GetMeshDimNames(const string& mesh_name, std::vector<string> &dimnames) const;
 
 
  //! Return a coordinate variable's definition
