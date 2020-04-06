@@ -7,7 +7,7 @@ import glob
 import distro
 from collections import OrderedDict
 
-InstallationDir = "/usr/local/VAPOR-Deps/2019-Aug-test2"
+InstallationDir = "/home/pearse/2019-Aug-test"
 BuildDir = r'build/'
 #InstallationDir = "/home/pearse/2019-Aug-src"
 CCompiler = "gcc"
@@ -20,15 +20,6 @@ if ( distro.id() == 'darwin' ):
     CCompiler = "clang"
     CppCompiler = "clang++"
 
-'''("zlib", 
-"CMAKE_EXE "
-"CC=C_COMPILER "
-"CXX=CPP_COMPILER "
-"-DCMAKE_INSTALL_PREFIX=INSTALLATION_DIR "
-"-DCMAKE_BUILD_TYPE=Release "
-".. "
-"&& MAKE_EXE "
-"&& MAKE_EXE install"),'''
 Libraries = OrderedDict( [
     ("assimp", 
         "CMAKE_EXE "
@@ -153,24 +144,22 @@ Libraries = OrderedDict( [
         "&& INSTALLATION_DIR/bin/pip3 install "
         "--upgrade "
         "--target INSTALLATION_DIR/lib/python3.6/site-packages numpy scipy matplotlib") ,
-])
-Libraries = OrderedDict( [
     ("qt",
-	    "rm -rf build/qt "
-        "&& git clone git://code.qt.io/qt/qt5.git build/qt "
-        "&& cd build/qt "
+	    "rm -rf qt "
+        "&& git clone git://code.qt.io/qt/qt5.git "
+        "&& cd qt5 "
         "&& git checkout QT_VERSION "
         "&& perl init-repository "
-        "&& ../qt5/configure "
+        "&& ./configure "
         "-prefix INSTALLATION_DIR/Qt "
         "-release "
         "-confirm-license "
         "-developer-build "
         "-opensource "
         "-nomake examples "
-        "-nomake tests ")
-        #"&& make "
-        #"&& make install")
+        "-nomake tests "
+        "&& make "
+        "&& make install")
     ]
 )
 
