@@ -16,6 +16,10 @@ CMake = "cmake"
 Make = "make"
 QtVersion = "5.13.2"
 
+if ( distro.id() == 'darwin' ):
+    CCompiler = "clang"
+    CppCompiler = "clang++"
+
 '''("zlib", 
 "CMAKE_EXE "
 "CC=C_COMPILER "
