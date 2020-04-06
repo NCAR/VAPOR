@@ -2040,22 +2040,15 @@ DerivedCFVertCoordVar *DerivedCFVertCoordVarFactory::CreateInstance(
     if(it != _factoryFunctionRegistry.end())
         instance = it->second(dc, mesh, formula);
 
-    if(instance != NULL)
-        return instance;
-    else
-        return NULL;
+	return instance;
 }
 
 vector <string> DerivedCFVertCoordVarFactory::GetFactoryNames() const {
 	vector <string> names;
 	map<string, function<DerivedCFVertCoordVar * (DC *, string , string )>>::const_iterator itr;
 
-	for (
-		itr = _factoryFunctionRegistry.begin();
-		itr!=_factoryFunctionRegistry.end();
-		++itr
-	) {
-		names.push_back(itr->first);
+	for (const auto &itr : _factoryFunctionRegistry) {
+		names.push_back(itr.first);
 	}
 	return(names);
 }
