@@ -30,4 +30,10 @@ void VolumeIsoParams::_init()
     SetValueLong(UseColormapVariableTag, UseColormapVariableTag, false);
 
     SetFieldVariableNames(vector<string>());
+
+    SetValueLong(LightingEnabledTag, "", GetDefaultLightingEnabled());
+    SetValueDouble(PhongAmbientTag, "", GetDefaultPhongAmbient());
+    SetValueDouble(PhongDiffuseTag, "", GetDefaultPhongDiffuse());
+    SetValueDouble(PhongSpecularTag, "", GetDefaultPhongSpecular());
+    SetValueDouble(PhongShininessTag, "", GetDefaultPhongShininess());
 }

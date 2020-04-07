@@ -167,7 +167,7 @@ void VolumeRenderer::_setShaderUniforms(const ShaderProgram *shader, const bool 
 
     shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
     shader->SetUniform("cameraPos", vec3(cameraPos[0], cameraPos[1], cameraPos[2]));
-    shader->SetUniform("samplingRateMultiplier", vp->GetSamplingMultiplier());
+    shader->SetUniform("samplingRateMultiplier", (float)vp->GetSamplingMultiplier());
     shader->SetUniform("lightingEnabled", vp->GetLightingEnabled());
     shader->SetUniform("phongAmbient", vp->GetPhongAmbient());
     shader->SetUniform("phongDiffuse", vp->GetPhongDiffuse());
@@ -190,7 +190,10 @@ void VolumeRenderer::_setShaderUniforms(const ShaderProgram *shader, const bool 
     shader->SetUniform("unitOpacityScalar", largestDimension / smallestDimension);
     shader->SetUniform("scales", extScales);
 
-    shader->SetUniform("density", (float)_cache.tf->getOpacityScale());
+    float density = vp->GetValueDouble(VolumeParams::VolumeDensityTag, 1);
+    density = powf(density, 4);
+
+    shader->SetUniform("density", (float)density);
     shader->SetUniform("LUTMin", (float)_cache.tf->getMinMapValue());
     shader->SetUniform("LUTMax", (float)_cache.tf->getMaxMapValue());
     shader->SetUniform("mapOrthoMode", viewpointParams->GetProjectionType() == ViewpointParams::MapOrthographic);

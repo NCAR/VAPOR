@@ -1,5 +1,14 @@
 #include "VolumeIsoSubtabs.h"
 #include "VolumeSubtabs.h"
+#include "PGroup.h"
+#include "PSection.h"
+#include "PTFEditor.h"
+#include "PCheckbox.h"
+#include "PStringDropdownHLI.h"
+#include "PEnumDropdown.h"
+#include "PSliderEdit.h"
+#include "PVariableSelector.h"
+#include "PColorSelector.h"
 
 using namespace VAPoR;
 
@@ -18,104 +27,30 @@ void VolumeIsoVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Re
 VolumeIsoAppearanceSubtab::VolumeIsoAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
-    ((QVBoxLayout *)layout())->insertWidget(0, _tfe = new TFEditorIsoSurface);
 
-    _params = nullptr;
+    _pg = new PGroup;
 
-    _samplingRateComboBox->blockSignals(true);
-    vector<float> samplingOptions = VolumeParams::GetSamplingRateMultiples();
-    for (double rate : samplingOptions) _samplingRateComboBox->addItem(VolumeAppearanceSubtab::GetQStringForSamplingRate(rate));
-    _samplingRateComboBox->blockSignals(false);
+    verticalLayout->insertWidget(0, _pg);
+    _pg->Add((new PTFEditor(RenderParams::_variableNameTag, {PTFEditor::Histogram, PTFEditor::IsoValues}, "Transfer Function")));
+    _pg->Add(
+        (new PTFEditor(RenderParams::_colorMapVariableNameTag, {PTFEditor::Histogram, PTFEditor::Colormap}, "Colormap Transfer Function"))->ShowBasedOnParam(VolumeParams::UseColormapVariableTag));
 
-    // Set up lighting parameter widgets
-    _ambientWidget->SetLabel(QString("Ambient"));
-    _ambientWidget->SetDecimals(2);
-    _ambientWidget->SetExtents(0.0, 1.0);
-    _ambientWidget->SetIntType(false);
+    PSection *rtp = new PSection("Isosurface Parameters");
+    _pg->Add(rtp);
+    rtp->Add(new PStringDropdownHLI<VolumeIsoParams>("Raytracing Algorithm", VolumeIsoParams::GetAlgorithmNames(VolumeParams::Type::Iso), &VolumeIsoParams::GetAlgorithm,
+                                                     &VolumeIsoParams::SetAlgorithmByUser));
+    rtp->Add(new PEnumDropdown(VolumeIsoParams::SamplingRateMultiplierTag, {"1x", "2x", "4x", "8x", "16x"}, {1, 2, 4, 8, 16}, "Sampling Rate Multiplier"));
+    rtp->Add(new PCheckbox(VolumeIsoParams::UseColormapVariableTag, "Color by other variable"));
+    rtp->Add((new PColorSelector(RenderParams::_constantColorTag, "Color"))->ShowBasedOnParam(VolumeIsoParams::UseColormapVariableTag, false));
+    rtp->Add((new PVariableSelector3D(RenderParams::_colorMapVariableNameTag))->ShowBasedOnParam(VolumeIsoParams::UseColormapVariableTag));
 
-    _diffuseWidget->SetLabel(QString("Diffuse"));
-    _diffuseWidget->SetDecimals(2);
-    _diffuseWidget->SetExtents(0.0, 1.0);
-    _diffuseWidget->SetIntType(false);
-
-    _specularWidget->SetLabel(QString("Specular"));
-    _specularWidget->SetDecimals(2);
-    _specularWidget->SetExtents(0.0, 1.0);
-    _specularWidget->SetIntType(false);
-
-    _shininessWidget->SetLabel(QString("Shininess"));
-    _shininessWidget->SetExtents(1.0, 100.0);
-    _shininessWidget->SetIntType(true);
+    PSection *lp = new PSection("Lighting Parameters");
+    _pg->Add(lp);
+    lp->Add(new PCheckbox(VolumeIsoParams::LightingEnabledTag));
+    lp->Add((new PDoubleSliderEdit(VolumeIsoParams::PhongAmbientTag, "Ambient"))->EnableDynamicUpdate());
+    lp->Add((new PDoubleSliderEdit(VolumeIsoParams::PhongDiffuseTag, "Diffuse"))->EnableDynamicUpdate());
+    lp->Add((new PDoubleSliderEdit(VolumeIsoParams::PhongSpecularTag, "Specular"))->EnableDynamicUpdate());
+    lp->Add((new PDoubleSliderEdit(VolumeIsoParams::PhongShininessTag, "Specular"))->SetRange(1, 100)->EnableDynamicUpdate());
 }
 
-void VolumeIsoAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *params)
-{
-    _tfe->Update(dataMgr, paramsMgr, params);
-
-    _params = dynamic_cast<VAPoR::VolumeIsoParams *>(params);
-    VAssert(_params);
-
-    _castingModeComboBox->blockSignals(true);
-    string algorithm = _params->GetAlgorithm();
-    int    index = _castingModeComboBox->findText(QString::fromStdString(algorithm));
-
-    if (index == -1) {
-        _castingModeComboBox->clear();
-        const vector<string> algorithms = VolumeParams::GetAlgorithmNames(VolumeParams::Type::Iso);
-        for (const string &s : algorithms) _castingModeComboBox->addItem(QString::fromStdString(s));
-
-        index = _castingModeComboBox->findText(QString::fromStdString(algorithm));
-    }
-    _castingModeComboBox->setCurrentIndex(index);
-    _castingModeComboBox->blockSignals(false);
-
-    _samplingRateComboBox->blockSignals(true);
-    _samplingRateComboBox->setCurrentIndex(_samplingRateComboBox->findText(VolumeAppearanceSubtab::GetQStringForSamplingRate(_params->GetSamplingMultiplier())));
-    _samplingRateComboBox->blockSignals(false);
-
-    _lightingCheckBox->setChecked(_params->GetLightingEnabled());
-
-    _ambientWidget->SetValue(_params->GetPhongAmbient());
-    _diffuseWidget->SetValue(_params->GetPhongDiffuse());
-    _specularWidget->SetValue(_params->GetPhongSpecular());
-    _shininessWidget->SetValue(_params->GetPhongShininess());
-}
-
-void VolumeIsoAppearanceSubtab::on__castingModeComboBox_currentIndexChanged(const QString &text)
-{
-    if (!text.isEmpty()) {
-        _params->SetAlgorithm(text.toStdString());
-        _params->SetAlgorithmWasManuallySetByUser(true);
-    }
-}
-
-void VolumeIsoAppearanceSubtab::on__samplingRateComboBox_currentIndexChanged(const QString &text)
-{
-    if (!text.isEmpty()) { _params->SetSamplingMultiplier(VolumeAppearanceSubtab::GetSamplingRateForQString(text)); }
-}
-
-void VolumeIsoAppearanceSubtab::on__lightingCheckBox_toggled(bool checked)
-{
-    _params->SetLightingEnabled(checked);
-
-    _ambientWidget->setEnabled(checked);
-    _diffuseWidget->setEnabled(checked);
-    _specularWidget->setEnabled(checked);
-    _shininessWidget->setEnabled(checked);
-}
-
-void VolumeIsoAppearanceSubtab::on__ambientWidget_valueChanged(double value) { _params->SetPhongAmbient(value); }
-
-void VolumeIsoAppearanceSubtab::on__diffuseWidget_valueChanged(double value) { _params->SetPhongDiffuse(value); }
-
-void VolumeIsoAppearanceSubtab::on__specularWidget_valueChanged(double value) { _params->SetPhongSpecular(value); }
-
-void VolumeIsoAppearanceSubtab::on__shininessWidget_valueChanged(int value) { _params->SetPhongShininess(value); }
-
-void VolumeIsoAppearanceSubtab::on__defaultLightingButton_clicked(bool checked)
-{
-    _params->SetPhongAmbient(_params->GetDefaultPhongAmbient());
-    _params->SetPhongDiffuse(_params->GetDefaultPhongDiffuse());
-    _params->SetPhongSpecular(_params->GetDefaultPhongSpecular());
-    _params->SetPhongShininess(_params->GetDefaultPhongShininess());
-}
+void VolumeIsoAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *params) { _pg->Update(params, paramsMgr, dataMgr); }

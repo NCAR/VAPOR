@@ -16,15 +16,16 @@ std::vector<VolumeParams::AlgorithmEntry> VolumeParams::_algorithms;
 
 const std::string VolumeParams::_algorithmTag = "AlgorithmTag";
 const std::string VolumeParams::_algorithmWasManuallySetByUserTag = "AlgorithmWasManuallySetByUserTag";
-const std::string VolumeParams::_samplingRateMultiplierTag = "SamplingRateMultiplierTag";
 const std::string VolumeParams::_isoValuesTag = "IsoValuesTag";
 const std::string VolumeParams::_enabledIsoValuesTag = "EnabledIsoValuesTag";
-const std::string VolumeParams::_lightingEnabledTag = "LightingEnabledTag";
-const std::string VolumeParams::_phongAmbientTag = "PhongAmbientTag";
-const std::string VolumeParams::_phongDiffuseTag = "PhongDiffuseTag";
-const std::string VolumeParams::_phongSpecularTag = "PhongSpecularTag";
-const std::string VolumeParams::_phongShininessTag = "PhongShininessTag";
+const std::string VolumeParams::LightingEnabledTag = "LightingEnabledTag";
+const std::string VolumeParams::PhongAmbientTag = "PhongAmbientTag";
+const std::string VolumeParams::PhongDiffuseTag = "PhongDiffuseTag";
+const std::string VolumeParams::PhongSpecularTag = "PhongSpecularTag";
+const std::string VolumeParams::PhongShininessTag = "PhongShininessTag";
 const std::string VolumeParams::UseColormapVariableTag = "UseColormapVariable";
+const std::string VolumeParams::SamplingRateMultiplierTag = "SamplingRateMultiplierTag";
+const std::string VolumeParams::VolumeDensityTag = "VolumeDensityTag";
 
 VolumeParams::VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave) : RenderParams(dataMgr, ssave, VolumeParams::GetClassType(), 3)
 {
@@ -52,15 +53,23 @@ void VolumeParams::SetAlgorithm(std::string algorithm)
     SetValueString(_algorithmTag, "Volume rendering algorithm", algorithm);
 }
 
+void VolumeParams::SetAlgorithmByUser(std::string algorithm)
+{
+    BeginGroup("Set Algorithm and set by user");
+    SetAlgorithm(algorithm);
+    SetAlgorithmWasManuallySetByUser(true);
+    EndGroup();
+}
+
 bool VolumeParams::GetAlgorithmWasManuallySetByUser() const { return GetValueLong(_algorithmWasManuallySetByUserTag, false); }
 
 void VolumeParams::SetAlgorithmWasManuallySetByUser(bool v) { SetValueLong(_algorithmWasManuallySetByUserTag, "User manually changed the algorithm", v); }
 
 std::vector<float> VolumeParams::GetSamplingRateMultiples() { return {1, 2, 4, 8, 16}; }
 
-float VolumeParams::GetSamplingMultiplier() const { return GetValueDouble(_samplingRateMultiplierTag, 1.0); }
+long VolumeParams::GetSamplingMultiplier() const { return GetValueLong(SamplingRateMultiplierTag, 1); }
 
-void VolumeParams::SetSamplingMultiplier(float d) { SetValueDouble(_samplingRateMultiplierTag, "Sampling Rate Multiplier", d); }
+void VolumeParams::SetSamplingMultiplier(long d) { SetValueLong(SamplingRateMultiplierTag, "Sampling Rate Multiplier", d); }
 
 vector<double> VolumeParams::GetIsoValues(const string &variable)
 {
@@ -84,16 +93,16 @@ void VolumeParams::SetIsoValues(const string &variable, const vector<double> &va
     SetValueDoubleVec(tag, tag, values);
 }
 
-void  VolumeParams::SetLightingEnabled(bool v) { SetValueLong(_lightingEnabledTag, "Lighting enabled", v); }
-bool  VolumeParams::GetLightingEnabled() const { return GetValueLong(_lightingEnabledTag, GetDefaultLightingEnabled()); }
-void  VolumeParams::SetPhongAmbient(float v) { SetValueDouble(_phongAmbientTag, "Phong ambient", v); };
-float VolumeParams::GetPhongAmbient() const { return GetValueDouble(_phongAmbientTag, GetDefaultPhongAmbient()); };
-void  VolumeParams::SetPhongDiffuse(float v) { SetValueDouble(_phongDiffuseTag, "Phong diffuse", v); };
-float VolumeParams::GetPhongDiffuse() const { return GetValueDouble(_phongDiffuseTag, GetDefaultPhongDiffuse()); };
-void  VolumeParams::SetPhongSpecular(float v) { SetValueDouble(_phongSpecularTag, "Phong specular", v); };
-float VolumeParams::GetPhongSpecular() const { return GetValueDouble(_phongSpecularTag, GetDefaultPhongSpecular()); };
-void  VolumeParams::SetPhongShininess(float v) { SetValueDouble(_phongShininessTag, "Phong shininess", v); };
-float VolumeParams::GetPhongShininess() const { return GetValueDouble(_phongShininessTag, GetDefaultPhongShininess()); };
+void  VolumeParams::SetLightingEnabled(bool v) { SetValueLong(LightingEnabledTag, "Lighting enabled", v); }
+bool  VolumeParams::GetLightingEnabled() const { return GetValueLong(LightingEnabledTag, GetDefaultLightingEnabled()); }
+void  VolumeParams::SetPhongAmbient(float v) { SetValueDouble(PhongAmbientTag, "Phong ambient", v); };
+float VolumeParams::GetPhongAmbient() const { return GetValueDouble(PhongAmbientTag, GetDefaultPhongAmbient()); };
+void  VolumeParams::SetPhongDiffuse(float v) { SetValueDouble(PhongDiffuseTag, "Phong diffuse", v); };
+float VolumeParams::GetPhongDiffuse() const { return GetValueDouble(PhongDiffuseTag, GetDefaultPhongDiffuse()); };
+void  VolumeParams::SetPhongSpecular(float v) { SetValueDouble(PhongSpecularTag, "Phong specular", v); };
+float VolumeParams::GetPhongSpecular() const { return GetValueDouble(PhongSpecularTag, GetDefaultPhongSpecular()); };
+void  VolumeParams::SetPhongShininess(float v) { SetValueDouble(PhongShininessTag, "Phong shininess", v); };
+float VolumeParams::GetPhongShininess() const { return GetValueDouble(PhongShininessTag, GetDefaultPhongShininess()); };
 
 const std::vector<std::string> VolumeParams::GetAlgorithmNames(Type type)
 {
@@ -120,4 +129,11 @@ void VolumeParams::_init()
     SetDiagMsg("VolumeParams::_init()");
 
     SetFieldVariableNames(vector<string>());
+    SetValueDouble(VolumeDensityTag, "", 1);
+
+    SetValueLong(LightingEnabledTag, "", GetDefaultLightingEnabled());
+    SetValueDouble(PhongAmbientTag, "", GetDefaultPhongAmbient());
+    SetValueDouble(PhongDiffuseTag, "", GetDefaultPhongDiffuse());
+    SetValueDouble(PhongSpecularTag, "", GetDefaultPhongSpecular());
+    SetValueDouble(PhongShininessTag, "", GetDefaultPhongShininess());
 }

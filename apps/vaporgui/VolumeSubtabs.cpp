@@ -1,6 +1,14 @@
 #include "VolumeSubtabs.h"
 #include "TFEditorVolume.h"
 #include "QSliderEdit.h"
+#include "PGroup.h"
+#include "PSection.h"
+#include "PTFEditor.h"
+#include "PCheckbox.h"
+#include "PStringDropdownHLI.h"
+#include "PEnumDropdown.h"
+#include "PSliderEdit.h"
+#include "PVariableSelector.h"
 
 using namespace VAPoR;
 
@@ -16,142 +24,29 @@ void VolumeVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Rende
 VolumeAppearanceSubtab::VolumeAppearanceSubtab(QWidget *parent)
 {
     setupUi(this);
-    verticalLayout->insertWidget(0, _tfe = new TFEditorVolume);
 
-    _densitySlider = new QSliderEdit();
-    _densitySlider->SetLabel("Volume Density");
-    _densitySlider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-    connect(_densitySlider, SIGNAL(valueChanged(double)), this, SLOT(_densitySlider_valueChanged(double)));
-    _raytracingFrame->layout()->addWidget(_densitySlider);
+    verticalLayout->insertWidget(0, _pg = new PGroup);
+    _pg->Add((new PTFEditor(RenderParams::_variableNameTag, {PTFEditor::Default}, "Transfer Function"))->ShowColormapBasedOnParam(VolumeParams::UseColormapVariableTag, false));
+    _pg->Add(
+        (new PTFEditor(RenderParams::_colorMapVariableNameTag, {PTFEditor::Histogram, PTFEditor::Colormap}, "Colormap Transfer Function"))->ShowBasedOnParam(VolumeParams::UseColormapVariableTag));
 
-    _params = nullptr;
+    PSection *rtp = new PSection("Volume Parameters");
+    _pg->Add(rtp);
+    rtp->Add(new PStringDropdownHLI<VolumeParams>("Raytracing Algorithm", VolumeParams::GetAlgorithmNames(VolumeParams::Type::DVR), &VolumeParams::GetAlgorithm, &VolumeParams::SetAlgorithmByUser));
+    rtp->Add(new PEnumDropdown(VolumeParams::SamplingRateMultiplierTag, {"1x", "2x", "4x", "8x", "16x"}, {1, 2, 4, 8, 16}, "Sampling Rate Multiplier"));
+    rtp->Add((new PDoubleSliderEdit(VolumeParams::VolumeDensityTag, "Volume Density"))
+                 ->EnableDynamicUpdate()
+                 ->SetTooltip("Changes the overall density or 'opacity' of the volume allowing for finer tuning of the transfer function."));
+    rtp->Add(new PCheckbox(VolumeParams::UseColormapVariableTag, "Color by other variable"));
+    rtp->Add((new PVariableSelector3D(RenderParams::_colorMapVariableNameTag))->ShowBasedOnParam(VolumeParams::UseColormapVariableTag));
 
-    _samplingRateComboBox->blockSignals(true);
-    vector<float> samplingOptions = VolumeParams::GetSamplingRateMultiples();
-    for (double rate : samplingOptions) _samplingRateComboBox->addItem(GetQStringForSamplingRate(rate));
-    _samplingRateComboBox->blockSignals(false);
-
-    // Set up lighting parameter widgets
-    _ambientWidget->SetLabel(QString("Ambient"));
-    _ambientWidget->SetDecimals(2);
-    _ambientWidget->SetExtents(0.0, 1.0);
-    _ambientWidget->SetIntType(false);
-
-    _diffuseWidget->SetLabel(QString("Diffuse"));
-    _diffuseWidget->SetDecimals(2);
-    _diffuseWidget->SetExtents(0.0, 1.0);
-    _diffuseWidget->SetIntType(false);
-
-    _specularWidget->SetLabel(QString("Specular"));
-    _specularWidget->SetDecimals(2);
-    _specularWidget->SetExtents(0.0, 1.0);
-    _specularWidget->SetIntType(false);
-
-    _shininessWidget->SetLabel(QString("Shininess"));
-    _shininessWidget->SetExtents(1.0, 100.0);
-    _shininessWidget->SetIntType(true);
+    PSection *lp = new PSection("Lighting Parameters");
+    _pg->Add(lp);
+    lp->Add(new PCheckbox(VolumeParams::LightingEnabledTag));
+    lp->Add((new PDoubleSliderEdit(VolumeParams::PhongAmbientTag, "Ambient"))->EnableDynamicUpdate());
+    lp->Add((new PDoubleSliderEdit(VolumeParams::PhongDiffuseTag, "Diffuse"))->EnableDynamicUpdate());
+    lp->Add((new PDoubleSliderEdit(VolumeParams::PhongSpecularTag, "Specular"))->EnableDynamicUpdate());
+    lp->Add((new PDoubleSliderEdit(VolumeParams::PhongShininessTag, "Specular"))->SetRange(1, 100)->EnableDynamicUpdate());
 }
 
-void VolumeAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
-{
-    VAPoR::VolumeParams *vp = dynamic_cast<VolumeParams *>(rParams);
-    _params = vp;
-    VAssert(vp);
-
-    _tfe->Update(dataMgr, paramsMgr, rParams);
-
-    // ---------------------------
-    // Raytracing Parameters
-    // ---------------------------
-
-    string algorithm = vp->GetAlgorithm();
-    int    index = _castingModeComboBox->findText(QString::fromStdString(algorithm));
-
-    _castingModeComboBox->blockSignals(true);
-    if (index == -1) {
-        _castingModeComboBox->clear();
-        const vector<string> algorithms = VolumeParams::GetAlgorithmNames(VolumeParams::Type::DVR);
-        for (const string &s : algorithms) _castingModeComboBox->addItem(QString::fromStdString(s));
-
-        index = _castingModeComboBox->findText(QString::fromStdString(algorithm));
-    }
-    _castingModeComboBox->setCurrentIndex(index);
-    _castingModeComboBox->blockSignals(false);
-
-    _samplingRateComboBox->blockSignals(true);
-    _samplingRateComboBox->setCurrentIndex(_samplingRateComboBox->findText(GetQStringForSamplingRate(_params->GetSamplingMultiplier())));
-    _samplingRateComboBox->blockSignals(false);
-
-    MapperFunction *tf = vp->GetMapperFunc(vp->GetVariableName());
-    float           opacityValue = powf(tf->getOpacityScale(), 1 / 4.f);
-    _densitySlider->SetValue(opacityValue);
-
-    // ---------------------------
-    // Lighting Parameters
-    // ---------------------------
-
-    _lightingCheckBox->setChecked(_params->GetLightingEnabled());
-    _ambientWidget->SetValue(_params->GetPhongAmbient());
-    _diffuseWidget->SetValue(_params->GetPhongDiffuse());
-    _specularWidget->SetValue(_params->GetPhongSpecular());
-    _shininessWidget->SetValue(_params->GetPhongShininess());
-}
-
-void VolumeAppearanceSubtab::_densitySlider_valueChanged(double v)
-{
-    MapperFunction *tf = _params->GetMapperFunc(_params->GetVariableName());
-    tf->setOpacityScale(powf(v, 4));
-}
-
-void VolumeAppearanceSubtab::on__castingModeComboBox_currentIndexChanged(const QString &text)
-{
-    if (!text.isEmpty()) {
-        _params->SetAlgorithm(text.toStdString());
-        _params->SetAlgorithmWasManuallySetByUser(true);
-    }
-}
-
-void VolumeAppearanceSubtab::on__samplingRateComboBox_currentIndexChanged(const QString &text)
-{
-    if (!text.isEmpty()) { _params->SetSamplingMultiplier(GetSamplingRateForQString(text)); }
-}
-
-void VolumeAppearanceSubtab::on__lightingCheckBox_toggled(bool checked)
-{
-    _params->SetLightingEnabled(checked);
-
-    _ambientWidget->setEnabled(checked);
-    _diffuseWidget->setEnabled(checked);
-    _specularWidget->setEnabled(checked);
-    _shininessWidget->setEnabled(checked);
-}
-
-void VolumeAppearanceSubtab::on__ambientWidget_valueChanged(double value) { _params->SetPhongAmbient(value); }
-
-void VolumeAppearanceSubtab::on__diffuseWidget_valueChanged(double value) { _params->SetPhongDiffuse(value); }
-
-void VolumeAppearanceSubtab::on__specularWidget_valueChanged(double value) { _params->SetPhongSpecular(value); }
-
-void VolumeAppearanceSubtab::on__shininessWidget_valueChanged(int value) { _params->SetPhongShininess(value); }
-
-void VolumeAppearanceSubtab::on__defaultLightingButton_clicked(bool checked)
-{
-    _params->SetPhongAmbient(_params->GetDefaultPhongAmbient());
-    _params->SetPhongDiffuse(_params->GetDefaultPhongDiffuse());
-    _params->SetPhongSpecular(_params->GetDefaultPhongSpecular());
-    _params->SetPhongShininess(_params->GetDefaultPhongShininess());
-}
-
-QString VolumeAppearanceSubtab::GetQStringForSamplingRate(const float rate)
-{
-    char buf[16];
-    sprintf(buf, "%gx", rate);
-    return QString(buf);
-}
-
-float VolumeAppearanceSubtab::GetSamplingRateForQString(const QString &str)
-{
-    double rate;
-    sscanf(str.toStdString().c_str(), "%lgx", &rate);
-    return rate;
-}
+void VolumeAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _pg->Update(rParams, paramsMgr, dataMgr); }

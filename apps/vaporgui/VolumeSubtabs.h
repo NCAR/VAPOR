@@ -17,6 +17,7 @@ class DataMgr;
 
 class TFEditorVolume;
 class QSliderEdit;
+class PGroup;
 
 class VolumeVariablesSubtab : public QWidget, public Ui_VolumeVariablesGUI {
     Q_OBJECT
@@ -43,25 +44,8 @@ public:
     VolumeAppearanceSubtab(QWidget *parent);
     void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 
-    static QString GetQStringForSamplingRate(const float rate);
-    static float   GetSamplingRateForQString(const QString &str);
-
-private slots:
-    void _densitySlider_valueChanged(double v);
-
-    void on__castingModeComboBox_currentIndexChanged(const QString &text);
-    void on__samplingRateComboBox_currentIndexChanged(const QString &text);
-    void on__lightingCheckBox_toggled(bool checked);
-    void on__ambientWidget_valueChanged(double value);
-    void on__diffuseWidget_valueChanged(double value);
-    void on__specularWidget_valueChanged(double value);
-    void on__shininessWidget_valueChanged(int value);
-    void on__defaultLightingButton_clicked(bool checked);
-
 private:
-    VAPoR::VolumeParams *_params;
-    TFEditorVolume *     _tfe;
-    QSliderEdit *        _densitySlider;
+    PGroup *_pg;
 };
 
 class VolumeGeometrySubtab : public QWidget, public Ui_VolumeGeometryGUI {
