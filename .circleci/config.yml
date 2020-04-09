@@ -92,14 +92,14 @@ jobs:
       - store_artifacts:
           path: /tmp
 
-      - run:
-          name: check for warnings
-          command: |
-            if grep -q warning /tmp/output.txt; then
-               exit -1
-            else
-               exit 0
-            fi
+      #- run:
+      #    name: check for warnings
+      #    command: |
+      #      if grep -q warning /tmp/output.txt; then
+      #         exit -1
+      #      else
+      #         exit 0
+      #      fi
 
   build_ubuntu18_installer:
     docker:
