@@ -109,7 +109,7 @@ OptionParser::OptDescRec_T  set_opts[] = {
         "Colon delimited list of grids to test"
     },
     {
-        "arrangements", 1, "Constant:Ramp:Triangle",  "Colon delimited list of "
+        "arrangements", 1, "Constant:Ramp:RampOnAxis:Triangle",  "Colon delimited list of "
         "data arrangements to test synthetic grids with"
     },
     {
@@ -211,25 +211,31 @@ int main( int argc, char** argv ) {
 
     std::vector< size_t > dims2d = { opt.dims[X], opt.dims[Y] };
 
+    int rc            = 0;
+    int regularRC     = 0;
+    int stretchedRC   = 0;
+    int layeredRC     = 0;
+    int curvilinearRC = 0;
+
     // Test Regular Grid
     if ( std::find( opt.grids.begin(), opt.grids.end(), "Regular" ) != opt.grids.end() ) {
         std::vector< float* > rgBlks  = AllocateBlocks( opt.bs, opt.dims );
         RegularGrid* regularGrid = new RegularGrid( opt.dims, opt.bs, rgBlks, minu, maxu );
-        TestGrid( regularGrid, opt.arrangements, opt.minValue, opt.maxValue );
+        regularRC = RunTests( regularGrid, opt.arrangements, opt.minValue, opt.maxValue );
         delete regularGrid;
     }
 
     // Test Stretched Grid
     if ( std::find( opt.grids.begin(), opt.grids.end(), "Stretched" ) != opt.grids.end() ) {
         StretchedGrid* stretchedGrid = MakeStretchedGrid( opt.dims, opt.bs, minu, maxu );
-        TestGrid( stretchedGrid, opt.arrangements, opt.minValue, opt.maxValue );
+        stretchedRC = RunTests( stretchedGrid, opt.arrangements, opt.minValue, opt.maxValue );
         delete stretchedGrid;
     }
 
     // Test Layered Grid
     if ( std::find( opt.grids.begin(), opt.grids.end(), "Layered" ) != opt.grids.end() ) {
         LayeredGrid* layeredGrid = MakeLayeredGrid( opt.dims, opt.bs, minu, maxu );
-        TestGrid( layeredGrid, opt.arrangements, opt.minValue, opt.maxValue );
+        layeredRC = RunTests( layeredGrid, opt.arrangements, opt.minValue, opt.maxValue );
         delete layeredGrid;
     }
    
@@ -237,12 +243,31 @@ int main( int argc, char** argv ) {
     if ( std::find( opt.grids.begin(), opt.grids.end(), "Curvilinear" ) != opt.grids.end() ) {
         CurvilinearGrid* curvilinearGrid;
         curvilinearGrid = MakeCurvilinearTerrainGrid( opt.bs, minu, maxu, opt.dims);
-        TestGrid( curvilinearGrid, opt.arrangements, opt.minValue, opt.maxValue );
+        curvilinearRC = RunTests( curvilinearGrid, opt.arrangements, opt.minValue, opt.maxValue );
         delete curvilinearGrid;
+    }
+
+    if ( regularRC != 0 ) {
+        cout << "Errors occurred while testing Grid::RegularGrid." << endl;
+        rc = -1;
+    }
+    if ( stretchedRC != 0 ) {
+        cout << "Errors occurred while testing Grid::StretchedGrid." << endl;
+        rc = -1;
+    }
+    if ( layeredRC != 0 ) {
+        cout << "Errors occurred while testing Grid::LayeredGrid." << endl;
+        rc = -1;
+    }
+    if ( curvilinearRC != 0 ) {
+        cout << "Errors occurred while testing Grid::CurvilinearGrid." << endl;
+        rc = -1;
     }
 
     double t1 = Wasp::GetTime();
     cout << "Elapsed time: " << t1-t0 << endl;
 
     DeleteHeap();
+
+    return rc;
 }

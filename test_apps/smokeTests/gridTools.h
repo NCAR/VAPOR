@@ -24,18 +24,25 @@ void MakeConstantField(
 void MakeRamp( 
     VAPoR::Grid* grid, 
     float minVal, 
+    float maxVal
+);
+
+void MakeRampOnAxis( 
+    VAPoR::Grid* grid, 
+    float minVal, 
     float maxVal, 
     size_t axis 
 );
 
-void CompareIndexToCoords(
+int CompareIndexToCoords(
     VAPoR::Grid* grid,
     double &rms,                // Root Mean Square error
     size_t &numMissingValues,   // Counter for receiving MissingValue upon query
     size_t &disagreements      // Counter for when AccessIJK() and GetValue() disagree
 );
 
-void TestNodeIterator( 
+// Returns the expected node count for the grid
+size_t TestNodeIterator( 
     const VAPoR::Grid *g, 
     int& count, 
     double& time 
@@ -47,7 +54,11 @@ void PrintStats(
     size_t disagreements 
 );
 
-void TestGrid(
+int RunTest(
+    VAPoR::Grid* grid
+);
+
+int RunTests(
     VAPoR::Grid* grid,
     const std::vector<std::string> &tests,
     float minVal,
