@@ -66,9 +66,6 @@ vector <float *> AllocateBlocks(
     for (size_t i=0; i<nblocks; i++) {
         blks.push_back(buf + i*block_size);
     }
-cout << "                                   nblocks: " << nblocks << " " << block_size << endl;
-cout << "                                   bs:      " << bs[0]<< " " << bs[1] << " " << bs[2] << endl;
-cout << "                                   dims:    " << dims[0]<< " " << dims[1] << " " << dims[2] << endl;
     return(blks);
 }
 
@@ -337,7 +334,7 @@ int RunTests(
             rc = -1;
     }
 
-    int count;
+    int count = 0;
     double time;
     size_t expectedCount = TestNodeIterator( grid, count, time );
     if (expectedCount != count)

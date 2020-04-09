@@ -77,6 +77,9 @@ dataMgrResultsFile = resultsDir + "dataMgrResults.txt"
 
 
 def testGrid( grid ):
+
+    rc = 0
+
     print( "Testing " + grid + " grid" )
 
     print( gridProgram + " -dims " + grid )
@@ -88,7 +91,11 @@ def testGrid( grid ):
         universal_newlines=True 
     )
 
-    print( "  Exit code " + str(programOutput.returncode) )
+    if ( programOutput.returncode != 0 ):
+        rc = 1
+        print( "  Test failed with exit code " + str(programOutput.returncode) )
+    else:
+        print( "  Test passed" )
 
     outputFileName = resultsDir + grid + ".txt"
     
@@ -98,6 +105,8 @@ def testGrid( grid ):
     outputFile.close()
     
     print( "  " + outputFileName + " written\n" )
+
+    return rc
 
 def testDataMgr( dataMgrType, dataMgr, makeBaseline=False ):
     print( "Testing " + dataMgrType + " with " + dataMgr )
@@ -154,7 +163,7 @@ def testDataMgrs( makeBaseline ):
 
     if ( makeBaseline == False ):    
         print( dataMgrResultsFile + " written" )
-        print( "    DataMgr tests resulted in " + str(mismatches) + " mismatches" )
+        print( "\n    DataMgr tests resulted in " + str(mismatches) + " mismatches" )
     else:
         print( "Baseline files have been generated.  Re-run smokeTests.py to run comparions.\n" )
 
@@ -177,16 +186,22 @@ def main():
     if ( os.path.isdir( resultsDir ) == False ):    
         os.mkdir( resultsDir )
 
+    failures = 0
     for grid in gridSizes:
-        testGrid( grid )
+        failures += testGrid( grid )
+ 
+    if ( failures == 0 ):
+        print ( "All Grid tests passed\n" ) 
+    else:
+        print ( str(failures) + " of " + str(len(gridSizes)) + " tests failed\n" )
 
     for dataType, dataFile in dataMgrs.items():
         baselineFile = resultsDir + dataType + "_baseline.txt"
         if ( os.path.isfile( baselineFile ) == False ):
             makeBaseline = True
         continue
-   
-    #dataMgr = testDataMgrs( makeBaseline )
+ 
+    dataMgr = testDataMgrs( makeBaseline )
 
 if __name__ == "__main__":
     main()
