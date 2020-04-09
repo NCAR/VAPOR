@@ -1,4 +1,15 @@
-version: 2
+version: 2.1
+
+orbs:
+  win: circleci/windows@2.2.0
+
+references:
+  workspace_root: &workspace_root
+    /tmp/workspace
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: *workspace_root
+
 jobs:
   build_ubuntu16:
     docker:
@@ -15,7 +26,7 @@ jobs:
             git checkout $CIRCLE_BRANCH
             cd build
             cmake ..
-            make &> /tmp/output.txt
+            make -j7 &> /tmp/output.txt
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -28,6 +39,29 @@ jobs:
             else
                exit 0
             fi
+
+  build_ubuntu16_installer:
+    docker:
+      - image: sgpearse/vapor3-ubuntu16:latest
+
+    steps:
+      - checkout
+
+      - run:
+          name: make installer
+          command: |
+            cd /VAPOR/build
+            cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
+            make -j7
+            make installer
+            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu16-Weekly}" ; done
+            mkdir -p /tmp/workspace/installers
+            mv *.sh /tmp/workspace/installers
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths: 
+            - installers
 
   build_ubuntu18:
     docker:
@@ -43,11 +77,20 @@ jobs:
             git pull
             git checkout $CIRCLE_BRANCH
             cd build
-            cmake ..
-            make &> /tmp/output.txt
+            cmake -DBUILD_TEST_APPS=ON ..
+            make -j7 &> /tmp/output.txt
+
+      - run:
+          name: Smoke test
+          command: |
+            /VAPOR/test_apps/smokeTests/smokeTests.py |
+            --makeBaseline=True |
+            --testDataRoot=/smokeTestData/smokeTestData
+            --binaryRoot=/VAPOR/build/bin
+          
 
       - store_artifacts:
-          path: /tmp/output.txt
+          path: /tmp
 
       - run:
           name: check for warnings
@@ -57,6 +100,52 @@ jobs:
             else
                exit 0
             fi
+
+  build_ubuntu18_installer:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+
+    steps:
+      - checkout
+
+      - run:
+          name: make installer
+          command: |
+            cd /VAPOR/build
+            cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
+            make -j7
+            make installer
+            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu18-Weekly}" ; done
+            mkdir -p /tmp/workspace/installers
+            mv *.sh /tmp/workspace/installers
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths: 
+            - installers
+
+  check_leaks:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+
+    steps:
+      - checkout
+
+      - run:
+          name: cmake and make
+          command: |
+            cd /VAPOR
+            git pull
+            cd build
+            cmake -DCMAKE_BUILD_TYPE:String=Release ..
+            make
+            #valgrind --leak-check=yes bin/vapor > /tmp/output.txt
+            valgrind --leak-check=yes bin/vaporpychecker &> /tmp/vaporpychecker.txt
+            #valgrind --leak-check=yes bin/vapor &> /tmp/vapor.txt
+            #bin/vapor &> /tmp/vapor.txt
+
+      - store_artifacts:
+          path: /tmp/*.txt
 
   build_centos7:
     docker:
@@ -74,7 +163,7 @@ jobs:
             git checkout $CIRCLE_BRANCH
             cd build
             cmake3 ..
-            make &> /tmp/output.txt
+            make -j7 &> /tmp/output.txt
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -87,38 +176,88 @@ jobs:
             else
                exit 0
             fi
+
+  build_centos7_installer:
+    docker:
+      - image: sgpearse/vapor3-centos7:latest
+
+    steps:
+      - checkout
+
+      - run:
+          name: cmake3 and make
+          command: |
+            ls -lrth /usr/local/VAPOR-Deps
+            cd /VAPOR
+            git pull
+            cd build
+            cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
+            make
+            make installer
+            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/CentOS7-Weekly}" ; done
+            mkdir -p /tmp/workspace/installers
+            mv *.sh /tmp/workspace/installers
+
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths: 
+            - installers
 
   build_osx:
     macos:
       xcode: "11.1.0"
     steps:
       - run:
-          name: Get 3rd party libs
+          name: Make VAPOR-Deps
           command: |
-            pip3 install gdown
             sudo mkdir -p /usr/local/VAPOR-Deps
-            sudo chmod 777 /usr/local/VAPOR-Deps
-            cd /usr/local/VAPOR-Deps
-            gdown https://drive.google.com/uc?id=1kyDAzmK9zShrIcoAbned8YW9vn2j7lpe
-      - run:
-          name: Extract 3rd party libs
-          command: |
-            cd /usr/local/VAPOR-Deps
-            tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
-            ls /usr/local/VAPOR-Deps
+            sudo chmod -R 777 /usr/local/VAPOR-Deps
+            sudo chown -R `whoami` /usr/local/VAPOR-Deps
+            
+      #- restore_cache:
+      #    key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+
       - checkout
+
       - run:
-          name: Install cmake
+          name: Get dependencies 
           command: |
-            brew install cmake
+            export DEPS=/usr/local/VAPOR-Deps/2019-Aug-Darwin.tar.xz
+            if [ ! -f $DEPS ]; then
+                ~/project/.circleci/getOSXDeps.sh
+                #pip3 install gdown
+                #sudo mkdir -p /usr/local/VAPOR-Deps
+                #sudo chmod 777 /usr/local/VAPOR-Deps
+                #cd /usr/local/VAPOR-Deps
+                #gdown https://drive.google.com/uc?id=1kyDAzmK9zShrIcoAbned8YW9vn2j7lpe
+                #cd /usr/local/VAPOR-Deps
+                #tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
+                #ls /usr/local/VAPOR-Deps
+            fi
+
+      #- run:
+      #    name: Install cmake
+      #    command: |
+      #      brew install cmake
+
       - run:
           name: make VAPOR
           command: |
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
-            cmake ..
-            make &> /tmp/output.txt
+            /usr/local/bin/cmake ..
+            make -j7 &> /tmp/output.txt
+
+      #- save_cache:
+      #    key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+      #    paths: 
+      #      - /VAPOR
+      #      - /usr/local/VAPOR-Deps
+      #      - /usr/local/lib/python3.7/site-packages/gdown
+      #      - /usr/local/bin/cmake
+      #      - /usr/local/Cellar/cmake
 
       - store_artifacts:
           path: /tmp/output.txt
@@ -132,11 +271,254 @@ jobs:
                exit 0
             fi
 
+  build_osx_installer:
+    macos:
+      xcode: "11.1.0"
+    steps:
+      - run:
+          name: Make VAPOR-Deps
+          command: |
+            sudo mkdir -p /usr/local/VAPOR-Deps
+            sudo chmod -R 777 /usr/local/VAPOR-Deps
+            sudo chown -R `whoami` /usr/local/VAPOR-Deps
+
+      #- restore_cache:
+      #    key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+
+      - checkout
+
+      - run:
+          name: Get dependencies 
+          command: |
+            export DEPS=/usr/local/VAPOR-Deps/2019-Aug-Darwin.tar.xz
+            if [ ! -f $DEPS ]; then
+                ~/project/.circleci/getOSXDeps.sh
+            fi
+#      - run:
+#          name: Get 3rd party libs
+#          command: |
+#            pip3 install gdown
+#            sudo mkdir -p /usr/local/VAPOR-Deps
+#            sudo chmod 777 /usr/local/VAPOR-Deps
+#            cd /usr/local/VAPOR-Deps
+#            gdown https://drive.google.com/uc?id=1kyDAzmK9zShrIcoAbned8YW9vn2j7lpe
+#      - run:
+#          name: Extract 3rd party libs
+#          command: |
+#            cd /usr/local/VAPOR-Deps
+#            tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
+#            ls /usr/local/VAPOR-Deps
+#      - run:
+#          name: Install cmake
+#          command: |
+#            brew install cmake
+      - run:
+          name: make VAPOR
+          command: |
+            cp site_files/site.NCAR site.local
+            mkdir build
+            cd build
+            /usr/local/bin/cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
+            make
+            make installer
+            for f in VAPOR3-*.dmg ; do mv "$f" "${f/Darwin/Darwin-Weekly}" ; done
+            mkdir -p /tmp/workspace/installers
+            mv *.dmg /tmp/workspace/installers
+          no_output_timeout: 30m
+
+      #- save_cache:
+      #    key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
+      #    paths: 
+      #      - /VAPOR
+      #      - /usr/local/VAPOR-Deps
+      #      - /usr/local/lib/python3.7/site-packages/gdown
+      #      - /usr/local/bin/cmake
+      #      - /usr/local/Cellar/cmake
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths: 
+            - installers
+
+  clang_tidy_ubuntu18:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+    steps:
+      - checkout
+      - run:
+          name: CMake
+          command: |
+            cd /VAPOR/build
+            cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=true ..
+            clang-tidy -checks=cppcoreguidelines* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
+
+      - store_artifacts:
+            path: /tmp/tidy.txt
+
+  clang_tidy_osx:
+    macos:
+      xcode: "11.1.0"
+    steps:
+      - checkout
+      - run:
+          name: check MainForm.cpp
+          command: |
+            sudo mkdir build
+            cd build
+      - run:
+          name: CMake
+          command: |
+            brew install cmake
+            cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=true ..
+      - run:
+          name: tidy
+          command: |
+            /usr/local/opt/llvm/bin/clang-tidy -checks=* -header-filter=.* -p ./ /VAPOR/apps/vaporgui/MainForm.cpp &> /tmp/tidy.txt
+
+      - store_artifacts:
+            path: /tmp/tidy.txt
+
+  build_win10_installer:
+    executor: win/default
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            choco install visualcpp-build-tools -version 14.0.25420.1 -y
+            choco install python -y
+            choco install git -y
+            choco install cmake -y
+            choco install nsis -y
+            python -m pip install gdown
+            setx /M PATH "%PATH%;C:\Program Files (x86)\MSBuild\14.0\bin" 
+            msbuild -version
+            pwd
+            ls
+            python .circleci/downloadWin3rdParty.py
+      - run:
+          name: Build Vapor
+          command: |
+            Copy-Item site_files\* -Destination .
+            mkdir build
+            cd build
+            & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DCMAKE_BUILD_TYPE:STRING=Release -G 'Visual Studio 14 2015' -A x64
+            msbuild C:\Users\circleci\project\build\PACKAGE.vcxproj /p:Configuration=Release /p:Platform=x64
+            mkdir -p C:\Users\circleci\project\tmp\workspace\installers
+            Copy-Item C:\Users\circleci\project\build\*.exe -Destination C:\Users\circleci\project\tmp\workspace\installers\VAPOR3-3.2.0-win64-Weekly.exe
+          no_output_timeout: 45m
+
+      - persist_to_workspace:
+          root: *workspace_root
+          paths: 
+            - installers
+
+  test_win10_workspace:
+    executor: win/default
+    steps:
+      - run:
+          name: do the stuff
+          command: |
+            #New-Item -Name installers -ItemType directory
+            mkdir -p C:\Users\circleci\project\tmp\workspace\installers
+            cd C:\Users\circleci\project\tmp\workspace\installers
+            echo "foo" >> foo.exe
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - installers
+
+  build_win10_docker:
+    docker:
+      - image: sgpearse/vapor3-win10:latest
+    steps:
+      - checkout
+      - run:
+          name: build installer
+          command: |
+            msbuild C:\VAPOR\build\PACKAGE.vcxproj /p:Configuration=Release /p:Platform=x64
+
+  release_on_github:
+    macos:
+      xcode: "11.1.0"
+    steps:
+      - *attach_workspace
+      - run:
+          name: list workspace
+          command: |
+            ls /tmp/workspace/installers
+      - run:
+          name: install ghr
+          command: |
+            brew install ghr
+      - run:
+          name: push assets with ghr
+          command: |
+            a=$'These installers are built weekly, and may not be stable.\n\n'
+            b=$'Official releases may be found below.\n\n'
+            c="Last built on "
+            d=`date +"%m-%d-%y".`
+            message="${a}${b}${c}${d}${e}"
+            echo $message
+            ghr -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace Weekly /tmp/workspace/installers
+
+
 workflows:
-  version: 2
   build:
     jobs:
       - build_ubuntu18
       #- build_ubuntu16
       #- build_centos7
       #- build_osx
+      #- build_win10_installer
+      #- test_win10_workspace
+      #- release_on_github:
+      #    requires:
+      #      - test_win10_workspace
+      #- clang_tidy_ubuntu18
+      #- build_ubuntu18_installer
+      #- build_ubuntu16_installer
+      #- build_centos7_installer
+      #- build_osx_installer
+      #- build_win10_installer
+      #- release_on_github:
+      #    requires:
+      #      - build_win10_installer
+      #      - build_ubuntu16_installer
+      #      - build_ubuntu18_installer
+      #      - build_centos7_installer
+      #      - build_osx_installer
+
+#  leak_check:
+#    triggers:
+#      - schedule:
+#           cron: "0 7 1 * *" #monthly cron job @ midnight MST, on the 1st
+#           filters:
+#             branches:
+#               only:
+#                 - nightly
+#    jobs:
+#      - check_leaks
+
+  nightly:
+    triggers:
+      - schedule:
+           cron: "0 9 * * 5" #weekly cron job on Friday @ 2:00am MST
+           filters:
+             branches:
+               only:
+                 - nightly
+                 #- master
+    jobs:
+      - build_ubuntu18_installer
+      - build_ubuntu16_installer
+      - build_centos7_installer
+      - build_osx_installer
+      - build_win10_installer
+      - release_on_github:
+          requires:
+            - build_ubuntu16_installer
+            - build_ubuntu18_installer
+            - build_centos7_installer
+            - build_osx_installer
+            - build_win10_installer
