@@ -90,7 +90,7 @@ jobs:
           
 
       - store_artifacts:
-          path: /tmp
+          path: /tmp/*.txt
 
       #- run:
       #    name: check for warnings
