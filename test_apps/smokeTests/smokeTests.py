@@ -74,7 +74,7 @@ testDataRoot = args.testDataRoot[0]
 if (testDataRoot[-1] != r'/'):
     testDataRoot += r'/'
 
-binaryRoot = args.binaryRoot
+binaryRoot = args.binaryRoot[0]
 if (binaryRoot[-1] != r'/'):
     binaryRoot += r'/'
 
