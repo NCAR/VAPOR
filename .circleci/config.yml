@@ -87,7 +87,7 @@ jobs:
       - run:
           name: Smoke test
           command: |
-            /VAPOR/test_apps/smokeTests/smokeTests.py |
+            python3 /VAPOR/test_apps/smokeTests/smokeTests.py |
             --testDataRoot=/smokeTestData/smokeTestData |
             --binaryRoot=/VAPOR/build/bin
           
