@@ -66,7 +66,7 @@ gridSizes = [
     "8x8x8"
 ]
 
-resultsDir = args.resultsDir
+resultsDir = args.resultsDir[0]
 if (resultsDir[-1] != r'/'):
     resultsDir += r'/'
 
