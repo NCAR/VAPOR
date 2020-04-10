@@ -68,6 +68,10 @@ jobs:
       - image: sgpearse/vapor3-ubuntu18:latest
 
     steps:
+      - run:
+          name: install python
+          command: apt-get install -y python3
+
       - checkout
 
       - run:
@@ -84,8 +88,7 @@ jobs:
           name: Smoke test
           command: |
             /VAPOR/test_apps/smokeTests/smokeTests.py |
-            --makeBaseline=True |
-            --testDataRoot=/smokeTestData/smokeTestData
+            --testDataRoot=/smokeTestData/smokeTestData |
             --binaryRoot=/VAPOR/build/bin
           
 
