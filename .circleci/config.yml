@@ -91,7 +91,7 @@ jobs:
           
 
       - store_artifacts:
-          path: /tmp/*.txt
+          path: /VAPOR/test_apps/smokeTests/testResults/*
 
       #- run:
       #    name: check for warnings

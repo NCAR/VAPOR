@@ -66,15 +66,18 @@ gridSizes = [
     "8x8x8"
 ]
 
-resultsDir = args.resultsDir[0]
+#resultsDir = args.resultsDir[0]
+resultsDir = "".join( args.resultsDir )
 if (resultsDir[-1] != r'/'):
     resultsDir += r'/'
 
-testDataRoot = args.testDataRoot[0]
+#testDataRoot = args.testDataRoot[0]
+testDataRoot = "".join( args.testDataRoot )
 if (testDataRoot[-1] != r'/'):
     testDataRoot += r'/'
 
-binaryRoot = args.binaryRoot[0]
+#binaryRoot = args.binaryRoot[0]
+binaryRoot = "".join( args.binaryRoot )
 if (binaryRoot[-1] != r'/'):
     binaryRoot += r'/'
 
@@ -184,7 +187,7 @@ def testDataMgrs( makeBaseline ):
 
     if ( makeBaseline == False ):    
         print( dataMgrResultsFile + " written" )
-        print( "\n    DataMgr tests resulted in " + str(mismatches) + " mismatches" )
+        print( "\n    DataMgr tests resulted in " + str(mismatches) + " mismatches\n" )
     else:
         print( "Baseline files have been generated.  Re-run smokeTests.py to run comparions.\n" )
 
@@ -223,6 +226,12 @@ def main():
         continue
  
     dataMgr = testDataMgrs( makeBaseline )
+    if ( dataMgr != 0 ):
+        print( "DataMgr tests failed.  Results are not identical to the baseline." )
+        exit(-1);
+    else:
+        print( "DataMgr tests passed" )
+        exit(0);
 
 if __name__ == "__main__":
     main()

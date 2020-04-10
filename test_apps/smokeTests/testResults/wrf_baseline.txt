@@ -1,4 +1,4 @@
-/Users/pearse/Data/smokeTestData/wrfout_d02_2005-08-29_05
+/Users/pearse/Data/smokeTestData
 
 Dimensions:
     DateStrLen = 19
@@ -147,4 +147,4 @@ Time Coordinates:
 
 Time coordinate variable name: Time
 Number of time steps: 1
-Elapsed time: 32.8023
+Elapsed time: 31.316

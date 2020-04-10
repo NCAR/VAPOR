@@ -1,4 +1,4 @@
-/Users/pearse/Data/smokeTestData/24Maycontrol.04000.000000.nc
+/Users/pearse/Data/smokeTestData
 
 Dimensions:
     time = 1
@@ -60,4 +60,4 @@ Time Coordinates:
 
 Time coordinate variable name: time
 Number of time steps: 1
-Elapsed time: 1.27804
+Elapsed time: 1.15194
