@@ -1,4 +1,4 @@
-/Users/pearse/Data/smokeTestData
+katrina_1timeStep.vdc
 
 Dimensions:
     DateStrLen = 19
@@ -147,4 +147,4 @@ Time Coordinates:
 
 Time coordinate variable name: Time
 Number of time steps: 1
-Elapsed time: 31.7939
+Elapsed time: 31.88

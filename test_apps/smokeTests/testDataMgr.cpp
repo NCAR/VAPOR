@@ -126,7 +126,7 @@ int main( int argc, char** argv ) {
 
     for (int i=0; i<files.size(); i++ ) {
         std::string fileName = files[i];
-        fileName = fileName.substr(0, fileName.find_last_of("\\/"));
+        fileName = fileName.substr(fileName.find_last_of("\\/")+1);
         cout << fileName << endl;
     }
 
