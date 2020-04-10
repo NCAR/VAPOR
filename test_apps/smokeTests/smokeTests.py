@@ -28,7 +28,7 @@ parser.add_argument(
     '--testDataRoot', 
     nargs=1,
     type=str,
-    default="/Users/pearse/Data/smokeTestData/", 
+    default="/Users/pearse/Data/smokeTestData", 
     required=False,
     metavar='/path/to/data',
     help='Directory where DataMgr test data is stored.'
@@ -41,6 +41,15 @@ parser.add_argument(
     required=False,
     metavar='/path/to/binaries',
     help='Directory where binary test programs (testGrid, testDataMgr) are stored.'
+)
+parser.add_argument( 
+    '--resultsDir', 
+    nargs=1,
+    type=str,
+    default="/Users/pearse/VAPOR/test_apps/smokeTests/testResults", 
+    required=False,
+    metavar='/path/to/write/results/to',
+    help='Directory where test results are stored.'
 )
 args = parser.parse_args()
 
@@ -57,17 +66,32 @@ gridSizes = [
     "8x8x8"
 ]
 
-resultsDir = "testResults/"
+resultsDir = args.resultsDir
+if (resultsDir[-1] != r'/'):
+    resultsDir += r'/'
+
+testDataRoot = args.testDataRoot[0]
+if (testDataRoot[-1] != r'/'):
+    testDataRoot += r'/'
+
+binaryRoot = args.binaryRoot
+if (binaryRoot[-1] != r'/'):
+    binaryRoot += r'/'
+
+
+print("resultsDir " + resultsDir )
+print("testDAtaRoot " + testDataRoot)
+print("binaryRoot " + binaryRoot )
 
 dataMgrs = {
-    #"mpas" : (args.testDataRoot + "hist.mpas-o.0001-01-01_00.00.00.nc")
-    "wrf"  : (args.testDataRoot + "wrfout_d02_2005-08-29_05"),
-    "cf"   : (args.testDataRoot + "24Maycontrol.04000.000000.nc"),
-    "vdc"  : (args.testDataRoot + "katrina_1timeStep.vdc"),
+    #"mpas" : (testDataRoot + "hist.mpas-o.0001-01-01_00.00.00.nc")
+    "wrf"  : (testDataRoot + "wrfout_d02_2005-08-29_05"),
+    "cf"   : (testDataRoot + "24Maycontrol.04000.000000.nc"),
+    "vdc"  : (testDataRoot + "katrina_1timeStep.vdc"),
 }
 
-gridProgram        = args.binaryRoot + "/testGrid"
-dataMgrProgram     = args.binaryRoot + "/testDataMgr"
+gridProgram        = binaryRoot + "testGrid"
+dataMgrProgram     = binaryRoot + "testDataMgr"
 gridResultsFile    = resultsDir + "gridResults.txt"
 dataMgrResultsFile = resultsDir + "dataMgrResults.txt"
 
@@ -91,20 +115,17 @@ def testGrid( grid ):
         universal_newlines=True 
     )
 
+    outputFileName = resultsDir + grid + ".txt"
+    outputFile = open( outputFileName, "w" )
+    outputFile.write( programOutput.stdout )
+    outputFile.close()
+    print( "  " + outputFileName + " written\n" )
+
     if ( programOutput.returncode != 0 ):
         rc = 1
         print( "  Test failed with exit code " + str(programOutput.returncode) )
     else:
         print( "  Test passed" )
-
-    outputFileName = resultsDir + grid + ".txt"
-    
-    outputFile = open( outputFileName, "w" )
-    #outputFile.write( programOutput.decode("utf-8") )
-    outputFile.write( programOutput.stdout )
-    outputFile.close()
-    
-    print( "  " + outputFileName + " written\n" )
 
     return rc
 
