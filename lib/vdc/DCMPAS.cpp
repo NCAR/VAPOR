@@ -913,7 +913,7 @@ int DCMPAS::_readRegionEdgeVariable(
 		size_t vidx1 = edgesOnVertex[i*vertexDegree + 1] - 1;
 		size_t vidx2 = edgesOnVertex[i*vertexDegree + 2] - 1;
 
-		region[ii] = 
+		region[j*(max[0]-min[0]+1)+ii] = 
 			edgeVariable[j*dims[0] + vidx0] * wgt + 
 			edgeVariable[j*dims[0] + vidx1] * wgt + 
 			edgeVariable[j*dims[0] + vidx2] * wgt;
