@@ -1999,21 +1999,21 @@ int DerivedCoordVarStandardOceanSCoordinate::initialize_missing_values()
         SetErrMsg("Invalid variable \"%s\"", _CVar.c_str());
         return (-1);
     }
-    if (dataInfo.GetHasMissing()) _CVarMV = dataInfo.GetHasMissing();
+    if (dataInfo.GetHasMissing()) _CVarMV = dataInfo.GetMissingValue();
 
     status = _dc->GetDataVarInfo(_etaVar, dataInfo);
     if (!status) {
         SetErrMsg("Invalid variable \"%s\"", _etaVar.c_str());
         return (-1);
     }
-    if (dataInfo.GetHasMissing()) _etaVarMV = dataInfo.GetHasMissing();
+    if (dataInfo.GetHasMissing()) _etaVarMV = dataInfo.GetMissingValue();
 
     status = _dc->GetDataVarInfo(_depthVar, dataInfo);
     if (!status) {
         SetErrMsg("Invalid variable \"%s\"", _depthVar.c_str());
         return (-1);
     }
-    if (dataInfo.GetHasMissing()) _depthVarMV = dataInfo.GetHasMissing();
+    if (dataInfo.GetHasMissing()) _depthVarMV = dataInfo.GetMissingValue();
 
     return (0);
 }
