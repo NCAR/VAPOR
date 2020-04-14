@@ -1,6 +1,7 @@
 #include "vapor/glutil.h"
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
+#include "vapor/FontManager.h"
 #include "vapor/STLUtils.h"
 #include <chrono>
 

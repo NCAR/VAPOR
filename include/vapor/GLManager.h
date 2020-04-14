@@ -2,11 +2,12 @@
 
 #include "vapor/ShaderManager.h"
 #include "vapor/MatrixManager.h"
-#include "vapor/FontManager.h"
+//#include "vapor/FontManager.h"
 
 namespace VAPoR {
     
 class LegacyGL;
+class FontManager;
     
 //! \class GLManager
 //! \ingroup Public_Render
