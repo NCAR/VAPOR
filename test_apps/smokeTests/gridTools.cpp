@@ -209,11 +209,11 @@ bool CompareIndexToCoords(
     rms = sqrt( sum / (x*y*z) );
 
     if ( rms != 0 || disagreements > 0 )
-        return false;
-    return true;
+        return 1;
+    return 0;
 }
 
-size_t TestNodeIterator( const Grid *g, int& count, double& time ) {
+size_t TestConstNodeIterator( const Grid *g, int& count, double& time ) {
     Grid::ConstNodeIterator itr;
     Grid::ConstNodeIterator enditr = g->ConstNodeEnd();
 
@@ -234,6 +234,47 @@ size_t TestNodeIterator( const Grid *g, int& count, double& time ) {
     return expectedCount;
 }
 
+size_t TestIterator( Grid *g, int& count, double& time ) {
+    Grid::Iterator itr;
+    Grid::Iterator enditr = g->end();
+
+    double t0 = Wasp::GetTime();
+    itr = g->begin();
+
+    for ( ; itr!=enditr; ++itr) {
+        count++;
+    }
+
+    size_t expectedCount = 1;
+    std::vector< size_t > dims = g->GetDimensions();
+    for ( auto dim : dims )
+        expectedCount *= dim;
+
+    time = Wasp::GetTime() - t0;
+
+    return expectedCount;
+}
+
+size_t TestConstCoordItr( const Grid *g, int& count, double& time ) {
+    Grid::ConstCoordItr itr;
+    Grid::ConstCoordItr enditr = g->ConstCoordEnd();
+
+    double t0 = Wasp::GetTime();
+    itr = g->ConstCoordBegin();
+
+    for ( ; itr!=enditr; ++itr) {
+        count++;
+    }
+
+    size_t expectedCount = 1;
+    std::vector< size_t > dims = g->GetDimensions();
+    for ( auto dim : dims )
+        expectedCount *= dim;
+
+    time = Wasp::GetTime() - t0;
+
+    return expectedCount;
+}
 void PrintStats( double rms, size_t numMissingValues, size_t disagreements ) {
     cout << "    RMS error:                                     " << rms << endl;
     cout << "    Missing value count:                           " << numMissingValues << endl;
@@ -333,20 +374,46 @@ bool RunTests(
             rc = 1;
     }
 
+    // Iterator tests
+
     int count = 0;
     double time;
-    size_t expectedCount = TestNodeIterator( grid, count, time );
+    size_t expectedCount = TestIterator( grid, count, time );
     if (expectedCount != count)
         rc = 1;
+    PrintGridIteratorResults( type, "Iterator", count, expectedCount, time );
 
-    cout << type << " Grid::ConstNodeIterator" << endl;
+    count = 0;
+    time  = 0.0;
+    expectedCount = TestConstCoordItr( grid, count, time );
+    if (expectedCount != count)
+        rc = 1;
+    PrintGridIteratorResults( type, "ConstCoordIterator", count, expectedCount, time );
+
+    count = 0;
+    time  = 0.0;
+    expectedCount = TestConstNodeIterator( grid, count, time );
+    if (expectedCount != count)
+        rc = 1;
+    PrintGridIteratorResults( type, "ConstNodeIterator", count, expectedCount, time );
+
+    return rc;
+}   
+
+void PrintGridIteratorResults( 
+    std::string& gridType,
+    std::string  itrType,
+    int count,
+    int expectedCount,
+    double time
+) {
+    std::string passFail = count == expectedCount ? " --- PASS" : " --- FAIL";
+    cout << gridType << " Grid::" << itrType << passFail << endl;
     cout << "  Count:          " << count << endl;;
     cout << "  Expected Count: " << expectedCount << endl;;
     cout << "  Time:  " << time << endl;
     cout << endl;
-
-    return rc;
-}   
+}
 
 VAPoR::CurvilinearGrid* MakeCurvilinearTerrainGrid( 
     const std::vector<size_t> &bs,
