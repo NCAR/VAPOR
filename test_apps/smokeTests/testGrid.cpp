@@ -159,29 +159,29 @@ void InitializeOptions( int argc, char **argv, OptionParser &op ) {
 
     if (op.AppendOptions(set_opts) < 0) {
         cerr << ProgName << " : " << op.GetErrMsg();
-        exit( 1 );
+        exit( EXIT_FAILURE );
     }
 
     if (op.ParseOptions(&argc, argv, get_options) < 0) {
         cerr << ProgName << " : " << op.GetErrMsg();
-        exit( 1 );
+        exit( EXIT_FAILURE );
     }
    
     if (opt.extents.size() != 6 ) {
         cerr << "The -extents flag must contain 6 elements if used" << endl;
         op.PrintOptionHelp(stderr, 80, false);
-        exit( 1 );
+        exit( EXIT_FAILURE );
     }
 
     if (opt.dims.size() != 3) {
         cerr << "The -dims flag must contain 3 elements if used" << endl;
         op.PrintOptionHelp(stderr);
-        exit( 1 );
+        exit( EXIT_FAILURE );
     }
 
     if (opt.help) {
         op.PrintOptionHelp(stderr);
-        exit( 1 );
+        exit( EXIT_FAILURE );
     }
 }
 

@@ -34,7 +34,7 @@ void MakeRampOnAxis(
     size_t axis 
 );
 
-int CompareIndexToCoords(
+bool CompareIndexToCoords(
     VAPoR::Grid* grid,
     double &rms,                // Root Mean Square error
     size_t &numMissingValues,   // Counter for receiving MissingValue upon query
@@ -54,11 +54,11 @@ void PrintStats(
     size_t disagreements 
 );
 
-int RunTest(
+bool RunTest(
     VAPoR::Grid* grid
 );
 
-int RunTests(
+bool RunTests(
     VAPoR::Grid* grid,
     const std::vector<std::string> &tests,
     float minVal,

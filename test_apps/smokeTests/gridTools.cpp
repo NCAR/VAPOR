@@ -157,7 +157,7 @@ void MakeRampOnAxis( Grid* grid, float minVal, float maxVal, size_t axis=X ) {
 
 // This function iterates across all nodes in a grid; making comparisons between the
 // data values returned by the functions GetValueAtIndex() and GetValue().
-int CompareIndexToCoords( 
+bool CompareIndexToCoords( 
     VAPoR::Grid* grid, 
     double &rms,                // Root Mean Square error
     size_t &numMissingValues,   // Counter for receiving MissingValue upon query
@@ -209,8 +209,8 @@ int CompareIndexToCoords(
     rms = sqrt( sum / (x*y*z) );
 
     if ( rms != 0 || disagreements > 0 )
-        return 1;
-    return 0;
+        return false;
+    return true;
 }
 
 size_t TestNodeIterator( const Grid *g, int& count, double& time ) {
@@ -241,10 +241,10 @@ void PrintStats( double rms, size_t numMissingValues, size_t disagreements ) {
     cout << endl;
 }
 
-int RunTest(
+bool RunTest(
     Grid* grid
 ) {
-    int rc=0;
+    bool rc = 0;
     double rms;
     size_t numMissingValues;
     size_t disagreements;
@@ -263,15 +263,12 @@ int RunTest(
     return rc;
 }
 
-int RunTests( 
+bool RunTests( 
     Grid* grid, 
     const std::vector<std::string> &tests, 
     float minVal, 
     float maxVal 
 ) {
-//    double rms;
-//    size_t numMissingValues;
-//    size_t disagreements;
 
     std::vector< size_t > dims = grid->GetDimensions();
     size_t x = dims[X];
@@ -290,11 +287,11 @@ int RunTests(
        
         grid->SetInterpolationOrder( linear );
         if ( RunTest( grid ) != 0 )
-            rc = -1;
+            rc = 1;
        
         grid->SetInterpolationOrder( nearestNeighbor );
         if ( RunTest( grid ) != 0 )
-            rc = -1;
+            rc = 1;
     }
   
     if ( std::find( tests.begin(), tests.end(), "Ramp" ) != tests.end() ) {
@@ -303,11 +300,11 @@ int RunTests(
         
         grid->SetInterpolationOrder( linear );
         if ( RunTest( grid ) != 0 )
-            rc = -1;
+            rc = 1;
         
         grid->SetInterpolationOrder( nearestNeighbor );
         if ( RunTest( grid ) != 0 )
-            rc = -1;
+            rc = 1;
     }
     
     if ( std::find( tests.begin(), tests.end(), "RampOnAxis" ) != tests.end() ) {
@@ -315,11 +312,11 @@ int RunTests(
         MakeRampOnAxis( grid, minVal, maxVal, Z);
         grid->SetInterpolationOrder( linear );
         if ( RunTest( grid ) != 0 )
-            rc = -1;
+            rc = 1;
 
         grid->SetInterpolationOrder( nearestNeighbor );
         if ( RunTest( grid ) != 0 )
-            rc = -1;
+            rc = 1;
     }
     
     if ( std::find( tests.begin(), tests.end(), "Triangle" ) != tests.end() ) {
@@ -328,19 +325,19 @@ int RunTests(
        
         grid->SetInterpolationOrder( linear );
         if ( RunTest( grid ) != 0 )
-            rc = -1;
+            rc = 1;
         RunTest( grid );
         
         grid->SetInterpolationOrder( nearestNeighbor );
         if ( RunTest( grid ) != 0 )
-            rc = -1;
+            rc = 1;
     }
 
     int count = 0;
     double time;
     size_t expectedCount = TestNodeIterator( grid, count, time );
     if (expectedCount != count)
-        rc = -1;
+        rc = 1;
 
     cout << type << " Grid::ConstNodeIterator" << endl;
     cout << "  Count:          " << count << endl;;

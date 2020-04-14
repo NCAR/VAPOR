@@ -88,18 +88,18 @@ void InitializeOptions(
 
     if (op.AppendOptions(set_opts) < 0) {
         cerr << ProgName << " : " << op.GetErrMsg();
-        exit(1);
+        exit( EXIT_FAILURE );
     }
 
     if (op.ParseOptions(&argc, argv, get_options) < 0) {
         cerr << ProgName << " : " << op.GetErrMsg();
-        exit(1);
+        exit( EXIT_FAILURE );
     }
 
     if (argc < 2) {
         cerr << "Usage: " << ProgName << " [options] vdcmaster " << endl;
         op.PrintOptionHelp(stderr);
-        exit(1);
+        exit( EXIT_FAILURE );
     }
 
     for (int i=1; i<argc; i++) {
@@ -130,7 +130,9 @@ int main( int argc, char** argv ) {
         cout << fileName << endl;
     }
 
-    TestDataMgr( opt.fileType, opt.memsize, opt.nthreads, files, options );
+    int rc = TestDataMgr( opt.fileType, opt.memsize, opt.nthreads, files, options );
 
     cout << "Elapsed time: " << Wasp::GetTime() - t0 << endl;
+
+    return rc;
 }
