@@ -62,6 +62,7 @@ class Statistics;
 class Plot;
 class PythonVariables;
 class ErrorReporter;
+class ParamsWidgetDemo;
 
 class MainForm : public QMainWindow {
 Q_OBJECT
@@ -107,6 +108,7 @@ private:
  QMenu *_Tools;
  QMenu *_captureMenu;
  QMenu *_helpMenu;
+ QMenu *_developerMenu;
 
  QToolBar *_modeToolBar;
  QToolBar *_vizToolBar;
@@ -192,6 +194,8 @@ private:
  bool _buttonPressed;
 
  ErrorReporter *_errRep;
+    
+    ParamsWidgetDemo *_paramsWidgetDemo = nullptr;
 
 
  // Zero out all member variables
@@ -293,6 +297,7 @@ private:
  void _createEditMenu();
  void _createFileMenu();
  void _createHelpMenu();
+ void _createDeveloperMenu();
  void createMenus();
  void hookupSignals();
  void _createModeToolBar();

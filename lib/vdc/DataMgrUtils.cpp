@@ -450,11 +450,11 @@ int DataMgrUtils::GetDefaultMetaInfoStride(DataMgr *dataMgr, std::string varname
     for (int i=0; i<dimsAtLevel.size(); i++)
         size *= dimsAtLevel[i];
         
-        int stride = 1;
-        if (size > REQUIRED_SAMPLE_SIZE)
-            stride = 1 + size / REQUIRED_SAMPLE_SIZE;
-            
-            return stride;
+    int stride = 1;
+    if (size > REQUIRED_SAMPLE_SIZE)
+        stride = 1 + size / REQUIRED_SAMPLE_SIZE;
+        
+    return stride;
 }
 
 double DataMgrUtils::Get2DRendererDefaultZ(DataMgr *dataMgr, size_t ts, int refLevel, int lod)

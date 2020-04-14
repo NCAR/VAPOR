@@ -16,8 +16,8 @@ using std::vector;
 
 static vec2 qvec2(const QPoint &qp)  { return vec2(qp.x(), qp.y()); }
 
-TFColorMap::TFColorMap(TFMapWidget *parent)
-: TFMap(parent) {
+TFColorMap::TFColorMap(const std::string &variableNameTag, TFMapWidget *parent)
+: TFMap(variableNameTag, parent) {
     _colorInterpolationMenu = new ParamsDropdownMenuItem(
         this,
         VAPoR::ColorMap::_interpTypeTag,
@@ -62,10 +62,23 @@ void TFColorMap::PopulateSettingsMenu(QMenu *menu) const
     
     QMenu *builtinColormapMenu = menu->addMenu("Load Built-In Colormap");
     string builtinPath = GetSharePath("palettes");
+    
+    populateBuiltinColormapMenu(builtinColormapMenu, builtinPath);
+}
+
+void TFColorMap::populateBuiltinColormapMenu(QMenu *menu, const std::string &builtinPath) const
+{
     auto fileNames = FileUtils::ListFiles(builtinPath);
     std::sort(fileNames.begin(), fileNames.end());
+    
     for (int i = 0; i < fileNames.size(); i++) {
+        string path = FileUtils::JoinPaths({builtinPath, fileNames[i]});
         
+        if (FileUtils::IsDirectory(path))
+            populateBuiltinColormapMenu(menu->addMenu(QString::fromStdString(fileNames[i])), path);
+    }
+    
+    for (int i = 0; i < fileNames.size(); i++) {
         string path = FileUtils::JoinPaths({builtinPath, fileNames[i]});
         
         if (FileUtils::Extension(path) != "tf3")
@@ -73,7 +86,7 @@ void TFColorMap::PopulateSettingsMenu(QMenu *menu) const
         
         QAction *item = new ColorMapMenuItem(path);
         connect(item, SIGNAL(triggered(std::string)), this, SLOT(menuLoadBuiltin(std::string)));
-        builtinColormapMenu->addAction(item);
+        menu->addAction(item);
     }
 }
 
@@ -90,8 +103,7 @@ void TFColorMap::paramsUpdate()
 
 TFInfoWidget *TFColorMap::createInfoWidget()
 {
-    TFColorInfoWidget *info = new TFColorInfoWidget;
-    info->UsingColormapVariable = this->UsingColormapVariable;
+    TFColorInfoWidget *info = new TFColorInfoWidget(getVariableNameTag());
     
     connect(this, SIGNAL(ControlPointDeselected()), info, SLOT(DeselectControlPoint()));
     connect(this, SIGNAL(UpdateInfo(float, QColor)), info, SLOT(SetControlPoint(float, QColor)));

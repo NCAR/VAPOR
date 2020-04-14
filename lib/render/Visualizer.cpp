@@ -200,7 +200,7 @@ int Visualizer::paintEvent(bool fast)
     if (_configureLighting())
         return -1;
 	
-	glDepthMask(GL_TRUE);
+    glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 	glEnable (GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -213,7 +213,7 @@ int Visualizer::paintEvent(bool fast)
     if (_initializeNewRenderers() < 0)
         return -1;
 
-	int rc = 0;
+    int rc = 0;
 	for (int i = 0; i< _renderers.size(); i++) {
         _glManager->matrixManager->MatrixModeModelView();
         _glManager->matrixManager->PushMatrix();
@@ -562,7 +562,7 @@ int Visualizer:: _captureImage(std::string path)
     if (FileUtils::Extension(path) == "")
         path += ".png";
     
-	ViewpointParams* vpParams = getActiveViewpointParams();
+    ViewpointParams* vpParams = getActiveViewpointParams();
 	int width, height;
 //	vpParams->GetWindowSize(width, height);
     _framebuffer.GetSize(&width, &height);

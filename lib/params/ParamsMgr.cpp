@@ -240,10 +240,10 @@ void ParamsMgr::addDataMgrMerge(string dataSetName) {
 
 	delete windowsSep;
 
-	_initAppRenParams(dataSetName);
+	_createAppRenParams(dataSetName);
 }
 
-void ParamsMgr::_initAppRenParams(string dataSetName) {
+void ParamsMgr::_createAppRenParams(string dataSetName) {
 
 	// Deal with any application render Params registered by the application
 	//
@@ -1135,6 +1135,21 @@ int ParamsMgr::loadFromFile(string path)
 }
 
 #endif
+
+void ParamsMgr::GetAppRenderParams(
+	string dataSetName, vector <RenderParams *> &appRenderParams
+) const {
+	appRenderParams.clear();
+	std::map <string, RenParamsContainer *>::const_iterator itr;
+	itr = _otherRenParams.find(dataSetName);
+	if (itr == _otherRenParams.cend()) return;
+	vector <string> v = itr->second->GetNames();
+	for (int i=0; i<v.size(); i++) {
+		if (itr->second->GetParams(v[i])) {
+			appRenderParams.push_back(itr->second->GetParams(v[i]));
+		}
+	}
+}
 
 //----------------------------------------------------------------------------
 // Save the transfer function to a file. 

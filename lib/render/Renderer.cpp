@@ -431,7 +431,7 @@ int Renderer::makeColorbarTexture(){
     if ((vip = dynamic_cast<VolumeIsoParams*>(rParams)))
         useConstantColor = !vip->GetValueLong(VolumeParams::UseColormapVariableTag, 0);
     
-	float rgb[3];
+    float rgb[3];
 	if (useConstantColor)
 		rParams->GetConstantColor(rgb);
 
