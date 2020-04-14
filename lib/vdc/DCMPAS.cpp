@@ -777,7 +777,7 @@ int DCMPAS::_readRegionEdgeVariable(MPASFileObject *w, const vector<size_t> &min
             size_t vidx1 = edgesOnVertex[i * vertexDegree + 1] - 1;
             size_t vidx2 = edgesOnVertex[i * vertexDegree + 2] - 1;
 
-            region[ii] = edgeVariable[j * dims[0] + vidx0] * wgt + edgeVariable[j * dims[0] + vidx1] * wgt + edgeVariable[j * dims[0] + vidx2] * wgt;
+            region[j * (max[0] - min[0] + 1) + ii] = edgeVariable[j * dims[0] + vidx0] * wgt + edgeVariable[j * dims[0] + vidx1] * wgt + edgeVariable[j * dims[0] + vidx2] * wgt;
         }
     }
 
