@@ -114,6 +114,9 @@ int	main(int argc, char **argv) {
 	for (int i=0; i<argc-1; i++) wrffiles.push_back(argv[i]);
 	string master = argv[argc-1];
 
+    if (FileUtils::Extension(master) != "vdc")
+        printf("Warning: VDC files should the extension .vdc\n");
+
 	VDCNetCDF    vdc(opt.nthreads);
 
 	if (vdc.DataDirExists(master) && !opt.force) {
