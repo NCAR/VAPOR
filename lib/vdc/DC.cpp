@@ -484,6 +484,7 @@ bool DC::_getDataVarDimensions(
 	if (! status) return(false);
 	
 	string mname = var.GetMeshName();
+	if (mname.empty()) return(true);	// 0-d variable
 
 	Mesh mesh;
 	status = GetMesh(mname, mesh);
@@ -1115,6 +1116,37 @@ vector <int> DC::FileTable::GetEntries() const {
 		}
 	}
 	return(fds);
+}
+
+bool DC::GetMeshDimLens(const string& mesh_name, std::vector<size_t> &dims) const {
+	dims.clear();
+
+	DC::Mesh mesh;
+	bool status = GetMesh(mesh_name, mesh);
+	if (! status) return (false);
+
+	vector <string> dimNames = mesh.GetDimNames();
+	for (int i=0; i<dimNames.size(); i++) {
+		DC::Dimension dimension;
+
+		status = GetDimension(dimNames[i], dimension);
+		if (! status) return(false);
+
+		dims.push_back(dimension.GetLength());
+	}
+	return(true);
+}
+
+bool DC::GetMeshDimNames(const string& mesh_name, std::vector<string> &dimnames) const {
+	dimnames.clear();
+
+	DC::Mesh mesh;
+	bool status = GetMesh(mesh_name, mesh);
+	if (! status) return (false);
+
+	dimnames = mesh.GetDimNames();
+
+	return(true);
 }
 
 
