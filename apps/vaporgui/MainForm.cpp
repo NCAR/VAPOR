@@ -252,6 +252,7 @@ void MainForm::_initMembers() {
 }
 
 #include <vapor/VDCNetCDF.h>
+#include <vapor/DCWRF.h>
 // Only the main program should call the constructor:
 //
 MainForm::MainForm(
@@ -379,13 +380,13 @@ MainForm::MainForm(
 
     show();
 
-	// Handle four initialization cases:
+	// Command line options:
 	//
-	// 1. No files
-	// 2. Session file
-	// 3. Session file + VDC file
-	// 4. V
+	// - Session file
+	// - Session file + data file
+	// - data file
 	//
+    
 	if (files.size() && files[0].endsWith(".vs3")) {
 		sessionOpen(files[0]);
 		files.erase(files.begin());
@@ -395,18 +396,30 @@ MainForm::MainForm(
 	}
 
     
-	if (files.size() && files[0].endsWith(".nc")) {
-        VDCNetCDF vdc;
-        bool errReportingEnabled = Wasp::MyBase::EnableErrMsg(false);
-        int ret = vdc.Initialize(files[0].toStdString(), {}, VDC::R);
-        Wasp::MyBase::EnableErrMsg(errReportingEnabled);
-        if (ret < 0) {
-            loadDataHelper({files[0].toStdString()}, "NetCDF CF files", "", "cf", true);
-        } else {
+	if (files.size()) {
+        if (files[0].endsWith(".nc")) {
+            if (isFileValidVDC(files[0].toStdString()))
+                loadData(files[0].toStdString());
+            else {
+                vector<string> stdFiles;
+                for (auto &f : files)
+                    stdFiles.push_back(f.toStdString());
+                loadDataHelper(stdFiles, "NetCDF CF files", "", "cf", true);
+            }
+        } else if (files[0].endsWith(".vdc")) {
             loadData(files[0].toStdString());
+        } else if (isFileValidWRF(files[0].toStdString())) {
+            vector<string> stdFiles;
+            for (auto &f : files)
+                stdFiles.push_back(f.toStdString());
+            loadDataHelper(stdFiles, "WRF files", "", "wrf", true);
+        } else {
+            MyBase::SetErrMsg("Command line argument \"%s\"", files[0].toStdString().c_str());
+            MSG_ERR("Command line argument is not a valid file or the correct type could not be determined");
         }
         _stateChangeCB();
 	}
+    
 	app->installEventFilter(this);
 
 	_controlExec->SetSaveStateEnabled(true);
@@ -426,6 +439,24 @@ MainForm::~MainForm()
 	if (_controlExec) delete _controlExec;
 	
     // no need to delete child widgets, Qt does it all for us?? (see closeEvent)
+}
+
+ bool MainForm::isFileValidVDC(const std::string &path)
+{
+    VDCNetCDF vdc;
+    bool errReportingEnabled = Wasp::MyBase::EnableErrMsg(false);
+    int ret = vdc.Initialize(path, {}, VDC::R);
+    Wasp::MyBase::EnableErrMsg(errReportingEnabled);
+    return ret == 0;
+}
+
+bool MainForm::isFileValidWRF(const std::string &path)
+{
+    DCWRF wrf;
+    bool errReportingEnabled = Wasp::MyBase::EnableErrMsg(false);
+    int ret = wrf.Initialize({path});
+    Wasp::MyBase::EnableErrMsg(errReportingEnabled);
+    return ret == 0;
 }
 
 void MainForm::_createModeToolBar() {

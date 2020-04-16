@@ -305,6 +305,9 @@ private:
  void _createVizToolBar();
  void createToolBars();
  virtual void sessionOpenHelper(string fileName);
+    
+ bool isFileValidVDC(const std::string &path);
+ bool isFileValidWRF(const std::string &path);
 
 
  // Enable/Disable all the widgets that require data to be present
