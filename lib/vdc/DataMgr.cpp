@@ -2616,6 +2616,19 @@ bool DataMgr::_hasVerticalXForm(
 
 	if (formula_terms.empty()) return(false);
 
+
+	// Make sure all of the dependent variables needed by the 
+	// formula actually exist
+	//
+	map<string, string> parsed_terms;
+	ok = DerivedCFVertCoordVar::ParseFormula(formula_terms, parsed_terms);
+	if (! ok) return(false);
+
+	for (auto itr = parsed_terms.begin(); itr!=parsed_terms.end(); ++itr) {
+		const string &varname = itr->second;
+		if (! _dc->VariableExists(0,varname, 0,0)) return(false);
+    }
+	
 	// Does a converter exist for this standard name?
 	//
 	vector <string> names = 
