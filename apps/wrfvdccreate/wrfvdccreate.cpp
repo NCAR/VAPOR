@@ -115,7 +115,7 @@ int	main(int argc, char **argv) {
 	string master = argv[argc-1];
 
     if (FileUtils::Extension(master) != "vdc")
-        printf("Warning: VDC files should the extension .vdc\n");
+        fprintf(stderr, "Warning: VDC files should the extension .vdc\n");
 
 	VDCNetCDF    vdc(opt.nthreads);
 
