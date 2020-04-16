@@ -128,6 +128,22 @@ public:
 
     virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const = 0;
 
+    //! Parse a CF conventions forumla string into terms and variables
+    //!
+    //! This static method parse the CF conventions
+    //! formula string, typically
+    //! associated with the \a formula_terms attribute, into a std::map
+    //! of term names and variable names.
+    //!
+    //! If \p formula cannot be parsed false is returned.
+    //!
+    //! \param[in] formula : A formatted CF formula string
+    //! \param[out] parse_terms A map from term names to variable names
+    //!
+    //! \sa http://cfconventions.org/
+    //!
+    static bool ParseFormula(string formula_terms, map<string, string> &parsed_terms);
+
     //! validate that a CF conventions forumla string is syntactically correct
     //!
     //! This static method checks to see if \p formula contains a
