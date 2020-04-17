@@ -74,13 +74,13 @@ Vapor's current master branch source code can be downloaded from GitHub_.
 
 Unzip the following file linked below into the root of your C:\\ directory.
 
-    `Windows third party libraries <https://drive.google.com/open?id=1sRlE06jSVrCScrt546G4UtI3hj93xV2W>`_
+    `Windows third party libraries <https://drive.google.com/open?id=1NRMu4_g8ZXu9bILBVRDsuUKIGBiT2016>`_
 
 *Linux and OSX*
 
 If building on Linux or OSX, the third party libraries must be placed in /usr/local/VAPOR-Deps/.
 
-    `OSX third-party libraries <https://drive.google.com/open?id=1kyDAzmK9zShrIcoAbned8YW9vn2j7lpe>`_
+    `OSX third-party libraries <https://drive.google.com/open?id=1p47yeyjyUfxlc7-eglsXkjCGYJLqqtEs>`_
 
     `Ubuntu third-party libraries <https://drive.google.com/open?id=1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd>`_
 
