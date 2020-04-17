@@ -61,6 +61,11 @@
 #include <vapor/STLUtils.h>
 #include <vapor/Proj4API.h>
 
+#include <vapor/VDCNetCDF.h>
+#include <vapor/DCWRF.h>
+#include <vapor/DCMPAS.h>
+#include <vapor/DCCF.h>
+
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
 #include "TabManager.h"
@@ -251,8 +256,6 @@ void MainForm::_initMembers() {
 
 }
 
-#include <vapor/VDCNetCDF.h>
-#include <vapor/DCWRF.h>
 // Only the main program should call the constructor:
 //
 MainForm::MainForm(
@@ -397,26 +400,17 @@ MainForm::MainForm(
 
     
 	if (files.size()) {
-        if (files[0].endsWith(".nc")) {
-            if (isFileValidVDC(files[0].toStdString()))
-                loadData(files[0].toStdString());
-            else {
-                vector<string> stdFiles;
-                for (auto &f : files)
-                    stdFiles.push_back(f.toStdString());
-                loadDataHelper(stdFiles, "NetCDF CF files", "", "cf", true);
-            }
-        } else if (files[0].endsWith(".vdc")) {
-            loadData(files[0].toStdString());
-        } else if (isFileValidWRF(files[0].toStdString())) {
-            vector<string> stdFiles;
-            for (auto &f : files)
-                stdFiles.push_back(f.toStdString());
-            loadDataHelper(stdFiles, "WRF files", "", "wrf", true);
+        vector<string> paths;
+        for (auto &f : files)
+            paths.push_back(f.toStdString());
+        
+        string fmt;
+        if (determineDatasetFormat(paths, &fmt) == 0) {
+            loadDataHelper(paths, "", "", fmt, true);
         } else {
-            MyBase::SetErrMsg("Command line argument \"%s\"", files[0].toStdString().c_str());
-            MSG_ERR("Command line argument is not a valid file or the correct type could not be determined");
+            MSG_ERR("Could not determine dataset format for command line parameters");
         }
+        
         _stateChangeCB();
 	}
     
@@ -441,22 +435,28 @@ MainForm::~MainForm()
     // no need to delete child widgets, Qt does it all for us?? (see closeEvent)
 }
 
- bool MainForm::isFileValidVDC(const std::string &path)
+template<class T> bool MainForm::isDatasetValidFormat(const std::vector<std::string> &paths) const
 {
-    VDCNetCDF vdc;
+    T dc;
     bool errReportingEnabled = Wasp::MyBase::EnableErrMsg(false);
-    int ret = vdc.Initialize(path, {}, VDC::R);
+    int ret = dc.Initialize(paths);
     Wasp::MyBase::EnableErrMsg(errReportingEnabled);
     return ret == 0;
 }
 
-bool MainForm::isFileValidWRF(const std::string &path)
+int MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const
 {
-    DCWRF wrf;
-    bool errReportingEnabled = Wasp::MyBase::EnableErrMsg(false);
-    int ret = wrf.Initialize({path});
-    Wasp::MyBase::EnableErrMsg(errReportingEnabled);
-    return ret == 0;
+    if (isDatasetValidFormat<VDCNetCDF>(paths))
+        *fmt = "vdc";
+    else if (isDatasetValidFormat<DCWRF>(paths))
+        *fmt = "wrf";
+    else if (isDatasetValidFormat<DCMPAS>(paths))
+        *fmt = "mpas";
+    else if (isDatasetValidFormat<DCCF>(paths))
+        *fmt = "cf";
+    else
+        return -1;
+    return 0;
 }
 
 void MainForm::_createModeToolBar() {

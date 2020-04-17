@@ -306,8 +306,8 @@ private:
  void createToolBars();
  virtual void sessionOpenHelper(string fileName);
     
- bool isFileValidVDC(const std::string &path);
- bool isFileValidWRF(const std::string &path);
+ template<class T> bool isDatasetValidFormat(const std::vector<std::string> &paths) const;
+ int determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const;
 
 
  // Enable/Disable all the widgets that require data to be present

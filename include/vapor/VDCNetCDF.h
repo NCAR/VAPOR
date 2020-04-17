@@ -123,8 +123,8 @@ public:
  //! zero results in NC_SIZEHINT_DEFAULT being used.
  //
  virtual int Initialize(
-	const vector <string> &paths, const vector <string> &options,
-	AccessMode mode, vector <size_t> bs = {64,64,64}, size_t chunksizehint = 0
+    const vector <string> &paths, const vector <string> &options = {},
+	AccessMode mode = VDC::R, vector <size_t> bs = {64,64,64}, size_t chunksizehint = 0
  );
  virtual int Initialize(
 	string path, const vector <string> &options,
