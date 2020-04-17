@@ -229,7 +229,8 @@ size_t TestConstNodeIterator(
 
     for ( ; itr!=enditr; ++itr) {
         size_t i = count % dims[X];
-        size_t j = count / dims[X];
+        //size_t j = count / dims[X];
+        size_t j = ( count / dims[X] ) % dims[Y];
         size_t k = count / ( dims[X] * dims[Y] );
        
         double itrData  = g->GetValueAtIndex( (*itr).data() );
@@ -265,7 +266,8 @@ size_t TestIterator(
 
     for ( ; itr!=enditr; ++itr) {
         size_t i = count % dims[X];
-        size_t j = count / dims[X];
+        size_t j = ( count / dims[X] ) % dims[Y];
+        //size_t j = count / dims[X];
         size_t k = count / ( dims[X] * dims[Y] );
         
         if ( *itr != g->AccessIJK( i, j, k ) )
@@ -299,7 +301,8 @@ size_t TestConstCoordItr(
 
     for ( ; itr!=enditr; ++itr) {
         size_t i = count % dims[X];
-        size_t j = count / dims[X];
+        size_t j = ( count / dims[X] ) % dims[Y];
+        //size_t j = ( count / dims[X] );
         size_t k = count / ( dims[X] * dims[Y] );
         size_t ijk[] = { i, j, k };
         double coords[3];
@@ -309,7 +312,7 @@ size_t TestConstCoordItr(
         for ( size_t dim=0; dim<dims.size(); dim++ ) {
             if ( (*itr)[dim] != coords[dim] ) {
                 disagree = true;
-                cout << count << " " << dim << " " << j << " " << (*itr)[dim] << " " << coords[dim] << endl;
+                //cout << count << " " << dim << " " << j << " " << (*itr)[dim] << " " << coords[dim] << endl;
             }
         }
         if ( disagree ) {
