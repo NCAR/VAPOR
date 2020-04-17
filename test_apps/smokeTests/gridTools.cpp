@@ -213,19 +213,34 @@ bool CompareIndexToCoords(
     return 0;
 }
 
-size_t TestConstNodeIterator( const Grid *g, int& count, double& time ) {
+size_t TestConstNodeIterator( 
+    const Grid *g, 
+    size_t& count, 
+    size_t& disagreements, 
+    double& time 
+) {
     Grid::ConstNodeIterator itr;
     Grid::ConstNodeIterator enditr = g->ConstNodeEnd();
 
     double t0 = Wasp::GetTime();
     itr = g->ConstNodeBegin();
+    
+    std::vector< size_t > dims = g->GetDimensions();
 
     for ( ; itr!=enditr; ++itr) {
+        size_t i = count % dims[X];
+        size_t j = count / dims[X];
+        size_t k = count / ( dims[X] * dims[Y] );
+       
+        double itrData  = g->GetValueAtIndex( (*itr).data() );
+        double gridData = g->AccessIJK( i, j, k ); 
+        if ( itrData != gridData )
+            disagreements++;
+
         count++;
     }
 
     size_t expectedCount = 1;
-    std::vector< size_t > dims = g->GetDimensions();
     for ( auto dim : dims )
         expectedCount *= dim;
 
@@ -234,19 +249,32 @@ size_t TestConstNodeIterator( const Grid *g, int& count, double& time ) {
     return expectedCount;
 }
 
-size_t TestIterator( Grid *g, int& count, double& time ) {
+size_t TestIterator( 
+    Grid *g, 
+    size_t& count, 
+    size_t& disagreements,
+    double& time 
+) {
     Grid::Iterator itr;
     Grid::Iterator enditr = g->end();
 
     double t0 = Wasp::GetTime();
     itr = g->begin();
+    
+    std::vector<size_t> dims = g->GetDimensions();
 
     for ( ; itr!=enditr; ++itr) {
+        size_t i = count % dims[X];
+        size_t j = count / dims[X];
+        size_t k = count / ( dims[X] * dims[Y] );
+        
+        if ( *itr != g->AccessIJK( i, j, k ) )
+            disagreements++;
+
         count++;
     }
 
     size_t expectedCount = 1;
-    std::vector< size_t > dims = g->GetDimensions();
     for ( auto dim : dims )
         expectedCount *= dim;
 
@@ -255,19 +283,43 @@ size_t TestIterator( Grid *g, int& count, double& time ) {
     return expectedCount;
 }
 
-size_t TestConstCoordItr( const Grid *g, int& count, double& time ) {
+size_t TestConstCoordItr( 
+    const Grid *g,
+    size_t& count, 
+    size_t& disagreements,
+    double& time 
+) {
     Grid::ConstCoordItr itr;
     Grid::ConstCoordItr enditr = g->ConstCoordEnd();
 
     double t0 = Wasp::GetTime();
     itr = g->ConstCoordBegin();
+    
+    std::vector< size_t > dims = g->GetDimensions();
 
     for ( ; itr!=enditr; ++itr) {
+        size_t i = count % dims[X];
+        size_t j = count / dims[X];
+        size_t k = count / ( dims[X] * dims[Y] );
+        size_t ijk[] = { i, j, k };
+        double coords[3];
+
+        bool disagree = false;
+        g->GetUserCoordinates( ijk, coords );
+        for ( size_t dim=0; dim<dims.size(); dim++ ) {
+            if ( (*itr)[dim] != coords[dim] ) {
+                disagree = true;
+                cout << count << " " << dim << " " << j << " " << (*itr)[dim] << " " << coords[dim] << endl;
+            }
+        }
+        if ( disagree ) {
+            disagreements++;
+        }
+
         count++;
     }
 
     size_t expectedCount = 1;
-    std::vector< size_t > dims = g->GetDimensions();
     for ( auto dim : dims )
         expectedCount *= dim;
 
@@ -275,6 +327,7 @@ size_t TestConstCoordItr( const Grid *g, int& count, double& time ) {
 
     return expectedCount;
 }
+
 void PrintStats( double rms, size_t numMissingValues, size_t disagreements ) {
     cout << "    RMS error:                                     " << rms << endl;
     cout << "    Missing value count:                           " << numMissingValues << endl;
@@ -376,26 +429,50 @@ bool RunTests(
 
     // Iterator tests
 
-    int count = 0;
     double time;
-    size_t expectedCount = TestIterator( grid, count, time );
+    size_t count = 0;
+    size_t disagreements = 0;
+    size_t expectedCount = TestIterator( grid, count, disagreements, time );
     if (expectedCount != count)
         rc = 1;
-    PrintGridIteratorResults( type, "Iterator", count, expectedCount, time );
+    PrintGridIteratorResults( 
+        type, 
+        "Iterator", 
+        count, 
+        expectedCount, 
+        disagreements, 
+        time 
+    );
 
     count = 0;
+    disagreements = 0;
+    expectedCount = TestConstCoordItr( grid, count, disagreements, time );
     time  = 0.0;
-    expectedCount = TestConstCoordItr( grid, count, time );
     if (expectedCount != count)
         rc = 1;
-    PrintGridIteratorResults( type, "ConstCoordIterator", count, expectedCount, time );
+    PrintGridIteratorResults( 
+        type, 
+        "ConstCoordIterator", 
+        count, 
+        expectedCount, 
+        disagreements, 
+        time 
+    );
 
     count = 0;
+    disagreements = 0;
+    expectedCount = TestConstNodeIterator( grid, count, disagreements, time );
     time  = 0.0;
-    expectedCount = TestConstNodeIterator( grid, count, time );
     if (expectedCount != count)
         rc = 1;
-    PrintGridIteratorResults( type, "ConstNodeIterator", count, expectedCount, time );
+    PrintGridIteratorResults( 
+        type, 
+        "ConstNodeIterator", 
+        count, 
+        expectedCount, 
+        disagreements, 
+        time 
+    );
 
     return rc;
 }   
@@ -403,15 +480,23 @@ bool RunTests(
 void PrintGridIteratorResults( 
     std::string& gridType,
     std::string  itrType,
-    int count,
-    int expectedCount,
+    size_t count,
+    size_t expectedCount,
+    size_t disagreements,
     double time
 ) {
-    std::string passFail = count == expectedCount ? " --- PASS" : " --- FAIL";
+    std::string passFail = " --- PASS";
+    if ( count != expectedCount ||
+         disagreements > 0
+    ) {
+        passFail = " --- FAIL";
+    }
+
     cout << gridType << " Grid::" << itrType << passFail << endl;
-    cout << "  Count:          " << count << endl;;
-    cout << "  Expected Count: " << expectedCount << endl;;
-    cout << "  Time:  " << time << endl;
+    cout << "  Count:                " << count << endl;;
+    cout << "  Expected Count:       " << expectedCount << endl;;
+    cout << "  Value Disagreements:  " << disagreements << endl;;
+    cout << "  Time:                 " << time << endl;
     cout << endl;
 }
 

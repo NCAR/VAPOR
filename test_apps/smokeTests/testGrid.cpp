@@ -151,7 +151,6 @@ OptionParser::Option_T  get_options[] = {
 };
     
 void InitializeOptions( int argc, char **argv, OptionParser &op ) {
-    string  s;
 
     std::string ProgName = FileUtils::LegacyBasename(argv[0]);
 
