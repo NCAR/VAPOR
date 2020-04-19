@@ -174,13 +174,13 @@ int main(int argc, char **argv) {
     }
 
     if (argc < 3) {
-        cerr << "Usage: " << ProgName << " cf_files... master.nc" << endl;
+        cerr << "Usage: " << ProgName << " cf_files... master.vdc" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         return (1);
     }
 
     if (opt.help) {
-        cerr << "Usage: " << ProgName << " cf_files... master.nc" << endl;
+        cerr << "Usage: " << ProgName << " cf_files... master.vdc" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         return (0);
     }
@@ -191,6 +191,9 @@ int main(int argc, char **argv) {
     for (int i = 0; i < argc - 1; i++)
         cffiles.push_back(argv[i]);
     string master = argv[argc - 1];
+
+    if (FileUtils::Extension(master) != "vdc")
+        fprintf(stderr, "Warning: VDC files should the extension .vdc\n");
 
     VDCNetCDF vdc(opt.nthreads);
 

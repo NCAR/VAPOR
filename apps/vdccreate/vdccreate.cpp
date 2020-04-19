@@ -249,20 +249,23 @@ int main(int argc, char **argv) {
     }
 
     if (argc != 2) {
-        cerr << "Usage: " << ProgName << " [options] master.nc" << endl;
+        cerr << "Usage: " << ProgName << " [options] master.vdc" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         exit(1);
     }
     if (opt.extents.size() && opt.extents.size() != 6) {
-        cerr << "Usage: " << ProgName << " master.nc" << endl;
+        cerr << "Usage: " << ProgName << " master.vdc" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         exit(1);
     }
 
     string master = argv[1];
 
+    if (FileUtils::Extension(master) != "vdc")
+        fprintf(stderr, "Warning: VDC files should the extension .vdc\n");
+
     if (opt.help) {
-        cerr << "Usage: " << ProgName << " master.nc" << endl;
+        cerr << "Usage: " << ProgName << " master.vdc" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         exit(0);
     }
