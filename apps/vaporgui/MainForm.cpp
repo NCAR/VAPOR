@@ -405,7 +405,7 @@ MainForm::MainForm(
             paths.push_back(f.toStdString());
         
         string fmt;
-        if (determineDatasetFormat(paths, &fmt) == 0) {
+        if (determineDatasetFormat(paths, &fmt)) {
             loadDataHelper(paths, "", "", fmt, true);
         } else {
             MSG_ERR("Could not determine dataset format for command line parameters");
@@ -444,7 +444,7 @@ template<class T> bool MainForm::isDatasetValidFormat(const std::vector<std::str
     return ret == 0;
 }
 
-int MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const
+bool MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const
 {
     if (isDatasetValidFormat<VDCNetCDF>(paths))
         *fmt = "vdc";
@@ -455,8 +455,8 @@ int MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std:
     else if (isDatasetValidFormat<DCCF>(paths))
         *fmt = "cf";
     else
-        return -1;
-    return 0;
+        return false;
+    return true;
 }
 
 void MainForm::_createModeToolBar() {
