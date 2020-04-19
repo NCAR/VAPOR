@@ -340,12 +340,12 @@ int main(int argc, char **argv)
         exit(1);
     }
     if (opt.help) {
-        cerr << "Usage: " << progName << " [options] vdc.nc" << endl;
+        cerr << "Usage: " << progName << " [options] vdc.vdc" << endl;
         op.PrintOptionHelp(stderr);
         exit(0);
     }
     if (argc != 2) {
-        cerr << "Usage: " << progName << " vdcmaster.nc" << endl;
+        cerr << "Usage: " << progName << " vdcmaster.vdc" << endl;
         exit(1);
     }
 

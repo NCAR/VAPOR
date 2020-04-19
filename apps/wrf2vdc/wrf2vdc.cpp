@@ -67,13 +67,13 @@ int main(int argc, char **argv)
     if (op.ParseOptions(&argc, argv, get_options) < 0) { return (1); }
 
     if (argc < 3) {
-        cerr << "Usage: " << ProgName << " wrffiles... master.nc" << endl;
+        cerr << "Usage: " << ProgName << " wrffiles... master.vdc" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         return (1);
     }
 
     if (opt.help) {
-        cerr << "Usage: " << ProgName << " master.nc" << endl;
+        cerr << "Usage: " << ProgName << " master.vdc" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         return (0);
     }

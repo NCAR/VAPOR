@@ -61,6 +61,11 @@
 #include <vapor/STLUtils.h>
 #include <vapor/Proj4API.h>
 
+#include <vapor/VDCNetCDF.h>
+#include <vapor/DCWRF.h>
+#include <vapor/DCMPAS.h>
+#include <vapor/DCCF.h>
+
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
 #include "TabManager.h"
@@ -242,7 +247,6 @@ void MainForm::_initMembers()
     _buttonPressed = false;
 }
 
-#include <vapor/VDCNetCDF.h>
 // Only the main program should call the constructor:
 //
 MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : QMainWindow(parent)
@@ -358,13 +362,13 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
 
     show();
 
-    // Handle four initialization cases:
+    // Command line options:
     //
-    // 1. No files
-    // 2. Session file
-    // 3. Session file + VDC file
-    // 4. V
+    // - Session file
+    // - Session file + data file
+    // - data file
     //
+
     if (files.size() && files[0].endsWith(".vs3")) {
         sessionOpen(files[0]);
         files.erase(files.begin());
@@ -372,18 +376,20 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
         sessionNew();
     }
 
-    if (files.size() && files[0].endsWith(".nc")) {
-        VDCNetCDF vdc;
-        bool      errReportingEnabled = Wasp::MyBase::EnableErrMsg(false);
-        int       ret = vdc.Initialize(files[0].toStdString(), {}, VDC::R);
-        Wasp::MyBase::EnableErrMsg(errReportingEnabled);
-        if (ret < 0) {
-            loadDataHelper({files[0].toStdString()}, "NetCDF CF files", "", "cf", true);
+    if (files.size()) {
+        vector<string> paths;
+        for (auto &f : files) paths.push_back(f.toStdString());
+
+        string fmt;
+        if (determineDatasetFormat(paths, &fmt)) {
+            loadDataHelper(paths, "", "", fmt, true);
         } else {
-            loadData(files[0].toStdString());
+            MSG_ERR("Could not determine dataset format for command line parameters");
         }
+
         _stateChangeCB();
     }
+
     app->installEventFilter(this);
 
     _controlExec->SetSaveStateEnabled(true);
@@ -402,6 +408,30 @@ MainForm::~MainForm()
     if (_controlExec) delete _controlExec;
 
     // no need to delete child widgets, Qt does it all for us?? (see closeEvent)
+}
+
+template<class T> bool MainForm::isDatasetValidFormat(const std::vector<std::string> &paths) const
+{
+    T    dc;
+    bool errReportingEnabled = Wasp::MyBase::EnableErrMsg(false);
+    int  ret = dc.Initialize(paths);
+    Wasp::MyBase::EnableErrMsg(errReportingEnabled);
+    return ret == 0;
+}
+
+bool MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const
+{
+    if (isDatasetValidFormat<VDCNetCDF>(paths))
+        *fmt = "vdc";
+    else if (isDatasetValidFormat<DCWRF>(paths))
+        *fmt = "wrf";
+    else if (isDatasetValidFormat<DCMPAS>(paths))
+        *fmt = "mpas";
+    else if (isDatasetValidFormat<DCCF>(paths))
+        *fmt = "cf";
+    else
+        return false;
+    return true;
 }
 
 void MainForm::_createModeToolBar()

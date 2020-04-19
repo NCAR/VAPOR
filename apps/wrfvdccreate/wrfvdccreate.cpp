@@ -71,13 +71,13 @@ int main(int argc, char **argv)
     if (op.ParseOptions(&argc, argv, get_options) < 0) { exit(1); }
 
     if (argc < 3) {
-        cerr << "Usage: " << ProgName << " wrf_file1 wrf_file2 ... master.nc" << endl;
+        cerr << "Usage: " << ProgName << " wrf_file1 wrf_file2 ... master.vdc" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         exit(1);
     }
 
     if (opt.help) {
-        cerr << "Usage: " << ProgName << "wrffiles... master.nc" << endl;
+        cerr << "Usage: " << ProgName << "wrffiles... master.vdc" << endl;
         op.PrintOptionHelp(stderr, 80, false);
         exit(0);
     }
@@ -87,6 +87,8 @@ int main(int argc, char **argv)
     vector<string> wrffiles;
     for (int i = 0; i < argc - 1; i++) wrffiles.push_back(argv[i]);
     string master = argv[argc - 1];
+
+    if (FileUtils::Extension(master) != "vdc") fprintf(stderr, "Warning: VDC files should the extension .vdc\n");
 
     VDCNetCDF vdc(opt.nthreads);
 
