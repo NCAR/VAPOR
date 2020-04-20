@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <cmath>
 #include <cstdio>
 #include <string>
 #include <algorithm>
@@ -213,6 +214,14 @@ bool CompareIndexToCoords(
     return 0;
 }
 
+bool isNotEqual(
+    double x, 
+    double y
+) {
+  const double epsilon = 1e-5;
+  return std::abs(x - y) > epsilon * std::abs(x);
+}
+
 size_t TestConstNodeIterator( 
     const Grid *g, 
     size_t& count, 
@@ -229,13 +238,12 @@ size_t TestConstNodeIterator(
 
     for ( ; itr!=enditr; ++itr) {
         size_t i = count % dims[X];
-        //size_t j = count / dims[X];
         size_t j = ( count / dims[X] ) % dims[Y];
         size_t k = count / ( dims[X] * dims[Y] );
        
         double itrData  = g->GetValueAtIndex( (*itr).data() );
         double gridData = g->AccessIJK( i, j, k ); 
-        if ( itrData != gridData )
+        if ( isNotEqual( itrData, gridData ) )
             disagreements++;
 
         count++;
@@ -270,7 +278,7 @@ size_t TestIterator(
         //size_t j = count / dims[X];
         size_t k = count / ( dims[X] * dims[Y] );
         
-        if ( *itr != g->AccessIJK( i, j, k ) )
+        if ( isNotEqual( *itr, g->AccessIJK( i, j, k) ) )
             disagreements++;
 
         count++;
@@ -302,7 +310,6 @@ size_t TestConstCoordItr(
     for ( ; itr!=enditr; ++itr) {
         size_t i = count % dims[X];
         size_t j = ( count / dims[X] ) % dims[Y];
-        //size_t j = ( count / dims[X] );
         size_t k = count / ( dims[X] * dims[Y] );
         size_t ijk[] = { i, j, k };
         double coords[3];
@@ -310,9 +317,8 @@ size_t TestConstCoordItr(
         bool disagree = false;
         g->GetUserCoordinates( ijk, coords );
         for ( size_t dim=0; dim<dims.size(); dim++ ) {
-            if ( (*itr)[dim] != coords[dim] ) {
+            if ( isNotEqual( (*itr)[dim], coords[dim] ) ) {
                 disagree = true;
-                //cout << count << " " << dim << " " << j << " " << (*itr)[dim] << " " << coords[dim] << endl;
             }
         }
         if ( disagree ) {
