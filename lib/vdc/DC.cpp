@@ -383,32 +383,34 @@ bool DC::_getDataVarDimensions(string varname, bool spatial, vector<DC::Dimensio
     if (!status) return (false);
 
     string mname = var.GetMeshName();
-    if (mname.empty()) return (true);    // 0-d variable
 
-    Mesh mesh;
-    status = GetMesh(mname, mesh);
-    if (!status) return (false);
-
-    vector<string> dimnames;
-    if (mesh.GetMeshType() == Mesh::STRUCTURED) {
-        dimnames = mesh.GetDimNames();
-    } else {
-        switch (var.GetSamplingLocation()) {
-        case Mesh::NODE: dimnames.push_back(mesh.GetNodeDimName()); break;
-        case Mesh::EDGE: dimnames.push_back(mesh.GetEdgeDimName()); break;
-        case Mesh::FACE: dimnames.push_back(mesh.GetFaceDimName()); break;
-        case Mesh::VOLUME: VAssert(0 && "VOLUME cells not supported"); break;
-        }
-        if (mesh.GetMeshType() == Mesh::UNSTRUC_LAYERED) { dimnames.push_back(mesh.GetLayersDimName()); }
-    }
-
-    for (int i = 0; i < dimnames.size(); i++) {
-        Dimension dim;
-
-        status = GetDimension(dimnames[i], dim);
+    if (!mname.empty()) {
+        ;    // 0-d variable
+        Mesh mesh;
+        status = GetMesh(mname, mesh);
         if (!status) return (false);
 
-        dimensions.push_back(dim);
+        vector<string> dimnames;
+        if (mesh.GetMeshType() == Mesh::STRUCTURED) {
+            dimnames = mesh.GetDimNames();
+        } else {
+            switch (var.GetSamplingLocation()) {
+            case Mesh::NODE: dimnames.push_back(mesh.GetNodeDimName()); break;
+            case Mesh::EDGE: dimnames.push_back(mesh.GetEdgeDimName()); break;
+            case Mesh::FACE: dimnames.push_back(mesh.GetFaceDimName()); break;
+            case Mesh::VOLUME: VAssert(0 && "VOLUME cells not supported"); break;
+            }
+            if (mesh.GetMeshType() == Mesh::UNSTRUC_LAYERED) { dimnames.push_back(mesh.GetLayersDimName()); }
+        }
+
+        for (int i = 0; i < dimnames.size(); i++) {
+            Dimension dim;
+
+            status = GetDimension(dimnames[i], dim);
+            if (!status) return (false);
+
+            dimensions.push_back(dim);
+        }
     }
 
     // we're done if time dim isn't wanted
