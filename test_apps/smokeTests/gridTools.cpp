@@ -408,12 +408,14 @@ bool RunTests(
         MakeConstantField( grid, maxVal );
        
         grid->SetInterpolationOrder( linear );
-        if ( RunTest( grid ) == false )
+        if ( RunTest( grid ) == false ) {
             rc = false;
+        }
        
         grid->SetInterpolationOrder( nearestNeighbor );
-        if ( RunTest( grid ) == false )
+        if ( RunTest( grid ) == false ) {
             rc = false;
+        }
     }
   
     if ( std::find( tests.begin(), tests.end(), "Ramp" ) != tests.end() ) {
@@ -421,24 +423,28 @@ bool RunTests(
         MakeRamp( grid, minVal, maxVal);
         
         grid->SetInterpolationOrder( linear );
-        if ( RunTest( grid ) == false )
+        if ( RunTest( grid ) == false ) {
             rc = false;
+        }
         
         grid->SetInterpolationOrder( nearestNeighbor );
-        if ( RunTest( grid ) == false )
+        if ( RunTest( grid ) == false ) {
             rc = false;
+        }
     }
     
     if ( std::find( tests.begin(), tests.end(), "RampOnAxis" ) != tests.end() ) {
         cout << type << " " << x << "x" << y << "x" << z << " Ramp up on Z axis:" << endl;
         MakeRampOnAxis( grid, minVal, maxVal, Z);
         grid->SetInterpolationOrder( linear );
-        if ( RunTest( grid ) == false )
+        if ( RunTest( grid ) == false ) {
             rc = false;
+        }
 
         grid->SetInterpolationOrder( nearestNeighbor );
-        if ( RunTest( grid ) == false )
+        if ( RunTest( grid ) == false ) {
             rc = false;
+        }
     }
     
     if ( std::find( tests.begin(), tests.end(), "Triangle" ) != tests.end() ) {
@@ -446,13 +452,15 @@ bool RunTests(
         MakeTriangle( grid, minVal, maxVal );
        
         grid->SetInterpolationOrder( linear );
-        if ( RunTest( grid ) == false )
+        if ( RunTest( grid ) == false ) {
             rc = false;
+        }
         RunTest( grid );
         
         grid->SetInterpolationOrder( nearestNeighbor );
-        if ( RunTest( grid ) == false )
+        if ( RunTest( grid ) == false ) {
             rc = false;
+        }
     }
 
     // Iterator tests
