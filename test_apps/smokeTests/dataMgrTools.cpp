@@ -152,7 +152,7 @@ int TestDataMgr(
     VAPoR::DataMgr dataMgr(fileType, memsize, nthreads);
     int rc = dataMgr.Initialize(files, options);
     if (rc<0) {
-        cout << "Failed to intialize WRF DataMGR" << endl;
+        cerr << "Failed to intialize WRF DataMGR" << endl;
         return -1;
     }
 

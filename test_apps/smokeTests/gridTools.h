@@ -47,25 +47,28 @@ bool isNotEqual(
 );
 
 // Returns the expected node count for Grid::ConstNodeIterator
-size_t TestConstNodeIterator( 
+bool TestConstNodeIterator( 
     const VAPoR::Grid *g, 
     size_t& count, 
+    size_t& expectedCount,
     size_t& disagreements,
     double& time 
 );
 
 // Returns the expected node count for Grid::Iterator
-size_t TestIterator( 
+bool TestIterator( 
     VAPoR::Grid *g, 
     size_t& count, 
+    size_t& expectedCount,
     size_t& disagreements,
     double& time 
 );
 
 // Returns the expected node count for Grid::ConstCoordIterator
-size_t TestConstCoordItr( 
+bool TestConstCoordItr( 
     const VAPoR::Grid *g, 
     size_t& count,
+    size_t& expectedCount,
     size_t& disagreements,
     double& time 
 );

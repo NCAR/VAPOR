@@ -97,7 +97,7 @@ void InitializeOptions(
     }
 
     if (argc < 2) {
-        cerr << "Usage: " << ProgName << " [options] vdcmaster " << endl;
+        cerr << "Usage: " << ProgName << " [options] dataFile " << endl;
         op.PrintOptionHelp(stderr);
         exit( EXIT_FAILURE );
     }

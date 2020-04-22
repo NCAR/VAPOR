@@ -211,7 +211,7 @@ int main( int argc, char** argv ) {
 
     std::vector< size_t > dims2d = { opt.dims[X], opt.dims[Y] };
 
-    int rc            = 0;
+    int rc            = EXIT_SUCCESS;
     int regularRC     = 0;
     int stretchedRC   = 0;
     int layeredRC     = 0;
@@ -247,21 +247,21 @@ int main( int argc, char** argv ) {
         delete curvilinearGrid;
     }
 
-    if ( regularRC != 0 ) {
-        cout << "Errors occurred while testing Grid::RegularGrid." << endl;
-        rc = 1;
+    if ( regularRC == false ) {
+        cerr << "Errors occurred while testing Grid::RegularGrid." << endl;
+        rc = EXIT_FAILURE;
     }
-    if ( stretchedRC != 0 ) {
-        cout << "Errors occurred while testing Grid::StretchedGrid." << endl;
-        rc = 1;
+    if ( stretchedRC == false ) {
+        cerr << "Errors occurred while testing Grid::StretchedGrid." << endl;
+        rc = EXIT_FAILURE;
     }
-    if ( layeredRC != 0 ) {
-        cout << "Errors occurred while testing Grid::LayeredGrid." << endl;
-        rc = 1;
+    if ( layeredRC == false ) {
+        cerr << "Errors occurred while testing Grid::LayeredGrid." << endl;
+        rc = EXIT_FAILURE;
     }
-    if ( curvilinearRC != 0 ) {
-        cout << "Errors occurred while testing Grid::CurvilinearGrid." << endl;
-        rc = 1;
+    if ( curvilinearRC == false ) {
+        cerr << "Errors occurred while testing Grid::CurvilinearGrid." << endl;
+        rc = EXIT_FAILURE;
     }
 
     double t1 = Wasp::GetTime();

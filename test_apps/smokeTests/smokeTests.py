@@ -121,13 +121,13 @@ def testGrid( grid ):
     outputFile = open( outputFileName, "w" )
     outputFile.write( programOutput.stdout )
     outputFile.close()
-    print( "  " + outputFileName + " written\n" )
+    print( "  " + outputFileName + " written" )
 
     if ( programOutput.returncode != 0 ):
         rc = 1
-        print( "  Test failed with exit code " + str(programOutput.returncode) )
+        print( "  Test failed with exit code " + str(programOutput.returncode + "\n") )
     else:
-        print( "  Test passed" )
+        print( "  Test passed\n" )
 
     return rc
 
