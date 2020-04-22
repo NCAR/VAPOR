@@ -42,9 +42,9 @@ Grid test for 3D variable dbz:
     Dimension Lengths:  371 441 201
     Topology Dimension: 3
 
-    RMS error:                                     0
-    Missing value count:                           0
-    AccessIJK() vs GetValue() disagreement count:  0
+    RMS error:                                           0
+    Missing value count:                                 0
+    GetValueAtIndex() vs GetValue() disagreement count:  0
 
 Projection String:  
 
@@ -60,4 +60,4 @@ Time Coordinates:
 
 Time coordinate variable name: time
 Number of time steps: 1
-Elapsed time: 1.14728
+Elapsed time: 0.490985
