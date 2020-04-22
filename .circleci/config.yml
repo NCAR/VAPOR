@@ -70,7 +70,9 @@ jobs:
     steps:
       - run:
           name: install python
-          command: apt-get install -y python3
+          command: |
+            apt-get update
+            apt-get install -y python3
 
       - checkout
 
