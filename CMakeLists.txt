@@ -203,6 +203,7 @@ set (CPACK_PACKAGE_EXECUTABLES vapor;vapor)
 set (CPACK_BINARY_STGZ OFF)
 set (CPACK_BINARY_TGZ OFF)
 set (CPACK_BINARY_TZ OFF)
+set (CPACK_BINARY_DRAGNDROP OFF)
 
 if (WIN32)
 	set (PRE_INSTALL_LOCAL_PATH "buildutils/NSIS.preInstall.ini")
@@ -256,6 +257,7 @@ if (WIN32)
 endif (WIN32)
 
 if (APPLE)
+	set (CPACK_BINARY_DRAGNDROP ON)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
 		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${PYTHONPATH} ${QTDIR}/lib/*.framework)
@@ -282,7 +284,6 @@ if (APPLE)
             COMPONENT Dependencies
             )
     endif ()
-	set (CPACK_BINARY_DRAGNDROP ON)
 endif (APPLE)
 
 if (UNIX AND NOT APPLE)
