@@ -21,7 +21,7 @@ using std::pair;
 #ifdef NDEBUG
     #if SHADER_AUTORELOAD
         #ifndef WIN32
-            #warning Disabling shader autoreloading
+            //#warning Disabling shader autoreloading
         #endif
         #undef SHADER_AUTORELOAD
     #endif
