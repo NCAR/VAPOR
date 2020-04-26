@@ -459,12 +459,12 @@ int FlowRenderer::_renderAdvection(const flow::Advection* adv)
     float radiusBase = rp->GetValueDouble(FlowParams::RenderRadiusBaseTag, -1);
     if (radiusBase == -1) {
         vector<double> mind, maxd;
-        _dataMgr->GetVariableExtents(rp->GetCurrentTimestep(), rp->GetVariableName(), rp->GetRefinementLevel(), rp->GetCompressionLevel(), mind, maxd);
+        _dataMgr->GetVariableExtents(rp->GetCurrentTimestep(), rp->GetColorMapVariableName(), rp->GetRefinementLevel(), rp->GetCompressionLevel(), mind, maxd);
         vec3 min(mind[0], mind[1], mind[2]);
         vec3 max(maxd[0], maxd[1], maxd[2]);
         vec3 lens = max - min;
         float largestDim  = glm::max(lens.x, glm::max(lens.y, lens.z));
-        radiusBase = largestDim / 260.f;
+        radiusBase = largestDim / 560.f;
         rp->SetValueDouble(FlowParams::RenderRadiusBaseTag, "", radiusBase);
     }
     float radiusScalar = rp->GetValueDouble(FlowParams::RenderRadiusScalarTag, 1);
@@ -514,11 +514,17 @@ show_dir_loop:
     shader->SetUniform("radius", radius);
     shader->SetUniform("lightingEnabled", true);
     shader->SetUniform("glyphStride", glyphStride);
+//    shader->SetUniform("showOnlyLeadingSample", (bool)rp->GetValueLong(FlowParams::RenderGlyphOnlyLeadingTag, false));
     shader->SetUniform("scales", _getScales());
     if (rp->GetValueLong(FlowParams::RenderLightAtCameraTag, true))
         shader->SetUniform("lightDir", cameraDir);
     else
         shader->SetUniform("lightDir", vec3(0, 0, -1));
+//    shader->SetUniform("phongAmbient",   (float)rp->GetValueDouble(FlowParams::PhongAmbientTag, 0));
+//    shader->SetUniform("phongDiffuse",   (float)rp->GetValueDouble(FlowParams::PhongDiffuseTag, 0));
+//    shader->SetUniform("phongSpecular",  (float)rp->GetValueDouble(FlowParams::PhongSpecularTag, 0));
+//    shader->SetUniform("phongShininess", (float)rp->GetValueDouble(FlowParams::PhongShininessTag, 0));
+    
     shader->SetUniform("mapRange", glm::make_vec2(_colorMapRange));
     
     shader->SetUniform("fade_tails", (bool)rp->GetValueLong(FlowParams::RenderFadeTailTag, 0));
