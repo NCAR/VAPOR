@@ -6,7 +6,9 @@
 
 int main(int argc, char **argv) {
     char path[PATH_MAX];
-    readlink("/proc/self/exe", path, PATH_MAX);
+    ssize_t rc = readlink("/proc/self/exe", path, PATH_MAX);
+    static_cast<void>(rc); // Remove warning
+
     char *p = &path[strlen(path) - 1];
     int up = 2;
     while (p != path && up) {

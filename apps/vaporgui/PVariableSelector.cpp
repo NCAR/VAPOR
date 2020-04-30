@@ -15,6 +15,7 @@ PVariableSelector::PVariableSelector(const std::string &tag, const std::string &
 void PVariableSelector::updateGUI() const {
     RenderParams *rp = dynamic_cast<RenderParams *>(getParams());
     assert(rp && "Params must be RenderParams");
+    static_cast<void>(rp); // Silence unused variable warning
 
     int nDims = getDimensionality();
 
