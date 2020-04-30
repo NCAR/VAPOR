@@ -251,7 +251,7 @@ int main(int argc, char **argv)
 
     string master = argv[1];
 
-    if (FileUtils::Extension(master) != "vdc") fprintf(stderr, "Warning: VDC files should the extension .vdc\n");
+    if (FileUtils::Extension(master) != "vdc") { fprintf(stderr, "Warning: VDC files should the extension .vdc\n"); }
 
     if (opt.help) {
         cerr << "Usage: " << ProgName << " master.vdc" << endl;

@@ -1686,7 +1686,7 @@ DerivedCFVertCoordVar *DerivedCFVertCoordVarFactory::CreateInstance(string stand
     // find standard_name in the registry and call factory method.
     //
     auto it = _factoryFunctionRegistry.find(standard_name);
-    if (it != _factoryFunctionRegistry.end()) instance = it->second(dc, mesh, formula);
+    if (it != _factoryFunctionRegistry.end()) { instance = it->second(dc, mesh, formula); }
 
     return instance;
 }
