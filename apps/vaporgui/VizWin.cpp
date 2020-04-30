@@ -433,8 +433,9 @@ void VizWin::mousePressEvent(QMouseEvent* e) {
 	else if (e->button() == Qt::MidButton) _buttonNum = 2;
     
     // ControlModifier means [command], not [control] apparently
-    if (e->button() == Qt::LeftButton && (e->modifiers() & Qt::ShiftModifier))
+    if (e->button() == Qt::LeftButton && (e->modifiers() & Qt::ShiftModifier)) {
         _buttonNum = 2;
+	}
 
 	if (_buttonNum == 0) {
 		_mouseClicked = true;	// mouse button is held

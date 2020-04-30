@@ -7,7 +7,9 @@
 #include <qdesktopwidget.h>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QScreen>
 #include <vapor/ResourcePath.h>
+#include <vapor/VAssert.h>
 #include "BannerGUI.h"
 
 BannerGUI::BannerGUI(
@@ -67,7 +69,9 @@ BannerGUI::BannerGUI(
             }
             else
             {
-                QRect screenGeometry = QApplication::desktop()->screenGeometry();
+				QScreen* screen = QGuiApplication::primaryScreen();
+				QRect screenGeometry = screen->geometry();
+
                 int x = (screenGeometry.width()-image.size().width()) / 2;
                 int y = (screenGeometry.height()-image.size().height()) / 2;
                 move(x, y);
