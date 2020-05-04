@@ -20,6 +20,7 @@ set (SRCS
 	Plot.cpp
 	helloSubtabs.cpp
 	VariablesWidget.cpp
+	VariablesWidget2.cpp
 	GeometryWidget.cpp
 	CopyRegionWidget.cpp
 	RangeCombos.cpp
@@ -46,6 +47,7 @@ set (SRCS
 	TransformTable.cpp
 	VaporTable.cpp
 	FidelityWidget.cpp
+	FidelityWidget2.cpp
 	QSliderEdit.cpp
 	QRange.cpp
 	QSinglePoint.cpp
@@ -111,6 +113,8 @@ set (SRCS
     VContainer.h
     VComboBox.cpp
     VComboBox.h
+    VLineComboBox.cpp
+    VLineComboBox.h
     VIntSpinBox.cpp
     VIntSpinBox.h
     VCheckBox.cpp
@@ -200,6 +204,7 @@ set (SRCS
     SliceSubtabs.h
     VaporTable.h 
 	FidelityWidget.h
+	FidelityWidget2.h
 	QSliderEdit.h
 	QRange.h
 	QSinglePoint.h
@@ -251,6 +256,7 @@ set (SRCS
 	StatisticsParams.h
 	TabManager.h
 	VariablesWidget.h
+	VariablesWidget2.h
 	VizSelectCombo.h
 	WireFrameEventRouter.h
 	ParamsWidgets.h

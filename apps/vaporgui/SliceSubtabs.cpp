@@ -2,6 +2,9 @@
 #include "SliceSubtabs.h"
 #include "TFEditor.h"
 #include "VLineItem.h"
+#include "PGroup.h"
+#include "PEnumDropdownHLI.h"
+#include "VariablesWidget2.h"
 
 #define MIN_SAMPLES 1 
 #define MAX_SAMPLES 2000
@@ -23,13 +26,37 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
         (VariableFlags)(SCALAR),
         (DimFlags)(THREED)
     );
+    
+    QButtonGroup* fidelityButtons;
+    fidelityButtons  = _variablesWidget->_fidelityWidget->GetFidelityButtons();
+    connect( 
+        fidelityButtons, 
+        SIGNAL( buttonClicked(int) ),
+        this, 
+        SLOT( _setDefaultSampleRate() )
+    );
+	QComboBox* refinementCombo;
+    refinementCombo  = _variablesWidget->_fidelityWidget->refinementCombo;
 
-    QButtonGroup* fidelityButtons = _variablesWidget->_fidelityWidget->GetFidelityButtons();
-    connect(fidelityButtons, SIGNAL(buttonClicked(int)),
-        this, SLOT(_setDefaultSampleRate()));
-	QComboBox* refinementCombo = _variablesWidget->_fidelityWidget->refinementCombo;
-	connect(refinementCombo, SIGNAL(currentIndexChanged(int)),
-		this, SLOT(_setDefaultSampleRate()));
+	connect(
+        refinementCombo, 
+        SIGNAL( currentIndexChanged(int) ),
+		this, 
+        SLOT( _setDefaultSampleRate() )
+    );
+
+    _variablesWidget2 = new VariablesWidget2();
+    layout()->addWidget( _variablesWidget2 );
+
+    VariableFlags variableFlags = (VariableFlags)(SCALAR);
+    _variablesWidget2->Reinit(
+        variableFlags,
+        (DimFlags)(THREED)
+    );
+
+    //_fidelityWidget2 = new FidelityWidget2();
+    //layout()->addWidget( _fidelityWidget2 );
+    //_fidelityWidget2->Reinit( variableFlags );
 }
 
 void SliceVariablesSubtab::Update(
@@ -40,6 +67,7 @@ void SliceVariablesSubtab::Update(
     _params = dynamic_cast<VAPoR::SliceParams*>(rParams);
     VAssert(_params);
     _variablesWidget->Update(dataMgr, paramsMgr, rParams);
+    _variablesWidget2->Update(dataMgr, paramsMgr, rParams);
 }
 
 void SliceVariablesSubtab::_setDefaultSampleRate() {
