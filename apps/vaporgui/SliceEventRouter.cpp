@@ -130,6 +130,11 @@ void SliceEventRouter::_updateTab(){
 		_controlExec->GetParamsMgr(),
 		GetActiveDataMgr()
     );
+    _pdse->Update(
+		GetActiveParams(),
+		_controlExec->GetParamsMgr(),
+		GetActiveDataMgr()
+    );
         
 	// The variable tab updates itself:
 	//
