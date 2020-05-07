@@ -23,9 +23,6 @@ template<class, typename> class PWidgetHLIBase;
 class PWidget : public QWidget {
     Q_OBJECT
     
-    VAPoR::ParamsBase *_params = nullptr;
-    VAPoR::ParamsMgr  *_paramsMgr = nullptr;
-    VAPoR::DataMgr    *_dataMgr = nullptr;
     const std::string _tag;
     
     bool        _showBasedOnParam = false;
@@ -63,6 +60,10 @@ public:
     void setToolTip(const QString &) = delete;
     
 protected:
+    VAPoR::ParamsBase *_params = nullptr;
+    VAPoR::ParamsMgr  *_paramsMgr = nullptr;
+    VAPoR::DataMgr    *_dataMgr = nullptr;
+
     virtual void updateGUI() const = 0;
     virtual bool requireParamsMgr() const { return false; }
     virtual bool requireDataMgr()   const { return false; }

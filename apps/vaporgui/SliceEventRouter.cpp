@@ -15,6 +15,7 @@
 #include "VariablesWidget.h"
 #include "SliceEventRouter.h"
 #include "EventRouter.h"
+#include "RenderEventRouter.h"
 
 using namespace VAPoR;
 
@@ -26,9 +27,11 @@ static RenderEventRouterRegistrar<SliceEventRouter> registrar(
 );
 
 
+//SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce) 
+//                    : QTabWidget(parent),
+//	                    RenderEventRouter( ce, SliceParams::GetClassType())
 SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce) 
-                    : QTabWidget(parent),
-	                    RenderEventRouter( ce, SliceParams::GetClassType())
+    : RenderEventRouter2( ce, SliceParams::GetClassType())
 {
 	_variables = new SliceVariablesSubtab(this);
 	QScrollArea *qsvar = new QScrollArea(this);
@@ -112,6 +115,22 @@ void SliceEventRouter::GetWebHelp(
 
 void SliceEventRouter::_updateTab(){
 
+    _variablesWidget->Update(
+		GetActiveDataMgr(),
+		_controlExec->GetParamsMgr(),
+		GetActiveParams()
+    );
+    _pVariablesWidget->Update(
+		GetActiveParams(),
+		_controlExec->GetParamsMgr(),
+		GetActiveDataMgr()
+    );
+    _pTest->Update(
+		GetActiveParams(),
+		_controlExec->GetParamsMgr(),
+		GetActiveDataMgr()
+    );
+        
 	// The variable tab updates itself:
 	//
 	_variables->Update(

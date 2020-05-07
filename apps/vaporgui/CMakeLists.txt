@@ -21,6 +21,8 @@ set (SRCS
 	helloSubtabs.cpp
 	VariablesWidget.cpp
 	VariablesWidget2.cpp
+	PVariablesWidget.cpp
+	PTest.cpp
 	GeometryWidget.cpp
 	CopyRegionWidget.cpp
 	RangeCombos.cpp
@@ -170,6 +172,7 @@ set (SRCS
 	PSliderEdit.h
 	PSliderEditHLI.h
 	PVariableSelector.cpp
+	PTest.cpp
 	PVariableSelector.h
 	PRegionSelector.cpp
 	PRegionSelector.h
@@ -250,6 +253,7 @@ set (SRCS
 	QIntValidatorWithFixup.h
 	RangeCombos.h
 	RenderEventRouter.h
+	RenderEventRouter2.h
 	RenderHolder.h
 	SettingsEventRouter.h
 	SettingsParams.h
@@ -257,6 +261,7 @@ set (SRCS
 	TabManager.h
 	VariablesWidget.h
 	VariablesWidget2.h
+	PVariablesWidget.h
 	VizSelectCombo.h
 	WireFrameEventRouter.h
 	ParamsWidgets.h

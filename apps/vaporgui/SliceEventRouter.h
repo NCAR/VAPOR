@@ -8,8 +8,12 @@
 #include "vapor/SliceRenderer.h"
 #include "vapor/SliceParams.h"
 #include "RenderEventRouter.h"
+#include "RenderEventRouter2.h"
 #include "VariablesWidget.h"
+#include "PVariablesWidget.h"
+#include "VariablesWidget2.h"
 #include "SliceSubtabs.h"
+#include <QTabWidget>
 
 QT_USE_NAMESPACE
 
@@ -30,7 +34,8 @@ class GLSliceImageWindow;
 //!	The SliceEventRouter class manages the Slice gui.  There are three sub-tabs,
 //! for variables, geometry, and appearance. 
 
-class SliceEventRouter : public QTabWidget,  public RenderEventRouter {
+//class SliceEventRouter : public QTabWidget,  public RenderEventRouter {
+class SliceEventRouter : public RenderEventRouter2 {
 
 Q_OBJECT
 
@@ -65,14 +70,14 @@ protected:
 
 private:
 
- SliceEventRouter() {} 
-
-
  //! Override default wheel behavior on the tab.  This has the effect of 
  //! ignoring wheel events over the tab.  This is because wheel events will always
  //! affect the combo boxes and other widgets in the tab, and it would be confusing
  //! if wheel events also scrolled the tab itself
   void wheelEvent(QWheelEvent*) {}
+
+ //VariablesWidget2* _variablesWidget;
+ //PVariablesWidget* _pVariablesWidget;
 
  //! VariablesWidget is used as Variables tab
  SliceVariablesSubtab *_variables;

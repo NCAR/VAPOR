@@ -31,6 +31,7 @@
 class RenderHolder;
 class EventRouter;
 class RenderEventRouter;
+class RenderEventRouter2;
 
 
 //! \class TabManager

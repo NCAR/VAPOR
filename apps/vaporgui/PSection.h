@@ -13,7 +13,6 @@ class PGroup;
 class PSection : public PWidget {
     Q_OBJECT
     
-    VSection *_vsection;
     PGroup *_pgroup;
     
 public:
@@ -22,5 +21,7 @@ public:
     PSection *Add(PWidget *pw);
 
 protected:
+    VSection *_vsection;
+
     void updateGUI() const override;
 };
