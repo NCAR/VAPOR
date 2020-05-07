@@ -398,7 +398,9 @@ int FlowRenderer::_renderAdvection(const flow::Advection* adv)
         for (int s = 0; s < nStreams; s++) {
             const vector<flow::Particle> &stream = adv->GetStreamAt(s);
             sv.clear();
-            const int sn = std::min(stream.size(), maxSamples);
+            int sn = stream.size();
+            if (_cache_isSteady)
+                sn = std::min(sn, (int)maxSamples);
             
             for (int i = 0; i < sn + 1; i++) {
                 // "IsSpecial" means don't render this sample.
@@ -489,7 +491,7 @@ show_dir_loop:
     } else {
         if (glyphType == FlowParams::GlpyhTypeSphere)
             if (geom3d)
-                shader = _glManager->shaderManager->GetShader("FlowGlyphsSphere");
+                shader = _glManager->shaderManager->GetShader("FlowGlyphsSphereSplat");
             else
                 shader = _glManager->shaderManager->GetShader("FlowGlyphsSphere2D");
         else
@@ -503,9 +505,10 @@ show_dir_loop:
     
     double m[16];
     double cameraPosD[3], cameraUpD[3], cameraDirD[3];
-    _glManager->matrixManager->GetDoublev(MatrixManager::Mode::ModelView, m);
+    _paramsMgr->GetViewpointParams(_winName)->GetModelViewMatrix(m);
     _paramsMgr->GetViewpointParams(_winName)->ReconstructCamera(m, cameraPosD, cameraUpD, cameraDirD);
     vec3 cameraDir = vec3(cameraDirD[0], cameraDirD[1], cameraDirD[2]);
+    vec3 cameraPos = vec3(cameraPosD[0], cameraPosD[1], cameraPosD[2]);
 
     shader->Bind();
     shader->SetUniform("P",      _glManager->matrixManager->GetProjectionMatrix());
@@ -514,16 +517,17 @@ show_dir_loop:
     shader->SetUniform("radius", radius);
     shader->SetUniform("lightingEnabled", true);
     shader->SetUniform("glyphStride", glyphStride);
-//    shader->SetUniform("showOnlyLeadingSample", (bool)rp->GetValueLong(FlowParams::RenderGlyphOnlyLeadingTag, false));
+    shader->SetUniform("showOnlyLeadingSample", (bool)rp->GetValueLong(FlowParams::RenderGlyphOnlyLeadingTag, false));
     shader->SetUniform("scales", _getScales());
+    shader->SetUniform("cameraPos", cameraPos);
     if (rp->GetValueLong(FlowParams::RenderLightAtCameraTag, true))
         shader->SetUniform("lightDir", cameraDir);
     else
         shader->SetUniform("lightDir", vec3(0, 0, -1));
-//    shader->SetUniform("phongAmbient",   (float)rp->GetValueDouble(FlowParams::PhongAmbientTag, 0));
-//    shader->SetUniform("phongDiffuse",   (float)rp->GetValueDouble(FlowParams::PhongDiffuseTag, 0));
-//    shader->SetUniform("phongSpecular",  (float)rp->GetValueDouble(FlowParams::PhongSpecularTag, 0));
-//    shader->SetUniform("phongShininess", (float)rp->GetValueDouble(FlowParams::PhongShininessTag, 0));
+    shader->SetUniform("phongAmbient",   (float)rp->GetValueDouble(FlowParams::PhongAmbientTag, 0));
+    shader->SetUniform("phongDiffuse",   (float)rp->GetValueDouble(FlowParams::PhongDiffuseTag, 0));
+    shader->SetUniform("phongSpecular",  (float)rp->GetValueDouble(FlowParams::PhongSpecularTag, 0));
+    shader->SetUniform("phongShininess", (float)rp->GetValueDouble(FlowParams::PhongShininessTag, 0));
     
     shader->SetUniform("mapRange", glm::make_vec2(_colorMapRange));
     

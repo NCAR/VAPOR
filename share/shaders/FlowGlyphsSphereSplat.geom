@@ -5,17 +5,18 @@
 #define REFINEMENT 10
 
 layout (lines_adjacency) in;
-layout (triangle_strip, max_vertices = 256) out;
+layout (triangle_strip, max_vertices = 4) out;
 
 
 in  float gValue[];
 in  float clip[];
 out float fValue;
-out vec3 fNormal;
+out vec2 fC;
 
 
 uniform mat4 P;
 uniform mat4 MV;
+uniform vec3 cameraPos;
 uniform vec3 scales;
 uniform float radius = 0.05;
 uniform int glyphStride = 1;
@@ -44,32 +45,19 @@ void main()
     fValue = gValue[1];
     vec3 o = gl_in[1].gl_Position.xyz;
 
-    for (int ti = 0; ti < REFINEMENT; ti++) {
-        float t  = float(ti  )/float(REFINEMENT) * PI;
-        float tn = float(ti+1)/float(REFINEMENT) * PI;
+	vec3 up = vec3(0.0, 0.0, 1.0);
+	vec3 toCamera = normalize(cameraPos - o);
+	vec3 xh = normalize(cross(up, toCamera));
+	vec3 yh = normalize(cross(toCamera, xh));
+	xh /= scales;
+	yh /= scales;
 
-        for (int ai = 0; ai < REFINEMENT+1; ai++) {
-            float a = float(ai)/float(REFINEMENT) * 2.f * PI;
-
-            vec3 d = vec3(
-                sin(t)*cos(a),
-                sin(t)*sin(a),
-                cos(t)
-            );
-            vec3 dn = vec3(
-                sin(tn)*cos(a),
-                sin(tn)*sin(a),
-                cos(tn)
-            );
-
-            fNormal = d;
-            EmitWorld(o + radius * d / scales);
-
-            fNormal = dn;
-            EmitWorld(o + radius * dn / scales);
-        }
-        EndPrimitive();
-    }
+	fC = vec2(-1.0, -1.0); EmitWorld(o + radius * (-xh + -yh));
+	fC = vec2( 1.0, -1.0); EmitWorld(o + radius * ( xh + -yh));
+	fC = vec2(-1.0,  1.0); EmitWorld(o + radius * (-xh +  yh));
+	fC = vec2( 1.0,  1.0); EmitWorld(o + radius * ( xh +  yh));
+	
+    // EmitWorld(o + radius * d / scales);
 } 
 
 

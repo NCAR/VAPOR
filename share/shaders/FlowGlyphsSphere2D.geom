@@ -14,14 +14,20 @@ out float t;
 
 uniform float radius = 0.05f;
 uniform int glyphStride = 1;
+uniform bool showOnlyLeadingSample = false;
 uniform float border = 0.f;
 uniform float aspect;
 
 
 void main()
 {
-    if (gl_PrimitiveIDIn % glyphStride != 0)
-        return;
+	if (showOnlyLeadingSample) {
+		if (gl_PrimitiveIDIn < nVertices-4)
+			return;
+	} else {
+		if (gl_PrimitiveIDIn % glyphStride != 0)
+			return;
+	}
 
     if (clip[1] < 0.0 || clip[2] < 0.0)
         return;

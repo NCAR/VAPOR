@@ -35,6 +35,12 @@ std::vector<int> GLManager::GetViewport()
     return {v[0], v[1], v[2], v[3]};
 }
 
+glm::vec2 GLManager::GetViewportSize()
+{
+    const auto v = GetViewport();
+    return glm::vec2(v[2] - v[0], v[3] - v[1]);
+}
+
 void GLManager::PixelCoordinateSystemPush()
 {
     MatrixManager *mm = matrixManager;

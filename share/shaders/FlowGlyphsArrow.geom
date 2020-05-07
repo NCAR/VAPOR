@@ -1,6 +1,6 @@
 #version 330 core
-#define FLT_EPSILON 1.19e-07
-#define PI float(3.1415926535897932384626433832795)
+
+#include FlowInclude.geom
 
 #define REFINEMENT 7
 
@@ -19,6 +19,7 @@ uniform mat4 MV;
 uniform vec3 scales;
 uniform float radius = 0.05;
 uniform int glyphStride = 1;
+uniform bool showOnlyLeadingSample = false;
 
 
 void EmitWorld(const vec3 v);
@@ -27,8 +28,13 @@ void CylinderVert(const vec3 v, const vec3 d, const float value);
 
 void main()
 {
-    if (gl_PrimitiveIDIn % glyphStride != 0)
-        return;
+	if (showOnlyLeadingSample) {
+		if (gl_PrimitiveIDIn < nVertices-4)
+			return;
+	} else {
+		if (gl_PrimitiveIDIn % glyphStride != 0)
+			return;
+	}
 
     if (clip[1] < 0.0 || clip[2] < 0.0)
         return;

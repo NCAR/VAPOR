@@ -128,11 +128,17 @@ public:
     
     static const std::string RenderGlyphTypeTag;
     static const std::string RenderGlyphStrideTag;
+    static const std::string RenderGlyphOnlyLeadingTag;
     
     static const std::string RenderFadeTailTag;
     static const std::string RenderFadeTailStartTag;
     static const std::string RenderFadeTailStopTag;
     static const std::string RenderFadeTailLengthTag;
+    
+    static const std::string PhongAmbientTag;
+    static const std::string PhongDiffuseTag;
+    static const std::string PhongSpecularTag;
+    static const std::string PhongShininessTag;
     
 
 private:
