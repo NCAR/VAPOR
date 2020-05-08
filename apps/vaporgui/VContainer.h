@@ -16,8 +16,8 @@
 class VContainer : public QWidget {
     Q_OBJECT
 
-protected:
-    VContainer();
+public:
+    VContainer( QLayout* layout = nullptr );
 
 private:
     static const int _LEFT_MARGIN;
