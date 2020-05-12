@@ -466,6 +466,7 @@ jobs:
             ghr -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace Weekly /tmp/workspace/installers
 
 
+
 workflows:
   build:
     jobs:
