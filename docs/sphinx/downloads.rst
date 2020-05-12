@@ -6,8 +6,15 @@ Downloads
 
 .. note:: If you are looking for our legacy version of Vapor 2.6, follow :ref:`this link <vapor2>` to the bottom of the page.
 
-Current Release: Vapor 3.2.0
-----------------------------
+Weekly Build
+------------
+
+Vapor builds installers on a weekly basis.  These have new features that have not been tested, and may be unstable.
+
+`Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
+
+Current Stable Release: Vapor 3.2.0
+-----------------------------------
 
 February 3, 2020 
 
