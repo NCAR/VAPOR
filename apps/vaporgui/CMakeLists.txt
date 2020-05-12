@@ -49,7 +49,6 @@ set (SRCS
 	TransformTable.cpp
 	VaporTable.cpp
 	FidelityWidget.cpp
-	FidelityWidget2.cpp
 	PFidelityWidget.cpp
 	QSliderEdit.cpp
 	QRange.cpp
@@ -208,7 +207,6 @@ set (SRCS
     SliceSubtabs.h
     VaporTable.h 
 	FidelityWidget.h
-	FidelityWidget2.h
 	PFidelityWidget.h
 	QSliderEdit.h
 	QRange.h
