@@ -1873,6 +1873,10 @@ int DCMPAS::DerivedCoordVertFromCell::ReadRegion(
 ) {
 
 	DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+	if (! f) {
+		SetErrMsg("Invalid file descriptor : %d", fd);
+		return(-1);
+	}
 
 	string varname = f->GetVarname();
 
