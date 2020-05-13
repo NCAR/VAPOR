@@ -386,7 +386,10 @@ int DCMPAS::initialize(
 			);
 
 			rc = derivedVar->Initialize();
-			if (rc<0) return(-1);
+			if (rc<0) {
+				delete (derivedVar);
+				return(-1);
+			}
 
 			_dvm.AddDataVar(derivedVar);
 
