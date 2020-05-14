@@ -46,7 +46,6 @@ void VComboBox::SetIndex( int index ) {
 void VComboBox::SetValue( const std::string& value ) {
     QString qValue = QString::fromStdString( value );
     int index = _combo->findText( qValue );
-    std::cout << "VComboBox::SetValue " << index << " " << value << std::endl;
     if ( index >= 0 )
         SetIndex( index );
 }

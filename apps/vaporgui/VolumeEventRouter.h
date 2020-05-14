@@ -9,6 +9,10 @@
 #include "VariablesWidget.h"
 #include "VolumeSubtabs.h"
 
+#include "PDoubleInput.h"
+#include "PIntegerInput.h"
+#include "VLineComboBox.h"
+
 QT_USE_NAMESPACE
 
 namespace VAPoR {
@@ -80,4 +84,8 @@ private:
  GLVolumeImageWindow* _glVolumeImageWindow;
  VolumeAppearanceSubtab * _appearance;
  VolumeAnnotationSubtab *_annotation;
+
+ VLineComboBox* _vLineComboBox;
+ PDoubleInput* _pDoubleInput;
+ PIntegerInput* _pIntegerInput;
 };

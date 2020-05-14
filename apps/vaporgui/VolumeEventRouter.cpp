@@ -42,6 +42,15 @@ VolumeEventRouter::VolumeEventRouter( QWidget *parent, ControlExec *ce)
 	qsapp->setWidgetResizable(true);
 	addTab(qsapp,"Appearance");
 
+    _vLineComboBox = new VLineComboBox("_vLineComboBox");
+    //addTab( _vLineComboBox, "VLineComboBox" );
+
+    _pDoubleInput = new PDoubleInput("demo_double", "PDoubleInput");
+    addTab( _pDoubleInput, "PDoubleInput Tab" );
+
+    _pIntegerInput = new PIntegerInput("demo_int", "PIntegerInput");
+    addTab( _pIntegerInput, "PIntegerInput Tab" );
+
 	_geometry = new VolumeGeometrySubtab(this);
 	QScrollArea *qsgeo = new QScrollArea(this);
 	qsgeo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -90,6 +99,12 @@ void VolumeEventRouter::GetWebHelp(
 }
 
 void VolumeEventRouter::_updateTab(){
+
+    _pDoubleInput->Update(
+        GetActiveParams(),
+        _controlExec->GetParamsMgr(),
+        GetActiveDataMgr()
+    );
 
 	// The variable tab updates itself:
 	//
