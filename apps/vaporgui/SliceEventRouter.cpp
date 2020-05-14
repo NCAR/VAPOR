@@ -62,15 +62,15 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
         (DimFlags)(THREED)
     );*/
 
-    _vLineComboBox = new VLineComboBox("_vLineComboBox");
-    addTab( _vLineComboBox, "VLineComboBox" );
+    //_vLineComboBox = new VLineComboBox("_vLineComboBox");
+    //addTab( _vLineComboBox, "VLineComboBox" );
 
-    _vSliderEdit = new VSliderEdit();
-    _vli = new VLineItem("VLineItem", _vSliderEdit);
+    //_vSliderEdit = new VSliderEdit();
+    //_vli = new VLineItem("VLineItem", _vSliderEdit);
     //addTab( _vli, "VLineItem/VSliderEdit" );
 
-    _pDoubleInput = new PDoubleInput("demo_double", "PDoubleInput");
-    addTab( _pDoubleInput, "PDoubleInput Tab" );
+    //_pDoubleInput = new PDoubleInput("demo_double", "PDoubleInput");
+    //addTab( _pDoubleInput, "PDoubleInput Tab" );
 
 	_appearance = new SliceAppearanceSubtab(this);
 	QScrollArea* qsapp = new QScrollArea(this);
@@ -79,11 +79,18 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
 	qsapp->setWidgetResizable(true);
 	addTab(qsapp,"Appearance");
 
-    _pIntegerInput = new PIntegerInput("demo_int", "PIntegerInput");
+    //_pIntegerInput = new PIntegerInput("demo_int", "PIntegerInput");
     //addTab( _pIntegerInput, "PIntegerInput Tab" );
 
-    //_pSimpleWidget = new PSimpleWidget();
-    //addTab( _pSimpleWidget, "PSimpleWidget's Tab" );
+    _pSimpleWidget = new PSimpleWidget();
+    addTab( _pSimpleWidget, "PSimpleWidget's Tab" );
+
+    _simpleWidget = new SimpleWidget();
+    addTab( _simpleWidget, "SimpleWidget's Tab" );
+    
+    _fidelityWidget = new FidelityWidget3();
+    addTab( _fidelityWidget, "FidelityWidget's Tab" );
+    _fidelityWidget->Reinit( (VariableFlags)(SCALAR) );
 #if 0	
 	QScrollArea *qsimg = new QScrollArea(this);
 	qsimg->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -149,22 +156,34 @@ void SliceEventRouter::_updateTab(){
 		GetActiveDataMgr()
     );*/
 
-    _pDoubleInput->Update(
-		GetActiveParams(),
-		_controlExec->GetParamsMgr(),
-		GetActiveDataMgr()
-    );
-    _pIntegerInput->Update(
-		GetActiveParams(),
-		_controlExec->GetParamsMgr(),
-		GetActiveDataMgr()
-    );
-
-    /*_pSimpleWidget->Update(
+    /*_pDoubleInput->Update(
 		GetActiveParams(),
 		_controlExec->GetParamsMgr(),
 		GetActiveDataMgr()
     );*/
+    /*_pIntegerInput->Update(
+		GetActiveParams(),
+		_controlExec->GetParamsMgr(),
+		GetActiveDataMgr()
+    );*/
+
+    _pSimpleWidget->Update(
+		GetActiveParams(),
+		_controlExec->GetParamsMgr(),
+		GetActiveDataMgr()
+    );
+    _simpleWidget->Update(
+		GetActiveDataMgr(),
+		_controlExec->GetParamsMgr(),
+		GetActiveParams()
+    );
+
+    _fidelityWidget->Update(
+		GetActiveDataMgr(),
+		_controlExec->GetParamsMgr(),
+		GetActiveParams()
+    );
+
     /*_pTest->Update(
 		GetActiveParams(),
 		_controlExec->GetParamsMgr(),

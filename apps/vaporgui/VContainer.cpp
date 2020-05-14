@@ -12,7 +12,6 @@ VContainer::VContainer( QLayout* layout )
 : QWidget() 
 {
     if (layout == nullptr) {
-        //QHBoxLayout* layout = new QHBoxLayout;
         layout = new QHBoxLayout;
     }
 

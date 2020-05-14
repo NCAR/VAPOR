@@ -10,6 +10,7 @@
 #include "RenderEventRouter.h"
 #include "RenderEventRouter2.h"
 #include "VariablesWidget.h"
+#include "PFidelityWidget.h"
 #include "PVariablesWidget.h"
 #include "PSimpleWidget.h"
 #include "PIntegerInput.h"
@@ -88,6 +89,8 @@ private:
  VariablesWidget2* _variablesWidget;
  PVariablesWidget* _pVariablesWidget;
  PSimpleWidget*    _pSimpleWidget;
+ SimpleWidget*     _simpleWidget;
+ FidelityWidget3*   _fidelityWidget;
  PIntegerInput*    _pIntegerInput;
  PDoubleInput*     _pDoubleInput;
 
