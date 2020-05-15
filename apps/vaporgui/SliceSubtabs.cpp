@@ -76,6 +76,7 @@ void SliceVariablesSubtab::_setDefaultSampleRate() {
     if (quality < 1) quality = 1;
     int adjustedRate = quality * SAMPLES_PER_QUALITY;
     _params->SetSampleRate(adjustedRate);
+    cout << "adjustedRate " << adjustedRate << endl;
 }
 
 SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget* parent) {

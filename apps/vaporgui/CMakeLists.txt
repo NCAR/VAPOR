@@ -50,6 +50,7 @@ set (SRCS
 	VaporTable.cpp
 	FidelityWidget.cpp
 	PFidelityWidget.cpp
+	VFidelityWidget.cpp
     PSimpleWidget.cpp
 	QSliderEdit.cpp
 	QRange.cpp
@@ -209,6 +210,7 @@ set (SRCS
     VaporTable.h 
 	FidelityWidget.h
 	PFidelityWidget.h
+	VFidelityWidget.h
     PSimpleWidget.h
 	QSliderEdit.h
 	QRange.h
