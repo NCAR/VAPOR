@@ -90,7 +90,8 @@ private:
  PVariablesWidget* _pVariablesWidget;
  PSimpleWidget*    _pSimpleWidget;
  SimpleWidget*     _simpleWidget;
- FidelityWidget3*   _fidelityWidget;
+ FidelityWidget3*  _fidelityWidget3;
+ PFidelityWidget*  _pFidelityWidget;
  PIntegerInput*    _pIntegerInput;
  PDoubleInput*     _pDoubleInput;
 

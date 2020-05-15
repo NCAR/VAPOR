@@ -27,7 +27,7 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
         (DimFlags)(THREED)
     );
     
-    QButtonGroup* fidelityButtons;
+    /*QButtonGroup* fidelityButtons;
     fidelityButtons  = _variablesWidget->_fidelityWidget->GetFidelityButtons();
     connect( 
         fidelityButtons, 
@@ -43,7 +43,7 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
         SIGNAL( currentIndexChanged(int) ),
 		this, 
         SLOT( _setDefaultSampleRate() )
-    );
+    );*/
 
     _variablesWidget2 = new VariablesWidget2();
     layout()->addWidget( _variablesWidget2 );
@@ -76,7 +76,6 @@ void SliceVariablesSubtab::_setDefaultSampleRate() {
     if (quality < 1) quality = 1;
     int adjustedRate = quality * SAMPLES_PER_QUALITY;
     _params->SetSampleRate(adjustedRate);
-    cout << "adjustedRate " << adjustedRate << endl;
 }
 
 SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget* parent) {

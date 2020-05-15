@@ -55,19 +55,8 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
 	qsAnnotation->setWidgetResizable(true);
 	addTab(qsAnnotation, "Annotations");
 
-    /*_pVariablesWidget = new PVariablesWidget();
-    addTab( _pVariablesWidget, "PVW" );
-    _pVariablesWidget->Reinit(
-        (VariableFlags)(SCALAR),
-        (DimFlags)(THREED)
-    );*/
-
     //_vLineComboBox = new VLineComboBox("_vLineComboBox");
     //addTab( _vLineComboBox, "VLineComboBox" );
-
-    //_vSliderEdit = new VSliderEdit();
-    //_vli = new VLineItem("VLineItem", _vSliderEdit);
-    //addTab( _vli, "VLineItem/VSliderEdit" );
 
     //_pDoubleInput = new PDoubleInput("demo_double", "PDoubleInput");
     //addTab( _pDoubleInput, "PDoubleInput Tab" );
@@ -82,15 +71,36 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
     //_pIntegerInput = new PIntegerInput("demo_int", "PIntegerInput");
     //addTab( _pIntegerInput, "PIntegerInput Tab" );
 
-    _pSimpleWidget = new PSimpleWidget();
-    addTab( _pSimpleWidget, "PSimpleWidget's Tab" );
+    /*_pSimpleWidget = new PSimpleWidget();
+    addTab( _pSimpleWidget, "PSimpleWidget's Tab" );*/
 
-    _simpleWidget = new SimpleWidget();
-    addTab( _simpleWidget, "SimpleWidget's Tab" );
+    /*_simpleWidget = new SimpleWidget();
+    addTab( _simpleWidget, "SimpleWidget's Tab" );*/
     
-    _fidelityWidget = new FidelityWidget3();
-    addTab( _fidelityWidget, "FidelityWidget's Tab" );
-    _fidelityWidget->Reinit( (VariableFlags)(SCALAR) );
+    _vSliderEdit = new VSliderEdit();
+    _vli = new VLineItem("VLineItem", _vSliderEdit);
+    addTab( _vli, "VLineItem/VSliderEdit" );
+
+    _fidelityWidget3 = new FidelityWidget3();
+    addTab( _fidelityWidget3, "FidelityWidget's Tab" );
+    _fidelityWidget3->Reinit( (VariableFlags)(SCALAR) );
+    
+    /*_pVariablesWidget = new PVariablesWidget();
+    VContainer* vc = new VContainer();
+    vc->layout()->addWidget( _pVariablesWidget );
+    addTab( _pVariablesWidget, "PVariablesWidget" );
+    _pVariablesWidget->Reinit(
+        (VariableFlags)(SCALAR),
+        (DimFlags)(THREED)
+    );
+   
+    _pFidelityWidget = new PFidelityWidget();
+    vc = new VContainer();
+    vc->layout()->addWidget( _pFidelityWidget );
+    addTab( vc, "PFidelityWidget's Tab" );
+    //addTab( _pFidelityWidget, "PFidelityWidget's Tab" );  // breaks the gui
+    _pFidelityWidget->Reinit( (VariableFlags)(SCALAR) );*/
+ 
 #if 0	
 	QScrollArea *qsimg = new QScrollArea(this);
 	qsimg->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -150,12 +160,6 @@ void SliceEventRouter::_updateTab(){
 		GetActiveParams()
     );*/
 
-    /*_pVariablesWidget->Update(
-		GetActiveParams(),
-		_controlExec->GetParamsMgr(),
-		GetActiveDataMgr()
-    );*/
-
     /*_pDoubleInput->Update(
 		GetActiveParams(),
 		_controlExec->GetParamsMgr(),
@@ -167,18 +171,31 @@ void SliceEventRouter::_updateTab(){
 		GetActiveDataMgr()
     );*/
 
-    _pSimpleWidget->Update(
+    /*_pSimpleWidget->Update(
 		GetActiveParams(),
 		_controlExec->GetParamsMgr(),
 		GetActiveDataMgr()
     );
+    */
     _simpleWidget->Update(
 		GetActiveDataMgr(),
 		_controlExec->GetParamsMgr(),
 		GetActiveParams()
     );
 
-    _fidelityWidget->Update(
+    /*_pVariablesWidget->Update(
+		GetActiveParams(),
+		_controlExec->GetParamsMgr(),
+		GetActiveDataMgr()
+    );*/
+
+    /*_pFidelityWidget->Update(
+		GetActiveParams(),
+		_controlExec->GetParamsMgr(),
+		GetActiveDataMgr()
+    ); */
+
+    _fidelityWidget3->Update(
 		GetActiveDataMgr(),
 		_controlExec->GetParamsMgr(),
 		GetActiveParams()
