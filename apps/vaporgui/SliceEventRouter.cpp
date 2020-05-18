@@ -177,11 +177,12 @@ void SliceEventRouter::_updateTab(){
 		GetActiveDataMgr()
     );
     */
-    _simpleWidget->Update(
+    
+    /*_simpleWidget->Update(
 		GetActiveDataMgr(),
 		_controlExec->GetParamsMgr(),
 		GetActiveParams()
-    );
+    );*/
 
     /*_pVariablesWidget->Update(
 		GetActiveParams(),
@@ -194,6 +195,8 @@ void SliceEventRouter::_updateTab(){
 		_controlExec->GetParamsMgr(),
 		GetActiveDataMgr()
     ); */
+
+    _vSliderEdit->SetValue( 1.0 );
 
     _fidelityWidget3->Update(
 		GetActiveDataMgr(),
