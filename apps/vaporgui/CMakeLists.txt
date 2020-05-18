@@ -49,7 +49,6 @@ set (SRCS
 	TransformTable.cpp
 	VaporTable.cpp
 	FidelityWidget.cpp
-	PFidelityWidget.cpp
 	#VFidelitySection.cpp
     PSimpleWidget.cpp
 	QSliderEdit.cpp
@@ -185,7 +184,13 @@ set (SRCS
 	PTFEditor.h
     PLODSelector.cpp
     PLODSelector.h
+    PRefinementSelector.cpp
+    PRefinementSelector.h
     #VariableDependent.h
+	PFidelityWidget3.h
+	PFidelityWidget3.cpp
+    
+    VariableGetter.h
 
 	ModelEventRouter.cpp
 	ModelEventRouter.h
@@ -214,7 +219,6 @@ set (SRCS
     SliceSubtabs.h
     VaporTable.h 
 	FidelityWidget.h
-	PFidelityWidget.h
 	#VFidelitySection.h
     PSimpleWidget.h
 	QSliderEdit.h

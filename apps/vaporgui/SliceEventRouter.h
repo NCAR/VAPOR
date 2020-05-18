@@ -10,7 +10,6 @@
 #include "RenderEventRouter.h"
 #include "RenderEventRouter2.h"
 #include "VariablesWidget.h"
-#include "PFidelityWidget.h"
 #include "PVariablesWidget.h"
 #include "PSimpleWidget.h"
 #include "PIntegerInput.h"
@@ -28,6 +27,9 @@ namespace VAPoR {
 }
 
 class GLSliceImageWindow;
+//#include "PFidelityWidget.h"
+class PFidelityWidget;
+class FidelityWidget3;
 
 //!
 //! \class SliceEventRouter

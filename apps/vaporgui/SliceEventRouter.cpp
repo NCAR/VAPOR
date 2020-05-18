@@ -18,6 +18,7 @@
 #include "RenderEventRouter.h"
 
 #include "VLineComboBox.h"
+#include "PFidelityWidget3.h"
 
 using namespace VAPoR;
 
