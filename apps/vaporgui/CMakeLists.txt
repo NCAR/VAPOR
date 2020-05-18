@@ -186,6 +186,7 @@ set (SRCS
     PLODSelector.h
     PRefinementSelector.cpp
     PRefinementSelector.h
+    PRefinementSelectorHLI.h
     #VariableDependent.h
 	PFidelityWidget3.h
 	PFidelityWidget3.cpp
