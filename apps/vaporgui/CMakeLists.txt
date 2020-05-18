@@ -184,6 +184,7 @@ set (SRCS
 	PTFEditor.h
     PLODSelector.cpp
     PLODSelector.h
+    PLODSelectorHLI.h
     PRefinementSelector.cpp
     PRefinementSelector.h
     PRefinementSelectorHLI.h
