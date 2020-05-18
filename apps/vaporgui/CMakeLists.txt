@@ -136,7 +136,8 @@ set (SRCS
     VFileSelector.h
     VGeometry2.cpp
     VGeometry2.h
-	PWidget.cpp
+	
+    PWidget.cpp
 	PWidget.h
 	PWidgetHLI.h
 	PGroup.cpp
@@ -182,6 +183,10 @@ set (SRCS
 	ParamsWidgetDemo.h
 	PTFEditor.cpp
 	PTFEditor.h
+    PLODSelector.cpp
+    PLODSelector.h
+    #VariableDependent.h
+
 	ModelEventRouter.cpp
 	ModelEventRouter.h
 	ModelSubtabs.cpp

@@ -77,9 +77,9 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
     /*_simpleWidget = new SimpleWidget();
     addTab( _simpleWidget, "SimpleWidget's Tab" );*/
     
-    _vSliderEdit = new VSliderEdit();
+    /*_vSliderEdit = new VSliderEdit();
     _vli = new VLineItem("VLineItem", _vSliderEdit);
-    addTab( _vli, "VLineItem/VSliderEdit" );
+    addTab( _vli, "VLineItem/VSliderEdit" );*/
 
     _fidelityWidget3 = new FidelityWidget3();
     addTab( _fidelityWidget3, "FidelityWidget's Tab" );
@@ -196,7 +196,7 @@ void SliceEventRouter::_updateTab(){
 		GetActiveDataMgr()
     ); */
 
-    _vSliderEdit->SetValue( 1.0 );
+    //_vSliderEdit->SetValue( 1.0 );
 
     _fidelityWidget3->Update(
 		GetActiveDataMgr(),
