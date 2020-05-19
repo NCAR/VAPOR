@@ -55,7 +55,7 @@ private:
 
     VContainer* _container;
 
-    PVariableSelectorHLI<std::string, VAPoR::RenderParams>* _pvshli;
+    PVariableSelector3DHLI<VAPoR::RenderParams>* _pvshli;
 
     // We cannot hide PVariableSelector, so use
     // VLineComboBox and signal/slot connections

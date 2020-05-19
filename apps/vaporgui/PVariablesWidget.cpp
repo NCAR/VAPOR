@@ -72,8 +72,8 @@ PVariablesWidget::PVariablesWidget()
     _fidelityWidget = new PFidelityWidget3();
     _container->layout()->addWidget( _fidelityWidget );
 
-    _pvshli = new PVariableSelectorHLI<VAPoR::RenderParams>( 
-        "PVarSelectorHLI",
+    _pvshli = new PVariableSelector3DHLI<VAPoR::RenderParams>( 
+        "PVarSelector3DHLI",
         &VAPoR::RenderParams::SetVariableName,
         &VAPoR::RenderParams::GetVariableName
     );
