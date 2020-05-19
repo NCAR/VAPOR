@@ -176,6 +176,7 @@ set (SRCS
 	PVariableSelector.cpp
 	PTest.cpp
 	PVariableSelector.h
+	PVariableSelectorHLI.h
 	PRegionSelector.cpp
 	PRegionSelector.h
 	ParamsWidgetDemo.cpp
