@@ -80,6 +80,12 @@ const string verticesOnEdge = "verticesOnEdge";
 const string edgesOnVertexVarName = "edgesOnVertex";
 const string edgesOnCellVarName = "edgesOnCell";
 const string nEdgesOnCellVarName = "nEdgesOnCell";
+const string angleEdgeVarName = "angleEdge";
+
+// Special data variables
+//
+const string uNormalVarName = "u";
+const string uTangentialVarName = "v";
 
 const vector<string> connectivityVarNames = {cellsOnVertexVarName, verticesOnCellVarName, verticesOnEdge, edgesOnCellVarName};
 
@@ -193,6 +199,16 @@ bool isEdgeVariable(NetCDFCollection *ncdfc, string varname)
 
     return (false);
 }
+template<class T> int _xgetVar(NetCDFCollection *ncdfc, size_t ts, string varname, T *buf)
+{
+    int fd = ncdfc->OpenRead(ts, varname);
+    if (fd < 0) return (fd);
+
+    int rc = ncdfc->Read(buf, fd);
+    if (rc < 0) return (fd);
+
+    return (ncdfc->Close(fd));
+}
 };    // namespace
 
 DCMPAS::DCMPAS()
@@ -281,6 +297,28 @@ int DCMPAS::initialize(const vector<string> &files, const std::vector<string> &o
     //
     rc = _InitDataVars(ncdfc);
     if (rc < 0) return (-1);
+
+    // If u and v variables are present create derived Uzonal and Umeridional
+    // variables.
+    //
+    if (ncdfc->VariableExists(uNormalVarName) && ncdfc->VariableExists(uTangentialVarName)) {
+        for (auto varname : {"Uzonal", "Umeridional"}) {
+            bool                   zonalFlag = (varname == string("Uzonal"));
+            DerivedZonalMeridonal *derivedVar = new DerivedZonalMeridonal(varname, this, ncdfc, uNormalVarName, uTangentialVarName, zonalFlag);
+
+            rc = derivedVar->Initialize();
+            if (rc < 0) {
+                delete (derivedVar);
+                return (-1);
+            }
+
+            _dvm.AddDataVar(derivedVar);
+
+            DC::DataVar dvarInfo;
+            (void)derivedVar->GetDataVarInfo(dvarInfo);
+            _dataVarsMap[varname] = dvarInfo;
+        }
+    }
 
     _ncdfc = ncdfc;
 
@@ -474,7 +512,7 @@ int DCMPAS::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_
     dims_at_level.clear();
     bs_at_level.clear();
 
-    if (_dvm.IsCoordVar(varname)) { return (_dvm.GetDimLensAtLevel(varname, 0, dims_at_level, bs_at_level)); }
+    if (_dvm.HasVar(varname)) { return (_dvm.GetDimLensAtLevel(varname, 0, dims_at_level, bs_at_level)); }
 
     bool ok = GetVarDimLens(varname, true, dims_at_level);
     if (!ok) {
@@ -487,17 +525,6 @@ int DCMPAS::getDimLensAtLevel(string varname, int, std::vector<size_t> &dims_at_
     bs_at_level = vector<size_t>(dims_at_level.size(), 1);
 
     return (0);
-}
-
-template<class T> int DCMPAS::_getVar(size_t ts, string varname, T *buf)
-{
-    int fd = _ncdfc->OpenRead(ts, varname);
-    if (fd < 0) return (fd);
-
-    int rc = _ncdfc->Read(buf, fd);
-    if (rc < 0) return (fd);
-
-    return (_ncdfc->Close(fd));
 }
 
 // Read the MPAS nEdgesOnCell auxiliary variable and store it for
@@ -655,7 +682,7 @@ int DCMPAS::openVariableRead(size_t ts, string varname, int, int)
 {
     int  aux;
     bool derivedFlag;
-    if (_dvm.IsCoordVar(varname)) {
+    if (_dvm.HasVar(varname)) {
         aux = _dvm.OpenVariableRead(ts, varname);
         derivedFlag = true;
     } else {
@@ -738,7 +765,7 @@ int DCMPAS::_readRegionEdgeVariable(MPASFileObject *w, const vector<size_t> &min
 
     vector<size_t> dims = _ncdfc->GetDims(edgesOnVertexVarName);
     int *          edgesOnVertex = new int[vproduct(dims)];
-    int            rc = _getVar(w->GetTS(), edgesOnVertexVarName, edgesOnVertex);
+    int            rc = _xgetVar(_ncdfc, w->GetTS(), edgesOnVertexVarName, edgesOnVertex);
     if (rc < 0) {
         delete[] edgesOnVertex;
         return (-1);
@@ -842,7 +869,7 @@ template<class T> int DCMPAS::_readRegionTemplate(int fd, const vector<size_t> &
 
 bool DCMPAS::variableExists(size_t ts, string varname, int, int) const
 {
-    if (_dvm.IsCoordVar(varname)) { return (_dvm.VariableExists(ts, varname, 0, 0)); }
+    if (_dvm.HasVar(varname)) { return (_dvm.VariableExists(ts, varname, 0, 0)); }
 
     return (_ncdfc->VariableExists(ts, varname));
 }
@@ -1524,6 +1551,10 @@ int *DCMPAS::DerivedCoordVertFromCell::_getCellsOnVertex(size_t i0, size_t i1, i
 int DCMPAS::DerivedCoordVertFromCell::ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
 {
     DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+    if (!f) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
 
     string varname = f->GetVarname();
 
@@ -1574,3 +1605,176 @@ int DCMPAS::DerivedCoordVertFromCell::ReadRegion(int fd, const vector<size_t> &m
 }
 
 bool DCMPAS::DerivedCoordVertFromCell::VariableExists(size_t ts, int, int) const { return (_dc->VariableExists(ts, _inName, -1, -1)); }
+
+//////////////////////////////////////////////////////////////////////
+//
+// Class definitions for derived data variables
+//
+//////////////////////////////////////////////////////////////////////
+
+DCMPAS::DerivedZonalMeridonal::DerivedZonalMeridonal(string derivedVarName, DC *dc, NetCDFCollection *ncdfc, string normalVarName, string tangentialVarName, bool zonalFlag
+
+                                                     )
+: DerivedDataVar(derivedVarName)
+{
+    _dc = dc;
+    _ncdfc = ncdfc;
+    _normalVarName = normalVarName;
+    _tangentialVarName = tangentialVarName;
+    _zonalFlag = zonalFlag;
+}
+
+int DCMPAS::DerivedZonalMeridonal::Initialize()
+{
+    // Set up DataVarInfo for derived variable. No difference between
+    // it and native variables derived from
+    //
+    bool status = _dc->GetDataVarInfo(_normalVarName, _dataVarInfo);
+    if (!status) {
+        SetErrMsg("Invalid variable \"%s\"", _normalVarName.c_str());
+        return (-1);
+    }
+
+    return (0);
+}
+
+bool DCMPAS::DerivedZonalMeridonal::GetBaseVarInfo(DC::BaseVar &var) const
+{
+    var = _dataVarInfo;
+    return (true);
+}
+
+bool DCMPAS::DerivedZonalMeridonal::GetDataVarInfo(DC::DataVar &cvar) const
+{
+    cvar = _dataVarInfo;
+    return (true);
+}
+
+int DCMPAS::DerivedZonalMeridonal::GetDimLensAtLevel(int, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
+{
+    dims_at_level.clear();
+    bs_at_level.clear();
+
+    int rc = _dc->GetDimLensAtLevel(_normalVarName, -1, dims_at_level, bs_at_level);
+    if (rc < 0) return (-1);
+
+    // Never blocked
+    //
+    bs_at_level = vector<size_t>(dims_at_level.size(), 1);
+
+    return (0);
+}
+
+int DCMPAS::DerivedZonalMeridonal::OpenVariableRead(size_t ts, int, int)
+{
+    DC::FileTable::FileObject *f = new DC::FileTable::FileObject(ts, _derivedVarName, 0, 0, 0);
+
+    return (_fileTable.AddEntry(f));
+}
+
+int DCMPAS::DerivedZonalMeridonal::CloseVariable(int fd)
+{
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+
+    _fileTable.RemoveEntry(fd);
+    delete f;
+
+    return (0);
+}
+
+int DCMPAS::DerivedZonalMeridonal::ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
+{
+    VAssert(min.size() == 2);
+    VAssert(min.size() == max.size());
+
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+    size_t                     ts = f->GetTS();
+
+    vector<size_t> dims = _ncdfc->GetDims(edgesOnVertexVarName);
+    vector<int>    edgesOnVertex(vproduct(dims));
+    int            rc = _xgetVar(_ncdfc, ts, edgesOnVertexVarName, edgesOnVertex.data());
+    if (rc < 0) return (-1);
+
+    size_t vertexDegree = dims[1];
+
+    dims = _ncdfc->GetDims(angleEdgeVarName);
+    vector<float> angleEdge(vproduct(dims));
+    rc = _xgetVar(_ncdfc, ts, angleEdgeVarName, angleEdge.data());
+    if (rc < 0) return (-1);
+
+    dims = _ncdfc->GetSpatialDims(_normalVarName);
+    vector<size_t> ncdf_start = {0, min[1]};
+    vector<size_t> ncdf_count = {dims[0], max[1] - min[1] + 1};
+
+    vector<float> u(vproduct(ncdf_count));
+    vector<float> v(vproduct(ncdf_count));
+    vector<float> buf(vproduct(ncdf_count));
+
+    int myfd = _ncdfc->OpenRead(ts, _normalVarName);
+    if (rc < 0) return (-1);
+
+    rc = _ncdfc->Read(ncdf_start, ncdf_count, buf.data(), myfd);
+    if (rc < 0) return (-1);
+
+    Wasp::Transpose(buf.data(), u.data(), ncdf_count[1], ncdf_count[0]);
+
+    (void)_ncdfc->Close(myfd);
+
+    myfd = _ncdfc->OpenRead(ts, _tangentialVarName);
+    if (rc < 0) return (-1);
+
+    rc = _ncdfc->Read(ncdf_start, ncdf_count, buf.data(), myfd);
+    if (rc < 0) return (-1);
+
+    Wasp::Transpose(buf.data(), v.data(), ncdf_count[1], ncdf_count[0]);
+
+    (void)_ncdfc->Close(myfd);
+
+    size_t j0 = min.size() == 2 ? min[1] : 0;
+    size_t j1 = max.size() == 2 ? max[1] : 0;
+
+    float wgt = 1.0 / (float)vertexDegree;
+    for (size_t j = j0; j <= j1; j++) {
+        for (size_t i = min[0], ii = 0; i <= max[0]; i++, ii++) {
+            size_t vidx0 = edgesOnVertex[i * vertexDegree + 0] - 1;
+            size_t vidx1 = edgesOnVertex[i * vertexDegree + 1] - 1;
+            size_t vidx2 = edgesOnVertex[i * vertexDegree + 2] - 1;
+
+            float alpha0 = angleEdge[vidx0];
+            float alpha1 = angleEdge[vidx1];
+            float alpha2 = angleEdge[vidx2];
+
+            float u0, u1, u2;
+
+            //
+            // |Um| = |cos(alpha)    -sin(alpha)|   |u|
+            // |  |   |                         | x | |
+            // |Uz| = |sin(alpha)    cos(alpha) |   |v|
+            //
+            if (_zonalFlag) {
+                u0 = (cos(alpha0) * u.data()[j * dims[0] + vidx0]) - (sin(alpha0) * v.data()[j * dims[0] + vidx0]);
+
+                u1 = (cos(alpha1) * u.data()[j * dims[0] + vidx1]) - (sin(alpha1) * v.data()[j * dims[0] + vidx1]);
+
+                u2 = (cos(alpha2) * u.data()[j * dims[0] + vidx2]) - (sin(alpha2) * v.data()[j * dims[0] + vidx2]);
+            } else {
+                u0 = (sin(alpha0) * u.data()[j * dims[0] + vidx0]) + (cos(alpha0) * v.data()[j * dims[0] + vidx0]);
+
+                u1 = (sin(alpha1) * u.data()[j * dims[0] + vidx1]) + (cos(alpha1) * v.data()[j * dims[0] + vidx1]);
+
+                u2 = (sin(alpha2) * u.data()[j * dims[0] + vidx2]) + (cos(alpha2) * v.data()[j * dims[0] + vidx2]);
+            }
+
+            region[j * (max[0] - min[0] + 1) + ii] = u0 * wgt + u1 * wgt + u2 * wgt;
+        }
+    }
+
+    return (0);
+}
+
+bool DCMPAS::DerivedZonalMeridonal::VariableExists(size_t ts, int, int) const { return (_dc->VariableExists(ts, _normalVarName, -1, -1) && _dc->VariableExists(ts, _tangentialVarName, -1, -1)); }

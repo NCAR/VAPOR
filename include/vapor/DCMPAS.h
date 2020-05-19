@@ -195,8 +195,6 @@ private:
     bool _isCoordVar(string varname) const;
     bool _isDataVar(string varname) const;
 
-    template<class T> int _getVar(size_t ts, string varname, T *buf);
-
     int  _read_nEdgesOnCell(size_t ts);
     void _addMissingFlag(int *data) const;
     int  _readVarToSmartBuf(size_t ts, string varname, Wasp::SmartBuf &smartBuf);
@@ -248,6 +246,41 @@ private:
         float *_getCellData();
 
         int *_getCellsOnVertex(size_t i0, size_t i1, int &vertexDegree);
+    };
+
+    // Derive Uzonal and Umeridional data variable
+    //
+    class DerivedZonalMeridonal : public DerivedDataVar {
+    public:
+        DerivedZonalMeridonal(string derivedVarName, DC *dc, NetCDFCollection *ncdfc, string normalVarName, string tangentialVarName, bool zonalFlag);
+
+        int Initialize();
+
+        bool GetBaseVarInfo(DC::BaseVar &var) const;
+
+        bool GetDataVarInfo(DC::DataVar &cvar) const;
+
+        virtual std::vector<string> GetInputs() const { return (std::vector<string>{_normalVarName, _tangentialVarName}); }
+
+        int GetDimLensAtLevel(int, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const;
+
+        int OpenVariableRead(size_t ts, int, int);
+
+        int CloseVariable(int fd);
+
+        int ReadRegionBlock(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
+
+        int ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region);
+
+        bool VariableExists(size_t ts, int, int) const;
+
+    private:
+        DC *              _dc;
+        NetCDFCollection *_ncdfc;
+        string            _normalVarName;
+        string            _tangentialVarName;
+        bool              _zonalFlag;
+        DC::DataVar       _dataVarInfo;
     };
 };
 };    // namespace VAPoR
