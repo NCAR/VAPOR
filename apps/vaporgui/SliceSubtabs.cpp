@@ -45,14 +45,13 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
         SLOT( _setDefaultSampleRate() )
     );*/
 
-    _variablesWidget2 = new VariablesWidget2();
+    /*_variablesWidget2 = new VariablesWidget2();
     layout()->addWidget( _variablesWidget2 );
-
     VariableFlags variableFlags = (VariableFlags)(SCALAR);
     _variablesWidget2->Reinit(
         variableFlags,
         (DimFlags)(THREED)
-    );
+    );*/
 
     //_fidelityWidget2 = new FidelityWidget2();
     //layout()->addWidget( _fidelityWidget2 );
@@ -67,7 +66,7 @@ void SliceVariablesSubtab::Update(
     _params = dynamic_cast<VAPoR::SliceParams*>(rParams);
     VAssert(_params);
     _variablesWidget->Update(dataMgr, paramsMgr, rParams);
-    _variablesWidget2->Update(dataMgr, paramsMgr, rParams);
+    //_variablesWidget2->Update(dataMgr, paramsMgr, rParams);
 }
 
 void SliceVariablesSubtab::_setDefaultSampleRate() {

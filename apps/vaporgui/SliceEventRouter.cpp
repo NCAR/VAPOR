@@ -82,23 +82,29 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
     _vli = new VLineItem("VLineItem", _vSliderEdit);
     addTab( _vli, "VLineItem/VSliderEdit" );*/
 
-    /*_fidelityWidget3 = new FidelityWidget3();
-    addTab( _fidelityWidget3, "FidelityWidget's Tab" );
-    _fidelityWidget3->Reinit( (VariableFlags)(SCALAR) );*/
+    //_fidelityWidget3 = new FidelityWidget3();
+    //addTab( _fidelityWidget3, "FidelityWidget's Tab" );
+    //_fidelityWidget3->Reinit( (VariableFlags)(SCALAR) );
    
-    _pVariablesWidget = new PVariablesWidget();
-    VContainer* vc = new VContainer();
-    vc->layout()->addWidget( _pVariablesWidget );
+    /*_pVariablesWidget = new PVariablesWidget();
+    //VContainer* vc = new VContainer();
+    //vc->layout()->addWidget( _pVariablesWidget );
     addTab( _pVariablesWidget, "PVariablesWidget" );
     _pVariablesWidget->Reinit(
         (VariableFlags)(SCALAR),
         (DimFlags)(THREED)
-    );
-	QScrollArea* qspvw = new QScrollArea(this);
-	qspvw->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	qspvw->setWidget(_pVariablesWidget);
-	qspvw->setWidgetResizable(true);
-	addTab(qspvw,"pvw");
+    );*/
+
+	//QScrollArea* qspvw = new QScrollArea(this);
+	//qspvw->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	//qspvw->setWidget(_pVariablesWidget);
+	//qspvw->setWidget(_fidelityWidget3);
+	//qspvw->setWidget(vc);
+    //QWidget* qw = new QWidget(this);
+	//qspvw->setWidget( qw );
+	//qspvw->setWidgetResizable(true);
+	//addTab(qspvw,"pvw");
+
     //qspvw->adjustSize();
     //_pVariablesWidget->adjustSize();
    
@@ -192,17 +198,17 @@ void SliceEventRouter::_updateTab(){
 		GetActiveParams()
     );*/
 
-    _pVariablesWidget->Update(
+    /*_pVariablesWidget->Update(
 		GetActiveParams(),
 		_controlExec->GetParamsMgr(),
 		GetActiveDataMgr()
-    );
+    );*/
 
     /*_pFidelityWidget->Update(
 		GetActiveParams(),
 		_controlExec->GetParamsMgr(),
 		GetActiveDataMgr()
-    ); */
+    );*/
 
     //_vSliderEdit->SetValue( 1.0 );
 
