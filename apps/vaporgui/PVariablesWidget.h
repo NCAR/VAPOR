@@ -17,6 +17,7 @@ namespace VAPoR {
 class VLineComboBox;
 class VContainer;
 class PFidelityWidget3;
+class PSection;
 //class VLineItem;
 //class FidelityWidget2;
 
@@ -55,8 +56,6 @@ private:
 
     VContainer* _container;
 
-    PVariableSelector3DHLI<VAPoR::RenderParams>* _pvshli;
-
     // We cannot hide PVariableSelector, so use
     // VLineComboBox and signal/slot connections
     VLineComboBox* _scalarCombo;
@@ -67,6 +66,44 @@ private:
     VLineComboBox* _heightCombo;
 
     PFidelityWidget3* _fidelityWidget;
+
+    //
+    // PWidgets
+    //
+    VSection*         _vs1;
+
+    //
+    // PWidgetHLI
+    //
+    
+    VSection*         _vs2;
+    PVariableSelector2DHLI<VAPoR::RenderParams>* _pscalarHLI2D;
+    PVariableSelector3DHLI<VAPoR::RenderParams>* _pscalarHLI3D;
+    PVariableSelector2DHLI<VAPoR::RenderParams>* _pXFieldHLI2D;
+    PVariableSelector3DHLI<VAPoR::RenderParams>* _pXFieldHLI3D;
+    PVariableSelector2DHLI<VAPoR::RenderParams>* _pYFieldHLI2D;
+    PVariableSelector3DHLI<VAPoR::RenderParams>* _pYFieldHLI3D;
+    PVariableSelector2DHLI<VAPoR::RenderParams>* _pZFieldHLI2D;
+    PVariableSelector3DHLI<VAPoR::RenderParams>* _pZFieldHLI3D;
+    PVariableSelector2DHLI<VAPoR::RenderParams>* _pheightHLI2D;
+    PVariableSelector2DHLI<VAPoR::RenderParams>* _pcolorHLI2D;
+    PVariableSelector3DHLI<VAPoR::RenderParams>* _pcolorHLI3D;
+
+    // VContainers to encapsulate the PVariableSelectorHLIs,
+    // so we can hide them
+    VContainer*                                  _pscalarHLIContainer2D;
+    VContainer*                                  _pscalarHLIContainer3D;
+    VContainer*                                  _pXFieldHLIContainer2D;
+    VContainer*                                  _pXFieldHLIContainer3D;
+    VContainer*                                  _pYFieldHLIContainer2D;
+    VContainer*                                  _pYFieldHLIContainer3D;
+    VContainer*                                  _pZFieldHLIContainer2D;
+    VContainer*                                  _pZFieldHLIContainer3D;
+    VContainer*                                  _pheightHLIContainer2D;
+    VContainer*                                  _pcolorHLIContainer2D;
+    VContainer*                                  _pcolorHLIContainer3D;
+    
+    
 
     static const std::string _sectionTitle;
 
