@@ -21,6 +21,7 @@ set (SRCS
 	helloSubtabs.cpp
 	VariablesWidget.cpp
 	VariablesWidget2.cpp
+	VVariablesWidget.cpp
 	PVariablesWidget.cpp
 	PTest.cpp
 	GeometryWidget.cpp
@@ -49,7 +50,7 @@ set (SRCS
 	TransformTable.cpp
 	VaporTable.cpp
 	FidelityWidget.cpp
-	#VFidelitySection.cpp
+	VFidelitySection.cpp
     PSimpleWidget.cpp
 	QSliderEdit.cpp
 	QRange.cpp
@@ -222,7 +223,7 @@ set (SRCS
     SliceSubtabs.h
     VaporTable.h 
 	FidelityWidget.h
-	#VFidelitySection.h
+	VFidelitySection.h
     PSimpleWidget.h
 	QSliderEdit.h
 	QRange.h
@@ -278,6 +279,7 @@ set (SRCS
 	VariablesWidget.h
 	VariablesWidget2.h
 	PVariablesWidget.h
+	VVariablesWidget.h
 	VizSelectCombo.h
 	WireFrameEventRouter.h
 	ParamsWidgets.h

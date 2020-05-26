@@ -3,7 +3,6 @@
 #include <QObject>
 #include "vapor/MyBase.h"
 #include "Flags.h"
-#include "PWidget.h"
 #include "VSection.h"
 
 QT_USE_NAMESPACE
@@ -14,27 +13,24 @@ namespace VAPoR {
 	class DataMgr;
 }
 
-class PGroup;
-class PLODSelector;
-class PRefinementSelector;
 class QGroupBox;
 class VLineComboBox;
-class FidelityWidget3;
+class VFidelityWidget3;
 class VLineItem;
 
-class PFidelityWidget3 : public PWidget {
+class PVFidelityWidget : public PWidget {
     public:
-        PFidelityWidget3();
+        PVFidelityWidget();
 
         void updateGUI() const override;
         void Reinit(VariableFlags variableFlags);
 
     private:
-        FidelityWidget3* _fidelityWidget;
+        VFidelityWidget3* _fidelityWidget;
 };
 
 //!
-//! \class FidelityWidget3
+//! \class VFidelityWidget3
 //! \ingroup Public_GUI
 //! \brief A Widget that can be reused to provide fidelity 
 //! selection in any renderer EventRouter class
@@ -42,13 +38,12 @@ class PFidelityWidget3 : public PWidget {
 //! \version 3.0
 //! \date  December 2017
 
-//class FidelityWidget3 : public VSection {
-class FidelityWidget3 : public VSection {
+class VFidelityWidget3 : public VSection {
 
 	Q_OBJECT
 
     public: 
-        FidelityWidget3();
+        VFidelityWidget3();
 
         void Reinit(VariableFlags variableFlags);
 
@@ -75,10 +70,10 @@ class FidelityWidget3 : public VSection {
         void setFidelity(int buttonID);
 
     private:
-           VariableFlags _variableFlags;
-           VAPoR::DataMgr *_dataMgr;
-           VAPoR::ParamsMgr *_paramsMgr;
-           VAPoR::RenderParams *_rParams;
+           VariableFlags        _variableFlags;
+           VAPoR::DataMgr*      _dataMgr;
+           VAPoR::ParamsMgr*    _paramsMgr;
+           VAPoR::RenderParams* _rParams;
 
            // Get the compression rates as a fraction for both the LOD and
            // Refinment parameters. Also format these factors into a displayable
@@ -99,22 +94,14 @@ class FidelityWidget3 : public VSection {
            VLineComboBox* _refCombo;
            VLineItem*     _vle;
 
-           PGroup*               _pg;
-           PLODSelector*         _plodSelector;
-           PRefinementSelector*  _refinementSelector;
-             
-           QButtonGroup* _fidelityButtons;
-           QGroupBox* _fidelityBox;
-           QFrame* _fidelityFrame;
-
            // Support for fidelity settings
            //
-           std::vector <int>     _fidelityLodIdx;
-           std::vector <int>     _fidelityMultiresIdx;
+           std::vector <int>      _fidelityLodIdx;
+           std::vector <int>      _fidelityMultiresIdx;
            std::vector <string>   _fidelityLodStrs;
            std::vector <string>   _fidelityMultiresStrs;
-           std::string          _currentLodStr;
-           std::string          _currentMultiresStr;
+           std::string            _currentLodStr;
+           std::string            _currentMultiresStr;
 
            static const std::string _sectionTitle;
 };

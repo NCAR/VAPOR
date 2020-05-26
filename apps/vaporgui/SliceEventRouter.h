@@ -10,7 +10,7 @@
 #include "RenderEventRouter.h"
 #include "RenderEventRouter2.h"
 #include "VariablesWidget.h"
-#include "PVariablesWidget.h"
+//#include "PVariablesWidget.h"
 #include "PSimpleWidget.h"
 #include "PIntegerInput.h"
 #include "PDoubleInput.h"
@@ -29,6 +29,8 @@ namespace VAPoR {
 class GLSliceImageWindow;
 //#include "PFidelityWidget.h"
 class PFidelityWidget3;
+class VVariablesWidget;
+class PVariablesWidget;
 class FidelityWidget3;
 
 //!
@@ -89,6 +91,7 @@ private:
  VLineItem*        _vli;
 
  VariablesWidget2* _variablesWidget;
+ VVariablesWidget* _vVariablesWidget;
  PVariablesWidget* _pVariablesWidget;
  PSimpleWidget*    _pSimpleWidget;
  SimpleWidget*     _simpleWidget;
