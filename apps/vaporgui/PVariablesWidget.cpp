@@ -25,7 +25,6 @@ namespace {
 }
 
 PVariablesWidget::PVariablesWidget() 
-    //: PWidget( "", _vSection = new VSection( _sectionTitle ) ),
     : PWidget( "", _container = new VContainer( new QVBoxLayout ) ),
     _activeDim( 3 ),
     _initialized( false )
@@ -35,66 +34,18 @@ PVariablesWidget::PVariablesWidget()
     //setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Minimum );
     setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Minimum );
 
-    VSection* varSelectionSection = new VSection( _sectionTitle );
-    _container->layout()->addWidget( varSelectionSection );
+    _vs2 = new VSection( "Variable Selection (VSection)" );
+    _container->layout()->addWidget( _vs2 );
 
-    //_vSection = new VSection( _sectionTitle );
-    _vSection = new VSection( "V Widgets" );
-    //_container->layout()->addWidget( _vSection );
-    varSelectionSection->layout()->addWidget( _vSection );
-
-    _dimCombo = new VLineComboBox( "Variable Dimension" );
+    _dimCombo = new VLineComboBox( "Variable Dimension (VLineComboBox)" );
     _dimCombo->SetOptions( {"3D", "2D"} );
-    _vSection->layout()->addWidget( _dimCombo );
+    _vs2->layout()->addWidget( _dimCombo );
     connect( _dimCombo, &VLineComboBox::ValueChanged,
         this, &PVariablesWidget::_dimChanged );
-
-    _scalarCombo = new VLineComboBox( "Variable name" );
-    connect( _scalarCombo, &VLineComboBox::ValueChanged,
-        this, &PVariablesWidget::_scalarVarChanged );
-    _vSection->layout()->addWidget( _scalarCombo );
-
-    _xFieldCombo = new VLineComboBox( "  X" );
-    connect( _xFieldCombo, &VLineComboBox::ValueChanged,
-        this, &PVariablesWidget::_xFieldVarChanged );
-    _vSection->layout()->addWidget( _xFieldCombo );
-
-    _yFieldCombo = new VLineComboBox( "  Y" );
-    connect( _yFieldCombo, &VLineComboBox::ValueChanged,
-        this, &PVariablesWidget::_yFieldVarChanged );
-    _vSection->layout()->addWidget( _yFieldCombo );
-
-    _zFieldCombo = new VLineComboBox( "  Z" );
-    connect( _zFieldCombo, &VLineComboBox::ValueChanged,
-        this, &PVariablesWidget::_zFieldVarChanged );
-    _vSection->layout()->addWidget( _zFieldCombo );
-
-    _colorCombo = new VLineComboBox( "Color mapped variable" );
-    connect( _colorCombo, &VLineComboBox::ValueChanged,
-        this, &PVariablesWidget::_colorVarChanged );
-    _vSection->layout()->addWidget( _colorCombo );
-    
-    _heightCombo = new VLineComboBox( "Height variable" );
-    connect( _heightCombo, &VLineComboBox::ValueChanged,
-        this, &PVariablesWidget::_heightVarChanged );
-    _vSection->layout()->addWidget( _heightCombo );
-
-    //
-    // PWidgets
-    //
-    _vs1 = new VSection( "Pure PWidgets" );
-    varSelectionSection->layout()->addWidget( _vs1 );
-
-
-    //
-    // PWidgetHLI
-    //
-    _vs2 = new VSection( "PWidgetsHLI" );
-    varSelectionSection->layout()->addWidget( _vs2 );
     
     _pscalarHLIContainer3D = new VContainer();
     _pscalarHLI3D = new PVariableSelector3DHLI<VAPoR::RenderParams>( 
-        "Variable name",
+        "Variable name (HLI)",
         //&VAPoR::RenderParams::SetVariableName,
         //&VAPoR::RenderParams::GetVariableName
         &VAPoR::RenderParams::GetVariableName,
@@ -105,7 +56,7 @@ PVariablesWidget::PVariablesWidget()
   
     _pXFieldHLIContainer3D = new VContainer();
     _pXFieldHLI3D = new PVariableSelector3DHLI<VAPoR::RenderParams>( 
-        "  X",
+        "  X (HLI)",
         &VAPoR::RenderParams::GetXFieldVariableName,
         &VAPoR::RenderParams::SetXFieldVariableName
     );
@@ -114,7 +65,7 @@ PVariablesWidget::PVariablesWidget()
 
     _pYFieldHLIContainer3D = new VContainer();
     _pYFieldHLI3D = new PVariableSelector3DHLI<VAPoR::RenderParams>( 
-        "  Y",
+        "  Y (HLI)",
         &VAPoR::RenderParams::GetYFieldVariableName,
         &VAPoR::RenderParams::SetYFieldVariableName
     );
@@ -123,7 +74,7 @@ PVariablesWidget::PVariablesWidget()
 
     _pZFieldHLIContainer3D = new VContainer();
     _pZFieldHLI3D = new PVariableSelector3DHLI<VAPoR::RenderParams>( 
-        "  Z",
+        "  Z (HLI)",
         &VAPoR::RenderParams::GetZFieldVariableName,
         &VAPoR::RenderParams::SetZFieldVariableName
     );
@@ -132,7 +83,7 @@ PVariablesWidget::PVariablesWidget()
 
     _pheightHLIContainer2D = new VContainer();
     _pheightHLI2D = new PVariableSelector2DHLI<VAPoR::RenderParams>( 
-        "Color variable",
+        "Color variable (HLI)",
         &VAPoR::RenderParams::GetHeightVariableName,
         &VAPoR::RenderParams::SetHeightVariableName
     );
@@ -141,7 +92,7 @@ PVariablesWidget::PVariablesWidget()
 
     _pcolorHLIContainer3D = new VContainer();
     _pcolorHLI3D = new PVariableSelector3DHLI<VAPoR::RenderParams>( 
-        "Color variable",
+        "Color variable (HLI)",
         &VAPoR::RenderParams::GetColorMapVariableName,
         &VAPoR::RenderParams::SetColorMapVariableName
     );
@@ -150,7 +101,7 @@ PVariablesWidget::PVariablesWidget()
 
     _pscalarHLIContainer2D = new VContainer();
     _pscalarHLI2D = new PVariableSelector2DHLI<VAPoR::RenderParams>( 
-        "Variable name",
+        "Variable name (HLI)",
         //&VAPoR::RenderParams::SetVariableName,
         //&VAPoR::RenderParams::GetVariableName
         &VAPoR::RenderParams::GetVariableName,
@@ -161,7 +112,7 @@ PVariablesWidget::PVariablesWidget()
   
     _pXFieldHLIContainer2D = new VContainer();
     _pXFieldHLI2D = new PVariableSelector2DHLI<VAPoR::RenderParams>( 
-        "  X",
+        "  X (HLI)",
         &VAPoR::RenderParams::GetXFieldVariableName,
         &VAPoR::RenderParams::SetXFieldVariableName
     );
@@ -170,7 +121,7 @@ PVariablesWidget::PVariablesWidget()
 
     _pYFieldHLIContainer2D = new VContainer();
     _pYFieldHLI2D = new PVariableSelector2DHLI<VAPoR::RenderParams>( 
-        "  Y",
+        "  Y (HLI)",
         &VAPoR::RenderParams::GetYFieldVariableName,
         &VAPoR::RenderParams::SetYFieldVariableName
     );
@@ -179,7 +130,7 @@ PVariablesWidget::PVariablesWidget()
 
     _pZFieldHLIContainer2D = new VContainer();
     _pZFieldHLI2D = new PVariableSelector2DHLI<VAPoR::RenderParams>( 
-        "  Z",
+        "  Z (HLI)",
         &VAPoR::RenderParams::GetZFieldVariableName,
         &VAPoR::RenderParams::SetZFieldVariableName
     );
@@ -188,7 +139,7 @@ PVariablesWidget::PVariablesWidget()
 
     _pcolorHLIContainer2D = new VContainer();
     _pcolorHLI2D = new PVariableSelector2DHLI<VAPoR::RenderParams>( 
-        "Color variable",
+        "Color variable (HLI)",
         &VAPoR::RenderParams::GetColorMapVariableName,
         &VAPoR::RenderParams::SetColorMapVariableName
     );
@@ -196,16 +147,11 @@ PVariablesWidget::PVariablesWidget()
     _vs2->layout()->addWidget( _pcolorHLIContainer2D );
     
     _fidelityWidget = new PFidelityWidget3();
-    _vs2->layout()->addWidget( _fidelityWidget );
+    _container->layout()->addWidget( _fidelityWidget );
 
-
-    //
-    // PFidelityWidget 
-    //
     _container->layout()->addItem( 
         new QSpacerItem( 1, 2000, QSizePolicy::Minimum, QSizePolicy::Maximum ) 
     );
-
 }
 
 void PVariablesWidget::Reinit(
@@ -227,122 +173,6 @@ void PVariablesWidget::Reinit(
             _activeDim = 2;
         }
     }
-
-    //
-    // VWidgets
-    //
-    if (_variableFlags & SCALAR) {
-        _scalarCombo->show();
-    }
-    else {
-        _scalarCombo->hide();
-    }
-
-    if ( _variableFlags & VECTOR ) {
-        _xFieldCombo->show();
-        _yFieldCombo->show();
-        _zFieldCombo->show();
-    }
-    else {
-        _xFieldCombo->hide();
-        _yFieldCombo->hide();
-        _zFieldCombo->hide();
-    }
-
-    if ( _variableFlags & HEIGHT ) {
-        _heightCombo->show();
-    }
-    else {
-        _heightCombo->hide();
-    }
-
-    if ( _variableFlags & COLOR ) {
-        _colorCombo->show();
-    }
-    else {
-        _colorCombo->hide();
-    }
-
-    //
-    // PWidgets
-    //
-
-    /*if ( _activeDim == 2 ) {
-        _pscalarContainer3D->hide();
-        _pXField3D->hide();
-        _pYField3D->hide();
-        _pZField3D->hide();
-        _pcolor3D->hide();
-        if (_variableFlags & SCALAR) {
-            _pscalarContainer2D->show();
-        }
-        else {
-            _pscalarContainer2D->hide();
-        }
-
-        if ( _variableFlags & VECTOR ) {
-            _pXFieldContainer2D->show();
-            _pYFieldContainer2D->show();
-            _pZFieldContainer2D->show();
-        }
-        else {
-            _pXFieldContainer2D->hide();
-            _pYFieldContainer2D->hide();
-            _pZFieldContainer2D->hide();
-        }
-
-        if ( _variableFlags & HEIGHT ) {
-            _pheightContainer2D->show();
-        }
-        else {
-            _pheightContainer2D->hide();
-        }
-
-        if ( _variableFlags & COLOR ) {
-            _pcolorContainer2D->show();
-        }
-        else {
-            _pcolorContainer2D->hide();
-        }
-    }
-    else {
-        _pscalarContainer2D->hide();
-        _pXFieldContainer2D->hide();
-        _pYFieldContainer2D->hide();
-        _pZFieldContainer2D->hide();
-        _pcolorContainer2D->hide();
-        if (_variableFlags & SCALAR) {
-            _pscalarContainer3D->show();
-        }
-        else {
-            _pscalarContainer3D->hide();
-        }
-
-        if ( _variableFlags & VECTOR ) {
-            _pXFieldContainer3D->show();
-            _pYFieldContainer3D->show();
-            _pZFieldContainer3D->show();
-        }
-        else {
-            _pXFieldContainer3D->hide();
-            _pYFieldContainer3D->hide();
-            _pZFieldContainer3D->hide();
-        }
-
-        if ( _variableFlags & HEIGHT ) {
-            _pheightContainer2D->show();
-        }
-        else {
-            _pheightContainer2D->hide();
-        }
-
-        if ( _variableFlags & COLOR ) {
-            _pcolorContainer3D->show();
-        }
-        else {
-            _pcolorContainer3D->hide();
-        }
-    }*/
 
     //
     // PWidgetHLI
@@ -438,14 +268,9 @@ void PVariablesWidget::Reinit(
         fdf = (VariableFlags)(fdf | HEIGHT);
 
     _fidelityWidget->Reinit(fdf);
-    _fidelityWidget->Reinit(fdf);
-
-    //variableSelectionWidget->adjustSize();
-    //adjustSize();
 }
 
 void PVariablesWidget::updateGUI() const {
-std::cout << "void PVariablesWidget::updateGUI() const {" << std::endl;
     
     VAPoR::RenderParams* rParams = dynamic_cast< VAPoR::RenderParams* >( _params );
 
@@ -459,46 +284,15 @@ std::cout << "void PVariablesWidget::updateGUI() const {" << std::endl;
         activeVars = twoDVars;
     }
 
-    _scalarCombo->SetOptions( activeVars );
-    _scalarCombo->SetValue( rParams->GetVariableName() );
-
-    _xFieldCombo->SetOptions( activeVars );
-    _yFieldCombo->SetOptions( activeVars );
-    _zFieldCombo->SetOptions( activeVars );
-    std::vector< std::string > fieldVars = rParams->GetFieldVariableNames();
-    _xFieldCombo->SetValue( fieldVars[X] );
-    _yFieldCombo->SetValue( fieldVars[Y] );
-    _zFieldCombo->SetValue( fieldVars[Z] );
-   
-    _colorCombo->SetOptions( activeVars );
-    _colorCombo->SetValue( rParams->GetColorMapVariableName() );
- 
-    _heightCombo->SetOptions( activeVars );
-    _heightCombo->SetValue( rParams->GetHeightVariableName() );
-
     _fidelityWidget->Update( _params, _paramsMgr, _dataMgr );
 
     //
-    // PWidgets
+    // Our widgets must be updated manually because they cannot
+    // be added to a PGroup, which would otherwise update them.
     //
-
-    /*_pscalar2D->Update( rParams, _paramsMgr, _dataMgr );
-    _pXField2D->Update( rParams, _paramsMgr, _dataMgr );
-    _pYField2D->Update( rParams, _paramsMgr, _dataMgr );
-    _pZField2D->Update( rParams, _paramsMgr, _dataMgr );
-    _pheight2D->Update( rParams, _paramsMgr, _dataMgr );
-    _pcolor2D->Update( rParams, _paramsMgr, _dataMgr );
-
-    _pscalar3D->Update( rParams, _paramsMgr, _dataMgr );
-    _pXField3D->Update( rParams, _paramsMgr, _dataMgr );
-    _pYField3D->Update( rParams, _paramsMgr, _dataMgr );
-    _pZField3D->Update( rParams, _paramsMgr, _dataMgr );
-    _pcolor3D->Update( rParams, _paramsMgr, _dataMgr );*/
-    
+    // They cannot be added to a PGroup becuase they need to be
+    // wrapped in a VContainer in order to be shown/hidden.
     //
-    // PWidgetHLI
-    //
-
     _pscalarHLI2D->Update( rParams, _paramsMgr, _dataMgr );
     _pXFieldHLI2D->Update( rParams, _paramsMgr, _dataMgr );
     _pYFieldHLI2D->Update( rParams, _paramsMgr, _dataMgr );
@@ -520,9 +314,6 @@ void PVariablesWidget::_dimChanged() {
     _activeDim = _dimCombo->GetCurrentIndex() == 0 ? 3 : 2;
 
     rParams->SetDefaultVariables( _activeDim, false );
-
-    //Update( _dataMgr, _paramsMgr, _params );
-
 }
 
 void PVariablesWidget::_scalarVarChanged( std::string var ) {

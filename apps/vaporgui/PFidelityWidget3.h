@@ -21,8 +21,10 @@ class PLODSelector;
 class PRefinementSelector;
 class QGroupBox;
 class VLineComboBox;
-class FidelityWidget3;
 class VLineItem;
+
+class FidelityWidget3;
+class VFidelitySection;
 
 class PFidelityWidget3 : public PWidget {
     public:
@@ -32,7 +34,8 @@ class PFidelityWidget3 : public PWidget {
         void Reinit(VariableFlags variableFlags);
 
     private:
-        FidelityWidget3* _fidelityWidget;
+        //FidelityWidget3* _fidelityWidget;
+        VFidelitySection* _fidelityWidget;
 };
 
 //!

@@ -19,7 +19,7 @@
 
 using namespace VAPoR;
 
-const std::string VFidelitySection::_sectionTitle = "VFidelitySection";
+const std::string VFidelitySection::_sectionTitle = "Data Fidelity (VFidelitySection)";
 
 // This namespace provides a function for the three Fidelity Widgets
 // (FidelityButtons, and comboBoxes for lod and ref) to acquire strings
@@ -151,12 +151,12 @@ VFidelitySection::VFidelitySection()
     _fidelityButtons = new VFidelityButtons();
     layout()->addWidget( _fidelityButtons );
 
-    _lodCombo = new VLineComboBox( "V Level of detail" );
+    _lodCombo = new VLineComboBox( "Level of detail (VLineComboBox)" );
     layout()->addWidget( _lodCombo );
     connect( _lodCombo, &VLineComboBox::IndexChanged,
         this, &VFidelitySection::setCompRatio );
 
-    _refCombo = new VLineComboBox( "V Refinement Level" );
+    _refCombo = new VLineComboBox( "Refinement Level (VLineComboBox)" );
     layout()->addWidget( _refCombo );
     connect( _refCombo, &VLineComboBox::IndexChanged,
         this, &VFidelitySection::setNumRefinements );

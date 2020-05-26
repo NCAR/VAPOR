@@ -11,7 +11,7 @@
 #include <QLabel>
 #include <QSpacerItem>
 
-const std::string VVariablesSection::_sectionTitle = "VVariablesSection";
+const std::string VVariablesSection::_sectionTitle = "Variable Selection (VVariablesSection)";
 
 namespace {
     size_t X = 0;

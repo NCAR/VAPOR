@@ -21,17 +21,23 @@
 #include "VLineComboBox.h"
 #include "VSection.h"
 
+#include "VFidelityWidget.h"
+#include "VFidelitySection.h"
+
 using namespace VAPoR;
 
 const std::string FidelityWidget3::_sectionTitle = "Data Fidelity";
 
 PFidelityWidget3::PFidelityWidget3()
-    : PWidget( "", _fidelityWidget = new FidelityWidget3() )
+    : PWidget( "", _fidelityWidget = new VFidelitySection() )
+//    : PWidget( "", _fidelityWidget = new FidelityWidget3() )
     //: PWidget( "", _fidelityWidget = new FidelityWidget() )
 {}
 
 void PFidelityWidget3::updateGUI() const {
-    _fidelityWidget->Update( _dataMgr, _paramsMgr, _params );
+    //_fidelityWidget->Update( _dataMgr, _paramsMgr, _params );
+    VAPoR::RenderParams* rParams = dynamic_cast<RenderParams*>(_params);
+    _fidelityWidget->Update( rParams, _paramsMgr, _dataMgr );
 }
 
 void PFidelityWidget3::Reinit( VariableFlags variableFlags ) {
