@@ -30,8 +30,8 @@ class CompressionWidget
             VAPoR::RenderParams*      rParams,
             VAPoR::DataMgr*           dataMgr,
             VariableFlags             variableFlags,
-            vector <long>&            lodCF, 
-            vector <long>&            multiresCF, 
+            vector <float>&           lodCF, 
+            vector <float>&           multiresCF, 
             std::vector<std::string>& lodStr,
             std::vector<std::string>& multiresStr
         );

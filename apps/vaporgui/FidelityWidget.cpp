@@ -389,6 +389,23 @@ void FidelityWidget::Update( const DataMgr *dataMgr,
         }
     }
     _fidelityButtons->blockSignals(false);
+
+    /*cout << "F _fidelityLodIdx,  size " << _fidelityLodIdx.size() << endl;
+    for (int i=0; i<_fidelityLodIdx.size(); i++) {
+        cout << "    " << _fidelityLodIdx[i] << endl;
+    }
+    cout << "F _fidelityLodStrs, size " << _fidelityLodStrs.size() << endl;
+    for (int i=0; i<_fidelityLodStrs.size(); i++) {
+        cout << "    " << _fidelityLodStrs[i] << endl;
+    }
+    cout << "F _fidelityMultiresIdx, size " << _fidelityMultiresIdx.size() << endl;
+    for (int i=0; i<_fidelityMultiresIdx.size(); i++) {
+        cout << "    " << _fidelityMultiresIdx[i] << endl;
+    }
+    cout << "F _fidelityMultiresStrs, size " << _fidelityMultiresStrs.size() << endl;
+    for (int i=0; i<_fidelityMultiresStrs.size(); i++) {
+        cout << "    " << _fidelityMultiresStrs[i] << endl;
+    }*/
 }
 
 

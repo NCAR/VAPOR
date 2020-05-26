@@ -28,8 +28,8 @@ void CompressionWidget::getCompressionFactors(
     VAPoR::RenderParams*      rParams,
     VAPoR::DataMgr*           dataMgr,
     VariableFlags             variableFlags,
-    std::vector<long>&        lodCFs,
-    std::vector<long>&        multiresCFs,
+    std::vector<float>&        lodCFs,
+    std::vector<float>&        multiresCFs,
     std::vector<std::string>& lodStrs,
     std::vector<std::string>& multiresStrs
 ) {
@@ -88,14 +88,14 @@ void CompressionWidget::getCompressionFactors(
             lodStrs.push_back(oss.str());
     }
 
-    int lodReq = rParams->GetCompressionLevel();
+    /*int lodReq = rParams->GetCompressionLevel();
     int refLevelReq = rParams->GetRefinementLevel();
 
     int lod = lodReq < 0 ? 0 : lodReq;
     lod = lodReq >= lodCFs.size() ? lodCFs.size()-1 : lodReq;
 
     int refLevel = refLevelReq < 0 ? 0 : refLevelReq;
-    refLevel = refLevelReq >= multiresCFs.size() ? multiresCFs.size()-1 : refLevelReq;
+    refLevel = refLevelReq >= multiresCFs.size() ? multiresCFs.size()-1 : refLevelReq;*/
 }
 
 std::string CompressionWidget::getCurrentVariableName( 
@@ -182,7 +182,7 @@ void VFidelitySection::Update(
 
     _fidelityButtons->Update( _rParams, _paramsMgr, _dataMgr );
     
-    vector <long> lodCFs, multiresCFs;
+    vector <float> lodCFs, multiresCFs;
     vector <string> lodStrs, multiresStrs;
     CompressionWidget::getCompressionFactors(
         _rParams,
@@ -194,11 +194,22 @@ void VFidelitySection::Update(
         multiresStrs
     );
 
+    /*int lodReq = rParams->GetCompressionLevel();
+    int refLevelReq = rParams->GetRefinementLevel();
+
+    int lod = lodReq < 0 ? 0 : lodReq;
+    lod = lodReq >= lodCFs.size() ? lodCFs.size()-1 : lodReq;
+
+    int refLevel = refLevelReq < 0 ? 0 : refLevelReq;
+    refLevel = refLevelReq >= multiresCFs.size() ? multiresCFs.size()-1 : refLevelReq;*/
+
     _lodCombo->SetOptions( lodStrs );
     _lodCombo->SetIndex( _rParams->GetCompressionLevel() );
+    //_lodCombo->SetIndex( lod );
     
     _refCombo->SetOptions( multiresStrs );
     _refCombo->SetIndex( _rParams->GetRefinementLevel() );
+    //_refCombo->SetIndex( refLevel );
 }
 
 void VFidelitySection::setNumRefinements( int num ) {
@@ -251,7 +262,7 @@ void VFidelityButtons::Update(
     // and as a string that can be displayed, for the LOD and refinement
     // control
     //
-    vector <long> lodCFs, multiresCFs;
+    vector <float> lodCFs, multiresCFs;
     vector <string> lodStrs, multiresStrs;
     CompressionWidget::getCompressionFactors(
         _rParams,
@@ -263,6 +274,9 @@ void VFidelityButtons::Update(
         multiresStrs
     );
 
+    //int lodReq = _rParams->GetCompressionLevel();
+    //int refLevelReq = _rParams->GetRefinementLevel();
+
     int lod = _rParams->GetCompressionLevel();
     int refLevel = _rParams->GetRefinementLevel();
 
@@ -273,17 +287,17 @@ void VFidelityButtons::Update(
     refLevel = refLevelReq >= multiresCFs.size() ?
         multiresCFs.size()-1 : refLevelReq;*/
 
-    /*
+    
     // set up the refinement and LOD combos
     //
     for (int i = 0; i<lodStrs.size(); i++){
         QString s = QString::fromStdString(lodStrs[i]);
     }
-    _currentLodStr = lodStrs.at(lod);
+    //_currentLodStr = lodStrs.at(lod);
 
-    _currentMultiresStr = multiresStrs.at(refLevel);
+    //_currentMultiresStr = multiresStrs.at(refLevel);
 
-    if (lodReq != lod) {
+    /*if (lodReq != lod) {
         _rParams->SetCompressionLevel(lod);
     }
     if (refLevelReq != refLevel) {
@@ -337,7 +351,6 @@ void VFidelityButtons::Update(
     int numButtons = _fidelityLodStrs.size();
     for (int i = 0; i<numButtons; i++)
     {
-        cout << "making button " << i << endl;
         QRadioButton * rd = new QRadioButton();
         hlay->addWidget(rd);
 
@@ -347,12 +360,33 @@ void VFidelityButtons::Update(
 
         rd->setToolTip(qs);
 
+        cout << "V lod " << lod << " " << _fidelityLodIdx[i] << endl;
+        cout << "V ref " << refLevel << " " << _fidelityMultiresIdx[i] << endl;
+
         if (lod == _fidelityLodIdx[i] && refLevel == _fidelityMultiresIdx[i])
         {
+            cout << "VBOOM" << endl;
             rd->setChecked(true);
         }
     }
     _fidelityButtons->blockSignals(false);
+
+    cout << "V _fidelityLodIdx,  size " << _fidelityLodIdx.size() << endl;
+    for (int i=0; i<_fidelityLodIdx.size(); i++) {
+        cout << "    " << _fidelityLodIdx[i] << endl;
+    }
+    cout << "V _fidelityLodStrs, size " << _fidelityLodStrs.size() << endl;
+    for (int i=0; i<_fidelityLodStrs.size(); i++) {
+        cout << "    " << _fidelityLodStrs[i] << endl;
+    }
+    cout << "V _fidelityMultiresIdx, size " << _fidelityMultiresIdx.size() << endl;
+    for (int i=0; i<_fidelityMultiresIdx.size(); i++) {
+        cout << "    " << _fidelityMultiresIdx[i] << endl;
+    }
+    cout << "V _fidelityMultiresStrs, size " << _fidelityMultiresStrs.size() << endl;
+    for (int i=0; i<_fidelityMultiresStrs.size(); i++) {
+        cout << "    " << _fidelityMultiresStrs[i] << endl;
+    }
 }
 
 
@@ -371,6 +405,8 @@ void VFidelityButtons::setFidelity(int buttonID) {
 
     int lod = _fidelityLodIdx[buttonID];
     int ref = _fidelityMultiresIdx[buttonID];
+
+    cout << "Lod/Ref " << lod << " " << ref << endl;
 
     _paramsMgr->BeginSaveStateGroup( "Set variable fidelity" );
     _rParams->SetCompressionLevel(lod);

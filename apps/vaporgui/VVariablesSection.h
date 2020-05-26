@@ -17,13 +17,13 @@ class PSection;
 //class VLineItem;
 //class FidelityWidget2;
 
-class VVariablesWidget : public VSection {
+class VVariablesSection : public VSection {
 
     Q_OBJECT
 
 public:
 
-    VVariablesWidget();
+    VVariablesSection();
 
     void Reinit(
         VariableFlags varFlags,

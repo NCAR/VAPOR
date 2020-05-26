@@ -21,7 +21,8 @@ set (SRCS
 	helloSubtabs.cpp
 	VariablesWidget.cpp
 	VariablesWidget2.cpp
-	VVariablesWidget.cpp
+	VVariablesSection.cpp
+	VVariablesContainer.cpp
 	PVariablesWidget.cpp
 	PTest.cpp
 	GeometryWidget.cpp
@@ -279,7 +280,8 @@ set (SRCS
 	VariablesWidget.h
 	VariablesWidget2.h
 	PVariablesWidget.h
-	VVariablesWidget.h
+	VVariablesSection.h
+	VVariablesContainer.h
 	VizSelectCombo.h
 	WireFrameEventRouter.h
 	ParamsWidgets.h
