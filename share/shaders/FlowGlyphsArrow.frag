@@ -1,3 +1,5 @@
+// Basic fragment shader. Maps the fValue onto a color using the LUT then applies Phong lighting.
+
 #version 330 core
 
 uniform bool constantColorEnabled = false;

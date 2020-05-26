@@ -1,3 +1,5 @@
+// This behaves the same as FlowGlyphsArrow.geom except it clips the geometry against the tube.
+
 #version 330 core
 
 #include FlowInclude.geom

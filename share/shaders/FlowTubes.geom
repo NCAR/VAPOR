@@ -1,3 +1,11 @@
+// This shader generates tubes between every pair of vertices in a line. 
+// The tube is generated as a triangle strip. This geometry is generated at the origin
+// and transformed with a simple affine tranformation using basis vectors.
+// 
+// EmitWorld(vec3 v) projects v and emits it.
+// CylinderVert(v, ...) is a helper function that generates a point on a circle
+// given the parameters and passes it to EmitWorld.
+
 #version 330 core
 
 #include FlowInclude.geom

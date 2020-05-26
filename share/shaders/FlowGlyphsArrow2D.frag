@@ -1,3 +1,4 @@
+// Basic fragment shader. Maps the fValue onto a color using the LUT.
 #version 330 core
 
 uniform bool constantColorEnabled = false;

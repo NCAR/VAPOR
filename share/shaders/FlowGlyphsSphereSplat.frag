@@ -1,3 +1,7 @@
+// Maps the fValue onto a color using the LUT then applies Phong lighting.
+// Using the texture coordinates of the billboard it caclulates the bounds and normals of a sphere
+// which is then used for the lighting calculation.
+
 #version 330 core
 
 #define PI (3.1415926)
@@ -37,9 +41,9 @@ void main() {
     else
         color = texture(LUT, (fValue - mapRange.x) / (mapRange.y - mapRange.x));
 
-	float a = length(fC);
-	float t = acos(a);
-	float t2 = PI/2.0 - t;
+	float a = length(fC); // Length of a right angle triangle with a hypontenuse going from the origin to the sphere surface.
+	float t = acos(a); // Angle of triangle
+	float t2 = PI/2.0 - t; // Reflected angle
 
 	if (a > 1)
 		discard;

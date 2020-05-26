@@ -1,3 +1,5 @@
+// This generates a billboard with a width and height equal to the diameter the sphere
+
 #version 330 core
 
 #include FlowInclude.geom
@@ -39,12 +41,14 @@ void main()
 			return;
 	}
 
+	// Need to manually clip if using geometry shader.
     if (clip[1] < 0.0 || clip[2] < 0.0)
         return;
 
     fValue = gValue[1];
     vec3 o = gl_in[1].gl_Position.xyz;
 
+	// Plane perpendicular to camera normal
 	vec3 up = vec3(0.0, 0.0, 1.0);
 	vec3 toCamera = normalize(cameraPos - o);
 	vec3 xh = normalize(cross(up, toCamera));
@@ -52,12 +56,11 @@ void main()
 	xh /= scales;
 	yh /= scales;
 
+	// Billboard
 	fC = vec2(-1.0, -1.0); EmitWorld(o + radius * (-xh + -yh));
 	fC = vec2( 1.0, -1.0); EmitWorld(o + radius * ( xh + -yh));
 	fC = vec2(-1.0,  1.0); EmitWorld(o + radius * (-xh +  yh));
 	fC = vec2( 1.0,  1.0); EmitWorld(o + radius * ( xh +  yh));
-	
-    // EmitWorld(o + radius * d / scales);
 } 
 
 

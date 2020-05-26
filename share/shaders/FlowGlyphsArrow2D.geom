@@ -1,3 +1,7 @@
+// This shader generates a 2D triangle at every vertex v_n pointing in the direction of 
+// the average normal between v_n-1 to v_n and v_n to v_n+1.
+// 
+
 #version 330 core
 
 #include FlowInclude.geom
@@ -19,6 +23,7 @@ uniform float aspect;
 
 void main()
 {
+	// Discard skipped samples
 	if (showOnlyLeadingSample) {
 		if (gl_PrimitiveIDIn < nVertices-4)
 			return;
@@ -27,6 +32,7 @@ void main()
 			return;
 	}
 
+	// Need to manually clip when using geometry shader
     if (clip[1] < 0.0 || clip[2] < 0.0)
         return;
 
@@ -38,6 +44,7 @@ void main()
     for (int i = 0; i < 3; i++)
         vN[i] = normalize(vS[i+1] - vS[i]);
 
+	// These calculations are done in screen-space so need to account for aspect ratio.
     vec2 n[2];
     vec2 p[2];
     vec4 o[2];

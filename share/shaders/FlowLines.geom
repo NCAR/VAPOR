@@ -1,3 +1,5 @@
+// Generates a line represented by quades from a set of points
+
 #version 330 core
 
 #include FlowInclude.geom
@@ -18,10 +20,11 @@ uniform float aspect;
 
 void main()
 {
+	// Need to manually clip when using geometry shader.
     if (clip[1] < 0.0 || clip[2] < 0.0)
         return;
 
-    vec2 vS[4];
+    vec2 vS[4]; // Screen space
     for (int i = 0; i < 4; i++)
         vS[i] = gl_in[i].gl_Position.xy / gl_in[i].gl_Position.w;
 

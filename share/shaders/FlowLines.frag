@@ -1,3 +1,6 @@
+// Basic fragment shader. Maps the fValue onto a color using the LUT.
+// This shader also supports anti-aliasing and adding a border to the lines
+// but these features are not currently in use.
 #version 330 core
 
 uniform bool constantColorEnabled = false;

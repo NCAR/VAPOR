@@ -1,3 +1,5 @@
+// This behaves the same as FlowGlyphsArrow2D.geom except the geometry is clipped against the line
+
 #version 330 core
 
 #include FlowInclude.geom

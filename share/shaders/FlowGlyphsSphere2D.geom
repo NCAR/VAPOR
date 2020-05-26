@@ -1,3 +1,5 @@
+// This behaves the same as FlowGlyphsArrow2D.geom except it draws a circle.
+
 #version 330 core
 
 #include FlowInclude.geom

@@ -1,3 +1,13 @@
+// This shader generates a cone at every vertex v_n pointing in the direction of 
+// the average normal between v_n-1 to v_n and v_n to v_n+1. The cone is generated
+// as a triangle strip, generated from the bottom circle and top vertex. This
+// geometry is generated at the origin and transformed with a simple affine tranformation
+// using basis vectors.
+// 
+// EmitWorld(vec3 v) projects v and emits it.
+// CylinderVert(v, ...) is a helper function that generates a point on a circle
+// given the parameters and passes it to EmitWorld.
+
 #version 330 core
 
 #include FlowInclude.geom
@@ -28,6 +38,7 @@ void CylinderVert(const vec3 v, const vec3 d, const float value);
 
 void main()
 {
+	// Discard skipped samples
 	if (showOnlyLeadingSample) {
 		if (gl_PrimitiveIDIn < nVertices-4)
 			return;
@@ -36,6 +47,7 @@ void main()
 			return;
 	}
 
+	// Need to manually clip when using geometry shader
     if (clip[1] < 0.0 || clip[2] < 0.0)
         return;
 
@@ -56,9 +68,11 @@ void main()
             parallelToUpChanged = true;
     }
 
+	// Basis vectors are generated against an arbritray up which needs to be different from N
     if (parallelToUpChanged)
         up = vec3(1, 0, 0);
 
+	// Generate basis vectors
     vec3 XH[2];
     vec3 YH[2];
     for (int i = 0; i < 2; i++) {
@@ -69,6 +83,7 @@ void main()
     fValue = gValue[1];
     vec3 top = V[1] + N[0] * radius * 1.618 / scales;
 
+	// Plot geometry sides
     for (int i = 0; i < REFINEMENT + 1; i++) {
         float t = float(i)/float(REFINEMENT) * 2.f * PI;
         vec3 d;
@@ -85,7 +100,7 @@ void main()
 
     fNormal = -N[0];
 
-    // Bottom
+    // Plot geometry bottom
     for (int i = 0; i < REFINEMENT + 1; i++) {
         float t = float(i)/float(REFINEMENT) * 2.f * PI;
         vec3 d;
