@@ -1,16 +1,10 @@
+#include "vapor/RenderParams.h"
+
 #include "PVariablesWidget.h"
-
-#include "PDisplay.h"
-
+#include "VPFidelitySection.h"
 #include "VComboBox.h"
-#include "FidelityWidget.h"
 #include "VLineComboBox.h"
 #include "VContainer.h"
-
-#include "PFidelityWidget3.h"
-#include "PSection.h"
-
-#include "vapor/RenderParams.h"
 
 #include <QLayout>
 #include <QLabel>
@@ -34,12 +28,12 @@ PVariablesWidget::PVariablesWidget()
     //setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Minimum );
     setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Minimum );
 
-    _vs2 = new VSection( "Variable Selection (VSection)" );
-    _container->layout()->addWidget( _vs2 );
+    _vSection = new VSection( "Variable Selection (VSection)" );
+    _container->layout()->addWidget( _vSection );
 
     _dimCombo = new VLineComboBox( "Variable Dimension (VLineComboBox)" );
     _dimCombo->SetOptions( {"3D", "2D"} );
-    _vs2->layout()->addWidget( _dimCombo );
+    _vSection->layout()->addWidget( _dimCombo );
     connect( _dimCombo, &VLineComboBox::ValueChanged,
         this, &PVariablesWidget::_dimChanged );
     
@@ -52,7 +46,7 @@ PVariablesWidget::PVariablesWidget()
         &VAPoR::RenderParams::SetVariableName
     );
     _pscalarHLIContainer3D->layout()->addWidget( _pscalarHLI3D );
-    _vs2->layout()->addWidget( _pscalarHLIContainer3D );
+    _vSection->layout()->addWidget( _pscalarHLIContainer3D );
   
     _pXFieldHLIContainer3D = new VContainer();
     _pXFieldHLI3D = new PVariableSelector3DHLI<VAPoR::RenderParams>( 
@@ -61,7 +55,7 @@ PVariablesWidget::PVariablesWidget()
         &VAPoR::RenderParams::SetXFieldVariableName
     );
     _pXFieldHLIContainer3D->layout()->addWidget( _pXFieldHLI3D );
-    _vs2->layout()->addWidget( _pXFieldHLIContainer3D );
+    _vSection->layout()->addWidget( _pXFieldHLIContainer3D );
 
     _pYFieldHLIContainer3D = new VContainer();
     _pYFieldHLI3D = new PVariableSelector3DHLI<VAPoR::RenderParams>( 
@@ -70,7 +64,7 @@ PVariablesWidget::PVariablesWidget()
         &VAPoR::RenderParams::SetYFieldVariableName
     );
     _pYFieldHLIContainer3D->layout()->addWidget( _pYFieldHLI3D );
-    _vs2->layout()->addWidget( _pYFieldHLIContainer3D );
+    _vSection->layout()->addWidget( _pYFieldHLIContainer3D );
 
     _pZFieldHLIContainer3D = new VContainer();
     _pZFieldHLI3D = new PVariableSelector3DHLI<VAPoR::RenderParams>( 
@@ -79,7 +73,7 @@ PVariablesWidget::PVariablesWidget()
         &VAPoR::RenderParams::SetZFieldVariableName
     );
     _pZFieldHLIContainer3D->layout()->addWidget( _pZFieldHLI3D );
-    _vs2->layout()->addWidget( _pZFieldHLIContainer3D );
+    _vSection->layout()->addWidget( _pZFieldHLIContainer3D );
 
     _pheightHLIContainer2D = new VContainer();
     _pheightHLI2D = new PVariableSelector2DHLI<VAPoR::RenderParams>( 
@@ -88,7 +82,7 @@ PVariablesWidget::PVariablesWidget()
         &VAPoR::RenderParams::SetHeightVariableName
     );
     _pheightHLIContainer2D->layout()->addWidget( _pheightHLI2D );
-    _vs2->layout()->addWidget( _pheightHLIContainer2D );
+    _vSection->layout()->addWidget( _pheightHLIContainer2D );
 
     _pcolorHLIContainer3D = new VContainer();
     _pcolorHLI3D = new PVariableSelector3DHLI<VAPoR::RenderParams>( 
@@ -97,7 +91,7 @@ PVariablesWidget::PVariablesWidget()
         &VAPoR::RenderParams::SetColorMapVariableName
     );
     _pcolorHLIContainer3D->layout()->addWidget( _pcolorHLI3D );
-    _vs2->layout()->addWidget( _pcolorHLIContainer3D );
+    _vSection->layout()->addWidget( _pcolorHLIContainer3D );
 
     _pscalarHLIContainer2D = new VContainer();
     _pscalarHLI2D = new PVariableSelector2DHLI<VAPoR::RenderParams>( 
@@ -108,7 +102,7 @@ PVariablesWidget::PVariablesWidget()
         &VAPoR::RenderParams::SetVariableName
     );
     _pscalarHLIContainer2D->layout()->addWidget( _pscalarHLI2D );
-    _vs2->layout()->addWidget( _pscalarHLIContainer2D );
+    _vSection->layout()->addWidget( _pscalarHLIContainer2D );
   
     _pXFieldHLIContainer2D = new VContainer();
     _pXFieldHLI2D = new PVariableSelector2DHLI<VAPoR::RenderParams>( 
@@ -117,7 +111,7 @@ PVariablesWidget::PVariablesWidget()
         &VAPoR::RenderParams::SetXFieldVariableName
     );
     _pXFieldHLIContainer2D->layout()->addWidget( _pXFieldHLI2D );
-    _vs2->layout()->addWidget( _pXFieldHLIContainer2D );
+    _vSection->layout()->addWidget( _pXFieldHLIContainer2D );
 
     _pYFieldHLIContainer2D = new VContainer();
     _pYFieldHLI2D = new PVariableSelector2DHLI<VAPoR::RenderParams>( 
@@ -126,7 +120,7 @@ PVariablesWidget::PVariablesWidget()
         &VAPoR::RenderParams::SetYFieldVariableName
     );
     _pYFieldHLIContainer2D->layout()->addWidget( _pYFieldHLI2D );
-    _vs2->layout()->addWidget( _pYFieldHLIContainer2D );
+    _vSection->layout()->addWidget( _pYFieldHLIContainer2D );
 
     _pZFieldHLIContainer2D = new VContainer();
     _pZFieldHLI2D = new PVariableSelector2DHLI<VAPoR::RenderParams>( 
@@ -135,7 +129,7 @@ PVariablesWidget::PVariablesWidget()
         &VAPoR::RenderParams::SetZFieldVariableName
     );
     _pZFieldHLIContainer2D->layout()->addWidget( _pZFieldHLI2D );
-    _vs2->layout()->addWidget( _pZFieldHLIContainer2D );
+    _vSection->layout()->addWidget( _pZFieldHLIContainer2D );
 
     _pcolorHLIContainer2D = new VContainer();
     _pcolorHLI2D = new PVariableSelector2DHLI<VAPoR::RenderParams>( 
@@ -144,9 +138,9 @@ PVariablesWidget::PVariablesWidget()
         &VAPoR::RenderParams::SetColorMapVariableName
     );
     _pcolorHLIContainer2D->layout()->addWidget( _pcolorHLI2D );
-    _vs2->layout()->addWidget( _pcolorHLIContainer2D );
+    _vSection->layout()->addWidget( _pcolorHLIContainer2D );
     
-    _fidelityWidget = new PFidelityWidget3();
+    _fidelityWidget = new VPFidelitySection();
     _container->layout()->addWidget( _fidelityWidget );
 
     _container->layout()->addItem( 
@@ -267,13 +261,12 @@ void PVariablesWidget::Reinit(
     if (_variableFlags & HEIGHT)
         fdf = (VariableFlags)(fdf | HEIGHT);
 
-    _fidelityWidget->Reinit(fdf);
+    //_fidelityWidget->Reinit(fdf);
+    _fidelityWidget->Reinit( (VariableFlags)(SCALAR) );
 }
 
 void PVariablesWidget::updateGUI() const {
     
-    VAPoR::RenderParams* rParams = dynamic_cast< VAPoR::RenderParams* >( _params );
-
     std::vector<std::string> twoDVars = _dataMgr->GetDataVarNames( 2 );
 
     std::vector<std::string> activeVars;
@@ -284,7 +277,8 @@ void PVariablesWidget::updateGUI() const {
         activeVars = twoDVars;
     }
 
-    _fidelityWidget->Update( _params, _paramsMgr, _dataMgr );
+    VAPoR::RenderParams* rParams = dynamic_cast< VAPoR::RenderParams* >( _params );
+    _fidelityWidget->Update( rParams, _paramsMgr, _dataMgr );
 
     //
     // Our widgets must be updated manually because they cannot

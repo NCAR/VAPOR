@@ -3,29 +3,23 @@
 #include <QObject>
 #include "vapor/MyBase.h"
 #include "Flags.h"
-#include "PWidget.h"
 #include "VSection.h"
 #include "VLineItem.h"
 
 QT_USE_NAMESPACE
 
-namespace VAPoR {
-	class RenderParams;
-	class ParamsMgr;
-	class DataMgr;
-}
-
 class QGroupBox;
 class VLineComboBox;
-class FidelityWidget3;
 class VFidelityButtons;
 
 class CompressionWidget
 {
-    public:
-        void Reinit(VariableFlags variableFlags);
+    //public:
+    //    void Reinit(VariableFlags variableFlags);
 
     protected:
+        CompressionWidget() {};
+
         void getCompressionFactors(
             VAPoR::RenderParams*      rParams,
             VAPoR::DataMgr*           dataMgr,

@@ -52,6 +52,7 @@ set (SRCS
 	VaporTable.cpp
 	FidelityWidget.cpp
 	VFidelitySection.cpp
+	VPFidelitySection.cpp
     PSimpleWidget.cpp
 	QSliderEdit.cpp
 	QRange.cpp
@@ -178,7 +179,7 @@ set (SRCS
 	PVariableSelector.cpp
 	PTest.cpp
 	PVariableSelector.h
-	#PVariableSelectorHLI.h
+	PVariableSelectorHLI.h
 	PRegionSelector.cpp
 	PRegionSelector.h
 	ParamsWidgetDemo.cpp
@@ -225,6 +226,7 @@ set (SRCS
     VaporTable.h 
 	FidelityWidget.h
 	VFidelitySection.h
+	VPFidelitySection.h
     PSimpleWidget.h
 	QSliderEdit.h
 	QRange.h
