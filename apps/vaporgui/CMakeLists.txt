@@ -116,8 +116,6 @@ set (SRCS
     VContainer.h
     VComboBox.cpp
     VComboBox.h
-    VLineComboBox.cpp
-    VLineComboBox.h
     VIntSpinBox.cpp
     VIntSpinBox.h
     VCheckBox.cpp
@@ -182,6 +180,7 @@ set (SRCS
 	ParamsWidgetDemo.h
 	PTFEditor.cpp
 	PTFEditor.h
+    
     PLODSelector.cpp
     PLODSelector.h
     PLODSelectorHLI.h
@@ -189,6 +188,8 @@ set (SRCS
     PRefinementSelector.h
     PRefinementSelectorHLI.h
     
+    VLineComboBox.cpp
+    VLineComboBox.h
     VariableGetter.h
 
 	ModelEventRouter.cpp
