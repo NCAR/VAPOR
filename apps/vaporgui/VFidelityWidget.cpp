@@ -260,7 +260,6 @@ void VFidelityWidget::Update(
     }
 
     if (varname.empty()) {
-        std::cout << "PVFidelityWidget setting enabled to false" << std::endl;
         setEnabled(false);
         return;
     }

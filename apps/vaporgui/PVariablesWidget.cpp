@@ -1,7 +1,7 @@
 #include "vapor/RenderParams.h"
 
 #include "PVariablesWidget.h"
-#include "VPFidelitySection.h"
+//#include "VPFidelitySection.h"
 #include "VComboBox.h"
 #include "VLineComboBox.h"
 #include "VContainer.h"
@@ -139,7 +139,7 @@ PVariablesWidget::PVariablesWidget()
     );
     _pcolorHLIContainer2D->layout()->addWidget( _pcolorHLI2D );
     _vSection->layout()->addWidget( _pcolorHLIContainer2D );
-    
+
     _fidelityWidget = new VPFidelitySection();
     _container->layout()->addWidget( _fidelityWidget );
 
@@ -261,7 +261,7 @@ void PVariablesWidget::Reinit(
     if (_variableFlags & HEIGHT)
         fdf = (VariableFlags)(fdf | HEIGHT);
 
-    //_fidelityWidget->Reinit(fdf);
+    _fidelityWidget->Reinit(fdf);
     _fidelityWidget->Reinit( (VariableFlags)(SCALAR) );
 }
 

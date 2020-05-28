@@ -5,6 +5,7 @@
 #include "Flags.h"
 
 #include "PVariableSelectorHLI.h"
+#include "PLODSelectorHLI.h"
 
 namespace VAPoR {
     class DataMgr;
@@ -16,7 +17,8 @@ namespace VAPoR {
 //class VComboBox;
 class VLineComboBox;
 class VContainer;
-class VPFidelitySection;
+//class VPFidelitySection;
+#include "VPFidelitySection.h"
 class PFidelityWidget3;
 class FidelityWidget3;
 class PSection;

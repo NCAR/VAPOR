@@ -14,7 +14,6 @@ class PLODSelector : public PEnumDropdown {
     
 public:
     
-    //PLODSelector(const std::string &tag, const std::string &label="");
     PLODSelector();
     void Reinit( VariableFlags varFlags );
 
