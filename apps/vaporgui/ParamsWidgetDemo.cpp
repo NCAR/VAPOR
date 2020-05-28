@@ -19,26 +19,14 @@
 #include "PFileSelectorHLI.h"
 #include "PEnumDropdownHLI.h"
 
-#include <QTabWidget>
-
 ParamsWidgetDemo::ParamsWidgetDemo()
 {
     setWindowTitle("Params Widget Demo");
     setLayout(new QVBoxLayout);
+    layout()->addWidget(pg = new PGroup);
     
     PSection *section;
-
-    QTabWidget* qtw = new QTabWidget();
-    layout()->addWidget( qtw );
     
-    PDoubleSliderEdit* pdse = new PDoubleSliderEdit("demo_double", "foo");
-    qtw->addTab( pdse, "foo" );
-    
-    PDoubleSliderEdit* pdse2 = new PDoubleSliderEdit("demo_double", "bar");
-    qtw->addTab(pdse2, "bar" );
-
-    layout()->addWidget(pg = new PGroup);
-
     section = new PSection("Numbers");
     section->Add(new PIntegerInput("demo_int", "PIntegerInput"));
     section->Add(new PDoubleInput("demo_double", "PDoubleInput"));
