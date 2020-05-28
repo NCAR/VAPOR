@@ -1,6 +1,5 @@
 #pragma once
 
-#include "PWidget.h"
 #include "VSection.h"
 #include "Flags.h"
 
@@ -12,10 +11,6 @@ namespace VAPoR {
 
 class VLineComboBox;
 class VContainer;
-class VFidelitySection;
-class PSection;
-//class VLineItem;
-//class FidelityWidget2;
 
 class VVariablesSection : public VSection {
 
@@ -57,18 +52,12 @@ private:
     VSection* _vSection;
     VLineComboBox* _dimCombo;
 
-    VContainer* _container;
-
-    // We cannot hide PVariableSelector, so use
-    // VLineComboBox and signal/slot connections
     VLineComboBox* _scalarCombo;
     VLineComboBox* _xFieldCombo;
     VLineComboBox* _yFieldCombo;
     VLineComboBox* _zFieldCombo;
     VLineComboBox* _colorCombo;
     VLineComboBox* _heightCombo;
-
-    VFidelitySection* _fidelitySection;
 
     static const std::string _sectionTitle;
 
