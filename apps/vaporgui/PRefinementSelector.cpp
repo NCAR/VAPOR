@@ -8,7 +8,7 @@
 #include "VariableGetter.h"
 
 PRefinementSelector::PRefinementSelector()
-: PEnumDropdown("", {}, {}, "Refinement level HLI")
+: PEnumDropdown("", {}, {}, "Refinement level")
 {}
 
 void PRefinementSelector::Reinit( VariableFlags varFlags ) {
