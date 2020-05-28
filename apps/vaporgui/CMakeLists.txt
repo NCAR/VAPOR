@@ -21,7 +21,6 @@ set (SRCS
 	helloSubtabs.cpp
 	VariablesWidget.cpp
 	VVariablesSection.cpp
-	VVariablesContainer.cpp
 	PVariablesWidget.cpp
 	GeometryWidget.cpp
 	CopyRegionWidget.cpp
@@ -49,8 +48,6 @@ set (SRCS
 	TransformTable.cpp
 	VaporTable.cpp
 	FidelityWidget.cpp
-	VFidelitySection.cpp
-	VFidelitySection_PW.cpp
 	QSliderEdit.cpp
 	QRange.cpp
 	QSinglePoint.cpp
@@ -188,9 +185,17 @@ set (SRCS
     PRefinementSelector.h
     PRefinementSelectorHLI.h
     
+	VVariablesContainer.cpp
+	VVariablesContainer.h
+	VFidelitySection.cpp
+	VFidelitySection.h
+	VFidelitySection_PW.cpp
+	VFidelitySection_PW.h
     VLineComboBox.cpp
     VLineComboBox.h
     VariableGetter.h
+	PVariablesWidget.h
+	VVariablesSection.h
 
 	ModelEventRouter.cpp
 	ModelEventRouter.h
@@ -219,8 +224,6 @@ set (SRCS
     SliceSubtabs.h
     VaporTable.h 
 	FidelityWidget.h
-	VFidelitySection.h
-	VFidelitySection_PW.h
 	QSliderEdit.h
 	QRange.h
 	QSinglePoint.h
@@ -272,9 +275,6 @@ set (SRCS
 	StatisticsParams.h
 	TabManager.h
 	VariablesWidget.h
-	PVariablesWidget.h
-	VVariablesSection.h
-	VVariablesContainer.h
 	VizSelectCombo.h
 	WireFrameEventRouter.h
 	ParamsWidgets.h
