@@ -182,17 +182,17 @@ set (SRCS
     PRefinementSelector.cpp
     PRefinementSelector.h
     PRefinementSelectorHLI.h
-	PVariablesWidget.cpp
-	PVariablesWidget.h
+    PVariablesWidget.cpp
+    PVariablesWidget.h
     
-	VVariablesSection.cpp
-	VVariablesSection.h
-	VVariablesContainer.cpp
-	VVariablesContainer.h
-	VFidelitySection.cpp
-	VFidelitySection.h
-	VFidelitySection_PW.cpp
-	VFidelitySection_PW.h
+    VVariablesSection.cpp
+    VVariablesSection.h
+    VVariablesContainer.cpp
+    VVariablesContainer.h
+    VFidelitySection.cpp
+    VFidelitySection.h
+    VFidelitySection_PW.cpp
+    VFidelitySection_PW.h
     VLineComboBox.cpp
     VLineComboBox.h
     VariableGetter.h
