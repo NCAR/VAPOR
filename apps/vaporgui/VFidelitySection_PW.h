@@ -13,12 +13,12 @@ class QGroupBox;
 class VFidelityButtons;
 class PLODSelector;
 
-class VPFidelitySection : public VSection
+class VFidelitySection_PW : public VSection
 {
     Q_OBJECT
 
     public:
-        VPFidelitySection();
+        VFidelitySection_PW();
 
         void Reinit( VariableFlags variableFlags );
 

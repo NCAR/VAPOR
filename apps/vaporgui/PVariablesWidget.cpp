@@ -1,6 +1,7 @@
 #include "vapor/RenderParams.h"
 
 #include "PVariablesWidget.h"
+#include "VFidelitySection_PW.h"
 #include "VLineComboBox.h"
 #include "VContainer.h"
 
@@ -131,7 +132,7 @@ PVariablesWidget::PVariablesWidget()
     _pcolorHLIContainer2D->layout()->addWidget( _pcolorHLI2D );
     _vSection->layout()->addWidget( _pcolorHLIContainer2D );
 
-    _fidelityWidget = new VPFidelitySection();
+    _fidelityWidget = new VFidelitySection_PW();
     _container->layout()->addWidget( _fidelityWidget );
 
     _container->layout()->addItem( 

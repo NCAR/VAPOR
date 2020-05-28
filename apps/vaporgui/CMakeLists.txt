@@ -50,7 +50,7 @@ set (SRCS
 	VaporTable.cpp
 	FidelityWidget.cpp
 	VFidelitySection.cpp
-	VPFidelitySection.cpp
+	VFidelitySection_PW.cpp
 	QSliderEdit.cpp
 	QRange.cpp
 	QSinglePoint.cpp
@@ -219,7 +219,7 @@ set (SRCS
     VaporTable.h 
 	FidelityWidget.h
 	VFidelitySection.h
-	VPFidelitySection.h
+	VFidelitySection_PW.h
 	QSliderEdit.h
 	QRange.h
 	QSinglePoint.h

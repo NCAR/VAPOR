@@ -3,16 +3,17 @@
 #include "vapor/RenderParams.h"
 
 // I don't understand why we need to include PWidget.h to use HLI widgets.
-// Commend the line below, and many errors arise that are not clear to me.
+// Comment the line below, and many errors arise that are not clear to me.
 // -Scott
 #include "PWidget.h"
 
-#include "VPFidelitySection.h"
-#include "VFidelitySection.h"
+#include "VFidelitySection_PW.h"
 
-const std::string VPFidelitySection::_sectionTitle = "Data Fidelity (VPFidelitySection)";
+#include "VFidelitySection.h"   // This is where VFidelityButtons is defined
 
-VPFidelitySection::VPFidelitySection()
+const std::string VFidelitySection_PW::_sectionTitle = "Data Fidelity (VFidelitySection_PW)";
+
+VFidelitySection_PW::VFidelitySection_PW()
     : VSection( _sectionTitle )
 {
     _fidelityButtons = new VFidelityButtons();
@@ -32,7 +33,7 @@ VPFidelitySection::VPFidelitySection()
 }
 
 
-void VPFidelitySection::Reinit( VariableFlags varFlags ) {
+void VFidelitySection_PW::Reinit( VariableFlags varFlags ) {
     _variableFlags = varFlags;
    
     _fidelityButtons->Reinit( _variableFlags);
@@ -40,7 +41,7 @@ void VPFidelitySection::Reinit( VariableFlags varFlags ) {
     _pRefHLI->Reinit( _variableFlags );
 }
 
-void VPFidelitySection::Update(
+void VFidelitySection_PW::Update(
     VAPoR::RenderParams* rParams,
     VAPoR::ParamsMgr*    paramsMgr,
     VAPoR::DataMgr*      dataMgr
@@ -58,18 +59,18 @@ void VPFidelitySection::Update(
     _fidelityButtons->Update( _rParams, _paramsMgr, _dataMgr );
 }
 
-void VPFidelitySection::setNumRefinements( int num ) {
+void VFidelitySection_PW::setNumRefinements( int num ) {
     _rParams->SetRefinementLevel(num);
 }
 
-void VPFidelitySection::setCompRatio( int num ) {
+void VFidelitySection_PW::setCompRatio( int num ) {
     _rParams->SetCompressionLevel(num);
 }
 
-std::string VPFidelitySection::GetCurrentLodString() const {
+std::string VFidelitySection_PW::GetCurrentLodString() const {
     return _currentLodStr;
 }
 
-std::string VPFidelitySection::GetCurrentMultiresString() const {
+std::string VFidelitySection_PW::GetCurrentMultiresString() const {
     return _currentMultiresStr;
 }

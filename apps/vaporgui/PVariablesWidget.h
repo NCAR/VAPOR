@@ -17,8 +17,7 @@ namespace VAPoR {
 //class VComboBox;
 class VLineComboBox;
 class VContainer;
-//class VPFidelitySection;
-#include "VPFidelitySection.h"
+class VFidelitySection_PW;
 class PFidelityWidget3;
 class FidelityWidget3;
 class PSection;
@@ -86,7 +85,7 @@ private:
     VContainer*                                  _pcolorHLIContainer2D;
     VContainer*                                  _pcolorHLIContainer3D;
     
-    VPFidelitySection*                           _fidelityWidget;
+    VFidelitySection_PW*                         _fidelityWidget;
 
 private slots:
     void _dimChanged();
