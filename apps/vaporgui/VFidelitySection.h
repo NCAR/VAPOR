@@ -12,33 +12,7 @@ class QGroupBox;
 class VLineComboBox;
 class VFidelityButtons;
 
-class CompressionWidget
-{
-    //public:
-    //    void Reinit(VariableFlags variableFlags);
-
-    protected:
-        CompressionWidget() {};
-
-        void getCompressionFactors(
-            VAPoR::RenderParams*      rParams,
-            VAPoR::DataMgr*           dataMgr,
-            VariableFlags             variableFlags,
-            vector <float>&           lodCF, 
-            vector <float>&           multiresCF, 
-            std::vector<std::string>& lodStr,
-            std::vector<std::string>& multiresStr
-        );
-
-        std::string getCurrentVariableName( 
-            VariableFlags        variableFlags,
-            VAPoR::RenderParams* rParams,
-            VAPoR::DataMgr*      dataMgr
-        ) const;
-
-};
-
-class VFidelitySection : public VSection, public CompressionWidget
+class VFidelitySection : public VSection
 {
     Q_OBJECT
 
@@ -69,8 +43,6 @@ class VFidelitySection : public VSection, public CompressionWidget
         VLineComboBox*    _lodCombo;
         VLineComboBox*    _refCombo;
 
-        std::string            _currentLodStr;
-        std::string            _currentMultiresStr;
         std::vector <string>   _fidelityLodStrs;
         std::vector <string>   _fidelityMultiresStrs;
         
@@ -79,7 +51,7 @@ class VFidelitySection : public VSection, public CompressionWidget
         void setCompRatio( int num );
 };
 
-class VFidelityButtons : public VLineItem, public CompressionWidget
+class VFidelityButtons : public VLineItem
 {
 
 	Q_OBJECT
@@ -103,28 +75,14 @@ class VFidelityButtons : public VLineItem, public CompressionWidget
         VAPoR::ParamsMgr*    _paramsMgr;
         VAPoR::RenderParams* _rParams;
 
-        VariableFlags _variableFlags;
+        VariableFlags        _variableFlags;
 
-        QButtonGroup* _fidelityButtons;
-        QGroupBox* _fidelityBox;
-        QFrame* _fidelityFrame;
+        QButtonGroup*        _fidelityButtons;
+        QGroupBox*           _fidelityBox;
+        QFrame*              _fidelityFrame;
 
-        VLineComboBox* _lodCombo;
-        VLineComboBox* _refCombo;
-
-        /*std::string getCurrentVariableName() const;
-
-        // Get the compression rates as a fraction for both the LOD and
-        // Refinment parameters. Also format these factors into a displayable
-        // string
-        //
-        void getCmpFactors(
-            const std::string& varname, 
-            vector <long> &lodCF, 
-            vector <string> &lodStr,
-            vector <long> &multiresCF, 
-            vector <string> &multiresStr
-        ) const;*/
+        VLineComboBox*       _lodCombo;
+        VLineComboBox*       _refCombo;
 
         void setupFidelity( VAPoR::RenderParams params );
         void uncheckFidelity();

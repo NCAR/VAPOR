@@ -16,6 +16,7 @@
 #include "VFidelitySection.h"
 #include "VLineComboBox.h"
 #include "VSection.h"
+#include "VariableGetter.h"
 
 using namespace VAPoR;
 
@@ -24,125 +25,69 @@ const std::string VFidelitySection::_sectionTitle = "Data Fidelity (VFidelitySec
 // This namespace provides a function for the three Fidelity Widgets
 // (FidelityButtons, and comboBoxes for lod and ref) to acquire strings
 // that correspond to different refinement and compression factors.
-void CompressionWidget::getCompressionFactors(
-    VAPoR::RenderParams*      rParams,
-    VAPoR::DataMgr*           dataMgr,
-    VariableFlags             variableFlags,
-    std::vector<float>&        lodCFs,
-    std::vector<float>&        multiresCFs,
-    std::vector<std::string>& lodStrs,
-    std::vector<std::string>& multiresStrs
-) {
-    lodCFs.clear();
-    lodStrs.clear();
-    multiresCFs.clear();
-    multiresStrs.clear();
+namespace {
+    void getCompressionFactors(
+        VAPoR::RenderParams*      rParams,
+        VAPoR::DataMgr*           dataMgr,
+        VariableFlags             variableFlags,
+        std::vector<float>&        lodCFs,
+        std::vector<float>&        multiresCFs,
+        std::vector<std::string>& lodStrs,
+        std::vector<std::string>& multiresStrs
+    ) {
+        lodCFs.clear();
+        lodStrs.clear();
+        multiresCFs.clear();
+        multiresStrs.clear();
 
-    std::string varName = getCurrentVariableName( variableFlags, rParams, dataMgr );
-    VAssert(! varName.empty());
-    int numLevels = dataMgr->GetNumRefLevels(varName);
+        VariableGetter varGetter( rParams, dataMgr, variableFlags );
+        std::string varName = varGetter.getCurrentVariable();
+        VAssert(! varName.empty());
+        int numLevels = dataMgr->GetNumRefLevels(varName);
 
-    // First get compression factors that are based on grid multiresolution
-    //
+        // Compute sorted list of number of grids points
+        // at each level in multiresolution hierarchy
+        //
+        vector <size_t> nGridPts;
+        for (int l=0; l<numLevels; l++) {
 
-    // Compute sorted list of number of grids points
-    // at each level in multiresolution hierarchy
-    //
-    vector <size_t> nGridPts;
-    for (int l=0; l<numLevels; l++) {
+            vector <size_t> dims_at_level;
+            int rc = dataMgr->GetDimLensAtLevel(varName, l, dims_at_level);
+            VAssert(rc >= 0);
 
-        vector <size_t> dims_at_level;
-        int rc = dataMgr->GetDimLensAtLevel(varName, l, dims_at_level);
-        VAssert(rc >= 0);
+            size_t n = 1;
+            ostringstream oss;
+            oss << l << " (";
+            for (int j=0; j<dims_at_level.size(); j++) {
+                n *= dims_at_level[j];
 
-        size_t n = 1;
-        ostringstream oss;
-        oss << l << " (";
-        for (int j=0; j<dims_at_level.size(); j++) {
-            n *= dims_at_level[j];
-
-            oss << dims_at_level[j];
-            if (j < dims_at_level.size()-1) oss << "x";
-        }
-        nGridPts.push_back(n);
-
-        oss << ")";
-        multiresStrs.push_back(oss.str());
-    }
-
-    for (int i=0; i<nGridPts.size()-1; i++) {
-        float cf = 1.0 / (nGridPts[nGridPts.size()-1] / nGridPts[i]);
-        multiresCFs.push_back(cf);
-    }
-    multiresCFs.push_back(1.0);
-
-    // Now get the "levels of detail" compression factors
-    //
-    vector <size_t> cratios = dataMgr->GetCRatios(varName);
-
-    for (int i=0; i<cratios.size(); i++) {
-        ostringstream oss;
-        lodCFs.push_back((float) 1.0 / cratios[i]);
-
-            oss << i << " (" << cratios[i] << ":1)";
-            lodStrs.push_back(oss.str());
-    }
-
-    /*int lodReq = rParams->GetCompressionLevel();
-    int refLevelReq = rParams->GetRefinementLevel();
-
-    int lod = lodReq < 0 ? 0 : lodReq;
-    lod = lodReq >= lodCFs.size() ? lodCFs.size()-1 : lodReq;
-
-    int refLevel = refLevelReq < 0 ? 0 : refLevelReq;
-    refLevel = refLevelReq >= multiresCFs.size() ? multiresCFs.size()-1 : refLevelReq;*/
-}
-
-std::string CompressionWidget::getCurrentVariableName( 
-    VariableFlags varFlags,
-    VAPoR::RenderParams* rParams,
-    VAPoR::DataMgr* dataMgr
-) const {
-    std::string varName;
-    if (varFlags & SCALAR) {
-        varName = rParams->GetVariableName();
-    }
-    else if (varFlags & VECTOR) {
-        vector <string> varNames = rParams->GetFieldVariableNames();
-        if( varNames.size() > 0 ) {
-            varName = varNames[0];
-            size_t vardim;
-            for( int i = 0; i < varNames.size(); i++ ) {
-                vardim = dataMgr->GetNumDimensions( varNames[i]);
-                if( vardim == 3 ) {
-                    varName = varNames[i];
-                    break;
-                }
+                oss << dims_at_level[j];
+                if (j < dims_at_level.size()-1) oss << "x";
             }
-        }
-    }
-    else if (varFlags & HEIGHT) {
-        varName = rParams->GetHeightVariableName();
-    }
-    else if (varFlags & AUXILIARY) {
-        vector<string> varNames = rParams->GetAuxVariableNames();
-        if(varNames.size() > 0) {
-            varName = varNames[0];
-            size_t vardim;
-            for( int i = 0; i < varNames.size(); i++ ) {
-                vardim = dataMgr->GetNumDimensions( varNames[i]);
-                if( vardim == 3 ) {
-                    varName = varNames[i];
-                    break;
-                }
-            }
-        }
-    }
-    else if (varFlags & COLOR) {
-        varName = rParams->GetColorMapVariableName();
-    }
+            nGridPts.push_back(n);
 
-    return varName;
+            oss << ")";
+            multiresStrs.push_back(oss.str());
+        }
+
+        for (int i=0; i<nGridPts.size()-1; i++) {
+            float cf = 1.0 / (nGridPts[nGridPts.size()-1] / nGridPts[i]);
+            multiresCFs.push_back(cf);
+        }
+        multiresCFs.push_back(1.0);
+
+        // Now get the "levels of detail" compression factors
+        //
+        vector <size_t> cratios = dataMgr->GetCRatios(varName);
+
+        for (int i=0; i<cratios.size(); i++) {
+            ostringstream oss;
+            lodCFs.push_back((float) 1.0 / cratios[i]);
+
+                oss << i << " (" << cratios[i] << ":1)";
+                lodStrs.push_back(oss.str());
+        }
+    }
 }
 
 VFidelitySection::VFidelitySection()
@@ -184,7 +129,7 @@ void VFidelitySection::Update(
     
     vector <float> lodCFs, multiresCFs;
     vector <string> lodStrs, multiresStrs;
-    CompressionWidget::getCompressionFactors(
+    getCompressionFactors(
         _rParams,
         _dataMgr,
         _variableFlags,
@@ -194,22 +139,11 @@ void VFidelitySection::Update(
         multiresStrs
     );
 
-    /*int lodReq = rParams->GetCompressionLevel();
-    int refLevelReq = rParams->GetRefinementLevel();
-
-    int lod = lodReq < 0 ? 0 : lodReq;
-    lod = lodReq >= lodCFs.size() ? lodCFs.size()-1 : lodReq;
-
-    int refLevel = refLevelReq < 0 ? 0 : refLevelReq;
-    refLevel = refLevelReq >= multiresCFs.size() ? multiresCFs.size()-1 : refLevelReq;*/
-
     _lodCombo->SetOptions( lodStrs );
     _lodCombo->SetIndex( _rParams->GetCompressionLevel() );
-    //_lodCombo->SetIndex( lod );
     
     _refCombo->SetOptions( multiresStrs );
     _refCombo->SetIndex( _rParams->GetRefinementLevel() );
-    //_refCombo->SetIndex( refLevel );
 }
 
 void VFidelitySection::setNumRefinements( int num ) {
@@ -221,8 +155,7 @@ void VFidelitySection::setCompRatio( int num ) {
 }
 
 VFidelityButtons::VFidelityButtons()
-    : VLineItem( "Fidelity", _fidelityBox = new QGroupBox("low <--> high") ),
-      CompressionWidget()
+    : VLineItem( "Fidelity", _fidelityBox = new QGroupBox("low <--> high") )
 {
     //_fidelityBox      = new QGroupBox("low <--> high");
     _fidelityBox->setAlignment( Qt::AlignHCenter );
@@ -264,7 +197,7 @@ void VFidelityButtons::Update(
     //
     vector <float> lodCFs, multiresCFs;
     vector <string> lodStrs, multiresStrs;
-    CompressionWidget::getCompressionFactors(
+    getCompressionFactors(
         _rParams,
         _dataMgr,
         _variableFlags,
@@ -274,35 +207,14 @@ void VFidelityButtons::Update(
         multiresStrs
     );
 
-    //int lodReq = _rParams->GetCompressionLevel();
-    //int refLevelReq = _rParams->GetRefinementLevel();
-
     int lod = _rParams->GetCompressionLevel();
     int refLevel = _rParams->GetRefinementLevel();
 
-    /*int lod = lodReq < 0 ? 0 : lodReq;
-    lod = lodReq >= lodCFs.size() ? lodCFs.size()-1 : lodReq;
-
-    int refLevel = refLevelReq < 0 ? 0 : refLevelReq;
-    refLevel = refLevelReq >= multiresCFs.size() ?
-        multiresCFs.size()-1 : refLevelReq;*/
-
-    
     // set up the refinement and LOD combos
     //
     for (int i = 0; i<lodStrs.size(); i++){
         QString s = QString::fromStdString(lodStrs[i]);
     }
-    //_currentLodStr = lodStrs.at(lod);
-
-    //_currentMultiresStr = multiresStrs.at(refLevel);
-
-    /*if (lodReq != lod) {
-        _rParams->SetCompressionLevel(lod);
-    }
-    if (refLevelReq != refLevel) {
-        _rParams->SetRefinementLevel(refLevel);
-    }*/
 
     _fidelityBox->adjustSize();
 
@@ -370,11 +282,11 @@ void VFidelityButtons::Update(
 
 
 std::string VFidelitySection::GetCurrentLodString() const {
-    return _currentLodStr;
+    return _lodCombo->GetValue();
 }
 
 std::string VFidelitySection::GetCurrentMultiresString() const {
-    return _currentMultiresStr;
+    return _refCombo->GetValue();
 }
 
 void VFidelityButtons::setFidelity(int buttonID) {

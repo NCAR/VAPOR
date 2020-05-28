@@ -33,8 +33,7 @@ void PLODSelector::dropdownIndexChanged( int index ) {
         value = _enumMap[index];
     }
 
-    VAPoR::RenderParams* rParams = dynamic_cast<VAPoR::RenderParams*>( _params );
-    rParams->SetCompressionLevel(value);
+    setParamsLong( (long)index );
 }
 
 void PLODSelector::updateGUI() const
