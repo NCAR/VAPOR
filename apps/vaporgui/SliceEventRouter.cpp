@@ -133,72 +133,18 @@ void SliceEventRouter::GetWebHelp(
 
 void SliceEventRouter::_updateTab(){
 
-    /*_variablesWidget->Update(
-		GetActiveDataMgr(),
-		_controlExec->GetParamsMgr(),
-		GetActiveParams()
-    );*/
-
-    /*_pDoubleInput->Update(
-		GetActiveParams(),
-		_controlExec->GetParamsMgr(),
-		GetActiveDataMgr()
-    );*/
-    /*_pIntegerInput->Update(
-		GetActiveParams(),
-		_controlExec->GetParamsMgr(),
-		GetActiveDataMgr()
-    );*/
-
-    /*_pSimpleWidget->Update(
-		GetActiveParams(),
-		_controlExec->GetParamsMgr(),
-		GetActiveDataMgr()
-    );
-    */
-    
-    /*_simpleWidget->Update(
-		GetActiveDataMgr(),
-		_controlExec->GetParamsMgr(),
-		GetActiveParams()
-    );*/
-
     _vVariablesContainer->Update(
 		GetActiveParams(),
 		_controlExec->GetParamsMgr(),
 		GetActiveDataMgr()
     );
+
     _pVariablesWidget->Update(
 		GetActiveParams(),
 		_controlExec->GetParamsMgr(),
 		GetActiveDataMgr()
     );
 
-    /*_pFidelityWidget->Update(
-		GetActiveParams(),
-		_controlExec->GetParamsMgr(),
-		GetActiveDataMgr()
-    );*/
-
-    //_vSliderEdit->SetValue( 1.0 );
-
-    /*_fidelityWidget3->Update(
-		GetActiveDataMgr(),
-		_controlExec->GetParamsMgr(),
-		GetActiveParams()
-    );*/
-
-    /*_pTest->Update(
-		GetActiveParams(),
-		_controlExec->GetParamsMgr(),
-		GetActiveDataMgr()
-    );
-    _pdse->Update(
-		GetActiveParams(),
-		_controlExec->GetParamsMgr(),
-		GetActiveDataMgr()
-    );*/
-        
 	// The variable tab updates itself:
 	//
 	_variables->Update(

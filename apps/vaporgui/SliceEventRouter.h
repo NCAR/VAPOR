@@ -8,12 +8,7 @@
 #include "vapor/SliceRenderer.h"
 #include "vapor/SliceParams.h"
 #include "RenderEventRouter.h"
-#include "RenderEventRouter2.h"
 #include "VariablesWidget.h"
-//#include "PVariablesWidget.h"
-#include "PSimpleWidget.h"
-#include "PIntegerInput.h"
-#include "PDoubleInput.h"
 #include "VLineComboBox.h"
 #include "VSliderEdit.h"
 #include "VariablesWidget2.h"
@@ -87,21 +82,8 @@ private:
  //! if wheel events also scrolled the tab itself
   void wheelEvent(QWheelEvent*) {}
 
- VLineComboBox*    _vLineComboBox;
- VSliderEdit*      _vSliderEdit;
- VLineItem*        _vli;
-
  VVariablesContainer* _vVariablesContainer;
-
- VariablesWidget2* _variablesWidget;
- VVariablesWidget* _vVariablesWidget;
  PVariablesWidget* _pVariablesWidget;
- PSimpleWidget*    _pSimpleWidget;
- SimpleWidget*     _simpleWidget;
- FidelityWidget3*  _fidelityWidget3;
- PFidelityWidget3*  _pFidelityWidget;
- PIntegerInput*    _pIntegerInput;
- PDoubleInput*     _pDoubleInput;
 
  //! VariablesWidget is used as Variables tab
  SliceVariablesSubtab *_variables;

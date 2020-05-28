@@ -20,11 +20,9 @@ set (SRCS
 	Plot.cpp
 	helloSubtabs.cpp
 	VariablesWidget.cpp
-	VariablesWidget2.cpp
 	VVariablesSection.cpp
 	VVariablesContainer.cpp
 	PVariablesWidget.cpp
-	PTest.cpp
 	GeometryWidget.cpp
 	CopyRegionWidget.cpp
 	RangeCombos.cpp
@@ -53,7 +51,6 @@ set (SRCS
 	FidelityWidget.cpp
 	VFidelitySection.cpp
 	VPFidelitySection.cpp
-    PSimpleWidget.cpp
 	QSliderEdit.cpp
 	QRange.cpp
 	QSinglePoint.cpp
@@ -177,7 +174,6 @@ set (SRCS
 	PSliderEdit.h
 	PSliderEditHLI.h
 	PVariableSelector.cpp
-	PTest.cpp
 	PVariableSelector.h
 	PVariableSelectorHLI.h
 	PRegionSelector.cpp
@@ -224,7 +220,6 @@ set (SRCS
 	FidelityWidget.h
 	VFidelitySection.h
 	VPFidelitySection.h
-    PSimpleWidget.h
 	QSliderEdit.h
 	QRange.h
 	QSinglePoint.h
@@ -270,14 +265,12 @@ set (SRCS
 	QIntValidatorWithFixup.h
 	RangeCombos.h
 	RenderEventRouter.h
-	RenderEventRouter2.h
 	RenderHolder.h
 	SettingsEventRouter.h
 	SettingsParams.h
 	StatisticsParams.h
 	TabManager.h
 	VariablesWidget.h
-	VariablesWidget2.h
 	PVariablesWidget.h
 	VVariablesSection.h
 	VVariablesContainer.h
