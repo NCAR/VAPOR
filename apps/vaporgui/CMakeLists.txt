@@ -20,8 +20,6 @@ set (SRCS
 	Plot.cpp
 	helloSubtabs.cpp
 	VariablesWidget.cpp
-	VVariablesSection.cpp
-	PVariablesWidget.cpp
 	GeometryWidget.cpp
 	CopyRegionWidget.cpp
 	RangeCombos.cpp
@@ -184,7 +182,11 @@ set (SRCS
     PRefinementSelector.cpp
     PRefinementSelector.h
     PRefinementSelectorHLI.h
+	PVariablesWidget.cpp
+	PVariablesWidget.h
     
+	VVariablesSection.cpp
+	VVariablesSection.h
 	VVariablesContainer.cpp
 	VVariablesContainer.h
 	VFidelitySection.cpp
@@ -194,8 +196,6 @@ set (SRCS
     VLineComboBox.cpp
     VLineComboBox.h
     VariableGetter.h
-	PVariablesWidget.h
-	VVariablesSection.h
 
 	ModelEventRouter.cpp
 	ModelEventRouter.h
