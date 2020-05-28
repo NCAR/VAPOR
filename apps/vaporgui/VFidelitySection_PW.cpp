@@ -5,10 +5,11 @@
 // I don't understand why we need to include PWidget.h to use HLI widgets.
 // Comment the line below, and many errors arise that are not clear to me.
 // -Scott
-#include "PWidget.h"
+//#include "PWidget.h"
+
+#include "PGroup.h"
 
 #include "VFidelitySection_PW.h"
-
 #include "VFidelitySection.h"   // This is where VFidelityButtons is defined
 
 const std::string VFidelitySection_PW::_sectionTitle = "Data Fidelity (VFidelitySection_PW)";
@@ -19,17 +20,22 @@ VFidelitySection_PW::VFidelitySection_PW()
     _fidelityButtons = new VFidelityButtons();
     layout()->addWidget( _fidelityButtons );
 
+    _pGroup = new PGroup();
+    layout()->addWidget( _pGroup );
+
     _plodHLI = new PLODSelectorHLI<VAPoR::RenderParams>(
         &VAPoR::RenderParams::GetCompressionLevel,
         &VAPoR::RenderParams::SetCompressionLevel
     );
-    layout()->addWidget( _plodHLI );
+    //layout()->addWidget( _plodHLI );
+    _pGroup->Add( _plodHLI );
 
     _pRefHLI = new PRefinementSelectorHLI<VAPoR::RenderParams>(
         &VAPoR::RenderParams::GetRefinementLevel,
         &VAPoR::RenderParams::SetRefinementLevel
     );
-    layout()->addWidget( _pRefHLI );
+    //layout()->addWidget( _pRefHLI );
+    _pGroup->Add( _pRefHLI );
 }
 
 
@@ -54,8 +60,10 @@ void VFidelitySection_PW::Update(
     _paramsMgr = paramsMgr;
     _rParams = rParams;
 
-    _plodHLI->Update( rParams, _paramsMgr, _dataMgr );
-    _pRefHLI->Update( rParams, _paramsMgr, _dataMgr );
+    _pGroup->Update( _rParams, _paramsMgr, _dataMgr );
+    //_plodHLI->Update( _rParams, _paramsMgr, _dataMgr );
+    //_pRefHLI->Update( _rParams, _paramsMgr, _dataMgr );
+
     _fidelityButtons->Update( _rParams, _paramsMgr, _dataMgr );
 }
 
