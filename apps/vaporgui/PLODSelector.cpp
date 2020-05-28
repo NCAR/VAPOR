@@ -36,16 +36,18 @@ void PLODSelector::updateGUI() const
     assert(rParams && "Params must be RenderParams");
     static_cast<void>(rParams);  // Silence unused variable warning
 
+    VAPoR::DataMgr* dataMgr = getDataMgr();
+
     std::string varName = getCurrentVariable( 
         rParams, 
-        _dataMgr, 
-        _variableFlags 
+        dataMgr,
+        _variableFlags
     );
 
     std::vector <long> lodCFs;
     std::vector <std::string> lodStrs;
 
-    vector <size_t> cratios = _dataMgr->GetCRatios(varName);
+    vector <size_t> cratios = dataMgr->GetCRatios(varName);
 
     for (int i=0; i<cratios.size(); i++) {
         ostringstream oss;

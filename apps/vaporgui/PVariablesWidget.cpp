@@ -4,6 +4,7 @@
 #include "VFidelitySection_PW.h"
 #include "VLineComboBox.h"
 #include "VContainer.h"
+#include "VSection.h"
 
 #include <QLayout>
 #include <QLabel>
@@ -235,19 +236,22 @@ void PVariablesWidget::Reinit(
 }
 
 void PVariablesWidget::updateGUI() const {
-    
-    std::vector<std::string> twoDVars = _dataMgr->GetDataVarNames( 2 );
+   
+    VAPoR::DataMgr* dataMgr = getDataMgr(); 
+    std::vector<std::string> twoDVars = dataMgr->GetDataVarNames( 2 );
 
     std::vector<std::string> activeVars;
     if ( _activeDim == 3 ) {
-        activeVars = _dataMgr->GetDataVarNames( 3 );
+        activeVars = dataMgr->GetDataVarNames( 3 );
     }
     else {
         activeVars = twoDVars;
     }
 
-    VAPoR::RenderParams* rParams = dynamic_cast< VAPoR::RenderParams* >( _params );
-    _fidelityWidget->Update( rParams, _paramsMgr, _dataMgr );
+    VAPoR::ParamsBase* params = getParams();
+    VAPoR::RenderParams* rParams = dynamic_cast< VAPoR::RenderParams* >( params );
+    VAPoR::ParamsMgr*  paramsMgr = getParamsMgr();
+    _fidelityWidget->Update( rParams, paramsMgr, dataMgr );
 
     //
     // These widgets must be updated manually because they cannot
@@ -256,22 +260,23 @@ void PVariablesWidget::updateGUI() const {
     // They cannot be added to a PGroup becuase they need to be
     // wrapped in a VContainer in order to be shown/hidden.
     //
-    _pscalarHLI2D->Update( rParams, _paramsMgr, _dataMgr );
-    _pXFieldHLI2D->Update( rParams, _paramsMgr, _dataMgr );
-    _pYFieldHLI2D->Update( rParams, _paramsMgr, _dataMgr );
-    _pZFieldHLI2D->Update( rParams, _paramsMgr, _dataMgr );
-    _pheightHLI2D->Update( rParams, _paramsMgr, _dataMgr );
-    _pcolorHLI2D->Update( rParams, _paramsMgr, _dataMgr );
+    _pscalarHLI2D->Update( rParams, paramsMgr, dataMgr );
+    _pXFieldHLI2D->Update( rParams, paramsMgr, dataMgr );
+    _pYFieldHLI2D->Update( rParams, paramsMgr, dataMgr );
+    _pZFieldHLI2D->Update( rParams, paramsMgr, dataMgr );
+    _pheightHLI2D->Update( rParams, paramsMgr, dataMgr );
+    _pcolorHLI2D->Update( rParams, paramsMgr, dataMgr );
 
-    _pscalarHLI3D->Update( rParams, _paramsMgr, _dataMgr );
-    _pXFieldHLI3D->Update( rParams, _paramsMgr, _dataMgr );
-    _pYFieldHLI3D->Update( rParams, _paramsMgr, _dataMgr );
-    _pZFieldHLI3D->Update( rParams, _paramsMgr, _dataMgr );
-    _pcolorHLI3D->Update( rParams, _paramsMgr, _dataMgr );
+    _pscalarHLI3D->Update( rParams, paramsMgr, dataMgr );
+    _pXFieldHLI3D->Update( rParams, paramsMgr, dataMgr );
+    _pYFieldHLI3D->Update( rParams, paramsMgr, dataMgr );
+    _pZFieldHLI3D->Update( rParams, paramsMgr, dataMgr );
+    _pcolorHLI3D->Update( rParams, paramsMgr, dataMgr );
 };
 
 void PVariablesWidget::_dimChanged() {
-    VAPoR::RenderParams* rParams = dynamic_cast< VAPoR::RenderParams* >( _params );
+    VAPoR::ParamsBase* params = getParams();
+    VAPoR::RenderParams* rParams = dynamic_cast< VAPoR::RenderParams* >( params );
 
     // Index 0 is 3D, 1 is 2D
     _activeDim = _dimCombo->GetCurrentIndex() == 0 ? 3 : 2;
@@ -288,11 +293,13 @@ DimFlags PVariablesWidget::GetDimFlags() const {
 }
 
 void PVariablesWidget::Configure2DFieldVars() {
-    VAPoR::RenderParams* rParams = dynamic_cast< VAPoR::RenderParams* >( _params );
+    VAPoR::ParamsBase* params = getParams();
+    VAPoR::RenderParams* rParams = dynamic_cast< VAPoR::RenderParams* >( params );
     rParams->SetDefaultVariables( 2, false );
 }
 
 void PVariablesWidget::Configure3DFieldVars() {
-    VAPoR::RenderParams* rParams = dynamic_cast< VAPoR::RenderParams* >( _params );
+    VAPoR::ParamsBase* params = getParams();
+    VAPoR::RenderParams* rParams = dynamic_cast< VAPoR::RenderParams* >( params );
     rParams->SetDefaultVariables( 3, false );
 }

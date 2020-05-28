@@ -7,22 +7,9 @@
 #include "PVariableSelectorHLI.h"
 #include "PLODSelectorHLI.h"
 
-namespace VAPoR {
-    class DataMgr;
-    class ParamsMgr;
-    class RenderParams;
-}
-
-//class PVariableSelector;
-//class VComboBox;
 class VLineComboBox;
 class VContainer;
 class VFidelitySection_PW;
-class PFidelityWidget3;
-class FidelityWidget3;
-class PSection;
-//class VLineItem;
-//class FidelityWidget2;
 
 class PVariablesWidget : public PWidget {
 

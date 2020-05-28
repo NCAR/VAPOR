@@ -27,7 +27,9 @@ void PRefinementSelector::dropdownIndexChanged( int index ) {
         value = _enumMap[index];
     }
 
-    VAPoR::RenderParams* rParams = dynamic_cast<VAPoR::RenderParams*>( _params );
+    VAPoR::ParamsBase* params = getParams();
+    VAPoR::RenderParams* rParams = dynamic_cast<VAPoR::RenderParams*>( params );
+    //VAPoR::RenderParams* rParams = dynamic_cast<VAPoR::RenderParams*>( _params );
     rParams->SetRefinementLevel(value);
 }
 
@@ -36,17 +38,18 @@ void PRefinementSelector::updateGUI() const {
     assert(rParams && "Params must be RenderParams");
     static_cast<void>(rParams);        // Silence unused variable warning
 
-    std::string varName = getCurrentVariable( rParams, _dataMgr, _variableFlags );
+    VAPoR::DataMgr* dataMgr = getDataMgr();
+    std::string varName = getCurrentVariable( rParams, dataMgr, _variableFlags );
 
     vector <long> multiresCFs;
     vector <string> multiresStrs;
     
-    int numLevels = _dataMgr->GetNumRefLevels(varName);
+    int numLevels = dataMgr->GetNumRefLevels(varName);
     vector <size_t> nGridPts;
     for (int l=0; l<numLevels; l++) {
 
         vector <size_t> dims_at_level;
-        int rc = _dataMgr->GetDimLensAtLevel(varName, l, dims_at_level);
+        int rc = dataMgr->GetDimLensAtLevel(varName, l, dims_at_level);
         VAssert(rc >= 0);
 
         size_t n = 1;
