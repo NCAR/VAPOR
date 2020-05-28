@@ -1,13 +1,8 @@
 #include <sstream>
-#include <qwidget.h>
-#include <QFileDialog>
 #include <QGroupBox>
-#include <QDesktopWidget>
 #include <QButtonGroup>
 #include <QHBoxLayout>
 #include <QRadioButton>
-
-#include <QPushButton>
 
 #include "vapor/RenderParams.h"
 #include "vapor/ParamsMgr.h"
@@ -20,7 +15,7 @@
 
 using namespace VAPoR;
 
-const std::string VFidelitySection::_sectionTitle = "Data Fidelity (VFidelitySection)";
+const std::string VFidelitySection::_sectionTitle = "Data Fidelity";
 
 // This namespace provides a function for the three Fidelity Widgets
 // (FidelityButtons, and comboBoxes for lod and ref) to acquire strings
@@ -30,8 +25,8 @@ namespace {
         VAPoR::RenderParams*      rParams,
         VAPoR::DataMgr*           dataMgr,
         VariableFlags             variableFlags,
-        std::vector<float>&        lodCFs,
-        std::vector<float>&        multiresCFs,
+        std::vector<float>&       lodCFs,
+        std::vector<float>&       multiresCFs,
         std::vector<std::string>& lodStrs,
         std::vector<std::string>& multiresStrs
     ) {
@@ -40,8 +35,6 @@ namespace {
         multiresCFs.clear();
         multiresStrs.clear();
 
-        //VariableGetter varGetter( rParams, dataMgr, variableFlags );
-        //std::string varName = varGetter.getCurrentVariable();
         std::string varName = getCurrentVariable( rParams, dataMgr, variableFlags );
         VAssert(! varName.empty());
         int numLevels = dataMgr->GetNumRefLevels(varName);
@@ -97,12 +90,12 @@ VFidelitySection::VFidelitySection()
     _fidelityButtons = new VFidelityButtons();
     layout()->addWidget( _fidelityButtons );
 
-    _lodCombo = new VLineComboBox( "Level of detail (VLineComboBox)" );
+    _lodCombo = new VLineComboBox( "Level of detail" );
     layout()->addWidget( _lodCombo );
     connect( _lodCombo, &VLineComboBox::IndexChanged,
         this, &VFidelitySection::setCompRatio );
 
-    _refCombo = new VLineComboBox( "Refinement Level (VLineComboBox)" );
+    _refCombo = new VLineComboBox( "Refinement level" );
     layout()->addWidget( _refCombo );
     connect( _refCombo, &VLineComboBox::IndexChanged,
         this, &VFidelitySection::setNumRefinements );
@@ -158,7 +151,6 @@ void VFidelitySection::setCompRatio( int num ) {
 VFidelityButtons::VFidelityButtons()
     : VLineItem( "Fidelity", _fidelityBox = new QGroupBox("low <--> high") )
 {
-    //_fidelityBox      = new QGroupBox("low <--> high");
     _fidelityBox->setAlignment( Qt::AlignHCenter );
     _fidelityButtons  = new QButtonGroup(_fidelityBox);
     QHBoxLayout* hlay = new QHBoxLayout(_fidelityBox);
@@ -303,5 +295,3 @@ void VFidelityButtons::setFidelity(int buttonID) {
     _rParams->SetRefinementLevel(ref);
     _paramsMgr->EndSaveStateGroup();
 }
-
-

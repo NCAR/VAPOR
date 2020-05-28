@@ -1,12 +1,12 @@
 #pragma once
 
 #include "PWidget.h"
-#include "VSection.h"
 #include "Flags.h"
 
 #include "PVariableSelectorHLI.h"
 #include "PLODSelectorHLI.h"
 
+class VSection;
 class VLineComboBox;
 class VContainer;
 class VFidelitySection_PW;

@@ -1,7 +1,5 @@
 #include "VComboBox.h"
 
-#include <iostream>
-
 VComboBox::VComboBox( const std::vector<std::string> &values )
 : VContainer()
 {
