@@ -22,11 +22,10 @@ namespace VAPoR {
 }
 
 class GLSliceImageWindow;
-//#include "PFidelityWidget.h"
-class PFidelityWidget3;
-class VVariablesWidget;
+//class PFidelityWidget3;
+//class VVariablesWidget;
 class PVariablesWidget;
-class FidelityWidget3;
+//class FidelityWidget3;
 class VVariablesContainer;
 
 //!
