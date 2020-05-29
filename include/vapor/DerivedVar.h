@@ -229,7 +229,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 
 
-class PARAMS_API DerivedCFVertCoordVarFactory {
+class VDF_API DerivedCFVertCoordVarFactory {
 public:
  static DerivedCFVertCoordVarFactory *Instance() {
 	static DerivedCFVertCoordVarFactory instance;
