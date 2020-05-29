@@ -2,12 +2,17 @@
 
 #include "vapor/RenderParams.h"
 
-// I don't understand why we need to include PWidget.h to use HLI widgets.
-// Comment the line below, and many errors arise that are not clear to me.
+#include "PGroup.h"
+
+// If we don't use a PGroup here, we need to include PWidget.h.  However,
+// this code should not need to.  We never directly reference a PWidget.
+// 
+// If we don't include PWidget.h in the above circumstance, the compiler
+// throws a complex error within the PWidgetHLIBase macro.
+//
 // -Scott
 //#include "PWidget.h"
 
-#include "PGroup.h"
 
 #include "VFidelitySection_PW.h"
 #include "VFidelitySection.h"   // This is where VFidelityButtons is defined
