@@ -208,7 +208,7 @@ class VDF_API DerivedCFVertCoordVar : public DerivedCoordVar {
 //
 /////////////////////////////////////////////////////////////////////////
 
-class PARAMS_API DerivedCFVertCoordVarFactory {
+class VDF_API DerivedCFVertCoordVarFactory {
   public:
     static DerivedCFVertCoordVarFactory *Instance() {
         static DerivedCFVertCoordVarFactory instance;
