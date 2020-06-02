@@ -12,10 +12,12 @@ class PRefinementSelectorHLI :
         PRefinementSelectorHLI(
             typename PWidgetHLIBase<P, long>::GetterType getter,
             typename PWidgetHLIBase<P, long>::SetterType setter
-        ) : PRefinementSelector(),
+        ) : 
+            PRefinementSelector(),
             PWidgetHLIBase<P, long> (
                 (PWidget*)this,
                 getter,
                 setter
-            ) {}
+            ) 
+        {}
 };

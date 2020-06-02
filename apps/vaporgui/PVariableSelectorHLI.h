@@ -20,12 +20,14 @@ public:
         const std::string &label,
         typename PWidgetHLIBase<P, std::string>::GetterType getter,
         typename PWidgetHLIBase<P, std::string>::SetterType setter
-    ) : PVariableSelector2D( "", label ),
+    ) : 
+        PVariableSelector2D( "", label ),
         PWidgetHLIBase<P, std::string> (
             (PWidget*)this,
             getter,
             setter
-        ) {}
+        ) 
+    {}
 };
 
 template<class P>
@@ -39,12 +41,14 @@ public:
         const std::string &label,
         typename PWidgetHLIBase<P, std::string>::GetterType getter,
         typename PWidgetHLIBase<P, std::string>::SetterType setter
-    ) : PVariableSelector2D( "", label ),
+    ) : 
+        PVariableSelector2D( "", label ),
         PWidgetHLIBase<P, std::string> (
             (PWidget*)this,
             getter,
             setter
-        ) {}
+        ) 
+    {}
 };
 
 template<class P>
@@ -58,10 +62,12 @@ public:
         const std::string &label,
         typename PWidgetHLIBase<P, std::string>::GetterType getter,
         typename PWidgetHLIBase<P, std::string>::SetterType setter
-    ) : PVariableSelector3D( "", label ),
+    ) : 
+        PVariableSelector3D( "", label ),
         PWidgetHLIBase<P, std::string> (
             (PWidget*)this,
             getter,
             setter
-        ) {}
+        ) 
+    {}
 };

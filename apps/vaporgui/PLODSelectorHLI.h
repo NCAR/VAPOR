@@ -17,10 +17,12 @@ class PLODSelectorHLI :
         PLODSelectorHLI(
             typename PWidgetHLIBase<P, long>::GetterType getter,
             typename PWidgetHLIBase<P, long>::SetterType setter
-        ) : PLODSelector(),
+        ) : 
+            PLODSelector(),
             PWidgetHLIBase<P, long> (
                 (PWidget*)this,
                 getter,
                 setter
-            ) {}
+            ) 
+        {}
 };
