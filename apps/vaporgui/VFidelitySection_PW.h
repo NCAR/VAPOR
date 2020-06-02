@@ -4,6 +4,14 @@
 #include "vapor/MyBase.h"
 #include "Flags.h"
 #include "VSection.h"
+
+//
+// Include HLI template objects instead of predeclaring them, as per
+// Google's C++ style guide.
+//
+// https://google.github.io/styleguide/cppguide.html#Forward_Declarations  
+//
+
 #include "PLODSelectorHLI.h"
 #include "PRefinementSelectorHLI.h"
 

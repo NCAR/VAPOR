@@ -2,25 +2,36 @@
 
 #include "vapor/RenderParams.h"
 
-#define COMPILER_ERROR false
+// We must remember to explicitly include PWidget.h in all .cpp files that use 
+// HLI PWidgets.  A very complex compiler error arises if we forget to do this.
+// 
+// Here, we are including PWidgets.h by including PGroup.h.  
+//
+// I'm not sure why this is the case, since we should already have PWidget.h
+// in this file, through the following sequence of includes:
+//
+// > #include "VFidelitySection_PW.h"
+//   > #include "PLODSelectorHLI.h"
+//     > #include "PLODSelector.h"
+//       > #include "PEnumDropdown.h"
+//         > #include "PLineItem.h"
+//           > #include "PWidget.h"
+//
 
+//#define MAKE_COMPILER_ERROR
 
-#ifndef COMPILER_ERROR
-#include "PGroup.h"
+#ifdef MAKE_COMPILER_ERROR
+    // Do not include PWidget.h through PGroup.h, or any other means
+    //
+    // Also, do not use PGroup for layout management
+#else
+    #include "PGroup.h"
 #endif
 
-// If we don't use a PGroup here, we need to include PWidget.h.  However,
-// this code should not need to.  We never directly reference a PWidget.
-// 
-// If we don't include PWidget.h in the above circumstance, the compiler
-// throws a complex error within the PWidgetHLIBase macro.
-//
-// -Scott
-//#include "PWidget.h"
 
 
-#include "VFidelitySection_PW.h"
-#include "VFidelitySection.h"   // This is where VFidelityButtons is defined
+#include "VFidelitySection_PW.h"  // 
+#include "VFidelitySection.h"     // This is where VFidelityButtons is defined
 
 const std::string VFidelitySection_PW::_sectionTitle = "Data Fidelity";
 
@@ -30,27 +41,31 @@ VFidelitySection_PW::VFidelitySection_PW()
     _fidelityButtons = new VFidelityButtons();
     layout()->addWidget( _fidelityButtons );
 
+#ifdef MAKE_COMPILER_ERROR
+
+#else  // Use PGroup
     _pGroup = new PGroup();
     layout()->addWidget( _pGroup );
+#endif
 
     _plodHLI = new PLODSelectorHLI<VAPoR::RenderParams>(
         &VAPoR::RenderParams::GetCompressionLevel,
         &VAPoR::RenderParams::SetCompressionLevel
     );
-#ifndef COMPILER_ERROR
-    _pGroup->Add( _plodHLI );
-#else
+#ifdef MAKE_COMPILER_ERROR
     layout()->addWidget( _plodHLI );
+#else
+    _pGroup->Add( _plodHLI );
 #endif
 
     _pRefHLI = new PRefinementSelectorHLI<VAPoR::RenderParams>(
         &VAPoR::RenderParams::GetRefinementLevel,
         &VAPoR::RenderParams::SetRefinementLevel
     );
-#ifndef COMPILER_ERROR
-    _pGroup->Add( _pRefHLI );
-#else
+#ifdef MAKE_COMPILER_ERROR
     layout()->addWidget( _pRefHLI );
+#else
+    _pGroup->Add( _pRefHLI );
 #endif
 }
 
@@ -76,7 +91,12 @@ void VFidelitySection_PW::Update(
     _paramsMgr = paramsMgr;
     _rParams = rParams;
 
+#ifdef MAKE_COMPILER_ERROR
+    _pRefHLI->Update( _rParams, _paramsMgr, _dataMgr );
+    _plodHLI->Update( _rParams, _paramsMgr, _dataMgr );
+#else
     _pGroup->Update( _rParams, _paramsMgr, _dataMgr );
+#endif
 
     _fidelityButtons->Update( _rParams, _paramsMgr, _dataMgr );
 }
