@@ -11,7 +11,6 @@
 #include "VariablesWidget.h"
 #include "VLineComboBox.h"
 #include "VSliderEdit.h"
-#include "VariablesWidget2.h"
 #include "SliceSubtabs.h"
 #include <QTabWidget>
 

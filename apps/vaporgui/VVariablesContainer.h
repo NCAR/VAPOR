@@ -12,6 +12,11 @@ namespace VAPoR {
 class VVariablesSection;
 class VFidelitySection;
 
+//! class VVariablesContainer
+//! A VContainer that holds pointers to a VVariablesSection, 
+//! and a VFidelitySection.  Updates, and reinits these pointers
+//! as necessary.
+
 class VVariablesContainer : public VContainer {
 
     Q_OBJECT

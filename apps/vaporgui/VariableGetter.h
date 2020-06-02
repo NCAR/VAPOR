@@ -2,9 +2,8 @@
 
 #include "Flags.h"
 
-//! \class VariableGetter
-//! A class that takes flags that indicate variable type on construction,
-//! and looks up the currently active variable for that type.
+//! A function in an anonymous namespace.  Takes flags that indicate variable 
+//! type, then looks up the currently active variable for that type.
 
 namespace {
     std::string getCurrentVariable(
