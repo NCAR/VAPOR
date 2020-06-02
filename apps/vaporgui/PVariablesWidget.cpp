@@ -11,12 +11,76 @@
 #include <QSpacerItem>
 
 const std::string PVariablesWidget::_sectionTitle = "Variable Selection";
+    
+// The MAKE_COMPILER_ERROR macro will swap the setter and getter functions for 
+// _pscalarHLI3d, causing the compilation to fail.  This error (shown below) 
+// was hard to decipher.
+//
+//
+// MAKE_COMPILER_ERROR:
+//   /Users/pearse/VAPOR/apps/vaporgui/PVariablesWidget.cpp:34:25: error: no matching constructor for
+//         initialization of 'PVariableSelector3DHLI<VAPoR::RenderParams>'
+//       _pscalarHLI3D = new PVariableSelector3DHLI<VAPoR::RenderParams>(
+//                           ^
+//   /Users/pearse/VAPOR/apps/vaporgui/PVariableSelectorHLI.h:61:5: note: candidate constructor not viable: no
+//         known conversion from 'void (VAPoR::RenderParams::*)(std::__1::string)' to 'typename
+//         PWidgetHLIBase<RenderParams, std::string>::GetterType' (aka 'function<basic_string<char,
+//         char_traits<char>, allocator<char> > (VAPoR::RenderParams *)>') for 2nd argument
+//       PVariableSelector3DHLI(
+//       ^
+//   /Users/pearse/VAPOR/apps/vaporgui/PVariableSelectorHLI.h:55:7: note: candidate constructor
+//         (the implicit copy constructor) not viable: requires 1 argument, but 3 were provided
+//   class PVariableSelector3DHLI :
+//         ^
+//   1 error generated.
+//   make[2]: *** [apps/vaporgui/CMakeFiles/vapor.dir/PVariablesWidget.cpp.o] Error 1
+//   make[1]: *** [apps/vaporgui/CMakeFiles/vapor.dir/all] Error 2
+//   make: *** [all] Error 2
+//
+//
+//
+// Normal type mismatch error (see line 82):
+//    /Users/pearse/VAPOR/apps/vaporgui/VFidelitySection_PW.cpp:82:26: error: cannot initialize a parameter of
+//          type 'QWidget *' with an rvalue of type 'int'
+//        layout()->addWidget( (int)1 );
+//                             ^~~~~~
+//    /usr/local/VAPOR-Deps/2019-Aug/Qt/5.13.2/clang_64/lib/QtWidgets.framework/Headers/qboxlayout.h:74:29: note:
+//          passing argument to parameter here
+//        void addWidget(QWidget *, int stretch = 0, Qt::Alignment alignment = Qt::Alignment());
+//                                  ^
+//    /Users/pearse/VAPOR/apps/vaporgui/PVariablesWidget.cpp:61:21: error: no matching constructor for
+//          initialization of 'VSection'
+//        _vSection = new VSection( (int)1 );
+//                          ^
+//    /Users/pearse/VAPOR/apps/vaporgui/VSection.h:16:7: note: candidate constructor
+//          (the implicit copy constructor) not viable: no known conversion from 'int' to 'const VSection' for
+//          1st argument
+//    class VSection : public QTabWidget {
+//          ^
+//    /Users/pearse/VAPOR/apps/vaporgui/VSection.h:22:5: note: candidate constructor not viable: no known
+//          conversion from 'int' to 'const std::string' (aka 'const basic_string<char, char_traits<char>,
+//          allocator<char> >') for 1st argument
+//        VSection(const std::string &title);
+//        ^
+//    1 error generated.
+//    make[2]: *** [apps/vaporgui/CMakeFiles/vapor.dir/VFidelitySection_PW.cpp.o] Error 1
+//    make[2]: *** Waiting for unfinished jobs....
+//    1 error generated.
+//    make[2]: *** [apps/vaporgui/CMakeFiles/vapor.dir/PVariablesWidget.cpp.o] Error 1
+//    make[1]: *** [apps/vaporgui/CMakeFiles/vapor.dir/all] Error 2
+//    make: *** [all] Error 2
+//
+//#define MAKE_COMPILER_ERROR
+//
 
 PVariablesWidget::PVariablesWidget() 
     : PWidget( "", _container = new VContainer( new QVBoxLayout ) ),
     _activeDim( 3 ),
     _initialized( false )
 {
+    // Uncomment this line to reproduce the "Normal type mismatch error, shown above"
+    //_vSection = new VSection( (int)1 );
+
     _vSection = new VSection( "Variable Selection" );
     _container->layout()->addWidget( _vSection );
 
@@ -28,10 +92,13 @@ PVariablesWidget::PVariablesWidget()
     
     _pscalarHLI3D = new PVariableSelector3DHLI<VAPoR::RenderParams>( 
         "Variable name",
-        //&VAPoR::RenderParams::SetVariableName,
-        //&VAPoR::RenderParams::GetVariableName
+#ifdef MAKE_COMPILER_ERROR
+        &VAPoR::RenderParams::SetVariableName,
+        &VAPoR::RenderParams::GetVariableName
+#else
         &VAPoR::RenderParams::GetVariableName,
         &VAPoR::RenderParams::SetVariableName
+#endif
     );
     _pWidgetVec.push_back( _pscalarHLI3D );
     _pscalarHLIContainer3D = new VContainer();
