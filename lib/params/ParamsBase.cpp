@@ -258,6 +258,14 @@ string ParamsBase::GetValueString(
 	return(v);
 }
 
+/*template <typename T>
+bool ParamsBase::_validate( 
+    const std::string& tag,
+    const T& value
+) {
+    std::function validator = _validationMap[tag];
+    return validator( value );
+}*/
 
 void ParamsBase::SetValueLong(
 	const string &tag, string description, long value

@@ -15,9 +15,6 @@ void PLODSelector::Reinit( VariableFlags varFlags ) {
     _variableFlags = varFlags;
 }   
 
-// Override PEnumDropdown::dropdownIndexChanged to call
-// RenderParams setter directly, instead of PWidget::setParamsLong.
-// PWidget::setParamsLong depends on a tag, which we are not using
 void PLODSelector::dropdownIndexChanged( int index ) {
     int value;
     if (_enumMap.empty()) {

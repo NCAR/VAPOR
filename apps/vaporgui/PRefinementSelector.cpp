@@ -27,10 +27,10 @@ void PRefinementSelector::dropdownIndexChanged( int index ) {
         value = _enumMap[index];
     }
 
-    VAPoR::ParamsBase* params = getParams();
-    VAPoR::RenderParams* rParams = dynamic_cast<VAPoR::RenderParams*>( params );
-    //VAPoR::RenderParams* rParams = dynamic_cast<VAPoR::RenderParams*>( _params );
-    rParams->SetRefinementLevel(value);
+    setParamsLong( (long)index );
+    //VAPoR::ParamsBase* params = getParams();
+    //VAPoR::RenderParams* rParams = dynamic_cast<VAPoR::RenderParams*>( params );
+    //rParams->SetRefinementLevel(value);
 }
 
 void PRefinementSelector::updateGUI() const {
