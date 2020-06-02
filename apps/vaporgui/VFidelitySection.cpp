@@ -17,9 +17,16 @@ using namespace VAPoR;
 
 const std::string VFidelitySection::_sectionTitle = "Data Fidelity";
 
+//
+// Note: Much of this file is legacy code that has been refactored on 5/2020.
+//       Further refactorization should be considered.
+//
+
 // This namespace provides a function for the three Fidelity Widgets
-// (FidelityButtons, and comboBoxes for lod and ref) to acquire strings
-// that correspond to different refinement and compression factors.
+// (FidelityButtons, PLODSelector, and PRefinementSelector) to acquire strings
+// for presenting different refinement and compression factors to the user.
+//
+// IE - "0 (500:1), 1 (100:1), ..." instead of "0, 1, 2..." for LOD options
 namespace {
     void getCompressionFactors(
         VAPoR::RenderParams*      rParams,
@@ -35,7 +42,11 @@ namespace {
         multiresCFs.clear();
         multiresStrs.clear();
 
-        std::string varName = getCurrentVariable( rParams, dataMgr, variableFlags );
+        std::string varName = getCurrentVariable( 
+            rParams, 
+            dataMgr, 
+            variableFlags 
+        );
         VAssert(! varName.empty());
         int numLevels = dataMgr->GetNumRefLevels(varName);
 

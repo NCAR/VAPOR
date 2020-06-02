@@ -12,6 +12,10 @@ class QGroupBox;
 class VLineComboBox;
 class VFidelityButtons;
 
+//! class VFidelitySection
+//! A VSection that encapsulates VWidgets (VFidelityButtons, and a 
+//! VLineComboBox for the LOD and Refinement selectors.
+
 class VFidelitySection : public VSection
 {
     Q_OBJECT
@@ -51,6 +55,11 @@ class VFidelitySection : public VSection
         void setCompRatio( int num );
 };
 
+//! class VFidelityButtons
+//! A VLineItem that holds a label on the left, and a QButtonGroup
+//! on the right.  The QButtonGroup holds a set of radio buttons that
+//! each map to a pair of LOD and Refinement values, allowing the user
+//! to linearly increase the quality of their rendering.
 class VFidelityButtons : public VLineItem
 {
 

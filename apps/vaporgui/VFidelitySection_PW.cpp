@@ -2,7 +2,12 @@
 
 #include "vapor/RenderParams.h"
 
+#define COMPILER_ERROR false
+
+
+#ifndef COMPILER_ERROR
 #include "PGroup.h"
+#endif
 
 // If we don't use a PGroup here, we need to include PWidget.h.  However,
 // this code should not need to.  We never directly reference a PWidget.
@@ -32,15 +37,21 @@ VFidelitySection_PW::VFidelitySection_PW()
         &VAPoR::RenderParams::GetCompressionLevel,
         &VAPoR::RenderParams::SetCompressionLevel
     );
-    //layout()->addWidget( _plodHLI );
+#ifndef COMPILER_ERROR
     _pGroup->Add( _plodHLI );
+#else
+    layout()->addWidget( _plodHLI );
+#endif
 
     _pRefHLI = new PRefinementSelectorHLI<VAPoR::RenderParams>(
         &VAPoR::RenderParams::GetRefinementLevel,
         &VAPoR::RenderParams::SetRefinementLevel
     );
-    //layout()->addWidget( _pRefHLI );
+#ifndef COMPILER_ERROR
     _pGroup->Add( _pRefHLI );
+#else
+    layout()->addWidget( _pRefHLI );
+#endif
 }
 
 
@@ -66,8 +77,6 @@ void VFidelitySection_PW::Update(
     _rParams = rParams;
 
     _pGroup->Update( _rParams, _paramsMgr, _dataMgr );
-    //_plodHLI->Update( _rParams, _paramsMgr, _dataMgr );
-    //_pRefHLI->Update( _rParams, _paramsMgr, _dataMgr );
 
     _fidelityButtons->Update( _rParams, _paramsMgr, _dataMgr );
 }
