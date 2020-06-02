@@ -11,6 +11,11 @@ class VLineComboBox;
 class VContainer;
 class VFidelitySection_PW;
 
+//! \class PVariablesWidget
+//! A PWidget that encapsulates Variable and Fidelity selectors.
+//! These Variable and Fidelity selectors are implemented as
+//! PWidgets wherever possible, and as VWidgets elsewhere.
+
 class PVariablesWidget : public PWidget {
 
     Q_OBJECT

@@ -14,7 +14,6 @@ class PRefinementSelector : public PEnumDropdown {
     
 public:
     
-    //PRefinementSelector(const std::string &tag, const std::string &label="");
     PRefinementSelector();
     void Reinit( VariableFlags varFlags );
 

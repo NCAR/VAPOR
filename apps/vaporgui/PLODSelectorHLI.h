@@ -3,6 +3,11 @@
 #include "PWidgetHLI.h"
 #include "PLODSelector.h"
 
+//! \class PLODSelectorHLI
+//! A High Level Interface class for PLODSelector
+//! \copydoc PLODSelector
+//! \copydoc PWidgetHLI
+
 template<class P>
 class PLODSelectorHLI :
     public PLODSelector,
