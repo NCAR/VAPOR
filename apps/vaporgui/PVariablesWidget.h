@@ -51,6 +51,8 @@ private:
     VContainer*              _container;
     VLineComboBox*           _dimCombo;
 
+    std::vector<PWidget*>    _pWidgetVec;
+
     PVariableSelector2DHLI<VAPoR::RenderParams>* _pscalarHLI2D;
     PVariableSelector3DHLI<VAPoR::RenderParams>* _pscalarHLI3D;
     PVariableSelector2DHLI<VAPoR::RenderParams>* _pXFieldHLI2D;
