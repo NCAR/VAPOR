@@ -22,8 +22,15 @@ VLineItem::VLineItem(const std::string &label, QWidget *centerWidget, QWidget *r
 }
 
 VLineItem::VLineItem(const std::string &label, QWidget *rightWidget)
-: VLineItem(label, (QLayoutItem*)new QSpacerItem(108, 20, QSizePolicy::Expanding, QSizePolicy::Minimum), rightWidget)
-{}
+: VLineItem(
+    label, 
+    (QLayoutItem*)new QSpacerItem(
+        0,
+        20, 
+        QSizePolicy::Expanding, 
+        QSizePolicy::Minimum), 
+    rightWidget
+) {}
 
 VLineItem::VLineItem(const std::string &label)
 {

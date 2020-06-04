@@ -302,10 +302,11 @@ MainForm::MainForm(
 
     // Now add a docking tabbed window on the left side.
 	//
-    _tabDockWindow = new QDockWidget(this );
+    //_tabDockWindow = new QDockWidget(this );
+    _tabDockWindow = new QDockWidget;
+    //_tabDockWindow->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    //_tabDockWindow->setFeatures(QDockWidget::NoDockWidgetFeatures);
     addDockWidget(Qt::LeftDockWidgetArea, _tabDockWindow );
-    _tabDockWindow->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    _tabDockWindow->setFeatures(QDockWidget::NoDockWidgetFeatures);
 
 	// Register additional params with the ParamsMgr
 	//
