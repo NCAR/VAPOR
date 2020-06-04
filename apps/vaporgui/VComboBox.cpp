@@ -4,6 +4,8 @@ VComboBox::VComboBox( const std::vector<std::string> &values )
 : VContainer()
 {
     _combo = new QComboBox;
+
+    _combo->setMinimumSize( 150, 20 );
 	
     // Disable scroll wheel
     //
