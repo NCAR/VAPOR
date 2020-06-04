@@ -1,17 +1,21 @@
 # To build:
 #   docker image build -t centos7:1.0 .
 
-FROM centos:centos7
+#FROM centos:centos7
+
+FROM centos:7.4.1708
 MAINTAINER The CentOS Project <cloud-ops@centos.org>
 
 CMD [ "/bin/bash" ]
 
-
-RUN yum -y clean all \
-    && yum -y clean metadata \
-    && yum -y update
+# Do not update yum!  updating system libraries renders Vapor incompatible on older
+# CentOS versions, such as those run on Casper and Hera
+#RUN yum -y clean all \
+#    && yum -y clean metadata \
+#    && yum -y update
 
 RUN yum -y install epel-release \
+    && yum -y install dbus \
     && yum -y install cmake3 \
     && yum -y install make \
     && yum -y install bsdtar \
@@ -44,7 +48,10 @@ RUN alternatives --install /usr/local/bin/cmake cmake /usr/bin/cmake3 20 \
 
 RUN mkdir -p /usr/local/VAPOR-Deps
 
-#Hack to download a file from google drive
+# Qt 5.12.4
+#RUN fileid="1q9U5FJIvWLvwNbKLVluCiSH-uAnQVgU1" \
+
+# Qt 5.13.2
 RUN fileid="1e7F3kDoKctBmB3NOF4dES2395oScb9_0" \
     && filename="/usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz" \
     && curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null \
