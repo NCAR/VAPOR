@@ -15,7 +15,16 @@ class VSliderEdit : public VContainer {
     Q_OBJECT
 
 public:
-    VSliderEdit( double min=0., double max=1., double value=0. );
+    VSliderEdit( 
+        double min   = 0., 
+        double max   = 1., 
+        double value = 0.,
+        bool intType = false
+    );
+
+    VSliderEdit(
+        bool intType
+    );
 
     void SetIntType( bool type );
 
@@ -31,12 +40,22 @@ private:
     double     _maxValid;
     double     _value;
     bool       _isIntType;
+    bool       _scientific;
+    int        _decDigits;
+
+public slots:
+    void ShowContextMenu( const QPoint& );
 
 private slots:
     void _lineEditChanged( const std::string& value );
 
     void _sliderChanged( double value );
     void _sliderChangedIntermediate( double value );
+
+    void _decimalDigitsChanged( int value );
+    void _scientificClicked( bool value );
+    void _minRangeChanged( double value );
+    void _maxRangeChanged( double value );
 
 signals:
     void ValueChanged( double value );

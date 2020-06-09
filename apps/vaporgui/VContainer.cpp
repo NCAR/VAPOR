@@ -9,7 +9,7 @@ const int VContainer::_RIGHT_MARGIN  = 0;
 const int VContainer::_BOTTOM_MARGIN = 0;
 
 VContainer::VContainer() 
-: QWidget() 
+: QFrame() 
 {
     QHBoxLayout* layout = new QHBoxLayout;
     layout->setContentsMargins(

@@ -5,13 +5,13 @@
 
 #include <QMenu>
 
+#include "VActions.h"
 #include "VLineEdit.h"
 #include "ErrorReporter.h"
 
 VLineEdit::VLineEdit( const std::string& value )
 : VContainer(),
   _value( value ),
-  _isDouble( false ),
   _scientific( false ),
   _menuEnabled( false ),
   _decDigits( 10 )
@@ -33,8 +33,6 @@ void VLineEdit::UseDoubleMenu() {
 }
 
 void VLineEdit::SetValue( double value ) {
-    VAssert( _isDouble );
-    
     std::stringstream stream;
     if (_menuEnabled) {
         stream << std::fixed << std::setprecision( _decDigits );
@@ -62,8 +60,7 @@ std::string VLineEdit::GetValue() const {
 }
 
 void VLineEdit::SetIsDouble( bool isDouble ) {
-    _isDouble = isDouble;
-
+    UseDoubleMenu();
 }
 
 void VLineEdit::SetReadOnly(bool b)
@@ -78,18 +75,19 @@ void VLineEdit::emitLineEditChanged() {
 }
 
 void VLineEdit::ShowContextMenu( const QPoint& pos ) {
+std::cout << "void VLineEdit::ShowContextMenu( const QPoint& pos ) {" << std::endl;
     if ( !_menuEnabled )
         return;
 
     QMenu menu;
     
-    SpinBoxAction* decimalAction = new SpinBoxAction(tr("Decimal digits"), _decDigits);
-    connect( decimalAction, &SpinBoxAction::editingFinished,
+    VSpinBoxAction* decimalAction = new VSpinBoxAction(tr("Decimal digits"), _decDigits);
+    connect( decimalAction, &VSpinBoxAction::editingFinished,
         this, &VLineEdit::_decimalDigitsChanged );
     menu.addAction(decimalAction);
 
-    CheckBoxAction* checkBoxAction = new CheckBoxAction(tr("Scientific"), _scientific);
-    connect( checkBoxAction, &CheckBoxAction::clicked,
+    VCheckBoxAction* checkBoxAction = new VCheckBoxAction(tr("Scientific"), _scientific);
+    connect( checkBoxAction, &VCheckBoxAction::clicked,
         this, &VLineEdit::_scientificClicked );
     menu.addAction(checkBoxAction);
 

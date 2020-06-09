@@ -303,6 +303,7 @@ public:
  {
 
 	// register the class factory function
+    cout << "registering " << name << endl;
 	m_factoryFunctionRegistry[name] = classFactoryFunction;
  }
 

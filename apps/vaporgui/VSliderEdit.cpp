@@ -1,19 +1,30 @@
 #include <cmath>
 #include <iostream>
 
+#include <QMenu>
+
 #include "vapor/VAssert.h"
+
 #include "VSliderEdit.h"
 #include "VSlider.h"
 #include "VLineEdit.h"
+#include "VActions.h"
 
-VSliderEdit::VSliderEdit( double min, double max, double value )
-: VContainer(),
+VSliderEdit::VSliderEdit( 
+    double min, 
+    double max, 
+    double value,
+    bool intType 
+) : VContainer(),
   _minValid( min ),
   _maxValid( max ),
   _value( value ),
-  _isIntType( false )
+  _isIntType( intType ),
+  _scientific( false ),
+  _decDigits( 0 )
 {
     _lineEdit = new VLineEdit();
+    _lineEdit->SetIsDouble( true );
     _slider = new VSlider();
 
     SetRange( min, max );
@@ -22,15 +33,27 @@ VSliderEdit::VSliderEdit( double min, double max, double value )
     layout()->addWidget(_slider);
     layout()->addWidget(_lineEdit);
 
+    setContextMenuPolicy( Qt::CustomContextMenu );
+
+    setFrameStyle(QFrame::Panel | QFrame::Raised );
+
+    setContextMenuPolicy( Qt::CustomContextMenu );
+    connect( this, &VSliderEdit::customContextMenuRequested,
+        this, &VSliderEdit::ShowContextMenu );
+
     connect( _lineEdit, &VLineEdit::ValueChanged,
         this, &VSliderEdit::_lineEditChanged );
 
     connect( _slider, &VSlider::ValueChanged,
         this, &VSliderEdit::_sliderChanged );
-
     connect( _slider, &VSlider::ValueChangedIntermediate,
         this, &VSliderEdit::_sliderChangedIntermediate );
 }
+
+VSliderEdit::VSliderEdit(
+    bool intType
+) : VSliderEdit( 0, 1, 0, intType )
+{}
 
 double VSliderEdit::GetValue() const {
     return _value;
@@ -65,10 +88,10 @@ void VSliderEdit::SetRange( double min, double max ){
     _maxValid = max;
 }
 
-void VSliderEdit::SetIntType( bool type ) {
-    _isIntType = type;
-    SetValue( _value );
-}
+//void VSliderEdit::SetIntType( bool type ) {
+//    _isIntType = type;
+//    SetValue( _value );
+//}
 
 void VSliderEdit::_lineEditChanged( const std::string& value ) {
     try {
@@ -103,5 +126,47 @@ void VSliderEdit::_sliderChangedIntermediate( double value ) {
     else {
         _lineEdit->SetValue( std::to_string( value ) );
         emit ValueChangedIntermediate( value );
+    }
+}
+
+void VSliderEdit::ShowContextMenu( const QPoint& pos ) {
+    std::cout << "VSliderEdit ShowContextMenu" << std::endl;
+    QMenu menu;
+
+    VSpinBoxAction* decimalAction = new VSpinBoxAction(tr("Decimal digits"), _decDigits);
+    connect( decimalAction, &VSpinBoxAction::editingFinished,
+        this, &VSliderEdit::_decimalDigitsChanged );
+    menu.addAction(decimalAction);
+
+    VCheckBoxAction* checkBoxAction = new VCheckBoxAction(tr("Scientific"), _scientific);
+    connect( checkBoxAction, &VCheckBoxAction::clicked,
+        this, &VSliderEdit::_scientificClicked );
+    menu.addAction(checkBoxAction);
+
+    QPoint globalPos = mapToGlobal(pos);
+    menu.exec(globalPos);
+}
+
+void VSliderEdit::_decimalDigitsChanged( int value ) {
+    _decDigits = value;
+    SetValue( _value );
+}
+
+void VSliderEdit::_scientificClicked( bool value ) {
+    _scientific = value;
+    SetValue( _value );
+}
+
+void VSliderEdit::_minRangeChanged( double value ) {
+    _minValid = value;
+    if ( _value < _minValid ) {
+        SetValue( _minValid );
+    }
+}
+
+void VSliderEdit::_maxRangeChanged( double value ) {
+    _maxValid = value;
+    if ( _value > _maxValid ) {
+        SetValue( _maxValid );
     }
 }
