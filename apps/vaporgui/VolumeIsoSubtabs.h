@@ -7,6 +7,9 @@
 
 #include "vapor/VolumeIsoParams.h"
 #include "TFEditorIsoSurface.h"
+#include "PGroup.h"
+#include "PVariablesWidget.h"
+
 
 namespace VAPoR 
 {
@@ -28,6 +31,13 @@ public:
         setupUi(this);
         _variablesWidget->Reinit( (VariableFlags)(SCALAR | COLOR),
                                   (DimFlags)(THREED) );
+        _variablesWidget->hide();
+        ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);
+        PSection *vars = new PSection("Variable Selection");
+        vars->Add(new PScalarVariableSelector);
+        vars->Add(new PColorMapVariableSelector);
+        pg->Add(vars);
+        pg->Add(new PFidelityWidget);
     }
 
     void Update(VAPoR::DataMgr *dataMgr,
@@ -38,6 +48,7 @@ private slots:
 
 private:
     VAPoR::VolumeIsoParams* _isoParams;
+    PGroup *pg;
 };
 
 
