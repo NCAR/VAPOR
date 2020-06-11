@@ -20,6 +20,7 @@ VLineEdit::VLineEdit( const std::string& value )
     SetValue( _value );
     layout()->addWidget(_lineEdit);
 
+    _lineEdit->setContextMenuPolicy( Qt::NoContextMenu );
     connect( _lineEdit, &QLineEdit::editingFinished,
         this, &VLineEdit::emitLineEditChanged);
 }
@@ -27,9 +28,9 @@ VLineEdit::VLineEdit( const std::string& value )
 void VLineEdit::UseDoubleMenu() {
     _menuEnabled = true;
 
-    _lineEdit->setContextMenuPolicy( Qt::CustomContextMenu );
-    connect( _lineEdit, &QLineEdit::customContextMenuRequested,
-        this, &VLineEdit::ShowContextMenu );
+    //_lineEdit->setContextMenuPolicy( Qt::CustomContextMenu );
+    //connect( _lineEdit, &QLineEdit::customContextMenuRequested,
+    //    this, &VLineEdit::ShowContextMenu );
 }
 
 void VLineEdit::SetValue( double value ) {

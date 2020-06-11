@@ -117,6 +117,8 @@ set (SRCS
     VCheckBox.h
     VLineEdit.cpp
     VLineEdit.h
+    VLineEdit2.cpp
+    VLineEdit2.h
     VActions.h
     VSlider.cpp
     VSlider.h

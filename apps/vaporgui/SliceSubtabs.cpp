@@ -2,6 +2,7 @@
 #include "SliceSubtabs.h"
 #include "TFEditor.h"
 #include "VLineItem.h"
+#include "VLineEdit2.h"
 
 #define MIN_SAMPLES 1 
 #define MAX_SAMPLES 2000
@@ -30,6 +31,18 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
 	QComboBox* refinementCombo = _variablesWidget->_fidelityWidget->refinementCombo;
 	connect(refinementCombo, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(_setDefaultSampleRate()));
+
+    VIntLineEdit* vlie = new VIntLineEdit( 10 );
+    VLineItem* vli = new VLineItem( "VIntLineEdit", vlie );
+    layout()->addWidget( vli );
+    
+    VDoubleLineEdit* vdle = new VDoubleLineEdit( 1.234 );
+    vli = new VLineItem( "VDoubleLineEdit", vdle );
+    layout()->addWidget( vli );
+    
+    VStringLineEdit* vsle = new VStringLineEdit( "woot" );
+    vli = new VLineItem( "VStringLineEdit", vsle );
+    layout()->addWidget( vli );
 }
 
 void SliceVariablesSubtab::Update(

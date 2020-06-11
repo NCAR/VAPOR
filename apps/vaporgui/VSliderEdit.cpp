@@ -24,7 +24,7 @@ VSliderEdit::VSliderEdit(
   _decDigits( 0 )
 {
     _lineEdit = new VLineEdit();
-    _lineEdit->SetIsDouble( true );
+    //_lineEdit->SetIsDouble( true );
     _slider = new VSlider();
 
     SetRange( min, max );
@@ -34,6 +34,8 @@ VSliderEdit::VSliderEdit(
     layout()->addWidget(_lineEdit);
 
     setContextMenuPolicy( Qt::CustomContextMenu );
+    _lineEdit->setContextMenuPolicy( Qt::NoContextMenu );
+    //_slider->setContextMenuPolicy( Qt::CustomContextMenu );
 
     setFrameStyle(QFrame::Panel | QFrame::Raised );
 
