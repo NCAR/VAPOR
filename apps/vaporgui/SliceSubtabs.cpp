@@ -35,14 +35,30 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     VIntLineEdit* vlie = new VIntLineEdit( 10 );
     VLineItem* vli = new VLineItem( "VIntLineEdit", vlie );
     layout()->addWidget( vli );
+    connect( vlie, &VIntLineEdit::ValueChanged, 
+        this, &SliceVariablesSubtab::testVIntLineEdit );
     
     VDoubleLineEdit* vdle = new VDoubleLineEdit( 1.234 );
     vli = new VLineItem( "VDoubleLineEdit", vdle );
     layout()->addWidget( vli );
+    connect( vdle, &VDoubleLineEdit::ValueChanged, 
+        this, &SliceVariablesSubtab::testVDoubleLineEdit );
     
     VStringLineEdit* vsle = new VStringLineEdit( "woot" );
     vli = new VLineItem( "VStringLineEdit", vsle );
     layout()->addWidget( vli );
+    connect( vsle, &VStringLineEdit::ValueChanged, 
+        this, &SliceVariablesSubtab::testVStringLineEdit );
+}
+
+void SliceVariablesSubtab::testVIntLineEdit( int value ) {
+    std::cout << "testVIntLineEdit " << value << std::endl;
+}
+void SliceVariablesSubtab::testVDoubleLineEdit( double value ) {
+    std::cout << "testVDoubleLineEdit " << value << std::endl;
+}
+void SliceVariablesSubtab::testVStringLineEdit( std::string value ) {
+    std::cout << "testVStringLineEdit " << value << std::endl;
 }
 
 void SliceVariablesSubtab::Update(

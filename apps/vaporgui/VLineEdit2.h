@@ -17,59 +17,61 @@
 //! Handles string and double types, as well as precision and display of
 //! double values.
 
-class VLESignals : public QObject {
+class VIntLineEdit : public VContainer {
     Q_OBJECT
 
-protected:
-    VLESignals();
-    QLineEdit*  _lineEdit;
+    public:
+        VIntLineEdit( int value );
+        void SetValue( int value );
+        int  GetValue() const;
 
-slots:
-    void emitChange();
+    private:
+        QLineEdit* _lineEdit;
+        int        _value;
 
-signals:
-    void ValueChanged( int );
-    virtual void ValueChanged( double );
-    virtual void ValueChanged( std::string );
+    private slots:
+        void emitChange();
+
+    signals:
+        void ValueChanged( const int value );
 };
 
-template <class T>
-//class VLineEdit2 : public VLESignals, public VContainer {
-class VLineEdit2 : public VLESignals, public VContainer {
+class VDoubleLineEdit : public VContainer {
+    Q_OBJECT
 
-public:
-    VLineEdit2( const T& value );
-    T    GetValue() const;
-    void SetValue( T value );
-    //void emitLineEditChanged();
+    public:
+        VDoubleLineEdit( double value );
 
-protected:
-    //VLineEdit2( const T& value );
-    T           _value;
+        void SetValue( double value );
+        double GetValue() const;
+
+    private:
+        QLineEdit* _lineEdit;
+        double     _value;
+
+    private slots:
+        void emitChange();
+
+    signals:
+        void ValueChanged( const double value );
 };
 
+class VStringLineEdit : public VContainer {
+    Q_OBJECT
 
+    public:
+        VStringLineEdit( const std::string& value );
 
-class VIntLineEdit : public VLineEdit2<int> {
+        void SetValue( const std::string& value );
+        std::string GetValue() const;
 
-public:
-    VIntLineEdit( int value );
-    void SetValue( int value );
-    //int          GetValue() { return _value; }
-    //virtual void UseContextMenu() { std::cout << "VIntLineEdit::UseContextMenu()" << std::endl }
-    //virtual void emitLineEditChanged() { emit ValueChanged( int ); }
-};
+    private:
+        QLineEdit*  _lineEdit;
+        std::string _value;
 
-class VDoubleLineEdit : public VLineEdit2<double> {
+    private slots:
+        void emitChange();
 
-public:
-    VDoubleLineEdit( double value );
-    void SetValue( double value );
-};
-
-class VStringLineEdit : public VLineEdit2<std::string> {
-
-public:
-    VStringLineEdit( std::string value );
-    void SetValue( std::string value );
+    signals:
+        void ValueChanged( const std::string& value );
 };

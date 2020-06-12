@@ -33,6 +33,9 @@ public:
 
 private slots:
     void _setDefaultSampleRate();
+    void testVIntLineEdit( int value );
+    void testVDoubleLineEdit( double value );
+    void testVStringLineEdit( std::string value );
 
 private:
     VAPoR::SliceParams* _params;

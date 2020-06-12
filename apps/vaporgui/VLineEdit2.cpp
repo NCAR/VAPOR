@@ -9,65 +9,94 @@
 #include "VLineEdit2.h"
 #include "ErrorReporter.h"
 
-VLESignals::VLESignals( VLineEdit2* vle2 ) : public QObject {
-    connect( _lineEdit, &QLineEdit::editingFinished,
-        this, &VLESignals::emitChange );
-}
-
-//void VLESignals::emitChange() {
-//    emit ValueChanged
-//}
-
-template <class T>
-VLineEdit2<T>::VLineEdit2( const T& value )
-: VLESignals(),
-  VContainer(), 
-  _value( value )
+VIntLineEdit::VIntLineEdit( int value ) : 
+    VContainer(), 
+    _lineEdit( new QLineEdit ),
+    _value( value ) 
 {
-    _lineEdit = new QLineEdit;
-    layout()->addWidget(_lineEdit);
+    connect( _lineEdit, &QLineEdit::editingFinished, this, &VIntLineEdit::emitChange );
+    layout()->addWidget( _lineEdit );
+    SetValue( _value );
 }
 
-template <class T>
-T VLineEdit2<T>::GetValue() const {
-    return _value;
-}
+void VIntLineEdit::emitChange() {
+    bool legalInt;
+    auto str = _lineEdit->text();
 
-template <class T>
-void VLineEdit2<T>::SetValue( T value ) {
-    std::cout << "    void VLineEdit2<T>::SetValue( T value ) {" << std::endl;
+    double value = str.toDouble( &legalInt );
     
-    _value = value;
-}
-
-VIntLineEdit::VIntLineEdit( int value ) : VLineEdit2<int>( value ) {
-    SetValue( value );
+    if ( legalInt ) {
+        _value = (int)value;
+        emit ValueChanged( _value );
+    }
+    else {
+        _lineEdit->setText( QString::number( _value ) );
+    }
 }
 
 void VIntLineEdit::SetValue( int value ) {
-    _lineEdit->setText( QString::number( value ) );
-    std::cout << "void VIntLineEdit::SetValue( int value ) " << std::endl;
-    VLineEdit2::SetValue( value );
+    _value = value;
+    _lineEdit->setText( QString::number( _value ) );
 }
 
-VDoubleLineEdit::VDoubleLineEdit( double value ) : VLineEdit2<double>( value ) {
-    SetValue( value );
-    emit ValueChanged( _value );
+int VIntLineEdit::GetValue() const {
+    return _value;
+}
+
+VDoubleLineEdit::VDoubleLineEdit( double value ) : 
+    VContainer(), 
+    _lineEdit( new QLineEdit ),
+    _value( value ) 
+{
+    connect( _lineEdit, &QLineEdit::editingFinished, this, &VDoubleLineEdit::emitChange );
+    layout()->addWidget( _lineEdit );
+    SetValue( _value );
+}
+
+void VDoubleLineEdit::emitChange() {
+    bool legalDouble;
+    auto str = _lineEdit->text();
+
+    double value = str.toDouble( &legalDouble );
+    
+    if ( legalDouble ) {
+        _value = value;
+        emit ValueChanged( _value );
+    }
+    else {
+        _lineEdit->setText( QString::number( _value ) );
+    }
 }
 
 void VDoubleLineEdit::SetValue( double value ) {
-    _lineEdit->setText( QString::number( value ) );
-    std::cout << "void VDoubleLineEdit::SetValue( double value ) " << std::endl;
-    VLineEdit2::SetValue( value );
+    _value = value;
+    _lineEdit->setText( QString::number( _value ) );
 }
 
-VStringLineEdit::VStringLineEdit( std::string value ) : VLineEdit2<std::string>( value ) {
-    SetValue( value );
+double VDoubleLineEdit::GetValue() const {
+    return _value;
+}
+
+VStringLineEdit::VStringLineEdit( const std::string& value ) : 
+    VContainer(), 
+    _lineEdit( new QLineEdit ),
+    _value( value ) 
+{
+    connect( _lineEdit, &QLineEdit::editingFinished, this, &VStringLineEdit::emitChange );
+    layout()->addWidget( _lineEdit );
+    SetValue( _value );
+}
+
+void VStringLineEdit::emitChange() {
+    _value = _lineEdit->text().toStdString();
     emit ValueChanged( _value );
 }
 
-void VStringLineEdit::SetValue( std::string value ) {
-    _lineEdit->setText( QString::fromStdString( value ) );
-    std::cout << "void VStringLineEdit::SetValue( std::string value ) " << std::endl;
-    VLineEdit2::SetValue( value );
+void VStringLineEdit::SetValue( const std::string& value ) {
+    _value = value;
+    _lineEdit->setText( QString::fromStdString( _value ) );
+}
+
+std::string VStringLineEdit::GetValue() const {
+    return _value;
 }
