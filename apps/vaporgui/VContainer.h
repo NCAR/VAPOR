@@ -16,6 +16,10 @@
 class VContainer : public QFrame {
     Q_OBJECT
 
+public:
+    virtual QSize sizeHint() const;
+    //virtual QSize minimumSizeHint() const;
+
 protected:
     VContainer();
 

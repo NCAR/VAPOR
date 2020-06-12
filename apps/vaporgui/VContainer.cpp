@@ -1,3 +1,4 @@
+#include <iostream>
 #include <QEvent>
 #include <QWidget>
 
@@ -21,6 +22,7 @@ VContainer::VContainer()
     setLayout( layout );
 
     setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Preferred );
+    setSizePolicy( QSizePolicy::Maximum, QSizePolicy::Preferred );
 }
 
 MouseWheelWidgetAdjustmentGuard::MouseWheelWidgetAdjustmentGuard(QObject *parent) : QObject(parent)
@@ -38,3 +40,19 @@ bool MouseWheelWidgetAdjustmentGuard::eventFilter(QObject *o, QEvent *e)
 
     return QObject::eventFilter(o, e);
 }
+
+QSize VContainer::sizeHint() const {
+    QWidget* parent = this->parentWidget();
+    if ( layout()->count() > 1 ) {
+        std::cout << "small size hint " << parent->width()/4. << std::endl;
+        return QSize( parent->width() / 2., 20 );
+    }
+    else {
+        return QSize( parent->width()/3., 20 );
+    }
+}
+
+/*QSize VContainer::minimumSizeHint() const {
+    QWidget* parent = this->parentWidget();
+    return QSize( parent->width()/3., 20 );
+}*/
