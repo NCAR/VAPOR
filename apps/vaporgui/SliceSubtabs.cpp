@@ -3,6 +3,7 @@
 #include "TFEditor.h"
 #include "VLineItem.h"
 #include "VLineEdit2.h"
+#include "VSliderEdit.h"
 
 #define MIN_SAMPLES 1 
 #define MAX_SAMPLES 2000
@@ -49,6 +50,12 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     layout()->addWidget( vli );
     connect( vsle, &VStringLineEdit::ValueChanged, 
         this, &SliceVariablesSubtab::testVStringLineEdit );
+
+    VIntSliderEdit* vise = new VIntSliderEdit();
+    vli = new VLineItem( "VIntSliderEdit", vise );
+    layout()->addWidget( vli );
+    connect( vise, SIGNAL( ValueChanged( int ) ),
+        this, SLOT( testVIntSliderEdit( int ) ) );
 }
 
 void SliceVariablesSubtab::testVIntLineEdit( int value ) {
@@ -59,6 +66,10 @@ void SliceVariablesSubtab::testVDoubleLineEdit( double value ) {
 }
 void SliceVariablesSubtab::testVStringLineEdit( std::string value ) {
     std::cout << "testVStringLineEdit " << value << std::endl;
+}
+
+void SliceVariablesSubtab::testVIntSliderEdit( int value ) {
+    std::cout << "VIntSliderEdit value " << value << std::endl;
 }
 
 void SliceVariablesSubtab::Update(

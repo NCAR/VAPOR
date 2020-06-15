@@ -33,7 +33,7 @@ public:
 
     double GetValue() const;
 
-private:
+protected:
     VLineEdit* _lineEdit;
     VSlider*   _slider;
     double     _minValid;
@@ -46,7 +46,7 @@ private:
 public slots:
     void ShowContextMenu( const QPoint& );
 
-private slots:
+protected slots:
     void _lineEditChanged( const std::string& value );
 
     void _sliderChanged( double value );
@@ -63,4 +63,25 @@ signals:
 
     void ValueChangedIntermediate( double value );
     void ValueChangedIntIntermediate( int    value );
+};
+
+class VIntSliderEdit : public VSliderEdit {
+    Q_OBJECT
+
+public:
+    VIntSliderEdit(
+        int min   = 0,
+        int max   = 1,
+        int value = 0
+    );
+
+private slots:
+    void _sliderChanged( int value );
+    void _sliderChangedIntermediate( int value );
+    //void _minRangeChanged( int value );
+    //void _maxRangeChanged( int value );
+
+signals:
+    void ValueChanged( int value );
+    void ValueChangedIntermediate( int value );
 };

@@ -36,6 +36,7 @@ private slots:
     void testVIntLineEdit( int value );
     void testVDoubleLineEdit( double value );
     void testVStringLineEdit( std::string value );
+    void testVIntSliderEdit( int value );
 
 private:
     VAPoR::SliceParams* _params;

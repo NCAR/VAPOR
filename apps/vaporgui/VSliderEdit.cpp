@@ -172,3 +172,29 @@ void VSliderEdit::_maxRangeChanged( double value ) {
         SetValue( _maxValid );
     }
 }
+
+VIntSliderEdit::VIntSliderEdit(
+    int min,
+    int max,
+    int value
+) : VSliderEdit( min, max, value ) {}
+
+void VIntSliderEdit::_sliderChanged( int value ) {
+    SetValue( value );
+    std::cout << "SliderChanged " << value << std::endl;
+    emit ValueChanged( value );
+}
+
+void VIntSliderEdit::_sliderChangedIntermediate( int value ) {
+    std::cout << "SliderChangedInt " << value << std::endl;
+    _lineEdit->SetValue( std::to_string( (int)value ) );
+    emit ValueChangedIntermediate( value );
+}
+
+/*void VIntSliderEdit::_minRangeChanged( int value ) {
+    VSliderEdit::_minRangeChanged( value );
+}
+
+void VIntSliderEdit::_maxRangeChanged( int value ) {
+    VSliderEdit::_maxRangeChanged( value );
+}*/
