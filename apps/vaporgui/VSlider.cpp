@@ -47,6 +47,7 @@ void VSlider::SetRange( double min, double max ) {
 
     _minValid = min;
     _maxValid = max;
+    SetValue( GetValue() );
 }
 
 double VSlider::GetValue() const {

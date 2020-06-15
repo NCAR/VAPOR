@@ -4,6 +4,7 @@
 #include "VLineItem.h"
 #include "VLineEdit2.h"
 #include "VSliderEdit.h"
+#include "VFrame.h"
 
 #define MIN_SAMPLES 1 
 #define MAX_SAMPLES 2000
@@ -51,9 +52,14 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     connect( vsle, &VStringLineEdit::ValueChanged, 
         this, &SliceVariablesSubtab::testVStringLineEdit );
 
-    VSliderEdit* vise = new VSliderEdit(0, 10, 5, true);
+    //VSliderEdit* vise = new VSliderEdit(0, 10, 5, true);
+    VSection* foo = new VSection("foo");
+    VFrame* bar = new VFrame();
+    foo->layout()->addWidget( bar );
+    layout()->addWidget( foo );
+    VSliderEdit* vise = new VSliderEdit(true);
     vli = new VLineItem( "VSliderEdit", vise );
-    layout()->addWidget( vli );
+    bar->layout()->addWidget( vli );
     connect( vise, SIGNAL( ValueChanged( int ) ),
         this, SLOT( testVIntSliderEdit( int ) ) );
 }

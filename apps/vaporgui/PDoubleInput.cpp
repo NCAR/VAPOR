@@ -6,8 +6,8 @@
 PDoubleInput::PDoubleInput(const std::string &tag, const std::string &label)
 : PLineItem(tag, label, _doubleInput = new VLineEdit)
 {
-    _doubleInput->SetIsDouble(true);
-    connect(_doubleInput, &VLineEdit::ValueChanged, this, &PDoubleInput::doubleInputValueChanged);
+    _doubleInput->UseDoubleMenu();
+    connect( _doubleInput, SIGNAL( ValueChanged( double ) ), this, SLOT( doubleInputValueChanged( double ) ) );
 }
 
 void PDoubleInput::updateGUI() const
@@ -16,8 +16,7 @@ void PDoubleInput::updateGUI() const
     _doubleInput->SetValue(to_string(value));
 }
 
-void PDoubleInput::doubleInputValueChanged(const std::string &v)
+void PDoubleInput::doubleInputValueChanged( double d )
 {
-    double d = stod(v);
     setParamsDouble(d);
 }

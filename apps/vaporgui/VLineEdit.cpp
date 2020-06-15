@@ -28,9 +28,23 @@ VLineEdit::VLineEdit( const std::string& value )
 void VLineEdit::UseDoubleMenu() {
     _menuEnabled = true;
 
-    //_lineEdit->setContextMenuPolicy( Qt::CustomContextMenu );
-    //connect( _lineEdit, &QLineEdit::customContextMenuRequested,
-    //    this, &VLineEdit::ShowContextMenu );
+    _lineEdit->setContextMenuPolicy( Qt::CustomContextMenu );
+    connect( _lineEdit, &QLineEdit::customContextMenuRequested,
+        this, &VLineEdit::ShowContextMenu );
+}
+
+void VLineEdit::SetValue( int value ) {
+    std::stringstream stream;
+    if (_menuEnabled) {
+        if (_scientific)
+            stream << std::scientific;
+    }
+    stream << value << std::endl;
+    _value = stream.str();
+    
+    _lineEdit->blockSignals(true);
+    _lineEdit->setText( QString::fromStdString(_value) );
+    _lineEdit->blockSignals(false);
 }
 
 void VLineEdit::SetValue( double value ) {
@@ -60,10 +74,6 @@ std::string VLineEdit::GetValue() const {
     return _value;    
 }
 
-void VLineEdit::SetIsDouble( bool isDouble ) {
-    UseDoubleMenu();
-}
-
 void VLineEdit::SetReadOnly(bool b)
 {
     _lineEdit->setReadOnly(b);
@@ -73,21 +83,22 @@ void VLineEdit::emitLineEditChanged() {
     std::string value = _lineEdit->text().toStdString();
     SetValue( value );
     emit ValueChanged( _value );
+    emit ValueChanged( stod( _value ) );
+    emit ValueChanged( stoi( _value ) );
 }
 
 void VLineEdit::ShowContextMenu( const QPoint& pos ) {
-std::cout << "void VLineEdit::ShowContextMenu( const QPoint& pos ) {" << std::endl;
     if ( !_menuEnabled )
         return;
 
     QMenu menu;
     
-    VSpinBoxAction* decimalAction = new VSpinBoxAction(tr("Decimal digits"), _decDigits);
+    VSpinBoxAction* decimalAction = new VSpinBoxAction( "Decimal digits", _decDigits);
     connect( decimalAction, &VSpinBoxAction::editingFinished,
         this, &VLineEdit::_decimalDigitsChanged );
     menu.addAction(decimalAction);
 
-    VCheckBoxAction* checkBoxAction = new VCheckBoxAction(tr("Scientific"), _scientific);
+    VCheckBoxAction* checkBoxAction = new VCheckBoxAction( "Scientific", _scientific);
     connect( checkBoxAction, &VCheckBoxAction::clicked,
         this, &VLineEdit::_scientificClicked );
     menu.addAction(checkBoxAction);
@@ -97,11 +108,12 @@ std::cout << "void VLineEdit::ShowContextMenu( const QPoint& pos ) {" << std::en
 }
 
 void VLineEdit::_decimalDigitsChanged( int value ) {
+    std::cout << "void VLineEdit::_decimalDigitsChanged( int value )" << std::endl;
     _decDigits = value;
-    SetValue( _value );
+    SetValue( stod( _value ) );
 }
 
 void VLineEdit::_scientificClicked( bool value ) {
     _scientific = value;
-    SetValue( _value );
+    SetValue( stod( _value ) );
 }

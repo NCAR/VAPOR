@@ -183,21 +183,21 @@ void FlowSeedingSubtab::_createSeedingSection( QWidget* parent ) {
     //_xSeedSliderEdit->SetIntType(true);
     _xSeedSliderEdit->SetRange( MIN_AXIS_SEEDS, MAX_AXIS_SEEDS );
     _griddedSeedsFrame->addWidget( new VLineItem( "X axis seeds", _xSeedSliderEdit ) );
-    connect( _xSeedSliderEdit, &VSliderEdit::ValueChangedInt,
-        this, &FlowSeedingSubtab::_rakeNumOfSeedsChanged );
+    connect( _xSeedSliderEdit, SIGNAL( ValueChanged( int ) ),
+        this, SLOT( _rakeNumOfSeedsChanged() ) );
     _ySeedSliderEdit = new VSliderEdit( true );
     //_ySeedSliderEdit->SetIntType(true);
     _ySeedSliderEdit->SetRange( MIN_AXIS_SEEDS, MAX_AXIS_SEEDS );
     _griddedSeedsFrame->addWidget( new VLineItem("Y axis seeds", _ySeedSliderEdit ) );
-    connect( _ySeedSliderEdit, &VSliderEdit::ValueChangedInt,
-        this, &FlowSeedingSubtab::_rakeNumOfSeedsChanged );
+    connect( _ySeedSliderEdit, SIGNAL( ValueChanged( int ) ),
+        this, SLOT( _rakeNumOfSeedsChanged() ) );
     _zSeedSliderEdit = new VSliderEdit( true );
     //_zSeedSliderEdit->SetIntType(true);
     _zSeedSliderEdit->SetRange( MIN_AXIS_SEEDS, MAX_AXIS_SEEDS );
     _zSeedLine =  new VLineItem("Z axis seeds", _zSeedSliderEdit);
     _griddedSeedsFrame->addWidget( _zSeedLine );
-    connect( _zSeedSliderEdit, &VSliderEdit::ValueChangedInt,
-        this, &FlowSeedingSubtab::_rakeNumOfSeedsChanged );
+    connect( _zSeedSliderEdit, SIGNAL( ValueChanged( int ) ),
+        this, SLOT( _rakeNumOfSeedsChanged() ) );
 
     // List of seeds selection
     _listOfSeedsFileReader = new VFileReader();
@@ -218,18 +218,18 @@ Any line that is empty or starts with a # is not considered as input.");
     _randomSeedsSliderEdit = new VSliderEdit( MIN_RANDOM_SEEDS, MAX_RANDOM_SEEDS, 5, true );
     //_randomSeedsSliderEdit->SetIntType( true );
     _randomSeedsFrame->addWidget( new VLineItem("Seed count", _randomSeedsSliderEdit ) ); // 1st widget
-    connect( _randomSeedsSliderEdit, &VSliderEdit::ValueChangedInt,
-        this, &FlowSeedingSubtab::_randomNumOfSeedsChanged );
+    connect( _randomSeedsSliderEdit, SIGNAL( ValueChanged( int ) ),
+        this, SLOT( _randomNumOfSeedsChanged() ) );
 
     _biasWeightSliderEdit = new VSliderEdit(-10.0, 10.0, 0.0);
     _randomSeedsFrame->addWidget( new VLineItem( "Bias weight", _biasWeightSliderEdit ) ); // 2nd widget
-    connect( _biasWeightSliderEdit, &VSliderEdit::ValueChanged,
-        this, &FlowSeedingSubtab::_biasStrengthChanged );
+    connect( _biasWeightSliderEdit, SIGNAL( ValueChanged( double ) ),
+        this, SLOT( _biasStrengthChanged( double ) ) );
 
     _biasVariableComboBox = new VComboBox( std::vector<std::string>() );
     _randomSeedsFrame->addWidget( new VLineItem( "Bias variable", _biasVariableComboBox ) ); // 3rd widget
-    connect( _biasVariableComboBox, &VComboBox::ValueChanged,
-        this, &FlowSeedingSubtab::_biasVariableChanged );
+    connect( _biasVariableComboBox, SIGNAL( ValueChanged( std::string ) ),
+        this, SLOT( _biasVariableChanged( std::string ) ) );
     
     // Rake selector
     _rakeRegionSection = new VSection("Rake Region");
@@ -268,8 +268,8 @@ void FlowSeedingSubtab::_createIntegrationSection() {
 
     _streamlineSamplesSliderEdit = new VSliderEdit( true );
     //_streamlineSamplesSliderEdit->SetIntType(true);
-    connect( _streamlineSamplesSliderEdit, &VSliderEdit::ValueChangedInt,
-        this, &FlowSeedingSubtab::_streamlineSamplesChanged );
+    connect( _streamlineSamplesSliderEdit, SIGNAL( ValueChanged( int ) ),
+        this, SLOT( _streamlineSamplesChanged( int ) ) );
     _streamlineFrame->addWidget( new VLineItem("Integration steps", _streamlineSamplesSliderEdit));
 
     // Unsteady flow options
@@ -279,8 +279,8 @@ void FlowSeedingSubtab::_createIntegrationSection() {
 
     _pathlineLengthSliderEdit = new VSliderEdit( true );
     //_pathlineLengthSliderEdit->SetIntType(true);
-    connect( _pathlineLengthSliderEdit, &VSliderEdit::ValueChangedInt,
-        this, &FlowSeedingSubtab::_pathlineLengthChanged );
+    connect( _pathlineLengthSliderEdit, SIGNAL( ValueChanged( int ) ),
+        this, SLOT( _pathlineLengthChanged( int ) ) );
     VLineItem* lengthLE = new VLineItem("Pathline length", _pathlineLengthSliderEdit);
     QString lengthTip = "Controls the length of the pathlines.  The units for this parameter\n"
                       "are timesteps.  A pathline with a length of 3 will display a line\n"
@@ -291,8 +291,8 @@ void FlowSeedingSubtab::_createIntegrationSection() {
 
     _pathlineInjInterval = new VSliderEdit( true );
     //_pathlineInjInterval->SetIntType( true );
-    connect( _pathlineInjInterval, &VSliderEdit::ValueChangedInt,
-             this, &FlowSeedingSubtab::_seedInjIntervalChanged );
+    connect( _pathlineInjInterval, SIGNAL( ValueChanged( int ) ) ,
+             this, SLOT( _seedInjIntervalChanged( int ) ) );
     VLineItem* injectionLE = new VLineItem("Injection interval", _pathlineInjInterval);
     QString injectionTip = "Controls the period in which seeds are injected into the scene.\n"
                            "For example, a value of 3 will inject seeds every 3 time steps.";
@@ -302,9 +302,9 @@ void FlowSeedingSubtab::_createIntegrationSection() {
     // Universal options: Velocity multiplier and periodicity checkboxes
     //    
     _velocityMultiplierLineEdit = new VLineEdit();
-    _velocityMultiplierLineEdit->SetIsDouble( true );
-    connect( _velocityMultiplierLineEdit, &VLineEdit::ValueChanged,
-        this, &FlowSeedingSubtab::_velocityMultiplierChanged );
+    _velocityMultiplierLineEdit->UseDoubleMenu();
+    connect( _velocityMultiplierLineEdit, SIGNAL( ValueChanged( double ) ),
+        this, SLOT( _velocityMultiplierChanged( double ) ) );
     _integrationSection->layout()->addWidget( new VLineItem("Vector field  multiplier", _velocityMultiplierLineEdit));
 
     // Periodicity Checkboxes
@@ -606,7 +606,11 @@ FlowSeedingSubtab::_periodicClicked()
     _params->SetPeriodic( bools );
 }
 
-void
+void FlowSeedingSubtab::_velocityMultiplierChanged( double value ) {
+    _params->SetVelocityMultiplier( value );
+}
+
+/*void
 FlowSeedingSubtab::_velocityMultiplierChanged( const std::string& value )
 {
     double oldval = _params->GetVelocityMultiplier();
@@ -642,7 +646,7 @@ FlowSeedingSubtab::_velocityMultiplierChanged( const std::string& value )
     }
     else
         _velocityMultiplierLineEdit->SetValue( oldval );
-}
+}*/
 
 
 void 

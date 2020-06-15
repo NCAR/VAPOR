@@ -18,8 +18,8 @@ PSliderEdit *PSliderEdit::SetRange(double min, double max)
 PDoubleSliderEdit::PDoubleSliderEdit(const std::string &tag, const std::string &label)
 : PSliderEdit(tag, label)
 {
-    connect(_sliderEdit, &VSliderEdit::ValueChanged, this, &PDoubleSliderEdit::valueChanged);
-    connect(_sliderEdit, &VSliderEdit::ValueChangedIntermediate, this, &PDoubleSliderEdit::valueChangedIntermediate);
+    connect(_sliderEdit, SIGNAL( ValueChanged( double ) ), this, SLOT( valueChanged( double ) ) );
+    connect(_sliderEdit, SIGNAL( ValueChangedIntermediate( double ) ), this, SLOT( valueChangedIntermediate( double ) ) );
 }
 
 void PDoubleSliderEdit::updateGUI() const
@@ -43,9 +43,8 @@ void PDoubleSliderEdit::valueChangedIntermediate(double v)
 PIntegerSliderEdit::PIntegerSliderEdit(const std::string &tag, const std::string &label)
 : PSliderEdit(tag, label)
 {
-    //_sliderEdit->SetIntType(true);
-    connect(_sliderEdit, &VSliderEdit::ValueChangedInt, this, &PIntegerSliderEdit::valueChanged);
-    connect(_sliderEdit, &VSliderEdit::ValueChangedIntIntermediate, this, &PIntegerSliderEdit::valueChangedIntermediate);
+    connect(_sliderEdit, SIGNAL( ValueChanged( int ) ), this, SLOT( valueChanged( int ) ) );
+    connect(_sliderEdit, SIGNAL( ValueChangedIntermediate( int ) ), this, SLOT( valueChangedIntermediate( int ) ) );
 }
 
 void PIntegerSliderEdit::updateGUI() const

@@ -26,8 +26,8 @@ VFileSelector::VFileSelector(
 
     connect( _pushButton, &VPushButton::ButtonClicked,
         this, &VFileSelector::OpenFileDialog );
-    connect( _lineEdit, &VLineEdit::ValueChanged,
-        this, &VFileSelector::SetPathFromLineEdit );
+    connect( _lineEdit, SIGNAL( ValueChanged( std::string ) ),
+        this, SLOT( SetPathFromLineEdit( std::string ) ) );
 }
 
 std::string VFileSelector::GetValue() const {

@@ -23,13 +23,11 @@ class VLineEdit : public VContainer {
 public:
     VLineEdit( const std::string& value = "");
 
+    void SetValue( int value );
     void SetValue( double value );
     void SetValue( const std::string& value );
     std::string GetValue() const;
 
-    // Note: VLineEdit does NOT support an integer type at this point.
-    // When isDouble == false, it represents a string. 
-    void SetIsDouble( bool isDouble );
     //! Sets the line edit to read-only based on the value of b
     void SetReadOnly(bool b);
 
@@ -39,7 +37,6 @@ private:
     QLineEdit*  _lineEdit;
 
     std::string _value;
-    bool        _isDouble;
     bool        _scientific;
     bool        _menuEnabled;
     int         _decDigits;
@@ -55,4 +52,6 @@ private slots:
 
 signals:
     void ValueChanged( const std::string& value );
+    void ValueChanged( double value );
+    void ValueChanged( int value );
 };

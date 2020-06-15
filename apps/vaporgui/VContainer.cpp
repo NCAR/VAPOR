@@ -44,16 +44,9 @@ bool MouseWheelWidgetAdjustmentGuard::eventFilter(QObject *o, QEvent *e)
 QSize VContainer::sizeHint() const {
     QWidget* parent = this->parentWidget();
     if ( layout()->count() > 1 ) {
-        std::cout << "big size hint " << parent->width()/2. << std::endl;
         return QSize( parent->width() / 2., 20 );
     }
     else {
-        std::cout << "small size hint " << parent->width()/3. << std::endl;
-        return QSize( parent->width()/3., 20 );
+        return QSize( parent->width() / 3. , 20 );
     }
 }
-
-/*QSize VContainer::minimumSizeHint() const {
-    QWidget* parent = this->parentWidget();
-    return QSize( parent->width()/3., 20 );
-}*/

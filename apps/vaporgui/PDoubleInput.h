@@ -21,5 +21,5 @@ protected:
     void updateGUI() const override;
     
 private slots:
-    void doubleInputValueChanged(const std::string &v);
+    void doubleInputValueChanged( double v );
 };

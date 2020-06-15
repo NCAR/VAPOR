@@ -127,7 +127,8 @@ private slots:
     void _seedInjIntervalChanged( int interval );
 
     void _periodicClicked();
-    void _velocityMultiplierChanged( const std::string& multiplier );
+    //void _velocityMultiplierChanged( const std::string& multiplier );
+    void _velocityMultiplierChanged( double multiplier );
 
     void _rakeNumOfSeedsChanged();
     void _randomNumOfSeedsChanged();
