@@ -64,24 +64,3 @@ signals:
     void ValueChangedIntermediate( double value );
     void ValueChangedIntIntermediate( int    value );
 };
-
-class VIntSliderEdit : public VSliderEdit {
-    Q_OBJECT
-
-public:
-    VIntSliderEdit(
-        int min   = 0,
-        int max   = 1,
-        int value = 0
-    );
-
-private slots:
-    void _sliderChanged( int value );
-    void _sliderChangedIntermediate( int value );
-    //void _minRangeChanged( int value );
-    //void _maxRangeChanged( int value );
-
-signals:
-    void ValueChanged( int value );
-    void ValueChangedIntermediate( int value );
-};

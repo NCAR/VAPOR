@@ -51,8 +51,8 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     connect( vsle, &VStringLineEdit::ValueChanged, 
         this, &SliceVariablesSubtab::testVStringLineEdit );
 
-    VIntSliderEdit* vise = new VIntSliderEdit();
-    vli = new VLineItem( "VIntSliderEdit", vise );
+    VSliderEdit* vise = new VSliderEdit(0, 10, 5, true);
+    vli = new VLineItem( "VSliderEdit", vise );
     layout()->addWidget( vli );
     connect( vise, SIGNAL( ValueChanged( int ) ),
         this, SLOT( testVIntSliderEdit( int ) ) );
