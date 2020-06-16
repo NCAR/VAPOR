@@ -5,10 +5,10 @@
 
 #include "vapor/VAssert.h"
 
+#include "VLineEdit2.h"
 #include "VSliderEdit.h"
 #include "VSlider.h"
-#include "VLineEdit.h"
-#include "VActions.h"
+//#include "VLineEdit.h"
 #include "VActions.h"
 
 VSliderEdit::VSliderEdit( 
@@ -31,7 +31,10 @@ VSliderEdit::VSliderEdit(
   _decimalAction( nullptr ),
   _scientificAction( nullptr )
 {
-    _lineEdit = new VLineEdit();
+    if (_isIntType)
+        _lineEdit = new VIntLineEdit( value, false );
+    else
+        _lineEdit = new VDoubleLineEdit( value, false );
     _slider = new VSlider();
 
     SetRange( min, max );
@@ -53,7 +56,7 @@ VSliderEdit::VSliderEdit(
         this, SLOT( _lineEditChanged( std::string ) ) );
 
     connect( _slider, &VSlider::ValueChanged,
-        this, &VSliderEdit::_sliderChanged );
+        this, &VSliderEdit::SetValue);
     connect( _slider, &VSlider::ValueChangedIntermediate,
         this, &VSliderEdit::_sliderChangedIntermediate );
 
@@ -88,12 +91,8 @@ void VSliderEdit::SetRange( double min, double max ){
         max = round(max);
     }
     
-    if ( min > max ) {
-        min = max;
-    }
-    else if ( max < min ) {
-        min = max;
-    }
+    if ( min > max ) min = max;
+    else if ( max < min ) min = max;
 
     if (_value < min) _value = min;
     if (_value > max) _value = max;
@@ -134,11 +133,6 @@ void VSliderEdit::SetMaximum( double max ) {
     SetRange( _minValid, _maxValid );
 }
 
-void VSliderEdit::SetScientific( bool sci ) {
-    _scientific = sci;
-    SetValue( _value );
-}
-
 void VSliderEdit::SetNumDigits( int digits ) {
     _decDigits = digits;
     SetValue( _value );
@@ -174,15 +168,6 @@ void VSliderEdit::_lineEditChanged( const std::string& value ) {
     catch (...) {
         SetValue( _value );
     }
-}
-
-void VSliderEdit::_sliderChanged( double value ) {
-    SetValue( value );
-    if (_isIntType) {
-        emit ValueChanged( (int)_value );
-    }
-    else
-        emit ValueChanged( _value );
 }
 
 void VSliderEdit::_sliderChangedIntermediate( double value ) {
@@ -226,7 +211,7 @@ void VSliderEdit::MakeContextMenu() {
 
     _scientificAction = new VCheckBoxAction( "Scientific", _scientific);
     connect( _scientificAction, &VCheckBoxAction::clicked,
-        this, &VSliderEdit::_scientificClicked );
+        this, &VSliderEdit::SetSciNotation );
 
     if ( _isIntType ) {
         _menu->addAction( _minIntAction );
@@ -246,8 +231,9 @@ void VSliderEdit::_decimalDigitsChanged( int value ) {
     emit FormatChanged();
 }
 
-void VSliderEdit::_scientificClicked( bool value ) {
+void VSliderEdit::SetSciNotation( bool value ) {
     _scientific = value;
+    _lineEdit->SetSciNotation( value );
     SetValue( _value );
     emit FormatChanged();
 }
@@ -272,4 +258,147 @@ void VSliderEdit::_maxRangeChanged( double value ) {
         SetValue( _maxValid );
     }
     emit FormatChanged();
+}
+
+VSliderEdit2::VSliderEdit2( 
+) : VContainer(),
+  _sciNotation( false ),
+  _decDigits( 0 )
+{
+    _slider = new VSlider();
+    layout()->addWidget(_slider);
+
+    setContextMenuPolicy( Qt::CustomContextMenu );
+
+    setFrameStyle(QFrame::Panel | QFrame::Raised );
+
+    setContextMenuPolicy( Qt::CustomContextMenu );
+    connect( this, &VSliderEdit2::customContextMenuRequested,
+        this, &VSliderEdit2::ShowContextMenu );
+
+    /*connect( _slider, &VSlider::ValueChanged,
+        this, &VSliderEdit2::SetValue );
+    connect( _slider, &VSlider::ValueChangedIntermediate,
+        this, &VSliderEdit2::_sliderChangedIntermediate );*/
+
+    _makeContextMenu();
+}
+
+int VSliderEdit2::GetNumDigits() const {
+    return _decDigits;
+}
+
+void VSliderEdit2::SetNumDigits( int digits ) {
+    _decDigits = digits;
+    _lineEdit->SetNumDigits( digits );
+    emit FormatChanged();
+}
+
+bool VSliderEdit2::GetSciNotation() const {
+    return _sciNotation;
+}
+
+void VSliderEdit2::SetSciNotation( bool value ) {
+    _sciNotation = value;
+    _lineEdit->SetSciNotation( value );
+    emit FormatChanged();
+}
+
+void VSliderEdit2::ShowContextMenu( const QPoint& pos ) {
+    QPoint globalPos = mapToGlobal(pos);
+    _menu->exec(globalPos);
+}
+
+void VSliderEdit2::_makeContextMenu() {
+    _menu = new QMenu;
+
+    _scientificAction = new VCheckBoxAction( "Scientific", _sciNotation );
+    connect( _scientificAction, &VCheckBoxAction::clicked,
+        this, &VSliderEdit2::SetSciNotation );
+    _menu->addAction( _scientificAction );
+
+    _decimalAction = new VSpinBoxAction( "Decimal digits", _decDigits );
+    connect( _decimalAction, &VSpinBoxAction::editingFinished,
+        this, &VSliderEdit2::SetNumDigits );
+    _menu->addAction( _decimalAction );
+}
+
+VIntSliderEdit::VIntSliderEdit( int min, int max, int value )
+    : VSliderEdit2(),
+      _min( min ),
+      _max( max ),
+      _value( value )
+{
+    _lineEdit = new VIntLineEdit( _value, false );
+    layout()->addWidget(_lineEdit);
+    _lineEdit->setContextMenuPolicy( Qt::NoContextMenu );
+    connect( _lineEdit, SIGNAL( ValueChanged( int ) ),
+        this, SLOT( SetValue( int ) ) );
+
+    _minRangeAction = new VIntLineEditAction( "Minimum slider value", _min );
+    _menu->addAction( _minRangeAction );
+    connect( _minRangeAction, &VIntLineEditAction::ValueChanged,
+        this, &VIntSliderEdit::SetMinimum);
+
+    _maxRangeAction = new VIntLineEditAction( "Maximum slider value", _max );
+    _menu->addAction( _maxRangeAction );
+    connect( _maxRangeAction, &VIntLineEditAction::ValueChanged,
+        this, &VIntSliderEdit::SetMaximum);
+}
+
+void VIntSliderEdit::SetValue( int value ) {
+    if (value < _min) value = _min;
+    if (value > _max) value = _max;
+    _value = value;
+
+    if ( QObject::sender() != nullptr ) {
+        emit ValueChanged( _value );
+    }
+}
+
+void VIntSliderEdit::SetMinimum( int min ) {
+    if ( _max < min ) _max = min;
+    _min = min;
+   
+    // If sender() is a nullptr, then this change is being issued through Update().
+    // Therefore we update the _minIntAction's value.  If the sender() is the gui,
+    // emit a signal to be received by a PWidget.
+    if ( QObject::sender() == nullptr ) {
+        _minRangeAction->SetValue( _min );
+    }
+    else {
+        emit MinimumChanged( _min );
+    }
+}
+
+void VIntSliderEdit::SetMaximum( int max ) {
+    if ( _min > max ) _min = max;
+    _max = max;
+    
+    // If sender() is a nullptr, then this change is being issued through Update().
+    // Therefore we update the _minIntAction's value.  If the sender() is the gui,
+    // emit a signal to be received by a PWidget.
+    if ( QObject::sender() == nullptr ) {
+        _minRangeAction->SetValue( _min );
+    }
+    else {
+        emit MaximumChanged( _max );
+    }
+}
+
+int VIntSliderEdit::GetValue() const {
+    return _value;
+}
+
+int VIntSliderEdit::GetMinimum() const {
+    return _min;
+}
+
+int VIntSliderEdit::GetMaximum() const {
+    return _max;
+}
+
+void VIntSliderEdit::_sliderChangedIntermediate( int value ) {
+    _lineEdit->SetValue( std::to_string( value ) );
+    emit ValueChangedIntermediate( value );
 }

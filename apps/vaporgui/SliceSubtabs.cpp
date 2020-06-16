@@ -46,20 +46,22 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     connect( vdle, &VDoubleLineEdit::ValueChanged, 
         this, &SliceVariablesSubtab::testVDoubleLineEdit );
     
-    VStringLineEdit* vsle = new VStringLineEdit( "woot" );
-    vli = new VLineItem( "VStringLineEdit", vsle );
+    VLineEdit2* vsle = new VLineEdit2( "woot" );
+    vli = new VLineItem( "VLineEdit", vsle );
     layout()->addWidget( vli );
-    connect( vsle, &VStringLineEdit::ValueChanged, 
+    connect( vsle, &VLineEdit2::ValueChanged, 
         this, &SliceVariablesSubtab::testVStringLineEdit );
 
     //VSliderEdit* vise = new VSliderEdit(0, 10, 5, true);
     VSection* foo = new VSection("foo");
     VFrame* bar = new VFrame();
     foo->layout()->addWidget( bar );
-    layout()->addWidget( foo );
-    VSliderEdit* vise = new VSliderEdit(true);
+    //layout()->addWidget( foo );
+    //VSliderEdit* vise = new VSliderEdit(true);
+    VIntSliderEdit* vise = new VIntSliderEdit();
     vli = new VLineItem( "VSliderEdit", vise );
-    bar->layout()->addWidget( vli );
+    layout()->addWidget( vli );
+    //bar->layout()->addWidget( vli );
     connect( vise, SIGNAL( ValueChanged( int ) ),
         this, SLOT( testVIntSliderEdit( int ) ) );
 }

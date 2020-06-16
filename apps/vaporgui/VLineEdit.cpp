@@ -14,7 +14,7 @@ VLineEdit::VLineEdit( const std::string& value )
   _value( value ),
   _scientific( false ),
   _menuEnabled( false ),
-  _decDigits( 10 )
+  _decDigits( 5 )
 {
     _lineEdit = new QLineEdit;
     SetValue( _value );
@@ -35,9 +35,8 @@ void VLineEdit::UseDoubleMenu() {
 
 void VLineEdit::SetValue( int value ) {
     std::stringstream stream;
-    if (_menuEnabled) {
-        if (_scientific)
-            stream << std::scientific;
+    if (_scientific) {
+        stream << std::scientific;
     }
     stream << value << std::endl;
     _value = stream.str();
@@ -49,16 +48,17 @@ void VLineEdit::SetValue( int value ) {
 
 void VLineEdit::SetValue( double value ) {
     std::stringstream stream;
-    if (_menuEnabled) {
-        stream << std::fixed << std::setprecision( _decDigits );
-        if (_scientific)
-            stream << std::scientific;
+    stream << std::fixed << std::setprecision( _decDigits );
+    if (_scientific) {
+        stream << std::scientific;
     }
     stream << value << std::endl;
     _value = stream.str();
+    std::cout << _value << std::endl;
     
     _lineEdit->blockSignals(true);
     _lineEdit->setText( QString::fromStdString(_value) );
+    _lineEdit->setText( QString::fromStdString("foobar") );
     _lineEdit->blockSignals(false);
 }
 
@@ -74,17 +74,16 @@ std::string VLineEdit::GetValue() const {
     return _value;    
 }
 
-void VLineEdit::SetReadOnly(bool b)
-{
+void VLineEdit::SetReadOnly(bool b) {
     _lineEdit->setReadOnly(b);
 }
 
 void VLineEdit::emitLineEditChanged() {
     std::string value = _lineEdit->text().toStdString();
     SetValue( value );
-    emit ValueChanged( _value );
-    emit ValueChanged( stod( _value ) );
-    emit ValueChanged( stoi( _value ) );
+    //emit ValueChanged( _value );
+    //emit ValueChanged( stod( _value ) );
+    //emit ValueChanged( stoi( _value ) );
 }
 
 void VLineEdit::ShowContextMenu( const QPoint& pos ) {
@@ -100,7 +99,7 @@ void VLineEdit::ShowContextMenu( const QPoint& pos ) {
 
     VCheckBoxAction* checkBoxAction = new VCheckBoxAction( "Scientific", _scientific);
     connect( checkBoxAction, &VCheckBoxAction::clicked,
-        this, &VLineEdit::_scientificClicked );
+        this, &VLineEdit::SetScientific );
     menu.addAction(checkBoxAction);
 
     QPoint globalPos = _lineEdit->mapToGlobal(pos);
@@ -113,7 +112,7 @@ void VLineEdit::_decimalDigitsChanged( int value ) {
     SetValue( stod( _value ) );
 }
 
-void VLineEdit::_scientificClicked( bool value ) {
+void VLineEdit::SetScientific( bool value ) {
     _scientific = value;
     SetValue( stod( _value ) );
 }

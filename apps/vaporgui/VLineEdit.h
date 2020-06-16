@@ -45,10 +45,10 @@ public slots:
     void emitLineEditChanged();
 
     void ShowContextMenu(const QPoint&);
+    void SetScientific( bool value );
 
 private slots:
     void _decimalDigitsChanged( int value );
-    void _scientificClicked( bool value );
 
 signals:
     void ValueChanged( const std::string& value );
