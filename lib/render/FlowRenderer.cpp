@@ -373,7 +373,7 @@ FlowRenderer::_paintGL( bool fast )
 
 int FlowRenderer::_renderAdvection(const flow::Advection* adv)
 {
-    FlowParams *rp = (FlowParams*)GetActiveParams();
+    FlowParams *rp = dynamic_cast<FlowParams*>(GetActiveParams());
     
     if (_renderStatus != FlowStatus::UPTODATE) {
         int nStreams = adv->GetNumberOfStreams();
@@ -389,7 +389,7 @@ int FlowRenderer::_renderAdvection(const flow::Advection* adv)
         // First calculate the starting time stamp. Copied from legacy.
         double startingTime;
         if (!_cache_isSteady) {
-            int pastNumOfTimeSteps = ((FlowParams*)GetActiveParams())->GetPastNumOfTimeSteps();
+            int pastNumOfTimeSteps = dynamic_cast<FlowParams*>(GetActiveParams())->GetPastNumOfTimeSteps();
             startingTime = _timestamps[0];
             if( _cache_currentTS - pastNumOfTimeSteps > 0 )
                 startingTime = _timestamps[ _cache_currentTS - pastNumOfTimeSteps ];
