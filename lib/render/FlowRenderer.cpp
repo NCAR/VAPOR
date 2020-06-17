@@ -453,15 +453,21 @@ int FlowRenderer::_renderAdvection(const flow::Advection* adv)
     }
     
     
-    FlowParams::RenderType renderType = (FlowParams::RenderType)rp->GetValueLong(FlowParams::RenderTypeTag, FlowParams::RenderTypeStream);
-    FlowParams::GlpyhType glyphType = (FlowParams::GlpyhType)rp->GetValueLong(FlowParams::RenderGlyphTypeTag, FlowParams::GlpyhTypeSphere);
+    FlowParams::RenderType renderType = (FlowParams::RenderType)
+		rp->GetValueLong(FlowParams::RenderTypeTag, FlowParams::RenderTypeStream);
+    FlowParams::GlpyhType glyphType = (FlowParams::GlpyhType)
+		rp->GetValueLong(FlowParams::RenderGlyphTypeTag, FlowParams::GlpyhTypeSphere);
+
     bool geom3d = rp->GetValueLong(FlowParams::RenderGeom3DTag, false);
     bool show_dir = rp->GetValueLong(FlowParams::RenderShowStreamDirTag, false);
     
     float radiusBase = rp->GetValueDouble(FlowParams::RenderRadiusBaseTag, -1);
     if (radiusBase == -1) {
         vector<double> mind, maxd;
-        _dataMgr->GetVariableExtents(rp->GetCurrentTimestep(), rp->GetColorMapVariableName(), rp->GetRefinementLevel(), rp->GetCompressionLevel(), mind, maxd);
+        _dataMgr->GetVariableExtents(
+				rp->GetCurrentTimestep(), rp->GetColorMapVariableName(),
+				rp->GetRefinementLevel(), rp->GetCompressionLevel(), mind, maxd
+				);
         vec3 min(mind[0], mind[1], mind[2]);
         vec3 max(maxd[0], maxd[1], maxd[2]);
         vec3 lens = max - min;
@@ -517,7 +523,8 @@ show_dir_loop:
     shader->SetUniform("radius", radius);
     shader->SetUniform("lightingEnabled", true);
     shader->SetUniform("glyphStride", glyphStride);
-    shader->SetUniform("showOnlyLeadingSample", (bool)rp->GetValueLong(FlowParams::RenderGlyphOnlyLeadingTag, false));
+    shader->SetUniform("showOnlyLeadingSample",
+			           (bool)rp->GetValueLong(FlowParams::RenderGlyphOnlyLeadingTag, false));
     shader->SetUniform("scales", _getScales());
     shader->SetUniform("cameraPos", cameraPos);
     if (rp->GetValueLong(FlowParams::RenderLightAtCameraTag, true))
