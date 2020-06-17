@@ -24,16 +24,33 @@ class VLineEdit2 : public VContainer {
     Q_OBJECT
 
     public:
-        VLineEdit2( const std::string& value );
+        VLineEdit2();
 
-        void SetValue( const std::string& value );
-        std::string GetValue() const;
+        //void SetValue( const std::string& value );
+        //std::string GetValue() const;
 
     protected:
         QLineEdit*  _lineEdit;
 
-    private slots:
-        void _emitChange();
+        virtual void _emitChange() = 0;
+
+    signals:
+        //void ValueChanged( const std::string& value );
+};
+
+class VStringLineEdit: public VLineEdit2 {
+    Q_OBJECT
+
+    public:
+        VStringLineEdit( const std::string& value );
+
+        void SetValue( const std::string& value );
+        std::string GetValue() const;
+
+    private:
+        std::string _value;
+
+        virtual void _emitChange();
 
     signals:
         void ValueChanged( const std::string& value );
@@ -45,8 +62,13 @@ class VNumericLineEdit : public VLineEdit2 {
 
     public:
         VNumericLineEdit( bool useMenu );
+        
+        bool GetSciNotation() const;
         void SetSciNotation( bool sciNotation );
+
         void SetNumDigits( int precision );
+        int  GetNumDigits() const;;
+
         virtual void Reformat() = 0;
 
     protected:
@@ -75,14 +97,14 @@ class VIntLineEdit : public VNumericLineEdit {
         int  GetValue() const;
         void Reformat() override;
 
-    protected:
+    private:
         int _value;
 
         void _emitChange() override;
         void _enableDecimalPrecision( bool enalbed );
 
     signals:
-        void ValueChanged( const int value );
+        void ValueChanged( int value );
 };
 
 class VDoubleLineEdit : public VNumericLineEdit {
@@ -94,11 +116,11 @@ class VDoubleLineEdit : public VNumericLineEdit {
         double GetValue() const;
         void Reformat() override;
 
-    protected:
+    private:
         double     _value;
 
         void _emitChange() override;
 
     signals:
-        void ValueChanged( const double value );
+        void ValueChanged( double value );
 };

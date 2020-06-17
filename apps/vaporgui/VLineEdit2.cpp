@@ -9,30 +9,46 @@
 #include "VLineEdit2.h"
 #include "ErrorReporter.h"
 
-VLineEdit2::VLineEdit2( const std::string& value ) : 
+VLineEdit2::VLineEdit2() : 
     VContainer(), 
     _lineEdit( new QLineEdit )
 {
-    connect( _lineEdit, &QLineEdit::editingFinished, this, &VLineEdit2::_emitChange );
+    connect( _lineEdit, &QLineEdit::editingFinished, 
+        this, &VLineEdit2::_emitChange );
     layout()->addWidget( _lineEdit );
 }
 
-void VLineEdit2::_emitChange() {
-    std::string value = _lineEdit->text().toStdString();
-    emit ValueChanged( value );
+
+VStringLineEdit::VStringLineEdit( const std::string& value ) :
+    VLineEdit2()
+{
+    _value = value;
+    _lineEdit->setText( QString::fromStdString( _value ) );
 }
 
-void VLineEdit2::SetValue( const std::string& value ) {
-    _lineEdit->setText( QString::fromStdString( value ) );
+void VStringLineEdit::SetValue( const std::string& value ) {
+    if ( QObject::sender() == _lineEdit ) {
+        _value = _lineEdit->text().toStdString();
+        emit ValueChanged( _value );
+    }
+
+    else {
+        _value = value;
+        _lineEdit->setText( QString::fromStdString( value ) );
+    }
 }
 
-std::string VLineEdit2::GetValue() const {
-    return _lineEdit->text().toStdString();
+std::string VStringLineEdit::GetValue() const {
+    return _value;
+}
+
+void VStringLineEdit::_emitChange() {
+    _value = _lineEdit->text().toStdString();
+    emit ValueChanged( _value );
 }
 
 VNumericLineEdit::VNumericLineEdit( bool useMenu ) : 
-    VLineEdit2( "" ), 
-    //_lineEdit( new QLineEdit ),
+    VLineEdit2( ), 
     _sciNotation( false ),
     _decimalDigits( 6 )
 {
@@ -59,14 +75,22 @@ VNumericLineEdit::VNumericLineEdit( bool useMenu ) :
     }
 }
 
-void VNumericLineEdit::SetNumDigits( int digits ) {
-    _decimalDigits = digits;
-    Reformat();
-    emit FormatChanged();
+bool VNumericLineEdit::GetSciNotation() const {
+    return _sciNotation;
 }
 
 void VNumericLineEdit::SetSciNotation( bool sciNotation ) {
     _sciNotation = sciNotation ;
+    Reformat();
+    emit FormatChanged();
+}
+
+int VNumericLineEdit::GetNumDigits() const {
+    return _decimalDigits;
+}
+
+void VNumericLineEdit::SetNumDigits( int digits ) {
+    _decimalDigits = digits;
     Reformat();
     emit FormatChanged();
 }
@@ -179,4 +203,3 @@ void VDoubleLineEdit::Reformat() {
     QString qValue = QString::fromStdString( stream.str() );
     _lineEdit->setText( qValue );
 }
-

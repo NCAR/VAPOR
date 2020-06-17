@@ -8,8 +8,8 @@
 
 VSlider::VSlider( double min, double max )
 : VContainer(),
-    _minValid(0.0),
-    _maxValid(0.0),
+    _min(0.0),
+    _max(0.0),
     _stepSize(1.0)
 {
     _slider = new QSlider;
@@ -28,16 +28,36 @@ VSlider::VSlider( double min, double max )
 }
 
 void VSlider::SetValue( double value ) {
+std::cout << "void VSlider::SetValue( double value ) { " << std::endl;
+std::cout << "   " << _min << std::endl;
+std::cout << "   " << _max << std::endl;
+std::cout << "   " << GetValue() << std::endl;
     if ( _stepSize <=0 )
         return;
 
-    if (value > _maxValid) value = _maxValid;
-    if (value < _minValid) value = _minValid;
+    if (value > _max) value = _max;
+    if (value < _min) value = _min;
 
-    value = (value-_minValid)/_stepSize;
+    value = (value-_min)/_stepSize;
     _slider->blockSignals(true);
     _slider->setValue( value );
     _slider->blockSignals(false);
+}
+
+double VSlider::GetMinimum() const {
+    return _min;
+}
+
+void VSlider::SetMinimum( double min ) {
+    SetRange( min, _max );
+}
+
+double VSlider::GetMaximum() const {
+    return _max;
+}
+
+void VSlider::SetMaximum( double max ) {
+    SetRange( _min, max );
 }
 
 void VSlider::SetRange( double min, double max ) {
@@ -45,9 +65,14 @@ void VSlider::SetRange( double min, double max ) {
 
     _stepSize = ( max - min ) / NUM_STEPS;
 
-    _minValid = min;
-    _maxValid = max;
+    _min = min;
+    _max = max;
     SetValue( GetValue() );
+std::cout << "void VSlider::SetRange( double value ) { " << std::endl;
+std::cout << "   " << _min << std::endl;
+std::cout << "   " << _max << std::endl;
+std::cout << "       " << max << std::endl;
+std::cout << "   " << GetValue() << std::endl;
 }
 
 double VSlider::GetValue() const {
@@ -57,11 +82,11 @@ double VSlider::GetValue() const {
     // note - Qt does not move the sliders to positions 0, 1, 99, or 100 until
     // the mouse is released.  
     if (sliderVal <= 2)                             // positions 0, 1 and 2
-        return _minValid;
+        return _min;
     if (sliderVal >= NUM_STEPS-2)                   // positions 98, 99, and 100
-        return _maxValid;
+        return _max;
 
-    double value = _stepSize * _slider->value() + _minValid;
+    double value = _stepSize * _slider->value() + _min;
     return value;
 }
 

@@ -7,6 +7,7 @@ class QMenu;
 class VSlider;
 class VNumericLineEdit;
 class VIntLineEditAction;
+class VIntLineEdit;
 class VDoubleLineEditAction;
 class VCheckBoxAction;
 class VSpinBoxAction;
@@ -69,7 +70,9 @@ public slots:
     void ShowContextMenu( const QPoint& );
 
 protected slots:
-    void _lineEditChanged( const std::string& value );
+    //void _lineEditChanged( const std::string& value );
+    void _lineEditChanged( double value );
+    void _lineEditChanged( int value );
 
     //void _sliderChanged( double value );
     void _sliderChangedIntermediate( double value );
@@ -94,7 +97,6 @@ class VSliderEdit2 : public VContainer {
     Q_OBJECT
 
 public:
-    VSliderEdit2();
     /*VSliderEdit( 
         double min   = 0., 
         double max   = 1., 
@@ -110,17 +112,19 @@ public:
     //void SetRange( double min, double max );
     //void SetMinimum( double min );
     //void SetMaximum( double max );
-    void SetSciNotation( bool sci );
-    void SetNumDigits( int digits );
+    virtual void SetSciNotation( bool sci ) = 0;
+    virtual void SetNumDigits( int digits ) = 0;
 
     //double GetValue() const;
     //double GetMinimum() const;
     //double GetMaximum() const;
-    bool   GetSciNotation() const;
-    int    GetNumDigits() const;
+    virtual bool   GetSciNotation() const = 0;
+    virtual int    GetNumDigits() const = 0;
 
 protected:
-    void _makeContextMenu();
+    VSliderEdit2();
+    virtual void _makeContextMenu() = 0;
+    virtual void _makeSliderEdit() = 0;
     //void _lineEditChanged( const std::string& value );
 
     VNumericLineEdit* _lineEdit;
@@ -130,8 +134,9 @@ protected:
     double     _maxValid;
     double     _value;
     bool       _isIntType;*/
-    bool       _sciNotation;
-    int        _decDigits;
+
+    //bool       _sciNotation;
+    //int        _decDigits;
 
     QMenu*                 _menu;
     /*VIntLineEditAction*    _minIntAction;
@@ -179,16 +184,26 @@ public:
     int GetMinimum() const;
     int GetMaximum() const;
     
+    virtual int  GetNumDigits() const;
+    virtual void SetNumDigits( int numDigits );
+
+    virtual bool GetSciNotation() const;
+    virtual void SetSciNotation( bool sciNotation );
+
 protected:
-    int _min;
-    int _max;
+    virtual void _makeSliderEdit();
+    virtual void _makeContextMenu();
+    void _sliderChanged( int value );
+    void _sliderChangedIntermediate( int value );
+
+    //int _min;
+    //int _max;
     int _value;    
 
+    VIntLineEdit* _lineEdit;
     VIntLineEditAction* _minRangeAction;
     VIntLineEditAction* _maxRangeAction;
     
-    //void _sliderChanged( int value );
-    void _sliderChangedIntermediate( int value );
 
 signals:
     void ValueChanged( int value );
