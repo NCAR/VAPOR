@@ -89,6 +89,7 @@ VolumeRenderer::~VolumeRenderer()
     if (_VBOChunked) glDeleteBuffers(1, &_VBOChunked);
     if (_cache.tf) delete _cache.tf;
     if (_algorithm) delete _algorithm;
+    _ospDelete();
 }
 
 int VolumeRenderer::_initializeGL()
@@ -132,7 +133,7 @@ int VolumeRenderer::_initializeGL()
     _LUT2Texture.Generate();
     _depthTexture.Generate();
     
-    return 0;
+    return _ospInit();
 }
 
 int VolumeRenderer::_paintGL(bool fast)
@@ -140,6 +141,11 @@ int VolumeRenderer::_paintGL(bool fast)
     if (fast && _wasTooSlowForFastRender())
         return 0;
     
+    CheckCache(_cache.ospEnabled, _ospEnabled());
+    CheckCache(_cache.ospMaxCells, GetActiveParams()->GetValueLong("osp_max_cells", 1));
+    CheckCache(_cache.ospTestCellId, GetActiveParams()->GetValueLong("osp_test_cells", 1));
+    CheckCache(_cache.osp_force_regular, GetActiveParams()->GetValueLong("osp_force_regular", 0));
+    CheckCache(_cache.osp_test_volume, GetActiveParams()->GetValueLong("osp_test_volume", 0));
     
     if (_initializeAlgorithm() < 0) return -1;
     if (_loadData() < 0) return -1;
@@ -162,10 +168,15 @@ int VolumeRenderer::_paintGL(bool fast)
     glDepthFunc(GL_ALWAYS);
     
     void *start = GLManager::BeginTimer();
-    if (_shouldUseChunkedRender(fast))
-        _drawScreenQuadChuncked();
-    else
-        _drawScreenQuad();
+    
+    if (_cache.ospEnabled) {
+        _ospRender(fast);
+    } else {
+        if (_shouldUseChunkedRender(fast))
+            _drawScreenQuadChuncked();
+        else
+            _drawScreenQuad();
+    }
     double renderTime = GLManager::EndTimer(start);
     _lastRenderTime = renderTime;
     _lastRenderWasFast = fast;
@@ -402,8 +413,19 @@ int VolumeRenderer::_initializeAlgorithm()
 {
     VolumeParams *vp = (VolumeParams *)GetActiveParams();
     
+    if (_cache.ospEnabled) {
+        if (_cache.algorithmName != "NULL") {
+            if (_algorithm) delete _algorithm;
+            _algorithm = new VolumeAlgorithmNull(_glManager);
+            _cache.algorithmName = "NULL";
+        }
+        return 0;
+    }
+    
     if (_cache.algorithmName != vp->GetAlgorithm()) {
         _cache.algorithmName = vp->GetAlgorithm();
+        if (_cache.algorithmName == "")
+            _cache.algorithmName = "NULL";
         if (_algorithm) delete _algorithm;
         _algorithm = VolumeAlgorithm::NewAlgorithm(_cache.algorithmName, _glManager);
         _cache.needsUpdate = true;
@@ -431,8 +453,8 @@ int VolumeRenderer::_loadData()
     if (!grid)
         return -1;
     
-    if (dynamic_cast<const UnstructuredGrid *>(grid)) {
-        MyBase::SetErrMsg("Unstructured grids are not supported by this renderer");
+    if (dynamic_cast<const UnstructuredGrid *>(grid) && !_cache.ospEnabled) {
+        MyBase::SetErrMsg("Unstructured grids are not supported by the GPU renderer");
         return -1;
     }
 
@@ -441,7 +463,7 @@ int VolumeRenderer::_loadData()
 	//
 	grid->GetUserExtents(_dataMinExt, _dataMaxExt);
     
-    if (_needToSetDefaultAlgorithm()) {
+    if (_needToSetDefaultAlgorithm() && !_cache.ospEnabled) {
         RP->SetAlgorithm(_getDefaultAlgorithmForGrid(grid));
         if (_initializeAlgorithm() < 0) {
             delete grid;
@@ -449,7 +471,12 @@ int VolumeRenderer::_loadData()
         }
     }
     
-    int ret = _algorithm->LoadData(grid);
+    int ret;
+    if (_ospEnabled()) {
+        ret = _ospLoadData(grid);
+    } else {
+        ret = _algorithm->LoadData(grid);
+    }
     _lastRenderTime = 10000;
     delete grid;
     return ret;
@@ -558,6 +585,7 @@ std::string VolumeRenderer::_getDefaultAlgorithmForGrid(const Grid *grid) const
     
     if (dynamic_cast<const RegularGrid *>   (grid)) return VolumeRegular      ::GetName();
     if (dynamic_cast<const StructuredGrid *>(grid)) return VolumeCellTraversal::GetName();
+    if (dynamic_cast<const UnstructuredGrid *>(grid)) return VolumeAlgorithmNull::GetName();
     MyBase::SetErrMsg("Unsupported grid type: %s", grid->GetType().c_str());
     return "";
 }
@@ -565,4 +593,732 @@ std::string VolumeRenderer::_getDefaultAlgorithmForGrid(const Grid *grid) const
 bool VolumeRenderer::_needToSetDefaultAlgorithm() const
 {
     return !((VolumeParams*)GetActiveParams())->GetAlgorithmWasManuallySetByUser();
+}
+
+bool VolumeRenderer::_ospEnabled()
+{
+    return GetActiveParams()->GetValueLong("osp_enable", false);
+}
+
+int VolumeRenderer::_ospInit()
+{
+    _ospCamera = ospNewCamera("perspective");
+    _ospWorld = ospNewWorld();
+    
+    OSPLight lightAmbient = ospNewLight("ambient");
+    ospSetFloat(lightAmbient, "intensity", 0.2);
+    ospCommit(lightAmbient);
+//    ospSetObjectAsData(_ospWorld, "light", OSP_LIGHT, lightAmbient);
+//    ospRelease(lightAmbient);
+    
+    OSPLight lightDistant = ospNewLight("distant");
+    ospSetVec3f(lightDistant, "direction", 0, 0, -1);
+    ospSetFloat(lightDistant, "angularDiameter", 1);
+    ospSetFloat(lightDistant, "insensity", 4);
+    ospCommit(lightDistant);
+    
+    vector<OSPLight> lights = {lightAmbient, lightDistant};
+    OSPData lightsData = VOSP::NewCopiedData(lights.data(), OSP_LIGHT, lights.size());
+    ospCommit(lightsData);
+    
+
+    // Although these are already pointers, unlike every other function,
+    // in the case of this function you need to reference here otherwise
+    // it will crash.
+    ospSetParam(_ospWorld, "light", OSP_LIGHT, &lightsData);
+    
+    ospRelease(lightsData);
+    ospRelease(lightAmbient);
+    _ospLightDistant = lightDistant;
+    ospRetain(lightDistant);
+    ospRelease(lightDistant);
+    
+    
+//    auto p = GetActiveParams();
+//    vector <double> minExt, maxExt;
+//    p->GetBox()->GetExtents(minExt, maxExt);
+//    Grid *grid = _dataMgr->GetVariable(p->GetCurrentTimestep(), p->GetVariableName(), p->GetRefinementLevel(), p->GetCompressionLevel(), minExt, maxExt);
+//    assert(grid);
+//    _ospLoadData(grid);
+//    delete grid;
+    
+//    OSPGeometricModel triangleModel = VOSP::Test::LoadTriangle();
+//
+//    OSPGroup group = ospNewGroup();
+//    ospSetObjectAsData(group, "geometry", OSP_GEOMETRIC_MODEL, triangleModel);
+//    ospCommit(group);
+//    ospRelease(triangleModel);
+//
+//    _ospInstance = ospNewInstance(group);
+//    ospCommit(_ospInstance);
+//    ospRelease(group);
+//
+//    ospSetObjectAsData(_ospWorld, "instance", OSP_INSTANCE, _ospInstance);
+//    ospCommit(_ospWorld);
+    
+    OSPBounds b = ospGetBounds(_ospWorld);
+    printf("world bounds: ({%f, %f, %f}, {%f, %f, %f}\n\n", b.lower[0],b.lower[1],b.lower[2],b.upper[0],b.upper[1],b.upper[2]);
+    
+    _ospRenderTexture.Generate();
+    
+    return 0;
+}
+
+int VolumeRenderer::_ospRender(bool fast)
+{
+    auto viewport = GLManager::GetViewport();
+    ivec2 fbSize(viewport[2], viewport[3]);
+    OSPFrameBuffer framebuffer = ospNewFrameBuffer(fbSize.x, fbSize.y, OSP_FB_SRGBA, OSP_FB_COLOR | /*OSP_FB_DEPTH |*/ OSP_FB_ACCUM);
+    ospResetAccumulation(framebuffer);
+    
+    _ospSetupCamera();
+    _ospLoadTF();
+    _ospApplyTransform();
+    _ospSetupRenderer(fast);
+    
+    ospSetFloat(_ospVolumeModel, "densityScale", GetActiveParams()->GetValueDouble("osp_density", 1));
+    ospCommit(_ospVolumeModel);
+    
+    ospRenderFrameBlocking(framebuffer, _ospRenderer, _ospCamera, _ospWorld);
+    
+    const uint32_t *fb = (uint32_t *)ospMapFrameBuffer(framebuffer, OSP_FB_COLOR);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, windowSize.x, windowSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, fb);
+    _ospRenderTexture.TexImage(GL_RGBA, fbSize.x, fbSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, fb);
+    ospUnmapFrameBuffer(fb, framebuffer);
+    ospRelease(framebuffer);
+    
+    
+    SmartShaderProgram framebufferShader = _glManager->shaderManager->GetShader("FramebufferND");
+    if (!framebufferShader.IsValid()) return -1;
+    framebufferShader->SetSampler("colorBuffer", _ospRenderTexture);
+    _drawScreenQuad();
+    
+    return 0;
+}
+
+void VolumeRenderer::_ospSetupRenderer(bool fast)
+{
+    bool usePT = GetActiveParams()->GetValueLong("osp_usePT", 0);
+    
+    if (!_ospRenderer || _cache.ospPT != usePT) {
+        ospRelease(_ospRenderer);
+        _ospRenderer = ospNewRenderer(usePT ? "pathtracer" : "scivis");
+        _cache.ospPT = usePT;
+    }
+    
+    vector<double> bgColor;
+    int spp = GetActiveParams()->GetValueLong("osp_spp", 1);
+    _paramsMgr->GetAnnotationParams(_winName)->GetBackgroundColor(bgColor);
+    ospSetVec3f(_ospRenderer, "backgroundColor", bgColor[0], bgColor[1], bgColor[2]);
+    ospSetFloat(_ospRenderer, "volumeSamplingRate", (fast ? 0.1 : 1) * GetActiveParams()->GetValueDouble("osp_volumeSamplingRate", 1));
+    ospSetInt(_ospRenderer, "pixelSamples", fast ? 1 : spp);
+    ospCommit(_ospRenderer);
+}
+
+void VolumeRenderer::_ospSetupCamera()
+{
+    ViewpointParams* vp = _paramsMgr->GetViewpointParams(_winName);
+    auto viewport = GLManager::GetViewport();
+    ivec2 fbSize(viewport[2], viewport[3]);
+    
+    double matrix[16], dpos[3], dup[3], ddir[3];
+    vp->GetModelViewMatrix(matrix);
+    assert(vp->ReconstructCamera(matrix, dpos, dup, ddir));
+    vec3 pos(dpos[0], dpos[1], dpos[2]);
+    vec3 up ( dup[0],  dup[1],  dup[2]);
+    vec3 dir(ddir[0], ddir[1], ddir[2]);
+    
+//    printf("Camera Pos = (%f, %f, %f)\n", pos.x, pos.y, pos.z);
+//    printf("Camera Up  = (%f, %f, %f)\n", up.x,  up.y,  up.z);
+//    printf("Camera Dir = (%f, %f, %f)\n", dir.x, dir.y, dir.z);
+    
+    ospSetFloat(_ospCamera, "aspect", fbSize.x / (float)fbSize.y);
+    ospSetFloat(_ospCamera, "fovy", vp->GetFOV());
+    ospSetParam(_ospCamera, "position", OSP_VEC3F, &pos);
+    ospSetParam(_ospCamera, "direction", OSP_VEC3F, &dir);
+    ospSetParam(_ospCamera, "up", OSP_VEC3F, &up);
+    ospCommit(_ospCamera);
+    
+    float intensity = GetActiveParams()->GetValueDouble("osp_light_intensity", 4);
+    float brightness = GetActiveParams()->GetValueDouble("osp_light_brightness", 1);
+    ospSetFloat(_ospLightDistant, "insensity", intensity);
+    ospSetVec3f(_ospLightDistant, "direction", dir.x, dir.y, dir.z);
+    ospSetVec3f(_ospLightDistant, "color", brightness, brightness, brightness);
+    ospCommit(_ospLightDistant);
+}
+
+void VolumeRenderer::_ospLoadTF()
+{
+    if (!_ospTF) {
+        fprintf(stderr, "Warning: _ospTF = NULL\n");
+        return;
+    }
+    auto p = GetActiveParams();
+    auto vtf = p->GetMapperFunc(p->GetVariableName());
+    auto range = vtf->getMinMaxMapValue();
+    
+    float *LUT = new float[4 * 256];
+    vtf->makeLut(LUT);
+    for (int i = 0; i < 256; i++) {
+        LUT[4*i+3] = powf(LUT[4*i+3], 2);
+    }
+    
+    vec3 *cLUT = new vec3[256];
+    float *oLUT = new float[256];
+    for (int i = 0; i < 256; i++) {
+        cLUT[i].r = LUT[4*i+0];
+        cLUT[i].g = LUT[4*i+1];
+        cLUT[i].b = LUT[4*i+2];
+        oLUT[i]   = LUT[4*i+3];
+    }
+    
+    OSPData data = VOSP::NewCopiedData(oLUT, OSP_FLOAT, 256);
+    ospCommit(data);
+    ospSetObject(_ospTF, "opacity", data);
+    ospRelease(data);
+    data = VOSP::NewCopiedData(cLUT, OSP_VEC3F, 256);
+    ospCommit(data);
+    ospSetObject(_ospTF, "color", data);
+    ospRelease(data);
+    ospSetVec2f(_ospTF, "valueRange", range[0], range[1]);
+    ospCommit(_ospTF);
+    
+    delete [] LUT;
+    delete [] cLUT;
+    delete [] oLUT;
+}
+
+vec3 D2V(const vector<double> &dv)
+{
+    VAssert(dv.size() >= 3);
+    return vec3(dv[0], dv[1], dv[2]);
+}
+
+#define PrintVec3(v) printf("%s = (%f, %f, %f)\n", #v, v.x, v.y, v.z)
+
+void VolumeRenderer::_ospApplyTransform()
+{
+    auto p = GetActiveParams();
+    vec3 translate = D2V(p->GetTransform()->GetTranslations());
+    vec3 rotate    = D2V(p->GetTransform()->GetRotations());
+    vec3 scale     = D2V(p->GetTransform()->GetScales());
+    vec3 origin    = D2V(p->GetTransform()->GetOrigin());
+    Transform *datasetTransform = _paramsMgr->GetViewpointParams(_winName)->GetTransform(_dataSetName);
+    vec3 datasetScales = D2V(datasetTransform->GetScales());
+    vec3 datasetRotation = D2V(datasetTransform->GetRotations());
+    vec3 datasetTranslation = D2V(datasetTransform->GetTranslations());
+    vec3 datasetOrigin = D2V(datasetTransform->GetOrigin());
+
+    mat4 m(1.f);
+
+    m = glm::translate(m, datasetTranslation);
+    m = glm::translate(m, datasetOrigin);
+    m = glm::rotate(m, glm::radians(datasetRotation.x), vec3(1,0,0));
+    m = glm::rotate(m, glm::radians(datasetRotation.y), vec3(0,1,0));
+    m = glm::rotate(m, glm::radians(datasetRotation.z), vec3(0,0,1));
+    m = glm::scale(m, datasetScales);
+    m = glm::translate(m, -datasetOrigin);
+    
+    m = glm::scale(m, 1.f/datasetScales);
+    m = glm::translate(m, translate);
+    m = glm::translate(m, origin);
+    m = glm::rotate(m, glm::radians((float)rotate[0]), vec3(1, 0, 0));
+    m = glm::rotate(m, glm::radians((float)rotate[1]), vec3(0, 1, 0));
+    m = glm::rotate(m, glm::radians((float)rotate[2]), vec3(0, 0, 1));
+    m = glm::scale(m, scale);
+    m = glm::translate(m, -origin);
+    m = glm::scale(m, datasetScales);
+//    PrintVec3(datasetScales);
+    
+    struct {
+        vec3 x, y, z, o;
+    } affine;
+    
+    affine.x = m*vec4(vec3(1,0,0),0);
+    affine.y = m*vec4(vec3(0,1,0),0);
+    affine.z = m*vec4(vec3(0,0,1),0);
+    affine.o = m*vec4(vec3(0,0,0),1);
+    
+    ospSetParam(_ospInstance, "xfm", OSP_AFFINE3F, &affine);
+    ospCommit(_ospInstance);
+    ospCommit(_ospWorld);
+}
+
+int VolumeRenderer::_ospLoadData(const Grid *grid)
+{
+    auto p = GetActiveParams();
+    OSPVolume volume;
+    
+    if (p->GetValueLong("osp_test_volume", 0)) volume = _ospLoadVolumeTest(grid);
+    else if (dynamic_cast<const RegularGrid *>     (grid) || p->GetValueLong("osp_force_regular", false)) volume = _ospLoadVolumeRegular(grid);
+    else if (dynamic_cast<const StructuredGrid *>  (grid)) volume = _ospLoadVolumeStructured(grid);
+    else if (dynamic_cast<const UnstructuredGrid *>(grid)) volume = _ospLoadVolumeUnstructured(grid);
+    else volume=0, VAssert(!"Unknown grid type");
+    
+    ospRelease(_ospVolumeModel);
+    _ospVolumeModel = ospNewVolumetricModel(volume);
+    ospRelease(volume);
+    
+    ospRelease(_ospTF);
+    _ospTF = ospNewTransferFunction("piecewiseLinear");
+    OSPData data = VOSP::NewCopiedData((float[]){0,0,0,1,1,1}, OSP_VEC3F, 2);
+    ospCommit(data);
+    ospSetObject(_ospTF, "color", data);
+    ospRelease(data);
+    data = VOSP::NewCopiedData((float[]){0,1}, OSP_FLOAT, 2);
+    ospCommit(data);
+    ospSetObject(_ospTF, "opacity", data);
+    ospRelease(data);
+    ospSetVec2f(_ospTF, "valueRange", -FLT_MAX, 0); // These initial values are necessary to work around bugs.
+    ospCommit(_ospTF);
+    ospSetObject(_ospVolumeModel, "transferFunction", _ospTF);
+    ospCommit(_ospVolumeModel);
+    
+    
+    OSPGroup group = ospNewGroup();
+    ospSetObjectAsData(group, "volume", OSP_VOLUMETRIC_MODEL, _ospVolumeModel);
+    ospCommit(group);
+    
+//    OSPGeometricModel triangleModel = VOSP::Test::LoadTriangle(vec3(1000000,1000000,1000000));
+//    ospSetObjectAsData(group, "geometry", OSP_GEOMETRIC_MODEL, triangleModel);
+//    ospCommit(group);
+//    ospRelease(triangleModel);
+    
+    ospRelease(_ospInstance);
+    _ospInstance = ospNewInstance(group);
+    ospCommit(_ospInstance);
+    ospRelease(group);
+    
+    ospSetObjectAsData(_ospWorld, "instance", OSP_INSTANCE, _ospInstance);
+    ospCommit(_ospWorld);
+    
+    if (dynamic_cast<const RegularGrid *>(grid))
+        p->SetValueDouble("osp_volumeSamplingRate", "", 1.f);
+    else
+        p->SetValueDouble("osp_volumeSamplingRate", "", _ospGuessSamplingRateScalar(grid));
+    
+    return 0;
+}
+
+float VolumeRenderer::_ospGuessSamplingRateScalar(const Grid *grid) const
+{
+    std::vector<double> dataMinExtD, dataMaxExtD;
+    grid->GetUserExtents(dataMinExtD, dataMaxExtD);
+    vec3 dataMinExt(dataMinExtD[0], dataMinExtD[1], dataMinExtD[2]);
+    vec3 dataMaxExt(dataMaxExtD[0], dataMaxExtD[1], dataMaxExtD[2]);
+    vec3 lens = dataMaxExt-dataMinExt;
+    float longest = max(lens.x, max(lens.y, lens.z));
+    
+    // I was going to try to come up with a continuous equation but I'm
+    // not sure how the original sample rate is determined so I'm just
+    // going off the following two samples of resonable performance vs
+    // quality:
+    //
+    // 4E7 = 0.001
+    // 3E6 = 0.1
+    
+    return longest < 3E6f ? glm::mix(1.f, 0.1f, longest/3E6f) :
+            glm::mix(0.1f, 0.001f, (longest-3E6f)/(4.05E7f-3E6f));
+}
+
+OSPVolume VolumeRenderer::_ospLoadVolumeRegular(const Grid *grid)
+{
+    printf("Load Regular Volume");
+    
+    const vector<size_t> dims = grid->GetDimensions();
+    const size_t nVerts = dims[0]*dims[1]*dims[2];
+    std::vector<double> dataMinExtD, dataMaxExtD;
+    grid->GetUserExtents(dataMinExtD, dataMaxExtD);
+    vec3 dataMinExt(dataMinExtD[0], dataMinExtD[1], dataMinExtD[2]);
+    vec3 dataMaxExt(dataMaxExtD[0], dataMaxExtD[1], dataMaxExtD[2]);
+    vec3 dimsf(dims[0], dims[1], dims[2]);
+    vec3 gridSpacing = (dataMaxExt-dataMinExt)/(dimsf-1.f);
+    float missingValue = grid->HasMissingData() ? grid->GetMissingValue() : NAN;
+    
+    float *fdata = new float[nVerts];
+    if (!fdata) {
+        Wasp::MyBase::SetErrMsg("Could not allocate enough RAM to load data");
+        return nullptr;
+    }
+    auto dataIt = grid->cbegin();
+    for (size_t i = 0; i < nVerts; ++i, ++dataIt) {
+        fdata[i] = *dataIt == missingValue ? NAN : *dataIt;
+    }
+    
+    OSPData data = VOSP::NewCopiedData(fdata, OSP_FLOAT, dims[0], dims[1], dims[2]);
+    ospCommit(data);
+    delete [] fdata;
+    
+    OSPVolume volume = ospNewVolume("structuredRegular");
+    
+    ospSetObject(volume, "data", data);
+    ospRelease(data);
+    
+    ospSetVec3f(volume, "gridOrigin", dataMinExt.x, dataMinExt.y, dataMinExt.z);
+    ospSetVec3f(volume, "gridSpacing", gridSpacing.x, gridSpacing.y, gridSpacing.z);
+    
+    ospCommit(volume);
+    return volume;
+}
+
+OSPVolume VolumeRenderer::_ospLoadVolumeStructured(const Grid *grid)
+{
+    printf("Load Structured Volume");
+    
+    const vector<size_t> dims = grid->GetDimensions();
+    const size_t nVerts = dims[0]*dims[1]*dims[2];
+    float missingValue = grid->HasMissingData() ? grid->GetMissingValue() : NAN;
+    
+    float *vdata = new float[nVerts];
+    auto dataIt = grid->cbegin();
+    for (size_t i = 0; i < nVerts; ++i, ++dataIt)
+        vdata[i] = *dataIt == missingValue ? NAN : *dataIt;
+    
+    float *cdata = new float[nVerts*3];
+    auto coord = grid->ConstCoordBegin();
+    for (size_t i = 0; i < nVerts; ++i, ++coord) {
+        cdata[i*3  ] = (*coord)[0];
+        cdata[i*3+1] = (*coord)[1];
+        cdata[i*3+2] = (*coord)[2];
+    }
+    
+    OSPVolume volume = ospNewVolume("unstructured");
+    OSPData data;
+    
+    data = VOSP::NewCopiedData(vdata, OSP_FLOAT, nVerts);
+    ospCommit(data);
+    ospSetObject(volume, "vertex.data", data);
+    ospRelease(data);
+    delete [] vdata;
+    
+    data = VOSP::NewCopiedData(cdata, OSP_VEC3F, nVerts);
+    ospCommit(data);
+    ospSetObject(volume, "vertex.position", data);
+    ospRelease(data);
+    delete [] cdata;
+    
+    int xd = dims[0];
+    int yd = dims[1];
+    int zd = dims[2];
+    int cxd = xd-1;
+    int cyd = yd-1;
+    int czd = zd-1;
+    
+    // "indexPrefixed" is broken
+    
+    typedef struct {
+        unsigned int i0, i1, i2, i3, i4, i5, i6, i7;
+    } Cell;
+    Cell *indices = new Cell[cxd*cyd*czd];
+    
+#define I(x,y,z) (unsigned int)((z)*yd*xd+(y)*xd+(x))
+
+    for (int z = 0; z < czd; z++) {
+        for (int y = 0; y < cyd; y++) {
+            for (int x = 0; x < cxd; x++) {
+                indices[z*cyd*cxd + y*cxd + x] = {
+                    I(x  ,y  ,z  ), I(x+1,y  ,z  ), I(x+1,y+1,z  ), I(x  ,y+1,z  ),
+                    I(x  ,y  ,z+1), I(x+1,y  ,z+1), I(x+1,y+1,z+1), I(x  ,y+1,z+1),
+                };
+            }
+        }
+    }
+#undef I
+    
+    data = VOSP::NewCopiedData(indices, OSP_UINT, cxd*cyd*czd*8);
+    ospCommit(data);
+    ospSetObject(volume, "index", data);
+    ospRelease(data);
+    delete [] indices;
+    
+    int *startIndex = new int[czd*cyd*cxd];
+    for (int i = 0; i < czd*cyd*cxd; i++)
+        startIndex[i] = i*8;
+    
+    data = VOSP::NewCopiedData(startIndex, OSP_UINT, czd*cyd*cxd);
+    ospCommit(data);
+    ospSetObject(volume, "cell.index", data);
+    ospRelease(data);
+    delete [] startIndex;
+    
+    unsigned char *cellType = new unsigned char[czd*cyd*cxd];
+    for (int i = 0; i < czd*cyd*cxd; i++)
+        cellType[i] = OSP_HEXAHEDRON;
+    
+    data = VOSP::NewCopiedData(cellType, OSP_UCHAR, czd*cyd*cxd);
+    ospCommit(data);
+    ospSetObject(volume, "cell.type", data);
+    ospRelease(data);
+    delete [] cellType;
+    
+    ospCommit(volume);
+    return volume;
+}
+
+enum WindingOrder { CCW, CW };
+WindingOrder GetWindingOrderRespectToZ(vec3 a, vec3 b, vec3 c)
+{
+    return glm::cross(b-a, c-b).z > 0 ? CCW : CW;
+}
+
+WindingOrder GetWindingOrderTetra(vec3 a, vec3 b, vec3 c, vec3 d)
+{
+    vec3 n = glm::normalize(glm::cross(glm::normalize(b-a), glm::normalize(c-b)));
+    vec3 tc = (a+b+c)/3.f;
+    return glm::dot(glm::normalize(d-tc), n) < 0 ? CCW : CW;
+}
+
+const char * to_string(WindingOrder o)
+{
+    return o == CCW ? "CCW" : "CW";
+}
+
+OSPVolume VolumeRenderer::_ospLoadVolumeUnstructured(const Grid *grid)
+{
+    printf("Load Unstructured Volume");
+    const vector<size_t> nodeDims = grid->GetDimensions();
+    size_t nodeDim = nodeDims.size();
+    const size_t nVerts = nodeDims[0]*nodeDims[1];
+    const vector<size_t> cellDims = grid->GetCellDimensions();
+    const size_t nCells = cellDims[0]*cellDims[1];
+    VAssert(nodeDim == 2 && cellDims.size() == 2);
+    
+    float missingValue = grid->HasMissingData() ? grid->GetMissingValue() : NAN;
+    size_t maxNodes = grid->GetMaxVertexPerCell();
+    size_t coordDim = grid->GetGeometryDim();
+    size_t *nodes = (size_t*)alloca(sizeof(size_t) * maxNodes * nodeDim);
+    
+    printf("nVerts = %li\n", nVerts);
+    printf("maxNodes = %li\n", maxNodes);
+    printf("coordDim = %li\n", coordDim);
+    printf("nodeDim = %li\n", nodeDim);
+    
+    float *vdata = new float[nVerts];
+    auto dataIt = grid->cbegin();
+    for (size_t i = 0; i < nVerts; ++i, ++dataIt)
+        vdata[i] = *dataIt == missingValue ? NAN : *dataIt;
+    
+    float *cdata = new float[nVerts*3];
+    auto coord = grid->ConstCoordBegin();
+    for (size_t i = 0; i < nVerts; ++i, ++coord) {
+        cdata[i*3  ] = (*coord)[0];
+        cdata[i*3+1] = (*coord)[1];
+        cdata[i*3+2] = (*coord)[2];
+    }
+    
+    vector<unsigned int> cellIndices;
+    vector<unsigned int> cellStarts;
+    vector<unsigned char> cellTypes;
+    
+    unsigned added[32] = {0};
+    unsigned skipped[32] = {0};
+    
+//    int maxCells = std::min((int)nCells, (int)GetActiveParams()->GetValueLong("osp_max_cells", 1));
+    
+    auto cellIt = grid->ConstCellBegin();
+    for (size_t cellCounter = 0; cellCounter < nCells; ++cellIt, ++cellCounter) {
+        const vector<size_t> &cell = *cellIt;
+        int numNodes;
+        grid->GetCellNodes(cell.data(), nodes, numNodes);
+        
+        if (numNodes == 4000) {
+            cellStarts.push_back(cellIndices.size());
+            cellTypes.push_back(OSP_TETRAHEDRON);
+            added[numNodes]++;
+            
+            for (int i = 0; i < 4; i++)
+                cellIndices.push_back(nodes[i*nodeDim] + nodes[i*nodeDim+1]*nodeDims[0]);
+        }
+        else if (numNodes == 6) {
+            cellStarts.push_back(cellIndices.size());
+            cellTypes.push_back(OSP_WEDGE);
+            added[numNodes]++;
+            
+            for (int i = 0; i < 6; i++)
+                cellIndices.push_back(nodes[i*nodeDim] + nodes[i*nodeDim+1]*nodeDims[0]);
+        }
+        else {
+            skipped[numNodes]++;
+        }
+        
+//        if (cellCounter >= maxCells-1) {
+//            printf("WARNING BREAKING EARLY\n");
+//            break;
+//        }
+    }
+    
+    int totalAdded=0, totalSkipped=0;
+    for (int i = 0; i < 32; i++) {
+        if (added[i] > 0) printf("Added[%i] = %i\n", i, added[i]);
+        if (skipped[i] > 0) printf("Skipped[%i] = %i\n", i, skipped[i]);
+        totalAdded += added[i];
+        totalSkipped += skipped[i];
+    }
+    printf("Total Added = %i\n", totalAdded);
+    printf("Total Skipped = %i\n", totalSkipped);
+//    printf("# Coords = %li\n", nVerts);
+    
+    vec3 *coords = (vec3*)cdata;
+    
+    
+    for (unsigned i = 0; i < cellStarts.size(); i++) {
+        unsigned start = cellStarts[i];
+        unsigned type = cellTypes[i];
+        
+        if (type == OSP_WEDGE) {
+            if (CW == GetWindingOrderRespectToZ(coords[cellIndices[start+0]], coords[cellIndices[start+1]], coords[cellIndices[start+2]])) {
+                swap(cellIndices[start+1], cellIndices[start+2]);
+                swap(cellIndices[start+1+3], cellIndices[start+2+3]);
+            }
+        }
+        else if (type == OSP_TETRAHEDRON) {
+//            if (CW == GetWindingOrderTetra(coords[cellIndices[start+0]], coords[cellIndices[start+1]], coords[cellIndices[start+2]], coords[cellIndices[start+3]]))
+//                swap(cellIndices[start+1], cellIndices[start+2]);
+//            assert(CCW == GetWindingOrderTetra(coords[cellIndices[start+0]], coords[cellIndices[start+1]], coords[cellIndices[start+2]], coords[cellIndices[start+3]]));
+        }
+    }
+    
+    
+    int testCell = std::min(cellStarts.size()-1, (size_t)GetActiveParams()->GetValueLong("osp_test_cells", 0));
+    if (testCell >= 0) {
+        int testCellNodes = cellTypes[testCell] == OSP_TETRAHEDRON ? 4 : 6;
+        printf("Cell[%i].nodes = %i\n", testCell, testCellNodes);
+        vec3 testCellCoords[testCellNodes];
+        for (int i = 0; i < testCellNodes; i++) {
+            int idx = cellIndices[cellStarts[testCell]+i];
+            testCellCoords[i] = coords[idx];
+            printf("\tCells[%i].vert[%i] = coords[%i] = (%f, %f, %f)\n", testCell, i, idx, coords[idx].x, coords[idx].y, coords[idx].z);
+        }
+        printf("Winding bottom = %s\n", to_string(GetWindingOrderRespectToZ(testCellCoords[0], testCellCoords[1], testCellCoords[2])));
+        if (testCellNodes == 6)
+            printf("Winding top = %s\n", to_string(GetWindingOrderRespectToZ(testCellCoords[3], testCellCoords[4], testCellCoords[5])));
+    }
+    
+    
+    // Sanity Checks
+    for (auto i : cellIndices) assert(i < nVerts);
+    for (auto i : cellStarts) assert(i < cellIndices.size());
+    for (auto i : cellTypes) assert(i == OSP_WEDGE || i == OSP_TETRAHEDRON);
+    assert(cellStarts[cellStarts.size()-1] + (cellTypes[cellTypes.size()-1] == OSP_WEDGE ? 6 : 4) == cellIndices.size());
+    assert(cellStarts.size() == cellTypes.size());
+    
+    OSPVolume volume = ospNewVolume("unstructured");
+    OSPData data;
+    
+    data = VOSP::NewCopiedData(vdata, OSP_FLOAT, nVerts);
+    ospCommit(data);
+    ospSetObject(volume, "vertex.data", data);
+    ospRelease(data);
+    
+    data = VOSP::NewCopiedData(cdata, OSP_VEC3F, nVerts);
+    ospCommit(data);
+    ospSetObject(volume, "vertex.position", data);
+    ospRelease(data);
+    
+    data = VOSP::NewCopiedData(cellIndices.data(), OSP_UINT, cellIndices.size());
+    ospCommit(data);
+    ospSetObject(volume, "index", data);
+    ospRelease(data);
+    
+    data = VOSP::NewCopiedData(cellStarts.data(), OSP_UINT, cellStarts.size());
+    ospCommit(data);
+    ospSetObject(volume, "cell.index", data);
+    ospRelease(data);
+    
+    data = VOSP::NewCopiedData(cellTypes.data(), OSP_UCHAR, cellTypes.size());
+    ospCommit(data);
+    ospSetObject(volume, "cell.type", data);
+    ospRelease(data);
+    
+    delete [] vdata;
+    delete [] cdata;
+    
+    ospCommit(volume);
+    return volume;
+}
+
+OSPVolume VolumeRenderer::_ospLoadVolumeTest(const Grid *grid)
+{
+    printf("Load Test Volume");
+    
+    std::vector<double> dataMinExtD, dataMaxExtD;
+    grid->GetUserExtents(dataMinExtD, dataMaxExtD);
+    vec3 dataMinExt(dataMinExtD[0], dataMinExtD[1], dataMinExtD[2]);
+    vec3 dataMaxExt(dataMaxExtD[0], dataMaxExtD[1], dataMaxExtD[2]);
+    int nVerts = 8;
+    
+    float values[nVerts];
+    for (int i = 0; i < nVerts; i++)
+        values[i] = 0;
+    
+    vec3 coords[nVerts];
+    float s = 1;
+    vec3 l = s * dataMinExt;
+    vec3 h = s * dataMaxExt;
+    coords[0] = vec3(l.x, l.y, l.z);
+    coords[1] = vec3(h.x, l.y, l.z);
+    coords[2] = vec3(h.x, h.y, l.z);
+    coords[3] = vec3(l.x, h.y, l.z);
+    coords[4] = vec3(l.x, l.y, h.z);
+    coords[5] = vec3(h.x, l.y, h.z);
+    coords[6] = vec3(h.x, h.y, h.z);
+    coords[7] = vec3(l.x, h.y, h.z);
+    
+    OSPVolume volume = ospNewVolume("unstructured");
+    OSPData data;
+    
+    data = VOSP::NewCopiedData(values, OSP_FLOAT, nVerts);
+    ospCommit(data);
+    ospSetObject(volume, "vertex.data", data);
+    ospRelease(data);
+    
+    data = VOSP::NewCopiedData(coords, OSP_VEC3F, nVerts);
+    ospCommit(data);
+    ospSetObject(volume, "vertex.position", data);
+    ospRelease(data);
+    
+    vector<unsigned int> cellIndices;
+    vector<unsigned int> cellStarts;
+    vector<unsigned int> cellTypes;
+    
+    cellStarts.push_back(cellIndices.size());
+    cellTypes.push_back(OSP_HEXAHEDRON);
+    cellIndices.push_back(0);
+    cellIndices.push_back(1);
+    cellIndices.push_back(2);
+    cellIndices.push_back(3);
+    cellIndices.push_back(4);
+    cellIndices.push_back(5);
+    cellIndices.push_back(6);
+    cellIndices.push_back(7);
+    
+    data = VOSP::NewCopiedData(cellIndices.data(), OSP_UINT, cellIndices.size());
+    ospCommit(data);
+    ospSetObject(volume, "index", data);
+    ospRelease(data);
+    
+    data = VOSP::NewCopiedData(cellStarts.data(), OSP_UINT, cellStarts.size());
+    ospCommit(data);
+    ospSetObject(volume, "cell.index", data);
+    ospRelease(data);
+    
+    data = VOSP::NewCopiedData(cellTypes.data(), OSP_UCHAR, cellTypes.size());
+    ospCommit(data);
+    ospSetObject(volume, "cell.type", data);
+    ospRelease(data);
+    
+    ospCommit(volume);
+    return volume;
+}
+
+void VolumeRenderer::_ospDelete()
+{
+    if (_ospRenderer    ) ospRelease(_ospRenderer    );
+    if (_ospWorld       ) ospRelease(_ospWorld       );
+    if (_ospCamera      ) ospRelease(_ospCamera      );
+    if (_ospTF          ) ospRelease(_ospTF          );
+    if (_ospInstance    ) ospRelease(_ospInstance    );
+    if (_ospVolumeModel ) ospRelease(_ospVolumeModel );
+    if (_ospLightDistant) ospRelease(_ospLightDistant);
+    
 }

@@ -5,6 +5,7 @@
 #include <vapor/Framebuffer.h>
 #include <vapor/VolumeAlgorithm.h>
 #include <glm/fwd.hpp>
+#include <vapor/OSPRay.h>
 
 namespace VAPoR
 {
@@ -100,8 +101,40 @@ protected:
         std::vector<double> minExt;
         std::vector<double> maxExt;
         
+        bool ospEnabled;
+        int ospMaxCells;
+        int ospTestCellId;
+        bool ospPT;
+        bool osp_force_regular;
+        bool osp_test_volume;
+        
         bool needsUpdate;
     } _cache;
+    
+    Texture2D _ospRenderTexture;
+    
+    OSPRenderer         _ospRenderer     = nullptr;
+    OSPWorld            _ospWorld        = nullptr;
+    OSPCamera           _ospCamera       = nullptr;
+    OSPTransferFunction _ospTF           = nullptr;
+    OSPInstance         _ospInstance     = nullptr;
+    OSPVolumetricModel  _ospVolumeModel  = nullptr;
+    OSPLight            _ospLightDistant = nullptr;
+    
+    bool _ospEnabled();
+    int _ospInit();
+    int _ospRender(bool fast);
+    void _ospSetupRenderer(bool fast);
+    void _ospSetupCamera();
+    void _ospLoadTF();
+    void _ospApplyTransform();
+    int _ospLoadData(const Grid *grid);
+    float _ospGuessSamplingRateScalar(const Grid *grid) const;
+    OSPVolume _ospLoadVolumeRegular(const Grid *grid);
+    OSPVolume _ospLoadVolumeStructured(const Grid *grid);
+    OSPVolume _ospLoadVolumeUnstructured(const Grid *grid);
+    OSPVolume _ospLoadVolumeTest(const Grid *grid);
+    void _ospDelete();
 };
 
 

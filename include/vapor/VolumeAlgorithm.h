@@ -55,6 +55,19 @@ namespace VAPoR {
     protected:
         GLManager *_glManager;
     };
+
+    class VolumeAlgorithmNull : public VolumeAlgorithm {
+    public:
+        VolumeAlgorithmNull(GLManager *gl) : VolumeAlgorithm(gl) {}
+        static std::string GetName() { return "NULL"; }
+        static Type        GetType() { return Type::Any; }
+        int LoadData(const Grid *grid) {return 0;}
+        int LoadSecondaryData(const Grid *grid) {return 0;}
+        void DeleteSecondaryData() {}
+        ShaderProgram *GetShader() const;
+        void SetUniforms(const ShaderProgram *shader) const {}
+        bool RequiresChunkedRendering() { return false; }
+    };
     
     
     class VolumeAlgorithmFactory {

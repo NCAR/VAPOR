@@ -28,3 +28,9 @@ void VolumeAlgorithm::Register(VolumeAlgorithmFactory *f)
     factories[f->name] = f;
     VolumeParams::Register(f->name, type);
 }
+
+#include <vapor/GLManager.h>
+
+static VolumeAlgorithmRegistrar<VolumeAlgorithmNull> registration;
+
+ShaderProgram *VolumeAlgorithmNull::GetShader() const {return _glManager->shaderManager->GetShader("VolumeDVR");}

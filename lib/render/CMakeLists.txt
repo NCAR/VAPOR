@@ -51,6 +51,7 @@ set (SRC
 	Texture.cpp
 	Framebuffer.cpp
 	ModelRenderer.cpp
+	OSPRay.cpp
 )
 
 set (HEADERS
@@ -107,6 +108,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/Texture.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Framebuffer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ModelRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/OSPRay.h
 )
 
 add_library (render SHARED ${SRC} ${HEADERS})
@@ -122,6 +124,13 @@ target_link_libraries (render PUBLIC common vdc params flow ${FTGL} ${FREETYPE} 
 if (UNIX AND NOT APPLE)
 	target_link_libraries (render PUBLIC GLU)
 endif ()
+
+
+set (OSPRAY_DIR /Users/stasj/Developer/ospray/ospray)
+find_library (OSPRAY ospray HINTS ${OSPRAY_DIR}/lib)
+# include_directories (${OSPRAY_DIR}/include)
+target_link_libraries (render PUBLIC ${OSPRAY})
+target_include_directories (render PUBLIC ${OSPRAY_DIR}/include)
 
 
 add_definitions (-DRENDER_EXPORTS)
