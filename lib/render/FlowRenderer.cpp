@@ -355,6 +355,10 @@ FlowRenderer::_paintGL( bool fast )
             _renderFromAnAdvectionLegacy( _2ndAdvection.get(), params, fast );
     } else {
         // Workaround for how bi-directional was implemented.
+        // The rendering caches the flow data on the GPU however it
+        // only caches one advection at a time. Since when using bidirectional
+        // flow it results in two separate advections, we need to reset the cache
+        // before each half is drawn.
         if (_2ndAdvection)
             _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
         
@@ -452,22 +456,32 @@ int FlowRenderer::_renderAdvection(const flow::Advection* adv)
         _streamSizes = sizes;
     }
     
-    
-    FlowParams::RenderType renderType = (FlowParams::RenderType)
-		rp->GetValueLong(FlowParams::RenderTypeTag, FlowParams::RenderTypeStream);
-    FlowParams::GlpyhType glyphType = (FlowParams::GlpyhType)
-		rp->GetValueLong(FlowParams::RenderGlyphTypeTag, FlowParams::GlpyhTypeSphere);
-
-    bool geom3d = rp->GetValueLong(FlowParams::RenderGeom3DTag, false);
     bool show_dir = rp->GetValueLong(FlowParams::RenderShowStreamDirTag, false);
     
+    _renderAdvectionHelper(show_dir);
+    if (show_dir)
+        _renderAdvectionHelper(false);
+    
+    return 0;
+}
+
+int  FlowRenderer::_renderAdvectionHelper(bool renderDirection)
+{
+    auto rp = GetActiveParams();
+    
+    FlowParams::RenderType renderType = (FlowParams::RenderType)
+        rp->GetValueLong(FlowParams::RenderTypeTag, FlowParams::RenderTypeStream);
+    FlowParams::GlpyhType glyphType = (FlowParams::GlpyhType)
+        rp->GetValueLong(FlowParams::RenderGlyphTypeTag, FlowParams::GlpyhTypeSphere);
+
+    bool geom3d = rp->GetValueLong(FlowParams::RenderGeom3DTag, false);
     float radiusBase = rp->GetValueDouble(FlowParams::RenderRadiusBaseTag, -1);
     if (radiusBase == -1) {
         vector<double> mind, maxd;
         _dataMgr->GetVariableExtents(
-				rp->GetCurrentTimestep(), rp->GetColorMapVariableName(),
-				rp->GetRefinementLevel(), rp->GetCompressionLevel(), mind, maxd
-				);
+                rp->GetCurrentTimestep(), rp->GetColorMapVariableName(),
+                rp->GetRefinementLevel(), rp->GetCompressionLevel(), mind, maxd
+                );
         vec3 min(mind[0], mind[1], mind[2]);
         vec3 max(maxd[0], maxd[1], maxd[2]);
         vec3 lens = max - min;
@@ -479,18 +493,16 @@ int FlowRenderer::_renderAdvection(const flow::Advection* adv)
     float radius = radiusBase * radiusScalar;
     int   glyphStride = rp->GetValueLong(FlowParams::RenderGlyphStrideTag, 5);
     
-show_dir_loop:
-
     ShaderProgram *shader = nullptr;
-    
+        
     if (renderType == FlowParams::RenderTypeStream) {
         if (geom3d)
-            if (show_dir)
+            if (renderDirection)
                 shader = _glManager->shaderManager->GetShader("FlowGlyphsTubeDirArrow");
             else
                 shader = _glManager->shaderManager->GetShader("FlowTubes");
         else
-            if (show_dir)
+            if (renderDirection)
                 shader = _glManager->shaderManager->GetShader("FlowGlyphsLineDirArrow2D");
             else
                 shader = _glManager->shaderManager->GetShader("FlowLines");
@@ -524,7 +536,7 @@ show_dir_loop:
     shader->SetUniform("lightingEnabled", true);
     shader->SetUniform("glyphStride", glyphStride);
     shader->SetUniform("showOnlyLeadingSample",
-			           (bool)rp->GetValueLong(FlowParams::RenderGlyphOnlyLeadingTag, false));
+                       (bool)rp->GetValueLong(FlowParams::RenderGlyphOnlyLeadingTag, false));
     shader->SetUniform("scales", _getScales());
     shader->SetUniform("cameraPos", cameraPos);
     if (rp->GetValueLong(FlowParams::RenderLightAtCameraTag, true))
@@ -575,11 +587,6 @@ show_dir_loop:
     glDisable(GL_CULL_FACE);
     shader->UnBind();
     DisableClippingPlanes();
-    
-    if (show_dir) {
-        show_dir = false;
-        goto show_dir_loop;
-    }
     
     return 0;
 }
