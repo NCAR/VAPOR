@@ -61,7 +61,7 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
 
     //VLineEdit3<double>* vle3d = new VLineEdit3<double>( 9.8765 );
     VDoubleLineEdit3* vle3d = new VDoubleLineEdit3( 9.8765 );
-    vli = new VLineItem( "VLineEdit3<double>", vle3d );
+    vli = new VLineItem( "VDoubleLineEdit3", vle3d );
     layout()->addWidget( vli );
     connect( vle3d, SIGNAL( ValueChanged( double ) ), 
         this, SLOT( testVDoubleLineEdit( double ) ) );
