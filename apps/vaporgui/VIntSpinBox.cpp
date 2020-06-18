@@ -9,7 +9,12 @@ VIntSpinBox::VIntSpinBox( int min, int max )
     layout()->addWidget(_spinBox);
 
     connect( _spinBox, &QSpinBox::editingFinished,
-        this, &VIntSpinBox::emitSpinBoxChanged );
+        this, &VIntSpinBox::emitSpinBoxFinished );
+
+    // QSpinBox overloads valueChanged.  This makes pointer syntax ugly.
+    // More info here: https://doc.qt.io/qt-5/qspinbox.html#valueChanged
+    connect( _spinBox, SIGNAL( valueChanged( int ) ),
+        this, SLOT( emitSpinBoxChanged( int ) ) );
 }
 
 
@@ -27,6 +32,10 @@ int VIntSpinBox::GetValue() const {
     return _spinBox->value();
 }
 
-void VIntSpinBox::emitSpinBoxChanged() {
+void VIntSpinBox::emitSpinBoxFinished() {
     emit ValueChanged( GetValue() );
+}
+
+void VIntSpinBox::emitSpinBoxChanged( int value ) {
+    emit ValueChanged( value );
 }

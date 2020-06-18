@@ -69,26 +69,25 @@ class VIntRangeMenu : public VNumericFormatMenu {
 public:
     explicit VIntRangeMenu( 
         QWidget* parent, 
-        bool sciNotation, 
-        int decimalDigits,
-        int min,
-        int max )
-        : VNumericFormatMenu( sciNotation, decimalDigits ),
+        bool sciNotation, int decimalDigits,
+        int min, int max 
+        ) 
+        : VNumericFormatMenu( parent, sciNotation, decimalDigits ),
           _minRangeAction( new VIntLineEditAction( "Minimum value", min ) ),
           _maxRangeAction( new VIntLineEditAction( "Maximum value", max ) )
     {
-        connect( _minRangeAction, &VIntLineEdit::ValueChanged,
+        connect( _minRangeAction, &VIntLineEditAction::ValueChanged,
             this, &VIntRangeMenu::_minChanged);
         addAction( _minRangeAction );
 
-        connect( _maxRangeAction, &VIntLineEdit::ValueChanged,
+        connect( _maxRangeAction, &VIntLineEditAction::ValueChanged,
             this, &VIntRangeMenu::_maxChanged);
         addAction( _maxRangeAction );
     }
 
 protected:
-    VIntLineEditAction _minRangeAction;
-    VIntLineEditAction _maxRangeAction;
+    VIntLineEditAction* _minRangeAction;
+    VIntLineEditAction* _maxRangeAction;
 
 public:
     void SetMinRange( int min ) { _minRangeAction->SetValue( min ); }
