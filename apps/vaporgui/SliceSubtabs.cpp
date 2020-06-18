@@ -3,6 +3,7 @@
 #include "TFEditor.h"
 #include "VLineItem.h"
 #include "VLineEdit2.h"
+#include "VLineEdit3.h"
 #include "VSliderEdit.h"
 #include "VFrame.h"
 
@@ -52,6 +53,16 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     connect( vsle, &VStringLineEdit::ValueChanged, 
         this, &SliceVariablesSubtab::testVStringLineEdit );
 
+    VLineEdit3<std::string>* vle3 = new VLineEdit3<std::string>( "woot" );
+    vli = new VLineItem( "VLineEdit3", vle3 );
+    layout()->addWidget( vli );
+    //connect( vle3, &VLineEditInterface::ValueChanged, 
+    //connect( vle3, &VLineEdit3::ValueChanged, 
+    //connect( vle3, &VLineEdit3<std::string>::ValueChanged, 
+    //    this, &SliceVariablesSubtab::testVStringLineEdit );
+    connect( vle3, SIGNAL( ValueChanged( const std::string& ) ), 
+        this, SLOT( testVStringLineEdit( const std::string& ) ) );
+
     VIntSliderEdit* vise = new VIntSliderEdit();
     vli = new VLineItem( "VIntSliderEdit", vise );
     layout()->addWidget( vli );
@@ -65,7 +76,7 @@ void SliceVariablesSubtab::testVIntLineEdit( int value ) {
 void SliceVariablesSubtab::testVDoubleLineEdit( double value ) {
     std::cout << "testVDoubleLineEdit " << value << std::endl;
 }
-void SliceVariablesSubtab::testVStringLineEdit( std::string value ) {
+void SliceVariablesSubtab::testVStringLineEdit( const std::string& value ) {
     std::cout << "testVStringLineEdit " << value << std::endl;
 }
 
