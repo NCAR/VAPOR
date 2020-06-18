@@ -63,6 +63,46 @@ signals:
     void SciNotationChanged( bool sciNotation );
 };
 
+class VIntRangeMenu : public VNumericFormatMenu {
+    Q_OBJECT
+
+public:
+    explicit VIntRangeMenu( 
+        QWidget* parent, 
+        bool sciNotation, 
+        int decimalDigits,
+        int min,
+        int max )
+        : VNumericFormatMenu( sciNotation, decimalDigits ),
+          _minRangeAction( new VIntLineEditAction( "Minimum value", min ) ),
+          _maxRangeAction( new VIntLineEditAction( "Maximum value", max ) )
+    {
+        connect( _minRangeAction, &VIntLineEdit::ValueChanged,
+            this, &VIntRangeMenu::_minChanged);
+        addAction( _minRangeAction );
+
+        connect( _maxRangeAction, &VIntLineEdit::ValueChanged,
+            this, &VIntRangeMenu::_maxChanged);
+        addAction( _maxRangeAction );
+    }
+
+protected:
+    VIntLineEditAction _minRangeAction;
+    VIntLineEditAction _maxRangeAction;
+
+public:
+    void SetMinRange( int min ) { _minRangeAction->SetValue( min ); }
+    void SetMaxRange( int max ) { _maxRangeAction->SetValue( max ); }
+
+private slots:
+    void _minChanged( int min ) { emit MinChanged( min ); }
+    void _maxChanged( int max ) { emit MaxChanged( max ); }
+
+signals:
+    void MinChanged( int min );
+    void MaxChanged( int max );
+};
+
 class AbstractVLineEdit : public VContainer {
     Q_OBJECT
 
