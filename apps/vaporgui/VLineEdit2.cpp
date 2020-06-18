@@ -57,13 +57,11 @@ VNumericLineEdit::VNumericLineEdit( bool useMenu ) :
 
     _menu = new QMenu(this);
     _sciNotationAction = new VCheckBoxAction( "Scientific notation", _sciNotation );
-    std::cout << "sci " << _sciNotationAction << std::endl;
     connect( _sciNotationAction, &VCheckBoxAction::clicked,
         this, &VIntLineEdit::SetSciNotation );
     _menu->addAction( _sciNotationAction );
 
     _decimalAction = new VSpinBoxAction( "Decimal digits", _decimalDigits);
-    std::cout << "dec " << _decimalAction << std::endl;
     connect( _decimalAction, &VSpinBoxAction::editingFinished,
         this, &VNumericLineEdit::_decimalDigitsChanged );
     _menu->addAction(_decimalAction);
@@ -110,9 +108,6 @@ VIntLineEdit::VIntLineEdit( int value, bool useMenu ) :
     VNumericLineEdit( useMenu ),
     _value( value )
 {
-    std::cout << "   " << _decimalAction << std::endl;
-    std::cout << "   " << _sciNotationAction << std::endl;
-
     connect( _lineEdit, &QLineEdit::editingFinished, this, &VIntLineEdit::_emitChange );
     SetValue( _value );
 

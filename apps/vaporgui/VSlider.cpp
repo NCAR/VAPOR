@@ -28,10 +28,6 @@ VSlider::VSlider( double min, double max )
 }
 
 void VSlider::SetValue( double value ) {
-std::cout << "void VSlider::SetValue( double value ) { " << std::endl;
-std::cout << "   " << _min << std::endl;
-std::cout << "   " << _max << std::endl;
-std::cout << "   " << GetValue() << std::endl;
     if ( _stepSize <=0 )
         return;
 
@@ -68,11 +64,6 @@ void VSlider::SetRange( double min, double max ) {
     _min = min;
     _max = max;
     SetValue( GetValue() );
-std::cout << "void VSlider::SetRange( double value ) { " << std::endl;
-std::cout << "   " << _min << std::endl;
-std::cout << "   " << _max << std::endl;
-std::cout << "       " << max << std::endl;
-std::cout << "   " << GetValue() << std::endl;
 }
 
 double VSlider::GetValue() const {
