@@ -53,24 +53,17 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     connect( vsle, &VStringLineEdit::ValueChanged, 
         this, &SliceVariablesSubtab::testVStringLineEdit );
 
-    VLineEdit3<std::string>* vle3 = new VLineEdit3<std::string>( "woot" );
-    vli = new VLineItem( "VLineEdit3<string>", vle3 );
+    VStringLineEdit3* vle3 = new VStringLineEdit3( "woot" );
+    vli = new VLineItem( "VStringLineEdit3", vle3 );
     layout()->addWidget( vli );
     connect( vle3, SIGNAL( ValueChanged( const std::string& ) ), 
         this, SLOT( testVStringLineEdit( const std::string& ) ) );
 
-    //VLineEdit3<double>* vle3d = new VLineEdit3<double>( 9.8765 );
     VDoubleLineEdit3* vle3d = new VDoubleLineEdit3( 9.8765 );
     vli = new VLineItem( "VDoubleLineEdit3", vle3d );
     layout()->addWidget( vli );
     connect( vle3d, SIGNAL( ValueChanged( double ) ), 
         this, SLOT( testVDoubleLineEdit( double ) ) );
-
-    VLineEdit3<int>* vle3i = new VLineEdit3<int>( 5 );
-    vli = new VLineItem( "VLineEdit3<int>", vle3i );
-    layout()->addWidget( vli );
-    connect( vle3i, SIGNAL( ValueChanged( int ) ), 
-        this, SLOT( testVIntLineEdit( int ) ) );
 
     VIntLineEdit3* vile3 = new VIntLineEdit3( 5 );
     vli = new VLineItem( "VIntLineEdit3", vile3 );
