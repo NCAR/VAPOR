@@ -195,6 +195,7 @@ class VLineEdit3 : public AbstractVLineEdit {
 
     public:
         T GetValue() const { return _value; }
+
         virtual void SetValue( T value ) { 
             _value = value;
             std::string formattedNumber = _formatValue( _value );
