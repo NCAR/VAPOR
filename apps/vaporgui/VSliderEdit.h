@@ -11,6 +11,7 @@ class VIntLineEdit;
 class VDoubleLineEditAction;
 class VCheckBoxAction;
 class VSpinBoxAction;
+class VIntRangeMenu;
 
 //! class VSliderEdit
 //!
@@ -127,7 +128,6 @@ protected:
     virtual void _makeSliderEdit() = 0;
     //void _lineEditChanged( const std::string& value );
 
-    VNumericLineEdit* _lineEdit;
     VSlider*          _slider;
 
     /*double     _minValid;
@@ -138,7 +138,8 @@ protected:
     //bool       _sciNotation;
     //int        _decDigits;
 
-    QMenu*                 _menu;
+    //QMenu*                 _menu;
+    VIntRangeMenu*                 _menu;
     /*VIntLineEditAction*    _minIntAction;
     VIntLineEditAction*    _maxIntAction;
     VDoubleLineEditAction* _minDoubleAction;

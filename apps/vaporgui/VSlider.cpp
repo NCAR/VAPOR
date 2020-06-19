@@ -45,6 +45,7 @@ double VSlider::GetMinimum() const {
 }
 
 void VSlider::SetMinimum( double min ) {
+    if ( min > _max ) _max = min;
     SetRange( min, _max );
 }
 
@@ -53,17 +54,25 @@ double VSlider::GetMaximum() const {
 }
 
 void VSlider::SetMaximum( double max ) {
+    if ( max < _min ) _min = max;
     SetRange( _min, max );
 }
 
 void VSlider::SetRange( double min, double max ) {
-    VAssert( min <= max );
+    //VAssert( min <= max );
 
-    _stepSize = ( max - min ) / NUM_STEPS;
-
+    double previousValue = GetValue();
+    
     _min = min;
     _max = max;
-    SetValue( GetValue() );
+    _stepSize = ( _max - _min ) / NUM_STEPS;
+    
+    if ( previousValue < min ) previousValue = min;
+    if ( previousValue > max ) previousValue = max;
+
+    //double newValue = previousValue / ( _max - _min );
+    //SetValue( newValue );
+    SetValue( previousValue );
 }
 
 double VSlider::GetValue() const {

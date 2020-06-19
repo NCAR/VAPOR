@@ -35,10 +35,6 @@ public:
         connect( _decimalAction, &VSpinBoxAction::editingFinished,
             this, &VNumericFormatMenu::_decimalDigitsChanged );
         addAction(_decimalAction);
-
-        /*parent->setContextMenuPolicy( Qt::CustomContextMenu );
-        connect( parent, &QWidget::customContextMenuRequested,
-            this, &VNumericFormatMenu::_showMenu );*/
     }
 
 protected:
@@ -48,11 +44,6 @@ protected:
 public:
     void SetDecimalDigits( int digits ) { _decimalAction->SetValue( digits ); }
     void SetSciNotation( bool sciNotation ) { _sciNotationAction->SetValue( sciNotation ); }
-    /*void _showMenu( const QPoint& pos ) {
-        std::cout << "foo" << std::endl;
-        QPoint globalPos = mapToGlobal(pos);
-        exec(globalPos);
-    };*/
 
 private slots:
     void _decimalDigitsChanged( int digits )     { emit DecimalDigitsChanged( digits ); }
@@ -154,7 +145,8 @@ public slots:
     void SetDecimalDigits( int digits ) { _decimalDigits = digits; }
     void SetSciNotation( bool sciNotation ) { _sciNotation = sciNotation; }
 
-private slots:
+//private slots:
+public slots:
     virtual void _valueChanged() = 0;
     void _setDecimalDigits( int digits ) { 
         _decimalDigits = digits;
@@ -200,6 +192,7 @@ class VLineEdit3 : public AbstractVLineEdit {
             _value = value;
             std::string formattedNumber = _formatValue( _value );
             _lineEdit->setText( QString::fromStdString( formattedNumber ) );
+            _lineEdit->setToolTip( QString::fromStdString( formattedNumber ) );
         }
 
     protected:
@@ -209,6 +202,7 @@ class VLineEdit3 : public AbstractVLineEdit {
         {
             std::string formattedNumber = _formatValue( _value );
             _lineEdit->setText( QString::fromStdString( formattedNumber ) );
+            _lineEdit->setToolTip( QString::fromStdString( formattedNumber ) );
         }
 
         virtual void _valueChanged() { 
@@ -229,10 +223,10 @@ class VLineEdit3 : public AbstractVLineEdit {
             stream << std::fixed << std::setprecision( _decimalDigits );
             if ( _sciNotation ) {
                 stream << std::scientific;
-                stream << (double)_value << std::endl;
+                stream << (double)_value;// << std::endl;
             }
             else {
-                stream << _value << std::endl;
+                stream << _value;// << std::endl;
             }
             std::cout << stream.str() << std::endl;
             return stream.str();
@@ -250,11 +244,13 @@ class VLineEdit3 <std::string> : public AbstractVLineEdit {
           _value( value )
         {
             _lineEdit->setText( QString::fromStdString( value ) );
+            _lineEdit->setToolTip( QString::fromStdString( value ) );
         }
         
         virtual void SetValue( const std::string& value ) { 
             _value = value; 
             _lineEdit->setText( QString::fromStdString( value ) );
+            _lineEdit->setToolTip( QString::fromStdString( value ) );
         }
 
         std::string GetValue() const { return _value; }

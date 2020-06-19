@@ -89,7 +89,7 @@ signals:
     void SciNotationChanged( bool sciNotation );
 };
 
-class VSliderEdit3 : public VContainer {
+class VSliderEdit2 : public VContainer {
     Q_OBJECT
 
 public:
@@ -101,8 +101,6 @@ public:
 
 protected:
     VSliderEdit2();
-    virtual void _makeContextMenu() = 0;
-    virtual void _makeSliderEdit() = 0;
 
     VNumericLineEdit* _lineEdit;
     VSlider*          _slider;
@@ -126,7 +124,7 @@ signals:
 };
 
 
-class VIntSliderEdit : public VSliderEdit3 {
+class VIntSliderEdit : public VSliderEdit2 {
     Q_OBJECT
 
 public:
