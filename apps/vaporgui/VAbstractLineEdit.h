@@ -19,7 +19,10 @@ public slots:
     virtual void SetValue( double value );
     virtual void SetValue( const std::string& value );
 
-    void SetDecimalDigits( int digits );
+    int GetNumDigits() const;
+    void SetNumDigits( int digits );
+
+    bool GetSciNotation() const;
     void SetSciNotation( bool sciNotation );
 
 public slots:

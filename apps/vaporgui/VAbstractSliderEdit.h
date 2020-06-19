@@ -7,7 +7,6 @@ class QMenu;
 class VSlider;
 class VNumericLineEdit;
 class VIntLineEditAction;
-class VIntLineEdit;
 class VDoubleLineEditAction;
 class VCheckBoxAction;
 class VSpinBoxAction;

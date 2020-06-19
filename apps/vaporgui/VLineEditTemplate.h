@@ -6,9 +6,8 @@ template <class T>
 class VLineEditTemplate : public VAbstractLineEdit {
 
     public:
-        T GetValue() const;
-
         virtual void SetValue( T value ); 
+        virtual T GetValue() const;
 
     protected:
         VLineEditTemplate( T value, bool useMenu=true );
@@ -21,12 +20,13 @@ class VLineEditTemplate : public VAbstractLineEdit {
 
 template <>
 class VLineEditTemplate <std::string> : public VAbstractLineEdit {
+    public:
+        virtual void SetValue( const std::string& value );
+        virtual std::string GetValue() const;
+
     protected:
         VLineEditTemplate( const std::string& value );
         
-        virtual void SetValue( const std::string& value );
-        std::string GetValue() const;
-
         virtual void _valueChanged();
 
         std::string _value;

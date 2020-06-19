@@ -4,7 +4,7 @@
 #include "vapor/VAssert.h"
 
 #include "VIntSliderEdit.h"
-#include "VLineEdit3.h"
+#include "VIntLineEdit.h"
 #include "VIntRangeMenu.h"
 #include "VSlider.h"
 
@@ -22,8 +22,8 @@ VIntSliderEdit::VIntSliderEdit( int min, int max, int value )
     _lineEdit = new VIntLineEdit( _value, false );
     layout()->addWidget(_lineEdit);
     _lineEdit->setContextMenuPolicy( Qt::NoContextMenu );
-    connect( _lineEdit, &VIntLineEdit::ValueChanged,
-        this, &VIntSliderEdit::SetValue );
+    connect( _lineEdit, SIGNAL( ValueChanged( int ) ),
+        this, SLOT( SetValue( int ) ) );
     
     _makeContextMenu();
 }

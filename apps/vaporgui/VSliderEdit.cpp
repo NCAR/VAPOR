@@ -5,12 +5,11 @@
 
 #include "vapor/VAssert.h"
 
-//#include "VLineEdit2.h"
-#include "VLineEdit3.h"
 #include "VSliderEdit.h"
 #include "VSlider.h"
-//#include "VLineEdit.h"
 #include "VActions.h"
+#include "VIntLineEdit.h"
+#include "VDoubleLineEdit.h"
 
 VSliderEdit::VSliderEdit( 
     double min, 

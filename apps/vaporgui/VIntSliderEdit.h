@@ -3,10 +3,9 @@
 #include <string>
 #include "VContainer.h"
 #include "VAbstractSliderEdit.h"
+#include "VIntLineEdit.h"
 
 class VIntRangeMenu;
-class VIntLineEdit;
-class VIntLineEditAction;
 
 class VIntSliderEdit : public VAbstractSliderEdit {
     Q_OBJECT

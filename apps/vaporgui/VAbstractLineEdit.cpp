@@ -41,8 +41,16 @@ void VAbstractLineEdit::SetValue( const std::string& value ) {
     emit ValueChanged( value ); 
 }
 
-void VAbstractLineEdit::SetDecimalDigits( int digits ) { 
+int VAbstractLineEdit::GetNumDigits() const { 
+    return _decimalDigits; 
+}
+
+void VAbstractLineEdit::SetNumDigits( int digits ) { 
     _decimalDigits = digits; 
+}
+
+bool VAbstractLineEdit::GetSciNotation() const { 
+    return _sciNotation;
 }
 
 void VAbstractLineEdit::SetSciNotation( bool sciNotation ) { 

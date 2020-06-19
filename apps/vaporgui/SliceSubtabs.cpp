@@ -2,8 +2,11 @@
 #include "SliceSubtabs.h"
 #include "TFEditor.h"
 #include "VLineItem.h"
-#include "VLineEdit2.h"
-#include "VLineEdit3.h"
+//#include "VLineEdit2.h"
+//#include "VLineEdit3.h"
+#include "VIntLineEdit.h"
+#include "VDoubleLineEdit.h"
+#include "VStringLineEdit.h"
 #include "VIntSliderEdit.h"
 #include "VFrame.h"
 
@@ -35,37 +38,21 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
 	connect(refinementCombo, SIGNAL(currentIndexChanged(int)),
 		this, SLOT(_setDefaultSampleRate()));
 
-    VIntLineEdit* vlie = new VIntLineEdit( 10 );
-    VLineItem* vli = new VLineItem( "VIntLineEdit", vlie );
-    layout()->addWidget( vli );
-    connect( vlie, &VIntLineEdit::ValueChanged, 
-        this, &SliceVariablesSubtab::testVIntLineEdit );
-    
-    VDoubleLineEdit* vdle = new VDoubleLineEdit( 1.234 );
-    vli = new VLineItem( "VDoubleLineEdit", vdle );
-    layout()->addWidget( vli );
-    connect( vdle, &VDoubleLineEdit::ValueChanged, 
-        this, &SliceVariablesSubtab::testVDoubleLineEdit );
-    
-    VStringLineEdit* vsle = new VStringLineEdit( "woot" );
-    vli = new VLineItem( "VStringLineEdit", vsle );
-    layout()->addWidget( vli );
-    connect( vsle, &VStringLineEdit::ValueChanged, 
-        this, &SliceVariablesSubtab::testVStringLineEdit );
+    VLineItem* vli;
 
-    VStringLineEdit3* vle3 = new VStringLineEdit3( "woot" );
+    VStringLineEdit* vle3 = new VStringLineEdit( "woot" );
     vli = new VLineItem( "VStringLineEdit3", vle3 );
     layout()->addWidget( vli );
     connect( vle3, SIGNAL( ValueChanged( const std::string& ) ), 
         this, SLOT( testVStringLineEdit( const std::string& ) ) );
 
-    VDoubleLineEdit3* vle3d = new VDoubleLineEdit3( 9.8765 );
+    VDoubleLineEdit* vle3d = new VDoubleLineEdit( 9.8765 );
     vli = new VLineItem( "VDoubleLineEdit3", vle3d );
     layout()->addWidget( vli );
     connect( vle3d, SIGNAL( ValueChanged( double ) ), 
         this, SLOT( testVDoubleLineEdit( double ) ) );
 
-    VIntLineEdit3* vile3 = new VIntLineEdit3( 5 );
+    VIntLineEdit* vile3 = new VIntLineEdit( 5 );
     vli = new VLineItem( "VIntLineEdit3", vile3 );
     layout()->addWidget( vli );
     connect( vile3, SIGNAL( ValueChanged( int ) ), 

@@ -13,6 +13,8 @@ class VCheckBoxAction;
 class VSpinBoxAction;
 class VIntRangeMenu;
 
+class VAbstractLineEdit;
+
 //! class VSliderEdit
 //!
 //! Wraps a VSlider and a VLineEdit for selecting a numeric value within a
@@ -49,7 +51,7 @@ public:
 protected:
     void MakeContextMenu();
 
-    VNumericLineEdit* _lineEdit;
+    VAbstractLineEdit* _lineEdit;
     VSlider*          _slider;
 
     double     _minValid;

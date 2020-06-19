@@ -2,8 +2,8 @@
 
 #include "VLineEditTemplate.h"
 
-class VStringLineEdit3 : public VLineEditTemplate<std::string> {
+class VStringLineEdit : public VLineEditTemplate<std::string> {
     public:
-        VStringLineEdit3( const std::string& value ) 
+        VStringLineEdit( const std::string& value ) 
         : VLineEditTemplate<std::string>(value) {}
 };

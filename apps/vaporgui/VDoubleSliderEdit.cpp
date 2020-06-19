@@ -5,7 +5,6 @@
 
 #include "vapor/VAssert.h"
 
-#include "VLineEdit3.h"
 #include "VAbstractSliderEdit.h"
 #include "VSlider.h"
 #include "VActions.h"
