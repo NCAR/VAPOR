@@ -54,7 +54,6 @@ void VLineEdit::SetValue( double value ) {
     }
     stream << value << std::endl;
     _value = stream.str();
-    std::cout << _value << std::endl;
     
     _lineEdit->blockSignals(true);
     _lineEdit->setText( QString::fromStdString(_value) );
@@ -107,7 +106,6 @@ void VLineEdit::ShowContextMenu( const QPoint& pos ) {
 }
 
 void VLineEdit::_decimalDigitsChanged( int value ) {
-    std::cout << "void VLineEdit::_decimalDigitsChanged( int value )" << std::endl;
     _decDigits = value;
     SetValue( stod( _value ) );
 }

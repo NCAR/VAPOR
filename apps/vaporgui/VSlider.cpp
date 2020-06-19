@@ -70,8 +70,6 @@ void VSlider::SetRange( double min, double max ) {
     if ( previousValue < min ) previousValue = min;
     if ( previousValue > max ) previousValue = max;
 
-    //double newValue = previousValue / ( _max - _min );
-    //SetValue( newValue );
     SetValue( previousValue );
 }
 

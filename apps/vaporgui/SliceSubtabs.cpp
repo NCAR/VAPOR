@@ -4,7 +4,7 @@
 #include "VLineItem.h"
 #include "VLineEdit2.h"
 #include "VLineEdit3.h"
-#include "VSliderEdit.h"
+#include "VIntSliderEdit.h"
 #include "VFrame.h"
 
 #define MIN_SAMPLES 1 

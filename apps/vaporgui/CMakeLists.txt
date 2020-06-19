@@ -125,6 +125,21 @@ set (SRCS
     VSlider.h
     VSliderEdit.cpp
     VSliderEdit.h
+    VAbstractSliderEdit.cpp
+    VAbstractSliderEdit.h
+    VIntSliderEdit.cpp
+    VIntSliderEdit.h
+    VAbstractLineEdit.cpp
+    VAbstractLineEdit.h
+    VLineEditTemplate.cpp
+    VLineEditTemplate.h
+    VIntLineEdit.h
+    VDoubleLineEdit.h
+    VStringLineEdit.h
+    VIntRangeMenu.cpp
+    VIntRangeMenu.h
+    VNumericFormatMenu.cpp
+    VNumericFormatMenu.h
     VPushButton.cpp
     VPushButton.h
     QPushButtonWithDoubleClick.h

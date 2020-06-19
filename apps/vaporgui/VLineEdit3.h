@@ -14,84 +14,8 @@
 
 #include "VContainer.h"
 
-//class VSpinBoxAction;
-//class VCheckBoxAction;
 #include "VActions.h"
-#include "VActions.h"
-
-class VNumericFormatMenu : public QMenu {
-    Q_OBJECT
-
-public:
-    explicit VNumericFormatMenu( QWidget* parent, bool sciNotation, int decimalDigits )
-        : QMenu( parent ),
-          _sciNotationAction( new VCheckBoxAction( "Scientific notation", sciNotation ) ),
-          _decimalAction( new VSpinBoxAction( "Decimal digits", decimalDigits) ) 
-    {
-        connect( _sciNotationAction, &VCheckBoxAction::clicked,
-            this, &VNumericFormatMenu::_sciNotationChanged );
-        addAction( _sciNotationAction );
-
-        connect( _decimalAction, &VSpinBoxAction::editingFinished,
-            this, &VNumericFormatMenu::_decimalDigitsChanged );
-        addAction(_decimalAction);
-    }
-
-protected:
-    VCheckBoxAction* _sciNotationAction;
-    VSpinBoxAction*  _decimalAction;
-
-public:
-    void SetDecimalDigits( int digits ) { _decimalAction->SetValue( digits ); }
-    void SetSciNotation( bool sciNotation ) { _sciNotationAction->SetValue( sciNotation ); }
-
-private slots:
-    void _decimalDigitsChanged( int digits )     { emit DecimalDigitsChanged( digits ); }
-    void _sciNotationChanged( bool sciNotation ) { emit SciNotationChanged( sciNotation ); }
-
-signals:
-    void DecimalDigitsChanged( int decimalDigits );
-    void SciNotationChanged( bool sciNotation );
-};
-
-class VIntRangeMenu : public VNumericFormatMenu {
-    Q_OBJECT
-
-public:
-    explicit VIntRangeMenu( 
-        QWidget* parent, 
-        bool sciNotation, int decimalDigits,
-        int min, int max 
-        ) 
-        : VNumericFormatMenu( parent, sciNotation, decimalDigits ),
-          _minRangeAction( new VIntLineEditAction( "Minimum value", min ) ),
-          _maxRangeAction( new VIntLineEditAction( "Maximum value", max ) )
-    {
-        connect( _minRangeAction, &VIntLineEditAction::ValueChanged,
-            this, &VIntRangeMenu::_minChanged);
-        addAction( _minRangeAction );
-
-        connect( _maxRangeAction, &VIntLineEditAction::ValueChanged,
-            this, &VIntRangeMenu::_maxChanged);
-        addAction( _maxRangeAction );
-    }
-
-protected:
-    VIntLineEditAction* _minRangeAction;
-    VIntLineEditAction* _maxRangeAction;
-
-public:
-    void SetMinRange( int min ) { _minRangeAction->SetValue( min ); }
-    void SetMaxRange( int max ) { _maxRangeAction->SetValue( max ); }
-
-private slots:
-    void _minChanged( int min ) { emit MinChanged( min ); }
-    void _maxChanged( int max ) { emit MaxChanged( max ); }
-
-signals:
-    void MinChanged( int min );
-    void MaxChanged( int max );
-};
+#include "VNumericFormatMenu.h"
 
 class AbstractVLineEdit : public VContainer {
     Q_OBJECT
@@ -141,11 +65,9 @@ public slots:
     virtual void SetValue( double value ) { emit ValueChanged( value ); }
     virtual void SetValue( const std::string& value ) { emit ValueChanged( value ); }
 
-    // For PWidgets:
     void SetDecimalDigits( int digits ) { _decimalDigits = digits; }
     void SetSciNotation( bool sciNotation ) { _sciNotation = sciNotation; }
 
-//private slots:
 public slots:
     virtual void _valueChanged() = 0;
     void _setDecimalDigits( int digits ) { 
@@ -161,7 +83,6 @@ public slots:
 
 protected:
     QLineEdit*          _lineEdit;
-    //QMenu*              _menu;
     VNumericFormatMenu* _menu;
     VCheckBoxAction*    _sciNotationAction;
     VSpinBoxAction*     _decimalAction;
@@ -223,12 +144,11 @@ class VLineEdit3 : public AbstractVLineEdit {
             stream << std::fixed << std::setprecision( _decimalDigits );
             if ( _sciNotation ) {
                 stream << std::scientific;
-                stream << (double)_value;// << std::endl;
+                stream << (double)_value;
             }
             else {
-                stream << _value;// << std::endl;
+                stream << _value;
             }
-            std::cout << stream.str() << std::endl;
             return stream.str();
         }
         

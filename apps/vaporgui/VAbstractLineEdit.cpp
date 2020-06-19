@@ -1,0 +1,66 @@
+#include <QLineEdit>
+
+#include "VContainer.h"
+#include "VActions.h"
+#include "VNumericFormatMenu.h"
+#include "VAbstractLineEdit.h"
+
+VAbstractLineEdit::VAbstractLineEdit( bool useNumericMenu ) :
+    VContainer(),
+    _sciNotation( false ),
+    _decimalDigits( 5 )
+{
+    _lineEdit = new QLineEdit;
+    layout()->addWidget( _lineEdit );
+    connect( _lineEdit, SIGNAL( editingFinished() ),
+        this, SLOT( _valueChanged() ) );
+
+    if (useNumericMenu) {
+        
+        _menu = new VNumericFormatMenu( this, _sciNotation, _decimalDigits );
+        _lineEdit->setContextMenuPolicy( Qt::CustomContextMenu );
+        connect( _lineEdit, &QLineEdit::customContextMenuRequested,
+            this, &VAbstractLineEdit::_showMenu );
+        
+        connect( _menu, &VNumericFormatMenu::SciNotationChanged,
+            this, &VAbstractLineEdit::_setSciNotation );
+        connect( _menu, &VNumericFormatMenu::DecimalDigitsChanged,
+            this, &VAbstractLineEdit::_setDecimalDigits );
+    }
+}
+
+void VAbstractLineEdit::SetValue( int value ) { 
+    emit ValueChanged( value ); 
+}
+
+void VAbstractLineEdit::SetValue( double value ) { 
+    emit ValueChanged( value ); 
+}
+
+void VAbstractLineEdit::SetValue( const std::string& value ) { 
+    emit ValueChanged( value ); 
+}
+
+void VAbstractLineEdit::SetDecimalDigits( int digits ) { 
+    _decimalDigits = digits; 
+}
+
+void VAbstractLineEdit::SetSciNotation( bool sciNotation ) { 
+    _sciNotation = sciNotation; 
+}
+
+void VAbstractLineEdit::_setDecimalDigits( int digits ) { 
+    _decimalDigits = digits;
+    _valueChanged();
+    emit DecimalDigitsChanged( _decimalDigits );
+}
+void VAbstractLineEdit::_setSciNotation( bool sciNotation ) {
+    _sciNotation = sciNotation;
+    _valueChanged();
+    emit SciNotationChanged( _sciNotation );
+}
+
+void VAbstractLineEdit::_showMenu( const QPoint& pos ) {
+    QPoint globalPos = mapToGlobal(pos);
+    _menu->exec(globalPos);
+};
