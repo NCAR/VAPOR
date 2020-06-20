@@ -27,8 +27,8 @@ public slots:
 
 public slots:
     virtual void _valueChanged() = 0;
-    void _setDecimalDigits( int digits ); 
-    void _setSciNotation( bool sciNotation );
+    /*void _setDecimalDigits( int digits ); 
+    void _setSciNotation( bool sciNotation );*/
 
 protected:
     QLineEdit*          _lineEdit;

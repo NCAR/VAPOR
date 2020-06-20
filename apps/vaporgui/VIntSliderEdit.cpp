@@ -4,7 +4,7 @@
 #include "vapor/VAssert.h"
 
 #include "VIntSliderEdit.h"
-#include "VIntLineEdit.h"
+#include "VLineEditTemplate.h"
 #include "VIntRangeMenu.h"
 #include "VSlider.h"
 
@@ -51,6 +51,8 @@ bool VIntSliderEdit::GetSciNotation() const {
 }
 
 void VIntSliderEdit::SetSciNotation( bool value ) {
+std::cout << "void VIntSliderEdit::SetSciNotation( bool value ) {" << std::endl;
+    
     _lineEdit->SetSciNotation( value );
     emit FormatChanged();
 }

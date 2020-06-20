@@ -11,10 +11,7 @@
 
 #include "VIntSpinBox.h"
 #include "VCheckBox.h"
-#include "VIntLineEdit.h"
-#include "VDoubleLineEdit.h"
-#include "VStringLineEdit.h"
-//#include "VLineEdit2.h"
+#include "VLineEditTemplate.h"
 
 class VSpinBoxAction : public QWidgetAction {
     Q_OBJECT

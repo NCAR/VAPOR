@@ -2,11 +2,7 @@
 #include "SliceSubtabs.h"
 #include "TFEditor.h"
 #include "VLineItem.h"
-//#include "VLineEdit2.h"
-//#include "VLineEdit3.h"
-#include "VIntLineEdit.h"
-#include "VDoubleLineEdit.h"
-#include "VStringLineEdit.h"
+#include "VLineEditTemplate.h"
 #include "VIntSliderEdit.h"
 #include "VFrame.h"
 

@@ -23,9 +23,9 @@ VAbstractLineEdit::VAbstractLineEdit( bool useNumericMenu ) :
             this, &VAbstractLineEdit::_showMenu );
         
         connect( _menu, &VNumericFormatMenu::SciNotationChanged,
-            this, &VAbstractLineEdit::_setSciNotation );
+            this, &VAbstractLineEdit::SetSciNotation );
         connect( _menu, &VNumericFormatMenu::DecimalDigitsChanged,
-            this, &VAbstractLineEdit::_setDecimalDigits );
+            this, &VAbstractLineEdit::SetNumDigits );
     }
 }
 
@@ -47,6 +47,8 @@ int VAbstractLineEdit::GetNumDigits() const {
 
 void VAbstractLineEdit::SetNumDigits( int digits ) { 
     _decimalDigits = digits; 
+    _valueChanged();
+    emit DecimalDigitsChanged( _decimalDigits );
 }
 
 bool VAbstractLineEdit::GetSciNotation() const { 
@@ -55,18 +57,21 @@ bool VAbstractLineEdit::GetSciNotation() const {
 
 void VAbstractLineEdit::SetSciNotation( bool sciNotation ) { 
     _sciNotation = sciNotation; 
+    _valueChanged();
+    emit SciNotationChanged( _sciNotation );
 }
 
-void VAbstractLineEdit::_setDecimalDigits( int digits ) { 
+/*void VAbstractLineEdit::_setDecimalDigits( int digits ) { 
     _decimalDigits = digits;
     _valueChanged();
     emit DecimalDigitsChanged( _decimalDigits );
 }
+
 void VAbstractLineEdit::_setSciNotation( bool sciNotation ) {
     _sciNotation = sciNotation;
     _valueChanged();
     emit SciNotationChanged( _sciNotation );
-}
+}*/
 
 void VAbstractLineEdit::_showMenu( const QPoint& pos ) {
     QPoint globalPos = mapToGlobal(pos);

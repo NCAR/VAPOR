@@ -8,8 +8,8 @@
 #include "VSliderEdit.h"
 #include "VSlider.h"
 #include "VActions.h"
-#include "VIntLineEdit.h"
-#include "VDoubleLineEdit.h"
+#include "VLineEditTemplate.h"
+#include "VLineEditTemplate.h"
 
 VSliderEdit::VSliderEdit( 
     double min, 

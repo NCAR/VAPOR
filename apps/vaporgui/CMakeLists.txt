@@ -131,11 +131,7 @@ set (SRCS
     VIntSliderEdit.h
     VAbstractLineEdit.cpp
     VAbstractLineEdit.h
-    VLineEditTemplate.cpp
     VLineEditTemplate.h
-    VIntLineEdit.h
-    VDoubleLineEdit.h
-    VStringLineEdit.h
     VIntRangeMenu.cpp
     VIntRangeMenu.h
     VNumericFormatMenu.cpp

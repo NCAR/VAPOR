@@ -3,7 +3,7 @@
 #include <string>
 #include "VContainer.h"
 #include "VAbstractSliderEdit.h"
-#include "VIntLineEdit.h"
+#include "VLineEditTemplate.h"
 
 class VIntRangeMenu;
 
@@ -13,7 +13,7 @@ class VIntSliderEdit : public VAbstractSliderEdit {
 public:
     VIntSliderEdit( int min=0, int max=10, int value=3 );
 
-    void SetValue( int value );
+//    void SetValue( int value );
     void SetMinimum( int min );
     void SetMaximum( int max );
 
@@ -28,6 +28,9 @@ public:
     virtual void SetSciNotation( bool sciNotation );
 
     virtual void ShowContextMenu( const QPoint& pos );
+
+public slots:
+    void SetValue( int value );
 
 protected:
     virtual void _makeContextMenu();
