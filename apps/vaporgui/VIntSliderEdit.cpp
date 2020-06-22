@@ -51,8 +51,6 @@ bool VIntSliderEdit::GetSciNotation() const {
 }
 
 void VIntSliderEdit::SetSciNotation( bool value ) {
-std::cout << "void VIntSliderEdit::SetSciNotation( bool value ) {" << std::endl;
-    
     _lineEdit->SetSciNotation( value );
     emit FormatChanged();
 }

@@ -21,7 +21,6 @@ VContainer::VContainer()
     );
     setLayout( layout );
 
-    setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Preferred );
     setSizePolicy( QSizePolicy::Maximum, QSizePolicy::Preferred );
 }
 

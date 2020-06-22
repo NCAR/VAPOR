@@ -24,8 +24,6 @@ VDoubleSliderEdit::VDoubleSliderEdit( double min, double max, double value )
     _lineEdit = new VDoubleLineEdit( _value, false );
     layout()->addWidget(_lineEdit);
     _lineEdit->setContextMenuPolicy( Qt::NoContextMenu );
-    //connect( _lineEdit, &VDoubleLineEdit::ValueChanged,
-    //    this, &VDoubleSliderEdit::SetValue );
     connect( _lineEdit, SIGNAL( ValueChanged( double ) ),
         this, SLOT( SetValue( double ) ) );
     

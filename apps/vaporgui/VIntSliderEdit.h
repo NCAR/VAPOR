@@ -13,7 +13,6 @@ class VIntSliderEdit : public VAbstractSliderEdit {
 public:
     VIntSliderEdit( int min=0, int max=10, int value=3 );
 
-//    void SetValue( int value );
     void SetMinimum( int min );
     void SetMaximum( int max );
 

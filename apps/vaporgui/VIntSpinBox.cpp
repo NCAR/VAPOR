@@ -11,7 +11,10 @@ VIntSpinBox::VIntSpinBox( int min, int max )
     connect( _spinBox, &QSpinBox::editingFinished,
         this, &VIntSpinBox::emitSpinBoxFinished );
 
-    // QSpinBox overloads valueChanged.  This makes pointer syntax ugly.
+    // QSpinBox overloads valueChanged.  This makes the function pointer 
+    // based syntax for signal and slot connection ugly, so defer to 
+    // SIGNAL/SLOT connections with data type specificaiton.
+    //
     // More info here: https://doc.qt.io/qt-5/qspinbox.html#valueChanged
     connect( _spinBox, SIGNAL( valueChanged( int ) ),
         this, SLOT( emitSpinBoxChanged( int ) ) );

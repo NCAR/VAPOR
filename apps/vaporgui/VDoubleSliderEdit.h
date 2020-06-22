@@ -5,15 +5,7 @@
 #include "VAbstractSliderEdit.h"
 
 class QMenu;
-class VSlider;
-//class VNumericLineEdit;
-//class VIntLineEditAction;
-//class VIntLineEdit;
 class VDoubleLineEdit;
-class VDoubleLineEditAction;
-//class VCheckBoxAction;
-//class VSpinBoxAction;
-//class VIntRangeMenu;
 class VDoubleRangeMenu;
 
 class VDoubleSliderEdit : public VAbstractSliderEdit {
