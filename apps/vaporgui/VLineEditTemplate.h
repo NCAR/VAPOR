@@ -113,5 +113,7 @@ class VDoubleLineEdit : public VLineEditTemplate<double> {
 class VStringLineEdit : public VLineEditTemplate<std::string> {
     public:
         VStringLineEdit( const std::string& value ) 
-        : VLineEditTemplate<std::string>(value) {}
+        : VLineEditTemplate<std::string>(value) {
+            _lineEdit->setContextMenuPolicy( Qt::DefaultContextMenu );
+        }
 };

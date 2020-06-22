@@ -4,6 +4,7 @@
 #include "VLineItem.h"
 #include "VLineEditTemplate.h"
 #include "VIntSliderEdit.h"
+#include "VDoubleSliderEdit.h"
 #include "VFrame.h"
 
 #define MIN_SAMPLES 1 
@@ -59,6 +60,12 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     layout()->addWidget( vli );
     connect( vise, SIGNAL( ValueChanged( int ) ),
         this, SLOT( testVIntSliderEdit( int ) ) );
+
+    VDoubleSliderEdit* vdse = new VDoubleSliderEdit();
+    vli = new VLineItem( "VDoubleSliderEdit", vdse );
+    layout()->addWidget( vli );
+    connect( vdse, SIGNAL( ValueChanged( int ) ),
+        this, SLOT( testVDoubleSliderEdit( int ) ) );
 }
 
 void SliceVariablesSubtab::testVIntLineEdit( int value ) {
@@ -73,6 +80,10 @@ void SliceVariablesSubtab::testVStringLineEdit( const std::string& value ) {
 
 void SliceVariablesSubtab::testVIntSliderEdit( int value ) {
     std::cout << "VIntSliderEdit value " << value << std::endl;
+}
+
+void SliceVariablesSubtab::testVDoubleSliderEdit( double value ) {
+    std::cout << "VDoubleSliderEdit value " << value << std::endl;
 }
 
 void SliceVariablesSubtab::Update(

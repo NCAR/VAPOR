@@ -2,16 +2,19 @@
 
 #include <string>
 #include "VContainer.h"
+#include "VAbstractSliderEdit.h"
 
 class QMenu;
 class VSlider;
-class VNumericLineEdit;
-class VIntLineEditAction;
-class VIntLineEdit;
+//class VNumericLineEdit;
+//class VIntLineEditAction;
+//class VIntLineEdit;
+class VDoubleLineEdit;
 class VDoubleLineEditAction;
-class VCheckBoxAction;
-class VSpinBoxAction;
-class VIntRangeMenu;
+//class VCheckBoxAction;
+//class VSpinBoxAction;
+//class VIntRangeMenu;
+class VDoubleRangeMenu;
 
 class VDoubleSliderEdit : public VAbstractSliderEdit {
     Q_OBJECT
@@ -33,6 +36,8 @@ public:
     virtual bool GetSciNotation() const;
     virtual void SetSciNotation( bool sciNotation );
 
+    virtual void ShowContextMenu( const QPoint& pos );
+
 protected:
     virtual void _makeContextMenu();
     void _sliderChanged( double value );
@@ -40,8 +45,8 @@ protected:
 
     double _value;    
 
-    VDoubleLineEdit* _lineEdit;
-    QDoubleRangeMenu* _menu;
+    VDoubleLineEdit*  _lineEdit;
+    VDoubleRangeMenu* _menu;
     
 
 signals:

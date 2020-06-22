@@ -5,9 +5,10 @@
 
 #include "vapor/VAssert.h"
 
-#include "VAbstractSliderEdit.h"
+#include "VDoubleSliderEdit.h"
+#include "VLineEditTemplate.h"
+#include "VDoubleRangeMenu.h"
 #include "VSlider.h"
-#include "VActions.h"
 
 VDoubleSliderEdit::VDoubleSliderEdit( double min, double max, double value )
     : VAbstractSliderEdit(),
@@ -23,8 +24,10 @@ VDoubleSliderEdit::VDoubleSliderEdit( double min, double max, double value )
     _lineEdit = new VDoubleLineEdit( _value, false );
     layout()->addWidget(_lineEdit);
     _lineEdit->setContextMenuPolicy( Qt::NoContextMenu );
-    connect( _lineEdit, &VDoubleLineEdit::ValueChanged,
-        this, &VDoubleSliderEdit::SetValue );
+    //connect( _lineEdit, &VDoubleLineEdit::ValueChanged,
+    //    this, &VDoubleSliderEdit::SetValue );
+    connect( _lineEdit, SIGNAL( ValueChanged( double ) ),
+        this, SLOT( SetValue( double ) ) );
     
     _makeContextMenu();
 }
@@ -138,6 +141,10 @@ void VDoubleSliderEdit::SetMaximum( double max ) {
     }
 }
 
+void VDoubleSliderEdit::ShowContextMenu( const QPoint& pos ) {
+    QPoint globalPos = mapToGlobal(pos);
+    _menu->exec(globalPos);
+}
 
 void VDoubleSliderEdit::_sliderChangedIntermediate( double value ) {
     dynamic_cast<VDoubleLineEdit*>(_lineEdit)->SetValue( value );

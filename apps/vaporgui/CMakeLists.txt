@@ -127,6 +127,8 @@ set (SRCS
     VSliderEdit.h
     VAbstractSliderEdit.cpp
     VAbstractSliderEdit.h
+    VDoubleSliderEdit.cpp
+    VDoubleSliderEdit.h
     VIntSliderEdit.cpp
     VIntSliderEdit.h
     VAbstractLineEdit.cpp
@@ -134,6 +136,8 @@ set (SRCS
     VLineEditTemplate.h
     VIntRangeMenu.cpp
     VIntRangeMenu.h
+    VDoubleRangeMenu.cpp
+    VDoubleRangeMenu.h
     VNumericFormatMenu.cpp
     VNumericFormatMenu.h
     VPushButton.cpp

@@ -27,6 +27,9 @@ VAbstractLineEdit::VAbstractLineEdit( bool useNumericMenu ) :
         connect( _menu, &VNumericFormatMenu::DecimalDigitsChanged,
             this, &VAbstractLineEdit::SetNumDigits );
     }
+    else {
+        _lineEdit->setContextMenuPolicy( Qt::NoContextMenu );
+    }
 }
 
 void VAbstractLineEdit::SetValue( int value ) { 
