@@ -43,8 +43,9 @@ void PDoubleSliderEdit::valueChangedIntermediate(double v)
 PIntegerSliderEdit::PIntegerSliderEdit(const std::string &tag, const std::string &label)
 : PSliderEdit(tag, label)
 {
-    connect(_sliderEdit, SIGNAL( ValueChanged( int ) ), this, SLOT( valueChanged( int ) ) );
-    connect(_sliderEdit, SIGNAL( ValueChangedIntermediate( int ) ), this, SLOT( valueChangedIntermediate( int ) ) );
+    _sliderEdit->SetIntType(true);
+    connect(_sliderEdit, &VSliderEdit::ValueChangedInt, this, &PIntegerSliderEdit::valueChanged);
+    connect(_sliderEdit, &VSliderEdit::ValueChangedIntIntermediate, this, &PIntegerSliderEdit::valueChangedIntermediate);
 }
 
 void PIntegerSliderEdit::updateGUI() const

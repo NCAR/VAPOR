@@ -64,18 +64,6 @@ void VAbstractLineEdit::SetSciNotation( bool sciNotation ) {
     emit SciNotationChanged( _sciNotation );
 }
 
-/*void VAbstractLineEdit::_setDecimalDigits( int digits ) { 
-    _decimalDigits = digits;
-    _valueChanged();
-    emit DecimalDigitsChanged( _decimalDigits );
-}
-
-void VAbstractLineEdit::_setSciNotation( bool sciNotation ) {
-    _sciNotation = sciNotation;
-    _valueChanged();
-    emit SciNotationChanged( _sciNotation );
-}*/
-
 void VAbstractLineEdit::_showMenu( const QPoint& pos ) {
     QPoint globalPos = mapToGlobal(pos);
     _menu->exec(globalPos);

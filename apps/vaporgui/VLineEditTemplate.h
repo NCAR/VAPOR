@@ -35,7 +35,6 @@ class VLineEditTemplate : public VAbstractLineEdit {
         }
 
         virtual void _valueChanged() {
-            std::cout << "value changed" << std::endl;
             bool legalConversion;
             QString str = _lineEdit->text();
             double value = str.toDouble( &legalConversion );
@@ -58,7 +57,6 @@ class VLineEditTemplate : public VAbstractLineEdit {
             else {
                 stream << _value;
             }
-            std::cout << "formatted to " << stream.str() << std::endl;
             return stream.str();
         }
         
@@ -100,19 +98,19 @@ class VLineEditTemplate <std::string> : public VAbstractLineEdit {
 
 class VIntLineEdit : public VLineEditTemplate<int> {
     public:
-        VIntLineEdit( int value, bool useMenu=true ) 
+        VIntLineEdit( int value = 0, bool useMenu=true ) 
         : VLineEditTemplate<int>(value, useMenu) {}
 };
 
 class VDoubleLineEdit : public VLineEditTemplate<double> {
     public:
-        VDoubleLineEdit( double value, bool useMenu=true ) 
+        VDoubleLineEdit( double value = 0.0, bool useMenu=true ) 
         : VLineEditTemplate<double>(value, useMenu) {}
 };
 
 class VStringLineEdit : public VLineEditTemplate<std::string> {
     public:
-        VStringLineEdit( const std::string& value ) 
+        VStringLineEdit( const std::string& value = "" ) 
         : VLineEditTemplate<std::string>(value) {
             _lineEdit->setContextMenuPolicy( Qt::DefaultContextMenu );
         }

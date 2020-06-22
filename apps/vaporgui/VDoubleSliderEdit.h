@@ -22,7 +22,6 @@ class VDoubleSliderEdit : public VAbstractSliderEdit {
 public:
     VDoubleSliderEdit( double min=0, double max=10, double value=3 );
 
-    void SetValue( double value );
     void SetMinimum( double min );
     void SetMaximum( double max );
 
@@ -37,6 +36,9 @@ public:
     virtual void SetSciNotation( bool sciNotation );
 
     virtual void ShowContextMenu( const QPoint& pos );
+
+public slots:
+    void SetValue( double value );
 
 protected:
     virtual void _makeContextMenu();

@@ -64,8 +64,8 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     VDoubleSliderEdit* vdse = new VDoubleSliderEdit();
     vli = new VLineItem( "VDoubleSliderEdit", vdse );
     layout()->addWidget( vli );
-    connect( vdse, SIGNAL( ValueChanged( int ) ),
-        this, SLOT( testVDoubleSliderEdit( int ) ) );
+    connect( vdse, SIGNAL( ValueChanged( double ) ),
+        this, SLOT( testVDoubleSliderEdit( double ) ) );
 }
 
 void SliceVariablesSubtab::testVIntLineEdit( int value ) {
