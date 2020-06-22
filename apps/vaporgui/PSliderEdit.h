@@ -15,7 +15,7 @@ class PSliderEdit : public PLineItem, public PDynamicMixin {
     Q_OBJECT
     
 public:
-    PSliderEdit(const std::string &tag, const std::string &label="", bool intType = false );
+    PSliderEdit(const std::string &tag, const std::string &label="");
     //! @copydoc VSliderEdit::SetRange
     PSliderEdit *SetRange(double min, double max);
     

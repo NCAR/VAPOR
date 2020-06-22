@@ -3,8 +3,8 @@
 #include <vapor/ParamsBase.h>
 #include "VSliderEdit.h"
 
-PSliderEdit::PSliderEdit(const std::string &tag, const std::string &label, bool intType)
-: PLineItem(tag, label, _sliderEdit = new VSliderEdit( intType ) )
+PSliderEdit::PSliderEdit(const std::string &tag, const std::string &label)
+: PLineItem(tag, label, _sliderEdit = new VSliderEdit)
 {}
 
 PSliderEdit *PSliderEdit::SetRange(double min, double max)
@@ -18,8 +18,8 @@ PSliderEdit *PSliderEdit::SetRange(double min, double max)
 PDoubleSliderEdit::PDoubleSliderEdit(const std::string &tag, const std::string &label)
 : PSliderEdit(tag, label)
 {
-    connect(_sliderEdit, SIGNAL( ValueChanged( double ) ), this, SLOT( valueChanged( double ) ) );
-    connect(_sliderEdit, SIGNAL( ValueChangedIntermediate( double ) ), this, SLOT( valueChangedIntermediate( double ) ) );
+    connect(_sliderEdit, &VSliderEdit::ValueChanged, this, &PDoubleSliderEdit::valueChanged);
+    connect(_sliderEdit, &VSliderEdit::ValueChangedIntermediate, this, &PDoubleSliderEdit::valueChangedIntermediate);
 }
 
 void PDoubleSliderEdit::updateGUI() const
