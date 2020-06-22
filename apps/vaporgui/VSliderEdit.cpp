@@ -22,8 +22,6 @@ VSliderEdit::VSliderEdit( double min, double max, double value )
     layout()->addWidget(_slider);
     layout()->addWidget(_lineEdit);
 
-    //connect( _lineEdit, &VLineEdit::ValueChanged,
-    //    this, &VSliderEdit::_lineEditChanged );
     connect( _lineEdit, SIGNAL( ValueChanged( const std::string& ) ),
         this, SLOT( _lineEditChanged( const std::string& ) ) );
 
