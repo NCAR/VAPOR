@@ -1,7 +1,6 @@
 #include <QLineEdit>
 
 #include "VContainer.h"
-#include "VActions.h"
 #include "VNumericFormatMenu.h"
 #include "VAbstractLineEdit.h"
 

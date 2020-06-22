@@ -5,7 +5,6 @@
 #include "VLineEditTemplate.h"
 #include "VIntSliderEdit.h"
 #include "VDoubleSliderEdit.h"
-#include "VFrame.h"
 
 #define MIN_SAMPLES 1 
 #define MAX_SAMPLES 2000
@@ -37,16 +36,16 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
 
     VLineItem* vli;
 
-    VStringLineEdit* vle3 = new VStringLineEdit( "woot" );
-    vli = new VLineItem( "VStringLineEdit3", vle3 );
+    VStringLineEdit* vsle = new VStringLineEdit( "woot" );
+    vli = new VLineItem( "VStringLineEdit3", vsle );
     layout()->addWidget( vli );
-    connect( vle3, SIGNAL( ValueChanged( const std::string& ) ), 
+    connect( vsle, SIGNAL( ValueChanged( const std::string& ) ), 
         this, SLOT( testVStringLineEdit( const std::string& ) ) );
 
-    VDoubleLineEdit* vle3d = new VDoubleLineEdit( 9.8765 );
-    vli = new VLineItem( "VDoubleLineEdit3", vle3d );
+    VDoubleLineEdit* vdle = new VDoubleLineEdit( 9.8765 );
+    vli = new VLineItem( "VDoubleLineEdit3", vdle );
     layout()->addWidget( vli );
-    connect( vle3d, SIGNAL( ValueChanged( double ) ), 
+    connect( vdle, SIGNAL( ValueChanged( double ) ), 
         this, SLOT( testVDoubleLineEdit( double ) ) );
 
     VIntLineEdit* vile3 = new VIntLineEdit( 5 );

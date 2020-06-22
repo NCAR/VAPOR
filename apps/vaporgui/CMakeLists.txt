@@ -118,6 +118,7 @@ set (SRCS
     VLineEdit.cpp
     VLineEdit.h
     VActions.h
+    VActions.cpp
     VSlider.cpp
     VSlider.h
     VSliderEdit.cpp
