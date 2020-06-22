@@ -3,6 +3,7 @@
 #include "VLineItem.h"
 #include <vapor/ParamsBase.h>
 #include <QVBoxLayout>
+#include <assert.h>
 
 PRegionSelector::PRegionSelector(const std::string &tag, const std::string &label) : PWidget(tag, _container = new QWidget)
 {

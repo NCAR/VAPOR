@@ -1,4 +1,5 @@
 #include "PWidget.h"
+#include <assert.h>
 #include <vapor/VAssert.h>
 #include <vapor/ParamsBase.h>
 #include <vapor/ParamsMgr.h>
