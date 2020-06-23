@@ -34,6 +34,7 @@
 #include <qcheckbox.h>
 #include <QTextEdit>
 #include <QScrollArea>
+#include <cfloat>
 
 #include <qcombobox.h>
 #include <qfiledialog.h>

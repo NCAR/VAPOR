@@ -8,6 +8,8 @@
 #define GL_ERROR -20
 
 using namespace VAPoR;
+using glm::vec3;
+using glm::vec4;
 
 static RendererRegistrar<FlowRenderer> registrar(FlowRenderer::GetClassType(), FlowParams::GetClassType());
 
@@ -65,6 +67,21 @@ int FlowRenderer::_initializeGL()
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_1D, 0);
 
+    glGenVertexArrays(1, &_VAO);
+    glGenBuffers(1, &_VBO);
+
+    assert(_VAO);
+    assert(_VBO);
+
+    glBindVertexArray(_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), NULL);
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void *)sizeof(glm::vec3));
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
     return 0;
 }
 
@@ -110,6 +127,8 @@ int FlowRenderer::_paintGL(bool fast)
         MyBase::SetErrMsg("Parameters not ready!");
         return flow::PARAMS_ERROR;
     }
+
+    if (_velocityStatus != FlowStatus::UPTODATE || _colorStatus != FlowStatus::UPTODATE) _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
 
     _velocityField.UpdateParams(params);
     _colorField.UpdateParams(params);
@@ -245,15 +264,259 @@ int FlowRenderer::_paintGL(bool fast)
     glDepthMask(true);
 
     _prepareColormap(params);
-    _renderFromAnAdvection(&_advection, params, fast);
-    /* If the advection is bi-directional */
-    if (_2ndAdvection) _renderFromAnAdvection(_2ndAdvection.get(), params, fast);
+
+    int ret = 0;
+
+    if (params->GetValueLong("old_render", 0)) {
+        _renderFromAnAdvectionLegacy(&_advection, params, fast);
+        /* If the advection is bi-directional */
+        if (_2ndAdvection) _renderFromAnAdvectionLegacy(_2ndAdvection.get(), params, fast);
+    } else {
+        // Workaround for how bi-directional was implemented.
+        // The rendering caches the flow data on the GPU however it
+        // only caches one advection at a time. Since when using bidirectional
+        // flow it results in two separate advections, we need to reset the cache
+        // before each half is drawn.
+        if (_2ndAdvection) _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
+
+        ret |= _renderAdvection(&_advection);
+        /* If the advection is bi-directional */
+        if (_2ndAdvection) {
+            _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
+            ret |= _renderAdvection(_2ndAdvection.get());
+        }
+    }
+
     _restoreGLState();
+
+    return ret;
+}
+
+int FlowRenderer::_renderAdvection(const flow::Advection *adv)
+{
+    FlowParams *rp = dynamic_cast<FlowParams *>(GetActiveParams());
+
+    if (_renderStatus != FlowStatus::UPTODATE) {
+        int nStreams = adv->GetNumberOfStreams();
+
+        typedef struct {
+            vec3  p;
+            float v;
+        } Vertex;
+        vector<Vertex> vertices;
+        vector<int>    sizes;
+        vector<Vertex> sv;
+
+        // If streams are larger than this then need to skip remaining
+        size_t maxSamples = rp->GetSteadyNumOfSteps() + 1;
+
+        // First calculate the starting time stamp. Copied from legacy.
+        double startingTime;
+        if (!_cache_isSteady) {
+            int pastNumOfTimeSteps = dynamic_cast<FlowParams *>(GetActiveParams())->GetPastNumOfTimeSteps();
+            startingTime = _timestamps[0];
+            if (_cache_currentTS - pastNumOfTimeSteps > 0) startingTime = _timestamps[_cache_currentTS - pastNumOfTimeSteps];
+        }
+
+        for (int s = 0; s < nStreams; s++) {
+            const vector<flow::Particle> &stream = adv->GetStreamAt(s);
+            sv.clear();
+            int sn = stream.size();
+            if (_cache_isSteady) sn = std::min(sn, (int)maxSamples);
+
+            for (int i = 0; i < sn + 1; i++) {
+                // "IsSpecial" means don't render this sample.
+                if (i == sn || stream[i].IsSpecial()) {
+                    int svn = sv.size();
+
+                    if (svn < 2) {
+                        sv.clear();
+                        continue;
+                    }
+
+                    vec3 prep(-normalize(sv[1].p - sv[0].p) + sv[0].p);
+                    vec3 post(normalize(sv[svn - 1].p - sv[svn - 2].p) + sv[svn - 1].p);
+
+                    size_t vn = vertices.size();
+                    vertices.resize(vn + svn + 2);
+                    vertices[vn] = {prep, sv[0].v};
+                    vertices[vertices.size() - 1] = {post, sv[svn - 1].v};
+
+                    memcpy(vertices.data() + vn + 1, sv.data(), sizeof(Vertex) * svn);
+
+                    sizes.push_back(svn + 2);
+                    sv.clear();
+                } else {
+                    const flow::Particle &p = stream[i];
+
+                    if (_cache_isSteady) {
+                        sv.push_back({p.location, p.value});
+                    } else {
+                        if (p.time > _timestamps.at(_cache_currentTS)) continue;
+                        if (p.time >= startingTime) sv.push_back({p.location, p.value});
+                    }
+                }
+            }
+
+            _renderStatus = FlowStatus::UPTODATE;
+        }
+
+        assert(glIsVertexArray(_VAO) == GL_TRUE);
+        assert(glIsBuffer(_VBO) == GL_TRUE);
+
+        glBindVertexArray(_VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STREAM_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        _streamSizes = sizes;
+    }
+
+    bool show_dir = rp->GetValueLong(FlowParams::RenderShowStreamDirTag, false);
+
+    _renderAdvectionHelper(show_dir);
+    if (show_dir) _renderAdvectionHelper(false);
 
     return 0;
 }
 
-int FlowRenderer::_renderFromAnAdvection(const flow::Advection *adv, FlowParams *params, bool fast)
+int FlowRenderer::_renderAdvectionHelper(bool renderDirection)
+{
+    auto rp = GetActiveParams();
+
+    FlowParams::RenderType renderType = (FlowParams::RenderType)rp->GetValueLong(FlowParams::RenderTypeTag, FlowParams::RenderTypeStream);
+    FlowParams::GlpyhType  glyphType = (FlowParams::GlpyhType)rp->GetValueLong(FlowParams::RenderGlyphTypeTag, FlowParams::GlpyhTypeSphere);
+
+    bool  geom3d = rp->GetValueLong(FlowParams::RenderGeom3DTag, false);
+    float radiusBase = rp->GetValueDouble(FlowParams::RenderRadiusBaseTag, -1);
+    if (radiusBase == -1) {
+        vector<double> mind, maxd;
+        _dataMgr->GetVariableExtents(rp->GetCurrentTimestep(), rp->GetColorMapVariableName(), rp->GetRefinementLevel(), rp->GetCompressionLevel(), mind, maxd);
+        vec3  min(mind[0], mind[1], mind[2]);
+        vec3  max(maxd[0], maxd[1], maxd[2]);
+        vec3  lens = max - min;
+        float largestDim = glm::max(lens.x, glm::max(lens.y, lens.z));
+        radiusBase = largestDim / 560.f;
+        rp->SetValueDouble(FlowParams::RenderRadiusBaseTag, "", radiusBase);
+    }
+    float radiusScalar = rp->GetValueDouble(FlowParams::RenderRadiusScalarTag, 1);
+    float radius = radiusBase * radiusScalar;
+    int   glyphStride = rp->GetValueLong(FlowParams::RenderGlyphStrideTag, 5);
+
+    ShaderProgram *shader = nullptr;
+
+    if (renderType == FlowParams::RenderTypeStream) {
+        if (geom3d)
+            if (renderDirection)
+                shader = _glManager->shaderManager->GetShader("FlowGlyphsTubeDirArrow");
+            else
+                shader = _glManager->shaderManager->GetShader("FlowTubes");
+        else if (renderDirection)
+            shader = _glManager->shaderManager->GetShader("FlowGlyphsLineDirArrow2D");
+        else
+            shader = _glManager->shaderManager->GetShader("FlowLines");
+    } else {
+        if (glyphType == FlowParams::GlpyhTypeSphere)
+            if (geom3d)
+                shader = _glManager->shaderManager->GetShader("FlowGlyphsSphereSplat");
+            else
+                shader = _glManager->shaderManager->GetShader("FlowGlyphsSphere2D");
+        else if (geom3d)
+            shader = _glManager->shaderManager->GetShader("FlowGlyphsArrow");
+        else
+            shader = _glManager->shaderManager->GetShader("FlowGlyphsArrow2D");
+    }
+
+    if (!shader) return -1;
+
+    double m[16];
+    double cameraPosD[3], cameraUpD[3], cameraDirD[3];
+    _paramsMgr->GetViewpointParams(_winName)->GetModelViewMatrix(m);
+    _paramsMgr->GetViewpointParams(_winName)->ReconstructCamera(m, cameraPosD, cameraUpD, cameraDirD);
+    vec3 cameraDir = vec3(cameraDirD[0], cameraDirD[1], cameraDirD[2]);
+    vec3 cameraPos = vec3(cameraPosD[0], cameraPosD[1], cameraPosD[2]);
+
+    shader->Bind();
+    shader->SetUniform("P", _glManager->matrixManager->GetProjectionMatrix());
+    shader->SetUniform("MV", _glManager->matrixManager->GetModelViewMatrix());
+    shader->SetUniform("aspect", _glManager->matrixManager->GetProjectionAspectRatio());
+    shader->SetUniform("radius", radius);
+    shader->SetUniform("lightingEnabled", true);
+    shader->SetUniform("glyphStride", glyphStride);
+    shader->SetUniform("showOnlyLeadingSample", (bool)rp->GetValueLong(FlowParams::RenderGlyphOnlyLeadingTag, false));
+    shader->SetUniform("scales", _getScales());
+    shader->SetUniform("cameraPos", cameraPos);
+    if (rp->GetValueLong(FlowParams::RenderLightAtCameraTag, true))
+        shader->SetUniform("lightDir", cameraDir);
+    else
+        shader->SetUniform("lightDir", vec3(0, 0, -1));
+    shader->SetUniform("phongAmbient", (float)rp->GetValueDouble(FlowParams::PhongAmbientTag, 0));
+    shader->SetUniform("phongDiffuse", (float)rp->GetValueDouble(FlowParams::PhongDiffuseTag, 0));
+    shader->SetUniform("phongSpecular", (float)rp->GetValueDouble(FlowParams::PhongSpecularTag, 0));
+    shader->SetUniform("phongShininess", (float)rp->GetValueDouble(FlowParams::PhongShininessTag, 0));
+
+    shader->SetUniform("mapRange", glm::make_vec2(_colorMapRange));
+
+    shader->SetUniform("fade_tails", (bool)rp->GetValueLong(FlowParams::RenderFadeTailTag, 0));
+    shader->SetUniform("fade_start", (int)rp->GetValueLong(FlowParams::RenderFadeTailStartTag, 10));
+    shader->SetUniform("fade_length", (int)rp->GetValueLong(FlowParams::RenderFadeTailLengthTag, 10));
+    shader->SetUniform("fade_stop", (int)rp->GetValueLong(FlowParams::RenderFadeTailStopTag, 0));
+
+    //    Features supported by shaders but not implemented in GUI/not finished
+    //
+    //    shader->SetUniform("constantColorEnabled", false);
+    //    shader->SetUniform("Color", vec3(1.0f));
+    //    shader->SetUniform("antiAlias", (bool)rp->GetValueLong("anti_alias", 0));
+    //    auto bcd = rp->GetValueDoubleVec("border_color");
+    //    if (bcd.size())
+    //        shader->SetUniform("borderColor", vec3((float)bcd[0], bcd[1], bcd[2]));
+    //    shader->SetUniform("border", (float)rp->GetValueDouble("border", 0));
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_1D, _colorMapTexId);
+    shader->SetUniform("LUT", 0);
+
+    EnableClipToBox(shader, 0.01);
+
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CCW);
+    glEnable(GL_BLEND);
+    glBindVertexArray(_VAO);
+
+    size_t offset = 0;
+    for (int n : _streamSizes) {
+        shader->SetUniform("nVertices", n);
+        glDrawArrays(GL_LINE_STRIP_ADJACENCY, offset, n);
+        offset += n;
+    }
+
+    glBindVertexArray(0);
+    glDisable(GL_CULL_FACE);
+    shader->UnBind();
+    DisableClippingPlanes();
+
+    return 0;
+}
+
+glm::vec3 FlowRenderer::_getScales()
+{
+    string                  myVisName = GetVisualizer();
+    VAPoR::ViewpointParams *vpp = _paramsMgr->GetViewpointParams(myVisName);
+    string                  datasetName = GetMyDatasetName();
+    Transform *             tDataset = vpp->GetTransform(datasetName);
+    Transform *             tRenderer = GetActiveParams()->GetTransform();
+
+    vector<double> scales = tDataset->GetScales();
+    vector<double> rendererScales = tRenderer->GetScales();
+
+    scales[0] *= rendererScales[0];
+    scales[1] *= rendererScales[1];
+    scales[2] *= rendererScales[2];
+
+    return vec3(scales[0], scales[1], scales[2]);
+}
+
+int FlowRenderer::_renderFromAnAdvectionLegacy(const flow::Advection *adv, FlowParams *params, bool fast)
 {
     size_t numOfStreams = adv->GetNumberOfStreams();
     auto   numOfPart = params->GetSteadyNumOfSteps() + 1;
@@ -516,6 +779,7 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
                 if (_colorStatus == FlowStatus::UPTODATE) _colorStatus = FlowStatus::TIME_STEP_OOD;
                 if (_velocityStatus == FlowStatus::UPTODATE) _velocityStatus = FlowStatus::TIME_STEP_OOD;
             }
+            if (params->GetSteadyNumOfSteps() != _cache_steadyNumOfSteps) _renderStatus = FlowStatus::TIME_STEP_OOD;
             _cache_steadyNumOfSteps = params->GetSteadyNumOfSteps();
 
             if (_cache_currentTS != params->GetCurrentTimestep()) {
@@ -549,6 +813,7 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
                 if (_colorStatus == FlowStatus::UPTODATE) { _colorStatus = FlowStatus::TIME_STEP_OOD; }
                 if (_velocityStatus == FlowStatus::UPTODATE) { _velocityStatus = FlowStatus::TIME_STEP_OOD; }
             }
+            if (_cache_currentTS != params->GetCurrentTimestep()) _renderStatus = FlowStatus::TIME_STEP_OOD;
             _cache_currentTS = params->GetCurrentTimestep();
             _cache_steadyNumOfSteps = params->GetSteadyNumOfSteps();
         } else    // switched from steady to unsteady

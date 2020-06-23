@@ -1,6 +1,7 @@
 #include "vapor/glutil.h"
 #include "vapor/TextLabel.h"
 #include "vapor/GLManager.h"
+#include <vapor/FontManager.h>
 #include "vapor/LegacyGL.h"
 
 using namespace VAPoR;

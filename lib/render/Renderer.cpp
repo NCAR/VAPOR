@@ -28,6 +28,7 @@
 #include <vapor/Renderer.h>
 #include <vapor/DataMgrUtils.h>
 #include "vapor/GLManager.h"
+#include "vapor/FontManager.h"
 #include "vapor/LegacyGL.h"
 #include "vapor/TextLabel.h"
 #include <glm/gtc/type_ptr.hpp>

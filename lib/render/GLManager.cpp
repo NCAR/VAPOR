@@ -1,6 +1,7 @@
 #include "vapor/glutil.h"
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
+#include "vapor/FontManager.h"
 #include "vapor/STLUtils.h"
 #include <chrono>
 
@@ -24,6 +25,12 @@ std::vector<int> GLManager::GetViewport()
     GLint v[4] = {0};
     glGetIntegerv(GL_VIEWPORT, v);
     return {v[0], v[1], v[2], v[3]};
+}
+
+glm::vec2 GLManager::GetViewportSize()
+{
+    const auto v = GetViewport();
+    return glm::vec2(v[2] - v[0], v[3] - v[1]);
 }
 
 void GLManager::PixelCoordinateSystemPush()

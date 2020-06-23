@@ -30,6 +30,7 @@ class VFrame;
 class VIntSpinBox;
 class VGeometry2;
 class VPushButton;
+class PGroup;
 
 namespace VAPoR {
 class ControlExec;
@@ -86,6 +87,7 @@ public:
 private:
     VAPoR::FlowParams *_params;
     TFEditor *         _TFEditor;
+    PGroup *           _pw;
 };
 
 //

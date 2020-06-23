@@ -102,9 +102,11 @@ set (SRCS
 	QPaintUtils.cpp
 	QPaintUtils.h
 	VSection.cpp
+	VSection.h
+	VSubGroup.cpp
+	VSubGroup.h
     VFrame.h
 	VFrame.cpp
-	VSection.h
 	VLineItem.cpp
 	VLineItem.h
     VContainer.cpp
