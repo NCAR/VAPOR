@@ -2,13 +2,13 @@
 
 #include <string>
 #include "VContainer.h"
-#include "VAbstractSliderEdit.h"
+#include "VSliderEditInterface.h"
 
 class QMenu;
 class VDoubleLineEdit;
 class VDoubleRangeMenu;
 
-class VDoubleSliderEdit : public VAbstractSliderEdit {
+class VDoubleSliderEdit : public VSliderEditInterface {
     Q_OBJECT
 
 public:

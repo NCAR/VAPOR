@@ -31,8 +31,6 @@ public slots:
 protected:
     QLineEdit*          _lineEdit;
     VNumericFormatMenu* _menu;
-    VCheckBoxAction*    _sciNotationAction;
-    VSpinBoxAction*     _decimalAction;
 
     bool _sciNotation;
     int  _decimalDigits;
@@ -40,9 +38,14 @@ protected:
     void _showMenu( const QPoint& pos );
 
 signals:
+
+    // Required to propotage changes up up to Params, via PWidgets
     void ValueChanged( int value );
     void ValueChanged( double value );
     void ValueChanged( const std::string& value );
+
+    // Required to propogate changes from the menus 
+    // up to Params, via PWidgets
     void DecimalDigitsChanged( int decimalDigits );
     void SciNotationChanged( bool sciNotation );
 };

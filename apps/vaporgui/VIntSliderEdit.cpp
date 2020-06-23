@@ -9,7 +9,7 @@
 #include "VSlider.h"
 
 VIntSliderEdit::VIntSliderEdit( int min, int max, int value )
-    : VAbstractSliderEdit(),
+    : VSliderEditInterface(),
       _value( value )
 {
     _slider = new VSlider( min, max );

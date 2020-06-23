@@ -2,12 +2,12 @@
 
 #include <string>
 #include "VContainer.h"
-#include "VAbstractSliderEdit.h"
+#include "VSliderEditInterface.h"
 #include "VLineEditTemplate.h"
 
 class VIntRangeMenu;
 
-class VIntSliderEdit : public VAbstractSliderEdit {
+class VIntSliderEdit : public VSliderEditInterface {
     Q_OBJECT
 
 public:

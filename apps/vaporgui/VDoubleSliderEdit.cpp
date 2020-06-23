@@ -11,7 +11,7 @@
 #include "VSlider.h"
 
 VDoubleSliderEdit::VDoubleSliderEdit( double min, double max, double value )
-    : VAbstractSliderEdit(),
+    : VSliderEditInterface(),
       _value( value )
 {
     _slider = new VSlider( min, max );

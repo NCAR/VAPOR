@@ -123,8 +123,8 @@ set (SRCS
     VSlider.h
     VSliderEdit.cpp
     VSliderEdit.h
-    VAbstractSliderEdit.cpp
-    VAbstractSliderEdit.h
+    VSliderEditInterface.cpp
+    VSliderEditInterface.h
     VDoubleSliderEdit.cpp
     VDoubleSliderEdit.h
     VIntSliderEdit.cpp

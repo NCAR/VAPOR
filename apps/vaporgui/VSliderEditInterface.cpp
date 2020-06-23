@@ -5,11 +5,11 @@
 
 #include "vapor/VAssert.h"
 
-#include "VAbstractSliderEdit.h"
+#include "VSliderEditInterface.h"
 #include "VSlider.h"
 #include "VActions.h"
 
-VAbstractSliderEdit::VAbstractSliderEdit( 
+VSliderEditInterface::VSliderEditInterface( 
 ) : VContainer()
 {
     setContextMenuPolicy( Qt::CustomContextMenu );
@@ -17,6 +17,6 @@ VAbstractSliderEdit::VAbstractSliderEdit(
     setFrameStyle(QFrame::Panel | QFrame::Raised );
 
     setContextMenuPolicy( Qt::CustomContextMenu );
-    connect( this, &VAbstractSliderEdit::customContextMenuRequested,
-        this, &VAbstractSliderEdit::ShowContextMenu );
+    connect( this, &VSliderEditInterface::customContextMenuRequested,
+        this, &VSliderEditInterface::ShowContextMenu );
 }

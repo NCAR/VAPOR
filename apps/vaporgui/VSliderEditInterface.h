@@ -3,16 +3,11 @@
 #include <string>
 #include "VContainer.h"
 
-class QMenu;
 class VSlider;
-class VNumericLineEdit;
-class VIntLineEditAction;
-class VDoubleLineEditAction;
 class VCheckBoxAction;
 class VSpinBoxAction;
-class VIntRangeMenu;
 
-class VAbstractSliderEdit : public VContainer {
+class VSliderEditInterface : public VContainer {
     Q_OBJECT
 
 public:
@@ -25,13 +20,12 @@ public:
     virtual void ShowContextMenu( const QPoint& ) = 0;
 
 protected:
-    VAbstractSliderEdit();
+    VSliderEditInterface();
     virtual void _makeContextMenu() = 0;
 
-    VSlider*          _slider;
-
-    VSpinBoxAction*        _decimalAction;
-    VCheckBoxAction*       _scientificAction;
+    VSlider*         _slider;
+    VSpinBoxAction*  _decimalAction;
+    VCheckBoxAction* _scientificAction;
 
 signals:
     void FormatChanged();
