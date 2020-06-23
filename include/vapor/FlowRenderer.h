@@ -84,6 +84,7 @@ class RENDER_API FlowRenderer final : public Renderer {
     FlowDir _cache_flowDir = FlowDir::FORWARD;
     FlowStatus _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
     FlowStatus _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
+    FlowStatus _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
     std::string _cache_rakeBiasVariable;
     std::string _cache_seedInputFilename;
 
@@ -97,6 +98,10 @@ class RENDER_API FlowRenderer final : public Renderer {
     GLuint _vertexBufferId = 0;
     GLuint _colorMapTexId = 0;
 
+    unsigned int _VAO = 0;
+    unsigned int _VBO = 0;
+    vector<int> _streamSizes;
+
     //
     // Member functions
     //
@@ -105,11 +110,14 @@ class RENDER_API FlowRenderer final : public Renderer {
     int _genSeedsRakeRandom(std::vector<flow::Particle> &seeds) const;
     int _genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) const;
 
-    int _renderFromAnAdvection(const flow::Advection *, FlowParams *, bool fast);
+    int _renderFromAnAdvectionLegacy(const flow::Advection *, FlowParams *, bool fast);
+    int _renderAdvection(const flow::Advection *adv);
+    int _renderAdvectionHelper(bool renderDirection = false);
     void _prepareColormap(FlowParams *);
     void _particleHelper1(std::vector<float> &vec, const flow::Particle &p, bool singleColor) const;
     int _drawALineStrip(const float *buf, size_t numOfParts, bool singleColor) const;
     void _restoreGLState() const;
+    glm::vec3 _getScales();
 
     // Update values of _cache_* and _state_* member variables.
     int _updateFlowCacheAndStates(const FlowParams *);
