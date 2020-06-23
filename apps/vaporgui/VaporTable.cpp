@@ -87,7 +87,7 @@ void VaporTable::Update(int rows, int cols,
 		std::vector<std::string> rowHeaders,
 		std::vector<std::string> colHeaders) {
 
-	_table->clear();
+	//_table->clear();
 	_table->setRowCount(rows);
 	_table->setColumnCount(cols);
 
