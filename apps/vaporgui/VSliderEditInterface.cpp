@@ -14,8 +14,6 @@ VSliderEditInterface::VSliderEditInterface(
 {
     setContextMenuPolicy( Qt::CustomContextMenu );
 
-    setFrameStyle(QFrame::Panel | QFrame::Raised );
-
     setContextMenuPolicy( Qt::CustomContextMenu );
     connect( this, &VSliderEditInterface::customContextMenuRequested,
         this, &VSliderEditInterface::ShowContextMenu );
