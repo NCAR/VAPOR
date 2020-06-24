@@ -2,11 +2,11 @@
 
 #include "vapor/ShaderManager.h"
 #include "vapor/MatrixManager.h"
-#include "vapor/FontManager.h"
 
 namespace VAPoR {
 
 class LegacyGL;
+class FontManager;
 
 //! \class GLManager
 //! \ingroup Public_Render
@@ -27,6 +27,7 @@ struct RENDER_API GLManager {
     //! \retval vector<int>[4] from glGetIntegerv(GL_VIEWPORT)
     //!
     static std::vector<int> GetViewport();
+    static glm::vec2        GetViewportSize();
 
     //! Utility function that pushes the current matrix state and
     //! sets up a pixel coorinate 2D orthographic projection

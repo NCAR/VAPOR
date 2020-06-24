@@ -2,6 +2,7 @@
 #include "vapor/DataMgrUtils.h"
 #include "vapor/Box.h"
 #include "ErrorReporter.h"
+#include <cfloat>
 
 #include "VFrame.h"
 #include "VIntSpinBox.h"
@@ -14,9 +15,18 @@
 #include "VGeometry2.h"
 #include "VPushButton.h"
 
+#include "PSliderEdit.h"
+#include "PEnumDropdown.h"
+#include "PCheckbox.h"
+#include "PGroup.h"
+#include "PSection.h"
+#include "PDoubleInput.h"
+
 #include <QScrollArea>
 
 #define verbose 1
+
+using VAPoR::FlowParams;
 
 namespace {
 const std::string UNSTEADY_STRING = "Pathlines";
@@ -113,8 +123,61 @@ void FlowVariablesSubtab::_dimensionalityChanged(int nDims) const
 FlowAppearanceSubtab::FlowAppearanceSubtab(QWidget *parent) : QVaporSubtab(parent)
 {
     _TFEditor = new TFEditor(true);
+    _pw = new PGroup;
 
     _layout->addWidget(_TFEditor, 0, 0);
+    _layout->addWidget(_pw);
+
+    PSection *ps;
+
+    _pw->Add(ps = new PSection("Appearance"));
+    ps->Add(new PEnumDropdown(FlowParams::RenderTypeTag, {"Tubes", "Samples"}, {FlowParams::RenderTypeStream, FlowParams::RenderTypeSamples}, "Render Type"));
+    ps->Add((new PEnumDropdown(FlowParams::RenderGlyphTypeTag, {"Circle", "Arrow"}, {FlowParams::GlpyhTypeSphere, FlowParams::GlpyhTypeArrow}, "Glyph Type"))
+                ->ShowBasedOnParam(FlowParams::RenderTypeTag, FlowParams::RenderTypeSamples));
+    ps->Add(new PCheckbox(FlowParams::RenderGeom3DTag, "3D Geometry"));
+    //    ps->Add((new PCheckbox(FlowParams::RenderLightAtCameraTag, "Light From Camera"))->ShowBasedOnParam(FlowParams::RenderGeom3DTag));
+    //    ps->Add((new PDoubleInput(FlowParams::RenderRadiusBaseTag, "Radius")));
+    ps->Add((new PDoubleSliderEdit(FlowParams::RenderRadiusScalarTag, "Radius Scalar"))->SetRange(0.1, 5)->EnableDynamicUpdate());
+
+    PGroup *streamGroup = new PGroup;
+    streamGroup->ShowBasedOnParam(FlowParams::RenderTypeTag, FlowParams::RenderTypeStream);
+    ps->Add(streamGroup);
+
+    streamGroup->Add((new PCheckbox(FlowParams::RenderShowStreamDirTag, "Show Stream Direction"))->ShowBasedOnParam(FlowParams::RenderTypeTag, FlowParams::RenderTypeStream));
+    PGroup *showDirGroup = new PSubGroup;
+    showDirGroup->ShowBasedOnParam(FlowParams::RenderShowStreamDirTag);
+    streamGroup->Add(showDirGroup);
+    showDirGroup->Add((new PIntegerSliderEdit(FlowParams::RenderGlyphStrideTag, "Every N Samples"))->SetRange(1, 20)->EnableDynamicUpdate());
+
+    streamGroup->Add((new PCheckbox(FlowParams::RenderFadeTailTag, "Fade Flow Tails")));
+    PGroup *fadeGroup = new PSubGroup;
+    fadeGroup->ShowBasedOnParam(FlowParams::RenderFadeTailTag);
+    streamGroup->Add(fadeGroup);
+    fadeGroup->Add(
+        (new PIntegerSliderEdit(FlowParams::RenderFadeTailStartTag, "Fade Start Sample"))->SetRange(0, 100)->EnableDynamicUpdate()->SetTooltip("How far behind leading sample fade begins."));
+    fadeGroup->Add(
+        (new PIntegerSliderEdit(FlowParams::RenderFadeTailLengthTag, "Fade Over N Samples"))->SetRange(1, 100)->EnableDynamicUpdate()->SetTooltip("Number of samples from opaque to transparent."));
+    fadeGroup->Add(
+        (new PIntegerSliderEdit(FlowParams::RenderFadeTailStopTag, "Animate Steady"))->SetRange(0, 200)->EnableDynamicUpdate()->SetTooltip("Temporary solution for animating steady flow particles."));
+
+    PGroup *sampleGroup = new PGroup;
+    sampleGroup->ShowBasedOnParam(FlowParams::RenderTypeTag, FlowParams::RenderTypeSamples);
+    ps->Add(sampleGroup);
+    sampleGroup->Add(
+        (new PIntegerSliderEdit(FlowParams::RenderGlyphStrideTag, "Every N Samples"))->SetRange(1, 20)->EnableDynamicUpdate()->EnableBasedOnParam(FlowParams::RenderGlyphOnlyLeadingTag, false));
+    sampleGroup->Add(new PCheckbox(FlowParams::RenderGlyphOnlyLeadingTag, "Only Show Leading Sample"));
+
+    _pw->Add(ps = new PSection("Lighting"));
+    ps->ShowBasedOnParam(FlowParams::RenderGeom3DTag);
+    ps->Add((new PDoubleSliderEdit(FlowParams::PhongAmbientTag, "Ambient"))->EnableDynamicUpdate());
+    ps->Add((new PDoubleSliderEdit(FlowParams::PhongDiffuseTag, "Diffuse"))->EnableDynamicUpdate());
+    ps->Add((new PDoubleSliderEdit(FlowParams::PhongSpecularTag, "Specular"))->EnableDynamicUpdate());
+    ps->Add((new PDoubleSliderEdit(FlowParams::PhongShininessTag, "Specular"))->SetRange(1, 100)->EnableDynamicUpdate());
+
+#ifndef NDEBUG
+    _pw->Add((ps = new PSection("Debug"))->SetTooltip("Only accessible in debug build."));
+    ps->Add((new PCheckbox("old_render", "Old Render Code (Regressing Testing)")));
+#endif
 
     _params = NULL;
 }
@@ -124,6 +187,7 @@ void FlowAppearanceSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *par
     _params = dynamic_cast<VAPoR::FlowParams *>(rParams);
     assert(_params);
     _TFEditor->Update(dataMgr, paramsMgr, rParams);
+    _pw->Update(rParams, paramsMgr, dataMgr);
 }
 
 //

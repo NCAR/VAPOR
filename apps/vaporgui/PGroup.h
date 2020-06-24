@@ -19,5 +19,17 @@ public:
     PGroup *Add(PWidget *pw);
 
 protected:
+    PGroup(QWidget *w);
     void updateGUI() const override;
+};
+
+//! \class PSubGroup
+//! Groups together PWidgets in a subgroup.
+//! \copydoc PGroup
+
+class PSubGroup : public PGroup {
+    Q_OBJECT
+
+public:
+    PSubGroup();
 };

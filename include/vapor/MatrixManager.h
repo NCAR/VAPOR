@@ -55,6 +55,8 @@ public:
     glm::vec2 ProjectToScreen(float x, float y, float z) const;
     glm::vec2 ProjectToScreen(const glm::vec3 &v) const;
 
+    float GetProjectionAspectRatio() const;
+
 #ifndef NDEBUG
     int         GetGLMatrixMode();
     const char *GetGLMatrixModeStr();
@@ -71,6 +73,7 @@ private:
     stack<glm::mat4>  _projectionStack;
     stack<glm::mat4> *_currentStack;
     Mode              _mode;
+    float             _projectionAspectRatio = 0;
 
     glm::mat4 &      top();
     const glm::mat4 &top() const;
