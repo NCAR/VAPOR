@@ -44,6 +44,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "vapor/GLManager.h"
 #include "vapor/LegacyGL.h"
+#include "vapor/FontManager.h"
 #include "vapor/FileUtils.h"
 #include "vapor/Visualizer.h"
 #include <vapor/FlowParams.h>
