@@ -184,6 +184,31 @@ void vectorinc::ith(
 	offset = linearize_coords(start, _dims);
 }
 
+#ifdef UNUSED
+bool vectorinc::next(vector <size_t> &start, size_t &offset) {
+
+	offset = 0;
+
+	int i = _next.size()-1;
+	bool done = false;
+	while (i >= 0 && ! done) {
+		_next[i] += _inc[i];
+		if (_next[i] >= _end[i]) {
+			_next[i] = _start[i];
+		}
+		else { 
+			done = true;
+		}
+		i--;
+	}
+	start = _next;
+
+	offset = linearize_coords(start, _dims);
+
+	return(done);
+}
+#endif
+
 // Execution thread state for data reads and writes
 //
 class thread_state {
