@@ -26,11 +26,8 @@ Forking Vapor's code
 --------------------
 After installing Git and registering with GitHub, it's time to "Fork" Vapor's code base by clicking the Fork button on the upper right corner of `Vapor's GitHub repository <https://github.com/NCAR/VAPOR>`_.  This creates your own repository on GitHub that contains a copy of Vapor's current master branch.  Clone this repository to a suitable location on your local work machine.  This new remote repository is what will be merged with Vapor's master branch.  The next step is to compile Vapor's source code, and then begin making changes.
 
-Building Vapor From Source
---------------------------
-
 Download the Third-Party Libraries
-``````````````````````````````````
+----------------------------------
 
 After forking and cloning your new Vapor repository, you will need to download the third-party libraries that Vapor will link to.  Links to these libraries are below.  Be sure to select the correct download for the operating system you're building on.
 
@@ -50,8 +47,8 @@ If building on Linux or OSX, the third party libraries must be placed in /usr/lo
 
     `CentOS third-party libraries <https://drive.google.com/open?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0>`_
 
-Run CMake
-`````````
+CMake & make
+------------
 
 On all operating systems, create a directory where the build will take place.  One option is to put the build directory inside of the Vapor source code directory.
 
@@ -65,21 +62,19 @@ On OSX and Linux, navigate to your build directory and run the command *cmake <s
 
     cmake .. && make
 
-
-
-
-
-, and push your changes to it.  When your issue has been fixed, submit a Pull Request from your forked repository to Vapor's.  
-
-
-and GitHub for hosting the code's repository.  The "Feature Branch" workflow, where all feature development takes place on a dedicated branch.
-
-These branches are merged into the master branch after testing and review.
-
-the "Feature Branch" workflow using git. A more detailed explanation of this workflow is available here, and here are a few take-aways.
+If compilation is successful, you can find Vapor's executable in the following locations
 
 Submitting Code Changes
 -----------------------
+
+After successfully compiling Vapor, you can make changes to the code base.  What pieces of code you add or modify will depend on the issue you're trying to fix.  Most often, contributors will be doing one of two things:
+
+.. toctree::
+   :maxdepth: 1
+
+   createDataReader
+   createRenderer
+
 
 .. _contributingToVaporsDocumentation:
 Contributing to Vapor's Documentation
