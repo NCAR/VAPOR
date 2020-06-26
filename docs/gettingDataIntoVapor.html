@@ -181,7 +181,7 @@
 </div></blockquote>
 <p><a class="reference internal" href="#binary"><span class="std std-ref">Raw binary</span></a> data must be converted to VDC before loading into Vapor.</p>
 <div class="section" id="importing-data">
-<h2>Importing data<a class="headerlink" href="#importing-data" title="Permalink to this headline">¶</a></h2>
+<span id="importdata"></span><h2>Importing data<a class="headerlink" href="#importing-data" title="Permalink to this headline">¶</a></h2>
 <p>Users can import their data through Vapor’s <code class="docutils literal notranslate"><span class="pre">File</span></code> menu.</p>
 <div class="align-center figure" id="id1">
 <a class="reference internal image-reference" href="_images/importWRF.png"><img alt="_images/importWRF.png" src="_images/importWRF.png" style="width: 400px;" /></a>
@@ -219,7 +219,7 @@
 <p>Creating a VDC requires command line tools that come bundled with Vapor.  These tools can be found and issued in the installation directory.  For example, Windows users may find it in C:Program FilesVAPORand Linux users may find it in /home/john_doe/vapor/bin/wrf2vdc.</p>
 <p>Alternatively, the tools can be added to the user’s system path by clicking on the <cite>Tools</cite> menu, and selecting <cite>Install Command Line Tools</cite>.After doing this, users will be able to issue the command line utilities from any directory in their terminal or command prompt.</p>
 <div class="align-center figure" id="id2">
-<img alt="_images/installCLTools.png" src="_images/installCLTools.png" />
+<span id="commandlinetools"></span><img alt="_images/installCLTools.png" src="_images/installCLTools.png" />
 <p class="caption"><span class="caption-text">Installing the command line tools for VDC creation, through Vapor’s GUI.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
 </div>
 <p>The two step VDC creation process is as follows:</p>
@@ -237,7 +237,7 @@
 </div>
 <div class="section" id="wrf-arw">
 <span id="wrf"></span><h2>WRF-ARW<a class="headerlink" href="#wrf-arw" title="Permalink to this headline">¶</a></h2>
-<p>Vapor supports WRF-ARW model output, so it can be <span class="xref std std-ref">directly imported</span>.</p>
+<p>Vapor supports WRF-ARW model output, so it can be <a class="reference internal" href="#importdata"><span class="std std-ref">directly imported</span></a>.</p>
 <p>The two tools for converting WRF-ARW into VDC are <code class="docutils literal notranslate"><span class="pre">wrfvdccreate</span></code> and <code class="docutils literal notranslate"><span class="pre">wrf2vdc</span></code>.  If either of these commands are issued by themselves, advanced options will be listed to the terminal.  These advanced options are usually not necessary.</p>
 <p>In the directory where Vapor 3 is installed, there is a command line utility called <code class="docutils literal notranslate"><span class="pre">wrfvdccreate</span></code>.  Issue this command in a terminal (Unix) or command prompt (Windows), followed by your WRF-ARW files, and finally the name of the .vdc file to be written.</p>
 <blockquote>

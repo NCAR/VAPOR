@@ -17,17 +17,17 @@ Where to start?
 
 All contributions are welcome.  The contributions that can be made include:
 
-    - `Bug reports <contributing.bugReports>`_
-    - `Feature requests <contributing.bugReports>`_
-    - `Code contributions <contributing.git>`_
-    - `Documentation updates <contributing.documentation>`_
-    - `Your own visualizations to share in Vapor's gallery <contributing.visGallery>`_
+    - :ref:`Bug reports <contributing.bugReports>`
+    - :ref:`Feature requests <contributing.bugReports>`
+    - :ref:`Code contributions <contributing.git>`
+    - :ref:`Documentation updates <contributing.documentation>`
+    - :ref:`Your own visualizations to share in Vapor's gallery <contributing.visGallery>`
 
-Vapor's current issues under development can be found on our `GitHub "issues" tab <https://github.com/ncar/vapor/issues>`_.  
+Vapor's current to-do list can be found on our `GitHub "issues" tab <https://github.com/ncar/vapor/issues>`_.  
 
-If you’ve found an interesting issue that you would like to help fix, leave a comment on the issue that you would like to be assigned to it.  This helps prevent multiple people working on the same problem without coordinating with eachother.
+If you’ve found an interesting issue that you would like to help fix, leave a comment on the issue that you would like to be assigned to it.  Assigning each issue to one or more individuals helps coordinaton among developers.
 
-you can refer to our Building From Source guide to get your development environment setup.  After that, our Vapor Architecture guide can help guide you on what part of the code base is relevant to your new feature.
+After assignment, you can refer to this guide to :ref:`set up your development environment <contributing.environment>`, and make your contribution.  Vapor's Architecture guide can help guide you on what part of the code base is relevant to your new feature.
 
 Feel free to ask questions on the `Vapor Discourse Forum <https://vapor.discourse.group>`_.
 
@@ -72,7 +72,7 @@ The `GitHub help pages <http://help.github.com/>`_ are a great place to get star
 setting up your SSH key, and configuring git.  All these steps need to be completed before
 you can work seamlessly between your local repository and GitHub.
 
-.. _contributing.forking:
+.. _contributing.environment:
 
 Forking Vapor's code
 ____________________
