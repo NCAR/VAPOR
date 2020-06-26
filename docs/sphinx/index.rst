@@ -33,7 +33,7 @@ VAPOR is a product of the National Center for Atmospheric Research’s Computati
    gettingDataIntoVapor
    usage
    Get Help on Our Forum <https://vapor.discourse.group>
-   contributorsGuide
+   contributing
    licenseAndCitation
 
 Indices and tables

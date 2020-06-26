@@ -41,7 +41,7 @@ Release notes for VAPOR-3.2.0
 Installation Instructions
 -------------------------
 
-We encourage users of Vapor to install with the methods described here.  If you're a developer and would like to contribute, see the :ref:`Building From Source <buildFromSource>` section below.
+We encourage users of Vapor to install with the methods described here.  If you're a developer and would like to contribute, see the `Building From Source <buildFromSource>` section below.
 
 **Linux**
 
