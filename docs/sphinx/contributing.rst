@@ -26,7 +26,7 @@ All contributions are welcome, and can include:
 
 Vapor's current to-do list can be found on our `GitHub "issues" tab <https://github.com/ncar/vapor/issues>`_.  
 
-If you’ve found an interesting issue that you would like to help fix, write a comment stating that you would like to be assigned to it.  Assigning issues to one or more individuals helps coordinaton among developers.
+If you’ve found an interesting issue that you would like to help fix, write a comment stating that you would like to be assigned to it.  Assigning issues to one or more individuals helps coordination among developers.
 
 After assignment, you can refer to this document to :ref:`set up your development environment <contributing.environment>`, and then make your contribution.  The purpose of this guide is to help developers understand what part of Vapor's architecture is relevant to their assigned issue, and how to get their fix incorporated into our *master* branch.
 
@@ -50,7 +50,7 @@ It is also worth searching for existing bug reports and pull requests to see if 
 Code Contributions
 ---------------------
 
-If you've found an issue you'd like to fix, you'll need to compile Vapor, fix the issue at hand, and submit your changes for review and approval.  Prerequesite software includes:
+If you've found an issue you'd like to fix, you'll need to compile Vapor, fix the issue at hand, and submit your changes for review and approval.  Prerequisite software includes:
 
     * Git for Vapor's version control
       
@@ -166,7 +166,7 @@ Windows
     Enter your build directory as the "Where to build the binaries" field in the CMake GUI.  Click *Configure*, *Generate*, and then *Open Project* in that order.  Visual Studio will open, and you can build the target *PACKAGE* to compile the source code.
 
 UNIX:
-    Navigate to your build directory and run the command *cmake <source_directory>*, where <source_directory> is the root directory of Vapor's source code.  If the configuraiton was successful, you can then run *make* to compile Vapor.
+    Navigate to your build directory and run the command *cmake <source_directory>*, where <source_directory> is the root directory of Vapor's source code.  If the configuration was successful, you can then run *make* to compile Vapor.
 
     cmake .. && make
 
@@ -201,7 +201,7 @@ On Linux, run  *cmake <vapor-source-dir> && make linuxpreinstall && make install
 Submitting Your Changes
 _______________________
 
-After your implementation is complete, push your committs to your forked repository on GitHub.  Then submit your changes you've made on your forked branch to Vapor's master branch as a GitHub Pull Request.
+After your implementation is complete, push your commits to your forked repository on GitHub.  Then submit your changes you've made on your forked branch to Vapor's master branch as a GitHub Pull Request.
 
 Vapor will automatically run a small set of tests to see if its internals are in tact, and check for warnings.  If these tests pass, Vapor's team will review the Pull Request to make sure that Vapor's `Code Conventions <https://github.com/NCAR/VAPOR/wiki/Vapor-Coding-Convention>`_ were honored, and that the logic and structure of the code is sound.  
 
