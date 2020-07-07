@@ -4,4 +4,4 @@
 Creating a Data Reader
 ======================
 
-Create a data reader...
+Coming soon: How to create a data reader

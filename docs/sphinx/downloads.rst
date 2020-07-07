@@ -122,24 +122,39 @@ If building on Linux or OSX, the third party libraries must be placed in /usr/lo
 +-----------------+----------------------------------------------------------------+
 | python          | 3.6.9                                                          |
 +-----------------+----------------------------------------------------------------+
-| Qt              | 5.12.4                                                         |
+| Qt              | 5.13.2                                                         |
 +-----------------+----------------------------------------------------------------+
 
 The source code for these libraries by be downloaded `here <https://drive.google.com/open?id=1sWIV-Y66aFuDkC2oDnceIIUJDDH4puKI>`_.
 
-**Step 3 - Set up your compiler**
+**Step 3 - Install system libraries**
+
+Building Vapor from source requires system libraries that are not natively available on all UNIX platforms.  The following commands can be used to acquire these libraries.
+
+Ubuntu: 
+    sudo apt-get install git freeglut3-dev libexpat1-dev libglib2.0-0 libdbus1-3 
+
+CentOS: 
+    sudo yum install dbus make freeglut-devel expat-devel libquadmath-devel libXrender-devel libSM-devel fontconfig-devel
+
+.. note::
+    Vapor uses docker images as a basis for its continuous integration test suite, which are built from Dockerfiles located in <source-directory>/share/docker.  These docker files are used to generate thes images can be used as a reference for how we build our test systems.
+
+**Step 4 - Set up your compiler**
 
 The following compilers were used to build Vapor.
 
 OSX - LLVM 10.0.1 (clang-1001.0.46.4)
-Ubuntu/CentOS - GCC 4.8.5 or higher
+
+Ubuntu/CentOS - g++ 7.5.0 or higher
+
 Windows - Microsoft Visual Studio 2015, version 14
 	
-**Step 4 - Configure CMake**
+**Step 5 - Configure CMake**
 
 CMake version 3.2 or higher is required on all platforms.  If you chose to build the third party libraries manually, CMake must be configured to point to those libraries wither with the CMake GUI (Windows) or the ccmake command (OSX and Linux).  Run either the GUI or ccmake on the directory where your source code resides to configure the build process.
 
-**Step 5 - Run CMake**
+**Step 6 - Run CMake**
 
 On all operating systems, create a directory where the build will take place.  
 
@@ -147,7 +162,7 @@ On Windows, enter this directory as the "Where to build the binaries" field in t
 
 On OSX and Linux, navigate to your build directory and type *cmake <build_directory> && make*, where <build_directory> is where your build is taking place.
 
-**Step 6 - Build an installer**
+**Step 7 - Build an installer**
 
 Edit the file *CMakeLists.txt* in the root of your source code directory, so that the field *CMAKE_BUILD_TYPE Debug* is changed to *CMAKE_BUILD_TYPE Release*.  Also change the field *DIST_INSTALLER OFF* to be *DIST_INSTALLER ON*.
 

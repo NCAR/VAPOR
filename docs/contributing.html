@@ -1,0 +1,368 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Contributing to Vapor &mdash; Vapor 3.2.0.59c3322 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="_static/vaporVLogo.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Creating a Data Reader" href="createDataReader.html" />
+    <link rel="prev" title="Ancillary Tools" href="usage/ancillaryTools.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Vapor
+          
+
+          
+            
+            <img src="_static/vaporLogoWhite2.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="downloads.html">Downloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickStartGuide.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingDataIntoVapor.html">Getting Data into Vapor3</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Using Vapor 3</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://vapor.discourse.group">Get Help on Our Forum</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing to Vapor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#where-to-start">Where to start?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bug-reports-and-feature-requests">Bug Reports and Feature Requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#code-contributions">Code Contributions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#version-control-git-and-github">Version control, Git, and GitHub</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#forking-vapor-s-code">Forking Vapor’s code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download-the-third-party-libraries">Download the Third-Party Libraries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-vapor-with-cmake">Build Vapor with CMake</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-to-the-code-base">Adding to the Code Base</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="createDataReader.html">Creating a Data Reader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="createRenderer.html">Creating a Renderer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#submitting-your-changes">Submitting Your Changes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Vapor Coding Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#contributing-to-vapor-s-documentation">Contributing to Vapor’s Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contributing-to-vapor-s-gallery">Contributing to Vapor’s Gallery</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="licenseAndCitation.html">License and Citation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Vapor</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Contributing to Vapor</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/contributing.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="contributing-to-vapor">
+<span id="contributing"></span><h1>Contributing to Vapor<a class="headerlink" href="#contributing-to-vapor" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="table-of-contents">
+<p class="topic-title">Table of contents:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#where-to-start" id="id3">Where to start?</a></p></li>
+<li><p><a class="reference internal" href="#bug-reports-and-feature-requests" id="id4">Bug Reports and Feature Requests</a></p></li>
+<li><p><a class="reference internal" href="#code-contributions" id="id5">Code Contributions</a></p></li>
+<li><p><a class="reference internal" href="#adding-to-the-code-base" id="id6">Adding to the Code Base</a></p></li>
+<li><p><a class="reference internal" href="#submitting-your-changes" id="id7">Submitting Your Changes</a></p></li>
+<li><p><a class="reference internal" href="#contributing-to-vapor-s-documentation" id="id8">Contributing to Vapor’s Documentation</a></p></li>
+<li><p><a class="reference internal" href="#contributing-to-vapor-s-gallery" id="id9">Contributing to Vapor’s Gallery</a></p></li>
+</ul>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Large parts of this document came from the <a class="reference external" href="http://xarray.pydata.org/en/stable/contributing.html">xarray Contributing
+Guide</a>.</p>
+</div>
+<div class="section" id="where-to-start">
+<h2><a class="toc-backref" href="#id3">Where to start?</a><a class="headerlink" href="#where-to-start" title="Permalink to this headline">¶</a></h2>
+<p>All contributions are welcome.  The contributions that can be made include:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#contributing-bugreports"><span class="std std-ref">Bug reports</span></a></p></li>
+<li><p><a class="reference internal" href="#contributing-bugreports"><span class="std std-ref">Feature requests</span></a></p></li>
+<li><p><a class="reference internal" href="#contributing-git"><span class="std std-ref">Code contributions</span></a></p></li>
+<li><p><a class="reference internal" href="#contributing-documentation"><span class="std std-ref">Documentation updates</span></a></p></li>
+<li><p><a class="reference internal" href="#contributing-visgallery"><span class="std std-ref">Your own visualizations to share in Vapor’s gallery</span></a></p></li>
+</ul>
+</div></blockquote>
+<p>Vapor’s current to-do list can be found on our <a class="reference external" href="https://github.com/ncar/vapor/issues">GitHub “issues” tab</a>.</p>
+<p>If you’ve found an interesting issue that you would like to help fix, leave a comment on the issue that you would like to be assigned to it.  Assigning each issue to one or more individuals helps coordinaton among developers.</p>
+<p>After assignment, you can refer to this guide to <a class="reference internal" href="#contributing-environment"><span class="std std-ref">set up your development environment</span></a>, and make your contribution.  Vapor’s Architecture guide can help guide you on what part of the code base is relevant to your new feature.</p>
+<p>Feel free to ask questions on the <a class="reference external" href="https://vapor.discourse.group">Vapor Discourse Forum</a>.</p>
+</div>
+<div class="section" id="bug-reports-and-feature-requests">
+<span id="contributing-bugreports"></span><h2><a class="toc-backref" href="#id4">Bug Reports and Feature Requests</a><a class="headerlink" href="#bug-reports-and-feature-requests" title="Permalink to this headline">¶</a></h2>
+<p>To submit a new bug report or feature request, you can click the “New issue” button in the upper right, or <a class="reference external" href="https://github.com/NCAR/VAPOR/issues/new/choose">clicking on this link</a>.</p>
+<p>Bug reports are an important part of making <em>Vapor</em> more stable.  A bug report should have a brief description of the problem, as well as a list of steps to reproduce the problem.  See <a class="reference external" href="https://stackoverflow.com/help/mcve">this stackoverflow article</a> for tips on writing a good bug report.</p>
+<p>Trying the bug-producing code out on the <em>master</em> branch is often a worthwhile exercise to confirm the bug still exists. It is also worth searching existing bug reports and pull requests to see if the issue has already been reported and/or fixed.</p>
+</div>
+<div class="section" id="code-contributions">
+<span id="contributing-git"></span><h2><a class="toc-backref" href="#id5">Code Contributions</a><a class="headerlink" href="#code-contributions" title="Permalink to this headline">¶</a></h2>
+<p>If you’ve found an issue you’d like to fix yourself, you’ll need to compile <em>Vapor</em>, fix the issue at hand, and submit your changes for review and approval.  Prerequesite software includes:</p>
+<blockquote>
+<div><ul>
+<li><p>Git for Vapor’s version control software</p></li>
+<li><p>CMake (version 3.2 or higher) for Vapor’s its build system</p></li>
+<li><p>One of the following compilers, dependent on which system its being built on:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>OSX - LLVM 10.0.1 (clang-1001.0.46.4)</p></li>
+<li><p>Ubuntu/CentOS - GCC 4.8.5 or higher</p></li>
+<li><p>Windows - Microsoft Visual Studio 2015, version 14</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<div class="section" id="version-control-git-and-github">
+<h3>Version control, Git, and GitHub<a class="headerlink" href="#version-control-git-and-github" title="Permalink to this headline">¶</a></h3>
+<p>To the new user, working with Git is one of the more daunting aspects of contributing to <em>Vapor</em>.  It can very quickly become overwhelming, but sticking to the guidelines below will help keep the process straightforward and mostly trouble free.  As always, if you are having difficulties please feel free to ask for help.</p>
+<p>The code is hosted on <a class="reference external" href="https://www.github.com/NCAR/vapor">GitHub</a>. To contribute you will need to sign up for a <a class="reference external" href="https://github.com/signup/free">free GitHub account</a>. We use <a class="reference external" href="http://git-scm.com/">Git</a> for version control to allow many people to work together on the project.  It can also be acquired by package managers like apt-get (Ubuntu), yum (RedHat), and choco (Windows).</p>
+<p>The <a class="reference external" href="http://help.github.com/">GitHub help pages</a> are a great place to get started with Git.</p>
+<p><a class="reference external" href="http://help.github.com/set-up-git-redirect">GitHub also has instructions</a> for installing git,
+setting up your SSH key, and configuring git.  All these steps need to be completed before
+you can work seamlessly between your local repository and GitHub.</p>
+</div>
+<div class="section" id="forking-vapor-s-code">
+<span id="contributing-environment"></span><h3>Forking Vapor’s code<a class="headerlink" href="#forking-vapor-s-code" title="Permalink to this headline">¶</a></h3>
+<p>After installing Git and registering with GitHub, it’s time to “Fork” Vapor’s code base by clicking the Fork button on the upper right corner of <a class="reference external" href="https://github.com/NCAR/VAPOR">Vapor’s GitHub repository</a>.  This creates your own repository on GitHub that contains a copy of Vapor’s current master branch.  Clone this repository to a suitable location on your local work machine.  This new remote repository is what will be merged with Vapor’s master branch.  The next step is to compile Vapor’s source code, and then begin making changes.</p>
+</div>
+<div class="section" id="download-the-third-party-libraries">
+<h3>Download the Third-Party Libraries<a class="headerlink" href="#download-the-third-party-libraries" title="Permalink to this headline">¶</a></h3>
+<p>After forking and cloning your new Vapor repository, you will need to download the third-party libraries that Vapor will link to.  Links to these libraries are below.  Be sure to select the correct download for the operating system you’re building on.</p>
+<p><em>Windows</em></p>
+<p>Unzip the following file linked below into the root of your C:\ directory.</p>
+<blockquote>
+<div><p><a class="reference external" href="https://drive.google.com/open?id=1NRMu4_g8ZXu9bILBVRDsuUKIGBiT2016">Windows third party libraries</a></p>
+</div></blockquote>
+<p><em>Linux and OSX</em></p>
+<p>If building on Linux or OSX, the third party libraries must be placed in /usr/local/VAPOR-Deps/.</p>
+<blockquote>
+<div><p><a class="reference external" href="https://drive.google.com/open?id=1p47yeyjyUfxlc7-eglsXkjCGYJLqqtEs">OSX third-party libraries</a></p>
+<p><a class="reference external" href="https://drive.google.com/open?id=1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd">Ubuntu third-party libraries</a></p>
+<p><a class="reference external" href="https://drive.google.com/open?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0">CentOS third-party libraries</a></p>
+</div></blockquote>
+</div>
+<div class="section" id="build-vapor-with-cmake">
+<h3>Build Vapor with CMake<a class="headerlink" href="#build-vapor-with-cmake" title="Permalink to this headline">¶</a></h3>
+<p>On all operating systems, create a directory where the build will take place.  One option is to put the build directory inside of the Vapor source code directory.</p>
+<blockquote>
+<div><p>&gt; cd VAPOR
+&gt; mkdir build
+&gt; cd build</p>
+</div></blockquote>
+<p>On Windows, enter this build directory as the “Where to build the binaries” field in the CMake GUI.  Click <em>Configure</em>, <em>Generate</em>, and then <em>Open Project</em> in that order.  Visual Studio will open, and you can build the target <em>PACKAGE</em> to compile the source code.</p>
+<p>On OSX and Linux, navigate to your build directory and run the command <em>cmake &lt;source_directory&gt;</em>, where &lt;source_directory&gt; is the root directory of Vapor’s source code.  If the configuraiton was successful, you can then run <em>make</em> to compile Vapor.</p>
+<blockquote>
+<div><p>cmake .. &amp;&amp; make</p>
+</div></blockquote>
+<p>If compilation is successful, you can find Vapor’s executable in the following locations</p>
+</div>
+</div>
+<div class="section" id="adding-to-the-code-base">
+<span id="contributing-architecture"></span><h2><a class="toc-backref" href="#id6">Adding to the Code Base</a><a class="headerlink" href="#adding-to-the-code-base" title="Permalink to this headline">¶</a></h2>
+<p>After successfully compiling Vapor, you can make changes to the code base.  Make sure to follow Vapor’s <a class="reference external" href="https://github.com/NCAR/VAPOR/wiki/Vapor-Coding-Convention">Code Conventions</a>, and eliminate all compiler warnings as you proceed.</p>
+<p>What pieces of code you add or modify will depend on the issue you’re trying to fix.  Most often, contributors will be doing one of two things:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="createDataReader.html">Creating a Data Reader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="createRenderer.html">Creating a Renderer</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="submitting-your-changes">
+<h2><a class="toc-backref" href="#id7">Submitting Your Changes</a><a class="headerlink" href="#submitting-your-changes" title="Permalink to this headline">¶</a></h2>
+<p>After your implementation is complete, push your committs to your forked repository on GitHub.  You can then submit your changes for review through a GitHub Pull Request.  Vapor will automatically run a small set of tests to see if its internals are in tact, and check for warnings.  If these tests pass, Vapor’s team will review the Pull Request to make sure that Vapor’s <a class="reference external" href="https://github.com/NCAR/VAPOR/wiki/Vapor-Coding-Convention">Code Conventions</a> were honored, and that the logic and structure of the code is sound.  After review, further changes may be requested, or the Pull Request will be merged into Vapor’s master repository.</p>
+<div class="section" id="id2">
+<h3><a class="reference external" href="https://github.com/NCAR/VAPOR/wiki/Vapor-Coding-Convention">Vapor Coding Conventions</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="contributing-to-vapor-s-documentation">
+<span id="contributing-documentation"></span><h2><a class="toc-backref" href="#id8">Contributing to Vapor’s Documentation</a><a class="headerlink" href="#contributing-to-vapor-s-documentation" title="Permalink to this headline">¶</a></h2>
+<p>Vapor uses the Sphinx documentation generator.</p>
+<p>To contribute to Vapor’s documentation, first follow these <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/installation.html">instructions for installing Sphinx</a>.</p>
+<p>Then navigate to &lt;vapor-install-dir/docs/sphinx.  Within this directory you will find .rst files that are used to generate the HTML used for Vapor’s documentation.  You can modify these .rst files, or add new ones.  Once the .rst files are complete, type <em>make ..</em> to generate the HTML, which will be built in &lt;vapor-install-dir&gt;/docs.  The HTML and .rst files can then be added to a pull request for review.</p>
+</div>
+<div class="section" id="contributing-to-vapor-s-gallery">
+<span id="contributing-visgallery"></span><h2><a class="toc-backref" href="#id9">Contributing to Vapor’s Gallery</a><a class="headerlink" href="#contributing-to-vapor-s-gallery" title="Permalink to this headline">¶</a></h2>
+<p>Contributing to <a class="reference external" href="https://visgallery.ucar.edu/category/visualization-software/vapor/">Vapor’s visualiation gallery</a> helps us understand how the application is being used, and can drive future requirements.  If you’d like to share your visualizations with us, you can submit them to our gallery by filling out the following form:</p>
+<p><a class="reference external" href="https://docs.google.com/forms/d/e/1FAIpQLSdJQA_1LGZ-DNySLGn4c9TekVuUcwvKo4Hgw3uBf9BmSDipUw/viewform?vc=0&amp;c=0&amp;w=1">Submit a visualization to Vapor’s gallery</a></p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="createDataReader.html" class="btn btn-neutral float-right" title="Creating a Data Reader" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="usage/ancillaryTools.html" class="btn btn-neutral float-left" title="Ancillary Tools" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019 University Corporation for Atmospheric Research
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

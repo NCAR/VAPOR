@@ -4,4 +4,4 @@
 Creating a Renderer
 ===================
 
-Create a renderer...
+Coming soon: How to create a renderer

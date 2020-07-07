@@ -6,6 +6,7 @@ Contributing to Vapor
 
 .. contents:: Table of contents:
    :local:
+   :depth: 1
 
 .. note::
 
@@ -119,8 +120,8 @@ If compilation is successful, you can find Vapor's executable in the following l
 
 .. _contributing.architecture:
 
-Vapor's Architecture
---------------------
+Adding to the Code Base
+-----------------------
 
 After successfully compiling Vapor, you can make changes to the code base.  Make sure to follow Vapor's `Code Conventions <https://github.com/NCAR/VAPOR/wiki/Vapor-Coding-Convention>`_, and eliminate all compiler warnings as you proceed.
 
@@ -146,10 +147,20 @@ ________________________________________________________________________________
 Contributing to Vapor's Documentation
 -------------------------------------
 
+Vapor uses the Sphinx documentation generator.  
 
+To contribute to Vapor's documentation, first follow these `instructions for installing Sphinx <https://www.sphinx-doc.org/en/master/usage/installation.html>`_.
+
+Then navigate to <vapor-install-dir/docs/sphinx.  Within this directory you will find .rst files that are used to generate the HTML used for Vapor's documentation.  You can modify these .rst files, or add new ones.  Once the .rst files are complete, type *make ..* to generate the HTML, which will be built in <vapor-install-dir>/docs.  The HTML and .rst files can then be added to a pull request for review.
 
 .. _contributing.visGallery:
 
 Contributing to Vapor's Gallery
 -------------------------------
+
+Contributing to `Vapor's visualiation gallery <https://visgallery.ucar.edu/category/visualization-software/vapor/>`_ helps us understand how the application is being used, and can drive future requirements.  If you'd like to share your visualizations with us, you can submit them to our gallery by filling out the following form:
+
+`Submit a visualization to Vapor's gallery <https://docs.google.com/forms/d/e/1FAIpQLSdJQA_1LGZ-DNySLGn4c9TekVuUcwvKo4Hgw3uBf9BmSDipUw/viewform?vc=0&c=0&w=1>`_
+
+
 

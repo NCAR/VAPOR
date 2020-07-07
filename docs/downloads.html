@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Downloads &mdash; Vapor 3.1.0 documentation</title>
+  <title>Downloads &mdash; Vapor 3.2.0.59c3322 documentation</title>
   
 
   
@@ -287,23 +287,35 @@
 <td><p>3.6.9</p></td>
 </tr>
 <tr class="row-even"><td><p>Qt</p></td>
-<td><p>5.12.4</p></td>
+<td><p>5.13.2</p></td>
 </tr>
 </tbody>
 </table>
 <p>The source code for these libraries by be downloaded <a class="reference external" href="https://drive.google.com/open?id=1sWIV-Y66aFuDkC2oDnceIIUJDDH4puKI">here</a>.</p>
-<p><strong>Step 3 - Set up your compiler</strong></p>
+<p><strong>Step 3 - Install system libraries</strong></p>
+<p>Building Vapor from source requires system libraries that are not natively available on all UNIX platforms.  The following commands can be used to acquire these libraries.</p>
+<dl class="simple">
+<dt>Ubuntu:</dt><dd><p>sudo apt-get install git freeglut3-dev libexpat1-dev libglib2.0-0 libdbus1-3</p>
+</dd>
+<dt>CentOS:</dt><dd><p>sudo yum install dbus make freeglut-devel expat-devel libquadmath-devel libXrender-devel libSM-devel fontconfig-devel</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Vapor uses docker images as a basis for its continuous integration test suite, which are built from Dockerfiles located in &lt;source-directory&gt;/share/docker.  These docker files are used to generate thes images can be used as a reference for how we build our test systems.</p>
+</div>
+<p><strong>Step 4 - Set up your compiler</strong></p>
 <p>The following compilers were used to build Vapor.</p>
-<p>OSX - LLVM 10.0.1 (clang-1001.0.46.4)
-Ubuntu/CentOS - GCC 4.8.5 or higher
-Windows - Microsoft Visual Studio 2015, version 14</p>
-<p><strong>Step 4 - Configure CMake</strong></p>
+<p>OSX - LLVM 10.0.1 (clang-1001.0.46.4)</p>
+<p>Ubuntu/CentOS - g++ 7.5.0 or higher</p>
+<p>Windows - Microsoft Visual Studio 2015, version 14</p>
+<p><strong>Step 5 - Configure CMake</strong></p>
 <p>CMake version 3.2 or higher is required on all platforms.  If you chose to build the third party libraries manually, CMake must be configured to point to those libraries wither with the CMake GUI (Windows) or the ccmake command (OSX and Linux).  Run either the GUI or ccmake on the directory where your source code resides to configure the build process.</p>
-<p><strong>Step 5 - Run CMake</strong></p>
+<p><strong>Step 6 - Run CMake</strong></p>
 <p>On all operating systems, create a directory where the build will take place.</p>
 <p>On Windows, enter this directory as the “Where to build the binaries” field in the GUI.  Click <em>Configure</em>, <em>Generate</em>, and then <em>Open Project</em> in that order.  Visual Studio will open, and you can build the target <em>PACKAGE</em> to compile the source code.</p>
 <p>On OSX and Linux, navigate to your build directory and type <em>cmake &lt;build_directory&gt; &amp;&amp; make</em>, where &lt;build_directory&gt; is where your build is taking place.</p>
-<p><strong>Step 6 - Build an installer</strong></p>
+<p><strong>Step 7 - Build an installer</strong></p>
 <p>Edit the file <em>CMakeLists.txt</em> in the root of your source code directory, so that the field <em>CMAKE_BUILD_TYPE Debug</em> is changed to <em>CMAKE_BUILD_TYPE Release</em>.  Also change the field <em>DIST_INSTALLER OFF</em> to be <em>DIST_INSTALLER ON</em>.</p>
 <p>On Windows, make sure that the build is taking place in <em>Release</em> mode, not <em>Debug</em>, and build the target <em>PACKAGE</em>.</p>
 <p>On OSX, run <em>cmake &lt;build_directory&gt; &amp;&amp; make &amp;&amp; make installer</em> from your build directory.</p>
