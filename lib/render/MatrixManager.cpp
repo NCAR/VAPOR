@@ -112,6 +112,7 @@ void MatrixManager::Rotate(float angle, float x, float y, float z)
 void MatrixManager::Perspective(float fovy, float aspect, float zNear, float zFar)
 {
     top() = glm::perspective(fovy, aspect, zNear, zFar);
+    _projectionAspectRatio = aspect;
     
 #ifndef NDEBUG
     Near = zNear;
@@ -122,6 +123,7 @@ void MatrixManager::Perspective(float fovy, float aspect, float zNear, float zFa
 void MatrixManager::Ortho(float left, float right, float bottom, float top)
 {
     this->top() = glm::ortho(left, right, bottom, top);
+    _projectionAspectRatio = (right-left)/(top-bottom);
 }
 
 void MatrixManager::Ortho(float left, float right, float bottom, float top, float zNear, float zFar)
@@ -140,6 +142,12 @@ glm::vec2 MatrixManager::ProjectToScreen(const glm::vec3 &v) const
     vec4 vs = GetModelViewProjectionMatrix() * vec4(v, 1.0f);
     vs /= vs.w;
     return vs;
+}
+
+float MatrixManager::GetProjectionAspectRatio() const
+{
+    VAssert(_projectionAspectRatio != 0);
+    return _projectionAspectRatio;
 }
 
 
