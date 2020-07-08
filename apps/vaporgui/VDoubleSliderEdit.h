@@ -12,7 +12,12 @@ class VDoubleSliderEdit : public VSliderEditInterface {
     Q_OBJECT
 
 public:
-    VDoubleSliderEdit( double min=0, double max=10, double value=3 );
+    VDoubleSliderEdit( 
+        double min   = 0, 
+        double max   = 10, 
+        double value = 3,
+        bool rangeChangable = false
+    );
 
     void SetMinimum( double min );
     void SetMaximum( double max );
@@ -37,7 +42,8 @@ protected:
     void _sliderChanged( double value );
     void _sliderChangedIntermediate( double value );
 
-    double _value;    
+    double _value;
+    bool   _rangeChangable;
 
     VDoubleLineEdit*  _lineEdit;
     VDoubleRangeMenu* _menu;

@@ -3,8 +3,11 @@
 
 VIntRangeMenu::VIntRangeMenu( 
     QWidget* parent, 
-    bool sciNotation, int decimalDigits,
-    int min, int max 
+    bool sciNotation, 
+    int decimalDigits,
+    int min, 
+    int max,
+    bool rangeChangable
     ) 
     : VNumericFormatMenu( parent, sciNotation, decimalDigits ),
       _minRangeAction( new VIntLineEditAction( "Minimum value", min ) ),
@@ -17,6 +20,11 @@ VIntRangeMenu::VIntRangeMenu(
     connect( _maxRangeAction, &VIntLineEditAction::ValueChanged,
         this, &VIntRangeMenu::_maxChanged);
     addAction( _maxRangeAction );
+
+    if ( !rangeChangable ) {
+        _minRangeAction->setEnabled( false );
+        _maxRangeAction->setEnabled( false );
+    }
 }
 
 void VIntRangeMenu::SetMinRange( int min ) { 

@@ -3,8 +3,11 @@
 
 VDoubleRangeMenu::VDoubleRangeMenu( 
     QWidget* parent, 
-    bool sciNotation, double decimalDigits,
-    double min, double max 
+    bool sciNotation, 
+    double decimalDigits,
+    double min, 
+    double max,
+    bool rangeChangable
     ) 
     : VNumericFormatMenu( parent, sciNotation, decimalDigits ),
       _minRangeAction( new VDoubleLineEditAction( "Minimum value", min ) ),
@@ -17,13 +20,18 @@ VDoubleRangeMenu::VDoubleRangeMenu(
     connect( _maxRangeAction, &VDoubleLineEditAction::ValueChanged,
         this, &VDoubleRangeMenu::_maxChanged);
     addAction( _maxRangeAction );
+
+    if ( !rangeChangable ) {
+        _minRangeAction->setEnabled( false );
+        _maxRangeAction->setEnabled( false );
+    }
 }
 
-void VDoubleRangeMenu::SetMinRange( double min ) { 
+void VDoubleRangeMenu::SetMinimum( double min ) { 
     _minRangeAction->SetValue( min ); 
 }
 
-void VDoubleRangeMenu::SetMaxRange( double max ) { 
+void VDoubleRangeMenu::SetMaximum( double max ) { 
     _maxRangeAction->SetValue( max ); 
 }
 

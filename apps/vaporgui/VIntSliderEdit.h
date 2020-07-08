@@ -3,10 +3,9 @@
 #include <string>
 #include "VContainer.h"
 #include "VSliderEditInterface.h"
-#include "VLineEditTemplate.h"
-#include "VIntLineEdit.h"
 
 class VIntRangeMenu;
+class VIntLineEdit;
 
 class VIntSliderEdit : public VSliderEditInterface {
     Q_OBJECT

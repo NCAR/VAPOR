@@ -2,7 +2,6 @@
 #include "SliceSubtabs.h"
 #include "TFEditor.h"
 #include "VLineItem.h"
-#include "VLineEditTemplate.h"
 #include "VStringLineEdit.h"
 #include "VIntLineEdit.h"
 #include "VDoubleLineEdit.h"
@@ -63,7 +62,7 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     connect( vise, SIGNAL( ValueChanged( int ) ),
         this, SLOT( testVIntSliderEdit( int ) ) );
 
-    VDoubleSliderEdit* vdse = new VDoubleSliderEdit();
+    VDoubleSliderEdit* vdse = new VDoubleSliderEdit( 0, 0, 0, true );
     vli = new VLineItem( "VDoubleSliderEdit", vdse );
     layout()->addWidget( vli );
     connect( vdse, SIGNAL( ValueChanged( double ) ),

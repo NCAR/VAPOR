@@ -4,7 +4,7 @@
 #include "vapor/VAssert.h"
 
 #include "VIntSliderEdit.h"
-#include "VLineEditTemplate.h"
+#include "VIntLineEdit.h"
 #include "VIntRangeMenu.h"
 #include "VSlider.h"
 

@@ -10,12 +10,15 @@
 #include "VDoubleRangeMenu.h"
 #include "VSlider.h"
 
-VDoubleSliderEdit::VDoubleSliderEdit( double min, double max, double value )
-    : VSliderEditInterface(),
-      _value( value )
+VDoubleSliderEdit::VDoubleSliderEdit( 
+    double min, 
+    double max, 
+    double value,
+    bool rangeChangable
+) : VSliderEditInterface(),
+    _value( value ),
+    _rangeChangable( rangeChangable )
 {
-    //_slider = new VSlider( min, max );
-    //layout()->addWidget(_slider);
     _slider->SetRange( min, max );
     _slider->SetValue( value );
     connect( _slider, &VSlider::ValueChanged,
@@ -38,7 +41,8 @@ void VDoubleSliderEdit::_makeContextMenu() {
         _lineEdit->GetSciNotation(),
         _lineEdit->GetNumDigits(),
         _slider->GetMinimum(),
-        _slider->GetMaximum()
+        _slider->GetMaximum(),
+        _rangeChangable
     );
     connect( _menu, &VNumericFormatMenu::DecimalDigitsChanged,
         this, &VDoubleSliderEdit::SetNumDigits );
@@ -74,10 +78,26 @@ double VDoubleSliderEdit::GetValue() const {
 
 void VDoubleSliderEdit::SetValue( double value ) {
     double min = _slider->GetMinimum();
-    if (value < min) value = min;
+    if (value < min) {
+        if ( _rangeChangable ) {
+            _slider->SetMinimum( value );
+            _menu->SetMinimum( value );
+        }
+        else {
+            value = min;
+        }
+    }
 
     double max = _slider->GetMaximum();
-    if (value > max) value = max;
+    if (value > max) {
+        if ( _rangeChangable ) {
+            _slider->SetMaximum( value );
+            _menu->SetMaximum( value );
+        }
+        else {
+            value = max;
+        }
+    }
     _value = value;
 
     _lineEdit->blockSignals( true );
@@ -105,9 +125,9 @@ void VDoubleSliderEdit::SetMinimum( double min ) {
    
     _slider->SetMinimum( min );
    
-    _menu->SetMinRange( min );
+    _menu->SetMinimum( min );
     if ( min >= _slider->GetMaximum() ) {
-        _menu->SetMaxRange( min );
+        _menu->SetMaximum( min );
     }
     
     // If sender() is a nullptr, then this fuction is being called from Update().
@@ -129,9 +149,9 @@ void VDoubleSliderEdit::SetMaximum( double max ) {
     
     _slider->SetMaximum( max );
 
-    _menu->SetMaxRange( max );
+    _menu->SetMaximum( max );
     if ( max <= _slider->GetMinimum() ) {
-        _menu->SetMinRange( max );
+        _menu->SetMinimum( max );
     }
 
     // If sender() is a nullptr, then this fuction is being called from Update().

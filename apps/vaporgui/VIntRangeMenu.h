@@ -10,8 +10,11 @@ class VIntRangeMenu : public VNumericFormatMenu {
 public:
     explicit VIntRangeMenu( 
         QWidget* parent, 
-        bool sciNotation, int decimalDigits,
-        int min, int max 
+        bool sciNotation, 
+        int decimalDigits,
+        int min, 
+        int max,
+        bool rangeChangable = false
     );
 
 protected:
