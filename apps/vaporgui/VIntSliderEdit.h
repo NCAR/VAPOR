@@ -4,6 +4,7 @@
 #include "VContainer.h"
 #include "VSliderEditInterface.h"
 #include "VLineEditTemplate.h"
+#include "VIntLineEdit.h"
 
 class VIntRangeMenu;
 

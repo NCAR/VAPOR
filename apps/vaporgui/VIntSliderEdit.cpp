@@ -12,8 +12,11 @@ VIntSliderEdit::VIntSliderEdit( int min, int max, int value )
     : VSliderEditInterface(),
       _value( value )
 {
-    _slider = new VSlider( min, max );
-    layout()->addWidget(_slider);
+//    _slider = new VSlider( min, max );
+//    layout()->addWidget(_slider);
+
+    _slider->SetRange( min, max );
+    _slider->SetValue( value );
     connect( _slider, &VSlider::ValueChanged,
         this, &VIntSliderEdit::SetValue );
     connect( _slider, &VSlider::ValueChangedIntermediate,

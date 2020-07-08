@@ -96,22 +96,22 @@ class VLineEditTemplate <std::string> : public VAbstractLineEdit {
         std::string _value;
 };
 
-class VIntLineEdit : public VLineEditTemplate<int> {
+/*class VIntLineEdit : public VLineEditTemplate<int> {
     public:
         VIntLineEdit( int value = 0, bool useMenu=true ) 
         : VLineEditTemplate<int>(value, useMenu) {}
-};
+};*/
 
-class VDoubleLineEdit : public VLineEditTemplate<double> {
+/*class VDoubleLineEdit : public VLineEditTemplate<double> {
     public:
         VDoubleLineEdit( double value = 0.0, bool useMenu=true ) 
         : VLineEditTemplate<double>(value, useMenu) {}
-};
+};*/
 
-class VStringLineEdit : public VLineEditTemplate<std::string> {
+/*class VStringLineEdit : public VLineEditTemplate<std::string> {
     public:
         VStringLineEdit( const std::string& value = "" ) 
         : VLineEditTemplate<std::string>(value) {
             _lineEdit->setContextMenuPolicy( Qt::DefaultContextMenu );
         }
-};
+};*/

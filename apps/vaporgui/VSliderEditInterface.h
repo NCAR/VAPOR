@@ -19,6 +19,8 @@ public:
 
     virtual void ShowContextMenu( const QPoint& ) = 0;
 
+    virtual QSize sizeHint() const;
+
 protected:
     VSliderEditInterface();
     virtual void _makeContextMenu() = 0;

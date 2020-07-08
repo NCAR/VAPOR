@@ -3,7 +3,10 @@
 #include "VActions.h"
 #include "VIntSpinBox.h"
 #include "VCheckBox.h"
-#include "VLineEditTemplate.h"
+//#include "VLineEditTemplate.h"
+#include "VStringLineEdit.h"
+#include "VIntLineEdit.h"
+#include "VDoubleLineEdit.h"
 
 VSpinBoxAction::VSpinBoxAction (const std::string& title, int value) : 
   QWidgetAction (NULL) {

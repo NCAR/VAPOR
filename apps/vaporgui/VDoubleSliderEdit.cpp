@@ -6,7 +6,7 @@
 #include "vapor/VAssert.h"
 
 #include "VDoubleSliderEdit.h"
-#include "VLineEditTemplate.h"
+#include "VDoubleLineEdit.h"
 #include "VDoubleRangeMenu.h"
 #include "VSlider.h"
 
@@ -14,8 +14,10 @@ VDoubleSliderEdit::VDoubleSliderEdit( double min, double max, double value )
     : VSliderEditInterface(),
       _value( value )
 {
-    _slider = new VSlider( min, max );
-    layout()->addWidget(_slider);
+    //_slider = new VSlider( min, max );
+    //layout()->addWidget(_slider);
+    _slider->SetRange( min, max );
+    _slider->SetValue( value );
     connect( _slider, &VSlider::ValueChanged,
         this, &VDoubleSliderEdit::SetValue );
     connect( _slider, &VSlider::ValueChangedIntermediate,
