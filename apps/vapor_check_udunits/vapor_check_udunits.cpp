@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 
     if (rc < 0) return 1;
 
-    if (!opt.quiet) printf("UDUnits passed\n");
+    if (!opt.quiet) { printf("UDUnits passed\n"); }
 
     return 0;
 }
