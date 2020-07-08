@@ -516,8 +516,7 @@ workflows:
            filters:
              branches:
                only:
-                 #- nightly
-                 - master
+                 - nightly
     jobs:
       - build_ubuntu18_installer
       - build_ubuntu16_installer
