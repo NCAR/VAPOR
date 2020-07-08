@@ -40,8 +40,9 @@ int ShaderProgram::Link() {
     glGetProgramiv(_id, GL_LINK_STATUS, &_successStatus);
     _linked = true;
 
-    for (int i = 0; i < _shaders.size(); i++)
+    for (int i = 0; i < _shaders.size(); i++) {
         delete _shaders[i];
+    }
     _shaders.clear();
 
     if (!_successStatus)
