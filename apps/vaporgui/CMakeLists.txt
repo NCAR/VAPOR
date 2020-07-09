@@ -117,8 +117,8 @@ set (SRCS
     VIntSpinBox.h
     VCheckBox.cpp
     VCheckBox.h
-    VLineEdit.cpp
-    VLineEdit.h
+    VLineEdit_Deprecated.cpp
+    VLineEdit_Deprecated.h
     VActions.h
     VActions.cpp
     VSlider.cpp

@@ -21,8 +21,6 @@ VContainer::VContainer()
     );
     setLayout( layout );
 
-    setFrameStyle( QFrame::Panel );
-
     setSizePolicy( QSizePolicy::Maximum, QSizePolicy::Preferred );
 }
 

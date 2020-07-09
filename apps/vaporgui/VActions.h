@@ -97,7 +97,7 @@ private:
 
 private slots:
 
-//! Respond to a change made (editingFinished, or returnPressed) in the VLineEdit
+//! Respond to a change made (editingFinished, or returnPressed) in the V*LineEdit
     void _lineEditChanged( int value );
 
 signals:

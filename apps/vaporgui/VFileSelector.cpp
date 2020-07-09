@@ -6,7 +6,7 @@
 #include "ErrorReporter.h"
 
 #include "VPushButton.h"
-#include "VLineEdit.h"
+#include "VLineEdit_Deprecated.h"
 
 VFileSelector::VFileSelector(
     const std::string& buttonText,
@@ -17,7 +17,7 @@ VFileSelector::VFileSelector(
     _filter( filter )
 {
     _pushButton = new VPushButton( buttonText );
-    _lineEdit = new VLineEdit( defaultPath );
+    _lineEdit = new VLineEdit_Deprecated( defaultPath );
     layout()->addWidget(_pushButton);
     layout()->addWidget(_lineEdit);
 

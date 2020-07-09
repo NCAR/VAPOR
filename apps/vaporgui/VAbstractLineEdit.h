@@ -11,7 +11,7 @@ class VSpinBoxAction;
 //! \class VAbstractSliderEdit
 //! \ingroup Public_GUI
 //! \brief An abstract class defining functions used by different
-//! VLineEdits (VDoubleLineEdit, VIntLineEdit, and VStringLineEdit).
+//! V*LineEdits (VDoubleLineEdit, VIntLineEdit, and VStringLineEdit).
 //! Supports menus that allow different functionalities, depending
 //! on the data type being used by the line edit.
 

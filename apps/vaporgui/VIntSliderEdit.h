@@ -27,7 +27,7 @@ public:
     void SetMaximum( int max );
 
     //! Get the value associated with the VSlider and VIntLineEdit
-    int GetValue() const;A
+    int GetValue() const;
 
     //! Get the minimum allowable value for the VSlider and VIntLineEdit
     int GetMinimum() const;

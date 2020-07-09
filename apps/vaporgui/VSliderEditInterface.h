@@ -10,7 +10,7 @@ class VSpinBoxAction;
 //! \class VSliderEditInterface
 //! \ingroup Public_GUI
 //! \brief An interface class that needs to be reimplemented to support the
-//! synchronization of a VSlider and a numeric VLineEdit, and their menus.
+//! synchronization of a VSlider and a numeric V*LineEdit, and their menus.
 
 class VSliderEditInterface : public VContainer {
     Q_OBJECT

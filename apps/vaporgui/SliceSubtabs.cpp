@@ -39,13 +39,13 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     VLineItem* vli;
 
     VStringLineEdit* vsle = new VStringLineEdit( "woot" );
-    vli = new VLineItem( "VStringLineEdit3", vsle );
+    vli = new VLineItem( "VStringLineEdit", vsle );
     layout()->addWidget( vli );
     connect( vsle, SIGNAL( ValueChanged( const std::string& ) ), 
         this, SLOT( testVStringLineEdit( const std::string& ) ) );
 
     VDoubleLineEdit* vdle = new VDoubleLineEdit( 9.8765 );
-    vli = new VLineItem( "VDoubleLineEdit3", vdle );
+    vli = new VLineItem( "VDoubleLineEdit", vdle );
     layout()->addWidget( vli );
     connect( vdle, SIGNAL( ValueChanged( double ) ), 
         this, SLOT( testVDoubleLineEdit( double ) ) );
@@ -56,13 +56,25 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     connect( vile3, SIGNAL( ValueChanged( int ) ), 
         this, SLOT( testVIntLineEdit( int ) ) );
 
-    VIntSliderEdit* vise = new VIntSliderEdit();
+    VIntSliderEdit* visei = new VIntSliderEdit(0, 10, false );
+    vli = new VLineItem( "VIntSliderEdit immutable", visei );
+    layout()->addWidget( vli );
+    connect( visei, SIGNAL( ValueChanged( int ) ),
+        this, SLOT( testVIntSliderEdit( int ) ) );
+
+    VIntSliderEdit* vise = new VIntSliderEdit(0, 10, true );
     vli = new VLineItem( "VIntSliderEdit", vise );
     layout()->addWidget( vli );
     connect( vise, SIGNAL( ValueChanged( int ) ),
         this, SLOT( testVIntSliderEdit( int ) ) );
 
-    VDoubleSliderEdit* vdse = new VDoubleSliderEdit( 0, 0, 0, true );
+    VDoubleSliderEdit* vdsei = new VDoubleSliderEdit( 0, 10, 0, false );
+    vli = new VLineItem( "VDoubleSliderEdit immutable", vdsei );
+    layout()->addWidget( vli );
+    connect( vdsei, SIGNAL( ValueChanged( double ) ),
+        this, SLOT( testVDoubleSliderEdit( double ) ) );
+    
+    VDoubleSliderEdit* vdse = new VDoubleSliderEdit( 0, 10, 0, true );
     vli = new VLineItem( "VDoubleSliderEdit", vdse );
     layout()->addWidget( vli );
     connect( vdse, SIGNAL( ValueChanged( double ) ),

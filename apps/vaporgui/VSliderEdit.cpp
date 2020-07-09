@@ -4,7 +4,7 @@
 #include "vapor/VAssert.h"
 #include "VSliderEdit.h"
 #include "VSlider.h"
-#include "VLineEdit.h"
+#include "VLineEdit_Deprecated.h"
 
 VSliderEdit::VSliderEdit( double min, double max, double value )
 : VContainer(),
@@ -13,7 +13,7 @@ VSliderEdit::VSliderEdit( double min, double max, double value )
   _value( value ),
   _isIntType( false )
 {
-    _lineEdit = new VLineEdit();
+    _lineEdit = new VLineEdit_Deprecated();
     _slider = new VSlider();
 
     SetRange( min, max );
