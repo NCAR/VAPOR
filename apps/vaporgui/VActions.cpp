@@ -3,7 +3,6 @@
 #include "VActions.h"
 #include "VIntSpinBox.h"
 #include "VCheckBox.h"
-//#include "VLineEditTemplate.h"
 #include "VStringLineEdit.h"
 #include "VIntLineEdit.h"
 #include "VDoubleLineEdit.h"

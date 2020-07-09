@@ -15,7 +15,6 @@ VAbstractLineEdit::VAbstractLineEdit( bool useNumericMenu ) :
         this, SLOT( _valueChanged() ) );
 
     if (useNumericMenu) {
-        
         _menu = new VNumericFormatMenu( this, _sciNotation, _decimalDigits );
         _lineEdit->setContextMenuPolicy( Qt::CustomContextMenu );
         connect( _lineEdit, &QLineEdit::customContextMenuRequested,
