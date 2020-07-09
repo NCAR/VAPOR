@@ -22,10 +22,6 @@ VSpinBoxAction::VSpinBoxAction (const std::string& title, int value) :
     setDefaultWidget(vli);
 }
 
-int VSpinBoxAction::GetValue() const {
-    return _spinBox->GetValue();
-}
-
 void VSpinBoxAction::SetValue( int value ) {
     _spinBox->SetValue( value );
 }
@@ -45,10 +41,6 @@ VCheckBoxAction::VCheckBoxAction (const std::string& title, bool value) :
         this, &VCheckBoxAction::_checkBoxChanged );
 
     setDefaultWidget(vli);
-}
-
-bool VCheckBoxAction::GetValue() const {
-    return _checkBox->GetValue();
 }
 
 void VCheckBoxAction::SetValue( bool value ) {

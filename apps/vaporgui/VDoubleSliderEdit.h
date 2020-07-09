@@ -8,6 +8,13 @@ class QMenu;
 class VDoubleLineEdit;
 class VDoubleRangeMenu;
 
+//! \class VDoubleSliderEdit
+//! \ingroup Public_GUI
+//! \brief A wrapper for a VSlider and a VDoubleLineEdit, that
+//! provides synchronization between the two widgets, and support
+//! for a menu that allows setting and getting the VSlider range,
+//! and the numeric representation of the VDoubleLineEdit
+
 class VDoubleSliderEdit : public VSliderEditInterface {
     Q_OBJECT
 
@@ -19,22 +26,38 @@ public:
         bool rangeChangable = false
     );
 
+    //! Set the minimum allowable value for the VSlider and VDoubleLineEdit
     void SetMinimum( double min );
+
+    //! Set the maximum allowable value for the VSlider and VDoubleLineEdit
     void SetMaximum( double max );
 
+    //! Get the value associated with the VSlider and VDoubleLineEdit
     double GetValue() const;
+
+    //! Get the minimum allowable value for the VSlider and VDoubleLineEdit
     double GetMinimum() const;
+
+    //! Get the maximum allowable value for the VSlider and VDoubleLineEdit
     double GetMaximum() const;
-    
+   
+    //! Get the number of digits displayed by the VDoubleLineEdit 
     virtual int GetNumDigits() const;
+
+    //! Set the number of digits displayed by the VDoubleLineEdit
     virtual void SetNumDigits( int numDigits );
 
+    //! Get whether the VDoubleLineEdit is being displayed with scientific notation
     virtual bool GetSciNotation() const;
+
+    //! Set whether the VDoubleLineEdit is being displayed with scientific notation
     virtual void SetSciNotation( bool sciNotation );
 
+    //! Show the context menu options for the entire widget, triggered on right-click
     virtual void ShowContextMenu( const QPoint& pos );
 
 public slots:
+    //! Set the current value displayed by the slider and line edit
     void SetValue( double value );
 
 protected:

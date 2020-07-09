@@ -127,6 +127,8 @@ set (SRCS
     VSliderEdit.h
     VSliderEditInterface.cpp
     VSliderEditInterface.h
+    VAbstractSliderEdit.cpp
+    VAbstractSliderEdit.h
     VStringLineEdit.h
     VStringLineEdit.cpp
     VIntLineEdit.h

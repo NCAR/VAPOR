@@ -4,6 +4,12 @@
 
 class VIntLineEditAction;
 
+//! \class VIntRangeMenu
+//! \ingroup Public_GUI
+//! \brief A menu that allows the user to control the range of integer values
+//! that can be set by a widget.  Also allows for setting the numeric format
+//! that the number is displayed with.  
+
 class VIntRangeMenu : public VNumericFormatMenu {
     Q_OBJECT
 
@@ -22,7 +28,10 @@ protected:
     VIntLineEditAction* _maxRangeAction;
 
 public:
+    //! Set the minimum value that the current widget can use
     void SetMinRange( int min );
+    
+    //! Set the maximum value that the current widget can use
     void SetMaxRange( int max );
 
 private slots:
