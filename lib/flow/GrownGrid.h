@@ -39,7 +39,7 @@ public:
     float GetValue(const std::vector <double> &coords) const override;
     void  GetUserExtents( std::vector <double> &minu, 
                           std::vector <double> &maxu ) const override;
-    bool  InsideGrid(const std::vector <double> &coords) const override;
+    bool  InsideGrid(const double coords[3]) const override;
     float GetMissingValue() const override;
 
 private:
@@ -48,8 +48,8 @@ private:
     // They do nothing and return meaningless values.
     // Do not use!
     // 
-    float GetValueNearestNeighbor( const std::vector <double> &coords) const override;
-    float GetValueLinear( const std::vector <double> &coords) const override;
+    float GetValueNearestNeighbor( const double coords[3]) const override;
+    float GetValueLinear( const double coords[3]) const override;
     std::vector<size_t> GetCoordDimensions(size_t) const override;
     size_t GetGeometryDim() const override;                
     const std::vector<size_t>& GetNodeDimensions() const override;
@@ -61,8 +61,8 @@ private:
 		std::vector <size_t> &min, std::vector <size_t> &max
 	) const override {return(false);}
     virtual void GetUserCoordinates( const size_t indices[], double coords[]) const override {}       
-    bool GetIndicesCell( const std::vector <double> &coords,
-      std::vector <size_t> &indices) const override;           
+    bool GetIndicesCell( const double coords[3],
+      size_t indices[3]) const override;           
     bool GetCellNodes( const size_t cindices[], size_t nodes[], int &n) const override;
     bool GetCellNeighbors( const std::vector <size_t> &cindices,
       std::vector <std::vector <size_t> > &cells) const override;
@@ -70,7 +70,7 @@ private:
       std::vector <std::vector <size_t> > &cells) const override;
     size_t GetMaxVertexPerFace() const override;
     size_t GetMaxVertexPerCell() const override;
-    void ClampCoord(std::vector <double> &coords) const override {}
+    void ClampCoord(const double coords[3], double cCoords[3]) const override {}
     ConstCoordItr ConstCoordBegin() const override;
     ConstCoordItr ConstCoordEnd() const override;
 

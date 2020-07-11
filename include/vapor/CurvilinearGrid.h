@@ -220,13 +220,13 @@ public:
  //! \copydoc Grid::GetIndicesCell
  //!
  virtual bool GetIndicesCell(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
+	const double coords[3],
+	size_t indices[3]
  ) const override;
 
  // \copydoc GetGrid::InsideGrid()
  //
- virtual bool InsideGrid(const std::vector <double> &coords) const override;
+ virtual bool InsideGrid(const double coords[3]) const override;
 
 
 
@@ -303,11 +303,11 @@ public:
 
 protected:
  virtual float GetValueNearestNeighbor(
-	const std::vector <double> &coords
+	const double coords[3]
  ) const override;
 
  virtual float GetValueLinear(
-	const std::vector <double> &coords
+	const double coords[3]
  ) const override;
 
 

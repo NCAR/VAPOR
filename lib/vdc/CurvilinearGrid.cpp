@@ -207,14 +207,14 @@ void CurvilinearGrid::GetUserCoordinates(
 
 
 bool CurvilinearGrid::GetIndicesCell(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
+	const double coords[3],
+	size_t indices[3]
 ) const {
 
 	// Clamp coordinates on periodic boundaries to grid extents
 	//
-	vector <double> cCoords = coords;
-	ClampCoord(cCoords);
+	double cCoords[3];
+	ClampCoord(coords, cCoords);
 	
 	double x = cCoords[0];
 	double y = cCoords[1];
@@ -227,30 +227,31 @@ bool CurvilinearGrid::GetIndicesCell(
 
 	if (! inside) return (false);
 
-	indices.push_back(i);
-	indices.push_back(j);
+	indices[0] = i;
+	indices[1] = j;
 
 	if (GetGeometryDim() == 2) return(true);
 
-	indices.push_back(k);
+	indices[2] = k;
 
 	return(true);
 }
 	
 
 
-bool CurvilinearGrid::InsideGrid(const std::vector <double> &coords) const {
+bool CurvilinearGrid::InsideGrid(const double coords[3]) const {
 
 	// Clamp coordinates on periodic boundaries to reside within the 
 	// grid extents 
 	//
-	vector <double> cCoords = coords;
-	ClampCoord(cCoords);
+	double cCoords[3];
+	ClampCoord(coords, cCoords);
 
 	// Do a quick check to see if the point is completely outside of 
 	// the grid bounds.
 	//
-	for (int i=0; i<cCoords.size(); i++) {
+	VAssert(GetGeometryDim() <= 3);
+	for (int i=0; i<GetGeometryDim(); i++) {
 		if (cCoords[i] < _minu[i] || cCoords[i] > _maxu[i]) return (false);
 	}
 
@@ -428,13 +429,13 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset) {
 
 
 float CurvilinearGrid::GetValueNearestNeighbor(
-	const std::vector <double> &coords
+	const double coords[3]
 ) const {
 
 	// Clamp coordinates on periodic boundaries to grid extents
 	//
-	vector <double> cCoords = coords;
-	ClampCoord(cCoords);
+	double cCoords[3];
+	ClampCoord(coords, cCoords);
 
 	double lambda[4], zwgt[2];
 	size_t i,j,k;
@@ -516,13 +517,13 @@ float interpolateQuad(
 };
 
 float CurvilinearGrid::GetValueLinear(
-	const std::vector <double> &coords
+	const double coords[3]
 ) const {
 
 	// Clamp coordinates on periodic boundaries to grid extents
 	//
-	vector <double> cCoords = coords;
-	ClampCoord(cCoords);
+	double cCoords[3];
+	ClampCoord(coords, cCoords);
 
 	// Get Wachspress coordinates for horizontal weights, and 
 	// simple linear interpolation weights for vertical axis. _insideGrid

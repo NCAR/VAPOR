@@ -230,34 +230,32 @@ bool    StructuredGrid::GetEnclosingRegion(
 	return(true);
 };
 
-void StructuredGrid::ClampCoord(std::vector <double> &coords) const {
-	VAssert(coords.size() >= GetGeometryDim());
+void StructuredGrid::ClampCoord(
+	const double coords[3], double cCoords[3]
+) const {
 
-	while (coords.size() > GetGeometryDim()) {
-		coords.pop_back();
-	}
-
-	vector <bool> periodic = GetPeriodic();
-	vector <size_t> dims = GetDimensions();
+	const vector <bool> &periodic = GetPeriodic();
+	const vector <size_t> &dims = GetDimensions();
 
 	vector <double> minu, maxu;
 	GetUserExtents(minu, maxu);
 
-	for (int i=0; i<coords.size(); i++) {
+	VAssert(GetGeometryDim() <= 3);
+	for (int i=0; i<GetGeometryDim(); i++) {
 
 		//
 		// Handle coordinates for dimensions of length 1
 		//
 		if (dims[i] == 1) {
-			coords[i] = minu[i];
+			cCoords[i] = minu[i];
 			continue;
 		}
 
-		if (coords[i]<minu[i] && periodic[i]) {
-			while (coords[i]<minu[i]) coords[i]+= maxu[i]-minu[i];
+		if (cCoords[i]<minu[i] && periodic[i]) {
+			while (cCoords[i]<minu[i]) cCoords[i]+= maxu[i]-minu[i];
 		}
-		if (coords[i]>maxu[i] && periodic[i]) {
-			while (coords[i]>maxu[i]) coords[i]-= maxu[i]-minu[i];
+		if (cCoords[i]>maxu[i] && periodic[i]) {
+			while (cCoords[i]>maxu[i]) cCoords[i]-= maxu[i]-minu[i];
 		}
 
 	}

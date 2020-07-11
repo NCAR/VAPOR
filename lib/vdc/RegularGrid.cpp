@@ -83,11 +83,11 @@ vector <size_t> RegularGrid::GetCoordDimensions(size_t dim) const {
 }
 
 float RegularGrid::GetValueNearestNeighbor(
-	const std::vector <double> &coords
+	const double coords[3]
 ) const {
 
-	std::vector <double> cCoords = coords;
-	ClampCoord(cCoords);
+	double cCoords[3];
+	ClampCoord(coords, cCoords);
 
 	if (! InsideGrid(cCoords)) return(GetMissingValue());
 
@@ -139,10 +139,10 @@ float RegularGrid::GetValueNearestNeighbor(
 
 }
 
-float RegularGrid::GetValueLinear(const std::vector <double> &coords) const {
+float RegularGrid::GetValueLinear(const double coords[3]) const {
 
-	std::vector <double> cCoords = coords;
-	ClampCoord(cCoords);
+	double cCoords[3];
+	ClampCoord(coords, cCoords);
 
 	if (! InsideGrid(cCoords)) return(GetMissingValue());
 
@@ -288,28 +288,27 @@ void RegularGrid::GetUserCoordinates(
 
 
 bool RegularGrid::GetIndicesCell(
-    const std::vector <double> &coords,
-    std::vector <size_t> &indices
+    const double coords[3],
+    size_t indices[3]
 ) const {
-	indices.clear();
 
-	std::vector <double> clampedCoords = coords;
-	ClampCoord(clampedCoords);
+	double cCoords[3];
+	ClampCoord(coords, cCoords);
 
 	vector <size_t> dims = GetDimensions();
 
 	vector <double> wgts;
 	
-	for (int i=0; i<clampedCoords.size(); i++) {
-		indices.push_back(0);
+	VAssert(GetGeometryDim() <= 3);
+	for (int i=0; i<GetGeometryDim(); i++) {
 
-		if (clampedCoords[i] < _minu[i] || clampedCoords[i] > _maxu[i]) {
+		if (cCoords[i] < _minu[i] || cCoords[i] > _maxu[i]) {
 			return(false);
 		}
 
 		if (_delta[i] != 0.0) {
 			indices[i] = (size_t) floor (
-				(clampedCoords[i]-_minu[i]) / _delta[i]
+				(cCoords[i]-_minu[i]) / _delta[i]
 			);
 
 			// Edge case
@@ -325,16 +324,17 @@ bool RegularGrid::GetIndicesCell(
 
 }
 
-bool RegularGrid::InsideGrid(const std::vector <double> &coords) const
+bool RegularGrid::InsideGrid(const double coords[3]) const
 {
 
-	std::vector <double> clampedCoords = coords;
-	ClampCoord(clampedCoords);
+	double cCoords[3];
+	ClampCoord(coords, cCoords);
 
-	for (int i=0; i<clampedCoords.size(); i++) {
-		if (clampedCoords[i] < _minu[i]) return(false);
+	VAssert(GetGeometryDim() <= 3);
+	for (int i=0; i<GetGeometryDim(); i++) {
+		if (cCoords[i] < _minu[i]) return(false);
 
-		if (clampedCoords[i] > _maxu[i]) return(false);
+		if (cCoords[i] > _maxu[i]) return(false);
 	}
 
 	return(true);

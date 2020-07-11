@@ -83,18 +83,18 @@ public:
  ) const override;
   
  bool GetIndicesCell(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
+	const double coords[3],
+	size_t indices[3]
  ) const override;
 
- bool InsideGrid(const std::vector <double> &coords) const override;
+ bool InsideGrid(const double coords[3]) const override;
 
  float GetValueNearestNeighbor (
-	const std::vector <double> &coords
+	const double coords[3]
  ) const override;
 
  float GetValueLinear (
-	const std::vector <double> &coords
+	const double coords[3]
  ) const override;
 
 
@@ -163,8 +163,8 @@ private:
  UnstructuredGridCoordless _zug;
 
  bool _insideGrid(
-	const std::vector <double> &coords,
-	std::vector <size_t> &cindices,
+	const double coords[3],
+	size_t cindices[2],
 	std::vector <size_t> &nodes2D,
 	std::vector <double> &lambda,
 	float zwgt[2]

@@ -90,24 +90,24 @@ public:
 
   
  bool GetIndicesCell(
-	const std::vector <double> &,
-	std::vector <size_t> &indices
+	const double *,
+	size_t *
  ) const override {
 	return(false);
  }
 
- bool InsideGrid(const std::vector <double> &coords) const override {
+ bool InsideGrid(const double coords[3]) const override {
 	return(false);
  }
 
  float GetValueNearestNeighbor (
-	const std::vector <double> &coords
+	const double coords[3]
  ) const override {
 	return(0.0);
  }
 
  float GetValueLinear (
-	const std::vector <double> &coords
+	const double coords[3]
  ) const override {
  	return(0.0);
  }

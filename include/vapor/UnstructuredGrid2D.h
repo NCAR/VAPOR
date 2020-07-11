@@ -86,8 +86,8 @@ public:
  ) const override;
   
  bool GetIndicesCell(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
+	const double coords[3],
+	size_t indices[3]
  ) const override {
 
 	std::vector <double> lambda;
@@ -102,21 +102,21 @@ public:
  //! at nodes identified by \p nodes
  //! 
  bool GetIndicesCell(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices,
+	const double coords[3],
+	size_t indices[3],
 	std::vector <std::vector <size_t> > &nodes,
 	std::vector <double> &lambda
  ) const;
  
 
- bool InsideGrid(const std::vector <double> &coords) const override;
+ bool InsideGrid(const double coords[3]) const override;
 
  float GetValueNearestNeighbor (
-	const std::vector <double> &coords
+	const double coords[3]
  ) const override;
 
  float GetValueLinear (
-	const std::vector <double> &coords
+	const double coords[3]
  ) const override;
 
 
@@ -187,19 +187,19 @@ private:
  std::shared_ptr<const QuadTreeRectangle<float, size_t> > _qtr;
 
  bool _insideGrid(
-	const std::vector <double> &coords,
+	const double coords[2],
 	size_t &face, std::vector <size_t> &nodes,
 	double *lambda, int &nlambda
  ) const;
 
  bool _insideGridNodeCentered(
-	const std::vector <double> &coords,
+	const double coords[2],
 	size_t &face, std::vector <size_t> &nodes,
 	double *lambda, int &nlambda
  ) const;
 
  bool _insideGridFaceCentered(
-	const std::vector <double> &coords,
+	const double coords[2],
 	size_t &face, std::vector <size_t> &nodes,
 	double *lambda, int &nlambda
  ) const;

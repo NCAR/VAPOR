@@ -48,7 +48,7 @@ void GrownGrid::GetUserExtents( std::vector<double> &minu, std::vector<double> &
         maxu.resize( 3, _defaultZ );
 }
     
-bool GrownGrid::InsideGrid(const std::vector <double> &coords) const
+bool GrownGrid::InsideGrid(const double coords[3]) const
 {
     // Note that we don't use defaultZ to decide if a position is inside of 
     // a grid or not.
@@ -59,12 +59,12 @@ bool GrownGrid::InsideGrid(const std::vector <double> &coords) const
 //
 // Start meaningless functions!
 //
-float GrownGrid::GetValueNearestNeighbor( const std::vector <double> &coords) const
+float GrownGrid::GetValueNearestNeighbor( const double *) const
 {
     return 0.0f;
 }
     
-float GrownGrid::GetValueLinear( const std::vector <double> &coords) const 
+float GrownGrid::GetValueLinear( const double *) const 
 {
     return 0.0f;
 }
@@ -92,8 +92,8 @@ const std::vector<size_t>& GrownGrid::GetCellDimensions() const
     return( GetDimensions() );
 }
     
-bool GrownGrid::GetIndicesCell( const std::vector <double> &coords,
-     std::vector <size_t> &indices) const 
+bool GrownGrid::GetIndicesCell( const double coords[3],
+     size_t indices[3]) const 
 {
     return false;
 }

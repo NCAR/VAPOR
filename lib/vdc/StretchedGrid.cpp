@@ -139,15 +139,15 @@ void StretchedGrid::GetUserCoordinates(
 
 
 bool StretchedGrid::GetIndicesCell(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
+	const double coords[3],
+	size_t indices[3]
 ) const {
 
 	// Clamp coordinates on periodic boundaries to grid extents
 	//
-	vector <double> cCoords = coords;
-	ClampCoord(cCoords);
-	
+	double cCoords[3];
+	ClampCoord(coords, cCoords);
+		
 	double x = cCoords[0];
 	double y = cCoords[1];
 	double z = GetGeometryDim() == 3 ? cCoords[2] : 0.0;
@@ -158,30 +158,31 @@ bool StretchedGrid::GetIndicesCell(
 
 	if (! inside) return (false);
 
-	indices.push_back(i);
-	indices.push_back(j);
+	indices[0] = i;
+	indices[1] = j;
 
 	if (GetGeometryDim() == 2) return(true);
 
-	indices.push_back(k);
+	indices[2] = k;
 
 	return(true);
 }
 	
 
 
-bool StretchedGrid::InsideGrid(const std::vector <double> &coords) const {
+bool StretchedGrid::InsideGrid(const double coords[3]) const {
 
 	// Clamp coordinates on periodic boundaries to reside within the 
 	// grid extents 
 	//
-	vector <double> cCoords = coords;
-	ClampCoord(cCoords);
+	double cCoords[3];
+	ClampCoord(coords, cCoords);
 
 	// Do a quick check to see if the point is completely outside of 
 	// the grid bounds.
 	//
-	for (int i=0; i<cCoords.size(); i++) {
+	VAssert(GetGeometryDim() <= 3);
+	for (int i=0; i<GetGeometryDim(); i++) {
 		if (cCoords[i] < _minu[i] || cCoords[i] > _maxu[i]) return (false);
 	}
 
@@ -298,13 +299,13 @@ void StretchedGrid::ConstCoordItrSG::next(const long &offset) {
 
 
 float StretchedGrid::GetValueNearestNeighbor(
-	const std::vector <double> &coords
+	const double coords[3]
 ) const {
 
 	// Clamp coordinates on periodic boundaries to grid extents
 	//
-	vector <double> cCoords = coords;
-	ClampCoord(cCoords);
+	double cCoords[3];
+	ClampCoord(coords, cCoords);
 
 	double xwgt[2], ywgt[2], zwgt[2];
 	size_t i,j,k;
@@ -323,13 +324,13 @@ float StretchedGrid::GetValueNearestNeighbor(
 }
 
 float StretchedGrid::GetValueLinear(
-	const std::vector <double> &coords
+	const double coords[3]
 ) const {
 
 	// Clamp coordinates on periodic boundaries to grid extents
 	//
-	vector <double> cCoords = coords;
-	ClampCoord(cCoords);
+	double cCoords[3];
+	ClampCoord(coords, cCoords);
 
 	// handlese case where grid is 2D. I.e. if 2d then zwgt[0] == 1 && 
 	// zwgt[1] = 0.0

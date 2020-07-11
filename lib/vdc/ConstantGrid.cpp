@@ -16,17 +16,17 @@ float ConstantGrid::GetConstantValue() const
     return _value;
 }
     
-float ConstantGrid::GetValue(const std::vector <double> &coords) const
+float ConstantGrid::GetValue(const double coords[3]) const
 {
     return _value;
 }
     
-float ConstantGrid::GetValueNearestNeighbor( const std::vector <double> &coords) const
+float ConstantGrid::GetValueNearestNeighbor( const double coords[3]) const
 {
     return _value;
 }
     
-float ConstantGrid::GetValueLinear( const std::vector <double> &coords) const 
+float ConstantGrid::GetValueLinear( const double coords[3]) const 
 {
     return _value;
 }
@@ -48,7 +48,7 @@ void ConstantGrid::GetUserExtents( std::vector<double> &minu, std::vector<double
     maxu.resize(_topologyDim, std::numeric_limits<double>::max() );
 }
     
-bool ConstantGrid::InsideGrid(const std::vector <double> &coords) const
+bool ConstantGrid::InsideGrid(const double coords[3]) const
 {
     return true;
 }
@@ -77,8 +77,8 @@ const std::vector<size_t>& ConstantGrid::GetCellDimensions() const
     return( GetDimensions() );
 }
     
-bool ConstantGrid::GetIndicesCell( const std::vector <double> &coords,
-     std::vector <size_t> &indices) const 
+bool ConstantGrid::GetIndicesCell( const double coords[3],
+     size_t indices[3]) const 
 {
     return false;
 }

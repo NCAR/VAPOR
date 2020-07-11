@@ -71,7 +71,7 @@ public:
 
  //! \copydoc RegularGrid::GetValue()
  //!
- float GetValue(const std::vector <double> &coords) const override;
+ float GetValue(const double coords[3]) const override;
 
  //! \copydoc Grid::GetInterpolationOrder()
  //
@@ -129,13 +129,13 @@ public:
  //! \copydoc Grid::GetIndicesCell
  //!
  virtual bool GetIndicesCell(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
+	const double coords[3],
+	size_t indices[3]
  ) const override;
 
  //! \copydoc Grid::InsideGrid()
  //!
- bool InsideGrid(const std::vector <double> &coords) const override;
+ bool InsideGrid(const double coords[3]) const override;
 
  //! \copydoc Grid::GetPeriodic()
  //!
@@ -217,10 +217,10 @@ private:
  );
 
  virtual float GetValueNearestNeighbor(
-	const std::vector <double> &coords
+	const double coords[3]
  ) const override;
 
- virtual float GetValueLinear(const std::vector <double> &coords) const override;
+ virtual float GetValueLinear(const double coords[3]) const override;
 
 
  //! 
@@ -236,7 +236,7 @@ private:
  //! \param[out] a bilinearly calculated weight for the x axis
  //! \param[out] a bilinearly calculated weight for the y axis
  //
- void _getBilinearWeights(const std::vector <double> &coords,
+ void _getBilinearWeights(const double coords[3],
 						double &iwgt, double &jwgt) const;
 
  //! This function applies the bilinear interpolation method to derive
@@ -293,7 +293,7 @@ private:
  //! \param[out] a quadratically interpolated value of a point in user
  //! coordinates
  //!
- float _getValueQuadratic(const std::vector <double> &coords) const;
+ float _getValueQuadratic(const double coords[3]) const;
 
  //! Return the linearly interpolated value of a point in user
  //! coordinates.  This only interpolates in the vertical (z) direction.
