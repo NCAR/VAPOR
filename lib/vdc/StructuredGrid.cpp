@@ -242,6 +242,7 @@ void StructuredGrid::ClampCoord(
 
 	VAssert(GetGeometryDim() <= 3);
 	for (int i=0; i<GetGeometryDim(); i++) {
+		cCoords[i] = coords[i];
 
 		//
 		// Handle coordinates for dimensions of length 1
