@@ -237,7 +237,7 @@ void StructuredGrid::ClampCoord(
 	const vector <bool> &periodic = GetPeriodic();
 	const vector <size_t> &dims = GetDimensions();
 
-	vector <double> minu, maxu;
+	double minu[3], maxu[3];
 	GetUserExtents(minu, maxu);
 
 	VAssert(GetGeometryDim() <= 3);

@@ -76,16 +76,6 @@ public:
  std::string GetType() const override {return (GetClassType()); }
 
 
- // \copydoc GetGrid::GetUserExtents()
- //
- virtual void GetUserExtents(
-    std::vector <double> &minu, std::vector <double> &maxu
- ) const override {
-	minu = _minu;
-	maxu = _maxu;
- }
-
-
  // \copydoc GetGrid::GetBoundingBox()
  //
  virtual void GetBoundingBox(
@@ -185,6 +175,10 @@ protected:
 	const double coords[3]
  ) const override;
 
+ void GetUserExtentsHelper(
+	double minu[3], double maxu[3]
+ ) const override;
+
 
 private:
  std::vector <double> _xcoords;
@@ -199,9 +193,6 @@ private:
 	const std::vector <double> &zcoords
  );
 
- void _GetUserExtents(
-	std::vector <double> &minu, std::vector <double> &maxu
- ) const ;
 
  bool _insideGrid(
 	double x, double y, double z,

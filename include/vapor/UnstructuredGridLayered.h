@@ -63,9 +63,6 @@ public:
  }  
  std::string GetType() const override {return (GetClassType()); }
 
- virtual void GetUserExtents(
-	std::vector <double> &minu, std::vector <double> &maxu
- ) const override;
 
  virtual void GetBoundingBox(
     const std::vector <size_t> &min, const std::vector <size_t> &max,
@@ -157,6 +154,12 @@ public:
 
  
  VDF_API friend std::ostream &operator<<(std::ostream &o, const UnstructuredGridLayered &sg);
+
+protected:
+
+ virtual void GetUserExtentsHelper(
+	double minu[3], double maxu[3]
+ ) const override;
 
 private:
  UnstructuredGrid2D _ug2d;

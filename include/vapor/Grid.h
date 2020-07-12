@@ -246,8 +246,16 @@ public:
  //! \sa GetDimensions(), Grid()
  //!
  virtual void GetUserExtents(
+	double minu[3], double maxu[3]
+ ) const;
+
+ virtual void GetUserExtents(
 	std::vector <double> &minu, std::vector <double> &maxu
- ) const = 0;
+ ) const {
+	minu.resize(GetGeometryDim());
+	maxu.resize(GetGeometryDim());
+	return(GetUserExtents(minu.data(), maxu.data()));
+ }
 
  //! Return the extents of the axis-aligned bounding box enclosign a region
  //!
@@ -606,7 +614,7 @@ public:
  //! Check for periodic boundaries
  //!
  //
- virtual std::vector <bool> GetPeriodic() const {
+ virtual const std::vector <bool> &GetPeriodic() const {
 	return(_periodic);
  }
 
@@ -1209,6 +1217,10 @@ protected:
 	const double coords[3]
  ) const = 0;
 
+ virtual void GetUserExtentsHelper(
+	double minu[3], double maxu[3]
+ ) const = 0;
+
  virtual float *GetValueAtIndex(
 	const std::vector <float *> &blks, const size_t indices[3]
  ) const;
@@ -1293,6 +1305,8 @@ private:
  int _interpolationOrder   = 0;	// Order of interpolation 
  long _nodeIDOffset        = 0;
  long _cellIDOffset        = 0;
+ mutable std::vector <double> _minuCache;
+ mutable std::vector <double> _maxuCache;
 
  virtual void _getUserCoordinatesHelper(
 	const std::vector <double> &coords, double &x, double &y, double &z

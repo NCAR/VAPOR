@@ -93,11 +93,6 @@ public:
  //!
  virtual void SetInterpolationOrder(int order) override;
 
- //! \copydoc Grid::GetUserExtents()
- //!
- virtual void GetUserExtents(
-	std::vector <double> &minu, std::vector <double> &maxu
-) const override;
 
 
  //! \copydoc Grid::GetBoundingBox()
@@ -202,6 +197,13 @@ public:
 	);
  }
 
+protected:
+
+ //! \copydoc Grid::GetUserExtents()
+ //!
+ virtual void GetUserExtentsHelper(
+	double minu[3], double maxu[3]
+ ) const override;
 
 private:
  RegularGrid _rg;

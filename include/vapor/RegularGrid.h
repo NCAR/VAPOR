@@ -61,11 +61,6 @@ public:
  }  
  std::string GetType() const override {return (GetClassType()); }
 
- //! \copydoc Grid::GetUserExtents()
- //
- virtual void GetUserExtents(
-    std::vector <double> &minu, std::vector <double> &maxu
- ) const override;
 
 
  //! \copydoc Grid::GetBoundingBox()
@@ -150,6 +145,12 @@ protected:
 
  virtual float GetValueLinear(
 	const double coords[3] 
+ ) const override;
+
+ //! \copydoc Grid::GetUserExtents()
+ //
+ virtual void GetUserExtentsHelper(
+    double minu[3], double maxu[3]
  ) const override;
 
 

@@ -42,10 +42,12 @@ size_t ConstantGrid::GetTopologyDim() const
     return _topologyDim;
 }
 
-void ConstantGrid::GetUserExtents( std::vector<double> &minu, std::vector<double> &maxu) const
+void ConstantGrid::GetUserExtentsHelper( double minu[3], double maxu[3]) const
 {
-    minu.resize(_topologyDim, std::numeric_limits<double>::min() );
-    maxu.resize(_topologyDim, std::numeric_limits<double>::max() );
+	for (int i=0; i<GetGeometryDim(); i++) {
+		minu[i] = std::numeric_limits<double>::min();
+		maxu[i] = std::numeric_limits<double>::max();
+	}
 }
     
 bool ConstantGrid::InsideGrid(const double coords[3]) const

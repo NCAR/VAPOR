@@ -39,13 +39,14 @@ float GrownGrid::GetMissingValue() const
     return _grid2d->GetMissingValue();
 }
 
-void GrownGrid::GetUserExtents( std::vector<double> &minu, std::vector<double> &maxu) const
+void GrownGrid::GetUserExtentsHelper( double minu[3], double maxu[3]) const
 {
     _grid2d->GetUserExtents( minu, maxu );
-    if( minu.size() < 3 )
-        minu.resize( 3, _defaultZ );
-    if( maxu.size() < 3 )
-        maxu.resize( 3, _defaultZ );
+
+	if (_grid2d->GetGeometryDim() < 3) {
+		minu[2] = _defaultZ;
+		maxu[2] = _defaultZ;
+	}
 }
     
 bool GrownGrid::InsideGrid(const double coords[3]) const

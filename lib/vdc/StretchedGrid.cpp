@@ -30,7 +30,9 @@ void StretchedGrid::_stretchedGrid(
 
 	// Get the user extents now. Do this only once.
 	//
-	_GetUserExtents(_minu, _maxu);
+	_minu.resize(3);
+	_maxu.resize(3);
+	GetUserExtentsHelper(_minu.data(), _maxu.data());
 
 }
 
@@ -368,8 +370,8 @@ float StretchedGrid::GetValueLinear(
 
 }
 
-void StretchedGrid::_GetUserExtents(
-	vector <double> &minext, vector <double> &maxext
+void StretchedGrid::GetUserExtentsHelper(
+	double minext[3], double maxext[3]
 ) const {
 
 	vector <size_t> dims = StructuredGrid::GetDimensions();
@@ -380,7 +382,12 @@ void StretchedGrid::_GetUserExtents(
 		max.push_back(dims[i]-1);
 	}
 
-	StretchedGrid::GetBoundingBox(min, max, minext, maxext);
+	vector <double> minv, maxv;
+	StretchedGrid::GetBoundingBox(min, max, minv, maxv);
+	for (int i=0; i<minv.size(); i++) {
+		minext[i] = minv[i];
+		maxext[i] = maxv[i];
+	}
 }
 
 

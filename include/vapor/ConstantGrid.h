@@ -38,8 +38,8 @@ public:
     // This version of ConstantGrid is considered to have infinity extents, 
     // so the following method will return numerical mins and maxes.
     // Note: other flavors of ConstantGrids may have specific user extents.
-    virtual void GetUserExtents( std::vector <double> &minu, 
-                                 std::vector <double> &maxu) const override;
+    virtual void GetUserExtentsHelper( double minu[3], 
+                                 double maxu[3]) const override;
     // Similarly, this will always return true. 
     virtual bool InsideGrid(const double coords[3]) const override;
 

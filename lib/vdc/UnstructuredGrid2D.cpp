@@ -84,27 +84,25 @@ size_t UnstructuredGrid2D::GetGeometryDim() const {
 }
 
 
-void UnstructuredGrid2D::GetUserExtents(
-    vector <double> &minu, vector <double> &maxu
+void UnstructuredGrid2D::GetUserExtentsHelper(
+    double minu[3], double maxu[3]
 ) const {
-	minu.clear();
-	maxu.clear();
 
 	float range[2];
 
 	_xug.GetRange(range);
-	minu.push_back(range[0]);
-	maxu.push_back(range[1]);
+	minu[0] = range[0];
+	maxu[0] = range[1];
 
 	_yug.GetRange(range);
-	minu.push_back(range[0]);
-	maxu.push_back(range[1]);
+	minu[1] = range[0];
+	maxu[1] = range[1];
 
 	if (GetGeometryDim() < 3) return;
 
 	_zug.GetRange(range);
-	minu.push_back(range[0]);
-	maxu.push_back(range[1]);
+	minu[2] = range[0];
+	maxu[2] = range[1];
 
 }
 
@@ -525,7 +523,7 @@ std::shared_ptr <QuadTreeRectangle<float, size_t> >UnstructuredGrid2D::_makeQuad
 	size_t coordDim = GetGeometryDim();
 	VAssert(coordDim == 2);
 
-	vector <double> minu, maxu;
+	double minu[3], maxu[3];
 	GetUserExtents(minu, maxu);
 
 	const vector <size_t> &dims = GetDimensions();

@@ -189,17 +189,6 @@ public:
  };
 
 
- // \copydoc GetGrid::GetUserExtents()
- //
- virtual void GetUserExtents(
-    std::vector <double> &minu, std::vector <double> &maxu
- ) const override {
-	if (! _minu.size()) {
-		_GetUserExtents(_minu, _maxu);
-	}
-	minu = _minu;
-	maxu = _maxu;
- }
 
 
  // \copydoc GetGrid::GetBoundingBox()
@@ -310,6 +299,12 @@ protected:
 	const double coords[3]
  ) const override;
 
+ // \copydoc GetGrid::GetUserExtents()
+ //
+ virtual void GetUserExtentsHelper(
+    double minu[3], double maxu[3]
+ ) const override;
+
 
 private:
  std::vector <double> _zcoords;
@@ -334,10 +329,6 @@ private:
 	const std::vector <double> &zcoords,
 	std::shared_ptr <const QuadTreeRectangle<float, size_t> > qtr
  );
-
- void _GetUserExtents(
-	std::vector <double> &minu, std::vector <double> &maxu
- ) const ;
 
  bool _insideFace(
 	const std::vector <size_t> &face, double pt[2],
