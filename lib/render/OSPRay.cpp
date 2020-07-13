@@ -72,6 +72,55 @@ OSPData VOSP::NewCopiedData(const void *data, OSPDataType type, uint64_t numItem
 }
 
 
+OSPTexture VOSP::OSPDepthFromGLPerspective(float fovy, float aspect, float zNear, float zFar,
+                                           glm::vec3 cameraDir, glm::vec3 cameraUp,
+                                           const float *glDepthBuffer, int width, int height)
+{
+    float *ospDepth = new float[width * height];
+    
+    // transform OpenGL depth to linear depth
+    for (size_t i=0; i<width*height; i++) {
+        const double z_n = 2.0 * glDepthBuffer[i] - 1.0;
+        ospDepth[i] = 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
+    }
+    
+    // transform from orthogonal Z depth to ray distance t
+    glm::vec3 dir_du = normalize(cross(cameraDir, cameraUp));
+    glm::vec3 dir_dv = normalize(cross(dir_du, cameraDir));
+    
+    const float imagePlaneSizeY = 2.f * tanf(fovy/2.f * M_PI/180.f);
+    const float imagePlaneSizeX = imagePlaneSizeY * aspect;
+    
+    dir_du *= imagePlaneSizeX;
+    dir_dv *= imagePlaneSizeY;
+    
+    const glm::vec3 dir_00 = cameraDir - .5f * dir_du - .5f * dir_dv;
+    
+    for (size_t j=0; j<height; j++) {
+        for (size_t i=0; i<width; i++) {
+            const glm::vec3 dir_ij = normalize(dir_00 + float(i)/float(width-1) * dir_du + float(j)/float(height-1) * dir_dv);
+            
+            const float t = ospDepth[j*width+i] / dot(cameraDir, dir_ij);
+            ospDepth[j*width+i] = t;
+        }
+    }
+    
+    OSPTexture depthTexture = ospNewTexture("texture2d");
+    ospSetInt(depthTexture, "format", OSP_TEXTURE_R32F);
+    ospSetInt(depthTexture, "filter", OSP_TEXTURE_FILTER_NEAREST);
+    
+    OSPData data = VOSP::NewCopiedData(ospDepth, OSP_FLOAT, width, height);
+    ospCommit(data);
+    ospSetObject(depthTexture, "data", data);
+    ospRelease(data);
+    
+    delete[] ospDepth;
+    
+    ospCommit(depthTexture);
+    return depthTexture;
+}
+
+
 
 
 // triangle mesh data

@@ -43,11 +43,13 @@ set (SRC
 	Proj4StringParser.cpp
 	glutil.cpp
 	VolumeAlgorithm.cpp
+	VolumeGLSL.cpp
 	VolumeRegular.cpp
 	# VolumeResampled.cpp
 	# VolumeTest.cpp
 	# VolumeTest2.cpp
 	VolumeCellTraversal.cpp
+	VolumeOSPRay.cpp
 	Texture.cpp
 	Framebuffer.cpp
 	ModelRenderer.cpp
@@ -100,11 +102,13 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/SliceRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/glutil.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeAlgorithm.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeGLSL.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeRegular.h
 	# ${PROJECT_SOURCE_DIR}/include/vapor/VolumeResampled.h
 	# ${PROJECT_SOURCE_DIR}/include/vapor/VolumeTest.h
 	# ${PROJECT_SOURCE_DIR}/include/vapor/VolumeTest2.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeCellTraversal.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeOSPRay.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Texture.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Framebuffer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ModelRenderer.h

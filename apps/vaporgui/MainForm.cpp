@@ -165,6 +165,37 @@ string makename(string file) {
 };
 
 
+
+#include <vapor/Progress.h>
+#include <QProgressDialog>
+#include <QOpenGLContext>
+//#include <vapor/Framebuffer.h>
+
+//class TestDialog : public QProgressDialog {
+//public:
+//    TestDialog(QString title, QString cancel, int start, int end, QWidget *parent)
+//    : QProgressDialog(title, cancel, start, end, parent) {}
+//protected:
+//    void paintEvent(QPaintEvent *event) override
+//    {
+//        printf("PAINT ");
+//        cout<<std::this_thread::get_id()<<endl;
+//    }
+//};
+
+static QProgressDialog *_progressDialog = nullptr;
+static long _progressN;
+static bool _enableProgress = false;
+//static bool _using2ndContext = false;
+//static QOpenGLContext *_progressContext = nullptr;
+//static QOpenGLContext *_progressSavedContext = nullptr;
+//static int _progressFramebufferOG = 0;
+//static Framebuffer _progressFramebuffer;
+//static int _progressViewport[4];
+//static bool _progressGL = false;
+
+
+
 void MainForm::_initMembers() {
 
 	_mdiArea = NULL;
@@ -259,6 +290,89 @@ void MainForm::_initMembers() {
 	_begForCitation = false;
 	_eventsSinceLastSave = 0;
 	_buttonPressed = false;
+    
+    Progress::Begin = [this](std::string title, long n, bool cancelable) {
+        if (!_enableProgress) return;
+//        cout<<"BEGIN "<<std::this_thread::get_id()<<endl;
+        
+//        if (QOpenGLContext::currentContext() && !_using2ndContext) {
+//
+//            if (!_progressContext) {
+//                _progressContext = new QOpenGLContext;
+//                _progressContext->create();
+//            }
+//            _progressSavedContext = QOpenGLContext::currentContext();
+//            _progressContext->makeCurrent(_progressSavedContext->surface());
+//            _using2ndContext = true;
+//        }
+        
+//        if (QOpenGLContext::currentContext()) {
+//            if (!_progressFramebuffer.Initialized()) {
+//                _progressFramebuffer.Generate();
+//                _progressFramebuffer.SetSize(256, 256);
+//            }
+//            glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &_progressFramebufferOG);
+//            glGetIntegerv(GL_VIEWPORT, _progressViewport);
+//            _progressFramebuffer.MakeRenderTarget();
+//            _progressGL = true;
+//        }
+            
+        if (!_progressDialog) {
+            _progressDialog = new QProgressDialog(QString::fromStdString(title), "Cancel", 0, n, this);
+            _progressDialog->setWindowModality(Qt::WindowModal);
+            _progressDialog->setAutoClose(false);
+            _progressDialog->setMinimumDuration(500);
+            if (!cancelable)
+                _progressDialog->setCancelButtonText(QString());
+        } else {
+            _progressDialog->reset();
+            if (cancelable) // Weird stuff to get around Qt bug
+                _progressDialog->setCancelButtonText(QString("Cancel"));
+            else
+                _progressDialog->setCancelButton(nullptr);
+            _progressDialog->setLabelText(QString::fromStdString(title));
+            _progressDialog->setValue(0);
+            _progressDialog->setMaximum(n);
+        }
+        _progressN = n;
+    };
+    
+    Progress::Update = [](long i) -> bool {
+        if (!_enableProgress) return false;
+        if (_progressN > 100 && i % (_progressN/100) != 0 && i != 0)
+            return false;
+        _progressDialog->setValue(i);
+        if (_progressDialog->wasCanceled()) {
+            _progressDialog->reset();
+            _progressDialog->close();
+            return true;
+        }
+        return false;
+    };
+    
+    Progress::Finish = []() {
+        if (!_enableProgress) return;
+        
+//        if (_using2ndContext) {
+//            _progressSavedContext->makeCurrent(_progressContext->surface());
+//            _using2ndContext = false;
+//        }
+        
+//        if (_progressGL) {
+//            _progressFramebuffer.UnBind();
+//            glBindFramebuffer(GL_FRAMEBUFFER, _progressFramebufferOG);
+//            glViewport(_progressViewport[0], _progressViewport[1], _progressViewport[2], _progressViewport[3]);
+//            _progressGL = false;
+//        }
+        
+        _progressDialog->setValue(_progressN);
+        _progressDialog->close();
+//        delete _progressDialog;
+//        _progressDialog = nullptr;
+    };
+    
+    
+    
 
 }
 
@@ -1340,7 +1454,6 @@ void MainForm::_createDeveloperMenu()
     
     _developerMenu = menuBar()->addMenu("Developer");
     _developerMenu->addAction("Show PWidget Demo", _paramsWidgetDemo, &QWidget::show);
-    
     
     QAction *enableProgress = new QAction(QString("Enable Progress Bar"), nullptr);
     enableProgress->setCheckable(true);
