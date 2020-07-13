@@ -4,6 +4,7 @@
 #include <functional>
 #include "UWidget.h"
 #include <vapor/VAssert.h>
+#include <memory>
 
 namespace VAPoR {
     class ParamsBase;
