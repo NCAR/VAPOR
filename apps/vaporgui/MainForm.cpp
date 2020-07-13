@@ -318,7 +318,7 @@ void MainForm::_initMembers() {
 //        }
             
         if (!_progressDialog) {
-            _progressDialog = new QProgressDialog(QString::fromStdString(title), "Cancel", 0, n, this);
+            _progressDialog = new QProgressDialog(QString::fromStdString(title), QString("Cancel"), 0, n, this);
             _progressDialog->setWindowModality(Qt::WindowModal);
             _progressDialog->setAutoClose(false);
             _progressDialog->setMinimumDuration(500);
