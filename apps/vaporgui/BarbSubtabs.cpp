@@ -28,11 +28,11 @@ BarbVariablesSubtab::BarbVariablesSubtab(QWidget* parent) {
     ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);
     PSection *vars = new PSection("Variable Selection");
     vars->Add(new PDimensionSelector);
-    vars->Add(new PXFieldVariableSelector);
-    vars->Add(new PYFieldVariableSelector);
-    vars->Add(new PZFieldVariableSelector);
-    vars->Add(new PColorMapVariableSelector);
-    vars->Add(new PHeightVariableSelector);
+    vars->Add(new PXFieldVariableSelectorHLI);
+    vars->Add(new PYFieldVariableSelectorHLI);
+    vars->Add(new PZFieldVariableSelectorHLI);
+    vars->Add(new PColorMapVariableSelectorHLI);
+    vars->Add(new PHeightVariableSelectorHLI);
     pg->Add(vars);
     pg->Add(new PFidelityWidget);
 }

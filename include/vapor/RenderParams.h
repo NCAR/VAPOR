@@ -156,11 +156,19 @@ public:
 	//
 	virtual void SetFieldVariableNames(vector <string> varNames);
 
+    void SetXFieldVariableName( std::string varName );
+    void SetYFieldVariableName( std::string varName );
+    void SetZFieldVariableName( std::string varName );
+
 	//! Get the field variable names, e.g. used in flow integration.
 	//! \retval vector<string> variable names. A vector of length 3 
 	//! containing variable names. The default is 3 empty variable names.
 	//
 	vector<string> GetFieldVariableNames() const ;
+
+    std::string GetXFieldVariableName() const;
+    std::string GetYFieldVariableName() const;
+    std::string GetZFieldVariableName() const;
 
 	//! Get the distribution variable names, e.g. used in flow integration.
 	//! \retval vector<string> variable names
@@ -421,9 +429,6 @@ public:
     static const string _variableNameTag;
     static const string _colorMapVariableNameTag;
     static const string _heightVariableNameTag;
-    static const string _xFieldVariableNameTag;
-    static const string _yFieldVariableNameTag;
-    static const string _zFieldVariableNameTag;
     static const string _useSingleColorTag;
     static const string _constantColorTag;
 };

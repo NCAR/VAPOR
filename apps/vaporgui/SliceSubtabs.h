@@ -7,6 +7,8 @@
 #include "ui_SliceAnnotationGUI.h"
 #include "Flags.h"
 
+//#include "PVariableSelectorHLI.h"
+
 #include <vapor/SliceParams.h>
 
 namespace VAPoR {

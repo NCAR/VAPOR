@@ -38,8 +38,8 @@ public:
         
         ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);
         PSection *vars = new PSection("Variable Selection");
-        vars->Add(new PScalarVariableSelector);
-        vars->Add(new PColorMapVariableSelector);
+        vars->Add(new PScalarVariableSelectorHLI);
+        vars->Add(new PColorMapVariableSelectorHLI);
         pg->Add(vars);
         pg->Add(new PFidelityWidget);
 	}

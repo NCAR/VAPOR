@@ -36,7 +36,7 @@ public:
       _variablesWidget->hide();
       ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);
       PSection *vars = new PSection("Variable Selection");
-      vars->Add(new PHeightVariableSelector);
+      vars->Add(new PHeightVariableSelectorHLI);
       pg->Add(vars);
       pg->Add(new PFidelityWidget);
 	}
@@ -45,7 +45,6 @@ public:
 		            VAPoR::ParamsMgr *paramsMgr,
 		            VAPoR::RenderParams *rParams) 
   {
-//		_variablesWidget->Update(dataMgr, paramsMgr, rParams);
       pg->Update(rParams, paramsMgr, dataMgr);
 	}
 };

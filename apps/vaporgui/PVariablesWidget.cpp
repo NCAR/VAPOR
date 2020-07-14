@@ -51,9 +51,10 @@ void PDimensionSelector::dropdownTextChanged(std::string text)
 // ==================================
 
 
-PScalarVariableSelector::PScalarVariableSelector()     : PVariableSelector  (RenderParams::_variableNameTag, "Variable Name") {}
-PColorMapVariableSelector::PColorMapVariableSelector() : PVariableSelector  (RenderParams::_colorMapVariableNameTag, "Color mapped variable") {}
-PHeightVariableSelector::PHeightVariableSelector()     : PVariableSelector2D(RenderParams::_heightVariableNameTag, "Height variable") { AddNullOption(); OnlyShowForDim(2); }
-PXFieldVariableSelector::PXFieldVariableSelector()     : PVariableSelector  (RenderParams::_xFieldVariableNameTag, "X") { AddNullOption(); }
-PYFieldVariableSelector::PYFieldVariableSelector()     : PVariableSelector  (RenderParams::_yFieldVariableNameTag, "Y") { AddNullOption(); }
-PZFieldVariableSelector::PZFieldVariableSelector()     : PVariableSelector  (RenderParams::_zFieldVariableNameTag, "Z") { AddNullOption(); }
+//PScalarVariableSelector::PScalarVariableSelector()     : PVariableSelector  (RenderParams::_variableNameTag, "Variable Name") {}
+PScalarVariableSelector::PScalarVariableSelector()     : PVariableSelector  ("", "Variable Name") {}
+PColorMapVariableSelector::PColorMapVariableSelector() : PVariableSelector  ("", "Color mapped variable") {}
+PHeightVariableSelector::PHeightVariableSelector()     : PVariableSelector2D("", "Height variable") { AddNullOption(); OnlyShowForDim(2); }
+PXFieldVariableSelector::PXFieldVariableSelector()     : PVariableSelector  ("", "X") { AddNullOption(); }
+PYFieldVariableSelector::PYFieldVariableSelector()     : PVariableSelector  ("", "Y") { AddNullOption(); }
+PZFieldVariableSelector::PZFieldVariableSelector()     : PVariableSelector  ("", "Z") { AddNullOption(); }

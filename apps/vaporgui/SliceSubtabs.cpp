@@ -3,6 +3,10 @@
 #include "TFEditor.h"
 #include "VLineItem.h"
 #include "PGroup.h"
+
+//#include "PVariableSelectorHLI.h"
+#include "PWidget.h"
+//#include "PVariablesWidgetHLI.h"
 #include "PVariablesWidget.h"
 
 #define MIN_SAMPLES 1 
@@ -36,7 +40,7 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     _variablesWidget->hide();
     ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);
     PSection *vars = new PSection("Variable Selection");
-    vars->Add(new PScalarVariableSelector);
+    vars->Add( new PScalarVariableSelectorHLI() );
     pg->Add(vars);
     pg->Add(new PFidelityWidget);
 }
@@ -48,7 +52,6 @@ void SliceVariablesSubtab::Update(
 ) {
     _params = dynamic_cast<VAPoR::SliceParams*>(rParams);
     VAssert(_params);
-//    _variablesWidget->Update(dataMgr, paramsMgr, rParams);
     pg->Update(rParams, paramsMgr, dataMgr);
 }
 

@@ -36,7 +36,7 @@ public:
         
         PSection *vars = new PSection("Variable Selection");
         vars->Add(new PDimensionSelector);
-        vars->Add(new PScalarVariableSelector);
+        vars->Add(new PScalarVariableSelectorHLI);
         pg->Add(vars);
         pg->Add(new PFidelityWidget);
 	}
