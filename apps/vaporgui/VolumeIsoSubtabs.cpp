@@ -21,7 +21,8 @@ void VolumeIsoVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Re
     // long mode = _isoParams->GetCastingMode();
     // _castingModeComboBox->setCurrentIndex( mode - 1 );
     
-    _variablesWidget->Update(dataMgr, paramsMgr, params);
+//    _variablesWidget->Update(dataMgr, paramsMgr, params);
+    pg->Update(params, paramsMgr, dataMgr);
 }
 
 VolumeIsoAppearanceSubtab::VolumeIsoAppearanceSubtab(QWidget* parent) 

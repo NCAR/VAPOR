@@ -21,6 +21,7 @@
 #include "PGroup.h"
 #include "PSection.h"
 #include "PDoubleInput.h"
+#include "PVariablesWidget.h"
 
 #include <QScrollArea>
 
@@ -71,6 +72,21 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
 
     connect( _variablesWidget, &VariablesWidget::_dimensionalityChanged,
         this, &FlowVariablesSubtab::_dimensionalityChanged );
+    
+    
+    
+    _variablesWidget->hide();
+    
+    ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);
+    PSection *vars = new PSection("Variable Selection");
+    vars->Add(new PDimensionSelector);
+    vars->Add(new PXFieldVariableSelector);
+    vars->Add(new PYFieldVariableSelector);
+    vars->Add((new PZFieldVariableSelector)->OnlyShowForDim(3));
+    vars->Add(new PColorMapVariableSelector);
+
+    pg->Add(vars);
+    pg->Add(new PFidelityWidget);
 }
 
 void 
@@ -83,11 +99,12 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     
     _paramsMgr = paramsMgr;
 
-    _variablesWidget->Update(dataMgr, paramsMgr, rParams);
+//    _variablesWidget->Update(dataMgr, paramsMgr, rParams);
+    pg->Update(rParams, paramsMgr, dataMgr);
 
-    GUIStateParams *gp = dynamic_cast<GUIStateParams*>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
-    int nDims = gp->GetFlowDimensionality();
-    bool no3DVars = dataMgr->GetDataVarNames(3).size() ? false : true;
+//    GUIStateParams *gp = dynamic_cast<GUIStateParams*>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
+//    int nDims = gp->GetFlowDimensionality();
+//    bool no3DVars = dataMgr->GetDataVarNames(3).size() ? false : true;
 
     // If dimensionality has changed, tell _variablesWidget to adjust itself for 2DFlow,
     // and update GUIStateParams to the new dimension.
@@ -100,17 +117,17 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     // Since the VariablesWidget has no information on what renderer it is working
     // with, we need to configure these two different cases externally, which is what's
     // being done here.
-    if ( no3DVars && nDims != _variablesWidget->GetActiveDimension() ) {
-            _variablesWidget->Configure2DFieldVars();
-            gp->SetFlowDimensionality( _variablesWidget->GetActiveDimension() );
-    }
-    else if (nDims != _variablesWidget->GetActiveDimension() ) {
-        if (nDims == 2 )
-            _variablesWidget->Configure2DFieldVars();
-        else
-            _variablesWidget->Configure3DFieldVars();
-        gp->SetFlowDimensionality( _variablesWidget->GetActiveDimension() );
-    }
+//    if ( no3DVars && nDims != _variablesWidget->GetActiveDimension() ) {
+//            _variablesWidget->Configure2DFieldVars();
+//            gp->SetFlowDimensionality( _variablesWidget->GetActiveDimension() );
+//    }
+//    else if (nDims != _variablesWidget->GetActiveDimension() ) {
+//        if (nDims == 2 )
+//            _variablesWidget->Configure2DFieldVars();
+//        else
+//            _variablesWidget->Configure3DFieldVars();
+//        gp->SetFlowDimensionality( _variablesWidget->GetActiveDimension() );
+//    }
 }
     
 void FlowVariablesSubtab::_dimensionalityChanged( int nDims ) const {

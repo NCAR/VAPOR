@@ -36,6 +36,9 @@ const string RenderParams::_editBoundsTag = "EditBounds";
 const string RenderParams::_histoBoundsTag = "HistoBounds";
 const string RenderParams::_cursorCoordsTag = "CursorCoords";
 const string RenderParams::_heightVariableNameTag = "HeightVariable";
+const string RenderParams::_xFieldVariableNameTag = "XFieldVariable";
+const string RenderParams::_yFieldVariableNameTag = "YxFieldVariable";
+const string RenderParams::_zFieldVariableNameTag = "ZFieldVariable";
 const string RenderParams::_colorMapVariableNameTag = "ColorMapVariable";
 const string RenderParams::_fieldVariableNamesTag = "FieldVariableNames";
 const string RenderParams::_auxVariableNamesTag = "AuxVariableNames";
@@ -477,7 +480,10 @@ vector<string> RenderParams::GetFieldVariableNames()  const {
 	vector <string> defaultv(3, "");
 	vector <string> varnames;
 
-	varnames = GetValueStringVec(_fieldVariableNamesTag, defaultv);
+    varnames.push_back(GetValueString(_xFieldVariableNameTag, ""));
+    varnames.push_back(GetValueString(_yFieldVariableNameTag, ""));
+    varnames.push_back(GetValueString(_zFieldVariableNameTag, ""));
+    
 	varnames = string_replace(varnames, "NULL", "");
 	for (int i=varnames.size(); i<3; i++) varnames.push_back("");
 
@@ -490,11 +496,11 @@ void RenderParams::SetFieldVariableNames(vector<string> varnames){
 	varnames = string_replace(varnames, "", "NULL");
 	for (int i=varnames.size(); i<3; i++) varnames.push_back("NULL");
 
-	SetValueStringVec(
-		_fieldVariableNamesTag, "Specify vector field variable names", 
-		varnames
-	);
-//	setAllBypass(false);
+    BeginGroup("Set Field Variables");
+    SetValueString(_xFieldVariableNameTag, "", varnames[0]);
+    SetValueString(_yFieldVariableNameTag, "", varnames[1]);
+    SetValueString(_zFieldVariableNameTag, "", varnames[2]);
+    EndGroup();
 }
 
 vector<string> RenderParams::GetAuxVariableNames()  const 

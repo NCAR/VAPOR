@@ -8,6 +8,8 @@
 #include "ui_ContourAnnotationGUI.h"
 #include "RangeCombos.h"
 #include "Flags.h"
+#include "PGroup.h"
+#include "PVariablesWidget.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -22,6 +24,7 @@ class TFEditor;
 class ContourVariablesSubtab : public QWidget, public Ui_ContourVariablesGUI {
 
 	Q_OBJECT
+    PGroup *pg;
 
 public:
 	ContourVariablesSubtab(QWidget* parent) {
@@ -30,6 +33,14 @@ public:
 			(VariableFlags)(SCALAR | HEIGHT),
 			(DimFlags)(TWOD)
 		);
+        
+        _variablesWidget->hide();
+        ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);
+        PSection *vars = new PSection("Variable Selection");
+        vars->Add(new PScalarVariableSelector);
+        vars->Add(new PHeightVariableSelector);
+        pg->Add(vars);
+        pg->Add(new PFidelityWidget);
 	}
 
 	void Update(
@@ -38,6 +49,7 @@ public:
 		VAPoR::RenderParams *rParams
 	) {
 		_variablesWidget->Update(dataMgr, paramsMgr, rParams);
+        pg->Update(rParams, paramsMgr, dataMgr);
 	}
 };
 

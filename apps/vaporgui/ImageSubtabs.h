@@ -9,6 +9,8 @@
 #include "vapor/ResourcePath.h"
 #include <QFileDialog>
 #include "Flags.h"
+#include "PGroup.h"
+#include "PVariablesWidget.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -21,7 +23,8 @@ namespace VAPoR {
 class ImageVariablesSubtab : public QWidget, public Ui_ImageVariablesGUI {
 
 	Q_OBJECT
-
+    PGroup *pg;
+    
 public:
 	ImageVariablesSubtab(QWidget* parent) 
   { 
@@ -30,13 +33,20 @@ public:
 			(VariableFlags)(HEIGHT), 
 			(DimFlags)(TWOD)
 		);
+      _variablesWidget->hide();
+      ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);
+      PSection *vars = new PSection("Variable Selection");
+      vars->Add(new PHeightVariableSelector);
+      pg->Add(vars);
+      pg->Add(new PFidelityWidget);
 	}
 
 	void Update(  VAPoR::DataMgr *dataMgr,
 		            VAPoR::ParamsMgr *paramsMgr,
 		            VAPoR::RenderParams *rParams) 
   {
-		_variablesWidget->Update(dataMgr, paramsMgr, rParams);
+//		_variablesWidget->Update(dataMgr, paramsMgr, rParams);
+      pg->Update(rParams, paramsMgr, dataMgr);
 	}
 };
 

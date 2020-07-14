@@ -10,7 +10,6 @@
 #include "PSliderEdit.h"
 #include "PVariableSelector.h"
 
-
 using namespace VAPoR;
 
 void VolumeVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *params)
@@ -19,7 +18,9 @@ void VolumeVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Rende
     _volumeParams = vp;
     VAssert(vp);
     
-    _variablesWidget->Update(dataMgr, paramsMgr, params);
+//    _variablesWidget->Update(dataMgr, paramsMgr, params);
+    
+    pg->Update(params, paramsMgr, dataMgr);
 }
 
 VolumeAppearanceSubtab::VolumeAppearanceSubtab(QWidget* parent) {
