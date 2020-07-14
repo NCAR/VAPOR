@@ -216,7 +216,7 @@ public:
     bool Supports2DVariables() const { return GetDimFlags() & DimFlags::TWOD; }
     bool Supports3DVariables() const { return GetDimFlags() & DimFlags::THREED; }
     
-    virtual DimFlags GetDimFlags() const {};// = 0;
+    virtual DimFlags GetDimFlags() const = 0;
 
 
 protected:
