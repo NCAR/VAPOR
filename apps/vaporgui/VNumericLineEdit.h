@@ -8,28 +8,26 @@ class VNumericFormatMenu;
 class VCheckBoxAction;
 class VSpinBoxAction;
 
-//! \class VAbstractSliderEdit
+//! \class VNumericSliderEdit
 //! \ingroup Public_GUI
 //! \brief An abstract class defining functions used by different
 //! V*LineEdits (VDoubleLineEdit, VIntLineEdit, and VStringLineEdit).
 //! Supports menus that allow different functionalities, depending
 //! on the data type being used by the line edit.
 
-class VAbstractLineEdit : public VContainer {
+class VNumericLineEdit : public VContainer {
     Q_OBJECT
 
 protected:
-    explicit VAbstractLineEdit( bool useNumericMenu = false);
+    explicit VNumericLineEdit();
 
 public slots:
-    //! Set the integer value in the VAbstractLineEdit
-    virtual void SetValue( int value );
+    //! Set the integer value in the VNumericLineEdit
+//    virtual void SetValue( int value );
 
-    //! Set the double value in the VAbstractLineEdit
-    virtual void SetValue( double value );
+    //! Set the double value in the VNumericLineEdit
+//    virtual void SetValue( double value );
 
-    //! Set the string value in the VAbstractLineEdit
-    virtual void SetValue( const std::string& value );
 
     //! If the line edit is numeric, get the number of digits of the number being displayed
     int GetNumDigits() const;
@@ -61,9 +59,9 @@ protected:
 signals:
 
     // Required to propotage changes up up to Params, via PWidgets
-    void ValueChanged( int value );
-    void ValueChanged( double value );
-    void ValueChanged( const std::string& value );
+//    void ValueChanged( int value );
+//    void ValueChanged( double value );
+//    void ValueChanged( const std::string& value );
 
     // Required to propogate changes from the menus 
     // up to Params, via PWidgets

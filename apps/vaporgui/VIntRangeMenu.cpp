@@ -27,11 +27,11 @@ VIntRangeMenu::VIntRangeMenu(
     }
 }
 
-void VIntRangeMenu::SetMinRange( int min ) { 
+void VIntRangeMenu::SetMinimum( int min ) { 
     _minRangeAction->SetValue( min ); 
 }
 
-void VIntRangeMenu::SetMaxRange( int max ) { 
+void VIntRangeMenu::SetMaximum( int max ) { 
     _maxRangeAction->SetValue( max ); 
 }
 

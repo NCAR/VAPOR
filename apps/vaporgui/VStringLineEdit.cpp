@@ -3,13 +3,19 @@
 #include <iomanip>
 
 #include <QString>
+#include <QLineEdit>
 
 #include <VStringLineEdit.h>
 
 VStringLineEdit::VStringLineEdit( std::string value ) : 
-    VAbstractLineEdit( false ),
+    VContainer(),
+    _lineEdit( new QLineEdit ),
     _value( value )
 {
+    layout()->addWidget( _lineEdit );
+    connect( _lineEdit, SIGNAL( editingFinished() ),
+        this, SLOT( _valueChanged() ) );
+
     _lineEdit->setContextMenuPolicy( Qt::DefaultContextMenu );
     _lineEdit->setText( QString::fromStdString( value ) );
     _lineEdit->setToolTip( QString::fromStdString( value ) );
@@ -29,6 +35,6 @@ void VStringLineEdit::_valueChanged() {
     std::string value = _lineEdit->text().toStdString();
     if ( value != _value ) {
         _value = value;
-        emit VAbstractLineEdit::ValueChanged( _value );
+        emit ValueChanged( _value );
     }
 }

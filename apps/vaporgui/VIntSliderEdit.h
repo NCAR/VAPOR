@@ -18,7 +18,12 @@ class VIntSliderEdit : public VSliderEditInterface {
     Q_OBJECT
 
 public:
-    VIntSliderEdit( int min=0, int max=10, int value=3 );
+    VIntSliderEdit( 
+        int min   = 0, 
+        int max   = 10, 
+        int value = 3,
+        bool rangeChangable = false
+    );
 
     //! Set the minimum allowable value for the VSlider and VIntLineEdit
     void SetMinimum( int min );
@@ -59,7 +64,8 @@ protected:
     void _sliderChanged( int value );
     void _sliderChangedIntermediate( int value );
 
-    int _value;    
+    int  _value;    
+    bool _rangeChangable;
 
     VIntRangeMenu*      _menu;
     VIntLineEdit*       _lineEdit;

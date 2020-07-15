@@ -29,10 +29,10 @@ protected:
 
 public:
     //! Set the minimum value that the current widget can use
-    void SetMinRange( int min );
+    void SetMinimum( int min );
     
     //! Set the maximum value that the current widget can use
-    void SetMaxRange( int max );
+    void SetMaximum( int max );
 
 private slots:
     void _minChanged( int min );

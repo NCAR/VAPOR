@@ -7,7 +7,7 @@
 #include <VIntLineEdit.h>
 
 VIntLineEdit::VIntLineEdit( int value, bool useMenu ) : 
-    VAbstractLineEdit(useMenu),
+    VNumericLineEdit(),
     _value( value )
 {
     std::string formattedNumber = _formatValue( _value );
@@ -36,7 +36,7 @@ void VIntLineEdit::_valueChanged() {
 
     if (legalConversion) {
         SetValue( value );
-        emit VAbstractLineEdit::ValueChanged( _value );
+        emit ValueChanged( _value );
     }
     else {
         SetValue( _value );

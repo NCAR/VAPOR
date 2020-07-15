@@ -56,13 +56,13 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     connect( vile3, SIGNAL( ValueChanged( int ) ), 
         this, SLOT( testVIntLineEdit( int ) ) );
 
-    VIntSliderEdit* visei = new VIntSliderEdit(0, 10, false );
+    VIntSliderEdit* visei = new VIntSliderEdit(0, 10, 3, false );
     vli = new VLineItem( "VIntSliderEdit immutable", visei );
     layout()->addWidget( vli );
     connect( visei, SIGNAL( ValueChanged( int ) ),
         this, SLOT( testVIntSliderEdit( int ) ) );
 
-    VIntSliderEdit* vise = new VIntSliderEdit(0, 10, true );
+    VIntSliderEdit* vise = new VIntSliderEdit(0, 10, 3, true );
     vli = new VLineItem( "VIntSliderEdit", vise );
     layout()->addWidget( vli );
     connect( vise, SIGNAL( ValueChanged( int ) ),

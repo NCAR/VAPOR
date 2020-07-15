@@ -8,22 +8,24 @@
 
 #include <QString>
 
-#include "VAbstractLineEdit.h"
+#include "VNumericLineEdit.h"
 
 //! \class VIntLineEdit
 //! \ingroup Public_GUI
 //! \brief A wrapper for a QLineEdit that handles user input of type int,
 //! and provides Vapor's standard setters, getters, and signals
 
-class VIntLineEdit : public VAbstractLineEdit {
+class VIntLineEdit : public VNumericLineEdit {
+    Q_OBJECT
+
     public:
         VIntLineEdit( int value, bool useMenu=true );
 
         //! Set the current int value in the line edit
-        virtual void SetValue( int value );
+        void SetValue( int value );
    
         //! Get the current int value in the line iedit 
-        virtual int GetValue() const;
+        int GetValue() const;
 
     protected:
         virtual void _valueChanged();
@@ -31,4 +33,7 @@ class VIntLineEdit : public VAbstractLineEdit {
         std::string  _formatValue( int value );
         
         int _value;
+
+    signals:
+        void ValueChanged( int value );
 };

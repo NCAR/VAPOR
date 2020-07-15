@@ -4,10 +4,10 @@
 
 #include <QString>
 
-#include <VDoubleLineEdit.h>
+#include "VDoubleLineEdit.h"
 
 VDoubleLineEdit::VDoubleLineEdit( double value, bool useMenu ) : 
-    VAbstractLineEdit(useMenu),
+    VNumericLineEdit(),
     _value( value )
 {
     std::string formattedNumber = _formatValue( _value );
@@ -34,7 +34,7 @@ void VDoubleLineEdit::_valueChanged() {
 
     if (legalConversion) {
         SetValue( value );
-        emit VAbstractLineEdit::ValueChanged( _value );
+        emit ValueChanged( _value );
     }
     else {
         SetValue( _value );
