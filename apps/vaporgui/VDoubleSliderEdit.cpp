@@ -27,8 +27,8 @@ VDoubleSliderEdit::VDoubleSliderEdit(
         this, &VDoubleSliderEdit::_sliderChangedIntermediate );
    
     _lineEdit = new VDoubleLineEdit( _value, false );
+    _lineEdit->RemoveContextMenu();
     layout()->addWidget(_lineEdit);
-    _lineEdit->setContextMenuPolicy( Qt::NoContextMenu );
     connect( _lineEdit, SIGNAL( ValueChanged( double ) ),
         this, SLOT( SetValue( double ) ) );
     
@@ -36,7 +36,6 @@ VDoubleSliderEdit::VDoubleSliderEdit(
 }
 
 void VDoubleSliderEdit::_makeContextMenu() {
-    setContextMenuPolicy( Qt::CustomContextMenu );
     _menu = new VDoubleRangeMenu(
         this,
         _lineEdit->GetSciNotation(),

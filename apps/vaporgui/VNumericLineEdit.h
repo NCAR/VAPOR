@@ -3,6 +3,7 @@
 #include <QLineEdit>
 
 #include "VContainer.h"
+#include "VStringLineEdit.h"
 
 class VNumericFormatMenu;
 class VCheckBoxAction;
@@ -15,20 +16,14 @@ class VSpinBoxAction;
 //! Supports menus that allow different functionalities, depending
 //! on the data type being used by the line edit.
 
-class VNumericLineEdit : public VContainer {
-    Q_OBJECT
+//class VNumericLineEdit : public VContainer {
+class VNumericLineEdit : private VStringLineEdit {
+    //Q_OBJECT
 
 protected:
     explicit VNumericLineEdit();
 
-public slots:
-    //! Set the integer value in the VNumericLineEdit
-//    virtual void SetValue( int value );
-
-    //! Set the double value in the VNumericLineEdit
-//    virtual void SetValue( double value );
-
-
+public:
     //! If the line edit is numeric, get the number of digits of the number being displayed
     int GetNumDigits() const;
     
@@ -40,6 +35,9 @@ public slots:
     
     //! If the line edit is numeric, set whether the display is in scientific notation
     void SetSciNotation( bool sciNotation );
+
+    //! Remove the custom context menu
+    void RemoveContextMenu();
 
 public slots:
     

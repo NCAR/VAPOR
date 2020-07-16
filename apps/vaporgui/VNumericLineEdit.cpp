@@ -1,11 +1,11 @@
 #include <QLineEdit>
 
-#include "VContainer.h"
 #include "VNumericFormatMenu.h"
 #include "VNumericLineEdit.h"
 
 VNumericLineEdit::VNumericLineEdit() :
-    VContainer(),
+    //VContainer(),
+    VStringLineEdit(),
     _sciNotation( false ),
     _decimalDigits( 5 )
 {
@@ -23,6 +23,11 @@ VNumericLineEdit::VNumericLineEdit() :
         this, &VNumericLineEdit::SetSciNotation );
     connect( _menu, &VNumericFormatMenu::DecimalDigitsChanged,
         this, &VNumericLineEdit::SetNumDigits );
+}
+
+void VNumericLineEdit::RemoveContextMenu() {
+    _lineEdit->setContextMenuPolicy( Qt::NoContextMenu );
+    setContextMenuPolicy( Qt::NoContextMenu );
 }
 
 int VNumericLineEdit::GetNumDigits() const { 

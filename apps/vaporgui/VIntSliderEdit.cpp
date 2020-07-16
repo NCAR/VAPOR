@@ -25,8 +25,8 @@ VIntSliderEdit::VIntSliderEdit(
         this, &VIntSliderEdit::_sliderChangedIntermediate );
    
     _lineEdit = new VIntLineEdit( _value, false );
+    _lineEdit->RemoveContextMenu();
     layout()->addWidget(_lineEdit);
-    _lineEdit->setContextMenuPolicy( Qt::NoContextMenu );
     connect( _lineEdit, SIGNAL( ValueChanged( int ) ),
         this, SLOT( SetValue( int ) ) );
     
