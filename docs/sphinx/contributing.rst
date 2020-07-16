@@ -105,7 +105,9 @@ If building on Linux or OSX, the third party libraries must be placed in /usr/lo
 
     `CentOS third-party libraries <https://drive.google.com/open?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0>`_
 
-.. note:: Alternatively, you can build the libraries yourself and store them wherever you want.  This is a more complex exercise.  If you choose to do this, you must also configure Vapor's CMake configuration to point to your custom directory.  If you wish to go down this route, you may follow these build instructions for `Windows <https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing>`_ and `UNIX <https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing>`_.
+.. note:: Alternatively to downloading our pre-built libraries, you can build the libraries yourself and store them wherever you want.  This is a more complex exercise.  If you choose to do this, you must also configure Vapor's CMake configuration to point to your custom directory.  If you wish to go down this route, you may follow these build instructions for `Windows <https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing>`_ and `UNIX <https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing>`_.
+
+.. note:: The file <vapor-source>/site_files/site.NCAR is used to specify the location of Vapor's third party libraries.  If you would like to link to a different set of libraries, edit this file to specify your choice.  CMake variables passed over the command line may be overwritten by this file's presets.
 
 +-----------------+----------------------------------------------------------------+
 | *Vapor 3 was build with the following third party library configuration.*        |
