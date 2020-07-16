@@ -36,6 +36,7 @@ VDoubleSliderEdit::VDoubleSliderEdit(
 }
 
 void VDoubleSliderEdit::_makeContextMenu() {
+    setContextMenuPolicy( Qt::CustomContextMenu );
     _menu = new VDoubleRangeMenu(
         this,
         _lineEdit->GetSciNotation(),

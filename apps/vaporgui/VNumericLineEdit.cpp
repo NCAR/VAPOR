@@ -15,7 +15,7 @@ VNumericLineEdit::VNumericLineEdit() :
         this, SLOT( _valueChanged() ) );
 
     _menu = new VNumericFormatMenu( this, _sciNotation, _decimalDigits );
-    _lineEdit->setContextMenuPolicy( Qt::NoContextMenu );
+    _lineEdit->setContextMenuPolicy( Qt::CustomContextMenu );
     connect( _lineEdit, &QLineEdit::customContextMenuRequested,
         this, &VNumericLineEdit::_showMenu );
     
