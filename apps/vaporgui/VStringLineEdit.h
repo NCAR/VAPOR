@@ -29,10 +29,11 @@ class VStringLineEdit : public VContainer {
 
     protected:
         QLineEdit*  _lineEdit;
+        std::string _strValue;
 
         std::string _formatValue( std::string value );
+        std::string _getText() const;
         
-        std::string _strValue;
 
     protected slots:
         virtual void _valueChanged();

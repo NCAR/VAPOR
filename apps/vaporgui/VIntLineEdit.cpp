@@ -18,8 +18,7 @@ VIntLineEdit::VIntLineEdit( int value, bool useMenu ) :
         this, SLOT( _valueChanged() ) );
 
     std::string formattedNumber = _formatValue( _value );
-    _lineEdit->setText( QString::fromStdString( formattedNumber ) );
-    _lineEdit->setToolTip( QString::fromStdString( formattedNumber ) );
+    SetValueString( formattedNumber );
 }
 
 void VIntLineEdit::SetValueInt( int value ) {
@@ -41,9 +40,21 @@ int VIntLineEdit::GetValueInt() const {
 }
 
 void VIntLineEdit::_valueChanged() {
-    bool legalConversion;
-    QString str = _lineEdit->text();
+    std::string str = _getText();
 
+    int value;
+    try {
+        value = (int)std::stod( str );
+        SetValueInt( value );
+        emit ValueChanged( _value );
+    } catch (const std::invalid_argument&) {
+        SetValueInt( _value );
+    } catch (const std::out_of_range&) {
+        SetValueInt( _value );
+    }
+
+    /*bool legalConversion;
+    QString str = _lineEdit->text();
     // QString does not convert integer values that have scientific notation,
     // so convert the string to a double, then cast to int :(
     int value = (int)str.toDouble( &legalConversion );
@@ -54,7 +65,7 @@ void VIntLineEdit::_valueChanged() {
     }
     else {
         SetValueInt( _value );
-    }
+    }*/
 }
 
 std::string VIntLineEdit::_formatValue( int value ) {

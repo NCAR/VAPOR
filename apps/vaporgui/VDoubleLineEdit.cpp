@@ -18,8 +18,7 @@ VDoubleLineEdit::VDoubleLineEdit( double value, bool useMenu ) :
         this, SLOT( _valueChanged() ) );
 
     std::string formattedNumber = _formatValue( _value );
-    _lineEdit->setText( QString::fromStdString( formattedNumber ) );
-    _lineEdit->setToolTip( QString::fromStdString( formattedNumber ) );
+    SetValueString( formattedNumber );
 }
 
 void VDoubleLineEdit::SetValueDouble( double value ) {
@@ -41,7 +40,19 @@ double VDoubleLineEdit::GetValueDouble() const {
 }
 
 void VDoubleLineEdit::_valueChanged() {
-    bool legalConversion;
+    std::string str = _getText();
+
+    double value;
+    try {
+        value = std::stod( str );
+        SetValueDouble( value );
+        emit ValueChanged( _value );
+    } catch (const std::invalid_argument&) {
+        SetValueDouble( _value );
+    } catch (const std::out_of_range&) {
+        SetValueDouble( _value );
+    }
+/*    bool legalConversion;
     QString str = _lineEdit->text();
     double value = str.toDouble( &legalConversion );
 
@@ -51,7 +62,7 @@ void VDoubleLineEdit::_valueChanged() {
     }
     else {
         SetValueDouble( _value );
-    }
+    }*/
 }
 
 std::string VDoubleLineEdit::_formatValue( double value ) {

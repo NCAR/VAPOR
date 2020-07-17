@@ -38,3 +38,8 @@ void VStringLineEdit::_valueChanged() {
         emit ValueChanged( _strValue );
     }
 }
+
+std::string VStringLineEdit::_getText() const {
+    std::string value = _lineEdit->text().toStdString();
+    return value;
+}
