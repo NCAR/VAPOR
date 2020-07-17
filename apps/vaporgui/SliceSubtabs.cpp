@@ -87,20 +87,10 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
 }
 
 void SliceVariablesSubtab::testVIntLineEdit( int value ) {
-    std::cout << "testVIntLineEdit signal " << value << std::endl;
-    int value2 = dynamic_cast<VIntLineEdit*>(sender())->GetValueInt();
-    std::cout << "testVIntLineEdit GetInt " << value2 << std::endl;
-    std::string value3 = dynamic_cast<VIntLineEdit*>(sender())->GetValueString();
-    std::cout << "testVIntLineEdit GetStr " << value3 << std::endl;
-    std::cout << std::endl;
+    std::cout << "testVIntLineEdit " << value << std::endl;
 }
 void SliceVariablesSubtab::testVDoubleLineEdit( double value ) {
-    std::cout << std::setprecision(8) << "testVDoubleLineEdit signal " << value << std::endl;
-    double value2 = dynamic_cast<VDoubleLineEdit*>(sender())->GetValueDouble();
-    std::cout << std::setprecision(8) << "testVDoubleLineEdit GetDbl " << value2 << std::endl;
-    std::string value3 = dynamic_cast<VDoubleLineEdit*>(sender())->GetValueString();
-    std::cout << "testVDoubleLineEdit GetStr " << value3 << std::endl;
-    std::cout << std::endl;
+    std::cout << "testVDoubleLineEdit " << value << std::endl;
 }
 
 void SliceVariablesSubtab::testVStringLineEdit( const std::string& value ) {

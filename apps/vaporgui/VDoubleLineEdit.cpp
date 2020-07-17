@@ -47,7 +47,6 @@ void VDoubleLineEdit::_valueChanged() {
 
     if (legalConversion) {
         SetValueDouble( value );
-        std::cout << "                  Emitting " << _value << std::endl;
         emit ValueChanged( _value );
     }
     else {
