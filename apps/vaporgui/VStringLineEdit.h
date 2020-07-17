@@ -19,23 +19,23 @@ class VStringLineEdit : public VContainer {
     Q_OBJECT
 
     public:
-        VStringLineEdit( std::string value );
+        VStringLineEdit( std::string value = "" );
 
         //! Set the current string value in the line edit
-        virtual void SetValue( std::string value );
+        virtual void SetValueString( std::string value );
    
         //! Get the current value in the line edit 
-        virtual std::string GetValue() const;
+        virtual std::string GetValueString() const;
 
     protected:
         QLineEdit*  _lineEdit;
 
-        std::string  _formatValue( std::string value );
+        std::string _formatValue( std::string value );
         
-        std::string _value;
+        std::string _strValue;
 
     protected slots:
-        void _valueChanged();
+        virtual void _valueChanged();
 
     signals:
         void ValueChanged( const std::string& value );

@@ -10,19 +10,33 @@ VIntLineEdit::VIntLineEdit( int value, bool useMenu ) :
     VNumericLineEdit(),
     _value( value )
 {
+    // Disconnect the QLineEdit's interaction with VStringLineEdit::_valueChanged(),
+    // and reconnect it to VIntLineEdit::_valueChanged()
+    disconnect( _lineEdit, SIGNAL( editingFinished() ),
+        this, SLOT( _valueChanged() ) );
+    connect( _lineEdit, SIGNAL( editingFinished() ),
+        this, SLOT( _valueChanged() ) );
+
     std::string formattedNumber = _formatValue( _value );
     _lineEdit->setText( QString::fromStdString( formattedNumber ) );
     _lineEdit->setToolTip( QString::fromStdString( formattedNumber ) );
 }
 
-void VIntLineEdit::SetValue( int value ) {
-    _value = value;
-    std::string formattedNumber = _formatValue( _value );
-    _lineEdit->setText( QString::fromStdString( formattedNumber ) );
-    _lineEdit->setToolTip( QString::fromStdString( formattedNumber ) );
+void VIntLineEdit::SetValueInt( int value ) {
+    std::string formattedNumber = _formatValue( value );
+
+    try {
+        _value = (int)std::stod(formattedNumber);
+    } catch (const std::invalid_argument&) {
+        return;
+    } catch (const std::out_of_range&) {
+        return;
+    }
+
+    SetValueString( formattedNumber );
 }
 
-int VIntLineEdit::GetValue() const {
+int VIntLineEdit::GetValueInt() const {
     return _value;
 }
 
@@ -35,11 +49,11 @@ void VIntLineEdit::_valueChanged() {
     int value = (int)str.toDouble( &legalConversion );
 
     if (legalConversion) {
-        SetValue( value );
+        SetValueInt( value );
         emit ValueChanged( _value );
     }
     else {
-        SetValue( _value );
+        SetValueInt( _value );
     }
 }
 

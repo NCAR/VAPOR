@@ -101,7 +101,7 @@ void VDoubleSliderEdit::SetValue( double value ) {
     _value = value;
 
     _lineEdit->blockSignals( true );
-    dynamic_cast<VDoubleLineEdit*>(_lineEdit)->SetValue( _value );
+    dynamic_cast<VDoubleLineEdit*>(_lineEdit)->SetValueDouble( _value );
     _lineEdit->blockSignals( false );
 
     _slider->blockSignals(   true );
@@ -120,7 +120,7 @@ double VDoubleSliderEdit::GetMinimum() const {
 void VDoubleSliderEdit::SetMinimum( double min ) {
     if ( min > _value ) {
         _value = min;
-        _lineEdit->SetValue( min );
+        _lineEdit->SetValueDouble( min );
     }
    
     _slider->SetMinimum( min );
@@ -144,7 +144,7 @@ double VDoubleSliderEdit::GetMaximum() const {
 void VDoubleSliderEdit::SetMaximum( double max ) {
     if ( max < _value ) {
         _value = max;
-        _lineEdit->SetValue( max );
+        _lineEdit->SetValueDouble( max );
     }
     
     _slider->SetMaximum( max );
@@ -167,6 +167,6 @@ void VDoubleSliderEdit::ShowContextMenu( const QPoint& pos ) {
 }
 
 void VDoubleSliderEdit::_sliderChangedIntermediate( double value ) {
-    dynamic_cast<VDoubleLineEdit*>(_lineEdit)->SetValue( value );
+    dynamic_cast<VDoubleLineEdit*>(_lineEdit)->SetValueDouble( value );
     emit ValueChangedIntermediate( value );
 }

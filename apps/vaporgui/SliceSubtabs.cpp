@@ -43,18 +43,21 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     layout()->addWidget( vli );
     connect( vsle, SIGNAL( ValueChanged( const std::string& ) ), 
         this, SLOT( testVStringLineEdit( const std::string& ) ) );
+    vsle->SetValueString( std::to_string(vsle->sizeHint().width()) );
 
     VDoubleLineEdit* vdle = new VDoubleLineEdit( 9.8765 );
     vli = new VLineItem( "VDoubleLineEdit", vdle );
     layout()->addWidget( vli );
     connect( vdle, SIGNAL( ValueChanged( double ) ), 
         this, SLOT( testVDoubleLineEdit( double ) ) );
+    vdle->SetValueDouble( vdle->sizeHint().width() );
 
     VIntLineEdit* vile3 = new VIntLineEdit( 5 );
     vli = new VLineItem( "VIntLineEdit", vile3 );
     layout()->addWidget( vli );
     connect( vile3, SIGNAL( ValueChanged( int ) ), 
         this, SLOT( testVIntLineEdit( int ) ) );
+    vile3->SetValueInt( vile3->sizeHint().width() );
 
     VIntSliderEdit* visei = new VIntSliderEdit(0, 10, 3, false );
     vli = new VLineItem( "VIntSliderEdit immutable", visei );
@@ -67,6 +70,7 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     layout()->addWidget( vli );
     connect( vise, SIGNAL( ValueChanged( int ) ),
         this, SLOT( testVIntSliderEdit( int ) ) );
+    vise->SetValue( vise->sizeHint().width() );
 
     VDoubleSliderEdit* vdsei = new VDoubleSliderEdit( 0, 10, 0, false );
     vli = new VLineItem( "VDoubleSliderEdit immutable", vdsei );
@@ -79,14 +83,26 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     layout()->addWidget( vli );
     connect( vdse, SIGNAL( ValueChanged( double ) ),
         this, SLOT( testVDoubleSliderEdit( double ) ) );
+    vdse->SetValue( vdse->sizeHint().width() );
 }
 
 void SliceVariablesSubtab::testVIntLineEdit( int value ) {
-    std::cout << "testVIntLineEdit " << value << std::endl;
+    std::cout << "testVIntLineEdit signal " << value << std::endl;
+    int value2 = dynamic_cast<VIntLineEdit*>(sender())->GetValueInt();
+    std::cout << "testVIntLineEdit GetInt " << value2 << std::endl;
+    std::string value3 = dynamic_cast<VIntLineEdit*>(sender())->GetValueString();
+    std::cout << "testVIntLineEdit GetStr " << value3 << std::endl;
+    std::cout << std::endl;
 }
 void SliceVariablesSubtab::testVDoubleLineEdit( double value ) {
-    std::cout << "testVDoubleLineEdit " << value << std::endl;
+    std::cout << std::setprecision(8) << "testVDoubleLineEdit signal " << value << std::endl;
+    double value2 = dynamic_cast<VDoubleLineEdit*>(sender())->GetValueDouble();
+    std::cout << std::setprecision(8) << "testVDoubleLineEdit GetDbl " << value2 << std::endl;
+    std::string value3 = dynamic_cast<VDoubleLineEdit*>(sender())->GetValueString();
+    std::cout << "testVDoubleLineEdit GetStr " << value3 << std::endl;
+    std::cout << std::endl;
 }
+
 void SliceVariablesSubtab::testVStringLineEdit( const std::string& value ) {
     std::cout << "testVStringLineEdit " << value << std::endl;
 }

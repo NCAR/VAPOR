@@ -10,7 +10,7 @@
 VStringLineEdit::VStringLineEdit( std::string value ) : 
     VContainer(),
     _lineEdit( new QLineEdit ),
-    _value( value )
+    _strValue( value )
 {
     layout()->addWidget( _lineEdit );
     connect( _lineEdit, SIGNAL( editingFinished() ),
@@ -21,20 +21,20 @@ VStringLineEdit::VStringLineEdit( std::string value ) :
     _lineEdit->setToolTip( QString::fromStdString( value ) );
 }
 
-void VStringLineEdit::SetValue( std::string value ) {
-    _value = value;
-    _lineEdit->setText( QString::fromStdString( _value ) );
-    _lineEdit->setToolTip( QString::fromStdString( _value ) );
+void VStringLineEdit::SetValueString( std::string value ) {
+    _strValue = value;
+    _lineEdit->setText( QString::fromStdString( _strValue ) );
+    _lineEdit->setToolTip( QString::fromStdString( _strValue ) );
 }
 
-std::string VStringLineEdit::GetValue() const {
-    return _value;
+std::string VStringLineEdit::GetValueString() const {
+    return _strValue;
 }
 
 void VStringLineEdit::_valueChanged() {
     std::string value = _lineEdit->text().toStdString();
-    if ( value != _value ) {
-        _value = value;
-        emit ValueChanged( _value );
+    if ( value != _strValue ) {
+        _strValue = value;
+        emit ValueChanged( _strValue );
     }
 }

@@ -16,16 +16,16 @@
 //! and provides Vapor's standard setters, getters, and signals
 
 class VIntLineEdit : public VNumericLineEdit {
-    //Q_OBJECT
+    Q_OBJECT
 
     public:
         VIntLineEdit( int value, bool useMenu=true );
 
         //! Set the current int value in the line edit
-        void SetValue( int value );
+        void SetValueInt( int value );
    
         //! Get the current int value in the line iedit 
-        int GetValue() const;
+        int GetValueInt() const;
 
     protected:
         virtual void _valueChanged();
@@ -36,7 +36,4 @@ class VIntLineEdit : public VNumericLineEdit {
 
     signals:
         void ValueChanged( int value );
-
-    private:
-        virtual std::string GetValue() const = delete;
 };

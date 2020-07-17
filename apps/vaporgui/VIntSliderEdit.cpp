@@ -100,7 +100,7 @@ void VIntSliderEdit::SetValue( int value ) {
     _value = value;
 
     _lineEdit->blockSignals( true );
-    dynamic_cast<VIntLineEdit*>(_lineEdit)->SetValue( _value );
+    dynamic_cast<VIntLineEdit*>(_lineEdit)->SetValueInt( _value );
     _lineEdit->blockSignals( false );
 
     _slider->blockSignals(   true );
@@ -119,7 +119,7 @@ int VIntSliderEdit::GetMinimum() const {
 void VIntSliderEdit::SetMinimum( int min ) {
     if ( min > _value ) {
         _value = min;
-        _lineEdit->SetValue( min );
+        _lineEdit->SetValueInt( min );
     }
    
     _slider->SetMinimum( min );
@@ -143,7 +143,7 @@ int VIntSliderEdit::GetMaximum() const {
 void VIntSliderEdit::SetMaximum( int max ) {
     if ( max < _value ) {
         _value = max;
-        _lineEdit->SetValue( max );
+        _lineEdit->SetValueInt( max );
     }
     
     _slider->SetMaximum( max );
@@ -166,6 +166,6 @@ void VIntSliderEdit::ShowContextMenu( const QPoint& pos ) {
 }
 
 void VIntSliderEdit::_sliderChangedIntermediate( int value ) {
-    dynamic_cast<VIntLineEdit*>(_lineEdit)->SetValue( value );
+    dynamic_cast<VIntLineEdit*>(_lineEdit)->SetValueInt( value );
     emit ValueChangedIntermediate( value );
 }

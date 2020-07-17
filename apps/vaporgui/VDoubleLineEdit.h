@@ -16,27 +16,25 @@
 //! and provides Vapor's standard setters, getters, and signals
 
 class VDoubleLineEdit : public VNumericLineEdit {
-    //Q_OBJECT
+    Q_OBJECT
 
     public:
         VDoubleLineEdit( double value, bool useMenu=true );
 
         //! Set the current double value in the line edit
-        void SetValue( double value );
+        void SetValueDouble( double value );
     
         //! Get the current double value in the line edit
-        double GetValue() const;
+        double GetValueDouble() const;
 
     protected:
-        virtual void _valueChanged();
-
         std::string  _formatValue( double value );
         
         double _value;
 
+    protected slots:
+        void _valueChanged() override;
+
     signals:
         void ValueChanged( double value );
-
-    private:
-        virtual std::string GetValue() const = delete;
 };

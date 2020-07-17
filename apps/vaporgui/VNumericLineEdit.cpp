@@ -3,17 +3,11 @@
 #include "VNumericFormatMenu.h"
 #include "VNumericLineEdit.h"
 
-VNumericLineEdit::VNumericLineEdit() :
-    //VContainer(),
+VNumericLineEdit::VNumericLineEdit( int decimals ) :
     VStringLineEdit(),
     _sciNotation( false ),
-    _decimalDigits( 5 )
+    _decimalDigits( decimals )
 {
-    _lineEdit = new QLineEdit;
-    layout()->addWidget( _lineEdit );
-    connect( _lineEdit, SIGNAL( editingFinished() ),
-        this, SLOT( _valueChanged() ) );
-
     _menu = new VNumericFormatMenu( this, _sciNotation, _decimalDigits );
     _lineEdit->setContextMenuPolicy( Qt::CustomContextMenu );
     connect( _lineEdit, &QLineEdit::customContextMenuRequested,

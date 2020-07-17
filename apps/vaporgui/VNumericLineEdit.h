@@ -2,6 +2,8 @@
 
 #include <QLineEdit>
 
+#include "vapor/VAssert.h"
+
 #include "VContainer.h"
 #include "VStringLineEdit.h"
 
@@ -16,12 +18,11 @@ class VSpinBoxAction;
 //! Supports menus that allow different functionalities, depending
 //! on the data type being used by the line edit.
 
-//class VNumericLineEdit : public VContainer {
-class VNumericLineEdit : private VStringLineEdit {
-    //Q_OBJECT
+class VNumericLineEdit : public VStringLineEdit {
+    Q_OBJECT
 
 protected:
-    explicit VNumericLineEdit();
+    explicit VNumericLineEdit( int decimals = 5 );
 
 public:
     //! If the line edit is numeric, get the number of digits of the number being displayed
@@ -46,7 +47,6 @@ public slots:
     virtual void _valueChanged() = 0;
 
 protected:
-    QLineEdit*          _lineEdit;
     VNumericFormatMenu* _menu;
 
     bool _sciNotation;
@@ -55,11 +55,6 @@ protected:
     void _showMenu( const QPoint& pos );
 
 signals:
-
-    // Required to propotage changes up up to Params, via PWidgets
-//    void ValueChanged( int value );
-//    void ValueChanged( double value );
-//    void ValueChanged( const std::string& value );
 
     // Required to propogate changes from the menus 
     // up to Params, via PWidgets
