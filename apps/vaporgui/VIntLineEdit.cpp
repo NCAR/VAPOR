@@ -6,7 +6,7 @@
 
 #include <VIntLineEdit.h>
 
-VIntLineEdit::VIntLineEdit( int value, bool useMenu ) : 
+VIntLineEdit::VIntLineEdit( int value ) : 
     VNumericLineEdit(),
     _value( value )
 {
@@ -52,20 +52,6 @@ void VIntLineEdit::_valueChanged() {
     } catch (const std::out_of_range&) {
         SetValueInt( _value );
     }
-
-    /*bool legalConversion;
-    QString str = _lineEdit->text();
-    // QString does not convert integer values that have scientific notation,
-    // so convert the string to a double, then cast to int :(
-    int value = (int)str.toDouble( &legalConversion );
-
-    if (legalConversion) {
-        SetValueInt( value );
-        emit ValueChanged( _value );
-    }
-    else {
-        SetValueInt( _value );
-    }*/
 }
 
 std::string VIntLineEdit::_formatValue( int value ) {

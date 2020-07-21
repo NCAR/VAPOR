@@ -6,7 +6,7 @@
 
 #include "VDoubleLineEdit.h"
 
-VDoubleLineEdit::VDoubleLineEdit( double value, bool useMenu ) : 
+VDoubleLineEdit::VDoubleLineEdit( double value ) : 
     VNumericLineEdit(),
     _value( value )
 {

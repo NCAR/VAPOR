@@ -19,7 +19,7 @@ class VDoubleLineEdit : public VNumericLineEdit {
     Q_OBJECT
 
     public:
-        VDoubleLineEdit( double value, bool useMenu=true );
+        VDoubleLineEdit( double value );
 
         //! Set the current double value in the line edit
         void SetValueDouble( double value );

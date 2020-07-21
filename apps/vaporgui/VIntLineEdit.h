@@ -19,7 +19,7 @@ class VIntLineEdit : public VNumericLineEdit {
     Q_OBJECT
 
     public:
-        VIntLineEdit( int value, bool useMenu=true );
+        VIntLineEdit( int value );
 
         //! Set the current int value in the line edit
         void SetValueInt( int value );
