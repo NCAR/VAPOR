@@ -133,9 +133,9 @@ public:
 
  virtual void confirmText() {EventRouter::confirmText(); }
 
- virtual bool Supports2DVariables() const = 0;//{ return (DimFlags)0; }//GetDimFlags() & DimFlags::TWOD; }
+ virtual bool Supports2DVariables() const = 0;
  
- virtual bool Supports3DVariables() const = 0;//{ return (DimFlags)0; }//GetDimFlags() & DimFlags::TWOD; }
+ virtual bool Supports3DVariables() const = 0;
 
  //! Virtual method to enable or disable rendering when turned on or off by 
  //! a gui tab.

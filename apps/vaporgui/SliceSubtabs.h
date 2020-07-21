@@ -19,27 +19,6 @@ namespace VAPoR {
 class TFEditor;
 class PGroup;
 
-/*class SliceVariablesSubtab : public QWidget, public Ui_SliceVariablesGUI {
-
-	Q_OBJECT
-
-public:
-	SliceVariablesSubtab(QWidget* parent);
-
-	void Update(
-		VAPoR::DataMgr *dataMgr,
-		VAPoR::ParamsMgr *paramsMgr,
-		VAPoR::RenderParams *rParams
-	);
-
-private slots:
-    void _setDefaultSampleRate();
-
-private:
-    VAPoR::SliceParams* _params;
-    PGroup *pg;
-};*/
-
 class SliceAppearanceSubtab : public QWidget, public Ui_SliceAppearanceGUI {
 
 	Q_OBJECT
