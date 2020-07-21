@@ -5,9 +5,9 @@
 class VComboBox;
 
 
-class PFidelityWidget : public PSection {
+class PFidelitySection : public PSection {
 public:
-    PFidelityWidget();
+    PFidelitySection();
 };
 
 
@@ -26,8 +26,6 @@ private slots:
     void dropdownTextChanged(std::string text);
 };
 
-
-
 class PLODSelector : public PLineItem {
     Q_OBJECT
     VComboBox *_vComboBox;
@@ -41,8 +39,6 @@ protected:
 private slots:
     void dropdownIndexChanged(int i);
 };
-
-
 
 class PRefinementSelector : public PLineItem {
     Q_OBJECT

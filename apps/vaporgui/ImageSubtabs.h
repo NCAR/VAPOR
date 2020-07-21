@@ -11,6 +11,7 @@
 #include "Flags.h"
 #include "PGroup.h"
 #include "PVariablesWidget.h"
+#include "PFidelitySection.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -38,7 +39,7 @@ public:
       PSection *vars = new PSection("Variable Selection");
       vars->Add(new PHeightVariableSelectorHLI);
       pg->Add(vars);
-      pg->Add(new PFidelityWidget);
+      pg->Add(new PFidelitySection);
 	}
 
 	void Update(  VAPoR::DataMgr *dataMgr,

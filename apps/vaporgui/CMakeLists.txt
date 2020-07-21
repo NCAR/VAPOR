@@ -178,9 +178,8 @@ set (SRCS
 	PTFEditor.h
 	PVariablesWidget.cpp
 	PVariablesWidget.h
-	#PVariablesWidgetHLI.h
-	PFidelityWidget.cpp
-	PFidelityWidget.h
+	PFidelitySection.cpp
+	PFidelitySection.h
 	ModelEventRouter.cpp
 	ModelEventRouter.h
 	ModelSubtabs.cpp

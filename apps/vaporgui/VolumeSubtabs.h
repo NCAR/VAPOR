@@ -8,6 +8,7 @@
 #include <vapor/MapperFunction.h>
 #include <vapor/VolumeParams.h>
 #include "PVariablesWidget.h"
+#include "PFidelitySection.h"
 #include "PGroup.h"
 
 namespace VAPoR {
@@ -41,7 +42,7 @@ public:
         vars->Add(new PScalarVariableSelectorHLI);
         vars->Add(new PColorMapVariableSelectorHLI);
         pg->Add(vars);
-        pg->Add(new PFidelityWidget);
+        pg->Add(new PFidelitySection);
 	}
 
 	void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);

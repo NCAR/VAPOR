@@ -22,6 +22,7 @@
 #include "PSection.h"
 #include "PDoubleInput.h"
 #include "PVariablesWidget.h"
+#include "PFidelitySection.h"
 
 #include <QScrollArea>
 
@@ -74,7 +75,7 @@ FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
     vars->Add(new PColorMapVariableSelectorHLI);
 
     pg->Add(vars);
-    pg->Add(new PFidelityWidget);
+    pg->Add(new PFidelitySection);
 }
 
 void 

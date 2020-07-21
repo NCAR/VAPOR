@@ -9,6 +9,8 @@
 #include "TFEditor.h"
 #include "PVariablesWidget.h"
 #include "PGroup.h"
+#include "PSection.h"
+#include "PFidelitySection.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -38,7 +40,7 @@ public:
         vars->Add(new PDimensionSelector);
         vars->Add(new PScalarVariableSelectorHLI);
         pg->Add(vars);
-        pg->Add(new PFidelityWidget);
+        pg->Add(new PFidelitySection);
 	}
 
 	void Update(

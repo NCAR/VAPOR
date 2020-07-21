@@ -9,6 +9,7 @@
 #include "TFEditorIsoSurface.h"
 #include "PGroup.h"
 #include "PVariablesWidget.h"
+#include "PFidelitySection.h"
 
 
 namespace VAPoR 
@@ -37,7 +38,7 @@ public:
         vars->Add(new PScalarVariableSelectorHLI);
         vars->Add(new PColorMapVariableSelectorHLI);
         pg->Add(vars);
-        pg->Add(new PFidelityWidget);
+        pg->Add(new PFidelitySection);
     }
 
     void Update(VAPoR::DataMgr *dataMgr,
