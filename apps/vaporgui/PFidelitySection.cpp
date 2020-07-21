@@ -18,6 +18,8 @@ PFidelitySection::PFidelitySection()
     Add(new PCheckbox("FidelityUseAdvanced", "Advanced"));
     Add((new PLODSelector)       ->EnableBasedOnParam("FidelityUseAdvanced"));
     Add((new PRefinementSelector)->EnableBasedOnParam("FidelityUseAdvanced"));
+    //Add((new PLODSelectorHLI)       ->EnableBasedOnParam("FidelityUseAdvanced"));
+    //Add((new PRefinementSelectorHLI)->EnableBasedOnParam("FidelityUseAdvanced"));
 }
 
 

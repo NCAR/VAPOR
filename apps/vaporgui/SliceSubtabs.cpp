@@ -22,7 +22,7 @@
 #define XZ 1 
 #define YZ 2
 
-SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
+/*SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     setupUi(this);
     _variablesWidget->Reinit(
         (VariableFlags)(SCALAR),
@@ -60,7 +60,7 @@ void SliceVariablesSubtab::_setDefaultSampleRate() {
     if (quality < 1) quality = 1;
     int adjustedRate = quality * SAMPLES_PER_QUALITY;
     _params->SetSampleRate(adjustedRate);
-}
+}*/
 
 SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget* parent) {
     setupUi(this);
@@ -77,8 +77,9 @@ SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget* parent) {
 }
 
 void SliceAppearanceSubtab::_qualityChanged(int quality) {
-    int sampleRate = quality * SAMPLES_PER_QUALITY;
-    _params->SetSampleRate(sampleRate);
+    //int sampleRate = quality * SAMPLES_PER_QUALITY;
+   std::cout << "void SliceAppearanceSubtab::_qualityChanged " << quality << std::endl;
+    _params->SetSampleRate( quality );
 }
 
 void SliceAppearanceSubtab::Update(

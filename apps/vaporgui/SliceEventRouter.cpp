@@ -20,6 +20,10 @@
 #include "PVariablesWidget.h"
 #include "PFidelitySection.h"
 
+#define MIN_QUALITY 1
+#define MAX_QUALITY 10
+#define SAMPLES_PER_QUALITY 200
+
 using namespace VAPoR;
 
 //
@@ -43,20 +47,20 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
 	addTab(qsvar, "Variables");*/
 
     PSection* varSection = new PSection("Variable Selection");
-    varSection->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
+    //varSection->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
     varSection->Add( new PScalarVariableSelector3DHLI() );
     PFidelitySection* fidelitySection = new PFidelitySection();
-    fidelitySection->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
+    //fidelitySection->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
 
     _pVarGroup = new PGroup;
-    _pVarGroup->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
+    //_pVarGroup->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
     _pVarGroup->Add( varSection );
     _pVarGroup->Add( fidelitySection );
 	QScrollArea *qsvar = new QScrollArea(this);
 	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	qsvar->setWidget( _pVarGroup );
 	qsvar->setWidgetResizable(true);
-    qsvar->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
+    //qsvar->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
     addTab( qsvar, "Variables" );
      
 
@@ -98,6 +102,15 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
 	_glSliceImageWindow = new GLSliceImageWindow(fmt,imageFrame,"gltwoddatawindow",imageFrame);
 	imageFrame->attachRenderWindow(_glSliceImageWindow, this);
 #endif
+}
+
+void SliceEventRouter::_setDefaultSampleRate() {
+    VAPoR::SliceParams* sParams = dynamic_cast<VAPoR::SliceParams*>( GetActiveParams() );
+    int defaultRate  = sParams->GetDefaultSampleRate();
+    int quality      = defaultRate / SAMPLES_PER_QUALITY;
+    if (quality < 1) quality = 1;
+    int adjustedRate = quality * SAMPLES_PER_QUALITY;
+    sParams->SetSampleRate(adjustedRate);
 }
 
 void SliceEventRouter::GetWebHelp(

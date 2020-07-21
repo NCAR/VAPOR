@@ -414,8 +414,6 @@ private:
  static const string _auxVariableNamesTag;
  static const string _distribVariableNamesTag;
  static const string _constantOpacityTag;
- static const string _CompressionLevelTag;
- static const string _RefinementLevelTag;
  static const string _transferFunctionsTag;
  static const string _stretchFactorsTag;
  static const string _currentTimestepTag;
@@ -431,6 +429,8 @@ public:
     static const string _heightVariableNameTag;
     static const string _useSingleColorTag;
     static const string _constantColorTag;
+    static const string _CompressionLevelTag;
+    static const string _RefinementLevelTag;
 };
 
 

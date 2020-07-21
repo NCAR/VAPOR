@@ -19,7 +19,7 @@ namespace VAPoR {
 class TFEditor;
 class PGroup;
 
-class SliceVariablesSubtab : public QWidget, public Ui_SliceVariablesGUI {
+/*class SliceVariablesSubtab : public QWidget, public Ui_SliceVariablesGUI {
 
 	Q_OBJECT
 
@@ -37,8 +37,8 @@ private slots:
 
 private:
     VAPoR::SliceParams* _params;
-    PGroup *_pg;
-};
+    PGroup *pg;
+};*/
 
 class SliceAppearanceSubtab : public QWidget, public Ui_SliceAppearanceGUI {
 
