@@ -24,9 +24,9 @@ public:
 
  virtual int Initialize() override;
 
- void SetRefinementLevel( int level ) override;
- 
- void SetCompressionLevel( int level ) override;
+ virtual void SetCompressionLevel( int level ) override;
+
+ virtual void SetRefinementLevel( int level ) override;
 
  // Get static string identifier for this params class
  //
@@ -48,8 +48,6 @@ public:
 private:
 
  void _init();
- void _setDefaultSampleRate();
-
  std::vector<double> _cachedValues;
 
  static const string _sampleRateTag;
