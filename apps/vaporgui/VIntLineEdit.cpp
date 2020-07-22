@@ -6,19 +6,12 @@
 
 #include <VIntLineEdit.h>
 
-VIntLineEdit::VIntLineEdit( int value, bool useMenu ) : 
+VIntLineEdit::VIntLineEdit( int value ) : 
     VNumericLineEdit(),
     _value( value )
 {
-    // Disconnect the QLineEdit's interaction with VStringLineEdit::_valueChanged(),
-    // and reconnect it to VIntLineEdit::_valueChanged()
-    disconnect( _lineEdit, SIGNAL( editingFinished() ),
-        this, SLOT( _valueChanged() ) );
-    connect( _lineEdit, SIGNAL( editingFinished() ),
-        this, SLOT( _valueChanged() ) );
-
     std::string formattedNumber = _formatValue( _value );
-    SetValueString( formattedNumber );
+    _setValueString( formattedNumber );
 }
 
 void VIntLineEdit::SetValueInt( int value ) {
@@ -32,7 +25,7 @@ void VIntLineEdit::SetValueInt( int value ) {
         return;
     }
 
-    SetValueString( formattedNumber );
+    _setValueString( formattedNumber );
 }
 
 int VIntLineEdit::GetValueInt() const {
@@ -52,20 +45,6 @@ void VIntLineEdit::_valueChanged() {
     } catch (const std::out_of_range&) {
         SetValueInt( _value );
     }
-
-    /*bool legalConversion;
-    QString str = _lineEdit->text();
-    // QString does not convert integer values that have scientific notation,
-    // so convert the string to a double, then cast to int :(
-    int value = (int)str.toDouble( &legalConversion );
-
-    if (legalConversion) {
-        SetValueInt( value );
-        emit ValueChanged( _value );
-    }
-    else {
-        SetValueInt( _value );
-    }*/
 }
 
 std::string VIntLineEdit::_formatValue( int value ) {

@@ -31,6 +31,18 @@ std::string VStringLineEdit::GetValueString() const {
     return _strValue;
 }
 
+void VStringLineEdit::RemoveContextMenu() {
+    _lineEdit->setContextMenuPolicy( Qt::NoContextMenu );
+    setContextMenuPolicy( Qt::NoContextMenu );
+}
+
+void VStringLineEdit::SetCustomContextMenu() {
+    _lineEdit->setContextMenuPolicy( Qt::CustomContextMenu );
+    setContextMenuPolicy( Qt::CustomContextMenu);
+    connect( _lineEdit, SIGNAL( customContextMenuRequested( const QPoint& ) ),
+        this, SLOT( _showMenu( const QPoint& ) ) );
+}
+
 void VStringLineEdit::_valueChanged() {
     std::string value = _lineEdit->text().toStdString();
     if ( value != _strValue ) {
@@ -43,3 +55,10 @@ std::string VStringLineEdit::_getText() const {
     std::string value = _lineEdit->text().toStdString();
     return value;
 }
+
+void VStringLineEdit::_setValueString( std::string value ) {
+    _strValue = value;
+    _lineEdit->setText( QString::fromStdString( _strValue ) );
+    _lineEdit->setToolTip( QString::fromStdString( _strValue ) );
+}
+

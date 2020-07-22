@@ -22,18 +22,24 @@ class VStringLineEdit : public VContainer {
         VStringLineEdit( std::string value = "" );
 
         //! Set the current string value in the line edit
-        virtual void SetValueString( std::string value );
+        void SetValueString( std::string value );
    
         //! Get the current value in the line edit 
-        virtual std::string GetValueString() const;
+        std::string GetValueString() const;
+
+        //! Remove the current context menu
+        void RemoveContextMenu();
+
+        //! Create a custom context menu for the QLineEdit
+        void SetCustomContextMenu();
 
     protected:
         QLineEdit*  _lineEdit;
         std::string _strValue;
 
-        std::string _formatValue( std::string value );
         std::string _getText() const;
-        
+        void _setValueString( std::string value );
+        virtual void _showMenu( const QPoint& pos ) {};
 
     protected slots:
         virtual void _valueChanged();

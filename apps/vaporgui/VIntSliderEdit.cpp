@@ -24,7 +24,7 @@ VIntSliderEdit::VIntSliderEdit(
     connect( _slider, &VSlider::ValueChangedIntermediate,
         this, &VIntSliderEdit::_sliderChangedIntermediate );
    
-    _lineEdit = new VIntLineEdit( _value, false );
+    _lineEdit = new VIntLineEdit( value );
     _lineEdit->RemoveContextMenu();
     layout()->addWidget(_lineEdit);
     connect( _lineEdit, SIGNAL( ValueChanged( int ) ),

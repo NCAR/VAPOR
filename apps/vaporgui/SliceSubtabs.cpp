@@ -39,25 +39,24 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     VLineItem* vli;
 
     VStringLineEdit* vsle = new VStringLineEdit( "woot" );
+    vsle->setToolTip( "VSLE" );
     vli = new VLineItem( "VStringLineEdit", vsle );
+    vli->setToolTip( "VLI" );
     layout()->addWidget( vli );
     connect( vsle, SIGNAL( ValueChanged( const std::string& ) ), 
         this, SLOT( testVStringLineEdit( const std::string& ) ) );
-    vsle->SetValueString( std::to_string(vsle->sizeHint().width()) );
 
-    VDoubleLineEdit* vdle = new VDoubleLineEdit( 9.8765 );
+    VDoubleLineEdit* vdle = new VDoubleLineEdit();
     vli = new VLineItem( "VDoubleLineEdit", vdle );
     layout()->addWidget( vli );
     connect( vdle, SIGNAL( ValueChanged( double ) ), 
         this, SLOT( testVDoubleLineEdit( double ) ) );
-    vdle->SetValueDouble( vdle->sizeHint().width() );
 
-    VIntLineEdit* vile3 = new VIntLineEdit( 5 );
+    VIntLineEdit* vile3 = new VIntLineEdit();
     vli = new VLineItem( "VIntLineEdit", vile3 );
     layout()->addWidget( vli );
     connect( vile3, SIGNAL( ValueChanged( int ) ), 
         this, SLOT( testVIntLineEdit( int ) ) );
-    vile3->SetValueInt( vile3->sizeHint().width() );
 
     VIntSliderEdit* visei = new VIntSliderEdit(0, 10, 3, false );
     vli = new VLineItem( "VIntSliderEdit immutable", visei );
@@ -70,7 +69,6 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     layout()->addWidget( vli );
     connect( vise, SIGNAL( ValueChanged( int ) ),
         this, SLOT( testVIntSliderEdit( int ) ) );
-    vise->SetValue( vise->sizeHint().width() );
 
     VDoubleSliderEdit* vdsei = new VDoubleSliderEdit( 0, 10, 0, false );
     vli = new VLineItem( "VDoubleSliderEdit immutable", vdsei );
@@ -83,7 +81,6 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     layout()->addWidget( vli );
     connect( vdse, SIGNAL( ValueChanged( double ) ),
         this, SLOT( testVDoubleSliderEdit( double ) ) );
-    vdse->SetValue( vdse->sizeHint().width() );
 }
 
 void SliceVariablesSubtab::testVIntLineEdit( int value ) {

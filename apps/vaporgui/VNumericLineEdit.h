@@ -37,22 +37,22 @@ public:
     //! If the line edit is numeric, set whether the display is in scientific notation
     void SetSciNotation( bool sciNotation );
 
-    //! Remove the custom context menu
-    void RemoveContextMenu();
+    void SetValueString( std::string value ) = delete;
 
-public slots:
+protected slots:
     
     //! Called whenever the line edit's value is changed.  Must be reimplemented by derived classes
     //! to handle correct formatting
     virtual void _valueChanged() = 0;
+
+    //! Show a custom context menu
+    virtual void _showMenu( const QPoint& pos );
 
 protected:
     VNumericFormatMenu* _menu;
 
     bool _sciNotation;
     int  _decimalDigits;
-
-    void _showMenu( const QPoint& pos );
 
 signals:
 

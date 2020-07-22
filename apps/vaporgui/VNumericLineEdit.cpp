@@ -9,19 +9,12 @@ VNumericLineEdit::VNumericLineEdit( int decimals ) :
     _decimalDigits( decimals )
 {
     _menu = new VNumericFormatMenu( this, _sciNotation, _decimalDigits );
-    _lineEdit->setContextMenuPolicy( Qt::CustomContextMenu );
-    connect( _lineEdit, &QLineEdit::customContextMenuRequested,
-        this, &VNumericLineEdit::_showMenu );
     
     connect( _menu, &VNumericFormatMenu::SciNotationChanged,
         this, &VNumericLineEdit::SetSciNotation );
     connect( _menu, &VNumericFormatMenu::DecimalDigitsChanged,
         this, &VNumericLineEdit::SetNumDigits );
-}
-
-void VNumericLineEdit::RemoveContextMenu() {
-    _lineEdit->setContextMenuPolicy( Qt::NoContextMenu );
-    setContextMenuPolicy( Qt::NoContextMenu );
+    SetCustomContextMenu();
 }
 
 int VNumericLineEdit::GetNumDigits() const { 

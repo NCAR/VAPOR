@@ -26,7 +26,7 @@ VDoubleSliderEdit::VDoubleSliderEdit(
     connect( _slider, &VSlider::ValueChangedIntermediate,
         this, &VDoubleSliderEdit::_sliderChangedIntermediate );
    
-    _lineEdit = new VDoubleLineEdit( _value, false );
+    _lineEdit = new VDoubleLineEdit( value );
     _lineEdit->RemoveContextMenu();
     layout()->addWidget(_lineEdit);
     connect( _lineEdit, SIGNAL( ValueChanged( double ) ),

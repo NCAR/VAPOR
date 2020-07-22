@@ -75,7 +75,7 @@ void VStringLineEditAction::_lineEditChanged( int value ) {
 
 VIntLineEditAction::VIntLineEditAction( const std::string& title, int value ) :
   QWidgetAction(nullptr) {
-    _lineEdit = new VIntLineEdit( value );
+    _lineEdit = new VIntLineEdit();
     VLineItem* vli = new VLineItem( title, _lineEdit );
     vli->setContentsMargins( 5, 0, 5, 0 );
 
@@ -95,7 +95,7 @@ void VIntLineEditAction::_lineEditChanged( int value ) {
 
 VDoubleLineEditAction::VDoubleLineEditAction( const std::string& title, double value ) :
   QWidgetAction(nullptr) {
-    _lineEdit = new VDoubleLineEdit( value );
+    _lineEdit = new VDoubleLineEdit();
     VLineItem* vli = new VLineItem( title, _lineEdit );
     vli->setContentsMargins( 5, 0, 5, 0 );
 

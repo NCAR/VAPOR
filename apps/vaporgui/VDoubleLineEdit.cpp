@@ -6,19 +6,12 @@
 
 #include "VDoubleLineEdit.h"
 
-VDoubleLineEdit::VDoubleLineEdit( double value, bool useMenu ) : 
+VDoubleLineEdit::VDoubleLineEdit( double value ) : 
     VNumericLineEdit(),
     _value( value )
 {
-    // Disconnect the QLineEdit's interaction with VStringLineEdit::_valueChanged(),
-    // and reconnect it to VDoubleLineEdit::_valueChanged()
-    disconnect( _lineEdit, SIGNAL( editingFinished() ),
-        this, SLOT( _valueChanged() ) );
-    connect( _lineEdit, SIGNAL( editingFinished() ),
-        this, SLOT( _valueChanged() ) );
-
     std::string formattedNumber = _formatValue( _value );
-    SetValueString( formattedNumber );
+    _setValueString( formattedNumber );
 }
 
 void VDoubleLineEdit::SetValueDouble( double value ) {
@@ -32,7 +25,7 @@ void VDoubleLineEdit::SetValueDouble( double value ) {
         return;
     }
 
-    SetValueString( formattedNumber );
+    _setValueString( formattedNumber );
 }
 
 double VDoubleLineEdit::GetValueDouble() const {
@@ -52,17 +45,6 @@ void VDoubleLineEdit::_valueChanged() {
     } catch (const std::out_of_range&) {
         SetValueDouble( _value );
     }
-/*    bool legalConversion;
-    QString str = _lineEdit->text();
-    double value = str.toDouble( &legalConversion );
-
-    if (legalConversion) {
-        SetValueDouble( value );
-        emit ValueChanged( _value );
-    }
-    else {
-        SetValueDouble( _value );
-    }*/
 }
 
 std::string VDoubleLineEdit::_formatValue( double value ) {
