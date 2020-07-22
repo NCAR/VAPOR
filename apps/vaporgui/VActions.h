@@ -10,6 +10,15 @@ class VStringLineEdit;
 class VIntLineEdit;
 class VDoubleLineEdit;
 
+#include "VContainer.h"
+
+class VLineAction : public QWidgetAction {
+    Q_OBJECT
+
+public:
+    VLineAction( const std::string& title, VContainer* container );
+};
+
 //!
 //! \class VSpinBoxAction
 //! \ingroup Public_GUI
@@ -21,7 +30,7 @@ class VDoubleLineEdit;
 //! function can be used to retrieve and update the current value.  Used
 //! within QMenu classes.
 
-class VSpinBoxAction : public QWidgetAction {
+class VSpinBoxAction : public VLineAction {
     Q_OBJECT
 
 public:
@@ -52,7 +61,7 @@ signals:
 //! function can be used to retrieve and update the current value.  Used
 //! within QMenu classes.
 
-class VCheckBoxAction : public QWidgetAction {
+class VCheckBoxAction : public VLineAction {
     Q_OBJECT
 
 public:
@@ -83,7 +92,7 @@ signals:
 //! function can be used to retrieve and update the current value.  Used
 //! within QMenu classes.
 
-class VStringLineEditAction : public QWidgetAction {
+class VStringLineEditAction : public VLineAction {
     Q_OBJECT
 
 public:
@@ -114,7 +123,7 @@ signals:
 //! function can be used to retrieve and update the current value.  Used
 //! within QMenu classes.
 
-class VIntLineEditAction : public QWidgetAction {
+class VIntLineEditAction : public VLineAction {
     Q_OBJECT
 
 public:
@@ -146,7 +155,7 @@ signals:
 //! function can be used to retrieve and update the current value.  Used
 //! within QMenu classes.
 
-class VDoubleLineEditAction : public QWidgetAction {
+class VDoubleLineEditAction : public VLineAction {
     Q_OBJECT
 
 public:

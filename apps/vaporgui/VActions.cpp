@@ -7,20 +7,20 @@
 #include "VIntLineEdit.h"
 #include "VDoubleLineEdit.h"
 
-VSpinBoxAction::VSpinBoxAction (const std::string& title, int value) : 
-  QWidgetAction (NULL) 
+VLineAction::VLineAction( const std::string& title, VContainer* container ) 
+  : QWidgetAction(NULL)
 {
-
-    _spinBox = new VIntSpinBox(1, 10);
-    _spinBox->SetValue( value );
-
-    VLineItem* vli = new VLineItem( title, _spinBox );
+    VLineItem* vli = new VLineItem( title, container );
     vli->setContentsMargins( 5, 0, 5, 0 );
+    setDefaultWidget( vli );
+}
 
+VSpinBoxAction::VSpinBoxAction (const std::string& title, int value)
+  : VLineAction(title, _spinBox = new VIntSpinBox( 1, 10 ) ) 
+{
+    _spinBox->SetValue( value );
     connect( _spinBox, SIGNAL( ValueChanged( int ) ),
         this, SLOT( _spinBoxChanged( int ) ) );
-
-    setDefaultWidget(vli);
 }
 
 void VSpinBoxAction::SetValue( int value ) {
@@ -31,17 +31,11 @@ void VSpinBoxAction::_spinBoxChanged( int value ) {
     emit editingFinished( value );
 }
 
-VCheckBoxAction::VCheckBoxAction (const std::string& title, bool value) : 
-  QWidgetAction (NULL) 
+VCheckBoxAction::VCheckBoxAction (const std::string& title, bool value)
+  : VLineAction( title, _checkBox = new VCheckBox( value ) )
 {
-    _checkBox = new VCheckBox( value );
-    VLineItem* vli = new VLineItem( title, _checkBox );
-    vli->setContentsMargins( 5, 0, 5, 0 );
-
     connect( _checkBox, &VCheckBox::ValueChanged,
         this, &VCheckBoxAction::_checkBoxChanged );
-
-    setDefaultWidget(vli);
 }
 
 void VCheckBoxAction::SetValue( bool value ) {
@@ -52,17 +46,11 @@ void VCheckBoxAction::_checkBoxChanged( bool value ) {
     emit clicked( value );
 }
 
-
-VStringLineEditAction::VStringLineEditAction( const std::string& title, std::string value ) :
-  QWidgetAction(nullptr) {
-    _lineEdit = new VStringLineEdit( value ); 
-    VLineItem* vli = new VLineItem( title, _lineEdit );
-    vli->setContentsMargins( 5, 0, 5, 0 );
-
+VStringLineEditAction::VStringLineEditAction( const std::string& title, std::string value )
+  : VLineAction( title, _lineEdit = new VStringLineEdit( value ) )
+{
     connect( _lineEdit, SIGNAL( ValueChanged( int ) ),
         this, SLOT( _lineEditChanged( int ) ) );
-
-    setDefaultWidget( vli );
 }
 
 void VStringLineEditAction::SetValue( const std::string& value ) {
@@ -73,16 +61,11 @@ void VStringLineEditAction::_lineEditChanged( int value ) {
     emit ValueChanged( value );
 }
 
-VIntLineEditAction::VIntLineEditAction( const std::string& title, int value ) :
-  QWidgetAction(nullptr) {
-    _lineEdit = new VIntLineEdit();
-    VLineItem* vli = new VLineItem( title, _lineEdit );
-    vli->setContentsMargins( 5, 0, 5, 0 );
-
+VIntLineEditAction::VIntLineEditAction( const std::string& title, int value )
+  : VLineAction( title, _lineEdit = new VIntLineEdit( value ) )
+{
     connect( _lineEdit, SIGNAL( ValueChanged( int ) ),
         this, SLOT( _lineEditChanged( int ) ) );
-
-    setDefaultWidget( vli );
 }
 
 void VIntLineEditAction::SetValue( int value ) {
@@ -93,16 +76,11 @@ void VIntLineEditAction::_lineEditChanged( int value ) {
     emit ValueChanged( value );
 }
 
-VDoubleLineEditAction::VDoubleLineEditAction( const std::string& title, double value ) :
-  QWidgetAction(nullptr) {
-    _lineEdit = new VDoubleLineEdit();
-    VLineItem* vli = new VLineItem( title, _lineEdit );
-    vli->setContentsMargins( 5, 0, 5, 0 );
-
+VDoubleLineEditAction::VDoubleLineEditAction( const std::string& title, double value )
+  : VLineAction( title, _lineEdit = new VDoubleLineEdit( value ) )
+{
     connect( _lineEdit, SIGNAL( ValueChanged( double ) ),
         this, SLOT( _lineEditChanged( double ) ) );
-
-    setDefaultWidget( vli );
 }
 
 void VDoubleLineEditAction::SetValue( double value ) {
