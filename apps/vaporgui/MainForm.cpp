@@ -263,19 +263,8 @@ void MainForm::_initMembers() {
 
 }
 
-class TLabel : public QLabel {
-public:
-    using QLabel::QLabel;
-protected:
-    void paintEvent(QPaintEvent *event) override
-    {
-//        printf("PainEvent\n");
-        QLabel::paintEvent(event);
-    }
-};
-
 class ProgressStatusBar : public QWidget {
-    QLabel *_titleLabel = new TLabel;
+    QLabel *_titleLabel = new QLabel;
     QProgressBar *_progressBar = new QProgressBar;
     QToolButton *_cancelButton = new QToolButton;
     
@@ -448,15 +437,7 @@ MainForm::MainForm(
     
     _status = new ProgressStatusBar;
     sidebarLayout->addWidget(_status);
-    
-    
-//    QHBoxLayout *statusLayout = new QHBoxLayout;
-//    statusLayout->setMargin(4);
-//    _status->setLayout(statusLayout);
-//    sidebarLayout->addWidget(_status);
-    
-//    statusLayout->addWidget(new QLabel("testing 123"));
-//    statusLayout->addWidget(_test = new TLabel("testing 123"));
+    _status->hide();
 
     _tabDockWindow->setWidget(sidebar);
 
@@ -828,89 +809,54 @@ void MainForm::_createProgressWidget()
     if (_progressEnabled)
         return;
     
-    // The modal version adds an animation that takes a little less than
-    // a second however on OSX the non-modal version is broken.
-    
-    if (!_progressBar) {
-        _progressBar = new QProgressBar;
-//        _test = new QLabel("Test");
-        
-//        statusBar()->addWidget(_progressBar);
-//        statusBar()->addPermanentWidget(_progressBar);
-//        statusBar()->addPermanentWidget(_test);
-    }
-    
 #define MAX_UPDATES_PER_SEC 10
 #define MILLIS_BETWEEN_UPDATES (1000/MAX_UPDATES_PER_SEC)
     
     Progress::Start_t start = [this](const std::string &name, long total, bool cancelable)
     {
-        if (QOpenGLContext::currentContext() && _progressSavedFB < 0) {
-            glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &_progressSavedFB);
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        }
-        
-        ((ProgressStatusBar*)_status)->StartTask(name, total, cancelable);
+        _status->StartTask(name, total, cancelable);
         _progressLastUpdateTime = std::chrono::system_clock::now();
-        
-        
-//        QProgressDialog *test = new QProgressDialog("Test", "Test", 0, 100, this);
-        //        QMessageBox *test = new QMessageBox(QMessageBox::Warning, "TESTING", "123");
-//                test->setWindowModality(Qt::WindowModal);
-//                test->show();
     };
     
     Progress::Finish_t finish = [this]()
     {
-        ((ProgressStatusBar*)_status)->Finish();
-        _disableUserInputForAllExcept = nullptr;
-        
-        if (QOpenGLContext::currentContext() && _progressSavedFB >= 0) {
-            glBindFramebuffer(GL_FRAMEBUFFER, _progressSavedFB);
-            _progressSavedFB = -1;
-        }
+        _status->Finish();
     };
     
     Progress::Update_t update = [this, finish](long done, bool *cancelled)
     {
-//        _progressBar->setValue(done);
-//        _progressBar->repaint();
-        
+        // Limit updates per second for perfomance reasons since this is on the same
+        // thread as the calculation
         auto now = std::chrono::system_clock::now();
         auto duration = chrono::duration_cast<chrono::milliseconds>(now - _progressLastUpdateTime);
         if (duration.count() < MILLIS_BETWEEN_UPDATES)
             return;
         _progressLastUpdateTime = now;
         
-        ((ProgressStatusBar*)_status)->SetDone(done);
-        _disableUserInputForAllExcept = ((ProgressStatusBar*)_status)->GetCancelButtonObject();
+        // Qt will clear the currently bound framebuffer for some reason
+        bool insideOpenGL = (bool)QOpenGLContext::currentContext();
+        if (insideOpenGL && _progressSavedFB < 0) {
+            glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &_progressSavedFB);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+        
+        _status->SetDone(done);
+        _disableUserInputForAllExcept = _status->GetCancelButtonObject();
         _insideMessedUpQtEventLoop = true;
         QCoreApplication::processEvents();
-//        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         _disableUserInputForAllExcept = nullptr;
         _insideMessedUpQtEventLoop = false;
-        *cancelled = ((ProgressStatusBar*)_status)->Cancelled();
+        *cancelled = _status->Cancelled();
         
-//        _test->setText(QString::fromStdString("Test " + to_string(done)));
-//        _test->repaint();
-//        _test->update();
-//        _status->update();
-//
-//        _status->repaint();
-        
-        
-//        this->repaint();
-//        statusBar()->repaint();
-//        printf("update %li\n", done);
-        
-//        if (_progressDialog->wasCanceled()) {
-//            *cancelled = true;
-//            finish();
-//        }
+        if (insideOpenGL && _progressSavedFB >= 0) {
+            glBindFramebuffer(GL_FRAMEBUFFER, _progressSavedFB);
+            _progressSavedFB = -1;
+        }
     };
     
     Progress::SetHandlers(start, update, finish);
     _progressEnabled = true;
+    _status->show();
     if (_progressEnabledMenuItem)
         _progressEnabledMenuItem->setChecked(true);
 }
@@ -923,6 +869,7 @@ void MainForm::_disableProgressWidget()
     Progress::Finish();
     Progress::SetHandlers([](const string&, long, bool){}, [](long,bool*){}, [](){});
     _progressEnabled = false;
+    _status->hide();
     if (_progressEnabledMenuItem)
         _progressEnabledMenuItem->setChecked(false);
 }

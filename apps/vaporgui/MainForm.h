@@ -52,8 +52,7 @@ class QMdiArea;
 class QDockWindow;
 class QLabel;
 class QSpinBox;
-class QProgressDialog;
-class QProgressBar;
+class ProgressStatusBar;
 
 class VizWindow;
 class VizWinMgr;
@@ -177,15 +176,12 @@ private:
  QSpinBox* _interactiveRefinementSpin;
  QDockWidget* _tabDockWindow;
     
- QProgressDialog *_progressDialog = nullptr;
  int _progressSavedFB = -1;
  bool _progressEnabled = false;
  bool _needToReenableProgressAfterAnimation = false;
  QAction *_progressEnabledMenuItem = nullptr;
     
-    QProgressBar *_progressBar = nullptr;
-    QLabel *_test = nullptr;
-    QWidget *_status = nullptr;
+    ProgressStatusBar *_status = nullptr;
     std::chrono::time_point<std::chrono::system_clock> _progressLastUpdateTime;
     const QObject * _disableUserInputForAllExcept = nullptr;
     bool _insideMessedUpQtEventLoop = false;
