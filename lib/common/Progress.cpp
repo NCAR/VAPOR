@@ -17,6 +17,11 @@ void Progress::Start(const std::string &name, long total, bool cancelable)
     _total = total;
 }
 
+void Progress::StartIndefinite(const std::string &name, bool cancelable)
+{
+    Progress::Start(name, 0, cancelable);
+}
+
 void Progress::Update(long completed)
 {
     if (_total > 100 && completed % (_total/100) != 0 && completed != 0)

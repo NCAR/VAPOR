@@ -10,6 +10,7 @@ public:
     typedef std::function<void()> Finish_t;
     
     static void Start(const std::string &name, long total, bool cancelable=false);
+    static void StartIndefinite(const std::string &name, bool cancelable=false);
     static void Update(long completed);
     static inline bool Cancelled() { return _cancelled; }
     static void Finish();

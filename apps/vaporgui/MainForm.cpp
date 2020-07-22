@@ -85,6 +85,9 @@
 #include "ParamsWidgetDemo.h"
 
 #include <QProgressDialog>
+#include <QProgressBar>
+#include <QToolButton>
+#include <QStyle>
 #include <QOpenGLContext>
 #include <vapor/Progress.h>
 
@@ -245,7 +248,6 @@ void MainForm::_initMembers() {
     _pythonVariables = NULL;
 	_banner = NULL;
 	_windowSelector = NULL;
-	_modeStatusWidget = NULL;
 	_controlExec = NULL;
 	_paramsMgr = NULL;
 	_tabMgr = NULL;
@@ -260,6 +262,72 @@ void MainForm::_initMembers() {
 	_buttonPressed = false;
 
 }
+
+class TLabel : public QLabel {
+public:
+    using QLabel::QLabel;
+protected:
+    void paintEvent(QPaintEvent *event) override
+    {
+//        printf("PainEvent\n");
+        QLabel::paintEvent(event);
+    }
+};
+
+class ProgressStatusBar : public QWidget {
+    QLabel *_titleLabel = new TLabel;
+    QProgressBar *_progressBar = new QProgressBar;
+    QToolButton *_cancelButton = new QToolButton;
+    
+    bool _canceled = false;
+    
+public:
+    ProgressStatusBar() {
+        QHBoxLayout *layout = new QHBoxLayout;
+        layout->setMargin(4);
+        setLayout(layout);
+        
+        _cancelButton->setIcon(_cancelButton->style()->standardIcon(QStyle::StandardPixmap::SP_DialogCancelButton));
+        QObject::connect(_cancelButton, &QAbstractButton::clicked, this, [this](){ printf("Clicked\n"); _canceled = true; });
+        
+        QSizePolicy sp = _cancelButton->sizePolicy();
+        sp.setRetainSizeWhenHidden(true);
+        _cancelButton->setSizePolicy(sp);
+        _cancelButton->setIconSize(_cancelButton->iconSize()*0.7);
+        _cancelButton->setToolTip("Cancel");
+        
+        layout->addWidget(_titleLabel);
+        layout->addWidget(_progressBar);
+        layout->addWidget(_cancelButton);
+        
+        Finish();
+    }
+    void SetTitle(const string &title) { _titleLabel->setText(QString::fromStdString(title)); }
+    void SetTotal(long total) { _progressBar->setRange(0, total); }
+    void SetCancelable(bool b) { _cancelButton->setEnabled(b); }
+    void SetDone(long done) {
+        _progressBar->setValue(done);
+    }
+    bool Cancelled() { return _canceled; }
+    void StartTask(const string &title, long total, bool cancelable) {
+        Reset();
+        SetTitle(title);
+        SetTotal(total);
+        SetCancelable(cancelable);
+        _progressBar->show();
+        _cancelButton->show();
+    }
+    void Finish() {
+        _progressBar->hide();
+        _cancelButton->hide();
+        SetTitle("");
+    }
+    void Reset() {
+        _canceled = false;
+        _progressBar->reset();
+    }
+    const QObject *GetCancelButtonObject() const { return _cancelButton; }
+};
 
 // Only the main program should call the constructor:
 //
@@ -370,8 +438,27 @@ MainForm::MainForm(
 		_tabMgr->setMinimumWidth(460);
 
     _tabMgr->setMinimumHeight(500);
+    
+    QWidget *sidebar = new QWidget;
+    QVBoxLayout *sidebarLayout = new QVBoxLayout;
+    sidebarLayout->setMargin(0);
+    sidebarLayout->setSpacing(0);
+    sidebar->setLayout(sidebarLayout);
+    sidebarLayout->addWidget(_tabMgr);
+    
+    _status = new ProgressStatusBar;
+    sidebarLayout->addWidget(_status);
+    
+    
+//    QHBoxLayout *statusLayout = new QHBoxLayout;
+//    statusLayout->setMargin(4);
+//    _status->setLayout(statusLayout);
+//    sidebarLayout->addWidget(_status);
+    
+//    statusLayout->addWidget(new QLabel("testing 123"));
+//    statusLayout->addWidget(_test = new TLabel("testing 123"));
 
-    _tabDockWindow->setWidget(_tabMgr);
+    _tabDockWindow->setWidget(sidebar);
 
     createMenus();
 
@@ -380,7 +467,7 @@ MainForm::MainForm(
     _createProgressWidget();
 	
 	addMouseModes();
-    (void)statusBar();
+//    (void)statusBar();
     _main_Menubar->adjustSize();
 	hookupSignals();   
 	enableWidgets(false);
@@ -438,12 +525,21 @@ MainForm::~MainForm()
         _paramsWidgetDemo->close();
 	}
 
-	if (_modeStatusWidget) delete _modeStatusWidget;
     if (_banner) delete _banner;
 	if (_controlExec) delete _controlExec;
 	
+    // This is required since if the user quits during the progressbar update,
+    // qt will process the quit event and delete things, and then it will
+    // return to the original event loop.
+    // When Qt does recursive event loops like this, it has backend code that
+    // prevents users from quiting.
+    if (_insideMessedUpQtEventLoop)
+        exit(0);
+    
     // no need to delete child widgets, Qt does it all for us?? (see closeEvent)
 }
+
+
 
 template<class T> bool MainForm::isDatasetValidFormat(const std::vector<std::string> &paths) const
 {
@@ -735,13 +831,17 @@ void MainForm::_createProgressWidget()
     // The modal version adds an animation that takes a little less than
     // a second however on OSX the non-modal version is broken.
     
-    if (!_progressDialog) {
-        _progressDialog = new QProgressDialog("Title", "Cancel", 0, 100, this);
-        _progressDialog->close();
-        _progressDialog->setWindowModality(Qt::WindowModal);
-        _progressDialog->setAutoClose(false);
-        _progressDialog->setMinimumDuration(1500);
+    if (!_progressBar) {
+        _progressBar = new QProgressBar;
+//        _test = new QLabel("Test");
+        
+//        statusBar()->addWidget(_progressBar);
+//        statusBar()->addPermanentWidget(_progressBar);
+//        statusBar()->addPermanentWidget(_test);
     }
+    
+#define MAX_UPDATES_PER_SEC 10
+#define MILLIS_BETWEEN_UPDATES (1000/MAX_UPDATES_PER_SEC)
     
     Progress::Start_t start = [this](const std::string &name, long total, bool cancelable)
     {
@@ -750,19 +850,20 @@ void MainForm::_createProgressWidget()
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
         
-        _progressDialog->reset();
-        if (cancelable)
-            _progressDialog->setCancelButtonText(QString("Cancel"));
-        else
-            _progressDialog->setCancelButton(nullptr);
-        _progressDialog->setLabelText(QString::fromStdString(name));
-        _progressDialog->setValue(0);
-        _progressDialog->setMaximum(total);
+        ((ProgressStatusBar*)_status)->StartTask(name, total, cancelable);
+        _progressLastUpdateTime = std::chrono::system_clock::now();
+        
+        
+//        QProgressDialog *test = new QProgressDialog("Test", "Test", 0, 100, this);
+        //        QMessageBox *test = new QMessageBox(QMessageBox::Warning, "TESTING", "123");
+//                test->setWindowModality(Qt::WindowModal);
+//                test->show();
     };
     
     Progress::Finish_t finish = [this]()
     {
-        _progressDialog->close();
+        ((ProgressStatusBar*)_status)->Finish();
+        _disableUserInputForAllExcept = nullptr;
         
         if (QOpenGLContext::currentContext() && _progressSavedFB >= 0) {
             glBindFramebuffer(GL_FRAMEBUFFER, _progressSavedFB);
@@ -772,11 +873,40 @@ void MainForm::_createProgressWidget()
     
     Progress::Update_t update = [this, finish](long done, bool *cancelled)
     {
-        _progressDialog->setValue(done);
-        if (_progressDialog->wasCanceled()) {
-            *cancelled = true;
-            finish();
-        }
+//        _progressBar->setValue(done);
+//        _progressBar->repaint();
+        
+        auto now = std::chrono::system_clock::now();
+        auto duration = chrono::duration_cast<chrono::milliseconds>(now - _progressLastUpdateTime);
+        if (duration.count() < MILLIS_BETWEEN_UPDATES)
+            return;
+        _progressLastUpdateTime = now;
+        
+        ((ProgressStatusBar*)_status)->SetDone(done);
+        _disableUserInputForAllExcept = ((ProgressStatusBar*)_status)->GetCancelButtonObject();
+        _insideMessedUpQtEventLoop = true;
+        QCoreApplication::processEvents();
+//        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        _disableUserInputForAllExcept = nullptr;
+        _insideMessedUpQtEventLoop = false;
+        *cancelled = ((ProgressStatusBar*)_status)->Cancelled();
+        
+//        _test->setText(QString::fromStdString("Test " + to_string(done)));
+//        _test->repaint();
+//        _test->update();
+//        _status->update();
+//
+//        _status->repaint();
+        
+        
+//        this->repaint();
+//        statusBar()->repaint();
+//        printf("update %li\n", done);
+        
+//        if (_progressDialog->wasCanceled()) {
+//            *cancelled = true;
+//            finish();
+//        }
     };
     
     Progress::SetHandlers(start, update, finish);
@@ -1801,14 +1931,20 @@ void MainForm::_setAnimationOnOff(bool on) {
 		enableAnimationWidgets(false);
 
 		_App->removeEventFilter(this);
-        _disableProgressWidget(); // Need to disable as popup prevents users from pressing pause
+        if (_progressEnabled) {
+            _disableProgressWidget(); // Need to disable as this prevents users from pressing pause
+            _needToReenableProgressAfterAnimation = true;
+        }
 	}
 	else  {
 		_playForwardAction->setChecked(false);
 		_playBackwardAction->setChecked(false);
 		enableAnimationWidgets(true);
 		_App->installEventFilter(this);
-        _createProgressWidget();
+        if (_needToReenableProgressAfterAnimation) {
+            _createProgressWidget();
+            _needToReenableProgressAfterAnimation = false;
+        }
 
 		// Generate an event and force an update
 		//
@@ -1847,16 +1983,6 @@ void MainForm::modeChange(int newmode){
 	}
 	
 	_navigationAction->setChecked(false);
-	
-	if(_modeStatusWidget) {
-		statusBar()->removeWidget(_modeStatusWidget);
-		delete _modeStatusWidget;
-	}
-
-	_modeStatusWidget = new QLabel(
-		QString::fromStdString(modeName)+" Mode: To modify box in scene, grab handle with left mouse to translate, right mouse to stretch",this); 
-
-	statusBar()->addWidget(_modeStatusWidget,2);
 }
 
 void MainForm::showCitationReminder(){
@@ -1997,6 +2123,27 @@ void MainForm::_setProj4String(string proj4String) {
 bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
 	VAssert(_controlExec && _vizWinMgr);
+    
+    if (_insideMessedUpQtEventLoop) {
+        // Prevent menu item actions from running
+        if (event->type() == QEvent::MetaCall)
+            return true;
+        // Prevent user input for all widgets except the cancel button. This is essentially
+        // the same behavior as we had before because the application would
+        // freeze during a render so all user input was essentially blocked.
+        // Since the events are processed top-down, we need to check to check
+        // if this is not only the cancel button, but any of its parents
+        if (_disableUserInputForAllExcept != nullptr && obj->isWidgetType()) {
+            if (dynamic_cast<QInputEvent*>(event)) {
+                const QObject *test = _disableUserInputForAllExcept;
+                do {
+                    if (obj == test)
+                        return false; // Approve input
+                } while (test = test->parent());
+                return true; // Reject input
+            }
+        }
+    }
 
 	// Only update the GUI if the Params state has changed
 	//
@@ -2025,7 +2172,9 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
 		// force visualizer redraw
 		//
+        menuBar()->setEnabled(false);
 		_vizWinMgr->Update(false);
+        menuBar()->setEnabled(true);
 
 		update();
 

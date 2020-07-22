@@ -53,6 +53,7 @@ class QDockWindow;
 class QLabel;
 class QSpinBox;
 class QProgressDialog;
+class QProgressBar;
 
 class VizWindow;
 class VizWinMgr;
@@ -179,14 +180,21 @@ private:
  QProgressDialog *_progressDialog = nullptr;
  int _progressSavedFB = -1;
  bool _progressEnabled = false;
- QAction *_progressEnabledMenuItem = nullptr;;
+ bool _needToReenableProgressAfterAnimation = false;
+ QAction *_progressEnabledMenuItem = nullptr;
+    
+    QProgressBar *_progressBar = nullptr;
+    QLabel *_test = nullptr;
+    QWidget *_status = nullptr;
+    std::chrono::time_point<std::chrono::system_clock> _progressLastUpdateTime;
+    const QObject * _disableUserInputForAllExcept = nullptr;
+    bool _insideMessedUpQtEventLoop = false;
 
  Statistics *_stats;
  Plot *_plot;
  PythonVariables *_pythonVariables;
  BannerGUI* _banner;
  VizSelectCombo* _windowSelector;
- QLabel* _modeStatusWidget;
  VAPoR::ControlExec* _controlExec;
  VAPoR::ParamsMgr *_paramsMgr;
  TabManager *_tabMgr;
