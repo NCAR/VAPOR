@@ -277,7 +277,11 @@ public:
         setLayout(layout);
         
         _cancelButton->setIcon(_cancelButton->style()->standardIcon(QStyle::StandardPixmap::SP_DialogCancelButton));
-        QObject::connect(_cancelButton, &QAbstractButton::clicked, this, [this](){ printf("Clicked\n"); _canceled = true; });
+        QObject::connect(_cancelButton, &QAbstractButton::clicked, this, [this](){
+            _canceled = true;
+            Finish();
+            SetTitle("Cancelled.");
+        });
         
         QSizePolicy sp = _cancelButton->sizePolicy();
         sp.setRetainSizeWhenHidden(true);
@@ -806,30 +810,20 @@ void MainForm::createToolBars(){
 
 void MainForm::_createProgressWidget()
 {
-    if (_progressEnabled)
-        return;
-    
 #define MAX_UPDATES_PER_SEC 10
 #define MILLIS_BETWEEN_UPDATES (1000/MAX_UPDATES_PER_SEC)
+    _progressLastUpdateTime = std::chrono::system_clock::now();
     
-    Progress::Start_t start = [this](const std::string &name, long total, bool cancelable)
+    Progress::Update_t update = [this](long done, bool *cancelled)
     {
-        _status->StartTask(name, total, cancelable);
-        _progressLastUpdateTime = std::chrono::system_clock::now();
-    };
-    
-    Progress::Finish_t finish = [this]()
-    {
-        _status->Finish();
-    };
-    
-    Progress::Update_t update = [this, finish](long done, bool *cancelled)
-    {
+        if (!_progressEnabled)
+            return;
+        
         // Limit updates per second for perfomance reasons since this is on the same
         // thread as the calculation
         auto now = std::chrono::system_clock::now();
         auto duration = chrono::duration_cast<chrono::milliseconds>(now - _progressLastUpdateTime);
-        if (duration.count() < MILLIS_BETWEEN_UPDATES)
+        if (duration.count() < MILLIS_BETWEEN_UPDATES || _insideMessedUpQtEventLoop)
             return;
         _progressLastUpdateTime = now;
         
@@ -854,8 +848,26 @@ void MainForm::_createProgressWidget()
         }
     };
     
+    Progress::Start_t start = [this, update](const std::string &name, long total, bool cancelable)
+    {
+        if (!_progressEnabled)
+            return;
+        
+        _status->StartTask(name, total, cancelable);
+        update(0, &cancelable);
+    };
+    
+    Progress::Finish_t finish = [this, update]()
+    {
+        if (!_progressEnabled)
+            return;
+        
+        _status->Finish();
+        bool b;
+        update(0, &b);
+    };
+    
     Progress::SetHandlers(start, update, finish);
-    _progressEnabled = true;
     _status->show();
     if (_progressEnabledMenuItem)
         _progressEnabledMenuItem->setChecked(true);
@@ -863,12 +875,8 @@ void MainForm::_createProgressWidget()
 
 void MainForm::_disableProgressWidget()
 {
-    if (!_progressEnabled)
-        return;
-    
     Progress::Finish();
     Progress::SetHandlers([](const string&, long, bool){}, [](long,bool*){}, [](){});
-    _progressEnabled = false;
     _status->hide();
     if (_progressEnabledMenuItem)
         _progressEnabledMenuItem->setChecked(false);
@@ -1292,7 +1300,6 @@ void MainForm::_createDeveloperMenu()
     
     QAction *enableProgress = new QAction(QString("Enable Progress Bar"), nullptr);
     enableProgress->setCheckable(true);
-    enableProgress->setChecked(_progressEnabled);
     QObject::connect(enableProgress, &QAction::toggled, [this](bool checked){
         if (checked)
             _createProgressWidget();
@@ -1878,20 +1885,20 @@ void MainForm::_setAnimationOnOff(bool on) {
 		enableAnimationWidgets(false);
 
 		_App->removeEventFilter(this);
-        if (_progressEnabled) {
-            _disableProgressWidget(); // Need to disable as this prevents users from pressing pause
-            _needToReenableProgressAfterAnimation = true;
-        }
+//        if (_progressEnabled) {
+//            _disableProgressWidget(); // Need to disable as no longer have event filter
+//            _needToReenableProgressAfterAnimation = true;
+//        }
 	}
 	else  {
 		_playForwardAction->setChecked(false);
 		_playBackwardAction->setChecked(false);
 		enableAnimationWidgets(true);
 		_App->installEventFilter(this);
-        if (_needToReenableProgressAfterAnimation) {
-            _createProgressWidget();
-            _needToReenableProgressAfterAnimation = false;
-        }
+//        if (_needToReenableProgressAfterAnimation) {
+//            _createProgressWidget();
+//            _needToReenableProgressAfterAnimation = false;
+//        }
 
 		// Generate an event and force an update
 		//
@@ -2075,6 +2082,11 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
         // Prevent menu item actions from running
         if (event->type() == QEvent::MetaCall)
             return true;
+        // Prevent queued ParamsChangedEvents from recursively running
+        if (event->type() == ParamsChangeEvent)
+            return true;
+        if (event->type() == ParamsIntermediateChangeEvent)
+            return true;
         // Prevent user input for all widgets except the cancel button. This is essentially
         // the same behavior as we had before because the application would
         // freeze during a render so all user input was essentially blocked.
@@ -2120,7 +2132,9 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 		// force visualizer redraw
 		//
         menuBar()->setEnabled(false);
+        _progressEnabled = true;
 		_vizWinMgr->Update(false);
+        _progressEnabled = false;
         menuBar()->setEnabled(true);
 
 		update();
@@ -2137,7 +2151,9 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
         
         // force visualizer redraw
         //
+        _progressEnabled = true;
         _vizWinMgr->Update(true);
+        _progressEnabled = false;
         
 #ifndef NDEBUG
         _paramsWidgetDemo->Update(GetStateParams(), _paramsMgr);

@@ -53,6 +53,7 @@ class QDockWindow;
 class QLabel;
 class QSpinBox;
 class ProgressStatusBar;
+class QTimer;
 
 class VizWindow;
 class VizWinMgr;

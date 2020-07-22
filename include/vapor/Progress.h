@@ -16,6 +16,10 @@ public:
     static void Finish();
     static void SetHandlers(Start_t start, Update_t update, Finish_t finish);
     
+#ifndef NDEBUG
+    static void Sleep(double s);
+#endif
+    
 private:
     static bool _cancelled;
     static long _total;
