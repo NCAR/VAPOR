@@ -177,7 +177,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
         return -1;
     }
     
-    Progress::Start("Load coord data", nCoords, true);
+    Progress::Start("Load coord data", nCoords);
     auto coord = grid->ConstCoordBegin();
     for (size_t i = 0; i < nCoords; ++i, ++coord) {
         Progress::Update(i);
@@ -209,7 +209,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     int ch = h-1;
     int cd = d-1;
     
-    Progress::Start("Compute acceleration data", 6, true);
+    Progress::Start("Compute acceleration data", 6);
     ComputeSideBBoxes(F_LEFT,  1, 2, boxMins, boxMaxs, data, ivec3(cw, ch, cd), ivec3(w, h, d), bd, sd);
     Progress::Update(1);
     ComputeSideBBoxes(F_RIGHT, 1, 2, boxMins, boxMaxs, data, ivec3(cw, ch, cd), ivec3(w, h, d), bd, sd);
@@ -254,7 +254,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     mipDims[0][FI_FRONT] = ivec2(cw, cd);
     mipDims[0][FI_BACK]  = ivec2(cw, cd);
     
-    Progress::Start("Generate tree", levels, true);
+    Progress::Start("Generate tree", levels);
     for (int level = 1; level < levels; level++) {
         Progress::Update(level);
         int ms = bd >> level;
