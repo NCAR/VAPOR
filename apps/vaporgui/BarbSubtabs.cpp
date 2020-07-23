@@ -4,7 +4,6 @@
 #include "TFEditor.h"
 #include "PVariablesWidget.h"
 #include "PFidelitySection.h"
-#include "PSection.h"
 #include "PGroup.h"
 
 #define X 0
@@ -44,7 +43,6 @@ void BarbVariablesSubtab::Update(
 	VAPoR::ParamsMgr *paramsMgr,
 	VAPoR::RenderParams *rParams
 ) {
-//    _variablesWidget->Update(dataMgr, paramsMgr, rParams);
     pg->Update(rParams, paramsMgr, dataMgr);
 }
 
