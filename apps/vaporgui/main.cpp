@@ -144,7 +144,6 @@ if (getenv("VAPOR_DEBUG"))
     }
 
 	app = &a;
-	a.setPalette(QPalette(QColor(233,236,216), QColor(233,236,216)));
 
 	vector<QString> files;
 	for (int i=1; i<argc; i++) {
