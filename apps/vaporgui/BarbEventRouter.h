@@ -20,6 +20,7 @@ namespace VAPoR {
 
 class GLBarbImageWindow;
 class PGroup;
+class PVariablesGroup;
 
 //!
 //! \class BarbEventRouter
@@ -83,6 +84,7 @@ private:
 	 void wheelEvent(QWheelEvent*) {}
 
     PGroup* _pVarGroup;
+    PVariablesGroup* _vw;
 
 	BarbGeometrySubtab *_geometry;
 	BarbAppearanceSubtab *_appearance;

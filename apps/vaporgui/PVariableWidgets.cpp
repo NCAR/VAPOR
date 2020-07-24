@@ -1,6 +1,8 @@
 #include "PVariableWidgets.h"
 #include <vapor/RenderParams.h>
 #include "VComboBox.h"
+#include "PSection.h"
+#include "PFidelitySection.h"
 
 using namespace VAPoR;
 
@@ -123,3 +125,29 @@ PYFieldVariableSelector::PYFieldVariableSelector()
 
 PZFieldVariableSelector::PZFieldVariableSelector()     
     : PVariableSelector  ("", "Z") { AddNullOption(); }
+
+PVariablesGroup::PVariablesGroup() :
+    PGroup()
+{
+    _varSection    = new PSection( "Variable Selection" );
+
+    PGroup* pGroup = new PGroup;
+    pGroup->Add( _varSection );
+    pGroup->Add( new PFidelitySection );
+
+    PGroup::Add( pGroup );
+
+    _scrollArea = new QScrollArea();
+    _scrollArea->setWidgetResizable( true );
+    _scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    _scrollArea->setWidget( pGroup );
+    _scrollArea->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Maximum );
+}
+
+QScrollArea* PVariablesGroup::GetScrollArea() const {
+    return _scrollArea;
+}
+
+void PVariablesGroup::AddVar( PWidget* pw ) {
+    _varSection->Add( pw );
+}

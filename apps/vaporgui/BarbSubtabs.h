@@ -18,23 +18,6 @@ namespace VAPoR {
 class TFEditor;
 class PGroup;
 
-class BarbVariablesSubtab : public QWidget, public Ui_BarbVariablesGUI {
-
-	Q_OBJECT
-  PGroup *pg;
-
-public:
-	BarbVariablesSubtab(QWidget* parent);
-
-	void Initialize(VAPoR::BarbParams* bParams, VAPoR::DataMgr* dataMgr);
-
-	void Update(
-		VAPoR::DataMgr *dataMgr,
-		VAPoR::ParamsMgr *paramsMgr,
-		VAPoR::RenderParams *rParams
-	);
-};
-
 class BarbAppearanceSubtab : public QWidget, public Ui_BarbAppearanceGUI {
 
 	Q_OBJECT

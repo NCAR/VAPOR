@@ -36,6 +36,18 @@ BarbEventRouter::BarbEventRouter(
 	RenderEventRouter(ce, BarbParams::GetClassType())
 {
 
+    // PVariablesGroup Methodoligy 
+    _vw = new PVariablesGroup();
+    _vw->AddVar(new PDimensionSelector);
+    _vw->AddVar(new PXFieldVariableSelectorHLI);
+    _vw->AddVar(new PYFieldVariableSelectorHLI);
+    _vw->AddVar(new PZFieldVariableSelectorHLI);
+    _vw->AddVar(new PColorMapVariableSelectorHLI);
+    _vw->AddVar(new PHeightVariableSelectorHLI);
+    addTab( _vw->GetScrollArea(), "pvw" );
+
+    
+    // Current Methodoligy 
     PSection *varSection = new PSection("Variable Selection");
     varSection->Add(new PDimensionSelector);
     varSection->Add(new PXFieldVariableSelectorHLI);
@@ -46,7 +58,6 @@ BarbEventRouter::BarbEventRouter(
     _pVarGroup = new PGroup;
     _pVarGroup->Add(varSection);
     _pVarGroup->Add(new PFidelitySection);
-    _pVarGroup->AddStretch();
     QScrollArea *qsvar = new QScrollArea(this);
     qsvar->setWidgetResizable(true);
     qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -108,6 +119,12 @@ void BarbEventRouter::_initializeTab() {
 }
 
 void BarbEventRouter::_updateTab(){
+    _vw->Update(
+        GetActiveParams(),
+        _controlExec->GetParamsMgr(),
+        GetActiveDataMgr()
+    );
+
     _pVarGroup->Update(
         GetActiveParams(),
         _controlExec->GetParamsMgr(),

@@ -4,31 +4,6 @@
 #include "PVariableWidgets.h"
 #include "PFidelitySection.h"
 
-ContourVariablesSubtab::ContourVariablesSubtab( QWidget* parent ) {
-    setupUi(this);
-    _variablesWidget->Reinit(
-        (VariableFlags)(SCALAR | HEIGHT),
-        (DimFlags)(TWOD)
-    );
-
-    _variablesWidget->hide();
-    ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);
-    PSection *vars = new PSection("Variable Selection");
-    vars->Add(new PScalarVariableSelectorHLI);
-    vars->Add(new PHeightVariableSelectorHLI);
-    pg->Add(vars);
-    pg->Add(new PFidelitySection);
-}
-
-void ContourVariablesSubtab::Update(
-        VAPoR::DataMgr *dataMgr,
-        VAPoR::ParamsMgr *paramsMgr,
-        VAPoR::RenderParams *rParams
-) {
-    _variablesWidget->Update(dataMgr, paramsMgr, rParams);
-    pg->Update(rParams, paramsMgr, dataMgr);
-}
-
 ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget* parent) {
 	setupUi(this);
     

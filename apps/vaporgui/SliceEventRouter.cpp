@@ -43,7 +43,6 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
     _pVarGroup = new PGroup;
     _pVarGroup->Add( varSection );
     _pVarGroup->Add( new PFidelitySection);
-    _pVarGroup->AddStretch();
 	QScrollArea *qsvar = new QScrollArea(this);
 	qsvar->setWidgetResizable(true);
 	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
