@@ -28,6 +28,8 @@
 #include "BannerGUI.h"
 #include <vapor/CMakeConfig.h>
 #include <vapor/ResourcePath.h>
+#include <vapor/OptionParser.h>
+#include <vapor/FileUtils.h>
 #ifdef WIN32
 #include "Windows.h"
 #endif
@@ -71,8 +73,49 @@ FILE *OpenLog(string path_var) {
 	return(fp);
 }
 
+
+struct opt_t {
+    OptionParser::Boolean_T    help;
+    OptionParser::IntRange_    renderRange;
+    OptionParser::Dimension2D_ resolution;
+    char*                      outputPath;
+} opt;
+OptionParser::OptDescRec_T    set_opts[] = {
+    {"help",       0,    "",           "Print this message and exit"},
+    {"render",     1,    "0:0",        "Render timesteps a:b for a given session file and exit"},
+    {"resolution", 1,    "1920x1080",  "Output resolution when using -render"},
+    {"output",     1,    "vapor.tiff", "Output image file when using -render. This will be suffixed with the timestep number. Supports tiff, jpg"},
+    {NULL}
+};
+OptionParser::Option_T    get_options[] = {
+    {"help",       Wasp::CvtToBoolean,     &opt.help, sizeof(opt.help)},
+    {"render",     Wasp::CvtToIntRange,    &opt.renderRange, sizeof(opt.renderRange)},
+    {"resolution", Wasp::CvtToDimension2D, &opt.resolution, sizeof(opt.resolution)},
+    {"output",     Wasp::CvtToString,      &opt.outputPath, sizeof(opt.outputPath)},
+    {NULL}
+};
+const char *ProgName;
+
+
+
 QApplication* app;
 int main( int argc, char ** argv ) {
+    
+    OptionParser op;
+    ProgName = FileUtils::LegacyBasename(argv[0]);
+    if (op.AppendOptions(set_opts) < 0) {
+        cerr << ProgName << " : " << op.GetErrMsg();
+        exit(1);
+    }
+    if (op.ParseOptions(&argc, argv, get_options) < 0) {
+        cerr << ProgName << " : " << op.GetErrMsg();
+        exit(1);
+    }
+    if (opt.help) {
+        cerr << "Usage: " << ProgName << " [options] [session.vs3] [data files...]" << endl;
+        op.PrintOptionHelp(stderr);
+        exit(0);
+    }
 
 	//Install our own message handler.
 	//Needed for SGI to avoid dithering:
@@ -136,12 +179,6 @@ if (getenv("VAPOR_DEBUG"))
 	MyBase::SetDiagMsg("PYTHONHOME = %s", phome.c_str());
 							   
 #endif
-    
-    // Show help
-    if (argc >= 2 && string(argv[1]) == "-h") {
-        fprintf(stderr, "Usage: %s [session.vs3] [data.vdc | data.nc ... | data.wrf ...]\n", argv[0]);
-        return 0;
-    }
 
 	app = &a;
 	a.setPalette(QPalette(QColor(233,236,216), QColor(233,236,216)));
@@ -174,7 +211,14 @@ if (getenv("VAPOR_DEBUG"))
     BannerGUI banner(mw, banner_file_name, 3000);
 #endif
     a.connect( &a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()) );
-	int estatus = a.exec();
+    
+    int estatus = 0;
+    if (opt.renderRange.min != 0 || opt.renderRange.max != 0) {
+        estatus = mw->RenderAndExit(opt.renderRange.min, opt.renderRange.max, opt.outputPath, opt.resolution.nx, opt.resolution.ny);
+    }
+    
+    if (estatus == 0)
+        estatus = a.exec();
 
 	if (diagfp) fclose(diagfp);
 	if (errfp) fclose(errfp);

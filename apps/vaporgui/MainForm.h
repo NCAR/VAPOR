@@ -73,6 +73,8 @@ public:
  );
  ~MainForm();
 
+    int RenderAndExit(int start, int end, const std::string &baseFile, int width, int height);
+    
 protected:
  bool eventFilter(QObject *obj, QEvent *event);
 
@@ -340,10 +342,8 @@ private slots:
  void captureJpegSequence();
  void captureTiffSequence();
  void capturePngSequence();
- void startAnimCapture(
-    string filter,
-    string defaultSuffix
- );
+ void selectAnimCatureOutput(string filter, string defaultSuffix);
+ void startAnimCapture(string baseFile, string defaultSuffix="tiff");
  void endAnimCapture();
  void captureSingleImage( 
     string filter,
