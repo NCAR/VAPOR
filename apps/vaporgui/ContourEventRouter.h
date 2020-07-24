@@ -81,7 +81,6 @@ private:
 	//! it would be confusing if wheel events also scrolled the tab itself
 	 void wheelEvent(QWheelEvent*) {}
 
-	PGroup* _pVarGroup;
 	ContourGeometrySubtab *_geometry;
 	ContourAppearanceSubtab *_appearance;
 	ContourAnnotationSubtab *_annotation;

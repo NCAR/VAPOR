@@ -14,6 +14,10 @@
 #include "VariablesWidget.h"
 #include "FlowEventRouter.h"
 #include "EventRouter.h"
+#include "PVariableWidgets.h"
+#include "PFidelitySection.h"
+#include "PSection.h"
+#include "PGroup.h"
 
 using namespace VAPoR;
 
@@ -29,13 +33,14 @@ FlowEventRouter::FlowEventRouter( QWidget *parent, ControlExec *ce)
                     : QTabWidget(parent),
 	                  RenderEventRouter( ce, FlowParams::GetClassType())
 {
-	_variables = new FlowVariablesSubtab(this);
-	QScrollArea *qsvar = new QScrollArea(this);
-	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	_variables->adjustSize();
-	qsvar->setWidget(_variables);
-	qsvar->setWidgetResizable(true);
-	addTab(qsvar, "Variables");
+    // PVariablesGroup Methodoligy
+    _pvg->AddVar(new PDimensionSelector);
+    _pvg->AddVar(new PXFieldVariableSelectorHLI);
+    _pvg->AddVar(new PYFieldVariableSelectorHLI);
+    _pvg->AddVar(new PZFieldVariableSelectorHLI);
+    _pvg->AddVar(new PColorMapVariableSelectorHLI);
+    _pvg->AddVar(new PHeightVariableSelectorHLI);
+    addTab( _pvg->GetScrollArea(), "Variables" );
 
 	_seeding = new FlowSeedingSubtab(this);
 	QScrollArea* qsseed = new QScrollArea(this);
@@ -102,13 +107,11 @@ void FlowEventRouter::GetWebHelp(
 
 void FlowEventRouter::_updateTab(){
 
-	// The variable tab updates itself:
-	//
-	_variables->Update(
-		GetActiveDataMgr(),
-		_controlExec->GetParamsMgr(),
-		GetActiveParams()
-	);
+    _pvg->Update(
+        GetActiveParams(),
+        _controlExec->GetParamsMgr(),
+        GetActiveDataMgr()
+    );
 
 	_appearance->Update(
 		GetActiveDataMgr(),

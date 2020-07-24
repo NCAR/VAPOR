@@ -12,18 +12,6 @@
 
 using namespace VAPoR;
 
-void VolumeIsoVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *params)
-{
-    VolumeIsoParams *vp = dynamic_cast<VolumeIsoParams*>( params );
-    _isoParams = vp;
-    VAssert(vp);
-    // TODO volume
-    // long mode = _isoParams->GetCastingMode();
-    // _castingModeComboBox->setCurrentIndex( mode - 1 );
-    
-    pg->Update(params, paramsMgr, dataMgr);
-}
-
 VolumeIsoAppearanceSubtab::VolumeIsoAppearanceSubtab(QWidget* parent) 
 {
     setupUi(this);

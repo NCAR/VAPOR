@@ -46,10 +46,10 @@ public:
 	 return(VAPoR::FlowRenderer::GetClassType());
  }
  string GetType() const {return GetClassType(); }
-  
+    
  virtual bool Supports2DVariables() const { return true; }
  virtual bool Supports3DVariables() const { return true; }
-  
+
 protected:
  void _updateTab();
  virtual string _getDescription() const;
@@ -73,7 +73,7 @@ private:
   void wheelEvent(QWheelEvent*) {}
 
  //! VariablesWidget is used as Variables tab
- FlowVariablesSubtab  *_variables;
+ PGroup               *_pVarGroup;
  FlowGeometrySubtab   *_geometry;
  FlowAppearanceSubtab *_appearance;
  FlowSeedingSubtab    *_seeding;

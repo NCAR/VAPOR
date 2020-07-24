@@ -84,8 +84,6 @@ private:
 	 void wheelEvent(QWheelEvent*) {}
 
     PGroup* _pVarGroup;
-    PVariablesGroup* _vw;
-
 	BarbGeometrySubtab *_geometry;
 	BarbAppearanceSubtab *_appearance;
 	BarbAnnotationSubtab *_annotation;

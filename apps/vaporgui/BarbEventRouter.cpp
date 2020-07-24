@@ -37,17 +37,15 @@ BarbEventRouter::BarbEventRouter(
 {
 
     // PVariablesGroup Methodoligy 
-    _vw = new PVariablesGroup();
-    _vw->AddVar(new PDimensionSelector);
-    _vw->AddVar(new PXFieldVariableSelectorHLI);
-    _vw->AddVar(new PYFieldVariableSelectorHLI);
-    _vw->AddVar(new PZFieldVariableSelectorHLI);
-    _vw->AddVar(new PColorMapVariableSelectorHLI);
-    _vw->AddVar(new PHeightVariableSelectorHLI);
-    addTab( _vw->GetScrollArea(), "pvw" );
-
+    _pvg->AddVar(new PDimensionSelector);
+    _pvg->AddVar(new PXFieldVariableSelectorHLI);
+    _pvg->AddVar(new PYFieldVariableSelectorHLI);
+    _pvg->AddVar(new PZFieldVariableSelectorHLI);
+    _pvg->AddVar(new PColorMapVariableSelectorHLI);
+    _pvg->AddVar(new PHeightVariableSelectorHLI);
+    addTab( _pvg->GetScrollArea(), "pvg" );
     
-    // Current Methodoligy 
+    // Current Methodology 
     PSection *varSection = new PSection("Variable Selection");
     varSection->Add(new PDimensionSelector);
     varSection->Add(new PXFieldVariableSelectorHLI);
@@ -119,7 +117,7 @@ void BarbEventRouter::_initializeTab() {
 }
 
 void BarbEventRouter::_updateTab(){
-    _vw->Update(
+    _pvg->Update(
         GetActiveParams(),
         _controlExec->GetParamsMgr(),
         GetActiveDataMgr()

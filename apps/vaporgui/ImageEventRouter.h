@@ -58,7 +58,6 @@ private:
  //! if wheel events also scrolled the tab itself
   void wheelEvent(QWheelEvent*) {}
 
-  ImageVariablesSubtab*   _variables;
   ImageGeometrySubtab*    _geometry;
   ImageAppearanceSubtab*  _appearance;
 };
