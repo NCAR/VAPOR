@@ -87,16 +87,8 @@ jobs:
             cmake -DBUILD_TEST_APPS=ON ..
             make -j7 &> /tmp/output.txt
 
-      - run:
-          name: Smoke test
-          command: |
-            /VAPOR/test_apps/smokeTests/smokeTests.py |
-            --makeBaseline=True |
-            --testDataRoot=/smokeTestData/smokeTestData
-            --binaryRoot=/VAPOR/build/bin
-          
       - store_artifacts:
-          path: /tmp
+          path: /tmp/output.txt
 
       - run:
           name: Smoke test
