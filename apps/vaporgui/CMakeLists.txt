@@ -167,8 +167,8 @@ set (SRCS
 	PSliderEdit.cpp
 	PSliderEdit.h
 	PSliderEditHLI.h
-	PVariableSelector.cpp
-	PVariableSelector.h
+	PVariableWidgets.cpp
+	PVariableWidgets.h
 	PVariableSelectorHLI.h
 	PRegionSelector.cpp
 	PRegionSelector.h

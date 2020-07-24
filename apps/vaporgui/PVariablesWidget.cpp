@@ -50,8 +50,6 @@ void PDimensionSelector::dropdownTextChanged(std::string text)
 //         Variable Selectors
 // ==================================
 
-
-//PScalarVariableSelector::PScalarVariableSelector()     : PVariableSelector  (RenderParams::_variableNameTag, "Variable Name") {}
 PScalarVariableSelector::PScalarVariableSelector()     : PVariableSelector  ("", "Variable Name") {}
 PColorMapVariableSelector::PColorMapVariableSelector() : PVariableSelector  ("", "Color mapped variable") {}
 PHeightVariableSelector::PHeightVariableSelector()     : PVariableSelector2D("", "Height variable") { AddNullOption(); OnlyShowForDim(2); }

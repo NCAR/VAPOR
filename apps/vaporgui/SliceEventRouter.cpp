@@ -45,14 +45,12 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
     //fidelitySection->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
 
     _pVarGroup = new PGroup;
-    //_pVarGroup->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
     _pVarGroup->Add( varSection );
     _pVarGroup->Add( fidelitySection );
 	QScrollArea *qsvar = new QScrollArea(this);
 	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	qsvar->setWidget( _pVarGroup );
-	qsvar->setWidgetResizable(true);
-    //qsvar->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
+    qsvar->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Maximum );
     addTab( qsvar, "Variables" );
      
 

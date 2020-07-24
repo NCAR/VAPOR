@@ -1,4 +1,4 @@
-#include "PVariableSelector.h"
+#include "PVariableWidgets.h"
 #include "VCheckBox.h"
 #include "VLineItem.h"
 #include <vapor/ParamsBase.h>

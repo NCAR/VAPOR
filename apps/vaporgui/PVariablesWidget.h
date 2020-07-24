@@ -2,7 +2,7 @@
 
 #include "vapor/RenderParams.h"
 
-#include "PVariableSelector.h"
+#include "PVariableWidgets.h"
 #include "PLineItem.h"
 #include "PWidgetHLI.h"
 
