@@ -25,13 +25,16 @@ enum class FlowDir : int
     FORWARD     = 0,
     BACKWARD    = 1,
     BI_DIR      = 2 
-}; 
+};
 
 
 
 class PARAMS_API FlowParams : public RenderParams 
 {
 public:
+    
+    enum RenderType { RenderTypeStream, RenderTypeSamples};
+    enum GlpyhType { GlpyhTypeSphere, GlpyhTypeArrow };
 
     // Constructors
     FlowParams( DataMgr*                 dataManager, 
@@ -42,17 +45,8 @@ public:
 
     virtual ~FlowParams();
 
-    //
-    // (Pure virtual methods from RenderParams)
-    //
-    virtual bool IsOpaque() const override
-    { 
-        return false; 
-    }
-    virtual bool usingVariable(const std::string& varname) override
-    {
-        return false;
-    }
+	virtual int Initialize() override;
+
 
     static std::string GetClassType() 
     {
@@ -124,6 +118,28 @@ public:
 
     int                 GetSeedInjInterval() const;
     void                SetSeedInjInterval( int );
+    
+    static const std::string RenderTypeTag;
+    static const std::string RenderRadiusBaseTag;
+    static const std::string RenderRadiusScalarTag;
+    static const std::string RenderGeom3DTag;
+    static const std::string RenderLightAtCameraTag;
+    static const std::string RenderShowStreamDirTag;
+    
+    static const std::string RenderGlyphTypeTag;
+    static const std::string RenderGlyphStrideTag;
+    static const std::string RenderGlyphOnlyLeadingTag;
+    
+    static const std::string RenderFadeTailTag;
+    static const std::string RenderFadeTailStartTag;
+    static const std::string RenderFadeTailStopTag;
+    static const std::string RenderFadeTailLengthTag;
+    
+    static const std::string PhongAmbientTag;
+    static const std::string PhongDiffuseTag;
+    static const std::string PhongSpecularTag;
+    static const std::string PhongShininessTag;
+    
 
 private:
 

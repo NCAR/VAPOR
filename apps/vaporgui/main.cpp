@@ -136,6 +136,12 @@ if (getenv("VAPOR_DEBUG"))
 	MyBase::SetDiagMsg("PYTHONHOME = %s", phome.c_str());
 							   
 #endif
+    
+    // Show help
+    if (argc >= 2 && string(argv[1]) == "-h") {
+        fprintf(stderr, "Usage: %s [session.vs3] [data.vdc | data.nc ... | data.wrf ...]\n", argv[0]);
+        return 0;
+    }
 
 	app = &a;
 	a.setPalette(QPalette(QColor(233,236,216), QColor(233,236,216)));

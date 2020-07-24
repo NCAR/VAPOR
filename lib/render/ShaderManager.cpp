@@ -21,7 +21,7 @@ using std::pair;
 #ifdef NDEBUG
     #if SHADER_AUTORELOAD
         #ifndef WIN32
-            #warning Disabling shader autoreloading
+            //#warning Disabling shader autoreloading
         #endif
         #undef SHADER_AUTORELOAD
     #endif
@@ -32,6 +32,11 @@ std::vector<std::string> ShaderManager::_getSourceFilePaths(const std::string &n
     vector<string> paths;
     paths.push_back(GetSharePath("shaders/" + name + ".vert"));
     paths.push_back(GetSharePath("shaders/" + name + ".frag"));
+    
+    string geomPath = GetSharePath("shaders/" + name + ".geom");
+    if (FileUtils::Exists(geomPath))
+        paths.push_back(geomPath);
+    
     return paths;
 }
 

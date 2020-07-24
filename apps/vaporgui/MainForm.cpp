@@ -49,6 +49,7 @@
 #include <QWhatsThis>
 #include <QStatusBar>
 #include <QDebug>
+#include <QScreen>
 
 #include <vapor/Version.h>
 #include <vapor/DataMgr.h>
@@ -60,6 +61,11 @@
 #include <vapor/utils.h>
 #include <vapor/STLUtils.h>
 #include <vapor/Proj4API.h>
+
+#include <vapor/VDCNetCDF.h>
+#include <vapor/DCWRF.h>
+#include <vapor/DCMPAS.h>
+#include <vapor/DCCF.h>
 
 #include "VizWinMgr.h"
 #include "VizSelectCombo.h"
@@ -76,6 +82,7 @@
 #include "FileOperationChecker.h"
 #include "windowsUtils.h"
 #include "MouseModeParams.h"
+#include "ParamsWidgetDemo.h"
 
 //Following shortcuts are provided:
 // CTRL_N: new session
@@ -250,7 +257,6 @@ void MainForm::_initMembers() {
 
 }
 
-#include <vapor/VDCNetCDF.h>
 // Only the main program should call the constructor:
 //
 MainForm::MainForm(
@@ -270,7 +276,9 @@ MainForm::MainForm(
 	setAttribute(Qt::WA_DeleteOnClose);
 
 	// For vertical screens, reverse aspect ratio for window size
-	QSize screenSize = QDesktopWidget().availableGeometry().size();
+    QScreen* screen = QGuiApplication::primaryScreen();
+    QRect screenSize = screen->geometry();
+
 	if (screenSize.width() < screenSize.height()) {
 		resize(
 			screenSize.width() * .7, 
@@ -378,13 +386,13 @@ MainForm::MainForm(
 
     show();
 
-	// Handle four initialization cases:
+	// Command line options:
 	//
-	// 1. No files
-	// 2. Session file
-	// 3. Session file + VDC file
-	// 4. V
+	// - Session file
+	// - Session file + data file
+	// - data file
 	//
+    
 	if (files.size() && files[0].endsWith(".vs3")) {
 		sessionOpen(files[0]);
 		files.erase(files.begin());
@@ -394,18 +402,21 @@ MainForm::MainForm(
 	}
 
     
-	if (files.size() && files[0].endsWith(".nc")) {
-        VDCNetCDF vdc;
-        bool errReportingEnabled = Wasp::MyBase::EnableErrMsg(false);
-        int ret = vdc.Initialize(files[0].toStdString(), {}, VDC::R);
-        Wasp::MyBase::EnableErrMsg(errReportingEnabled);
-        if (ret < 0) {
-            loadDataHelper({files[0].toStdString()}, "NetCDF CF files", "", "cf", true);
+	if (files.size()) {
+        vector<string> paths;
+        for (auto &f : files)
+            paths.push_back(f.toStdString());
+        
+        string fmt;
+        if (determineDatasetFormat(paths, &fmt)) {
+            loadDataHelper(paths, "", "", fmt, true);
         } else {
-            loadData(files[0].toStdString());
+            MSG_ERR("Could not determine dataset format for command line parameters");
         }
+        
         _stateChangeCB();
 	}
+    
 	app->installEventFilter(this);
 
 	_controlExec->SetSaveStateEnabled(true);
@@ -417,12 +428,39 @@ MainForm::MainForm(
  */
 MainForm::~MainForm()
 {
+    if (_paramsWidgetDemo) {
+        _paramsWidgetDemo->close();
+	}
 
 	if (_modeStatusWidget) delete _modeStatusWidget;
     if (_banner) delete _banner;
 	if (_controlExec) delete _controlExec;
 	
     // no need to delete child widgets, Qt does it all for us?? (see closeEvent)
+}
+
+template<class T> bool MainForm::isDatasetValidFormat(const std::vector<std::string> &paths) const
+{
+    T dc;
+    bool errReportingEnabled = Wasp::MyBase::EnableErrMsg(false);
+    int ret = dc.Initialize(paths);
+    Wasp::MyBase::EnableErrMsg(errReportingEnabled);
+    return ret == 0;
+}
+
+bool MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const
+{
+    if (isDatasetValidFormat<VDCNetCDF>(paths))
+        *fmt = "vdc";
+    else if (isDatasetValidFormat<DCWRF>(paths))
+        *fmt = "wrf";
+    else if (isDatasetValidFormat<DCMPAS>(paths))
+        *fmt = "mpas";
+    else if (isDatasetValidFormat<DCCF>(paths))
+        *fmt = "cf";
+    else
+        return false;
+    return true;
 }
 
 void MainForm::_createModeToolBar() {
@@ -1090,6 +1128,15 @@ void MainForm::_createHelpMenu() {
     connect( _webDocumentationAction, &QAction::triggered, this, &MainForm::launchWebDocs );
 }
 
+void MainForm::_createDeveloperMenu()
+{
+    _paramsWidgetDemo = new ParamsWidgetDemo;
+//    _paramsWidgetDemo->setWindowFlags(_paramsWidgetDemo->windowFlags() & ~Qt::WA_QuitOnClose);
+    
+    _developerMenu = menuBar()->addMenu("Developer");
+    _developerMenu->addAction("Show PWidget Demo", _paramsWidgetDemo, &QWidget::show);
+}
+
 void MainForm::createMenus(){
 	
 	// menubar
@@ -1101,7 +1148,9 @@ void MainForm::createMenus(){
 	_createToolsMenu();
 	_createCaptureMenu();
 	_createHelpMenu();
-
+#ifndef NDEBUG
+    _createDeveloperMenu();
+#endif
 }
 
 void MainForm::sessionOpenHelper(string fileName) {
@@ -1354,7 +1403,7 @@ void MainForm::helpAbout()
 		"Boulder, Colorado 80305, U.S.A.\n"
 		"Web site: http://www.vapor.ucar.edu\n"
         "Contact: vapor@ucar.edu\n"
-        "Version: " + string(Version::GetVersionString().c_str());
+        "Version: " + string(Version::GetFullVersionString().c_str());
 
 	_banner = new BannerGUI(
 		this, banner_file_name, -1, true, banner_text.c_str(), 
@@ -1875,7 +1924,13 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
             _pythonVariables->Update();
         }
 
+		setUpdatesEnabled(false);
 		_tabMgr->Update();
+        
+#ifndef NDEBUG
+        _paramsWidgetDemo->Update(GetStateParams(), _paramsMgr);
+#endif
+		setUpdatesEnabled(true); 
 
 		// force visualizer redraw
 		//
@@ -1896,6 +1951,10 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
         // force visualizer redraw
         //
         _vizWinMgr->Update(true);
+        
+#ifndef NDEBUG
+        _paramsWidgetDemo->Update(GetStateParams(), _paramsMgr);
+#endif
         
 //        update();
         

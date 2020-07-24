@@ -19,9 +19,6 @@ public:
  VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node);
  virtual ~VolumeParams();
 
- virtual bool IsOpaque() const;
-
- virtual bool usingVariable(const std::string& varname);
  virtual string GetDefaultAlgorithmName() const;
     
     virtual bool GetDefaultLightingEnabled() const { return true; }
@@ -37,12 +34,13 @@ public:
     
     std::string GetAlgorithm() const;
     void SetAlgorithm(std::string algorithm);
+    void SetAlgorithmByUser(std::string algorithm);
     bool GetAlgorithmWasManuallySetByUser() const;
     void SetAlgorithmWasManuallySetByUser(bool v);
     
     static std::vector<float> GetSamplingRateMultiples();
-    float GetSamplingMultiplier() const;
-    void SetSamplingMultiplier(float d);
+    long GetSamplingMultiplier() const;
+    void SetSamplingMultiplier(long d);
     
     using RenderParams::SetIsoValues;
     using RenderParams::GetIsoValues;
@@ -79,17 +77,19 @@ private:
     
     static const std::string _algorithmTag;
     static const std::string _algorithmWasManuallySetByUserTag;
-    static const std::string _samplingRateMultiplierTag;
     static const std::string _isoValuesTag;
     static const std::string _enabledIsoValuesTag;
-    static const std::string _lightingEnabledTag;
-    static const std::string _phongAmbientTag;
-    static const std::string _phongDiffuseTag;
-    static const std::string _phongSpecularTag;
-    static const std::string _phongShininessTag;
     
 public:
     static const std::string UseColormapVariableTag;
+    static const std::string SamplingRateMultiplierTag;
+    static const std::string VolumeDensityTag;
+    
+    static const std::string LightingEnabledTag;
+    static const std::string PhongAmbientTag;
+    static const std::string PhongDiffuseTag;
+    static const std::string PhongSpecularTag;
+    static const std::string PhongShininessTag;
 };
     
 };

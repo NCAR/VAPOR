@@ -485,41 +485,44 @@ bool DC::_getDataVarDimensions(
 	
 	string mname = var.GetMeshName();
 
-	Mesh mesh;
-	status = GetMesh(mname, mesh);
-	if (! status) return(false);
 
-	vector <string> dimnames;
-	if (mesh.GetMeshType() == Mesh::STRUCTURED) {
-		 dimnames = mesh.GetDimNames();
-	}
-	else {
-		switch (var.GetSamplingLocation()) {
-		case Mesh::NODE:
-			dimnames.push_back(mesh.GetNodeDimName()); 
-			break;
-		case Mesh::EDGE:
-			dimnames.push_back(mesh.GetEdgeDimName()); 
-			break;
-		case Mesh::FACE:
-			dimnames.push_back(mesh.GetFaceDimName()); 
-			break;
-		case Mesh::VOLUME:
-			VAssert(0 && "VOLUME cells not supported");
-			break;
-		}
-		if (mesh.GetMeshType() == Mesh::UNSTRUC_LAYERED) {
-			dimnames.push_back(mesh.GetLayersDimName());
-		}
-	}
-
-	for (int i=0; i<dimnames.size(); i++) {
-		Dimension dim;
-
-		status = GetDimension(dimnames[i], dim);
+	if (! mname.empty()) {;	// 0-d variable
+		Mesh mesh;
+		status = GetMesh(mname, mesh);
 		if (! status) return(false);
 
-		dimensions.push_back(dim);
+		vector <string> dimnames;
+		if (mesh.GetMeshType() == Mesh::STRUCTURED) {
+			 dimnames = mesh.GetDimNames();
+		}
+		else {
+			switch (var.GetSamplingLocation()) {
+			case Mesh::NODE:
+				dimnames.push_back(mesh.GetNodeDimName()); 
+				break;
+			case Mesh::EDGE:
+				dimnames.push_back(mesh.GetEdgeDimName()); 
+				break;
+			case Mesh::FACE:
+				dimnames.push_back(mesh.GetFaceDimName()); 
+				break;
+			case Mesh::VOLUME:
+				VAssert(0 && "VOLUME cells not supported");
+				break;
+			}
+			if (mesh.GetMeshType() == Mesh::UNSTRUC_LAYERED) {
+				dimnames.push_back(mesh.GetLayersDimName());
+			}
+		}
+
+		for (int i=0; i<dimnames.size(); i++) {
+			Dimension dim;
+
+			status = GetDimension(dimnames[i], dim);
+			if (! status) return(false);
+
+			dimensions.push_back(dim);
+		}
 	}
 
 	// we're done if time dim isn't wanted
@@ -1115,6 +1118,37 @@ vector <int> DC::FileTable::GetEntries() const {
 		}
 	}
 	return(fds);
+}
+
+bool DC::GetMeshDimLens(const string& mesh_name, std::vector<size_t> &dims) const {
+	dims.clear();
+
+	DC::Mesh mesh;
+	bool status = GetMesh(mesh_name, mesh);
+	if (! status) return (false);
+
+	vector <string> dimNames = mesh.GetDimNames();
+	for (int i=0; i<dimNames.size(); i++) {
+		DC::Dimension dimension;
+
+		status = GetDimension(dimNames[i], dimension);
+		if (! status) return(false);
+
+		dims.push_back(dimension.GetLength());
+	}
+	return(true);
+}
+
+bool DC::GetMeshDimNames(const string& mesh_name, std::vector<string> &dimnames) const {
+	dimnames.clear();
+
+	DC::Mesh mesh;
+	bool status = GetMesh(mesh_name, mesh);
+	if (! status) return (false);
+
+	dimnames = mesh.GetDimNames();
+
+	return(true);
 }
 
 

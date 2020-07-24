@@ -32,19 +32,6 @@ WireFrameParams::~WireFrameParams() {
 
 }
 
-bool WireFrameParams::IsOpaque() const {
-	return true;
-}
-
-bool WireFrameParams::usingVariable(const std::string& varname) {
-	if ((varname.compare(GetHeightVariableName()) == 0)){
-		return(true);
-	}
-
-	return(varname.compare(GetVariableName()) == 0);
-}
-
-
 //Set everything to default values
 void WireFrameParams::_init() {
 	SetDiagMsg("WireFrameParams::_init()");

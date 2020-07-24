@@ -2,6 +2,24 @@
 
 using namespace VAPoR;
 
+const std::string FlowParams::RenderTypeTag          = "RenderTypeTag";
+const std::string FlowParams::RenderRadiusBaseTag    = "RenderRadiusBaseTag";
+const std::string FlowParams::RenderRadiusScalarTag  = "RenderRadiusScalarTag";
+const std::string FlowParams::RenderGeom3DTag        = "RenderGeom3DTag";
+const std::string FlowParams::RenderLightAtCameraTag = "RenderLightAtCameraTag";
+const std::string FlowParams::RenderShowStreamDirTag = "RenderShowStreamDirTag";
+const std::string FlowParams::RenderGlyphTypeTag     = "RenderGlyphTypeTag";
+const std::string FlowParams::RenderGlyphStrideTag   = "RenderGlyphStrideTag";
+const std::string FlowParams::RenderGlyphOnlyLeadingTag = "RenderGlyphOnlyLeadingTag";
+const std::string FlowParams::RenderFadeTailTag      = "RenderFadeTailTag";
+const std::string FlowParams::RenderFadeTailStartTag = "RenderFadeTailStartTag";
+const std::string FlowParams::RenderFadeTailStopTag  = "RenderFadeTailStopTag";
+const std::string FlowParams::RenderFadeTailLengthTag= "RenderFadeTailLengthTag";
+const std::string FlowParams::PhongAmbientTag        = "PhongAmbientTag";
+const std::string FlowParams::PhongDiffuseTag        = "PhongDiffuseTag";
+const std::string FlowParams::PhongSpecularTag       = "PhongSpecularTag";
+const std::string FlowParams::PhongShininessTag      = "PhongShininessTag";
+
 const std::string FlowParams::_isSteadyTag           = "IsSteadyTag";
 const std::string FlowParams::_velocityMultiplierTag = "VelocityMultiplierTag";
 const std::string FlowParams::_steadyNumOfStepsTag   = "SteadyNumOfStepsTag";
@@ -32,19 +50,27 @@ FlowParams::FlowParams(   DataMgr*                 dataManager,
 {
 	SetVariableName("");
     SetDiagMsg("FlowParams::FlowParams() this=%p", this);
-
-    // At this point the base class is initialized, and the _Box is properly initialized
-    // to be the extents of the domain. Let's use that information to initialize the rake! 
-    std::vector<double> minext, maxext;
-    auto box = RenderParams::GetBox();
-    box->GetExtents( minext, maxext );
-    std::vector<float> floats( minext.size() * 2 );
-    for( int i = 0; i < minext.size(); i++ )
-    {
-        floats[i*2]   = minext[i];
-        floats[i*2+1] = maxext[i];
-    }
-    this->SetRake( floats );
+    
+    SetValueLong(RenderTypeTag, "", RenderTypeStream);
+    SetValueDouble(RenderRadiusBaseTag, "", -1);
+    SetValueDouble(RenderRadiusScalarTag, "", 1);
+    SetValueLong(RenderGeom3DTag, "", false);
+    SetValueLong(RenderLightAtCameraTag, "", true);
+    SetValueLong(RenderShowStreamDirTag, "", false);
+    
+    SetValueLong(RenderGlyphTypeTag, "", GlpyhTypeSphere);
+    SetValueLong(RenderGlyphStrideTag, "", 5);
+    SetValueLong(RenderGlyphOnlyLeadingTag, "", false);
+    
+    SetValueLong(RenderFadeTailTag, "", false);
+    SetValueLong(RenderFadeTailStartTag, "", 10);
+    SetValueLong(RenderFadeTailLengthTag, "", 10);
+    SetValueLong(RenderFadeTailStopTag, "", 0);
+    
+    SetValueDouble(PhongAmbientTag, "", 0.4);
+    SetValueDouble(PhongDiffuseTag, "", 0.8);
+    SetValueDouble(PhongSpecularTag, "", 0);
+    SetValueDouble(PhongShininessTag, "", 2);
 }
 
 FlowParams::FlowParams(   DataMgr*                dataManager, 
@@ -62,6 +88,30 @@ FlowParams::FlowParams(   DataMgr*                dataManager,
 FlowParams::~FlowParams()
 {
     SetDiagMsg( "FlowParams::~FlowParams() this=%p", this );
+}
+
+int FlowParams::Initialize() {
+						  
+	int rc = RenderParams::Initialize();            
+	if (rc<0) return(rc);   
+
+    // At this point the base class is initialized, and the _Box is 
+	// properly initialized
+    // to be the extents of the domain. Let's use that information to 
+	// initialize the rake! 
+	//
+    std::vector<double> minext, maxext;
+    auto box = RenderParams::GetBox();
+    box->GetExtents( minext, maxext );
+    std::vector<float> floats( minext.size() * 2 );
+    for( int i = 0; i < minext.size(); i++ )
+    {
+        floats[i*2]   = minext[i];
+        floats[i*2+1] = maxext[i];
+    }
+    this->SetRake( floats );
+						  
+	return(0);
 }
 
 

@@ -23,6 +23,7 @@ jobs:
           command: |
             cd /VAPOR
             git pull
+            git checkout $CIRCLE_BRANCH
             cd build
             cmake ..
             make -j7 &> /tmp/output.txt
@@ -67,6 +68,12 @@ jobs:
       - image: sgpearse/vapor3-ubuntu18:latest
 
     steps:
+      - run:
+          name: install python
+          command: |
+            apt-get update
+            apt-get install -y python3
+
       - checkout
 
       - run:
@@ -74,6 +81,7 @@ jobs:
           command: |
             cd /VAPOR
             git pull
+            git checkout $CIRCLE_BRANCH
             cd build
             cmake -DBUILD_TEST_APPS=ON ..
             make -j7 &> /tmp/output.txt
@@ -86,9 +94,16 @@ jobs:
             --testDataRoot=/smokeTestData/smokeTestData
             --binaryRoot=/VAPOR/build/bin
           
-
       - store_artifacts:
           path: /tmp
+
+      - run:
+          name: Smoke test
+          command: |
+            python3 /VAPOR/test_apps/smokeTests/smokeTests.py --testDataRoot=/smokeTestData/smokeTestData --binaryRoot=/VAPOR/build/bin --resultsDir=/VAPOR/test_apps/smokeTests/testResults
+
+      - store_artifacts:
+          path: /VAPOR/test_apps/smokeTests/testResults
 
       - run:
           name: check for warnings
@@ -158,6 +173,7 @@ jobs:
             ls -lrth /usr/local/VAPOR-Deps
             cd /VAPOR
             git pull
+            git checkout $CIRCLE_BRANCH
             cd build
             cmake3 ..
             make -j7 &> /tmp/output.txt
@@ -459,7 +475,6 @@ jobs:
             echo $message
             ghr -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -replace Weekly /tmp/workspace/installers
 
-
 workflows:
   build:
     jobs:
@@ -500,7 +515,7 @@ workflows:
   nightly:
     triggers:
       - schedule:
-           cron: "30 14 * * 5" #weekly cron job on Friday @ 7:30am MST
+           cron: "30 14 * * 5" #weekly cron job on Friday @ 8:30am MST
            filters:
              branches:
                only:

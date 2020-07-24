@@ -480,11 +480,11 @@ int DCCF::_InitHorizontalCoordinates(
 ) {
 
     //
-    // Get names of data variables  in the CF data set that have 2 or 3
+    // Get names of data variables  in the CF data set that have 1 to 3
     // spatial dimensions
     //
     vector <string> dvars;
-    for (int i=2; i<4; i++) {
+    for (int i=1; i<4; i++) {
         vector <string> v = ncdfc->GetDataVariableNames(i,true);
         dvars.insert(dvars.end(), v.begin(), v.end());
     }
@@ -769,11 +769,11 @@ int DCCF::_InitVars(NetCDFCFCollection *ncdfc)
 
 	vector <bool> periodic(3, false);
 	//
-	// Get names of variables  in the CF data set that have 2 or 3
+	// Get names of variables  in the CF data set that have 0 to 3
 	// spatial dimensions
 	//
 	vector <string> vars;
-	for (int i=2; i<4; i++) {
+	for (int i=0; i<4; i++) {
         vector <string> v = ncdfc->GetDataVariableNames(i,true);
 		vars.insert(vars.end(), v.begin(), v.end());
 	}

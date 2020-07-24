@@ -2584,6 +2584,8 @@ bool DataMgr::_hasVerticalXForm(
 	bool ok = _dc->GetMesh(meshname, m);
 	if (! ok) return(false);
 
+	if (m.GetDimNames().size() != 3) return(false);
+
 	vector <string> coordVars = m.GetCoordVars();
 	
 	bool hasVertCoord = false;
@@ -2614,13 +2616,29 @@ bool DataMgr::_hasVerticalXForm(
 
 	if (formula_terms.empty()) return(false);
 
-	// Currently only support one vertical transform!!!
+
+	// Make sure all of the dependent variables needed by the 
+	// formula actually exist
 	//
-	if (! DerivedCoordVarStandardWRF_Terrain::ValidFormula(formula_terms)) {
-		return(false);
+	map<string, string> parsed_terms;
+	ok = DerivedCFVertCoordVar::ParseFormula(formula_terms, parsed_terms);
+	if (! ok) return(false);
+
+	for (auto itr = parsed_terms.begin(); itr!=parsed_terms.end(); ++itr) {
+		const string &varname = itr->second;
+		if (! _dc->VariableExists(0,varname, 0,0)) return(false);
+    }
+	
+	// Does a converter exist for this standard name?
+	//
+	vector <string> names = 
+		DerivedCFVertCoordVarFactory::Instance()->GetFactoryNames();
+
+	for (int i=0; i<names.size(); i++) {
+		if (standard_name == names[i]) return(true);
 	}
 
-	return(true);
+	return(false);
 }
 
 
@@ -3856,10 +3874,15 @@ int DataMgr::_initVerticalCoordVars() {
 
 		VAssert (m.GetCoordVars().size() > 2);
 
-		DerivedCoordVarStandardWRF_Terrain *derivedVar = 
-			new DerivedCoordVarStandardWRF_Terrain(
-				_dc, meshnames[i], formula_terms
-			);
+		DerivedCoordVar *derivedVar = NULL;
+
+		derivedVar = DerivedCFVertCoordVarFactory::Instance()->CreateInstance(
+			standard_name, _dc, meshnames[i], formula_terms
+		);
+		if (! derivedVar) {
+			SetErrMsg("Failed to initialize derived coord variable");
+			return(-1);
+		}
 
 		int rc = derivedVar->Initialize(); 
 		if (rc<0) {
