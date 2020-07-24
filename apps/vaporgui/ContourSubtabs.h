@@ -9,7 +9,6 @@
 #include "RangeCombos.h"
 #include "Flags.h"
 #include "PGroup.h"
-//#include "PVariablesWidget.h"
 
 namespace VAPoR {
 	class ControlExec;
