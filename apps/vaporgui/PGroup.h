@@ -18,6 +18,8 @@ public:
     //! Adds the PWidget to this group.
     PGroup *Add(PWidget *pw);
 
+    void AddStretch();
+
 protected:
     PGroup(QWidget *w);
     void updateGUI() const override;

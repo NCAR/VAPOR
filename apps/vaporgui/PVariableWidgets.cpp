@@ -1,4 +1,4 @@
-#include "PVariablesWidget.h"
+#include "PVariableWidgets.h"
 #include <vapor/RenderParams.h>
 #include "VComboBox.h"
 

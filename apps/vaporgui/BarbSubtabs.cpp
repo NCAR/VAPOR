@@ -18,38 +18,6 @@
 #define THICKNESS_MIN .01
 #define THICKNESS_MAX 4
 
-BarbVariablesSubtab::BarbVariablesSubtab(QWidget* parent) {
-	setupUi(this);
-	_variablesWidget->Reinit(
-		(VariableFlags)(VECTOR | HEIGHT | COLOR),
-		(DimFlags)(TWOD | THREED)
-	);
-    _variablesWidget->hide();
-    
-    ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);
-    PSection *vars = new PSection("Variable Selection");
-    vars->Add(new PDimensionSelector);
-    vars->Add(new PXFieldVariableSelectorHLI);
-    vars->Add(new PYFieldVariableSelectorHLI);
-    vars->Add(new PZFieldVariableSelectorHLI);
-    vars->Add(new PColorMapVariableSelectorHLI);
-    vars->Add(new PHeightVariableSelectorHLI);
-    pg->Add(vars);
-    pg->Add(new PFidelitySection);
-}
-
-void BarbVariablesSubtab::Update(
-	VAPoR::DataMgr *dataMgr,
-	VAPoR::ParamsMgr *paramsMgr,
-	VAPoR::RenderParams *rParams
-) {
-    pg->Update(rParams, paramsMgr, dataMgr);
-}
-
-void BarbVariablesSubtab::Initialize(VAPoR::BarbParams* bParams,
-								VAPoR::DataMgr* dataMgr) {
-}
-
 BarbGeometrySubtab::BarbGeometrySubtab(QWidget* parent) {
 	setupUi(this);
 	_geometryWidget->Reinit(

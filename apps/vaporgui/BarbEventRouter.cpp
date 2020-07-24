@@ -15,6 +15,10 @@
 #include "VariablesWidget.h"
 #include "BarbEventRouter.h"
 #include "EventRouter.h"
+#include "PVariableWidgets.h"
+#include "PFidelitySection.h"
+#include "PSection.h"
+#include "PGroup.h"
 
 
 using namespace VAPoR;
@@ -32,13 +36,23 @@ BarbEventRouter::BarbEventRouter(
 	RenderEventRouter(ce, BarbParams::GetClassType())
 {
 
-	_variables = new BarbVariablesSubtab(this);
-	QScrollArea *qsvar = new QScrollArea(this);
-	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	_variables->adjustSize();
-	qsvar->setWidget(_variables);
-	qsvar->setWidgetResizable(true);
-	addTab(qsvar, "Variables");
+    PSection *varSection = new PSection("Variable Selection");
+    varSection->Add(new PDimensionSelector);
+    varSection->Add(new PXFieldVariableSelectorHLI);
+    varSection->Add(new PYFieldVariableSelectorHLI);
+    varSection->Add(new PZFieldVariableSelectorHLI);
+    varSection->Add(new PColorMapVariableSelectorHLI);
+    varSection->Add(new PHeightVariableSelectorHLI);
+    _pVarGroup = new PGroup;
+    _pVarGroup->Add(varSection);
+    _pVarGroup->Add(new PFidelitySection);
+    _pVarGroup->AddStretch();
+    QScrollArea *qsvar = new QScrollArea(this);
+    qsvar->setWidgetResizable(true);
+    qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    qsvar->setWidget( _pVarGroup );
+    qsvar->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Maximum );
+    addTab( qsvar, "Variables" );
 
 	_appearance = new BarbAppearanceSubtab(this);
 	QScrollArea* qsapp = new QScrollArea(this);
@@ -91,19 +105,14 @@ void BarbEventRouter::GetWebHelp(
 
 void BarbEventRouter::_initializeTab() {
 	_updateTab();
-	BarbParams* rParams = (BarbParams*) GetActiveParams();
-	DataMgr* dataMgr = GetActiveDataMgr();
-
-	_variables->Initialize(rParams, dataMgr);
 }
 
 void BarbEventRouter::_updateTab(){
-	//The variable tab updates itself:
-	_variables->Update(
-		GetActiveDataMgr(),
-		_controlExec->GetParamsMgr(),
-		GetActiveParams()
-	);
+    _pVarGroup->Update(
+        GetActiveParams(),
+        _controlExec->GetParamsMgr(),
+        GetActiveDataMgr()
+    );
 
 	_appearance->Update(
 		GetActiveDataMgr(),

@@ -1,7 +1,7 @@
 #include "ContourSubtabs.h"
 #include "TFEditor.h"
 #include <vapor/glutil.h>
-#include "PVariablesWidget.h"
+#include "PVariableWidgets.h"
 #include "PFidelitySection.h"
 
 ContourVariablesSubtab::ContourVariablesSubtab( QWidget* parent ) {

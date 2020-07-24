@@ -19,6 +19,7 @@ namespace VAPoR {
 }
 
 class GLBarbImageWindow;
+class PGroup;
 
 //!
 //! \class BarbEventRouter
@@ -81,7 +82,8 @@ private:
 	//! it would be confusing if wheel events also scrolled the tab itself
 	 void wheelEvent(QWheelEvent*) {}
 
-	BarbVariablesSubtab *_variables;
+    PGroup* _pVarGroup;
+
 	BarbGeometrySubtab *_geometry;
 	BarbAppearanceSubtab *_appearance;
 	BarbAnnotationSubtab *_annotation;

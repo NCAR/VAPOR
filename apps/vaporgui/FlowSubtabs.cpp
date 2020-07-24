@@ -21,7 +21,7 @@
 #include "PGroup.h"
 #include "PSection.h"
 #include "PDoubleInput.h"
-#include "PVariablesWidget.h"
+#include "PVariableWidgets.h"
 #include "PFidelitySection.h"
 
 #include <QScrollArea>

@@ -22,6 +22,11 @@ PGroup *PGroup::Add(PWidget *pw)
     return this;
 }
 
+void PGroup::AddStretch() {
+    QVBoxLayout* layout = dynamic_cast<QVBoxLayout*>(_widget->layout());
+    layout->addStretch();
+}
+
 void PGroup::updateGUI() const
 {
     auto params = getParams();

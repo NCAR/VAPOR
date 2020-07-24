@@ -17,7 +17,7 @@
 #include "EventRouter.h"
 #include "PGroup.h"
 #include "PSection.h"
-#include "PVariablesWidget.h"
+#include "PVariableWidgets.h"
 #include "PFidelitySection.h"
 
 #define MIN_QUALITY 1
@@ -39,15 +39,13 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
 	                    RenderEventRouter( ce, SliceParams::GetClassType())
 {
     PSection* varSection = new PSection("Variable Selection");
-    //varSection->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
     varSection->Add( new PScalarVariableSelector3DHLI() );
-    PFidelitySection* fidelitySection = new PFidelitySection();
-    //fidelitySection->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
-
     _pVarGroup = new PGroup;
     _pVarGroup->Add( varSection );
-    _pVarGroup->Add( fidelitySection );
+    _pVarGroup->Add( new PFidelitySection);
+    _pVarGroup->AddStretch();
 	QScrollArea *qsvar = new QScrollArea(this);
+	qsvar->setWidgetResizable(true);
 	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	qsvar->setWidget( _pVarGroup );
     qsvar->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Maximum );

@@ -5,7 +5,6 @@
 #include "PGroup.h"
 
 #include "PWidget.h"
-#include "PVariablesWidget.h"
 #include "PFidelitySection.h"
 
 #define MIN_SAMPLES 1 

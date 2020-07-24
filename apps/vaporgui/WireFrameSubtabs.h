@@ -7,7 +7,7 @@
 #include "ui_WireFrameAnnotationGUI.h"
 #include "Flags.h"
 #include "TFEditor.h"
-#include "PVariablesWidget.h"
+#include "PVariableWidgets.h"
 #include "PGroup.h"
 #include "PSection.h"
 #include "PFidelitySection.h"
@@ -18,40 +18,6 @@ namespace VAPoR {
 	class ParamsMgr;
 	class DataMgr;
 }
-
-class WireFrameVariablesSubtab : public QWidget, public Ui_WireFrameVariablesGUI {
-
-	Q_OBJECT
-    
-    PGroup *pg;
-
-public:
-	WireFrameVariablesSubtab(QWidget* parent) {
-		setupUi(this);
-		_variablesWidget->Reinit(
-			(VariableFlags)(SCALAR | HEIGHT),
-			(DimFlags)(THREED | TWOD)
-		);
-        _variablesWidget->hide();
-        
-        ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);
-        
-        PSection *vars = new PSection("Variable Selection");
-        vars->Add(new PDimensionSelector);
-        vars->Add(new PScalarVariableSelectorHLI);
-        pg->Add(vars);
-        pg->Add(new PFidelitySection);
-	}
-
-	void Update(
-		VAPoR::DataMgr *dataMgr,
-		VAPoR::ParamsMgr *paramsMgr,
-		VAPoR::RenderParams *rParams
-	) {
-//        _variablesWidget->Update(dataMgr, paramsMgr, rParams);
-        pg->Update(rParams, paramsMgr, dataMgr);
-	}
-};
 
 class WireFrameAppearanceSubtab : public QWidget, public Ui_WireFrameAppearanceGUI {
 
