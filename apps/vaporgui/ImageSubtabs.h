@@ -10,7 +10,7 @@
 #include <QFileDialog>
 #include "Flags.h"
 #include "PGroup.h"
-#include "PVariablesWidget.h"
+#include "PVariableWidgets.h"
 #include "PFidelitySection.h"
 
 namespace VAPoR {

@@ -7,7 +7,7 @@
 #include "PStringDropdownHLI.h"
 #include "PEnumDropdown.h"
 #include "PSliderEdit.h"
-#include "PVariableWidgets.h"
+//#include "PVariableWidgets.h"
 #include "PColorSelector.h"
 
 using namespace VAPoR;
@@ -21,7 +21,6 @@ void VolumeIsoVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, Re
     // long mode = _isoParams->GetCastingMode();
     // _castingModeComboBox->setCurrentIndex( mode - 1 );
     
-//    _variablesWidget->Update(dataMgr, paramsMgr, params);
     pg->Update(params, paramsMgr, dataMgr);
 }
 

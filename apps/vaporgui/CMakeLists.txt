@@ -167,17 +167,14 @@ set (SRCS
 	PSliderEdit.cpp
 	PSliderEdit.h
 	PSliderEditHLI.h
-	PVariableWidgets.cpp
-	PVariableWidgets.h
-	PVariableSelectorHLI.h
 	PRegionSelector.cpp
 	PRegionSelector.h
 	ParamsWidgetDemo.cpp
 	ParamsWidgetDemo.h
 	PTFEditor.cpp
 	PTFEditor.h
-	PVariablesWidget.cpp
-	PVariablesWidget.h
+	PVariableWidgets.cpp
+	PVariableWidgets.h
 	PFidelitySection.cpp
 	PFidelitySection.h
 	ModelEventRouter.cpp
