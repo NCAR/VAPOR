@@ -26,16 +26,6 @@ protected slots:
     virtual void dropdownTextChanged(std::string text);
 };
 
-class PFlowDimensionSelector : public PDimensionSelector {
-    Q_OBJECT
-    VComboBox *_vComboBox;
-public:
-    PFlowDimensionSelector();
-
-protected slots:
-    void dropdownTextChanged(std::string text);
-};
-
 //! \class PVariableSelector
 //! Allows the user to select variables. Automatically switches between 2D and 3D
 //! based on the currently selected variable.

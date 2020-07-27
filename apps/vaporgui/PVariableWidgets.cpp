@@ -24,11 +24,23 @@ void PDimensionSelector::updateGUI() const
 {
     RenderParams *rp = dynamic_cast<RenderParams*>(getParams());
     assert(rp && "Params must be RenderParams");
-    
-    if (rp->GetBox()->GetOrientation() == Box::XYZ)
+
+    DataMgr* dm = getDataMgr();
+    std::vector< size_t > throwaway;
+    dm->GetDimLens( rp->GetXFieldVariableName(), throwaway );
+    int xDims = throwaway.size();
+    dm->GetDimLens( rp->GetYFieldVariableName(), throwaway );
+    int yDims = throwaway.size();
+    dm->GetDimLens( rp->GetZFieldVariableName(), throwaway );
+    int zDims = throwaway.size();
+    VAssert( xDims == yDims && yDims == zDims );
+        
+    if ( xDims == 3 ) {
         _vComboBox->SetValue("3D");
-    else
+    }
+    else {
         _vComboBox->SetValue("2D");
+    }
 }
 
 void PDimensionSelector::dropdownTextChanged(std::string text)
@@ -38,22 +50,6 @@ void PDimensionSelector::dropdownTextChanged(std::string text)
     
     rp->SetDefaultVariables(dim, true);
 }
-
-PFlowDimensionSelector::PFlowDimensionSelector()
-: PDimensionSelector()
-{}
-
-void PFlowDimensionSelector::dropdownTextChanged(std::string text) {
-    int dim = text == "2D" ? 2 : 3;
-
-    ParamsMgr* pm = getParamsMgr();
-    GUIStateParams *gp;
-    gp = dynamic_cast<GUIStateParams*>( pm->GetParams( GUIStateParams::GetClassType() ) );
-    gp->SetFlowDimensionality( dim );
-
-    PDimensionSelector::dropdownTextChanged( text );
-}
-
 
 // ==================================
 //         Variable Selectors

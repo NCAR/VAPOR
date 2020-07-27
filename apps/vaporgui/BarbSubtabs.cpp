@@ -3,7 +3,6 @@
 #include "vapor/BarbParams.h"
 #include "TFEditor.h"
 #include "PVariableWidgets.h"
-#include "PFidelitySection.h"
 #include "PGroup.h"
 
 #define X 0

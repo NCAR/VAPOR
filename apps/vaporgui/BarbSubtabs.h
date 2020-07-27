@@ -15,7 +15,6 @@ namespace VAPoR {
 }
 
 class TFEditor;
-class PGroup;
 
 class BarbAppearanceSubtab : public QWidget, public Ui_BarbAppearanceGUI {
 
