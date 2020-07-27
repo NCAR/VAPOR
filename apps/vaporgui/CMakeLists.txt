@@ -173,10 +173,10 @@ set (SRCS
 	ParamsWidgetDemo.h
 	PTFEditor.cpp
 	PTFEditor.h
-	PVariableWidgets.cpp
-	PVariableWidgets.h
-	PFidelitySection.cpp
-	PFidelitySection.h
+    PVariableWidgets.cpp
+    PVariableWidgets.h
+    PFidelitySection.cpp
+    PFidelitySection.h
 	ModelEventRouter.cpp
 	ModelEventRouter.h
 	ModelSubtabs.cpp

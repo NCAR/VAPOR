@@ -15,10 +15,7 @@
 #include "VariablesWidget.h"
 #include "SliceEventRouter.h"
 #include "EventRouter.h"
-#include "PGroup.h"
-#include "PSection.h"
 #include "PVariableWidgets.h"
-#include "PFidelitySection.h"
 
 #define MIN_QUALITY 1
 #define MAX_QUALITY 10

@@ -40,7 +40,6 @@ namespace VAPoR {
 #endif
 
 class ColorbarWidget;
-class PVariablesGroup;
 
 //!
 //! \class RenderEventRouter

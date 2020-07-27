@@ -24,8 +24,6 @@ public:
 
  virtual int Initialize() override;
 
- virtual void SetCompressionLevel( int level ) override;
-
  virtual void SetRefinementLevel( int level ) override;
 
  // Get static string identifier for this params class

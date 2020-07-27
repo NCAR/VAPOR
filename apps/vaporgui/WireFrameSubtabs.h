@@ -2,14 +2,11 @@
 #define WIREFRAMESUBTABS_H
 
 #include "ui_WireFrameAppearanceGUI.h"
+#include "ui_WireFrameVariablesGUI.h"
 #include "ui_WireFrameGeometryGUI.h"
 #include "ui_WireFrameAnnotationGUI.h"
 #include "Flags.h"
 #include "TFEditor.h"
-#include "PVariableWidgets.h"
-#include "PGroup.h"
-#include "PSection.h"
-#include "PFidelitySection.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -17,6 +14,28 @@ namespace VAPoR {
 	class ParamsMgr;
 	class DataMgr;
 }
+
+class WireFrameVariablesSubtab : public QWidget, public Ui_WireFrameVariablesGUI {
+
+	Q_OBJECT
+
+public:
+	WireFrameVariablesSubtab(QWidget* parent) {
+		setupUi(this);
+		_variablesWidget->Reinit(
+			(VariableFlags)(SCALAR | HEIGHT),
+			(DimFlags)(THREED | TWOD)
+		);
+	}
+
+	void Update(
+		VAPoR::DataMgr *dataMgr,
+		VAPoR::ParamsMgr *paramsMgr,
+		VAPoR::RenderParams *rParams
+	) {
+		_variablesWidget->Update(dataMgr, paramsMgr, rParams);
+	}
+};
 
 class WireFrameAppearanceSubtab : public QWidget, public Ui_WireFrameAppearanceGUI {
 

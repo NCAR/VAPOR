@@ -14,7 +14,6 @@
 #include "vapor/WireFrameRenderer.h"
 #include "VariablesWidget.h"
 #include "WireFrameEventRouter.h"
-#include "PGroup.h"
 
 using namespace VAPoR;
 
@@ -30,10 +29,13 @@ WireFrameEventRouter::WireFrameEventRouter( QWidget *parent, ControlExec *ce)
                     : QTabWidget(parent),
 	                    RenderEventRouter( ce, WireFrameParams::GetClassType())
 {
-
-    _variablesGroup->AddVar(new PDimensionSelector);
-    _variablesGroup->AddVar(new PScalarVariableSelectorHLI);
-    addTab( _variablesGroup->GetScrollArea(), "Variables" );
+	_variables = new WireFrameVariablesSubtab(this);
+	QScrollArea *qsvar = new QScrollArea(this);
+	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_variables->adjustSize();
+	qsvar->setWidget(_variables);
+	qsvar->setWidgetResizable(true);
+	addTab(qsvar, "Variables");
 
 	_appearance = new WireFrameAppearanceSubtab(this);
 	QScrollArea* qsapp = new QScrollArea(this);
@@ -91,11 +93,13 @@ void WireFrameEventRouter::GetWebHelp(
 
 void WireFrameEventRouter::_updateTab(){
 
-    _variablesGroup->Update(
-        GetActiveParams(),
-        _controlExec->GetParamsMgr(),
-        GetActiveDataMgr()
-    );
+	// The variable tab updates itself:
+	//
+	_variables->Update(
+		GetActiveDataMgr(),
+		_controlExec->GetParamsMgr(),
+		GetActiveParams()
+	);
 
 	_appearance->Update(
 		GetActiveDataMgr(),
