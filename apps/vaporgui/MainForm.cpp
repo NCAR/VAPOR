@@ -425,6 +425,8 @@ MainForm::MainForm(
 
 int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int width, int height)
 {
+    if (start == 0 && end == 0)
+        end = INT_MAX;
     start = std::max(0, start);
     
     if (_sessionNewFlag) {

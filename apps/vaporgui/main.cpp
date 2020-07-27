@@ -76,20 +76,23 @@ FILE *OpenLog(string path_var) {
 
 struct opt_t {
     OptionParser::Boolean_T    help;
+    OptionParser::Boolean_T    render;
     OptionParser::IntRange_    renderRange;
     OptionParser::Dimension2D_ resolution;
     char*                      outputPath;
 } opt;
 OptionParser::OptDescRec_T    set_opts[] = {
     {"help",       0,    "",           "Print this message and exit"},
-    {"render",     1,    "0:0",        "Render timesteps a:b for a given session file and exit"},
+    {"render",     0,    "",           "Render a given session file and exit"},
+    {"timesteps",  1,    "0:0",        "Timesteps to render when using -render. Defaults to all timesteps."},
     {"resolution", 1,    "1920x1080",  "Output resolution when using -render"},
     {"output",     1,    "vapor.tiff", "Output image file when using -render. This will be suffixed with the timestep number. Supports tiff, jpg"},
     {NULL}
 };
 OptionParser::Option_T    get_options[] = {
     {"help",       Wasp::CvtToBoolean,     &opt.help, sizeof(opt.help)},
-    {"render",     Wasp::CvtToIntRange,    &opt.renderRange, sizeof(opt.renderRange)},
+    {"render",     Wasp::CvtToBoolean,     &opt.render, sizeof(opt.render)},
+    {"timesteps",  Wasp::CvtToIntRange,    &opt.renderRange, sizeof(opt.renderRange)},
     {"resolution", Wasp::CvtToDimension2D, &opt.resolution, sizeof(opt.resolution)},
     {"output",     Wasp::CvtToString,      &opt.outputPath, sizeof(opt.outputPath)},
     {NULL}
@@ -213,7 +216,7 @@ if (getenv("VAPOR_DEBUG"))
     a.connect( &a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()) );
     
     int estatus = 0;
-    if (opt.renderRange.min != 0 || opt.renderRange.max != 0) {
+    if (opt.render) {
         estatus = mw->RenderAndExit(opt.renderRange.min, opt.renderRange.max, opt.outputPath, opt.resolution.nx, opt.resolution.ny);
     }
     
