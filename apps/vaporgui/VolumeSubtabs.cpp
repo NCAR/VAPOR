@@ -11,17 +11,6 @@
 
 using namespace VAPoR;
 
-void VolumeVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *params)
-{
-    VolumeParams *vp = dynamic_cast<VolumeParams*>( params );
-    _volumeParams = vp;
-    VAssert(vp);
-    
-//    _variablesWidget->Update(dataMgr, paramsMgr, params);
-    
-    pg->Update(params, paramsMgr, dataMgr);
-}
-
 VolumeAppearanceSubtab::VolumeAppearanceSubtab(QWidget* parent) {
     setupUi(this);
     

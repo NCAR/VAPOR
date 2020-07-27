@@ -22,37 +22,6 @@ class TFEditorVolume;
 class QSliderEdit;
 class PGroup;
 
-class VolumeVariablesSubtab : public QWidget, public Ui_VolumeVariablesGUI {
-
-    Q_OBJECT
-    
-    PGroup *pg;
-
-public:
-	VolumeVariablesSubtab(QWidget* parent) {
-		setupUi(this);
-		_variablesWidget->Reinit(
-			(VariableFlags)(SCALAR | COLOR),
-			(DimFlags)(THREED)
-		);
-        _variablesWidget->hide();
-        
-        ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);
-        PSection *vars = new PSection("Variable Selection");
-        vars->Add(new PScalarVariableSelectorHLI);
-        vars->Add(new PColorMapVariableSelectorHLI);
-        pg->Add(vars);
-        pg->Add(new PFidelitySection);
-	}
-
-	void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
-    
-private slots:
-    
-private:
-    VAPoR::VolumeParams *_volumeParams;
-};
-
 class VolumeAppearanceSubtab : public QWidget, public Ui_VolumeAppearanceGUI {
 	Q_OBJECT
 

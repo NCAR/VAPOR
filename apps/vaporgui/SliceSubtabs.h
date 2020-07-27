@@ -2,7 +2,6 @@
 #define SLICESUBTABS_H
 
 #include "ui_SliceAppearanceGUI.h"
-#include "ui_SliceVariablesGUI.h"
 #include "ui_SliceGeometryGUI.h"
 #include "ui_SliceAnnotationGUI.h"
 #include "Flags.h"

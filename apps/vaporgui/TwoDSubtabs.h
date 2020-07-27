@@ -2,7 +2,6 @@
 #define TWODSUBTABS_H
 
 #include "ui_TwoDAppearanceGUI.h"
-#include "ui_TwoDVariablesGUI.h"
 #include "ui_TwoDGeometryGUI.h"
 #include "ui_TwoDAnnotationGUI.h"
 #include "Flags.h"
@@ -17,37 +16,6 @@ namespace VAPoR {
 	class ParamsMgr;
 	class DataMgr;
 }
-
-class TwoDVariablesSubtab : public QWidget, public Ui_TwoDVariablesGUI {
-
-	Q_OBJECT
-    PGroup *pg;
-
-public:
-	TwoDVariablesSubtab(QWidget* parent) {
-		setupUi(this);
-		_variablesWidget->Reinit(
-			(VariableFlags)(SCALAR | HEIGHT),
-			(DimFlags)(TWOD)
-		);
-        //_variablesWidget->hide();
-        ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);
-        PSection *vars = new PSection("Variable Selection");
-        vars->Add(new PScalarVariableSelectorHLI);
-        vars->Add(new PHeightVariableSelectorHLI);
-        pg->Add(vars);
-        pg->Add(new PFidelitySection);
-	}
-
-	void Update(
-		VAPoR::DataMgr *dataMgr,
-		VAPoR::ParamsMgr *paramsMgr,
-		VAPoR::RenderParams *rParams
-	) {
-		_variablesWidget->Update(dataMgr, paramsMgr, rParams);
-        pg->Update(rParams, paramsMgr, dataMgr);
-	}
-};
 
 class TwoDAppearanceSubtab : public QWidget, public Ui_TwoDAppearanceGUI {
 

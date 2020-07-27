@@ -275,18 +275,15 @@ set (UIS
 	helloLayoutSubtab.ui
 	helloAppearanceSubtab.ui
 	BarbAppearanceGUI.ui
-	BarbVariablesGUI.ui
 	BarbGeometryGUI.ui
 	BarbAnnotationGUI.ui
 	ImageAppearanceGUI.ui
 	ImageGeometryGUI.ui
-	ImageVariablesGUI.ui
 	TransformTableGUI.ui
 	TwoDVariablesGUI.ui
 	TwoDAppearanceGUI.ui
 	TwoDGeometryGUI.ui
 	TwoDAnnotationGUI.ui
-	ContourVariablesGUI.ui
 	ContourAppearanceGUI.ui
 	ContourGeometryGUI.ui
 	ContourAnnotationGUI.ui
@@ -294,7 +291,6 @@ set (UIS
 	WireFrameAppearanceGUI.ui
 	WireFrameGeometryGUI.ui
 	WireFrameAnnotationGUI.ui
-    SliceVariablesGUI.ui
     SliceAppearanceGUI.ui
     SliceGeometryGUI.ui
     SliceAnnotationGUI.ui
@@ -316,7 +312,6 @@ set (UIS
 	VolumeIsoAnnotationGUI.ui
 	VolumeIsoAppearanceGUI.ui
 	VolumeIsoGeometryGUI.ui
-	VolumeIsoVariablesGUI.ui
 	ModelGeometryGUI.ui
 	ModelVariablesGUI.ui
 	

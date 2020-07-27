@@ -2,7 +2,6 @@
 #define BARBSUBTABS_H
 
 #include "ui_BarbAppearanceGUI.h"
-#include "ui_BarbVariablesGUI.h"
 #include "ui_BarbGeometryGUI.h"
 #include "ui_BarbAnnotationGUI.h"
 #include "ParamsWidgets.h"

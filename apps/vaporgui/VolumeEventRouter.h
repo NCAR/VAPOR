@@ -74,8 +74,6 @@ private:
  //! if wheel events also scrolled the tab itself
   void wheelEvent(QWheelEvent*) {}
 
- //! VariablesWidget is used as Variables tab
- VolumeVariablesSubtab *_variables;
  VolumeGeometrySubtab* _geometry;
  GLVolumeImageWindow* _glVolumeImageWindow;
  VolumeAppearanceSubtab * _appearance;

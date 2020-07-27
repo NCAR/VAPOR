@@ -2,7 +2,6 @@
 #define WIREFRAMESUBTABS_H
 
 #include "ui_WireFrameAppearanceGUI.h"
-#include "ui_WireFrameVariablesGUI.h"
 #include "ui_WireFrameGeometryGUI.h"
 #include "ui_WireFrameAnnotationGUI.h"
 #include "Flags.h"

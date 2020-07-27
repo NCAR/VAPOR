@@ -43,7 +43,7 @@ BarbEventRouter::BarbEventRouter(
     _variablesGroup->AddVar(new PZFieldVariableSelectorHLI);
     _variablesGroup->AddVar(new PColorMapVariableSelectorHLI);
     _variablesGroup->AddVar(new PHeightVariableSelectorHLI);
-    addTab( _variablesGroup->GetScrollArea(), "pvg" );
+    addTab( _variablesGroup->GetScrollArea(), "PVariablesGroup" );
     
     // Current Methodology 
     PSection *varSection = new PSection("Variable Selection");
