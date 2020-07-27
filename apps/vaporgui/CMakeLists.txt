@@ -274,6 +274,7 @@ set (UIS
 	errMsg.ui
 	helloLayoutSubtab.ui
 	helloAppearanceSubtab.ui
+    BarbVariablesGUI.ui
 	BarbAppearanceGUI.ui
 	BarbGeometryGUI.ui
 	BarbAnnotationGUI.ui
