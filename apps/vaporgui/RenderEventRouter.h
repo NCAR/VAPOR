@@ -121,12 +121,12 @@ public:
 
 	_instName = "";
 
-    _pvg = new PVariablesGroup();
+    _variablesGroup = new PVariablesGroup();
 	
 }
 
  virtual ~RenderEventRouter(){
-    delete _pvg;
+    delete _variablesGroup;
  }
 
  void SetActive(string instName) {
@@ -256,7 +256,7 @@ protected:
 
  virtual string _getIconImagePath() const = 0;
 
- PVariablesGroup* _pvg;
+ PVariablesGroup* _variablesGroup;
 
 private:
  string _instName;

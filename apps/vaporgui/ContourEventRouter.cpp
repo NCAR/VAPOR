@@ -36,9 +36,9 @@ ContourEventRouter::ContourEventRouter(
 {
 
     // PVariablesGroup Methodoligy
-    _pvg->AddVar(new PScalarVariableSelector2DHLI);
-    _pvg->AddVar(new PHeightVariableSelectorHLI);
-    addTab( _pvg->GetScrollArea(), "Variables" );
+    _variablesGroup->AddVar(new PScalarVariableSelector2DHLI);
+    _variablesGroup->AddVar(new PHeightVariableSelectorHLI);
+    addTab( _variablesGroup->GetScrollArea(), "Variables" );
 
 	_appearance = new ContourAppearanceSubtab(this);
 	QScrollArea* qsapp = new QScrollArea(this);
@@ -99,7 +99,7 @@ void ContourEventRouter::_initializeTab() {
 }
 
 void ContourEventRouter::_updateTab(){
-    _pvg->Update(
+    _variablesGroup->Update(
         GetActiveParams(),
         _controlExec->GetParamsMgr(),
         GetActiveDataMgr()

@@ -28,8 +28,8 @@ ImageEventRouter::ImageEventRouter( QWidget* parent, ControlExec* ce)
 
   sizePolicy().setVerticalPolicy(QSizePolicy::Maximum);
 
-  _pvg->AddVar( new PHeightVariableSelectorHLI );
-  addTab( _pvg->GetScrollArea(), "Variables" );
+  _variablesGroup->AddVar( new PHeightVariableSelectorHLI );
+  addTab( _variablesGroup->GetScrollArea(), "Variables" );
 
   _appearance = new ImageAppearanceSubtab(this);
   QScrollArea* qsapp = new QScrollArea(this);
@@ -54,7 +54,7 @@ void ImageEventRouter::GetWebHelp( vector <pair <string, string> > &help) const
 
 void ImageEventRouter::_updateTab()
 {
-  _pvg->Update(
+  _variablesGroup->Update(
       GetActiveParams(),
       _controlExec->GetParamsMgr(),
       GetActiveDataMgr()

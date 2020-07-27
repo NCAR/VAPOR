@@ -34,13 +34,13 @@ FlowEventRouter::FlowEventRouter( QWidget *parent, ControlExec *ce)
 	                  RenderEventRouter( ce, FlowParams::GetClassType())
 {
     // PVariablesGroup Methodoligy
-    _pvg->AddVar(new PDimensionSelector);
-    _pvg->AddVar(new PXFieldVariableSelectorHLI);
-    _pvg->AddVar(new PYFieldVariableSelectorHLI);
-    _pvg->AddVar(new PZFieldVariableSelectorHLI);
-    _pvg->AddVar(new PColorMapVariableSelectorHLI);
-    _pvg->AddVar(new PHeightVariableSelectorHLI);
-    addTab( _pvg->GetScrollArea(), "Variables" );
+    _variablesGroup->AddVar(new PDimensionSelector);
+    _variablesGroup->AddVar(new PXFieldVariableSelectorHLI);
+    _variablesGroup->AddVar(new PYFieldVariableSelectorHLI);
+    _variablesGroup->AddVar(new PZFieldVariableSelectorHLI);
+    _variablesGroup->AddVar(new PColorMapVariableSelectorHLI);
+    _variablesGroup->AddVar(new PHeightVariableSelectorHLI);
+    addTab( _variablesGroup->GetScrollArea(), "Variables" );
 
 	_seeding = new FlowSeedingSubtab(this);
 	QScrollArea* qsseed = new QScrollArea(this);
@@ -107,7 +107,7 @@ void FlowEventRouter::GetWebHelp(
 
 void FlowEventRouter::_updateTab(){
 
-    _pvg->Update(
+    _variablesGroup->Update(
         GetActiveParams(),
         _controlExec->GetParamsMgr(),
         GetActiveDataMgr()
