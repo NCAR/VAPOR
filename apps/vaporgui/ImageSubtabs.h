@@ -8,9 +8,6 @@
 #include "vapor/ResourcePath.h"
 #include <QFileDialog>
 #include "Flags.h"
-#include "PGroup.h"
-#include "PVariableWidgets.h"
-#include "PFidelitySection.h"
 
 namespace VAPoR {
 	class ControlExec;

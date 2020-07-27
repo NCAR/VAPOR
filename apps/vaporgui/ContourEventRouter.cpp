@@ -16,9 +16,6 @@
 #include "ContourEventRouter.h"
 #include "EventRouter.h"
 #include "PVariableWidgets.h"
-#include "PFidelitySection.h"
-#include "PSection.h"
-#include "PGroup.h"
 
 using namespace VAPoR;
 

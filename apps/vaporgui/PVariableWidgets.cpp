@@ -1,9 +1,8 @@
-#include "PVariableWidgets.h"
 #include <vapor/RenderParams.h>
 #include <vapor/ParamsMgr.h>
+#include "PVariableWidgets.h"
 #include "GUIStateParams.h"
 #include "VComboBox.h"
-#include "PSection.h"
 #include "PFidelitySection.h"
 
 using namespace VAPoR;
@@ -33,7 +32,7 @@ void PDimensionSelector::updateGUI() const
     int yDims = throwaway.size();
     dm->GetDimLens( rp->GetZFieldVariableName(), throwaway );
     int zDims = throwaway.size();
-    VAssert( xDims == yDims && yDims == zDims );
+    VAssert( xDims == yDims || yDims == zDims );
         
     if ( xDims == 3 ) {
         _vComboBox->SetValue("3D");

@@ -1,8 +1,6 @@
 #include "ContourSubtabs.h"
 #include "TFEditor.h"
 #include <vapor/glutil.h>
-#include "PVariableWidgets.h"
-#include "PFidelitySection.h"
 
 ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget* parent) {
 	setupUi(this);

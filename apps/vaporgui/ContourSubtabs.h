@@ -7,7 +7,6 @@
 #include "ui_ContourAnnotationGUI.h"
 #include "RangeCombos.h"
 #include "Flags.h"
-#include "PGroup.h"
 
 namespace VAPoR {
 	class ControlExec;
