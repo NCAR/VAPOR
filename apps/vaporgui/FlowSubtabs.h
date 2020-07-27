@@ -58,9 +58,10 @@ protected:
 class FlowVariablesSubtab : public QVaporSubtab {
 
 	Q_OBJECT
-    PGroup *pg;
 
 public:
+    VariablesWidget*    _variablesWidget;
+    
 	FlowVariablesSubtab(QWidget* parent);
 
 	void Update(
@@ -74,7 +75,7 @@ private:
     VAPoR::ParamsMgr*   _paramsMgr;
 
 private slots:
-    //void _dimensionalityChanged( int nDims ) const;
+    void _dimensionalityChanged( int nDims ) const;
 };
 
 //

@@ -21,8 +21,6 @@
 #include "PGroup.h"
 #include "PSection.h"
 #include "PDoubleInput.h"
-#include "PVariableWidgets.h"
-#include "PFidelitySection.h"
 
 #include <QScrollArea>
 
@@ -66,16 +64,13 @@ QVaporSubtab::QVaporSubtab(QWidget* parent) : QWidget(parent)
 //
 FlowVariablesSubtab::FlowVariablesSubtab(QWidget* parent) : QVaporSubtab(parent)
 {
-    ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);
-    PSection *vars = new PSection("Variable Selection");
-    vars->Add(new PDimensionSelector);
-    vars->Add(new PXFieldVariableSelectorHLI);
-    vars->Add(new PYFieldVariableSelectorHLI);
-    vars->Add((new PZFieldVariableSelectorHLI)->OnlyShowForDim(3));
-    vars->Add(new PColorMapVariableSelectorHLI);
+    _variablesWidget = new VariablesWidget(this);
+    _variablesWidget->Reinit(   (VariableFlags)(VECTOR | COLOR),
+                                (DimFlags)( TWOD | THREED ) );
+    _layout->addWidget( _variablesWidget, 0, 0 );
 
-    pg->Add(vars);
-    pg->Add(new PFidelitySection);
+    connect( _variablesWidget, &VariablesWidget::_dimensionalityChanged,
+        this, &FlowVariablesSubtab::_dimensionalityChanged );
 }
 
 void 
@@ -88,9 +83,46 @@ FlowVariablesSubtab::Update( VAPoR::DataMgr      *dataMgr,
     
     _paramsMgr = paramsMgr;
 
-    pg->Update(rParams, paramsMgr, dataMgr);
+    _variablesWidget->Update(dataMgr, paramsMgr, rParams);
+
+    GUIStateParams *gp = dynamic_cast<GUIStateParams*>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
+    int nDims = gp->GetFlowDimensionality();
+    bool no3DVars = dataMgr->GetDataVarNames(3).size() ? false : true;
+
+    // If dimensionality has changed, tell _variablesWidget to adjust itself for 2DFlow,
+    // and update GUIStateParams to the new dimension.
+    //
+    // Note: We don't want the variables-widget making this call because this is
+    // not always our desired behavior.  
+    //
+    // The barb renderer can operate on three two-dimensional variables.  
+    // However the flow renderer operates on two two-dimensional variables.
+    // Since the VariablesWidget has no information on what renderer it is working
+    // with, we need to configure these two different cases externally, which is what's
+    // being done here.
+    if ( no3DVars && nDims != _variablesWidget->GetActiveDimension() ) {
+            _variablesWidget->Configure2DFieldVars();
+            gp->SetFlowDimensionality( _variablesWidget->GetActiveDimension() );
+    }
+    else if (nDims != _variablesWidget->GetActiveDimension() ) {
+        if (nDims == 2 )
+            _variablesWidget->Configure2DFieldVars();
+        else
+            _variablesWidget->Configure3DFieldVars();
+        gp->SetFlowDimensionality( _variablesWidget->GetActiveDimension() );
+    }
 }
     
+void FlowVariablesSubtab::_dimensionalityChanged( int nDims ) const {
+    GUIStateParams *gp = dynamic_cast<GUIStateParams*>(_paramsMgr->GetParams(GUIStateParams::GetClassType()));
+    gp->SetFlowDimensionality( nDims );
+    if (nDims == 2 )
+        _variablesWidget->Configure2DFieldVars();
+    else
+        _variablesWidget->Configure3DFieldVars();
+    
+}
+
 //
 //================================
 //
@@ -108,6 +140,8 @@ FlowAppearanceSubtab::FlowAppearanceSubtab(QWidget* parent) : QVaporSubtab(paren
     ps->Add(new PEnumDropdown(FlowParams::RenderTypeTag, {"Tubes", "Samples"}, {FlowParams::RenderTypeStream, FlowParams::RenderTypeSamples}, "Render Type"));
     ps->Add((new PEnumDropdown(FlowParams::RenderGlyphTypeTag, {"Circle", "Arrow"}, {FlowParams::GlpyhTypeSphere, FlowParams::GlpyhTypeArrow}, "Glyph Type"))->ShowBasedOnParam(FlowParams::RenderTypeTag, FlowParams::RenderTypeSamples));
     ps->Add(new PCheckbox(FlowParams::RenderGeom3DTag, "3D Geometry"));
+//    ps->Add((new PCheckbox(FlowParams::RenderLightAtCameraTag, "Light From Camera"))->ShowBasedOnParam(FlowParams::RenderGeom3DTag));
+//    ps->Add((new PDoubleInput(FlowParams::RenderRadiusBaseTag, "Radius")));
     ps->Add((new PDoubleSliderEdit(FlowParams::RenderRadiusScalarTag, "Radius Scalar"))->SetRange(0.1, 5)->EnableDynamicUpdate());
     
     
