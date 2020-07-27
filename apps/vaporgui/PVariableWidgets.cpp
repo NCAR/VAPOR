@@ -36,17 +36,7 @@ void PDimensionSelector::dropdownTextChanged(std::string text)
     RenderParams *rp = (RenderParams*)getParams();
     int dim = text == "2D" ? 2 : 3;
     
-/*    rp->BeginGroup("Change dim");
-    if (dim == 2) {
-        rp->GetBox()->SetPlanar(true);
-        rp->GetBox()->SetOrientation(VAPoR::Box::XY);
-    }
-    else {
-        rp->GetBox()->SetPlanar(false);
-        rp->GetBox()->SetOrientation(VAPoR::Box::XYZ);
-    }*/
     rp->SetDefaultVariables(dim, true);
-    //rp->EndGroup();
 }
 
 PFlowDimensionSelector::PFlowDimensionSelector()
