@@ -4,7 +4,9 @@
 
 #include <QString>
 
-#include <VIntLineEdit.h>
+#include <ErrorReporter.h>
+
+#include "VIntLineEdit.h"
 
 VIntLineEdit::VIntLineEdit( int value ) : 
     VNumericLineEdit(),
@@ -37,6 +39,13 @@ void VIntLineEdit::_valueChanged() {
 
     int value;
     try {
+        double dValue = std::stod( str );
+       
+        if ( _checkOverflow( dValue ) ) {
+            SetValueInt( _value );
+            return;
+        }
+        
         value = (int)std::stod( str );
         SetValueInt( value );
         emit ValueChanged( _value );
@@ -58,4 +67,23 @@ std::string VIntLineEdit::_formatValue( int value ) {
         stream << value;
     }
     return stream.str();
+}
+
+bool VIntLineEdit::_checkOverflow( double value ) {
+    std::stringstream svalue;
+    svalue << std::fixed << std::setprecision(0) << value;
+    std::string error = "Value " + svalue.str() + " exceeds ";
+
+    if ( value < INT_MIN ) {
+        error += " minimum integer limit (" + std::to_string(INT_MIN) + ").";
+        MSG_ERR( error );
+        return true;
+    }
+    if ( value > INT_MAX ) {
+        error += " maximum integer limit (" + std::to_string(INT_MAX) + ").";
+        MSG_ERR( error );
+        return true;
+    }
+
+    return false;
 }

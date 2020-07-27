@@ -31,6 +31,7 @@ class VIntLineEdit : public VNumericLineEdit {
         virtual void _valueChanged();
 
         std::string  _formatValue( int value );
+        bool         _checkOverflow( double value );
         
         int _value;
 
