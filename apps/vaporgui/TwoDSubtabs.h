@@ -6,9 +6,6 @@
 #include "ui_TwoDAnnotationGUI.h"
 #include "Flags.h"
 #include <TFEditor.h>
-#include "PGroup.h"
-#include "PVariableWidgets.h"
-#include "PFidelitySection.h"
 
 namespace VAPoR {
 	class ControlExec;

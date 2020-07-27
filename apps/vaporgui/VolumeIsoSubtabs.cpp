@@ -7,7 +7,6 @@
 #include "PStringDropdownHLI.h"
 #include "PEnumDropdown.h"
 #include "PSliderEdit.h"
-//#include "PVariableWidgets.h"
 #include "PColorSelector.h"
 
 using namespace VAPoR;

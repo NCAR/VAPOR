@@ -6,9 +6,6 @@
 #include "Flags.h"
 #include <vapor/MapperFunction.h>
 #include <vapor/VolumeParams.h>
-#include "PVariableWidgets.h"
-#include "PFidelitySection.h"
-#include "PGroup.h"
 
 namespace VAPoR {
 	class ControlExec;

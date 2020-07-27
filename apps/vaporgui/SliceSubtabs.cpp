@@ -2,10 +2,6 @@
 #include "SliceSubtabs.h"
 #include "TFEditor.h"
 #include "VLineItem.h"
-#include "PGroup.h"
-
-#include "PWidget.h"
-#include "PFidelitySection.h"
 
 #define MIN_SAMPLES 1 
 #define MAX_SAMPLES 2000
