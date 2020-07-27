@@ -1,5 +1,7 @@
 #include "PVariableWidgets.h"
 #include <vapor/RenderParams.h>
+#include <vapor/ParamsMgr.h>
+#include "GUIStateParams.h"
 #include "VComboBox.h"
 #include "PSection.h"
 #include "PFidelitySection.h"
@@ -34,7 +36,7 @@ void PDimensionSelector::dropdownTextChanged(std::string text)
     RenderParams *rp = (RenderParams*)getParams();
     int dim = text == "2D" ? 2 : 3;
     
-    rp->BeginGroup("Change dim");
+/*    rp->BeginGroup("Change dim");
     if (dim == 2) {
         rp->GetBox()->SetPlanar(true);
         rp->GetBox()->SetOrientation(VAPoR::Box::XY);
@@ -42,9 +44,24 @@ void PDimensionSelector::dropdownTextChanged(std::string text)
     else {
         rp->GetBox()->SetPlanar(false);
         rp->GetBox()->SetOrientation(VAPoR::Box::XYZ);
-    }
+    }*/
     rp->SetDefaultVariables(dim, true);
-    rp->EndGroup();
+    //rp->EndGroup();
+}
+
+PFlowDimensionSelector::PFlowDimensionSelector()
+: PDimensionSelector()
+{}
+
+void PFlowDimensionSelector::dropdownTextChanged(std::string text) {
+    int dim = text == "2D" ? 2 : 3;
+
+    ParamsMgr* pm = getParamsMgr();
+    GUIStateParams *gp;
+    gp = dynamic_cast<GUIStateParams*>( pm->GetParams( GUIStateParams::GetClassType() ) );
+    gp->SetFlowDimensionality( dim );
+
+    PDimensionSelector::dropdownTextChanged( text );
 }
 
 
