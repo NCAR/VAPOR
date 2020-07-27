@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ui_VolumeAppearanceGUI.h"
-#include "ui_VolumeVariablesGUI.h"
 #include "ui_VolumeGeometryGUI.h"
 #include "ui_VolumeAnnotationGUI.h"
 #include "Flags.h"

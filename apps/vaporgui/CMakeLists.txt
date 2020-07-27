@@ -280,14 +280,12 @@ set (UIS
 	ImageAppearanceGUI.ui
 	ImageGeometryGUI.ui
 	TransformTableGUI.ui
-	TwoDVariablesGUI.ui
 	TwoDAppearanceGUI.ui
 	TwoDGeometryGUI.ui
 	TwoDAnnotationGUI.ui
 	ContourAppearanceGUI.ui
 	ContourGeometryGUI.ui
 	ContourAnnotationGUI.ui
-	WireFrameVariablesGUI.ui
 	WireFrameAppearanceGUI.ui
 	WireFrameGeometryGUI.ui
 	WireFrameAnnotationGUI.ui
@@ -308,7 +306,6 @@ set (UIS
 	VolumeAnnotationGUI.ui
 	VolumeAppearanceGUI.ui
 	VolumeGeometryGUI.ui
-	VolumeVariablesGUI.ui
 	VolumeIsoAnnotationGUI.ui
 	VolumeIsoAppearanceGUI.ui
 	VolumeIsoGeometryGUI.ui
