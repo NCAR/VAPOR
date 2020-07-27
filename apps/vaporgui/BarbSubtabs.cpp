@@ -2,8 +2,6 @@
 #include "BarbSubtabs.h"
 #include "vapor/BarbParams.h"
 #include "TFEditor.h"
-#include "PVariableWidgets.h"
-#include "PGroup.h"
 
 #define X 0
 #define Y 1
@@ -16,6 +14,26 @@
 #define LENGTH_MAX 4
 #define THICKNESS_MIN .01
 #define THICKNESS_MAX 4
+
+BarbVariablesSubtab::BarbVariablesSubtab(QWidget* parent) {
+	setupUi(this);
+	_variablesWidget->Reinit(
+		(VariableFlags)(VECTOR | HEIGHT | COLOR),
+		(DimFlags)(TWOD | THREED)
+	);
+}
+
+void BarbVariablesSubtab::Update(
+	VAPoR::DataMgr *dataMgr,
+	VAPoR::ParamsMgr *paramsMgr,
+	VAPoR::RenderParams *rParams
+) {
+	_variablesWidget->Update(dataMgr, paramsMgr, rParams);
+}
+
+void BarbVariablesSubtab::Initialize(VAPoR::BarbParams* bParams,
+								VAPoR::DataMgr* dataMgr) {
+}
 
 BarbGeometrySubtab::BarbGeometrySubtab(QWidget* parent) {
 	setupUi(this);

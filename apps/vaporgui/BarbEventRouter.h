@@ -19,8 +19,6 @@ namespace VAPoR {
 }
 
 class GLBarbImageWindow;
-class PGroup;
-class PVariablesGroup;
 
 //!
 //! \class BarbEventRouter
@@ -45,9 +43,6 @@ public:
 
 	virtual void hookUpTab() {}
 
-    virtual bool Supports2DVariables() const { return true; }
-    virtual bool Supports3DVariables() const { return true; }
-
 	void GetWebHelp(
 		vector <pair <string, string> > &help
 	) const;
@@ -60,6 +55,11 @@ public:
 
 	string GetType() const {return GetClassType(); }
     
+    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
+
+    virtual bool Supports2DVariables() const { return true; }
+    virtual bool Supports3DVariables() const { return true; }
+
 protected:
 	virtual void _updateTab();
 	virtual void _initializeTab();
@@ -83,7 +83,7 @@ private:
 	//! it would be confusing if wheel events also scrolled the tab itself
 	 void wheelEvent(QWheelEvent*) {}
 
-    PGroup* _pVarGroup;
+	BarbVariablesSubtab *_variables;
 	BarbGeometrySubtab *_geometry;
 	BarbAppearanceSubtab *_appearance;
 	BarbAnnotationSubtab *_annotation;
