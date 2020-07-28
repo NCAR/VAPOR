@@ -509,7 +509,7 @@ workflows:
   nightly:
     triggers:
       - schedule:
-           cron: "0 9 * * 5" #weekly cron job on Friday @ 2:00am MST
+           cron: "* 9 * * 5" #weekly cron job on Friday @ 2:00am MST
            filters:
              branches:
                only:
