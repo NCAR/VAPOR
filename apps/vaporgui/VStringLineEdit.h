@@ -33,13 +33,13 @@ class VStringLineEdit : public VContainer {
         //! Create a custom context menu for the QLineEdit
         void SetCustomContextMenu();
 
-    protected:
+    private:
         QLineEdit*  _lineEdit;
         std::string _strValue;
 
+    protected:
         std::string _getText() const;
         void _setValueString( std::string value );
-        virtual void _showMenu( const QPoint& pos ) {};
 
     protected slots:
         virtual void _valueChanged();
