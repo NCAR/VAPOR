@@ -101,6 +101,7 @@ jobs:
           name: check for warnings
           command: |
             if grep -q warning /tmp/output.txt; then
+               cat /tmp/output.txt
                exit -1
             else
                exit 0
