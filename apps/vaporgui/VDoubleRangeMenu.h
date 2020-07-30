@@ -4,9 +4,9 @@
 
 class VDoubleLineEditAction;
 
-//! \class VIntRangeMenu
+//! \class VDoubleRangeMenu
 //! \ingroup Public_GUI
-//! \brief A menu that allows the user to control the range of integer values
+//! \brief A menu that allows the user to control the range of double values
 //! that can be set by a widget.  Also allows for setting the numeric format
 //! that the number is displayed with.
 
