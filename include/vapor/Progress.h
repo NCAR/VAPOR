@@ -1,9 +1,10 @@
 #pragma once
 #include <string>
 #include <functional>
+#include <vapor/common.h>
 
 namespace VAPoR {
-class Progress {
+class COMMON_API Progress {
 public:
     typedef std::function<void(const std::string&, long, bool)> Start_t;
     typedef std::function<void(long, bool*)> Update_t;
