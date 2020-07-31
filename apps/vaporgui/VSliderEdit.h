@@ -4,11 +4,11 @@
 #include "VContainer.h"
 
 class VSlider;
-class VLineEdit;
+class VLineEdit_Deprecated;
 
 //! class VSliderEdit
 //!
-//! Wraps a VSlider and a VLineEdit for selecting a numeric value within a
+//! Wraps a VSlider and a VLineEdit_Deprecated for selecting a numeric value within a
 //! defined range.  Allows for integer and double value types.  This class
 //! also provides vaporgui's standard setter/getter functions and signals.
 class VSliderEdit : public VContainer {
@@ -25,7 +25,7 @@ class VSliderEdit : public VContainer {
     double GetValue() const;
 
   private:
-    VLineEdit *_lineEdit;
+    VLineEdit_Deprecated *_lineEdit;
     VSlider *_slider;
     double _minValid;
     double _maxValid;

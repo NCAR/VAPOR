@@ -8,8 +8,8 @@
 
 VSlider::VSlider(double min, double max)
     : VContainer(),
-      _minValid(0.0),
-      _maxValid(0.0),
+      _min(0.0),
+      _max(0.0),
       _stepSize(1.0) {
     _slider = new QSlider;
     _slider->setOrientation(Qt::Horizontal);
@@ -30,24 +30,52 @@ void VSlider::SetValue(double value) {
     if (_stepSize <= 0)
         return;
 
-    if (value > _maxValid)
-        value = _maxValid;
-    if (value < _minValid)
-        value = _minValid;
+    if (value > _max)
+        value = _max;
+    if (value < _min)
+        value = _min;
 
-    value = (value - _minValid) / _stepSize;
+    value = (value - _min) / _stepSize;
     _slider->blockSignals(true);
     _slider->setValue(value);
     _slider->blockSignals(false);
 }
 
+double VSlider::GetMinimum() const {
+    return _min;
+}
+
+void VSlider::SetMinimum(double min) {
+    if (min > _max)
+        _max = min;
+    SetRange(min, _max);
+}
+
+double VSlider::GetMaximum() const {
+    return _max;
+}
+
+void VSlider::SetMaximum(double max) {
+    if (max < _min)
+        _min = max;
+    SetRange(_min, max);
+}
+
 void VSlider::SetRange(double min, double max) {
-    VAssert(min <= max);
+    //VAssert( min <= max );
 
-    _stepSize = (max - min) / NUM_STEPS;
+    double previousValue = GetValue();
 
-    _minValid = min;
-    _maxValid = max;
+    _min = min;
+    _max = max;
+    _stepSize = (_max - _min) / NUM_STEPS;
+
+    if (previousValue < min)
+        previousValue = min;
+    if (previousValue > max)
+        previousValue = max;
+
+    SetValue(previousValue);
 }
 
 double VSlider::GetValue() const {
@@ -57,11 +85,11 @@ double VSlider::GetValue() const {
     // note - Qt does not move the sliders to positions 0, 1, 99, or 100 until
     // the mouse is released.
     if (sliderVal <= 2) // positions 0, 1 and 2
-        return _minValid;
+        return _min;
     if (sliderVal >= NUM_STEPS - 2) // positions 98, 99, and 100
-        return _maxValid;
+        return _max;
 
-    double value = _stepSize * _slider->value() + _minValid;
+    double value = _stepSize * _slider->value() + _min;
     return value;
 }
 

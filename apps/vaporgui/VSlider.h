@@ -18,15 +18,21 @@ class VSlider : public VContainer {
   public:
     VSlider(double min = 0, double max = 1);
 
-    void SetValue(double value);
-    void SetRange(double min, double max);
-
     double GetValue() const;
+    void SetValue(double value);
+
+    double GetMinimum() const;
+    void SetMinimum(double min);
+
+    double GetMaximum() const;
+    void SetMaximum(double max);
+
+    void SetRange(double min, double max);
 
   private:
     QSlider *_slider;
-    double _minValid;
-    double _maxValid;
+    double _min;
+    double _max;
     double _stepSize;
 
   private slots:
