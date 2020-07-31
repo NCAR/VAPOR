@@ -577,6 +577,7 @@ int  FlowRenderer::_renderAdvectionHelper(bool renderDirection)
     
     shader->SetUniform("density", renderType == FlowParams::RenderTypeDensity);
     shader->SetUniform("falloff", (float)rp->GetValueDouble(FlowParams::RenderDensityFalloffTag, 1));
+    shader->SetUniform("tone", (float)rp->GetValueDouble(FlowParams::RenderDensityToneMappingTag, 1));
     
 //    Features supported by shaders but not implemented in GUI/not finished
 //

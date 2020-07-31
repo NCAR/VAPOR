@@ -140,6 +140,7 @@ public:
     static const std::string RenderGlyphOnlyLeadingTag;
     
     static const std::string RenderDensityFalloffTag;
+    static const std::string RenderDensityToneMappingTag;
     
     static const std::string RenderFadeTailTag;
     static const std::string RenderFadeTailStartTag;

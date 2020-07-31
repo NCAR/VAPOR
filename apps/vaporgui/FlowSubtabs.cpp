@@ -182,6 +182,7 @@ FlowAppearanceSubtab::FlowAppearanceSubtab(QWidget* parent) : QVaporSubtab(paren
     densityGroup->ShowBasedOnParam(FlowParams::RenderTypeTag, FlowParams::RenderTypeDensity);
     ps->Add(densityGroup);
     densityGroup->Add((new PDoubleSliderEdit(FlowParams::RenderDensityFalloffTag, "Density Falloff"))->SetRange(0.5, 10)->EnableDynamicUpdate());
+    densityGroup->Add((new PDoubleSliderEdit(FlowParams::RenderDensityToneMappingTag, "Tone Mapping"))->SetRange(0, 1)->EnableDynamicUpdate());
     densityGroup->Add((new PCheckbox("invert"))->SetTooltip("For rendering on light backgrounds"));
     densityGroup->Add(fadeTailWidget());
     

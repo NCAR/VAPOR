@@ -10,6 +10,7 @@ uniform float border = 0.f;
 uniform vec3 borderColor = vec3(1.0f);
 uniform bool antiAlias = false;
 uniform float falloff = 1.0f;
+uniform float tone = 1.0f;
 uniform bool density = false;
 
 uniform sampler1D LUT;
@@ -45,8 +46,11 @@ void main()
         color = c;
     }
     
-    if (density)
+    if (density) {
         color.rgb *= vec3(pow(1-abs(t), falloff));
+        // Not exactly correct but will do for now
+        color.rgb = 1-exp(-tone * color.rgb);
+    }
 
     color.a *= fFade;
     if (fFade < 0.05)
