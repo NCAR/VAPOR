@@ -9,6 +9,8 @@ uniform float radius = 0.05f;
 uniform float border = 0.f;
 uniform vec3 borderColor = vec3(1.0f);
 uniform bool antiAlias = false;
+uniform float falloff = 1.0f;
+uniform bool density = false;
 
 uniform sampler1D LUT;
 uniform vec2 mapRange;
@@ -42,6 +44,9 @@ void main()
 
         color = c;
     }
+    
+    if (density)
+        color.rgb *= vec3(pow(1-abs(t), falloff));
 
     color.a *= fFade;
     if (fFade < 0.05)

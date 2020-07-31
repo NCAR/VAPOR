@@ -172,6 +172,8 @@ set (SRCS
 	PDisplay.cpp
 	PDisplay.h
 	PDisplayHLI.h
+	PLabel.cpp
+	PLabel.h
 	PLineItem.cpp
 	PLineItem.h
 	PEnumDropdown.cpp
