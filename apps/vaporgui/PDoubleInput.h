@@ -3,7 +3,7 @@
 #include "PLineItem.h"
 //#include "VaporWidgetsFwd.h"
 
-class VLineEdit;
+class VLineEdit_Deprecated;
 
 //! \class PDoubleInput
 //! Creates a Qt text input for double values synced with the paramsdatabase using the PWidget interface.
@@ -12,7 +12,7 @@ class VLineEdit;
 class PDoubleInput : public PLineItem {
     Q_OBJECT
 
-    VLineEdit *_doubleInput;
+    VLineEdit_Deprecated *_doubleInput;
 
 public:
     PDoubleInput(const std::string &tag, const std::string &label = "");

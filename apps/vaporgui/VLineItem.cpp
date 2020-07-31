@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "VLineItem.h"
 #include <QHBoxLayout>
 #include <QLabel>
@@ -19,14 +21,13 @@ VLineItem::VLineItem(const std::string &label, QWidget *centerWidget, QWidget *r
     layout()->addWidget(rightWidget);
 }
 
-VLineItem::VLineItem(const std::string &label, QWidget *rightWidget) : VLineItem(label, (QLayoutItem *)new QSpacerItem(108, 20, QSizePolicy::Expanding, QSizePolicy::Minimum), rightWidget) {}
+VLineItem::VLineItem(const std::string &label, QWidget *rightWidget) : VLineItem(label, (QLayoutItem *)new QSpacerItem(0, 20, QSizePolicy::Maximum, QSizePolicy::Minimum), rightWidget) {}
 
 VLineItem::VLineItem(const std::string &label)
 {
     setLayout(new QHBoxLayout);
     layout()->setContentsMargins(_LEFT_MARGIN, _TOP_MARGIN, _RIGHT_MARGIN, _BOTTOM_MARGIN);
 
-    layout()->addWidget(new QLabel(label.c_str()));
-
-    // QWidgetItem broke in Qt5 so this class had to be refactored not to use it.
+    QLabel *qLabel = new QLabel(label.c_str());
+    layout()->addWidget(qLabel);
 }

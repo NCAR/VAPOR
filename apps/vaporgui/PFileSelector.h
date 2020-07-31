@@ -3,7 +3,7 @@
 #include "PLineItem.h"
 
 class VPushButton;
-class VLineEdit;
+class VLineEdit_Deprecated;
 class QString;
 
 //! \class PFileSelector
@@ -13,8 +13,8 @@ class QString;
 class PFileSelector : public PLineItem {
     Q_OBJECT
 
-    VPushButton *_button;
-    VLineEdit *  _pathTexbox;
+    VPushButton *         _button;
+    VLineEdit_Deprecated *_pathTexbox;
 
     bool        _syncWithSettings = false;
     std::string _syncWithSettingsTag;

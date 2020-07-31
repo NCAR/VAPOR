@@ -402,16 +402,17 @@ WARN_LOGFILE           =
 
 INPUT = @CMAKE_CURRENT_SOURCE_DIR@/mainpage.dox \
 		@PROJECT_SOURCE_DIR@/include/vapor \
-		@PROJECT_SOURCE_DIR@/apps/vaporgui/VizWinMgr.h \
-		@PROJECT_SOURCE_DIR@/apps/vaporgui/TabManager.h \
-		@PROJECT_SOURCE_DIR@/apps/vaporgui/VizWin.h \
-		@PROJECT_SOURCE_DIR@/apps/vaporgui/EventRouter.h \
-		@PROJECT_SOURCE_DIR@/apps/vaporgui/BarbEventRouter.h \
-		@PROJECT_SOURCE_DIR@/apps/vaporgui/HelloEventRouter.h \
-		@PROJECT_SOURCE_DIR@/apps/vaporgui/MappingFrame.h \
-		@PROJECT_SOURCE_DIR@/apps/vaporgui/VariablesWidget.h \
-		@PROJECT_SOURCE_DIR@/apps/vaporgui/RenderHolder.h \
-		@PROJECT_SOURCE_DIR@/apps/vaporgui/ErrorReporter.h
+		@PROJECT_SOURCE_DIR@/apps/vaporgui
+#		@PROJECT_SOURCE_DIR@/apps/vaporgui/VizWinMgr.h \
+#		@PROJECT_SOURCE_DIR@/apps/vaporgui/TabManager.h \
+#		@PROJECT_SOURCE_DIR@/apps/vaporgui/VizWin.h \
+#		@PROJECT_SOURCE_DIR@/apps/vaporgui/EventRouter.h \
+#		@PROJECT_SOURCE_DIR@/apps/vaporgui/BarbEventRouter.h \
+#		@PROJECT_SOURCE_DIR@/apps/vaporgui/HelloEventRouter.h \
+#		@PROJECT_SOURCE_DIR@/apps/vaporgui/MappingFrame.h \
+#		@PROJECT_SOURCE_DIR@/apps/vaporgui/VariablesWidget.h \
+#		@PROJECT_SOURCE_DIR@/apps/vaporgui/RenderHolder.h \
+#		@PROJECT_SOURCE_DIR@/apps/vaporgui/ErrorReporter.h
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 

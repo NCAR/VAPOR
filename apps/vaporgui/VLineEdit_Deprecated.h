@@ -11,23 +11,23 @@
 
 #include "VContainer.h"
 
-//! \class VLineEdit
+//! \class VLineEdit_Deprecated
 //!
 //! Wraps a QLineEdit with vaporgui's standard setter/getter functions.
 //! Handles string and double types, as well as precision and display of
 //! double values.
 
-class VLineEdit : public VContainer {
+class VLineEdit_Deprecated : public VContainer {
     Q_OBJECT
 
 public:
-    VLineEdit(const std::string &value = "");
+    VLineEdit_Deprecated(const std::string &value = "");
 
     void        SetValue(double value);
     void        SetValue(const std::string &value);
     std::string GetValue() const;
 
-    // Note: VLineEdit does NOT support an integer type at this point.
+    // Note: VLineEdit_Deprecated does NOT support an integer type at this point.
     // When isDouble == false, it represents a string.
     void SetIsDouble(bool isDouble);
     //! Sets the line edit to read-only based on the value of b
