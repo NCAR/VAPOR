@@ -320,10 +320,7 @@ MainForm::MainForm(
     _paramsMgr = _controlExec->GetParamsMgr();
     _paramsMgr->RegisterStateChangeCB(
         std::bind(&MainForm::_stateChangeCB, this));
-    _paramsMgr->RegisterIntermediateStateChangeCB([this]() {
-        QEvent *event = new QEvent(ParamsIntermediateChangeEvent);
-        QApplication::postEvent(this, event);
-    });
+    _paramsMgr->RegisterIntermediateStateChangeCB(std::bind(&MainForm::_intermediateStateChangedCB, this));
     _paramsMgr->RegisterStateChangeFlag(&_stateChangeFlag);
 
     // Set Defaults from startup file
@@ -1223,6 +1220,9 @@ void MainForm::fileExit() {
 }
 
 void MainForm::_stateChangeCB() {
+    if (_paramsEventQueued)
+        return;
+    _paramsEventQueued = true;
 
     // Generate an application event whenever state changes
     //
@@ -1230,6 +1230,15 @@ void MainForm::_stateChangeCB() {
     QApplication::postEvent(this, event);
 
     _eventsSinceLastSave++;
+}
+
+void MainForm::_intermediateStateChangedCB() {
+    if (_paramsEventQueued)
+        return;
+    _paramsEventQueued = true;
+
+    QEvent *event = new QEvent(ParamsIntermediateChangeEvent);
+    QApplication::postEvent(this, event);
 }
 
 void MainForm::undoRedoHelper(bool undo) {
@@ -1762,6 +1771,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
     // Only update the GUI if the Params state has changed
     //
     if (event->type() == ParamsChangeEvent) {
+        _paramsEventQueued = false;
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
         if (_stats) {
@@ -1793,6 +1803,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
     }
 
     if (event->type() == ParamsIntermediateChangeEvent) {
+        _paramsEventQueued = false;
         // Rendering the GUI becomes a bottleneck
         //        _tabMgr->Update();
 

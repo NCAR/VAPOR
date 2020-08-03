@@ -189,6 +189,7 @@ class MainForm : public QMainWindow {
     bool _begForCitation;
     int _eventsSinceLastSave;
     bool _buttonPressed;
+    bool _paramsEventQueued = false;
 
     ErrorReporter *_errRep;
 
@@ -200,6 +201,7 @@ class MainForm : public QMainWindow {
 
     void _performSessionAutoSave();
     void _stateChangeCB();
+    void _intermediateStateChangedCB();
 
     QMdiArea *getMDIArea() { return _mdiArea; }
 
