@@ -192,6 +192,7 @@ private:
  bool _begForCitation;
  int _eventsSinceLastSave;
  bool _buttonPressed;
+ bool _paramsEventQueued = false;
 
  ErrorReporter *_errRep;
     
@@ -204,6 +205,7 @@ private:
 
  void _performSessionAutoSave();
  void _stateChangeCB();
+ void _intermediateStateChangedCB();
 
  QMdiArea* getMDIArea() {return _mdiArea;}
 
