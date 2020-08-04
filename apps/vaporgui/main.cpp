@@ -198,7 +198,7 @@ int           main(int argc, char **argv)
     int estatus = 0;
     if (opt.render) { estatus = mw->RenderAndExit(opt.renderRange.min, opt.renderRange.max, opt.outputPath, opt.resolution.nx, opt.resolution.ny); }
 
-    if (estatus == 0) estatus = a.exec();
+    if (estatus == 0) { estatus = a.exec(); }
 
     if (diagfp) fclose(diagfp);
     if (errfp) fclose(errfp);
