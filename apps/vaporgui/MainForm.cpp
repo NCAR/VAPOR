@@ -1885,20 +1885,12 @@ void MainForm::_setAnimationOnOff(bool on) {
 		enableAnimationWidgets(false);
 
 		_App->removeEventFilter(this);
-//        if (_progressEnabled) {
-//            _disableProgressWidget(); // Need to disable as no longer have event filter
-//            _needToReenableProgressAfterAnimation = true;
-//        }
 	}
 	else  {
 		_playForwardAction->setChecked(false);
 		_playBackwardAction->setChecked(false);
 		enableAnimationWidgets(true);
 		_App->installEventFilter(this);
-//        if (_needToReenableProgressAfterAnimation) {
-//            _createProgressWidget();
-//            _needToReenableProgressAfterAnimation = false;
-//        }
 
 		// Generate an event and force an update
 		//
