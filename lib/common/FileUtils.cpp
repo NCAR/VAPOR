@@ -100,6 +100,13 @@ std::string FileUtils::Extension(const std::string &path)
     return basename.substr(index + 1);
 }
 
+std::string FileUtils::RemoveExtension(const std::string &path)
+{
+    const string extension = Extension(path);
+    if (extension.empty()) return path;
+    return path.substr(0, path.size() - Extension(path).size() - 1);
+}
+
 std::string FileUtils::POSIXPathToWindows(std::string path)
 {
     std::replace(path.begin(), path.end(), '/', '\\');

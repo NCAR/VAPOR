@@ -17,6 +17,7 @@ COMMON_API std::string HomeDir();
 COMMON_API std::string Basename(const std::string &path);
 COMMON_API std::string Dirname(const std::string &path);
 COMMON_API std::string Extension(const std::string &path);
+COMMON_API std::string RemoveExtension(const std::string &path);
 COMMON_API std::string POSIXPathToWindows(std::string path);
 COMMON_API std::string POSIXPathToCurrentOS(const std::string &path);
 COMMON_API std::string CleanupPath(std::string path);
