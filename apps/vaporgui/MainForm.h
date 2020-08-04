@@ -72,6 +72,8 @@ class MainForm : public QMainWindow {
         vector<QString> files, QApplication *app, QWidget *parent = 0);
     ~MainForm();
 
+    int RenderAndExit(int start, int end, const std::string &baseFile, int width, int height);
+
   protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
@@ -331,9 +333,8 @@ class MainForm : public QMainWindow {
     void captureJpegSequence();
     void captureTiffSequence();
     void capturePngSequence();
-    void startAnimCapture(
-        string filter,
-        string defaultSuffix);
+    void selectAnimCatureOutput(string filter, string defaultSuffix);
+    void startAnimCapture(string baseFile, string defaultSuffix = "tiff");
     void endAnimCapture();
     void captureSingleImage(
         string filter,
