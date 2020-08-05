@@ -100,7 +100,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#forking-vapor-s-code">Forking Vapor’s code</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#download-the-third-party-libraries">Download the Third-Party Libraries</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#install-system-libraries">Install System Libraries</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#build-vapor-with-cmake">Build Vapor with CMake</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-vapor-with-cmake">Build Vapor with CMake</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#changing-cmake-variables">Changing CMake Variables</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#adding-to-the-code-base">Adding to the Code Base</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="createDataReader.html">Creating a Data Reader</a></li>
 <li class="toctree-l4"><a class="reference internal" href="createRenderer.html">Creating a Renderer</a></li>
@@ -185,11 +188,11 @@
 <div class="contents local topic" id="table-of-contents">
 <p class="topic-title">Table of contents:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#where-to-start" id="id3">Where to start?</a></p></li>
-<li><p><a class="reference internal" href="#bug-reports-and-feature-requests" id="id4">Bug Reports and Feature Requests</a></p></li>
-<li><p><a class="reference internal" href="#code-contributions" id="id5">Code Contributions</a></p></li>
-<li><p><a class="reference internal" href="#contributing-to-vapor-s-documentation" id="id6">Contributing to Vapor’s Documentation</a></p></li>
-<li><p><a class="reference internal" href="#contributing-to-vapor-s-gallery" id="id7">Contributing to Vapor’s Gallery</a></p></li>
+<li><p><a class="reference internal" href="#where-to-start" id="id4">Where to start?</a></p></li>
+<li><p><a class="reference internal" href="#bug-reports-and-feature-requests" id="id5">Bug Reports and Feature Requests</a></p></li>
+<li><p><a class="reference internal" href="#code-contributions" id="id6">Code Contributions</a></p></li>
+<li><p><a class="reference internal" href="#contributing-to-vapor-s-documentation" id="id7">Contributing to Vapor’s Documentation</a></p></li>
+<li><p><a class="reference internal" href="#contributing-to-vapor-s-gallery" id="id8">Contributing to Vapor’s Gallery</a></p></li>
 </ul>
 </div>
 <div class="admonition note">
@@ -198,7 +201,7 @@
 Guide</a>.</p>
 </div>
 <div class="section" id="where-to-start">
-<h2><a class="toc-backref" href="#id3">Where to start?</a><a class="headerlink" href="#where-to-start" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id4">Where to start?</a><a class="headerlink" href="#where-to-start" title="Permalink to this headline">¶</a></h2>
 <p>All contributions are welcome, and can include:</p>
 <blockquote>
 <div><ul class="simple">
@@ -215,14 +218,14 @@ Guide</a>.</p>
 <p>Feel free to ask questions on the <a class="reference external" href="https://vapor.discourse.group">Vapor Discourse Forum</a>.</p>
 </div>
 <div class="section" id="bug-reports-and-feature-requests">
-<span id="contributing-bugreports"></span><h2><a class="toc-backref" href="#id4">Bug Reports and Feature Requests</a><a class="headerlink" href="#bug-reports-and-feature-requests" title="Permalink to this headline">¶</a></h2>
+<span id="contributing-bugreports"></span><h2><a class="toc-backref" href="#id5">Bug Reports and Feature Requests</a><a class="headerlink" href="#bug-reports-and-feature-requests" title="Permalink to this headline">¶</a></h2>
 <p>To submit a new bug report or feature request, you can click the “New issue” button in the upper right of our <a class="reference external" href="https://github.com/ncar/vapor/issues">GitHub issue tracker</a>, or by <a class="reference external" href="https://github.com/NCAR/VAPOR/issues/new/choose">clicking on this link</a>.</p>
 <p>Bug reports are an important part of making Vapor more stable.  A bug report should have a brief description of the problem, as well as a list of steps to reproduce the problem.  See <a class="reference external" href="https://stackoverflow.com/help/mcve">this stackoverflow article</a> for tips on writing a good bug report.</p>
 <p>If you’re building Vapor from its source code and find a bug, always try to reproduce your bug on the <em>master</em> branch.</p>
 <p>It is also worth searching for existing bug reports and pull requests to see if the issue has already been reported and/or fixed.  It’s possible that a bug may be fixed, but it has not been merged into <em>master</em> or incorporated into a current installer.</p>
 </div>
 <div class="section" id="code-contributions">
-<span id="contributing-git"></span><h2><a class="toc-backref" href="#id5">Code Contributions</a><a class="headerlink" href="#code-contributions" title="Permalink to this headline">¶</a></h2>
+<span id="contributing-git"></span><h2><a class="toc-backref" href="#id6">Code Contributions</a><a class="headerlink" href="#code-contributions" title="Permalink to this headline">¶</a></h2>
 <p>If you’ve found an issue you’d like to fix, you’ll need to compile Vapor, fix the issue at hand, and submit your changes for review and approval.  Prerequisite software includes:</p>
 <blockquote>
 <div><ul>
@@ -270,7 +273,7 @@ writing code for Vapor.</p>
 </div></blockquote>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Alternatively to downloading our pre-built libraries, you can build the libraries yourself and store them wherever you want.  This is a more complex exercise.  If you choose to do this, you must also configure Vapor’s CMake configuration to point to your custom directory.  If you wish to go down this route, you may follow these build instructions for <a class="reference external" href="https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing">Windows</a> and <a class="reference external" href="https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing">UNIX</a>.</p>
+<p>Alternatively to downloading our pre-built libraries, you can build the libraries yourself and store them wherever you want.  This is a more complex exercise.  If you choose to do this, you must also configure Vapor’s CMake configuration to point to your custom directory.  Do not build the libraries in the same directory that Vapor is being built in - this will interfere with the generation of installers.  If you wish to go down this route, you may follow these build instructions for <a class="reference external" href="https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing">Windows</a> and <a class="reference external" href="https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing">UNIX</a>.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -325,6 +328,10 @@ writing code for Vapor.</p>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Different versions of Qt have presented bugs.  It’s reocmmended that developers use the same library versions as those listed above, especially for Qt.</p>
+</div>
 <p>The source code for these libraries by be downloaded <a class="reference external" href="https://drive.google.com/open?id=1sWIV-Y66aFuDkC2oDnceIIUJDDH4puKI">here</a>.</p>
 </div>
 <div class="section" id="install-system-libraries">
@@ -357,6 +364,56 @@ writing code for Vapor.</p>
 </dd>
 </dl>
 <p>If compilation is successful, you can find Vapor’s executable in the <em>bin</em> directory within your <em>build</em> directory.</p>
+<div class="section" id="changing-cmake-variables">
+<h4>Changing CMake Variables<a class="headerlink" href="#changing-cmake-variables" title="Permalink to this headline">¶</a></h4>
+<p>Some users may want their build to target a different library than what is distributed with Vapor’s 3rd party library bundle.  Different libraries can be targetted in two ways, 1) through the <em>ccmake</em> tool, and 2) by editing the file located in &lt;source-directory&gt;/site_files/site.NCAR.</p>
+<div class="section" id="ccmake">
+<h5>ccmake<a class="headerlink" href="#ccmake" title="Permalink to this headline">¶</a></h5>
+<p>Cmake provides an interface to set build variables called <em>ccmake</em>.  From your build directory, you can issue the ccmake command, followed by the path to Vapor’s source code.  If your build directory is in &lt;source_directory&gt;/build, issuing ccmake from this directory would look like this:</p>
+<blockquote>
+<div><p>ccmake ..</p>
+</div></blockquote>
+<div class="align-center figure" id="id3">
+<img alt="_images/ccmake.png" src="_images/ccmake.png" />
+<p class="caption"><span class="caption-text">ccmake’s interface for changing build variables after issuing “<em>ccmake ..</em>” on Vapor’s source directory.  This is assuming your build directory is in &lt;vapor_source&gt;/build.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+<p>The above interface allows you to set targets for some (but not all) of Vapor’s libraries.  <a class="reference external" href="https://cmake.org/cmake/help/v3.0/manual/ccmake.1.html">More information on ccmake can be found here.</a>  If you need to re-target a library that is not listed by the <em>ccmake</em> utility, you will need to edit the site.NCAR file, described below.</p>
+</div>
+<div class="section" id="site-ncar">
+<h5>site.NCAR<a class="headerlink" href="#site-ncar" title="Permalink to this headline">¶</a></h5>
+<p>The site.NCAR file is what is used by the Vapor team to define what third party libraries a build should link to.  This file is located at &lt;vapor_source&gt;/site_files/site.NCAR, and contains conditionals for buildong on Darwin (OSX), Windows, and Linux (Ubuntu/CentOS).  There are also conditionals for building on NCAR’s visualization cluster, Casper.</p>
+<p>The THIRD_PARTY_DIR variable in this file may be overloaded to re-target the location of Vapor’s libraries.  Special values exist for the Qt and Python libraries becasuse they are built outside of the THIRD_PARTY_DIR, and must be manually overridden.  These variables are:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 76%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>QTDIR</p></td>
+<td><p>Directory where the Qt library has been built/installed</p></td>
+</tr>
+<tr class="row-even"><td><p>Qt5Core_DIR</p></td>
+<td><p>Directory where the Qt5Core shared library was built/installed</p></td>
+</tr>
+<tr class="row-odd"><td><p>QT_QMAKE_EXECUTABLE</p></td>
+<td><p>Location of Qt’s QMake executable</p></td>
+</tr>
+<tr class="row-even"><td><p>PYTHONDIR</p></td>
+<td><p>Directory containing Python’s libraries and headers</p></td>
+</tr>
+<tr class="row-odd"><td><p>PYTHONPATH</p></td>
+<td><p>Directory containing Python’s site packages</p></td>
+</tr>
+<tr class="row-even"><td><p>PYTHONVERSION</p></td>
+<td><p>Version of Python</p></td>
+</tr>
+<tr class="row-odd"><td><p>NUMPY_INCLUDE_DIR</p></td>
+<td><p>Directory containing numpy’s header files</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div class="section" id="adding-to-the-code-base">
 <h3>Adding to the Code Base<a class="headerlink" href="#adding-to-the-code-base" title="Permalink to this headline">¶</a></h3>
@@ -388,7 +445,7 @@ writing code for Vapor.</p>
 </div>
 </div>
 <div class="section" id="contributing-to-vapor-s-documentation">
-<span id="contributing-documentation"></span><h2><a class="toc-backref" href="#id6">Contributing to Vapor’s Documentation</a><a class="headerlink" href="#contributing-to-vapor-s-documentation" title="Permalink to this headline">¶</a></h2>
+<span id="contributing-documentation"></span><h2><a class="toc-backref" href="#id7">Contributing to Vapor’s Documentation</a><a class="headerlink" href="#contributing-to-vapor-s-documentation" title="Permalink to this headline">¶</a></h2>
 <p>Vapor uses the <a class="reference external" href="https://www.sphinx-doc.org/en/master/">Sphinx</a> documentation generator.</p>
 <p>To contribute to Vapor’s documentation, first follow these <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/installation.html">instructions for installing Sphinx</a>.</p>
 <p>After installing sphinx, you will have a program called <em>sphinx-build</em> available.  You can find its location by typing the command <em>which sphinx-build</em>.  This location needs to be applied to the <em>SPHINXBUILD</em> variable, at line 6 in &lt;vapor-install-dir&gt;/docs/sphinx/Makefile.</p>
@@ -396,7 +453,7 @@ writing code for Vapor.</p>
 <p>Once the .rst file changes are complete, type <em>make ..</em> from the &lt;vapor-build-dir&gt;/docs/sphinx directory.  This will generate the HTML, which will be saved in &lt;vapor-install-dir&gt;/docs.  The HTML and .rst files can then be committed in Git, and added to a pull request for review.</p>
 </div>
 <div class="section" id="contributing-to-vapor-s-gallery">
-<span id="contributing-visgallery"></span><h2><a class="toc-backref" href="#id7">Contributing to Vapor’s Gallery</a><a class="headerlink" href="#contributing-to-vapor-s-gallery" title="Permalink to this headline">¶</a></h2>
+<span id="contributing-visgallery"></span><h2><a class="toc-backref" href="#id8">Contributing to Vapor’s Gallery</a><a class="headerlink" href="#contributing-to-vapor-s-gallery" title="Permalink to this headline">¶</a></h2>
 <p>Contributing to <a class="reference external" href="https://visgallery.ucar.edu/category/visualization-software/vapor/">Vapor’s visualiation gallery</a> helps us understand how the application is being used, and can drive future requirements.  If you’d like to share your visualizations with us, you can submit them to our gallery by filling out the following form:</p>
 <p><a class="reference external" href="https://docs.google.com/forms/d/e/1FAIpQLSdJQA_1LGZ-DNySLGn4c9TekVuUcwvKo4Hgw3uBf9BmSDipUw/viewform?vc=0&amp;c=0&amp;w=1">Submit a visualization to Vapor’s gallery</a></p>
 </div>

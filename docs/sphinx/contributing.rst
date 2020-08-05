@@ -105,7 +105,7 @@ If building on Linux or OSX, the third party libraries must be placed in /usr/lo
 
     `CentOS third-party libraries <https://drive.google.com/open?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0>`_
 
-.. note:: Alternatively to downloading our pre-built libraries, you can build the libraries yourself and store them wherever you want.  This is a more complex exercise.  If you choose to do this, you must also configure Vapor's CMake configuration to point to your custom directory.  If you wish to go down this route, you may follow these build instructions for `Windows <https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing>`_ and `UNIX <https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing>`_.
+.. note:: Alternatively to downloading our pre-built libraries, you can build the libraries yourself and store them wherever you want.  This is a more complex exercise.  If you choose to do this, you must also configure Vapor's CMake configuration to point to your custom directory.  Do not build the libraries in the same directory that Vapor is being built in - this will interfere with the generation of installers.  If you wish to go down this route, you may follow these build instructions for `Windows <https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing>`_ and `UNIX <https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing>`_.
 
 .. note:: The file <vapor-source>/site_files/site.NCAR is used to specify the location of Vapor's third party libraries.  If you would like to link to a different set of libraries, edit this file to specify your choice.  CMake variables passed over the command line may be overwritten by this file's presets.
 
@@ -138,6 +138,8 @@ If building on Linux or OSX, the third party libraries must be placed in /usr/lo
 +-----------------+----------------------------------------------------------------+
 | Qt              | 5.13.2                                                         |
 +-----------------+----------------------------------------------------------------+
+
+.. note:: Different versions of Qt have presented bugs.  It's reocmmended that developers use the same library versions as those listed above, especially for Qt.
 
 The source code for these libraries by be downloaded `here <https://drive.google.com/open?id=1sWIV-Y66aFuDkC2oDnceIIUJDDH4puKI>`_.
 
@@ -173,6 +175,49 @@ UNIX:
     cmake .. && make
 
 If compilation is successful, you can find Vapor's executable in the *bin* directory within your *build* directory.
+
+Changing CMake Variables
+````````````````````````
+
+Some users may want their build to target a different library than what is distributed with Vapor's 3rd party library bundle.  Different libraries can be targetted in two ways, 1) through the *ccmake* tool, and 2) by editing the file located in <source-directory>/site_files/site.NCAR.
+
+ccmake
+======
+
+Cmake provides an interface to set build variables called *ccmake*.  From your build directory, you can issue the ccmake command, followed by the path to Vapor's source code.  If your build directory is in <source_directory>/build, issuing ccmake from this directory would look like this:
+
+    ccmake ..
+
+.. figure:: ../_images/ccmake.png
+     :align: center
+     :figclass: align-center
+
+     ccmake's interface for changing build variables after issuing "*ccmake ..*" on Vapor's source directory.  This is assuming your build directory is in <vapor_source>/build.
+
+The above interface allows you to set targets for some (but not all) of Vapor's libraries.  `More information on ccmake can be found here. <https://cmake.org/cmake/help/v3.0/manual/ccmake.1.html>`_  Your changes will be saved in your build directory in a file named CMakeLists.txt.  If this file gets deleted, your changes will be lost.  To set your libraries in a more permanent fashion, you can edit the site.NCAR file, described below.
+
+site.NCAR
+=========
+
+The site.NCAR file is what is used by the Vapor team to define what third party libraries a build should link to.  This file is located at <vapor_source>/site_files/site.NCAR, and contains conditionals for buildong on Darwin (OSX), Windows, and Linux (Ubuntu/CentOS).  There are also conditionals for building on NCAR's visualization cluster, Casper.
+
+The THIRD_PARTY_DIR variable in this file may be overloaded to re-target the location of Vapor's libraries.  Special values exist for the Qt and Python libraries becasuse they are built outside of the THIRD_PARTY_DIR, and must be manually overridden.  These variables are:
+
++---------------------+-----------------------------------------------------------------+
+| QTDIR               | Directory where the Qt library has been built/installed         |
++---------------------+-----------------------------------------------------------------+
+| Qt5Core_DIR         | Directory where the Qt5Core shared library was built/installed  |
++---------------------+-----------------------------------------------------------------+
+| QT_QMAKE_EXECUTABLE | Location of Qt's QMake executable                               |
++---------------------+-----------------------------------------------------------------+
+| PYTHONDIR           | Directory containing Python's libraries and headers             |
++---------------------+-----------------------------------------------------------------+
+| PYTHONPATH          | Directory containing Python's site packages                     |
++---------------------+-----------------------------------------------------------------+
+| PYTHONVERSION       | Version of Python                                               |
++---------------------+-----------------------------------------------------------------+
+| NUMPY_INCLUDE_DIR   | Directory containing numpy's header files                       |
++---------------------+-----------------------------------------------------------------+
 
 Adding to the Code Base
 _______________________
