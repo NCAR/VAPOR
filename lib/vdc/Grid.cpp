@@ -66,11 +66,6 @@ float Grid::GetMissingValue() const
     return (_missingValue); 
 }
 
-float Grid::GetValueAtIndex(const size_t indices[3]) const {
-	float *fptr = GetValueAtIndex(_blks, indices);
-	if (! fptr) return(GetMissingValue());
-	return (*fptr);
-}
 
 void Grid::GetUserExtents(
     double minu[3], double maxu[3]
@@ -87,18 +82,24 @@ void Grid::GetUserExtents(
 	}
 }
 
-void Grid::SetValue(const size_t indices[3], float v) {
-	float *fptr = GetValueAtIndex(_blks, indices);
+float Grid::GetValueAtIndex(const Size_tArr3 &indices) const {
+	float *fptr = GetValuePtrAtIndex(_blks, indices);
+	if (! fptr) return(GetMissingValue());
+	return (*fptr);
+}
+
+void Grid::SetValue(const Size_tArr3 &indices, float v) {
+	float *fptr = GetValuePtrAtIndex(_blks, indices);
 	if (! fptr) return;
 	*fptr = v;
 }
 
-float *Grid::GetValueAtIndex(
+float *Grid::GetValuePtrAtIndex(
 	const std::vector <float *> &blks,
-	const size_t indices[3]
+	const Size_tArr3 &indices
 ) const {
 
-	size_t cIndices[3];
+	Size_tArr3 cIndices;
 	ClampIndex(indices, cIndices);
 
 	size_t bs[] = {0,0,0};
@@ -126,12 +127,12 @@ float *Grid::GetValueAtIndex(
 }
 
 float Grid::AccessIJK(size_t i, size_t j, size_t k) const {
-    size_t indices[] = {i,j,k};
+    Size_tArr3 indices = {i,j,k};
     return(GetValueAtIndex(indices));
 }
 
 void Grid::SetValueIJK(size_t i, size_t j, size_t k, float v) {
-    std::vector <size_t> indices = {i,j,k};
+    Size_tArr3 indices = {i,j,k};
     return(SetValue(indices, v));
 }
 
@@ -154,20 +155,17 @@ void Grid::GetRange(float range[2]) const
 }
 
 void Grid::GetRange(
-	std::vector <size_t> min, std::vector <size_t> max,
+	const Size_tArr3 &min, const Size_tArr3 &max,
 	float range[2]
 ) const {
 
-	vector <size_t> cMin = min;
-	ClampIndex(cMin);
+	Size_tArr3 cMin;
+	ClampIndex(min, cMin);
 
-	vector <size_t> cMax = max;
-	ClampIndex(cMax);
+	Size_tArr3 cMax;
+	ClampIndex(max, cMax);
 
 	const vector <size_t> &dims = GetDimensions();
-
-    VAssert(cMin.size() == cMax.size());
-
 
 	float mv = GetMissingValue();
 
@@ -207,13 +205,13 @@ void Grid::GetRange(
 	}
 }
 
-float Grid::GetValue(const double coords[3]) const {
+float Grid::GetValue(const DblArr3 &coords) const {
 	if (!_blks.size()) return(GetMissingValue());
 
 
     // Clamp coordinates on periodic boundaries to grid extents
     //
-	double cCoords[3];
+	DblArr3 cCoords;
 	ClampCoord(coords, cCoords);
 
 #ifdef	VAPOR3_0_0_ALPHA
@@ -223,34 +221,23 @@ float Grid::GetValue(const double coords[3]) const {
 #endif
 
     if (_interpolationOrder == 0) {
-        return (GetValueNearestNeighbor(cCoords));
+        return (GetValueNearestNeighbor(cCoords.data()));
     }
     else {
-        return (GetValueLinear(cCoords));
+        return (GetValueLinear(cCoords.data()));
     }
-}
-
-void Grid::GetUserCoordinates(
-	const std::vector <size_t> &indices,
-	std::vector <double> &coords
-) const {
-	coords.clear();
-
-	coords.resize(GetGeometryDim());
-	GetUserCoordinates(indices.data(), coords.data());
-
 }
 
 void Grid::_getUserCoordinatesHelper(
 	const vector <double> &coords, double &x, double &y, double &z
 ) const {
-	if (coords.size() >= 1) {
+	if (GetDimensions().size() >= 1) {
 		x = coords[0];
 	}
-	if (coords.size() >= 2) {
+	if (GetDimensions().size() >= 2) {
 		y = coords[1];
 	}
-	if (coords.size() >= 3) {
+	if (GetDimensions().size() >= 3) {
 		z = coords[2];
 	}
 }
@@ -290,29 +277,6 @@ void Grid::SetInterpolationOrder(int order) {
 	_interpolationOrder = order;
 }
 
-bool Grid::GetCellNodes(
-    const std::vector <size_t> &cindices,
-    std::vector <vector <size_t> > &nodes
-) const {
-	nodes.clear();
-
-	const vector <size_t> &ndims = GetNodeDimensions();
-	size_t *nodes_a = (size_t*)alloca(sizeof(size_t) * GetMaxVertexPerCell() * ndims.size());
-	int n = 0;
-
-	bool ok = GetCellNodes(cindices.data(), nodes_a, n);
-	if (! ok) return(ok);
-
-	nodes.resize(n);
-	vector <size_t> indices(ndims.size(), 0);
-	for (int j=0; j<n; j++) {
-		for (int i=0; i<ndims.size(); i++) {
-			indices[i] = nodes_a[j*ndims.size()+i];
-		}
-		nodes[j] = indices;
-	}
-	return(true);
-}
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -509,9 +473,11 @@ void Grid::ConstCellIteratorSG::next(const long &offset) {
 
 }
 
+
 bool Grid::ConstCellIteratorBoxSG::_cellInsideBox(
 	const size_t cindices[]
 ) const {
+#ifdef	VAPOR3_0_0
 	size_t maxNodes = _g->GetMaxVertexPerCell();
 	size_t nodeDim = _g->GetNodeDimensions().size();
 	size_t *nodes = (size_t*)alloca(sizeof(size_t) * maxNodes * nodeDim);
@@ -526,6 +492,7 @@ bool Grid::ConstCellIteratorBoxSG::_cellInsideBox(
 		_g->GetUserCoordinates(&nodes[i*nodeDim], coord);
 		if (!_pred(coord)) return (false);
 	}
+#endif
 
 	return(true);
 }

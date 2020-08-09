@@ -84,29 +84,22 @@ void LayeredGrid::GetUserExtentsHelper(
 }
 
 void LayeredGrid::GetBoundingBox(
-    const vector <size_t> &min,
-    const vector <size_t> &max,
-    vector <double> &minu,
-    vector <double> &maxu
+	const Size_tArr3 &min, const Size_tArr3 &max,
+	DblArr3 &minu, DblArr3 &maxu
 ) const {
 
-	vector <size_t> cMin = min;
-	ClampIndex(cMin);
+	Size_tArr3 cMin;
+	ClampIndex(min, cMin);
 
-	vector <size_t> cMax = max;
-	ClampIndex(cMax);
-
-	VAssert(cMin.size() == cMax.size());
-
-	minu.clear();
-	maxu.clear();
+	Size_tArr3 cMax;
+	ClampIndex(max, cMax);
 
 
 	// Get extents of horizontal dimensions. Note: also get vertical 
 	// dimension, but it's bogus for layered grid.
 	//
-	Grid::GetUserCoordinates(cMin, minu);
-	Grid::GetUserCoordinates(cMax, maxu);
+	GetUserCoordinates(cMin, minu);
+	GetUserCoordinates(cMax, maxu);
 
 	// Initialize min and max coordinates of varying dimension with 
 	// coordinates of "first" and "last" grid point. Coordinates of 
@@ -322,11 +315,11 @@ void LayeredGrid::SetInterpolationOrder(int order) {
 }
 
 void LayeredGrid::GetUserCoordinates(
-	const size_t indices[],
-	double coords[]
+	const Size_tArr3 &indices,
+	DblArr3 &coords
 ) const {
 
-    size_t cIndices[3];
+    Size_tArr3 cIndices;
     ClampIndex(indices, cIndices); 
 	
 	// First get coordinates of non-varying (horizontal) dimensions
@@ -350,11 +343,11 @@ void LayeredGrid::GetUserCoordinates(
 
 
 bool LayeredGrid::GetIndicesCell(
-	const double coords[3],
-	size_t indices[3]
+	const DblArr3 &coords,
+	Size_tArr3 &indices
 ) const {
 
-	double cCoords[3];
+	DblArr3 cCoords;
 	ClampCoord(coords, cCoords);
 
 	vector <size_t> dims = GetDimensions();

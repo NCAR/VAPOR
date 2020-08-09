@@ -194,23 +194,23 @@ public:
  // \copydoc GetGrid::GetBoundingBox()
  //
  virtual void GetBoundingBox(
-	const std::vector <size_t> &min, const std::vector <size_t> &max,
-	std::vector <double> &minu, std::vector <double> &maxu
+	const Size_tArr3 &min, const Size_tArr3 &max,
+	DblArr3 &minu, DblArr3 &maxu
  ) const override;
 
 
  // \copydoc GetGrid::GetUserCoordinates()
  //
  virtual void GetUserCoordinates(
-	const size_t indices[],
-	double coords[]
+	const Size_tArr3 &indices,
+	DblArr3 &coords
  ) const override;
 
  //! \copydoc Grid::GetIndicesCell
  //!
  virtual bool GetIndicesCell(
-	const double coords[3],
-	size_t indices[3]
+	const DblArr3 &coords,
+	Size_tArr3 &indices
  ) const override;
 
  // \copydoc GetGrid::InsideGrid()
@@ -331,8 +331,8 @@ private:
  );
 
  bool _insideFace(
-	const std::vector <size_t> &face, double pt[2],
-	double lambda[4]
+	const Size_tArr3 &face, double pt[2],
+	double lambda[4], std::vector <Size_tArr3> &nodes
  ) const;
 
  bool _insideGrid(

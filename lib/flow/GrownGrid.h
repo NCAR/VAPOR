@@ -36,7 +36,7 @@ public:
     //
     float GetDefaultZ() const;
     std::string GetType() const override;
-    float GetValue(const std::vector <double> &coords) const override;
+    float GetValue(const DblArr3 &coords) const override;
     void  GetUserExtentsHelper( double minu[3], 
                           double maxu[3] ) const override;
     bool  InsideGrid(const double coords[3]) const override;
@@ -54,16 +54,19 @@ private:
     size_t GetGeometryDim() const override;                
     const std::vector<size_t>& GetNodeDimensions() const override;
     const std::vector<size_t>& GetCellDimensions() const override;
-    void GetBoundingBox( const std::vector <size_t> &min, const std::vector <size_t> &max,
-      std::vector <double> &minu, std::vector <double> &maxu) const override {}
+    void GetBoundingBox(
+		const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu
+    ) const override {}
 	bool    GetEnclosingRegion(
-		const std::vector <double> &minu, const std::vector <double> &maxu,
-		std::vector <size_t> &min, std::vector <size_t> &max
+		const DblArr3 &minu, const DblArr3 &maxu,
+		Size_tArr3 &min, Size_tArr3 &max
 	) const override {return(false);}
-    virtual void GetUserCoordinates( const size_t indices[], double coords[]) const override {}       
-    bool GetIndicesCell( const double coords[3],
-      size_t indices[3]) const override;           
-    bool GetCellNodes( const size_t cindices[], size_t nodes[], int &n) const override;
+    virtual void GetUserCoordinates(
+		const Size_tArr3 &indices, DblArr3 &coords
+	) const override {}       
+    bool GetIndicesCell(const DblArr3 &coords,
+		Size_tArr3 &indices ) const override;           
+    bool GetCellNodes(const Size_tArr3 &cindices, std::vector <Size_tArr3> &nodes) const override;
     bool GetCellNeighbors( const std::vector <size_t> &cindices,
       std::vector <std::vector <size_t> > &cells) const override;
     bool GetNodeCells( const std::vector <size_t> &indices,
@@ -71,6 +74,9 @@ private:
     size_t GetMaxVertexPerFace() const override;
     size_t GetMaxVertexPerCell() const override;
     void ClampCoord(const double coords[3], double cCoords[3]) const override {}
+	void ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const override {
+		cCoords = coords;
+	}
     ConstCoordItr ConstCoordBegin() const override;
     ConstCoordItr ConstCoordEnd() const override;
 

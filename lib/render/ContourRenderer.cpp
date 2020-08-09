@@ -135,27 +135,22 @@ int ContourRenderer::_buildCache()
 	);
 
     size_t maxNodes = grid->GetMaxVertexPerCell();
-    size_t nodeDim = grid->GetNodeDimensions().size();
-	size_t *nodes = (size_t*)alloca(sizeof(size_t) * maxNodes * nodeDim);
+	vector <Size_tArr3> nodes(maxNodes);
 
-    size_t coordDim = grid->GetGeometryDim();
-
-	float *values = (float*)alloca(sizeof(float) * maxNodes);
-	double *coords = (double*)alloca(sizeof(double) * maxNodes * coordDim);
+	vector <float> values(maxNodes);
+	vector <DblArr3> coords(maxNodes);
 
     Grid::ConstCellIterator end = grid->ConstCellEnd();
     for (; it != end; ++it)
     {
         const vector<size_t> &cell = *it;
-		int numNodes;
-        grid->GetCellNodes(cell.data(), nodes, numNodes);
+        grid->GetCellNodes(cell.data(), nodes);
         
 		bool hasMissing = false;
-        for (int i = 0; i < numNodes; i++)
+        for (int i = 0; i < nodes.size(); i++)
         {
-            grid->GetUserCoordinates(&nodes[i*nodeDim], &coords[i*coordDim]);
-            //values[i] = grid->GetValue(&coords[i*coordDim]);
-            values[i] = grid->GetValueAtIndex(&nodes[i*nodeDim]);
+            grid->GetUserCoordinates(nodes[i], coords[i]);
+            values[i] = grid->GetValueAtIndex(nodes[i]);
 			if (values[i] == mv) {
 				hasMissing = true;
 			}
@@ -164,9 +159,9 @@ int ContourRenderer::_buildCache()
         
         for (int ci = 0; ci != contours.size(); ci++)
         {
-            for (int a=numNodes-1, b=0; b < numNodes; a++, b++)
+            for (int a=nodes.size()-1, b=0; b < nodes.size(); a++, b++)
             {
-                if (a == numNodes)
+                if (a == nodes.size())
                     a = 0;
                 float contour = contours[ci];
                 
@@ -176,16 +171,14 @@ int ContourRenderer::_buildCache()
                 
                 float t = (contour - values[a])/(values[b] - values[a]);
                 float v[3];
-                v[0] = coords[a*coordDim+0] + t * (coords[b*coordDim+0] - coords[a*coordDim+0]);
-                v[1] = coords[a*coordDim+1] + t * (coords[b*coordDim+1] - coords[a*coordDim+1]);
+                v[0] = coords[a][0] + t * (coords[b][0] - coords[a][0]);
+                v[1] = coords[a][1] + t * (coords[b][1] - coords[a][1]);
                 v[2] = Z0;
                 
                 if (heightGrid)
                 {
-                    //float aHeight = heightGrid->GetValue(&coords[a*coordDim]);
-                    //float bHeight = heightGrid->GetValue(&coords[b*coordDim]);
-                    float aHeight = heightGrid->GetValueAtIndex(&nodes[a*nodeDim]);
-                    float bHeight = heightGrid->GetValueAtIndex(&nodes[b*nodeDim]);
+                    float aHeight = heightGrid->GetValueAtIndex(nodes[a]);
+                    float bHeight = heightGrid->GetValueAtIndex(nodes[b]);
                     v[2] = aHeight + t * (bHeight - aHeight);
                 }
                 

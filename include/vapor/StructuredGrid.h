@@ -90,10 +90,13 @@ public:
  //! \copydoc Grid::GetCellNodes()
  //!
  virtual bool GetCellNodes(
-	const size_t cindices[],
-	size_t nodes[],
-	int &n
+	const Size_tArr3 &cindices,
+	std::vector <Size_tArr3> &nodes
  ) const override;
+ // For grandparent inheritance of
+ // Grid::GetUserCoordinates(const size_t indices[], double coords[])
+ //
+ using Grid::GetCellNodes;
 
  //! \copydoc Grid::GetCellNeighbors()
  //!
@@ -110,8 +113,8 @@ public:
  ) const override;
 
  virtual bool    GetEnclosingRegion(
-    const std::vector <double> &minu, const std::vector <double> &maxu,
-    std::vector <size_t> &min, std::vector <size_t> &max
+	const DblArr3 &minu, const DblArr3 &maxu,
+	Size_tArr3 &min, Size_tArr3 &max
  ) const override;
 
  size_t GetMaxVertexPerFace() const override {
@@ -122,7 +125,14 @@ public:
 	return((GetTopologyDim() == 3) ? 8 : 4);
  };
 
- virtual void ClampCoord(const double coords[3], double cCoords[3]) const override;
+ virtual void ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const override;
+
+ //! \deprecated
+ //
+ virtual void ClampCoord(const double coords[3], double cCoords[3]) const override {
+	Grid::ClampCoord(coords, cCoords);
+ }
+
 
  //! \copydoc Grid::HasInvertedCoordinateSystemHandiness()
  //!

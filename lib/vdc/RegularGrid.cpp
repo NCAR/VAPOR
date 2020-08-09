@@ -87,7 +87,7 @@ float RegularGrid::GetValueNearestNeighbor(
 ) const {
 
 	double cCoords[3];
-	ClampCoord(coords, cCoords);
+	Grid::ClampCoord(coords, cCoords);
 
 	if (! InsideGrid(cCoords)) return(GetMissingValue());
 
@@ -251,28 +251,26 @@ void RegularGrid::GetUserExtentsHelper(
 }
 
 void RegularGrid::GetBoundingBox(
-    const vector <size_t> &min, const vector <size_t> &max,
-    vector <double> &minu, vector <double> &maxu
+	const Size_tArr3 &min, const Size_tArr3 &max,
+	DblArr3 &minu, DblArr3 &maxu
 ) const {
-	vector <size_t> cMin = min;
-	ClampIndex(cMin);
+	Size_tArr3 cMin;
+	ClampIndex(min, cMin);
 
-	vector <size_t> cMax = max;
-	ClampIndex(cMax); 
+	Size_tArr3 cMax;
+	ClampIndex(max, cMax); 
 
-	VAssert(cMin.size() == cMax.size());
-
-	Grid::GetUserCoordinates(cMin, minu);
-	Grid::GetUserCoordinates(cMax, maxu);
+	GetUserCoordinates(cMin, minu);
+	GetUserCoordinates(cMax, maxu);
 }
 
 
 void RegularGrid::GetUserCoordinates(
-	const size_t indices[],
-	double coords[]
+	const Size_tArr3 &indices,
+	DblArr3 &coords
 ) const {
 
-	size_t cIndices[3];
+	Size_tArr3 cIndices;
 	ClampIndex(indices, cIndices);
 
 	const vector <size_t> &dims = GetDimensions();
@@ -290,11 +288,11 @@ void RegularGrid::GetUserCoordinates(
 
 
 bool RegularGrid::GetIndicesCell(
-    const double coords[3],
-    size_t indices[3]
+	const DblArr3 &coords,
+	Size_tArr3 &indices
 ) const {
 
-	double cCoords[3];
+	DblArr3 cCoords;
 	ClampCoord(coords, cCoords);
 
 	vector <size_t> dims = GetDimensions();

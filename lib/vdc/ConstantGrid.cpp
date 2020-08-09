@@ -45,7 +45,7 @@ size_t ConstantGrid::GetTopologyDim() const
 void ConstantGrid::GetUserExtentsHelper( double minu[3], double maxu[3]) const
 {
 	for (int i=0; i<GetGeometryDim(); i++) {
-		minu[i] = std::numeric_limits<double>::min();
+		minu[i] = std::numeric_limits<double>::lowest();
 		maxu[i] = std::numeric_limits<double>::max();
 	}
 }
@@ -64,7 +64,7 @@ std::vector<size_t> ConstantGrid::GetCoordDimensions(size_t) const
 
 size_t ConstantGrid::GetGeometryDim() const 
 {
-    return 0;
+    return 3;
 }
     
 
@@ -79,13 +79,15 @@ const std::vector<size_t>& ConstantGrid::GetCellDimensions() const
     return( GetDimensions() );
 }
     
-bool ConstantGrid::GetIndicesCell( const double coords[3],
-     size_t indices[3]) const 
+bool ConstantGrid::GetIndicesCell(
+	const DblArr3 &coords, Size_tArr3 &indices) const
 {
     return false;
 }
     
-bool ConstantGrid::GetCellNodes( const size_t cindices[], size_t nodes[], int &n) const 
+bool ConstantGrid::GetCellNodes(
+	const Size_tArr3 &cindices,
+	std::vector <Size_tArr3> &nodes) const
 {
     return false;
 }

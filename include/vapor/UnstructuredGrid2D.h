@@ -68,29 +68,34 @@ public:
 
 
  virtual void GetBoundingBox(
-    const std::vector <size_t> &min, const std::vector <size_t> &max,
-    std::vector <double> &minu, std::vector <double> &maxu
+	const Size_tArr3 &min, const Size_tArr3 &max,
+	DblArr3 &minu, DblArr3 &maxu
  ) const override;
 
  bool GetEnclosingRegion(
-	const std::vector <double> &minu, const std::vector <double> &maxu,
-	std::vector <size_t> &min, std::vector <size_t> &max
+	const DblArr3 &minu, const DblArr3 &maxu,
+	Size_tArr3 &min, Size_tArr3 &max
  ) const override;
 
  virtual void GetUserCoordinates(
-	const size_t indices[],
-	double coords[]
+	const Size_tArr3 &indices,
+	DblArr3 &coords
  ) const override;
   
  bool GetIndicesCell(
-	const double coords[3],
-	size_t indices[3]
+	const DblArr3 &coords,
+	Size_tArr3 &indices
  ) const override {
 
 	std::vector <double> lambda;
 	std::vector <std::vector <size_t> > nodes;
 	return(GetIndicesCell(coords, indices, nodes, lambda));
  }
+ // For grandparent inheritance of
+ // Grid::GetIndicesCell(const double coords[3], size_t indices[3])
+ //
+ using Grid::GetIndicesCell;
+
 
  //! \copydoc Grid::GetIndicesCell()
  //!
@@ -99,8 +104,8 @@ public:
  //! at nodes identified by \p nodes
  //! 
  bool GetIndicesCell(
-	const double coords[3],
-	size_t indices[3],
+	const DblArr3 &coords,
+	Size_tArr3 &indices,
 	std::vector <std::vector <size_t> > &nodes,
 	std::vector <double> &lambda
  ) const;
@@ -189,19 +194,19 @@ private:
  std::shared_ptr<const QuadTreeRectangle<float, size_t> > _qtr;
 
  bool _insideGrid(
-	const double coords[2],
+	const DblArr3 &coords,
 	size_t &face, std::vector <size_t> &nodes,
 	double *lambda, int &nlambda
  ) const;
 
  bool _insideGridNodeCentered(
-	const double coords[2],
+	const DblArr3 &coords,
 	size_t &face, std::vector <size_t> &nodes,
 	double *lambda, int &nlambda
  ) const;
 
  bool _insideGridFaceCentered(
-	const double coords[2],
+	const DblArr3 &coords,
 	size_t &face, std::vector <size_t> &nodes,
 	double *lambda, int &nlambda
  ) const;

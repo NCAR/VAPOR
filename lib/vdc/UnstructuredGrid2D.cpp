@@ -107,26 +107,31 @@ void UnstructuredGrid2D::GetUserExtentsHelper(
 }
 
 void UnstructuredGrid2D::GetBoundingBox(
-	const vector <size_t> &min,
-	const vector <size_t> &max,
-	vector <double> &minu,
-	vector <double> &maxu
+	const Size_tArr3 &min, const Size_tArr3 &max,
+	DblArr3 &minu, DblArr3 &maxu
 ) const {
 
-	vector <size_t> cMin = min;
-	ClampIndex(cMin);
+	Size_tArr3 cMin;
+	ClampIndex(min, cMin);
 
-	vector <size_t> cMax = max;
-	ClampIndex(cMax); 
-
-	VAssert(cMin.size() == cMax.size());
+	Size_tArr3 cMax;
+	ClampIndex(max, cMax);
 
 	int ncoords = GetGeometryDim();
-	minu = vector <double> (ncoords, 0.0);
-	maxu = vector <double> (ncoords, 0.0);
+	minu = {
+		std::numeric_limits<float>::max(),
+		std::numeric_limits<float>::max(),
+		std::numeric_limits<float>::max()
+	};
+	minu = {
+		std::numeric_limits<float>::lowest(),
+		std::numeric_limits<float>::lowest(),
+		std::numeric_limits<float>::lowest()
+	};
 
-	size_t start = Wasp::LinearizeCoords(cMin, GetDimensions());
-	size_t stop = Wasp::LinearizeCoords(cMax, GetDimensions());
+
+	size_t start = Wasp::LinearizeCoords(cMin.data(), GetDimensions().data(), GetDimensions().size());
+	size_t stop = Wasp::LinearizeCoords(cMax.data(), GetDimensions().data(), GetDimensions().size());
 
 	// Currently only support ++ opererator for ConstCoordItr. So random
 	// access is tricky.
@@ -143,34 +148,27 @@ void UnstructuredGrid2D::GetBoundingBox(
 			if ((*itr)[i] > maxu[i]) maxu[i] = (*itr)[i];
 		}
 	}
-	
 }
 
 bool UnstructuredGrid2D::GetEnclosingRegion(
-    const vector <double> &minu, const vector <double> &maxu,
-    vector <size_t> &min, vector <size_t> &max
+	const DblArr3 &minu, const DblArr3 &maxu,
+	Size_tArr3 &min, Size_tArr3 &max
 ) const {
-
-    double cMinu[3];
-    ClampCoord(minu.data(), cMinu);
-
-    double cMaxu[3];
-    ClampCoord(maxu.data(), cMaxu);
 
 	VAssert(0 && "Not implemented");
 	return(true);
 }
 
 void UnstructuredGrid2D::GetUserCoordinates(
-	const size_t indices[],
-	double coords[]
+	const Size_tArr3 &indices,
+	DblArr3 &coords
 ) const {
 
-    size_t cIndices[1];
+	Size_tArr3 cIndices;
     ClampIndex(indices, cIndices);
 
 	coords[0] = _xug.GetValueAtIndex(cIndices);
-	coords[1] = (_yug.GetValueAtIndex(cIndices));
+	coords[1] = _yug.GetValueAtIndex(cIndices);
 	if (GetGeometryDim() == 3) {
 		coords[2] = _zug.GetValueAtIndex(cIndices);
 	}
@@ -178,15 +176,15 @@ void UnstructuredGrid2D::GetUserCoordinates(
 }
 
 bool UnstructuredGrid2D::GetIndicesCell(
-	const double coords[3],
-	size_t cindices[3],
+	const DblArr3 &coords,
+	Size_tArr3 &cindices,
 	std::vector <std::vector <size_t> > &nodes,
 	std::vector <double> &lambdav
 ) const {
 	nodes.clear();
 	lambdav.clear();
 
-	double cCoords[3];
+	DblArr3 cCoords;
 	ClampCoord(coords, cCoords);
 
 	double *lambda = new double[_maxVertexPerFace];
@@ -215,8 +213,8 @@ bool UnstructuredGrid2D::GetIndicesCell(
 
 bool UnstructuredGrid2D::InsideGrid(const double coords[3]) const {
 
-	double cCoords[3];
-	ClampCoord(coords, cCoords);
+	DblArr3 cCoords;
+	ClampCoord(DblArr3 {coords[0], coords[1], coords[2]}, cCoords);
 
 	double *lambda = new double[_maxVertexPerFace];
 	int nlambda;
@@ -242,8 +240,8 @@ float UnstructuredGrid2D::GetValueNearestNeighbor (
 	// Clamp coordinates on periodic boundaries to reside within the
 	// grid extents
 	//
-	double cCoords[3];
-	ClampCoord(coords, cCoords);
+	DblArr3 cCoords;
+	ClampCoord(DblArr3 {coords[0], coords[1], coords[2]}, cCoords);
 
 	double *lambda = new double[_maxVertexPerFace];
 	int nlambda;
@@ -285,8 +283,8 @@ float UnstructuredGrid2D::GetValueLinear (
 	// Clamp coordinates on periodic boundaries to reside within the
 	// grid extents
 	//
-	double cCoords[3];
-	ClampCoord(coords, cCoords);
+    DblArr3 cCoords;
+    ClampCoord(DblArr3 {coords[0], coords[1], coords[2]}, cCoords);
 
 	double *lambda = new double[_maxVertexPerFace];
 	int nlambda;
@@ -413,7 +411,7 @@ std::ostream &operator<<(std::ostream &o, const UnstructuredGrid2D &ug)
 // interpolation weights/coordinates along Z. 
 //
 bool UnstructuredGrid2D::_insideGrid(
-	const double coords[2],
+	const DblArr3 &coords,
 	size_t &face,
 	vector <size_t> &nodes,
 	double *lambda, int &nlambda
@@ -433,7 +431,7 @@ bool UnstructuredGrid2D::_insideGrid(
 }
 
 bool UnstructuredGrid2D::_insideGridFaceCentered(
-	const double coords[2],
+	const DblArr3 &coords,
 	size_t &face,
 	vector <size_t> &nodes,
 	double *lambda, int &nlambda
@@ -443,7 +441,7 @@ bool UnstructuredGrid2D::_insideGridFaceCentered(
 }
 
 bool UnstructuredGrid2D::_insideGridNodeCentered(
-	const double coords[2],
+	const DblArr3 &coords,
 	size_t &face_index,
 	vector <size_t> &nodes,
 	double *lambda, int &nlambda
@@ -517,8 +515,7 @@ bool UnstructuredGrid2D::_insideFace(
 std::shared_ptr <QuadTreeRectangle<float, size_t> >UnstructuredGrid2D::_makeQuadTreeRectangle() const {
 
 	size_t maxNodes = GetMaxVertexPerCell();
-	size_t nodeDim = GetNodeDimensions().size();
-	size_t *nodes = new size_t [maxNodes * nodeDim];
+	vector <Size_tArr3> nodes(maxNodes);
 
 	size_t coordDim = GetGeometryDim();
 	VAssert(coordDim == 2);
@@ -535,23 +532,22 @@ std::shared_ptr <QuadTreeRectangle<float, size_t> >UnstructuredGrid2D::_makeQuad
 			16, reserve_size
 		);
 
-	double coords[2];
+	DblArr3 coords;
 	Grid::ConstCellIterator it = ConstCellBegin();
 	Grid::ConstCellIterator end = ConstCellEnd();
 	for (; it != end; ++it) {
 		const vector<size_t> &cell = *it;
 		VAssert(cell.size() == 1);
-		int numNodes;
-		GetCellNodes(cell.data(), nodes, numNodes);
-		if (numNodes < 2) continue;
+		GetCellNodes(Size_tArr3 {cell[0], 0, 0}, nodes);
+		if (nodes.size() < 2) continue;
 
-		GetUserCoordinates(&nodes[0], coords);
+		GetUserCoordinates(nodes[0], coords);
 		float left = (float) coords[0];
 		float right = (float) coords[0];
 		float top = (float) coords[1];
 		float bottom = (float) coords[1];
-		for (int i = 1; i < numNodes; i++) {
-			GetUserCoordinates(&nodes[i*nodeDim], coords);
+		for (int i = 1; i < nodes.size(); i++) {
+			GetUserCoordinates(nodes[i], coords);
 			if (coords[0] < left) left = coords[0];
 			if (coords[0] > right) right = coords[0];
 			if (coords[1] < top) top = coords[1];
@@ -560,7 +556,6 @@ std::shared_ptr <QuadTreeRectangle<float, size_t> >UnstructuredGrid2D::_makeQuad
 		qtr->Insert(left, top, right, bottom, cell[0]);
 	}
 
-	delete [] nodes;
 
 	return(qtr);
 }

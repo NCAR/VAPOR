@@ -77,28 +77,24 @@ vector <size_t> StretchedGrid::GetCoordDimensions(size_t dim) const {
 
 
 void StretchedGrid::GetBoundingBox(
-	const std::vector <size_t> &min, const std::vector <size_t> &max,
-	std::vector <double> &minu, std::vector <double> &maxu
+	const Size_tArr3 &min, const Size_tArr3 &max,
+	DblArr3 &minu, DblArr3 &maxu
 ) const {
 
-	vector <size_t> cMin = min;
-	ClampIndex(cMin);
+	Size_tArr3 cMin;
+	ClampIndex(min, cMin);
 
-	vector <size_t> cMax = max;
-	ClampIndex(cMax); 
+	Size_tArr3 cMax;
+	ClampIndex(max, cMax); 
 
-	VAssert(cMin.size() == cMax.size());
 
-	for (int i=0; i<cMin.size(); i++) {
+	for (int i=0; i<GetNodeDimensions().size(); i++) {
 		VAssert(cMin[i] <= cMax[i]);
 	}
 
-	minu.clear();
-	maxu.clear();
-	
-	for (int i=0; i<cMin.size(); i++) {
-		minu.push_back(0.0);
-		maxu.push_back(0.0);
+	for (int i=0; i<GetGeometryDim(); i++) {
+		minu[i] = 0.0;
+		maxu[i] = 0.0;
 	}
 
 	minu[0] = _xcoords[cMin[0]];
@@ -122,11 +118,11 @@ void StretchedGrid::GetBoundingBox(
 
 
 void StretchedGrid::GetUserCoordinates(
-	const size_t indices[],
-	double coords[]
+	const Size_tArr3 &indices,
+	DblArr3 &coords
 ) const {
 
-    size_t cIndices[3];
+    Size_tArr3 cIndices;
     ClampIndex(indices, cIndices);
 
 	vector <size_t> dims = StructuredGrid::GetDimensions();
@@ -141,13 +137,13 @@ void StretchedGrid::GetUserCoordinates(
 
 
 bool StretchedGrid::GetIndicesCell(
-	const double coords[3],
-	size_t indices[3]
+	const DblArr3 &coords,
+	Size_tArr3 &indices
 ) const {
 
 	// Clamp coordinates on periodic boundaries to grid extents
 	//
-	double cCoords[3];
+	DblArr3 cCoords;
 	ClampCoord(coords, cCoords);
 		
 	double x = cCoords[0];
@@ -376,15 +372,15 @@ void StretchedGrid::GetUserExtentsHelper(
 
 	vector <size_t> dims = StructuredGrid::GetDimensions();
 
-	vector <size_t> min, max;
+	Size_tArr3 min, max;
 	for (int i=0; i<dims.size(); i++) {
-		min.push_back(0);
-		max.push_back(dims[i]-1);
+		min[i] = 0;
+		max[i] = (dims[i]-1);
 	}
 
-	vector <double> minv, maxv;
+	DblArr3 minv, maxv;
 	StretchedGrid::GetBoundingBox(min, max, minv, maxv);
-	for (int i=0; i<minv.size(); i++) {
+	for (int i=0; i<GetDimensions().size(); i++) {
 		minext[i] = minv[i];
 		maxext[i] = maxv[i];
 	}

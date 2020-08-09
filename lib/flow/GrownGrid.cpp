@@ -23,7 +23,7 @@ float GrownGrid::GetDefaultZ() const
     return _defaultZ;
 }
     
-float GrownGrid::GetValue(const std::vector <double> &coords) const
+float GrownGrid::GetValue(const DblArr3 &coords) const
 {
     return _grid2d->GetValue( coords );
 }
@@ -78,7 +78,7 @@ std::vector<size_t> GrownGrid::GetCoordDimensions(size_t) const
 
 size_t GrownGrid::GetGeometryDim() const 
 {
-    return 0;
+    return 3;
 }
     
 
@@ -93,13 +93,15 @@ const std::vector<size_t>& GrownGrid::GetCellDimensions() const
     return( GetDimensions() );
 }
     
-bool GrownGrid::GetIndicesCell( const double coords[3],
-     size_t indices[3]) const 
+bool GrownGrid::GetIndicesCell(const DblArr3 &coords,
+	Size_tArr3 &indices
+     ) const 
 {
     return false;
 }
     
-bool GrownGrid::GetCellNodes( const size_t cindices[], size_t nodes[], int &n) const 
+bool GrownGrid::GetCellNodes(
+	const Size_tArr3 &cindices, std::vector <Size_tArr3> &nodes) const 
 {
     return false;
 }

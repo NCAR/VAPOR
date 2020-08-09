@@ -98,35 +98,35 @@ public:
  //! \copydoc Grid::GetBoundingBox()
  //!
  virtual void GetBoundingBox(
-	const std::vector <size_t> &min, const std::vector <size_t> &max,
-	std::vector <double> &minu, std::vector <double> &maxu
+	const Size_tArr3 &min, const Size_tArr3 &max,
+	DblArr3 &minu, DblArr3 &maxu
  ) const override;
 
  //! \copydoc Grid::GetUserCoordinates()
  //!
  virtual void GetUserCoordinates(
-	const size_t indices[],
-	double coords[]
+	const Size_tArr3 &indices,
+	DblArr3 &coords
  ) const override;
 
- void GetUserCoordinates(
-	size_t i, size_t j, size_t k,
-	double &x, double &y, double &z
- ) const override {
-	std::vector <size_t> indices = {i,j,k};
-	std::vector <double> coords;
-	Grid::GetUserCoordinates(indices, coords);
-	x = coords[0];
-	y = coords[1];
-	z = coords[2];
- }
+ // For grandparent inheritance of
+ // Grid::GetUserCoordinates(const size_t indices[], double coords[])
+ //
+ using Grid::GetUserCoordinates;
+
 
  //! \copydoc Grid::GetIndicesCell
  //!
  virtual bool GetIndicesCell(
-	const double coords[3],
-	size_t indices[3]
+	const DblArr3 &coords,
+	Size_tArr3 &indices
  ) const override;
+
+
+ // For grandparent inheritance of
+ // Grid::GetIndicesCell(const double coords[3], size_t indices[3])
+ //
+ using Grid::GetIndicesCell; 
 
  //! \copydoc Grid::InsideGrid()
  //!

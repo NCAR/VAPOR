@@ -142,9 +142,8 @@ public:
  std::string GetType() const override {return (GetClassType()); }
 
  bool GetCellNodes(
-	const size_t cindices[],
-	size_t nodes[],
-	int &n
+	const Size_tArr3 &cindices,
+	std::vector <Size_tArr3> &nodes
  ) const override;
  
  //! \copydoc Grid::GetCellNeighbors()
@@ -215,7 +214,14 @@ public:
 	_boundaryID = v;
  }
 
+ virtual void ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const override {
+	cCoords = coords;
+ }
+
+ //! \deprecated
+ //
  virtual void ClampCoord(const double coords[3], double cCoords[3]) const override {
+	Grid::ClampCoord(coords, cCoords);
  }
 
  // A no-op for unstructured grids. Needs to be set in the constuctor :-(
