@@ -182,8 +182,9 @@ std::string Wasp::GetAppPath(
 	}
 #endif
     
-    if (!pathExists(path))
+    if (!pathExists(path)) {
         path = "";
+    }
 
 	if (path.empty()) {
 		if (myResource.compare("share") == 0) {

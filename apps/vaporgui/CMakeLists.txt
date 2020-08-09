@@ -102,9 +102,11 @@ set (SRCS
 	QPaintUtils.cpp
 	QPaintUtils.h
 	VSection.cpp
+	VSection.h
+	VSubGroup.cpp
+	VSubGroup.h
     VFrame.h
 	VFrame.cpp
-	VSection.h
 	VLineItem.cpp
 	VLineItem.h
     VContainer.cpp
@@ -115,12 +117,34 @@ set (SRCS
     VIntSpinBox.h
     VCheckBox.cpp
     VCheckBox.h
-    VLineEdit.cpp
-    VLineEdit.h
+    VLineEdit_Deprecated.cpp
+    VLineEdit_Deprecated.h
+    VActions.h
+    VActions.cpp
     VSlider.cpp
     VSlider.h
     VSliderEdit.cpp
     VSliderEdit.h
+    VSliderEditInterface.cpp
+    VSliderEditInterface.h
+    VStringLineEdit.h
+    VStringLineEdit.cpp
+    VIntLineEdit.h
+    VIntLineEdit.cpp
+    VDoubleLineEdit.h
+    VDoubleLineEdit.cpp
+    VDoubleSliderEdit.cpp
+    VDoubleSliderEdit.h
+    VIntSliderEdit.cpp
+    VIntSliderEdit.h
+    VNumericLineEdit.cpp
+    VNumericLineEdit.h
+    VIntRangeMenu.cpp
+    VIntRangeMenu.h
+    VDoubleRangeMenu.cpp
+    VDoubleRangeMenu.h
+    VNumericFormatMenu.cpp
+    VNumericFormatMenu.h
     VPushButton.cpp
     VPushButton.h
     QPushButtonWithDoubleClick.h

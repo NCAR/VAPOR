@@ -48,7 +48,7 @@ endif()
 
 # compiler warning flags
 if (NOT WIN32)
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-sign-compare -Wno-overloaded-virtual")
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-sign-compare -Wno-overloaded-virtual -Wno-parentheses")
   SET (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wall -Wno-sign-compare")
 else ()
   # Enable multithread compiling on Visual Studio
@@ -96,8 +96,6 @@ include_directories (${THIRD_PARTY_INC_DIR}/freetype2)
 link_directories (${THIRD_PARTY_LIB_DIR})
 link_directories (${PYTHONPATH})
 list (APPEND CMAKE_PREFIX_PATH ${THIRD_PARTY_LIB_DIR})
-list (APPEND CMAKE_PREFIX_PATH ${QTDIR}/lib/cmake)
-list (APPEND CMAKE_PROGRAM_PATH ${QTDIR}/bin)
 
 if (WIN32)
 	include_directories (${THIRD_PARTY_DIR}/Python${PYTHONVERSION}/include)
@@ -114,7 +112,6 @@ if (BUILD_VDC)
 	link_directories (${PYTHONPATH}/lib-dynload)
 endif ()
 
-find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 find_library(NETCDF netcdf)
 find_library(UDUNITS2 udunits2)
 find_library(FREETYPE freetype)

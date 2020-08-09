@@ -335,10 +335,7 @@ MainForm::MainForm(
 	_paramsMgr->RegisterStateChangeCB(
 		std::bind(&MainForm::_stateChangeCB,this)
 	);
-    _paramsMgr->RegisterIntermediateStateChangeCB([this]() {
-        QEvent *event = new QEvent(ParamsIntermediateChangeEvent);
-        QApplication::postEvent(this, event);
-    });
+    _paramsMgr->RegisterIntermediateStateChangeCB(std::bind(&MainForm::_intermediateStateChangedCB, this));
 	_paramsMgr->RegisterStateChangeFlag( &_stateChangeFlag );
 
 	// Set Defaults from startup file
@@ -384,7 +381,7 @@ MainForm::MainForm(
 	
 	setUpdatesEnabled(true);
 
-    show();
+//    show();
 
 	// Command line options:
 	//
@@ -421,6 +418,54 @@ MainForm::MainForm(
 
 	_controlExec->SetSaveStateEnabled(true);
 	_controlExec->RebaseStateSave();
+}
+
+int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int width, int height)
+{
+    if (start == 0 && end == 0)
+        end = INT_MAX;
+    start = std::max(0, start);
+    
+    if (_sessionNewFlag) {
+        fprintf(stderr, "No session loaded\n");
+        return -1;
+    }
+    
+    QString dir = QString::fromStdString(FileUtils::Dirname(baseFile));
+    QFileInfo dirInfo(dir);
+    if (!dirInfo.isWritable()) {
+        fprintf(stderr, "Do not have write permissions\n");
+        return -1;
+    }
+    
+    
+    auto baseFileWithTS = FileUtils::RemoveExtension(baseFile) + "-" + to_string(start) + "." + FileUtils::Extension(baseFile);
+    
+    auto ap = GetAnimationParams();
+    auto vpp = _paramsMgr->GetViewpointParams(GetStateParams()->GetActiveVizName());
+    
+    _paramsMgr->BeginSaveStateGroup("test");
+    startAnimCapture(baseFileWithTS);
+    ap->SetStartTimestep(start);
+    ap->SetEndTimestep(end);
+    
+    vpp->SetValueLong(vpp->UseCustomFramebufferTag, "", true);
+    vpp->SetValueLong(vpp->CustomFramebufferWidthTag, "", width);
+    vpp->SetValueLong(vpp->CustomFramebufferHeightTag, "", height);
+    
+    _tabMgr->AnimationPlayForward();
+    _paramsMgr->EndSaveStateGroup();
+    
+    connect(_tabMgr, &TabManager::AnimationOnOffSignal, this, [this](){
+        endAnimCapture();
+        close();
+    });
+    
+    connect(_tabMgr, &TabManager::AnimationDrawSignal, this, [this]() {
+        printf("Rendering timestep %li\n", GetAnimationParams()->GetCurrentTimestep());
+    });
+    
+    return 0;
 }
 
 /*
@@ -1339,7 +1384,11 @@ void MainForm::fileExit()
 	close();
 }
 
-void MainForm::_stateChangeCB() {
+void MainForm::_stateChangeCB()
+{
+    if (_paramsEventQueued)
+        return;
+    _paramsEventQueued = true;
 
     // Generate an application event whenever state changes
     //      
@@ -1347,6 +1396,16 @@ void MainForm::_stateChangeCB() {
     QApplication::postEvent(this, event);
 
 	_eventsSinceLastSave++;
+}
+
+void MainForm::_intermediateStateChangedCB()
+{
+    if (_paramsEventQueued)
+        return;
+    _paramsEventQueued = true;
+    
+    QEvent *event = new QEvent(ParamsIntermediateChangeEvent);
+    QApplication::postEvent(this, event);
 }
 
 void MainForm::undoRedoHelper(bool undo) {
@@ -1911,6 +1970,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 	//
 	if (event->type() == ParamsChangeEvent)
     {
+        _paramsEventQueued = false;
 		QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 		
 		if (_stats) 
@@ -1945,6 +2005,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
     
     if (event->type() == ParamsIntermediateChangeEvent)
     {
+        _paramsEventQueued = false;
         // Rendering the GUI becomes a bottleneck
 //        _tabMgr->Update();
         
@@ -2327,25 +2388,25 @@ void MainForm::_setTimeStep()
 void MainForm::captureJpegSequence() {
     string filter = "JPG (*.jpg *.jpeg)";
     string defaultSuffix = "jpg";
-    startAnimCapture( filter, defaultSuffix);
+    selectAnimCatureOutput( filter, defaultSuffix);
 }
 
 void MainForm::capturePngSequence() {
     string filter = "PNG (*.png)";
     string defaultSuffix = "png";
-    startAnimCapture( filter, defaultSuffix);
+    selectAnimCatureOutput( filter, defaultSuffix);
 }
 
 void MainForm::captureTiffSequence() {
     string filter = "TIFF (*.tif *.tiff)";
     string defaultSuffix = "tiff";
-    startAnimCapture( filter, defaultSuffix);
+    selectAnimCatureOutput( filter, defaultSuffix);
 }
 
 //Begin capturing animation images.
 //Launch a file save dialog to specify the names
 //Then start file saving mode.
-void MainForm::startAnimCapture(
+void MainForm::selectAnimCatureOutput(
     string filter,
     string defaultSuffix
 ) {
@@ -2367,6 +2428,13 @@ void MainForm::startAnimCapture(
 	if (qsl.isEmpty()) 
         return;
     QString fileName = qsl[0];
+    
+    startAnimCapture(fileName.toStdString(), defaultSuffix);
+}
+
+void MainForm::startAnimCapture(string baseFile, string defaultSuffix)
+{
+    QString fileName = QString::fromStdString(baseFile);
 	QFileInfo fileInfo = QFileInfo( fileName );
 
 	QString suffix = fileInfo.suffix();

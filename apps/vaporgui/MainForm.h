@@ -73,6 +73,8 @@ public:
  );
  ~MainForm();
 
+    int RenderAndExit(int start, int end, const std::string &baseFile, int width, int height);
+    
 protected:
  bool eventFilter(QObject *obj, QEvent *event);
 
@@ -192,6 +194,7 @@ private:
  bool _begForCitation;
  int _eventsSinceLastSave;
  bool _buttonPressed;
+ bool _paramsEventQueued = false;
 
  ErrorReporter *_errRep;
     
@@ -204,6 +207,7 @@ private:
 
  void _performSessionAutoSave();
  void _stateChangeCB();
+ void _intermediateStateChangedCB();
 
  QMdiArea* getMDIArea() {return _mdiArea;}
 
@@ -340,10 +344,8 @@ private slots:
  void captureJpegSequence();
  void captureTiffSequence();
  void capturePngSequence();
- void startAnimCapture(
-    string filter,
-    string defaultSuffix
- );
+ void selectAnimCatureOutput(string filter, string defaultSuffix);
+ void startAnimCapture(string baseFile, string defaultSuffix="tiff");
  void endAnimCapture();
  void captureSingleImage( 
     string filter,

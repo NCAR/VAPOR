@@ -18,7 +18,7 @@
 #include "ColorbarWidget.h"
 
 class VLineItem;
-class VLineEdit;
+class VLineEdit_Deprecated;
 class VCheckBox;
 class VComboBox;
 class VSlider;
@@ -30,6 +30,7 @@ class VFrame;
 class VIntSpinBox;
 class VGeometry2;
 class VPushButton;
+class PGroup;
 
 namespace VAPoR {
 	class ControlExec;
@@ -96,6 +97,7 @@ public:
 private:
     VAPoR::FlowParams* _params;
     TFEditor*   _TFEditor;
+    PGroup *_pw;
 };
 
 //
@@ -181,7 +183,7 @@ private:
     VCheckBox*              _periodicYCheckBox;
     VCheckBox*              _periodicZCheckBox;
     VLineItem*              _zPeriodicityLine;
-    VLineEdit*              _velocityMultiplierLineEdit;
+    VLineEdit_Deprecated*   _velocityMultiplierLineEdit;
    
     // Seed distribution options
     VSection*               _seedDistributionSection;
