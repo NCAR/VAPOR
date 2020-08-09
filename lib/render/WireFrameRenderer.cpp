@@ -374,8 +374,9 @@ int WireFrameRenderer::_buildCache()
 int WireFrameRenderer::_paintGL(bool fast)
 {
     int rc = 0;
-    if (_isCacheDirty())
+    if (_isCacheDirty()) {
         rc = _buildCache();
+	}
     
     if (_GPUOutOfMemory) {
         SetErrMsg("GPU out of memory");

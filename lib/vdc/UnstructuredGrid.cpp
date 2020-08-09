@@ -85,9 +85,9 @@ bool UnstructuredGrid::GetCellNodes(
 	long offset = GetNodeOffset();
 	
 
-	nodes.resize(_maxVertexPerFace); // ensure sufficient memory
 	size_t n = 0;
 	if (cdims.size() == 1) {
+		nodes.resize(_maxVertexPerFace); // ensure sufficient memory
 		for (int i=0; i<_maxVertexPerFace; i++, ptr++) {
 			if (*ptr == GetMissingID() || *ptr + offset < 0) break;
 			if (*ptr == GetBoundaryID()) continue;
@@ -99,6 +99,7 @@ bool UnstructuredGrid::GetCellNodes(
 		}
 	}
 	else {	// layered case
+		nodes.resize(2*_maxVertexPerFace); // ensure sufficient memory
 
 		// Bottom layer
 		//
@@ -118,7 +119,6 @@ bool UnstructuredGrid::GetCellNodes(
 		for (int i=0; i<nNodesPerLayer; i++) {
 			nodes[n][0] = nodes[i][0];
 			nodes[n][1] = nodes[i][1] + 1;
-			nodes[n][0] = 0;
 			n++;
 		}
 	}
