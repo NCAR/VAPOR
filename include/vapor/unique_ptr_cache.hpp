@@ -9,16 +9,18 @@
 // All structures stored in this cache are const qualified, so once a
 // structure is put in this cache, there is no more modification to this structure.
 //
-// Caveat: This cache guarantees that a returned non-null pointer is valid at the
-//         query time, but cannot guarantee that the pointer keeps being valid after
-//         handing it over (i.e., not being evicted). Thus, this cache should be initialized 
-//         sufficiently big so that a returned pointer won't be evicted while that pointer
-//         is in use.
+// Caveat: A cache keeps things that it is asked to keep, which in this case are pointers.
+//         This implementation guarantees that pointers and the objects that they point to
+//         are not altered, and are properly destroyed when evicted.
+//         The cache guarantees no more than that.
+//
+// Tip:    This cache should be initialized sufficiently big so that a returned 
+//         pointer won't be evicted while that pointer is in use.
 //         To use an example, a `unique_ptr_cache` is initialized to hold N objects.
 //         A queried pointer `ptr` is valid at the time of query, and will remain valid until
 //         another (N-1) different individual objects being queried/inserted. 
-//         At that point, the immediate next query/insertion of the next individual object (the Nth)
-//         will evict `ptr`, and `prt` is no longer valid.
+//         At that point, the immediate next query/insertion of another individual object (the Nth)
+//         will evict `ptr`, and the object it points to is destroyed, and `prt` is no longer valid.
 //
 // Revision: (8/13/2020) it uses std::array<> to achieve the highest performance with
 //                       small to medium cache sizes.
