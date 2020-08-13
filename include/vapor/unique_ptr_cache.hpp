@@ -14,14 +14,19 @@
 //         handing it over (i.e., not being evicted). Thus, this cache should be initialized 
 //         sufficiently big so that a returned pointer won't be evicted while that pointer
 //         is in use.
+//         To use an example, a `unique_ptr_cache` is initialized to hold N objects.
+//         A queried pointer `ptr` is valid at the time of query, and will remain valid until
+//         another (N-1) different individual objects being queried/inserted. 
+//         At that point, the immediate next query/insertion of the next individual object (the Nth)
+//         will evict `ptr`, and `prt` is no longer valid.
 //
 // Revision: (8/13/2020) it uses std::array<> to achieve the highest performance with
 //                       small to medium cache sizes.
 // Revision: (8/13/2020) it uses mutexes to achieve thread safety.
 //
-// Author: Samuel Li
-// Date  : 9/26/2019
-// Revision: 8/13/2020
+// Author   : Samuel Li
+// Date     : 9/26/2019
+// Revision : 8/13/2020
 //-----------------------------------------------------------------------------
 
 #ifndef UNIQUE_PTR_CACHE_H
@@ -59,22 +64,22 @@ public:
 
     auto size() const -> size_t
     {
-        return current_size;
+        return _current_size;
     }
 
     void clear() 
     {
-        current_size = 0;
+        _current_size = 0;
     }
 
     auto empty() const -> bool
     {
-        return (current_size == 0 );
+        return (_current_size == 0 );
     }
 
     auto full() const -> bool
     {
-        return (current_size == CacheCapacity );
+        return (_current_size == CacheCapacity );
     }
 
     //
@@ -84,58 +89,58 @@ public:
     // 
     auto query( const Key& key ) -> const std::unique_ptr<const BigObj>&
     {
-        const std::lock_guard<std::mutex> lock( element_array_mutex );
+        const std::lock_guard<std::mutex> lock( __element_array_mutex );
 
-        auto it = std::find_if( element_array.begin(), element_array.end(), 
+        auto it = std::find_if( _element_array.begin(), _element_array.end(), 
                                 [&key](element_type& e){return e.first == key;} );
-        if( it == element_array.end() ) {   // This key does not exist
-            return local_nullptr;
+        if( it == _element_array.end() ) {  // This key does not exist
+            return _local_nullptr;
         } 
         else {                              // This key does exist
             auto tmp = std::move(*it);
-            std::move_backward( element_array.begin(), it, it + 1 );
-            element_array.front() = std::move(tmp);
+            std::move_backward( _element_array.begin(), it, it + 1 );
+            _element_array.front() = std::move(tmp);
             
-            return element_array.front().second;
+            return _element_array.front().second;
         }
     }
 
     void insert( Key key, const BigObj* ptr )
     {
-        const std::lock_guard<std::mutex> lock( element_array_mutex );
+        const std::lock_guard<std::mutex> lock( __element_array_mutex );
 
-        auto it = std::find_if( element_array.begin(), element_array.end(), 
+        auto it = std::find_if( _element_array.begin(), _element_array.end(), 
                                 [&key](element_type& e){return e.first == key;} );
 
-        if( it == element_array.end() ) {           // This key does not exist
-            if( current_size < CacheCapacity ) {    // This cache is not full
-                element_array[current_size].first = std::move(key);
-                element_array[current_size].second.reset(ptr);
-                std::rotate( element_array.begin(), element_array.begin() + current_size,
-                             element_array.begin() + current_size + 1 );
-                current_size++;
+        if( it == _element_array.end() ) {          // This key does not exist
+            if( _current_size < CacheCapacity ) {   // This cache is not full
+                _element_array[_current_size].first = std::move(key);
+                _element_array[_current_size].second.reset(ptr);
+                std::rotate( _element_array.begin(), _element_array.begin() + _current_size,
+                             _element_array.begin() + _current_size + 1 );
+                _current_size++;
             }
             else {                                  // The cache is full!
-                element_array.back().first = std::move(key);
-                element_array.back().second.reset(ptr);
-                std::rotate( element_array.begin(), element_array.end() - 1, element_array.end() );
+                _element_array.back().first = std::move(key);
+                _element_array.back().second.reset(ptr);
+                std::rotate( _element_array.begin(), _element_array.end() - 1, _element_array.end() );
             }
         }
         else {                                      // This key does exist. 
             it->second.reset(ptr);
             auto tmp = std::move(*it);
-            std::move_backward( element_array.begin(), it, it + 1 );
-            element_array.front() = std::move(tmp);
+            std::move_backward( _element_array.begin(), it, it + 1 );
+            _element_array.front() = std::move(tmp);
         }
     }
 
 private:
     using element_type = std::pair<Key, std::unique_ptr<const BigObj>>;
 
-    std::array< element_type, CacheCapacity >   element_array;
-    size_t                                      current_size = 0;
-    const std::unique_ptr<const BigObj>         local_nullptr = {nullptr};
-    std::mutex                                  element_array_mutex;
+    std::array< element_type, CacheCapacity >   _element_array;
+    size_t                                      _current_size = 0;
+    const std::unique_ptr<const BigObj>         _local_nullptr = {nullptr};
+    std::mutex                                  __element_array_mutex;
 };
 
 }   // End of VAPoR namespace
