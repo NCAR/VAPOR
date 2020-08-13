@@ -22,8 +22,8 @@
 //
 //         To use an example, a `unique_ptr_cache` is initialized to hold N objects.
 //         A queried pointer `ptr` is valid at the time of query, and will remain valid until
-//         another (N-1) different individual objects being queried/inserted. 
-//         At that point, the immediate next query/insertion of another individual object (the Nth)
+//         another (N-1) different individual objects being inserted. 
+//         At that point, the immediate next insertion of another individual object (the Nth)
 //         will evict `ptr`, and the object it points to is destroyed, and `prt` is no longer valid.
 //
 // Revision: (8/13/2020) it uses std::array<> to achieve the highest performance with
