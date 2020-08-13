@@ -103,7 +103,7 @@ class FLOW_API VaporField final : public Field {
     std::vector<float> _timestamps; // in ascending order
     VAPoR::DataMgr *_datamgr = nullptr;
     const VAPoR::FlowParams *_params = nullptr;
-    using cacheType = VAPoR::unique_ptr_cache<std::string, GridWrapper>;
+    using cacheType = VAPoR::unique_ptr_cache<std::string, GridWrapper, 9>;
     mutable cacheType _recentGrids; // so this variable can be
                                     // modified by a const function.
     const std::string _constantGridZero = "ConstantGrid with zeros";
