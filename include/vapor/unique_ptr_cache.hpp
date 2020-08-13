@@ -22,117 +22,102 @@
 #include <list>
 #include <utility>
 #include <memory>
+#include <array>
+#include <mutex>
 
-namespace VAPoR
-{
+namespace VAPoR {
 
+//
 // Note : Key must support == operator
-template <typename Key, typename BigObj>
+//
+template <typename Key, typename BigObj, size_t CacheCapacity >
 class unique_ptr_cache final
 {
 public:
-    // Constructor with the max size specified
-    unique_ptr_cache( size_t size )
-      : m_max_size( size > 1 ? size : 1 )   // cache max size has to be at least one 
-    { }
-    
-    // Given that this cache is intended to be used to keep unique pointers,
+
+    // Constructors
+    // Note: because this cache is intended to be used to keep unique pointers,
     // we don't want to allow any type of copy constructors, so delete them.
+    unique_ptr_cache()                                      = default;
     unique_ptr_cache( const unique_ptr_cache& )             = delete;
     unique_ptr_cache( const unique_ptr_cache&& )            = delete;
     unique_ptr_cache& operator=( const unique_ptr_cache& )  = delete;
     unique_ptr_cache& operator=( const unique_ptr_cache&& ) = delete;
 
-    size_t max_size() const
+    auto capacity() const -> size_t
     {
-        return m_max_size;
+        return CacheCapacity;
     }
 
-    size_t size() const
+    auto size() const -> size_t
     {
-        return m_list.size();
+        return current_size;
     }
 
     void clear() 
     {
-        m_list.clear();        
+        current_size = 0;
     }
 
-    bool empty() const
+    auto empty() const -> bool
     {
-        return m_list.empty();
+        return (current_size == 0 );
     }
 
-    // Key must support == operator.
-    bool contains( const Key& key ) const
+    auto query( const Key& key ) -> const BigObj*
     {
-        // (Should use const iterator here, but gcc-4.8 on CentOS7 doesn't support...)
-        for( auto it = m_list.begin(); it != m_list.end(); ++it )
-        {
-            if( it->first == key )
-            {
-                // Move the current element to the list head if it's not already there
-                if( it != m_list.begin() )
-                    m_list.splice( m_list.begin(), m_list, it );
+        const std::lock_guard<std::mutex> lock( element_array_mutex );
 
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // Upon the existance of Key, returns a const pointer pointing to BigObj
-    // Upon non-existance of Key, return a nullptr
-    const BigObj* find( const Key& key ) const
-    {
-        // We found the key, and now the pair is at the beginning of the list
-        if( this->contains( key ) )
-        {
-            // Get a raw pointer from the unique_ptr
-            return (m_list.cbegin()->second).get();
-        }
-        else
+        auto it = std::find_if( element_array.begin(), element_array.end(), 
+                                [&key](element_type& e){return e.first == key;} );
+        if( it == element_array.end() ) {   // This key does not exist
             return nullptr;
+        } 
+        else {                              // This key does exist
+            auto tmp = std::move(*it);
+            std::move_backward( element_array.begin(), it, it + 1 );
+            element_array.front() = std::move(tmp);
+            
+            return element_array.front().second.get();
+        }
     }
 
-    //
-    // Inserts to the head of the cache a key and a raw pointer pointing to a BigObj.
-    // Upon success, this class takes ownership of the BigObj and the old raw pointer 
-    // shall not be used anymore.
-    // In the case of the key already exists, the new BigObj takes place of the old 
-    // BigObj, while the old BigObj is properly destroyed.
-    // (Pass by value and move idiom on Key)
-    //
     void insert( Key key, const BigObj* ptr )
     {
-        // Remove the old pair if the same key already exists.
-        // (Should use const iterator here, but gcc-4.8 on CentOS7 doesn't support...)
-        for( auto it = m_list.begin(); it != m_list.end(); ++it )
-        { 
-            if( it->first == key )
-            {
-                m_list.erase( it );
-                break;  // There's at most one existing key, so OK to break here.
+        const std::lock_guard<std::mutex> lock( element_array_mutex );
+
+        auto it = std::find_if( element_array.begin(), element_array.end(), 
+                                [&key](element_type& e){return e.first == key;} );
+
+        if( it == element_array.end() ) {           // This key does not exist
+            if( current_size < CacheCapacity ) {    // This cache is not full
+                element_array[current_size].first = std::move(key);
+                element_array[current_size].second.reset(ptr);
+                std::rotate( element_array.begin(), element_array.begin() + current_size,
+                             element_array.begin() + current_size + 1 );
+                current_size++;
+            }
+            else {                                  // The cache is full!
+                element_array.back().first = std::move(key);
+                element_array.back().second.reset(ptr);
+                std::rotate( element_array.begin(), element_array.end() - 1, element_array.end() );
             }
         }
-
-        // Should have used make_unique<> in C++14. GCC-4.8 in CentOS7 prevents it as of 2019.
-        std::unique_ptr<const BigObj> tmp( ptr );
-
-        // Create a new pair at the front of the list
-        m_list.emplace_front( std::move(key), std::move(tmp) );
-
-        if( m_list.size() > m_max_size )
-            m_list.pop_back();
+        else {                                      // This key does exist. 
+            it->second.reset(ptr);
+            auto tmp = std::move(*it);
+            std::move_backward( element_array.begin(), it, it + 1 );
+            element_array.front() = std::move(tmp);
+        }
     }
 
 private:
-    using list_type = std::list< std::pair<Key, std::unique_ptr<const BigObj>> >;
-    mutable list_type   m_list;
-    const   size_t      m_max_size;
+    using element_type = std::pair<Key, std::unique_ptr<const BigObj>> ;
+    std::array< element_type, CacheCapacity > element_array;
+    size_t current_size = 0;
+    std::mutex element_array_mutex;
+};
 
-};  // end of class unique_ptr_cache
-
-}   // end of namespace VAPoR
+}   // End of VAPoR namespace
 
 #endif

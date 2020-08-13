@@ -8,7 +8,6 @@ using namespace flow;
 
 // Constructor
 VaporField::VaporField( size_t cache_limit )
-    : _recentGrids( cache_limit )
 { }
 
 
@@ -473,11 +472,12 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
     _params->GetBox()->GetExtents( extMin, extMax );
     int refLevel    = _params->GetRefinementLevel();
     int compLevel   = _params->GetCompressionLevel();
-    std::string key = _paramsToString( timestep, varName, refLevel, compLevel, 
-                                       extMin, extMax );
-    if( _recentGrids.contains( key ) )
-    {
-        const VAPoR::Grid* grid = _recentGrids.find( key )->grid();
+    std::string key = _paramsToString( timestep, varName, refLevel, compLevel, extMin, extMax );
+
+    const auto* grid_wrapper = _recentGrids.query( key );
+
+    if( grid_wrapper != nullptr ) {
+        const VAPoR::Grid* grid = grid_wrapper->grid();
         // Is this a GrownGrid? 
         const VAPoR::GrownGrid* ggrid = dynamic_cast<const VAPoR::GrownGrid*>(grid);
         if( ggrid == nullptr )
@@ -493,7 +493,7 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
 
     //
     // There's no such grid in our cache! 
-    // Let's do one of the three and then keep it in the cache.
+    // Let's create a new grid by doing one of the three things, and then put it in the cache.
     // 1) create it by ourselves if a ConstantGrid is required, or
     // 2) ask for it from the data manager,
     // 3) query a 2D grid and grow it to be a GrownGrid.
