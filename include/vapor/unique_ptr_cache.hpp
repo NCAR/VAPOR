@@ -16,6 +16,10 @@
 //
 // Tip:    This cache should be initialized sufficiently big so that a returned 
 //         pointer won't be evicted while that pointer is in use.
+//         In other words, users need to know how many new insersions are going to happen
+//         while a queried pointer is in use, and initialize the cache to be at least
+//         that big.
+//
 //         To use an example, a `unique_ptr_cache` is initialized to hold N objects.
 //         A queried pointer `ptr` is valid at the time of query, and will remain valid until
 //         another (N-1) different individual objects being queried/inserted. 
