@@ -11,7 +11,7 @@
 //
 // Caveat: A cache keeps things that it is asked to keep, which in this case are pointers.
 //         This implementation guarantees that pointers and the objects that they point to
-//         are not altered, and are properly destroyed when evicted.
+//         are not altered while in the cache, and are properly destroyed when evicted.
 //         The cache guarantees no more than that.
 //
 // Tip:    This cache should be initialized sufficiently big so that a returned 
