@@ -474,7 +474,7 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
     int compLevel   = _params->GetCompressionLevel();
     std::string key = _paramsToString( timestep, varName, refLevel, compLevel, extMin, extMax );
 
-    const auto* grid_wrapper = _recentGrids.query( key );
+    const auto& grid_wrapper = _recentGrids.query( key );
 
     if( grid_wrapper != nullptr ) {
         const VAPoR::Grid* grid = grid_wrapper->grid();
