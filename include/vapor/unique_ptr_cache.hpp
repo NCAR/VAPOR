@@ -80,7 +80,7 @@ public:
     //
     // Major action function.
     // If the key exists, it returns the unique pointer associated with the key. 
-    // If the key does not exist, it returns nullptr.
+    // If the key does not exist, it returns the unique_ptr version of a nullptr.
     // 
     auto query( const Key& key ) -> const std::unique_ptr<const BigObj>&
     {
@@ -130,11 +130,12 @@ public:
     }
 
 private:
-    using element_type = std::pair<Key, std::unique_ptr<const BigObj>> ;
-    std::array< element_type, CacheCapacity > element_array;
-    size_t current_size = 0;
-    std::unique_ptr<const BigObj> local_nullptr;
-    std::mutex element_array_mutex;
+    using element_type = std::pair<Key, std::unique_ptr<const BigObj>>;
+
+    std::array< element_type, CacheCapacity >   element_array;
+    size_t                                      current_size = 0;
+    const std::unique_ptr<const BigObj>         local_nullptr = {nullptr};
+    std::mutex                                  element_array_mutex;
 };
 
 }   // End of VAPoR namespace
