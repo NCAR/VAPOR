@@ -9,107 +9,116 @@
 // All structures stored in this cache are const qualified, so once a
 // structure is put in this cache, there is no more modification to this structure.
 //
-// This implementation follows std container naming conventions.
+// Caveat: This cache guarantees that a returned non-null pointer is valid at the
+//         query time, but cannot guarantee that the pointer keeps being valid after
+//         handing it over (i.e., not being evicted). Thus, this cache should be initialized
+//         sufficiently big so that a returned pointer won't be evicted while that pointer
+//         is in use.
+//         To use an example, a `unique_ptr_cache` is initialized to hold N objects.
+//         A queried pointer `ptr` is valid at the time of query, and will remain valid until
+//         another (N-1) different individual objects being queried/inserted.
+//         At that point, the immediate next query/insertion of the next individual object (the Nth)
+//         will evict `ptr`, and `prt` is no longer valid.
 //
-// Author: Samuel Li
-// Date  : 9/26/2019
+// Revision: (8/13/2020) it uses std::array<> to achieve the highest performance with
+//                       small to medium cache sizes.
+// Revision: (8/13/2020) it uses mutexes to achieve thread safety.
+//
+// Author   : Samuel Li
+// Date     : 9/26/2019
+// Revision : 8/13/2020
 //-----------------------------------------------------------------------------
 
 #ifndef UNIQUE_PTR_CACHE_H
 #define UNIQUE_PTR_CACHE_H
 
-#include <cstddef>
-#include <list>
-#include <utility>
-#include <memory>
+#include <cstddef>    // size_t
+#include <utility>    // std::pair<>
+#include <memory>     // std::unique_ptr<>
+#include <array>
+#include <mutex>
 
 namespace VAPoR {
 
+//
 // Note : Key must support == operator
-template<typename Key, typename BigObj> class unique_ptr_cache final {
+//
+template<typename Key, typename BigObj, size_t CacheCapacity> class unique_ptr_cache final {
 public:
-    // Constructor with the max size specified
-    unique_ptr_cache(size_t size) : m_max_size(size > 1 ? size : 1)    // cache max size has to be at least one
-    {
-    }
-
-    // Given that this cache is intended to be used to keep unique pointers,
+    // Constructors
+    // Note: because this cache is intended to be used to keep unique pointers,
     // we don't want to allow any type of copy constructors, so delete them.
+    unique_ptr_cache() = default;
     unique_ptr_cache(const unique_ptr_cache &) = delete;
     unique_ptr_cache(const unique_ptr_cache &&) = delete;
     unique_ptr_cache &operator=(const unique_ptr_cache &) = delete;
     unique_ptr_cache &operator=(const unique_ptr_cache &&) = delete;
 
-    size_t max_size() const { return m_max_size; }
+    auto capacity() const -> size_t { return CacheCapacity; }
 
-    size_t size() const { return m_list.size(); }
+    auto size() const -> size_t { return _current_size; }
 
-    void clear() { m_list.clear(); }
+    void clear() { _current_size = 0; }
 
-    bool empty() const { return m_list.empty(); }
+    auto empty() const -> bool { return (_current_size == 0); }
 
-    // Key must support == operator.
-    bool contains(const Key &key) const
+    auto full() const -> bool { return (_current_size == CacheCapacity); }
+
+    //
+    // Major action function.
+    // If the key exists, it returns the unique pointer associated with the key.
+    // If the key does not exist, it returns the unique_ptr version of a nullptr.
+    //
+    auto query(const Key &key) -> const std::unique_ptr<const BigObj> &
     {
-        // (Should use const iterator here, but gcc-4.8 on CentOS7 doesn't support...)
-        for (auto it = m_list.begin(); it != m_list.end(); ++it) {
-            if (it->first == key) {
-                // Move the current element to the list head if it's not already there
-                if (it != m_list.begin()) m_list.splice(m_list.begin(), m_list, it);
+        const std::lock_guard<std::mutex> lock(__element_array_mutex);
 
-                return true;
-            }
+        auto it = std::find_if(_element_array.begin(), _element_array.end(), [&key](element_type &e) { return e.first == key; });
+        if (it == _element_array.end()) {    // This key does not exist
+            return _local_nullptr;
+        } else {    // This key does exist
+            auto tmp = std::move(*it);
+            std::move_backward(_element_array.begin(), it, it + 1);
+            _element_array.front() = std::move(tmp);
+
+            return _element_array.front().second;
         }
-        return false;
     }
 
-    // Upon the existance of Key, returns a const pointer pointing to BigObj
-    // Upon non-existance of Key, return a nullptr
-    const BigObj *find(const Key &key) const
-    {
-        // We found the key, and now the pair is at the beginning of the list
-        if (this->contains(key)) {
-            // Get a raw pointer from the unique_ptr
-            return (m_list.cbegin()->second).get();
-        } else
-            return nullptr;
-    }
-
-    //
-    // Inserts to the head of the cache a key and a raw pointer pointing to a BigObj.
-    // Upon success, this class takes ownership of the BigObj and the old raw pointer
-    // shall not be used anymore.
-    // In the case of the key already exists, the new BigObj takes place of the old
-    // BigObj, while the old BigObj is properly destroyed.
-    // (Pass by value and move idiom on Key)
-    //
     void insert(Key key, const BigObj *ptr)
     {
-        // Remove the old pair if the same key already exists.
-        // (Should use const iterator here, but gcc-4.8 on CentOS7 doesn't support...)
-        for (auto it = m_list.begin(); it != m_list.end(); ++it) {
-            if (it->first == key) {
-                m_list.erase(it);
-                break;    // There's at most one existing key, so OK to break here.
+        const std::lock_guard<std::mutex> lock(__element_array_mutex);
+
+        auto it = std::find_if(_element_array.begin(), _element_array.end(), [&key](element_type &e) { return e.first == key; });
+
+        if (it == _element_array.end()) {           // This key does not exist
+            if (_current_size < CacheCapacity) {    // This cache is not full
+                _element_array[_current_size].first = std::move(key);
+                _element_array[_current_size].second.reset(ptr);
+                std::rotate(_element_array.begin(), _element_array.begin() + _current_size, _element_array.begin() + _current_size + 1);
+                _current_size++;
+            } else {    // The cache is full!
+                _element_array.back().first = std::move(key);
+                _element_array.back().second.reset(ptr);
+                std::rotate(_element_array.begin(), _element_array.end() - 1, _element_array.end());
             }
+        } else {    // This key does exist.
+            it->second.reset(ptr);
+            auto tmp = std::move(*it);
+            std::move_backward(_element_array.begin(), it, it + 1);
+            _element_array.front() = std::move(tmp);
         }
-
-        // Should have used make_unique<> in C++14. GCC-4.8 in CentOS7 prevents it as of 2019.
-        std::unique_ptr<const BigObj> tmp(ptr);
-
-        // Create a new pair at the front of the list
-        m_list.emplace_front(std::move(key), std::move(tmp));
-
-        if (m_list.size() > m_max_size) m_list.pop_back();
     }
 
 private:
-    using list_type = std::list<std::pair<Key, std::unique_ptr<const BigObj>>>;
-    mutable list_type m_list;
-    const size_t      m_max_size;
+    using element_type = std::pair<Key, std::unique_ptr<const BigObj>>;
 
-};    // end of class unique_ptr_cache
+    std::array<element_type, CacheCapacity> _element_array;
+    size_t                                  _current_size = 0;
+    const std::unique_ptr<const BigObj>     _local_nullptr = {nullptr};
+    std::mutex                              __element_array_mutex;
+};
 
-}    // end of namespace VAPoR
+}    // namespace VAPoR
 
 #endif
