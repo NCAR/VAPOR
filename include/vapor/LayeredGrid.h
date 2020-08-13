@@ -202,13 +202,13 @@ protected:
  //! \copydoc Grid::GetUserExtents()
  //!
  virtual void GetUserExtentsHelper(
-	double minu[3], double maxu[3]
+	DblArr3 &minu, DblArr3 &maxu
  ) const override;
 
 private:
  RegularGrid _rg;
- std::vector <double> _minu;
- std::vector <double> _maxu;
+ DblArr3 _minu = {0.0, 0.0, 0.0};
+ DblArr3 _maxu = {0.0, 0.0, 0.0};
  std::vector <double> _delta;
  int _interpolationOrder;
 

@@ -42,9 +42,9 @@ size_t ConstantGrid::GetTopologyDim() const
     return _topologyDim;
 }
 
-void ConstantGrid::GetUserExtentsHelper( double minu[3], double maxu[3]) const
+void ConstantGrid::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const
 {
-	for (int i=0; i<GetGeometryDim(); i++) {
+	for (int i=0; i<minu.size(); i++) {
 		minu[i] = std::numeric_limits<double>::lowest();
 		maxu[i] = std::numeric_limits<double>::max();
 	}

@@ -39,7 +39,7 @@ float GrownGrid::GetMissingValue() const
     return _grid2d->GetMissingValue();
 }
 
-void GrownGrid::GetUserExtentsHelper( double minu[3], double maxu[3]) const
+void GrownGrid::GetUserExtentsHelper( DblArr3 &minu, DblArr3 &maxu) const
 {
     _grid2d->GetUserExtents( minu, maxu );
 

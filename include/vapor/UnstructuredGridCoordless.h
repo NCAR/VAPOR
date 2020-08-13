@@ -163,12 +163,10 @@ public:
 protected:
 
  virtual void GetUserExtentsHelper(
-	double minu[3], double maxu[3]
+	DblArr3 &minu, DblArr3 &maxu
  ) const override {
-	for (int i=0; i<GetGeometryDim(); i++) {
-		minu[i] = 0.0;
-		maxu[i] = 0.0;
-	}
+	minu = {0.0, 0.0, 0.0};
+	maxu = {0.0, 0.0, 0.0};
  }
 
 private:

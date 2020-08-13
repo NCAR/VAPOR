@@ -168,6 +168,9 @@ public:
  //! returned by GetDimensions()
  //!
  virtual float GetValueAtIndex(const Size_tArr3 &indices) const;
+
+ //! \deprecated
+ //
  virtual float GetValueAtIndex(const std::vector <size_t> &indices) const {
 	Size_tArr3 a = {0,0,0};
 	CopyToArr3(indices, a);
@@ -180,6 +183,9 @@ public:
  //! \p indices to \p value. 
  //!
  virtual void SetValue(const Size_tArr3 &indices, float value);
+
+ //! \deprecated
+ //
  virtual void SetValue(const size_t indices[3], float value) {
 	Size_tArr3 i3 = {0,0,0};
 	CopyToArr3(indices, GetNodeDimensions().size(), i3);
@@ -227,12 +233,18 @@ public:
  //!
  virtual float GetValue(const DblArr3 &coords) const;
 
+
+ //! \deprecated
+ //
  virtual float GetValue(const std::vector <double> &coords) const {
 	DblArr3 c3 = {0.0, 0.0, 0.0};
 	CopyToArr3(coords, c3);
 	return(GetValue(c3));
  };
 
+
+ //! \deprecated
+ //
  virtual float GetValue(const double coords[]) const {
 	DblArr3 c3 = {0.0, 0.0, 0.0};
 	CopyToArr3(coords, GetGeometryDim(), c3);
@@ -264,15 +276,38 @@ public:
  //! \sa GetDimensions(), Grid()
  //!
  virtual void GetUserExtents(
-	double minu[3], double maxu[3]
+	DblArr3 &minu, DblArr3 &maxu
  ) const;
 
+ //! \deprecated
+ //
+ virtual void GetUserExtents(
+	double minu[3], double maxu[3]
+ ) const {
+	DblArr3 minu3 = {0.0, 0.0, 0.0};
+	DblArr3 maxu3 = {0.0, 0.0, 0.0};
+	GetUserExtents(minu3, maxu3);
+	CopyFromArr3(minu3, minu);
+	CopyFromArr3(maxu3, maxu); 
+ }
+
+ //! \deprecated
+ //
  virtual void GetUserExtents(
 	std::vector <double> &minu, std::vector <double> &maxu
  ) const {
+	DblArr3 minu3 = {0.0, 0.0, 0.0};
+	DblArr3 maxu3 = {0.0, 0.0, 0.0};
+	GetUserExtents(minu3, maxu3);
+	CopyFromArr3(minu3, minu);
+	CopyFromArr3(maxu3, maxu); 
+
+	// Much of the use of this method assumes that the size of the minu,maxu
+	// vectors can be used to determine the number of coordinates. So we 
+	// maintain this property for now. 
+	//
 	minu.resize(GetGeometryDim());
 	maxu.resize(GetGeometryDim());
-	return(GetUserExtents(minu.data(), maxu.data()));
  }
 
  //! Return the extents of the axis-aligned bounding box enclosign a region
@@ -1308,7 +1343,7 @@ protected:
  ) const = 0;
 
  virtual void GetUserExtentsHelper(
-	double minu[3], double maxu[3]
+	DblArr3 &minu, DblArr3 &maxu
  ) const = 0;
 
  virtual float *GetValuePtrAtIndex(
@@ -1330,26 +1365,26 @@ protected:
  }
 
  template <typename T>
- void CopyToArr3(const std::vector <T> &src, std::array <T, 3> &dst) const {
+ static void CopyToArr3(const std::vector <T> &src, std::array <T, 3> &dst) {
 	for (int i=0; i<src.size() && i < dst.size(); i++) {
 		dst[i] = src[i];
 	}
  }
  template <typename T>
- void CopyToArr3(const T *src, size_t n, std::array <T, 3> &dst) const {
+ static void CopyToArr3(const T *src, size_t n, std::array <T, 3> &dst) {
 	for (int i=0; i<n && i < dst.size(); i++) {
 		dst[i] = src[i];
 	}
  }
  template <typename T>
- void CopyFromArr3(const std::array <T, 3> &src, std::vector <T> &dst) const {
+ static void CopyFromArr3(const std::array <T, 3> &src, std::vector <T> &dst) {
 	dst.resize(src.size());
 	for (int i=0; i<src.size() && i < dst.size(); i++) {
 		dst[i] = src[i];
 	}
  }
  template <typename T>
- void CopyFromArr3(const std::array <T, 3> &src, T *dst) const {
+ static void CopyFromArr3(const std::array <T, 3> &src, T *dst) {
 	for (int i=0; i < src.size(); i++) {
 		dst[i] = src[i];
 	}
@@ -1372,8 +1407,16 @@ private:
  int _interpolationOrder   = 0;	// Order of interpolation 
  long _nodeIDOffset        = 0;
  long _cellIDOffset        = 0;
- mutable std::vector <double> _minuCache;
- mutable std::vector <double> _maxuCache;
+ mutable DblArr3 _minuCache = {
+	std::numeric_limits<double>::infinity(),
+	std::numeric_limits<double>::infinity(),
+	std::numeric_limits<double>::infinity()
+ };
+ mutable DblArr3 _maxuCache = {
+	std::numeric_limits<double>::infinity(),
+	std::numeric_limits<double>::infinity(),
+	std::numeric_limits<double>::infinity()
+ };
 
  virtual void _getUserCoordinatesHelper(
 	const std::vector <double> &coords, double &x, double &y, double &z

@@ -52,8 +52,6 @@ Grid::Grid(
 	_nodeIDOffset = 0;
 	_cellIDOffset = 0;
 	_minAbs = vector <size_t> (_dims.size(), 0);
-	_minuCache.clear();
-	_maxuCache.clear();
 
     //
     // Shallow  copy blocks
@@ -68,18 +66,19 @@ float Grid::GetMissingValue() const
 
 
 void Grid::GetUserExtents(
-    double minu[3], double maxu[3]
+    DblArr3 &minu, DblArr3 &maxu
  ) const {
-	if (! _minuCache.size()) {
-		_minuCache.resize(GetGeometryDim());
-		_maxuCache.resize(GetGeometryDim());
-		GetUserExtentsHelper(_minuCache.data(), _maxuCache.data());
+	auto p = [] (double v) {return(v == std::numeric_limits<double>::infinity());};
+	if (
+		std::any_of(_minuCache.begin(), _minuCache.end(), p) ||
+		std::any_of(_maxuCache.begin(), _maxuCache.end(), p)) {
+
+		GetUserExtentsHelper(_minuCache, _maxuCache);
 	}
 
-	for (int i=0; i<_minuCache.size(); i++) {
-		minu[i] = _minuCache[i];
-		maxu[i] = _maxuCache[i];
-	}
+	minu = _minuCache;
+	maxu = _maxuCache;
+
 }
 
 float Grid::GetValueAtIndex(const Size_tArr3 &indices) const {

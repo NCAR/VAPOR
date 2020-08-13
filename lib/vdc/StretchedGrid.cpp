@@ -22,17 +22,13 @@ void StretchedGrid::_stretchedGrid(
 	_xcoords.clear();
 	_ycoords.clear();
 	_zcoords.clear();
-	_minu.clear();
-	_maxu.clear();
 	_xcoords = xcoords;
 	_ycoords = ycoords;
 	_zcoords = zcoords;
 
 	// Get the user extents now. Do this only once.
 	//
-	_minu.resize(3);
-	_maxu.resize(3);
-	GetUserExtentsHelper(_minu.data(), _maxu.data());
+	GetUserExtentsHelper(_minu, _maxu);
 
 }
 
@@ -367,7 +363,7 @@ float StretchedGrid::GetValueLinear(
 }
 
 void StretchedGrid::GetUserExtentsHelper(
-	double minext[3], double maxext[3]
+	DblArr3 &minext, DblArr3 &maxext
 ) const {
 
 	vector <size_t> dims = StructuredGrid::GetDimensions();

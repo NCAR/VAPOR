@@ -239,7 +239,7 @@ void StructuredGrid::ClampCoord(
 	const vector <bool> &periodic = GetPeriodic();
 	const vector <size_t> &dims = GetDimensions();
 
-	double minu[3], maxu[3];
+	DblArr3 minu, maxu;
 	GetUserExtents(minu, maxu);
 
 	cCoords = coords;

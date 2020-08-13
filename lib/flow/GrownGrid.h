@@ -37,8 +37,7 @@ public:
     float GetDefaultZ() const;
     std::string GetType() const override;
     float GetValue(const DblArr3 &coords) const override;
-    void  GetUserExtentsHelper( double minu[3], 
-                          double maxu[3] ) const override;
+    void  GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu ) const override;
     bool  InsideGrid(const double coords[3]) const override;
     float GetMissingValue() const override;
 

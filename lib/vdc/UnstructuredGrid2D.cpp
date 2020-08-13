@@ -85,7 +85,7 @@ size_t UnstructuredGrid2D::GetGeometryDim() const {
 
 
 void UnstructuredGrid2D::GetUserExtentsHelper(
-    double minu[3], double maxu[3]
+    DblArr3 &minu, DblArr3 &maxu
 ) const {
 
 	float range[2];

@@ -20,17 +20,13 @@ void CurvilinearGrid::_curvilinearGrid(
 	std::shared_ptr <const QuadTreeRectangle<float, size_t> > qtr
 ) {
 	_zcoords.clear();
-	_minu.clear();
-	_maxu.clear();
 	_xrg = xrg;
 	_yrg = yrg;
 	_zrg = zrg;
 
 	_zcoords = zcoords;
 
-	_minu.resize(GetGeometryDim());
-	_maxu.resize(GetGeometryDim());
-	GetUserExtentsHelper(_minu.data(), _maxu.data());
+	GetUserExtentsHelper(_minu, _maxu);
 
 	_qtr = qtr;
 	if (! _qtr) {
@@ -584,7 +580,7 @@ float CurvilinearGrid::GetValueLinear(
 }
 
 void CurvilinearGrid::GetUserExtentsHelper(
-	double minu[3], double maxu[3]
+	DblArr3 &minu, DblArr3 &maxu
 ) const {
 
 	// Get the horiztonal (X & Y) extents by visiting every point

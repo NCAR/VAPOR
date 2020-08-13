@@ -155,7 +155,7 @@ protected:
  //! \copydoc Grid::GetUserExtents()
  //
  virtual void GetUserExtentsHelper(
-    double minu[3], double maxu[3]
+    DblArr3 &minu, DblArr3 &maxu
  ) const override;
 
 
@@ -167,8 +167,9 @@ private:
 	const std::vector <double> &maxu
  );
 
- std::vector <double> _minu;	
- std::vector <double> _maxu;	// User coords of first and last voxel
+ DblArr3 _minu = {0.0, 0.0, 0.0};
+ DblArr3 _maxu = {0.0, 0.0, 0.0};
+ size_t _geometryDim;
  std::vector <double> _delta;	// increment between grid points in user coords
 
 

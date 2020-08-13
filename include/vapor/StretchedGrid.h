@@ -176,7 +176,7 @@ protected:
  ) const override;
 
  void GetUserExtentsHelper(
-	double minu[3], double maxu[3]
+	DblArr3 &minu, DblArr3 &maxu
  ) const override;
 
 
@@ -184,8 +184,8 @@ private:
  std::vector <double> _xcoords;
  std::vector <double> _ycoords;
  std::vector <double> _zcoords;
- std::vector <double> _minu;
- std::vector <double> _maxu;
+ DblArr3 _minu = {0.0, 0.0, 0.0};
+ DblArr3 _maxu = {0.0, 0.0, 0.0};
 
  void _stretchedGrid(
 	const std::vector <double> &xcoords,

@@ -21,14 +21,12 @@ void LayeredGrid::_layeredGrid(
 	VAssert(minu.size() == 2);
 
 
-	_minu.clear();
-	_maxu.clear();
 	_delta.clear();
 	_interpolationOrder = 1;
 
 	_rg = rg;
-	_minu = minu;
-	_maxu = maxu;
+	CopyToArr3(minu, _minu);
+	CopyToArr3(maxu, _maxu);
 
 	// Coordinates for horizontal dimensions
 	//
@@ -42,8 +40,8 @@ void LayeredGrid::_layeredGrid(
 	//
 	float range[2];
 	_rg.GetRange(range);
-	_minu.push_back(range[0]);
-	_maxu.push_back(range[1]);
+	_minu[2] = range[0];
+	_maxu[2] = range[1];
 
 }
 
@@ -75,12 +73,10 @@ vector <size_t> LayeredGrid::GetCoordDimensions(size_t dim) const {
 }
 
 void LayeredGrid::GetUserExtentsHelper(
-	double minu[3], double maxu[3]
+	DblArr3 &minu, DblArr3 &maxu
 ) const {
-	for (int i=0; i<_minu.size(); i++) {
-		minu[i] = _minu[i];
-		maxu[i] = _maxu[i];
-	}
+	minu = _minu;
+	maxu = _maxu;
 }
 
 void LayeredGrid::GetBoundingBox(
@@ -404,9 +400,10 @@ LayeredGrid::ConstCoordItrLayered::ConstCoordItrLayered(
 	const LayeredGrid *lg, bool begin
 ) : ConstCoordItrAbstract() {
 	_dims = lg->GetDimensions();
-	_minu = lg->_minu;
 	_delta = lg->_delta;
-	_coords = lg->_minu;
+
+	Grid::CopyFromArr3(lg->_minu, _minu);
+	Grid::CopyFromArr3(lg->_minu, _coords);
 
     _index = vector<size_t> (_dims.size(), 0);
 	_zCoordItr = lg->_rg.cbegin();

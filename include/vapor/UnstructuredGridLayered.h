@@ -158,7 +158,7 @@ public:
 protected:
 
  virtual void GetUserExtentsHelper(
-	double minu[3], double maxu[3]
+	DblArr3 &minu, DblArr3 &maxu
  ) const override;
 
 private:
