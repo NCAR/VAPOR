@@ -82,10 +82,38 @@ ____________________
 
 After installing Git and registering with GitHub, it's time to "Fork" Vapor's code base by clicking the Fork button on the upper right corner of `Vapor's GitHub repository <https://github.com/NCAR/VAPOR>`_.  This creates your own repository on GitHub that contains a copy of Vapor's current master branch.  
 
+.. figure:: ../_images/forkVapor.png
+     :align: center
+     :figclass: align-center
+     :width: 60%
+
+     Click the "Fork" button in the top-left corner of we website.
+
+.. figure:: ../_images/newFork.png
+     :align: center
+     :figclass: align-center
+
+     The newly created fork, based off Vapor's master branch.  Note the new repository name (sgpearse/VAPOR).  This is the repository you will clone from.
+
 Clone your forked repository to a suitable location on your local work machine.  This new remote repository is what will be merged with Vapor's master branch once your changes have been made.
 
-Download the Third-Party Libraries
-__________________________________
+After completing your work, your changes can be submitted for review through a Pull Request from your Fork, into Vapor's master repository.  This is done under the Pull Requests tab in Vapor's github repository.  From this tab, create a new pull request that brings the changes from your forked repo into Vapor's master repo.  More details on this step are included in the :ref:`Submitting Your Changes <contributing.submitting>` section of this document.
+
+For more information on the Forking Workflow, please see `Atlassian has a tutorial <https://www.atlassian.com/git/tutorials/comparing-workflows/forking-workflow>`_ on basics and best practices.
+
+.. figure:: ../_images/mergeFork.png
+     :align: center
+     :figclass: align-center
+
+     Submitting a pull request to Vapor's master branch.
+
+Third-Party Libraries
+_____________________
+
+Download pre-built Third-Party Libraries
+****************************************
+
+This is the recommended approach for acquiring the third-party libraries that Vapor depends on.  If you require additional libraries, or custom settings to the libraries currently used by vapor, see the :ref:`Building third-party Libraries <contributing.build3rdParty>`.
 
 After forking and cloning your new Vapor repository, you will need to download the third-party libraries that Vapor will link to.  These libraries can be downloaded below.  Be sure to select the correct libraries for the operating system you're building on.
 
@@ -105,12 +133,21 @@ If building on Linux or OSX, the third party libraries must be placed in /usr/lo
 
     `CentOS third-party libraries <https://drive.google.com/open?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0>`_
 
-.. note:: Alternatively to downloading our pre-built libraries, you can build the libraries yourself and store them wherever you want.  This is a more complex exercise.  If you choose to do this, you must also configure Vapor's CMake configuration to point to your custom directory.  Do not build the libraries in the same directory that Vapor is being built in - this will interfere with the generation of installers.  If you wish to go down this route, you may follow these build instructions for `Windows <https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing>`_ and `UNIX <https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing>`_.
+.. _contributing.build3rdParty:
+
+Building third-party Libraries
+******************************
+
+This is an alternative to downloading our pre-built libraries that allows you to configure and store them wherever you want.  This is a more complex exercise.  If you choose to do this, you must also configure Vapor's CMake configuration to point to your custom directory.  
+
+If you wish to go down this route, you may follow these build instructions for `Windows <https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing>`_ and `UNIX <https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing>`_.
+
+.. note:: In order for Vapor to generate installers, all third-party libraries must be built in the same directory.
 
 .. note:: The file <vapor-source>/site_files/site.NCAR is used to specify the location of Vapor's third party libraries.  If you would like to link to a different set of libraries, edit this file to specify your choice.  CMake variables passed over the command line may be overwritten by this file's presets.
 
 +-----------------+----------------------------------------------------------------+
-| *Vapor 3 was build with the following third party library configuration.*        |
+| *Vapor 3 was built with the following third party library configuration.*        |
 +-----------------+----------------------------------------------------------------+
 | Library         | Version                                                        |
 +-----------------+----------------------------------------------------------------+
@@ -244,6 +281,8 @@ On Windows, make sure that the Visual Studio setting for the build is in *Releas
 On OSX, run *cmake <vapor-source-dir> && make && make installer* from your build directory.
 
 On Linux, run  *cmake <vapor-source-dir> && make linuxpreinstall && make installer* from your build directory.
+
+.. _contributing.submitting:
 
 Submitting Your Changes
 _______________________
