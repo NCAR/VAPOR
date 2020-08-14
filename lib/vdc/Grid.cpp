@@ -68,11 +68,15 @@ float Grid::GetMissingValue() const
 void Grid::GetUserExtents(
     DblArr3 &minu, DblArr3 &maxu
  ) const {
+
+	size_t n = min(GetGeometryDim(), _minuCache.size());
 	auto p = [] (double v) {return(v == std::numeric_limits<double>::infinity());};
 	if (
-		std::any_of(_minuCache.begin(), _minuCache.end(), p) ||
-		std::any_of(_maxuCache.begin(), _maxuCache.end(), p)) {
+		std::any_of(_minuCache.begin(), _minuCache.begin()+n, p) ||
+		std::any_of(_maxuCache.begin(), _maxuCache.begin()+n, p)) {
 
+		_minuCache = {0.0, 0.0, 0.0};
+		_maxuCache = {0.0, 0.0, 0.0};
 		GetUserExtentsHelper(_minuCache, _maxuCache);
 	}
 
@@ -220,10 +224,10 @@ float Grid::GetValue(const DblArr3 &coords) const {
 #endif
 
     if (_interpolationOrder == 0) {
-        return (GetValueNearestNeighbor(cCoords.data()));
+        return (GetValueNearestNeighbor(cCoords));
     }
     else {
-        return (GetValueLinear(cCoords.data()));
+        return (GetValueLinear(cCoords));
     }
 }
 

@@ -101,15 +101,15 @@ public:
  //! \copydoc Grid::GetCellNeighbors()
  //!
  virtual bool GetCellNeighbors(
-	const std::vector <size_t> &cindices,
-	std::vector <std::vector <size_t> > &cells
+	const Size_tArr3 &cindices,
+	std::vector <Size_tArr3> &cells
  ) const override;
 
  //! \copydoc Grid::GetNodeCells()
  //!
  virtual bool GetNodeCells(
-	const std::vector <size_t> &indices,
-	std::vector <std::vector <size_t> > &cells
+	const Size_tArr3 &cindices,
+	std::vector <Size_tArr3> &cells
  ) const override;
 
  virtual bool    GetEnclosingRegion(

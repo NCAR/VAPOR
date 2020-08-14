@@ -181,12 +181,12 @@ bool LayeredGrid::_getCellAndWeights(
 }
 
 float LayeredGrid::GetValueNearestNeighbor(
-	const double coords[3]
+	const DblArr3 &coords
 ) const {
 
 	size_t indices[3];
 	double wgts[3];
-	bool found = _getCellAndWeights(coords, indices, wgts);
+	bool found = _getCellAndWeights(coords.data(), indices, wgts);
 	if (! found) return(GetMissingValue());
 
 	if (wgts[0] > 0.5) indices[0] += 1;
@@ -198,12 +198,12 @@ float LayeredGrid::GetValueNearestNeighbor(
 
 
 float LayeredGrid::GetValueLinear (
-	const double coords[3]
+	const DblArr3 &coords
 ) const {
 
 	size_t indices0[3];
 	double wgts[3];
-	bool found = _getCellAndWeights(coords, indices0, wgts);
+	bool found = _getCellAndWeights(coords.data(), indices0, wgts);
 	if (! found) return(GetMissingValue());
 
 
@@ -276,11 +276,11 @@ float LayeredGrid::GetValueLinear (
 }
 
 
-float LayeredGrid::GetValue(const double coords[3]) const {
+float LayeredGrid::GetValue(const DblArr3 &coords) const {
 
 	// Clamp coordinates on periodic boundaries to grid extents
 	//
-	double cCoords[3];
+	DblArr3 cCoords;
 	ClampCoord(coords, cCoords);
 
 	if (! LayeredGrid::InsideGrid(cCoords)) return(GetMissingValue());
@@ -301,7 +301,7 @@ float LayeredGrid::GetValue(const double coords[3]) const {
         return (GetValueLinear(cCoords));
     }
 
-	return _getValueQuadratic(cCoords);
+	return _getValueQuadratic(cCoords.data());
 
 }
 
@@ -381,15 +381,15 @@ bool LayeredGrid::GetIndicesCell(
 }
 
 
-bool LayeredGrid::InsideGrid(const double coords[3]) const {
+bool LayeredGrid::InsideGrid(const DblArr3 &coords) const {
 
 	// Clamp coordinates on periodic boundaries to reside within the 
 	// grid extents (vary-dimensions can not have periodic boundaries)
 	//
-	double cCoords[3];
+	DblArr3 cCoords;
 	ClampCoord(coords, cCoords);
 
-	size_t indices[3];
+	Size_tArr3 indices;
 	bool found = GetIndicesCell(cCoords, indices);
 	return (found);
 

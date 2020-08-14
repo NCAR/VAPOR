@@ -530,10 +530,11 @@ public:
  //! \deprecated
  //
  virtual bool GetIndicesCell(const double coords[3], size_t indices[3]) const {
-	DblArr3 c3 = {coords[0], coords[1], coords[2]};
-	Size_tArr3 i3;
+	DblArr3 c3 = {0.0, 0.0, 0.0};
+	Size_tArr3 i3 = {0,0,0};
+	CopyToArr3(coords, GetGeometryDim(), c3);
 	bool status = GetIndicesCell(c3,i3);
-	indices[0] = i3[0]; indices[1] = i3[1]; indices[2] = i3[2];
+	CopyFromArr3(i3, indices);
 	return(status);
  }
 
@@ -543,8 +544,12 @@ public:
     const std::vector <double> &coords,
     std::vector <size_t> &indices
  ) const {
-	indices.resize(GetNodeDimensions().size());
-	return(GetIndicesCell(coords.data(), indices.data()));
+	DblArr3 c3 = {0.0, 0.0, 0.0};
+	Size_tArr3 i3 = {0,0,0};
+	CopyToArr3(coords, c3);
+	bool status = GetIndicesCell(c3,i3);
+	CopyFromArr3(i3, indices);
+	return(status);
  }
 
  //! Return the min and max data value
@@ -586,9 +591,22 @@ public:
  //!
  //! \retval bool True if point is inside the grid
  //!
- virtual bool InsideGrid(const double coords[3]) const = 0;
+ virtual bool InsideGrid(const DblArr3 &coords) const = 0;
+
+ //! \deprecated
+ //
+ virtual bool InsideGrid(const double coords[3]) const {
+	DblArr3 c3 = {0.0, 0.0, 0.0};
+	CopyToArr3(coords, GetGeometryDim(), c3);
+	return(InsideGrid(c3));
+ }
+
+ //! \deprecated
+ //
  virtual bool InsideGrid(const std::vector <double> &coords) const {
-	return(InsideGrid(coords.data()));
+	DblArr3 c3 = {0.0, 0.0, 0.0};
+	CopyToArr3(coords, c3);
+	return(InsideGrid(c3));
  }
 
  //! Get the indices of the nodes that define a cell
@@ -641,8 +659,8 @@ public:
  //! has size given by GetDimensions.size()
  //!
  virtual bool GetCellNeighbors(
-	const std::vector <size_t> &cindices,
-	std::vector <std::vector <size_t> > &cells
+	const Size_tArr3 &cindices,
+	std::vector <Size_tArr3> &cells
  ) const = 0;
 
  //! Get the IDs (indices) of all of the cells that share a node
@@ -656,8 +674,8 @@ public:
  //! has size given by GetDimensions.size()
  //!
  virtual bool GetNodeCells(
-	const std::vector <size_t> &indices,
-	std::vector <std::vector <size_t> > &cells
+	const Size_tArr3 &indices,
+	std::vector <Size_tArr3> &cells
  ) const = 0;
 
  //! Return the maximum number of vertices per cell face
@@ -1335,11 +1353,11 @@ public:
 protected:
 
  virtual float GetValueNearestNeighbor(
-	const double coords[3]
+	const DblArr3 &coords
  ) const = 0;
 
  virtual float GetValueLinear(
-	const double coords[3]
+	const DblArr3 &coords
  ) const = 0;
 
  virtual void GetUserExtentsHelper(

@@ -84,14 +84,14 @@ public:
 	Size_tArr3 &indices
  ) const override;
 
- bool InsideGrid(const double coords[3]) const override;
+ bool InsideGrid(const DblArr3 &coords) const override;
 
  float GetValueNearestNeighbor (
-	const double coords[3]
+	const DblArr3 &coords
  ) const override;
 
  float GetValueLinear (
-	const double coords[3]
+	const DblArr3 &coords
  ) const override;
 
 

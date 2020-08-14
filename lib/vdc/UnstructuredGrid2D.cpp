@@ -211,10 +211,10 @@ bool UnstructuredGrid2D::GetIndicesCell(
 	return(status);
 }
 
-bool UnstructuredGrid2D::InsideGrid(const double coords[3]) const {
+bool UnstructuredGrid2D::InsideGrid(const DblArr3 &coords) const {
 
 	DblArr3 cCoords;
-	ClampCoord(DblArr3 {coords[0], coords[1], coords[2]}, cCoords);
+	ClampCoord(coords, cCoords);
 
 	double *lambda = new double[_maxVertexPerFace];
 	int nlambda;
@@ -234,14 +234,14 @@ bool UnstructuredGrid2D::InsideGrid(const double coords[3]) const {
 }
 
 float UnstructuredGrid2D::GetValueNearestNeighbor (
-	const double coords[3]
+	const DblArr3 &coords
 ) const {
 
 	// Clamp coordinates on periodic boundaries to reside within the
 	// grid extents
 	//
 	DblArr3 cCoords;
-	ClampCoord(DblArr3 {coords[0], coords[1], coords[2]}, cCoords);
+	ClampCoord(coords, cCoords);
 
 	double *lambda = new double[_maxVertexPerFace];
 	int nlambda;
@@ -277,14 +277,14 @@ float UnstructuredGrid2D::GetValueNearestNeighbor (
 }
 
 float UnstructuredGrid2D::GetValueLinear (
-	const double coords[3]
+	const DblArr3 &coords
 ) const {
 
 	// Clamp coordinates on periodic boundaries to reside within the
 	// grid extents
 	//
     DblArr3 cCoords;
-    ClampCoord(DblArr3 {coords[0], coords[1], coords[2]}, cCoords);
+    ClampCoord(coords, cCoords);
 
 	double *lambda = new double[_maxVertexPerFace];
 	int nlambda;

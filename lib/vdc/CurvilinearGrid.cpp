@@ -236,12 +236,12 @@ bool CurvilinearGrid::GetIndicesCell(
 	
 
 
-bool CurvilinearGrid::InsideGrid(const double coords[3]) const {
+bool CurvilinearGrid::InsideGrid(const DblArr3 &coords) const {
 
 	// Clamp coordinates on periodic boundaries to reside within the 
 	// grid extents 
 	//
-	double cCoords[3];
+	DblArr3 cCoords;
 	ClampCoord(coords, cCoords);
 
 	// Do a quick check to see if the point is completely outside of 
@@ -426,12 +426,12 @@ void CurvilinearGrid::ConstCoordItrCG::next(const long &offset) {
 
 
 float CurvilinearGrid::GetValueNearestNeighbor(
-	const double coords[3]
+	const DblArr3 &coords
 ) const {
 
 	// Clamp coordinates on periodic boundaries to grid extents
 	//
-	double cCoords[3];
+	DblArr3 cCoords;
 	ClampCoord(coords, cCoords);
 
 	double lambda[4], zwgt[2];
@@ -514,12 +514,12 @@ float interpolateQuad(
 };
 
 float CurvilinearGrid::GetValueLinear(
-	const double coords[3]
+	const DblArr3 &coords
 ) const {
 
 	// Clamp coordinates on periodic boundaries to grid extents
 	//
-	double cCoords[3];
+	DblArr3 cCoords;
 	ClampCoord(coords, cCoords);
 
 	// Get Wachspress coordinates for horizontal weights, and 

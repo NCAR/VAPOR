@@ -213,9 +213,7 @@ bool UnstructuredGridLayered::GetIndicesCell(
 	return(_insideGrid(coords, indices, nodes2D, lambda, zwgt));
 }
 
-bool UnstructuredGridLayered::InsideGrid(
-	const double coords[3]
-) const {
+bool UnstructuredGridLayered::InsideGrid(const DblArr3 &coords) const {
 
 
 	Size_tArr3 indices;
@@ -223,19 +221,19 @@ bool UnstructuredGridLayered::InsideGrid(
     vector <double> lambda;
 	float zwgt[2];
 
-	return(_insideGrid(DblArr3 {coords[0], coords[1], coords[2]}, indices, nodes2D, lambda, zwgt));
+	return(_insideGrid(coords, indices, nodes2D, lambda, zwgt));
 
 }
 
 float UnstructuredGridLayered::GetValueNearestNeighbor (
-	const double coords[3]
+	const DblArr3 &coords
 ) const {
 	Size_tArr3 indices;
     std::vector <size_t> nodes2D;
     vector <double> lambda;
 	float zwgt[2];
 
-	bool inside = _insideGrid(DblArr3 {coords[0], coords[1], coords[2]}, indices, nodes2D, lambda, zwgt);
+	bool inside = _insideGrid(coords, indices, nodes2D, lambda, zwgt);
 	if (! inside) return (GetMissingValue());
 
 	// Find nearest node in XY plane (the curvilinear part of grid)
@@ -264,7 +262,7 @@ float UnstructuredGridLayered::GetValueNearestNeighbor (
 }
 
 float UnstructuredGridLayered::GetValueLinear (
-	const double coords[3]
+	const DblArr3 &coords
 ) const {
 
 	Size_tArr3 indices;
@@ -272,7 +270,7 @@ float UnstructuredGridLayered::GetValueLinear (
     vector <double> lambda;
 	float zwgt[2];
 
-	bool inside = _insideGrid(DblArr3 {coords[0], coords[1], coords[2]}, indices, nodes2D, lambda, zwgt);
+	bool inside = _insideGrid(coords, indices, nodes2D, lambda, zwgt);
 	if (! inside) return (GetMissingValue());
 
 	// Interpolate value inside bottom face

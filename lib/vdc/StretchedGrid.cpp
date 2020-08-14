@@ -164,12 +164,12 @@ bool StretchedGrid::GetIndicesCell(
 	
 
 
-bool StretchedGrid::InsideGrid(const double coords[3]) const {
+bool StretchedGrid::InsideGrid(const DblArr3 &coords) const {
 
 	// Clamp coordinates on periodic boundaries to reside within the 
 	// grid extents 
 	//
-	double cCoords[3];
+	DblArr3 cCoords;
 	ClampCoord(coords, cCoords);
 
 	// Do a quick check to see if the point is completely outside of 
@@ -293,12 +293,12 @@ void StretchedGrid::ConstCoordItrSG::next(const long &offset) {
 
 
 float StretchedGrid::GetValueNearestNeighbor(
-	const double coords[3]
+	const DblArr3 &coords
 ) const {
 
 	// Clamp coordinates on periodic boundaries to grid extents
 	//
-	double cCoords[3];
+	DblArr3 cCoords;
 	ClampCoord(coords, cCoords);
 
 	double xwgt[2], ywgt[2], zwgt[2];
@@ -318,12 +318,12 @@ float StretchedGrid::GetValueNearestNeighbor(
 }
 
 float StretchedGrid::GetValueLinear(
-	const double coords[3]
+	const DblArr3 &coords
 ) const {
 
 	// Clamp coordinates on periodic boundaries to grid extents
 	//
-	double cCoords[3];
+	DblArr3 cCoords;
 	ClampCoord(coords, cCoords);
 
 	// handlese case where grid is 2D. I.e. if 2d then zwgt[0] == 1 && 

@@ -36,10 +36,10 @@ public:
     //
     float GetDefaultZ() const;
     std::string GetType() const override;
-    float GetValue(const DblArr3 &coords) const override;
     void  GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu ) const override;
-    bool  InsideGrid(const double coords[3]) const override;
+    bool  InsideGrid(const DblArr3 &coords) const override;
     float GetMissingValue() const override;
+    float GetValue(const DblArr3 &coords) const override;
 
 private:
     //
@@ -47,8 +47,8 @@ private:
     // They do nothing and return meaningless values.
     // Do not use!
     // 
-    float GetValueNearestNeighbor( const double coords[3]) const override;
-    float GetValueLinear( const double coords[3]) const override;
+    float GetValueNearestNeighbor(const DblArr3 &coords) const override;
+    float GetValueLinear(const DblArr3 &coords) const override;
     std::vector<size_t> GetCoordDimensions(size_t) const override;
     size_t GetGeometryDim() const override;                
     const std::vector<size_t>& GetNodeDimensions() const override;
@@ -66,10 +66,8 @@ private:
     bool GetIndicesCell(const DblArr3 &coords,
 		Size_tArr3 &indices ) const override;           
     bool GetCellNodes(const Size_tArr3 &cindices, std::vector <Size_tArr3> &nodes) const override;
-    bool GetCellNeighbors( const std::vector <size_t> &cindices,
-      std::vector <std::vector <size_t> > &cells) const override;
-    bool GetNodeCells( const std::vector <size_t> &indices,
-      std::vector <std::vector <size_t> > &cells) const override;
+    bool GetCellNeighbors(const Size_tArr3 &cindices, std::vector <Size_tArr3> &nodes) const override;
+    bool GetNodeCells(const Size_tArr3 &cindices, std::vector <Size_tArr3> &nodes) const override;
     size_t GetMaxVertexPerFace() const override;
     size_t GetMaxVertexPerCell() const override;
     void ClampCoord(const double coords[3], double cCoords[3]) const override {}

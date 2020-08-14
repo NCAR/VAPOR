@@ -31,16 +31,16 @@ public:
     //
     // The following four GetValue methods all return the constant value of this grid.
     float GetConstantValue() const;
-    float GetValue(const double coords[3]) const override;
-    float GetValueNearestNeighbor( const double coords[3]) const override;
-    float GetValueLinear( const double coords[3]) const override;
+    float GetValue(const DblArr3 &coords) const override;
+    float GetValueNearestNeighbor(const DblArr3 &coords) const override;
+    float GetValueLinear(const DblArr3 &coords) const override;
 
     // This version of ConstantGrid is considered to have infinity extents, 
     // so the following method will return numerical mins and maxes.
     // Note: other flavors of ConstantGrids may have specific user extents.
     virtual void GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const override;
     // Similarly, this will always return true. 
-    virtual bool InsideGrid(const double coords[3]) const override;
+    virtual bool InsideGrid(const DblArr3 &coords) const override;
 
     std::string GetType() const override;
 
@@ -68,10 +68,8 @@ private:
     virtual void GetUserCoordinates(const Size_tArr3 &, DblArr3 &) const override {}       
     bool GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) const override;           
     bool GetCellNodes(const Size_tArr3 &, std::vector <Size_tArr3> &) const override;
-    bool GetCellNeighbors( const std::vector <size_t> &cindices,
-      std::vector <std::vector <size_t> > &cells) const override;
-    bool GetNodeCells( const std::vector <size_t> &indices,
-      std::vector <std::vector <size_t> > &cells) const override;
+    bool GetCellNeighbors(const Size_tArr3 &, std::vector <Size_tArr3> &) const override;
+    bool GetNodeCells(const Size_tArr3 &, std::vector <Size_tArr3> &) const override;
     size_t GetMaxVertexPerFace() const override;
     size_t GetMaxVertexPerCell() const override;
     void ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const override {

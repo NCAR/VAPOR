@@ -16,17 +16,16 @@ float ConstantGrid::GetConstantValue() const
     return _value;
 }
     
-float ConstantGrid::GetValue(const double coords[3]) const
+float ConstantGrid::GetValue(const DblArr3 &coords) const
+{
+    return _value;
+}
+float ConstantGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
 {
     return _value;
 }
     
-float ConstantGrid::GetValueNearestNeighbor( const double coords[3]) const
-{
-    return _value;
-}
-    
-float ConstantGrid::GetValueLinear( const double coords[3]) const 
+float ConstantGrid::GetValueLinear(const DblArr3 &coords) const 
 {
     return _value;
 }
@@ -50,7 +49,7 @@ void ConstantGrid::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const
 	}
 }
     
-bool ConstantGrid::InsideGrid(const double coords[3]) const
+bool ConstantGrid::InsideGrid(const DblArr3 &coords) const
 {
     return true;
 }
@@ -92,14 +91,16 @@ bool ConstantGrid::GetCellNodes(
     return false;
 }
     
-bool ConstantGrid::GetCellNeighbors( const std::vector <size_t> &cindices,
-     std::vector <std::vector <size_t> > &cells) const 
+bool ConstantGrid::GetCellNeighbors(
+    const Size_tArr3 &cindices,
+    std::vector <Size_tArr3> &cells) const 
 {
     return false;
 }
     
-bool ConstantGrid::GetNodeCells( const std::vector <size_t> &indices,
-     std::vector <std::vector <size_t> > &cells) const 
+bool ConstantGrid::GetNodeCells(
+    const Size_tArr3 &cindices,
+    std::vector <Size_tArr3> &cells) const 
 {
     return false;
 }

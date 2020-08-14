@@ -22,11 +22,6 @@ float GrownGrid::GetDefaultZ() const
 {
     return _defaultZ;
 }
-    
-float GrownGrid::GetValue(const DblArr3 &coords) const
-{
-    return _grid2d->GetValue( coords );
-}
 
 std::string GrownGrid::GetType() const
 {
@@ -49,26 +44,28 @@ void GrownGrid::GetUserExtentsHelper( DblArr3 &minu, DblArr3 &maxu) const
 	}
 }
     
-bool GrownGrid::InsideGrid(const double coords[3]) const
+bool GrownGrid::InsideGrid(const DblArr3 &coords) const
 {
     // Note that we don't use defaultZ to decide if a position is inside of 
     // a grid or not.
     return ( _grid2d->InsideGrid( coords ) );
 }
 
-    
-//
-// Start meaningless functions!
-//
-float GrownGrid::GetValueNearestNeighbor( const double *) const
+float GrownGrid::GetValue(const DblArr3 &coords) const
 {
-    return 0.0f;
+    return _grid2d->GetValue( coords );
 }
     
-float GrownGrid::GetValueLinear( const double *) const 
+float GrownGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
 {
-    return 0.0f;
+    return _grid2d->GetValue( coords );
 }
+    
+float GrownGrid::GetValueLinear(const DblArr3 &coords) const 
+{
+    return _grid2d->GetValue( coords );
+}
+
 std::vector<size_t> GrownGrid::GetCoordDimensions(size_t) const
 {
     std::vector<size_t> tmp;
@@ -76,6 +73,9 @@ std::vector<size_t> GrownGrid::GetCoordDimensions(size_t) const
 }
     
 
+//
+// Start meaningless functions!
+//
 size_t GrownGrid::GetGeometryDim() const 
 {
     return 3;
@@ -106,14 +106,14 @@ bool GrownGrid::GetCellNodes(
     return false;
 }
     
-bool GrownGrid::GetCellNeighbors( const std::vector <size_t> &cindices,
-     std::vector <std::vector <size_t> > &cells) const 
+bool GrownGrid::GetCellNeighbors(
+    const Size_tArr3 &cindices, std::vector <Size_tArr3> &nodes) const 
 {
     return false;
 }
     
-bool GrownGrid::GetNodeCells( const std::vector <size_t> &indices,
-     std::vector <std::vector <size_t> > &cells) const 
+bool GrownGrid::GetNodeCells(
+    const Size_tArr3 &cindices, std::vector <Size_tArr3> &nodes) const 
 {
     return false;
 }

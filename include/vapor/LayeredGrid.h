@@ -71,7 +71,7 @@ public:
 
  //! \copydoc RegularGrid::GetValue()
  //!
- float GetValue(const double coords[3]) const override;
+ float GetValue(const DblArr3 &coords) const override;
 
  //! \copydoc Grid::GetInterpolationOrder()
  //
@@ -130,7 +130,7 @@ public:
 
  //! \copydoc Grid::InsideGrid()
  //!
- bool InsideGrid(const double coords[3]) const override;
+ bool InsideGrid(const DblArr3 &coords) const override;
 
  //! \copydoc Grid::GetPeriodic()
  //!
@@ -219,10 +219,10 @@ private:
  );
 
  virtual float GetValueNearestNeighbor(
-	const double coords[3]
+	const DblArr3 &coords
  ) const override;
 
- virtual float GetValueLinear(const double coords[3]) const override;
+ virtual float GetValueLinear(const DblArr3 &coords) const override;
 
 
  //! 

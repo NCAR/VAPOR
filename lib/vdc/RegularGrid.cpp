@@ -82,11 +82,11 @@ vector <size_t> RegularGrid::GetCoordDimensions(size_t dim) const {
 }
 
 float RegularGrid::GetValueNearestNeighbor(
-	const double coords[3]
+	const DblArr3 &coords
 ) const {
 
-	double cCoords[3];
-	Grid::ClampCoord(coords, cCoords);
+	DblArr3 cCoords;
+	ClampCoord(coords, cCoords);
 
 	if (! InsideGrid(cCoords)) return(GetMissingValue());
 
@@ -138,9 +138,9 @@ float RegularGrid::GetValueNearestNeighbor(
 
 }
 
-float RegularGrid::GetValueLinear(const double coords[3]) const {
+float RegularGrid::GetValueLinear(const DblArr3 &coords) const {
 
-	double cCoords[3];
+	DblArr3 cCoords;
 	ClampCoord(coords, cCoords);
 
 	if (! InsideGrid(cCoords)) return(GetMissingValue());
@@ -321,10 +321,10 @@ bool RegularGrid::GetIndicesCell(
 
 }
 
-bool RegularGrid::InsideGrid(const double coords[3]) const
+bool RegularGrid::InsideGrid(const DblArr3 &coords) const
 {
 
-	double cCoords[3];
+	DblArr3 cCoords;
 	ClampCoord(coords, cCoords);
 
 	VAssert(GetGeometryDim() <= 3);

@@ -215,7 +215,7 @@ public:
 
  // \copydoc GetGrid::InsideGrid()
  //
- virtual bool InsideGrid(const double coords[3]) const override;
+ virtual bool InsideGrid(const DblArr3 &coords) const override;
 
 
 
@@ -292,11 +292,11 @@ public:
 
 protected:
  virtual float GetValueNearestNeighbor(
-	const double coords[3]
+	const DblArr3 &coords
  ) const override;
 
  virtual float GetValueLinear(
-	const double coords[3]
+	const DblArr3 &coords
  ) const override;
 
  // \copydoc GetGrid::GetUserExtents()

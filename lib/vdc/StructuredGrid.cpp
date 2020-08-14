@@ -119,15 +119,13 @@ bool StructuredGrid::GetCellNodes(
 }
 
 bool StructuredGrid::GetCellNeighbors(
-    const std::vector <size_t> &cindices,
-    std::vector <vector <size_t> > &cells
+	const Size_tArr3 &cindices,
+	std::vector <Size_tArr3> &cells
 ) const {
 	cells.clear();
 
-	Size_tArr3 aCindices = {0,0,0};
-	Size_tArr3 cCindices = {0,0,0};
-	CopyToArr3(cindices, aCindices);
-    ClampCellIndex(aCindices, cCindices);
+	Size_tArr3 cCindices;
+    ClampCellIndex(cindices, cCindices);
 
 	const vector <size_t> &dims = GetDimensions();
 
@@ -138,25 +136,25 @@ bool StructuredGrid::GetCellNeighbors(
 	// walk counter-clockwise order
 	//
 	if (dims.size() == 2) {
-		vector <size_t> indices;
+		Size_tArr3 indices;
 
 		if (cCindices[1] != 0) {	// below
-			indices = {cCindices[0], cCindices[1]-1};
+			indices = {cCindices[0], cCindices[1]-1, 0};
 		}
 		cells.push_back(indices);
 
 		if (cCindices[0] != dims[0]-2) {	// right
-			indices = {cCindices[0]+1, cCindices[1]};
+			indices = {cCindices[0]+1, cCindices[1], 0};
 		}
 		cells.push_back(indices);
 
 		if (cCindices[1] != dims[1]-2) {	// top
-			indices = {cCindices[0], cCindices[1]+1};
+			indices = {cCindices[0], cCindices[1]+1, 0};
 		}
 		cells.push_back(indices);
 
 		if (cCindices[0] != 0) {	// left
-			indices = {cCindices[0]-1, cCindices[1]};
+			indices = {cCindices[0]-1, cCindices[1], 0};
 		}
 		cells.push_back(indices);
 	}
@@ -164,13 +162,12 @@ bool StructuredGrid::GetCellNeighbors(
 }
 
 bool StructuredGrid::GetNodeCells(
-    const std::vector <size_t> &indices,
-    std::vector <vector <size_t> > &cells
+    const Size_tArr3 &indices,
+    std::vector <Size_tArr3> &cells
 ) const {
 	cells.clear();
 
 	vector <size_t> dims = GetDimensions();
-	VAssert (indices.size() == dims.size());
 
 	VAssert((dims.size() == 2) && "3D cells not yet supported");
 
@@ -181,25 +178,25 @@ bool StructuredGrid::GetNodeCells(
 	}
 
 	if (dims.size() == 2) {
-		vector <size_t> indices;
+		Size_tArr3 indices;
 
 		if (indices[0] != 0 && indices[1] != 0) {	// below, left
-			indices = {indices[0]-1, indices[1]-1};
+			indices = {indices[0]-1, indices[1]-1, 0};
 			cells.push_back(indices);
 		}
 
 		if (indices[1] != 0) {	// below, right
-			indices = {indices[0], indices[1]-1};
+			indices = {indices[0], indices[1]-1, 0};
 			cells.push_back(indices);
 		}
 
 		if (indices[0] != (dims[0]-1) && indices[1] != (dims[1])) {// top, right
-			indices = {indices[0], indices[1]};
+			indices = {indices[0], indices[1], 0};
 			cells.push_back(indices);
 		}
 
 		if (indices[0] != 0) {// top, top
-			indices = {indices[0]-1, indices[1]};
+			indices = {indices[0]-1, indices[1], 0};
 			cells.push_back(indices);
 		}
 	}

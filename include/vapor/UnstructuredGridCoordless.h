@@ -91,18 +91,18 @@ public:
 	return(false);
  }
 
- bool InsideGrid(const double coords[3]) const override {
+ bool InsideGrid(const DblArr3 &coords) const override {
 	return(false);
  }
 
  float GetValueNearestNeighbor (
-	const double coords[3]
+	const DblArr3 &coords
  ) const override {
 	return(0.0);
  }
 
  float GetValueLinear (
-	const double coords[3]
+	const DblArr3 &coords
  ) const override {
  	return(0.0);
  }
