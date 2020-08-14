@@ -77,7 +77,7 @@ public:
     //
     auto query(const Key &key) -> const std::unique_ptr<const BigObj> &
     {
-        const std::lock_guard<std::mutex> lock(__element_array_mutex);
+        const std::lock_guard<std::mutex> lock_gd(_element_array_mutex);
 
         auto it = std::find_if(_element_array.begin(), _element_array.end(), [&key](element_type &e) { return e.first == key; });
         if (it == _element_array.end()) {    // This key does not exist
@@ -93,7 +93,7 @@ public:
 
     void insert(Key key, const BigObj *ptr)
     {
-        const std::lock_guard<std::mutex> lock(__element_array_mutex);
+        const std::lock_guard<std::mutex> lock_gd(_element_array_mutex);
 
         auto it = std::find_if(_element_array.begin(), _element_array.end(), [&key](element_type &e) { return e.first == key; });
 
@@ -122,7 +122,7 @@ private:
     std::array<element_type, CacheCapacity> _element_array;
     size_t                                  _current_size = 0;
     const std::unique_ptr<const BigObj>     _local_nullptr = {nullptr};
-    std::mutex                              __element_array_mutex;
+    std::mutex                              _element_array_mutex;
 };
 
 }    // namespace VAPoR
