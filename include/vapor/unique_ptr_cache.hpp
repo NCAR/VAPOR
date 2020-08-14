@@ -95,7 +95,7 @@ public:
     // 
     auto query( const Key& key ) -> const std::unique_ptr<const BigObj>&
     {
-        const std::lock_guard<std::mutex> lock( _element_array_mutex );
+        const std::lock_guard<std::mutex> lock_gd( _element_array_mutex );
 
         auto it = std::find_if( _element_array.begin(), _element_array.end(), 
                                 [&key](element_type& e){return e.first == key;} );
@@ -113,7 +113,7 @@ public:
 
     void insert( Key key, const BigObj* ptr )
     {
-        const std::lock_guard<std::mutex> lock( _element_array_mutex );
+        const std::lock_guard<std::mutex> lock_gd( _element_array_mutex );
 
         auto it = std::find_if( _element_array.begin(), _element_array.end(), 
                                 [&key](element_type& e){return e.first == key;} );

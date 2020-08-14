@@ -475,7 +475,7 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
     std::string key = _paramsToString( timestep, varName, refLevel, compLevel, extMin, extMax );
 
     // Use a lock here, so no two threads querying grids simultaneously.
-    const std::lock_guard<std::mutex> lock( _grid_operation_mutex );
+    const std::lock_guard<std::mutex> lock_gd( _grid_operation_mutex );
 
     const auto& grid_wrapper = _recentGrids.query( key );
 
