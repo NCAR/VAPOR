@@ -100,7 +100,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#forking-vapor-s-code">Forking Vapor’s code</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#third-party-libraries">Third-Party Libraries</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#download-pre-built-third-party-libraries">Download pre-built Third-Party Libraries</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#building-third-party-libraries">Building third-party Libraries</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#building-third-party-libraries">Building Third-Party Libraries</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#install-system-libraries">Install System Libraries</a></li>
@@ -275,8 +275,12 @@ writing code for Vapor.</p>
 <h3>Third-Party Libraries<a class="headerlink" href="#third-party-libraries" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="download-pre-built-third-party-libraries">
 <h4>Download pre-built Third-Party Libraries<a class="headerlink" href="#download-pre-built-third-party-libraries" title="Permalink to this headline">¶</a></h4>
-<p>This is the recommended approach for acquiring the third-party libraries that Vapor depends on.  If you require additional libraries, or custom settings to the libraries currently used by vapor, see the <a class="reference internal" href="#contributing-build3rdparty"><span class="std std-ref">Building third-party Libraries</span></a>.</p>
-<p>After forking and cloning your new Vapor repository, you will need to download the third-party libraries that Vapor will link to.  These libraries can be downloaded below.  Be sure to select the correct libraries for the operating system you’re building on.</p>
+<p>This is the recommended approach for acquiring the third-party libraries that Vapor depends on.  If you require additional libraries, or custom settings to the libraries currently used by vapor, see the <a class="reference internal" href="#contributing-build3rdparty"><span class="std std-ref">Building Third-Party Libraries section</span></a>.</p>
+<p>After forking your new Vapor repository and cloning from it, you can download pre-built third-party libraries from the links below.  Be sure to select the correct libraries for the operating system you’re building on.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These libraries must be placed in the directory specified above their respective links.</p>
+</div>
 <p><em>Windows</em></p>
 <p>Unzip the following file linked below into the root of your C:\ directory.</p>
 <blockquote>
@@ -291,16 +295,16 @@ writing code for Vapor.</p>
 </div></blockquote>
 </div>
 <div class="section" id="building-third-party-libraries">
-<span id="contributing-build3rdparty"></span><h4>Building third-party Libraries<a class="headerlink" href="#building-third-party-libraries" title="Permalink to this headline">¶</a></h4>
+<span id="contributing-build3rdparty"></span><h4>Building Third-Party Libraries<a class="headerlink" href="#building-third-party-libraries" title="Permalink to this headline">¶</a></h4>
 <p>This is an alternative to downloading our pre-built libraries that allows you to configure and store them wherever you want.  This is a more complex exercise.  If you choose to do this, you must also configure Vapor’s CMake configuration to point to your custom directory.</p>
-<p>If you wish to go down this route, you may follow these build instructions for <a class="reference external" href="https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing">Windows</a> and <a class="reference external" href="https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing">UNIX</a>.</p>
+<p>If you wish to go down this route, you may follow the build instructions for <a class="reference external" href="https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing">Windows</a> and <a class="reference external" href="https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing">UNIX</a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>In order for Vapor to generate installers, all third-party libraries must be built in the same directory.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The file &lt;vapor-source&gt;/site_files/site.NCAR is used to specify the location of Vapor’s third party libraries.  If you would like to link to a different set of libraries, edit this file to specify your choice.  CMake variables passed over the command line may be overwritten by this file’s presets.</p>
+<p>The file &lt;vapor-source&gt;/site_files/site.NCAR may be used in lieu of CMake to specify the location of your party libraries.  Edit this file to specify your choice.  CMake variables passed over the command line may be overwritten by this file’s presets.</p>
 </div>
 <table class="docutils align-default">
 <colgroup>

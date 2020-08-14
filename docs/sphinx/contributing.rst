@@ -113,9 +113,11 @@ _____________________
 Download pre-built Third-Party Libraries
 ****************************************
 
-This is the recommended approach for acquiring the third-party libraries that Vapor depends on.  If you require additional libraries, or custom settings to the libraries currently used by vapor, see the :ref:`Building third-party Libraries <contributing.build3rdParty>`.
+This is the recommended approach for acquiring the third-party libraries that Vapor depends on.  If you require additional libraries, or custom settings to the libraries currently used by vapor, see the :ref:`Building Third-Party Libraries section <contributing.build3rdParty>`.
 
-After forking and cloning your new Vapor repository, you will need to download the third-party libraries that Vapor will link to.  These libraries can be downloaded below.  Be sure to select the correct libraries for the operating system you're building on.
+After forking your new Vapor repository and cloning from it, you can download pre-built third-party libraries from the links below.  Be sure to select the correct libraries for the operating system you're building on.
+
+.. note:: These libraries must be placed in the directory specified above their respective links.
 
 *Windows*
 
@@ -135,16 +137,16 @@ If building on Linux or OSX, the third party libraries must be placed in /usr/lo
 
 .. _contributing.build3rdParty:
 
-Building third-party Libraries
+Building Third-Party Libraries
 ******************************
 
 This is an alternative to downloading our pre-built libraries that allows you to configure and store them wherever you want.  This is a more complex exercise.  If you choose to do this, you must also configure Vapor's CMake configuration to point to your custom directory.  
 
-If you wish to go down this route, you may follow these build instructions for `Windows <https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing>`_ and `UNIX <https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing>`_.
+If you wish to go down this route, you may follow the build instructions for `Windows <https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing>`_ and `UNIX <https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing>`_.
 
 .. note:: In order for Vapor to generate installers, all third-party libraries must be built in the same directory.
 
-.. note:: The file <vapor-source>/site_files/site.NCAR is used to specify the location of Vapor's third party libraries.  If you would like to link to a different set of libraries, edit this file to specify your choice.  CMake variables passed over the command line may be overwritten by this file's presets.
+.. note:: The file <vapor-source>/site_files/site.NCAR may be used in lieu of CMake to specify the location of your party libraries.  Edit this file to specify your choice.  CMake variables passed over the command line may be overwritten by this file's presets.
 
 +-----------------+----------------------------------------------------------------+
 | *Vapor 3 was built with the following third party library configuration.*        |
