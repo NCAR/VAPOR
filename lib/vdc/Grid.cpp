@@ -3,6 +3,7 @@
 #include "vapor/VAssert.h"
 #include <numeric>
 #include <cmath>
+#include <algorithm>
 #include <time.h>
 #ifdef  Darwin
 #include <mach/mach_time.h>
