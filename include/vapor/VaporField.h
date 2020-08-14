@@ -118,6 +118,8 @@ private:
     mutable cacheType           _recentGrids;   // so this variable can be 
                                                 // modified by a const function.
     const std::string           _constantGridZero = "ConstantGrid with zeros";
+    mutable std::mutex          _grid_operation_mutex;  // Use `mutable` qualifier so this
+                                                        // mutex can be used in const methods.
 
     // Member functions
     std::string _paramsToString(  size_t currentTS, const std::string& var, int refLevel, 
