@@ -114,10 +114,12 @@ private:
     std::vector<float>          _timestamps;    // in ascending order
     VAPoR::DataMgr*             _datamgr = nullptr;   
     const VAPoR::FlowParams*    _params  = nullptr;
-    using cacheType = VAPoR::unique_ptr_cache< std::string, GridWrapper >;
+    using cacheType = VAPoR::unique_ptr_cache< std::string, GridWrapper, 9 >;
     mutable cacheType           _recentGrids;   // so this variable can be 
                                                 // modified by a const function.
     const std::string           _constantGridZero = "ConstantGrid with zeros";
+    mutable std::mutex          _grid_operation_mutex;  // Use `mutable` qualifier so this
+                                                        // mutex can be used in const methods.
 
     // Member functions
     std::string _paramsToString(  size_t currentTS, const std::string& var, int refLevel, 
