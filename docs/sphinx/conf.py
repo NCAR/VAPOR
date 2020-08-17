@@ -38,8 +38,8 @@ version = ''
 release = '3.1.0'
 
 
-breathe_projects = { "myproject": "/Users/pearse/vapor2/targets/common/doc/library/xml" }
-breathe_default_project = "myproject"
+#breathe_projects = { "myproject": "/Users/pearse/vapor2/targets/common/doc/library/xml" }
+#breathe_default_project = "myproject"
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -53,8 +53,8 @@ breathe_default_project = "myproject"
 extensions = [
     'sphinx.ext.imgmath', 
     'sphinx.ext.todo', 
-    'sphinx.ext.autodoc',
-    'breathe'
+    'sphinx.ext.autodoc'
+    #'breathe'
     #'wheel'
 ]
 
