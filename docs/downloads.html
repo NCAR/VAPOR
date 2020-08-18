@@ -8,10 +8,12 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Downloads &mdash; Vapor 3.1.0 documentation</title>
+  <title>Downloads &mdash; Vapor 3.2.0.59c3322 documentation</title>
   
 
   
+  
+    <link rel="shortcut icon" href="_static/vaporVLogo.png"/>
   
   
   
@@ -54,6 +56,9 @@
           
 
           
+            
+            <img src="_static/vaporLogoWhite2.png" class="logo" alt="Logo"/>
+          
           </a>
 
           
@@ -86,7 +91,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#weekly-build">Weekly Build</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#current-stable-release-vapor-3-2-0">Current Stable Release: Vapor 3.2.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#installation-instructions">Installation Instructions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#building-from-source">Building From Source</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#sample-data">Sample Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#previous-releases">Previous Releases</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#vapor-3-1-0">Vapor 3.1.0</a></li>
@@ -98,7 +102,8 @@
 <li class="toctree-l1"><a class="reference internal" href="quickStartGuide.html">Quick Start Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gettingDataIntoVapor.html">Getting Data into Vapor3</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Using Vapor 3</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contactAndContribute.html">Contact and Contribute</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://vapor.discourse.group">Get Help on Our Forum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing to Vapor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="licenseAndCitation.html">License and Citation</a></li>
 </ul>
 
@@ -200,7 +205,7 @@
 </div>
 <div class="section" id="installation-instructions">
 <span id="installationinstructions"></span><h2>Installation Instructions<a class="headerlink" href="#installation-instructions" title="Permalink to this headline">¶</a></h2>
-<p>We encourage users of Vapor to install with the methods described here.  If you’re a developer and would like to contribute, see the <a class="reference internal" href="#buildfromsource"><span class="std std-ref">Building From Source</span></a> section below.</p>
+<p>We encourage users of Vapor to install with the methods described here.  If you’re a developer and would like to contribute, see the <cite>Building From Source &lt;buildFromSource&gt;</cite> section below.</p>
 <p><strong>Linux</strong></p>
 <p>Run the downloaded .sh script in a terminal window.  It will prompt you as to where the binaries will be installed. For example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">sh</span> <span class="n">VAPOR3</span><span class="o">-</span><span class="mf">3.0</span><span class="o">.</span><span class="mf">0.</span><span class="n">beta</span><span class="o">-</span><span class="n">RH7</span><span class="o">.</span><span class="n">sh</span>
@@ -210,98 +215,6 @@
 <p>Double click on the downloaded .dmg file.  Once the Finder window pops up, drag the Vapor icon into the Applications folder.</p>
 <p><strong>Windows</strong></p>
 <p>Run the downloaded .exe file.  A wizard will step you through the installer settings necessary for setup.</p>
-<div class="line-block">
-<div class="line"><br /></div>
-</div>
-</div>
-<div class="section" id="building-from-source">
-<span id="buildfromsource"></span><h2>Building From Source<a class="headerlink" href="#building-from-source" title="Permalink to this headline">¶</a></h2>
-<p><strong>Warning: Building Vapor from source is a complex process.  We highly encourage users to use our binary installers provided above.</strong></p>
-<p><strong>Step 1 - Download the source code</strong></p>
-<p>Vapor’s current master branch source code can be downloaded from <a class="reference external" href="https://github.com/NCAR/vapor">GitHub</a>.</p>
-<p><strong>Step 2 - Install Vapor’s third party libraries</strong></p>
-<p><em>Windows</em></p>
-<p>Unzip the following file linked below into the root of your C:\ directory.</p>
-<blockquote>
-<div><p><a class="reference external" href="https://drive.google.com/open?id=1NRMu4_g8ZXu9bILBVRDsuUKIGBiT2016">Windows third party libraries</a></p>
-</div></blockquote>
-<p><em>Linux and OSX</em></p>
-<p>If building on Linux or OSX, the third party libraries must be placed in /usr/local/VAPOR-Deps/.</p>
-<blockquote>
-<div><p><a class="reference external" href="https://drive.google.com/open?id=1p47yeyjyUfxlc7-eglsXkjCGYJLqqtEs">OSX third-party libraries</a></p>
-<p><a class="reference external" href="https://drive.google.com/open?id=1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd">Ubuntu third-party libraries</a></p>
-<p><a class="reference external" href="https://drive.google.com/open?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0">CentOS third-party libraries</a></p>
-</div></blockquote>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Alternatively, you can build the libraries yourself and store them wherever you want.  If you choose to do this, you must also configure CMake to point to your custom directory.  If you wish to go down this route, you may follow these build instructions for <a class="reference external" href="https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing">Windows</a> and <a class="reference external" href="https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing">UNIX</a>.</p>
-</div>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 21%" />
-<col style="width: 79%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td colspan="2"><p><em>Vapor 3 was build with the following third party library configuration.</em></p></td>
-</tr>
-<tr class="row-even"><td><p>Library</p></td>
-<td><p>Version</p></td>
-</tr>
-<tr class="row-odd"><td><p>assimp</p></td>
-<td><p>4.1.0</p></td>
-</tr>
-<tr class="row-even"><td><p>freetype</p></td>
-<td><p>2.10.1</p></td>
-</tr>
-<tr class="row-odd"><td><p>glew</p></td>
-<td><p>2.1.0</p></td>
-</tr>
-<tr class="row-even"><td><p>hdf5</p></td>
-<td><p>1.10.5</p></td>
-</tr>
-<tr class="row-odd"><td><p>jpeg</p></td>
-<td><p>9c</p></td>
-</tr>
-<tr class="row-even"><td><p>libgeotiff</p></td>
-<td><p>1.5.1</p></td>
-</tr>
-<tr class="row-odd"><td><p>udunits</p></td>
-<td><p>2.2.26</p></td>
-</tr>
-<tr class="row-even"><td><p>netCDF</p></td>
-<td><p>4.7.0</p></td>
-</tr>
-<tr class="row-odd"><td><p>tiff</p></td>
-<td><p>4.0.10</p></td>
-</tr>
-<tr class="row-even"><td><p>proj</p></td>
-<td><p>6.1.1</p></td>
-</tr>
-<tr class="row-odd"><td><p>python</p></td>
-<td><p>3.6.9</p></td>
-</tr>
-<tr class="row-even"><td><p>Qt</p></td>
-<td><p>5.12.4</p></td>
-</tr>
-</tbody>
-</table>
-<p>The source code for these libraries by be downloaded <a class="reference external" href="https://drive.google.com/open?id=1sWIV-Y66aFuDkC2oDnceIIUJDDH4puKI">here</a>.</p>
-<p><strong>Step 3 - Set up your compiler</strong></p>
-<p>The following compilers were used to build Vapor.</p>
-<p>OSX - LLVM 10.0.1 (clang-1001.0.46.4)
-Ubuntu/CentOS - GCC 4.8.5 or higher
-Windows - Microsoft Visual Studio 2015, version 14</p>
-<p><strong>Step 4 - Configure CMake</strong></p>
-<p>CMake version 3.2 or higher is required on all platforms.  If you chose to build the third party libraries manually, CMake must be configured to point to those libraries wither with the CMake GUI (Windows) or the ccmake command (OSX and Linux).  Run either the GUI or ccmake on the directory where your source code resides to configure the build process.</p>
-<p><strong>Step 5 - Run CMake</strong></p>
-<p>On all operating systems, create a directory where the build will take place.</p>
-<p>On Windows, enter this directory as the “Where to build the binaries” field in the GUI.  Click <em>Configure</em>, <em>Generate</em>, and then <em>Open Project</em> in that order.  Visual Studio will open, and you can build the target <em>PACKAGE</em> to compile the source code.</p>
-<p>On OSX and Linux, navigate to your build directory and type <em>cmake &lt;build_directory&gt; &amp;&amp; make</em>, where &lt;build_directory&gt; is where your build is taking place.</p>
-<p><strong>Step 6 - Build an installer</strong></p>
-<p>Edit the file <em>CMakeLists.txt</em> in the root of your source code directory, so that the field <em>CMAKE_BUILD_TYPE Debug</em> is changed to <em>CMAKE_BUILD_TYPE Release</em>.  Also change the field <em>DIST_INSTALLER OFF</em> to be <em>DIST_INSTALLER ON</em>.</p>
-<p>On Windows, make sure that the build is taking place in <em>Release</em> mode, not <em>Debug</em>, and build the target <em>PACKAGE</em>.</p>
-<p>On OSX, run <em>cmake &lt;build_directory&gt; &amp;&amp; make &amp;&amp; make installer</em> from your build directory.</p>
-<p>On Linux, run  <em>cmake &lt;build_directory&gt; &amp;&amp; make linuxpreinstall &amp;&amp; make installer</em> from your build directory.</p>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
