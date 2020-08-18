@@ -52,6 +52,8 @@ class QMdiArea;
 class QDockWindow;
 class QLabel;
 class QSpinBox;
+class ProgressStatusBar;
+class QTimer;
 
 class VizWindow;
 class VizWinMgr;
@@ -174,12 +176,21 @@ class MainForm : public QMainWindow {
     QSpinBox *_interactiveRefinementSpin;
     QDockWidget *_tabDockWindow;
 
+    int _progressSavedFB = -1;
+    bool _progressEnabled = false;
+    bool _needToReenableProgressAfterAnimation = false;
+    QAction *_progressEnabledMenuItem = nullptr;
+
+    ProgressStatusBar *_status = nullptr;
+    std::chrono::time_point<std::chrono::system_clock> _progressLastUpdateTime;
+    const QObject *_disableUserInputForAllExcept = nullptr;
+    bool _insideMessedUpQtEventLoop = false;
+
     Statistics *_stats;
     Plot *_plot;
     PythonVariables *_pythonVariables;
     BannerGUI *_banner;
     VizSelectCombo *_windowSelector;
-    QLabel *_modeStatusWidget;
     VAPoR::ControlExec *_controlExec;
     VAPoR::ParamsMgr *_paramsMgr;
     TabManager *_tabMgr;
@@ -297,11 +308,15 @@ class MainForm : public QMainWindow {
     void _createAnimationToolBar();
     void _createVizToolBar();
     void createToolBars();
+    void _createProgressWidget();
+    void _disableProgressWidget();
     virtual void sessionOpenHelper(string fileName);
 
     template <class T>
     bool isDatasetValidFormat(const std::vector<std::string> &paths) const;
     bool determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const;
+
+    bool isOpenGLContextActive() const;
 
     // Enable/Disable all the widgets that require data to be present
     //

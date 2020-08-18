@@ -1,5 +1,4 @@
 configure_file (CMakeConfig.cpp.in CMakeConfig.cpp)
-
 set (SRC
 	common.cpp
 	MyBase.cpp
@@ -15,6 +14,7 @@ set (SRC
 	LegacyVectorMath.cpp
 	STLUtils.cpp
 	VAssert.cpp
+	Progress.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/CMakeConfig.cpp
 )
 
@@ -36,6 +36,7 @@ set (HEADERS
     ${PROJECT_SOURCE_DIR}/include/vapor/STLUtils.h
     ${PROJECT_SOURCE_DIR}/include/vapor/NonCopyableMixin.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VAssert.h
+	${PROJECT_SOURCE_DIR}/include/vapor/Progress.h
 )
 
 add_library (common SHARED ${SRC} ${HEADERS})

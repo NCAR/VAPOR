@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <vapor/GLManager.h>
 #include <vapor/ShaderManager.h>
+#include <vapor/Progress.h>
 
 #ifndef FLT16_MAX
 #define FLT16_MAX 6.55E4
@@ -167,12 +168,15 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
         return -1;
     }
 
+    Progress::Start("Load coord data", nCoords);
     auto coord = grid->ConstCoordBegin();
     for (size_t i = 0; i < nCoords; ++i, ++coord) {
+        Progress::Update(i);
         data[i * 3] = (*coord)[0];
         data[i * 3 + 1] = (*coord)[1];
         data[i * 3 + 2] = (*coord)[2];
     }
+    Progress::Finish();
 
     _coordTexture.TexImage(GL_RGB32F, dims[0], dims[1], dims[2], GL_RGB, GL_FLOAT, data);
 
@@ -196,12 +200,19 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
     int ch = h - 1;
     int cd = d - 1;
 
+    Progress::Start("Compute acceleration data", 6);
     ComputeSideBBoxes(F_LEFT, 1, 2, boxMins, boxMaxs, data, ivec3(cw, ch, cd), ivec3(w, h, d), bd, sd);
+    Progress::Update(1);
     ComputeSideBBoxes(F_RIGHT, 1, 2, boxMins, boxMaxs, data, ivec3(cw, ch, cd), ivec3(w, h, d), bd, sd);
+    Progress::Update(2);
     ComputeSideBBoxes(F_UP, 0, 1, boxMins, boxMaxs, data, ivec3(cw, ch, cd), ivec3(w, h, d), bd, sd);
+    Progress::Update(3);
     ComputeSideBBoxes(F_DOWN, 0, 1, boxMins, boxMaxs, data, ivec3(cw, ch, cd), ivec3(w, h, d), bd, sd);
+    Progress::Update(4);
     ComputeSideBBoxes(F_FRONT, 0, 2, boxMins, boxMaxs, data, ivec3(cw, ch, cd), ivec3(w, h, d), bd, sd);
+    Progress::Update(5);
     ComputeSideBBoxes(F_BACK, 0, 2, boxMins, boxMaxs, data, ivec3(cw, ch, cd), ivec3(w, h, d), bd, sd);
+    Progress::Finish();
 
     int levels = 1;
     int size = bd;
@@ -235,7 +246,9 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
     mipDims[0][FI_FRONT] = ivec2(cw, cd);
     mipDims[0][FI_BACK] = ivec2(cw, cd);
 
+    Progress::Start("Generate tree", levels);
     for (int level = 1; level < levels; level++) {
+        Progress::Update(level);
         int ms = bd >> level;
         int mUpS = sizes[level - 1];
 
@@ -326,6 +339,7 @@ int VolumeCellTraversal::LoadData(const Grid *grid) {
         _minTexture.TexImage(GL_RGB32F, ms, ms, 6, GL_RGB, GL_FLOAT, minMip[level], level);
         _maxTexture.TexImage(GL_RGB32F, ms, ms, 6, GL_RGB, GL_FLOAT, maxMip[level], level);
     }
+    Progress::Finish();
 
     _BBLevelDimTexture.TexImage(GL_RG32I, 6, levels, 0, GL_RG_INTEGER, GL_INT, mipDims.data());
 

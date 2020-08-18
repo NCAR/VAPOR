@@ -137,6 +137,7 @@ class VizWinMgr : public QObject {
     VAPoR::ControlExec *_controlExec;
     Trackball *_trackBall;
     bool _initialized;
+    bool _insideRender = false;
 
     void _attachVisualizer(string vizName);
 
