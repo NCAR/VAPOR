@@ -310,8 +310,21 @@ void VizWinMgr::_vizAboutToDisappear(string vizName)
 
 void VizWinMgr::Update(bool fast)
 {
+    // Certain actions queue multiple renders within Qt's event queue (e.g. changing the
+    // renderer variable dimension). Normally, Qt will then process each of these events
+    // sequentially and render multiple times. While not ideal, this just results in extra
+    // renders and computation time. When using the progress bar, however, it sometimes
+    // requests a redraw of the entire GUI at which point Qt processes queued events.
+    // When you have pending render events, it will now try to initiate a new render
+    // before the first has finished. This prevents that but it does not fix the
+    // underlying issue.
+    if (_insideRender) return;
+    _insideRender = true;
+
     map<string, VizWin *>::const_iterator it;
     for (it = _vizWindow.begin(); it != _vizWindow.end(); it++) { (it->second)->Render(fast); }
+
+    _insideRender = false;
 }
 
 int VizWinMgr::EnableImageCapture(string filename, string winName)

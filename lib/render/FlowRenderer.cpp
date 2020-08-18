@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <random>
+#include <vapor/Progress.h>
 
 #define GL_ERROR -20
 
@@ -229,17 +230,31 @@ int FlowRenderer::_paintGL(bool fast)
             if (params->GetFlowDirection() == 1)    // backward integration
                 deltaT *= -1.0f;
             int numOfSteps = params->GetSteadyNumOfSteps();
+            int total = numOfSteps - (_advection.GetMaxNumOfPart() - 1);
+            int done = 0;
+
+            if (_2ndAdvection) total += numOfSteps - (_2ndAdvection->GetMaxNumOfPart() - 1);
+
+            Progress::Start("Advect particles", total, true);
             for (size_t i = _advection.GetMaxNumOfPart() - 1;    // existing number of advection steps
                  i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++) {
+                Progress::Update(done++);
+                if (Progress::Cancelled()) return 0;
                 rv = _advection.AdvectOneStep(&_velocityField, deltaT);
             }
+            if (!_2ndAdvection) Progress::Finish();
 
             /* If the advection is bi-directional */
             if (_2ndAdvection) {
                 assert(deltaT > 0.0f);
                 float deltaT2 = deltaT * -1.0f;
                 rv = flow::ADVECT_HAPPENED;
-                for (size_t i = _2ndAdvection->GetMaxNumOfPart() - 1; i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++) { rv = _2ndAdvection->AdvectOneStep(&_velocityField, deltaT2); }
+                for (size_t i = _2ndAdvection->GetMaxNumOfPart() - 1; i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++) {
+                    Progress::Update(done++);
+                    if (Progress::Cancelled()) return 0;
+                    rv = _2ndAdvection->AdvectOneStep(&_velocityField, deltaT2);
+                }
+                Progress::Finish();
             }
 
         }

@@ -31,6 +31,7 @@ set (SRCS
 	SettingsParams.cpp
 	main.cpp
 	MainForm.cpp
+	MainForm_isOpenGLContextActive.cpp
     VizWin.cpp
 	VizWinMgr.cpp
 	TabManager.cpp
