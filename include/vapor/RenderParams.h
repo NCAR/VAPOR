@@ -156,8 +156,19 @@ public:
 	//
 	virtual void SetFieldVariableNames(vector <string> varNames);
 
+	//! Set the X field variable name, e.g. used in flow integration.
+	//! \param[in] std::string varName for X field
+	//
     void SetXFieldVariableName( std::string varName );
+
+	//! Set the Y field variable name, e.g. used in flow integration.
+	//! \param[in] std::string varName for Y field
+	//
     void SetYFieldVariableName( std::string varName );
+
+	//! Set the Z field variable name, e.g. used in flow integration.
+	//! \param[in] std::string varName for Z field
+	//
     void SetZFieldVariableName( std::string varName );
 
 	//! Get the field variable names, e.g. used in flow integration.
@@ -166,8 +177,19 @@ public:
 	//
 	vector<string> GetFieldVariableNames() const ;
 
+	//! Get the X field variable name, e.g. used in flow integration.
+	//! \retval std::string X field variable name. 
+	//
     std::string GetXFieldVariableName() const;
+
+	//! Get the Y field variable name, e.g. used in flow integration.
+	//! \retval std::string Y field variable name. 
+	//
     std::string GetYFieldVariableName() const;
+
+	//! Get the Z field variable name, e.g. used in flow integration.
+	//! \retval std::string Z field variable name. 
+	//
     std::string GetZFieldVariableName() const;
 
 	//! Get the distribution variable names, e.g. used in flow integration.

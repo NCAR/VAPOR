@@ -499,33 +499,39 @@ void RenderParams::SetFieldVariableNames(vector<string> varnames){
 
 std::string RenderParams::GetXFieldVariableName() const {
     std::vector< std::string> fieldVars = GetFieldVariableNames();
+    VAssert( fieldVars.size() == 3 );
     return fieldVars[0];
 }
 
 void  RenderParams::SetXFieldVariableName( std::string varName ) {
     std::vector< std::string> fieldVars = GetFieldVariableNames();
+    VAssert( fieldVars.size() == 3 );
     fieldVars[0] = varName;
     SetFieldVariableNames( fieldVars );
 }
 
 std::string RenderParams::GetYFieldVariableName() const {
     std::vector< std::string> fieldVars = GetFieldVariableNames();
+    VAssert( fieldVars.size() == 3 );
     return fieldVars[1];
 }
 
 void RenderParams::SetYFieldVariableName( std::string varName ) {
     std::vector< std::string> fieldVars = GetFieldVariableNames();
+    VAssert( fieldVars.size() == 3 );
     fieldVars[1] = varName;
     SetFieldVariableNames( fieldVars );
 }
 
 std::string RenderParams::GetZFieldVariableName() const {
     std::vector< std::string> fieldVars = GetFieldVariableNames();
+    VAssert( fieldVars.size() == 3 );
     return fieldVars[2];
 }
 
 void RenderParams::SetZFieldVariableName( std::string varName ) {
     std::vector< std::string> fieldVars = GetFieldVariableNames();
+    VAssert( fieldVars.size() == 3 );
     fieldVars[2] = varName;
     SetFieldVariableNames( fieldVars );
 }
