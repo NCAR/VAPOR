@@ -41,7 +41,7 @@ Release notes for VAPOR-3.2.0
 Installation Instructions
 -------------------------
 
-We encourage users of Vapor to install with the methods described here.  If you're a developer and would like to contribute, see the :ref:`Building From Source <buildFromSource>` section below.
+We encourage users of Vapor to install with the methods described here.  If you're a developer and would like to contribute, see the `Building From Source <buildFromSource>` section below.
 
 **Linux**
 
@@ -59,103 +59,6 @@ Double click on the downloaded .dmg file.  Once the Finder window pops up, drag 
 **Windows**
 
 Run the downloaded .exe file.  A wizard will step you through the installer settings necessary for setup.
-
-|
-
-.. _buildFromSource:
-
-Building From Source
---------------------
-
-**Warning: Building Vapor from source is a complex process.  We highly encourage users to use our binary installers provided above.**
-
-**Step 1 - Download the source code**
-
-Vapor's current master branch source code can be downloaded from GitHub_.
-
-.. _GitHub: https://github.com/NCAR/vapor
-
-**Step 2 - Install Vapor's third party libraries**
-
-*Windows*
-
-Unzip the following file linked below into the root of your C:\\ directory.
-
-    `Windows third party libraries <https://drive.google.com/open?id=1NRMu4_g8ZXu9bILBVRDsuUKIGBiT2016>`_
-
-*Linux and OSX*
-
-If building on Linux or OSX, the third party libraries must be placed in /usr/local/VAPOR-Deps/.
-
-    `OSX third-party libraries <https://drive.google.com/open?id=1p47yeyjyUfxlc7-eglsXkjCGYJLqqtEs>`_
-
-    `Ubuntu third-party libraries <https://drive.google.com/open?id=1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd>`_
-
-    `CentOS third-party libraries <https://drive.google.com/open?id=1e7F3kDoKctBmB3NOF4dES2395oScb9_0>`_
-
-.. note:: Alternatively, you can build the libraries yourself and store them wherever you want.  If you choose to do this, you must also configure CMake to point to your custom directory.  If you wish to go down this route, you may follow these build instructions for `Windows <https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing>`_ and `UNIX <https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing>`_.
-
-+-----------------+----------------------------------------------------------------+
-| *Vapor 3 was build with the following third party library configuration.*        |
-+-----------------+----------------------------------------------------------------+
-| Library         | Version                                                        |
-+-----------------+----------------------------------------------------------------+
-| assimp          | 4.1.0                                                          |
-+-----------------+----------------------------------------------------------------+
-| freetype        | 2.10.1                                                         |
-+-----------------+----------------------------------------------------------------+
-| glew            | 2.1.0                                                          |
-+-----------------+----------------------------------------------------------------+
-| hdf5            | 1.10.5                                                         |
-+-----------------+----------------------------------------------------------------+
-| jpeg            | 9c                                                             |
-+-----------------+----------------------------------------------------------------+
-| libgeotiff      | 1.5.1                                                          |
-+-----------------+----------------------------------------------------------------+
-| udunits         | 2.2.26                                                         |
-+-----------------+----------------------------------------------------------------+
-| netCDF          | 4.7.0                                                          |
-+-----------------+----------------------------------------------------------------+
-| tiff	          | 4.0.10                                                         |
-+-----------------+----------------------------------------------------------------+
-| proj            | 6.1.1                                                          |
-+-----------------+----------------------------------------------------------------+
-| python          | 3.6.9                                                          |
-+-----------------+----------------------------------------------------------------+
-| Qt              | 5.12.4                                                         |
-+-----------------+----------------------------------------------------------------+
-
-The source code for these libraries by be downloaded `here <https://drive.google.com/open?id=1sWIV-Y66aFuDkC2oDnceIIUJDDH4puKI>`_.
-
-**Step 3 - Set up your compiler**
-
-The following compilers were used to build Vapor.
-
-OSX - LLVM 10.0.1 (clang-1001.0.46.4)
-Ubuntu/CentOS - GCC 4.8.5 or higher
-Windows - Microsoft Visual Studio 2015, version 14
-	
-**Step 4 - Configure CMake**
-
-CMake version 3.2 or higher is required on all platforms.  If you chose to build the third party libraries manually, CMake must be configured to point to those libraries wither with the CMake GUI (Windows) or the ccmake command (OSX and Linux).  Run either the GUI or ccmake on the directory where your source code resides to configure the build process.
-
-**Step 5 - Run CMake**
-
-On all operating systems, create a directory where the build will take place.  
-
-On Windows, enter this directory as the "Where to build the binaries" field in the GUI.  Click *Configure*, *Generate*, and then *Open Project* in that order.  Visual Studio will open, and you can build the target *PACKAGE* to compile the source code.
-
-On OSX and Linux, navigate to your build directory and type *cmake <build_directory> && make*, where <build_directory> is where your build is taking place.
-
-**Step 6 - Build an installer**
-
-Edit the file *CMakeLists.txt* in the root of your source code directory, so that the field *CMAKE_BUILD_TYPE Debug* is changed to *CMAKE_BUILD_TYPE Release*.  Also change the field *DIST_INSTALLER OFF* to be *DIST_INSTALLER ON*.
-
-On Windows, make sure that the build is taking place in *Release* mode, not *Debug*, and build the target *PACKAGE*.
-
-On OSX, run *cmake <build_directory> && make && make installer* from your build directory.
-
-On Linux, run  *cmake <build_directory> && make linuxpreinstall && make installer* from your build directory.
 
 |
 
