@@ -54,33 +54,3 @@ protected:
 private slots:
     void dropdownIndexChanged(int i);
 };
-
-class PLODSelectorHLI :
-    public PLODSelector,
-    public PWidgetHLIBase<VAPoR::RenderParams, double>
-{
-public:
-    PLODSelectorHLI() :
-        PLODSelector(),
-        PWidgetHLIBase<VAPoR::RenderParams, double> (
-            (PWidget*) this,
-            &VAPoR::RenderParams::GetCompressionLevel,
-            &VAPoR::RenderParams::SetCompressionLevel
-        )
-    {}
-};
-
-class PRefinementSelectorHLI :
-    public PRefinementSelector,
-    public PWidgetHLIBase<VAPoR::RenderParams, double>
-{
-public:
-    PRefinementSelectorHLI() :
-        PRefinementSelector(),
-        PWidgetHLIBase<VAPoR::RenderParams, double> (
-            (PWidget*) this,
-            &VAPoR::RenderParams::GetRefinementLevel,
-            &VAPoR::RenderParams::SetRefinementLevel
-        )
-    {}
-};
