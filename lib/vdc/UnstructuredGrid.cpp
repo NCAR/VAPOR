@@ -70,12 +70,11 @@ UnstructuredGrid::UnstructuredGrid(
 
 
 bool UnstructuredGrid::GetCellNodes(
-	const size_t cindices[],
-	size_t nodes[],
-	int &n
+	const Size_tArr3 &cindices,
+	vector <Size_tArr3> &nodes
 ) const {
 
-    size_t cCindices[3];
+    Size_tArr3 cCindices;
     ClampCellIndex(cindices, cCindices);
 
 	const vector <size_t> &cdims = GetCellDimensions();
@@ -85,17 +84,22 @@ bool UnstructuredGrid::GetCellNodes(
 	const int *ptr = _vertexOnFace + (_maxVertexPerFace * cCindices[0]);
 	long offset = GetNodeOffset();
 	
-	n = 0;
+
+	size_t n = 0;
 	if (cdims.size() == 1) {
+		nodes.resize(_maxVertexPerFace); // ensure sufficient memory
 		for (int i=0; i<_maxVertexPerFace; i++, ptr++) {
 			if (*ptr == GetMissingID() || *ptr + offset < 0) break;
 			if (*ptr == GetBoundaryID()) continue;
 
-			nodes[n] = *ptr + offset;
+			nodes[n][0] = *ptr + offset;
+			nodes[n][1] = 0;
+			nodes[n][2] = 0;
 			n++;
 		}
 	}
 	else {	// layered case
+		nodes.resize(2*_maxVertexPerFace); // ensure sufficient memory
 
 		// Bottom layer
 		//
@@ -103,8 +107,8 @@ bool UnstructuredGrid::GetCellNodes(
 			if (*ptr == GetMissingID() || *ptr + offset < 0) break;
 			if (*ptr == GetBoundaryID()) continue;
 
-			nodes[2*n+0] = *ptr + offset;
-			nodes[2*n+1] = cCindices[1];
+			nodes[n][0] = *ptr + offset;
+			nodes[n][1] = cCindices[1];
 			n++;
 		}
 
@@ -113,23 +117,24 @@ bool UnstructuredGrid::GetCellNodes(
 		//
 		int nNodesPerLayer = n;
 		for (int i=0; i<nNodesPerLayer; i++) {
-			nodes[2*n+0] = nodes[2*i+0];
-			nodes[2*n+1] = nodes[2*i+1] + 1;
+			nodes[n][0] = nodes[i][0];
+			nodes[n][1] = nodes[i][1] + 1;
 			n++;
 		}
 	}
+	nodes.resize(n);	// resize to actual count
 	return(true);
 }
 
 
 bool UnstructuredGrid::GetCellNeighbors(
-    const std::vector <size_t> &cindices,
-    std::vector <vector <size_t> > &cells
+	const Size_tArr3 &cindices,
+	std::vector <Size_tArr3> &cells
 ) const {
 	cells.clear();
 
-    vector <size_t> cCindices = cindices;
-    ClampCellIndex(cCindices);
+	Size_tArr3 cCindices = {0,0,0};
+    ClampCellIndex(cindices, cCindices);
 
 	vector <size_t> cdims = GetCellDimensions();
 
@@ -138,14 +143,13 @@ bool UnstructuredGrid::GetCellNeighbors(
 	const int *ptr = _faceOnFace + (_maxVertexPerFace * cCindices[0]);
 	long offset = GetCellOffset();
 
+	Size_tArr3 indices = {0,0,0};
 	if (cdims.size() == 1) {
 		for (int i=0; i<_maxVertexPerFace; i++) {
-			vector <size_t> indices;
 			if (*ptr == GetMissingID() || *ptr + offset < 0) break;
 
 			if (*ptr != GetBoundaryID()) {
-				indices.push_back(*ptr + offset);
-				indices.push_back(cCindices[1]);
+				indices[0] = *ptr + offset;
 			}
 			cells.push_back(indices);
 		}
@@ -153,12 +157,11 @@ bool UnstructuredGrid::GetCellNeighbors(
 	else {	// layered case
 
 		for (int i=0; i<_maxVertexPerFace; i++) {
-			vector <size_t> indices;
 			if (*ptr == GetMissingID() || *ptr + offset < 0) break;
 
 			if (*ptr != GetBoundaryID()) {
-				indices.push_back(*ptr + offset);
-				indices.push_back(cCindices[1]);
+				indices[0] = *ptr + offset;
+				indices[1] = cCindices[1];
 			}
 
 			cells.push_back(indices);
@@ -167,23 +170,17 @@ bool UnstructuredGrid::GetCellNeighbors(
 		// layer below
 		//
 		if (cCindices[1] != 0) {
-			vector <size_t> indices = cCindices;
+			Size_tArr3 indices = {cCindices[0], cCindices[1], 0};
 			indices[1] = cCindices[1] - 1;
 			cells.push_back(indices);
-		}
-		else {
-			cells.push_back(vector <size_t> ());
 		}
 
 		// layer above
 		//
 		if (cCindices[1] != cdims[1]-1) {
-			vector <size_t> indices = cCindices;
+			Size_tArr3 indices = {cCindices[0], cCindices[1], 0};
 			indices[1] = indices[1] + 1;
 			cells.push_back(indices);
-		}
-		else {
-			cells.push_back(vector <size_t> ());
 		}
 	}
 
@@ -192,8 +189,8 @@ bool UnstructuredGrid::GetCellNeighbors(
 }
 
 bool UnstructuredGrid::GetNodeCells(
-    const std::vector <size_t> &indices,
-    std::vector <vector <size_t> > &cells
+	const Size_tArr3 &indices,
+	std::vector <Size_tArr3> &cells
 ) const {
 	cells.clear();
 

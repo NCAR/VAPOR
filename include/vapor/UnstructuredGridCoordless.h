@@ -61,53 +61,48 @@ public:
  }  
  std::string GetType() const override {return (GetClassType()); }
 
- virtual void GetUserExtents(
-	std::vector <double> &minu, std::vector <double> &maxu
- ) const override {
-	minu.clear(); maxu.clear();
- }
 
  virtual void GetBoundingBox(
-    const std::vector <size_t> &, const std::vector <size_t> &,
-    std::vector <double> &minu, std::vector <double> &maxu
+	const Size_tArr3 &min, const Size_tArr3 &max,
+	DblArr3 &minu, DblArr3 &maxu
  ) const override {
-	minu.clear(); maxu.clear();
+	minu = {0.0, 0.0, 0.0};
+	maxu = {0.0, 0.0, 0.0};
  }
 
  bool GetEnclosingRegion(
-	const std::vector <double> &, const std::vector <double> &,
-	std::vector <size_t> &min, std::vector <size_t> &max
+	const DblArr3 &minu, const DblArr3 &maxu,
+	Size_tArr3 &min, Size_tArr3 &max
  ) const override {
-	min.clear(); max.clear();
 	return(false);
  }
 
 
  virtual void GetUserCoordinates(
-	const size_t indices[],
-	double coords[]
+	const Size_tArr3 &indices,
+	DblArr3 &coords
  ) const override { }
 
   
  bool GetIndicesCell(
-	const std::vector <double> &,
-	std::vector <size_t> &indices
+    const DblArr3 &,
+    Size_tArr3 &
  ) const override {
 	return(false);
  }
 
- bool InsideGrid(const std::vector <double> &coords) const override {
+ bool InsideGrid(const DblArr3 &coords) const override {
 	return(false);
  }
 
  float GetValueNearestNeighbor (
-	const std::vector <double> &coords
+	const DblArr3 &coords
  ) const override {
 	return(0.0);
  }
 
  float GetValueLinear (
-	const std::vector <double> &coords
+	const DblArr3 &coords
  ) const override {
  	return(0.0);
  }
@@ -164,6 +159,15 @@ public:
 
  
  VDF_API friend std::ostream &operator<<(std::ostream &o, const UnstructuredGridCoordless &sg);
+
+protected:
+
+ virtual void GetUserExtentsHelper(
+	DblArr3 &minu, DblArr3 &maxu
+ ) const override {
+	minu = {0.0, 0.0, 0.0};
+	maxu = {0.0, 0.0, 0.0};
+ }
 
 private:
 };

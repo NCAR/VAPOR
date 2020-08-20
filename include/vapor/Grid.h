@@ -4,6 +4,7 @@
 #include <iostream>
 #include <ostream>
 #include <vector>
+#include <array>
 #include <string>
 #include <limits>
 #include "vapor/VAssert.h"
@@ -15,6 +16,11 @@
 #endif
 
 namespace VAPoR {
+
+using DblArr3 = std::array<double, 3>;
+using Size_tArr3 = std::array<size_t, 3>;
+
+
 
 //! \class Grid
 //! \brief Abstract base class for a 2D or 3D structured or unstructured
@@ -161,9 +167,14 @@ public:
  //! size of \p indices must be equal to that of the \p dims vector 
  //! returned by GetDimensions()
  //!
- virtual float GetValueAtIndex(const size_t indices[3]) const;
+ virtual float GetValueAtIndex(const Size_tArr3 &indices) const;
+
+ //! \deprecated
+ //
  virtual float GetValueAtIndex(const std::vector <size_t> &indices) const {
-	return(GetValueAtIndex(indices.data()));
+	Size_tArr3 a = {0,0,0};
+	CopyToArr3(indices, a);
+	return(GetValueAtIndex(a));
  }
 
  //! Set the data value at the indicated grid point
@@ -171,9 +182,14 @@ public:
  //! This method sets the data value of the grid point indexed by 
  //! \p indices to \p value. 
  //!
- virtual void SetValue(const size_t indices[3], float value);
- virtual void SetValue(const std::vector <size_t> &indices, float value) {
-	SetValue(indices.data(), value);
+ virtual void SetValue(const Size_tArr3 &indices, float value);
+
+ //! \deprecated
+ //
+ virtual void SetValue(const size_t indices[3], float value) {
+	Size_tArr3 i3 = {0,0,0};
+	CopyToArr3(indices, GetNodeDimensions().size(), i3);
+	SetValue(i3, value);
  }
 
  //! This method provides an alternate interface to Grid::GetValueAtIndex()
@@ -215,20 +231,32 @@ public:
  //! \sa GetInterpolationOrder(), HasPeriodic(), GetMissingValue()
  //! \sa GetUserExtents()
  //!
- virtual float GetValue(const std::vector <double> &coords) const;
+ virtual float GetValue(const DblArr3 &coords) const;
 
+
+ //! \deprecated
+ //
+ virtual float GetValue(const std::vector <double> &coords) const {
+	DblArr3 c3 = {0.0, 0.0, 0.0};
+	CopyToArr3(coords, c3);
+	return(GetValue(c3));
+ };
+
+
+ //! \deprecated
+ //
  virtual float GetValue(const double coords[]) const {
-	std::vector <double> coordsVec(GetGeometryDim(), 0);
-	for (int i=0; i<coordsVec.size(); i++) coordsVec[i] = coords[i];
-	return(GetValue(coordsVec));
- }
+	DblArr3 c3 = {0.0, 0.0, 0.0};
+	CopyToArr3(coords, GetGeometryDim(), c3);
+	return(GetValue(c3));
+ } 
 
  virtual float GetValue(double x, double y) const {
-	std::vector <double> coords = {x, y};
+	double coords[] = {x, y, 0.0};
 	return(GetValue(coords));
  }
  virtual float GetValue(double x, double y, double z) const {
-	std::vector <double> coords = {x, y, z};
+	double coords[] = {x, y, z};
 	return(GetValue(coords));
  }
  
@@ -248,8 +276,39 @@ public:
  //! \sa GetDimensions(), Grid()
  //!
  virtual void GetUserExtents(
+	DblArr3 &minu, DblArr3 &maxu
+ ) const;
+
+ //! \deprecated
+ //
+ virtual void GetUserExtents(
+	double minu[3], double maxu[3]
+ ) const {
+	DblArr3 minu3 = {0.0, 0.0, 0.0};
+	DblArr3 maxu3 = {0.0, 0.0, 0.0};
+	GetUserExtents(minu3, maxu3);
+	CopyFromArr3(minu3, minu);
+	CopyFromArr3(maxu3, maxu); 
+ }
+
+ //! \deprecated
+ //
+ virtual void GetUserExtents(
 	std::vector <double> &minu, std::vector <double> &maxu
- ) const = 0;
+ ) const {
+	DblArr3 minu3 = {0.0, 0.0, 0.0};
+	DblArr3 maxu3 = {0.0, 0.0, 0.0};
+	GetUserExtents(minu3, maxu3);
+	CopyFromArr3(minu3, minu);
+	CopyFromArr3(maxu3, maxu); 
+
+	// Much of the use of this method assumes that the size of the minu,maxu
+	// vectors can be used to determine the number of coordinates. So we 
+	// maintain this property for now. 
+	//
+	minu.resize(GetGeometryDim());
+	maxu.resize(GetGeometryDim());
+ }
 
  //! Return the extents of the axis-aligned bounding box enclosign a region
  //!
@@ -278,9 +337,26 @@ public:
  //! \sa GetDimensions(), Grid()
  //!
  virtual void GetBoundingBox(
+	const Size_tArr3 &min, const Size_tArr3 &max,
+	DblArr3 &minu, DblArr3 &maxu
+ ) const = 0;
+
+ virtual void GetBoundingBox(
 	const std::vector <size_t> &min, const std::vector <size_t> &max,
 	std::vector <double> &minu, std::vector <double> &maxu
- ) const = 0;
+ ) const {
+	VAssert(min.size() == max.size());
+	Size_tArr3 min3 = {0,0,0};
+	Size_tArr3 max3 = {0,0,0};
+	DblArr3 minu3 = {0.0, 0.0, 0.0};
+	DblArr3 maxu3 = {0.0, 0.0, 0.0};
+
+	CopyToArr3(min, min3);
+	CopyToArr3(max, max3);
+	GetBoundingBox(min3, max3, minu3, maxu3);
+	CopyFromArr3(minu3, minu);
+	CopyFromArr3(maxu3, maxu); 
+ }
 
  //!
  //! Get bounding indices of grid containing a region
@@ -300,8 +376,8 @@ public:
  //! \param[out] max Integer coordinates of maximum coorner
  //!
  virtual bool    GetEnclosingRegion(
-	const std::vector <double> &minu, const std::vector <double> &maxu,
-	std::vector <size_t> &min, std::vector <size_t> &max
+	const DblArr3 &minu, const DblArr3 &maxu,
+	Size_tArr3 &min, Size_tArr3 &max
  ) const = 0;
 
 
@@ -393,14 +469,32 @@ public:
  //! returned by GetGeometryDim().
  //!
  virtual void GetUserCoordinates(
+	const Size_tArr3 &indices,
+	DblArr3 &coords
+ ) const = 0;
+
+ virtual void GetUserCoordinates(
 	const size_t indices[],
 	double coords[]
- ) const = 0;
+ ) const {
+	Size_tArr3 indices3 = {0,0,0};
+	DblArr3 coords3 = {0.0,0.0,0.0};
+	CopyToArr3(indices, GetNodeDimensions().size(), indices3);
+	GetUserCoordinates(indices3, coords3);
+	CopyFromArr3(coords3, coords);
+ }
+	
 
  virtual void GetUserCoordinates(
 	const std::vector <size_t> &indices,
 	std::vector <double> &coords
- ) const;
+ ) const {
+	Size_tArr3 indices3 = {0,0,0};
+	DblArr3 coords3 = {0.0,0.0,0.0};
+	CopyToArr3(indices, indices3);
+	GetUserCoordinates(indices3, coords3);
+	CopyFromArr3(coords3, coords);
+ }
 
  virtual void GetUserCoordinates(
 	size_t i, double &x, double &y, double &z
@@ -429,9 +523,34 @@ public:
  //! by any cell.
  //!
  virtual bool GetIndicesCell(
+    const DblArr3 &coords,
+    Size_tArr3 &indices
+ ) const = 0;
+
+ //! \deprecated
+ //
+ virtual bool GetIndicesCell(const double coords[3], size_t indices[3]) const {
+	DblArr3 c3 = {0.0, 0.0, 0.0};
+	Size_tArr3 i3 = {0,0,0};
+	CopyToArr3(coords, GetGeometryDim(), c3);
+	bool status = GetIndicesCell(c3,i3);
+	CopyFromArr3(i3, indices);
+	return(status);
+ }
+
+ //! \deprecated
+ //
+ virtual bool GetIndicesCell(
     const std::vector <double> &coords,
     std::vector <size_t> &indices
- ) const = 0;
+ ) const {
+	DblArr3 c3 = {0.0, 0.0, 0.0};
+	Size_tArr3 i3 = {0,0,0};
+	CopyToArr3(coords, c3);
+	bool status = GetIndicesCell(c3,i3);
+	CopyFromArr3(i3, indices);
+	return(status);
+ }
 
  //! Return the min and max data value
  //!
@@ -444,10 +563,24 @@ public:
  //! maximum values, in that order
  //!
  virtual void GetRange(float range[2]) const;
+
+ virtual void GetRange(
+	const Size_tArr3 &min, const Size_tArr3 &max,
+	float range[2]
+ ) const;
+
+ //! \deprecated
+ //
  virtual void GetRange(
 	std::vector <size_t> min, std::vector <size_t> max,
 	float range[2]
- ) const;
+ ) const {
+	Size_tArr3 min3 = {0,0,0};
+	Size_tArr3 max3 = {0,0,0};
+	CopyToArr3(min, min3);
+	CopyToArr3(max, max3);
+	GetRange(min3, max3, range);
+ }
 
  //! Return true if the specified point lies inside the grid
  //!
@@ -458,7 +591,23 @@ public:
  //!
  //! \retval bool True if point is inside the grid
  //!
- virtual bool InsideGrid(const std::vector <double> &coords) const = 0;
+ virtual bool InsideGrid(const DblArr3 &coords) const = 0;
+
+ //! \deprecated
+ //
+ virtual bool InsideGrid(const double coords[3]) const {
+	DblArr3 c3 = {0.0, 0.0, 0.0};
+	CopyToArr3(coords, GetGeometryDim(), c3);
+	return(InsideGrid(c3));
+ }
+
+ //! \deprecated
+ //
+ virtual bool InsideGrid(const std::vector <double> &coords) const {
+	DblArr3 c3 = {0.0, 0.0, 0.0};
+	CopyToArr3(coords, c3);
+	return(InsideGrid(c3));
+ }
 
  //! Get the indices of the nodes that define a cell
  //!
@@ -479,26 +628,20 @@ public:
  //!
  //!
  virtual bool GetCellNodes(
-    const size_t cindices[],
-    size_t nodes[],
-    int &n
+	const Size_tArr3 &cindices,
+	std::vector <Size_tArr3> &nodes
  ) const = 0;
 
- //! Get the indices of the nodes that define a cell
- //!
- //! This method is equivalent in functionality 
- //! to Grid::GetCellNodes(const size_t cindices[], size_t nodes[], int &n) 
- //! but less performant due to the use of std::vector
- //!
- //! \param[in] cindices An ordered vector of multi-dimensional cell 
- //! indices.
- //! \param[out] nodes A vector of index vectors . Each index vector
- //! has size given by GetDimensions.size()
+ //! \deprecated
  //
  virtual bool GetCellNodes(
-	const std::vector <size_t> &cindices,
-	std::vector <std::vector <size_t> > &nodes
- ) const;
+    const size_t cindices[],
+	std::vector <Size_tArr3> &nodes
+ ) const {
+	Size_tArr3 i3 = {0,0,0};
+	CopyToArr3(cindices, GetCellDimensions().size(), i3);
+	return(GetCellNodes(i3, nodes));
+ }
 
 
  //! Get the IDs (indices) of all of the cells that border a cell
@@ -516,8 +659,8 @@ public:
  //! has size given by GetDimensions.size()
  //!
  virtual bool GetCellNeighbors(
-	const std::vector <size_t> &cindices,
-	std::vector <std::vector <size_t> > &cells
+	const Size_tArr3 &cindices,
+	std::vector <Size_tArr3> &cells
  ) const = 0;
 
  //! Get the IDs (indices) of all of the cells that share a node
@@ -531,8 +674,8 @@ public:
  //! has size given by GetDimensions.size()
  //!
  virtual bool GetNodeCells(
-	const std::vector <size_t> &indices,
-	std::vector <std::vector <size_t> > &cells
+	const Size_tArr3 &indices,
+	std::vector <Size_tArr3> &cells
  ) const = 0;
 
  //! Return the maximum number of vertices per cell face
@@ -550,26 +693,44 @@ public:
  //! exceed the number of allowable coordinates as returned by 
  //! GetGeometryDim().
  //!
- //! \param[in,out] coords A coordinate vector
+ //! \param[in] coords A coordinate vector
+ //! \param[out] cCoords The clamped coordintes \p coords
  //! \sa GetGeometryDim()
  //
- virtual void ClampCoord(std::vector <double> &coords) const = 0;
+ virtual void ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const = 0;
+
+ //! \deprecated
+ //
+ virtual void ClampCoord(const double coords[3], double cCoords[3]) const {
+	DblArr3 c3 = {coords[0], coords[1], coords[2]};
+	DblArr3 cC3;
+	ClampCoord(c3, cC3);
+	cCoords[0] = cC3[0]; cCoords[1] = cC3[1]; cCoords[2] = cC3[2];
+ }
 
  //! Clamp grid array indices 
  //!
- //! This method ensures that grid indices are not out of bounds and
- //! that the \p indices vector lengh does not exceed the number
- //! of available dimensions as returned by GetDimensions().
+ //! This method ensures that grid indices are not out of bounds, clamping
+ //! any elements of \p indices that exceeds or equals the corresponding element of
+ //! GetNodeDimensions() to that value minus 1.
  //!
- //! \param[in,out] indices An array index vector
+ //! \param[in] indices An array index vector
+ //! \param[out] cindices An array index vector, clamped as described above
+ //!
  //! \sa GetNodeDimensions()
  //
- virtual void ClampIndex(std::vector <size_t> &indices) const {
-	ClampIndex(GetNodeDimensions(), indices);
+ virtual void ClampIndex(const Size_tArr3 &indices, Size_tArr3 &cIndices) const {
+	ClampIndex(GetNodeDimensions(), indices, cIndices);
  }
 
- virtual void ClampCellIndex(std::vector <size_t> &indices) const {
-	ClampIndex(GetCellDimensions(), indices);
+ //! Clamp grid cell indices
+ //!
+ //! Same as ClampIndex() accept that indices are clamped to GetCellDimensions()
+ //!
+ //! \sa ClampIndex()
+ //
+ virtual void ClampCellIndex(const Size_tArr3 &indices, Size_tArr3 &cIndices) const {
+	ClampIndex(GetCellDimensions(), indices, cIndices);
  }
 
 
@@ -596,7 +757,7 @@ public:
  //! Check for periodic boundaries
  //!
  //
- virtual std::vector <bool> GetPeriodic() const {
+ virtual const std::vector <bool> &GetPeriodic() const {
 	return(_periodic);
  }
 
@@ -1192,78 +1353,59 @@ public:
 protected:
 
  virtual float GetValueNearestNeighbor(
-	const std::vector <double> &coords
+	const DblArr3 &coords
  ) const = 0;
 
  virtual float GetValueLinear(
-	const std::vector <double> &coords
+	const DblArr3 &coords
  ) const = 0;
 
- virtual float *GetValueAtIndex(
-	const std::vector <float *> &blks, const size_t indices[3]
- ) const;
+ virtual void GetUserExtentsHelper(
+	DblArr3 &minu, DblArr3 &maxu
+ ) const = 0;
 
- virtual float *GetValueAtIndex(
-	const std::vector <float *> &blks, const std::vector <size_t> &indices
- ) const {
-	return GetValueAtIndex(blks, indices.data());
- }
+ virtual float *GetValuePtrAtIndex(
+	const std::vector <float *> &blks, const Size_tArr3 &indices
+ ) const;
 
  virtual void ClampIndex(
 	const std::vector <size_t> &dims,
-	std::vector <size_t> &indices
+	const Size_tArr3 indices,
+	Size_tArr3 &cIndices
  ) const {
-	while (indices.size() > dims.size()) {
-		indices.pop_back();
-	}
-	while (indices.size() < dims.size()) {
-		indices.push_back(0);
-	}
-	for (int i=0; i<indices.size(); i++) {
-		if (indices[i] >= dims[i]) {
-			indices[i] = dims[i] - 1;
-		}
-	}
- }
+	cIndices = indices;
 
- virtual void ClampIndex(
-	const size_t indices[3],
-	size_t *cIndices
- ) const {
-	const std::vector <size_t> &dims = GetNodeDimensions();
 	for (int i=0; i<dims.size(); i++) {
-		cIndices[i] = indices[i];
 		if (cIndices[i] >= dims[i]) {
 			cIndices[i] = dims[i] - 1;
 		}
 	}
  }
 
- virtual void ClampIndex(
-	const std::vector <size_t> &indices,
-	size_t *cIndices
- ) const {
-	ClampIndex(indices.data(), cIndices);
- }
-
- virtual void ClampCellIndex(
-	const size_t indices[3],
-	size_t *cIndices
- ) const {
-	const std::vector <size_t> &dims = GetCellDimensions();
-	for (int i=0; i<dims.size(); i++) {
-		cIndices[i] = indices[i];
-		if (cIndices[i] >= dims[i]) {
-			cIndices[i] = dims[i] - 1;
-		}
+ template <typename T>
+ static void CopyToArr3(const std::vector <T> &src, std::array <T, 3> &dst) {
+	for (int i=0; i<src.size() && i < dst.size(); i++) {
+		dst[i] = src[i];
 	}
  }
-
- virtual void ClampCellIndex(
-	const std::vector <size_t> &indices,
-	size_t *cIndices
- ) const {
-	ClampCellIndex(indices.data(), cIndices);
+ template <typename T>
+ static void CopyToArr3(const T *src, size_t n, std::array <T, 3> &dst) {
+	for (int i=0; i<n && i < dst.size(); i++) {
+		dst[i] = src[i];
+	}
+ }
+ template <typename T>
+ static void CopyFromArr3(const std::array <T, 3> &src, std::vector <T> &dst) {
+	dst.resize(src.size());
+	for (int i=0; i<src.size() && i < dst.size(); i++) {
+		dst[i] = src[i];
+	}
+ }
+ template <typename T>
+ static void CopyFromArr3(const std::array <T, 3> &src, T *dst) {
+	for (int i=0; i < src.size(); i++) {
+		dst[i] = src[i];
+	}
  }
 
 
@@ -1283,6 +1425,16 @@ private:
  int _interpolationOrder   = 0;	// Order of interpolation 
  long _nodeIDOffset        = 0;
  long _cellIDOffset        = 0;
+ mutable DblArr3 _minuCache = {
+	std::numeric_limits<double>::infinity(),
+	std::numeric_limits<double>::infinity(),
+	std::numeric_limits<double>::infinity()
+ };
+ mutable DblArr3 _maxuCache = {
+	std::numeric_limits<double>::infinity(),
+	std::numeric_limits<double>::infinity(),
+	std::numeric_limits<double>::infinity()
+ };
 
  virtual void _getUserCoordinatesHelper(
 	const std::vector <double> &coords, double &x, double &y, double &z
