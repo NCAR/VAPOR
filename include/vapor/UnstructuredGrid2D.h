@@ -63,29 +63,30 @@ class VDF_API UnstructuredGrid2D : public UnstructuredGrid {
     }
     std::string GetType() const override { return (GetClassType()); }
 
-    virtual void GetUserExtents(
-        std::vector<double> &minu, std::vector<double> &maxu) const override;
-
     virtual void GetBoundingBox(
-        const std::vector<size_t> &min, const std::vector<size_t> &max,
-        std::vector<double> &minu, std::vector<double> &maxu) const override;
+        const Size_tArr3 &min, const Size_tArr3 &max,
+        DblArr3 &minu, DblArr3 &maxu) const override;
 
     bool GetEnclosingRegion(
-        const std::vector<double> &minu, const std::vector<double> &maxu,
-        std::vector<size_t> &min, std::vector<size_t> &max) const override;
+        const DblArr3 &minu, const DblArr3 &maxu,
+        Size_tArr3 &min, Size_tArr3 &max) const override;
 
     virtual void GetUserCoordinates(
-        const size_t indices[],
-        double coords[]) const override;
+        const Size_tArr3 &indices,
+        DblArr3 &coords) const override;
 
     bool GetIndicesCell(
-        const std::vector<double> &coords,
-        std::vector<size_t> &indices) const override {
+        const DblArr3 &coords,
+        Size_tArr3 &indices) const override {
 
         std::vector<double> lambda;
         std::vector<std::vector<size_t>> nodes;
         return (GetIndicesCell(coords, indices, nodes, lambda));
     }
+    // For grandparent inheritance of
+    // Grid::GetIndicesCell(const double coords[3], size_t indices[3])
+    //
+    using Grid::GetIndicesCell;
 
     //! \copydoc Grid::GetIndicesCell()
     //!
@@ -94,18 +95,18 @@ class VDF_API UnstructuredGrid2D : public UnstructuredGrid {
     //! at nodes identified by \p nodes
     //!
     bool GetIndicesCell(
-        const std::vector<double> &coords,
-        std::vector<size_t> &indices,
+        const DblArr3 &coords,
+        Size_tArr3 &indices,
         std::vector<std::vector<size_t>> &nodes,
         std::vector<double> &lambda) const;
 
-    bool InsideGrid(const std::vector<double> &coords) const override;
+    bool InsideGrid(const DblArr3 &coords) const override;
 
     float GetValueNearestNeighbor(
-        const std::vector<double> &coords) const override;
+        const DblArr3 &coords) const override;
 
     float GetValueLinear(
-        const std::vector<double> &coords) const override;
+        const DblArr3 &coords) const override;
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -161,6 +162,10 @@ class VDF_API UnstructuredGrid2D : public UnstructuredGrid {
 
     VDF_API friend std::ostream &operator<<(std::ostream &o, const UnstructuredGrid2D &sg);
 
+  protected:
+    virtual void GetUserExtentsHelper(
+        DblArr3 &minu, DblArr3 &maxu) const override;
+
   private:
     UnstructuredGridCoordless _xug;
     UnstructuredGridCoordless _yug;
@@ -168,17 +173,17 @@ class VDF_API UnstructuredGrid2D : public UnstructuredGrid {
     std::shared_ptr<const QuadTreeRectangle<float, size_t>> _qtr;
 
     bool _insideGrid(
-        const std::vector<double> &coords,
+        const DblArr3 &coords,
         size_t &face, std::vector<size_t> &nodes,
         double *lambda, int &nlambda) const;
 
     bool _insideGridNodeCentered(
-        const std::vector<double> &coords,
+        const DblArr3 &coords,
         size_t &face, std::vector<size_t> &nodes,
         double *lambda, int &nlambda) const;
 
     bool _insideGridFaceCentered(
-        const std::vector<double> &coords,
+        const DblArr3 &coords,
         size_t &face, std::vector<size_t> &nodes,
         double *lambda, int &nlambda) const;
 

@@ -487,18 +487,18 @@ int TwoDDataRenderer::_getMeshUnStructured(
     // Count the number of triangle vertex indices needed
     //
     size_t maxVertexPerCell = g->GetMaxVertexPerCell();
-    size_t *nodes = (size_t *)alloca(sizeof(size_t) * maxVertexPerCell);
+    vector<Size_tArr3> nodes(maxVertexPerCell);
     _nindices = 0;
     Grid::ConstCellIterator citr;
     Grid::ConstCellIterator endcitr = g->ConstCellEnd();
     for (citr = g->ConstCellBegin(); citr != endcitr; ++citr) {
 
-        int numNodes;
-        g->GetCellNodes((*citr).data(), nodes, numNodes);
+        const vector<size_t> &cell = *citr;
+        g->GetCellNodes(Size_tArr3{cell[0], 0, 0}, nodes);
 
-        if (numNodes < 3)
+        if (nodes.size() < 3)
             continue; // degenerate
-        _nindices += 3 * (numNodes - 2);
+        _nindices += 3 * (nodes.size() - 2);
     }
 
     // (Re)allocate space for verts
@@ -600,27 +600,24 @@ int TwoDDataRenderer::_getMeshUnStructuredHelper(
     // array for the triangle list
     //
     size_t maxVertexPerCell = g->GetMaxVertexPerCell();
-    size_t *nodes = (size_t *)alloca(sizeof(size_t) * maxVertexPerCell);
+    vector<Size_tArr3> nodes(maxVertexPerCell);
     Grid::ConstCellIterator citr;
     Grid::ConstCellIterator endcitr = g->ConstCellEnd();
     size_t index = 0;
     for (citr = g->ConstCellBegin(); citr != endcitr; ++citr) {
-        int numNodes;
-        g->GetCellNodes((*citr).data(), nodes, numNodes);
+        const vector<size_t> &cell = *citr;
+        g->GetCellNodes(Size_tArr3{cell[0], 0, 0}, nodes);
 
-        if (numNodes < 3)
+        if (nodes.size() < 3)
             continue; // degenerate
 
         // Compute triangle node indices, with common vertex at
         // nodes[0]
         //
-        for (int i = 0; i < numNodes - 2; i++) {
-            //indices[index++] = LinearizeCoords(nodes[0], dims);
-            //indices[index++] = LinearizeCoords(nodes[i+1], dims);
-            //indices[index++] = LinearizeCoords(nodes[i+2], dims);
-            indices[index++] = nodes[0];
-            indices[index++] = nodes[i + 1];
-            indices[index++] = nodes[i + 2];
+        for (int i = 0; i < nodes.size() - 2; i++) {
+            indices[index++] = nodes[0][0];
+            indices[index++] = nodes[i + 1][0];
+            indices[index++] = nodes[i + 2][0];
         }
     }
 

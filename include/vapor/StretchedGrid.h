@@ -72,35 +72,27 @@ class VDF_API StretchedGrid : public StructuredGrid {
     }
     std::string GetType() const override { return (GetClassType()); }
 
-    // \copydoc GetGrid::GetUserExtents()
-    //
-    virtual void GetUserExtents(
-        std::vector<double> &minu, std::vector<double> &maxu) const override {
-        minu = _minu;
-        maxu = _maxu;
-    }
-
     // \copydoc GetGrid::GetBoundingBox()
     //
     virtual void GetBoundingBox(
-        const std::vector<size_t> &min, const std::vector<size_t> &max,
-        std::vector<double> &minu, std::vector<double> &maxu) const override;
+        const Size_tArr3 &min, const Size_tArr3 &max,
+        DblArr3 &minu, DblArr3 &maxu) const override;
 
     // \copydoc GetGrid::GetUserCoordinates()
     //
     virtual void GetUserCoordinates(
-        const size_t indices[],
-        double coords[]) const override;
+        const Size_tArr3 &indices,
+        DblArr3 &coords) const override;
 
     //! \copydoc Grid::GetIndicesCell
     //!
     virtual bool GetIndicesCell(
-        const std::vector<double> &coords,
-        std::vector<size_t> &indices) const override;
+        const DblArr3 &coords,
+        Size_tArr3 &indices) const override;
 
     // \copydoc GetGrid::InsideGrid()
     //
-    virtual bool InsideGrid(const std::vector<double> &coords) const override;
+    virtual bool InsideGrid(const DblArr3 &coords) const override;
 
     //! Returns reference to vector containing X user coordinates
     //!
@@ -166,25 +158,25 @@ class VDF_API StretchedGrid : public StructuredGrid {
 
   protected:
     virtual float GetValueNearestNeighbor(
-        const std::vector<double> &coords) const override;
+        const DblArr3 &coords) const override;
 
     virtual float GetValueLinear(
-        const std::vector<double> &coords) const override;
+        const DblArr3 &coords) const override;
+
+    void GetUserExtentsHelper(
+        DblArr3 &minu, DblArr3 &maxu) const override;
 
   private:
     std::vector<double> _xcoords;
     std::vector<double> _ycoords;
     std::vector<double> _zcoords;
-    std::vector<double> _minu;
-    std::vector<double> _maxu;
+    DblArr3 _minu = {0.0, 0.0, 0.0};
+    DblArr3 _maxu = {0.0, 0.0, 0.0};
 
     void _stretchedGrid(
         const std::vector<double> &xcoords,
         const std::vector<double> &ycoords,
         const std::vector<double> &zcoords);
-
-    void _GetUserExtents(
-        std::vector<double> &minu, std::vector<double> &maxu) const;
 
     bool _insideGrid(
         double x, double y, double z,

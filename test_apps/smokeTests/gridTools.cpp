@@ -181,10 +181,10 @@ bool CompareIndexToCoords(
     for (size_t k = 0; k < z; k++) {
         for (size_t j = 0; j < y; j++) {
             for (size_t i = 0; i < x; i++) {
-                size_t indices[3] = {i, j, k};
-                double trueValue = grid->GetValueAtIndex({i, j, k});
+                Size_tArr3 indices = {i, j, k};
+                double trueValue = grid->GetValueAtIndex(indices);
 
-                double coords[3];
+                DblArr3 coords;
                 grid->GetUserCoordinates(indices, coords);
                 float sampleValue = grid->GetValue(coords);
 
@@ -243,9 +243,14 @@ bool TestConstNodeIterator(
 
     for (; itr != enditr; ++itr) {
         std::vector<size_t> ijk = Wasp::VectorizeCoords(count, dims);
+        Size_tArr3 ijk3;
+        std::copy_n(ijk.begin(), ijk3.size(), ijk3.begin());
 
-        double itrData = g->GetValueAtIndex((*itr).data());
-        double gridData = g->GetValueAtIndex(ijk);
+        Size_tArr3 itr3;
+        std::copy_n((*itr).begin(), itr3.size(), itr3.begin());
+
+        double itrData = g->GetValueAtIndex(itr3);
+        double gridData = g->GetValueAtIndex(ijk3);
 
         if (isNotEqual(itrData, gridData)) {
             disagreements++;

@@ -143,21 +143,20 @@ class VDF_API UnstructuredGrid : public Grid {
     std::string GetType() const override { return (GetClassType()); }
 
     bool GetCellNodes(
-        const size_t cindices[],
-        size_t nodes[],
-        int &n) const override;
+        const Size_tArr3 &cindices,
+        std::vector<Size_tArr3> &nodes) const override;
 
     //! \copydoc Grid::GetCellNeighbors()
     //!
     virtual bool GetCellNeighbors(
-        const std::vector<size_t> &cindices,
-        std::vector<std::vector<size_t>> &cells) const override;
+        const Size_tArr3 &cindices,
+        std::vector<Size_tArr3> &cells) const override;
 
     //! \copydoc Grid::GetNodeCells()
     //!
     virtual bool GetNodeCells(
-        const std::vector<size_t> &indices,
-        std::vector<std::vector<size_t>> &cells) const override;
+        const Size_tArr3 &indices,
+        std::vector<Size_tArr3> &cells) const override;
 
     size_t GetMaxVertexPerFace() const override {
         return (_maxVertexPerFace);
@@ -208,11 +207,14 @@ class VDF_API UnstructuredGrid : public Grid {
         _boundaryID = v;
     }
 
-    virtual void ClampCoord(std::vector<double> &coords) const override {
-        VAssert(coords.size() >= GetGeometryDim());
-        while (coords.size() > GetGeometryDim()) {
-            coords.pop_back();
-        }
+    virtual void ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const override {
+        cCoords = coords;
+    }
+
+    //! \deprecated
+    //
+    virtual void ClampCoord(const double coords[3], double cCoords[3]) const override {
+        Grid::ClampCoord(coords, cCoords);
     }
 
     // A no-op for unstructured grids. Needs to be set in the constuctor :-(
