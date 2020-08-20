@@ -76,23 +76,31 @@ public:
 
     //! \copydoc Grid::GetCellNodes()
     //!
-    virtual bool GetCellNodes(const size_t cindices[], size_t nodes[], int &n) const override;
+    virtual bool GetCellNodes(const Size_tArr3 &cindices, std::vector<Size_tArr3> &nodes) const override;
+    // For grandparent inheritance of
+    // Grid::GetUserCoordinates(const size_t indices[], double coords[])
+    //
+    using Grid::GetCellNodes;
 
     //! \copydoc Grid::GetCellNeighbors()
     //!
-    virtual bool GetCellNeighbors(const std::vector<size_t> &cindices, std::vector<std::vector<size_t>> &cells) const override;
+    virtual bool GetCellNeighbors(const Size_tArr3 &cindices, std::vector<Size_tArr3> &cells) const override;
 
     //! \copydoc Grid::GetNodeCells()
     //!
-    virtual bool GetNodeCells(const std::vector<size_t> &indices, std::vector<std::vector<size_t>> &cells) const override;
+    virtual bool GetNodeCells(const Size_tArr3 &cindices, std::vector<Size_tArr3> &cells) const override;
 
-    virtual bool GetEnclosingRegion(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const override;
+    virtual bool GetEnclosingRegion(const DblArr3 &minu, const DblArr3 &maxu, Size_tArr3 &min, Size_tArr3 &max) const override;
 
     size_t GetMaxVertexPerFace() const override { return (4); };
 
     size_t GetMaxVertexPerCell() const override { return ((GetTopologyDim() == 3) ? 8 : 4); };
 
-    virtual void ClampCoord(std::vector<double> &coords) const override;
+    virtual void ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const override;
+
+    //! \deprecated
+    //
+    virtual void ClampCoord(const double coords[3], double cCoords[3]) const override { Grid::ClampCoord(coords, cCoords); }
 
     //! \copydoc Grid::HasInvertedCoordinateSystemHandiness()
     //!

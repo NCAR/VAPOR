@@ -16,8 +16,6 @@ GrownGrid::~GrownGrid()
 
 float GrownGrid::GetDefaultZ() const { return _defaultZ; }
 
-float GrownGrid::GetValue(const std::vector<double> &coords) const { return _grid2d->GetValue(coords); }
-
 std::string GrownGrid::GetType() const
 {
     std::string type("GrownGrid");
@@ -26,45 +24,51 @@ std::string GrownGrid::GetType() const
 
 float GrownGrid::GetMissingValue() const { return _grid2d->GetMissingValue(); }
 
-void GrownGrid::GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const
+void GrownGrid::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const
 {
     _grid2d->GetUserExtents(minu, maxu);
-    if (minu.size() < 3) minu.resize(3, _defaultZ);
-    if (maxu.size() < 3) maxu.resize(3, _defaultZ);
+
+    if (_grid2d->GetGeometryDim() < 3) {
+        minu[2] = _defaultZ;
+        maxu[2] = _defaultZ;
+    }
 }
 
-bool GrownGrid::InsideGrid(const std::vector<double> &coords) const
+bool GrownGrid::InsideGrid(const DblArr3 &coords) const
 {
     // Note that we don't use defaultZ to decide if a position is inside of
     // a grid or not.
     return (_grid2d->InsideGrid(coords));
 }
 
-//
-// Start meaningless functions!
-//
-float GrownGrid::GetValueNearestNeighbor(const std::vector<double> &coords) const { return 0.0f; }
+float GrownGrid::GetValue(const DblArr3 &coords) const { return _grid2d->GetValue(coords); }
 
-float               GrownGrid::GetValueLinear(const std::vector<double> &coords) const { return 0.0f; }
+float GrownGrid::GetValueNearestNeighbor(const DblArr3 &coords) const { return _grid2d->GetValue(coords); }
+
+float GrownGrid::GetValueLinear(const DblArr3 &coords) const { return _grid2d->GetValue(coords); }
+
 std::vector<size_t> GrownGrid::GetCoordDimensions(size_t) const
 {
     std::vector<size_t> tmp;
     return tmp;
 }
 
-size_t GrownGrid::GetGeometryDim() const { return 0; }
+//
+// Start meaningless functions!
+//
+size_t GrownGrid::GetGeometryDim() const { return 3; }
 
 const std::vector<size_t> &GrownGrid::GetNodeDimensions() const { return (GetDimensions()); }
 
 const std::vector<size_t> &GrownGrid::GetCellDimensions() const { return (GetDimensions()); }
 
-bool GrownGrid::GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const { return false; }
+bool GrownGrid::GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) const { return false; }
 
-bool GrownGrid::GetCellNodes(const size_t cindices[], size_t nodes[], int &n) const { return false; }
+bool GrownGrid::GetCellNodes(const Size_tArr3 &cindices, std::vector<Size_tArr3> &nodes) const { return false; }
 
-bool GrownGrid::GetCellNeighbors(const std::vector<size_t> &cindices, std::vector<std::vector<size_t>> &cells) const { return false; }
+bool GrownGrid::GetCellNeighbors(const Size_tArr3 &cindices, std::vector<Size_tArr3> &nodes) const { return false; }
 
-bool GrownGrid::GetNodeCells(const std::vector<size_t> &indices, std::vector<std::vector<size_t>> &cells) const { return false; }
+bool GrownGrid::GetNodeCells(const Size_tArr3 &cindices, std::vector<Size_tArr3> &nodes) const { return false; }
 
 size_t GrownGrid::GetMaxVertexPerFace() const { return 0; }
 

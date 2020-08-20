@@ -190,7 +190,7 @@ void WireFrameRenderer::_buildCacheVertices(const Grid *grid, const Grid *height
             }
         }
 
-        float dataValue = grid->GetValueAtIndex((*nodeItr).data());
+        float dataValue = grid->GetValueAtIndex(*nodeItr);
 
         // Create an entry in nodeMap
         //
@@ -221,12 +221,12 @@ void WireFrameRenderer::_buildCacheVertices(const Grid *grid, const Grid *height
 //
 size_t WireFrameRenderer::_buildCacheConnectivity(const Grid *grid, const vector<GLuint> &nodeMap, bool *GPUOutOfMemory) const
 {
-    size_t         invalidIndex = std::numeric_limits<size_t>::max();
-    size_t         numNodes = Wasp::VProduct(grid->GetDimensions());
-    bool           layered = grid->GetTopologyDim() == 3;
-    size_t         maxVertsPerCell = grid->GetMaxVertexPerCell();
-    vector<size_t> cellNodeIndices(maxVertsPerCell * grid->GetDimensions().size());
-    vector<GLuint> cellNodeIndicesLinear(maxVertsPerCell);
+    size_t             invalidIndex = std::numeric_limits<size_t>::max();
+    size_t             numNodes = Wasp::VProduct(grid->GetDimensions());
+    bool               layered = grid->GetTopologyDim() == 3;
+    size_t             maxVertsPerCell = grid->GetMaxVertexPerCell();
+    vector<Size_tArr3> cellNodeIndices(maxVertsPerCell);
+    vector<GLuint>     cellNodeIndicesLinear(maxVertsPerCell);
 
     size_t numCells = Wasp::VProduct(grid->GetCellDimensions());
     size_t maxLineIndices = numCells * (layered ? maxVertsPerCell / 2 * 3 : maxVertsPerCell * 2);
@@ -251,12 +251,12 @@ size_t WireFrameRenderer::_buildCacheConnectivity(const Grid *grid, const vector
         for (int done = 0; cellItr != cellEnd; ++cellItr, ++done) {
             Progress::Update(done);
             if (Progress::Cancelled()) return 0;
-            int numNodes;
-            grid->GetCellNodes((*cellItr).data(), cellNodeIndices.data(), numNodes);
 
-            for (int i = 0; i < numNodes; i++) {
+            grid->GetCellNodes((*cellItr).data(), cellNodeIndices);
+
+            for (int i = 0; i < cellNodeIndices.size(); i++) {
                 int    ndim = grid->GetDimensions().size();
-                size_t idx = Wasp::LinearizeCoords(cellNodeIndices.data() + (i * ndim), grid->GetDimensions().data(), ndim);
+                size_t idx = Wasp::LinearizeCoords(cellNodeIndices[i].data(), grid->GetDimensions().data(), ndim);
 
                 if (idx > std::numeric_limits<GLuint>::max()) {
 #ifndef NDEBUG
@@ -267,7 +267,7 @@ size_t WireFrameRenderer::_buildCacheConnectivity(const Grid *grid, const vector
                 cellNodeIndicesLinear[i] = idx;
             }
 
-            _drawCell(cellNodeIndicesLinear.data(), numNodes, layered, nodeMap, invalidIndex, indices, drawList);
+            _drawCell(cellNodeIndicesLinear.data(), cellNodeIndices.size(), layered, nodeMap, invalidIndex, indices, drawList);
         }
     }
 
@@ -323,7 +323,7 @@ int WireFrameRenderer::_buildCache()
 int WireFrameRenderer::_paintGL(bool fast)
 {
     int rc = 0;
-    if (_isCacheDirty()) rc = _buildCache();
+    if (_isCacheDirty()) { rc = _buildCache(); }
 
     if (Progress::Cancelled()) {
         _cacheParams.varName = "";

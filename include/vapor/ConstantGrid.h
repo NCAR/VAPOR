@@ -28,16 +28,16 @@ public:
     //
     // The following four GetValue methods all return the constant value of this grid.
     float GetConstantValue() const;
-    float GetValue(const std::vector<double> &coords) const override;
-    float GetValueNearestNeighbor(const std::vector<double> &coords) const override;
-    float GetValueLinear(const std::vector<double> &coords) const override;
+    float GetValue(const DblArr3 &coords) const override;
+    float GetValueNearestNeighbor(const DblArr3 &coords) const override;
+    float GetValueLinear(const DblArr3 &coords) const override;
 
     // This version of ConstantGrid is considered to have infinity extents,
     // so the following method will return numerical mins and maxes.
     // Note: other flavors of ConstantGrids may have specific user extents.
-    virtual void GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const override;
+    virtual void GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const override;
     // Similarly, this will always return true.
-    virtual bool InsideGrid(const std::vector<double> &coords) const override;
+    virtual bool InsideGrid(const DblArr3 &coords) const override;
 
     std::string GetType() const override;
 
@@ -54,18 +54,18 @@ private:
     size_t                     GetGeometryDim() const override;
     const std::vector<size_t> &GetNodeDimensions() const override;
     const std::vector<size_t> &GetCellDimensions() const override;
-    void                       GetBoundingBox(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<double> &minu, std::vector<double> &maxu) const override {}
-    bool          GetEnclosingRegion(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const override { return (false); }
-    virtual void  GetUserCoordinates(const size_t indices[], double coords[]) const override {}
-    bool          GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const override;
-    bool          GetCellNodes(const size_t cindices[], size_t nodes[], int &n) const override;
-    bool          GetCellNeighbors(const std::vector<size_t> &cindices, std::vector<std::vector<size_t>> &cells) const override;
-    bool          GetNodeCells(const std::vector<size_t> &indices, std::vector<std::vector<size_t>> &cells) const override;
-    size_t        GetMaxVertexPerFace() const override;
-    size_t        GetMaxVertexPerCell() const override;
-    void          ClampCoord(std::vector<double> &coords) const override {}
-    ConstCoordItr ConstCoordBegin() const override;
-    ConstCoordItr ConstCoordEnd() const override;
+    void                       GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const override {}
+    bool                       GetEnclosingRegion(const DblArr3 &minu, const DblArr3 &maxu, Size_tArr3 &min, Size_tArr3 &max) const override { return (false); }
+    virtual void               GetUserCoordinates(const Size_tArr3 &, DblArr3 &) const override {}
+    bool                       GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) const override;
+    bool                       GetCellNodes(const Size_tArr3 &, std::vector<Size_tArr3> &) const override;
+    bool                       GetCellNeighbors(const Size_tArr3 &, std::vector<Size_tArr3> &) const override;
+    bool                       GetNodeCells(const Size_tArr3 &, std::vector<Size_tArr3> &) const override;
+    size_t                     GetMaxVertexPerFace() const override;
+    size_t                     GetMaxVertexPerCell() const override;
+    void                       ClampCoord(const DblArr3 &coords, DblArr3 &cCoords) const override { cCoords = coords; }
+    ConstCoordItr              ConstCoordBegin() const override;
+    ConstCoordItr              ConstCoordEnd() const override;
 
     // Private data member that holds this constant value.
     const float  _value;

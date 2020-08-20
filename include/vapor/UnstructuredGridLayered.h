@@ -42,21 +42,19 @@ public:
     static std::string GetClassType() { return ("UnstructuredLayered"); }
     std::string        GetType() const override { return (GetClassType()); }
 
-    virtual void GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const override;
+    virtual void GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const override;
 
-    virtual void GetBoundingBox(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<double> &minu, std::vector<double> &maxu) const override;
+    bool GetEnclosingRegion(const DblArr3 &minu, const DblArr3 &maxu, Size_tArr3 &min, Size_tArr3 &max) const override;
 
-    bool GetEnclosingRegion(const std::vector<double> &minu, const std::vector<double> &maxu, std::vector<size_t> &min, std::vector<size_t> &max) const override;
+    virtual void GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords) const override;
 
-    virtual void GetUserCoordinates(const size_t indices[], double coords[]) const override;
+    bool GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) const override;
 
-    bool GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const override;
+    bool InsideGrid(const DblArr3 &coords) const override;
 
-    bool InsideGrid(const std::vector<double> &coords) const override;
+    float GetValueNearestNeighbor(const DblArr3 &coords) const override;
 
-    float GetValueNearestNeighbor(const std::vector<double> &coords) const override;
-
-    float GetValueLinear(const std::vector<double> &coords) const override;
+    float GetValueLinear(const DblArr3 &coords) const override;
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -100,11 +98,14 @@ public:
 
     VDF_API friend std::ostream &operator<<(std::ostream &o, const UnstructuredGridLayered &sg);
 
+protected:
+    virtual void GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const override;
+
 private:
     UnstructuredGrid2D        _ug2d;
     UnstructuredGridCoordless _zug;
 
-    bool _insideGrid(const std::vector<double> &coords, std::vector<size_t> &cindices, std::vector<size_t> &nodes2D, std::vector<double> &lambda, float zwgt[2]) const;
+    bool _insideGrid(const DblArr3 &coords, Size_tArr3 &cindices, std::vector<size_t> &nodes2D, std::vector<double> &lambda, float zwgt[2]) const;
 };
 };    // namespace VAPoR
 

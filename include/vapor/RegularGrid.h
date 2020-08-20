@@ -52,25 +52,26 @@ public:
     static std::string GetClassType() { return ("Regular"); }
     std::string        GetType() const override { return (GetClassType()); }
 
-    //! \copydoc Grid::GetUserExtents()
-    //
-    virtual void GetUserExtents(std::vector<double> &minu, std::vector<double> &maxu) const override;
-
     //! \copydoc Grid::GetBoundingBox()
     //
-    virtual void GetBoundingBox(const std::vector<size_t> &min, const std::vector<size_t> &max, std::vector<double> &minu, std::vector<double> &maxu) const override;
+    virtual void GetBoundingBox(const Size_tArr3 &min, const Size_tArr3 &max, DblArr3 &minu, DblArr3 &maxu) const override;
 
     //! \copydoc Grid::GetUserCoordinates()
     //
-    virtual void GetUserCoordinates(const size_t indices[], double coords[]) const override;
+    virtual void GetUserCoordinates(const Size_tArr3 &indices, DblArr3 &coords) const override;
+
+    // For grandparent inheritance of
+    // Grid::GetUserCoordinates(const size_t indices[], double coords[])
+    //
+    using Grid::GetUserCoordinates;
 
     //! \copydoc Grid::GetIndicesCell
     //!
-    virtual bool GetIndicesCell(const std::vector<double> &coords, std::vector<size_t> &indices) const override;
+    virtual bool GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) const override;
 
     //! \copydoc Grid::InsideGrid()
     //
-    virtual bool InsideGrid(const std::vector<double> &coords) const override;
+    virtual bool InsideGrid(const DblArr3 &coords) const override;
 
     class ConstCoordItrRG : public Grid::ConstCoordItrAbstract {
     public:
@@ -108,15 +109,20 @@ public:
     VDF_API friend std::ostream &operator<<(std::ostream &o, const RegularGrid &rg);
 
 protected:
-    virtual float GetValueNearestNeighbor(const std::vector<double> &coords) const override;
+    virtual float GetValueNearestNeighbor(const DblArr3 &coords) const override;
 
-    virtual float GetValueLinear(const std::vector<double> &coords) const override;
+    virtual float GetValueLinear(const DblArr3 &coords) const override;
+
+    //! \copydoc Grid::GetUserExtents()
+    //
+    virtual void GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const override;
 
 private:
     void _SetExtents(const std::vector<double> &minu, const std::vector<double> &maxu);
 
-    std::vector<double> _minu;
-    std::vector<double> _maxu;     // User coords of first and last voxel
+    DblArr3             _minu = {0.0, 0.0, 0.0};
+    DblArr3             _maxu = {0.0, 0.0, 0.0};
+    size_t              _geometryDim;
     std::vector<double> _delta;    // increment between grid points in user coords
 };
 };    // namespace VAPoR
