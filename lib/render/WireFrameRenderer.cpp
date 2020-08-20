@@ -290,7 +290,7 @@ size_t WireFrameRenderer::_buildCacheConnectivity(
             Progress::Update(done);
             if (Progress::Cancelled())
                 return 0;
-			int numNodes;
+
 			grid->GetCellNodes((*cellItr).data(), cellNodeIndices);
 
 			for (int i=0; i<cellNodeIndices.size(); i++) {
