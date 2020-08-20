@@ -34,6 +34,7 @@
 #include <vapor/ControlExecutive.h>
 #include "vapor/GLManager.h"
 #include "vapor/debug.h"
+#include <vapor/Progress.h>
 
 using namespace VAPoR;
 
@@ -188,8 +189,11 @@ void WireFrameRenderer::_buildCacheVertices(
     Grid::ConstNodeIterator nodeEnd = grid->ConstNodeEnd();
     Grid::ConstCoordItr coordItr = grid->ConstCoordBegin();
     Grid::ConstCoordItr coordEnd = grid->ConstCoordEnd();
-	for (; nodeItr != nodeEnd; ++nodeItr, ++coordItr) {
+    Progress::Start("Load Grid", numNodes);
+    long done = 0;
+    for (; nodeItr != nodeEnd; ++nodeItr, ++coordItr, ++done) {
 
+        Progress::Update(done);
 	
 		// Get current node's coordinates
 		//
@@ -280,8 +284,13 @@ size_t WireFrameRenderer::_buildCacheConnectivity(
 		//
 		Grid::ConstCellIterator cellItr = grid->ConstCellBegin();
 		Grid::ConstCellIterator cellEnd = grid->ConstCellEnd();
-		for (; cellItr != cellEnd; ++cellItr)
+        Progress::Start("Generate Connectivity", numCells, true);
+		for (int done = 0; cellItr != cellEnd; ++cellItr, ++done)
 		{
+            Progress::Update(done);
+            if (Progress::Cancelled())
+                return 0;
+			int numNodes;
 			grid->GetCellNodes((*cellItr).data(), cellNodeIndices);
 
 			for (int i=0; i<cellNodeIndices.size(); i++) {
@@ -367,6 +376,8 @@ int WireFrameRenderer::_buildCache()
 
 	if (grid) delete grid;
 	if (heightGrid) delete heightGrid;
+    
+    Progress::Finish();
 	return 0;
 
 }
@@ -377,6 +388,11 @@ int WireFrameRenderer::_paintGL(bool fast)
     if (_isCacheDirty()) {
         rc = _buildCache();
 	}
+    
+    if (Progress::Cancelled()) {
+        _cacheParams.varName = "";
+        return 0;
+    }
     
     if (_GPUOutOfMemory) {
         SetErrMsg("GPU out of memory");

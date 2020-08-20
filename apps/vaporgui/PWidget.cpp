@@ -28,10 +28,17 @@ void PWidget::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAP
         this->setDisabled(true);
         return;
     }
+    if (requireDataMgr()   && !dataMgr)   VAssert(!"Data manager required but missing");
+    if (requireParamsMgr() && !paramsMgr) VAssert(!"Params manager required but missing");
     
     if (_showBasedOnParam) {
         int value = params->GetValueLong(_showBasedOnParamTag, 0);
-        setVisible(value == _showBasedOnParamValue);
+        if (value == _showBasedOnParamValue) {
+            setVisible(true);
+        } else {
+            setVisible(false);
+            return;
+        }
     } else {
         setVisible(true);
     }
@@ -43,8 +50,6 @@ void PWidget::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAP
         setEnabled(true);
     }
     
-    if (requireDataMgr()   && !dataMgr)   VAssert(!"Data manager required but missing");
-    if (requireParamsMgr() && !paramsMgr) VAssert(!"Params manager required but missing");
     updateGUI();
 }
 
