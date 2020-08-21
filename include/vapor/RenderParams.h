@@ -342,6 +342,17 @@ public:
     int dim,
     bool secondaryColormapVariable
 );
+
+ //! Return the renderer's current dimension
+ //!
+ //! For renderers only that are only capable of operating on variables of a fixed
+ //! dimensionality (e.g. 2D or 3D) this function will return a constant value:
+ //! the number of dimensions. For renderers that can operate on a variable of
+ //! varying dimension this method returns the current dimensionality. The
+ //! returned value will be between 0 and 3.
+ //!
+ //!
+ virtual size_t GetRenderDim() const = 0;
     
     //! This should be overriden by params for renderes that support iso values to return true.
     virtual bool HasIsoValues() const { return false; }

@@ -71,8 +71,16 @@ public:
 	return("BarbParams");
  }
 
+ 
+ //! \copydoc RenderParams::GetRenderDim()
+ //
+ virtual  size_t GetRenderDim() const override {
+	VAssert(GetFieldVariableNames().size());
+	return(_dataMgr->GetNumDimensions(GetFieldVariableNames()[0]));
+ }
+
 protected:
-    virtual bool GetUseSingleColorDefault() const { return true; }
+    virtual bool GetUseSingleColorDefault() const override { return true; }
 
 private:
 

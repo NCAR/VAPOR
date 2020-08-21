@@ -118,6 +118,13 @@ public:
 
     int                 GetSeedInjInterval() const;
     void                SetSeedInjInterval( int );
+
+     //! \copydoc RenderParams::GetRenderDim()
+     //
+    virtual  size_t GetRenderDim() const override {
+        VAssert(GetFieldVariableNames().size());
+        return(_dataMgr->GetNumDimensions(GetFieldVariableNames()[0]));
+    }
     
     static const std::string RenderTypeTag;
     static const std::string RenderRadiusBaseTag;
