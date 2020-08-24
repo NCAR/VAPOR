@@ -129,21 +129,26 @@ PZFieldVariableSelector::PZFieldVariableSelector()
     : PVariableSelector  ("", "Z") { AddNullOption(); }
 
 PVariablesGroup::PVariablesGroup() :
-    PGroup()
+    PGroup( _scrollArea = new QScrollArea() )
 {
-    _varSection    = new PSection( "Variable Selection" );
+    QVBoxLayout *layout = new QVBoxLayout;
+    layout->setMargin(0);
+    layout->addStretch();
+    _scrollArea->setLayout(layout);
+    _scrollArea->setWidgetResizable( true );
+    _scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    _scrollArea->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Maximum );
 
-    PGroup* pGroup = new PGroup;
+    PGroup* pGroup                = new PGroup;
+    _varSection                   = new PSection( "Variable Selection" );
+    PFidelitySection* fidSection  = new PFidelitySection;
+    
     pGroup->Add( _varSection );
-    pGroup->Add( new PFidelitySection );
+    pGroup->Add( fidSection  );
 
     PGroup::Add( pGroup );
 
-    _scrollArea = new QScrollArea();
-    _scrollArea->setWidgetResizable( true );
-    _scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
     _scrollArea->setWidget( pGroup );
-    _scrollArea->setSizePolicy( QSizePolicy::Preferred, QSizePolicy::Maximum );
 }
 
 QScrollArea* PVariablesGroup::GetScrollArea() const {
