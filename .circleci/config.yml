@@ -86,23 +86,26 @@ jobs:
             cmake -DBUILD_TEST_APPS=ON ..
             make -j7 &> /tmp/output.txt
 
+      - store_artifacts:
+          path: /tmp/output.txt
+
       - run:
           name: Smoke test
           command: |
             python3 /VAPOR/test_apps/smokeTests/smokeTests.py --testDataRoot=/smokeTestData/smokeTestData --binaryRoot=/VAPOR/build/bin --resultsDir=/VAPOR/test_apps/smokeTests/testResults
-          
 
       - store_artifacts:
           path: /VAPOR/test_apps/smokeTests/testResults
 
-      #- run:
-      #    name: check for warnings
-      #    command: |
-      #      if grep -q warning /tmp/output.txt; then
-      #         exit -1
-      #      else
-      #         exit 0
-      #      fi
+      - run:
+          name: check for warnings
+          command: |
+            if grep -q warning /tmp/output.txt; then
+               cat /tmp/output.txt
+               exit -1
+            else
+               exit 0
+            fi
 
   build_ubuntu18_installer:
     docker:
@@ -512,7 +515,6 @@ workflows:
              branches:
                only:
                  - nightly
-                 #- master
     jobs:
       - build_ubuntu18_installer
       - build_ubuntu16_installer

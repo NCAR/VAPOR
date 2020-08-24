@@ -32,14 +32,9 @@ VAPOR is a product of the National Center for Atmospheric Research’s Computati
    quickStartGuide
    gettingDataIntoVapor
    usage
-   contactAndContribute
+   Get Help on Our Forum <https://vapor.discourse.group>
+   contributing
    licenseAndCitation
-..   usage/renderers
-..   usage/thegui
-..   usage/dataconversion
-..   usage/foo
-..   usage/namespaces
-..   usage/classes
 
 Indices and tables
 ==================

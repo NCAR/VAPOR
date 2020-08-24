@@ -84,6 +84,12 @@
 #include "MouseModeParams.h"
 #include "ParamsWidgetDemo.h"
 
+#include <QProgressDialog>
+#include <QProgressBar>
+#include <QToolButton>
+#include <QStyle>
+#include <vapor/Progress.h>
+
 //Following shortcuts are provided:
 // CTRL_N: new session
 // CTRL_O: open session
@@ -241,7 +247,6 @@ void MainForm::_initMembers() {
     _pythonVariables = NULL;
 	_banner = NULL;
 	_windowSelector = NULL;
-	_modeStatusWidget = NULL;
 	_controlExec = NULL;
 	_paramsMgr = NULL;
 	_tabMgr = NULL;
@@ -256,6 +261,65 @@ void MainForm::_initMembers() {
 	_buttonPressed = false;
 
 }
+
+class ProgressStatusBar : public QWidget {
+    QLabel *_titleLabel = new QLabel;
+    QProgressBar *_progressBar = new QProgressBar;
+    QToolButton *_cancelButton = new QToolButton;
+    
+    bool _canceled = false;
+    
+public:
+    ProgressStatusBar() {
+        QHBoxLayout *layout = new QHBoxLayout;
+        layout->setMargin(4);
+        setLayout(layout);
+        
+        _cancelButton->setIcon(_cancelButton->style()->standardIcon(QStyle::StandardPixmap::SP_DialogCancelButton));
+        QObject::connect(_cancelButton, &QAbstractButton::clicked, this, [this](){
+            _canceled = true;
+            Finish();
+            SetTitle("Cancelled.");
+        });
+        
+        QSizePolicy sp = _cancelButton->sizePolicy();
+        sp.setRetainSizeWhenHidden(true);
+        _cancelButton->setSizePolicy(sp);
+        _cancelButton->setIconSize(_cancelButton->iconSize()*0.7);
+        _cancelButton->setToolTip("Cancel");
+        
+        layout->addWidget(_titleLabel);
+        layout->addWidget(_progressBar);
+        layout->addWidget(_cancelButton);
+        
+        Finish();
+    }
+    void SetTitle(const string &title) { _titleLabel->setText(QString::fromStdString(title)); }
+    void SetTotal(long total) { _progressBar->setRange(0, total); }
+    void SetCancelable(bool b) { _cancelButton->setEnabled(b); }
+    void SetDone(long done) {
+        _progressBar->setValue(done);
+    }
+    bool Cancelled() { return _canceled; }
+    void StartTask(const string &title, long total, bool cancelable) {
+        Reset();
+        SetTitle(title);
+        SetTotal(total);
+        SetCancelable(cancelable);
+        _progressBar->show();
+        _cancelButton->show();
+    }
+    void Finish() {
+        _progressBar->hide();
+        _cancelButton->hide();
+        SetTitle("");
+    }
+    void Reset() {
+        _canceled = false;
+        _progressBar->reset();
+    }
+    const QObject *GetCancelButtonObject() const { return _cancelButton; }
+};
 
 // Only the main program should call the constructor:
 //
@@ -335,10 +399,7 @@ MainForm::MainForm(
 	_paramsMgr->RegisterStateChangeCB(
 		std::bind(&MainForm::_stateChangeCB,this)
 	);
-    _paramsMgr->RegisterIntermediateStateChangeCB([this]() {
-        QEvent *event = new QEvent(ParamsIntermediateChangeEvent);
-        QApplication::postEvent(this, event);
-    });
+    _paramsMgr->RegisterIntermediateStateChangeCB(std::bind(&MainForm::_intermediateStateChangedCB, this));
 	_paramsMgr->RegisterStateChangeFlag( &_stateChangeFlag );
 
 	// Set Defaults from startup file
@@ -366,15 +427,28 @@ MainForm::MainForm(
 		_tabMgr->setMinimumWidth(460);
 
     _tabMgr->setMinimumHeight(500);
+    
+    QWidget *sidebar = new QWidget;
+    QVBoxLayout *sidebarLayout = new QVBoxLayout;
+    sidebarLayout->setMargin(0);
+    sidebarLayout->setSpacing(0);
+    sidebar->setLayout(sidebarLayout);
+    sidebarLayout->addWidget(_tabMgr);
+    
+    _status = new ProgressStatusBar;
+    sidebarLayout->addWidget(_status);
+    _status->hide();
 
-    _tabDockWindow->setWidget(_tabMgr);
+    _tabDockWindow->setWidget(sidebar);
 
     createMenus();
 
-	createToolBars();	
+	createToolBars();
+    
+    _createProgressWidget();
 	
 	addMouseModes();
-    (void)statusBar();
+//    (void)statusBar();
     _main_Menubar->adjustSize();
 	hookupSignals();   
 	enableWidgets(false);
@@ -384,7 +458,7 @@ MainForm::MainForm(
 	
 	setUpdatesEnabled(true);
 
-    show();
+//    show();
 
 	// Command line options:
 	//
@@ -423,6 +497,54 @@ MainForm::MainForm(
 	_controlExec->RebaseStateSave();
 }
 
+int MainForm::RenderAndExit(int start, int end, const std::string &baseFile, int width, int height)
+{
+    if (start == 0 && end == 0)
+        end = INT_MAX;
+    start = std::max(0, start);
+    
+    if (_sessionNewFlag) {
+        fprintf(stderr, "No session loaded\n");
+        return -1;
+    }
+    
+    QString dir = QString::fromStdString(FileUtils::Dirname(baseFile));
+    QFileInfo dirInfo(dir);
+    if (!dirInfo.isWritable()) {
+        fprintf(stderr, "Do not have write permissions\n");
+        return -1;
+    }
+    
+    
+    auto baseFileWithTS = FileUtils::RemoveExtension(baseFile) + "-" + to_string(start) + "." + FileUtils::Extension(baseFile);
+    
+    auto ap = GetAnimationParams();
+    auto vpp = _paramsMgr->GetViewpointParams(GetStateParams()->GetActiveVizName());
+    
+    _paramsMgr->BeginSaveStateGroup("test");
+    startAnimCapture(baseFileWithTS);
+    ap->SetStartTimestep(start);
+    ap->SetEndTimestep(end);
+    
+    vpp->SetValueLong(vpp->UseCustomFramebufferTag, "", true);
+    vpp->SetValueLong(vpp->CustomFramebufferWidthTag, "", width);
+    vpp->SetValueLong(vpp->CustomFramebufferHeightTag, "", height);
+    
+    _tabMgr->AnimationPlayForward();
+    _paramsMgr->EndSaveStateGroup();
+    
+    connect(_tabMgr, &TabManager::AnimationOnOffSignal, this, [this](){
+        endAnimCapture();
+        close();
+    });
+    
+    connect(_tabMgr, &TabManager::AnimationDrawSignal, this, [this]() {
+        printf("Rendering timestep %li\n", GetAnimationParams()->GetCurrentTimestep());
+    });
+    
+    return 0;
+}
+
 /*
  *  Destroys the object and frees any allocated resources
  */
@@ -432,12 +554,21 @@ MainForm::~MainForm()
         _paramsWidgetDemo->close();
 	}
 
-	if (_modeStatusWidget) delete _modeStatusWidget;
     if (_banner) delete _banner;
 	if (_controlExec) delete _controlExec;
 	
+    // This is required since if the user quits during the progressbar update,
+    // qt will process the quit event and delete things, and then it will
+    // return to the original event loop.
+    // When Qt does recursive event loops like this, it has backend code that
+    // prevents users from quiting.
+    if (_insideMessedUpQtEventLoop)
+        exit(0);
+    
     // no need to delete child widgets, Qt does it all for us?? (see closeEvent)
 }
+
+
 
 template<class T> bool MainForm::isDatasetValidFormat(const std::vector<std::string> &paths) const
 {
@@ -719,6 +850,80 @@ void MainForm::createToolBars(){
 	_createAnimationToolBar();
 	_createVizToolBar();
 	
+}
+
+void MainForm::_createProgressWidget()
+{
+#define MAX_UPDATES_PER_SEC 10
+#define MILLIS_BETWEEN_UPDATES (1000/MAX_UPDATES_PER_SEC)
+    _progressLastUpdateTime = std::chrono::system_clock::now();
+    
+    Progress::Update_t update = [this](long done, bool *cancelled)
+    {
+        if (!_progressEnabled)
+            return;
+        
+        // Limit updates per second for perfomance reasons since this is on the same
+        // thread as the calculation
+        auto now = std::chrono::system_clock::now();
+        auto duration = chrono::duration_cast<chrono::milliseconds>(now - _progressLastUpdateTime);
+        if (duration.count() < MILLIS_BETWEEN_UPDATES || _insideMessedUpQtEventLoop)
+            return;
+        _progressLastUpdateTime = now;
+        
+        // Qt will clear the currently bound framebuffer for some reason
+        bool insideOpenGL = isOpenGLContextActive();
+        if (insideOpenGL && _progressSavedFB < 0) {
+            glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &_progressSavedFB);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+        
+        _status->SetDone(done);
+        _disableUserInputForAllExcept = _status->GetCancelButtonObject();
+        _insideMessedUpQtEventLoop = true;
+        QCoreApplication::processEvents();
+        _disableUserInputForAllExcept = nullptr;
+        _insideMessedUpQtEventLoop = false;
+        *cancelled = _status->Cancelled();
+        
+        if (insideOpenGL && _progressSavedFB >= 0) {
+            glBindFramebuffer(GL_FRAMEBUFFER, _progressSavedFB);
+            _progressSavedFB = -1;
+        }
+    };
+    
+    Progress::Start_t start = [this, update](const std::string &name, long total, bool cancelable)
+    {
+        if (!_progressEnabled)
+            return;
+        
+        _status->StartTask(name, total, cancelable);
+        update(0, &cancelable);
+    };
+    
+    Progress::Finish_t finish = [this, update]()
+    {
+        if (!_progressEnabled)
+            return;
+        
+        _status->Finish();
+        bool b;
+        update(0, &b);
+    };
+    
+    Progress::SetHandlers(start, update, finish);
+    _status->show();
+    if (_progressEnabledMenuItem)
+        _progressEnabledMenuItem->setChecked(true);
+}
+
+void MainForm::_disableProgressWidget()
+{
+    Progress::Finish();
+    Progress::SetHandlers([](const string&, long, bool){}, [](long,bool*){}, [](){});
+    _status->hide();
+    if (_progressEnabledMenuItem)
+        _progressEnabledMenuItem->setChecked(false);
 }
 
 void MainForm::hookupSignals() {
@@ -1135,6 +1340,18 @@ void MainForm::_createDeveloperMenu()
     
     _developerMenu = menuBar()->addMenu("Developer");
     _developerMenu->addAction("Show PWidget Demo", _paramsWidgetDemo, &QWidget::show);
+    
+    
+    QAction *enableProgress = new QAction(QString("Enable Progress Bar"), nullptr);
+    enableProgress->setCheckable(true);
+    QObject::connect(enableProgress, &QAction::toggled, [this](bool checked){
+        if (checked)
+            _createProgressWidget();
+        else
+            _disableProgressWidget();
+    });
+    _developerMenu->addAction(enableProgress);
+    _progressEnabledMenuItem = enableProgress;
 }
 
 void MainForm::createMenus(){
@@ -1339,7 +1556,11 @@ void MainForm::fileExit()
 	close();
 }
 
-void MainForm::_stateChangeCB() {
+void MainForm::_stateChangeCB()
+{
+    if (_paramsEventQueued)
+        return;
+    _paramsEventQueued = true;
 
     // Generate an application event whenever state changes
     //      
@@ -1347,6 +1568,16 @@ void MainForm::_stateChangeCB() {
     QApplication::postEvent(this, event);
 
 	_eventsSinceLastSave++;
+}
+
+void MainForm::_intermediateStateChangedCB()
+{
+    if (_paramsEventQueued)
+        return;
+    _paramsEventQueued = true;
+    
+    QEvent *event = new QEvent(ParamsIntermediateChangeEvent);
+    QApplication::postEvent(this, event);
 }
 
 void MainForm::undoRedoHelper(bool undo) {
@@ -1756,16 +1987,6 @@ void MainForm::modeChange(int newmode){
 	}
 	
 	_navigationAction->setChecked(false);
-	
-	if(_modeStatusWidget) {
-		statusBar()->removeWidget(_modeStatusWidget);
-		delete _modeStatusWidget;
-	}
-
-	_modeStatusWidget = new QLabel(
-		QString::fromStdString(modeName)+" Mode: To modify box in scene, grab handle with left mouse to translate, right mouse to stretch",this); 
-
-	statusBar()->addWidget(_modeStatusWidget,2);
 }
 
 void MainForm::showCitationReminder(){
@@ -1906,11 +2127,38 @@ void MainForm::_setProj4String(string proj4String) {
 bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
 	VAssert(_controlExec && _vizWinMgr);
+    
+    if (_insideMessedUpQtEventLoop) {
+        // Prevent menu item actions from running
+        if (event->type() == QEvent::MetaCall)
+            return true;
+        // Prevent queued ParamsChangedEvents from recursively running
+        if (event->type() == ParamsChangeEvent)
+            return true;
+        if (event->type() == ParamsIntermediateChangeEvent)
+            return true;
+        // Prevent user input for all widgets except the cancel button. This is essentially
+        // the same behavior as we had before because the application would
+        // freeze during a render so all user input was essentially blocked.
+        // Since the events are processed top-down, we need to check to check
+        // if this is not only the cancel button, but any of its parents
+        if (_disableUserInputForAllExcept != nullptr && obj->isWidgetType()) {
+            if (dynamic_cast<QInputEvent*>(event)) {
+                const QObject *test = _disableUserInputForAllExcept;
+                do {
+                    if (obj == test)
+                        return false; // Approve input
+                } while (test = test->parent());
+                return true; // Reject input
+            }
+        }
+    }
 
 	// Only update the GUI if the Params state has changed
 	//
 	if (event->type() == ParamsChangeEvent)
     {
+        _paramsEventQueued = false;
 		QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 		
 		if (_stats) 
@@ -1934,7 +2182,11 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
 		// force visualizer redraw
 		//
+        menuBar()->setEnabled(false);
+        _progressEnabled = true;
 		_vizWinMgr->Update(false);
+        _progressEnabled = false;
+        menuBar()->setEnabled(true);
 
 		update();
 
@@ -1945,12 +2197,15 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
     
     if (event->type() == ParamsIntermediateChangeEvent)
     {
+        _paramsEventQueued = false;
         // Rendering the GUI becomes a bottleneck
 //        _tabMgr->Update();
         
         // force visualizer redraw
         //
+        _progressEnabled = true;
         _vizWinMgr->Update(true);
+        _progressEnabled = false;
         
 #ifndef NDEBUG
         _paramsWidgetDemo->Update(GetStateParams(), _paramsMgr);
@@ -2327,25 +2582,25 @@ void MainForm::_setTimeStep()
 void MainForm::captureJpegSequence() {
     string filter = "JPG (*.jpg *.jpeg)";
     string defaultSuffix = "jpg";
-    startAnimCapture( filter, defaultSuffix);
+    selectAnimCatureOutput( filter, defaultSuffix);
 }
 
 void MainForm::capturePngSequence() {
     string filter = "PNG (*.png)";
     string defaultSuffix = "png";
-    startAnimCapture( filter, defaultSuffix);
+    selectAnimCatureOutput( filter, defaultSuffix);
 }
 
 void MainForm::captureTiffSequence() {
     string filter = "TIFF (*.tif *.tiff)";
     string defaultSuffix = "tiff";
-    startAnimCapture( filter, defaultSuffix);
+    selectAnimCatureOutput( filter, defaultSuffix);
 }
 
 //Begin capturing animation images.
 //Launch a file save dialog to specify the names
 //Then start file saving mode.
-void MainForm::startAnimCapture(
+void MainForm::selectAnimCatureOutput(
     string filter,
     string defaultSuffix
 ) {
@@ -2367,6 +2622,13 @@ void MainForm::startAnimCapture(
 	if (qsl.isEmpty()) 
         return;
     QString fileName = qsl[0];
+    
+    startAnimCapture(fileName.toStdString(), defaultSuffix);
+}
+
+void MainForm::startAnimCapture(string baseFile, string defaultSuffix)
+{
+    QString fileName = QString::fromStdString(baseFile);
 	QFileInfo fileInfo = QFileInfo( fileName );
 
 	QString suffix = fileInfo.suffix();

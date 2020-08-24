@@ -87,7 +87,6 @@ void VaporTable::Update(int rows, int cols,
 		std::vector<std::string> rowHeaders,
 		std::vector<std::string> colHeaders) {
 
-	_table->clear();
 	_table->setRowCount(rows);
 	_table->setColumnCount(cols);
 
@@ -102,10 +101,12 @@ void VaporTable::Update(int rows, int cols,
         _activeRow = -1;
         _activeCol = -1;
     }
-    if (_activeRow >= rows)
+    if (_activeRow >= rows) {
         _activeRow = rows-1;
-    if (_activeCol >= cols)
+    }
+    if (_activeCol >= cols) {
         _activeCol = cols-1;
+    }
 
 	if (_highlightFlags & ROWS) highlightActiveRow(_activeRow);
 	if (_highlightFlags & COLS) highlightActiveCol(_activeCol);
@@ -391,8 +392,9 @@ void VaporTable::setVerticalHeader(std::vector<std::string> header) {
 		_table->verticalHeader()->hide();
 		return;
 	}
-    else if ( _table->verticalHeader()->isHidden() )
+    else if ( _table->verticalHeader()->isHidden() ) {
         _table->verticalHeader()->show();
+    }
 	
 	QStringList list;
 	for (int i=0; i<size; i++) {
@@ -425,8 +427,9 @@ void VaporTable::SetCheckboxesInFinalColumn(bool enabled) {
 }
 
 void VaporTable::EnableDisableCheckboxes(bool enabled) {
-    if (!_lastRowIsCheckboxes && !_lastColIsCheckboxes)
+    if (!_lastRowIsCheckboxes && !_lastColIsCheckboxes) {
         return;
+    }
 
     _checkboxesEnabled = enabled;
 }

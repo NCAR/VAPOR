@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <random>
+#include <vapor/Progress.h>
 
 #define GL_ERROR     -20
 
@@ -299,7 +300,22 @@ FlowRenderer::_paintGL( bool fast )
             int numOfSteps = params->GetSteadyNumOfSteps();
             // existing number of advection steps
             numOfSteps -= (_advection.GetMaxNumOfPart() -1);
+
+            int total = numOfSteps;
+            int done = 0;
+
+            if(_2ndAdvection)
+                total += numOfSteps - (_2ndAdvection->GetMaxNumOfPart() - 1);
+
+            Progress::Start("Advect particles", total, true);
+
             _advection.AdvectSteps(&_velocityField, deltaT, numOfSteps);
+            // Move inside advection loop
+            // Progress::Update(done++);
+            //     if (Progress::Cancelled())
+            //        return 0;
+            if (!_2ndAdvection)
+                Progress::Finish();
 
             /* If the advection is bi-directional */
             if( _2ndAdvection )
@@ -311,6 +327,11 @@ FlowRenderer::_paintGL( bool fast )
                 // existing number of advection steps
                 numOfSteps -= (_2ndAdvection->GetMaxNumOfPart() -1);
                 rv =  _2ndAdvection->AdvectSteps( &_velocityField, deltaT2, numOfSteps);
+                // Move inside advection loop
+                // Progress::Update(done++);
+                //     if (Progress::Cancelled())
+                //        return 0;
+                Progress::Finish();
             }
 
         }

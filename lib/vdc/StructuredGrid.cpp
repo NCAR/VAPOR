@@ -37,13 +37,11 @@ StructuredGrid::StructuredGrid(
 }
 
 bool StructuredGrid::GetCellNodes(
-    const size_t cindices[],
-    size_t nodes[],
-    int &n
+    const Size_tArr3 &cindices,
+    vector <Size_tArr3> &nodes
 ) const {
-	n = 0;
 
-    size_t cCindices[3];
+	Size_tArr3 cCindices;
     ClampCellIndex(cindices, cCindices);
 
 	const vector <size_t> &dims = GetDimensions();
@@ -52,64 +50,67 @@ bool StructuredGrid::GetCellNodes(
 	//
 	// walk counter-clockwise order
 	//
-	vector <size_t> indices;
 
 	if (dims.size() == 2) {
-		nodes[0] = cCindices[0];
-		nodes[1] = cCindices[1];
+		nodes.resize(4);
+		nodes[0][0] = cCindices[0];
+		nodes[0][1] = cCindices[1];
+		nodes[0][2] = 0;
 
-		nodes[2] = cCindices[0]+1;
-		nodes[3] = cCindices[1];
+		nodes[1][0] = cCindices[0]+1;
+		nodes[1][1] = cCindices[1];
+		nodes[1][2] = 0;
 
-		nodes[4] = cCindices[0]+1;
-		nodes[5] = cCindices[1]+1;
+		nodes[2][0] = cCindices[0]+1;
+		nodes[2][1] = cCindices[1]+1;
+		nodes[2][2] = 0;
 
-		nodes[6] = cCindices[0];
-		nodes[7] = cCindices[1]+1;
-		n = 4;
+		nodes[3][0] = cCindices[0];
+		nodes[3][1] = cCindices[1]+1;
+		nodes[3][2] = 0;
 
 	}
 	else if (dims.size() == 3) {
-		nodes[0] = cCindices[0];
-		nodes[1] = cCindices[1];
-		nodes[2] = cCindices[2];
+		nodes.resize(8);
+		nodes[0][0] = cCindices[0];
+		nodes[0][1] = cCindices[1];
+		nodes[0][2] = cCindices[2];
 
-		nodes[3] = cCindices[0]+1;
-		nodes[4] = cCindices[1];
-		nodes[5] = cCindices[2];
+		nodes[1][0] = cCindices[0]+1;
+		nodes[1][1] = cCindices[1];
+		nodes[1][2] = cCindices[2];
 
-		nodes[6] = cCindices[0]+1;
-		nodes[7] = cCindices[1]+1;
-		nodes[8] = cCindices[2];
+		nodes[2][0] = cCindices[0]+1;
+		nodes[2][1] = cCindices[1]+1;
+		nodes[2][2] = cCindices[2];
 
-		nodes[9] = cCindices[0];
-		nodes[10] = cCindices[1]+1;
-		nodes[11] = cCindices[2];
+		nodes[3][0] = cCindices[0];
+		nodes[3][1] = cCindices[1]+1;
+		nodes[3][2] = cCindices[2];
 
-		nodes[12] = cCindices[0];
-		nodes[13] = cCindices[1];
-		nodes[14] = cCindices[2]+1;
+		nodes[4][0] = cCindices[0];
+		nodes[4][1] = cCindices[1];
+		nodes[4][2] = cCindices[2]+1;
 
-		nodes[15] = cCindices[0]+1;
-		nodes[16] = cCindices[1];
-		nodes[17] = cCindices[2]+1;
+		nodes[5][0] = cCindices[0]+1;
+		nodes[5][1] = cCindices[1];
+		nodes[5][2] = cCindices[2]+1;
 
-		nodes[18] = cCindices[0]+1;
-		nodes[19] = cCindices[1]+1;
-		nodes[20] = cCindices[2]+1;
+		nodes[6][0] = cCindices[0]+1;
+		nodes[6][1] = cCindices[1]+1;
+		nodes[6][2] = cCindices[2]+1;
 
-		nodes[21] = cCindices[0];
-		nodes[22] = cCindices[1]+1;
-		nodes[23] = cCindices[2]+1;
-		n = 8;
+		nodes[7][0] = cCindices[0];
+		nodes[7][1] = cCindices[1]+1;
+		nodes[7][2] = cCindices[2]+1;
 	}
 
 	// Handle dims[i] == 1
 	//
-	for (int j=0; j<n; j++) {
+	for (int j=0; j<nodes.size(); j++) {
 		for (int i=0; i<dims.size(); i++) {
-			if (nodes[j*dims.size()+i] >= dims[i]) {
-				nodes[j*dims.size()+i] -= 1;
+			if (nodes[j][i] >= dims[i]) {
+				nodes[j][i] -= 1;
 			}
 		}
 	}
@@ -118,12 +119,12 @@ bool StructuredGrid::GetCellNodes(
 }
 
 bool StructuredGrid::GetCellNeighbors(
-    const std::vector <size_t> &cindices,
-    std::vector <vector <size_t> > &cells
+	const Size_tArr3 &cindices,
+	std::vector <Size_tArr3> &cells
 ) const {
 	cells.clear();
 
-    size_t cCindices[3];
+	Size_tArr3 cCindices;
     ClampCellIndex(cindices, cCindices);
 
 	const vector <size_t> &dims = GetDimensions();
@@ -135,25 +136,25 @@ bool StructuredGrid::GetCellNeighbors(
 	// walk counter-clockwise order
 	//
 	if (dims.size() == 2) {
-		vector <size_t> indices;
+		Size_tArr3 indices;
 
 		if (cCindices[1] != 0) {	// below
-			indices = {cCindices[0], cCindices[1]-1};
+			indices = {cCindices[0], cCindices[1]-1, 0};
 		}
 		cells.push_back(indices);
 
 		if (cCindices[0] != dims[0]-2) {	// right
-			indices = {cCindices[0]+1, cCindices[1]};
+			indices = {cCindices[0]+1, cCindices[1], 0};
 		}
 		cells.push_back(indices);
 
 		if (cCindices[1] != dims[1]-2) {	// top
-			indices = {cCindices[0], cCindices[1]+1};
+			indices = {cCindices[0], cCindices[1]+1, 0};
 		}
 		cells.push_back(indices);
 
 		if (cCindices[0] != 0) {	// left
-			indices = {cCindices[0]-1, cCindices[1]};
+			indices = {cCindices[0]-1, cCindices[1], 0};
 		}
 		cells.push_back(indices);
 	}
@@ -161,42 +162,41 @@ bool StructuredGrid::GetCellNeighbors(
 }
 
 bool StructuredGrid::GetNodeCells(
-    const std::vector <size_t> &indices,
-    std::vector <vector <size_t> > &cells
+    const Size_tArr3 &indices,
+    std::vector <Size_tArr3> &cells
 ) const {
 	cells.clear();
 
 	vector <size_t> dims = GetDimensions();
-	VAssert (indices.size() == dims.size());
 
 	VAssert((dims.size() == 2) && "3D cells not yet supported");
 
 	// Check if invalid indices
 	//
-	for (int i=0; i<indices.size(); i++) {
+	for (int i=0; i<GetGeometryDim(); i++) {
 		if (indices[i] > (dims[i]-1)) return(false);
 	}
 
 	if (dims.size() == 2) {
-		vector <size_t> indices;
+		Size_tArr3 indices;
 
 		if (indices[0] != 0 && indices[1] != 0) {	// below, left
-			indices = {indices[0]-1, indices[1]-1};
+			indices = {indices[0]-1, indices[1]-1, 0};
 			cells.push_back(indices);
 		}
 
 		if (indices[1] != 0) {	// below, right
-			indices = {indices[0], indices[1]-1};
+			indices = {indices[0], indices[1]-1, 0};
 			cells.push_back(indices);
 		}
 
 		if (indices[0] != (dims[0]-1) && indices[1] != (dims[1])) {// top, right
-			indices = {indices[0], indices[1]};
+			indices = {indices[0], indices[1], 0};
 			cells.push_back(indices);
 		}
 
 		if (indices[0] != 0) {// top, top
-			indices = {indices[0]-1, indices[1]};
+			indices = {indices[0]-1, indices[1], 0};
 			cells.push_back(indices);
 		}
 	}
@@ -205,59 +205,57 @@ bool StructuredGrid::GetNodeCells(
 }
 
 bool    StructuredGrid::GetEnclosingRegion(
-	const std::vector <double> &minu, const std::vector <double> &maxu,
-	std::vector <size_t> &min, std::vector <size_t> &max
+	const DblArr3 &minu, const DblArr3 &maxu,
+	Size_tArr3 &min, Size_tArr3 &max
 ) const {
-	VAssert(minu.size() == maxu.size());
 
-	if (! GetIndicesCell(minu,  min)) return(false);
-	if (! GetIndicesCell(maxu,  max)) return(false);
-	for (int i=0; i<max.size(); i++) {
+	if (! GetIndicesCell(minu, min)) return(false);
+	if (! GetIndicesCell(maxu, max)) return(false);
+	for (int i=0; i<GetDimensions().size(); i++) {
 		max[i] += 1;
 	}
 
 	// For curvilinear grids it's possible that minu and maxu components 
 	// are swapped
 	//
-	vector <double> newMinu, newMaxu;
-	GetUserCoordinates(min, newMinu);
-	GetUserCoordinates(max, newMaxu);
+	DblArr3 newMinu, newMaxu;
+	GetUserCoordinates(min.data(), newMinu.data());
+	GetUserCoordinates(max.data(), newMaxu.data());
 
-	for (int i=0; i<min.size(); i++) {
+	for (int i=0; i<GetDimensions().size(); i++) {
 		if (newMinu > newMaxu) std::swap(min[i], max[i]);
 	}
 
 	return(true);
 };
 
-void StructuredGrid::ClampCoord(std::vector <double> &coords) const {
-	VAssert(coords.size() >= GetGeometryDim());
+void StructuredGrid::ClampCoord(
+	const DblArr3 &coords, DblArr3 &cCoords
+) const {
 
-	while (coords.size() > GetGeometryDim()) {
-		coords.pop_back();
-	}
+	const vector <bool> &periodic = GetPeriodic();
+	const vector <size_t> &dims = GetDimensions();
 
-	vector <bool> periodic = GetPeriodic();
-	vector <size_t> dims = GetDimensions();
-
-	vector <double> minu, maxu;
+	DblArr3 minu, maxu;
 	GetUserExtents(minu, maxu);
 
-	for (int i=0; i<coords.size(); i++) {
+	cCoords = coords;
+	VAssert(GetGeometryDim() <= 3);
+	for (int i=0; i<GetGeometryDim(); i++) {
 
 		//
 		// Handle coordinates for dimensions of length 1
 		//
 		if (dims[i] == 1) {
-			coords[i] = minu[i];
+			cCoords[i] = minu[i];
 			continue;
 		}
 
-		if (coords[i]<minu[i] && periodic[i]) {
-			while (coords[i]<minu[i]) coords[i]+= maxu[i]-minu[i];
+		if (cCoords[i]<minu[i] && periodic[i]) {
+			while (cCoords[i]<minu[i]) cCoords[i]+= maxu[i]-minu[i];
 		}
-		if (coords[i]>maxu[i] && periodic[i]) {
-			while (coords[i]>maxu[i]) coords[i]-= maxu[i]-minu[i];
+		if (cCoords[i]>maxu[i] && periodic[i]) {
+			while (cCoords[i]>maxu[i]) cCoords[i]-= maxu[i]-minu[i];
 		}
 
 	}
