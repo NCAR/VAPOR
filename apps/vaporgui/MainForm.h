@@ -35,6 +35,7 @@
 #include <QIcon>
 #include <QLineEdit>
 #include <QWidgetAction>
+#include <chrono>
 #include <vapor/ControlExecutive.h>
 #include "GUIStateParams.h"
 #include "SettingsParams.h"
