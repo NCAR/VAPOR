@@ -30,6 +30,12 @@ class PARAMS_API TwoDDataParams : public RenderParams {
         return ("TwoDDataParams");
     }
 
+    //! \copydoc RenderParams::GetRenderDim()
+    //
+    virtual size_t GetRenderDim() const override {
+        return (2);
+    }
+
   private:
     void _init();
 #ifdef VAPOR3_0_0_ALPHA

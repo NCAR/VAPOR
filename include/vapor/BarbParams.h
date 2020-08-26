@@ -70,8 +70,18 @@ class PARAMS_API BarbParams : public RenderParams {
         return ("BarbParams");
     }
 
+    //! \copydoc RenderParams::GetRenderDim()
+    //
+    virtual size_t GetRenderDim() const override {
+        for (auto p = GetFieldVariableNames().begin(); p != GetFieldVariableNames().begin(); ++p) {
+            if (*p != "")
+                return (_dataMgr->GetNumDimensions(*p));
+        }
+        return (0);
+    }
+
   protected:
-    virtual bool GetUseSingleColorDefault() const { return true; }
+    virtual bool GetUseSingleColorDefault() const override { return true; }
 
   private:
     void _init();

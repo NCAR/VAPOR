@@ -131,17 +131,6 @@ class PARAMS_API RenderParams : public ParamsBase {
         return false;
     }
 
-    //! Get the primary variable, or the first valid field variable
-    //!
-    //! Return the first non-empty variable found, first searching
-    //! the name returned by GetVariableName(), and the ordered list
-    //! of variables returned by GetFieldVariableNames(). The empty
-    //! string is returned if no non-empty variable names exist.
-    //!
-    //! \retval string variable name
-    //
-    string GetFirstVariableName() const;
-
     //! Specify field variable names; e.g. used in flow integration
     //! can be 0 or 3 strings
     //! \param[in] string varNames. If any element is "0" the element
@@ -155,22 +144,6 @@ class PARAMS_API RenderParams : public ParamsBase {
     //! containing variable names. The default is 3 empty variable names.
     //
     vector<string> GetFieldVariableNames() const;
-
-    //! Get the distribution variable names, e.g. used in flow integration.
-    //! \retval vector<string> variable names
-    vector<string> GetDistribVariableNames() const {
-        return (GetValueStringVec(_distribVariableNamesTag));
-    }
-
-    //! Specify distribution variable names; e.g. used in flow integration
-    //! can be 0 or 3 strings
-    //! \param[in] string varNames. If any element is "0" the element
-    //! will be quietly
-    //! set to the empty string, "".
-    virtual void SetDistribVariableNames(vector<string> varNames) {
-        SetValueStringVec(
-            _distribVariableNamesTag, "Set Distrib Vars", varNames);
-    }
 
     //! Virtual method sets current number of refinements of this Params.
     //! \param[in] int refinements
@@ -359,6 +332,18 @@ class PARAMS_API RenderParams : public ParamsBase {
         int dim,
         bool secondaryColormapVariable);
 
+    //! Return the renderer's current dimension
+    //!
+    //! For renderers that are only capable of operating on variables of a fixed
+    //! dimensionality (e.g. 2D or 3D) this function will return a constant value:
+    //! the number of dimensions. For renderers that can operate on a variable of
+    //! varying dimension this method returns the current dimensionality. The
+    //! returned value will be between 0 and 3. A value of zero will be
+    //! returned if the current dimensionality cannot be determined.
+    //!
+    //!
+    virtual size_t GetRenderDim() const = 0;
+
     //! This should be overriden by params for renderes that support iso values to return true.
     virtual bool HasIsoValues() const { return false; }
     virtual vector<double> GetIsoValues(const string &variable) {
@@ -394,7 +379,6 @@ class PARAMS_API RenderParams : public ParamsBase {
     static const string _terrainMapTag;
     static const string _fieldVariableNamesTag;
     static const string _auxVariableNamesTag;
-    static const string _distribVariableNamesTag;
     static const string _constantOpacityTag;
     static const string _CompressionLevelTag;
     static const string _RefinementLevelTag;
