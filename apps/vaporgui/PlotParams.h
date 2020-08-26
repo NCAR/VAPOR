@@ -65,6 +65,9 @@ public:
     {
         return("PlotParams");
     }
+    virtual size_t GetRenderDim() const override {
+        return(0);
+    }
 
 private:
     static const string _minMaxTSTag;
