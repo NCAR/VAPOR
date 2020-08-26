@@ -52,6 +52,8 @@ public:
     //
     static string GetClassType() { return ("HelloParams"); }
 
+    virtual size_t GetRenderDim() const override { return (0); }
+
 private:
     static const string m_lineThicknessTag;
     static const string m_point1Tag;

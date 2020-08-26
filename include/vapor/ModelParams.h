@@ -16,6 +16,10 @@ public:
 
     static string GetClassType() { return ("ModelParams"); }
 
+    //! \copydoc RenderParams::GetRenderDim()
+    //
+    virtual size_t GetRenderDim() const override { return (0); }
+
 private:
     void _init();
 };

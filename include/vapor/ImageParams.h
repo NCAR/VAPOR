@@ -17,6 +17,10 @@ public:
 
     static std::string GetClassType() { return ("ImageParams"); }
 
+    //! \copydoc RenderParams::GetRenderDim()
+    //
+    virtual size_t GetRenderDim() const override { return (2); }
+
     //
     // Get and set image file path
     //

@@ -13,14 +13,14 @@ public:
 
     static string GetClassType() { return ("VolumeIsoParams"); }
 
-    virtual bool   GetDefaultLightingEnabled() const { return true; }
-    virtual double GetDefaultPhongAmbient() const { return 0.2; }
-    virtual string GetDefaultAlgorithmName() const;
+    virtual bool   GetDefaultLightingEnabled() const override { return true; }
+    virtual double GetDefaultPhongAmbient() const override { return 0.2; }
+    virtual string GetDefaultAlgorithmName() const override;
 
-    bool HasIsoValues() const { return true; }
+    bool HasIsoValues() const override { return true; }
 
 protected:
-    virtual bool GetUseSingleColorDefault() const { return true; }
+    virtual bool GetUseSingleColorDefault() const override { return true; }
 
 private:
     void _init();

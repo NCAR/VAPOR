@@ -39,7 +39,6 @@ const string RenderParams::_heightVariableNameTag = "HeightVariable";
 const string RenderParams::_colorMapVariableNameTag = "ColorMapVariable";
 const string RenderParams::_fieldVariableNamesTag = "FieldVariableNames";
 const string RenderParams::_auxVariableNamesTag = "AuxVariableNames";
-const string RenderParams::_distribVariableNamesTag = "DistributionVariableNames";
 const string RenderParams::_variableNameTag = "VariableName";
 const string RenderParams::_useSingleColorTag = "UseSingleColor";
 const string RenderParams::_constantColorTag = "ConstantColor";
@@ -443,17 +442,6 @@ void RenderParams::SetAuxVariableNames(std::vector<std::string> varnames)
     varnames = string_replace(varnames, "<no-variable>", "NULL");
     varnames = string_replace(varnames, "", "NULL");
     SetValueStringVec(_auxVariableNamesTag, "Specify auxiliary varnames", varnames);
-}
-
-string RenderParams::GetFirstVariableName() const
-{
-    string str = GetVariableName();
-    if (str.length()) return str;
-    vector<string> strvec = GetFieldVariableNames();
-    for (int i = 0; i < strvec.size(); i++) {
-        if (strvec[i] != "") return strvec[i];
-    }
-    return "";
 }
 
 string RenderParams::GetHeightVariableName() const

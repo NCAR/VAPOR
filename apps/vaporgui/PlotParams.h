@@ -60,7 +60,8 @@ public:
     void              SetAxisLocks(const std::vector<bool> &locks);
     std::vector<bool> GetAxisLocks();
 
-    static string GetClassType() { return ("PlotParams"); }
+    static string  GetClassType() { return ("PlotParams"); }
+    virtual size_t GetRenderDim() const override { return (0); }
 
 private:
     static const string _minMaxTSTag;

@@ -23,6 +23,10 @@ public:
     //
     static string GetClassType() { return ("WireFrameParams"); }
 
+    //! \copydoc RenderParams::GetRenderDim()
+    //
+    virtual size_t GetRenderDim() const override { return (_dataMgr->GetNumDimensions(GetVariableName())); }
+
 private:
     void _init();
 

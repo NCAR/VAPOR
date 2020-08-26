@@ -31,6 +31,10 @@ public:
     long GetSampleRateMultiplier() const;    // ComboBox index is held here. Need to translate
     void SetSampleRateMultiplier(long);      //   to real multipliers in RayCaster.cpp
 
+    //! \copydoc RenderParams::GetRenderDim()
+    //
+    virtual size_t GetRenderDim() const override { return (3); }
+
 protected:
     static const std::string _lightingTag;
     static const std::string _lightingCoeffsTag;

@@ -53,7 +53,8 @@ public:
     bool GetStdDevEnabled();
     void SetStdDevEnabled(bool state);
 
-    static string GetClassType() { return ("StatisticsParams"); }
+    static string  GetClassType() { return ("StatisticsParams"); }
+    virtual size_t GetRenderDim() const override { return (0); }
 
 private:
     static const string _maxTSTag;
