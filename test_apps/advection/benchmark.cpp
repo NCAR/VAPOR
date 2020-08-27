@@ -17,17 +17,15 @@ using namespace Wasp;
 using namespace VAPoR;
 
 void GenerateSeeds(std::vector<flow::Particle>& seeds,
-                   const std::vector<double>& xrake,
-                   const std::vector<double>& yrake,
-                   const std::vector<double>& zrake,
+                   const std::vector<double>& extents,
                    const long numOfSeeds,
                    const double initTime)
 {
   const unsigned int randSeed = 32;
   std::mt19937 gen(randSeed); //Standard mersenne_twister_engine
-  std::uniform_real_distribution<float> distX( xrake.at(0), xrake.at(1));
-  std::uniform_real_distribution<float> distY( yrake.at(0), yrake.at(1));
-  std::uniform_real_distribution<float> distZ( zrake.at(0), zrake.at(1));
+  std::uniform_real_distribution<float> distX( extents.at(0), extents.at(1));
+  std::uniform_real_distribution<float> distY( extents.at(2), extents.at(3));
+  std::uniform_real_distribution<float> distZ( extents.at(4), extents.at(5));
   seeds.resize(numOfSeeds);
   for( long i = 0; i < numOfSeeds; i++ )
   {
@@ -53,6 +51,20 @@ int PrintStreams(flow::Advection& advector)
     }
   }
   return 0;
+}
+
+void AdjustOverlap(std::vector<double>& overlapmin,
+                   std::vector<double>& overlapmax,
+                   const std::vector<double>& mind,
+                   const std::vector<double>& maxd)
+{
+  overlapmin[0] = std::max(overlapmin[0], mind[0]);
+  overlapmin[1] = std::max(overlapmin[1], mind[1]);
+  overlapmin[2] = std::max(overlapmin[2], mind[2]);
+
+  overlapmax[0] = std::min(overlapmax[0], maxd[0]);
+  overlapmax[1] = std::min(overlapmax[1], maxd[1]);
+  overlapmax[2] = std::min(overlapmax[2], maxd[2]);
 }
 
 struct {
@@ -157,20 +169,39 @@ int main (int argc, char** argv)
   std::vector<double> timeCoords;
   datamgr.GetTimeCoordinates(timeCoords);
   double initTime = timeCoords.at(0);
-  // Create particles
-  std::vector<flow::Particle> seeds;
-  std::vector<double> xrake;
-  xrake.push_back(opt.minu.at(0));
-  xrake.push_back(opt.maxu.at(0));
-  std::vector<double> yrake;
-  yrake.push_back(opt.minu.at(1));
-  yrake.push_back(opt.maxu.at(1));
-  std::vector<double> zrake;
-  zrake.push_back(opt.minu.at(2));
-  zrake.push_back(opt.maxu.at(2));
+  std::vector<double> extents;
+  if(opt.minu.size() == 0 || opt.maxu.size() == 0)
+  {
+    //use extents of entire data
+    vector<double> mind, maxd;
+    vector<double> overlapmin(3, std::numeric_limits<double>::min());
+    vector<double> overlapmax(3, std::numeric_limits<double>::max());
+    res = datamgr.GetVariableExtents(0, fieldx, 0, 0, mind, maxd);
+    AdjustOverlap(overlapmin, overlapmax, mind, maxd);
+    res = datamgr.GetVariableExtents(0, fieldy, 0, 0, mind, maxd);
+    AdjustOverlap(overlapmin, overlapmax, mind, maxd);
+    res = datamgr.GetVariableExtents(0, fieldz, 0, 0, mind, maxd);
+    AdjustOverlap(overlapmin, overlapmax, mind, maxd);
+    extents.push_back(mind.at(0));
+    extents.push_back(maxd.at(0));
+    extents.push_back(mind.at(1));
+    extents.push_back(maxd.at(1));
+    extents.push_back(mind.at(2));
+    extents.push_back(maxd.at(2));
+  }
+  else
+  {
+    extents.push_back(opt.minu.at(0));
+    extents.push_back(opt.maxu.at(0));
+    extents.push_back(opt.minu.at(1));
+    extents.push_back(opt.maxu.at(1));
+    extents.push_back(opt.minu.at(2));
+    extents.push_back(opt.maxu.at(2));
+  }
   // Populate seeds array
   // Random for now, VAPOR lets users configure
-  GenerateSeeds(seeds, xrake, yrake, zrake, numSeeds, initTime);
+  std::vector<flow::Particle> seeds;
+  GenerateSeeds(seeds, extents, numSeeds, initTime);
 
   flow::VaporField velocityField(3);
   velocityField.IsSteady = true;
