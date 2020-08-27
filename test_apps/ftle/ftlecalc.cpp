@@ -18,6 +18,16 @@
 using namespace Wasp;
 using namespace VAPoR;
 
+void AppendDataPathtoFiles(const std::string& datapath, 
+                           std::vector<std::string>& files)
+{
+  for(size_t index = 0; index < files.size(); index++)
+  {
+    std::string filepath = datapath + "/" + files.at(index);
+    files[index] = filepath;
+  }
+}
+
 void GenerateSeeds(std::vector<flow::Particle>& seeds,
                    const std::vector<double>& overlapmin,
                    const std::vector<double>& overlapmax,
@@ -160,10 +170,8 @@ int main (int argc, char** argv)
   const size_t threads = 0;
 
   std::vector<std::string> files = FileUtils::ListFiles(datapath);
-  // no options to set that I know
+  AppendDataPathtoFiles(datapath, files);
   std::vector<std::string> fileopts;
-  //fileopts.push_back("-project_to_pcs");
-  //fileopts.push_back("-vertical_xform");
   VAPoR::DataMgr datamgr(filetype, cache, threads);
   res = datamgr.Initialize(files, fileopts);
   if(res < 0)
@@ -213,14 +221,14 @@ int main (int argc, char** argv)
 
   res = velocityField.CalcDeltaTFromCurrentTimeStep(length);
 
+  auto start = chrono::steady_clock::now();
+
   // Advect particles in the field
   flow::Advection advection;
   advection.UseSeedParticles(seeds);
 
   int advect = flow::ADVECT_HAPPENED;
   advect = advection.AdvectTillTime(&velocityField, initTime, length, (initTime + duration), flow::Advection::ADVECTION_METHOD::RK4);
-
-  auto start = chrono::steady_clock::now();
 
   // Extract streams from the advection class
   std::vector<flow::Particle> endLocations;
