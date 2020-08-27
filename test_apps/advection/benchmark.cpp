@@ -129,7 +129,7 @@ int main (int argc, char** argv)
   }
 
   const std::string datapath = opt.datapath;
-  // Field is not really used
+
   const std::string fieldx = opt.fieldname.at(0);
   const std::string fieldy = opt.fieldname.at(1);
   const std::string fieldz = opt.fieldname.at(2);
@@ -148,8 +148,7 @@ int main (int argc, char** argv)
             << "\nLength : " << length  << std::endl;
 
   int res;
-  // TODO : read field and variable information
-  // Let's assume we have read the data and field
+
   const std::string filetype = "cf";
   const size_t cache = 2000;
   const size_t threads = 0;
@@ -157,8 +156,6 @@ int main (int argc, char** argv)
   std::vector<std::string> files;
   files.push_back(datapath);
   std::vector<std::string> fileopts;
-  //fileopts.push_back("-project_to_pcs");
-  //fileopts.push_back("-vertical_xform");
   VAPoR::DataMgr datamgr(filetype, cache, threads);
   res = datamgr.Initialize(files, fileopts);
   if(res < 0)
@@ -210,7 +207,7 @@ int main (int argc, char** argv)
   velocityField.VelocityNames[1] = fieldy.c_str();
   velocityField.VelocityNames[2] = fieldz.c_str();
 
-  ParamsBase::StateSave stateSave;// = nullptr;
+  ParamsBase::StateSave stateSave;
   VAPoR::FlowParams params(&datamgr, &stateSave);
   params.SetIsSteady(true);
   params.SetSteadyNumOfSteps(steps);
