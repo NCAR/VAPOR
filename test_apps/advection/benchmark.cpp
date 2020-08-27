@@ -2,32 +2,19 @@
 #include <iostream>
 #include <vector>
 #include <random>
-#include <omp.h>
 
-#include "boost/filesystem.hpp"
-#include "boost/program_options.hpp"
+#ifdef OMP_POSSIBLE
+  #include <omp.h>
+#endif
 
-#include "Advection.h"
-
+#include <vapor/Advection.h>
 #include <vapor/DataMgr.h>
 #include <vapor/FileUtils.h>
+#include <vapor/OptionParser.h>
 #include <vapor/VaporField.h>
 
+using namespace Wasp;
 using namespace VAPoR;
-
-int GetFilesFromDirectory(const std::string& datapath,
-                           std::vector<std::string>& datafiles)
-{
-  if ( !boost::filesystem::exists( datapath ) ) return -1;
-  boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
-  for ( boost::filesystem::directory_iterator itr( datapath );
-        itr != end_itr;
-        ++itr )
-  {
-    datafiles.push_back(itr->path().c_str());
-  }
-  return 0;
-}
 
 void GenerateSeeds(std::vector<flow::Particle>& seeds,
                    const std::vector<double>& xrake,
@@ -51,7 +38,7 @@ void GenerateSeeds(std::vector<flow::Particle>& seeds,
   }
 }
 
-int PrintStreams(external::Advection& advector)
+int PrintStreams(flow::Advection& advector)
 {
   size_t numStreams = advector.GetNumberOfStreams();
   for(size_t index = 0; index < numStreams; index++)
@@ -68,68 +55,79 @@ int PrintStreams(external::Advection& advector)
   return 0;
 }
 
-void multitoken_double(const std::string& tokens,
-                       std::vector<double>& doubles)
-{
-  const std::string delimiter = " ";
-  size_t pos = 0;
-  pos = tokens.find(delimiter);
-  doubles.push_back(stod(tokens.substr(0, pos)));
-  doubles.push_back(stod(tokens.substr(pos, tokens.size())));
-  std::cout << doubles.size() << std::endl;
-}
+struct {
+  string datapath;
+  std::vector <string> fieldname;
+  int seeds;
+  int steps;
+  double length;
+  std::vector <double> minu;
+  std::vector <double> maxu;
+} opt;
+
+OptionParser::OptDescRec_T  set_opts[] = {
+  {"datapath", 1,  "", "Path to the parent directory of the dataset"},
+  {
+    "fieldname",  1,  "",  "Colon delimited 3-element vector "
+    "specifying field names for X, Y, Z components (u:v:w)"
+  },
+  {"seeds", 1,  "100", "Number of random seeds for the benchmark"},
+  {"steps", 1,  "100", "Maximum number of advection steps for particles"},
+  {"length", 1,  "", "Prescribed step length for an advection step"},
+  {
+    "minu",  1,  "",  "Colon delimited 3-element vector "
+    "specifying rake min extents in user coordinates (X0:Y0:Z0)"
+  },
+  {
+    "maxu",  1,  "",  "Colon delimited 3-element vector "
+    "specifying rake max extents in user coordinates (X1:Y1:Z1)"
+  },
+  {NULL}
+};
+
+OptionParser::Option_T  get_options[] = {
+  {"datapath", Wasp::CvtToCPPStr, &opt.datapath, sizeof(opt.datapath)},
+  {"fieldname", Wasp::CvtToStrVec, &opt.fieldname, sizeof(opt.fieldname)},
+  {"seeds", Wasp::CvtToInt, &opt.seeds, sizeof(opt.seeds)},
+  {"steps", Wasp::CvtToInt, &opt.steps, sizeof(opt.steps)},
+  {"length", Wasp::CvtToDouble, &opt.length, sizeof(opt.length)},
+  {"minu", Wasp::CvtToDoubleVec, &opt.minu, sizeof(opt.minu)},
+  {"maxu", Wasp::CvtToDoubleVec, &opt.maxu, sizeof(opt.maxu)},
+  {NULL}
+};
+
+const char  *ProgName;
 
 int main (int argc, char** argv)
 {
-  // Input params
-  // 1. File
-  // 2. Field variable
-  // 3. Number of steps
-  // 4. Step length (deltaT) : step length is calculated dynamically
-  //    This is suggestive?
-  // 5. Seeding parameters
-  namespace options = boost::program_options;
-  options::options_description desc("Options");
-  desc.add_options()("datapath", options::value<std::string>()->required(), "Path to dataset")
-                    ("fieldx", options::value<std::string>()->required(), "Name of vector field")
-                    ("fieldy", options::value<std::string>()->required(), "Name of vector field")
-                    ("fieldz", options::value<std::string>()->required(), "Name of vector field")
-                    ("seeds", options::value<long>()->required(), "Number of seed particles")
-                    ("steps", options::value<long>()->required(), "Number of Steps")
-                    ("length", options::value<float>()->required(), "Length of a single step")
-                    ("xrake", options::value<std::string>()->required(), "Number of Steps")
-                    ("yrake", options::value<std::string>()->required(), "Number of Steps")
-                    ("zrake", options::value<std::string>()->required(), "Number of Steps");
-  options::variables_map vm;
-  std::ifstream settings_file(std::string(argv[1]), std::ifstream::in);
-  options::store(options::parse_config_file(settings_file, desc), vm);
-  settings_file.close();
-  options::notify(vm);
-  if (!(vm.count("datapath")
-      && vm.count("fieldx")
-      && vm.count("fieldy")
-      && vm.count("fieldz")
-      && vm.count("seeds")
-      && vm.count("steps")
-      && vm.count("length")
-      && vm.count("xrake")
-      && vm.count("yrake")
-      && vm.count("zrake")))
-  {
-    std::cout << "Advection Benchmark" << std::endl << desc << std::endl;
+
+  OptionParser op;
+
+  ProgName = FileUtils::LegacyBasename(argv[0]);
+
+  MyBase::SetErrMsgFilePtr(stderr);
+
+  if (op.AppendOptions(set_opts) < 0) {
+    cerr << ProgName << " : " << op.GetErrMsg();
+    exit(1);
+  }
+  if (op.ParseOptions(&argc, argv, get_options) < 0) {
+    cerr << ProgName << " : " << op.GetErrMsg();
+    exit(1);
   }
 
-  std::string datapath = vm["datapath"].as<std::string>();
+  const std::string datapath = opt.datapath;
   // Field is not really used
-  std::string fieldx = vm["fieldx"].as<std::string>();
-  std::string fieldy = vm["fieldy"].as<std::string>();
-  std::string fieldz = vm["fieldz"].as<std::string>();
+  const std::string fieldx = opt.fieldname.at(0);
+  const std::string fieldy = opt.fieldname.at(1);
+  const std::string fieldz = opt.fieldname.at(2);
 
-  const long numSeeds = vm["seeds"].as<long>();
-  const long steps = vm["steps"].as<long>();
-  float length = vm["length"].as<float>();
-
+  const long numSeeds = opt.seeds;
+  const long steps = opt.steps;
+  float length = opt.length;
+#ifdef OMP_POSSIBLE
   std::cout << "Available # of threads : " << omp_get_max_threads() << std::endl;
+#endif
   std::cout << "Advection w/ : "
             << "\nData : " << datapath
             << "\nField : " << fieldx << "| " << fieldy << " | " << fieldz
@@ -145,8 +143,7 @@ int main (int argc, char** argv)
   const size_t threads = 0;
 
   std::vector<std::string> files;
-  GetFilesFromDirectory(datapath, files);
-  // no options to set that I know
+  files.push_back(datapath);
   std::vector<std::string> fileopts;
   //fileopts.push_back("-project_to_pcs");
   //fileopts.push_back("-vertical_xform");
@@ -163,17 +160,16 @@ int main (int argc, char** argv)
   // Create particles
   std::vector<flow::Particle> seeds;
   std::vector<double> xrake;
-  multitoken_double(vm["xrake"].as<std::string>(), xrake);
+  xrake.push_back(opt.minu.at(0));
+  xrake.push_back(opt.maxu.at(0));
   std::vector<double> yrake;
-  multitoken_double(vm["yrake"].as<std::string>(), yrake);
+  yrake.push_back(opt.minu.at(1));
+  yrake.push_back(opt.maxu.at(1));
   std::vector<double> zrake;
-  multitoken_double(vm["zrake"].as<std::string>(), zrake);
-  // Get the extents of the dataset
-  // I don't know why this requires a variable name!
-  vector<double> mind, maxd;
-  res = datamgr.GetVariableExtents(0, fieldx, 0, 0, mind, maxd);
+  zrake.push_back(opt.minu.at(2));
+  zrake.push_back(opt.maxu.at(2));
   // Populate seeds array
-  // Random for now, let users configure later
+  // Random for now, VAPOR lets users configure
   GenerateSeeds(seeds, xrake, yrake, zrake, numSeeds, initTime);
 
   flow::VaporField velocityField(3);
@@ -192,31 +188,30 @@ int main (int argc, char** argv)
   params.SetRefinementLevel(0);
   params.SetCompressionLevel(0);
   velocityField.UpdateParams(&params);
-  params.GetBox()->SetExtents( mind, maxd );
-
+  params.GetBox()->SetExtents( opt.minu, opt.maxu );
   res = velocityField.CalcDeltaTFromCurrentTimeStep(length);
 
   // Advect particles in the field
-  external::Advection advection;
+  flow::Advection advection;
   advection.UseSeedParticles(seeds);
 
   auto start = chrono::steady_clock::now();
 
   int advect = flow::ADVECT_HAPPENED;
-
   for(size_t step =  advection.GetMaxNumOfPart() - 1;
       step < steps && advect == flow::ADVECT_HAPPENED; step++)
   {
-    advect = advection.AdvectOneStep(&velocityField, length, external::Advection::ADVECTION_METHOD::RK4);
+    advect = advection.AdvectOneStep(&velocityField, length, flow::Advection::ADVECTION_METHOD::RK4);
   }
 
-  //advect = advection.AdvectSteps(&velocityField, length, steps, external::Advection::ADVECTION_METHOD::RK4);
+  //advect = advection.AdvectSteps(&velocityField, length, steps, flow::Advection::ADVECTION_METHOD::RK4);
 
   auto end = chrono::steady_clock::now();
   const double nanotosec = 1e-9;
   auto elapsed = chrono::duration_cast<chrono::nanoseconds>(end - start).count() * nanotosec;
   cout << "Elapsed time : " << elapsed << " sec." << endl;
 
-  // PrintStreams(advection);
+  //PrintStreams(advection);
+
   return 0;
 }
