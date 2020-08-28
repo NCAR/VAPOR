@@ -2,6 +2,8 @@
 #include "SliceSubtabs.h"
 #include "TFEditor.h"
 #include "VLineItem.h"
+#include "PSection.h"
+#include "PFidelitySection.h"
 
 #define MIN_SAMPLES 1 
 #define MAX_SAMPLES 2000
@@ -16,6 +18,23 @@
 #define XY 0
 #define XZ 1 
 #define YZ 2
+
+SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
+    setLayout( new QVBoxLayout );
+    ((QVBoxLayout*)layout())->insertWidget(1, _pg = new PGroup);
+    PSection *vars = new PSection("Variable Selection");
+    vars->Add(new PScalarVariableSelectorHLI);
+    _pg->Add(vars);
+    _pg->Add(new PFidelitySection);
+}
+
+void SliceVariablesSubtab::Update(
+    VAPoR::DataMgr *dataMgr,
+    VAPoR::ParamsMgr *paramsMgr,
+    VAPoR::RenderParams *rParams
+) {
+    _pg->Update(rParams, paramsMgr, dataMgr);
+}
 
 SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget* parent) {
     setupUi(this);

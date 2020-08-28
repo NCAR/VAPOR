@@ -79,6 +79,7 @@ private:
 
  //! VariablesWidget is used as Variables tab
  PGroup* _pVarGroup;
+ SliceVariablesSubtab* _variables;
  SliceGeometrySubtab* _geometry;
  GLSliceImageWindow* _glSliceImageWindow;
  SliceAppearanceSubtab* _appearance;
