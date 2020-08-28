@@ -18,6 +18,21 @@ class TFEditorVolume;
 class QSliderEdit;
 class PGroup;
 
+class VolumeVariablesSubtab : public QWidget {
+
+    Q_OBJECT
+    PGroup *pg;
+
+public:
+    VolumeVariablesSubtab(QWidget* parent);
+
+    void Update(
+        VAPoR::DataMgr *dataMgr,
+        VAPoR::ParamsMgr *paramsMgr,
+        VAPoR::RenderParams *rParams
+    );
+};
+
 class VolumeAppearanceSubtab : public QWidget, public Ui_VolumeAppearanceGUI {
 	Q_OBJECT
 
