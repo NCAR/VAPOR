@@ -537,6 +537,7 @@ void VolumeOSPRay::_copyBackplate()
     int height = viewport[3];
     
     _backplateData.resize(width * height * 3);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, (GLvoid *)_backplateData.data());
 }
 
@@ -822,7 +823,7 @@ OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
 
 OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
 {
-    printf("Load Unstructured Volume");
+    printf("Load Unstructured Volume\n");
     const vector<size_t> nodeDims = grid->GetDimensions();
     size_t nodeDim = nodeDims.size();
     const size_t nVerts = nodeDims[0]*nodeDims[1];
@@ -835,12 +836,12 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
     size_t coordDim = grid->GetGeometryDim();
     size_t *nodes = (size_t*)alloca(sizeof(size_t) * maxNodes * nodeDim);
     
-    printf("nVerts = %li\n", nVerts);
-    printf("maxNodes = %li\n", maxNodes);
-    printf("coordDim = %li\n", coordDim);
-    printf("nodeDim = %li\n", nodeDim);
-    if (nodeDims.size() == 2)
-        printf("nodeDims = [%li, %li]\n", nodeDims[0], nodeDims[1]);
+//    printf("nVerts = %li\n", nVerts);
+//    printf("maxNodes = %li\n", maxNodes);
+//    printf("coordDim = %li\n", coordDim);
+//    printf("nodeDim = %li\n", nodeDim);
+//    if (nodeDims.size() == 2)
+//        printf("nodeDims = [%li, %li]\n", nodeDims[0], nodeDims[1]);
     
     Progress::Begin("Loading Grid Data", 2, false);
     float *vdata = new float[nVerts];
@@ -927,15 +928,15 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
 //    Progress::Finish();
 //    printf("done\n");
     
-    long totalAdded=0, totalSkipped=0;
-    for (int i = 0; i < 32; i++) {
-        if (added[i] > 0) printf("\tAdded[%i] = %li\n", i, added[i]);
-        if (skipped[i] > 0) printf("\tSkipped[%i] = %li\n", i, skipped[i]);
-        totalAdded += added[i];
-        totalSkipped += skipped[i];
-    }
-    printf("\tTotal Added = %li\n", totalAdded);
-    printf("\tTotal Skipped = %li\n", totalSkipped);
+//    long totalAdded=0, totalSkipped=0;
+//    for (int i = 0; i < 32; i++) {
+//        if (added[i] > 0) printf("\tAdded[%i] = %li\n", i, added[i]);
+//        if (skipped[i] > 0) printf("\tSkipped[%i] = %li\n", i, skipped[i]);
+//        totalAdded += added[i];
+//        totalSkipped += skipped[i];
+//    }
+//    printf("\tTotal Added = %li\n", totalAdded);
+//    printf("\tTotal Skipped = %li\n", totalSkipped);
 //    printf("# Coords = %li\n", nVerts);
     
     vec3 *coords = (vec3*)cdata;
@@ -998,20 +999,20 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
     
     
 //    int testCell = std::min(cellStarts.size()-1, (size_t)GetActiveParams()->GetValueLong("osp_test_cells", 0));
-    int testCell = 0;
-    if (testCell >= 0) {
-        int testCellNodes = cellTypes[testCell] == OSP_TETRAHEDRON ? 4 : 6;
-        printf("Test Cell[%i].nodes = %i\n", testCell, testCellNodes);
-        vec3 testCellCoords[testCellNodes];
-        for (int i = 0; i < testCellNodes; i++) {
-            int idx = cellIndices[cellStarts[testCell]+i];
-            testCellCoords[i] = coords[idx];
-            printf("\tCells[%i].vert[%i] = coords[%i] = (%f, %f, %f)\n", testCell, i, idx, coords[idx].x, coords[idx].y, coords[idx].z);
-        }
-        printf("\tWinding bottom = %s\n", to_string(GetWindingOrderRespectToZ(testCellCoords[0], testCellCoords[1], testCellCoords[2])));
-        if (testCellNodes == 6)
-            printf("\tWinding top = %s\n", to_string(GetWindingOrderRespectToZ(testCellCoords[3], testCellCoords[4], testCellCoords[5])));
-    }
+//    int testCell = 0;
+//    if (testCell >= 0) {
+//        int testCellNodes = cellTypes[testCell] == OSP_TETRAHEDRON ? 4 : 6;
+//        printf("Test Cell[%i].nodes = %i\n", testCell, testCellNodes);
+//        vec3 testCellCoords[testCellNodes];
+//        for (int i = 0; i < testCellNodes; i++) {
+//            int idx = cellIndices[cellStarts[testCell]+i];
+//            testCellCoords[i] = coords[idx];
+//            printf("\tCells[%i].vert[%i] = coords[%i] = (%f, %f, %f)\n", testCell, i, idx, coords[idx].x, coords[idx].y, coords[idx].z);
+//        }
+//        printf("\tWinding bottom = %s\n", to_string(GetWindingOrderRespectToZ(testCellCoords[0], testCellCoords[1], testCellCoords[2])));
+//        if (testCellNodes == 6)
+//            printf("\tWinding top = %s\n", to_string(GetWindingOrderRespectToZ(testCellCoords[3], testCellCoords[4], testCellCoords[5])));
+//    }
     
     
 //    printf("Sanity Checks..."); flush(cout);
