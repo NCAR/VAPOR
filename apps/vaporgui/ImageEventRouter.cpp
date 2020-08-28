@@ -37,9 +37,6 @@ ImageEventRouter::ImageEventRouter( QWidget* parent, ControlExec* ce)
   qsvar->setWidgetResizable(true);
   addTab(qsvar, "Variables");
 
-  _variablesGroup->AddVar( new PHeightVariableSelectorHLI );
-  addTab( _variablesGroup->GetScrollArea(), "Variables" );
-
   _appearance = new ImageAppearanceSubtab(this);
   QScrollArea* qsapp = new QScrollArea(this);
   qsapp->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
