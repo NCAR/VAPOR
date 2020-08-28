@@ -74,6 +74,7 @@ private:
  //! if wheel events also scrolled the tab itself
   void wheelEvent(QWheelEvent*) {}
 
+ VolumeIsoVariablesSubtab* _variables;
  VolumeIsoGeometrySubtab* _geometry;
  GLVolumeImageWindow* _glVolumeImageWindow;
  VolumeIsoAppearanceSubtab * _appearance;

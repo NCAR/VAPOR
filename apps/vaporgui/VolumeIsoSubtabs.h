@@ -17,6 +17,21 @@ namespace VAPoR
 
 class PGroup;
 
+class VolumeIsoVariablesSubtab : public QWidget
+{
+    Q_OBJECT
+
+public:
+    VolumeIsoVariablesSubtab(QWidget* parent);
+
+    void Update( VAPoR::DataMgr      *dataMgr,
+                 VAPoR::ParamsMgr    *paramsMgr,
+                 VAPoR::RenderParams *params );
+
+private:
+    PGroup *_pg;
+}; 
+
 class VolumeIsoAppearanceSubtab : public QWidget, public Ui_VolumeIsoAppearanceGUI 
 {
     Q_OBJECT

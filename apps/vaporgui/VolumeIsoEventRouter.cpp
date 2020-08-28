@@ -27,9 +27,12 @@ VolumeIsoEventRouter::VolumeIsoEventRouter( QWidget *parent, ControlExec *ce)
                     : QTabWidget(parent),
 	                    RenderEventRouter( ce, VolumeIsoParams::GetClassType())
 {
-    _variablesGroup->AddVar( new PScalarVariableSelectorHLI );
-    _variablesGroup->AddVar( new PColorMapVariableSelectorHLI );
-    addTab( _variablesGroup->GetScrollArea(), "Variables" );
+	_variables = new VolumeIsoVariablesSubtab(this);
+	QScrollArea* qsvar = new QScrollArea(this);
+	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	qsvar->setWidget(_variables);
+	qsvar->setWidgetResizable(true);
+	addTab(qsvar,"Variables");
 
 	_appearance = new VolumeIsoAppearanceSubtab(this);
 	QScrollArea* qsapp = new QScrollArea(this);
@@ -86,11 +89,11 @@ void VolumeIsoEventRouter::GetWebHelp(
 }
 
 void VolumeIsoEventRouter::_updateTab(){
-    _variablesGroup->Update(
-        GetActiveParams(),
-        _controlExec->GetParamsMgr(),
-        GetActiveDataMgr()
-    );
+	_variables->Update(
+		GetActiveDataMgr(),
+		_controlExec->GetParamsMgr(),
+		GetActiveParams()
+	);
 
 	_appearance->Update(
 		GetActiveDataMgr(),
