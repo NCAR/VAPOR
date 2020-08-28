@@ -1345,14 +1345,12 @@ class VDF_API Grid {
     int _interpolationOrder = 0; // Order of interpolation
     long _nodeIDOffset = 0;
     long _cellIDOffset = 0;
-    mutable DblArr3 _minuCache = {
-        std::numeric_limits<double>::infinity(),
-        std::numeric_limits<double>::infinity(),
-        std::numeric_limits<double>::infinity()};
-    mutable DblArr3 _maxuCache = {
-        std::numeric_limits<double>::infinity(),
-        std::numeric_limits<double>::infinity(),
-        std::numeric_limits<double>::infinity()};
+    mutable DblArr3 _minuCache = {{std::numeric_limits<double>::infinity(),
+                                   std::numeric_limits<double>::infinity(),
+                                   std::numeric_limits<double>::infinity()}};
+    mutable DblArr3 _maxuCache = {{std::numeric_limits<double>::infinity(),
+                                   std::numeric_limits<double>::infinity(),
+                                   std::numeric_limits<double>::infinity()}};
 
     virtual void _getUserCoordinatesHelper(
         const std::vector<double> &coords, double &x, double &y, double &z) const;

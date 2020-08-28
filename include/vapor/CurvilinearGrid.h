@@ -285,8 +285,8 @@ class VDF_API CurvilinearGrid : public StructuredGrid {
 
   private:
     std::vector<double> _zcoords;
-    DblArr3 _minu = {0.0, 0.0, 0.0};
-    DblArr3 _maxu = {0.0, 0.0, 0.0};
+    DblArr3 _minu = {{0.0, 0.0, 0.0}};
+    DblArr3 _maxu = {{0.0, 0.0, 0.0}};
     RegularGrid _xrg;
     RegularGrid _yrg;
     RegularGrid _zrg;

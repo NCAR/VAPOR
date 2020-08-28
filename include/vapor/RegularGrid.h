@@ -148,8 +148,8 @@ class VDF_API RegularGrid : public StructuredGrid {
         const std::vector<double> &minu,
         const std::vector<double> &maxu);
 
-    DblArr3 _minu = {0.0, 0.0, 0.0};
-    DblArr3 _maxu = {0.0, 0.0, 0.0};
+    DblArr3 _minu = {{0.0, 0.0, 0.0}};
+    DblArr3 _maxu = {{0.0, 0.0, 0.0}};
     size_t _geometryDim;
     std::vector<double> _delta; // increment between grid points in user coords
 };

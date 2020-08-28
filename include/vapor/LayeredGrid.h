@@ -191,8 +191,8 @@ class VDF_API LayeredGrid : public StructuredGrid {
 
   private:
     RegularGrid _rg;
-    DblArr3 _minu = {0.0, 0.0, 0.0};
-    DblArr3 _maxu = {0.0, 0.0, 0.0};
+    DblArr3 _minu = {{0.0, 0.0, 0.0}};
+    DblArr3 _maxu = {{0.0, 0.0, 0.0}};
     std::vector<double> _delta;
     int _interpolationOrder;
 
