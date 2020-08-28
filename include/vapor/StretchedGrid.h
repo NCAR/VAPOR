@@ -144,8 +144,8 @@ private:
     std::vector<double> _xcoords;
     std::vector<double> _ycoords;
     std::vector<double> _zcoords;
-    DblArr3             _minu = {0.0, 0.0, 0.0};
-    DblArr3             _maxu = {0.0, 0.0, 0.0};
+    DblArr3             _minu = {{0.0, 0.0, 0.0}};
+    DblArr3             _maxu = {{0.0, 0.0, 0.0}};
 
     void _stretchedGrid(const std::vector<double> &xcoords, const std::vector<double> &ycoords, const std::vector<double> &zcoords);
 
