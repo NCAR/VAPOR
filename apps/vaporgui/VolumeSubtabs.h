@@ -21,7 +21,7 @@ class PGroup;
 class VolumeVariablesSubtab : public QWidget {
 
     Q_OBJECT
-    PGroup *pg;
+    PGroup *_pg;
 
 public:
     VolumeVariablesSubtab(QWidget* parent);
