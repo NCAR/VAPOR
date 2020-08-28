@@ -28,6 +28,15 @@ ImageEventRouter::ImageEventRouter( QWidget* parent, ControlExec* ce)
 
   sizePolicy().setVerticalPolicy(QSizePolicy::Maximum);
 
+  _variables = new ImageVariablesSubtab(this);
+  QScrollArea *qsvar = new QScrollArea(this);
+  qsvar->sizePolicy().setVerticalPolicy(QSizePolicy::Maximum);
+  qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  _variables->adjustSize();
+  qsvar->setWidget(_variables);
+  qsvar->setWidgetResizable(true);
+  addTab(qsvar, "Variables");
+
   _variablesGroup->AddVar( new PHeightVariableSelectorHLI );
   addTab( _variablesGroup->GetScrollArea(), "Variables" );
 
@@ -54,12 +63,9 @@ void ImageEventRouter::GetWebHelp( vector <pair <string, string> > &help) const
 
 void ImageEventRouter::_updateTab()
 {
-  _variablesGroup->Update(
-      GetActiveParams(),
-      _controlExec->GetParamsMgr(),
-      GetActiveDataMgr()
-  );
-  
+  _variables->Update( GetActiveDataMgr(),
+                       _controlExec->GetParamsMgr(),
+                       GetActiveParams());
   _appearance->Update( GetActiveDataMgr(),
                        _controlExec->GetParamsMgr(),
                        GetActiveParams());
