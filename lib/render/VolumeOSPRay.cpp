@@ -640,7 +640,7 @@ OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
     const size_t nVerts = dims[0]*dims[1]*dims[2];
     float missingValue = grid->HasMissingData() ? grid->GetMissingValue() : NAN;
     
-    Progress::Begin("Loading Grid", 2, false);
+    Progress::Start("Loading Grid", 2, false);
     float *vdata = new float[nVerts];
     auto dataIt = grid->cbegin();
     for (size_t i = 0; i < nVerts; ++i, ++dataIt)
@@ -654,7 +654,7 @@ OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
         cdata[i*3+1] = (*coord)[1];
         cdata[i*3+2] = (*coord)[2];
     }
-    Progress::Update(2);
+    Progress::Finish();
     
     int xd = dims[0];
     int yd = dims[1];
@@ -676,9 +676,10 @@ OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
     
 #define I(x,y,z) (unsigned int)((z)*yd*xd+(y)*xd+(x))
 
-    Progress::Begin("Convert Grid", czd, true);
+    Progress::Start("Convert Grid", czd, true);
     for (int z = 0; z < czd; z++) {
-        if (Progress::Update(z)) {
+        Progress::Update(z);
+        if (Progress::Cancelled()) {
             delete [] vdata;
             delete [] cdata;
             return nullptr;
@@ -692,6 +693,7 @@ OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
             }
         }
     }
+    Progress::Finish();
 #undef I
     
 //    const int maxCells = GetActiveParams()->GetValueLong("osp_max_cells", INT_MAX);
@@ -718,11 +720,12 @@ OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
     unsigned nDecomposed = 0;
     unsigned nDiscarded = 0;
     
-    Progress::Begin("Preprocess Grid", nCells, true);
+    Progress::Start("Preprocess Grid", nCells, true);
     vector<unsigned int> startIndex;
     vector<unsigned char> cellType;
     for (int i = 0; i < nCells; i++) {
-        if (Progress::Update(i)) {
+        Progress::Update(i);
+        if (Progress::Cancelled()) {
             delete [] vdata;
             delete [] cdata;
             return nullptr;
@@ -770,6 +773,7 @@ OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
         startIndex.push_back(i*8);
         cellType.push_back(OSP_HEXAHEDRON);
     }
+    Progress::Finish();
     
     printf("Discarded %i cells\n", nDiscarded);
     printf("Decomposed %i cells\n", nDecomposed);
@@ -777,7 +781,7 @@ OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
     
     OSPVolume volume = ospNewVolume("unstructured");
     OSPData data;
-    Progress::Begin("Copy data to OSPRay", 5, false);
+    Progress::Start("Copy data to OSPRay", 5, false);
     
     data = VOSP::NewCopiedData(vdata, OSP_FLOAT, nVerts);
     ospCommit(data);
@@ -812,8 +816,9 @@ OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
     ospSetObject(volume, "cell.type", data);
     ospRelease(data);
     Progress::Update(5);
+    Progress::Finish();
     
-    Progress::Begin("Commit OSPRay", 1, false);
+    Progress::StartIndefinite("Commit OSPRay");
     ospSetBool(volume, "hexIterative", true);
     ospCommit(volume);
     Progress::Finish();
@@ -834,7 +839,8 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
     float missingValue = grid->HasMissingData() ? grid->GetMissingValue() : NAN;
     size_t maxNodes = grid->GetMaxVertexPerCell();
     size_t coordDim = grid->GetGeometryDim();
-    size_t *nodes = (size_t*)alloca(sizeof(size_t) * maxNodes * nodeDim);
+//    size_t *nodes = (size_t*)alloca(sizeof(size_t) * maxNodes * nodeDim);
+    std::vector<Size_tArr3> nodes(maxNodes * nodeDim);
     
 //    printf("nVerts = %li\n", nVerts);
 //    printf("maxNodes = %li\n", maxNodes);
@@ -843,7 +849,7 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
 //    if (nodeDims.size() == 2)
 //        printf("nodeDims = [%li, %li]\n", nodeDims[0], nodeDims[1]);
     
-    Progress::Begin("Loading Grid Data", 2, false);
+    Progress::Start("Loading Grid Data", 2, false);
     float *vdata = new float[nVerts];
     auto dataIt = grid->cbegin();
     for (size_t i = 0; i < nVerts; ++i, ++dataIt)
@@ -858,6 +864,7 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
         cdata[i*3+2] = (*coord)[2];
     }
     Progress::Update(2);
+    Progress::Finish();
     
     vector<unsigned int> cellIndices;
     vector<unsigned int> cellStarts;
@@ -869,17 +876,17 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
 //    int maxCells = std::min((int)nCells, (int)GetActiveParams()->GetValueLong("osp_max_cells", 1));
     
     auto cellIt = grid->ConstCellBegin();
-    Progress::Begin("Loading Grid", nCells, true);
+    Progress::Start("Loading Grid", nCells, true);
     for (size_t cellCounter = 0; cellCounter < nCells; ++cellIt, ++cellCounter) {
-//        PrintPercent("Generate nodes...", cellCounter, nCells);
-        if (Progress::Update(cellCounter)) {
+        Progress::Update(cellCounter);
+        if (Progress::Cancelled()) {
             delete [] vdata;
             delete [] cdata;
             return nullptr;
         }
         const vector<size_t> &cell = *cellIt;
-        int numNodes;
-        grid->GetCellNodes(cell.data(), nodes, numNodes);
+        grid->GetCellNodes(cell.data(), nodes);
+        int numNodes = nodes.size();
         
         // nodes = [[
         
@@ -889,7 +896,7 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
             added[numNodes]++;
             
             for (int i = 0; i < 4; i++)
-                cellIndices.push_back(nodes[i*nodeDim] + nodes[i*nodeDim+1]*nodeDims[0]);
+                cellIndices.push_back(nodes[i][0] + nodes[i][1]*nodeDims[0]);
         }
         else if (numNodes == 6) {
             cellStarts.push_back(cellIndices.size());
@@ -897,12 +904,12 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
             added[numNodes]++;
             
             for (int i = 0; i < 6; i++)
-                cellIndices.push_back(nodes[i*nodeDim] + nodes[i*nodeDim+1]*nodeDims[0]);
+                cellIndices.push_back(nodes[i][0] + nodes[i][1]*nodeDims[0]);
         }
         else if (numNodes == 12) { // Hexagonal Prism
 //            skipped[numNodes]++;
             
-#define add(i) cellIndices.push_back(nodes[(i)*nodeDim] + nodes[(i)*nodeDim+1]*nodeDims[0]);
+#define add(i) cellIndices.push_back(nodes[i][0] + nodes[i][1]*nodeDims[0]);
             for (int i = 0; i < 4; i++) {
                 cellStarts.push_back(cellIndices.size());
                 cellTypes.push_back(OSP_WEDGE);
@@ -925,7 +932,7 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
 //            break;
 //        }
     }
-//    Progress::Finish();
+    Progress::Finish();
 //    printf("done\n");
     
 //    long totalAdded=0, totalSkipped=0;
@@ -942,10 +949,10 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
     vec3 *coords = (vec3*)cdata;
     vector<bool> erase(cellStarts.size(), false);
     
-    Progress::Begin("Preprocessing Cells", cellStarts.size(), true);
+    Progress::Start("Preprocessing Cells", cellStarts.size(), true);
     for (unsigned i = 0; i < cellStarts.size(); i++) {
-//        PrintPercent("Preprocess cells...", i, cellStarts.size());
-        if (Progress::Update(i)) {
+        Progress::Update(i);
+        if (Progress::Cancelled()) {
             delete [] vdata;
             delete [] cdata;
             return nullptr;
@@ -979,6 +986,7 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
 //            }
         }
     }
+    Progress::Finish();
     {
         vector<unsigned int> cellStartsNew;
         vector<unsigned char> cellTypesNew;
@@ -1016,7 +1024,7 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
     
     
 //    printf("Sanity Checks..."); flush(cout);
-    Progress::Begin("Sanity Checks", 5, false);
+    Progress::Start("Sanity Checks", 5, false);
     for (auto i : cellIndices) VAssert(i < nVerts);
     Progress::Update(1);
     for (auto i : cellStarts) VAssert(i < cellIndices.size());
@@ -1027,11 +1035,11 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
     Progress::Update(4);
     VAssert(cellStarts.size() == cellTypes.size());
     Progress::Update(5);
-//    printf("done\n");
+    Progress::Finish();
     
     
 //    printf("Copy data to OSPRay..."); flush(cout);
-    Progress::Begin("Copy data to OSPRay", 5, false);
+    Progress::Start("Copy data to OSPRay", 5, false);
     OSPVolume volume = ospNewVolume("unstructured");
     OSPData data;
     
@@ -1067,9 +1075,9 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
     delete [] vdata;
     delete [] cdata;
     Progress::Update(5);
-//    printf("done\n");
+    Progress::Finish();
     
-    Progress::Begin("Commit OSPRay", 1, false);
+    Progress::Start("Commit OSPRay", 1, false);
 //    printf("Commit volume..."); flush(cout);
     ospCommit(volume);
 //    printf("done\n");

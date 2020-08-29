@@ -156,14 +156,10 @@ VolumeCellTraversal::~VolumeCellTraversal()
 {
 }
 
-#include <vapor/Progress.h>
-
 int VolumeCellTraversal::LoadData(const Grid *grid)
 {
     if (VolumeRegular::LoadData(grid) < 0)
         return -1;
-    
-    Progress::Begin("Load", 1, true);
     
     _useHighPrecisionTriangleRoutine = _needsHighPrecisionTriangleRoutine(grid);
     _gridHasInvertedCoordinateSystemHandiness = !grid->HasInvertedCoordinateSystemHandiness();
@@ -362,7 +358,6 @@ int VolumeCellTraversal::LoadData(const Grid *grid)
     delete [] data;
     delete [] boxMins;
     delete [] boxMaxs;
-    Progress::Finish();
     return 0;
 }
 
