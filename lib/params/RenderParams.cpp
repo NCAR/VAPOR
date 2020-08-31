@@ -553,12 +553,14 @@ void RenderParams::SetAuxVariableNames(std::vector<std::string> varnames)
 
 string RenderParams::GetFirstVariableName() const {
 	string str = GetVariableName();
-	if (str.length()) return str;
+	if (str.length()) return str;                       // scalar
 	vector<string> strvec = GetFieldVariableNames();
 	for (int i = 0; i<strvec.size(); i++){
-		if (strvec[i] != "") return strvec[i];
+		if (strvec[i] != "") return strvec[i];          // vector
 	}
-	return "";
+    str = GetHeightVariableName();
+	if (str.length()) return str;                       // height
+	return "";                                          // none
 }
 
 

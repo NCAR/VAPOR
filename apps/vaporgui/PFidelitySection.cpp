@@ -66,10 +66,15 @@ void PQuickFidelitySelector::dropdownTextChanged(std::string text)
     int nLod = dm->GetCRatios(vn).size();
     int nRef = dm->GetNumRefLevels(vn);
     int v = text == "Low" ? 0 : text == "Medium" ? 1 : 2;
-    
-    rp->BeginGroup("Change dim");
-    rp->SetCompressionLevel(v * nLod / 2);
-    rp->SetRefinementLevel(v * nRef / 2);
+    int lod =  v * nLod / 2;
+    int ref =  v * nRef / 2;
+
+    if (lod == nLod) lod--;
+    if (ref == nRef) ref--;
+
+    rp->BeginGroup("Change lod/cRatio");
+    rp->SetCompressionLevel( lod );
+    rp->SetRefinementLevel(  ref );
     rp->EndGroup();
 }
 
