@@ -75,6 +75,7 @@ private:
  //! if wheel events also scrolled the tab itself
   void wheelEvent(QWheelEvent*) {}
 
+ TwoDVariablesSubtab* _variables;
  TwoDGeometrySubtab* _geometry;
  GLTwoDDataImageWindow* _glTwoDDataImageWindow;
  TwoDAppearanceSubtab* _appearance;

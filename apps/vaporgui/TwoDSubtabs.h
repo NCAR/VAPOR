@@ -6,6 +6,8 @@
 #include "ui_TwoDAnnotationGUI.h"
 #include "Flags.h"
 #include <TFEditor.h>
+#include "PSection.h"
+#include "PFidelitySection.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -13,6 +15,31 @@ namespace VAPoR {
 	class ParamsMgr;
 	class DataMgr;
 }
+
+class TwoDVariablesSubtab : public QWidget {
+
+    Q_OBJECT
+    PGroup *_pg;
+
+public:
+    TwoDVariablesSubtab(QWidget* parent) {
+      setLayout( new QVBoxLayout );
+      ((QVBoxLayout*)layout())->insertWidget(1, _pg = new PGroup);
+      PSection *vars = new PSection("Variable Selection");
+      vars->Add(new PScalarVariableSelector2DHLI);
+      vars->Add(new PHeightVariableSelectorHLI);
+      _pg->Add(vars);
+      _pg->Add(new PFidelitySection);
+    }
+
+    void Update(
+        VAPoR::DataMgr *dataMgr,
+        VAPoR::ParamsMgr *paramsMgr,
+        VAPoR::RenderParams *rParams
+    ) {
+      _pg->Update(rParams, paramsMgr, dataMgr);
+    }
+};
 
 class TwoDAppearanceSubtab : public QWidget, public Ui_TwoDAppearanceGUI {
 

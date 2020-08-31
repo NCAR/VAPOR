@@ -107,20 +107,6 @@ public:
     PZFieldVariableSelector(); 
 };
 
-class PVariablesGroup : public PGroup {
-public:
-    PVariablesGroup();
-
-    void AddVar( PWidget* pw );
-
-    QScrollArea* GetScrollArea() const;
-
-private:
-    PSection*    _varSection;
-    QScrollArea* _scrollArea;
-};
-
-
 // ==================================
 //       HLI Variable Selectors
 // ==================================

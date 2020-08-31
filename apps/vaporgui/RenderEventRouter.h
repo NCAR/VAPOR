@@ -119,13 +119,9 @@ public:
  ) : EventRouter(ce, paramsType) {
 
 	_instName = "";
-
-    _variablesGroup = new PVariablesGroup();
-	
 }
 
  virtual ~RenderEventRouter(){
-    delete _variablesGroup;
  }
 
  void SetActive(string instName) {
@@ -254,8 +250,6 @@ protected:
  virtual string _getSmallIconImagePath() const = 0;
 
  virtual string _getIconImagePath() const = 0;
-
- PVariablesGroup* _variablesGroup;
 
 private:
  string _instName;
