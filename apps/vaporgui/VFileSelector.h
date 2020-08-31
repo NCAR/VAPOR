@@ -7,13 +7,13 @@
 #include "VContainer.h"
 
 class VPushButton;
-class VLineEdit;
+class VLineEdit_Deprecated;
 
 
 //! class VFileSelector
 //!
 //! An abstract class for reading and writing files, or selecting
-//! directory paths.  This class wraps a VLineEdit to display the current
+//! directory paths.  This class wraps a VLineEdit_Deprecated to display the current
 //! selection, and a VPushButton to open file dialogs.  It also provides
 //! vaporgui's standard setter/getter functions and signals.
 class VFileSelector : public VContainer {
@@ -32,7 +32,7 @@ protected:
         const std::string& filter
     );
 
-    VLineEdit*           _lineEdit;
+    VLineEdit_Deprecated*           _lineEdit;
     VPushButton*         _pushButton;
 
     std::string           _filePath;

@@ -83,11 +83,9 @@ size_t UnstructuredGridLayered::GetGeometryDim() const {
 }
 
 
-void UnstructuredGridLayered::GetUserExtents(
-    vector <double> &minu, vector <double> &maxu
+void UnstructuredGridLayered::GetUserExtentsHelper(
+    DblArr3 &minu, DblArr3 &maxu
 ) const {
-	minu.clear();
-	maxu.clear();
 
 	// Get horizontal extents from base class
 	//
@@ -98,89 +96,75 @@ void UnstructuredGridLayered::GetUserExtents(
 	//
 	float range[2];
 	_zug.GetRange(range);
-	minu.push_back(range[0]);
-	maxu.push_back(range[1]);
+	minu[2] = range[0];
+	maxu[2] = range[1];
 
 }
 
 void UnstructuredGridLayered::GetBoundingBox(
-	const vector <size_t> &min,
-	const vector <size_t> &max,
-	vector <double> &minu,
-	vector <double> &maxu
+	const Size_tArr3 &min, const Size_tArr3 &max,
+	DblArr3 &minu, DblArr3 &maxu
 ) const {
 
-	vector <size_t> cMin = min;
-	ClampIndex(cMin);
+	Size_tArr3 cMin;
+	ClampIndex(min, cMin);
 
-	vector <size_t> cMax = max;
-	ClampIndex(cMax); 
+	Size_tArr3 cMax;
+	ClampIndex(max, cMax);
 
-	vector <size_t> min2d = {cMin[0]};
-	vector <size_t> max2d = {cMax[0]};
-
-	_ug2d.GetBoundingBox(min2d, max2d, minu, maxu);
+	_ug2d.GetBoundingBox(cMin, cMax, minu, maxu);
 
 	float range[2];
 	_zug.GetRange(min, max, range);
-	minu.push_back(range[0]);
-	maxu.push_back(range[1]);
+	minu[2] = range[0];
+	maxu[2] = range[1];
 
 }
 
 bool UnstructuredGridLayered::GetEnclosingRegion(
-    const vector <double> &minu, const vector <double> &maxu,
-    vector <size_t> &min, vector <size_t> &max
+	const DblArr3 &minu, const DblArr3 &maxu,
+	Size_tArr3 &min, Size_tArr3 &max
 ) const {
-
-	vector <double> cMinu = minu;
-	ClampCoord(cMinu);
-
-	vector <double> cMaxu = maxu;
-	ClampCoord(cMaxu);
 
 	VAssert(0 && "Not implemented");
 	return(true);
 }
 
 void UnstructuredGridLayered::GetUserCoordinates(
-    const size_t indices[],
-    double coords[]
+	const Size_tArr3 &indices,
+	DblArr3 &coords
 ) const {
 
-    size_t cIndices[2];
+    Size_tArr3 cIndices;
     ClampIndex(indices, cIndices);
 
-	size_t indices2d[] = {cIndices[0]};
-	_ug2d.GetUserCoordinates(indices2d, coords);
+	_ug2d.GetUserCoordinates(cIndices, coords);
 
 	coords[2] = _zug.GetValueAtIndex(cIndices);
 }
 
 
 bool UnstructuredGridLayered::_insideGrid(
-	const std::vector <double> &coords,
-    std::vector <size_t> &cindices,
+	const DblArr3 &coords,
+	Size_tArr3 &cindices,
     std::vector <size_t> &nodes2D,
     std::vector <double> &lambda,
 	float zwgt[2]
 ) const {
 	VAssert (_location == NODE);
 
-	cindices.clear();
 	nodes2D.clear();
 	lambda.clear();
 
-	vector <double> cCoords = coords;
-	ClampCoord(cCoords);
+	DblArr3 cCoords;
+	ClampCoord(coords, cCoords);
 
 	// Find the 2D horizontal cell containing the X,Y coordinates
 	//
-	vector <double> coords2D = {cCoords[0], cCoords[1]};
     std::vector <std::vector <size_t> > nodes;
 
 	bool status = _ug2d.GetIndicesCell(
-			coords2D, cindices, nodes, lambda
+		cCoords, cindices, nodes, lambda
 	);
 	if (! status) return (status);
 
@@ -207,7 +191,7 @@ bool UnstructuredGridLayered::_insideGrid(
 	if (! Wasp::BinarySearchRange(zcoords, cCoords[2], k)) return(false);
 
 	VAssert(k>=0 && k<nz);
-	cindices.push_back(k);
+	cindices[1] = k;
 
 	float z = cCoords[2];
     zwgt[0] = 1.0 - (z - zcoords[k]) / (zcoords[k+1] - zcoords[k]);
@@ -218,10 +202,9 @@ bool UnstructuredGridLayered::_insideGrid(
 }
 
 bool UnstructuredGridLayered::GetIndicesCell(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
+	const DblArr3 &coords,
+	Size_tArr3 &indices
 ) const {
-	indices.clear();
 
     vector <size_t> nodes2D;
     vector <double> lambda;
@@ -230,12 +213,10 @@ bool UnstructuredGridLayered::GetIndicesCell(
 	return(_insideGrid(coords, indices, nodes2D, lambda, zwgt));
 }
 
-bool UnstructuredGridLayered::InsideGrid(
-	const std::vector <double> &coords
-) const {
+bool UnstructuredGridLayered::InsideGrid(const DblArr3 &coords) const {
 
 
-	std::vector <size_t> indices;
+	Size_tArr3 indices;
     std::vector <size_t> nodes2D;
     vector <double> lambda;
 	float zwgt[2];
@@ -245,9 +226,9 @@ bool UnstructuredGridLayered::InsideGrid(
 }
 
 float UnstructuredGridLayered::GetValueNearestNeighbor (
-	const std::vector <double> &coords
+	const DblArr3 &coords
 ) const {
-	std::vector <size_t> indices;
+	Size_tArr3 indices;
     std::vector <size_t> nodes2D;
     vector <double> lambda;
 	float zwgt[2];
@@ -281,10 +262,10 @@ float UnstructuredGridLayered::GetValueNearestNeighbor (
 }
 
 float UnstructuredGridLayered::GetValueLinear (
-	const std::vector <double> &coords
+	const DblArr3 &coords
 ) const {
 
-	std::vector <size_t> indices;
+	Size_tArr3 indices;
     std::vector <size_t> nodes2D;
     vector <double> lambda;
 	float zwgt[2];

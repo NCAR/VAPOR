@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QWidget>
+#include <QFrame>
 #include <QHBoxLayout>
 
 #include <string>
@@ -13,8 +13,11 @@
 //! Sets a standard layout and margin policy, and protects
 //! against unwanted mouse scroll whell events.
 
-class VContainer : public QWidget {
+class VContainer : public QFrame {
     Q_OBJECT
+
+public:
+    virtual QSize sizeHint() const;
 
 protected:
     VContainer();

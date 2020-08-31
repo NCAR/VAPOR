@@ -8,10 +8,12 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Contact and Contribute &mdash; Vapor 3.1.0 documentation</title>
+  <title>Creating a Renderer &mdash; Vapor 3.2.0.59c3322 documentation</title>
   
 
   
+  
+    <link rel="shortcut icon" href="_static/vaporVLogo.png"/>
   
   
   
@@ -36,7 +38,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="License and Citation" href="licenseAndCitation.html" />
-    <link rel="prev" title="Ancillary Tools" href="usage/ancillaryTools.html" /> 
+    <link rel="prev" title="Creating a Data Reader" href="createDataReader.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -53,6 +55,9 @@
             <a href="index.html" class="icon icon-home"> Vapor
           
 
+          
+            
+            <img src="_static/vaporLogoWhite2.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -86,12 +91,28 @@
 <li class="toctree-l1"><a class="reference internal" href="quickStartGuide.html">Quick Start Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gettingDataIntoVapor.html">Getting Data into Vapor3</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Using Vapor 3</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Contact and Contribute</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#gethelp">Get help on our forum</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#reportabug">Report a bug</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#submitanenhancement">Request an enhancement</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#forkongithub">GitHub Repository</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#readcodingconvention">Read our coding conventions</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://vapor.discourse.group">Get Help on Our Forum</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="contributing.html">Contributing to Vapor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#where-to-start">Where to start?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#bug-reports-and-feature-requests">Bug Reports and Feature Requests</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="contributing.html#code-contributions">Code Contributions</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#version-control-git-and-github">Version control, Git, and GitHub</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#forking-vapor-s-code">Forking Vapor’s code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#download-the-third-party-libraries">Download the Third-Party Libraries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#install-system-libraries">Install System Libraries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#build-vapor-with-cmake">Build Vapor with CMake</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="contributing.html#adding-to-the-code-base">Adding to the Code Base</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="createDataReader.html">Creating a Data Reader</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Creating a Renderer</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#build-and-test-an-installer">Build and Test an Installer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#submitting-your-changes">Submitting Your Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="contributing.html#id2">Vapor Coding Conventions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#contributing-to-vapor-s-documentation">Contributing to Vapor’s Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#contributing-to-vapor-s-gallery">Contributing to Vapor’s Gallery</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="licenseAndCitation.html">License and Citation</a></li>
@@ -140,13 +161,15 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Contact and Contribute</li>
+          <li><a href="contributing.html">Contributing to Vapor</a> &raquo;</li>
+        
+      <li>Creating a Renderer</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/contactAndContribute.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/createRenderer.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -159,23 +182,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="contact-and-contribute">
-<span id="contactandcontribute"></span><h1>Contact and Contribute<a class="headerlink" href="#contact-and-contribute" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="gethelp">
-<span id="id1"></span><h2><a class="reference external" href="https://vapor.discourse.group/">Get help on our forum</a><a class="headerlink" href="#gethelp" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="reportabug">
-<span id="id2"></span><h2><a class="reference external" href="https://github.com/NCAR/VAPOR/issues/new/choose">Report a bug</a><a class="headerlink" href="#reportabug" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="submitanenhancement">
-<span id="id3"></span><h2><a class="reference external" href="https://github.com/NCAR/VAPOR/issues/new/choose">Request an enhancement</a><a class="headerlink" href="#submitanenhancement" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="forkongithub">
-<span id="id4"></span><h2><a class="reference external" href="https://github.com/NCAR/VAPOR">GitHub Repository</a><a class="headerlink" href="#forkongithub" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="readcodingconvention">
-<span id="id5"></span><h2><a class="reference external" href="https://github.com/NCAR/VAPOR/wiki/Vapor-Coding-Convention">Read our coding conventions</a><a class="headerlink" href="#readcodingconvention" title="Permalink to this headline">¶</a></h2>
-</div>
+  <div class="section" id="creating-a-renderer">
+<span id="createrenderer"></span><h1>Creating a Renderer<a class="headerlink" href="#creating-a-renderer" title="Permalink to this headline">¶</a></h1>
+<p>Coming soon: How to create a renderer</p>
 </div>
 
 
@@ -189,7 +198,7 @@
         <a href="licenseAndCitation.html" class="btn btn-neutral float-right" title="License and Citation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="usage/ancillaryTools.html" class="btn btn-neutral float-left" title="Ancillary Tools" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="createDataReader.html" class="btn btn-neutral float-left" title="Creating a Data Reader" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

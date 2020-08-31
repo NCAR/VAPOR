@@ -52,6 +52,8 @@ class QMdiArea;
 class QDockWindow;
 class QLabel;
 class QSpinBox;
+class ProgressStatusBar;
+class QTimer;
 
 class VizWindow;
 class VizWinMgr;
@@ -73,6 +75,8 @@ public:
  );
  ~MainForm();
 
+    int RenderAndExit(int start, int end, const std::string &baseFile, int width, int height);
+    
 protected:
  bool eventFilter(QObject *obj, QEvent *event);
 
@@ -174,13 +178,22 @@ private:
  QAction* _stepBackAction;
  QSpinBox* _interactiveRefinementSpin;
  QDockWidget* _tabDockWindow;
+    
+ int _progressSavedFB = -1;
+ bool _progressEnabled = false;
+ bool _needToReenableProgressAfterAnimation = false;
+ QAction *_progressEnabledMenuItem = nullptr;
+    
+    ProgressStatusBar *_status = nullptr;
+    std::chrono::time_point<std::chrono::system_clock> _progressLastUpdateTime;
+    const QObject * _disableUserInputForAllExcept = nullptr;
+    bool _insideMessedUpQtEventLoop = false;
 
  Statistics *_stats;
  Plot *_plot;
  PythonVariables *_pythonVariables;
  BannerGUI* _banner;
  VizSelectCombo* _windowSelector;
- QLabel* _modeStatusWidget;
  VAPoR::ControlExec* _controlExec;
  VAPoR::ParamsMgr *_paramsMgr;
  TabManager *_tabMgr;
@@ -192,6 +205,7 @@ private:
  bool _begForCitation;
  int _eventsSinceLastSave;
  bool _buttonPressed;
+ bool _paramsEventQueued = false;
 
  ErrorReporter *_errRep;
     
@@ -204,6 +218,7 @@ private:
 
  void _performSessionAutoSave();
  void _stateChangeCB();
+ void _intermediateStateChangedCB();
 
  QMdiArea* getMDIArea() {return _mdiArea;}
 
@@ -304,11 +319,14 @@ private:
  void _createAnimationToolBar();
  void _createVizToolBar();
  void createToolBars();
+ void _createProgressWidget();
+ void _disableProgressWidget();
  virtual void sessionOpenHelper(string fileName);
     
  template<class T> bool isDatasetValidFormat(const std::vector<std::string> &paths) const;
  bool determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const;
 
+ bool isOpenGLContextActive() const;
 
  // Enable/Disable all the widgets that require data to be present
  //
@@ -340,10 +358,8 @@ private slots:
  void captureJpegSequence();
  void captureTiffSequence();
  void capturePngSequence();
- void startAnimCapture(
-    string filter,
-    string defaultSuffix
- );
+ void selectAnimCatureOutput(string filter, string defaultSuffix);
+ void startAnimCapture(string baseFile, string defaultSuffix="tiff");
  void endAnimCapture();
  void captureSingleImage( 
     string filter,

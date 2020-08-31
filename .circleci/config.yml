@@ -101,6 +101,7 @@ jobs:
           name: check for warnings
           command: |
             if grep -q warning /tmp/output.txt; then
+               cat /tmp/output.txt
                exit -1
             else
                exit 0
@@ -172,15 +173,6 @@ jobs:
 
       - store_artifacts:
           path: /tmp/output.txt
-
-      - run:
-          name: check for warnings
-          command: |
-            if grep -q warning /tmp/output.txt; then
-               exit 1
-            else
-               exit 0
-            fi
 
   build_centos7_installer:
     docker:
@@ -473,8 +465,8 @@ workflows:
   build:
     jobs:
       - build_ubuntu18
+      - build_centos7
       #- build_ubuntu16
-      #- build_centos7
       #- build_osx
       #- build_win10_installer
       #- test_win10_workspace

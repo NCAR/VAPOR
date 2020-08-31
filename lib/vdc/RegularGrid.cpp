@@ -25,15 +25,14 @@ void RegularGrid::_SetExtents(
 ) {
 	VAssert(minu.size() == maxu.size());
 
-	_minu.clear();
-	_maxu.clear();
 	_delta.clear();
+	_geometryDim = minu.size();
 
-	_minu = minu;
-	_maxu = maxu;
+	CopyToArr3(minu, _minu);
+	CopyToArr3(maxu, _maxu);
 
 	vector <size_t> dims = GetDimensions();
-	for (int i=0; i<_minu.size(); i++) {
+	for (int i=0; i<dims.size(); i++) {
 		if (dims[i] > 1) {
 			_delta.push_back((_maxu[i] - _minu[i])/(double) (dims[i] - 1));
 		}
@@ -59,7 +58,7 @@ RegularGrid::RegularGrid(
 }
 
 size_t RegularGrid::GetGeometryDim() const {
-	return(_minu.size());
+	return(_geometryDim);
 }
 
 vector <size_t> RegularGrid::GetCoordDimensions(size_t dim) const {
@@ -83,11 +82,11 @@ vector <size_t> RegularGrid::GetCoordDimensions(size_t dim) const {
 }
 
 float RegularGrid::GetValueNearestNeighbor(
-	const std::vector <double> &coords
+	const DblArr3 &coords
 ) const {
 
-	std::vector <double> cCoords = coords;
-	ClampCoord(cCoords);
+	DblArr3 cCoords;
+	ClampCoord(coords, cCoords);
 
 	if (! InsideGrid(cCoords)) return(GetMissingValue());
 
@@ -100,7 +99,7 @@ float RegularGrid::GetValueNearestNeighbor(
 
 	vector <size_t> dims = GetDimensions();
 
-	if (dims.size() == 3) 
+	if (GetGeometryDim()== 3) 
 		if (_delta[2] != 0.0) k = (size_t) floor ((cCoords[2]-_minu[2]) / _delta[2]);
 
 	VAssert(i<dims[0]);
@@ -121,7 +120,7 @@ float RegularGrid::GetValueNearestNeighbor(
 		jwgt = ((cCoords[1] - _minu[1]) - (j * _delta[1])) / _delta[1];
 	}
 
-	if (dims.size() == 3)  {
+	if (GetGeometryDim() == 3)  {
 		if (_delta[2] != 0.0) {
 			kwgt = ((cCoords[2] - _minu[2]) - (k * _delta[2])) / _delta[2];
 		}
@@ -139,10 +138,10 @@ float RegularGrid::GetValueNearestNeighbor(
 
 }
 
-float RegularGrid::GetValueLinear(const std::vector <double> &coords) const {
+float RegularGrid::GetValueLinear(const DblArr3 &coords) const {
 
-	std::vector <double> cCoords = coords;
-	ClampCoord(cCoords);
+	DblArr3 cCoords;
+	ClampCoord(coords, cCoords);
 
 	if (! InsideGrid(cCoords)) return(GetMissingValue());
 
@@ -157,12 +156,11 @@ float RegularGrid::GetValueLinear(const std::vector <double> &coords) const {
 		j = (size_t) floor ((cCoords[1]-_minu[1]) / _delta[1]);
 	}
 
-	vector <size_t> dims = GetDimensions();
-
-	if (dims.size() == 3 && _delta[2] != 0.0) {
+	if (GetGeometryDim() == 3 && _delta[2] != 0.0) {
 		k = (size_t) floor ((cCoords[2]-_minu[2]) / _delta[2]);
 	}
 
+	const vector <size_t> dims = GetDimensions();
 	VAssert(i<dims[0]);
 	VAssert(j<dims[1]);
 
@@ -181,7 +179,7 @@ float RegularGrid::GetValueLinear(const std::vector <double> &coords) const {
 		jwgt = ((cCoords[1] - _minu[1]) - (j * _delta[1])) / _delta[1];
 	}
 
-	if (dims.size() == 3 && _delta[2] != 0.0) {
+	if (GetGeometryDim() == 3 && _delta[2] != 0.0) {
 		kwgt = ((cCoords[2] - _minu[2]) - (k * _delta[2])) / _delta[2];
 	}
 
@@ -241,36 +239,35 @@ float RegularGrid::GetValueLinear(const std::vector <double> &coords) const {
 
 }
 
-void RegularGrid::GetUserExtents(
-	vector <double> &minu, vector <double> &maxu
+void RegularGrid::GetUserExtentsHelper(
+    DblArr3 &minu, DblArr3 &maxu
 ) const {
 	minu = _minu;
 	maxu = _maxu;
 }
 
 void RegularGrid::GetBoundingBox(
-    const vector <size_t> &min, const vector <size_t> &max,
-    vector <double> &minu, vector <double> &maxu
+	const Size_tArr3 &min, const Size_tArr3 &max,
+	DblArr3 &minu, DblArr3 &maxu
 ) const {
-	vector <size_t> cMin = min;
-	ClampIndex(cMin);
+	Size_tArr3 cMin;
+	ClampIndex(min, cMin);
 
-	vector <size_t> cMax = max;
-	ClampIndex(cMax); 
+	Size_tArr3 cMax;
+	ClampIndex(max, cMax); 
 
-	VAssert(cMin.size() == cMax.size());
-
-	Grid::GetUserCoordinates(cMin, minu);
-	Grid::GetUserCoordinates(cMax, maxu);
+	GetUserCoordinates(cMin, minu);
+	GetUserCoordinates(cMax, maxu);
 }
 
 
 void RegularGrid::GetUserCoordinates(
-	const size_t indices[],
-	double coords[]
+	const Size_tArr3 &indices,
+	DblArr3 &coords
 ) const {
+	coords = {0.0, 0.0, 0.0};
 
-	size_t cIndices[3];
+	Size_tArr3 cIndices;
 	ClampIndex(indices, cIndices);
 
 	const vector <size_t> &dims = GetDimensions();
@@ -288,28 +285,27 @@ void RegularGrid::GetUserCoordinates(
 
 
 bool RegularGrid::GetIndicesCell(
-    const std::vector <double> &coords,
-    std::vector <size_t> &indices
+	const DblArr3 &coords,
+	Size_tArr3 &indices
 ) const {
-	indices.clear();
 
-	std::vector <double> clampedCoords = coords;
-	ClampCoord(clampedCoords);
+	DblArr3 cCoords;
+	ClampCoord(coords, cCoords);
 
 	vector <size_t> dims = GetDimensions();
 
 	vector <double> wgts;
 	
-	for (int i=0; i<clampedCoords.size(); i++) {
-		indices.push_back(0);
+	VAssert(GetGeometryDim() <= 3);
+	for (int i=0; i<GetGeometryDim(); i++) {
 
-		if (clampedCoords[i] < _minu[i] || clampedCoords[i] > _maxu[i]) {
+		if (cCoords[i] < _minu[i] || cCoords[i] > _maxu[i]) {
 			return(false);
 		}
 
 		if (_delta[i] != 0.0) {
 			indices[i] = (size_t) floor (
-				(clampedCoords[i]-_minu[i]) / _delta[i]
+				(cCoords[i]-_minu[i]) / _delta[i]
 			);
 
 			// Edge case
@@ -325,16 +321,17 @@ bool RegularGrid::GetIndicesCell(
 
 }
 
-bool RegularGrid::InsideGrid(const std::vector <double> &coords) const
+bool RegularGrid::InsideGrid(const DblArr3 &coords) const
 {
 
-	std::vector <double> clampedCoords = coords;
-	ClampCoord(clampedCoords);
+	DblArr3 cCoords;
+	ClampCoord(coords, cCoords);
 
-	for (int i=0; i<clampedCoords.size(); i++) {
-		if (clampedCoords[i] < _minu[i]) return(false);
+	VAssert(GetGeometryDim() <= 3);
+	for (int i=0; i<GetGeometryDim(); i++) {
+		if (cCoords[i] < _minu[i]) return(false);
 
-		if (clampedCoords[i] > _maxu[i]) return(false);
+		if (cCoords[i] > _maxu[i]) return(false);
 	}
 
 	return(true);
@@ -345,9 +342,10 @@ RegularGrid::ConstCoordItrRG::ConstCoordItrRG(
 	const RegularGrid *rg, bool begin
 ) : ConstCoordItrAbstract() {
 	_dims = rg->GetDimensions();
-	_minu = rg->_minu;
 	_delta = rg->_delta;
-	_coords = rg->_minu;
+
+	Grid::CopyFromArr3(rg->_minu, _minu);
+	Grid::CopyFromArr3(rg->_minu, _coords);
 
     _index = vector<size_t> (_dims.size(), 0);
     if (! begin) {
