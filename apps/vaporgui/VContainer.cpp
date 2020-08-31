@@ -21,7 +21,7 @@ VContainer::VContainer()
     );
     setLayout( layout );
 
-    setSizePolicy( QSizePolicy::Maximum, QSizePolicy::Preferred );
+    setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Preferred );
 }
 
 MouseWheelWidgetAdjustmentGuard::MouseWheelWidgetAdjustmentGuard(QObject *parent) : QObject(parent)
