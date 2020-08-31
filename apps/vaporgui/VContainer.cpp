@@ -1,3 +1,4 @@
+#include <iostream>
 #include <QEvent>
 #include <QWidget>
 
@@ -9,7 +10,7 @@ const int VContainer::_RIGHT_MARGIN  = 0;
 const int VContainer::_BOTTOM_MARGIN = 0;
 
 VContainer::VContainer() 
-: QWidget() 
+: QFrame() 
 {
     QHBoxLayout* layout = new QHBoxLayout;
     layout->setContentsMargins(
@@ -37,4 +38,14 @@ bool MouseWheelWidgetAdjustmentGuard::eventFilter(QObject *o, QEvent *e)
     }
 
     return QObject::eventFilter(o, e);
+}
+
+QSize VContainer::sizeHint() const {
+    QWidget* parent = this->parentWidget();
+    if ( layout()->count() > 1 ) {
+        return QSize( parent->width() / 2., 20 );
+    }
+    else {
+        return QSize( parent->width() / 3. , 20 );
+    }
 }
