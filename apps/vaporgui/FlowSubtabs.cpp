@@ -138,7 +138,7 @@ FlowAppearanceSubtab::FlowAppearanceSubtab(QWidget* parent) : QVaporSubtab(paren
     PSection *ps;
     
     _pw->Add(ps = new PSection("Appearance"));
-    ps->Add(new PEnumDropdown(FlowParams::RenderTypeTag, {"Tubes", "Samples", "Density"}, {FlowParams::RenderTypeStream, FlowParams::RenderTypeSamples, FlowParams::RenderTypeDensity}, "Render Type"));
+    ps->Add(new PEnumDropdown(FlowParams::RenderTypeTag, {"Tubes", "Samples", "KLGWTH"}, {FlowParams::RenderTypeStream, FlowParams::RenderTypeSamples, FlowParams::RenderTypeDensity}, "Render Type"));
     ps->Add((new PLabel("May not render correctly with other renderers"))->ShowBasedOnParam(FlowParams::RenderTypeTag, FlowParams::RenderTypeDensity));
     ps->Add((new PEnumDropdown(FlowParams::RenderGlyphTypeTag, {"Circle", "Arrow"}, {FlowParams::GlpyhTypeSphere, FlowParams::GlpyhTypeArrow}, "Glyph Type"))->ShowBasedOnParam(FlowParams::RenderTypeTag, FlowParams::RenderTypeSamples));
     ps->Add((new PCheckbox(FlowParams::RenderGeom3DTag, "3D Geometry"))->ShowBasedOnParam(FlowParams::RenderTypeTag, FlowParams::RenderTypeStream));
@@ -181,8 +181,8 @@ FlowAppearanceSubtab::FlowAppearanceSubtab(QWidget* parent) : QVaporSubtab(paren
     PGroup *densityGroup = new PGroup;
     densityGroup->ShowBasedOnParam(FlowParams::RenderTypeTag, FlowParams::RenderTypeDensity);
     ps->Add(densityGroup);
-    densityGroup->Add((new PDoubleSliderEdit(FlowParams::RenderDensityFalloffTag, "Density Falloff"))->SetRange(0.5, 10)->EnableDynamicUpdate());
-    densityGroup->Add((new PDoubleSliderEdit(FlowParams::RenderDensityToneMappingTag, "Tone Mapping"))->SetRange(0, 1)->EnableDynamicUpdate());
+    densityGroup->Add((new PDoubleSliderEdit(FlowParams::RenderDensityFalloffTag, "Density Falloff"))->SetRange(0.5, 10)->EnableDynamicUpdate()->SetTooltip("The exponential factor at which the intensity falls off along the width of the line"));
+    densityGroup->Add((new PDoubleSliderEdit(FlowParams::RenderDensityToneMappingTag, "Tone Mapping"))->SetRange(0, 1)->EnableDynamicUpdate()->SetTooltip("The overall color intensity of the line"));
     densityGroup->Add((new PCheckbox("invert"))->SetTooltip("For rendering on light backgrounds"));
     densityGroup->Add(fadeTailWidget());
     
