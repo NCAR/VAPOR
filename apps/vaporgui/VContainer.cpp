@@ -21,7 +21,8 @@ VContainer::VContainer()
     );
     setLayout( layout );
 
-    setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Preferred );
+    setSizePolicy( QSizePolicy::Maximum, QSizePolicy::Preferred );
+    //setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Preferred );
 }
 
 MouseWheelWidgetAdjustmentGuard::MouseWheelWidgetAdjustmentGuard(QObject *parent) : QObject(parent)
@@ -43,9 +44,13 @@ bool MouseWheelWidgetAdjustmentGuard::eventFilter(QObject *o, QEvent *e)
 QSize VContainer::sizeHint() const {
     QWidget* parent = this->parentWidget();
     if ( layout()->count() > 1 ) {
+        std::cout << "A" << std::endl;
         return QSize( parent->width() / 2., 20 );
     }
     else {
+        std::cout << " B" << std::endl;
+        //return QSize( parent->width() / 2. , 20 );
+        std::cout << parent->width() / 3. << std::endl;
         return QSize( parent->width() / 3. , 20 );
     }
 }

@@ -4,6 +4,12 @@
 #include "PFidelitySection.h"
 #include <vapor/glutil.h>
 
+#include "VStringLineEdit.h"
+#include "VIntLineEdit.h"
+#include "VDoubleLineEdit.h"
+#include "VIntSliderEdit.h"
+#include "VDoubleSliderEdit.h"
+
 ContourVariablesSubtab::ContourVariablesSubtab(QWidget* parent) {
     setLayout( new QVBoxLayout );
     ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);
@@ -12,6 +18,52 @@ ContourVariablesSubtab::ContourVariablesSubtab(QWidget* parent) {
     vars->Add(new PHeightVariableSelectorHLI);
     pg->Add(vars);
     pg->Add(new PFidelitySection);
+
+    VLineItem* vli;
+
+    /*VStringLineEdit* vsle = new VStringLineEdit( "woot" );
+    vsle->setToolTip( "VSLE" );
+    vli = new VLineItem( "VStringLineEdit", vsle );
+    vli->setToolTip( "VLI" );
+    layout()->addWidget( vli );
+    connect( vsle, SIGNAL( ValueChanged( const std::string& ) ),
+        this, SLOT( testVStringLineEdit( const std::string& ) ) );
+
+    VDoubleLineEdit* vdle = new VDoubleLineEdit();
+    vli = new VLineItem( "VDoubleLineEdit", vdle );
+    layout()->addWidget( vli );
+    connect( vdle, SIGNAL( ValueChanged( double ) ),
+        this, SLOT( testVDoubleLineEdit( double ) ) );
+
+    VIntLineEdit* vile3 = new VIntLineEdit();
+    vli = new VLineItem( "VIntLineEdit", vile3 );
+    layout()->addWidget( vli );
+    connect( vile3, SIGNAL( ValueChanged( int ) ),
+        this, SLOT( testVIntLineEdit( int ) ) );    */
+
+/*VIntSliderEdit* visei = new VIntSliderEdit(0, 10, 3, false );
+vli = new VLineItem( "VIntSliderEdit immutable", visei );
+layout()->addWidget( vli );
+connect( visei, SIGNAL( ValueChanged( int ) ),
+    this, SLOT( testVIntSliderEdit( int ) ) );  */
+
+    /*VIntSliderEdit* vise = new VIntSliderEdit(0, 10, 3, true );
+    vli = new VLineItem( "VIntSliderEdit", vise );
+    layout()->addWidget( vli );
+    connect( vise, SIGNAL( ValueChanged( int ) ),
+        this, SLOT( testVIntSliderEdit( int ) ) );  */
+
+VDoubleSliderEdit* vdsei = new VDoubleSliderEdit( 0, 10, 0, false );
+vli = new VLineItem( "VDoubleSliderEdit immutable", vdsei );
+layout()->addWidget( vli );
+connect( vdsei, SIGNAL( ValueChanged( double ) ),
+    this, SLOT( testVDoubleSliderEdit( double ) ) );
+
+    /*VDoubleSliderEdit* vdse = new VDoubleSliderEdit( 0, 10, 0, true );
+    vli = new VLineItem( "VDoubleSliderEdit", vdse );
+    layout()->addWidget( vli );
+    connect( vdse, SIGNAL( ValueChanged( double ) ),
+        this, SLOT( testVDoubleSliderEdit( double ) ) );*/
 }
 
 void ContourVariablesSubtab::Update(

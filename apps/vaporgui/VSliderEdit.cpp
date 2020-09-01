@@ -13,6 +13,8 @@ VSliderEdit::VSliderEdit( double min, double max, double value )
   _value( value ),
   _isIntType( false )
 {
+    //setSizePolicy( QSizePolicy::Maximum, QSizePolicy::Preferred );
+
     _lineEdit = new VLineEdit_Deprecated();
     _slider = new VSlider();
 
