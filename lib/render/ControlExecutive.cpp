@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <algorithm>
 
 #include <vapor/ParamsMgr.h>
 #include <vapor/ControlExecutive.h>
@@ -673,11 +674,39 @@ string ControlExec::MakeStringConformant(string s) {
 }
 
 
-void ControlExec::undoRedoHelper() {
+void ControlExec::undoRedoHelper(
+	const map <string, vector <string> > &addRenderInstances,
+	const map <string, vector <string> > &removeRenderInstances
+) {
 
 	bool enabled = GetSaveStateEnabled();
 	SetSaveStateEnabled(false);
 
+	for (const auto &itr : addRenderInstances) {
+        string renderType = RendererFactory::Instance()->GetRenderClassFromParamsClass(
+			itr.second[2]
+		);
+
+		Visualizer* v = getVisualizer(itr.second[0]);
+		VAssert(v);
+        int rc = v->CreateRenderer(itr.second[1], renderType, itr.first);
+		VAssert(rc >=0);
+
+	}
+
+	for (const auto &itr : removeRenderInstances) {
+
+        string renderType = RendererFactory::Instance()->GetRenderClassFromParamsClass(
+			itr.second[2]
+		);
+
+		Visualizer* v = getVisualizer(itr.second[0]);
+		VAssert(v);
+
+		v->DestroyRenderer(renderType, itr.first, false);
+	}
+
+#ifdef	DEAD
 	// Destroy current visualizers
 	//
 	vector <string> vizNames = GetVisualizerNames();
@@ -698,6 +727,7 @@ void ControlExec::undoRedoHelper() {
 	//
 	int rc = openDataHelper(false);
 	VAssert(rc>=0);
+#endif
 
 	SetSaveStateEnabled(enabled);
 }
@@ -706,10 +736,47 @@ bool ControlExec::Undo() {
 
 	// Attempt to undo parameter state
 	//
+	vector <string> beforeNames;
+	map <string, vector <string> > beforeMap;
+	_paramsMgr->GetRenderParamNames(beforeNames);
+	std::sort(beforeNames.begin(), beforeNames.end());
+	for (const auto &name: beforeNames) {
+		string winName, dataSetName, className;
+		bool status = _paramsMgr->RenderParamsLookup(name, winName, dataSetName, className);
+		VAssert(status);
+		beforeMap[name] = vector <string> {winName, dataSetName, className};
+	}
+
 	bool status = _paramsMgr->Undo();
 	if (! status) return (status);
 
-	undoRedoHelper();
+	vector <string> afterNames;
+	map <string, vector <string> > afterMap;
+	_paramsMgr->GetRenderParamNames(afterNames);
+	std::sort(afterNames.begin(), afterNames.end());
+	for (const auto &name: afterNames) {
+		string winName, dataSetName, className;
+		bool status = _paramsMgr->RenderParamsLookup(name, winName, dataSetName, className);
+		VAssert(status);
+		afterMap[name] = vector <string> {winName, dataSetName, className};
+	}
+
+	map <string, vector <string> > createdMap;
+	std::set_difference(
+		afterMap.begin(), afterMap.end(),
+		beforeMap.begin(), beforeMap.end(),
+		std::inserter(createdMap, createdMap.end())
+	);
+
+
+	map <string, vector <string> > destroyedMap;
+	std::set_difference(
+		beforeMap.begin(), beforeMap.end(),
+		afterMap.begin(), afterMap.end(),
+		std::inserter(destroyedMap, destroyedMap.end())
+	);
+
+	undoRedoHelper(createdMap, destroyedMap);
 
 	return(true);
 }
@@ -721,7 +788,7 @@ bool ControlExec::Redo() {
 	bool status = _paramsMgr->Redo();
 	if (! status) return (status);
 
-	undoRedoHelper();
+	undoRedoHelper(map <string, vector <string> > (), map <string, vector <string> >());
 
 	return(true);
 }
@@ -806,12 +873,12 @@ bool ControlExec::RenderLookup(
     string instName, string &winName, string &dataSetName, string &renderType
 ) const {
 
-	string paramsType = RendererFactory::Instance()->
-		GetParamsClassFromRenderClass(renderType);
+	string paramsType;
+	bool ok = _paramsMgr->RenderParamsLookup(instName, winName, dataSetName, paramsType);
+	if (! ok) return (ok);
 
-	return(_paramsMgr->RenderParamsLookup(
-		instName, winName, dataSetName, paramsType)
-	);
+	renderType = RendererFactory::Instance()->GetRenderClassFromParamsClass(paramsType);
+	return(ok);
 
 }
 

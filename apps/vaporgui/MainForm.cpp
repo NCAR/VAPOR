@@ -1588,7 +1588,9 @@ void MainForm::undoRedoHelper(bool undo) {
 	_controlExec->SetSaveStateEnabled(false);
 
 	bool status;
+#ifdef	DEAD
 	_vizWinMgr->Shutdown();
+#endif
 	_tabMgr->Shutdown();
 
 	if (undo) {
@@ -1603,7 +1605,9 @@ void MainForm::undoRedoHelper(bool undo) {
 		return;
 	}
 
+#ifdef	DEAD
 	_vizWinMgr->Restart();
+#endif
 	_tabMgr->Restart();
 
 	// Restore state saving
