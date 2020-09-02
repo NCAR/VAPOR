@@ -31,11 +31,11 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
 	                    RenderEventRouter( ce, SliceParams::GetClassType())
 {
 	_variables = new SliceVariablesSubtab(this);
-	QScrollArea* qsvar = new QScrollArea(this);
+	QScrollArea *qsvar = new QScrollArea(this);
 	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	qsvar->setWidget(_variables);
 	qsvar->setWidgetResizable(true);
-	addTab(qsvar,"Variables");
+	addTab(qsvar, "Variables");
 
 	_appearance = new SliceAppearanceSubtab(this);
 	QScrollArea* qsapp = new QScrollArea(this);
@@ -111,6 +111,8 @@ void SliceEventRouter::GetWebHelp(
 
 void SliceEventRouter::_updateTab(){
 
+	// The variable tab updates itself:	
+	//
 	_variables->Update(
 		GetActiveDataMgr(),
 		_controlExec->GetParamsMgr(),
