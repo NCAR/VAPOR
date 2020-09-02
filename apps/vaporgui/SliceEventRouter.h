@@ -69,8 +69,6 @@ private:
 
  SliceEventRouter() {} 
 
- void _setDefaultSampleRate();
-
  //! Override default wheel behavior on the tab.  This has the effect of 
  //! ignoring wheel events over the tab.  This is because wheel events will always
  //! affect the combo boxes and other widgets in the tab, and it would be confusing
@@ -78,7 +76,6 @@ private:
   void wheelEvent(QWheelEvent*) {}
 
  //! VariablesWidget is used as Variables tab
- PGroup* _pVarGroup;
  SliceVariablesSubtab* _variables;
  SliceGeometrySubtab* _geometry;
  GLSliceImageWindow* _glSliceImageWindow;

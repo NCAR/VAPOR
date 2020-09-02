@@ -111,7 +111,7 @@ void SliceEventRouter::GetWebHelp(
 
 void SliceEventRouter::_updateTab(){
 
-	// The variable tab updates itself:	
+	// The variable tab updates itself:
 	//
 	_variables->Update(
 		GetActiveDataMgr(),

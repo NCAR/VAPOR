@@ -52,7 +52,7 @@ SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget* parent) {
 
 void SliceAppearanceSubtab::_qualityChanged(int quality) {
     int sampleRate = quality * SAMPLES_PER_QUALITY;
-    _params->SetSampleRate( sampleRate );
+    _params->SetSampleRate(sampleRate);
 }
 
 void SliceAppearanceSubtab::Update(
