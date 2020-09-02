@@ -34,6 +34,7 @@
 #include <vapor/ControlExecutive.h>
 #include "vapor/GLManager.h"
 #include "vapor/debug.h"
+#include <vapor/Progress.h>
 
 using namespace VAPoR;
 
@@ -188,8 +189,11 @@ void WireFrameRenderer::_buildCacheVertices(
     Grid::ConstNodeIterator nodeEnd = grid->ConstNodeEnd();
     Grid::ConstCoordItr coordItr = grid->ConstCoordBegin();
     Grid::ConstCoordItr coordEnd = grid->ConstCoordEnd();
-	for (; nodeItr != nodeEnd; ++nodeItr, ++coordItr) {
+    Progress::Start("Load Grid", numNodes);
+    long done = 0;
+    for (; nodeItr != nodeEnd; ++nodeItr, ++coordItr, ++done) {
 
+        Progress::Update(done);
 	
 		// Get current node's coordinates
 		//
@@ -209,7 +213,7 @@ void WireFrameRenderer::_buildCacheVertices(
 			}
 		}
 			
-		float dataValue = grid->GetValueAtIndex((*nodeItr).data());
+		float dataValue = grid->GetValueAtIndex(*nodeItr);
 		
 		// Create an entry in nodeMap
 		//
@@ -256,7 +260,7 @@ size_t WireFrameRenderer::_buildCacheConnectivity(
 	size_t numNodes = Wasp::VProduct(grid->GetDimensions());
 	bool layered = grid->GetTopologyDim() == 3;
 	size_t maxVertsPerCell = grid->GetMaxVertexPerCell();
-	vector <size_t> cellNodeIndices(maxVertsPerCell*grid->GetDimensions().size());
+	vector <Size_tArr3> cellNodeIndices(maxVertsPerCell);
 	vector <GLuint> cellNodeIndicesLinear(maxVertsPerCell);
 
 	size_t numCells = Wasp::VProduct(grid->GetCellDimensions());
@@ -280,15 +284,19 @@ size_t WireFrameRenderer::_buildCacheConnectivity(
 		//
 		Grid::ConstCellIterator cellItr = grid->ConstCellBegin();
 		Grid::ConstCellIterator cellEnd = grid->ConstCellEnd();
-		for (; cellItr != cellEnd; ++cellItr)
+        Progress::Start("Generate Connectivity", numCells, true);
+		for (int done = 0; cellItr != cellEnd; ++cellItr, ++done)
 		{
-			int numNodes;
-			grid->GetCellNodes((*cellItr).data(), cellNodeIndices.data(), numNodes);
+            Progress::Update(done);
+            if (Progress::Cancelled())
+                return 0;
 
-			for (int i=0; i<numNodes; i++) {
+			grid->GetCellNodes((*cellItr).data(), cellNodeIndices);
+
+			for (int i=0; i<cellNodeIndices.size(); i++) {
 				int ndim = grid->GetDimensions().size();
 				size_t idx = Wasp::LinearizeCoords(
-					cellNodeIndices.data()+(i*ndim),
+					cellNodeIndices[i].data(),
 					grid->GetDimensions().data(), 
 					ndim
 				);
@@ -305,8 +313,8 @@ size_t WireFrameRenderer::_buildCacheConnectivity(
 			}
 			
 			_drawCell(
-				cellNodeIndicesLinear.data(), numNodes, layered, nodeMap,
-				invalidIndex, indices, drawList
+				cellNodeIndicesLinear.data(), cellNodeIndices.size(), 
+				layered, nodeMap, invalidIndex, indices, drawList
 			);
 		}
 	}
@@ -368,6 +376,8 @@ int WireFrameRenderer::_buildCache()
 
 	if (grid) delete grid;
 	if (heightGrid) delete heightGrid;
+    
+    Progress::Finish();
 	return 0;
 
 }
@@ -375,8 +385,14 @@ int WireFrameRenderer::_buildCache()
 int WireFrameRenderer::_paintGL(bool fast)
 {
     int rc = 0;
-    if (_isCacheDirty())
+    if (_isCacheDirty()) {
         rc = _buildCache();
+	}
+    
+    if (Progress::Cancelled()) {
+        _cacheParams.varName = "";
+        return 0;
+    }
     
     if (_GPUOutOfMemory) {
         SetErrMsg("GPU out of memory");

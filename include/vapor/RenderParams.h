@@ -136,16 +136,15 @@ public:
 		return false;
 	}
 
-
-	//! Get the primary variable, or the first valid field variable
-	//!
-	//! Return the first non-empty variable found, first searching
-	//! the name returned by GetVariableName(), and the ordered list
-	//! of variables returned by GetFieldVariableNames(). The empty 
-	//! string is returned if no non-empty variable names exist.
-	//!
-	//! \retval string variable name
-	//
+	//! Get the primary variable, or the first valid field variable	
+	//!	
+	//! Return the first non-empty variable found, first searching	
+	//! the name returned by GetVariableName(), and the ordered list	
+	//! of variables returned by GetFieldVariableNames(). The empty 	
+	//! string is returned if no non-empty variable names exist.	
+	//!	
+	//! \retval string variable name	
+	//	
 	string GetFirstVariableName() const ;
 
 	//! Specify field variable names; e.g. used in flow integration
@@ -203,11 +202,11 @@ public:
 	//! \param[in] string varNames. If any element is "0" the element
 	//! will be quietly 
 	//! set to the empty string, "".
-	virtual void SetDistribVariableNames(vector <string> varNames){
+	/*virtual void SetDistribVariableNames(vector <string> varNames){
 		SetValueStringVec(
 			_distribVariableNamesTag, "Set Distrib Vars", varNames
 		);
-	}
+	}*/
 
 	//! Virtual method sets current number of refinements of this Params.
 	//! \param[in] int refinements
@@ -400,6 +399,18 @@ public:
     int dim,
     bool secondaryColormapVariable
 );
+
+ //! Return the renderer's current dimension
+ //!
+ //! For renderers that are only capable of operating on variables of a fixed
+ //! dimensionality (e.g. 2D or 3D) this function will return a constant value:
+ //! the number of dimensions. For renderers that can operate on a variable of
+ //! varying dimension this method returns the current dimensionality. The
+ //! returned value will be between 0 and 3. A value of zero will be
+ //! returned if the current dimensionality cannot be determined.
+ //!
+ //!
+ virtual size_t GetRenderDim() const = 0;
     
     //! This should be overriden by params for renderes that support iso values to return true.
     virtual bool HasIsoValues() const { return false; }

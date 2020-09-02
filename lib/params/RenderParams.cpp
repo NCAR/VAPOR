@@ -550,7 +550,6 @@ void RenderParams::SetAuxVariableNames(std::vector<std::string> varnames)
     SetValueStringVec( _auxVariableNamesTag, "Specify auxiliary varnames", varnames);
 }
 
-
 string RenderParams::GetFirstVariableName() const {
 	string str = GetVariableName();
 	if (str.length()) return str;                       // scalar
@@ -562,7 +561,6 @@ string RenderParams::GetFirstVariableName() const {
 	if (str.length()) return str;                       // height
 	return "";                                          // none
 }
-
 
 string RenderParams::GetHeightVariableName() const {
 	string varname = GetValueString(_heightVariableNameTag, "");

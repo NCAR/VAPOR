@@ -1,13 +1,13 @@
 #include "PFileSelector.h"
 #include "VPushButton.h"
-#include "VLineEdit.h"
+#include "VLineEdit_Deprecated.h"
 #include <QFileDialog>
 #include <vapor/ParamsBase.h>
 #include <vapor/FileUtils.h>
 #include "SettingsParams.h"
 
 PFileSelector::PFileSelector(const std::string &tag, const std::string &label)
-: PLineItem(tag, label, _pathTexbox = new VLineEdit, _button = new VPushButton("Select"))
+: PLineItem(tag, label, _pathTexbox = new VLineEdit_Deprecated, _button = new VPushButton("Select"))
 {
     _pathTexbox->SetReadOnly(true);
     connect(_button, &VPushButton::ButtonClicked, this, &PFileSelector::buttonClicked);

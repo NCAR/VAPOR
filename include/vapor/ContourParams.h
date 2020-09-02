@@ -81,9 +81,9 @@ public:
 
  bool GetLockToTF() const; 
 
- bool HasIsoValues() const { return true; }
-    vector<double> GetIsoValues(const string &variable);
-    void SetIsoValues(const string &variable, const vector<double> &values);
+ bool HasIsoValues() const override { return true; }
+    vector<double> GetIsoValues(const string &variable) override;
+    void SetIsoValues(const string &variable, const vector<double> &values) override;
     
  vector<double> GetContourValues(const string &varName);
  void SetContourValues(const string &varName, const vector<double> &vals);
@@ -92,6 +92,12 @@ public:
  //
  static string GetClassType() {
 	return("ContourParams");
+ }
+
+ //! \copydoc RenderParams::GetRenderDim()
+ //
+ virtual  size_t GetRenderDim() const override {
+	return(2);
  }
 
  int GetNumDigits() const {

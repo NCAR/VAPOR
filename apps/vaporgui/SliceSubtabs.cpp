@@ -26,7 +26,7 @@ SliceVariablesSubtab::SliceVariablesSubtab(QWidget* parent) {
     vars->Add(new PScalarVariableSelectorHLI);
     _pg->Add(vars);
     _pg->Add(new PFidelitySection);
-}
+}	
 
 void SliceVariablesSubtab::Update(
     VAPoR::DataMgr *dataMgr,

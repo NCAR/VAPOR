@@ -31,6 +31,13 @@ public:
         VAPoR::ParamsMgr *paramsMgr,
         VAPoR::RenderParams *rParams
     );
+
+private slots:
+    void testVIntLineEdit( int value );	
+    void testVDoubleLineEdit( double value );	
+    void testVStringLineEdit( const std::string& value );	
+    void testVIntSliderEdit( int value );	
+    void testVDoubleSliderEdit( double value );
 };
 
 class SliceAppearanceSubtab : public QWidget, public Ui_SliceAppearanceGUI {

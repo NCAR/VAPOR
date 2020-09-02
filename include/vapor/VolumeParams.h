@@ -44,8 +44,8 @@ public:
     
     using RenderParams::SetIsoValues;
     using RenderParams::GetIsoValues;
-    vector<double> GetIsoValues(const string &variable);
-    void SetIsoValues(const string &variable, const vector<double> &values);
+    vector<double> GetIsoValues(const string &variable) override;
+    void SetIsoValues(const string &variable, const vector<double> &values) override;
     
     void  SetLightingEnabled(bool v);
     bool  GetLightingEnabled() const;
@@ -57,6 +57,12 @@ public:
     float GetPhongSpecular() const;
     void  SetPhongShininess(float v);
     float GetPhongShininess() const;
+
+    //! \copydoc RenderParams::GetRenderDim()
+    //
+    virtual  size_t GetRenderDim() const override {
+        return(3);
+    }
     
     static const std::vector<std::string> GetAlgorithmNames(Type type = Type::Any);
     static void Register(const std::string &name, Type type = Type::Any);

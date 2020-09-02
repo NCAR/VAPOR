@@ -11,7 +11,7 @@ Vapor can directly import the datasets listed below.  Some of them can be conver
 
 :ref:`Raw binary <binary>` data must be converted to VDC before loading into Vapor.
 
-.. _importData::
+.. _importData:
 
 Importing data 
 ``````````````
@@ -46,7 +46,7 @@ Creating a VDC requires command line tools that come bundled with Vapor.  These 
 
 Alternatively, the tools can be added to the user's system path by clicking on the `Tools` menu, and selecting `Install Command Line Tools`.After doing this, users will be able to issue the command line utilities from any directory in their terminal or command prompt.
 
-.. _commandLineTools::
+.. _commandLineTools:
 
 .. figure:: ../_images/installCLTools.png
     :align: center

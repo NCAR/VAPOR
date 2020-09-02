@@ -33,6 +33,12 @@ public:
     return("SliceParams");
  }
 
+ //! \copydoc RenderParams::GetRenderDim()
+ //
+ virtual  size_t GetRenderDim() const override {
+     return(3);
+ }
+
  int GetSampleRate() const;
 
  void SetSampleRate(int rate);

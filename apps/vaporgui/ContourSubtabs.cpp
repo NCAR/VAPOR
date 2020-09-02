@@ -4,6 +4,12 @@
 #include "PFidelitySection.h"
 #include <vapor/glutil.h>
 
+#include "VStringLineEdit.h"
+#include "VIntLineEdit.h"
+#include "VDoubleLineEdit.h"
+#include "VIntSliderEdit.h"
+#include "VDoubleSliderEdit.h"
+
 ContourVariablesSubtab::ContourVariablesSubtab(QWidget* parent) {
     setLayout( new QVBoxLayout );
     ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);

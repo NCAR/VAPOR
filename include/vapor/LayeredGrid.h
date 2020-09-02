@@ -71,7 +71,7 @@ public:
 
  //! \copydoc RegularGrid::GetValue()
  //!
- float GetValue(const std::vector <double> &coords) const override;
+ float GetValue(const DblArr3 &coords) const override;
 
  //! \copydoc Grid::GetInterpolationOrder()
  //
@@ -93,49 +93,44 @@ public:
  //!
  virtual void SetInterpolationOrder(int order) override;
 
- //! \copydoc Grid::GetUserExtents()
- //!
- virtual void GetUserExtents(
-	std::vector <double> &minu, std::vector <double> &maxu
-) const override;
 
 
  //! \copydoc Grid::GetBoundingBox()
  //!
  virtual void GetBoundingBox(
-	const std::vector <size_t> &min, const std::vector <size_t> &max,
-	std::vector <double> &minu, std::vector <double> &maxu
+	const Size_tArr3 &min, const Size_tArr3 &max,
+	DblArr3 &minu, DblArr3 &maxu
  ) const override;
 
  //! \copydoc Grid::GetUserCoordinates()
  //!
  virtual void GetUserCoordinates(
-	const size_t indices[],
-	double coords[]
+	const Size_tArr3 &indices,
+	DblArr3 &coords
  ) const override;
 
- void GetUserCoordinates(
-	size_t i, size_t j, size_t k,
-	double &x, double &y, double &z
- ) const override {
-	std::vector <size_t> indices = {i,j,k};
-	std::vector <double> coords;
-	Grid::GetUserCoordinates(indices, coords);
-	x = coords[0];
-	y = coords[1];
-	z = coords[2];
- }
+ // For grandparent inheritance of
+ // Grid::GetUserCoordinates(const size_t indices[], double coords[])
+ //
+ using Grid::GetUserCoordinates;
+
 
  //! \copydoc Grid::GetIndicesCell
  //!
  virtual bool GetIndicesCell(
-	const std::vector <double> &coords,
-	std::vector <size_t> &indices
+	const DblArr3 &coords,
+	Size_tArr3 &indices
  ) const override;
+
+
+ // For grandparent inheritance of
+ // Grid::GetIndicesCell(const double coords[3], size_t indices[3])
+ //
+ using Grid::GetIndicesCell; 
 
  //! \copydoc Grid::InsideGrid()
  //!
- bool InsideGrid(const std::vector <double> &coords) const override;
+ bool InsideGrid(const DblArr3 &coords) const override;
 
  //! \copydoc Grid::GetPeriodic()
  //!
@@ -202,11 +197,18 @@ public:
 	);
  }
 
+protected:
+
+ //! \copydoc Grid::GetUserExtents()
+ //!
+ virtual void GetUserExtentsHelper(
+	DblArr3 &minu, DblArr3 &maxu
+ ) const override;
 
 private:
  RegularGrid _rg;
- std::vector <double> _minu;
- std::vector <double> _maxu;
+ DblArr3 _minu = {0.0, 0.0, 0.0};
+ DblArr3 _maxu = {0.0, 0.0, 0.0};
  std::vector <double> _delta;
  int _interpolationOrder;
 
@@ -217,10 +219,10 @@ private:
  );
 
  virtual float GetValueNearestNeighbor(
-	const std::vector <double> &coords
+	const DblArr3 &coords
  ) const override;
 
- virtual float GetValueLinear(const std::vector <double> &coords) const override;
+ virtual float GetValueLinear(const DblArr3 &coords) const override;
 
 
  //! 
@@ -236,7 +238,7 @@ private:
  //! \param[out] a bilinearly calculated weight for the x axis
  //! \param[out] a bilinearly calculated weight for the y axis
  //
- void _getBilinearWeights(const std::vector <double> &coords,
+ void _getBilinearWeights(const double coords[3],
 						double &iwgt, double &jwgt) const;
 
  //! This function applies the bilinear interpolation method to derive
@@ -293,7 +295,7 @@ private:
  //! \param[out] a quadratically interpolated value of a point in user
  //! coordinates
  //!
- float _getValueQuadratic(const std::vector <double> &coords) const;
+ float _getValueQuadratic(const double coords[3]) const;
 
  //! Return the linearly interpolated value of a point in user
  //! coordinates.  This only interpolates in the vertical (z) direction.

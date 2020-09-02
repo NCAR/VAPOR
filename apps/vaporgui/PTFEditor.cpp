@@ -70,6 +70,8 @@ PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, c
     
     if (elements.count(RegularIsoArray))
         _isoMap->SetEquidistantIsoValues(true);
+    else
+        _isoMap->SetEquidistantIsoValues(false);
     
     if (elements.count(Default)) {
         _histogram->show();
