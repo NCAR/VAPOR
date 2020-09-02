@@ -22,7 +22,6 @@ VSliderEditInterface::VSliderEditInterface(
 }
 
 QSize VSliderEditInterface::sizeHint() const {
-    std::cout << "  C" << std::endl;
     QWidget* parent = this->parentWidget();
     return QSize( parent->width()*3/5., 20 );
 }

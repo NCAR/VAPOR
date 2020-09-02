@@ -12,7 +12,7 @@ const int VLineItem::_BOTTOM_MARGIN = 0;
 VLineItem::VLineItem(const std::string &label, QLayoutItem *centerItem, QWidget *rightWidget)
 : VLineItem(label)
 {
-    //layout()->addItem(centerItem);
+    layout()->addItem(centerItem);
     layout()->addWidget(rightWidget);
 }
 
