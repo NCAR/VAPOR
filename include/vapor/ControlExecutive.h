@@ -729,10 +729,9 @@ private:
  }
 
  int openDataHelper(bool reportErrs);
- void undoRedoHelper(
-	const map <string, vector <string> > &addRenderInstances,
-	const map <string, vector <string> > &removeRenderInstances
- );
+ bool _undoRedoRenderer(bool undoFlag);
+ bool _undoRedoVisualizer(bool undoFlag);
+
  int activateClassRenderers(
 	string vizName, string dataSetName,
 	string pClassName, vector <string> instNames, bool reportErrs

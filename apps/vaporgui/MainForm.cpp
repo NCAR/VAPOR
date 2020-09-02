@@ -1587,17 +1587,19 @@ void MainForm::undoRedoHelper(bool undo) {
 	bool enabled = _controlExec->GetSaveStateEnabled();
 	_controlExec->SetSaveStateEnabled(false);
 
-	bool status;
-	cout << "ParamsMgr::GetTopUndo() " << _paramsMgr->GetTopUndo() << endl;
 	bool visualizerEvent = 
 		((_paramsMgr->GetTopUndo() == "Remove Visualizer") ||
 		(_paramsMgr->GetTopUndo() == "Create Visualizer")); 
 
+	// Visualizer create/destroy undo/redo events require special 
+	// handling.
+	//
 	if (visualizerEvent) {
 		_vizWinMgr->Shutdown();
 	}
 	_tabMgr->Shutdown();
 
+	bool status = true;
 	if (undo) {
 		status = _controlExec->Undo();
 	}

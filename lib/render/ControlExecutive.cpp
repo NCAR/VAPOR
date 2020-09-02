@@ -578,6 +578,7 @@ int ControlExec::OpenData(
 
 void ControlExec::CloseData(string dataSetName) {
 
+
 	if (! _dataStatus->GetDataMgr(dataSetName)) return; 
 
 	_dataStatus->Close(dataSetName);
@@ -605,6 +606,7 @@ void ControlExec::CloseData(string dataSetName) {
 	}
 		
 	_paramsMgr->RemoveDataMgr(dataSetName);
+
 }
 
 
@@ -674,75 +676,11 @@ string ControlExec::MakeStringConformant(string s) {
 }
 
 
-bool visualizerEvent = false;
-void ControlExec::undoRedoHelper(
-	const map <string, vector <string> > &addRenderInstances,
-	const map <string, vector <string> > &removeRenderInstances
-) {
-
-	bool enabled = GetSaveStateEnabled();
-	SetSaveStateEnabled(false);
-
-	for (const auto &itr : addRenderInstances) {
-        string renderType = RendererFactory::Instance()->GetRenderClassFromParamsClass(
-			itr.second[2]
-		);
-
-		Visualizer* v = getVisualizer(itr.second[0]);
-		VAssert(v);
-        int rc = v->CreateRenderer(itr.second[1], renderType, itr.first);
-		VAssert(rc >=0);
-
-	}
-
-	for (const auto &itr : removeRenderInstances) {
-
-        string renderType = RendererFactory::Instance()->GetRenderClassFromParamsClass(
-			itr.second[2]
-		);
-
-		Visualizer* v = getVisualizer(itr.second[0]);
-		VAssert(v);
-
-		v->DestroyRenderer(renderType, itr.first, false);
-	}
 
 
-	if (visualizerEvent) {
-		// Destroy current visualizers
-		//
-		vector <string> vizNames = GetVisualizerNames();
-		for (int i=0; i<vizNames.size(); i++) {
-			RemoveVisualizer(vizNames[i]);
-		}
+bool ControlExec::_undoRedoRenderer(bool undoFlag) {
 
-		// Create new visualizers based on new parameter state
-		//
-		vizNames = _paramsMgr->GetVisualizerNames();
-		for (int i=0; i<vizNames.size(); i++) {
-			string winName = vizNames[i];
-			Visualizer* viz = new Visualizer(_paramsMgr, _dataStatus, winName);
-			_visualizers[winName] = viz;
-		}
-
-		// Data-dependent re-initialization
-		//
-		int rc = openDataHelper(false);
-		VAssert(rc>=0);
-	}
-
-	SetSaveStateEnabled(enabled);
-}
-
-bool ControlExec::Undo() {
-
-	bool renderEvent = (_paramsMgr->GetTopUndo() == "Create new renderer") ||
-        (_paramsMgr->GetTopUndo() == "Delete renderer");
-
-	visualizerEvent = ((_paramsMgr->GetTopUndo() == "Remove Visualizer") ||
-        (_paramsMgr->GetTopUndo() == "Create Visualizer"));
-
-	// Attempt to undo parameter state
+	// Get renderer parameters *before* undo/redo event
 	//
 	vector <string> beforeNames;
 	map <string, vector <string> > beforeMap;
@@ -755,9 +693,19 @@ bool ControlExec::Undo() {
 		beforeMap[name] = vector <string> {winName, dataSetName, className};
 	}
 
-	bool status = _paramsMgr->Undo();
+	// Undo/Redo the event
+	//
+	bool status = true;
+	if (undoFlag) {
+		status = _paramsMgr->Undo();
+	}
+	else {
+		status = _paramsMgr->Undo();
+	}
 	if (! status) return (status);
 
+	// Get renderer parameters *after* undo/redo event
+	//
 	vector <string> afterNames;
 	map <string, vector <string> > afterMap;
 	_paramsMgr->GetRenderParamNames(afterNames);
@@ -769,38 +717,146 @@ bool ControlExec::Undo() {
 		afterMap[name] = vector <string> {winName, dataSetName, className};
 	}
 
-	map <string, vector <string> > createdMap;
-	if (renderEvent) 
-		std::set_difference(
-			afterMap.begin(), afterMap.end(),
-			beforeMap.begin(), beforeMap.end(),
-			std::inserter(createdMap, createdMap.end())
+	// Generate list of renderers we need to create
+	//
+	map <string, vector <string> > createMap;
+	std::set_difference(
+		afterMap.begin(), afterMap.end(),
+		beforeMap.begin(), beforeMap.end(),
+		std::inserter(createMap, createMap.end())
+	);
+
+
+	// Generate list of renderers we need to destroy
+	//
+	map <string, vector <string> > destroyMap;
+	std::set_difference(
+		beforeMap.begin(), beforeMap.end(),
+		afterMap.begin(), afterMap.end(),
+		std::inserter(destroyMap, destroyMap.end())
+	);
+
+	// Disable state saving. This is probably not necessary as code below should not be
+	// changing params state
+	//
+	bool enabled = GetSaveStateEnabled();
+	SetSaveStateEnabled(false);
+
+	// Create renderers
+	//
+	for (const auto &itr : createMap) {
+        string renderType = RendererFactory::Instance()->GetRenderClassFromParamsClass(
+			itr.second[2]
 		);
 
+		Visualizer* v = getVisualizer(itr.second[0]);
+		VAssert(v);
+        int rc = v->CreateRenderer(itr.second[1], renderType, itr.first);
+		VAssert(rc >=0);
 
-	map <string, vector <string> > destroyedMap;
-	if (renderEvent) 
-		std::set_difference(
-			beforeMap.begin(), beforeMap.end(),
-			afterMap.begin(), afterMap.end(),
-			std::inserter(destroyedMap, destroyedMap.end())
+	}
+
+	// Destroy renderers
+	//
+	for (const auto &itr : destroyMap) {
+
+        string renderType = RendererFactory::Instance()->GetRenderClassFromParamsClass(
+			itr.second[2]
 		);
 
-	undoRedoHelper(createdMap, destroyedMap);
+		Visualizer* v = getVisualizer(itr.second[0]);
+		VAssert(v);
+
+		v->DestroyRenderer(renderType, itr.first, false);
+	}
+	SetSaveStateEnabled(enabled);
 
 	return(true);
 }
 
-bool ControlExec::Redo() {
+bool ControlExec::_undoRedoVisualizer(bool undoFlag) {
 
-	// Attempt to redo parameter state
+	// Undo/Redo the event
 	//
-	bool status = _paramsMgr->Redo();
+	bool status = true;
+	if (undoFlag) {
+		status = _paramsMgr->Undo();
+	}
+	else {
+		status = _paramsMgr->Undo();
+	}
 	if (! status) return (status);
 
-	undoRedoHelper(map <string, vector <string> > (), map <string, vector <string> >());
+	bool enabled = GetSaveStateEnabled();
+	SetSaveStateEnabled(false);
+
+	// Destroy current visualizers
+	//
+	vector <string> vizNames = GetVisualizerNames();
+	for (int i=0; i<vizNames.size(); i++) {
+		RemoveVisualizer(vizNames[i]);
+	}
+
+	// Create new visualizers based on new parameter state
+	//
+	vizNames = _paramsMgr->GetVisualizerNames();
+	for (int i=0; i<vizNames.size(); i++) {
+		string winName = vizNames[i];
+		Visualizer* viz = new Visualizer(_paramsMgr, _dataStatus, winName);
+		_visualizers[winName] = viz;
+	}
+
+	// Data-dependent re-initialization
+	//
+	int rc = openDataHelper(false);
+	VAssert(rc>=0);
+
+	SetSaveStateEnabled(enabled);
 
 	return(true);
+}
+
+bool ControlExec::Undo() {
+
+	// Render and Visualizer Create/Destroy events require special handing for undo/redo
+	// because renderer and visualizer creation is done explicity (not implicitly via 
+	// Update(). The only way to determine if an undo/redo was for renderer of visualizer
+	// event is to examine the comment associated with the state change.
+	//
+	bool renderEvent = (_paramsMgr->GetTopUndo() == "Create new renderer") ||
+        (_paramsMgr->GetTopUndo() == "Delete renderer");
+
+	bool visualizerEvent = ((_paramsMgr->GetTopUndo() == "Remove Visualizer") ||
+        (_paramsMgr->GetTopUndo() == "Create Visualizer"));
+
+	if (renderEvent)  {
+		return(_undoRedoRenderer(true));
+	}
+	else if (visualizerEvent) {
+		return(_undoRedoVisualizer(true));
+	}
+	else {
+		return(_paramsMgr->Undo());
+	}
+}
+
+bool ControlExec::Redo() {
+
+	bool renderEvent = (_paramsMgr->GetTopUndo() == "Create new renderer") ||
+        (_paramsMgr->GetTopUndo() == "Delete renderer");
+
+	bool visualizerEvent = ((_paramsMgr->GetTopUndo() == "Remove Visualizer") ||
+        (_paramsMgr->GetTopUndo() == "Create Visualizer"));
+
+	if (renderEvent)  {
+		return(_undoRedoRenderer(false));
+	}
+	else if (visualizerEvent) {
+		return(_undoRedoVisualizer(false));
+	}
+	else {
+		return(_paramsMgr->Redo());
+	}
 }
 
 void ControlExec::UndoRedoClear() {
