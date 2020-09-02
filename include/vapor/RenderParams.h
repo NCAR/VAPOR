@@ -176,37 +176,11 @@ public:
 	//
 	vector<string> GetFieldVariableNames() const ;
 
-	//! Get the X field variable name, e.g. used in flow integration.
-	//! \retval std::string X field variable name. 
-	//
-    std::string GetXFieldVariableName() const;
-
-	//! Get the Y field variable name, e.g. used in flow integration.
-	//! \retval std::string Y field variable name. 
-	//
-    std::string GetYFieldVariableName() const;
-
-	//! Get the Z field variable name, e.g. used in flow integration.
-	//! \retval std::string Z field variable name. 
-	//
-    std::string GetZFieldVariableName() const;
-
 	//! Get the distribution variable names, e.g. used in flow integration.
 	//! \retval vector<string> variable names
 	vector<string> GetDistribVariableNames() const {
 		return(GetValueStringVec(_distribVariableNamesTag));
 	}
-
-	//! Specify distribution variable names; e.g. used in flow integration
-	//! can be 0 or 3 strings
-	//! \param[in] string varNames. If any element is "0" the element
-	//! will be quietly 
-	//! set to the empty string, "".
-	/*virtual void SetDistribVariableNames(vector <string> varNames){
-		SetValueStringVec(
-			_distribVariableNamesTag, "Set Distrib Vars", varNames
-		);
-	}*/
 
 	//! Virtual method sets current number of refinements of this Params.
 	//! \param[in] int refinements
@@ -445,7 +419,6 @@ private:
  static const string _terrainMapTag;
  static const string _fieldVariableNamesTag;
  static const string _auxVariableNamesTag;
- static const string _distribVariableNamesTag;
  static const string _constantOpacityTag;
  static const string _transferFunctionsTag;
  static const string _stretchFactorsTag;

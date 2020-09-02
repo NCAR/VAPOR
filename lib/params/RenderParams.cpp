@@ -39,7 +39,6 @@ const string RenderParams::_heightVariableNameTag = "HeightVariable";
 const string RenderParams::_colorMapVariableNameTag = "ColorMapVariable";
 const string RenderParams::_fieldVariableNamesTag = "FieldVariableNames";
 const string RenderParams::_auxVariableNamesTag = "AuxVariableNames";
-const string RenderParams::_distribVariableNamesTag = "DistributionVariableNames";
 const string RenderParams::_variableNameTag = "VariableName";
 const string RenderParams::_useSingleColorTag = "UseSingleColor";
 const string RenderParams::_constantColorTag = "ConstantColor";

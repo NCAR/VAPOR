@@ -14,7 +14,7 @@ VNumericLineEdit::VNumericLineEdit( int decimals ) :
         this, &VNumericLineEdit::SetSciNotation );
     connect( _menu, &VNumericFormatMenu::DecimalDigitsChanged,
         this, &VNumericLineEdit::SetNumDigits );
-//    SetCustomContextMenu();
+    SetCustomContextMenu();
 }
 
 int VNumericLineEdit::GetNumDigits() const { 
