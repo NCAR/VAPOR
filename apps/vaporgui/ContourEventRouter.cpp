@@ -32,11 +32,11 @@ ContourEventRouter::ContourEventRouter(
 	RenderEventRouter(ce, ContourParams::GetClassType())
 {
 	_variables = new ContourVariablesSubtab(this);
-	QScrollArea* qsvar = new QScrollArea(this);
+	QScrollArea *qsvar = new QScrollArea(this);
 	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	qsvar->setWidget(_variables);
 	qsvar->setWidgetResizable(true);
-	addTab(qsvar,"Variables");
+	addTab(qsvar, "Variables");
 
 	_appearance = new ContourAppearanceSubtab(this);
 	QScrollArea* qsapp = new QScrollArea(this);
@@ -97,13 +97,13 @@ void ContourEventRouter::_initializeTab() {
 }
 
 void ContourEventRouter::_updateTab(){
-    _variables->Update(
+	_variables->Update(
 		GetActiveDataMgr(),
 		_controlExec->GetParamsMgr(),
 		GetActiveParams()
 	);
 
-    _appearance->Update(
+	_appearance->Update(
 		GetActiveDataMgr(),
 		_controlExec->GetParamsMgr(),
 		GetActiveParams()
