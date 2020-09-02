@@ -15,11 +15,6 @@
 #include "VariablesWidget.h"
 #include "SliceEventRouter.h"
 #include "EventRouter.h"
-#include "PVariableWidgets.h"
-
-#define MIN_QUALITY 1
-#define MAX_QUALITY 10
-#define SAMPLES_PER_QUALITY 200
 
 using namespace VAPoR;
 
@@ -82,15 +77,6 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
 #endif
 }
 
-void SliceEventRouter::_setDefaultSampleRate() {
-    VAPoR::SliceParams* sParams = dynamic_cast<VAPoR::SliceParams*>( GetActiveParams() );
-    int defaultRate  = sParams->GetDefaultSampleRate();
-    int quality      = defaultRate / SAMPLES_PER_QUALITY;
-    if (quality < 1) quality = 1;
-    int adjustedRate = quality * SAMPLES_PER_QUALITY;
-    sParams->SetSampleRate(adjustedRate);
-}
-
 void SliceEventRouter::GetWebHelp(
 	vector <pair <string, string> > &help
 ) const {
@@ -130,6 +116,7 @@ void SliceEventRouter::_updateTab(){
 		_controlExec->GetParamsMgr(),
 		GetActiveParams()
 	);
+
 	_appearance->Update(
 		GetActiveDataMgr(),
 		_controlExec->GetParamsMgr(),

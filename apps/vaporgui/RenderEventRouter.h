@@ -117,7 +117,6 @@ public:
  RenderEventRouter(
 	VAPoR::ControlExec *ce, string paramsType
  ) : EventRouter(ce, paramsType) {
-
 	_instName = "";
 }
 

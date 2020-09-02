@@ -13,15 +13,13 @@ PGroup::PGroup()
 }
 
 PGroup::PGroup(QWidget *w)
-: PWidget("", _widget = w) {
-}
+: PWidget("", _widget = w) {}
 
 PGroup *PGroup::Add(PWidget *pw)
 {
     _children.push_back(pw);
     QVBoxLayout* layout = dynamic_cast<QVBoxLayout*>(_widget->layout());
     layout->insertWidget( layout->count()-1, pw);
-//    layout->addWidget(pw);
     return this;
 }
 
