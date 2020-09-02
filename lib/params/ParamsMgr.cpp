@@ -1320,6 +1320,8 @@ void ParamsMgr::PMgrStateSave::EndGroup() {
 	string desc = _groups.top();
 	_groups.pop();
 
+cout << "ParamsMgr::PMgrStateSave::EndGroup() : " << desc << endl;
+
 	// Don't do anything until _groups is empty
 	//
 	if (_groups.size()) return;	
@@ -1381,6 +1383,8 @@ bool ParamsMgr::PMgrStateSave::Undo() {
 	if (! _undoStack.size()) return(false);
 
 	pair <string, XmlNode *> &p1 = _undoStack.back();
+
+cout << "ParamsMgr::PMgrStateSave::Undo " << p1.first << endl;
 
 	// Delete oldest elements if needed
 	// 

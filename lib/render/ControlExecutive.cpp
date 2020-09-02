@@ -674,6 +674,7 @@ string ControlExec::MakeStringConformant(string s) {
 }
 
 
+bool visualizerEvent = false;
 void ControlExec::undoRedoHelper(
 	const map <string, vector <string> > &addRenderInstances,
 	const map <string, vector <string> > &removeRenderInstances
@@ -706,33 +707,40 @@ void ControlExec::undoRedoHelper(
 		v->DestroyRenderer(renderType, itr.first, false);
 	}
 
-#ifdef	DEAD
-	// Destroy current visualizers
-	//
-	vector <string> vizNames = GetVisualizerNames();
-	for (int i=0; i<vizNames.size(); i++) {
-		RemoveVisualizer(vizNames[i]);
-	}
 
-	// Create new visualizers based on new parameter state
-	//
-	vizNames = _paramsMgr->GetVisualizerNames();
-	for (int i=0; i<vizNames.size(); i++) {
-		string winName = vizNames[i];
-		Visualizer* viz = new Visualizer(_paramsMgr, _dataStatus, winName);
-		_visualizers[winName] = viz;
-	}
+	if (visualizerEvent) {
+		// Destroy current visualizers
+		//
+		vector <string> vizNames = GetVisualizerNames();
+		for (int i=0; i<vizNames.size(); i++) {
+			RemoveVisualizer(vizNames[i]);
+		}
 
-	// Data-dependent re-initialization
-	//
-	int rc = openDataHelper(false);
-	VAssert(rc>=0);
-#endif
+		// Create new visualizers based on new parameter state
+		//
+		vizNames = _paramsMgr->GetVisualizerNames();
+		for (int i=0; i<vizNames.size(); i++) {
+			string winName = vizNames[i];
+			Visualizer* viz = new Visualizer(_paramsMgr, _dataStatus, winName);
+			_visualizers[winName] = viz;
+		}
+
+		// Data-dependent re-initialization
+		//
+		int rc = openDataHelper(false);
+		VAssert(rc>=0);
+	}
 
 	SetSaveStateEnabled(enabled);
 }
 
 bool ControlExec::Undo() {
+
+	bool renderEvent = (_paramsMgr->GetTopUndo() == "Create new renderer") ||
+        (_paramsMgr->GetTopUndo() == "Delete renderer");
+
+	visualizerEvent = ((_paramsMgr->GetTopUndo() == "Remove Visualizer") ||
+        (_paramsMgr->GetTopUndo() == "Create Visualizer"));
 
 	// Attempt to undo parameter state
 	//
@@ -762,19 +770,21 @@ bool ControlExec::Undo() {
 	}
 
 	map <string, vector <string> > createdMap;
-	std::set_difference(
-		afterMap.begin(), afterMap.end(),
-		beforeMap.begin(), beforeMap.end(),
-		std::inserter(createdMap, createdMap.end())
-	);
+	if (renderEvent) 
+		std::set_difference(
+			afterMap.begin(), afterMap.end(),
+			beforeMap.begin(), beforeMap.end(),
+			std::inserter(createdMap, createdMap.end())
+		);
 
 
 	map <string, vector <string> > destroyedMap;
-	std::set_difference(
-		beforeMap.begin(), beforeMap.end(),
-		afterMap.begin(), afterMap.end(),
-		std::inserter(destroyedMap, destroyedMap.end())
-	);
+	if (renderEvent) 
+		std::set_difference(
+			beforeMap.begin(), beforeMap.end(),
+			afterMap.begin(), afterMap.end(),
+			std::inserter(destroyedMap, destroyedMap.end())
+		);
 
 	undoRedoHelper(createdMap, destroyedMap);
 

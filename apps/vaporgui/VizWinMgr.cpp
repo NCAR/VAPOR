@@ -168,16 +168,20 @@ void VizWinMgr::_attachVisualizer(string vizName) {
 
 void VizWinMgr::LaunchVisualizer()
 {
+	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	paramsMgr->BeginSaveStateGroup("Create Visualizer");
 
 	string vizName = make_viz_name(_controlExec->GetVisualizerNames());
     
 	int rc = _controlExec->NewVisualizer(vizName);
 	if (rc<0) {
+		paramsMgr->EndSaveStateGroup();
 		MSG_ERR("Failed to create new visualizer");
 		return;
 	}
 
 	_attachVisualizer(vizName);
+	paramsMgr->EndSaveStateGroup();
 }
 
 
@@ -308,8 +312,14 @@ void VizWinMgr::_vizAboutToDisappear(string vizName)  {
 	string activeViz = p->GetActiveVizName();
 
     itr->second->makeCurrent();
+
+    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+    paramsMgr->BeginSaveStateGroup("Remove Visualizer");
+
     _controlExec->RemoveAllRenderers(vizName, true);
     _controlExec->RemoveVisualizer(vizName);
+
+	paramsMgr->EndSaveStateGroup();
 
 
 	// disconnect all signals from window

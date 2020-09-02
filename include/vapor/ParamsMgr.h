@@ -575,6 +575,12 @@ public:
 	return(true);
  }
 
+ string GetTopUndo() const {
+	string s;
+	_ssave.GetTop(s);
+	return(s);
+ }
+
 
 
 private:
