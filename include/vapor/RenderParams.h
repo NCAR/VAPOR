@@ -215,7 +215,7 @@ public:
 	//! Virtual method sets current Compression level.
 	//! \param[in] val  compression level, 0 is most compressed
 	//!
-	void SetCompressionLevel(int val);
+	virtual void SetCompressionLevel(int val);
 
 	//! Specify a stretch factor used in displaying histograms in 
 	//! mapper functions.
