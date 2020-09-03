@@ -30,6 +30,7 @@ VolumeIsoEventRouter::VolumeIsoEventRouter( QWidget *parent, ControlExec *ce)
 	_variables = new VolumeIsoVariablesSubtab(this);
 	QScrollArea *qsvar = new QScrollArea(this);
 	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_variables->adjustSize();
 	qsvar->setWidget(_variables);
 	qsvar->setWidgetResizable(true);
 	addTab(qsvar, "Variables");
@@ -89,6 +90,9 @@ void VolumeIsoEventRouter::GetWebHelp(
 }
 
 void VolumeIsoEventRouter::_updateTab(){
+
+	// The variable tab updates itself:
+	//
 	_variables->Update(
 		GetActiveDataMgr(),
 		_controlExec->GetParamsMgr(),
