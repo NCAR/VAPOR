@@ -91,7 +91,7 @@ void VolumeEventRouter::GetWebHelp(
 
 void VolumeEventRouter::_updateTab(){
 
-	// The variable tab updates itself:	
+	// The variable tab updates itself:
 	//
 	_variables->Update(
 		GetActiveDataMgr(),
