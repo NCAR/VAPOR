@@ -28,11 +28,12 @@ VolumeEventRouter::VolumeEventRouter( QWidget *parent, ControlExec *ce)
 	                    RenderEventRouter( ce, VolumeParams::GetClassType())
 {
 	_variables = new VolumeVariablesSubtab(this);
-	QScrollArea* qsvar = new QScrollArea(this);
+	QScrollArea *qsvar = new QScrollArea(this);
 	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_variables->adjustSize();
 	qsvar->setWidget(_variables);
 	qsvar->setWidgetResizable(true);
-	addTab(qsvar,"Variables");
+	addTab(qsvar, "Variables");
 
 	_appearance = new VolumeAppearanceSubtab(this);
 	QScrollArea* qsapp = new QScrollArea(this);
@@ -90,6 +91,8 @@ void VolumeEventRouter::GetWebHelp(
 
 void VolumeEventRouter::_updateTab(){
 
+	// The variable tab updates itself:	
+	//
 	_variables->Update(
 		GetActiveDataMgr(),
 		_controlExec->GetParamsMgr(),

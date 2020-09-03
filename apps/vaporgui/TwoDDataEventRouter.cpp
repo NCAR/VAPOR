@@ -117,6 +117,7 @@ void TwoDDataEventRouter::_updateTab(){
 		_controlExec->GetParamsMgr(),
 		GetActiveParams()
 	);
+
 	_appearance->Update(
 		GetActiveDataMgr(),
 		_controlExec->GetParamsMgr(),
