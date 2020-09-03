@@ -105,6 +105,7 @@ ImageRenderer::ImageRenderer( const ParamsMgr*    pm,
   _texWidth = 0;
   _texHeight = 0;
 	_cacheTimestep = 0;
+    _cacheDownsample = 1024;
 	_cacheRefLevel = 0;
 	_cacheLod = 0;
 	_cacheHgtVar = "";
@@ -332,7 +333,7 @@ bool ImageRenderer::_gridStateDirty() const
 		lod != _cacheLod ||
 		hgtVar != _cacheHgtVar ||
 		ts != _cacheTimestep ||
-		boxExtents != _cacheBoxExtents 
+		boxExtents != _cacheBoxExtents
 	);
 }
 
@@ -362,10 +363,12 @@ bool ImageRenderer::_imageStateDirty( const vector <double> &times) const
 {
 	ImageParams *myParams = (ImageParams *) GetActiveParams();
 	string imgFileName = myParams->GetImagePath();
+    int downsample = myParams->GetDownsampleLimit();
 
 	return(
 		_cacheImgFileName != imgFileName ||
-		_cacheTimes != times 
+		_cacheTimes != times ||
+        _cacheDownsample != downsample
 	);
 }
 
@@ -377,12 +380,14 @@ void ImageRenderer::_imageStateSet( const vector <double> &times)
 
 	_cacheImgFileName = imgFileName;
 	_cacheTimes = times;
+    _cacheDownsample = myParams->GetDownsampleLimit();
 }
 
 void ImageRenderer::_imageStateClear() 
 {
 	_cacheImgFileName.clear();
 	_cacheTimes.clear();
+    _cacheDownsample = 1024;
 }
 
 bool ImageRenderer::_texStateDirty( DataMgr *dataMgr) const 
@@ -395,9 +400,11 @@ bool ImageRenderer::_texStateDirty( DataMgr *dataMgr) const
   myParams->GetBox()->GetExtents( minExt, maxExt );
 	vector <double> boxExtents( minExt );
   boxExtents.insert( boxExtents.end(), maxExt.begin(), maxExt.end() ); 
+	int downsample = myParams->GetDownsampleLimit();
 
 	return(
 		_cacheTimestepTex != ts ||
+	    _cacheDownsample  != downsample ||
 		_cacheBoxExtentsTex != boxExtents ||
 		_cacheGeoreferenced != georeferenced
 	);
@@ -409,6 +416,7 @@ void ImageRenderer::_texStateSet( DataMgr *dataMgr)
 	int georeferenced = (int) myParams->GetIsGeoRef();
 
 	_cacheTimestepTex = myParams->GetCurrentTimestep();
+	_cacheDownsample  = myParams->GetDownsampleLimit();
 	_cacheGeoreferenced = georeferenced;
   vector<double> minExt, maxExt;
   myParams->GetBox()->GetExtents( minExt, maxExt );
@@ -419,6 +427,7 @@ void ImageRenderer::_texStateSet( DataMgr *dataMgr)
 void ImageRenderer::_texStateClear() 
 {
 	_cacheTimestepTex = -1;
+	_cacheDownsample = true;
 	_cacheBoxExtentsTex.clear();
 	_cacheGeoreferenced = -1;
 }
@@ -509,8 +518,16 @@ unsigned char *ImageRenderer::_getImage(  GeoImage *geoimage,
 
 	// Ugh. Hardcode maximum image size request
 	//
-	const int maxWidthReq = 1024;
-	const int maxHeightReq = 1024;
+    // If the user specifies not to downsample, disable it by setting
+    // maxWidth/HeightReq to 0
+    ImageParams *myParams = (ImageParams *) GetActiveParams();
+    bool tryDownsample = myParams->GetTryDownsample();
+	//const int maxWidthReq  = tryDownsample ? 1024 : 2048;//0;
+	//const int maxHeightReq = tryDownsample ? 1024 : 2048;//0;
+	const int maxWidthReq  = myParams->GetDownsampleLimit();
+	const int maxHeightReq = maxWidthReq;
+
+    std::cout << "wid/hgt " << maxWidthReq << " " << maxHeightReq << std::endl;
 
 	double pcsExtentsData[4];
 	for (int i=0; i<4; i++) {
@@ -529,7 +546,6 @@ unsigned char *ImageRenderer::_getImage(  GeoImage *geoimage,
 		tex = geoimage->GetImage(ts, my_width, my_height);
 	}
 	else {
-
 
 		tex = geoimage->GetImage(
 			ts, pcsExtentsData, proj4StringData, maxWidthReq, maxHeightReq,

@@ -9,6 +9,10 @@
 #include "vapor/ResourcePath.h"
 #include <QFileDialog>
 #include "Flags.h"
+#include "PGroup.h"
+#include "PWidgetHLI.h"
+#include "PCheckboxHLI.h"
+#include "PIntegerInputHLI.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -53,6 +57,22 @@ public:
     {
     _rParams = NULL;
     setupUi(this);
+    
+    _pg = new PGroup;
+    verticalLayout->addWidget( _pg );
+    _pg->Add( new PCheckboxHLI<VAPoR::ImageParams>(
+        "Downsample image if very large",
+        &VAPoR::ImageParams::GetTryDownsample,
+        &VAPoR::ImageParams::SetTryDownsample
+        )
+    );
+    _pg->Add( new PIntegerInputHLI<VAPoR::ImageParams>(
+        "Downsample image if very large",
+        &VAPoR::ImageParams::GetDownsampleLimit,
+        &VAPoR::ImageParams::SetDownsampleLimit
+        )
+    );
+        
     _opacityCombo = new Combo( OpacityEdit, OpacitySlider );
     _opacityCombo->SetPrecision( 2 );
 
@@ -67,6 +87,8 @@ public:
 		            VAPoR::RenderParams*  rParams) 
   {
     _rParams = (ImageParams*) rParams;
+    
+    _pg->Update( _rParams, paramsMgr, dataMgr );
 
     bool state = _rParams->GetIsGeoRef();
     GeoRefCheckbox->setChecked(state);
@@ -121,6 +143,7 @@ private slots:
   }
 
 private:
+  PGroup* _pg;
   ImageParams* _rParams;
 
   Combo* _opacityCombo;

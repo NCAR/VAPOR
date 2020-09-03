@@ -162,7 +162,7 @@ unsigned char *GeoImageTMS::GetImage(
 	// Pick a lod that won't allow the resulting image to 
 	// exceed the max width and height
 	//
-	int lod = _getBestLOD(myGeoExtentsData, maxWidthReq, maxHeightReq);
+    int lod = _getBestLOD(myGeoExtentsData, maxWidthReq, maxHeightReq);
 	SetDiagMsg("GeoImageTMS::GetImage() LOD : %d", lod);
 
 	//
