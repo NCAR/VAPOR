@@ -15,7 +15,6 @@
 #include "VariablesWidget.h"
 #include "TwoDDataEventRouter.h"
 #include "EventRouter.h"
-#include "PVariableWidgets.h"
 
 using namespace VAPoR;
 
@@ -34,6 +33,7 @@ TwoDDataEventRouter::TwoDDataEventRouter( QWidget *parent, ControlExec *ce)
 	_variables = new TwoDVariablesSubtab(this);
 	QScrollArea *qsvar = new QScrollArea(this);
 	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_variables->adjustSize();
 	qsvar->setWidget(_variables);
 	qsvar->setWidgetResizable(true);
 	addTab(qsvar, "Variables");
@@ -112,6 +112,8 @@ void TwoDDataEventRouter::GetWebHelp(
 
 void TwoDDataEventRouter::_updateTab(){
 
+	// The variable tab updates itself:
+	//
 	_variables->Update(
 		GetActiveDataMgr(),
 		_controlExec->GetParamsMgr(),

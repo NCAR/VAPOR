@@ -15,7 +15,7 @@
 #include "VariablesWidget.h"
 #include "ContourEventRouter.h"
 #include "EventRouter.h"
-#include "PVariableWidgets.h"
+
 
 using namespace VAPoR;
 
@@ -31,9 +31,11 @@ ContourEventRouter::ContourEventRouter(
 ) : QTabWidget(parent),
 	RenderEventRouter(ce, ContourParams::GetClassType())
 {
+
 	_variables = new ContourVariablesSubtab(this);
 	QScrollArea *qsvar = new QScrollArea(this);
 	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_variables->adjustSize();
 	qsvar->setWidget(_variables);
 	qsvar->setWidgetResizable(true);
 	addTab(qsvar, "Variables");
@@ -97,6 +99,7 @@ void ContourEventRouter::_initializeTab() {
 }
 
 void ContourEventRouter::_updateTab(){
+	//The variable tab updates itself:
 	_variables->Update(
 		GetActiveDataMgr(),
 		_controlExec->GetParamsMgr(),

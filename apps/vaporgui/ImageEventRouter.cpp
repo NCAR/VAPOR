@@ -4,6 +4,7 @@
 
 #include <vapor/glutil.h>
 #include <vapor/ImageParams.h>
+// #include <vapor/ImageRenderer.h>
 #include <ImageEventRouter.h>
 #include <EventRouter.h>
 #include <qlineedit.h>
@@ -61,6 +62,7 @@ void ImageEventRouter::_updateTab()
   _variables->Update( GetActiveDataMgr(),
                       _controlExec->GetParamsMgr(),
                       GetActiveParams());
+
   _appearance->Update( GetActiveDataMgr(),
                        _controlExec->GetParamsMgr(),
                        GetActiveParams());

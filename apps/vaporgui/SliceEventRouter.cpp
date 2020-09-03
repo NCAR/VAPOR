@@ -33,6 +33,7 @@ SliceEventRouter::SliceEventRouter( QWidget *parent, ControlExec *ce)
 	_variables = new SliceVariablesSubtab(this);
 	QScrollArea *qsvar = new QScrollArea(this);
 	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_variables->adjustSize();
 	qsvar->setWidget(_variables);
 	qsvar->setWidgetResizable(true);
 	addTab(qsvar, "Variables");
