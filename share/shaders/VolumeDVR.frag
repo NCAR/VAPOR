@@ -72,7 +72,9 @@ void main(void)
         
         gl_FragDepth = CalculateDepth(eye + dir*t1);
         fragColor = accum;
-    }
+    } else {
+        fragColor = vec4(0.f);
+	}
     if (accum.a < ALPHA_DISCARD)
         gl_FragDepth = GetDepthBuffer();
 }
