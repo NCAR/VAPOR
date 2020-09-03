@@ -10,8 +10,6 @@
 #include <QFileDialog>
 #include <qscrollarea.h>
 
-#include "PVariableWidgets.h"
-
 using namespace VAPoR;
 
 //
@@ -61,8 +59,8 @@ void ImageEventRouter::GetWebHelp( vector <pair <string, string> > &help) const
 void ImageEventRouter::_updateTab()
 {
   _variables->Update( GetActiveDataMgr(),
-                       _controlExec->GetParamsMgr(),
-                       GetActiveParams());
+                      _controlExec->GetParamsMgr(),
+                      GetActiveParams());
   _appearance->Update( GetActiveDataMgr(),
                        _controlExec->GetParamsMgr(),
                        GetActiveParams());

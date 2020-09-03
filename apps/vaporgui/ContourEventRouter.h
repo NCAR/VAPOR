@@ -19,7 +19,6 @@ namespace VAPoR {
 }
 
 class GLContourImageWindow;
-class PGroup;
 
 //!
 //! \class ContourEventRouter
