@@ -2,7 +2,9 @@
 #include "SliceSubtabs.h"
 #include "TFEditor.h"
 #include "VLineItem.h"
+#include "PGroup.h"
 #include "PSection.h"
+#include "PVariableWidgets.h"
 #include "PFidelitySection.h"
 
 #define MIN_SAMPLES 1 

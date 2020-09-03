@@ -1,6 +1,8 @@
 #include "ContourSubtabs.h"
 #include "TFEditor.h"
+#include "PGroup.h"
 #include "PSection.h"
+#include "PVariableWidgets.h"
 #include "PFidelitySection.h"
 #include <vapor/glutil.h>
 

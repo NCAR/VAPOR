@@ -8,6 +8,7 @@
 #include "PEnumDropdown.h"
 #include "PSliderEdit.h"
 #include "PColorSelector.h"
+#include "PVariableWidgets.h"
 #include "PFidelitySection.h"
 
 using namespace VAPoR;

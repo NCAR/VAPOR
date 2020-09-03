@@ -17,6 +17,7 @@ namespace VAPoR {
 
 class SpacingCombo;
 class TFEditor;
+class PGroup;
 
 class ContourVariablesSubtab : public QWidget {
 

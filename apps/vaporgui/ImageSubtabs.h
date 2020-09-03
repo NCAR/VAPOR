@@ -7,7 +7,9 @@
 #include "vapor/ImageParams.h"
 #include "vapor/ResourcePath.h"
 #include "Flags.h"
+#include "PGroup.h"
 #include "PFidelitySection.h"
+#include "PVariableWidgets.h"
 
 namespace VAPoR {
 	class ControlExec;

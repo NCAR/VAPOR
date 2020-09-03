@@ -24,8 +24,6 @@
 #include "EventRouter.h"
 #include "Flags.h"
 
-#include "PVariableWidgets.h"
-
 namespace VAPoR {
 	class ControlExec;
 	class RenderParams;
@@ -117,7 +115,9 @@ public:
  RenderEventRouter(
 	VAPoR::ControlExec *ce, string paramsType
  ) : EventRouter(ce, paramsType) {
+
 	_instName = "";
+
 }
 
  virtual ~RenderEventRouter(){
@@ -133,8 +133,12 @@ public:
 
  virtual void confirmText() {EventRouter::confirmText(); }
 
+ //! Pure virtual method that indicates whether the current RenderEventRouter
+ //! and its associated renderer support 2D variables.
  virtual bool Supports2DVariables() const = 0;
  
+ //! Pure virtual method that indicates whether the current RenderEventRouter
+ //! and its associated renderer support 3D variables.
  virtual bool Supports3DVariables() const = 0;
 
  //! Virtual method to enable or disable rendering when turned on or off by 

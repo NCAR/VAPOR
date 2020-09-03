@@ -6,7 +6,9 @@
 #include "ui_TwoDAnnotationGUI.h"
 #include "Flags.h"
 #include <TFEditor.h>
+#include "PGroup.h"
 #include "PSection.h"
+#include "PVariableWidgets.h"
 #include "PFidelitySection.h"
 
 namespace VAPoR {
