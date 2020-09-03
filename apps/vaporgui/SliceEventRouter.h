@@ -76,7 +76,7 @@ private:
   void wheelEvent(QWheelEvent*) {}
 
  //! VariablesWidget is used as Variables tab
- SliceVariablesSubtab* _variables;
+ SliceVariablesSubtab *_variables;
  SliceGeometrySubtab* _geometry;
  GLSliceImageWindow* _glSliceImageWindow;
  SliceAppearanceSubtab* _appearance;

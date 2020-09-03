@@ -32,7 +32,7 @@ VolumeEventRouter::VolumeEventRouter( QWidget *parent, ControlExec *ce)
 	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	qsvar->setWidget(_variables);
 	qsvar->setWidgetResizable(true);
-	addTab(qsvar,"Appearance");
+	addTab(qsvar,"Variables");
 
 	_appearance = new VolumeAppearanceSubtab(this);
 	QScrollArea* qsapp = new QScrollArea(this);

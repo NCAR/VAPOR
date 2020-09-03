@@ -28,11 +28,11 @@ VolumeIsoEventRouter::VolumeIsoEventRouter( QWidget *parent, ControlExec *ce)
 	                    RenderEventRouter( ce, VolumeIsoParams::GetClassType())
 {
 	_variables = new VolumeIsoVariablesSubtab(this);
-	QScrollArea* qsvar = new QScrollArea(this);
+	QScrollArea *qsvar = new QScrollArea(this);
 	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	qsvar->setWidget(_variables);
 	qsvar->setWidgetResizable(true);
-	addTab(qsvar,"Variables");
+	addTab(qsvar, "Variables");
 
 	_appearance = new VolumeIsoAppearanceSubtab(this);
 	QScrollArea* qsapp = new QScrollArea(this);

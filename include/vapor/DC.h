@@ -136,7 +136,9 @@ namespace VAPoR {
 //! than that of a variable's array dimensions (or empty), in which case only
 //! the \b n fastest varying variable dimensions will be blocked, where
 //! \b n is the rank of \p bs. The ordering of the dimensions in \p bs
-//! is from fastest to slowest. A block is the basic unit of compression //! in the DC: variables are decomposed into blocks, and individual blocks //! are compressed independently. Note, the time dimension is never blocked.
+//! is from fastest to slowest. A block is the basic unit of compression
+//! in the DC: variables are decomposed into blocks, and individual blocks
+//! are compressed independently. Note, the time dimension is never blocked.
 //!
 //! \param wname Name of wavelet used for transforming compressed 
 //! variables between wavelet and physical space. Valid values

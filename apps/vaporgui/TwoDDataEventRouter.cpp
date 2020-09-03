@@ -32,11 +32,11 @@ TwoDDataEventRouter::TwoDDataEventRouter( QWidget *parent, ControlExec *ce)
 	                    RenderEventRouter( ce, TwoDDataParams::GetClassType())
 {
 	_variables = new TwoDVariablesSubtab(this);
-	QScrollArea* qsvar = new QScrollArea(this);
+	QScrollArea *qsvar = new QScrollArea(this);
 	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	qsvar->setWidget(_variables);
 	qsvar->setWidgetResizable(true);
-	addTab(qsvar,"Variables");
+	addTab(qsvar, "Variables");
 
 	_appearance = new TwoDAppearanceSubtab(this);
 	QScrollArea* qsapp = new QScrollArea(this);
