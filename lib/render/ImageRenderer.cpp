@@ -378,7 +378,6 @@ void ImageRenderer::_imageStateSet( const vector <double> &times)
 
 	_cacheImgFileName = imgFileName;
 	_cacheTimes = times;
-    _cacheDownsample = myParams->GetDownsampleLimit();
 }
 
 void ImageRenderer::_imageStateClear() 
