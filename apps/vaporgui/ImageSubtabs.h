@@ -10,6 +10,7 @@
 #include "vapor/ResourcePath.h"
 #include <QFileDialog>
 #include "Flags.h"
+#include "PWidget.h"    // Must explicitly inclue PWidget.h to use PWidgetHLI.h
 #include "PWidgetHLI.h"
 #include "PIntegerInputHLI.h"
 
