@@ -31,5 +31,6 @@ public slots:
     void emitSpinBoxFinished();
 
 signals:
+    void EditingFinished( int value );
     void ValueChanged( int value );
 };

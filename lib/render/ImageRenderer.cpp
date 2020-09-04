@@ -521,13 +521,8 @@ unsigned char *ImageRenderer::_getImage(  GeoImage *geoimage,
     // If the user specifies not to downsample, disable it by setting
     // maxWidth/HeightReq to 0
     ImageParams *myParams = (ImageParams *) GetActiveParams();
-    bool tryDownsample = myParams->GetTryDownsample();
-	//const int maxWidthReq  = tryDownsample ? 1024 : 2048;//0;
-	//const int maxHeightReq = tryDownsample ? 1024 : 2048;//0;
 	const int maxWidthReq  = myParams->GetDownsampleLimit();
 	const int maxHeightReq = maxWidthReq;
-
-    std::cout << "wid/hgt " << maxWidthReq << " " << maxHeightReq << std::endl;
 
 	double pcsExtentsData[4];
 	for (int i=0; i<4; i++) {

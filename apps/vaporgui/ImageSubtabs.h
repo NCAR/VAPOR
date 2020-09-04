@@ -1,6 +1,7 @@
 #ifndef IMAGESUBTABS_H
 #define IMAGESUBTABS_H
 
+#include <fstream>
 #include "ui_ImageAppearanceGUI.h"
 #include "ui_ImageVariablesGUI.h"
 #include "ui_ImageGeometryGUI.h"
@@ -58,20 +59,12 @@ public:
     _rParams = NULL;
     setupUi(this);
     
-    _pg = new PGroup;
-    verticalLayout->addWidget( _pg );
-    _pg->Add( new PCheckboxHLI<VAPoR::ImageParams>(
-        "Downsample image if very large",
-        &VAPoR::ImageParams::GetTryDownsample,
-        &VAPoR::ImageParams::SetTryDownsample
-        )
-    );
-    _pg->Add( new PIntegerInputHLI<VAPoR::ImageParams>(
-        "Downsample image if very large",
+    _downsampleInput =  new PIntegerInputHLI<VAPoR::ImageParams>(
+        "Tile downsampling threshold",
         &VAPoR::ImageParams::GetDownsampleLimit,
         &VAPoR::ImageParams::SetDownsampleLimit
-        )
     );
+    ((QVBoxLayout*)layout())->insertWidget( 4, _downsampleInput );
         
     _opacityCombo = new Combo( OpacityEdit, OpacitySlider );
     _opacityCombo->SetPrecision( 2 );
@@ -88,7 +81,23 @@ public:
   {
     _rParams = (ImageParams*) rParams;
     
-    _pg->Update( _rParams, paramsMgr, dataMgr );
+    _downsampleInput->Update( _rParams, paramsMgr, dataMgr );
+
+    // Disable the downsample threshold if we're not working with a TMS image
+    //
+    std::string path = _rParams->GetImagePath();
+    if (path.rfind(".tms", path.size()-4) != string::npos) {
+        ifstream in;
+        in.open(path.c_str());
+        if ( ! in ) {
+            _downsampleInput->setEnabled( false );
+        }
+        in.close();
+        _downsampleInput->setEnabled( true );
+    }
+    else {
+        _downsampleInput->setEnabled( false );
+    }
 
     bool state = _rParams->GetIsGeoRef();
     GeoRefCheckbox->setChecked(state);
@@ -143,7 +152,7 @@ private slots:
   }
 
 private:
-  PGroup* _pg;
+  PIntegerInputHLI<VAPoR::ImageParams>* _downsampleInput;
   ImageParams* _rParams;
 
   Combo* _opacityCombo;

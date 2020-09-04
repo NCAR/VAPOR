@@ -84,7 +84,6 @@ int TwoDRenderer::_initializeGL(){
 }
 
 int TwoDRenderer::_paintGL(bool) {
-auto t1 = std::chrono::high_resolution_clock::now();
 	// Get the 2D texture
 	//
 	_texture = GetTexture(
@@ -97,9 +96,6 @@ auto t1 = std::chrono::high_resolution_clock::now();
 	VAssert(_texWidth >= 1);
 	VAssert(_texHeight >= 1);
 
-//auto t2 = std::chrono::high_resolution_clock::now();
-//auto t1ms = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-//std::cout << "GetTexture time " << t1ms << std::endl;
 	// Get the proxy geometry used to render the 2D surface (vertices and
 	// normals)
 	//
@@ -130,9 +126,6 @@ auto t1 = std::chrono::high_resolution_clock::now();
     
     GL_ERR_BREAK();
 
-auto t3 = std::chrono::high_resolution_clock::now();
-auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t3 - t1 ).count();
-std::cout << "Duration " << duration << std::endl;
 	return(0);
 }
 

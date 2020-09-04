@@ -108,12 +108,10 @@ public:
   int GetDownsampleLimit() const
   {
     int value = ( (int)GetValueLong( _tryDownsampleTag, 1024 ) );
-    std::cout << "Getting " << value << std::endl;
     return value;
   }
   void SetDownsampleLimit( int val )
   {
-    std::cout << "Setting " << val << std::endl;
     SetValueLong( _tryDownsampleTag, "size at which to downsample TMS images", (long)val );
   }
 
