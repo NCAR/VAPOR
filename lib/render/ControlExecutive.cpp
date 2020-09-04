@@ -66,6 +66,8 @@ ControlExec::~ControlExec() {
 
 int ControlExec::NewVisualizer(string winName) {
 
+	_paramsMgr->BeginSaveStateGroup(GetNewVisualizerUndoTag());
+
 	// Remove if already exists. Else no-op
 	//
 	RemoveVisualizer(winName);
@@ -77,21 +79,32 @@ int ControlExec::NewVisualizer(string winName) {
 	);
 	if (! vpParams) {
 		SetErrMsg("Failed to create Visualizer parameters");
+		_paramsMgr->EndSaveStateGroup();
 		return -1;
 	}
 
 	Visualizer* viz = new Visualizer(_paramsMgr, _dataStatus, winName);
 	_visualizers[winName] = viz;
 
+	_paramsMgr->EndSaveStateGroup();
+
 	return(0);
 }
 
-void ControlExec::RemoveVisualizer(string winName) {
+void ControlExec::RemoveVisualizer(string winName, bool hasOpenGLContext) {
+
+	_paramsMgr->BeginSaveStateGroup(GetRemoveVisualizerUndoTag());
+
+	RemoveAllRenderers(winName, hasOpenGLContext);
+
 	std::map<string, Visualizer*>::iterator itr2 = _visualizers.find(winName);
 	if (itr2 != _visualizers.end()) {
 		delete itr2->second;
 		_visualizers.erase(itr2);
+		_paramsMgr->RemoveVisualizer(winName);
 	}
+
+	_paramsMgr->EndSaveStateGroup();
 }
 	
 int ControlExec::InitializeViz(string winName, GLManager *glManager) {
@@ -174,7 +187,7 @@ int ControlExec::ActivateRender(
 		return -1;
 	}
 
-	_paramsMgr->BeginSaveStateGroup("ActivateRender");
+	_paramsMgr->BeginSaveStateGroup(GetActivateRendererTag());
 
 	// Create new renderer if one does not exist
 	//
@@ -200,6 +213,7 @@ int ControlExec::ActivateRender(
 		int rc = rp->Initialize();
 		if (rc < 0) {
 			SetErrMsg("Failed to initialize of type \"%s\"",renderType.c_str());
+			_paramsMgr->EndSaveStateGroup();
 			return(-1);
 		}
 
@@ -251,7 +265,7 @@ int ControlExec::ActivateRender(
 
 	string paramsType = rp->GetName();
 
-	_paramsMgr->BeginSaveStateGroup("ActivateRender");
+	_paramsMgr->BeginSaveStateGroup(GetActivateRendererTag());
 
 	// Create new renderer if one does not exist
 	//
@@ -292,29 +306,31 @@ int ControlExec::ActivateRender(
 }
 
 void ControlExec::_removeRendererHelper(
-	string winName, string dataSetName, string renderType, string renderName,
+	string winName, string dataSetName, string pClassName, string renderName,
 	bool removeFromParamsFlag, bool hasOpenGLContext
 ) {
 
 	// No-op if tuple of winName, dataSetName, renderType, and
 	// renderName is unknown
 	//
-	string paramsType = RendererFactory::Instance()->
-		GetParamsClassFromRenderClass(renderType);
+
+	// Convert from params render type to render type. Sigh
+	//
+	string rClassName = RendererFactory::Instance()->GetRenderClassFromParamsClass(pClassName);
 
 	RenderParams *rParams = _paramsMgr->GetRenderParams(
-		winName, dataSetName, paramsType, renderName
+		winName, dataSetName, pClassName, renderName
 	);
 	if (! rParams) return;
 
 	Visualizer* v = getVisualizer(winName);
 	if (! v)  return;
 
-	v->DestroyRenderer(renderType, renderName, hasOpenGLContext);
+	v->DestroyRenderer(rClassName, renderName, hasOpenGLContext);
 
 	if (removeFromParamsFlag) {
 		_paramsMgr->RemoveRenderParamsInstance(
-				winName, dataSetName, paramsType, renderName
+				winName, dataSetName, pClassName, renderName
 		);
 	}
 }
@@ -323,9 +339,23 @@ void ControlExec::RemoveRenderer(
 	string winName, string dataSetName, string renderType, string renderName,
 	bool hasOpenGLContext
 ) {
-	_removeRendererHelper(
-		winName, dataSetName, renderType, renderName, true, hasOpenGLContext
+
+	string pClassName = RendererFactory::Instance()->GetParamsClassFromRenderClass(renderType);
+
+	RenderParams *rParams = _paramsMgr->GetRenderParams(
+		winName, dataSetName, pClassName, renderName
 	);
+	if (! rParams) return;
+
+	_paramsMgr->BeginSaveStateGroup(GetRemoveRendererTag());
+
+	rParams->SetEnabled(false);
+
+	_removeRendererHelper(
+		winName, dataSetName, pClassName, renderName, true, hasOpenGLContext
+	);
+
+	_paramsMgr->EndSaveStateGroup();
 }
 
 void ControlExec::RemoveAllRenderers(
@@ -342,15 +372,10 @@ void ControlExec::RemoveAllRenderers(
 				winName, dataSetNames[k], pClassNames[j]
 			);
 
-			string rClassName =
-				RendererFactory::Instance()->GetRenderClassFromParamsClass(
-					pClassNames[j]
-				);
-
 			for (int i=0; i<instNames.size(); i++) {
 
 				_removeRendererHelper(
-					winName, dataSetNames[k], rClassName,
+					winName, dataSetNames[k], pClassNames[j],
 					instNames[i], true, hasOpenGLContext
 				);
 			}
@@ -440,10 +465,7 @@ int ControlExec::activateClassRenderers(
 
 		// Convert from params render type to render type. Sigh
 		//
-		string rClassName = 
-			RendererFactory::Instance()->GetRenderClassFromParamsClass(
-				pClassName
-			);
+		string rClassName = RendererFactory::Instance()->GetRenderClassFromParamsClass(pClassName);
 
 		if (! reportErrs) {
 			EnableErrMsg(false);
@@ -526,15 +548,10 @@ int ControlExec::OpenData(
 					vizNames[k], dataSetName, pClassNames[j]
 				);
 
-				string rClassName =
-					RendererFactory::Instance()->GetRenderClassFromParamsClass(
-						pClassNames[j]
-					);
-
 				for (int i=0; i<instNames.size(); i++) {
 
 					_removeRendererHelper(
-						vizNames[k], dataSetName, rClassName,
+						vizNames[k], dataSetName, pClassNames[j],
 						instNames[i], false, false
 					);
 				}
@@ -700,7 +717,7 @@ bool ControlExec::_undoRedoRenderer(bool undoFlag) {
 		status = _paramsMgr->Undo();
 	}
 	else {
-		status = _paramsMgr->Undo();
+		status = _paramsMgr->Redo();
 	}
 	if (! status) return (status);
 
@@ -783,7 +800,7 @@ bool ControlExec::_undoRedoVisualizer(bool undoFlag) {
 		status = _paramsMgr->Undo();
 	}
 	else {
-		status = _paramsMgr->Undo();
+		status = _paramsMgr->Redo();
 	}
 	if (! status) return (status);
 
@@ -823,11 +840,11 @@ bool ControlExec::Undo() {
 	// Update(). The only way to determine if an undo/redo was for renderer of visualizer
 	// event is to examine the comment associated with the state change.
 	//
-	bool renderEvent = (_paramsMgr->GetTopUndo() == "Create new renderer") ||
-        (_paramsMgr->GetTopUndo() == "Delete renderer");
+	bool renderEvent = (_paramsMgr->GetTopUndoDesc() == "Create new renderer") ||
+        (_paramsMgr->GetTopUndoDesc() == GetRemoveRendererTag());
 
-	bool visualizerEvent = ((_paramsMgr->GetTopUndo() == "Remove Visualizer") ||
-        (_paramsMgr->GetTopUndo() == "Create Visualizer"));
+	bool visualizerEvent = ((_paramsMgr->GetTopUndoDesc() == GetRemoveVisualizerUndoTag()) ||
+        (_paramsMgr->GetTopUndoDesc() == GetNewVisualizerUndoTag()));
 
 	if (renderEvent)  {
 		return(_undoRedoRenderer(true));
@@ -842,11 +859,11 @@ bool ControlExec::Undo() {
 
 bool ControlExec::Redo() {
 
-	bool renderEvent = (_paramsMgr->GetTopUndo() == "Create new renderer") ||
-        (_paramsMgr->GetTopUndo() == "Delete renderer");
+	bool renderEvent = (_paramsMgr->GetTopRedoDesc() == "Create new renderer") ||
+        (_paramsMgr->GetTopRedoDesc() == GetRemoveRendererTag());
 
-	bool visualizerEvent = ((_paramsMgr->GetTopUndo() == "Remove Visualizer") ||
-        (_paramsMgr->GetTopUndo() == "Create Visualizer"));
+	bool visualizerEvent = ((_paramsMgr->GetTopRedoDesc() == GetRemoveVisualizerUndoTag()) ||
+        (_paramsMgr->GetTopRedoDesc() == GetNewVisualizerUndoTag()));
 
 	if (renderEvent)  {
 		return(_undoRedoRenderer(false));

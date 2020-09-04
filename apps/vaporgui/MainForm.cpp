@@ -1587,9 +1587,18 @@ void MainForm::undoRedoHelper(bool undo) {
 	bool enabled = _controlExec->GetSaveStateEnabled();
 	_controlExec->SetSaveStateEnabled(false);
 
-	bool visualizerEvent = 
-		((_paramsMgr->GetTopUndo() == "Remove Visualizer") ||
-		(_paramsMgr->GetTopUndo() == "Create Visualizer")); 
+	bool visualizerEvent = false;
+	if (undo) { 
+		visualizerEvent = 
+			((_paramsMgr->GetTopUndoDesc() == _controlExec->GetRemoveVisualizerUndoTag()) ||
+			(_paramsMgr->GetTopUndoDesc() ==  _controlExec->GetNewVisualizerUndoTag())); 
+	}
+	else {
+		visualizerEvent = 
+			((_paramsMgr->GetTopRedoDesc() == _controlExec->GetRemoveVisualizerUndoTag()) ||
+			(_paramsMgr->GetTopRedoDesc() ==  _controlExec->GetNewVisualizerUndoTag())); 
+	}
+
 
 	// Visualizer create/destroy undo/redo events require special 
 	// handling.
@@ -2269,6 +2278,12 @@ void MainForm::updateMenus() {
     // Turn off jpeg and png capture if we're in MapOrthographic mode
     ViewpointParams *VPP;
     VPP = _paramsMgr->GetViewpointParams(GetStateParams()->GetActiveVizName());
+
+	// If there are no visualizers (can only happen if user deletes them)
+	// then there are no ViewpointParams. See GitHub issue #1636
+	//
+	if (! VPP) return;
+
     if (VPP->GetProjectionType() == ViewpointParams::MapOrthographic) {
         if (_captureSingleJpegAction->isEnabled())
             _captureSingleJpegAction->setEnabled(false);

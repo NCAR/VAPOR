@@ -168,20 +168,16 @@ void VizWinMgr::_attachVisualizer(string vizName) {
 
 void VizWinMgr::LaunchVisualizer()
 {
-	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-	paramsMgr->BeginSaveStateGroup("Create Visualizer");
 
 	string vizName = make_viz_name(_controlExec->GetVisualizerNames());
     
 	int rc = _controlExec->NewVisualizer(vizName);
 	if (rc<0) {
-		paramsMgr->EndSaveStateGroup();
 		MSG_ERR("Failed to create new visualizer");
 		return;
 	}
 
 	_attachVisualizer(vizName);
-	paramsMgr->EndSaveStateGroup();
 }
 
 
@@ -209,8 +205,6 @@ void VizWinMgr::FitSpace(){
  * Method called when the user makes a visualizer active:
  **********************************************************************/
 void VizWinMgr::_setActiveViz(string vizName){
-	if (vizName.empty()) return;
-
 
 	GUIStateParams *p = _getStateParams();
 	string currentVizName = p->GetActiveVizName();
@@ -218,6 +212,8 @@ void VizWinMgr::_setActiveViz(string vizName){
 
 		p->SetActiveVizName(vizName);
 		emit(activateViz(QString::fromStdString(vizName)));
+
+		if (vizName.empty()) return;
 		
 		//Need to cause a redraw in all windows if we are not in navigate mode,
 		//So that the manips will change where they are drawn:
@@ -313,14 +309,7 @@ void VizWinMgr::_vizAboutToDisappear(string vizName)  {
 
     itr->second->makeCurrent();
 
-    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-    paramsMgr->BeginSaveStateGroup("Remove Visualizer");
-
-    _controlExec->RemoveAllRenderers(vizName, true);
-    _controlExec->RemoveVisualizer(vizName);
-
-	paramsMgr->EndSaveStateGroup();
-
+    _controlExec->RemoveVisualizer(vizName, true);
 
 	// disconnect all signals from window
 	//

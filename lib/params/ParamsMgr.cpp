@@ -303,6 +303,30 @@ void ParamsMgr::AddDataMgr(string dataSetName, DataMgr *dataMgr) {
 
 }
 
+void ParamsMgr::RemoveVisualizer(string winName) {
+
+	if (! _rootSeparator->HasChild(_windowsTag)) return;
+
+	ParamsSeparator windowsSep(_rootSeparator, _windowsTag);
+
+	if (! windowsSep.HasChild(winName)) return;
+
+	_ssave.BeginGroup("CreateVisualizer");
+
+	delete_ren_containers(winName);
+
+	RemoveVisualizerParamsInstance(winName);
+
+	ParamsSeparator windowSep(ParamsSeparator(&windowsSep, winName));
+	
+	// Set parent to root so  Xml representation will be deleted
+	//
+	windowSep.SetParent(NULL);
+
+	_ssave.EndGroup();
+
+}
+
 void ParamsMgr::RemoveDataMgr(string dataSetName) {
 
 	map <string, DataMgr *>::iterator itr;
@@ -340,6 +364,29 @@ ViewpointParams *ParamsMgr::CreateVisualizerParamsInstance(
 	_ssave.EndGroup();
 
 	return(vpParams);
+}
+
+void ParamsMgr::RemoveVisualizerParamsInstance(
+	string winName
+) {
+
+	_ssave.BeginGroup("RemoveVisualizerParamsInstance");
+
+	map <string, ViewpointParams *>::const_iterator itr;
+	itr = _viewpointParamsMap.find(winName);
+	if (itr == _viewpointParamsMap.end()) return;
+
+    ViewpointParams *vParams = itr->second;
+
+    // Set parent to root so  Xml representation will be deleted
+    //
+    vParams->SetParent(NULL);
+	delete vParams;
+
+	_viewpointParamsMap.erase(itr);
+
+	_ssave.EndGroup();
+
 }
 
 RenParamsContainer *ParamsMgr::createRenderParamsHelper(
@@ -1180,7 +1227,7 @@ bool ParamsMgr::undoRedoHelper() {
 
 	// Get top of **undo** stack
 	//
-	const XmlNode *newNode = _ssave.GetTop(description);
+	const XmlNode *newNode = _ssave.GetTopUndo(description);
 	if (! newNode) {
 		newNode = _ssave.GetBase();
 	}
@@ -1225,6 +1272,20 @@ void ParamsMgr::UndoRedoClear() {
 	_ssave.Clear();
 }
 
+string ParamsMgr::GetTopUndoDesc() const {
+    string s;
+    _ssave.GetTopUndo(s);
+    return(s);
+}
+
+string ParamsMgr::GetTopRedoDesc() const {
+    string s;
+    _ssave.GetTopRedo(s);
+    return(s);
+}
+
+
+
 ParamsMgr::PMgrStateSave::PMgrStateSave(int stackSize) :
  StateSave() {
 	_enabled = true;
@@ -1265,7 +1326,7 @@ void ParamsMgr::PMgrStateSave::Save(
 
 	const XmlNode *topNode = NULL;
 	string s;
-	topNode = GetTop(s);
+	topNode = GetTopUndo(s);
 	if (topNode && (*topNode == *_rootNode)) {
 
 		// Don't save tree if no changes
@@ -1326,7 +1387,7 @@ void ParamsMgr::PMgrStateSave::EndGroup() {
 
 	const XmlNode *topNode = NULL;
 	string s;
-	topNode = GetTop(s);
+	topNode = GetTopUndo(s);
 
 	if (topNode && (*topNode == *_rootNode)) {
 		// Don't save tree if no changes
@@ -1361,7 +1422,7 @@ void ParamsMgr::PMgrStateSave::IntermediateChange()
     emitIntermediateStateChange();
 }
 
-const XmlNode *ParamsMgr::PMgrStateSave::GetTop(
+const XmlNode *ParamsMgr::PMgrStateSave::GetTopUndo(
 	string &description
 ) const {
 	VAssert(_rootNode);
@@ -1370,6 +1431,20 @@ const XmlNode *ParamsMgr::PMgrStateSave::GetTop(
 	if (! _undoStack.size()) return(NULL);
 
 	const pair <string, XmlNode *> &p1 = _undoStack.back();
+
+	description = p1.first;
+	return(p1.second);
+}
+
+const XmlNode *ParamsMgr::PMgrStateSave::GetTopRedo(
+	string &description
+) const {
+	VAssert(_rootNode);
+	description.clear();
+
+	if (! _redoStack.size()) return(NULL);
+
+	const pair <string, XmlNode *> &p1 = _redoStack.back();
 
 	description = p1.first;
 	return(p1.second);
@@ -1421,6 +1496,8 @@ void ParamsMgr::PMgrStateSave::Clear() {
 	cleanStack(0, _undoStack);
 	cleanStack(0, _redoStack);
 	while (_groups.size()) _groups.pop();
+	if (_enabled) Save(_rootNode, "Top");
+
 }
 
 void ParamsMgr::PMgrStateSave::cleanStack(
