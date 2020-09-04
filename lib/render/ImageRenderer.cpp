@@ -367,8 +367,7 @@ bool ImageRenderer::_imageStateDirty( const vector <double> &times) const
 
 	return(
 		_cacheImgFileName != imgFileName ||
-		_cacheTimes != times ||
-        _cacheDownsample != downsample
+		_cacheTimes != times
 	);
 }
 
