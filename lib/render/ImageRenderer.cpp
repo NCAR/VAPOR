@@ -363,7 +363,6 @@ bool ImageRenderer::_imageStateDirty( const vector <double> &times) const
 {
 	ImageParams *myParams = (ImageParams *) GetActiveParams();
 	string imgFileName = myParams->GetImagePath();
-    int downsample = myParams->GetDownsampleLimit();
 
 	return(
 		_cacheImgFileName != imgFileName ||
@@ -386,7 +385,6 @@ void ImageRenderer::_imageStateClear()
 {
 	_cacheImgFileName.clear();
 	_cacheTimes.clear();
-    _cacheDownsample = 1024;
 }
 
 bool ImageRenderer::_texStateDirty( DataMgr *dataMgr) const 

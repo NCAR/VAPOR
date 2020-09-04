@@ -82,6 +82,7 @@ int TwoDRenderer::_initializeGL(){
 }
 
 int TwoDRenderer::_paintGL(bool) {
+
 	// Get the 2D texture
 	//
 	_texture = GetTexture(
