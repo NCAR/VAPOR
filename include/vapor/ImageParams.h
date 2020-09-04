@@ -95,24 +95,17 @@ public:
     SetValueLong( _orientationTag, "set orientation value", val );
   }
 
-  bool GetTryDownsample() const
-  {
-    bool value = ( (bool)GetValueLong( _tryDownsampleTag, (long)true ) );
-    return value;
-  }
-  void SetTryDownsample( bool val )
-  {
-    SetValueLong( _tryDownsampleTag, "downsample image if it's vary large", (long)val );
-  }
-  
+  //
+  // Get and set the threshold for TMS image downsampling
+  // 
   int GetDownsampleLimit() const
   {
-    int value = ( (int)GetValueLong( _tryDownsampleTag, 1024 ) );
+    int value = ( (int)GetValueLong( _downsampleThresholdTag, 1024 ) );
     return value;
   }
   void SetDownsampleLimit( int val )
   {
-    SetValueLong( _tryDownsampleTag, "size at which to downsample TMS images", (long)val );
+    SetValueLong( _downsampleThresholdTag, "size at which to downsample TMS images", (long)val );
   }
 
 private:
@@ -120,7 +113,7 @@ private:
   static const std::string          _isGeoRefTag;
   static const std::string          _ignoreTransparencyTag;
   static const std::string          _opacityTag;
-  static const std::string          _tryDownsampleTag;
+  static const std::string          _downsampleThresholdTag;
   static const std::string          _orientationTag;  // If it's X-Y (orientation = 2) 
                                                       // If it's X-Z (orientation = 1)
                                                       // If it's Y-Z (orientation = 0)

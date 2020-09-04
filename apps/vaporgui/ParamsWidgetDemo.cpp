@@ -4,7 +4,6 @@
 #include <vapor/ParamsMgr.h>
 #include <QVBoxLayout>
 #include "GUIStateParams.h"
-#include "vapor/ImageParams.h"
 
 #include "PGroup.h"
 #include "PSection.h"
@@ -19,7 +18,6 @@
 #include "PStringDropdown.h"
 #include "PFileSelectorHLI.h"
 #include "PEnumDropdownHLI.h"
-#include "PCheckboxHLI.h"
 
 ParamsWidgetDemo::ParamsWidgetDemo()
 {
@@ -56,17 +54,16 @@ ParamsWidgetDemo::ParamsWidgetDemo()
     section->Add((new PCheckbox("demo_bool", "Tooltips"))->SetTooltip("This is a tooltip"));
     pg->Add(section);
     
-    /*section = new PSection("Labels");
+    section = new PSection("Labels");
     section->Add(new PIntegerDisplay("demo_int", "PIntegerDisplay"));
     section->Add(new PDoubleDisplay("demo_double", "PDoubleDisplay"));
     section->Add(new PStringDisplay("demo_path", "PStringDisplay"));
     section->Add(new PBooleanDisplay("demo_bool", "PBooleanDisplay"));
-    pg->Add(section);*/
+    pg->Add(section);
     
     section = new PSection("High Level Interface");
     section->Add(new_PDirectorySelectorHLI("Image Output Dir", &GUIStateParams::GetCurrentImagePath, &GUIStateParams::SetCurrentImagePath));
     section->Add(new PEnumDropdownHLI<GUIStateParams>("Flow Dimensions", {"2", "3"}, {2, 3}, &GUIStateParams::GetFlowDimensionality, &GUIStateParams::SetFlowDimensionality));
-    section->Add(new PCheckboxHLI<VAPoR::ImageParams>("checkbox", &VAPoR::ImageParams::GetTryDownsample, &VAPoR::ImageParams::SetTryDownsample));
     pg->Add(section);
 }
 

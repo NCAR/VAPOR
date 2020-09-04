@@ -427,7 +427,7 @@ void ImageRenderer::_texStateSet( DataMgr *dataMgr)
 void ImageRenderer::_texStateClear() 
 {
 	_cacheTimestepTex = -1;
-	_cacheDownsample = true;
+	_cacheDownsample = 1024;
 	_cacheBoxExtentsTex.clear();
 	_cacheGeoreferenced = -1;
 }
@@ -516,10 +516,6 @@ unsigned char *ImageRenderer::_getImage(  GeoImage *geoimage,
 	}
 	width = height = 0;
 
-	// Ugh. Hardcode maximum image size request
-	//
-    // If the user specifies not to downsample, disable it by setting
-    // maxWidth/HeightReq to 0
     ImageParams *myParams = (ImageParams *) GetActiveParams();
 	const int maxWidthReq  = myParams->GetDownsampleLimit();
 	const int maxHeightReq = maxWidthReq;

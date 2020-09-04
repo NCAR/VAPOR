@@ -8,7 +8,6 @@ PGroup::PGroup()
 {
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setMargin(0);
-    //layout->addStretch();
     _widget->setLayout(layout);
 }
 

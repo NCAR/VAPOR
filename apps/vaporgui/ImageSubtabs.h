@@ -10,9 +10,7 @@
 #include "vapor/ResourcePath.h"
 #include <QFileDialog>
 #include "Flags.h"
-#include "PGroup.h"
 #include "PWidgetHLI.h"
-#include "PCheckboxHLI.h"
 #include "PIntegerInputHLI.h"
 
 namespace VAPoR {

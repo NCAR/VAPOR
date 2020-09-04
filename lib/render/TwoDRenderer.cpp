@@ -16,8 +16,6 @@
 #include <vapor/TwoDRenderer.h>
 #include "vapor/GLManager.h"
 
-#include <chrono>
-
 using namespace VAPoR;
 using namespace Wasp;
 

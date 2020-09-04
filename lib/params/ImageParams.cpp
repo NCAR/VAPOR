@@ -8,7 +8,7 @@ const std::string   ImageParams::_isGeoRefTag          = "IsGeoRefTag";
 const std::string   ImageParams::_ignoreTransparencyTag = "IgnoreTransparency";
 const std::string   ImageParams::_opacityTag            = "Opacity";
 const std::string   ImageParams::_orientationTag        = "Orientation";
-const std::string   ImageParams::_tryDownsampleTag      = "tryDownsample";
+const std::string   ImageParams::_downsampleThresholdTag = "downsampleThreshold";
 
 //
 // Register class with object factory
