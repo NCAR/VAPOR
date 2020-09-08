@@ -247,7 +247,7 @@ public:
 
  //! Return tag pushed to the undo stack when ActivateRender() is called
  //
- string GetActivateRendererTag() const {
+ string GetActivateRendererUndoTag() const {
 	return("ActivateRenderer");
  }
 
@@ -265,7 +265,7 @@ public:
 
  //! Return tag pushed to the undo stack when RemoveRenderer() is called
  //
- string GetRemoveRendererTag() const {
+ string GetRemoveRendererUndoTag() const {
 	return("RemoveRenderer");
  }
 

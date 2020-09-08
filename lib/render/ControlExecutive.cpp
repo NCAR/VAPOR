@@ -187,7 +187,7 @@ int ControlExec::ActivateRender(
 		return -1;
 	}
 
-	_paramsMgr->BeginSaveStateGroup(GetActivateRendererTag());
+	_paramsMgr->BeginSaveStateGroup(GetActivateRendererUndoTag());
 
 	// Create new renderer if one does not exist
 	//
@@ -265,7 +265,7 @@ int ControlExec::ActivateRender(
 
 	string paramsType = rp->GetName();
 
-	_paramsMgr->BeginSaveStateGroup(GetActivateRendererTag());
+	_paramsMgr->BeginSaveStateGroup(GetActivateRendererUndoTag());
 
 	// Create new renderer if one does not exist
 	//
@@ -347,7 +347,7 @@ void ControlExec::RemoveRenderer(
 	);
 	if (! rParams) return;
 
-	_paramsMgr->BeginSaveStateGroup(GetRemoveRendererTag());
+	_paramsMgr->BeginSaveStateGroup(GetRemoveRendererUndoTag());
 
 	rParams->SetEnabled(false);
 
@@ -840,8 +840,8 @@ bool ControlExec::Undo() {
 	// Update(). The only way to determine if an undo/redo was for renderer of visualizer
 	// event is to examine the comment associated with the state change.
 	//
-	bool renderEvent = (_paramsMgr->GetTopUndoDesc() == "Create new renderer") ||
-        (_paramsMgr->GetTopUndoDesc() == GetRemoveRendererTag());
+	bool renderEvent = (_paramsMgr->GetTopUndoDesc() == GetActivateRendererUndoTag()) ||
+        (_paramsMgr->GetTopUndoDesc() == GetRemoveRendererUndoTag());
 
 	bool visualizerEvent = ((_paramsMgr->GetTopUndoDesc() == GetRemoveVisualizerUndoTag()) ||
         (_paramsMgr->GetTopUndoDesc() == GetNewVisualizerUndoTag()));
@@ -859,8 +859,8 @@ bool ControlExec::Undo() {
 
 bool ControlExec::Redo() {
 
-	bool renderEvent = (_paramsMgr->GetTopRedoDesc() == "Create new renderer") ||
-        (_paramsMgr->GetTopRedoDesc() == GetRemoveRendererTag());
+	bool renderEvent = (_paramsMgr->GetTopRedoDesc() == GetActivateRendererUndoTag()) ||
+        (_paramsMgr->GetTopRedoDesc() == GetRemoveRendererUndoTag());
 
 	bool visualizerEvent = ((_paramsMgr->GetTopRedoDesc() == GetRemoveVisualizerUndoTag()) ||
         (_paramsMgr->GetTopRedoDesc() == GetNewVisualizerUndoTag()));

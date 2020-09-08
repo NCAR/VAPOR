@@ -355,7 +355,6 @@ void RenderHolder::_newRendererDialogAccepted()
 		activeViz, dataSetName, rendererType, rendererName, false
 	);
 	if (rc<0) {
-		paramsMgr->EndSaveStateGroup();
 		MSG_ERR("Can't create renderer");
 		return;
 	}
