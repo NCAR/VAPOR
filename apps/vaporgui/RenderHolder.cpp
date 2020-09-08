@@ -351,11 +351,14 @@ void RenderHolder::_newRendererDialogAccepted()
 	rendererName = uniqueName(rendererName);
 	qname = QString(rendererName.c_str());
 
+	paramsMgr->BeginSaveStateGroup(_controlExec->GetActivateRendererUndoTag());
+
 	int rc = _controlExec->ActivateRender(
 		activeViz, dataSetName, rendererType, rendererName, false
 	);
 	if (rc<0) {
 		MSG_ERR("Can't create renderer");
+		paramsMgr->EndSaveStateGroup();
 		return;
 	}
 
@@ -366,6 +369,7 @@ void RenderHolder::_newRendererDialogAccepted()
 	Update();
 
 	emit newRendererSignal(activeViz, rendererType, rendererName);
+	paramsMgr->EndSaveStateGroup();
 
 }
 
