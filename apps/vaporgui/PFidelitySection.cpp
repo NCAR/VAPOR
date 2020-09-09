@@ -35,7 +35,7 @@ PQuickFidelitySelector::PQuickFidelitySelector()
 void PQuickFidelitySelector::updateGUI() const
 {
     RenderParams *rp = dynamic_cast<RenderParams*>(getParams());
-    assert(rp && "Params must be RenderParams");
+    VAssert(rp && "Params must be RenderParams");
     
     auto dm = getDataMgr();
     auto vn = rp->GetFirstVariableName();
@@ -93,7 +93,7 @@ PLODSelector::PLODSelector()
 void PLODSelector::updateGUI() const
 {
     RenderParams *rp = dynamic_cast<RenderParams*>(getParams());
-    assert(rp && "Params must be RenderParams");
+    VAssert(rp && "Params must be RenderParams");
     
     auto cr = getDataMgr()->GetCRatios(rp->GetFirstVariableName());
     vector<string> items;
@@ -126,7 +126,7 @@ PRefinementSelector::PRefinementSelector()
 void PRefinementSelector::updateGUI() const
 {
     RenderParams *rp = dynamic_cast<RenderParams*>(getParams());
-    assert(rp && "Params must be RenderParams");
+    VAssert(rp && "Params must be RenderParams");
     
     auto varName = rp->GetFirstVariableName();
     auto dm = getDataMgr();
