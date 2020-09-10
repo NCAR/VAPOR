@@ -1485,10 +1485,12 @@ void MainForm::sessionOpen(QString qfileName)
     state->GetActiveRenderer(vizWin, activeRendererType, activeRendererName);
     _controlExec->RenderLookup(activeRendererName, vizWin, activeDataSetName, activeRendererType);
     
-    if (STLUtils::Contains(openDataSetNames, activeDataSetName))
+    if (STLUtils::Contains(openDataSetNames, activeDataSetName)) {
         _tabMgr->SetActiveRenderer(vizWin, activeRendererType, activeRendererName);
-    else
+	}
+    else {
         _tabMgr->HideRenderWidgets();
+	}
     
 	_paramsMgr->EndSaveStateGroup();
 
