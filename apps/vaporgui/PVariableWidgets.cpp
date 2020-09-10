@@ -21,7 +21,9 @@ PDimensionSelector::PDimensionSelector()
 
 void PDimensionSelector::updateGUI() const
 {
-    /*RenderParams *rp = dynamic_cast<RenderParams*>(getParams());
+// Save this code for upcomming PDimensionSelector PR
+#ifdef SAVE_FOR_NEXT_PR
+    RenderParams *rp = dynamic_cast<RenderParams*>(getParams());
     assert(rp && "Params must be RenderParams");
 
     DataMgr* dm = getDataMgr();
@@ -39,7 +41,8 @@ void PDimensionSelector::updateGUI() const
     }
     else {
         _vComboBox->SetValue("2D");
-    }*/
+    }
+#endif
 }
 
 void PDimensionSelector::dropdownTextChanged(std::string text)

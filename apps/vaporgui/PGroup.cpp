@@ -8,7 +8,6 @@ PGroup::PGroup()
 {
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setMargin(0);
-    layout->addStretch();
     _widget->setLayout(layout);
 }
 
@@ -18,8 +17,7 @@ PGroup::PGroup(QWidget *w)
 PGroup *PGroup::Add(PWidget *pw)
 {
     _children.push_back(pw);
-    QVBoxLayout* layout = dynamic_cast<QVBoxLayout*>(_widget->layout());
-    layout->insertWidget( layout->count()-1, pw);
+    _widget->layout()->addWidget(pw);
     return this;
 }
 
