@@ -1379,6 +1379,7 @@ void MainForm::sessionOpenHelper(string fileName) {
 	_vizWinMgr->Shutdown();
 	_tabMgr->Shutdown();
 
+
 	// Close any open data sets
 	//
 	GUIStateParams *p = GetStateParams();
@@ -1412,7 +1413,7 @@ void MainForm::sessionOpenHelper(string fileName) {
             newP->RemoveOpenDateSet(name);
         }
 	}
-    
+
 	_vizWinMgr->Restart();
 	_tabMgr->Restart();
 }
@@ -1464,6 +1465,8 @@ void MainForm::sessionOpen(QString qfileName)
 		return;
 	}
 
+	_paramsMgr->BeginSaveStateGroup("Load state");
+
 	string fileName = qfileName.toStdString();
     _sessionNewFlag = false;
 	sessionOpenHelper(fileName);
@@ -1487,6 +1490,12 @@ void MainForm::sessionOpen(QString qfileName)
     else
         _tabMgr->HideRenderWidgets();
     
+	_paramsMgr->EndSaveStateGroup();
+
+	// Session load can't currently be undone
+	//
+	_paramsMgr->UndoRedoClear();
+
     _stateChangeCB();
 }
 
@@ -1683,6 +1692,8 @@ bool MainForm::openDataHelper(
 	const vector <string> &options
 ) {
 
+	_paramsMgr->BeginSaveStateGroup("Load data");
+
 	GUIStateParams *p = GetStateParams();
 	vector <string> dataSetNames =  p->GetOpenDataSetNames();
 
@@ -1704,6 +1715,7 @@ bool MainForm::openDataHelper(
 	);
 	if (rc<0) {
 		MSG_ERR("Failed to load data");
+		_paramsMgr->EndSaveStateGroup();
 		return (false);;
 	}
 
@@ -1714,6 +1726,7 @@ bool MainForm::openDataHelper(
 
 	_tabMgr->LoadDataNotify(dataSetName);
 
+	_paramsMgr->EndSaveStateGroup();
 	return(true);
 }
 
@@ -1721,6 +1734,7 @@ void MainForm::loadDataHelper(
 	const vector <string> &files, string prompt, string filter, string format,
 	bool multi, bool promptToReplaceExistingDataset
 ) {
+
 	vector <string> myFiles = files;
 
 	GUIStateParams *p = GetStateParams();
@@ -1749,6 +1763,7 @@ void MainForm::loadDataHelper(
 	
 	if (myFiles.empty()) return;
 
+
 	// Generate data set name 
 	//
 	string dataSetName = _getDataSetName(myFiles[0], promptToReplaceExistingDataset);
@@ -1762,8 +1777,13 @@ void MainForm::loadDataHelper(
         options.push_back(p->GetProjectionString());
     }
     
+	_paramsMgr->BeginSaveStateGroup("Load data");
+
 	bool status = openDataHelper(dataSetName, format, myFiles, options);
-	if (! status) return;
+	if (! status) {
+		_paramsMgr->EndSaveStateGroup();
+		return;
+	}
 
 	// Reinitialize all tabs
 	//
@@ -1784,6 +1804,8 @@ void MainForm::loadDataHelper(
 	enableWidgets(true);
 
 	_timeStepEditValidator->setRange(0,ds->GetTimeCoordinates().size()-1);
+
+	_paramsMgr->EndSaveStateGroup();
 
 }
 
@@ -1943,9 +1965,17 @@ void MainForm::sessionNew()
     }
 #endif
 
+	_paramsMgr->BeginSaveStateGroup("Load state");
+
 	sessionOpenHelper("");
 
 	_vizWinMgr->LaunchVisualizer();
+
+	_paramsMgr->EndSaveStateGroup();
+
+	// Session load can't currently be undone
+	//
+	_paramsMgr->UndoRedoClear();
 
     _stateChangeFlag = false;
 	_sessionNewFlag = true;
@@ -2112,6 +2142,7 @@ void MainForm::_setProj4String(string proj4String) {
 
 	vector <string> dataSets =  p->GetOpenDataSetNames();
 
+	_paramsMgr->BeginSaveStateGroup("Set proj4 string");
 
 	// Close and re-open all data with new
 	// proj4 string
@@ -2141,6 +2172,8 @@ void MainForm::_setProj4String(string proj4String) {
 		);
 
 	}
+
+	_paramsMgr->EndSaveStateGroup();
 
 	_App->installEventFilter(this);
 }

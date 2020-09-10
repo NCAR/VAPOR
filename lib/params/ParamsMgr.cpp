@@ -144,6 +144,7 @@ ParamsMgr::~ParamsMgr() {
 }
 
 void ParamsMgr::LoadState() {
+	BeginSaveStateGroup("Load state");
 	_destroy();
 
 	_init(_appParamNames, NULL);
@@ -153,9 +154,11 @@ void ParamsMgr::LoadState() {
 	if (_dataMgrMap.size()) {
 		addDataMgrNew();
 	}
+	EndSaveStateGroup();
 }
 
 void ParamsMgr::LoadState(const XmlNode *node) {
+	BeginSaveStateGroup("Load state");
 	_destroy();
 
 	XmlNode *mynode = new XmlNode(*node);
@@ -183,9 +186,11 @@ void ParamsMgr::LoadState(const XmlNode *node) {
 	for (itr = _dataMgrMap.begin(); itr != _dataMgrMap.end(); ++itr) {
 		addDataMgrMerge(itr->first);
 	}
+	EndSaveStateGroup();
 }
 
 int ParamsMgr::LoadState(string stateFile) {
+	BeginSaveStateGroup("Load state");
 
 	XmlParser parser;
 	XmlNode node;
@@ -193,10 +198,12 @@ int ParamsMgr::LoadState(string stateFile) {
 	int rc = parser.LoadFromFile(&node, stateFile);
 	if (rc < 0) { 
 		SetErrMsg("Invalid session file : %s", stateFile.c_str());
+		EndSaveStateGroup();
 		return(-1);
 	}
 
 	LoadState(&node);
+	EndSaveStateGroup();
 	return(0);
 }
 
@@ -1496,7 +1503,6 @@ void ParamsMgr::PMgrStateSave::Clear() {
 	cleanStack(0, _undoStack);
 	cleanStack(0, _redoStack);
 	while (_groups.size()) _groups.pop();
-	if (_enabled) Save(_rootNode, "Top");
 
 }
 

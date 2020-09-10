@@ -385,18 +385,22 @@ void ControlExec::RemoveAllRenderers(
 
 void ControlExec::LoadState() {
 
+	_paramsMgr->BeginSaveStateGroup("Load state");
+
 	vector <string> vizNames = GetVisualizerNames();
 	for (int i=0; i<vizNames.size(); i++) {
 		RemoveVisualizer(vizNames[i]);
 	}
 
 	_paramsMgr->LoadState();
+	_paramsMgr->EndSaveStateGroup();
 
 
 }
 
 
 void ControlExec::LoadState(const XmlNode *rootNode) {
+	_paramsMgr->BeginSaveStateGroup("Load state");
 
 	// Destroy current visualizers
 	//
@@ -417,9 +421,11 @@ void ControlExec::LoadState(const XmlNode *rootNode) {
 		Visualizer* viz = new Visualizer(_paramsMgr, _dataStatus, winName);
 		_visualizers[winName] = viz;
 	}
+	_paramsMgr->EndSaveStateGroup();
 }
 
 int ControlExec::LoadState(string stateFile) {
+	_paramsMgr->BeginSaveStateGroup("Load state");
 
 	vector <string> vizNames = GetVisualizerNames();
 	for (int i=0; i<vizNames.size(); i++) {
@@ -427,7 +433,10 @@ int ControlExec::LoadState(string stateFile) {
 	}
 
 	int rc = _paramsMgr->LoadState(stateFile);
-	if (rc < 0) return(-1);
+	if (rc < 0) {
+		_paramsMgr->EndSaveStateGroup();
+		return(-1);
+	}
 
 	vizNames = _paramsMgr->GetVisualizerNames();
 	for (int i=0; i<vizNames.size(); i++) {
@@ -436,6 +445,7 @@ int ControlExec::LoadState(string stateFile) {
 		_visualizers[winName] = viz;
 	}
 
+	_paramsMgr->EndSaveStateGroup();
 	return(0);
 }
 
