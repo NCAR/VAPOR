@@ -169,15 +169,23 @@ void VizWinMgr::_attachVisualizer(string vizName) {
 void VizWinMgr::LaunchVisualizer()
 {
 
+	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	paramsMgr->BeginSaveStateGroup(_controlExec->GetNewVisualizerUndoTag());
+
 	string vizName = make_viz_name(_controlExec->GetVisualizerNames());
     
 	int rc = _controlExec->NewVisualizer(vizName);
 	if (rc<0) {
 		MSG_ERR("Failed to create new visualizer");
+		paramsMgr->EndSaveStateGroup();
 		return;
 	}
 
 	_attachVisualizer(vizName);
+
+	paramsMgr->EndSaveStateGroup();
+
+	
 }
 
 
@@ -304,6 +312,9 @@ void VizWinMgr::_vizAboutToDisappear(string vizName)  {
 	std::map<string,QMdiSubWindow*>::iterator itr2 = _vizMdiWin.find(vizName);
 	VAssert(itr2 != _vizMdiWin.end());
 
+	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	paramsMgr->BeginSaveStateGroup(_controlExec->GetRemoveVisualizerUndoTag());
+
 	GUIStateParams *p = _getStateParams();
 	string activeViz = p->GetActiveVizName();
 
@@ -335,6 +346,8 @@ void VizWinMgr::_vizAboutToDisappear(string vizName)  {
 	// When the number is reduced to 1, disable multiviz options.
 	//
 	if (_vizWindow.size() == 1) emit enableMultiViz(false);
+
+	paramsMgr->EndSaveStateGroup();
 	
 }
 

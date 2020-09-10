@@ -2175,6 +2175,10 @@ void MainForm::_setProj4String(string proj4String) {
 
 	_paramsMgr->EndSaveStateGroup();
 
+	// Map projection changes can't currently be undone
+	//
+	_paramsMgr->UndoRedoClear();
+
 	_App->installEventFilter(this);
 }
 
