@@ -67,6 +67,7 @@ class PWidget : public QWidget {
     virtual void updateGUI() const = 0;
     virtual bool requireParamsMgr() const { return false; }
     virtual bool requireDataMgr() const { return false; }
+    virtual bool isShown() const { return true; }
 
     const std::string &getTag() const;
     VAPoR::ParamsBase *getParams() const;

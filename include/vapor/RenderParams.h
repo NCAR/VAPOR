@@ -131,6 +131,17 @@ class PARAMS_API RenderParams : public ParamsBase {
         return false;
     }
 
+    //! Get the primary variable, or the first valid field variable
+    //!
+    //! Return the first non-empty variable found, first searching
+    //! the name returned by GetVariableName(), and the ordered list
+    //! of variables returned by GetFieldVariableNames(). The empty
+    //! string is returned if no non-empty variable names exist.
+    //!
+    //! \retval string variable name
+    //
+    string GetFirstVariableName() const;
+
     //! Specify field variable names; e.g. used in flow integration
     //! can be 0 or 3 strings
     //! \param[in] string varNames. If any element is "0" the element
@@ -139,11 +150,47 @@ class PARAMS_API RenderParams : public ParamsBase {
     //
     virtual void SetFieldVariableNames(vector<string> varNames);
 
+    //! Set the X field variable name, e.g. used in flow integration.
+    //! \param[in] std::string varName for X field
+    //
+    void SetXFieldVariableName(std::string varName);
+
+    //! Set the Y field variable name, e.g. used in flow integration.
+    //! \param[in] std::string varName for Y field
+    //
+    void SetYFieldVariableName(std::string varName);
+
+    //! Set the Z field variable name, e.g. used in flow integration.
+    //! \param[in] std::string varName for Z field
+    //
+    void SetZFieldVariableName(std::string varName);
+
     //! Get the field variable names, e.g. used in flow integration.
     //! \retval vector<string> variable names. A vector of length 3
     //! containing variable names. The default is 3 empty variable names.
     //
     vector<string> GetFieldVariableNames() const;
+
+    //! Get the X field variable name, e.g. used in flow integration.
+    //! \retval std::string X field variable name.
+    //
+    std::string GetXFieldVariableName() const;
+
+    //! Get the Y field variable name, e.g. used in flow integration.
+    //! \retval std::string Y field variable name.
+    //
+    std::string GetYFieldVariableName() const;
+
+    //! Get the Z field variable name, e.g. used in flow integration.
+    //! \retval std::string Z field variable name.
+    //
+    std::string GetZFieldVariableName() const;
+
+    //! Get the distribution variable names, e.g. used in flow integration.
+    //! \retval vector<string> variable names
+    vector<string> GetDistribVariableNames() const {
+        return (GetValueStringVec(_distribVariableNamesTag));
+    }
 
     //! Virtual method sets current number of refinements of this Params.
     //! \param[in] int refinements
@@ -379,9 +426,8 @@ class PARAMS_API RenderParams : public ParamsBase {
     static const string _terrainMapTag;
     static const string _fieldVariableNamesTag;
     static const string _auxVariableNamesTag;
+    static const string _distribVariableNamesTag;
     static const string _constantOpacityTag;
-    static const string _CompressionLevelTag;
-    static const string _RefinementLevelTag;
     static const string _transferFunctionsTag;
     static const string _stretchFactorsTag;
     static const string _currentTimestepTag;
@@ -396,6 +442,8 @@ class PARAMS_API RenderParams : public ParamsBase {
     static const string _heightVariableNameTag;
     static const string _useSingleColorTag;
     static const string _constantColorTag;
+    static const string _CompressionLevelTag;
+    static const string _RefinementLevelTag;
 };
 
 //////////////////////////////////////////////////////////////////////////

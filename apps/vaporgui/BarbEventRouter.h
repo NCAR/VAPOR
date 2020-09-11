@@ -52,6 +52,9 @@ class BarbEventRouter : public QTabWidget, public RenderEventRouter {
 
     virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
 
+    virtual bool Supports2DVariables() const { return true; }
+    virtual bool Supports3DVariables() const { return true; }
+
   protected:
     virtual void _updateTab();
     virtual void _initializeTab();

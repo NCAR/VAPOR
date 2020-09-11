@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ui_VolumeIsoAppearanceGUI.h"
-#include "ui_VolumeIsoVariablesGUI.h"
 #include "ui_VolumeIsoGeometryGUI.h"
 #include "ui_VolumeIsoAnnotationGUI.h"
 
@@ -17,24 +16,18 @@ class DataMgr;
 
 class PGroup;
 
-class VolumeIsoVariablesSubtab : public QWidget, public Ui_VolumeIsoVariablesGUI {
+class VolumeIsoVariablesSubtab : public QWidget {
     Q_OBJECT
 
   public:
-    VolumeIsoVariablesSubtab(QWidget *parent) {
-        setupUi(this);
-        _variablesWidget->Reinit((VariableFlags)(SCALAR | COLOR),
-                                 (DimFlags)(THREED));
-    }
+    VolumeIsoVariablesSubtab(QWidget *parent);
 
     void Update(VAPoR::DataMgr *dataMgr,
                 VAPoR::ParamsMgr *paramsMgr,
                 VAPoR::RenderParams *params);
 
-  private slots:
-
   private:
-    VAPoR::VolumeIsoParams *_isoParams;
+    PGroup *_pg;
 };
 
 class VolumeIsoAppearanceSubtab : public QWidget, public Ui_VolumeIsoAppearanceGUI {

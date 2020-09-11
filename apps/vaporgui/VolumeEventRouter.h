@@ -46,7 +46,8 @@ class VolumeEventRouter : public QTabWidget, public RenderEventRouter {
     }
     string GetType() const { return GetClassType(); }
 
-    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
+    virtual bool Supports2DVariables() const { return false; }
+    virtual bool Supports3DVariables() const { return true; }
 
   protected:
     void _updateTab();
@@ -68,7 +69,6 @@ class VolumeEventRouter : public QTabWidget, public RenderEventRouter {
     //! if wheel events also scrolled the tab itself
     void wheelEvent(QWheelEvent *) {}
 
-    //! VariablesWidget is used as Variables tab
     VolumeVariablesSubtab *_variables;
     VolumeGeometrySubtab *_geometry;
     GLVolumeImageWindow *_glVolumeImageWindow;

@@ -46,6 +46,9 @@ class TwoDDataEventRouter : public QTabWidget, public RenderEventRouter {
     }
     string GetType() const { return GetClassType(); }
 
+    virtual bool Supports2DVariables() const { return true; }
+    virtual bool Supports3DVariables() const { return false; }
+
   protected:
     void _updateTab();
     virtual string _getDescription() const;
@@ -57,8 +60,6 @@ class TwoDDataEventRouter : public QTabWidget, public RenderEventRouter {
         return ("TwoDData.png");
     }
 
-    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
-
   private:
     TwoDDataEventRouter() {}
 
@@ -68,7 +69,6 @@ class TwoDDataEventRouter : public QTabWidget, public RenderEventRouter {
     //! if wheel events also scrolled the tab itself
     void wheelEvent(QWheelEvent *) {}
 
-    //! VariablesWidget is used as Variables tab
     TwoDVariablesSubtab *_variables;
     TwoDGeometrySubtab *_geometry;
     GLTwoDDataImageWindow *_glTwoDDataImageWindow;

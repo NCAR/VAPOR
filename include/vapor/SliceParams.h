@@ -21,6 +21,8 @@ class PARAMS_API SliceParams : public RenderParams {
 
     virtual int Initialize() override;
 
+    virtual void SetRefinementLevel(int level) override;
+
     // Get static string identifier for this params class
     //
     static string GetClassType() {
