@@ -37,6 +37,14 @@ SliceParams::SliceParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode
 
 SliceParams::~SliceParams() { SetDiagMsg("SliceParams::~SliceParams() this=%p", this); }
 
+void SliceParams::SetRefinementLevel(int level)
+{
+    BeginGroup("SliceParams: Change refinement level and sample rate");
+    RenderParams::SetRefinementLevel(level);
+    SetSampleRate(GetDefaultSampleRate());
+    EndGroup();
+}
+
 void SliceParams::_init()
 {
     SetDiagMsg("SliceParams::_init()");

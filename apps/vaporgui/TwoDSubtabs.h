@@ -2,11 +2,14 @@
 #define TWODSUBTABS_H
 
 #include "ui_TwoDAppearanceGUI.h"
-#include "ui_TwoDVariablesGUI.h"
 #include "ui_TwoDGeometryGUI.h"
 #include "ui_TwoDAnnotationGUI.h"
 #include "Flags.h"
 #include <TFEditor.h>
+#include "PGroup.h"
+#include "PSection.h"
+#include "PVariableWidgets.h"
+#include "PFidelitySection.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -15,17 +18,23 @@ class ParamsMgr;
 class DataMgr;
 }    // namespace VAPoR
 
-class TwoDVariablesSubtab : public QWidget, public Ui_TwoDVariablesGUI {
+class TwoDVariablesSubtab : public QWidget {
     Q_OBJECT
+    PGroup *_pg;
 
 public:
     TwoDVariablesSubtab(QWidget *parent)
     {
-        setupUi(this);
-        _variablesWidget->Reinit((VariableFlags)(SCALAR | HEIGHT), (DimFlags)(TWOD));
+        setLayout(new QVBoxLayout);
+        ((QVBoxLayout *)layout())->insertWidget(1, _pg = new PGroup);
+        PSection *vars = new PSection("Variable Selection");
+        vars->Add(new PScalarVariableSelector2DHLI);
+        vars->Add(new PHeightVariableSelectorHLI);
+        _pg->Add(vars);
+        _pg->Add(new PFidelitySection);
     }
 
-    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _variablesWidget->Update(dataMgr, paramsMgr, rParams); }
+    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _pg->Update(rParams, paramsMgr, dataMgr); }
 };
 
 class TwoDAppearanceSubtab : public QWidget, public Ui_TwoDAppearanceGUI {

@@ -7,22 +7,24 @@
 #include "PStringDropdownHLI.h"
 #include "PEnumDropdown.h"
 #include "PSliderEdit.h"
-#include "PVariableSelector.h"
 #include "PColorSelector.h"
+#include "PVariableWidgets.h"
+#include "PFidelitySection.h"
 
 using namespace VAPoR;
 
-void VolumeIsoVariablesSubtab::Update(DataMgr *dataMgr, ParamsMgr *paramsMgr, RenderParams *params)
+VolumeIsoVariablesSubtab::VolumeIsoVariablesSubtab(QWidget *parent)
 {
-    VolumeIsoParams *vp = dynamic_cast<VolumeIsoParams *>(params);
-    _isoParams = vp;
-    VAssert(vp);
-    // TODO volume
-    // long mode = _isoParams->GetCastingMode();
-    // _castingModeComboBox->setCurrentIndex( mode - 1 );
-
-    _variablesWidget->Update(dataMgr, paramsMgr, params);
+    setLayout(new QVBoxLayout);
+    ((QVBoxLayout *)layout())->insertWidget(1, _pg = new PGroup);
+    PSection *vars = new PSection("Variable Selection");
+    vars->Add(new PScalarVariableSelectorHLI);
+    vars->Add(new PColorMapVariableSelectorHLI);
+    _pg->Add(vars);
+    _pg->Add(new PFidelitySection);
 }
+
+void VolumeIsoVariablesSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _pg->Update(rParams, paramsMgr, dataMgr); }
 
 VolumeIsoAppearanceSubtab::VolumeIsoAppearanceSubtab(QWidget *parent)
 {

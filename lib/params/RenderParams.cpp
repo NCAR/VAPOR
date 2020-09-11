@@ -39,6 +39,7 @@ const string RenderParams::_heightVariableNameTag = "HeightVariable";
 const string RenderParams::_colorMapVariableNameTag = "ColorMapVariable";
 const string RenderParams::_fieldVariableNamesTag = "FieldVariableNames";
 const string RenderParams::_auxVariableNamesTag = "AuxVariableNames";
+const string RenderParams::_distribVariableNamesTag = "DistributionVariableNames";
 const string RenderParams::_variableNameTag = "VariableName";
 const string RenderParams::_useSingleColorTag = "UseSingleColor";
 const string RenderParams::_constantColorTag = "ConstantColor";
@@ -430,6 +431,51 @@ void RenderParams::SetFieldVariableNames(vector<string> varnames)
     //	setAllBypass(false);
 }
 
+std::string RenderParams::GetXFieldVariableName() const
+{
+    std::vector<std::string> fieldVars = GetFieldVariableNames();
+    VAssert(fieldVars.size() == 3);
+    return fieldVars[0];
+}
+
+void RenderParams::SetXFieldVariableName(std::string varName)
+{
+    std::vector<std::string> fieldVars = GetFieldVariableNames();
+    VAssert(fieldVars.size() == 3);
+    fieldVars[0] = varName;
+    SetFieldVariableNames(fieldVars);
+}
+
+std::string RenderParams::GetYFieldVariableName() const
+{
+    std::vector<std::string> fieldVars = GetFieldVariableNames();
+    VAssert(fieldVars.size() == 3);
+    return fieldVars[1];
+}
+
+void RenderParams::SetYFieldVariableName(std::string varName)
+{
+    std::vector<std::string> fieldVars = GetFieldVariableNames();
+    VAssert(fieldVars.size() == 3);
+    fieldVars[1] = varName;
+    SetFieldVariableNames(fieldVars);
+}
+
+std::string RenderParams::GetZFieldVariableName() const
+{
+    std::vector<std::string> fieldVars = GetFieldVariableNames();
+    VAssert(fieldVars.size() == 3);
+    return fieldVars[2];
+}
+
+void RenderParams::SetZFieldVariableName(std::string varName)
+{
+    std::vector<std::string> fieldVars = GetFieldVariableNames();
+    VAssert(fieldVars.size() == 3);
+    fieldVars[2] = varName;
+    SetFieldVariableNames(fieldVars);
+}
+
 vector<string> RenderParams::GetAuxVariableNames() const
 {
     std::vector<std::string> varnames = GetValueStringVec(_auxVariableNamesTag);
@@ -442,6 +488,19 @@ void RenderParams::SetAuxVariableNames(std::vector<std::string> varnames)
     varnames = string_replace(varnames, "<no-variable>", "NULL");
     varnames = string_replace(varnames, "", "NULL");
     SetValueStringVec(_auxVariableNamesTag, "Specify auxiliary varnames", varnames);
+}
+
+string RenderParams::GetFirstVariableName() const
+{
+    string str = GetVariableName();
+    if (str.length()) return str;    // scalar
+    vector<string> strvec = GetFieldVariableNames();
+    for (int i = 0; i < strvec.size(); i++) {
+        if (strvec[i] != "") return strvec[i];    // vector
+    }
+    str = GetHeightVariableName();
+    if (str.length()) return str;    // height
+    return "";                       // none
 }
 
 string RenderParams::GetHeightVariableName() const

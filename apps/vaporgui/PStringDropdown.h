@@ -23,6 +23,6 @@ public:
 protected:
     virtual void updateGUI() const override;
 
-private slots:
-    void dropdownTextChanged(std::string text);
+protected slots:
+    virtual void dropdownTextChanged(std::string text);
 };

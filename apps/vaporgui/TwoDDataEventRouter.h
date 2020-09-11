@@ -41,14 +41,15 @@ public:
     static string GetClassType() { return (VAPoR::TwoDDataRenderer::GetClassType()); }
     string        GetType() const { return GetClassType(); }
 
+    virtual bool Supports2DVariables() const { return true; }
+    virtual bool Supports3DVariables() const { return false; }
+
 protected:
     void           _updateTab();
     virtual string _getDescription() const;
 
     virtual string _getSmallIconImagePath() const { return ("TwoDData_small.png"); }
     virtual string _getIconImagePath() const { return ("TwoDData.png"); }
-
-    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
 
 private:
     TwoDDataEventRouter() {}
@@ -59,7 +60,6 @@ private:
     //! if wheel events also scrolled the tab itself
     void wheelEvent(QWheelEvent *) {}
 
-    //! VariablesWidget is used as Variables tab
     TwoDVariablesSubtab *  _variables;
     TwoDGeometrySubtab *   _geometry;
     GLTwoDDataImageWindow *_glTwoDDataImageWindow;

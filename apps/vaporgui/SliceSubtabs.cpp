@@ -2,6 +2,10 @@
 #include "SliceSubtabs.h"
 #include "TFEditor.h"
 #include "VLineItem.h"
+#include "PGroup.h"
+#include "PSection.h"
+#include "PVariableWidgets.h"
+#include "PFidelitySection.h"
 
 #define MIN_SAMPLES         1
 #define MAX_SAMPLES         2000
@@ -19,30 +23,15 @@
 
 SliceVariablesSubtab::SliceVariablesSubtab(QWidget *parent)
 {
-    setupUi(this);
-    _variablesWidget->Reinit((VariableFlags)(SCALAR), (DimFlags)(THREED));
-
-    QButtonGroup *fidelityButtons = _variablesWidget->_fidelityWidget->GetFidelityButtons();
-    connect(fidelityButtons, SIGNAL(buttonClicked(int)), this, SLOT(_setDefaultSampleRate()));
-    QComboBox *refinementCombo = _variablesWidget->_fidelityWidget->refinementCombo;
-    connect(refinementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_setDefaultSampleRate()));
+    setLayout(new QVBoxLayout);
+    ((QVBoxLayout *)layout())->insertWidget(1, _pg = new PGroup);
+    PSection *vars = new PSection("Variable Selection");
+    vars->Add(new PScalarVariableSelectorHLI);
+    _pg->Add(vars);
+    _pg->Add(new PFidelitySection);
 }
 
-void SliceVariablesSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams)
-{
-    _params = dynamic_cast<VAPoR::SliceParams *>(rParams);
-    VAssert(_params);
-    _variablesWidget->Update(dataMgr, paramsMgr, rParams);
-}
-
-void SliceVariablesSubtab::_setDefaultSampleRate()
-{
-    int defaultRate = _params->GetDefaultSampleRate();
-    int quality = defaultRate / SAMPLES_PER_QUALITY;
-    if (quality < 1) quality = 1;
-    int adjustedRate = quality * SAMPLES_PER_QUALITY;
-    _params->SetSampleRate(adjustedRate);
-}
+void SliceVariablesSubtab::Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _pg->Update(rParams, paramsMgr, dataMgr); }
 
 SliceAppearanceSubtab::SliceAppearanceSubtab(QWidget *parent)
 {

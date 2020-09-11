@@ -3,7 +3,6 @@
 
 #include "vapor/ContourParams.h"
 #include "ui_ContourAppearanceGUI.h"
-#include "ui_ContourVariablesGUI.h"
 #include "ui_ContourGeometryGUI.h"
 #include "ui_ContourAnnotationGUI.h"
 #include "RangeCombos.h"
@@ -18,18 +17,16 @@ class DataMgr;
 
 class SpacingCombo;
 class TFEditor;
+class PGroup;
 
-class ContourVariablesSubtab : public QWidget, public Ui_ContourVariablesGUI {
+class ContourVariablesSubtab : public QWidget {
     Q_OBJECT
+    PGroup *pg;
 
 public:
-    ContourVariablesSubtab(QWidget *parent)
-    {
-        setupUi(this);
-        _variablesWidget->Reinit((VariableFlags)(SCALAR | HEIGHT), (DimFlags)(TWOD));
-    }
+    ContourVariablesSubtab(QWidget *parent);
 
-    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams) { _variablesWidget->Update(dataMgr, paramsMgr, rParams); }
+    void Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
 };
 
 class ContourAppearanceSubtab : public QWidget, public Ui_ContourAppearanceGUI {

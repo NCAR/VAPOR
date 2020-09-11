@@ -37,6 +37,9 @@ public:
 
     virtual void hookUpTab() {}
 
+    virtual bool Supports2DVariables() const { return true; }
+    virtual bool Supports3DVariables() const { return false; }
+
     void GetWebHelp(vector<pair<string, string>> &help) const;
 
     // Get static string identifier for this router class
@@ -44,8 +47,6 @@ public:
     static string GetClassType() { return (VAPoR::ContourRenderer::GetClassType()); }
 
     string GetType() const { return GetClassType(); }
-
-    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
 
 protected:
     virtual void   _initializeTab();

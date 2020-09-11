@@ -121,6 +121,14 @@ public:
 
     virtual void confirmText() { EventRouter::confirmText(); }
 
+    //! Pure virtual method that indicates whether the current RenderEventRouter
+    //! and its associated renderer support 2D variables.
+    virtual bool Supports2DVariables() const = 0;
+
+    //! Pure virtual method that indicates whether the current RenderEventRouter
+    //! and its associated renderer support 3D variables.
+    virtual bool Supports3DVariables() const = 0;
+
     //! Virtual method to enable or disable rendering when turned on or off by
     //! a gui tab.
     //! Only useful if the tab corresponds to a renderer.
@@ -192,11 +200,6 @@ public:
     //!
     string GetSmallIconImagePath() const;
     string GetIconImagePath() const;
-
-    bool Supports2DVariables() const { return GetDimFlags() & DimFlags::TWOD; }
-    bool Supports3DVariables() const { return GetDimFlags() & DimFlags::THREED; }
-
-    virtual DimFlags GetDimFlags() const = 0;
 
 protected:
     RenderEventRouter() {}

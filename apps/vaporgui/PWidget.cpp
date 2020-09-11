@@ -38,7 +38,7 @@ void PWidget::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAP
             return;
         }
     } else {
-        setVisible(true);
+        setVisible(isShown());
     }
 
     if (_enableBasedOnParam) {
