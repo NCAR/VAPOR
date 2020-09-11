@@ -11,6 +11,8 @@ const std::string FlowParams::RenderShowStreamDirTag = "RenderShowStreamDirTag";
 const std::string FlowParams::RenderGlyphTypeTag = "RenderGlyphTypeTag";
 const std::string FlowParams::RenderGlyphStrideTag = "RenderGlyphStrideTag";
 const std::string FlowParams::RenderGlyphOnlyLeadingTag = "RenderGlyphOnlyLeadingTag";
+const std::string FlowParams::RenderDensityFalloffTag = "RenderDensityFalloffTag";
+const std::string FlowParams::RenderDensityToneMappingTag = "RenderDensityToneMappingTag";
 const std::string FlowParams::RenderFadeTailTag = "RenderFadeTailTag";
 const std::string FlowParams::RenderFadeTailStartTag = "RenderFadeTailStartTag";
 const std::string FlowParams::RenderFadeTailStopTag = "RenderFadeTailStopTag";
@@ -59,6 +61,9 @@ FlowParams::FlowParams(DataMgr *dataManager,
     SetValueLong(RenderGlyphTypeTag, "", GlpyhTypeSphere);
     SetValueLong(RenderGlyphStrideTag, "", 5);
     SetValueLong(RenderGlyphOnlyLeadingTag, "", false);
+
+    SetValueDouble(RenderDensityFalloffTag, "", 1);
+    SetValueDouble(RenderDensityToneMappingTag, "", 1);
 
     SetValueLong(RenderFadeTailTag, "", false);
     SetValueLong(RenderFadeTailStartTag, "", 10);

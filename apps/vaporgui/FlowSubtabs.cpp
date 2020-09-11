@@ -21,6 +21,7 @@
 #include "PGroup.h"
 #include "PSection.h"
 #include "PDoubleInput.h"
+#include "PLabel.h"
 
 #include <QScrollArea>
 
@@ -130,9 +131,11 @@ FlowAppearanceSubtab::FlowAppearanceSubtab(QWidget *parent) : QVaporSubtab(paren
     PSection *ps;
 
     _pw->Add(ps = new PSection("Appearance"));
-    ps->Add(new PEnumDropdown(FlowParams::RenderTypeTag, {"Tubes", "Samples"}, {FlowParams::RenderTypeStream, FlowParams::RenderTypeSamples}, "Render Type"));
+    ps->Add(new PEnumDropdown(FlowParams::RenderTypeTag, {"Tubes", "Samples", "KLGWTH"}, {FlowParams::RenderTypeStream, FlowParams::RenderTypeSamples, FlowParams::RenderTypeDensity}, "Render Type"));
+    ps->Add((new PLabel("May not render correctly with other renderers"))->ShowBasedOnParam(FlowParams::RenderTypeTag, FlowParams::RenderTypeDensity));
     ps->Add((new PEnumDropdown(FlowParams::RenderGlyphTypeTag, {"Circle", "Arrow"}, {FlowParams::GlpyhTypeSphere, FlowParams::GlpyhTypeArrow}, "Glyph Type"))->ShowBasedOnParam(FlowParams::RenderTypeTag, FlowParams::RenderTypeSamples));
-    ps->Add(new PCheckbox(FlowParams::RenderGeom3DTag, "3D Geometry"));
+    ps->Add((new PCheckbox(FlowParams::RenderGeom3DTag, "3D Geometry"))->ShowBasedOnParam(FlowParams::RenderTypeTag, FlowParams::RenderTypeStream));
+    ps->Add((new PCheckbox(FlowParams::RenderGeom3DTag, "3D Geometry"))->ShowBasedOnParam(FlowParams::RenderTypeTag, FlowParams::RenderTypeSamples));
     //    ps->Add((new PCheckbox(FlowParams::RenderLightAtCameraTag, "Light From Camera"))->ShowBasedOnParam(FlowParams::RenderGeom3DTag));
     //    ps->Add((new PDoubleInput(FlowParams::RenderRadiusBaseTag, "Radius")));
     ps->Add((new PDoubleSliderEdit(FlowParams::RenderRadiusScalarTag, "Radius Scalar"))->SetRange(0.1, 5)->EnableDynamicUpdate());
@@ -147,19 +150,33 @@ FlowAppearanceSubtab::FlowAppearanceSubtab(QWidget *parent) : QVaporSubtab(paren
     streamGroup->Add(showDirGroup);
     showDirGroup->Add((new PIntegerSliderEdit(FlowParams::RenderGlyphStrideTag, "Every N Samples"))->SetRange(1, 20)->EnableDynamicUpdate());
 
-    streamGroup->Add((new PCheckbox(FlowParams::RenderFadeTailTag, "Fade Flow Tails")));
-    PGroup *fadeGroup = new PSubGroup;
-    fadeGroup->ShowBasedOnParam(FlowParams::RenderFadeTailTag);
-    streamGroup->Add(fadeGroup);
-    fadeGroup->Add((new PIntegerSliderEdit(FlowParams::RenderFadeTailStartTag, "Fade Start Sample"))->SetRange(0, 100)->EnableDynamicUpdate()->SetTooltip("How far behind leading sample fade begins."));
-    fadeGroup->Add((new PIntegerSliderEdit(FlowParams::RenderFadeTailLengthTag, "Fade Over N Samples"))->SetRange(1, 100)->EnableDynamicUpdate()->SetTooltip("Number of samples from opaque to transparent."));
-    fadeGroup->Add((new PIntegerSliderEdit(FlowParams::RenderFadeTailStopTag, "Animate Steady"))->SetRange(0, 200)->EnableDynamicUpdate()->SetTooltip("Temporary solution for animating steady flow particles."));
+    auto fadeTailWidget = []() {
+        PGroup *g = new PGroup;
+        g->Add(new PCheckbox(FlowParams::RenderFadeTailTag, "Fade Flow Tails"));
+        PGroup *fadeGroup = new PSubGroup;
+        fadeGroup->ShowBasedOnParam(FlowParams::RenderFadeTailTag);
+        g->Add(fadeGroup);
+        fadeGroup->Add((new PIntegerSliderEdit(FlowParams::RenderFadeTailStartTag, "Fade Start Sample"))->SetRange(0, 100)->EnableDynamicUpdate()->SetTooltip("How far behind leading sample fade begins."));
+        fadeGroup->Add((new PIntegerSliderEdit(FlowParams::RenderFadeTailLengthTag, "Fade Over N Samples"))->SetRange(1, 100)->EnableDynamicUpdate()->SetTooltip("Number of samples from opaque to transparent."));
+        fadeGroup->Add((new PIntegerSliderEdit(FlowParams::RenderFadeTailStopTag, "Animate Steady"))->SetRange(0, 200)->EnableDynamicUpdate()->SetTooltip("Temporary solution for animating steady flow particles."));
+        return g;
+    };
+
+    streamGroup->Add(fadeTailWidget());
 
     PGroup *sampleGroup = new PGroup;
     sampleGroup->ShowBasedOnParam(FlowParams::RenderTypeTag, FlowParams::RenderTypeSamples);
     ps->Add(sampleGroup);
     sampleGroup->Add((new PIntegerSliderEdit(FlowParams::RenderGlyphStrideTag, "Every N Samples"))->SetRange(1, 20)->EnableDynamicUpdate()->EnableBasedOnParam(FlowParams::RenderGlyphOnlyLeadingTag, false));
     sampleGroup->Add(new PCheckbox(FlowParams::RenderGlyphOnlyLeadingTag, "Only Show Leading Sample"));
+
+    PGroup *densityGroup = new PGroup;
+    densityGroup->ShowBasedOnParam(FlowParams::RenderTypeTag, FlowParams::RenderTypeDensity);
+    ps->Add(densityGroup);
+    densityGroup->Add((new PDoubleSliderEdit(FlowParams::RenderDensityFalloffTag, "Density Falloff"))->SetRange(0.5, 10)->EnableDynamicUpdate()->SetTooltip("The exponential factor at which the intensity falls off along the width of the line"));
+    densityGroup->Add((new PDoubleSliderEdit(FlowParams::RenderDensityToneMappingTag, "Tone Mapping"))->SetRange(0, 1)->EnableDynamicUpdate()->SetTooltip("The overall color intensity of the line"));
+    densityGroup->Add((new PCheckbox("invert"))->SetTooltip("For rendering on light backgrounds"));
+    densityGroup->Add(fadeTailWidget());
 
     _pw->Add(ps = new PSection("Lighting"));
     ps->ShowBasedOnParam(FlowParams::RenderGeom3DTag);

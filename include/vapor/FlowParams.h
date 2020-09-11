@@ -27,7 +27,8 @@ enum class FlowDir : int {
 class PARAMS_API FlowParams : public RenderParams {
   public:
     enum RenderType { RenderTypeStream,
-                      RenderTypeSamples };
+                      RenderTypeSamples,
+                      RenderTypeDensity };
     enum GlpyhType { GlpyhTypeSphere,
                      GlpyhTypeArrow };
 
@@ -132,6 +133,9 @@ class PARAMS_API FlowParams : public RenderParams {
     static const std::string RenderGlyphTypeTag;
     static const std::string RenderGlyphStrideTag;
     static const std::string RenderGlyphOnlyLeadingTag;
+
+    static const std::string RenderDensityFalloffTag;
+    static const std::string RenderDensityToneMappingTag;
 
     static const std::string RenderFadeTailTag;
     static const std::string RenderFadeTailStartTag;
