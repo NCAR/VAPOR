@@ -442,8 +442,9 @@ bool DCCF::_isUniform(NetCDFCFCollection *ncdfc, string varname) {
 	EnableErrMsg(enabled);
 
 	float epsilon = 0.0001;
-	for (int i = 0; i<buf.size()-2; i++) {
-		if (! Wasp::NearlyEqual((buf[i+1] - buf[i]), (buf[i+2] - buf[i+1]), epsilon)) {       
+	float delta = buf[1] - buf[0];
+	for (int i = 1; i<buf.size()-1; i++) {
+		if (! Wasp::NearlyEqual((buf[i+1]-buf[i]), delta, epsilon)) {
 			return(false);
 		}   
 	}   
