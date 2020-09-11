@@ -17,6 +17,7 @@ namespace VAPoR {
 	class ControlExec;
 }
 
+class PGroup;
 class GLSliceImageWindow;
 
 //!
@@ -50,7 +51,8 @@ public:
  }
  string GetType() const {return GetClassType(); }
 
-    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
+ virtual bool Supports2DVariables() const { return false; }
+ virtual bool Supports3DVariables() const { return true; }
 
 protected:
  void _updateTab();
@@ -66,7 +68,6 @@ protected:
 private:
 
  SliceEventRouter() {} 
-
 
  //! Override default wheel behavior on the tab.  This has the effect of 
  //! ignoring wheel events over the tab.  This is because wheel events will always

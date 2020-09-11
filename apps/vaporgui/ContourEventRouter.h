@@ -43,6 +43,9 @@ public:
 
 	virtual void hookUpTab() {}
 
+    virtual bool Supports2DVariables() const { return true; }
+    virtual bool Supports3DVariables() const { return false; }
+
 	void GetWebHelp(
 		vector <pair <string, string> > &help
 	) const;
@@ -54,8 +57,6 @@ public:
 	}
 
 	string GetType() const {return GetClassType(); }
-    
-    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
 
 protected:
 	virtual void _initializeTab();

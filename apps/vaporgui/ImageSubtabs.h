@@ -1,45 +1,44 @@
 #ifndef IMAGESUBTABS_H
 #define IMAGESUBTABS_H
 
+#include <QFileDialog>
 #include "ui_ImageAppearanceGUI.h"
-#include "ui_ImageVariablesGUI.h"
 #include "ui_ImageGeometryGUI.h"
-#include "RangeCombos.h"
 #include "vapor/ImageParams.h"
 #include "vapor/ResourcePath.h"
-#include <QFileDialog>
 #include "Flags.h"
+#include "PGroup.h"
+#include "PFidelitySection.h"
+#include "PVariableWidgets.h"
 
 namespace VAPoR {
 	class ControlExec;
 	class ParamsMgr;
 	class DataMgr;
 
-//
-// ImageVariablesSubtab class
-//
-class ImageVariablesSubtab : public QWidget, public Ui_ImageVariablesGUI {
+class ImageVariablesSubtab : public QWidget {
 
 	Q_OBJECT
-
+    PGroup *_pg;
+    
 public:
 	ImageVariablesSubtab(QWidget* parent) 
   { 
-    setupUi(this);
-		_variablesWidget->Reinit( 
-			(VariableFlags)(HEIGHT), 
-			(DimFlags)(TWOD)
-		);
+      setLayout( new QVBoxLayout );
+      ((QVBoxLayout*)layout())->insertWidget(1, _pg = new PGroup);
+      PSection *vars = new PSection("Variable Selection");
+      vars->Add(new PHeightVariableSelectorHLI);
+      _pg->Add(vars);
+      _pg->Add(new PFidelitySection);
 	}
 
 	void Update(  VAPoR::DataMgr *dataMgr,
 		            VAPoR::ParamsMgr *paramsMgr,
 		            VAPoR::RenderParams *rParams) 
-  {
-		_variablesWidget->Update(dataMgr, paramsMgr, rParams);
-	}
+    {
+      _pg->Update(rParams, paramsMgr, dataMgr);
+    }
 };
-
 
 //
 // ImageAppearanceSubtab class

@@ -2,7 +2,6 @@
 #define SLICESUBTABS_H
 
 #include "ui_SliceAppearanceGUI.h"
-#include "ui_SliceVariablesGUI.h"
 #include "ui_SliceGeometryGUI.h"
 #include "ui_SliceAnnotationGUI.h"
 #include "Flags.h"
@@ -17,25 +16,21 @@ namespace VAPoR {
 }
 
 class TFEditor;
+class PGroup;
 
-class SliceVariablesSubtab : public QWidget, public Ui_SliceVariablesGUI {
+class SliceVariablesSubtab : public QWidget {
 
-	Q_OBJECT
+    Q_OBJECT
+    PGroup *_pg;
 
 public:
-	SliceVariablesSubtab(QWidget* parent);
+    SliceVariablesSubtab(QWidget* parent);
 
-	void Update(
-		VAPoR::DataMgr *dataMgr,
-		VAPoR::ParamsMgr *paramsMgr,
-		VAPoR::RenderParams *rParams
-	);
-
-private slots:
-    void _setDefaultSampleRate();
-
-private:
-    VAPoR::SliceParams* _params;
+    void Update(
+        VAPoR::DataMgr *dataMgr,
+        VAPoR::ParamsMgr *paramsMgr,
+        VAPoR::RenderParams *rParams
+    );
 };
 
 class SliceAppearanceSubtab : public QWidget, public Ui_SliceAppearanceGUI {
