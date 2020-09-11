@@ -430,7 +430,7 @@ int FlowRenderer::_renderAdvectionHelper(bool renderDirection)
             shader = _glManager->shaderManager->GetShader("FlowGlyphsLineDirArrow2D");
         else
             shader = _glManager->shaderManager->GetShader("FlowLines");
-    } else {
+    } else if (renderType == FlowParams::RenderTypeSamples) {
         if (glyphType == FlowParams::GlpyhTypeSphere)
             if (geom3d)
                 shader = _glManager->shaderManager->GetShader("FlowGlyphsSphereSplat");
@@ -440,6 +440,8 @@ int FlowRenderer::_renderAdvectionHelper(bool renderDirection)
             shader = _glManager->shaderManager->GetShader("FlowGlyphsArrow");
         else
             shader = _glManager->shaderManager->GetShader("FlowGlyphsArrow2D");
+    } else {
+        shader = _glManager->shaderManager->GetShader("FlowLines");
     }
 
     if (!shader) return -1;
@@ -477,6 +479,10 @@ int FlowRenderer::_renderAdvectionHelper(bool renderDirection)
     shader->SetUniform("fade_length", (int)rp->GetValueLong(FlowParams::RenderFadeTailLengthTag, 10));
     shader->SetUniform("fade_stop", (int)rp->GetValueLong(FlowParams::RenderFadeTailStopTag, 0));
 
+    shader->SetUniform("density", renderType == FlowParams::RenderTypeDensity);
+    shader->SetUniform("falloff", (float)rp->GetValueDouble(FlowParams::RenderDensityFalloffTag, 1));
+    shader->SetUniform("tone", (float)rp->GetValueDouble(FlowParams::RenderDensityToneMappingTag, 1));
+
     //    Features supported by shaders but not implemented in GUI/not finished
     //
     //    shader->SetUniform("constantColorEnabled", false);
@@ -498,6 +504,15 @@ int FlowRenderer::_renderAdvectionHelper(bool renderDirection)
     glEnable(GL_BLEND);
     glBindVertexArray(_VAO);
 
+    if (renderType == FlowParams::RenderTypeDensity) {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        if (rp->GetValueLong("invert", false))
+            glBlendEquation(GL_FUNC_REVERSE_SUBTRACT);
+        else
+            glBlendEquation(GL_FUNC_ADD);
+        glDepthMask(GL_FALSE);
+    }
+
     size_t offset = 0;
     for (int n : _streamSizes) {
         shader->SetUniform("nVertices", n);
@@ -505,6 +520,9 @@ int FlowRenderer::_renderAdvectionHelper(bool renderDirection)
         offset += n;
     }
 
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+    glBlendEquation(GL_FUNC_ADD);
     glBindVertexArray(0);
     glDisable(GL_CULL_FACE);
     shader->UnBind();
