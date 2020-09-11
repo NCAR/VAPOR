@@ -1,10 +1,8 @@
 #include <iostream>
-#include <sstream>
 #include <cstdarg>
 #include "vapor/VAssert.h"
 #include <cmath>
 #include <cstdio>
-#include <sys/stat.h>
 #ifdef WIN32
 #include <geotiff/geotiff.h>
 #include <geotiff/geo_normalize.h>
@@ -66,7 +64,7 @@ int GeoImageTMS::Initialize(string dir, vector <double> times) {
 	// Find the maximum available LOD in the TMS database. 
 	//
 	int lod = 0;
-	while (_tilePath(_dir, 0,0,lod) != "") {
+	while (TilePath(_dir, 0,0,lod) != "") {
 		lod++;
 	}
 	lod--;
@@ -254,43 +252,6 @@ unsigned char *GeoImageTMS::GetImage(
 	return (_texture);
 }
 
-
-// Get the file path of a single tile from the TMS database
-// with the give lod and tile coordinates
-//
-string GeoImageTMS::_tilePath(
-	string dir, size_t tileX, size_t tileY, int lod
-) const {
-
-//	size_t ntiles = 1 << lod;
-//	size_t tmsTileY = ntiles - 1 - tileY;
-	size_t tmsTileY = tileY;
-
-	ostringstream oss;
-	oss << dir;
-	oss << "/";
-	oss << lod;
-	oss << "/";
-	oss << tileX;
-	oss << "/";
-	oss << tmsTileY;
-
-	string base = oss.str();
-	
-	string path = base + ".tif";
-
-	struct stat statbuf;
-	if (stat(path.c_str(), &statbuf) == 0)  return(path);
-
-	path = base + ".tiff";
-
-	if (stat(path.c_str(), &statbuf) == 0) return (path);
-
-	// Tile does not exist
-	//
-	return("");
-}
-
 // Get the dimensions of a single tile from the TMS database
 // N.B. This method allows the specification of the tile coordinates,
 // but all tiles in a single TMS must be the same size
@@ -299,7 +260,7 @@ int GeoImageTMS::_tileSize(
 	string dir, size_t tileX, size_t tileY, int lod, size_t &w, size_t &h
 ) {
 	
-	string path = _tilePath(dir, tileX, tileY, lod);
+	string path = TilePath(dir, tileX, tileY, lod);
 	if (path.empty()) {
 		SetErrMsg("Tile %d %d %d does not exist", tileX, tileY, lod);
 		return(-1);
@@ -329,7 +290,7 @@ int GeoImageTMS::_tileRead(
 		"GeoImageTMS::_tileRead(%s,%d,%d,%d)", dir.c_str(), tileX, tileY, lod
 	);
 
-	string path = _tilePath(dir, tileX, tileY, lod);
+	string path = TilePath(dir, tileX, tileY, lod);
 	if (path.empty()) {
 		SetErrMsg("Tile %d %d %d does not exist", tileX, tileY, lod);
 		return(-1);

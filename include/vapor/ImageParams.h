@@ -98,14 +98,14 @@ public:
   //
   // Get and set the threshold for TMS image downsampling
   // 
-  int GetDownsampleLimit() const
+  int GetTMSLOD() const
   {
-    int value = ( (int)GetValueLong( _downsampleThresholdTag, 1024 ) );
+    int value = ( (int)GetValueLong( _TMSLODTag, 1 ) );
     return value;
   }
   void SetDownsampleLimit( int val )
   {
-    SetValueLong( _downsampleThresholdTag, "size at which to downsample TMS images", (long)val );
+    SetValueLong( _TMSLODTag, "TMS level of detail", (long)val );
   }
 
 private:
@@ -113,7 +113,7 @@ private:
   static const std::string          _isGeoRefTag;
   static const std::string          _ignoreTransparencyTag;
   static const std::string          _opacityTag;
-  static const std::string          _downsampleThresholdTag;
+  static const std::string          _TMSLODTag;
   static const std::string          _orientationTag;  // If it's X-Y (orientation = 2) 
                                                       // If it's X-Z (orientation = 1)
                                                       // If it's Y-Z (orientation = 0)

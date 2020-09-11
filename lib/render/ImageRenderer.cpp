@@ -105,7 +105,7 @@ ImageRenderer::ImageRenderer( const ParamsMgr*    pm,
   _texWidth = 0;
   _texHeight = 0;
 	_cacheTimestep = 0;
-    _cacheDownsample = 1024;
+    _cacheLOD = 1;
 	_cacheRefLevel = 0;
 	_cacheLod = 0;
 	_cacheHgtVar = "";
@@ -396,11 +396,11 @@ bool ImageRenderer::_texStateDirty( DataMgr *dataMgr) const
   myParams->GetBox()->GetExtents( minExt, maxExt );
 	vector <double> boxExtents( minExt );
   boxExtents.insert( boxExtents.end(), maxExt.begin(), maxExt.end() ); 
-	int downsample = myParams->GetDownsampleLimit();
+	int downsample = myParams->GetTMSLOD();
 
 	return(
 		_cacheTimestepTex != ts ||
-	    _cacheDownsample  != downsample ||
+	    _cacheLOD  != downsample ||
 		_cacheBoxExtentsTex != boxExtents ||
 		_cacheGeoreferenced != georeferenced
 	);
@@ -412,7 +412,7 @@ void ImageRenderer::_texStateSet( DataMgr *dataMgr)
 	int georeferenced = (int) myParams->GetIsGeoRef();
 
 	_cacheTimestepTex = myParams->GetCurrentTimestep();
-	_cacheDownsample  = myParams->GetDownsampleLimit();
+	_cacheLOD  = myParams->GetTMSLOD();
 	_cacheGeoreferenced = georeferenced;
   vector<double> minExt, maxExt;
   myParams->GetBox()->GetExtents( minExt, maxExt );
@@ -423,7 +423,7 @@ void ImageRenderer::_texStateSet( DataMgr *dataMgr)
 void ImageRenderer::_texStateClear() 
 {
 	_cacheTimestepTex = -1;
-	_cacheDownsample = 1024;
+	_cacheLOD = 1;
 	_cacheBoxExtentsTex.clear();
 	_cacheGeoreferenced = -1;
 }
@@ -436,13 +436,14 @@ int ImageRenderer::_reinit( string path, vector <double> times)
 	// path must point to a tiff file
 	//
 	bool tms_flag = false;
-	if (path.rfind(".tms", path.size()-4) != string::npos) {
+    if ( IsTMSFile( path ) ) {
+	//if (path.rfind(".tms", path.size()-4) != string::npos) {
 		ifstream in;
 		in.open(path.c_str());
-		if ( ! in ) {
+		/*if ( ! in ) {
 			SetErrMsg("fopen(%s) : %M", path.c_str());
 			return(-1);
-		}
+		}*/
 		string tiledir;
 		in >> tiledir;
 		in.close();
@@ -513,7 +514,7 @@ unsigned char *ImageRenderer::_getImage(  GeoImage *geoimage,
 	width = height = 0;
 
     ImageParams *myParams = (ImageParams *) GetActiveParams();
-	const int maxWidthReq  = myParams->GetDownsampleLimit();
+	const int maxWidthReq  = myParams->GetTMSLOD();
 	const int maxHeightReq = maxWidthReq;
 
 	double pcsExtentsData[4];

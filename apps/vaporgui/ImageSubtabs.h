@@ -58,10 +58,10 @@ public:
     _rParams = NULL;
     setupUi(this);
     
-    _downsampleInput =  new PIntegerInputHLI<VAPoR::ImageParams>(
+    _downsampleInput =  new PComboBoxHLI<VAPoR::ImageParams>(
         "Tile downsampling threshold",
-        &VAPoR::ImageParams::GetDownsampleLimit,
-        &VAPoR::ImageParams::SetDownsampleLimit
+        &VAPoR::ImageParams::GetTMSLOD,
+        &VAPoR::ImageParams::SetTMSLOD
     );
     ((QVBoxLayout*)layout())->insertWidget( 4, _downsampleInput );
         
