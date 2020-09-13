@@ -255,9 +255,9 @@ bool Wasp::BinarySearchRange(
 
 
 bool Wasp::NearlyEqual(float a, float b, float epsilon) {
-	float absA = fabs(a);
-	float absB = fabs(b);
-	float diff = fabs(a-b);
+	float absA = std::fabs(a);
+	float absB = std::fabs(b);
+	float diff = std::fabs(a-b);
 	
 	// shortcut, handles infinities
 	//
