@@ -161,4 +161,11 @@ COMMON_API bool BinarySearchRange(
     double x,
     size_t &i);
 
+//! Floating point comparison for near equality.
+//!
+//! Perform a floating point comparison to see if two values are nearly equal;
+//! The relative difference of the values is compared against epsilon.
+//
+COMMON_API bool NearlyEqual(float a, float b, float epsilon);
+
 }; // namespace Wasp
