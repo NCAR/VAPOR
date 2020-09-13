@@ -237,6 +237,10 @@ private:
     NetCDFCFCollection *ncdfc, const vector <string> &cvars
  );
 
+ // Return true if a 1D variable has uniform, absolute deltas between elements
+ //
+ bool _isUniform(NetCDFCFCollection *ncdfc, string varname);
+
  int _InitHorizontalCoordinates(NetCDFCFCollection *ncdfc);
 
  int _InitVerticalCoordinates(NetCDFCFCollection *ncdfc); 

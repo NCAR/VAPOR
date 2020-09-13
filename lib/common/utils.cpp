@@ -1,6 +1,7 @@
 #include "vapor/VAssert.h"
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 #include <vapor/utils.h>
 
 #define MAXCOORDS 4
@@ -250,4 +251,25 @@ bool Wasp::BinarySearchRange(
 	}
 	i = i0;
 	return(true);
+}
+
+
+bool Wasp::NearlyEqual(float a, float b, float epsilon) {
+	float absA = std::fabs(a);
+	float absB = std::fabs(b);
+	float diff = std::fabs(a-b);
+	
+	// shortcut, handles infinities
+	//
+	if (a == b) return (true);
+
+	if (a == 0.0 || b == 0.0 || (absA + absB < std::numeric_limits<float>::min())) {
+		// a or b is zero or both are extremely close to it
+		// relative error is less meaningful here
+		//
+		return (diff < (epsilon * std::numeric_limits<float>::min()));
+	}
+
+	// use relative error
+	return (diff / min((absA + absB), std::numeric_limits<float>::max()) < epsilon);
 }
