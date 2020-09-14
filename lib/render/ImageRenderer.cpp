@@ -107,7 +107,6 @@ ImageRenderer::ImageRenderer( const ParamsMgr*    pm,
 	_cacheTimestep = 0;
     _cacheLOD = 1;
 	_cacheRefLevel = 0;
-	_cacheLod = 0;
 	_cacheHgtVar = "";
 	_cacheGeoreferenced = -1;
 	_cacheTimestepTex = 0;
@@ -330,7 +329,7 @@ bool ImageRenderer::_gridStateDirty() const
 
 	return(
 		refLevel != _cacheRefLevel ||
-		lod != _cacheLod ||
+		lod != _cacheLOD ||
 		hgtVar != _cacheHgtVar ||
 		ts != _cacheTimestep ||
 		boxExtents != _cacheBoxExtents
@@ -340,7 +339,7 @@ bool ImageRenderer::_gridStateDirty() const
 void ImageRenderer::_gridStateClear() 
 {
 	_cacheRefLevel = 0;
-	_cacheLod  = 0;
+	_cacheLOD  = 0;
 	_cacheHgtVar.clear();
 	_cacheTimestep  = -1;
 	_cacheBoxExtents.clear();
@@ -350,7 +349,7 @@ void ImageRenderer::_gridStateSet()
 {
 	ImageParams *myParams = (ImageParams *) GetActiveParams();
 	_cacheRefLevel = myParams->GetRefinementLevel();
-	_cacheLod = myParams->GetCompressionLevel();
+	_cacheLOD = myParams->GetCompressionLevel();
 	_cacheHgtVar = myParams->GetHeightVariableName();
 	_cacheTimestep = myParams->GetCurrentTimestep();
   vector<double> minExt, maxExt;

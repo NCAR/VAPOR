@@ -12,7 +12,7 @@
 #include "Flags.h"
 #include "PWidget.h"    // Must explicitly inclue PWidget.h to use PWidgetHLI.h
 #include "PWidgetHLI.h"
-#include "PIntegerInputHLI.h"
+#include "PComboBoxHLI.h"
 
 namespace VAPoR {
 	class ControlExec;
