@@ -33,7 +33,7 @@ class PARAMS_API FlowParams : public RenderParams
 {
 public:
     
-    enum RenderType { RenderTypeStream, RenderTypeSamples};
+    enum RenderType { RenderTypeStream, RenderTypeSamples, RenderTypeDensity};
     enum GlpyhType { GlpyhTypeSphere, GlpyhTypeArrow };
 
     // Constructors
@@ -138,6 +138,9 @@ public:
     static const std::string RenderGlyphTypeTag;
     static const std::string RenderGlyphStrideTag;
     static const std::string RenderGlyphOnlyLeadingTag;
+    
+    static const std::string RenderDensityFalloffTag;
+    static const std::string RenderDensityToneMappingTag;
     
     static const std::string RenderFadeTailTag;
     static const std::string RenderFadeTailStartTag;

@@ -172,6 +172,8 @@ set (SRCS
 	PDisplay.cpp
 	PDisplay.h
 	PDisplayHLI.h
+	PLabel.cpp
+	PLabel.h
 	PLineItem.cpp
 	PLineItem.h
 	PEnumDropdown.cpp
@@ -190,14 +192,16 @@ set (SRCS
 	PSliderEdit.cpp
 	PSliderEdit.h
 	PSliderEditHLI.h
-	PVariableSelector.cpp
-	PVariableSelector.h
 	PRegionSelector.cpp
 	PRegionSelector.h
 	ParamsWidgetDemo.cpp
 	ParamsWidgetDemo.h
 	PTFEditor.cpp
 	PTFEditor.h
+    PVariableWidgets.cpp
+    PVariableWidgets.h
+    PFidelitySection.cpp
+    PFidelitySection.h
 	ModelEventRouter.cpp
 	ModelEventRouter.h
 	ModelSubtabs.cpp
@@ -296,26 +300,21 @@ set (UIS
 	helloLayoutSubtab.ui
 	helloAppearanceSubtab.ui
 	BarbAppearanceGUI.ui
-	BarbVariablesGUI.ui
+    BarbVariablesGUI.ui
 	BarbGeometryGUI.ui
 	BarbAnnotationGUI.ui
 	ImageAppearanceGUI.ui
 	ImageGeometryGUI.ui
-	ImageVariablesGUI.ui
 	TransformTableGUI.ui
-	TwoDVariablesGUI.ui
 	TwoDAppearanceGUI.ui
 	TwoDGeometryGUI.ui
 	TwoDAnnotationGUI.ui
-	ContourVariablesGUI.ui
 	ContourAppearanceGUI.ui
 	ContourGeometryGUI.ui
 	ContourAnnotationGUI.ui
-	WireFrameVariablesGUI.ui
 	WireFrameAppearanceGUI.ui
 	WireFrameGeometryGUI.ui
 	WireFrameAnnotationGUI.ui
-    SliceVariablesGUI.ui
     SliceAppearanceGUI.ui
     SliceGeometryGUI.ui
     SliceAnnotationGUI.ui
@@ -333,11 +332,9 @@ set (UIS
 	VolumeAnnotationGUI.ui
 	VolumeAppearanceGUI.ui
 	VolumeGeometryGUI.ui
-	VolumeVariablesGUI.ui
 	VolumeIsoAnnotationGUI.ui
 	VolumeIsoAppearanceGUI.ui
 	VolumeIsoGeometryGUI.ui
-	VolumeIsoVariablesGUI.ui
 	ModelGeometryGUI.ui
 	ModelVariablesGUI.ui
 	

@@ -1,7 +1,7 @@
 add_subdirectory (Doxygen)
 
 if (BUILD_VDC)
-	file (GLOB SHADERS_SRC shaders/*.vert shaders/*.frag)
+	file (GLOB SHADERS_SRC shaders/*.vert shaders/*.frag shaders/*.geom)
 	add_custom_target (
 		shaders ALL
 		SOURCES ${SHADERS_SRC}

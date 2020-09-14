@@ -1,6 +1,28 @@
 #include "ContourSubtabs.h"
 #include "TFEditor.h"
+#include "PGroup.h"
+#include "PSection.h"
+#include "PVariableWidgets.h"
+#include "PFidelitySection.h"
 #include <vapor/glutil.h>
+
+ContourVariablesSubtab::ContourVariablesSubtab(QWidget* parent) {
+    setLayout( new QVBoxLayout );
+    ((QVBoxLayout*)layout())->insertWidget(1, pg = new PGroup);
+    PSection *vars = new PSection("Variable Selection");
+    vars->Add(new PScalarVariableSelector2DHLI);
+    vars->Add(new PHeightVariableSelectorHLI);
+    pg->Add(vars);
+    pg->Add(new PFidelitySection);
+}
+
+void ContourVariablesSubtab::Update(
+    VAPoR::DataMgr *dataMgr,
+    VAPoR::ParamsMgr *paramsMgr,
+    VAPoR::RenderParams *rParams
+) {
+    pg->Update(rParams, paramsMgr, dataMgr);
+}
 
 ContourAppearanceSubtab::ContourAppearanceSubtab(QWidget* parent) {
 	setupUi(this);

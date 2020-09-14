@@ -103,7 +103,7 @@ public:
     int value = ( (int)GetValueLong( _TMSLODTag, 1 ) );
     return value;
   }
-  void SetDownsampleLimit( int val )
+  void SetTMSLOD( int val )
   {
     SetValueLong( _TMSLODTag, "TMS level of detail", (long)val );
   }

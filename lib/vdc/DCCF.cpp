@@ -418,6 +418,41 @@ int DCCF:: _get_latlon_coordvars(
 	return(0);
 }
 
+bool DCCF::_isUniform(NetCDFCFCollection *ncdfc, string varname) {
+	vector <size_t> dims = ncdfc->GetDims(varname);
+
+	if (dims.size() != 1) return(false);
+
+	if (dims[0] == 2) return(true);
+
+	vector <float> buf(dims[0]);
+
+	bool enabled = EnableErrMsg(false);
+	int fd = ncdfc->OpenRead(0, varname);
+	if (fd < 0) {
+		EnableErrMsg(enabled);
+		return(false);
+	}
+	int rc = ncdfc->Read(buf.data(), fd);
+	if (rc < 0) {
+		EnableErrMsg(enabled);
+		return(false);
+	}
+	ncdfc->Close(fd);
+	EnableErrMsg(enabled);
+
+	float epsilon = 0.0001;
+	float delta = buf[1] - buf[0];
+	for (int i = 1; i<buf.size()-1; i++) {
+		if (! Wasp::NearlyEqual((buf[i+1]-buf[i]), delta, epsilon)) {
+			return(false);
+		}   
+	}   
+
+	return(true);
+}
+	
+		
 int DCCF::_AddCoordvars(
 	NetCDFCFCollection *ncdfc,
 	const vector <string> &cvars
@@ -459,11 +494,15 @@ int DCCF::_AddCoordvars(
 			units = "";
 		} 
 
+		// See if the variable has uniform spacing. If so, set the uniform hint
+		//
+		bool uniformHint = _isUniform(ncdfc, cvars[i]);
+
 		// Finally, add the variable to _coordVarsMap. 
 		//
 		vector <bool> periodic(false);
 		_coordVarsMap[cvars[i]] = CoordVar(
-			cvars[i], units, DC::FLOAT, periodic, axis, false,
+			cvars[i], units, DC::FLOAT, periodic, axis, uniformHint,
 			dimnames, time_dim_name
 		);
 
