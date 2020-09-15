@@ -749,7 +749,10 @@ int DC::_getVarTemplate(
 	if (fd<0) return(-1);
 
 	int rc = Read(fd, data);
-	if (fd<0) return(-1);
+	if (rc<0) {
+		CloseVariable(fd);
+		return(-1);
+	}
 
 	rc = CloseVariable(fd);
 
