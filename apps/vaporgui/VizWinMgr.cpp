@@ -169,15 +169,23 @@ void VizWinMgr::_attachVisualizer(string vizName) {
 void VizWinMgr::LaunchVisualizer()
 {
 
+	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	paramsMgr->BeginSaveStateGroup(_controlExec->GetNewVisualizerUndoTag());
+
 	string vizName = make_viz_name(_controlExec->GetVisualizerNames());
     
 	int rc = _controlExec->NewVisualizer(vizName);
 	if (rc<0) {
 		MSG_ERR("Failed to create new visualizer");
+		paramsMgr->EndSaveStateGroup();
 		return;
 	}
 
 	_attachVisualizer(vizName);
+
+	paramsMgr->EndSaveStateGroup();
+
+	
 }
 
 
@@ -205,8 +213,6 @@ void VizWinMgr::FitSpace(){
  * Method called when the user makes a visualizer active:
  **********************************************************************/
 void VizWinMgr::_setActiveViz(string vizName){
-	if (vizName.empty()) return;
-
 
 	GUIStateParams *p = _getStateParams();
 	string currentVizName = p->GetActiveVizName();
@@ -214,6 +220,8 @@ void VizWinMgr::_setActiveViz(string vizName){
 
 		p->SetActiveVizName(vizName);
 		emit(activateViz(QString::fromStdString(vizName)));
+
+		if (vizName.empty()) return;
 		
 		//Need to cause a redraw in all windows if we are not in navigate mode,
 		//So that the manips will change where they are drawn:
@@ -304,13 +312,15 @@ void VizWinMgr::_vizAboutToDisappear(string vizName)  {
 	std::map<string,QMdiSubWindow*>::iterator itr2 = _vizMdiWin.find(vizName);
 	VAssert(itr2 != _vizMdiWin.end());
 
+	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	paramsMgr->BeginSaveStateGroup(_controlExec->GetRemoveVisualizerUndoTag());
+
 	GUIStateParams *p = _getStateParams();
 	string activeViz = p->GetActiveVizName();
 
     itr->second->makeCurrent();
-    _controlExec->RemoveAllRenderers(vizName, true);
-    _controlExec->RemoveVisualizer(vizName);
 
+    _controlExec->RemoveVisualizer(vizName, true);
 
 	// disconnect all signals from window
 	//
@@ -336,6 +346,8 @@ void VizWinMgr::_vizAboutToDisappear(string vizName)  {
 	// When the number is reduced to 1, disable multiviz options.
 	//
 	if (_vizWindow.size() == 1) emit enableMultiViz(false);
+
+	paramsMgr->EndSaveStateGroup();
 	
 }
 

@@ -351,14 +351,14 @@ void RenderHolder::_newRendererDialogAccepted()
 	rendererName = uniqueName(rendererName);
 	qname = QString(rendererName.c_str());
 
-	paramsMgr->BeginSaveStateGroup("Create new renderer");
+	paramsMgr->BeginSaveStateGroup(_controlExec->GetActivateRendererUndoTag());
 
 	int rc = _controlExec->ActivateRender(
 		activeViz, dataSetName, rendererType, rendererName, false
 	);
 	if (rc<0) {
-		paramsMgr->EndSaveStateGroup();
 		MSG_ERR("Can't create renderer");
+		paramsMgr->EndSaveStateGroup();
 		return;
 	}
 
@@ -369,8 +369,8 @@ void RenderHolder::_newRendererDialogAccepted()
 	Update();
 
 	emit newRendererSignal(activeViz, rendererType, rendererName);
-
 	paramsMgr->EndSaveStateGroup();
+
 }
 
 
@@ -393,14 +393,6 @@ void RenderHolder::_deleteRenderer() {
     int row = _getRow(rendererName);
     _getRowInfo(row, rendererName, rendererType, dataSetName);
 
-	ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-	paramsMgr->BeginSaveStateGroup("Delete renderer");
-
-	int rc = _controlExec->ActivateRender(
-		activeViz, dataSetName, rendererType, rendererName, false
-	);
-	VAssert(rc == 0);
-
 	_controlExec->RemoveRenderer(
 		activeViz, dataSetName, rendererType, rendererName, false
 	);
@@ -420,7 +412,6 @@ void RenderHolder::_deleteRenderer() {
 
 	_vaporTable->SetActiveRow(0);
 
-	paramsMgr->EndSaveStateGroup();
 }
 
 void RenderHolder::_activeRendererChanged(int row, int col) {
