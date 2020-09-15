@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <algorithm>
 
 #include <vapor/ParamsMgr.h>
 #include <vapor/ControlExecutive.h>
@@ -49,6 +50,8 @@ ControlExec::~ControlExec()
 
 int ControlExec::NewVisualizer(string winName)
 {
+    _paramsMgr->BeginSaveStateGroup(GetNewVisualizerUndoTag());
+
     // Remove if already exists. Else no-op
     //
     RemoveVisualizer(winName);
@@ -58,22 +61,32 @@ int ControlExec::NewVisualizer(string winName)
     ViewpointParams *vpParams = _paramsMgr->CreateVisualizerParamsInstance(winName);
     if (!vpParams) {
         SetErrMsg("Failed to create Visualizer parameters");
+        _paramsMgr->EndSaveStateGroup();
         return -1;
     }
 
     Visualizer *viz = new Visualizer(_paramsMgr, _dataStatus, winName);
     _visualizers[winName] = viz;
 
+    _paramsMgr->EndSaveStateGroup();
+
     return (0);
 }
 
-void ControlExec::RemoveVisualizer(string winName)
+void ControlExec::RemoveVisualizer(string winName, bool hasOpenGLContext)
 {
+    _paramsMgr->BeginSaveStateGroup(GetRemoveVisualizerUndoTag());
+
+    RemoveAllRenderers(winName, hasOpenGLContext);
+
     std::map<string, Visualizer *>::iterator itr2 = _visualizers.find(winName);
     if (itr2 != _visualizers.end()) {
         delete itr2->second;
         _visualizers.erase(itr2);
+        _paramsMgr->RemoveVisualizer(winName);
     }
+
+    _paramsMgr->EndSaveStateGroup();
 }
 
 int ControlExec::InitializeViz(string winName, GLManager *glManager)
@@ -151,7 +164,7 @@ int ControlExec::ActivateRender(string winName, string dataSetName, string rende
         return -1;
     }
 
-    _paramsMgr->BeginSaveStateGroup("ActivateRender");
+    _paramsMgr->BeginSaveStateGroup(GetActivateRendererUndoTag());
 
     // Create new renderer if one does not exist
     //
@@ -172,6 +185,7 @@ int ControlExec::ActivateRender(string winName, string dataSetName, string rende
         int rc = rp->Initialize();
         if (rc < 0) {
             SetErrMsg("Failed to initialize of type \"%s\"", renderType.c_str());
+            _paramsMgr->EndSaveStateGroup();
             return (-1);
         }
 
@@ -217,7 +231,7 @@ int ControlExec::ActivateRender(string winName, string dataSetName, const Render
 
     string paramsType = rp->GetName();
 
-    _paramsMgr->BeginSaveStateGroup("ActivateRender");
+    _paramsMgr->BeginSaveStateGroup(GetActivateRendererUndoTag());
 
     // Create new renderer if one does not exist
     //
@@ -252,27 +266,41 @@ int ControlExec::ActivateRender(string winName, string dataSetName, const Render
     return 0;
 }
 
-void ControlExec::_removeRendererHelper(string winName, string dataSetName, string renderType, string renderName, bool removeFromParamsFlag, bool hasOpenGLContext)
+void ControlExec::_removeRendererHelper(string winName, string dataSetName, string pClassName, string renderName, bool removeFromParamsFlag, bool hasOpenGLContext)
 {
     // No-op if tuple of winName, dataSetName, renderType, and
     // renderName is unknown
     //
-    string paramsType = RendererFactory::Instance()->GetParamsClassFromRenderClass(renderType);
 
-    RenderParams *rParams = _paramsMgr->GetRenderParams(winName, dataSetName, paramsType, renderName);
+    // Convert from params render type to render type. Sigh
+    //
+    string rClassName = RendererFactory::Instance()->GetRenderClassFromParamsClass(pClassName);
+
+    RenderParams *rParams = _paramsMgr->GetRenderParams(winName, dataSetName, pClassName, renderName);
     if (!rParams) return;
 
     Visualizer *v = getVisualizer(winName);
     if (!v) return;
 
-    v->DestroyRenderer(renderType, renderName, hasOpenGLContext);
+    v->DestroyRenderer(rClassName, renderName, hasOpenGLContext);
 
-    if (removeFromParamsFlag) { _paramsMgr->RemoveRenderParamsInstance(winName, dataSetName, paramsType, renderName); }
+    if (removeFromParamsFlag) { _paramsMgr->RemoveRenderParamsInstance(winName, dataSetName, pClassName, renderName); }
 }
 
 void ControlExec::RemoveRenderer(string winName, string dataSetName, string renderType, string renderName, bool hasOpenGLContext)
 {
-    _removeRendererHelper(winName, dataSetName, renderType, renderName, true, hasOpenGLContext);
+    string pClassName = RendererFactory::Instance()->GetParamsClassFromRenderClass(renderType);
+
+    RenderParams *rParams = _paramsMgr->GetRenderParams(winName, dataSetName, pClassName, renderName);
+    if (!rParams) return;
+
+    _paramsMgr->BeginSaveStateGroup(GetRemoveRendererUndoTag());
+
+    rParams->SetEnabled(false);
+
+    _removeRendererHelper(winName, dataSetName, pClassName, renderName, true, hasOpenGLContext);
+
+    _paramsMgr->EndSaveStateGroup();
 }
 
 void ControlExec::RemoveAllRenderers(string winName, bool hasOpenGLContext)
@@ -284,23 +312,26 @@ void ControlExec::RemoveAllRenderers(string winName, bool hasOpenGLContext)
         for (int j = 0; j < pClassNames.size(); j++) {
             vector<string> instNames = _paramsMgr->GetRenderParamInstances(winName, dataSetNames[k], pClassNames[j]);
 
-            string rClassName = RendererFactory::Instance()->GetRenderClassFromParamsClass(pClassNames[j]);
-
-            for (int i = 0; i < instNames.size(); i++) { _removeRendererHelper(winName, dataSetNames[k], rClassName, instNames[i], true, hasOpenGLContext); }
+            for (int i = 0; i < instNames.size(); i++) { _removeRendererHelper(winName, dataSetNames[k], pClassNames[j], instNames[i], true, hasOpenGLContext); }
         }
     }
 }
 
 void ControlExec::LoadState()
 {
+    _paramsMgr->BeginSaveStateGroup("Load state");
+
     vector<string> vizNames = GetVisualizerNames();
     for (int i = 0; i < vizNames.size(); i++) { RemoveVisualizer(vizNames[i]); }
 
     _paramsMgr->LoadState();
+    _paramsMgr->EndSaveStateGroup();
 }
 
 void ControlExec::LoadState(const XmlNode *rootNode)
 {
+    _paramsMgr->BeginSaveStateGroup("Load state");
+
     // Destroy current visualizers
     //
     vector<string> vizNames = GetVisualizerNames();
@@ -318,15 +349,21 @@ void ControlExec::LoadState(const XmlNode *rootNode)
         Visualizer *viz = new Visualizer(_paramsMgr, _dataStatus, winName);
         _visualizers[winName] = viz;
     }
+    _paramsMgr->EndSaveStateGroup();
 }
 
 int ControlExec::LoadState(string stateFile)
 {
+    _paramsMgr->BeginSaveStateGroup("Load state");
+
     vector<string> vizNames = GetVisualizerNames();
     for (int i = 0; i < vizNames.size(); i++) { RemoveVisualizer(vizNames[i]); }
 
     int rc = _paramsMgr->LoadState(stateFile);
-    if (rc < 0) return (-1);
+    if (rc < 0) {
+        _paramsMgr->EndSaveStateGroup();
+        return (-1);
+    }
 
     vizNames = _paramsMgr->GetVisualizerNames();
     for (int i = 0; i < vizNames.size(); i++) {
@@ -335,6 +372,7 @@ int ControlExec::LoadState(string stateFile)
         _visualizers[winName] = viz;
     }
 
+    _paramsMgr->EndSaveStateGroup();
     return (0);
 }
 
@@ -413,9 +451,7 @@ int ControlExec::OpenData(const std::vector<string> &files, const std::vector<st
             for (int j = 0; j < pClassNames.size(); j++) {
                 vector<string> instNames = _paramsMgr->GetRenderParamInstances(vizNames[k], dataSetName, pClassNames[j]);
 
-                string rClassName = RendererFactory::Instance()->GetRenderClassFromParamsClass(pClassNames[j]);
-
-                for (int i = 0; i < instNames.size(); i++) { _removeRendererHelper(vizNames[k], dataSetName, rClassName, instNames[i], false, false); }
+                for (int i = 0; i < instNames.size(); i++) { _removeRendererHelper(vizNames[k], dataSetName, pClassNames[j], instNames[i], false, false); }
             }
         }
     }
@@ -524,8 +560,98 @@ string ControlExec::MakeStringConformant(string s)
     return (s);
 }
 
-void ControlExec::undoRedoHelper()
+bool ControlExec::_undoRedoRenderer(bool undoFlag)
 {
+    // Get renderer parameters *before* undo/redo event
+    //
+    vector<string>              beforeNames;
+    map<string, vector<string>> beforeMap;
+    _paramsMgr->GetRenderParamNames(beforeNames);
+    std::sort(beforeNames.begin(), beforeNames.end());
+    for (const auto &name : beforeNames) {
+        string winName, dataSetName, className;
+        bool   status = _paramsMgr->RenderParamsLookup(name, winName, dataSetName, className);
+        VAssert(status);
+        beforeMap[name] = vector<string>{winName, dataSetName, className};
+    }
+
+    // Undo/Redo the event
+    //
+    bool status = true;
+    if (undoFlag) {
+        status = _paramsMgr->Undo();
+    } else {
+        status = _paramsMgr->Redo();
+    }
+    if (!status) return (status);
+
+    // Get renderer parameters *after* undo/redo event
+    //
+    vector<string>              afterNames;
+    map<string, vector<string>> afterMap;
+    _paramsMgr->GetRenderParamNames(afterNames);
+    std::sort(afterNames.begin(), afterNames.end());
+    for (const auto &name : afterNames) {
+        string winName, dataSetName, className;
+        bool   status = _paramsMgr->RenderParamsLookup(name, winName, dataSetName, className);
+        VAssert(status);
+        afterMap[name] = vector<string>{winName, dataSetName, className};
+    }
+
+    // Generate list of renderers we need to create
+    //
+    map<string, vector<string>> createMap;
+    std::set_difference(afterMap.begin(), afterMap.end(), beforeMap.begin(), beforeMap.end(), std::inserter(createMap, createMap.end()));
+
+    // Generate list of renderers we need to destroy
+    //
+    map<string, vector<string>> destroyMap;
+    std::set_difference(beforeMap.begin(), beforeMap.end(), afterMap.begin(), afterMap.end(), std::inserter(destroyMap, destroyMap.end()));
+
+    // Disable state saving. This is probably not necessary as code below should not be
+    // changing params state
+    //
+    bool enabled = GetSaveStateEnabled();
+    SetSaveStateEnabled(false);
+
+    // Create renderers
+    //
+    for (const auto &itr : createMap) {
+        string renderType = RendererFactory::Instance()->GetRenderClassFromParamsClass(itr.second[2]);
+
+        Visualizer *v = getVisualizer(itr.second[0]);
+        VAssert(v);
+        int rc = v->CreateRenderer(itr.second[1], renderType, itr.first);
+        VAssert(rc >= 0);
+    }
+
+    // Destroy renderers
+    //
+    for (const auto &itr : destroyMap) {
+        string renderType = RendererFactory::Instance()->GetRenderClassFromParamsClass(itr.second[2]);
+
+        Visualizer *v = getVisualizer(itr.second[0]);
+        VAssert(v);
+
+        v->DestroyRenderer(renderType, itr.first, false);
+    }
+    SetSaveStateEnabled(enabled);
+
+    return (true);
+}
+
+bool ControlExec::_undoRedoVisualizer(bool undoFlag)
+{
+    // Undo/Redo the event
+    //
+    bool status = true;
+    if (undoFlag) {
+        status = _paramsMgr->Undo();
+    } else {
+        status = _paramsMgr->Redo();
+    }
+    if (!status) return (status);
+
     bool enabled = GetSaveStateEnabled();
     SetSaveStateEnabled(false);
 
@@ -549,30 +675,43 @@ void ControlExec::undoRedoHelper()
     VAssert(rc >= 0);
 
     SetSaveStateEnabled(enabled);
+
+    return (true);
 }
 
 bool ControlExec::Undo()
 {
-    // Attempt to undo parameter state
+    // Render and Visualizer Create/Destroy events require special handing for undo/redo
+    // because renderer and visualizer creation is done explicity (not implicitly via
+    // Update(). The only way to determine if an undo/redo was for renderer of visualizer
+    // event is to examine the comment associated with the state change.
     //
-    bool status = _paramsMgr->Undo();
-    if (!status) return (status);
+    bool renderEvent = (_paramsMgr->GetTopUndoDesc() == GetActivateRendererUndoTag()) || (_paramsMgr->GetTopUndoDesc() == GetRemoveRendererUndoTag());
 
-    undoRedoHelper();
+    bool visualizerEvent = ((_paramsMgr->GetTopUndoDesc() == GetRemoveVisualizerUndoTag()) || (_paramsMgr->GetTopUndoDesc() == GetNewVisualizerUndoTag()));
 
-    return (true);
+    if (renderEvent) {
+        return (_undoRedoRenderer(true));
+    } else if (visualizerEvent) {
+        return (_undoRedoVisualizer(true));
+    } else {
+        return (_paramsMgr->Undo());
+    }
 }
 
 bool ControlExec::Redo()
 {
-    // Attempt to redo parameter state
-    //
-    bool status = _paramsMgr->Redo();
-    if (!status) return (status);
+    bool renderEvent = (_paramsMgr->GetTopRedoDesc() == GetActivateRendererUndoTag()) || (_paramsMgr->GetTopRedoDesc() == GetRemoveRendererUndoTag());
 
-    undoRedoHelper();
+    bool visualizerEvent = ((_paramsMgr->GetTopRedoDesc() == GetRemoveVisualizerUndoTag()) || (_paramsMgr->GetTopRedoDesc() == GetNewVisualizerUndoTag()));
 
-    return (true);
+    if (renderEvent) {
+        return (_undoRedoRenderer(false));
+    } else if (visualizerEvent) {
+        return (_undoRedoVisualizer(false));
+    } else {
+        return (_paramsMgr->Redo());
+    }
 }
 
 void ControlExec::UndoRedoClear() { _paramsMgr->UndoRedoClear(); }
@@ -633,9 +772,12 @@ vector<string> ControlExec::GetAllRenderClasses() { return (RendererFactory::Ins
 
 bool ControlExec::RenderLookup(string instName, string &winName, string &dataSetName, string &renderType) const
 {
-    string paramsType = RendererFactory::Instance()->GetParamsClassFromRenderClass(renderType);
+    string paramsType;
+    bool   ok = _paramsMgr->RenderParamsLookup(instName, winName, dataSetName, paramsType);
+    if (!ok) return (ok);
 
-    return (_paramsMgr->RenderParamsLookup(instName, winName, dataSetName, paramsType));
+    renderType = RendererFactory::Instance()->GetRenderClassFromParamsClass(paramsType);
+    return (ok);
 }
 
 int ControlExec::DrawText(string winName, string text, int x, int y, int size, float color[3], int type)

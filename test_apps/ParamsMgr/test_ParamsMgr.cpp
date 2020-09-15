@@ -7,11 +7,12 @@
 
 #include <vapor/MyBase.h>
 #include <vapor/ParamsMgr.h>
-#include <vapor/DataMgrV3_0.h>
+#include <vapor/DataMgr.h>
+#include <vapor/DataStatus.h>
 #include <vapor/OptionParser.h>
 #include <vapor/TwoDDataParams.h>
-#include <vapor/ArrowParams.h>
 #include <vapor/CFuncs.h>
+#include <vapor/FileUtils.h>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -39,7 +40,7 @@ int main(int argc, char **argv)
     OptionParser op;
     string       s;
 
-    ProgName = Basename(argv[0]);
+    ProgName = FileUtils::LegacyBasename(argv[0]);
 
     MyBase::SetErrMsgFilePtr(stderr);
 
@@ -67,38 +68,36 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    string         vdcfile = argv[1];
-    vector<string> files(1, vdcfile);
+    string vdcfile = argv[1];
 
     DataStatus dataStatus;
-    int        rc = dataStatus.Open(files, "mydata", "vdc");
+    string     dataSetName = "mydata";
+
+    int rc = dataStatus.Open(vector<string>{vdcfile}, vector<string>(), dataSetName, "vdc");
     if (rc < 0) return (1);
 
     ParamsMgr *pm = new ParamsMgr();
     pm->SetSaveStateEnabled(false);
 
-    pm->SetDataStatus(&dataStatus);
+    string winName = "myWindow";
 
-    TwoDDataParams *twoDparams0 = (TwoDDataParams *)pm->CreateRenderParamsInstance("viz0", TwoDDataParams::GetClassType(), "twoD0");
+    pm->AddDataMgr(dataSetName, dataStatus.GetDataMgr(dataSetName));
+
+    TwoDDataParams *twoDparams0 = (TwoDDataParams *)pm->CreateRenderParamsInstance(winName, dataSetName, TwoDDataParams::GetClassType(), "twoD0");
 
     twoDparams0->SetVariableName("U10");
-    twoDparams0->MakeTransferFunc("U10");
 
-    TwoDDataParams *twoDparams1 = (TwoDDataParams *)pm->CreateRenderParamsInstance("viz0", TwoDDataParams::GetClassType(), "twoD1");
+    TwoDDataParams *twoDparams1 = (TwoDDataParams *)pm->CreateRenderParamsInstance(winName, dataSetName, TwoDDataParams::GetClassType(), "twoD1");
 
     twoDparams1->SetVariableName("V10");
-    twoDparams1->MakeTransferFunc("V10");
-
-    ArrowParams *arrowParams0 = (ArrowParams *)pm->CreateRenderParamsInstance("viz0", ArrowParams::GetClassType(), "arrow");
-    arrowParams0->MakeTransferFunc("U");
-
-    pm->SaveToFile("file.xml");
 
     pm->SetSaveStateEnabled(true);
+    pm->UndoRedoClear();
 
-    twoDparams1->SetVariableName("U10");
+    pm->SaveToFile("file.xml");
+    twoDparams1->SetVariableName("U1");
     twoDparams1->SetCompressionLevel(1);
-    twoDparams1->SetVariableName("V10");
+    pm->RemoveVisualizer(winName);
 
     pm->Undo();
     pm->Undo();
@@ -106,6 +105,8 @@ int main(int argc, char **argv)
 
     pm->Redo();
     pm->Redo();
+    pm->Redo();
+    pm->Undo();
     pm->Undo();
     pm->Undo();
 

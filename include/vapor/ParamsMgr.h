@@ -107,6 +107,12 @@ public:
     //!
     void AddDataMgr(string dataSetName, DataMgr *dataMgr);
 
+    //! Remove a previously created Window instance
+    //!
+    //! \param [in] winName Window name  to remove
+    //
+    void RemoveVisualizer(string winName);
+
     //! Remove a DataMgr instance previously.
     //!
     //! This method removes the association of a DataMgr instance with
@@ -134,6 +140,12 @@ public:
     //! GetRenderParams()
     //
     ViewpointParams *CreateVisualizerParamsInstance(string winName);
+
+    //! Remove a previously created ViewpointParams instance
+    //!
+    //! \param [in] winName Window name  to remove
+    //
+    void RemoveVisualizerParamsInstance(string winName);
 
     //! Create a new rendering params instances
     //!
@@ -450,6 +462,14 @@ public:
 
     void UndoRedoClear();
 
+    //! Return description string for event at top of undo stack
+    //
+    string GetTopUndoDesc() const;
+
+    //! Return description string for event at top of redo stack
+    //
+    string GetTopRedoDesc() const;
+
     //! Return number states saved that can be undone with Undo()
     //!
     size_t UndoSize() const { return (_ssave.UndoSize()); }
@@ -531,7 +551,8 @@ private:
 
         bool GetEnabled() const { return (_enabled); }
 
-        const XmlNode *GetTop(string &description) const;
+        const XmlNode *GetTopUndo(string &description) const;
+        const XmlNode *GetTopRedo(string &description) const;
         const XmlNode *GetBase() const { return (_state0); }
 
         bool Undo();

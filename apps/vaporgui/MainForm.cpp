@@ -1186,6 +1186,8 @@ void MainForm::sessionOpen(QString qfileName)
         return;
     }
 
+    _paramsMgr->BeginSaveStateGroup("Load state");
+
     string fileName = qfileName.toStdString();
     _sessionNewFlag = false;
     sessionOpenHelper(fileName);
@@ -1204,10 +1206,17 @@ void MainForm::sessionOpen(QString qfileName)
     state->GetActiveRenderer(vizWin, activeRendererType, activeRendererName);
     _controlExec->RenderLookup(activeRendererName, vizWin, activeDataSetName, activeRendererType);
 
-    if (STLUtils::Contains(openDataSetNames, activeDataSetName))
+    if (STLUtils::Contains(openDataSetNames, activeDataSetName)) {
         _tabMgr->SetActiveRenderer(vizWin, activeRendererType, activeRendererName);
-    else
+    } else {
         _tabMgr->HideRenderWidgets();
+    }
+
+    _paramsMgr->EndSaveStateGroup();
+
+    // Session load can't currently be undone
+    //
+    _paramsMgr->UndoRedoClear();
 
     _stateChangeCB();
 }
@@ -1293,10 +1302,20 @@ void MainForm::undoRedoHelper(bool undo)
     bool enabled = _controlExec->GetSaveStateEnabled();
     _controlExec->SetSaveStateEnabled(false);
 
-    bool status;
-    _vizWinMgr->Shutdown();
+    bool visualizerEvent = false;
+    if (undo) {
+        visualizerEvent = ((_paramsMgr->GetTopUndoDesc() == _controlExec->GetRemoveVisualizerUndoTag()) || (_paramsMgr->GetTopUndoDesc() == _controlExec->GetNewVisualizerUndoTag()));
+    } else {
+        visualizerEvent = ((_paramsMgr->GetTopRedoDesc() == _controlExec->GetRemoveVisualizerUndoTag()) || (_paramsMgr->GetTopRedoDesc() == _controlExec->GetNewVisualizerUndoTag()));
+    }
+
+    // Visualizer create/destroy undo/redo events require special
+    // handling.
+    //
+    if (visualizerEvent) { _vizWinMgr->Shutdown(); }
     _tabMgr->Shutdown();
 
+    bool status = true;
     if (undo) {
         status = _controlExec->Undo();
     } else {
@@ -1308,7 +1327,7 @@ void MainForm::undoRedoHelper(bool undo)
         return;
     }
 
-    _vizWinMgr->Restart();
+    if (visualizerEvent) { _vizWinMgr->Restart(); }
     _tabMgr->Restart();
 
     // Restore state saving
@@ -1362,6 +1381,8 @@ void MainForm::closeDataHelper(string dataSetName)
 //
 bool MainForm::openDataHelper(string dataSetName, string format, const vector<string> &files, const vector<string> &options)
 {
+    _paramsMgr->BeginSaveStateGroup("Load data");
+
     GUIStateParams *p = GetStateParams();
     vector<string>  dataSetNames = p->GetOpenDataSetNames();
 
@@ -1378,6 +1399,7 @@ bool MainForm::openDataHelper(string dataSetName, string format, const vector<st
     int rc = _controlExec->OpenData(files, options, dataSetName, format);
     if (rc < 0) {
         MSG_ERR("Failed to load data");
+        _paramsMgr->EndSaveStateGroup();
         return (false);
         ;
     }
@@ -1389,6 +1411,7 @@ bool MainForm::openDataHelper(string dataSetName, string format, const vector<st
 
     _tabMgr->LoadDataNotify(dataSetName);
 
+    _paramsMgr->EndSaveStateGroup();
     return (true);
 }
 
@@ -1431,8 +1454,13 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
         options.push_back(p->GetProjectionString());
     }
 
+    _paramsMgr->BeginSaveStateGroup("Load data");
+
     bool status = openDataHelper(dataSetName, format, myFiles, options);
-    if (!status) return;
+    if (!status) {
+        _paramsMgr->EndSaveStateGroup();
+        return;
+    }
 
     // Reinitialize all tabs
     //
@@ -1453,6 +1481,8 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
     enableWidgets(true);
 
     _timeStepEditValidator->setRange(0, ds->GetTimeCoordinates().size() - 1);
+
+    _paramsMgr->EndSaveStateGroup();
 }
 
 // Load data into current session
@@ -1577,9 +1607,17 @@ void MainForm::sessionNew()
     }
 #endif
 
+    _paramsMgr->BeginSaveStateGroup("Load state");
+
     sessionOpenHelper("");
 
     _vizWinMgr->LaunchVisualizer();
+
+    _paramsMgr->EndSaveStateGroup();
+
+    // Session load can't currently be undone
+    //
+    _paramsMgr->UndoRedoClear();
 
     _stateChangeFlag = false;
     _sessionNewFlag = true;
@@ -1743,6 +1781,8 @@ void MainForm::_setProj4String(string proj4String)
 
     vector<string> dataSets = p->GetOpenDataSetNames();
 
+    _paramsMgr->BeginSaveStateGroup("Set proj4 string");
+
     // Close and re-open all data with new
     // proj4 string
     //
@@ -1764,6 +1804,12 @@ void MainForm::_setProj4String(string proj4String)
     };
 
     for (int i = 0; i < dataSets.size(); i++) { (void)openDataHelper(dataSets[i], formatsMap[i], filesMap[i], options); }
+
+    _paramsMgr->EndSaveStateGroup();
+
+    // Map projection changes can't currently be undone
+    //
+    _paramsMgr->UndoRedoClear();
 
     _App->installEventFilter(this);
 }
@@ -1879,6 +1925,12 @@ void MainForm::updateMenus()
     // Turn off jpeg and png capture if we're in MapOrthographic mode
     ViewpointParams *VPP;
     VPP = _paramsMgr->GetViewpointParams(GetStateParams()->GetActiveVizName());
+
+    // If there are no visualizers (can only happen if user deletes them)
+    // then there are no ViewpointParams. See GitHub issue #1636
+    //
+    if (!VPP) return;
+
     if (VPP->GetProjectionType() == ViewpointParams::MapOrthographic) {
         if (_captureSingleJpegAction->isEnabled()) _captureSingleJpegAction->setEnabled(false);
         if (_captureSinglePngAction->isEnabled()) _captureSinglePngAction->setEnabled(false);
