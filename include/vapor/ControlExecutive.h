@@ -119,13 +119,34 @@ class RENDER_API ControlExec : public MyBase {
     //
     int NewVisualizer(string name);
 
+    //! Return tag pushed to the undo stack when NewVisualizer() is called
+    //
+    string GetNewVisualizerUndoTag() const {
+        return ("NewVisualizer");
+    }
+
     //! Delete an existing visualizer
+    //!
+    //! Deletes visualizer and all of its renderers
     //!
     //! \param[in] name handle to existing visualizer returned by
     //! NewVisualizer(). This method is a no-op if a Visualizer named
     //! \p name doesn't exist
+    //!
+    //! \param[in] hasOpenGLContext If true it is the callers job to ensure
+    //! that the OpenGL Context for the window \p winName is active. In
+    //! this case the renderer is destroyed immediately. If false the
+    //! renderer is queue'd for later destruction
+    //! when \p winName has an active OpenGL context.
+    //!
     //
-    void RemoveVisualizer(string name);
+    void RemoveVisualizer(string name, bool hasOpenGLContext = false);
+
+    //! Return tag pushed to the undo stack when RemoveVisualizer() is called
+    //
+    string GetRemoveVisualizerUndoTag() const {
+        return ("RemoveVisualizer");
+    }
 
     //! Perform OpenGL initialization of specified visualizer
     //!
@@ -215,6 +236,12 @@ class RENDER_API ControlExec : public MyBase {
         string winName, string dataSetName,
         const RenderParams *rp, string renderName, bool on);
 
+    //! Return tag pushed to the undo stack when ActivateRender() is called
+    //
+    string GetActivateRendererUndoTag() const {
+        return ("ActivateRenderer");
+    }
+
     //! Remove (destroy) the indicated renderer
     //!
     //! \param[in] hasOpenGLContext If true it is the callers job to ensure that the
@@ -226,6 +253,12 @@ class RENDER_API ControlExec : public MyBase {
         string winName, string dataSetName,
         string renderType, string renderName, bool hasOpenGLContext);
 
+    //! Return tag pushed to the undo stack when RemoveRenderer() is called
+    //
+    string GetRemoveRendererUndoTag() const {
+        return ("RemoveRenderer");
+    }
+
     //! Remove (destroy) all renderers on this window
     //!
     //! \param[in] hasOpenGLContext If true it is the callers job to ensure that the
@@ -234,7 +267,7 @@ class RENDER_API ControlExec : public MyBase {
     //! when \p winName has an active OpenGL context.
     //!
     void RemoveAllRenderers(
-        string winName, bool hasOpenGLContext);
+        string winName, bool hasOpenGLContext = false);
 
     //! Obtain the ParamsMgr, for use in accessing the Params instances.
     //! \return ParamsMgr*
@@ -701,13 +734,15 @@ class RENDER_API ControlExec : public MyBase {
     }
 
     int openDataHelper(bool reportErrs);
-    void undoRedoHelper();
+    bool _undoRedoRenderer(bool undoFlag);
+    bool _undoRedoVisualizer(bool undoFlag);
+
     int activateClassRenderers(
         string vizName, string dataSetName,
         string pClassName, vector<string> instNames, bool reportErrs);
 
     void _removeRendererHelper(
-        string winName, string dataSetName, string renderType, string renderName,
+        string winName, string dataSetName, string paramsType, string renderName,
         bool removeFromParamsFlag, bool hasOpenGLContext);
 };
 }; // namespace VAPoR
