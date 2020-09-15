@@ -74,6 +74,7 @@ private:
  int _cacheDownsample;
  int _cacheRefLevel;
  int _cacheLOD;
+ int _cacheTMSLOD;
  vector <double> _cacheBoxExtents;
  size_t _cacheTimestepTex;
  string _cacheHgtVar;

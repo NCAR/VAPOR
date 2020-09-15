@@ -75,6 +75,15 @@ static inline std::string TilePath(
     return("");
 }
 
+static inline int GetAvailableTMSLODs( std::string dir ) {
+    int lod = 0;
+    while ( TilePath( dir, 0, 0, lod ) != "" ) {
+        lod++;
+    }
+    lod--;
+    return lod;
+}
+
 //! \class GeoImageTMS
 //! \brief A class for managing OSGeo Tile Map Service Specification images
 //! \author John Clyne
@@ -87,6 +96,8 @@ public:
  virtual ~GeoImageTMS();
 
  int Initialize(string path, vector <double> times);
+
+ void SetLOD( int lod );
 
  unsigned char *GetImage(size_t ts, size_t &width, size_t &height);
 
@@ -102,6 +113,7 @@ private:
 
  string _dir;	// path to TMS directory
  int _maxLOD;	// Maximum LOD available in TMS
+ int _currentLOD; // Current LOD in TMS
  
  unsigned char *_texture;	// storage for texture image
  size_t _textureSize;

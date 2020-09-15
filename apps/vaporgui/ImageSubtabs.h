@@ -7,10 +7,11 @@
 #include "ui_ImageGeometryGUI.h"
 #include "vapor/ImageParams.h"
 #include "vapor/ResourcePath.h"
+#include "vapor/GeoImageTMS.h"
 #include "Flags.h"
 #include "PWidget.h"    // Must explicitly inclue PWidget.h to use PWidgetHLI.h
 #include "PGroup.h"
-#include "PEnumDropdownHLI.h"
+#include "VComboBox.h"
 #include "PFidelitySection.h"
 #include "PVariableWidgets.h"
 
@@ -44,6 +45,42 @@ public:
 };
 
 //
+// PWidget for selecting TMS file level-of-detail
+//
+
+class PTMSLODInput : public PLineItem {
+    Q_OBJECT
+    VComboBox* _vComboBox;
+public:
+    PTMSLODInput() : PLineItem("", "TMS level of detail", _vComboBox = new VComboBox({"0"})) {
+        connect( _vComboBox, &VComboBox::IndexChanged, this, &PTMSLODInput::dropdownIndexChanged );
+    }
+
+protected:
+    virtual void updateGUI() const override {
+        ImageParams* rp = dynamic_cast<ImageParams*>( getParams() );
+        VAssert( rp && "Params must be ImageParams" );
+
+        std::vector< std::string > options;
+        int lods = GetAvailableTMSLODs( rp->GetImagePath() );
+        for ( int i=0; i<lods; i++ ) {
+            options.push_back( std::to_string( i ) );
+            std::cout << std::to_string( i ) << std::endl;
+        }
+        std::cout << "  " << rp->GetTMSLOD() << std::endl;
+        _vComboBox->SetOptions( options );
+        _vComboBox->SetIndex( rp->GetTMSLOD() );
+    };
+
+private slots:
+    void dropdownIndexChanged( int i ) {
+        ImageParams* rp = dynamic_cast<ImageParams*>( getParams() );
+        VAssert( rp && "Params must be ImageParams" );
+        rp->SetTMSLOD( i );
+    }
+};
+
+//
 // ImageAppearanceSubtab class
 //
 class ImageAppearanceSubtab : public QWidget, public Ui_ImageAppearanceGUI {
@@ -56,14 +93,15 @@ public:
     _rParams = NULL;
     setupUi(this);
     
-    _downsampleInput =  new PEnumDropdownHLI<VAPoR::ImageParams>(
+    _TMSLODInput = new PTMSLODInput();
+        /*new PEnumDropdownHLI<VAPoR::ImageParams>(
         "TMS image level of detail",
         std::vector<std::string>{},
         std::vector<long>{},
         &VAPoR::ImageParams::GetTMSLOD,
         &VAPoR::ImageParams::SetTMSLOD
-    );
-    ((QVBoxLayout*)layout())->insertWidget( 4, _downsampleInput );
+    );*/
+    ((QVBoxLayout*)layout())->insertWidget( 4, _TMSLODInput );
         
     _opacityCombo = new Combo( OpacityEdit, OpacitySlider );
     _opacityCombo->SetPrecision( 2 );
@@ -80,7 +118,7 @@ public:
   {
     _rParams = (ImageParams*) rParams;
     
-    _downsampleInput->Update( _rParams, paramsMgr, dataMgr );
+    _TMSLODInput->Update( _rParams, paramsMgr, dataMgr );
 
     // Disable the downsample threshold if we're not working with a TMS image
     //
@@ -89,13 +127,13 @@ public:
         ifstream in;
         in.open(path.c_str());
         if ( ! in ) {
-            _downsampleInput->setEnabled( false );
+            _TMSLODInput->setEnabled( false );
         }
         in.close();
-        _downsampleInput->setEnabled( true );
+        _TMSLODInput->setEnabled( true );
     }
     else {
-        _downsampleInput->setEnabled( false );
+        _TMSLODInput->setEnabled( false );
     }
 
     bool state = _rParams->GetIsGeoRef();
@@ -151,7 +189,7 @@ private slots:
   }
 
 private:
-  PEnumDropdownHLI<VAPoR::ImageParams>* _downsampleInput;
+  PTMSLODInput* _TMSLODInput;
   ImageParams* _rParams;
 
   Combo* _opacityCombo;

@@ -105,7 +105,8 @@ ImageRenderer::ImageRenderer( const ParamsMgr*    pm,
   _texWidth = 0;
   _texHeight = 0;
 	_cacheTimestep = 0;
-    _cacheLOD = 1;
+    _cacheTMSLOD = 0;
+    _cacheLOD = 0;
 	_cacheRefLevel = 0;
 	_cacheHgtVar = "";
 	_cacheGeoreferenced = -1;
@@ -399,7 +400,7 @@ bool ImageRenderer::_texStateDirty( DataMgr *dataMgr) const
 
 	return(
 		_cacheTimestepTex != ts ||
-	    _cacheLOD  != downsample ||
+	    _cacheTMSLOD        != downsample ||
 		_cacheBoxExtentsTex != boxExtents ||
 		_cacheGeoreferenced != georeferenced
 	);
@@ -411,7 +412,7 @@ void ImageRenderer::_texStateSet( DataMgr *dataMgr)
 	int georeferenced = (int) myParams->GetIsGeoRef();
 
 	_cacheTimestepTex = myParams->GetCurrentTimestep();
-	_cacheLOD  = myParams->GetTMSLOD();
+	_cacheTMSLOD  = myParams->GetTMSLOD();
 	_cacheGeoreferenced = georeferenced;
   vector<double> minExt, maxExt;
   myParams->GetBox()->GetExtents( minExt, maxExt );
@@ -422,7 +423,7 @@ void ImageRenderer::_texStateSet( DataMgr *dataMgr)
 void ImageRenderer::_texStateClear() 
 {
 	_cacheTimestepTex = -1;
-	_cacheLOD = 1;
+	_cacheTMSLOD = 0;
 	_cacheBoxExtentsTex.clear();
 	_cacheGeoreferenced = -1;
 }
@@ -478,7 +479,12 @@ int ImageRenderer::_reinit( string path, vector <double> times)
 	// Create an appropriate instance of _geoImage for the cache path
 	//
 	if (! _geoImage) {
-		if (tms_flag) _geoImage = new GeoImageTMS();
+		if (tms_flag) {
+            GeoImageTMS* geoImage = new GeoImageTMS();
+            ImageParams *myParams = (ImageParams *) GetActiveParams();
+            geoImage->SetLOD( myParams->GetTMSLOD() );
+            _geoImage = new GeoImageTMS();
+        }
 		else _geoImage = new GeoImageGeoTiff();
 	}
 
@@ -513,8 +519,8 @@ unsigned char *ImageRenderer::_getImage(  GeoImage *geoimage,
 	width = height = 0;
 
     ImageParams *myParams = (ImageParams *) GetActiveParams();
-	const int maxWidthReq  = myParams->GetTMSLOD();
-	const int maxHeightReq = maxWidthReq;
+	const int maxWidthReq  = 1024;
+	const int maxHeightReq = 1024;
 
 	double pcsExtentsData[4];
 	for (int i=0; i<4; i++) {

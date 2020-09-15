@@ -24,6 +24,7 @@ GeoImageTMS::GeoImageTMS()
 	: GeoImage(8, 4) {
 
 	_dir.clear();
+    _currentLOD = 0;
 	_maxLOD = 0;
 	_texture = NULL;  
 	_textureSize = 0;
@@ -63,11 +64,12 @@ int GeoImageTMS::Initialize(string dir, vector <double> times) {
 
 	// Find the maximum available LOD in the TMS database. 
 	//
-	int lod = 0;
+    int lod = GetAvailableTMSLODs( _dir );
+	/*int lod = 0;
 	while (TilePath(_dir, 0,0,lod) != "") {
 		lod++;
 	}
-	lod--;
+	lod--;*/
 
 	if (lod<0) {
 		SetErrMsg("Failed to initialize TMS directory %s", _dir.c_str());
@@ -98,6 +100,10 @@ int GeoImageTMS::Initialize(string dir, vector <double> times) {
 
 	return(0);
 
+}
+
+void GeoImageTMS::SetLOD( int lod ) {
+    _currentLOD = lod;
 }
 
 unsigned char *GeoImageTMS::GetImage(
@@ -160,8 +166,8 @@ unsigned char *GeoImageTMS::GetImage(
 	// Pick a lod that won't allow the resulting image to 
 	// exceed the max width and height
 	//
-	int lod = _getBestLOD(myGeoExtentsData, maxWidthReq, maxHeightReq);
-	SetDiagMsg("GeoImageTMS::GetImage() LOD : %d", lod);
+	//int lod = _getBestLOD(myGeoExtentsData, maxWidthReq, maxHeightReq);
+	SetDiagMsg("GeoImageTMS::GetImage() LOD : %d", _currentLOD);
 
 	//
 	// Get GeoTile's pixel coordinates of subregion at the given lod 
@@ -170,16 +176,16 @@ unsigned char *GeoImageTMS::GetImage(
 	size_t pixelNE[2];
 	size_t nx,ny;
 	_geotile->LatLongToPixelXY(
-		myGeoExtentsData[0], myGeoExtentsData[1], lod, 
+		myGeoExtentsData[0], myGeoExtentsData[1], _currentLOD, 
 		pixelSW[0], pixelSW[1]
 	);
 	_geotile->LatLongToPixelXY(
-		myGeoExtentsData[2], myGeoExtentsData[3], lod, 
+		myGeoExtentsData[2], myGeoExtentsData[3], _currentLOD, 
 		pixelNE[0], pixelNE[1]
 	);
 
 	int rc = _geotile->MapSize(
-		pixelSW[0],pixelSW[1],pixelNE[0],pixelNE[1],lod,nx, ny
+		pixelSW[0],pixelSW[1],pixelNE[0],pixelNE[1],_currentLOD,nx, ny
 	);
 
 	//
@@ -195,7 +201,7 @@ unsigned char *GeoImageTMS::GetImage(
 	//
 	// Extract the image
 	//
-	rc = _getMap(pixelSW, pixelNE, lod, _texture);
+	rc = _getMap(pixelSW, pixelNE, _currentLOD, _texture);
 	if (rc<0) return(NULL);
 
 
