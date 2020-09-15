@@ -31,7 +31,7 @@ std::string STLUtils::Join(const std::vector<std::string> &parts, const std::str
 {
     string whole;
     auto   itr = parts.begin();
-    whole = *itr++;
+    if (itr != parts.end()) whole = *itr++;
     for (; itr != parts.end(); ++itr) whole += delimeter + *itr;
     return whole;
 }
