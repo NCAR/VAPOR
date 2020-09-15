@@ -34,7 +34,8 @@ std::vector<std::string> STLUtils::Split(std::string str, const std::string &del
 std::string STLUtils::Join(const std::vector<std::string> &parts, const std::string &delimeter) {
     string whole;
     auto itr = parts.begin();
-    whole = *itr++;
+    if (itr != parts.end())
+        whole = *itr++;
     for (; itr != parts.end(); ++itr)
         whole += delimeter + *itr;
     return whole;
