@@ -36,7 +36,7 @@ int VIntSpinBox::GetValue() const {
 }
 
 void VIntSpinBox::emitSpinBoxFinished() {
-    emit EditingFinished( GetValue() );
+    emit ValueChanged( GetValue() );
 }
 
 void VIntSpinBox::emitSpinBoxChanged( int value ) {

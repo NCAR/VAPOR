@@ -1,7 +1,6 @@
 #ifndef IMAGESUBTABS_H
 #define IMAGESUBTABS_H
 
-#include <fstream>
 #include <QFileDialog>
 #include "ui_ImageAppearanceGUI.h"
 #include "ui_ImageGeometryGUI.h"
@@ -9,7 +8,6 @@
 #include "vapor/ResourcePath.h"
 #include "vapor/GeoImageTMS.h"
 #include "Flags.h"
-#include "PWidget.h"    // Must explicitly inclue PWidget.h to use PWidgetHLI.h
 #include "PGroup.h"
 #include "VComboBox.h"
 #include "PFidelitySection.h"
@@ -62,17 +60,17 @@ protected:
         VAssert( rp && "Params must be ImageParams" );
 
         std::string imageFile = rp->GetImagePath();
-        std::string imageDir = imageFile; 
         if ( IsTMSFile( imageFile ) ) {
-            imageDir.erase( imageDir.length()-4, 4 );  // Remove .tms extension
+            imageFile.erase( imageFile.length()-4, 4 );  // Remove .tms extension
+            _vComboBox->setEnabled( true );
         }
         else {
-            _vComboBox->setEnabled( false );
+            _vComboBox->setEnabled( false );             // Disable if not using a TMS image
             return;
         }
 
         std::vector< std::string > options;
-        int lods = GetAvailableTMSLODs( imageDir );
+        int lods = GetAvailableTMSLODs( imageFile );
         for ( int i=0; i<lods; i++ ) {
             options.push_back( std::to_string( i ) );
         }
@@ -102,13 +100,6 @@ public:
     setupUi(this);
     
     _TMSLODInput = new PTMSLODInput();
-        /*new PEnumDropdownHLI<VAPoR::ImageParams>(
-        "TMS image level of detail",
-        std::vector<std::string>{},
-        std::vector<long>{},
-        &VAPoR::ImageParams::GetTMSLOD,
-        &VAPoR::ImageParams::SetTMSLOD
-    );*/
     ((QVBoxLayout*)layout())->insertWidget( 4, _TMSLODInput );
         
     _opacityCombo = new Combo( OpacityEdit, OpacitySlider );
@@ -127,22 +118,6 @@ public:
     _rParams = (ImageParams*) rParams;
     
     _TMSLODInput->Update( _rParams, paramsMgr, dataMgr );
-
-    // Disable the downsample threshold if we're not working with a TMS image
-    //
-    std::string path = _rParams->GetImagePath();
-    if (path.rfind(".tms", path.size()-4) != string::npos) {
-        ifstream in;
-        in.open(path.c_str());
-        if ( ! in ) {
-            _TMSLODInput->setEnabled( false );
-        }
-        in.close();
-        _TMSLODInput->setEnabled( true );
-    }
-    else {
-        _TMSLODInput->setEnabled( false );
-    }
 
     bool state = _rParams->GetIsGeoRef();
     GeoRefCheckbox->setChecked(state);

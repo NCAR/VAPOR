@@ -105,9 +105,9 @@ ImageRenderer::ImageRenderer( const ParamsMgr*    pm,
   _texWidth = 0;
   _texHeight = 0;
 	_cacheTimestep = 0;
-    _cacheTMSLOD = 0;
-    _cacheLOD = 0;
+    _cacheTMSLOD = 1;
 	_cacheRefLevel = 0;
+    _cacheLod = 0;
 	_cacheHgtVar = "";
 	_cacheGeoreferenced = -1;
 	_cacheTimestepTex = 0;
@@ -330,17 +330,17 @@ bool ImageRenderer::_gridStateDirty() const
 
 	return(
 		refLevel != _cacheRefLevel ||
-		lod != _cacheLOD ||
+		lod != _cacheLod ||
 		hgtVar != _cacheHgtVar ||
 		ts != _cacheTimestep ||
-		boxExtents != _cacheBoxExtents
+		boxExtents != _cacheBoxExtents 
 	);
 }
 
 void ImageRenderer::_gridStateClear() 
 {
 	_cacheRefLevel = 0;
-	_cacheLOD  = 0;
+	_cacheLod  = 0;
 	_cacheHgtVar.clear();
 	_cacheTimestep  = -1;
 	_cacheBoxExtents.clear();
@@ -350,7 +350,7 @@ void ImageRenderer::_gridStateSet()
 {
 	ImageParams *myParams = (ImageParams *) GetActiveParams();
 	_cacheRefLevel = myParams->GetRefinementLevel();
-	_cacheLOD = myParams->GetCompressionLevel();
+	_cacheLod = myParams->GetCompressionLevel();
 	_cacheHgtVar = myParams->GetHeightVariableName();
 	_cacheTimestep = myParams->GetCurrentTimestep();
   vector<double> minExt, maxExt;
@@ -366,7 +366,7 @@ bool ImageRenderer::_imageStateDirty( const vector <double> &times) const
 
 	return(
 		_cacheImgFileName != imgFileName ||
-		_cacheTimes != times
+		_cacheTimes != times 
 	);
 }
 
@@ -396,11 +396,11 @@ bool ImageRenderer::_texStateDirty( DataMgr *dataMgr) const
   myParams->GetBox()->GetExtents( minExt, maxExt );
 	vector <double> boxExtents( minExt );
   boxExtents.insert( boxExtents.end(), maxExt.begin(), maxExt.end() ); 
-	int downsample = myParams->GetTMSLOD();
+	int tmsLOD = myParams->GetTMSLOD();
 
 	return(
 		_cacheTimestepTex != ts ||
-	    _cacheTMSLOD        != downsample ||
+	    _cacheTMSLOD        != tmsLOD ||
 		_cacheBoxExtentsTex != boxExtents ||
 		_cacheGeoreferenced != georeferenced
 	);
@@ -423,7 +423,7 @@ void ImageRenderer::_texStateSet( DataMgr *dataMgr)
 void ImageRenderer::_texStateClear() 
 {
 	_cacheTimestepTex = -1;
-	_cacheTMSLOD = 0;
+	_cacheTMSLOD = 1;
 	_cacheBoxExtentsTex.clear();
 	_cacheGeoreferenced = -1;
 }
@@ -437,13 +437,12 @@ int ImageRenderer::_reinit( string path, vector <double> times)
 	//
 	bool tms_flag = false;
     if ( IsTMSFile( path ) ) {
-	//if (path.rfind(".tms", path.size()-4) != string::npos) {
 		ifstream in;
 		in.open(path.c_str());
-		/*if ( ! in ) {
+		if ( ! in ) {
 			SetErrMsg("fopen(%s) : %M", path.c_str());
 			return(-1);
-		}*/
+		}
 		string tiledir;
 		in >> tiledir;
 		in.close();
@@ -480,9 +479,9 @@ int ImageRenderer::_reinit( string path, vector <double> times)
 	//
 	if (! _geoImage) {
 		if (tms_flag) {
-            ImageParams *myParams = (ImageParams *) GetActiveParams();
+            ImageParams *myParams = static_cast<ImageParams*>(GetActiveParams());
             _geoImage = new GeoImageTMS();
-            ((GeoImageTMS*)_geoImage)->SetLOD( myParams->GetTMSLOD() );
+            static_cast<GeoImageTMS*>(_geoImage)->SetLOD( myParams->GetTMSLOD() );
         }
 		else _geoImage = new GeoImageGeoTiff();
 	}
@@ -521,9 +520,10 @@ unsigned char *ImageRenderer::_getImage(  GeoImage *geoimage,
 	const int maxWidthReq  = 1024;
 	const int maxHeightReq = 1024;
 
-    GeoImageTMS* geoImageTMS = dynamic_cast< GeoImageTMS* >( geoimage );
+    //GeoImageTMS* geoImageTMS = dynamic_cast< GeoImageTMS* >( geoimage );
+    GeoImageTMS* geoImageTMS = static_cast<GeoImageTMS*>( geoimage );
     if ( geoImageTMS != nullptr ) {
-            ((GeoImageTMS*)_geoImage)->SetLOD( myParams->GetTMSLOD() );
+            static_cast<GeoImageTMS*>(_geoImage)->SetLOD( myParams->GetTMSLOD() );
     }
 
 	double pcsExtentsData[4];

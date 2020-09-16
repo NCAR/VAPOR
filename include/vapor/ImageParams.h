@@ -100,12 +100,11 @@ public:
   // 
   int GetTMSLOD() const
   {
-    int value = ( (int)GetValueLong( _TMSLODTag, 0 ) );
+    int value = ( (int)GetValueLong( _TMSLODTag, 1 ) );
     return value;
   }
   void SetTMSLOD( int val )
   {
-    std::cout << "Setting TMSLOD to " << val << std::endl;
     SetValueLong( _TMSLODTag, "TMS level of detail", (long)val );
   }
 

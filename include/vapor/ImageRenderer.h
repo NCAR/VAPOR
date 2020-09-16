@@ -73,7 +73,7 @@ private:
  size_t _cacheTimestep;
  int _cacheDownsample;
  int _cacheRefLevel;
- int _cacheLOD;
+ int _cacheLod;
  int _cacheTMSLOD;
  vector <double> _cacheBoxExtents;
  size_t _cacheTimestepTex;

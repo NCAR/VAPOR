@@ -45,9 +45,6 @@ static inline bool IsTMSFile(
 static inline std::string TilePath(
     string dir, size_t tileX, size_t tileY, int lod
 ) {
-
-//  size_t ntiles = 1 << lod;
-//  size_t tmsTileY = ntiles - 1 - tileY;
     size_t tmsTileY = tileY;
 
     ostringstream oss;
@@ -125,8 +122,6 @@ private:
 
  string _defaultProj4String;	// proj4 string for global mercator
 
- //string _tilePath(string dir, size_t tileX, size_t tileY, int lod) const;
-
  int _tileSize(
 	string dir, size_t tileX, size_t tileY, int lod, size_t &w, size_t &h
  ); 
@@ -134,10 +129,6 @@ private:
  int _tileRead(
     string dir, size_t tileX, size_t tileY, int lod, unsigned char *tile
  );
-
- int _getBestLOD(
-	const double myGeoExtentsData[4], int maxWidthReq, int maxHeightReq
- ) const;
 
  int _getMap(
 	const size_t pixelSW[2], const size_t pixelNE[2], 

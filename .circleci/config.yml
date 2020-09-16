@@ -461,8 +461,8 @@ jobs:
 workflows:
   build:
     jobs:
-      #- build_ubuntu18
-      #- build_centos7
+      - build_ubuntu18
+      - build_centos7
       #- build_ubuntu16
       #- build_osx
       #- build_win10_installer
@@ -473,15 +473,15 @@ workflows:
       #- clang_tidy_ubuntu18
       #- build_ubuntu18_installer
       #- build_ubuntu16_installer
-      - build_centos7_installer
+      #- build_centos7_installer
       #- build_osx_installer
       #- build_win10_installer
-      - release_on_github:
-          requires:
+      #- release_on_github:
+      #    requires:
       #      - build_win10_installer
       #      - build_ubuntu16_installer
       #      - build_ubuntu18_installer
-            - build_centos7_installer
+      #      - build_centos7_installer
       #      - build_osx_installer
 
 #  leak_check:
