@@ -479,9 +479,9 @@ int ImageRenderer::_reinit( string path, vector <double> times)
 	//
 	if (! _geoImage) {
 		if (tms_flag) {
-            ImageParams *myParams = static_cast<ImageParams*>(GetActiveParams());
+            ImageParams *myParams = dynamic_cast<ImageParams*>(GetActiveParams());
             _geoImage = new GeoImageTMS();
-            static_cast<GeoImageTMS*>(_geoImage)->SetLOD( myParams->GetTMSLOD() );
+            dynamic_cast<GeoImageTMS*>(_geoImage)->SetLOD( myParams->GetTMSLOD() );
         }
 		else _geoImage = new GeoImageGeoTiff();
 	}
@@ -520,10 +520,9 @@ unsigned char *ImageRenderer::_getImage(  GeoImage *geoimage,
 	const int maxWidthReq  = 1024;
 	const int maxHeightReq = 1024;
 
-    //GeoImageTMS* geoImageTMS = dynamic_cast< GeoImageTMS* >( geoimage );
-    GeoImageTMS* geoImageTMS = static_cast<GeoImageTMS*>( geoimage );
+    GeoImageTMS* geoImageTMS = dynamic_cast< GeoImageTMS* >( geoimage );
     if ( geoImageTMS != nullptr ) {
-            static_cast<GeoImageTMS*>(_geoImage)->SetLOD( myParams->GetTMSLOD() );
+            dynamic_cast<GeoImageTMS*>(_geoImage)->SetLOD( myParams->GetTMSLOD() );
     }
 
 	double pcsExtentsData[4];

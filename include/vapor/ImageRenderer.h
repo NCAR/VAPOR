@@ -71,7 +71,6 @@ private:
  GLsizei _texWidth;
  GLsizei _texHeight;
  size_t _cacheTimestep;
- int _cacheDownsample;
  int _cacheRefLevel;
  int _cacheLod;
  int _cacheTMSLOD;
