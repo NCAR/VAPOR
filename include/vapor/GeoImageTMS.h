@@ -23,20 +23,11 @@ static inline bool IsTMSFile(
     std::string path 
 ) {
     if ( path.rfind(".tms", path.size()-4) != string::npos ) {
-        ifstream in;
-        in.open( path.c_str() );
-        if ( ! in ) {
-            GeoImage::SetErrMsg("fopen(%s) : %M", path.c_str());
-            return false ;
-        }
-        in.close();
+        return true;
     }
-
     else {
         return false;
     }
-
-    return true;
 }
 
 // Get the file path of a single tile from the TMS database
