@@ -61,13 +61,21 @@ protected:
         ImageParams* rp = dynamic_cast<ImageParams*>( getParams() );
         VAssert( rp && "Params must be ImageParams" );
 
+        std::string imageFile = rp->GetImagePath();
+        std::string imageDir = imageFile; 
+        if ( IsTMSFile( imageFile ) ) {
+            imageDir.erase( imageDir.length()-4, 4 );  // Remove .tms extension
+        }
+        else {
+            _vComboBox->setEnabled( false );
+            return;
+        }
+
         std::vector< std::string > options;
-        int lods = GetAvailableTMSLODs( rp->GetImagePath() );
+        int lods = GetAvailableTMSLODs( imageDir );
         for ( int i=0; i<lods; i++ ) {
             options.push_back( std::to_string( i ) );
-            std::cout << std::to_string( i ) << std::endl;
         }
-        std::cout << "  " << rp->GetTMSLOD() << std::endl;
         _vComboBox->SetOptions( options );
         _vComboBox->SetIndex( rp->GetTMSLOD() );
     };

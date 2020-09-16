@@ -169,6 +169,8 @@ unsigned char *GeoImageTMS::GetImage(
 	//int lod = _getBestLOD(myGeoExtentsData, maxWidthReq, maxHeightReq);
 	SetDiagMsg("GeoImageTMS::GetImage() LOD : %d", _currentLOD);
 
+    std::cout << "GeoImageTMS::GetImage " << _currentLOD << std::endl;
+
 	//
 	// Get GeoTile's pixel coordinates of subregion at the given lod 
 	//
