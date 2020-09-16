@@ -25,9 +25,7 @@ static inline bool IsTMSFile(
     if ( path.rfind(".tms", path.size()-4) != string::npos ) {
         return true;
     }
-    else {
-        return false;
-    }
+    return false;
 }
 
 // Get the file path of a single tile from the TMS database
