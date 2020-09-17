@@ -101,7 +101,6 @@ int GeoImageTMS::GetNumTMSLODs( std::string file ) {
     while ( TilePath( file, 0, 0, lod ) != "" ) {
         lod++;
     }
-    //lod--;
     return lod;
 }
 
