@@ -34,6 +34,12 @@ static inline bool IsTMSFile(
 static inline std::string TilePath(
     string dir, size_t tileX, size_t tileY, int lod
 ) {
+    // If we're given a file instead of a directory, remove the .tms extension
+    //
+    if ( dir.rfind(".tms", dir.size()-4) != string::npos ) {
+        dir.erase( dir.length()-4, 4 );
+    }
+
     size_t tmsTileY = tileY;
 
     ostringstream oss;
@@ -61,9 +67,9 @@ static inline std::string TilePath(
     return("");
 }
 
-static inline int GetAvailableTMSLODs( std::string dir ) {
+static inline int GetAvailableTMSLODs( std::string file ) {
     int lod = 0;
-    while ( TilePath( dir, 0, 0, lod ) != "" ) {
+    while ( TilePath( file, 0, 0, lod ) != "" ) {
         lod++;
     }
     lod--;

@@ -62,7 +62,6 @@ protected:
 
         std::string imageFile = rp->GetImagePath();
         if ( IsTMSFile( imageFile ) ) {
-            imageFile.erase( imageFile.length()-4, 4 );  // Remove .tms extension
             _vComboBox->setEnabled( true );
         }
         else {
