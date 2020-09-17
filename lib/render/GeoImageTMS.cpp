@@ -24,7 +24,7 @@ GeoImageTMS::GeoImageTMS()
 	: GeoImage(8, 4) {
 
 	_dir.clear();
-    _currentLOD = 1;
+    _currentLOD = -1;
 	_maxLOD = 0;
 	_texture = NULL;  
 	_textureSize = 0;
@@ -160,7 +160,14 @@ unsigned char *GeoImageTMS::GetImage(
 	// Pick a lod that won't allow the resulting image to 
 	// exceed the max width and height
 	//
-	SetDiagMsg("GeoImageTMS::GetImage() LOD : %d", _currentLOD);
+    int lod;
+    if ( _currentLOD == -1 ) {
+        lod = _getBestLOD(myGeoExtentsData, maxWidthReq, maxHeightReq);
+    }
+    else {
+        lod = _currentLOD;
+    }
+	SetDiagMsg("GeoImageTMS::GetImage() LOD : %d", lod);
 
 	//
 	// Get GeoTile's pixel coordinates of subregion at the given lod 
@@ -169,16 +176,16 @@ unsigned char *GeoImageTMS::GetImage(
 	size_t pixelNE[2];
 	size_t nx,ny;
 	_geotile->LatLongToPixelXY(
-		myGeoExtentsData[0], myGeoExtentsData[1], _currentLOD, 
+		myGeoExtentsData[0], myGeoExtentsData[1], lod, 
 		pixelSW[0], pixelSW[1]
 	);
 	_geotile->LatLongToPixelXY(
-		myGeoExtentsData[2], myGeoExtentsData[3], _currentLOD, 
+		myGeoExtentsData[2], myGeoExtentsData[3], lod, 
 		pixelNE[0], pixelNE[1]
 	);
 
 	int rc = _geotile->MapSize(
-		pixelSW[0],pixelSW[1],pixelNE[0],pixelNE[1],_currentLOD,nx, ny
+		pixelSW[0],pixelSW[1],pixelNE[0],pixelNE[1],lod,nx, ny
 	);
 
 	//
@@ -194,7 +201,7 @@ unsigned char *GeoImageTMS::GetImage(
 	//
 	// Extract the image
 	//
-	rc = _getMap(pixelSW, pixelNE, _currentLOD, _texture);
+	rc = _getMap(pixelSW, pixelNE, lod, _texture);
 	if (rc<0) return(NULL);
 
 
@@ -308,6 +315,47 @@ int GeoImageTMS::_tileRead(
 	GeoImage::TiffClose();
 
 	return(0);
+}
+
+// Determine the best lod for a region specified in lat-lon	
+// coordinates. I.e. the largest lod where the resulting image	
+// dimensions won't exceed maxWidthReq or maxHeightReq	
+//	
+int GeoImageTMS::_getBestLOD(	
+	const double myGeoExtentsData[4], int maxWidthReq, int maxHeightReq	
+) const {	
+	size_t pixelSW[2];	
+	size_t pixelNE[2];	
+
+	bool done = false;	
+	int lod = 0;	
+	for (; lod<_maxLOD && ! done; lod++) {	
+		size_t nx, ny;	
+
+		//	
+		// Get GeoTile's pixel coordinates of subregion. 	
+		//	
+		_geotile->LatLongToPixelXY(	
+			myGeoExtentsData[0], myGeoExtentsData[1], lod, 	
+			pixelSW[0], pixelSW[1]	
+		);	
+		_geotile->LatLongToPixelXY(	
+			myGeoExtentsData[2], myGeoExtentsData[3], lod, 	
+			pixelNE[0], pixelNE[1]	
+		);	
+
+		int rc = _geotile->MapSize(	
+			pixelSW[0],pixelSW[1],pixelNE[0],pixelNE[1],lod,nx, ny	
+		);	
+		VAssert(! (rc<0));	
+
+		if (nx > maxWidthReq || ny > maxHeightReq) {	
+			done = true;	
+			if (lod>0) lod--;	
+		}	
+	}	
+
+	return(lod);	
 }
 
 // Construct a contiguous map (raster image) from the TMS for the 

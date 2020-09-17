@@ -13,7 +13,6 @@ class VComboBox;
 class PEnumDropdown : public PLineItem {
     Q_OBJECT
     
-    VComboBox *_vComboBox;
     const std::vector<long> _enumMap;
     
 public:
@@ -22,6 +21,7 @@ public:
 
 protected:
     void updateGUI() const override;
+    VComboBox *_vComboBox;
     
 private slots:
     void dropdownIndexChanged(int index);

@@ -100,7 +100,7 @@ public:
   // 
   int GetTMSLOD() const
   {
-    int value = ( (int)GetValueLong( _TMSLODTag, 1 ) );
+    int value = ( (int)GetValueLong( _TMSLODTag, -1 ) );
     return value;
   }
   void SetTMSLOD( int val )

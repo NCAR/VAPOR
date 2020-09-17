@@ -12,6 +12,7 @@
 #include "VComboBox.h"
 #include "PFidelitySection.h"
 #include "PVariableWidgets.h"
+#include "PEnumDropdown.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -69,20 +70,20 @@ protected:
             return;
         }
 
-        std::vector< std::string > options;
+        std::vector< std::string > options{"default"};
         int lods = GetAvailableTMSLODs( imageFile );
         for ( int i=0; i<lods; i++ ) {
             options.push_back( std::to_string( i ) );
         }
         _vComboBox->SetOptions( options );
-        _vComboBox->SetIndex( rp->GetTMSLOD() );
+        _vComboBox->SetIndex( rp->GetTMSLOD()+1 );
     };
 
 private slots:
     void dropdownIndexChanged( int i ) {
         ImageParams* rp = dynamic_cast<ImageParams*>( getParams() );
         VAssert( rp && "Params must be ImageParams" );
-        rp->SetTMSLOD( i );
+        rp->SetTMSLOD( i-1 );
     }
 };
 

@@ -105,7 +105,7 @@ ImageRenderer::ImageRenderer( const ParamsMgr*    pm,
   _texWidth = 0;
   _texHeight = 0;
 	_cacheTimestep = 0;
-    _cacheTMSLOD = 1;
+    _cacheTMSLOD = -1;
 	_cacheRefLevel = 0;
     _cacheLod = 0;
 	_cacheHgtVar = "";
@@ -423,7 +423,7 @@ void ImageRenderer::_texStateSet( DataMgr *dataMgr)
 void ImageRenderer::_texStateClear() 
 {
 	_cacheTimestepTex = -1;
-	_cacheTMSLOD = 1;
+	_cacheTMSLOD = -1;
 	_cacheBoxExtentsTex.clear();
 	_cacheGeoreferenced = -1;
 }

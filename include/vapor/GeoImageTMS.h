@@ -119,6 +119,10 @@ private:
     string dir, size_t tileX, size_t tileY, int lod, unsigned char *tile
  );
 
+ int _getBestLOD(	
+	const double myGeoExtentsData[4], int maxWidthReq, int maxHeightReq	
+ ) const;
+
  int _getMap(
 	const size_t pixelSW[2], const size_t pixelNE[2], 
 	int lod, unsigned char *texture
