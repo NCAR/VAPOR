@@ -478,7 +478,7 @@ int ImageRenderer::_reinit( string path, vector <double> times)
 	// Create an appropriate instance of _geoImage for the cache path
 	//
 	if (! _geoImage) {
-		if (tms_flag) {
+        if (tms_flag) {
             ImageParams *myParams = dynamic_cast<ImageParams*>(GetActiveParams());
             _geoImage = new GeoImageTMS();
             dynamic_cast<GeoImageTMS*>(_geoImage)->SetLOD( myParams->GetTMSLOD() );
@@ -516,10 +516,10 @@ unsigned char *ImageRenderer::_getImage(  GeoImage *geoimage,
 	}
 	width = height = 0;
 
-    ImageParams *myParams = (ImageParams *) GetActiveParams();
 	const int maxWidthReq  = 1024;
 	const int maxHeightReq = 1024;
 
+    ImageParams *myParams = (ImageParams *) GetActiveParams();
     GeoImageTMS* geoImageTMS = dynamic_cast< GeoImageTMS* >( geoimage );
     if ( geoImageTMS != nullptr ) {
             dynamic_cast<GeoImageTMS*>(_geoImage)->SetLOD( myParams->GetTMSLOD() );
