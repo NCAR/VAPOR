@@ -12,7 +12,6 @@
 #include "VComboBox.h"
 #include "PFidelitySection.h"
 #include "PVariableWidgets.h"
-#include "PEnumDropdown.h"
 
 namespace VAPoR {
 	class ControlExec;
