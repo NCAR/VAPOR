@@ -61,18 +61,18 @@ bool GeoImageTMS::IsTMSFile( std::string path ) {
 }
 
 std::string GeoImageTMS::TilePath(
-    string dir, size_t tileX, size_t tileY, int lod
+    string file, size_t tileX, size_t tileY, int lod
 ) {
     // If we're given a file instead of a directory, remove the .tms extension
     //
-    if ( dir.rfind(".tms", dir.size()-4) != string::npos ) {
-        dir.erase( dir.length()-4, 4 );
+    if ( file.rfind(".tms", file.size()-4) != string::npos ) {
+        file.erase( file.length()-4, 4 );
     }
 
     size_t tmsTileY = tileY;
 
     ostringstream oss;
-    oss << dir;
+    oss << file;
     oss << "/";
     oss << lod;
     oss << "/";
@@ -96,12 +96,12 @@ std::string GeoImageTMS::TilePath(
     return("");
 }
 
-int GeoImageTMS::GetAvailableTMSLODs( std::string file ) {
+int GeoImageTMS::GetNumTMSLODs( std::string file ) {
     int lod = 0;
     while ( TilePath( file, 0, 0, lod ) != "" ) {
         lod++;
     }
-    lod--;
+    //lod--;
     return lod;
 }
 
@@ -116,7 +116,7 @@ int GeoImageTMS::Initialize(string dir, vector <double> times) {
 
 	// Find the maximum available LOD in the TMS database. 
 	//
-    int lod = GetAvailableTMSLODs( _dir );
+    int lod = GetNumTMSLODs( _dir ) - 1;
 	if (lod<0) {
 		SetErrMsg("Failed to initialize TMS directory %s", _dir.c_str());
 		return(-1);

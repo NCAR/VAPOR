@@ -69,7 +69,7 @@ protected:
         }
 
         std::vector< std::string > options{"default"};
-        int lods = GeoImageTMS::GetAvailableTMSLODs( imageFile );
+        int lods = GeoImageTMS::GetNumTMSLODs( imageFile );
         for ( int i=0; i<lods; i++ ) {
             options.push_back( std::to_string( i ) );
         }
