@@ -19,63 +19,6 @@
 
 namespace VAPoR {
 
-static inline bool IsTMSFile( 
-    std::string path 
-) {
-    if ( path.rfind(".tms", path.size()-4) != string::npos ) {
-        return true;
-    }
-    return false;
-}
-
-// Get the file path of a single tile from the TMS database
-// with the give lod and tile coordinates
-//
-static inline std::string TilePath(
-    string dir, size_t tileX, size_t tileY, int lod
-) {
-    // If we're given a file instead of a directory, remove the .tms extension
-    //
-    if ( dir.rfind(".tms", dir.size()-4) != string::npos ) {
-        dir.erase( dir.length()-4, 4 );
-    }
-
-    size_t tmsTileY = tileY;
-
-    ostringstream oss;
-    oss << dir;
-    oss << "/";
-    oss << lod;
-    oss << "/";
-    oss << tileX;
-    oss << "/";
-    oss << tmsTileY;
-
-    string base = oss.str();
-
-    string path = base + ".tif";
-
-    struct stat statbuf;
-    if (stat(path.c_str(), &statbuf) == 0)  return(path);
-
-    path = base + ".tiff";
-
-    if (stat(path.c_str(), &statbuf) == 0) return (path);
-
-    // Tile does not exist
-    //
-    return("");
-}
-
-static inline int GetAvailableTMSLODs( std::string file ) {
-    int lod = 0;
-    while ( TilePath( file, 0, 0, lod ) != "" ) {
-        lod++;
-    }
-    lod--;
-    return lod;
-}
-
 //! \class GeoImageTMS
 //! \brief A class for managing OSGeo Tile Map Service Specification images
 //! \author John Clyne
@@ -86,6 +29,10 @@ public:
 
  GeoImageTMS();
  virtual ~GeoImageTMS();
+
+ static bool IsTMSFile( std::string path );
+ static std::string TilePath( std::string dir, size_t tileX, size_t tileY, int lod );
+ static int GetAvailableTMSLODs( std::string file );
 
  int Initialize(string path, vector <double> times);
 

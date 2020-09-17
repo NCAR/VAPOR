@@ -61,7 +61,7 @@ protected:
         VAssert( rp && "Params must be ImageParams" );
 
         std::string imageFile = rp->GetImagePath();
-        if ( IsTMSFile( imageFile ) ) {
+        if ( GeoImageTMS::IsTMSFile( imageFile ) ) {
             _vComboBox->setEnabled( true );
         }
         else {
@@ -70,7 +70,7 @@ protected:
         }
 
         std::vector< std::string > options{"default"};
-        int lods = GetAvailableTMSLODs( imageFile );
+        int lods = GeoImageTMS::GetAvailableTMSLODs( imageFile );
         for ( int i=0; i<lods; i++ ) {
             options.push_back( std::to_string( i ) );
         }

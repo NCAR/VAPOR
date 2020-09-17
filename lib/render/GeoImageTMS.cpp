@@ -20,6 +20,7 @@ using namespace VAPoR;
 using namespace Wasp;
 
 
+
 GeoImageTMS::GeoImageTMS() 
 	: GeoImage(8, 4) {
 
@@ -52,6 +53,57 @@ GeoImageTMS::~GeoImageTMS()
 	if (_geotile) delete _geotile;
 }
 
+bool GeoImageTMS::IsTMSFile( std::string path ) {
+    if ( path.rfind(".tms", path.size()-4) != string::npos ) {
+        return true;
+    }
+    return false;
+}
+
+std::string GeoImageTMS::TilePath(
+    string dir, size_t tileX, size_t tileY, int lod
+) {
+    // If we're given a file instead of a directory, remove the .tms extension
+    //
+    if ( dir.rfind(".tms", dir.size()-4) != string::npos ) {
+        dir.erase( dir.length()-4, 4 );
+    }
+
+    size_t tmsTileY = tileY;
+
+    ostringstream oss;
+    oss << dir;
+    oss << "/";
+    oss << lod;
+    oss << "/";
+    oss << tileX;
+    oss << "/";
+    oss << tmsTileY;
+
+    string base = oss.str();
+
+    string path = base + ".tif";
+
+    struct stat statbuf;
+    if (stat(path.c_str(), &statbuf) == 0)  return(path);
+
+    path = base + ".tiff";
+
+    if (stat(path.c_str(), &statbuf) == 0) return (path);
+
+    // Tile does not exist
+    //
+    return("");
+}
+
+int GeoImageTMS::GetAvailableTMSLODs( std::string file ) {
+    int lod = 0;
+    while ( TilePath( file, 0, 0, lod ) != "" ) {
+        lod++;
+    }
+    lod--;
+    return lod;
+}
 
 int GeoImageTMS::Initialize(string dir, vector <double> times) {
 
