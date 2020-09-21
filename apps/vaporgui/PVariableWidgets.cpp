@@ -39,7 +39,8 @@ void PDimensionSelector::dropdownTextChanged(std::string text)
 {
     RenderParams *rp = (RenderParams*)getParams();
     int dim = text == "2D" ? 2 : 3;
-    
+   
+    std::cout << "dropdownTextChanged( " << text << std::endl; 
     rp->SetDefaultVariables(dim, true);
 }
 

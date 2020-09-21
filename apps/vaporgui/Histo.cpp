@@ -340,6 +340,7 @@ void Histo::populateIteratingHistogram(const Grid *grid, const int stride)
 void Histo::populateSamplingHistogram(const Grid *grid, const vector<double> &minExts, const vector<double> &maxExts)
 {
     VAssert(grid);
+std::cout << "void Histo::populateSamplingHistogram() " << minExts.size() << " " << maxExts.size() << std::endl;
     VAssert(minExts.size() == 3 && maxExts.size() == 3);
     
     double dx = (maxExts[X]-minExts[X]) / SAMPLE_RATE;
