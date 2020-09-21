@@ -7,6 +7,9 @@
 #include "ui_WireFrameAnnotationGUI.h"
 #include "Flags.h"
 #include "TFEditor.h"
+#include "PGroup.h"
+#include "PSection.h"
+#include "PVariableWidgets.h"
 
 namespace VAPoR {
 	class ControlExec;
@@ -18,6 +21,7 @@ namespace VAPoR {
 class WireFrameVariablesSubtab : public QWidget, public Ui_WireFrameVariablesGUI {
 
 	Q_OBJECT
+    PGroup* _pg;
 
 public:
 	WireFrameVariablesSubtab(QWidget* parent) {
@@ -26,6 +30,15 @@ public:
 			(VariableFlags)(SCALAR | HEIGHT),
 			(DimFlags)(THREED | TWOD)
 		);
+        ((QVBoxLayout*)layout())->insertWidget(1, _pg = new PGroup);
+
+//        setLayout( new QVBoxLayout );
+        ((QVBoxLayout*)layout())->insertWidget(1, _pg = new PGroup);
+        PSection *vars = new PSection("Variable Selection");
+        vars->Add(new PDimensionSelector);
+        vars->Add(new PScalarVariableSelectorHLI);
+        _pg->Add(vars);
+        //_pg->Add(new PFidelitySection);
 	}
 
 	void Update(
@@ -34,6 +47,7 @@ public:
 		VAPoR::RenderParams *rParams
 	) {
 		_variablesWidget->Update(dataMgr, paramsMgr, rParams);
+        _pg->Update(rParams, paramsMgr, dataMgr);
 	}
 };
 

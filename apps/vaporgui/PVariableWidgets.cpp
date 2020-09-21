@@ -21,28 +21,18 @@ PDimensionSelector::PDimensionSelector()
 
 void PDimensionSelector::updateGUI() const
 {
-// Save this code for upcomming PDimensionSelector PR
-#ifdef SAVE_FOR_NEXT_PR
     RenderParams *rp = dynamic_cast<RenderParams*>(getParams());
-    assert(rp && "Params must be RenderParams");
+    VAssert(rp && "Params must be RenderParams");
 
-    DataMgr* dm = getDataMgr();
-    std::vector< size_t > throwaway;
-    dm->GetDimLens( rp->GetXFieldVariableName(), throwaway );
-    int xDims = throwaway.size();
-    dm->GetDimLens( rp->GetYFieldVariableName(), throwaway );
-    int yDims = throwaway.size();
-    dm->GetDimLens( rp->GetZFieldVariableName(), throwaway );
-    int zDims = throwaway.size();
-    VAssert( xDims == yDims || yDims == zDims );
-        
-    if ( xDims == 3 ) {
+    size_t dim = rp->GetRenderDim();
+    VAssert( dim == 2 || dim == 3 && "Invalid dimensionality" );
+ 
+    if ( dim == 3 ) {
         _vComboBox->SetValue("3D");
     }
     else {
         _vComboBox->SetValue("2D");
     }
-#endif
 }
 
 void PDimensionSelector::dropdownTextChanged(std::string text)
