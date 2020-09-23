@@ -484,7 +484,7 @@ int XmlNode::DeleteChild(const string &tag) {
         child = GetChild(i);
         VAssert(child);
 
-        if (StrCmpNoCase(child->_tag, tag) == 0) {
+        if (child->_tag == tag) {
             return (XmlNode::DeleteChild(i));
         }
     }
@@ -516,7 +516,7 @@ XmlNode *XmlNode::GetChild(const string &tag) const {
         if (!(child = GetChild(i)))
             return (NULL);
 
-        if (StrCmpNoCase(child->_tag, tag) == 0)
+        if (child->_tag == tag)
             return (child);
     }
 
@@ -531,7 +531,7 @@ bool XmlNode::HasChild(const string &tag) const {
         child = GetChild(i);
         VAssert(child != NULL);
 
-        if (StrCmpNoCase(child->_tag, tag) == 0)
+        if (child->_tag == tag)
             return (true);
     }
     return (false);
