@@ -304,18 +304,18 @@ FlowRenderer::_paintGL( bool fast )
             if(_2ndAdvection)
                 total += numOfSteps - (_2ndAdvection->GetMaxNumOfPart() - 1);
                 
-            
             Progress::Start("Advect particles", total, true);
+            
             for( size_t i = _advection.GetMaxNumOfPart() - 1;  // existing number of advection steps 
                  i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
             {
                 Progress::Update(done++);
+
                 if (Progress::Cancelled())
-                    return 0;
+                    return flow::SUCCESS;
+
                 rv = _advection.AdvectOneStep( &_velocityField, deltaT );
             }
-            if (!_2ndAdvection)
-                Progress::Finish();
 
             /* If the advection is bi-directional */
             if( _2ndAdvection )
@@ -328,12 +328,13 @@ FlowRenderer::_paintGL( bool fast )
                 {
                     Progress::Update(done++);
                     if (Progress::Cancelled())
-                        return 0;
+                        return flow::SUCCESS;
+
                     rv = _2ndAdvection->AdvectOneStep( &_velocityField, deltaT2 );
                 }
-                Progress::Finish();
             }
 
+            Progress::Finish();
         }
 
         /* Advection scheme 2: advect to a certain timestamp.
@@ -364,7 +365,7 @@ FlowRenderer::_paintGL( bool fast )
 
     _prepareColormap( params );
     
-    int ret = 0;
+    rv = 0;
     
     if (params->GetValueLong("old_render", 0)) {
         _renderFromAnAdvectionLegacy( &_advection, params, fast );
@@ -380,17 +381,17 @@ FlowRenderer::_paintGL( bool fast )
         if (_2ndAdvection)
             _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
         
-        ret |= _renderAdvection(&_advection);
+        rv |= _renderAdvection(&_advection);
         /* If the advection is bi-directional */
         if(_2ndAdvection) {
             _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
-            ret |= _renderAdvection(_2ndAdvection.get());
+            rv |= _renderAdvection(_2ndAdvection.get());
         }
     }
     
     _restoreGLState();
 
-    return ret;
+    return rv;
 }
 
 int FlowRenderer::_renderAdvection(const flow::Advection* adv)
