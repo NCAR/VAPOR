@@ -140,6 +140,108 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
 }
 
 int
+Advection::AdvectSteps( Field* velocity, float deltaT, size_t maxSteps, ADVECTION_METHOD method )
+{
+    int ready = CheckReady();
+    if( ready != 0 )
+        return ready;
+    bool happened = false;
+
+    // The particle advection process can be parallelized per particle
+    // Each stream represents a trajectory for a single particle
+    // #pragma omp parallel for
+    for(size_t streamIdx = 0; streamIdx < _streams.size(); streamIdx++)  // Process one stream at a time
+    {
+        auto& s = _streams[streamIdx];
+        size_t numberOfSteps = 0;
+        while(numberOfSteps < maxSteps)
+        {
+            // Check if the particle is inside of the volume.
+            // Also wrap it along periodic dimensions if enabled.
+            if( !velocity->InsideVolumeVelocity( s.back().time, s.back().location ) )
+            {
+                auto& p0 = s.back();
+                // Attempt to apply periodicity
+                bool locChanged = false;
+                auto loc = p0.location;
+                for( int i = 0; i < 3; i++ )    // correct coordinates in each periodic dimension
+                {
+                    if( _isPeriodic[i] )
+                    {
+                        loc[i] = _applyPeriodic( loc[i], _periodicBounds[i][0], _periodicBounds[i][1] );
+                        locChanged = true;
+                    }
+                }
+
+                if( !locChanged )   // no dimension is periodic
+                    break;          // skip this particle, since it's out of the volume
+
+                // If the new location comes inside volume, then we do these things:
+                // 1) Update the location of p0 to represent the wrapped result.
+                // 2) Insert a separator particle before p0.
+                if( velocity->InsideVolumeVelocity( p0.time, loc ) )
+                {
+                    p0.location = loc;
+
+                    Particle separator;
+                    separator.SetSpecial( true );
+                    auto itr = s.end();
+                    --itr;      // insert before the last element, p0
+                    s.insert( itr, std::move(separator) );
+                    _separatorCount[streamIdx]++;
+                }
+                else
+                    break;   // skip this particle, since it's out of the volume
+
+            }
+
+            const auto& past0 = s.back();
+            float dt = deltaT;
+            if( s.size() > 2 )  // If there are at least 3 particles in the stream and
+            {                   // neither is a separator, we also adjust *dt*
+                const auto& past1 = s[ s.size()-2 ];
+                const auto& past2 = s[ s.size()-3 ];
+                if( (!past1.IsSpecial()) && (!past2.IsSpecial()) )
+                {
+                    float mindt = deltaT / 20.0f,   maxdt = deltaT * 20.0f;
+                    dt  = past0.time - past1.time;     // step size used by last integration
+                    dt *= _calcAdjustFactor( past2, past1, past0 );
+                    if( dt > 0 )    // integrate forward 
+                        dt  = glm::clamp( dt, mindt, maxdt );
+                    else            // integrate backward
+                        dt  = glm::clamp( dt, maxdt, mindt );
+                }
+           }
+
+           Particle p1;
+           int rv = 0;
+           switch (method)
+           {
+               case ADVECTION_METHOD::EULER:
+                    rv = _advectEuler( velocity, past0, dt, p1 ); break;
+               case ADVECTION_METHOD::RK4:
+                    rv = _advectRK4(   velocity, past0, dt, p1 ); break;
+           }
+           if( rv != 0 )   // Advection wasn't successful for some reason...
+               break;
+           else            // Advection successful, keep the new particle.
+           {
+                happened = true;
+                numberOfSteps++;
+                s.emplace_back( std::move(p1) );
+           }
+        } //end loop for particle
+    } // end loop for streams
+
+    if( happened )
+        return ADVECT_HAPPENED;
+    else
+        return NO_ADVECT_HAPPENED;
+}
+
+
+
+int
 Advection::AdvectTillTime( Field* velocity, float startT, float deltaT, float targetT, 
                            ADVECTION_METHOD method )
 {

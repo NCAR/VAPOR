@@ -32,6 +32,10 @@ public:
     // Advect one step as long as the particle is within spatial and temporal boundary
     int  AdvectOneStep(  Field* velocityField, float deltaT, 
                          ADVECTION_METHOD method = ADVECTION_METHOD::RK4 );
+    // Advect all particles as long as they are within spatial and temporal boundary
+    // for a specified number if steps.
+    int  AdvectSteps(  Field* velocityField, float deltaT, size_t maxSteps,
+                         ADVECTION_METHOD method = ADVECTION_METHOD::RK4 );
     // Advect as many steps as necessary to reach a certain time: targetT.
     // Note: it only considers particles that have already passed startT.
     int  AdvectTillTime( Field* velocityField, float startT, float deltaT, float targetT,
