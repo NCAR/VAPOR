@@ -749,6 +749,7 @@ private:
  void delete_ren_containers(string winName, string dataSetName);
  void delete_ren_containers(string winName);
  void delete_ren_containers();
+ void delete_datasets(string dataSetName);
 
  RenParamsContainer *make_ren_container(
 	string winName, string dataSetName, string renderName
