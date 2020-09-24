@@ -1848,6 +1848,10 @@ void MainForm::closeData(string fileName) {
 	// Close data can't be undone
 	//
 	_controlExec->UndoRedoClear();
+
+	if (! _controlExec->GetDataNames().size()) {
+		sessionNew();
+	}
 }
 	
 //import WRF data into current session
