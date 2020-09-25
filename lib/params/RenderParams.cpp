@@ -72,7 +72,6 @@ void RenderParams::SetDefaultVariables(
     int dim=3,
     bool secondaryColormapVariable = false
 ) {
-
 	// Find the first variable in the data collection of 
 	// the requested dimesion that exists and make it the default.
 	//
@@ -102,6 +101,7 @@ void RenderParams::SetDefaultVariables(
     if (secondaryColormapVariable)
 	    colorVar = _findVarStartingWithLetter(varnames, 't');
 
+    std::cout << "setting default var to " << varname << std::endl;
 	SetColorMapVariableName(colorVar);
 }
 

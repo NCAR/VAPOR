@@ -36,7 +36,9 @@ public:
         ((QVBoxLayout*)layout())->insertWidget(1, _pg = new PGroup);
         PSection *vars = new PSection("Variable Selection");
         vars->Add(new PDimensionSelector);
-        vars->Add(new PScalarVariableSelectorHLI);
+        //vars->Add(new PScalarVariableSelectorHLI);
+        vars->Add(new PScalarVariableSelector2DHLI);
+        vars->Add(new PScalarVariableSelector3DHLI);
         _pg->Add(vars);
         //_pg->Add(new PFidelitySection);
 	}
@@ -46,6 +48,7 @@ public:
 		VAPoR::ParamsMgr *paramsMgr,
 		VAPoR::RenderParams *rParams
 	) {
+        //std::cout << "WireFrameVariablesSubtab::Update() " << rParams->GetVariableName() << std::endl;
 		_variablesWidget->Update(dataMgr, paramsMgr, rParams);
         _pg->Update(rParams, paramsMgr, dataMgr);
 	}

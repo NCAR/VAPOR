@@ -16,10 +16,13 @@ namespace VAPoR {
 }
 
 class TFEditor;
+class PGroup;
 
 class BarbVariablesSubtab : public QWidget, public Ui_BarbVariablesGUI {
 
 	Q_OBJECT
+
+    PGroup* _pg;
 
 public:
 	BarbVariablesSubtab(QWidget* parent);

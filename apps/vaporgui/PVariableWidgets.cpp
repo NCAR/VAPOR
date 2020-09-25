@@ -25,13 +25,13 @@ void PDimensionSelector::updateGUI() const
     VAssert(rp && "Params must be RenderParams");
 
     size_t dim = rp->GetRenderDim();
-    VAssert( dim == 2 || dim == 3 && "Invalid dimensionality" );
+    //VAssert( dim == 2 || dim == 3 && "Invalid dimensionality" );
  
-    if ( dim == 3 ) {
-        _vComboBox->SetValue("3D");
+    if ( dim == 2 ) {
+        _vComboBox->SetValue("2D");
     }
     else {
-        _vComboBox->SetValue("2D");
+        _vComboBox->SetValue("3D");
     }
 }
 
@@ -40,8 +40,22 @@ void PDimensionSelector::dropdownTextChanged(std::string text)
     RenderParams *rp = (RenderParams*)getParams();
     int dim = text == "2D" ? 2 : 3;
    
-    std::cout << "dropdownTextChanged( " << text << std::endl; 
-    rp->SetDefaultVariables(dim, true);
+    //std::cout << "dropdownTextChanged( " << text << std::endl; 
+    ParamsMgr* pm = getParamsMgr();
+    //pm->BeginSaveStateGroup( "Set default variables" );
+    //std::cout << "Setting dim to " << dim << std::endl;
+    rp->SetDefaultVariables(dim, false);
+    //pm->EndSaveStateGroup();
+
+    if (dim == 2) {
+        rp->GetBox()->SetPlanar(true);
+        rp->GetBox()->SetOrientation(VAPoR::Box::XY);
+    }
+    else {
+        rp->GetBox()->SetPlanar(false);
+        rp->GetBox()->SetOrientation(VAPoR::Box::XYZ);
+    }
+
 }
 
 // ==================================
@@ -56,6 +70,7 @@ PVariableSelector::PVariableSelector(const std::string &tag, const std::string &
 
 void PVariableSelector::updateGUI() const
 {
+    //std::cout << " void PVariableSelector::updateGUI() const " << std::endl;
     RenderParams *rp = dynamic_cast<RenderParams*>(getParams());
     assert(rp && "Params must be RenderParams");
     static_cast<void>(rp);        // Silence unused variable warning
@@ -73,6 +88,7 @@ void PVariableSelector::updateGUI() const
 
 bool PVariableSelector::isShown() const
 {
+    //std::cout << "      isShown() " << getRendererDimension() << " " << _onlyShowForDim << std::endl;
     if (_onlyShowForDim > 0)
         return getRendererDimension() == _onlyShowForDim;
     return true;
@@ -80,13 +96,19 @@ bool PVariableSelector::isShown() const
 
 int PVariableSelector::getRendererDimension() const
 {
-    RenderParams *rp = dynamic_cast<RenderParams*>(getParams());
-    return rp->GetBox()->GetOrientation() == Box::XYZ ? 3 : 2;
+    //RenderParams *rp = dynamic_cast<RenderParams*>(getParams());
+    //return rp->GetBox()->GetOrientation() == Box::XYZ ? 3 : 2;
+    int dims = dynamic_cast<RenderParams*>(getParams())->GetRenderDim();
+    //VAssert( dims == 2 || dims == 3 && "Invalid dimensionality" );
+    VAssert( dims < 4 && "Invalid dimensionality" );
+    return dims;
 }
 
 int PVariableSelector::getDimensionality() const
 {
-    int dims = getDataMgr()->GetNumDimensions(getParamsString());
+    //int dims = getDataMgr()->GetNumDimensions(getParamsString());
+    int dims = dynamic_cast<RenderParams*>(getParams())->GetRenderDim();
+    //VAssert( dims == 2 || dims == 3 && "Invalid dimensionality" );
     if (dims > 0)
         return dims;
 
