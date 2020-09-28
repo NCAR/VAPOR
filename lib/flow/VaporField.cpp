@@ -1,5 +1,3 @@
-#include <sstream>
-
 #include "vapor/VaporField.h"
 #include "vapor/ConstantGrid.h"
 #include "GrownGrid.h"
@@ -554,13 +552,18 @@ VaporField::_paramsToString(  size_t currentTS,               const std::string&
     }
     else
     {
-        std::ostringstream oss;
-        std::string space( "  " );
-        oss << currentTS << space << var << space << refLevel << space << compLevel << space ;
+        std::string rv;
+        rv.reserve( 512 );  // 512 should be long enough for most cases.
+        rv.append( std::to_string( currentTS ) );
+        rv.append( var );
+        rv.append( std::to_string( refLevel ) );
+        rv.append( std::to_string( compLevel ) );
+
         for( size_t i = 0; i < min.size(); i++ )
-            oss << min[i] << space;
+            rv.append( std::to_string(min[i] ) );
         for( size_t i = 0; i < max.size(); i++ )
-            oss << max[i] << space;
-        return oss.str();
+            rv.append( std::to_string(max[i] ) );
+
+        return rv;
     }
 }
