@@ -126,7 +126,7 @@ VaporField::InsideVolumeScalar( float time, const glm::vec3& pos ) const
 int VaporField::GetVelocityIntersection( size_t ts, glm::vec3& minxyz, glm::vec3& maxxyz ) const
 {
     const VAPoR::Grid* grid = nullptr;
-    std::vector<double> min[3], max[3];
+    std::array<double, 3> min[3], max[3];
 
     // For each velocity variables
     for( int i = 0; i < 3; i++ )
