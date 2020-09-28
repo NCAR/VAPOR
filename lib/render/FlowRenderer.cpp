@@ -297,44 +297,23 @@ FlowRenderer::_paintGL( bool fast )
             /* If the advection is single-directional */
             if( params->GetFlowDirection() == 1 )           // backward integration
                 deltaT *= -1.0f;
-            int numOfSteps = params->GetSteadyNumOfSteps();
-            int total = numOfSteps - (_advection.GetMaxNumOfPart() - 1);
-            int done = 0;
-            
-            if(_2ndAdvection)
-                total += numOfSteps - (_2ndAdvection->GetMaxNumOfPart() - 1);
-                
-            Progress::Start("Advect particles", total, true);
-            
-            for( size_t i = _advection.GetMaxNumOfPart() - 1;  // existing number of advection steps 
-                 i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
-            {
-                Progress::Update(done++);
+            auto numOfSteps = params->GetSteadyNumOfSteps();
+            auto stepsToGo  = numOfSteps - _advection.GetMaxNumOfPart() + 1;            
+            assert( stepsToGo >= 0 );
 
-                if (Progress::Cancelled())
-                    return flow::SUCCESS;
-
-                rv = _advection.AdvectOneStep( &_velocityField, deltaT );
-            }
+            _advection.AdvectSteps( &_velocityField, deltaT, stepsToGo );
 
             /* If the advection is bi-directional */
             if( _2ndAdvection )
             {
                 assert( deltaT > 0.0f );
                 float   deltaT2 = deltaT * -1.0f;
-                rv = flow::ADVECT_HAPPENED;
-                for( size_t i = _2ndAdvection->GetMaxNumOfPart() - 1; 
-                     i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
-                {
-                    Progress::Update(done++);
-                    if (Progress::Cancelled())
-                        return flow::SUCCESS;
 
-                    rv = _2ndAdvection->AdvectOneStep( &_velocityField, deltaT2 );
-                }
+                stepsToGo = numOfSteps - _2ndAdvection->GetMaxNumOfPart() + 1;
+                assert( stepsToGo >= 0 );
+                    
+                _2ndAdvection->AdvectSteps( &_velocityField, deltaT2, stepsToGo );
             }
-
-            Progress::Finish();
         }
 
         /* Advection scheme 2: advect to a certain timestamp.

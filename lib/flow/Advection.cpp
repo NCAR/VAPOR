@@ -150,7 +150,7 @@ Advection::AdvectSteps( Field* velocity, float deltaT, size_t maxSteps, ADVECTIO
     // The particle advection process can be parallelized per particle
     // Each stream represents a trajectory for a single particle
     // #pragma omp parallel for
-    for(size_t streamIdx = 0; streamIdx < _streams.size(); streamIdx++)  // Process one stream at a time
+    for(size_t streamIdx = 0; streamIdx < _streams.size(); streamIdx++)
     {
         auto& s = _streams[streamIdx];
         size_t numberOfSteps = 0;
