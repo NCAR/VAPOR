@@ -12,7 +12,7 @@ VaporField::VaporField( size_t cache_limit )
 bool
 VaporField::InsideVolumeVelocity( float time, const glm::vec3& pos ) const
 {
-    const std::vector<double> coords{ pos.x, pos.y, pos.z };
+    const std::array<double, 3> coords{ pos.x, pos.y, pos.z };
     const VAPoR::Grid* grid = nullptr;
     VAssert( _isReady() );
 
@@ -77,7 +77,7 @@ VaporField::InsideVolumeScalar( float time, const glm::vec3& pos ) const
     if( ScalarName.empty() )
         return true;
 
-    const std::vector<double> coords{ pos.x, pos.y, pos.z };
+    const std::array<double, 3> coords{ pos.x, pos.y, pos.z };
     const VAPoR::Grid* grid = nullptr;
     VAssert( _isReady() );
 
@@ -159,7 +159,7 @@ int
 VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity,
                          bool  checkInsideVolume ) const
 {
-    const std::vector<double> coords{ pos.x, pos.y, pos.z };
+    const std::array<double, 3> coords{ pos.x, pos.y, pos.z };
     const VAPoR::Grid* grid = nullptr;
 
     // First make sure the query positions are inside of the volume
@@ -262,7 +262,7 @@ VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar,
         if( !InsideVolumeScalar( time, pos ) )
             return OUT_OF_FIELD;
 
-    const std::vector<double> coords{ pos.x, pos.y, pos.z };
+    const std::array<double, 3> coords{ pos.x, pos.y, pos.z };
     const VAPoR::Grid* grid = nullptr;
 
     if( IsSteady )
