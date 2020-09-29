@@ -1332,6 +1332,7 @@ bool ParamsMgr::Redo() {
 
 void ParamsMgr::UndoRedoClear() {
 	_ssave.Clear();
+	RebaseStateSave();
 }
 
 string ParamsMgr::GetTopUndoDesc() const {

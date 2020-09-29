@@ -615,7 +615,7 @@ private:
 
   void Rebase() {
 	if (_state0) delete _state0;
-	_state0 = new XmlNode(*_rootNode);
+	_state0 = _rootNode ? new XmlNode(*_rootNode) : NULL;
   }
   void Save(const XmlNode *node, string description);
   void BeginGroup(string descripion);
