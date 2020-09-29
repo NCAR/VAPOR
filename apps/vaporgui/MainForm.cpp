@@ -2188,7 +2188,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
 	VAssert(_controlExec && _vizWinMgr);
     
-    if (_insideMessedUpQtEventLoop) {
+    /*if (_insideMessedUpQtEventLoop) {
         // Prevent menu item actions from running
         if (event->type() == QEvent::MetaCall)
             return true;
@@ -2212,7 +2212,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
                 return true; // Reject input
             }
         }
-    }
+    }*/
 
 	// Only update the GUI if the Params state has changed
 	//
