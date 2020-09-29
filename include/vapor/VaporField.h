@@ -11,6 +11,29 @@
 
 namespace flow
 {
+
+//
+// Helper class that is used to identify a specific grid.
+//
+class FLOW_API GridKey
+{
+private:
+    size_t currentTS = 0;
+    std::string var; 
+    int refLevel     = 0;
+    int compLevel    = 0;
+    double min[3]    = {0.0, 0.0, 0.0}; 
+    double max[3]    = {0.0, 0.0, 0.0}; 
+
+public:
+    // Constructor
+    GridKey( size_t, std::string, int, int, const std::vector<double>&, 
+                                            const std::vector<double>& );
+    // == operator to be used in the cache
+    bool operator==(const GridKey& ) const;
+};
+
+
 //
 //  Note on variable names in a VaporField:
 //  If a variable name is an empty string, then this variable is still valid, 
@@ -30,7 +53,7 @@ public:
                                glm::vec3& vel ,                     // output
                                bool checkInsideVolume = true )      const override;
     virtual int  GetScalar(    float time, const glm::vec3& pos,    // input 
-                               float& scalar,                          // output
+                               float& scalar,                       // output
                                bool checkInsideVolume = true )      const override;
     virtual int  GetNumberOfTimesteps()                             const override;
 
@@ -107,6 +130,7 @@ public:
     // It'll return 0 on success, and non-zero on error conditions.
     //
     int  CalcDeltaTFromCurrentTimeStep( float& delT ) const;
+
 
 private:
 

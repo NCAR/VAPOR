@@ -29,8 +29,8 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
                       FlowRenderer::GetClassType(),
                       instName,
                       dataMgr ),
-            _velocityField     ( 8 ),
-            _colorField        ( 2 ),
+            _velocityField     ( 9 ),
+            _colorField        ( 3 ),
             _colorMapTexOffset ( 0 )
 { }
 
