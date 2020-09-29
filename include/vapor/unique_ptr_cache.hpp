@@ -125,7 +125,7 @@ public:
 
         if( it == _element_vector.end() ) {         // This key does not exist
             std::unique_ptr<const BigObj> tmp( ptr );
-            _element_vector.emplace( _element_vector.cbegin(), std::move(key), std::move(tmp) );
+            _element_vector.emplace( _element_vector.begin(), std::move(key), std::move(tmp) );
             if( _element_vector.size() > _capacity )
                 _element_vector.pop_back();
         }
