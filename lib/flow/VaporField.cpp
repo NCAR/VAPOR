@@ -2,8 +2,52 @@
 #include "vapor/ConstantGrid.h"
 #include "GrownGrid.h"
 
+
 using namespace flow;
 
+
+//
+// Class GridKey
+//
+GridKey::GridKey( size_t ts, std::string v, int ref, int comp, 
+                  const std::vector<double>& in_min,
+                  const std::vector<double>& in_max )
+{
+    currentTS = ts;
+    var       = std::move( v );
+    refLevel  = ref;
+    compLevel = comp;
+    for( size_t i = 0; i < in_min.size(); i++ )
+        min[i] = in_min[i];
+    for( size_t i = 0; i < in_max.size(); i++ )
+        max[i] = in_max[i];
+}
+
+bool GridKey::operator==(const GridKey& other) const
+{
+    if (this->currentTS != other.currentTS  ||
+        this->refLevel  != other.refLevel   ||
+        this->compLevel != other.compLevel  )
+        return false;
+
+    for( int i = 0; i < 3; i++ )
+        if( this->min[i] != other.min[i]  ||
+            this->max[i] != other.max[i]  )
+            return false;
+
+    // String comparison seems to be most expensive, so put it at the last
+    return( this->var == other.var );
+}
+
+bool GridKey::emptyVar() const
+{
+    return var.empty();
+}
+
+
+//
+// Class GridWrapper
+//
 GridWrapper::GridWrapper( const VAPoR::Grid* gp, VAPoR::DataMgr* mp )
            : gridPtr( gp ), mgr( mp )
 {}
@@ -29,6 +73,9 @@ const VAPoR::Grid* GridWrapper::grid() const
 }
 
 
+//
+// Class VaporField
+//
 VaporField::VaporField( size_t cache_limit )
           : _recentGrids( cache_limit )
 { }
@@ -494,7 +541,7 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
     _params->GetBox()->GetExtents( extMin, extMax );
     int refLevel    = _params->GetRefinementLevel();
     int compLevel   = _params->GetCompressionLevel();
-    std::string key = _paramsToString( timestep, varName, refLevel, compLevel, extMin, extMax );
+    GridKey key( timestep, varName, refLevel, compLevel, extMin, extMax );
 
     // Use a lock here, so no two threads querying grids simultaneously.
     const std::lock_guard<std::mutex> lock_gd( _grid_operation_mutex );
@@ -524,8 +571,9 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
     // 3) query a 2D grid and grow it to be a GrownGrid.
     //
     VAPoR::Grid* grid = nullptr;
-    if( key == _constantGridZero )  // need a ConstantGrid
+    if( key.emptyVar() )
     {
+        // In case of an empty variable name, we generate a constantGrid with zeros.
         grid = new VAPoR::ConstantGrid( 0.0f, 3 );
     }
     else
@@ -559,35 +607,5 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
     {
         Wasp::MyBase::SetErrMsg("Variable Dimension Wrong!");
         return nullptr;
-    }
-}
-
-
-std::string 
-VaporField::_paramsToString(  size_t currentTS,               const std::string& var, 
-                              int refLevel,                   int compLevel, 
-                              const std::vector<double>& min, const std::vector<double>& max ) const
-{
-    // In case of an empty variable name, we generate a string that represents a
-    // ConstantGrid with zeros, no matter what other parameters are.
-    if( var.empty() )
-    {
-        return _constantGridZero;
-    }
-    else
-    {
-        std::string rv;
-        rv.reserve( 512 );  // 512 should be long enough for most cases.
-        rv.append( std::to_string( currentTS ) );
-        rv.append( var );
-        rv.append( std::to_string( refLevel ) );
-        rv.append( std::to_string( compLevel ) );
-
-        for( size_t i = 0; i < min.size(); i++ )
-            rv.append( std::to_string(min[i] ) );
-        for( size_t i = 0; i < max.size(); i++ )
-            rv.append( std::to_string(max[i] ) );
-
-        return rv;
     }
 }

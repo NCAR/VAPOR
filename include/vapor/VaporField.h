@@ -26,11 +26,11 @@ private:
     double max[3]    = {0.0, 0.0, 0.0}; 
 
 public:
-    // Constructor
     GridKey( size_t, std::string, int, int, const std::vector<double>&, 
                                             const std::vector<double>& );
     // == operator to be used in the cache
     bool operator==(const GridKey& ) const;
+    bool emptyVar() const;
 };
 
 // 
@@ -116,18 +116,16 @@ private:
     std::vector<float>          _timestamps;    // in ascending order
     VAPoR::DataMgr*             _datamgr = nullptr;   
     const VAPoR::FlowParams*    _params  = nullptr;
-    using cacheType = VAPoR::unique_ptr_cache< std::string, GridWrapper >;
+    using cacheType = VAPoR::unique_ptr_cache< GridKey, GridWrapper >;
     mutable cacheType           _recentGrids;   // so this variable can be 
                                                 // modified by a const function.
-    const std::string           _constantGridZero = "ConstantGrid with zeros";
     mutable std::mutex          _grid_operation_mutex;  // Use `mutable` qualifier so this
                                                         // mutex can be used in const methods.
 
     // Member functions
-    std::string _paramsToString(  size_t currentTS, const std::string& var, int refLevel, 
-            int compLevel, const std::vector<double>& min, const std::vector<double>& max ) const;
 
-    // Are the following member pointers set? 1) _datamgr, 2) _params
+    // Are the following member pointers correctly set? 
+    //   1) _datamgr, 2) _params
     bool _isReady() const;
 
     // _getAGrid will use _params to retrieve/generate grids. 
