@@ -584,6 +584,7 @@ int Visualizer:: _captureImage(std::string path)
         goto captureImageEnd;
     
     if (geoTiffOutput) {
+		VAssert(_paramsMgr->GetDataMgrNames().size());
         string projString = _dataStatus->GetDataMgr(_paramsMgr->GetDataMgrNames()[0])->GetMapProjection();
         
         vector<double> dataMinExtents, dataMaxExtents;
