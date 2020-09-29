@@ -13,9 +13,9 @@ namespace flow
 {
 
 //
-// Helper class that is used to identify a specific grid.
+// Helper class: it is used to identify a specific grid.
 //
-class FLOW_API GridKey
+class FLOW_API GridKey final
 {
 private:
     size_t currentTS = 0;
@@ -31,6 +31,26 @@ public:
                                             const std::vector<double>& );
     // == operator to be used in the cache
     bool operator==(const GridKey& ) const;
+};
+
+// 
+// Helper class: it wraps a grid and a data manager pointer to ensure
+// the grid is properly destroyed.
+//
+class FLOW_API GridWrapper final
+{
+private:
+    const VAPoR::Grid*  const  gridPtr;
+    VAPoR::DataMgr*     const  mgr;     // The pointer itself cannot be changed
+public:
+    GridWrapper( const VAPoR::Grid* gp, VAPoR::DataMgr* mp );
+    // Rule of five
+    GridWrapper(            const GridWrapper&  ) = delete;
+    GridWrapper& operator=( const GridWrapper&  ) = delete;
+    GridWrapper(            const GridWrapper&& ) = delete;
+    GridWrapper& operator=( const GridWrapper&& ) = delete;
+   ~GridWrapper();
+    const VAPoR::Grid* grid() const;
 };
 
 
@@ -71,48 +91,6 @@ public:
                          size_t& floor ) const;               // Output
 
     // 
-    // This wrapper class wraps a grid and a data manager pointer to ensure
-    // the grid is properly destroyed.
-    //
-    class FLOW_API GridWrapper final
-    {
-    private:
-        const VAPoR::Grid*  const  gridPtr;
-        VAPoR::DataMgr*     const  mgr;     // The pointer itself cannot be changed
-    public:
-        GridWrapper( const VAPoR::Grid* gp, VAPoR::DataMgr* mp )
-                   : gridPtr( gp ), mgr( mp )
-        {}   
-        // Rule of five
-        GridWrapper(            const GridWrapper&  ) = delete;
-        GridWrapper& operator=( const GridWrapper&  ) = delete;
-        GridWrapper(            const GridWrapper&& ) = delete;
-        GridWrapper& operator=( const GridWrapper&& ) = delete;
-       ~GridWrapper()
-        {
-            if( gridPtr )
-            {
-                if( gridPtr->GetType() == "GrownGrid" )
-                    delete gridPtr; // GrownGrid can unlock itself...
-                else
-                {
-                    if( mgr )
-                    {
-                        mgr->UnlockGrid( gridPtr );
-                        delete gridPtr;
-                    }
-                }
-                
-            }
-        }
-
-        const VAPoR::Grid* grid() const
-        {
-            return gridPtr;
-        }
-    };
-
-    // 
     // Returns the intersection domain of 3 velocity variables at a specific time step.
     // It returns non-zeros upon failure.
     //
@@ -138,7 +116,7 @@ private:
     std::vector<float>          _timestamps;    // in ascending order
     VAPoR::DataMgr*             _datamgr = nullptr;   
     const VAPoR::FlowParams*    _params  = nullptr;
-    using cacheType = VAPoR::unique_ptr_cache< std::string, GridWrapper, 9 >;
+    using cacheType = VAPoR::unique_ptr_cache< std::string, GridWrapper >;
     mutable cacheType           _recentGrids;   // so this variable can be 
                                                 // modified by a const function.
     const std::string           _constantGridZero = "ConstantGrid with zeros";

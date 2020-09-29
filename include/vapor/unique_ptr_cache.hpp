@@ -126,7 +126,6 @@ public:
             _element_vector.emplace( _element_vector.cbegin(), std::move(key), std::move(tmp) );
             if( _element_vector.size() > _capacity )
                 _element_vector.pop_back();
-
         }
         else {                                      // This key does exist. 
             it->second.reset(ptr);

@@ -4,10 +4,34 @@
 
 using namespace flow;
 
-// Constructor
-VaporField::VaporField( size_t cache_limit )
-{ }
+GridWrapper::GridWrapper( const VAPoR::Grid* gp, VAPoR::DataMgr* mp )
+           : gridPtr( gp ), mgr( mp )
+{}
 
+GridWrapper::~GridWrapper()
+{
+    if( gridPtr ) {
+        if( gridPtr->GetType() == "GrownGrid" ) {
+            delete gridPtr; // GrownGrid can unlock itself...
+        }
+        else {
+            if( mgr ) {
+                mgr->UnlockGrid( gridPtr );
+                delete gridPtr;
+            }
+        }
+    }
+}
+
+const VAPoR::Grid* GridWrapper::grid() const
+{
+    return gridPtr;
+}
+
+
+VaporField::VaporField( size_t cache_limit )
+          : _recentGrids( cache_limit )
+{ }
 
 bool
 VaporField::InsideVolumeVelocity( float time, const glm::vec3& pos ) const
