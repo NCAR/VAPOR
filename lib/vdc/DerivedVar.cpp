@@ -1805,13 +1805,13 @@ int DerivedCoordVarStandardWRF_Terrain::GetDimLensAtLevel(int level, std::vector
     if (rc < 0) return (-1);
 
     if (_derivedVarName == "Elevation") {
-        dims[2]--;
+        if (dims[2] > 1) dims[2]--;
     } else if (_derivedVarName == "ElevationU") {
         dims[0]++;
-        dims[2]--;
+        if (dims[2] > 1) dims[2]--;
     } else if (_derivedVarName == "ElevationV") {
         dims[1]++;
-        dims[2]--;
+        if (dims[2] > 1) dims[2]--;
     } else if (_derivedVarName == "ElevationW") {
     } else {
         SetErrMsg("Invalid variable name: %s", _derivedVarName.c_str());
@@ -1902,27 +1902,22 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(int fd, const vector<size_t> 
 
     size_t nElements = std::max(numElements(wMin, wMax), numElements(min, max));
 
-    float *buf1 = new float[nElements];
-    rc = _getVar(_dc, f->GetTS(), _PHVar, f->GetLevel(), f->GetLOD(), wMin, wMax, buf1);
-    if (rc < 0) {
-        delete[] buf1;
-        return (rc);
-    }
+    vector<float> buf1(nElements);
+    rc = _getVar(_dc, f->GetTS(), _PHVar, f->GetLevel(), f->GetLOD(), wMin, wMax, buf1.data());
+    if (rc < 0) { return (rc); }
 
-    float *buf2 = new float[nElements];
-    rc = _getVar(_dc, f->GetTS(), _PHBVar, f->GetLevel(), f->GetLOD(), wMin, wMax, buf2);
-    if (rc < 0) {
-        delete[] buf1;
-        delete[] buf2;
-        return (rc);
-    }
+    vector<float> buf2(nElements);
+    rc = _getVar(_dc, f->GetTS(), _PHBVar, f->GetLevel(), f->GetLOD(), wMin, wMax, buf2.data());
+    if (rc < 0) { return (rc); }
 
     float *dst = region;
-    if (varname != "ElevationW") { dst = buf1; }
+    if (varname != "ElevationW" && wDims[2] > 1) { dst = buf1.data(); }
 
     // Compute elevation on the W grid
     //
-    for (size_t i = 0; i < nElements; i++) { dst[i] = (buf1[i] + buf2[i]) / _grav; }
+    for (size_t i = 0; i < nElements; i++) { dst[i] = (buf1.data()[i] + buf2.data()[i]) / _grav; }
+
+    if (wDims[2] < 2) return (0);
 
     // Elevation is correct for W grid. If we want Elevation, ElevationU, or
     // Elevation V grid we need to interpolate
@@ -1931,23 +1926,20 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(int fd, const vector<size_t> 
     if (varname == "Elevation") {
         // Resample stagged W grid to base grid
         //
-        resampleToUnStaggered(buf1, wMin, wMax, region, min, max, 2);
+        resampleToUnStaggered(buf1.data(), wMin, wMax, region, min, max, 2);
     } else if (varname == "ElevationU") {
         // Resample stagged W grid to base grid
         //
-        resampleToUnStaggered(buf1, wMin, wMax, buf2, bMin, bMax, 2);
+        resampleToUnStaggered(buf1.data(), wMin, wMax, buf2.data(), bMin, bMax, 2);
 
-        resampleToStaggered(buf2, bMin, bMax, region, min, max, 0);
+        resampleToStaggered(buf2.data(), bMin, bMax, region, min, max, 0);
     } else if (varname == "ElevationV") {
         // Resample stagged W grid to base grid
         //
-        resampleToUnStaggered(buf1, wMin, wMax, buf2, bMin, bMax, 2);
+        resampleToUnStaggered(buf1.data(), wMin, wMax, buf2.data(), bMin, bMax, 2);
 
-        resampleToStaggered(buf2, bMin, bMax, region, min, max, 1);
+        resampleToStaggered(buf2.data(), bMin, bMax, region, min, max, 1);
     }
-
-    delete[] buf1;
-    delete[] buf2;
 
     return (0);
 }
