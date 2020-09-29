@@ -93,7 +93,6 @@ void WireFrameEventRouter::GetWebHelp(
 
 void WireFrameEventRouter::_updateTab(){
 
-std::cout << "          void WireFrameEventRouter::_updateTab(){ " << std::endl;
 	// The variable tab updates itself:
 	//
 	_variables->Update(
