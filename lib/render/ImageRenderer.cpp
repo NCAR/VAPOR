@@ -90,7 +90,8 @@ ImageRenderer::ImageRenderer( const ParamsMgr*    pm,
                               ImageParams::GetClassType(),
                               ImageRenderer::GetClassType(),
                               instName,
-                              dataMgr )
+                              dataMgr ),
+                _maxResamplingResolution(1024)
 {
 	_geoImage = NULL;
 	_cacheImgFileName.clear();
@@ -209,8 +210,8 @@ int ImageRenderer::GetMesh( DataMgr *dataMgr,
 		// will be used to set the width and height of the mesh.
 		//
         _getTexture(dataMgr);   // Ugh, this function is more than a get method...
-		_vertsWidth = _texWidth;
-		_vertsHeight = _texHeight;
+		_vertsWidth = min( _maxResamplingResolution, _texWidth);
+		_vertsHeight = min( _maxResamplingResolution, _texHeight);
 		rc = _getMeshDisplaced(
 			dataMgr, _vertsWidth, _vertsHeight, minBoxReq, maxBoxReq
 		);
