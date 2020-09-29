@@ -26,9 +26,11 @@
 //         At that point, the immediate next insertion of another unique object (the N-th)
 //         will evict `ptr`, and the object it points to is destroyed, and `prt` is no longer valid.
 //
-// Revision: (8/13/2020) it uses std::array<> to achieve the highest performance with
-//                       small to medium cache sizes.
+// Revision: (8/13/2020) it uses std::array<> instead of std::list<> to achieve 
+//                       the highest performance with small to medium cache sizes.
 // Revision: (8/13/2020) it uses mutexes to achieve thread safety.
+// Revision: (9/29/2020) it uses std::vector<> instead of std::array<> so that the cache size
+//                       can be set dynamically at construction time.
 //
 // Author   : Samuel Li
 // Date     : 9/26/2019
