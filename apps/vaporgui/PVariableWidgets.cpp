@@ -25,7 +25,6 @@ void PDimensionSelector::updateGUI() const
     VAssert(rp && "Params must be RenderParams");
 
     size_t dim = rp->GetRenderDim();
-    //VAssert( dim == 2 || dim == 3 && "Invalid dimensionality" );
  
     if ( dim == 2 ) {
         _vComboBox->SetValue("2D");
@@ -40,12 +39,9 @@ void PDimensionSelector::dropdownTextChanged(std::string text)
     RenderParams *rp = (RenderParams*)getParams();
     int dim = text == "2D" ? 2 : 3;
    
-    //std::cout << "dropdownTextChanged( " << text << std::endl; 
     ParamsMgr* pm = getParamsMgr();
-    //pm->BeginSaveStateGroup( "Set default variables" );
-    //std::cout << "Setting dim to " << dim << std::endl;
+    pm->BeginSaveStateGroup( "Set default variables" );
     rp->SetDefaultVariables(dim, false);
-    //pm->EndSaveStateGroup();
 
     if (dim == 2) {
         rp->GetBox()->SetPlanar(true);
@@ -55,7 +51,7 @@ void PDimensionSelector::dropdownTextChanged(std::string text)
         rp->GetBox()->SetPlanar(false);
         rp->GetBox()->SetOrientation(VAPoR::Box::XYZ);
     }
-
+    pm->EndSaveStateGroup();
 }
 
 // ==================================
@@ -70,7 +66,6 @@ PVariableSelector::PVariableSelector(const std::string &tag, const std::string &
 
 void PVariableSelector::updateGUI() const
 {
-    //std::cout << " void PVariableSelector::updateGUI() const " << std::endl;
     RenderParams *rp = dynamic_cast<RenderParams*>(getParams());
     assert(rp && "Params must be RenderParams");
     static_cast<void>(rp);        // Silence unused variable warning
@@ -88,7 +83,6 @@ void PVariableSelector::updateGUI() const
 
 bool PVariableSelector::isShown() const
 {
-    //std::cout << "      isShown() " << getRendererDimension() << " " << _onlyShowForDim << std::endl;
     if (_onlyShowForDim > 0)
         return getRendererDimension() == _onlyShowForDim;
     return true;
