@@ -38,6 +38,7 @@ public:
     bool emptyVar() const;
 };
 
+
 // 
 // Helper class: it wraps a grid and a data manager pointer to ensure
 // the grid is properly destroyed.
@@ -82,6 +83,7 @@ public:
                                bool checkInsideVolume = true )      const override;
     virtual int  GetNumberOfTimesteps()                             const override;
 
+
     //
     // Functions for interaction with VAPOR components
     //
@@ -114,20 +116,39 @@ public:
     //
     int  CalcDeltaTFromCurrentTimeStep( float& delT ) const;
 
+    //
+    // It turns that interactions from FlowParams can be expensive.
+    // Let's implement a mechanism to cache information and interact with them less frequently.
+    // Specifically, the following two functions are used to `lock` into (and `unlock` from) 
+    // the current set of params from FlowParams, so we don't need to interact with it anymore.
+    //
+    auto LockParams()   -> int; // Returns 0 on success.
+    auto UnlockParams() -> int; // Returns 0 on success.
+
 
 private:
 
+    //
     // Member variables
+    //
     std::vector<float>          _timestamps;    // in ascending order
     VAPoR::DataMgr*             _datamgr = nullptr;   
     const VAPoR::FlowParams*    _params  = nullptr;
+
     using cacheType = VAPoR::unique_ptr_cache< GridKey, GridWrapper >;
     mutable cacheType           _recentGrids;   // so this variable can be 
                                                 // modified by a const function.
     mutable std::mutex          _grid_operation_mutex;  // Use `mutable` qualifier so this
                                                         // mutex can be used in const methods.
 
+    bool                        _params_locked = false;
+    std::vector<double>         _c_ext_min, _c_ext_max;
+    uint64_t                    _c_currentTS = 0;
+    int32_t                     _c_refLev = -2, _c_compLev = -2;
+
+    //
     // Member functions
+    //
 
     // Are the following member pointers correctly set? 
     //   1) _datamgr, 2) _params

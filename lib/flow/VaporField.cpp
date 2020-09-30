@@ -76,8 +76,35 @@ VaporField::VaporField( size_t cache_limit )
           : _recentGrids( cache_limit )
 { }
 
-bool
-VaporField::InsideVolumeVelocity( float time, const glm::vec3& pos ) const
+
+auto VaporField::LockParams() -> int
+{
+    if( !_isReady() )
+        return 1;
+
+    // Retrieve param values and put them in the local cache.
+    _params->GetBox()->GetExtents( _c_ext_min, _c_ext_max );
+    _c_refLev    = _params->GetRefinementLevel();
+    _c_compLev   = _params->GetCompressionLevel();
+    _c_currentTS = _params->GetCurrentTimestep();
+
+    _params_locked = true;
+    return 0;
+}
+
+auto VaporField::UnlockParams() -> int
+{
+    _c_ext_min.clear();
+    _c_ext_max.clear();
+    _c_currentTS =  0;
+    _c_refLev    = -2;
+    _c_compLev   = -2;
+    _params_locked = false;
+    return 0;
+}
+
+
+bool VaporField::InsideVolumeVelocity( float time, const glm::vec3& pos ) const
 {
     const std::array<double, 3> coords{ pos.x, pos.y, pos.z };
     const VAPoR::Grid* grid = nullptr;
@@ -533,7 +560,7 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
 {
     // First check if we have the requested grid in our cache.
     // If it exists, return the grid directly.
-    std::vector<double>            extMin, extMax;
+    std::vector<double> extMin, extMax;
     _params->GetBox()->GetExtents( extMin, extMax );
     int refLevel    = _params->GetRefinementLevel();
     int compLevel   = _params->GetCompressionLevel();
