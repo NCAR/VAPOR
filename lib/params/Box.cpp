@@ -95,8 +95,11 @@ void Box::GetExtents(
 ) const {
 	minExt.clear();
 	maxExt.clear();
+	minExt.reserve(3);
+	maxExt.reserve(3);
 
-	vector <double> defaultv;
+    vector <double> defaultv;
+    defaultv.reserve( 6 );
 	for (int i=0; i<3; i++) defaultv.push_back(0.0);
 	for (int i=0; i<3; i++) defaultv.push_back(1.0);
 
