@@ -5,8 +5,9 @@
 #ifndef FIELD_H
 #define FIELD_H
 
-#include <glm/glm.hpp>
 #include <string>
+#include <array>
+#include <glm/glm.hpp>
 #include <vapor/common.h>
 
 namespace flow
@@ -53,9 +54,9 @@ public:
     int GetNumOfEmptyVelocityNames() const;
 
     // Class members
-    bool            IsSteady = false;
-    std::string     ScalarName = "";
-    std::string     VelocityNames[3]{"", "", ""};
+    bool                        IsSteady      = false;
+    std::string                 ScalarName    = "";
+    std::array<std::string, 3>  VelocityNames = {"", "", ""};
 };
 };
 
