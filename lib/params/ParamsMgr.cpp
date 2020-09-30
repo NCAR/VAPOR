@@ -314,6 +314,9 @@ void ParamsMgr::AddDataMgr(string dataSetName, DataMgr *dataMgr) {
 	for (int i=0; i<winSepNode->GetNumChildren(); i++) {
 		string winName = winSepNode->GetChild(i)->GetTag();
 
+		// Instantiating ParamsSeparator classes will add child nodes to the 
+		// XML tree as a side effect
+		//
 		ParamsSeparator windowSep(&windowsSep, winName);
 
 		ParamsSeparator renderSep(&windowSep, _renderersTag);
