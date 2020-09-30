@@ -18,16 +18,21 @@ namespace flow
 class FLOW_API GridKey final
 {
 private:
-    size_t currentTS = 0;
-    std::string var; 
-    int refLevel     = 0;
-    int compLevel    = 0;
-    double min[3]    = {0.0, 0.0, 0.0}; 
-    double max[3]    = {0.0, 0.0, 0.0}; 
+    // Buffer definition:
+    // Offset   Data_Type   Information
+    // 0        uint64_t    currentTS
+    // 8        int32_t     refLevel
+    // 12       int32_t     compLevel
+    // 16       double[3]   extent_min
+    // 40       double[3]   extent_max
+    // Total size: 64
+    std::array<uint8_t, 64> buf;
+
+    std::string varName; 
 
 public:
-    GridKey( size_t, std::string, int, int, const std::vector<double>&, 
-                                            const std::vector<double>& );
+    GridKey( uint64_t, int32_t, int32_t, std::string, const std::vector<double>&, 
+                                                      const std::vector<double>& );
     // == operator to be used in the cache
     bool operator==(const GridKey& ) const;
     bool emptyVar() const;

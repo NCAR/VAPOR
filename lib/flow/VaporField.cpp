@@ -9,39 +9,35 @@ using namespace flow;
 //
 // Class GridKey
 //
-GridKey::GridKey( size_t ts, std::string v, int ref, int comp, 
-                  const std::vector<double>& in_min,
-                  const std::vector<double>& in_max )
+GridKey::GridKey( uint64_t ts, int32_t ref, int32_t comp, std::string var,
+                  const std::vector<double>& min,
+                  const std::vector<double>& max )
 {
-    currentTS = ts;
-    var       = std::move( v );
-    refLevel  = ref;
-    compLevel = comp;
-    for( size_t i = 0; i < in_min.size(); i++ )
-        min[i] = in_min[i];
-    for( size_t i = 0; i < in_max.size(); i++ )
-        max[i] = in_max[i];
+    buf.fill( 0 );
+
+    // See the header file for information stored at each offset.
+    std::memcpy( buf.data(),      &ts,     8 );
+    std::memcpy( buf.data() + 8,  &ref,    4 );
+    std::memcpy( buf.data() + 12, &comp,   4 );
+    std::memcpy( buf.data() + 16, min.data(), 8 * min.size() );
+    std::memcpy( buf.data() + 40, max.data(), 8 * max.size() );
+
+    varName = std::move( var );
 }
 
 bool GridKey::operator==(const GridKey& other) const
 {
-    if (this->currentTS != other.currentTS  ||
-        this->refLevel  != other.refLevel   ||
-        this->compLevel != other.compLevel  )
+    // String comparison seems to be most frequent, so put it at the first
+    if( this->varName != other.varName )
         return false;
 
-    for( int i = 0; i < 3; i++ )
-        if( this->min[i] != other.min[i]  ||
-            this->max[i] != other.max[i]  )
-            return false;
-
-    // String comparison seems to be most expensive, so put it at the last
-    return( this->var == other.var );
+    int cmp = std::memcmp( this->buf.data(), other.buf.data(), buf.size() );
+    return (cmp == 0);
 }
 
 bool GridKey::emptyVar() const
 {
-    return var.empty();
+    return varName.empty();
 }
 
 
@@ -541,7 +537,7 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
     _params->GetBox()->GetExtents( extMin, extMax );
     int refLevel    = _params->GetRefinementLevel();
     int compLevel   = _params->GetCompressionLevel();
-    GridKey key( timestep, varName, refLevel, compLevel, extMin, extMax );
+    GridKey key( timestep, refLevel, compLevel, varName, extMin, extMax );
 
     // Use a lock here, so no two threads querying grids simultaneously.
     const std::lock_guard<std::mutex> lock_gd( _grid_operation_mutex );
