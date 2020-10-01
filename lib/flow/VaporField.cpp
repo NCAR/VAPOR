@@ -267,10 +267,10 @@ int VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& veloci
     const std::array<double, 3> coords{ pos.x, pos.y, pos.z };
     const VAPoR::Grid* grid = nullptr;
 
-    // First make sure the query positions are inside of the volume
-    if( checkInsideVolume )
+    if( checkInsideVolume ) {
         if( !InsideVolumeVelocity( time, pos ) )
             return OUT_OF_FIELD; 
+    }
 
     // Retrieve the missing value and velocity multiplier 
     glm::vec3 missingV( 0.0f ); // stores missing values for 3 velocity variables
