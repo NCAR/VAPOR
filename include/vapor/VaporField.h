@@ -126,8 +126,8 @@ public:
     // Specifically, the following two functions are used to `lock` into (and `unlock` from) 
     // the current set of params from FlowParams, so we don't need to interact with it anymore.
     //
-    auto LockParams()   -> int; // Returns 0 on success.
-    auto UnlockParams() -> int; // Returns 0 on success.
+    virtual auto LockParams()   -> int override;
+    virtual auto UnlockParams() -> int override;
 
 
 private:

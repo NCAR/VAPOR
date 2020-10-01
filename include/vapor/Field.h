@@ -53,6 +53,13 @@ public:
     // 
     int GetNumOfEmptyVelocityNames() const;
 
+    //
+    // Provide an option to cache and lock certain parameters.
+    // Both functions return 0 on success.
+    //
+    virtual auto LockParams()   -> int = 0;
+    virtual auto UnlockParams() -> int = 0;
+
     // Class members
     bool                        IsSteady      = false;
     std::string                 ScalarName    = "";

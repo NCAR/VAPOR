@@ -147,6 +147,11 @@ Advection::AdvectSteps( Field* velocity, float deltaT, size_t maxSteps, ADVECTIO
         return ready;
     bool happened = false;
 
+    // Observation: user parameters are not gonna change while this function executes.
+    // Action: lock these parameters.
+    if( !velocity->LockParams() )
+        return PARAMS_ERROR;
+
     // The particle advection process can be parallelized per particle
     // Each stream represents a trajectory for a single particle
     // #pragma omp parallel for
@@ -192,7 +197,6 @@ Advection::AdvectSteps( Field* velocity, float deltaT, size_t maxSteps, ADVECTIO
                 }
                 else
                     break;   // skip this particle, since it's out of the volume
-
             }
 
             const auto& past0 = s.back();
@@ -232,6 +236,8 @@ Advection::AdvectSteps( Field* velocity, float deltaT, size_t maxSteps, ADVECTIO
            }
         } //end loop for particle
     } // end loop for streams
+
+    velocity->UnlockParams();
 
     if( happened )
         return ADVECT_HAPPENED;
