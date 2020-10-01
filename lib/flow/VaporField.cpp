@@ -93,6 +93,7 @@ auto VaporField::LockParams() -> int
     _c_refLev    = _params->GetRefinementLevel();
     _c_compLev   = _params->GetCompressionLevel();
     _c_currentTS = _params->GetCurrentTimestep();
+    _c_vel_mult  = _params->GetVelocityMultiplier();
 
     _params_locked = true;
     return 0;
@@ -105,6 +106,8 @@ auto VaporField::UnlockParams() -> int
     _c_currentTS =  0;
     _c_refLev    = -2;
     _c_compLev   = -2;
+    _c_vel_mult  = 0.0;
+
     _params_locked = false;
     return 0;
 }
@@ -119,11 +122,7 @@ bool VaporField::InsideVolumeVelocity( float time, const glm::vec3& pos ) const
     // In case of steady field, we only check a specific time step
     if( IsSteady )
     {
-        size_t currentTS;
-        if( _params_locked )
-            currentTS = _c_currentTS;
-        else
-            currentTS = _params->GetCurrentTimestep();
+        auto currentTS = _params_locked ? _c_currentTS : _params->GetCurrentTimestep();
 
         for( auto& v : VelocityNames )
         {
@@ -188,11 +187,7 @@ bool VaporField::InsideVolumeScalar( float time, const glm::vec3& pos ) const
     // In case of steady field, we only check a specific time step
     if( IsSteady )
     {
-        size_t currentTS;
-        if( _params_locked )
-            currentTS = _c_currentTS;
-        else
-            currentTS = _params->GetCurrentTimestep();
+        auto currentTS = _params_locked ? _c_currentTS : _params->GetCurrentTimestep();
 
         grid = _getAGrid( currentTS, ScalarName );
         if( grid == nullptr )
@@ -278,13 +273,12 @@ int VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& veloci
             return OUT_OF_FIELD; 
 
     // Retrieve the missing value and velocity multiplier 
-    const float mult = _params->GetVelocityMultiplier();
     glm::vec3 missingV( 0.0f ); // stores missing values for 3 velocity variables
     velocity = glm::vec3( 0.0f );
 
-    if( IsSteady )
-    {
-        size_t currentTS = _params->GetCurrentTimestep();
+    if( IsSteady ) {
+        float mult     = _params_locked ? _c_vel_mult  : _params->GetVelocityMultiplier();
+        auto currentTS = _params_locked ? _c_currentTS : _params->GetCurrentTimestep();
         for( int i = 0; i < 3; i++ )
         {
             grid = _getAGrid( currentTS, VelocityNames[i] );
@@ -299,8 +293,9 @@ int VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& veloci
         else
             velocity *= mult;
     }
-    else
-    {
+    else {
+        float mult = _params->GetVelocityMultiplier();
+
         // First check if the query time is within range
         if( time < _timestamps.front() || time > _timestamps.back() )
             return TIME_ERROR;
@@ -377,7 +372,7 @@ VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar,
 
     if( IsSteady )
     {
-        size_t currentTS = _params->GetCurrentTimestep();
+        auto currentTS = _params_locked ? _c_currentTS : _params->GetCurrentTimestep();
         grid = _getAGrid( currentTS, ScalarName );
         if( grid == nullptr )
             return GRID_ERROR;
@@ -507,6 +502,9 @@ int VaporField::GetNumberOfTimesteps() const
 int VaporField::CalcDeltaTFromCurrentTimeStep( float& delT ) const
 {
     VAssert( _isReady() );
+
+    // This function is called only one-time before advection starts, 
+    // so don't worry about parameter locking here.
     const auto currentTS = _params->GetCurrentTimestep();
     const auto timestamp = _timestamps.at( currentTS );
 
@@ -595,6 +593,7 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
 
     if( grid_wrapper != nullptr ) {
         const VAPoR::Grid* grid = grid_wrapper->grid();
+
         // Is this a GrownGrid? 
         const VAPoR::GrownGrid* ggrid = dynamic_cast<const VAPoR::GrownGrid*>(grid);
         if( ggrid == nullptr )

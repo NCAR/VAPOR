@@ -149,7 +149,7 @@ Advection::AdvectSteps( Field* velocity, float deltaT, size_t maxSteps, ADVECTIO
 
     // Observation: user parameters are not gonna change while this function executes.
     // Action: lock these parameters.
-    if( !velocity->LockParams() )
+    if( velocity->LockParams() != 0 )
         return PARAMS_ERROR;
 
     // The particle advection process can be parallelized per particle

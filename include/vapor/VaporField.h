@@ -149,6 +149,7 @@ private:
     std::vector<double>         _c_ext_min, _c_ext_max;          // cached extents
     uint64_t                    _c_currentTS = 0;                // cached timestep
     int32_t                     _c_refLev = -2, _c_compLev = -2; // cached ref/comp levels
+    float                       _c_vel_mult = 0.0;               // cached velocity multiplier
 
     //
     // Member functions
