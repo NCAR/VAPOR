@@ -31,11 +31,14 @@ private:
     std::string varName; 
 
 public:
-    GridKey( uint64_t, int32_t, int32_t, std::string, const std::vector<double>&, 
-                                                      const std::vector<double>& );
+    void Reset( uint64_t, int32_t, int32_t, std::string, const std::vector<double>&, 
+                                                         const std::vector<double>& );
+    void Reset( std::string );
+
+    bool emptyVar() const;
+
     // == operator to be used in the cache
     bool operator==(const GridKey& ) const;
-    bool emptyVar() const;
 };
 
 
@@ -111,7 +114,8 @@ public:
     float DefaultZ = 0.0f;
 
     //
-    // Calculate a default deltaT based on the velocity speed and domain size.
+    // Calculate a reasonable deltaT based on the velocity speed and domain size.
+    // This is used as a one-time operation when getting ready a velocity field.
     // It'll return 0 on success, and non-zero on error conditions.
     //
     int  CalcDeltaTFromCurrentTimeStep( float& delT ) const;
@@ -142,9 +146,9 @@ private:
                                                         // mutex can be used in const methods.
 
     bool                        _params_locked = false;
-    std::vector<double>         _c_ext_min, _c_ext_max;
-    uint64_t                    _c_currentTS = 0;
-    int32_t                     _c_refLev = -2, _c_compLev = -2;
+    std::vector<double>         _c_ext_min, _c_ext_max;          // cached extents
+    uint64_t                    _c_currentTS = 0;                // cached timestep
+    int32_t                     _c_refLev = -2, _c_compLev = -2; // cached ref/comp levels
 
     //
     // Member functions
