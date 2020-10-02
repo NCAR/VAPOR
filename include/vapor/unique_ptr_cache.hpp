@@ -58,14 +58,14 @@ class unique_ptr_cache final
 {
 public:
 
-    // Constructors
-    // Note: because this cache is intended to be used to keep unique pointers,
-    // we don't want to allow any type of copy constructors, so delete them.
+    // Constructor
     unique_ptr_cache( size_t capacity )
         : _capacity( capacity )
     {
-        _element_vector.reserve( _capacity + 1 );
+        _element_vector.reserve( _capacity );
     }
+    // Note: because this cache is intended to be used to keep unique pointers,
+    // we don't want to allow any type of copy constructors, so delete them.
     unique_ptr_cache( const unique_ptr_cache& )             = delete;
     unique_ptr_cache( const unique_ptr_cache&& )            = delete;
     unique_ptr_cache& operator=( const unique_ptr_cache& )  = delete;
@@ -93,7 +93,7 @@ public:
 
     auto full() const -> bool
     {
-        return (_element_vector.size() == _capacity);
+        return (_element_vector.size() >= _capacity);
     }
 
     //
@@ -124,10 +124,10 @@ public:
                                 [&key](element_type& e){return e.first == key;} );
 
         if( it == _element_vector.end() ) {         // This key does not exist
+            if( _element_vector.size() >= _capacity )
+                _element_vector.pop_back();         // Evict the last element
             std::unique_ptr<const BigObj> tmp( ptr );
             _element_vector.emplace( _element_vector.begin(), std::move(key), std::move(tmp) );
-            if( _element_vector.size() > _capacity )
-                _element_vector.pop_back();
         }
         else {                                      // This key does exist. 
             it->second.reset(ptr);
