@@ -79,7 +79,7 @@ const VAPoR::Grid* GridWrapper::grid() const
 // Class VaporField
 //
 VaporField::VaporField( size_t cache_limit )
-          : _recentGrids( cache_limit )
+          : _recentGrids( cache_limit, false )
 {}
 
 
