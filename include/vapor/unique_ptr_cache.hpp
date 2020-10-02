@@ -1,6 +1,10 @@
 //-----------------------------------------------------------------------------
-// This is an implementation of a LRU cache that keeps unique pointers 
-// pointing to big structures (e.g., grids, quadtrees).
+// This is an implementation of a least-recently-used (LRU) cache that keeps 
+// unique pointers pointing to big structures (e.g., grids, quadtrees).
+//
+// This cache has two execution policies: 
+// 1) only insertion counts as `recently used`, and
+// 2) both insertion and query count as `recently used`.
 //
 // Given this design, this cache is expected to keep the ownership of these 
 // structures once they're put in the cache, and all other codes will not
@@ -59,8 +63,11 @@ class unique_ptr_cache final
 public:
 
     // Constructor
-    unique_ptr_cache( size_t capacity )
-        : _capacity( capacity )
+    // A user needs to specify if a query is counted as `recently used` 
+    // by passing a boolean to the constructor.
+    unique_ptr_cache( size_t capacity, bool query )
+        : _capacity( capacity ),
+          _query_shuffle( query )
     {
         _element_vector.reserve( _capacity );
     }
@@ -111,8 +118,12 @@ public:
             return _local_nullptr;
         } 
         else {                              // This key does exist
-            std::rotate( _element_vector.begin(), it, it + 1 );
-            return _element_vector.front().second;
+            if( _query_shuffle ) {
+                std::rotate( _element_vector.begin(), it, it + 1 );
+                return _element_vector.front().second;
+            }
+            else
+                return it->second;
         }
     }
 
@@ -140,6 +151,7 @@ private:
     using element_type = std::pair<Key, std::unique_ptr<const BigObj>>;
 
     const size_t                                _capacity;
+    const bool                                  _query_shuffle;
     std::vector< element_type >                 _element_vector;
     const std::unique_ptr<const BigObj>         _local_nullptr = {nullptr};
     std::mutex                                  _element_vector_mutex;
