@@ -42,9 +42,9 @@ Advection::CheckReady() const
     return 0;
 }
 
-
-int
-Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method )
+# if 0
+// Code from VAPOR 3.2. Could be deleted if VAPOR 3.3 runs well.
+int Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method )
 {
     int ready = CheckReady();
     if( ready != 0 )
@@ -138,6 +138,7 @@ Advection::AdvectOneStep( Field* velocity, float deltaT, ADVECTION_METHOD method
     else
         return 0;
 }
+#endif
 
 int
 Advection::AdvectSteps( Field* velocity, float deltaT, size_t maxSteps, ADVECTION_METHOD method )

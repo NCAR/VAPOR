@@ -29,9 +29,12 @@ public:
     //
     // Major action functions
     //
+#if 0
+    // Code from VAPOR 3.2. Could be deleted if VAPOR 3.3 runs well.
     // Advect one step as long as the particle is within spatial and temporal boundary
     int  AdvectOneStep(  Field* velocityField, float deltaT, 
                          ADVECTION_METHOD method = ADVECTION_METHOD::RK4 );
+#endif
     // Advect all particles as long as they are within spatial and temporal boundary
     // for a specified number if steps.
     int  AdvectSteps(  Field* velocityField, float deltaT, size_t maxSteps,
