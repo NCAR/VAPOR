@@ -491,7 +491,7 @@ Advection::OutputStreamsGnuplotMaxPart( const std::string&  filename,
     if( f == nullptr )
         return FILE_ERROR;
 
-    int idx = 0;
+    uint64_t idx = 0;
     for( const auto& s : _streams )
     {
         // Either output all the particles in this stream, 
@@ -502,7 +502,7 @@ Advection::OutputStreamsGnuplotMaxPart( const std::string&  filename,
             const auto& p = s[i];
             if( !p.IsSpecial() )
             {
-                std::fprintf( f, "%d, %f, %f, %f, %f, %f\n", idx, p.location.x, 
+                std::fprintf( f, "%lu, %f, %f, %f, %f, %f\n", idx, p.location.x, 
                               p.location.y, p.location.z, p.time, p.value );
                 numPart++;
             }
@@ -524,7 +524,7 @@ Advection::OutputStreamsGnuplotMaxTime( const  std::string& filename,
     if( f == nullptr )
         return FILE_ERROR;
 
-    int idx = 0;
+    uint64_t idx = 0;
     for( const auto& s : _streams )
     {
         for( const auto& p : s )
@@ -534,7 +534,7 @@ Advection::OutputStreamsGnuplotMaxTime( const  std::string& filename,
 
             if( !p.IsSpecial() )
             {
-                std::fprintf( f, "%d, %f, %f, %f, %f, %f\n", idx, p.location.x, 
+                std::fprintf( f, "%lu, %f, %f, %f, %f, %f\n", idx, p.location.x, 
                               p.location.y, p.location.z, p.time, p.value );
             }
         }
