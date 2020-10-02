@@ -346,36 +346,29 @@ Advection::AdvectTillTime( Field* velocity, float startT, float deltaT, float ta
 }
 
 
-int
-Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
+int Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
 {
-    size_t mostSteps = 0;
-    for( const auto& s : _streams )
-        if( s.size() > mostSteps )
-            mostSteps = s.size();
+    if( scalar->LockParams() != 0 )
+        return PARAMS_ERROR;
 
-    // Color step i of all particles, and then move on to the next step
-    for( size_t i = 0; i < mostSteps; i++ )
-    {
-        for( auto& s : _streams )
-        {
-            if( i < s.size() )
-            {
-                auto& p = s[i];
-                // Skip this particle if it's a separator
-                if( p.IsSpecial() )
-                    continue;
-                // Do not evaluate this particle if its value is non-zero
-                if( skipNonZero && p.value != 0.0f )
-                    continue;
-                float value;
-                int rv = scalar->GetScalar( p.time, p.location, value, false );
-                if( rv == 0 )       // The end of a stream could be outside of the volume,
-                    p.value = value;// so let's only color it when the return value is 0.
-            }
+    for( auto& s : _streams ) {
+        for( auto& p : s ) {
+            // Skip this particle if it's a separator
+            if( p.IsSpecial() )
+                continue;
+
+            // Do not evaluate this particle if its value is non-zero
+            if( skipNonZero && p.value != 0.0f )
+                continue;
+
+            float value;
+            int rv = scalar->GetScalar( p.time, p.location, value, false );
+            if( rv == 0 )       // The end of a stream could be outside of the volume,
+                p.value = value;// so let's only color it when the return value is 0.
         }
     }
 
+    scalar->UnlockParams();
     return 0;
 }
 
