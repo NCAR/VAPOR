@@ -349,28 +349,60 @@ Advection::AdvectTillTime( Field* velocity, float startT, float deltaT, float ta
 
 int Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
 {
-    if( scalar->LockParams() != 0 )
-        return PARAMS_ERROR;
+    // For steady fields, we calculate values one stream at a time
+    if( scalar->IsSteady ) {
+        if( scalar->LockParams() != 0 )
+            return PARAMS_ERROR;
 
-    for( auto& s : _streams ) {
-        for( auto& p : s ) {
-            // Skip this particle if it's a separator
-            if( p.IsSpecial() )
-                continue;
+        for( auto& s : _streams ) {
+            for( auto& p : s ) {
+                // Skip this particle if it's a separator
+                if( p.IsSpecial() )
+                    continue;
 
-            // Do not evaluate this particle if its value is non-zero
-            if( skipNonZero && p.value != 0.0f )
-                continue;
+                // Do not evaluate this particle if its value is non-zero
+                if( skipNonZero && p.value != 0.0f )
+                    continue;
 
-            float value;
-            int rv = scalar->GetScalar( p.time, p.location, value, false );
-            if( rv == 0 )       // The end of a stream could be outside of the volume,
-                p.value = value;// so let's only color it when the return value is 0.
+                float value;
+                int rv = scalar->GetScalar( p.time, p.location, value, false );
+                if( rv == 0 )       // The end of a stream could be outside of the volume,
+                    p.value = value;// so let's only color it when the return value is 0.
+            }
         }
-    }
 
-    scalar->UnlockParams();
-    return 0;
+        scalar->UnlockParams();
+        return 0;
+    }
+    // For unsteady fields, we calculate values at one timestep at a time
+    else {
+        size_t mostSteps = 0;
+        for( auto& s : _streams ) {
+            if( s.size() > mostSteps )
+                mostSteps = s.size();
+        }
+
+        for( size_t i = 0; i < mostSteps; i++ ) {
+            for( auto& s : _streams ) {
+                if( i < s.size() ) {
+                    auto& p = s[i];
+                    if( p.IsSpecial() )
+                        continue;
+
+                    // Do not evaluate this particle if its value is non-zero
+                    if( skipNonZero && p.value != 0.0f )
+                        continue;
+
+                    float val;
+                    int rv = scalar->GetScalar( p.time, p.location, val, false );
+                    if( rv == 0 )
+                        p.value = val;
+                }
+            } // end of a stream
+        } // end of all steps
+
+        return 0;
+    }
 }
 
 
