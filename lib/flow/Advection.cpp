@@ -372,7 +372,6 @@ int Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
         }
 
         scalar->UnlockParams();
-        return 0;
     }
     // For unsteady fields, we calculate values at one timestep at a time
     else {
@@ -400,9 +399,9 @@ int Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
                 }
             } // end of a stream
         } // end of all steps
-
-        return 0;
     }
+
+    return 0;
 }
 
 
