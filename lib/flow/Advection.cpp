@@ -406,25 +406,39 @@ int Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
 }
 
 
-int
-Advection::CalculateParticleProperties( Field* scalar )
+int Advection::CalculateParticleProperties( Field* scalar )
 {
-    size_t mostSteps = 0;
-    for( const auto& s : _streams )
-        if( s.size() > mostSteps )
-            mostSteps = s.size();
-     
-    for( size_t i = 0; i < mostSteps; i++ )
-    {
-        for( auto& s : _streams )
+    if( scalar->IsSteady ) {
+        if( scalar->LockParams() != 0 )
+            return PARAMS_ERROR;
+
+        for( auto& s : _streams ) {
+            for( auto& p : s ) {
+                float val;
+                int rv = scalar->GetScalar( p.time, p.location, val, false );
+                if( rv == 0 )
+                    p.AttachProperty( val );
+            }
+        }
+    }
+    else {
+        size_t mostSteps = 0;
+        for( const auto& s : _streams )
+            if( s.size() > mostSteps )
+                mostSteps = s.size();
+         
+        for( size_t i = 0; i < mostSteps; i++ )
         {
-            if( i < s.size() )
+            for( auto& s : _streams )
             {
-                auto& p = s[i];
-                float value;
-                int rv = scalar->GetScalar( p.time, p.location, value, false );
-                if( rv == 0 )   // A particle could be out of the volume, so we only
-                    p.AttachProperty( value );  // attach property when returns 0.
+                if( i < s.size() )
+                {
+                    auto& p = s[i];
+                    float value;
+                    int rv = scalar->GetScalar( p.time, p.location, value, false );
+                    if( rv == 0 )   // A particle could be out of the volume, so we only
+                        p.AttachProperty( value );  // attach property when returns 0.
+                }
             }
         }
     }
