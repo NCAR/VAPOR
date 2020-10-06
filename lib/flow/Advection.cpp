@@ -753,3 +753,13 @@ Advection::_applyPeriodic( float val, float min, float max ) const
         return pval;
     }
 }
+
+auto Advection::GetValueVarName() const -> std::string
+{
+    return _valueVarName;
+}
+
+auto Advection::GetPropertyVarNames() const -> std::vector<std::string>
+{
+    return _propertyVarNames;
+}

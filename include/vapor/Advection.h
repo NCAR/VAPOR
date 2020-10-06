@@ -101,6 +101,9 @@ public:
     void  SetYPeriodicity( bool, float min, float max );
     void  SetZPeriodicity( bool, float min, float max );
 
+    // Retrieve the names of value variable and property variables.
+    auto GetValueVarName()     const -> std::string;
+    auto GetPropertyVarNames() const -> std::vector<std::string>;
 
 private:
     std::vector< std::vector<Particle> >    _streams;
