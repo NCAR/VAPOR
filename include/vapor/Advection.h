@@ -101,8 +101,12 @@ public:
     void  SetYPeriodicity( bool, float min, float max );
     void  SetZPeriodicity( bool, float min, float max );
 
+
 private:
     std::vector< std::vector<Particle> >    _streams;
+    std::string                             _valueVarName;
+    std::vector< std::string >              _propertyVarNames;
+
     const float _lowerAngle,    _upperAngle;            // Thresholds for step size adjustment
     float       _lowerAngleCos, _upperAngleCos;         // Cosine values of the threshold angles
     std::vector<int>            _separatorCount;        // how many separators does each stream have.

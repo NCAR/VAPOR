@@ -354,6 +354,8 @@ int Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
         if( scalar->LockParams() != 0 )
             return PARAMS_ERROR;
 
+        _valueVarName = scalar->ScalarName;
+
         for( auto& s : _streams ) {
             for( auto& p : s ) {
                 // Skip this particle if it's a separator
@@ -506,20 +508,19 @@ Advection::_prepareFileWrite( const std::string& filename, bool append ) const
         return nullptr;
 
     FILE* f = nullptr;
-    if( append )
-    {
+    if( append ) {
         f = std::fopen( filename.c_str(), "a" );
     }
-    else
-    {
+    else {
         f = std::fopen( filename.c_str(), "w" );
     }
     if( f == nullptr )
         return nullptr;
 
-    std::fprintf( f, "%s\n",   "# This file could be plotted by Gnuplot using the following command:");
-    std::fprintf( f, "%s\n\n", "# splot output_filename u 2:3:4 w lines ");
-    std::fprintf( f, "%s\n\n", "# ID,   X-position,    Y-position,    Z-position,    Time,   Value" );
+    std::fprintf( f, "%s\n","# This file could be plotted by Gnuplot using the following command:");
+    std::fprintf( f, "%s\n\n",   "# splot output_filename u 2:3:4 w lines ");
+    std::fprintf( f, "%s%s\n\n", "# ID,  X-position,  Y-position,  Z-position,  Time,   ",
+                                    _valueVarName.c_str() );
 
     return f;
 }
