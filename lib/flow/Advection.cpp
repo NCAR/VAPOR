@@ -426,12 +426,9 @@ int Advection::CalculateParticleProperties( Field* scalar )
             if( s.size() > mostSteps )
                 mostSteps = s.size();
          
-        for( size_t i = 0; i < mostSteps; i++ )
-        {
-            for( auto& s : _streams )
-            {
-                if( i < s.size() )
-                {
+        for( size_t i = 0; i < mostSteps; i++ ) {
+            for( auto& s : _streams ) {
+                if( i < s.size() ) {
                     auto& p = s[i];
                     float value;
                     int rv = scalar->GetScalar( p.time, p.location, value, false );
