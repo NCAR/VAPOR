@@ -54,7 +54,7 @@ public:
     // Reset all particle values to zero
     void ResetParticleValues( );
     // Clear all existing properties of a particle
-    void ClearParticleProperties( );
+    void ClearParticleProperty( );
 
     // Set advection basics
     void UseSeedParticles( const std::vector<Particle>& seeds );

@@ -8,6 +8,7 @@
 #include "vapor/common.h"
 #include <glm/glm.hpp>
 #include <forward_list>
+#include <utility>  // std::pair<>
 
 namespace flow
 {
@@ -46,24 +47,23 @@ public:
     // are associated with this particle. It's up to the user to keep a record on 
     // what these values at each index stand for.
     //
-    void  AttachProperty  (  float v );
-    // This function will throw an exception when idx is out of bound
-    float RetrieveProperty(  int idx ) const;
-    void  ClearProperties();
-    int   GetNumOfProperties() const;
+    void  AttachProperty( float v );
+    void  ClearProperty();
+
+    auto GetPropertyList() const -> std::pair< const std::forward_list<float>&, uint32_t>;
 
     // A particle could be set to be at a special state.
     void  SetSpecial( bool isSpecial );
     bool  IsSpecial() const; 
 
 private:
-    std::forward_list<float>  _properties;  
-    // Note on the choice of using a forward_list:
-    // Forward_list takes 8 bytes, whereas a vector or list take 24 bytes!
-    int                       _nProperties = 0;
+    uint32_t                  _property_size = 0;
     // Note on the property counter: since forward_list doesn't have a .size()
     // of itself, we keep a counter by ourselves.
-    // Also, we consider an unsigned short type is big enough for this use case.
+    // Also, given the memory alignment of this class, this field doesn't take any extra space! 
+    std::forward_list<float>  _properties;
+    // Note on the choice of using a forward_list:
+    // Forward_list takes 8 bytes, whereas a vector or list take 24 bytes!
 };
 
 };

@@ -683,12 +683,11 @@ Advection::GetMaxNumOfPart() const
     return max;
 }
 
-void 
-Advection::ClearParticleProperties()
+void Advection::ClearParticleProperty()
 {
     for( auto& stream : _streams )
         for( auto& part : stream )
-            part.ClearProperties();
+            part.ClearProperty();
 }
 
 void 
