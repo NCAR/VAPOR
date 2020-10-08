@@ -66,6 +66,7 @@ public:
     // Retrieve the maximum number of particles in any stream
     size_t GetMaxNumOfPart() const;
 
+#if 0
     //
     // Output a file that could be plotted by gnuplot
     //   Command:  splot "filename" u 1:2:3 w lines
@@ -91,6 +92,7 @@ public:
     int  OutputStreamsGnuplotMaxTime( const std::string& filename, 
                                       float time, 
                                       bool  append = false ) const;
+#endif
     int  InputStreamsGnuplot(  const std::string& filename );
 
     // Query properties (most are properties of the velocity field)

@@ -142,26 +142,22 @@ FlowRenderer::_paintGL( bool fast )
                 return rv;
         }
 
-        if( _2ndAdvection )     // bi-directional advection
-        {
-            if( params->GetIsSteady() )
-            {
-                rv = _2ndAdvection->OutputStreamsGnuplotMaxPart( 
-                                        params->GetFlowlineOutputFilename(), 
-                                        params->GetSteadyNumOfSteps() + 1,                    
-                                        true );
+        if( _2ndAdvection ) {   // bi-directional advection
+            if( params->GetIsSteady() ) {
+                rv = flow::OutputGnuplotNumSteps( _2ndAdvection.get(),
+                                                  params->GetFlowlineOutputFilename().c_str(), 
+                                                  params->GetSteadyNumOfSteps(),
+                                                  true );
             }
-            else
-            {
-                rv = _2ndAdvection->OutputStreamsGnuplotMaxTime(
-                                        params->GetFlowlineOutputFilename(),
-                                        _timestamps.at( params->GetCurrentTimestep() ),
-                                        true );
+            else {
+                rv = flow::OutputGnuplotMaxTime( _2ndAdvection.get(),
+                                                  params->GetFlowlineOutputFilename().c_str(), 
+                                                  _timestamps.at( params->GetCurrentTimestep() ),
+                                                  true );
             }
-            if( rv != 0 )
-            {
+            if( rv != 0 ) {
                     MyBase::SetErrMsg("Output flow lines wrong!");
-                    return flow::FILE_ERROR;
+                    return rv;
             }
         }
 

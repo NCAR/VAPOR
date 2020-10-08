@@ -530,6 +530,7 @@ Advection::_prepareFileWrite( const std::string& filename, bool append ) const
     return f;
 }
 
+#if 0
 int
 Advection::OutputStreamsGnuplotMaxPart( const std::string&  filename, 
                                         size_t              maxPart, 
@@ -593,6 +594,7 @@ Advection::OutputStreamsGnuplotMaxTime( const  std::string& filename,
 
     return 0;
 }
+#endif
 
 int
 Advection::InputStreamsGnuplot( const std::string& filename )
