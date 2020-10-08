@@ -306,7 +306,7 @@ int VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& veloci
         VAssert( rv == 0 );
 
         // Find the velocity values at floor time step
-        glm::vec3 floorVelocity, ceilVelocity;
+        glm::vec3 floorVelocity, ceilingVelocity;
         for( int i = 0; i < 3; i++ )
         {
             grid = _getAGrid( floorTS, VelocityNames[i] ); 
@@ -335,10 +335,10 @@ int VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& veloci
                 grid = _getAGrid( floorTS + 1, VelocityNames[i] );
                 if( grid == nullptr )
                     return GRID_ERROR;
-                ceilVelocity[i] = grid->GetValue( coords );
-                missingV[i]     = grid->GetMissingValue();
+                ceilingVelocity[i] = grid->GetValue( coords );
+                missingV[i]        = grid->GetMissingValue();
             }
-            hasMissing = glm::equal( ceilVelocity, missingV );
+            hasMissing = glm::equal( ceilingVelocity, missingV );
             if( glm::any( hasMissing ) )
             {
                 velocity = glm::vec3( 0.0f );
@@ -347,7 +347,7 @@ int VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& veloci
             
             float weight = (time - _timestamps[floorTS]) / 
                            (_timestamps[floorTS+1] - _timestamps[floorTS]);
-            velocity = glm::mix( floorVelocity, ceilVelocity, weight ) * mult;
+            velocity = glm::mix( floorVelocity, ceilingVelocity, weight ) * mult;
         }
     }
 
@@ -409,15 +409,15 @@ VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar,
             grid = _getAGrid( floorTS + 1, ScalarName );
             if( grid == nullptr )
                 return GRID_ERROR;
-            float ceilScalar = grid->GetValue( coords );
-            if( ceilScalar  == grid->GetMissingValue() )
+            float ceilingScalar = grid->GetValue( coords );
+            if( ceilingScalar  == grid->GetMissingValue() )
             {
                 scalar = 0.0f;
                 return 0;
             }
             float weight = (time - _timestamps[floorTS]) /
                            (_timestamps[floorTS+1] - _timestamps[floorTS]);
-            scalar = glm::mix( floorScalar, ceilScalar, weight );
+            scalar = glm::mix( floorScalar, ceilingScalar, weight );
         }
     }
 

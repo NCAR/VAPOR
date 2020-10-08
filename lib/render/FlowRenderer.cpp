@@ -1,6 +1,7 @@
 #include "vapor/glutil.h"
 #include "vapor/FlowRenderer.h"
 #include "vapor/Particle.h"
+#include "vapor/AdvectionIO.h"
 #include <iostream>
 #include <cstring>
 #include <random>
@@ -123,24 +124,22 @@ FlowRenderer::_paintGL( bool fast )
         // equals to the advection steps plus one.
         // In the case of unsteady flow, output particles that are up to 
         // the advection time step.
-        if( params->GetIsSteady() )
-        {
-            rv = _advection.OutputStreamsGnuplotMaxPart( 
-                                params->GetFlowlineOutputFilename(),
-                                params->GetSteadyNumOfSteps() + 1,
-                                false );
+        if( params->GetIsSteady() ) {
+            rv = flow::OutputGnuplotNumSteps( &_advection, 
+                                              params->GetFlowlineOutputFilename().c_str(),
+                                              params->GetSteadyNumOfSteps(),
+                                              false );
         }
-        else
-        {
-            rv = _advection.OutputStreamsGnuplotMaxTime( 
-                                params->GetFlowlineOutputFilename(),
-                                _timestamps.at( params->GetCurrentTimestep() ),
-                                false );
+        else {
+            rv = flow::OutputGnuplotMaxTime( &_advection,
+                                             params->GetFlowlineOutputFilename().c_str(),
+                                             _timestamps.at( params->GetCurrentTimestep() ),
+                                             false );
+
         }
-        if( rv != 0 )
-        {
+        if( rv != 0 ) {
                 MyBase::SetErrMsg("Output flow lines wrong!");
-                return flow::FILE_ERROR;
+                return rv;
         }
 
         if( _2ndAdvection )     // bi-directional advection
@@ -168,6 +167,7 @@ FlowRenderer::_paintGL( bool fast )
 
         params->SetNeedFlowlineOutput( false );
     }
+
 
     if( _updateFlowCacheAndStates( params ) != 0 )
     {

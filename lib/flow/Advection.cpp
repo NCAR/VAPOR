@@ -196,8 +196,9 @@ Advection::AdvectSteps( Field* velocity, float deltaT, size_t maxSteps, ADVECTIO
                     s.insert( itr, std::move(separator) );
                     _separatorCount[streamIdx]++;
                 }
-                else
+                else {
                     break;   // skip this particle, since it's out of the volume
+                }
             }
 
             const auto& past0 = s.back();
@@ -295,8 +296,9 @@ Advection::AdvectTillTime( Field* velocity, float startT, float deltaT, float ta
                     s.insert( itr, std::move(separator) );
                     _separatorCount[streamIdx]++;
                 }
-                else 
+                else {
                     break;  // break the while loop
+                }
 
             }   // Finish of the if condition
 
@@ -368,8 +370,9 @@ int Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
 
                 float value;
                 int rv = scalar->GetScalar( p.time, p.location, value, false );
-                if( rv == 0 )       // The end of a stream could be outside of the volume,
+                if( rv == 0 ) {     // The end of a stream could be outside of the volume,
                     p.value = value;// so let's only color it when the return value is 0.
+                }
             }
         }
 
@@ -382,6 +385,7 @@ int Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
             if( s.size() > mostSteps )
                 mostSteps = s.size();
         }
+        _valueVarName = scalar->ScalarName;
 
         for( size_t i = 0; i < mostSteps; i++ ) {
             for( auto& s : _streams ) {
@@ -396,8 +400,9 @@ int Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
 
                     float val;
                     int rv = scalar->GetScalar( p.time, p.location, val, false );
-                    if( rv == 0 )
+                    if( rv == 0 ) {
                         p.value = val;
+                    }
                 }
             } // end of a stream
         } // end of all steps

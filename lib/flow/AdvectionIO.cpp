@@ -22,9 +22,9 @@ auto flow::OutputGnuplotNumSteps( const Advection*  adv,
     // Write the header
     if( !append ) {
         std::fprintf( f, "%s\n","# This file could be plotted by Gnuplot using the following command:");
-        std::fprintf( f, "%s\n\n",   "# splot output_filename u 2:3:4 w lines ");
-        std::fprintf( f, "%s%s", "    # ID,  X-position,  Y-position,  Z-position,  Time,   ",
-                                        adv->GetValueVarName().c_str() );
+        std::fprintf( f, "%s\n\n", "# splot output_filename u 2:3:4 w lines ");
+        std::fprintf( f, "%s%s",   "# ID,  X-position,  Y-position,  Z-position,  Time,   ",
+                                    adv->GetValueVarName().c_str() );
 
         for( auto& n : propertyNames )
             std::fprintf( f, ",  %s", n.c_str() );
@@ -83,9 +83,9 @@ auto flow::OutputGnuplotMaxTime( const Advection*  adv,
     // Write the header
     if( !append ) {
         std::fprintf( f, "%s\n","# This file could be plotted by Gnuplot using the following command:");
-        std::fprintf( f, "%s\n\n",   "# splot output_filename u 2:3:4 w lines ");
-        std::fprintf( f, "%s%s", "    # ID,  X-position,  Y-position,  Z-position,  Time,   ",
-                                        adv->GetValueVarName().c_str() );
+        std::fprintf( f, "%s\n\n", "# splot output_filename u 2:3:4 w lines ");
+        std::fprintf( f, "%s%s",   "# ID,  X-position,  Y-position,  Z-position,  Time,   ",
+                                    adv->GetValueVarName().c_str() );
 
         for( auto& n : propertyNames )
             std::fprintf( f, ",  %s", n.c_str() );
