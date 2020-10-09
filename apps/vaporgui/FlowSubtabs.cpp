@@ -234,13 +234,25 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) :
     //
     _flowWriterSection= new VSection("Write Flowlines to File");
     layout()->addWidget( _flowWriterSection );
+
     string defaultPath = QDir::homePath().toStdString() + "/vaporFlow.txt";
     _flowWriterSelector = new VFileWriter("Select", defaultPath);
     _flowWriterSection->layout()->addWidget( new VLineItem("Target file", _flowWriterSelector) );
+
     _flowWriterButton = new VPushButton("Write to file");
     _flowWriterSection->layout()->addWidget( new VLineItem("", _flowWriterButton) );
     connect( _flowWriterButton, &VPushButton::ButtonClicked,
-        this, &FlowSeedingSubtab::_geometryWriterClicked );
+        this, &FlowSeedingSubtab::_flowWriterClicked );
+
+    QString msg( "Additional Output Variables:\n"
+                 "(Type variable names separated by commas, "
+                 "and their values will be sampled along output flowlines.)" );
+    QLabel* label = new QLabel( msg, _flowWriterSection );
+    label->setWordWrap( true );
+    _flowWriterSection->layout()->addWidget( label );
+
+    _flowWriterMoreVariables = new QTextEdit( _flowWriterSection );
+    _flowWriterSection->layout()->addWidget( _flowWriterMoreVariables );
 }
 
 void FlowSeedingSubtab::_createSeedingSection( QWidget* parent ) {
@@ -880,7 +892,7 @@ FlowSeedingSubtab::_streamlineDirectionChanged( int index )
     _params->SetFlowDirection( index );
 }
 
-void FlowSeedingSubtab::_geometryWriterClicked() {
+void FlowSeedingSubtab::_flowWriterClicked() {
     bool enabled = _params->IsEnabled();
     if ( !enabled ) {
         MSG_ERR( "The Flow renderer must be enabled to compute trajectories " \
@@ -890,9 +902,13 @@ void FlowSeedingSubtab::_geometryWriterClicked() {
     }
 
     std::string file = _flowWriterSelector->GetValue();
+    auto moreVariables = _flowWriterMoreVariables->toPlainText();
 
     _paramsMgr->BeginSaveStateGroup("Write flowline geometry file");
     _params->SetFlowlineOutputFilename( file );
+    if( !moreVariables.isEmpty() ) {
+        _params->SetFlowOutputMoreVariables( moreVariables.toStdString() );
+    }
     _params->SetNeedFlowlineOutput( true );
     _paramsMgr->EndSaveStateGroup();
 }

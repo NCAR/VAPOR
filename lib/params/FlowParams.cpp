@@ -28,6 +28,7 @@ const std::string FlowParams::_steadyNumOfStepsTag   = "SteadyNumOfStepsTag";
 const std::string FlowParams::_seedGenModeTag        = "SeedGenModeTag";
 const std::string FlowParams::_seedInputFilenameTag  = "SeedInputFilenameTag";
 const std::string FlowParams::_flowlineOutputFilenameTag = "FlowlineOutputFilenameTag";
+const std::string FlowParams::_flowOutputMoreVariablesTag = "FlowOutputMoreVariablesTag";
 const std::string FlowParams::_flowDirectionTag      = "FlowDirectionTag";
 const std::string FlowParams::_needFlowlineOutputTag = "NeedFlowlineOutputTag";
 const std::string FlowParams::_periodicTag           = "PeriodicTag";
@@ -206,16 +207,23 @@ FlowParams::SetSeedInputFilename( const std::string& name )
     SetValueString( _seedInputFilenameTag, "filename for input seeding list", name ); 
 }
 
-std::string
-FlowParams::GetFlowlineOutputFilename() const
+std::string FlowParams::GetFlowlineOutputFilename() const
 {
     return GetValueString( _flowlineOutputFilenameTag, "" );
 }
-
-void
-FlowParams::SetFlowlineOutputFilename( const std::string& name )
+void FlowParams::SetFlowlineOutputFilename( const std::string& name )
 {
     SetValueString( _flowlineOutputFilenameTag, "filename for output flow lines", name ); 
+}
+
+std::string FlowParams::GetFlowOutputMoreVariables() const
+{
+    return GetValueString( _flowOutputMoreVariablesTag, "" );
+}
+void FlowParams::SetFlowOutputMoreVariables( const std::string& var )
+{
+    SetValueString( _flowOutputMoreVariablesTag, "Additional variables to sample along flowlines",
+                    var );
 }
 
 int FlowParams::GetFlowDirection() const

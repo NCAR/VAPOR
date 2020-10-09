@@ -6,6 +6,7 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <QTextEdit>
 #include <vapor/FlowParams.h>
 
 #include <QLineEdit>
@@ -139,7 +140,7 @@ private slots:
 
     void _rakeGeometryChanged( const std::vector<float>& range );
 
-    void _geometryWriterClicked();
+    void _flowWriterClicked();
 
     void _selectedTabChanged( int index );
 
@@ -213,6 +214,7 @@ private:
     VFileWriter*            _flowWriterSelector;
     VPushButton*            _flowWriterButton;
     VSection*               _flowWriterSection;
+    QTextEdit*              _flowWriterMoreVariables;
 };
 
 //
