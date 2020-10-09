@@ -210,9 +210,9 @@ private:
     VComboBox*              _biasVariableComboBox;
     VSliderEdit*            _biasWeightSliderEdit;
 
-    VFileWriter*            _geometryWriterSelector;
-    VPushButton*            _geometryWriterExecutor;
-    VSection*               _geometryWriterSection;
+    VFileWriter*            _flowWriterSelector;
+    VPushButton*            _flowWriterButton;
+    VSection*               _flowWriterSection;
 };
 
 //

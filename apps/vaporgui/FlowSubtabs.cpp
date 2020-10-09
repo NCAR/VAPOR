@@ -232,16 +232,15 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) :
 
     // Lastly add file selector for writing seed geometry
     //
-    _geometryWriterSection= new VSection("Write Flowlines to File");
-    layout()->addWidget( _geometryWriterSection );
+    _flowWriterSection= new VSection("Write Flowlines to File");
+    layout()->addWidget( _flowWriterSection );
     string defaultPath = QDir::homePath().toStdString() + "/vaporFlow.txt";
-    _geometryWriterSelector = new VFileWriter("Select", defaultPath);
-    _geometryWriterSection->layout()->addWidget( new VLineItem("Target file", _geometryWriterSelector) );
-    _geometryWriterExecutor = new VPushButton("Write to file");
-    _geometryWriterSection->layout()->addWidget( new VLineItem("", _geometryWriterExecutor) );
-    connect( _geometryWriterExecutor, &VPushButton::ButtonClicked,
+    _flowWriterSelector = new VFileWriter("Select", defaultPath);
+    _flowWriterSection->layout()->addWidget( new VLineItem("Target file", _flowWriterSelector) );
+    _flowWriterButton = new VPushButton("Write to file");
+    _flowWriterSection->layout()->addWidget( new VLineItem("", _flowWriterButton) );
+    connect( _flowWriterButton, &VPushButton::ButtonClicked,
         this, &FlowSeedingSubtab::_geometryWriterClicked );
-    layout()->addWidget( _geometryWriterSection );
 }
 
 void FlowSeedingSubtab::_createSeedingSection( QWidget* parent ) {
@@ -890,7 +889,7 @@ void FlowSeedingSubtab::_geometryWriterClicked() {
         return;
     }
 
-    std::string file = _geometryWriterSelector->GetValue();
+    std::string file = _flowWriterSelector->GetValue();
 
     _paramsMgr->BeginSaveStateGroup("Write flowline geometry file");
     _params->SetFlowlineOutputFilename( file );
