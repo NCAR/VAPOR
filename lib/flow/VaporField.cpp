@@ -448,8 +448,7 @@ VaporField::AssignDataManager( VAPoR::DataMgr* dmgr )
 }
 
 
-void
-VaporField::UpdateParams( const VAPoR::FlowParams* p )
+void VaporField::UpdateParamAndVarNames( const VAPoR::FlowParams* p )
 {
     _params = p;
 
@@ -464,6 +463,12 @@ VaporField::UpdateParams( const VAPoR::FlowParams* p )
         else
             VelocityNames[i] = "";  // make sure it keeps an empty string,
     }                               // instead of whatever left from before.
+}
+
+
+void VaporField::UpdateParams( const VAPoR::FlowParams* p )
+{
+    _params = p;
 }
 
 

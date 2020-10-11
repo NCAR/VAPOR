@@ -175,8 +175,8 @@ FlowRenderer::_paintGL( bool fast )
         _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
     
 
-    _velocityField.UpdateParams( params );
-    _colorField.UpdateParams( params );
+    _velocityField.UpdateParamAndVarNames( params );
+    _colorField.UpdateParamAndVarNames( params );
 
     // In case there's 0 or 1 variable selected, meaning that more than one the velocity 
     // variable names are empty strings, then the paint routine aborts.
