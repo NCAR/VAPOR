@@ -245,13 +245,14 @@ FlowSeedingSubtab::FlowSeedingSubtab(QWidget* parent) :
         this, &FlowSeedingSubtab::_flowWriterClicked );
 
     QString msg( "Additional Output Variables:\n"
-                 "(Type variable names separated by commas, "
+                 "(Type variable names separated by commas or new lines, "
                  "and their values will be sampled along output flowlines.)" );
     QLabel* label = new QLabel( msg, _flowWriterSection );
     label->setWordWrap( true );
     _flowWriterSection->layout()->addWidget( label );
 
     _flowWriterMoreVariables = new QTextEdit( _flowWriterSection );
+    _flowWriterMoreVariables->setPlainText("");
     _flowWriterSection->layout()->addWidget( _flowWriterMoreVariables );
 }
 

@@ -128,14 +128,9 @@ private:
 
     int _updateAdvectionPeriodicity( flow::Advection* advc );
 
-    // A function to populate particle properties.
-    // If useAsColor == true, then this calculated property will be stored in a field
-    //    of a Particle that will be used for coloring the particle.
-    // If useAsColor == false, then this property is simply kept by the Particle without
-    //    any impact to the visualization.
-    int  _populateParticleProperties( const std::string& varname,
-                                      const FlowParams*  params,
-                                      bool  useAsColor );
+    // Input:  a long string that is the input by the user.
+    // Output: a vector of *valid* variable names.
+    auto _parseAdditionalVariables(const std::string& longString) const -> std::vector<std::string>;
 
     // Color the last particle in a stream
     int  _colorLastParticle();

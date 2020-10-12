@@ -3,7 +3,9 @@
 #include "vapor/Particle.h"
 #include "vapor/AdvectionIO.h"
 #include <iostream>
+#include <sstream>
 #include <cstring>
+#include <cctype>   // std::isspace
 #include <random>
 #include <vapor/Progress.h>
 
@@ -110,16 +112,59 @@ FlowRenderer::_initializeGL()
     return 0;
 }
 
-int
-FlowRenderer::_paintGL( bool fast )
+
+auto FlowRenderer::_parseAdditionalVariables( const std::string& longString ) const
+                   -> std::vector<std::string>
+{
+    // Step 1: extract comma separated values
+    std::stringstream ss( longString );
+    std::vector<std::string> varNames;
+    for( std::string line; std::getline( ss, line, ',' ); )
+        varNames.emplace_back( line );
+
+    // Step 2: remove any white space and newline symbol for each variable name
+    for( auto& e : varNames ) {
+        e.erase( std::remove_if(e.begin(), e.end(), 
+                 [](unsigned char c){return std::isspace(c);}), 
+                 e.end() );
+    }
+
+    // Step 3: remove any empty entry
+    varNames.erase( std::remove_if( varNames.begin(), varNames.end(), 
+                    [](const std::string& s){return s.empty();} ), 
+                    varNames.end() );
+
+    // Step 4: check if these variable names are actually available in the DataMgr.
+    const auto availVars = _dataMgr->GetDataVarNames();
+    auto no_contain = [&availVars](const std::string& s) {return 
+                       std::find(availVars.cbegin(), availVars.cend(), s) == availVars.cend();};
+    varNames.erase( std::remove_if( varNames.begin(), varNames.end(), no_contain ),
+                    varNames.end() );
+
+    return varNames;
+}
+
+int FlowRenderer::_paintGL( bool fast )
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
     int rv;     // return value
 
     _velocityField.DefaultZ = Renderer::GetDefaultZ( _dataMgr, params->GetCurrentTimestep() );
 
-    if( params->GetNeedFlowlineOutput() )
-    {
+    if( params->GetNeedFlowlineOutput() ) {
+
+        // First check if there are additional variables to sample along pathlines.
+        std::string longString = params->GetFlowOutputMoreVariables();
+        auto addiVars = this->_parseAdditionalVariables( longString );
+
+
+
+
+
+
+
+
+
         // In case of steady flow, output the number of particles that 
         // equals to the advection steps plus one.
         // In the case of unsteady flow, output particles that are up to 
@@ -603,7 +648,8 @@ int  FlowRenderer::_renderAdvectionHelper(bool renderDirection)
     return 0;
 }
 
-glm::vec3 FlowRenderer::_getScales() {
+glm::vec3 FlowRenderer::_getScales() 
+{
     string myVisName = GetVisualizer();
     VAPoR::ViewpointParams* vpp = _paramsMgr->GetViewpointParams(myVisName);
     string datasetName = GetMyDatasetName();
