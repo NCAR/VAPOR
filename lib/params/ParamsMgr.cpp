@@ -146,8 +146,11 @@ void ParamsMgr::LoadState(const XmlNode *node)
 
     // If data loaded set up data dependent parameters from new state.
     //
-    map<string, DataMgr *>::const_iterator itr;
-    for (itr = _dataMgrMap.begin(); itr != _dataMgrMap.end(); ++itr) { addDataMgrMerge(itr->first); }
+    vector<string> dataSetNames = GetDataMgrNames();
+    for (auto dataSetName : dataSetNames) {
+        map<string, DataMgr *>::const_iterator itr = _dataMgrMap.find(dataSetName);
+        if (itr != _dataMgrMap.end()) addDataMgrMerge(itr->first);
+    }
     EndSaveStateGroup();
 }
 
@@ -252,6 +255,21 @@ void ParamsMgr::AddDataMgr(string dataSetName, DataMgr *dataMgr)
     } else {
         addDataMgrNew();
     }
+
+    ParamsSeparator windowsSep(_rootSeparator, _windowsTag);
+    XmlNode *       winSepNode = windowsSep.GetNode();
+    for (int i = 0; i < winSepNode->GetNumChildren(); i++) {
+        string winName = winSepNode->GetChild(i)->GetTag();
+
+        // Instantiating ParamsSeparator classes will add child nodes to the
+        // XML tree as a side effect
+        //
+        ParamsSeparator windowSep(&windowsSep, winName);
+
+        ParamsSeparator renderSep(&windowSep, _renderersTag);
+
+        ParamsSeparator dataSep(&renderSep, dataSetName);
+    }
 }
 
 void ParamsMgr::RemoveVisualizer(string winName)
@@ -284,14 +302,35 @@ void ParamsMgr::RemoveDataMgr(string dataSetName)
     if (itr == _dataMgrMap.end()) return;
 
     _dataMgrMap.erase(itr);
+
+    delete_datasets(dataSetName);
 }
 
 vector<string> ParamsMgr::GetDataMgrNames() const
 {
     vector<string> dataMgrNames;
 
-    map<string, DataMgr *>::const_iterator itr;
-    for (itr = _dataMgrMap.begin(); itr != _dataMgrMap.end(); ++itr) { dataMgrNames.push_back(itr->first); }
+    ParamsSeparator windowsSep(_rootSeparator, _windowsTag);
+
+    XmlNode *winSepNode = windowsSep.GetNode();
+    for (int i = 0; i < winSepNode->GetNumChildren(); i++) {
+        XmlNode *winNode = winSepNode->GetChild(i);
+        string   winName = winNode->GetTag();
+
+        if (winNode->HasChild(_renderersTag)) {
+            XmlNode *renderersNode = winNode->GetChild(_renderersTag);
+
+            for (int j = 0; j < renderersNode->GetNumChildren(); j++) {
+                XmlNode *dataSepNode = renderersNode->GetChild(j);
+                string   s = dataSepNode->GetTag();
+
+                dataMgrNames.push_back(s);
+            }
+        }
+    }
+
+    sort(dataMgrNames.begin(), dataMgrNames.end());
+    dataMgrNames.erase(unique(dataMgrNames.begin(), dataMgrNames.end()), dataMgrNames.end());
 
     return (dataMgrNames);
 }
@@ -884,6 +923,30 @@ void ParamsMgr::delete_ren_containers()
     while ((itr = _renderParamsMap.begin()) != _renderParamsMap.end()) { delete_ren_containers(itr->first); }
 }
 
+void ParamsMgr::delete_datasets(string dataSetName)
+{
+    ParamsSeparator windowsSep(_rootSeparator, _windowsTag);
+
+    XmlNode *winSepNode = windowsSep.GetNode();
+    for (int i = 0; i < winSepNode->GetNumChildren(); i++) {
+        XmlNode *winNode = winSepNode->GetChild(i);
+        string   winName = winNode->GetTag();
+
+        delete_ren_containers(winName, dataSetName);
+
+        XmlNode *renderersNode = winNode->GetChild(_renderersTag);
+        for (int j = 0; j < renderersNode->GetNumChildren(); j++) {
+            XmlNode *dataSepNode = renderersNode->GetChild(j);
+            string   s = dataSepNode->GetTag();
+
+            if (s == dataSetName) {
+                dataSepNode->SetParent(NULL);
+                break;
+            }
+        }
+    }
+}
+
 RenParamsContainer *ParamsMgr::make_ren_container(string winName, string dataSetName, string renderName)
 {
     ParamsSeparator *windowsSep = new ParamsSeparator(_rootSeparator, _windowsTag);
@@ -1056,7 +1119,11 @@ bool ParamsMgr::Redo()
     return (undoRedoHelper());
 }
 
-void ParamsMgr::UndoRedoClear() { _ssave.Clear(); }
+void ParamsMgr::UndoRedoClear()
+{
+    _ssave.Clear();
+    RebaseStateSave();
+}
 
 string ParamsMgr::GetTopUndoDesc() const
 {

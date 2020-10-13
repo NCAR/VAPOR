@@ -459,6 +459,7 @@ int ControlExec::OpenData(const std::vector<string> &files, const std::vector<st
     int rc = _dataStatus->Open(files, options, dataSetName, typ);
     if (rc < 0) {
         SetErrMsg("Failure to open data set of type \"%s\"", typ.c_str());
+        UndoRedoClear();
         return -1;
     }
 
@@ -474,6 +475,7 @@ int ControlExec::OpenData(const std::vector<string> &files, const std::vector<st
             _dataStatus->Close(dataSetName);
             _paramsMgr->RemoveDataMgr(dataSetName);
             SetErrMsg("Failure to initialize application renderer \"%s\"", appRenderParams[i]->GetName().c_str());
+            UndoRedoClear();
             return (-1);
         }
     }
@@ -482,6 +484,7 @@ int ControlExec::OpenData(const std::vector<string> &files, const std::vector<st
     //
     rc = openDataHelper(true);
 
+    UndoRedoClear();
     return (rc);
 }
 
@@ -508,6 +511,8 @@ void ControlExec::CloseData(string dataSetName)
     }
 
     _paramsMgr->RemoveDataMgr(dataSetName);
+
+    UndoRedoClear();
 }
 
 int ControlExec::EnableImageCapture(string filename, string winName)
