@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "VContainer.h"
+#include "VHBoxWidget.h"
 #include "VSliderEditInterface.h"
 
 class VIntRangeMenu;

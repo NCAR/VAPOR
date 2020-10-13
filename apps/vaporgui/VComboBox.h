@@ -2,7 +2,7 @@
 
 #include <string>
 #include <QComboBox>
-#include "VContainer.h"
+#include "VHBoxWidget.h"
 
 
 //! class VComboBox
@@ -10,11 +10,11 @@
 //! Wraps a QComboBox and provides vaporgui's standard setter/getter functions
 //! and signals.
 
-class VComboBox : public VContainer {
+class VComboBox : public VHBoxWidget {
     Q_OBJECT
 
 public:
-    VComboBox( const std::vector<std::string> &values );
+    VComboBox( const std::vector<std::string> &values={} );
 
     void SetOptions( const std::vector<std::string> &values );
     void SetIndex( int index );

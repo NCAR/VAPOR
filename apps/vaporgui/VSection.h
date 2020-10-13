@@ -38,6 +38,20 @@ private:
 
 
 
+#include "AbstractWidgetGroup.h"
+#include "VGroup.h"
+
+class VSectionGroup : public VSection, public WidgetGroupWrapper<VSectionGroup, QWidget, VGroup> {
+    VGroup *_vgroup;
+public:
+    VSectionGroup(const std::string &title)
+    : VSection(title), WidgetGroupWrapper(_vgroup = new VGroup)
+    { layout()->addWidget(_vgroup); }
+};
+
+
+
+
 
 class VSection::SettingsMenuButton : public QToolButton {
     Q_OBJECT

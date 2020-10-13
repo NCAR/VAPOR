@@ -1,137 +1,144 @@
-#ifdef WIN32
-//Annoying unreferenced formal parameter warning
-#pragma warning( disable : 4100 )
-#endif
-
-#include <vapor/glutil.h>
-#include <qlineedit.h>
-#include <qscrollarea.h>
-#include <qcolordialog.h>
-#include <QFileDialog>
-#include <vector>
-#include <string>
-#include "vapor/FlowParams.h"
-#include "VariablesWidget.h"
 #include "FlowEventRouter.h"
-#include "EventRouter.h"
+#include "vapor/FlowParams.h"
+#include "PWidgets.h"
+#include "PFlowRakeRegionSelector.h"
 
 using namespace VAPoR;
+typedef FlowParams FP;
 
-//
-// Register class with object factory!!!
-//
-static RenderEventRouterRegistrar<FlowEventRouter> registrar(
-    FlowEventRouter::GetClassType()
-);
+static RenderEventRouterRegistrar<FlowEventRouter> registrar(FlowEventRouter::GetClassType());
 
-
-FlowEventRouter::FlowEventRouter( QWidget *parent, ControlExec *ce) 
-                    : QTabWidget(parent),
-	                  RenderEventRouter( ce, FlowParams::GetClassType())
+FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce)
+: RenderEventRouterGUI(ce, FlowParams::GetClassType())
 {
-	_variables = new FlowVariablesSubtab(this);
-	QScrollArea *qsvar = new QScrollArea(this);
-	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	_variables->adjustSize();
-	qsvar->setWidget(_variables);
-	qsvar->setWidgetResizable(true);
-	addTab(qsvar, "Variables");
-
-	_seeding = new FlowSeedingSubtab(this);
-	QScrollArea* qsseed = new QScrollArea(this);
-	qsseed->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	qsseed->setWidget(_seeding);
-	qsseed->setWidgetResizable(true);
-    _seedingTab = qsseed;
-	addTab(qsseed,"Seeding");
-
-	_appearance = new FlowAppearanceSubtab(this);
-	QScrollArea* qsapp = new QScrollArea(this);
-	qsapp->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	qsapp->setWidget(_appearance);
-	qsapp->setWidgetResizable(true);
-	addTab(qsapp,"Appearance");
-
-	_geometry = new FlowGeometrySubtab(this);
-	QScrollArea *qsgeo = new QScrollArea(this);
-	qsgeo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	qsgeo->setWidget(_geometry);
-	qsgeo->setWidgetResizable(true);
-	addTab(qsgeo, "Geometry");
-
-	_annotation = new FlowAnnotationSubtab(this);
-	QScrollArea *qsAnnotation = new QScrollArea(this);
-	qsAnnotation->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	qsAnnotation->setWidget(_annotation);
-	qsAnnotation->setWidgetResizable(true);
-	addTab(qsAnnotation, "Annotations");
-}
-
-void FlowEventRouter::GetWebHelp(
-	vector <pair <string, string> > &help
-) const {
-	help.clear();
-
-#ifdef VAPOR_3_0
-	help.push_back(make_pair(
-		"Flow Overview",
-		"http://www.vapor.ucar.edu/docs/vapor-gui-help/twoD#FlowOverview"
-	));
-
-	help.push_back(make_pair(
-		"Renderer control",
-		"http://www.vapor.ucar.edu/docs/vapor-how-guide/renderer-instances"
-	));
-
-	help.push_back(make_pair(
-		"Data accuracy control",
-		"http://www.vapor.ucar.edu/docs/vapor-how-guide/refinement-and-lod-control"
-	));
-
-	help.push_back(make_pair(
-		"Flow geometry options",
-		"http://www.vapor.ucar.edu/docs/vapor-gui-help/twoD#FlowGeometry"
-	));
-
-	help.push_back(make_pair(
-		"Flow Appearance settings",
-		"http://www.vapor.ucar.edu/docs/vapor-gui-help/twoD#HelloAppearance"
-	));
+    AddSubtab("Variables", new PGroup({
+        new PSection("Variable Selection", {
+            new S::PDimensionSelector,
+            new S::PXFieldVariableSelector,
+            new S::PYFieldVariableSelector,
+            (new S::PZFieldVariableSelector)->OnlyShowForDim(3),
+            new S::PColorMapVariableSelector,
+        }),
+        new PFidelitySection
+    }));
+    
+    _seedingTab =
+    AddSubtab("Seeding", new PGroup({
+        new PSection("Flow Integration Settings", {
+            new PEnumDropdown(FP::_isSteadyTag, {"Streamlines", "Pathlines"}, {true, false}, "Flow Type"),
+            (new Pif(FP::_isSteadyTag))->Equals(true)->Then({
+                new PEnumDropdown(FP::_flowDirectionTag, {"Forward", "Backward", "Bi-Directional"}, {(int)FlowDir::FORWARD, (int)FlowDir::BACKWARD, (int)FlowDir::BI_DIR}, "Flow Direction"),
+                (new PIntegerSliderEdit(FP::_steadyNumOfStepsTag, "Integration Steps"))->SetRange(0, 5000),
+            })->Else({
+                _pathlineLengthSlider = new PIntegerSliderEdit(FP::_pastNumOfTimeSteps, "Pathline Length"),
+                _pathlineInjectionSlider = new PIntegerSliderEdit(FP::_seedInjInterval, "Injection Interval"),
+            }),
+            new PDoubleInput(FP::_velocityMultiplierTag, "Vector Field Multiplier"),
+            new PCheckbox(FP::_xPeriodicTag, "X axis periodicity"),
+            new PCheckbox(FP::_yPeriodicTag, "Y axis periodicity"),
+            new PCheckbox(FP::_zPeriodicTag, "Z axis periodicity"),
+        }),
+        new PSection("Seed Distribution Settings", {
+            new PEnumDropdown(FP::_seedGenModeTag, {"Gridded", "Random", "Random w/ Bias", "List of seeds"}, {(int)FlowSeedMode::UNIFORM, (int)FlowSeedMode::RANDOM, (int)FlowSeedMode::RANDOM_BIAS, (int)FlowSeedMode::LIST}, "Seed distribution type"),
+            (new Pif(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::UNIFORM)->Then({
+                (new PIntegerSliderEdit(FP::_xGridNumOfSeedsTag, "X axis seeds"))->SetRange(1, 50),
+                (new PIntegerSliderEdit(FP::_yGridNumOfSeedsTag, "Y axis seeds"))->SetRange(1, 50),
+                (new PIntegerSliderEdit(FP::_zGridNumOfSeedsTag, "Z axis seeds"))->SetRange(1, 50),
+            }),
+            (new Pif(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::RANDOM)->Then({
+                (new PIntegerSliderEdit(FP::_randomNumOfSeedsTag, "Seed count"))->SetRange(1, 500),
+            }),
+            (new Pif(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::RANDOM_BIAS)->Then({
+                (new PIntegerSliderEdit(FP::_randomNumOfSeedsTag, "Seed count"))->SetRange(1, 500),
+                (new PDoubleSliderEdit(FP::_rakeBiasStrength, "Bias weight"))->SetRange(-10, 10),
+                new S::PVariableSelector(FP::_rakeBiasVariable)
+            }),
+            (new Pif(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::LIST)->Then({
+                new PFileOpenSelector(FP::_seedInputFilenameTag, "List of seeds file")
+            }),
+        }),
+        new PSection("Rake Region", {
+            new PFlowRakeRegionSelector1D(0),
+            new PFlowRakeRegionSelector1D(1),
+            new PFlowRakeRegionSelector1D(2),
+        }),
+        
+        new PSection("Write Flowlines to File", {
+            new PFileOpenSelector(FP::_flowlineOutputFilenameTag, "Target file"),
+            new PButton("Write to file", [](ParamsBase *p) { p->SetValueLong(FP::_needFlowlineOutputTag, "", true); })
+        }),
+    }));
+    
+    AddSubtab("Appearance", new PGroup({
+        new PTFEditor(RenderParams::_colorMapVariableNameTag),
+        new PSection("Appearance", {
+            new PEnumDropdown(FP::RenderTypeTag, {"Tubes", "Samples", "KLGWTH"}, {FP::RenderTypeStream, FP::RenderTypeSamples, FP::RenderTypeDensity}, "Render Type"),
+            (new Pif(FP::RenderTypeTag))->Equals(FP::RenderTypeStream)->Then({
+                new PCheckbox(FP::RenderGeom3DTag, "3D Geometry"),
+                (new PDoubleSliderEdit(FP::RenderRadiusScalarTag, "Radius Scalar"))->SetRange(0.1, 5)->EnableDynamicUpdate(),
+                new PCheckbox(FP::RenderShowStreamDirTag, "Show Stream Direction"),
+                (new PSubGroup({(new PIntegerSliderEdit(FP::RenderGlyphStrideTag, "Every N Samples"))->SetRange(1, 20)->EnableDynamicUpdate()}))->ShowBasedOnParam(FP::RenderShowStreamDirTag),
+            }),
+            (new Pif(FP::RenderTypeTag))->Equals(FP::RenderTypeSamples)->Then({
+                new PEnumDropdown(FP::RenderGlyphTypeTag, {"Circle", "Arrow"}, {FP::GlpyhTypeSphere, FP::GlpyhTypeArrow}, "Glyph Type"),
+                new PCheckbox(FP::RenderGeom3DTag, "3D Geometry"),
+                (new PDoubleSliderEdit(FP::RenderRadiusScalarTag, "Radius Scalar"))->SetRange(0.1, 5)->EnableDynamicUpdate(),
+                (new PIntegerSliderEdit(FP::RenderGlyphStrideTag, "Every N Samples"))->SetRange(1, 20)->EnableDynamicUpdate(),
+                new PCheckbox(FP::RenderGlyphOnlyLeadingTag, "Only Show Leading Sample"),
+            }),
+            (new Pif(FP::RenderTypeTag))->Equals(FP::RenderTypeDensity)->Then({
+                new PLabel("May not render correctly with other renderers"),
+                (new PDoubleSliderEdit(FP::RenderRadiusScalarTag, "Radius Scalar"))->SetRange(0.1, 5)->EnableDynamicUpdate(),
+                (new PDoubleSliderEdit(FlowParams::RenderDensityFalloffTag, "Density Falloff"))->SetRange(0.5, 10)->EnableDynamicUpdate()->SetTooltip("The exponential factor at which the intensity falls off along the width of the line"),
+                (new PDoubleSliderEdit(FlowParams::RenderDensityToneMappingTag, "Tone Mapping"))->SetRange(0, 1)->EnableDynamicUpdate()->SetTooltip("The overall color intensity of the line"),
+                (new PCheckbox("Invert"))->SetTooltip("For rendering on light backgrounds"),
+            }),
+            (new Pif(FP::RenderTypeTag))->Not()->Equals(FP::RenderTypeSamples)->Then({
+                new PCheckbox(FP::RenderFadeTailTag, "Fade Flow Tails"),
+                (new Pif(FP::RenderFadeTailTag))->Equals(true)->Then(new PSubGroup({
+                    (new PIntegerSliderEdit(FP::RenderFadeTailStartTag, "Fade Start Sample"))->SetRange(0, 100)->EnableDynamicUpdate()->SetTooltip("How far behind leading sample fade begins."),
+                    (new PIntegerSliderEdit(FP::RenderFadeTailLengthTag, "Fade Over N Samples"))->SetRange(1, 100)->EnableDynamicUpdate()->SetTooltip("Number of samples from opaque to transparent."),
+                    (new PIntegerSliderEdit(FP::RenderFadeTailStopTag, "Animate Steady"))->SetRange(0, 200)->EnableDynamicUpdate()->SetTooltip("Temporary solution for animating steady flow particles."),
+                })),
+            }),
+        }),
+#ifndef NDEBUG
+        (new PSection("Debug", {
+            new PCheckbox("old_render", "Old Render Code (Regressing Testing)")
+        }))->SetTooltip("Only accessible in debug build."),
 #endif
+    }));
+
+	AddSubtab("Geometry", new PGeometrySubtab);
+    AddSubtab("Annotation", new PAnnotationColorbarWidget);
+    
+    connect(this, &QTabWidget::currentChanged, this, &FlowEventRouter::tabChanged);
 }
 
 void FlowEventRouter::_updateTab(){
-
-	// The variable tab updates itself:
-	//
-	_variables->Update(
-		GetActiveDataMgr(),
-		_controlExec->GetParamsMgr(),
-		GetActiveParams()
-	);
-
-	_appearance->Update(
-		GetActiveDataMgr(),
-		_controlExec->GetParamsMgr(),
-		GetActiveParams()
-	);
-	_seeding->Update(
-		GetActiveDataMgr(),
-		_controlExec->GetParamsMgr(),
-		GetActiveParams()
-    );
-	_geometry->Update(
-		_controlExec->GetParamsMgr(),
-		GetActiveDataMgr(),
-		GetActiveParams()
-	);
-	_annotation->Update(
-		_controlExec->GetParamsMgr(),
-		GetActiveDataMgr(),
-		GetActiveParams()
-	);
+    RenderEventRouterGUI::_updateTab();
     
-    // Sync selected tab with GUIStateParams
+    int numTS = GetActiveDataMgr()->GetNumTimeSteps();
+    _pathlineLengthSlider   ->SetRange(0, numTS-1);
+    _pathlineInjectionSlider->SetRange(0, numTS-1);
+    
+    syncOpenTabWithGUIStateParams();
+}
+
+string FlowEventRouter::_getDescription() const
+{
+	return "Computes and displays steady or unsteady flow trajectories.\n";
+}
+
+void FlowEventRouter::tabChanged(int i)
+{
+    GUIStateParams *gp = (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
+    bool setToSeedingTab = widget(i) == _seedingTab;
+    gp->SetFlowSeedTabActive(setToSeedingTab);
+}
+
+void FlowEventRouter::syncOpenTabWithGUIStateParams()
+{
     GUIStateParams *gp = (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
     if (gp->IsFlowSeedTabActive()) {
         if (currentWidget() != _seedingTab) {
@@ -147,10 +154,3 @@ void FlowEventRouter::_updateTab(){
         }
     }
 }
-
-string FlowEventRouter::_getDescription() const {
-	return(
-	"Displays steady or unsteady flow trajectories through the user's domain.\n"
-	);
-}
-
