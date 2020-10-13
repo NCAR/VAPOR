@@ -97,7 +97,7 @@ int Visualizer::resizeGL( int wid, int ht )
 }
 
 int Visualizer::_getCurrentTimestep() const {
-	vector <string> dataSetNames = _dataStatus->GetDataMgrNames();
+	vector <string> dataSetNames = _paramsMgr->GetDataMgrNames();
 
 	bool first = true;
 	size_t min_ts = 0;
@@ -168,7 +168,7 @@ int Visualizer::paintEvent(bool fast)
     MatrixManager *mm = _glManager->matrixManager;
 
 	//Do not proceed if there is no DataMgr
-	if (! _dataStatus->GetDataMgrNames().size()) return(0);
+	if (! _paramsMgr->GetDataMgrNames().size()) return(0);
     
     // Do not proceed with invalid viewport
     // This can occur sometimes on Qt startup
@@ -584,7 +584,8 @@ int Visualizer:: _captureImage(std::string path)
         goto captureImageEnd;
     
     if (geoTiffOutput) {
-        string projString = _dataStatus->GetDataMgr(_dataStatus->GetDataMgrNames()[0])->GetMapProjection();
+		VAssert(_paramsMgr->GetDataMgrNames().size());
+        string projString = _dataStatus->GetDataMgr(_paramsMgr->GetDataMgrNames()[0])->GetMapProjection();
         
         vector<double> dataMinExtents, dataMaxExtents;
         _dataStatus->GetActiveExtents(_paramsMgr, _winName, _getCurrentTimestep(), dataMinExtents, dataMaxExtents);
