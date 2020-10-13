@@ -9,7 +9,6 @@ VSection::VSection(const std::string &title)
     _tab()->setLayout(new QVBoxLayout);
     layout()->setMargin(12);
     setStyleSheet(_createStylesheet());
-    setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
 }
 
 QVBoxLayout *VSection::layout() const

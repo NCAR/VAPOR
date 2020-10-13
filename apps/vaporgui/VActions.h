@@ -10,13 +10,13 @@ class VStringLineEdit;
 class VIntLineEdit;
 class VDoubleLineEdit;
 
-#include "VContainer.h"
+#include "VHBoxWidget.h"
 
 class VLineAction : public QWidgetAction {
     Q_OBJECT
 
 public:
-    VLineAction( const std::string& title, VContainer* container );
+    VLineAction( const std::string& title, VHBoxWidget* container );
 };
 
 //!

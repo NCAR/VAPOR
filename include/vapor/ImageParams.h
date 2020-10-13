@@ -124,7 +124,7 @@ public:
     return value;
   }
   
-private:
+public:
   static const std::string          _fileNameTag;
   static const std::string          _isGeoRefTag;
   static const std::string          _ignoreTransparencyTag;

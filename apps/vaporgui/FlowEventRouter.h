@@ -1,89 +1,34 @@
-#ifndef FLOWEVENTROUTER_H
-#define FLOWEVENTROUTER_H
+#pragma once
 
-
-#include <qobject.h>
-#include <vapor/MyBase.h>
-#include <vapor/FlowRenderer.h>
-#include "GL/glew.h"
 #include "RenderEventRouter.h"
-#include "VariablesWidget.h"
-#include "FlowSubtabs.h"
+#include <vapor/FlowRenderer.h>
 
-QT_USE_NAMESPACE
+class PSliderEdit;
 
-namespace VAPoR {
-	class ControlExec;
-}
-
-//!
 //! \class FlowEventRouter
 //! \ingroup Public_GUI
-//! \brief An EventRouter subclass that handles the Flow tab in the GUI
-//! \author Scott Pearse 
-//! \version 3.0
-//! \date  April 2016
+//! \brief Flow renderer GUI
+//! \author Stas Jaroszynski
 
-//!	The FlowEventRouter class manages the Flow gui.  There are three sub-tabs,
-//! for variables, geometry, and appearance. 
-
-class FlowEventRouter : public QTabWidget,  public RenderEventRouter {
-
-Q_OBJECT
-
-public: 
-
- FlowEventRouter(
-	QWidget *parent, VAPoR::ControlExec *ce
- );
-
- void GetWebHelp(
-	vector <pair <string, string> > &help
- ) const;
-
- //
- static string GetClassType() {
-	 return(VAPoR::FlowRenderer::GetClassType());
- }
- string GetType() const {return GetClassType(); }
+class FlowEventRouter : public RenderEventRouterGUI {
+    QWidget *_seedingTab;
+    PSliderEdit *_pathlineLengthSlider;
+    PSliderEdit *_pathlineInjectionSlider;
     
-    virtual DimFlags GetDimFlags() const { return _variables->_variablesWidget->GetDimFlags(); }
-
- virtual bool Supports2DVariables() const { return true; }
- virtual bool Supports3DVariables() const { return true; }
-
+public:
+    FlowEventRouter(QWidget *parent, VAPoR::ControlExec *ce);
+    static string GetClassType() { return VAPoR::FlowRenderer::GetClassType(); }
+    string GetType() const {return GetClassType(); }
+    bool Supports2DVariables() const { return true; }
+    bool Supports3DVariables() const { return true; }
+    
 protected:
- void _updateTab();
- virtual string _getDescription() const;
-                      
- virtual string _getSmallIconImagePath() const {
-	return("Flow_small.png");
- }   
- virtual string _getIconImagePath() const {
-	return("Flow.png");
- }
+    void _updateTab();
+    string _getDescription() const;
+    string _getSmallIconImagePath() const { return "Flow_small.png"; }
+    string _getIconImagePath() const { return "Flow.png"; }
 
 private:
-
- FlowEventRouter() {} 
-
-
- //! Override default wheel behavior on the tab.  This has the effect of 
- //! ignoring wheel events over the tab.  This is because wheel events will always
- //! affect the combo boxes and other widgets in the tab, and it would be confusing
- //! if wheel events also scrolled the tab itself
-  void wheelEvent(QWheelEvent*) {}
-
- //! VariablesWidget is used as Variables tab
- FlowVariablesSubtab  *_variables;
- FlowGeometrySubtab   *_geometry;
- FlowAppearanceSubtab *_appearance;
- FlowSeedingSubtab    *_seeding;
-    QWidget *_seedingTab;
- FlowAnnotationSubtab *_annotation;
-
+    void tabChanged(int i);
+    void syncOpenTabWithGUIStateParams();
 };
-
-#endif //FLOWEVENTROUTER_H 
-
-

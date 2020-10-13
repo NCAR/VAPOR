@@ -27,10 +27,20 @@ enum class FlowDir : int
     BI_DIR      = 2 
 };
 
+class FlowParams;
+class PARAMS_API FakeRakeBox : public Box {
+public:
+    using Box::Box;
+    FlowParams *parent = nullptr;
+    void SetExtents(const vector <double> &minExt, const vector <double> &maxExt) override;
+};
 
 
 class PARAMS_API FlowParams : public RenderParams 
 {
+    StateSave _fakeRakeStateSave;
+    FakeRakeBox *_fakeRakeBox = nullptr;
+    bool _initialized = false;
 public:
     
     enum RenderType { RenderTypeStream, RenderTypeSamples, RenderTypeDensity};
@@ -43,6 +53,9 @@ public:
                 ParamsBase::StateSave*   stateSave, 
                 XmlNode*                 xmlNode );
 
+    FlowParams(const FlowParams &rhs);
+    FlowParams &operator=( const FlowParams& rhs );
+    
     virtual ~FlowParams();
 
 	virtual int Initialize() override;
@@ -88,6 +101,7 @@ public:
      * If the rake wasn't set by users, it returns a vector containing nans.
      * If it represents a 2D area, then it will contain the first 4 elements.
      */
+    Box *GetRakeBox();
     std::vector<float>  GetRake() const;
     void                SetRake( const std::vector<float>& );
 
@@ -122,10 +136,10 @@ public:
      //! \copydoc RenderParams::GetRenderDim()
      //
     virtual  size_t GetRenderDim() const override {
-		for (auto p = GetFieldVariableNames().begin(); p != GetFieldVariableNames().begin(); ++p) {
-			if (*p != "") return(_dataMgr->GetNumDimensions(*p));
+		for (const auto &p : GetFieldVariableNames()) {
+			if (!p.empty()) return _dataMgr->GetNumDimensions(p);
 		}
-		return(0);
+        return GetBox()->IsPlanar() ? 2 : 3;
     }
     
     static const std::string RenderTypeTag;
@@ -151,9 +165,6 @@ public:
     static const std::string PhongDiffuseTag;
     static const std::string PhongSpecularTag;
     static const std::string PhongShininessTag;
-    
-
-private:
 
     static const std::string    _isSteadyTag           ; 
     static const std::string    _velocityMultiplierTag ; 
@@ -163,13 +174,17 @@ private:
     static const std::string    _flowlineOutputFilenameTag ;
     static const std::string    _flowDirectionTag      ; 
     static const std::string    _needFlowlineOutputTag ;
-    static const std::string    _periodicTag           ; 
+    static const std::string    _xPeriodicTag          ;
+    static const std::string    _yPeriodicTag          ;
+    static const std::string    _zPeriodicTag          ;
     static const std::string    _rakeTag               ; 
     static const std::string    _rakeBiasVariable      ; 
     static const std::string    _rakeBiasStrength      ; 
     static const std::string    _pastNumOfTimeSteps    ;
     static const std::string    _seedInjInterval       ; 
-    static const std::string    _gridNumOfSeedsTag     ; 
+    static const std::string    _xGridNumOfSeedsTag    ;
+    static const std::string    _yGridNumOfSeedsTag    ;
+    static const std::string    _zGridNumOfSeedsTag    ;
     static const std::string    _randomNumOfSeedsTag   ; 
 
     // maps between ints and "human readable" strings

@@ -146,11 +146,13 @@ public:
 	static string GetClassType() {
 		return("ColorBarSettingParams");
 	}
-private:
+public:
 
 	static const string _colorbarBackColorTag;
-	static const string _colorbarSizeTag;
-	static const string _colorbarPositionTag;
+	static const string _colorbarSizeXTag;
+    static const string _colorbarSizeYTag;
+	static const string _colorbarPositionXTag;
+    static const string _colorbarPositionYTag;
 	static const string _colorbarFontSizeTag;
 	static const string _colorbarNumDigitsTag;
 	static const string _colorbarTitleTag;

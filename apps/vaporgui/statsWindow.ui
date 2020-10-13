@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>981</width>
-    <height>423</height>
+    <width>1009</width>
+    <height>441</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -65,11 +65,11 @@
             <attribute name="horizontalHeaderVisible">
              <bool>true</bool>
             </attribute>
-            <attribute name="horizontalHeaderDefaultSectionSize">
-             <number>129</number>
-            </attribute>
             <attribute name="horizontalHeaderMinimumSectionSize">
              <number>21</number>
+            </attribute>
+            <attribute name="horizontalHeaderDefaultSectionSize">
+             <number>129</number>
             </attribute>
             <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
              <bool>false</bool>
@@ -299,42 +299,10 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0,1,0,0">
+       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,1,0,0">
         <property name="spacing">
          <number>12</number>
         </property>
-        <item>
-         <widget class="GeometryWidget" name="MyGeometryWidget" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>50</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="CopyRegionWidget" name="MyCopyRegionWidget" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>20</height>
-           </size>
-          </property>
-         </widget>
-        </item>
         <item>
          <widget class="Line" name="line_2">
           <property name="minimumSize">
@@ -556,18 +524,6 @@
    <class>FidelityWidget</class>
    <extends>QWidget</extends>
    <header>FidelityWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>CopyRegionWidget</class>
-   <extends>QWidget</extends>
-   <header>CopyRegionWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>GeometryWidget</class>
-   <extends>QWidget</extends>
-   <header>GeometryWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
