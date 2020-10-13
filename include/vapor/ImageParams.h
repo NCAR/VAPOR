@@ -95,7 +95,7 @@ public:
     SetValueLong( _orientationTag, "set orientation value", val );
   }
 
-private:
+public:
   static const std::string          _fileNameTag;
   static const std::string          _isGeoRefTag;
   static const std::string          _ignoreTransparencyTag;

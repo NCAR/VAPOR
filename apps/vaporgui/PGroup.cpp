@@ -1,25 +1,16 @@
 #include "PGroup.h"
 #include <vapor/ParamsBase.h>
 #include <QVBoxLayout>
-#include "VSubGroup.h"
+#include "VGroup.h"
 
 PGroup::PGroup()
-: PGroup(new QWidget)
-{
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->setMargin(0);
-    _widget->setLayout(layout);
-}
+: PGroup(new VGroup) {}
 
-PGroup::PGroup(QWidget *w)
-: PWidget("", _widget = w) {}
+PGroup::PGroup(const List &widgets)
+: PGroup() { AddM(widgets); }
 
-PGroup *PGroup::Add(PWidget *pw)
-{
-    _children.push_back(pw);
-    _widget->layout()->addWidget(pw);
-    return this;
-}
+PGroup::PGroup(VGroup *w)
+: PWidget("", _widget = w), WidgetGroupWrapper(w) {}
 
 void PGroup::updateGUI() const
 {
@@ -33,4 +24,8 @@ void PGroup::updateGUI() const
 
 
 
-PSubGroup::PSubGroup() : PGroup(new VSubGroup) {}
+PSubGroup::PSubGroup()
+: PGroup(new VSubGroup) {}
+
+PSubGroup::PSubGroup(const List &widgets)
+: PSubGroup() { AddM(widgets); }

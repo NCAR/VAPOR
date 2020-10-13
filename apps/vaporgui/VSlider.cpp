@@ -7,7 +7,7 @@
 #define NUM_STEPS 100
 
 VSlider::VSlider( double min, double max )
-: VContainer(),
+: VHBoxWidget(),
     _min(0.0),
     _max(0.0),
     _stepSize(1.0)
