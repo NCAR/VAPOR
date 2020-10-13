@@ -1299,6 +1299,10 @@ void MainForm::sessionOpenHelper(string fileName) {
 
     _vizWinMgr->Restart();
     _tabMgr->Restart();
+
+    // Close data can't be undone
+    //
+    _controlExec->UndoRedoClear();
 }
 
 void MainForm::sessionOpen(QString qfileName) {
@@ -1374,7 +1378,7 @@ void MainForm::sessionOpen(QString qfileName) {
 
     // Session load can't currently be undone
     //
-    _paramsMgr->UndoRedoClear();
+    _controlExec->UndoRedoClear();
 
     _stateChangeCB();
 }
@@ -1549,6 +1553,10 @@ void MainForm::closeDataHelper(string dataSetName) {
     p->RemoveOpenDateSet(dataSetName);
 
     _controlExec->CloseData(dataSetName);
+
+    // Close data can't be undone
+    //
+    _controlExec->UndoRedoClear();
 }
 
 // Open a data set and remove from database. If data with same name
@@ -1560,20 +1568,8 @@ bool MainForm::openDataHelper(
     const vector<string> &files,
     const vector<string> &options) {
 
-    _paramsMgr->BeginSaveStateGroup("Load data");
-
     GUIStateParams *p = GetStateParams();
     vector<string> dataSetNames = p->GetOpenDataSetNames();
-
-#ifdef VAPOR3_0_0_ALPHA
-    // If data set with this name already exists, close it
-    //
-    for (int i = 0; i < dataSetNames.size(); i++) {
-        if (dataSetNames[i] == dataSetName) {
-            closeDataHelper(dataSetName);
-        }
-    }
-#endif
 
     // Open the data set
     //
@@ -1581,7 +1577,6 @@ bool MainForm::openDataHelper(
         files, options, dataSetName, format);
     if (rc < 0) {
         MSG_ERR("Failed to load data");
-        _paramsMgr->EndSaveStateGroup();
         return (false);
         ;
     }
@@ -1593,7 +1588,9 @@ bool MainForm::openDataHelper(
 
     _tabMgr->LoadDataNotify(dataSetName);
 
-    _paramsMgr->EndSaveStateGroup();
+    // Opening data is not an undoable event :-(
+    //
+    _controlExec->UndoRedoClear();
     return (true);
 }
 
@@ -1641,11 +1638,8 @@ void MainForm::loadDataHelper(
         options.push_back(p->GetProjectionString());
     }
 
-    _paramsMgr->BeginSaveStateGroup("Load data");
-
     bool status = openDataHelper(dataSetName, format, myFiles, options);
     if (!status) {
-        _paramsMgr->EndSaveStateGroup();
         return;
     }
 
@@ -1669,7 +1663,9 @@ void MainForm::loadDataHelper(
 
     _timeStepEditValidator->setRange(0, ds->GetTimeCoordinates().size() - 1);
 
-    _paramsMgr->EndSaveStateGroup();
+    // Opening data is not an undoable event :-(
+    //
+    _controlExec->UndoRedoClear();
 }
 
 //Load data into current session
@@ -1706,6 +1702,14 @@ void MainForm::closeData(string fileName) {
 
     _tabMgr->Update();
     _vizWinMgr->Reinit();
+
+    // Close data can't be undone
+    //
+    _controlExec->UndoRedoClear();
+
+    if (!_controlExec->GetDataNames().size()) {
+        sessionNew();
+    }
 }
 
 //import WRF data into current session
@@ -1816,7 +1820,7 @@ void MainForm::sessionNew() {
 
     // Session load can't currently be undone
     //
-    _paramsMgr->UndoRedoClear();
+    _controlExec->UndoRedoClear();
 
     _stateChangeFlag = false;
     _sessionNewFlag = true;
@@ -2013,7 +2017,7 @@ void MainForm::_setProj4String(string proj4String) {
 
     // Map projection changes can't currently be undone
     //
-    _paramsMgr->UndoRedoClear();
+    _controlExec->UndoRedoClear();
 
     _App->installEventFilter(this);
 }
