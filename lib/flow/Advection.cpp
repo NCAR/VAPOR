@@ -515,6 +515,7 @@ Advection::_calcAdjustFactor( const Particle& p2, const Particle& p1,
         return 1.0f;
 }
 
+#if 0
 std::FILE*
 Advection::_prepareFileWrite( const std::string& filename, bool append ) const
 {
@@ -539,7 +540,6 @@ Advection::_prepareFileWrite( const std::string& filename, bool append ) const
     return f;
 }
 
-#if 0
 int
 Advection::OutputStreamsGnuplotMaxPart( const std::string&  filename, 
                                         size_t              maxPart, 
