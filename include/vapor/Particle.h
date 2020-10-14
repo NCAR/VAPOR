@@ -24,7 +24,8 @@ enum FLOW_ERROR_CODE    // these enum values are available in the flow namespace
     TIME_ERROR           = -5,
     GRID_ERROR           = -6,
     SIZE_MISMATCH        = -7,
-    PARAMS_ERROR         = -8
+    PARAMS_ERROR         = -8,
+    NO_FLOAT             = -9
 };
 
 // Particle is not expected to serve as a base class.

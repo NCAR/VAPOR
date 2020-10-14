@@ -69,8 +69,6 @@ public:
     // Retrieve the maximum number of particles in any stream
     size_t GetMaxNumOfPart() const;
 
-    int  InputStreamsGnuplot(  const std::string& filename );
-
     // Query properties (most are properties of the velocity field)
     int  CheckReady() const;
 

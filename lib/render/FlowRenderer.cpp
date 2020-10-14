@@ -197,16 +197,16 @@ int FlowRenderer::_paintGL( bool fast )
         // In the case of unsteady flow, output particles that are up to 
         // the advection time step.
         if( params->GetIsSteady() ) {
-            rv = flow::OutputGnuplotNumSteps( &_advection, 
-                                              params->GetFlowlineOutputFilename().c_str(),
-                                              params->GetSteadyNumOfSteps(),
-                                              false );
+            rv = flow::OutputFlowlinesNumSteps( &_advection, 
+                                                params->GetFlowlineOutputFilename().c_str(),
+                                                params->GetSteadyNumOfSteps(),
+                                                false );
         }
         else {
-            rv = flow::OutputGnuplotMaxTime( &_advection,
-                                             params->GetFlowlineOutputFilename().c_str(),
-                                             _timestamps.at( params->GetCurrentTimestep() ),
-                                             false );
+            rv = flow::OutputFlowlinesMaxTime( &_advection,
+                                               params->GetFlowlineOutputFilename().c_str(),
+                                               _timestamps.at( params->GetCurrentTimestep() ),
+                                               false );
         }
         if( rv != 0 ) {
             MyBase::SetErrMsg("Output flow lines wrong!");
@@ -215,16 +215,16 @@ int FlowRenderer::_paintGL( bool fast )
 
         if( _2ndAdvection ) {   // bi-directional advection
             if( params->GetIsSteady() ) {
-                rv = flow::OutputGnuplotNumSteps( _2ndAdvection.get(),
-                                                  params->GetFlowlineOutputFilename().c_str(), 
-                                                  params->GetSteadyNumOfSteps(),
-                                                  true );
+                rv = flow::OutputFlowlinesNumSteps( _2ndAdvection.get(),
+                                                    params->GetFlowlineOutputFilename().c_str(), 
+                                                    params->GetSteadyNumOfSteps(),
+                                                    true );
             }
             else {
-                rv = flow::OutputGnuplotMaxTime( _2ndAdvection.get(),
-                                                  params->GetFlowlineOutputFilename().c_str(), 
-                                                  _timestamps.at( params->GetCurrentTimestep() ),
-                                                  true );
+                rv = flow::OutputFlowlinesMaxTime( _2ndAdvection.get(),
+                                                   params->GetFlowlineOutputFilename().c_str(), 
+                                                   _timestamps.at( params->GetCurrentTimestep() ),
+                                                   true );
             }
             if( rv != 0 ) {
                     MyBase::SetErrMsg("Output flow lines wrong!");
@@ -270,7 +270,8 @@ int FlowRenderer::_paintGL( bool fast )
         /* Read seeds from a file is a special case, so we put it up front */
         if( _cache_seedGenMode == FlowSeedMode::LIST )
         {
-            rv = _advection.InputStreamsGnuplot( params->GetSeedInputFilename() );
+            //rv = _advection.InputStreamsGnuplot( params->GetSeedInputFilename() );
+            rv = flow::InputSeedsCSV( params->GetSeedInputFilename(), &_advection );
             if( rv != 0 )
             {
                 MyBase::SetErrMsg("Input seed list wrong!");
@@ -284,7 +285,8 @@ int FlowRenderer::_paintGL( bool fast )
             }
             if( _2ndAdvection )     // bi-directional advection
             {
-                _2ndAdvection->InputStreamsGnuplot( params->GetSeedInputFilename() );
+                //_2ndAdvection->InputStreamsGnuplot( params->GetSeedInputFilename() );
+                flow::InputSeedsCSV( params->GetSeedInputFilename(), _2ndAdvection.get() );
                 rv = _updateAdvectionPeriodicity( _2ndAdvection.get() ); 
                 if( rv != 0 )
                 {

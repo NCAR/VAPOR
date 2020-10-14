@@ -1,11 +1,14 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <cctype>
 #include "vapor/AdvectionIO.h"
 
-auto flow::OutputGnuplotNumSteps( const Advection*  adv,
-                                  const char*       filename,
-                                  size_t            numSteps,
-                                  bool              append ) -> int
+auto flow::OutputFlowlinesNumSteps( const Advection*  adv,
+                                    const char*       filename,
+                                    size_t            numSteps,
+                                    bool              append ) -> int
 {
     std::FILE* f = nullptr;
     if( append ) {
@@ -59,10 +62,10 @@ auto flow::OutputGnuplotNumSteps( const Advection*  adv,
 }
 
 
-auto flow::OutputGnuplotMaxTime( const Advection*  adv,
-                                 const char*       filename,
-                                 float             maxTime,
-                                 bool              append ) -> int
+auto flow::OutputFlowlinesMaxTime( const Advection*  adv,
+                                   const char*       filename,
+                                   float             maxTime,
+                                   bool              append ) -> int
 {
     std::FILE* f = nullptr;
     if( append ) {
@@ -110,6 +113,58 @@ auto flow::OutputGnuplotMaxTime( const Advection*  adv,
     }
 
     std::fclose( f );
+
+    return 0;
+}
+
+auto flow::InputSeedsCSV( const std::string& filename,
+                          Advection*         adv ) -> int
+{
+    std::ifstream ifs( filename );
+    if( !ifs.is_open() )
+        return FILE_ERROR;
+
+    std::vector<Particle> newSeeds;
+
+    for( std::string line; std::getline( ifs, line ); )
+    {
+        // remove spaces/tabs in this line
+        line.erase( std::remove_if( line.begin(), line.end(), 
+                    [](unsigned char c){return std::isspace(c);}), line.end() );
+
+        // skip this line if it's empty
+        if( line.empty() )      
+            continue;
+
+        // If leading by a #, then skip it.
+        if( line.front() == '#' )
+            continue;
+
+        // Now try to parse numbers separated by comma
+        std::stringstream ss( line );
+        std::vector<float> valFloat;
+        valFloat.reserve( 4 );
+        for( std::string tmp; std::getline( ss, tmp, ',' ); ) {
+            try{ valFloat.push_back( std::stof( tmp ) ); }
+            catch( const std::invalid_argument& e ) {
+                ifs.close();
+                return NO_FLOAT;
+            }
+            if( valFloat.size() >= 4 ) // we parse at most 4 values, and discard the rest of this line.
+                break;
+        }
+
+        if( valFloat.size() < 3 ){   // less than 3 values provided in this line
+            ifs.close();
+            return NO_FLOAT;
+        }
+
+        newSeeds.emplace_back( valFloat[0], valFloat[1], valFloat[2], valFloat[3] );
+    }
+    ifs.close();
+
+    if( !newSeeds.empty() )
+        adv->UseSeedParticles( newSeeds );
 
     return 0;
 }
