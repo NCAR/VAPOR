@@ -469,6 +469,7 @@ void VaporField::UpdateParamAndVarNames( const VAPoR::FlowParams* p )
 void VaporField::UpdateParams( const VAPoR::FlowParams* p )
 {
     _params = p;
+    IsSteady = p->GetIsSteady();
 }
 
 

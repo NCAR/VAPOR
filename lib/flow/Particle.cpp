@@ -29,11 +29,11 @@ Particle::Particle( float x, float y, float z, float t, float val )
 
 void Particle::AttachProperty( float v )
 {
-    auto itr = _properties.cbefore_begin();  
-    for( uint32_t i = 0; i < _property_size; i++ )
-        ++itr;
+    auto before_itr = _properties.cbefore_begin();  
+    for( auto itr = _properties.cbegin(); itr != _properties.cend(); ++itr )
+        ++before_itr;
 
-    _properties.insert_after( itr, v );
+    _properties.insert_after( before_itr, v );
     _property_size++;
 }
 
@@ -46,6 +46,21 @@ void Particle::ClearProperty()
 {
     _properties.clear();
     _property_size = 0;
+}
+    
+void Particle::ClearProperty( size_t target_i )
+{
+    size_t current_i = 0;
+    auto before_it = _properties.cbefore_begin();
+    for( auto it = _properties.cbegin(); it != _properties.cend(); ++it ) {
+        if( current_i == target_i ){
+            _properties.erase_after( before_it );
+            _property_size--;
+            break;
+        }
+        ++current_i;
+        ++before_it;
+    }
 }
 
 void Particle::SetSpecial( bool isSpecial )

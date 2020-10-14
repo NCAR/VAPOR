@@ -153,17 +153,44 @@ int FlowRenderer::_paintGL( bool fast )
 
     if( params->GetNeedFlowlineOutput() ) {
 
-        // First check if there are additional variables to sample along pathlines.
+        // Retrieve additional variables that users require to sample
         std::string longString = params->GetFlowOutputMoreVariables();
-        auto addiVars = this->_parseAdditionalVariables( longString );
+        const auto addiVars = this->_parseAdditionalVariables( longString );
 
+        // Identify variables that an advection already has, but the user doesn't 
+        // include in addiVars. Remove them.
+        auto removeVars = _advection.GetPropertyVarNames();
+        auto containV = [&addiVars](const std::string& v) {return 
+                        std::find(addiVars.cbegin(), addiVars.cend(), v) != addiVars.cend();};
+        removeVars.erase( std::remove_if( removeVars.begin(), removeVars.end(), containV ),
+                          removeVars.end() );
+        for( const auto& rmV : removeVars ) {
+            auto availVars = _advection.GetPropertyVarNames();
+            size_t rmI = 0;
+            for( size_t i = 0; i < availVars.size(); i++ )
+                if( rmV == availVars[i] ) {
+                    rmI = i;
+                    break;
+                }
+            _advection.RemoveParticleProperty( rmI );
 
+            if( _2ndAdvection )
+                _2ndAdvection->RemoveParticleProperty( rmI );
+        }
+                     
+        // Note that the advection class will do nothing if this variable already exists.
+        for( const auto& v : addiVars ) {
+            // Create a VaporField with this variable
+            flow::VaporField varField( 2 );
+            varField.AssignDataManager( _dataMgr );
+            varField.UpdateParams( params );
+            varField.ScalarName = v;
 
-
-
-
-
-
+            // Sample values along the pathlines
+            _advection.CalculateParticleProperties( &varField );
+            if( _2ndAdvection )
+                _2ndAdvection->CalculateParticleProperties( &varField );
+        }
 
         // In case of steady flow, output the number of particles that 
         // equals to the advection steps plus one.
@@ -180,11 +207,10 @@ int FlowRenderer::_paintGL( bool fast )
                                              params->GetFlowlineOutputFilename().c_str(),
                                              _timestamps.at( params->GetCurrentTimestep() ),
                                              false );
-
         }
         if( rv != 0 ) {
-                MyBase::SetErrMsg("Output flow lines wrong!");
-                return rv;
+            MyBase::SetErrMsg("Output flow lines wrong!");
+            return rv;
         }
 
         if( _2ndAdvection ) {   // bi-directional advection

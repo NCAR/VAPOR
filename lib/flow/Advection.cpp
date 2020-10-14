@@ -1,6 +1,7 @@
 #include <iostream>
 #include "vapor/Advection.h"
 #include <fstream>
+#include <algorithm>
 
 using namespace flow;
 
@@ -414,6 +415,14 @@ int Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
 
 int Advection::CalculateParticleProperties( Field* scalar )
 {
+    // Test if this scalar property is already calculated.
+    if( std::find( _propertyVarNames.cbegin(), _propertyVarNames.cend(), scalar->ScalarName )
+        != _propertyVarNames.cend() )
+        return 0;
+
+    // Proceed if there is no current scalar property
+    _propertyVarNames.emplace_back( scalar->ScalarName );
+
     if( scalar->IsSteady ) {
         if( scalar->LockParams() != 0 )
             return PARAMS_ERROR;
@@ -690,12 +699,28 @@ Advection::GetMaxNumOfPart() const
     return max;
 }
 
+
 void Advection::ClearParticleProperties()
 {
+    _propertyVarNames.clear();
     for( auto& stream : _streams )
         for( auto& part : stream )
             part.ClearProperty();
 }
+    
+
+void Advection::RemoveParticleProperty( size_t i )
+{
+    if( i >= _propertyVarNames.size() )
+        return;
+    else{
+        _propertyVarNames.erase( _propertyVarNames.begin() + i );
+        for( auto& stream : _streams )
+            for( auto& part : stream )
+                part.ClearProperty( i );
+    }
+}
+
 
 void Advection::ResetParticleValues()
 {

@@ -55,6 +55,9 @@ public:
     void ResetParticleValues( );
     // Clear all existing properties of a particle
     void ClearParticleProperties( );
+    // Clear particle property at a certain index. 
+    // If the index is out of bound, then nothing is done.
+    void RemoveParticleProperty( size_t i );
 
     // Set advection basics
     void UseSeedParticles( const std::vector<Particle>& seeds );
