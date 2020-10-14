@@ -572,6 +572,7 @@ int ControlExec::OpenData(
 	int rc = _dataStatus->Open(files, options, dataSetName, typ);
 	if (rc < 0) {
 		SetErrMsg("Failure to open data set of type \"%s\"", typ.c_str());
+		UndoRedoClear();
 		return -1;
 	}
 
@@ -592,6 +593,7 @@ int ControlExec::OpenData(
 				"Failure to initialize application renderer \"%s\"",
 				appRenderParams[i]->GetName().c_str()
 			);
+			UndoRedoClear();
 			return(-1);
 		}
 	}
@@ -600,6 +602,7 @@ int ControlExec::OpenData(
 	//
 	rc = openDataHelper(true);
 
+	UndoRedoClear();
 	return(rc);
 }
 
@@ -634,6 +637,7 @@ void ControlExec::CloseData(string dataSetName) {
 		
 	_paramsMgr->RemoveDataMgr(dataSetName);
 
+	UndoRedoClear();
 }
 
 
