@@ -365,7 +365,7 @@ int Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
                     continue;
 
                 float value;
-                int rv = scalar->GetScalar( p.time, p.location, value, false );
+                int rv = scalar->GetScalar( p.time, p.location, value );
                 if( rv == 0 )       // The end of a stream could be outside of the volume,
                     p.value = value;// so let's only color it when the return value is 0.
             }
@@ -393,7 +393,7 @@ int Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
                         continue;
 
                     float val;
-                    int rv = scalar->GetScalar( p.time, p.location, val, false );
+                    int rv = scalar->GetScalar( p.time, p.location, val );
                     if( rv == 0 )
                         p.value = val;
                 }
@@ -421,7 +421,7 @@ Advection::CalculateParticleProperties( Field* scalar )
             {
                 auto& p = s[i];
                 float value;
-                int rv = scalar->GetScalar( p.time, p.location, value, false );
+                int rv = scalar->GetScalar( p.time, p.location, value );
                 if( rv == 0 )   // A particle could be out of the volume, so we only
                     p.AttachProperty( value );  // attach property when returns 0.
             }
@@ -436,7 +436,7 @@ int
 Advection::_advectEuler( Field* velocity, const Particle& p0, float dt, Particle& p1 ) const
 {
     glm::vec3 v0;
-    int rv  = velocity->GetVelocity( p0.time, p0.location, v0, false );
+    int rv  = velocity->GetVelocity( p0.time, p0.location, v0 );
     if( rv != 0 )
         return rv;
     p1.location = p0.location + dt * v0;
@@ -450,16 +450,16 @@ Advection::_advectRK4( Field* velocity, const Particle& p0, float dt, Particle& 
     glm::vec3 k1, k2, k3, k4;
     float dt2 = dt * 0.5f;
     int rv;
-    rv = velocity->GetVelocity( p0.time,       p0.location,            k1, false );
+    rv = velocity->GetVelocity( p0.time,       p0.location,            k1 );
     if( rv != 0 )
         return rv;
-    rv = velocity->GetVelocity( p0.time + dt2, p0.location + dt2 * k1, k2, false );
+    rv = velocity->GetVelocity( p0.time + dt2, p0.location + dt2 * k1, k2 );
     if( rv != 0 )
         return rv;
-    rv = velocity->GetVelocity( p0.time + dt2, p0.location + dt2 * k2, k3, false );
+    rv = velocity->GetVelocity( p0.time + dt2, p0.location + dt2 * k2, k3 );
     if( rv != 0 )
         return rv;
-    rv = velocity->GetVelocity( p0.time + dt,  p0.location + dt  * k3, k4, false );
+    rv = velocity->GetVelocity( p0.time + dt,  p0.location + dt  * k3, k4 );
     if( rv != 0 )
         return rv;
     p1.location = p0.location + dt / 6.0f * (k1 + 2.0f * (k2 + k3) + k4 );

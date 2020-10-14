@@ -261,16 +261,10 @@ int VaporField::GetVelocityIntersection( size_t ts, glm::vec3& minxyz, glm::vec3
 }
 
 
-int VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity,
-                             bool checkInsideVolume ) const
+int VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& velocity ) const
 {
     const std::array<double, 3> coords{ pos.x, pos.y, pos.z };
     const VAPoR::Grid* grid = nullptr;
-
-    if( checkInsideVolume ) {
-        if( !InsideVolumeVelocity( time, pos ) )
-            return OUT_OF_FIELD; 
-    }
 
     // Retrieve the missing value and velocity multiplier 
     glm::vec3 missingV( 0.0f ); // stores missing values for 3 velocity variables
@@ -356,16 +350,12 @@ int VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& veloci
 
 
 int
-VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar,
-                       bool  checkInsideVolume ) const
+VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar ) const
 {
     // When this variable doesn't exist, it doesn't make sense to get a scalar value
     // from it, so just return that fact.
     if( ScalarName.empty() )
         return NO_FIELD_YET;
-    if( checkInsideVolume )
-        if( !InsideVolumeScalar( time, pos ) )
-            return OUT_OF_FIELD;
 
     const std::array<double, 3> coords{ pos.x, pos.y, pos.z };
     const VAPoR::Grid* grid = nullptr;
@@ -550,7 +540,7 @@ int VaporField::CalcDeltaTFromCurrentTimeStep( float& delT ) const
     glm::vec3 vel;
     for( long i = 0; i < totalSamples; i++ )
     {
-        int rv  = this->GetVelocity( timestamp, samples[i], vel, false );
+        int rv  = this->GetVelocity( timestamp, samples[i], vel );
         if( rv != 0 )
             return rv;
         vel *= mult1o;  // Restore the raw velocity values
