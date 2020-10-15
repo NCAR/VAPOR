@@ -5,6 +5,10 @@
 
 class VDoubleLineEdit;
 
+//! \class V3DInput
+//! \brief Widget that allows the user to specify a 3D point.
+//! \author Stas Jaroszynski
+
 class V3DInput : public QWidget {
     Q_OBJECT
     

@@ -70,10 +70,6 @@ int SliceParams::Initialize() {
 
     std::vector<double> minExt, maxExt;
     box->GetExtents(minExt, maxExt);
-//    double average = (minExt[Z] + maxExt[Z])/2.f;
-//    minExt[Z] = average;
-//    maxExt[Z] = average;
-//    box->SetExtents(minExt, maxExt);
     
     std::vector<double> sampleLocation(3);
     for (int i = 0; i < 3; i++)
