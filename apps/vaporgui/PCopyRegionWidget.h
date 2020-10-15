@@ -4,6 +4,10 @@
 
 class CopyRegionWidget;
 
+//! \class PCopyRegionWidget
+//! \brief PWidget wrapper for the CopyRegionWidget
+//! \author Stas Jaroszynski
+
 class PCopyRegionWidget : public PWidget {
     CopyRegionWidget *_widget;
 public:
