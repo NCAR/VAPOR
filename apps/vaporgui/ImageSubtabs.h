@@ -51,6 +51,9 @@ class PTMSLODInput : public PLineItem {
     VComboBox* _vComboBox;
 public:
     PTMSLODInput() : PLineItem("", "TMS level of detail", _vComboBox = new VComboBox({"0"})) {
+        QString tooltip = "TMS images can be displayed at varying resolutions.\n"
+            "This setting allows for manual resolution selection.";
+        _vComboBox->setToolTip( tooltip );
         connect( _vComboBox, &VComboBox::IndexChanged, this, &PTMSLODInput::dropdownIndexChanged );
     }
 
@@ -69,7 +72,8 @@ protected:
         }
 
         std::vector< std::string > options{"default"};
-        int lods = GeoImageTMS::GetNumTMSLODs( imageFile );
+        //int lods = GeoImageTMS::GetNumTMSLODs( imageFile );
+        int lods = rp->GetNumTMSLODs();
         for ( int i=0; i<lods; i++ ) {
             options.push_back( std::to_string( i ) );
         }
