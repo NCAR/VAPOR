@@ -497,11 +497,9 @@ void RenderParams::SetFieldVariableNames(vector<string> varnames){
 	varnames = string_replace(varnames, "", "NULL");
 	for (int i=varnames.size(); i<3; i++) varnames.push_back("NULL");
 
-//	SetValueStringVec(_fieldVariableNamesTag, "", varnames);
     SetValueString(_xFieldVariableNameTag, "", varnames[0]);
     SetValueString(_yFieldVariableNameTag, "", varnames[1]);
     SetValueString(_zFieldVariableNameTag, "", varnames[2]);
-//	setAllBypass(false);
 }
 
 std::string RenderParams::GetXFieldVariableName() const {

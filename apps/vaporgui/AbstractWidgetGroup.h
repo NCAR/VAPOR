@@ -3,6 +3,10 @@
 #include <initializer_list>
 #include <vector>
 
+//! \class AbstractWidgetGroup
+//! \brief Provides an interface that standardizes widget grouping classes
+//! \author Stas Jaroszynski
+
 template <class This, class Widget>
 class AbstractWidgetGroup {
 protected:
@@ -10,11 +14,14 @@ protected:
 public:
     typedef std::initializer_list<Widget *> List;
     
+    //! Adds a widget.
     virtual This *Add(Widget *w)
     {
         _children.push_back(w);
         return (This*)this;
     }
+    //! Adds multiple widgets.
+    //! Has a different name for compiler reasons.
     This *AddM(const List &list)
     {
         for (const auto &w : list)
@@ -23,6 +30,9 @@ public:
     }
 };
 
+//! \class WidgetGroupWrapper
+//! \brief Automates the creation of widget groups that wrap other widget groups
+//! \author Stas Jaroszynski
 
 template <class This, class Widget, class That>
 class WidgetGroupWrapper : public AbstractWidgetGroup<This, Widget> {
