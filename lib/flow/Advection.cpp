@@ -405,8 +405,7 @@ int Advection::CalculateParticleValues( Field* scalar, bool skipNonZero )
 }
 
 
-int
-Advection::CalculateParticleProperties( Field* scalar )
+int Advection::CalculateParticleProperties( Field* scalar )
 {
     size_t mostSteps = 0;
     for( const auto& s : _streams )

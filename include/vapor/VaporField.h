@@ -78,12 +78,12 @@ public:
     //
     virtual bool InsideVolumeVelocity( float time, const glm::vec3& pos ) const override;
     virtual bool InsideVolumeScalar(   float time, const glm::vec3& pos ) const override;
+    virtual int  GetNumberOfTimesteps()                                   const override;
 
     virtual int  GetVelocity(  float time, const glm::vec3& pos,    // input 
                                glm::vec3& vel ) const override;     // output
     virtual int  GetScalar(    float time, const glm::vec3& pos,    // input 
                                float& scalar ) const override;      // output
-    virtual int  GetNumberOfTimesteps()                             const override;
 
 
     //

@@ -283,9 +283,11 @@ int VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& veloci
         }
         auto hasMissing = glm::equal( velocity, missingV );
         if( glm::any( hasMissing ) )
-            velocity = glm::vec3( 0.0f );
-        else
+            return MISSING_VAL;
+        else {
             velocity *= mult;
+            return 0;
+        }
     }
     else {
         float mult = _params->GetVelocityMultiplier();
@@ -310,15 +312,13 @@ int VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& veloci
             missingV[i]      = grid->GetMissingValue();
         }
         auto hasMissing = glm::equal( floorVelocity, missingV );
-        if( glm::any( hasMissing ) )
-        {
-            velocity = glm::vec3( 0.0f );
-            return 0;
+        if( glm::any( hasMissing ) ) {
+            return MISSING_VAL;
         }
 
-        if( time == _timestamps[floorTS] )
-        {
+        if( time == _timestamps[floorTS] ) {
             velocity = floorVelocity * mult; 
+            return 0;
         }
         else // Find the velocity values at the ceiling time step
         {
@@ -333,19 +333,16 @@ int VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& veloci
                 missingV[i]     = grid->GetMissingValue();
             }
             hasMissing = glm::equal( ceilVelocity, missingV );
-            if( glm::any( hasMissing ) )
-            {
-                velocity = glm::vec3( 0.0f );
-                return 0;
+            if( glm::any( hasMissing ) ) {
+                return MISSING_VAL;
             }
             
             float weight = (time - _timestamps[floorTS]) / 
                            (_timestamps[floorTS+1] - _timestamps[floorTS]);
             velocity = glm::mix( floorVelocity, ceilVelocity, weight ) * mult;
+            return 0;
         }
-    }
-
-    return 0;
+    } // end of unsteady condition
 }
 
 
@@ -360,20 +357,20 @@ VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar ) const
     const std::array<double, 3> coords{ pos.x, pos.y, pos.z };
     const VAPoR::Grid* grid = nullptr;
 
-    if( IsSteady )
-    {
+    if( IsSteady ) {
         auto currentTS = _params_locked ? _c_currentTS : _params->GetCurrentTimestep();
         grid = _getAGrid( currentTS, ScalarName );
         if( grid == nullptr )
             return GRID_ERROR;
-        float gridV = grid->GetValue( coords );
-        if( gridV  == grid->GetMissingValue() )
-            scalar  = 0.0f;
-        else
-            scalar  = gridV;
+        scalar = grid->GetValue( coords );
+        if( scalar == grid->GetMissingValue() ) {
+            return MISSING_VAL;
+        }
+        else {
+            return 0;
+        }
     }
-    else
-    {
+    else {
         // First check if the query time is within range
         if( time < _timestamps.front() || time > _timestamps.back() )
             return TIME_ERROR;
@@ -386,32 +383,31 @@ VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar ) const
         if( grid == nullptr )
             return GRID_ERROR;
         float floorScalar = grid->GetValue( coords );
-        if( floorScalar  == grid->GetMissingValue() )
-        {
-            scalar = 0.0f;
-            return 0;
+        if( floorScalar  == grid->GetMissingValue() ) {
+            return MISSING_VAL;
         }
 
-        if( time == _timestamps[floorTS] )
+        if( time == _timestamps[floorTS] ) {
             scalar = floorScalar;
+            return 0;
+        }
         else
         {
             grid = _getAGrid( floorTS + 1, ScalarName );
             if( grid == nullptr )
                 return GRID_ERROR;
             float ceilScalar = grid->GetValue( coords );
-            if( ceilScalar  == grid->GetMissingValue() )
-            {
-                scalar = 0.0f;
+            if( ceilScalar  == grid->GetMissingValue() ) {
+                return MISSING_VAL;
+            }
+            else {
+                float weight = (time - _timestamps[floorTS]) /
+                               (_timestamps[floorTS+1] - _timestamps[floorTS]);
+                scalar = glm::mix( floorScalar, ceilScalar, weight );
                 return 0;
             }
-            float weight = (time - _timestamps[floorTS]) /
-                           (_timestamps[floorTS+1] - _timestamps[floorTS]);
-            scalar = glm::mix( floorScalar, ceilScalar, weight );
         }
-    }
-
-    return 0;
+    } // end of unsteady condition
 }
 
 
