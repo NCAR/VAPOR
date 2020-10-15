@@ -38,11 +38,13 @@ public:
   // 
   void SetImagePath( std::string file )
   {
+    BeginGroup("Set image path");
     SetValueString( _fileNameTag, "Set image file path", file );
     if ( GeoImageTMS::IsTMSFile( file ) ) {
       int numTMSLODs = GeoImageTMS::GetNumTMSLODs( file );
       _setNumTMSLODs( numTMSLODs );
     }
+    EndGroup();
   }
 
     std::string GetImagePath( ) const;
