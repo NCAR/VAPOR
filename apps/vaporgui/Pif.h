@@ -3,6 +3,17 @@
 #include "PWidgetWrapper.h"
 #include "PGroup.h"
 
+//! \class Pif
+//! \brief Shows and hides PWidgets based on a logic test.
+//! \author Stas Jaroszynski
+//!
+//! For example:
+//! (new Pif("param_tag"))->Not()->Equals("Hi")->Then(
+//!     PWidgets here will only show if param_tag != "Hi"
+//! )->Else(
+//!     PWidgets here will only show if param_tag == "Hi"
+//! );
+
 class Pif : public PWidgetWrapper {
     PGroup *_group;
     bool _negate = false;
