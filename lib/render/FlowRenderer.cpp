@@ -387,7 +387,7 @@ int FlowRenderer::_renderAdvection(const flow::Advection* adv)
         size_t maxSamples = rp->GetSteadyNumOfSteps() + 1;
         
         // First calculate the starting time stamp. Copied from legacy.
-        double startingTime;
+        double startingTime = _timestamps[0];
         if (!_cache_isSteady) {
             int pastNumOfTimeSteps = dynamic_cast<FlowParams*>(GetActiveParams())->GetPastNumOfTimeSteps();
             startingTime = _timestamps[0];
