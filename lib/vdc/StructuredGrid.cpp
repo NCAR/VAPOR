@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include "vapor/VAssert.h"
 #include <cmath>
 #include <time.h>
