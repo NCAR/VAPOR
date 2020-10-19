@@ -570,9 +570,6 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
         key.Reset( timestep, refLevel, compLevel, varName, extMin, extMax );
     }
 
-    // Use a lock here, so no two threads querying grids simultaneously.
-    const std::lock_guard<std::mutex> lock_gd( _grid_operation_mutex );
-
     // First check if we have the requested grid in our cache.
     // If it exists, return the grid directly.
     const auto& grid_wrapper = _recentGrids.query( key );
@@ -600,6 +597,10 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
     // 2) ask for it from the data manager,
     // 3) query a 2D grid and grow it to be a GrownGrid.
     //
+
+    // Note that we use a lock here, so no two threads querying _datamgr simultaneously.
+    const std::lock_guard<std::mutex> lock_gd( _grid_operation_mutex );
+
     VAPoR::Grid* grid = nullptr;
     if( key.emptyVar() ) {
         // In case of an empty variable name, we generate a constantGrid with zeros.
