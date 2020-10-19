@@ -22,13 +22,15 @@ private:
 
     // Buffer definition:
     // Offset   Data_Type   Information
+    //
     // 0        uint64_t    currentTS
     // 8        int32_t     refLevel
     // 12       int32_t     compLevel
     // 16       double[3]   extent_min
     // 40       double[3]   extent_max
-    // Total size: 64
-    std::array<uint8_t, 64> buf;
+    // 64       uint8_t     "if this buf should be compared"
+    // Total size: 65
+    std::array<uint8_t, 65> buf;
 
 public:
     void Reset( uint64_t, int32_t, int32_t, std::string, const std::vector<double>&, 

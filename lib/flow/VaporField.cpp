@@ -13,7 +13,7 @@ void GridKey::Reset( uint64_t ts, int32_t ref, int32_t comp, std::string var,
                      const std::vector<double>& min,
                      const std::vector<double>& max )
 {
-    buf.fill( 0 );
+    buf.fill( 0 );  // In case min/max isn't full.
 
     // See the header file for information stored at each offset.
     std::memcpy( buf.data(),      &ts,     8 );
@@ -22,12 +22,14 @@ void GridKey::Reset( uint64_t ts, int32_t ref, int32_t comp, std::string var,
     std::memcpy( buf.data() + 16, min.data(), 8 * min.size() );
     std::memcpy( buf.data() + 40, max.data(), 8 * max.size() );
 
+    buf[64] = 1; // Meaning that this buf *should* be compared.
+
     varName = std::move( var );
 }
 
 void GridKey::Reset( std::string var )
 {
-    buf.fill( 0 );
+    buf[64] = 0; // Meaning that this buf does *not* need to be compared.
     varName = std::move( var );
 }
 
@@ -37,8 +39,12 @@ bool GridKey::operator==(const GridKey& other) const
     if( this->varName != other.varName )
         return false;
 
-    int cmp = std::memcmp( this->buf.data(), other.buf.data(), buf.size() );
-    return (cmp == 0);
+    if( buf[64] == 0 ) // The content of this buf doesn't need to be compared
+        return true;
+    else {
+        int cmp = std::memcmp( this->buf.data(), other.buf.data(), buf.size() );
+        return (cmp == 0);
+    }
 }
 
 bool GridKey::emptyVar() const
