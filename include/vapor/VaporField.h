@@ -18,6 +18,8 @@ namespace flow
 class FLOW_API GridKey final
 {
 private:
+    std::string varName; 
+
     // Buffer definition:
     // Offset   Data_Type   Information
     // 0        uint64_t    currentTS
@@ -27,8 +29,6 @@ private:
     // 40       double[3]   extent_max
     // Total size: 64
     std::array<uint8_t, 64> buf;
-
-    std::string varName; 
 
 public:
     void Reset( uint64_t, int32_t, int32_t, std::string, const std::vector<double>&, 
