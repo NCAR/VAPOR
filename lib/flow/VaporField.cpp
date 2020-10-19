@@ -9,37 +9,46 @@ using namespace flow;
 //
 // Class GridKey
 //
-void GridKey::Reset( uint64_t ts, int32_t ref, int32_t comp, std::string var,
+void GridKey::Reset( uint32_t ts, int32_t ref, int32_t comp, std::string var,
                      const std::vector<double>& min,
-                     const std::vector<double>& max )
+                     const std::vector<double>& max,
+                     uint32_t var_dim, float dz )
 {
-    buf.fill( 0 );  // In case min/max isn't full.
+    varName = std::move( var );
+
+    std::array<float, 6> tmp;
+    tmp.fill( 0.0 );
+    for( size_t i = 0; i < min.size() && i < 3; i++ )
+        tmp[i] = float(min[i]);
+    for( size_t i = 0; i < max.size() && i < 3; i++ )
+        tmp[i + 3] = float(max[i]);
 
     // See the header file for information stored at each offset.
-    std::memcpy( buf.data(),      &ts,     8 );
-    std::memcpy( buf.data() + 8,  &ref,    4 );
-    std::memcpy( buf.data() + 12, &comp,   4 );
-    std::memcpy( buf.data() + 16, min.data(), 8 * min.size() );
-    std::memcpy( buf.data() + 40, max.data(), 8 * max.size() );
+    std::memcpy( buf.data(),      &ts,        4 );
+    std::memcpy( buf.data() + 4,  &ref,       4 );
+    std::memcpy( buf.data() + 8,  &comp,      4 );
+    std::memcpy( buf.data() + 12, tmp.data(), 24 );
+    std::memcpy( buf.data() + 36, &var_dim,   4  );
+    std::memcpy( buf.data() + 40, &dz,        4  );
 
-    buf[64] = 1; // Meaning that this buf *should* be compared.
-
-    varName = std::move( var );
+    // Because the key is reset this way, then this buf *should* be compared.
+    buf[ buf.size() - 1 ] = 1;
 }
 
 void GridKey::Reset( std::string var )
 {
-    buf[64] = 0; // Meaning that this buf does *not* need to be compared.
+    // Because the key is reset this way, then this buf does *not* need to be compared.
+    buf[ buf.size() - 1 ] = 0;
     varName = std::move( var );
 }
 
 bool GridKey::operator==(const GridKey& other) const
 {
-    // String comparison seems to be most frequent, so put it at the first
+    // String comparison seems to be most frequent, so put it at the first.
     if( this->varName != other.varName )
         return false;
 
-    if( buf[64] == 0 ) // The content of this buf doesn't need to be compared
+    if( buf[ buf.size() - 1 ] == 0 ) // The content of this buf doesn't need to be compared
         return true;
     else {
         int cmp = std::memcmp( this->buf.data(), other.buf.data(), buf.size() );
@@ -95,11 +104,12 @@ auto VaporField::LockParams() -> int
         return 1;
 
     // Retrieve param values and put them in the local cache.
-    _params->GetBox()->GetExtents( _c_ext_min, _c_ext_max );
+    _c_currentTS = _params->GetCurrentTimestep();
     _c_refLev    = _params->GetRefinementLevel();
     _c_compLev   = _params->GetCompressionLevel();
-    _c_currentTS = _params->GetCurrentTimestep();
     _c_vel_mult  = _params->GetVelocityMultiplier();
+
+    _params->GetBox()->GetExtents( _c_ext_min, _c_ext_max );
 
     _params_locked = true;
     return 0;
@@ -573,27 +583,16 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
         _params->GetBox()->GetExtents( extMin, extMax );
         int refLevel  = _params->GetRefinementLevel();
         int compLevel = _params->GetCompressionLevel();
-        key.Reset( timestep, refLevel, compLevel, varName, extMin, extMax );
+        key.Reset( uint32_t(timestep), refLevel, compLevel, varName, extMin, extMax, 
+                   uint32_t(_datamgr->GetVarTopologyDim( varName )), // possible dims: 3, 2, 0
+                   this->DefaultZ );
     }
 
     // First check if we have the requested grid in our cache.
     // If it exists, return the grid directly.
     const auto& grid_wrapper = _recentGrids.query( key );
-
     if( grid_wrapper != nullptr ) {
-        const VAPoR::Grid* grid = grid_wrapper->grid();
-
-        // Is this a GrownGrid? 
-        const VAPoR::GrownGrid* ggrid = dynamic_cast<const VAPoR::GrownGrid*>(grid);
-        if( ggrid == nullptr )
-            return grid;
-        else    // Need to test if the DefaultZ value has changed.
-        {
-            if( ggrid->GetDefaultZ() == this->DefaultZ )    // DefaultZ is the same! 
-                return grid;
-            // If DefaultZ has changed, a new GrownGrid will be constructed 
-            // with the new DefaultZ value.
-        }
+        return grid_wrapper->grid();
     }
 
     //
@@ -633,10 +632,10 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
     }
 
     // Now we have this grid, but also put it in a GridWrapper so 
-    // 1) it will be properly deleted, and 2) it is stored in our cache
-    // where its ownership is kept.
+    // 1) it will be properly deleted, and 
+    // 2) it is stored in our cache, where its ownership is kept.
     // We also make it become a GrownGrid if it's 2D in nature.
-    int dim = _datamgr->GetVarTopologyDim( varName );
+    uint32_t dim = _datamgr->GetVarTopologyDim( varName );
     if( dim == 3 || dim == 0 )  // dim == 0 happens when varName is empty.
     {
         _recentGrids.insert( key, new GridWrapper(grid, _datamgr) );
