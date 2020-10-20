@@ -101,6 +101,16 @@ auto VaporField::LockParams() -> int
 
     _params->GetBox()->GetExtents( _c_ext_min, _c_ext_max );
 
+    for( int i = 0; i < 3; i++ ) {
+        _c_velocity_grids[i] = _getAGrid( _c_currentTS, this->VelocityNames[i] );
+    }
+    _c_scalar_grid = _getAGrid( _c_currentTS, this->ScalarName );
+
+    // Note that if the DefaultZ value is changed by the renderer after LockParams(),
+    // cached grids here won't reflect the change.
+    // This is due to the that DefaultZ is kept by the Renderer, but not Params.
+    // A query directed to _getAGrid() would reflect this change though.
+
     _params_locked = true;
     return 0;
 }
@@ -114,6 +124,11 @@ auto VaporField::UnlockParams() -> int
     _c_ext_min.clear();
     _c_ext_max.clear();
 
+    for( int i = 0; i < 3; i++ ) {
+        _c_velocity_grids[i] = nullptr;
+    }
+    _c_scalar_grid = nullptr;
+
     _params_locked = false;
     return 0;
 }
@@ -126,13 +141,18 @@ bool VaporField::InsideVolumeVelocity( float time, const glm::vec3& pos ) const
     VAssert( _isReady() );
 
     // In case of steady field, we only check a specific time step
-    if( IsSteady )
-    {
-        auto currentTS = _params_locked ? _c_currentTS : _params->GetCurrentTimestep();
+    if( IsSteady ) {
 
-        for( auto& v : VelocityNames )
-        {
-            grid = _getAGrid( currentTS, v );
+        for( int i = 0; i < 3; i++ ) {
+            const auto& v = VelocityNames[i];
+            if( _params_locked ) {
+                grid = _c_velocity_grids[i];
+            }
+            else {
+                auto currentTS = _params->GetCurrentTimestep();
+                grid = _getAGrid( currentTS, v );
+            }
+        
             if( grid == nullptr )
                 return false;
             if( !grid->InsideGrid( coords ) )
@@ -191,15 +211,17 @@ bool VaporField::InsideVolumeScalar( float time, const glm::vec3& pos ) const
     VAssert( _isReady() );
 
     // In case of steady field, we only check a specific time step
-    if( IsSteady )
-    {
-        auto currentTS = _params_locked ? _c_currentTS : _params->GetCurrentTimestep();
-
-        grid = _getAGrid( currentTS, ScalarName );
+    if( IsSteady ) {
+        if( _params_locked ) {
+            grid = _c_scalar_grid;
+        }
+        else {
+            auto currentTS = _params->GetCurrentTimestep();
+            grid = _getAGrid( currentTS, ScalarName );
+        }
         if( grid == nullptr )
             return false;
-        if( !grid->InsideGrid( coords ) )
-            return false;
+        return grid->InsideGrid( coords );
     }
     else    // In case of unsteady field, we check two time steps
     {
@@ -228,9 +250,9 @@ bool VaporField::InsideVolumeScalar( float time, const glm::vec3& pos ) const
             if( !grid->InsideGrid( coords ) )
                 return false;
         }
-    }
 
-    return true;
+        return true;
+    }
 }
 
 
@@ -277,17 +299,22 @@ int VaporField::GetVelocity( float time, const glm::vec3& pos, glm::vec3& veloci
     velocity = glm::vec3( 0.0f );
 
     if( IsSteady ) {
-        float mult     = _params_locked ? _c_vel_mult  : _params->GetVelocityMultiplier();
-        auto currentTS = _params_locked ? _c_currentTS : _params->GetCurrentTimestep();
         for( int i = 0; i < 3; i++ )
         {
-            grid = _getAGrid( currentTS, VelocityNames[i] );
+            if( _params_locked ) {
+                grid = _c_velocity_grids[i];
+            }
+            else {
+                auto currentTS = _params->GetCurrentTimestep();
+                grid = _getAGrid( currentTS, VelocityNames[i] );
+            }
             if( grid == nullptr )
                 return GRID_ERROR;
             velocity[i] = grid->GetValue( coords );
             missingV[i] = grid->GetMissingValue();
         }
         auto hasMissing = glm::equal( velocity, missingV );
+        float mult      = _params_locked ? _c_vel_mult  : _params->GetVelocityMultiplier();
         if( glm::any( hasMissing ) )
             return MISSING_VAL;
         else {
@@ -364,8 +391,13 @@ VaporField::GetScalar( float time, const glm::vec3& pos, float& scalar ) const
     const VAPoR::Grid* grid = nullptr;
 
     if( IsSteady ) {
-        auto currentTS = _params_locked ? _c_currentTS : _params->GetCurrentTimestep();
-        grid = _getAGrid( currentTS, ScalarName );
+        if( _params_locked ){
+            grid = _c_scalar_grid;
+        }
+        else {
+            auto currentTS = _params->GetCurrentTimestep();
+            grid = _getAGrid( currentTS, ScalarName );
+        }
         if( grid == nullptr )
             return GRID_ERROR;
         scalar = grid->GetValue( coords );
@@ -565,7 +597,9 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
 {
     GridKey key;
     if( _params_locked ) {
-        assert( timestep == _c_currentTS ); // gone in release
+        // Because in unsteady case, both currentTS and currentTS will be queried,
+        // so we do a sanity check here. The assertion will be gone in release mode.
+        assert( timestep == _c_currentTS );
         key.Reset( _c_currentTS, _c_refLev, _c_compLev, varName, 
         _c_ext_min, _c_ext_max, this->DefaultZ );
     }

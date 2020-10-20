@@ -152,6 +152,11 @@ private:
     int32_t                     _c_refLev = -2, _c_compLev = -2; // cached ref/comp levels
     float                       _c_vel_mult = 0.0;               // cached velocity multiplier
     std::vector<double>         _c_ext_min, _c_ext_max;          // cached extents
+    const VAPoR::Grid*          _c_scalar_grid = nullptr;        // cached scalar grid
+    std::array<const VAPoR::Grid*, 3> _c_velocity_grids = {nullptr, nullptr, nullptr};
+    // Note on the cached scalar and velocity grids:
+    // they act as a cache of _recentGrids, so kind of like a cache of cache.
+    // This is due to the not-so-cheap cost of constructing keys and querying _recentGrids.
 
     //
     // Member functions
