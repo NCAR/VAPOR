@@ -30,8 +30,8 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
                       FlowRenderer::GetClassType(),
                       instName,
                       dataMgr ),
-            _velocityField     ( 9 ),
-            _colorField        ( 3 ),
+            _velocityField     ( 9 ), // big enough to hold velocities for 3 time steps.
+            _colorField        ( 3 ), // big enough to hold scalars for 3 time steps.
             _colorMapTexOffset ( 0 )
 { }
 
@@ -299,8 +299,6 @@ FlowRenderer::_paintGL( bool fast )
             if( params->GetFlowDirection() == 1 )           // backward integration
                 deltaT *= -1.0f;
             long numOfSteps = params->GetSteadyNumOfSteps();
-            //long stepsToGo  = numOfSteps - long(_advection.GetMaxNumOfPart() + 1);
-            //stepsToGo = std::max( stepsToGo, 0l );
             
             _advection.AdvectSteps( &_velocityField, deltaT, numOfSteps );
 

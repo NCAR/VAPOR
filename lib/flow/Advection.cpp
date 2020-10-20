@@ -75,6 +75,10 @@ int Advection::AdvectSteps( Field* velocity, float deltaT, size_t maxSteps, ADVE
                 const auto& past2 = s[ s.size()-3 ];
                 if( (!past1.IsSpecial()) && (!past2.IsSpecial()) )
                 {
+                    // We enforce a factor of 20.0f as a limit of how much the step size 
+                    // can be adjusted by _calcAdjustFactor().
+                    // I.e., the adjusted value can be at most 20X larger or 20X smaller.
+                    // The choice of 20.0f is just an empirical value that seems to work well.
                     float mindt = deltaT / 20.0f,   maxdt = deltaT * 20.0f;
                     dt  = past0.time - past1.time;     // step size used by last integration
                     dt *= _calcAdjustFactor( past2, past1, past0 );
@@ -106,7 +110,13 @@ int Advection::AdvectSteps( Field* velocity, float deltaT, size_t maxSteps, ADVE
                 // 2) past0 is inside the volume, but really close to the boundary,
                 //    causing RK4 method to fail;
                 // 3) past0 is not at a missing location, but out of the volume.
-                // Now we need to detect and deal with each of these possibilities.
+                // 
+                // Note that we need to detect and deal with each of these possibilities
+                //   here instead of using the periodic capabilities of a grid class,
+                //   because the advection code needs to have knowledge when a pathline
+                //   exits from one side and comes back from another sice, and record
+                //   this event by inserting a separator. The separator will later be used
+                //   by the rendering code to break a pathline into segments.
 
                 glm::vec3 vel;
                 bool isMissing = (velocity->GetVelocity( past0.time, past0.location, vel )
