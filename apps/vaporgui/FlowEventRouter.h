@@ -3,7 +3,7 @@
 #include "RenderEventRouter.h"
 #include <vapor/FlowRenderer.h>
 
-class PSliderEdit;
+class PIntegerSliderEdit;
 
 //! \class FlowEventRouter
 //! \ingroup Public_GUI
@@ -12,8 +12,8 @@ class PSliderEdit;
 
 class FlowEventRouter : public RenderEventRouterGUI {
     QWidget *_seedingTab;
-    PSliderEdit *_pathlineLengthSlider;
-    PSliderEdit *_pathlineInjectionSlider;
+    PIntegerSliderEdit *_pathlineLengthSlider;
+    PIntegerSliderEdit *_pathlineInjectionSlider;
     
 public:
     FlowEventRouter(QWidget *parent, VAPoR::ControlExec *ce);

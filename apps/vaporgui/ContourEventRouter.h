@@ -3,7 +3,7 @@
 #include "RenderEventRouter.h"
 #include "vapor/ContourRenderer.h"
 
-class PSliderEdit;
+class PDoubleSliderEdit;
 
 //! \class ContourEventRouter
 //! \ingroup Public_GUI
@@ -25,6 +25,6 @@ protected:
 	string _getIconImagePath() const { return "Contours.png"; }
 	
 private:
-    PSliderEdit *_spacingSlider;
-    PSliderEdit *_minValueSlider;
+    PDoubleSliderEdit *_spacingSlider;
+    PDoubleSliderEdit *_minValueSlider;
 };

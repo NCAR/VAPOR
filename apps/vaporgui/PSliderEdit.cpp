@@ -2,30 +2,42 @@
 #include "VLineItem.h"
 #include <vapor/ParamsBase.h>
 #include "VSliderEdit.h"
+#include "VDoubleSliderEdit.h"
+#include "VIntSliderEdit.h"
 
-PSliderEdit::PSliderEdit(const std::string &tag, const std::string &label)
-: PLineItem(tag, label, _sliderEdit = new VSliderEdit)
-{}
+#define USER_RANGE_MIN_TAG "_PWidget_UserRangeMinimum"
+#define USER_RANGE_MAX_TAG "_PWidget_UserRangeMaximum"
 
-PSliderEdit *PSliderEdit::SetRange(double min, double max)
-{
-    _sliderEdit->SetRange(min, max);
-    return this;
-}
 
+// ===============================
+//        PDoubleSliderEdit
+// ===============================
 
 
 PDoubleSliderEdit::PDoubleSliderEdit(const std::string &tag, const std::string &label)
-: PSliderEdit(tag, label)
+: PLineItem(tag, label, _sliderEdit = new VDoubleSliderEdit(0, 1, 0, true))
 {
-    connect(_sliderEdit, &VSliderEdit::ValueChanged, this, &PDoubleSliderEdit::valueChanged);
-    connect(_sliderEdit, &VSliderEdit::ValueChangedIntermediate, this, &PDoubleSliderEdit::valueChangedIntermediate);
+    connect(_sliderEdit, &VDoubleSliderEdit::ValueChanged, this, &PDoubleSliderEdit::valueChanged);
+    connect(_sliderEdit, &VDoubleSliderEdit::ValueChangedIntermediate, this, &PDoubleSliderEdit::valueChangedIntermediate);
+    connect(_sliderEdit, &VDoubleSliderEdit::MinimumChanged, this, &PDoubleSliderEdit::minimumChanged);
+    connect(_sliderEdit, &VDoubleSliderEdit::MaximumChanged, this, &PDoubleSliderEdit::maximumChanged);
+}
+
+PDoubleSliderEdit *PDoubleSliderEdit::SetRange(double min, double max)
+{
+    _defaultRangeMin = min;
+    _defaultRangeMax = max;
+    _sliderEdit->SetMinimum(min);
+    _sliderEdit->SetMaximum(max);
+    return this;
 }
 
 void PDoubleSliderEdit::updateGUI() const
 {
-    double value = getParamsDouble();
-    _sliderEdit->SetValue(value);
+    auto p = getParams();
+    _sliderEdit->SetMinimum(p->GetValueDouble(getTag() + USER_RANGE_MIN_TAG, _defaultRangeMin));
+    _sliderEdit->SetMaximum(p->GetValueDouble(getTag() + USER_RANGE_MAX_TAG, _defaultRangeMax));
+    _sliderEdit->SetValue(getParamsDouble());
 }
 
 void PDoubleSliderEdit::valueChanged(double v)
@@ -38,20 +50,48 @@ void PDoubleSliderEdit::valueChangedIntermediate(double v)
     dynamicSetParamsDouble(v);
 }
 
+void PDoubleSliderEdit::minimumChanged(double v)
+{
+    auto p = getParams();
+    p->SetValueDouble(getTag() + "_chromePWidget_UserRangeMinimum", "", v);
+}
+
+void PDoubleSliderEdit::maximumChanged(double v)
+{
+    auto p = getParams();
+    p->SetValueDouble(getTag() + "_PWidget_UserRangeMaximum", "", v);
+}
+
+
+// ===============================
+//       PIntegerSliderEdit
+// ===============================
 
 
 PIntegerSliderEdit::PIntegerSliderEdit(const std::string &tag, const std::string &label)
-: PSliderEdit(tag, label)
+: PLineItem(tag, label, _sliderEdit = new VIntSliderEdit(0, 1, 0, true))
 {
-    _sliderEdit->SetIntType(true);
-    connect(_sliderEdit, &VSliderEdit::ValueChangedInt, this, &PIntegerSliderEdit::valueChanged);
-    connect(_sliderEdit, &VSliderEdit::ValueChangedIntIntermediate, this, &PIntegerSliderEdit::valueChangedIntermediate);
+    connect(_sliderEdit, &VIntSliderEdit::ValueChanged, this, &PIntegerSliderEdit::valueChanged);
+    connect(_sliderEdit, &VIntSliderEdit::ValueChangedIntermediate, this, &PIntegerSliderEdit::valueChangedIntermediate);
+    connect(_sliderEdit, &VIntSliderEdit::MinimumChanged, this, &PIntegerSliderEdit::minimumChanged);
+    connect(_sliderEdit, &VIntSliderEdit::MaximumChanged, this, &PIntegerSliderEdit::maximumChanged);
+}
+
+PIntegerSliderEdit *PIntegerSliderEdit::SetRange(int min, int max)
+{
+    _defaultRangeMin = min;
+    _defaultRangeMax = max;
+    _sliderEdit->SetMinimum(min);
+    _sliderEdit->SetMaximum(max);
+    return this;
 }
 
 void PIntegerSliderEdit::updateGUI() const
 {
-    int value = getParamsLong();
-    _sliderEdit->SetValue(value);
+    auto p = getParams();
+    _sliderEdit->SetMinimum(p->GetValueLong(getTag() + USER_RANGE_MIN_TAG, _defaultRangeMin));
+    _sliderEdit->SetMaximum(p->GetValueLong(getTag() + USER_RANGE_MAX_TAG, _defaultRangeMax));
+    _sliderEdit->SetValue(getParamsLong());
 }
 
 void PIntegerSliderEdit::valueChanged(int v)
@@ -62,4 +102,16 @@ void PIntegerSliderEdit::valueChanged(int v)
 void PIntegerSliderEdit::valueChangedIntermediate(int v)
 {
     dynamicSetParamsLong(v);
+}
+
+void PIntegerSliderEdit::minimumChanged(int v)
+{
+    auto p = getParams();
+    p->SetValueLong(getTag() + "_PWidget_UserRangeMinimum", "", v);
+}
+
+void PIntegerSliderEdit::maximumChanged(int v)
+{
+    auto p = getParams();
+    p->SetValueLong(getTag() + "_PWidget_UserRangeMaximum", "", v);
 }
