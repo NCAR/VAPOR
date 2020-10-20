@@ -49,7 +49,6 @@ set (SRC
 	# VolumeTest.cpp
 	# VolumeTest2.cpp
 	VolumeCellTraversal.cpp
-	VolumeOSPRay.cpp
 	Texture.cpp
 	Framebuffer.cpp
 	ModelRenderer.cpp
@@ -115,6 +114,12 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/OSPRay.h
 )
 
+if(BUILD_OSP)
+	set(SRC ${SRC}
+		VolumeOSPRay.cpp
+	)
+endif()
+
 add_library (render SHARED ${SRC} ${HEADERS})
 
 if (WIN32)
@@ -130,12 +135,12 @@ if (UNIX AND NOT APPLE)
 endif ()
 
 
-set (OSPRAY_DIR /Users/stasj/Developer/ospray/ospray)
-find_library (OSPRAY ospray HINTS ${OSPRAY_DIR}/lib)
-# include_directories (${OSPRAY_DIR}/include)
-target_link_libraries (render PUBLIC ${OSPRAY})
-target_include_directories (render PUBLIC ${OSPRAY_DIR}/include)
-
+if(BUILD_OSP)
+	find_library (OSPRAY ospray HINTS ${OSPRAYDIR}/lib REQUIRED)
+	target_link_libraries (render PUBLIC ${OSPRAY})
+	target_include_directories (render PUBLIC ${OSPRAYDIR}/include)
+	target_compile_definitions (render PUBLIC BUILD_OSPRAY)
+endif()
 
 add_definitions (-DRENDER_EXPORTS)
 

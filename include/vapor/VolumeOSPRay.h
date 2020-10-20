@@ -15,6 +15,7 @@ namespace VAPoR {
     //! \date July, 2020
     //!
     
+#ifdef BUILD_OSPRAY
     class VolumeOSPRay : public VolumeAlgorithm {
     public:
         VolumeOSPRay(GLManager *gl, VolumeRenderer *renderer);
@@ -80,6 +81,15 @@ namespace VAPoR {
         static const char * windingOrderToString(WindingOrder o);
         static bool isQuadCoPlanar(const glm::vec3 &a, const glm::vec3 &b, const glm::vec3 &c, const glm::vec3 &d);
     };
+#else
+class VolumeOSPRay : public VolumeAlgorithm {
+public:
+    VolumeOSPRay(GLManager *gl, VolumeRenderer *renderer)
+    : VolumeAlgorithm(gl, renderer){}
+    
+    static std::string GetName() { return "OSPRay"; }
+};
+#endif
     
     
     //! \class VolumeOSPRayIso

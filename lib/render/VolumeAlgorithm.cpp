@@ -1,6 +1,7 @@
 #include <vapor/VolumeAlgorithm.h>
 #include <vapor/VolumeParams.h>
 #include <vapor/VolumeRenderer.h>
+#include <glm/glm.hpp>
 
 using namespace VAPoR;
 using std::vector;

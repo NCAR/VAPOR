@@ -5,7 +5,6 @@
 #include <vapor/Framebuffer.h>
 #include <vapor/VolumeAlgorithm.h>
 #include <glm/fwd.hpp>
-#include <vapor/OSPRay.h>
 
 namespace VAPoR
 {

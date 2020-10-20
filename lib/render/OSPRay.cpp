@@ -4,8 +4,8 @@
 
 using namespace VOSP;
 
+#ifdef BUILD_OSPRAY
 static int _initialized = false;
-
 
 void ospErrorCallback(OSPError error, const char *msg)
 {
@@ -24,10 +24,11 @@ void ospErrorCallback(OSPError error, const char *msg)
     fprintf(stderr, ": %s\n", msg);
     exit(1);
 }
-
+#endif
 
 int VOSP::Initialize(int *argc, char **argv)
 {
+#ifdef BUILD_OSPRAY
     if (_initialized)
         return 0;
     
@@ -44,6 +45,9 @@ int VOSP::Initialize(int *argc, char **argv)
 //    printf("OSPRay Version = %s\n", Version().c_str());
     _initialized = true;
     return 0;
+#else
+    return 0;
+#endif
 }
 
 
@@ -56,12 +60,17 @@ int VOSP::Shutdown()
 
 std::string VOSP::Version()
 {
+#ifdef BUILD_OSPRAY
     long major = ospDeviceGetProperty(ospGetCurrentDevice(), OSP_DEVICE_VERSION_MAJOR);
     long minor = ospDeviceGetProperty(ospGetCurrentDevice(), OSP_DEVICE_VERSION_MINOR);
     long patch = ospDeviceGetProperty(ospGetCurrentDevice(), OSP_DEVICE_VERSION_PATCH);
     return std::to_string(major) + "." + std::to_string(minor) + "." + std::to_string(patch);
+#else
+    return "0.0.0";
+#endif
 }
 
+#ifdef BUILD_OSPRAY
 
 OSPData VOSP::NewCopiedData(const void *data, OSPDataType type, uint64_t numItems1, uint64_t numItems2, uint64_t numItems3)
 {
@@ -187,3 +196,5 @@ OSPGeometricModel Test::LoadTriangle(glm::vec3 scale, const std::string &rendere
     
     return model;
 }
+
+#endif
