@@ -26,18 +26,16 @@ private:
     // 0        uint32_t    currentTS
     // 4        int32_t     refLevel
     // 8        int32_t     compLevel
-    // 12       float[3]    extent_min
-    // 24       float[3]    extent_max
-    // 36       uint32_t    variable_dimension
-    // 40       float       DefaultZ
-    // 44       uint8_t     "if this buf should be compared"
-    // Total size: 45 
-    std::array<uint8_t, 45> buf;
+    // 12       double[3]   extent_min
+    // 36       double[3]   extent_max
+    // 60       float       DefaultZ
+    //
+    // Total size: 64
+    std::array<uint8_t, 64> buf;
 
 public:
     void Reset( uint32_t, int32_t, int32_t, std::string, const std::vector<double>&, 
-                const std::vector<double>&, uint32_t, float );
-    void Reset( std::string );
+                const std::vector<double>&, float );
 
     bool emptyVar() const;
 
