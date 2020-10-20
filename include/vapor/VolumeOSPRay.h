@@ -55,6 +55,7 @@ namespace VAPoR {
         OSPTransferFunction _ospTF           = nullptr;
         OSPInstance         _ospInstance     = nullptr;
         OSPVolumetricModel  _ospVolumeModel  = nullptr;
+        OSPLight            _ospLightAmbient = nullptr;
         OSPLight            _ospLightDistant = nullptr;
         OSPGeometry         _ospIso          = nullptr;
         OSPGeometricModel   _ospIsoModel     = nullptr;
@@ -72,19 +73,21 @@ namespace VAPoR {
         OSPVolume _loadVolumeStructured(const Grid *grid);
         OSPVolume _loadVolumeUnstructured(const Grid *grid);
         OSPVolume _loadVolumeTest(const Grid *grid);
+        
+        enum WindingOrder { CCW, CW, INVALID };
+        static WindingOrder getWindingOrderRespectToZ(const glm::vec3 &a, const glm::vec3 &b, const glm::vec3 &c);
+        static WindingOrder getWindingOrderTetra     (const glm::vec3 &a, const glm::vec3 &b, const glm::vec3 &c, const glm::vec3 &d);
+        static const char * windingOrderToString(WindingOrder o);
+        static bool isQuadCoPlanar(const glm::vec3 &a, const glm::vec3 &b, const glm::vec3 &c, const glm::vec3 &d);
     };
     
     
     //! \class VolumeOSPRayIso
     //! \ingroup Public_Render
     //!
-    //! \brief Regular grid isosurface rendering algorithm
+    //! \brief OSPRay isosurface rendering adapter
     //!
     //! \author Stanislaw Jaroszynski
-    //! \date Feburary, 2019
-    //!
-    //! Renders isosurfaces by ray tracing. This does the same CPU side tasks
-    //! as the volume renderer but it provides different GLSL code.
     
     class VolumeOSPRayIso : public VolumeOSPRay {
     public:

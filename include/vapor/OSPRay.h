@@ -1,7 +1,6 @@
 #pragma once
 #include <ospray/ospray_util.h>
 #include <string>
-#include <vapor/MapperFunction.h>
 #include <glm/glm.hpp>
 
 namespace VOSP {

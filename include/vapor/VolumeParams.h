@@ -100,6 +100,8 @@ public:
     
     static const std::string OSPDensity;
     static const std::string OSPSampleRateScalar;
+    static const std::string OSPAmbientLightIntensity;
+    static const std::string OSPDirectionalLightIntensity;
 };
     
 };

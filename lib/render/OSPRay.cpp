@@ -35,9 +35,13 @@ int VOSP::Initialize(int *argc, char **argv)
     if (init_error != OSP_NO_ERROR)
       return init_error;
     
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    // If this is not set, OSPRay will crash upon shutdown
     ospDeviceSetErrorFunc(ospGetCurrentDevice(), ospErrorCallback);
+#pragma GCC diagnostic pop
     
-    printf("OSPRay Version = %s\n", Version().c_str());
+//    printf("OSPRay Version = %s\n", Version().c_str());
     _initialized = true;
     return 0;
 }

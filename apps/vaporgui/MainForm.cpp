@@ -165,37 +165,6 @@ string makename(string file) {
 };
 
 
-
-#include <vapor/Progress.h>
-#include <QProgressDialog>
-#include <QOpenGLContext>
-//#include <vapor/Framebuffer.h>
-
-//class TestDialog : public QProgressDialog {
-//public:
-//    TestDialog(QString title, QString cancel, int start, int end, QWidget *parent)
-//    : QProgressDialog(title, cancel, start, end, parent) {}
-//protected:
-//    void paintEvent(QPaintEvent *event) override
-//    {
-//        printf("PAINT ");
-//        cout<<std::this_thread::get_id()<<endl;
-//    }
-//};
-
-static QProgressDialog *_progressDialog = nullptr;
-static long _progressN;
-static bool _enableProgress = false;
-//static bool _using2ndContext = false;
-//static QOpenGLContext *_progressContext = nullptr;
-//static QOpenGLContext *_progressSavedContext = nullptr;
-//static int _progressFramebufferOG = 0;
-//static Framebuffer _progressFramebuffer;
-//static int _progressViewport[4];
-//static bool _progressGL = false;
-
-
-
 void MainForm::_initMembers() {
 
 	_mdiArea = NULL;
@@ -290,6 +259,7 @@ void MainForm::_initMembers() {
 	_begForCitation = false;
 	_eventsSinceLastSave = 0;
 	_buttonPressed = false;
+
 }
 
 class ProgressStatusBar : public QWidget {
@@ -1370,6 +1340,7 @@ void MainForm::_createDeveloperMenu()
     
     _developerMenu = menuBar()->addMenu("Developer");
     _developerMenu->addAction("Show PWidget Demo", _paramsWidgetDemo, &QWidget::show);
+    
     
     QAction *enableProgress = new QAction(QString("Enable Progress Bar"), nullptr);
     enableProgress->setCheckable(true);

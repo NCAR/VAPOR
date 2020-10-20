@@ -29,6 +29,8 @@ const std::string VolumeParams::SamplingRateMultiplierTag = "SamplingRateMultipl
 const std::string VolumeParams::VolumeDensityTag = "VolumeDensityTag";
 const std::string VolumeParams::OSPDensity = "OSPDensity";
 const std::string VolumeParams::OSPSampleRateScalar = "OSPSampleRateScalar";
+const std::string VolumeParams::OSPAmbientLightIntensity = "OSPAmbientLightIntensity";
+const std::string VolumeParams::OSPDirectionalLightIntensity = "OSPDirectionalLightIntensity";
 
 VolumeParams::VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave)
 : RenderParams(dataMgr, ssave, VolumeParams::GetClassType(), 3)
@@ -173,5 +175,7 @@ void VolumeParams::_init() {
     
     SetValueDouble(OSPDensity, "", 1);
     SetValueDouble(OSPSampleRateScalar, "", 1);
+    SetValueDouble(OSPAmbientLightIntensity, "", 0.2);
+    SetValueDouble(OSPDirectionalLightIntensity, "", 1);
 }
 

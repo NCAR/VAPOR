@@ -8,10 +8,6 @@ VSection::VSection(const std::string &title)
     QTabWidget::addTab(new QWidget, QString::fromStdString(title));
     _tab()->setLayout(new QVBoxLayout);
     layout()->setMargin(12);
-    setMinimumHeight(10);
-    setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::MinimumExpanding);
-    _tab()->setMinimumHeight(10);
-    _tab()->setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::MinimumExpanding);
     setStyleSheet(_createStylesheet());
 }
 

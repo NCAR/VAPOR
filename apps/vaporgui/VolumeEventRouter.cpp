@@ -1,5 +1,6 @@
 #include "VolumeEventRouter.h"
 #include "vapor/VolumeParams.h"
+#include <vapor/VolumeOSPRay.h>
 #include "PWidgets.h"
 #include "PStringDropdownHLI.h"
 
@@ -21,20 +22,30 @@ VolumeEventRouter::VolumeEventRouter(QWidget *parent, ControlExec *ce)
     
     AddSubtab("Appearance", new PGroup({
         (new PTFEditor)->ShowColormapBasedOnParam(VP::UseColormapVariableTag, false),
-        new PSection("Ray Tracing", {
+        new PSection("Rendering Method", {
             new PStringDropdownHLI<VP>("Raytracing Algorithm", VP::GetAlgorithmNames(VP::Type::DVR), &VP::GetAlgorithm, &VP::SetAlgorithmByUser),
-            new PEnumDropdown(VP::SamplingRateMultiplierTag, {"1x", "2x", "4x", "8x", "16x"}, {1, 2, 4, 8, 16}, "Sampling Rate Multiplier"),
-            (new PDoubleSliderEdit(VP::VolumeDensityTag, "Volume Density"))->EnableDynamicUpdate()->SetTooltip("Changes the overall density or 'opacity' of the volume allowing for finer tuning of the transfer function."),
-            new PCheckbox(VP::UseColormapVariableTag, "Color by other variable"),
-            (new S::PVariableSelector3D(RenderParams::_colorMapVariableNameTag))->ShowBasedOnParam(VP::UseColormapVariableTag)
         }),
-        (new PColormapTFEditor)->ShowBasedOnParam(VolumeParams::UseColormapVariableTag),
-        new PSection("Lighting", {
-            new PCheckbox(VolumeParams::LightingEnabledTag),
-            (new PDoubleSliderEdit(VP::PhongAmbientTag,   "Ambient" ))->EnableDynamicUpdate(),
-            (new PDoubleSliderEdit(VP::PhongDiffuseTag,   "Diffuse" ))->EnableDynamicUpdate(),
-            (new PDoubleSliderEdit(VP::PhongSpecularTag,  "Specular"))->EnableDynamicUpdate(),
-            (new PDoubleSliderEdit(VP::PhongShininessTag, "Shininess"))->SetRange(1, 100)->EnableDynamicUpdate()
+        (new Pif(VP::_algorithmTag))->Equals(VolumeOSPRay::GetName())->Then({
+            new PSection("OSPRay Parameters", {
+                (new PDoubleSliderEdit(VolumeParams::OSPDensity, "Density"))->SetRange(0, 3)->EnableDynamicUpdate(),
+                (new PIntegerSliderEdit("osp_spp", "Samples Per Pixel"))->SetRange(1, 10),
+                (new PDoubleInput(VolumeParams::OSPSampleRateScalar, "Volume Sample Rate Scalar"))->EnableBasedOnParam("osp_usePT", false),
+            })
+        })->Else({
+            new PSection("Ray Tracing", {
+                new PEnumDropdown(VP::SamplingRateMultiplierTag, {"1x", "2x", "4x", "8x", "16x"}, {1, 2, 4, 8, 16}, "Sampling Rate Multiplier"),
+                (new PDoubleSliderEdit(VP::VolumeDensityTag, "Volume Density"))->EnableDynamicUpdate()->SetTooltip("Changes the overall density or 'opacity' of the volume allowing for finer tuning of the transfer function."),
+                new PCheckbox(VP::UseColormapVariableTag, "Color by other variable"),
+                (new S::PVariableSelector3D(RenderParams::_colorMapVariableNameTag))->ShowBasedOnParam(VP::UseColormapVariableTag)
+            }),
+            (new PColormapTFEditor)->ShowBasedOnParam(VolumeParams::UseColormapVariableTag),
+            new PSection("Lighting", {
+                new PCheckbox(VolumeParams::LightingEnabledTag, "Enabled"),
+                (new PDoubleSliderEdit(VP::PhongAmbientTag,   "Ambient" ))->EnableDynamicUpdate(),
+                (new PDoubleSliderEdit(VP::PhongDiffuseTag,   "Diffuse" ))->EnableDynamicUpdate(),
+                (new PDoubleSliderEdit(VP::PhongSpecularTag,  "Specular"))->EnableDynamicUpdate(),
+                (new PDoubleSliderEdit(VP::PhongShininessTag, "Shininess"))->SetRange(1, 100)->EnableDynamicUpdate()
+            })
         })
     }));
     
