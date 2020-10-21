@@ -9,35 +9,49 @@ using namespace flow;
 //
 // Class GridKey
 //
-void GridKey::Reset( uint32_t ts, int32_t ref, int32_t comp, std::string var,
+void GridKey::Reset( uint64_t ts, int32_t ref, int32_t comp, std::string var,
                      const std::vector<double>& min,
                      const std::vector<double>& max,
                      float dz )
 {
-    // See the header file for information stored at each offset.
-    std::memcpy( buf.data(),      &ts,        4 );
-    std::memcpy( buf.data() + 4,  &ref,       4 );
-    std::memcpy( buf.data() + 8,  &comp,      4 );
+    timestep = ts;
+    refLev   = ref;
+    compLev  = comp;
+    defaultZ = dz;
 
-    // Fill the field positions [12, 60) with zeros,
-    // in case min and max vectors are not full.
-    for( int i = 12; i < 60; i++ )
-        buf[i] = 0;
-    std::memcpy( buf.data() + 12, min.data(), 8 * min.size() );
-    std::memcpy( buf.data() + 36, max.data(), 8 * max.size() );
-    std::memcpy( buf.data() + 60, &dz,        4              );
+    for( int i = 0; i < 3; i++ ) {
+        ext_min[i] = 0.0;
+        ext_max[i] = 0.0;
+    }
+    for( int i = 0; i < min.size(); i++ )
+        ext_min[i] = min[i];
+    for( int i = 0; i < max.size(); i++ )
+        ext_max[i] = max[i];
 
-    varName = std::move( var );
+    varName  = std::move( var );
 }
 
 bool GridKey::operator==(const GridKey& other) const
 {
-    // String comparison seems to be most frequent, so put it at the first.
-    if( this->varName != other.varName )
+    // String comparison seems to occur most frequently, so put it at the first.
+    if( this->varName  != other.varName )
         return false;
-
-    int cmp = std::memcmp( this->buf.data(), other.buf.data(), buf.size() );
-    return (cmp == 0);
+    if( this->timestep != other.timestep )
+        return false;
+    if( this->refLev   != other.refLev )
+        return false;
+    if( this->compLev  != other.compLev )
+        return false;
+    if( this->defaultZ != other.defaultZ)
+        return false;
+    for( int i = 0; i < 3; i++ ) {
+        if( this->ext_min[i] != other.ext_min[i] )
+            return false;
+        if( this->ext_max[i] != other.ext_max[i] )
+            return false;
+    }
+    
+    return true;
 
     // Note the decision to always record and compare DefaultZ value.
     // In the event of DefaultZ changes, but it's 3D case in essense, 
@@ -601,15 +615,14 @@ const VAPoR::Grid* VaporField::_getAGrid( size_t timestep, const std::string& va
         // so we do a sanity check here. The assertion will be gone in release mode.
         assert( timestep == _c_currentTS );
         key.Reset( _c_currentTS, _c_refLev, _c_compLev, varName, 
-        _c_ext_min, _c_ext_max, this->DefaultZ );
+                   _c_ext_min, _c_ext_max, this->DefaultZ );
     }
     else {
         std::vector<double> extMin, extMax;
         _params->GetBox()->GetExtents( extMin, extMax );
         int refLevel  = _params->GetRefinementLevel();
         int compLevel = _params->GetCompressionLevel();
-        key.Reset( uint32_t(timestep), refLevel, compLevel, varName, 
-                   extMin, extMax, this->DefaultZ );
+        key.Reset( timestep, refLevel, compLevel, varName, extMin, extMax, this->DefaultZ );
     }
 
     // First check if we have the requested grid in our cache.

@@ -20,21 +20,13 @@ class FLOW_API GridKey final
 private:
     std::string varName; 
 
-    // Buffer definition:
-    // Offset   Data_Type   Information
-    //
-    // 0        uint32_t    currentTS
-    // 4        int32_t     refLevel
-    // 8        int32_t     compLevel
-    // 12       double[3]   extent_min
-    // 36       double[3]   extent_max
-    // 60       float       DefaultZ
-    //
-    // Total size: 64
-    std::array<uint8_t, 64> buf;
+    uint64_t timestep;
+    int32_t  refLev, compLev;
+    float    defaultZ;
+    std::array<double, 3> ext_min, ext_max;
 
 public:
-    void Reset( uint32_t, int32_t, int32_t, std::string, const std::vector<double>&, 
+    void Reset( uint64_t, int32_t, int32_t, std::string, const std::vector<double>&, 
                 const std::vector<double>&, float );
 
     bool emptyVar() const;
@@ -148,7 +140,7 @@ private:
 
     // The following variables are cache states from DataMgr and Params.
     bool                        _params_locked = false;
-    uint32_t                    _c_currentTS = 0;                // cached timestep
+    uint64_t                    _c_currentTS = 0;                // cached timestep
     int32_t                     _c_refLev = -2, _c_compLev = -2; // cached ref/comp levels
     float                       _c_vel_mult = 0.0;               // cached velocity multiplier
     std::vector<double>         _c_ext_min, _c_ext_max;          // cached extents
