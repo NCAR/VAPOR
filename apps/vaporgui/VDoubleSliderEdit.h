@@ -31,6 +31,8 @@ public:
 
     //! Set the maximum allowable value for the VSlider and VDoubleLineEdit
     void SetMaximum( double max );
+    
+    void AllowUserRange(bool allowed=true);
 
     //! Get the value associated with the VSlider and VDoubleLineEdit
     double GetValue() const;

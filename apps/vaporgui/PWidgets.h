@@ -24,6 +24,6 @@
 #include "PStringInput.h"
 #include "PTFEditor.h"
 //#include "PVariableWidgets.h"
-#include "Pif.h"
+#include "PShowIf.h"
 #include "S_PDimensionSelector.h"
 #include "S_PVariableSelector.h"

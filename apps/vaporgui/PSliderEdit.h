@@ -21,6 +21,7 @@ public:
     PDoubleSliderEdit(const std::string &tag, const std::string &label="");
     //! @copydoc VSliderEdit::SetRange
     PDoubleSliderEdit *SetRange(double min, double max);
+    PDoubleSliderEdit *AllowUserRange(bool allowed=true);
 
 protected:
     void updateGUI() const override;
@@ -47,6 +48,7 @@ public:
     PIntegerSliderEdit(const std::string &tag, const std::string &label="");
     //! @copydoc VSliderEdit::SetRange
     PIntegerSliderEdit *SetRange(int min, int max);
+    PIntegerSliderEdit *AllowUserRange(bool allowed=true);
 
 protected:
     void updateGUI() const override;

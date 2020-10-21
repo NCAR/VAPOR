@@ -30,7 +30,7 @@ VolumeEventRouter::VolumeEventRouter(QWidget *parent, ControlExec *ce)
         }),
         (new PColormapTFEditor)->ShowBasedOnParam(VolumeParams::UseColormapVariableTag),
         new PSection("Lighting", {
-            new PCheckbox(VolumeParams::LightingEnabledTag),
+            new PCheckbox(VolumeParams::LightingEnabledTag, "Enabled"),
             (new PDoubleSliderEdit(VP::PhongAmbientTag,   "Ambient" ))->EnableDynamicUpdate(),
             (new PDoubleSliderEdit(VP::PhongDiffuseTag,   "Diffuse" ))->EnableDynamicUpdate(),
             (new PDoubleSliderEdit(VP::PhongSpecularTag,  "Specular"))->EnableDynamicUpdate(),

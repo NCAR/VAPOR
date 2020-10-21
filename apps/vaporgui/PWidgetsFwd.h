@@ -23,5 +23,5 @@ class PStringDropdown;
 class PStringInput;
 class PTFEditor;
 class PVariableWidgets;
-class Pif;
+class PShowIf;
 

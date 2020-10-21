@@ -14,21 +14,21 @@
 //!     PWidgets here will only show if param_tag == "Hi"
 //! );
 
-class Pif : public PWidgetWrapper {
+class PShowIf : public PWidgetWrapper {
     PGroup *_group;
     bool _negate = false;
     bool _hasThen = false;
     bool _hasElse = false;
 public:
-    Pif (std::string tag);
-    Pif *Equals(long l);
-    Pif *Equals(std::string s);
+    PShowIf (std::string tag);
+    PShowIf *Equals(long l);
+    PShowIf *Equals(std::string s);
 //    Pif *Or(Pif *);
-    Pif *Not();
-    Pif *Then(PWidget *p);
-    Pif *Else(PWidget *p);
-    Pif *Then(const PGroup::List &list);
-    Pif *Else(const PGroup::List &list);
+    PShowIf *Not();
+    PShowIf *Then(PWidget *p);
+    PShowIf *Else(PWidget *p);
+    PShowIf *Then(const PGroup::List &list);
+    PShowIf *Else(const PGroup::List &list);
     
 protected:
     bool isShown() const override;
@@ -37,10 +37,10 @@ private:
     bool evaluate() const;
     
     class Helper : public PWidgetWrapper {
-        const Pif *_parent;
+        const PShowIf *_parent;
         const bool _negate;
     public:
-        Helper(Pif *parent, PWidget *widget, bool negate=false);
+        Helper(PShowIf *parent, PWidget *widget, bool negate=false);
     protected:
         bool isShown() const override;
     };

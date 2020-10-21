@@ -3,7 +3,7 @@
 #include "PGroup.h"
 #include "PLineItem.h"
 
-class VSliderEdit;
+class VDoubleSliderEdit;
 
 //! \class PSliceSampleLocationSelector
 class PSliceSampleLocationSelector : public PGroup {
@@ -12,7 +12,7 @@ public:
 };
 
 class PSliceSampleLocationSelector1D : public PLineItem {
-    VSliderEdit *_slider;
+    VDoubleSliderEdit *_slider;
     const int _dim;
     
 public:

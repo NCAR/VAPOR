@@ -27,6 +27,12 @@ VIntRangeMenu::VIntRangeMenu(
     }
 }
 
+void VIntRangeMenu::AllowUserRange(bool allowed)
+{
+    _minRangeAction->setEnabled(allowed);
+    _maxRangeAction->setEnabled(allowed);
+}
+
 void VIntRangeMenu::SetMinimum( int min ) { 
     _minRangeAction->SetValue( min ); 
 }

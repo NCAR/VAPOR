@@ -32,6 +32,12 @@ PDoubleSliderEdit *PDoubleSliderEdit::SetRange(double min, double max)
     return this;
 }
 
+PDoubleSliderEdit *PDoubleSliderEdit::AllowUserRange(bool allowed)
+{
+    _sliderEdit->AllowUserRange(allowed);
+    return this;
+}
+
 void PDoubleSliderEdit::updateGUI() const
 {
     auto p = getParams();
@@ -53,13 +59,13 @@ void PDoubleSliderEdit::valueChangedIntermediate(double v)
 void PDoubleSliderEdit::minimumChanged(double v)
 {
     auto p = getParams();
-    p->SetValueDouble(getTag() + "_chromePWidget_UserRangeMinimum", "", v);
+    p->SetValueDouble(getTag() + USER_RANGE_MIN_TAG, "", v);
 }
 
 void PDoubleSliderEdit::maximumChanged(double v)
 {
     auto p = getParams();
-    p->SetValueDouble(getTag() + "_PWidget_UserRangeMaximum", "", v);
+    p->SetValueDouble(getTag() + USER_RANGE_MAX_TAG, "", v);
 }
 
 
@@ -86,6 +92,12 @@ PIntegerSliderEdit *PIntegerSliderEdit::SetRange(int min, int max)
     return this;
 }
 
+PIntegerSliderEdit *PIntegerSliderEdit::AllowUserRange(bool allowed)
+{
+    _sliderEdit->AllowUserRange(allowed);
+    return this;
+}
+
 void PIntegerSliderEdit::updateGUI() const
 {
     auto p = getParams();
@@ -107,11 +119,11 @@ void PIntegerSliderEdit::valueChangedIntermediate(int v)
 void PIntegerSliderEdit::minimumChanged(int v)
 {
     auto p = getParams();
-    p->SetValueLong(getTag() + "_PWidget_UserRangeMinimum", "", v);
+    p->SetValueLong(getTag() + USER_RANGE_MIN_TAG, "", v);
 }
 
 void PIntegerSliderEdit::maximumChanged(int v)
 {
     auto p = getParams();
-    p->SetValueLong(getTag() + "_PWidget_UserRangeMaximum", "", v);
+    p->SetValueLong(getTag() + USER_RANGE_MAX_TAG, "", v);
 }

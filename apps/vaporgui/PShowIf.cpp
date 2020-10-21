@@ -1,79 +1,79 @@
-#include "Pif.h"
+#include "PShowIf.h"
 #include "PGroup.h"
 #include <vapor/ParamsBase.h>
 #include <vapor/VAssert.h>
 
-Pif::Pif(std::string tag)
+PShowIf::PShowIf(std::string tag)
 : PWidgetWrapper(tag, _group = new PGroup) {}
 
-Pif *Pif::Equals(long l)
+PShowIf *PShowIf::Equals(long l)
 {
     _test = std::unique_ptr<Test>(new TestLongEquals(getTag(), l));
     return this;
 }
 
-Pif *Pif::Equals(std::string s)
+PShowIf *PShowIf::Equals(std::string s)
 {
     _test = std::unique_ptr<Test>(new TestStringEquals(getTag(), s));
     return this;
 }
 
-Pif *Pif::Not()
+PShowIf *PShowIf::Not()
 {
     _negate = !_negate;
     return this;
 }
 
-Pif *Pif::Then(PWidget *p)
+PShowIf *PShowIf::Then(PWidget *p)
 {
     _hasThen = true;
     _group->Add(new Helper(this, p));
     return this;
 }
 
-Pif *Pif::Else(PWidget *p)
+PShowIf *PShowIf::Else(PWidget *p)
 {
     _hasElse = true;
     _group->Add(new Helper(this, p, true));
     return this;
 }
 
-Pif *Pif::Then(const PGroup::List &list)
+PShowIf *PShowIf::Then(const PGroup::List &list)
 {
     return Then(new PGroup(list));
 }
 
-Pif *Pif::Else(const PGroup::List &list)
+PShowIf *PShowIf::Else(const PGroup::List &list)
 {
     return Else(new PGroup(list));
 }
 
-bool Pif::isShown() const
+bool PShowIf::isShown() const
 {
     bool result = evaluate();
     return (result && _hasThen) || (!result && _hasElse);
 }
 
-bool Pif::evaluate() const
+bool PShowIf::evaluate() const
 {
     VAssert(_test);
     return _test->Evaluate(getParams()) != _negate;
 }
 
-Pif::Helper::Helper(Pif *parent, PWidget *widget, bool negate)
+PShowIf::Helper::Helper(PShowIf *parent, PWidget *widget, bool negate)
 : PWidgetWrapper(widget), _parent(parent), _negate(negate) {}
 
-bool Pif::Helper::isShown() const
+bool PShowIf::Helper::isShown() const
 {
     return _parent->evaluate() != _negate;
 }
 
-bool Pif::TestLongEquals::Evaluate(VAPoR::ParamsBase *params) const
+bool PShowIf::TestLongEquals::Evaluate(VAPoR::ParamsBase *params) const
 {
     return params->GetValueLong(_tag, 0) == _val;
 }
 
-bool Pif::TestStringEquals::Evaluate(VAPoR::ParamsBase *params) const
+bool PShowIf::TestStringEquals::Evaluate(VAPoR::ParamsBase *params) const
 {
     return params->GetValueString(_tag, "") == _val;
 }

@@ -1,5 +1,5 @@
 #include "PSliceSampleLocationSelector.h"
-#include "VSliderEdit.h"
+#include "VDoubleSliderEdit.h"
 #include <vapor/SliceParams.h>
 #include <assert.h>
 
@@ -15,9 +15,9 @@ PSliceSampleLocationSelector::PSliceSampleLocationSelector()
 
 
 PSliceSampleLocationSelector1D::PSliceSampleLocationSelector1D(int dim)
-: PLineItem("", dim==0?"Sample X":dim==1?"Sample Y":"Sample Z", _slider = new VSliderEdit), _dim(dim)
+: PLineItem("", dim==0?"Sample X":dim==1?"Sample Y":"Sample Z", _slider = new VDoubleSliderEdit), _dim(dim)
 {
-    QObject::connect(_slider, &VSliderEdit::ValueChanged, this, &PSliceSampleLocationSelector1D::sliderValueChanged);
+    QObject::connect(_slider, &VDoubleSliderEdit::ValueChanged, this, &PSliceSampleLocationSelector1D::sliderValueChanged);
 }
 
 void PSliceSampleLocationSelector1D::updateGUI() const
@@ -32,7 +32,8 @@ void PSliceSampleLocationSelector1D::updateGUI() const
     
     int ret = getDataMgr()->GetVariableExtents(ts, varName, level, lod, min, max);
     assert(ret == 0);
-    _slider->SetRange(min[_dim], max[_dim]);
+    _slider->SetMinimum(min[_dim]);
+    _slider->SetMaximum(max[_dim]);
     
     min = rp->GetValueDoubleVec(SliceParams::SampleLocationTag);
     _slider->SetValue(min[_dim]);

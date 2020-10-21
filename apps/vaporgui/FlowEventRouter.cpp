@@ -26,7 +26,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce)
     AddSubtab("Seeding", new PGroup({
         new PSection("Flow Integration Settings", {
             new PEnumDropdown(FP::_isSteadyTag, {"Streamlines", "Pathlines"}, {true, false}, "Flow Type"),
-            (new Pif(FP::_isSteadyTag))->Equals(true)->Then({
+            (new PShowIf(FP::_isSteadyTag))->Equals(true)->Then({
                 new PEnumDropdown(FP::_flowDirectionTag, {"Forward", "Backward", "Bi-Directional"}, {(int)FlowDir::FORWARD, (int)FlowDir::BACKWARD, (int)FlowDir::BI_DIR}, "Flow Direction"),
                 (new PIntegerSliderEdit(FP::_steadyNumOfStepsTag, "Integration Steps"))->SetRange(0, 5000),
             })->Else({
@@ -40,20 +40,20 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce)
         }),
         new PSection("Seed Distribution Settings", {
             new PEnumDropdown(FP::_seedGenModeTag, {"Gridded", "Random", "Random w/ Bias", "List of seeds"}, {(int)FlowSeedMode::UNIFORM, (int)FlowSeedMode::RANDOM, (int)FlowSeedMode::RANDOM_BIAS, (int)FlowSeedMode::LIST}, "Seed distribution type"),
-            (new Pif(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::UNIFORM)->Then({
+            (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::UNIFORM)->Then({
                 (new PIntegerSliderEdit(FP::_xGridNumOfSeedsTag, "X axis seeds"))->SetRange(1, 50),
                 (new PIntegerSliderEdit(FP::_yGridNumOfSeedsTag, "Y axis seeds"))->SetRange(1, 50),
                 (new PIntegerSliderEdit(FP::_zGridNumOfSeedsTag, "Z axis seeds"))->SetRange(1, 50),
             }),
-            (new Pif(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::RANDOM)->Then({
+            (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::RANDOM)->Then({
                 (new PIntegerSliderEdit(FP::_randomNumOfSeedsTag, "Seed count"))->SetRange(1, 500),
             }),
-            (new Pif(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::RANDOM_BIAS)->Then({
+            (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::RANDOM_BIAS)->Then({
                 (new PIntegerSliderEdit(FP::_randomNumOfSeedsTag, "Seed count"))->SetRange(1, 500),
                 (new PDoubleSliderEdit(FP::_rakeBiasStrength, "Bias weight"))->SetRange(-10, 10),
                 new S::PVariableSelector(FP::_rakeBiasVariable)
             }),
-            (new Pif(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::LIST)->Then({
+            (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::LIST)->Then({
                 new PFileOpenSelector(FP::_seedInputFilenameTag, "List of seeds file")
             }),
         }),
@@ -73,29 +73,29 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce)
         new PTFEditor(RenderParams::_colorMapVariableNameTag),
         new PSection("Appearance", {
             new PEnumDropdown(FP::RenderTypeTag, {"Tubes", "Samples", "KLGWTH"}, {FP::RenderTypeStream, FP::RenderTypeSamples, FP::RenderTypeDensity}, "Render Type"),
-            (new Pif(FP::RenderTypeTag))->Equals(FP::RenderTypeStream)->Then({
+            (new PShowIf(FP::RenderTypeTag))->Equals(FP::RenderTypeStream)->Then({
                 new PCheckbox(FP::RenderGeom3DTag, "3D Geometry"),
                 (new PDoubleSliderEdit(FP::RenderRadiusScalarTag, "Radius Scalar"))->SetRange(0.1, 5)->EnableDynamicUpdate(),
                 new PCheckbox(FP::RenderShowStreamDirTag, "Show Stream Direction"),
                 (new PSubGroup({(new PIntegerSliderEdit(FP::RenderGlyphStrideTag, "Every N Samples"))->SetRange(1, 20)->EnableDynamicUpdate()}))->ShowBasedOnParam(FP::RenderShowStreamDirTag),
             }),
-            (new Pif(FP::RenderTypeTag))->Equals(FP::RenderTypeSamples)->Then({
+            (new PShowIf(FP::RenderTypeTag))->Equals(FP::RenderTypeSamples)->Then({
                 new PEnumDropdown(FP::RenderGlyphTypeTag, {"Circle", "Arrow"}, {FP::GlpyhTypeSphere, FP::GlpyhTypeArrow}, "Glyph Type"),
                 new PCheckbox(FP::RenderGeom3DTag, "3D Geometry"),
                 (new PDoubleSliderEdit(FP::RenderRadiusScalarTag, "Radius Scalar"))->SetRange(0.1, 5)->EnableDynamicUpdate(),
                 (new PIntegerSliderEdit(FP::RenderGlyphStrideTag, "Every N Samples"))->SetRange(1, 20)->EnableDynamicUpdate(),
                 new PCheckbox(FP::RenderGlyphOnlyLeadingTag, "Only Show Leading Sample"),
             }),
-            (new Pif(FP::RenderTypeTag))->Equals(FP::RenderTypeDensity)->Then({
+            (new PShowIf(FP::RenderTypeTag))->Equals(FP::RenderTypeDensity)->Then({
                 new PLabel("May not render correctly with other renderers"),
                 (new PDoubleSliderEdit(FP::RenderRadiusScalarTag, "Radius Scalar"))->SetRange(0.1, 5)->EnableDynamicUpdate(),
                 (new PDoubleSliderEdit(FlowParams::RenderDensityFalloffTag, "Density Falloff"))->SetRange(0.5, 10)->EnableDynamicUpdate()->SetTooltip("The exponential factor at which the intensity falls off along the width of the line"),
                 (new PDoubleSliderEdit(FlowParams::RenderDensityToneMappingTag, "Tone Mapping"))->SetRange(0, 1)->EnableDynamicUpdate()->SetTooltip("The overall color intensity of the line"),
                 (new PCheckbox("Invert"))->SetTooltip("For rendering on light backgrounds"),
             }),
-            (new Pif(FP::RenderTypeTag))->Not()->Equals(FP::RenderTypeSamples)->Then({
+            (new PShowIf(FP::RenderTypeTag))->Not()->Equals(FP::RenderTypeSamples)->Then({
                 new PCheckbox(FP::RenderFadeTailTag, "Fade Flow Tails"),
-                (new Pif(FP::RenderFadeTailTag))->Equals(true)->Then(new PSubGroup({
+                (new PShowIf(FP::RenderFadeTailTag))->Equals(true)->Then(new PSubGroup({
                     (new PIntegerSliderEdit(FP::RenderFadeTailStartTag, "Fade Start Sample"))->SetRange(0, 100)->EnableDynamicUpdate()->SetTooltip("How far behind leading sample fade begins."),
                     (new PIntegerSliderEdit(FP::RenderFadeTailLengthTag, "Fade Over N Samples"))->SetRange(1, 100)->EnableDynamicUpdate()->SetTooltip("Number of samples from opaque to transparent."),
                     (new PIntegerSliderEdit(FP::RenderFadeTailStopTag, "Animate Steady"))->SetRange(0, 200)->EnableDynamicUpdate()->SetTooltip("Temporary solution for animating steady flow particles."),

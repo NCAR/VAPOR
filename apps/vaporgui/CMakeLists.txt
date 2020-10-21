@@ -229,8 +229,8 @@ set (SRCS
 	S_PDimensionSelector.h
 	S_PVariableSelector.cpp
 	S_PVariableSelector.h
-	Pif.cpp
-	Pif.h
+	PShowIf.cpp
+	PShowIf.h
 	PWidgetWrapper.cpp
 	PWidgetWrapper.h
 	PButton.cpp
