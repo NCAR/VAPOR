@@ -44,12 +44,10 @@ bool GridKey::operator==(const GridKey& other) const
         return false;
     if( this->defaultZ != other.defaultZ)
         return false;
-    for( int i = 0; i < 3; i++ ) {
-        if( this->ext_min[i] != other.ext_min[i] )
-            return false;
-        if( this->ext_max[i] != other.ext_max[i] )
-            return false;
-    }
+    if( this->ext_min  != other.ext_min )
+        return false;
+    if( this->ext_max  != other.ext_max )
+        return false;
     
     return true;
 
