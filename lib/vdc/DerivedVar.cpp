@@ -2598,9 +2598,8 @@ int DerivedCoordVarStandardOceanSCoordinate::Initialize() {
 	// available compression ratios
 	//
     _coordVarInfo = DC::CoordVar(
-        _derivedVarName, "m", DC::XType::FLOAT, etaInfo.GetWName(),
-        etaInfo.GetCRatios(), vector <bool> (3, false), 
-        dimnames, timeDimName, 2, false
+        _derivedVarName, "m", DC::XType::FLOAT, vector <bool> (3, false), 
+        2, false, dimnames, timeDimName
 	);
 
     return(0);
@@ -2649,15 +2648,8 @@ int DerivedCoordVarStandardOceanSCoordinate::GetDimLensAtLevel(
 	rc = _dc->GetDimLensAtLevel(_sVar, -1, dims1d, bs1d);
 	if (rc<0) return(-1);
 
-	vector <size_t> dims = {dims2d[0], dims2d[1], dims1d[0]};
-	vector <size_t> bs = {bs2d[0], bs2d[1], bs1d[0]};
-
-	int nlevels = _dc->GetNumRefLevels(_etaVar);
-	if (level < 0) level = nlevels + level;
-
-	WASP::InqDimsAtLevel(
-		_coordVarInfo.GetWName(), level, dims, bs, dims_at_level, bs_at_level
-	);
+	dims_at_level = {dims2d[0], dims2d[1], dims1d[0]};
+	bs_at_level = {bs2d[0], bs2d[1], bs1d[0]};
 
 	return(0);
 }
@@ -2666,6 +2658,10 @@ int DerivedCoordVarStandardOceanSCoordinate::OpenVariableRead(
     size_t ts, int level, int lod
 ) {
 
+	// Compression not supported
+	//
+	level = -1;
+	lod = -1;
 	DC::FileTable::FileObject *f = new DC::FileTable::FileObject(
 		ts, _derivedVarName, level, lod
 	);
