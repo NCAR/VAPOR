@@ -1007,11 +1007,11 @@ public:
  ) const;
 
  virtual size_t GetNumRefLevels() const {
-    return(_dc->GetNumRefLevels(_psVar));
+    return(1);
  } 
 
  virtual std::vector <size_t> GetCRatios() const {
-    return(_dc->GetCRatios(_psVar));
+	return(std::vector <size_t> (1,1));
  }
 
  virtual int OpenVariableRead(
