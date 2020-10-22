@@ -3160,24 +3160,19 @@ int DerivedCoordVarStandardAHSPC::ReadRegion(
 	if (rc<0) return(rc);
 
 
+	float p0 = 1.0;
 	if (! _aVar.empty()) {
-		float p0;
 		myMin = {};
 		myMax = {};
 		rc = _getVar(
 			_dc, f->GetTS(), _p0Var, f->GetLevel(), f->GetLOD(),
 			myMin, myMax, &p0
 		);
+	}
 
-		compute_a(
-			min, max, a.data(), b.data(), ps.data(), p0, region
-		);
-	}
-	else {
-		compute_ap(
-			min, max, a.data(), b.data(), ps.data(), region
-		);
-	}
+	compute_a(
+		min, max, a.data(), b.data(), ps.data(), p0, region
+	);
 
 	return(0);
 }
@@ -3239,41 +3234,6 @@ void DerivedCoordVarStandardAHSPC::compute_a(
 		if (l_ps == _psVarMV) l_ps = 0;
 
 		float pressure = (a[k]*p0) + (b[k]*l_ps);
-
-		// Convert from pressure to meters above the ground:
-		// [1] "A Quick Derivation relating altitude to air pressure" from
-		// Portland State Aerospace Society, Version 1.03, 12/22/2004.
-		//
-		region[k*rDims[0]*rDims[1] + j*rDims[0] + i] = 
-			44331.5 - (4946.62 * std::pow(pressure, 0.190263));
-		
-    }
-	}
-	}
-}
-
-void DerivedCoordVarStandardAHSPC::compute_ap(
-	const vector <size_t> &min, const vector <size_t> &max,
-	const float *ap, const float *b, const float *ps, 
-	float *region
-) const {
-
-	vector <size_t> rDims;
-	for (int i=0; i<3; i++) {
-		rDims.push_back(max[i]-min[i]+1);
-	}
-
-    for (size_t k=0; k<max[2]-min[2]+1; k++) {
-    for (size_t j=0; j<max[1]-min[1]+1; j++) {
-    for (size_t i=0; i<max[0]-min[0]+1; i++) {
-
-		// We are deriving coordinate values from data values, so missing
-		// values may be present
-		//
-		float l_ps = ps[j*rDims[0]+i];
-		if (l_ps == _psVarMV) l_ps = 0;
-
-		float pressure = ap[k] + b[k]*l_ps;
 
 		// Convert from pressure to meters above the ground:
 		// [1] "A Quick Derivation relating altitude to air pressure" from

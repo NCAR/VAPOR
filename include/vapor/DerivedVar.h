@@ -1059,11 +1059,6 @@ private:
 	const float *a, const float *b, const float *ps, float p0,
 	float *region
  ) const;
- void compute_ap(
-	const vector <size_t> &min, const vector <size_t> &max,
-	const float *ap, const float *b, const float *ps,
-	float *region
- ) const;
  
 };
 
