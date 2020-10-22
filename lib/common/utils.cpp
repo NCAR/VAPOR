@@ -175,42 +175,39 @@ bool Wasp::BinarySearchRange(const vector<double> &sorted, double x, size_t &i)
 {
     i = 0;
 
-    if (sorted.size() < 2) return (false);
+    if (sorted.size() == 1) return (sorted[0] == x);
 
-    // See if above or below the array
+    // if sorted in ascending order
     //
-    if (sorted[0] < sorted[1]) {    // increasing
+    if (sorted[0] <= sorted[sorted.size() - 1]) {
         if (x < sorted[0]) return (false);
-        if (x > sorted[sorted.size() - 1]) return (false);
-    } else {    // decreasing
-        if (x > sorted[0]) return (false);
+
+        if (x == sorted[sorted.size() - 1]) {
+            i = sorted.size() - 2;
+            return (true);
+        }
+
+        vector<double>::const_iterator itr;
+        itr = std::upper_bound(sorted.begin(), sorted.end(), x);
+        if (itr == sorted.end()) { return (false); }
+        if (itr != sorted.begin()) { --itr; }
+        i = itr - sorted.begin();
+
+    } else {
         if (x < sorted[sorted.size() - 1]) return (false);
-    }
 
-    // Binary search for starting index of cell containing x
-    //
-    size_t i0 = 0;
-    size_t i1 = sorted.size() - 1;
-    double x0 = sorted[i0];
-    double x1 = sorted[i1];
-    while (i1 - i0 > 1) {
-        x1 = sorted[(i0 + i1) >> 1];
-        if (x1 == x) {    // pathological case
-            i0 = (i0 + i1) >> 1;
-            break;
+        if (x == sorted[sorted.size() - 1]) {
+            i = sorted.size() - 2;
+            return (true);
         }
 
-        // if the signs of differences change then the coordinate
-        // is between x0 and x1
-        //
-        if ((x - x0) * (x - x1) <= 0.0) {
-            i1 = (i0 + i1) >> 1;
-        } else {
-            i0 = (i0 + i1) >> 1;
-            x0 = x1;
-        }
+        vector<double>::const_reverse_iterator itr;
+        itr = std::lower_bound(sorted.rbegin(), sorted.rend(), x);
+        if (itr == sorted.rend()) { return (false); }
+        if (itr != sorted.rbegin()) { ++itr; }
+        i = sorted.rend() - itr;
     }
-    i = i0;
+
     return (true);
 }
 

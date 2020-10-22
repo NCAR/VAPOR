@@ -75,7 +75,17 @@ public:
 
     //! \copydoc Grid::GetIndicesCell
     //!
-    virtual bool GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) const override;
+    //! Returns resampling weights if point is found
+    //
+    virtual bool GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices, double wgts[3]) const;
+
+    //! \copydoc Grid::GetIndicesCell
+    //!
+    virtual bool GetIndicesCell(const DblArr3 &coords, Size_tArr3 &indices) const override
+    {
+        double dummy[3];
+        return (GetIndicesCell(coords, indices, dummy));
+    };
 
     // \copydoc GetGrid::InsideGrid()
     //

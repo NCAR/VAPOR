@@ -2,6 +2,7 @@
 #define _LayeredGrid_
 #include <vapor/common.h>
 #include "RegularGrid.h"
+#include "StretchedGrid.h"
 
 namespace VAPoR {
 
@@ -9,8 +10,8 @@ namespace VAPoR {
 //!
 //! \brief This class implements a 2D or 3D layered grid.
 //!
-//! This class implements a 2D or 3D layered grid: a generalization
-//! of a regular grid where the spacing of grid points along the K dimension
+//! This class implements a 3D layered grid: a generalization
+//! of a stretched grid where the spacing of grid points along the K dimension
 //! varies at each grid point. The spacing along the remaining I and J
 //! dimensions is invariant between grid points. I.e.
 //! z coordinate is given by some
@@ -33,18 +34,16 @@ public:
     //!
     //! Adds or changes parameters:
     //!
-    //! \param[in] minu A two-element vector specifying the X and Y user
-    //! coordinates
-    //! of the first grid point.
-    //! \param[in] maxu A two-element vector specifying the X and Y user
-    //! coordinates
+    //! \param[in] xcoords  A 1D vector whose size matches that of the I
+    //! dimension of this class, and whose values specify the X user coordinates.
+    //! \param[in] ycoords  A 1D vector whose size matches that of the J
     //! of the last grid point.
     //!
     //! \param[in] rg A RegularGrid instance with the same dimensionality and
     //! min/max offsets as specified by \p bs, \p min, and \p max. The
     //! data values of \p rg provide the user coordinates for the Z dinmension.
     //!
-    LayeredGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const std::vector<double> &minu, const std::vector<double> &maxu,
+    LayeredGrid(const std::vector<size_t> &dims, const std::vector<size_t> &bs, const std::vector<float *> &blks, const std::vector<double> &xcoords, const std::vector<double> &ycoords,
                 const RegularGrid &rg);
 
     LayeredGrid() = default;
@@ -121,7 +120,7 @@ public:
     //! Return the internal data structure containing a copy of the coordinate
     //! blocks passed in by the constructor
     //!
-    const RegularGrid &GetZRG() const { return (_rg); };
+    const RegularGrid &GetZRG() const { return (_zrg); };
 
     class ConstCoordItrLayered : public Grid::ConstCoordItrAbstract {
     public:
@@ -140,18 +139,18 @@ public:
         {
             const ConstCoordItrLayered *itrptr = static_cast<const ConstCoordItrLayered *>(rhs);
 
-            return (_index == itrptr->_index);
+            return (_zCoordItr == itrptr->_zCoordItr);
         }
 
         virtual std::unique_ptr<ConstCoordItrAbstract> clone() const { return std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrLayered(*this)); };
 
     private:
-        std::vector<size_t> _index;
-        std::vector<size_t> _dims;
-        std::vector<double> _minu;
-        std::vector<double> _delta;
-        std::vector<double> _coords;
-        ConstIterator       _zCoordItr;
+        const LayeredGrid *          _lg;
+        size_t                       _nElements2D;
+        std::vector<double>          _coords;
+        size_t                       _index2D;
+        ConstIterator                _zCoordItr;
+        StretchedGrid::ConstCoordItr _itr2D;
     };
 
     virtual ConstCoordItr ConstCoordBegin() const override { return ConstCoordItr(std::unique_ptr<ConstCoordItrAbstract>(new ConstCoordItrLayered(this, true))); }
@@ -163,13 +162,19 @@ protected:
     virtual void GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const override;
 
 private:
-    RegularGrid         _rg;
+    StretchedGrid       _sg2d;    // horizontal coordinates maintained in stretched grid
+    RegularGrid         _zrg;     // vertical coords are the values of a regular grid
+    std::vector<double> _xcoords;
+    std::vector<double> _ycoords;
     DblArr3             _minu = {{0.0, 0.0, 0.0}};
     DblArr3             _maxu = {{0.0, 0.0, 0.0}};
-    std::vector<double> _delta;
     int                 _interpolationOrder;
 
-    void _layeredGrid(const std::vector<double> &minu, const std::vector<double> &maxu, const RegularGrid &rg);
+    mutable struct {
+        size_t k = 0;
+        float  z0 = 0.0;
+        float  z1 = 0.0;
+    } _insideGridCache;
 
     virtual float GetValueNearestNeighbor(const DblArr3 &coords) const override;
 
@@ -259,9 +264,7 @@ private:
 
     double _interpolateVaryingCoord(size_t i0, size_t j0, size_t k0, double x, double y) const;
 
-    int _bsearchKIndexCell(size_t i, size_t j, double z, size_t &k) const;
-
-    bool _getCellAndWeights(const double coords[3], size_t indices0[3], double wgts[3]) const;
+    bool _insideGrid(const DblArr3 &coords, Size_tArr3 &indices, double wgts[3]) const;
 };
 };    // namespace VAPoR
 #endif

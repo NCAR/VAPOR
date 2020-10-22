@@ -459,18 +459,23 @@ VAPoR::CurvilinearGrid *MakeCurvilinearTerrainGrid(const std::vector<size_t> &bs
 
 LayeredGrid *MakeLayeredGrid(const vector<size_t> &dims, const vector<size_t> &bs, const std::vector<double> &minu, const std::vector<double> &maxu)
 {
-    // Get horizontal dimensions
-    //
-    std::vector<double> hminu = {minu[X], minu[Y]};
-    std::vector<double> hmaxu = {maxu[X], maxu[Y]};
-
     std::vector<float *> zCoordBlocks = AllocateBlocks(bs, dims);
 
     RegularGrid rg(dims, bs, zCoordBlocks, minu, maxu);
     MakeRampOnAxis(&rg, minu[Z], maxu[Z], Z);
 
+    double         deltax = maxu[0] - minu[0] / (dims[0] - 1);
+    vector<double> xcoords;
+    for (int i = 0; i < dims[0]; i++) { xcoords.push_back(minu[0] + (i * deltax)); }
+
+    // Get horizontal dimensions
+    //
+    double         deltay = maxu[1] - minu[1] / (dims[1] - 1);
+    vector<double> ycoords;
+    for (int i = 0; i < dims[1]; i++) { ycoords.push_back(minu[1] + (i * deltay)); }
+
     std::vector<float *> dataBlocks = AllocateBlocks(bs, dims);
-    LayeredGrid *        lg = new LayeredGrid(dims, bs, dataBlocks, hminu, hmaxu, rg);
+    LayeredGrid *        lg = new LayeredGrid(dims, bs, dataBlocks, xcoords, ycoords, rg);
 
     return (lg);
 }

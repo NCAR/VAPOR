@@ -70,7 +70,9 @@ bool isLayered(const DC::Mesh &m, const vector<DC::CoordVar> &cvarsinfo, const v
 
     if (cdimnames.size() != 3) return (false);
 
-    if (!(cvarsinfo[0].GetUniform() && cvarsinfo[1].GetUniform())) { return (false); }
+    for (int i = 0; i < 2; i++) {
+        if (!(cdimnames[i].size() == 1)) { return (false); }
+    }
 
     if (!(cdimnames[2].size() == 3)) return (false);
 
@@ -202,12 +204,11 @@ LayeredGrid *GridHelper::_make_grid_layered(const vector<size_t> &dims, const ve
 
     // Get horizontal dimensions
     //
-    vector<double> hminu, hmaxu;
-    for (int i = 0; i < 2; i++) {
-        float *coords = blkvec[i + 1];
-        hminu.push_back(coords[0]);
-        hmaxu.push_back(coords[dims[i] - 1]);
-    }
+    vector<double> xcoords;
+    for (int i = 0; i < dims[0]; i++) xcoords.push_back(blkvec[1][i]);
+
+    vector<double> ycoords;
+    for (int i = 0; i < dims[1]; i++) ycoords.push_back(blkvec[2][i]);
 
     // Data blocks
     //
@@ -236,7 +237,7 @@ LayeredGrid *GridHelper::_make_grid_layered(const vector<size_t> &dims, const ve
 
     RegularGrid rg(dims, bs, zcblkptrs, vector<double>(3, 0.0), vector<double>(3, 1.0));
 
-    LayeredGrid *lg = new LayeredGrid(dims, bs, blkptrs, hminu, hmaxu, rg);
+    LayeredGrid *lg = new LayeredGrid(dims, bs, blkptrs, xcoords, ycoords, rg);
 
     return (lg);
 }

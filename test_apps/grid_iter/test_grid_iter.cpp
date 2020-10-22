@@ -165,9 +165,15 @@ VAPoR::LayeredGrid *make_layered_grid()
 
     vector<float *> blks = alloc_blocks(opt.bs, opt.dims);
 
-    vector<double> minu2d = {opt.minu[0], opt.minu[1]};
-    vector<double> maxu2d = {opt.maxu[0], opt.maxu[1]};
-    LayeredGrid *  lg = new LayeredGrid(opt.dims, opt.bs, blks, minu2d, maxu2d, *rg);
+    double         deltax = opt.maxu[0] - opt.minu[0] / (opt.dims[0] - 1);
+    vector<double> xcoords;
+    for (int i = 0; i < opt.dims[0]; i++) { xcoords.push_back(opt.minu[0] + (i * deltax)); }
+
+    double         deltay = opt.maxu[1] - opt.minu[1] / (opt.dims[1] - 1);
+    vector<double> ycoords;
+    for (int i = 0; i < opt.dims[1]; i++) { ycoords.push_back(opt.minu[1] + (i * deltay)); }
+
+    LayeredGrid *lg = new LayeredGrid(opt.dims, opt.bs, blks, xcoords, ycoords, *rg);
 
     return (lg);
 }
