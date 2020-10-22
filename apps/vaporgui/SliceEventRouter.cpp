@@ -12,7 +12,7 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce)
 {
     AddSubtab("Variables", new PGroup({
         new PSection("Variable Selection", {
-            new S::PScalarVariableSelector
+            new PScalarVariableSelector
         }),
         new PFidelitySection
     }));

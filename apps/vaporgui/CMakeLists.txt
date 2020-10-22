@@ -194,8 +194,6 @@ set (SRCS
 	ParamsWidgetDemo.h
 	PTFEditor.cpp
 	PTFEditor.h
-    PVariableWidgets.cpp
-    PVariableWidgets.h
     PFidelitySection.cpp
     PFidelitySection.h
     PTMSLODInput.h
@@ -225,10 +223,10 @@ set (SRCS
 	PWidgetsFwd.h
 	PGeometrySubtab.cpp
 	PGeometrySubtab.h
-	S_PDimensionSelector.cpp
-	S_PDimensionSelector.h
-	S_PVariableSelector.cpp
-	S_PVariableSelector.h
+	PDimensionSelector.cpp
+	PDimensionSelector.h
+	PVariableSelector.cpp
+	PVariableSelector.h
 	PShowIf.cpp
 	PShowIf.h
 	PWidgetWrapper.cpp

@@ -13,11 +13,11 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce)
 {
     AddSubtab("Variables", new PGroup({
         new PSection("Variable Selection", {
-            new S::PDimensionSelector,
-            new S::PXFieldVariableSelector,
-            new S::PYFieldVariableSelector,
-            (new S::PZFieldVariableSelector)->OnlyShowForDim(3),
-            new S::PColorMapVariableSelector,
+            new PDimensionSelector,
+            new PXFieldVariableSelector,
+            new PYFieldVariableSelector,
+            (new PZFieldVariableSelector)->OnlyShowForDim(3),
+            new PColorMapVariableSelector,
         }),
         new PFidelitySection
     }));
@@ -51,7 +51,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce)
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::RANDOM_BIAS)->Then({
                 (new PIntegerSliderEdit(FP::_randomNumOfSeedsTag, "Seed count"))->SetRange(1, 500),
                 (new PDoubleSliderEdit(FP::_rakeBiasStrength, "Bias weight"))->SetRange(-10, 10),
-                new S::PVariableSelector(FP::_rakeBiasVariable)
+                new PVariableSelector(FP::_rakeBiasVariable)
             }),
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::LIST)->Then({
                 new PFileOpenSelector(FP::_seedInputFilenameTag, "List of seeds file")

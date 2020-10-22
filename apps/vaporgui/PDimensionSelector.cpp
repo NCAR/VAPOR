@@ -1,9 +1,8 @@
-#include "S_PDimensionSelector.h"
+#include "PDimensionSelector.h"
 #include <vapor/RenderParams.h>
 #include "VComboBox.h"
 
 using namespace VAPoR;
-using namespace S;
 
 PDimensionSelector::PDimensionSelector()
 : PLineItem("", "Variable Dimension", _vComboBox = new VComboBox({"2D", "3D"}))

@@ -2,8 +2,6 @@
 
 #include "PStringDropdown.h"
 
-namespace S {
-
 //! \class PVariableSelector
 //! \author Stas Jaroszynski
 //! Allows the user to select variables. Automatically switches between 2D and 3D
@@ -65,5 +63,3 @@ class PHeightVariableSelector   : public PVariableSelector2D { public: PHeightVa
 class PXFieldVariableSelector   : public PVariableSelector   { public: PXFieldVariableSelector(); };
 class PYFieldVariableSelector   : public PVariableSelector   { public: PYFieldVariableSelector(); };
 class PZFieldVariableSelector   : public PVariableSelector   { public: PZFieldVariableSelector(); };
-
-}

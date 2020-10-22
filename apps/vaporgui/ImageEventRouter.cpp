@@ -12,7 +12,7 @@ ImageEventRouter::ImageEventRouter( QWidget* parent, ControlExec* ce)
 {
     AddSubtab("Variables", new PGroup({
         new PSection("Variable Selection", {
-            new S::PHeightVariableSelector
+            new PHeightVariableSelector
         }),
         new PFidelitySection
     }));

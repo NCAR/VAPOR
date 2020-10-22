@@ -11,9 +11,9 @@ WireFrameEventRouter::WireFrameEventRouter( QWidget *parent, ControlExec *ce)
 {
     AddSubtab("Variables", new PGroup({
         new PSection("Variable Selection", {
-            new S::PDimensionSelector,
-            new S::PScalarVariableSelector,
-            new S::PHeightVariableSelector
+            new PDimensionSelector,
+            new PScalarVariableSelector,
+            new PHeightVariableSelector
         }),
         new PFidelitySection
     }));

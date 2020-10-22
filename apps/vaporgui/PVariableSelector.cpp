@@ -1,10 +1,9 @@
-#include "S_PVariableSelector.h"
+#include "PVariableSelector.h"
 #include <vapor/RenderParams.h>
 #include <assert.h>
 
 using VAPoR::RenderParams;
 using VAPoR::Box;
-using namespace S;
 
 #define NULL_TEXT "<none>"
 

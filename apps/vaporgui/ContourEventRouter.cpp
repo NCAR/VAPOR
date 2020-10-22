@@ -13,8 +13,8 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce)
 {
     AddSubtab("Variables", new PGroup({
         new PSection("Variable Selection", {
-            new S::PScalarVariableSelector,
-            new S::PHeightVariableSelector,
+            new PScalarVariableSelector,
+            new PHeightVariableSelector,
         }),
         new PFidelitySection
     }));

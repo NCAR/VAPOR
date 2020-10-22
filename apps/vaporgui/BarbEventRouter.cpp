@@ -12,12 +12,12 @@ BarbEventRouter::BarbEventRouter(QWidget *parent, ControlExec *ce)
 {
     AddSubtab("Variables", new PGroup({
         new PSection("Variable Selection", {
-            new S::PDimensionSelector,
-            new S::PXFieldVariableSelector,
-            new S::PYFieldVariableSelector,
-            new S::PZFieldVariableSelector,
-            new S::PHeightVariableSelector,
-            new S::PColorMapVariableSelector,
+            new PDimensionSelector,
+            new PXFieldVariableSelector,
+            new PYFieldVariableSelector,
+            new PZFieldVariableSelector,
+            new PHeightVariableSelector,
+            new PColorMapVariableSelector,
         }),
         new PFidelitySection
     }));
