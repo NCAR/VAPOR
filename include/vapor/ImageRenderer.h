@@ -44,9 +44,11 @@ private:
     string         _proj4StringImg;
     GLsizei        _texWidth;
     GLsizei        _texHeight;
+    const int      _maxResamplingResolution;
     size_t         _cacheTimestep;
     int            _cacheRefLevel;
     int            _cacheLod;
+    int            _cacheTMSLOD;
     vector<double> _cacheBoxExtents;
     size_t         _cacheTimestepTex;
     string         _cacheHgtVar;

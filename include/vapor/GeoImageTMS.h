@@ -9,6 +9,9 @@
     #include <xtiffio.h>
     #include <geotiff.h>
 #endif
+#include <sstream>
+#include <fstream>
+#include <sys/stat.h>
 #include <vapor/MyBase.h>
 #include <vapor/UDUnitsClass.h>
 #include "GeoTileMercator.h"
@@ -26,7 +29,13 @@ public:
     GeoImageTMS();
     virtual ~GeoImageTMS();
 
+    static bool        IsTMSFile(std::string path);
+    static std::string TilePath(std::string file, size_t tileX, size_t tileY, int lod);
+    static int         GetNumTMSLODs(std::string file);
+
     int Initialize(string path, vector<double> times);
+
+    void SetLOD(int lod);
 
     unsigned char *GetImage(size_t ts, size_t &width, size_t &height);
 
@@ -34,8 +43,9 @@ public:
                             string &proj4StringImg, size_t &width, size_t &height);
 
 private:
-    string _dir;       // path to TMS directory
-    int    _maxLOD;    // Maximum LOD available in TMS
+    string _dir;           // path to TMS directory
+    int    _maxLOD;        // Maximum LOD available in TMS
+    int    _currentLOD;    // Current LOD in TMS
 
     unsigned char *_texture;    // storage for texture image
     size_t         _textureSize;
@@ -46,8 +56,6 @@ private:
     GeoTileMercator *_geotile;
 
     string _defaultProj4String;    // proj4 string for global mercator
-
-    string _tilePath(string dir, size_t tileX, size_t tileY, int lod) const;
 
     int _tileSize(string dir, size_t tileX, size_t tileY, int lod, size_t &w, size_t &h);
 

@@ -8,6 +8,8 @@ const std::string ImageParams::_isGeoRefTag = "IsGeoRefTag";
 const std::string ImageParams::_ignoreTransparencyTag = "IgnoreTransparency";
 const std::string ImageParams::_opacityTag = "Opacity";
 const std::string ImageParams::_orientationTag = "Orientation";
+const std::string ImageParams::_TMSLODTag = "TMSLevelOfDetail";
+const std::string ImageParams::_numTMSLODTag = "numTMSLevelOfDetail";
 
 //
 // Register class with object factory
