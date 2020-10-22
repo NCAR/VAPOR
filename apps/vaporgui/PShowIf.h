@@ -2,6 +2,7 @@
 
 #include "PWidgetWrapper.h"
 #include "PGroup.h"
+#include <memory>
 
 //! \class PShowIf
 //! \brief Shows and hides PWidgets based on a logic test.

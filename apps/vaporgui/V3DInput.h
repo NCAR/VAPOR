@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QWidget.h>
+#include <QWidget>
 #include <vector>
 
 class VDoubleLineEdit;

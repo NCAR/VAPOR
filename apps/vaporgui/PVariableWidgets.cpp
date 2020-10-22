@@ -4,6 +4,7 @@
 #include "GUIStateParams.h"
 #include "VComboBox.h"
 #include "PFidelitySection.h"
+#include <cassert>
 
 using namespace VAPoR;
 

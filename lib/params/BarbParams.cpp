@@ -59,7 +59,8 @@ void BarbParams::_init() {
 	SetUseSingleColor(true);
 	float rgb[] = {1.f,1.f,1.f};
 	SetConstantColor(rgb);
-    SetGrid((int[]){10,10,1});
+	int grid[] = {10,10,1};
+    SetGrid(grid);
     SetLineThickness(1);
     SetLengthScale(1);
 }
