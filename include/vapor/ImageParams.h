@@ -103,7 +103,7 @@ public:
   }
 
   //! Get the TMS level of detail
-  //! \retval int Currently selected TMS level of detail.  Value of 0 means we are computing a default value.
+  //! \retval int Currently selected TMS level of detail.  Value of -1 means we are computing a default value.
   int GetTMSLOD() const
   {
     int value = ( (int)GetValueLong( _TMSLODTag, -1 ) );
