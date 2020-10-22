@@ -809,11 +809,11 @@ class VDF_API DerivedCoordVarStandardOceanSCoordinate : public DerivedCFVertCoor
         std::vector<size_t> &bs_at_level) const;
 
     virtual size_t GetNumRefLevels() const {
-        return (_dc->GetNumRefLevels(_etaVar));
+        return (1);
     }
 
     virtual std::vector<size_t> GetCRatios() const {
-        return (_dc->GetCRatios(_etaVar));
+        return (std::vector<size_t>(1, 1));
     }
 
     virtual int OpenVariableRead(
