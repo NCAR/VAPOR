@@ -1,10 +1,8 @@
 #include <iostream>
-#include <sstream>
 #include <cstdarg>
 #include "vapor/VAssert.h"
 #include <cmath>
 #include <cstdio>
-#include <sys/stat.h>
 #ifdef WIN32
 #include <geotiff/geotiff.h>
 #include <geotiff/geo_normalize.h>
@@ -22,10 +20,12 @@ using namespace VAPoR;
 using namespace Wasp;
 
 
+
 GeoImageTMS::GeoImageTMS() 
 	: GeoImage(8, 4) {
 
 	_dir.clear();
+    _currentLOD = -1;
 	_maxLOD = 0;
 	_texture = NULL;  
 	_textureSize = 0;
@@ -53,6 +53,56 @@ GeoImageTMS::~GeoImageTMS()
 	if (_geotile) delete _geotile;
 }
 
+bool GeoImageTMS::IsTMSFile( std::string path ) {
+    if ( path.rfind(".tms", path.size()-4) != string::npos ) {
+        return true;
+    }
+    return false;
+}
+
+std::string GeoImageTMS::TilePath(
+    string file, size_t tileX, size_t tileY, int lod
+) {
+    // If we're given a file instead of a directory, remove the .tms extension
+    //
+    if ( file.rfind(".tms", file.size()-4) != string::npos ) {
+        file.erase( file.length()-4, 4 );
+    }
+
+    size_t tmsTileY = tileY;
+
+    ostringstream oss;
+    oss << file;
+    oss << "/";
+    oss << lod;
+    oss << "/";
+    oss << tileX;
+    oss << "/";
+    oss << tmsTileY;
+
+    string base = oss.str();
+
+    string path = base + ".tif";
+
+    struct stat statbuf;
+    if (stat(path.c_str(), &statbuf) == 0)  return(path);
+
+    path = base + ".tiff";
+
+    if (stat(path.c_str(), &statbuf) == 0) return (path);
+
+    // Tile does not exist
+    //
+    return("");
+}
+
+int GeoImageTMS::GetNumTMSLODs( std::string file ) {
+    int lod = 0;
+    while ( TilePath( file, 0, 0, lod ) != "" ) {
+        lod++;
+    }
+    return lod;
+}
 
 int GeoImageTMS::Initialize(string dir, vector <double> times) {
 
@@ -65,12 +115,7 @@ int GeoImageTMS::Initialize(string dir, vector <double> times) {
 
 	// Find the maximum available LOD in the TMS database. 
 	//
-	int lod = 0;
-	while (_tilePath(_dir, 0,0,lod) != "") {
-		lod++;
-	}
-	lod--;
-
+    int lod = GetNumTMSLODs( _dir ) - 1;
 	if (lod<0) {
 		SetErrMsg("Failed to initialize TMS directory %s", _dir.c_str());
 		return(-1);
@@ -100,6 +145,10 @@ int GeoImageTMS::Initialize(string dir, vector <double> times) {
 
 	return(0);
 
+}
+
+void GeoImageTMS::SetLOD( int lod ) {
+    _currentLOD = lod;
 }
 
 unsigned char *GeoImageTMS::GetImage(
@@ -162,7 +211,13 @@ unsigned char *GeoImageTMS::GetImage(
 	// Pick a lod that won't allow the resulting image to 
 	// exceed the max width and height
 	//
-	int lod = _getBestLOD(myGeoExtentsData, maxWidthReq, maxHeightReq);
+    int lod;
+    if ( _currentLOD == -1 ) {
+        lod = _getBestLOD(myGeoExtentsData, maxWidthReq, maxHeightReq);
+    }
+    else {
+        lod = _currentLOD;
+    }
 	SetDiagMsg("GeoImageTMS::GetImage() LOD : %d", lod);
 
 	//
@@ -254,43 +309,6 @@ unsigned char *GeoImageTMS::GetImage(
 	return (_texture);
 }
 
-
-// Get the file path of a single tile from the TMS database
-// with the give lod and tile coordinates
-//
-string GeoImageTMS::_tilePath(
-	string dir, size_t tileX, size_t tileY, int lod
-) const {
-
-//	size_t ntiles = 1 << lod;
-//	size_t tmsTileY = ntiles - 1 - tileY;
-	size_t tmsTileY = tileY;
-
-	ostringstream oss;
-	oss << dir;
-	oss << "/";
-	oss << lod;
-	oss << "/";
-	oss << tileX;
-	oss << "/";
-	oss << tmsTileY;
-
-	string base = oss.str();
-	
-	string path = base + ".tif";
-
-	struct stat statbuf;
-	if (stat(path.c_str(), &statbuf) == 0)  return(path);
-
-	path = base + ".tiff";
-
-	if (stat(path.c_str(), &statbuf) == 0) return (path);
-
-	// Tile does not exist
-	//
-	return("");
-}
-
 // Get the dimensions of a single tile from the TMS database
 // N.B. This method allows the specification of the tile coordinates,
 // but all tiles in a single TMS must be the same size
@@ -299,7 +317,7 @@ int GeoImageTMS::_tileSize(
 	string dir, size_t tileX, size_t tileY, int lod, size_t &w, size_t &h
 ) {
 	
-	string path = _tilePath(dir, tileX, tileY, lod);
+	string path = TilePath(dir, tileX, tileY, lod);
 	if (path.empty()) {
 		SetErrMsg("Tile %d %d %d does not exist", tileX, tileY, lod);
 		return(-1);
@@ -329,7 +347,7 @@ int GeoImageTMS::_tileRead(
 		"GeoImageTMS::_tileRead(%s,%d,%d,%d)", dir.c_str(), tileX, tileY, lod
 	);
 
-	string path = _tilePath(dir, tileX, tileY, lod);
+	string path = TilePath(dir, tileX, tileY, lod);
 	if (path.empty()) {
 		SetErrMsg("Tile %d %d %d does not exist", tileX, tileY, lod);
 		return(-1);
