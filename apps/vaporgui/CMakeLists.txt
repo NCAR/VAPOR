@@ -202,6 +202,7 @@ set (SRCS
     PVariableWidgets.h
     PFidelitySection.cpp
     PFidelitySection.h
+    PTMSLODInput.h
 	ModelEventRouter.cpp
 	ModelEventRouter.h
 	ModelSubtabs.cpp

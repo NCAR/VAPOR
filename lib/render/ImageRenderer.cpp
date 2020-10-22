@@ -88,7 +88,8 @@ ImageRenderer::ImageRenderer(const ParamsMgr *pm,
                    ImageParams::GetClassType(),
                    ImageRenderer::GetClassType(),
                    instName,
-                   dataMgr) {
+                   dataMgr),
+      _maxResamplingResolution(1024) {
     _geoImage = NULL;
     _cacheImgFileName.clear();
     _twoDTex = NULL;
@@ -101,6 +102,7 @@ ImageRenderer::ImageRenderer(const ParamsMgr *pm,
     _texWidth = 0;
     _texHeight = 0;
     _cacheTimestep = 0;
+    _cacheTMSLOD = -1;
     _cacheRefLevel = 0;
     _cacheLod = 0;
     _cacheHgtVar = "";
@@ -199,8 +201,8 @@ int ImageRenderer::GetMesh(DataMgr *dataMgr,
         // will be used to set the width and height of the mesh.
         //
         _getTexture(dataMgr); // Ugh, this function is more than a get method...
-        _vertsWidth = _texWidth;
-        _vertsHeight = _texHeight;
+        _vertsWidth = min(_maxResamplingResolution, _texWidth);
+        _vertsHeight = min(_maxResamplingResolution, _texHeight);
         rc = _getMeshDisplaced(
             dataMgr, _vertsWidth, _vertsHeight, minBoxReq, maxBoxReq);
     } else {
@@ -372,9 +374,11 @@ bool ImageRenderer::_texStateDirty(DataMgr *dataMgr) const {
     myParams->GetBox()->GetExtents(minExt, maxExt);
     vector<double> boxExtents(minExt);
     boxExtents.insert(boxExtents.end(), maxExt.begin(), maxExt.end());
+    int tmsLOD = myParams->GetTMSLOD();
 
     return (
         _cacheTimestepTex != ts ||
+        _cacheTMSLOD != tmsLOD ||
         _cacheBoxExtentsTex != boxExtents ||
         _cacheGeoreferenced != georeferenced);
 }
@@ -384,6 +388,7 @@ void ImageRenderer::_texStateSet(DataMgr *dataMgr) {
     int georeferenced = (int)myParams->GetIsGeoRef();
 
     _cacheTimestepTex = myParams->GetCurrentTimestep();
+    _cacheTMSLOD = myParams->GetTMSLOD();
     _cacheGeoreferenced = georeferenced;
     vector<double> minExt, maxExt;
     myParams->GetBox()->GetExtents(minExt, maxExt);
@@ -393,6 +398,7 @@ void ImageRenderer::_texStateSet(DataMgr *dataMgr) {
 
 void ImageRenderer::_texStateClear() {
     _cacheTimestepTex = -1;
+    _cacheTMSLOD = -1;
     _cacheBoxExtentsTex.clear();
     _cacheGeoreferenced = -1;
 }
@@ -403,7 +409,7 @@ int ImageRenderer::_reinit(string path, vector<double> times) {
     // path must point to a tiff file
     //
     bool tms_flag = false;
-    if (path.rfind(".tms", path.size() - 4) != string::npos) {
+    if (GeoImageTMS::IsTMSFile(path)) {
         ifstream in;
         in.open(path.c_str());
         if (!in) {
@@ -443,9 +449,11 @@ int ImageRenderer::_reinit(string path, vector<double> times) {
     // Create an appropriate instance of _geoImage for the cache path
     //
     if (!_geoImage) {
-        if (tms_flag)
+        if (tms_flag) {
+            ImageParams *myParams = dynamic_cast<ImageParams *>(GetActiveParams());
             _geoImage = new GeoImageTMS();
-        else
+            dynamic_cast<GeoImageTMS *>(_geoImage)->SetLOD(myParams->GetTMSLOD());
+        } else
             _geoImage = new GeoImageGeoTiff();
     }
 
@@ -478,10 +486,14 @@ unsigned char *ImageRenderer::_getImage(GeoImage *geoimage,
     }
     width = height = 0;
 
-    // Ugh. Hardcode maximum image size request
-    //
     const int maxWidthReq = 1024;
     const int maxHeightReq = 1024;
+
+    ImageParams *myParams = (ImageParams *)GetActiveParams();
+    GeoImageTMS *geoImageTMS = dynamic_cast<GeoImageTMS *>(geoimage);
+    if (geoImageTMS != nullptr) {
+        dynamic_cast<GeoImageTMS *>(_geoImage)->SetLOD(myParams->GetTMSLOD());
+    }
 
     double pcsExtentsData[4];
     for (int i = 0; i < 4; i++) {

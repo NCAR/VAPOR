@@ -6,10 +6,13 @@
 #include "ui_ImageGeometryGUI.h"
 #include "vapor/ImageParams.h"
 #include "vapor/ResourcePath.h"
+#include "vapor/GeoImageTMS.h"
 #include "Flags.h"
 #include "PGroup.h"
+#include "VComboBox.h"
 #include "PFidelitySection.h"
 #include "PVariableWidgets.h"
+#include "PTMSLODInput.h"
 
 namespace VAPoR {
 class ControlExec;
@@ -49,6 +52,10 @@ class ImageAppearanceSubtab : public QWidget, public Ui_ImageAppearanceGUI {
     ImageAppearanceSubtab(QWidget *parent) {
         _rParams = NULL;
         setupUi(this);
+
+        _TMSLODInput = new PTMSLODInput();
+        ((QVBoxLayout *)layout())->insertWidget(4, _TMSLODInput);
+
         _opacityCombo = new Combo(OpacityEdit, OpacitySlider);
         _opacityCombo->SetPrecision(2);
 
@@ -62,6 +69,8 @@ class ImageAppearanceSubtab : public QWidget, public Ui_ImageAppearanceGUI {
                 VAPoR::ParamsMgr *paramsMgr,
                 VAPoR::RenderParams *rParams) {
         _rParams = (ImageParams *)rParams;
+
+        _TMSLODInput->Update(_rParams, paramsMgr, dataMgr);
 
         bool state = _rParams->GetIsGeoRef();
         GeoRefCheckbox->setChecked(state);
@@ -110,6 +119,7 @@ class ImageAppearanceSubtab : public QWidget, public Ui_ImageAppearanceGUI {
     }
 
   private:
+    PTMSLODInput *_TMSLODInput;
     ImageParams *_rParams;
 
     Combo *_opacityCombo;
