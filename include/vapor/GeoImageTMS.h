@@ -30,9 +30,54 @@ public:
  GeoImageTMS();
  virtual ~GeoImageTMS();
 
- static bool IsTMSFile( std::string path );
- static std::string TilePath( std::string file, size_t tileX, size_t tileY, int lod );
- static int GetNumTMSLODs( std::string file );
+ static bool IsTMSFile( std::string path ) {
+    if ( path.rfind(".tms", path.size()-4) != string::npos ) {
+        return true;
+    }
+    return false;
+ }
+
+ static int GetNumTMSLODs( std::string file ) {
+    int lod = 0;
+    while ( TilePath( file, 0, 0, lod ) != "" ) {
+        lod++;
+    }
+    return lod;
+ }
+ 
+ static std::string TilePath( std::string file, size_t tileX, size_t tileY, int lod ) {
+    // If we're given a file instead of a directory, remove the .tms extension
+    //
+    if ( file.rfind(".tms", file.size()-4) != string::npos ) {
+        file.erase( file.length()-4, 4 );
+    }
+
+    size_t tmsTileY = tileY;
+
+    ostringstream oss;
+    oss << file;
+    oss << "/";
+    oss << lod;
+    oss << "/";
+    oss << tileX;
+    oss << "/";
+    oss << tmsTileY;
+
+    string base = oss.str();
+
+    string path = base + ".tif";
+
+    struct stat statbuf;
+    if (stat(path.c_str(), &statbuf) == 0)  return(path);
+
+    path = base + ".tiff";
+
+    if (stat(path.c_str(), &statbuf) == 0) return (path);
+
+    // Tile does not exist
+    //
+    return("");
+}
 
  int Initialize(string path, vector <double> times);
 
