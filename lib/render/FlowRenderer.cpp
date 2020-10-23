@@ -300,6 +300,8 @@ FlowRenderer::_paintGL( bool fast )
                 deltaT *= -1.0f;
             long numOfSteps = params->GetSteadyNumOfSteps();
             
+            Progress::StartIndefinite("Performing flowline calculations");
+            Progress::Update(0);
             _advection.AdvectSteps( &_velocityField, deltaT, numOfSteps );
 
             /* If the advection is bi-directional */
@@ -310,6 +312,7 @@ FlowRenderer::_paintGL( bool fast )
                     
                 _2ndAdvection->AdvectSteps( &_velocityField, deltaT2, numOfSteps );
             }
+            Progress::Finish();
         }
 
         /* Advection scheme 2: advect to a certain timestamp.
