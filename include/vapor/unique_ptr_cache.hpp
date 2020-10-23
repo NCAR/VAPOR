@@ -1,6 +1,10 @@
 //-----------------------------------------------------------------------------
-// This is an implementation of a LRU cache that keeps unique pointers
-// pointing to big structures (e.g., grids, quadtrees).
+// This is an implementation of a least-recently-used (LRU) cache that keeps
+// unique pointers pointing to big structures (e.g., grids, quadtrees).
+//
+// This cache has two execution policies:
+// 1) only insertion counts as `recently used`, and
+// 2) both insertion and query count as `recently used`.
 //
 // Given this design, this cache is expected to keep the ownership of these
 // structures once they're put in the cache, and all other codes will not
@@ -26,13 +30,15 @@
 //         At that point, the immediate next insertion of another unique object (the N-th)
 //         will evict `ptr`, and the object it points to is destroyed, and `prt` is no longer valid.
 //
-// Revision: (8/13/2020) it uses std::array<> to achieve the highest performance with
-//                       small to medium cache sizes.
+// Revision: (8/13/2020) it uses std::array<> instead of std::list<> to achieve
+//                       the highest performance with small to medium cache sizes.
 // Revision: (8/13/2020) it uses mutexes to achieve thread safety.
+// Revision: (9/29/2020) it uses std::vector<> instead of std::array<> so that the cache size
+//                       can be set dynamically at construction time.
 //
 // Author   : Samuel Li
 // Date     : 9/26/2019
-// Revision : 8/13/2020
+// Revision : 8/13/2020, 9/29/2020
 //-----------------------------------------------------------------------------
 
 #ifndef UNIQUE_PTR_CACHE_H
@@ -41,34 +47,37 @@
 #include <cstddef>    // size_t
 #include <utility>    // std::pair<>
 #include <memory>     // std::unique_ptr<>
-#include <array>
 #include <mutex>
+#include <algorithm>
+#include <vector>
 
 namespace VAPoR {
 
 //
 // Note : Key must support == operator
 //
-template<typename Key, typename BigObj, size_t CacheCapacity> class unique_ptr_cache final {
+template<typename Key, typename BigObj> class unique_ptr_cache final {
 public:
-    // Constructors
+    // Constructor
+    // A user needs to specify if a query is counted as `recently used`
+    // by passing a boolean to the constructor.
+    unique_ptr_cache(size_t capacity, bool query) : _capacity(capacity), _query_shuffle(query) { _element_vector.reserve(_capacity); }
     // Note: because this cache is intended to be used to keep unique pointers,
     // we don't want to allow any type of copy constructors, so delete them.
-    unique_ptr_cache() = default;
     unique_ptr_cache(const unique_ptr_cache &) = delete;
     unique_ptr_cache(const unique_ptr_cache &&) = delete;
     unique_ptr_cache &operator=(const unique_ptr_cache &) = delete;
     unique_ptr_cache &operator=(const unique_ptr_cache &&) = delete;
 
-    auto capacity() const -> size_t { return CacheCapacity; }
+    auto capacity() const -> size_t { return _capacity; }
 
-    auto size() const -> size_t { return _current_size; }
+    auto size() const -> size_t { return _element_vector.size(); }
 
-    void clear() { _current_size = 0; }
+    void clear() { _element_vector.clear(); }
 
-    auto empty() const -> bool { return (_current_size == 0); }
+    auto empty() const -> bool { return _element_vector.empty(); }
 
-    auto full() const -> bool { return (_current_size == CacheCapacity); }
+    auto full() const -> bool { return (_element_vector.size() >= _capacity); }
 
     //
     // Major action function.
@@ -77,54 +86,46 @@ public:
     //
     auto query(const Key &key) -> const std::unique_ptr<const BigObj> &
     {
-        const std::lock_guard<std::mutex> lock_gd(_element_array_mutex);
+        // Only need to apply the mutex if `_query_shuffle` is enabled.
+        if (_query_shuffle) const std::lock_guard<std::mutex> lock_gd(_element_vector_mutex);
 
-        auto it = std::find_if(_element_array.begin(), _element_array.end(), [&key](element_type &e) { return e.first == key; });
-        if (it == _element_array.end()) {    // This key does not exist
+        auto it = std::find_if(_element_vector.begin(), _element_vector.end(), [&key](element_type &e) { return e.first == key; });
+        if (it == _element_vector.end()) {    // This key does not exist
             return _local_nullptr;
         } else {    // This key does exist
-            auto tmp = std::move(*it);
-            std::move_backward(_element_array.begin(), it, it + 1);
-            _element_array.front() = std::move(tmp);
-
-            return _element_array.front().second;
+            if (_query_shuffle) {
+                std::rotate(_element_vector.begin(), it, it + 1);
+                return _element_vector.front().second;
+            } else
+                return it->second;
         }
     }
 
     void insert(Key key, const BigObj *ptr)
     {
-        const std::lock_guard<std::mutex> lock_gd(_element_array_mutex);
+        const std::lock_guard<std::mutex> lock_gd(_element_vector_mutex);
 
-        auto it = std::find_if(_element_array.begin(), _element_array.end(), [&key](element_type &e) { return e.first == key; });
+        auto it = std::find_if(_element_vector.begin(), _element_vector.end(), [&key](element_type &e) { return e.first == key; });
 
-        if (it == _element_array.end()) {           // This key does not exist
-            if (_current_size < CacheCapacity) {    // This cache is not full
-                _element_array[_current_size].first = std::move(key);
-                _element_array[_current_size].second.reset(ptr);
-                std::rotate(_element_array.begin(), _element_array.begin() + _current_size, _element_array.begin() + _current_size + 1);
-                _current_size++;
-            } else {    // The cache is full!
-                _element_array.back().first = std::move(key);
-                _element_array.back().second.reset(ptr);
-                std::rotate(_element_array.begin(), _element_array.end() - 1, _element_array.end());
-            }
+        if (it == _element_vector.end()) {                                          // This key does not exist
+            if (_element_vector.size() >= _capacity) _element_vector.pop_back();    // Evict the last element
+            std::unique_ptr<const BigObj> tmp(ptr);
+            _element_vector.emplace(_element_vector.begin(), std::move(key), std::move(tmp));
         } else {    // This key does exist.
             it->second.reset(ptr);
-            auto tmp = std::move(*it);
-            std::move_backward(_element_array.begin(), it, it + 1);
-            _element_array.front() = std::move(tmp);
+            std::rotate(_element_vector.begin(), it, it + 1);
         }
     }
 
 private:
     using element_type = std::pair<Key, std::unique_ptr<const BigObj>>;
 
-    std::array<element_type, CacheCapacity> _element_array;
-    size_t                                  _current_size = 0;
-    const std::unique_ptr<const BigObj>     _local_nullptr = {nullptr};
-    std::mutex                              _element_array_mutex;
+    const size_t                        _capacity;
+    const bool                          _query_shuffle;
+    std::vector<element_type>           _element_vector;
+    const std::unique_ptr<const BigObj> _local_nullptr = {nullptr};
+    std::mutex                          _element_vector_mutex;
 };
-
 }    // namespace VAPoR
 
 #endif

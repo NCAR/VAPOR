@@ -45,7 +45,7 @@ public:
     RegularGrid() = default;
     virtual ~RegularGrid() = default;
 
-    virtual size_t GetGeometryDim() const override;
+    virtual size_t GetGeometryDim() const override { return (_geometryDim); }
 
     virtual std::vector<size_t> GetCoordDimensions(size_t dim) const override;
 
