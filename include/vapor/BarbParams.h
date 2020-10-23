@@ -36,16 +36,18 @@ public:
     //! \retval vector<long> grid
     const vector<long> GetGrid() const
     {
-        vector<long> defaultGrid(2, 10);
-        defaultGrid.push_back(1.0);
-        return (GetValueLongVec(_gridTag, defaultGrid));
+        vector<long> dims(3);
+        dims[0] = GetValueLong(_xBarbsCountTag, 10);
+        dims[1] = GetValueLong(_yBarbsCountTag, 10);
+        dims[2] = GetValueLong(_zBarbsCountTag, 1);
+        return dims;
     }
 
     void SetGrid(const int grid[3])
     {
-        vector<long> griddims;
-        for (int i = 0; i < 3; i++) { griddims.push_back((long)grid[i]); }
-        SetValueLongVec(_gridTag, "Set grid", griddims);
+        SetValueLong(_xBarbsCountTag, "", grid[0]);
+        SetValueLong(_yBarbsCountTag, "", grid[1]);
+        SetValueLong(_zBarbsCountTag, "", grid[2]);
     }
 
     //! Determine line thickness in voxels
@@ -62,21 +64,25 @@ public:
     //
     virtual size_t GetRenderDim() const override
     {
-        for (auto p = GetFieldVariableNames().begin(); p != GetFieldVariableNames().begin(); ++p) {
-            if (*p != "") return (_dataMgr->GetNumDimensions(*p));
+        for (const auto &p : GetFieldVariableNames()) {
+            if (!p.empty()) return _dataMgr->GetNumDimensions(p);
         }
-        return (0);
+        return GetBox()->IsPlanar() ? 2 : 3;
     }
 
 protected:
     virtual bool GetUseSingleColorDefault() const override { return true; }
 
 private:
-    void                _init();
+    void _init();
+
+public:
     static const string _needToRecalculateScalesTag;
     static const string _lengthScaleTag;
     static const string _thicknessScaleTag;
-    static const string _gridTag;
+    static const string _xBarbsCountTag;
+    static const string _yBarbsCountTag;
+    static const string _zBarbsCountTag;
     static const string _alignGridTag;
     static const string _alignGridStridesTag;
     static const string _varsAre3dTag;

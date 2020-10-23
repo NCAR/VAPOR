@@ -6,7 +6,7 @@
 
 #define NUM_STEPS 100
 
-VSlider::VSlider(double min, double max) : VContainer(), _min(0.0), _max(0.0), _stepSize(1.0)
+VSlider::VSlider(double min, double max) : VHBoxWidget(), _min(0.0), _max(0.0), _stepSize(1.0)
 {
     _slider = new QSlider;
     _slider->setOrientation(Qt::Horizontal);

@@ -12,6 +12,8 @@
 //! Provides a consistent layout which is not supposed to be changed
 //! Provides a settings menu that is intended to provide extra options for the parameters that are
 //! shown within this section, for example resetting to default values.
+//!
+//! Prefer the use of VSectionGroup when possible.
 
 class VSection : public QTabWidget {
     Q_OBJECT
@@ -32,6 +34,20 @@ public:
 private:
     QWidget *_tab() const;
     QString  _createStylesheet() const;
+};
+
+#include "AbstractWidgetGroup.h"
+#include "VGroup.h"
+
+//! \class VSectionGroup
+//! \brief VSection that implements the standardized widget group interface. Use this one when possible.
+//! \author Stas Jaroszynski
+
+class VSectionGroup : public VSection, public WidgetGroupWrapper<VSectionGroup, QWidget, VGroup> {
+    VGroup *_vgroup;
+
+public:
+    VSectionGroup(const std::string &title) : VSection(title), WidgetGroupWrapper(_vgroup = new VGroup) { layout()->addWidget(_vgroup); }
 };
 
 class VSection::SettingsMenuButton : public QToolButton {

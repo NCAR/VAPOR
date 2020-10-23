@@ -16,6 +16,12 @@ VDoubleRangeMenu::VDoubleRangeMenu(QWidget *parent, bool sciNotation, double dec
     }
 }
 
+void VDoubleRangeMenu::AllowUserRange(bool allowed)
+{
+    _minRangeAction->setEnabled(allowed);
+    _maxRangeAction->setEnabled(allowed);
+}
+
 void VDoubleRangeMenu::SetMinimum(double min) { _minRangeAction->SetValue(min); }
 
 void VDoubleRangeMenu::SetMaximum(double max) { _maxRangeAction->SetValue(max); }

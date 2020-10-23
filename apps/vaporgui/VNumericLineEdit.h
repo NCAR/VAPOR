@@ -4,7 +4,7 @@
 
 #include "vapor/VAssert.h"
 
-#include "VContainer.h"
+#include "VHBoxWidget.h"
 #include "VStringLineEdit.h"
 
 class VNumericFormatMenu;

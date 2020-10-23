@@ -1,9 +1,9 @@
 #pragma once
 
 #include "PWidget.h"
+#include "PGroup.h"
 
 class VSection;
-class PGroup;
 
 //! \class PSection
 //! Same as a PGroup however collated inside of a VSection
@@ -17,7 +17,7 @@ class PSection : public PWidget {
     PGroup *  _pgroup;
 
 public:
-    PSection(const std::string &label = "");
+    PSection(const std::string &label = "", const PGroup::List &widgets = {});
     //! @copydoc PGroup::Add
     PSection *Add(PWidget *pw);
 

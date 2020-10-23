@@ -361,7 +361,7 @@ int ImageRenderer::_reinit(string path, vector<double> times)
     // path must point to a tiff file
     //
     bool tms_flag = false;
-    if (GeoImageTMS::IsTMSFile(path)) {
+    if (Wasp::TMSUtils::IsTMSFile(path)) {
         ifstream in;
         in.open(path.c_str());
         if (!in) {

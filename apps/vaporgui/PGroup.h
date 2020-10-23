@@ -1,25 +1,27 @@
 #pragma once
 
 #include "PWidget.h"
+#include "AbstractWidgetGroup.h"
 #include <vector>
+#include "VGroup.h"
+
+class VGroup;
 
 //! \class PGroup
 //! Groups together PWidgets. See ParamsWidgetDemo for example use cases.
 //! \copydoc PWidget
 
-class PGroup : public PWidget {
+class PGroup : public PWidget, public WidgetGroupWrapper<PGroup, PWidget, VGroup> {
     Q_OBJECT
 
-    QWidget *              _widget;
-    std::vector<PWidget *> _children;
+    VGroup *_widget;
 
 public:
     PGroup();
-    //! Adds the PWidget to this group.
-    PGroup *Add(PWidget *pw);
+    PGroup(const List &widgets);
 
 protected:
-    PGroup(QWidget *w);
+    PGroup(VGroup *w);
     void updateGUI() const override;
 };
 
@@ -32,4 +34,5 @@ class PSubGroup : public PGroup {
 
 public:
     PSubGroup();
+    PSubGroup(const List &widgets);
 };

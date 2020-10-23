@@ -19,7 +19,9 @@ static RenParamsRegistrar<BarbParams> registrar(BarbParams::GetClassType());
 const string BarbParams::_needToRecalculateScalesTag = "NeedToRecalc";
 const string BarbParams::_thicknessScaleTag = "LineThickness";
 const string BarbParams::_lengthScaleTag = "VectorScale";
-const string BarbParams::_gridTag = "GridDimensions";
+const string BarbParams::_xBarbsCountTag = "BarbsCountTag_X";
+const string BarbParams::_yBarbsCountTag = "BarbsCountTag_Y";
+const string BarbParams::_zBarbsCountTag = "BarbsCountTag_Z";
 const string BarbParams::_alignGridTag = "GridAlignedToData";
 const string BarbParams::_alignGridStridesTag = "GridAlignedStrides";
 const string BarbParams::_varsAre3dTag = "VarsAre3D";
@@ -49,4 +51,8 @@ void BarbParams::_init()
     SetUseSingleColor(true);
     float rgb[] = {1.f, 1.f, 1.f};
     SetConstantColor(rgb);
+    int grid[] = {10, 10, 1};
+    SetGrid(grid);
+    SetLineThickness(1);
+    SetLengthScale(1);
 }

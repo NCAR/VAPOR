@@ -5,14 +5,14 @@
 #include <QWidget>
 #include <QCheckBox>
 
-#include "VContainer.h"
+#include "VHBoxWidget.h"
 
 //! class VCheckBox
 //!
 //! Wraps a QCheckBox and provides vaporgui's standard setter/getter functions
 //! and signals.
 
-class VCheckBox : public VContainer {
+class VCheckBox : public VHBoxWidget {
     Q_OBJECT
 
 public:

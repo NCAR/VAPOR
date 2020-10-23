@@ -2,56 +2,56 @@
 
 #include "PLineItem.h"
 #include "PDynamicMixin.h"
-//#include "VaporWidgetsFwd.h"
 
-class VSliderEdit;
-
-//! \class PSliderEdit
-//! Creates a Qt slider and text input combo synced with the paramsdatabase using the PWidget interface.
-//! \copydoc PWidget
-
-class PSliderEdit : public PLineItem, public PDynamicMixin {
-    Q_OBJECT
-
-public:
-    PSliderEdit(const std::string &tag, const std::string &label = "");
-    //! @copydoc VSliderEdit::SetRange
-    PSliderEdit *SetRange(double min, double max);
-
-protected:
-    VSliderEdit *_sliderEdit;
-};
+class VDoubleSliderEdit;
+class VIntSliderEdit;
 
 //! \class PDoubleSliderEdit
-//! \copydoc PSliderEdit
+//! Creates a slider and text input combo synced with the paramsdatabase.
+//! Due to the way VDoubleSliderEdit and VIntSliderEdit are implemented,
+//! duplicating the code was simpler than templatizing.
 
-class PDoubleSliderEdit : public PSliderEdit {
-    Q_OBJECT
+class PDoubleSliderEdit : public PLineItem, public PDynamicMixin {
+    VDoubleSliderEdit *_sliderEdit;
+    double             _defaultRangeMin = 0, _defaultRangeMax = 1;
 
 public:
     PDoubleSliderEdit(const std::string &tag, const std::string &label = "");
+    //! @copydoc VSliderEdit::SetRange
+    PDoubleSliderEdit *SetRange(double min, double max);
+    PDoubleSliderEdit *AllowUserRange(bool allowed = true);
 
 protected:
     void updateGUI() const override;
 
-private slots:
+private:
     void valueChanged(double v);
     void valueChangedIntermediate(double v);
+    void minimumChanged(double v);
+    void maximumChanged(double v);
 };
 
 //! \class PIntegerSliderEdit
-//! \copydoc PSliderEdit
+//! Creates a slider and text input combo synced with the paramsdatabase.
+//! Due to the way VDoubleSliderEdit and VIntSliderEdit are implemented,
+//! duplicating the code was simpler than templatizing.
 
-class PIntegerSliderEdit : public PSliderEdit {
-    Q_OBJECT
+class PIntegerSliderEdit : public PLineItem, public PDynamicMixin {
+    VIntSliderEdit *_sliderEdit;
+    int             _defaultRangeMin = 0, _defaultRangeMax = 1;
 
 public:
     PIntegerSliderEdit(const std::string &tag, const std::string &label = "");
+    //! @copydoc VSliderEdit::SetRange
+    PIntegerSliderEdit *SetRange(int min, int max);
+    PIntegerSliderEdit *AllowUserRange(bool allowed = true);
 
 protected:
     void updateGUI() const override;
 
-private slots:
+private:
     void valueChanged(int v);
     void valueChangedIntermediate(int v);
+    void minimumChanged(int v);
+    void maximumChanged(int v);
 };

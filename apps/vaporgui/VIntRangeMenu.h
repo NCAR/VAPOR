@@ -16,6 +16,8 @@ class VIntRangeMenu : public VNumericFormatMenu {
 public:
     explicit VIntRangeMenu(QWidget *parent, bool sciNotation, int decimalDigits, int min, int max, bool rangeChangable = false);
 
+    void AllowUserRange(bool allowed = true);
+
 protected:
     VIntLineEditAction *_minRangeAction;
     VIntLineEditAction *_maxRangeAction;

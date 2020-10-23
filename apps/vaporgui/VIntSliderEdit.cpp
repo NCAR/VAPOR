@@ -23,6 +23,12 @@ VIntSliderEdit::VIntSliderEdit(int min, int max, int value, bool rangeChangable)
     _makeContextMenu();
 }
 
+void VIntSliderEdit::AllowUserRange(bool allowed)
+{
+    _rangeChangable = allowed;
+    _menu->AllowUserRange(allowed);
+}
+
 void VIntSliderEdit::_makeContextMenu()
 {
     _menu = new VIntRangeMenu(this, _lineEdit->GetSciNotation(), _lineEdit->GetNumDigits(), _slider->GetMinimum(), _slider->GetMaximum(), _rangeChangable);

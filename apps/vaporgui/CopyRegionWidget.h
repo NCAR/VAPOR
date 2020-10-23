@@ -1,8 +1,10 @@
 #ifndef COPYREGIONWIDGET_H
 #define COPYREGIONWIDGET_H
 
-#include "ui_CopyRegionWidgetGUI.h"
 #include <vapor/Box.h>
+#include "VSection.h"
+#include <QPushButton>
+#include <QComboBox>
 
 namespace VAPoR {
 class RenderParams;
@@ -10,8 +12,11 @@ class ParamsMgr;
 class DataMgr;
 }    // namespace VAPoR
 
-class CopyRegionWidget : public QWidget, public Ui_CopyRegionWidgetGUI {
+class CopyRegionWidget : public VSectionGroup {
     Q_OBJECT
+
+    QPushButton *copyButton;
+    QComboBox *  copyCombo;
 
 public:
     CopyRegionWidget(QWidget *parent = 0);

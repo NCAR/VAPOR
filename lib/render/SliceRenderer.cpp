@@ -170,7 +170,7 @@ int SliceRenderer::_resetBoxCache()
 {
     SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
     VAssert(p);
-    p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
+    _getModifiedExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 
     int rc = _dataMgr->GetVariableExtents(_cacheParams.ts, _cacheParams.varName, _cacheParams.refinementLevel, _cacheParams.compressionLevel, _cacheParams.domainMin, _cacheParams.domainMax);
     if (rc < 0) {
@@ -393,7 +393,8 @@ bool SliceRenderer::_isDataCacheDirty() const
     // then we will need to return true and resample our data.  If its extents
     // change along its perimeter, then we will just reconfigure the texture
     // coordinates via _resetBoxCache in our _paintGL routine.
-    box->GetExtents(min, max);
+    _getModifiedExtents(min, max);
+
     if (min != _cacheParams.boxMin) return true;
     if (max != _cacheParams.boxMax) return true;
 
@@ -415,15 +416,43 @@ bool SliceRenderer::_isColormapCacheDirty() const
 
 bool SliceRenderer::_isBoxCacheDirty() const
 {
-    SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
-    VAssert(p);
-
-    Box *          box = p->GetBox();
     vector<double> min, max;
-    box->GetExtents(min, max);
+    _getModifiedExtents(min, max);
+
     if (_cacheParams.boxMin != min) return true;
     if (_cacheParams.boxMax != max) return true;
     return false;
+}
+
+void SliceRenderer::_getModifiedExtents(vector<double> &min, vector<double> &max) const
+{
+    SliceParams *p = dynamic_cast<SliceParams *>(GetActiveParams());
+    VAssert(p);
+    Box *box = p->GetBox();
+
+    min.resize(3);
+    max.resize(3);
+    box->GetExtents(min, max);
+    VAssert(min.size() == 3);
+    VAssert(max.size() == 3);
+
+    vector<double> sampleLocation = p->GetValueDoubleVec(p->SampleLocationTag);
+    VAssert(sampleLocation.size() == 3);
+    switch (box->GetOrientation()) {
+    case XY:
+        min[Z] = sampleLocation[Z];
+        max[Z] = sampleLocation[Z];
+        break;
+    case XZ:
+        min[Y] = sampleLocation[Y];
+        max[Y] = sampleLocation[Y];
+        break;
+    case YZ:
+        min[X] = sampleLocation[X];
+        max[X] = sampleLocation[X];
+        break;
+    default: VAssert(0);
+    }
 }
 
 int SliceRenderer::_paintGL(bool fast)

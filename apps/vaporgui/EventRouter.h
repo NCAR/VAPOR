@@ -132,7 +132,7 @@ public:
     //! \param[out] help A vector of string pairs. The first string is a
     //! descriptive text. The secone is a URL.
     //!
-    virtual void GetWebHelp(std::vector<std::pair<string, string>> &help) const = 0;
+    virtual void GetWebHelp(std::vector<std::pair<string, string>> &help) const {}
 
     //! Update GUI display
     //!

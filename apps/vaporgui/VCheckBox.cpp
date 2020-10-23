@@ -1,6 +1,6 @@
 #include "VCheckBox.h"
 
-VCheckBox::VCheckBox(bool checked) : VContainer()
+VCheckBox::VCheckBox(bool checked) : VHBoxWidget()
 {
     _checkBox = new QCheckBox;
     SetValue(checked);

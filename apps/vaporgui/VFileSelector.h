@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QFileDialog>
 
-#include "VContainer.h"
+#include "VHBoxWidget.h"
 
 class VPushButton;
 class VLineEdit_Deprecated;
@@ -15,7 +15,7 @@ class VLineEdit_Deprecated;
 //! directory paths.  This class wraps a VLineEdit_Deprecated to display the current
 //! selection, and a VPushButton to open file dialogs.  It also provides
 //! vaporgui's standard setter/getter functions and signals.
-class VFileSelector : public VContainer {
+class VFileSelector : public VHBoxWidget {
     Q_OBJECT
 
 public:

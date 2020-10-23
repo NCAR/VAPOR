@@ -38,7 +38,7 @@ const std::string Box::m_orientationTag = "Orientation";
 //
 static ParamsRegistrar<Box> registrar(Box::GetClassType());
 
-Box::Box(ParamsBase::StateSave *ssave) : ParamsBase(ssave, Box::GetClassType())
+Box::Box(ParamsBase::StateSave *ssave, string name) : ParamsBase(ssave, name)
 {
     MyBase::SetDiagMsg("Box::Box() this=%p", this);
 
@@ -100,7 +100,17 @@ void Box::GetExtents(vector<double> &minExt, vector<double> &maxExt) const
     for (int i = 0; i < n; i++) maxExt.push_back(exts[i + 3]);
 }
 
-void Box::SetPlanar(bool value) { SetValueLong(Box::m_planarTag, "Set box planar value", (long)value); }
+void Box::SetPlanar(bool value)
+{
+    SetValueLong(Box::m_planarTag, "Set box planar value", (long)value);
+    //    SetValueLong(m_orientationTag, "", value?XYZ:XY);
+}
+
+bool Box::IsPlanar() const
+{
+    return GetValueLong(Box::m_planarTag, (long)false);
+    //    return GetValueLong(Box::m_orientationTag, XY);
+}
 
 #ifdef VAPOR3_0_0_ALPHA
 int Box::GetStretchedLocalExtents(double extents[6], int timestep)

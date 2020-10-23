@@ -1,6 +1,6 @@
 #include "VComboBox.h"
 
-VComboBox::VComboBox(const std::vector<std::string> &values) : VContainer()
+VComboBox::VComboBox(const std::vector<std::string> &values) : VHBoxWidget()
 {
     _combo = new QComboBox;
 

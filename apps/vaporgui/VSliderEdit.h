@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "VContainer.h"
+#include "VHBoxWidget.h"
 
 class VSlider;
 class VLineEdit_Deprecated;
@@ -11,7 +11,7 @@ class VLineEdit_Deprecated;
 //! Wraps a VSlider and a VLineEdit_Deprecated for selecting a numeric value within a
 //! defined range.  Allows for integer and double value types.  This class
 //! also provides vaporgui's standard setter/getter functions and signals.
-class VSliderEdit : public VContainer {
+class VSliderEdit : public VHBoxWidget {
     Q_OBJECT
 
 public:

@@ -67,7 +67,8 @@ class PTFEditor : public PWidget {
 public:
     enum Element { Opacity, Histogram, Colormap, IsoValues, RegularIsoArray, Default };
 
-    PTFEditor(const std::string &tag, const std::set<Element> elements = {Default}, const std::string &label = "");
+    PTFEditor();
+    PTFEditor(const std::string &tag, const std::set<Element> elements = {Default}, const std::string &label = "Transfer Function");
     //! Behaves the same as PWidget::ShowBasedOnParam except shows/hides the opacity controls.
     //! @copydoc PWidget::ShowBasedOnParam
     PTFEditor *ShowOpacityBasedOnParam(const std::string &tag, int value);
@@ -77,4 +78,9 @@ public:
 
 protected:
     void updateGUI() const override;
+};
+
+class PColormapTFEditor : public PTFEditor {
+public:
+    PColormapTFEditor();
 };

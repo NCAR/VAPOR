@@ -6,13 +6,7 @@
 #include <QHBoxLayout>
 #include "SettingsParams.h"
 
-PWidget::PWidget(const std::string &tag, QWidget *widget) : _tag(tag)
-{
-    setLayout(new QHBoxLayout);
-    layout()->setMargin(0);
-    layout()->addWidget(widget);
-    this->setDisabled(true);
-}
+PWidget::PWidget(const std::string &tag, QWidget *widget) : UWidget(widget), _tag(tag) { this->setDisabled(true); }
 
 void PWidget::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr)
 {
@@ -29,16 +23,13 @@ void PWidget::Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr, VAP
     if (requireDataMgr() && !dataMgr) VAssert(!"Data manager required but missing");
     if (requireParamsMgr() && !paramsMgr) VAssert(!"Params manager required but missing");
 
-    if (_showBasedOnParam) {
-        int value = params->GetValueLong(_showBasedOnParamTag, 0);
-        if (value == _showBasedOnParamValue) {
-            setVisible(true);
-        } else {
-            setVisible(false);
-            return;
-        }
+    bool paramsVisible = isShown();
+    if (paramsVisible && _showBasedOnParam) paramsVisible = _showBasedOnParamValue == params->GetValueLong(_showBasedOnParamTag, 0);
+    if (paramsVisible) {
+        setVisible(true);
     } else {
-        setVisible(isShown());
+        setVisible(false);
+        return;
     }
 
     if (_enableBasedOnParam) {

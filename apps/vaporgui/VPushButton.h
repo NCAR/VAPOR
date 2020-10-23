@@ -5,14 +5,14 @@
 #include <QWidget>
 #include <QPushButton>
 
-#include "VContainer.h"
+#include "VHBoxWidget.h"
 
 //! \class VPushButton
 //!
 //! Wraps a QPushButton with vaporgui's VContainer, so that
 //! the QPushButton follows correct size policy
 
-class VPushButton : public VContainer {
+class VPushButton : public VHBoxWidget {
     Q_OBJECT
 
 public:

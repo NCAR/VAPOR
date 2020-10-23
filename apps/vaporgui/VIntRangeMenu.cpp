@@ -16,6 +16,12 @@ VIntRangeMenu::VIntRangeMenu(QWidget *parent, bool sciNotation, int decimalDigit
     }
 }
 
+void VIntRangeMenu::AllowUserRange(bool allowed)
+{
+    _minRangeAction->setEnabled(allowed);
+    _maxRangeAction->setEnabled(allowed);
+}
+
 void VIntRangeMenu::SetMinimum(int min) { _minRangeAction->SetValue(min); }
 
 void VIntRangeMenu::SetMaximum(int max) { _maxRangeAction->SetValue(max); }

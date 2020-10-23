@@ -25,6 +25,12 @@ VDoubleSliderEdit::VDoubleSliderEdit(double min, double max, double value, bool 
     _makeContextMenu();
 }
 
+void VDoubleSliderEdit::AllowUserRange(bool allowed)
+{
+    _rangeChangable = allowed;
+    _menu->AllowUserRange(allowed);
+}
+
 void VDoubleSliderEdit::_makeContextMenu()
 {
     _menu = new VDoubleRangeMenu(this, _lineEdit->GetSciNotation(), _lineEdit->GetNumDigits(), _slider->GetMinimum(), _slider->GetMaximum(), _rangeChangable);

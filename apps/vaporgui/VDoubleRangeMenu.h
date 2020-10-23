@@ -16,6 +16,8 @@ class VDoubleRangeMenu : public VNumericFormatMenu {
 public:
     explicit VDoubleRangeMenu(QWidget *parent, bool sciNotation, double decimalDigits, double min, double max, bool rangeChangable);
 
+    void AllowUserRange(bool allowed = true);
+
 protected:
     VDoubleLineEditAction *_minRangeAction;
     VDoubleLineEditAction *_maxRangeAction;

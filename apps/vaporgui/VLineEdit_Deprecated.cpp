@@ -8,7 +8,7 @@
 #include "VLineEdit_Deprecated.h"
 #include "ErrorReporter.h"
 
-VLineEdit_Deprecated::VLineEdit_Deprecated(const std::string &value) : VContainer(), _value(value), _isDouble(false), _scientific(false), _menuEnabled(false), _decDigits(10)
+VLineEdit_Deprecated::VLineEdit_Deprecated(const std::string &value) : VHBoxWidget(), _value(value), _isDouble(false), _scientific(false), _menuEnabled(false), _decDigits(10)
 {
     _lineEdit = new QLineEdit;
     SetValue(_value);

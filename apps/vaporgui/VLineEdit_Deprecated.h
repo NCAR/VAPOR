@@ -9,7 +9,7 @@
 #include <QCheckBox>
 #include <QWidgetAction>
 
-#include "VContainer.h"
+#include "VHBoxWidget.h"
 
 //! \class VLineEdit_Deprecated
 //!
@@ -17,7 +17,7 @@
 //! Handles string and double types, as well as precision and display of
 //! double values.
 
-class VLineEdit_Deprecated : public VContainer {
+class VLineEdit_Deprecated : public VHBoxWidget {
     Q_OBJECT
 
 public:

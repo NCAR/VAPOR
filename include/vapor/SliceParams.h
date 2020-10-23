@@ -41,11 +41,12 @@ public:
 
     std::vector<double> GetCachedValues() const;
 
+    static const string _sampleRateTag;
+    static const string SampleLocationTag;
+
 private:
     void                _init();
     std::vector<double> _cachedValues;
-
-    static const string _sampleRateTag;
 
 };    // End of Class SliceParams
 };    // namespace VAPoR

@@ -12,7 +12,6 @@ static RenParamsRegistrar<ContourParams>        registrar(ContourParams::GetClas
 static ParamsRegistrar<ContourParams::Contours> registrar2(ContourParams::Contours::GetClassType());
 
 const string ContourParams::_thicknessScaleTag = "LineThickness";
-const string ContourParams::_varsAre3dTag = "VarsAre3D";
 const string ContourParams::_contoursTag = "Contours";
 const string ContourParams::_numDigitsTag = "NumDigits";
 const string ContourParams::_textDensityTag = "TextDensity";
@@ -110,11 +109,19 @@ void ContourParams::MakeNewContours(string varName)
     vector<double> minMax = mf->getMinMaxMapValue();
     int            numContours = newContours.GetContourValues().size();
     double         spacing = (minMax[1] - minMax[0]) / (numContours - 1);
-    vector<double> vals;
-    for (int i = 0; i < numContours; i++) { vals.push_back(minMax[0] + i * spacing); }
-    newContours.SetContourValues(vals);
+
+    GenerateContourValues(minMax[0], spacing, numContours, &newContours);
 
     _contours->Insert(&newContours, varName);
+}
+
+void ContourParams::GenerateContourValues(double start, double spacing, int num, Contours *c)
+{
+    if (!c) c = GetCurrentContours();
+
+    vector<double> vals;
+    for (int i = 0; i < num; i++) vals.push_back(start + i * spacing);
+    c->SetContourValues(vals);
 }
 
 // Set everything to default values
@@ -157,6 +164,12 @@ double ContourParams::GetContourSpacing()
     else
         return vals[1] - vals[0];
 }
+
+void ContourParams::SetContourCount(int num) { GenerateContourValues(GetContourMin(), GetContourSpacing(), num); }
+
+void ContourParams::SetContourMin(double val) { GenerateContourValues(val, GetContourSpacing(), GetContourCount()); }
+
+void ContourParams::SetContourSpacing(double val) { GenerateContourValues(GetContourMin(), val, GetContourCount()); }
 
 void ContourParams::GetLineColor(int lineNum, float color[3])
 {
