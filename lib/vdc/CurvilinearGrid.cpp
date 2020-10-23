@@ -651,8 +651,8 @@ bool CurvilinearGrid::_insideGridHelperTerrain(
 	//
 	double lambda[3];
 	double pt[] = {x,y};
-	vector <size_t> iv = {i, i+1, i+1};
-	vector <size_t> jv = {j, j, j+1};
+	Size_tArr3 iv = {i, i+1, i+1};
+	Size_tArr3 jv = {j, j, j+1};
 	double tverts0[] = {
 		_xrg.AccessIJK(iv[0], jv[0], 0),
 		_yrg.AccessIJK(iv[0], jv[0], 0),
@@ -697,9 +697,8 @@ bool CurvilinearGrid::_insideGridHelperTerrain(
 
 		// Find k index of cell containing z. Already know i and j indices
 		//
-		vector <double> zcoords;
-
 		size_t nz = GetDimensions()[2];
+		vector <double> zcoords(nz);
 		for (int kk=0; kk<nz; kk++) {
 
 			// Interpolate Z coordinate across triangle
@@ -709,7 +708,7 @@ bool CurvilinearGrid::_insideGridHelperTerrain(
 				_zrg.AccessIJK(iv[1], jv[1], kk) * lambda[1] +
 				_zrg.AccessIJK(iv[2], jv[2], kk) * lambda[2];
 
-				zcoords.push_back(zk);
+				zcoords[kk] = zk;
 		}
 
 		if (! Wasp::BinarySearchRange(zcoords, z, k)) return(false);
