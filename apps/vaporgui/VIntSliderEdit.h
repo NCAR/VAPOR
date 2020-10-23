@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "VContainer.h"
+#include "VHBoxWidget.h"
 #include "VSliderEditInterface.h"
 
 class VIntRangeMenu;
@@ -30,6 +30,8 @@ public:
 
     //! Set the maximum allowable value for the VSlider and VIntLineEdit
     void SetMaximum( int max );
+    
+    void AllowUserRange(bool allowed=true);
 
     //! Get the value associated with the VSlider and VIntLineEdit
     int GetValue() const;

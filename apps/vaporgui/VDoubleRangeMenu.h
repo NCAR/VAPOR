@@ -22,6 +22,8 @@ public:
         double max,
         bool rangeChangable
     );
+    
+    void AllowUserRange(bool allowed=true);
 
 protected:
     VDoubleLineEditAction* _minRangeAction;

@@ -7,7 +7,7 @@
 #include "VIntLineEdit.h"
 #include "VDoubleLineEdit.h"
 
-VLineAction::VLineAction( const std::string& title, VContainer* container ) 
+VLineAction::VLineAction( const std::string& title, VHBoxWidget* container ) 
   : QWidgetAction(NULL)
 {
     VLineItem* vli = new VLineItem( title, container );

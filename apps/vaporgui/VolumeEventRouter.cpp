@@ -1,121 +1,45 @@
-#ifdef WIN32
-//Annoying unreferenced formal parameter warning
-#pragma warning( disable : 4100 )
-#endif
-
-#include <vapor/glutil.h>
-#include <QLineEdit>
-#include <QScrollArea>
-#include <vector>
-#include <string>
-#include "vapor/VolumeParams.h"
-#include "vapor/VolumeRenderer.h"
-#include "VariablesWidget.h"
 #include "VolumeEventRouter.h"
+#include "vapor/VolumeParams.h"
+#include "PWidgets.h"
+#include "PStringDropdownHLI.h"
 
 using namespace VAPoR;
+typedef VolumeParams VP;
 
-//
-// Register class with object factory!!!
-//
-static RenderEventRouterRegistrar<VolumeEventRouter> registrar(
-    VolumeEventRouter::GetClassType()
-);
+static RenderEventRouterRegistrar<VolumeEventRouter> registrar(VolumeEventRouter::GetClassType());
 
-
-VolumeEventRouter::VolumeEventRouter( QWidget *parent, ControlExec *ce) 
-                    : QTabWidget(parent),
-	                    RenderEventRouter( ce, VolumeParams::GetClassType())
+VolumeEventRouter::VolumeEventRouter(QWidget *parent, ControlExec *ce)
+: RenderEventRouterGUI(ce, VolumeParams::GetClassType())
 {
-	_variables = new VolumeVariablesSubtab(this);
-	QScrollArea *qsvar = new QScrollArea(this);
-	qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	_variables->adjustSize();
-	qsvar->setWidget(_variables);
-	qsvar->setWidgetResizable(true);
-	addTab(qsvar, "Variables");
-
-	_appearance = new VolumeAppearanceSubtab(this);
-	QScrollArea* qsapp = new QScrollArea(this);
-	qsapp->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	qsapp->setWidget(_appearance);
-	qsapp->setWidgetResizable(true);
-	addTab(qsapp,"Appearance");
-
-	_geometry = new VolumeGeometrySubtab(this);
-	QScrollArea *qsgeo = new QScrollArea(this);
-	qsgeo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	qsgeo->setWidget(_geometry);
-	qsgeo->setWidgetResizable(true);
-	addTab(qsgeo, "Geometry");
-
-	_annotation= new VolumeAnnotationSubtab(this);
-	QScrollArea *qsAnnotation = new QScrollArea(this);
-	qsAnnotation->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	qsAnnotation->setWidget(_annotation);
-	qsAnnotation->setWidgetResizable(true);
-	addTab(qsAnnotation, "Annotation");
-}
-
-void VolumeEventRouter::GetWebHelp(
-	vector <pair <string, string> > &help
-) const {
-	help.clear();
-
-	help.push_back(make_pair(
-		"Volume Overview",
-		"http://www.vapor.ucar.edu/docs/vapor-gui-help/Volume#VolumeOverview"
-	));
-
-	help.push_back(make_pair(
-		"Renderer control",
-		"http://www.vapor.ucar.edu/docs/vapor-how-guide/renderer-instances"
-	));
-
-	help.push_back(make_pair(
-		"Data accuracy control",
-		"http://www.vapor.ucar.edu/docs/vapor-how-guide/refinement-and-lod-control"
-	));
-
-	help.push_back(make_pair(
-		"Volume geometry options",
-		"http://www.vapor.ucar.edu/docs/vapor-gui-help/twoD#TwoDGeometry"
-	));
-
-	help.push_back(make_pair(
-		"Volume Appearance settings",
-		"http://www.vapor.ucar.edu/docs/vapor-gui-help/Volume#VolumeAppearance"
-	));
-
-}
-
-void VolumeEventRouter::_updateTab(){
-
-	// The variable tab updates itself:
-	//
-	_variables->Update(
-		GetActiveDataMgr(),
-		_controlExec->GetParamsMgr(),
-		GetActiveParams()
-	);
-
-	_appearance->Update(
-		GetActiveDataMgr(),
-		_controlExec->GetParamsMgr(),
-		GetActiveParams()
-	);
-
-	_geometry->Update(
-		_controlExec->GetParamsMgr(),
-		GetActiveDataMgr(),
-		GetActiveParams()
-	);
-
-	_annotation->Update(
-		_controlExec->GetParamsMgr(),
-		GetActiveDataMgr(),
-		GetActiveParams()
-	);
+    AddSubtab("Variables", new PGroup({
+        new PSection("Variable Selection", {
+            new PScalarVariableSelector,
+            new PColorMapVariableSelector
+        }),
+        new PFidelitySection
+    }));
+    
+    AddSubtab("Appearance", new PGroup({
+        (new PTFEditor)->ShowColormapBasedOnParam(VP::UseColormapVariableTag, false),
+        new PSection("Ray Tracing", {
+            new PStringDropdownHLI<VP>("Raytracing Algorithm", VP::GetAlgorithmNames(VP::Type::DVR), &VP::GetAlgorithm, &VP::SetAlgorithmByUser),
+            new PEnumDropdown(VP::SamplingRateMultiplierTag, {"1x", "2x", "4x", "8x", "16x"}, {1, 2, 4, 8, 16}, "Sampling Rate Multiplier"),
+            (new PDoubleSliderEdit(VP::VolumeDensityTag, "Volume Density"))->EnableDynamicUpdate()->SetTooltip("Changes the overall density or 'opacity' of the volume allowing for finer tuning of the transfer function."),
+            new PCheckbox(VP::UseColormapVariableTag, "Color by other variable"),
+            (new PVariableSelector3D(RenderParams::_colorMapVariableNameTag))->ShowBasedOnParam(VP::UseColormapVariableTag)
+        }),
+        (new PColormapTFEditor)->ShowBasedOnParam(VolumeParams::UseColormapVariableTag),
+        new PSection("Lighting", {
+            new PCheckbox(VolumeParams::LightingEnabledTag, "Enabled"),
+            (new PDoubleSliderEdit(VP::PhongAmbientTag,   "Ambient" ))->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit(VP::PhongDiffuseTag,   "Diffuse" ))->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit(VP::PhongSpecularTag,  "Specular"))->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit(VP::PhongShininessTag, "Shininess"))->SetRange(1, 100)->EnableDynamicUpdate()
+        })
+    }));
+    
+    AddSubtab("Geometry", new PGeometrySubtab);
+    AddSubtab("Annotation", new PAnnotationColorbarWidget);
 }
 
 string VolumeEventRouter::_getDescription() const
@@ -125,4 +49,3 @@ string VolumeEventRouter::_getDescription() const
            "file, according to color and opacity settings defined by the user.\n\n"
            "These 3D variables may be offset by a height variable.\n\n");
 }
-

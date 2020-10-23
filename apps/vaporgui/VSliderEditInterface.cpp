@@ -10,7 +10,7 @@
 #include "VActions.h"
 
 VSliderEditInterface::VSliderEditInterface( 
-) : VContainer()
+) : VHBoxWidget()
 {
     _slider = new VSlider();
     _slider->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred );
