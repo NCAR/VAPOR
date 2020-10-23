@@ -1,43 +1,13 @@
 #pragma once
 
-#include <QFrame>
-#include <QHBoxLayout>
+#include <QWidget>
 
-#include <string>
-
-#include "VLineItem.h"
-
-//! \class VContainer
-//!
-//! A simple wrapper class for one or more VWidgets.
-//! Sets a standard layout and margin policy, and protects
-//! against unwanted mouse scroll whell events.
-
-class VContainer : public QFrame {
-    Q_OBJECT
-
+class VContainer : public QWidget {
   public:
-    virtual QSize sizeHint() const;
+    VContainer(QWidget *w);
+    void AddBottomStretch();
+    void SetPadding(int left, int top, int right, int bottom);
 
-  protected:
-    VContainer();
-
-  private:
-    static const int _LEFT_MARGIN;
-    static const int _TOP_MARGIN;
-    static const int _RIGHT_MARGIN;
-    static const int _BOTTOM_MARGIN;
-};
-
-// Helper object for disabling the mouse scroll-wheel on a given widget.
-//
-
-#include <QObject>
-
-class MouseWheelWidgetAdjustmentGuard : public QObject {
-  public:
-    explicit MouseWheelWidgetAdjustmentGuard(QObject *parent);
-
-  protected:
-    bool eventFilter(QObject *o, QEvent *e) override;
+    QLayout *layout() const = delete;
+    void setLayout(QLayout *) = delete;
 };

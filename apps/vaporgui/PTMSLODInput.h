@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include "vapor/ImageParams.h"
 #include "vapor/GeoImageTMS.h"
+#include "vapor/TMSUtils.h"
 #include "PGroup.h"
 #include "VComboBox.h"
 
@@ -28,7 +29,7 @@ class PTMSLODInput : public PLineItem {
         VAssert(rp && "Params must be ImageParams");
 
         std::string imageFile = rp->GetImagePath();
-        if (VAPoR::GeoImageTMS::IsTMSFile(imageFile)) {
+        if (Wasp::TMSUtils::IsTMSFile(imageFile)) {
             _vComboBox->setEnabled(true);
         } else {
             _vComboBox->setEnabled(false); // Disable if not using a TMS image

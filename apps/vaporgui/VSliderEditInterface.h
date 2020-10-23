@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "VContainer.h"
+#include "VHBoxWidget.h"
 
 class VSlider;
 class VCheckBoxAction;
@@ -12,7 +12,7 @@ class VSpinBoxAction;
 //! \brief An interface class that needs to be reimplemented to support the
 //! synchronization of a VSlider and a numeric V*LineEdit, and their menus.
 
-class VSliderEditInterface : public VContainer {
+class VSliderEditInterface : public VHBoxWidget {
     Q_OBJECT
 
   public:

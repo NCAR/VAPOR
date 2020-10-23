@@ -31,6 +31,11 @@ VIntSliderEdit::VIntSliderEdit(
     _makeContextMenu();
 }
 
+void VIntSliderEdit::AllowUserRange(bool allowed) {
+    _rangeChangable = allowed;
+    _menu->AllowUserRange(allowed);
+}
+
 void VIntSliderEdit::_makeContextMenu() {
     _menu = new VIntRangeMenu(
         this,

@@ -28,6 +28,9 @@ template class PTFMapWidget<TFOpacityWidget>;
 template class PTFMapWidget<TFHistogramWidget>;
 template class PTFMapWidget<TFIsoValueWidget>;
 
+PTFEditor::PTFEditor()
+    : PTFEditor(RenderParams::_variableNameTag) {}
+
 PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, const std::string &label)
     : PWidget(tag, _section = new VSection(label.empty() ? tag : label)) {
     _maps = new TFMapGroupWidget;
@@ -119,3 +122,6 @@ void PTFEditor::updateGUI() const {
             _colorMap->hide();
     }
 }
+
+PColormapTFEditor::PColormapTFEditor()
+    : PTFEditor(RenderParams::_colorMapVariableNameTag, {PTFEditor::Histogram, PTFEditor::Colormap}, "Colormap Transfer Function") {}

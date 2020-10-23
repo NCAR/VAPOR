@@ -7,7 +7,7 @@
 
 #include <VStringLineEdit.h>
 
-VStringLineEdit::VStringLineEdit(std::string value) : VContainer(),
+VStringLineEdit::VStringLineEdit(std::string value) : VHBoxWidget(),
                                                       _lineEdit(new QLineEdit),
                                                       _strValue(value) {
     layout()->addWidget(_lineEdit);

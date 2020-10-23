@@ -25,6 +25,7 @@
 #include "vapor/RenderParams.h"
 #include "vapor/DataMgrUtils.h"
 #include "CopyRegionWidget.h"
+#include "VLineItem.h"
 
 #define X 0
 #define Y 1
@@ -50,8 +51,9 @@ std::vector<std::string> split(const std::string &s, char delim) {
 }
 } // namespace
 
-CopyRegionWidget::CopyRegionWidget(QWidget *parent) : QWidget(parent), Ui_CopyRegionWidgetGUI() {
-    setupUi(this);
+CopyRegionWidget::CopyRegionWidget(QWidget *parent) : VSectionGroup("Copy region from renderer") {
+    Add(new VLineItem("Renderer", copyCombo = new QComboBox));
+    Add(new VLineItem("", copyButton = new QPushButton("Copy")));
 
     _paramsMgr = NULL;
     _rParams = NULL;

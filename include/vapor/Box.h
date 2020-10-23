@@ -46,7 +46,7 @@ class PARAMS_API Box : public ParamsBase {
 
     //! Create a Box object from scratch
     //
-    Box(ParamsBase::StateSave *ssave);
+    Box(ParamsBase::StateSave *ssave, string name = Box::GetClassType());
 
     //! Create a Box object from an existing XmlNode tree
     //
@@ -64,7 +64,7 @@ class PARAMS_API Box : public ParamsBase {
     //! of the box, specified in the order X, Y, Z
     //!
     //
-    void SetExtents(const vector<double> &minExt, const vector<double> &maxExt);
+    virtual void SetExtents(const vector<double> &minExt, const vector<double> &maxExt);
 
     //! Get the box min and max extents
     //!
@@ -89,9 +89,7 @@ class PARAMS_API Box : public ParamsBase {
     //!
     //! \sa GetOrientation()
     //
-    bool IsPlanar() const {
-        return GetValueLong(Box::m_planarTag, (long)false);
-    }
+    bool IsPlanar() const;
 
     //! Constain the box to be planar or not
     //!
@@ -345,6 +343,7 @@ class PARAMS_API Box : public ParamsBase {
 
 #endif
 
+  public:
     static const string m_anglesTag;
     static const string m_extentsTag;
     static const string m_planarTag;

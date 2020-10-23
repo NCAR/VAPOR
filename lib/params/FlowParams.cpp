@@ -1,4 +1,5 @@
 #include "vapor/FlowParams.h"
+#include <vapor/FileUtils.h>
 
 using namespace VAPoR;
 
@@ -30,13 +31,17 @@ const std::string FlowParams::_seedInputFilenameTag = "SeedInputFilenameTag";
 const std::string FlowParams::_flowlineOutputFilenameTag = "FlowlineOutputFilenameTag";
 const std::string FlowParams::_flowDirectionTag = "FlowDirectionTag";
 const std::string FlowParams::_needFlowlineOutputTag = "NeedFlowlineOutputTag";
-const std::string FlowParams::_periodicTag = "PeriodicTag";
+const std::string FlowParams::_xPeriodicTag = "PeriodicTag_X";
+const std::string FlowParams::_yPeriodicTag = "PeriodicTag_Y";
+const std::string FlowParams::_zPeriodicTag = "PeriodicTag_Z";
 const std::string FlowParams::_rakeTag = "RakeTag";
 const std::string FlowParams::_rakeBiasVariable = "RakeBiasVariable";
 const std::string FlowParams::_rakeBiasStrength = "RakeBiasStrength";
 const std::string FlowParams::_pastNumOfTimeSteps = "PastNumOfTimeSteps";
 const std::string FlowParams::_seedInjInterval = "SeedInjInterval";
-const std::string FlowParams::_gridNumOfSeedsTag = "GridNumOfSeeds";
+const std::string FlowParams::_xGridNumOfSeedsTag = "GridNumOfSeeds_X";
+const std::string FlowParams::_yGridNumOfSeedsTag = "GridNumOfSeeds_Y";
+const std::string FlowParams::_zGridNumOfSeedsTag = "GridNumOfSeeds_Z";
 const std::string FlowParams::_randomNumOfSeedsTag = "RandomNumOfSeeds";
 
 static RenParamsRegistrar<FlowParams> registrar(FlowParams::GetClassType());
@@ -83,19 +88,23 @@ FlowParams::FlowParams(DataMgr *dataManager,
                    stateSave,
                    node,
                    3 /* max dim */) {
+    _initialized = true;
     SetDiagMsg("FlowParams::FlowParams() this=%p", this);
 }
 
 // Destructor
 FlowParams::~FlowParams() {
     SetDiagMsg("FlowParams::~FlowParams() this=%p", this);
+    if (_fakeRakeBox)
+        delete _fakeRakeBox;
 }
 
 int FlowParams::Initialize() {
-
     int rc = RenderParams::Initialize();
     if (rc < 0)
         return (rc);
+    if (_initialized)
+        return 0;
 
     // At this point the base class is initialized, and the _Box is
     // properly initialized
@@ -111,6 +120,27 @@ int FlowParams::Initialize() {
         floats[i * 2 + 1] = maxext[i];
     }
     this->SetRake(floats);
+
+    vector<float> rake;
+    rake.push_back(minext[0]);
+    rake.push_back(maxext[0]);
+    rake.push_back(minext[1]);
+    rake.push_back(maxext[1]);
+    if (minext.size() == 3) {
+        rake.push_back(minext[2]);
+        rake.push_back(maxext[2]);
+    }
+    SetRake(rake);
+
+    SetFlowDirection((int)FlowDir::FORWARD);
+    SetSteadyNumOfSteps(100);
+    SetVelocityMultiplier(1);
+    SetPeriodic(vector<bool>(3, false));
+    SetGridNumOfSeeds(vector<long>(3, 5));
+    SetRandomNumOfSeeds(50);
+    SetFlowlineOutputFilename(Wasp::FileUtils::HomeDir() + "/VaporFlow.txt");
+    SetIsSteady(true);
+    SetPastNumOfTimeSteps(_dataMgr->GetNumTimeSteps());
 
     return (0);
 }
@@ -151,22 +181,11 @@ void FlowParams::SetSteadyNumOfSteps(long i) {
 }
 
 int FlowParams::GetSeedGenMode() const {
-    auto val = GetValueString(_seedGenModeTag, "");
-    for (const auto &e : _seed2Str) {
-        if (val == e.second)
-            return e.first;
-    }
-    return 0;
+    return GetValueLong(_seedGenModeTag, (int)FlowSeedMode::UNIFORM);
 }
 
 void FlowParams::SetSeedGenMode(int i) {
-    for (const auto &e : _seed2Str) {
-        if (i == e.first) {
-            SetValueString(_seedGenModeTag, "which way to generate seeds", e.second);
-            return;
-        }
-    }
-    SetValueString(_seedGenModeTag, "which way to generate seeds", "");
+    SetValueLong(_seedGenModeTag, "", i);
 }
 
 std::string
@@ -188,53 +207,89 @@ void FlowParams::SetFlowlineOutputFilename(const std::string &name) {
 }
 
 int FlowParams::GetFlowDirection() const {
-    auto val = GetValueString(_flowDirectionTag, "");
-    for (const auto &e : _dir2Str) {
-        if (val == e.second)
-            return e.first;
-    }
-    return 0;
+    return GetValueLong(_flowDirectionTag, (int)FlowDir::FORWARD);
 }
 
 void FlowParams::SetFlowDirection(int i) {
-    for (const auto &e : _dir2Str) {
-        if (i == e.first) {
-            SetValueString(_flowDirectionTag, "flow direction", e.second);
-            return;
-        }
-    }
-    SetValueString(_flowDirectionTag, "flow direction", "");
+    VAssert(i == (int)FlowDir::FORWARD || i == (int)FlowDir::BACKWARD || i == (int)FlowDir::BI_DIR);
+    SetValueLong(_flowDirectionTag, "", i);
 }
 
 std::vector<bool> FlowParams::GetPeriodic() const {
-    auto longs = GetValueLongVec(_periodicTag);
-    if (longs.size() != 3 && longs.size() != 2) {
-        std::vector<long> tmp(3, 0);
-        longs = tmp;
-    }
-    std::vector<bool> bools(longs.size(), false);
-    for (int i = 0; i < bools.size(); i++)
-        if (longs[i] != 0)
-            bools[i] = true;
+    vector<bool> sav;
+    sav.push_back(GetValueLong(_xPeriodicTag, false));
+    sav.push_back(GetValueLong(_yPeriodicTag, false));
+    if (GetRenderDim() == 3)
+        sav.push_back(GetValueLong(_zPeriodicTag, false));
 
-    return bools;
+    return sav;
 }
 
 void FlowParams::SetPeriodic(const std::vector<bool> &bools) {
     VAssert(bools.size() == 3 || bools.size() == 2);
-    std::vector<long> longs(bools.size(), 0);
-    for (int i = 0; i < bools.size(); i++)
-        if (bools[i])
-            longs[i] = 1;
+    SetValueLong(_xPeriodicTag, "", bools[0]);
+    SetValueLong(_yPeriodicTag, "", bools[1]);
+    if (bools.size() == 3)
+        SetValueLong(_zPeriodicTag, "", bools[2]);
+}
 
-    SetValueLongVec(_periodicTag, "any axis is periodic", longs);
+void FakeRakeBox::SetExtents(const vector<double> &min, const vector<double> &max) {
+    VAssert(parent);
+
+    vector<float> rake;
+    rake.push_back(min[0]);
+    rake.push_back(max[0]);
+    rake.push_back(min[1]);
+    rake.push_back(max[1]);
+    if (min.size() == 3) {
+        rake.push_back(min[2]);
+        rake.push_back(max[2]);
+    }
+
+    parent->SetRake(rake);
+}
+
+Box *FlowParams::GetRakeBox() {
+    if (!_fakeRakeBox) {
+        _fakeRakeBox = new FakeRakeBox(&_fakeRakeStateSave);
+        _fakeRakeBox->parent = this;
+    }
+
+    Box *extBox = GetBox();
+    _fakeRakeBox->SetPlanar(extBox->IsPlanar());
+    _fakeRakeBox->SetOrientation(extBox->GetOrientation());
+
+    const auto rake = GetRake();
+    const auto rakesize = rake.size();
+    VAssert(rakesize == 4 || rakesize == 6);
+    vector<double> min, max;
+
+    min.push_back(rake[0]);
+    max.push_back(rake[1]);
+    min.push_back(rake[2]);
+    max.push_back(rake[3]);
+    if (rakesize == 6) {
+        min.push_back(rake[4]);
+        max.push_back(rake[5]);
+    }
+
+    _fakeRakeBox->Box::SetExtents(min, max);
+
+    return _fakeRakeBox;
 }
 
 std::vector<float> FlowParams::GetRake() const {
     auto doubles = GetValueDoubleVec(_rakeTag);
-    std::vector<float> floats(doubles.size());
-    std::copy(doubles.cbegin(), doubles.cend(), floats.begin());
-    return floats;
+    vector<float> ret;
+
+    int dim = GetRenderDim();
+    for (int i = 0; i < dim * 2; i++) {
+        if (i < doubles.size())
+            ret.push_back(doubles[i]);
+        else
+            ret.push_back(5);
+    }
+    return ret;
 }
 
 void FlowParams::SetRake(const std::vector<float> &rake) {
@@ -246,19 +301,26 @@ void FlowParams::SetRake(const std::vector<float> &rake) {
 }
 
 std::vector<long> FlowParams::GetGridNumOfSeeds() const {
-    auto num = GetValueLongVec(_gridNumOfSeedsTag);
-    if (num.size() == 3 || num.size() == 2)
-        return num;
-    else {
-        // Default: 5 along each of the three dimensions.
-        const std::vector<long> tmp(3, 5);
-        return tmp;
-    }
+    vector<long> sav(3);
+    sav[0] = GetValueLong(_xGridNumOfSeedsTag, 5);
+    sav[1] = GetValueLong(_yGridNumOfSeedsTag, 5);
+    sav[2] = GetValueLong(_zGridNumOfSeedsTag, 5);
+
+    vector<long> ret;
+    int dims = GetRenderDim();
+
+    for (int i = 0; i < dims; i++)
+        ret.push_back(sav[i]);
+
+    return ret;
 }
 
 void FlowParams::SetGridNumOfSeeds(const std::vector<long> &num) {
     VAssert(num.size() == 3 || num.size() == 2);
-    SetValueLongVec(_gridNumOfSeedsTag, "grid num of seeds", num);
+    SetValueLong(_xGridNumOfSeedsTag, "", num[0]);
+    SetValueLong(_yGridNumOfSeedsTag, "", num[1]);
+    if (num.size() == 3)
+        SetValueLong(_zGridNumOfSeedsTag, "", num[2]);
 }
 
 long FlowParams::GetRandomNumOfSeeds() const {

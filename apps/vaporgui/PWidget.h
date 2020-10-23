@@ -1,8 +1,9 @@
 #pragma once
 
 #include <string>
-#include <QWidget>
 #include <functional>
+#include "UWidget.h"
+#include <vapor/VAssert.h>
 
 namespace VAPoR {
 class ParamsBase;
@@ -21,7 +22,7 @@ class PWidgetHLIBase;
 //! All other public methods are self-explanitory. To see a demo and example
 //! of how to use these widgets, see ParamsWidgetDemo
 
-class PWidget : public QWidget {
+class PWidget : public UWidget {
     Q_OBJECT
 
     VAPoR::ParamsBase *_params = nullptr;
@@ -51,7 +52,7 @@ class PWidget : public QWidget {
   public:
     PWidget(const std::string &tag, QWidget *widget);
     //! Follows the Vapor GUI update function convention. Update the element.
-    void Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr = nullptr, VAPoR::DataMgr *dataMgr = nullptr);
+    void Update(VAPoR::ParamsBase *params, VAPoR::ParamsMgr *paramsMgr = nullptr, VAPoR::DataMgr *dataMgr = nullptr) override;
 
     //! tag must be a key referencing a long value in the Params Database. If the associated value is equal
     //! to whenEqualTo, the current widget will be shown/enabled, and hidden/disabled otherwise.
@@ -92,4 +93,12 @@ class PWidget : public QWidget {
     friend class PDynamicMixin;
     template <class, typename>
     friend class PWidgetHLIBase;
+
+  protected:
+    template <class T>
+    T *getParams() const {
+        T *p = dynamic_cast<T *>(getParams());
+        VAssert(p);
+        return p;
+    }
 };

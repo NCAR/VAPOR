@@ -25,6 +25,11 @@ VDoubleRangeMenu::VDoubleRangeMenu(
     }
 }
 
+void VDoubleRangeMenu::AllowUserRange(bool allowed) {
+    _minRangeAction->setEnabled(allowed);
+    _maxRangeAction->setEnabled(allowed);
+}
+
 void VDoubleRangeMenu::SetMinimum(double min) {
     _minRangeAction->SetValue(min);
 }

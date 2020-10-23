@@ -51,6 +51,10 @@ int ImageParams::Initialize() {
     GetBox()->SetOrientation(VAPoR::Box::XY);
     GetBox()->SetPlanar(true);
 
+    SetImagePath(Wasp::GetSharePath("images/NaturalEarth.tms"));
+    SetIsGeoRef(true);
+    SetIgnoreTransparency(false);
+
     return (0);
 }
 

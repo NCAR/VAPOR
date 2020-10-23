@@ -22,6 +22,8 @@ class VIntRangeMenu : public VNumericFormatMenu {
         int max,
         bool rangeChangable = false);
 
+    void AllowUserRange(bool allowed = true);
+
   protected:
     VIntLineEditAction *_minRangeAction;
     VIntLineEditAction *_maxRangeAction;

@@ -5,14 +5,14 @@
 #include <QWidget>
 #include <QSlider>
 
-#include "VContainer.h"
+#include "VHBoxWidget.h"
 
 //! class VSlider
 //!
 //! Wraps a QSlider and provides vaporgui's standard setter/getter fucntions
 //! and signals.  This class also provides range setting for the slider values.
 
-class VSlider : public VContainer {
+class VSlider : public VHBoxWidget {
     Q_OBJECT
 
   public:

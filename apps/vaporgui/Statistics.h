@@ -32,6 +32,7 @@
 #include "ui_errMsg.h"
 #include <RangeCombos.h>
 #include <StatisticsParams.h>
+#include "PWidgets.h"
 
 namespace VAPoR {
 class ParamsMgr;
@@ -124,6 +125,7 @@ class Statistics : public QDialog, public Ui_StatsWindow {
     ValidStats _validStats;
     sErrMsg *_errMsg;
     VAPoR::ControlExec *_controlExec;
+    std::vector<PWidget *> _pw;
 
     void _updateStatsTable();
 

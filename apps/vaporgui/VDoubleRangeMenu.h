@@ -22,6 +22,8 @@ class VDoubleRangeMenu : public VNumericFormatMenu {
         double max,
         bool rangeChangable);
 
+    void AllowUserRange(bool allowed = true);
+
   protected:
     VDoubleLineEditAction *_minRangeAction;
     VDoubleLineEditAction *_maxRangeAction;

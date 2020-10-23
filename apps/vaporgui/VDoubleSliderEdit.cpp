@@ -33,6 +33,11 @@ VDoubleSliderEdit::VDoubleSliderEdit(
     _makeContextMenu();
 }
 
+void VDoubleSliderEdit::AllowUserRange(bool allowed) {
+    _rangeChangable = allowed;
+    _menu->AllowUserRange(allowed);
+}
+
 void VDoubleSliderEdit::_makeContextMenu() {
     _menu = new VDoubleRangeMenu(
         this,

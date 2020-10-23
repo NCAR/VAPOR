@@ -7,7 +7,7 @@
 #include "VLineEdit_Deprecated.h"
 
 VSliderEdit::VSliderEdit(double min, double max, double value)
-    : VContainer(),
+    : VHBoxWidget(),
       _minValid(min),
       _maxValid(max),
       _value(value),

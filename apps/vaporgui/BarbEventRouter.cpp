@@ -1,117 +1,38 @@
-#ifdef WIN32
-//Annoying unreferenced formal parameter warning
-#pragma warning(disable : 4100)
-#endif
-
-#include <vapor/glutil.h>
-#include <qlineedit.h>
-#include <qscrollarea.h>
-#include <qcolordialog.h>
-#include <QFileDialog>
-#include <vector>
-#include <string>
-#include <vapor/MapperFunction.h>
-#include "vapor/BarbParams.h"
-#include "VariablesWidget.h"
 #include "BarbEventRouter.h"
-#include "EventRouter.h"
+#include "vapor/BarbParams.h"
+#include "PWidgets.h"
 
 using namespace VAPoR;
+typedef BarbParams BP;
 
-//
-// Register class with object factory!!!
-//
-static RenderEventRouterRegistrar<BarbEventRouter> registrar(
-    BarbEventRouter::GetClassType());
+static RenderEventRouterRegistrar<BarbEventRouter> registrar(BarbEventRouter::GetClassType());
 
-BarbEventRouter::BarbEventRouter(
-    QWidget *parent, ControlExec *ce) : QTabWidget(parent),
-                                        RenderEventRouter(ce, BarbParams::GetClassType()) {
+BarbEventRouter::BarbEventRouter(QWidget *parent, ControlExec *ce)
+    : RenderEventRouterGUI(ce, BarbParams::GetClassType()) {
+    AddSubtab("Variables", new PGroup({new PSection("Variable Selection", {
+                                                                              new PDimensionSelector,
+                                                                              new PXFieldVariableSelector,
+                                                                              new PYFieldVariableSelector,
+                                                                              new PZFieldVariableSelector,
+                                                                              new PHeightVariableSelector,
+                                                                              new PColorMapVariableSelector,
+                                                                          }),
+                                       new PFidelitySection}));
 
-    _variables = new BarbVariablesSubtab(this);
-    QScrollArea *qsvar = new QScrollArea(this);
-    qsvar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _variables->adjustSize();
-    qsvar->setWidget(_variables);
-    qsvar->setWidgetResizable(true);
-    addTab(qsvar, "Variables");
+    AddSubtab("Appearance", new PGroup({new PSection("Barbs", {(new PIntegerSliderEdit(BP::_xBarbsCountTag, "X Barbs"))->SetRange(1, 50),
+                                                               (new PIntegerSliderEdit(BP::_yBarbsCountTag, "Y Barbs"))->SetRange(1, 50),
+                                                               (new PIntegerSliderEdit(BP::_zBarbsCountTag, "Z Barbs"))->SetRange(1, 50),
+                                                               (new PDoubleSliderEdit(BP::_lengthScaleTag, "Length Scale"))->SetRange(0.01, 4)->EnableDynamicUpdate(),
+                                                               (new PDoubleSliderEdit(BP::_thicknessScaleTag, "Thickness Scale"))->SetRange(0.01, 4)->EnableDynamicUpdate(),
+                                                               new PCheckbox(BP::_useSingleColorTag, "Use Constant Color"),
+                                                               new PColorSelector(BP::_constantColorTag, "Constant Color")}),
+                                        (new PColormapTFEditor)->ShowBasedOnParam(BP::_useSingleColorTag, false)}));
 
-    _appearance = new BarbAppearanceSubtab(this);
-    QScrollArea *qsapp = new QScrollArea(this);
-    qsapp->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    qsapp->setWidget(_appearance);
-    qsapp->setWidgetResizable(true);
-    addTab(qsapp, "Appearance");
-
-    _geometry = new BarbGeometrySubtab(this);
-    QScrollArea *qsgeo = new QScrollArea(this);
-    qsgeo->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    qsgeo->setWidget(_geometry);
-    qsgeo->setWidgetResizable(true);
-    addTab(qsgeo, "Geometry");
-
-    _annotation = new BarbAnnotationSubtab(this);
-    QScrollArea *qsAnnotation = new QScrollArea(this);
-    qsAnnotation->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    qsAnnotation->setWidget(_annotation);
-    qsAnnotation->setWidgetResizable(true);
-    addTab(qsAnnotation, "Annotation");
-}
-
-void BarbEventRouter::GetWebHelp(
-    vector<pair<string, string>> &help) const {
-    help.clear();
-
-    help.push_back(make_pair(
-        "Barb Overview",
-        "http://www.vapor.ucar.edu/docs/vapor-gui-help/BarbOverview"));
-    help.push_back(make_pair(
-        "Renderer control",
-        "http://www.vapor.ucar.edu/docs/vapor-how-guide/renderer-instances"));
-    help.push_back(make_pair(
-        "Data accuracy control",
-        "http://www.vapor.ucar.edu/docs/vapor-how-guide/refinement-and-lod-control"));
-    help.push_back(make_pair(
-        "Barb geometry options",
-        "http://www.vapor.ucar.edu/docs/vapor-gui-help/BarbGeometry"));
-    help.push_back(make_pair(
-        "Barb Appearance settings", "<>"
-                                    "http://www.vapor.ucar.edu/docs/vapor-gui-help/BarbAppearance"));
-}
-
-void BarbEventRouter::_initializeTab() {
-    _updateTab();
-    BarbParams *rParams = (BarbParams *)GetActiveParams();
-    DataMgr *dataMgr = GetActiveDataMgr();
-
-    _variables->Initialize(rParams, dataMgr);
-}
-
-void BarbEventRouter::_updateTab() {
-    //The variable tab updates itself:
-    _variables->Update(
-        GetActiveDataMgr(),
-        _controlExec->GetParamsMgr(),
-        GetActiveParams());
-
-    _appearance->Update(
-        GetActiveDataMgr(),
-        _controlExec->GetParamsMgr(),
-        GetActiveParams());
-
-    _geometry->Update(
-        _controlExec->GetParamsMgr(),
-        GetActiveDataMgr(),
-        GetActiveParams());
-
-    _annotation->Update(
-        _controlExec->GetParamsMgr(),
-        GetActiveDataMgr(),
-        GetActiveParams());
+    AddSubtab("Geometry", new PGeometrySubtab);
+    AddSubtab("Annotation", new PAnnotationColorbarWidget);
 }
 
 string BarbEventRouter::_getDescription() const {
-
     return (
         "Displays an "
         "array of arrows with the users domain, with custom dimensions that are "

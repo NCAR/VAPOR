@@ -47,6 +47,7 @@ class RENDER_API SliceRenderer : public Renderer {
         std::vector<double> tf_minMax;
         std::vector<double> boxMin, boxMax;
         std::vector<double> domainMin, domainMax;
+        std::vector<double> sampleLocation;
     } _cacheParams;
 
     void _initVAO();
@@ -56,6 +57,7 @@ class RENDER_API SliceRenderer : public Renderer {
     bool _isColormapCacheDirty() const;
     bool _isDataCacheDirty() const;
     bool _isBoxCacheDirty() const;
+    void _getModifiedExtents(vector<double> &min, vector<double> &max) const;
     int _saveCacheParams();
     void _resetColormapCache();
     int _resetBoxCache();

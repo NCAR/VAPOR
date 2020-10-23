@@ -135,7 +135,7 @@ class EventRouter {
     //! descriptive text. The secone is a URL.
     //!
     virtual void GetWebHelp(
-        std::vector<std::pair<string, string>> &help) const = 0;
+        std::vector<std::pair<string, string>> &help) const {}
 
     //! Update GUI display
     //!

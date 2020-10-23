@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <vapor/MyBase.h>
 #include <vapor/DataStatus.h>
+#include "PWidgets.h"
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -48,11 +49,17 @@ Statistics::Statistics(QWidget *parent) : QDialog(parent), Ui_StatsWindow() {
 
     setupUi(this);
     setWindowTitle("Statistics");
-    MyGeometryWidget->Reinit((DimFlags)THREED,
-                             (VariableFlags)AUXILIARY);
     MyFidelityWidget->Reinit((VariableFlags)AUXILIARY);
 
     Connect();
+
+    auto rs = new PRegionSelector;
+    verticalLayout_2->insertWidget(0, rs);
+    _pw.push_back(rs);
+
+    auto cr = new PCopyRegionWidget;
+    verticalLayout_2->insertWidget(1, cr);
+    _pw.push_back(cr);
 }
 
 Statistics::~Statistics() {
@@ -205,9 +212,22 @@ bool Statistics::Update() {
     MaxTimestepSpinbox->setValue(statsParams->GetCurrentMaxTS());
     MaxTimestepSpinbox->blockSignals(false);
 
-    // Update geometry extents
-    MyGeometryWidget->Update(_controlExec->GetParamsMgr(), currentDmgr, statsParams);
-    MyCopyRegionWidget->Update(_controlExec->GetParamsMgr(), statsParams);
+    bool has3DVar = false;
+    for (const auto &var : enabledVars)
+        has3DVar |= 3 == currentDmgr->GetNumDimensions(var);
+
+    _controlExec->GetParamsMgr()->BeginSaveStateGroup("Update Box Dims");
+    if (has3DVar) {
+        statsParams->GetBox()->SetPlanar(false);
+        statsParams->GetBox()->SetOrientation(Box::XYZ);
+    } else {
+        statsParams->GetBox()->SetPlanar(true);
+        statsParams->GetBox()->SetOrientation(Box::XY);
+    }
+    _controlExec->GetParamsMgr()->EndSaveStateGroup();
+
+    for (auto p : _pw)
+        p->Update(statsParams, _controlExec->GetParamsMgr(), currentDmgr);
 
     return true;
 }
@@ -350,7 +370,6 @@ bool Statistics::Connect() {
     connect(MinTimestepSpinbox, SIGNAL(valueChanged(int)), this, SLOT(_minTSChanged(int)));
     connect(MaxTimestepSpinbox, SIGNAL(valueChanged(int)), this, SLOT(_maxTSChanged(int)));
     connect(UpdateButton, SIGNAL(clicked()), this, SLOT(_updateButtonClicked()));
-    connect(MyGeometryWidget, SIGNAL(valueChanged()), this, SLOT(_geometryValueChanged()));
     connect(DataMgrCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(_dataSourceChanged(int)));
     connect(UpdateCheckbox, SIGNAL(stateChanged(int)), this, SLOT(_autoUpdateClicked(int)));
     connect(ExportButton, SIGNAL(clicked()), this, SLOT(_exportTextClicked()));

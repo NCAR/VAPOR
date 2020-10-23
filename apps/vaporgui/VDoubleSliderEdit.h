@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "VContainer.h"
+#include "VHBoxWidget.h"
 #include "VSliderEditInterface.h"
 
 class QMenu;
@@ -30,6 +30,8 @@ class VDoubleSliderEdit : public VSliderEditInterface {
 
     //! Set the maximum allowable value for the VSlider and VDoubleLineEdit
     void SetMaximum(double max);
+
+    void AllowUserRange(bool allowed = true);
 
     //! Get the value associated with the VSlider and VDoubleLineEdit
     double GetValue() const;

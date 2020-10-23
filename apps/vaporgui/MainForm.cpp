@@ -2031,10 +2031,14 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
         if (event->type() == QEvent::MetaCall)
             return true;
         // Prevent queued ParamsChangedEvents from recursively running
-        if (event->type() == ParamsChangeEvent)
+        if (event->type() == ParamsChangeEvent) {
+            _paramsEventQueued = false;
             return true;
-        if (event->type() == ParamsIntermediateChangeEvent)
+        }
+        if (event->type() == ParamsIntermediateChangeEvent) {
+            _paramsEventQueued = false;
             return true;
+        }
         // Prevent user input for all widgets except the cancel button. This is essentially
         // the same behavior as we had before because the application would
         // freeze during a render so all user input was essentially blocked.

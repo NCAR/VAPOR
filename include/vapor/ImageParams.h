@@ -3,7 +3,7 @@
 
 #include <vapor/RenderParams.h>
 #include <vapor/DataMgr.h>
-#include <vapor/GeoImageTMS.h>
+#include <vapor/TMSUtils.h>
 
 namespace VAPoR {
 
@@ -35,8 +35,8 @@ class PARAMS_API ImageParams : public RenderParams {
     void SetImagePath(std::string file) {
         BeginGroup("Set image path");
         SetValueString(_fileNameTag, "Set image file path", file);
-        if (GeoImageTMS::IsTMSFile(file)) {
-            int numTMSLODs = GeoImageTMS::GetNumTMSLODs(file);
+        if (Wasp::TMSUtils::IsTMSFile(file)) {
+            int numTMSLODs = Wasp::TMSUtils::GetNumTMSLODs(file);
             _setNumTMSLODs(numTMSLODs);
         }
         EndGroup();
@@ -109,7 +109,7 @@ class PARAMS_API ImageParams : public RenderParams {
         return value;
     }
 
-  private:
+  public:
     static const std::string _fileNameTag;
     static const std::string _isGeoRefTag;
     static const std::string _ignoreTransparencyTag;

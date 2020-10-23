@@ -11,7 +11,7 @@
 VFileSelector::VFileSelector(
     const std::string &buttonText,
     const std::string &defaultPath,
-    const std::string &filter = "") : VContainer(),
+    const std::string &filter = "") : VHBoxWidget(),
                                       _filePath(defaultPath),
                                       _filter(filter) {
     _pushButton = new VPushButton(buttonText);

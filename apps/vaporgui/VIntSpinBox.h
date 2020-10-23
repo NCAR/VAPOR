@@ -5,14 +5,14 @@
 #include <QWidget>
 #include <QSpinBox>
 
-#include "VContainer.h"
+#include "VHBoxWidget.h"
 
 //! class VIntSpinBox
 //!
 //! Wraps a QSpinBox and provides vaporgui's standard setter/getter functions
 //! and signals.
 
-class VIntSpinBox : public VContainer {
+class VIntSpinBox : public VHBoxWidget {
     Q_OBJECT
 
   public:

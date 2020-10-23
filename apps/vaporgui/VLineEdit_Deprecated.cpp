@@ -9,7 +9,7 @@
 #include "ErrorReporter.h"
 
 VLineEdit_Deprecated::VLineEdit_Deprecated(const std::string &value)
-    : VContainer(),
+    : VHBoxWidget(),
       _value(value),
       _isDouble(false),
       _scientific(false),
