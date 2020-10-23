@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include "vapor/VAssert.h"
 #include <cmath>
 #include <time.h>
@@ -230,6 +231,14 @@ void StructuredGrid::ClampCoord(
     const DblArr3 &coords, DblArr3 &cCoords) const {
 
     const vector<bool> &periodic = GetPeriodic();
+
+    size_t n = min(GetGeometryDim(), periodic.size());
+    auto p = [](bool v) { return (v == true); };
+    if (std::none_of(periodic.begin(), periodic.begin() + n, p)) {
+        cCoords = coords;
+        return;
+    }
+
     const vector<size_t> &dims = GetDimensions();
 
     DblArr3 minu, maxu;

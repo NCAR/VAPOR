@@ -35,94 +35,144 @@ int Advection::CheckReady() const {
     return 0;
 }
 
-int Advection::AdvectOneStep(Field *velocity, float deltaT, ADVECTION_METHOD method) {
+int Advection::AdvectSteps(Field *velocity, float deltaT, size_t maxSteps, ADVECTION_METHOD method) {
     int ready = CheckReady();
     if (ready != 0)
         return ready;
-
     bool happened = false;
-    size_t streamIdx = 0;
-    for (auto &s : _streams) // Process one stream at a time
-    {
-        // Check if the particle is inside of the volume.
-        // Also wrap it along periodic dimensions if enabled.
-        if (!velocity->InsideVolumeVelocity(s.back().time, s.back().location)) {
-            auto &p0 = s.back();
-            // Attempt to apply periodicity
-            bool locChanged = false;
-            auto loc = p0.location;
-            for (int i = 0; i < 3; i++) // correct coordinates in each periodic dimension
-            {
-                if (_isPeriodic[i]) {
-                    loc[i] = _applyPeriodic(loc[i], _periodicBounds[i][0], _periodicBounds[i][1]);
-                    locChanged = true;
+
+    // Observation: user parameters are not gonna change while this function executes.
+    // Action: lock these parameters.
+    if (velocity->LockParams() != 0)
+        return PARAMS_ERROR;
+
+    // The particle advection process can be parallelized per particle
+    // Each stream represents a trajectory for a single particle
+    // #pragma omp parallel for
+    for (size_t streamIdx = 0; streamIdx < _streams.size(); streamIdx++) {
+        auto &s = _streams[streamIdx];
+        size_t numberOfSteps = s.size() - _separatorCount[streamIdx];
+        while (numberOfSteps < maxSteps) {
+            auto &past0 = s.back();
+            if (past0.IsSpecial()) // If the last particle is marked "special,"
+                break;             // terminate stream immediately.
+
+            float dt = deltaT;
+            if (s.size() > 2) // If there are at least 3 particles in the stream and
+            {                 // neither is a separator, we also adjust *dt*
+                const auto &past1 = s[s.size() - 2];
+                const auto &past2 = s[s.size() - 3];
+                if ((!past1.IsSpecial()) && (!past2.IsSpecial())) {
+                    // We enforce a factor of 20.0f as a limit of how much the step size
+                    // can be adjusted by _calcAdjustFactor().
+                    // I.e., the adjusted value can be at most 20X larger or 20X smaller.
+                    // The choice of 20.0f is just an empirical value that seems to work well.
+                    float mindt = deltaT / 20.0f, maxdt = deltaT * 20.0f;
+                    dt = past0.time - past1.time; // step size used by last integration
+                    dt *= _calcAdjustFactor(past2, past1, past0);
+                    if (dt > 0) // integrate forward
+                        dt = glm::clamp(dt, mindt, maxdt);
+                    else // integrate backward
+                        dt = glm::clamp(dt, maxdt, mindt);
                 }
             }
 
-            if (!locChanged) // no dimension is periodic
-                continue;    // skip this particle, since it's out of the volume
-
-            // If the new location comes inside volume, then we do these things:
-            // 1) Update the location of p0 to represent the wrapped result.
-            // 2) Insert a separator particle before p0.
-            if (velocity->InsideVolumeVelocity(p0.time, loc)) {
-                p0.location = loc;
-
-                Particle separator;
-                separator.SetSpecial(true);
-                auto itr = s.end(); // Should use const iterator here,
-                                    // but gcc-4.8 on CentOS7 doesn't support...
-                --itr;              // insert before the last element, p0
-                s.insert(itr, std::move(separator));
-                _separatorCount[streamIdx]++;
-            } else
-                continue; // skip this particle, since it's out of the volume
-
-        } // end of if condition
-
-        const auto &past0 = s.back();
-        float dt = deltaT;
-        if (s.size() > 2) // If there are at least 3 particles in the stream and
-        {                 // neither is a separator, we also adjust *dt*
-            const auto &past1 = s[s.size() - 2];
-            const auto &past2 = s[s.size() - 3];
-            if ((!past1.IsSpecial()) && (!past2.IsSpecial())) {
-                float mindt = deltaT / 20.0f, maxdt = deltaT * 20.0f;
-                dt = past0.time - past1.time; // step size used by last integration
-                dt *= _calcAdjustFactor(past2, past1, past0);
-                if (dt > 0) // integrate forward
-                    dt = glm::clamp(dt, mindt, maxdt);
-                else // integrate backward
-                    dt = glm::clamp(dt, maxdt, mindt);
+            Particle p1;
+            int rv = 0;
+            switch (method) {
+            case ADVECTION_METHOD::EULER:
+                rv = _advectEuler(velocity, past0, dt, p1);
+                break;
+            case ADVECTION_METHOD::RK4:
+                rv = _advectRK4(velocity, past0, dt, p1);
+                break;
             }
-        }
 
-        Particle p1;
-        int rv = 0;
-        switch (method) {
-        case ADVECTION_METHOD::EULER:
-            rv = _advectEuler(velocity, past0, dt, p1);
-            break;
-        case ADVECTION_METHOD::RK4:
-            rv = _advectRK4(velocity, past0, dt, p1);
-            break;
-        }
-        if (rv != 0) // Advection wasn't successful for some reason...
-            continue;
-        else // Advection successful, keep the new particle.
-        {
-            happened = true;
-            s.push_back(std::move(p1));
-        }
+            if (rv == 0) { // Advection successful, keep the new particle.
+                happened = true;
+                s.emplace_back(p1);
+                numberOfSteps++;
+            } else if (rv == MISSING_VAL) {
 
-        streamIdx++;
+                // This is the annoying part: there are multiple possiblities.
+                // 1) past0 is really located at a missing value location;
+                // 2) past0 is inside the volume, but really close to the boundary,
+                //    causing RK4 method to fail;
+                // 3) past0 is not at a missing location, but out of the volume.
+                //
+                // Note that we need to detect and deal with each of these possibilities
+                //   here instead of using the periodic capabilities of a grid class,
+                //   because the advection code needs to have knowledge when a pathline
+                //   exits from one side and comes back from another sice, and record
+                //   this event by inserting a separator. The separator will later be used
+                //   by the rendering code to break a pathline into segments.
 
-    } // end of for loop
+                glm::vec3 vel;
+                bool isMissing = (velocity->GetVelocity(past0.time, past0.location, vel) == MISSING_VAL);
+                bool isInside = velocity->InsideVolumeVelocity(past0.time, past0.location);
+
+                if (isInside && isMissing) { // Case 1)
+                    // We identified a particle at a bad location.
+                    // We mark it as special, and terminate the current stream.
+                    past0.SetSpecial(true);
+                    _separatorCount[streamIdx]++;
+                    break;
+                } else if (isInside && (!isMissing)) { // Case 2)
+                    // Use Euler advection for this particle.
+                    rv = _advectEuler(velocity, past0, dt, p1);
+                    assert(rv == 0);
+                    s.emplace_back(p1);
+                    numberOfSteps++;
+                } else { // Case 3)
+                    // We identified a particle that's out of the volume.
+                    // We treat it depending on field periodicity.
+                    // In case of no periodicity, we mark this particle special and
+                    //    terminate the current stream.
+                    // In case of periodicity enabled, we apply it!
+                    if ((!_isPeriodic[0]) && (!_isPeriodic[1]) && (!_isPeriodic[2])) {
+                        past0.SetSpecial(true);
+                        _separatorCount[streamIdx]++;
+                        break;
+                    } else {
+                        auto loc = past0.location;
+                        for (int i = 0; i < 3; i++) {
+                            if (_isPeriodic[i])
+                                loc[i] = _applyPeriodic(loc[i], _periodicBounds[i][0],
+                                                        _periodicBounds[i][1]);
+                        }
+
+                        // Notice that loc isn't guaranteed to be inside the volume right now,
+                        // since periodic ain't enabled for all directions.
+                        // As a result, we need to test again
+                        if (velocity->InsideVolumeVelocity(past0.time, loc)) {
+                            past0.location = loc;
+                            Particle separator;
+                            separator.SetSpecial(true);
+                            auto it = s.end();
+                            --it;
+                            s.insert(it, std::move(separator));
+                            _separatorCount[streamIdx]++;
+                        } else {
+                            past0.SetSpecial(true);
+                            _separatorCount[streamIdx]++;
+                            break;
+                        }
+                    }
+                }
+
+            }    // end (rv == MISSING_VAL) condition
+            else // Advection wasn't successful for other reasons
+                break;
+
+        } //end loop for particle
+    }     // end loop for streams
+
+    velocity->UnlockParams();
 
     if (happened)
         return ADVECT_HAPPENED;
     else
-        return 0;
+        return NO_ADVECT_HAPPENED;
 }
 
 int Advection::AdvectTillTime(Field *velocity, float startT, float deltaT, float targetT,
@@ -216,28 +266,56 @@ int Advection::AdvectTillTime(Field *velocity, float startT, float deltaT, float
 }
 
 int Advection::CalculateParticleValues(Field *scalar, bool skipNonZero) {
-    size_t mostSteps = 0;
-    for (const auto &s : _streams)
-        if (s.size() > mostSteps)
-            mostSteps = s.size();
+    // For steady fields, we calculate values one stream at a time
+    if (scalar->IsSteady) {
+        if (scalar->LockParams() != 0)
+            return PARAMS_ERROR;
 
-    // Color step i of all particles, and then move on to the next step
-    for (size_t i = 0; i < mostSteps; i++) {
         for (auto &s : _streams) {
-            if (i < s.size()) {
-                auto &p = s[i];
+            for (auto &p : s) {
                 // Skip this particle if it's a separator
                 if (p.IsSpecial())
                     continue;
+
                 // Do not evaluate this particle if its value is non-zero
                 if (skipNonZero && p.value != 0.0f)
                     continue;
+
                 float value;
-                int rv = scalar->GetScalar(p.time, p.location, value, false);
+                int rv = scalar->GetScalar(p.time, p.location, value);
                 if (rv == 0)         // The end of a stream could be outside of the volume,
                     p.value = value; // so let's only color it when the return value is 0.
             }
         }
+
+        scalar->UnlockParams();
+    }
+    // For unsteady fields, we calculate values at one timestep at a time
+    else {
+        size_t mostSteps = 0;
+        for (auto &s : _streams) {
+            if (s.size() > mostSteps)
+                mostSteps = s.size();
+        }
+
+        for (size_t i = 0; i < mostSteps; i++) {
+            for (auto &s : _streams) {
+                if (i < s.size()) {
+                    auto &p = s[i];
+                    if (p.IsSpecial())
+                        continue;
+
+                    // Do not evaluate this particle if its value is non-zero
+                    if (skipNonZero && p.value != 0.0f)
+                        continue;
+
+                    float val;
+                    int rv = scalar->GetScalar(p.time, p.location, val);
+                    if (rv == 0)
+                        p.value = val;
+                }
+            } // end of a stream
+        }     // end of all steps
     }
 
     return 0;
@@ -254,7 +332,7 @@ int Advection::CalculateParticleProperties(Field *scalar) {
             if (i < s.size()) {
                 auto &p = s[i];
                 float value;
-                int rv = scalar->GetScalar(p.time, p.location, value, false);
+                int rv = scalar->GetScalar(p.time, p.location, value);
                 if (rv == 0)                 // A particle could be out of the volume, so we only
                     p.AttachProperty(value); // attach property when returns 0.
             }
@@ -266,7 +344,7 @@ int Advection::CalculateParticleProperties(Field *scalar) {
 
 int Advection::_advectEuler(Field *velocity, const Particle &p0, float dt, Particle &p1) const {
     glm::vec3 v0;
-    int rv = velocity->GetVelocity(p0.time, p0.location, v0, false);
+    int rv = velocity->GetVelocity(p0.time, p0.location, v0);
     if (rv != 0)
         return rv;
     p1.location = p0.location + dt * v0;
@@ -278,16 +356,16 @@ int Advection::_advectRK4(Field *velocity, const Particle &p0, float dt, Particl
     glm::vec3 k1, k2, k3, k4;
     float dt2 = dt * 0.5f;
     int rv;
-    rv = velocity->GetVelocity(p0.time, p0.location, k1, false);
+    rv = velocity->GetVelocity(p0.time, p0.location, k1);
     if (rv != 0)
         return rv;
-    rv = velocity->GetVelocity(p0.time + dt2, p0.location + dt2 * k1, k2, false);
+    rv = velocity->GetVelocity(p0.time + dt2, p0.location + dt2 * k1, k2);
     if (rv != 0)
         return rv;
-    rv = velocity->GetVelocity(p0.time + dt2, p0.location + dt2 * k2, k3, false);
+    rv = velocity->GetVelocity(p0.time + dt2, p0.location + dt2 * k2, k3);
     if (rv != 0)
         return rv;
-    rv = velocity->GetVelocity(p0.time + dt, p0.location + dt * k3, k4, false);
+    rv = velocity->GetVelocity(p0.time + dt, p0.location + dt * k3, k4);
     if (rv != 0)
         return rv;
     p1.location = p0.location + dt / 6.0f * (k1 + 2.0f * (k2 + k3) + k4);

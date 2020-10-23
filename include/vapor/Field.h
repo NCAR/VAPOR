@@ -5,8 +5,9 @@
 #ifndef FIELD_H
 #define FIELD_H
 
-#include <glm/glm.hpp>
 #include <string>
+#include <array>
+#include <glm/glm.hpp>
 #include <vapor/common.h>
 
 namespace flow {
@@ -30,19 +31,15 @@ class FLOW_API Field {
 
     //
     // Get the field value at a certain position, at a certain time.
-    // Users could control if this method checks position inside volume.
     //
     virtual int GetScalar(float time, const glm::vec3 &pos, // input
-                          float &val,                       // output
-                          bool checkInsideVolume = true) const = 0;
+                          float &val) const = 0;            // output
 
     //
     // Get the velocity value at a certain position, at a certain time.
-    // Users could control if this method checks position inside volume.
     //
     virtual int GetVelocity(float time, const glm::vec3 &pos, // input
-                            glm::vec3 &vel,                   // output
-                            bool checkInsideVolume = true) const = 0;
+                            glm::vec3 &vel) const = 0;        // output
 
     //
     // Returns the number of empty velocity variable names.
@@ -50,10 +47,17 @@ class FLOW_API Field {
     //
     int GetNumOfEmptyVelocityNames() const;
 
+    //
+    // Provide an option to cache and lock certain parameters.
+    // Both functions return 0 on success.
+    //
+    virtual auto LockParams() -> int = 0;
+    virtual auto UnlockParams() -> int = 0;
+
     // Class members
     bool IsSteady = false;
     std::string ScalarName = "";
-    std::string VelocityNames[3]{"", "", ""};
+    std::array<std::string, 3> VelocityNames = {{"", "", ""}};
 };
 }; // namespace flow
 
