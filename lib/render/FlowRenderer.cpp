@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <random>
+#include <algorithm>
 #include <vapor/Progress.h>
 
 #define GL_ERROR     -20
@@ -29,8 +30,8 @@ FlowRenderer::FlowRenderer( const ParamsMgr*    pm,
                       FlowRenderer::GetClassType(),
                       instName,
                       dataMgr ),
-            _velocityField     ( 8 ),
-            _colorField        ( 2 ),
+            _velocityField     ( 9 ), // big enough to hold velocities for 3 time steps.
+            _colorField        ( 3 ), // big enough to hold scalars for 3 time steps.
             _colorMapTexOffset ( 0 )
 { }
 
@@ -182,7 +183,7 @@ FlowRenderer::_paintGL( bool fast )
     _velocityField.UpdateParams( params );
     _colorField.UpdateParams( params );
 
-    // In case there's 0 or 1 variable selected, meaning that more than one the velocity 
+    // In case there's 0 or 1 variable selected, meaning that more than one of the velocity 
     // variable names are empty strings, then the paint routine aborts.
     if( _velocityField.GetNumOfEmptyVelocityNames() > 1 )
     {
@@ -297,43 +298,21 @@ FlowRenderer::_paintGL( bool fast )
             /* If the advection is single-directional */
             if( params->GetFlowDirection() == 1 )           // backward integration
                 deltaT *= -1.0f;
-            int numOfSteps = params->GetSteadyNumOfSteps();
-            int total = numOfSteps - (_advection.GetMaxNumOfPart() - 1);
-            int done = 0;
+            long numOfSteps = params->GetSteadyNumOfSteps();
             
-            if(_2ndAdvection)
-                total += numOfSteps - (_2ndAdvection->GetMaxNumOfPart() - 1);
-                
-            
-            Progress::Start("Advect particles", total, true);
-            for( size_t i = _advection.GetMaxNumOfPart() - 1;  // existing number of advection steps 
-                 i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
-            {
-                Progress::Update(done++);
-                if (Progress::Cancelled())
-                    return 0;
-                rv = _advection.AdvectOneStep( &_velocityField, deltaT );
-            }
-            if (!_2ndAdvection)
-                Progress::Finish();
+            Progress::StartIndefinite("Performing flowline calculations");
+            Progress::Update(0);
+            _advection.AdvectSteps( &_velocityField, deltaT, numOfSteps );
 
             /* If the advection is bi-directional */
             if( _2ndAdvection )
             {
                 assert( deltaT > 0.0f );
                 float   deltaT2 = deltaT * -1.0f;
-                rv = flow::ADVECT_HAPPENED;
-                for( size_t i = _2ndAdvection->GetMaxNumOfPart() - 1; 
-                     i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++ )
-                {
-                    Progress::Update(done++);
-                    if (Progress::Cancelled())
-                        return 0;
-                    rv = _2ndAdvection->AdvectOneStep( &_velocityField, deltaT2 );
-                }
-                Progress::Finish();
+                    
+                _2ndAdvection->AdvectSteps( &_velocityField, deltaT2, numOfSteps );
             }
-
+            Progress::Finish();
         }
 
         /* Advection scheme 2: advect to a certain timestamp.
@@ -364,7 +343,7 @@ FlowRenderer::_paintGL( bool fast )
 
     _prepareColormap( params );
     
-    int ret = 0;
+    rv = 0;
     
     if (params->GetValueLong("old_render", 0)) {
         _renderFromAnAdvectionLegacy( &_advection, params, fast );
@@ -380,17 +359,17 @@ FlowRenderer::_paintGL( bool fast )
         if (_2ndAdvection)
             _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
         
-        ret |= _renderAdvection(&_advection);
+        rv |= _renderAdvection(&_advection);
         /* If the advection is bi-directional */
         if(_2ndAdvection) {
             _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
-            ret |= _renderAdvection(_2ndAdvection.get());
+            rv |= _renderAdvection(_2ndAdvection.get());
         }
     }
     
     _restoreGLState();
 
-    return ret;
+    return rv;
 }
 
 int FlowRenderer::_renderAdvection(const flow::Advection* adv)
@@ -409,7 +388,7 @@ int FlowRenderer::_renderAdvection(const flow::Advection* adv)
         size_t maxSamples = rp->GetSteadyNumOfSteps() + 1;
         
         // First calculate the starting time stamp. Copied from legacy.
-        double startingTime;
+        double startingTime = _timestamps[0];
         if (!_cache_isSteady) {
             int pastNumOfTimeSteps = dynamic_cast<FlowParams*>(GetActiveParams())->GetPastNumOfTimeSteps();
             startingTime = _timestamps[0];
@@ -813,12 +792,8 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
     }
 
-    /* Don't know why, but on MacOS 10.14.6 and Apple LLVM version 10.0.1 (clang-1001.0.46.4),
-       this comment fixes issue #2141. */
-
     std::string colorVarName = params->GetColorMapVariableName();
-    if( colorVarName != _colorField.ScalarName )
-    {
+    if( colorVarName != _colorField.ScalarName ) {
         _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
     }
 
@@ -854,17 +829,14 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     const auto peri  = params->GetPeriodic();
     if( peri.size() != _cache_periodic.size() )
         diff = true;
-    else
-    {
+    else {
         for( int i = 0; i < peri.size(); i++ )
-            if( peri[i] != _cache_periodic[i] )
-            {
+            if( peri[i] != _cache_periodic[i] ) {
                 diff = true;
                 break;
             }
     }
-    if( diff )
-    {
+    if( diff ) {
         _cache_periodic = peri;
         _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
         _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
@@ -879,17 +851,15 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     else
     {
         for( int i = 0; i < rake.size(); i++ )
-            if( rake[i] != _cache_rake[i] )
-            {
+            if( rake[i] != _cache_rake[i] ) {
                 diff = true;
                 break;
             }
     }
-    if( diff )
-    {
+    if( diff ) {
         _cache_rake = rake;
-        if( _cache_seedGenMode != FlowSeedMode::LIST )
-        { // Mark out-of-date if we're currently using any mode that involves a rake
+        // Mark out-of-date if we're currently using any mode that involves a rake
+        if( _cache_seedGenMode != FlowSeedMode::LIST ) {
             _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
             _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
         }
@@ -903,8 +873,7 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     else
     {
         for( int i = 0; i < gridNOS.size(); i++ )
-            if( gridNOS[i] != _cache_gridNumOfSeeds[i] )
-            {
+            if( gridNOS[i] != _cache_gridNumOfSeeds[i] ) {
                 diff = true;
                 break;
             }
@@ -912,8 +881,7 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     if( diff )
     {
         _cache_gridNumOfSeeds   = gridNOS;
-        if( _cache_seedGenMode == FlowSeedMode::UNIFORM )
-        {
+        if( _cache_seedGenMode == FlowSeedMode::UNIFORM ) {
             _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
             _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
         }
@@ -941,8 +909,7 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         _cache_rakeBiasVariable = rakeBiasVariable;
         _cache_rakeBiasStrength = rakeBiasStrength;
         
-        if( _cache_seedGenMode == FlowSeedMode::RANDOM_BIAS )
-        {
+        if( _cache_seedGenMode == FlowSeedMode::RANDOM_BIAS ) {
             _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
             _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
         }
@@ -963,7 +930,7 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
                     _velocityStatus   = FlowStatus::TIME_STEP_OOD;
             }
             if (params->GetSteadyNumOfSteps() != _cache_steadyNumOfSteps)
-                _renderStatus = FlowStatus::TIME_STEP_OOD;
+                _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
             _cache_steadyNumOfSteps = params->GetSteadyNumOfSteps();
 
             if( _cache_currentTS     != params->GetCurrentTimestep() )
