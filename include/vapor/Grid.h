@@ -131,8 +131,8 @@ class VDF_API Grid {
     //!
     //! \sa GetBlockSize();
     //
-    const std::vector<size_t> &GetDimensionInBlks() const {
-        return (_bdims);
+    const std::vector<size_t> GetDimensionInBlks() const {
+        return (_bdimsDeprecated);
     }
 
     //! Return the internal blocking factor
@@ -141,7 +141,7 @@ class VDF_API Grid {
     //! to the constructor.
     //
     const std::vector<size_t> &GetBlockSize() const {
-        return (_bs);
+        return (_bsDeprecated);
     }
 
     //! Return the internal data structure containing a copy of the blocks
@@ -1297,9 +1297,10 @@ class VDF_API Grid {
         const std::vector<size_t> &dims,
         const Size_tArr3 indices,
         Size_tArr3 &cIndices) const {
-        cIndices = indices;
+        cIndices = {0, 0, 0};
 
         for (int i = 0; i < dims.size(); i++) {
+            cIndices[i] = indices[i];
             if (cIndices[i] >= dims[i]) {
                 cIndices[i] = dims[i] - 1;
             }
@@ -1333,9 +1334,11 @@ class VDF_API Grid {
     }
 
   private:
-    std::vector<size_t> _dims;  // dimensions of grid arrays
-    std::vector<size_t> _bs;    // dimensions of each block
-    std::vector<size_t> _bdims; // dimensions (specified in blocks) of ROI
+    std::vector<size_t> _dims;            // dimensions of grid arrays
+    Size_tArr3 _bs = {{1, 1, 1}};         // dimensions of each block
+    Size_tArr3 _bdims = {{1, 1, 1}};      // dimensions (specified in blocks) of ROI
+    std::vector<size_t> _bsDeprecated;    // legacy API
+    std::vector<size_t> _bdimsDeprecated; // legacy API
     std::vector<float *> _blks;
     std::vector<bool> _periodic; // periodicity of boundaries
     std::vector<size_t> _minAbs; // Offset to start of grid
