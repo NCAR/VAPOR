@@ -1415,8 +1415,8 @@ protected:
 private:
 
  std::vector <size_t> _dims;	// dimensions of grid arrays
- Size_tArr3 _bs = {1,1,1};      // dimensions of each block
- Size_tArr3 _bdims = {1,1,1};   // dimensions (specified in blocks) of ROI
+ Size_tArr3 _bs = {{1,1,1}};      // dimensions of each block
+ Size_tArr3 _bdims = {{1,1,1}};   // dimensions (specified in blocks) of ROI
  std::vector <size_t> _bsDeprecated;	// legacy API
  std::vector <size_t> _bdimsDeprecated;	// legacy API
  std::vector <float *> _blks;
