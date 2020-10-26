@@ -25,7 +25,7 @@ VolumeIsoEventRouter::VolumeIsoEventRouter( QWidget *parent, ControlExec *ce)
         new PSection("Rendering Method", {
             new PStringDropdownHLI<VIP>("Raytracing Algorithm", VIP::GetAlgorithmNames(VIP::Type::Iso), &VIP::GetAlgorithm, &VIP::SetAlgorithmByUser),
         }),
-        (new Pif(VIP::_algorithmTag))->Equals(VolumeOSPRayIso::GetName())->Then({
+        (new PShowIf(VIP::_algorithmTag))->Equals(VolumeOSPRayIso::GetName())->Then({
             new PSection("OSPRay Parameters", {
                 (new PIntegerSliderEdit("osp_spp", "Samples Per Pixel"))->SetRange(1, 10),
                 (new PDoubleSliderEdit(VIP::OSPAmbientLightIntensity, "Ambient Light"))->EnableDynamicUpdate(),
@@ -36,7 +36,7 @@ VolumeIsoEventRouter::VolumeIsoEventRouter( QWidget *parent, ControlExec *ce)
                 new PEnumDropdown(VIP::SamplingRateMultiplierTag, {"1x", "2x", "4x", "8x", "16x"}, {1, 2, 4, 8, 16}, "Sampling Rate Multiplier"),
                 new PCheckbox(VIP::UseColormapVariableTag, "Color by other variable"),
                 (new PColorSelector(RenderParams::_constantColorTag, "Color"))->ShowBasedOnParam(VIP::UseColormapVariableTag, false),
-                (new S::PVariableSelector3D(RenderParams::_colorMapVariableNameTag))->ShowBasedOnParam(VIP::UseColormapVariableTag)
+                (new PVariableSelector3D(RenderParams::_colorMapVariableNameTag))->ShowBasedOnParam(VIP::UseColormapVariableTag)
             }),
             (new PColormapTFEditor)->ShowBasedOnParam(VIP::UseColormapVariableTag),
             new PSection("Lighting", {
