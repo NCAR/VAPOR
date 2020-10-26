@@ -28,7 +28,7 @@ class PARAMS_API WireFrameParams : public RenderParams {
     //! \copydoc RenderParams::GetRenderDim()
     //
     virtual size_t GetRenderDim() const override {
-        return (_dataMgr->GetNumDimensions(GetVariableName()));
+        return (_dataMgr->GetVarTopologyDim(GetVariableName()));
     }
 
   private:

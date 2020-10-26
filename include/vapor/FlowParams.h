@@ -134,7 +134,7 @@ class PARAMS_API FlowParams : public RenderParams {
     virtual size_t GetRenderDim() const override {
         for (const auto &p : GetFieldVariableNames()) {
             if (!p.empty())
-                return _dataMgr->GetNumDimensions(p);
+                return _dataMgr->GetVarTopologyDim(p);
         }
         return GetBox()->IsPlanar() ? 2 : 3;
     }
