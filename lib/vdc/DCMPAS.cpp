@@ -1346,7 +1346,7 @@ bool DCMPAS::_HasVertical(
 		string s = optionalVertCoordVarNames[i];
 
 		itr = find(varnames.begin(), varnames.end(), s);
-		if (itr == varnames.end()) {
+		if (itr != varnames.end()) {
 			return(true);
 		}
 	} 
