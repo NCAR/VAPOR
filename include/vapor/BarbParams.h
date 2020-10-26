@@ -65,7 +65,7 @@ public:
     virtual size_t GetRenderDim() const override
     {
         for (const auto &p : GetFieldVariableNames()) {
-            if (!p.empty()) return _dataMgr->GetNumDimensions(p);
+            if (!p.empty()) return _dataMgr->GetVarTopologyDim(p);
         }
         return GetBox()->IsPlanar() ? 2 : 3;
     }
