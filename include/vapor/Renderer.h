@@ -274,6 +274,18 @@ public:
 			_winName, _dataSetName, _paramsType, _instName)
 		);
 	}
+    
+    ViewpointParams *GetViewpointParams() const {
+        return _paramsMgr->GetViewpointParams(_winName);
+    }
+    
+    AnnotationParams *GetAnnotationParams() const {
+        return _paramsMgr->GetAnnotationParams(_winName);
+    }
+    
+    Transform *GetDatasetTransform() const {
+        return GetViewpointParams()->GetTransform(_dataSetName);
+    }
 
 protected:
 	Renderer() {}

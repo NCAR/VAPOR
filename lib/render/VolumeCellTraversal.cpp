@@ -142,8 +142,8 @@ static bool ComputeSideBBoxes(ivec3 side, int fastDim, int slowDim, vec3 *boxMin
     return false;
 }
 
-VolumeCellTraversal::VolumeCellTraversal(GLManager *gl)
-: VolumeRegular(gl),
+VolumeCellTraversal::VolumeCellTraversal(GLManager *gl, VolumeRenderer *renderer)
+: VolumeRegular(gl, renderer),
 _useHighPrecisionTriangleRoutine(false)
 {
     _coordTexture.Generate(GL_NEAREST);
