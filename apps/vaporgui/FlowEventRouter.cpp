@@ -59,7 +59,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce)
                              }));
 
     AddSubtab("Appearance", new PGroup({
-                                new PTFEditor(RenderParams::_colorMapVariableNameTag),
+                                (new PTFEditor(RenderParams::_colorMapVariableNameTag))->ShowOpacityBasedOnParam("NULL", 1),
                                 new PSection("Appearance", {
                                                                new PEnumDropdown(FP::RenderTypeTag, {"Tubes", "Samples", "KLGWTH"}, {FP::RenderTypeStream, FP::RenderTypeSamples, FP::RenderTypeDensity}, "Render Type"),
                                                                (new PShowIf(FP::RenderTypeTag))->Equals(FP::RenderTypeStream)->Then({
