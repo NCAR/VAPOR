@@ -1,5 +1,7 @@
 #version 330 core
 
+// Draw framebuffer while translating OSPRay depth buffer to OpenGL depth buffer.
+
 uniform mat4 MVP;
 uniform vec3 camPos;
 uniform vec3 camDir;

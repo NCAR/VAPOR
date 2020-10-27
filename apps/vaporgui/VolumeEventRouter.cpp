@@ -27,9 +27,9 @@ VolumeEventRouter::VolumeEventRouter(QWidget *parent, ControlExec *ce)
         }),
         (new PShowIf(VP::_algorithmTag))->Equals(VolumeOSPRay::GetName())->Then({
             new PSection("OSPRay Parameters", {
-                (new PDoubleSliderEdit(VolumeParams::OSPDensity, "Density"))->SetRange(0, 3)->EnableDynamicUpdate(),
-                (new PIntegerSliderEdit("osp_spp", "Samples Per Pixel"))->SetRange(1, 10),
-                (new PDoubleInput(VolumeParams::OSPSampleRateScalar, "Volume Sample Rate Scalar"))->EnableBasedOnParam("osp_usePT", false),
+                (new PDoubleSliderEdit(VolumeParams::OSPDensity, "Density"))->SetRange(0, 3)->EnableDynamicUpdate()->SetTooltip("Volume density (aka opacity)."),
+                (new PIntegerSliderEdit("osp_spp", "Samples Per Pixel"))->SetRange(1, 10)->SetTooltip("Number of render passes. Increases fidelity but may significantly reduce performance."),
+                (new PDoubleInput(VolumeParams::OSPSampleRateScalar, "Volume Sample Rate Scalar"))->EnableBasedOnParam("osp_usePT", false)->SetTooltip("Scales the sampling rate along the ray throughout the volume. Increasing may significantly reduce performance."),
             })
         })->Else({
             new PSection("Ray Tracing", {

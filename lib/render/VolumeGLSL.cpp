@@ -71,19 +71,12 @@ void VolumeGLSL::_loadTF()
 
 void VolumeGLSL::_loadTF(Texture1D *texture, MapperFunction *tf, MapperFunction **cacheTF)
 {
-//    if (!*cacheTF || **cacheTF != *tf)
-//        _cache.needsUpdate = true;
-    
-//    if (!_cache.needsUpdate)
-//        return;
-    
     if (*cacheTF) delete *cacheTF;
     *cacheTF = new MapperFunction(*tf);
     
-    float *LUT = new float[4 * 256];
-    _getLUTFromTF(tf, LUT);
-    texture->TexImage(GL_RGBA8, 256, 0, 0, GL_RGBA, GL_FLOAT, LUT);
-    delete [] LUT;
+    vector<float> LUT(4 * 256);
+    _getLUTFromTF(tf, LUT.data());
+    texture->TexImage(GL_RGBA8, 256, 0, 0, GL_RGBA, GL_FLOAT, LUT.data());
 }
 
 void VolumeGLSL::_getLUTFromTF(const MapperFunction *tf, float *LUT) const

@@ -27,7 +27,7 @@ VolumeIsoEventRouter::VolumeIsoEventRouter( QWidget *parent, ControlExec *ce)
         }),
         (new PShowIf(VIP::_algorithmTag))->Equals(VolumeOSPRayIso::GetName())->Then({
             new PSection("OSPRay Parameters", {
-                (new PIntegerSliderEdit("osp_spp", "Samples Per Pixel"))->SetRange(1, 10),
+                (new PIntegerSliderEdit("osp_spp", "Samples Per Pixel"))->SetRange(1, 10)->SetTooltip("Number of render passes. Increases fidelity but may significantly reduce performance."),
                 (new PDoubleSliderEdit(VIP::OSPAmbientLightIntensity, "Ambient Light"))->EnableDynamicUpdate(),
                 (new PDoubleSliderEdit(VIP::OSPDirectionalLightIntensity, "Diffuse Light"))->SetRange(0, 3)->EnableDynamicUpdate(),
             })

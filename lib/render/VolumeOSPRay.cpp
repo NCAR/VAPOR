@@ -154,8 +154,6 @@ int VolumeOSPRay::LoadData(const Grid *grid)
     if (volume == nullptr)
         return -1;
     
-    printf("Volume Loaded\n");
-    
     ospRelease(_ospVolumeModel);
     _ospVolumeModel = ospNewVolumetricModel(volume);
     ospRelease(volume);
@@ -228,8 +226,6 @@ int VolumeOSPRay::LoadData(const Grid *grid)
         p->SetValueDouble(VolumeParams::OSPSampleRateScalar, "", 1.f);
     else
         p->SetValueDouble(VolumeParams::OSPSampleRateScalar, "", _guessSamplingRateScalar(grid));
-    
-    printf("Volume added to world\n");
     
     return 0;
 }
@@ -499,8 +495,6 @@ float VolumeOSPRay::_guessSamplingRateScalar(const Grid *grid) const
 
 OSPVolume VolumeOSPRay::_loadVolumeRegular(const Grid *grid)
 {
-    printf("Load Regular Volume\n");
-    
     const vector<size_t> dims = grid->GetDimensions();
     const size_t nVerts = dims[0]*dims[1]*dims[2];
     std::vector<double> dataMinExtD, dataMaxExtD;
@@ -565,8 +559,6 @@ bool VolumeOSPRay::isQuadCoPlanar(const vec3 &a, const vec3 &b, const vec3 &c, c
 
 OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
 {
-    printf("Load Structured Volume\n");
-    
     const vector<size_t> dims = grid->GetDimensions();
     const size_t nVerts = dims[0]*dims[1]*dims[2];
     float missingValue = grid->HasMissingData() ? grid->GetMissingValue() : NAN;
@@ -756,7 +748,6 @@ OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
 
 OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
 {
-    printf("Load Unstructured Volume\n");
     const vector<size_t> nodeDims = grid->GetDimensions();
     size_t nodeDim = nodeDims.size();
     const size_t nVerts = nodeDims[0]*nodeDims[1];
@@ -1000,8 +991,6 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
 
 OSPVolume VolumeOSPRay::_loadVolumeTest(const Grid *grid)
 {
-    printf("Load Test Volume\n");
-    
     std::vector<double> dataMinExtD, dataMaxExtD;
     grid->GetUserExtents(dataMinExtD, dataMaxExtD);
     vec3 dataMinExt(dataMinExtD[0], dataMinExtD[1], dataMinExtD[2]);
