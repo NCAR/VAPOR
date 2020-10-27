@@ -14,7 +14,7 @@ class ImageEventRouter : public RenderEventRouterGUI {
     static std::string GetClassType() { return VAPoR::ImageRenderer::GetClassType(); }
     std::string GetType() const { return GetClassType(); }
     bool Supports2DVariables() const { return true; }
-    bool Supports3DVariables() const { return false; }
+    bool Supports3DVariables() const { return true; }
 
   protected:
     string _getDescription() const;
