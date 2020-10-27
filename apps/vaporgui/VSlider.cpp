@@ -103,7 +103,6 @@ void VSlider::_sliderChangedIntermediate( int position ) {
 
 bool ScrollWheelEater::eventFilter( QObject* object, QEvent* event ) {
     if (event->type() == QEvent::Wheel) {
-        QScrollEvent *scrollEvent = static_cast<QScrollEvent*>(event);
         return true;
     } else {
         return QObject::eventFilter( object, event );
