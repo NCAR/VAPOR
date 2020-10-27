@@ -102,7 +102,7 @@ public:
     class VolumeOSPRayIso : public VolumeOSPRay {
     public:
         VolumeOSPRayIso(GLManager *gl, VolumeRenderer *renderer):VolumeOSPRay(gl, renderer){}
-        static std::string GetName() { return "Iso OPSRay"; }
+        static std::string GetName() { return "Iso OSPRay"; }
         static Type        GetType() { return Type::Iso; }
     protected:
         bool _isIso() const { return true; }
