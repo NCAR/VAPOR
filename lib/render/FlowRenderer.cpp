@@ -260,7 +260,7 @@ int FlowRenderer::_paintGL( bool fast )
 
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
-        /* First step is to re-calculate deltaT */
+        // First step is to re-calculate deltaT
         rv = _velocityField.CalcDeltaTFromCurrentTimeStep( _cache_deltaT );
         if( rv != 0 )
         {
@@ -268,10 +268,9 @@ int FlowRenderer::_paintGL( bool fast )
             return rv;
         }
 
-        /* Read seeds from a file is a special case, so we put it up front */
+        // Read seeds from a file is a special case, so we put it up front
         if( _cache_seedGenMode == FlowSeedMode::LIST )
         {
-            //rv = _advection.InputStreamsGnuplot( params->GetSeedInputFilename() );
             rv = flow::InputSeedsCSV( params->GetSeedInputFilename(), &_advection );
             if( rv != 0 )
             {
@@ -286,7 +285,6 @@ int FlowRenderer::_paintGL( bool fast )
             }
             if( _2ndAdvection )     // bi-directional advection
             {
-                //_2ndAdvection->InputStreamsGnuplot( params->GetSeedInputFilename() );
                 flow::InputSeedsCSV( params->GetSeedInputFilename(), _2ndAdvection.get() );
                 rv = _updateAdvectionPeriodicity( _2ndAdvection.get() ); 
                 if( rv != 0 )
@@ -360,11 +358,11 @@ int FlowRenderer::_paintGL( bool fast )
         float deltaT = _cache_deltaT;
         rv = flow::ADVECT_HAPPENED;
 
-        /* Advection scheme 1: advect a maximum number of steps.
-         * This scheme is used for steady flow */
+        // Advection scheme 1: advect a maximum number of steps.
+        // This scheme is used for steady flow
         if( params->GetIsSteady() )
         {
-            /* If the advection is single-directional */
+            // If the advection is single-directional
             if( params->GetFlowDirection() == 1 )           // backward integration
                 deltaT *= -1.0f;
             long numOfSteps = params->GetSteadyNumOfSteps();
@@ -373,7 +371,7 @@ int FlowRenderer::_paintGL( bool fast )
             Progress::Update(0);
             _advection.AdvectSteps( &_velocityField, deltaT, numOfSteps );
 
-            /* If the advection is bi-directional */
+            // If the advection is bi-directional
             if( _2ndAdvection )
             {
                 assert( deltaT > 0.0f );
@@ -384,8 +382,8 @@ int FlowRenderer::_paintGL( bool fast )
             Progress::Finish();
         }
 
-        /* Advection scheme 2: advect to a certain timestamp.
-         * This scheme is used for unsteady flow */
+        // Advection scheme 2: advect to a certain timestamp.
+        // This scheme is used for unsteady flow
         else
         {
             for( int i = 1; i <= _cache_currentTS; i++ )

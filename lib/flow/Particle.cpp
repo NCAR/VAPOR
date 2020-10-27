@@ -48,7 +48,7 @@ void Particle::ClearProperty()
     _property_size = 0;
 }
     
-void Particle::ClearProperty( size_t target_i )
+void Particle::RemoveProperty( size_t target_i )
 {
     size_t current_i = 0;
     auto before_it = _properties.cbefore_begin();

@@ -505,7 +505,7 @@ void Advection::RemoveParticleProperty( size_t i )
         _propertyVarNames.erase( _propertyVarNames.begin() + i );
         for( auto& stream : _streams )
             for( auto& part : stream )
-                part.ClearProperty( i );
+                part.RemoveProperty( i );
     }
 }
 

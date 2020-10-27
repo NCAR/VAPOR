@@ -53,7 +53,7 @@ public:
     void  ClearProperty();
     // Remove the property at a certain index.
     // If the index is out of bound, then nothing is performed
-    void  ClearProperty( size_t i );
+    void  RemoveProperty( size_t i );
 
     auto GetPropertyList() const -> std::pair< const std::forward_list<float>&, uint32_t>;
 
