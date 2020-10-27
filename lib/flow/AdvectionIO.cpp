@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <iterator> // std::distance
 #include <cctype>
 #include "vapor/AdvectionIO.h"
 
@@ -43,8 +44,9 @@ auto flow::OutputFlowlinesNumSteps( const Advection*  adv,
                                   p.location.z, p.time, p.value );
 
                 auto props = p.GetPropertyList();
-                assert( props.second == propertyNames.size() ); // sanity check
-                for( const auto& val : props.first )
+                // A quick sanity check
+                assert( std::distance(props.cbegin(), props.cend()) == propertyNames.size() );
+                for( const auto& val : props )
                     std::fprintf( f, ", %f", val );
 
                 std::fprintf( f, "\n" ); // end of one line
@@ -103,8 +105,9 @@ auto flow::OutputFlowlinesMaxTime( const Advection*  adv,
                                   p.location.z, p.time, p.value );
 
                 auto props = p.GetPropertyList();
-                assert( props.second == propertyNames.size() ); // sanity check
-                for( const auto& val : props.first )
+                // A quick sanity check
+                assert( std::distance(props.cbegin(), props.cend()) == propertyNames.size() );
+                for( const auto& val : props )
                     std::fprintf( f, ", %f", val );
 
                 std::fprintf( f, "\n" ); // end of one line

@@ -34,18 +34,16 @@ void Particle::AttachProperty( float v )
         ++before_itr;
 
     _properties.insert_after( before_itr, v );
-    _property_size++;
 }
 
-auto Particle::GetPropertyList() const -> std::pair< const std::forward_list<float>&, uint32_t >
+auto Particle::GetPropertyList() const -> const std::forward_list<float>&
 {
-    return {_properties, _property_size};
+    return _properties;
 }
 
 void Particle::ClearProperty()
 {
     _properties.clear();
-    _property_size = 0;
 }
     
 void Particle::RemoveProperty( size_t target_i )
@@ -55,7 +53,6 @@ void Particle::RemoveProperty( size_t target_i )
     for( auto it = _properties.cbegin(); it != _properties.cend(); ++it ) {
         if( current_i == target_i ){
             _properties.erase_after( before_it );
-            _property_size--;
             break;
         }
         ++current_i;

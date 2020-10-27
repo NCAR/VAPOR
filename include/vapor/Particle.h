@@ -8,7 +8,6 @@
 #include "vapor/common.h"
 #include <glm/glm.hpp>
 #include <forward_list>
-#include <utility>  // std::pair<>
 
 namespace flow
 {
@@ -55,20 +54,17 @@ public:
     // If the index is out of bound, then nothing is performed
     void  RemoveProperty( size_t i );
 
-    auto GetPropertyList() const -> std::pair< const std::forward_list<float>&, uint32_t>;
+    auto  GetPropertyList() const -> const std::forward_list<float>&;
 
     // A particle could be set to be at a special state.
     void  SetSpecial( bool isSpecial );
     bool  IsSpecial() const; 
 
 private:
-    uint32_t                  _property_size = 0;
-    // Note on the property counter: since forward_list doesn't have a .size()
-    // of itself, we keep a counter by ourselves.
-    // Also, given the memory alignment of this class, this field doesn't take any extra space! 
     std::forward_list<float>  _properties;
     // Note on the choice of using a forward_list:
     // Forward_list takes 8 bytes, whereas a vector or list take 24 bytes!
+    // Fun fact: the end() iterator of a forward_list is the nullptr.
 };
 
 };
