@@ -125,20 +125,20 @@ int main(int argc, char **argv)
     //
     ProgName = FileUtils::LegacyBasename(argv[0]);
 
-    if (op.AppendOptions(set_opts) < 0) { exit(1); }
+    if (op.AppendOptions(set_opts) < 0) { return (1); }
 
-    if (op.ParseOptions(&argc, argv, get_options) < 0) { exit(1); }
+    if (op.ParseOptions(&argc, argv, get_options) < 0) { return (1); }
 
     if (opt.help) {
         cerr << "Usage: " << ProgName << " [options] vdcFile rawDataFile" << endl;
         op.PrintOptionHelp(stderr);
-        exit(0);
+        return (0);
     }
 
     if (argc != 3) {
         cerr << "Usage: " << ProgName << " [options] vdcFile rawDataFile" << endl;
         op.PrintOptionHelp(stderr);
-        exit(1);
+        return (1);
     }
 
     string master = argv[1];      // Path to VDC master file
@@ -174,27 +174,27 @@ int main(int argc, char **argv)
     FILE *fp = fopen(datafile.c_str(), "rb");
     if (!fp) {
         MyBase::SetErrMsg("fopen(%s) : %M", datafile.c_str());
-        exit(1);
+        return (1);
     }
 
     int fdr = vdc.OpenVariableWrite(opt.ts, opt.varname, opt.lod);
-    if (fdr < 0) exit(1);
+    if (fdr < 0) return (1);
 
     for (size_t i = 0; i < nslice; i++) {
         nelements = nelements < ntotal ? nelements : ntotal;
         int rc = read_data(fp, opt.type, opt.swapbytes, nelements, slice);
-        if (rc < 0) exit(1);
+        if (rc < 0) return (1);
 
         ntotal -= nelements;
 
         rc = vdc.WriteSlice(fdr, slice);
-        if (rc < 0) exit(1);
+        if (rc < 0) return (1);
     }
 
     rc = vdc.CloseVariableWrite(fdr);
-    if (rc < 0) exit(1);
+    if (rc < 0) return (1);
 
     fclose(fp);
 
-    exit(0);
+    return (0);
 }
