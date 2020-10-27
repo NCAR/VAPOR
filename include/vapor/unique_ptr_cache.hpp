@@ -110,7 +110,9 @@ public:
     // 
     auto query( const Key& key ) -> const std::unique_ptr<const BigObj>&
     {
-        const std::lock_guard<std::mutex> lock_gd( _element_vector_mutex );
+        // Only need to apply the mutex if `_query_shuffle` is enabled.
+        if( _query_shuffle) 
+            const std::lock_guard<std::mutex> lock_gd( _element_vector_mutex );
 
         auto it = std::find_if( _element_vector.begin(), _element_vector.end(), 
                                 [&key](element_type& e){return e.first == key;} );

@@ -8,7 +8,7 @@
 #include <VStringLineEdit.h>
 
 VStringLineEdit::VStringLineEdit( std::string value ) : 
-    VContainer(),
+    VHBoxWidget(),
     _lineEdit( new QLineEdit ),
     _strValue( value )
 {

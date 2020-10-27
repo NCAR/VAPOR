@@ -2198,15 +2198,15 @@ int DerivedCoordVarStandardWRF_Terrain::GetDimLensAtLevel(
 	if (rc<0) return(-1);
 
 	if (_derivedVarName == "Elevation") {
-		dims[2]--;
+		if (dims[2] > 1) dims[2]--;
 	}
 	else if (_derivedVarName == "ElevationU") {
 		dims[0]++;
-		dims[2]--;
+		if (dims[2] > 1) dims[2]--;
 	}
 	else if (_derivedVarName == "ElevationV") {
 		dims[1]++;
-		dims[2]--;
+		if (dims[2] > 1) dims[2]--;
 	}
 	else if (_derivedVarName == "ElevationW") {
 	}
@@ -2330,37 +2330,36 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
 	size_t nElements = std::max(numElements(wMin, wMax), numElements(min, max));
 
 
-	float *buf1 = new float[nElements];
+	vector <float> buf1(nElements);
 	rc = _getVar(
 		_dc, f->GetTS(), _PHVar, f->GetLevel(), f->GetLOD(),
-		wMin, wMax, buf1
+		wMin, wMax, buf1.data()
 	);
 	if (rc<0) {
-		delete [] buf1;
 		return(rc);
 	}
 
-	float *buf2 = new float[nElements];
+	vector <float> buf2(nElements);
 	rc = _getVar(
 		_dc, f->GetTS(), _PHBVar, f->GetLevel(), f->GetLOD(),
-		wMin, wMax, buf2
+		wMin, wMax, buf2.data()
 	);
 	if (rc<0) {
-		delete [] buf1;
-		delete [] buf2;
 		return(rc);
 	}
 
 	float *dst = region;
-	if (varname != "ElevationW") {
-		dst = buf1;
+	if (varname != "ElevationW" && wDims[2] > 1) {
+		dst = buf1.data();
 	}
 	
 	// Compute elevation on the W grid
 	//
     for (size_t i=0; i<nElements; i++) {
-        dst[i] = (buf1[i] + buf2[i]) / _grav;
+        dst[i] = (buf1.data()[i] + buf2.data()[i]) / _grav;
     }
+
+	if (wDims[2] < 2) return(0);
 
 	// Elevation is correct for W grid. If we want Elevation, ElevationU, or 
 	// Elevation V grid we need to interpolate
@@ -2371,7 +2370,7 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
 		// Resample stagged W grid to base grid
 		//
 		resampleToUnStaggered(
-			buf1, wMin, wMax, region, min, max, 2
+			buf1.data(), wMin, wMax, region, min, max, 2
 		);
 	}
 	else if (varname == "ElevationU") {
@@ -2379,11 +2378,11 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
 		// Resample stagged W grid to base grid
 		//
 		resampleToUnStaggered(
-			buf1, wMin, wMax, buf2, bMin, bMax, 2
+			buf1.data(), wMin, wMax, buf2.data(), bMin, bMax, 2
 		);
 
 		resampleToStaggered(
-			buf2, bMin, bMax, region, min, max, 0
+			buf2.data(), bMin, bMax, region, min, max, 0
 		);
 	}
 	else if (varname == "ElevationV") {
@@ -2391,16 +2390,13 @@ int DerivedCoordVarStandardWRF_Terrain::ReadRegion(
 		// Resample stagged W grid to base grid
 		//
 		resampleToUnStaggered(
-			buf1, wMin, wMax, buf2, bMin, bMax, 2
+			buf1.data(), wMin, wMax, buf2.data(), bMin, bMax, 2
 		);
 
 		resampleToStaggered(
-			buf2, bMin, bMax, region, min, max, 1
+			buf2.data(), bMin, bMax, region, min, max, 1
 		);
 	}
-
-	delete [] buf1;
-	delete [] buf2;
 
 	return(0);
 }
@@ -2598,9 +2594,8 @@ int DerivedCoordVarStandardOceanSCoordinate::Initialize() {
 	// available compression ratios
 	//
     _coordVarInfo = DC::CoordVar(
-        _derivedVarName, "m", DC::XType::FLOAT, etaInfo.GetWName(),
-        etaInfo.GetCRatios(), vector <bool> (3, false), 
-        dimnames, timeDimName, 2, false
+        _derivedVarName, "m", DC::XType::FLOAT, vector <bool> (3, false), 
+        2, false, dimnames, timeDimName
 	);
 
     return(0);
@@ -2649,15 +2644,8 @@ int DerivedCoordVarStandardOceanSCoordinate::GetDimLensAtLevel(
 	rc = _dc->GetDimLensAtLevel(_sVar, -1, dims1d, bs1d);
 	if (rc<0) return(-1);
 
-	vector <size_t> dims = {dims2d[0], dims2d[1], dims1d[0]};
-	vector <size_t> bs = {bs2d[0], bs2d[1], bs1d[0]};
-
-	int nlevels = _dc->GetNumRefLevels(_etaVar);
-	if (level < 0) level = nlevels + level;
-
-	WASP::InqDimsAtLevel(
-		_coordVarInfo.GetWName(), level, dims, bs, dims_at_level, bs_at_level
-	);
+	dims_at_level = {dims2d[0], dims2d[1], dims1d[0]};
+	bs_at_level = {bs2d[0], bs2d[1], bs1d[0]};
 
 	return(0);
 }
@@ -2666,6 +2654,10 @@ int DerivedCoordVarStandardOceanSCoordinate::OpenVariableRead(
     size_t ts, int level, int lod
 ) {
 
+	// Compression not supported
+	//
+	level = -1;
+	lod = -1;
 	DC::FileTable::FileObject *f = new DC::FileTable::FileObject(
 		ts, _derivedVarName, level, lod
 	);
@@ -2899,3 +2891,350 @@ void DerivedCoordVarStandardOceanSCoordinate::compute_g2(
 	}
 }
 
+////////////////////////////////////////////////////////////////////////////// 
+//
+//	DerivedCoordVarStandardAHSPC
+//
+//	Atmosphere Hybrid Sigma Pressure Coordinate
+//
+////////////////////////////////////////////////////////////////////////////// 
+
+//
+// Register class with object factory!!!
+//
+
+static DerivedCFVertCoordVarFactoryRegistrar<DerivedCoordVarStandardAHSPC> registrar_atmosphere_hybrid_sigma_pressure_coordinate("atmosphere_hybrid_sigma_pressure_coordinate");
+
+DerivedCoordVarStandardAHSPC::DerivedCoordVarStandardAHSPC(
+	DC *dc, string mesh, string formula
+) : DerivedCFVertCoordVar(
+	"", dc, mesh, formula
+) {
+
+	_standard_name = "atmosphere_hybrid_sigma_pressure_coordinate";
+	_aVar.clear();
+	_apVar.clear();
+	_bVar.clear();
+	_p0Var.clear();
+	_psVar.clear();
+
+	_psVarMV = std::numeric_limits<double>::infinity();
+
+}
+
+int DerivedCoordVarStandardAHSPC::initialize_missing_values() {
+
+	DC::DataVar dataInfo;
+	bool status = _dc->GetDataVarInfo(_psVar, dataInfo);
+	if (! status) {
+		SetErrMsg("Invalid variable \"%s\"", _psVar.c_str());
+		return(-1);
+	}
+	if (dataInfo.GetHasMissing()) _psVarMV = dataInfo.GetMissingValue();
+
+
+	return(0);
+}
+
+
+int DerivedCoordVarStandardAHSPC::Initialize() {
+
+	map <string, string> formulaMap;
+	if (! ParseFormula(_formula, formulaMap)) {
+		SetErrMsg("Invalid conversion formula \"%s\"", _formula.c_str());
+		return(-1);
+	}
+
+
+	// There are two possible formulations, one with 'ap', and one
+	// with 'a' and 'p0'
+	//
+	map <string, string>::const_iterator itr;
+	VAssert((itr = formulaMap.find("a")) != formulaMap.end());
+	if (itr != formulaMap.end()) {
+		_aVar = itr->second;
+		VAssert((itr = formulaMap.find("p0")) != formulaMap.end());
+		_p0Var = itr->second;
+	}
+	else {
+		VAssert((itr = formulaMap.find("ap")) != formulaMap.end());
+		_apVar = itr->second;
+	}
+
+	VAssert((itr = formulaMap.find("b")) != formulaMap.end());
+	_bVar = itr->second;
+
+	VAssert((itr = formulaMap.find("ps")) != formulaMap.end());
+	_psVar = itr->second;
+
+	if (initialize_missing_values() < 0) return(-1);
+
+	// Use the 'b' and 'ps' variables to set up metadata for the derived 
+	// variable
+	//
+	DC::DataVar bInfo;
+	bool status = _dc->GetDataVarInfo(_bVar, bInfo);
+	if (! status) {
+		SetErrMsg("Invalid variable \"%s\"", _bVar.c_str());
+		return(-1);
+	}
+
+	DC::DataVar psInfo;
+	status = _dc->GetDataVarInfo(_psVar, psInfo);
+	if (! status) {
+		SetErrMsg("Invalid variable \"%s\"", _psVar.c_str());
+		return(-1);
+	}
+
+
+	// Construct spatial and temporal dimensions from the 1D 'b' 
+	// variable and 2D, time-varying 'ps' variable
+	//
+	DC::Mesh m;
+	status = _dc->GetMesh(psInfo.GetMeshName(), m);
+	if (! status) {
+		SetErrMsg("Invalid mesh \"%s\"", _mesh.c_str());
+		return(-1);
+	}
+	vector <string> dimnames = m.GetDimNames();
+
+
+	status = _dc->GetMesh(bInfo.GetMeshName(), m);
+	if (! status) {
+		SetErrMsg("Invalid mesh \"%s\"", _mesh.c_str());
+		return(-1);
+	}
+	dimnames.push_back(m.GetDimNames()[0]);
+
+	string timeCoordVar = psInfo.GetTimeCoordVar();
+	string timeDimName;
+	if (! timeCoordVar.empty()) {
+		DC::CoordVar cvarInfo;
+		bool status = _dc->GetCoordVarInfo(timeCoordVar, cvarInfo);
+		if (! status) {
+			SetErrMsg("Invalid variable \"%s\"", timeCoordVar.c_str());
+			return(-1);
+		}
+		timeDimName = cvarInfo.GetTimeDimName();
+	}
+
+
+	// We're deriving a 3D varible from 1D and 2D varibles. We arbitarily
+	// use one of the 2D variables to configure metadata such as the
+	// available compression ratios
+	//
+	_derivedVarName = "Z_" + _bVar;
+    _coordVarInfo = DC::CoordVar(
+        _derivedVarName, "m", DC::XType::FLOAT, vector <bool> (3, false),
+		2, false, dimnames, timeDimName
+	);
+
+
+    return(0);
+}
+
+bool DerivedCoordVarStandardAHSPC::GetBaseVarInfo(
+	DC::BaseVar &var
+) const {
+	var = _coordVarInfo;
+	return(true);
+}
+
+bool DerivedCoordVarStandardAHSPC::GetCoordVarInfo(
+	DC::CoordVar &cvar
+) const {
+	cvar = _coordVarInfo;
+	return(true);
+}
+
+vector <string> DerivedCoordVarStandardAHSPC::GetInputs() const {
+
+    map <string, string> formulaMap;
+    bool ok = ParseFormula(_formula, formulaMap);
+	VAssert(ok);
+
+	vector <string> inputs;
+	for (auto it = formulaMap.begin(); it != formulaMap.end(); ++it) {
+		inputs.push_back(it->second);
+	}
+	return(inputs);
+}
+
+
+int DerivedCoordVarStandardAHSPC::GetDimLensAtLevel(
+    int level, std::vector <size_t> &dims_at_level,
+    std::vector <size_t> &bs_at_level
+) const {
+	dims_at_level.clear();
+	bs_at_level.clear();
+
+	vector <size_t> dims2d, bs2d;
+	int rc = _dc->GetDimLensAtLevel(_psVar, -1, dims2d, bs2d);
+	if (rc<0) return(-1);
+
+	vector <size_t> dims1d, bs1d;
+	rc = _dc->GetDimLensAtLevel(_bVar, -1, dims1d, bs1d);
+	if (rc<0) return(-1);
+
+	dims_at_level = {dims2d[0], dims2d[1], dims1d[0]};
+	bs_at_level = {bs2d[0], bs2d[1], bs1d[0]};
+
+	return(0);
+}
+
+int DerivedCoordVarStandardAHSPC::OpenVariableRead(
+    size_t ts, int level, int lod
+) {
+
+	// We don't support compressed data
+	//
+	level = -1;
+	lod = -1;
+
+	DC::FileTable::FileObject *f = new DC::FileTable::FileObject(
+		ts, _derivedVarName, level, lod
+	);
+
+	return(_fileTable.AddEntry(f));
+}
+
+int DerivedCoordVarStandardAHSPC::CloseVariable(int fd) {
+	DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+	if (! f) {
+		SetErrMsg("Invalid file descriptor : %d", fd);
+		return(-1);
+	}
+
+	_fileTable.RemoveEntry(fd);
+	delete f;
+
+	return(0);
+}
+
+int DerivedCoordVarStandardAHSPC::ReadRegion(
+	int fd,
+    const vector <size_t> &min, const vector <size_t> &max, float *region
+) {
+
+	DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+	vector <size_t> dims, dummy;
+	int rc = GetDimLensAtLevel(f->GetLevel(), dims, dummy);
+	if (rc<0) return(-1);
+
+	string aVar = _aVar.empty() ? _apVar : _aVar;
+	vector <float> a(dims[2]);
+	vector <size_t> myMin = {min[2]};
+	vector <size_t> myMax = {max[2]};
+	rc = _getVar(
+		_dc, f->GetTS(), aVar, f->GetLevel(), f->GetLOD(),
+		myMin, myMax, a.data()
+	);
+	if (rc<0) return(rc);
+
+	vector <float> b(dims[2]);
+	myMin = {min[2]};
+	myMax = {max[2]};
+	rc = _getVar(
+		_dc, f->GetTS(), _bVar, f->GetLevel(), f->GetLOD(),
+		myMin, myMax, b.data()
+	);
+	if (rc<0) return(rc);
+
+	vector <float> ps(dims[0]*dims[1]);
+	myMin = {min[0], min[1]};
+	myMax = {max[0], max[1]};
+	rc = _getVar(
+		_dc, f->GetTS(), _psVar, f->GetLevel(), f->GetLOD(),
+		myMin, myMax, ps.data()
+	);
+	if (rc<0) return(rc);
+
+
+	float p0 = 1.0;
+	if (! _aVar.empty()) {
+		myMin = {};
+		myMax = {};
+		rc = _getVar(
+			_dc, f->GetTS(), _p0Var, f->GetLevel(), f->GetLOD(),
+			myMin, myMax, &p0
+		);
+	}
+
+	compute_a(
+		min, max, a.data(), b.data(), ps.data(), p0, region
+	);
+
+	return(0);
+}
+
+bool DerivedCoordVarStandardAHSPC::VariableExists(
+	size_t ts,
+	int reflevel,
+	int lod
+) const {
+
+	if (! _aVar.empty()) {
+		return(
+			_dc->VariableExists(ts, _aVar, reflevel, lod) &&
+			_dc->VariableExists(ts, _bVar, reflevel, lod) &&
+			_dc->VariableExists(ts, _psVar, reflevel, lod) 
+		);
+	}
+	else {
+		return(
+			_dc->VariableExists(ts, _apVar, reflevel, lod) &&
+			_dc->VariableExists(ts, _bVar, reflevel, lod) &&
+			_dc->VariableExists(ts, _psVar, reflevel, lod) &&
+			_dc->VariableExists(ts, _p0Var, reflevel, lod) 
+		);
+	}
+}
+
+bool DerivedCoordVarStandardAHSPC::ValidFormula(string formula) {
+
+	return(
+		DerivedCFVertCoordVar::ValidFormula(
+			vector <string> {"a", "b", "p0", "ps"}, formula
+		) ||
+		DerivedCFVertCoordVar::ValidFormula(
+			vector <string> {"ap", "b", "ps"}, formula
+		)
+	);
+}
+
+void DerivedCoordVarStandardAHSPC::compute_a(
+	const vector <size_t> &min, const vector <size_t> &max,
+	const float *a, const float *b, const float *ps, float p0,
+	float *region
+) const {
+
+	vector <size_t> rDims;
+	for (int i=0; i<3; i++) {
+		rDims.push_back(max[i]-min[i]+1);
+	}
+
+    for (size_t k=0; k<max[2]-min[2]+1; k++) {
+    for (size_t j=0; j<max[1]-min[1]+1; j++) {
+    for (size_t i=0; i<max[0]-min[0]+1; i++) {
+
+		// We are deriving coordinate values from data values, so missing
+		// values may be present
+		//
+		float l_ps = ps[j*rDims[0]+i];
+		if (l_ps == _psVarMV) l_ps = 0;
+
+		float pressure = (a[k]*p0) + (b[k]*l_ps);
+
+		// Convert from pressure to meters above the ground:
+		// [1] "A Quick Derivation relating altitude to air pressure" from
+		// Portland State Aerospace Society, Version 1.03, 12/22/2004.
+		//
+		region[k*rDims[0]*rDims[1] + j*rDims[0] + i] = 
+			44331.5 - (4946.62 * std::pow(pressure, 0.190263));
+		
+    }
+	}
+	}
+}

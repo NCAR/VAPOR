@@ -29,12 +29,16 @@ Grid::Grid(
 	VAssert (dims.size() == bs.size());
 	VAssert (dims.size() <= 3);
 
+
 	for (int i=0; i<bs.size(); i++) {
 
 		VAssert(bs[i] > 0);
 		VAssert(dims[i] > 0);
 
-		_bdims.push_back(((dims[i]-1) / bs[i]) + 1);
+		_bdims[i] = ((dims[i]-1) / bs[i]) + 1;
+		_bs[i] = bs[i];
+		_bdimsDeprecated.push_back(_bdims[i]);
+		_bsDeprecated.push_back(_bs[i]);
 	}
 	VAssert(
 		blks.size() == 0 ||	// dataless
@@ -44,7 +48,6 @@ Grid::Grid(
     );
 
 	_dims = dims;
-	_bs = bs;
 	_periodic = vector <bool>(topology_dimension, false);
 	_topologyDimension = topology_dimension;
 	_missingValue = INFINITY;
@@ -103,31 +106,21 @@ float *Grid::GetValuePtrAtIndex(
 	const Size_tArr3 &indices
 ) const {
 
+	if (! blks.size()) return(NULL);
+
 	Size_tArr3 cIndices;
 	ClampIndex(indices, cIndices);
 
-	size_t bs[] = {0,0,0};
-	size_t bdims[] = {0,0,0};
+	size_t xb = cIndices[0] / _bs[0];
+	size_t yb = cIndices[1] / _bs[1];
+	size_t zb = cIndices[2] / _bs[2];
 
-	if (! blks.size()) return(NULL);
+	size_t x = cIndices[0] % _bs[0];
+	size_t y = cIndices[1] % _bs[1];
+	size_t z = cIndices[2] % _bs[2];
 
-	const vector <size_t> &dims = GetDimensions();
-	size_t ndim = dims.size();
-	for (int i=0; i<ndim; i++) {
-		bs[i] = _bs[i];
-		bdims[i] = _bdims[i];
-	}
-
-	size_t xb = cIndices[0] / bs[0];
-	size_t yb = ndim > 1 ? cIndices[1] / bs[1] : 0;
-	size_t zb = ndim > 2 ? cIndices[2] / bs[2] : 0;
-
-	size_t x = cIndices[0] % bs[0];
-	size_t y = ndim > 1 ? cIndices[1] % bs[1] : 0;
-	size_t z = ndim > 2 ? cIndices[2] % bs[2] : 0;
-
-	float *blk = blks[zb*bdims[0]*bdims[1] + yb*bdims[0] + xb];
-	return(&blk[z*bs[0]*bs[1] + y*bs[0] + x]);
+	float *blk = blks[zb*_bdims[0]*_bdims[1] + yb*_bdims[0] + xb];
+	return(&blk[z*_bs[0]*_bs[1] + y*_bs[0] + x]);
 }
 
 float Grid::AccessIJK(size_t i, size_t j, size_t k) const {

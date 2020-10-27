@@ -5,8 +5,9 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <QLineEdit>
 
-#include "VContainer.h"
+#include "VHBoxWidget.h"
 
 class QStringLineEdit;
 
@@ -15,7 +16,7 @@ class QStringLineEdit;
 //! \brief A wrapper for a QLineEdit that handles user input of type string, 
 //! and provides Vapor's standard setters, getters, and signals
 
-class VStringLineEdit : public VContainer {
+class VStringLineEdit : public VHBoxWidget {
     Q_OBJECT
 
     public:

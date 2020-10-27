@@ -8,6 +8,8 @@ const std::string   ImageParams::_isGeoRefTag          = "IsGeoRefTag";
 const std::string   ImageParams::_ignoreTransparencyTag = "IgnoreTransparency";
 const std::string   ImageParams::_opacityTag            = "Opacity";
 const std::string   ImageParams::_orientationTag        = "Orientation";
+const std::string   ImageParams::_TMSLODTag             = "TMSLevelOfDetail";
+const std::string   ImageParams::_numTMSLODTag          = "numTMSLevelOfDetail";
 
 //
 // Register class with object factory
@@ -25,8 +27,6 @@ ImageParams::ImageParams( DataMgr*                dataManager,
   SetVariableName("");
   SetFieldVariableNames(vector <string>());
   SetDiagMsg("ImageParams::ImageParams() this=%p", this);
-
-
 }
 
 ImageParams::ImageParams( DataMgr*                dataManager, 
@@ -53,11 +53,15 @@ int ImageParams::Initialize() {
   //
   GetBox()->SetOrientation(VAPoR::Box::XY);
   GetBox()->SetPlanar(true);
+    
+    SetImagePath(Wasp::GetSharePath("images/NaturalEarth.tms"));
+    SetIsGeoRef(true);
+    SetIgnoreTransparency(false);
 
   return(0);
 }
 
-std::string ImageParams::GetImagePath( ) const
+std::string ImageParams::GetImagePath() const
 {
     std::string defaultImage = Wasp::GetSharePath("images/NaturalEarth.tms");
     

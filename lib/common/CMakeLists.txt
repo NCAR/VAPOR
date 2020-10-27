@@ -15,6 +15,7 @@ set (SRC
 	STLUtils.cpp
 	VAssert.cpp
 	Progress.cpp
+	TMSUtils.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/CMakeConfig.cpp
 )
 
@@ -37,6 +38,7 @@ set (HEADERS
     ${PROJECT_SOURCE_DIR}/include/vapor/NonCopyableMixin.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VAssert.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Progress.h
+	${PROJECT_SOURCE_DIR}/include/vapor/TMSUtils.h
 )
 
 add_library (common SHARED ${SRC} ${HEADERS})

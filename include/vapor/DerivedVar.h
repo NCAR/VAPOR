@@ -910,11 +910,11 @@ public:
  ) const;
 
  virtual size_t GetNumRefLevels() const {
-    return(_dc->GetNumRefLevels(_etaVar));
+    return(1);
  } 
 
  virtual std::vector <size_t> GetCRatios() const {
-    return(_dc->GetCRatios(_etaVar));
+	return(std::vector <size_t> (1,1));
  }
 
  virtual int OpenVariableRead(
@@ -972,6 +972,92 @@ private:
 	const vector <size_t> &min, const vector <size_t> &max,
 	const float *s, const float *C, const float *eta, const float *depth,
 	float depth_c, float *region
+ ) const;
+ 
+};
+
+//! \class DerivedCoordVarStandardAHSPC
+//!
+//! \brief Convert a CF parameterless vertical coordinate to an Ocean
+//! s-coordinate, generic form 1 or 2
+//!
+//! This derived class converts a dimensionless sigma coordinate variable
+//! to either a Ocean s-coordinate, generic form 1 or 2
+//!
+//! \sa http://cfconventions.org/
+//
+class VDF_API DerivedCoordVarStandardAHSPC : public DerivedCFVertCoordVar {
+public:
+ DerivedCoordVarStandardAHSPC(
+	DC *dc, string mesh, string formula
+ );
+ virtual ~DerivedCoordVarStandardAHSPC() {}
+
+ virtual int Initialize();
+
+ virtual bool GetBaseVarInfo(DC::BaseVar &var) const;
+
+ virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
+
+ virtual std::vector <string> GetInputs() const;
+
+ virtual int GetDimLensAtLevel(
+	int level, std::vector <size_t> &dims_at_level,
+	std::vector <size_t> &bs_at_level
+ ) const;
+
+ virtual size_t GetNumRefLevels() const {
+    return(1);
+ } 
+
+ virtual std::vector <size_t> GetCRatios() const {
+	return(std::vector <size_t> (1,1));
+ }
+
+ virtual int OpenVariableRead(
+	size_t ts, int level=0, int lod=0
+ );
+
+ virtual int CloseVariable(int fd);
+ 
+ virtual int ReadRegionBlock(
+	int fd,
+	const std::vector <size_t> &min, const std::vector <size_t> &max,
+	float *region
+ ) {
+	return(ReadRegion(fd, min, max, region));
+ }
+
+ virtual int ReadRegion(
+	int fd,
+	const std::vector <size_t> &min, const std::vector <size_t> &max,
+	float *region
+ );
+
+ virtual bool VariableExists(
+	size_t ts,
+	int reflevel,
+	int lod
+ ) const;
+
+ static bool ValidFormula(string formula);
+
+private:
+ string _standard_name;
+ string _aVar;
+ string _apVar;
+ string _bVar;
+ string _p0Var;
+ string _psVar;
+ double _psVarMV;
+
+ DC::CoordVar _coordVarInfo;
+
+ int initialize_missing_values();
+ void compute_a(
+	const vector <size_t> &min, const vector <size_t> &max,
+	const float *a, const float *b, const float *ps, float p0,
+	float *region
  ) const;
  
 };

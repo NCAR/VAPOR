@@ -138,7 +138,7 @@ public:
  //! 
  virtual void GetWebHelp(
 	std::vector <std::pair <string, string>> &help
- ) const = 0;
+) const {}
 
  //! Update GUI display
  //!

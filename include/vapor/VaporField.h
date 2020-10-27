@@ -18,22 +18,16 @@ namespace flow
 class FLOW_API GridKey final
 {
 private:
-    // Buffer definition:
-    // Offset   Data_Type   Information
-    // 0        uint64_t    currentTS
-    // 8        int32_t     refLevel
-    // 12       int32_t     compLevel
-    // 16       double[3]   extent_min
-    // 40       double[3]   extent_max
-    // Total size: 64
-    std::array<uint8_t, 64> buf;
-
     std::string varName; 
+
+    uint64_t timestep;
+    int32_t  refLev, compLev;
+    float    defaultZ;
+    std::array<double, 3> ext_min, ext_max;
 
 public:
     void Reset( uint64_t, int32_t, int32_t, std::string, const std::vector<double>&, 
-                                                         const std::vector<double>& );
-    void Reset( std::string );
+                const std::vector<double>&, float );
 
     bool emptyVar() const;
 
@@ -78,13 +72,12 @@ public:
     //
     virtual bool InsideVolumeVelocity( float time, const glm::vec3& pos ) const override;
     virtual bool InsideVolumeScalar(   float time, const glm::vec3& pos ) const override;
+    virtual int  GetNumberOfTimesteps()                                   const override;
+
     virtual int  GetVelocity(  float time, const glm::vec3& pos,    // input 
-                               glm::vec3& vel ,                     // output
-                               bool checkInsideVolume = true )      const override;
+                               glm::vec3& vel ) const override;     // output
     virtual int  GetScalar(    float time, const glm::vec3& pos,    // input 
-                               float& scalar,                       // output
-                               bool checkInsideVolume = true )      const override;
-    virtual int  GetNumberOfTimesteps()                             const override;
+                               float& scalar ) const override;      // output
 
 
     //
@@ -146,11 +139,17 @@ private:
     mutable std::mutex          _grid_operation_mutex;  // Use `mutable` qualifier so this
                                                         // mutex can be used in const methods.
 
+    // The following variables are cache states from DataMgr and Params.
     bool                        _params_locked = false;
-    std::vector<double>         _c_ext_min, _c_ext_max;          // cached extents
     uint64_t                    _c_currentTS = 0;                // cached timestep
     int32_t                     _c_refLev = -2, _c_compLev = -2; // cached ref/comp levels
     float                       _c_vel_mult = 0.0;               // cached velocity multiplier
+    std::vector<double>         _c_ext_min, _c_ext_max;          // cached extents
+    const VAPoR::Grid*          _c_scalar_grid = nullptr;        // cached scalar grid
+    std::array<const VAPoR::Grid*, 3> _c_velocity_grids = {{nullptr, nullptr, nullptr}};
+    // Note on the cached scalar and velocity grids:
+    // they act as a cache of _recentGrids, so kind of like a cache of cache.
+    // This is due to the not-so-cheap cost of constructing keys and querying _recentGrids.
 
     //
     // Member functions

@@ -20,6 +20,7 @@ using namespace VAPoR;
 #define MIN_DEFAULT_SAMPLERATE 200
 
 const string SliceParams::_sampleRateTag   = "SampleRate";
+const string SliceParams::SampleLocationTag= "SampleLocationTag";
 
 //
 // Register class with object factory!!!
@@ -69,10 +70,13 @@ int SliceParams::Initialize() {
 
     std::vector<double> minExt, maxExt;
     box->GetExtents(minExt, maxExt);
-    double average = (minExt[Z] + maxExt[Z])/2.f;
-    minExt[Z] = average;
-    maxExt[Z] = average;
-    box->SetExtents(minExt, maxExt);
+    
+    std::vector<double> sampleLocation(3);
+    for (int i = 0; i < 3; i++)
+        sampleLocation[i] = (minExt[i] + maxExt[i]) / 2.0;
+    SetValueDoubleVec(SampleLocationTag, "", sampleLocation);
+    
+    SetSampleRate(MIN_DEFAULT_SAMPLERATE);
 
 	return(0);
 }

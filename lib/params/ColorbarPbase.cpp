@@ -25,8 +25,10 @@
 
 using namespace VAPoR;
 const string ColorbarPbase::_colorbarBackColorTag = "ColorbarBackgroundColor";
-const string ColorbarPbase::_colorbarSizeTag = "ColorbarSize";
-const string ColorbarPbase::_colorbarPositionTag = "ColorbarPosition";
+const string ColorbarPbase::_colorbarSizeXTag = "ColorbarSize_X";
+const string ColorbarPbase::_colorbarSizeYTag = "ColorbarSize_Y";
+const string ColorbarPbase::_colorbarPositionXTag = "ColorbarPosition_X";
+const string ColorbarPbase::_colorbarPositionYTag = "ColorbarPosition_Y";
 const string ColorbarPbase::_colorbarFontSizeTag = "ColorbarFontsize";
 const string ColorbarPbase::_colorbarNumDigitsTag = "ColorbarNumDigits";
 const string ColorbarPbase::_colorbarTitleTag = "ColorbarTitle";
@@ -71,8 +73,9 @@ ColorbarPbase::~ColorbarPbase() {
 
 
 vector<double> ColorbarPbase::GetCornerPosition() const {
-	vector <double> defaultv(2,0.0);
-	vector <double> val = GetValueDoubleVec(_colorbarPositionTag, defaultv);
+	vector <double> val(2,0.0);
+	val[0] = GetValueDouble(_colorbarPositionXTag, 0);
+    val[1] = GetValueDouble(_colorbarPositionYTag, 0);
 	for (int i = 0; i<2; i++) {
 		if (val[i] < 0.0) val[i] = 0.0;
 		if (val[i] > 1.0) val[i] = 1.0;
@@ -91,15 +94,17 @@ void ColorbarPbase::SetCornerPosition(vector<double> posn) {
 		if (posn[i] > 1.0) posn[i] = 1.0;
 	}
 
-	SetValueDoubleVec(_colorbarPositionTag, "set colorbar position", posn);
+	SetValueDouble(_colorbarPositionXTag, "", posn[0]);
+    SetValueDouble(_colorbarPositionYTag, "", posn[1]);
 }
 
 //! Get the X,Y size
 //! Relative to [0,1]
 //! \retval pair of x,y sizes
 vector<double> ColorbarPbase::GetSize() const {
-	vector <double> defaultv(2,0.0);
-	vector <double> val = GetValueDoubleVec(_colorbarSizeTag, defaultv);
+	vector <double> val(2,0.0);
+	val[0] = GetValueDouble(_colorbarSizeXTag, 0);
+    val[1] = GetValueDouble(_colorbarSizeYTag, 0);
 	for (int i = 0; i<2; i++) {
 		if (val[i] < 0.0) val[i] = 0.0;
 		if (val[i] > 1.0) val[i] = 1.0;
@@ -117,7 +122,8 @@ void ColorbarPbase::SetSize(vector<double> sz) {
 		if (sz[i] < 0.0) sz[i] = 0.0;
 		if (sz[i] > 1.0) sz[i] = 1.0;
 	}
-	SetValueDoubleVec(_colorbarSizeTag, "set colorbar size", sz);
+	SetValueDouble(_colorbarSizeXTag, "", sz[0]);
+    SetValueDouble(_colorbarSizeYTag, "", sz[1]);
 }
 
 

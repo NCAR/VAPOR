@@ -40,8 +40,8 @@ static ParamsRegistrar<Box> registrar(Box::GetClassType());
 
 
 Box::Box(
-    ParamsBase::StateSave *ssave
-) : ParamsBase(ssave, Box::GetClassType()) {
+    ParamsBase::StateSave *ssave, string name
+) : ParamsBase(ssave, name) {
 
     MyBase::SetDiagMsg("Box::Box() this=%p", this);
 
@@ -117,6 +117,13 @@ void Box::GetExtents(
 void Box::SetPlanar(bool value) {
 
 	SetValueLong(Box::m_planarTag, "Set box planar value", (long)value);
+//    SetValueLong(m_orientationTag, "", value?XYZ:XY);
+}
+
+bool Box::IsPlanar() const
+{
+    return GetValueLong(Box::m_planarTag, (long) false);
+//    return GetValueLong(Box::m_orientationTag, XY);
 }
 
 

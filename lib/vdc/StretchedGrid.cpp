@@ -134,7 +134,8 @@ void StretchedGrid::GetUserCoordinates(
 
 bool StretchedGrid::GetIndicesCell(
 	const DblArr3 &coords,
-	Size_tArr3 &indices
+	Size_tArr3 &indices,
+	double wgts[3]
 ) const {
 
 	// Clamp coordinates on periodic boundaries to grid extents
@@ -151,6 +152,8 @@ bool StretchedGrid::GetIndicesCell(
 	bool inside = _insideGrid(x,y,z,i,j,k, xwgt, ywgt, zwgt);
 
 	if (! inside) return (false);
+	wgts[0] = xwgt[0];
+	wgts[1] = ywgt[0];
 
 	indices[0] = i;
 	indices[1] = j;
@@ -158,6 +161,7 @@ bool StretchedGrid::GetIndicesCell(
 	if (GetGeometryDim() == 2) return(true);
 
 	indices[2] = k;
+	wgts[2] = zwgt[0];
 
 	return(true);
 }

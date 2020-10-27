@@ -2,28 +2,24 @@ set (SRCS
 	EventRouter.cpp
 	RenderEventRouter.cpp
 	RenderHolder.cpp
-	ImageFrame.cpp
 	GLWidget.cpp
 	ErrorReporter.cpp
 	Histo.cpp
-	ColorbarWidget.cpp
 	SettingsEventRouter.cpp
 	VizSelectCombo.cpp
 	AnnotationEventRouter.cpp
 	AnimationEventRouter.cpp
-	HelloEventRouter.cpp
 	NavigationEventRouter.cpp
 	TwoDDataEventRouter.cpp
+	TwoDDataEventRouter.h
 	WireFrameEventRouter.cpp
     PythonVariables.cpp
 	Statistics.cpp
 	Plot.cpp
-	helloSubtabs.cpp
-	VariablesWidget.cpp
-	GeometryWidget.cpp
 	CopyRegionWidget.cpp
 	RangeCombos.cpp
 	BarbEventRouter.cpp
+	BarbEventRouter.h
 	BannerGUI.cpp
 	AnimationParams.cpp
 	GUIStateParams.cpp
@@ -37,13 +33,13 @@ set (SRCS
 	TabManager.cpp
 	TrackBall.cpp
 	ImageEventRouter.cpp
+	ImageEventRouter.h
 	ContourEventRouter.cpp
+	ContourEventRouter.h
     SliceEventRouter.cpp
+    SliceEventRouter.h
 	PlotParams.cpp
 	StatisticsParams.cpp
-	ContourSubtabs.cpp
-    SliceSubtabs.cpp
-	BarbSubtabs.cpp
 	TransformTable.cpp
 	VaporTable.cpp
 	FidelityWidget.cpp
@@ -56,18 +52,14 @@ set (SRCS
 	windowsUtils.cpp
 	Manip.cpp
     FlowEventRouter.cpp
-    FlowSubtabs.cpp
 	VolumeEventRouter.cpp
+	VolumeEventRouter.h
 	VolumeIsoEventRouter.cpp
-	VolumeIsoSubtabs.cpp
-	VolumeSubtabs.cpp
-	ParamsWidgets.cpp
+	VolumeIsoEventRouter.h
 	ParamsMenuItems.cpp
 	ParamsMenuItems.h
 	TFEditor.cpp
 	TFEditor.h
-	TFEditorIsoSurface.cpp
-	TFEditorIsoSurface.h
 	TFOpacityWidget.cpp
 	TFOpacityWidget.h
 	TFColorWidget.cpp
@@ -104,14 +96,12 @@ set (SRCS
 	QPaintUtils.h
 	VSection.cpp
 	VSection.h
-	VSubGroup.cpp
-	VSubGroup.h
     VFrame.h
 	VFrame.cpp
 	VLineItem.cpp
 	VLineItem.h
-    VContainer.cpp
-    VContainer.h
+	VHBoxWidget.cpp
+	VHBoxWidget.h
     VComboBox.cpp
     VComboBox.h
     VIntSpinBox.cpp
@@ -151,8 +141,14 @@ set (SRCS
     QPushButtonWithDoubleClick.h
     VFileSelector.cpp
     VFileSelector.h
-    VGeometry2.cpp
-    VGeometry2.h
+	V3DInput.cpp
+	V3DInput.h
+	VGroup.cpp
+	VGroup.h
+	Updateable.cpp
+	Updateable.h
+	POrientationSelector.cpp
+	POrientationSelector.h
 	PWidget.cpp
 	PWidget.h
 	PWidgetHLI.h
@@ -198,47 +194,58 @@ set (SRCS
 	ParamsWidgetDemo.h
 	PTFEditor.cpp
 	PTFEditor.h
-    PVariableWidgets.cpp
-    PVariableWidgets.h
     PFidelitySection.cpp
     PFidelitySection.h
+    PTMSLODInput.h
 	ModelEventRouter.cpp
 	ModelEventRouter.h
-	ModelSubtabs.cpp
-	ModelSubtabs.h
-	TFEditorVolume.cpp
-	TFEditorVolume.h
 	VDoubleValidator.cpp
 	VDoubleValidator.h
 	hide_std_error_util.cpp
 	hide_std_error_util.h
+	VContainer.cpp
+	VContainer.h
+	UWidget.cpp
+	UWidget.h
+	AbstractWidgetGroup.cpp
+	AbstractWidgetGroup.h
+	PTransformWidget.cpp
+	PTransformWidget.h
+	PCopyRegionWidget.cpp
+	PCopyRegionWidget.h
+	PSliceSampleLocationSelector.cpp
+	PSliceSampleLocationSelector.h
+	PAnnotationColorbarWidget.cpp
+	PAnnotationColorbarWidget.h
+	PStringInput.cpp
+	PStringInput.h
+	PWidgets.h
+	PWidgetsFwd.h
+	PGeometrySubtab.cpp
+	PGeometrySubtab.h
+	PDimensionSelector.cpp
+	PDimensionSelector.h
+	PVariableSelector.cpp
+	PVariableSelector.h
+	PShowIf.cpp
+	PShowIf.h
+	PWidgetWrapper.cpp
+	PWidgetWrapper.h
+	PButton.cpp
+	PButton.h
+	PFlowRakeRegionSelector.cpp
+	PFlowRakeRegionSelector.h
 
 	# Need to include all files that request .ui files
-	TwoDSubtabs.h
-	WireFrameSubtabs.h
-    FlowSubtabs.h
 	Statistics.h
 	Plot.h
     PythonVariables.h
-    BarbSubtabs.h
-    ColorbarWidget.h
-    OrientationAngles.h
     TransformTable.h
-	ImageSubtabs.h
-	ContourSubtabs.h
-    SliceSubtabs.h
     VaporTable.h 
 	FidelityWidget.h
 	QSliderEdit.h
 	QRange.h
 	QSinglePoint.h
-	VolumeEventRouter.h
-	VolumeIsoEventRouter.h
-	VolumeSubtabs.h
-	VolumeIsoSubtabs.h
-	HelloEventRouter.h
-    SliceEventRouter.h
-	TwoDDataEventRouter.h
 
 	MainForm.h
 	VizWinMgr.h
@@ -256,18 +263,11 @@ set (SRCS
 	AnimationParams.h
 	AnnotationEventRouter.h
 	BannerGUI.h
-	BarbEventRouter.h
 	FlowEventRouter.h
 	Combo.h
-	ContourEventRouter.h
 	CopyRegionWidget.h
 	FileOperationChecker.h
 	GUIStateParams.h
-	GeometryWidget.h
-	ImageEventRouter.h
-	ImageEventRouter.h
-	ImageFrame.h
-	ImageFrame.h
 	MouseModeParams.h
 	PlotParams.h
     PythonVariablesParams.h
@@ -279,10 +279,8 @@ set (SRCS
 	SettingsParams.h
 	StatisticsParams.h
 	TabManager.h
-	VariablesWidget.h
 	VizSelectCombo.h
 	WireFrameEventRouter.h
-	ParamsWidgets.h
 	Flags.h
 )
 
@@ -290,53 +288,16 @@ set (UIS
 	LeftPanel.ui
 	animationTab.ui
 	NavigationTab.ui
-	boxframe.ui
-	startupTab.ui
 	AnnotationGUI.ui
 	SettingsGUI.ui
 	appSettingsTab.ui
 	NewRendererDialog.ui
-	errMsg.ui
-	helloLayoutSubtab.ui
-	helloAppearanceSubtab.ui
-	BarbAppearanceGUI.ui
-    BarbVariablesGUI.ui
-	BarbGeometryGUI.ui
-	BarbAnnotationGUI.ui
-	ImageAppearanceGUI.ui
-	ImageGeometryGUI.ui
 	TransformTableGUI.ui
-	TwoDAppearanceGUI.ui
-	TwoDGeometryGUI.ui
-	TwoDAnnotationGUI.ui
-	ContourAppearanceGUI.ui
-	ContourGeometryGUI.ui
-	ContourAnnotationGUI.ui
-	WireFrameAppearanceGUI.ui
-	WireFrameGeometryGUI.ui
-	WireFrameAnnotationGUI.ui
-    SliceAppearanceGUI.ui
-    SliceGeometryGUI.ui
-    SliceAnnotationGUI.ui
-	VariablesWidgetGUI.ui
 	statsWindow.ui
 	plotWindow.ui
-	firstTimeUser.ui
     PythonVariablesGUI.ui
-	GeometryWidgetGUI.ui
-	ColorbarWidgetGUI.ui
 	FidelityWidgetGUI.ui
-	StretchFactorTableGUI.ui
-	OrientationAnglesGUI.ui
-	CopyRegionWidgetGUI.ui
-	VolumeAnnotationGUI.ui
-	VolumeAppearanceGUI.ui
-	VolumeGeometryGUI.ui
-	VolumeIsoAnnotationGUI.ui
-	VolumeIsoAppearanceGUI.ui
-	VolumeIsoGeometryGUI.ui
-	ModelGeometryGUI.ui
-	ModelVariablesGUI.ui
+	errMsg.ui
 	
 	QSliderEdit.ui
 	QRange.ui

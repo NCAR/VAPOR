@@ -49,6 +49,7 @@ namespace VAPoR {
             std::vector<double> tf_minMax;
             std::vector<double> boxMin, boxMax;
             std::vector<double> domainMin, domainMax;
+            std::vector<double> sampleLocation;
         } _cacheParams;
 
         void _initVAO();
@@ -58,6 +59,7 @@ namespace VAPoR {
         bool _isColormapCacheDirty() const;
         bool _isDataCacheDirty() const;
         bool _isBoxCacheDirty() const;
+        void _getModifiedExtents(vector<double> &min, vector<double> &max) const;
         int  _saveCacheParams();
         void _resetColormapCache();
         int  _resetBoxCache();

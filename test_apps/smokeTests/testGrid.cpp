@@ -20,8 +20,8 @@
 //    const std::vector <size_t> &dims,
 //    const std::vector <size_t> &bs,
 //    const std::vector <float *> &blks,
-//    const std::vector <double> &minu,
-//    const std::vector <double> &maxu,
+//    const std::vector <double> &xcoords,
+//    const std::vector <double> &ycoords,
 //    const RegularGrid &rg
 //  )
 //  RegularGrid::RegularGrid(
