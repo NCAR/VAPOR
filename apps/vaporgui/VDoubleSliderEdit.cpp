@@ -65,6 +65,9 @@ bool VDoubleSliderEdit::GetSciNotation() const {
 }
 
 void VDoubleSliderEdit::SetSciNotation( bool value ) {
+    if (value == _lineEdit->GetSciNotation()) {
+        return;
+    }
     _lineEdit->SetSciNotation( value );
     emit FormatChanged();
 }
@@ -74,6 +77,9 @@ int VDoubleSliderEdit::GetNumDigits() const {
 }
 
 void VDoubleSliderEdit::SetNumDigits( int digits ) {
+    if (digits == _lineEdit->GetNumDigits()) {
+        return;
+    }
     _lineEdit->SetNumDigits( digits );
     emit FormatChanged();
 }
@@ -83,6 +89,10 @@ double VDoubleSliderEdit::GetValue() const {
 }
 
 void VDoubleSliderEdit::SetValue( double value ) {
+    if ( value == _value ) {
+        return;
+    }
+
     double min = _slider->GetMinimum();
     if (value < min) {
         if ( _rangeChangable ) {
@@ -124,6 +134,10 @@ double VDoubleSliderEdit::GetMinimum() const {
 }
 
 void VDoubleSliderEdit::SetMinimum( double min ) {
+    if (min == _slider->GetMinimum()) {
+        return;
+    }
+
     if ( min > _value ) {
         _value = min;
         _lineEdit->SetValueDouble( min );
@@ -148,6 +162,10 @@ double VDoubleSliderEdit::GetMaximum() const {
 }
 
 void VDoubleSliderEdit::SetMaximum( double max ) {
+    if (max == _slider->GetMaximum()) {
+        return;
+    }
+
     if ( max < _value ) {
         _value = max;
         _lineEdit->SetValueDouble( max );
