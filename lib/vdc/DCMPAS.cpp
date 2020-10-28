@@ -81,10 +81,12 @@ namespace {
 
 	// Vertical coordinate variables
 	//
-	const string zGridP1VarName = "zgrid";
+	const string zGridP1VarName = "zgrid"; // atmosphere vertical coordinate
+	const string zTopVarName = "zTop";	// ocean vertical coordinate
 
 	const vector <string> optionalVertCoordVarNames = {
-		zGridP1VarName
+		zGridP1VarName,
+		zTopVarName
 	};
 
 	// Time coordinate variables
@@ -136,12 +138,17 @@ namespace {
 	const string coreNameAttr  = "core_name";
 	const string onASphereAttr = "on_a_sphere";
 
-	// Derived variable names. These don't appear in the MPAS output. 
+	// Derived MPAS-A variable names. These don't appear in the MPAS output. 
 	// They are derived at run-time by the DCMPAS class
 	//
 	const string zGridVertP1VarName = "zgridVert";
 	const string zGridVarName = "zgridM1";	
 	const string zGridVertVarName = "zgridVertM1";
+
+	// Derived MPAS-O variable names. These don't appear in the MPAS output. 
+	// They are derived at run-time by the DCMPAS class
+	//
+	const string zTopVertVarName = "zTopVert";
 
 	const vector <string> requiredAttrNames = {
 //		coreNameAttr,
@@ -782,13 +789,23 @@ void DCMPAS::_splitOnBoundary(string varname, int *connData) const {
 	int n = connDims[0];
 	for (size_t j = 0; j<connDims[1]; j++) {
 
+		bool mpas_boundary_marker = false;
+		for (size_t i=0; i<n; i++) {
+			if (connData[j*n+i] == 0) {
+				connData[j*n+i] = -2;
+				mpas_boundary_marker = true;
+			}
+		}
+		if (mpas_boundary_marker) continue;
+
 		// Ha ha. despite MPAS documentation longitude may run -pi to pi
 		//
 		double lon1 = lonBuf2[connData[j*n]-1];
 		if (lon1 > 180.0) lon1 -= 360.0;
 		for (size_t i=1; i<n && connData[j*n+i] >= 0; i++) {
 
-			size_t index = connData[j*n+i] - 1;	// Arrg. Index starts from 1!!
+			size_t index = connData[j*n+i] - 1; // Arrg. Index starts from 1!!
+
 			double lon2 = lonBuf2[index];
 
 			// Ha ha. despite MPAS documentation longitude may run -pi to pi
@@ -1099,14 +1116,22 @@ int DCMPAS::_InitCoordvars(
 	vector <bool> periodic(false);
 	vector <string> dimnames;
 
-	if (_isAtmosphere(ncdfc) && _hasVertical) {
+	if (_hasVertical && (_isAtmosphere(ncdfc) || _isOcean(ncdfc))) {
+
+		string name;
+		if (_isAtmosphere(ncdfc)) {
+			name = zGridP1VarName;
+		}
+		else {
+			name = zTopVarName;
+		}
 
 		// Vertical coordinate variables
 		//
 		string units = "meters";
 		int axis = 2;
-		string name = zGridP1VarName;
-		dimnames = ncdfc->GetDimNames(name);
+		dimnames = ncdfc->GetSpatialDimNames(name);
+		time_dim_name = ncdfc->GetTimeDimName(name);
 		VAssert(dimnames.size() == 2);
 
 		_coordVarsMap[name] = CoordVar(
@@ -1117,7 +1142,6 @@ int DCMPAS::_InitCoordvars(
         if (rc<0) return(-1);
 	}
 
-
 	return(0);
 }
 
@@ -1126,11 +1150,11 @@ int DCMPAS::_InitCoordvars(
 int DCMPAS::_InitDerivedVars(
 	NetCDFCollection *ncdfc
 ) {
-	int rc = _InitVerticalCoordinatesDerived(ncdfc);
+	int rc = _InitVerticalCoordinatesDerivedAtmosphere(ncdfc);
 	if (rc<0) return(-1);
 
-
-
+	rc = _InitVerticalCoordinatesDerivedOcean(ncdfc);
+	if (rc<0) return(-1);
 
     // Create and install the Time coordinate variable
     //
@@ -1156,7 +1180,7 @@ int DCMPAS::_InitDerivedVars(
 }
 
 
-int DCMPAS::_InitVerticalCoordinatesDerived(
+int DCMPAS::_InitVerticalCoordinatesDerivedAtmosphere(
 	NetCDFCollection *ncdfc
 ) {
 	// MPAS-A only outputs a single vertical coordinate variable, zgrid,
@@ -1208,6 +1232,35 @@ int DCMPAS::_InitVerticalCoordinatesDerived(
 	VAssert(ok);
 	_coordVarsMap[zGridVertVarName] = cvarInfo;
 
+	return(0);
+}
+
+int DCMPAS::_InitVerticalCoordinatesDerivedOcean(
+	NetCDFCollection *ncdfc
+) {
+	// MPAS-O only outputs a single vertical coordinate variable, zTop,
+	// which is the elevation of the primary (cell) mesh.
+	//
+
+	if (! _hasVertical) return(0);
+	if (! _isOcean(ncdfc)) return(0);
+
+	DerivedCoordVar *derivedVar = NULL;
+	
+	derivedVar = new DerivedCoordVertFromCell(
+		zTopVertVarName, nVerticesDimName, this, zTopVarName,
+		cellsOnVertexVarName
+	);
+
+	int rc = derivedVar->Initialize();
+	if (rc<0) return(-1);
+	_dvm.AddCoordVar(derivedVar);
+
+	DC::CoordVar cvarInfo;
+	bool ok = _dvm.GetCoordVarInfo(zTopVertVarName, cvarInfo);
+	VAssert(ok);
+	_coordVarsMap[zTopVertVarName] = cvarInfo;
+		
 	return(0);
 }
 
@@ -1303,11 +1356,11 @@ bool DCMPAS::_HasVertical(
 		string s = optionalVertCoordVarNames[i];
 
 		itr = find(varnames.begin(), varnames.end(), s);
-		if (itr == varnames.end()) {
-			return(false);
+		if (itr != varnames.end()) {
+			return(true);
 		}
 	} 
-	return(true);
+	return(false);
 
 }
 
@@ -1364,6 +1417,16 @@ int DCMPAS::_GetVarCoordinates(
 		dimnames.erase(dimnames.begin());
 	}
 
+	string verticalCellVarName;
+	string verticalVertexVarName;
+	if (_isAtmosphere(ncdfc)) {
+		verticalCellVarName = zGridVarName;
+		verticalVertexVarName = zGridVertVarName;
+	}
+	else {
+		verticalCellVarName = zTopVarName;
+		verticalVertexVarName = zTopVertVarName;
+	}
 		
 
 	if (find(_cellVars.begin(), _cellVars.end(), varname) != _cellVars.end()) {
@@ -1374,7 +1437,7 @@ int DCMPAS::_GetVarCoordinates(
 		if (dimnames.size() > 1) {
 			sdimnames.push_back(dimnames[1]);	
 			if (dimnames[1] == nVertLevelsDimName) {
-				scoordvars.push_back(zGridVarName);
+				scoordvars.push_back(verticalCellVarName);
 			}
 			else {
 				scoordvars.push_back(zGridP1VarName);
@@ -1389,7 +1452,7 @@ int DCMPAS::_GetVarCoordinates(
 		if (dimnames.size() > 1) {
 			sdimnames.push_back(dimnames[1]);	
 			if (dimnames[1] == nVertLevelsDimName) {
-				scoordvars.push_back(zGridVertVarName);
+				scoordvars.push_back(verticalVertexVarName);
 			}
 			else {
 				scoordvars.push_back(zGridVertP1VarName);
@@ -1404,7 +1467,7 @@ int DCMPAS::_GetVarCoordinates(
 		if (dimnames.size() > 1) {
 			sdimnames.push_back(dimnames[1]);	
 			if (dimnames[1] == nVertLevelsDimName) {
-				scoordvars.push_back(zGridVarName);
+				scoordvars.push_back(verticalCellVarName);
 			}
 			else {
 				scoordvars.push_back(zGridP1VarName);
@@ -1444,21 +1507,24 @@ int DCMPAS::_InitMeshes(
 	);
 
 
-	if (_isAtmosphere(ncdfc) && _hasVertical) {
-		coordvars = {lonCellVarName, latCellVarName, zGridVarName };
+	if ((_isAtmosphere(ncdfc) || _isOcean(ncdfc)) && _hasVertical) {
+		if (_isAtmosphere(ncdfc)) {
+			coordvars = {lonCellVarName, latCellVarName, zGridP1VarName};
+			_meshMap[mesh3DP1TriName] = Mesh(
+				mesh3DP1TriName, 3, dimension.GetLength(),
+				nCellsDimName, nVerticesDimName, nVertLevelsP1DimName, coordvars, 
+				cellsOnVertexVarName, verticesOnCellVarName
+			);
+
+			coordvars = {lonCellVarName, latCellVarName, zGridVarName };
+		}
+		else {
+			coordvars = {lonCellVarName, latCellVarName, zTopVarName };
+		}
+
 		_meshMap[mesh3DTriName] = Mesh(
 			mesh3DTriName, 3, dimension.GetLength(),
 			nCellsDimName, nVerticesDimName, nVertLevelsDimName, coordvars, 
-			cellsOnVertexVarName, verticesOnCellVarName
-		);
-
-		coordvars = {
-			lonCellVarName, latCellVarName, zGridP1VarName 
-		};
-
-		_meshMap[mesh3DP1TriName] = Mesh(
-			mesh3DP1TriName, 3, dimension.GetLength(),
-			nCellsDimName, nVerticesDimName, nVertLevelsP1DimName, coordvars, 
 			cellsOnVertexVarName, verticesOnCellVarName
 		);
 	}
@@ -1475,24 +1541,27 @@ int DCMPAS::_InitMeshes(
 		nCellsDimName, coordvars, verticesOnCellVarName, cellsOnVertexVarName
 	);
 
-	if (_isAtmosphere(ncdfc) && _hasVertical) {
+	if ((_isAtmosphere(ncdfc) || _isOcean(ncdfc)) && _hasVertical) {
+		if (_isAtmosphere(ncdfc)) {
+			coordvars = {lonVertexVarName, latVertexVarName, zGridVertP1VarName };
+			_meshMap[mesh3DP1CellName] = Mesh(
+				mesh3DP1CellName, dimension.GetLength(), 3, nVerticesDimName, 
+				nCellsDimName, nVertLevelsP1DimName, coordvars,
+				verticesOnCellVarName, cellsOnVertexVarName
+			);
 
-		coordvars = {lonVertexVarName, latVertexVarName, zGridVertVarName};
+			coordvars = {lonVertexVarName, latVertexVarName, zGridVertVarName};
+		}
+		else {
+			coordvars = {lonVertexVarName, latVertexVarName, zTopVertVarName};
+		}
+
 		_meshMap[mesh3DCellName] = Mesh(
 			mesh3DCellName, dimension.GetLength(), 3, nVerticesDimName, 
 			nCellsDimName, nVertLevelsDimName, coordvars, verticesOnCellVarName,
 			cellsOnVertexVarName
 		);
 
-		coordvars = {
-			lonVertexVarName, latVertexVarName, zGridVertP1VarName
-		};
-
-		_meshMap[mesh3DP1CellName] = Mesh(
-			mesh3DP1CellName, dimension.GetLength(), 3, nVerticesDimName, 
-			nCellsDimName, nVertLevelsP1DimName, coordvars,
-			verticesOnCellVarName, cellsOnVertexVarName
-		);
 	}
 
 	return(0);
@@ -1672,6 +1741,16 @@ bool DCMPAS::_isAtmosphere(NetCDFCollection *ncdfc) const {
 	return(value == "" || value == "atmosphere");
 	
 
+}
+
+// Ocean core configuration ?
+//
+bool DCMPAS::_isOcean(NetCDFCollection *ncdfc) const {
+
+	string value;
+	ncdfc->GetAtt("", coreNameAttr, value);
+
+	return(value == "ocean");
 }
 
 // 

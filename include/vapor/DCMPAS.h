@@ -232,7 +232,8 @@ private:
  int _InitDerivedVars(NetCDFCollection *ncdfc);
  int _InitCoordvars(NetCDFCollection *ncdfc);
 
- int _InitVerticalCoordinatesDerived(NetCDFCollection *ncdfc); 
+ int _InitVerticalCoordinatesDerivedAtmosphere(NetCDFCollection *ncdfc); 
+ int _InitVerticalCoordinatesDerivedOcean(NetCDFCollection *ncdfc); 
 
  int _CheckRequiredFields(NetCDFCollection *ncdfc) const ;
  bool _HasVertical(NetCDFCollection *ncdfc) const ;
@@ -256,6 +257,7 @@ private:
  ) const;
 
  bool _isAtmosphere(NetCDFCollection *ncdfc) const;
+ bool _isOcean(NetCDFCollection *ncdfc) const;
 
  bool _isCoordVar(string varname) const;
  bool _isDataVar(string varname) const;
