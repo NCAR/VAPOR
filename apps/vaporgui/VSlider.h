@@ -43,3 +43,10 @@ class VSlider : public VHBoxWidget {
     void ValueChanged(double value);
     void ValueChangedIntermediate(double value);
 };
+
+class ScrollWheelEater : public QObject {
+    Q_OBJECT
+
+  protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
+};
