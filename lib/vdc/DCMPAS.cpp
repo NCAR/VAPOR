@@ -789,10 +789,16 @@ void DCMPAS::_splitOnBoundary(string varname, int *connData) const {
 	int n = connDims[0];
 	for (size_t j = 0; j<connDims[1]; j++) {
 
+		// MPAS apparently uses a 0 to indicate cell boundaries. This is a undocumented feature
+		// the we need to handle here
+		//
 		bool mpas_boundary_marker = false;
 		for (size_t i=0; i<n; i++) {
 			if (connData[j*n+i] == 0) {
-				connData[j*n+i] = -2;
+				for (size_t ii=0; ii<n; ii++) {
+					connData[j*n+ii] = -2;
+				}
+				break;
 				mpas_boundary_marker = true;
 			}
 		}
