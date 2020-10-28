@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
 
+#include <QScrollEvent>
 #include <vapor/VAssert.h>
 #include "VSlider.h"
 
@@ -19,6 +20,8 @@ VSlider::VSlider(double min, double max) : VHBoxWidget(), _min(0.0), _max(0.0), 
     connect(_slider, &QSlider::sliderMoved, this, &VSlider::_sliderChangedIntermediate);
 
     connect(_slider, &QSlider::sliderReleased, this, &VSlider::_sliderChanged);
+
+    _slider->installEventFilter(new ScrollWheelEater);
 }
 
 void VSlider::SetValue(double value)
@@ -92,4 +95,13 @@ void VSlider::_sliderChangedIntermediate(int position)
 {
     double value = GetValue();
     emit   ValueChangedIntermediate(value);
+}
+
+bool ScrollWheelEater::eventFilter(QObject *object, QEvent *event)
+{
+    if (event->type() == QEvent::Wheel) {
+        return true;
+    } else {
+        return QObject::eventFilter(object, event);
+    }
 }
