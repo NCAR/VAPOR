@@ -21,7 +21,7 @@ namespace VAPoR {
         VolumeOSPRay(GLManager *gl, VolumeRenderer *renderer);
         ~VolumeOSPRay();
         
-        static std::string GetName() { return "OSPRay"; }
+        static std::string GetName() { return "OSPRay (experimental)"; }
         static Type        GetType() { return Type::DVR; }
         virtual bool RequiresChunkedRendering() { return false; }
         
@@ -102,7 +102,7 @@ public:
     class VolumeOSPRayIso : public VolumeOSPRay {
     public:
         VolumeOSPRayIso(GLManager *gl, VolumeRenderer *renderer):VolumeOSPRay(gl, renderer){}
-        static std::string GetName() { return "Iso OSPRay"; }
+        static std::string GetName() { return "Iso OSPRay (experimental)"; }
         static Type        GetType() { return Type::Iso; }
     protected:
         bool _isIso() const { return true; }
