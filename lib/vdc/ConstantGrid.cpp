@@ -16,16 +16,16 @@ float ConstantGrid::GetConstantValue() const
     return _value;
 }
     
-float ConstantGrid::GetValue(const DblArr3 &coords) const
+float ConstantGrid::GetValue(const VAPoR::DblArr3 &coords) const
 {
     return _value;
 }
-float ConstantGrid::GetValueNearestNeighbor(const DblArr3 &coords) const
+float ConstantGrid::GetValueNearestNeighbor(const VAPoR::DblArr3 &coords) const
 {
     return _value;
 }
     
-float ConstantGrid::GetValueLinear(const DblArr3 &coords) const 
+float ConstantGrid::GetValueLinear(const VAPoR::DblArr3 &coords) const 
 {
     return _value;
 }
@@ -41,7 +41,7 @@ size_t ConstantGrid::GetTopologyDim() const
     return _topologyDim;
 }
 
-void ConstantGrid::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const
+void ConstantGrid::GetUserExtentsHelper(VAPoR::DblArr3 &minu, VAPoR::DblArr3 &maxu) const
 {
 	for (int i=0; i<minu.size(); i++) {
 		minu[i] = std::numeric_limits<double>::lowest();
@@ -49,7 +49,7 @@ void ConstantGrid::GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const
 	}
 }
     
-bool ConstantGrid::InsideGrid(const DblArr3 &coords) const
+bool ConstantGrid::InsideGrid(const VAPoR::DblArr3 &coords) const
 {
     return true;
 }
@@ -79,7 +79,7 @@ const std::vector<size_t>& ConstantGrid::GetCellDimensions() const
 }
     
 bool ConstantGrid::GetIndicesCell(
-	const DblArr3 &coords, Size_tArr3 &indices) const
+	const VAPoR::DblArr3 &coords, Size_tArr3 &indices) const
 {
     return false;
 }
