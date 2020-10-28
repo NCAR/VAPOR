@@ -42,8 +42,6 @@ int VOSP::Initialize(int *argc, char **argv)
     // If this is not set, OSPRay will crash upon shutdown
     ospDeviceSetErrorFunc(ospGetCurrentDevice(), ospErrorCallback);
 #pragma GCC diagnostic pop
-    
-    printf("OSPRay Version = %s\n", Version().c_str());
     _initialized = true;
     return 0;
 #else
