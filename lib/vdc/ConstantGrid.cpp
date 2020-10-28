@@ -79,28 +79,28 @@ const std::vector<size_t>& ConstantGrid::GetCellDimensions() const
 }
     
 bool ConstantGrid::GetIndicesCell(
-	const VAPoR::DblArr3 &coords, Size_tArr3 &indices) const
+	const VAPoR::DblArr3 &coords, VAPoR::Size_tArr3 &indices) const
 {
     return false;
 }
     
 bool ConstantGrid::GetCellNodes(
-	const Size_tArr3 &cindices,
-	std::vector <Size_tArr3> &nodes) const
+	const VAPoR::Size_tArr3 &cindices,
+	std::vector <VAPoR::Size_tArr3> &nodes) const
 {
     return false;
 }
     
 bool ConstantGrid::GetCellNeighbors(
-    const Size_tArr3 &cindices,
-    std::vector <Size_tArr3> &cells) const 
+    const VAPoR::Size_tArr3 &cindices,
+    std::vector <VAPoR::Size_tArr3> &cells) const 
 {
     return false;
 }
     
 bool ConstantGrid::GetNodeCells(
-    const Size_tArr3 &cindices,
-    std::vector <Size_tArr3> &cells) const 
+    const VAPoR::Size_tArr3 &cindices,
+    std::vector <VAPoR::Size_tArr3> &cells) const 
 {
     return false;
 }
