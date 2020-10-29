@@ -12,10 +12,34 @@ PMultiVarSelector::PMultiVarSelector(std::string tag)
     connect(_listWidget, &QListWidget::itemChanged, this, &PMultiVarSelector::itemChanged);
 }
 
+PMultiVarSelector *PMultiVarSelector::DisplayVars(Mode mode)
+{
+    _mode = mode;
+    return this;
+}
+
 void PMultiVarSelector::updateGUI() const
 {
+    vector<string> varNames;
     const auto nDims = getParams<RenderParams>()->GetRenderDim();
-    const auto varNames = getDataMgr()->GetDataVarNames(nDims);
+    
+    switch (_mode) {
+        default:
+        case Auto:
+            varNames = getDataMgr()->GetDataVarNames(nDims);
+            break;
+        case D2:
+            varNames = getDataMgr()->GetDataVarNames(2);
+            break;
+        case D3:
+            varNames = getDataMgr()->GetDataVarNames(3);
+            break;
+        case Both:
+            varNames = getDataMgr()->GetDataVarNames(2);
+            const auto other = getDataMgr()->GetDataVarNames(3);
+            varNames.insert(varNames.end(), other.begin(), other.end());
+            break;
+    }
     
     _listWidget->blockSignals(true);
     _listWidget->clear();

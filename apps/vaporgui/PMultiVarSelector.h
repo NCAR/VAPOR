@@ -10,10 +10,11 @@ class QListWidgetItem;
 //! \author Stas Jaroszynski
 
 class PMultiVarSelector : public PWidget {
-    QListWidget *_listWidget;
-    
 public:
+    enum Mode { Auto, D2, D3, Both };
+    
     PMultiVarSelector(std::string tag);
+    PMultiVarSelector *DisplayVars(Mode mode);
     
 protected:
     void updateGUI() const override;
@@ -21,6 +22,9 @@ protected:
     bool requireDataMgr() const override { return true; }
     
 private:
+    QListWidget *_listWidget;
+    Mode _mode = Auto;
+    
     QListWidgetItem *addVarToList(const std::string &var) const;
     void itemChanged(QListWidgetItem*);
 };
