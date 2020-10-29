@@ -772,8 +772,8 @@ void DCMPAS::_splitOnBoundary(string varname, int *connData) const {
                 for (size_t ii = 0; ii < n; ii++) {
                     connData[j * n + ii] = -2;
                 }
-                break;
                 mpas_boundary_marker = true;
+                break;
             }
         }
         if (mpas_boundary_marker)
