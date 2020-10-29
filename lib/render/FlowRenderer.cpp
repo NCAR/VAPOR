@@ -250,11 +250,11 @@ int FlowRenderer::_paintGL( bool fast )
     _velocityField.UpdateParamAndVarNames( params );
     _colorField.UpdateParamAndVarNames( params );
 
-    // In case there's 0 or 1 variable selected, meaning that more than one of the velocity 
+    // In case there's 0 variable selected, meaning that more than one of the velocity 
     // variable names are empty strings, then the paint routine aborts.
-    if( _velocityField.GetNumOfEmptyVelocityNames() > 1 )
+    if( _velocityField.GetNumOfEmptyVelocityNames() > 2 )
     {
-        MyBase::SetErrMsg("Please provide at least 2 field variables for advection!");
+        MyBase::SetErrMsg("Please provide at least 1 field variables for advection!");
         return flow::PARAMS_ERROR;
     }
 
