@@ -8,6 +8,8 @@ class QListWidgetItem;
 //! \class PMultiVarSelector
 //! \brief Allows the selection of multiple variables. To add a title, use a PLabel.
 //! \author Stas Jaroszynski
+//! By default this shows the vars with the same dimension as the renderer. This can be changed
+//! with DisplayVars(Mode)
 
 class PMultiVarSelector : public PWidget {
 public:
