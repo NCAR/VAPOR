@@ -9,7 +9,7 @@ PMultiVarSelector::PMultiVarSelector(std::string tag)
 : PWidget(tag, _listWidget = new QListWidget)
 {
     _listWidget->setSelectionMode(QAbstractItemView::NoSelection);
-    connect(_listWidget, &QListWidget::itemChanged, this, &PMultiVarSelector::itemChanged);
+    connect(_listWidget, &QListWidget::itemChanged, this, &PMultiVarSelector::_itemChanged);
 }
 
 PMultiVarSelector *PMultiVarSelector::DisplayVars(Mode mode)
@@ -44,14 +44,14 @@ void PMultiVarSelector::updateGUI() const
     _listWidget->blockSignals(true);
     _listWidget->clear();
     for (const auto &var : varNames)
-        addVarToList(var);
+        _addVarToList(var);
     
     const auto selectedVars = getParams()->GetValueStringVec(getTag());
     for (const auto &var : selectedVars) {
         const auto items = _listWidget->findItems(QString::fromStdString(var), Qt::MatchExactly);
         QListWidgetItem *item;
         if (items.isEmpty())
-            item = addVarToList(var);
+            item = _addVarToList(var);
         else
             item = items[0];
         item->setCheckState(Qt::Checked);
@@ -69,7 +69,7 @@ QSize PMultiVarSelector::minimumSizeHint() const
     return s;
 }
 
-QListWidgetItem *PMultiVarSelector::addVarToList(const std::string &var) const
+QListWidgetItem *PMultiVarSelector::_addVarToList(const std::string &var) const
 {
     QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(var));
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
@@ -78,7 +78,7 @@ QListWidgetItem *PMultiVarSelector::addVarToList(const std::string &var) const
     return item;
 }
 
-void PMultiVarSelector::itemChanged(QListWidgetItem*)
+void PMultiVarSelector::_itemChanged(QListWidgetItem*)
 {
     std::vector<std::string> selected;
     for (int i = 0; i < _listWidget->count(); i++) {

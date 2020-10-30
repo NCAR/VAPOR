@@ -27,6 +27,6 @@ private:
     QListWidget *_listWidget;
     Mode _mode = Auto;
     
-    QListWidgetItem *addVarToList(const std::string &var) const;
-    void itemChanged(QListWidgetItem*);
+    QListWidgetItem *_addVarToList(const std::string &var) const;
+    void _itemChanged(QListWidgetItem*);
 };
