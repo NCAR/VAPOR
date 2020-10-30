@@ -1,3 +1,8 @@
+#ifdef WIN32
+#define _USE_MATH_DEFINES
+#include <cmath>
+#endif
+
 #include <vapor/OSPRay.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -4,11 +4,12 @@
 #endif
 #include <string>
 #include <glm/glm.hpp>
+#include <vapor/common.h>
 
 namespace VOSP {
-int Initialize(int *argc, char **argv);
-int Shutdown();
-std::string Version();
+RENDER_API int Initialize(int *argc, char **argv);
+RENDER_API int Shutdown();
+RENDER_API std::string Version();
 
 #ifdef BUILD_OSPRAY
 OSPData NewCopiedData(const void *data, OSPDataType type, uint64_t numItems1, uint64_t numItems2=1, uint64_t numItems3=1);

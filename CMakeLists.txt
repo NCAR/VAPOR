@@ -215,7 +215,7 @@ if (WIN32)
 	
 	if (GENERATE_FULL_INSTALLER)
 		set (LIB_DIR ${THIRD_PARTY_DIR}/lib)
-		file (GLOB WIN_INSTALL_DLLS ${LIB_DIR}/*.dll ${QTDIR}/bin/*.dll)
+		file (GLOB WIN_INSTALL_DLLS ${LIB_DIR}/*.dll ${QTDIR}/bin/*.dll ${OSPRAYDIR}/bin/*.dll)
 
 		install (
 			FILES ${WIN_INSTALL_DLLS}

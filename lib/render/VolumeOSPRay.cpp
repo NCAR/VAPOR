@@ -672,12 +672,12 @@ OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
             Cell w2 = {{{c.i1, c.i2, c.i3, c.i5, c.i6, c.i7, 0, 0}}};
             
             if (CW == getWindingOrderRespectToZ(coords[w1.i0], coords[w1.i1], coords[w1.i2])) {
-                swap(w1.i1, w1.i2);
-                swap(w1.i4, w1.i5);
+                std::swap(w1.i1, w1.i2);
+				std::swap(w1.i4, w1.i5);
             }
             if (CW == getWindingOrderRespectToZ(coords[w2.i0], coords[w2.i1], coords[w2.i2])) {
-                swap(w2.i1, w2.i2);
-                swap(w2.i4, w2.i5);
+				std::swap(w2.i1, w2.i2);
+				std::swap(w2.i4, w2.i5);
             }
             
             startIndex.push_back(indices.size()*8);
@@ -870,14 +870,14 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
         
         if (type == OSP_WEDGE) {
             if (CW == getWindingOrderRespectToZ(coords[cellIndices[start+0]], coords[cellIndices[start+1]], coords[cellIndices[start+2]])) {
-                swap(cellIndices[start+1], cellIndices[start+2]);
-                swap(cellIndices[start+1+3], cellIndices[start+2+3]);
+				std::swap(cellIndices[start+1], cellIndices[start+2]);
+				std::swap(cellIndices[start+1+3], cellIndices[start+2+3]);
             }
         }
         else if (type == OSP_TETRAHEDRON) {
             WindingOrder w = getWindingOrderTetra(coords[cellIndices[start+0]], coords[cellIndices[start+1]], coords[cellIndices[start+2]], coords[cellIndices[start+3]]);
             if (w == CW)
-                swap(cellIndices[start+1], cellIndices[start+2]);
+				std::swap(cellIndices[start+1], cellIndices[start+2]);
             if (w == INVALID) {
                 erase[i] = true;
                 continue;
@@ -997,11 +997,11 @@ OSPVolume VolumeOSPRay::_loadVolumeTest(const Grid *grid)
     vec3 dataMaxExt(dataMaxExtD[0], dataMaxExtD[1], dataMaxExtD[2]);
     int nVerts = 8;
     
-    float values[nVerts];
+    vector<float> values(nVerts);
     for (int i = 0; i < nVerts; i++)
         values[i] = 0;
     
-    vec3 coords[nVerts];
+    vector<vec3> coords(nVerts);
     float s = 1;
     vec3 l = s * dataMinExt;
     vec3 h = s * dataMaxExt;
@@ -1020,12 +1020,12 @@ OSPVolume VolumeOSPRay::_loadVolumeTest(const Grid *grid)
     OSPVolume volume = ospNewVolume("unstructured");
     OSPData data;
     
-    data = VOSP::NewCopiedData(values, OSP_FLOAT, nVerts);
+    data = VOSP::NewCopiedData(values.data(), OSP_FLOAT, nVerts);
     ospCommit(data);
     ospSetObject(volume, "vertex.data", data);
     ospRelease(data);
     
-    data = VOSP::NewCopiedData(coords, OSP_VEC3F, nVerts);
+    data = VOSP::NewCopiedData(coords.data(), OSP_VEC3F, nVerts);
     ospCommit(data);
     ospSetObject(volume, "vertex.position", data);
     ospRelease(data);

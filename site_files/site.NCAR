@@ -13,6 +13,7 @@ else ()
 	set (THIRD_PARTY_DIR    C:/2019-Aug)
     set (QTDIR              ${THIRD_PARTY_DIR}/Qt/5.13.2/msvc2015_64)
     set (CMAKE_PREFIX_PATH  ${QTDIR}/lib/cmake/Qt5) 
+    set (OSPRAYDIR C:/Users/stasj/Downloads/ospray)
 endif ()
 
 set (THIRD_PARTY_LIB_DIR "${THIRD_PARTY_DIR}/lib")
