@@ -131,6 +131,16 @@ void Grid::GetRange(float range[2]) const {
     float missingValue = GetMissingValue();
     Grid::ConstIterator itr = this->cbegin();
     Grid::ConstIterator enditr = this->cend();
+
+    // Edge case: all values are missing values.
+    //
+    range[0] = range[1] = missingValue;
+    while (*itr == missingValue && itr != enditr) {
+        ++itr;
+    }
+    if (itr == enditr)
+        return;
+
     range[0] = *itr;
     range[1] = range[0];
     while (itr != enditr) {
