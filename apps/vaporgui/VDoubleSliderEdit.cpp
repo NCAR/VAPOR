@@ -89,11 +89,19 @@ double VDoubleSliderEdit::GetValue() const {
 }
 
 void VDoubleSliderEdit::SetValue( double value ) {
-    if ( value == _value ) {
+
+    // If 'value' is illegal, reset _lineEdit's text and return
+    //
+    
+    if ( value == _value                ||
+         value <  _slider->GetMinimum() ||
+         value >  _slider->GetMaximum()
+    ) {
+        _lineEdit->SetValueDouble( _value );
         return;
     }
 
-    double min = _slider->GetMinimum();
+    /*double min = _slider->GetMinimum();
     if (value < min) {
         if ( _rangeChangable ) {
             _slider->SetMinimum( value );
@@ -113,16 +121,19 @@ void VDoubleSliderEdit::SetValue( double value ) {
         else {
             value = max;
         }
-    }
+    }*/
     _value = value;
 
-    _lineEdit->blockSignals( true );
+    //dynamic_cast<VDoubleLineEdit*>(_lineEdit)->SetValueDouble( _value );
+    _lineEdit->SetValueDouble( _value );
+    _slider->SetValue( _value );
+    /*_lineEdit->blockSignals( true );
     dynamic_cast<VDoubleLineEdit*>(_lineEdit)->SetValueDouble( _value );
     _lineEdit->blockSignals( false );
 
     _slider->blockSignals(   true );
     _slider->SetValue( _value );
-    _slider->blockSignals(   false );
+    _slider->blockSignals(   false );*/
 
     if ( QObject::sender() != nullptr ) {
         emit ValueChanged( _value );
@@ -134,21 +145,28 @@ double VDoubleSliderEdit::GetMinimum() const {
 }
 
 void VDoubleSliderEdit::SetMinimum( double min ) {
-    if (min == _slider->GetMinimum()) {
+    if (min == _slider->GetMinimum() ||
+        min >= _slider->GetMaximum() ||
+        min > _value
+    ) {
+        //std::cout << "set min too high" << min << " " << _value << " " << _slider->GetMinimum() << std::endl;
+        //_menu->blockSignals( true );
+        _menu->SetMinimum( _slider->GetMinimum() );
+        //_menu->blockSignals( false );
         return;
     }
 
-    if ( min > _value ) {
+    /*if ( min > _value ) {
         _value = min;
         _lineEdit->SetValueDouble( min );
-    }
+    }*/
    
     _slider->SetMinimum( min );
    
     _menu->SetMinimum( min );
-    if ( min >= _slider->GetMaximum() ) {
+    /*if ( min >= _slider->GetMaximum() ) {
         _menu->SetMaximum( min );
-    }
+    }*/
     
     // If sender() is a nullptr, then this fuction is being called from Update().
     // Don't emit anythong.  Otherwise, emit our signal.
@@ -162,21 +180,25 @@ double VDoubleSliderEdit::GetMaximum() const {
 }
 
 void VDoubleSliderEdit::SetMaximum( double max ) {
-    if (max == _slider->GetMaximum()) {
+    if (max == _slider->GetMaximum() ||
+        max <= _slider->GetMinimum() ||
+        max < _value
+    ) {
+        _menu->SetMaximum( _slider->GetMaximum() );
         return;
     }
 
-    if ( max < _value ) {
+    /*if ( max < _value ) {
         _value = max;
         _lineEdit->SetValueDouble( max );
-    }
+    }*/
     
     _slider->SetMaximum( max );
 
     _menu->SetMaximum( max );
-    if ( max <= _slider->GetMinimum() ) {
-        _menu->SetMinimum( max );
-    }
+    //if ( max <= _slider->GetMinimum() ) {
+    //    _menu->SetMinimum( max );
+    //}
 
     // If sender() is a nullptr, then this fuction is being called from Update().
     // Don't emit anythong.  Otherwise, emit our signal.

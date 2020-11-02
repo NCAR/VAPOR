@@ -29,6 +29,8 @@ protected:
 private:
     void valueChanged(double v);
     void valueChangedIntermediate(double v);
+    void minimumChanged(double v);
+    void maximumChanged(double v);
 };
 
 
@@ -54,4 +56,6 @@ protected:
 private:
     void valueChanged(int v);
     void valueChangedIntermediate(int v);
+    void minimumChanged(int v);
+    void maximumChanged(int v);
 };
