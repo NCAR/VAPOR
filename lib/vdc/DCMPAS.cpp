@@ -789,13 +789,29 @@ void DCMPAS::_splitOnBoundary(string varname, int *connData) const {
 	int n = connDims[0];
 	for (size_t j = 0; j<connDims[1]; j++) {
 
+		// MPAS apparently uses a 0 to indicate cell boundaries. This is a undocumented feature
+		// the we need to handle here
+		//
+		bool mpas_boundary_marker = false;
+		for (size_t i=0; i<n; i++) {
+			if (connData[j*n+i] == 0) {
+				for (size_t ii=0; ii<n; ii++) {
+					connData[j*n+ii] = -2;
+				}
+				mpas_boundary_marker = true;
+				break;
+			}
+		}
+		if (mpas_boundary_marker) continue;
+
 		// Ha ha. despite MPAS documentation longitude may run -pi to pi
 		//
 		double lon1 = lonBuf2[connData[j*n]-1];
 		if (lon1 > 180.0) lon1 -= 360.0;
 		for (size_t i=1; i<n && connData[j*n+i] >= 0; i++) {
 
-			size_t index = connData[j*n+i] - 1;	// Arrg. Index starts from 1!!
+			size_t index = connData[j*n+i] - 1; // Arrg. Index starts from 1!!
+
 			double lon2 = lonBuf2[index];
 
 			// Ha ha. despite MPAS documentation longitude may run -pi to pi
