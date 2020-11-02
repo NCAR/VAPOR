@@ -89,10 +89,7 @@ double VDoubleSliderEdit::GetValue() const {
 }
 
 void VDoubleSliderEdit::SetValue( double value ) {
-
-    // If 'value' is illegal, reset _lineEdit's text and return
-    //
-    
+    // If the new value is unchanged or illegal, reset _lineEdit's text and return
     if ( value == _value                ||
          value <  _slider->GetMinimum() ||
          value >  _slider->GetMaximum()
@@ -116,6 +113,7 @@ double VDoubleSliderEdit::GetMinimum() const {
 }
 
 void VDoubleSliderEdit::SetMinimum( double min ) {
+    // If the new value is unchanged, or illegal, reset the menu and return
     if (min == _slider->GetMinimum() ||
         min >= _slider->GetMaximum() ||
         min > _value
@@ -139,6 +137,7 @@ double VDoubleSliderEdit::GetMaximum() const {
 }
 
 void VDoubleSliderEdit::SetMaximum( double max ) {
+    // If the new value is unchanged, or illegal, reset the menu and retur
     if (max == _slider->GetMaximum() ||
         max <= _slider->GetMinimum() ||
         max < _value
