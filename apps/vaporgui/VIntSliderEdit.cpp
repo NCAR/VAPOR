@@ -95,37 +95,10 @@ void VIntSliderEdit::SetValue( int value ) {
         return;
     }
 
-    /*int min = _slider->GetMinimum();
-    if (value < min) {
-        if ( _rangeChangable ) {
-            _slider->SetMinimum( value );
-            _menu->SetMinimum( value );
-        }
-        else {
-            value = min;
-        }
-    }
-
-    int max = _slider->GetMaximum();
-    if (value > max) {
-        if ( _rangeChangable ) {
-            _slider->SetMaximum( value );
-            _menu->SetMaximum( value );
-        }
-        else {
-            value = max;
-        }
-    }*/
-
     _value = value;
 
-    _lineEdit->blockSignals( true );
-    dynamic_cast<VIntLineEdit*>(_lineEdit)->SetValueInt( _value );
-    _lineEdit->blockSignals( false );
-
-    _slider->blockSignals(   true );
+    _lineEdit->SetValueInt( _value );
     _slider->SetValue( _value );
-    _slider->blockSignals(   false );
 
     if ( QObject::sender() != nullptr ) {
         emit ValueChanged( _value );
@@ -145,17 +118,8 @@ void VIntSliderEdit::SetMinimum( int min ) {
         return;
     }
 
-    /*if ( min > _value ) {
-        _value = min;
-        _lineEdit->SetValueInt( min );
-    }*/
-   
     _slider->SetMinimum( min );
-   
     _menu->SetMinimum( min );
-    /*if ( min >= _slider->GetMaximum() ) {
-        _menu->SetMaximum( min );
-    }*/
     
     // If sender() is a nullptr, then this fuction is being called from Update().
     // Don't emit anythong.  Otherwise, emit our signal.
@@ -177,17 +141,9 @@ void VIntSliderEdit::SetMaximum( int max ) {
         return;
     }
 
-    /*if ( max < _value ) {
-        _value = max;
-        _lineEdit->SetValueInt( max );
-    }*/
-    
     _slider->SetMaximum( max );
 
     _menu->SetMaximum( max );
-    /*if ( max <= _slider->GetMinimum() ) {
-        _menu->SetMinimum( max );
-    }*/
 
     // If sender() is a nullptr, then this fuction is being called from Update().
     // Don't emit anythong.  Otherwise, emit our signal.
