@@ -48,6 +48,7 @@ void PDoubleSliderEdit::updateGUI() const
 
 void PDoubleSliderEdit::valueChanged(double v)
 {
+    std::cout << "          P " << v << std::endl;
     setParamsDouble(v);
 }
 
