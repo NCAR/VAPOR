@@ -91,8 +91,7 @@ public:
     std::string GetFlowlineOutputFilename() const;
     void        SetFlowlineOutputFilename( const std::string& ) ;
 
-    std::string GetFlowOutputMoreVariables() const;
-    void        SetFlowOutputMoreVariables( const std::string& );
+    std::vector<std::string> GetFlowOutputMoreVariables() const;
 
     // Note: this result vector could be of size 2 or 3.
     std::vector<bool>   GetPeriodic() const;

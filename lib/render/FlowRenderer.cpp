@@ -114,37 +114,6 @@ FlowRenderer::_initializeGL()
 }
 
 
-auto FlowRenderer::_parseAdditionalVariables( const std::string& longString ) const
-                   -> std::vector<std::string>
-{
-    // Step 1: extract comma separated values
-    std::stringstream ss( longString );
-    std::vector<std::string> varNames;
-    for( std::string line; std::getline( ss, line, ',' ); )
-        varNames.emplace_back( line );
-
-    // Step 2: remove any white space and newline symbol for each variable name
-    for( auto& e : varNames ) {
-        e.erase( std::remove_if(e.begin(), e.end(), 
-                 [](unsigned char c){return std::isspace(c);}), 
-                 e.end() );
-    }
-
-    // Step 3: remove any empty entry
-    varNames.erase( std::remove_if( varNames.begin(), varNames.end(), 
-                    [](const std::string& s){return s.empty();} ), 
-                    varNames.end() );
-
-    // Step 4: check if these variable names are actually available in the DataMgr.
-    const auto availVars = _dataMgr->GetDataVarNames();
-    auto no_contain = [&availVars](const std::string& s) {return 
-                       std::find(availVars.cbegin(), availVars.cend(), s) == availVars.cend();};
-    varNames.erase( std::remove_if( varNames.begin(), varNames.end(), no_contain ),
-                    varNames.end() );
-
-    return varNames;
-}
-
 int FlowRenderer::_paintGL( bool fast )
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
@@ -155,8 +124,7 @@ int FlowRenderer::_paintGL( bool fast )
     if( params->GetNeedFlowlineOutput() ) {
 
         // Retrieve additional variables that users require to sample
-        std::string longString = params->GetFlowOutputMoreVariables();
-        const auto addiVars = this->_parseAdditionalVariables( longString );
+        const auto addiVars = params->GetFlowOutputMoreVariables();
 
         // Identify variables that an advection already has, but the user doesn't 
         // include in addiVars. Remove them.
