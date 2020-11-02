@@ -45,6 +45,7 @@ namespace VAPoR {
         Texture2D _ospRenderTexture;
         Texture2D _ospWriteDepthTexture;
         struct {glm::vec3 min, max;} _clipBox = {glm::vec3(0), glm::vec3(1)};
+        float _ospSampleRateScalar;
         
         struct {
             bool usePT;

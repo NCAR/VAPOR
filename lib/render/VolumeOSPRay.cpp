@@ -223,9 +223,9 @@ int VolumeOSPRay::LoadData(const Grid *grid)
     ospCommit(_ospWorld);
     
     if (dynamic_cast<const RegularGrid *>(grid))
-        p->SetValueDouble(VolumeParams::OSPSampleRateScalar, "", 1.f);
+        _ospSampleRateScalar = 1.f;
     else
-        p->SetValueDouble(VolumeParams::OSPSampleRateScalar, "", _guessSamplingRateScalar(grid));
+        _ospSampleRateScalar = _guessSamplingRateScalar(grid);
     
     return 0;
 }
@@ -267,7 +267,7 @@ void VolumeOSPRay::_setupRenderer(bool fast)
     bool opaqueBG = p->GetValueLong("osp_opaque_bg", false);
     GetAnnotationParams()->GetBackgroundColor(bgColor);
     ospSetVec4f(_ospRenderer, "backgroundColor", bgColor[0], bgColor[1], bgColor[2], opaqueBG ? 1 : 0);
-    ospSetFloat(_ospRenderer, "volumeSamplingRate", (fast ? 0.1 : 1) * p->GetValueDouble(VolumeParams::OSPSampleRateScalar, 1));
+    ospSetFloat(_ospRenderer, "volumeSamplingRate", _ospSampleRateScalar * (fast ? 0.1 : 1) * p->GetValueDouble(VolumeParams::OSPSampleRateScalar, 1));
     ospSetInt(_ospRenderer, "pixelSamples", fast ? 1 : spp);
     ospSetInt(_ospRenderer, "aoSamples", 0);
     
