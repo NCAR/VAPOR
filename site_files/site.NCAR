@@ -9,7 +9,7 @@ elseif (UNIX AND NOT APPLE)
     set (CMAKE_PREFIX_PATH    ${QTDIR}/lib/cmake )
     set (Qt5Core_DIR          ${QTDIR}/lib/cmake/Qt5Core )
     set (QT_QMAKE_EXECUTABLE  ${QTDIR}/gcc_64/bin/qmake )
-    set (OSPRAYDIR            ${THIRD_PARTY_DIR}/ospray-2.4.0.x86_64.linux
+    set (OSPRAYDIR            ${THIRD_PARTY_DIR}/ospray-2.4.0.x86_64.linux )
 else ()
 	set (THIRD_PARTY_DIR    C:/2019-Aug)
     set (QTDIR              ${THIRD_PARTY_DIR}/Qt/5.13.2/msvc2015_64)
