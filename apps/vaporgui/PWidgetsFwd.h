@@ -15,6 +15,7 @@ class PGeometrySubtab;
 class PGroup;
 class PIntegerInput;
 class PLabel;
+class PMultiVarSelector;
 class POrientationSelector;
 class PRegionSelector;
 class PSection;
