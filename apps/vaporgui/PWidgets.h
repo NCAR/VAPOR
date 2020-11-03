@@ -16,6 +16,7 @@
 #include "PGroup.h"
 #include "PIntegerInput.h"
 #include "PLabel.h"
+#include "PMultiVarSelector.h"
 #include "POrientationSelector.h"
 #include "PRegionSelector.h"
 #include "PSection.h"
