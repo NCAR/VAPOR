@@ -222,7 +222,7 @@ int FlowRenderer::_paintGL( bool fast )
     // variable names are empty strings, then the paint routine aborts.
     if( _velocityField.GetNumOfEmptyVelocityNames() > 1 )
     {
-        MyBase::SetErrMsg("Please provide at least 2 field variables for advection!");
+        MyBase::SetErrMsg("Please provide at least 1 field variables for advection!");
         return flow::PARAMS_ERROR;
     }
 
