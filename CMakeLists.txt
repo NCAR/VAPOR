@@ -65,6 +65,7 @@ endif ()
 
 option (BUILD_VDC "Build VDC library and utilities" ON)
 option (BUILD_GUI "Build Vapor GUI" ON)
+option (BUILD_OSP "Build OSPRay" ON)
 option (BUILD_UTL "Build conversion and utility applications" ${DEFAULT_BUILD_UTILITIES})
 option (BUILD_DOC "Build Vapor Doxygen documentation" ON)
 option (BUILD_TEST_APPS "Build test applications" OFF)
@@ -80,6 +81,7 @@ set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set (QTDIR )
+set (OSPRAYDIR )
 set (PYTHONDIR )
 set (PYTHONVERSION )
 set (PYTHONPATH )
@@ -213,7 +215,7 @@ if (WIN32)
 	
 	if (GENERATE_FULL_INSTALLER)
 		set (LIB_DIR ${THIRD_PARTY_DIR}/lib)
-		file (GLOB WIN_INSTALL_DLLS ${LIB_DIR}/*.dll ${QTDIR}/bin/*.dll)
+		file (GLOB WIN_INSTALL_DLLS ${LIB_DIR}/*.dll ${QTDIR}/bin/*.dll ${OSPRAYDIR}/bin/*.dll)
 
 		install (
 			FILES ${WIN_INSTALL_DLLS}
@@ -256,7 +258,7 @@ endif (WIN32)
 if (APPLE)
 	set (CPACK_BINARY_DRAGNDROP ON)
 	if (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
-		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib) 
+		file (GLOB INSTALL_LIBS ${THIRD_PARTY_LIB_DIR}/*.dylib ${OSPRAYDIR}/lib/*.dylib) 
 		file (GLOB INSTALL_FRAMEWORKS ${THIRD_PARTY_LIB_DIR}/*.framework ${PYTHONPATH} ${QTDIR}/lib/*.framework)
 		install (
 			FILES ${INSTALL_LIBS}

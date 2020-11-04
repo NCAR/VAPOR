@@ -43,6 +43,7 @@ set (SRC
 	Proj4StringParser.cpp
 	glutil.cpp
 	VolumeAlgorithm.cpp
+	VolumeGLSL.cpp
 	VolumeRegular.cpp
 	# VolumeResampled.cpp
 	# VolumeTest.cpp
@@ -51,6 +52,7 @@ set (SRC
 	Texture.cpp
 	Framebuffer.cpp
 	ModelRenderer.cpp
+	OSPRay.cpp
 )
 
 set (HEADERS
@@ -99,15 +101,24 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/SliceRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/glutil.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeAlgorithm.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeGLSL.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeRegular.h
 	# ${PROJECT_SOURCE_DIR}/include/vapor/VolumeResampled.h
 	# ${PROJECT_SOURCE_DIR}/include/vapor/VolumeTest.h
 	# ${PROJECT_SOURCE_DIR}/include/vapor/VolumeTest2.h
 	${PROJECT_SOURCE_DIR}/include/vapor/VolumeCellTraversal.h
+	${PROJECT_SOURCE_DIR}/include/vapor/VolumeOSPRay.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Texture.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Framebuffer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ModelRenderer.h
+	${PROJECT_SOURCE_DIR}/include/vapor/OSPRay.h
 )
+
+if(BUILD_OSP)
+	set(SRC ${SRC}
+		VolumeOSPRay.cpp
+	)
+endif()
 
 add_library (render SHARED ${SRC} ${HEADERS})
 
@@ -123,6 +134,13 @@ if (UNIX AND NOT APPLE)
 	target_link_libraries (render PUBLIC GLU)
 endif ()
 
+
+if(BUILD_OSP)
+	find_library (OSPRAY ospray HINTS ${OSPRAYDIR}/lib REQUIRED)
+	target_link_libraries (render PUBLIC ${OSPRAY})
+	target_include_directories (render PUBLIC ${OSPRAYDIR}/include)
+	target_compile_definitions (render PUBLIC BUILD_OSPRAY)
+endif()
 
 add_definitions (-DRENDER_EXPORTS)
 
