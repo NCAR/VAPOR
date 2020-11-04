@@ -26,6 +26,10 @@ const std::string VolumeParams::PhongShininessTag = "PhongShininessTag";
 const std::string VolumeParams::UseColormapVariableTag = "UseColormapVariable";
 const std::string VolumeParams::SamplingRateMultiplierTag = "SamplingRateMultiplierTag";
 const std::string VolumeParams::VolumeDensityTag = "VolumeDensityTag";
+const std::string VolumeParams::OSPDensity = "OSPDensity";
+const std::string VolumeParams::OSPSampleRateScalar = "OSPSampleRateScalar";
+const std::string VolumeParams::OSPAmbientLightIntensity = "OSPAmbientLightIntensity";
+const std::string VolumeParams::OSPDirectionalLightIntensity = "OSPDirectionalLightIntensity";
 
 VolumeParams::VolumeParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave) : RenderParams(dataMgr, ssave, VolumeParams::GetClassType(), 3)
 {
@@ -136,4 +140,9 @@ void VolumeParams::_init()
     SetValueDouble(PhongDiffuseTag, "", GetDefaultPhongDiffuse());
     SetValueDouble(PhongSpecularTag, "", GetDefaultPhongSpecular());
     SetValueDouble(PhongShininessTag, "", GetDefaultPhongShininess());
+
+    SetValueDouble(OSPDensity, "", 1);
+    SetValueDouble(OSPSampleRateScalar, "", 1);
+    SetValueDouble(OSPAmbientLightIntensity, "", 0.2);
+    SetValueDouble(OSPDirectionalLightIntensity, "", 1);
 }

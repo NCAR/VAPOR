@@ -64,9 +64,9 @@ public:
     int         GetGLProjectionStackDepth();
     int         GetGLCurrentStackDepth();
     const char *GetMatrixModeStr();
-
-    float Near, Far;
 #endif
+
+    float Near, Far, FOV, Aspect;
 
 private:
     stack<glm::mat4>  _modelviewStack;

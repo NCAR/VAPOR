@@ -30,6 +30,7 @@
 #include <vapor/ResourcePath.h>
 #include <vapor/OptionParser.h>
 #include <vapor/FileUtils.h>
+#include <vapor/OSPRay.h>
 #ifdef WIN32
     #include "Windows.h"
 #endif
@@ -130,6 +131,8 @@ int           main(int argc, char **argv)
     QApplication::setColorSpec(QApplication::ManyColor);
 #endif
 
+    VOSP::Initialize(&argc, argv);
+
     QApplication a(argc, argv, true);
 
     // All C programs are run with the locale set to "C"
@@ -200,6 +203,7 @@ int           main(int argc, char **argv)
 
     if (estatus == 0) { estatus = a.exec(); }
 
+    VOSP::Shutdown();
     if (diagfp) fclose(diagfp);
     if (errfp) fclose(errfp);
     exit(estatus);
