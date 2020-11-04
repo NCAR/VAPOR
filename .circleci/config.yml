@@ -372,6 +372,27 @@ jobs:
       - store_artifacts:
             path: /tmp/tidy.txt
 
+  test_win10:
+    executor: win/default
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            #choco install visualcpp-build-tools -version 14.0.25420.1 -y
+            choco install visualstudio2019-workload-vctools -y
+            choco install python -y
+            choco install git -y
+            choco install cmake -y
+            choco install nsis -y
+            python -m pip install gdown
+            #setx /M PATH "%PATH%;C:\Program Files (x86)\MSBuild\14.0\bin" 
+            setx /M PATH "%PATH%;C:\Program Files (x86)\MSBuild\14.0\bin" 
+            msbuild -version
+            pwd
+            ls
+            python .circleci/downloadWin3rdParty.py
+
   build_win10_installer:
     executor: win/default
     steps:
@@ -379,12 +400,14 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            choco install visualcpp-build-tools -version 14.0.25420.1 -y
+            #choco install visualcpp-build-tools -version 14.0.25420.1 -y
+            choco install visualstudio2019-workload-vctools -y
             choco install python -y
             choco install git -y
             choco install cmake -y
             choco install nsis -y
             python -m pip install gdown
+            #setx /M PATH "%PATH%;C:\Program Files (x86)\MSBuild\14.0\bin" 
             setx /M PATH "%PATH%;C:\Program Files (x86)\MSBuild\14.0\bin" 
             msbuild -version
             pwd
@@ -396,6 +419,7 @@ jobs:
             Copy-Item site_files\* -Destination .
             mkdir build
             cd build
+            #& 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DCMAKE_BUILD_TYPE:STRING=Release -G 'Visual Studio 14 2015' -A x64
             & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DCMAKE_BUILD_TYPE:STRING=Release -G 'Visual Studio 14 2015' -A x64
             msbuild C:\Users\circleci\project\build\PACKAGE.vcxproj /p:Configuration=Release /p:Platform=x64
             mkdir -p C:\Users\circleci\project\tmp\workspace\installers
@@ -461,8 +485,9 @@ jobs:
 workflows:
   build:
     jobs:
-      - build_ubuntu18
-      - build_centos7
+      - test_win10
+      #- build_ubuntu18
+      #- build_centos7
       #- build_ubuntu16
       #- build_osx
       #- build_win10_installer
