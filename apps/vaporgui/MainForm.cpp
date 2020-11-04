@@ -89,6 +89,7 @@
 #include <QToolButton>
 #include <QStyle>
 #include <vapor/Progress.h>
+#include <vapor/OSPRay.h>
 
 // Following shortcuts are provided:
 // CTRL_N: new session
@@ -1088,6 +1089,10 @@ void MainForm::_createDeveloperMenu()
     });
     _developerMenu->addAction(enableProgress);
     _progressEnabledMenuItem = enableProgress;
+
+#ifdef BUILD_OSPRAY
+    _developerMenu->addAction(QString::fromStdString("OSPRay " + VOSP::Version()))->setDisabled(true);
+#endif
 }
 
 void MainForm::createMenus()

@@ -31,7 +31,7 @@ namespace VAPoR {
 
 class VolumeCellTraversal : public VolumeRegular {
 public:
-    VolumeCellTraversal(GLManager *gl);
+    VolumeCellTraversal(GLManager *gl, VolumeRenderer *renderer);
     ~VolumeCellTraversal();
 
     static std::string GetName() { return "Curvilinear"; }
@@ -75,7 +75,7 @@ protected:
 
 class VolumeCellTraversalIso : public VolumeCellTraversal {
 public:
-    VolumeCellTraversalIso(GLManager *gl) : VolumeCellTraversal(gl) {}
+    VolumeCellTraversalIso(GLManager *gl, VolumeRenderer *renderer) : VolumeCellTraversal(gl, renderer) {}
     static std::string     GetName() { return "Iso Curvilinear"; }
     static Type            GetType() { return Type::Iso; }
     virtual ShaderProgram *GetShader() const;

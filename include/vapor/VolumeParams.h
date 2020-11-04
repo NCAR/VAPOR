@@ -67,12 +67,13 @@ private:
     };
     static std::vector<AlgorithmEntry> _algorithms;
 
-    static const std::string _algorithmTag;
     static const std::string _algorithmWasManuallySetByUserTag;
     static const std::string _isoValuesTag;
     static const std::string _enabledIsoValuesTag;
 
 public:
+    static const std::string _algorithmTag;
+
     static const std::string UseColormapVariableTag;
     static const std::string SamplingRateMultiplierTag;
     static const std::string VolumeDensityTag;
@@ -82,6 +83,11 @@ public:
     static const std::string PhongDiffuseTag;
     static const std::string PhongSpecularTag;
     static const std::string PhongShininessTag;
+
+    static const std::string OSPDensity;
+    static const std::string OSPSampleRateScalar;
+    static const std::string OSPAmbientLightIntensity;
+    static const std::string OSPDirectionalLightIntensity;
 };
 
 };    // namespace VAPoR

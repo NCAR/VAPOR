@@ -42,6 +42,7 @@ bool VIntSliderEdit::GetSciNotation() const { return _lineEdit->GetSciNotation()
 
 void VIntSliderEdit::SetSciNotation(bool value)
 {
+    if (value == _lineEdit->GetSciNotation()) { return; }
     _lineEdit->SetSciNotation(value);
     emit FormatChanged();
 }
@@ -50,6 +51,7 @@ int VIntSliderEdit::GetNumDigits() const { return _lineEdit->GetNumDigits(); }
 
 void VIntSliderEdit::SetNumDigits(int digits)
 {
+    if (digits == _lineEdit->GetNumDigits()) { return; }
     _lineEdit->SetNumDigits(digits);
     emit FormatChanged();
 }
@@ -58,35 +60,16 @@ int VIntSliderEdit::GetValue() const { return _value; }
 
 void VIntSliderEdit::SetValue(int value)
 {
-    int min = _slider->GetMinimum();
-    if (value < min) {
-        if (_rangeChangable) {
-            _slider->SetMinimum(value);
-            _menu->SetMinimum(value);
-        } else {
-            value = min;
-        }
-    }
-
-    int max = _slider->GetMaximum();
-    if (value > max) {
-        if (_rangeChangable) {
-            _slider->SetMaximum(value);
-            _menu->SetMaximum(value);
-        } else {
-            value = max;
-        }
+    // If the new value is unchanged or illegal, reset _lineEdit and return
+    if (value == _value || value < _slider->GetMinimum() || value > _slider->GetMaximum()) {
+        _lineEdit->SetValueInt(_value);
+        return;
     }
 
     _value = value;
 
-    _lineEdit->blockSignals(true);
-    dynamic_cast<VIntLineEdit *>(_lineEdit)->SetValueInt(_value);
-    _lineEdit->blockSignals(false);
-
-    _slider->blockSignals(true);
+    _lineEdit->SetValueInt(_value);
     _slider->SetValue(_value);
-    _slider->blockSignals(false);
 
     if (QObject::sender() != nullptr) { emit ValueChanged(_value); }
 }
@@ -99,15 +82,14 @@ int VIntSliderEdit::GetMinimum() const
 
 void VIntSliderEdit::SetMinimum(int min)
 {
-    if (min > _value) {
-        _value = min;
-        _lineEdit->SetValueInt(min);
+    // If the new value is unchanged, or illegal, reset the menu and retur
+    if (min == _slider->GetMinimum() || min >= _slider->GetMaximum() || min > _value) {
+        _menu->SetMinimum(_slider->GetMinimum());
+        return;
     }
 
     _slider->SetMinimum(min);
-
     _menu->SetMinimum(min);
-    if (min >= _slider->GetMaximum()) { _menu->SetMaximum(min); }
 
     // If sender() is a nullptr, then this fuction is being called from Update().
     // Don't emit anythong.  Otherwise, emit our signal.
@@ -118,15 +100,15 @@ int VIntSliderEdit::GetMaximum() const { return _slider->GetMaximum(); }
 
 void VIntSliderEdit::SetMaximum(int max)
 {
-    if (max < _value) {
-        _value = max;
-        _lineEdit->SetValueInt(max);
+    // If the new value is unchanged, or illegal, reset the menu and return
+    if (max == _slider->GetMaximum() || max <= _slider->GetMinimum() || max < _value) {
+        _menu->SetMaximum(_slider->GetMaximum());
+        return;
     }
 
     _slider->SetMaximum(max);
 
     _menu->SetMaximum(max);
-    if (max <= _slider->GetMinimum()) { _menu->SetMinimum(max); }
 
     // If sender() is a nullptr, then this fuction is being called from Update().
     // Don't emit anythong.  Otherwise, emit our signal.

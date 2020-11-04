@@ -74,10 +74,10 @@ void MatrixManager::Perspective(float fovy, float aspect, float zNear, float zFa
     top() = glm::perspective(fovy, aspect, zNear, zFar);
     _projectionAspectRatio = aspect;
 
-#ifndef NDEBUG
     Near = zNear;
     Far = zFar;
-#endif
+    FOV = fovy;
+    Aspect = aspect;
 }
 
 void MatrixManager::Ortho(float left, float right, float bottom, float top)

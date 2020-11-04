@@ -11,6 +11,11 @@ namespace VAPoR {
 
 struct GLManager;
 class VolumeAlgorithmFactory;
+class VolumeRenderer;
+class VolumeParams;
+class ViewpointParams;
+class AnnotationParams;
+class Transform;
 
 //! \class VolumeAlgorithm
 //! \ingroup Public_Render
@@ -26,13 +31,14 @@ class VolumeAlgorithm : private NonCopyableMixin {
 public:
     enum class Type { Any, DVR, Iso };
 
-    VolumeAlgorithm(GLManager *gl);
+    VolumeAlgorithm(GLManager *gl, VolumeRenderer *renderer);
     virtual ~VolumeAlgorithm() {}
-    virtual int            LoadData(const Grid *grid) = 0;
-    virtual int            LoadSecondaryData(const Grid *grid) = 0;
-    virtual void           DeleteSecondaryData() = 0;
-    virtual ShaderProgram *GetShader() const = 0;
-    virtual void           SetUniforms(const ShaderProgram *shader) const = 0;
+    virtual void SaveDepthBuffer(bool fast){};
+    virtual int  Render(bool fast) = 0;
+    virtual int  LoadData(const Grid *grid) = 0;
+    virtual int  LoadSecondaryData(const Grid *grid) = 0;
+    virtual void DeleteSecondaryData() = 0;
+    virtual void GetFinalBlendingMode(int *src, int *dst) = 0;
 
     //! On OSX, some shaders can run for a long time without problems
     //! while others will crash if the run too long. It seems to correlate
@@ -41,22 +47,42 @@ public:
     virtual bool  RequiresChunkedRendering() = 0;
     virtual float GuestimateFastModeSpeedupFactor() const { return 1; }
 
-    static VolumeAlgorithm *NewAlgorithm(const std::string &name, GLManager *gl);
+    static VolumeAlgorithm *NewAlgorithm(const std::string &name, GLManager *gl, VolumeRenderer *renderer);
 
     static void Register(VolumeAlgorithmFactory *f);
 
-private:
-    static std::map<std::string, VolumeAlgorithmFactory *> factories;
-
 protected:
     GLManager *_glManager;
+
+    VolumeParams *    GetParams() const;
+    ViewpointParams * GetViewpointParams() const;
+    AnnotationParams *GetAnnotationParams() const;
+    Transform *       GetDatasetTransform() const;
+    void              GetExtents(glm::vec3 *dataMin, glm::vec3 *dataMax, glm::vec3 *userMin, glm::vec3 *userMax) const;
+
+private:
+    static std::map<std::string, VolumeAlgorithmFactory *> factories;
+    VolumeRenderer *                                       _renderer;
+};
+
+class VolumeAlgorithmNull : public VolumeAlgorithm {
+public:
+    VolumeAlgorithmNull(GLManager *gl, VolumeRenderer *renderer) : VolumeAlgorithm(gl, renderer) {}
+    static std::string GetName() { return "NULL"; }
+    static Type        GetType() { return Type::Any; }
+    int                Render(bool fast) { return 0; }
+    int                LoadData(const Grid *grid) { return 0; }
+    int                LoadSecondaryData(const Grid *grid) { return 0; }
+    void               DeleteSecondaryData() {}
+    bool               RequiresChunkedRendering() { return false; }
+    void               GetFinalBlendingMode(int *src, int *dst) {}
 };
 
 class VolumeAlgorithmFactory {
 public:
     std::string              name;
     VolumeAlgorithm::Type    type;
-    virtual VolumeAlgorithm *Create(GLManager *gl) = 0;
+    virtual VolumeAlgorithm *Create(GLManager *gl, VolumeRenderer *renderer) = 0;
 };
 
 template<class T> class VolumeAlgorithmRegistrar : public VolumeAlgorithmFactory {
@@ -68,7 +94,7 @@ public:
         type = T::GetType();
         VolumeAlgorithm::Register(this);
     }
-    VolumeAlgorithm *Create(GLManager *gl) { return new T(gl); }
+    VolumeAlgorithm *Create(GLManager *gl, VolumeRenderer *renderer) { return new T(gl, renderer); }
 };
 
 }    // namespace VAPoR
