@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 #include <vapor/VolumeRegular.h>
 #include <vapor/VolumeCellTraversal.h>
+#include <vapor/VolumeOSPRay.h>
 
 using std::vector;
 using std::string;
@@ -128,9 +129,6 @@ int VolumeRenderer::_initializeGL()
     
     _framebuffer.EnableDepthBuffer();
     _framebuffer.Generate();
-    _LUTTexture.Generate();
-    _LUT2Texture.Generate();
-    _depthTexture.Generate();
     
     return 0;
 }
@@ -140,28 +138,33 @@ int VolumeRenderer::_paintGL(bool fast)
     if (fast && _wasTooSlowForFastRender())
         return 0;
     
+    auto p = GetActiveParams();
+    CheckCache(_cache.ospMaxCells,         p->GetValueLong("osp_max_cells", 1));
+    CheckCache(_cache.ospTestCellId,       p->GetValueLong("osp_test_cells", 1));
+    CheckCache(_cache.osp_force_regular,   p->GetValueLong("osp_force_regular", 0));
+    CheckCache(_cache.osp_test_volume,     p->GetValueLong("osp_test_volume", 0));
+    CheckCache(_cache.osp_decompose,       p->GetValueLong("osp_decompose", 0));
+    CheckCache(_cache.osp_enable_clipping, p->GetValueLong("osp_enable_clipping", 0));
     
     if (_initializeAlgorithm() < 0) return -1;
     if (_loadData() < 0) return -1;
     if (_loadSecondaryData() < 0) return -1;
-    _loadTF();
     _cache.needsUpdate = false;
     
-    _depthTexture.CopyDepthBuffer();
+    _algorithm->SaveDepthBuffer(fast);
     _initializeFramebuffer(fast);
     
-    ShaderProgram *shader = _algorithm->GetShader();
-    if (!shader) return -1;
-    shader->Bind();
-    _setShaderUniforms(shader, fast);
-    
     glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    int src, dst;
+    _algorithm->GetFinalBlendingMode(&src, &dst);
+    glBlendFunc(src, dst);
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_ALWAYS);
     
     void *start = GLManager::BeginTimer();
+    
+    _algorithm->Render(fast);
     if (_shouldUseChunkedRender(fast))
         _drawScreenQuadChuncked();
     else
@@ -187,63 +190,6 @@ std::string VolumeRenderer::_getColorbarVariableName() const
         return vp->GetColorMapVariableName();
     else
         return vp->GetVariableName();
-}
-
-void VolumeRenderer::_setShaderUniforms(const ShaderProgram *shader, const bool fast) const
-{
-    VolumeParams *vp = dynamic_cast<VolumeParams *>(GetActiveParams());
-    ViewpointParams *viewpointParams = _paramsMgr->GetViewpointParams(_winName);
-    Viewpoint *viewpoint = viewpointParams->getCurrentViewpoint();
-    double m[16];
-    double cameraPos[3], cameraUp[3], cameraDir[3];
-    _glManager->matrixManager->GetDoublev(MatrixManager::Mode::ModelView, m);
-    viewpoint->ReconstructCamera(m, cameraPos, cameraUp, cameraDir);
-    
-    shader->SetUniform("MVP", _glManager->matrixManager->GetModelViewProjectionMatrix());
-    shader->SetUniform("cameraPos", vec3(cameraPos[0], cameraPos[1], cameraPos[2]));
-    shader->SetUniform("samplingRateMultiplier", (float)vp->GetSamplingMultiplier());
-    shader->SetUniform("lightingEnabled", vp->GetLightingEnabled());
-    shader->SetUniform("phongAmbient",   vp->GetPhongAmbient());
-    shader->SetUniform("phongDiffuse",   vp->GetPhongDiffuse());
-    shader->SetUniform("phongSpecular",  vp->GetPhongSpecular());
-    shader->SetUniform("phongShininess", vp->GetPhongShininess());
-    
-    glm::vec3 dataMin, dataMax, userMin, userMax;
-    _getExtents(&dataMin, &dataMax, &userMin, &userMax);
-    vec3 extLengths = dataMax - dataMin;
-    vec3 extScales = _getVolumeScales();
-    vec3 extLengthsScaled = extLengths * extScales;
-    float smallestDimension = min(extLengthsScaled[0], min(extLengthsScaled[1], extLengthsScaled[2]));
-    float largestDimension = max(extLengthsScaled[0], max(extLengthsScaled[1], extLengthsScaled[2]));
-    
-    shader->SetUniform("dataBoundsMin", dataMin);
-    shader->SetUniform("dataBoundsMax", dataMax);
-    shader->SetUniform("userExtsMin", userMin);
-    shader->SetUniform("userExtsMax", userMax);
-    shader->SetUniform("unitDistance", largestDimension/100.f);
-    shader->SetUniform("unitOpacityScalar", largestDimension/smallestDimension);
-    shader->SetUniform("scales", extScales);
-    
-    float density = vp->GetValueDouble(VolumeParams::VolumeDensityTag, 1);
-    density = powf(density, 4);
-    
-    shader->SetUniform("density", (float)density);
-    shader->SetUniform("LUTMin", (float)_cache.tf->getMinMapValue());
-    shader->SetUniform("LUTMax", (float)_cache.tf->getMaxMapValue());
-    shader->SetUniform("mapOrthoMode", viewpointParams->GetProjectionType() == ViewpointParams::MapOrthographic);
-    
-    shader->SetSampler("LUT", _LUTTexture);
-    shader->SetSampler("sceneDepth", _depthTexture);
-    
-    if (_cache.useColorMapVar) {
-        shader->SetUniform("LUTMin2", (float)_cache.tf2->getMinMapValue());
-        shader->SetUniform("LUTMax2", (float)_cache.tf2->getMaxMapValue());
-        shader->SetSampler("LUT2", _LUT2Texture);
-    }
-    
-    shader->SetUniform("fast", fast);
-    
-    _algorithm->SetUniforms(shader);
 }
 
 void VolumeRenderer::_drawScreenQuad()
@@ -404,8 +350,10 @@ int VolumeRenderer::_initializeAlgorithm()
     
     if (_cache.algorithmName != vp->GetAlgorithm()) {
         _cache.algorithmName = vp->GetAlgorithm();
+        if (_cache.algorithmName == "")
+            _cache.algorithmName = "NULL";
         if (_algorithm) delete _algorithm;
-        _algorithm = VolumeAlgorithm::NewAlgorithm(_cache.algorithmName, _glManager);
+        _algorithm = VolumeAlgorithm::NewAlgorithm(_cache.algorithmName, _glManager, this);
         _cache.needsUpdate = true;
     }
     if (_algorithm) return 0;
@@ -431,8 +379,8 @@ int VolumeRenderer::_loadData()
     if (!grid)
         return -1;
     
-    if (dynamic_cast<const UnstructuredGrid *>(grid)) {
-        MyBase::SetErrMsg("Unstructured grids are not supported by this renderer");
+    if (dynamic_cast<const UnstructuredGrid *>(grid) && !dynamic_cast<VolumeOSPRay*>(_algorithm)) {
+        MyBase::SetErrMsg("Unstructured grids are not supported by the GPU renderer");
         return -1;
     }
 
@@ -476,88 +424,13 @@ int VolumeRenderer::_loadSecondaryData()
     }
 }
 
-void VolumeRenderer::_getLUTFromTF(const MapperFunction *tf, float *LUT) const
-{
-    // Constant opacity needs to be removed here and applied in the shader
-    // because otherwise we run out of precision in the LUT
-    MapperFunction tfSansConstantOpacity(*tf);
-    tfSansConstantOpacity.setOpacityScale(1);
-    
-    tfSansConstantOpacity.makeLut(LUT);
-    for (int i = 0; i < 256; i++) {
-        LUT[4*i+3] = powf(LUT[4*i+3], 2);
-    }
-}
-
-void VolumeRenderer::_loadTF()
-{
-    VolumeParams *vp = (VolumeParams *)GetActiveParams();
-    
-    vector<float> constantColor = vp->GetConstantColor();
-    constantColor.push_back(vp->GetMapperFunc(_cache.var)->getOpacityScale());
-    CheckCache(_cache.constantColor, constantColor);
-    
-    _loadTF(&_LUTTexture, vp->GetMapperFunc(_cache.var), &_cache.tf);
-    
-    if (_cache.useColorMapVar) {
-        _loadTF(&_LUT2Texture, vp->GetMapperFunc(_cache.colorMapVar), &_cache.tf2);
-    }
-}
-
-void VolumeRenderer::_loadTF(Texture1D *texture, MapperFunction *tf, MapperFunction **cacheTF)
-{
-    if (!*cacheTF || **cacheTF != *tf)
-        _cache.needsUpdate = true;
-    
-    if (!_cache.needsUpdate)
-        return;
-    
-    if (*cacheTF) delete *cacheTF;
-    *cacheTF = new MapperFunction(*tf);
-    
-    float *LUT = new float[4 * 256];
-    _getLUTFromTF(tf, LUT);
-    texture->TexImage(GL_RGBA8, 256, 0, 0, GL_RGBA, GL_FLOAT, LUT);
-    delete [] LUT;
-}
-
-glm::vec3 VolumeRenderer::_getVolumeScales() const
-{
-    ViewpointParams *vpp = _paramsMgr->GetViewpointParams(_winName);
-    Transform *datasetTransform = vpp->GetTransform(GetMyDatasetName());
-    Transform *rendererTransform = GetActiveParams()->GetTransform();
-    VAssert(datasetTransform && rendererTransform);
- 
-    vector<double> datasetScales, rendererScales;
-    datasetScales = datasetTransform->GetScales();
-    rendererScales = rendererTransform->GetScales();
-    
-    return glm::vec3 (
-        datasetScales[0] * rendererScales[0],
-        datasetScales[1] * rendererScales[1],
-        datasetScales[2] * rendererScales[2]
-    );
-}
-
-void VolumeRenderer::_getExtents(glm::vec3 *dataMin, glm::vec3 *dataMax, glm::vec3 *userMin, glm::vec3 *userMax) const
-{
-    *userMin = vec3(_cache.minExt[0], _cache.minExt[1], _cache.minExt[2]);
-    *userMax = vec3(_cache.maxExt[0], _cache.maxExt[1], _cache.maxExt[2]);
-    *dataMin = vec3(_dataMinExt[0], _dataMinExt[1], _dataMinExt[2]);
-    *dataMax = vec3(_dataMaxExt[0], _dataMaxExt[1], _dataMaxExt[2]);
-    
-    // Moving domain allows area outside of data to be selected
-    *userMin = glm::max(*userMin, *dataMin);
-    *userMax = glm::min(*userMax, *dataMax);
-}
-
 std::string VolumeRenderer::_getDefaultAlgorithmForGrid(const Grid *grid) const
 {
-    if (GLManager::GetVendor() == GLManager::Vendor::Intel)
-        return VolumeRegular::GetName();
+    bool intel = GLManager::GetVendor() == GLManager::Vendor::Intel;
     
     if (dynamic_cast<const RegularGrid *>   (grid)) return VolumeRegular      ::GetName();
-    if (dynamic_cast<const StructuredGrid *>(grid)) return VolumeCellTraversal::GetName();
+    if (dynamic_cast<const StructuredGrid *>(grid)) return intel ? VolumeOSPRay::GetName() : VolumeCellTraversal::GetName();
+    if (dynamic_cast<const UnstructuredGrid *>(grid)) return VolumeOSPRay::GetName();
     MyBase::SetErrMsg("Unsupported grid type: %s", grid->GetType().c_str());
     return "";
 }
