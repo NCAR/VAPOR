@@ -277,7 +277,7 @@ int VaporField::GetVelocity(float time, const glm::vec3 &pos, glm::vec3 &velocit
         VAssert(rv == 0);
 
         // Find the velocity values at floor time step
-        glm::vec3 floorVelocity, ceilVelocity;
+        glm::vec3 floorVelocity, ceilingVelocity;
         for (int i = 0; i < 3; i++) {
             grid = _getAGrid(floorTS, VelocityNames[i]);
             if (grid == nullptr) return GRID_ERROR;
@@ -297,14 +297,14 @@ int VaporField::GetVelocity(float time, const glm::vec3 &pos, glm::vec3 &velocit
             for (int i = 0; i < 3; i++) {
                 grid = _getAGrid(floorTS + 1, VelocityNames[i]);
                 if (grid == nullptr) return GRID_ERROR;
-                ceilVelocity[i] = grid->GetValue(coords);
+                ceilingVelocity[i] = grid->GetValue(coords);
                 missingV[i] = grid->GetMissingValue();
             }
-            hasMissing = glm::equal(ceilVelocity, missingV);
+            hasMissing = glm::equal(ceilingVelocity, missingV);
             if (glm::any(hasMissing)) { return MISSING_VAL; }
 
             float weight = (time - _timestamps[floorTS]) / (_timestamps[floorTS + 1] - _timestamps[floorTS]);
-            velocity = glm::mix(floorVelocity, ceilVelocity, weight) * mult;
+            velocity = glm::mix(floorVelocity, ceilingVelocity, weight) * mult;
             return 0;
         }
     }    // end of unsteady condition
@@ -352,12 +352,13 @@ int VaporField::GetScalar(float time, const glm::vec3 &pos, float &scalar) const
         } else {
             grid = _getAGrid(floorTS + 1, ScalarName);
             if (grid == nullptr) return GRID_ERROR;
-            float ceilScalar = grid->GetValue(coords);
-            if (ceilScalar == grid->GetMissingValue()) {
+
+            float ceilingScalar = grid->GetValue(coords);
+            if (ceilingScalar == grid->GetMissingValue()) {
                 return MISSING_VAL;
             } else {
                 float weight = (time - _timestamps[floorTS]) / (_timestamps[floorTS + 1] - _timestamps[floorTS]);
-                scalar = glm::mix(floorScalar, ceilScalar, weight);
+                scalar = glm::mix(floorScalar, ceilingScalar, weight);
                 return 0;
             }
         }
@@ -382,7 +383,7 @@ void VaporField::AssignDataManager(VAPoR::DataMgr *dmgr)
     for (size_t i = 0; i < timeCoords.size(); i++) _timestamps[i] = timeCoords[i];
 }
 
-void VaporField::UpdateParams(const VAPoR::FlowParams *p)
+void VaporField::UpdateParamAndVarNames(const VAPoR::FlowParams *p)
 {
     _params = p;
 
@@ -396,6 +397,12 @@ void VaporField::UpdateParams(const VAPoR::FlowParams *p)
         else
             VelocityNames[i] = "";    // make sure it keeps an empty string,
     }                                 // instead of whatever left from before.
+}
+
+void VaporField::UpdateParams(const VAPoR::FlowParams *p)
+{
+    _params = p;
+    IsSteady = p->GetIsSteady();
 }
 
 int VaporField::LocateTimestamp(float time, size_t &floor) const
@@ -459,7 +466,7 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(float &delT) const
             }
 
     // Let's find the maximum velocity on these sampled locations
-    // Note that we want the raw velocity, which will be the value
+    // Note that we want the velocity without a multiplier, which will be the value
     // returned by GetVelocity() divided by the velocity multiplier.
     float mult = _params->GetVelocityMultiplier();
     if (mult == 0.0f) mult = 1.0f;
@@ -468,10 +475,17 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(float &delT) const
     glm::vec3   vel;
     for (long i = 0; i < totalSamples; i++) {
         int rv = this->GetVelocity(timestamp, samples[i], vel);
-        if (rv != 0) return rv;
-        vel *= mult1o;    // Restore the raw velocity values
-        auto mag = glm::length(vel);
-        if (mag > maxmag) maxmag = mag;
+        // Among possible return values, 0 is good, and MISSING_VAL isn't too bad,
+        // we just need to ignore those values.
+        if (rv == flow::MISSING_VAL)
+            continue;
+        else if (rv != 0)
+            return rv;
+        else {
+            vel *= mult1o;    // Restore the raw velocity values
+            auto mag = glm::length(vel);
+            if (mag > maxmag) maxmag = mag;
+        }
     }
 
     // Let's dictate that using the maximum velocity FROM OUR SAMPLES

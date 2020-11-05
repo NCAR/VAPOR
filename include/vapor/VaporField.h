@@ -76,7 +76,8 @@ public:
     // Functions for interaction with VAPOR components
     //
     void AssignDataManager(VAPoR::DataMgr *dmgr);
-    void UpdateParams(const VAPoR::FlowParams *p);
+    void UpdateParamAndVarNames(const VAPoR::FlowParams *p);
+    void UpdateParams(const VAPoR::FlowParams *);
 
     //
     // Find one index whose timestamp is just below a given time

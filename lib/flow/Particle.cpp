@@ -1,5 +1,4 @@
 #include "vapor/Particle.h"
-#include <stdexcept>
 
 using namespace flow;
 
@@ -30,31 +29,29 @@ Particle::Particle(float x, float y, float z, float t, float val)
 
 void Particle::AttachProperty(float v)
 {
-    auto itr = _properties.cbefore_begin();
-    for (const auto &x : _properties) {
-        (void)x;
-        ++itr;
+    auto before_itr = _properties.cbefore_begin();
+    for (auto itr = _properties.cbegin(); itr != _properties.cend(); ++itr) ++before_itr;
+
+    _properties.insert_after(before_itr, v);
+}
+
+auto Particle::GetPropertyList() const -> const std::forward_list<float> & { return _properties; }
+
+void Particle::ClearProperty() { _properties.clear(); }
+
+void Particle::RemoveProperty(size_t target_i)
+{
+    size_t current_i = 0;
+    auto   before_it = _properties.cbefore_begin();
+    for (auto it = _properties.cbegin(); it != _properties.cend(); ++it) {
+        if (current_i == target_i) {
+            _properties.erase_after(before_it);
+            break;
+        }
+        ++current_i;
+        ++before_it;
     }
-    _properties.insert_after(itr, v);
-    _nProperties++;
 }
-
-float Particle::RetrieveProperty(int idx) const
-{
-    if (idx < 0 || idx > _nProperties) throw std::out_of_range("flow::Particle");
-
-    auto itr = _properties.cbegin();
-    for (int i = 0; i < idx; i++) { ++itr; }
-    return *itr;
-}
-
-void Particle::ClearProperties()
-{
-    _properties.clear();
-    _nProperties = 0;
-}
-
-int Particle::GetNumOfProperties() const { return (_nProperties); }
 
 void Particle::SetSpecial(bool isSpecial)
 {

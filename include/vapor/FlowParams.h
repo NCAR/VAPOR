@@ -70,6 +70,8 @@ public:
     std::string GetFlowlineOutputFilename() const;
     void        SetFlowlineOutputFilename(const std::string &);
 
+    std::vector<std::string> GetFlowOutputMoreVariables() const;
+
     // Note: this result vector could be of size 2 or 3.
     std::vector<bool> GetPeriodic() const;
     void              SetPeriodic(const std::vector<bool> &);
@@ -152,6 +154,7 @@ public:
     static const std::string _seedGenModeTag;
     static const std::string _seedInputFilenameTag;
     static const std::string _flowlineOutputFilenameTag;
+    static const std::string _flowOutputMoreVariablesTag;
     static const std::string _flowDirectionTag;
     static const std::string _needFlowlineOutputTag;
     static const std::string _xPeriodicTag;
