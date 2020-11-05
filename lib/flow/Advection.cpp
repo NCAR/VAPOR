@@ -1,6 +1,7 @@
 #include <iostream>
 #include "vapor/Advection.h"
 #include <fstream>
+#include <algorithm>
 
 using namespace flow;
 
@@ -215,8 +216,9 @@ int Advection::AdvectTillTime(Field *velocity, float startT, float deltaT, float
                     separator.SetSpecial(true);
                     s.insert(itr, std::move(separator));
                     _separatorCount[streamIdx]++;
-                } else
+                } else {
                     break; // break the while loop
+                }
 
             } // Finish of the if condition
 
@@ -271,6 +273,8 @@ int Advection::CalculateParticleValues(Field *scalar, bool skipNonZero) {
         if (scalar->LockParams() != 0)
             return PARAMS_ERROR;
 
+        _valueVarName = scalar->ScalarName;
+
         for (auto &s : _streams) {
             for (auto &p : s) {
                 // Skip this particle if it's a separator
@@ -298,6 +302,8 @@ int Advection::CalculateParticleValues(Field *scalar, bool skipNonZero) {
                 mostSteps = s.size();
         }
 
+        _valueVarName = scalar->ScalarName;
+
         for (size_t i = 0; i < mostSteps; i++) {
             for (auto &s : _streams) {
                 if (i < s.size()) {
@@ -322,19 +328,44 @@ int Advection::CalculateParticleValues(Field *scalar, bool skipNonZero) {
 }
 
 int Advection::CalculateParticleProperties(Field *scalar) {
-    size_t mostSteps = 0;
-    for (const auto &s : _streams)
-        if (s.size() > mostSteps)
-            mostSteps = s.size();
+    // Test if this scalar property is already calculated.
+    if (std::find(_propertyVarNames.cbegin(), _propertyVarNames.cend(), scalar->ScalarName) != _propertyVarNames.cend())
+        return 0;
 
-    for (size_t i = 0; i < mostSteps; i++) {
+    // Also test if this scalar field is the same as the one used to calculate particle values.
+    if (scalar->ScalarName == _valueVarName)
+        return 0;
+
+    // Proceed if there is no current scalar property
+    _propertyVarNames.emplace_back(scalar->ScalarName);
+
+    if (scalar->IsSteady) {
+        if (scalar->LockParams() != 0)
+            return PARAMS_ERROR;
+
         for (auto &s : _streams) {
-            if (i < s.size()) {
-                auto &p = s[i];
-                float value;
-                int rv = scalar->GetScalar(p.time, p.location, value);
-                if (rv == 0)                 // A particle could be out of the volume, so we only
-                    p.AttachProperty(value); // attach property when returns 0.
+            for (auto &p : s) {
+                float val;
+                int rv = scalar->GetScalar(p.time, p.location, val);
+                if (rv == 0)
+                    p.AttachProperty(val);
+            }
+        }
+    } else {
+        size_t mostSteps = 0;
+        for (const auto &s : _streams)
+            if (s.size() > mostSteps)
+                mostSteps = s.size();
+
+        for (size_t i = 0; i < mostSteps; i++) {
+            for (auto &s : _streams) {
+                if (i < s.size()) {
+                    auto &p = s[i];
+                    float value;
+                    int rv = scalar->GetScalar(p.time, p.location, value);
+                    if (rv == 0)                 // A particle could be out of the volume, so we only
+                        p.AttachProperty(value); // attach property when returns 0.
+                }
             }
         }
     }
@@ -392,140 +423,6 @@ float Advection::_calcAdjustFactor(const Particle &p2, const Particle &p1,
         return 1.0f;
 }
 
-std::FILE *
-Advection::_prepareFileWrite(const std::string &filename, bool append) const {
-    if (filename.empty())
-        return nullptr;
-
-    FILE *f = nullptr;
-    if (append) {
-        f = std::fopen(filename.c_str(), "a");
-    } else {
-        f = std::fopen(filename.c_str(), "w");
-    }
-    if (f == nullptr)
-        return nullptr;
-
-    std::fprintf(f, "%s\n", "# This file could be plotted by Gnuplot using the following command:");
-    std::fprintf(f, "%s\n\n", "# splot output_filename u 2:3:4 w lines ");
-    std::fprintf(f, "%s\n\n", "# ID,   X-position,    Y-position,    Z-position,    Time,   Value");
-
-    return f;
-}
-
-int Advection::OutputStreamsGnuplotMaxPart(const std::string &filename,
-                                           size_t maxPart,
-                                           bool append) const {
-    std::FILE *f = _prepareFileWrite(filename, append);
-    if (f == nullptr)
-        return FILE_ERROR;
-
-    int idx = 0;
-    for (const auto &s : _streams) {
-        // Either output all the particles in this stream,
-        // or only up to a certain number of particles.
-        size_t numPart = 0;
-        for (size_t i = 0; i < s.size() && numPart < maxPart; i++) {
-            const auto &p = s[i];
-            if (!p.IsSpecial()) {
-                std::fprintf(f, "%d, %f, %f, %f, %f, %f\n", idx, p.location.x,
-                             p.location.y, p.location.z, p.time, p.value);
-                numPart++;
-            }
-        }
-        std::fprintf(f, "\n\n");
-        idx++;
-    }
-    std::fclose(f);
-
-    return 0;
-}
-
-int Advection::OutputStreamsGnuplotMaxTime(const std::string &filename,
-                                           float timeStamp,
-                                           bool append) const {
-    std::FILE *f = _prepareFileWrite(filename, append);
-    if (f == nullptr)
-        return FILE_ERROR;
-
-    int idx = 0;
-    for (const auto &s : _streams) {
-        for (const auto &p : s) {
-            if (p.time > timeStamp)
-                break; // finish this current stream
-
-            if (!p.IsSpecial()) {
-                std::fprintf(f, "%d, %f, %f, %f, %f, %f\n", idx, p.location.x,
-                             p.location.y, p.location.z, p.time, p.value);
-            }
-        }
-        std::fprintf(f, "\n\n");
-        idx++;
-    }
-    std::fclose(f);
-
-    return 0;
-}
-
-int Advection::InputStreamsGnuplot(const std::string &filename) {
-    std::ifstream ifs(filename);
-    if (!ifs.is_open())
-        return FILE_ERROR;
-
-    std::vector<Particle> newSeeds;
-    std::string line;
-
-    while (std::getline(ifs, line)) {
-        // remove leading spaces and tabs
-        size_t found = line.find_first_not_of(" \t");
-        if (found != std::string::npos)
-            line = line.substr(found, line.size() - found);
-        // skip this line if it's empty
-        if (line.empty())
-            continue;
-
-        // If leading by a #, then skip it.
-        if (line.front() == '#')
-            continue;
-
-        // Now try to parse numbers separated by comma
-        line.push_back(','); // append a comma to the very end of the line
-        std::vector<float> values;
-        size_t start = 0;
-        size_t end = line.find(',');
-        while (end != std::string::npos && values.size() < 4) {
-            // Here we read in first 3 or 4 values of the line.
-            // Additional values are discarded.
-            auto str = line.substr(start, end - start);
-            float val;
-            try {
-                val = std::stof(str);
-            } catch (const std::invalid_argument &e) {
-                ifs.close();
-                return FILE_ERROR;
-            }
-            values.push_back(val);
-            start = end + 1;
-            end = line.find(',', start);
-        }
-
-        // See if we have collected enough numbers
-        if (values.size() < 3) {
-            ifs.close();
-            return FILE_ERROR;
-        } else if (values.size() == 3)
-            newSeeds.emplace_back(values.data(), 0.0f);
-        else // values.size() == 4
-            newSeeds.emplace_back(values.data(), values[3]);
-    }
-    ifs.close();
-
-    if (!newSeeds.empty())
-        this->UseSeedParticles(newSeeds);
-
-    return 0;
-}
-
 size_t
 Advection::GetNumberOfStreams() const {
     return _streams.size();
@@ -552,9 +449,25 @@ Advection::GetMaxNumOfPart() const {
 }
 
 void Advection::ClearParticleProperties() {
+    _propertyVarNames.clear();
     for (auto &stream : _streams)
         for (auto &part : stream)
-            part.ClearProperties();
+            part.ClearProperty();
+}
+
+void Advection::RemoveParticleProperty(const std::string &varToRemove) {
+    auto itr = std::find(_propertyVarNames.begin(), _propertyVarNames.end(), varToRemove);
+
+    // Do nothing if `varToRemove` does not exist
+    if (itr == _propertyVarNames.end())
+        return;
+    else {
+        auto rmI = std::distance(_propertyVarNames.begin(), itr);
+        _propertyVarNames.erase(itr);
+        for (auto &stream : _streams)
+            for (auto &part : stream)
+                part.RemoveProperty(rmI);
+    }
 }
 
 void Advection::ResetParticleValues() {
@@ -606,4 +519,12 @@ float Advection::_applyPeriodic(float val, float min, float max) const {
             pval -= span;
         return pval;
     }
+}
+
+auto Advection::GetValueVarName() const -> std::string {
+    return _valueVarName;
+}
+
+auto Advection::GetPropertyVarNames() const -> std::vector<std::string> {
+    return _propertyVarNames;
 }

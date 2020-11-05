@@ -29,6 +29,7 @@ const std::string FlowParams::_steadyNumOfStepsTag = "SteadyNumOfStepsTag";
 const std::string FlowParams::_seedGenModeTag = "SeedGenModeTag";
 const std::string FlowParams::_seedInputFilenameTag = "SeedInputFilenameTag";
 const std::string FlowParams::_flowlineOutputFilenameTag = "FlowlineOutputFilenameTag";
+const std::string FlowParams::_flowOutputMoreVariablesTag = "FlowOutputMoreVariablesTag";
 const std::string FlowParams::_flowDirectionTag = "FlowDirectionTag";
 const std::string FlowParams::_needFlowlineOutputTag = "NeedFlowlineOutputTag";
 const std::string FlowParams::_xPeriodicTag = "PeriodicTag_X";
@@ -197,13 +198,15 @@ void FlowParams::SetSeedInputFilename(const std::string &name) {
     SetValueString(_seedInputFilenameTag, "filename for input seeding list", name);
 }
 
-std::string
-FlowParams::GetFlowlineOutputFilename() const {
+std::string FlowParams::GetFlowlineOutputFilename() const {
     return GetValueString(_flowlineOutputFilenameTag, "");
 }
-
 void FlowParams::SetFlowlineOutputFilename(const std::string &name) {
     SetValueString(_flowlineOutputFilenameTag, "filename for output flow lines", name);
+}
+
+std::vector<std::string> FlowParams::GetFlowOutputMoreVariables() const {
+    return GetValueStringVec(_flowOutputMoreVariablesTag);
 }
 
 int FlowParams::GetFlowDirection() const {

@@ -52,6 +52,9 @@ class FLOW_API Advection final {
     void ResetParticleValues();
     // Clear all existing properties of a particle
     void ClearParticleProperties();
+    // Clear particle property with a certain name.
+    // If the the specified property name does not exist, then nothing is done.
+    void RemoveParticleProperty(const std::string &);
 
     // Set advection basics
     void UseSeedParticles(const std::vector<Particle> &seeds);
@@ -63,33 +66,6 @@ class FLOW_API Advection final {
     // Retrieve the maximum number of particles in any stream
     size_t GetMaxNumOfPart() const;
 
-    //
-    // Output a file that could be plotted by gnuplot
-    //   Command:  splot "filename" u 1:2:3 w lines
-    //   Tutorial: http://lowrank.net/gnuplot/datafile-e.html
-    // Input seed points from a CVS file.
-    //   This CVS file should follow gnuplot conventions, meaning:
-    //   - lines starting with # are treated as comments
-    //   - empty lines are omitted
-    //   - each line should have at least three columns for X, Y, Z position.
-    //     An optional 4th column is used to indicate time.
-    //     The rest columns are omitted.
-    //
-    // Params: maxPart sets the maximum number of particles to write output to file
-    //         even if a stream might contain more particles.
-    //
-    int OutputStreamsGnuplotMaxPart(const std::string &filename,
-                                    size_t maxPart,
-                                    bool append = false) const;
-    //
-    // Params: maxTime sets the maximum number of particles to write output to file
-    //         even if a stream might contain more particles.
-    //
-    int OutputStreamsGnuplotMaxTime(const std::string &filename,
-                                    float time,
-                                    bool append = false) const;
-    int InputStreamsGnuplot(const std::string &filename);
-
     // Query properties (most are properties of the velocity field)
     int CheckReady() const;
 
@@ -98,8 +74,15 @@ class FLOW_API Advection final {
     void SetYPeriodicity(bool, float min, float max);
     void SetZPeriodicity(bool, float min, float max);
 
+    // Retrieve the names of value variable and property variables.
+    auto GetValueVarName() const -> std::string;
+    auto GetPropertyVarNames() const -> std::vector<std::string>;
+
   private:
     std::vector<std::vector<Particle>> _streams;
+    std::string _valueVarName;
+    std::vector<std::string> _propertyVarNames;
+
     const float _lowerAngle, _upperAngle; // Thresholds for step size adjustment
     float _lowerAngleCos, _upperAngleCos; // Cosine values of the threshold angles
     std::vector<int> _separatorCount;     // how many separators does each stream have.
@@ -127,12 +110,6 @@ class FLOW_API Advection final {
     // Adjust input "val" according to the bound specified by min and max.
     // Returns the value after adjustment.
     float _applyPeriodic(float val, float min, float max) const;
-
-    // Prepares an std::FILE object and writes the header.
-    // Upon success, this function returns a pointer pointing to a valid FILE object.
-    // Upon failure, this function returns a nullptr.  In this case,
-    // the caller of this function will need to close this file object.
-    std::FILE *_prepareFileWrite(const std::string &filename, bool append) const;
 };
 }; // namespace flow
 

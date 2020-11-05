@@ -124,17 +124,7 @@ class RENDER_API FlowRenderer final : public Renderer {
 
     int _updateAdvectionPeriodicity(flow::Advection *advc);
 
-    // A function to populate particle properties.
-    // If useAsColor == true, then this calculated property will be stored in a field
-    //    of a Particle that will be used for coloring the particle.
-    // If useAsColor == false, then this property is simply kept by the Particle without
-    //    any impact to the visualization.
-    int _populateParticleProperties(const std::string &varname,
-                                    const FlowParams *params,
-                                    bool useAsColor);
-
-    // Color the last particle in a stream
-    int _colorLastParticle();
+    int _outputFlowLines();
 
     void _dupSeedsNewTime(std::vector<flow::Particle> &seeds,
                           size_t firstN,        // First N particles to duplicate
