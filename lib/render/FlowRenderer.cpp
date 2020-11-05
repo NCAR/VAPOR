@@ -1,8 +1,11 @@
 #include "vapor/glutil.h"
 #include "vapor/FlowRenderer.h"
 #include "vapor/Particle.h"
+#include "vapor/AdvectionIO.h"
 #include <iostream>
+#include <sstream>
 #include <cstring>
+#include <cctype>   // std::isspace
 #include <random>
 #include <algorithm>
 #include <vapor/Progress.h>
@@ -110,65 +113,106 @@ FlowRenderer::_initializeGL()
     return 0;
 }
 
-int
-FlowRenderer::_paintGL( bool fast )
+
+int FlowRenderer::_outputFlowLines()
+{
+    auto* params = dynamic_cast<FlowParams*>( GetActiveParams() );
+    assert( params != nullptr );
+
+    // Retrieve additional variables that users require to sample
+    const auto addiVars = params->GetFlowOutputMoreVariables();
+
+    // Identify variables that an advection already has, but the user doesn't 
+    // include in addiVars. Remove them.
+    //
+    // start by listing all variables as potentially to be removed
+    auto removeVars = _advection.GetPropertyVarNames();
+    auto containV = [&addiVars](const std::string& v) {return 
+                    std::find(addiVars.cbegin(), addiVars.cend(), v) != addiVars.cend();};
+    // remove those confirmed by the user from the "to remove" list
+    removeVars.erase( std::remove_if( removeVars.begin(), removeVars.end(), containV ),
+                      removeVars.end() );
+    for( const auto& rmV : removeVars ) {
+        _advection.RemoveParticleProperty( rmV );
+
+        if( _2ndAdvection )
+            _2ndAdvection->RemoveParticleProperty( rmV );
+    }
+                 
+    for( const auto& v : addiVars ) {
+        // Create a VaporField with this variable
+        flow::VaporField varField( 2 );
+        varField.AssignDataManager( _dataMgr );
+        varField.UpdateParams( params );
+        varField.ScalarName = v;
+
+        // Sample values along the pathlines.
+        // Note that the advection class will do nothing if this variable already exists
+        //   either as a property or as a value.
+        _advection.CalculateParticleProperties( &varField );
+        if( _2ndAdvection )
+            _2ndAdvection->CalculateParticleProperties( &varField );
+    }
+
+    // In case of steady flow, output the number of particles that 
+    // equals to the advection steps.
+    // In the case of unsteady flow, output particles that are up to 
+    // the advection timestamp.
+    int rv;
+    if( params->GetIsSteady() ) {
+        rv = flow::OutputFlowlinesNumSteps( &_advection, 
+                                            params->GetFlowlineOutputFilename().c_str(),
+                                            params->GetSteadyNumOfSteps(),
+                                            false );
+    }
+    else {
+        rv = flow::OutputFlowlinesMaxTime( &_advection,
+                                           params->GetFlowlineOutputFilename().c_str(),
+                                           _timestamps.at( params->GetCurrentTimestep() ),
+                                           false );
+    }
+    if( rv != 0 ) {
+        MyBase::SetErrMsg("Output flow lines wrong!");
+        return rv;
+    }
+
+    if( _2ndAdvection ) {   // bi-directional advection
+        if( params->GetIsSteady() ) {
+            rv = flow::OutputFlowlinesNumSteps( _2ndAdvection.get(),
+                                                params->GetFlowlineOutputFilename().c_str(), 
+                                                params->GetSteadyNumOfSteps(),
+                                                true );
+        }
+        else {
+            rv = flow::OutputFlowlinesMaxTime( _2ndAdvection.get(),
+                                               params->GetFlowlineOutputFilename().c_str(), 
+                                               _timestamps.at( params->GetCurrentTimestep() ),
+                                               true );
+        }
+        if( rv != 0 ) {
+                MyBase::SetErrMsg("Output flow lines wrong!");
+                return rv;
+        }
+    }
+
+    return 0;
+}
+
+
+int FlowRenderer::_paintGL( bool fast )
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
     int rv;     // return value
 
     _velocityField.DefaultZ = Renderer::GetDefaultZ( _dataMgr, params->GetCurrentTimestep() );
 
-    if( params->GetNeedFlowlineOutput() )
-    {
-        // In case of steady flow, output the number of particles that 
-        // equals to the advection steps plus one.
-        // In the case of unsteady flow, output particles that are up to 
-        // the advection time step.
-        if( params->GetIsSteady() )
-        {
-            rv = _advection.OutputStreamsGnuplotMaxPart( 
-                                params->GetFlowlineOutputFilename(),
-                                params->GetSteadyNumOfSteps() + 1,
-                                false );
-        }
-        else
-        {
-            rv = _advection.OutputStreamsGnuplotMaxTime( 
-                                params->GetFlowlineOutputFilename(),
-                                _timestamps.at( params->GetCurrentTimestep() ),
-                                false );
-        }
-        if( rv != 0 )
-        {
-                MyBase::SetErrMsg("Output flow lines wrong!");
-                return flow::FILE_ERROR;
-        }
-
-        if( _2ndAdvection )     // bi-directional advection
-        {
-            if( params->GetIsSteady() )
-            {
-                rv = _2ndAdvection->OutputStreamsGnuplotMaxPart( 
-                                        params->GetFlowlineOutputFilename(), 
-                                        params->GetSteadyNumOfSteps() + 1,                    
-                                        true );
-            }
-            else
-            {
-                rv = _2ndAdvection->OutputStreamsGnuplotMaxTime(
-                                        params->GetFlowlineOutputFilename(),
-                                        _timestamps.at( params->GetCurrentTimestep() ),
-                                        true );
-            }
-            if( rv != 0 )
-            {
-                    MyBase::SetErrMsg("Output flow lines wrong!");
-                    return flow::FILE_ERROR;
-            }
-        }
-
+    if( params->GetNeedFlowlineOutput() ) {
+        rv = _outputFlowLines();
         params->SetNeedFlowlineOutput( false );
+        if( rv != 0 )
+            return rv;
     }
+
 
     if( _updateFlowCacheAndStates( params ) != 0 )
     {
@@ -180,20 +224,20 @@ FlowRenderer::_paintGL( bool fast )
         _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
     
 
-    _velocityField.UpdateParams( params );
-    _colorField.UpdateParams( params );
+    _velocityField.UpdateParamAndVarNames( params );
+    _colorField.UpdateParamAndVarNames( params );
 
     // In case there's 0 or 1 variable selected, meaning that more than one of the velocity 
     // variable names are empty strings, then the paint routine aborts.
     if( _velocityField.GetNumOfEmptyVelocityNames() > 1 )
     {
-        MyBase::SetErrMsg("Please provide at least 2 field variables for advection!");
+        MyBase::SetErrMsg("Please provide at least 1 field variables for advection!");
         return flow::PARAMS_ERROR;
     }
 
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
-        /* First step is to re-calculate deltaT */
+        // First step is to re-calculate deltaT
         rv = _velocityField.CalcDeltaTFromCurrentTimeStep( _cache_deltaT );
         if( rv != 0 )
         {
@@ -201,10 +245,10 @@ FlowRenderer::_paintGL( bool fast )
             return rv;
         }
 
-        /* Read seeds from a file is a special case, so we put it up front */
+        // Read seeds from a file is a special case, so we put it up front
         if( _cache_seedGenMode == FlowSeedMode::LIST )
         {
-            rv = _advection.InputStreamsGnuplot( params->GetSeedInputFilename() );
+            rv = flow::InputSeedsCSV( params->GetSeedInputFilename(), &_advection );
             if( rv != 0 )
             {
                 MyBase::SetErrMsg("Input seed list wrong!");
@@ -218,7 +262,7 @@ FlowRenderer::_paintGL( bool fast )
             }
             if( _2ndAdvection )     // bi-directional advection
             {
-                _2ndAdvection->InputStreamsGnuplot( params->GetSeedInputFilename() );
+                flow::InputSeedsCSV( params->GetSeedInputFilename(), _2ndAdvection.get() );
                 rv = _updateAdvectionPeriodicity( _2ndAdvection.get() ); 
                 if( rv != 0 )
                 {
@@ -291,11 +335,11 @@ FlowRenderer::_paintGL( bool fast )
         float deltaT = _cache_deltaT;
         rv = flow::ADVECT_HAPPENED;
 
-        /* Advection scheme 1: advect a maximum number of steps.
-         * This scheme is used for steady flow */
+        // Advection scheme 1: advect a maximum number of steps.
+        // This scheme is used for steady flow
         if( params->GetIsSteady() )
         {
-            /* If the advection is single-directional */
+            // If the advection is single-directional
             if( params->GetFlowDirection() == 1 )           // backward integration
                 deltaT *= -1.0f;
             long numOfSteps = params->GetSteadyNumOfSteps();
@@ -304,7 +348,7 @@ FlowRenderer::_paintGL( bool fast )
             Progress::Update(0);
             _advection.AdvectSteps( &_velocityField, deltaT, numOfSteps );
 
-            /* If the advection is bi-directional */
+            // If the advection is bi-directional
             if( _2ndAdvection )
             {
                 assert( deltaT > 0.0f );
@@ -315,8 +359,8 @@ FlowRenderer::_paintGL( bool fast )
             Progress::Finish();
         }
 
-        /* Advection scheme 2: advect to a certain timestamp.
-         * This scheme is used for unsteady flow */
+        // Advection scheme 2: advect to a certain timestamp.
+        // This scheme is used for unsteady flow
         else
         {
             for( int i = 1; i <= _cache_currentTS; i++ )
@@ -606,7 +650,8 @@ int  FlowRenderer::_renderAdvectionHelper(bool renderDirection)
     return 0;
 }
 
-glm::vec3 FlowRenderer::_getScales() {
+glm::vec3 FlowRenderer::_getScales() 
+{
     string myVisName = GetVisualizer();
     VAPoR::ViewpointParams* vpp = _paramsMgr->GetViewpointParams(myVisName);
     string datasetName = GetMyDatasetName();

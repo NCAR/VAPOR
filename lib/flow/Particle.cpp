@@ -1,5 +1,4 @@
 #include "vapor/Particle.h"
-#include <stdexcept>
 
 using namespace flow;
 
@@ -28,66 +27,55 @@ Particle::Particle( float x, float y, float z, float t, float val )
     value      = val;
 }
 
-void
-Particle::AttachProperty( float v )
+void Particle::AttachProperty( float v )
 {
-    auto itr = _properties.cbefore_begin();  
-    for( const auto& x : _properties )
-    {
-        (void) x;
-        ++itr;
-    }
-    _properties.insert_after( itr, v );
-    _nProperties++;
+    auto before_itr = _properties.cbefore_begin();  
+    for( auto itr = _properties.cbegin(); itr != _properties.cend(); ++itr )
+        ++before_itr;
+
+    _properties.insert_after( before_itr, v );
 }
 
-float
-Particle::RetrieveProperty( int idx ) const
+auto Particle::GetPropertyList() const -> const std::forward_list<float>&
 {
-    if( idx < 0 || idx > _nProperties )
-        throw std::out_of_range( "flow::Particle" );
-
-    auto itr = _properties.cbegin();
-    for( int i = 0; i < idx; i++ )
-    {
-        ++itr;
-    }
-    return *itr;
+    return _properties;
 }
 
-void
-Particle::ClearProperties()
+void Particle::ClearProperty()
 {
     _properties.clear();
-    _nProperties = 0;
 }
-
-int
-Particle::GetNumOfProperties() const
+    
+void Particle::RemoveProperty( size_t target_i )
 {
-    return (_nProperties);
+    size_t current_i = 0;
+    auto before_it = _properties.cbefore_begin();
+    for( auto it = _properties.cbegin(); it != _properties.cend(); ++it ) {
+        if( current_i == target_i ){
+            _properties.erase_after( before_it );
+            break;
+        }
+        ++current_i;
+        ++before_it;
+    }
 }
 
-void
-Particle::SetSpecial( bool isSpecial )
+void Particle::SetSpecial( bool isSpecial )
 {
     // Give both "time" and "value" a nan to indicate the "special state."
     // Accidental assignment of nan to one of the two variables would not 
     // render a "special state."
-    if( isSpecial )
-    {
+    if( isSpecial ) {
         time  = std::nanf("1");
         value = std::nanf("1");
     }
-    else
-    {
+    else {
         time  = 0.0f;
         value = 0.0f;
     }
 }
 
-bool
-Particle::IsSpecial() const
+bool Particle::IsSpecial() const
 {
     return (std::isnan(time) && std::isnan(value));
 }
