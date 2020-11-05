@@ -128,8 +128,7 @@ private:
 
     int _updateAdvectionPeriodicity( flow::Advection* advc );
 
-    // Color the last particle in a stream
-    int  _colorLastParticle();
+    int _outputFlowLines();
 
     void _dupSeedsNewTime( std::vector<flow::Particle>& seeds,
                            size_t  firstN,                      // First N particles to duplicate

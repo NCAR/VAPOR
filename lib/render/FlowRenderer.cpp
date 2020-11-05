@@ -114,6 +114,97 @@ FlowRenderer::_initializeGL()
 }
 
 
+int FlowRenderer::_outputFlowLines()
+{
+    auto* params = dynamic_cast<FlowParams*>( GetActiveParams() );
+    assert( params != nullptr );
+
+    // Retrieve additional variables that users require to sample
+    const auto addiVars = params->GetFlowOutputMoreVariables();
+
+    // Identify variables that an advection already has, but the user doesn't 
+    // include in addiVars. Remove them.
+    //
+    // start by listing all variables as potentially to be removed
+    auto removeVars = _advection.GetPropertyVarNames();
+    auto containV = [&addiVars](const std::string& v) {return 
+                    std::find(addiVars.cbegin(), addiVars.cend(), v) != addiVars.cend();};
+    // remove those confirmed by the user from the "to remove" list
+    removeVars.erase( std::remove_if( removeVars.begin(), removeVars.end(), containV ),
+                      removeVars.end() );
+    for( const auto& rmV : removeVars ) {
+        auto availVars = _advection.GetPropertyVarNames();
+        size_t rmI = 0;
+        for( size_t i = 0; i < availVars.size(); i++ )
+            if( rmV == availVars[i] ) {
+                rmI = i;
+                break;
+            }
+        _advection.RemoveParticleProperty( rmI );
+
+        if( _2ndAdvection )
+            _2ndAdvection->RemoveParticleProperty( rmI );
+    }
+                 
+    for( const auto& v : addiVars ) {
+        // Create a VaporField with this variable
+        flow::VaporField varField( 2 );
+        varField.AssignDataManager( _dataMgr );
+        varField.UpdateParams( params );
+        varField.ScalarName = v;
+
+        // Sample values along the pathlines.
+        // Note that the advection class will do nothing if this variable already exists.
+        _advection.CalculateParticleProperties( &varField );
+        if( _2ndAdvection )
+            _2ndAdvection->CalculateParticleProperties( &varField );
+    }
+
+    // In case of steady flow, output the number of particles that 
+    // equals to the advection steps.
+    // In the case of unsteady flow, output particles that are up to 
+    // the advection timestamp.
+    int rv;
+    if( params->GetIsSteady() ) {
+        rv = flow::OutputFlowlinesNumSteps( &_advection, 
+                                            params->GetFlowlineOutputFilename().c_str(),
+                                            params->GetSteadyNumOfSteps(),
+                                            false );
+    }
+    else {
+        rv = flow::OutputFlowlinesMaxTime( &_advection,
+                                           params->GetFlowlineOutputFilename().c_str(),
+                                           _timestamps.at( params->GetCurrentTimestep() ),
+                                           false );
+    }
+    if( rv != 0 ) {
+        MyBase::SetErrMsg("Output flow lines wrong!");
+        return rv;
+    }
+
+    if( _2ndAdvection ) {   // bi-directional advection
+        if( params->GetIsSteady() ) {
+            rv = flow::OutputFlowlinesNumSteps( _2ndAdvection.get(),
+                                                params->GetFlowlineOutputFilename().c_str(), 
+                                                params->GetSteadyNumOfSteps(),
+                                                true );
+        }
+        else {
+            rv = flow::OutputFlowlinesMaxTime( _2ndAdvection.get(),
+                                               params->GetFlowlineOutputFilename().c_str(), 
+                                               _timestamps.at( params->GetCurrentTimestep() ),
+                                               true );
+        }
+        if( rv != 0 ) {
+                MyBase::SetErrMsg("Output flow lines wrong!");
+                return rv;
+        }
+    }
+
+    return 0;
+}
+
+
 int FlowRenderer::_paintGL( bool fast )
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
@@ -122,86 +213,10 @@ int FlowRenderer::_paintGL( bool fast )
     _velocityField.DefaultZ = Renderer::GetDefaultZ( _dataMgr, params->GetCurrentTimestep() );
 
     if( params->GetNeedFlowlineOutput() ) {
-
-        // Retrieve additional variables that users require to sample
-        const auto addiVars = params->GetFlowOutputMoreVariables();
-
-        // Identify variables that an advection already has, but the user doesn't 
-        // include in addiVars. Remove them.
-        auto removeVars = _advection.GetPropertyVarNames();
-        auto containV = [&addiVars](const std::string& v) {return 
-                        std::find(addiVars.cbegin(), addiVars.cend(), v) != addiVars.cend();};
-        removeVars.erase( std::remove_if( removeVars.begin(), removeVars.end(), containV ),
-                          removeVars.end() );
-        for( const auto& rmV : removeVars ) {
-            auto availVars = _advection.GetPropertyVarNames();
-            size_t rmI = 0;
-            for( size_t i = 0; i < availVars.size(); i++ )
-                if( rmV == availVars[i] ) {
-                    rmI = i;
-                    break;
-                }
-            _advection.RemoveParticleProperty( rmI );
-
-            if( _2ndAdvection )
-                _2ndAdvection->RemoveParticleProperty( rmI );
-        }
-                     
-        // Note that the advection class will do nothing if this variable already exists.
-        for( const auto& v : addiVars ) {
-            // Create a VaporField with this variable
-            flow::VaporField varField( 2 );
-            varField.AssignDataManager( _dataMgr );
-            varField.UpdateParams( params );
-            varField.ScalarName = v;
-
-            // Sample values along the pathlines
-            _advection.CalculateParticleProperties( &varField );
-            if( _2ndAdvection )
-                _2ndAdvection->CalculateParticleProperties( &varField );
-        }
-
-        // In case of steady flow, output the number of particles that 
-        // equals to the advection steps plus one.
-        // In the case of unsteady flow, output particles that are up to 
-        // the advection time step.
-        if( params->GetIsSteady() ) {
-            rv = flow::OutputFlowlinesNumSteps( &_advection, 
-                                                params->GetFlowlineOutputFilename().c_str(),
-                                                params->GetSteadyNumOfSteps(),
-                                                false );
-        }
-        else {
-            rv = flow::OutputFlowlinesMaxTime( &_advection,
-                                               params->GetFlowlineOutputFilename().c_str(),
-                                               _timestamps.at( params->GetCurrentTimestep() ),
-                                               false );
-        }
-        if( rv != 0 ) {
-            MyBase::SetErrMsg("Output flow lines wrong!");
-            return rv;
-        }
-
-        if( _2ndAdvection ) {   // bi-directional advection
-            if( params->GetIsSteady() ) {
-                rv = flow::OutputFlowlinesNumSteps( _2ndAdvection.get(),
-                                                    params->GetFlowlineOutputFilename().c_str(), 
-                                                    params->GetSteadyNumOfSteps(),
-                                                    true );
-            }
-            else {
-                rv = flow::OutputFlowlinesMaxTime( _2ndAdvection.get(),
-                                                   params->GetFlowlineOutputFilename().c_str(), 
-                                                   _timestamps.at( params->GetCurrentTimestep() ),
-                                                   true );
-            }
-            if( rv != 0 ) {
-                    MyBase::SetErrMsg("Output flow lines wrong!");
-                    return rv;
-            }
-        }
-
+        rv = _outputFlowLines();
         params->SetNeedFlowlineOutput( false );
+        if( rv != 0 )
+            return rv;
     }
 
 
