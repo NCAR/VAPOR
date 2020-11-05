@@ -501,15 +501,19 @@ void Advection::ClearParticleProperties()
 }
     
 
-void Advection::RemoveParticleProperty( size_t i )
+void Advection::RemoveParticleProperty( const std::string& varToRemove )
 {
-    if( i >= _propertyVarNames.size() )
+    auto itr = std::find( _propertyVarNames.begin(), _propertyVarNames.end(), varToRemove );
+
+    // Do nothing if `varToRemove` does not exist
+    if( itr == _propertyVarNames.end() )
         return;
-    else{
-        _propertyVarNames.erase( _propertyVarNames.begin() + i );
+    else {
+        auto rmI = std::distance( _propertyVarNames.begin(), itr );
+        _propertyVarNames.erase( itr );
         for( auto& stream : _streams )
             for( auto& part : stream )
-                part.RemoveProperty( i );
+                part.RemoveProperty( rmI );
     }
 }
 

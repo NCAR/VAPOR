@@ -133,17 +133,10 @@ int FlowRenderer::_outputFlowLines()
     removeVars.erase( std::remove_if( removeVars.begin(), removeVars.end(), containV ),
                       removeVars.end() );
     for( const auto& rmV : removeVars ) {
-        auto availVars = _advection.GetPropertyVarNames();
-        size_t rmI = 0;
-        for( size_t i = 0; i < availVars.size(); i++ )
-            if( rmV == availVars[i] ) {
-                rmI = i;
-                break;
-            }
-        _advection.RemoveParticleProperty( rmI );
+        _advection.RemoveParticleProperty( rmV );
 
         if( _2ndAdvection )
-            _2ndAdvection->RemoveParticleProperty( rmI );
+            _2ndAdvection->RemoveParticleProperty( rmV );
     }
                  
     for( const auto& v : addiVars ) {
