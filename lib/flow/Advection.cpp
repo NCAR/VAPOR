@@ -362,6 +362,10 @@ int Advection::CalculateParticleProperties( Field* scalar )
         != _propertyVarNames.cend() )
         return 0;
 
+    // Also test if this scalar field is the same as the one used to calculate particle values.
+    if(  scalar->ScalarName == _valueVarName )
+        return 0;
+
     // Proceed if there is no current scalar property
     _propertyVarNames.emplace_back( scalar->ScalarName );
 
