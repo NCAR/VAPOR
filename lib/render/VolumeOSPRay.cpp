@@ -861,6 +861,13 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid) {
                 std::swap(cellIndices[start + 1], cellIndices[start + 2]);
                 std::swap(cellIndices[start + 1 + 3], cellIndices[start + 2 + 3]);
             }
+            WindingOrder w1 = getWindingOrderTetra(coords[cellIndices[start + 0]], coords[cellIndices[start + 1]], coords[cellIndices[start + 2]], coords[cellIndices[start + 3]]);
+            WindingOrder w2 = getWindingOrderTetra(coords[cellIndices[start + 0]], coords[cellIndices[start + 1]], coords[cellIndices[start + 2]], coords[cellIndices[start + 4]]);
+            WindingOrder w3 = getWindingOrderTetra(coords[cellIndices[start + 0]], coords[cellIndices[start + 1]], coords[cellIndices[start + 2]], coords[cellIndices[start + 5]]);
+            if (w1 == INVALID || w2 == INVALID || w3 == INVALID) {
+                erase[i] = true;
+                continue;
+            }
         } else if (type == OSP_TETRAHEDRON) {
             WindingOrder w = getWindingOrderTetra(coords[cellIndices[start + 0]], coords[cellIndices[start + 1]], coords[cellIndices[start + 2]], coords[cellIndices[start + 3]]);
             if (w == CW)
