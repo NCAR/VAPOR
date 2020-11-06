@@ -177,14 +177,7 @@ unsigned char *GeoImageTMS::GetImage(
 	size_t pixelSW[2];
 	size_t pixelNE[2];
 	size_t nx,ny;
-	_geotile->LatLongToPixelXY(
-		myGeoExtentsData[0], myGeoExtentsData[1], lod, 
-		pixelSW[0], pixelSW[1]
-	);
-	_geotile->LatLongToPixelXY(
-		myGeoExtentsData[2], myGeoExtentsData[3], lod, 
-		pixelNE[0], pixelNE[1]
-	);
+	_geotile->LatLongRectToPixelRect(myGeoExtentsData, myGeoExtentsData+2, lod, pixelSW, pixelNE);
 
 	int rc = _geotile->MapSize(
 		pixelSW[0],pixelSW[1],pixelNE[0],pixelNE[1],lod,nx, ny
@@ -337,14 +330,7 @@ int GeoImageTMS::_getBestLOD(
 		//
 		// Get GeoTile's pixel coordinates of subregion. 
 		//
-		_geotile->LatLongToPixelXY(
-			myGeoExtentsData[0], myGeoExtentsData[1], lod, 
-			pixelSW[0], pixelSW[1]
-		);
-		_geotile->LatLongToPixelXY(
-			myGeoExtentsData[2], myGeoExtentsData[3], lod, 
-			pixelNE[0], pixelNE[1]
-		);
+		_geotile->LatLongRectToPixelRect(myGeoExtentsData, myGeoExtentsData+2, lod, pixelSW, pixelNE);
 
 		int rc = _geotile->MapSize(
 			pixelSW[0],pixelSW[1],pixelNE[0],pixelNE[1],lod,nx, ny
