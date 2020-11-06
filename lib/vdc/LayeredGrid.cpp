@@ -178,6 +178,7 @@ bool LayeredGrid::_insideGrid(
         vector<double> zcoords;
 
         size_t nz = GetDimensions()[2];
+        zcoords.reserve(nz);
         for (int kk = 0; kk < nz; kk++) {
 
             // Interpolate Z coordinate across triangle
