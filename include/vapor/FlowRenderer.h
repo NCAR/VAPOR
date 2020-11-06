@@ -128,12 +128,7 @@ private:
 
     int _updateAdvectionPeriodicity( flow::Advection* advc );
 
-    // Input:  a long string that is the input by the user.
-    // Output: a vector of *valid* variable names.
-    auto _parseAdditionalVariables(const std::string& longString) const -> std::vector<std::string>;
-
-    // Color the last particle in a stream
-    int  _colorLastParticle();
+    int _outputFlowLines();
 
     void _dupSeedsNewTime( std::vector<flow::Particle>& seeds,
                            size_t  firstN,                      // First N particles to duplicate

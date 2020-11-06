@@ -584,7 +584,7 @@ int VaporField::CalcDeltaTFromCurrentTimeStep( float& delT ) const
             }
 
     // Let's find the maximum velocity on these sampled locations
-    // Note that we want the raw velocity, which will be the value
+    // Note that we want the velocity without a multiplier, which will be the value
     // returned by GetVelocity() divided by the velocity multiplier.
     float mult =  _params->GetVelocityMultiplier();
     if(   mult == 0.0f )
@@ -595,12 +595,18 @@ int VaporField::CalcDeltaTFromCurrentTimeStep( float& delT ) const
     for( long i = 0; i < totalSamples; i++ )
     {
         int rv  = this->GetVelocity( timestamp, samples[i], vel );
-        if( rv != 0 )
+        // Among possible return values, 0 is good, and MISSING_VAL isn't too bad,
+        // we just need to ignore those values.
+        if( rv == flow::MISSING_VAL )
+            continue;
+        else if( rv != 0 )
             return rv;
-        vel *= mult1o;  // Restore the raw velocity values
-        auto mag = glm::length( vel );
-        if(  mag > maxmag )
-             maxmag = mag;
+        else{ 
+            vel *= mult1o;  // Restore the raw velocity values
+            auto mag = glm::length( vel );
+            if(  mag > maxmag )
+                 maxmag = mag;
+        }
     }
 
     // Let's dictate that using the maximum velocity FROM OUR SAMPLES
