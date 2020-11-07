@@ -71,10 +71,12 @@ int SliceParams::Initialize() {
     std::vector<double> minExt, maxExt;
     box->GetExtents(minExt, maxExt);
     
-    std::vector<double> sampleLocation(3);
-    for (int i = 0; i < 3; i++)
-        sampleLocation[i] = (minExt[i] + maxExt[i]) / 2.0;
-    SetValueDoubleVec(SampleLocationTag, "", sampleLocation);
+    if (GetValueDoubleVec(SampleLocationTag).size() != 3) {
+        std::vector<double> sampleLocation(3);
+        for (int i = 0; i < 3; i++)
+            sampleLocation[i] = (minExt[i] + maxExt[i]) / 2.0;
+        SetValueDoubleVec(SampleLocationTag, "", sampleLocation);
+    }
     
     SetSampleRate(MIN_DEFAULT_SAMPLERATE);
 
