@@ -1,6 +1,7 @@
 #include <ImageEventRouter.h>
 #include <vapor/ImageParams.h>
 #include "PWidgets.h"
+#include "PTMSLODInput.h"
 
 using namespace VAPoR;
 typedef ImageParams IP;
@@ -11,9 +12,10 @@ ImageEventRouter::ImageEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
 {
     AddSubtab("Variables", new PGroup({new PSection("Variable Selection", {new PHeightVariableSelector}), new PFidelitySection}));
 
-    AddSubtab("Appearance", new PSection("Image", {new PCheckbox(IP::_isGeoRefTag, "Geo Reference"), new PCheckbox(IP::_ignoreTransparencyTag, "Ingore Transparency"),
-                                                   (new PDoubleSliderEdit(IP::_constantOpacityTag, "Opacity"))->EnableDynamicUpdate(),
-                                                   (new PFileOpenSelector(IP::_fileNameTag, "Image File"))->SetFileTypeFilter("TIFF files, tiled images (*.tiff *.tif *.gtif *.tms)")}));
+    AddSubtab("Appearance",
+              new PSection("Image", {new PCheckbox(IP::_isGeoRefTag, "Geo Reference"), new PCheckbox(IP::_ignoreTransparencyTag, "Ingore Transparency"),
+                                     (new PDoubleSliderEdit(IP::_constantOpacityTag, "Opacity"))->EnableDynamicUpdate(),
+                                     (new PFileOpenSelector(IP::_fileNameTag, "Image File"))->SetFileTypeFilter("TIFF files, tiled images (*.tiff *.tif *.gtif *.tms)"), new PTMSLODInput()}));
 
     AddSubtab("Geometry", new PGeometrySubtab);
 }
