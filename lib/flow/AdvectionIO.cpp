@@ -51,6 +51,11 @@ auto flow::OutputFlowlinesNumSteps( const Advection*   adv,
         std::fprintf( f, "\n" );
     }
 
+    // Let's declare variables that will be used repeatedly for 
+    //   time and geo coordinate conversion
+    int   year, month, day, hour, minute, second;
+    float cX,   cY,    cZ;  // converted X, Y, Z
+
     // Write the trajectories
     for( size_t s_idx = 0; s_idx < adv->GetNumberOfStreams(); s_idx++ ) {
         const auto& stream = adv->GetStreamAt( s_idx );
@@ -59,13 +64,12 @@ auto flow::OutputFlowlinesNumSteps( const Advection*   adv,
         for( const auto& p : stream ) {
             if( !p.IsSpecial() ) {
                 // Let's convert the time!
-                int year, month, day, hour, minute, second;
                 udunits.DecodeTime( p.time, &year, &month, &day, &hour, &minute, &second );
 
                 // Let's also convert geo coordinates if needed.
-                float cX = p.location.x;    // converted X, Y, Z
-                float cY = p.location.y;
-                float cZ = p.location.z;
+                cX = p.location.x;
+                cY = p.location.y;
+                cZ = p.location.z;
                 if( needGeoConversion ) {
                     proj4API.Transform( &cX, &cY, &cZ, 1 );
                 }
@@ -139,6 +143,11 @@ auto flow::OutputFlowlinesMaxTime( const Advection*   adv,
         std::fprintf( f, "\n" );
     }
 
+    // Let's declare variables that will be used repeatedly for 
+    //   time and geo coordinate conversion
+    int   year, month, day, hour, minute, second;
+    float cX,   cY,    cZ;  // converted X, Y, Z
+
     // Write the trajectories
     for( size_t s_idx = 0; s_idx < adv->GetNumberOfStreams(); s_idx++ ) {
         const auto& stream = adv->GetStreamAt( s_idx );
@@ -150,13 +159,12 @@ auto flow::OutputFlowlinesMaxTime( const Advection*   adv,
 
             if( !p.IsSpecial() ) {
                 // Let's convert the time!
-                int year, month, day, hour, minute, second;
                 udunits.DecodeTime( p.time, &year, &month, &day, &hour, &minute, &second );
 
                 // Let's also convert geo coordinates if needed.
-                float cX = p.location.x;    // converted X, Y, Z
-                float cY = p.location.y;
-                float cZ = p.location.z;
+                cX = p.location.x;
+                cY = p.location.y;
+                cZ = p.location.z;
                 if( needGeoConversion ) {
                     proj4API.Transform( &cX, &cY, &cZ, 1 );
                 }
