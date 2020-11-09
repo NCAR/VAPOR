@@ -227,7 +227,7 @@ public:
 
     //! Compute the size of a map in pixels at a specified lod and coordinates
     //!
-    //! Given a rectangular boundary described to two points (the north-west and
+    //! Given a rectangular boundary described by two points (the north-west and
     //! south-east corner) in pixel coordinates, and a level of detail, this
     //! method computes the size of the map (width and height) in pixels.
     //!
@@ -254,6 +254,21 @@ public:
         w = _tile_width;
         h = _tile_height;
     }
+
+    //! Map a rectanular region described by lat-lon coordinates to pixel coordinates
+    //!
+    //!
+    //! \param[in] geoSW A two-element array containing the longitude, and latitude coordinate, respectively,
+    //! of the south-west corner of the region
+    //! \param[in] geoNE A two-element array containing the longitude, and latitude coordinate, respectively,
+    //! of the north-east corner of the region
+    //! \param[in] lod The level of detail
+    //! \param[out] pixelSW Returns a two-element array containing the X, and Y pixel coordinates, respectively,
+    //! of the south-west corner of the region
+    //! \param[out] pixelNE Returns a two-element array containing the X, and Y pixel coordinates, respectively,
+    //! of the north-east corner of the region
+    //
+    void LatLongRectToPixelRect(const double geoSW[2], const double geoNE[2], int lod, size_t pixelSW[2], size_t pixelNE[2]) const;
 
 private:
     size_t                                 _pixel_size;

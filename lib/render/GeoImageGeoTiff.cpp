@@ -442,8 +442,7 @@ bool GeoImageGeoTiff::_extractSubtexture(unsigned char *texture, size_t width, s
     //
     // Get GeoTile's pixel coordinates of subregion.
     //
-    geotile->LatLongToPixelXY(myGeoExtentsData[0], myGeoExtentsData[1], 0, pixelSW[0], pixelSW[1]);
-    geotile->LatLongToPixelXY(myGeoExtentsData[2], myGeoExtentsData[3], 0, pixelNE[0], pixelNE[1]);
+    geotile->LatLongRectToPixelRect(myGeoExtentsData, myGeoExtentsData + 2, 0, pixelSW, pixelNE);
 
     int rc = geotile->MapSize(pixelSW[0], pixelSW[1], pixelNE[0], pixelNE[1], 0, nx, ny);
     if (rc != 0) {

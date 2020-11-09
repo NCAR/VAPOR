@@ -80,11 +80,6 @@ int GeoTile::GetMap(size_t pixelX0, size_t pixelY0, size_t pixelX1, size_t pixel
     size_t nx_global, ny_global;
     MapSize(lod, nx_global, ny_global);
 
-    if (pixelX0 == pixelX1) { pixelX1 = pixelX0 == 0 ? nx_global - 1 : pixelX1 - 1; }
-    if (pixelY0 == pixelY1) {    // Needed?
-        pixelY1 = pixelY0 == 0 ? ny_global - 1 : pixelY1 - 1;
-    }
-
     //
     // resolution of requested sub region (map). Need to handle periodicity.
     //
@@ -248,8 +243,6 @@ int GeoTile::MapSize(size_t pixelX0, size_t pixelY0, size_t pixelX1, size_t pixe
     size_t nx_global, ny_global;
     MapSize(lod, nx_global, ny_global);
 
-    if (pixelX0 == pixelX1) { pixelX1 = pixelX0 == 0 ? nx_global - 1 : pixelX1 - 1; }
-
     if (pixelX0 > nx_global - 1) return (-1);
     if (pixelY0 > ny_global - 1) return (-1);
     if (pixelX1 > nx_global - 1) return (-1);
@@ -260,7 +253,7 @@ int GeoTile::MapSize(size_t pixelX0, size_t pixelY0, size_t pixelX1, size_t pixe
     //
     // resolution of requested sub region (map). Need to handle periodicity.
     //
-    if (pixelX1 > pixelX0) {
+    if (pixelX1 >= pixelX0) {
         nx = pixelX1 - pixelX0 + 1;
     } else {
         nx = nx_global - (pixelX0 - pixelX1 - 1);    // map wraps around lon
@@ -288,6 +281,41 @@ void GeoTile::_CopyTileToMap(const unsigned char *tile, size_t tilePixelX0, size
 
             mapptr += _pixel_size;
             tileptr += _pixel_size;
+        }
+    }
+}
+
+void GeoTile::LatLongRectToPixelRect(const double geoSW[2], const double geoNE[2], int lod, size_t pixelSW[2], size_t pixelNE[2]) const
+{
+    LatLongToPixelXY(geoSW[0], geoSW[1], lod, pixelSW[0], pixelSW[1]);
+    LatLongToPixelXY(geoNE[0], geoNE[1], lod, pixelNE[0], pixelNE[1]);
+
+    // Handle wraparound for longitude. I.e. if the S.W. and N.E. longitudes map to
+    // same pixel coordinate, the region may span the entire globe, or they may simply span
+    // a small region contained within a single pixel. To determine the case we pick a longitude point
+    // between the geographic SW and NE corners, convert to pixels, and see if the midpoint is still
+    // in the same pixel.
+    //
+    if (pixelSW[0] == pixelNE[0]) {
+        // X pixel coordinate for SW and NE corners are the same. Determine if
+        // longitude wraps around, or simply defines a small region residing entirely
+        // within a single pixel.
+        //
+        double midpointGeo[2] = {(geoNE[0] + geoSW[0]) / 2.0, (geoNE[1] + geoSW[1]) / 2.0};
+        size_t midpointPixel[2];
+        LatLongToPixelXY(midpointGeo[0], midpointGeo[1], lod, midpointPixel[0], midpointPixel[1]);
+
+        // If geographic midpoint resuls in a different pixel the region wraps around.
+        // Correct the NE (or SW) pixel so we
+        // don't have identical pixel coordinates for both corners
+        //
+        size_t nx_global, ny_global;
+        MapSize(lod, nx_global, ny_global);
+        if (pixelSW[0] != midpointPixel[0]) {
+            if (pixelSW[0] == 0)
+                pixelNE[0] = nx_global - 1;
+            else
+                pixelNE[0] = pixelSW[0] - 1;
         }
     }
 }
