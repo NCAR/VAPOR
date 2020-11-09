@@ -82,6 +82,12 @@ auto flow::OutputFlowlinesMaxTime( const Advection*  adv,
                                    float             maxTime,
                                    bool              append ) -> int
 {
+    // First we need the infrastructure for time conversion
+	VAPoR::UDUnits udunits;
+	if( udunits.Initialize() < 0 )
+        return PARAMS_ERROR;
+
+    // Requesting the file handle
     std::FILE* f = nullptr;
     if( append ) {
         f = std::fopen( filename, "a" );
@@ -114,8 +120,14 @@ auto flow::OutputFlowlinesMaxTime( const Advection*  adv,
                 break;
 
             if( !p.IsSpecial() ) {
-                std::fprintf( f, "%lu, %f, %f, %f, %f, %f", s_idx, p.location.x, p.location.y,
-                                  p.location.z, p.time, p.value );
+                // Let's convert the time!
+                int year, month, day, hour, minute, second;
+                udunits.DecodeTime( p.time, &year, &month, &day, &hour, &minute, &second );
+
+                std::fprintf( f, "%lu, %f, %f, %f, %4.4d-%2.2d-%2.2d_%2.2d:%2.2d:%2.2d, %f", 
+                                  s_idx, p.location.x, p.location.y, p.location.z,
+                                  year, month, day, hour, minute, second,
+                                  p.value );
 
                 auto props = p.GetPropertyList();
                 // A quick sanity check
