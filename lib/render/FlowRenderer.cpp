@@ -163,12 +163,14 @@ int FlowRenderer::_outputFlowLines()
         rv = flow::OutputFlowlinesNumSteps( &_advection, 
                                             params->GetFlowlineOutputFilename().c_str(),
                                             params->GetSteadyNumOfSteps(),
+                                            _dataMgr->GetMapProjection(),
                                             false );
     }
     else {
         rv = flow::OutputFlowlinesMaxTime( &_advection,
                                            params->GetFlowlineOutputFilename().c_str(),
                                            _timestamps.at( params->GetCurrentTimestep() ),
+                                           _dataMgr->GetMapProjection(),
                                            false );
     }
     if( rv != 0 ) {
@@ -181,12 +183,14 @@ int FlowRenderer::_outputFlowLines()
             rv = flow::OutputFlowlinesNumSteps( _2ndAdvection.get(),
                                                 params->GetFlowlineOutputFilename().c_str(), 
                                                 params->GetSteadyNumOfSteps(),
+                                                _dataMgr->GetMapProjection(),
                                                 true );
         }
         else {
             rv = flow::OutputFlowlinesMaxTime( _2ndAdvection.get(),
                                                params->GetFlowlineOutputFilename().c_str(), 
                                                _timestamps.at( params->GetCurrentTimestep() ),
+                                               _dataMgr->GetMapProjection(),
                                                true );
         }
         if( rv != 0 ) {

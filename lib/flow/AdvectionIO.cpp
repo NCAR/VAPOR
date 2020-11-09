@@ -6,16 +6,27 @@
 #include <cctype>
 #include "vapor/AdvectionIO.h"
 #include "vapor/UDUnitsClass.h"
+#include "vapor/Proj4API.h"
 
-auto flow::OutputFlowlinesNumSteps( const Advection*  adv,
-                                    const char*       filename,
-                                    size_t            numSteps,
-                                    bool              append ) -> int
+auto flow::OutputFlowlinesNumSteps( const Advection*   adv,
+                                    const char*        filename,
+                                    size_t             numSteps,
+                                    const std::string& proj4string,
+                                    bool               append ) -> int
 {
     // First we need the infrastructure for time conversion
 	VAPoR::UDUnits udunits;
 	if( udunits.Initialize() < 0 )
         return PARAMS_ERROR;
+
+    // Second we need the infrastructure for coordinate conversion
+    bool needGeoConversion = false;
+    VAPoR::Proj4API proj4API;
+    if( !proj4string.empty() ) {
+        if( proj4API.Initialize(proj4string, "") < 0 )
+            return PARAMS_ERROR;
+        needGeoConversion = true;
+    }
 
     // Requesting the file handle
     std::FILE* f = nullptr;
@@ -51,8 +62,16 @@ auto flow::OutputFlowlinesNumSteps( const Advection*  adv,
                 int year, month, day, hour, minute, second;
                 udunits.DecodeTime( p.time, &year, &month, &day, &hour, &minute, &second );
 
+                // Let's also convert geo coordinates if needed.
+                float cX = p.location.x;    // converted X, Y, Z
+                float cY = p.location.y;
+                float cZ = p.location.z;
+                if( needGeoConversion ) {
+                    proj4API.Transform( &cX, &cY, &cZ, 1 );
+                }
+
                 std::fprintf( f, "%lu, %f, %f, %f, %4.4d-%2.2d-%2.2d_%2.2d:%2.2d:%2.2d, %f", 
-                                  s_idx, p.location.x, p.location.y, p.location.z,
+                                  s_idx, cX, cY, cZ,
                                   year, month, day, hour, minute, second,
                                   p.value );
 
@@ -77,15 +96,25 @@ auto flow::OutputFlowlinesNumSteps( const Advection*  adv,
 }
 
 
-auto flow::OutputFlowlinesMaxTime( const Advection*  adv,
-                                   const char*       filename,
-                                   float             maxTime,
-                                   bool              append ) -> int
+auto flow::OutputFlowlinesMaxTime( const Advection*   adv,
+                                   const char*        filename,
+                                   float              maxTime,
+                                   const std::string& proj4string,
+                                   bool               append ) -> int
 {
     // First we need the infrastructure for time conversion
 	VAPoR::UDUnits udunits;
 	if( udunits.Initialize() < 0 )
         return PARAMS_ERROR;
+
+    // Second we need the infrastructure for coordinate conversion
+    bool needGeoConversion = false;
+    VAPoR::Proj4API proj4API;
+    if( !proj4string.empty() ) {
+        if( proj4API.Initialize(proj4string, "") < 0 )
+            return PARAMS_ERROR;
+        needGeoConversion = true;
+    }
 
     // Requesting the file handle
     std::FILE* f = nullptr;
@@ -124,8 +153,16 @@ auto flow::OutputFlowlinesMaxTime( const Advection*  adv,
                 int year, month, day, hour, minute, second;
                 udunits.DecodeTime( p.time, &year, &month, &day, &hour, &minute, &second );
 
+                // Let's also convert geo coordinates if needed.
+                float cX = p.location.x;    // converted X, Y, Z
+                float cY = p.location.y;
+                float cZ = p.location.z;
+                if( needGeoConversion ) {
+                    proj4API.Transform( &cX, &cY, &cZ, 1 );
+                }
+
                 std::fprintf( f, "%lu, %f, %f, %f, %4.4d-%2.2d-%2.2d_%2.2d:%2.2d:%2.2d, %f", 
-                                  s_idx, p.location.x, p.location.y, p.location.z,
+                                  s_idx, cX, cY, cZ,
                                   year, month, day, hour, minute, second,
                                   p.value );
 
