@@ -54,7 +54,7 @@ auto flow::OutputFlowlinesNumSteps( const Advection*   adv,
     // Let's declare variables that will be used repeatedly for 
     //   time and geo coordinate conversion
     int   year, month, day, hour, minute, second;
-    float cX,   cY,    cZ;  // converted X, Y, Z
+    float cX,   cY;     // converted X, Y coordinates
 
     // Write the trajectories
     for( size_t s_idx = 0; s_idx < adv->GetNumberOfStreams(); s_idx++ ) {
@@ -69,13 +69,12 @@ auto flow::OutputFlowlinesNumSteps( const Advection*   adv,
                 // Let's also convert geo coordinates if needed.
                 cX = p.location.x;
                 cY = p.location.y;
-                cZ = p.location.z;
                 if( needGeoConversion ) {
-                    proj4API.Transform( &cX, &cY, &cZ, 1 );
+                    proj4API.Transform( &cX, &cY, 1 );
                 }
 
                 std::fprintf( f, "%lu, %f, %f, %f, %4.4d-%2.2d-%2.2d_%2.2d:%2.2d:%2.2d, %f", 
-                                  s_idx, cX, cY, cZ,
+                                  s_idx, cX, cY, p.location.z,
                                   year, month, day, hour, minute, second,
                                   p.value );
 
@@ -146,7 +145,7 @@ auto flow::OutputFlowlinesMaxTime( const Advection*   adv,
     // Let's declare variables that will be used repeatedly for 
     //   time and geo coordinate conversion
     int   year, month, day, hour, minute, second;
-    float cX,   cY,    cZ;  // converted X, Y, Z
+    float cX,   cY;    // converted X, Y coordinates
 
     // Write the trajectories
     for( size_t s_idx = 0; s_idx < adv->GetNumberOfStreams(); s_idx++ ) {
@@ -164,13 +163,12 @@ auto flow::OutputFlowlinesMaxTime( const Advection*   adv,
                 // Let's also convert geo coordinates if needed.
                 cX = p.location.x;
                 cY = p.location.y;
-                cZ = p.location.z;
                 if( needGeoConversion ) {
-                    proj4API.Transform( &cX, &cY, &cZ, 1 );
+                    proj4API.Transform( &cX, &cY, 1 );
                 }
 
                 std::fprintf( f, "%lu, %f, %f, %f, %4.4d-%2.2d-%2.2d_%2.2d:%2.2d:%2.2d, %f", 
-                                  s_idx, cX, cY, cZ,
+                                  s_idx, cX, cY, p.location.z,
                                   year, month, day, hour, minute, second,
                                   p.value );
 
