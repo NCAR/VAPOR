@@ -134,9 +134,9 @@ int FlowRenderer::_outputFlowLines()
     // the advection timestamp.
     int rv;
     if (params->GetIsSteady()) {
-        rv = flow::OutputFlowlinesNumSteps(&_advection, params->GetFlowlineOutputFilename().c_str(), params->GetSteadyNumOfSteps(), false);
+        rv = flow::OutputFlowlinesNumSteps(&_advection, params->GetFlowlineOutputFilename().c_str(), params->GetSteadyNumOfSteps(), _dataMgr->GetMapProjection(), false);
     } else {
-        rv = flow::OutputFlowlinesMaxTime(&_advection, params->GetFlowlineOutputFilename().c_str(), _timestamps.at(params->GetCurrentTimestep()), false);
+        rv = flow::OutputFlowlinesMaxTime(&_advection, params->GetFlowlineOutputFilename().c_str(), _timestamps.at(params->GetCurrentTimestep()), _dataMgr->GetMapProjection(), false);
     }
     if (rv != 0) {
         MyBase::SetErrMsg("Output flow lines wrong!");
@@ -145,9 +145,9 @@ int FlowRenderer::_outputFlowLines()
 
     if (_2ndAdvection) {    // bi-directional advection
         if (params->GetIsSteady()) {
-            rv = flow::OutputFlowlinesNumSteps(_2ndAdvection.get(), params->GetFlowlineOutputFilename().c_str(), params->GetSteadyNumOfSteps(), true);
+            rv = flow::OutputFlowlinesNumSteps(_2ndAdvection.get(), params->GetFlowlineOutputFilename().c_str(), params->GetSteadyNumOfSteps(), _dataMgr->GetMapProjection(), true);
         } else {
-            rv = flow::OutputFlowlinesMaxTime(_2ndAdvection.get(), params->GetFlowlineOutputFilename().c_str(), _timestamps.at(params->GetCurrentTimestep()), true);
+            rv = flow::OutputFlowlinesMaxTime(_2ndAdvection.get(), params->GetFlowlineOutputFilename().c_str(), _timestamps.at(params->GetCurrentTimestep()), _dataMgr->GetMapProjection(), true);
         }
         if (rv != 0) {
             MyBase::SetErrMsg("Output flow lines wrong!");
