@@ -17,6 +17,7 @@ namespace flow {
 auto OutputFlowlinesNumSteps(const Advection *adv,
                              const char *filename,
                              size_t numStep,
+                             const std::string &proj4string,
                              bool append) -> int;
 
 // Output trajectory to a maximum time.
@@ -25,10 +26,12 @@ auto OutputFlowlinesNumSteps(const Advection *adv,
 auto OutputFlowlinesMaxTime(const Advection *adv,
                             const char *filename,
                             float maxTime,
+                            const std::string &proj4string,
                             bool append) -> int;
 
 // Input a list of seeds from lines of CSVs.
 auto InputSeedsCSV(const std::string &filename,
                    Advection *adv) -> int;
+
 }; // namespace flow
 #endif
