@@ -55,7 +55,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce)
                 new PVariableSelector(FP::_rakeBiasVariable)
             }),
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::LIST)->Then({
-                new PFileOpenSelector(FP::_seedInputFilenameTag, "List of seeds file")
+                new PFileSaveSelector(FP::_seedInputFilenameTag, "List of seeds file")
             }),
         }),
         new PSection("Rake Region", {
