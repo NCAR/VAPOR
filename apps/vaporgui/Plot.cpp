@@ -23,6 +23,7 @@
 #include "ErrorReporter.h"
 #include "Plot.h"
 #include "Flags.h"
+#include "VPushButton.h"
 
 // Constructor
 Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent) : QDialog(parent), Ui_PlotWindow()
@@ -94,6 +95,10 @@ Plot::Plot(VAPoR::DataStatus *status, VAPoR::ParamsMgr *manager, QWidget *parent
     _plotLayout->addWidget(_plotLabel);
     _plotLayout->addWidget(_plotPathEdit);
     _plotLayout->addWidget(_plotImageLabel);
+
+    VPushButton *close = new VPushButton("Close Window");
+    connect(close, &VPushButton::ButtonClicked, this, &QDialog::accept);
+    layout()->addWidget(close);
 
     // Put the current window on top
     show();
