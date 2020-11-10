@@ -54,10 +54,8 @@ void VDoubleSliderEdit::_makeContextMenu() {
         this, &VDoubleSliderEdit::SetNumDigits );
     connect( _menu, &VNumericFormatMenu::SciNotationChanged,
         this, &VDoubleSliderEdit::SetSciNotation );
-    //connect( _menu, &VDoubleRangeMenu::MinChanged,
-    //    this, &VDoubleSliderEdit::SetMinimum );
-    connect( _menu, SIGNAL( MinChanged( double )  ),
-        this, SLOT( SetMinimum( double ) ) );
+    connect( _menu, &VDoubleRangeMenu::MinChanged,
+        this, &VDoubleSliderEdit::SetMinimum );
     connect( _menu, &VDoubleRangeMenu::MaxChanged,
         this, &VDoubleSliderEdit::SetMaximum );
 }
@@ -94,7 +92,6 @@ double VDoubleSliderEdit::GetValue() const {
 
 void VDoubleSliderEdit::SetValue( double value ) {
     // If the new value is illegal, reset _lineEdit's text and return
-    //if ( value == _value ||
     if ( value <  _slider->GetMinimum() ||
          value >  _slider->GetMaximum()
     ) {
@@ -109,21 +106,9 @@ void VDoubleSliderEdit::SetValue( double value ) {
     _slider->SetValue( _value );
     blockSignals( false );
 
-    if ( _value == .91 ) {
-        //std::cout << "Test " << this << std::endl;
-        if ( QObject::sender() != nullptr)
-            std::cout << "QObject::sender() != nullptr " << QObject::sender() << " " << this << std::endl;
-        if ( QObject::sender() != this ) 
-            std::cout << "QObject::sender() != this " << QObject::sender() << " " << this << std::endl;
-        if ( QObject::sender() == this ) {
-            std::cout << "QObject::sender() == this " << QObject::sender() << " " << this << std::endl;
-            std::cout << "menu " << _menu << " " << this << std::endl;
-        }
-    }
-    //if ( QObject::sender() != nullptr &&   // if VDoubleLineEdit or VSlider are sending the signal
-    //     QObject::sender() != this ) {      // if not performing updateGUI()
-    if ( QObject::sender() != nullptr ) {   // if VDoubleLineEdit or VSlider are sending the signal
-        std::cout << "Emitting ValueChanged() " << _value << std::endl;
+    if ( QObject::sender() != nullptr &&   
+         QObject::sender() != this ) {     
+        std::cout << "VDSEdit::ValueChanged() val " << _value << std::endl;
         emit ValueChanged( _value );
     }
 }
