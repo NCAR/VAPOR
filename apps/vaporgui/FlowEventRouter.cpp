@@ -55,7 +55,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce)
                 new PVariableSelector(FP::_rakeBiasVariable)
             }),
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::LIST)->Then({
-                new PFileSaveSelector(FP::_seedInputFilenameTag, "List of seeds file")
+                new PFileOpenSelector(FP::_seedInputFilenameTag, "List of seeds file")
             }),
         }),
         new PSection("Rake Region", {
@@ -65,7 +65,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce)
         }),
         
         new PSection("Write Flowlines to File", {
-            new PFileOpenSelector(FP::_flowlineOutputFilenameTag, "Target file"),
+            new PFileSaveSelector(FP::_flowlineOutputFilenameTag, "Target file"),
             new PButton("Write to file", 
                 [](ParamsBase *p){p->SetValueLong(FP::_needFlowlineOutputTag, "", true);}),
             new PLabel("Specify variables to sample and output along the flowlines"),
