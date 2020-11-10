@@ -54,8 +54,10 @@ void VDoubleSliderEdit::_makeContextMenu() {
         this, &VDoubleSliderEdit::SetNumDigits );
     connect( _menu, &VNumericFormatMenu::SciNotationChanged,
         this, &VDoubleSliderEdit::SetSciNotation );
-    connect( _menu, &VDoubleRangeMenu::MinChanged,
-        this, &VDoubleSliderEdit::SetMinimum );
+    //connect( _menu, &VDoubleRangeMenu::MinChanged,
+    //    this, &VDoubleSliderEdit::SetMinimum );
+    connect( _menu, SIGNAL( MinChanged( double )  ),
+        this, SLOT( SetMinimum( double ) ) );
     connect( _menu, &VDoubleRangeMenu::MaxChanged,
         this, &VDoubleSliderEdit::SetMaximum );
 }
@@ -69,6 +71,7 @@ void VDoubleSliderEdit::SetSciNotation( bool value ) {
         return;
     }
     _lineEdit->SetSciNotation( value );
+    std::cout << "VDSEdit::FormatChanged() sci " << value << std::endl;
     emit FormatChanged();
 }
 
@@ -81,6 +84,7 @@ void VDoubleSliderEdit::SetNumDigits( int digits ) {
         return;
     }
     _lineEdit->SetNumDigits( digits );
+    std::cout << "VDSEdit::FormatChanged() dig " << digits<< std::endl;
     emit FormatChanged();
 }
 
@@ -89,9 +93,9 @@ double VDoubleSliderEdit::GetValue() const {
 }
 
 void VDoubleSliderEdit::SetValue( double value ) {
-    // If the new value is unchanged or illegal, reset _lineEdit's text and return
-    if ( value == _value                ||
-         value <  _slider->GetMinimum() ||
+    // If the new value is illegal, reset _lineEdit's text and return
+    //if ( value == _value ||
+    if ( value <  _slider->GetMinimum() ||
          value >  _slider->GetMaximum()
     ) {
         _lineEdit->SetValueDouble( _value );
@@ -100,10 +104,26 @@ void VDoubleSliderEdit::SetValue( double value ) {
 
     _value = value;
 
+    blockSignals( true );
     _lineEdit->SetValueDouble( _value );
     _slider->SetValue( _value );
+    blockSignals( false );
 
-    if ( QObject::sender() != nullptr ) {
+    if ( _value == .91 ) {
+        //std::cout << "Test " << this << std::endl;
+        if ( QObject::sender() != nullptr)
+            std::cout << "QObject::sender() != nullptr " << QObject::sender() << " " << this << std::endl;
+        if ( QObject::sender() != this ) 
+            std::cout << "QObject::sender() != this " << QObject::sender() << " " << this << std::endl;
+        if ( QObject::sender() == this ) {
+            std::cout << "QObject::sender() == this " << QObject::sender() << " " << this << std::endl;
+            std::cout << "menu " << _menu << " " << this << std::endl;
+        }
+    }
+    //if ( QObject::sender() != nullptr &&   // if VDoubleLineEdit or VSlider are sending the signal
+    //     QObject::sender() != this ) {      // if not performing updateGUI()
+    if ( QObject::sender() != nullptr ) {   // if VDoubleLineEdit or VSlider are sending the signal
+        std::cout << "Emitting ValueChanged() " << _value << std::endl;
         emit ValueChanged( _value );
     }
 }
@@ -122,12 +142,15 @@ void VDoubleSliderEdit::SetMinimum( double min ) {
         return;
     }
 
+    blockSignals( true );
     _slider->SetMinimum( min );
     _menu->SetMinimum( min );
+    blockSignals( false );
     
     // If sender() is a nullptr, then this fuction is being called from Update().
     // Don't emit anythong.  Otherwise, emit our signal.
     if ( QObject::sender() != nullptr ) {
+        std::cout << "VDSEdit::MinimumChanged " << min << std::endl;
         emit MinimumChanged( min );
     }
 }
@@ -152,6 +175,7 @@ void VDoubleSliderEdit::SetMaximum( double max ) {
     // If sender() is a nullptr, then this fuction is being called from Update().
     // Don't emit anythong.  Otherwise, emit our signal.
     if ( QObject::sender() != nullptr ) {
+        std::cout << "VDSEdit::MaximumChanged " << max << std::endl;
         emit MaximumChanged( max );
     }
 }
