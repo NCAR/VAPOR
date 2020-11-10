@@ -39,7 +39,8 @@ SliceParams::SliceParams(
 
 SliceParams::SliceParams(
 	DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node
-) : RenderParams(dataMgr, ssave, node, THREED) {}
+) : RenderParams(dataMgr, ssave, node, THREED)
+{_initialized = true;}
 
 SliceParams::~SliceParams() {
 	SetDiagMsg("SliceParams::~SliceParams() this=%p", this);
@@ -64,6 +65,8 @@ void SliceParams::_init() {
 int SliceParams::Initialize() {
 	int rc = RenderParams::Initialize();
 	if (rc<0) return(rc);
+    if (_initialized) return 0;
+    _initialized = true;
 
     Box* box = GetBox();
     box->SetOrientation(XY);
@@ -71,12 +74,10 @@ int SliceParams::Initialize() {
     std::vector<double> minExt, maxExt;
     box->GetExtents(minExt, maxExt);
     
-    if (GetValueDoubleVec(SampleLocationTag).size() != 3) {
-        std::vector<double> sampleLocation(3);
-        for (int i = 0; i < 3; i++)
-            sampleLocation[i] = (minExt[i] + maxExt[i]) / 2.0;
-        SetValueDoubleVec(SampleLocationTag, "", sampleLocation);
-    }
+    std::vector<double> sampleLocation(3);
+    for (int i = 0; i < 3; i++)
+        sampleLocation[i] = (minExt[i] + maxExt[i]) / 2.0;
+    SetValueDoubleVec(SampleLocationTag, "", sampleLocation);
     
     SetSampleRate(MIN_DEFAULT_SAMPLERATE);
 
