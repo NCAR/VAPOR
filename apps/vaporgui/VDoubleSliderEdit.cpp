@@ -62,8 +62,8 @@ double VDoubleSliderEdit::GetValue() const { return _value; }
 
 void VDoubleSliderEdit::SetValue(double value)
 {
-    // If the new value is unchanged or illegal, reset _lineEdit's text and return
-    if (value == _value || value < _slider->GetMinimum() || value > _slider->GetMaximum()) {
+    // If the new value is illegal, reset _lineEdit's text and return
+    if (value < _slider->GetMinimum() || value > _slider->GetMaximum()) {
         _lineEdit->SetValueDouble(_value);
         return;
     }
@@ -73,7 +73,7 @@ void VDoubleSliderEdit::SetValue(double value)
     _lineEdit->SetValueDouble(_value);
     _slider->SetValue(_value);
 
-    if (QObject::sender() != nullptr) { emit ValueChanged(_value); }
+    if (QObject::sender() != nullptr && QObject::sender() != this) { emit ValueChanged(_value); }
 }
 
 double VDoubleSliderEdit::GetMinimum() const

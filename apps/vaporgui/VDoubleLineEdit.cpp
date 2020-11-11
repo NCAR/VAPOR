@@ -36,8 +36,14 @@ void VDoubleLineEdit::_valueChanged()
     double value;
     try {
         value = std::stod(str);
-        SetValueDouble(value);
-        emit ValueChanged(_value);
+
+        // If value changed, update and emit, otherwiese revert to old value
+        if (value != _value) {
+            SetValueDouble(value);
+            emit ValueChanged(_value);
+        } else {
+            SetValueDouble(_value);
+        }
     } catch (const std::invalid_argument &) {
         SetValueDouble(_value);
     } catch (const std::out_of_range &) {
