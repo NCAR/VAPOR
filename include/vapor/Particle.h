@@ -34,7 +34,7 @@ class FLOW_API Particle final
 public:
     glm::vec3   location { 0.0f, 0.0f, 0.0f };
     float       value    = 0.0f;
-    double      time     = 0.0f;
+    double      time     = 0.0;
 
     // Constructors.
     // This class complies with rule of zero.
