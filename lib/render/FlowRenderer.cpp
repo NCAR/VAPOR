@@ -862,7 +862,7 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
 
     // Check velocity multiplier
     // If the multiplier is changed, then the entire stream is out of date
-    const auto mult = params->GetVelocityMultiplier();
+    const float mult = params->GetVelocityMultiplier();
     if( _cache_velocityMltp != mult )
     {
         _cache_velocityMltp       = mult;
