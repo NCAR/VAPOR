@@ -102,8 +102,9 @@ void VDoubleSliderEdit::SetValue( double value ) {
     _lineEdit->SetValueDouble( _value );
     _slider->SetValue( _value );
 
-    if ( QObject::sender() != nullptr &&   
-         QObject::sender() != this ) {     
+    if ( QObject::sender() != nullptr &&
+         QObject::sender() != this
+    ) {
         emit ValueChanged( _value );
     }
 }
