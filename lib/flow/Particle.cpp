@@ -2,21 +2,13 @@
 
 using namespace flow;
 
-Particle::Particle(const glm::vec3 &loc, float t, float val) {
+Particle::Particle(const glm::vec3 &loc, double t, float val) {
     location = loc;
     time = t;
     value = val;
 }
 
-Particle::Particle(const float *loc, float t, float val) {
-    location.x = loc[0];
-    location.y = loc[1];
-    location.z = loc[2];
-    time = t;
-    value = val;
-}
-
-Particle::Particle(float x, float y, float z, float t, float val) {
+Particle::Particle(float x, float y, float z, double t, float val) {
     location.x = x;
     location.y = y;
     location.z = z;
