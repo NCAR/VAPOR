@@ -5,12 +5,30 @@
 #include <iterator> // std::distance
 #include <cctype>
 #include "vapor/AdvectionIO.h"
+#include "vapor/UDUnitsClass.h"
+#include "vapor/Proj4API.h"
 
-auto flow::OutputFlowlinesNumSteps( const Advection*  adv,
-                                    const char*       filename,
-                                    size_t            numSteps,
-                                    bool              append ) -> int
+auto flow::OutputFlowlinesNumSteps( const Advection*   adv,
+                                    const char*        filename,
+                                    size_t             numSteps,
+                                    const std::string& proj4string,
+                                    bool               append ) -> int
 {
+    // First we need the infrastructure for time conversion
+	VAPoR::UDUnits udunits;
+	if( udunits.Initialize() < 0 )
+        return PARAMS_ERROR;
+
+    // Second we need the infrastructure for coordinate conversion
+    bool needGeoConversion = false;
+    VAPoR::Proj4API proj4API;
+    if( !proj4string.empty() ) {
+        if( proj4API.Initialize(proj4string, "") < 0 )
+            return PARAMS_ERROR;
+        needGeoConversion = true;
+    }
+
+    // Requesting the file handle
     std::FILE* f = nullptr;
     if( append ) {
         f = std::fopen( filename, "a" );
@@ -33,6 +51,11 @@ auto flow::OutputFlowlinesNumSteps( const Advection*  adv,
         std::fprintf( f, "\n" );
     }
 
+    // Let's declare variables that will be used repeatedly for 
+    //   time and geo coordinate conversion
+    int   year, month, day, hour, minute, second;
+    float cX,   cY;     // converted X, Y coordinates
+
     // Write the trajectories
     for( size_t s_idx = 0; s_idx < adv->GetNumberOfStreams(); s_idx++ ) {
         const auto& stream = adv->GetStreamAt( s_idx );
@@ -40,8 +63,20 @@ auto flow::OutputFlowlinesNumSteps( const Advection*  adv,
         size_t step = 0;
         for( const auto& p : stream ) {
             if( !p.IsSpecial() ) {
-                std::fprintf( f, "%lu, %f, %f, %f, %f, %f", s_idx, p.location.x, p.location.y,
-                                  p.location.z, p.time, p.value );
+                // Let's convert the time!
+                udunits.DecodeTime( p.time, &year, &month, &day, &hour, &minute, &second );
+
+                // Let's also convert geo coordinates if needed.
+                cX = p.location.x;
+                cY = p.location.y;
+                if( needGeoConversion ) {
+                    proj4API.Transform( &cX, &cY, 1 );
+                }
+
+                std::fprintf( f, "%lu, %f, %f, %f, %4.4d-%2.2d-%2.2d_%2.2d:%2.2d:%2.2d, %f", 
+                                  s_idx, cX, cY, p.location.z,
+                                  year, month, day, hour, minute, second,
+                                  p.value );
 
                 auto props = p.GetPropertyList();
                 // A quick sanity check
@@ -64,11 +99,27 @@ auto flow::OutputFlowlinesNumSteps( const Advection*  adv,
 }
 
 
-auto flow::OutputFlowlinesMaxTime( const Advection*  adv,
-                                   const char*       filename,
-                                   float             maxTime,
-                                   bool              append ) -> int
+auto flow::OutputFlowlinesMaxTime( const Advection*   adv,
+                                   const char*        filename,
+                                   double             maxTime,
+                                   const std::string& proj4string,
+                                   bool               append ) -> int
 {
+    // First we need the infrastructure for time conversion
+	VAPoR::UDUnits udunits;
+	if( udunits.Initialize() < 0 )
+        return PARAMS_ERROR;
+
+    // Second we need the infrastructure for coordinate conversion
+    bool needGeoConversion = false;
+    VAPoR::Proj4API proj4API;
+    if( !proj4string.empty() ) {
+        if( proj4API.Initialize(proj4string, "") < 0 )
+            return PARAMS_ERROR;
+        needGeoConversion = true;
+    }
+
+    // Requesting the file handle
     std::FILE* f = nullptr;
     if( append ) {
         f = std::fopen( filename, "a" );
@@ -91,6 +142,11 @@ auto flow::OutputFlowlinesMaxTime( const Advection*  adv,
         std::fprintf( f, "\n" );
     }
 
+    // Let's declare variables that will be used repeatedly for 
+    //   time and geo coordinate conversion
+    int   year, month, day, hour, minute, second;
+    float cX,   cY;    // converted X, Y coordinates
+
     // Write the trajectories
     for( size_t s_idx = 0; s_idx < adv->GetNumberOfStreams(); s_idx++ ) {
         const auto& stream = adv->GetStreamAt( s_idx );
@@ -101,8 +157,20 @@ auto flow::OutputFlowlinesMaxTime( const Advection*  adv,
                 break;
 
             if( !p.IsSpecial() ) {
-                std::fprintf( f, "%lu, %f, %f, %f, %f, %f", s_idx, p.location.x, p.location.y,
-                                  p.location.z, p.time, p.value );
+                // Let's convert the time!
+                udunits.DecodeTime( p.time, &year, &month, &day, &hour, &minute, &second );
+
+                // Let's also convert geo coordinates if needed.
+                cX = p.location.x;
+                cY = p.location.y;
+                if( needGeoConversion ) {
+                    proj4API.Transform( &cX, &cY, 1 );
+                }
+
+                std::fprintf( f, "%lu, %f, %f, %f, %4.4d-%2.2d-%2.2d_%2.2d:%2.2d:%2.2d, %f", 
+                                  s_idx, cX, cY, p.location.z,
+                                  year, month, day, hour, minute, second,
+                                  p.value );
 
                 auto props = p.GetPropertyList();
                 // A quick sanity check

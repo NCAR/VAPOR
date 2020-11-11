@@ -70,13 +70,13 @@ public:
     //
     // Functions from class Field
     //
-    virtual bool InsideVolumeVelocity( float time, const glm::vec3& pos ) const override;
-    virtual bool InsideVolumeScalar(   float time, const glm::vec3& pos ) const override;
+    virtual bool InsideVolumeVelocity( double time, const glm::vec3& pos ) const override;
+    virtual bool InsideVolumeScalar(   double time, const glm::vec3& pos ) const override;
     virtual int  GetNumberOfTimesteps()                                   const override;
 
-    virtual int  GetVelocity(  float time, const glm::vec3& pos,    // input 
+    virtual int  GetVelocity(  double time, const glm::vec3& pos,   // input 
                                glm::vec3& vel ) const override;     // output
-    virtual int  GetScalar(    float time, const glm::vec3& pos,    // input 
+    virtual int  GetScalar(    double time, const glm::vec3& pos,   // input 
                                float& scalar ) const override;      // output
 
 
@@ -91,7 +91,7 @@ public:
     // Find one index whose timestamp is just below a given time
     // I.e., _timestamps[floor] <= time 
     //  
-    int LocateTimestamp( float   time,                        // Input
+    int LocateTimestamp( double  time,                        // Input
                          size_t& floor ) const;               // Output
 
     // 
@@ -112,7 +112,7 @@ public:
     // This is used as a one-time operation when getting ready a velocity field.
     // It'll return 0 on success, and non-zero on error conditions.
     //
-    int  CalcDeltaTFromCurrentTimeStep( float& delT ) const;
+    int  CalcDeltaTFromCurrentTimeStep( double& delT ) const;
 
     //
     // It turns that interactions from FlowParams can be expensive.
@@ -129,7 +129,7 @@ private:
     //
     // Member variables
     //
-    std::vector<float>          _timestamps;    // in ascending order
+    std::vector<double>         _timestamps;    // in ascending order
     VAPoR::DataMgr*             _datamgr = nullptr;   
     const VAPoR::FlowParams*    _params  = nullptr;
 
@@ -143,7 +143,7 @@ private:
     bool                        _params_locked = false;
     uint64_t                    _c_currentTS = 0;                // cached timestep
     int32_t                     _c_refLev = -2, _c_compLev = -2; // cached ref/comp levels
-    float                       _c_vel_mult = 0.0;               // cached velocity multiplier
+    float                       _c_vel_mult = 0.0f;              // cached velocity multiplier
     std::vector<double>         _c_ext_min, _c_ext_max;          // cached extents
     const VAPoR::Grid*          _c_scalar_grid = nullptr;        // cached scalar grid
     std::array<const VAPoR::Grid*, 3> _c_velocity_grids = {{nullptr, nullptr, nullptr}};
