@@ -267,7 +267,7 @@ int FlowRenderer::_paintGL(bool fast)
     }
 
     if (!_advectionComplete) {
-        float deltaT = _cache_deltaT;
+        auto deltaT = _cache_deltaT;
         rv = flow::ADVECT_HAPPENED;
 
         // Advection scheme 1: advect a maximum number of steps.
@@ -275,7 +275,7 @@ int FlowRenderer::_paintGL(bool fast)
         if (params->GetIsSteady()) {
             // If the advection is single-directional
             if (params->GetFlowDirection() == 1)    // backward integration
-                deltaT *= -1.0f;
+                deltaT *= -1.0;
             long numOfSteps = params->GetSteadyNumOfSteps();
 
             Progress::StartIndefinite("Performing flowline calculations");
@@ -284,8 +284,8 @@ int FlowRenderer::_paintGL(bool fast)
 
             // If the advection is bi-directional
             if (_2ndAdvection) {
-                assert(deltaT > 0.0f);
-                float deltaT2 = deltaT * -1.0f;
+                assert(deltaT > 0.0);
+                auto deltaT2 = deltaT * -1.0;
 
                 _2ndAdvection->AdvectSteps(&_velocityField, deltaT2, numOfSteps);
             }
@@ -640,7 +640,6 @@ void FlowRenderer::_particleHelper1(std::vector<float> &vec, const flow::Particl
     {
         vec.push_back(p.location.x);
         vec.push_back(p.location.y);
-        // vec.push_back( 0.0f );
         vec.push_back(p.location.z);
         vec.push_back(p.value);
     } else if (vec.size() > 0)    // p is a separator and vec is non-empty
@@ -899,7 +898,7 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
     return 0;
 }
 
-void FlowRenderer::_dupSeedsNewTime(std::vector<flow::Particle> &seeds, size_t firstN, float newTime) const
+void FlowRenderer::_dupSeedsNewTime(std::vector<flow::Particle> &seeds, size_t firstN, double newTime) const
 {
     VAssert(firstN <= seeds.size());
     for (size_t i = 0; i < firstN; i++) seeds.emplace_back(seeds[i].location, newTime);
@@ -935,7 +934,7 @@ int FlowRenderer::_genSeedsRakeUniform(std::vector<flow::Particle> &seeds) const
     }
 
     /* Populate the list of seeds */
-    float     timeVal = _timestamps.at(0);    // Default time value
+    auto      timeVal = _timestamps.at(0);    // Default time value
     glm::vec3 loc;
     seeds.clear();
     long seedsZ;
@@ -981,7 +980,7 @@ int FlowRenderer::_genSeedsRakeRandom(std::vector<flow::Particle> &seeds) const
     std::uniform_real_distribution<float> distX(_cache_rake[0], _cache_rake[1]);
     std::uniform_real_distribution<float> distY(_cache_rake[2], _cache_rake[3]);
 
-    float timeVal = _timestamps.at(0);
+    auto timeVal = _timestamps.at(0);
     seeds.resize(_cache_randNumOfSeeds);
     if (dim == 3) {
         std::uniform_real_distribution<float> distZ(_cache_rake[4], _cache_rake[5]);
@@ -1053,7 +1052,7 @@ int FlowRenderer::_genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) 
     // Thus, we only keep random seeds that are falling on non-missing-value locations.
     glm::vec3           loc;
     std::vector<double> locD(3);
-    float               timeVal = _timestamps.at(0);
+    auto                timeVal = _timestamps.at(0);
     // This is the total number of seeds to generate, based on the bias strength.
     long numOfSeedsToGen = long(numOfSeedsNeeded * (std::abs(_cache_rakeBiasStrength) + 1.0f));
     long numOfTrials = 0;
