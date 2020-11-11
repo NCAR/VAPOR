@@ -33,15 +33,14 @@ class FLOW_API Particle final
 {
 public:
     glm::vec3   location { 0.0f, 0.0f, 0.0f };
-    float       time     = 0.0f;
     float       value    = 0.0f;
+    double      time     = 0.0f;
 
     // Constructors.
     // This class complies with rule of zero.
     Particle() = default;
-    Particle( const glm::vec3& loc, float t, float val = 0.0f );
-    Particle( const float* loc, float t, float val = 0.0f );
-    Particle( float x, float y, float z, float t, float val = 0.0f );
+    Particle( const glm::vec3& loc, double t, float val = 0.0f );
+    Particle( float x, float y, float z, double t, float val = 0.0f );
 
     //
     // The "property" field allows the user to keep one or more arbitrary values that

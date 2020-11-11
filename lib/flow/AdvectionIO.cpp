@@ -101,7 +101,7 @@ auto flow::OutputFlowlinesNumSteps( const Advection*   adv,
 
 auto flow::OutputFlowlinesMaxTime( const Advection*   adv,
                                    const char*        filename,
-                                   float              maxTime,
+                                   double             maxTime,
                                    const std::string& proj4string,
                                    bool               append ) -> int
 {
