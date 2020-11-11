@@ -43,8 +43,6 @@ void PDoubleSliderEdit::updateGUI() const
     auto p = getParams();
     _sliderEdit->SetMinimum(p->GetValueDouble(getTag() + USER_RANGE_MIN_TAG, _defaultRangeMin));
     _sliderEdit->SetMaximum(p->GetValueDouble(getTag() + USER_RANGE_MAX_TAG, _defaultRangeMax));
-    if (getParamsDouble() == .11)
-        std::cout << "foo" << std::endl;
     _sliderEdit->SetValue(getParamsDouble());
 }
 

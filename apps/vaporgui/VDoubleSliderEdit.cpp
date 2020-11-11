@@ -99,10 +99,8 @@ void VDoubleSliderEdit::SetValue( double value ) {
 
     _value = value;
 
-    blockSignals( true );
     _lineEdit->SetValueDouble( _value );
     _slider->SetValue( _value );
-    blockSignals( false );
 
     if ( QObject::sender() != nullptr &&   
          QObject::sender() != this ) {     
@@ -124,10 +122,8 @@ void VDoubleSliderEdit::SetMinimum( double min ) {
         return;
     }
 
-    blockSignals( true );
     _slider->SetMinimum( min );
     _menu->SetMinimum( min );
-    blockSignals( false );
     
     // If sender() is a nullptr, then this fuction is being called from Update().
     // Don't emit anythong.  Otherwise, emit our signal.

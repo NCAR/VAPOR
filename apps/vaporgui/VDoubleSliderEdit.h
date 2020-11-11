@@ -26,6 +26,12 @@ public:
         bool rangeChangable = false
     );
 
+    //! Set the minimum allowable value for the VSlider and VDoubleLineEdit
+    void SetMinimum( double min );
+
+    //! Set the maximum allowable value for the VSlider and VDoubleLineEdit
+    void SetMaximum( double max );
+    
     void AllowUserRange(bool allowed=true);
 
     //! Get the value associated with the VSlider and VDoubleLineEdit
@@ -40,8 +46,14 @@ public:
     //! Get the number of digits displayed by the VDoubleLineEdit 
     virtual int GetNumDigits() const;
 
+    //! Set the number of digits displayed by the VDoubleLineEdit
+    virtual void SetNumDigits( int numDigits );
+
     //! Get whether the VDoubleLineEdit is being displayed with scientific notation
     virtual bool GetSciNotation() const;
+
+    //! Set whether the VDoubleLineEdit is being displayed with scientific notation
+    virtual void SetSciNotation( bool sciNotation );
 
     //! Show the context menu options for the entire widget, triggered on right-click
     virtual void ShowContextMenu( const QPoint& pos );
@@ -49,18 +61,6 @@ public:
 public slots:
     //! Set the current value displayed by the slider and line edit
     void SetValue( double value );
-    
-    //! Set the minimum allowable value for the VSlider and VDoubleLineEdit
-    void SetMinimum( double min );
-
-    //! Set the maximum allowable value for the VSlider and VDoubleLineEdit
-    void SetMaximum( double max );
-    
-    //! Set the number of digits displayed by the VDoubleLineEdit
-    virtual void SetNumDigits( int numDigits );
-
-    //! Set whether the VDoubleLineEdit is being displayed with scientific notation
-    virtual void SetSciNotation( bool sciNotation );
 
 protected:
     virtual void _makeContextMenu();
