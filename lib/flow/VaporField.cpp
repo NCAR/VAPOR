@@ -610,7 +610,7 @@ int VaporField::CalcDeltaTFromCurrentTimeStep( double& delT ) const
 
     // Let's dictate that using the maximum velocity FROM OUR SAMPLES
     // a particle needs 500 steps to travel the entire space.
-    const float desiredNum = 500.0;
+    const float desiredNum = 500.0f;
     const float actualNum  = glm::distance( minxyz, maxxyz ) / maxmag;
     delT = actualNum / desiredNum;
 
