@@ -5,7 +5,9 @@
 # libnetcdf-dev,  libudunits2-dev,  libproj-dev
 
 cmake_minimum_required (VERSION 3.1)
-project (VAPOR3)
+set(CMAKE_C_COMPILER "/opt/local/bin/clang")
+set(CMAKE_CXX_COMPILER "/opt/local/bin/clang++")
+project (VAPOR3 LANGUAGES C CXX)
 
 include (buildutils/UtilityFunctions.cmake)
 include (buildutils/GetGitRevisionDescription.cmake)
@@ -48,8 +50,8 @@ endif()
 
 # compiler warning flags
 if (NOT WIN32)
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-sign-compare -Wno-overloaded-virtual -Wno-parentheses")
-  SET (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wall -Wno-sign-compare")
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -Wall -Wno-sign-compare -Wno-overloaded-virtual -Wno-parentheses")
+  SET (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fopenmp -Wall -Wno-sign-compare")
 else ()
   # Enable multithread compiling on Visual Studio
   # This feature is glitchy so you may need to re-run
