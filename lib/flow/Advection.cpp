@@ -412,7 +412,7 @@ Advection::_advectEuler( Field* velocity, const Particle& p0, double dt, Particl
     int rv  = velocity->GetVelocity( p0.time, p0.location, v0 );
     if( rv != 0 )
         return rv;
-    float dt32 = float(dt);
+    float dt32 = float(dt); // glm is strict about data types (which is a good thing).
     p1.location = p0.location + dt32 * v0;
     p1.time     = p0.time + dt;
     return 0;
@@ -422,9 +422,9 @@ int
 Advection::_advectRK4( Field* velocity, const Particle& p0, double dt, Particle& p1 ) const
 {
     glm::vec3 k1, k2, k3, k4;
-    double dt_half = dt * 0.5;
-    float dt32     = float(dt);
-    float dt_half32 = float(dt_half);
+    double dt_half  = dt * 0.5;
+    float dt32      = float(dt);      // glm is strict about data types (which is a good thing).
+    float dt_half32 = float(dt_half); // glm is strict about data types (which is a good thing).
     int rv;
     rv = velocity->GetVelocity( p0.time,       p0.location,            k1 );
     if( rv != 0 )
