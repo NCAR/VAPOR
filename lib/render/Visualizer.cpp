@@ -63,11 +63,11 @@ Visualizer::Visualizer(
 	_vizFeatures = new AnnotationRenderer(_paramsMgr, _dataStatus, _winName);
     _insideGLContext = false;
 	_imageCaptureEnabled = false;
-	_animationCaptureEnabled = false;
-	
-	
-	_renderers.clear();
-	_renderersToDestroy.clear();
+    _animationCaptureEnabled = false;
+
+
+    _renderers.clear();
+    _renderersToDestroy.clear();
 
     MyBase::SetDiagMsg("Visualizer::Visualizer() end");
 }
@@ -76,113 +76,113 @@ Visualizer::~Visualizer()
 {
 
 #ifdef	VAPOR_3_1_0
-	// Can't call renderer destructors because these free OpenGL resources that
-	// may require the OpenGL context to be current :-(
-	//
-	for (int i = 0; i< _renderers.size(); i++)
-		delete _renderers[i];
+    // Can't call renderer destructors because these free OpenGL resources that
+    // may require the OpenGL context to be current :-(
+    //
+    for (int i = 0; i< _renderers.size(); i++)
+        delete _renderers[i];
     _renderers.clear();
 #endif
-    
+
     if (_vizFeatures)
         delete _vizFeatures;
-    
+
     if (_screenQuadVAO) glDeleteVertexArrays(1, &_screenQuadVAO);
     if (_screenQuadVBO) glDeleteBuffers(1, &_screenQuadVBO);
 }
 
 int Visualizer::resizeGL( int wid, int ht )
 {
-	return 0;
+    return 0;
 }
 
 int Visualizer::_getCurrentTimestep() const {
-	vector <string> dataSetNames = _paramsMgr->GetDataMgrNames();
+    vector <string> dataSetNames = _paramsMgr->GetDataMgrNames();
 
-	bool first = true;
-	size_t min_ts = 0;
-	size_t max_ts = 0;
-	for (int i=0; i<dataSetNames.size(); i++) {
-		vector <RenderParams *> rParams;
-		_paramsMgr->GetRenderParams(_winName, dataSetNames[i], rParams);
+    bool first = true;
+    size_t min_ts = 0;
+    size_t max_ts = 0;
+    for (int i=0; i<dataSetNames.size(); i++) {
+        vector <RenderParams *> rParams;
+        _paramsMgr->GetRenderParams(_winName, dataSetNames[i], rParams);
 
-		if (rParams.size()) {
+        if (rParams.size()) {
 
-			// Use local time of first RenderParams instance on window
-			// for current data set. I.e. it is assumed that every
-			// RenderParams instance for a data set has same current
-			// time step.
-			//
-			size_t local_ts = rParams[0]->GetCurrentTimestep();
-			size_t my_min_ts, my_max_ts;
-			_dataStatus->MapLocalToGlobalTimeRange(
-				dataSetNames[i], local_ts, my_min_ts, my_max_ts
-			);
-			if (first) {
-				min_ts = my_min_ts;
-				max_ts = my_max_ts;
-				first = false;
-			}
-			else {
-				if (my_min_ts > min_ts) min_ts = my_min_ts;
-				if (my_max_ts < max_ts) max_ts = my_max_ts;
-			}
-		}
-	}
-	if (min_ts > max_ts) return (-1);
+            // Use local time of first RenderParams instance on window
+            // for current data set. I.e. it is assumed that every
+            // RenderParams instance for a data set has same current
+            // time step.
+            //
+            size_t local_ts = rParams[0]->GetCurrentTimestep();
+            size_t my_min_ts, my_max_ts;
+            _dataStatus->MapLocalToGlobalTimeRange(
+                    dataSetNames[i], local_ts, my_min_ts, my_max_ts
+                    );
+            if (first) {
+                min_ts = my_min_ts;
+                max_ts = my_max_ts;
+                first = false;
+            }
+            else {
+                if (my_min_ts > min_ts) min_ts = my_min_ts;
+                if (my_max_ts < max_ts) max_ts = my_max_ts;
+            }
+        }
+    }
+    if (min_ts > max_ts) return (-1);
 
-	return(min_ts);
+    return(min_ts);
 }
 
 void Visualizer::_applyDatasetTransformsForRenderer(Renderer *r) {
-	string datasetName = r->GetMyDatasetName();
-	string myName = r->GetMyName();
-	string myType = r->GetMyType();
+    string datasetName = r->GetMyDatasetName();
+    string myName = r->GetMyName();
+    string myType = r->GetMyType();
 
-	VAPoR::ViewpointParams* vpParams = getActiveViewpointParams();
-	vector<double> scales, rotations, translations, origin;
-	Transform *t = vpParams->GetTransform(datasetName);
-	VAssert(t);
-	scales = t->GetScales();
-	rotations = t->GetRotations();
-	translations = t->GetTranslations();
-	origin = t->GetOrigin();
+    VAPoR::ViewpointParams* vpParams = getActiveViewpointParams();
+    vector<double> scales, rotations, translations, origin;
+    Transform *t = vpParams->GetTransform(datasetName);
+    VAssert(t);
+    scales = t->GetScales();
+    rotations = t->GetRotations();
+    translations = t->GetTranslations();
+    origin = t->GetOrigin();
 
-	MatrixManager *mm = _glManager->matrixManager;
+    MatrixManager *mm = _glManager->matrixManager;
 
     mm->Translate(translations[0], translations[1], translations[2]);
     mm->Translate(origin[0], origin[1], origin[2]);
     mm->Rotate(glm::radians(rotations[0]), 1, 0, 0);
-	mm->Rotate(glm::radians(rotations[1]), 0, 1, 0);
-	mm->Rotate(glm::radians(rotations[2]), 0, 0, 1);
+    mm->Rotate(glm::radians(rotations[1]), 0, 1, 0);
+    mm->Rotate(glm::radians(rotations[2]), 0, 0, 1);
     mm->Scale(scales[0], scales[1], scales[2]);
-	mm->Translate(-origin[0], -origin[1], -origin[2]);
+    mm->Translate(-origin[0], -origin[1], -origin[2]);
 }
 
 int Visualizer::paintEvent(bool fast)
 {
     _insideGLContext = true;
-	MyBase::SetDiagMsg("Visualizer::paintGL()");
+    MyBase::SetDiagMsg("Visualizer::paintGL()");
     GL_ERR_BREAK();
-    
+
     MatrixManager *mm = _glManager->matrixManager;
 
-	//Do not proceed if there is no DataMgr
-	if (! _paramsMgr->GetDataMgrNames().size()) return(0);
-    
+    //Do not proceed if there is no DataMgr
+    if (! _paramsMgr->GetDataMgrNames().size()) return(0);
+
     // Do not proceed with invalid viewport
     // This can occur sometimes on Qt startup
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     if (viewport[2] <= 0) return 0;
     if (viewport[3] <= 0) return 0;
-    
-	
+
+
     _clearActiveFramebuffer(0.3, 0.3, 0.3);
-    
+
     int fbWidth = viewport[2];
     int fbHeight = viewport[3];
-    
+
     ViewpointParams *vp = getActiveViewpointParams();
     if (vp->GetValueLong(ViewpointParams::UseCustomFramebufferTag, 0)) {
         fbWidth = vp->GetValueLong(ViewpointParams::CustomFramebufferWidthTag, 0);
@@ -190,64 +190,65 @@ int Visualizer::paintEvent(bool fast)
     }
     _framebuffer.SetSize(fbWidth, fbHeight);
     _framebuffer.MakeRenderTarget();
-    
+
     double clr[3];
     getActiveAnnotationParams()->GetBackgroundColor(clr);
     _clearActiveFramebuffer(clr[0], clr[1], clr[2]);
-    
+
 
     _loadMatricesFromViewpointParams();
     if (_configureLighting())
         return -1;
-	
+
     glDepthMask(GL_TRUE);
-	glEnable(GL_DEPTH_TEST);
-	glEnable (GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
+    glEnable(GL_DEPTH_TEST);
+    glEnable (GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     //Draw the domain frame and other in-scene features
     _vizFeatures->InScenePaint(_getCurrentTimestep());
     GL_ERR_BREAK();
-    
+
     _deleteFlaggedRenderers();
     if (_initializeNewRenderers() < 0)
         return -1;
 
     int rc = 0;
-	for (int i = 0; i< _renderers.size(); i++) {
+    for (int i = 0; i< _renderers.size(); i++) {
         _glManager->matrixManager->MatrixModeModelView();
         _glManager->matrixManager->PushMatrix();
-        
-		if (_renderers[i]->IsGLInitialized()) {
+
+        if (_renderers[i]->IsGLInitialized()) {
             _applyDatasetTransformsForRenderer(_renderers[i]);
-            
-//            void *t = _glManager->BeginTimer();
-			int myrc = _renderers[i]->paintGL(fast);
-//            printf("%s: %f\n", _renderers[i]->GetMyName().c_str(), _glManager->EndTimer(t));
+
+            //            void *t = _glManager->BeginTimer();
+            int myrc = _renderers[i]->paintGL(fast);
+            //            printf("%s: %f\n", _renderers[i]->GetMyName().c_str(), _glManager->EndTimer(t));
             GL_ERR_BREAK();
             if (myrc < 0)
                 rc = -1;
-		}
+        }
         mm->MatrixModeModelView();
         mm->PopMatrix();
-		int myrc = CheckGLErrorMsg(_renderers[i]->GetMyName().c_str());
+        int myrc = CheckGLErrorMsg(_renderers[i]->GetMyName().c_str());
         if (myrc < 0)
             rc = -1;
-	}
-    
+    }
+
     _vizFeatures->DrawText();
     GL_ERR_BREAK();
-	_renderColorbars(_getCurrentTimestep());
+    _renderColorbars(_getCurrentTimestep());
     GL_ERR_BREAK();
 
-//    _glManager->ShowDepthBuffer();
-    
-	glFlush();
-	
+    //    _glManager->ShowDepthBuffer();
+
+    glFlush();
+
     int captureImageSuccess = 0;
-	if (_imageCaptureEnabled) {
+    if (_imageCaptureEnabled) {
         captureImageSuccess = _captureImage(_captureImageFile);
     } else if (_animationCaptureEnabled) {
+        std::cout << _captureImageFile << std::endl;
 		captureImageSuccess = _captureImage(_captureImageFile);
 		_incrementPath(_captureImageFile);
 	}
@@ -580,8 +581,10 @@ int Visualizer:: _captureImage(std::string path)
     
     if (geoTiffOutput) writer = new GeoTIFWriter(path);
     else writer = ImageWriter::CreateImageWriterForFile(path);
-    if (writer == nullptr)
+    if (writer == nullptr) {
+        std::cout << "captureImageEnd A" << std::endl;
         goto captureImageEnd;
+    }
     
     if (geoTiffOutput) {
 		VAssert(_paramsMgr->GetDataMgrNames().size());
@@ -631,6 +634,7 @@ int Visualizer:: _captureImage(std::string path)
         if (croppedWidth <= 0 || croppedHeight <= 0) {
             MyBase::SetErrMsg("Dataset not visible");
             writeReturn = -1;
+            std::cout << "captureImageEnd B" << std::endl;
             goto captureImageEnd;
         }
         
@@ -661,6 +665,7 @@ int Visualizer:: _captureImage(std::string path)
         geo->SetPixelScale(s*aspect*2/(float)width, s*2/(float)height);
         if (geo->ConfigureFromProj4(projString) < 0) {
             writeReturn = -1;
+            std::cout << "captureImageEnd C" << std::endl;
             goto captureImageEnd;
         }
     }
@@ -668,6 +673,7 @@ int Visualizer:: _captureImage(std::string path)
     writeReturn = writer->Write(framebuffer, width, height);
 
 captureImageEnd:
+    std::cout << "captureImageEnd" << std::endl;
     if (writer) delete writer;
 	if (framebuffer) delete [] framebuffer;
 
