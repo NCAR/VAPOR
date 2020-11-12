@@ -157,27 +157,37 @@ void test_get_value(Grid *g)
 
     g->SetInterpolationOrder(1);
 
-    Grid::ConstIterator enditr = g->cend();
+    //	Grid::ConstIterator enditr = g->cend();
 
-    Grid::ConstCoordItr c_enditr = g->ConstCoordEnd();
+    //	Grid::ConstCoordItr c_enditr = g->ConstCoordEnd();
 
     const float epsilon = 0.000001;
 
     float t0 = GetTime();
 
+    size_t n = VProduct(g->GetDimensions());
+
     size_t ecount = 0;
-    //	omp_set_num_threads(8);
+    omp_set_num_threads(2);
 #pragma omp parallel
     {
         cout << "Thread " << omp_get_thread_num() << " of " << omp_get_num_threads() << endl;
 
-        Grid::ConstIterator itr = g->cbegin();
-        Grid::ConstCoordItr c_itr = g->ConstCoordBegin();
-        int                 nthreads = omp_get_num_threads();
-        size_t              my_ecount = 0;
-        size_t              my_count = 0;
+        size_t my_ecount = 0;
+        size_t my_count = 0;
+        int    id = omp_get_thread_num();
+        int    nthreads = omp_get_num_threads();
+        size_t istart = id * n / nthreads;
+        size_t iend = (id + 1) * n / nthreads;
+        if (id == nthreads - 1) iend = n;
 
-        for (; itr != enditr; itr += nthreads, c_itr += nthreads) {
+        Grid::ConstIterator itr = g->cbegin() + istart;
+        Grid::ConstCoordItr c_itr = g->ConstCoordBegin() + istart;
+
+        //	for ( ; itr!=enditr; itr+=nthreads, c_itr+=nthreads) {
+        //	for ( ; itr!=enditr; ++itr, ++c_itr) {
+        //	for ( ; itr!=enditr; itr+=1, c_itr+=1) {
+        for (size_t i = istart; i < iend; i++, ++itr, ++c_itr) {
             float v0 = *itr;
 
             float v1 = g->GetValue(*c_itr);
