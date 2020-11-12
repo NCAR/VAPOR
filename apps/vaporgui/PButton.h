@@ -19,6 +19,7 @@ class PButton : public PWidget {
     bool _disableUndo = false;
 public:
     PButton(std::string label, Callback cb);
+    // @copydoc VAPoR::ParamsMgr::SetSaveStateUndoEnabled(bool)
     PButton *DisableUndo();
 protected:
     void updateGUI() const override {}

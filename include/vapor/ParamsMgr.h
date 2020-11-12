@@ -509,10 +509,16 @@ public:
 
  bool GetSaveStateEnabled() const { return (_ssave.GetEnabled()); }
     
+    
+    //! Enable/Disable adding params changes to the undo list.
+    //! When enabled, behaves as normal.
+    //! When disabled, params are saved as normal, however the undo list is not updated.
+    //! An example use case is to store a computed value in the params database.
     void SetSaveStateUndoEnabled( bool enabled) {
        _ssave.SetUndoEnabled(enabled);
     }
 
+    //! Get whether updating the undo list is enabled.
     bool GetSaveStateUndoEnabled() const { return (_ssave.GetUndoEnabled()); }
 
  //! Restore state to previously saved state
