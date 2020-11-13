@@ -1414,7 +1414,9 @@ void ParamsMgr::PMgrStateSave::Save(
 
 	// It not inside a group push this element onto the stack
 	//
-	_undoStack.push_back(make_pair(description, new XmlNode(*_rootNode)));
+    if (GetUndoEnabled())
+        _undoStack.push_back(make_pair(description, new XmlNode(*_rootNode)));
+    
 //#define DEBUG
 #ifdef	DEBUG
 	cout << "ParamsMgr::PMgrStateSave::Save() : saving node " << 

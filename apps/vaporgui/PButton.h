@@ -16,10 +16,14 @@ class PButton : public PWidget {
     typedef std::function<void(VAPoR::ParamsBase*)> Callback;
     VPushButton *_button;
     const Callback _cb;
+    bool _disableUndo = false;
 public:
     PButton(std::string label, Callback cb);
+    // @copydoc VAPoR::ParamsMgr::SetSaveStateUndoEnabled(bool)
+    PButton *DisableUndo();
 protected:
     void updateGUI() const override {}
+    bool requireParamsMgr() const override { return _disableUndo; }
 private:
     void clicked();
 };
