@@ -484,6 +484,17 @@ class PARAMS_API ParamsMgr : public MyBase {
 
     bool GetSaveStateEnabled() const { return (_ssave.GetEnabled()); }
 
+    //! Enable/Disable adding params changes to the undo list.
+    //! When enabled, behaves as normal.
+    //! When disabled, params are saved as normal, however the undo list is not updated.
+    //! An example use case is to store a computed value in the params database.
+    void SetSaveStateUndoEnabled(bool enabled) {
+        _ssave.SetUndoEnabled(enabled);
+    }
+
+    //! Get whether updating the undo list is enabled.
+    bool GetSaveStateUndoEnabled() const { return (_ssave.GetUndoEnabled()); }
+
     //! Restore state to previously saved state
     //!
     //! \retval status Returns true on success, false if the state is unchanged
@@ -602,6 +613,13 @@ class PARAMS_API ParamsMgr : public MyBase {
 
         bool GetEnabled() const { return (_enabled); }
 
+        void SetUndoEnabled(bool b) {
+            if (!_groups.empty())
+                return; // Can't change inside group
+            _addToUndoEnabled = b;
+        }
+        bool GetUndoEnabled() const { return _addToUndoEnabled; }
+
         const XmlNode *GetTopUndo(string &description) const;
         const XmlNode *GetTopRedo(string &description) const;
         const XmlNode *GetBase() const {
@@ -632,6 +650,7 @@ class PARAMS_API ParamsMgr : public MyBase {
 
       private:
         bool _enabled;
+        bool _addToUndoEnabled = true;
         int _stackSize;
         const XmlNode *_rootNode;
         const XmlNode *_state0;
