@@ -366,8 +366,8 @@ jobs:
 workflows:
   build:
     jobs:
-      - build_ubuntu18
-      - build_centos7
+      #- build_ubuntu18
+      #- build_centos7
       #- build_ubuntu16
       #- build_osx
       #- build_win10_installer
