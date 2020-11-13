@@ -1856,7 +1856,6 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
     // Only update the GUI if the Params state has changed
     //
     if (event->type() == ParamsChangeEvent) {
-        _paramsEventQueued = false;
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
         if (_stats) { _stats->Update(); }
@@ -1884,11 +1883,12 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         update();
 
         QApplication::restoreOverrideCursor();
+
+        _paramsEventQueued = false;
         return (false);
     }
 
     if (event->type() == ParamsIntermediateChangeEvent) {
-        _paramsEventQueued = false;
         // Rendering the GUI becomes a bottleneck
         //        _tabMgr->Update();
 
@@ -1904,6 +1904,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
 
         //        update();
 
+        _paramsEventQueued = false;
         return (false);
     }
 
