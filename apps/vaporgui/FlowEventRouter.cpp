@@ -65,7 +65,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce)
         }),
         
         new PSection("Write Flowlines to File", {
-            new PFileOpenSelector(FP::_flowlineOutputFilenameTag, "Target file"),
+            new PFileSaveSelector(FP::_flowlineOutputFilenameTag, "Target file"),
             (new PButton("Write to file", [](ParamsBase *p){p->SetValueLong(FP::_needFlowlineOutputTag, "", true);}))->DisableUndo(),
             new PLabel("Specify variables to sample and output along the flowlines"),
             new PMultiVarSelector(FP::_flowOutputMoreVariablesTag)
