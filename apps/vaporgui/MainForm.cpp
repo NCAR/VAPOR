@@ -2254,13 +2254,11 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event) {
 
 		// force visualizer redraw
 		//
-        if ( _animationCapture == false  ) {
-            menuBar()->setEnabled(false);
-            _progressEnabled = true;
-            _vizWinMgr->Update(false);
-            _progressEnabled = false;
-            menuBar()->setEnabled(true);
-        }
+        menuBar()->setEnabled(false);
+        _progressEnabled = true;
+		_vizWinMgr->Update(false);
+        _progressEnabled = false;
+        menuBar()->setEnabled(true);
 
 		update();
 
@@ -2793,7 +2791,6 @@ void MainForm::startAnimCapture(string baseFile, string defaultSuffix)
     }
 
 	//Turn on "image capture mode" in the current active visualizer
-    _animationCapture = true;
 	GUIStateParams *p = GetStateParams();
 	string vizName = p->GetActiveVizName();
 	_controlExec->EnableAnimationCapture(vizName, true, fpath);
@@ -2821,8 +2818,6 @@ void MainForm::endAnimCapture(){
 	if (_controlExec->EnableAnimationCapture(_capturingAnimationVizName, false))
 		MSG_WARN("Image Capture Warning;\nCurrent active visualizer is not capturing images");
 	
-    _animationCapture = false;
-
 	_capturingAnimationVizName = "";
 
 
