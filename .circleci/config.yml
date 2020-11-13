@@ -10,59 +10,6 @@ references:
     attach_workspace:
       at: *workspace_root
 
-jobs:
-  build_ubuntu16:
-    docker:
-      - image: sgpearse/vapor3-ubuntu16:latest
-
-    steps:
-      - checkout
-
-      - run:
-          name: cmake and make
-          command: |
-            cd /VAPOR
-            git pull
-            git checkout $CIRCLE_BRANCH
-            cd build
-            cmake ..
-            make -j7 &> /tmp/output.txt
-
-      - store_artifacts:
-          path: /tmp/output.txt
-
-      - run:
-          name: check for warnings
-          command: |
-            if grep -q warning /tmp/output.txt; then
-               exit 1
-            else
-               exit 0
-            fi
-
-  build_ubuntu16_installer:
-    docker:
-      - image: sgpearse/vapor3-ubuntu16:latest
-
-    steps:
-      - checkout
-
-      - run:
-          name: make installer
-          command: |
-            cd /VAPOR/build
-            cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
-            make -j7
-            make installer
-            for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/Ubuntu16-Weekly}" ; done
-            mkdir -p /tmp/workspace/installers
-            mv *.sh /tmp/workspace/installers
-
-      - persist_to_workspace:
-          root: *workspace_root
-          paths: 
-            - installers
-
   build_ubuntu18:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
@@ -118,6 +65,8 @@ jobs:
           name: make installer
           command: |
             cd /VAPOR/build
+            git pull
+            git checkout $CIRCLE_BRANCH
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make -j7
             make installer
@@ -288,30 +237,15 @@ jobs:
             if [ ! -f $DEPS ]; then
                 ~/project/.circleci/getOSXDeps.sh
             fi
-#      - run:
-#          name: Get 3rd party libs
-#          command: |
-#            pip3 install gdown
-#            sudo mkdir -p /usr/local/VAPOR-Deps
-#            sudo chmod 777 /usr/local/VAPOR-Deps
-#            cd /usr/local/VAPOR-Deps
-#            gdown https://drive.google.com/uc?id=1kyDAzmK9zShrIcoAbned8YW9vn2j7lpe
-#      - run:
-#          name: Extract 3rd party libs
-#          command: |
-#            cd /usr/local/VAPOR-Deps
-#            tar xf 2019-Aug-Darwin.tar.xz -C /usr/local/VAPOR-Deps
-#            ls /usr/local/VAPOR-Deps
-#      - run:
-#          name: Install cmake
-#          command: |
-#            brew install cmake
+
       - run:
           name: make VAPOR
           command: |
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
+            git pull
+            git checkout $CIRCLE_BRANCH
             /usr/local/bin/cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
@@ -319,15 +253,6 @@ jobs:
             mkdir -p /tmp/workspace/installers
             mv *.dmg /tmp/workspace/installers
           no_output_timeout: 30m
-
-      #- save_cache:
-      #    key: osxDeps-v5-{{ .Environment.CIRCLE_PROJECT_REPONAME }}
-      #    paths: 
-      #      - /VAPOR
-      #      - /usr/local/VAPOR-Deps
-      #      - /usr/local/lib/python3.7/site-packages/gdown
-      #      - /usr/local/bin/cmake
-      #      - /usr/local/Cellar/cmake
 
       - persist_to_workspace:
           root: *workspace_root
@@ -396,9 +321,10 @@ jobs:
           name: Build Vapor
           command: |
             Copy-Item site_files\* -Destination .
+            git pull
+            git checkout $CIRCLE_BRANCH
             mkdir build
             cd build
-            #& 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DCMAKE_BUILD_TYPE:STRING=Release -G 'Visual Studio 14 2015' -A x64
             & 'C:\\Program Files\\CMake\\bin\\cmake.exe' -S C:\Users\circleci\project -B C:\Users\circleci\project\build -DCMAKE_BUILD_TYPE:STRING=Release -G 'Visual Studio 16 2019' -A x64
             msbuild C:\Users\circleci\project\build\PACKAGE.vcxproj /p:Configuration=Release /p:Platform=x64
             mkdir -p C:\Users\circleci\project\tmp\workspace\installers
@@ -409,31 +335,6 @@ jobs:
           root: *workspace_root
           paths: 
             - installers
-
-  test_win10_workspace:
-    executor: win/default
-    steps:
-      - run:
-          name: do the stuff
-          command: |
-            #New-Item -Name installers -ItemType directory
-            mkdir -p C:\Users\circleci\project\tmp\workspace\installers
-            cd C:\Users\circleci\project\tmp\workspace\installers
-            echo "foo" >> foo.exe
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - installers
-
-  build_win10_docker:
-    docker:
-      - image: sgpearse/vapor3-win10:latest
-    steps:
-      - checkout
-      - run:
-          name: build installer
-          command: |
-            msbuild C:\VAPOR\build\PACKAGE.vcxproj /p:Configuration=Release /p:Platform=x64
 
   release_on_github:
     macos:
@@ -474,18 +375,16 @@ workflows:
       #    requires:
       #      - test_win10_workspace
       #- clang_tidy_ubuntu18
-      #- build_ubuntu18_installer
-      #- build_ubuntu16_installer
-      #- build_centos7_installer
-      #- build_osx_installer
-      #- build_win10_installer
-      #- release_on_github:
-      #    requires:
-      #      - build_win10_installer
-      #      - build_ubuntu16_installer
-      #      - build_ubuntu18_installer
-      #      - build_centos7_installer
-      #      - build_osx_installer
+      - build_ubuntu18_installer
+      - build_centos7_installer
+      - build_osx_installer
+      - build_win10_installer
+      - release_on_github:
+          requires:
+            - build_win10_installer
+            - build_ubuntu18_installer
+            - build_centos7_installer
+            - build_osx_installer
 
 #  leak_check:
 #    triggers:
