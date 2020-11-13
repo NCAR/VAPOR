@@ -246,7 +246,7 @@ jobs:
             mkdir build
             cd build
             git pull
-            git checkout $CIRCLE_BRANCH
+            git checkout master
             /usr/local/bin/cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
@@ -417,3 +417,17 @@ workflows:
             - build_centos7_installer
             - build_osx_installer
             - build_win10_installer
+
+  installers:
+    build:
+      jobs:
+        - build_ubuntu18_installer
+        - build_centos7_installer
+        - build_osx_installer
+        - build_win10_installer
+        - release_on_github:
+            requires:
+              - build_ubuntu18_installer
+              - build_centos7_installer
+              - build_osx_installer
+              - build_win10_installer
