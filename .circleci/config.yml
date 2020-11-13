@@ -10,6 +10,7 @@ references:
     attach_workspace:
       at: *workspace_root
 
+jobs:
   build_ubuntu18:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
