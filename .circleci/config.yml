@@ -421,17 +421,21 @@ workflows:
   installers:
     jobs:
       - build_ubuntu18_installer:
-          branches:
-            only: installers
+          filters:
+            branches:
+              only: installers
       - build_centos7_installer:
-          branches:
-            only: installers
+          filters:
+            branches:
+              only: installers
       - build_osx_installer:
-          branches:
-            only: installers
+          filters:
+            branches:
+              only: installers
       - build_win10_installer:
-          branches:
-            only: installers
+          filters:
+            branches:
+              only: installers
       - release_on_github:
           requires:
             - build_ubuntu18_installer
