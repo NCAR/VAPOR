@@ -248,7 +248,6 @@ int Visualizer::paintEvent(bool fast)
     if (_imageCaptureEnabled) {
         captureImageSuccess = _captureImage(_captureImageFile);
     } else if (_animationCaptureEnabled) {
-        std::cout << _captureImageFile << std::endl;
 		captureImageSuccess = _captureImage(_captureImageFile);
 		_incrementPath(_captureImageFile);
 	}
@@ -582,7 +581,6 @@ int Visualizer:: _captureImage(std::string path)
     if (geoTiffOutput) writer = new GeoTIFWriter(path);
     else writer = ImageWriter::CreateImageWriterForFile(path);
     if (writer == nullptr) {
-        std::cout << "captureImageEnd A" << std::endl;
         goto captureImageEnd;
     }
     
@@ -634,7 +632,6 @@ int Visualizer:: _captureImage(std::string path)
         if (croppedWidth <= 0 || croppedHeight <= 0) {
             MyBase::SetErrMsg("Dataset not visible");
             writeReturn = -1;
-            std::cout << "captureImageEnd B" << std::endl;
             goto captureImageEnd;
         }
         
@@ -665,7 +662,6 @@ int Visualizer:: _captureImage(std::string path)
         geo->SetPixelScale(s*aspect*2/(float)width, s*2/(float)height);
         if (geo->ConfigureFromProj4(projString) < 0) {
             writeReturn = -1;
-            std::cout << "captureImageEnd C" << std::endl;
             goto captureImageEnd;
         }
     }
@@ -673,7 +669,6 @@ int Visualizer:: _captureImage(std::string path)
     writeReturn = writer->Write(framebuffer, width, height);
 
 captureImageEnd:
-    std::cout << "captureImageEnd" << std::endl;
     if (writer) delete writer;
 	if (framebuffer) delete [] framebuffer;
 
