@@ -33,17 +33,19 @@ ImageParams::ImageParams(DataMgr *dataManager,
     : RenderParams(dataManager,
                    stateSave,
                    node,
-                   2) {}
+                   2) { _initialized = true; }
 
 ImageParams::~ImageParams() {
     SetDiagMsg("ImageParams::~ImageParams() this=%p", this);
 }
 
 int ImageParams::Initialize() {
-
     int rc = RenderParams::Initialize();
     if (rc < 0)
         return (rc);
+    if (_initialized)
+        return 0;
+    _initialized = true;
 
     // The image renderer behaves like a 2D renderer, but it doesn't operate
     // on any data variables. Make sure the box is planar.
