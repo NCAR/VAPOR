@@ -419,15 +419,14 @@ workflows:
             - build_win10_installer
 
   installers:
-    build:
-      jobs:
-        - build_ubuntu18_installer
-        - build_centos7_installer
-        - build_osx_installer
-        - build_win10_installer
-        - release_on_github:
-            requires:
-              - build_ubuntu18_installer
-              - build_centos7_installer
-              - build_osx_installer
-              - build_win10_installer
+    jobs:
+      - build_ubuntu18_installer
+      - build_centos7_installer
+      - build_osx_installer
+      - build_win10_installer
+      - release_on_github:
+          requires:
+            - build_ubuntu18_installer
+            - build_centos7_installer
+            - build_osx_installer
+            - build_win10_installer
