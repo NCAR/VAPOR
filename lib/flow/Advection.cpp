@@ -321,9 +321,13 @@ int Advection::CalculateParticleProperties(Field *scalar)
 
         for (auto &s : _streams) {
             for (auto &p : s) {
-                float val;
-                int   rv = scalar->GetScalar(p.time, p.location, val);
-                if (rv == 0) p.AttachProperty(val);
+                if (p.IsSpecial()) continue;
+
+                // At the end of a flow line, a particle might be outside of the volume.
+                // We attach something in that case as well.
+                float val = std::nanf("1");
+                scalar->GetScalar(p.time, p.location, val);
+                p.AttachProperty(val);
             }
         }
     } else {
@@ -335,10 +339,11 @@ int Advection::CalculateParticleProperties(Field *scalar)
             for (auto &s : _streams) {
                 if (i < s.size()) {
                     auto &p = s[i];
-                    float value;
-                    int   rv = scalar->GetScalar(p.time, p.location, value);
-                    if (rv == 0)                    // A particle could be out of the volume, so we only
-                        p.AttachProperty(value);    // attach property when returns 0.
+                    if (p.IsSpecial()) continue;
+
+                    float value = std::nanf("1");
+                    scalar->GetScalar(p.time, p.location, value);
+                    p.AttachProperty(value);
                 }
             }
         }
