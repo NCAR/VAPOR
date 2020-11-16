@@ -180,33 +180,29 @@ jobs:
           name: list workspace
           command: |
             cd /tmp/workspace/installers
-            time=`date +"%dd_%mm_%yy_%H:%M"`
+            time=`date +"%d/%m/%y-%H:%M"`
             ubu="VAPOR3-3.2.0-Ubuntu18-Weekly.sh"
             mv $ubu ${ubu/Weekly/$time}
             osx="VAPOR3-3.2.0-Darwin-Weekly.dmg"
             mv $osx ${osx/Weekly/$time}
             cent="VAPOR3-3.2.0-CentOS7-Weekly.sh"
             mv $cent ${cent/Weekly/$time}
-
-      - run:
-          name: install ghr
-          command: |
             brew install ghr
-      - run:
-          name: push assets with ghr
-          command: |
-            a=$'These installers are built weekly, and may not be stable.\n\n'
-            b=$'Official releases may be found below.\n\n'
-            c="Last built on "
-            d=`date +"%m-%d-%y".\n\n`
-            e="sha 256\n"
-            f=$'Ubuntu18:  `shasum -a 256 VAPOR3*Ubuntu*`\n'
-            g=$'CentOS:    `shasum -a 256 VAPOR3*CentOS7*`\n'
-            h=$'OSX:       `shasum -a 256 VAPOR3*Darwin*`\n'
+            endl=$'\n'
+            e="sha 256"$endl
+            f="Ubuntu18:  "
+            sha=`shasum -a 256 VAPOR3*Ubuntu*`
+            f=$f$sha$endl
+            g="CentOS:    "
+            sha=`shasum -a 256 VAPOR3*CentOS7*`
+            g=$g$sha$endl
+            h="OSX:       "
+            sha=`shasum -a 256 VAPOR3*Darwin*`
+            h=$h$sha$endl
             #i=$'Windows10: `shasum -a 256 VAPOR3*win64*`\n'
-            message="$a$b$c$d$e$f$g$h"
+            message="$e$f$g$h"
             echo $message
-            ghr -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate 3.3preRelease /tmp/workspace/installers
+            ghr -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate 3.3_PreRelease /tmp/workspace/installers
 
 
 workflows:
