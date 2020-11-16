@@ -90,8 +90,6 @@ jobs:
             cp site_files/site.NCAR site.local
             mkdir build
             cd build
-            git pull
-            git checkout master
             /usr/local/bin/cmake -DCPACK_BINARY_DRAGNDROP=ON -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
             make installer
