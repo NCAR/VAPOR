@@ -179,7 +179,7 @@ jobs:
       - run:
           name: list workspace
           command: |
-            ls /tmp/workspace/installers
+            cd /tmp/workspace/installers
             time=`date +"%d-%m-%y %H:%M"`
             ubu="VAPOR3-3.2.0-Ubuntu18-Weekly.sh"
             mv $ubu ${ubu/Weekly/$time}
