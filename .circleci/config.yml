@@ -180,13 +180,13 @@ jobs:
           name: list workspace
           command: |
             cd /tmp/workspace/installers
-            time=`date +"%d-%m-%y %H:%M"`
+            time=`date +"%dd_%mm_%yy_%H:%M"`
             ubu="VAPOR3-3.2.0-Ubuntu18-Weekly.sh"
             mv $ubu ${ubu/Weekly/$time}
             osx="VAPOR3-3.2.0-Darwin-Weekly.dmg"
-            mv $osx  ${ubu/Weekly/$time}
+            mv $osx ${osx/Weekly/$time}
             cent="VAPOR3-3.2.0-CentOS7-Weekly.sh"
-            mv $cent ${ubu/Weekly/$time}
+            mv $cent ${cent/Weekly/$time}
 
       - run:
           name: install ghr
@@ -200,10 +200,10 @@ jobs:
             c="Last built on "
             d=`date +"%m-%d-%y".\n\n`
             e="sha 256\n"
-            f="Ubuntu18:  `shasum -a 256 VAPOR3*Ubuntu*`"
-            g="CentOS:    `shasum -a 256 VAPOR3*CentOS7*`"
-            h="OSX:       `shasum -a 256 VAPOR3*Darwin*`"
-            #i="Windows10: `shasum -a 256 VAPOR3*win64*`"
+            f=$'Ubuntu18:  `shasum -a 256 VAPOR3*Ubuntu*`\n'
+            g=$'CentOS:    `shasum -a 256 VAPOR3*CentOS7*`\n'
+            h=$'OSX:       `shasum -a 256 VAPOR3*Darwin*`\n'
+            #i=$'Windows10: `shasum -a 256 VAPOR3*win64*`\n'
             message="$a$b$c$d$e$f$g$h"
             echo $message
             ghr -b "${message}" -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -prerelease -c ${CIRCLE_SHA1} -recreate 3.3preRelease /tmp/workspace/installers
