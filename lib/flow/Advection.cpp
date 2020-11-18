@@ -44,7 +44,7 @@ Advection::CheckReady() const
 }
 
 
-int Advection::AdvectSteps( Field* velocity, float deltaT, size_t maxSteps, ADVECTION_METHOD method )
+int Advection::AdvectSteps( Field* velocity, double deltaT, size_t maxSteps, ADVECTION_METHOD method )
 {
     int ready = CheckReady();
     if( ready != 0 )
@@ -69,7 +69,7 @@ int Advection::AdvectSteps( Field* velocity, float deltaT, size_t maxSteps, ADVE
             if( past0.IsSpecial() ) // If the last particle is marked "special,"
                 break;              // terminate stream immediately.
 
-            float dt = deltaT;
+            double dt = deltaT;
             if( s.size() > 2 )  // If there are at least 3 particles in the stream and
             {                   // neither is a separator, we also adjust *dt*
                 const auto& past1 = s[ s.size()-2 ];
@@ -80,7 +80,7 @@ int Advection::AdvectSteps( Field* velocity, float deltaT, size_t maxSteps, ADVE
                     // can be adjusted by _calcAdjustFactor().
                     // I.e., the adjusted value can be at most 20X larger or 20X smaller.
                     // The choice of 20.0f is just an empirical value that seems to work well.
-                    float mindt = deltaT / 20.0f,   maxdt = deltaT * 20.0f;
+                    double mindt = deltaT / 20.0,   maxdt = deltaT * 20.0;
                     dt  = past0.time - past1.time;     // step size used by last integration
                     dt *= _calcAdjustFactor( past2, past1, past0 );
                     if( dt > 0 )    // integrate forward 
@@ -194,7 +194,7 @@ int Advection::AdvectSteps( Field* velocity, float deltaT, size_t maxSteps, ADVE
 
 
 int
-Advection::AdvectTillTime( Field* velocity, float startT, float deltaT, float targetT, 
+Advection::AdvectTillTime( Field* velocity, double startT, double deltaT, double targetT, 
                            ADVECTION_METHOD method )
 {
     int ready = CheckReady();
@@ -246,10 +246,10 @@ Advection::AdvectTillTime( Field* velocity, float startT, float deltaT, float ta
 
             }   // Finish of the if condition
 
-            float dt = deltaT;
+            double dt = deltaT;
             if( s.size() > 2 )  // If there are at least 3 particles in the stream, 
             {                   // we also adjust *dt*
-                float mindt = deltaT / 20.0f,   maxdt = deltaT * 20.0f;
+                double mindt = deltaT / 20.0,   maxdt = deltaT * 20.0;
                 maxdt = glm::min( maxdt, targetT - p0.time );
                 const auto& past1 = s[ s.size()-2 ];
                 const auto& past2 = s[ s.size()-3 ];
@@ -375,10 +375,14 @@ int Advection::CalculateParticleProperties( Field* scalar )
 
         for( auto& s : _streams ) {
             for( auto& p : s ) {
-                float val;
-                int rv = scalar->GetScalar( p.time, p.location, val );
-                if( rv == 0 )
-                    p.AttachProperty( val );
+                if( p.IsSpecial() )
+                    continue;
+
+                // At the end of a flow line, a particle might be outside of the volume.
+                // We attach something in that case as well.
+                float val = std::nanf("1");
+                scalar->GetScalar( p.time, p.location, val );
+                p.AttachProperty( val );
             }
         }
     }
@@ -392,10 +396,12 @@ int Advection::CalculateParticleProperties( Field* scalar )
             for( auto& s : _streams ) {
                 if( i < s.size() ) {
                     auto& p = s[i];
-                    float value;
-                    int rv = scalar->GetScalar( p.time, p.location, value );
-                    if( rv == 0 )   // A particle could be out of the volume, so we only
-                        p.AttachProperty( value );  // attach property when returns 0.
+                    if( p.IsSpecial() )
+                        continue;
+
+                    float value = std::nanf("1");
+                    scalar->GetScalar( p.time, p.location, value );
+                    p.AttachProperty( value );
                 }
             }
         }
@@ -406,36 +412,39 @@ int Advection::CalculateParticleProperties( Field* scalar )
 
 
 int
-Advection::_advectEuler( Field* velocity, const Particle& p0, float dt, Particle& p1 ) const
+Advection::_advectEuler( Field* velocity, const Particle& p0, double dt, Particle& p1 ) const
 {
     glm::vec3 v0;
     int rv  = velocity->GetVelocity( p0.time, p0.location, v0 );
     if( rv != 0 )
         return rv;
-    p1.location = p0.location + dt * v0;
+    float dt32 = float(dt); // glm is strict about data types (which is a good thing).
+    p1.location = p0.location + dt32 * v0;
     p1.time     = p0.time + dt;
     return 0;
 }
 
 int
-Advection::_advectRK4( Field* velocity, const Particle& p0, float dt, Particle& p1 ) const
+Advection::_advectRK4( Field* velocity, const Particle& p0, double dt, Particle& p1 ) const
 {
     glm::vec3 k1, k2, k3, k4;
-    float dt2 = dt * 0.5f;
+    double dt_half  = dt * 0.5;
+    float dt32      = float(dt);      // glm is strict about data types (which is a good thing).
+    float dt_half32 = float(dt_half); // glm is strict about data types (which is a good thing).
     int rv;
     rv = velocity->GetVelocity( p0.time,       p0.location,            k1 );
     if( rv != 0 )
         return rv;
-    rv = velocity->GetVelocity( p0.time + dt2, p0.location + dt2 * k1, k2 );
+    rv = velocity->GetVelocity( p0.time + dt_half, p0.location + dt_half32 * k1, k2 );
     if( rv != 0 )
         return rv;
-    rv = velocity->GetVelocity( p0.time + dt2, p0.location + dt2 * k2, k3 );
+    rv = velocity->GetVelocity( p0.time + dt_half, p0.location + dt_half32 * k2, k3 );
     if( rv != 0 )
         return rv;
-    rv = velocity->GetVelocity( p0.time + dt,  p0.location + dt  * k3, k4 );
+    rv = velocity->GetVelocity( p0.time + dt,  p0.location + dt32  * k3, k4 );
     if( rv != 0 )
         return rv;
-    p1.location = p0.location + dt / 6.0f * (k1 + 2.0f * (k2 + k3) + k4 );
+    p1.location = p0.location + dt32 / 6.0f * (k1 + 2.0f * (k2 + k3) + k4 );
     p1.time     = p0.time + dt;
     return 0;
 }
