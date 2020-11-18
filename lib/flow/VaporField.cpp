@@ -130,7 +130,7 @@ auto VaporField::UnlockParams() -> int {
     return 0;
 }
 
-bool VaporField::InsideVolumeVelocity(float time, const glm::vec3 &pos) const {
+bool VaporField::InsideVolumeVelocity(double time, const glm::vec3 &pos) const {
     const std::array<double, 3> coords{pos.x, pos.y, pos.z};
     const VAPoR::Grid *grid = nullptr;
     VAssert(_isReady());
@@ -188,7 +188,7 @@ bool VaporField::InsideVolumeVelocity(float time, const glm::vec3 &pos) const {
     return true;
 }
 
-bool VaporField::InsideVolumeScalar(float time, const glm::vec3 &pos) const {
+bool VaporField::InsideVolumeScalar(double time, const glm::vec3 &pos) const {
     // When this variable doesn't exist, it doesn't make sense to say if
     // a position is inside of the volume, so simply return true.
     if (ScalarName.empty())
@@ -268,7 +268,7 @@ int VaporField::GetVelocityIntersection(size_t ts, glm::vec3 &minxyz, glm::vec3 
     return 0;
 }
 
-int VaporField::GetVelocity(float time, const glm::vec3 &pos, glm::vec3 &velocity) const {
+int VaporField::GetVelocity(double time, const glm::vec3 &pos, glm::vec3 &velocity) const {
     const std::array<double, 3> coords{pos.x, pos.y, pos.z};
     const VAPoR::Grid *grid = nullptr;
 
@@ -350,7 +350,7 @@ int VaporField::GetVelocity(float time, const glm::vec3 &pos, glm::vec3 &velocit
     } // end of unsteady condition
 }
 
-int VaporField::GetScalar(float time, const glm::vec3 &pos, float &scalar) const {
+int VaporField::GetScalar(double time, const glm::vec3 &pos, float &scalar) const {
     // When this variable doesn't exist, it doesn't make sense to get a scalar value
     // from it, so just return that fact.
     if (ScalarName.empty())
@@ -451,7 +451,7 @@ void VaporField::UpdateParams(const VAPoR::FlowParams *p) {
     IsSteady = p->GetIsSteady();
 }
 
-int VaporField::LocateTimestamp(float time, size_t &floor) const {
+int VaporField::LocateTimestamp(double time, size_t &floor) const {
     if (_timestamps.empty())
         return TIME_ERROR;
     if (_timestamps.size() == 1) {
@@ -476,7 +476,7 @@ int VaporField::GetNumberOfTimesteps() const {
     return _timestamps.size();
 }
 
-int VaporField::CalcDeltaTFromCurrentTimeStep(float &delT) const {
+int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const {
     VAssert(_isReady());
 
     // This function is called only one-time before advection starts,
@@ -519,8 +519,7 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(float &delT) const {
     float mult = _params->GetVelocityMultiplier();
     if (mult == 0.0f)
         mult = 1.0f;
-    const float mult1o = 1.0f / mult;
-    float maxmag = 0.0;
+    float maxmag = 0.0f;
     glm::vec3 vel;
     for (long i = 0; i < totalSamples; i++) {
         int rv = this->GetVelocity(timestamp, samples[i], vel);
@@ -531,7 +530,7 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(float &delT) const {
         else if (rv != 0)
             return rv;
         else {
-            vel *= mult1o; // Restore the raw velocity values
+            vel /= mult; // Restore the raw velocity values
             auto mag = glm::length(vel);
             if (mag > maxmag)
                 maxmag = mag;

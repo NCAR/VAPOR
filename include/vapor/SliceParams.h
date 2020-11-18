@@ -49,6 +49,8 @@ class PARAMS_API SliceParams : public RenderParams {
     static const string SampleLocationTag;
 
   private:
+    bool _initialized = false;
+
     void _init();
     std::vector<double> _cachedValues;
 

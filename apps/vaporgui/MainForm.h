@@ -177,6 +177,7 @@ class MainForm : public QMainWindow {
     QSpinBox *_interactiveRefinementSpin;
     QDockWidget *_tabDockWindow;
 
+    bool _animationCapture = false;
     int _progressSavedFB = -1;
     bool _progressEnabled = false;
     bool _needToReenableProgressAfterAnimation = false;

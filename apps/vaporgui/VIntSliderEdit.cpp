@@ -96,7 +96,8 @@ void VIntSliderEdit::SetValue(int value) {
     _lineEdit->SetValueInt(_value);
     _slider->SetValue(_value);
 
-    if (QObject::sender() != nullptr) {
+    if (QObject::sender() != nullptr &&
+        QObject::sender() != this) {
         emit ValueChanged(_value);
     }
 }
