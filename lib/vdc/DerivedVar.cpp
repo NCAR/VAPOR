@@ -1330,6 +1330,89 @@ bool DerivedCoordVar_TimeInSeconds::VariableExists(size_t ts, int reflevel, int 
 
 //////////////////////////////////////////////////////////////////////////////
 //
+//	DerivedCoordVar_Time
+//
+//////////////////////////////////////////////////////////////////////////////
+
+DerivedCoordVar_Time::DerivedCoordVar_Time(string derivedVarName, string dimName, size_t n) : DerivedCoordVar(derivedVarName)
+{
+    _times.clear();
+    for (size_t i = 0; i < n; i++) _times.push_back((float)i);
+
+    string units = "seconds";
+    int    axis = 3;
+    _coordVarInfo = DC::CoordVar(_derivedVarName, units, DC::XType::FLOAT, vector<bool>(), axis, false, vector<string>(), dimName);
+}
+
+int DerivedCoordVar_Time::Initialize() { return (0); }
+
+bool DerivedCoordVar_Time::GetBaseVarInfo(DC::BaseVar &var) const
+{
+    var = _coordVarInfo;
+    return (true);
+}
+
+bool DerivedCoordVar_Time::GetCoordVarInfo(DC::CoordVar &cvar) const
+{
+    cvar = _coordVarInfo;
+    return (true);
+}
+
+int DerivedCoordVar_Time::GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const
+{
+    dims_at_level.clear();
+    bs_at_level.clear();
+
+    return (0);
+}
+
+int DerivedCoordVar_Time::OpenVariableRead(size_t ts, int level, int lod)
+{
+    ts = ts < _times.size() ? ts : _times.size() - 1;
+
+    DC::FileTable::FileObject *f = new DC::FileTable::FileObject(ts, _derivedVarName, level, lod);
+
+    return (_fileTable.AddEntry(f));
+}
+
+int DerivedCoordVar_Time::CloseVariable(int fd)
+{
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor : %d", fd);
+        return (-1);
+    }
+
+    _fileTable.RemoveEntry(fd);
+    delete f;
+
+    return (0);
+}
+
+int DerivedCoordVar_Time::ReadRegion(int fd, const vector<size_t> &min, const vector<size_t> &max, float *region)
+{
+    VAssert(min.size() == 0);
+    VAssert(max.size() == 0);
+
+    DC::FileTable::FileObject *f = _fileTable.GetEntry(fd);
+
+    if (!f) {
+        SetErrMsg("Invalid file descriptor: %d", fd);
+        return (-1);
+    }
+
+    size_t ts = f->GetTS();
+
+    *region = _times[ts];
+
+    return (0);
+}
+
+bool DerivedCoordVar_Time::VariableExists(size_t ts, int reflevel, int lod) const { return (ts < _times.size()); }
+
+//////////////////////////////////////////////////////////////////////////////
+//
 //	DerivedCoordVar_Staggered
 //
 //////////////////////////////////////////////////////////////////////////////
