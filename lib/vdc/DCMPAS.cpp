@@ -1156,28 +1156,49 @@ int DCMPAS::_InitCoordvars(
 int DCMPAS::_InitDerivedVars(
 	NetCDFCollection *ncdfc
 ) {
+
 	int rc = _InitVerticalCoordinatesDerivedAtmosphere(ncdfc);
 	if (rc<0) return(-1);
 
 	rc = _InitVerticalCoordinatesDerivedOcean(ncdfc);
 	if (rc<0) return(-1);
 
-    // Create and install the Time coordinate variable
-    //
-	DerivedCoordVar_WRFTime *derivedVar = new DerivedCoordVar_WRFTime(
-        timeDimName, ncdfc, xTimeVarName, timeDimName
-    );
-
-	rc = derivedVar->Initialize();
-	if (rc<0) return(-1);
-
-	_dvm.AddCoordVar(derivedVar);
-
-	// Time coordinate is a derived variable
-	//
 	DC::CoordVar cvarInfo;
-	bool ok = _dvm.GetCoordVarInfo(timeDimName, cvarInfo);
-	VAssert(ok);
+	if (ncdfc->VariableExists(ncdfc->GetNumTimeSteps()-1, xTimeVarName)) {
+
+		// Create and install the Time coordinate variable
+		//
+		DerivedCoordVar_WRFTime *derivedVar = new DerivedCoordVar_WRFTime(
+			timeDimName, ncdfc, xTimeVarName, timeDimName
+		);
+
+		rc = derivedVar->Initialize();
+		if (rc<0) return(-1);
+
+		_dvm.AddCoordVar(derivedVar);
+
+		// Time coordinate is a derived variable
+		//
+		bool ok = _dvm.GetCoordVarInfo(timeDimName, cvarInfo);
+		VAssert(ok);
+	}
+	else {
+		// Synthesize and install a Time coordinate variable
+		//
+		DerivedCoordVar_Time *derivedVar = new DerivedCoordVar_Time(
+			timeDimName, timeDimName, ncdfc->GetNumTimeSteps()
+		);
+
+		rc = derivedVar->Initialize();
+		if (rc<0) return(-1);
+
+		_dvm.AddCoordVar(derivedVar);
+
+		// Time coordinate is a derived variable
+		//
+		bool ok = _dvm.GetCoordVarInfo(timeDimName, cvarInfo);
+		VAssert(ok);
+	}
 
 	_coordVarsMap[timeDimName] = cvarInfo;
 
