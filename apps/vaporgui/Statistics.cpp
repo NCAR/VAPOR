@@ -36,6 +36,7 @@
 #include <vapor/MyBase.h>
 #include <vapor/DataStatus.h>
 #include "PWidgets.h"
+#include "VPushButton.h"
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -61,6 +62,10 @@ Statistics::Statistics(QWidget *parent) : QDialog(parent), Ui_StatsWindow()
     auto cr = new PCopyRegionWidget;
     verticalLayout_2->insertWidget(1, cr);
     _pw.push_back(cr);
+
+    VPushButton *close = new VPushButton("Close Window");
+    connect(close, &VPushButton::ButtonClicked, this, &QDialog::accept);
+    layout()->addWidget(close);
 }
 
 Statistics::~Statistics()

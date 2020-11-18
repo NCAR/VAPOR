@@ -26,18 +26,12 @@ public:
     //
     // Major action functions
     //
-#if 0
-    // Code from VAPOR 3.2. Could be deleted if VAPOR 3.3 runs well.
-    // Advect one step as long as the particle is within spatial and temporal boundary
-    int  AdvectOneStep(  Field* velocityField, float deltaT, 
-                         ADVECTION_METHOD method = ADVECTION_METHOD::RK4 );
-#endif
     // Advect all particles as long as they are within spatial and temporal boundary
     // for a specified number if steps.
-    int AdvectSteps(Field *velocityField, float deltaT, size_t maxSteps, ADVECTION_METHOD method = ADVECTION_METHOD::RK4);
+    int AdvectSteps(Field *velocityField, double deltaT, size_t maxSteps, ADVECTION_METHOD method = ADVECTION_METHOD::RK4);
     // Advect as many steps as necessary to reach a certain time: targetT.
     // Note: it only considers particles that have already passed startT.
-    int AdvectTillTime(Field *velocityField, float startT, float deltaT, float targetT, ADVECTION_METHOD method = ADVECTION_METHOD::RK4);
+    int AdvectTillTime(Field *velocityField, double startT, double deltaT, double targetT, ADVECTION_METHOD method = ADVECTION_METHOD::RK4);
 
     // Retrieve field values of a particle based on its location, and put the result in
     // the "value" field or the "properties" field of a particle
@@ -92,10 +86,10 @@ private:
     glm::vec2 _periodicBounds[3];    // periodic boundaries in X, Y, Z dimensions
 
     // Advection methods here could assume all input is valid.
-    int _advectEuler(Field *, const Particle &, float deltaT,    // Input
-                     Particle &p1) const;                        // Output
-    int _advectRK4(Field *, const Particle &, float deltaT,      // Input
-                   Particle &p1) const;                          // Output
+    int _advectEuler(Field *, const Particle &, double deltaT,    // Input
+                     Particle &p1) const;                         // Output
+    int _advectRK4(Field *, const Particle &, double deltaT,      // Input
+                   Particle &p1) const;                           // Output
 
     // Get an adjust factor for deltaT based on how curvy the past two steps are.
     //   A value in range (0.0, 1.0) means shrink deltaT.

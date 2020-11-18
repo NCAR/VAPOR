@@ -1,13 +1,9 @@
-
+#include <algorithm>
 #include "vapor/Field.h"
 
 using namespace flow;
 
 int Field::GetNumOfEmptyVelocityNames() const
 {
-    int counter = 0;
-    for (const auto &e : VelocityNames)
-        if (e.empty()) counter++;
-
-    return counter;
+    return std::count_if(VelocityNames.begin(), VelocityNames.end(), [](const std::string &e) { return e.empty(); });
 }

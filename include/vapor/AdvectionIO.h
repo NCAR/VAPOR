@@ -19,7 +19,7 @@ auto OutputFlowlinesNumSteps(const Advection *adv, const char *filename, size_t 
 // Output trajectory to a maximum time.
 // When `append == false`, a header will also be output.
 // Otherwise, only trajectories are output.
-auto OutputFlowlinesMaxTime(const Advection *adv, const char *filename, float maxTime, const std::string &proj4string, bool append) -> int;
+auto OutputFlowlinesMaxTime(const Advection *adv, const char *filename, double maxTime, const std::string &proj4string, bool append) -> int;
 
 // Input a list of seeds from lines of CSVs.
 auto InputSeedsCSV(const std::string &filename, Advection *adv) -> int;

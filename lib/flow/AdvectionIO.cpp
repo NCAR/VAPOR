@@ -81,7 +81,7 @@ auto flow::OutputFlowlinesNumSteps(const Advection *adv, const char *filename, s
     return 0;
 }
 
-auto flow::OutputFlowlinesMaxTime(const Advection *adv, const char *filename, float maxTime, const std::string &proj4string, bool append) -> int
+auto flow::OutputFlowlinesMaxTime(const Advection *adv, const char *filename, double maxTime, const std::string &proj4string, bool append) -> int
 {
     // First we need the infrastructure for time conversion
     VAPoR::UDUnits udunits;

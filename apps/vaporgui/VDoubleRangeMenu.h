@@ -22,7 +22,7 @@ protected:
     VDoubleLineEditAction *_minRangeAction;
     VDoubleLineEditAction *_maxRangeAction;
 
-public:
+public slots:
     //! Set the minimum value that the current widget can use
     void SetMinimum(double min);
 

@@ -102,6 +102,9 @@ public:
                                                  // If it's X-Z (orientation = 1)
                                                  // If it's Y-Z (orientation = 0)
 
+private:
+    bool _initialized = false;
+
     //! Set the number of TMS levels of detail for the currently selected image
     //! \param[in] val int val, the number of TMS levels of detail available in the current file.
     void _setNumTMSLODs(int val) { SetValueLong(_numTMSLODTag, "Number of TMS levels of detail", (long)val); }

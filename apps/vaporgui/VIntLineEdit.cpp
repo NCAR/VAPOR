@@ -45,8 +45,14 @@ void VIntLineEdit::_valueChanged()
         }
 
         value = (int)std::stod(str);
-        SetValueInt(value);
-        emit ValueChanged(_value);
+
+        // If value changed, update and emit, otherwiese revert to old value
+        if (value != _value) {
+            SetValueInt(value);
+            emit ValueChanged(_value);
+        } else {
+            SetValueInt(_value);
+        }
     } catch (const std::invalid_argument &) {
         SetValueInt(_value);
     } catch (const std::out_of_range &) {
