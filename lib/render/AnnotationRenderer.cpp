@@ -625,10 +625,11 @@ void AnnotationRenderer::drawAxisTics(
 		//_drawTic(startPosn, endPosn, length, width, axisColor);
 		_drawTic(startPosn, endPosn, width, axisColor);
 		
-		double text = pointOnAxis[0];
+		double xValue = pointOnAxis[0];
+		double yValue = pointOnAxis[1];
 		if (latLon)
-			convertPointToLon(text);
-		renderText(text, startPosn, aa);
+			convertPointToLonLat(xValue, yValue);
+		renderText(xValue, startPosn, aa);
 	}
 	
 	//Now draw tic marks for y:
@@ -650,10 +651,11 @@ void AnnotationRenderer::drawAxisTics(
 		
 		_drawTic(startPosn, endPosn, width, axisColor);
 
-		double text = pointOnAxis[1];
+		double xValue = pointOnAxis[0];
+		double yValue = pointOnAxis[1];
 		if (latLon)
-			convertPointToLat(text);
-		renderText(text, startPosn, aa);
+			convertPointToLonLat(xValue, yValue);
+		renderText(yValue, startPosn, aa);
 	}
 
 	//Now draw tic marks for z:
@@ -683,6 +685,8 @@ void AnnotationRenderer::_drawAxes(
 	std::vector<double> origin,
 	std::vector<double> color,
 	double width) {
+
+    //std::cout << "axes " << min[0] << " " << min[1] << " " << min[2] << std::endl;
 	
     LegacyGL *lgl = _glManager->legacy;
     

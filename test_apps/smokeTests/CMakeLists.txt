@@ -14,5 +14,11 @@ add_executable (
     gridTools.h
 )
 
+add_executable (
+    testProj
+    testProj.cpp
+)
+
 target_link_libraries (testGrid common vdc wasp)
 target_link_libraries (testDataMgr common vdc wasp)
+target_link_libraries (testProj common vdc )
