@@ -32,6 +32,7 @@ set (SRC
 	kdtree.c
 	VDC_c.cpp
 	DCUtils.cpp
+	QuadTreeRectangleP.cpp
 )
 
 set (HEADERS
@@ -66,6 +67,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/DerivedVarMgr.h
 	${PROJECT_SOURCE_DIR}/include/vapor/DCUtils.h
 	${PROJECT_SOURCE_DIR}/include/vapor/QuadTreeRectangle.hpp
+	${PROJECT_SOURCE_DIR}/include/vapor/QuadTreeRectangleP.h
 )
 
 add_library (vdc SHARED ${SRC} ${HEADERS})

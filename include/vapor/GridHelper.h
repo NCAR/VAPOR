@@ -112,7 +112,7 @@ private:
         size_t                                     _max_size;
     };
 
-    lru_cache<string, std::shared_ptr<const QuadTreeRectangle<float, size_t>>> _qtrCache;
+    lru_cache<string, std::shared_ptr<const QuadTreeRectangleP<float, size_t>>> _qtrCache;
 
     RegularGrid *_make_grid_regular(const std::vector<size_t> &dims, const std::vector<float *> &blkvec, const std::vector<size_t> &bs, const std::vector<size_t> &bmin, const std::vector<size_t> &bmax
 

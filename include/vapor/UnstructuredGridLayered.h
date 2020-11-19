@@ -6,7 +6,7 @@
 #include <memory>
 #include <vapor/common.h>
 #include <vapor/UnstructuredGrid2D.h>
-#include <vapor/QuadTreeRectangle.hpp>
+#include <vapor/QuadTreeRectangleP.h>
 
 #ifdef WIN32
     #pragma warning(disable : 4661 4251)    // needed for template class
@@ -28,12 +28,12 @@ public:
                             const std::vector<float *> &blks, const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                             Location location,    // node,face, edge
                             size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset, const UnstructuredGridCoordless &xug, const UnstructuredGridCoordless &yug,
-                            const UnstructuredGridCoordless &zug, std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr);
+                            const UnstructuredGridCoordless &zug, std::shared_ptr<const QuadTreeRectangleP<float, size_t>> qtr);
 
     UnstructuredGridLayered() = default;
     virtual ~UnstructuredGridLayered() = default;
 
-    std::shared_ptr<const QuadTreeRectangle<float, size_t>> GetQuadTreeRectangle() const { return (_ug2d.GetQuadTreeRectangle()); }
+    std::shared_ptr<const QuadTreeRectangleP<float, size_t>> GetQuadTreeRectangle() const { return (_ug2d.GetQuadTreeRectangle()); }
 
     virtual std::vector<size_t> GetCoordDimensions(size_t dim) const override;
 

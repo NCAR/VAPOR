@@ -167,7 +167,7 @@ public:
         return (os);
     }
 
-private:
+public:
     class rectangle_t {
     public:
         rectangle_t() : _left(0.0f), _top(0.0f), _right(0.0f), _bottom(0.0f) {}
@@ -223,6 +223,7 @@ private:
         T _left, _top, _right, _bottom;
     };
 
+private:
     class node_t {
     public:
         node_t(int level = 0) : _level(level), _is_leaf(true), _child0(0), _rectangle(0.0, 0.0, 1.0, 1.0) {}

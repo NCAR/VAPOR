@@ -168,7 +168,7 @@ void test_get_value(Grid *g)
     size_t n = VProduct(g->GetDimensions());
 
     size_t ecount = 0;
-    omp_set_num_threads(2);
+    omp_set_num_threads(1);
 #pragma omp parallel
     {
         cout << "Thread " << omp_get_thread_num() << " of " << omp_get_num_threads() << endl;
@@ -184,9 +184,6 @@ void test_get_value(Grid *g)
         Grid::ConstIterator itr = g->cbegin() + istart;
         Grid::ConstCoordItr c_itr = g->ConstCoordBegin() + istart;
 
-        //	for ( ; itr!=enditr; itr+=nthreads, c_itr+=nthreads) {
-        //	for ( ; itr!=enditr; ++itr, ++c_itr) {
-        //	for ( ; itr!=enditr; itr+=1, c_itr+=1) {
         for (size_t i = istart; i < iend; i++, ++itr, ++c_itr) {
             float v0 = *itr;
 

@@ -6,14 +6,16 @@
 #include <limits>
 #include <vapor/utils.h>
 #include <vapor/CurvilinearGrid.h>
-#include <vapor/QuadTreeRectangle.hpp>
+#include <vapor/QuadTreeRectangleP.h>
 #include <vapor/vizutil.h>
 
 using namespace std;
 using namespace VAPoR;
 
+template class VAPoR::QuadTreeRectangleP<float, size_t>;
+
 void CurvilinearGrid::_curvilinearGrid(const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg, const vector<double> &zcoords,
-                                       std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr)
+                                       std::shared_ptr<const QuadTreeRectangleP<float, size_t>> qtr)
 {
     _zcoords.clear();
     _xrg = xrg;
@@ -29,7 +31,7 @@ void CurvilinearGrid::_curvilinearGrid(const RegularGrid &xrg, const RegularGrid
 }
 
 CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const vector<double> &zcoords,
-                                 std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr)
+                                 std::shared_ptr<const QuadTreeRectangleP<float, size_t>> qtr)
 : StructuredGrid(dims, bs, blks)
 {
     VAssert(dims.size() == 2 || dims.size() == 3);
@@ -47,7 +49,7 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
 }
 
 CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg, const RegularGrid &zrg,
-                                 std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr)
+                                 std::shared_ptr<const QuadTreeRectangleP<float, size_t>> qtr)
 : StructuredGrid(dims, bs, blks)
 {
     VAssert(dims.size() == 3);
@@ -65,7 +67,7 @@ CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t
 }
 
 CurvilinearGrid::CurvilinearGrid(const vector<size_t> &dims, const vector<size_t> &bs, const vector<float *> &blks, const RegularGrid &xrg, const RegularGrid &yrg,
-                                 std::shared_ptr<const QuadTreeRectangle<float, size_t>> qtr)
+                                 std::shared_ptr<const QuadTreeRectangleP<float, size_t>> qtr)
 : StructuredGrid(dims, bs, blks)
 {
     VAssert(dims.size() == 2);
@@ -250,7 +252,7 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const ConstCoordItrCG &rhs) : 
     _coords = rhs._coords;
     _xCoordItr = rhs._xCoordItr;
     _yCoordItr = rhs._yCoordItr;
-    _zCoordItr = rhs._zCoordItr;
+    if (rhs._terrainFollowing) { _zCoordItr = rhs._zCoordItr; }
     _terrainFollowing = rhs._terrainFollowing;
 }
 
@@ -561,34 +563,25 @@ bool CurvilinearGrid::_insideGridHelperTerrain(double x, double y, double z, con
 
     // Check cached z values from last search first
     //
-    if (((z - _insideGridCache.z0) * (z - _insideGridCache.z1)) < 0.0) {
-        k = _insideGridCache.k;
-        z0 = _insideGridCache.z0;
-        z1 = _insideGridCache.z1;
-    } else {
-        // Find k index of cell containing z. Already know i and j indices
+
+    // Find k index of cell containing z. Already know i and j indices
+    //
+    size_t         nz = GetDimensions()[2];
+    vector<double> zcoords(nz);
+    for (int kk = 0; kk < nz; kk++) {
+        // Interpolate Z coordinate across triangle
         //
-        size_t         nz = GetDimensions()[2];
-        vector<double> zcoords(nz);
-        for (int kk = 0; kk < nz; kk++) {
-            // Interpolate Z coordinate across triangle
-            //
-            float zk = _zrg.AccessIJK(iv[0], jv[0], kk) * lambda[0] + _zrg.AccessIJK(iv[1], jv[1], kk) * lambda[1] + _zrg.AccessIJK(iv[2], jv[2], kk) * lambda[2];
+        float zk = _zrg.AccessIJK(iv[0], jv[0], kk) * lambda[0] + _zrg.AccessIJK(iv[1], jv[1], kk) * lambda[1] + _zrg.AccessIJK(iv[2], jv[2], kk) * lambda[2];
 
-            zcoords[kk] = zk;
-        }
-
-        if (!Wasp::BinarySearchRange(zcoords, z, k)) return (false);
-
-        VAssert(k < nz - 1);
-
-        z0 = zcoords[k];
-        z1 = zcoords[k + 1];
-
-        _insideGridCache.k = k;
-        _insideGridCache.z0 = z0;
-        _insideGridCache.z1 = z1;
+        zcoords[kk] = zk;
     }
+
+    if (!Wasp::BinarySearchRange(zcoords, z, k)) return (false);
+
+    VAssert(k < nz - 1);
+
+    z0 = zcoords[k];
+    z1 = zcoords[k + 1];
 
     zwgt[0] = 1.0 - (z - z0) / (z1 - z0);
     zwgt[1] = 1.0 - zwgt[0];
@@ -679,13 +672,13 @@ bool CurvilinearGrid::_insideGrid(double x, double y, double z, size_t &i, size_
     }
 }
 
-std::shared_ptr<QuadTreeRectangle<float, size_t>> CurvilinearGrid::_makeQuadTreeRectangle() const
+std::shared_ptr<QuadTreeRectangleP<float, size_t>> CurvilinearGrid::_makeQuadTreeRectangle() const
 {
     const vector<size_t> &dims = GetDimensions();
     const vector<size_t>  dims2d = {dims[0], dims[1]};
     size_t                reserve_size = dims2d[0] * dims2d[1];
 
-    std::shared_ptr<QuadTreeRectangle<float, size_t>> qtr = std::make_shared<QuadTreeRectangle<float, size_t>>((float)_minu[0], (float)_minu[1], (float)_maxu[0], (float)_maxu[1], 16, reserve_size);
+    std::shared_ptr<QuadTreeRectangleP<float, size_t>> qtr = std::make_shared<QuadTreeRectangleP<float, size_t>>((float)_minu[0], (float)_minu[1], (float)_maxu[0], (float)_maxu[1], 16, reserve_size);
 
     // Loop over horizontal dimensions only - the grid, if 3D, is layered.
     // There are dims2d[i]-1 cells (faces) along each dimension.
