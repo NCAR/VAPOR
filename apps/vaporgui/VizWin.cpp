@@ -586,8 +586,6 @@ void VizWin::_setNewExtents() {
         FlowParams *fp = dynamic_cast<FlowParams*>(rParams);
         if (fp) {
             // Sam's box format: xmin, xmax, ymin, ymax, zmin, zmax
-	        ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-            GUIStateParams *gp = dynamic_cast<GUIStateParams*>(paramsMgr->GetParams(GUIStateParams::GetClassType()));
             int dims = fp->GetRenderDim();
 
             if (dims == 3) {                // 3D flow renderer
