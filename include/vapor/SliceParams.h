@@ -45,6 +45,8 @@ public:
     static const string SampleLocationTag;
 
 private:
+    bool _initialized = false;
+
     void                _init();
     std::vector<double> _cachedValues;
 

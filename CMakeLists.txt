@@ -343,6 +343,15 @@ if (UNIX AND NOT APPLE)
 			COMPONENT Dependencies
 			)
 
+		if (BUILD_OSP)
+			file (GLOB INSTALL_OSPRAY_LIBS ${OSPRAYDIR}/lib/*.so*)
+			install (
+				FILES ${INSTALL_OSPRAY_LIBS}
+				DESTINATION ${INSTALL_LIB_DIR}
+				COMPONENT Dependencies
+				)
+		endif ()
+
 
 	endif (DIST_INSTALLER AND GENERATE_FULL_INSTALLER)
 endif (UNIX AND NOT APPLE)

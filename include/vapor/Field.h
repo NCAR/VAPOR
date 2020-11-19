@@ -21,8 +21,8 @@ public:
     //
     // If a given position at a given time is inside of this field
     //
-    virtual bool InsideVolumeVelocity(float time, const glm::vec3 &pos) const = 0;
-    virtual bool InsideVolumeScalar(float time, const glm::vec3 &pos) const = 0;
+    virtual bool InsideVolumeVelocity(double time, const glm::vec3 &pos) const = 0;
+    virtual bool InsideVolumeScalar(double time, const glm::vec3 &pos) const = 0;
 
     //
     // Retrieve the number of time steps in this field
@@ -32,14 +32,14 @@ public:
     //
     // Get the field value at a certain position, at a certain time.
     //
-    virtual int GetScalar(float time, const glm::vec3 &pos,    // input
-                          float &val) const = 0;               // output
+    virtual int GetScalar(double time, const glm::vec3 &pos,    // input
+                          float &val) const = 0;                // output
 
     //
     // Get the velocity value at a certain position, at a certain time.
     //
-    virtual int GetVelocity(float time, const glm::vec3 &pos,    // input
-                            glm::vec3 &vel) const = 0;           // output
+    virtual int GetVelocity(double time, const glm::vec3 &pos,    // input
+                            glm::vec3 &vel) const = 0;            // output
 
     //
     // Returns the number of empty velocity variable names.

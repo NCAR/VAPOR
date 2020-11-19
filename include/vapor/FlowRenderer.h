@@ -62,8 +62,7 @@ private:
     ;
     int _cache_compressionLevel = 0;
     ;
-    float _cache_velocityMltp = 1.0;
-    ;
+    float              _cache_velocityMltp = 1.0f;
     bool               _cache_isSteady = false;
     long               _cache_steadyNumOfSteps = 0;
     size_t             _cache_currentTS = 0;
@@ -73,7 +72,7 @@ private:
     long               _cache_randNumOfSeeds = 5;
     int                _cache_seedInjInterval = 0;
     float              _cache_rakeBiasStrength = 0.0f;
-    float              _cache_deltaT = 0.05f;
+    double             _cache_deltaT = 0.05;
     FlowSeedMode       _cache_seedGenMode = FlowSeedMode::UNIFORM;
     FlowDir            _cache_flowDir = FlowDir::FORWARD;
     FlowStatus         _velocityStatus = FlowStatus::SIMPLE_OUTOFDATE;
@@ -122,7 +121,7 @@ private:
 
     void _dupSeedsNewTime(std::vector<flow::Particle> &seeds,
                           size_t                       firstN,    // First N particles to duplicate
-                          float                        newTime) const;                   // New time to assign to particles
+                          double                       newTime) const;                  // New time to assign to particles
 
 #ifndef WIN32
     double _getElapsedSeconds(const struct timeval *begin, const struct timeval *end) const;

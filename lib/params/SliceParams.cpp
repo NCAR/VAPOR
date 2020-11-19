@@ -34,7 +34,7 @@ SliceParams::SliceParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave) : Rende
     _init();
 }
 
-SliceParams::SliceParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node, THREED) {}
+SliceParams::SliceParams(DataMgr *dataMgr, ParamsBase::StateSave *ssave, XmlNode *node) : RenderParams(dataMgr, ssave, node, THREED) { _initialized = true; }
 
 SliceParams::~SliceParams() { SetDiagMsg("SliceParams::~SliceParams() this=%p", this); }
 
@@ -59,6 +59,8 @@ int SliceParams::Initialize()
 {
     int rc = RenderParams::Initialize();
     if (rc < 0) return (rc);
+    if (_initialized) return 0;
+    _initialized = true;
 
     Box *box = GetBox();
     box->SetOrientation(XY);

@@ -4,6 +4,8 @@
 #include <vapor/VAssert.h>
 #include <cfloat>
 #include <QAction>
+#include "VDoubleLineEdit.h"
+#include "VDoubleRangeMenu.h"
 
 QRangeSliderTextCombo::QRangeSliderTextCombo()
 {
@@ -12,9 +14,9 @@ QRangeSliderTextCombo::QRangeSliderTextCombo()
     layout->setSpacing(0);
     setLayout(layout);
 
-    layout->addWidget(_leftText = new QLineEdit, 20);
+    layout->addWidget(_leftText = new VDoubleLineEdit, 20);
     layout->addWidget(_slider = new QRangeSlider, 60);
-    layout->addWidget(_rightText = new QLineEdit, 20);
+    layout->addWidget(_rightText = new VDoubleLineEdit, 20);
 
     _min = 0;
     _max = 1;
@@ -23,24 +25,34 @@ QRangeSliderTextCombo::QRangeSliderTextCombo()
     connect(_slider, SIGNAL(ValueChanged(float, float)), this, SLOT(sliderChanged(float, float)));
     connect(_slider, SIGNAL(ValueChangedIntermediate(float, float)), this, SLOT(sliderChangedIntermediate(float, float)));
     connect(_slider, SIGNAL(ValueChangedBegin()), this, SIGNAL(ValueChangedBegin()));
-    connect(_leftText, SIGNAL(editingFinished()), this, SLOT(leftTextChanged()));
-    connect(_rightText, SIGNAL(editingFinished()), this, SLOT(rightTextChanged()));
+    connect(_leftText, SIGNAL(ValueChanged(double)), this, SLOT(leftTextChanged(double)));
+    connect(_rightText, SIGNAL(ValueChanged(double)), this, SLOT(rightTextChanged(double)));
+
+    _leftText->RemoveContextMenu();
+    _rightText->RemoveContextMenu();
+
+    _menu = new VDoubleRangeMenu(this, _leftText->GetSciNotation(), _leftText->GetNumDigits(), _min, _max, _allowCustomRange);
+    connect(_menu, &VDoubleRangeMenu::MinChanged, this, &QRangeSliderTextCombo::minChanged);
+    connect(_menu, &VDoubleRangeMenu::MaxChanged, this, &QRangeSliderTextCombo::maxChanged);
+    connect(_menu, &VDoubleRangeMenu::SciNotationChanged, _leftText, &VDoubleLineEdit::SetSciNotation);
+    connect(_menu, &VDoubleRangeMenu::SciNotationChanged, _rightText, &VDoubleLineEdit::SetSciNotation);
+    connect(_menu, &VDoubleRangeMenu::DecimalDigitsChanged, _leftText, &VDoubleLineEdit::SetNumDigits);
+    connect(_menu, &VDoubleRangeMenu::DecimalDigitsChanged, _rightText, &VDoubleLineEdit::SetNumDigits);
+
+    setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showContextMenu(const QPoint &)));
 }
 
 void QRangeSliderTextCombo::SetRange(float min, float max)
 {
-    VAssert(_max >= _min);
-    _min = min;
-    _max = max;
-
-    if (_allowCustomRange) {
-        min = -FLT_MAX;
-        max = FLT_MAX;
+    if (min < max) {
+        _min = min;
+        _max = max;
     }
 
-    setValidator(_leftText, new VDoubleValidator(min, max, 100));
-    setValidator(_rightText, new VDoubleValidator(min, max, 100));
     SetValue(_left, _right);
+    _menu->SetMinimum(_min);
+    _menu->SetMaximum(_max);
 }
 
 void QRangeSliderTextCombo::SetValue(float left, float right)
@@ -61,37 +73,13 @@ void QRangeSliderTextCombo::AllowCustomRange()
     if (_allowCustomRange) return;
 
     _allowCustomRange = true;
-
-    QAction *newMinAction = new QAction("Set as new min", this);
-    QAction *newMaxAction = new QAction("Set as new max", this);
-    QAction *resetRangeAction = new QAction("Reset range to default", this);
-    QObject::connect(newMinAction, &QAction::triggered, this, &QRangeSliderTextCombo::makeLeftValueNewMin);
-    QObject::connect(newMaxAction, &QAction::triggered, this, &QRangeSliderTextCombo::makeRightValueNewMax);
-    QObject::connect(resetRangeAction, &QAction::triggered, this, &QRangeSliderTextCombo::RangeDefaultRequested);
-
-    _leftText->setContextMenuPolicy(Qt::ActionsContextMenu);
-    _rightText->setContextMenuPolicy(Qt::ActionsContextMenu);
-    _leftText->addAction(newMinAction);
-    _rightText->addAction(newMaxAction);
-    _leftText->addAction(resetRangeAction);
-    _rightText->addAction(resetRangeAction);
-}
-
-void QRangeSliderTextCombo::setValidator(QLineEdit *edit, QValidator *validator)
-{
-    const QValidator *toDelete = edit->validator();
-    edit->setValidator(validator);
-    if (toDelete) delete toDelete;
+    _menu->AllowUserRange();
 }
 
 void QRangeSliderTextCombo::setTextboxes(float left, float right)
 {
-    QString qLeft = QString::number(left);
-    _leftText->setText(qLeft);
-    _leftText->setToolTip(qLeft);
-    QString qRight = QString::number(right);
-    _rightText->setText(qRight);
-    _rightText->setToolTip(qRight);
+    _leftText->SetValueDouble(left);
+    _rightText->SetValueDouble(right);
 }
 
 float QRangeSliderTextCombo::getRange() const
@@ -119,28 +107,32 @@ void QRangeSliderTextCombo::sliderChanged(float leftNorm, float rightNorm)
     emit ValueChanged(_left, _right);
 }
 
-void QRangeSliderTextCombo::leftTextChanged()
+void QRangeSliderTextCombo::leftTextChanged(double left)
 {
-    float left = _leftText->text().toDouble();
     SetValue(left, _right);
     emit ValueChanged(_left, _right);
 }
 
-void QRangeSliderTextCombo::rightTextChanged()
+void QRangeSliderTextCombo::rightTextChanged(double right)
 {
-    float right = _rightText->text().toDouble();
     SetValue(_left, right);
     emit ValueChanged(_left, _right);
 }
 
-void QRangeSliderTextCombo::makeLeftValueNewMin()
+void QRangeSliderTextCombo::minChanged(double min)
 {
-    SetRange(_left, _max);
+    SetRange(min, _max);
     emit RangeChanged(_min, _max);
 }
 
-void QRangeSliderTextCombo::makeRightValueNewMax()
+void QRangeSliderTextCombo::maxChanged(double max)
 {
-    SetRange(_min, _right);
+    SetRange(_min, max);
     emit RangeChanged(_min, _max);
+}
+
+void QRangeSliderTextCombo::showContextMenu(const QPoint &pos)
+{
+    QPoint globalPos = mapToGlobal(pos);
+    _menu->exec(globalPos);
 }

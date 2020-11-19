@@ -1856,7 +1856,6 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
     // Only update the GUI if the Params state has changed
     //
     if (event->type() == ParamsChangeEvent) {
-        _paramsEventQueued = false;
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
         if (_stats) { _stats->Update(); }
@@ -1873,20 +1872,23 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
 
         // force visualizer redraw
         //
-        menuBar()->setEnabled(false);
-        _progressEnabled = true;
-        _vizWinMgr->Update(false);
-        _progressEnabled = false;
-        menuBar()->setEnabled(true);
+        if (_animationCapture == false) {
+            menuBar()->setEnabled(false);
+            _progressEnabled = true;
+            _vizWinMgr->Update(false);
+            _progressEnabled = false;
+            menuBar()->setEnabled(true);
+        }
 
         update();
 
         QApplication::restoreOverrideCursor();
+
+        _paramsEventQueued = false;
         return (false);
     }
 
     if (event->type() == ParamsIntermediateChangeEvent) {
-        _paramsEventQueued = false;
         // Rendering the GUI becomes a bottleneck
         //        _tabMgr->Update();
 
@@ -1902,6 +1904,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
 
         //        update();
 
+        _paramsEventQueued = false;
         return (false);
     }
 
@@ -2348,6 +2351,7 @@ void MainForm::startAnimCapture(string baseFile, string defaultSuffix)
     }
 
     // Turn on "image capture mode" in the current active visualizer
+    _animationCapture = true;
     GUIStateParams *p = GetStateParams();
     string          vizName = p->GetActiveVizName();
     _controlExec->EnableAnimationCapture(vizName, true, fpath);
@@ -2372,6 +2376,8 @@ void MainForm::endAnimCapture()
     string          vizName = p->GetActiveVizName();
     if (vizName != _capturingAnimationVizName) { MSG_WARN("Terminating capture in non-active visualizer"); }
     if (_controlExec->EnableAnimationCapture(_capturingAnimationVizName, false)) MSG_WARN("Image Capture Warning;\nCurrent active visualizer is not capturing images");
+
+    _animationCapture = false;
 
     _capturingAnimationVizName = "";
 
