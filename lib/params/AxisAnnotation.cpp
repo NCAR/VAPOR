@@ -140,14 +140,11 @@ vector<double> AxisAnnotation::GetAxisOrigin() const {
 
 void AxisAnnotation::SetMinTics(vector<double> ticMin) {
     VAssert(ticMin.size() == 3);
-    //std::cout << "SetMinTics() " << ticMin[0] << " " << ticMin[1] << " " << ticMin[2] << std::endl;
     SetValueDoubleVec(_minTicsTag, "Set minimum tics", ticMin);
 }
 
 vector<double> AxisAnnotation::GetMinTics() const {
     vector <double> defaultv(3,0.0);
-    std::vector<double> vec = GetValueDoubleVec(_minTicsTag, defaultv);
-    //std::cout << "GetMinTics() " << vec[0] << " " << vec[1] << " " << vec[2] << std::endl;
     return GetValueDoubleVec(_minTicsTag, defaultv);
 }
 

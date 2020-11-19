@@ -685,8 +685,6 @@ void AnnotationRenderer::_drawAxes(
 	std::vector<double> origin,
 	std::vector<double> color,
 	double width) {
-
-    //std::cout << "axes " << min[0] << " " << min[1] << " " << min[2] << std::endl;
 	
     LegacyGL *lgl = _glManager->legacy;
     

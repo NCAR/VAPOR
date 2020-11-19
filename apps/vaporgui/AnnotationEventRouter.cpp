@@ -385,9 +385,9 @@ void AnnotationEventRouter::updateAxisTable() {
         //
         double minX = minTics[0];
         double minY = minTics[1];
-		convertPCSToLonLat( minTics[0], minTics[1] );  // min X, min Y
-		convertPCSToLonLat( minX,       maxTics[1] );  // min X, max Y
-		convertPCSToLonLat( maxTics[0], minY );        // max X, min Y
+        convertPCSToLonLat( minTics[0], minTics[1] );  // min X, min Y
+        convertPCSToLonLat( minX,       maxTics[1] );  // min X, max Y
+        convertPCSToLonLat( maxTics[0], minY );        // max X, min Y
 	}
 	tableValues.insert(tableValues.end(), minTics.begin(), minTics.end());
 	tableValues.insert(tableValues.end(), maxTics.begin(), maxTics.end());
@@ -397,8 +397,8 @@ void AnnotationEventRouter::updateAxisTable() {
 	if (latLonEnabled) {
         double originLon = origin[0];
         double originLat = origin[1];
-		convertPCSToLonLat(originLon, origin[1]);
-		convertPCSToLonLat(origin[0], originLat);
+        convertPCSToLonLat(originLon, origin[1]);
+        convertPCSToLonLat(origin[0], originLat);
 	}
 	tableValues.insert(tableValues.end(), origin.begin(), origin.end());
 
@@ -589,8 +589,8 @@ void AnnotationEventRouter::axisAnnotationTableChanged() {
         convertLonLatToPCS( maxTics[0], minTics[1] );  // max lon, min lat
         convertLonLatToPCS( minLon,     maxTics[1] );  // min lon, max lat
     }
-	scaleWorldCoordsToNormalized( minTics );
-	scaleWorldCoordsToNormalized( maxTics );
+    scaleWorldCoordsToNormalized( minTics );
+    scaleWorldCoordsToNormalized( maxTics );
     aa->SetMinTics( minTics );
     aa->SetMaxTics( maxTics );
 
@@ -598,8 +598,8 @@ void AnnotationEventRouter::axisAnnotationTableChanged() {
 	if (annotateLatLon) {
         double originLon = origins[0];
         double originLat = origins[1];
-		convertLonLatToPCS( originLon, origins[1] );
-		convertLonLatToPCS( origins[0], originLat );
+        convertLonLatToPCS( originLon, origins[1] );
+        convertLonLatToPCS( origins[0], originLat );
 	}
 	scaleWorldCoordsToNormalized(origins);
 	aa->SetAxisOrigin(origins);
