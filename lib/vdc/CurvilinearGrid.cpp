@@ -251,7 +251,7 @@ CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG(const ConstCoordItrCG &rhs) : 
     _xCoordItr = rhs._xCoordItr;
     _yCoordItr = rhs._yCoordItr;
     _zCoordItr = rhs._zCoordItr;
-    _terrainFollowing = rhs._terrainFollowing;
+    if (rhs._terrainFollowing) { _terrainFollowing = rhs._terrainFollowing; }
 }
 
 CurvilinearGrid::ConstCoordItrCG::ConstCoordItrCG() : ConstCoordItrAbstract()

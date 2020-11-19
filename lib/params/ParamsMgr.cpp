@@ -113,7 +113,6 @@ ParamsMgr::~ParamsMgr() { _destroy(); }
 
 void ParamsMgr::LoadState()
 {
-    BeginSaveStateGroup("Load state");
     _destroy();
 
     _init(_appParamNames, NULL);
@@ -121,12 +120,10 @@ void ParamsMgr::LoadState()
     // If data loaded set up data dependent parameters from default state.
     //
     if (_dataMgrMap.size()) { addDataMgrNew(); }
-    EndSaveStateGroup();
 }
 
 void ParamsMgr::LoadState(const XmlNode *node)
 {
-    BeginSaveStateGroup("Load state");
     _destroy();
 
     XmlNode *mynode = new XmlNode(*node);
@@ -151,7 +148,6 @@ void ParamsMgr::LoadState(const XmlNode *node)
         map<string, DataMgr *>::const_iterator itr = _dataMgrMap.find(dataSetName);
         if (itr != _dataMgrMap.end()) addDataMgrMerge(itr->first);
     }
-    EndSaveStateGroup();
 }
 
 int ParamsMgr::LoadState(string stateFile)
