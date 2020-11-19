@@ -354,20 +354,17 @@ void AnnotationEventRouter::scaleWorldCoordsToNormalized(
 	std::vector<double> &coords
 ) {
 	std::vector<double> extents = getDomainExtents();
-    //std::cout << "getDomainExtents " << extents[0] << " " << extents[1] << " " << extents[2] << " " << extents[3] << " " << extents[4] << " " << extents[5] << std::endl;
 	int size = extents.size()/2;
 	for (int i=0; i<size; i++) {
 		double point = coords[i]-extents[i];
 		double magnitude = extents[i+3]-extents[i];
-        if (magnitude < 0)
-            std::cout << "mag " << magnitude << std::endl;
 		coords[i] = point/magnitude;
 	}   
 }
 
 void AnnotationEventRouter::updateAxisTable() {
 	AxisAnnotation* aa = _getCurrentAxisAnnotation();
-	bool annotationEnabled = aa->GetLatLonAxesEnabled();
+	bool latLonEnabled = aa->GetLatLonAxesEnabled();
 
 	vector<double> tableValues;
 
@@ -381,46 +378,27 @@ void AnnotationEventRouter::updateAxisTable() {
 	vector<double> maxTics = aa->GetMaxTics();
 	scaleNormalizedCoordsToWorld(minTics);
 	scaleNormalizedCoordsToWorld(maxTics);
-    std::cout << "scaled values " << minTics[0] << " " << maxTics[0] << std::endl;
-	if (annotationEnabled) {
+	if (latLonEnabled) {
+        // converPCSToLonLat() modifies inputs by reference, so we need dummy
+        // variables that can be discarded in order to do use these values
+        // multiple times.
+        //
         double minX = minTics[0];
         double minY = minTics[1];
-		//convertPCSToLonLat( minX, minTics[1] );
-		//convertPCSToLonLat( minX, maxTics[1] );
-		//convertPCSToLonLat( minTics[0], minY );
-		//convertPCSToLonLat( maxTics[0], minY );
-		convertPCSToLonLat( minTics[0], minTics[1] );  // min min
-		convertPCSToLonLat( minX, maxTics[1] );   // min max
-		convertPCSToLonLat( maxTics[0], minY );   // max min
-        std::cout << "Updating " << minTics[0] << " " << maxTics[0] << std::endl;
+		convertPCSToLonLat( minTics[0], minTics[1] );  // min X, min Y
+		convertPCSToLonLat( minX,       maxTics[1] );  // min X, max Y
+		convertPCSToLonLat( maxTics[0], minY );        // max X, min Y
 	}
 	tableValues.insert(tableValues.end(), minTics.begin(), minTics.end());
 	tableValues.insert(tableValues.end(), maxTics.begin(), maxTics.end());
-
-	/*vector<double> minTics = aa->GetMinTics();
-	scaleNormalizedCoordsToWorld(minTics);
-	if (annotationEnabled) {
-		convertPCSToLon(minTics[0]);
-		convertPCSToLat(minTics[1]);
-	}
-	tableValues.insert(tableValues.end(), minTics.begin(), minTics.end());
-
-	vector<double> maxTics = aa->GetMaxTics();
-	scaleNormalizedCoordsToWorld(maxTics);
-	if (annotationEnabled) {
-        std::cout << "from " << maxTics[0] << " " << maxTics[1] << std::endl;
-		convertPCSToLon(maxTics[0]);
-		convertPCSToLat(maxTics[1]);
-        std::cout << "to   " << maxTics[0] << " " << maxTics[1] << std::endl;
-	}
-	tableValues.insert(tableValues.end(), maxTics.begin(), maxTics.end());
-    */
 
 	vector<double> origin = aa->GetAxisOrigin();
 	scaleNormalizedCoordsToWorld(origin);
-	if (annotationEnabled) {
-		convertPCSToLon(origin[0]);
-		convertPCSToLat(origin[1]);
+	if (latLonEnabled) {
+        double originLon = origin[0];
+        double originLat = origin[1];
+		convertPCSToLonLat(originLon, origin[1]);
+		convertPCSToLonLat(origin[0], originLat);
 	}
 	tableValues.insert(tableValues.end(), origin.begin(), origin.end());
 
@@ -527,9 +505,6 @@ std::vector<double> AnnotationEventRouter::getDomainExtents() const {
 	std::vector<double> minExts, maxExts;
 	dataStatus->GetActiveExtents(paramsMgr, ts, minExts, maxExts);
 
-    //std::cout << "minExts " << minExts[0] << " " << minExts[1] << " " << minExts[2] << std::endl;
-    //std::cout << "maxExts " << maxExts[0] << " " << maxExts[1] << " " << maxExts[2] << std::endl;
-
 	std::vector<double> extents = {minExts[0], minExts[1], minExts[2],
 		maxExts[0], maxExts[1], maxExts[2]};
 	return extents;
@@ -604,56 +579,27 @@ void AnnotationEventRouter::axisAnnotationTableChanged() {
 	std::vector<double> minTics = getTableRow(2);
 	std::vector<double> maxTics = getTableRow(3);
 	if (annotateLatLon) {
+        // converLonLatToPCS() modifies inputs by reference, so we need dummy
+        // variables that can be discarded in order to do use these values
+        // multiple times.
+        //
         double minLon = minTics[0];
         double minLat = minTics[1];
-        convertLonLatToPCS( minTics[0], minLat );
-        convertLonLatToPCS( maxTics[0], minLat );
-        convertLonLatToPCS( minLon,     minTics[1] );
-        convertLonLatToPCS( minLon,     maxTics[1] );
+        convertLonLatToPCS( minTics[0], minLat     );  // min lon, min lat
+        convertLonLatToPCS( maxTics[0], minTics[1] );  // max lon, min lat
+        convertLonLatToPCS( minLon,     maxTics[1] );  // min lon, max lat
     }
 	scaleWorldCoordsToNormalized( minTics );
 	scaleWorldCoordsToNormalized( maxTics );
-    std::cout << "Setting " << minTics[0] << " " << maxTics[0] << std::endl;
     aa->SetMinTics( minTics );
-    aa->SetMinTics( maxTics );
-
-	/*std::vector<double> minTics = getTableRow(2);
-	if (annotateLatLon) {
-		convertLonToPCS(minTics[0]);
-		convertLatToPCS(minTics[1]);
-	}
-	scaleWorldCoordsToNormalized(minTics);
-    //std::cout << "AER::SetMinTics " << minTics[0] << " " << minTics[1] << " " << minTics[2] << std::endl;
-	aa->SetMinTics(minTics);
-
-	std::vector<double> maxTics = getTableRow(3);
-	if (annotateLatLon) {
-        std::cout << "latLon: " << maxTics[0] << " " << maxTics[1] << std::endl;
-        double coords[2] = {maxTics[0], maxTics[1]};
-        std::cout << "proj:   " << getProjString() << std::endl;
-        //int rc = DataMgrUtils::ConvertLonLatToPCS( getProjString(), coords, 1);
-		//convertLonToPCS(maxTics[0]);
-		//convertLatToPCS(maxTics[1]);
-        //maxTics[0] = coords[0];
-        //maxTics[1] = coords[1];
-        convertLonLatToPCS(maxTics[0], maxTics[1]);
-        std::cout << "PCS   : " << maxTics[0] << " " << maxTics[1] << std::endl;
-	    //DataMgrUtils::ConvertPCSToLonLat(getProjString(), coords, 1); 
-        //std::cout << "pcs2ll: " << coords[0] << " " << coords[1] << std::endl << endl;
-
-
-		//std::cout << "convertLatToPCS() " << maxTics[1] << " ";
-        //std::cout << maxTics[1] << endl;
-	}
-    std::cout << "preScale " << maxTics[0] << " " << maxTics[1] << std::endl;
-	scaleWorldCoordsToNormalized(maxTics);
-    std::cout << "postScale " << maxTics[0] << " " << maxTics[1] << std::endl << std::endl;
-	aa->SetMaxTics(maxTics);*/
+    aa->SetMaxTics( maxTics );
 
 	std::vector<double> origins = getTableRow(4);
 	if (annotateLatLon) {
-		convertLonToPCS(origins[0]);
-		convertLatToPCS(origins[1]);
+        double originLon = origins[0];
+        double originLat = origins[1];
+		convertLonLatToPCS( originLon, origins[1] );
+		convertLonLatToPCS( origins[0], originLat );
 	}
 	scaleWorldCoordsToNormalized(origins);
 	aa->SetAxisOrigin(origins);

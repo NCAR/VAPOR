@@ -722,16 +722,6 @@ void AnnotationRenderer::_drawTic(
 	glDisable(GL_LINE_SMOOTH);
 }
 
-void AnnotationRenderer::convertPointToLon(double &xCoord) {
-	double dummy = 0.;
-	convertPointToLonLat(xCoord, dummy); 
-}
-
-void AnnotationRenderer::convertPointToLat(double &yCoord) {
-	double dummy = 0.;
-	convertPointToLonLat(dummy, yCoord); 
-}
-
 void AnnotationRenderer::convertPointToLonLat(
     double &xCoord, double &yCoord
 ) {
