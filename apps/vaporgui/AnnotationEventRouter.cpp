@@ -395,10 +395,7 @@ void AnnotationEventRouter::updateAxisTable() {
 	vector<double> origin = aa->GetAxisOrigin();
 	scaleNormalizedCoordsToWorld(origin);
 	if (latLonEnabled) {
-        double originLon = origin[0];
-        double originLat = origin[1];
-        convertPCSToLonLat(originLon, origin[1]);
-        convertPCSToLonLat(origin[0], originLat);
+        convertPCSToLonLat(origin[0], origin[1]);
 	}
 	tableValues.insert(tableValues.end(), origin.begin(), origin.end());
 
@@ -585,8 +582,8 @@ void AnnotationEventRouter::axisAnnotationTableChanged() {
         //
         double minLon = minTics[0];
         double minLat = minTics[1];
-        convertLonLatToPCS( minTics[0], minLat     );  // min lon, min lat
-        convertLonLatToPCS( maxTics[0], minTics[1] );  // max lon, min lat
+        convertLonLatToPCS( minTics[0], minTics[1] );  // min lon, min lat
+        convertLonLatToPCS( maxTics[0], minLat     );  // max lon, min lat
         convertLonLatToPCS( minLon,     maxTics[1] );  // min lon, max lat
     }
     scaleWorldCoordsToNormalized( minTics );
@@ -596,10 +593,7 @@ void AnnotationEventRouter::axisAnnotationTableChanged() {
 
 	std::vector<double> origins = getTableRow(4);
 	if (annotateLatLon) {
-        double originLon = origins[0];
-        double originLat = origins[1];
-        convertLonLatToPCS( originLon, origins[1] );
-        convertLonLatToPCS( origins[0], originLat );
+        convertLonLatToPCS( origins[0], origins[1] );
 	}
 	scaleWorldCoordsToNormalized(origins);
 	aa->SetAxisOrigin(origins);
