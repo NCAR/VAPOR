@@ -272,7 +272,7 @@ UnstructuredGrid2D::ConstCoordItrU2D::ConstCoordItrU2D(const ConstCoordItrU2D &r
     _coords = rhs._coords;
     _xCoordItr = rhs._xCoordItr;
     _yCoordItr = rhs._yCoordItr;
-    _zCoordItr = rhs._zCoordItr;
+    if (rhs._ncoords >= 3) { _zCoordItr = rhs._zCoordItr; }
 }
 
 UnstructuredGrid2D::ConstCoordItrU2D::ConstCoordItrU2D() : ConstCoordItrAbstract() {}
@@ -415,6 +415,11 @@ std::shared_ptr<QuadTreeRectangleP<float, size_t>> UnstructuredGrid2D::_makeQuad
 
     std::shared_ptr<QuadTreeRectangleP<float, size_t>> qtr = std::make_shared<QuadTreeRectangleP<float, size_t>>((float)minu[0], (float)minu[1], (float)maxu[0], (float)maxu[1], 16, reserve_size);
 
+    std::vector<class QuadTreeRectangle<float, size_t>::rectangle_t> rectangles;
+    std::vector<size_t>                                              payloads;
+    rectangles.reserve(reserve_size);
+    payloads.reserve(reserve_size);
+
     DblArr3                 coords;
     Grid::ConstCellIterator it = ConstCellBegin();
     Grid::ConstCellIterator end = ConstCellEnd();
@@ -436,8 +441,12 @@ std::shared_ptr<QuadTreeRectangleP<float, size_t>> UnstructuredGrid2D::_makeQuad
             if (coords[1] < top) top = coords[1];
             if (coords[1] > bottom) bottom = coords[1];
         }
-        qtr->Insert(left, top, right, bottom, cell[0]);
+        //		qtr->Insert(left, top, right, bottom, cell[0]);
+        rectangles.push_back(QuadTreeRectangle<float, size_t>::rectangle_t(left, top, right, bottom));
+        payloads.push_back(cell[0]);
     }
+
+    qtr->Insert(rectangles, payloads);
 
     return (qtr);
 }

@@ -15,6 +15,60 @@ namespace VAPoR {
 //
 template<typename T, typename S> class QuadTreeRectangle {
 public:
+    class rectangle_t {
+    public:
+        rectangle_t() : _left(0.0f), _top(0.0f), _right(0.0f), _bottom(0.0f) {}
+        rectangle_t(T x1, T y1, T x2, T y2) : _left(x1), _top(y1), _right(x2), _bottom(y2) {}
+
+        // return true iff other intersects us
+        //
+        bool intersects(rectangle_t const &other) const
+        {
+            if (_left > other._right || _top > other._bottom) return (false);
+
+            if (_right < other._left || _bottom < other._top) return (false);
+            return (true);
+        }
+
+        // return true iff other is completely contained inside or on boundary
+        //
+        bool contains(rectangle_t const &other) const { return ((_left <= other._left) && (_right >= other._right) && (_top <= other._top) && (_bottom >= other._bottom)); }
+
+        // return true iff point(x,y) is completely contained inside or on boundary
+        //
+        bool contains(T x, T y) const { return ((_left <= x) && (_right >= x) && (_top <= y) && (_bottom >= y)); }
+
+        bool touches(rectangle_t const &other) const { return ((_left == other._right) || (_right == other._left) || (_top == other._bottom) || (_bottom == other._top)); }
+
+        T width() const { return (_right - _left); }
+        T height() const { return (_bottom - _top); }
+
+        // return the sub-rectangle for the specified quadrant
+        //
+        rectangle_t quadrant(uint32_t n) const
+        {
+            T const center_x((_left + _right) / 2);
+            T const center_y((_top + _bottom) / 2);
+            switch (n & 0x03) {
+            case 0: return rectangle_t(_left, _top, center_x, center_y);
+            case 1: return rectangle_t(center_x, _top, _right, center_y);
+            case 2: return rectangle_t(_left, center_y, center_x, _bottom);
+            case 3: return rectangle_t(center_x, center_y, _right, _bottom);
+            }
+            return *this;    // Can't happen since we mask n
+        }
+
+        friend std::ostream &operator<<(std::ostream &os, const rectangle_t &rec)
+        {
+            os << "left-top, right-bottom : "
+               << "(" << rec._left << ", " << rec._top << ") "
+               << "(" << rec._right << ", " << rec._bottom << ")" << std::endl;
+            return (os);
+        }
+
+        T _left, _top, _right, _bottom;
+    };
+
     //! Construct a QuadTreeRectangle instance for a defined 2D region
     //!
     //! This contstructor initiates a 2D quad tree with specified min
@@ -104,13 +158,15 @@ public:
     //! \retval status Return true on success, or false if region to be inserted
     //! does not overlap the region managed by the tree.
     //
-    bool Insert(T left, T top, T right, T bottom, S payload)
+    bool Insert(const rectangle_t &rectangle, const S &payload)
     {
         node_t *root = _nodes[_rootidx];
-        if (!root->intersects(rectangle_t(left, top, right, bottom))) return (false);
+        if (!root->intersects(rectangle)) return (false);
 
-        return (root->insert(_nodes, rectangle_t(left, top, right, bottom), payload, _maxDepth));
+        return (root->insert(_nodes, rectangle, payload, _maxDepth));
     }
+
+    bool Insert(T left, T top, T right, T bottom, S payload) { return (Insert(rectangle_t(left, top, right, bottom), payload)); }
 
     //! Return a list of payloads that intersect a specified point
     //!
@@ -166,62 +222,6 @@ public:
         root->print(q._nodes, os);
         return (os);
     }
-
-public:
-    class rectangle_t {
-    public:
-        rectangle_t() : _left(0.0f), _top(0.0f), _right(0.0f), _bottom(0.0f) {}
-        rectangle_t(T x1, T y1, T x2, T y2) : _left(x1), _top(y1), _right(x2), _bottom(y2) {}
-
-        // return true iff other intersects us
-        //
-        bool intersects(rectangle_t const &other) const
-        {
-            if (_left > other._right || _top > other._bottom) return (false);
-
-            if (_right < other._left || _bottom < other._top) return (false);
-            return (true);
-        }
-
-        // return true iff other is completely contained inside or on boundary
-        //
-        bool contains(rectangle_t const &other) const { return ((_left <= other._left) && (_right >= other._right) && (_top <= other._top) && (_bottom >= other._bottom)); }
-
-        // return true iff point(x,y) is completely contained inside or on boundary
-        //
-        bool contains(T x, T y) const { return ((_left <= x) && (_right >= x) && (_top <= y) && (_bottom >= y)); }
-
-        bool touches(rectangle_t const &other) const { return ((_left == other._right) || (_right == other._left) || (_top == other._bottom) || (_bottom == other._top)); }
-
-        T width() const { return (_right - _left); }
-        T height() const { return (_bottom - _top); }
-
-        // return the sub-rectangle for the specified quadrant
-        //
-        rectangle_t quadrant(uint32_t n) const
-        {
-            T const center_x((_left + _right) / 2);
-            T const center_y((_top + _bottom) / 2);
-            switch (n & 0x03) {
-            case 0: return rectangle_t(_left, _top, center_x, center_y);
-            case 1: return rectangle_t(center_x, _top, _right, center_y);
-            case 2: return rectangle_t(_left, center_y, center_x, _bottom);
-            case 3: return rectangle_t(center_x, center_y, _right, _bottom);
-            }
-            return *this;    // Can't happen since we mask n
-        }
-
-        friend std::ostream &operator<<(std::ostream &os, const rectangle_t &rec)
-        {
-            os << "left-top, right-bottom : "
-               << "(" << rec._left << ", " << rec._top << ") "
-               << "(" << rec._right << ", " << rec._bottom << ")" << std::endl;
-            return (os);
-        }
-
-    private:
-        T _left, _top, _right, _bottom;
-    };
 
 private:
     class node_t {

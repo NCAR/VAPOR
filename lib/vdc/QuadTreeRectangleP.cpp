@@ -4,6 +4,7 @@
 #include <vapor/QuadTreeRectangleP.h>
 
 using namespace VAPoR;
+using namespace std;
 
 template<typename T, typename S> QuadTreeRectangleP<T, S>::QuadTreeRectangleP(T left, T top, T right, T bottom, size_t max_depth, size_t reserve_size) : _left(left), _right(right)
 {
@@ -11,11 +12,12 @@ template<typename T, typename S> QuadTreeRectangleP<T, S>::QuadTreeRectangleP(T 
     VAssert(top <= bottom);
 
     int nthreads = 1;
-// omp_set_num_threads(1);
+    omp_set_num_threads(1);
 #pragma omp parallel
     {
         nthreads = omp_get_num_threads();
     }
+    cout << "NTHREADS = " << nthreads << endl;
 
     for (int i = 0; i < nthreads; i++) {
         T bin_width = (right - left) / ((T)nthreads);
@@ -75,13 +77,13 @@ template<typename T, typename S> QuadTreeRectangleP<T, S>::~QuadTreeRectangleP()
 
 template<typename T, typename S> bool QuadTreeRectangleP<T, S>::Insert(T left, T top, T right, T bottom, S payload)
 {
-    bool status = false;
+    bool status = true;
     for (int i = 0; i < _qtrs.size(); i++) {
         T bin_width = (_right - _left) / ((T)_qtrs.size());
         T l = _left + (i * bin_width);
         T r = l + bin_width;
 
-        if (left <= r && r > left) { status |= _qtrs[i]->Insert(left, top, right, bottom, payload); }
+        if (left <= r && right > l) { status &= _qtrs[i]->Insert(left, top, right, bottom, payload); }
     }
     return (status);
 }
@@ -89,6 +91,42 @@ template<typename T, typename S> bool QuadTreeRectangleP<T, S>::Insert(T left, T
 template<typename T, typename S> bool QuadTreeRectangleP<T, S>::Insert(std::vector<class QuadTreeRectangle<T, S>::rectangle_t> rectangles, std::vector<S> payloads)
 {
     VAssert(rectangles.size() == payloads.size());
+
+    cout << "INSERT 1\n";
+
+    bool status = true;
+
+    vector<vector<class QuadTreeRectangle<T, S>::rectangle_t>> parRectangles(_qtrs.size());
+    vector<vector<S>>                                          parPayloads(_qtrs.size());
+    for (int i = 0; i < _qtrs.size(); i++) {
+        parRectangles[i].reserve(rectangles.size() / _qtrs.size());
+        parPayloads[i].reserve(payloads.size() / _qtrs.size());
+    }
+
+    cout << "INSERT 2\n";
+    T bin_width = (_right - _left) / ((T)_qtrs.size());
+    for (size_t j = 0; j < rectangles.size(); j++) {
+        for (int i = 0; i < _qtrs.size(); i++) {
+            T l = _left + (i * bin_width);
+            T r = l + bin_width;
+
+            if ((rectangles[j]._left <= r) && (rectangles[j]._right > l)) {
+                parRectangles[i].push_back(rectangles[j]);
+                parPayloads[i].push_back(payloads[j]);
+            }
+        }
+    }
+
+    cout << "INSERT 3\n";
+#pragma omp parallel
+#pragma omp for
+    for (int i = 0; i < _qtrs.size(); i++) {
+        cout << "thread num " << omp_get_thread_num() << endl;
+        for (size_t j = 0; j < parRectangles[i].size(); j++) { status &= _qtrs[i]->Insert(parRectangles[i][j], parPayloads[i][j]); }
+    }
+    cout << "INSERT 4\n";
+
+    return (status);
 }
 
 template<typename T, typename S> void QuadTreeRectangleP<T, S>::GetPayloadContained(T x, T y, std::vector<S> &payloads) const
