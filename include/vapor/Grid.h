@@ -1158,6 +1158,24 @@ public:
 
     ConstIterator cend() const { return (ConstIterator(this, false)); }
 
+    template<typename T> static void CopyToArr3(const std::vector<T> &src, std::array<T, 3> &dst)
+    {
+        for (int i = 0; i < src.size() && i < dst.size(); i++) { dst[i] = src[i]; }
+    }
+    template<typename T> static void CopyToArr3(const T *src, size_t n, std::array<T, 3> &dst)
+    {
+        for (int i = 0; i < n && i < dst.size(); i++) { dst[i] = src[i]; }
+    }
+    template<typename T> static void CopyFromArr3(const std::array<T, 3> &src, std::vector<T> &dst)
+    {
+        dst.resize(src.size());
+        for (int i = 0; i < src.size() && i < dst.size(); i++) { dst[i] = src[i]; }
+    }
+    template<typename T> static void CopyFromArr3(const std::array<T, 3> &src, T *dst)
+    {
+        for (int i = 0; i < src.size(); i++) { dst[i] = src[i]; }
+    }
+
 protected:
     virtual float GetValueNearestNeighbor(const DblArr3 &coords) const = 0;
 
@@ -1175,24 +1193,6 @@ protected:
             cIndices[i] = indices[i];
             if (cIndices[i] >= dims[i]) { cIndices[i] = dims[i] - 1; }
         }
-    }
-
-    template<typename T> static void CopyToArr3(const std::vector<T> &src, std::array<T, 3> &dst)
-    {
-        for (int i = 0; i < src.size() && i < dst.size(); i++) { dst[i] = src[i]; }
-    }
-    template<typename T> static void CopyToArr3(const T *src, size_t n, std::array<T, 3> &dst)
-    {
-        for (int i = 0; i < n && i < dst.size(); i++) { dst[i] = src[i]; }
-    }
-    template<typename T> static void CopyFromArr3(const std::array<T, 3> &src, std::vector<T> &dst)
-    {
-        dst.resize(src.size());
-        for (int i = 0; i < src.size() && i < dst.size(); i++) { dst[i] = src[i]; }
-    }
-    template<typename T> static void CopyFromArr3(const std::array<T, 3> &src, T *dst)
-    {
-        for (int i = 0; i < src.size(); i++) { dst[i] = src[i]; }
     }
 
 private:

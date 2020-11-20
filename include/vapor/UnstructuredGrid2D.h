@@ -29,7 +29,7 @@ public:
                        const int *vertexOnFace, const int *faceOnVertex, const int *faceOnFace,
                        Location location,    // node,face, edge
                        size_t maxVertexPerFace, size_t maxFacePerVertex, long nodeOffset, long cellOffset, const UnstructuredGridCoordless &xug, const UnstructuredGridCoordless &yug,
-                       const UnstructuredGridCoordless &zug, std::shared_ptr<const QuadTreeRectangleP<float, size_t>> qtr);
+                       const UnstructuredGridCoordless &zug, std::shared_ptr<const QuadTreeRectangleP> qtr);
 
     UnstructuredGrid2D() = default;
     virtual ~UnstructuredGrid2D()
@@ -37,7 +37,7 @@ public:
         if (_qtr) _qtr = nullptr;
     }
 
-    std::shared_ptr<const QuadTreeRectangleP<float, size_t>> GetQuadTreeRectangle() const { return (_qtr); }
+    std::shared_ptr<const QuadTreeRectangleP> GetQuadTreeRectangle() const { return (_qtr); }
 
     virtual std::vector<size_t> GetCoordDimensions(size_t dim) const override;
 
@@ -122,10 +122,10 @@ protected:
     virtual void GetUserExtentsHelper(DblArr3 &minu, DblArr3 &maxu) const override;
 
 private:
-    UnstructuredGridCoordless                                _xug;
-    UnstructuredGridCoordless                                _yug;
-    UnstructuredGridCoordless                                _zug;
-    std::shared_ptr<const QuadTreeRectangleP<float, size_t>> _qtr;
+    UnstructuredGridCoordless                 _xug;
+    UnstructuredGridCoordless                 _yug;
+    UnstructuredGridCoordless                 _zug;
+    std::shared_ptr<const QuadTreeRectangleP> _qtr;
 
     bool _insideGrid(const DblArr3 &coords, size_t &face, std::vector<size_t> &nodes, double *lambda, int &nlambda) const;
 
@@ -137,7 +137,7 @@ private:
 
     bool _insideFace(size_t face, double pt[2], std::vector<size_t> &node_indices, double *lambda, int &nlambda) const;
 
-    std::shared_ptr<QuadTreeRectangleP<float, size_t>> _makeQuadTreeRectangle() const;
+    std::shared_ptr<QuadTreeRectangleP> _makeQuadTreeRectangle() const;
 };
 };    // namespace VAPoR
 

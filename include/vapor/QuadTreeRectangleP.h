@@ -2,9 +2,15 @@
 
 #include <vector>
 #include <iostream>
+#pragma once
+
 #include <cstdint>
 #include <vapor/VAssert.h>
+#include <vapor/Grid.h>
 #include <vapor/QuadTreeRectangle.hpp>
+
+using UInt32_tArr2 = std::array<uint32_t, 2>;
+using pType = UInt32_tArr2;
 
 namespace VAPoR {
 
@@ -14,9 +20,9 @@ namespace VAPoR {
 //! tree construction
 //!
 //
-template<typename T, typename S> class QuadTreeRectangleP {
+class QuadTreeRectangleP {
 public:
-    QuadTreeRectangleP(T left, T top, T right, T bottom, size_t max_depth = 12, size_t reserve_size = 1000);
+    QuadTreeRectangleP(float left, float top, float right, float bottom, size_t max_depth = 12, size_t reserve_size = 1000);
 
     QuadTreeRectangleP(size_t max_depth = 12, size_t reserve_size = 1000);
 
@@ -26,11 +32,13 @@ public:
 
     ~QuadTreeRectangleP();
 
-    bool Insert(T left, T top, T right, T bottom, S payload);
+    bool Insert(float left, float top, float right, float bottom, Size_tArr3 payload);
 
-    bool Insert(std::vector<class QuadTreeRectangle<T, S>::rectangle_t> rectangles, std::vector<S> payloads);
+    bool Insert(std::vector<class QuadTreeRectangle<float, pType>::rectangle_t> rectangles, std::vector<pType> payloads);
 
-    void GetPayloadContained(T x, T y, std::vector<S> &payloads) const;
+    bool Insert(const Grid *grid);
+
+    void GetPayloadContained(float x, float y, std::vector<Size_tArr3> &payloads) const;
 
     void GetStats(std::vector<size_t> &payload_histo, std::vector<size_t> &level_histo) const;
 
@@ -44,8 +52,8 @@ public:
     }
 
 private:
-    T                                      _left;
-    T                                      _right;
-    std::vector<QuadTreeRectangle<T, S> *> _qtrs;
+    float                                          _left;
+    float                                          _right;
+    std::vector<QuadTreeRectangle<float, pType> *> _qtrs;
 };
 };    // namespace VAPoR

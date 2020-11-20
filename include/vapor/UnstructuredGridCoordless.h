@@ -6,7 +6,6 @@
 #include <memory>
 #include <vapor/common.h>
 #include <vapor/UnstructuredGrid.h>
-#include <vapor/QuadTreeRectangleP.h>
 
 #ifdef WIN32
     #pragma warning(disable : 4661 4251)    // needed for template class

@@ -305,7 +305,7 @@ CurvilinearGrid *GridHelper::_make_grid_curvilinear(size_t ts, int level, int lo
     // classes. This a peformance optimization, necessary be creating
     // a QuadTreeRectangle is expensive.
     //
-    std::shared_ptr<const QuadTreeRectangleP<float, size_t>> qtr = _qtrCache.get(qtr_key);
+    std::shared_ptr<const QuadTreeRectangleP> qtr = _qtrCache.get(qtr_key);
 
     CurvilinearGrid *g;
     if (dims.size() == 3 && cvarsinfo[2].GetDimNames().size() == 3) {
@@ -417,7 +417,7 @@ UnstructuredGrid2D *GridHelper::_make_grid_unstructured2d(size_t ts, int level, 
     // classes. This a peformance optimization, necessary be creating
     // a QuadTreeRectangle is expensive.
     //
-    std::shared_ptr<const QuadTreeRectangleP<float, size_t>> qtr = _qtrCache.get(qtr_key);
+    std::shared_ptr<const QuadTreeRectangleP> qtr = _qtrCache.get(qtr_key);
 
     UnstructuredGrid2D *g = new UnstructuredGrid2D(vertexDims, faceDims, edgeDims, bs, blkptrs, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, vertexOffset,
                                                    faceOffset, xug, yug, zug, qtr);
@@ -524,7 +524,7 @@ UnstructuredGridLayered *GridHelper::_make_grid_unstructured_layered(size_t ts, 
     // classes. This a peformance optimization, necessary be creating
     // a QuadTreeRectangle is expensive.
     //
-    std::shared_ptr<const QuadTreeRectangleP<float, size_t>> qtr = _qtrCache.get(qtr_key);
+    std::shared_ptr<const QuadTreeRectangleP> qtr = _qtrCache.get(qtr_key);
 
     UnstructuredGridLayered *g = new UnstructuredGridLayered(vertexDims, faceDims, edgeDims, bs, blkptrs, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex,
                                                              vertexOffset, faceOffset, xug, yug, zug, qtr);
