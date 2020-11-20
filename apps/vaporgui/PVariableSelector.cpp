@@ -17,7 +17,7 @@ void PVariableSelector::updateGUI() const
     
     auto varNames = getDataMgr()->GetDataVarNames(nDims);
     
-    if (_addNull)
+    if (_addNull || getParamsString().empty())
         varNames.insert(varNames.begin(), NULL_TEXT);
     
     SetItems(varNames);
