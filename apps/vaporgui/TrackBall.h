@@ -87,13 +87,13 @@ public:
 	// Initialize the trackball, provide viewer position, direction, upvector,
 	// and the center of rotation (all in trackball coordinate space)
 	//
-	void	setFromFrame(
+	int setFromFrame(
 		const std::vector<double>& posvec, const std::vector<double>& dirvec,
 		const std::vector<double>& upvec, const std::vector<double>& centerRot,
 		bool perspective
 	);
 
-	void	setFromFrame(
+	int setFromFrame(
 		const double posvec[3], const double dirvec[3],
 		const double upvec[3], const double centerRot[3],
 		bool perspective
@@ -105,7 +105,7 @@ public:
 			up.push_back(upvec[i]);
 			center.push_back(centerRot[i]);
 		}
-		setFromFrame(pos, dir, up, center, perspective);
+		return setFromFrame(pos, dir, up, center, perspective);
 	}
 
 	void SetScale(const double scale[3]) {

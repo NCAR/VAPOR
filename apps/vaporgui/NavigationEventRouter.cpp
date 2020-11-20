@@ -1008,13 +1008,34 @@ void NavigationEventRouter::_setViewpointParams(
 	// matrix 
 	//
 	Trackball trackball;
-    trackball.setFromFrame(posvec, dirvec, upvec, center, true);
-    trackball.TrackballSetMatrix();
+    int rc = trackball.setFromFrame(posvec, dirvec, upvec, center, true);
+    std::cout << "rc " << rc << std::endl;
+    std::vector<double> modelview, centerv;
+    if (rc > 0 ) {
+	    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+	    vector <string> winNames = paramsMgr->GetVisualizerNames();
+        VAssert( winNames.size() > 0 );
+		ViewpointParams *vpParams = paramsMgr->GetViewpointParams(winNames[0]);
+       
+        //modelview = vpParams->GetModelViewMatrix();
+        //centerv = vpParams->GetRotationCenter();
+        double modelView[16], position[3], viewDir[3], upDir[3];
+        vpParams->ReconstructCamera( modelView, position, viewDir, upDir );
+        modelview.assign( modelView, modelView+16 );
+        centerv.assign( position, position+3 );
 
-	const double *m = trackball.GetModelViewMatrix();
+        std::cout << position[0] << " " << position[1] << " " << position[2] << std::endl;
+        std::cout << centerv[0] << " " << centerv[1] << " " << centerv[2] << std::endl;
+    }
+    else {
+        trackball.TrackballSetMatrix();
+	    const double *m = trackball.GetModelViewMatrix();
+        modelview.assign(m, m + 16);
+	    centerv.assign(center, center + 3);
+    }
 
-	vector <double> modelview (m, m + 16);
-	vector <double> centerv (center, center + 3);
+	//vector <double> modelview (m, m + 16);
+	//vector <double> centerv (center, center + 3);
 
 	_setViewpointParams(modelview, centerv);
 
@@ -1034,7 +1055,7 @@ bool NavigationEventRouter::_getViewpointParams(
 
 	bool status = vpParams->ReconstructCamera(m, posvec, upvec, dirvec);
 	if (! status) {
-		MSG_ERR("Failed to get camera parameters");
+		MSG_ERR("Failed                 to get camera parameters");
 		return(false);
 	}
 

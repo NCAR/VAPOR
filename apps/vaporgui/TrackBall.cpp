@@ -85,8 +85,10 @@
 #include <glm/gtc/quaternion.hpp>
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
+#include <vapor/VAssert.h>
 
 #include "TrackBall.h"
+#include "ErrorReporter.h"
 
 using namespace VAPoR;
 void Trackball::TrackballReset()
@@ -368,11 +370,26 @@ bool Trackball::ReconstructCamera(
 
 // Set the quaternion and translation from a viewer frame
 // Also happens to construct modelview matrix, but we don't use its translation
-void Trackball::setFromFrame(
+int Trackball::setFromFrame(
 	const std::vector<double>& posvec, const std::vector<double>& dirvec, 
 	const std::vector<double>& upvec, const std::vector<double>& centerRot,
 	bool persp
 ) {
+    VAssert( posvec.size() == 3 );
+    VAssert( dirvec.size() == 3 );
+    VAssert( upvec.size() == 3 );
+    VAssert( centerRot.size() == 3 );
+
+    // Check for valid up vector and view direction
+    if ( upvec[0] == 0 && upvec[1] == 0 && upvec[2] == 0 ) {
+        MSG_ERR("foo");
+        return 1;
+    }
+    if ( dirvec[0] == 0 && dirvec[1] == 0 && dirvec[2] == 0 ) {
+        MSG_ERR("bar");
+        return 1;
+    }
+
 	//First construct the rotation matrix:
 	double mtrx1[16];
 	double trnsMtrx[16];
@@ -398,5 +415,6 @@ void Trackball::setFromFrame(
 	_perspective = persp;
 	//vcopy(posvec, trans);
 	for (int i = 0; i<3; i++) _trans[i] = (double)mtrx[i+12];
-	
+
+	return 0;
 }
