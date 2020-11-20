@@ -346,7 +346,7 @@ void TFMapWidget::mousePressEvent(QMouseEvent *event)
         return; // Reserved for context menu
     
     for (auto map : _maps) {
-        if (!map->HasValidParams())
+        if (!map->HasValidParams() || map->_hidden)
             continue;
         event->accept();
         map->mousePressEvent(event);
@@ -361,7 +361,7 @@ void TFMapWidget::mouseReleaseEvent(QMouseEvent *event)
         return; // Reserved for context menu
     
     for (auto map : _maps) {
-        if (!map->HasValidParams())
+        if (!map->HasValidParams() || map->_hidden)
             continue;
         event->accept();
         map->mouseReleaseEvent(event);
@@ -376,7 +376,7 @@ void TFMapWidget::mouseMoveEvent(QMouseEvent *event)
         return; // Reserved for context menu
     
     for (auto map : _maps) {
-        if (!map->HasValidParams())
+        if (!map->HasValidParams() || map->_hidden)
             continue;
         event->accept();
         map->mouseMoveEvent(event);
@@ -391,7 +391,7 @@ void TFMapWidget::mouseDoubleClickEvent(QMouseEvent *event)
         return; // Reserved for context menu
     
     for (auto map : _maps) {
-        if (!map->HasValidParams())
+        if (!map->HasValidParams() || map->_hidden)
             continue;
         event->accept();
         map->mouseDoubleClickEvent(event);
