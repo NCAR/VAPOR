@@ -561,6 +561,11 @@ OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
     int cyd = yd - 1;
     int czd = zd - 1;
 
+    if (cxd * cyd * czd == 0) {
+        MyBase::SetErrMsg("Volume rendering a flat grid not supported with this method");
+        return nullptr;
+    }
+
     // "indexPrefixed" is broken
 
     typedef struct {
