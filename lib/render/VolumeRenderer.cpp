@@ -422,7 +422,7 @@ std::string VolumeRenderer::_getDefaultAlgorithmForGrid(const Grid *grid) const 
     if (dynamic_cast<const RegularGrid *>(grid))
         return VolumeRegular ::GetName();
     if (dynamic_cast<const StructuredGrid *>(grid))
-        return intel ? VolumeOSPRay::GetName() : VolumeCellTraversal::GetName();
+        return intel ? VolumeRegular::GetName() : VolumeCellTraversal::GetName();
     if (dynamic_cast<const UnstructuredGrid *>(grid))
         return VolumeOSPRay::GetName();
     MyBase::SetErrMsg("Unsupported grid type: %s", grid->GetType().c_str());
