@@ -332,13 +332,22 @@ int Advection::CalculateParticleProperties(Field *scalar) {
     if (std::find(_propertyVarNames.cbegin(), _propertyVarNames.cend(), scalar->ScalarName) != _propertyVarNames.cend())
         return 0;
 
-    // Also test if this scalar field is the same as the one used to calculate particle values.
-    if (scalar->ScalarName == _valueVarName)
-        return 0;
-
     // Proceed if there is no current scalar property
     _propertyVarNames.emplace_back(scalar->ScalarName);
 
+    // Test if this scalar field is the same as the one used to calculate particle values,
+    //   if so, copy over the values.
+    if (scalar->ScalarName == _valueVarName) {
+        for (auto &s : _streams) {
+            for (auto &p : s) {
+                p.AttachProperty(p.value);
+            }
+        }
+
+        return 0;
+    }
+
+    // In case this property field is a brand new variable, we do the actual sampling work.
     if (scalar->IsSteady) {
         if (scalar->LockParams() != 0)
             return PARAMS_ERROR;

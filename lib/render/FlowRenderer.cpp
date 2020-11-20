@@ -133,8 +133,9 @@ int FlowRenderer::_outputFlowLines() {
         varField.ScalarName = v;
 
         // Sample values along the pathlines.
-        // Note that the advection class will do nothing if this variable already exists
-        //   either as a property or as a value.
+        // Note that the advection class will do nothing if this variable already exists.
+        // Also note that the advection class will do a simple copy if this variable is
+        //   the same as particle values.
         _advection.CalculateParticleProperties(&varField);
         if (_2ndAdvection)
             _2ndAdvection->CalculateParticleProperties(&varField);
