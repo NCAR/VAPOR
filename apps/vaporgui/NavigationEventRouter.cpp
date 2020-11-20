@@ -1004,20 +1004,21 @@ void NavigationEventRouter::_setViewpointParams(
 	const double dirvec[3], const double upvec[3]
 ) const {
 
+    std::vector<double> modelview, centerv;
+
 	// Ugh. Use trackball to convert viewing vectors into a model view
 	// matrix 
 	//
 	Trackball trackball;
     int rc = trackball.setFromFrame(posvec, dirvec, upvec, center, true);
-    std::vector<double> modelview, centerv;
     if (rc > 0 ) {  // If trackball fails
 
         // Get the first available visualizer to retrieve a model view matrix we
         // can reset to.
-	    ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-	    vector <string> winNames = paramsMgr->GetVisualizerNames();
+        ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+        vector <string> winNames = paramsMgr->GetVisualizerNames();
         VAssert( winNames.size() > 0 );
-		ViewpointParams *vpParams = paramsMgr->GetViewpointParams(winNames[0]);
+        ViewpointParams *vpParams = paramsMgr->GetViewpointParams(winNames[0]);
 
         // Reset to the older, vaid model view matrix.  _setViewpointParams() requires a 
         // discreet  vector for the camera center, even though that info is in the modelView 
@@ -1029,9 +1030,9 @@ void NavigationEventRouter::_setViewpointParams(
     }
     else {      // else use the trackball's model view matrix
         trackball.TrackballSetMatrix();
-	    const double *m = trackball.GetModelViewMatrix();
+        const double *m = trackball.GetModelViewMatrix();
         modelview.assign(m, m + 16);
-	    centerv.assign(center, center + 3);
+        centerv.assign(center, center + 3);
     }
 
 	_setViewpointParams(modelview, centerv);
