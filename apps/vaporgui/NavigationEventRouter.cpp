@@ -1011,7 +1011,7 @@ void NavigationEventRouter::_setViewpointParams(
 	//
 	Trackball trackball;
     int rc = trackball.setFromFrame(posvec, dirvec, upvec, center, true);
-    if (rc > 0 ) {  // If trackball fails
+    if (rc < 0 ) {  // If trackball fails
 
         // Get the first available visualizer to retrieve a model view matrix we
         // can reset to.
