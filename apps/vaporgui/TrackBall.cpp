@@ -382,11 +382,11 @@ int Trackball::setFromFrame(
 
     // Check for valid up vector and view direction
     if ( upvec[0] == 0 && upvec[1] == 0 && upvec[2] == 0 ) {
-        MSG_ERR("foo");
+        MSG_ERR("Invalid up direction");
         return 1;
     }
     if ( dirvec[0] == 0 && dirvec[1] == 0 && dirvec[2] == 0 ) {
-        MSG_ERR("bar");
+        MSG_ERR("Invalid view direction");
         return 1;
     }
 
