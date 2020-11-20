@@ -1034,11 +1034,7 @@ void NavigationEventRouter::_setViewpointParams(
 	    centerv.assign(center, center + 3);
     }
 
-	//vector <double> modelview (m, m + 16);
-	//vector <double> centerv (center, center + 3);
-
 	_setViewpointParams(modelview, centerv);
-
 }
 
 bool NavigationEventRouter::_getViewpointParams(
@@ -1055,7 +1051,7 @@ bool NavigationEventRouter::_getViewpointParams(
 
 	bool status = vpParams->ReconstructCamera(m, posvec, upvec, dirvec);
 	if (! status) {
-		MSG_ERR("Failed                 to get camera parameters");
+		MSG_ERR("Failed to get camera parameters");
 		return(false);
 	}
 

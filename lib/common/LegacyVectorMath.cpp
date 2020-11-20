@@ -827,7 +827,7 @@ makeModelviewMatrix(float* vpos, float* vdir, float* upvec, float* mtrx){
 	vscale(minv+8, -1.f);
 	vcopy(vpos, minv+ 12);
 	int rc = minvert(minv, mtrx);
-	//VAssert(rc >= 0);//Only catch this in debug mode
+	VAssert(rc >= 0);//Only catch this in debug mode
 }
 /*
  * make a modelview matrix from viewer position, direction, and up vector
@@ -939,7 +939,7 @@ makeModelviewMatrixD(const std::vector<double>& vpos, const std::vector<double>&
 	vscale(minv+8, -1.);
 	vcopy(dvpos, minv+ 12);
 	int rc = minvert(minv, mtrx);
-	//VAssert(rc >= 0);//Only catch this in debug mode
+	VAssert(rc >= 0);//Only catch this in debug mode
 }
 void	matrix4x4_vec3_mult(
 		const float	m[16],
