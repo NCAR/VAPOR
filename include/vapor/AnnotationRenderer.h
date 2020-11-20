@@ -125,8 +125,6 @@ private:
     void       applyTransform(Transform *t);
     void       renderText(double text, double coords[], AxisAnnotation *aa = NULL);
     Transform *getTransform(string dataMgr = "");
-    void       convertPointToLon(double &xCoord);
-    void       convertPointToLat(double &yCoord);
     void       convertPointToLonLat(double &xCoord, double &yCoord);
 
     // Draw Axis arrows
