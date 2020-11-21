@@ -239,6 +239,14 @@ int FlowRenderer::_paintGL( bool fast )
         MyBase::SetErrMsg("Please provide at least 1 field variables for advection!");
         return flow::PARAMS_ERROR;
     }
+    // In case a color mapping variable wasn't specified, it's also considered an ill-formed
+    //   parameter. That is because, the color mapping variable is required in private method
+    //   _renderAdvectionHelper() and there isn't an obvious way to satisfy it without a
+    //   color mapping variable.
+    if( _colorField.ScalarName.empty() ) {
+        MyBase::SetErrMsg("Please provide a color mapping variable!");
+        return flow::PARAMS_ERROR;
+    }
 
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
@@ -377,7 +385,6 @@ int FlowRenderer::_paintGL( bool fast )
 
         _advectionComplete = true;
     }
-
 
     if( !_coloringComplete )
     {
