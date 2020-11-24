@@ -239,14 +239,6 @@ int FlowRenderer::_paintGL( bool fast )
         MyBase::SetErrMsg("Please provide at least 1 field variables for advection!");
         return flow::PARAMS_ERROR;
     }
-    // In case a color mapping variable wasn't specified, it's also considered an ill-formed
-    //   parameter. That is because, the color mapping variable is required in private method
-    //   _renderAdvectionHelper() and there isn't an obvious way to satisfy it without a
-    //   color mapping variable.
-    if( _colorField.ScalarName.empty() ) {
-        MyBase::SetErrMsg("Please provide a color mapping variable!");
-        return flow::PARAMS_ERROR;
-    }
 
     if( _velocityStatus == FlowStatus::SIMPLE_OUTOFDATE )
     {
@@ -534,8 +526,19 @@ int  FlowRenderer::_renderAdvectionHelper(bool renderDirection)
     float radiusBase = rp->GetValueDouble(FlowParams::RenderRadiusBaseTag, -1);
     if (radiusBase == -1) {
         vector<double> mind, maxd;
+
+        // Need to find a non-empty variable from all velocity variables.
+        std::string nonEmptyVarName;
+        for( auto it  = _velocityField.VelocityNames.cbegin(); 
+                  it != _velocityField.VelocityNames.cend(); ++it ) {
+            if( !it->empty() ) {
+                nonEmptyVarName = *it;
+                break;
+            }
+        }
+
         _dataMgr->GetVariableExtents(
-                rp->GetCurrentTimestep(), rp->GetColorMapVariableName(),
+                rp->GetCurrentTimestep(), nonEmptyVarName,
                 rp->GetRefinementLevel(), rp->GetCompressionLevel(), mind, maxd
                 );
         vec3 min(mind[0], mind[1], mind[2]);
