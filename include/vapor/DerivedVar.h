@@ -469,6 +469,50 @@ private:
     DC::CoordVar        _coordVarInfo;
 };
 
+//!
+//! \class DerivedCoordVar_Time
+//!
+//! \brief Synthesize a time coordinate variable
+//!
+//! Creates a time coordinate variable with \p n user times, running
+//! from 0.0 to n-1.
+//!
+//! \author John Clyne
+//! \date   Novermber, 2020
+//!
+//!
+class VDF_API DerivedCoordVar_Time : public DerivedCoordVar {
+public:
+    DerivedCoordVar_Time(string derivedVarName, string dimName, size_t n);
+    virtual ~DerivedCoordVar_Time() {}
+
+    virtual int Initialize();
+
+    virtual bool GetBaseVarInfo(DC::BaseVar &var) const;
+
+    virtual bool GetCoordVarInfo(DC::CoordVar &cvar) const;
+
+    virtual std::vector<string> GetInputs() const { return (std::vector<string>()); }
+
+    virtual int GetDimLensAtLevel(int level, std::vector<size_t> &dims_at_level, std::vector<size_t> &bs_at_level) const;
+
+    virtual int OpenVariableRead(size_t ts, int level = 0, int lod = 0);
+
+    virtual int CloseVariable(int fd);
+
+    virtual int ReadRegionBlock(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region) { return (ReadRegion(fd, min, max, region)); }
+
+    virtual int ReadRegion(int fd, const std::vector<size_t> &min, const std::vector<size_t> &max, float *region);
+
+    virtual bool VariableExists(size_t ts, int reflevel, int lod) const;
+
+    const vector<double> &GetTimes() const { return (_times); }
+
+private:
+    std::vector<double> _times;
+    DC::CoordVar        _coordVarInfo;
+};
+
 class VDF_API DerivedCoordVar_Staggered : public DerivedCoordVar {
 public:
     DerivedCoordVar_Staggered(string derivedVarName, string stagDimName, DC *dc, string inName, string dimName);
