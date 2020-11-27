@@ -41,8 +41,7 @@ auto flow::OutputFlowlinesNumSteps(const Advection *adv,
 
     // Write the header
     if (!append) {
-        std::fprintf(f, "%s%s", "# ID,  X-position,  Y-position,  Z-position,  Time,   ",
-                     adv->GetValueVarName().c_str());
+        std::fprintf(f, "%s", "# ID,  X-position,  Y-position,  Z-position,  Time,  ");
 
         for (auto &n : propertyNames)
             std::fprintf(f, ",  %s", n.c_str());
@@ -71,10 +70,9 @@ auto flow::OutputFlowlinesNumSteps(const Advection *adv,
                     proj4API.Transform(&cX, &cY, 1);
                 }
 
-                std::fprintf(f, "%lu, %f, %f, %f, %4.4d-%2.2d-%2.2d_%2.2d:%2.2d:%2.2d, %f",
+                std::fprintf(f, "%lu, %f, %f, %f, %4.4d-%2.2d-%2.2d_%2.2d:%2.2d:%2.2d",
                              s_idx, cX, cY, p.location.z,
-                             year, month, day, hour, minute, second,
-                             p.value);
+                             year, month, day, hour, minute, second);
 
                 auto props = p.GetPropertyList();
                 // A quick sanity check
@@ -128,8 +126,7 @@ auto flow::OutputFlowlinesMaxTime(const Advection *adv,
 
     // Write the header
     if (!append) {
-        std::fprintf(f, "%s%s", "# ID,  X-position,  Y-position,  Z-position,  Time,   ",
-                     adv->GetValueVarName().c_str());
+        std::fprintf(f, "%s", "# ID,  X-position,  Y-position,  Z-position,  Time,  ");
 
         for (auto &n : propertyNames)
             std::fprintf(f, ",  %s", n.c_str());
@@ -161,10 +158,9 @@ auto flow::OutputFlowlinesMaxTime(const Advection *adv,
                     proj4API.Transform(&cX, &cY, 1);
                 }
 
-                std::fprintf(f, "%lu, %f, %f, %f, %4.4d-%2.2d-%2.2d_%2.2d:%2.2d:%2.2d, %f",
+                std::fprintf(f, "%lu, %f, %f, %f, %4.4d-%2.2d-%2.2d_%2.2d:%2.2d:%2.2d",
                              s_idx, cX, cY, p.location.z,
-                             year, month, day, hour, minute, second,
-                             p.value);
+                             year, month, day, hour, minute, second);
 
                 auto props = p.GetPropertyList();
                 // A quick sanity check
