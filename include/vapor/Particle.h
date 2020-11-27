@@ -12,6 +12,7 @@
 namespace flow {
 enum FLOW_ERROR_CODE    // these enum values are available in the flow namespace.
 {
+    FIELD_ALL_ZERO = 4,
     MISSING_VAL = 3,
     NO_ADVECT_HAPPENED = 2,
     ADVECT_HAPPENED = 1,
