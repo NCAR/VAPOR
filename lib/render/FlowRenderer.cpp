@@ -244,8 +244,11 @@ int FlowRenderer::_paintGL( bool fast )
     {
         // First step is to re-calculate deltaT
         rv = _velocityField.CalcDeltaTFromCurrentTimeStep( _cache_deltaT );
-        if( rv != 0 )
-        {
+        if( rv == flow::FIELD_ALL_ZERO ) {
+            MyBase::SetErrMsg("The velocity field seems to contain only zero values!");
+            return flow::PARAMS_ERROR;
+        }
+        else if( rv != 0 ) {
             MyBase::SetErrMsg("Update deltaT failed!");
             return rv;
         }
@@ -377,7 +380,6 @@ int FlowRenderer::_paintGL( bool fast )
 
         _advectionComplete = true;
     }
-
 
     if( !_coloringComplete )
     {
@@ -524,8 +526,19 @@ int  FlowRenderer::_renderAdvectionHelper(bool renderDirection)
     float radiusBase = rp->GetValueDouble(FlowParams::RenderRadiusBaseTag, -1);
     if (radiusBase == -1) {
         vector<double> mind, maxd;
+
+        // Need to find a non-empty variable from all velocity variables.
+        std::string nonEmptyVarName;
+        for( auto it  = _velocityField.VelocityNames.cbegin(); 
+                  it != _velocityField.VelocityNames.cend(); ++it ) {
+            if( !it->empty() ) {
+                nonEmptyVarName = *it;
+                break;
+            }
+        }
+
         _dataMgr->GetVariableExtents(
-                rp->GetCurrentTimestep(), rp->GetColorMapVariableName(),
+                rp->GetCurrentTimestep(), nonEmptyVarName,
                 rp->GetRefinementLevel(), rp->GetCompressionLevel(), mind, maxd
                 );
         vec3 min(mind[0], mind[1], mind[2]);
