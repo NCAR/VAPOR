@@ -282,7 +282,7 @@ private:
             // node) there is no point in refining. I.e. stop descending the
             // tree and store the payload here.
             //
-            if ((_rectangle.width() < rec.width() && _rectangle.height() < rec.height()) || _level >= maxDepth) {
+            if (_rectangle.width() < rec.width() || _rectangle.height() < rec.height() || _level >= maxDepth) {
                 _payloads.push_back(payload);
                 return (true);
             }
