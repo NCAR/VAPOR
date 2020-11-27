@@ -15,7 +15,7 @@ void PVariableSelector::updateGUI() const
 
     auto varNames = getDataMgr()->GetDataVarNames(nDims);
 
-    if (_addNull) varNames.insert(varNames.begin(), NULL_TEXT);
+    if (_addNull || getParamsString().empty()) varNames.insert(varNames.begin(), NULL_TEXT);
 
     SetItems(varNames);
     PStringDropdown::updateGUI();

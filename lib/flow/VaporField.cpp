@@ -487,6 +487,13 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
         }
     }
 
+    // If all sampled locations are missing values or zero values,
+    //   we give deltaT an arbitrary value and return a special value.
+    if (maxmag == 0.0) {
+        delT = glm::distance(minxyz, maxxyz) / 1000.0;
+        return flow::FIELD_ALL_ZERO;
+    }
+
     // Let's dictate that using the maximum velocity FROM OUR SAMPLES
     // a particle needs 500 steps to travel the entire space.
     const float desiredNum = 500.0f;

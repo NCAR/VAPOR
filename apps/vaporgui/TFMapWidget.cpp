@@ -290,7 +290,7 @@ void TFMapWidget::mousePressEvent(QMouseEvent *event)
     if (event->button() == Qt::RightButton) return;    // Reserved for context menu
 
     for (auto map : _maps) {
-        if (!map->HasValidParams()) continue;
+        if (!map->HasValidParams() || map->_hidden) continue;
         event->accept();
         map->mousePressEvent(event);
         if (event->isAccepted()) break;
@@ -302,7 +302,7 @@ void TFMapWidget::mouseReleaseEvent(QMouseEvent *event)
     if (event->button() == Qt::RightButton) return;    // Reserved for context menu
 
     for (auto map : _maps) {
-        if (!map->HasValidParams()) continue;
+        if (!map->HasValidParams() || map->_hidden) continue;
         event->accept();
         map->mouseReleaseEvent(event);
         if (event->isAccepted()) break;
@@ -314,7 +314,7 @@ void TFMapWidget::mouseMoveEvent(QMouseEvent *event)
     if (event->button() == Qt::RightButton) return;    // Reserved for context menu
 
     for (auto map : _maps) {
-        if (!map->HasValidParams()) continue;
+        if (!map->HasValidParams() || map->_hidden) continue;
         event->accept();
         map->mouseMoveEvent(event);
         if (event->isAccepted()) break;
@@ -326,7 +326,7 @@ void TFMapWidget::mouseDoubleClickEvent(QMouseEvent *event)
     if (event->button() == Qt::RightButton) return;    // Reserved for context menu
 
     for (auto map : _maps) {
-        if (!map->HasValidParams()) continue;
+        if (!map->HasValidParams() || map->_hidden) continue;
         event->accept();
         map->mouseDoubleClickEvent(event);
         if (event->isAccepted()) break;
