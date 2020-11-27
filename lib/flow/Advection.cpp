@@ -89,10 +89,20 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
                 break;
             }
 
-            if (rv == 0) { // Advection successful, keep the new particle.
-                happened = true;
-                s.emplace_back(p1);
-                numberOfSteps++;
+            if (rv == 0) { // Advection successful!
+                // The new particle *may* be the same as the old particle in case
+                // there's a sink, meaning the velocity is zero.
+                // In that case, we mark p1 as "special" and terminate the current stream.
+                if (p1.location == past0.location) {
+                    p1.SetSpecial(true);
+                    s.emplace_back(p1);
+                    _separatorCount[streamIdx]++;
+                    break;
+                } else {
+                    happened = true;
+                    s.emplace_back(p1);
+                    numberOfSteps++;
+                }
             } else if (rv == MISSING_VAL) {
 
                 // This is the annoying part: there are multiple possiblities.
