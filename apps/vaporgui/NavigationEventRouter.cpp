@@ -364,6 +364,7 @@ void NavigationEventRouter::LoadDataNotify(string dataSetName) {
 
 
 void NavigationEventRouter::setCameraChanged() {
+    std::cout << "setCameraChanged" << std::endl;
 
 	double posvec[3], dirvec[3], upvec[3], center[3]; 
 
@@ -1002,7 +1003,7 @@ void NavigationEventRouter::_setViewpointParams(
 void NavigationEventRouter::_setViewpointParams(
 	const double center[3], const double posvec[3],
 	const double dirvec[3], const double upvec[3]
-) const {
+) {
 
     std::vector<double> modelview, centerv;
 
@@ -1013,21 +1014,8 @@ void NavigationEventRouter::_setViewpointParams(
     bool rc = trackball.setFromFrame(posvec, dirvec, upvec, center, true);
     if (rc == false ) {  // If trackball fails
         MSG_ERR( "Invalid camera settings" );
-        
-        // Get the first available visualizer to retrieve a model view matrix we
-        // can reset to.
-        ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
-        vector <string> winNames = paramsMgr->GetVisualizerNames();
-        VAssert( winNames.size() > 0 );
-        ViewpointParams *vpParams = paramsMgr->GetViewpointParams(winNames[0]);
-
-        // Reset to the older, vaid model view matrix.  _setViewpointParams() requires a 
-        // discreet  vector for the camera center, even though that info is in the modelView 
-        // matrix...so make that too. 
-        modelview = vpParams->GetModelViewMatrix();
-        centerv.push_back( modelview[12] );
-        centerv.push_back( modelview[13] );
-        centerv.push_back( modelview[14] );
+        updateCameraChanged();
+        return;
     }
     else {      // else use the trackball's model view matrix
         trackball.TrackballSetMatrix();
