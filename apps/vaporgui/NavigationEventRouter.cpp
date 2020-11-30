@@ -364,7 +364,6 @@ void NavigationEventRouter::LoadDataNotify(string dataSetName) {
 
 
 void NavigationEventRouter::setCameraChanged() {
-    std::cout << "setCameraChanged" << std::endl;
 
 	double posvec[3], dirvec[3], upvec[3], center[3]; 
 
