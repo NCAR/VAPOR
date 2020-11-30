@@ -87,13 +87,13 @@ public:
 	// Initialize the trackball, provide viewer position, direction, upvector,
 	// and the center of rotation (all in trackball coordinate space)
 	//
-	int setFromFrame(
+	bool setFromFrame(
 		const std::vector<double>& posvec, const std::vector<double>& dirvec,
 		const std::vector<double>& upvec, const std::vector<double>& centerRot,
 		bool perspective
 	);
 
-	int setFromFrame(
+	bool setFromFrame(
 		const double posvec[3], const double dirvec[3],
 		const double upvec[3], const double centerRot[3],
 		bool perspective

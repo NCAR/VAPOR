@@ -1010,9 +1010,11 @@ void NavigationEventRouter::_setViewpointParams(
 	// matrix 
 	//
 	Trackball trackball;
-    int rc = trackball.setFromFrame(posvec, dirvec, upvec, center, true);
-    if (rc < 0 ) {  // If trackball fails
-
+    bool rc = trackball.setFromFrame(posvec, dirvec, upvec, center, true);
+    if (rc == false ) {  // If trackball fails
+        return;
+        MSG_ERR( "Invalid camera settings" );
+        
         // Get the first available visualizer to retrieve a model view matrix we
         // can reset to.
         ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();

@@ -88,7 +88,6 @@
 #include <vapor/VAssert.h>
 
 #include "TrackBall.h"
-#include "ErrorReporter.h"
 
 using namespace VAPoR;
 void Trackball::TrackballReset()
@@ -370,7 +369,7 @@ bool Trackball::ReconstructCamera(
 
 // Set the quaternion and translation from a viewer frame
 // Also happens to construct modelview matrix, but we don't use its translation
-int Trackball::setFromFrame(
+bool Trackball::setFromFrame(
 	const std::vector<double>& posvec, const std::vector<double>& dirvec, 
 	const std::vector<double>& upvec, const std::vector<double>& centerRot,
 	bool persp
@@ -382,12 +381,10 @@ int Trackball::setFromFrame(
 
     // Check for valid up vector and view direction
     if ( upvec[0] == 0 && upvec[1] == 0 && upvec[2] == 0 ) {
-        MSG_ERR("Invalid up vector");
-        return -1;
+        return false;
     }
     if ( dirvec[0] == 0 && dirvec[1] == 0 && dirvec[2] == 0 ) {
-        MSG_ERR("Invalid camera direction");
-        return -1;
+        return false;
     }
 
 	//First construct the rotation matrix:
@@ -416,5 +413,5 @@ int Trackball::setFromFrame(
 	//vcopy(posvec, trans);
 	for (int i = 0; i<3; i++) _trans[i] = (double)mtrx[i+12];
 
-	return 0;
+	return true;
 }
