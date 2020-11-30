@@ -99,7 +99,7 @@ class NavigationEventRouter : public QWidget, public Ui_NavigationTab, public Ev
 
     void _setViewpointParams(
         const double center[3], const double posvec[3],
-        const double dirvec[3], const double upvec[3]) const;
+        const double dirvec[3], const double upvec[3]);
 
     bool _getViewpointParams(
         double center[3], double posvec[3],
