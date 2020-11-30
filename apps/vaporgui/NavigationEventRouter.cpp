@@ -821,19 +821,25 @@ void NavigationEventRouter::_setViewpointParams(const vector<double> &modelview,
     paramsMgr->EndSaveStateGroup();
 }
 
-void NavigationEventRouter::_setViewpointParams(const double center[3], const double posvec[3], const double dirvec[3], const double upvec[3]) const
+void NavigationEventRouter::_setViewpointParams(const double center[3], const double posvec[3], const double dirvec[3], const double upvec[3])
 {
+    std::vector<double> modelview, centerv;
+
     // Ugh. Use trackball to convert viewing vectors into a model view
     // matrix
     //
     Trackball trackball;
-    trackball.setFromFrame(posvec, dirvec, upvec, center, true);
-    trackball.TrackballSetMatrix();
-
-    const double *m = trackball.GetModelViewMatrix();
-
-    vector<double> modelview(m, m + 16);
-    vector<double> centerv(center, center + 3);
+    bool      rc = trackball.setFromFrame(posvec, dirvec, upvec, center, true);
+    if (rc == false) {    // If trackball fails
+        MSG_ERR("Invalid camera settings");
+        updateCameraChanged();
+        return;
+    } else {    // else use the trackball's model view matrix
+        trackball.TrackballSetMatrix();
+        const double *m = trackball.GetModelViewMatrix();
+        modelview.assign(m, m + 16);
+        centerv.assign(center, center + 3);
+    }
 
     _setViewpointParams(modelview, centerv);
 }
