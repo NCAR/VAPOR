@@ -245,7 +245,7 @@ int FlowRenderer::_paintGL( bool fast )
         // First step is to re-calculate deltaT
         rv = _velocityField.CalcDeltaTFromCurrentTimeStep( _cache_deltaT );
         if( rv == flow::FIELD_ALL_ZERO ) {
-            MyBase::SetErrMsg("The velocity field seems to contain only zero or missing values!");
+            MyBase::SetErrMsg("The velocity field seems to contain only invalid values!");
             return flow::PARAMS_ERROR;
         }
         else if( rv != 0 ) {
@@ -1426,5 +1426,4 @@ double FlowRenderer::_getElapsedSeconds( const struct timeval* begin,
     return (end->tv_sec - begin->tv_sec) + ((end->tv_usec - begin->tv_usec)/1000000.0);
 }
 #endif
-
 
