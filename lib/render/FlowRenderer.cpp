@@ -398,9 +398,10 @@ int FlowRenderer::_renderAdvection(const flow::Advection *adv) {
         // First calculate the starting time stamp. Copied from legacy.
         double startingTime = _timestamps[0];
         if (!_cache_isSteady) {
-            int pastNumOfTimeSteps = dynamic_cast<FlowParams *>(GetActiveParams())->GetPastNumOfTimeSteps();
+            int pastNumOfTimeSteps = rp->GetPastNumOfTimeSteps();
             startingTime = _timestamps[0];
-            if (_cache_currentTS - pastNumOfTimeSteps > 0)
+            // note that _cache_currentTS is cast to a signed integer.
+            if (int(_cache_currentTS) - pastNumOfTimeSteps > 0)
                 startingTime = _timestamps[_cache_currentTS - pastNumOfTimeSteps];
         }
 
