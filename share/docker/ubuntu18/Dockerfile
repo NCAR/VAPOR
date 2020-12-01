@@ -25,7 +25,7 @@ RUN apt-get update \
 # Acquire 3rd party libraries
 #
 RUN mkdir -p /usr/local/VAPOR-Deps
-RUN fileid="1j4IO4VCU0Wvyu2T3BH0e9I0qiiwCIrEd" \
+RUN fileid="1v0AwfOnDsf8hMzBqg4OcEtcEyH5YpnIn" \
     && filename="/usr/local/VAPOR-Deps/2019-Aug-Ubuntu.tar.xz" \
     && curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${fileid}" > /dev/null \
     && curl -Lb ./cookie \
