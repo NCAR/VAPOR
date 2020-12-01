@@ -193,7 +193,7 @@ int FlowRenderer::_paintGL(bool fast)
         // First step is to re-calculate deltaT
         rv = _velocityField.CalcDeltaTFromCurrentTimeStep(_cache_deltaT);
         if (rv == flow::FIELD_ALL_ZERO) {
-            MyBase::SetErrMsg("The velocity field seems to contain only zero values!");
+            MyBase::SetErrMsg("The velocity field seems to contain only invalid values!");
             return flow::PARAMS_ERROR;
         } else if (rv != 0) {
             MyBase::SetErrMsg("Update deltaT failed!");

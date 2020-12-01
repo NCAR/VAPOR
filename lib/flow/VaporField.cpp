@@ -489,7 +489,7 @@ int VaporField::CalcDeltaTFromCurrentTimeStep(double &delT) const
 
     // If all sampled locations are missing values or zero values,
     //   we give deltaT an arbitrary value and return a special value.
-    if (maxmag == 0.0) {
+    if (maxmag == 0.0 || std::isinf(maxmag)) {
         delT = glm::distance(minxyz, maxxyz) / 1000.0;
         return flow::FIELD_ALL_ZERO;
     }
