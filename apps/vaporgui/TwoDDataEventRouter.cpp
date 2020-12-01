@@ -12,7 +12,7 @@ TwoDDataEventRouter::TwoDDataEventRouter(QWidget *parent, ControlExec *ce)
                                                                            new PHeightVariableSelector}),
                                        new PFidelitySection}));
 
-    AddSubtab("Appearance", (new PTFEditor)->ShowOpacityBasedOnParam("NULL", 1));
+    AddSubtab("Appearance", (new PTFEditor));
     AddSubtab("Geometry", new PGeometrySubtab);
     AddSubtab("Annotation", new PAnnotationColorbarWidget);
 }

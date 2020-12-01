@@ -454,8 +454,14 @@ MainForm::MainForm(
     //
 
     if (files.size() && files[0].endsWith(".vs3")) {
-        sessionOpen(files[0]);
+        bool loadDatasetsFromSession = files.size() == 1;
+        sessionOpen(files[0], loadDatasetsFromSession);
         files.erase(files.begin());
+
+        if (!loadDatasetsFromSession && _controlExec->GetDataNames().size() > 1) {
+            fprintf(stderr, "Cannot replace dataset from command line in session which contains multiple open datasets.");
+            exit(1);
+        }
     } else {
         sessionNew();
     }
@@ -467,7 +473,7 @@ MainForm::MainForm(
 
         string fmt;
         if (determineDatasetFormat(paths, &fmt)) {
-            loadDataHelper(paths, "", "", fmt, true);
+            loadDataHelper(paths, "", "", fmt, true, ReplaceFirst);
         } else {
             MSG_ERR("Could not determine dataset format for command line parameters");
         }
@@ -1260,7 +1266,7 @@ void MainForm::createMenus() {
 #endif
 }
 
-void MainForm::sessionOpenHelper(string fileName) {
+void MainForm::sessionOpenHelper(string fileName, bool loadDatasets) {
 
     // Clear out the current session:
 
@@ -1292,14 +1298,19 @@ void MainForm::sessionOpenHelper(string fileName) {
     GUIStateParams *newP = GetStateParams();
     dataSetNames = newP->GetOpenDataSetNames();
 
-    for (int i = 0; i < dataSetNames.size(); i++) {
-        string name = dataSetNames[i];
-        vector<string> paths = newP->GetOpenDataSetPaths(name);
-        if (std::all_of(paths.begin(), paths.end(), [](string path) { return FileUtils::Exists(path); })) {
-            loadDataHelper(paths, "", "", newP->GetOpenDataSetFormat(name), true, false);
-        } else {
-            newP->RemoveOpenDateSet(name);
+    if (loadDatasets) {
+        for (int i = 0; i < dataSetNames.size(); i++) {
+            string name = dataSetNames[i];
+            vector<string> paths = newP->GetOpenDataSetPaths(name);
+            if (std::all_of(paths.begin(), paths.end(), [](string path) { return FileUtils::Exists(path); })) {
+                loadDataHelper(paths, "", "", newP->GetOpenDataSetFormat(name), true, DatasetExistsAction::AddNew);
+            } else {
+                newP->RemoveOpenDateSet(name);
+            }
         }
+    } else {
+        for (auto name : dataSetNames)
+            newP->RemoveOpenDateSet(name);
     }
 
     _vizWinMgr->Restart();
@@ -1310,7 +1321,7 @@ void MainForm::sessionOpenHelper(string fileName) {
     _controlExec->UndoRedoClear();
 }
 
-void MainForm::sessionOpen(QString qfileName) {
+void MainForm::sessionOpen(QString qfileName, bool loadDatasets) {
     // Disable "Are you sure?" popup in debug build
 #ifdef NDEBUG
     if (_stateChangeFlag) {
@@ -1357,7 +1368,7 @@ void MainForm::sessionOpen(QString qfileName) {
 
     string fileName = qfileName.toStdString();
     _sessionNewFlag = false;
-    sessionOpenHelper(fileName);
+    sessionOpenHelper(fileName, loadDatasets);
 
     GUIStateParams *p = GetStateParams();
     p->SetCurrentSessionFile(fileName);
@@ -1601,7 +1612,7 @@ bool MainForm::openDataHelper(
 
 void MainForm::loadDataHelper(
     const vector<string> &files, string prompt, string filter, string format,
-    bool multi, bool promptToReplaceExistingDataset) {
+    bool multi, DatasetExistsAction existsAction) {
 
     vector<string> myFiles = files;
 
@@ -1632,7 +1643,7 @@ void MainForm::loadDataHelper(
 
     // Generate data set name
     //
-    string dataSetName = _getDataSetName(myFiles[0], promptToReplaceExistingDataset);
+    string dataSetName = _getDataSetName(myFiles[0], existsAction);
     if (dataSetName.empty())
         return;
 
@@ -2340,15 +2351,25 @@ void MainForm::installCLITools() {
     string binPath = home + "/MacOS";
     home.erase(home.size() - strlen("Contents/"), strlen("Contents/"));
 
-    string profilePath = string(getenv("HOME")) + "/.profile";
-    FILE *prof = fopen(profilePath.c_str(), "a");
-    if (prof) {
-        fprintf(prof, "\n");
-        fprintf(prof, "export VAPOR_HOME=\"%s\"\n", home.c_str());
-        fprintf(prof, "export PATH=\"%s:$PATH\"\n", binPath.c_str());
-        fclose(prof);
+    vector<string> profilePaths = {
+        string(getenv("HOME")) + "/.profile",
+        string(getenv("HOME")) + "/.zshrc",
+    };
+    bool success = true;
 
-        box.setText("Environmental variables set in ~/.profile");
+    for (auto profilePath : profilePaths) {
+        FILE *prof = fopen(profilePath.c_str(), "a");
+        success &= (bool)prof;
+        if (prof) {
+            fprintf(prof, "\n\n");
+            fprintf(prof, "export VAPOR_HOME=\"%s\"\n", home.c_str());
+            fprintf(prof, "export PATH=\"%s:$PATH\"\n", binPath.c_str());
+            fclose(prof);
+        }
+    }
+
+    if (success) {
+        box.setText("Environmental variables set in ~/.profile and ~/.zshrc");
         box.setInformativeText("Please log out and log back in for changes to take effect.");
         box.setIcon(QMessageBox::Information);
     } else {
@@ -2658,11 +2679,13 @@ void MainForm::endAnimCapture() {
     _captureSingleTiffAction->setEnabled(true);
 }
 
-string MainForm::_getDataSetName(string file, bool promptToReplaceExistingDataset) {
+string MainForm::_getDataSetName(string file, DatasetExistsAction existsAction) {
 
     vector<string> names = _controlExec->GetDataNames();
-    if (names.empty() || !promptToReplaceExistingDataset) {
+    if (names.empty() || existsAction == AddNew) {
         return (makename(file));
+    } else if (existsAction == ReplaceFirst) {
+        return names[0];
     }
 
     string newSession = "New Dataset";
