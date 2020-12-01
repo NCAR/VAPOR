@@ -154,8 +154,8 @@ void FlowEventRouter::_updateTab()
     RenderEventRouterGUI::_updateTab();
 
     int numTS = GetActiveDataMgr()->GetNumTimeSteps();
-    _pathlineLengthSlider->SetRange(0, numTS - 1);
-    _pathlineInjectionSlider->SetRange(0, numTS - 1);
+    _pathlineLengthSlider->SetRange(1, numTS);
+    _pathlineInjectionSlider->SetRange(0, numTS);
 
     syncOpenTabWithGUIStateParams();
 }
