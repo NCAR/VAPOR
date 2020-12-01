@@ -337,8 +337,8 @@ private:
 	// tree and store the payload here.
 	//
 	if (
-		(_rectangle.width() < rec.width() && 
-		_rectangle.height() < rec.height()) ||
+		_rectangle.width() < rec.width() || 
+		_rectangle.height() < rec.height() ||
 		_level >= maxDepth
 	) {
 		_payloads.push_back(payload);
