@@ -2523,15 +2523,25 @@ void MainForm::installCLITools(){
     string binPath = home + "/MacOS";
     home.erase(home.size() - strlen("Contents/"), strlen("Contents/"));
     
-    string profilePath = string(getenv("HOME")) + "/.profile";
-    FILE *prof = fopen(profilePath.c_str(), "a");
-    if (prof) {
-        fprintf(prof, "\n");
-        fprintf(prof, "export VAPOR_HOME=\"%s\"\n", home.c_str());
-        fprintf(prof, "export PATH=\"%s:$PATH\"\n", binPath.c_str());
-        fclose(prof);
-        
-        box.setText("Environmental variables set in ~/.profile");
+    vector<string> profilePaths = {
+        string(getenv("HOME")) + "/.profile",
+        string(getenv("HOME")) + "/.zshrc",
+    };
+    bool success = true;
+    
+    for (auto profilePath : profilePaths) {
+        FILE *prof = fopen(profilePath.c_str(), "a");
+        success &= (bool)prof;
+        if (prof) {
+            fprintf(prof, "\n\n");
+            fprintf(prof, "export VAPOR_HOME=\"%s\"\n", home.c_str());
+            fprintf(prof, "export PATH=\"%s:$PATH\"\n", binPath.c_str());
+            fclose(prof);
+        }
+    }
+     
+    if (success) {
+        box.setText("Environmental variables set in ~/.profile and ~/.zshrc");
         box.setInformativeText("Please log out and log back in for changes to take effect.");
         box.setIcon(QMessageBox::Information);
     } else {
