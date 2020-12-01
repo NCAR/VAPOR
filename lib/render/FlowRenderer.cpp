@@ -527,15 +527,18 @@ int  FlowRenderer::_renderAdvectionHelper(bool renderDirection)
     if (radiusBase == -1) {
         vector<double> mind, maxd;
 
-        // Need to find a non-empty variable from all velocity variables.
-        std::string nonEmptyVarName;
-        for( auto it  = _velocityField.VelocityNames.cbegin(); 
-                  it != _velocityField.VelocityNames.cend(); ++it ) {
-            if( !it->empty() ) {
-                nonEmptyVarName = *it;
-                break;
+        // Need to find a non-empty variable from color mapping or velocity variables.
+        std::string nonEmptyVarName = rp->GetColorMapVariableName();
+        if( nonEmptyVarName.empty() ) {
+            for( auto it  = _velocityField.VelocityNames.cbegin();
+                      it != _velocityField.VelocityNames.cend(); ++it ) {
+                if( !it->empty() ) {
+                    nonEmptyVarName = *it;
+                    break;
+                }
             }
         }
+        assert( !nonEmptyVarName.empty() );
 
         _dataMgr->GetVariableExtents(
                 rp->GetCurrentTimestep(), nonEmptyVarName,
