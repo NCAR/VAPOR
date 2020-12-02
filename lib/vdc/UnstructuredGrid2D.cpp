@@ -401,15 +401,6 @@ bool UnstructuredGrid2D::_insideFace(size_t face, double pt[2], vector<size_t> &
 
 std::shared_ptr<QuadTreeRectangleP> UnstructuredGrid2D::_makeQuadTreeRectangle() const
 {
-#ifdef DEAD
-
-    size_t             maxNodes = GetMaxVertexPerCell();
-    vector<Size_tArr3> nodes(maxNodes);
-
-    size_t coordDim = GetGeometryDim();
-    VAssert(coordDim == 2);
-
-#endif
     const vector<size_t> &dims = GetDimensions();
     size_t                reserve_size = dims[0];
 
@@ -420,41 +411,4 @@ std::shared_ptr<QuadTreeRectangleP> UnstructuredGrid2D::_makeQuadTreeRectangle()
 
     qtr->Insert(this);
     return (qtr);
-
-#ifdef DEAD
-    std::vector<class QuadTreeRectangle<float, Size_tArr3>::rectangle_t> rectangles;
-    std::vector<Size_tArr3>                                              payloads;
-    rectangles.reserve(reserve_size);
-    payloads.reserve(reserve_size);
-
-    DblArr3                 coords;
-    Grid::ConstCellIterator it = ConstCellBegin();
-    Grid::ConstCellIterator end = ConstCellEnd();
-    for (; it != end; ++it) {
-        const vector<size_t> &cell = *it;
-        VAssert(cell.size() == 1);
-        GetCellNodes(Size_tArr3{cell[0], 0, 0}, nodes);
-        if (nodes.size() < 2) continue;
-
-        GetUserCoordinates(nodes[0], coords);
-        float left = (float)coords[0];
-        float right = (float)coords[0];
-        float top = (float)coords[1];
-        float bottom = (float)coords[1];
-        for (int i = 1; i < nodes.size(); i++) {
-            GetUserCoordinates(nodes[i], coords);
-            if (coords[0] < left) left = coords[0];
-            if (coords[0] > right) right = coords[0];
-            if (coords[1] < top) top = coords[1];
-            if (coords[1] > bottom) bottom = coords[1];
-        }
-        //		qtr->Insert(left, top, right, bottom, cell[0]);
-        rectangles.push_back(QuadTreeRectangle<float, Size_tArr3>::rectangle_t(left, top, right, bottom));
-        payloads.push_back(Size_tArr3{cell[0], 0, 0});
-    }
-
-    qtr->Insert(rectangles, payloads);
-
-    return (qtr);
-#endif
 }
