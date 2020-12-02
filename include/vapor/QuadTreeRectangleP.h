@@ -22,20 +22,42 @@ namespace VAPoR {
 //
 class QuadTreeRectangleP {
 public:
+    //! \copydoc QuadTreeRectangle::QuadTreeRectangle()
+    //
     QuadTreeRectangleP(float left, float top, float right, float bottom, size_t max_depth = 12, size_t reserve_size = 1000);
 
+    //! \copydoc QuadTreeRectangle::QuadTreeRectangle()
+    //
     QuadTreeRectangleP(size_t max_depth = 12, size_t reserve_size = 1000);
 
+    //! \copydoc QuadTreeRectangle::QuadTreeRectangle()
+    //
     QuadTreeRectangleP(const QuadTreeRectangleP &rhs);
 
+    //! \copydoc QuadTreeRectangle::QuadTreeRectangle()
+    //
     QuadTreeRectangleP &operator=(const QuadTreeRectangleP &rhs);
 
     ~QuadTreeRectangleP();
 
+    //! \copydoc QuadTreeRectangle::Insert()
+    //
     bool Insert(float left, float top, float right, float bottom, Size_tArr3 payload);
 
+    //! Parallel tree creation
+    //!
+    //! Inserts multiple rectangles into the quad tree in parallel
+    //!
+    //! \sa QuadTreeRectangle::Insert()
+    //
     bool Insert(std::vector<class QuadTreeRectangle<float, pType>::rectangle_t> rectangles, std::vector<pType> payloads);
 
+    //! Constructs a quadtree from the cells contained in a Grid class
+    //!
+    //! This method iterates over all of the cells found in \p grid and
+    //! constructs a Quadtree. The construction is performed in parallel.
+    //! The topological dimesion of \p grid must be two.
+    //!
     bool Insert(const Grid *grid);
 
     void GetPayloadContained(float x, float y, std::vector<Size_tArr3> &payloads) const;
