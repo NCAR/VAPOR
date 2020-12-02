@@ -667,52 +667,13 @@ bool CurvilinearGrid::_insideGrid(double x, double y, double z, size_t &i, size_
 std::shared_ptr<QuadTreeRectangleP> CurvilinearGrid::_makeQuadTreeRectangle() const
 {
     const vector<size_t> &dims = GetDimensions();
-    const vector<size_t>  dims2d = {dims[0], dims[1]};
-    size_t                reserve_size = dims2d[0] * dims2d[1];
+    size_t                reserve_size = dims[0] * dims[1];
 
-    std::shared_ptr<QuadTreeRectangleP> qtr = std::make_shared<QuadTreeRectangleP>((float)_minu[0], (float)_minu[1], (float)_maxu[0], (float)_maxu[1], 16, reserve_size);
+    DblArr3 minu, maxu;
+    GetUserExtents(minu, maxu);
 
-    // Loop over horizontal dimensions only - the grid, if 3D, is layered.
-    // There are dims2d[i]-1 cells (faces) along each dimension.
-    //
-    float coords[2];
-    for (size_t j = 0; j < dims2d[1] - 1; j++) {
-        for (size_t i = 0; i < dims2d[0] - 1; i++) {
-            // Find bounding rectangle for each cell
-            //
-            float left = std::numeric_limits<float>::max();
-            float right = std::numeric_limits<float>::lowest();
-            float top = std::numeric_limits<float>::max();
-            float bottom = std::numeric_limits<float>::lowest();
-            for (size_t jj = 0; jj < 2; jj++) {
-                for (size_t ii = 0; ii < 2; ii++) {
-                    coords[0] = _xrg.AccessIJK(i + ii, j + jj);
-                    coords[1] = _yrg.AccessIJK(i + ii, j + jj);
-                    if (coords[0] < left) left = coords[0];
-                    if (coords[0] > right) right = coords[0];
-                    if (coords[1] < top) top = coords[1];
-                    if (coords[1] > bottom) bottom = coords[1];
-                }
-            }
+    std::shared_ptr<QuadTreeRectangleP> qtr = std::make_shared<QuadTreeRectangleP>((float)minu[0], (float)minu[1], (float)maxu[0], (float)maxu[1], 16, reserve_size);
 
-            // face index is index of first node in the face
-            //
-            Size_tArr3 face = {i, j, 0};
-            qtr->Insert(left, top, right, bottom, face);
-        }
-    }
-
-#ifdef DEBUG
-    vector<size_t> payload_histo;
-    vector<size_t> level_histo;
-    qtr->GetStats(payload_histo, level_histo);
-    cout << "Payload histo" << endl;
-    for (int i = 0; i < payload_histo.size(); i++) { cout << "	" << i << " " << payload_histo[i] << endl; }
-
-    cout << "Level histo" << endl;
-    for (int i = 0; i < level_histo.size(); i++) { cout << "	" << i << " " << level_histo[i] << endl; }
-    cout << endl;
-#endif
-
+    qtr->Insert(this);
     return (qtr);
 }
