@@ -23,8 +23,7 @@ jobs:
           command: |
             ls -lrth /usr/local/VAPOR-Deps
             cd /VAPOR
-            git checkout master
-            git pull
+            git checkout $CIRCLE_BRANCH
             cd build
             cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
