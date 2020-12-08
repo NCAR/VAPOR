@@ -35,7 +35,7 @@ auto flow::OutputFlowlinesNumSteps(const Advection *adv, const char *filename, s
 
     // Write the header
     if (!append) {
-        std::fprintf(f, "%s", "# ID,  X-position,  Y-position,  Z-position,  Time,  ");
+        std::fprintf(f, "%s", "# ID,  X-position,  Y-position,  Z-position,  Time");
 
         for (auto &n : propertyNames) std::fprintf(f, ",  %s", n.c_str());
         std::fprintf(f, "\n");
