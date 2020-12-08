@@ -748,42 +748,39 @@ int DCWRF::_GetProj4String(
 // the files as being "idealized"; for idealized cases the horizontal 
 // coordinates are initialized to constant values.
 //
-bool DCWRF::_isConstantHorizontalCoords(NetCDFCollection *ncdfc) const {
+bool DCWRF::_isConstantValuedVariable(NetCDFCollection *ncdfc, string varname) const {
 
 
 	bool enabled = EnableErrMsg(false);
 
-	vector <string> coordVars = {"XLONG", "XLAT"};
 	vector <float> data;
-	for( const auto& c : coordVars ) {
 
-		vector <size_t> dims = ncdfc->GetSpatialDims(c);
-		VAssert(dims.size() == 2);
+	vector <size_t> dims = ncdfc->GetSpatialDims(varname);
+	VAssert(dims.size() == 2);
 
-		vector <size_t> start = {0,0};
-		vector <size_t> count = {dims[0],dims[1]};
+	vector <size_t> start = {0,0};
+	vector <size_t> count = {dims[0],dims[1]};
 
-		data.resize(Wasp::VProduct(dims));
-		
-		int fd = ncdfc->OpenRead(0, c);
-		if (fd<0) {
+	data.resize(Wasp::VProduct(dims));
+	
+	int fd = ncdfc->OpenRead(0, varname);
+	if (fd<0) {
+		EnableErrMsg(enabled);
+		return(false);
+	}
+
+	int rc = ncdfc->Read(start.data(), count.data(), data.data(), fd);
+	if (rc<0) {
+		EnableErrMsg(enabled);
+		return(false);
+	}
+
+	ncdfc->Close(fd);
+
+	for (size_t i=0; i<Wasp::VProduct(dims)-1; i++) {
+		if (data[i] != data[i+1]) {
 			EnableErrMsg(enabled);
 			return(false);
-		}
-
-		int rc = ncdfc->Read(start.data(), count.data(), data.data(), fd);
-		if (rc<0) {
-			EnableErrMsg(enabled);
-			return(false);
-		}
-
-		ncdfc->Close(fd);
-
-		for (size_t i=0; i<Wasp::VProduct(dims)-1; i++) {
-			if (data[i] != data[i+1]) {
-				EnableErrMsg(enabled);
-				return(false);
-			}
 		}
 	}
 
@@ -813,7 +810,10 @@ bool DCWRF::_isIdealized(NetCDFCollection *ncdfc) const {
 	// idealized cases. However, these cases have constant valued 
 	// horizontal coordinates.
 	//
-	if (_isConstantHorizontalCoords(ncdfc)) return(true);
+	vector <string> cvars = {"XLONG", "XLAT", "XLONG_U", "XLAT_U", "XLONG_V", "XLAT_V"};
+	for (auto &c : cvars) {
+		if (_isConstantValuedVariable(ncdfc, c)) return(true);
+	}
 
 	if (_isWRFSFIRE(ncdfc) && 
 		_cen_lat == 0.0 && _cen_lon == 0.0 && 
@@ -1045,7 +1045,7 @@ int DCWRF::_InitHorizontalCoordinatesHelper(
 	}
 	else if (
 		ncdfc->VariableExists(name) && _proj4String.empty() &&
-		_isWRFSFIRE(ncdfc)
+		_isWRFSFIRE(ncdfc) && ! _isConstantValuedVariable(ncdfc, name)
 	) {
 
 		// Idealized WRF-SFIRE cases do have coordinate variables that
