@@ -760,6 +760,10 @@ bool DCWRF::_isConstantValuedVariable(NetCDFCollection *ncdfc, string varname) c
 	vector <size_t> start(dims.size(), 0);
 	vector <size_t> count = dims;
 
+	// Edge case. 
+	//
+	if (Wasp::VProduct(dims) < 2) return (true);
+
 	data.resize(Wasp::VProduct(dims));
 	
 	int fd = ncdfc->OpenRead(0, varname);
@@ -776,8 +780,10 @@ bool DCWRF::_isConstantValuedVariable(NetCDFCollection *ncdfc, string varname) c
 
 	ncdfc->Close(fd);
 
-	for (size_t i=0; i<Wasp::VProduct(dims)-1; i++) {
-		if (data[i] != data[i+1]) {
+	float a0 = data[0];
+	float epsilon = 0.000001;
+	for (size_t i=1; i<Wasp::VProduct(dims); i++) {
+		if (! Wasp::NearlyEqual(a0, data[i], epsilon)) {
 			EnableErrMsg(enabled);
 			return(false);
 		}
