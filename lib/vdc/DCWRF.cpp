@@ -812,10 +812,11 @@ bool DCWRF::_isIdealized(NetCDFCollection *ncdfc) const {
 	if (Wasp::StrCmpNoCase(s, "IDEALIZED DATA") == 0) return(true);
 
 	// Pre version 4.x WRF did not have an attribute to identify 
-	// idealized cases. However, these cases have constant valued 
-	// horizontal coordinates.
+	// idealized cases. However, these cases have constant-valued 
+	// XLONG and XLAT coordinates. N.B. The staggered grid horizontal
+	// coordinates (XLONG_U, XLAT_V, etc.) may not exist.
 	//
-	vector <string> cvars = {"XLONG", "XLAT", "XLONG_U", "XLAT_U", "XLONG_V", "XLAT_V"};
+	vector <string> cvars = {"XLONG", "XLAT"};
 	for (auto &c : cvars) {
 		if (_isConstantValuedVariable(ncdfc, c)) return(true);
 	}
