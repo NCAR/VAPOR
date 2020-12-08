@@ -1134,4 +1134,4 @@ lgl->Vertex(testCell[c]); } #define QUAD(a, b, c, d) { FACE(a, b, d); FACE(d, b,
 }
 */
 
-static VolumeAlgorithmRegistrar<VolumeOSPRayIso> registrationIso;
+// static VolumeAlgorithmRegistrar<VolumeOSPRayIso> registrationIso;
