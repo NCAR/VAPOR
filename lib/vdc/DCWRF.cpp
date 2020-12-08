@@ -756,10 +756,9 @@ bool DCWRF::_isConstantValuedVariable(NetCDFCollection *ncdfc, string varname) c
 	vector <float> data;
 
 	vector <size_t> dims = ncdfc->GetSpatialDims(varname);
-	VAssert(dims.size() == 2);
 
-	vector <size_t> start = {0,0};
-	vector <size_t> count = {dims[0],dims[1]};
+	vector <size_t> start(dims.size(), 0);
+	vector <size_t> count = dims;
 
 	data.resize(Wasp::VProduct(dims));
 	
