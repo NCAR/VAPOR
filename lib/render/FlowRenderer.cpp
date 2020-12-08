@@ -981,9 +981,9 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         }
     }
 
-    /* 
-     * Now we branch into steady and unsteady cases, and treat them separately 
-     */
+    //
+    // Now we branch into steady and unsteady cases, and treat them separately 
+    //
     if( params->GetIsSteady() )
     {
         if( _cache_isSteady )   // steady state isn't changed
@@ -1082,51 +1082,40 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
     VAssert( params );
 
-    /* sanity check: rake extents and uniform seed numbers match dims */
-    int dim = _cache_gridNumOfSeeds.size();
+    // sanity check: rake extents and uniform seed numbers match dims
+    size_t dim = _cache_gridNumOfSeeds.size();
+    VAssert( dim == 2 || dim == 3 );
     VAssert( _cache_rake.size() == dim * 2 );
 
-    /* Create arrays that contain X, Y, and Z coordinates */
+    // Populate the list of seeds
     float start[3], step[3];
-    for( int i = 0; i < dim; i++ )    // for each of the X, Y, Z dimensions
-    {
-        if( _cache_gridNumOfSeeds[i] == 1 )     // one seed in this dimension
-        {
-            start[i] = _cache_rake[i*2] + 
-                       0.5f * (_cache_rake[i*2+1] - _cache_rake[i*2]);
-            step[i]  = 0.0f;
-        }
-        else                        // more than one seed in this dimension
-        {
-            start[i] = _cache_rake[i*2];
-            step[i]  = (_cache_rake[i*2+1] - _cache_rake[i*2]) / 
-                       float(_cache_gridNumOfSeeds[i] - 1);
-        }
+    for( size_t i = 0; i < dim; i++ ) {
+        step[i] = (_cache_rake[i*2+1] - _cache_rake[i*2]) / float(_cache_gridNumOfSeeds[i]);
+        start[i] = _cache_rake[i*2];
     }
-    if( dim == 2 )  // put default Z values
-    {
+    if( dim == 2 ) {
         start[2] = Renderer::GetDefaultZ( _dataMgr, params->GetCurrentTimestep() );
         step[2]  = 0.0f;
     }
+    size_t seedsZ = 1;
+    if( dim == 3 ) {
+        seedsZ = _cache_gridNumOfSeeds[2];
+    }
 
-    /* Populate the list of seeds */
     auto timeVal = _timestamps.at(0);  // Default time value
     glm::vec3 loc;
     seeds.clear();
-    long seedsZ;
-    if( dim == 2 )  seedsZ = 1;
-    else            seedsZ = _cache_gridNumOfSeeds[2];
-    // Reserve enough space at the beginning for performance considerations
     seeds.reserve( seedsZ * _cache_gridNumOfSeeds[1] * _cache_gridNumOfSeeds[0] );
-    for( long k = 0; k < seedsZ; k++ )
-        for( long j = 0; j < _cache_gridNumOfSeeds[1]; j++ )
-            for( long i = 0; i < _cache_gridNumOfSeeds[0]; i++ )
-            {
-                loc.x = start[0] + float(i) * step[0];
-                loc.y = start[1] + float(j) * step[1];
-                loc.z = start[2] + float(k) * step[2];
+    for( long k = 0; k < seedsZ; k++ ) {
+        for( long j = 0; j < _cache_gridNumOfSeeds[1]; j++ ) {
+            for( long i = 0; i < _cache_gridNumOfSeeds[0]; i++ ) {
+                loc.x = start[0] + (float(i) + 0.5f) * step[0];
+                loc.y = start[1] + (float(j) + 0.5f) * step[1];
+                loc.z = start[2] + (float(k) + 0.5f) * step[2];
                 seeds.emplace_back( loc, timeVal );
             }
+        }
+    }
 
     /* If in unsteady case and there are multiple seed injections, 
        we insert more seeds */
