@@ -1174,4 +1174,4 @@ void VolumeRenderer::drawTestCellOutline()
 }
 */
 
-static VolumeAlgorithmRegistrar<VolumeOSPRayIso> registrationIso;
+//static VolumeAlgorithmRegistrar<VolumeOSPRayIso> registrationIso;
