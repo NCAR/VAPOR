@@ -102,7 +102,6 @@ void CalcEngineMgr::RemoveFunction(
 	
 }
 
-
 vector <string> CalcEngineMgr::GetFunctionNames(
 	string scriptType,
 	string dataSetName
@@ -193,7 +192,7 @@ void CalcEngineMgr::_sync() {
 	// Reubild PyEngine instances from database
 	//
 
-	vector <string> dataSetNames = _dataStatus->GetDataMgrNames();
+	vector <string> dataSetNames = _paramsMgr->GetDataMgrNames();
 	DatasetsParams *dParams = _paramsMgr->GetDatasetsParams();
 	VAssert(dParams);
 
