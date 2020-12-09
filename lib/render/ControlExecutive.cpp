@@ -611,8 +611,6 @@ void ControlExec::CloseData(string dataSetName) {
 
 	if (! _dataStatus->GetDataMgr(dataSetName)) return; 
 
-	_dataStatus->Close(dataSetName);
-
 
 	// Remove any renderers associated with this data set
 	//
@@ -636,6 +634,14 @@ void ControlExec::CloseData(string dataSetName) {
 	}
 		
 	_paramsMgr->RemoveDataMgr(dataSetName);
+
+	// Rebuild the calculation engine from params database after removing 
+	// the data set from the params database.
+	//
+	_calcEngineMgr->ReinitFromState();
+
+	_dataStatus->Close(dataSetName);
+	
 
 	UndoRedoClear();
 }

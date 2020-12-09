@@ -265,7 +265,7 @@ private:
 	NetCDFCollection *ncdfc, float radius, int map_proj, string &projstring
  ); 
 
- bool _isConstantHorizontalCoords(NetCDFCollection *ncdfc) const;
+ bool _isConstantValuedVariable(NetCDFCollection *ncdfc, string varname) const;
 
  bool _isIdealized(NetCDFCollection *ncdfc) const;
 
