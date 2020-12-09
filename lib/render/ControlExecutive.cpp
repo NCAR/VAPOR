@@ -140,12 +140,12 @@ int ControlExec::Paint(string winName, bool fast)
 
     // Disable state saving when generating the transfer function
     //
-    bool enabled = _paramsMgr->GetSaveStateUndoEnabled();
-    _paramsMgr->SetSaveStateUndoEnabled(false);
+    bool enabled = _paramsMgr->GetSaveStateEnabled();
+    _paramsMgr->SetSaveStateEnabled(false);
 
     int rc = v->paintEvent(fast);
 
-    _paramsMgr->SetSaveStateUndoEnabled(enabled);
+    _paramsMgr->SetSaveStateEnabled(enabled);
 
     if (rc) SetErrMsg("Error performing paint event");
     return rc;

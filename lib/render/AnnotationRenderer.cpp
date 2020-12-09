@@ -514,9 +514,10 @@ void AnnotationRenderer::drawAxisTics(AxisAnnotation *aa, std::vector<double> mi
         //_drawTic(startPosn, endPosn, length, width, axisColor);
         _drawTic(startPosn, endPosn, width, axisColor);
 
-        double text = pointOnAxis[0];
-        if (latLon) convertPointToLon(text);
-        renderText(text, startPosn, aa);
+        double xValue = pointOnAxis[0];
+        double yValue = pointOnAxis[1];
+        if (latLon) convertPointToLonLat(xValue, yValue);
+        renderText(xValue, startPosn, aa);
     }
 
     // Now draw tic marks for y:
@@ -539,9 +540,10 @@ void AnnotationRenderer::drawAxisTics(AxisAnnotation *aa, std::vector<double> mi
 
         _drawTic(startPosn, endPosn, width, axisColor);
 
-        double text = pointOnAxis[1];
-        if (latLon) convertPointToLat(text);
-        renderText(text, startPosn, aa);
+        double xValue = pointOnAxis[0];
+        double yValue = pointOnAxis[1];
+        if (latLon) convertPointToLonLat(xValue, yValue);
+        renderText(yValue, startPosn, aa);
     }
 
     // Now draw tic marks for z:
@@ -596,18 +598,6 @@ void AnnotationRenderer::_drawTic(double startPosn[], double endPosn[], double w
     lgl->Vertex3dv(endPosn);
     lgl->End();
     glDisable(GL_LINE_SMOOTH);
-}
-
-void AnnotationRenderer::convertPointToLon(double &xCoord)
-{
-    double dummy = 0.;
-    convertPointToLonLat(xCoord, dummy);
-}
-
-void AnnotationRenderer::convertPointToLat(double &yCoord)
-{
-    double dummy = 0.;
-    convertPointToLonLat(dummy, yCoord);
 }
 
 void AnnotationRenderer::convertPointToLonLat(double &xCoord, double &yCoord)

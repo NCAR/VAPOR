@@ -81,10 +81,20 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
             case ADVECTION_METHOD::RK4: rv = _advectRK4(velocity, past0, dt, p1); break;
             }
 
-            if (rv == 0) {    // Advection successful, keep the new particle.
-                happened = true;
-                s.emplace_back(p1);
-                numberOfSteps++;
+            if (rv == 0) {    // Advection successful!
+                // The new particle *may* be the same as the old particle in case
+                // there's a sink, meaning the velocity is zero.
+                // In that case, we mark p1 as "special" and terminate the current stream.
+                if (p1.location == past0.location) {
+                    p1.SetSpecial(true);
+                    s.emplace_back(p1);
+                    _separatorCount[streamIdx]++;
+                    break;
+                } else {
+                    happened = true;
+                    s.emplace_back(p1);
+                    numberOfSteps++;
+                }
             } else if (rv == MISSING_VAL) {
                 // This is the annoying part: there are multiple possiblities.
                 // 1) past0 is really located at a missing value location;
@@ -310,12 +320,20 @@ int Advection::CalculateParticleProperties(Field *scalar)
     // Test if this scalar property is already calculated.
     if (std::find(_propertyVarNames.cbegin(), _propertyVarNames.cend(), scalar->ScalarName) != _propertyVarNames.cend()) return 0;
 
-    // Also test if this scalar field is the same as the one used to calculate particle values.
-    if (scalar->ScalarName == _valueVarName) return 0;
-
     // Proceed if there is no current scalar property
     _propertyVarNames.emplace_back(scalar->ScalarName);
 
+    // Test if this scalar field is the same as the one used to calculate particle values,
+    //   if so, copy over the values.
+    if (scalar->ScalarName == _valueVarName) {
+        for (auto &s : _streams) {
+            for (auto &p : s) { p.AttachProperty(p.value); }
+        }
+
+        return 0;
+    }
+
+    // In case this property field is a brand new variable, we do the actual sampling work.
     if (scalar->IsSteady) {
         if (scalar->LockParams() != 0) return PARAMS_ERROR;
 

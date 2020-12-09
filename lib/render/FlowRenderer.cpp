@@ -122,8 +122,9 @@ int FlowRenderer::_outputFlowLines()
         varField.ScalarName = v;
 
         // Sample values along the pathlines.
-        // Note that the advection class will do nothing if this variable already exists
-        //   either as a property or as a value.
+        // Note that the advection class will do nothing if this variable already exists.
+        // Also note that the advection class will do a simple copy if this variable is
+        //   the same as particle values.
         _advection.CalculateParticleProperties(&varField);
         if (_2ndAdvection) _2ndAdvection->CalculateParticleProperties(&varField);
     }
@@ -191,7 +192,10 @@ int FlowRenderer::_paintGL(bool fast)
     if (_velocityStatus == FlowStatus::SIMPLE_OUTOFDATE) {
         // First step is to re-calculate deltaT
         rv = _velocityField.CalcDeltaTFromCurrentTimeStep(_cache_deltaT);
-        if (rv != 0) {
+        if (rv == flow::FIELD_ALL_ZERO) {
+            MyBase::SetErrMsg("The velocity field seems to contain only invalid values!");
+            return flow::PARAMS_ERROR;
+        } else if (rv != 0) {
             MyBase::SetErrMsg("Update deltaT failed!");
             return rv;
         }
@@ -361,9 +365,10 @@ int FlowRenderer::_renderAdvection(const flow::Advection *adv)
         // First calculate the starting time stamp. Copied from legacy.
         double startingTime = _timestamps[0];
         if (!_cache_isSteady) {
-            int pastNumOfTimeSteps = dynamic_cast<FlowParams *>(GetActiveParams())->GetPastNumOfTimeSteps();
+            int pastNumOfTimeSteps = rp->GetPastNumOfTimeSteps();
             startingTime = _timestamps[0];
-            if (_cache_currentTS - pastNumOfTimeSteps > 0) startingTime = _timestamps[_cache_currentTS - pastNumOfTimeSteps];
+            // note that _cache_currentTS is cast to a signed integer.
+            if (int(_cache_currentTS) - pastNumOfTimeSteps > 0) startingTime = _timestamps[_cache_currentTS - pastNumOfTimeSteps];
         }
 
         for (int s = 0; s < nStreams; s++) {
@@ -439,7 +444,20 @@ int FlowRenderer::_renderAdvectionHelper(bool renderDirection)
     float radiusBase = rp->GetValueDouble(FlowParams::RenderRadiusBaseTag, -1);
     if (radiusBase == -1) {
         vector<double> mind, maxd;
-        _dataMgr->GetVariableExtents(rp->GetCurrentTimestep(), rp->GetColorMapVariableName(), rp->GetRefinementLevel(), rp->GetCompressionLevel(), mind, maxd);
+
+        // Need to find a non-empty variable from color mapping or velocity variables.
+        std::string nonEmptyVarName = rp->GetColorMapVariableName();
+        if (nonEmptyVarName.empty()) {
+            for (auto it = _velocityField.VelocityNames.cbegin(); it != _velocityField.VelocityNames.cend(); ++it) {
+                if (!it->empty()) {
+                    nonEmptyVarName = *it;
+                    break;
+                }
+            }
+        }
+        assert(!nonEmptyVarName.empty());
+
+        _dataMgr->GetVariableExtents(rp->GetCurrentTimestep(), nonEmptyVarName, rp->GetRefinementLevel(), rp->GetCompressionLevel(), mind, maxd);
         vec3  min(mind[0], mind[1], mind[2]);
         vec3  max(maxd[0], maxd[1], maxd[2]);
         vec3  lens = max - min;
