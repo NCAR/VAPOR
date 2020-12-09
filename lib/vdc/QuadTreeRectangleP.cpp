@@ -151,11 +151,9 @@ bool QuadTreeRectangleP::Insert(std::vector<class QuadTreeRectangle<float, pType
     return (status);
 }
 
-bool QuadTreeRectangleP::Insert(const Grid *grid)
+bool QuadTreeRectangleP::Insert(const Grid *grid, size_t ncells)
 {
-    VAssert(grid->GetTopologyDim() == 2);
-
-    size_t ncells = Wasp::VProduct(grid->GetCellDimensions());
+    if (ncells == 0) { ncells = Wasp::VProduct(grid->GetCellDimensions()); }
 
     // parRectangles and parPayloads will contain the rectangles and their
     // payloads that need to be inserted into each substree

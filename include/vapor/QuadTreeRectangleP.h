@@ -58,7 +58,12 @@ public:
     //! constructs a Quadtree. The construction is performed in parallel.
     //! The topological dimesion of \p grid must be two.
     //!
-    bool Insert(const Grid *grid);
+    //! \param[in] grid The grid from which to construct the tree
+    //! \param[in] ncells If non-zero specifies the number of cells to
+    //! insert via iterating over the cells contained in the grid. If zero,
+    //! all of the cells are inserted.
+    //!
+    bool Insert(const Grid *grid, size_t ncells = 0);
 
     void GetPayloadContained(float x, float y, std::vector<Size_tArr3> &payloads) const;
 
