@@ -685,7 +685,7 @@ std::shared_ptr<QuadTreeRectangle<float, size_t>> CurvilinearGrid::_makeQuadTree
     const vector<size_t>  dims2d = {dims[0], dims[1]};
     size_t                reserve_size = dims2d[0] * dims2d[1];
 
-    std::shared_ptr<QuadTreeRectangle<float, size_t>> qtr = std::make_shared<QuadTreeRectangle<float, size_t>>((float)_minu[0], (float)_minu[1], (float)_maxu[0], (float)_maxu[1], 16, reserve_size);
+    std::shared_ptr<QuadTreeRectangle<float, size_t>> qtr = std::make_shared<QuadTreeRectangle<float, size_t>>((float)_minu[0], (float)_minu[1], (float)_maxu[0], (float)_maxu[1], 12, reserve_size);
 
     // Loop over horizontal dimensions only - the grid, if 3D, is layered.
     // There are dims2d[i]-1 cells (faces) along each dimension.
