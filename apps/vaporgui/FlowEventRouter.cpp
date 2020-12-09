@@ -55,7 +55,12 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce)
                 new PVariableSelector(FP::_rakeBiasVariable)
             }),
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::LIST)->Then({
-                new PFileOpenSelector(FP::_seedInputFilenameTag, "List of seeds file")
+                (new PFileOpenSelector(FP::_seedInputFilenameTag, "List of seeds file"))->SetTooltip(
+                    "Seed injection points may be defined in space and time in this file. \n"
+                    "The format is X,Y,Z,Time.  The X,Y,Z spacial coordinates are in meters, \n"
+                    "and Time is expressed as the timestep increment in the dataset.  This \n"
+                    "demo file applies one seed at location .5,.5,.5, at timestep 0."
+                )
             }),
         }),
         new PSection("Rake Region", {

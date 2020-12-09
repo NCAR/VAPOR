@@ -1,0 +1,5 @@
+# Seed injection points may be defined in space and time in this file.
+# The format is X,Y,Z,Time.  The X,Y,Z spacial coordinates are in meters,
+# and Time is expressed as the timestep increment in the dataset.  The
+# following line applies one seed at location .5,.5,.5, at timestep 0.
+.5,.5,.5,0
