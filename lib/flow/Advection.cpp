@@ -25,9 +25,7 @@ Advection::UseSeedParticles( const std::vector<Particle>& seeds )
     for( size_t i = 0; i < seeds.size(); i++ )
         _streams[i].push_back( seeds[i] );
 
-    _separatorCount.resize( seeds.size() );
-    for( auto& e : _separatorCount )
-        e = 0;
+    _separatorCount.assign( seeds.size(), 0 );
 }
 
 int

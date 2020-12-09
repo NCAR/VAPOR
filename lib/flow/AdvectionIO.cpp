@@ -217,16 +217,18 @@ auto flow::InputSeedsCSV( const std::string& filename,
                 ifs.close();
                 return NO_FLOAT;
             }
-            if( valFloat.size() >= 4 ) // we parse at most 4 values, and discard the rest of this line.
+            if( valFloat.size() >= 4 )  // we parse at most 4 values, and discard the rest of this line.
                 break;
         }
 
-        if( valFloat.size() < 3 ){   // less than 3 values provided in this line
+        if( valFloat.size() < 3 ){      // less than 3 values provided in this line
             ifs.close();
             return NO_FLOAT;
         }
+        else if( valFloat.size() == 3 ) // Let's make sure that there are 4 values for each seed
+            valFloat.push_back( 0.0f ); //   by giving it a default time stamp zero.
 
-        newSeeds.emplace_back( valFloat[0], valFloat[1], valFloat[2], valFloat[3] );
+        newSeeds.emplace_back( valFloat[0], valFloat[1], valFloat[2], double(valFloat[3]) );
     }
     ifs.close();
 
