@@ -529,7 +529,7 @@ std::shared_ptr <QuadTreeRectangle<float, size_t> >UnstructuredGrid2D::_makeQuad
 	std::shared_ptr <QuadTreeRectangle<float, size_t> >qtr = 
 		std::make_shared <QuadTreeRectangle<float, size_t>>(
 			(float) minu[0], (float) minu[1], (float) maxu[0], (float) maxu[1], 
-			16, reserve_size
+			12, reserve_size
 		);
 
 	DblArr3 coords;
