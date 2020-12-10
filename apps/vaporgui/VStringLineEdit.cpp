@@ -60,5 +60,6 @@ void VStringLineEdit::_setValueString( std::string value ) {
     _strValue = value;
     _lineEdit->setText( QString::fromStdString( _strValue ) );
     _lineEdit->setToolTip( QString::fromStdString( _strValue ) );
+    _lineEdit->setCursorPosition(0);
 }
 
