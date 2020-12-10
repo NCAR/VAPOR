@@ -17,7 +17,8 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce)
                                        new PFidelitySection}));
 
     AddSubtab("Appearance", new PGroup({
-                                new PTFEditor,
+                                new PTFEditor(RenderParams::_variableNameTag, {PTFEditor::Default,
+                                                                               PTFEditor::RegularIsoArray}),
                                 new PSection("Contour Lines", {
                                                                   _spacingSlider = new PDoubleSliderEditHLI<CP>("Spacing", &CP::GetContourSpacing, &CP::SetContourSpacing),
                                                                   (new PIntegerSliderEditHLI<CP>("Count", &CP::GetContourCount, &CP::SetContourCount))->SetRange(1, 50),
