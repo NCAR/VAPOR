@@ -372,6 +372,7 @@ int VolumeRenderer::_loadData()
     CheckCache(_cache.compression, RP->GetCompressionLevel());
     CheckCache(_cache.minExt, minExt);
     CheckCache(_cache.maxExt, maxExt);
+    CheckCache(_cache.ospMaxCells, RP->GetValueLong("osp_max_cells", 1));
     if (!_cache.needsUpdate)
         return 0;
     
