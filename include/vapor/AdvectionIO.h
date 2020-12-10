@@ -33,8 +33,8 @@ namespace flow
                                           bool                append ) -> int;
 
     // Input a list of seeds from lines of CSVs.
-    FLOW_API auto InputSeedsCSV( const  std::string& filename, 
-                                 double time ) -> std::vector<flow::Particle>;
+    FLOW_API auto InputSeedsCSV( const  std::string& filename ) -> 
+                                 std::vector<flow::Particle>;
 
 };
 #endif
