@@ -184,8 +184,8 @@ auto flow::OutputFlowlinesMaxTime( const Advection*   adv,
     return 0;
 }
 
-auto flow::InputSeedsCSV( const std::string& filename,
-                          Advection*         adv ) -> int
+auto flow::InputSeedsCSV( const  std::string& filename,
+                          double time ) -> std::vector<flow::Particle>
 {
     std::ifstream ifs( filename );
     if( !ifs.is_open() )
@@ -210,30 +210,26 @@ auto flow::InputSeedsCSV( const std::string& filename,
         // Now try to parse numbers separated by comma
         std::stringstream ss( line );
         std::vector<float> valFloat;
-        valFloat.reserve( 4 );
+        valFloat.reserve( 3 );
         for( std::string tmp; std::getline( ss, tmp, ',' ); ) {
             try{ valFloat.push_back( std::stof( tmp ) ); }
             catch( const std::invalid_argument& e ) {
                 ifs.close();
                 return NO_FLOAT;
             }
-            if( valFloat.size() >= 4 )  // we parse at most 4 values, and discard the rest of this line.
+            if( valFloat.size() >= 3 )  // we parse at most 3 values, and discard the rest of this line.
                 break;
         }
 
         if( valFloat.size() < 3 ){      // less than 3 values provided in this line
             ifs.close();
-            return NO_FLOAT;
+            newSeeds.clear();           // Not accepting any seed when encountering a bad line
+            break;
         }
-        else if( valFloat.size() == 3 ) // Let's make sure that there are 4 values for each seed
-            valFloat.push_back( 0.0f ); //   by giving it a default time stamp zero.
 
-        newSeeds.emplace_back( valFloat[0], valFloat[1], valFloat[2], double(valFloat[3]) );
+        newSeeds.emplace_back( valFloat[0], valFloat[1], valFloat[2], time );
     }
     ifs.close();
 
-    if( !newSeeds.empty() )
-        adv->UseSeedParticles( newSeeds );
-
-    return 0;
+    return std::move( newSeeds );
 }
