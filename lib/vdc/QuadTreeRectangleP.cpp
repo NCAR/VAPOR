@@ -26,14 +26,15 @@ QuadTreeRectangleP::QuadTreeRectangleP(float left, float top, float right, float
     // each thread. This way there are no dependencies between the regions
     // covered by each subtree and we can process each subtree in parallel
     //
+    float bin_width = ((float)right - (float)left) / ((float)nthreads);
+    float binLeft = left;
     for (int i = 0; i < nthreads; i++) {
-        float bin_width = ((float)right - (float)left) / ((float)nthreads);
-        float binLeft = left + (i * bin_width);
         float binRight = binLeft + bin_width;
 
         if (i == nthreads - 1) binRight = right;
 
         _qtrs.push_back(new QuadTreeRectangle<float, pType>(binLeft, top, binRight, bottom, max_depth, reserve_size / nthreads));
+        binLeft = binRight;
     }
 }
 
@@ -45,14 +46,16 @@ QuadTreeRectangleP::QuadTreeRectangleP(size_t max_depth, size_t reserve_size) : 
         nthreads = omp_get_num_threads();
     }
 
+    float bin_width = (1.0 - 0.0) / ((float)nthreads);
+    float binLeft = 0.0;
     for (int i = 0; i < nthreads; i++) {
-        float bin_width = (1.0 - 0.0) / ((float)nthreads);
-        float binLeft = 0.0 + (i * bin_width);
         float binRight = binLeft + bin_width;
 
         if (i == nthreads - 1) binRight = 1.0;
 
         _qtrs.push_back(new QuadTreeRectangle<float, pType>(binLeft, 0.0, binRight, 1.0, max_depth, reserve_size / nthreads));
+
+        binLeft = binRight;
     }
 }
 
@@ -90,10 +93,10 @@ bool QuadTreeRectangleP::Insert(float left, float top, float right, float bottom
 {
     // Serial insertion of a single element
     //
-    bool status = true;
+    bool  status = true;
+    float bin_width = (_right - _left) / ((float)_qtrs.size());
+    float binLeft = _left;
     for (int i = 0; i < _qtrs.size(); i++) {
-        float bin_width = (_right - _left) / ((float)_qtrs.size());
-        float binLeft = _left + (i * bin_width);
         float binRight = binLeft + bin_width;
 
         if (i == _qtrs.size() - 1) binRight = right;
@@ -102,6 +105,8 @@ bool QuadTreeRectangleP::Insert(float left, float top, float right, float bottom
             pType p = {(uint32_t)payload[0], (uint32_t)payload[1]};
             status &= _qtrs[i]->Insert(left, top, right, bottom, p);
         }
+
+        binLeft = binRight;
     }
     return (status);
 }
@@ -126,9 +131,9 @@ bool QuadTreeRectangleP::Insert(std::vector<class QuadTreeRectangle<float, pType
     // need to be inserted into each subtree
     //
     float bin_width = (_right - _left) / ((float)_qtrs.size());
+    float binLeft = _left;
     for (size_t j = 0; j < rectangles.size(); j++) {
         for (int i = 0; i < _qtrs.size(); i++) {
-            float binLeft = _left + (i * bin_width);
             float binRight = binLeft + bin_width;
 
             if (i == _qtrs.size() - 1) binRight = _right;
@@ -137,6 +142,8 @@ bool QuadTreeRectangleP::Insert(std::vector<class QuadTreeRectangle<float, pType
                 parRectangles[i].push_back(rectangles[j]);
                 parPayloads[i].push_back(payloads[j]);
             }
+
+            binLeft = binRight;
         }
     }
 
@@ -207,14 +214,13 @@ bool QuadTreeRectangleP::Insert(const Grid *grid, size_t ncells)
                 if (coords[1] > bottom) bottom = (float)coords[1];
             }
 
-            float bin_width = (_right - _left) / ((float)_qtrs.size());
-
             // Figure out which subtree(s) contain the rectangle. In general,
             // a rectangle can span multiple subtrees, in which case it
             // will be inserted into both.
             //
+            float bin_width = (_right - _left) / ((float)_qtrs.size());
+            float binLeft = _left;
             for (int j = 0; j < _qtrs.size(); j++) {
-                float binLeft = _left + (j * bin_width);
                 float binRight = binLeft + bin_width;
 
                 if (i == nthreads - 1) binRight = _right;
@@ -229,6 +235,8 @@ bool QuadTreeRectangleP::Insert(const Grid *grid, size_t ncells)
                         parPayloads[j].push_back(p);
                     }
                 }
+
+                binLeft = binRight;
             }
         }
     }
@@ -253,14 +261,17 @@ void QuadTreeRectangleP::GetPayloadContained(float x, float y, std::vector<Size_
 {
     payloads.clear();
 
-    float bin_width = (_right - _left) / ((float)_qtrs.size());
-    int   bin = (x - _left) / bin_width;
-
-    // Edge case
-    //
-    if (x == _right) { bin = _qtrs.size() - 1; }
-
-    if (bin < 0 || bin >= _qtrs.size()) return;
+    int   bin = 0;
+    float bin_width = ((float)_right - (float)_left) / ((float)_qtrs.size());
+    float binLeft = _left;
+    for (int i = 0; i < _qtrs.size(); i++) {
+        float binRight = binLeft + bin_width;
+        if (x >= binLeft && x <= binRight) {
+            bin = i;
+            break;
+        }
+        binLeft = binRight;
+    }
 
     std::vector<pType> p;
     _qtrs[bin]->GetPayloadContained(x, y, p);

@@ -299,7 +299,7 @@ void Grid::ConstNodeIteratorSG::next(const long &offset)
 {
     if (!_index.size()) return;
 
-    long maxIndexL = Wasp::VProduct(_lastIndex);
+    long maxIndexL = Wasp::VProduct(_dims) - 1;
     long newIndexL = Wasp::LinearizeCoords(_index, _dims) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {
@@ -385,7 +385,7 @@ void Grid::ConstCellIteratorSG::next()
 
 void Grid::ConstCellIteratorSG::next(const long &offset)
 {
-    long maxIndexL = Wasp::VProduct(_lastIndex);
+    long maxIndexL = Wasp::VProduct(_dims) - 1;
     long newIndexL = Wasp::LinearizeCoords(_index, _dims) + offset;
     if (newIndexL < 0) { newIndexL = 0; }
     if (newIndexL > maxIndexL) {

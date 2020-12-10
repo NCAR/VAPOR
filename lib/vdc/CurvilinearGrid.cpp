@@ -641,9 +641,10 @@ bool CurvilinearGrid::_insideGrid(double x, double y, double z, size_t &i, size_
     Size_tArr3         face = {0, 0, 0};
     vector<Size_tArr3> nodes(8);
     for (int ii = 0; ii < face_indices.size(); ii++) {
-        if (_insideFace(face_indices[i], pt, lambda, nodes)) {
-            i = face_indices[i][0];
-            j = face_indices[i][1];
+        if (_insideFace(face_indices[ii], pt, lambda, nodes)) {
+            i = face_indices[ii][0];
+            j = face_indices[ii][1];
+
             inside = true;
             break;
         }
