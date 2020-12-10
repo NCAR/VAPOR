@@ -638,7 +638,6 @@ bool CurvilinearGrid::_insideGrid(double x, double y, double z, size_t &i, size_
 
     bool               inside = false;
     double             pt[] = {x, y};
-    Size_tArr3         face = {0, 0, 0};
     vector<Size_tArr3> nodes(8);
     for (int ii = 0; ii < face_indices.size(); ii++) {
         if (_insideFace(face_indices[ii], pt, lambda, nodes)) {
@@ -659,7 +658,7 @@ bool CurvilinearGrid::_insideGrid(double x, double y, double z, size_t &i, size_
     }
 
     if (_terrainFollowing) {
-        return (_insideGridHelperTerrain(x, y, z, face[0], face[1], k, zwgt));
+        return (_insideGridHelperTerrain(x, y, z, i, j, k, zwgt));
     } else {
         return (_insideGridHelperStretched(z, k, zwgt));
     }
