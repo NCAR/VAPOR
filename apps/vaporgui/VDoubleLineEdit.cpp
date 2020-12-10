@@ -32,12 +32,20 @@ double VDoubleLineEdit::GetValueDouble() const {
     return _value;
 }
 
+void VDoubleLineEdit::SetRange(double min, double max)
+{
+    _min = min;
+    _max = max;
+}
+
 void VDoubleLineEdit::_valueChanged() {
     std::string str = _getText();
 
     double value;
     try {
         value = std::stod( str );
+        
+        value = std::min(_max, std::max(_min, value));
 
         // If value changed, update and emit, otherwiese revert to old value
         if ( value != _value ) {
