@@ -71,6 +71,21 @@ std::string VOSP::Version()
 #endif
 }
 
+bool VOSP::IsVersionAtLeast(int testMajor, int testMinor)
+{
+#ifdef BUILD_OSPRAY
+    long major = ospDeviceGetProperty(ospGetCurrentDevice(), OSP_DEVICE_VERSION_MAJOR);
+    long minor = ospDeviceGetProperty(ospGetCurrentDevice(), OSP_DEVICE_VERSION_MINOR);
+
+    if (major > testMajor || (major == testMajor && minor >= testMinor)) return true;
+
+    return false;
+
+#else
+    return false;
+#endif
+}
+
 #ifdef BUILD_OSPRAY
 
 OSPData VOSP::NewCopiedData(const void *data, OSPDataType type, uint64_t numItems1, uint64_t numItems2, uint64_t numItems3)
