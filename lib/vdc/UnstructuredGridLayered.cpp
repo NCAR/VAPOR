@@ -279,16 +279,10 @@ void UnstructuredGridLayered::ConstCoordItrULayered::next(const long &offset)
 {
     VAssert(offset >= 0);
 
-    long offset2D = offset % _nElements2D;
+    long offset2D = (_index2D + offset) % _nElements2D;
 
-    if (offset2D + _index2D < _nElements2D) {
-        _itr2D += offset;
-        _index2D += offset;
-    } else {
-        size_t o = (offset2D + _index2D) % _nElements2D;
-        _itr2D = _ug->_ug2d.ConstCoordBegin() + o;
-        _index2D = o;
-    }
+    _itr2D += (offset2D - _index2D);
+    _index2D += (offset2D - _index2D);
 
     _coords[0] = (*_itr2D)[0];
     _coords[1] = (*_itr2D)[1];
