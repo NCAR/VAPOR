@@ -1116,12 +1116,13 @@ int FlowRenderer::_genSeedsFromList( std::vector<flow::Particle>& seeds ) const
     VAssert( params );
 
     // Read seed locations (X, Y, Z) from a file.
-    auto read_from_disk = flow::InputSeedsCSV( params->GetSeedInputFilename() );
+    std::vector<flow::Particle> read_from_disk = 
+        flow::InputSeedsCSV( params->GetSeedInputFilename() );
     if( read_from_disk.empty() )
         return flow::NO_SEED_PARTICLE_YET;
 
     // Set seed time to be the time stamp at step 0
-    auto timeVal = _timestamps.at(0);
+    double timeVal = _timestamps.at(0);
     for( auto& seed : read_from_disk )
         seed.time = timeVal;
 
