@@ -1,5 +1,6 @@
-# Seed injection points may be defined in space and time in this file.
-# The format is X,Y,Z,Time.  The X,Y,Z spacial coordinates are in meters,
-# and Time is expressed as the timestep increment in the dataset.  The
-# following line applies one seed at location .5,.5,.5, at timestep 0.
-.5,.5,.5,0
+# Seed injection points within your domain may be defined in this file.
+# The format is a list of X,Y,Z coordinates, using the units of your dataset's
+# spatial domain.  The timestep that the seeds are injected is determined by
+# whatever timestep is currently being rendered in Vapor.  This demo file
+# applies one seed at location .5,.5,.5.
+.5,.5,.5

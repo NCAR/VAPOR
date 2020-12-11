@@ -56,10 +56,11 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce)
             }),
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::LIST)->Then({
                 (new PFileOpenSelector(FP::_seedInputFilenameTag, "List of seeds file"))->SetTooltip(
-                    "Seed injection points may be defined in space and time in this file. \n"
-                    "The format is X,Y,Z,Time.  The X,Y,Z spacial coordinates are in meters, \n"
-                    "and Time is expressed as the timestep increment in the dataset.  This \n"
-                    "demo file applies one seed at location .5,.5,.5, at timestep 0."
+                    "Seed injection points within your domain may be defined in this file. \n"
+                    "The format is a list of X,Y,Z coordinates, using the units of your dataset's \n"
+                    "spatial domain.  The timestep that the seeds are injected is determined by \n"
+                    "whatever timestep is currently being rendered in Vapor.  The listOfSeeds.txt \n"
+                    "demo file applies one seed at location .5,.5,.5."
                 )
             }),
         }),
