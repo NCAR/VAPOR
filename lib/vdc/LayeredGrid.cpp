@@ -141,38 +141,26 @@ bool LayeredGrid::_insideGrid(const DblArr3 &coords, Size_tArr3 &indices, double
 
     float z0, z1;
 
-    // Check cached z values from last search first
+    // Find k index of cell containing z. Already know i and j indices
     //
-    if (((coords[2] - _insideGridCache.z0) * (coords[2] - _insideGridCache.z1)) < 0.0) {
-        indices[2] = _insideGridCache.k;
-        z0 = _insideGridCache.z0;
-        z1 = _insideGridCache.z1;
-    } else {
-        // Find k index of cell containing z. Already know i and j indices
+    vector<double> zcoords;
+
+    size_t nz = GetDimensions()[2];
+    zcoords.reserve(nz);
+    for (int kk = 0; kk < nz; kk++) {
+        // Interpolate Z coordinate across triangle
         //
-        vector<double> zcoords;
+        float zk = _zrg.AccessIJK(iv[0], jv[0], kk) * lambda[0] + _zrg.AccessIJK(iv[1], jv[1], kk) * lambda[1] + _zrg.AccessIJK(iv[2], jv[2], kk) * lambda[2];
 
-        size_t nz = GetDimensions()[2];
-        zcoords.reserve(nz);
-        for (int kk = 0; kk < nz; kk++) {
-            // Interpolate Z coordinate across triangle
-            //
-            float zk = _zrg.AccessIJK(iv[0], jv[0], kk) * lambda[0] + _zrg.AccessIJK(iv[1], jv[1], kk) * lambda[1] + _zrg.AccessIJK(iv[2], jv[2], kk) * lambda[2];
-
-            zcoords.push_back(zk);
-        }
-
-        if (!Wasp::BinarySearchRange(zcoords, coords[2], indices[2])) return (false);
-
-        VAssert(indices[2] < nz - 1);
-
-        z0 = zcoords[indices[2]];
-        z1 = zcoords[indices[2] + 1];
-
-        _insideGridCache.k = indices[2];
-        _insideGridCache.z0 = z0;
-        _insideGridCache.z1 = z1;
+        zcoords.push_back(zk);
     }
+
+    if (!Wasp::BinarySearchRange(zcoords, coords[2], indices[2])) return (false);
+
+    VAssert(indices[2] < nz - 1);
+
+    z0 = zcoords[indices[2]];
+    z1 = zcoords[indices[2] + 1];
 
     wgts[2] = 1.0 - (coords[2] - z0) / (z1 - z0);
 
