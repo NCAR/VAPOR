@@ -197,12 +197,6 @@ class VDF_API LayeredGrid : public StructuredGrid {
     DblArr3 _maxu = {{0.0, 0.0, 0.0}};
     int _interpolationOrder;
 
-    mutable struct {
-        size_t k = 0;
-        float z0 = 0.0;
-        float z1 = 0.0;
-    } _insideGridCache;
-
     virtual float GetValueNearestNeighbor(
         const DblArr3 &coords) const override;
 
