@@ -222,8 +222,7 @@ auto flow::InputSeedsCSV( const  std::string& filename) -> std::vector<flow::Par
 
         if( valFloat.size() < 3 ){      // less than 3 values provided in this line
             ifs.close();
-            newSeeds.clear();           // Not accepting any seed when encountering a bad line
-            break;
+            return {};                  // Not accepting any seed when encountering a bad line
         }
 
         newSeeds.emplace_back( valFloat[0], valFloat[1], valFloat[2], 0.0 );
