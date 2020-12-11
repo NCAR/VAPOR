@@ -840,7 +840,7 @@ std::shared_ptr <QuadTreeRectangle<float, size_t> >CurvilinearGrid::_makeQuadTre
 	std::shared_ptr <QuadTreeRectangle<float, size_t> >qtr = 
 		std::make_shared <QuadTreeRectangle<float, size_t> >(
 			(float) _minu[0], (float) _minu[1], (float) _maxu[0], (float) _maxu[1], 
-			16, reserve_size
+			12, reserve_size
 		);
 
 

@@ -748,42 +748,44 @@ int DCWRF::_GetProj4String(
 // the files as being "idealized"; for idealized cases the horizontal 
 // coordinates are initialized to constant values.
 //
-bool DCWRF::_isConstantHorizontalCoords(NetCDFCollection *ncdfc) const {
+bool DCWRF::_isConstantValuedVariable(NetCDFCollection *ncdfc, string varname) const {
 
 
 	bool enabled = EnableErrMsg(false);
 
-	vector <string> coordVars = {"XLONG", "XLAT"};
 	vector <float> data;
-	for( const auto& c : coordVars ) {
 
-		vector <size_t> dims = ncdfc->GetSpatialDims(c);
-		VAssert(dims.size() == 2);
+	vector <size_t> dims = ncdfc->GetSpatialDims(varname);
 
-		vector <size_t> start = {0,0};
-		vector <size_t> count = {dims[0],dims[1]};
+	vector <size_t> start(dims.size(), 0);
+	vector <size_t> count = dims;
 
-		data.resize(Wasp::VProduct(dims));
-		
-		int fd = ncdfc->OpenRead(0, c);
-		if (fd<0) {
+	// Edge case. 
+	//
+	if (Wasp::VProduct(dims) < 2) return (true);
+
+	data.resize(Wasp::VProduct(dims));
+	
+	int fd = ncdfc->OpenRead(0, varname);
+	if (fd<0) {
+		EnableErrMsg(enabled);
+		return(false);
+	}
+
+	int rc = ncdfc->Read(start.data(), count.data(), data.data(), fd);
+	if (rc<0) {
+		EnableErrMsg(enabled);
+		return(false);
+	}
+
+	ncdfc->Close(fd);
+
+	float a0 = data[0];
+	float epsilon = 0.000001;
+	for (size_t i=1; i<Wasp::VProduct(dims); i++) {
+		if (! Wasp::NearlyEqual(a0, data[i], epsilon)) {
 			EnableErrMsg(enabled);
 			return(false);
-		}
-
-		int rc = ncdfc->Read(start.data(), count.data(), data.data(), fd);
-		if (rc<0) {
-			EnableErrMsg(enabled);
-			return(false);
-		}
-
-		ncdfc->Close(fd);
-
-		for (size_t i=0; i<Wasp::VProduct(dims)-1; i++) {
-			if (data[i] != data[i+1]) {
-				EnableErrMsg(enabled);
-				return(false);
-			}
 		}
 	}
 
@@ -810,10 +812,14 @@ bool DCWRF::_isIdealized(NetCDFCollection *ncdfc) const {
 	if (Wasp::StrCmpNoCase(s, "IDEALIZED DATA") == 0) return(true);
 
 	// Pre version 4.x WRF did not have an attribute to identify 
-	// idealized cases. However, these cases have constant valued 
-	// horizontal coordinates.
+	// idealized cases. However, these cases have constant-valued 
+	// XLONG and XLAT coordinates. N.B. The staggered grid horizontal
+	// coordinates (XLONG_U, XLAT_V, etc.) may not exist.
 	//
-	if (_isConstantHorizontalCoords(ncdfc)) return(true);
+	vector <string> cvars = {"XLONG", "XLAT"};
+	for (auto &c : cvars) {
+		if (_isConstantValuedVariable(ncdfc, c)) return(true);
+	}
 
 	if (_isWRFSFIRE(ncdfc) && 
 		_cen_lat == 0.0 && _cen_lon == 0.0 && 
@@ -1045,7 +1051,7 @@ int DCWRF::_InitHorizontalCoordinatesHelper(
 	}
 	else if (
 		ncdfc->VariableExists(name) && _proj4String.empty() &&
-		_isWRFSFIRE(ncdfc)
+		_isWRFSFIRE(ncdfc) && ! _isConstantValuedVariable(ncdfc, name)
 	) {
 
 		// Idealized WRF-SFIRE cases do have coordinate variables that
