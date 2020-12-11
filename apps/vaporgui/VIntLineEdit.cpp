@@ -11,7 +11,7 @@
 VIntLineEdit::VIntLineEdit(int value) : VNumericLineEdit(),
                                         _value(value) {
     std::string formattedNumber = _formatValue(_value);
-    _setValueString(formattedNumber);
+    SetValueString(formattedNumber);
 }
 
 void VIntLineEdit::SetValueInt(int value) {
@@ -25,7 +25,7 @@ void VIntLineEdit::SetValueInt(int value) {
         return;
     }
 
-    _setValueString(formattedNumber);
+    SetValueString(formattedNumber);
 }
 
 int VIntLineEdit::GetValueInt() const {

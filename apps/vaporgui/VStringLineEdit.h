@@ -40,7 +40,6 @@ class VStringLineEdit : public VHBoxWidget {
 
   protected:
     std::string _getText() const;
-    void _setValueString(std::string value);
 
   protected slots:
     virtual void _valueChanged();
