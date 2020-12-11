@@ -9,7 +9,7 @@
 VDoubleLineEdit::VDoubleLineEdit(double value) : VNumericLineEdit(), _value(value)
 {
     std::string formattedNumber = _formatValue(_value);
-    _setValueString(formattedNumber);
+    SetValueString(formattedNumber);
 }
 
 void VDoubleLineEdit::SetValueDouble(double value)
@@ -24,7 +24,7 @@ void VDoubleLineEdit::SetValueDouble(double value)
         return;
     }
 
-    _setValueString(formattedNumber);
+    SetValueString(formattedNumber);
 }
 
 double VDoubleLineEdit::GetValueDouble() const { return _value; }
