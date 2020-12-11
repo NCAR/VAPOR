@@ -33,6 +33,9 @@ class VStringLineEdit : public VHBoxWidget {
 
         //! Create a custom context menu for the QLineEdit
         void SetCustomContextMenu();
+    
+    void SetReadOnly(bool b) { _lineEdit->setReadOnly(b); }
+    void Clear() { SetValueString(""); }
 
     private:
         QLineEdit*  _lineEdit;
