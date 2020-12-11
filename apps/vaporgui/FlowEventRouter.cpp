@@ -58,8 +58,9 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce)
                 (new PFileOpenSelector(FP::_seedInputFilenameTag, "List of seeds file"))->SetTooltip(
                     "Seed injection points within your domain may be defined in this file. \n"
                     "The format is a list of X,Y,Z coordinates, using the units of your dataset's \n"
-                    "spatial domain.  The timestep that the seeds are injected is determined by \n"
-                    "whatever timestep is currently being rendered in Vapor.  The listOfSeeds.txt \n"
+                    "spatial domain.  Note: lat-lon coordinates may be converted to meters via a map projection\n"
+					"The timestep that the seeds are injected is determined by \n"
+                    "the GUI.  The listOfSeeds.txt \n"
                     "demo file applies one seed at location .5,.5,.5."
                 )
             }),
