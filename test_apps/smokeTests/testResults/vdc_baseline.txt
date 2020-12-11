@@ -113,9 +113,9 @@ Grid test for 3D variable P:
     Dimension Lengths:  315 309 34
     Topology Dimension: 3
 
-    RMS error:                                           9.03838
+    RMS error:                                           0
     Missing value count:                                 0
-    GetValueAtIndex() vs GetValue() disagreement count:  283693
+    GetValueAtIndex() vs GetValue() disagreement count:  0
 
 Projection String:  +proj=merc +lon_0=-85 +lat_ts=30 +ellps=WGS84
 
@@ -147,4 +147,4 @@ Time Coordinates:
 
 Time coordinate variable name: Time
 Number of time steps: 1
-Elapsed time: 11.2818
+Elapsed time: 15.3444

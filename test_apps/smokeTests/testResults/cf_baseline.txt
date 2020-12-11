@@ -60,4 +60,4 @@ Time Coordinates:
 
 Time coordinate variable name: time
 Number of time steps: 1
-Elapsed time: 0.490985
+Elapsed time: 0.131529
