@@ -1,9 +1,9 @@
 #include <iostream>
-#include <omp.h>
 #include <vapor/VAssert.h>
 #include <vapor/utils.h>
 #include <cstdint>
 #include <vapor/QuadTreeRectangleP.h>
+#include <vapor/OpenMPSupport.h>
 
 using namespace VAPoR;
 using namespace std;

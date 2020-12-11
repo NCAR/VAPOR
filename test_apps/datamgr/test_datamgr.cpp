@@ -1,4 +1,3 @@
-#include <omp.h>
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -12,6 +11,7 @@
 #include <vapor/DataMgr.h>
 #include <vapor/FileUtils.h>
 #include <vapor/utils.h>
+#include <vapor/OpenMPSupport.h>
 
 using namespace Wasp;
 using namespace VAPoR;
@@ -156,10 +156,6 @@ void test_get_value(Grid *g)
     cout << "Get Value Test ----->" << endl;
 
     g->SetInterpolationOrder(1);
-
-    //	Grid::ConstIterator enditr = g->cend();
-
-    //	Grid::ConstCoordItr c_enditr = g->ConstCoordEnd();
 
     const float epsilon = 0.000001;
 

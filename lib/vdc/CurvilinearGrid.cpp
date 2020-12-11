@@ -558,9 +558,6 @@ bool CurvilinearGrid::_insideGridHelperTerrain(double x, double y, double z, con
 
     float z0, z1;
 
-    // Check cached z values from last search first
-    //
-
     // Find k index of cell containing z. Already know i and j indices
     //
     size_t         nz = GetDimensions()[2];

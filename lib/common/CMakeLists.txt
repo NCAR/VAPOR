@@ -39,6 +39,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/VAssert.h
 	${PROJECT_SOURCE_DIR}/include/vapor/Progress.h
 	${PROJECT_SOURCE_DIR}/include/vapor/TMSUtils.h
+	${PROJECT_SOURCE_DIR}/include/vapor/OpenMPSupport.h
 )
 
 add_library (common SHARED ${SRC} ${HEADERS})
