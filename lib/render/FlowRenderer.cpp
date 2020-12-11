@@ -253,61 +253,40 @@ int FlowRenderer::_paintGL( bool fast )
             return rv;
         }
 
-        // Read seeds from a file is a special case, so we put it up front
-        if( _cache_seedGenMode == FlowSeedMode::LIST )
-        {
-            rv = flow::InputSeedsCSV( params->GetSeedInputFilename(), &_advection );
-            if( rv != 0 )
-            {
-                MyBase::SetErrMsg("Input seed list wrong!");
-                return flow::FILE_ERROR;
-            }
-            rv = _updateAdvectionPeriodicity( &_advection ); 
-            if( rv != 0 )
-            {
-                MyBase::SetErrMsg("Update Advection Periodicity failed!");
-                return flow::GRID_ERROR;
-            }
-            if( _2ndAdvection )     // bi-directional advection
-            {
-                flow::InputSeedsCSV( params->GetSeedInputFilename(), _2ndAdvection.get() );
-                rv = _updateAdvectionPeriodicity( _2ndAdvection.get() ); 
-                if( rv != 0 )
-                {
-                    MyBase::SetErrMsg("Update Advection Periodicity failed!");
-                    return flow::GRID_ERROR;
-                }
-            }
-        }
-        else 
-        {
-            std::vector<flow::Particle> seeds;
-            if( _cache_seedGenMode      == FlowSeedMode::UNIFORM )
-                _genSeedsRakeUniform( seeds );
-            else if( _cache_seedGenMode == FlowSeedMode::RANDOM )
-                _genSeedsRakeRandom( seeds );
-            else if( _cache_seedGenMode == FlowSeedMode::RANDOM_BIAS )
-                _genSeedsRakeRandomBiased( seeds );
+        // Obtain seeds for Flow Renderer.
+        std::vector<flow::Particle> seeds;
+        if( _cache_seedGenMode      == FlowSeedMode::UNIFORM )
+            rv = _genSeedsRakeUniform( seeds );
+        else if( _cache_seedGenMode == FlowSeedMode::RANDOM )
+            rv = _genSeedsRakeRandom( seeds );
+        else if( _cache_seedGenMode == FlowSeedMode::RANDOM_BIAS )
+            rv = _genSeedsRakeRandomBiased( seeds );
+        else if( _cache_seedGenMode == FlowSeedMode::LIST )
+            rv = _genSeedsFromList( seeds );
 
-            // Note on UseSeedParticles(): this is the only function that resets
-            //   all the streams inside of an Advection class.
-            //   It should immediately be followed by a function to set its periodicity
-            _advection.UseSeedParticles( seeds );
-            rv = _updateAdvectionPeriodicity( &_advection );
+        if( rv != 0 ) {
+            MyBase::SetErrMsg("Generating seeds failed!");
+            return flow::NO_SEED_PARTICLE_YET;
+        }
+
+        // Note on UseSeedParticles(): this is the only function that resets
+        //   all the streams inside of an Advection class.
+        //   It should immediately be followed by a function to set its periodicity
+        _advection.UseSeedParticles( seeds );
+        rv = _updateAdvectionPeriodicity( &_advection );
+        if( rv != 0 )
+        {
+            MyBase::SetErrMsg("Update Advection Periodicity failed!");
+            return flow::GRID_ERROR;
+        }
+        if( _2ndAdvection )     // bi-directional advection
+        {
+            _2ndAdvection->UseSeedParticles( seeds );
+            rv = _updateAdvectionPeriodicity( _2ndAdvection.get() ); 
             if( rv != 0 )
             {
                 MyBase::SetErrMsg("Update Advection Periodicity failed!");
                 return flow::GRID_ERROR;
-            }
-            if( _2ndAdvection )     // bi-directional advection
-            {
-                _2ndAdvection->UseSeedParticles( seeds );
-                rv = _updateAdvectionPeriodicity( _2ndAdvection.get() ); 
-                if( rv != 0 )
-                {
-                    MyBase::SetErrMsg("Update Advection Periodicity failed!");
-                    return flow::GRID_ERROR;
-                }
             }
         }
 
@@ -1076,8 +1055,7 @@ FlowRenderer::_dupSeedsNewTime( std::vector<flow::Particle>& seeds,
         seeds.emplace_back( seeds[i].location, newTime );
 }
 
-int
-FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
+int FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
     VAssert( params );
@@ -1117,16 +1095,14 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
         }
     }
 
-    /* If in unsteady case and there are multiple seed injections, 
-       we insert more seeds */
-    if( !_cache_isSteady && _cache_seedInjInterval > 0 )
-    {
+    // If in unsteady case and there are multiple seed injections, 
+    //   we insert more seeds.
+    if( !_cache_isSteady && _cache_seedInjInterval > 0 ) {
         size_t firstN = seeds.size();
         // Check every time step available, see if we need to inject seeds at that time step
         for( size_t ts = 1; ts < _timestamps.size(); ts++ )
-            if( ts % _cache_seedInjInterval == 0 )
-            {
-                _dupSeedsNewTime( seeds, firstN, _timestamps.at(ts) );
+            if( ts % _cache_seedInjInterval == 0 ) {
+                _dupSeedsNewTime( seeds, firstN, _timestamps[ts] );
             }
     }
 
@@ -1134,8 +1110,40 @@ FlowRenderer::_genSeedsRakeUniform( std::vector<flow::Particle>& seeds ) const
 }
 
 
-int
-FlowRenderer::_genSeedsRakeRandom( std::vector<flow::Particle>& seeds ) const
+int FlowRenderer::_genSeedsFromList( std::vector<flow::Particle>& seeds ) const
+{
+    FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
+    VAssert( params );
+
+    // Read seed locations (X, Y, Z) from a file.
+    std::vector<flow::Particle> read_from_disk = 
+        flow::InputSeedsCSV( params->GetSeedInputFilename() );
+    if( read_from_disk.empty() )
+        return flow::NO_SEED_PARTICLE_YET;
+
+    // Set seed time to be the time stamp at step 0
+    double timeVal = _timestamps.at(0);
+    for( auto& seed : read_from_disk )
+        seed.time = timeVal;
+
+    seeds = std::move( read_from_disk );
+
+    // If in unsteady case and there are multiple seed injections, we insert more seeds.
+    if( !_cache_isSteady && _cache_seedInjInterval > 0 ) {
+        size_t firstN = seeds.size();
+        // Check every time step available, see if we need to inject seeds at that time step
+        for( size_t ts = 1; ts < _timestamps.size(); ts++ ) {
+            if( ts % _cache_seedInjInterval == 0 ) {
+                _dupSeedsNewTime( seeds, firstN, _timestamps[ts] );
+            }
+        }
+    }
+
+    return 0;
+}
+
+
+int FlowRenderer::_genSeedsRakeRandom( std::vector<flow::Particle>& seeds ) const
 {
     FlowParams* params = dynamic_cast<FlowParams*>( GetActiveParams() );
 
@@ -1176,16 +1184,15 @@ FlowRenderer::_genSeedsRakeRandom( std::vector<flow::Particle>& seeds ) const
         }
     }
 
-    /* If in unsteady case and there are multiple seed injections, we insert more seeds */
-    if( !_cache_isSteady && _cache_seedInjInterval > 0 )
-    {
+    // If in unsteady case and there are multiple seed injections, we insert more seeds.
+    if( !_cache_isSteady && _cache_seedInjInterval > 0 ) {
         size_t firstN = seeds.size();
         // Check every time step available, see if we need to inject seeds at that time step
-        for( size_t ts = 1; ts < _timestamps.size(); ts++ )
-            if( ts % _cache_seedInjInterval == 0 )
-            {
-                _dupSeedsNewTime( seeds, firstN, _timestamps.at(ts) );
+        for( size_t ts = 1; ts < _timestamps.size(); ts++ ) {
+            if( ts % _cache_seedInjInterval == 0 ) {
+                _dupSeedsNewTime( seeds, firstN, _timestamps[ts] );
             }
+        }
     }
 
     return 0;
@@ -1308,16 +1315,15 @@ int FlowRenderer::_genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds 
     for( auto& e : seeds )              // reset the value field of each particle
         e.value = 0.0f;
 
-    /* If in unsteady case and there are multiple seed injections, we insert more seeds */
-    if( !_cache_isSteady && _cache_seedInjInterval > 0 )
-    {
+    // If in unsteady case and there are multiple seed injections, we insert more seeds.
+    if( !_cache_isSteady && _cache_seedInjInterval > 0 ) {
         size_t firstN = seeds.size();
         // Check every time step available, see if we need to inject seeds at that time step
-        for( size_t ts = 1; ts < _timestamps.size(); ts++ )
-            if( ts % _cache_seedInjInterval == 0 )
-            {
-                _dupSeedsNewTime( seeds, firstN, _timestamps.at(ts) );
+        for( size_t ts = 1; ts < _timestamps.size(); ts++ ) {
+            if( ts % _cache_seedInjInterval == 0 ) {
+                _dupSeedsNewTime( seeds, firstN, _timestamps[ts] );
             }
+        }
     }
 
     return 0;

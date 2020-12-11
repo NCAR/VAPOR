@@ -113,6 +113,7 @@ private:
     int  _genSeedsRakeUniform(      std::vector<flow::Particle>& seeds ) const;
     int  _genSeedsRakeRandom(       std::vector<flow::Particle>& seeds ) const;
     int  _genSeedsRakeRandomBiased( std::vector<flow::Particle>& seeds ) const;
+    int  _genSeedsFromList(         std::vector<flow::Particle>& seeds ) const;
 
     int  _renderFromAnAdvectionLegacy( const flow::Advection*, FlowParams*, bool fast );
     int  _renderAdvection(const flow::Advection* adv);
