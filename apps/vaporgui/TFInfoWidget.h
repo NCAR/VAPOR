@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QWidget>
-#include <QLineEdit>
+#include <VDoubleLineEdit.h>
 #include <QComboBox>
 #include <string>
 
@@ -41,7 +41,7 @@ protected:
     virtual void controlPointChanged() {};
     
 protected:
-    QLineEdit *_valueEdit;
+    VDoubleLineEdit *_valueEdit;
     QComboBox *_valueEditType;
     
     float _min = 0;

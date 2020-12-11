@@ -124,7 +124,7 @@ std::string PWidget::getParamsString() const
     if (_usingHLI)
         return _getterString(_params);
     else
-        return _params->GetValueString(_tag, "<empty>");
+        return _params->GetValueString(_tag, "");
 }
 
 void PWidget::dynamicUpdateBegin()

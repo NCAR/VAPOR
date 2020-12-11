@@ -26,11 +26,15 @@ class VDoubleLineEdit : public VNumericLineEdit {
     
         //! Get the current double value in the line edit
         double GetValueDouble() const;
+    
+        void SetRange(double min, double max);
 
     protected:
         std::string  _formatValue( double value );
         
         double _value;
+        double _min = -std::numeric_limits<double>::max();
+        double _max =  std::numeric_limits<double>::max();
 
     protected slots:
         void _valueChanged() override;

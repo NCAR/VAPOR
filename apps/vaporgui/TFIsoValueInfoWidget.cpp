@@ -17,5 +17,5 @@ void TFIsoValueInfoWidget::SetControlPoint(float value)
 void TFIsoValueInfoWidget::Deselect()
 {
     this->setEnabled(false);
-    _valueEdit->clear();
+    _valueEdit->Clear();
 }
