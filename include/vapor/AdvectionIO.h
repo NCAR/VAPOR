@@ -30,8 +30,8 @@ FLOW_API auto OutputFlowlinesMaxTime(const Advection *adv,
                                      bool append) -> int;
 
 // Input a list of seeds from lines of CSVs.
-FLOW_API auto InputSeedsCSV(const std::string &filename,
-                            Advection *adv) -> int;
+// In case of any error occurs, it returns an empty list.
+FLOW_API auto InputSeedsCSV(const std::string &filename) -> std::vector<flow::Particle>;
 
 }; // namespace flow
 #endif
