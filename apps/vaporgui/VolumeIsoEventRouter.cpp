@@ -15,7 +15,7 @@ VolumeIsoEventRouter::VolumeIsoEventRouter(QWidget *parent, ControlExec *ce)
                                                                            new PColorMapVariableSelector}),
                                        new PFidelitySection}));
 
-    AddSubtab("Appearance", new PGroup({new PTFEditor(RenderParams::_variableNameTag, {PTFEditor::Histogram, PTFEditor::IsoValues}),
+    AddSubtab("Appearance", new PGroup({new PTFEditor(RenderParams::_variableNameTag, {PTFEditor::Histogram, PTFEditor::Opacity, PTFEditor::IsoValues}),
                                         new PSection("Rendering Method", {
                                                                              new PStringDropdownHLI<VIP>("Raytracing Algorithm", VIP::GetAlgorithmNames(VIP::Type::Iso), &VIP::GetAlgorithm, &VIP::SetAlgorithmByUser),
                                                                          }),
