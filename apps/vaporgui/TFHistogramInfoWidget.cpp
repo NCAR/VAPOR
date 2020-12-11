@@ -5,7 +5,7 @@
 
 TFHistogramInfoWidget::TFHistogramInfoWidget(const std::string &variableNameTag)
     : TFInfoWidget(variableNameTag) {
-    _valueEdit->setReadOnly(true);
+    _valueEdit->SetReadOnly(true);
 }
 
 void TFHistogramInfoWidget::SetControlPoint(float value) {
@@ -15,5 +15,5 @@ void TFHistogramInfoWidget::SetControlPoint(float value) {
 
 void TFHistogramInfoWidget::Deselect() {
     this->setEnabled(false);
-    _valueEdit->clear();
+    _valueEdit->Clear();
 }
