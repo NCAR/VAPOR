@@ -8,6 +8,10 @@
 
 namespace VAPoR {
 
+// Maximum aspect ratio of a rectangle before it is split
+//
+const float maxAspectRatio = 2.0;
+
 //
 //! \class QuadTreeRectangle
 //! \brief This class implements a 2D quad tree space partitioning tree
@@ -59,6 +63,10 @@ public:
             VAssert(0);
             return *this;    // Can't happen since we mask n
         }
+
+        // Horizontal aspect ratio
+        //
+        float hAspectRatio() const { return (fabs((_right - _left) / (_bottom - _top))); }
 
         friend std::ostream &operator<<(std::ostream &os, const rectangle_t &rec)
         {
@@ -154,7 +162,36 @@ public:
     {
         if (!_nodes[_rootidx].intersects(rectangle)) return (false);
 
-        return (node_t::insert(_nodes, _rootidx, rectangle, payload, _maxDepth));
+        float ar = rectangle.hAspectRatio();
+        if (ar <= maxAspectRatio && ar >= (1.0 / maxAspectRatio)) {
+            return (node_t::insert(_nodes, _rootidx, rectangle, payload, _maxDepth));
+        } else if (ar >= maxAspectRatio) {
+            // Horizontal split
+            //
+            bool   status = true;
+            size_t n = (size_t)ar;
+            float  split_width = (rectangle._right - rectangle._left) / (float)n;
+            float  splitLeft = rectangle._left;
+            for (int i = 0; i < n; i++) {
+                float splitRight = splitLeft + split_width;
+                status &= node_t::insert(_nodes, _rootidx, rectangle_t(splitLeft, rectangle._top, splitRight, rectangle._bottom), payload, _maxDepth);
+                splitLeft = splitRight;
+            }
+            return (status);
+        } else {
+            // Vertical split
+            //
+            bool   status = true;
+            size_t n = (size_t)ar;
+            float  split_width = (rectangle._bottom - rectangle._top) / (float)n;
+            float  splitTop = rectangle._top;
+            for (int i = 0; i < n; i++) {
+                float splitBottom = splitTop + split_width;
+                status &= node_t::insert(_nodes, _rootidx, rectangle_t(rectangle._left, splitTop, rectangle._right, splitTop), payload, _maxDepth);
+                splitTop = splitBottom;
+            }
+            return (status);
+        }
     }
 
     bool Insert(T left, T top, T right, T bottom, S payload) { return (Insert(rectangle_t(left, top, right, bottom), payload)); }
