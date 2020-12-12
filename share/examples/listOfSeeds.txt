@@ -1,0 +1,19 @@
+#
+# Seed injection points within your domain may be defined in this file
+# as comma separated values.
+#
+
+# A line starts with a pound sign is ignored, so is an empty line.
+
+# This is a seed at location (.5, .5, .5)
+.5,.5,.5
+
+# The following line would be ill-formated because it has less than 3 values.
+# .5,.5
+
+# The following line specifies a location (1.0, 1.0, 1.0) with the rest of values ignored.
+1.0, 1.0, 1.0, 0.0, -1.0, -2.0
+
+# The following line specifies a repeated location (.5, .5, .5) which will be ignored.
+.5,.5,.5
+
