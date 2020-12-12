@@ -1,5 +1,6 @@
 #include "vapor/FlowParams.h"
 #include <vapor/FileUtils.h>
+#include <vapor/ResourcePath.h>
 
 using namespace VAPoR;
 
@@ -142,6 +143,7 @@ int FlowParams::Initialize() {
     SetGridNumOfSeeds(vector<long>(3,5));
     SetRandomNumOfSeeds(50);
     SetFlowlineOutputFilename(Wasp::FileUtils::HomeDir() + "/VaporFlow.txt");
+    SetSeedInputFilename( Wasp::GetSharePath("examples/listOfSeeds.txt" ) );
     SetIsSteady(true);
     SetPastNumOfTimeSteps(_dataMgr->GetNumTimeSteps());
 						  

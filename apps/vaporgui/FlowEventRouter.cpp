@@ -55,7 +55,17 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce)
                 new PVariableSelector(FP::_rakeBiasVariable)
             }),
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::LIST)->Then({
-                new PFileOpenSelector(FP::_seedInputFilenameTag, "List of seeds file")
+                (new PFileOpenSelector(FP::_seedInputFilenameTag, "List of seeds file"))->SetTooltip(
+                    "Seed injection points within your domain may be defined in this text file with the following definition: \n"
+                    "1. Each line specifies the location of one seed. \n"
+                    "2. Empty lines and lines starting with a pound sign is ignored. \n"
+                    "3. Seed locations are specified using comma separated X,Y,Z coordinates. \n"
+                    "4. A line with less than 3 comma separated values is invalid, which also invalidates the entire file. \n"
+                    "5. A line can have more than 3 comma separated values, with additional values being ignored. \n"
+                    "6. X, Y, Z coordinates use the same unit of the dataset's spatial domain. \n"
+                    "    Note: lat-lon coordinates may be converted to meters via a map projection. \n"
+                    "Finally, the listOfSeeds.txt demo file provides a starting point to specify your own seeds."
+                )
             }),
         }),
         new PSection("Rake Region", {
