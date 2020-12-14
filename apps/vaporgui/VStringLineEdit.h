@@ -34,13 +34,15 @@ public:
     //! Create a custom context menu for the QLineEdit
     void SetCustomContextMenu();
 
+    void SetReadOnly(bool b) { _lineEdit->setReadOnly(b); }
+    void Clear() { SetValueString(""); }
+
 private:
     QLineEdit * _lineEdit;
     std::string _strValue;
 
 protected:
     std::string _getText() const;
-    void        _setValueString(std::string value);
 
 protected slots:
     virtual void _valueChanged();

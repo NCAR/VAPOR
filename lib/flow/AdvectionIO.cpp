@@ -35,7 +35,7 @@ auto flow::OutputFlowlinesNumSteps(const Advection *adv, const char *filename, s
 
     // Write the header
     if (!append) {
-        std::fprintf(f, "%s", "# ID,  X-position,  Y-position,  Z-position,  Time,  ");
+        std::fprintf(f, "%s", "# ID,  X-position,  Y-position,  Z-position,  Time");
 
         for (auto &n : propertyNames) std::fprintf(f, ",  %s", n.c_str());
         std::fprintf(f, "\n");
@@ -152,10 +152,10 @@ auto flow::OutputFlowlinesMaxTime(const Advection *adv, const char *filename, do
     return 0;
 }
 
-auto flow::InputSeedsCSV(const std::string &filename, Advection *adv) -> int
+auto flow::InputSeedsCSV(const std::string &filename) -> std::vector<flow::Particle>
 {
     std::ifstream ifs(filename);
-    if (!ifs.is_open()) return FILE_ERROR;
+    if (!ifs.is_open()) return {};
 
     std::vector<Particle> newSeeds;
 
@@ -172,28 +172,44 @@ auto flow::InputSeedsCSV(const std::string &filename, Advection *adv) -> int
         // Now try to parse numbers separated by comma
         std::stringstream  ss(line);
         std::vector<float> valFloat;
-        valFloat.reserve(4);
+        valFloat.reserve(3);
         for (std::string tmp; std::getline(ss, tmp, ',');) {
             try {
                 valFloat.push_back(std::stof(tmp));
             } catch (const std::invalid_argument &e) {
                 ifs.close();
-                return NO_FLOAT;
+                return {};
             }
-            if (valFloat.size() >= 4)    // we parse at most 4 values, and discard the rest of this line.
+            if (valFloat.size() >= 3)    // we parse at most 3 values, and discard the rest of this line.
                 break;
         }
 
         if (valFloat.size() < 3) {    // less than 3 values provided in this line
             ifs.close();
-            return NO_FLOAT;
+            return {};    // Not accepting any seed when encountering a bad line
         }
 
-        newSeeds.emplace_back(valFloat[0], valFloat[1], valFloat[2], valFloat[3]);
+        newSeeds.emplace_back(valFloat[0], valFloat[1], valFloat[2], 0.0);
     }
     ifs.close();
 
-    if (!newSeeds.empty()) adv->UseSeedParticles(newSeeds);
+    // Let's also remove duplicate seeds.
+    auto less = [](const flow::Particle &a, const flow::Particle &b) {
+        if (a.location.x != b.location.x)
+            return (a.location.x < b.location.x);
+        else if (a.location.y != b.location.y)
+            return (a.location.y < b.location.y);
+        else
+            return (a.location.z < b.location.z);
+    };
+    std::sort(newSeeds.begin(), newSeeds.end(), less);
 
-    return 0;
+    auto equal = [](const flow::Particle &a, const flow::Particle &b) {
+        auto eq = glm::equal(a.location, b.location);
+        return glm::all(eq);
+    };
+    auto itr = std::unique(newSeeds.begin(), newSeeds.end(), equal);
+    newSeeds.erase(itr, newSeeds.end());
+
+    return newSeeds;
 }

@@ -37,8 +37,6 @@ public:
     //! If the line edit is numeric, set whether the display is in scientific notation
     void SetSciNotation(bool sciNotation);
 
-    void SetValueString(std::string value) = delete;
-
 protected slots:
 
     //! Called whenever the line edit's value is changed.  Must be reimplemented by derived classes

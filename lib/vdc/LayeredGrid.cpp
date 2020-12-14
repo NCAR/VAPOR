@@ -141,9 +141,6 @@ bool LayeredGrid::_insideGrid(const DblArr3 &coords, Size_tArr3 &indices, double
 
     float z0, z1;
 
-    // Check cached z values from last search first
-    //
-
     // Find k index of cell containing z. Already know i and j indices
     //
     vector<double> zcoords;

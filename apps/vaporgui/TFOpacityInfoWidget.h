@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TFInfoWidget.h"
-#include <QLineEdit>
+#include <VDoubleLineEdit.h>
 
 namespace VAPoR {
 class RenderParams;
@@ -23,7 +23,7 @@ protected:
     void controlPointChanged();
 
 private:
-    QLineEdit *_opacityEdit;
+    VDoubleLineEdit *_opacityEdit;
 
     float _opacity;
 

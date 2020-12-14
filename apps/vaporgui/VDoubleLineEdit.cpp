@@ -9,7 +9,7 @@
 VDoubleLineEdit::VDoubleLineEdit(double value) : VNumericLineEdit(), _value(value)
 {
     std::string formattedNumber = _formatValue(_value);
-    _setValueString(formattedNumber);
+    SetValueString(formattedNumber);
 }
 
 void VDoubleLineEdit::SetValueDouble(double value)
@@ -24,10 +24,16 @@ void VDoubleLineEdit::SetValueDouble(double value)
         return;
     }
 
-    _setValueString(formattedNumber);
+    SetValueString(formattedNumber);
 }
 
 double VDoubleLineEdit::GetValueDouble() const { return _value; }
+
+void VDoubleLineEdit::SetRange(double min, double max)
+{
+    _min = min;
+    _max = max;
+}
 
 void VDoubleLineEdit::_valueChanged()
 {
@@ -36,6 +42,8 @@ void VDoubleLineEdit::_valueChanged()
     double value;
     try {
         value = std::stod(str);
+
+        value = std::min(_max, std::max(_min, value));
 
         // If value changed, update and emit, otherwiese revert to old value
         if (value != _value) {

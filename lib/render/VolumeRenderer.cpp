@@ -331,6 +331,7 @@ int VolumeRenderer::_loadData()
     CheckCache(_cache.compression, RP->GetCompressionLevel());
     CheckCache(_cache.minExt, minExt);
     CheckCache(_cache.maxExt, maxExt);
+    CheckCache(_cache.ospMaxCells, RP->GetValueLong("osp_max_cells", 1));
     if (!_cache.needsUpdate) return 0;
 
     Grid *grid = _dataMgr->GetVariable(_cache.ts, _cache.var, _cache.refinement, _cache.compression, _cache.minExt, _cache.maxExt);

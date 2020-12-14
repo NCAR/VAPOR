@@ -221,6 +221,8 @@ int VolumeOSPRay::LoadData(const Grid *grid)
 
     if (dynamic_cast<const RegularGrid *>(grid))
         _ospSampleRateScalar = 1.f;
+    else if (VOSP::IsVersionAtLeast(2, 5))
+        _ospSampleRateScalar = 1.f;
     else
         _ospSampleRateScalar = _guessSamplingRateScalar(grid);
 
@@ -710,18 +712,21 @@ OSPVolume VolumeOSPRay::_loadVolumeStructured(const Grid *grid)
     ospCommit(data);
     ospSetObject(volume, "index", data);
     ospRelease(data);
+    indices.clear();
     Progress::Update(3);
 
     data = VOSP::NewCopiedData(startIndex.data(), OSP_UINT, startIndex.size());
     ospCommit(data);
     ospSetObject(volume, "cell.index", data);
     ospRelease(data);
+    startIndex.clear();
     Progress::Update(4);
 
     data = VOSP::NewCopiedData(cellType.data(), OSP_UCHAR, cellType.size());
     ospCommit(data);
     ospSetObject(volume, "cell.type", data);
     ospRelease(data);
+    cellType.clear();
     Progress::Update(5);
     Progress::Finish();
 
@@ -934,33 +939,35 @@ OSPVolume VolumeOSPRay::_loadVolumeUnstructured(const Grid *grid)
     ospCommit(data);
     ospSetObject(volume, "vertex.data", data);
     ospRelease(data);
+    delete[] vdata;
     Progress::Update(1);
 
     data = VOSP::NewCopiedData(cdata, OSP_VEC3F, nVerts);
     ospCommit(data);
     ospSetObject(volume, "vertex.position", data);
     ospRelease(data);
+    delete[] cdata;
     Progress::Update(2);
 
     data = VOSP::NewCopiedData(cellIndices.data(), OSP_UINT, cellIndices.size());
     ospCommit(data);
     ospSetObject(volume, "index", data);
     ospRelease(data);
+    cellIndices.clear();
     Progress::Update(3);
 
     data = VOSP::NewCopiedData(cellStarts.data(), OSP_UINT, cellStarts.size());
     ospCommit(data);
     ospSetObject(volume, "cell.index", data);
     ospRelease(data);
+    cellStarts.clear();
     Progress::Update(4);
 
     data = VOSP::NewCopiedData(cellTypes.data(), OSP_UCHAR, cellTypes.size());
     ospCommit(data);
     ospSetObject(volume, "cell.type", data);
     ospRelease(data);
-
-    delete[] vdata;
-    delete[] cdata;
+    cellTypes.clear();
     Progress::Update(5);
     Progress::Finish();
 
@@ -1134,4 +1141,4 @@ lgl->Vertex(testCell[c]); } #define QUAD(a, b, c, d) { FACE(a, b, d); FACE(d, b,
 }
 */
 
-static VolumeAlgorithmRegistrar<VolumeOSPRayIso> registrationIso;
+// static VolumeAlgorithmRegistrar<VolumeOSPRayIso> registrationIso;

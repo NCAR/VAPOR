@@ -22,6 +22,7 @@ void VStringLineEdit::SetValueString(std::string value)
     _strValue = value;
     _lineEdit->setText(QString::fromStdString(_strValue));
     _lineEdit->setToolTip(QString::fromStdString(_strValue));
+    _lineEdit->setCursorPosition(0);
 }
 
 std::string VStringLineEdit::GetValueString() const { return _strValue; }
@@ -52,11 +53,4 @@ std::string VStringLineEdit::_getText() const
 {
     std::string value = _lineEdit->text().toStdString();
     return value;
-}
-
-void VStringLineEdit::_setValueString(std::string value)
-{
-    _strValue = value;
-    _lineEdit->setText(QString::fromStdString(_strValue));
-    _lineEdit->setToolTip(QString::fromStdString(_strValue));
 }

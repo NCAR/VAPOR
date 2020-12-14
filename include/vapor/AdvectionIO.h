@@ -22,7 +22,8 @@ FLOW_API auto OutputFlowlinesNumSteps(const Advection *adv, const char *filename
 FLOW_API auto OutputFlowlinesMaxTime(const Advection *adv, const char *filename, double maxTime, const std::string &proj4string, bool append) -> int;
 
 // Input a list of seeds from lines of CSVs.
-FLOW_API auto InputSeedsCSV(const std::string &filename, Advection *adv) -> int;
+// In case of any error occurs, it returns an empty list.
+FLOW_API auto InputSeedsCSV(const std::string &filename) -> std::vector<flow::Particle>;
 
 };    // namespace flow
 #endif
