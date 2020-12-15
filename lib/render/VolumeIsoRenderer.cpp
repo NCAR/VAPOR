@@ -77,9 +77,9 @@ std::string VolumeIsoRenderer::_getDefaultAlgorithmForGrid(const Grid *grid) con
     bool intel = GLManager::GetVendor() == GLManager::Vendor::Intel;
 
     if (dynamic_cast<const RegularGrid *>(grid))
-        return VolumeRegularIso ::GetName();
+        return VolumeRegularIso::GetName();
     if (dynamic_cast<const StructuredGrid *>(grid))
-        return intel ? VolumeOSPRayIso::GetName() : VolumeCellTraversalIso::GetName();
+        return intel ? VolumeRegularIso::GetName() : VolumeCellTraversalIso::GetName();
     //    if (dynamic_cast<const UnstructuredGrid *>(grid)) return VolumeOSPRayIso       ::GetName();
     MyBase::SetErrMsg("Unsupported grid type: %s", grid->GetType().c_str());
     return "";
