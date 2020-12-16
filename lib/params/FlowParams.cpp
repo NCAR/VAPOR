@@ -145,7 +145,7 @@ int FlowParams::Initialize() {
     SetFlowlineOutputFilename(Wasp::FileUtils::HomeDir() + "/VaporFlow.txt");
     SetSeedInputFilename( Wasp::GetSharePath("examples/listOfSeeds.txt" ) );
     SetIsSteady(true);
-    SetPastNumOfTimeSteps(_dataMgr->GetNumTimeSteps());
+    SetPastNumOfTimeSteps(std::max(_dataMgr->GetNumTimeSteps()-1, 1));
 						  
 	return(0);
 }
