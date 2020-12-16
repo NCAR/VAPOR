@@ -128,7 +128,7 @@ int FlowParams::Initialize()
     SetSteadyNumOfSteps(100);
     SetVelocityMultiplier(1);
     SetPeriodic(vector<bool>(3, false));
-    SetGridNumOfSeeds(vector<long>(3, 5));
+    SetGridNumOfSeeds({5, 5, 1});
     SetRandomNumOfSeeds(50);
     SetFlowlineOutputFilename(Wasp::FileUtils::HomeDir() + "/VaporFlow.txt");
     SetSeedInputFilename(Wasp::GetSharePath("examples/listOfSeeds.txt"));
