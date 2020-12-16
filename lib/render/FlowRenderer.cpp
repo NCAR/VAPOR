@@ -420,11 +420,10 @@ int FlowRenderer::_renderAdvection(const flow::Advection* adv)
         // First calculate the starting time stamp. Copied from legacy.
         double startingTime = _timestamps[0];
         if (!_cache_isSteady) {
-            int pastNumOfTimeSteps = rp->GetPastNumOfTimeSteps();
             startingTime = _timestamps[0];
             // note that _cache_currentTS is cast to a signed integer.
-            if( int(_cache_currentTS) - pastNumOfTimeSteps > 0 )
-                startingTime = _timestamps[ _cache_currentTS - pastNumOfTimeSteps ];
+            if( int(_cache_currentTS) - _cache_pastNumOfTimeSteps > 0 )
+                startingTime = _timestamps[ _cache_currentTS - _cache_pastNumOfTimeSteps ];
         }
         
         for (int s = 0; s < nStreams; s++) {
@@ -700,10 +699,9 @@ FlowRenderer::_renderFromAnAdvectionLegacy( const flow::Advection* adv,
     else    // Unsteady flow (only occurs with forward direction)
     {
         // First calculate the starting time stamp
-        int pastNumOfTimeSteps = params->GetPastNumOfTimeSteps();
         double startingTime = _timestamps[0];
-        if( _cache_currentTS - pastNumOfTimeSteps > 0 )
-            startingTime = _timestamps[ _cache_currentTS - pastNumOfTimeSteps ];
+        if( int(_cache_currentTS) - _cache_pastNumOfTimeSteps > 0 )
+            startingTime = _timestamps[ _cache_currentTS - _cache_pastNumOfTimeSteps ];
 
         std::vector<float> vec;
         for( size_t s = 0; s < numOfStreams; s++ )
@@ -822,7 +820,7 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         }
     }
 
-    // Check variable names
+    // Check velocity variable names
     // If names not the same, entire stream is out of date
     // Note: variable names are kept in VaporFields.
     // Note: RenderParams always returns arrays of size 3 here.
@@ -837,6 +835,7 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
         _colorStatus    = FlowStatus::SIMPLE_OUTOFDATE;
     }
 
+    // Check color mapping variable names
     std::string colorVarName = params->GetColorMapVariableName();
     if( colorVarName != _colorField.ScalarName ) {
         _colorStatus = FlowStatus::SIMPLE_OUTOFDATE;
@@ -1009,6 +1008,7 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
     {
         if( !_cache_isSteady )  // unsteady state isn't changed
         {
+            // First consider if the advection needs to be updated.
             if( _cache_currentTS     < params->GetCurrentTimestep() )
             {
                 if( _colorStatus    == FlowStatus::UPTODATE )
@@ -1020,10 +1020,16 @@ int FlowRenderer::_updateFlowCacheAndStates( const FlowParams* params )
                     _velocityStatus  = FlowStatus::TIME_STEP_OOD;
                 }
             }
-            if(_cache_currentTS != params->GetCurrentTimestep())
-                _renderStatus = FlowStatus::TIME_STEP_OOD;
-            _cache_currentTS        = params->GetCurrentTimestep();
-            _cache_steadyNumOfSteps = params->GetSteadyNumOfSteps();
+
+            // Second consider if the rendering needs to be updated.
+            if(_cache_currentTS != params->GetCurrentTimestep() ||
+                _cache_pastNumOfTimeSteps != params->GetPastNumOfTimeSteps() )
+            {
+                _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
+            }
+            _cache_currentTS          = params->GetCurrentTimestep();
+            _cache_steadyNumOfSteps   = params->GetSteadyNumOfSteps();
+            _cache_pastNumOfTimeSteps = params->GetPastNumOfTimeSteps();
         }
         else    // switched from steady to unsteady
         {
