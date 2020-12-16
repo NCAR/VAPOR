@@ -138,7 +138,7 @@ int FlowParams::Initialize() {
     
     SetFlowDirection((int)FlowDir::FORWARD);
     SetSteadyNumOfSteps(100);
-    SetVelocityMultiplier(1);
+    SetVelocityMultiplier(1.0);
     SetPeriodic(vector<bool>(3,false));
     SetGridNumOfSeeds( {5, 5, 1} );
     SetRandomNumOfSeeds(50);
