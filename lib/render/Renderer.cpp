@@ -156,9 +156,10 @@ int Renderer::paintGL(bool fast) {
 	mm->MatrixModeModelView();
     mm->PushMatrix();
     
+    mm->Translate(translate[0], translate[1], translate[2]);
+    
     mm->Scale(1/datasetScales[0], 1/datasetScales[1], 1/datasetScales[2]);
 
-    mm->Translate(translate[0], translate[1], translate[2]);
 	mm->Translate(origin[0], origin[1], origin[2]);
     mm->Rotate(glm::radians(rotate[0]), 1, 0, 0);
 	mm->Rotate(glm::radians(rotate[1]), 0, 1, 0);
