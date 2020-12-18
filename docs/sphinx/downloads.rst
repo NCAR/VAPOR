@@ -13,6 +13,26 @@ Vapor builds installers on a weekly basis.  These have new features that have no
 
 `Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
 
+Current Stable Release: Vapor 3.3.0
+-----------------------------------
+
+December 17, 2020
+
+`Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
+
+Release notes for VAPOR-3.3.0
+
+    - Introduced new flow rendering algorithms, including pathlines and streamlines rendered in 3D, as well as the option for density colormapping
+    - The Flow renderer can now sample any set of data values along a pathline or streamline, and write those samples to a text file
+    - Included a prototype Volume Renderer using Intel's Ospray engine, allowing for 3D rendering of unstructured models like MPAS
+    - Improved Vapor's GUI components and architecture for more consistent behavior and improved usability
+    - Vapor's sliders no longer have pre-set limits, and can now have their range of values adjusted through a menu opened with a right-mouse click
+    - Multiple performance optimizations to Vapor's internal data management system, and the Flow and Image renderers
+    - New colormaps, taken from MatPlotLib's cmocean package
+    - Updates to Vapor's third-party libraries
+
+|
+
 Current Stable Release: Vapor 3.2.0
 -----------------------------------
 
