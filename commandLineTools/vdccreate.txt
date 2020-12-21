@@ -1,0 +1,54 @@
+Usage: vdccreate [options] master.nc
+    OPTION        NUM_ARGS    DEFAULT         
+    ------        --------    -------         
+    -bs           1           64:64:64        
+        Internal storage blocking factor expressed in grid points (NX:NY:NZ) 
+    -cratios      1           500:100:10:1    
+        Colon delimited list compression ratios. The default is 500:100:10:1. 
+        The maximum compression ratio is wavelet and block size dependent. 
+    -dimension    1           512x512x512     
+        Data volume dimensions expressed in grid points (NXxNYxNZ) 
+    -extents      1           ""              
+        Colon delimited 6-element vector specifying domain extents in user 
+        coordinates (X0:Y0:Z0:X1:Y1:Z1) 
+    -force        0           false           
+        Create a new VDC master file even if a VDC data directory already 
+        exists. Results may be undefined if settings between the new master 
+        file and old data directory do not match. 
+    -help         0           false           
+        Print this message and exit 
+    -ncvars2dxy   1           ""              
+        Colon delimited list of 2D XY-plane variable names (not compressed) to 
+        be included in the VDC 
+    -ncvars2dxz   1           ""              
+        Colon delimited list of 3D XZ-plane variable names (not compressed) to 
+        be included in the VDC 
+    -ncvars2dyz   1           ""              
+        Colon delimited list of 3D YZ-plane variable names (not compressed) to 
+        be included in the VDC 
+    -ncvars3d     1           ""              
+        Colon delimited list of 3D variable names (not compressed) to be 
+        included in the VDC 
+    -nthreads     1           0               
+        Specify number of execution threads 0 => use number of cores 
+    -numts        1           1               
+        Number of timesteps in the data set 
+    -vars2dxy     1           ""              
+        Colon delimited list of 2D XY-plane variable names (compressed) to be 
+        included in the VDC 
+    -vars2dxz     1           ""              
+        Colon delimited list of 3D XZ-plane variable names (compressed) to be 
+        included in the VDC 
+    -vars2dyz     1           ""              
+        Colon delimited list of 3D YZ-plane variable names (compressed) to be 
+        included in the VDC 
+    -vars3d       1           ""              
+        Colon delimited list of 3D variable names (compressed) to be included 
+        in the VDC 
+    -wname        1           bior4.4         
+        Wavelet family used for compression Valid values are bior1.1, bior1.3, 
+        bior1.5, bior2.2, bior2.4 ,bior2.6, bior2.8, bior3.1, bior3.3, bior3.5, 
+        bior3.7, bior3.9, bior4.4 
+    -xtype        1           float           
+        External data type representation. Valid values are uint8 int8 int16 
+        int32 int64 float double 
