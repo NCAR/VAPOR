@@ -11,7 +11,7 @@ Weekly Build
 
 Vapor builds installers on a weekly basis.  These have new features that have not been tested, and may be unstable.
 
-`Download here <https://forms.gle/piowN9Lnd3oZhno79>`_
+`Download here <https://github.com/NCAR/VAPOR/releases/tag/Weekly>`_
 
 Current Stable Release: Vapor 3.3.0
 -----------------------------------
