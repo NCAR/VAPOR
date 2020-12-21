@@ -1,9 +1,0 @@
-//!
-//! \mainpage The VAPOR project developer API
-//!
-//! Documentation for the VAPOR project's C++ API
-//!
-//! \defgroup Public_Params VAPOR Params Developer API
-//! \defgroup Public_Render VAPOR Render Developer API
-//! \defgroup Public_VDC VAPOR VDC Developer API
-//! \defgroup Public_GUI VAPOR GUI Developer API

@@ -1,9 +1,0 @@
-#!/bin/csh -f
-# This postflight script echoes the values of the available
-# arguments and environmental variables.
-#
-
-echo "Start postflight script"
-echo ""
-echo "Finished postflight script"
-exit 0

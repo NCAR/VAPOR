@@ -1,8 +1,0 @@
-; MessageBox MB_OK "Pre Un Install Command"
-
-; delete variable
-DeleteRegValue ${env_hklm} "VAPOR3_HOME"
-; DeleteRegValue ${env_hkcu} MYVAR
-
-; make sure windows knows about the change
-SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000

@@ -1,2 +1,0 @@
-@ECHO OFF
-SET PATH="%VAPOR3_HOME%/bin";%PATH%
