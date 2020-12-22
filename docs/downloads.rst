@@ -33,8 +33,8 @@ Release notes for VAPOR-3.3.0
 
 |
 
-Current Stable Release: Vapor 3.2.0
------------------------------------
+Vapor 3.2.0
+-----------
 
 February 3, 2020 
 
