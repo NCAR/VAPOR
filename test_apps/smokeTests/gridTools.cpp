@@ -32,7 +32,7 @@ size_t X = 0;
 size_t Y = 1;
 size_t Z = 2;
 
-std::vector<float *> Heap;
+std::vector<void *> Heap;
 }    // namespace
 
 void DeleteHeap()
@@ -40,7 +40,7 @@ void DeleteHeap()
     for (size_t i = 0; i < Heap.size(); i++) delete[] Heap[i];
 }
 
-vector<float *> AllocateBlocks(const vector<size_t> &bs, const vector<size_t> &dims)
+template<typename T> vector<T *> AllocateBlocksType(const vector<size_t> &bs, const vector<size_t> &dims)
 {
     size_t block_size = 1;
     size_t nblocks = 1;
@@ -54,14 +54,16 @@ vector<float *> AllocateBlocks(const vector<size_t> &bs, const vector<size_t> &d
         nblocks *= nb;
     }
 
-    float *buf = new float[nblocks * block_size];
+    T *buf = new T[nblocks * block_size];
 
     Heap.push_back(buf);
 
-    std::vector<float *> blks;
+    std::vector<T *> blks;
     for (size_t i = 0; i < nblocks; i++) { blks.push_back(buf + i * block_size); }
     return (blks);
 }
+
+vector<float *> AllocateBlocks(const vector<size_t> &bs, const vector<size_t> &dims) { return (AllocateBlocksType<float>(bs, dims)); }
 
 void MakeTriangle(Grid *grid, float minVal, float maxVal)
 {
@@ -503,6 +505,80 @@ VAPoR::StretchedGrid *MakeStretchedGrid(const vector<size_t> &dims, const vector
         double zIncrement = zRange * pow(float(i) / (dims[Z] - 1), 2.0);
         zCoords[i] = zIncrement + minu[Z];
     }
+
+    vector<float *> blocks = AllocateBlocks(bs, dims);
+    StretchedGrid * sg = new StretchedGrid(dims, bs, blocks, xCoords, yCoords, zCoords);
+    return sg;
+}
+
+VAPoR::UnstructuredGrid2D *MakeUnstructuredGrid2D(const vector<size_t> &dims, const vector<size_t> &bs, const std::vector<double> &minu, const std::vector<double> &maxu)
+{
+    assert(dims.size() == 2);
+    assert(bs.size() == 2);
+
+    vector<size_t>             bs1d = {bs[0] * bs[1]};
+    vector<size_t>             dims1d = {dims[0] * dims[1]};
+    vector<size_t>             vertexDims = {dims[0] * dims[1]};
+    vector<size_t>             faceDims = {(dims[0] - 1) * (dims[1] - 1) * 2};
+    vector<size_t>             edgeDims;
+    UnstructuredGrid::Location location = Location::NODE;
+    size_t                     maxVertexPerFace = 3;    // each cell is a triangle
+    size_t                     maxFacePerVertex = 6;    // each interior vertex defines 4 triangles
+    long                       vertexOffset = 0;
+    long                       faceOffset = 0;
+
+    vector<int> faceOnVertex(vertexDims[0] * maxFacePerVertex);
+    const int * faceOnFace = NULL;
+
+    std::vector<float *> xCoordBlocks = AllocateBlocksType<float>(bs1d, dims1d);
+    std::vector<int *>   vertexOnFace = AllocateBlocksType<int>(vector<size_t>{faceDims[0] * maxVertexPerFace}, vector<size_t>{faceDims[0] * maxVertexPerFace});
+
+    size_t index = 0;
+    for (size_t j = 0; j < dims[1] - 1; j++) {
+        for (size_t i = 0; i < dims[0] - 1; i++) {
+            vertexOnFace[0][index + 0] = j * (dims[0] - 1) + i;
+            vertexOnFace[0][index + 1] = j * (dims[0] - 1) + i + 1;
+            vertexOnFace[0][index + 2] = (j + 1) * (dims[0] - 1) + i;
+
+            vertexOnFace[0][index + 3] = j * (dims[0] - 1) + i + 1;
+            vertexOnFace[0][index + 4] = (j + 1) * (dims[0] - 1) + i + 1;
+            vertexOnFace[0][index + 5] = (j + 1) * (dims[0] - 1) + i;
+            index += 2 * maxVertexPerFace;
+        }
+    }
+
+    std::vector<int *> faceOnVertex = AllocateBlocksType<int>(vector<size_t>{vertexDims[0] * maxFacePerVertex}, vector<size_t>{vertexDims[0] * maxFacePerVertex});
+
+    index = 0;
+    for (size_t j = 0; j < dims[1]; j++) {
+        for (size_t i = 0; i < dims[0]; i++) {
+            vertexOnFace[0][index + 0] = j * (dims[0] - 1) + i;
+            vertexOnFace[0][index + 1] = j * (dims[0] - 1) + i + 1;
+            vertexOnFace[0][index + 2] = (j + 1) * (dims[0] - 1) + i;
+
+            vertexOnFace[0][index + 3] = j * (dims[0] - 1) + i + 1;
+            vertexOnFace[0][index + 4] = (j + 1) * (dims[0] - 1) + i + 1;
+            vertexOnFace[0][index + 5] = (j + 1) * (dims[0] - 1) + i;
+            index += 6;
+        }
+    }
+
+    UnstructuredGridCoordless xug(vertexDims, faceDims, edgeDims, bs1d, xCoordBlocks, 2, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, vertexOffset,
+                                  faceOffset);
+
+    RegularGrid xrg(dims, bs, xCoordBlocks, minu, maxu);
+    MakeRampOnAxis(&rg, minu[X], maxu[X], X);
+
+    std::vector<float *> yCoordBlocks = AllocateBlocks(bs, dims);
+
+    RegularGrid yrg(dims, bs, yCoordBlocks, minu, maxu);
+    MakeRampOnAxis(&rg, minu[Y], maxu[Y], Y);
+
+    const int *vertexOnFace = conn_blkvec[0];
+    const int *faceOnVertex = conn_blkvec[1];
+    const int *faceOnFace = conn_blkvec.size() == 3 ? conn_blkvec[2] : NULL;
+
+    UnstructuredGridCoordless xug(vertexDims, faceDims, edgeDims, bs, xcblkptrs, 2, vertexOnFace, faceOnVertex, faceOnFace, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
 
     vector<float *> blocks = AllocateBlocks(bs, dims);
     StretchedGrid * sg = new StretchedGrid(dims, bs, blocks, xCoords, yCoords, zCoords);
