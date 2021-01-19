@@ -65,6 +65,9 @@ public:
 
     void ClearText(int type = -1);
 
+    //! Draw Axis arrows
+    void DrawAxisArrows();
+
 #ifdef VAPOR3_0_0_ALPHA
     //! Clear all the text objects
     void invalidateCache();
@@ -126,10 +129,6 @@ private:
     void       renderText(double text, double coords[], AxisAnnotation *aa = NULL);
     Transform *getTransform(string dataMgr = "");
     void       convertPointToLonLat(double &xCoord, double &yCoord);
-
-    // Draw Axis arrows
-    //
-    void drawAxisArrows(std::vector<double> minExts, std::vector<double> maxExts, Transform *transform);
 
 #ifdef VAPOR3_0_0_ALPHA
     //! Static method to convert axis coordinates between user and lat-lon

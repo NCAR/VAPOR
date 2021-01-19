@@ -19,6 +19,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cfloat>
+#include <numeric>
 #include <sstream>
 #include <iomanip>
 
@@ -429,11 +430,14 @@ void AnnotationRenderer::InScenePaint(size_t ts)
     mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
     vpParams->SetModelViewMatrix(mvMatrix);
 
-    if (vfParams->GetShowAxisArrows()) {
-        vector<double> minExts, maxExts;
-        m_dataStatus->GetActiveExtents(m_paramsMgr, m_winName, ts, minExts, maxExts);
+    /*if (vfParams->GetShowAxisArrows()) {
+
+        vector <double> minExts, maxExts;
+        m_dataStatus->GetActiveExtents(
+            m_paramsMgr, m_winName, ts, minExts, maxExts
+        );
         drawAxisArrows(minExts, maxExts, t);
-    }
+    }*/
 
     //	mm->MatrixModeModelView();
     //	mm->PopMatrix();
@@ -674,9 +678,19 @@ void AnnotationRenderer::renderText(double text, double coord[], AxisAnnotation 
     label.DrawText(glm::vec3(coord[0], coord[1], coord[2]), textString);
 }
 
-void AnnotationRenderer::drawAxisArrows(vector<double> minExts, vector<double> maxExts, Transform *transform)
+// void AnnotationRenderer::drawAxisArrows(
+//	vector <double> minExts,
+//	vector <double> maxExts,
+void AnnotationRenderer::DrawAxisArrows()
 {
+    vector<double>      minExts, maxExts;
+    std::vector<string> names = m_paramsMgr->GetDataMgrNames();
+    m_dataStatus->GetActiveExtents(m_paramsMgr, m_winName, _currentTimestep, minExts, maxExts);
     VAssert(minExts.size() == maxExts.size());
+
+    ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
+    Transform *      transform = vpParams->GetTransform(names[0]);
+
     while (minExts.size() < 3) {
         minExts.push_back(0.0);
         maxExts.push_back(0.0);
@@ -700,18 +714,65 @@ void AnnotationRenderer::drawAxisArrows(vector<double> minExts, vector<double> m
 
     mm->MatrixModeModelView();
     mm->PushMatrix();
-    mm->Translate(origin[0], origin[1], origin[2]);
-    mm->Scale(len, len, len);
+    //    mm->Translate(origin[0], origin[1], origin[2]);
+    //    mm->Scale(len, len, len);
 
-    vector<string> names = m_paramsMgr->GetDataMgrNames();
+    glDepthMask(GL_FALSE);
+    glDisable(GL_DEPTH_TEST);
+
+    // GLint viewport[4];                  // Where The Viewport Values Will Be Stored
+    // glGetIntegerv(GL_VIEWPORT, viewport);           // Retrieves The Viewport Values (X, Y, Width, Height)
+    std::vector<int> v = _glManager->GetViewport();
+    GLint            viewport[4] = {v[0], v[1], v[2], v[3]};
+    double           modelview[16];    // Where The 16 Doubles Of The Modelview Matrix Are To Be Stored
+    _glManager->matrixManager->GetDoublev(MatrixManager::Mode::ModelView, modelview);
+    double projection[16];    // Where The 16 Doubles Of The Projection Matrix Are To Be Stored
+    _glManager->matrixManager->GetDoublev(MatrixManager::Mode::Projection, projection);
+    GLfloat winX, winY, winZ;    // Holds Our X, Y and Z Coordinates
+    winX = (float)60;            // Holds The Mouse X Coordinate
+    winY = (float)50;
+    // winY = (float)viewport[3] - winY;           // Subtract The Current Mouse Y Coordinate From The Screen Height.
+    glReadPixels(winX, winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
+    GLdouble posX, posY, posZ;    // Hold The Final Values
+    // gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+    gluUnProject(winX, winY, .15, modelview, projection, viewport, &posX, &posY, &posZ);
+    mm->Translate(posX, posY, posZ);
+
+    // Need scale algorithm here
+    // https://gamedev.stackexchange.com/questions/24968/constant-size-geometries
+    // const double fov = M_PI / 4.0;  //suppose 45 degrees FOV
+    const double fov = m_paramsMgr->GetViewpointParams(m_winName)->GetFOV();
+    // float cameraObjectDistance = Vector3.Distance(Camera.Position, Object.Position);
+    double m[16];
+    double cameraPosD[3], cameraUpD[3], cameraDirD[3];
+    m_paramsMgr->GetViewpointParams(m_winName)->GetModelViewMatrix(m);
+    m_paramsMgr->GetViewpointParams(m_winName)->ReconstructCamera(m, cameraPosD, cameraUpD, cameraDirD);
+    glm::vec3 cameraPos = glm::vec3(cameraPosD[0], cameraPosD[1], cameraPosD[2]);
+
+    // Un-scale a 3D object
+    // https://gamedev.stackexchange.com/questions/24968/constant-size-geometries
+    float cameraObjectDistance = sqrt(pow(cameraPos[0] - posX, 2) + pow(cameraPos[1] - posY, 2) + pow(cameraPos[2] - posZ, 2));
+    float worldSize = (2 * tan(fov / 2.0)) * cameraObjectDistance;
+    // float size = 0.25f * worldSize;
+    // float size = 0.0001f * worldSize;
+    float size = 0.05f * worldSize;
+    std::cout << size << std::endl;
+    mm->Scale(size, size, size);
+
+    // glDepthMask(GL_FALSE);
+    // glDisable(GL_DEPTH_TEST);
+
+    // glClear(GL_DEPTH_BUFFER_BIT);
+
     vector<double> scale = transform->GetScales();
-    mm->Scale(1 / scale[0], 1 / scale[1], 1 / scale[2]);
+    // mm->Scale(1/scale[0], 1/scale[1], 1/scale[2]);
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     lgl->Color3f(1, 0, 0);
     glEnable(GL_LINE_SMOOTH);
 
     lgl->Begin(GL_LINES);
+
     lgl->Vertex3f(0, 0, 0);
     lgl->Vertex3f(1, 0, 0);
     lgl->End();
@@ -781,6 +842,8 @@ void AnnotationRenderer::drawAxisArrows(vector<double> minExts, vector<double> m
     lgl->Vertex3f(0, -.1, .8);
     lgl->Vertex3f(.1, 0, .8);
     lgl->End();
+
+    glDepthRange(0, 1.0);
 
     mm->PopMatrix();
     glDisable(GL_LINE_SMOOTH);
