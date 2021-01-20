@@ -9,6 +9,7 @@
 PFileSelector::PFileSelector(const std::string &tag, const std::string &label) : PLineItem(tag, label, _pathTexbox = new VLineEdit_Deprecated, _button = new VPushButton("Select"))
 {
     _pathTexbox->SetReadOnly(true);
+    _pathTexbox->setSizePolicy(QSizePolicy::Expanding, _pathTexbox->sizePolicy().verticalPolicy());
     connect(_button, &VPushButton::ButtonClicked, this, &PFileSelector::buttonClicked);
 }
 
