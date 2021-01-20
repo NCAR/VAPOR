@@ -1,4 +1,5 @@
 if (BUILD_TEST_APPS)
+	add_subdirectory (advection)
 	add_subdirectory (datamgr)
 	add_subdirectory (ftle)
 	add_subdirectory (grid_iter)

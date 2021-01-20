@@ -230,18 +230,21 @@ int FlowRenderer::_paintGL(bool fast)
             if (params->GetFlowDirection() == 1)    // backward integration
                 deltaT *= -1.0f;
             int numOfSteps = params->GetSteadyNumOfSteps();
-            int total = numOfSteps - (_advection.GetMaxNumOfPart() - 1);
+            // existing number of advection steps
+            numOfSteps -= (_advection.GetMaxNumOfPart() - 1);
+
+            int total = numOfSteps;
             int done = 0;
 
             if (_2ndAdvection) total += numOfSteps - (_2ndAdvection->GetMaxNumOfPart() - 1);
 
             Progress::Start("Advect particles", total, true);
-            for (size_t i = _advection.GetMaxNumOfPart() - 1;    // existing number of advection steps
-                 i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++) {
-                Progress::Update(done++);
-                if (Progress::Cancelled()) return 0;
-                rv = _advection.AdvectOneStep(&_velocityField, deltaT);
-            }
+
+            _advection.AdvectSteps(&_velocityField, deltaT, numOfSteps);
+            // Move inside advection loop
+            // Progress::Update(done++);
+            //     if (Progress::Cancelled())
+            //        return 0;
             if (!_2ndAdvection) Progress::Finish();
 
             /* If the advection is bi-directional */
@@ -249,11 +252,14 @@ int FlowRenderer::_paintGL(bool fast)
                 assert(deltaT > 0.0f);
                 float deltaT2 = deltaT * -1.0f;
                 rv = flow::ADVECT_HAPPENED;
-                for (size_t i = _2ndAdvection->GetMaxNumOfPart() - 1; i < numOfSteps && rv == flow::ADVECT_HAPPENED; i++) {
-                    Progress::Update(done++);
-                    if (Progress::Cancelled()) return 0;
-                    rv = _2ndAdvection->AdvectOneStep(&_velocityField, deltaT2);
-                }
+                int numOfSteps = params->GetSteadyNumOfSteps();
+                // existing number of advection steps
+                numOfSteps -= (_2ndAdvection->GetMaxNumOfPart() - 1);
+                rv = _2ndAdvection->AdvectSteps(&_velocityField, deltaT2, numOfSteps);
+                // Move inside advection loop
+                // Progress::Update(done++);
+                //     if (Progress::Cancelled())
+                //        return 0;
                 Progress::Finish();
             }
 
