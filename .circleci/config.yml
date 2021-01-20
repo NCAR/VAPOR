@@ -27,9 +27,7 @@ jobs:
       - run:
           name: cmake and make
           command: |
-            cd /VAPOR
-            git pull
-            git checkout $CIRCLE_BRANCH
+            mkdir build
             cd build
             cmake -DBUILD_TEST_APPS=ON ..
             make -j7 &> /tmp/output.txt
@@ -40,10 +38,10 @@ jobs:
       - run:
           name: Smoke test
           command: |
-            python3 /VAPOR/test_apps/smokeTests/smokeTests.py --testDataRoot=/smokeTestData/smokeTestData --binaryRoot=/VAPOR/build/bin --resultsDir=/VAPOR/test_apps/smokeTests/testResults
+            python3 /root/project/test_apps/smokeTests/smokeTests.py --testDataRoot=/smokeTestData/smokeTestData --binaryRoot=/root/project/build/bin --resultsDir=/root/project/test_apps/smokeTests/testResults
 
       - store_artifacts:
-          path: /VAPOR/test_apps/smokeTests/testResults
+          path: /project/test_apps/smokeTests/testResults
 
       - run:
           name: check for warnings
@@ -114,9 +112,8 @@ jobs:
           name: cmake3 and make
           command: |
             ls -lrth /usr/local/VAPOR-Deps
-            cd /VAPOR
-            git pull
-            git checkout $CIRCLE_BRANCH
+            cd /root/project
+            mkdir build
             cd build
             cmake3 ..
             make -j7
