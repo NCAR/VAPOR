@@ -17,6 +17,7 @@ extern const CMakeConfigStringType VERSION_STRING_FULL;
 
 extern const CMakeConfigStringType BUILD_TYPE;
 extern const CMakeConfigStringType SOURCE_DIR;
+extern const CMakeConfigStringType THIRD_PARTY_DIR;
 
 extern const CMakeConfigStringType PYTHON_VERSION;
 extern const CMakeConfigStringType PYTHON_DIR;

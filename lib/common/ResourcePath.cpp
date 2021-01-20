@@ -66,22 +66,22 @@ string GetInstalledResourceRoot()
 
 std::string Wasp::GetResourcePath(const std::string &name)
 {
-    string posixPath;
+    string path;
+
+#define TRY_PATH(p)                            \
+    path = FileUtils::POSIXPathToCurrentOS(p); \
+    if (FileUtils::Exists(path)) return path;
 
 #if FORCE_USE_DEV_LIBS
-    posixPath = FileUtils::JoinPaths({SOURCE_DIR, name});
+    TRY_PATH(FileUtils::JoinPaths({SOURCE_DIR, name}));
 #else
-    posixPath = FileUtils::JoinPaths({GetInstalledResourceRoot(), name});
-
-    if (!FileUtils::Exists(FileUtils::POSIXPathToCurrentOS(posixPath))) posixPath = FileUtils::JoinPaths({SOURCE_DIR, name});
-
-    if (!FileUtils::Exists(FileUtils::POSIXPathToCurrentOS(posixPath))) posixPath = CallGetAppPathForResourceName(name);
+    TRY_PATH(FileUtils::JoinPaths({GetInstalledResourceRoot(), name}));
+    TRY_PATH(FileUtils::JoinPaths({SOURCE_DIR, name}));
+    TRY_PATH(FileUtils::JoinPaths({THIRD_PARTY_DIR, name}));
+    TRY_PATH(CallGetAppPathForResourceName(name));
 #endif
 
-    string path = FileUtils::POSIXPathToCurrentOS(posixPath);
-    if (!FileUtils::Exists(path)) path = "";
-
-    return path;
+    return "";
 }
 
 std::string Wasp::GetSharePath(const std::string &name) { return GetResourcePath("share/" + name); }
