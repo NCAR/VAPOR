@@ -10,25 +10,32 @@ static RenderEventRouterRegistrar<ContourEventRouter> registrar(ContourEventRout
 
 ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : RenderEventRouterGUI(ce, ContourParams::GetClassType())
 {
-    AddSubtab("Variables", new PGroup({new PSection("Variable Selection",
-                                                    {
-                                                        new PScalarVariableSelector,
-                                                        new PHeightVariableSelector,
-                                                    }),
-                                       new PFidelitySection}));
+    // clang-format off
 
+    AddSubtab("Variables", new PGroup({
+        new PSection("Variable Selection", {
+            new PScalarVariableSelector,
+            new PHeightVariableSelector,
+        }),
+        new PFidelitySection
+    }));
+    
     AddSubtab("Appearance", new PGroup({
-                                new PTFEditor(RenderParams::_variableNameTag, {PTFEditor::Default, PTFEditor::RegularIsoArray}),
-                                new PSection("Contour Lines",
-                                             {
-                                                 _spacingSlider = new PDoubleSliderEditHLI<CP>("Spacing", &CP::GetContourSpacing, &CP::SetContourSpacing),
-                                                 (new PIntegerSliderEditHLI<CP>("Count", &CP::GetContourCount, &CP::SetContourCount))->SetRange(1, 50),
-                                                 _minValueSlider = new PDoubleSliderEditHLI<CP>("Minimum Value", &CP::GetContourMin, &CP::SetContourMin),
-                                             }),
-                            }));
-
+        new PTFEditor(RenderParams::_variableNameTag, {
+            PTFEditor::Default,
+            PTFEditor::RegularIsoArray
+        }),
+        new PSection("Contour Lines", {
+            _spacingSlider = new PDoubleSliderEditHLI<CP>("Spacing", &CP::GetContourSpacing, &CP::SetContourSpacing),
+            (new PIntegerSliderEditHLI<CP>("Count", &CP::GetContourCount, &CP::SetContourCount))->SetRange(1, 50),
+            _minValueSlider = new PDoubleSliderEditHLI<CP>("Minimum Value", &CP::GetContourMin, &CP::SetContourMin),
+        }),
+    }));
+    
     AddSubtab("Geometry", new PGeometrySubtab);
     AddSubtab("Annotation", new PAnnotationColorbarWidget);
+
+    // clang-format on
 }
 
 void ContourEventRouter::_updateTab()

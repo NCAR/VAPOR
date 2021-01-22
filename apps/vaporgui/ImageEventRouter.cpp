@@ -10,14 +10,26 @@ static RenderEventRouterRegistrar<ImageEventRouter> registrar(ImageEventRouter::
 
 ImageEventRouter::ImageEventRouter(QWidget *parent, ControlExec *ce) : RenderEventRouterGUI(ce, ImageParams::GetClassType())
 {
-    AddSubtab("Variables", new PGroup({new PSection("Variable Selection", {new PHeightVariableSelector}), new PFidelitySection}));
+    // clang-format off
 
-    AddSubtab("Appearance",
-              new PSection("Image", {new PCheckbox(IP::_isGeoRefTag, "Geo Reference"), new PCheckbox(IP::_ignoreTransparencyTag, "Ingore Transparency"),
-                                     (new PDoubleSliderEdit(IP::_constantOpacityTag, "Opacity"))->EnableDynamicUpdate(),
-                                     (new PFileOpenSelector(IP::_fileNameTag, "Image File"))->SetFileTypeFilter("TIFF files, tiled images (*.tiff *.tif *.gtif *.tms)"), new PTMSLODInput()}));
-
+    AddSubtab("Variables", new PGroup({
+        new PSection("Variable Selection", {
+            new PHeightVariableSelector
+        }),
+        new PFidelitySection
+    }));
+    
+    AddSubtab("Appearance", new PSection("Image", {
+        new PCheckbox(IP::_isGeoRefTag, "Geo Reference"),
+        new PCheckbox(IP::_ignoreTransparencyTag, "Ingore Transparency"),
+        (new PDoubleSliderEdit(IP::_constantOpacityTag, "Opacity"))->EnableDynamicUpdate(),
+        (new PFileOpenSelector(IP::_fileNameTag, "Image File"))->SetFileTypeFilter("TIFF files, tiled images (*.tiff *.tif *.gtif *.tms)"),
+        new PTMSLODInput()
+    }));
+    
     AddSubtab("Geometry", new PGeometrySubtab);
+
+    // clang-format on
 }
 
 string ImageEventRouter::_getDescription() const
