@@ -14,6 +14,7 @@
 //
 //----------------------------------------------------------------------------
 
+
 #include <vapor/glutil.h>    // Must be included first!!!
 #include <cstdlib>
 #include <cstdio>
@@ -34,12 +35,15 @@
 #include <vapor/ResourcePath.h>
 #include "vapor/LegacyGL.h"
 #include "vapor/TextLabel.h"
+#include "vapor/AnnotationParams.h"
 #define INCLUDE_DEPRECATED_LEGACY_VECTOR_MATH
 #include <vapor/LegacyVectorMath.h>
 
 #define X 0
 #define Y 1
 #define Z 2
+
+#define ARROW_SCALE_FACTOR .25
 
 using namespace VAPoR;
 using namespace Wasp;
@@ -444,6 +448,7 @@ void AnnotationRenderer::InScenePaint(size_t ts)
     AxisAnnotation *aa = vfParams->GetAxisAnnotation();
     if (aa->GetAxisAnnotationEnabled()) { drawAxisTics(aa); }
 
+
     mm->MatrixModeModelView();
     mm->PopMatrix();
 
@@ -678,100 +683,81 @@ void AnnotationRenderer::renderText(double text, double coord[], AxisAnnotation 
     label.DrawText(glm::vec3(coord[0], coord[1], coord[2]), textString);
 }
 
-// void AnnotationRenderer::drawAxisArrows(
-//	vector <double> minExts,
-//	vector <double> maxExts,
+// Find the world corrdinates of the user-selected screen coordinates, and translate the current matrix to that point
+//
+void AnnotationRenderer::_configureMatrixForArrows(MatrixManager *matrixManager)
+{
+    matrixManager->MatrixModeModelView();
+    matrixManager->PushMatrix();
+
+
+    // Calculate the pixel location on the screen from the user's value, which is between 0 and 1
+    //
+    AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
+    double            winX = vfParams->GetAxisArrowXPos();    // X position of arrows, between 0 and 1
+    double            winY = vfParams->GetAxisArrowYPos();    // Y position of arrows, between 0 and 1
+    // Scale the Params values by the window width/height
+    std::vector<int> viewport = _glManager->GetViewport();
+    winX = winX * viewport[2];    // viewport[2] is window width
+    winY = winY * viewport[3];    // viewport[3] is window hight
+
+    // Gather parameters for glm::unProject
+    //
+    // glm::unProject requires glm::mat4 for the modelview and projection matrices, so we need to
+    // convert from vapor's array representation to glm::mat4
+    double modelview[16], projection[16];
+    _glManager->matrixManager->GetDoublev(MatrixManager::Mode::ModelView, modelview);
+    _glManager->matrixManager->GetDoublev(MatrixManager::Mode::Projection, projection);
+    glm::mat4 mat4modelview = glm::make_mat4(modelview);
+    glm::mat4 mat4projection = glm::make_mat4(projection);
+
+    // glm::unProject requres a glm::vec4 for the viewport, so we need to convert it from its std::vector<int>
+    glm::vec4 vec4viewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+
+    // Now un-project to find the world coordinates of the selected pixel, and and translate to it for drawing
+    //
+    glm::vec3 win = {winX, winY, .15};
+    glm::vec3 coords = glm::unProject(win, mat4modelview, mat4projection, vec4viewport);
+    _glManager->matrixManager->Translate(coords[0], coords[1], coords[2]);
+
+    // Finally, apply an scale factor that cancels the scaling done when zooming in and out, so that the arrows
+    // retain a constant size on the screen.  This code was derived from
+    // https://gamedev.stackexchange.com/questions/24968/constant-size-geometries with the exception of using
+    // glm::unproject instead of the deprecated gluUnProject function.
+    //
+    // double modelview[16];
+    //_glManager->matrixManager->GetDoublev(MatrixManager::Mode::ModelView,  modelview);
+    const double fov = m_paramsMgr->GetViewpointParams(m_winName)->GetFOV();
+    double       cameraPosD[3], cameraUpD[3], cameraDirD[3];
+    m_paramsMgr->GetViewpointParams(m_winName)->ReconstructCamera(modelview, cameraPosD, cameraUpD, cameraDirD);
+    glm::vec3 cameraPos = glm::vec3(cameraPosD[0], cameraPosD[1], cameraPosD[2]);
+    float     cameraObjectDistance = sqrt(pow(cameraPos[0] - coords[0], 2) + pow(cameraPos[1] - coords[1], 2) + pow(cameraPos[2] - coords[2], 2));
+    float     worldSize = (2 * tan(fov / 2.0)) * cameraObjectDistance;
+    float     size = vfParams->GetAxisArrowSize() * worldSize * ARROW_SCALE_FACTOR;
+    matrixManager->Scale(size, size, size);
+}
+
 void AnnotationRenderer::DrawAxisArrows()
 {
-    vector<double>      minExts, maxExts;
-    std::vector<string> names = m_paramsMgr->GetDataMgrNames();
-    m_dataStatus->GetActiveExtents(m_paramsMgr, m_winName, _currentTimestep, minExts, maxExts);
-    VAssert(minExts.size() == maxExts.size());
-
-    ViewpointParams *vpParams = m_paramsMgr->GetViewpointParams(m_winName);
-    Transform *      transform = vpParams->GetTransform(names[0]);
-
-    while (minExts.size() < 3) {
-        minExts.push_back(0.0);
-        maxExts.push_back(0.0);
-    }
-
-    float origin[3];
-    float maxLen = -1.f;
-
     AnnotationParams *vfParams = m_paramsMgr->GetAnnotationParams(m_winName);
-
-    vector<double> axisArrowCoords = vfParams->GetAxisArrowCoords();
-
-    for (int i = 0; i < 3; i++) {
-        origin[i] = minExts[i] + (axisArrowCoords[i]) * (maxExts[i] - minExts[i]);
-        if (maxExts[i] - minExts[i] > maxLen) { maxLen = maxExts[i] - minExts[i]; }
-    }
-    float len = maxLen * 0.2f;
+    if (!vfParams->GetAxisArrowEnabled()) { return; }
 
     LegacyGL *     lgl = _glManager->legacy;
     MatrixManager *mm = _glManager->matrixManager;
 
-    mm->MatrixModeModelView();
-    mm->PushMatrix();
-    //    mm->Translate(origin[0], origin[1], origin[2]);
-    //    mm->Scale(len, len, len);
+    _configureMatrixForArrows(mm);
 
     glDepthMask(GL_FALSE);
     glDisable(GL_DEPTH_TEST);
 
-    // GLint viewport[4];                  // Where The Viewport Values Will Be Stored
-    // glGetIntegerv(GL_VIEWPORT, viewport);           // Retrieves The Viewport Values (X, Y, Width, Height)
-    std::vector<int> v = _glManager->GetViewport();
-    GLint            viewport[4] = {v[0], v[1], v[2], v[3]};
-    double           modelview[16];    // Where The 16 Doubles Of The Modelview Matrix Are To Be Stored
-    _glManager->matrixManager->GetDoublev(MatrixManager::Mode::ModelView, modelview);
-    double projection[16];    // Where The 16 Doubles Of The Projection Matrix Are To Be Stored
-    _glManager->matrixManager->GetDoublev(MatrixManager::Mode::Projection, projection);
-    GLfloat winX, winY, winZ;    // Holds Our X, Y and Z Coordinates
-    winX = (float)60;            // Holds The Mouse X Coordinate
-    winY = (float)50;
-    // winY = (float)viewport[3] - winY;           // Subtract The Current Mouse Y Coordinate From The Screen Height.
-    glReadPixels(winX, winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
-    GLdouble posX, posY, posZ;    // Hold The Final Values
-    // gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
-    gluUnProject(winX, winY, .15, modelview, projection, viewport, &posX, &posY, &posZ);
-    mm->Translate(posX, posY, posZ);
-
-    // Need scale algorithm here
-    // https://gamedev.stackexchange.com/questions/24968/constant-size-geometries
-    // const double fov = M_PI / 4.0;  //suppose 45 degrees FOV
-    const double fov = m_paramsMgr->GetViewpointParams(m_winName)->GetFOV();
-    // float cameraObjectDistance = Vector3.Distance(Camera.Position, Object.Position);
-    double m[16];
-    double cameraPosD[3], cameraUpD[3], cameraDirD[3];
-    m_paramsMgr->GetViewpointParams(m_winName)->GetModelViewMatrix(m);
-    m_paramsMgr->GetViewpointParams(m_winName)->ReconstructCamera(m, cameraPosD, cameraUpD, cameraDirD);
-    glm::vec3 cameraPos = glm::vec3(cameraPosD[0], cameraPosD[1], cameraPosD[2]);
-
-    // Un-scale a 3D object
-    // https://gamedev.stackexchange.com/questions/24968/constant-size-geometries
-    float cameraObjectDistance = sqrt(pow(cameraPos[0] - posX, 2) + pow(cameraPos[1] - posY, 2) + pow(cameraPos[2] - posZ, 2));
-    float worldSize = (2 * tan(fov / 2.0)) * cameraObjectDistance;
-    // float size = 0.25f * worldSize;
-    // float size = 0.0001f * worldSize;
-    float size = 0.05f * worldSize;
-    std::cout << size << std::endl;
-    mm->Scale(size, size, size);
-
-    // glDepthMask(GL_FALSE);
-    // glDisable(GL_DEPTH_TEST);
-
-    // glClear(GL_DEPTH_BUFFER_BIT);
-
-    vector<double> scale = transform->GetScales();
-    // mm->Scale(1/scale[0], 1/scale[1], 1/scale[2]);
-
+    // Begin drawing
+    //
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     lgl->Color3f(1, 0, 0);
     glEnable(GL_LINE_SMOOTH);
 
     lgl->Begin(GL_LINES);
+
 
     lgl->Vertex3f(0, 0, 0);
     lgl->Vertex3f(1, 0, 0);
@@ -794,6 +780,7 @@ void AnnotationRenderer::DrawAxisArrows()
     lgl->Vertex3f(.8, 0, -.1);
     lgl->Vertex3f(.8, .1, 0);
     lgl->End();
+
 
     lgl->Color3f(0, 1, 0);
     lgl->Begin(GL_LINES);
@@ -818,6 +805,7 @@ void AnnotationRenderer::DrawAxisArrows()
     lgl->Vertex3f(0, .8, -.1);
     lgl->Vertex3f(.1, .8, 0);
     lgl->End();
+
 
     lgl->Color3f(0, 0.3, 1);
     lgl->Begin(GL_LINES);

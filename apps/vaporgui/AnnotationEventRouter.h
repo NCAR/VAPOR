@@ -20,6 +20,7 @@
 #ifndef ANNOTATIONEVENTROUTER_H
 #define ANNOTATIONEVENTROUTER_H
 
+
 #include <qobject.h>
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
@@ -33,6 +34,8 @@ QT_USE_NAMESPACE
 namespace VAPoR {
 class ControlExec;
 }
+
+class PGroup;
 
 class AnnotationEventRouter : public QWidget, public Ui_AnnotationGUI, public EventRouter {
     Q_OBJECT
@@ -75,10 +78,6 @@ protected slots:
     void setDomainFrameEnabled();
     void setTimeColor();
     void setLatLonAnnot(bool);
-    void setAxisArrowsEnabled();
-    void setXArrowPosition();
-    void setYArrowPosition();
-    void setZArrowPosition();
     void timeAnnotationChanged();
     void timeLLXChanged();
     void timeLLYChanged();
@@ -151,6 +150,8 @@ private:
 
     AnimationParams *_ap;
     bool             _animConnected;
+
+    PGroup *_aa;
 };
 
 #endif    // ANNOTATIONEVENTROUTER_H

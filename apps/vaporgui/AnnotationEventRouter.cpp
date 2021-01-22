@@ -45,6 +45,7 @@
 #include "AnnotationEventRouter.h"
 #include "vapor/ControlExecutive.h"
 #include "EventRouter.h"
+#include "PWidgets.h"
 
 using namespace VAPoR;
 
@@ -81,7 +82,14 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
 
     _animConnected = false;
     _ap = NULL;
+
+    _aa = new PGroup({new PSection("Orientation Arrows", {(new PCheckbox(AnnotationParams::AxisArrowEnabledTag, "Show arrows (XYZ->RGB)")),
+                                                          (new PDoubleSliderEdit(AnnotationParams::AxisArrowSizeTag, "Size"))->SetRange(0.f, 1.f)->EnableDynamicUpdate(),
+                                                          (new PDoubleSliderEdit(AnnotationParams::AxisArrowXPosTag, "X Position"))->SetRange(0.f, 1.f)->EnableDynamicUpdate(),
+                                                          (new PDoubleSliderEdit(AnnotationParams::AxisArrowYPosTag, "Y Position"))->SetRange(0.f, 1.f)->EnableDynamicUpdate()})});
+    layout()->addWidget(_aa);
 }
+
 
 AnnotationEventRouter::~AnnotationEventRouter() {}
 
@@ -99,9 +107,6 @@ void AnnotationEventRouter::connectAnnotationWidgets()
     connect(yTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setYTicOrientation(int)));
     connect(zTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setZTicOrientation(int)));
     connect(copyRegionButton, SIGNAL(pressed()), this, SLOT(copyRegionFromRenderer()));
-    connect(_arrowXEdit, SIGNAL(returnPressed()), this, SLOT(setXArrowPosition()));
-    connect(_arrowYEdit, SIGNAL(returnPressed()), this, SLOT(setYArrowPosition()));
-    connect(_arrowZEdit, SIGNAL(returnPressed()), this, SLOT(setZArrowPosition()));
     connect(_timeCombo, SIGNAL(activated(int)), this, SLOT(timeAnnotationChanged()));
     connect(_timeLLXEdit, SIGNAL(returnPressed()), this, SLOT(timeLLXChanged()));
     connect(_timeLLYEdit, SIGNAL(returnPressed()), this, SLOT(timeLLYChanged()));
@@ -112,7 +117,6 @@ void AnnotationEventRouter::connectAnnotationWidgets()
     connect(domainColorButton, SIGNAL(clicked()), this, SLOT(setDomainColor()));
     connect(domainFrameCheckbox, SIGNAL(clicked()), this, SLOT(setDomainFrameEnabled()));
     connect(regionColorButton, SIGNAL(clicked()), this, SLOT(setRegionColor()));
-    connect(_axisArrowCheckbox, SIGNAL(clicked()), this, SLOT(setAxisArrowsEnabled()));
 }
 
 void AnnotationEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
@@ -134,13 +138,7 @@ void AnnotationEventRouter::_updateTab()
 
     domainFrameCheckbox->setChecked(vParams->GetUseDomainFrame());
 
-    // Axis arrows:
-    //
-    vector<double> axisArrowCoords = vParams->GetAxisArrowCoords();
-    _arrowXEdit->setText(QString::number(axisArrowCoords[0]));
-    _arrowYEdit->setText(QString::number(axisArrowCoords[1]));
-    _arrowZEdit->setText(QString::number(axisArrowCoords[2]));
-    _axisArrowCheckbox->setChecked(vParams->GetShowAxisArrows());
+    _aa->Update(vParams);
 
     return;
 }
@@ -198,6 +196,7 @@ void AnnotationEventRouter::addRendererToCombo(string visName, string typeName, 
     std::vector<string> renNames;
     ParamsMgr *         paramsMgr = _controlExec->GetParamsMgr();
     renNames = paramsMgr->GetRenderParamInstances(visName, dataSetName, typeName);
+
 
     for (int k = 0; k < renNames.size(); k++) {
         string  displayName = visAbb + ":" + dataSetName + ":" + typeAbb + ":" + renNames[k];
@@ -562,6 +561,7 @@ void AnnotationEventRouter::updateColorHelper(const vector<double> &rgb, QWidget
     w->setPalette(pal);
 }
 
+
 void AnnotationEventRouter::setRegionColor()
 {
     vector<double> rgb;
@@ -601,6 +601,8 @@ void AnnotationEventRouter::updateDomainColor()
 
     updateColorHelper(rgb, domainColorEdit);
 }
+
+
 
 void AnnotationEventRouter::setBackgroundColor()
 {
@@ -847,31 +849,4 @@ void AnnotationEventRouter::setAxisTextSize(int size)
 {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     aa->SetAxisFontSize(size);
-}
-
-void AnnotationEventRouter::setAxisArrowsEnabled()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetShowAxisArrows(_axisArrowCheckbox->isChecked());
-}
-
-void AnnotationEventRouter::setXArrowPosition()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    float             pos = _arrowXEdit->text().toFloat();
-    aParams->SetXAxisArrowPosition(pos);
-}
-
-void AnnotationEventRouter::setYArrowPosition()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    float             pos = _arrowYEdit->text().toFloat();
-    aParams->SetYAxisArrowPosition(pos);
-}
-
-void AnnotationEventRouter::setZArrowPosition()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    float             pos = _arrowZEdit->text().toFloat();
-    aParams->SetZAxisArrowPosition(pos);
 }
