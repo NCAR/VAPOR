@@ -22,7 +22,6 @@
 #ifndef ANNOTATIONPARAMS_H
 #define ANNOTATIONPARAMS_H
 
-
 #include <vector>
 
 #include <vapor/common.h>
@@ -62,7 +61,6 @@ public:
     //! Copy from already existing instance
     //
     AnnotationParams(const AnnotationParams &rhs);
-
 
     virtual ~AnnotationParams(){};
 

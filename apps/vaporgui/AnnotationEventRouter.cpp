@@ -90,7 +90,6 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
     layout()->addWidget(_aa);
 }
 
-
 AnnotationEventRouter::~AnnotationEventRouter() {}
 
 void AnnotationEventRouter::connectAnnotationWidgets()
@@ -196,7 +195,6 @@ void AnnotationEventRouter::addRendererToCombo(string visName, string typeName, 
     std::vector<string> renNames;
     ParamsMgr *         paramsMgr = _controlExec->GetParamsMgr();
     renNames = paramsMgr->GetRenderParamInstances(visName, dataSetName, typeName);
-
 
     for (int k = 0; k < renNames.size(); k++) {
         string  displayName = visAbb + ":" + dataSetName + ":" + typeAbb + ":" + renNames[k];
@@ -561,7 +559,6 @@ void AnnotationEventRouter::updateColorHelper(const vector<double> &rgb, QWidget
     w->setPalette(pal);
 }
 
-
 void AnnotationEventRouter::setRegionColor()
 {
     vector<double> rgb;
@@ -601,8 +598,6 @@ void AnnotationEventRouter::updateDomainColor()
 
     updateColorHelper(rgb, domainColorEdit);
 }
-
-
 
 void AnnotationEventRouter::setBackgroundColor()
 {

@@ -68,7 +68,6 @@ public:
     //! Draw Axis arrows
     void DrawAxisArrows();
 
-
 #ifdef VAPOR3_0_0_ALPHA
     //! Clear all the text objects
     void invalidateCache();

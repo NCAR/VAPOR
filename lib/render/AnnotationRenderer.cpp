@@ -14,7 +14,6 @@
 //
 //----------------------------------------------------------------------------
 
-
 #include <vapor/glutil.h>    // Must be included first!!!
 #include <cstdlib>
 #include <cstdio>
@@ -434,20 +433,8 @@ void AnnotationRenderer::InScenePaint(size_t ts)
     mm->GetDoublev(MatrixManager::Mode::ModelView, mvMatrix);
     vpParams->SetModelViewMatrix(mvMatrix);
 
-    /*if (vfParams->GetShowAxisArrows()) {
-
-        vector <double> minExts, maxExts;
-        m_dataStatus->GetActiveExtents(
-            m_paramsMgr, m_winName, ts, minExts, maxExts
-        );
-        drawAxisArrows(minExts, maxExts, t);
-    }*/
-
-    //	mm->MatrixModeModelView();
-    //	mm->PopMatrix();
     AxisAnnotation *aa = vfParams->GetAxisAnnotation();
     if (aa->GetAxisAnnotationEnabled()) { drawAxisTics(aa); }
-
 
     mm->MatrixModeModelView();
     mm->PopMatrix();
@@ -716,7 +703,8 @@ void AnnotationRenderer::_configureMatrixForArrows(MatrixManager *matrixManager)
 
     // Now un-project to find the world coordinates of the selected pixel, and and translate to it for drawing
     //
-    glm::vec3 win = {winX, winY, .15};
+    //glm::vec3 win = {winX, winY, .15};
+    glm::vec3 win = {winX, winY, .5};
     glm::vec3 coords = glm::unProject(win, mat4modelview, mat4projection, vec4viewport);
     _glManager->matrixManager->Translate(coords[0], coords[1], coords[2]);
 
@@ -734,6 +722,7 @@ void AnnotationRenderer::_configureMatrixForArrows(MatrixManager *matrixManager)
     float     cameraObjectDistance = sqrt(pow(cameraPos[0] - coords[0], 2) + pow(cameraPos[1] - coords[1], 2) + pow(cameraPos[2] - coords[2], 2));
     float     worldSize = (2 * tan(fov / 2.0)) * cameraObjectDistance;
     float     size = vfParams->GetAxisArrowSize() * worldSize * ARROW_SCALE_FACTOR;
+    //float     size = vfParams->GetAxisArrowSize() * worldSize;// * ARROW_SCALE_FACTOR;
     matrixManager->Scale(size, size, size);
 }
 
@@ -758,7 +747,6 @@ void AnnotationRenderer::DrawAxisArrows()
 
     lgl->Begin(GL_LINES);
 
-
     lgl->Vertex3f(0, 0, 0);
     lgl->Vertex3f(1, 0, 0);
     lgl->End();
@@ -780,7 +768,6 @@ void AnnotationRenderer::DrawAxisArrows()
     lgl->Vertex3f(.8, 0, -.1);
     lgl->Vertex3f(.8, .1, 0);
     lgl->End();
-
 
     lgl->Color3f(0, 1, 0);
     lgl->Begin(GL_LINES);
@@ -805,7 +792,6 @@ void AnnotationRenderer::DrawAxisArrows()
     lgl->Vertex3f(0, .8, -.1);
     lgl->Vertex3f(.1, .8, 0);
     lgl->End();
-
 
     lgl->Color3f(0, 0.3, 1);
     lgl->Begin(GL_LINES);

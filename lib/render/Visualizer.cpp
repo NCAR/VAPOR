@@ -47,7 +47,6 @@
 #include "vapor/ImageWriter.h"
 #include "vapor/GeoTIFWriter.h"
 
-
 using namespace VAPoR;
 
 Visualizer::Visualizer(const ParamsMgr *pm, const DataStatus *dataStatus, string winName)
@@ -62,7 +61,6 @@ Visualizer::Visualizer(const ParamsMgr *pm, const DataStatus *dataStatus, string
     _insideGLContext = false;
     _imageCaptureEnabled = false;
     _animationCaptureEnabled = false;
-
 
     _renderers.clear();
     _renderersToDestroy.clear();
@@ -168,7 +166,6 @@ int Visualizer::paintEvent(bool fast)
     if (viewport[2] <= 0) return 0;
     if (viewport[3] <= 0) return 0;
 
-
     _clearActiveFramebuffer(0.3, 0.3, 0.3);
 
     int fbWidth = viewport[2];
@@ -185,7 +182,6 @@ int Visualizer::paintEvent(bool fast)
     double clr[3];
     getActiveAnnotationParams()->GetBackgroundColor(clr);
     _clearActiveFramebuffer(clr[0], clr[1], clr[2]);
-
 
     _loadMatricesFromViewpointParams();
     if (_configureLighting()) return -1;
@@ -247,7 +243,6 @@ int Visualizer::paintEvent(bool fast)
 
     GL_ERR_BREAK();
     if (CheckGLError()) return -1;
-
 
     _framebuffer.UnBind();
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
@@ -360,7 +355,6 @@ int Visualizer::CreateRenderer(string dataSetName, string renderType, string ren
     return (0);
 }
 
-
 void Visualizer::DestroyRenderer(string renderType, string renderName, bool haveOpenGLContext)
 {
     Renderer *ren = _getRenderer(renderType, renderName);
@@ -435,7 +429,6 @@ int Visualizer::_configureLighting()
     return 0;
 }
 
-
 Visualizer::GLVendorType Visualizer::GetVendor()
 {
     string ven_str((const char *)glGetString(GL_VENDOR));
@@ -459,7 +452,6 @@ Visualizer::GLVendorType Visualizer::GetVendor()
     }
     return (UNKNOWN);
 }
-
 
 double Visualizer::getPixelSize() const
 {
@@ -493,15 +485,11 @@ double Visualizer::getPixelSize() const
     return (0.0);
 }
 
-
 ViewpointParams *Visualizer::getActiveViewpointParams() const { return _paramsMgr->GetViewpointParams(_winName); }
-
 
 RegionParams *Visualizer::getActiveRegionParams() const { return _paramsMgr->GetRegionParams(_winName); }
 
-
 AnnotationParams *Visualizer::getActiveAnnotationParams() const { return _paramsMgr->GetAnnotationParams(_winName); }
-
 
 int Visualizer::_captureImage(std::string path)
 {
@@ -621,7 +609,6 @@ captureImageEnd:
     return writeReturn;
 }
 
-
 bool Visualizer::_getPixelData(unsigned char *data) const
 {
     int width, height;
@@ -656,7 +643,6 @@ bool Visualizer::_getPixelData(unsigned char *data) const
     return true;
 }
 
-
 void Visualizer::_deleteFlaggedRenderers()
 {
     VAssert(_insideGLContext);
@@ -667,7 +653,6 @@ void Visualizer::_deleteFlaggedRenderers()
     }
     _renderersToDestroy.clear();
 }
-
 
 int Visualizer::_initializeNewRenderers()
 {
@@ -682,7 +667,6 @@ int Visualizer::_initializeNewRenderers()
     return 0;
 }
 
-
 void Visualizer::_clearActiveFramebuffer(float r, float g, float b) const
 {
     VAssert(_insideGLContext);
@@ -691,7 +675,6 @@ void Visualizer::_clearActiveFramebuffer(float r, float g, float b) const
     glClearColor(r, g, b, 1.f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 }
-
 
 void Visualizer::_renderColorbars(int timeStep)
 {
@@ -712,7 +695,6 @@ void Visualizer::_renderColorbars(int timeStep)
     mm->MatrixModeModelView();
     mm->PopMatrix();
 }
-
 
 void Visualizer::_incrementPath(string &s)
 {

@@ -20,7 +20,6 @@
 #ifndef ANNOTATIONEVENTROUTER_H
 #define ANNOTATIONEVENTROUTER_H
 
-
 #include <qobject.h>
 #include "EventRouter.h"
 #include <vapor/MyBase.h>
