@@ -703,7 +703,7 @@ void AnnotationRenderer::_configureMatrixForArrows(MatrixManager *matrixManager)
 
     // Now un-project to find the world coordinates of the selected pixel, and and translate to it for drawing
     //
-    //glm::vec3 win = {winX, winY, .15};
+    // glm::vec3 win = {winX, winY, .15};
     glm::vec3 win = {winX, winY, .5};
     glm::vec3 coords = glm::unProject(win, mat4modelview, mat4projection, vec4viewport);
     _glManager->matrixManager->Translate(coords[0], coords[1], coords[2]);
@@ -722,7 +722,7 @@ void AnnotationRenderer::_configureMatrixForArrows(MatrixManager *matrixManager)
     float     cameraObjectDistance = sqrt(pow(cameraPos[0] - coords[0], 2) + pow(cameraPos[1] - coords[1], 2) + pow(cameraPos[2] - coords[2], 2));
     float     worldSize = (2 * tan(fov / 2.0)) * cameraObjectDistance;
     float     size = vfParams->GetAxisArrowSize() * worldSize * ARROW_SCALE_FACTOR;
-    //float     size = vfParams->GetAxisArrowSize() * worldSize;// * ARROW_SCALE_FACTOR;
+    // float     size = vfParams->GetAxisArrowSize() * worldSize;// * ARROW_SCALE_FACTOR;
     matrixManager->Scale(size, size, size);
 }
 
