@@ -57,6 +57,10 @@ class PTFEditor : public PWidget {
     TFIsoValueMap *         _isoMap;
     TFMappingRangeSelector *_range;
 
+    std::vector<QAction *> _colorMapActions;
+    std::vector<QAction *> _opacityMapActions;
+    std::vector<QAction *> _histogramActions;
+
     bool        _showOpacityBasedOnParam = false;
     std::string _showOpacityBasedOnParamTag;
     int         _showOpacityBasedOnParamValue;
