@@ -12,6 +12,7 @@ const CMakeConfigStringType VERSION_STRING_FULL = "@VERSION_STRING_FULL@";
 
 const CMakeConfigStringType BUILD_TYPE          = "@CMAKE_BUILD_TYPE@";
 const CMakeConfigStringType SOURCE_DIR          = "@PROJECT_SOURCE_DIR@";
+const CMakeConfigStringType THIRD_PARTY_DIR     = "@THIRD_PARTY_DIR@";
 
 const CMakeConfigStringType PYTHON_VERSION      = "@PYTHONVERSION@";
 const CMakeConfigStringType PYTHON_DIR          = "@PYTHONDIR@";

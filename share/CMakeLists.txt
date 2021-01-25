@@ -17,6 +17,7 @@ if (BUILD_VDC AND ${GENERATE_FULL_INSTALLER})
 		python
 		palettes
 		examples
+		${THIRD_PARTY_DIR}/share/images
 	)
 	install (
 		DIRECTORY ${SHARE_DIRS}
