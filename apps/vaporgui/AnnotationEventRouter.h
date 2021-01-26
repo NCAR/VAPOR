@@ -150,7 +150,7 @@ private:
     AnimationParams *_ap;
     bool             _animConnected;
 
-    PGroup *_aa;
+    PGroup *_axisArrowGroup;
 };
 
 #endif    // ANNOTATIONEVENTROUTER_H

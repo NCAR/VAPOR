@@ -143,7 +143,7 @@ void AnnotationEventRouter::_updateTab()
 
     domainFrameCheckbox->setChecked(vParams->GetUseDomainFrame());
 
-    _aa->Update(vParams);
+    _axisArrowGroup->Update(vParams);
 
     return;
 }
