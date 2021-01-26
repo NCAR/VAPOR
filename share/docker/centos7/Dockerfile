@@ -81,6 +81,4 @@ RUN git clone https://github.com/NCAR/VAPOR.git /root/project \
     && cmake3 .. \
     && make && pwd && ls && ls bin
 
-RUN /root/project/build/bin/vaporpychecker
-
 WORKDIR /root/project
