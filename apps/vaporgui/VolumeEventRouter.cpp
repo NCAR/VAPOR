@@ -36,7 +36,6 @@ VolumeEventRouter::VolumeEventRouter(QWidget *parent, ControlExec *ce) : RenderE
                 new PEnumDropdown(VP::SamplingRateMultiplierTag, {"1x", "2x", "4x", "8x", "16x"}, {1, 2, 4, 8, 16}, "Sampling Rate Multiplier"),
                 (new PDoubleSliderEdit(VP::VolumeDensityTag, "Volume Density"))->EnableDynamicUpdate()->SetTooltip("Changes the overall density or 'opacity' of the volume allowing for finer tuning of the transfer function."),
                 new PCheckbox(VP::UseColormapVariableTag, "Color by other variable"),
-                (new PVariableSelector3D(RenderParams::_colorMapVariableNameTag))->ShowBasedOnParam(VP::UseColormapVariableTag)
             }),
             (new PColormapTFEditor)->ShowBasedOnParam(VolumeParams::UseColormapVariableTag),
             new PSection("Lighting", {
