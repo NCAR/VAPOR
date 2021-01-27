@@ -76,8 +76,13 @@ RUN chmod -R 777 /usr/local/VAPOR-Deps
 RUN git clone https://github.com/NCAR/VAPOR.git /root/project
 RUN chown -R root:root /root/project
 RUN chmod -R 777 /root/project
+
 RUN cp /root/project/site_files/site.NCAR /root/project/site.local \
-    && mkdir -p /root/project/build \
+RUN chown -R root:root /root/project
+RUN chmod -R 777 /root/project
+    && mkdir -p /root/project/build
+RUN chown -R root:root /root/project
+RUN chmod -R 777 /root/project
     && export CMAKE_CXX_COMPILER=g++ \
     && cd /root/project/build \
     && cmake3 .. \
