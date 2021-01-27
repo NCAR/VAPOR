@@ -13,7 +13,12 @@ PFileSelector::PFileSelector(const std::string &tag, const std::string &label) :
     connect(_button, &VPushButton::ButtonClicked, this, &PFileSelector::buttonClicked);
 }
 
-void PFileSelector::updateGUI() const { _pathTexbox->SetValue(getParamsString()); }
+void PFileSelector::updateGUI() const
+{
+    const string path = getParamsString();
+    _pathTexbox->SetValue(path);
+    _pathTexbox->setToolTip(QString::fromStdString(path));
+}
 
 PFileSelector *PFileSelector::SetFileTypeFilter(const std::string &filter)
 {
