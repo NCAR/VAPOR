@@ -144,6 +144,8 @@ This is an alternative to downloading our pre-built libraries that allows you to
 
 If you wish to go down this route, you may follow the build instructions for `Windows <https://drive.google.com/a/ucar.edu/file/d/1nPZyNtH516D00Te2AwttRrPDTi0bDIbl/view?usp=sharing>`_ and `UNIX <https://docs.google.com/document/d/1XNBmoUvxGn9I0fy9xvB1m5PQyOI32TtdyMbwfOve0QQ/edit?usp=sharing>`_.
 
+The final step after building the libraries in your specified directory is to extract the images.tar.xz file into the *share* directory in the root of your third party library location.  IE - If I built my libraries in the directory /thirdParty, then I would need to run *tar xv -C /thirdParty/share -f images.tar.xz*.
+
 .. note:: In order for Vapor to generate installers, all third-party libraries must be built in the same directory.
 
 .. note:: The file <vapor-source>/site_files/site.NCAR may be used in lieu of CMake to specify the location of your party libraries.  Edit this file to specify your choice.  CMake variables passed over the command line may be overwritten by this file's presets.
@@ -182,7 +184,7 @@ If you wish to go down this route, you may follow the build instructions for `Wi
 
 .. note:: Different versions of Qt have presented bugs.  It's reocmmended that developers use the same library versions as those listed above, especially for Qt.
 
-The source code for these libraries by be downloaded `here <https://drive.google.com/open?id=1sWIV-Y66aFuDkC2oDnceIIUJDDH4puKI>`_.
+The source code for these libraries may be downloaded `here <https://drive.google.com/open?id=1sWIV-Y66aFuDkC2oDnceIIUJDDH4puKI>`_.
 
 Install System Libraries
 ________________________
