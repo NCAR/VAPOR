@@ -65,6 +65,9 @@ public:
 
     void ClearText(int type = -1);
 
+    //! Draw Axis arrows
+    void DrawAxisArrows();
+
 #ifdef VAPOR3_0_0_ALPHA
     //! Clear all the text objects
     void invalidateCache();
@@ -112,6 +115,13 @@ private:
     string              getCurrentDataMgrName() const;
     void                scaleNormalizedCoordinatesToWorld(std::vector<double> &coords, string dataMgrName);
 
+    //! Configure the MVP matrix for drawing axis orientation arrows.  These
+    //! arrows are drawn on top of the scene at an X/Y pixel location.  Users
+    //! define this location by selecting an X and Y value between 0 and 1,
+    //! which correspond to the minimum and maximum pixel id's on the X and Y
+    //! axes.
+    void _configureMatrixForArrows(MatrixManager *matrixManager);
+
 #ifdef VAPOR3_0_0_ALPHA
     //! Render the region frame
     void drawRegionBounds(size_t ts) const;
@@ -126,10 +136,6 @@ private:
     void       renderText(double text, double coords[], AxisAnnotation *aa = NULL);
     Transform *getTransform(string dataMgr = "");
     void       convertPointToLonLat(double &xCoord, double &yCoord);
-
-    // Draw Axis arrows
-    //
-    void drawAxisArrows(std::vector<double> minExts, std::vector<double> maxExts, Transform *transform);
 
 #ifdef VAPOR3_0_0_ALPHA
     //! Static method to convert axis coordinates between user and lat-lon

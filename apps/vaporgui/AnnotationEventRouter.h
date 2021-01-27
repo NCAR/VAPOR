@@ -34,6 +34,8 @@ namespace VAPoR {
 class ControlExec;
 }
 
+class PGroup;
+
 class AnnotationEventRouter : public QWidget, public Ui_AnnotationGUI, public EventRouter {
     Q_OBJECT
 
@@ -75,10 +77,6 @@ protected slots:
     void setDomainFrameEnabled();
     void setTimeColor();
     void setLatLonAnnot(bool);
-    void setAxisArrowsEnabled();
-    void setXArrowPosition();
-    void setYArrowPosition();
-    void setZArrowPosition();
     void timeAnnotationChanged();
     void timeLLXChanged();
     void timeLLYChanged();
@@ -151,6 +149,8 @@ private:
 
     AnimationParams *_ap;
     bool             _animConnected;
+
+    PGroup *_axisArrowGroup;
 };
 
 #endif    // ANNOTATIONEVENTROUTER_H

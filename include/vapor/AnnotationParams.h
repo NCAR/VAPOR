@@ -90,16 +90,6 @@ public:
 
     AxisAnnotation *GetAxisAnnotation();
 
-    void                SetAxisArrowCoords(std::vector<double> coords);
-    std::vector<double> GetAxisArrowCoords() const;
-
-    void SetXAxisArrowPosition(float pos);
-    void SetYAxisArrowPosition(float pos);
-    void SetZAxisArrowPosition(float pos);
-
-    bool GetShowAxisArrows() const;
-    void SetShowAxisArrows(bool val);
-
     void SetAxisFontSize(int size);
     int  GetAxisFontSize();
 
@@ -119,7 +109,23 @@ public:
     int  GetTimeSize() const;
     void SetTimeSize(int size);
 
+
+    bool   GetAxisArrowEnabled() const;
+    double GetAxisArrowSize() const;
+    double GetAxisArrowXPos() const;
+    double GetAxisArrowYPos() const;
+
+    void SetAxisArrowEnabled(bool enabled);
+    void SetAxisArrowSize(double pos);
+    void SetAxisArrowXPos(double pos);
+    void SetAxisArrowYPos(double pos);
+
     static string GetClassType() { return ("AnnotationParams"); }
+
+    static const string AxisArrowSizeTag;
+    static const string AxisArrowXPosTag;
+    static const string AxisArrowYPosTag;
+    static const string AxisArrowEnabledTag;
 
 private:
     ParamsContainer *_axisAnnotations;
@@ -145,8 +151,6 @@ private:
     static const string _axisAnnotationsTag;
     static const string _latLonAxesTag;
 
-    static const string   _axisArrowCoordsTag;
-    static const string   _showAxisArrowsTag;
     static const string   _currentAxisDataMgrTag;
     static vector<double> _previousStretch;
 
