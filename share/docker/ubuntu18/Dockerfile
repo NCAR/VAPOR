@@ -55,13 +55,13 @@ RUN tar -xf /tmp/smokeTestData.tar.gz \
 RUN chmod -R 777 /smokeTestData
 
 RUN cd / \
-    && git clone https://github.com/NCAR/VAPOR.git \
-    && cd VAPOR \
+    && git clone https://github.com/NCAR/VAPOR.git /root/project \
+    && cd /root/project \
     && cp site_files/site.NCAR site.local \
     && mkdir build
 
-RUN cd /VAPOR/build \
+RUN cd /root/project/build \
     && export CMAKE_CXX_COMPILER=g++ \
     && cmake .. && make
 
-WORKDIR /VAPOR
+WORKDIR /root/project

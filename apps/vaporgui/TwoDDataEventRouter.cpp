@@ -8,11 +8,21 @@ static RenderEventRouterRegistrar<TwoDDataEventRouter> registrar(TwoDDataEventRo
 
 TwoDDataEventRouter::TwoDDataEventRouter(QWidget *parent, ControlExec *ce) : RenderEventRouterGUI(ce, TwoDDataParams::GetClassType())
 {
-    AddSubtab("Variables", new PGroup({new PSection("Variable Selection", {new PScalarVariableSelector, new PHeightVariableSelector}), new PFidelitySection}));
+    // clang-format off
 
+    AddSubtab("Variables", new PGroup({
+        new PSection("Variable Selection", {
+            new PScalarVariableSelector,
+            new PHeightVariableSelector
+        }),
+        new PFidelitySection
+    }));
+    
     AddSubtab("Appearance", (new PTFEditor));
     AddSubtab("Geometry", new PGeometrySubtab);
     AddSubtab("Annotation", new PAnnotationColorbarWidget);
+
+    // clang-format on
 }
 
 string TwoDDataEventRouter::_getDescription() const

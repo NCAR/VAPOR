@@ -9,13 +9,28 @@ static RenderEventRouterRegistrar<SliceEventRouter> registrar(SliceEventRouter::
 
 SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEventRouterGUI(ce, SliceParams::GetClassType())
 {
-    AddSubtab("Variables", new PGroup({new PSection("Variable Selection", {new PScalarVariableSelector}), new PFidelitySection}));
+    // clang-format off
 
-    AddSubtab("Appearance", new PGroup({new PTFEditor, new PSection("Slice", {new POrientationSelector, new PSliceSampleLocationSelector,
-                                                                              (new PDoubleSliderEdit(SliceParams::_sampleRateTag, "N Samples"))->SetRange(32, 2000)})}));
-
+    AddSubtab("Variables", new PGroup({
+        new PSection("Variable Selection", {
+            new PScalarVariableSelector
+        }),
+        new PFidelitySection
+    }));
+    
+    AddSubtab("Appearance", new PGroup({
+        new PTFEditor,
+        new PSection("Slice", {
+            new POrientationSelector,
+            new PSliceSampleLocationSelector,
+            (new PDoubleSliderEdit(SliceParams::_sampleRateTag, "N Samples"))->SetRange(32, 2000)
+        })
+    }));
+    
     AddSubtab("Geometry", new PGeometrySubtab);
     AddSubtab("Annotation", new PAnnotationColorbarWidget);
+
+    // clang-format on
 }
 
 string SliceEventRouter::_getDescription() const
