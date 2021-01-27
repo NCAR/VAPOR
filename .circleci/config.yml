@@ -399,7 +399,7 @@ workflows:
            filters:
              branches:
                only:
-                 - nightly
+                 - main
     jobs:
       - build_ubuntu18_installer
       - build_centos7_installer
