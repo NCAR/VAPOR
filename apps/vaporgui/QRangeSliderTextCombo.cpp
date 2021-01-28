@@ -73,7 +73,7 @@ void QRangeSliderTextCombo::SetValue(float left, float right)
     _left = left;
     _right = right;
     setTextboxes(left, right);
-    if (fabsf(_max - _min) < FLT_EPSILON)
+    if (abs(_max - _min) < FLT_EPSILON)
         _slider->SetValue(0, 1);
     else
         _slider->SetValue((left - _min) / (_max - _min), (right - _min) / (_max - _min));
