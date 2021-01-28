@@ -34,8 +34,6 @@ set (SRCS
 	TrackBall.cpp
 	ImageEventRouter.cpp
 	ImageEventRouter.h
-	PreferencesEventRouter.cpp
-	PreferencesEventRouter.h
 	ContourEventRouter.cpp
 	ContourEventRouter.h
     SliceEventRouter.cpp
@@ -239,6 +237,8 @@ set (SRCS
 	PFlowRakeRegionSelector.h
 	PMultiVarSelector.cpp
 	PMultiVarSelector.h
+	PreferencesMenu.cpp
+	PreferencesMenu.h
 
 	# Need to include all files that request .ui files
 	Statistics.h

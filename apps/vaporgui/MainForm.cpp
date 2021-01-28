@@ -83,6 +83,7 @@
 #include "windowsUtils.h"
 #include "MouseModeParams.h"
 #include "ParamsWidgetDemo.h"
+#include "PreferencesMenu.h"
 
 #include <QProgressDialog>
 #include <QProgressBar>
@@ -236,6 +237,7 @@ void MainForm::_initMembers()
     _interactiveRefinementSpin = NULL;
     _tabDockWindow = NULL;
 
+    _preferencesMenu = nullptr;
     _stats = NULL;
     _plot = NULL;
     _pythonVariables = NULL;
@@ -943,20 +945,24 @@ void MainForm::_createEditMenu()
     _editRedoAction->setShortcut(tr("Ctrl+Y"));
     _editRedoAction->setToolTip("Redo the last undone session state change");
     _editRedoAction->setEnabled(false);
-
+   
+    _preferencesMenu   = new PreferencesMenu(this); 
     _preferencesAction = new QAction(this);
     _preferencesAction->setText( tr("Preferences") );
-    _editRedoAction->setToolTip( "Edit preferences that apply to all of Vapor" );
-    _editRedoAction->setEnabled(true);
+    _preferencesAction->setToolTip( "Edit preferences that apply to all of Vapor" );
+    _preferencesAction->setEnabled(true);
+    connect( _preferencesAction, &QAction::triggered, 
+             _preferencesMenu,   &PreferencesMenu::open );
 
     _Edit = menuBar()->addMenu(tr("Edit"));
     _Edit->addAction(_editUndoAction);
     _Edit->addAction(_editRedoAction);
-    _Edit->addSeparator();
+    //_Edit->addSeparator();
+    _Edit->addAction(_preferencesAction);
+    //_Edit->addSeparator();
 
     connect(_editUndoAction, SIGNAL(triggered()), this, SLOT(undo()));
     connect(_editRedoAction, SIGNAL(triggered()), this, SLOT(redo()));
-    connect( _preferencesAction, SIGNAL(triggered()), this, SLOT( launchPreferences() ) );
 }
 
 void MainForm::_createToolsMenu()
@@ -1878,6 +1884,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         if (_stats) { _stats->Update(); }
         if (_plot) { _plot->Update(); }
         if (_pythonVariables) { _pythonVariables->Update(); }
+        if (_preferencesMenu) { _preferencesMenu->Update( GetSettingsParams() ); }
 
         setUpdatesEnabled(false);
         _tabMgr->Update();

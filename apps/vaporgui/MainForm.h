@@ -66,6 +66,7 @@ class Plot;
 class PythonVariables;
 class ErrorReporter;
 class ParamsWidgetDemo;
+class PreferencesMenu;
 
 class MainForm : public QMainWindow {
     Q_OBJECT
@@ -190,7 +191,7 @@ private:
 
     Statistics *        _stats;
     Plot *              _plot;
-    Preferences*        _preferences;
+    PreferencesMenu*        _preferencesMenu;
     PythonVariables *   _pythonVariables;
     BannerGUI *         _banner;
     VizSelectCombo *    _windowSelector;
