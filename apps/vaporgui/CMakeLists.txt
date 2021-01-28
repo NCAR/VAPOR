@@ -34,6 +34,8 @@ set (SRCS
 	TrackBall.cpp
 	ImageEventRouter.cpp
 	ImageEventRouter.h
+	PreferencesEventRouter.cpp
+	PreferencesEventRouter.h
 	ContourEventRouter.cpp
 	ContourEventRouter.h
     SliceEventRouter.cpp

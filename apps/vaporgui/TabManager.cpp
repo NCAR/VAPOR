@@ -309,7 +309,14 @@ void TabManager::EnableRouters(bool onOff)
 
         QWidget *w = dynamic_cast<QWidget *>(itr->second);
         VAssert(w);
-        w->setEnabled(onOff);
+        std::cout << itr->first << std::endl;
+        if (itr->first == "SettingsEventRouter" ) {
+            std::cout << "enabling Settings" << std::endl;
+            w->setEnabled( true );
+        }
+        else {
+            w->setEnabled(onOff);
+        }
     }
 }
 

@@ -170,6 +170,7 @@ void MainForm::_initMembers()
     _navigationAction = NULL;
     _editUndoAction = NULL;
     _editRedoAction = NULL;
+    _preferencesAction = NULL;
     _timeStepEdit = NULL;
     _timeStepEditValidator = NULL;
 
@@ -943,6 +944,11 @@ void MainForm::_createEditMenu()
     _editRedoAction->setToolTip("Redo the last undone session state change");
     _editRedoAction->setEnabled(false);
 
+    _preferencesAction = new QAction(this);
+    _preferencesAction->setText( tr("Preferences") );
+    _editRedoAction->setToolTip( "Edit preferences that apply to all of Vapor" );
+    _editRedoAction->setEnabled(true);
+
     _Edit = menuBar()->addMenu(tr("Edit"));
     _Edit->addAction(_editUndoAction);
     _Edit->addAction(_editRedoAction);
@@ -950,6 +956,7 @@ void MainForm::_createEditMenu()
 
     connect(_editUndoAction, SIGNAL(triggered()), this, SLOT(undo()));
     connect(_editRedoAction, SIGNAL(triggered()), this, SLOT(redo()));
+    connect( _preferencesAction, SIGNAL(triggered()), this, SLOT( launchPreferences() ) );
 }
 
 void MainForm::_createToolsMenu()
@@ -2020,12 +2027,12 @@ void MainForm::enableWidgets(bool onOff)
     _viewRegionAction->setEnabled(onOff);
     //	_stepForwardAction->setEnabled(onOff);
     //	_stepBackAction->setEnabled(onOff);
-    _interactiveRefinementSpin->setEnabled(onOff);
+    //_interactiveRefinementSpin->setEnabled(onOff);
     _alignViewCombo->setEnabled(onOff);
     _navigationAction->setEnabled(onOff);
     _Edit->setEnabled(onOff);
     _windowSelector->setEnabled(onOff);
-    _tabMgr->setEnabled(onOff);
+    //_tabMgr->setEnabled(onOff);
     _statsAction->setEnabled(onOff);
     _plotAction->setEnabled(onOff);
     _pythonAction->setEnabled(onOff);

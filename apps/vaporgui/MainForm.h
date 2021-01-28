@@ -98,6 +98,7 @@ private:
     QAction *      _navigationAction;
     QAction *      _editUndoAction;
     QAction *      _editRedoAction;
+    QAction *      _preferencesAction;
     QLineEdit *    _timeStepEdit;
     QIntValidator *_timeStepEditValidator;
 
@@ -189,6 +190,7 @@ private:
 
     Statistics *        _stats;
     Plot *              _plot;
+    Preferences*        _preferences;
     PythonVariables *   _pythonVariables;
     BannerGUI *         _banner;
     VizSelectCombo *    _windowSelector;
