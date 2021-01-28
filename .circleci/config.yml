@@ -27,7 +27,6 @@ jobs:
       - run:
           name: cmake and make
           command: |
-            mkdir build
             cd build
             cmake -DBUILD_TEST_APPS=ON ..
             make -j7 &> /tmp/output.txt
@@ -112,9 +111,7 @@ jobs:
           name: cmake3 and make
           command: |
             ls -lrth /usr/local/VAPOR-Deps
-            cd /root/project
-            mkdir build
-            cd build
+            cd /root/project/build
             cmake3 ..
             make -j7
 
@@ -402,7 +399,7 @@ workflows:
            filters:
              branches:
                only:
-                 - nightly
+                 - main
     jobs:
       - build_ubuntu18_installer
       - build_centos7_installer

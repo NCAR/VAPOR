@@ -73,14 +73,19 @@ RUN rm /usr/local/VAPOR-Deps/2019-Aug-CentOS.tar.xz
 RUN chown -R root:root /usr/local/VAPOR-Deps
 RUN chmod -R 777 /usr/local/VAPOR-Deps
 
-RUN git clone https://github.com/NCAR/VAPOR.git \
-    && cp /VAPOR/site_files/site.NCAR /VAPOR/site.local \
-    && mkdir /VAPOR/build \
+RUN git clone https://github.com/NCAR/VAPOR.git /root/project
+RUN chown -R root:root /root/project
+RUN chmod -R 777 /root/project
+
+RUN cp /root/project/site_files/site.NCAR /root/project/site.local \
+RUN chown -R root:root /root/project
+RUN chmod -R 777 /root/project
+    && mkdir -p /root/project/build
+RUN chown -R root:root /root/project
+RUN chmod -R 777 /root/project
     && export CMAKE_CXX_COMPILER=g++ \
-    && cd /VAPOR/build \
+    && cd /root/project/build \
     && cmake3 .. \
     && make && pwd && ls && ls bin
 
-RUN /VAPOR/build/bin/vaporpychecker
-
-WORKDIR /VAPOR
+WORKDIR /root/project

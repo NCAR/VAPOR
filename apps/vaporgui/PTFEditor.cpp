@@ -46,12 +46,23 @@ PTFEditor::PTFEditor(const std::string &tag, const std::set<Element> elements, c
     _section->layout()->addWidget(_range);
     connect(_range, SIGNAL(ValueChangedIntermediate(float, float)), _histogram, SLOT(update()));
 
+    int    start = 0;
     QMenu *menu = new QMenu;
     _colorMap->PopulateSettingsMenu(menu);
+    for (int i = start; i < menu->actions().size(); i++) _colorMapActions.push_back(menu->actions()[i]);
+
     menu->addSeparator();
+
+    start = menu->actions().size();
     _opacityMap->PopulateSettingsMenu(menu);
+    for (int i = start; i < menu->actions().size(); i++) _opacityMapActions.push_back(menu->actions()[i]);
+
     menu->addSeparator();
+
+    start = menu->actions().size();
     _histogram->PopulateSettingsMenu(menu);
+    for (int i = start; i < menu->actions().size(); i++) _histogramActions.push_back(menu->actions()[i]);
+
     _section->setMenu(menu);
 
     _histogram->hide();
@@ -117,6 +128,10 @@ void PTFEditor::updateGUI() const
         else
             _colorMap->hide();
     }
+
+    for (auto a : _colorMapActions) a->setEnabled(_colorMap->IsShown());
+    for (auto a : _opacityMapActions) a->setEnabled(_opacityMap->IsShown());
+    for (auto a : _histogramActions) a->setEnabled(_histogram->IsShown());
 }
 
 PColormapTFEditor::PColormapTFEditor() : PTFEditor(RenderParams::_colorMapVariableNameTag, {PTFEditor::Histogram, PTFEditor::Colormap}, "Colormap Transfer Function") {}
