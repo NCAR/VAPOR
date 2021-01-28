@@ -25,6 +25,7 @@ BarbEventRouter::BarbEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
     }));
     
     AddSubtab("Appearance", new PGroup({
+        new PColormapTFEditor,
         new PSection("Barbs", {
             (new PIntegerSliderEdit(BP::_xBarbsCountTag, "X Barbs"))->SetRange(1, 50),
             (new PIntegerSliderEdit(BP::_yBarbsCountTag, "Y Barbs"))->SetRange(1, 50),
@@ -33,7 +34,6 @@ BarbEventRouter::BarbEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
             (new PDoubleSliderEdit(BP::_thicknessScaleTag, "Thickness Scale"))->SetRange(0.01, 4)->EnableDynamicUpdate(),
             new PConstantColorWidget
         }),
-        (new PColormapTFEditor)->ShowBasedOnParam(BP::_useSingleColorTag, false)
     }));
     
     AddSubtab("Geometry", new PGeometrySubtab);
