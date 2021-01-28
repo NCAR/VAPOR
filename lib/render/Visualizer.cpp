@@ -222,6 +222,8 @@ int Visualizer::paintEvent(bool fast)
     GL_ERR_BREAK();
     _renderColorbars(_getCurrentTimestep());
     GL_ERR_BREAK();
+    _vizFeatures->DrawAxisArrows();
+    GL_ERR_BREAK();
 
     //    _glManager->ShowDepthBuffer();
 
