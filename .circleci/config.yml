@@ -390,7 +390,7 @@ workflows:
     triggers:
       - schedule:
 #           cron: "30 13 * * 5" #weekly cron job on Friday @ 6:30am MST
-           cron: "20 14 * * 0" #weekly cron job on Monday @ 7:20am MST
+           cron: "30 14 * * 1" #weekly cron job on Monday @ 7:300am MST
            filters:
              branches:
                only:
