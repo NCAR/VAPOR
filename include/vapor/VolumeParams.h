@@ -20,7 +20,7 @@ public:
     virtual double GetDefaultPhongAmbient() const { return 0.6; }
     virtual double GetDefaultPhongDiffuse() const { return 0.5; }
     virtual double GetDefaultPhongSpecular() const { return 0.1; }
-    virtual double GetDefaultPhongShininess() const { return 4; }
+    virtual double GetDefaultPhongShininess() const { return 0.2; }
 
     static string GetClassType() { return ("VolumeParams"); }
 
