@@ -47,6 +47,9 @@ static RenderEventRouterRegistrar<ImageEventRouter> registrar(ImageEventRouter::
 
 
 
+
+
+
 ImageEventRouter::ImageEventRouter(QWidget *parent, ControlExec *ce) : QTabWidget(parent), RenderEventRouter(ce, ImageParams::GetClassType())
 {
     sizePolicy().setVerticalPolicy(QSizePolicy::Maximum);
