@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+
+# Run clang-format on all .cpp and .h files to be pushed
+for FILE in $(git diff --name-only origin/master |grep -E "\.h|\.cpp")
+do
+    echo "    Running clang format on  $FILE"
+    clang-format -i $FILE
+done
+
+git commit -a -m "clang-format pre-receive hook"
