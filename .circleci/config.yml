@@ -52,6 +52,41 @@ jobs:
                exit 0
             fi
 
+  test_clang_format:
+    docker:
+      - image: sgpearse/vapor3-ubuntu18:latest
+    
+    steps:
+      - run:
+          name: install clang-format
+          command: |
+            apt-get update
+            apt-get install -y clang-format
+
+      - checkout
+
+      - run:
+          name: run clang-format
+          command: |
+            for FILE in $(git diff --name-only origin/master |grep -E "\.h|\.cpp")
+            do
+                echo "    Running clang format on  $FILE"
+                clang-format --dry-run $FILE >> /tmp/clang-format.txt 2>&1
+            done
+
+      - store_artifacts:
+          path: /tmp/clang-format.txt
+
+      - run:
+          name: check formatting 
+          command: |
+            if grep -q warning /tmp/clang-format.txt; then
+               cat /tmp/clang-format.txt
+               exit -1
+            else
+               exit 0
+            fi
+
   build_ubuntu18_installer:
     docker:
       - image: sgpearse/vapor3-ubuntu18:latest
@@ -356,6 +391,7 @@ workflows:
     jobs:
       - build_ubuntu18
       - build_centos7
+      - test_clang_format
       #- build_ubuntu16
       #- build_osx
       #- build_win10_installer
