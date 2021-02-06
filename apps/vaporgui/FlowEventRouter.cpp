@@ -69,10 +69,12 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
                 )
             }),
         }),
-        new PSection("Rake Region", {
-            new PFlowRakeRegionSelector1D(0),
-            new PFlowRakeRegionSelector1D(1),
-            new PFlowRakeRegionSelector1D(2),
+        (new PShowIf(FP::_seedGenModeTag))->Not()->Equals((int)FlowSeedMode::LIST)->Then({
+            new PSection("Rake Region", {
+                new PFlowRakeRegionSelector1D(0),
+                new PFlowRakeRegionSelector1D(1),
+                new PFlowRakeRegionSelector1D(2),
+            }),
         }),
         
         new PSection("Write Flowlines to File", {
