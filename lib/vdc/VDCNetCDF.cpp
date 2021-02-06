@@ -1047,7 +1047,7 @@ bool VDCNetCDF::variableExists(size_t ts, string varname, int level, int lod) co
 
     for (int i = 0; i <= lod; i++) {
         struct stat statbuf;
-        if (stat(path.c_str(), &statbuf) < 0) return (false);
+        if (stat(paths[i].c_str(), &statbuf) < 0) return (false);
     }
     return (true);
 }
