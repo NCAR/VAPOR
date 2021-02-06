@@ -1155,6 +1155,16 @@ void MainForm::sessionOpenHelper(string fileName, bool loadDatasets)
                 loadDataHelper(paths, "", "", newP->GetOpenDataSetFormat(name), true, DatasetExistsAction::AddNew);
             } else {
                 newP->RemoveOpenDateSet(name);
+                
+                string err = "This session links to the dataset " + name +
+                             " which was not found. Please open this dataset if it is in a different location";
+                
+                string details;
+                for (const auto &path : paths)
+                    if (!FileUtils::Exists(path))
+                        details += "\""+path+"\" not found.\n";
+                
+                ErrorReporter::GetInstance()->Report(err, ErrorReporter::Warning, details);
             }
         }
     } else {
