@@ -7,9 +7,10 @@ jobs:
 
     steps:
       - run:
-          name: install sphinx 
+          name: install prerequisites
           command: |
             apt-get update
+            apt-get install git -y
             echo 1 > input.txt
             echo 1 >> input.txt
             apt-get install -y tzdata < input.txt
@@ -17,12 +18,15 @@ jobs:
             echo America/Los_Angeles > /etc/timezone
             apt-get install -y python3-sphinx
 
-      - checkout
+      - run:
+          name: get the docs
+          command: |
+            git clone https://github.com/NCAR/VAPOR.git
+            git checkout $CIRCLE_BRANCH
 
       - run:
           name: build sphinx
           command: |
-            cd 
 
 workflows:
   build:
