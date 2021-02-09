@@ -13,10 +13,10 @@ jobs:
             apt-get install git -y
             echo 1 > input.txt
             echo 1 >> input.txt
-            apt-get install -y tzdata < input.txt
-            ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
-            echo America/Los_Angeles > /etc/timezone
-            apt-get install -y python3-sphinx
+#            apt-get install -y tzdata < input.txt
+#            ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+#            echo America/Los_Angeles > /etc/timezone
+#            apt-get install -y python3-sphinx
           no_output_timeout: 30m
 
       - run:
