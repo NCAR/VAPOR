@@ -27,6 +27,7 @@ jobs:
       - run:
           name: build sphinx
           command: |
+            cd ~/
 
 workflows:
   build:
