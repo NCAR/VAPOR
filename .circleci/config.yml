@@ -1,0 +1,30 @@
+version: 2.1
+
+jobs:
+  build_sphinx:
+    docker:
+      - image: ubuntu:20.04
+
+    steps:
+      - run:
+          name: install sphinx 
+          command: |
+            apt-get update
+            echo 1 > input.txt
+            echo 1 >> input.txt
+            apt-get install -y tzdata < input.txt
+            ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+            echo America/Los_Angeles > /etc/timezone
+            apt-get install -y python3-sphinx
+
+      - checkout
+
+      - run:
+          name: build sphinx
+          command: |
+            cd 
+
+workflows:
+  build:
+    jobs:
+      - build_sphinx
