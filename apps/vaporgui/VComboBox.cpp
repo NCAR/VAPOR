@@ -46,10 +46,10 @@ void VComboBox::SetValue(const std::string &value)
 
 void VComboBox::SetItemEnabled(int index, bool enabled)
 {
-    QStandardItemModel *model = dynamic_cast<QStandardItemModel*>(_combo->model());
+    QStandardItemModel *model = dynamic_cast<QStandardItemModel *>(_combo->model());
     assert(model);
     if (!model) return;
-    
+
     model->item(index)->setEnabled(enabled);
 }
 

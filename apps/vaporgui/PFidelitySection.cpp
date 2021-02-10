@@ -50,26 +50,25 @@ void PQuickFidelitySelector::updateGUI() const
     int lod = rp->GetCompressionLevel();
     int ref = rp->GetRefinementLevel();
     int n = items.size();
-    
+
     _vComboBox->SetIndex(paramsToSimple(n, nLod, nRef, lod, ref));
-    
+
     long ts = rp->GetCurrentTimestep();
     for (int i = 0; i < n; i++) {
         simpleToParams(n, nLod, nRef, i, &lod, &ref);
         bool exists = dm->VariableExists(ts, vn, 0, ref);
-        if (!exists)
-            _vComboBox->SetItemEnabled(i, false);
+        if (!exists) _vComboBox->SetItemEnabled(i, false);
     }
 }
 
 void PQuickFidelitySelector::dropdownTextChanged(std::string)
 {
     auto *rp = (RenderParams *)getParams();
-    auto dm = getDataMgr();
-    auto vn = rp->GetFirstVariableName();
-    int  nLod = dm->GetCRatios(vn).size();
-    int  nRef = dm->GetNumRefLevels(vn);
-    int lod, ref;
+    auto  dm = getDataMgr();
+    auto  vn = rp->GetFirstVariableName();
+    int   nLod = dm->GetCRatios(vn).size();
+    int   nRef = dm->GetNumRefLevels(vn);
+    int   lod, ref;
     simpleToParams(_vComboBox->GetCount(), nLod, nRef, _vComboBox->GetCurrentIndex(), &lod, &ref);
 
     rp->BeginGroup("Change lod/cRatio");
@@ -84,8 +83,8 @@ void PQuickFidelitySelector::simpleToParams(int nSimple, int nLod, int nRef, int
         *lod = 0;
         *ref = 0;
     } else {
-        *lod = simple * (nLod-1) / (nSimple-1);
-        *ref = simple * (nRef-1) / (nSimple-1);
+        *lod = simple * (nLod - 1) / (nSimple - 1);
+        *ref = simple * (nRef - 1) / (nSimple - 1);
     }
 }
 
@@ -93,7 +92,7 @@ int PQuickFidelitySelector::paramsToSimple(int nSimple, int nLod, int nRef, int 
 {
     int div = nLod + nRef - 2;
     if (div == 0) return 0;
-    return (1 + lod + ref) * (nSimple-1) / div;
+    return (1 + lod + ref) * (nSimple - 1) / div;
 }
 
 // ==================================
@@ -143,7 +142,7 @@ void PRefinementSelector::updateGUI() const
     auto dm = getDataMgr();
     int  nrf = dm->GetNumRefLevels(varName);
     long timestep = rp->GetCurrentTimestep();
-    
+
     vector<string> items;
 
     for (int i = 0; i < nrf; i++) {
@@ -159,11 +158,10 @@ void PRefinementSelector::updateGUI() const
 
     _vComboBox->SetOptions(items);
     _vComboBox->SetIndex(rp->GetRefinementLevel());
-    
+
     for (int i = 0; i < nrf; i++) {
         bool exists = dm->VariableExists(timestep, varName, 0, i);
-        if (!exists)
-            _vComboBox->SetItemEnabled(i, false);
+        if (!exists) _vComboBox->SetItemEnabled(i, false);
     }
 }
 
