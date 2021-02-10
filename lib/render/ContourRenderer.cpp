@@ -184,9 +184,9 @@ int ContourRenderer::_paintGL(bool)
         float c[3];
         rp->GetConstantColor(c);
         for (int i = 0; i < 256; i++) {
-            lut[i*4+0] = c[0];
-            lut[i*4+1] = c[1];
-            lut[i*4+2] = c[2];
+            lut[i * 4 + 0] = c[0];
+            lut[i * 4 + 1] = c[1];
+            lut[i * 4 + 2] = c[2];
         }
     }
     _lutTexture.TexImage(GL_RGBA8, 256, 0, 0, GL_RGBA, GL_FLOAT, lut);

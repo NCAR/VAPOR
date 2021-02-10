@@ -8,6 +8,5 @@ using VAPoR::RenderParams;
 PConstantColorWidget::PConstantColorWidget()
 {
     Add(new PCheckbox(RenderParams::_useSingleColorTag, "Use Constant Color"));
-    Add((new PSubGroup({new PColorSelector(RenderParams::_constantColorTag, "Constant Color")}))
-        ->ShowBasedOnParam(RenderParams::_useSingleColorTag));
+    Add((new PSubGroup({new PColorSelector(RenderParams::_constantColorTag, "Constant Color")}))->ShowBasedOnParam(RenderParams::_useSingleColorTag));
 }
