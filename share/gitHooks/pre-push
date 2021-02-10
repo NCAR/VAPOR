@@ -26,4 +26,8 @@ else
     done
 
     git commit -a -m "clang-format pre-receive hook"
+
+    # git commit will return non-zero status if there's nothing to commit.  Make sure
+    # we return 0 so git 'push' will still be invoked
+    exit 0
 fi
