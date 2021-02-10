@@ -124,9 +124,9 @@ int MyPython::Initialize()
     // a break!
     //
     std::string stdErr = "try:\n"
-                         "	import sys, os\n"
+                         "	import sys\n"
                          "except: \n"
-                         "	print >> sys.stderr, \'Failed to import sys\'\n"
+                         "	print('Failed to import sys')\n"
                          "	raise\n"
                          "class CatchErr:\n"
                          "	def __init__(self):\n"
@@ -145,9 +145,9 @@ int MyPython::Initialize()
     }
 
     std::string stdOut = "try:\n"
-                         "	import sys, os\n"
+                         "	import sys\n"
                          "except: \n"
-                         "	print >> sys.stderr, \'Failed to import sys\'\n"
+                         "	print('Failed to import sys')\n"
                          "	raise\n"
                          "class CatchOut:\n"
                          "	def __init__(self):\n"
@@ -170,7 +170,7 @@ int MyPython::Initialize()
     std::string importMPL = "try:\n"
                             "	import matplotlib\n"
                             "except: \n"
-                            "	print >> sys.stderr, \'Failed to import matplotlib\'\n"
+                            "	print('Failed to import matplotlib', file=sys.stderr)\n"
                             "	raise\n";
     rc = PyRun_SimpleString(importMPL.c_str());
     if (rc < 0) {

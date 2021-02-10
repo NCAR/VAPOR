@@ -30,6 +30,7 @@
 
 #include <vapor/AnnotationParams.h>
 
+
 using namespace VAPoR;
 
 const string AnnotationParams::_domainFrameTag = "DomainFrame";
@@ -51,8 +52,10 @@ const string AnnotationParams::_numTicsTag = "NumberTics";
 const string AnnotationParams::_currentAxisDataMgrTag = "AxisDataMgr";
 const string AnnotationParams::_latLonAxesTag = "LatLonAxes";
 const string AnnotationParams::_axisOriginTag = "AxisOrigin";
-const string AnnotationParams::_showAxisArrowsTag = "ShowAxisArrows";
-const string AnnotationParams::_axisArrowCoordsTag = "AxisArrowCoords";
+const string AnnotationParams::AxisArrowEnabledTag = "ShowAxisArrows";
+const string AnnotationParams::AxisArrowSizeTag = "AxisArrowSize";
+const string AnnotationParams::AxisArrowXPosTag = "AxisArrowXPos";
+const string AnnotationParams::AxisArrowYPosTag = "AxisArrowYPos";
 const string AnnotationParams::_axisAnnotationsTag = "AxisAnnotations";
 const string AnnotationParams::_timeLLXTag = "TimeLLX";
 const string AnnotationParams::_timeLLYTag = "TimeLLY";
@@ -105,8 +108,10 @@ void AnnotationParams::_init()
     SetUseRegionFrame(false);
     SetUseDomainFrame(true);
     vector<double> dvec(3, 0.0);
-    SetAxisArrowCoords(dvec);
-    SetShowAxisArrows(false);
+    SetValueLong(AxisArrowEnabledTag, "Initializing AxisArrowEnabledTag", 0);
+    SetValueDouble(AxisArrowSizeTag, "Initializing AxisArrowSizeTag", .2);
+    SetValueDouble(AxisArrowXPosTag, "Initializing AxisArrowXPosTag", .05);
+    SetValueDouble(AxisArrowYPosTag, "Initializing AxisArrowYPosTag", .05);
 }
 
 void AnnotationParams::_getColor(vector<double> &color, string tag) const
@@ -163,42 +168,21 @@ AxisAnnotation *AnnotationParams::GetAxisAnnotation()
     return aa;
 }
 
-void AnnotationParams::SetShowAxisArrows(bool val) { SetValueLong(_showAxisArrowsTag, "Toggle Axis Arrows", val); }
+void AnnotationParams::SetAxisArrowEnabled(bool enabled) { SetValueLong(AxisArrowEnabledTag, "Set axis arrow to enabled/disabled", (long)enabled); }
 
-bool AnnotationParams::GetShowAxisArrows() const { return (0 != GetValueLong(_showAxisArrowsTag, (long)false)); }
+void AnnotationParams::SetAxisArrowSize(double val) { SetValueDouble(AxisArrowSizeTag, "Set axis arrow size", val); }
 
-void AnnotationParams::SetAxisArrowCoords(vector<double> val)
-{
-    VAssert(val.size() == 3);
-    SetValueDoubleVec(_axisArrowCoordsTag, "Set axis arrow coords", val);
-}
+void AnnotationParams::SetAxisArrowXPos(double val) { SetValueDouble(AxisArrowXPosTag, "Set axis arrow X coordinate", val); }
 
-void AnnotationParams::SetXAxisArrowPosition(float val)
-{
-    std::vector<double> pos = GetAxisArrowCoords();
-    pos[0] = val;
-    SetAxisArrowCoords(pos);
-}
+void AnnotationParams::SetAxisArrowYPos(double val) { SetValueDouble(AxisArrowYPosTag, "Set axis arrow Y coordinate", val); }
 
-void AnnotationParams::SetYAxisArrowPosition(float val)
-{
-    std::vector<double> pos = GetAxisArrowCoords();
-    pos[1] = val;
-    SetAxisArrowCoords(pos);
-}
+bool AnnotationParams::GetAxisArrowEnabled() const { return (bool)GetValueLong(AxisArrowEnabledTag, false); }
 
-void AnnotationParams::SetZAxisArrowPosition(float val)
-{
-    std::vector<double> pos = GetAxisArrowCoords();
-    pos[2] = val;
-    SetAxisArrowCoords(pos);
-}
+double AnnotationParams::GetAxisArrowSize() const { return GetValueDouble(AxisArrowSizeTag, .2); }
 
-vector<double> AnnotationParams::GetAxisArrowCoords() const
-{
-    vector<double> defaultv(3, 0.0);
-    return GetValueDoubleVec(_axisArrowCoordsTag, defaultv);
-}
+double AnnotationParams::GetAxisArrowXPos() const { return GetValueDouble(AxisArrowXPosTag, .05); }
+
+double AnnotationParams::GetAxisArrowYPos() const { return GetValueDouble(AxisArrowYPosTag, .05); }
 
 int AnnotationParams::GetTimeLLX() const { return (int)GetValueDouble(_timeLLXTag, 10); }
 

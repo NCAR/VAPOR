@@ -42,6 +42,7 @@ public:
     TFInfoWidget *GetInfoWidget();
     void          Update(VAPoR::DataMgr *dataMgr, VAPoR::ParamsMgr *paramsMgr, VAPoR::RenderParams *rParams);
     bool          HasValidParams() const;
+    bool          IsShown() const;
     virtual void  LostFocus() = 0;
     virtual QSize minimumSizeHint() const = 0;
     //! (Right-click menu)

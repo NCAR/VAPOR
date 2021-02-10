@@ -8,11 +8,22 @@ static RenderEventRouterRegistrar<WireFrameEventRouter> registrar(WireFrameEvent
 
 WireFrameEventRouter::WireFrameEventRouter(QWidget *parent, ControlExec *ce) : RenderEventRouterGUI(ce, WireFrameParams::GetClassType())
 {
-    AddSubtab("Variables", new PGroup({new PSection("Variable Selection", {new PDimensionSelector, new PScalarVariableSelector, new PHeightVariableSelector}), new PFidelitySection}));
+    // clang-format off
 
+    AddSubtab("Variables", new PGroup({
+        new PSection("Variable Selection", {
+            new PDimensionSelector,
+            new PScalarVariableSelector,
+            new PHeightVariableSelector
+        }),
+        new PFidelitySection
+    }));
+    
     AddSubtab("Appearance", (new PTFEditor)->ShowOpacityBasedOnParam("NULL", 1));
     AddSubtab("Geometry", new PGeometrySubtab);
     AddSubtab("Annotation", new PAnnotationColorbarWidget);
+
+    // clang-format on
 }
 
 string WireFrameEventRouter::_getDescription() const { return ("Displays a wireframe of the mesh for the selected variable"); }

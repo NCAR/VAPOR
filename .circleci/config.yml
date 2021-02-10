@@ -27,9 +27,6 @@ jobs:
       - run:
           name: cmake and make
           command: |
-            cd /VAPOR
-            git pull
-            git checkout $CIRCLE_BRANCH
             cd build
             cmake -DBUILD_TEST_APPS=ON ..
             make -j7 &> /tmp/output.txt
@@ -40,16 +37,60 @@ jobs:
       - run:
           name: Smoke test
           command: |
-            python3 /VAPOR/test_apps/smokeTests/smokeTests.py --testDataRoot=/smokeTestData/smokeTestData --binaryRoot=/VAPOR/build/bin --resultsDir=/VAPOR/test_apps/smokeTests/testResults
+            python3 /root/project/test_apps/smokeTests/smokeTests.py --testDataRoot=/smokeTestData/smokeTestData --binaryRoot=/root/project/build/bin --resultsDir=/root/project/test_apps/smokeTests/testResults
 
       - store_artifacts:
-          path: /VAPOR/test_apps/smokeTests/testResults
+          path: /project/test_apps/smokeTests/testResults
 
       - run:
           name: check for warnings
           command: |
             if grep -q warning /tmp/output.txt; then
                cat /tmp/output.txt
+               exit -1
+            else
+               exit 0
+            fi
+
+  test_clang_format:
+    docker:
+      - image: ubuntu:20.04
+    
+    steps:
+      - run:
+          name: install deps
+          command: |
+            apt-get update
+            apt-get install -y clang-format-11
+            apt-get install -y git
+
+      - checkout
+
+      - run:
+          name: run clang-format
+          command: |
+            for COMMIT in $(git log --pretty=format:%h main...$BRANCH); do
+                for FILE in $(git diff --name-only origin/main |grep -E "\.h|\.cpp"); do
+                    NUMBERS=""
+                    for NUMBER in $(git blame --line-porcelain "$FILE" | egrep ^$COMMIT | cut -d' ' -f3); do
+                        NUMBERS="$NUMBERS --lines $NUMBER:$NUMBER "
+                    done
+
+                    if [ "$NUMBERS" != "" ]; then
+                        echo "  Running clang-format on $FILE"
+                        clang-format-11 --dry-run $FILE $NUMBERS >> /tmp/clang-format.txt 2>&1
+                    fi
+                done
+            done
+
+      - store_artifacts:
+          path: /tmp/clang-format.txt
+
+      - run:
+          name: check formatting 
+          command: |
+            if grep -q warning /tmp/clang-format.txt; then
+               cat /tmp/clang-format.txt
                exit -1
             else
                exit 0
@@ -65,9 +106,7 @@ jobs:
       - run:
           name: make installer
           command: |
-            cd /VAPOR/build
-            git pull
-            git checkout $CIRCLE_BRANCH
+            cd build
             cmake -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make -j7
             make installer
@@ -114,10 +153,7 @@ jobs:
           name: cmake3 and make
           command: |
             ls -lrth /usr/local/VAPOR-Deps
-            cd /VAPOR
-            git pull
-            git checkout $CIRCLE_BRANCH
-            cd build
+            cd /root/project/build
             cmake3 ..
             make -j7
 
@@ -131,9 +167,6 @@ jobs:
       - run:
           name: cmake3 and make
           command: |
-            ls -lrth /usr/local/VAPOR-Deps
-            cd /VAPOR
-            git pull
             cd build
             cmake3 -DCMAKE_BUILD_TYPE:String=Release -DDIST_INSTALLER:string=ON ..
             make
@@ -141,7 +174,6 @@ jobs:
             for f in VAPOR3-*.sh ; do mv "$f" "${f/Linux/CentOS7-Weekly}" ; done
             mkdir -p /tmp/workspace/installers
             mv *.sh /tmp/workspace/installers
-
 
       - persist_to_workspace:
           root: *workspace_root
@@ -368,6 +400,7 @@ workflows:
     jobs:
       - build_ubuntu18
       - build_centos7
+      - test_clang_format
       #- build_ubuntu16
       #- build_osx
       #- build_win10_installer
@@ -401,19 +434,20 @@ workflows:
   nightly:
     triggers:
       - schedule:
-           cron: "0 9 * * 5" #weekly cron job on Friday @ 2:00am MST
+#           cron: "30 13 * * 5" #weekly cron job on Friday @ 6:30am MST
+           cron: "30 14 * * 1" #weekly cron job on Monday @ 7:300am MST
            filters:
              branches:
                only:
-                 - nightly
+                 - main
     jobs:
       - build_ubuntu18_installer
       - build_centos7_installer
       - build_osx_installer
-      - build_win10_installer
+#      - build_win10_installer
       - release_on_github:
           requires:
             - build_ubuntu18_installer
             - build_centos7_installer
             - build_osx_installer
-            - build_win10_installer
+#            - build_win10_installer
