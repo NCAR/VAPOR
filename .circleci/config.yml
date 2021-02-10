@@ -54,24 +54,33 @@ jobs:
 
   test_clang_format:
     docker:
-      - image: sgpearse/vapor3-ubuntu18:latest
+      - image: ubuntu:20.04
     
     steps:
       - run:
-          name: install clang-format
+          name: install deps
           command: |
             apt-get update
-            apt-get install -y clang-format
+            apt-get install -y clang-format-11
+            apt-get install -y git
 
       - checkout
 
       - run:
           name: run clang-format
           command: |
-            for FILE in $(git diff --name-only origin/master |grep -E "\.h|\.cpp")
-            do
-                echo "    Running clang format on  $FILE"
-                clang-format --dry-run $FILE >> /tmp/clang-format.txt 2>&1
+            for COMMIT in $(git log --pretty=format:%h main...$BRANCH); do
+                for FILE in $(git diff --name-only origin/main |grep -E "\.h|\.cpp"); do
+                    NUMBERS=""
+                    for NUMBER in $(git blame --line-porcelain "$FILE" | egrep ^$COMMIT | cut -d' ' -f3); do
+                        NUMBERS="$NUMBERS --lines $NUMBER:$NUMBER "
+                    done
+
+                    if [ "$NUMBERS" != "" ]; then
+                        echo "  Running clang-format on $FILE"
+                        clang-format-11 --dry-run $FILE $NUMBERS >> /tmp/clang-format.txt 2>&1
+                    fi
+                done
             done
 
       - store_artifacts:
