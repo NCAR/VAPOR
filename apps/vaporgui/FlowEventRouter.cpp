@@ -3,6 +3,7 @@
 #include "PWidgets.h"
 #include "PFlowRakeRegionSelector.h"
 #include "PMultiVarSelector.h"
+#include "PFileSelectorHLI.h"
 
 using namespace VAPoR;
 typedef FlowParams FP;

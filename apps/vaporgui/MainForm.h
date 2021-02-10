@@ -66,7 +66,7 @@ class Plot;
 class PythonVariables;
 class ErrorReporter;
 class ParamsWidgetDemo;
-class PreferencesMenu;
+class AppSettingsMenu;
 
 class MainForm : public QMainWindow {
     Q_OBJECT
@@ -99,7 +99,7 @@ private:
     QAction *      _navigationAction;
     QAction *      _editUndoAction;
     QAction *      _editRedoAction;
-    QAction *      _preferencesAction;
+    QAction *      _appSettingsAction;
     QLineEdit *    _timeStepEdit;
     QIntValidator *_timeStepEditValidator;
 
@@ -191,8 +191,8 @@ private:
 
     Statistics *        _stats;
     Plot *              _plot;
-    PreferencesMenu*        _preferencesMenu;
     PythonVariables *   _pythonVariables;
+    AppSettingsMenu*    _appSettingsMenu;
     BannerGUI *         _banner;
     VizSelectCombo *    _windowSelector;
     VAPoR::ControlExec *_controlExec;

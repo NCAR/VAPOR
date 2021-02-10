@@ -68,6 +68,7 @@ const string SettingsParams::_sessionAutoSaveEnabledTag = "AutoSaveEnabled";
 const string SettingsParams::_fontFileTag = "FontFile";
 const string SettingsParams::_fontSizeTag = "FontSize";
 const string SettingsParams::_dontShowIntelDriverWarningTag = "DontShowIntelDriverWarning";
+const string SettingsParams::_settingsNeedsWriteTag = "SettingsNeedsWrite";
 
 //
 // Register class with object factory!!!
@@ -191,7 +192,8 @@ void SettingsParams::SetJpegQuality(int quality)
 
 bool SettingsParams::GetSessionAutoSaveEnabled() const
 {
-    double enabled = GetValueDouble(_sessionAutoSaveEnabledTag, 1.f);
+    //double enabled = GetValueDouble(_sessionAutoSaveEnabledTag, 1.f);
+    double enabled = GetValueLong(_sessionAutoSaveEnabledTag, 1);
     if (enabled > 0)
         return true;
     else
@@ -200,15 +202,17 @@ bool SettingsParams::GetSessionAutoSaveEnabled() const
 
 void SettingsParams::SetSessionAutoSaveEnabled(bool enabled)
 {
-    double val = 0.f;
-    if (enabled) val = 1.f;
+    //double val = 0.f;
+    //if (enabled) val = 1.f;
     string description = "Enable/disable auto save of session files";
-    SetValueDouble(_sessionAutoSaveEnabledTag, description, val);
+    //SetValueDouble(_sessionAutoSaveEnabledTag, description, val);
+    SetValueLong(_sessionAutoSaveEnabledTag, description, (long)enabled);
 }
 
 int SettingsParams::GetChangesPerAutoSave() const
 {
-    int changes = (int)GetValueDouble(_changesPerAutoSaveTag, 5.f);
+    //int changes = (int)GetValueDouble(_changesPerAutoSaveTag, 5.f);
+    int changes = (int)GetValueLong(_changesPerAutoSaveTag, 5);
     return changes;
 }
 
@@ -216,7 +220,8 @@ void SettingsParams::SetChangesPerAutoSave(int count)
 {
     if (count < 0) count = 5;
     string description = "User changes before auto saving session file";
-    SetValueDouble(_changesPerAutoSaveTag, description, count);
+    //SetValueDouble(_changesPerAutoSaveTag, description, count);
+    SetValueLong(_changesPerAutoSaveTag, description, count);
 }
 
 string SettingsParams::GetAutoSaveSessionFile() const
@@ -411,6 +416,8 @@ bool SettingsParams::_loadFromSettingsFile()
 
 int SettingsParams::SaveSettings() const
 {
+    
+std::cout << "int SettingsParams::SaveSettings() const" << std::endl;
     ofstream fileout;
     string   s;
 
@@ -443,6 +450,34 @@ void SettingsParams::_init()
 
     string python = GetPythonDir();
     SetDefaultPythonDir(string(python));
+}
+
+//void SettingsParams::SetWinWidth( size_t width ) {
+void SettingsParams::SetWinWidth( int width ) {
+    size_t dummyWidth, height;
+    GetWinSize( dummyWidth, height );
+    SetWinSize( width, height );
+}
+
+//void SettingsParams::SetWinHeight( size_t height ) {
+void SettingsParams::SetWinHeight( int height ) {
+    size_t width, dummyHeight;
+    GetWinSize( width, dummyHeight );
+    SetWinSize( width, height );
+}
+
+//size_t SettingsParams::GetWinWidth() const {
+int SettingsParams::GetWinWidth() const {
+    size_t width, height;
+    GetWinSize( width, height );
+    return width;
+}
+
+//size_t SettingsParams::GetWinHeight() const {
+int SettingsParams::GetWinHeight() const {
+    size_t width, height;
+    GetWinSize( width, height );
+    return height;
 }
 
 void SettingsParams::SetWinSize(size_t width, size_t height)

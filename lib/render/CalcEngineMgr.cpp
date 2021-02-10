@@ -158,7 +158,8 @@ void CalcEngineMgr::_sync()
     for (int i = 0; i < dataSetNames.size(); i++) {
         PyEngine *pyEngine = new PyEngine(_dataStatus->GetDataMgr(dataSetNames[i]));
         int       rc = pyEngine->Initialize();
-        VAssert(rc >= 0);
+        std::cout << "pyEngine->Initialize() rc = " << rc << std::endl;
+        //VAssert(rc >= 0);
 
         _pyScripts[dataSetNames[i]] = pyEngine;
 

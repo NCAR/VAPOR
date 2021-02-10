@@ -237,8 +237,8 @@ set (SRCS
 	PFlowRakeRegionSelector.h
 	PMultiVarSelector.cpp
 	PMultiVarSelector.h
-	PreferencesMenu.cpp
-	PreferencesMenu.h
+	AppSettingsMenu.cpp
+	AppSettingsMenu.h
 
 	# Need to include all files that request .ui files
 	Statistics.h

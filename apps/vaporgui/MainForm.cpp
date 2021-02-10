@@ -83,7 +83,7 @@
 #include "windowsUtils.h"
 #include "MouseModeParams.h"
 #include "ParamsWidgetDemo.h"
-#include "PreferencesMenu.h"
+#include "AppSettingsMenu.h"
 
 #include <QProgressDialog>
 #include <QProgressBar>
@@ -171,7 +171,7 @@ void MainForm::_initMembers()
     _navigationAction = NULL;
     _editUndoAction = NULL;
     _editRedoAction = NULL;
-    _preferencesAction = NULL;
+    _appSettingsAction = NULL;
     _timeStepEdit = NULL;
     _timeStepEditValidator = NULL;
 
@@ -237,7 +237,7 @@ void MainForm::_initMembers()
     _interactiveRefinementSpin = NULL;
     _tabDockWindow = NULL;
 
-    _preferencesMenu = nullptr;
+    _appSettingsMenu = nullptr;
     _stats = NULL;
     _plot = NULL;
     _pythonVariables = NULL;
@@ -945,21 +945,22 @@ void MainForm::_createEditMenu()
     _editRedoAction->setShortcut(tr("Ctrl+Y"));
     _editRedoAction->setToolTip("Redo the last undone session state change");
     _editRedoAction->setEnabled(false);
-   
-    _preferencesMenu   = new PreferencesMenu(this); 
-    _preferencesAction = new QAction(this);
-    _preferencesAction->setText( tr("Preferences") );
-    _preferencesAction->setToolTip( "Edit preferences that apply to all of Vapor" );
-    _preferencesAction->setEnabled(true);
-    connect( _preferencesAction, &QAction::triggered, 
-             _preferencesMenu,   &PreferencesMenu::open );
+
 
     _Edit = menuBar()->addMenu(tr("Edit"));
     _Edit->addAction(_editUndoAction);
     _Edit->addAction(_editRedoAction);
-    //_Edit->addSeparator();
-    _Edit->addAction(_preferencesAction);
-    //_Edit->addSeparator();
+    
+    _Edit->addSeparator();
+    _appSettingsMenu   = new AppSettingsMenu(this);
+    //_appSettingsMenu   = new AppSettingsMenu();
+    //_Edit->addAction("Application Settings", _appSettingsMenu, &QDialog::open);
+    //_Edit->addAction("Application Settings", _appSettingsMenu, &AppSettingsMenu::open);
+    //_Edit->addAction("Application Settings", _appSettingsMenu, &AppSettingsMenu::exec);
+    //_Edit->addAction("Application Settings", _appSettingsMenu, &QWidget::show);
+    _Edit->addAction("Application Settings", _appSettingsMenu, &AppSettingsMenu::ShowEvent);
+    //_developerMenu->addAction("Show PWidget Demo", _paramsWidgetDemo, &QWidget::show);
+    _Edit->addSeparator();
 
     connect(_editUndoAction, SIGNAL(triggered()), this, SLOT(undo()));
     connect(_editRedoAction, SIGNAL(triggered()), this, SLOT(redo()));
@@ -1884,7 +1885,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         if (_stats) { _stats->Update(); }
         if (_plot) { _plot->Update(); }
         if (_pythonVariables) { _pythonVariables->Update(); }
-        if (_preferencesMenu) { _preferencesMenu->Update( GetSettingsParams() ); }
+        if (_appSettingsMenu) { _appSettingsMenu->Update( GetSettingsParams() ); }
 
         setUpdatesEnabled(false);
         _tabMgr->Update();
@@ -2034,12 +2035,13 @@ void MainForm::enableWidgets(bool onOff)
     _viewRegionAction->setEnabled(onOff);
     //	_stepForwardAction->setEnabled(onOff);
     //	_stepBackAction->setEnabled(onOff);
-    //_interactiveRefinementSpin->setEnabled(onOff);
+    _interactiveRefinementSpin->setEnabled(onOff);
     _alignViewCombo->setEnabled(onOff);
     _navigationAction->setEnabled(onOff);
-    _Edit->setEnabled(onOff);
+    _editUndoAction->setEnabled(onOff);
+    _editRedoAction->setEnabled(onOff);
     _windowSelector->setEnabled(onOff);
-    //_tabMgr->setEnabled(onOff);
+    _tabMgr->setEnabled(onOff);
     _statsAction->setEnabled(onOff);
     _plotAction->setEnabled(onOff);
     _pythonAction->setEnabled(onOff);
