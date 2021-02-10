@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+
+BRANCH=`git rev-parse --abbrev-ref HEAD`
+
+# If we're on the readTheDocs branch, skip clang-format
+#
+if [ "$BRANCH" = "readTheDocs" ]; then
+    echo "pre-push hook skipped for current branch."
+
+# Otherwise format the changed lines in all commits up to this push
+#
+else
+    for COMMIT in $(git log --pretty=format:%h main...$BRANCH); do
+        for FILE in $(git diff --name-only origin/main |grep -E "\.h|\.cpp"); do
+            NUMBERS=""
+            for NUMBER in $(git blame --line-porcelain "$FILE" | egrep ^$COMMIT | cut -d' ' -f3); do
+                NUMBERS="$NUMBERS --lines $NUMBER:$NUMBER "
+            done
+
+            if [ "$NUMBERS" != "" ]; then
+                echo "  Running clang-format on $FILE"
+                clang-format -i $FILE $NUMBERS
+            fi
+        done
+    done
+
+    git commit -a -m "clang-format pre-receive hook"
+fi
