@@ -21,8 +21,7 @@ void VStringLineEdit::SetValueString(std::string value)
 {
     _strValue = value;
     _lineEdit->setText(QString::fromStdString(_strValue));
-    if (_autoTooltip)
-        _lineEdit->setToolTip(QString::fromStdString(_strValue));
+    if (_autoTooltip) _lineEdit->setToolTip(QString::fromStdString(_strValue));
     _lineEdit->setCursorPosition(0);
 }
 

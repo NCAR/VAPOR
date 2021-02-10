@@ -30,7 +30,7 @@ QRangeSliderTextCombo::QRangeSliderTextCombo()
 
     _leftText->RemoveContextMenu();
     _rightText->RemoveContextMenu();
-    
+
     _leftText->SetAutoTooltip(false);
     _rightText->SetAutoTooltip(false);
 
@@ -56,11 +56,8 @@ void QRangeSliderTextCombo::SetRange(float min, float max)
     SetValue(_left, _right);
     _menu->SetMinimum(_min);
     _menu->SetMaximum(_max);
-    
-    setToolTip(QString::fromStdString(
-        "Min: " + std::to_string(_min) + "\n" +
-        "Max: " + std::to_string(_max)
-    ));
+
+    setToolTip(QString::fromStdString("Min: " + std::to_string(_min) + "\n" + "Max: " + std::to_string(_max)));
 }
 
 void QRangeSliderTextCombo::SetValue(float left, float right)

@@ -172,38 +172,29 @@ void AnimationEventRouter::setCurrentTimestep(size_t ts) const
             for (int k = 0; k < rParams.size(); k++) {
                 RenderParams *rp = rParams[k];
                 rp->SetCurrentTimestep(local_ts);
-                
+
                 // If variable was not initialzed but now is, reset the TF mapping range
-                std::string varNames[2] = {
-                    rp->GetVariableName(),
-                    rp->GetColorMapVariableName()
-                };
-                
+                std::string varNames[2] = {rp->GetVariableName(), rp->GetColorMapVariableName()};
+
                 for (int l = 0; l < 2; l++) {
-                    if (varNames[i].empty())
-                        continue;
-                    
+                    if (varNames[i].empty()) continue;
+
                     MapperFunction *tf = rp->GetMapperFunc(varNames[i]);
-                    vector<double> range = tf->getMinMaxMapValue();
-                    if (abs(range[1] - range[0]) > FLT_EPSILON)
-                        continue;
-                    
+                    vector<double>  range = tf->getMinMaxMapValue();
+                    if (abs(range[1] - range[0]) > FLT_EPSILON) continue;
+
                     DataMgr *dm = dataStatus->GetDataMgr(dataSetNames[j]);
                     if (!dm) continue;
-                    
-                    if (!dm->VariableExists(local_ts, varNames[i], 0, 0))
-                        continue;
-                    
-                    if (dm->GetDataRange(local_ts, varNames[i], 0, 0, range) < 0)
-                        continue;
-                    
+
+                    if (!dm->VariableExists(local_ts, varNames[i], 0, 0)) continue;
+
+                    if (dm->GetDataRange(local_ts, varNames[i], 0, 0, range) < 0) continue;
+
                     bool SSE = paramsMgr->GetSaveStateEnabled();
                     paramsMgr->SetSaveStateEnabled(false);
                     tf->setMinMaxMapValue(range[0], range[1]);
                     paramsMgr->SetSaveStateEnabled(SSE);
                 }
-                
-                
             }
         }
     }
