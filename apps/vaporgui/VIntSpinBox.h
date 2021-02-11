@@ -32,4 +32,5 @@ public slots:
 
 signals:
     void ValueChanged(int value);
+    void EditingFinished(int value);
 };

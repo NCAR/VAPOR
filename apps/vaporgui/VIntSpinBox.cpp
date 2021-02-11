@@ -16,7 +16,7 @@ VIntSpinBox::VIntSpinBox(int min, int max) : VHBoxWidget()
     //
     // More info here: https://doc.qt.io/qt-5/qspinbox.html#valueChanged
 
-    // connect(_spinBox, SIGNAL(valueChanged(int)), this, SLOT(emitSpinBoxChanged(int)));
+    connect(_spinBox, SIGNAL(valueChanged(int)), this, SLOT(emitSpinBoxChanged(int)));
 }
 
 void VIntSpinBox::SetValue(int value)
@@ -37,9 +37,11 @@ int VIntSpinBox::GetValue() const { return _spinBox->value(); }
 
 void VIntSpinBox::emitSpinBoxFinished()
 {
-    std::cout << "Foo" << std::endl;
-    _spinBox->findChild<QLineEdit *>()->clearFocus();
-    emit ValueChanged(GetValue());
+    std::cout << "Editing finished" << std::endl;
+    emit EditingFinished(GetValue());
 }
 
-void VIntSpinBox::emitSpinBoxChanged(int value) { emit ValueChanged(value); }
+void VIntSpinBox::emitSpinBoxChanged(int value) { 
+    std::cout << "Value Changed" << std::endl;
+    emit ValueChanged(value); 
+}
