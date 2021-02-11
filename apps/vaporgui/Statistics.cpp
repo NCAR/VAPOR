@@ -38,11 +38,6 @@
 #include "PWidgets.h"
 #include "VPushButton.h"
 
-#include "PWidget.h"
-#include "SettingsParams.h"
-#include "PFileSelectorHLI.h"
-#include "PIntegerInput.h"
-
 using namespace Wasp;
 using namespace VAPoR;
 using namespace std;
@@ -58,19 +53,6 @@ Statistics::Statistics(QWidget *parent) : QDialog(parent), Ui_StatsWindow()
     setWindowTitle("Statistics");
     MyFidelityWidget->Reinit((VariableFlags)AUXILIARY);
 
-    pfile = new PFileSaveSelectorHLI<SettingsParams>(
-                "Auto-save session file",
-                &SettingsParams::GetAutoSaveSessionFile,
-                &SettingsParams::SetAutoSaveSessionFile
-             );
-    layout()->addWidget(pfile);
-    pint = new PIntegerInputHLI<SettingsParams>(
-        "Number of threads (0 for available num. of CPU cores)",
-        &SettingsParams::GetNumThreads,
-        &SettingsParams::SetNumThreads
-    );
-    layout()->addWidget(pint);
-
     Connect();
 
     auto rs = new PRegionSelector;
@@ -84,7 +66,6 @@ Statistics::Statistics(QWidget *parent) : QDialog(parent), Ui_StatsWindow()
     VPushButton *close = new VPushButton("Close Window");
     connect(close, &VPushButton::ButtonClicked, this, &QDialog::accept);
     layout()->addWidget(close);
-
 }
 
 Statistics::~Statistics()
@@ -97,9 +78,6 @@ Statistics::~Statistics()
 
 bool Statistics::Update()
 {
-    SettingsParams *sParams = dynamic_cast<SettingsParams*>(_controlExec->GetParamsMgr()->GetParams(SettingsParams::GetClassType()));
-    pfile->Update(sParams); 
-    pint->Update(sParams); 
     // Initialize pointers
     VAPoR::DataStatus *      dataStatus = _controlExec->GetDataStatus();
     std::vector<std::string> dmNames = dataStatus->GetDataMgrNames();

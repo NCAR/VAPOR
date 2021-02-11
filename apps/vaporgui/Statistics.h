@@ -33,9 +33,6 @@
     #include <RangeCombos.h>
     #include <StatisticsParams.h>
     #include "PWidgets.h"
-#include "SettingsParams.h"
-#include "PFileSelectorHLI.h"
-#include "PIntegerInputHLI.h"
 
 namespace VAPoR {
 class ParamsMgr;
@@ -53,9 +50,6 @@ class Statistics : public QDialog, public Ui_StatsWindow {
     Q_OBJECT
 
 public:
-    PFileSaveSelectorHLI<SettingsParams>* pfile;
-    PIntegerInputHLI<SettingsParams>* pint;
-
     Statistics(QWidget *parent);
     ~Statistics();
     int  initControlExec(VAPoR::ControlExec *ce);

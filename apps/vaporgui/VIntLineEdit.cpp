@@ -33,7 +33,6 @@ int VIntLineEdit::GetValueInt() const { return _value; }
 
 void VIntLineEdit::_valueChanged()
 {
-    std::cout << "void VIntLineEdit::_valueChanged()" << std::endl;
     std::string str = _getText();
 
     int value;
