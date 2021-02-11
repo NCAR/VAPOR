@@ -5,7 +5,7 @@
 
 PIntegerInput::PIntegerInput(const std::string &tag, const std::string &label) : PLineItem(tag, label, _spinbox = new VIntSpinBox(INT_MIN, INT_MAX))
 {
-    connect(_spinbox, &VIntSpinBox::EditingFinished, this, &PIntegerInput::spinboxValueChanged);
+    connect(_spinbox, &VIntSpinBox::ValueChanged, this, &PIntegerInput::spinboxValueChanged);
 }
 
 PIntegerInput *PIntegerInput::SetRange(int min, int max)
