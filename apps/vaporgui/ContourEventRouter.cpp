@@ -2,6 +2,7 @@
 #include "vapor/ContourParams.h"
 #include "PWidgets.h"
 #include "PSliderEditHLI.h"
+#include "PConstantColorWidget.h"
 
 using namespace VAPoR;
 typedef ContourParams CP;
@@ -29,6 +30,7 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : Rende
             _spacingSlider = new PDoubleSliderEditHLI<CP>("Spacing", &CP::GetContourSpacing, &CP::SetContourSpacing),
             (new PIntegerSliderEditHLI<CP>("Count", &CP::GetContourCount, &CP::SetContourCount))->SetRange(1, 50),
             _minValueSlider = new PDoubleSliderEditHLI<CP>("Minimum Value", &CP::GetContourMin, &CP::SetContourMin),
+            new PConstantColorWidget
         }),
     }));
     
