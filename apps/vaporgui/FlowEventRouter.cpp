@@ -3,6 +3,7 @@
 #include "PWidgets.h"
 #include "PFlowRakeRegionSelector.h"
 #include "PMultiVarSelector.h"
+#include "PConstantColorWidget.h"
 
 using namespace VAPoR;
 typedef FlowParams FP;
@@ -88,6 +89,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
     AddSubtab("Appearance", new PGroup({
         (new PTFEditor(RenderParams::_colorMapVariableNameTag))->ShowOpacityBasedOnParam("NULL", 1),
         new PSection("Appearance", {
+            new PConstantColorWidget,
             new PEnumDropdown(FP::RenderTypeTag, {"Tubes", "Samples", "KLGWTH"}, {FP::RenderTypeStream, FP::RenderTypeSamples, FP::RenderTypeDensity}, "Render Type"),
             (new PShowIf(FP::RenderTypeTag))->Equals(FP::RenderTypeStream)->Then({
                 new PCheckbox(FP::RenderGeom3DTag, "3D Geometry"),
