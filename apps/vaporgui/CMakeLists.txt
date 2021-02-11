@@ -239,6 +239,8 @@ set (SRCS
 	PMultiVarSelector.h
 	AppSettingsMenu.cpp
 	AppSettingsMenu.h
+    PConstantColorWidget.cpp
+    PConstantColorWidget.h
 
 	# Need to include all files that request .ui files
 	Statistics.h

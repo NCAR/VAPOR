@@ -37,9 +37,12 @@ public:
     void SetReadOnly(bool b) { _lineEdit->setReadOnly(b); }
     void Clear() { SetValueString(""); }
 
+    void SetAutoTooltip(bool on);
+
 private:
     QLineEdit * _lineEdit;
     std::string _strValue;
+    bool        _autoTooltip = true;
 
 protected:
     std::string _getText() const;
