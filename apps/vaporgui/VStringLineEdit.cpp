@@ -21,7 +21,7 @@ void VStringLineEdit::SetValueString(std::string value)
 {
     _strValue = value;
     _lineEdit->setText(QString::fromStdString(_strValue));
-    _lineEdit->setToolTip(QString::fromStdString(_strValue));
+    if (_autoTooltip) _lineEdit->setToolTip(QString::fromStdString(_strValue));
     _lineEdit->setCursorPosition(0);
 }
 
@@ -38,6 +38,15 @@ void VStringLineEdit::SetCustomContextMenu()
     _lineEdit->setContextMenuPolicy(Qt::CustomContextMenu);
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(_lineEdit, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(_showMenu(const QPoint &)));
+}
+
+void VStringLineEdit::SetAutoTooltip(bool on)
+{
+    _autoTooltip = on;
+    if (on)
+        _lineEdit->setToolTip(_lineEdit->text());
+    else
+        _lineEdit->setToolTip("");
 }
 
 void VStringLineEdit::_valueChanged()
