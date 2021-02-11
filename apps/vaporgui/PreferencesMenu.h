@@ -12,6 +12,6 @@ class SettingsParams;
 
 class PreferencesMenu : public QDialog {
 public:
-    PreferencesMenu( QWidget* parent );
-    void Update( SettingsParams* sp );
+    PreferencesMenu(QWidget *parent);
+    void Update(SettingsParams *sp);
 };

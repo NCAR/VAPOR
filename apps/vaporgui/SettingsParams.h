@@ -61,13 +61,13 @@ public:
     void SetWinSizeLock(bool val);
     bool GetWinSizeLock() const;
     void SetWinSize(size_t width, size_t height);
-    //void SetWinWidth(  size_t width );
-    //void SetWinHeight( size_t height );
-    void SetWinWidth(  int width );
-    void SetWinHeight( int height );
+    // void SetWinWidth(  size_t width );
+    // void SetWinHeight( size_t height );
+    void SetWinWidth(int width);
+    void SetWinHeight(int height);
     void GetWinSize(size_t &width, size_t &height) const;
-    //size_t GetWinWidth() const;
-    //size_t GetWinHeight() const;
+    // size_t GetWinWidth() const;
+    // size_t GetWinHeight() const;
     int GetWinWidth() const;
     int GetWinHeight() const;
 

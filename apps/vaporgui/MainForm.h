@@ -192,7 +192,7 @@ private:
     Statistics *        _stats;
     Plot *              _plot;
     PythonVariables *   _pythonVariables;
-    AppSettingsMenu*    _appSettingsMenu;
+    AppSettingsMenu *   _appSettingsMenu;
     BannerGUI *         _banner;
     VizSelectCombo *    _windowSelector;
     VAPoR::ControlExec *_controlExec;

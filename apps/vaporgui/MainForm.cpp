@@ -950,7 +950,7 @@ void MainForm::_createEditMenu()
     _Edit = menuBar()->addMenu(tr("Edit"));
     _Edit->addAction(_editUndoAction);
     _Edit->addAction(_editRedoAction);
-    
+
     /*_Edit->addSeparator();
     _appSettingsMenu   = new AppSettingsMenu(this);
     //_appSettingsMenu   = new AppSettingsMenu();
@@ -1009,9 +1009,9 @@ void MainForm::_createToolsMenu()
     connect(_statsAction, SIGNAL(triggered()), this, SLOT(launchStats()));
     connect(_plotAction, SIGNAL(triggered()), this, SLOT(launchPlotUtility()));
     connect(_pythonAction, SIGNAL(triggered()), this, SLOT(launchPythonVariables()));
-    
+
     _Tools->addSeparator();
-    _appSettingsMenu   = new AppSettingsMenu(this);
+    _appSettingsMenu = new AppSettingsMenu(this);
     //_appSettingsMenu   = new AppSettingsMenu();
     //_Edit->addAction("Application Settings", _appSettingsMenu, &QDialog::open);
     _Tools->addAction("Prefs", _appSettingsMenu, &QDialog::open);
@@ -1897,7 +1897,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         if (_stats) { _stats->Update(); }
         if (_plot) { _plot->Update(); }
         if (_pythonVariables) { _pythonVariables->Update(); }
-        if (_appSettingsMenu) { _appSettingsMenu->Update( GetSettingsParams() ); }
+        if (_appSettingsMenu) { _appSettingsMenu->Update(GetSettingsParams()); }
 
         setUpdatesEnabled(false);
         _tabMgr->Update();

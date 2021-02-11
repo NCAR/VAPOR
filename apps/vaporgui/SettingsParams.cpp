@@ -171,8 +171,9 @@ void SettingsParams::SetTexSizeEnable(bool val) { SetValueLong(_texSizeEnableTag
 
 bool SettingsParams::GetTexSizeEnable() const { return (0 != GetValueLong(_texSizeEnableTag, (long)0)); }
 
-void SettingsParams::SetWinSizeLock(bool val) { 
-    SetValueLong(_winSizeLockTag, "toggle lock window size", (long)val); 
+void SettingsParams::SetWinSizeLock(bool val)
+{
+    SetValueLong(_winSizeLockTag, "toggle lock window size", (long)val);
     SaveSettings();
 }
 
@@ -180,7 +181,8 @@ bool SettingsParams::GetWinSizeLock() const { return (0 != GetValueLong(_winSize
 
 bool SettingsParams::GetAutoStretchEnabled() const { return (0 != GetValueLong(_autoStretchTag, (long)true)); }
 
-void SettingsParams::SetAutoStretchEnabled(bool val) { 
+void SettingsParams::SetAutoStretchEnabled(bool val)
+{
     SetValueLong(_autoStretchTag, "Enable Auto Stretch", val);
     SaveSettings();
 }
@@ -199,7 +201,7 @@ void SettingsParams::SetJpegQuality(int quality)
 
 bool SettingsParams::GetSessionAutoSaveEnabled() const
 {
-    //double enabled = GetValueDouble(_sessionAutoSaveEnabledTag, 1.f);
+    // double enabled = GetValueDouble(_sessionAutoSaveEnabledTag, 1.f);
     double enabled = GetValueLong(_sessionAutoSaveEnabledTag, 1);
     if (enabled > 0)
         return true;
@@ -209,17 +211,17 @@ bool SettingsParams::GetSessionAutoSaveEnabled() const
 
 void SettingsParams::SetSessionAutoSaveEnabled(bool enabled)
 {
-    //double val = 0.f;
-    //if (enabled) val = 1.f;
+    // double val = 0.f;
+    // if (enabled) val = 1.f;
     string description = "Enable/disable auto save of session files";
-    //SetValueDouble(_sessionAutoSaveEnabledTag, description, val);
+    // SetValueDouble(_sessionAutoSaveEnabledTag, description, val);
     SetValueLong(_sessionAutoSaveEnabledTag, description, (long)enabled);
     SaveSettings();
 }
 
 int SettingsParams::GetChangesPerAutoSave() const
 {
-    //int changes = (int)GetValueDouble(_changesPerAutoSaveTag, 5.f);
+    // int changes = (int)GetValueDouble(_changesPerAutoSaveTag, 5.f);
     int changes = (int)GetValueLong(_changesPerAutoSaveTag, 5);
     return changes;
 }
@@ -228,7 +230,7 @@ void SettingsParams::SetChangesPerAutoSave(int count)
 {
     if (count < 0) count = 5;
     string description = "User changes before auto saving session file";
-    //SetValueDouble(_changesPerAutoSaveTag, description, count);
+    // SetValueDouble(_changesPerAutoSaveTag, description, count);
     SetValueLong(_changesPerAutoSaveTag, description, count);
     SaveSettings();
 }
@@ -256,8 +258,9 @@ string SettingsParams::GetSessionDir() const
     return (dir);
 }
 
-void SettingsParams::SetSessionDir(string name) { 
-    SetValueString(_sessionDirTag, "Set session directory", name); 
+void SettingsParams::SetSessionDir(string name)
+{
+    SetValueString(_sessionDirTag, "Set session directory", name);
     SaveSettings();
 }
 
@@ -288,8 +291,9 @@ string SettingsParams::GetMetadataDir() const
     return (dir);
 }
 
-void SettingsParams::SetMetadataDir(string dir) { 
-    SetValueString(_metadataDirTag, "set metadata directory", dir); 
+void SettingsParams::SetMetadataDir(string dir)
+{
+    SetValueString(_metadataDirTag, "set metadata directory", dir);
     SaveSettings();
 }
 
@@ -382,8 +386,9 @@ int SettingsParams::GetNumThreads() const
     return ((int)val);
 }
 
-void SettingsParams::SetNumThreads(int val) { 
-    SetValueLong(_numThreadsTag, "Number of execution threads", val); 
+void SettingsParams::SetNumThreads(int val)
+{
+    SetValueLong(_numThreadsTag, "Number of execution threads", val);
     SaveSettings();
 }
 
@@ -434,8 +439,7 @@ bool SettingsParams::_loadFromSettingsFile()
 
 int SettingsParams::SaveSettings() const
 {
-    
-std::cout << "int SettingsParams::SaveSettings() const" << std::endl;
+    std::cout << "int SettingsParams::SaveSettings() const" << std::endl;
     ofstream fileout;
     string   s;
 
@@ -470,33 +474,37 @@ void SettingsParams::_init()
     SetDefaultPythonDir(string(python));
 }
 
-//void SettingsParams::SetWinWidth( size_t width ) {
-void SettingsParams::SetWinWidth( int width ) {
+// void SettingsParams::SetWinWidth( size_t width ) {
+void SettingsParams::SetWinWidth(int width)
+{
     size_t dummyWidth, height;
-    GetWinSize( dummyWidth, height );
-    SetWinSize( width, height );
+    GetWinSize(dummyWidth, height);
+    SetWinSize(width, height);
     SaveSettings();
 }
 
-//void SettingsParams::SetWinHeight( size_t height ) {
-void SettingsParams::SetWinHeight( int height ) {
+// void SettingsParams::SetWinHeight( size_t height ) {
+void SettingsParams::SetWinHeight(int height)
+{
     size_t width, dummyHeight;
-    GetWinSize( width, dummyHeight );
-    SetWinSize( width, height );
+    GetWinSize(width, dummyHeight);
+    SetWinSize(width, height);
     SaveSettings();
 }
 
-//size_t SettingsParams::GetWinWidth() const {
-int SettingsParams::GetWinWidth() const {
+// size_t SettingsParams::GetWinWidth() const {
+int SettingsParams::GetWinWidth() const
+{
     size_t width, height;
-    GetWinSize( width, height );
+    GetWinSize(width, height);
     return width;
 }
 
-//size_t SettingsParams::GetWinHeight() const {
-int SettingsParams::GetWinHeight() const {
+// size_t SettingsParams::GetWinHeight() const {
+int SettingsParams::GetWinHeight() const
+{
     size_t width, height;
-    GetWinSize( width, height );
+    GetWinSize(width, height);
     return height;
 }
 
