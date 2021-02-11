@@ -41,7 +41,8 @@ void VIntSpinBox::emitSpinBoxFinished()
     emit EditingFinished(GetValue());
 }
 
-void VIntSpinBox::emitSpinBoxChanged(int value) { 
+void VIntSpinBox::emitSpinBoxChanged(int value)
+{
     std::cout << "Value Changed" << std::endl;
-    emit ValueChanged(value); 
+    emit ValueChanged(value);
 }
