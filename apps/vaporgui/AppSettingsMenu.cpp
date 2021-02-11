@@ -10,18 +10,26 @@
 
 //AppSettingsMenu::AppSettingsMenu()
 //AppSettingsMenu::AppSettingsMenu() : QDialog()
-//AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog( parent )
-AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QWidget( parent )
+AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog( parent )
+//AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog( parent ), QWidget
+//AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QWidget( parent )
 {
-    setWindowModality(Qt::WindowModal);
-    std::cout << "AppSettingsMenu constructor" << std::endl;
+    setFocusPolicy(Qt::ClickFocus);
+    //setFocusPolicy(Qt::StrongFocus);
+    //setFocusPolicy(Qt::NoFocus);
     pfile = new PFileSaveSelectorHLI<SettingsParams>( 
             "Auto-save open session file", 
             &SettingsParams::GetAutoSaveSessionFile, 
             &SettingsParams::SetAutoSaveSessionFile
-        ),
+        );
+    //pfile->setFocus(Qt::NoFocus);
 
     _settings = new PGroup( {
+            new PFileSaveSelectorHLI<SettingsParams>( 
+                "Auto-save open session file2", 
+                &SettingsParams::GetAutoSaveSessionFile, 
+                &SettingsParams::SetAutoSaveSessionFile
+            ),//->setFocus(Qt::NoFocus),
             new PCheckboxHLI<SettingsParams>( 
                 "Automatically stretch domain", 
                 &SettingsParams::GetAutoStretchEnabled, 
@@ -29,19 +37,7 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QWidget( parent )
             ),
 
 
-    /*_generalSettings = new PSection("General Settings", {
-        new PCheckboxHLI<SettingsParams>( 
-            "Automatically stretch domain", 
-            &SettingsParams::GetAutoStretchEnabled, 
-            &SettingsParams::SetAutoStretchEnabled
-        ),*/
-        /*new PFileSaveSelectorHLI<SettingsParams>( 
-            "Auto-save session file", 
-            &SettingsParams::GetAutoSaveSessionFile, 
-            &SettingsParams::SetAutoSaveSessionFile
-        ),*/
-
-        /*new PSection("General Settings", {
+        new PSection("General Settings", {
             new PIntegerInputHLI<SettingsParams>( 
                 "Changes per save", 
                 &SettingsParams::GetChangesPerAutoSave, 
@@ -58,10 +54,10 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QWidget( parent )
                 &SettingsParams::SetAutoSaveSessionFile
             ),
             
-        } ),*/
+        } ),
         
 
-        /*new PSection("Startup Settings", {
+        new PSection("Startup Settings", {
             new PCheckboxHLI<SettingsParams>( 
                 "Automatically stretch domain", 
                 &SettingsParams::GetAutoStretchEnabled, 
@@ -104,9 +100,9 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QWidget( parent )
             //),
             //(new PIntegerInput( SettingsParams::_changesPerAutoSaveTag, "Number of threads (0 for available num. of CPU cores)")),
             
-        } ),*/
+        } ),
         
-        /*new PSection("Default Search Paths", {
+        new PSection("Default Search Paths", {
             new PDirectorySelectorHLI<SettingsParams>( 
                 "Session file path", 
                 &SettingsParams::GetSessionDir, 
@@ -120,13 +116,12 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QWidget( parent )
         } ),
         new PButton( "Apply settings",  [](VAPoR::ParamsBase *p){
             dynamic_cast<SettingsParams*>(p)->SaveSettings();
-        })*/
+        })
     } );
 
     setLayout( new QVBoxLayout );
     layout()->addWidget( pfile );
     layout()->addWidget( _settings );
-    
 }
 
 void AppSettingsMenu::ShowEvent() {

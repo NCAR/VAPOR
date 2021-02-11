@@ -951,16 +951,17 @@ void MainForm::_createEditMenu()
     _Edit->addAction(_editUndoAction);
     _Edit->addAction(_editRedoAction);
     
-    _Edit->addSeparator();
+    /*_Edit->addSeparator();
     _appSettingsMenu   = new AppSettingsMenu(this);
     //_appSettingsMenu   = new AppSettingsMenu();
     //_Edit->addAction("Application Settings", _appSettingsMenu, &QDialog::open);
+    _Edit->addAction("Preferences", _appSettingsMenu, &QDialog::open);
     //_Edit->addAction("Application Settings", _appSettingsMenu, &AppSettingsMenu::open);
     //_Edit->addAction("Application Settings", _appSettingsMenu, &AppSettingsMenu::exec);
     //_Edit->addAction("Application Settings", _appSettingsMenu, &QWidget::show);
-    _Edit->addAction("Application Settings", _appSettingsMenu, &AppSettingsMenu::ShowEvent);
+    //_Edit->addAction("Application Settings", _appSettingsMenu, &AppSettingsMenu::ShowEvent);
     //_developerMenu->addAction("Show PWidget Demo", _paramsWidgetDemo, &QWidget::show);
-    _Edit->addSeparator();
+    _Edit->addSeparator();*/
 
     connect(_editUndoAction, SIGNAL(triggered()), this, SLOT(undo()));
     connect(_editRedoAction, SIGNAL(triggered()), this, SLOT(redo()));
@@ -1008,6 +1009,17 @@ void MainForm::_createToolsMenu()
     connect(_statsAction, SIGNAL(triggered()), this, SLOT(launchStats()));
     connect(_plotAction, SIGNAL(triggered()), this, SLOT(launchPlotUtility()));
     connect(_pythonAction, SIGNAL(triggered()), this, SLOT(launchPythonVariables()));
+    
+    _Tools->addSeparator();
+    _appSettingsMenu   = new AppSettingsMenu(this);
+    //_appSettingsMenu   = new AppSettingsMenu();
+    //_Edit->addAction("Application Settings", _appSettingsMenu, &QDialog::open);
+    _Tools->addAction("Prefs", _appSettingsMenu, &QDialog::open);
+    //_Edit->addAction("Application Settings", _appSettingsMenu, &AppSettingsMenu::open);
+    //_Edit->addAction("Application Settings", _appSettingsMenu, &AppSettingsMenu::exec);
+    //_Edit->addAction("Application Settings", _appSettingsMenu, &QWidget::show);
+    //_Edit->addAction("Application Settings", _appSettingsMenu, &AppSettingsMenu::ShowEvent);
+    //_developerMenu->addAction("Show PWidget Demo", _paramsWidgetDemo, &QWidget::show);
 }
 
 void MainForm::_createCaptureMenu()

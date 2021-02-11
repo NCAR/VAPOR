@@ -8,7 +8,7 @@ VIntSpinBox::VIntSpinBox(int min, int max) : VHBoxWidget()
     SetValue(min);
     layout()->addWidget(_spinBox);
 
-    connect(_spinBox, &QSpinBox::editingFinished, this, &VIntSpinBox::emitSpinBoxFinished);
+    //connect(_spinBox, &QSpinBox::editingFinished, this, &VIntSpinBox::emitSpinBoxFinished);
 
     // QSpinBox overloads valueChanged.  This makes the function pointer
     // based syntax for signal and slot connection ugly, so defer to
@@ -16,7 +16,7 @@ VIntSpinBox::VIntSpinBox(int min, int max) : VHBoxWidget()
     //
     // More info here: https://doc.qt.io/qt-5/qspinbox.html#valueChanged
 
-    //connect(_spinBox, SIGNAL(valueChanged(int)), this, SLOT(emitSpinBoxChanged(int)));
+    connect(_spinBox, SIGNAL(valueChanged(int)), this, SLOT(emitSpinBoxChanged(int)));
 }
 
 void VIntSpinBox::SetValue(int value)
@@ -36,8 +36,11 @@ void VIntSpinBox::SetRange(int min, int max)
 int VIntSpinBox::GetValue() const { return _spinBox->value(); }
 
 void VIntSpinBox::emitSpinBoxFinished() { 
+    std::cout << "Foo" << std::endl;
     _spinBox->findChild<QLineEdit *>()->clearFocus(); 
     emit ValueChanged(GetValue()); 
 }
 
-void VIntSpinBox::emitSpinBoxChanged(int value) { emit ValueChanged(value); }
+void VIntSpinBox::emitSpinBoxChanged(int value) { 
+    emit ValueChanged(value); 
+}

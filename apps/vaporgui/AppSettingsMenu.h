@@ -3,7 +3,7 @@
 #include <QDialog>
 #include "PWidget.h"
 #include "PFileSelectorHLI.h"
-
+#include "VFileSelector.h"
 
 class QWidget;
 class SettingsParams;
@@ -15,8 +15,8 @@ class PSection;
 //! \brief Menu for global application preferences
 //! \author Scott Pearse
 
-//class AppSettingsMenu : public QDialog {
-class AppSettingsMenu : public QWidget {
+class AppSettingsMenu : public QDialog {
+//class AppSettingsMenu : public QWidget {
     Q_OBJECT
 
 public:
@@ -28,6 +28,7 @@ public slots:
     void ShowEvent();
 
 private:
+    VFileWriter *vfile;
     PFileSaveSelectorHLI<SettingsParams> *pfile;
     //PFileOpenSelectorHLI<SettingsParams> *pfile;
     PGroup* _settings;
