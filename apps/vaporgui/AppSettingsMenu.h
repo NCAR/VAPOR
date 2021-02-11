@@ -24,12 +24,9 @@ public:
     //AppSettingsMenu();
     void Update( SettingsParams* sp );
 
-public slots:
-    void ShowEvent();
+//public slots:
+//    void ShowEvent();
 
 private:
-    VFileWriter *vfile;
-    PFileSaveSelectorHLI<SettingsParams> *pfile;
-    //PFileOpenSelectorHLI<SettingsParams> *pfile;
     PGroup* _settings;
 };

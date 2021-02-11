@@ -3,61 +3,33 @@
 #include <SettingsParams.h>
 #include "PWidgets.h"
 #include "PGroup.h"
-#include "PFileSelector.h"
+//#include "PFileSelector.h"
 #include "PFileSelectorHLI.h"
 #include "PIntegerInputHLI.h"
 #include "PCheckboxHLI.h"
 
-//AppSettingsMenu::AppSettingsMenu()
-//AppSettingsMenu::AppSettingsMenu() : QDialog()
 AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog( parent )
-//AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog( parent ), QWidget
-//AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QWidget( parent )
 {
-    setFocusPolicy(Qt::ClickFocus);
-    //setFocusPolicy(Qt::StrongFocus);
-    //setFocusPolicy(Qt::NoFocus);
-    pfile = new PFileSaveSelectorHLI<SettingsParams>( 
-            "Auto-save open session file", 
-            &SettingsParams::GetAutoSaveSessionFile, 
-            &SettingsParams::SetAutoSaveSessionFile
-        );
-    //pfile->setFocus(Qt::NoFocus);
-
     _settings = new PGroup( {
-            new PFileSaveSelectorHLI<SettingsParams>( 
-                "Auto-save open session file2", 
-                &SettingsParams::GetAutoSaveSessionFile, 
-                &SettingsParams::SetAutoSaveSessionFile
-            ),//->setFocus(Qt::NoFocus),
+        new PSection("Automatic Session Recovery", {
             new PCheckboxHLI<SettingsParams>( 
-                "Automatically stretch domain", 
-                &SettingsParams::GetAutoStretchEnabled, 
-                &SettingsParams::SetAutoStretchEnabled
+                "Automatically save session", 
+                &SettingsParams::GetSessionAutoSaveEnabled, 
+                &SettingsParams::SetSessionAutoSaveEnabled
             ),
-
-
-        new PSection("General Settings", {
             new PIntegerInputHLI<SettingsParams>( 
-                "Changes per save", 
+                "Changes per auto-save", 
                 &SettingsParams::GetChangesPerAutoSave, 
                 &SettingsParams::SetChangesPerAutoSave
             ),
-            new PCheckboxHLI<SettingsParams>( 
-                "Automatically stretch domain", 
-                &SettingsParams::GetAutoStretchEnabled, 
-                &SettingsParams::SetAutoStretchEnabled
-            ),
             new PFileSaveSelectorHLI<SettingsParams>( 
-                "Auto-save session file", 
+                "Auto-save file", 
                 &SettingsParams::GetAutoSaveSessionFile, 
                 &SettingsParams::SetAutoSaveSessionFile
             ),
-            
         } ),
         
-
-        new PSection("Startup Settings", {
+        new PSection("Vapor's Startup Settings", {
             new PCheckboxHLI<SettingsParams>( 
                 "Automatically stretch domain", 
                 &SettingsParams::GetAutoStretchEnabled, 
@@ -73,10 +45,6 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog( parent )
                 &SettingsParams::GetCacheMB, 
                 &SettingsParams::SetCacheMB
             ),
-            //new PCheckbox( 
-            //    SettingsParams::_winSizeLockTag, 
-            //    "Lock window dimensions"
-            //),
             new PCheckboxHLI<SettingsParams>(
                 "Lock window dimensions",
                 &SettingsParams::GetWinSizeLock,
@@ -91,15 +59,8 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog( parent )
                 "Height",
                 &SettingsParams::GetWinHeight,
                 &SettingsParams::SetWinHeight
-            ))->EnableBasedOnParam( SettingsParams::_winSizeLockTag )
-            
-            //(new PCheckboxHLI<SettingsParams>( 
-            //    "Lock window dimensions", 
-            //    &SettingsParams::SetWinSizeLock, 
-            //    &SettingsParams::GetWinSizeLock)
-            //),
-            //(new PIntegerInput( SettingsParams::_changesPerAutoSaveTag, "Number of threads (0 for available num. of CPU cores)")),
-            
+            ))->EnableBasedOnParam( SettingsParams::_winSizeLockTag ),
+            new PStringDisplay("","*Vapor must be restarted for these settings to take effect"),
         } ),
         
         new PSection("Default Search Paths", {
@@ -114,24 +75,20 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog( parent )
                 &SettingsParams::SetMetadataDir
             )
         } ),
-        new PButton( "Apply settings",  [](VAPoR::ParamsBase *p){
-            dynamic_cast<SettingsParams*>(p)->SaveSettings();
-        })
     } );
 
     setLayout( new QVBoxLayout );
-    layout()->addWidget( pfile );
     layout()->addWidget( _settings );
+    
+    setFocusPolicy(Qt::ClickFocus);
 }
 
-void AppSettingsMenu::ShowEvent() {
+/*void AppSettingsMenu::ShowEvent() {
     show();
     raise();
-}
+}*/
 
 void AppSettingsMenu::Update( SettingsParams* sp ) {
-    std::cout << sp << " " << sp->GetFontSize() << std::endl;
-    pfile->Update( sp );
     _settings->Update( sp );
     std::cout << "AppSettingsMenu::Update( SettingsParams* sp )" << std::endl;
 }
