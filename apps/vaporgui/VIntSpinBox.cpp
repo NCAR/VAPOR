@@ -10,7 +10,7 @@ VIntSpinBox::VIntSpinBox(int min, int max) : VHBoxWidget(), _value(min)
 
     // Emit when the spinbox loses focus, or when return is pressed
     // Note: when opening a context menu with right click, a QSpinBox will emit the editingFinished signal,
-    // due to the QLineEdit receiving focus upon click, and losing focus upon opening the menu. 
+    // due to the QLineEdit receiving focus upon click, and losing focus upon opening the menu.
     // In the VIntSpinBox's slot, we must therefore check if the currently held value has changed before emitting.
     connect(_spinBox, &QSpinBox::editingFinished, this, &VIntSpinBox::emitSpinBoxFinished);
 
@@ -42,7 +42,7 @@ int VIntSpinBox::GetValue() const { return _spinBox->value(); }
 void VIntSpinBox::emitSpinBoxFinished()
 {
     int value = GetValue();
-    if( value != _value ) {
+    if (value != _value) {
         _value = value;
         emit EditingFinished(_value);
     }
