@@ -66,8 +66,8 @@ public:
     void SetWinWidth(int width);
     void SetWinHeight(int height);
     void GetWinSize(size_t &width, size_t &height) const;
-    int GetWinWidth() const;
-    int GetWinHeight() const;
+    int  GetWinWidth() const;
+    int  GetWinHeight() const;
 
     bool GetAutoStretchEnabled() const;
     void SetAutoStretchEnabled(bool val);
