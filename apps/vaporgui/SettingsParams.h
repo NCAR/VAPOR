@@ -45,6 +45,8 @@ public:
     SettingsParams(const SettingsParams &rhs);
     SettingsParams &operator=(const SettingsParams &rhs);
 
+    void Init();
+
     ~SettingsParams();
 
     int  GetNumThreads() const;
@@ -168,7 +170,6 @@ private:
     static const string _dontShowIntelDriverWarningTag;
     static const string _settingsNeedsWriteTag;
 
-    void _init();
     bool _loadFromSettingsFile();
 
     string _settingsPath;

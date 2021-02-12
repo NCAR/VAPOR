@@ -92,7 +92,7 @@ SettingsParams::SettingsParams(ParamsBase::StateSave *ssave, bool loadFromFile) 
         if (ok) return;
     }
 
-    _init();
+    Init();
 }
 
 SettingsParams::SettingsParams(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node)
@@ -113,7 +113,7 @@ SettingsParams::SettingsParams(ParamsBase::StateSave *ssave, XmlNode *node) : Pa
         if (ok)
             return;
         else
-            _init();
+            Init();
     }
 }
 
@@ -122,7 +122,7 @@ SettingsParams::SettingsParams(const SettingsParams &rhs) : ParamsBase(new Param
     _settingsPath = QDir::homePath().toStdString();
     _settingsPath += QDir::separator().toLatin1();
     _settingsPath += SettingsFile;
-    _init();
+    Init();
 }
 
 SettingsParams &SettingsParams::operator=(const SettingsParams &rhs)
@@ -136,7 +136,7 @@ SettingsParams &SettingsParams::operator=(const SettingsParams &rhs)
     return (*this);
 }
 
-void SettingsParams::Reinit() { _init(); }
+void SettingsParams::Reinit() { Init(); }
 
 SettingsParams::~SettingsParams() {}
 
@@ -461,8 +461,19 @@ int SettingsParams::SaveSettings() const
 }
 
 // Reset settings settings to initial state
-void SettingsParams::_init()
+void SettingsParams::Init()
 {
+    SetSessionAutoSaveEnabled(true);
+    SetChangesPerAutoSave(5);
+    SetAutoSaveSessionFile("~/VaporAutoSave.vs3");
+
+    SetAutoStretchEnabled(true);
+    SetNumThreads(4);
+    SetCacheMB(8000);
+    SetWinSizeLock(false);
+    SetWinWidth(1920);
+    SetWinHeight(1024);
+    
     SetDefaultSessionDir(string("~"));
     SetDefaultMetadataDir(string("~"));
     SetDefaultFlowDir(string("~"));
@@ -472,6 +483,8 @@ void SettingsParams::_init()
 
     string python = GetPythonDir();
     SetDefaultPythonDir(string(python));
+
+    SaveSettings();
 }
 
 // void SettingsParams::SetWinWidth( size_t width ) {
