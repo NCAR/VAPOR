@@ -951,17 +951,8 @@ void MainForm::_createEditMenu()
     _Edit->addAction(_editUndoAction);
     _Edit->addAction(_editRedoAction);
 
-    /*_Edit->addSeparator();
-    _appSettingsMenu   = new AppSettingsMenu(this);
-    //_appSettingsMenu   = new AppSettingsMenu();
-    //_Edit->addAction("Application Settings", _appSettingsMenu, &QDialog::open);
+    _Edit->addSeparator();
     _Edit->addAction("Preferences", _appSettingsMenu, &QDialog::open);
-    //_Edit->addAction("Application Settings", _appSettingsMenu, &AppSettingsMenu::open);
-    //_Edit->addAction("Application Settings", _appSettingsMenu, &AppSettingsMenu::exec);
-    //_Edit->addAction("Application Settings", _appSettingsMenu, &QWidget::show);
-    //_Edit->addAction("Application Settings", _appSettingsMenu, &AppSettingsMenu::ShowEvent);
-    //_developerMenu->addAction("Show PWidget Demo", _paramsWidgetDemo, &QWidget::show);
-    _Edit->addSeparator();*/
 
     connect(_editUndoAction, SIGNAL(triggered()), this, SLOT(undo()));
     connect(_editRedoAction, SIGNAL(triggered()), this, SLOT(redo()));
@@ -1012,14 +1003,7 @@ void MainForm::_createToolsMenu()
 
     _Tools->addSeparator();
     _appSettingsMenu = new AppSettingsMenu(this);
-    //_appSettingsMenu   = new AppSettingsMenu();
-    //_Edit->addAction("Application Settings", _appSettingsMenu, &QDialog::open);
     _Tools->addAction("Prefs", _appSettingsMenu, &QDialog::open);
-    //_Edit->addAction("Application Settings", _appSettingsMenu, &AppSettingsMenu::open);
-    //_Edit->addAction("Application Settings", _appSettingsMenu, &AppSettingsMenu::exec);
-    //_Edit->addAction("Application Settings", _appSettingsMenu, &QWidget::show);
-    //_Edit->addAction("Application Settings", _appSettingsMenu, &AppSettingsMenu::ShowEvent);
-    //_developerMenu->addAction("Show PWidget Demo", _paramsWidgetDemo, &QWidget::show);
 }
 
 void MainForm::_createCaptureMenu()

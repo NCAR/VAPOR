@@ -59,7 +59,6 @@ void VLineEdit_Deprecated::SetReadOnly(bool b) { _lineEdit->setReadOnly(b); }
 
 void VLineEdit_Deprecated::emitLineEditChanged()
 {
-    std::cout << "VLineEdit changed" << std::endl;
     std::string value = _lineEdit->text().toStdString();
     SetValue(value);
     emit ValueChanged(_value);

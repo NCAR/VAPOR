@@ -201,7 +201,6 @@ void SettingsParams::SetJpegQuality(int quality)
 
 bool SettingsParams::GetSessionAutoSaveEnabled() const
 {
-    // double enabled = GetValueDouble(_sessionAutoSaveEnabledTag, 1.f);
     double enabled = GetValueLong(_sessionAutoSaveEnabledTag, 1);
     if (enabled > 0)
         return true;
@@ -211,17 +210,13 @@ bool SettingsParams::GetSessionAutoSaveEnabled() const
 
 void SettingsParams::SetSessionAutoSaveEnabled(bool enabled)
 {
-    // double val = 0.f;
-    // if (enabled) val = 1.f;
     string description = "Enable/disable auto save of session files";
-    // SetValueDouble(_sessionAutoSaveEnabledTag, description, val);
     SetValueLong(_sessionAutoSaveEnabledTag, description, (long)enabled);
     SaveSettings();
 }
 
 int SettingsParams::GetChangesPerAutoSave() const
 {
-    // int changes = (int)GetValueDouble(_changesPerAutoSaveTag, 5.f);
     int changes = (int)GetValueLong(_changesPerAutoSaveTag, 5);
     return changes;
 }
@@ -230,7 +225,6 @@ void SettingsParams::SetChangesPerAutoSave(int count)
 {
     if (count < 0) count = 5;
     string description = "User changes before auto saving session file";
-    // SetValueDouble(_changesPerAutoSaveTag, description, count);
     SetValueLong(_changesPerAutoSaveTag, description, count);
     SaveSettings();
 }
@@ -439,7 +433,6 @@ bool SettingsParams::_loadFromSettingsFile()
 
 int SettingsParams::SaveSettings() const
 {
-    std::cout << "int SettingsParams::SaveSettings() const" << std::endl;
     ofstream fileout;
     string   s;
 
@@ -473,7 +466,7 @@ void SettingsParams::Init()
     SetWinSizeLock(false);
     SetWinWidth(1920);
     SetWinHeight(1024);
-
+    
     SetDefaultSessionDir(string("~"));
     SetDefaultMetadataDir(string("~"));
     SetDefaultFlowDir(string("~"));
@@ -487,7 +480,6 @@ void SettingsParams::Init()
     SaveSettings();
 }
 
-// void SettingsParams::SetWinWidth( size_t width ) {
 void SettingsParams::SetWinWidth(int width)
 {
     size_t dummyWidth, height;
@@ -496,7 +488,6 @@ void SettingsParams::SetWinWidth(int width)
     SaveSettings();
 }
 
-// void SettingsParams::SetWinHeight( size_t height ) {
 void SettingsParams::SetWinHeight(int height)
 {
     size_t width, dummyHeight;
