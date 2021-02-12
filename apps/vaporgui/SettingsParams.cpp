@@ -473,7 +473,7 @@ void SettingsParams::Init()
     SetWinSizeLock(false);
     SetWinWidth(1920);
     SetWinHeight(1024);
-    
+
     SetDefaultSessionDir(string("~"));
     SetDefaultMetadataDir(string("~"));
     SetDefaultFlowDir(string("~"));
