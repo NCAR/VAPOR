@@ -435,7 +435,7 @@ workflows:
     triggers:
       - schedule:
 #           cron: "30 13 * * 5" #weekly cron job on Friday @ 6:30am MST
-           cron: "30 14 * * 1" #weekly cron job on Monday @ 7:300am MST
+           cron: "0 16 * * 2" #weekly cron job on Tuesday @ 9:00am MST
            filters:
              branches:
                only:
