@@ -182,7 +182,7 @@ jobs:
 
   build_osx:
     macos:
-      xcode: "11.1.0"
+      xcode: "12.4.0"
     steps:
       - run:
           name: Make VAPOR-Deps
@@ -431,7 +431,7 @@ workflows:
 #    jobs:
 #      - check_leaks
 
-  nightly:
+  weekly:
     triggers:
       - schedule:
 #           cron: "30 13 * * 5" #weekly cron job on Friday @ 6:30am MST
