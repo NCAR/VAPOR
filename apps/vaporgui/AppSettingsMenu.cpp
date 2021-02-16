@@ -31,7 +31,7 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent)
 
         new PSection("Default Search Paths", {new PDirectorySelectorHLI<SettingsParams>("Session file path", &SettingsParams::GetSessionDir, &SettingsParams::SetSessionDir),
                                               new PDirectorySelectorHLI<SettingsParams>("Data set path", &SettingsParams::GetMetadataDir, &SettingsParams::SetMetadataDir)}),
-        new PButton( "Restore defaults",  [](VAPoR::ParamsBase *p){ dynamic_cast<SettingsParams*>(p)->Init();}),
+        new PButton("Restore defaults", [](VAPoR::ParamsBase *p) { dynamic_cast<SettingsParams *>(p)->Init(); }),
     });
 
 
@@ -45,7 +45,4 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent)
     setFocusPolicy(Qt::ClickFocus);
 }
 
-void AppSettingsMenu::Update(SettingsParams *sp)
-{
-    _settings->Update(sp);
-}
+void AppSettingsMenu::Update(SettingsParams *sp) { _settings->Update(sp); }
