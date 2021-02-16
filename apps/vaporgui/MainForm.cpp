@@ -952,6 +952,7 @@ void MainForm::_createEditMenu()
     _Edit->addAction(_editRedoAction);
 
     _Edit->addSeparator();
+    _appSettingsMenu = new AppSettingsMenu(this);
     _Edit->addAction("Preferences", _appSettingsMenu, &QDialog::open);
 
     connect(_editUndoAction, SIGNAL(triggered()), this, SLOT(undo()));
@@ -1000,10 +1001,6 @@ void MainForm::_createToolsMenu()
     connect(_statsAction, SIGNAL(triggered()), this, SLOT(launchStats()));
     connect(_plotAction, SIGNAL(triggered()), this, SLOT(launchPlotUtility()));
     connect(_pythonAction, SIGNAL(triggered()), this, SLOT(launchPythonVariables()));
-
-    _Tools->addSeparator();
-    _appSettingsMenu = new AppSettingsMenu(this);
-    _Tools->addAction("Prefs", _appSettingsMenu, &QDialog::open);
 }
 
 void MainForm::_createCaptureMenu()
