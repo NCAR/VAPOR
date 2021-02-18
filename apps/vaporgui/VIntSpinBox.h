@@ -28,10 +28,10 @@ private:
     int       _value;
 
 public slots:
-    void emitSpinBoxChanged(int value);
-    void emitSpinBoxFinished();
+    void emitValueChanged();
+    void emitValueChangedIntermediate(int value);
 
 signals:
     void ValueChanged(int value);
-    void EditingFinished(int value);
+    void ValueChangedIntermediate(int value);
 };

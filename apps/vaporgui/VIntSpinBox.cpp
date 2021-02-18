@@ -12,14 +12,14 @@ VIntSpinBox::VIntSpinBox(int min, int max) : VHBoxWidget(), _value(min)
     // Note: when opening a context menu with right click, a QSpinBox will emit the editingFinished signal,
     // due to the QLineEdit receiving focus upon click, and losing focus upon opening the menu.
     // In the VIntSpinBox's slot, we must therefore check if the currently held value has changed before emitting.
-    connect(_spinBox, &QSpinBox::editingFinished, this, &VIntSpinBox::emitSpinBoxFinished);
+    connect(_spinBox, &QSpinBox::editingFinished, this, &VIntSpinBox::emitValueChanged);
 
     // QSpinBox overloads valueChanged.  This makes the function pointer
     // based syntax for signal and slot connection ugly, so defer to
     // SIGNAL/SLOT connections with data type specificaiton.
     //
     // More info here: https://doc.qt.io/qt-5/qspinbox.html#valueChanged
-    connect(_spinBox, SIGNAL(valueChanged(int)), this, SLOT(emitSpinBoxChanged(int)));
+    connect(_spinBox, SIGNAL(valueChanged(int)), this, SLOT(emitValueChangedIntermediate(int)));
 }
 
 void VIntSpinBox::SetValue(int value)
@@ -39,17 +39,17 @@ void VIntSpinBox::SetRange(int min, int max)
 
 int VIntSpinBox::GetValue() const { return _spinBox->value(); }
 
-void VIntSpinBox::emitSpinBoxFinished()
+void VIntSpinBox::emitValueChanged()
 {
     int value = GetValue();
     if (value != _value) {
         _value = value;
-        emit EditingFinished(_value);
+        emit ValueChanged(_value);
     }
 }
 
-void VIntSpinBox::emitSpinBoxChanged(int value)
+void VIntSpinBox::emitValueChangedIntermediate(int value)
 {
     _value = value;
-    emit ValueChanged(_value);
+    emit ValueChangedIntermediate(_value);
 }
