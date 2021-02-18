@@ -31,6 +31,9 @@ QRangeSliderTextCombo::QRangeSliderTextCombo()
     _leftText->RemoveContextMenu();
     _rightText->RemoveContextMenu();
 
+    _leftText->SetAutoTooltip(false);
+    _rightText->SetAutoTooltip(false);
+
     _menu = new VDoubleRangeMenu(this, _leftText->GetSciNotation(), _leftText->GetNumDigits(), _min, _max, _allowCustomRange);
     connect(_menu, &VDoubleRangeMenu::MinChanged, this, &QRangeSliderTextCombo::minChanged);
     connect(_menu, &VDoubleRangeMenu::MaxChanged, this, &QRangeSliderTextCombo::maxChanged);
@@ -45,7 +48,7 @@ QRangeSliderTextCombo::QRangeSliderTextCombo()
 
 void QRangeSliderTextCombo::SetRange(float min, float max)
 {
-    if (min < max) {
+    if (min <= max) {
         _min = min;
         _max = max;
     }
@@ -53,6 +56,8 @@ void QRangeSliderTextCombo::SetRange(float min, float max)
     SetValue(_left, _right);
     _menu->SetMinimum(_min);
     _menu->SetMaximum(_max);
+
+    setToolTip(QString::fromStdString("Min: " + std::to_string(_min) + "\n" + "Max: " + std::to_string(_max)));
 }
 
 void QRangeSliderTextCombo::SetValue(float left, float right)
@@ -65,7 +70,10 @@ void QRangeSliderTextCombo::SetValue(float left, float right)
     _left = left;
     _right = right;
     setTextboxes(left, right);
-    _slider->SetValue((left - _min) / (_max - _min), (right - _min) / (_max - _min));
+    if (abs(_max - _min) < FLT_EPSILON)
+        _slider->SetValue(0, 1);
+    else
+        _slider->SetValue((left - _min) / (_max - _min), (right - _min) / (_max - _min));
 }
 
 void QRangeSliderTextCombo::AllowCustomRange()
