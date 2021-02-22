@@ -6,6 +6,8 @@ jobs:
       - image: ubuntu:20.04
 
     steps:
+      - checkout
+
       - run:
           name: install prerequisites
           command: |
@@ -18,8 +20,6 @@ jobs:
 #            echo America/Los_Angeles > /etc/timezone
 #            apt-get install -y python3-sphinx
           no_output_timeout: 30m
-
-      - checkout
 
       #- run:
       #    name: get the docs
