@@ -19,16 +19,19 @@ jobs:
 #            apt-get install -y python3-sphinx
           no_output_timeout: 30m
 
-      - run:
-          name: get the docs
-          command: |
-            git clone https://github.com/NCAR/VAPOR.git
-            git checkout $CIRCLE_BRANCH
+      - checkout
+
+      #- run:
+      #    name: get the docs
+      #    command: |
+      #      git clone https://github.com/NCAR/VAPOR.git
+      #      git checkout $CIRCLE_BRANCH
 
       - run:
           name: build sphinx
           command: |
-            cd ~/
+            cd ~/project/docs
+            make ..
 
 workflows:
   build:
