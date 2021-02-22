@@ -10,6 +10,12 @@
 .. |
 .. |
 
+Free Vapor Tutorial - March 17
+==============================
+A free 1 hour Vapor tutorial will be held on March 17, 2021 from 2-3pm MST.  Principles of 3D visualization will be discussed, as well as demonstrating some of these principles in Vapor.
+
+.. raw:: html
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/UMVWLwnDa_Q" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 Vapor 3
 =================================
