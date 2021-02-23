@@ -6,22 +6,25 @@ jobs:
       - image: ubuntu:20.04
 
     steps:
+      - checkout
+
       - run:
           name: install prerequisites
           command: |
             apt-get update
             apt-get install git -y
             apt-get install build-essential -y
-#            echo 1 > input.txt
-#            echo 1 >> input.txt
-#            apt-get install -y tzdata < input.txt
-#            ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
-#            echo America/Los_Angeles > /etc/timezone
-#            apt-get install -y python3-sphinx
+            #echo 1 > input.txt
+            #echo 1 >> input.txt
+            export TZ=US/Denver
+            ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+            #apt-get install -y tzdata < input.txt
+            apt-get install -y tzdata
+            #ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+            #echo America/Los_Angeles > /etc/timezone
+            apt-get install -y python3-sphinx
           no_output_timeout: 30m
       
-      - checkout
-
       #- run:
       #    name: get the docs
       #    command: |
