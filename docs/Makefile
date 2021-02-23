@@ -3,7 +3,8 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    = -b html
-SPHINXBUILD   = /usr/local/bin/sphinx-build
+#SPHINXBUILD   = /usr/local/bin/sphinx-build
+SPHINXBUILD   = sphinx-build
 SOURCEDIR     = .
 BUILDDIR     = .
 
