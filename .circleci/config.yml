@@ -12,8 +12,8 @@ jobs:
             apt-get update
             apt-get install git -y
             apt-get install build-essential -y
-            echo 1 > input.txt
-            echo 1 >> input.txt
+#            echo 1 > input.txt
+#            echo 1 >> input.txt
 #            apt-get install -y tzdata < input.txt
 #            ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 #            echo America/Los_Angeles > /etc/timezone
