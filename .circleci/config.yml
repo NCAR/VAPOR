@@ -16,6 +16,7 @@ jobs:
             apt-get install build-essential -y
             #echo 1 > input.txt
             #echo 1 >> input.txt
+            export DEBIAN_FRONTEND=noninteractive
             export TZ=US/Denver
             ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
             #apt-get install -y tzdata < input.txt
