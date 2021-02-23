@@ -20,7 +20,7 @@ jobs:
 #            apt-get install -y python3-sphinx
           no_output_timeout: 30m
       
-      - checkout
+#      - checkout
 
       #- run:
       #    name: get the docs
