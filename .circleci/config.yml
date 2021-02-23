@@ -17,7 +17,8 @@ jobs:
             ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
             apt-get install -y tzdata
             apt-get install -y python3-sphinx
-            pip install sphinx-rtd-theme
+            apt-get install -y python3-pip
+            python3 -m pip install sphinx-rtd-theme
           no_output_timeout: 30m
       
       - checkout
