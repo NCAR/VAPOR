@@ -11,23 +11,20 @@
 
 class PCornerSelector : public PLineItem {
     class Check;
-    QWidget *_w;
-    std::vector<Check*> _checks;
-    float padding = 0.03;
-    
+    QWidget *            _w;
+    std::vector<Check *> _checks;
+    float                padding = 0.03;
+
 public:
     PCornerSelector(std::string tag, std::string title);
-    
+
 protected:
-    static bool equalsf(float a, float b)
-    {
-        return (fabsf(b-a) <= 0.05);
-    }
-    
-    void updateGUI() const override;
-    void checked(bool on);
+    static bool equalsf(float a, float b) { return (fabsf(b - a) <= 0.05); }
+
+    void                        updateGUI() const override;
+    void                        checked(bool on);
     virtual std::vector<double> getValue() const;
-    virtual void setValue(const std::vector<double> &v);
+    virtual void                setValue(const std::vector<double> &v);
 };
 
 //! \class PColorbarCornerSelector
@@ -39,5 +36,5 @@ class PColorbarCornerSelector : public PCornerSelector {
 public:
     PColorbarCornerSelector();
     virtual std::vector<double> getValue() const override;
-    virtual void setValue(const std::vector<double> &v) override;
+    virtual void                setValue(const std::vector<double> &v) override;
 };

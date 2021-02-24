@@ -138,7 +138,7 @@ public:
     static const string _colorbarTitleTag;
     static const string _colorbarNumTicksTag;
     static const string _colorbarEnabledTag;
-    
+
     static const string UseScientificNotationTag;
 };
 };        // namespace VAPoR

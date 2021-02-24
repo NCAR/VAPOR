@@ -8,8 +8,7 @@ using VAPoR::ColorbarPbase;
 using VAPoR::RenderParams;
 typedef ColorbarPbase CBP;
 
-PAnnotationColorbarWidget::PAnnotationColorbarWidget()
-: PWidget("", _pSection = new PSection("Colorbar Settings"))
+PAnnotationColorbarWidget::PAnnotationColorbarWidget() : PWidget("", _pSection = new PSection("Colorbar Settings"))
 {
     // clang-format off
     _pSection->Add({

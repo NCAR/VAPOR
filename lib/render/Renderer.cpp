@@ -315,13 +315,12 @@ void Renderer::renderColorbar()
 {
     RenderParams *rParams = GetActiveParams();
     if (!rParams->IsEnabled()) return;
-    
+
     // If constant color, no valid colorbar
     VolumeIsoParams *vip;
     if ((vip = dynamic_cast<VolumeIsoParams *>(rParams)))
-        if (!vip->GetValueLong(VolumeParams::UseColormapVariableTag, 0))
-            return;
-    
+        if (!vip->GetValueLong(VolumeParams::UseColormapVariableTag, 0)) return;
+
     ColorbarRenderer::Render(_glManager, rParams);
 }
 
