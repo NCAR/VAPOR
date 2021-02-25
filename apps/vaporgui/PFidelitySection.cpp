@@ -109,13 +109,21 @@ void PLODSelector::updateGUI() const
     RenderParams *rp = dynamic_cast<RenderParams *>(getParams());
     VAssert(rp && "Params must be RenderParams");
 
-    auto           cr = getDataMgr()->GetCRatios(rp->GetFirstVariableName());
+    auto varName = rp->GetFirstVariableName();
+    auto dm = getDataMgr();
+    auto cr = dm->GetCRatios(varName);
+    long timestep = rp->GetCurrentTimestep();
+    
     vector<string> items;
-
     for (int i = 0; i < cr.size(); i++) items.push_back(to_string(i) + " (" + to_string(cr[i]) + ":1)");
 
     _vComboBox->SetOptions(items);
     _vComboBox->SetIndex(rp->GetCompressionLevel());
+    
+    for (int i = 0; i < cr.size(); i++) {
+        bool exists = dm->VariableExists(timestep, varName, 0, i);
+        if (!exists) _vComboBox->SetItemEnabled(i, false);
+    }
 }
 
 void PLODSelector::dropdownIndexChanged(int i)
@@ -141,7 +149,6 @@ void PRefinementSelector::updateGUI() const
     auto varName = rp->GetFirstVariableName();
     auto dm = getDataMgr();
     int  nrf = dm->GetNumRefLevels(varName);
-    long timestep = rp->GetCurrentTimestep();
 
     vector<string> items;
 
@@ -158,11 +165,6 @@ void PRefinementSelector::updateGUI() const
 
     _vComboBox->SetOptions(items);
     _vComboBox->SetIndex(rp->GetRefinementLevel());
-
-    for (int i = 0; i < nrf; i++) {
-        bool exists = dm->VariableExists(timestep, varName, 0, i);
-        if (!exists) _vComboBox->SetItemEnabled(i, false);
-    }
 }
 
 void PRefinementSelector::dropdownIndexChanged(int i)
