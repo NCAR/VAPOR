@@ -113,13 +113,13 @@ void PLODSelector::updateGUI() const
     auto dm = getDataMgr();
     auto cr = dm->GetCRatios(varName);
     long timestep = rp->GetCurrentTimestep();
-    
+
     vector<string> items;
     for (int i = 0; i < cr.size(); i++) items.push_back(to_string(i) + " (" + to_string(cr[i]) + ":1)");
 
     _vComboBox->SetOptions(items);
     _vComboBox->SetIndex(rp->GetCompressionLevel());
-    
+
     for (int i = 0; i < cr.size(); i++) {
         bool exists = dm->VariableExists(timestep, varName, 0, i);
         if (!exists) _vComboBox->SetItemEnabled(i, false);
