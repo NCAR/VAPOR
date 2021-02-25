@@ -99,7 +99,7 @@ void VolumeGLSL::_setShaderUniforms(const ShaderProgram *shader, const bool fast
     shader->SetUniform("phongAmbient", vp->GetPhongAmbient());
     shader->SetUniform("phongDiffuse", vp->GetPhongDiffuse());
     shader->SetUniform("phongSpecular", vp->GetPhongSpecular());
-    shader->SetUniform("phongShininess", vp->GetPhongShininess());
+    shader->SetUniform("phongShininess", powf(vp->GetPhongShininess(), 2) * 100);
 
     glm::vec3 dataMin, dataMax, userMin, userMax;
     _getExtents(&dataMin, &dataMax, &userMin, &userMax);
