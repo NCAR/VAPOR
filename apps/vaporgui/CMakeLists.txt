@@ -5,7 +5,6 @@ set (SRCS
 	GLWidget.cpp
 	ErrorReporter.cpp
 	Histo.cpp
-	SettingsEventRouter.cpp
 	VizSelectCombo.cpp
 	AnnotationEventRouter.cpp
 	AnimationEventRouter.cpp
@@ -281,7 +280,6 @@ set (SRCS
 	RangeCombos.h
 	RenderEventRouter.h
 	RenderHolder.h
-	SettingsEventRouter.h
 	SettingsParams.h
 	StatisticsParams.h
 	TabManager.h
