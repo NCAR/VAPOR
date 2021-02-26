@@ -210,7 +210,7 @@ void ColorbarRenderer::Render(GLManager *glm, RenderParams *rp)
 
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
-    
+
     lgl->Color(foregroundColor);
     DrawRect(lgl, pos, size);
     lgl->Color(backgroundColor);
