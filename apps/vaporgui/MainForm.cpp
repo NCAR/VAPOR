@@ -2253,9 +2253,10 @@ void MainForm::launchPythonVariables()
 {
     if (!_pythonVariables) {
         _pythonVariables = new PythonVariables(this);
-        connect(_pythonVariables, &QDialog::finished, this, &MainForm::_pythonClosed);
     }
-    if (_controlExec) { _pythonVariables->InitControlExec(_controlExec); }
+    if (_controlExec) { 
+	    _pythonVariables->InitControlExec(_controlExec);
+    }
     _pythonVariables->ShowMe();
 }
 
