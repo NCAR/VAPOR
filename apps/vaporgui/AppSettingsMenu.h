@@ -22,6 +22,9 @@ public:
     AppSettingsMenu(QWidget *parent);
     void Update(SettingsParams *sp);
 
+private slots:
+    void accept() override;
+
 private:
     PGroup *_settings;
 };

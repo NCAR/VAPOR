@@ -293,8 +293,6 @@ set (UIS
 	animationTab.ui
 	NavigationTab.ui
 	AnnotationGUI.ui
-	SettingsGUI.ui
-	appSettingsTab.ui
 	NewRendererDialog.ui
 	TransformTableGUI.ui
 	statsWindow.ui

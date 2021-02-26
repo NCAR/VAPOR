@@ -242,6 +242,7 @@ void SettingsParams::SetAutoSaveSessionFile(string file)
 {
     string description = "Session auto-save file location";
     SetValueString(_autoSaveFileLocationTag, description, file);
+    SaveSettings();
 }
 
 string SettingsParams::GetSessionDir() const

@@ -21,6 +21,7 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent)
         new PSection("Vapor's Startup Settings",
                      {
                          new PCheckboxHLI<SettingsParams>("Automatically stretch domain", &SettingsParams::GetAutoStretchEnabled, &SettingsParams::SetAutoStretchEnabled),
+                         //(new PIntegerInputHLI<SettingsParams>("Number of threads (0 for available num. of CPU cores)", &SettingsParams::GetNumThreads, &SettingsParams::SetNumThreads)->SetRange(0,1024)),
                          new PIntegerInputHLI<SettingsParams>("Number of threads (0 for available num. of CPU cores)", &SettingsParams::GetNumThreads, &SettingsParams::SetNumThreads),
                          new PIntegerInputHLI<SettingsParams>("Cache size (Megabytes)", &SettingsParams::GetCacheMB, &SettingsParams::SetCacheMB),
                          new PCheckboxHLI<SettingsParams>("Lock window dimensions", &SettingsParams::GetWinSizeLock, &SettingsParams::SetWinSizeLock),
@@ -43,6 +44,11 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent)
     layout()->addWidget(close);
 
     setFocusPolicy(Qt::ClickFocus);
+}
+
+void AppSettingsMenu::accept() {
+    std::cout << "void AppSettingsMenu::accept() {" << std::endl;
+    QDialog::accept();
 }
 
 void AppSettingsMenu::Update(SettingsParams *sp) { _settings->Update(sp); }
