@@ -464,8 +464,8 @@ void TabManager::_installWidgets()
 
     // Create top widgets.  Tab widgets exist but need to be
     // inserted as tabs, based on their type
-    // Type RENDERERS is for renderers, NAVIGATION for nav 
-    // Create top Tab Widgets to hold the nav 
+    // Type RENDERERS is for renderers, NAVIGATION for nav
+    // Create top Tab Widgets to hold the nav
     for (int i = 1; i < _tabNames.size(); i++) { _tabWidgets[_tabNames[i]] = new QTabWidget(this); }
 
     for (int i = 0; i < _subTabWidgets[_renderersTabName].size(); i++) {
