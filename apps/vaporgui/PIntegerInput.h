@@ -1,7 +1,7 @@
 #pragma once
 
 #include "PLineItem.h"
-//#include "VaporWidgetsFwd.h"
+#include "PDynamicMixin.h"
 
 class VIntSpinBox;
 
@@ -9,7 +9,7 @@ class VIntSpinBox;
 //! Creates a Qt text input for double values using a spinbox synced with the paramsdatabase using the PWidget interface.
 //! \copydoc PWidget
 
-class PIntegerInput : public PLineItem {
+class PIntegerInput : public PLineItem, public PDynamicMixin {
     Q_OBJECT
 
     VIntSpinBox *_spinbox;
@@ -24,4 +24,5 @@ protected:
 
 private slots:
     void spinboxValueChanged(int i);
+    void valueChangedIntermediate(int i);
 };
