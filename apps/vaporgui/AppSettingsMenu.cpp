@@ -18,17 +18,18 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent)
                          new PFileSaveSelectorHLI<SettingsParams>("Auto-save file", &SettingsParams::GetAutoSaveSessionFile, &SettingsParams::SetAutoSaveSessionFile),
                      }),
 
-        new PSection("Vapor's Startup Settings",
-                     {
-                         new PCheckboxHLI<SettingsParams>("Automatically stretch domain", &SettingsParams::GetAutoStretchEnabled, &SettingsParams::SetAutoStretchEnabled),
-                         //(new PIntegerInputHLI<SettingsParams>("Number of threads (0 for available num. of CPU cores)", &SettingsParams::GetNumThreads, &SettingsParams::SetNumThreads)->SetRange(0,1024)),
-                         new PIntegerInputHLI<SettingsParams>("Number of threads (0 for available num. of CPU cores)", &SettingsParams::GetNumThreads, &SettingsParams::SetNumThreads),
-                         new PIntegerInputHLI<SettingsParams>("Cache size (Megabytes)", &SettingsParams::GetCacheMB, &SettingsParams::SetCacheMB),
-                         new PCheckboxHLI<SettingsParams>("Lock window dimensions", &SettingsParams::GetWinSizeLock, &SettingsParams::SetWinSizeLock),
-                         (new PIntegerInputHLI<SettingsParams>("Width", &SettingsParams::GetWinWidth, &SettingsParams::SetWinWidth))->EnableBasedOnParam(SettingsParams::_winSizeLockTag),
-                         (new PIntegerInputHLI<SettingsParams>("Height", &SettingsParams::GetWinHeight, &SettingsParams::SetWinHeight))->EnableBasedOnParam(SettingsParams::_winSizeLockTag),
-                         new PStringDisplay("", "*Vapor must be restarted for these settings to take effect"),
-                     }),
+        new PSection(
+            "Vapor's Startup Settings",
+            {
+                new PCheckboxHLI<SettingsParams>("Automatically stretch domain", &SettingsParams::GetAutoStretchEnabled, &SettingsParams::SetAutoStretchEnabled),
+                //(new PIntegerInputHLI<SettingsParams>("Number of threads (0 for available num. of CPU cores)", &SettingsParams::GetNumThreads, &SettingsParams::SetNumThreads)->SetRange(0,1024)),
+                new PIntegerInputHLI<SettingsParams>("Number of threads (0 for available num. of CPU cores)", &SettingsParams::GetNumThreads, &SettingsParams::SetNumThreads),
+                new PIntegerInputHLI<SettingsParams>("Cache size (Megabytes)", &SettingsParams::GetCacheMB, &SettingsParams::SetCacheMB),
+                new PCheckboxHLI<SettingsParams>("Lock window dimensions", &SettingsParams::GetWinSizeLock, &SettingsParams::SetWinSizeLock),
+                (new PIntegerInputHLI<SettingsParams>("Width", &SettingsParams::GetWinWidth, &SettingsParams::SetWinWidth))->EnableBasedOnParam(SettingsParams::_winSizeLockTag),
+                (new PIntegerInputHLI<SettingsParams>("Height", &SettingsParams::GetWinHeight, &SettingsParams::SetWinHeight))->EnableBasedOnParam(SettingsParams::_winSizeLockTag),
+                new PStringDisplay("", "*Vapor must be restarted for these settings to take effect"),
+            }),
 
         new PSection("Default Search Paths", {new PDirectorySelectorHLI<SettingsParams>("Session file path", &SettingsParams::GetSessionDir, &SettingsParams::SetSessionDir),
                                               new PDirectorySelectorHLI<SettingsParams>("Data set path", &SettingsParams::GetMetadataDir, &SettingsParams::SetMetadataDir)}),
@@ -46,7 +47,8 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent)
     setFocusPolicy(Qt::ClickFocus);
 }
 
-void AppSettingsMenu::accept() {
+void AppSettingsMenu::accept()
+{
     std::cout << "void AppSettingsMenu::accept() {" << std::endl;
     QDialog::accept();
 }
