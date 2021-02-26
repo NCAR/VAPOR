@@ -208,6 +208,9 @@ void ColorbarRenderer::Render(GLManager *glm, RenderParams *rp)
     vec2 pos = (corner * viewSize) - (size * corner);
     vec2 colorbarPos = glm::round(pos + padding);
 
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+    
     lgl->Color(foregroundColor);
     DrawRect(lgl, pos, size);
     lgl->Color(backgroundColor);
