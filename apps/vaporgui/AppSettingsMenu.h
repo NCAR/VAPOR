@@ -16,16 +16,11 @@ class PSection;
 //! \author Scott Pearse
 
 class AppSettingsMenu : public QDialog {
-    // class AppSettingsMenu : public QWidget {
     Q_OBJECT
 
 public:
     AppSettingsMenu(QWidget *parent);
-    // AppSettingsMenu();
     void Update(SettingsParams *sp);
-
-    // public slots:
-    //    void ShowEvent();
 
 private:
     PGroup *_settings;
