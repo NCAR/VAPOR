@@ -1,3 +1,4 @@
+#include <iostream>
 #include "PIntegerInput.h"
 #include "VLineItem.h"
 #include <vapor/ParamsBase.h>
@@ -6,6 +7,7 @@
 PIntegerInput::PIntegerInput(const std::string &tag, const std::string &label) : PLineItem(tag, label, _spinbox = new VIntSpinBox(INT_MIN, INT_MAX))
 {
     connect(_spinbox, &VIntSpinBox::ValueChanged, this, &PIntegerInput::spinboxValueChanged);
+    connect(_spinbox, &VIntSpinBox::ValueChangedIntermediate, this, &PIntegerInput::valueChangedIntermediate);
 }
 
 PIntegerInput *PIntegerInput::SetRange(int min, int max)
@@ -21,3 +23,5 @@ void PIntegerInput::updateGUI() const
 }
 
 void PIntegerInput::spinboxValueChanged(int i) { setParamsLong(i); }
+
+void PIntegerInput::valueChangedIntermediate(int v) { dynamicSetParamsLong(v); }

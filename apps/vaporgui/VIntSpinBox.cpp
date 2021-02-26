@@ -50,6 +50,5 @@ void VIntSpinBox::emitValueChanged()
 
 void VIntSpinBox::emitValueChangedIntermediate(int value)
 {
-    _value = value;
-    emit ValueChangedIntermediate(_value);
+    emit ValueChangedIntermediate(value);
 }
