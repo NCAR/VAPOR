@@ -18,6 +18,7 @@ public:
     void SetOptions(const std::vector<std::string> &values);
     void SetIndex(int index);
     void SetValue(const std::string &value);
+    void SetItemEnabled(int index, bool enabled);
 
     std::string GetValue() const;
     int         GetCurrentIndex() const;
