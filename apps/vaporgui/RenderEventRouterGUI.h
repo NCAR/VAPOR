@@ -19,7 +19,7 @@ public:
     static const std::string AppearanceTabName;
     static const std::string GeometryTabName;
     static const std::string AnnotationTabName;
-    
+
     RenderEventRouterGUI(VAPoR::ControlExec *ce, string paramsType);
     QWidget *AddSubtab(string title, UWidget *subtab);
     // clang-format off
@@ -28,13 +28,13 @@ public:
     QWidget *AddGeometrySubtab(UWidget *subtab)   { return AddSubtab(GeometryTabName,   subtab); }
     QWidget *AddAnnotationSubtab(UWidget *subtab) { return AddSubtab(AnnotationTabName, subtab); }
     // clang-format on
-    
+
 
 protected:
     virtual void _updateTab() override;
-    
+
 private:
-    void setTab(int i);
-    void tabChanged(int i);
+    void            setTab(int i);
+    void            tabChanged(int i);
     GUIStateParams *getGUIStateParams() const;
 };

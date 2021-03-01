@@ -17,7 +17,7 @@ class FlowEventRouter : public RenderEventRouterGUI {
 
 public:
     static const std::string SeedingTabName;
-    
+
     FlowEventRouter(QWidget *parent, VAPoR::ControlExec *ce);
     static string GetClassType() { return VAPoR::FlowRenderer::GetClassType(); }
     string        GetType() const { return GetClassType(); }

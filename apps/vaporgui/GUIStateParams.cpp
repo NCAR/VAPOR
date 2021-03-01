@@ -249,8 +249,8 @@ std::string GUIStateParams::GetPlotDatasetName() const { return GetValueString(m
 
 void GUIStateParams::SetPlotDatasetName(std::string &name) { SetValueString(m_plotDatasetNameTag, "Name of the active data set in Plot", name); }
 
-string GUIStateParams::ActiveTab() const { return    GetValueString("ActiveTabTag", ""); }
-void GUIStateParams::SetActiveTab(const string &t) { SetValueString("ActiveTabTag", "", t); }
+string GUIStateParams::ActiveTab() const { return GetValueString("ActiveTabTag", ""); }
+void   GUIStateParams::SetActiveTab(const string &t) { SetValueString("ActiveTabTag", "", t); }
 
 int GUIStateParams::GetFlowDimensionality() const { return GetValueLong(_flowDimensionalityTag, -1); }
 

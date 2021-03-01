@@ -3,15 +3,14 @@
 #include <QScrollArea>
 #include "VContainer.h"
 
-
-const std::string RenderEventRouterGUI::VariablesTabName = "Variables";
+// clang-format off
+const std::string RenderEventRouterGUI::VariablesTabName  = "Variables";
 const std::string RenderEventRouterGUI::AppearanceTabName = "Appearance";
-const std::string RenderEventRouterGUI::GeometryTabName = "Geometry";
+const std::string RenderEventRouterGUI::GeometryTabName   = "Geometry";
 const std::string RenderEventRouterGUI::AnnotationTabName = "Annotation";
+// clang-format on
 
-
-RenderEventRouterGUI::RenderEventRouterGUI(VAPoR::ControlExec *ce, string paramsType)
-: RenderEventRouter(ce, paramsType)
+RenderEventRouterGUI::RenderEventRouterGUI(VAPoR::ControlExec *ce, string paramsType) : RenderEventRouter(ce, paramsType)
 {
     connect(this, &QTabWidget::currentChanged, this, &RenderEventRouterGUI::tabChanged);
 }
@@ -40,8 +39,8 @@ void RenderEventRouterGUI::_updateTab()
     auto *paramsMgr = _controlExec->GetParamsMgr();
     auto *dataMgr = GetActiveDataMgr();
     if (!(params && paramsMgr && dataMgr)) return;
-    
-    
+
+    // clang-format off
     auto gp = getGUIStateParams();
     bool hasTab = false;
     const auto activeTab = QString::fromStdString(gp->ActiveTab());
@@ -55,6 +54,7 @@ void RenderEventRouterGUI::_updateTab()
     if (!hasTab) {
         setTab(0);
     }
+    // clang-format on
 
     for (Updateable *subtab : _subtabs) subtab->Update(params, paramsMgr, dataMgr);
 }
@@ -64,7 +64,7 @@ void RenderEventRouterGUI::setTab(int i)
     blockSignals(true);
     setCurrentIndex(i);
     blockSignals(false);
-    
+
     auto pm = _controlExec->GetParamsMgr();
     bool undoEnabled = pm->GetSaveStateUndoEnabled();
     pm->SetSaveStateUndoEnabled(false);
@@ -72,6 +72,7 @@ void RenderEventRouterGUI::setTab(int i)
     pm->SetSaveStateUndoEnabled(undoEnabled);
 }
 
+// clang-format off
 void RenderEventRouterGUI::tabChanged(int i)
 {
     setTab(i);
@@ -81,4 +82,4 @@ GUIStateParams *RenderEventRouterGUI::getGUIStateParams() const
 {
     return (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
 }
-
+// clang-format on

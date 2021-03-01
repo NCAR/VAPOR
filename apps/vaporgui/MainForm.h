@@ -230,7 +230,7 @@ private:
         _playBackwardAction->setChecked(false);
         _pauseAction->setChecked(true);
     }
-    
+
     void showCitationReminder();
 
     void stopAnimCapture(string vizName)

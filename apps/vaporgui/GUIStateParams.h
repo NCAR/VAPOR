@@ -121,9 +121,9 @@ public:
     //!
     std::string GetPlotDatasetName() const;
     void        SetPlotDatasetName(std::string &name);
-    
+
     string ActiveTab() const;
-    void SetActiveTab(const string &t);
+    void   SetActiveTab(const string &t);
 
     int  GetFlowDimensionality() const;
     void SetFlowDimensionality(int nDims);

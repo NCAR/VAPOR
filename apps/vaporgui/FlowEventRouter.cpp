@@ -9,7 +9,7 @@ using namespace VAPoR;
 typedef FlowParams FP;
 
 static RenderEventRouterRegistrar<FlowEventRouter> registrar(FlowEventRouter::GetClassType());
-const string FlowEventRouter::SeedingTabName = "Seeding";
+const string                                       FlowEventRouter::SeedingTabName = "Seeding";
 
 FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEventRouterGUI(ce, FlowParams::GetClassType())
 {
