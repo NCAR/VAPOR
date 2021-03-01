@@ -19,7 +19,7 @@ public:
     PCornerSelector(std::string tag, std::string title);
 
 protected:
-    static bool equalsf(float a, float b) { return (fabsf(b - a) <= 0.05); }
+    static bool equalsf(float a, float b) { return (std::abs(b - a) <= 0.05); }
 
     void                        updateGUI() const override;
     void                        checked(bool on);
