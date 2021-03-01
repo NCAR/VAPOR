@@ -31,7 +31,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
             new PEnumDropdown(FP::_isSteadyTag, {"Streamlines", "Pathlines"}, {true, false}, "Flow Type"),
             (new PShowIf(FP::_isSteadyTag))->Equals(true)->Then({
                 new PEnumDropdown(FP::_flowDirectionTag, {"Forward", "Backward", "Bi-Directional"}, {(int)FlowDir::FORWARD, (int)FlowDir::BACKWARD, (int)FlowDir::BI_DIR}, "Flow Direction"),
-                (new PIntegerSliderEdit(FP::_steadyNumOfStepsTag, "Integration Steps"))->SetRange(0, 5000),
+                (new PIntegerInput(FP::_steadyNumOfStepsTag, "Integration Steps"))->SetRange(0, 10000)->EnableDynamicUpdate(),
             })->Else({
                 _pathlineLengthSlider = new PIntegerSliderEdit(FP::_pastNumOfTimeSteps, "Pathline Length"),
                 _pathlineInjectionSlider = new PIntegerSliderEdit(FP::_seedInjInterval, "Injection Interval"),
