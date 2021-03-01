@@ -11,14 +11,14 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
 {
     // clang-format off
 
-    AddSubtab("Variables", new PGroup({
+    AddVariablesSubtab(new PGroup({
         new PSection("Variable Selection", {
             new PScalarVariableSelector
         }),
         new PFidelitySection
     }));
     
-    AddSubtab("Appearance", new PGroup({
+    AddAppearanceSubtab(new PGroup({
         new PTFEditor,
         new PSection("Slice", {
             new POrientationSelector,
@@ -27,8 +27,8 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
         })
     }));
     
-    AddSubtab("Geometry", new PGeometrySubtab);
-    AddSubtab("Annotation", new PAnnotationColorbarWidget);
+    AddGeometrySubtab(new PGeometrySubtab);
+    AddAnnotationSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on
 }
