@@ -1077,7 +1077,7 @@ int FlowRenderer::_genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) 
     std::vector<double> locD(3);
     auto                timeVal = _timestamps.at(0);
     // This is the total number of seeds to generate, based on the bias strength.
-    long numOfSeedsToGen = long(numOfSeedsNeeded * (std::abs(_cache_rakeBiasStrength) + 1.0f));
+    auto numOfSeedsToGen = numOfSeedsNeeded * (std::abs(_cache_rakeBiasStrength) + 1);
     long numOfTrials = 0;
     seeds.clear();
     seeds.reserve(numOfSeedsToGen);    // For performance reasons
