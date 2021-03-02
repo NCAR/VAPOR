@@ -3,9 +3,9 @@
 #include <QScrollArea>
 #include "VContainer.h"
 
-const std::string RenderEventRouterGUI::VariablesTabName  = "Variables";
+const std::string RenderEventRouterGUI::VariablesTabName = "Variables";
 const std::string RenderEventRouterGUI::AppearanceTabName = "Appearance";
-const std::string RenderEventRouterGUI::GeometryTabName   = "Geometry";
+const std::string RenderEventRouterGUI::GeometryTabName = "Geometry";
 const std::string RenderEventRouterGUI::AnnotationTabName = "Annotation";
 
 RenderEventRouterGUI::RenderEventRouterGUI(VAPoR::ControlExec *ce, string paramsType) : RenderEventRouter(ce, paramsType)
@@ -38,8 +38,8 @@ void RenderEventRouterGUI::_updateTab()
     auto *dataMgr = GetActiveDataMgr();
     if (!(params && paramsMgr && dataMgr)) return;
 
-    auto gp = getGUIStateParams();
-    bool hasTab = false;
+    auto       gp = getGUIStateParams();
+    bool       hasTab = false;
     const auto activeTab = QString::fromStdString(gp->ActiveTab());
     for (int i = 0; i <= count(); i++) {
         if (activeTab == tabText(i)) {
@@ -48,9 +48,7 @@ void RenderEventRouterGUI::_updateTab()
             break;
         }
     }
-    if (!hasTab) {
-        setTab(0);
-    }
+    if (!hasTab) { setTab(0); }
 
     for (Updateable *subtab : _subtabs) subtab->Update(params, paramsMgr, dataMgr);
 }
@@ -68,12 +66,6 @@ void RenderEventRouterGUI::setTab(int i)
     pm->SetSaveStateUndoEnabled(undoEnabled);
 }
 
-void RenderEventRouterGUI::tabChanged(int i)
-{
-    setTab(i);
-}
+void RenderEventRouterGUI::tabChanged(int i) { setTab(i); }
 
-GUIStateParams *RenderEventRouterGUI::getGUIStateParams() const
-{
-    return (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
-}
+GUIStateParams *RenderEventRouterGUI::getGUIStateParams() const { return (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType()); }
