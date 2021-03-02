@@ -40,7 +40,7 @@ PCornerSelector::PCornerSelector(std::string tag, std::string title) : PLineItem
         w->setContentsMargins(0, 0, 0, 0);
         if (auto c = dynamic_cast<Check *>(w))
             _checks.push_back(c);
-        else if (auto c = dynamic_cast<VLine *>(w))
+        else if (dynamic_cast<VLine *>(w))
             l->setAlignment(w, Qt::AlignHCenter);
     };
 
