@@ -22,12 +22,10 @@ public:
 
     RenderEventRouterGUI(VAPoR::ControlExec *ce, string paramsType);
     QWidget *AddSubtab(string title, UWidget *subtab);
-    // clang-format off
     QWidget *AddVariablesSubtab(UWidget *subtab)  { return AddSubtab(VariablesTabName,  subtab); }
     QWidget *AddAppearanceSubtab(UWidget *subtab) { return AddSubtab(AppearanceTabName, subtab); }
     QWidget *AddGeometrySubtab(UWidget *subtab)   { return AddSubtab(GeometryTabName,   subtab); }
     QWidget *AddAnnotationSubtab(UWidget *subtab) { return AddSubtab(AnnotationTabName, subtab); }
-    // clang-format on
 
 
 protected:

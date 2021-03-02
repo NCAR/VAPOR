@@ -3,12 +3,10 @@
 #include <QScrollArea>
 #include "VContainer.h"
 
-// clang-format off
 const std::string RenderEventRouterGUI::VariablesTabName  = "Variables";
 const std::string RenderEventRouterGUI::AppearanceTabName = "Appearance";
 const std::string RenderEventRouterGUI::GeometryTabName   = "Geometry";
 const std::string RenderEventRouterGUI::AnnotationTabName = "Annotation";
-// clang-format on
 
 RenderEventRouterGUI::RenderEventRouterGUI(VAPoR::ControlExec *ce, string paramsType) : RenderEventRouter(ce, paramsType)
 {
@@ -40,7 +38,6 @@ void RenderEventRouterGUI::_updateTab()
     auto *dataMgr = GetActiveDataMgr();
     if (!(params && paramsMgr && dataMgr)) return;
 
-    // clang-format off
     auto gp = getGUIStateParams();
     bool hasTab = false;
     const auto activeTab = QString::fromStdString(gp->ActiveTab());
@@ -54,7 +51,6 @@ void RenderEventRouterGUI::_updateTab()
     if (!hasTab) {
         setTab(0);
     }
-    // clang-format on
 
     for (Updateable *subtab : _subtabs) subtab->Update(params, paramsMgr, dataMgr);
 }
@@ -72,7 +68,6 @@ void RenderEventRouterGUI::setTab(int i)
     pm->SetSaveStateUndoEnabled(undoEnabled);
 }
 
-// clang-format off
 void RenderEventRouterGUI::tabChanged(int i)
 {
     setTab(i);
@@ -82,4 +77,3 @@ GUIStateParams *RenderEventRouterGUI::getGUIStateParams() const
 {
     return (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
 }
-// clang-format on
