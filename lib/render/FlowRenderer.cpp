@@ -1133,6 +1133,7 @@ int FlowRenderer::_genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) 
     }
 
     seeds.resize(numOfSeedsNeeded);    // We only take first chunck of seeds that we need
+    seeds.shrink_to_fit();             // Free up some memory
     for (auto &e : seeds) {            // reset the value field of each particle
         e.value = 0.0;
     }
