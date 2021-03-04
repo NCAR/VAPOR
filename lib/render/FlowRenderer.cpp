@@ -1123,12 +1123,14 @@ int FlowRenderer::_genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) 
     }
 
     // How we sort all seeds based on their values
-    auto ascLambda = [](const flow::Particle &p1, const flow::Particle &p2) -> bool { return p1.value < p2.value; };
-    auto desLambda = [](const flow::Particle &p1, const flow::Particle &p2) -> bool { return p2.value < p1.value; };
-    if (_cache_rakeBiasStrength < 0)
-        std::partial_sort(seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), ascLambda);
-    else
-        std::partial_sort(seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), desLambda);
+    auto ascLambda = [](const flow::Particle &p1, const flow::Particle &p2) { return p1.value < p2.value; };
+    auto desLambda = [](const flow::Particle &p1, const flow::Particle &p2) { return p2.value < p1.value; };
+    if (_cache_rakeBiasStrength < 0) {
+        std::nth_element(seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), ascLambda);
+    }
+    else {
+        std::nth_element(seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), desLambda);
+    }
 
     seeds.resize(numOfSeedsNeeded);    // We only take first chunck of seeds that we need
     for (auto &e : seeds)              // reset the value field of each particle
