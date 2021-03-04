@@ -113,7 +113,6 @@
 #include "images/vapor-icon-32.xpm"
 #include "images/cascade.xpm"
 #include "images/tiles.xpm"
-#include "images/wheel.xpm"
 
 #include "images/home.xpm"
 #include "images/sethome.xpm"
