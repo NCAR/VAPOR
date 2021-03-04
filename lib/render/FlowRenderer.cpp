@@ -1133,8 +1133,9 @@ int FlowRenderer::_genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) 
     }
 
     seeds.resize(numOfSeedsNeeded);    // We only take first chunck of seeds that we need
-    for (auto &e : seeds)              // reset the value field of each particle
+    for (auto &e : seeds) {            // reset the value field of each particle
         e.value = 0.0f;
+    }
 
     // If in unsteady case and there are multiple seed injections, we insert more seeds.
     if (!_cache_isSteady && _cache_seedInjInterval > 0) {
