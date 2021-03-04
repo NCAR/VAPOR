@@ -1127,8 +1127,7 @@ int FlowRenderer::_genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) 
     auto desLambda = [](const flow::Particle &p1, const flow::Particle &p2) { return p2.value < p1.value; };
     if (_cache_rakeBiasStrength < 0) {
         std::nth_element(seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), ascLambda);
-    }
-    else {
+    } else {
         std::nth_element(seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), desLambda);
     }
 
