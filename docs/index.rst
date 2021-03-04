@@ -43,6 +43,7 @@ VAPOR is a product of the National Center for Atmospheric Research’s Computati
    quickStartGuide
    gettingDataIntoVapor
    usage
+   YouTube Channel <https://www.youtube.com/channel/UCpf-d1GDO1sotzjJ2t_QkDw>
    Get Help on Our Forum <https://vapor.discourse.group>
    contributing
    licenseAndCitation
