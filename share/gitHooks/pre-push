@@ -21,11 +21,12 @@ else
             if [ "$NUMBERS" != "" ]; then
                 echo "  Running clang-format on $FILE"
                 clang-format -i $FILE $NUMBERS
+                git add $FILE
             fi
         done
     done
 
-    git commit -a -m "clang-format pre-push hook"
+    git commit -m "clang-format pre-push hook"
 
     # git commit will return non-zero status if there's nothing to commit.  Make sure
     # we return 0 so git 'push' will still be invoked
