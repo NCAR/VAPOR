@@ -92,7 +92,7 @@ public:
 protected:
     virtual void RenderInner(GLManager *glm)
     {
-        vec2 p;
+        vec2 p(0);
         for (auto d : _children) {
             d->Render(glm, p);
             p.*primaryAxis += d->Size.*primaryAxis + _spacing;
