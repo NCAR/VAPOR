@@ -22,6 +22,7 @@
 #include <QHeaderView>
 #include <QHBoxLayout>
 #include <QCheckBox>
+#include <QScrollBar>
 #include "VaporTable.h"
 
 namespace {
@@ -50,7 +51,7 @@ VaporTable::VaporTable(QTableWidget *table, bool lastRowIsCheckboxes, bool lastC
 
     SetVerticalHeaderWidth(100);
 
-    _table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+//    _table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 
 // Clear current table, then generate table of rows x columns
@@ -171,11 +172,14 @@ void VaporTable::setTableCells(std::vector<std::string> values)
 
             QString qVal = QString::fromStdString(value);
 
-            CustomLineEdit *edit = createLineEdit(qVal);
-            edit->setProperty("row", j);
-            edit->setProperty("col", i);
+            //CustomLineEdit *edit = createLineEdit(qVal);
+            QTableWidgetItem *edit = new QTableWidgetItem(qVal);
+            
+            //edit->setProperty("row", j);
+            //edit->setProperty("col", i);
             if (_showToolTips) edit->setToolTip(qVal);
-            _table->setCellWidget(j, i, edit);
+            //_table->setCellWidget(j, i, edit);
+            _table->setItem( j, i, edit );
         }
     }
 }
@@ -266,6 +270,14 @@ CustomLineEdit *VaporTable::createLineEdit(QString val)
     }
 
     edit->setAlignment(Qt::AlignHCenter);
+    //edit->setSizePolicy(
+        //QSizePolicy::Maximum, 
+        //QSizePolicy::Maximum
+        //QSizePolicy::Preferred, 
+        //QSizePolicy::Preferred
+    //    QSizePolicy::Minimum, 
+    //    QSizePolicy::Minimum
+    //);
 
     connect(edit, SIGNAL(editingFinished()), this, SLOT(emitValueChanged()));
 
@@ -278,9 +290,21 @@ CustomLineEdit *VaporTable::createLineEdit(QString val)
 
 void VaporTable::emitValueChanged()
 {
-    QObject *obj = sender();
-    int      row = obj->property("row").toInt();
-    int      col = obj->property("col").toInt();
+    int row, col;
+    //QObject *obj = sender();
+    QCheckBox* item = qobject_cast<QCheckBox*>(QObject::sender());
+    if ( item != nullptr ) {
+        row = item->property("row").toInt();
+        col = item->property("col").toInt();
+    }
+    else {
+        return;
+        //row = sender()->row();
+        //col = sender()->column();
+    }
+
+    //row = _table->currentRow();
+    //col = _table->currentColumn();
 
     _activeRow = row;
     _activeCol = col;
@@ -294,8 +318,22 @@ void VaporTable::emitReturnPressed() { emit returnPressed(); }
 
 void VaporTable::emitCellClicked(QObject *obj)
 {
-    int row = obj->property("row").toInt();
-    int col = obj->property("col").toInt();
+    //int row = obj->property("row").toInt();
+    //int col = obj->property("col").toInt();
+    int row, col;
+    //QTableWidgetItem* item = qobject_cast<QTableWidgetItem*>(obj);
+    /*QCheckBox* item = qobject_cast<QCheckBox*>(obj);
+    if ( item != nullptr ) {
+        row = obj->property("row").toInt();
+        col = obj->property("col").toInt();
+    }
+    else {
+        row = sender()->row();
+        col = sender()->column();
+    }*/
+
+    row = _table->currentRow();
+    col = _table->currentColumn();
 
     _activeRow = row;
     _activeCol = col;
@@ -333,9 +371,16 @@ void VaporTable::setHorizontalHeader(std::vector<std::string> header)
     QStringList list;
     for (int i = 0; i < size; i++) { list << QString::fromStdString(header[i]); }
 
-    _table->resizeColumnsToContents();
+//    _table->resizeColumnsToContents();
+//    _table->setHorizontalHeaderLabels(list);
+//    _table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+
+_table->horizontalScrollBar()->setEnabled(false);
+_table->resizeColumnsToContents();
+QHeaderView *headerView = _table->horizontalHeader();
+headerView->setSectionResizeMode(2, QHeaderView::Stretch);
     _table->setHorizontalHeaderLabels(list);
-    _table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     QTableWidgetItem *headerItem;
     for (int i = 0; i < size; i++) {
@@ -393,12 +438,15 @@ void VaporTable::EnableDisableCheckboxes(bool enabled)
 
 Value VaporTable::GetValue(int row, int col)
 {
+    std::cout << "foo" << std::endl;
     std::string value;
     int         nRows = _table->rowCount();
     int         nCols = _table->columnCount();
 
+    if (row < 0 || col < 0) return {"X"};
+
     QWidget *widget = _table->cellWidget(row, col);
-    VAssert(widget);
+    //VAssert(widget);
 
     if ((col == nCols - 1 && _lastColIsCheckboxes) || (row == nRows - 1 && _lastRowIsCheckboxes)) {
         QCheckBox *checkBox = widget->findChild<QCheckBox *>();
@@ -407,8 +455,11 @@ Value VaporTable::GetValue(int row, int col)
         else
             value = "0";
     } else {
-        QString qvalue = ((QLineEdit *)widget)->text();
+        //QString qvalue = ((QLineEdit *)widget)->text();
+        //QString qvalue = ((QTableWidgetItem*)widget)->text();
+        QString qvalue = _table->item(row, col)->text();
         value = qvalue.toStdString();
+        std::cout << row << " " << col << " " << value << std::endl;
     }
 
     return {value};
@@ -425,13 +476,16 @@ std::string VaporTable::GetStringValue(int row, int col)
     QWidget *widget = _table->cellWidget(row, col);
 
     if ((col == nCols - 1 && _lastColIsCheckboxes) || (row == nRows - 1 && _lastRowIsCheckboxes)) {
-        QCheckBox *checkBox = widget->findChild<QCheckBox *>();
+        //QCheckBox *checkBox = widget->findChild<QCheckBox *>();
+        QCheckBox *checkBox = _table->cellWidget(row, col)->findChild<QCheckBox *>();
         if (checkBox->isChecked())
             value = "1";
         else
             value = "0";
     } else {
-        QString qvalue = ((QLineEdit *)widget)->text();
+        //QString qvalue = ((QLineEdit *)widget)->text();
+        //QString qvalue = ((QTableWidgetItem*)widget)->text();
+        QString qvalue = _table->item(row,col)->text();
         value = qvalue.toStdString();
     }
 
@@ -496,11 +550,22 @@ void VaporTable::highlightActiveRow(int row)
                     le->setStyleSheet("QLineEdit " + selectionColor);
                 else
                     le->setStyleSheet("QLineEdit " + normalColor);
+            //} else if (cell) {
             } else {
-                if (i == row)
-                    cell->setStyleSheet("QWidget " + selectionColor);
-                else
-                    cell->setStyleSheet("QWidget " + normalColor);
+                if (i == row) {
+                    QBrush b( QColor("blue") );
+                    QBrush w( QColor("white") );
+                    _table->item(i,j)->setForeground( w );
+                    _table->item(i,j)->setBackground( b );
+                    //cell->setStyleSheet("QWidget " + selectionColor);
+                }
+                else {
+                    QBrush b( QColor("black") );
+                    QBrush w( QColor("white") );
+                    _table->item(i,j)->setForeground( b );
+                    _table->item(i,j)->setBackground( w );
+                    //cell->setStyleSheet("QWidget " + normalColor);
+                }
             }
         }
     }
@@ -520,10 +585,21 @@ void VaporTable::highlightActiveCol(int col)
                 else
                     le->setStyleSheet("QLineEdit " + normalColor);
             } else {
-                if (j == col)
-                    cell->setStyleSheet("QWidget " + selectionColor);
-                else
-                    cell->setStyleSheet("QWidget " + normalColor);
+                if (j == col) {
+                    QBrush b( QColor("black") );
+                    QBrush w( QColor("white") );
+                    _table->item(i,j)->setForeground( b );
+                    _table->item(i,j)->setBackground( w );
+                    //cell->setStyleSheet("QWidget " + selectionColor);
+                }
+                else {
+                    QBrush b( QColor("blue") );
+                    QBrush w( QColor("white") );
+                    _table->item(i,j)->setForeground( w );
+                    _table->item(i,j)->setBackground( b );
+                    //_table->itemAt(i,j)->setStyleSheet( normalColor );
+                    //cell->setStyleSheet("QWidget " + normalColor);
+                }
             }
         }
     }
