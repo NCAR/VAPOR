@@ -11,7 +11,7 @@ WireFrameEventRouter::WireFrameEventRouter(QWidget *parent, ControlExec *ce) : R
 {
     // clang-format off
 
-    AddSubtab("Variables", new PGroup({
+    AddVariablesSubtab(new PGroup({
         new PSection("Variable Selection", {
             new PDimensionSelector,
             new PScalarVariableSelector,
@@ -20,15 +20,15 @@ WireFrameEventRouter::WireFrameEventRouter(QWidget *parent, ControlExec *ce) : R
         new PFidelitySection
     }));
     
-    AddSubtab("Appearance", new PGroup({
+    AddAppearanceSubtab(new PGroup({
         (new PTFEditor)->ShowOpacityBasedOnParam("NULL", 1),
         new PSection("Appearance", {
             new PConstantColorWidget
         })
     }));
     
-    AddSubtab("Geometry", new PGeometrySubtab);
-    AddSubtab("Annotation", new PAnnotationColorbarWidget);
+    AddGeometrySubtab(new PGeometrySubtab);
+    AddAnnotationSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on
 }

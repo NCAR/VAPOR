@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RenderEventRouter.h"
+#include "RenderEventRouterGUI.h"
 #include "vapor/VolumeIsoRenderer.h"
 
 //! \class VolumeIsoEventRouter

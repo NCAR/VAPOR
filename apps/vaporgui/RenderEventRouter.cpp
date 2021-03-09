@@ -139,36 +139,13 @@ void RenderEventRouter::updateTab()
     EventRouter::updateTab();
 }
 
-#include "UWidget.h"
-#include <QScrollArea>
-#include "VContainer.h"
 
-QWidget *RenderEventRouterGUI::AddSubtab(string title, UWidget *subtab)
-{
-    VContainer *container = new VContainer(subtab);
-    container->AddBottomStretch();
-    container->SetPadding(0, 6, 0, 0);
+//////////////////////////////////////////////////////////////////////////
+//
+// RenderEventRouterFactory Class
+//
+/////////////////////////////////////////////////////////////////////////
 
-    QScrollArea *scrollArea = new QScrollArea;
-    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollArea->setWidget(container);
-    scrollArea->setWidgetResizable(true);
-
-    addTab(scrollArea, QString::fromStdString(title));
-    _subtabs.push_back(subtab);
-
-    return scrollArea;
-}
-
-void RenderEventRouterGUI::_updateTab()
-{
-    auto *params = GetActiveParams();
-    auto *paramsMgr = _controlExec->GetParamsMgr();
-    auto *dataMgr = GetActiveDataMgr();
-    if (!(params && paramsMgr && dataMgr)) return;
-
-    for (Updateable *subtab : _subtabs) subtab->Update(params, paramsMgr, dataMgr);
-}
 
 RenderEventRouter *RenderEventRouterFactory::CreateInstance(string className, QWidget *parent, VAPoR::ControlExec *ce)
 {

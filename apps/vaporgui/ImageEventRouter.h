@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vapor/ImageRenderer.h>
-#include <RenderEventRouter.h>
+#include <RenderEventRouterGUI.h>
 
 //! \class ImageEventRouter
 //! \ingroup Public_GUI

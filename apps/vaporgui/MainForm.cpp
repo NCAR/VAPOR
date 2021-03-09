@@ -81,7 +81,6 @@
 #include "MainForm.h"
 #include "FileOperationChecker.h"
 #include "windowsUtils.h"
-#include "MouseModeParams.h"
 #include "ParamsWidgetDemo.h"
 
 #include <QProgressDialog>
@@ -114,7 +113,6 @@
 #include "images/vapor-icon-32.xpm"
 #include "images/cascade.xpm"
 #include "images/tiles.xpm"
-#include "images/wheel.xpm"
 
 #include "images/home.xpm"
 #include "images/sethome.xpm"
@@ -167,14 +165,12 @@ void MainForm::_initMembers()
     _playBackwardAction = NULL;
     _pauseAction = NULL;
 
-    _navigationAction = NULL;
     _editUndoAction = NULL;
     _editRedoAction = NULL;
     _timeStepEdit = NULL;
     _timeStepEditValidator = NULL;
 
     _alignViewCombo = NULL;
-    _modeCombo = NULL;
     _main_Menubar = NULL;
     _File = NULL;
     _Edit = NULL;
@@ -182,7 +178,6 @@ void MainForm::_initMembers()
     _captureMenu = NULL;
     _helpMenu = NULL;
 
-    _modeToolBar = NULL;
     _vizToolBar = NULL;
     _animationToolBar = NULL;
 
@@ -223,7 +218,6 @@ void MainForm::_initMembers()
 
     _captureEndImageAction = NULL;
 
-    _mouseModeActions = NULL;
     _tileAction = NULL;
     _cascadeAction = NULL;
     _homeAction = NULL;
@@ -429,7 +423,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
 
     _createProgressWidget();
 
-    addMouseModes();
     //    (void)statusBar();
     _main_Menubar->adjustSize();
     hookupSignals();
@@ -568,39 +561,6 @@ bool MainForm::determineDatasetFormat(const std::vector<std::string> &paths, std
     else
         return false;
     return true;
-}
-
-void MainForm::_createModeToolBar()
-{
-    _mouseModeActions = new QActionGroup(this);
-    QPixmap *wheelIcon = new QPixmap(wheel);
-
-    _navigationAction = new QAction(*wheelIcon, "Navigation Mode", _mouseModeActions);
-
-    _navigationAction->setCheckable(true);
-    _navigationAction->setChecked(true);
-
-    // mouse mode toolbar:
-    //
-    _modeToolBar = addToolBar("Mouse Modes");
-    _modeToolBar->setWindowTitle(tr("Mouse Modes"));
-    _modeToolBar->setParent(this);
-    _modeToolBar->addWidget(new QLabel(" Modes: "));
-    QString qws = QString("The mouse modes are used to enable various manipulation tools ") + "that can be used to control the location and position of objects in "
-                + "the 3D scene, by dragging box-handles in the scene. " + "Select the desired mode from the pull-down menu," + "or revert to the default (Navigation) by clicking the button";
-
-    _modeToolBar->setWhatsThis(qws);
-
-    // add mode buttons, left to right:
-    //
-    _modeToolBar->addAction(_navigationAction);
-
-    _modeCombo = new QComboBox(_modeToolBar);
-    _modeCombo->setToolTip("Select the mouse mode to use in the visualizer");
-
-    _modeToolBar->addWidget(_modeCombo);
-
-    connect(_modeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(modeChange(int)));
 }
 
 void MainForm::_createAnimationToolBar()
@@ -746,7 +706,6 @@ void MainForm::_createVizToolBar()
 
 void MainForm::createToolBars()
 {
-    _createModeToolBar();
     _createAnimationToolBar();
     _createVizToolBar();
 }
@@ -1687,23 +1646,6 @@ void MainForm::enableKeyframing(bool ison)
     _timeStepEdit->setEnabled(!ison);
 }
 
-void MainForm::modeChange(int newmode)
-{
-    string modeName = _modeCombo->itemText(newmode).toStdString();
-
-    // Get the current mode setting from MouseModeParams
-    //
-    MouseModeParams *p = GetStateParams()->GetMouseModeParams();
-    p->SetCurrentMouseMode(modeName);
-
-    if (modeName == MouseModeParams::GetNavigateModeName()) {
-        _navigationAction->setChecked(true);
-        return;
-    }
-
-    _navigationAction->setChecked(false);
-}
-
 void MainForm::showCitationReminder()
 {
     // Disable citation reminder in Debug build
@@ -1727,19 +1669,6 @@ void MainForm::showCitationReminder()
     msgBox.setDefaultButton(QMessageBox::Ok);
 
     msgBox.exec();
-}
-void MainForm::addMouseModes()
-{
-    MouseModeParams *p = GetStateParams()->GetMouseModeParams();
-    vector<string>   mouseModes = p->GetAllMouseModes();
-
-    for (int i = 0; i < mouseModes.size(); i++) {
-        QString            text = QString::fromStdString(mouseModes[i]);
-        const char *const *xpmIcon = p->GetIcon(mouseModes[i]);
-        QPixmap            qp = QPixmap(xpmIcon);
-        QIcon              icon = QIcon(qp);
-        addMode(text, icon);
-    }
 }
 
 void MainForm::launchWebDocs() const
@@ -2005,9 +1934,6 @@ void MainForm::update()
     size_t           timestep = aParams->GetCurrentTimestep();
 
     _timeStepEdit->setText(QString::number((int)timestep));
-    _modeCombo->blockSignals(true);
-    _modeCombo->setCurrentIndex(_modeCombo->findText(QString::fromStdString(GetStateParams()->GetMouseModeParams()->GetCurrentMouseMode())));
-    _modeCombo->blockSignals(false);
 
     updateMenus();
 
@@ -2016,7 +1942,6 @@ void MainForm::update()
 
 void MainForm::enableWidgets(bool onOff)
 {
-    _modeCombo->setEnabled(onOff);
     _captureMenu->setEnabled(onOff);
     _timeStepEdit->setEnabled(onOff);
     _animationToolBar->setEnabled(onOff);
@@ -2030,7 +1955,6 @@ void MainForm::enableWidgets(bool onOff)
     //	_stepBackAction->setEnabled(onOff);
     _interactiveRefinementSpin->setEnabled(onOff);
     _alignViewCombo->setEnabled(onOff);
-    _navigationAction->setEnabled(onOff);
     _Edit->setEnabled(onOff);
     _windowSelector->setEnabled(onOff);
     _tabMgr->setEnabled(onOff);

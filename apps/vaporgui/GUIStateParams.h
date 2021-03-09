@@ -122,8 +122,8 @@ public:
     std::string GetPlotDatasetName() const;
     void        SetPlotDatasetName(std::string &name);
 
-    bool IsFlowSeedTabActive() const;
-    void SetFlowSeedTabActive(bool b);
+    string ActiveTab() const;
+    void   SetActiveTab(const string &t);
 
     int  GetFlowDimensionality() const;
     void SetFlowDimensionality(int nDims);
@@ -193,7 +193,6 @@ private:
     static const string m_plotDatasetNameTag;
     static const string m_proj4StringTag;
     static const string m_openDataSetsTag;
-    static const string _isFlowSeedTabActiveTag;
     static const string _flowDimensionalityTag;
 
     MouseModeParams *m_mouseModeParams;
