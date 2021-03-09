@@ -174,6 +174,7 @@ void VaporTable::setTableCells(std::vector<std::string> values)
 
             //CustomLineEdit *edit = createLineEdit(qVal);
             QTableWidgetItem *edit = new QTableWidgetItem(qVal);
+            edit->setFlags( Qt::ItemIsEditable );
             
             //edit->setProperty("row", j);
             //edit->setProperty("col", i);
@@ -318,6 +319,8 @@ void VaporTable::emitReturnPressed() { emit returnPressed(); }
 
 void VaporTable::emitCellClicked(QObject *obj)
 {
+    QWidget* item = qobject_cast<QWidget*>(obj);
+    if ( item != nullptr ) return;
     //int row = obj->property("row").toInt();
     //int col = obj->property("col").toInt();
     int row, col;
