@@ -2177,18 +2177,9 @@ void MainForm::launchPythonVariables()
 {
     if (!_pythonVariables) {
         _pythonVariables = new PythonVariables(this);
-        connect(_pythonVariables, &QDialog::finished, this, &MainForm::_pythonClosed);
     }
     if (_controlExec) { _pythonVariables->InitControlExec(_controlExec); }
     _pythonVariables->ShowMe();
-}
-
-void MainForm::_pythonClosed()
-{
-    if (_pythonVariables != nullptr) {
-        delete _pythonVariables;
-        _pythonVariables = nullptr;
-    }
 }
 
 void MainForm::_setTimeStep()
