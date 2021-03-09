@@ -1,6 +1,7 @@
 #include "WireFrameEventRouter.h"
 #include "vapor/WireFrameParams.h"
 #include "PWidgets.h"
+#include "PConstantColorWidget.h"
 
 using namespace VAPoR;
 
@@ -19,7 +20,13 @@ WireFrameEventRouter::WireFrameEventRouter(QWidget *parent, ControlExec *ce) : R
         new PFidelitySection
     }));
     
-    AddSubtab("Appearance", (new PTFEditor)->ShowOpacityBasedOnParam("NULL", 1));
+    AddSubtab("Appearance", new PGroup({
+        (new PTFEditor)->ShowOpacityBasedOnParam("NULL", 1),
+        new PSection("Appearance", {
+            new PConstantColorWidget
+        })
+    }));
+    
     AddSubtab("Geometry", new PGeometrySubtab);
     AddSubtab("Annotation", new PAnnotationColorbarWidget);
 

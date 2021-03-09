@@ -3,6 +3,7 @@
 #include "PWidgets.h"
 #include "PFlowRakeRegionSelector.h"
 #include "PMultiVarSelector.h"
+#include "PConstantColorWidget.h"
 
 using namespace VAPoR;
 typedef FlowParams FP;
@@ -30,7 +31,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
             new PEnumDropdown(FP::_isSteadyTag, {"Streamlines", "Pathlines"}, {true, false}, "Flow Type"),
             (new PShowIf(FP::_isSteadyTag))->Equals(true)->Then({
                 new PEnumDropdown(FP::_flowDirectionTag, {"Forward", "Backward", "Bi-Directional"}, {(int)FlowDir::FORWARD, (int)FlowDir::BACKWARD, (int)FlowDir::BI_DIR}, "Flow Direction"),
-                (new PIntegerSliderEdit(FP::_steadyNumOfStepsTag, "Integration Steps"))->SetRange(0, 5000),
+                (new PIntegerInput(FP::_steadyNumOfStepsTag, "Integration Steps"))->SetRange(0, 10000)->EnableDynamicUpdate(),
             })->Else({
                 _pathlineLengthSlider = new PIntegerSliderEdit(FP::_pastNumOfTimeSteps, "Pathline Length"),
                 _pathlineInjectionSlider = new PIntegerSliderEdit(FP::_seedInjInterval, "Injection Interval"),
@@ -69,10 +70,12 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
                 )
             }),
         }),
-        new PSection("Rake Region", {
-            new PFlowRakeRegionSelector1D(0),
-            new PFlowRakeRegionSelector1D(1),
-            new PFlowRakeRegionSelector1D(2),
+        (new PShowIf(FP::_seedGenModeTag))->Not()->Equals((int)FlowSeedMode::LIST)->Then({
+            new PSection("Rake Region", {
+                new PFlowRakeRegionSelector1D(0),
+                new PFlowRakeRegionSelector1D(1),
+                new PFlowRakeRegionSelector1D(2),
+            }),
         }),
         
         new PSection("Write Flowlines to File", {
@@ -86,6 +89,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
     AddSubtab("Appearance", new PGroup({
         (new PTFEditor(RenderParams::_colorMapVariableNameTag))->ShowOpacityBasedOnParam("NULL", 1),
         new PSection("Appearance", {
+            new PConstantColorWidget,
             new PEnumDropdown(FP::RenderTypeTag, {"Tubes", "Samples", "KLGWTH"}, {FP::RenderTypeStream, FP::RenderTypeSamples, FP::RenderTypeDensity}, "Render Type"),
             (new PShowIf(FP::RenderTypeTag))->Equals(FP::RenderTypeStream)->Then({
                 new PCheckbox(FP::RenderGeom3DTag, "3D Geometry"),

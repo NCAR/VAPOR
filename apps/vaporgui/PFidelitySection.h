@@ -24,8 +24,11 @@ protected:
     virtual void updateGUI() const override;
     bool         requireDataMgr() const override { return true; }
 
-private slots:
-    void dropdownTextChanged(std::string text);
+private:
+    void dropdownTextChanged(std::string);
+
+    static void simpleToParams(int nSimple, int nLod, int nRef, int simple, int *lod, int *ref);
+    static int  paramsToSimple(int nSimple, int nLod, int nRef, int lod, int ref);
 };
 
 class PLODSelector : public PLineItem {
