@@ -326,7 +326,6 @@ private:
 private slots:
     void _plotClosed();
     void _statsClosed();
-    void _pythonClosed();
     void sessionOpen(QString qfileName = "", bool loadDatasets = true);
     void fileSave();
     void fileSaveAs();

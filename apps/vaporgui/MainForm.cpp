@@ -2258,14 +2258,6 @@ void MainForm::launchPythonVariables()
     _pythonVariables->ShowMe();
 }
 
-void MainForm::_pythonClosed()
-{
-    if (_pythonVariables != nullptr) {
-        delete _pythonVariables;
-        _pythonVariables = nullptr;
-    }
-}
-
 void MainForm::_setTimeStep()
 {
     _paramsMgr->BeginSaveStateGroup("Change Timestep");
