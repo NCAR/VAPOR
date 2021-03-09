@@ -34,7 +34,10 @@ jobs:
             make -j7 &> /tmp/releaseOutput.txt
 
       - store_artifacts:
-          path: /tmp
+          path: /tmp/debugOutput.txt
+
+      - store_artifacts:
+          path: /tmp/releaseOutput.txt
 
       - run:
           name: Smoke test
@@ -58,7 +61,7 @@ jobs:
           name: check for Release warnings
           command: |
             if grep -q warning /tmp/releaseOutput.txt; then
-               cat /tmp/debugOutput.txt
+               cat /tmp/releaseOutput.txt
                exit -1
             else
                exit 0
