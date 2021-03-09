@@ -34,7 +34,7 @@ jobs:
             make -j7 &> /tmp/releaseOutput.txt
 
       - store_artifacts:
-          path: /tmp/output.txt
+          path: /tmp/*
 
       - run:
           name: Smoke test
