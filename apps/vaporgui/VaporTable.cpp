@@ -46,12 +46,16 @@ VaporTable::VaporTable(QTableWidget *table, bool lastRowIsCheckboxes, bool lastC
     _checkboxesEnabled = true;
     _activeRow = -1;
     _activeCol = -1;
+    _stretchColumn = -1;
+    _hideColumn = -1;
     _autoResizeHeight = false;
     _showToolTips = false;
 
     SetVerticalHeaderWidth(100);
 
-//    _table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    //_table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    
+    connect( _table, &QTableWidget::cellClicked, this, &VaporTable::emitCellClicked2 );
 }
 
 // Clear current table, then generate table of rows x columns
@@ -75,6 +79,7 @@ void VaporTable::Update(int rows, int cols, std::vector<double> values, std::vec
 
 void VaporTable::Update(int rows, int cols, std::vector<std::string> values, std::vector<std::string> rowHeaders, std::vector<std::string> colHeaders)
 {
+    _table->clearContents();
     _table->setRowCount(rows);
     _table->setColumnCount(cols);
 
@@ -105,9 +110,20 @@ bool VaporTable::GetAutoResizeHeight() const { return _autoResizeHeight; }
 
 void VaporTable::StretchToColumn(int column)
 {
-    QHeaderView *headerView = new QHeaderView(Qt::Horizontal, _table);
-    _table->setHorizontalHeader(headerView);
-    headerView->setSectionResizeMode(QHeaderView::Stretch);
+    _stretchColumn = column;
+
+//    QHeaderView *headerView = new QHeaderView(Qt::Horizontal, _table);
+//    _table->setHorizontalHeader(headerView);
+//    headerView->setSectionResizeMode(QHeaderView::Stretch);
+
+/*_table->horizontalScrollBar()->setEnabled(false);
+_table->resizeColumnsToContents();
+QHeaderView *headerView = _table->horizontalHeader();
+headerView->setSectionResizeMode(column, QHeaderView::Stretch);*/
+}
+
+void VaporTable::HideColumn( int column ) {
+    _hideColumn = column;
 }
 
 void VaporTable::ShowToolTips(bool showOrHide) { _showToolTips = showOrHide; }
@@ -167,20 +183,27 @@ void VaporTable::setTableCells(std::vector<std::string> values)
 
     for (int i = 0; i < cols; i++) {
         for (int j = 0; j < rows; j++) {
+
             int         index = i + (cols)*j;
             std::string value = values[index];
 
             QString qVal = QString::fromStdString(value);
 
+            // If the cell has a checkbox, 
+            // don't write the string value into the cell
+            if ( _lastColIsCheckboxes && i==_table->columnCount()-1 ) {
+                qVal = "";
+            }
+
             //CustomLineEdit *edit = createLineEdit(qVal);
-            QTableWidgetItem *edit = new QTableWidgetItem(qVal);
-            edit->setFlags( Qt::ItemIsEditable );
+            QTableWidgetItem *item = new QTableWidgetItem(qVal);
+            item->setFlags( Qt::ItemIsEditable );
             
             //edit->setProperty("row", j);
             //edit->setProperty("col", i);
-            if (_showToolTips) edit->setToolTip(qVal);
+            if (_showToolTips) item->setToolTip(qVal);
             //_table->setCellWidget(j, i, edit);
-            _table->setItem( j, i, edit );
+            _table->setItem( j, i, item );
         }
     }
 }
@@ -254,7 +277,7 @@ void VaporTable::addCheckbox(int row, int column, bool checked)
 
     connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(emitValueChanged()));
 
-    cbWidget->installEventFilter(this);
+    //cbWidget->installEventFilter(this);
 }
 
 CustomLineEdit *VaporTable::createLineEdit(QString val)
@@ -317,23 +340,29 @@ void VaporTable::emitValueChanged()
 
 void VaporTable::emitReturnPressed() { emit returnPressed(); }
 
-void VaporTable::emitCellClicked(QObject *obj)
+void VaporTable::emitCellClicked2(int row, int col) {
+    emit cellClicked( row, col );
+}
+
+/*void VaporTable::emitCellClicked(QObject *obj)
 {
+    std::cout << "clicked" << std::endl;
     QWidget* item = qobject_cast<QWidget*>(obj);
     if ( item != nullptr ) return;
     //int row = obj->property("row").toInt();
     //int col = obj->property("col").toInt();
     int row, col;
     //QTableWidgetItem* item = qobject_cast<QTableWidgetItem*>(obj);
-    /*QCheckBox* item = qobject_cast<QCheckBox*>(obj);
-    if ( item != nullptr ) {
-        row = obj->property("row").toInt();
-        col = obj->property("col").toInt();
-    }
-    else {
-        row = sender()->row();
-        col = sender()->column();
-    }*/
+    
+    //QCheckBox* item = qobject_cast<QCheckBox*>(obj);
+    //if ( item != nullptr ) {
+    //    row = obj->property("row").toInt();
+    //    col = obj->property("col").toInt();
+    //}
+    //else {
+    //    row = sender()->row();
+    //    col = sender()->column();
+    //}/
 
     row = _table->currentRow();
     col = _table->currentColumn();
@@ -344,13 +373,14 @@ void VaporTable::emitCellClicked(QObject *obj)
     if (_highlightFlags & COLS) highlightActiveCol(_activeCol);
 
     emit cellClicked(row, col);
-}
+}*/
 
-bool VaporTable::eventFilter(QObject *object, QEvent *event)
+/*bool VaporTable::eventFilter(QObject *object, QEvent *event)
 {
+std::cout << "bool VaporTable::eventFilter(QObject *object, QEvent *event) " << event->type() << std::endl;
     if (event->type() == QEvent::MouseButtonPress) emitCellClicked(object);
     return false;
-}
+}*/
 
 void VaporTable::setValidator(QLineEdit *edit)
 {
@@ -365,6 +395,19 @@ void VaporTable::setValidator(QLineEdit *edit)
 
 void VaporTable::setHorizontalHeader(std::vector<std::string> header)
 {
+    QHeaderView *headerView = _table->horizontalHeader();
+    if ( _stretchColumn != -1 ) {
+        _table->horizontalScrollBar()->setEnabled(false);
+        _table->resizeColumnsToContents();
+        headerView->setSectionResizeMode(2, QHeaderView::Stretch);
+    }
+    else {
+        headerView->setSectionResizeMode(QHeaderView::Stretch);
+    }
+
+    if ( _hideColumn != -1 )
+        _table->hideColumn( _hideColumn );
+
     int size = header.size();
     if (size < 1) {
         _table->horizontalHeader()->hide();
@@ -374,15 +417,6 @@ void VaporTable::setHorizontalHeader(std::vector<std::string> header)
     QStringList list;
     for (int i = 0; i < size; i++) { list << QString::fromStdString(header[i]); }
 
-//    _table->resizeColumnsToContents();
-//    _table->setHorizontalHeaderLabels(list);
-//    _table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
-
-_table->horizontalScrollBar()->setEnabled(false);
-_table->resizeColumnsToContents();
-QHeaderView *headerView = _table->horizontalHeader();
-headerView->setSectionResizeMode(2, QHeaderView::Stretch);
     _table->setHorizontalHeaderLabels(list);
 
     QTableWidgetItem *headerItem;

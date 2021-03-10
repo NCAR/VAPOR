@@ -212,6 +212,8 @@ RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce, const vector<QWidge
     _vaporTable = new VaporTable(tableWidget, false, true);
     _vaporTable->Reinit((VaporTable::ValidatorFlags)(0), (VaporTable::MutabilityFlags)(VaporTable::IMMUTABLE), (VaporTable::HighlightFlags)(VaporTable::ROWS));
     _vaporTable->ShowToolTips(true);
+    _vaporTable->StretchToColumn(2);
+    _vaporTable->HideColumn(1);
     _currentRow = 0;
 
     _widgetNames = widgetNames;
@@ -367,6 +369,7 @@ void RenderHolder::_deleteRenderer()
 
 void RenderHolder::_activeRendererChanged(int row, int col)
 {
+    std::cout << "RH _activeRendererChanged " << row << " " << col << std::endl;
     _currentRow = row;
     GUIStateParams *p = _getStateParams();
     string          activeViz = p->GetActiveVizName();

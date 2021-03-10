@@ -85,6 +85,7 @@ public:
     bool GetAutoResizeHeight() const;
 
     void StretchToColumn(int column);
+    void HideColumn( int column );
 
     void ShowToolTips(bool showOrHide);
     bool GetShowToolTips() const;
@@ -92,6 +93,7 @@ public:
     void SetVerticalHeaderWidth(int width);
 
 public slots:
+    void emitCellClicked2(int, int);
     void emitValueChanged();
     void emitReturnPressed();
 
@@ -103,7 +105,7 @@ signals:
 
 private:
     void emitCellClicked(QObject *object);
-    bool eventFilter(QObject *object, QEvent *event);
+    //bool eventFilter(QObject *object, QEvent *event);
 
     std::vector<std::string> convertToString(std::vector<int> values);
 
@@ -133,6 +135,8 @@ private:
 
     int           _activeRow;
     int           _activeCol;
+    int           _stretchColumn;
+    int           _hideColumn;
     bool          _lastRowIsCheckboxes;
     bool          _lastColIsCheckboxes;
     bool          _checkboxesEnabled;
