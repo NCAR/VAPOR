@@ -1,7 +1,7 @@
 #pragma once
 
 #include "vapor/VolumeRenderer.h"
-#include "RenderEventRouter.h"
+#include "RenderEventRouterGUI.h"
 
 //! \class VolumeEventRouter
 //! \ingroup Public_GUI
