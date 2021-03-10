@@ -78,7 +78,7 @@ FlowParams::FlowParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave) :
     SetValueDouble(PhongSpecularTag, "", 0);
     SetValueDouble(PhongShininessTag, "", 2);
 
-    // Give the random bias variable the same as color mapping variable
+    // Give the random bias variable the same as color mapping variable.
     auto colorvar = GetColorMapVariableName();
     SetValueString(_rakeBiasVariable, "which variable to bias with", colorvar); 
 }
