@@ -55,7 +55,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::RANDOM_BIAS)->Then({
                 (new PIntegerSliderEdit(FP::_randomNumOfSeedsTag, "Seed count"))->SetRange(1, 500),
                 (new PIntegerSliderEdit(FP::_rakeBiasStrength, "Bias weight"))->SetRange(-100, 100),
-                new PVariableSelector(FP::_rakeBiasVariable)
+                new PVariableSelector(FP::_rakeBiasVariable, "Bias Variable")
             }),
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::LIST)->Then({
                 (new PFileOpenSelector(FP::_seedInputFilenameTag, "List of seeds file"))->SetTooltip(
