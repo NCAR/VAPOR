@@ -151,10 +151,7 @@ void PythonVariables::Update(bool internalUpdate)
     std::vector<string> outputValues;
     _makeOutputTableValues(outputValues);
     numRows = outputValues.size() / 2;
-    // std::vector<std::string> h = {"Variable Name", "Grid"};
-    //_outputVarTable->Update(numRows, numCols, outputValues, {}, h);
     _outputVarTable->Update(numRows, numCols, outputValues);
-    //_outputVarTable->StretchToColumn(1);
 
     _coordInputVarTable->blockSignals(false);
     _2DInputVarTable->blockSignals(false);

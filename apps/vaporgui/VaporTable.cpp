@@ -175,7 +175,9 @@ void VaporTable::setTableCells(std::vector<std::string> values)
             if (_lastColIsCheckboxes && i == _table->columnCount() - 1) { qVal = ""; }
 
             QTableWidgetItem *item = new QTableWidgetItem(qVal);
-            item->setFlags(Qt::ItemIsEditable);
+            if (_mutabilityFlags & IMMUTABLE) { 
+                item->setFlags(Qt::ItemIsEditable);  // turns off user-editability
+            }
 
             if (_showToolTips) item->setToolTip(qVal);
             _table->setItem(j, i, item);
@@ -374,8 +376,6 @@ Value VaporTable::GetValue(int row, int col)
     std::string value;
     int         nRows = _table->rowCount();
     int         nCols = _table->columnCount();
-
-    if (row < 0 || col < 0) return {"X"};
 
     QWidget *widget = _table->cellWidget(row, col);
 
