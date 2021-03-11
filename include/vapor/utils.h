@@ -1,6 +1,7 @@
 
 #include <cstring>
 #include <vector>
+#include <limits>
 #include <vapor/common.h>
 
 #pragma once
