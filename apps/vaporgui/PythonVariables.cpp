@@ -152,6 +152,7 @@ void PythonVariables::Update(bool internalUpdate)
     _makeOutputTableValues(outputValues);
     numRows = outputValues.size() / 2;
     _outputVarTable->Update(numRows, numCols, outputValues);
+    _outputVarTable->StretchToColumn(1);
 
     _coordInputVarTable->blockSignals(false);
     _2DInputVarTable->blockSignals(false);

@@ -8,15 +8,6 @@
 
 struct Value;
 
-class CustomLineEdit : public QLineEdit {
-    Q_OBJECT
-public:
-    CustomLineEdit(QWidget *parent = nullptr);
-
-protected:
-    void focusOutEvent(QFocusEvent *event);
-};
-
 // class VaporTable
 //
 class VaporTable : public QWidget {
@@ -105,8 +96,6 @@ private:
     std::vector<std::string> convertToString(std::vector<int> values);
 
     std::vector<std::string> convertToString(std::vector<double> values);
-
-    CustomLineEdit *createLineEdit(QString val);
 
     void setHorizontalHeader(std::vector<std::string> header);
 

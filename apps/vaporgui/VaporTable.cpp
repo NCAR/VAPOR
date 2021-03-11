@@ -30,14 +30,6 @@ QString selectionColor = "{color: white; background-color: blue}";
 QString normalColor = "{ color: black; background: white; }";
 }    // namespace
 
-CustomLineEdit::CustomLineEdit(QWidget *parent) : QLineEdit(parent) {}
-
-void CustomLineEdit::focusOutEvent(QFocusEvent *event)
-{
-    QLineEdit::focusOutEvent(event);
-    if (!hasAcceptableInput()) undo();
-}
-
 VaporTable::VaporTable(QTableWidget *table, bool lastRowIsCheckboxes, bool lastColIsCheckboxes)
 {
     _table = table;
