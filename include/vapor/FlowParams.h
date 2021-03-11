@@ -105,8 +105,8 @@ public:
     std::string GetRakeBiasVariable() const;
     void        SetRakeBiasVariable(const std::string &);
 
-    float GetRakeBiasStrength() const;
-    void  SetRakeBiasStrength(float);
+    long GetRakeBiasStrength() const;
+    void SetRakeBiasStrength(long);
 
     int  GetPastNumOfTimeSteps() const;
     void SetPastNumOfTimeSteps(int);
