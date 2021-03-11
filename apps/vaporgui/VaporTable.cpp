@@ -52,7 +52,7 @@ VaporTable::VaporTable(QTableWidget *table, bool lastRowIsCheckboxes, bool lastC
 
     SetVerticalHeaderWidth(100);
 
-    connect( _table, &QTableWidget::cellClicked, this, &VaporTable::emitCellClicked );
+    connect(_table, &QTableWidget::cellClicked, this, &VaporTable::emitCellClicked);
 }
 
 // Clear current table, then generate table of rows x columns
@@ -95,9 +95,7 @@ void VaporTable::Update(int rows, int cols, std::vector<std::string> values, std
 
     resizeTableHeight();
 
-    if (_mutabilityFlags & IMMUTABLE) {
-        _correctImmutableCellText();
-    }
+    if (_mutabilityFlags & IMMUTABLE) { _correctImmutableCellText(); }
 }
 
 void VaporTable::SetVerticalHeaderWidth(int width) { _table->verticalHeader()->setMaximumWidth(width); }
@@ -106,14 +104,9 @@ void VaporTable::SetAutoResizeHeight(bool val) { _autoResizeHeight = val; }
 
 bool VaporTable::GetAutoResizeHeight() const { return _autoResizeHeight; }
 
-void VaporTable::StretchToColumn(int column)
-{
-    _stretchColumn = column;
-}
+void VaporTable::StretchToColumn(int column) { _stretchColumn = column; }
 
-void VaporTable::HideColumn( int column ) {
-    _hideColumn = column;
-}
+void VaporTable::HideColumn(int column) { _hideColumn = column; }
 
 void VaporTable::ShowToolTips(bool showOrHide) { _showToolTips = showOrHide; }
 
@@ -172,23 +165,20 @@ void VaporTable::setTableCells(std::vector<std::string> values)
 
     for (int i = 0; i < cols; i++) {
         for (int j = 0; j < rows; j++) {
-
             int         index = i + (cols)*j;
             std::string value = values[index];
 
             QString qVal = QString::fromStdString(value);
 
-            // If the cell has a checkbox, 
+            // If the cell has a checkbox,
             // don't write the string value into the cell
-            if ( _lastColIsCheckboxes && i==_table->columnCount()-1 ) {
-                qVal = "";
-            }
+            if (_lastColIsCheckboxes && i == _table->columnCount() - 1) { qVal = ""; }
 
             QTableWidgetItem *item = new QTableWidgetItem(qVal);
-            item->setFlags( Qt::ItemIsEditable );
-            
+            item->setFlags(Qt::ItemIsEditable);
+
             if (_showToolTips) item->setToolTip(qVal);
-            _table->setItem( j, i, item );
+            _table->setItem(j, i, item);
         }
     }
 }
@@ -265,13 +255,12 @@ void VaporTable::addCheckbox(int row, int column, bool checked)
 
 void VaporTable::emitValueChanged()
 {
-    int row, col;
-    QCheckBox* item = qobject_cast<QCheckBox*>(QObject::sender());
-    if ( item != nullptr ) {
+    int        row, col;
+    QCheckBox *item = qobject_cast<QCheckBox *>(QObject::sender());
+    if (item != nullptr) {
         row = item->property("row").toInt();
         col = item->property("col").toInt();
-    }
-    else {
+    } else {
         return;
     }
 
@@ -283,13 +272,12 @@ void VaporTable::emitValueChanged()
 
 void VaporTable::emitReturnPressed() { emit returnPressed(); }
 
-void VaporTable::emitCellClicked(int row, int col) {
+void VaporTable::emitCellClicked(int row, int col)
+{
     _activeRow = row;
 
-    if (_highlightFlags & ROWS) { 
-        highlightActiveRow(_activeRow); 
-    }
-    emit cellClicked( row, col );
+    if (_highlightFlags & ROWS) { highlightActiveRow(_activeRow); }
+    emit cellClicked(row, col);
 }
 
 void VaporTable::setValidator(QLineEdit *edit)
@@ -306,17 +294,15 @@ void VaporTable::setValidator(QLineEdit *edit)
 void VaporTable::setHorizontalHeader(std::vector<std::string> header)
 {
     QHeaderView *headerView = _table->horizontalHeader();
-    if ( _stretchColumn != -1 ) {
+    if (_stretchColumn != -1) {
         _table->horizontalScrollBar()->setEnabled(false);
         _table->resizeColumnsToContents();
         headerView->setSectionResizeMode(_stretchColumn, QHeaderView::Stretch);
-    }
-    else {
+    } else {
         headerView->setSectionResizeMode(1, QHeaderView::Stretch);
     }
 
-    if ( _hideColumn != -1 )
-        _table->hideColumn( _hideColumn );
+    if (_hideColumn != -1) _table->hideColumn(_hideColumn);
 
     int size = header.size();
     if (size < 1) {
@@ -422,7 +408,7 @@ std::string VaporTable::GetStringValue(int row, int col)
         else
             value = "0";
     } else {
-        QString qvalue = _table->item(row,col)->text();
+        QString qvalue = _table->item(row, col)->text();
         value = qvalue.toStdString();
     }
 
@@ -474,33 +460,35 @@ void VaporTable::GetValues(std::vector<double> &vec)
     }
 }
 
-void VaporTable::_correctImmutableCellText() {
+void VaporTable::_correctImmutableCellText()
+{
     for (int i = 0; i < _table->rowCount(); i++) {
-        if ( i == _activeRow ) continue;
+        if (i == _activeRow) continue;
         for (int j = 0; j < _table->columnCount(); j++) {
-            QBrush b( QColor("black") );
-            QBrush w( QColor("white") );
-            _table->item(i,j)->setForeground( b );
-            _table->item(i,j)->setBackground( w );
+            QBrush b(QColor("black"));
+            QBrush w(QColor("white"));
+            _table->item(i, j)->setForeground(b);
+            _table->item(i, j)->setBackground(w);
         }
     }
 }
 
-void VaporTable::highlightActiveRow(int row) {
+void VaporTable::highlightActiveRow(int row)
+{
     if (row < 0) return;
 
     for (int i = 0; i < _table->rowCount(); i++) {
         for (int j = 0; j < _table->columnCount(); j++) {
             if (i == row) {
-                QBrush b( QColor("blue") );
-                QBrush w( QColor("white") );
-                _table->item(i,j)->setForeground( w );
-                _table->item(i,j)->setBackground( b );
+                QBrush b(QColor("blue"));
+                QBrush w(QColor("white"));
+                _table->item(i, j)->setForeground(w);
+                _table->item(i, j)->setBackground(b);
             } else {
-                QBrush b( QColor("black") );
-                QBrush w( QColor("white") );
-                _table->item(i,j)->setForeground( b );
-                _table->item(i,j)->setBackground( w );
+                QBrush b(QColor("black"));
+                QBrush w(QColor("white"));
+                _table->item(i, j)->setForeground(b);
+                _table->item(i, j)->setBackground(w);
             }
         }
     }

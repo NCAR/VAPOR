@@ -83,7 +83,7 @@ public:
     bool GetAutoResizeHeight() const;
 
     void StretchToColumn(int column);
-    void HideColumn( int column );
+    void HideColumn(int column);
 
     void ShowToolTips(bool showOrHide);
     bool GetShowToolTips() const;
