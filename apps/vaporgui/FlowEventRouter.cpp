@@ -9,12 +9,13 @@ using namespace VAPoR;
 typedef FlowParams FP;
 
 static RenderEventRouterRegistrar<FlowEventRouter> registrar(FlowEventRouter::GetClassType());
+const string                                       FlowEventRouter::SeedingTabName = "Seeding";
 
 FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEventRouterGUI(ce, FlowParams::GetClassType())
 {
     // clang-format off
 
-    AddSubtab("Variables", new PGroup({
+    AddVariablesSubtab(new PGroup({
         new PSection("Variable Selection", {
             new PDimensionSelector,
             new PXFieldVariableSelector,
@@ -26,7 +27,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
     }));
     
     _seedingTab =
-    AddSubtab("Seeding", new PGroup({
+    AddSubtab(SeedingTabName, new PGroup({
         new PSection("Flow Integration Settings", {
             new PEnumDropdown(FP::_isSteadyTag, {"Streamlines", "Pathlines"}, {true, false}, "Flow Type"),
             (new PShowIf(FP::_isSteadyTag))->Equals(true)->Then({
@@ -53,7 +54,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
             }),
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::RANDOM_BIAS)->Then({
                 (new PIntegerSliderEdit(FP::_randomNumOfSeedsTag, "Seed count"))->SetRange(1, 500),
-                (new PDoubleSliderEdit(FP::_rakeBiasStrength, "Bias weight"))->SetRange(-10, 10),
+                (new PIntegerSliderEdit(FP::_rakeBiasStrength, "Bias weight"))->SetRange(-100, 100),
                 new PVariableSelector(FP::_rakeBiasVariable)
             }),
             (new PShowIf(FP::_seedGenModeTag))->Equals((int)FlowSeedMode::LIST)->Then({
@@ -86,7 +87,7 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
         }),
     }));
     
-    AddSubtab("Appearance", new PGroup({
+    AddAppearanceSubtab(new PGroup({
         (new PTFEditor(RenderParams::_colorMapVariableNameTag))->ShowOpacityBasedOnParam("NULL", 1),
         new PSection("Appearance", {
             new PConstantColorWidget,
@@ -127,10 +128,8 @@ FlowEventRouter::FlowEventRouter(QWidget *parent, ControlExec *ce) : RenderEvent
 #endif
     }));
 
-	AddSubtab("Geometry", new PGeometrySubtab);
-    AddSubtab("Annotation", new PAnnotationColorbarWidget);
-    
-    connect(this, &QTabWidget::currentChanged, this, &FlowEventRouter::tabChanged);
+    AddGeometrySubtab(new PGeometrySubtab);
+    AddAnnotationSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on
 }
@@ -142,33 +141,6 @@ void FlowEventRouter::_updateTab()
     int numTS = GetActiveDataMgr()->GetNumTimeSteps();
     _pathlineLengthSlider->SetRange(0, std::max(1, numTS - 1));
     _pathlineInjectionSlider->SetRange(0, numTS);
-
-    syncOpenTabWithGUIStateParams();
 }
 
 string FlowEventRouter::_getDescription() const { return "Computes and displays steady or unsteady flow trajectories.\n"; }
-
-void FlowEventRouter::tabChanged(int i)
-{
-    GUIStateParams *gp = (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
-    bool            setToSeedingTab = widget(i) == _seedingTab;
-    gp->SetFlowSeedTabActive(setToSeedingTab);
-}
-
-void FlowEventRouter::syncOpenTabWithGUIStateParams()
-{
-    GUIStateParams *gp = (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
-    if (gp->IsFlowSeedTabActive()) {
-        if (currentWidget() != _seedingTab) {
-            blockSignals(true);
-            setCurrentWidget(_seedingTab);
-            blockSignals(false);
-        }
-    } else {
-        if (currentWidget() == _seedingTab) {
-            blockSignals(true);
-            setCurrentIndex(1);
-            blockSignals(false);
-        }
-    }
-}
