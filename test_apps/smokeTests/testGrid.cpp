@@ -191,17 +191,18 @@ int main(int argc, char **argv)
     bool curvilinearRC = true;
     bool unstructured2DRC = true;
 
-	#pragma omp parallel
-	{
-		if (omp_get_thread_num() == 0) cout << "Num threads: " << omp_get_num_threads() << endl;;
-	}
+#pragma omp parallel
+    {
+        if (omp_get_thread_num() == 0) cout << "Num threads: " << omp_get_num_threads() << endl;
+        ;
+    }
 
     // Test Regular Grid
     if (std::find(opt.grids.begin(), opt.grids.end(), "Regular") != opt.grids.end()) {
-        double t0 = Wasp::GetTime();
+        double               t0 = Wasp::GetTime();
         std::vector<float *> rgBlks = AllocateBlocks(opt.bs, opt.dims);
         RegularGrid *        regularGrid = new RegularGrid(opt.dims, opt.bs, rgBlks, minu, maxu);
-        double t1 = Wasp::GetTime() - t0;
+        double               t1 = Wasp::GetTime() - t0;
         cout << "RegularGrid() time: " << t1 << endl;
         regularRC = RunTests(regularGrid, opt.arrangements, opt.minValue, opt.maxValue);
         delete regularGrid;
@@ -209,9 +210,9 @@ int main(int argc, char **argv)
 
     // Test Stretched Grid
     if (std::find(opt.grids.begin(), opt.grids.end(), "Stretched") != opt.grids.end()) {
-        double t0 = Wasp::GetTime();
+        double         t0 = Wasp::GetTime();
         StretchedGrid *stretchedGrid = MakeStretchedGrid(opt.dims, opt.bs, minu, maxu);
-        double t1 = Wasp::GetTime() - t0;
+        double         t1 = Wasp::GetTime() - t0;
         cout << "MakeStretchedGrid() time: " << t1 << endl;
         stretchedRC = RunTests(stretchedGrid, opt.arrangements, opt.minValue, opt.maxValue);
         delete stretchedGrid;
@@ -219,9 +220,9 @@ int main(int argc, char **argv)
 
     // Test Layered Grid
     if (std::find(opt.grids.begin(), opt.grids.end(), "Layered") != opt.grids.end()) {
-        double t0 = Wasp::GetTime();
+        double       t0 = Wasp::GetTime();
         LayeredGrid *layeredGrid = MakeLayeredGrid(opt.dims, opt.bs, minu, maxu);
-        double t1 = Wasp::GetTime() - t0;
+        double       t1 = Wasp::GetTime() - t0;
         cout << "MakeLayeredGrid() time: " << t1 << endl;
         layeredRC = RunTests(layeredGrid, opt.arrangements, opt.minValue, opt.maxValue);
         delete layeredGrid;
@@ -229,7 +230,7 @@ int main(int argc, char **argv)
 
     // Test Curvilinear Grid
     if (std::find(opt.grids.begin(), opt.grids.end(), "Curvilinear") != opt.grids.end()) {
-        double t0 = Wasp::GetTime();
+        double           t0 = Wasp::GetTime();
         CurvilinearGrid *curvilinearGrid;
         curvilinearGrid = MakeCurvilinearTerrainGrid(opt.bs, minu, maxu, opt.dims);
         double t1 = Wasp::GetTime() - t0;
@@ -240,9 +241,9 @@ int main(int argc, char **argv)
 
     // Test Unstructured Grid 2D
     if (std::find(opt.grids.begin(), opt.grids.end(), "Unstructured2D") != opt.grids.end()) {
-        double t0 = Wasp::GetTime();
+        double              t0 = Wasp::GetTime();
         UnstructuredGrid2D *g = MakeUnstructuredGrid2D(opt.dims, opt.bs, minu, maxu);
-        double t1 = Wasp::GetTime() - t0;
+        double              t1 = Wasp::GetTime() - t0;
         cout << "MakeUnstructuredGrid2D() time: " << t1 << endl;
         unstructured2DRC = RunTests(g, opt.arrangements, opt.minValue, opt.maxValue);
         delete g;

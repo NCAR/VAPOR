@@ -104,7 +104,7 @@ void MakeRamp(Grid *grid, float minVal, float maxVal)
     size_t              y = dims.size() > 1 ? dims[Y] : 1;
     size_t              z = dims.size() > 2 ? dims[Z] : 1;
 
-    float increment = (maxVal - minVal) / ((x*y*z - 1) == 0 ? 1 : (x*y*z - 1));
+    float increment = (maxVal - minVal) / ((x * y * z - 1) == 0 ? 1 : (x * y * z - 1));
 
     float value = minVal;
     for (size_t k = 0; k < z; k++) {
@@ -181,9 +181,7 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
 
                 double error = abs(sampleValue - trueValue);
 
-				if (! Wasp::NearlyEqual(error, 0.0)) {
-					disagreements++;
-				}
+                if (!Wasp::NearlyEqual(error, 0.0)) { disagreements++; }
 
                 if (error > peak) peak = error;
                 sum += error * error;
@@ -224,7 +222,7 @@ bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, 
         double itrData = g->GetValueAtIndex(itr3);
         double gridData = g->GetValueAtIndex(ijk3);
 
-        if (! Wasp::NearlyEqual(itrData, gridData)) { disagreements++; }
+        if (!Wasp::NearlyEqual(itrData, gridData)) { disagreements++; }
 
         count++;
     }
@@ -254,7 +252,7 @@ bool TestIterator(Grid *g, size_t &count, size_t &expectedCount, size_t &disagre
     for (; itr != enditr; ++itr) {
         std::vector<size_t> ijk = Wasp::VectorizeCoords(count, dims);
 
-        if (! Wasp::NearlyEqual(*itr, g->GetValueAtIndex(ijk))) { disagreements++; }
+        if (!Wasp::NearlyEqual(*itr, g->GetValueAtIndex(ijk))) { disagreements++; }
 
         count++;
     }
@@ -289,7 +287,7 @@ bool TestConstCoordItr(const Grid *g, size_t &count, size_t &expectedCount, size
         bool disagree = false;
         g->GetUserCoordinates(ijk, coords);
         for (size_t dim = 0; dim < dims.size(); dim++) {
-            if (! Wasp::NearlyEqual((*itr)[dim], coords[dim])) { disagree = true; }
+            if (!Wasp::NearlyEqual((*itr)[dim], coords[dim])) { disagree = true; }
         }
         if (disagree) { disagreements++; }
 
@@ -317,7 +315,7 @@ bool RunTest(Grid *grid)
     double rms;
     size_t numMissingValues;
     size_t disagreements;
-	double t0 = Wasp::GetTime();
+    double t0 = Wasp::GetTime();
 
     if (CompareIndexToCoords(grid, rms, numMissingValues, disagreements) == false) {
         cerr << "       *** Error reported in " << grid->GetType() << " grid***" << endl;
@@ -326,12 +324,11 @@ bool RunTest(Grid *grid)
 
     if (grid->GetInterpolationOrder() == 0) {
         cout << "  nearestNeighbor: " << endl;
-	}
-    else {
+    } else {
         cout << "  linear:          " << endl;
-	}
+    }
 
-	double time = Wasp::GetTime() - t0;
+    double time = Wasp::GetTime() - t0;
 
     PrintStats(rms, numMissingValues, disagreements, time);
 
@@ -524,7 +521,7 @@ VAPoR::UnstructuredGrid2D *MakeUnstructuredGrid2D(const vector<size_t> &dims, co
     long                       vertexOffset = 0;
     long                       faceOffset = 0;
 
-    const int * faceOnFace = NULL;
+    const int *faceOnFace = NULL;
 
     std::vector<float *> xCoordBlocks = AllocateBlocksType<float>(bs1d, dims1d);
     std::vector<float *> yCoordBlocks = AllocateBlocksType<float>(bs1d, dims1d);
@@ -537,107 +534,98 @@ VAPoR::UnstructuredGrid2D *MakeUnstructuredGrid2D(const vector<size_t> &dims, co
             vertexOnFace[0][face + 1] = j * (dims[0]) + i + 1;
             vertexOnFace[0][face + 2] = (j + 1) * (dims[0]) + i;
 
-			face += maxVertexPerFace;
+            face += maxVertexPerFace;
 
             vertexOnFace[0][face + 0] = j * (dims[0]) + i + 1;
             vertexOnFace[0][face + 1] = (j + 1) * (dims[0]) + i + 1;
             vertexOnFace[0][face + 2] = (j + 1) * (dims[0]) + i;
 
-			face += maxVertexPerFace;
+            face += maxVertexPerFace;
         }
     }
 
     std::vector<int *> faceOnVertex = AllocateBlocksType<int>(vector<size_t>{vertexDims[0] * maxFacePerVertex}, vector<size_t>{vertexDims[0] * maxFacePerVertex});
 
 
-	// In the diagram below the x's are nodes and the triangle faces are numbered 0 to 7
-	//
-	// The faces connected to the center node (x) are 6,5,4,1,2,3.
-	// The faces connected to the bottom, left node (x) are 0
-	// The faces connected to the bottom, right node (x) are 3,2
-	//
-	//  x---x---x	
-	//  |4\5|6\7|
-	//  x---x---x
-	//	|0\1|2\3|
-	//  x---x---x	
-	//
+    // In the diagram below the x's are nodes and the triangle faces are numbered 0 to 7
+    //
+    // The faces connected to the center node (x) are 6,5,4,1,2,3.
+    // The faces connected to the bottom, left node (x) are 0
+    // The faces connected to the bottom, right node (x) are 3,2
+    //
+    //  x---x---x
+    //  |4\5|6\7|
+    //  x---x---x
+    //	|0\1|2\3|
+    //  x---x---x
+    //
     int vertex = 0;
     for (long j = 0; j < dims[1]; j++) {
+        int leftMostFaceTop = (j * (dims[0] - 1)) * 2;
+        int rightMostFaceTop = leftMostFaceTop + 2 * (dims[0] - 1) - 1;
 
-		int leftMostFaceTop = (j*(dims[0]-1)) * 2;
-		int rightMostFaceTop = leftMostFaceTop + 2*(dims[0]-1)-1;
-
-		int leftMostFaceBot = ((j-1)*(dims[0]-1)) * 2;
-		int rightMostFaceBot = leftMostFaceBot + 2*(dims[0]-1)-1;
+        int leftMostFaceBot = ((j - 1) * (dims[0] - 1)) * 2;
+        int rightMostFaceBot = leftMostFaceBot + 2 * (dims[0] - 1) - 1;
 
         for (long i = 0; i < dims[0]; i++, vertex++) {
+            // Initialize to missing faces
+            //
+            int face_i = 0;
+            for (face_i = 0; face_i < maxFacePerVertex; face_i++) { faceOnVertex[0][(vertex * maxFacePerVertex) + face_i] = -1; }
 
-			// Initialize to missing faces
-			//
-			int face_i = 0;
-			for (face_i=0; face_i<maxFacePerVertex; face_i++) {
-				faceOnVertex[0][(vertex * maxFacePerVertex) + face_i] = -1;
-			}
+            // No top of triangles for last row of nodes
+            //
+            face_i = 0;
+            if (j < (dims[1] - 1)) {
+                int face = ((j) * ((int)dims[0] - 1) * 2) + (2 * i);
 
-			// No top of triangles for last row of nodes
-			//
-			face_i = 0;
-			if (j < (dims[1]-1)) {
-				int face = ((j) * ((int) dims[0]-1) * 2) + (2 * i);
+                // top row of triangles - iterate in CC order
+                //
+                for (int ii = 0; ii < 3; ii++, face--) {
+                    if (face < leftMostFaceTop || face > rightMostFaceTop) continue;
+                    faceOnVertex[0][(vertex * maxFacePerVertex) + face_i] = face;
+                    face_i++;
+                }
+            }
 
-				// top row of triangles - iterate in CC order
-				//
-				for (int ii=0; ii<3; ii++, face--) {
-					if (face < leftMostFaceTop || face > rightMostFaceTop) continue;
-					faceOnVertex[0][(vertex * maxFacePerVertex) + face_i] = face;
-					face_i++;
-				}
-			}
+            // No bottom row of triangles for first row of nodes
+            //
+            if (j > 0) {
+                int face = ((j - 1) * ((int)dims[0] - 1) * 2) + (2 * i) - 1;
 
-			// No bottom row of triangles for first row of nodes
-			//
-			if (j > 0 ) {
-				int face = ((j-1) * ((int) dims[0]-1) * 2) + (2 * i) - 1;
-
-				// bottom row of triangles - iterate in CC order
-				//
-				for (int ii=0; ii<3; ii++, face++) {
-					if (face < leftMostFaceBot || face > rightMostFaceBot) continue;
-					faceOnVertex[0][(vertex * maxFacePerVertex) + face_i] = face;
-					face_i++;
-				}
-			}
+                // bottom row of triangles - iterate in CC order
+                //
+                for (int ii = 0; ii < 3; ii++, face++) {
+                    if (face < leftMostFaceBot || face > rightMostFaceBot) continue;
+                    faceOnVertex[0][(vertex * maxFacePerVertex) + face_i] = face;
+                    face_i++;
+                }
+            }
         }
     }
 
-    UnstructuredGridCoordless xug(
-		vertexDims, faceDims, edgeDims, bs1d, xCoordBlocks, 2, vertexOnFace[0], faceOnVertex[0], 
-		faceOnFace, location, maxVertexPerFace, maxFacePerVertex, vertexOffset, faceOffset);
-
-    UnstructuredGridCoordless yug(
-		vertexDims, faceDims, edgeDims, bs1d, yCoordBlocks, 2, vertexOnFace[0], faceOnVertex[0], faceOnFace, location, maxVertexPerFace, maxFacePerVertex, vertexOffset,
+    UnstructuredGridCoordless xug(vertexDims, faceDims, edgeDims, bs1d, xCoordBlocks, 2, vertexOnFace[0], faceOnVertex[0], faceOnFace, location, maxVertexPerFace, maxFacePerVertex, vertexOffset,
                                   faceOffset);
 
-	float deltaX = 1.0 / (dims[0] - 1);
-	float deltaY = 1.0 / (dims[1] - 1);
+    UnstructuredGridCoordless yug(vertexDims, faceDims, edgeDims, bs1d, yCoordBlocks, 2, vertexOnFace[0], faceOnVertex[0], faceOnFace, location, maxVertexPerFace, maxFacePerVertex, vertexOffset,
+                                  faceOffset);
+
+    float deltaX = 1.0 / (dims[0] - 1);
+    float deltaY = 1.0 / (dims[1] - 1);
     for (long j = 0; j < dims[1]; j++) {
-
         for (long i = 0; i < dims[0]; i++) {
+            Size_tArr3 indices = {j * dims[0] + i, 0, 0};
 
-			Size_tArr3 indices = {j*dims[0]+i, 0,0};
+            xug.SetValue(indices, i * deltaX);
+            yug.SetValue(indices, j * deltaY);
+        }
+    }
 
-			xug.SetValue(indices, i * deltaX);
-			yug.SetValue(indices, j * deltaY);
+    UnstructuredGridCoordless zug;
 
-	}
-	}
-
-	UnstructuredGridCoordless zug;
-
-    vector<float *> blocks = AllocateBlocks(bs1d, dims1d);
-    UnstructuredGrid2D *g = new UnstructuredGrid2D(vertexDims, faceDims, edgeDims, bs1d, blocks, vertexOnFace[0], faceOnVertex[0], faceOnFace, location, maxVertexPerFace, maxFacePerVertex, vertexOffset,
-                                                   faceOffset, xug, yug, zug, nullptr);
+    vector<float *>     blocks = AllocateBlocks(bs1d, dims1d);
+    UnstructuredGrid2D *g = new UnstructuredGrid2D(vertexDims, faceDims, edgeDims, bs1d, blocks, vertexOnFace[0], faceOnVertex[0], faceOnFace, location, maxVertexPerFace, maxFacePerVertex,
+                                                   vertexOffset, faceOffset, xug, yug, zug, nullptr);
 
     return g;
 }

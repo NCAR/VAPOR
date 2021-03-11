@@ -141,7 +141,7 @@ COMMON_API bool BinarySearchRange(const std::vector<double> &sorted, double x, s
 //! Floating point comparison for near equality.
 //!
 //! Perform a floating point comparison to see if two values are nearly equal;
-//! 
+//!
 //! For values close to zero the comparison is made directly againt
 //! \p abs_th.
 //!
@@ -151,10 +151,6 @@ COMMON_API bool BinarySearchRange(const std::vector<double> &sorted, double x, s
 //! See https://stackoverflow.com/questions/4915462/how-should-i-do-floating-point-comparison
 //
 //
-COMMON_API bool NearlyEqual(
-	float a, float b, 
-	float epsilon = std::numeric_limits<float>::epsilon(),
-	float abs_th = std::numeric_limits<float>::epsilon()
-);
+COMMON_API bool NearlyEqual(float a, float b, float epsilon = std::numeric_limits<float>::epsilon(), float abs_th = std::numeric_limits<float>::epsilon());
 
 };    // namespace Wasp

@@ -211,7 +211,7 @@ bool Wasp::BinarySearchRange(const vector<double> &sorted, double x, size_t &i)
     return (true);
 }
 
-#ifdef	DEPRECATED
+#ifdef DEPRECATED
 //
 // Remove after release 3.5
 //
@@ -239,18 +239,15 @@ bool Wasp::NearlyEqual(float a, float b, float epsilon)
 
 #endif
 
-bool Wasp::NearlyEqual(
-  float a, float b,
-  float epsilon,
-  float abs_th
-) {
-  VAssert(std::numeric_limits<float>::epsilon() <= epsilon);
-  VAssert(epsilon < 1.f);
+bool Wasp::NearlyEqual(float a, float b, float epsilon, float abs_th)
+{
+    VAssert(std::numeric_limits<float>::epsilon() <= epsilon);
+    VAssert(epsilon < 1.f);
 
-  if (a == b) return true;
+    if (a == b) return true;
 
-  auto diff = std::abs(a-b);
-  auto norm = std::min((std::abs(a) + std::abs(b)), std::numeric_limits<float>::max());
+    auto diff = std::abs(a - b);
+    auto norm = std::min((std::abs(a) + std::abs(b)), std::numeric_limits<float>::max());
 
-  return diff < std::max(abs_th, epsilon * norm);
+    return diff < std::max(abs_th, epsilon * norm);
 }
