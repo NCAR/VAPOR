@@ -369,7 +369,6 @@ void RenderHolder::_deleteRenderer()
 
 void RenderHolder::_activeRendererChanged(int row, int col)
 {
-    std::cout << "RH _activeRendererChanged " << row << " " << col << std::endl;
     _currentRow = row;
     GUIStateParams *p = _getStateParams();
     string          activeViz = p->GetActiveVizName();
