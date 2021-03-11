@@ -95,14 +95,12 @@ private:
 
     // Undo/redo actions
     //
-    QAction *      _navigationAction;
     QAction *      _editUndoAction;
     QAction *      _editRedoAction;
     QLineEdit *    _timeStepEdit;
     QIntValidator *_timeStepEditValidator;
 
     QComboBox *_alignViewCombo;
-    QComboBox *_modeCombo;
     QMenuBar * _main_Menubar;
     QMenu *    _File;
     QMenu *    _Edit;
@@ -111,7 +109,6 @@ private:
     QMenu *    _helpMenu;
     QMenu *    _developerMenu;
 
-    QToolBar *_modeToolBar;
     QToolBar *_vizToolBar;
     QToolBar *_animationToolBar;
 
@@ -164,7 +161,6 @@ private:
 
     // Toolbars:
     //
-    QActionGroup *_mouseModeActions;
     QAction *     _tileAction;
     QAction *     _cascadeAction;
     QAction *     _homeAction;
@@ -235,15 +231,6 @@ private:
         _pauseAction->setChecked(true);
     }
 
-    int addMode(QString &text, QIcon &icon)
-    {
-        _modeCombo->addItem(icon, text);
-        return (_modeCombo->count() - 1);
-    }
-
-    //! Insert all the mouse modes into the modeCombo.
-    void addMouseModes();
-    void setMouseMode(int newMode) { _modeCombo->setCurrentIndex(newMode); }
     void showCitationReminder();
 
     void stopAnimCapture(string vizName)
@@ -300,7 +287,6 @@ private:
     void         _createDeveloperMenu();
     void         createMenus();
     void         hookupSignals();
-    void         _createModeToolBar();
     void         _createAnimationToolBar();
     void         _createVizToolBar();
     void         createToolBars();
@@ -326,7 +312,6 @@ private:
 private slots:
     void _plotClosed();
     void _statsClosed();
-    void _pythonClosed();
     void sessionOpen(QString qfileName = "", bool loadDatasets = true);
     void fileSave();
     void fileSaveAs();
@@ -359,7 +344,6 @@ private slots:
     void _setTimeStep();
 
     void launchWebDocs() const;
-    void modeChange(int);
     void setInteractiveRefLevel(int);
     void loadStartingPrefs();
 

@@ -13,7 +13,7 @@ VolumeIsoEventRouter::VolumeIsoEventRouter(QWidget *parent, ControlExec *ce) : R
 {
     // clang-format off
 
-    AddSubtab("Variables", new PGroup({
+    AddVariablesSubtab(new PGroup({
         new PSection("Variable Selection", {
             new PScalarVariableSelector,
             new PColorMapVariableSelector
@@ -21,7 +21,7 @@ VolumeIsoEventRouter::VolumeIsoEventRouter(QWidget *parent, ControlExec *ce) : R
         new PFidelitySection
     }));
     
-    AddSubtab("Appearance", new PGroup({
+    AddAppearanceSubtab(new PGroup({
         new PTFEditor(RenderParams::_variableNameTag, {PTFEditor::Histogram, PTFEditor::Opacity, PTFEditor::IsoValues}),
         new PSection("Rendering Method", {
             new PStringDropdownHLI<VIP>("Raytracing Algorithm", VIP::GetAlgorithmNames(VIP::Type::Iso), &VIP::GetAlgorithm, &VIP::SetAlgorithmByUser),
@@ -50,8 +50,8 @@ VolumeIsoEventRouter::VolumeIsoEventRouter(QWidget *parent, ControlExec *ce) : R
         })
     }));
     
-    AddSubtab("Geometry", new PGeometrySubtab);
-    AddSubtab("Annotation", new PAnnotationColorbarWidget);
+    AddGeometrySubtab(new PGeometrySubtab);
+    AddAnnotationSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on
 }

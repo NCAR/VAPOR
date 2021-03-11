@@ -13,7 +13,7 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : Rende
 {
     // clang-format off
 
-    AddSubtab("Variables", new PGroup({
+    AddVariablesSubtab(new PGroup({
         new PSection("Variable Selection", {
             new PScalarVariableSelector,
             new PHeightVariableSelector,
@@ -21,7 +21,7 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : Rende
         new PFidelitySection
     }));
     
-    AddSubtab("Appearance", new PGroup({
+    AddAppearanceSubtab(new PGroup({
         new PTFEditor(RenderParams::_variableNameTag, {
             PTFEditor::Default,
             PTFEditor::RegularIsoArray
@@ -34,8 +34,8 @@ ContourEventRouter::ContourEventRouter(QWidget *parent, ControlExec *ce) : Rende
         }),
     }));
     
-    AddSubtab("Geometry", new PGeometrySubtab);
-    AddSubtab("Annotation", new PAnnotationColorbarWidget);
+    AddGeometrySubtab(new PGeometrySubtab);
+    AddAnnotationSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on
 }
