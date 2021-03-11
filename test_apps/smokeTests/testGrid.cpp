@@ -103,7 +103,7 @@ struct opt_t {
     OptionParser::Boolean_T  help;
 } opt;
 
-OptionParser::OptDescRec_T set_opts[] = {{"grids", 1, "Regular:Stretched:Layered:Curvilinear", "Colon delimited list of grids to test"},
+OptionParser::OptDescRec_T set_opts[] = {{"grids", 1, "Regular:Stretched:Layered:Curvilinear:Unstructured2D", "Colon delimited list of grids to test"},
                                          {"arrangements", 1, "Constant:Ramp:RampOnAxis:Triangle",
                                           "Colon delimited list of "
                                           "data arrangements to test synthetic grids with"},
@@ -188,6 +188,7 @@ int main(int argc, char **argv)
     int stretchedRC = 0;
     int layeredRC = 0;
     int curvilinearRC = 0;
+    int unstructured2DRC = 0;
 
     // Test Regular Grid
     if (std::find(opt.grids.begin(), opt.grids.end(), "Regular") != opt.grids.end()) {
@@ -219,6 +220,13 @@ int main(int argc, char **argv)
         delete curvilinearGrid;
     }
 
+    // Test Unstructured Grid 2D
+    if (std::find(opt.grids.begin(), opt.grids.end(), "Unstructured2D") != opt.grids.end()) {
+        UnstructuredGrid2D *g = MakeUnstructuredGrid2D(opt.dims, opt.bs, minu, maxu);
+        unstructured2DRC = RunTests(g, opt.arrangements, opt.minValue, opt.maxValue);
+        delete g;
+    }
+
     if (regularRC == false) {
         cerr << "Errors occurred while testing Grid::RegularGrid." << endl;
         rc = EXIT_FAILURE;
@@ -233,6 +241,10 @@ int main(int argc, char **argv)
     }
     if (curvilinearRC == false) {
         cerr << "Errors occurred while testing Grid::CurvilinearGrid." << endl;
+        rc = EXIT_FAILURE;
+    }
+    if (unstructured2DRC == false) {
+        cerr << "Errors occurred while testing Grid::UnstructuredGrid2D." << endl;
         rc = EXIT_FAILURE;
     }
 
