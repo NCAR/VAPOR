@@ -133,6 +133,7 @@ public:
     int SaveSettings() const;
 
     static const string _winSizeLockTag;
+    static const string _sessionAutoSaveEnabledTag;
 
 private:
     static const string _classType;
@@ -160,7 +161,6 @@ private:
     static const string _changesPerAutoSaveTag;
     static const string _autoSaveFileLocationTag;
     static const string _defaultAutoSaveFileTag;
-    static const string _sessionAutoSaveEnabledTag;
     static const string _fontFileTag;
     static const string _fontSizeTag;
     static const string _dontShowIntelDriverWarningTag;
