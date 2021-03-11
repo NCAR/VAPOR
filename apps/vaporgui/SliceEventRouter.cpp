@@ -21,13 +21,17 @@ SliceEventRouter::SliceEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
     AddAppearanceSubtab(new PGroup({
         new PTFEditor,
         new PSection("Slice", {
-            new POrientationSelector,
-            new PSliceSampleLocationSelector,
             (new PDoubleSliderEdit(SliceParams::_sampleRateTag, "N Samples"))->SetRange(32, 2000)
         })
     }));
     
-    AddGeometrySubtab(new PGeometrySubtab);
+    AddGeometrySubtab(new PGroup({
+        new PSection("Slice", {
+            new POrientationSelector,
+            new PSliceSampleLocationSelector,
+        }),
+        new PGeometrySubtab,
+    }));
     AddAnnotationSubtab(new PAnnotationColorbarWidget);
 
     // clang-format on
