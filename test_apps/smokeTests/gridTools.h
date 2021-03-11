@@ -35,7 +35,7 @@ bool TestConstCoordItr(const VAPoR::Grid *g, size_t &count, size_t &expectedCoun
 
 void PrintGridIteratorResults(std::string &gridType, std::string itrType, size_t count, size_t expectedCount, size_t disagreements, double time);
 
-void PrintStats(double rms, size_t numMissingValues, size_t disagreements);
+void PrintStats(double rms, size_t numMissingValues, size_t disagreements, double time);
 
 bool RunTest(VAPoR::Grid *grid);
 

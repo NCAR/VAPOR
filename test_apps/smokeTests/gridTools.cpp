@@ -302,11 +302,12 @@ bool TestConstCoordItr(const Grid *g, size_t &count, size_t &expectedCount, size
     return rc;
 }
 
-void PrintStats(double rms, size_t numMissingValues, size_t disagreements)
+void PrintStats(double rms, size_t numMissingValues, size_t disagreements, double time)
 {
     cout << "    RMS error:                                           " << rms << endl;
     cout << "    Missing value count:                                 " << numMissingValues << endl;
     cout << "    GetValueAtIndex() vs GetValue() disagreement count:  " << disagreements << endl;
+    cout << "    Time:                                                " << time << endl;
     cout << endl;
 }
 
@@ -316,17 +317,23 @@ bool RunTest(Grid *grid)
     double rms;
     size_t numMissingValues;
     size_t disagreements;
+	double t0 = Wasp::GetTime();
 
     if (CompareIndexToCoords(grid, rms, numMissingValues, disagreements) == false) {
         cerr << "       *** Error reported in " << grid->GetType() << " grid***" << endl;
         rc = false;
     }
 
-    if (grid->GetInterpolationOrder() == 0)
+    if (grid->GetInterpolationOrder() == 0) {
         cout << "  nearestNeighbor: " << endl;
-    else
+	}
+    else {
         cout << "  linear:          " << endl;
-    PrintStats(rms, numMissingValues, disagreements);
+	}
+
+	double time = Wasp::GetTime() - t0;
+
+    PrintStats(rms, numMissingValues, disagreements, time);
 
     return rc;
 }
