@@ -181,7 +181,9 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
 
                 double error = abs(sampleValue - trueValue);
 
-                if (error != 0) { disagreements++; }
+				if (! Wasp::NearlyEqual(error, 0.0)) {
+					disagreements++;
+				}
 
                 if (error > peak) peak = error;
                 sum += error * error;
@@ -193,12 +195,6 @@ bool CompareIndexToCoords(VAPoR::Grid *grid,
 
     if (rms != 0 || disagreements > 0) rc = false;
     return rc;
-}
-
-bool isNotEqual(double x, double y)
-{
-    const double epsilon = 1e-5;
-    return std::abs(x - y) > epsilon * std::abs(x);
 }
 
 bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, size_t &disagreements, double &time)
@@ -228,7 +224,7 @@ bool TestConstNodeIterator(const Grid *g, size_t &count, size_t &expectedCount, 
         double itrData = g->GetValueAtIndex(itr3);
         double gridData = g->GetValueAtIndex(ijk3);
 
-        if (isNotEqual(itrData, gridData)) { disagreements++; }
+        if (! Wasp::NearlyEqual(itrData, gridData)) { disagreements++; }
 
         count++;
     }
@@ -258,7 +254,7 @@ bool TestIterator(Grid *g, size_t &count, size_t &expectedCount, size_t &disagre
     for (; itr != enditr; ++itr) {
         std::vector<size_t> ijk = Wasp::VectorizeCoords(count, dims);
 
-        if (isNotEqual(*itr, g->GetValueAtIndex(ijk))) { disagreements++; }
+        if (! Wasp::NearlyEqual(*itr, g->GetValueAtIndex(ijk))) { disagreements++; }
 
         count++;
     }
@@ -293,7 +289,7 @@ bool TestConstCoordItr(const Grid *g, size_t &count, size_t &expectedCount, size
         bool disagree = false;
         g->GetUserCoordinates(ijk, coords);
         for (size_t dim = 0; dim < dims.size(); dim++) {
-            if (isNotEqual((*itr)[dim], coords[dim])) { disagree = true; }
+            if (! Wasp::NearlyEqual((*itr)[dim], coords[dim])) { disagree = true; }
         }
         if (disagree) { disagreements++; }
 
