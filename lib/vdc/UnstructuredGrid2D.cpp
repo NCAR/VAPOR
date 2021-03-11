@@ -192,17 +192,15 @@ float UnstructuredGrid2D::GetValueNearestNeighbor(const DblArr3 &coords) const
         delete[] lambda;
         return (GetMissingValue());
     }
+    VAssert(nodes.size() == nlambda);
     VAssert(face < GetCellDimensions()[0]);
 
-    const int *ptr = _vertexOnFace + (face * _maxVertexPerFace);
-
-    int maxindx = lambda[0];
+    int maxindx = 0;
     for (int i = 1; i < nlambda; i++) {
         if (lambda[i] > lambda[maxindx]) maxindx = i;
     }
 
-    long  offset = GetNodeOffset();
-    float value = AccessIJK(*ptr + maxindx + offset);
+    float value = AccessIJK(nodes[maxindx], 0, 0);
 
     delete[] lambda;
 
