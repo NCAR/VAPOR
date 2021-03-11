@@ -59,25 +59,20 @@ PythonVariables::PythonVariables(QWidget *parent) : QDialog(parent), Ui_PythonVa
     _variableTabs->removeTab(0);
     ;
 
-    //_coordVarTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     _coordInputVarTable = new VaporTable(_coordVarTable, false, true);
     bool checkboxesEnabled = false;
     _coordInputVarTable->EnableDisableCheckboxes(checkboxesEnabled);
     _coordInputVarTable->Reinit((VaporTable::ValidatorFlags)(0), (VaporTable::MutabilityFlags)(VaporTable::IMMUTABLE), (VaporTable::HighlightFlags)(0));
 
-    //_2DVarTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     _2DInputVarTable = new VaporTable(_2DVarTable, false, true);
     _2DInputVarTable->Reinit((VaporTable::ValidatorFlags)(0), (VaporTable::MutabilityFlags)(VaporTable::IMMUTABLE), (VaporTable::HighlightFlags)(0));
 
-    //_3DVarTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     _3DInputVarTable = new VaporTable(_3DVarTable, false, true);
     _3DInputVarTable->Reinit((VaporTable::ValidatorFlags)(0), (VaporTable::MutabilityFlags)(VaporTable::IMMUTABLE), (VaporTable::HighlightFlags)(0));
 
-    //_varSummaryTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     _summaryTable = new VaporTable(_varSummaryTable);
     _summaryTable->Reinit((VaporTable::ValidatorFlags)(0), (VaporTable::MutabilityFlags)(VaporTable::IMMUTABLE), (VaporTable::HighlightFlags)(0));
 
-    //_outputVariablesTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     _outputVarTable = new VaporTable(_outputVariablesTable);
     _outputVarTable->Reinit((VaporTable::ValidatorFlags)(0), (VaporTable::MutabilityFlags)(VaporTable::IMMUTABLE), (VaporTable::HighlightFlags)(VaporTable::ROWS));
 
@@ -156,8 +151,10 @@ void PythonVariables::Update(bool internalUpdate)
     std::vector<string> outputValues;
     _makeOutputTableValues(outputValues);
     numRows = outputValues.size() / 2;
+    //std::vector<std::string> h = {"Variable Name", "Grid"};
+    //_outputVarTable->Update(numRows, numCols, outputValues, {}, h);
     _outputVarTable->Update(numRows, numCols, outputValues);
-    _outputVarTable->StretchToColumn(1);
+    //_outputVarTable->StretchToColumn(1);
 
     _coordInputVarTable->blockSignals(false);
     _2DInputVarTable->blockSignals(false);

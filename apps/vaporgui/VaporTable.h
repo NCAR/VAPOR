@@ -133,6 +133,8 @@ private:
 
     void resizeTableHeight();
 
+    void _correctImmutableCellText();
+
     int           _activeRow;
     int           _activeCol;
     int           _stretchColumn;

@@ -100,6 +100,10 @@ void VaporTable::Update(int rows, int cols, std::vector<std::string> values, std
     if (_highlightFlags & COLS) highlightActiveCol(_activeCol);
 
     resizeTableHeight();
+
+    if (_mutabilityFlags & IMMUTABLE) {
+        _correctImmutableCellText();
+    }
 }
 
 void VaporTable::SetVerticalHeaderWidth(int width) { _table->verticalHeader()->setMaximumWidth(width); }
@@ -341,6 +345,12 @@ void VaporTable::emitValueChanged()
 void VaporTable::emitReturnPressed() { emit returnPressed(); }
 
 void VaporTable::emitCellClicked2(int row, int col) {
+std::cout << "void VaporTable::emitCellClicked2(int row, int col) {" << std::endl;
+_activeRow = row;
+if (_highlightFlags & ROWS) { 
+    std::cout << "highlighting " << row << " " << col << std::endl;  
+    highlightActiveRow(_activeRow); 
+}
     emit cellClicked( row, col );
 }
 
@@ -399,10 +409,10 @@ void VaporTable::setHorizontalHeader(std::vector<std::string> header)
     if ( _stretchColumn != -1 ) {
         _table->horizontalScrollBar()->setEnabled(false);
         _table->resizeColumnsToContents();
-        headerView->setSectionResizeMode(2, QHeaderView::Stretch);
+        headerView->setSectionResizeMode(_stretchColumn, QHeaderView::Stretch);
     }
     else {
-        headerView->setSectionResizeMode(QHeaderView::Stretch);
+        headerView->setSectionResizeMode(1, QHeaderView::Stretch);
     }
 
     if ( _hideColumn != -1 )
@@ -574,6 +584,21 @@ void VaporTable::GetValues(std::vector<double> &vec)
     }
 }
 
+void VaporTable::_correctImmutableCellText()
+{
+    for (int i = 0; i < _table->rowCount(); i++) {
+        if ( i == _activeRow ) continue;
+        for (int j = 0; j < _table->columnCount(); j++) {
+            if ( j == _activeCol ) continue;
+            QWidget *  cell = _table->cellWidget(i, j);
+            QBrush b( QColor("black") );
+            QBrush w( QColor("white") );
+            _table->item(i,j)->setForeground( b );
+            _table->item(i,j)->setBackground( w );
+        }
+    }
+}
+
 void VaporTable::highlightActiveRow(int row)
 {
     if (row < 0) return;
@@ -581,14 +606,14 @@ void VaporTable::highlightActiveRow(int row)
     for (int i = 0; i < _table->rowCount(); i++) {
         for (int j = 0; j < _table->columnCount(); j++) {
             QWidget *  cell = _table->cellWidget(i, j);
-            QLineEdit *le = qobject_cast<QLineEdit *>(cell);
+            /*QLineEdit *le = qobject_cast<QLineEdit *>(cell);
             if (le) {
                 if (i == row)
                     le->setStyleSheet("QLineEdit " + selectionColor);
                 else
                     le->setStyleSheet("QLineEdit " + normalColor);
             //} else if (cell) {
-            } else {
+            } else {*/
                 if (i == row) {
                     QBrush b( QColor("blue") );
                     QBrush w( QColor("white") );
@@ -602,7 +627,7 @@ void VaporTable::highlightActiveRow(int row)
                     _table->item(i,j)->setForeground( b );
                     _table->item(i,j)->setBackground( w );
                     //cell->setStyleSheet("QWidget " + normalColor);
-                }
+                //}
             }
         }
     }
