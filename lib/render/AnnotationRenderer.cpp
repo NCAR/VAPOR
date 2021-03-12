@@ -195,12 +195,12 @@ void AnnotationRenderer::DrawText(vector<billboard> billboards)
     float txtColor[] = {1.f, 1.f, 1.f, 1.f};
     float bgColor[] = {0.f, 0.f, 0.f, 0.f};
     float coords[] = {67.5f, 31.6f, 0.f};
-    
+
     auto size = _glManager->GetViewportSize();
 
     for (int i = 0; i < billboards.size(); i++) {
         string text = billboards[i].text;
-        
+
         if (billboards[i].x == 0 && billboards[i].y == 0) {
             coords[0] = billboards[i].xn * size.x;
             coords[1] = billboards[i].yn * size.y;

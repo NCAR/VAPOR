@@ -80,8 +80,8 @@ private:
         string text;
         int    x;
         int    y;
-        float xn;
-        float yn;
+        float  xn;
+        float  yn;
         int    size;
         float  color[3];
     };
