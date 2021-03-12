@@ -93,11 +93,11 @@ public:
     void SetAxisFontSize(int size);
     int  GetAxisFontSize();
 
-    int  GetTimeLLX() const;
-    void SetTimeLLX(int llx);
+    double  GetTimeLLX() const;
+    void SetTimeLLX(double llx);
 
-    int  GetTimeLLY() const;
-    void SetTimeLLY(int lly);
+    double  GetTimeLLY() const;
+    void SetTimeLLY(double lly);
 
     std::vector<double>       GetTimeColor() const;
     template<typename T> void GetTimeColor(T color[]) const { m_getColor(color, _timeColorTag); };

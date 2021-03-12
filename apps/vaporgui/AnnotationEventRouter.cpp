@@ -759,13 +759,13 @@ void AnnotationEventRouter::drawTimeStep(string myString)
     if (myString == "") { myString = "Timestep: " + std::to_string(GetCurrentTimeStep()); }
 
     AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    int               x = aParams->GetTimeLLX();
-    int               y = aParams->GetTimeLLY();
+    float             x = aParams->GetTimeLLX();
+    float             y = aParams->GetTimeLLY();
     int               size = aParams->GetTimeSize();
     float             color[] = {0., 0., 0.};
     aParams->GetTimeColor(color);
 
-    _controlExec->DrawText(myString, x, y, size, color, 1);
+    _controlExec->DrawTextNormalizedCoords(myString, x, y, size, color, 1);
 }
 
 void AnnotationEventRouter::drawTimeUser()

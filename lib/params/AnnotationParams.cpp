@@ -184,13 +184,13 @@ double AnnotationParams::GetAxisArrowXPos() const { return GetValueDouble(AxisAr
 
 double AnnotationParams::GetAxisArrowYPos() const { return GetValueDouble(AxisArrowYPosTag, .05); }
 
-int AnnotationParams::GetTimeLLX() const { return (int)GetValueDouble(_timeLLXTag, 10); }
+double AnnotationParams::GetTimeLLX() const { return GetValueDouble(_timeLLXTag, 0.01); }
 
-void AnnotationParams::SetTimeLLX(int llx) { SetValueDouble(_timeLLXTag, "Timestep llx coordinate", llx); }
+void AnnotationParams::SetTimeLLX(double llx) { SetValueDouble(_timeLLXTag, "Timestep llx coordinate", llx); }
 
-int AnnotationParams::GetTimeLLY() const { return (int)GetValueDouble(_timeLLYTag, 10); }
+double AnnotationParams::GetTimeLLY() const { return GetValueDouble(_timeLLYTag, 0.01); }
 
-void AnnotationParams::SetTimeLLY(int lly) { SetValueDouble(_timeLLYTag, "Timestep lly coordinate", lly); }
+void AnnotationParams::SetTimeLLY(double lly) { SetValueDouble(_timeLLYTag, "Timestep lly coordinate", lly); }
 
 std::vector<double> AnnotationParams::GetTimeColor() const
 {
