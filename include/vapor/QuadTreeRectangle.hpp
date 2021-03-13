@@ -303,8 +303,8 @@ private:
         static size_t quadrant(std::vector<node_t> &nodes, size_t nidx, uint32_t n)
         {
             const node_t &node = nodes[nidx];
+			VAssert(node._child0 < nodes.size());
             switch (n & 0x03) {
-                assert(node._child0 < nodes.size());
             case 0: return node._child0 + 0;
             case 1: return node._child0 + 1;
             case 2: return node._child0 + 2;
