@@ -223,7 +223,7 @@ bool QuadTreeRectangleP::Insert(const Grid *grid, size_t ncells)
             for (int j = 0; j < _qtrs.size(); j++) {
                 float binRight = binLeft + bin_width;
 
-                if (i == nthreads - 1) binRight = _right;
+                if (j == _qtrs.size() - 1) binRight = _right;
 
                 if ((left <= binRight) && (right >= binLeft)) {
                     class QuadTreeRectangle<float, pType>::rectangle_t r(left, top, right, bottom);
@@ -266,6 +266,8 @@ void QuadTreeRectangleP::GetPayloadContained(float x, float y, std::vector<Size_
     float binLeft = _left;
     for (int i = 0; i < _qtrs.size(); i++) {
         float binRight = binLeft + bin_width;
+		if (i == _qtrs.size() - 1) binRight = _right;
+
         if (x >= binLeft && x <= binRight) {
             bin = i;
             break;
