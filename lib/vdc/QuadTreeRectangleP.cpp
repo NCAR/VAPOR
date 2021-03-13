@@ -266,7 +266,7 @@ void QuadTreeRectangleP::GetPayloadContained(float x, float y, std::vector<Size_
     float binLeft = _left;
     for (int i = 0; i < _qtrs.size(); i++) {
         float binRight = binLeft + bin_width;
-		if (i == _qtrs.size() - 1) binRight = _right;
+        if (i == _qtrs.size() - 1) binRight = _right;
 
         if (x >= binLeft && x <= binRight) {
             bin = i;
