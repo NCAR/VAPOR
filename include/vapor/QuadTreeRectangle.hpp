@@ -175,6 +175,8 @@ public:
             float  splitLeft = rectangle._left;
             for (int i = 0; i < n; i++) {
                 float splitRight = splitLeft + split_width;
+                if (i == (n-1)) splitRight = rectangle._right;
+
                 status &= node_t::insert(_nodes, _rootidx, rectangle_t(splitLeft, rectangle._top, splitRight, rectangle._bottom), payload, _maxDepth);
                 splitLeft = splitRight;
             }
@@ -183,12 +185,14 @@ public:
             // Vertical split
             //
             bool   status = true;
-            size_t n = (size_t)ar;
+            size_t n = (size_t) (1.0 / ar);
             float  split_width = (rectangle._bottom - rectangle._top) / (float)n;
             float  splitTop = rectangle._top;
             for (int i = 0; i < n; i++) {
                 float splitBottom = splitTop + split_width;
-                status &= node_t::insert(_nodes, _rootidx, rectangle_t(rectangle._left, splitTop, rectangle._right, splitTop), payload, _maxDepth);
+                if (i == (n-1)) splitBottom = rectangle._bottom;
+
+                status &= node_t::insert(_nodes, _rootidx, rectangle_t(rectangle._left, splitTop, rectangle._right, splitBottom), payload, _maxDepth);
                 splitTop = splitBottom;
             }
             return (status);
