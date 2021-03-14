@@ -93,6 +93,16 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
         })
     });
     layout()->addWidget(_axisArrowGroup);
+    
+    
+    _timeSlidersGroup = new PGroup({
+        new PLabel("Lower-left coordinates:"),
+        new PDoubleSliderEdit(AnnotationParams::_timeLLXTag, "X"),
+        new PDoubleSliderEdit(AnnotationParams::_timeLLYTag, "Y"),
+    });
+    auto l = (QVBoxLayout*)tab_4->layout();
+    l->insertWidget(l->indexOf(verticalLayout_9), _timeSlidersGroup);
+    verticalLayout_9->hide();
     // clang-format on
 }
 
@@ -113,8 +123,6 @@ void AnnotationEventRouter::connectAnnotationWidgets()
     connect(zTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setZTicOrientation(int)));
     connect(copyRegionButton, SIGNAL(pressed()), this, SLOT(copyRegionFromRenderer()));
     connect(_timeCombo, SIGNAL(activated(int)), this, SLOT(timeAnnotationChanged()));
-    connect(_timeLLXEdit, SIGNAL(returnPressed()), this, SLOT(timeLLXChanged()));
-    connect(_timeLLYEdit, SIGNAL(returnPressed()), this, SLOT(timeLLYChanged()));
     connect(_timeSizeEdit, SIGNAL(returnPressed()), this, SLOT(timeSizeChanged()));
     connect(_timeColorButton, SIGNAL(clicked()), this, SLOT(setTimeColor()));
 
@@ -144,6 +152,7 @@ void AnnotationEventRouter::_updateTab()
     domainFrameCheckbox->setChecked(vParams->GetUseDomainFrame());
 
     _axisArrowGroup->Update(vParams);
+    _timeSlidersGroup->Update(vParams);
 
     return;
 }
@@ -679,7 +688,6 @@ void AnnotationEventRouter::setTimeColor()
 void AnnotationEventRouter::updateTimePanel()
 {
     updateTimeColor();
-    updateTimeCoords();
     updateTimeType();
     updateTimeSize();
     timeAnnotationChanged();
@@ -691,16 +699,6 @@ void AnnotationEventRouter::updateTimeColor()
     std::vector<double> rgb = aParams->GetTimeColor();
 
     updateColorHelper(rgb, _timeColorEdit);
-}
-
-void AnnotationEventRouter::updateTimeCoords()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    float             llx = aParams->GetTimeLLX();
-    float             lly = aParams->GetTimeLLY();
-
-    _timeLLXEdit->setText(QString::number(llx));
-    _timeLLYEdit->setText(QString::number(lly));
 }
 
 void AnnotationEventRouter::updateTimeType()
@@ -729,20 +727,6 @@ void AnnotationEventRouter::timeAnnotationChanged()
     case 2: drawTimeUser(); break;
     case 3: drawTimeStamp(); break;
     }
-}
-
-void AnnotationEventRouter::timeLLXChanged()
-{
-    float             llx = _timeLLXEdit->text().toFloat();
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetTimeLLX(llx);
-}
-
-void AnnotationEventRouter::timeLLYChanged()
-{
-    float             lly = _timeLLYEdit->text().toFloat();
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetTimeLLY(lly);
 }
 
 void AnnotationEventRouter::timeSizeChanged()

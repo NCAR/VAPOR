@@ -130,6 +130,7 @@ public:
 private:
     ParamsContainer *_axisAnnotations;
 
+public:
     static const string _domainColorTag;
     static const string _domainFrameTag;
     static const string _regionFrameTag;
@@ -161,6 +162,8 @@ private:
     static const string _timeSizeTag;
 
     static const string _projStringTag;
+    
+private:
 
     void _init();
 

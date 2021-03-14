@@ -112,6 +112,8 @@ void AnnotationParams::_init()
     SetValueDouble(AxisArrowSizeTag, "Initializing AxisArrowSizeTag", .2);
     SetValueDouble(AxisArrowXPosTag, "Initializing AxisArrowXPosTag", .05);
     SetValueDouble(AxisArrowYPosTag, "Initializing AxisArrowYPosTag", .05);
+    SetValueDouble(_timeLLXTag, "", 0.01);
+    SetValueDouble(_timeLLYTag, "", 0.01);
 }
 
 void AnnotationParams::_getColor(vector<double> &color, string tag) const
