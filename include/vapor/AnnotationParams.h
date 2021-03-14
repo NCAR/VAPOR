@@ -162,9 +162,8 @@ public:
     static const string _timeSizeTag;
 
     static const string _projStringTag;
-    
-private:
 
+private:
     void _init();
 
     template<typename T> void m_getColor(T color[3], string tag) const
