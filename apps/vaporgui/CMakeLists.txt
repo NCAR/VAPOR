@@ -239,6 +239,8 @@ set (SRCS
 	PMultiVarSelector.h
     PConstantColorWidget.cpp
     PConstantColorWidget.h
+    PCornerSelector.cpp
+    PCornerSelector.h
     RenderEventRouterGUI.cpp
     RenderEventRouterGUI.h
 
