@@ -241,6 +241,8 @@ set (SRCS
     PConstantColorWidget.h
     PCornerSelector.cpp
     PCornerSelector.h
+    RenderEventRouterGUI.cpp
+    RenderEventRouterGUI.h
 
 	# Need to include all files that request .ui files
 	Statistics.h

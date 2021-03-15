@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RenderEventRouter.h"
+#include "RenderEventRouterGUI.h"
 #include <vapor/FlowRenderer.h>
 
 class PIntegerSliderEdit;
@@ -16,6 +16,8 @@ class FlowEventRouter : public RenderEventRouterGUI {
     PIntegerSliderEdit *_pathlineInjectionSlider;
 
 public:
+    static const std::string SeedingTabName;
+
     FlowEventRouter(QWidget *parent, VAPoR::ControlExec *ce);
     static string GetClassType() { return VAPoR::FlowRenderer::GetClassType(); }
     string        GetType() const { return GetClassType(); }
@@ -27,8 +29,4 @@ protected:
     string _getDescription() const;
     string _getSmallIconImagePath() const { return "Flow_small.png"; }
     string _getIconImagePath() const { return "Flow.png"; }
-
-private:
-    void tabChanged(int i);
-    void syncOpenTabWithGUIStateParams();
 };

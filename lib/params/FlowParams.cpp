@@ -77,6 +77,10 @@ FlowParams::FlowParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave) :
     SetValueDouble(PhongDiffuseTag, "", 0.8);
     SetValueDouble(PhongSpecularTag, "", 0);
     SetValueDouble(PhongShininessTag, "", 2);
+
+    // Give the random bias variable the same as color mapping variable.
+    auto colorvar = GetColorMapVariableName();
+    SetValueString(_rakeBiasVariable, "which variable to bias with", colorvar);
 }
 
 FlowParams::FlowParams(DataMgr *dataManager, ParamsBase::StateSave *stateSave, XmlNode *node) : RenderParams(dataManager, stateSave, node, 3 /* max dim */)
@@ -311,9 +315,9 @@ std::string FlowParams::GetRakeBiasVariable() const
 
 void FlowParams::SetRakeBiasVariable(const std::string &varname) { SetValueString(_rakeBiasVariable, "which variable to bias with", varname); }
 
-float FlowParams::GetRakeBiasStrength() const { return float(GetValueDouble(_rakeBiasStrength, 0.0f)); }
+long FlowParams::GetRakeBiasStrength() const { return (GetValueLong(_rakeBiasStrength, 0)); }
 
-void FlowParams::SetRakeBiasStrength(float strength) { SetValueDouble(_rakeBiasStrength, "bias strength", strength); }
+void FlowParams::SetRakeBiasStrength(long strength) { SetValueLong(_rakeBiasStrength, "bias strength", strength); }
 
 int FlowParams::GetPastNumOfTimeSteps() const
 {

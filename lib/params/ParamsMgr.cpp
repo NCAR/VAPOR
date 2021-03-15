@@ -1165,13 +1165,14 @@ void ParamsMgr::PMgrStateSave::Save(const XmlNode *node, string description)
     vector<string> pathvec = node->GetPathVec();
     if ((!pathvec.size()) || (pathvec[0] != _rootTag)) { return; }
 
-    const XmlNode *topNode = NULL;
-    string         s;
-    topNode = GetTopUndo(s);
-    if (topNode && (*topNode == *_rootNode)) {
-        // Don't save tree if no changes
-        //
-        return;
+    if (GetUndoEnabled()) {
+        const XmlNode *topNode = NULL;
+        string         s;
+        topNode = GetTopUndo(s);
+        if (topNode && (*topNode == *_rootNode)) {
+            // Don't save tree if no changes
+            return;
+        }
     }
 
     if (!_groups.empty()) { return; }
