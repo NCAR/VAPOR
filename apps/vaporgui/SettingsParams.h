@@ -45,6 +45,8 @@ public:
     SettingsParams(const SettingsParams &rhs);
     SettingsParams &operator=(const SettingsParams &rhs);
 
+    void Init();
+
     ~SettingsParams();
 
     int  GetNumThreads() const;
@@ -61,7 +63,11 @@ public:
     void SetWinSizeLock(bool val);
     bool GetWinSizeLock() const;
     void SetWinSize(size_t width, size_t height);
+    void SetWinWidth(int width);
+    void SetWinHeight(int height);
     void GetWinSize(size_t &width, size_t &height) const;
+    int  GetWinWidth() const;
+    int  GetWinHeight() const;
 
     bool GetAutoStretchEnabled() const;
     void SetAutoStretchEnabled(bool val);
@@ -126,6 +132,11 @@ public:
 
     int SaveSettings() const;
 
+    static const string _winSizeLockTag;
+    static const string _sessionAutoSaveEnabledTag;
+
+    std::string GetSettingsPath() const;
+
 private:
     static const string _classType;
     static const string _shortName;
@@ -134,7 +145,6 @@ private:
     static const string _texSizeTag;
     static const string _texSizeEnableTag;
     static const string _winSizeTag;
-    static const string _winSizeLockTag;
     static const string _currentPrefsPathTag;
     static const string _sessionDirTag;
     static const string _defaultSessionDirTag;
@@ -153,12 +163,11 @@ private:
     static const string _changesPerAutoSaveTag;
     static const string _autoSaveFileLocationTag;
     static const string _defaultAutoSaveFileTag;
-    static const string _sessionAutoSaveEnabledTag;
     static const string _fontFileTag;
     static const string _fontSizeTag;
     static const string _dontShowIntelDriverWarningTag;
+    static const string _settingsNeedsWriteTag;
 
-    void _init();
     bool _loadFromSettingsFile();
 
     string _settingsPath;

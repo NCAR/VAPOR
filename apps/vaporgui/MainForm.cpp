@@ -82,6 +82,7 @@
 #include "FileOperationChecker.h"
 #include "windowsUtils.h"
 #include "ParamsWidgetDemo.h"
+#include "AppSettingsMenu.h"
 
 #include <QProgressDialog>
 #include <QProgressBar>
@@ -167,6 +168,7 @@ void MainForm::_initMembers()
 
     _editUndoAction = NULL;
     _editRedoAction = NULL;
+    _appSettingsAction = NULL;
     _timeStepEdit = NULL;
     _timeStepEditValidator = NULL;
 
@@ -229,6 +231,7 @@ void MainForm::_initMembers()
     _interactiveRefinementSpin = NULL;
     _tabDockWindow = NULL;
 
+    _appSettingsMenu = nullptr;
     _stats = NULL;
     _plot = NULL;
     _pythonVariables = NULL;
@@ -902,10 +905,14 @@ void MainForm::_createEditMenu()
     _editRedoAction->setToolTip("Redo the last undone session state change");
     _editRedoAction->setEnabled(false);
 
+
     _Edit = menuBar()->addMenu(tr("Edit"));
     _Edit->addAction(_editUndoAction);
     _Edit->addAction(_editRedoAction);
+
     _Edit->addSeparator();
+    _appSettingsMenu = new AppSettingsMenu(this);
+    _Edit->addAction("Preferences", _appSettingsMenu, &QDialog::open);
 
     connect(_editUndoAction, SIGNAL(triggered()), this, SLOT(undo()));
     connect(_editRedoAction, SIGNAL(triggered()), this, SLOT(redo()));
@@ -1808,6 +1815,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         if (_stats) { _stats->Update(); }
         if (_plot) { _plot->Update(); }
         if (_pythonVariables) { _pythonVariables->Update(); }
+        if (_appSettingsMenu) { _appSettingsMenu->Update(GetSettingsParams()); }
 
         setUpdatesEnabled(false);
         _tabMgr->Update();

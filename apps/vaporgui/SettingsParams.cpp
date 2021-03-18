@@ -37,7 +37,6 @@ using namespace VAPoR;
 using namespace Wasp;
 
 const string SettingsParams::_classType = "SettingsParams";
-// const string SettingsParams::_classType = "Settings";
 
 const string SettingsParams::_shortName = "Settings";
 const string SettingsParams::_cacheMBTag = "CacheMBs";
@@ -68,6 +67,7 @@ const string SettingsParams::_sessionAutoSaveEnabledTag = "AutoSaveEnabled";
 const string SettingsParams::_fontFileTag = "FontFile";
 const string SettingsParams::_fontSizeTag = "FontSize";
 const string SettingsParams::_dontShowIntelDriverWarningTag = "DontShowIntelDriverWarning";
+const string SettingsParams::_settingsNeedsWriteTag = "SettingsNeedsWrite";
 
 //
 // Register class with object factory!!!
@@ -91,7 +91,7 @@ SettingsParams::SettingsParams(ParamsBase::StateSave *ssave, bool loadFromFile) 
         if (ok) return;
     }
 
-    _init();
+    Init();
 }
 
 SettingsParams::SettingsParams(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node)
@@ -112,7 +112,7 @@ SettingsParams::SettingsParams(ParamsBase::StateSave *ssave, XmlNode *node) : Pa
         if (ok)
             return;
         else
-            _init();
+            Init();
     }
 }
 
@@ -121,7 +121,7 @@ SettingsParams::SettingsParams(const SettingsParams &rhs) : ParamsBase(new Param
     _settingsPath = QDir::homePath().toStdString();
     _settingsPath += QDir::separator().toLatin1();
     _settingsPath += SettingsFile;
-    _init();
+    Init();
 }
 
 SettingsParams &SettingsParams::operator=(const SettingsParams &rhs)
@@ -135,7 +135,7 @@ SettingsParams &SettingsParams::operator=(const SettingsParams &rhs)
     return (*this);
 }
 
-void SettingsParams::Reinit() { _init(); }
+void SettingsParams::Reinit() { Init(); }
 
 SettingsParams::~SettingsParams() {}
 
@@ -191,7 +191,7 @@ void SettingsParams::SetJpegQuality(int quality)
 
 bool SettingsParams::GetSessionAutoSaveEnabled() const
 {
-    double enabled = GetValueDouble(_sessionAutoSaveEnabledTag, 1.f);
+    double enabled = GetValueLong(_sessionAutoSaveEnabledTag, 1);
     if (enabled > 0)
         return true;
     else
@@ -200,15 +200,13 @@ bool SettingsParams::GetSessionAutoSaveEnabled() const
 
 void SettingsParams::SetSessionAutoSaveEnabled(bool enabled)
 {
-    double val = 0.f;
-    if (enabled) val = 1.f;
     string description = "Enable/disable auto save of session files";
-    SetValueDouble(_sessionAutoSaveEnabledTag, description, val);
+    SetValueLong(_sessionAutoSaveEnabledTag, description, (long)enabled);
 }
 
 int SettingsParams::GetChangesPerAutoSave() const
 {
-    int changes = (int)GetValueDouble(_changesPerAutoSaveTag, 5.f);
+    int changes = (int)GetValueLong(_changesPerAutoSaveTag, 5);
     return changes;
 }
 
@@ -216,7 +214,7 @@ void SettingsParams::SetChangesPerAutoSave(int count)
 {
     if (count < 0) count = 5;
     string description = "User changes before auto saving session file";
-    SetValueDouble(_changesPerAutoSaveTag, description, count);
+    SetValueLong(_changesPerAutoSaveTag, description, count);
 }
 
 string SettingsParams::GetAutoSaveSessionFile() const
@@ -432,8 +430,19 @@ int SettingsParams::SaveSettings() const
 }
 
 // Reset settings settings to initial state
-void SettingsParams::_init()
+void SettingsParams::Init()
 {
+    SetSessionAutoSaveEnabled(true);
+    SetChangesPerAutoSave(5);
+    SetAutoSaveSessionFile("~/VaporAutoSave.vs3");
+
+    SetAutoStretchEnabled(true);
+    SetNumThreads(4);
+    SetCacheMB(8000);
+    SetWinSizeLock(false);
+    SetWinWidth(1920);
+    SetWinHeight(1024);
+
     SetDefaultSessionDir(string("~"));
     SetDefaultMetadataDir(string("~"));
     SetDefaultFlowDir(string("~"));
@@ -443,6 +452,34 @@ void SettingsParams::_init()
 
     string python = GetPythonDir();
     SetDefaultPythonDir(string(python));
+}
+
+void SettingsParams::SetWinWidth(int width)
+{
+    size_t dummyWidth, height;
+    GetWinSize(dummyWidth, height);
+    SetWinSize(width, height);
+}
+
+void SettingsParams::SetWinHeight(int height)
+{
+    size_t width, dummyHeight;
+    GetWinSize(width, dummyHeight);
+    SetWinSize(width, height);
+}
+
+int SettingsParams::GetWinWidth() const
+{
+    size_t width, height;
+    GetWinSize(width, height);
+    return width;
+}
+
+int SettingsParams::GetWinHeight() const
+{
+    size_t width, height;
+    GetWinSize(width, height);
+    return height;
 }
 
 void SettingsParams::SetWinSize(size_t width, size_t height)
@@ -467,3 +504,5 @@ void SettingsParams::GetWinSize(size_t &width, size_t &height) const
     width = val[0];
     height = val[1];
 }
+
+std::string SettingsParams::GetSettingsPath() const { return _settingsPath; }
