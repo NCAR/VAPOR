@@ -215,6 +215,7 @@ RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce, const vector<QWidge
     _vaporTable->StretchToColumn(2);
     _vaporTable->HideColumn(1);
     _currentRow = 0;
+    tableWidget->setWordWrap(false);
 
     _widgetNames = widgetNames;
     for (int i = 0; i < widgets.size(); i++) { stackedWidget->addWidget(widgets[i]); }
