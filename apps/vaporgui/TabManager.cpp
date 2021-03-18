@@ -35,7 +35,7 @@
 using namespace VAPoR;
 
 const string TabManager::_renderersTabName = "Renderers";
-const string TabManager::_navigationTabName = "Navigation";
+const string TabManager::_navigationTabName = "Scene";
 const string TabManager::_settingsTabName = "Settings";
 
 TabManager::TabManager(QWidget *parent, ControlExec *ce) : QTabWidget(parent)
