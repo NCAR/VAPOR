@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RenderEventRouter.h"
+#include "RenderEventRouterGUI.h"
 #include "vapor/ContourRenderer.h"
 
 class PDoubleSliderEdit;

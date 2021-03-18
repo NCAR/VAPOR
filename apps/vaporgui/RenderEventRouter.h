@@ -235,21 +235,6 @@ private:
     string _instName;
 };
 
-#include <QTabWidget>
-
-class Updateable;
-class UWidget;
-
-class RenderEventRouterGUI : public RenderEventRouter, public QTabWidget {
-    vector<Updateable *> _subtabs;
-
-public:
-    using RenderEventRouter::RenderEventRouter;
-    QWidget *AddSubtab(string title, UWidget *subtab);
-
-protected:
-    virtual void _updateTab() override;
-};
 
 //////////////////////////////////////////////////////////////////////////
 //

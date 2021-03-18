@@ -38,6 +38,8 @@
 #include "AnimationParams.h"
 #include "qdatetime.h"
 #include "ErrorReporter.h"
+#include "RenderEventRouterGUI.h"
+#include "FlowEventRouter.h"
 #include "images/vapor-icon-32.xpm"
 #include "VizWin.h"
 #include "Core3_2_context.h"
@@ -524,9 +526,12 @@ string VizWin::_getCurrentMouseMode() const
 {
     ParamsMgr *      paramsMgr = _controlExec->GetParamsMgr();
     GUIStateParams * guiP = (GUIStateParams *)paramsMgr->GetParams(GUIStateParams::GetClassType());
-    MouseModeParams *p = guiP->GetMouseModeParams();
-    string           modeName = p->GetCurrentMouseMode();
-    return modeName;
+
+    string activeTab = guiP->ActiveTab();
+    if (activeTab == RenderEventRouterGUI::GeometryTabName || activeTab == FlowEventRouter::SeedingTabName)
+        return MouseModeParams::GetRegionModeName();
+    else
+        return MouseModeParams::GetNavigateModeName();
 }
 
 void VizWin::_setNewExtents()
@@ -786,13 +791,14 @@ void VizWin::updateManip(bool initialize)
         GUIStateParams *gp = (GUIStateParams *)_controlExec->GetParamsMgr()->GetParams(GUIStateParams::GetClassType());
 
         if (rParams->GetName() == FlowParams::GetClassType()) {
-            if (gp->IsFlowSeedTabActive()) _manipFlowSeedFlag = true;
+            if (gp->ActiveTab() == FlowEventRouter::SeedingTabName) _manipFlowSeedFlag = true;
         }
         if (_manipFlowSeedFlag) {
             FlowParams *fp = dynamic_cast<FlowParams *>(rParams);
             VAssert(fp);
 
             // Sam's box format: xmin, xmax, ymin, ymax, zmin, zmax
+            // Why doesn't Sam's code use the standard box class?
             vector<float> b = fp->GetRake();
 
             // If the flow renderer is 2d, add z extents or the Manip will break

@@ -17,3 +17,9 @@ PSection *PSection::Add(PWidget *pw)
     _pgroup->Add(pw);
     return this;
 }
+
+PSection *PSection::Add(const PGroup::List &widgets)
+{
+    _pgroup->AddM(widgets);
+    return this;
+}

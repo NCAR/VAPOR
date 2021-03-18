@@ -1,4 +1,5 @@
 #include "VComboBox.h"
+#include <QStandardItemModel>
 
 VComboBox::VComboBox(const std::vector<std::string> &values) : VHBoxWidget()
 {
@@ -41,6 +42,15 @@ void VComboBox::SetValue(const std::string &value)
     QString qValue = QString::fromStdString(value);
     int     index = _combo->findText(qValue);
     if (index >= 0) SetIndex(index);
+}
+
+void VComboBox::SetItemEnabled(int index, bool enabled)
+{
+    QStandardItemModel *model = dynamic_cast<QStandardItemModel *>(_combo->model());
+    assert(model);
+    if (!model) return;
+
+    model->item(index)->setEnabled(enabled);
 }
 
 int VComboBox::GetCurrentIndex() const { return _combo->currentIndex(); }

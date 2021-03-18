@@ -72,7 +72,7 @@ private:
     long               _cache_randNumOfSeeds = 5;
     int                _cache_seedInjInterval = 0;
     int                _cache_pastNumOfTimeSteps = 0;
-    float              _cache_rakeBiasStrength = 0.0f;
+    long               _cache_rakeBiasStrength = 0;
     double             _cache_deltaT = 0.05;
     FlowSeedMode       _cache_seedGenMode = FlowSeedMode::UNIFORM;
     FlowDir            _cache_flowDir = FlowDir::FORWARD;
