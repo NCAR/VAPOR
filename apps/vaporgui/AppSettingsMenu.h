@@ -16,7 +16,7 @@ class PSection;
 //! \brief Menu for global application preferences
 //! \author Scott Pearse
 
-class AppSettingsMenu : public QDialog, public Updateable{
+class AppSettingsMenu : public QDialog, public Updateable {
     Q_OBJECT
 
 public:

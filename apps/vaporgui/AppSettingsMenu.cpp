@@ -48,11 +48,12 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(
     setFocusPolicy(Qt::ClickFocus);
 }
 
-void AppSettingsMenu::Update(VAPoR::ParamsBase *p, VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr) {
-    SettingsParams* sp = dynamic_cast<SettingsParams*>(p);
-    _settings->Update(sp); 
+void AppSettingsMenu::Update(VAPoR::ParamsBase *p, VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr)
+{
+    SettingsParams *sp = dynamic_cast<SettingsParams *>(p);
+    _settings->Update(sp);
     int rc = sp->SaveSettings();
-    if ( rc < 0 ) {
+    if (rc < 0) {
         std::string settingsPath = sp->GetSettingsPath();
         MSG_ERR("Unable to write to settings file " + settingsPath);
     }
