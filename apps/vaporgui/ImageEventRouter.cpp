@@ -12,14 +12,14 @@ ImageEventRouter::ImageEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
 {
     // clang-format off
 
-    AddSubtab("Variables", new PGroup({
+    AddVariablesSubtab(new PGroup({
         new PSection("Variable Selection", {
             new PHeightVariableSelector
         }),
         new PFidelitySection
     }));
     
-    AddSubtab("Appearance", new PSection("Image", {
+    AddAppearanceSubtab(new PSection("Image", {
         new PCheckbox(IP::_isGeoRefTag, "Geo Reference"),
         new PCheckbox(IP::_ignoreTransparencyTag, "Ingore Transparency"),
         (new PDoubleSliderEdit(IP::_constantOpacityTag, "Opacity"))->EnableDynamicUpdate(),
@@ -27,7 +27,7 @@ ImageEventRouter::ImageEventRouter(QWidget *parent, ControlExec *ce) : RenderEve
         new PTMSLODInput()
     }));
     
-    AddSubtab("Geometry", new PGeometrySubtab);
+    AddGeometrySubtab(new PGeometrySubtab);
 
     // clang-format on
 }
