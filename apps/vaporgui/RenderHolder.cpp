@@ -212,7 +212,10 @@ RenderHolder::RenderHolder(QWidget *parent, ControlExec *ce, const vector<QWidge
     _vaporTable = new VaporTable(tableWidget, false, true);
     _vaporTable->Reinit((VaporTable::ValidatorFlags)(0), (VaporTable::MutabilityFlags)(VaporTable::IMMUTABLE), (VaporTable::HighlightFlags)(VaporTable::ROWS));
     _vaporTable->ShowToolTips(true);
+    _vaporTable->StretchToColumn(2);
+    _vaporTable->HideColumn(1);
     _currentRow = 0;
+    tableWidget->setWordWrap(false);
 
     _widgetNames = widgetNames;
     for (int i = 0; i < widgets.size(); i++) { stackedWidget->addWidget(widgets[i]); }
