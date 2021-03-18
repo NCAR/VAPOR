@@ -41,7 +41,7 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(
     setLayout(new QVBoxLayout);
     layout()->addWidget(_settings);
 
-    VPushButton *close = new VPushButton("Save and Close");
+    VPushButton *close = new VPushButton("Close");
     connect(close, &VPushButton::ButtonClicked, this, &QDialog::accept);
     layout()->addWidget(close);
 
