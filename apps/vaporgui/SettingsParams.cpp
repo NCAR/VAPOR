@@ -37,7 +37,6 @@ using namespace VAPoR;
 using namespace Wasp;
 
 const string SettingsParams::_classType = "SettingsParams";
-// const string SettingsParams::_classType = "Settings";
 
 const string SettingsParams::_shortName = "Settings";
 const string SettingsParams::_cacheMBTag = "CacheMBs";
@@ -151,7 +150,6 @@ void SettingsParams::SetCacheMB(long val)
 {
     if (val < 0) val = 8000;
     SetValueLong(_cacheMBTag, "Set cache size", val);
-    SaveSettings();
 }
 
 long SettingsParams::GetTextureSize() const
@@ -174,7 +172,6 @@ bool SettingsParams::GetTexSizeEnable() const { return (0 != GetValueLong(_texSi
 void SettingsParams::SetWinSizeLock(bool val)
 {
     SetValueLong(_winSizeLockTag, "toggle lock window size", (long)val);
-    SaveSettings();
 }
 
 bool SettingsParams::GetWinSizeLock() const { return (0 != GetValueLong(_winSizeLockTag, (long)false)); }
@@ -184,7 +181,6 @@ bool SettingsParams::GetAutoStretchEnabled() const { return (0 != GetValueLong(_
 void SettingsParams::SetAutoStretchEnabled(bool val)
 {
     SetValueLong(_autoStretchTag, "Enable Auto Stretch", val);
-    SaveSettings();
 }
 
 int SettingsParams::GetJpegQuality() const
@@ -212,7 +208,6 @@ void SettingsParams::SetSessionAutoSaveEnabled(bool enabled)
 {
     string description = "Enable/disable auto save of session files";
     SetValueLong(_sessionAutoSaveEnabledTag, description, (long)enabled);
-    SaveSettings();
 }
 
 int SettingsParams::GetChangesPerAutoSave() const
@@ -226,7 +221,6 @@ void SettingsParams::SetChangesPerAutoSave(int count)
     if (count < 0) count = 5;
     string description = "User changes before auto saving session file";
     SetValueLong(_changesPerAutoSaveTag, description, count);
-    SaveSettings();
 }
 
 string SettingsParams::GetAutoSaveSessionFile() const
@@ -242,7 +236,6 @@ void SettingsParams::SetAutoSaveSessionFile(string file)
 {
     string description = "Session auto-save file location";
     SetValueString(_autoSaveFileLocationTag, description, file);
-    SaveSettings();
 }
 
 string SettingsParams::GetSessionDir() const
@@ -256,7 +249,6 @@ string SettingsParams::GetSessionDir() const
 void SettingsParams::SetSessionDir(string name)
 {
     SetValueString(_sessionDirTag, "Set session directory", name);
-    SaveSettings();
 }
 
 string SettingsParams::GetDefaultSessionDir() const
@@ -289,7 +281,6 @@ string SettingsParams::GetMetadataDir() const
 void SettingsParams::SetMetadataDir(string dir)
 {
     SetValueString(_metadataDirTag, "set metadata directory", dir);
-    SaveSettings();
 }
 
 string SettingsParams::GetDefaultMetadataDir() const
@@ -384,7 +375,6 @@ int SettingsParams::GetNumThreads() const
 void SettingsParams::SetNumThreads(int val)
 {
     SetValueLong(_numThreadsTag, "Number of execution threads", val);
-    SaveSettings();
 }
 
 int SettingsParams::GetFontSize() const { return 24; }
@@ -477,8 +467,6 @@ void SettingsParams::Init()
 
     string python = GetPythonDir();
     SetDefaultPythonDir(string(python));
-
-    SaveSettings();
 }
 
 void SettingsParams::SetWinWidth(int width)
@@ -486,7 +474,6 @@ void SettingsParams::SetWinWidth(int width)
     size_t dummyWidth, height;
     GetWinSize(dummyWidth, height);
     SetWinSize(width, height);
-    SaveSettings();
 }
 
 void SettingsParams::SetWinHeight(int height)
@@ -494,10 +481,8 @@ void SettingsParams::SetWinHeight(int height)
     size_t width, dummyHeight;
     GetWinSize(width, dummyHeight);
     SetWinSize(width, height);
-    SaveSettings();
 }
 
-// size_t SettingsParams::GetWinWidth() const {
 int SettingsParams::GetWinWidth() const
 {
     size_t width, height;
@@ -505,7 +490,6 @@ int SettingsParams::GetWinWidth() const
     return width;
 }
 
-// size_t SettingsParams::GetWinHeight() const {
 int SettingsParams::GetWinHeight() const
 {
     size_t width, height;
@@ -534,4 +518,8 @@ void SettingsParams::GetWinSize(size_t &width, size_t &height) const
     if (val[1] < 400) val[1] = defaultv[1];
     width = val[0];
     height = val[1];
+}
+
+std::string SettingsParams::GetSettingsPath() const {
+    return _settingsPath;
 }

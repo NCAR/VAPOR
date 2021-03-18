@@ -135,6 +135,8 @@ public:
     static const string _winSizeLockTag;
     static const string _sessionAutoSaveEnabledTag;
 
+    std::string GetSettingsPath() const;
+
 private:
     static const string _classType;
     static const string _shortName;

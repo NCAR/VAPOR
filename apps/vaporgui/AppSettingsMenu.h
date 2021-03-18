@@ -2,6 +2,7 @@
 
 #include <QDialog>
 #include "PWidget.h"
+#include "Updateable.h"
 #include "PFileSelectorHLI.h"
 #include "VFileSelector.h"
 
@@ -15,12 +16,12 @@ class PSection;
 //! \brief Menu for global application preferences
 //! \author Scott Pearse
 
-class AppSettingsMenu : public QDialog {
+class AppSettingsMenu : public QDialog, public Updateable{
     Q_OBJECT
 
 public:
     AppSettingsMenu(QWidget *parent);
-    void Update(SettingsParams *sp);
+    virtual void Update(VAPoR::ParamsBase *p, VAPoR::ParamsMgr *paramsMgr = nullptr, VAPoR::DataMgr *dataMgr = nullptr);
 
 private:
     PGroup *_settings;

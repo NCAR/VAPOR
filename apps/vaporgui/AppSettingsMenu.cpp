@@ -7,8 +7,9 @@
 #include "PIntegerInputHLI.h"
 #include "PCheckboxHLI.h"
 #include "VPushButton.h"
+#include "ErrorReporter.h"
 
-AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent)
+AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable()
 {
     _settings = new PGroup({
         new PSection("Automatic Session Recovery",
@@ -40,11 +41,19 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent)
     setLayout(new QVBoxLayout);
     layout()->addWidget(_settings);
 
-    VPushButton *close = new VPushButton("Close");
+    VPushButton *close = new VPushButton("Save and Close");
     connect(close, &VPushButton::ButtonClicked, this, &QDialog::accept);
     layout()->addWidget(close);
 
     setFocusPolicy(Qt::ClickFocus);
 }
 
-void AppSettingsMenu::Update(SettingsParams *sp) { _settings->Update(sp); }
+void AppSettingsMenu::Update(VAPoR::ParamsBase *p, VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr) {
+    SettingsParams* sp = dynamic_cast<SettingsParams*>(p);
+    _settings->Update(sp); 
+    int rc = sp->SaveSettings();
+    if ( rc < 0 ) {
+        std::string settingsPath = sp->GetSettingsPath();
+        MSG_ERR("Unable to write to settings file " + settingsPath);
+    }
+}
