@@ -1963,7 +1963,8 @@ void MainForm::enableWidgets(bool onOff)
     //	_stepBackAction->setEnabled(onOff);
     _interactiveRefinementSpin->setEnabled(onOff);
     _alignViewCombo->setEnabled(onOff);
-    _Edit->setEnabled(onOff);
+    _editUndoAction->setEnabled(onOff);
+    _editRedoAction->setEnabled(onOff);
     _windowSelector->setEnabled(onOff);
     _tabMgr->setEnabled(onOff);
     _statsAction->setEnabled(onOff);
