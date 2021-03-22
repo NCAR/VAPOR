@@ -60,15 +60,6 @@ public:
     void SetTexSizeEnable(bool val);
     bool GetTexSizeEnable() const;
 
-    void SetWinSizeLock(bool val);
-    bool GetWinSizeLock() const;
-    void SetWinSize(size_t width, size_t height);
-    void SetWinWidth(int width);
-    void SetWinHeight(int height);
-    void GetWinSize(size_t &width, size_t &height) const;
-    int  GetWinWidth() const;
-    int  GetWinHeight() const;
-
     bool GetAutoStretchEnabled() const;
     void SetAutoStretchEnabled(bool val);
 
