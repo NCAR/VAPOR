@@ -123,7 +123,6 @@ public:
 
     int SaveSettings() const;
 
-    static const string _winSizeLockTag;
     static const string _sessionAutoSaveEnabledTag;
 
     std::string GetSettingsPath() const;
@@ -135,7 +134,6 @@ private:
     static const string _cacheMBTag;
     static const string _texSizeTag;
     static const string _texSizeEnableTag;
-    static const string _winSizeTag;
     static const string _currentPrefsPathTag;
     static const string _sessionDirTag;
     static const string _defaultSessionDirTag;
