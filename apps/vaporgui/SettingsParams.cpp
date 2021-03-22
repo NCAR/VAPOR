@@ -435,7 +435,7 @@ void SettingsParams::Init()
     SetSessionAutoSaveEnabled(true);
     SetChangesPerAutoSave(5);
     std::string homeDir = QDir::homePath().toStdString();
-    SetAutoSaveSessionFile( homeDir + "/VaporAutoSave.vs3");
+    SetAutoSaveSessionFile(homeDir + "/VaporAutoSave.vs3");
 
     SetAutoStretchEnabled(true);
     SetNumThreads(4);
