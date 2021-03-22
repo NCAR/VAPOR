@@ -435,7 +435,7 @@ void SettingsParams::Init()
     SetSessionAutoSaveEnabled(true);
     SetChangesPerAutoSave(5);
     std::string homeDir = QDir::homePath().toStdString();
-    SetAutoSaveSessionFile(homeDir + "/VaporAutoSave.vs3");
+    SetAutoSaveSessionFile( homeDir + "/VaporAutoSave.vs3" );
 
     SetAutoStretchEnabled(true);
     SetNumThreads(4);
@@ -444,9 +444,9 @@ void SettingsParams::Init()
     SetWinWidth(1920);
     SetWinHeight(1024);
 
-    SetDefaultSessionDir(string(homeDir));
-    SetDefaultMetadataDir(string(homeDir));
-    SetDefaultFlowDir(string(homeDir));
+    SetDefaultSessionDir( string(homeDir ) );
+    SetDefaultMetadataDir( string(homeDir ) );
+    SetDefaultFlowDir( string( homeDir ) );
 
     string palettes = GetSharePath("palettes");
     SetDefaultTFDir(string(palettes));
