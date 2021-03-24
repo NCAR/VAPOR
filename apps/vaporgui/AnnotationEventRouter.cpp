@@ -229,7 +229,7 @@ void AnnotationEventRouter::updateCopyRegionCombo()
 
     ParamsMgr *              paramsMgr = _controlExec->GetParamsMgr();
     std::vector<std::string> visNames = paramsMgr->GetVisualizerNames();
-    DataStatus *        dataStatus = _controlExec->GetDataStatus();
+    DataStatus *             dataStatus = _controlExec->GetDataStatus();
 
     for (int i = 0; i < visNames.size(); i++) {
         string visName = visNames[i];
