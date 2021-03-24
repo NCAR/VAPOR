@@ -1432,9 +1432,7 @@ void MainForm::loadDataHelper(string dataSetName, const vector<string> &files, s
 
     // Generate data set name
     //
-    if (dataSetName.empty()) {
-        dataSetName = _getDataSetName(myFiles[0], existsAction);
-    }
+    if (dataSetName.empty()) { dataSetName = _getDataSetName(myFiles[0], existsAction); }
     if (dataSetName.empty()) return;
 
     vector<string> options = {"-project_to_pcs", "-vertical_xform"};
