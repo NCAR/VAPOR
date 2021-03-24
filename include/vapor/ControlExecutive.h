@@ -8,6 +8,7 @@
 
 #include <vapor/ParamsMgr.h>
 #include <vapor/GLManager.h>
+#include <vapor/DataStatus.h>
 
 using namespace std;
 namespace VAPoR {
@@ -329,7 +330,7 @@ public:
     //!
     //! \sa OpenData(), CloseData()
     //
-    std::vector<string> GetDataNames() const { return (_paramsMgr->GetDataMgrNames()); }
+    std::vector<string> GetDataNames() const { return (_dataStatus->GetDataMgrNames()); }
 
     //! Obtain the current DataStatus
     //! Needed to store in GUI when the DataStatus changes.
