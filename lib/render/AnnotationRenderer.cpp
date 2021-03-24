@@ -422,6 +422,9 @@ void AnnotationRenderer::_calculateDomainExtents(std::vector<double> &domainExte
 
     vector<string> names = m_paramsMgr->GetDataMgrNames();
     for (int i = 0; i < names.size(); i++) {
+        if (!m_dataStatus->GetDataMgr(names[i]))
+            continue;
+        
         std::vector<double> dataMgrMinExts, dataMgrMaxExts;
 
         m_dataStatus->GetActiveExtents(m_paramsMgr, m_winName, names[i], _currentTimestep, dataMgrMinExts, dataMgrMaxExts);

@@ -156,7 +156,12 @@ void CalcEngineMgr::_sync()
     VAssert(dParams);
 
     for (int i = 0; i < dataSetNames.size(); i++) {
-        PyEngine *pyEngine = new PyEngine(_dataStatus->GetDataMgr(dataSetNames[i]));
+        auto dataMgr = _dataStatus->GetDataMgr(dataSetNames[i]);
+        
+        if (!dataMgr)
+            continue;
+        
+        PyEngine *pyEngine = new PyEngine(dataMgr);
         int       rc = pyEngine->Initialize();
         VAssert(rc >= 0);
 
