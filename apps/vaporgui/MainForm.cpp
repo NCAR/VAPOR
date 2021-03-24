@@ -387,13 +387,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
     _controlExec->SetCacheSize(sP->GetCacheMB());
     _controlExec->SetNumThreads(sP->GetNumThreads());
 
-    bool lockSize = sP->GetWinSizeLock();
-    if (lockSize) {
-        size_t width, height;
-        sP->GetWinSize(width, height);
-        setFixedSize(QSize(width, height));
-    }
-
     _vizWinMgr = new VizWinMgr(this, _mdiArea, _controlExec);
 
     _tabMgr = new TabManager(this, _controlExec);

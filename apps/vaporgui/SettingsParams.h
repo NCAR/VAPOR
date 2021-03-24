@@ -60,15 +60,6 @@ public:
     void SetTexSizeEnable(bool val);
     bool GetTexSizeEnable() const;
 
-    void SetWinSizeLock(bool val);
-    bool GetWinSizeLock() const;
-    void SetWinSize(size_t width, size_t height);
-    void SetWinWidth(int width);
-    void SetWinHeight(int height);
-    void GetWinSize(size_t &width, size_t &height) const;
-    int  GetWinWidth() const;
-    int  GetWinHeight() const;
-
     bool GetAutoStretchEnabled() const;
     void SetAutoStretchEnabled(bool val);
 
@@ -132,7 +123,6 @@ public:
 
     int SaveSettings() const;
 
-    static const string _winSizeLockTag;
     static const string _sessionAutoSaveEnabledTag;
 
     std::string GetSettingsPath() const;
@@ -144,7 +134,6 @@ private:
     static const string _cacheMBTag;
     static const string _texSizeTag;
     static const string _texSizeEnableTag;
-    static const string _winSizeTag;
     static const string _currentPrefsPathTag;
     static const string _sessionDirTag;
     static const string _defaultSessionDirTag;

@@ -43,8 +43,6 @@ const string SettingsParams::_cacheMBTag = "CacheMBs";
 const string SettingsParams::_numThreadsTag = "NumThreads";
 const string SettingsParams::_texSizeTag = "TexSize";
 const string SettingsParams::_texSizeEnableTag = "TexSizeEnabled";
-const string SettingsParams::_winSizeTag = "WinSize";
-const string SettingsParams::_winSizeLockTag = "WinSizeLocked";
 const string SettingsParams::_sessionDirTag = "SessionDir";
 const string SettingsParams::_defaultSessionDirTag = "SessionDir";
 const string SettingsParams::_metadataDirTag = "MetadataDir";
@@ -168,10 +166,6 @@ void SettingsParams::SetTextureSize(long val)
 void SettingsParams::SetTexSizeEnable(bool val) { SetValueLong(_texSizeEnableTag, "toggle enable texture size", (long)val); }
 
 bool SettingsParams::GetTexSizeEnable() const { return (0 != GetValueLong(_texSizeEnableTag, (long)0)); }
-
-void SettingsParams::SetWinSizeLock(bool val) { SetValueLong(_winSizeLockTag, "toggle lock window size", (long)val); }
-
-bool SettingsParams::GetWinSizeLock() const { return (0 != GetValueLong(_winSizeLockTag, (long)false)); }
 
 bool SettingsParams::GetAutoStretchEnabled() const { return (0 != GetValueLong(_autoStretchTag, (long)true)); }
 
@@ -439,9 +433,6 @@ void SettingsParams::Init()
     SetAutoStretchEnabled(true);
     SetNumThreads(4);
     SetCacheMB(8000);
-    SetWinSizeLock(false);
-    SetWinWidth(1920);
-    SetWinHeight(1024);
 
     SetDefaultSessionDir(string("~"));
     SetDefaultMetadataDir(string("~"));
@@ -452,57 +443,6 @@ void SettingsParams::Init()
 
     string python = GetPythonDir();
     SetDefaultPythonDir(string(python));
-}
-
-void SettingsParams::SetWinWidth(int width)
-{
-    size_t dummyWidth, height;
-    GetWinSize(dummyWidth, height);
-    SetWinSize(width, height);
-}
-
-void SettingsParams::SetWinHeight(int height)
-{
-    size_t width, dummyHeight;
-    GetWinSize(width, dummyHeight);
-    SetWinSize(width, height);
-}
-
-int SettingsParams::GetWinWidth() const
-{
-    size_t width, height;
-    GetWinSize(width, height);
-    return width;
-}
-
-int SettingsParams::GetWinHeight() const
-{
-    size_t width, height;
-    GetWinSize(width, height);
-    return height;
-}
-
-void SettingsParams::SetWinSize(size_t width, size_t height)
-{
-    if (width < 400) width = 400;
-    if (height < 400) height = 400;
-
-    vector<long> val;
-    val.push_back(width);
-    val.push_back(height);
-    SetValueLongVec(_winSizeTag, "Set window size", val);
-}
-
-void SettingsParams::GetWinSize(size_t &width, size_t &height) const
-{
-    vector<long> defaultv;
-    defaultv.push_back(1280);
-    defaultv.push_back(1024);
-    vector<long> val = GetValueLongVec(_winSizeTag, defaultv);
-    if (val[0] < 400) val[0] = defaultv[0];
-    if (val[1] < 400) val[1] = defaultv[1];
-    width = val[0];
-    height = val[1];
 }
 
 std::string SettingsParams::GetSettingsPath() const { return _settingsPath; }
