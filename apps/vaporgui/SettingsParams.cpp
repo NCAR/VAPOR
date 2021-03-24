@@ -431,7 +431,7 @@ void SettingsParams::Init()
     SetAutoSaveSessionFile("~/VaporAutoSave.vs3");
 
     SetAutoStretchEnabled(true);
-    SetNumThreads(4);
+    SetNumThreads(0);
     SetCacheMB(8000);
 
     SetDefaultSessionDir(string("~"));
