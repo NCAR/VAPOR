@@ -24,7 +24,8 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(
         new PSection("Vapor's Startup Settings",
                      {
                          new PCheckboxHLI<SettingsParams>("Automatically stretch domain", &SettingsParams::GetAutoStretchEnabled, &SettingsParams::SetAutoStretchEnabled),
-                         new PIntegerInputHLI<SettingsParams>("Number of threads (0 for available num. of CPU cores)", &SettingsParams::GetNumThreads, &SettingsParams::SetNumThreads),
+                         new PCheckbox(SettingsParams::UseAllCoresTag, "Use all available cores for multithreaded tasks"),
+                         new PSubGroup({(new PIntegerInputHLI<SettingsParams>("Limit threads to", &SettingsParams::GetNumThreads, &SettingsParams::SetNumThreads))->SetRange(1, 1024)->EnableBasedOnParam(SettingsParams::UseAllCoresTag, false)}),
                          new PIntegerInputHLI<SettingsParams>("Cache size (Megabytes)", &SettingsParams::GetCacheMB, &SettingsParams::SetCacheMB),
                          new PLabel("*Vapor must be restarted for these settings to take effect"),
                      }),
