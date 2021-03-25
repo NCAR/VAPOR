@@ -281,7 +281,7 @@ private:
     bool openDataHelper(string dataSetName, string format, const vector<string> &files, const vector<string> &options = vector<string>());
 
     enum DatasetExistsAction { Prompt, AddNew, ReplaceFirst };
-    void         loadDataHelper(const std::vector<string> &files, string prompt, string filter, string format, bool multi, DatasetExistsAction existsAction = Prompt);
+    void         loadDataHelper(string dataSetName, const std::vector<string> &files, string prompt, string filter, string format, bool multi, DatasetExistsAction existsAction = Prompt);
     void         _createCaptureMenu();
     void         _createToolsMenu();
     void         _createEditMenu();

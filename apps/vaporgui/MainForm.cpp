@@ -457,7 +457,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
 
         string fmt;
         if (determineDatasetFormat(paths, &fmt)) {
-            loadDataHelper(paths, "", "", fmt, true, ReplaceFirst);
+            loadDataHelper("", paths, "", "", fmt, true, ReplaceFirst);
         } else {
             MSG_ERR("Could not determine dataset format for command line parameters");
         }
@@ -1111,7 +1111,7 @@ void MainForm::sessionOpenHelper(string fileName, bool loadDatasets)
             string         name = dataSetNames[i];
             vector<string> paths = newP->GetOpenDataSetPaths(name);
             if (std::all_of(paths.begin(), paths.end(), [](string path) { return FileUtils::Exists(path); })) {
-                loadDataHelper(paths, "", "", newP->GetOpenDataSetFormat(name), true, DatasetExistsAction::AddNew);
+                loadDataHelper(name, paths, "", "", newP->GetOpenDataSetFormat(name), true, DatasetExistsAction::AddNew);
             } else {
                 newP->RemoveOpenDateSet(name);
 
@@ -1396,7 +1396,7 @@ bool MainForm::openDataHelper(string dataSetName, string format, const vector<st
     return (true);
 }
 
-void MainForm::loadDataHelper(const vector<string> &files, string prompt, string filter, string format, bool multi, DatasetExistsAction existsAction)
+void MainForm::loadDataHelper(string dataSetName, const vector<string> &files, string prompt, string filter, string format, bool multi, DatasetExistsAction existsAction)
 {
     vector<string> myFiles = files;
 
@@ -1425,7 +1425,7 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
 
     // Generate data set name
     //
-    string dataSetName = _getDataSetName(myFiles[0], existsAction);
+    if (dataSetName.empty()) { dataSetName = _getDataSetName(myFiles[0], existsAction); }
     if (dataSetName.empty()) return;
 
     vector<string> options = {"-project_to_pcs", "-vertical_xform"};
@@ -1471,7 +1471,7 @@ void MainForm::loadData(string fileName)
     vector<string> files;
     if (!fileName.empty()) { files.push_back(fileName); }
 
-    loadDataHelper(files, "Choose the Master data File to load", "Vapor VDC files (*.nc *.vdc)", "vdc", false);
+    loadDataHelper("", files, "Choose the Master data File to load", "Vapor VDC files (*.nc *.vdc)", "vdc", false);
 
     _tabMgr->adjustSize();
     _tabDockWindow->adjustSize();
@@ -1505,19 +1505,19 @@ void MainForm::closeData(string fileName)
 void MainForm::importWRFData()
 {
     vector<string> files;
-    loadDataHelper(files, "WRF-ARW NetCDF files", "", "wrf", true);
+    loadDataHelper("", files, "WRF-ARW NetCDF files", "", "wrf", true);
 }
 
 void MainForm::importCFData()
 {
     vector<string> files;
-    loadDataHelper(files, "NetCDF CF files", "", "cf", true);
+    loadDataHelper("", files, "NetCDF CF files", "", "cf", true);
 }
 
 void MainForm::importMPASData()
 {
     vector<string> files;
-    loadDataHelper(files, "MPAS files", "", "mpas", true);
+    loadDataHelper("", files, "MPAS files", "", "mpas", true);
 }
 
 bool MainForm::doesQStringContainNonASCIICharacter(const QString &s)
