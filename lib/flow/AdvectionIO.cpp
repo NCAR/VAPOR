@@ -72,7 +72,6 @@ if(std::distance(props.cbegin(), props.cend()) != propertyNames.size())
 
                 std::fprintf(f, "\n");    // end of one line
                 step++;
-printf("%f\n", p.value);
             }
             if (step > numSteps)    // when numSteps + 1 particles are printed.
                 break;

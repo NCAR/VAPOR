@@ -87,6 +87,16 @@ auto VaporField::LockParams() -> int
     for (int i = 0; i < 3; i++) { _c_velocity_grids[i] = _getAGrid(_c_currentTS, this->VelocityNames[i]); }
     _c_scalar_grid = _getAGrid(_c_currentTS, this->ScalarName);
 
+// Debug output
+const std::array<double, 3> coords{ 2303.0, 1732.0, 747.5 };
+for( int i = 0; i < 3; i++ ) {
+    float val = _c_velocity_grids[i]->GetValue(coords);
+    printf("Vector VarName = %s, p = %p, val = %f\n", this->VelocityNames[i].c_str(), 
+                                                      _c_velocity_grids[i], val);
+}
+float val = _c_scalar_grid->GetValue(coords);
+printf("Scalar VarName = %s, p = %p, val = %f\n\n", this->ScalarName.c_str(), _c_scalar_grid, val);
+
     // Note that if the DefaultZ value is changed by the renderer after LockParams(),
     // cached grids here won't reflect the change.
     // This is due to the that DefaultZ is kept by the Renderer, but not Params.
