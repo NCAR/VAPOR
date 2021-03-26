@@ -420,7 +420,7 @@ void AnnotationRenderer::_calculateDomainExtents(std::vector<double> &domainExte
 {
     domainExtents = {NAN, NAN, NAN, NAN, NAN, NAN};
 
-    vector<string> names = m_paramsMgr->GetDataMgrNames();
+    vector<string> names = m_dataStatus->GetDataMgrNames();
     for (int i = 0; i < names.size(); i++) {
         std::vector<double> dataMgrMinExts, dataMgrMaxExts;
 
@@ -457,7 +457,7 @@ void AnnotationRenderer::InScenePaint(size_t ts)
 
     if (vfParams->GetUseDomainFrame()) drawDomainFrame(domainExtents);
 
-    vector<string> names = m_paramsMgr->GetDataMgrNames();
+    vector<string> names = m_dataStatus->GetDataMgrNames();
     Transform *    t = vpParams->GetTransform(names[0]);
     applyTransform(t);
 

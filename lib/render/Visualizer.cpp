@@ -88,7 +88,7 @@ int Visualizer::resizeGL(int wid, int ht) { return 0; }
 
 int Visualizer::_getCurrentTimestep() const
 {
-    vector<string> dataSetNames = _paramsMgr->GetDataMgrNames();
+    vector<string> dataSetNames = _dataStatus->GetDataMgrNames();
 
     bool   first = true;
     size_t min_ts = 0;
@@ -520,8 +520,8 @@ int Visualizer::_captureImage(std::string path)
     if (writer == nullptr) goto captureImageEnd;
 
     if (geoTiffOutput) {
-        VAssert(_paramsMgr->GetDataMgrNames().size());
-        string projString = _dataStatus->GetDataMgr(_paramsMgr->GetDataMgrNames()[0])->GetMapProjection();
+        VAssert(_dataStatus->GetDataMgrNames().size());
+        string projString = _dataStatus->GetDataMgr(_dataStatus->GetDataMgrNames()[0])->GetMapProjection();
 
         vector<double> dataMinExtents, dataMaxExtents;
         _dataStatus->GetActiveExtents(_paramsMgr, _winName, _getCurrentTimestep(), dataMinExtents, dataMaxExtents);

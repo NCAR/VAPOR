@@ -370,7 +370,8 @@ void NavigationEventRouter::updateTransforms()
         ViewpointParams *vParams = paramsMgr->GetViewpointParams(winNames[i]);
         if (!vParams) continue;
 
-        vector<string> names = paramsMgr->GetDataMgrNames();
+        DataStatus *   dataStatus = _controlExec->GetDataStatus();
+        vector<string> names = dataStatus->GetDataMgrNames();
 
         for (int j = 0; j < names.size(); j++) {
             Transform *t = vParams->GetTransform(names[j]);
@@ -380,7 +381,6 @@ void NavigationEventRouter::updateTransforms()
                 vector<double> minExts;
                 vector<double> maxExts;
                 vector<double> origin;
-                DataStatus *   dataStatus = _controlExec->GetDataStatus();
 
                 dataStatus->GetActiveExtents(paramsMgr, winNames[i], names[j], ts, minExts, maxExts);
 

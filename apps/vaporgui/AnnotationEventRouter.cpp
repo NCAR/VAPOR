@@ -229,6 +229,8 @@ void AnnotationEventRouter::updateCopyRegionCombo()
 
     ParamsMgr *              paramsMgr = _controlExec->GetParamsMgr();
     std::vector<std::string> visNames = paramsMgr->GetVisualizerNames();
+    DataStatus *             dataStatus = _controlExec->GetDataStatus();
+
     for (int i = 0; i < visNames.size(); i++) {
         string visName = visNames[i];
 
@@ -244,7 +246,7 @@ void AnnotationEventRouter::updateCopyRegionCombo()
         for (int j = 0; j < typeNames.size(); j++) {
             string typeName = typeNames[j];
 
-            std::vector<string> dmNames = paramsMgr->GetDataMgrNames();
+            std::vector<string> dmNames = dataStatus->GetDataMgrNames();
             for (int k = 0; k < dmNames.size(); k++) {
                 string dataSetName = dmNames[k];
                 addRendererToCombo(visName, typeName, visAbb, dataSetName);

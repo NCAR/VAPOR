@@ -281,8 +281,7 @@ void RenderHolder::_showIntelDriverWarning(const string &rendererType)
 
 void RenderHolder::_showNewRendererDialog()
 {
-    ParamsMgr *    paramsMgr = _controlExec->GetParamsMgr();
-    vector<string> dataSetNames = paramsMgr->GetDataMgrNames();
+    vector<string> dataSetNames = _controlExec->GetDataStatus()->GetDataMgrNames();
 
     _initializeNewRendererDialog(dataSetNames);
     _newRendererDialog->open();
@@ -291,7 +290,7 @@ void RenderHolder::_showNewRendererDialog()
 void RenderHolder::_newRendererDialogAccepted()
 {
     ParamsMgr *    paramsMgr = _controlExec->GetParamsMgr();
-    vector<string> dataSetNames = paramsMgr->GetDataMgrNames();
+    vector<string> dataSetNames = _controlExec->GetDataStatus()->GetDataMgrNames();
 
     string rendererType = _newRendererDialog->GetSelectedRenderer();
     _showIntelDriverWarning(rendererType);
