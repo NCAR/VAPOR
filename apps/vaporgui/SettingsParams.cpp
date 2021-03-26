@@ -67,6 +67,8 @@ const string SettingsParams::_fontSizeTag = "FontSize";
 const string SettingsParams::_dontShowIntelDriverWarningTag = "DontShowIntelDriverWarning";
 const string SettingsParams::_settingsNeedsWriteTag = "SettingsNeedsWrite";
 
+const string SettingsParams::UseAllCoresTag = "UseAllCoresTag";
+
 //
 // Register class with object factory!!!
 //
@@ -349,6 +351,7 @@ void SettingsParams::SetCurrentPrefsPath(string pth) { SetValueString(_currentPr
 
 int SettingsParams::GetNumThreads() const
 {
+    if (GetValueLong(UseAllCoresTag, true)) { return 0; }
     long val = GetValueLong(_numThreadsTag, 0);
     val = val >= 0 ? val : 0;
     return ((int)val);
@@ -431,6 +434,7 @@ void SettingsParams::Init()
     SetAutoSaveSessionFile("~/VaporAutoSave.vs3");
 
     SetAutoStretchEnabled(true);
+    SetValueLong(UseAllCoresTag, "", true);
     SetNumThreads(4);
     SetCacheMB(8000);
 
