@@ -96,6 +96,9 @@ int FlowRenderer::_outputFlowLines()
 {
     auto *params = dynamic_cast<FlowParams *>(GetActiveParams());
     assert(params != nullptr);
+if( params == nullptr ) {
+    fprintf(stderr, "failure at %s, %d\n", __FILE__, __LINE__);
+}
 
     // Retrieve additional variables that users require to sample
     const auto addiVars = params->GetFlowOutputMoreVariables();

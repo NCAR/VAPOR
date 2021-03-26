@@ -122,6 +122,8 @@ int Advection::AdvectSteps(Field *velocity, double deltaT, size_t maxSteps, ADVE
                     // Use Euler advection for this particle.
                     rv = _advectEuler(velocity, past0, dt, p1);
                     assert(rv == 0);
+if( rv != 0 )
+    fprintf(stderr, "failure at %s, %d\n", __FILE__, __LINE__);
                     s.emplace_back(p1);
                     numberOfSteps++;
                 } else {    // Case 3)

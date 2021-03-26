@@ -29,6 +29,7 @@ public:
     // Advect all particles as long as they are within spatial and temporal boundary
     // for a specified number if steps.
     int AdvectSteps(Field *velocityField, double deltaT, size_t maxSteps, ADVECTION_METHOD method = ADVECTION_METHOD::RK4);
+
     // Advect as many steps as necessary to reach a certain time: targetT.
     // Note: it only considers particles that have already passed startT.
     int AdvectTillTime(Field *velocityField, double startT, double deltaT, double targetT, ADVECTION_METHOD method = ADVECTION_METHOD::RK4);
@@ -42,8 +43,10 @@ public:
 
     // Reset all particle values to zero
     void ResetParticleValues();
+
     // Clear all existing properties of a particle
     void ClearParticleProperties();
+
     // Clear particle property with a certain name.
     // If the the specified property name does not exist, then nothing is done.
     void RemoveParticleProperty(const std::string &);

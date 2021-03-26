@@ -66,10 +66,13 @@ auto flow::OutputFlowlinesNumSteps(const Advection *adv, const char *filename, s
                 auto props = p.GetPropertyList();
                 // A quick sanity check
                 assert(std::distance(props.cbegin(), props.cend()) == propertyNames.size());
+if(std::distance(props.cbegin(), props.cend()) != propertyNames.size()) 
+    fprintf(stderr, "failure at %s, %d\n", __FILE__, __LINE__);
                 for (const auto &val : props) std::fprintf(f, ", %f", val);
 
                 std::fprintf(f, "\n");    // end of one line
                 step++;
+printf("%f\n", p.value);
             }
             if (step > numSteps)    // when numSteps + 1 particles are printed.
                 break;
