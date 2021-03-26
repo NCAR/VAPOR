@@ -128,7 +128,7 @@ public:
     std::string GetSettingsPath() const;
 
     static const string UseAllCoresTag;
-    
+
 private:
     static const string _classType;
     static const string _shortName;
