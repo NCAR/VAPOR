@@ -937,7 +937,7 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector
         return (new RegularGrid());
     }
 
-    return (DataMgr::GetVariable(ts, varname, level, lod, min_ui, max_ui));
+    return (DataMgr::GetVariable(ts, varname, level, lod, min_ui, max_ui, lock));
 }
 
 Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, bool lock, bool dataless)
