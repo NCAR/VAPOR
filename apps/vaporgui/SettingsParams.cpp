@@ -223,6 +223,14 @@ string SettingsParams::GetAutoSaveSessionFile() const
     string defaultFile = autoSaveDir + "/VaporAutoSave.vs3";
 
     string file = GetValueString(_autoSaveFileLocationTag, defaultFile);
+
+    // Replace all occurances of "~" with the user's home directory
+    size_t pos = 0;
+    while((pos = file.find("~", pos)) != std::string::npos) {
+         file.replace(pos, 1, QDir::homePath().toStdString() );
+         pos += 1;
+    }
+
     return file;
 }
 
