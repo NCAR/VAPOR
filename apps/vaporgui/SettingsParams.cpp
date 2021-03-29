@@ -144,7 +144,7 @@ void SettingsParams::_swapTildeWithHome(std::string &file) const
     size_t pos = 0;
     while ((pos = file.find("~", pos)) != std::string::npos) {
         file.replace(pos, 1, QDir::homePath().toStdString());
-        pos += 1;
+        pos += QDir::homePath().toStdString().length();
     }
 }
 

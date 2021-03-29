@@ -1930,11 +1930,9 @@ void MainForm::_performSessionAutoSave()
     if (_eventsSinceLastSave >= eventCountForAutoSave) {
         string autoSaveFile = sParams->GetAutoSaveSessionFile();
         int    rc = _paramsMgr->SaveToFile(autoSaveFile);
-        if (rc == -1) {
-            MSG_ERR("Unable to open settings file " + autoSaveFile);
-        } else if (rc < -1) {
-            MSG_ERR("Unable to write settings file " + autoSaveFile);
-        }
+        if (rc < 0) {
+            MSG_ERR();
+        } 
         _eventsSinceLastSave = 0;
     }
 }

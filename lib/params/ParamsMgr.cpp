@@ -1063,7 +1063,7 @@ int ParamsMgr::SaveToFile(string path) const
 
     if (out.bad()) {
         MyBase::SetErrMsg("Failed to write file %s : %M", path.c_str());
-        return (-2);
+        return (-1);
     }
     out.close();
 
