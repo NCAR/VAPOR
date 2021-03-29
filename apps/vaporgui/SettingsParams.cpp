@@ -226,9 +226,9 @@ string SettingsParams::GetAutoSaveSessionFile() const
 
     // Replace all occurances of "~" with the user's home directory
     size_t pos = 0;
-    while((pos = file.find("~", pos)) != std::string::npos) {
-         file.replace(pos, 1, QDir::homePath().toStdString() );
-         pos += 1;
+    while ((pos = file.find("~", pos)) != std::string::npos) {
+        file.replace(pos, 1, QDir::homePath().toStdString());
+        pos += 1;
     }
 
     return file;
