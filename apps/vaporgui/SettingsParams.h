@@ -169,6 +169,7 @@ private:
     static const string _settingsNeedsWriteTag;
 
     bool _loadFromSettingsFile();
+    void _swapTildeWithHome( std::string& file ) const;
 
     string _settingsPath;
 };

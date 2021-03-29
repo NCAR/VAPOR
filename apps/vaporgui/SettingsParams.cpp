@@ -139,6 +139,14 @@ void SettingsParams::Reinit() { Init(); }
 
 SettingsParams::~SettingsParams() {}
 
+void SettingsParams::_swapTildeWithHome( std::string& file ) const {
+    size_t pos = 0;
+    while((pos = file.find("~", pos)) != std::string::npos) {
+         file.replace(pos, 1, QDir::homePath().toStdString() );
+         pos += 1;
+    }
+}
+
 long SettingsParams::GetCacheMB() const
 {
     long val = GetValueLong(_cacheMBTag, 8000);
@@ -224,12 +232,7 @@ string SettingsParams::GetAutoSaveSessionFile() const
 
     string file = GetValueString(_autoSaveFileLocationTag, defaultFile);
 
-    // Replace all occurances of "~" with the user's home directory
-    size_t pos = 0;
-    while ((pos = file.find("~", pos)) != std::string::npos) {
-        file.replace(pos, 1, QDir::homePath().toStdString());
-        pos += 1;
-    }
+    _swapTildeWithHome( file );
 
     return file;
 }
