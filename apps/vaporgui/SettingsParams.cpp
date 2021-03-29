@@ -139,11 +139,12 @@ void SettingsParams::Reinit() { Init(); }
 
 SettingsParams::~SettingsParams() {}
 
-void SettingsParams::_swapTildeWithHome( std::string& file ) const {
+void SettingsParams::_swapTildeWithHome(std::string &file) const
+{
     size_t pos = 0;
-    while((pos = file.find("~", pos)) != std::string::npos) {
-         file.replace(pos, 1, QDir::homePath().toStdString() );
-         pos += 1;
+    while ((pos = file.find("~", pos)) != std::string::npos) {
+        file.replace(pos, 1, QDir::homePath().toStdString());
+        pos += 1;
     }
 }
 
@@ -232,7 +233,7 @@ string SettingsParams::GetAutoSaveSessionFile() const
 
     string file = GetValueString(_autoSaveFileLocationTag, defaultFile);
 
-    _swapTildeWithHome( file );
+    _swapTildeWithHome(file);
 
     return file;
 }
