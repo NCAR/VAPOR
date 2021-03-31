@@ -107,25 +107,9 @@ void BarbRenderer::_saveCacheParams()
     _cacheParams.ts = p->GetCurrentTimestep();
     _cacheParams.level = p->GetRefinementLevel();
     _cacheParams.lod = p->GetCompressionLevel();
-    //    _cacheParams.useSingleColor = p->UseSingleColor();
-    //    _cacheParams.lineThickness = p->GetLineThickness();
-    //    _cacheParams.lengthScale = p->GetLengthScale();
     _cacheParams.grid = p->GetGrid();
     _cacheParams.needToRecalc = p->GetNeedToRecalculateScales();
-    //    p->GetConstantColor(_cacheParams.constantColor);
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
-
-    //    if (_cacheParams.useSingleColor) return;
-    //
-    //    MapperFunction *tf = p->GetMapperFunc(_cacheParams.colorVarName);
-    //    _cacheParams.opacity = tf->getOpacityScale();
-    //    _cacheParams.minMapValue = tf->getMinMapValue();
-    //    _cacheParams.maxMapValue = tf->getMaxMapValue();
-    //    for (int i = 0; i < 10; i++) {
-    //        float point = _cacheParams.minMapValue + i / 10.f * (_cacheParams.maxMapValue - _cacheParams.minMapValue);
-    //        tf->rgbValue(point, _cacheParams.colorSamples[i]);
-    //        _cacheParams.alphaSamples[i] = tf->getOpacityValueData(point);
-    //    }
 }
 
 bool BarbRenderer::_isCacheDirty() const
@@ -138,9 +122,6 @@ bool BarbRenderer::_isCacheDirty() const
     if (_cacheParams.ts != p->GetCurrentTimestep()) return true;
     if (_cacheParams.level != p->GetRefinementLevel()) return true;
     if (_cacheParams.lod != p->GetCompressionLevel()) return true;
-    //    if (_cacheParams.useSingleColor != p->UseSingleColor()) return true;
-    //    if (_cacheParams.lineThickness != p->GetLineThickness()) return true;
-    //    if (_cacheParams.lengthScale != p->GetLengthScale()) return true;
     if (_cacheParams.grid != p->GetGrid()) return true;
     if (_cacheParams.needToRecalc != p->GetNeedToRecalculateScales()) return true;
 
@@ -149,27 +130,6 @@ bool BarbRenderer::_isCacheDirty() const
 
     if (_cacheParams.boxMin != min) return true;
     if (_cacheParams.boxMax != max) return true;
-
-    //    float constantColor[3];
-    //    p->GetConstantColor(constantColor);
-    //    if (memcmp(_cacheParams.constantColor, constantColor, sizeof(constantColor))) return true;
-
-    //    if (_cacheParams.useSingleColor) return false;
-    //
-    //    MapperFunction *tf = p->GetMapperFunc(_cacheParams.colorVarName);
-    //    if (_cacheParams.opacity != tf->getOpacityScale()) return true;
-    //    if (_cacheParams.minMapValue != tf->getMinMapValue()) return true;
-    //    if (_cacheParams.maxMapValue != tf->getMaxMapValue()) return true;
-    //
-    //    for (int i = 0; i < 10; i++) {
-    //        float point = _cacheParams.minMapValue + i / 10.f * (_cacheParams.maxMapValue - _cacheParams.minMapValue);
-    //        float color[3];
-    //        tf->rgbValue(point, color);
-    //        if (_cacheParams.colorSamples[i][0] != color[0]) return true;
-    //        if (_cacheParams.colorSamples[i][1] != color[1]) return true;
-    //        if (_cacheParams.colorSamples[i][2] != color[2]) return true;
-    //        if (_cacheParams.alphaSamples[i] != tf->getOpacityValueData(point)) return true;
-    //    }
 
     return false;
 }
