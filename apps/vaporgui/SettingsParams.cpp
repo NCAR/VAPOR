@@ -76,6 +76,7 @@ static ParamsRegistrar<SettingsParams> registrar(SettingsParams::GetClassType())
 
 namespace {
 string SettingsFile = ".vapor3_settings";
+const size_t defaultCacheSize = 0;
 }
 
 SettingsParams::SettingsParams(ParamsBase::StateSave *ssave, bool loadFromFile) : ParamsBase(ssave, _classType)
@@ -151,13 +152,15 @@ void SettingsParams::_swapTildeWithHome(std::string &file) const
 long SettingsParams::GetCacheMB() const
 {
     long val = GetValueLong(_cacheMBTag, 0);
-    if (val < 0) val = 0;
+    if (val < 0) val = defaultCacheSize;
+
     return (val);
 }
 
 void SettingsParams::SetCacheMB(long val)
 {
-    if (val < 0) val = 0;
+    if (val < 0) val = defaultCacheSize;
+
     SetValueLong(_cacheMBTag, "Set cache size", val);
 }
 
@@ -449,7 +452,8 @@ void SettingsParams::Init()
     SetAutoStretchEnabled(true);
     SetValueLong(UseAllCoresTag, "", true);
     SetNumThreads(4);
-    SetCacheMB(0);
+    SetCacheMB(defaultCacheSize);
+
 
     SetDefaultSessionDir(string(homeDir));
     SetDefaultMetadataDir(string(homeDir));
