@@ -72,6 +72,8 @@ private:
     //! \copydoc Renderer::_paintGL()
     virtual int _paintGL(bool fast);
 
+    int _generateBarbs();
+
     int _getVectorVarGrids(int ts, int refLevel, int lod, std::vector<double> minExts, std::vector<double> maxExts, std::vector<VAPoR::Grid *> &varData);
 
     int _getVarGrid(int ts, int refLevel, int lod, string varName, std::vector<double> minExts, std::vector<double> maxExts, std::vector<VAPoR::Grid *> &varData);
@@ -110,7 +112,7 @@ private:
 
     void _getStrides(vector<float> &strides, vector<int> &rakeGrid, vector<float> &rakeExts) const;
 
-    bool _defineBarb(const std::vector<Grid *>, float start[3], float end[3], bool doColorMapping, const float clut[1024]);
+    bool _defineBarb(const std::vector<Grid *>, float start[3], float end[3], float *value, bool doColorMapping, const float clut[1024]);
 
     void _operateOnGrid(vector<Grid *> variableData, bool drawBarb = true);
 
@@ -129,6 +131,11 @@ private:
     //! \param[in] const float endPoint[3] ending position of barb
     // void drawBarb(const float startPoint[3], const float endPoint[3]);
     void _drawBarb(const std::vector<Grid *> variableData, const float startPoint[3], bool doColorMapping, const float clut[1024]);
+
+    void _setBarbColor(float value, const float clut[1024], double crange[2]) const;
+
+    struct Barb;
+    void _drawBarb(Barb b, bool doColorMapping, const float clut[1024], double crange[2]);
 
 #ifdef DEBUG
     _printBackDiameter(const float startVertex[18]) const;
@@ -159,6 +166,15 @@ private:
     void _saveCacheParams();
 
     void _clearCache() { _cacheParams.fieldVarNames.clear(); }
+
+    struct Barb {
+        float startPoint[3];
+        float endPoint[3];
+        float value;
+        float lengthScalar;
+    };
+
+    vector<Barb> _barbCache;
 };
 
 };    // namespace VAPoR
