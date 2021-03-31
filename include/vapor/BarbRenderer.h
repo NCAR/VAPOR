@@ -71,7 +71,7 @@ private:
 
     //! \copydoc Renderer::_paintGL()
     virtual int _paintGL(bool fast);
-    
+
     int _generateBarbs();
 
     int _getVectorVarGrids(int ts, int refLevel, int lod, std::vector<double> minExts, std::vector<double> maxExts, std::vector<VAPoR::Grid *> &varData);
@@ -131,9 +131,9 @@ private:
     //! \param[in] const float endPoint[3] ending position of barb
     // void drawBarb(const float startPoint[3], const float endPoint[3]);
     void _drawBarb(const std::vector<Grid *> variableData, const float startPoint[3], bool doColorMapping, const float clut[1024]);
-    
+
     void _setBarbColor(float value, const float clut[1024], double crange[2]) const;
-    
+
     struct Barb;
     void _drawBarb(Barb b, bool doColorMapping, const float clut[1024], double crange[2]);
 
@@ -166,14 +166,14 @@ private:
     void _saveCacheParams();
 
     void _clearCache() { _cacheParams.fieldVarNames.clear(); }
-    
+
     struct Barb {
         float startPoint[3];
         float endPoint[3];
         float value;
         float lengthScalar;
     };
-    
+
     vector<Barb> _barbCache;
 };
 
