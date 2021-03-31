@@ -141,14 +141,14 @@ SettingsParams::~SettingsParams() {}
 
 long SettingsParams::GetCacheMB() const
 {
-    long val = GetValueLong(_cacheMBTag, 8000);
-    if (val < 0) val = 8000;
+    long val = GetValueLong(_cacheMBTag, 0);
+    if (val < 0) val = 0;
     return (val);
 }
 
 void SettingsParams::SetCacheMB(long val)
 {
-    if (val < 0) val = 8000;
+    if (val < 0) val = 0;
     SetValueLong(_cacheMBTag, "Set cache size", val);
 }
 
@@ -436,7 +436,7 @@ void SettingsParams::Init()
     SetAutoStretchEnabled(true);
     SetValueLong(UseAllCoresTag, "", true);
     SetNumThreads(4);
-    SetCacheMB(8000);
+    SetCacheMB(0);
 
     SetDefaultSessionDir(string("~"));
     SetDefaultMetadataDir(string("~"));
