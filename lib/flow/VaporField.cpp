@@ -383,22 +383,6 @@ void VaporField::AssignDataManager(VAPoR::DataMgr *dmgr)
     for (size_t i = 0; i < timeCoords.size(); i++) _timestamps[i] = timeCoords[i];
 }
 
-void VaporField::UpdateParamAndVarNames(const VAPoR::FlowParams *p)
-{
-    _params = p;
-
-    // Update properties of this Field
-    IsSteady = p->GetIsSteady();
-    ScalarName = p->GetColorMapVariableName();
-    auto velNames = p->GetFieldVariableNames();
-    for (int i = 0; i < 3; i++) {
-        if (i < velNames.size())
-            VelocityNames[i] = velNames.at(i);
-        else
-            VelocityNames[i] = "";    // make sure it keeps an empty string,
-    }                                 // instead of whatever left from before.
-}
-
 void VaporField::UpdateParams(const VAPoR::FlowParams *p)
 {
     _params = p;

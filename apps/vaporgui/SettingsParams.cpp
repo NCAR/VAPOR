@@ -140,16 +140,27 @@ void SettingsParams::Reinit() { Init(); }
 
 SettingsParams::~SettingsParams() {}
 
+void SettingsParams::_swapTildeWithHome(std::string &file) const
+{
+    size_t pos = 0;
+    while ((pos = file.find("~", pos)) != std::string::npos) {
+        file.replace(pos, 1, QDir::homePath().toStdString());
+        pos += QDir::homePath().toStdString().length();
+    }
+}
+
 long SettingsParams::GetCacheMB() const
 {
     long val = GetValueLong(_cacheMBTag, 0);
     if (val < 0) val = defaultCacheSize;
+
     return (val);
 }
 
 void SettingsParams::SetCacheMB(long val)
 {
     if (val < 0) val = defaultCacheSize;
+
     SetValueLong(_cacheMBTag, "Set cache size", val);
 }
 
@@ -220,6 +231,9 @@ string SettingsParams::GetAutoSaveSessionFile() const
     string defaultFile = autoSaveDir + "/VaporAutoSave.vs3";
 
     string file = GetValueString(_autoSaveFileLocationTag, defaultFile);
+
+    _swapTildeWithHome(file);
+
     return file;
 }
 
@@ -233,7 +247,7 @@ string SettingsParams::GetSessionDir() const
 {
     string defaultDir = GetDefaultSessionDir();
     string dir = GetValueString(_sessionDirTag, defaultDir);
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -242,7 +256,7 @@ void SettingsParams::SetSessionDir(string name) { SetValueString(_sessionDirTag,
 string SettingsParams::GetDefaultSessionDir() const
 {
     string dir = GetValueString(_defaultSessionDirTag, string("."));
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -262,7 +276,7 @@ string SettingsParams::GetMetadataDir() const
 {
     string defaultDir = GetDefaultMetadataDir();
     string dir = GetValueString(_metadataDirTag, defaultDir);
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -271,7 +285,7 @@ void SettingsParams::SetMetadataDir(string dir) { SetValueString(_metadataDirTag
 string SettingsParams::GetDefaultMetadataDir() const
 {
     string dir = GetValueString(_defaultMetadataDirTag, string("."));
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -285,7 +299,7 @@ string SettingsParams::GetTFDir() const
 {
     string defaultDir = GetDefaultTFDir();
     string dir = GetValueString(_tfDirTag, defaultDir);
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -294,7 +308,7 @@ void SettingsParams::SetTFDir(string dir) { SetValueString(_tfDirTag, "set trans
 string SettingsParams::GetDefaultTFDir() const
 {
     string dir = GetValueString(_defaultTfDirTag, string(""));
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -308,7 +322,7 @@ string SettingsParams::GetFlowDir() const
 {
     string defaultDir = GetDefaultFlowDir();
     string dir = GetValueString(_flowDirTag, defaultDir);
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -317,7 +331,7 @@ void SettingsParams::SetFlowDir(string dir) { SetValueString(_flowDirTag, "set f
 string SettingsParams::GetDefaultFlowDir() const
 {
     string dir = GetValueString(_defaultFlowDirTag, string("."));
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -327,7 +341,7 @@ string SettingsParams::GetPythonDir() const
 {
     string defaultDir = GetDefaultPythonDir();
     string dir = GetValueString(_pythonDirTag, defaultDir);
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -336,7 +350,7 @@ void SettingsParams::SetPythonDir(string dir) { SetValueString(_pythonDirTag, "s
 string SettingsParams::GetDefaultPythonDir() const
 {
     string dir = GetValueString(_defaultPythonDirTag, string("."));
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -432,16 +446,18 @@ void SettingsParams::Init()
 {
     SetSessionAutoSaveEnabled(true);
     SetChangesPerAutoSave(5);
-    SetAutoSaveSessionFile("~/VaporAutoSave.vs3");
+    std::string homeDir = QDir::homePath().toStdString();
+    SetAutoSaveSessionFile(homeDir + "/VaporAutoSave.vs3");
 
     SetAutoStretchEnabled(true);
     SetValueLong(UseAllCoresTag, "", true);
     SetNumThreads(4);
     SetCacheMB(defaultCacheSize);
 
-    SetDefaultSessionDir(string("~"));
-    SetDefaultMetadataDir(string("~"));
-    SetDefaultFlowDir(string("~"));
+
+    SetDefaultSessionDir(string(homeDir));
+    SetDefaultMetadataDir(string(homeDir));
+    SetDefaultFlowDir(string(homeDir));
 
     string palettes = GetSharePath("palettes");
     SetDefaultTFDir(string(palettes));
