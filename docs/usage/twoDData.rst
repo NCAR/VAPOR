@@ -17,6 +17,6 @@ The 2D Data Renderer displays the user's 2D data variables along the plane descr
 Basic Controls
 --------------
 
-Like the Contour and Image renderers, 2D variables may be offset by a height variable.
-
 This renderer contains all of Vapor's standard renderer controls: the :ref:`Variables <variablesTab>`, :ref:`Appearance <appearanceTab>`, :ref:`Geometry <geometryTab>`, and :ref:`Annotation <annotationTab>` tabs.
+
+.. include:: commonControls/heightVariable.rst

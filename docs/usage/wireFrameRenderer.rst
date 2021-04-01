@@ -12,10 +12,11 @@ ___________
 Description
 -----------
 
-The Wire Frame Renderer displays a wireframe of the mesh for the selected variable.  Wireframes may be rendered for either two-dimensional or three dimensional variables.
+The Wire Frame Renderer displays a wireframe of the mesh for the selected variable.  Wireframes may be rendered for either 2D or 3D variables.
 
 Basic Controls
 --------------
 
 This renderer contains all of Vapor's standard renderer controls: the :ref:`Variables <variablesTab>`, :ref:`Appearance <appear    anceTab>`, :ref:`Geometry <geometryTab>`, and :ref:`Annotation <annotationTab>` tabs.
 
+.. include:: commonControls/heightVariable.rst

@@ -9,6 +9,8 @@ ______________
 
 |
 
+.. note:: The images that come bundled with Vapor are relatively coarse in resolution.  If a higher resolution map is needed, you can download a 500 meter version of `NASA's Big Blue Marble here <https://drive.google.com/file/d/1qIwh8ZJj67d85ktkjpgOVBAE-oMRi3rD/view?usp=sharing>`_.
+
 Description
 -----------
 
@@ -23,9 +25,11 @@ This renderer contains a subset of Vapor's standard renderer controls: the :ref:
 
 The Image Renderer's Appearance tab does not contain a transfer function since it is not rendering any variable with color or opacity.
 
-Specialized Controls
+Georeferenced Images
 --------------------
 
 Georeferenced images may be selected for rendering in the Appearance tab.  Vapor comes bundled with two georeferenced image products: *NaturalEarth*, and *BigBlueMarble*.
 
 If an image contains transparency, this transparency can be toggled with the *Ignore transparency* checkbox.  Vapor's BigBlueMarble contains transparency over its ocean regions so that sub-surface ocean models may be viewed alongside land masses.
+
+.. include:: commonControls/heightVariable.rst

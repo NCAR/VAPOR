@@ -19,8 +19,6 @@ Basic Controls
 
 This renderer contains all of Vapor's standard renderer controls: the :ref:`Variables <variablesTab>`, :ref:`Appearance <appearanceTab>`, :ref:`Geometry <geometryTab>`, and :ref:`Annotation <annotationTab>` tabs.
 
-Like the Image and TwoDData renderers, Contours may be offset by a height variable.
-
 Specialized Controls
 --------------------
 
@@ -31,3 +29,5 @@ The Contour Renderer has specialized controls in its Appearance tab, under the h
     *Count* controls how many contours are currently being drawn
 
     *Contour Minimum* sets the value of the lowest valued contour in the series
+
+.. include:: commonControls/heightVariable.rst

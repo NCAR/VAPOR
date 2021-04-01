@@ -21,8 +21,6 @@ This renderer contains all of Vapor's standard renderer controls: the :ref:`Vari
 
 The Barb Renderer can operate on either two-dimensional, or three-dimensional field variables.  This is defined in the Variables tab.
 
-The Barb Renderer may be offset by a height variable, if the barbs are referencing two-dimensional variables.
-
 Specialized Controls
 --------------------
 
@@ -40,3 +38,4 @@ The Barb's Appearance tab contains controls as follows:
 
 *Recalculate Scales* - Recalculates the unitless values for *Length Scale* and *Thickness Scale* at the current timestep.
 
+.. include:: commonControls/heightVariable.rst
