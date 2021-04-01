@@ -12,7 +12,7 @@ ___________
 Description
 -----------
 
-The Isosurface Renderer displays the user's 3D data variables within a volume described by the source data file, according to color and opacity settings defined by the user.
+The Isosurface Renderer displays surfaces that follow a single value of their selected variable.  This is similar to a 2D contour, but in 3D space.  Each instance of the Isosurface renderer can display up to four surfaces.  Initially, only one will be displayed.  Additional isosurfaces can be created by double-clicking on the Transfer Function historgram, in the Appearance tab.
 
 Basic Controls
 --------------

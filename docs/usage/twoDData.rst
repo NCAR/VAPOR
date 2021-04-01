@@ -1,7 +1,7 @@
 .. _twoDData:
 
-Two Dimensional Data
-____________________
+2D Data
+_______
 
 .. raw:: html
 
@@ -12,7 +12,7 @@ ____________________
 Description
 -----------
 
-The Two Dimensional Data Renderer displays the user's 2D data variables along the plane described by the source data file.
+The 2D Data Renderer displays the user's 2D data variables along the plane described by the source data file.
 
 Basic Controls
 --------------
