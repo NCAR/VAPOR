@@ -10,6 +10,7 @@ class QWidget;
 class SettingsParams;
 class PGroup;
 class PSection;
+class SettingsParams;
 
 //! \class Preferences Menu
 //! \ingroup Public_GUI
@@ -21,8 +22,11 @@ class AppSettingsMenu : public QDialog, public Updateable {
 
 public:
     AppSettingsMenu(QWidget *parent);
-    virtual void Update(VAPoR::ParamsBase *p, VAPoR::ParamsMgr *paramsMgr = nullptr, VAPoR::DataMgr *dataMgr = nullptr);
+    virtual void Update(VAPoR::ParamsBase *p, VAPoR::ParamsMgr *paramsMgr = nullptr, VAPoR::DataMgr *dataMgr = nullptr) override;
 
 private:
+    void accept() override;
+
     PGroup *_settings;
+    SettingsParams* _params;
 };
