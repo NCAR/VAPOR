@@ -48,13 +48,10 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(
     setFocusPolicy(Qt::ClickFocus);
 }
 
-// Handle the pressing of the escape key 
-// Since settings are applied when changed in the gui, 
+// Handle the pressing of the escape key
+// Since settings are applied when changed in the gui,
 // we still want to save the settings file, even if esc is pressed
-void AppSettingsMenu::reject()
-{
-    accept();
-}
+void AppSettingsMenu::reject() { accept(); }
 
 void AppSettingsMenu::accept()
 {
