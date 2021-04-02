@@ -28,5 +28,5 @@ private:
     void accept() override;
 
     PGroup *_settings;
-    SettingsParams* _params;
+    SettingsParams *_params;
 };

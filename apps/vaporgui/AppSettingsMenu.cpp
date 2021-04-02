@@ -48,8 +48,9 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(
     setFocusPolicy(Qt::ClickFocus);
 }
 
-void AppSettingsMenu::accept() {
-    VAssert( _params != nullptr );
+void AppSettingsMenu::accept()
+{
+    VAssert(_params != nullptr);
     int rc = _params->SaveSettings();
     if (rc < 0) {
         std::string settingsPath = _params->GetSettingsPath();
@@ -61,7 +62,7 @@ void AppSettingsMenu::accept() {
 void AppSettingsMenu::Update(VAPoR::ParamsBase *p, VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr)
 {
     _params = dynamic_cast<SettingsParams *>(p);
-    VAssert( _params != nullptr );
+    VAssert(_params != nullptr);
 
     _settings->Update(_params);
 }
