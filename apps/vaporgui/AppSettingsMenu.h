@@ -26,6 +26,7 @@ public:
 
 private:
     void accept() override;
+    void reject() override;
 
     PGroup *_settings;
     SettingsParams *_params;
