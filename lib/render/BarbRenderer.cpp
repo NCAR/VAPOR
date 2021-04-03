@@ -109,6 +109,7 @@ void BarbRenderer::_saveCacheParams()
     _cacheParams.lod = p->GetCompressionLevel();
     _cacheParams.grid = p->GetGrid();
     _cacheParams.needToRecalc = p->GetNeedToRecalculateScales();
+    _cacheParams.useSingleColor = p->UseSingleColor();
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
 }
 
@@ -124,6 +125,7 @@ bool BarbRenderer::_isCacheDirty() const
     if (_cacheParams.lod != p->GetCompressionLevel()) return true;
     if (_cacheParams.grid != p->GetGrid()) return true;
     if (_cacheParams.needToRecalc != p->GetNeedToRecalculateScales()) return true;
+    if (_cacheParams.useSingleColor != p->UseSingleColor()) return true;
 
     vector<double> min, max, contourValues;
     p->GetBox()->GetExtents(min, max);
