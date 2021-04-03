@@ -9,7 +9,7 @@
 #include "VPushButton.h"
 #include "ErrorReporter.h"
 
-AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable()
+AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(), _params(nullptr)
 {
     _settings = new PGroup({
         new PSection("Automatic Session Recovery",
@@ -42,19 +42,32 @@ AppSettingsMenu::AppSettingsMenu(QWidget *parent) : QDialog(parent), Updateable(
     layout()->addWidget(_settings);
 
     VPushButton *close = new VPushButton("Close");
-    connect(close, &VPushButton::ButtonClicked, this, &QDialog::accept);
+    connect(close, &VPushButton::ButtonClicked, this, &AppSettingsMenu::accept);
     layout()->addWidget(close);
 
     setFocusPolicy(Qt::ClickFocus);
 }
 
-void AppSettingsMenu::Update(VAPoR::ParamsBase *p, VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr)
+// Handle the pressing of the escape key
+// Since settings are applied when changed in the gui,
+// we still want to save the settings file, even if esc is pressed
+void AppSettingsMenu::reject() { accept(); }
+
+void AppSettingsMenu::accept()
 {
-    SettingsParams *sp = dynamic_cast<SettingsParams *>(p);
-    _settings->Update(sp);
-    int rc = sp->SaveSettings();
+    VAssert(_params != nullptr);
+    int rc = _params->SaveSettings();
     if (rc < 0) {
-        std::string settingsPath = sp->GetSettingsPath();
+        std::string settingsPath = _params->GetSettingsPath();
         MSG_ERR("Unable to write to settings file " + settingsPath);
     }
+    QDialog::accept();
+}
+
+void AppSettingsMenu::Update(VAPoR::ParamsBase *p, VAPoR::ParamsMgr *paramsMgr, VAPoR::DataMgr *dataMgr)
+{
+    _params = dynamic_cast<SettingsParams *>(p);
+    VAssert(_params != nullptr);
+
+    _settings->Update(_params);
 }
