@@ -169,9 +169,9 @@ int DataMgrUtils::GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &va
         grids[i] = rGrid;
     }
 
-    if (! lock) {
+    if (!lock) {
         for (auto g : grids) {
-			if (g) dataMgr->UnlockGrid(g);
+            if (g) dataMgr->UnlockGrid(g);
         }
     }
 

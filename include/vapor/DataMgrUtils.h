@@ -121,13 +121,14 @@ VDF_API int ConvertLonLatToPCS(string projString, double coords[], int npoints =
 //
 template<typename T>
 VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, const vector<T> &minExtsReq, const vector<T> &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod,
-                     std::vector<Grid *> &grids, bool lock=false);
+                     std::vector<Grid *> &grids, bool lock = false);
 
-VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, string varname, const vector<double> &minExtsReq, const vector<double> &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod, Grid **gridptr, bool lock=false);
+VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, string varname, const vector<double> &minExtsReq, const vector<double> &maxExtsReq, bool useLowerAccuracy, int *refLevel, int *lod, Grid **gridptr,
+                     bool lock = false);
 
-VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, bool useLowerAccuracy, int *refLevel, int *lod, std::vector<Grid *> &grids, bool lock=false);
+VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, const vector<string> &varnames, bool useLowerAccuracy, int *refLevel, int *lod, std::vector<Grid *> &grids, bool lock = false);
 
-VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, string varname, bool useLowerAccuracy, int *refLevel, int *lod, Grid **gridptr, bool lock=false);
+VDF_API int GetGrids(DataMgr *dataMgr, size_t ts, string varname, bool useLowerAccuracy, int *refLevel, int *lod, Grid **gridptr, bool lock = false);
 
 VDF_API void UnlockGrids(DataMgr *dataMgr, const std::vector<Grid *> &grids);
 
