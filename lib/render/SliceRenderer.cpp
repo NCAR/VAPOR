@@ -351,6 +351,7 @@ int SliceRenderer::_saveTextureData()
     _createDataTexture(dataValues);
 
     delete[] dataValues;
+    _dataMgr->UnlockGrid(grid);
     delete grid;
     grid = nullptr;
 
