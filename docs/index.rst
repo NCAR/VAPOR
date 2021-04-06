@@ -10,15 +10,29 @@
 .. |
 .. |
 
-Free Vapor Tutorial - March 17
-==============================
-A 1 hour Vapor tutorial was held on March 17, 2021 from 2-3pm MDT.  Principles of 3D visualization are discussed, as well as demonstrating some of these principles in Vapor.  See the recording below.
+Vapor 3.4.0 is now Live!
+========================
+Vapor 3.4.0 
 
-`Register for our free tutorial here! <https://docs.google.com/forms/d/e/1FAIpQLSfoMX55_KXUdSp9Kr1SIeWaGl_XSvRQypzbne9MS4Kw1cyWHA/viewform>`_
+Version 3.4 is Vapor's first usability-focused release.  See some of the new features in the following demo:
 
 .. raw:: html
 
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/MOdZyHBhP80" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/8FabwuxxbDo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+Major usability improvements include:
+- Improved algorithm for the Flow renderer's random seeding bias variable
+- Data-independent settings (e.g. Cache size) can now be modified before data is loaded
+- Restructuring of Vapor's top-level tabs
+- New and improved Colorbars
+- Improved functionality of the Geometry tab
+- Better space management of the Renderer Table
+
+Other notable issues include:
+- Addition of clang-format linter, and git pre-push hook
+- Fixed weekly builds on all platforms
+
+A comprehensive list of fixes can be viewed in `the 3_4_0 release milestone. <https://github.com/NCAR/VAPOR/issues?q=is%3Aissue+milestone%3A%223_4_0+release%22+is%3Aclosed>`_
 
 |
 
