@@ -3,6 +3,7 @@
 #include <streambuf>
 #include <ostream>
 #include <istream>
+#include <memory>
 
 
 
