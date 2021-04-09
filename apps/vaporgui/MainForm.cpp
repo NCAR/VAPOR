@@ -1077,7 +1077,7 @@ void MainForm::_createDeveloperMenu()
 void MainForm::createBookmark()
 {
     bool    ok;
-    QString input = QInputDialog::getText(this, "Bookmark Name", tr("Bookmark Name:"), QLineEdit::Normal, "", &ok);
+    QString input = QInputDialog::getText(this, "New Bookmark", "Bookmark Name:", QLineEdit::Normal, "", &ok);
     if (!ok) return;
 
     string title = input.toStdString();
@@ -1103,7 +1103,7 @@ void MainForm::createBookmark()
     int  customViewportWidth = vpp->GetValueLong(vpp->CustomFramebufferWidthTag, 0);
     int  customViewportHeight = vpp->GetValueLong(vpp->CustomFramebufferHeightTag, 0);
 
-    int           iconSize = 16;
+    int           iconSize = 19;
     int           iconDataSize = iconSize * iconSize * 3;
     unsigned char iconData[iconDataSize];
     char          iconDataString[64];
