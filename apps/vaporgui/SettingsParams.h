@@ -128,6 +128,8 @@ public:
     std::string GetSettingsPath() const;
 
     static const string UseAllCoresTag;
+    
+    int LoadFromSettingsFile();
 
 private:
     static const string _classType;
@@ -159,7 +161,6 @@ private:
     static const string _dontShowIntelDriverWarningTag;
     static const string _settingsNeedsWriteTag;
 
-    bool _loadFromSettingsFile();
     void _swapTildeWithHome(std::string &file) const;
 
     string _settingsPath;
