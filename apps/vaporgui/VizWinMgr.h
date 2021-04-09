@@ -73,6 +73,11 @@ public:
 
     //! \copydoc VAPoR::ControlExec::EnableImageCapture()
     int EnableImageCapture(string filename, string winName);
+    
+    VizWin *Get(const std::string &name)
+    {
+        return _vizWindow[name];
+    }
 
 public slots:
 

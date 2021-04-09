@@ -244,6 +244,8 @@ set (SRCS
     PCornerSelector.h
     RenderEventRouterGUI.cpp
     RenderEventRouterGUI.h
+    BookmarkParams.cpp
+    BookmarkParams.h
 
 	# Need to include all files that request .ui files
 	Statistics.h

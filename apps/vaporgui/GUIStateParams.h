@@ -22,6 +22,7 @@
 #include <vapor/ParamsBase.h>
 
 class MouseModeParams;
+class BookmarkParams;
 
 class GUIStateParams : public VAPoR::ParamsBase {
 public:
@@ -162,6 +163,15 @@ public:
     // Get static string identifier for this params class
     //
     static string GetClassType() { return ("GUIStateParams"); }
+    
+    void AddBookmark(BookmarkParams *bookmark);
+    BookmarkParams *CreateBookmark();
+    void SetBookmarks(const vector<BookmarkParams*> &all);
+    void DeleteBookmark(int i);
+    void ClearBookmarks();
+    vector<BookmarkParams*> GetBookmarks() const;
+    int GetNumBookmarks() const;
+    BookmarkParams *GetBookmark(int i) const;
 
 private:
     class ActiveRenderer : public ParamsBase {
@@ -194,10 +204,12 @@ private:
     static const string m_proj4StringTag;
     static const string m_openDataSetsTag;
     static const string _flowDimensionalityTag;
+    static const string BookmarksTag;
 
     MouseModeParams *m_mouseModeParams;
 
     VAPoR::ParamsContainer *m_openDataSets;
+    VAPoR::ParamsContainer *_bookmarks;
 
     void _init();
 };

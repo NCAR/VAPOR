@@ -627,22 +627,11 @@ void VizWin::_renderHelper(bool fast)
     vParams->SetWindowSize(width(), height());
     _controlExec->SetSaveStateEnabled(enabled);
 
-    glClearColor(0., 0., 0., 1.);
-    glClear(GL_COLOR_BUFFER_BIT);
-
     DataStatus *dataStatus = _controlExec->GetDataStatus();
     if (!dataStatus->GetDataMgrNames().size()) return;
 
-    // Set up projection and modelview matrices
-    //
-    _glManager->matrixManager->MatrixModeProjection();
-    _glManager->matrixManager->PushMatrix();
-    _setUpProjMatrix();
-
-    _glManager->matrixManager->MatrixModeModelView();
-    _glManager->matrixManager->PushMatrix();
-    _setUpModelViewMatrix();
-
+    _preRender();
+    
     int rc = _controlExec->Paint(_winName, fast);
     if (rc < 0) { MSG_ERR("Paint failed"); }
 
@@ -664,7 +653,26 @@ void VizWin::_renderHelper(bool fast)
 
     rc = CheckGLErrorMsg("VizWindowPaintGL");
     if (rc < 0) { MSG_ERR("OpenGL error"); }
+    
+    _postRender();
+}
 
+void VizWin::_preRender()
+{
+    glClearColor(0., 0., 0., 1.);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    _glManager->matrixManager->MatrixModeProjection();
+    _glManager->matrixManager->PushMatrix();
+    _setUpProjMatrix();
+
+    _glManager->matrixManager->MatrixModeModelView();
+    _glManager->matrixManager->PushMatrix();
+    _setUpModelViewMatrix();
+}
+
+void VizWin::_postRender()
+{
     _glManager->matrixManager->MatrixModeProjection();
     _glManager->matrixManager->PopMatrix();
     _glManager->matrixManager->MatrixModeModelView();

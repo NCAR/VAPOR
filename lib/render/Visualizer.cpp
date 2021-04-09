@@ -491,21 +491,18 @@ RegionParams *Visualizer::getActiveRegionParams() const { return _paramsMgr->Get
 
 AnnotationParams *Visualizer::getActiveAnnotationParams() const { return _paramsMgr->GetAnnotationParams(_winName); }
 
+#include <vapor/STLUtils.h>
+
 int Visualizer::_captureImage(std::string path)
 {
     // Turn off the single capture flag
     _imageCaptureEnabled = false;
-
-    if (FileUtils::Extension(path) == "") path += ".png";
 
     ViewpointParams *vpParams = getActiveViewpointParams();
     int              width, height;
     //	vpParams->GetWindowSize(width, height);
     _framebuffer.GetSize(&width, &height);
 
-    bool geoTiffOutput = vpParams->GetProjectionType() == ViewpointParams::MapOrthographic && (FileUtils::Extension(path) == "tif" || FileUtils::Extension(path) == "tiff");
-
-    ImageWriter *  writer = nullptr;
     unsigned char *framebuffer = nullptr;
     int            writeReturn = -1;
 
@@ -513,6 +510,20 @@ int Visualizer::_captureImage(std::string path)
     if (!_getPixelData(framebuffer))
         ;    // goto captureImageEnd;
 
+    if (STLUtils::BeginsWith(path, ":RAM:")) {
+        void *ptr;
+        sscanf(path.c_str(), ":RAM:%p", &ptr);
+        
+        memcpy(ptr, framebuffer, sizeof(*framebuffer) * 3 * width * height);
+        
+        delete [] framebuffer;
+        return 0;
+    }
+    
+    if (FileUtils::Extension(path) == "") path += ".png";
+    bool geoTiffOutput = vpParams->GetProjectionType() == ViewpointParams::MapOrthographic && (FileUtils::Extension(path) == "tif" || FileUtils::Extension(path) == "tiff");
+    ImageWriter *  writer = nullptr;
+    
     if (geoTiffOutput)
         writer = new GeoTIFWriter(path);
     else

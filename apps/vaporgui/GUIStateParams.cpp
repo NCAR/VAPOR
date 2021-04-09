@@ -24,6 +24,7 @@
 
 #include "MouseModeParams.h"
 #include "GUIStateParams.h"
+#include "BookmarkParams.h"
 
 using namespace VAPoR;
 
@@ -40,6 +41,7 @@ const string GUIStateParams::m_plotDatasetNameTag = "PlotDatasetNameTag";
 const string GUIStateParams::m_proj4StringTag = "Proj4StringTag";
 const string GUIStateParams::m_openDataSetsTag = "OpenDataSetsTag";
 const string GUIStateParams::_flowDimensionalityTag = "_flowDimensionalityTag";
+const string GUIStateParams::BookmarksTag = "BookmarksTag";
 const string GUIStateParams::DataSetParam::m_dataSetPathsTag = "DataSetPathsTag";
 const string GUIStateParams::DataSetParam::m_dataSetFormatTag = "DataSetFormatTag";
 
@@ -66,6 +68,9 @@ GUIStateParams::GUIStateParams(ParamsBase::StateSave *ssave) : ParamsBase(ssave,
     //
     m_openDataSets = new ParamsContainer(ssave, m_openDataSetsTag);
     m_openDataSets->SetParent(this);
+    
+    _bookmarks = new ParamsContainer(ssave, BookmarksTag);
+    _bookmarks->SetParent(this);
 }
 
 GUIStateParams::GUIStateParams(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node)
@@ -100,18 +105,27 @@ GUIStateParams::GUIStateParams(ParamsBase::StateSave *ssave, XmlNode *node) : Pa
         m_openDataSets = new ParamsContainer(ssave, m_openDataSetsTag);
         m_openDataSets->SetParent(this);
     }
+    
+    if (node->HasChild(BookmarksTag)) {
+        _bookmarks = new ParamsContainer(ssave, node->GetChild(BookmarksTag));
+    } else {
+        _bookmarks = new ParamsContainer(ssave, BookmarksTag);
+        _bookmarks->SetParent(this);
+    }
 }
 
 GUIStateParams::GUIStateParams(const GUIStateParams &rhs) : ParamsBase(rhs)
 {
     m_mouseModeParams = new MouseModeParams(*(rhs.m_mouseModeParams));
     m_activeRenderer = new ActiveRenderer(*(rhs.m_activeRenderer));
+    _bookmarks = new ParamsContainer(*(rhs._bookmarks));
 }
 
 GUIStateParams &GUIStateParams::operator=(const GUIStateParams &rhs)
 {
     m_mouseModeParams = new MouseModeParams(*(rhs.m_mouseModeParams));
     m_activeRenderer = new ActiveRenderer(*(rhs.m_activeRenderer));
+    _bookmarks = new ParamsContainer(*(rhs._bookmarks));
 
     return (*this);
 }
@@ -221,6 +235,64 @@ void GUIStateParams::InsertOpenDateSet(string dataSetName, string format, const 
     dsParam.SetFormat(format);
 
     m_openDataSets->Insert(&dsParam, dataSetName);
+}
+
+void GUIStateParams::AddBookmark(BookmarkParams *bookmark)
+{
+    _bookmarks->Insert(bookmark, "i_"+std::to_string(_bookmarks->Size()));
+}
+
+BookmarkParams *GUIStateParams::CreateBookmark()
+{
+    return (BookmarkParams *)_bookmarks->Create(BookmarkParams::GetClassType(), "i_"+std::to_string(_bookmarks->Size()));
+}
+
+void GUIStateParams::SetBookmarks(const vector<BookmarkParams*> &all)
+{
+    ClearBookmarks();
+    
+    for (auto b : all)
+        AddBookmark(b);
+}
+
+void GUIStateParams::DeleteBookmark(int i)
+{
+    auto b = GetBookmark(i);
+    if (b)
+        _bookmarks->Remove(b);
+}
+
+void GUIStateParams::ClearBookmarks()
+{
+    auto names = _bookmarks->GetNames();
+    
+    for (auto & name : names)
+        _bookmarks->Remove(name);
+}
+
+vector<BookmarkParams*> GUIStateParams::GetBookmarks() const
+{
+    vector<BookmarkParams*> ret;
+    auto names = _bookmarks->GetNames();
+    
+    for (auto & name : names)
+        ret.push_back((BookmarkParams*)_bookmarks->GetParams(name));
+    
+    return ret;
+}
+
+int GUIStateParams::GetNumBookmarks() const
+{
+    return _bookmarks->Size();
+}
+
+BookmarkParams *GUIStateParams::GetBookmark(int i) const
+{
+    assert(i >= 0 && i < _bookmarks->Size());
+    if (i < 0 && i >= _bookmarks->Size())
+        return NULL;
+    
+    return (BookmarkParams *)_bookmarks->GetParams(_bookmarks->GetNames()[i]);
 }
 
 void GUIStateParams::_init() { SetActiveVizName(""); }

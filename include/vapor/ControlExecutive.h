@@ -655,6 +655,11 @@ public:
     //!
     std::vector<string> GetFunctionNames(string scriptType, string dataSetName) const;
 
+    void CreateRenderers()
+    {
+        openDataHelper(true);
+    }
+    
 private:
     ParamsMgr *                    _paramsMgr;
     DataStatus *                   _dataStatus;

@@ -68,6 +68,10 @@ class ErrorReporter;
 class ParamsWidgetDemo;
 class AppSettingsMenu;
 
+namespace VAPoR {
+class XmlNode;
+};
+
 class MainForm : public QMainWindow {
     Q_OBJECT
 
@@ -207,6 +211,14 @@ private:
     ErrorReporter *_errRep;
 
     ParamsWidgetDemo *_paramsWidgetDemo = nullptr;
+    
+    QMenu *_loadBookmarkMenu;
+    QMenu *_deleteBookmarkMenu;
+    
+    void createBookmark();
+    void populateBookmarkList();
+    void loadBookmark(int i);
+    void deleteBookmark(int i);
 
     // Zero out all member variables
     //
@@ -296,6 +308,8 @@ private:
     void         _createProgressWidget();
     void         _disableProgressWidget();
     virtual void sessionOpenHelper(string fileName, bool loadDatasets = true);
+    void closeAllParamsDatasets();
+    void loadAllParamsDatasets();
 
     template<class T> bool isDatasetValidFormat(const std::vector<std::string> &paths) const;
     bool                   determineDatasetFormat(const std::vector<std::string> &paths, std::string *fmt) const;
