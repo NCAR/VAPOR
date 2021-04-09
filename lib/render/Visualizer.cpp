@@ -513,17 +513,17 @@ int Visualizer::_captureImage(std::string path)
     if (STLUtils::BeginsWith(path, ":RAM:")) {
         void *ptr;
         sscanf(path.c_str(), ":RAM:%p", &ptr);
-        
+
         memcpy(ptr, framebuffer, sizeof(*framebuffer) * 3 * width * height);
-        
-        delete [] framebuffer;
+
+        delete[] framebuffer;
         return 0;
     }
-    
+
     if (FileUtils::Extension(path) == "") path += ".png";
-    bool geoTiffOutput = vpParams->GetProjectionType() == ViewpointParams::MapOrthographic && (FileUtils::Extension(path) == "tif" || FileUtils::Extension(path) == "tiff");
-    ImageWriter *  writer = nullptr;
-    
+    bool         geoTiffOutput = vpParams->GetProjectionType() == ViewpointParams::MapOrthographic && (FileUtils::Extension(path) == "tif" || FileUtils::Extension(path) == "tiff");
+    ImageWriter *writer = nullptr;
+
     if (geoTiffOutput)
         writer = new GeoTIFWriter(path);
     else

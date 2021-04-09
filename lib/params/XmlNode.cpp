@@ -748,7 +748,7 @@ int XmlParser::LoadFromFile(XmlNode *node, string path)
         SetErrMsg("Failed to open file %s : %M", path.c_str());
         return (-1);
     }
-    
+
     int rc = LoadFromFile(node, in);
     in.close();
 
@@ -763,7 +763,7 @@ int XmlParser::LoadFromFile(XmlNode *node, string path)
 int XmlParser::LoadFromFile(XmlNode *node, istream &in)
 {
     VAssert(node != NULL);
-    
+
     _root = node;
     _nodeType = UNKNOWN;
     _stringData.clear();
@@ -774,7 +774,7 @@ int XmlParser::LoadFromFile(XmlNode *node, istream &in)
     // Delete all current children
     //
     _root->DeleteAll();
-    
+
     XML_Parser expatParser = XML_ParserCreate(NULL);
     VAssert(expatParser != NULL);
 
@@ -798,7 +798,7 @@ int XmlParser::LoadFromFile(XmlNode *node, istream &in)
         }
     }
     XML_ParserFree(expatParser);
-    
+
     return 0;
 }
 

@@ -151,7 +151,7 @@ private:
     VAPoR::TranslateStretchManip *_manip;
 
     bool _openGLInitFlag;
-    
+
     friend class VizWinMgr;
 };
 

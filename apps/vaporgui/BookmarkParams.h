@@ -30,30 +30,29 @@ public:
     static const string DataTag;
     static const string IconDataTag;
     static const string IconSizeTag;
-    
-    void SetName(const string &name) { SetValueString(NameTag, "", name); }
+
+    void   SetName(const string &name) { SetValueString(NameTag, "", name); }
     string GetName() const { return GetValueString(NameTag, ""); }
-    
-    void SetData(const string &data) { SetValueString(DataTag, "", data); }
+
+    void   SetData(const string &data) { SetValueString(DataTag, "", data); }
     string GetData() const { return GetValueString(DataTag, ""); }
-    
+
     string GetIconData() const { return GetValueString(IconDataTag, ""); }
-    int GetIconSize() const { return GetValueLong(IconSizeTag, 0); }
-    
+    int    GetIconSize() const { return GetValueLong(IconSizeTag, 0); }
+
     size_t GetIconDataSize() const
     {
         size_t s = GetIconSize();
-        return s*s*3;
+        return s * s * 3;
     }
-    
+
     void SetIcon(int size, const string &data)
     {
         SetIconData(data);
         SetIconSize(size);
     }
-    
-private:
 
+private:
     void SetIconData(const string &data) { SetValueString(IconDataTag, "", data); }
     void SetIconSize(int size) { SetValueLong(IconSizeTag, "", size); }
     void _init();

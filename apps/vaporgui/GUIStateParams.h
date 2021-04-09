@@ -163,15 +163,15 @@ public:
     // Get static string identifier for this params class
     //
     static string GetClassType() { return ("GUIStateParams"); }
-    
-    void AddBookmark(BookmarkParams *bookmark);
-    BookmarkParams *CreateBookmark();
-    void SetBookmarks(const vector<BookmarkParams*> &all);
-    void DeleteBookmark(int i);
-    void ClearBookmarks();
-    vector<BookmarkParams*> GetBookmarks() const;
-    int GetNumBookmarks() const;
-    BookmarkParams *GetBookmark(int i) const;
+
+    void                     AddBookmark(BookmarkParams *bookmark);
+    BookmarkParams *         CreateBookmark();
+    void                     SetBookmarks(const vector<BookmarkParams *> &all);
+    void                     DeleteBookmark(int i);
+    void                     ClearBookmarks();
+    vector<BookmarkParams *> GetBookmarks() const;
+    int                      GetNumBookmarks() const;
+    BookmarkParams *         GetBookmark(int i) const;
 
 private:
     class ActiveRenderer : public ParamsBase {

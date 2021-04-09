@@ -68,7 +68,7 @@ GUIStateParams::GUIStateParams(ParamsBase::StateSave *ssave) : ParamsBase(ssave,
     //
     m_openDataSets = new ParamsContainer(ssave, m_openDataSetsTag);
     m_openDataSets->SetParent(this);
-    
+
     _bookmarks = new ParamsContainer(ssave, BookmarksTag);
     _bookmarks->SetParent(this);
 }
@@ -105,7 +105,7 @@ GUIStateParams::GUIStateParams(ParamsBase::StateSave *ssave, XmlNode *node) : Pa
         m_openDataSets = new ParamsContainer(ssave, m_openDataSetsTag);
         m_openDataSets->SetParent(this);
     }
-    
+
     if (node->HasChild(BookmarksTag)) {
         _bookmarks = new ParamsContainer(ssave, node->GetChild(BookmarksTag));
     } else {
@@ -237,61 +237,47 @@ void GUIStateParams::InsertOpenDateSet(string dataSetName, string format, const 
     m_openDataSets->Insert(&dsParam, dataSetName);
 }
 
-void GUIStateParams::AddBookmark(BookmarkParams *bookmark)
-{
-    _bookmarks->Insert(bookmark, "i_"+std::to_string(_bookmarks->Size()));
-}
+void GUIStateParams::AddBookmark(BookmarkParams *bookmark) { _bookmarks->Insert(bookmark, "i_" + std::to_string(_bookmarks->Size())); }
 
-BookmarkParams *GUIStateParams::CreateBookmark()
-{
-    return (BookmarkParams *)_bookmarks->Create(BookmarkParams::GetClassType(), "i_"+std::to_string(_bookmarks->Size()));
-}
+BookmarkParams *GUIStateParams::CreateBookmark() { return (BookmarkParams *)_bookmarks->Create(BookmarkParams::GetClassType(), "i_" + std::to_string(_bookmarks->Size())); }
 
-void GUIStateParams::SetBookmarks(const vector<BookmarkParams*> &all)
+void GUIStateParams::SetBookmarks(const vector<BookmarkParams *> &all)
 {
     ClearBookmarks();
-    
-    for (auto b : all)
-        AddBookmark(b);
+
+    for (auto b : all) AddBookmark(b);
 }
 
 void GUIStateParams::DeleteBookmark(int i)
 {
     auto b = GetBookmark(i);
-    if (b)
-        _bookmarks->Remove(b);
+    if (b) _bookmarks->Remove(b);
 }
 
 void GUIStateParams::ClearBookmarks()
 {
     auto names = _bookmarks->GetNames();
-    
-    for (auto & name : names)
-        _bookmarks->Remove(name);
+
+    for (auto &name : names) _bookmarks->Remove(name);
 }
 
-vector<BookmarkParams*> GUIStateParams::GetBookmarks() const
+vector<BookmarkParams *> GUIStateParams::GetBookmarks() const
 {
-    vector<BookmarkParams*> ret;
-    auto names = _bookmarks->GetNames();
-    
-    for (auto & name : names)
-        ret.push_back((BookmarkParams*)_bookmarks->GetParams(name));
-    
+    vector<BookmarkParams *> ret;
+    auto                     names = _bookmarks->GetNames();
+
+    for (auto &name : names) ret.push_back((BookmarkParams *)_bookmarks->GetParams(name));
+
     return ret;
 }
 
-int GUIStateParams::GetNumBookmarks() const
-{
-    return _bookmarks->Size();
-}
+int GUIStateParams::GetNumBookmarks() const { return _bookmarks->Size(); }
 
 BookmarkParams *GUIStateParams::GetBookmark(int i) const
 {
     assert(i >= 0 && i < _bookmarks->Size());
-    if (i < 0 && i >= _bookmarks->Size())
-        return NULL;
-    
+    if (i < 0 && i >= _bookmarks->Size()) return NULL;
+
     return (BookmarkParams *)_bookmarks->GetParams(_bookmarks->GetNames()[i]);
 }
 

@@ -631,7 +631,7 @@ void VizWin::_renderHelper(bool fast)
     if (!dataStatus->GetDataMgrNames().size()) return;
 
     _preRender();
-    
+
     int rc = _controlExec->Paint(_winName, fast);
     if (rc < 0) { MSG_ERR("Paint failed"); }
 
@@ -653,7 +653,7 @@ void VizWin::_renderHelper(bool fast)
 
     rc = CheckGLErrorMsg("VizWindowPaintGL");
     if (rc < 0) { MSG_ERR("OpenGL error"); }
-    
+
     _postRender();
 }
 
@@ -661,7 +661,7 @@ void VizWin::_preRender()
 {
     glClearColor(0., 0., 0., 1.);
     glClear(GL_COLOR_BUFFER_BIT);
-    
+
     _glManager->matrixManager->MatrixModeProjection();
     _glManager->matrixManager->PushMatrix();
     _setUpProjMatrix();

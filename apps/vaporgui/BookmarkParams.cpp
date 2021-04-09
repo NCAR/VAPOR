@@ -23,15 +23,9 @@ const string BookmarkParams::IconSizeTag = "IconSizeTag";
 
 static ParamsRegistrar<BookmarkParams> registrar(BookmarkParams::GetClassType());
 
-void BookmarkParams::_init()
-{
-    
-}
+void BookmarkParams::_init() {}
 
-BookmarkParams::BookmarkParams(ParamsBase::StateSave *ssave) : ParamsBase(ssave, GetClassType())
-{
-    _init();
-}
+BookmarkParams::BookmarkParams(ParamsBase::StateSave *ssave) : ParamsBase(ssave, GetClassType()) { _init(); }
 
 BookmarkParams::BookmarkParams(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node)
 {
@@ -41,7 +35,4 @@ BookmarkParams::BookmarkParams(ParamsBase::StateSave *ssave, XmlNode *node) : Pa
     }
 }
 
-BookmarkParams::BookmarkParams(const BookmarkParams &rhs) : ParamsBase(rhs)
-{
-    
-}
+BookmarkParams::BookmarkParams(const BookmarkParams &rhs) : ParamsBase(rhs) {}
