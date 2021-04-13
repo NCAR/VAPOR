@@ -7,12 +7,25 @@
 
 
 
+//! \class Base16StreamBuf
+//!
+//! \brief A custom std stream buffer that saves data piped through it into a base16 encoded string.
+//!
+//! \author Stanislaw Jaroszynski
+
 class Base16StreamBuf : public std::streambuf {
 public:
     std::string      _string;
     int              _i = 0;
     virtual int_type overflow(int_type c) override;
 };
+
+
+//! \class Base16StringStream
+//!
+//! \brief An implementation similar to std::stringstream which results in a base16 encoded string.
+//!
+//! \author Stanislaw Jaroszynski
 
 class Base16StringStream : public std::ostream {
     Base16StreamBuf _buf;
@@ -23,6 +36,12 @@ public:
 };
 
 
+
+//! \class Base16DecoderStream
+//!
+//! \brief Creates a raw std istream from a base16 encoded string.
+//!
+//! \author Stanislaw Jaroszynski
 
 class Base16DecoderStream : public std::istream {
     struct MemBuf : std::streambuf {

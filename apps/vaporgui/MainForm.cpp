@@ -1108,6 +1108,10 @@ void MainForm::createBookmark()
     unsigned char iconData[iconDataSize];
     char          iconDataString[64];
     sprintf(iconDataString, ":RAM:%p", iconData);
+    // The above string is a "file path" that points to an address in memory
+    // which tells the visualizer to save the resulting image to ram rather than
+    // to disk. The current "image capture" implementation is very buggy spaghetti
+    // and this is the cleanest solution without major refactoring.
 
     vpp->SetValueLong(vpp->UseCustomFramebufferTag, "", true);
     vpp->SetValueLong(vpp->CustomFramebufferWidthTag, "", iconSize);
