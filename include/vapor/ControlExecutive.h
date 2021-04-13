@@ -8,6 +8,7 @@
 
 #include <vapor/ParamsMgr.h>
 #include <vapor/GLManager.h>
+#include <vapor/DataStatus.h>
 
 using namespace std;
 namespace VAPoR {
@@ -329,7 +330,7 @@ public:
     //!
     //! \sa OpenData(), CloseData()
     //
-    std::vector<string> GetDataNames() const { return (_paramsMgr->GetDataMgrNames()); }
+    std::vector<string> GetDataNames() const { return (_dataStatus->GetDataMgrNames()); }
 
     //! Obtain the current DataStatus
     //! Needed to store in GUI when the DataStatus changes.
@@ -394,6 +395,7 @@ public:
     //! \params[in] color Three tuple describing rgj values for the billboard
     //
     int DrawText(string winName, string text, int x, int y, int size, float color[3], int type = 0);
+    int DrawTextNormalizedCoords(string winName, string text, float x, float y, int size, float color[3], int type = 0);
 
     //! Draw 2D text to all visualizers
     //!
@@ -411,6 +413,7 @@ public:
     //! \params[in] color Three tuple describing rgj values for the billboard
     //
     int DrawText(string text, int x, int y, int size, float color[3], int type = 0);
+    int DrawTextNormalizedCoords(string text, float x, float y, int size, float color[3], int type = 0);
 
     int ClearText();
     int ClearText(string winName);

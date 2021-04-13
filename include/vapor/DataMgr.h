@@ -118,7 +118,8 @@ public:
     //! \param[in] format A string indicating the format of data collection.
     //!
     //! \param[in] mem_size Size of memory cache to be created, specified
-    //! in MEGABYTES!!
+    //! in MEGABYTES!! If 0, not restriction is placed on the cache size; the DataMgr will
+    //! attempt to allocate as much memory is needed.
     //!
     //! \param[in] numthreads Number of parallel execution threads
     //! to be run during encoding and decoding of compressed data. A value

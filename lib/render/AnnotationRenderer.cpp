@@ -196,10 +196,18 @@ void AnnotationRenderer::DrawText(vector<billboard> billboards)
     float bgColor[] = {0.f, 0.f, 0.f, 0.f};
     float coords[] = {67.5f, 31.6f, 0.f};
 
+    auto size = _glManager->GetViewportSize();
+
     for (int i = 0; i < billboards.size(); i++) {
         string text = billboards[i].text;
-        coords[0] = billboards[i].x;
-        coords[1] = billboards[i].y;
+
+        if (billboards[i].x == 0 && billboards[i].y == 0) {
+            coords[0] = billboards[i].xn * size.x;
+            coords[1] = billboards[i].yn * size.y;
+        } else {
+            coords[0] = billboards[i].x;
+            coords[1] = billboards[i].y;
+        }
         int size = billboards[i].size;
         txtColor[0] = billboards[i].color[0];
         txtColor[1] = billboards[i].color[1];
@@ -224,6 +232,30 @@ void AnnotationRenderer::AddText(string text, int x, int y, int size, float colo
     myBoard.text = text;
     myBoard.x = x;
     myBoard.y = y;
+    myBoard.xn = 0;
+    myBoard.yn = 0;
+    myBoard.size = size;
+    myBoard.color[0] = color[0];
+    myBoard.color[1] = color[1];
+    myBoard.color[2] = color[2];
+
+    if (type == 0) {    // Miscellaneous annotation
+        _miscAnnot.push_back(myBoard);
+    } else if (type == 1) {    // Time annotation
+        _timeAnnot.push_back(myBoard);
+    } else if (type == 2) {
+        _axisAnnot.push_back(myBoard);
+    }
+}
+
+void AnnotationRenderer::AddTextNormalizedCoords(string text, float x, float y, int size, float color[3], int type)
+{
+    billboard myBoard;
+    myBoard.text = text;
+    myBoard.x = 0;
+    myBoard.y = 0;
+    myBoard.xn = x;
+    myBoard.yn = y;
     myBoard.size = size;
     myBoard.color[0] = color[0];
     myBoard.color[1] = color[1];
@@ -388,7 +420,7 @@ void AnnotationRenderer::_calculateDomainExtents(std::vector<double> &domainExte
 {
     domainExtents = {NAN, NAN, NAN, NAN, NAN, NAN};
 
-    vector<string> names = m_paramsMgr->GetDataMgrNames();
+    vector<string> names = m_dataStatus->GetDataMgrNames();
     for (int i = 0; i < names.size(); i++) {
         std::vector<double> dataMgrMinExts, dataMgrMaxExts;
 
@@ -425,7 +457,7 @@ void AnnotationRenderer::InScenePaint(size_t ts)
 
     if (vfParams->GetUseDomainFrame()) drawDomainFrame(domainExtents);
 
-    vector<string> names = m_paramsMgr->GetDataMgrNames();
+    vector<string> names = m_dataStatus->GetDataMgrNames();
     Transform *    t = vpParams->GetTransform(names[0]);
     applyTransform(t);
 

@@ -107,25 +107,10 @@ void BarbRenderer::_saveCacheParams()
     _cacheParams.ts = p->GetCurrentTimestep();
     _cacheParams.level = p->GetRefinementLevel();
     _cacheParams.lod = p->GetCompressionLevel();
-    _cacheParams.useSingleColor = p->UseSingleColor();
-    _cacheParams.lineThickness = p->GetLineThickness();
-    _cacheParams.lengthScale = p->GetLengthScale();
     _cacheParams.grid = p->GetGrid();
     _cacheParams.needToRecalc = p->GetNeedToRecalculateScales();
-    p->GetConstantColor(_cacheParams.constantColor);
+    _cacheParams.useSingleColor = p->UseSingleColor();
     p->GetBox()->GetExtents(_cacheParams.boxMin, _cacheParams.boxMax);
-
-    if (_cacheParams.useSingleColor) return;
-
-    MapperFunction *tf = p->GetMapperFunc(_cacheParams.colorVarName);
-    _cacheParams.opacity = tf->getOpacityScale();
-    _cacheParams.minMapValue = tf->getMinMapValue();
-    _cacheParams.maxMapValue = tf->getMaxMapValue();
-    for (int i = 0; i < 10; i++) {
-        float point = _cacheParams.minMapValue + i / 10.f * (_cacheParams.maxMapValue - _cacheParams.minMapValue);
-        tf->rgbValue(point, _cacheParams.colorSamples[i]);
-        _cacheParams.alphaSamples[i] = tf->getOpacityValueData(point);
-    }
 }
 
 bool BarbRenderer::_isCacheDirty() const
@@ -138,38 +123,15 @@ bool BarbRenderer::_isCacheDirty() const
     if (_cacheParams.ts != p->GetCurrentTimestep()) return true;
     if (_cacheParams.level != p->GetRefinementLevel()) return true;
     if (_cacheParams.lod != p->GetCompressionLevel()) return true;
-    if (_cacheParams.useSingleColor != p->UseSingleColor()) return true;
-    if (_cacheParams.lineThickness != p->GetLineThickness()) return true;
-    if (_cacheParams.lengthScale != p->GetLengthScale()) return true;
     if (_cacheParams.grid != p->GetGrid()) return true;
     if (_cacheParams.needToRecalc != p->GetNeedToRecalculateScales()) return true;
+    if (_cacheParams.useSingleColor != p->UseSingleColor()) return true;
 
     vector<double> min, max, contourValues;
     p->GetBox()->GetExtents(min, max);
 
     if (_cacheParams.boxMin != min) return true;
     if (_cacheParams.boxMax != max) return true;
-
-    float constantColor[3];
-    p->GetConstantColor(constantColor);
-    if (memcmp(_cacheParams.constantColor, constantColor, sizeof(constantColor))) return true;
-
-    if (_cacheParams.useSingleColor) return false;
-
-    MapperFunction *tf = p->GetMapperFunc(_cacheParams.colorVarName);
-    if (_cacheParams.opacity != tf->getOpacityScale()) return true;
-    if (_cacheParams.minMapValue != tf->getMinMapValue()) return true;
-    if (_cacheParams.maxMapValue != tf->getMaxMapValue()) return true;
-
-    for (int i = 0; i < 10; i++) {
-        float point = _cacheParams.minMapValue + i / 10.f * (_cacheParams.maxMapValue - _cacheParams.minMapValue);
-        float color[3];
-        tf->rgbValue(point, color);
-        if (_cacheParams.colorSamples[i][0] != color[0]) return true;
-        if (_cacheParams.colorSamples[i][1] != color[1]) return true;
-        if (_cacheParams.colorSamples[i][2] != color[2]) return true;
-        if (_cacheParams.alphaSamples[i] != tf->getOpacityValueData(point)) return true;
-    }
 
     return false;
 }
@@ -243,12 +205,28 @@ int BarbRenderer::_getVarGrid(int ts, int refLevel, int lod, string varName, std
 
 int BarbRenderer::_paintGL(bool)
 {
-    int rc = 0;
+    if (_isCacheDirty()) {
+        if (_generateBarbs() < 0) return -1;
+        _saveCacheParams();
+    }
 
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
+    _setUpLightingAndColor();
 
-    // _saveCacheParams();
+    float clut[1024];
+    bool  doColorMapping = _makeCLUT(clut);
+    auto  crange = GetActiveParams()->GetMapperFunc(GetActiveParams()->GetColorMapVariableName())->getMinMaxMapValue();
+    for (auto b : _barbCache) _drawBarb(b, doColorMapping, clut, crange.data());
+
+    _glManager->legacy->DisableLighting();
+
+    return 0;
+}
+
+int BarbRenderer::_generateBarbs()
+{
+    int rc;
 
     // Set up the variable data required, while determining data
     // extents to use in rendering
@@ -287,12 +265,9 @@ int BarbRenderer::_paintGL(bool)
 
     _recalculateScales(varData, ts);
 
-    _setUpLightingAndColor();
-
+    _barbCache.clear();
     // Render the barbs
     _operateOnGrid(varData);
-
-    _glManager->legacy->DisableLighting();
 
     // Release the locks on the data
     for (int i = 0; i < varData.size(); i++) {
@@ -391,16 +366,40 @@ void BarbRenderer::_printBackDiameter(const float startVertex[18]) const
 //
 void BarbRenderer::_drawBarb(const std::vector<Grid *> variableData, const float startPoint_[3], bool doColorMapping, const float clut[1024])
 {
-    float startPoint[3];
-    memcpy(startPoint, startPoint_, sizeof(float) * 3);
+    Barb b;
+    memcpy(b.startPoint, startPoint_, sizeof(float) * 3);
+    b.lengthScalar = ((BarbParams *)GetActiveParams())->GetLengthScale() * _vectorScaleFactor;
 
     VAssert(variableData.size() == 5);
-    MatrixManager *mm = _glManager->matrixManager;
 
-    float endPoint[3];
-    bool  missing = _defineBarb(variableData, startPoint, endPoint, doColorMapping, clut);
+    bool missing = _defineBarb(variableData, b.startPoint, b.endPoint, &b.value, doColorMapping, clut);
 
     if (missing) return;
+
+    _barbCache.push_back(b);
+}
+
+void BarbRenderer::_setBarbColor(float value, const float clut[1024], double crange[2]) const
+{
+    float range = crange[1] - crange[0];
+    float n = (value - crange[0]) / range;
+    n = glm::clamp(n, 0.f, 1.f);
+    int i = 255 * n;
+
+    _glManager->legacy->Color4fv(&clut[i * 4]);
+}
+
+void BarbRenderer::_drawBarb(Barb b, bool doColorMapping, const float clut[1024], double crange[2])
+{
+    float *        startPoint = b.startPoint;
+    float *        endPoint = b.endPoint;
+    MatrixManager *mm = _glManager->matrixManager;
+    if (doColorMapping) _setBarbColor(b.value, clut, crange);
+    float     newLengthScalar = ((BarbParams *)GetActiveParams())->GetLengthScale() * _vectorScaleFactor;
+    glm::vec3 v = glm::make_vec3(b.endPoint) - glm::make_vec3(b.startPoint);
+    float     l = glm::length(v) / b.lengthScalar * newLengthScalar;
+    glm::vec3 end = glm::make_vec3(b.startPoint) + glm::normalize(v) * l;
+    memcpy(b.endPoint, glm::value_ptr(end), sizeof(float) * 3);
 
     mm->MatrixModeModelView();
     mm->PushMatrix();
@@ -689,7 +688,7 @@ void BarbRenderer::_getStrides(vector<float> &strides, vector<int> &rakeGrid, ve
     strides.push_back(zStride);
 }
 
-bool BarbRenderer::_defineBarb(const std::vector<Grid *> variableData, float start[3], float end[3], bool doColorMapping, const float clut[1024])
+bool BarbRenderer::_defineBarb(const std::vector<Grid *> variableData, float start[3], float end[3], float *value, bool doColorMapping, const float clut[1024])
 {
     bool missing = false;
 
@@ -703,6 +702,7 @@ bool BarbRenderer::_defineBarb(const std::vector<Grid *> variableData, float sta
 
     if (doColorMapping) {
         float val = variableData[4]->GetValue(start[X], start[Y], start[Z]);
+        *value = val;
 
         if (val == variableData[4]->GetMissingValue())
             missing = true;

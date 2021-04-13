@@ -66,6 +66,7 @@ class Plot;
 class PythonVariables;
 class ErrorReporter;
 class ParamsWidgetDemo;
+class AppSettingsMenu;
 
 class MainForm : public QMainWindow {
     Q_OBJECT
@@ -95,14 +96,13 @@ private:
 
     // Undo/redo actions
     //
-    QAction *      _navigationAction;
     QAction *      _editUndoAction;
     QAction *      _editRedoAction;
+    QAction *      _appSettingsAction;
     QLineEdit *    _timeStepEdit;
     QIntValidator *_timeStepEditValidator;
 
     QComboBox *_alignViewCombo;
-    QComboBox *_modeCombo;
     QMenuBar * _main_Menubar;
     QMenu *    _File;
     QMenu *    _Edit;
@@ -111,7 +111,6 @@ private:
     QMenu *    _helpMenu;
     QMenu *    _developerMenu;
 
-    QToolBar *_modeToolBar;
     QToolBar *_vizToolBar;
     QToolBar *_animationToolBar;
 
@@ -164,7 +163,6 @@ private:
 
     // Toolbars:
     //
-    QActionGroup *_mouseModeActions;
     QAction *     _tileAction;
     QAction *     _cascadeAction;
     QAction *     _homeAction;
@@ -190,6 +188,7 @@ private:
     Statistics *        _stats;
     Plot *              _plot;
     PythonVariables *   _pythonVariables;
+    AppSettingsMenu *   _appSettingsMenu;
     BannerGUI *         _banner;
     VizSelectCombo *    _windowSelector;
     VAPoR::ControlExec *_controlExec;
@@ -235,15 +234,6 @@ private:
         _pauseAction->setChecked(true);
     }
 
-    int addMode(QString &text, QIcon &icon)
-    {
-        _modeCombo->addItem(icon, text);
-        return (_modeCombo->count() - 1);
-    }
-
-    //! Insert all the mouse modes into the modeCombo.
-    void addMouseModes();
-    void setMouseMode(int newMode) { _modeCombo->setCurrentIndex(newMode); }
     void showCitationReminder();
 
     void stopAnimCapture(string vizName)
@@ -291,7 +281,7 @@ private:
     bool openDataHelper(string dataSetName, string format, const vector<string> &files, const vector<string> &options = vector<string>());
 
     enum DatasetExistsAction { Prompt, AddNew, ReplaceFirst };
-    void         loadDataHelper(const std::vector<string> &files, string prompt, string filter, string format, bool multi, DatasetExistsAction existsAction = Prompt);
+    void         loadDataHelper(string dataSetName, const std::vector<string> &files, string prompt, string filter, string format, bool multi, DatasetExistsAction existsAction = Prompt);
     void         _createCaptureMenu();
     void         _createToolsMenu();
     void         _createEditMenu();
@@ -300,7 +290,6 @@ private:
     void         _createDeveloperMenu();
     void         createMenus();
     void         hookupSignals();
-    void         _createModeToolBar();
     void         _createAnimationToolBar();
     void         _createVizToolBar();
     void         createToolBars();
@@ -326,7 +315,6 @@ private:
 private slots:
     void _plotClosed();
     void _statsClosed();
-    void _pythonClosed();
     void sessionOpen(QString qfileName = "", bool loadDatasets = true);
     void fileSave();
     void fileSaveAs();
@@ -359,7 +347,6 @@ private slots:
     void _setTimeStep();
 
     void launchWebDocs() const;
-    void modeChange(int);
     void setInteractiveRefLevel(int);
     void loadStartingPrefs();
 

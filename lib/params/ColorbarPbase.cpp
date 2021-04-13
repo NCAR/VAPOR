@@ -34,6 +34,8 @@ const string ColorbarPbase::_colorbarTitleTag = "ColorbarTitle";
 const string ColorbarPbase::_colorbarNumTicksTag = "ColorbarNumTicks";
 const string ColorbarPbase::_colorbarEnabledTag = "ColorbarEnabled";
 
+const string ColorbarPbase::UseScientificNotationTag = "UseScientificNotationTag";
+
 //
 // Register class with object factory!!!
 //
@@ -44,7 +46,7 @@ ColorbarPbase::ColorbarPbase(ParamsBase::StateSave *ssave) : ParamsBase(ssave, C
     MyBase::SetDiagMsg("ColorbarPbase::ColorbarPbase() this=%p", this);
 
     // Initialize with default values
-    SetCornerPosition(vector<double>(2, 0.1));
+    SetCornerPosition(vector<double>(2, 0.03));
     SetSize(vector<double>(2, 0.1));
     SetTitle("");
     SetFontSize(10);
@@ -52,6 +54,7 @@ ColorbarPbase::ColorbarPbase(ParamsBase::StateSave *ssave) : ParamsBase(ssave, C
     SetNumTicks(6);
     SetBackgroundColor(vector<double>(3, 1.));
     SetEnabled(false);
+    SetValueLong(UseScientificNotationTag, "", false);
 }
 
 ColorbarPbase::ColorbarPbase(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node) {}

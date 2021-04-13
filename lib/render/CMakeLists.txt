@@ -53,6 +53,7 @@ set (SRC
 	Framebuffer.cpp
 	ModelRenderer.cpp
 	OSPRay.cpp
+    ColorbarRenderer.cpp
 )
 
 set (HEADERS
@@ -112,6 +113,7 @@ set (HEADERS
 	${PROJECT_SOURCE_DIR}/include/vapor/Framebuffer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/ModelRenderer.h
 	${PROJECT_SOURCE_DIR}/include/vapor/OSPRay.h
+	${PROJECT_SOURCE_DIR}/include/vapor/ColorbarRenderer.h
 )
 
 if(BUILD_OSP)

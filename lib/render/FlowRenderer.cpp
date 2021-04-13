@@ -179,8 +179,14 @@ int FlowRenderer::_paintGL(bool fast)
 
     if (_velocityStatus != FlowStatus::UPTODATE || _colorStatus != FlowStatus::UPTODATE) _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
 
-    _velocityField.UpdateParamAndVarNames(params);
-    _colorField.UpdateParamAndVarNames(params);
+    _velocityField.UpdateParams(params);
+    _velocityField.ScalarName.clear();
+    auto vel_tmp = params->GetFieldVariableNames();
+    for (int i = 0; i < 3; i++) _velocityField.VelocityNames[i] = i < vel_tmp.size() ? vel_tmp[i] : "";
+
+    _colorField.UpdateParams(params);
+    for (int i = 0; i < 3; i++) _colorField.VelocityNames[i].clear();
+    _colorField.ScalarName = params->GetColorMapVariableName();
 
     // In case there's 0 variable selected, meaning that more than 2 of the velocity
     // variable names are empty strings, then the paint routine aborts.
@@ -823,7 +829,7 @@ int FlowRenderer::_updateFlowCacheAndStates(const FlowParams *params)
 
     // Check the bias variable and bias strength
     const auto rakeBiasVariable = params->GetRakeBiasVariable();
-    const auto rakeBiasStrength = params->GetRakeBiasStrength();
+    const auto rakeBiasStrength = params->GetRakeBiasStrength() * 100;
     if (_cache_rakeBiasStrength != rakeBiasStrength || _cache_rakeBiasVariable.compare(rakeBiasVariable) != 0) {
         _cache_rakeBiasVariable = rakeBiasVariable;
         _cache_rakeBiasStrength = rakeBiasStrength;
@@ -1077,7 +1083,7 @@ int FlowRenderer::_genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) 
     std::vector<double> locD(3);
     auto                timeVal = _timestamps.at(0);
     // This is the total number of seeds to generate, based on the bias strength.
-    long numOfSeedsToGen = long(numOfSeedsNeeded * (std::abs(_cache_rakeBiasStrength) + 1.0f));
+    auto numOfSeedsToGen = numOfSeedsNeeded * (std::abs(_cache_rakeBiasStrength) + 1);
     long numOfTrials = 0;
     seeds.clear();
     seeds.reserve(numOfSeedsToGen);    // For performance reasons
@@ -1123,16 +1129,19 @@ int FlowRenderer::_genSeedsRakeRandomBiased(std::vector<flow::Particle> &seeds) 
     }
 
     // How we sort all seeds based on their values
-    auto ascLambda = [](const flow::Particle &p1, const flow::Particle &p2) -> bool { return p1.value < p2.value; };
-    auto desLambda = [](const flow::Particle &p1, const flow::Particle &p2) -> bool { return p2.value < p1.value; };
-    if (_cache_rakeBiasStrength < 0)
-        std::partial_sort(seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), ascLambda);
-    else
-        std::partial_sort(seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), desLambda);
+    auto ascLambda = [](const flow::Particle &p1, const flow::Particle &p2) { return p1.value < p2.value; };
+    auto desLambda = [](const flow::Particle &p1, const flow::Particle &p2) { return p2.value < p1.value; };
+    if (_cache_rakeBiasStrength < 0) {
+        std::nth_element(seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), ascLambda);
+    } else {
+        std::nth_element(seeds.begin(), seeds.begin() + numOfSeedsNeeded, seeds.end(), desLambda);
+    }
 
     seeds.resize(numOfSeedsNeeded);    // We only take first chunck of seeds that we need
-    for (auto &e : seeds)              // reset the value field of each particle
-        e.value = 0.0f;
+    seeds.shrink_to_fit();             // Free up some memory
+    for (auto &e : seeds) {            // reset the value field of each particle
+        e.value = 0.0;
+    }
 
     // If in unsteady case and there are multiple seed injections, we insert more seeds.
     if (!_cache_isSteady && _cache_seedInjInterval > 0) {
