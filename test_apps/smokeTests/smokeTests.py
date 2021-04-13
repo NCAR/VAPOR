@@ -65,17 +65,14 @@ gridSizes = [
     "8x8x8"
 ]
 
-#resultsDir = args.resultsDir[0]
 resultsDir = "".join( args.resultsDir )
 if (resultsDir[-1] != r'/'):
     resultsDir += r'/'
 
-#testDataRoot = args.testDataRoot[0]
 testDataRoot = "".join( args.testDataRoot )
 if (testDataRoot[-1] != r'/'):
     testDataRoot += r'/'
 
-#binaryRoot = args.binaryRoot[0]
 binaryRoot = "".join( args.binaryRoot )
 if (binaryRoot[-1] != r'/'):
     binaryRoot += r'/'
@@ -108,9 +105,7 @@ def testGrid( grid ):
 
     print( "Testing " + grid + " grid" )
 
-    print( gridProgram + " -dims " + grid )
-    #programOutput  = subprocess.check_output( [ gridProgram, " -dims ", grid ] )
-    #programOutput  = subprocess.run( [ gridProgram, " -dims ", grid ], encoding="utf-8" )
+    print( "  Command: " + gridProgram + " -dims " + grid )
     programOutput  = subprocess.run( 
         [ gridProgram, " -dims ", grid ], 
         stdout=subprocess.PIPE,  
@@ -133,8 +128,8 @@ def testGrid( grid ):
 
 def testDataMgr( dataMgrType, dataMgr, makeBaseline=False ):
     print( "Testing " + dataMgrType + " with " + dataMgr )
-    
     command = [ dataMgrProgram, "-fileType", dataMgrType, dataMgr ]
+    print( "  Command: " + " ".join(command) )
     programOutput = subprocess.check_output( command )
     
     if ( makeBaseline ):
