@@ -128,7 +128,7 @@ public:
     std::string GetSettingsPath() const;
 
     static const string UseAllCoresTag;
-    
+
     int LoadFromSettingsFile();
 
 private:
