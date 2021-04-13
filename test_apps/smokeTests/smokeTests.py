@@ -107,7 +107,7 @@ def testGrid( grid ):
 
     print( "  Command: " + gridProgram + " -dims " + grid )
     programOutput  = subprocess.run( 
-        [ gridProgram, " -dims ", grid ], 
+        [ gridProgram, "-dims", grid ], 
         stdout=subprocess.PIPE,  
         universal_newlines=True 
     )
