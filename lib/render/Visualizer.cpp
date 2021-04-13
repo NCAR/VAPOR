@@ -503,20 +503,16 @@ int Visualizer::_captureImage(std::string path)
     //	vpParams->GetWindowSize(width, height);
     _framebuffer.GetSize(&width, &height);
 
-    unsigned char *framebuffer = nullptr;
+    vector<unsigned char> framebuffer(3 * width * height);
     int            writeReturn = -1;
-
-    framebuffer = new unsigned char[3 * width * height];
-    if (!_getPixelData(framebuffer))
-        ;    // goto captureImageEnd;
+    _getPixelData(framebuffer.data());
 
     if (STLUtils::BeginsWith(path, ":RAM:")) {
         void *ptr;
         sscanf(path.c_str(), ":RAM:%p", &ptr);
 
-        memcpy(ptr, framebuffer, sizeof(*framebuffer) * 3 * width * height);
+        memcpy(ptr, framebuffer.data(), sizeof(framebuffer[0]) * 3 * width * height);
 
-        delete[] framebuffer;
         return 0;
     }
 
@@ -586,13 +582,11 @@ int Visualizer::_captureImage(std::string path)
         cropMin[1] = height - cropMax[1];
         cropMax[1] = height - temp;
 
-        unsigned char *croppedFB = new unsigned char[3 * croppedWidth * croppedHeight];
+        vector<unsigned char> croppedFB(3 * croppedWidth * croppedHeight);
         for (int y = 0; y < croppedHeight; y++) memcpy(&croppedFB[3 * y * croppedWidth], &framebuffer[3 * ((y + cropMin[1]) * width + cropMin[0])], 3 * croppedWidth);
 
-        delete[] framebuffer;
         framebuffer = croppedFB;
 
-        framebuffer = croppedFB;
         s *= croppedHeight / (float)height;
 
         x = (newCameraMaxExtents[0] - newCameraMinExtents[0]) / 2 + newCameraMinExtents[0];
@@ -611,11 +605,10 @@ int Visualizer::_captureImage(std::string path)
         }
     }
 
-    writeReturn = writer->Write(framebuffer, width, height);
+    writeReturn = writer->Write(framebuffer.data(), width, height);
 
 captureImageEnd:
     if (writer) delete writer;
-    if (framebuffer) delete[] framebuffer;
 
     return writeReturn;
 }
