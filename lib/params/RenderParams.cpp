@@ -78,7 +78,7 @@ void RenderParams::SetDefaultVariables(int dim = 3, bool secondaryColormapVariab
     //
     string varname;
     size_t ts;
-    bool   ok;
+    bool   ok = false;
     for (int i = dim; i > 1; i--) {
         if (ok = DataMgrUtils::GetFirstExistingVariable(_dataMgr, 0, 0, i, varname, ts)) break;
     }

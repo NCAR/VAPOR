@@ -277,7 +277,8 @@ int VaporField::GetVelocity(double time, const glm::vec3 &pos, glm::vec3 &veloci
         VAssert(rv == 0);
 
         // Find the velocity values at floor time step
-        glm::vec3 floorVelocity, ceilingVelocity;
+        glm::vec3 floorVelocity(0.f, 0.f, 0.f);
+        glm::vec3 ceilingVelocity(0.f, 0.f, 0.f);
         for (int i = 0; i < 3; i++) {
             grid = _getAGrid(floorTS, VelocityNames[i]);
             if (grid == nullptr) return GRID_ERROR;
