@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+import sys
 import os
 import subprocess
 import difflib
@@ -58,9 +59,6 @@ args = parser.parse_args()
 
 gridSizes = [
     "1x1x1",
-    "2x2x2",
-    "4x2x2",
-    "8x2x2",
     "1x8x8",
     "8x1x8",
     "8x8x1",
@@ -68,17 +66,14 @@ gridSizes = [
     "8x8x8"
 ]
 
-#resultsDir = args.resultsDir[0]
 resultsDir = "".join( args.resultsDir )
 if (resultsDir[-1] != r'/'):
     resultsDir += r'/'
 
-#testDataRoot = args.testDataRoot[0]
 testDataRoot = "".join( args.testDataRoot )
 if (testDataRoot[-1] != r'/'):
     testDataRoot += r'/'
 
-#binaryRoot = args.binaryRoot[0]
 binaryRoot = "".join( args.binaryRoot )
 if (binaryRoot[-1] != r'/'):
     binaryRoot += r'/'
@@ -111,11 +106,9 @@ def testGrid( grid ):
 
     print( "Testing " + grid + " grid" )
 
-    print( gridProgram + "-dims" + grid )
-    #programOutput  = subprocess.check_output( [ gridProgram, " -dims ", grid ] )
-    #programOutput  = subprocess.run( [ gridProgram, " -dims ", grid ], encoding="utf-8" )
+    print( "  Command: " + gridProgram + " -dims " + grid )
     programOutput  = subprocess.run( 
-        [ gridProgram, " -dims ", grid ], 
+        [ gridProgram, "-dims", grid ], 
         stdout=subprocess.PIPE,  
         universal_newlines=True 
     )
@@ -128,7 +121,7 @@ def testGrid( grid ):
 
     if ( programOutput.returncode != 0 ):
         rc = 1
-        print( "  Test failed with exit code " + str(programOutput.returncode + "\n") )
+        print( "  Test failed with exit code " + str(programOutput.returncode) + "\n" )
     else:
         print( "  Test passed\n" )
 
@@ -136,8 +129,8 @@ def testGrid( grid ):
 
 def testDataMgr( dataMgrType, dataMgr, makeBaseline=False ):
     print( "Testing " + dataMgrType + " with " + dataMgr )
-    
     command = [ dataMgrProgram, "-fileType", dataMgrType, dataMgr ]
+    print( "  Command: " + " ".join(command) )
     programOutput = subprocess.check_output( command )
     
     if ( makeBaseline ):
@@ -212,15 +205,13 @@ def main():
     if ( os.path.isdir( resultsDir ) == False ):    
         os.mkdir( resultsDir )
 
-    failures = 0
     for grid in gridSizes:
-        failures += testGrid( grid )
+        if ( testGrid(grid) > 0):
+            print ("Test failed." )
+            print ("See artifact file " + grid + ".txt or " + resultsDir + grid + ".txt for grid value mismatches on the current branch.")
+            print ("Failed assertions, if any, are shown above.\n" )
+            sys.exit(1)
  
-    if ( failures == 0 ):
-        print ( "All Grid tests passed\n" ) 
-    else:
-        print ( str(failures) + " of " + str(len(gridSizes)) + " tests failed\n" )
-
     for dataType, dataFile in dataMgrs.items():
         baselineFile = resultsDir + dataType + "_baseline.txt"
         if ( os.path.isfile( baselineFile ) == False ):
