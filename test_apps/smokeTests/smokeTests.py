@@ -212,7 +212,7 @@ def main():
         print ( "All Grid tests passed\n" ) 
     else:
         print ( str(failures) + " of " + str(len(gridSizes)) + " tests failed\n" )
-        return -1
+        sys.exit(-1)
 
     for dataType, dataFile in dataMgrs.items():
         baselineFile = resultsDir + dataType + "_baseline.txt"
