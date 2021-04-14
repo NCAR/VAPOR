@@ -205,16 +205,11 @@ def main():
     if ( os.path.isdir( resultsDir ) == False ):    
         os.mkdir( resultsDir )
 
-    failures = 0
     for grid in gridSizes:
-        failures += testGrid( grid )
+        if ( testGrid(grid) > 0):
+            print ( "Test failed.  See " + resultsDir + grid + ".txt for details\n" )
+            sys.exit(1)
  
-    if ( failures == 0 ):
-        print ( "All Grid tests passed\n" ) 
-    else:
-        print ( str(failures) + " of " + str(len(gridSizes)) + " tests failed\n" )
-        sys.exit(-1)
-
     for dataType, dataFile in dataMgrs.items():
         baselineFile = resultsDir + dataType + "_baseline.txt"
         if ( os.path.isfile( baselineFile ) == False ):
