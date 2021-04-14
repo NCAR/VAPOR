@@ -51,6 +51,8 @@ public:
         SetIconData(data);
         SetIconSize(size);
     }
+    
+    static int DefaultIconSize() { return 32; }
 
 private:
     void SetIconData(const string &data) { SetValueString(IconDataTag, "", data); }

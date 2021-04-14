@@ -888,6 +888,20 @@ void MainForm::_createFileMenu()
     connect(_fileExitAction, SIGNAL(triggered()), this, SLOT(fileExit()));
 }
 
+#include <QProxyStyle>
+class QCustomIconSizeProxyStyle : public QProxyStyle {
+    const int _size;
+public:
+    QCustomIconSizeProxyStyle(int size) : _size(size) {}
+    virtual int pixelMetric(PixelMetric metric, const QStyleOption* option, const QWidget *widget) const override
+    {
+        if (metric == PM_SmallIconSize)
+            return _size;
+        else
+            return QCommonStyle::pixelMetric(metric, option, widget);
+    }
+};
+
 void MainForm::_createEditMenu()
 {
     _editUndoAction = new QAction(this);
@@ -919,9 +933,11 @@ void MainForm::_createEditMenu()
     _Edit->addAction("Create Bookmark", this, &MainForm::createBookmark);
 
     _loadBookmarkMenu = new QMenu("Load Bookmark");
+    _loadBookmarkMenu->setStyle(new QCustomIconSizeProxyStyle(BookmarkParams::DefaultIconSize()));
     _Edit->addMenu(_loadBookmarkMenu);
 
     _deleteBookmarkMenu = new QMenu("Delete Bookmark");
+    _deleteBookmarkMenu->setStyle(new QCustomIconSizeProxyStyle(BookmarkParams::DefaultIconSize()));
     _Edit->addMenu(_deleteBookmarkMenu);
 }
 
@@ -1103,8 +1119,8 @@ void MainForm::createBookmark()
     int  customViewportWidth = vpp->GetValueLong(vpp->CustomFramebufferWidthTag, 0);
     int  customViewportHeight = vpp->GetValueLong(vpp->CustomFramebufferHeightTag, 0);
 
-    int           iconSize = 19;
-    int           iconDataSize = iconSize * iconSize * 3;
+    const int     iconSize = BookmarkParams::DefaultIconSize();
+    const int     iconDataSize = iconSize * iconSize * 3;
     unsigned char iconData[iconDataSize];
     char          iconDataString[64];
     sprintf(iconDataString, ":RAM:%p", iconData);
