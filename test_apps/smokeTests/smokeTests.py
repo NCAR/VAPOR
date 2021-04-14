@@ -111,7 +111,7 @@ def testGrid( grid ):
 
     print( "Testing " + grid + " grid" )
 
-    print( gridProgram + " -dims " + grid )
+    print( gridProgram + "-dims" + grid )
     #programOutput  = subprocess.check_output( [ gridProgram, " -dims ", grid ] )
     #programOutput  = subprocess.run( [ gridProgram, " -dims ", grid ], encoding="utf-8" )
     programOutput  = subprocess.run( 
