@@ -120,7 +120,7 @@ def testGrid( grid ):
 
     if ( programOutput.returncode != 0 ):
         rc = 1
-        print( "  Test failed with exit code " + str(programOutput.returncode + "\n") )
+        print( "  Test failed with exit code " + str(programOutput.returncode) + "\n" )
     else:
         print( "  Test passed\n" )
 
