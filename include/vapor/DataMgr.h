@@ -683,8 +683,8 @@ private:
 
     std::map<string, BlkExts> _blkExtsCache;
 
-    std::map <const Grid *, vector <float *> > _lockedFloatBlks;
-    std::map <const Grid *, vector <int *> > _lockedIntBlks;
+    std::map<const Grid *, vector<float *>> _lockedFloatBlks;
+    std::map<const Grid *, vector<int *>>   _lockedIntBlks;
 
     // Get the immediate variable dependencies of a variable
     //
