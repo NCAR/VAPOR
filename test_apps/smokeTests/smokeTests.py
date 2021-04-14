@@ -207,7 +207,9 @@ def main():
 
     for grid in gridSizes:
         if ( testGrid(grid) > 0):
-            print ( "Test failed.  See artifact file " + grid + ".txt or " + resultsDir + grid + ".txt for grid value mismatches on the current branch.  Failed assertions are shown above.\n" )
+            print ("Test failed." )
+            print ("See artifact file " + grid + ".txt or " + resultsDir + grid + ".txt for grid value mismatches on the current branch.")
+            print ("Failed assertions, if any, are shown above.\n" )
             sys.exit(1)
  
     for dataType, dataFile in dataMgrs.items():
