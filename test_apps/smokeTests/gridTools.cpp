@@ -325,7 +325,7 @@ bool RunTest(Grid *grid)
     size_t disagreements;
 
     if (CompareIndexToCoords(grid, rms, numMissingValues, disagreements) == false) {
-        //cerr << "       *** Error reported in " << grid->GetType() << " grid***" << endl;
+        // cerr << "       *** Error reported in " << grid->GetType() << " grid***" << endl;
         cout << "       *** Error reported in " << grid->GetType() << " grid***" << endl;
         rc = false;
     }
