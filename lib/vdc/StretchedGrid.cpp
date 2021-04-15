@@ -291,9 +291,9 @@ float StretchedGrid::GetValueLinear(const DblArr3 &coords) const
     if (!inside) return (GetMissingValue());
 
     vector<size_t> dims = GetDimensions();
-    VAssert(i < dims[0] - 1);
-    VAssert(j < dims[1] - 1);
-    if (dims.size() > 2) VAssert(k < dims[2] - 1);
+    VAssert(i <= dims[0] - 1);
+    VAssert(j <= dims[1] - 1);
+    if (dims.size() > 2) VAssert(k <= dims[2] - 1);
 
     float v0 = ((AccessIJK(i, j, k) * xwgt[0] + AccessIJK(i + 1, j, k) * xwgt[1]) * ywgt[0]) + ((AccessIJK(i, j + 1, k) * xwgt[0] + AccessIJK(i + 1, j + 1, k) * xwgt[1]) * ywgt[1]);
 
