@@ -129,7 +129,7 @@ public:
 
     static const string UseAllCoresTag;
 
-    int LoadFromSettingsFile();
+    bool LoadFromSettingsFile();
 
 private:
     static const string _classType;

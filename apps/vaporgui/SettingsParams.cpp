@@ -88,7 +88,7 @@ SettingsParams::SettingsParams(ParamsBase::StateSave *ssave, bool loadFromFile) 
     // Try to get settings params from .settings file
     //
     if (loadFromFile) {
-        bool ok = LoadFromSettingsFile() >= 0;
+        bool ok = LoadFromSettingsFile();
         if (ok) return;
     }
 
@@ -109,7 +109,7 @@ SettingsParams::SettingsParams(ParamsBase::StateSave *ssave, XmlNode *node) : Pa
 
         // Try to get settings params from .settings file
         //
-        bool ok = LoadFromSettingsFile() >= 0;
+        bool ok = LoadFromSettingsFile();
         if (ok)
             return;
         else
@@ -402,7 +402,7 @@ void SettingsParams::SetFidelityDefault2D(long lodDef, long refDef)
     SetValueLongVec(_fidelityDefault2DTag, "Set fidelity 2D default", val);
 }
 
-int SettingsParams::LoadFromSettingsFile()
+bool SettingsParams::LoadFromSettingsFile()
 {
     XmlNode *node = GetNode();
     VAssert(node != NULL);
@@ -416,7 +416,7 @@ int SettingsParams::LoadFromSettingsFile()
 
     MyBase::EnableErrMsg(enabled);
 
-    return status ? 0 : -1;
+    return status;
 }
 
 int SettingsParams::SaveSettings() const
