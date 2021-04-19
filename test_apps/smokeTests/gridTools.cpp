@@ -317,11 +317,12 @@ bool RunTest(Grid *grid)
     size_t disagreements;
     double t0 = Wasp::GetTime();
 
-    if (CompareIndexToCoords(grid, rms, numMissingValues, disagreements) == false) {
+    rc = CompareIndexToCoords(grid, rms, numMissingValues, disagreements);
+    //if (CompareIndexToCoords(grid, rms, numMissingValues, disagreements) == false) {
         // cerr << "       *** Error reported in " << grid->GetType() << " grid***" << endl;
-        cout << "       *** Error reported in " << grid->GetType() << " grid***" << endl;
-        rc = false;
-    }
+    //    cout << "       *** Error reported in " << grid->GetType() << " grid***" << endl;
+    //    rc = false;
+    //}
 
     if (grid->GetInterpolationOrder() == 0) {
         cout << "  Interpolation order: nearestNeighbor " << endl;
@@ -332,6 +333,10 @@ bool RunTest(Grid *grid)
     double time = Wasp::GetTime() - t0;
 
     PrintStats(rms, numMissingValues, disagreements, time);
+
+    if (rc == false) {
+        cout << "*** Error reported in " << grid->GetType() << " grid ***" << endl;
+    }
 
     return rc;
 }

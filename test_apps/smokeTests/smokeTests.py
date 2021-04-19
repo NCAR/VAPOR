@@ -124,7 +124,7 @@ def testGrid( grid ):
 
     if ( programOutput.returncode != 0 ):
         rc = 1
-        print( "  Test failed with exit code " + str(programOutput.returncode) + "\n" )
+        print( "  Test failed with exit code " + str(programOutput.returncode) )
     else:
         print( "  Test passed\n" )
 
@@ -210,9 +210,8 @@ def main():
 
     for grid in gridSizes:
         if ( testGrid(grid) > 0):
-            print ("Test failed." )
-            print ("See artifact file " + grid + ".txt or " + resultsDir + grid + ".txt for grid value mismatches on the current branch.")
-            print ("Failed assertions, if any, are shown above.\n" )
+            print ("  See artifact file " + grid + ".txt or " + resultsDir + grid + ".txt for mismatches")
+            print ("  Failed assertions, if any, are shown above.\n" )
             #sys.exit(1)
  
     for dataType, dataFile in dataMgrs.items():
