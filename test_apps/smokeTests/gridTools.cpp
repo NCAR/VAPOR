@@ -487,9 +487,9 @@ VAPoR::StretchedGrid *MakeStretchedGrid(const vector<size_t> &dims, const vector
     double yRange = maxu[Y] - minu[Y];
     double zRange = maxu[Z] - minu[Z];
 
-    double xDenom = dims[X] > 1 ? dims[X]-1 : 1;
-    double yDenom = dims[Y] > 1 ? dims[Y]-1 : 1;
-    double zDenom = dims[Z] > 1 ? dims[Z]-1 : 1;
+    double xDenom = dims[X] > 1 ? dims[X] - 1 : 1;
+    double yDenom = dims[Y] > 1 ? dims[Y] - 1 : 1;
+    double zDenom = dims[Z] > 1 ? dims[Z] - 1 : 1;
 
     // Parabolically increasing coordinates
     for (size_t i = 0; i < dims[X]; i++) {
