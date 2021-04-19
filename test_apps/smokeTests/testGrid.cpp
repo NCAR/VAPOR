@@ -184,9 +184,9 @@ int main(int argc, char **argv)
     std::vector<size_t> dims2d = {opt.dims[X], opt.dims[Y]};
 
     int rc = EXIT_SUCCESS;
-    bool regularRC     = true;
-    bool stretchedRC   = true;
-    bool layeredRC     = true;
+    bool regularRC = true;
+    bool stretchedRC = true;
+    bool layeredRC = true;
     bool curvilinearRC = true;
 
     // Test Regular Grid
