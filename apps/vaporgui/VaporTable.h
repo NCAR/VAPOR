@@ -8,15 +8,6 @@
 
 struct Value;
 
-class CustomLineEdit : public QLineEdit {
-    Q_OBJECT
-public:
-    CustomLineEdit(QWidget *parent = nullptr);
-
-protected:
-    void focusOutEvent(QFocusEvent *event);
-};
-
 // class VaporTable
 //
 class VaporTable : public QWidget {
@@ -76,15 +67,14 @@ public:
     QWidget *CellWidget(int row, int col) { return _table->cellWidget(row, col); }
 
     int GetActiveRow() const;
-    int GetActiveCol() const;
 
     void SetActiveRow(int row);
-    void SetActiveCol(int col);
 
     void SetAutoResizeHeight(bool val);
     bool GetAutoResizeHeight() const;
 
     void StretchToColumn(int column);
+    void HideColumn(int column);
 
     void ShowToolTips(bool showOrHide);
     bool GetShowToolTips() const;
@@ -92,6 +82,7 @@ public:
     void SetVerticalHeaderWidth(int width);
 
 public slots:
+    void emitCellClicked(int, int);
     void emitValueChanged();
     void emitReturnPressed();
 
@@ -102,14 +93,9 @@ signals:
     void returnPressed();
 
 private:
-    void emitCellClicked(QObject *object);
-    bool eventFilter(QObject *object, QEvent *event);
-
     std::vector<std::string> convertToString(std::vector<int> values);
 
     std::vector<std::string> convertToString(std::vector<double> values);
-
-    CustomLineEdit *createLineEdit(QString val);
 
     void setHorizontalHeader(std::vector<std::string> header);
 
@@ -127,12 +113,13 @@ private:
 
     void highlightActiveRow(int row);
 
-    void highlightActiveCol(int col);
-
     void resizeTableHeight();
 
+    void _correctImmutableCellText();
+
     int           _activeRow;
-    int           _activeCol;
+    int           _stretchColumn;
+    int           _hideColumn;
     bool          _lastRowIsCheckboxes;
     bool          _lastColIsCheckboxes;
     bool          _checkboxesEnabled;

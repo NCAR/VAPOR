@@ -179,8 +179,14 @@ int FlowRenderer::_paintGL(bool fast)
 
     if (_velocityStatus != FlowStatus::UPTODATE || _colorStatus != FlowStatus::UPTODATE) _renderStatus = FlowStatus::SIMPLE_OUTOFDATE;
 
-    _velocityField.UpdateParamAndVarNames(params);
-    _colorField.UpdateParamAndVarNames(params);
+    _velocityField.UpdateParams(params);
+    _velocityField.ScalarName.clear();
+    auto vel_tmp = params->GetFieldVariableNames();
+    for (int i = 0; i < 3; i++) _velocityField.VelocityNames[i] = i < vel_tmp.size() ? vel_tmp[i] : "";
+
+    _colorField.UpdateParams(params);
+    for (int i = 0; i < 3; i++) _colorField.VelocityNames[i].clear();
+    _colorField.ScalarName = params->GetColorMapVariableName();
 
     // In case there's 0 variable selected, meaning that more than 2 of the velocity
     // variable names are empty strings, then the paint routine aborts.

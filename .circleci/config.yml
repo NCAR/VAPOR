@@ -29,10 +29,16 @@ jobs:
           command: |
             cd build
             cmake -DBUILD_TEST_APPS=ON ..
-            make -j7 &> /tmp/output.txt
+            make -j7 &> /tmp/debugOutput.txt
+            make clean
+            cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release ..
+            make -j7 &> /tmp/releaseOutput.txt
 
       - store_artifacts:
-          path: /tmp/output.txt
+          path: /tmp/debugOutput.txt
+
+      - store_artifacts:
+          path: /tmp/releaseOutput.txt
 
       - run:
           name: Smoke test
@@ -43,10 +49,20 @@ jobs:
           path: /root/project/test_apps/smokeTests/testResults
 
       - run:
-          name: check for warnings
+          name: check for Debug warnings
           command: |
-            if grep -q warning /tmp/output.txt; then
-               cat /tmp/output.txt
+            if grep -q warning /tmp/debugOutput.txt; then
+               cat /tmp/debugOutput.txt
+               exit -1
+            else
+               exit 0
+            fi
+
+      - run:
+          name: check for Release warnings
+          command: |
+            if grep -q warning /tmp/releaseOutput.txt; then
+               cat /tmp/releaseOutput.txt
                exit -1
             else
                exit 0
@@ -154,8 +170,37 @@ jobs:
           command: |
             ls -lrth /usr/local/VAPOR-Deps
             cd /root/project/build
-            cmake3 ..
-            make -j7
+            cmake3 -DBUILD_TEST_APPS=ON ..
+            make -j7 &> /tmp/debugOutput.txt
+            make clean
+            cmake -DBUILD_TEST_APPS=ON -DCMAKE_BUILD_TYPE=Release ..
+            make -j7 &> /tmp/releaseOutput.txt
+
+      - store_artifacts:
+          path: /tmp/debugOutput.txt
+
+      - store_artifacts:
+          path: /tmp/releaseOutput.txt
+
+      - run:
+          name: check for Debug warnings
+          command: |
+            if grep -q warning /tmp/debugOutput.txt; then
+               cat /tmp/debugOutput.txt
+               exit -1
+            else
+               exit 0
+            fi
+
+      - run:
+          name: check for Release warnings
+          command: |
+            if grep -q warning /tmp/releaseOutput.txt; then
+               cat /tmp/releaseOutput.txt
+               exit -1
+            else
+               exit 0
+            fi
 
   build_centos7_installer:
     docker:

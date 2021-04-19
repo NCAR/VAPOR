@@ -82,6 +82,7 @@
 #include "FileOperationChecker.h"
 #include "windowsUtils.h"
 #include "ParamsWidgetDemo.h"
+#include "AppSettingsMenu.h"
 
 #include <QProgressDialog>
 #include <QProgressBar>
@@ -167,6 +168,7 @@ void MainForm::_initMembers()
 
     _editUndoAction = NULL;
     _editRedoAction = NULL;
+    _appSettingsAction = NULL;
     _timeStepEdit = NULL;
     _timeStepEditValidator = NULL;
 
@@ -229,6 +231,7 @@ void MainForm::_initMembers()
     _interactiveRefinementSpin = NULL;
     _tabDockWindow = NULL;
 
+    _appSettingsMenu = nullptr;
     _stats = NULL;
     _plot = NULL;
     _pythonVariables = NULL;
@@ -384,13 +387,6 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
     _controlExec->SetCacheSize(sP->GetCacheMB());
     _controlExec->SetNumThreads(sP->GetNumThreads());
 
-    bool lockSize = sP->GetWinSizeLock();
-    if (lockSize) {
-        size_t width, height;
-        sP->GetWinSize(width, height);
-        setFixedSize(QSize(width, height));
-    }
-
     _vizWinMgr = new VizWinMgr(this, _mdiArea, _controlExec);
 
     _tabMgr = new TabManager(this, _controlExec);
@@ -461,7 +457,7 @@ MainForm::MainForm(vector<QString> files, QApplication *app, QWidget *parent) : 
 
         string fmt;
         if (determineDatasetFormat(paths, &fmt)) {
-            loadDataHelper(paths, "", "", fmt, true, ReplaceFirst);
+            loadDataHelper("", paths, "", "", fmt, true, ReplaceFirst);
         } else {
             MSG_ERR("Could not determine dataset format for command line parameters");
         }
@@ -902,10 +898,14 @@ void MainForm::_createEditMenu()
     _editRedoAction->setToolTip("Redo the last undone session state change");
     _editRedoAction->setEnabled(false);
 
+
     _Edit = menuBar()->addMenu(tr("Edit"));
     _Edit->addAction(_editUndoAction);
     _Edit->addAction(_editRedoAction);
+
     _Edit->addSeparator();
+    _appSettingsMenu = new AppSettingsMenu(this);
+    _Edit->addAction("Preferences", _appSettingsMenu, &QDialog::open);
 
     connect(_editUndoAction, SIGNAL(triggered()), this, SLOT(undo()));
     connect(_editRedoAction, SIGNAL(triggered()), this, SLOT(redo()));
@@ -1111,7 +1111,7 @@ void MainForm::sessionOpenHelper(string fileName, bool loadDatasets)
             string         name = dataSetNames[i];
             vector<string> paths = newP->GetOpenDataSetPaths(name);
             if (std::all_of(paths.begin(), paths.end(), [](string path) { return FileUtils::Exists(path); })) {
-                loadDataHelper(paths, "", "", newP->GetOpenDataSetFormat(name), true, DatasetExistsAction::AddNew);
+                loadDataHelper(name, paths, "", "", newP->GetOpenDataSetFormat(name), true, DatasetExistsAction::AddNew);
             } else {
                 newP->RemoveOpenDateSet(name);
 
@@ -1396,7 +1396,7 @@ bool MainForm::openDataHelper(string dataSetName, string format, const vector<st
     return (true);
 }
 
-void MainForm::loadDataHelper(const vector<string> &files, string prompt, string filter, string format, bool multi, DatasetExistsAction existsAction)
+void MainForm::loadDataHelper(string dataSetName, const vector<string> &files, string prompt, string filter, string format, bool multi, DatasetExistsAction existsAction)
 {
     vector<string> myFiles = files;
 
@@ -1425,7 +1425,7 @@ void MainForm::loadDataHelper(const vector<string> &files, string prompt, string
 
     // Generate data set name
     //
-    string dataSetName = _getDataSetName(myFiles[0], existsAction);
+    if (dataSetName.empty()) { dataSetName = _getDataSetName(myFiles[0], existsAction); }
     if (dataSetName.empty()) return;
 
     vector<string> options = {"-project_to_pcs", "-vertical_xform"};
@@ -1471,7 +1471,7 @@ void MainForm::loadData(string fileName)
     vector<string> files;
     if (!fileName.empty()) { files.push_back(fileName); }
 
-    loadDataHelper(files, "Choose the Master data File to load", "Vapor VDC files (*.nc *.vdc)", "vdc", false);
+    loadDataHelper("", files, "Choose the Master data File to load", "Vapor VDC files (*.nc *.vdc)", "vdc", false);
 
     _tabMgr->adjustSize();
     _tabDockWindow->adjustSize();
@@ -1505,19 +1505,19 @@ void MainForm::closeData(string fileName)
 void MainForm::importWRFData()
 {
     vector<string> files;
-    loadDataHelper(files, "WRF-ARW NetCDF files", "", "wrf", true);
+    loadDataHelper("", files, "WRF-ARW NetCDF files", "", "wrf", true);
 }
 
 void MainForm::importCFData()
 {
     vector<string> files;
-    loadDataHelper(files, "NetCDF CF files", "", "cf", true);
+    loadDataHelper("", files, "NetCDF CF files", "", "cf", true);
 }
 
 void MainForm::importMPASData()
 {
     vector<string> files;
-    loadDataHelper(files, "MPAS files", "", "mpas", true);
+    loadDataHelper("", files, "MPAS files", "", "mpas", true);
 }
 
 bool MainForm::doesQStringContainNonASCIICharacter(const QString &s)
@@ -1808,6 +1808,7 @@ bool MainForm::eventFilter(QObject *obj, QEvent *event)
         if (_stats) { _stats->Update(); }
         if (_plot) { _plot->Update(); }
         if (_pythonVariables) { _pythonVariables->Update(); }
+        if (_appSettingsMenu) { _appSettingsMenu->Update(GetSettingsParams()); }
 
         setUpdatesEnabled(false);
         _tabMgr->Update();
@@ -1921,7 +1922,8 @@ void MainForm::_performSessionAutoSave()
 
     if (_eventsSinceLastSave >= eventCountForAutoSave) {
         string autoSaveFile = sParams->GetAutoSaveSessionFile();
-        _paramsMgr->SaveToFile(autoSaveFile);
+        int    rc = _paramsMgr->SaveToFile(autoSaveFile);
+        if (rc < 0) { MSG_ERR("Unable to write settings file " + autoSaveFile); }
         _eventsSinceLastSave = 0;
     }
 }
@@ -1955,7 +1957,8 @@ void MainForm::enableWidgets(bool onOff)
     //	_stepBackAction->setEnabled(onOff);
     _interactiveRefinementSpin->setEnabled(onOff);
     _alignViewCombo->setEnabled(onOff);
-    _Edit->setEnabled(onOff);
+    _editUndoAction->setEnabled(onOff);
+    _editRedoAction->setEnabled(onOff);
     _windowSelector->setEnabled(onOff);
     _tabMgr->setEnabled(onOff);
     _statsAction->setEnabled(onOff);

@@ -66,6 +66,7 @@ class Plot;
 class PythonVariables;
 class ErrorReporter;
 class ParamsWidgetDemo;
+class AppSettingsMenu;
 
 class MainForm : public QMainWindow {
     Q_OBJECT
@@ -97,6 +98,7 @@ private:
     //
     QAction *      _editUndoAction;
     QAction *      _editRedoAction;
+    QAction *      _appSettingsAction;
     QLineEdit *    _timeStepEdit;
     QIntValidator *_timeStepEditValidator;
 
@@ -186,6 +188,7 @@ private:
     Statistics *        _stats;
     Plot *              _plot;
     PythonVariables *   _pythonVariables;
+    AppSettingsMenu *   _appSettingsMenu;
     BannerGUI *         _banner;
     VizSelectCombo *    _windowSelector;
     VAPoR::ControlExec *_controlExec;
@@ -278,7 +281,7 @@ private:
     bool openDataHelper(string dataSetName, string format, const vector<string> &files, const vector<string> &options = vector<string>());
 
     enum DatasetExistsAction { Prompt, AddNew, ReplaceFirst };
-    void         loadDataHelper(const std::vector<string> &files, string prompt, string filter, string format, bool multi, DatasetExistsAction existsAction = Prompt);
+    void         loadDataHelper(string dataSetName, const std::vector<string> &files, string prompt, string filter, string format, bool multi, DatasetExistsAction existsAction = Prompt);
     void         _createCaptureMenu();
     void         _createToolsMenu();
     void         _createEditMenu();

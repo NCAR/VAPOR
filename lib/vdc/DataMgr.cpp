@@ -499,7 +499,7 @@ DataMgr::DataMgr(string format, size_t mem_size, int nthreads)
     _nthreads = nthreads;
     _mem_size = mem_size;
 
-    if (!_mem_size) _mem_size = 100;
+    if (!_mem_size) _mem_size = std::numeric_limits<size_t>::max() / 1048576;
 
     _dc = NULL;
 
@@ -937,7 +937,7 @@ Grid *DataMgr::GetVariable(size_t ts, string varname, int level, int lod, vector
         return (new RegularGrid());
     }
 
-    return (DataMgr::GetVariable(ts, varname, level, lod, min_ui, max_ui));
+    return (DataMgr::GetVariable(ts, varname, level, lod, min_ui, max_ui, lock));
 }
 
 Grid *DataMgr::_getVariable(size_t ts, string varname, int level, int lod, bool lock, bool dataless)

@@ -29,6 +29,7 @@ void PSliceSampleLocationSelector1D::updateGUI() const
 
     int ret = getDataMgr()->GetVariableExtents(ts, varName, level, lod, min, max);
     assert(ret == 0);
+    (void)ret;
     _slider->SetMinimum(min[_dim]);
     _slider->SetMaximum(max[_dim]);
 
@@ -52,6 +53,8 @@ bool PSliceSampleLocationSelector1D::isShown() const
     case Box::YZ: return d == 0;
     default: assert(0);
     }
+
+    return false;
 }
 
 void PSliceSampleLocationSelector1D::sliderValueChanged(float v0)

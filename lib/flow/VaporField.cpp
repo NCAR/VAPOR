@@ -277,7 +277,8 @@ int VaporField::GetVelocity(double time, const glm::vec3 &pos, glm::vec3 &veloci
         VAssert(rv == 0);
 
         // Find the velocity values at floor time step
-        glm::vec3 floorVelocity, ceilingVelocity;
+        glm::vec3 floorVelocity(0.f, 0.f, 0.f);
+        glm::vec3 ceilingVelocity(0.f, 0.f, 0.f);
         for (int i = 0; i < 3; i++) {
             grid = _getAGrid(floorTS, VelocityNames[i]);
             if (grid == nullptr) return GRID_ERROR;
@@ -381,22 +382,6 @@ void VaporField::AssignDataManager(VAPoR::DataMgr *dmgr)
     const auto &timeCoords = dmgr->GetTimeCoordinates();
     _timestamps.resize(timeCoords.size());
     for (size_t i = 0; i < timeCoords.size(); i++) _timestamps[i] = timeCoords[i];
-}
-
-void VaporField::UpdateParamAndVarNames(const VAPoR::FlowParams *p)
-{
-    _params = p;
-
-    // Update properties of this Field
-    IsSteady = p->GetIsSteady();
-    ScalarName = p->GetColorMapVariableName();
-    auto velNames = p->GetFieldVariableNames();
-    for (int i = 0; i < 3; i++) {
-        if (i < velNames.size())
-            VelocityNames[i] = velNames.at(i);
-        else
-            VelocityNames[i] = "";    // make sure it keeps an empty string,
-    }                                 // instead of whatever left from before.
 }
 
 void VaporField::UpdateParams(const VAPoR::FlowParams *p)

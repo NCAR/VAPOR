@@ -78,8 +78,6 @@ protected slots:
     void setTimeColor();
     void setLatLonAnnot(bool);
     void timeAnnotationChanged();
-    void timeLLXChanged();
-    void timeLLYChanged();
     void timeSizeChanged();
     void copyRegionFromRenderer();
 
@@ -118,7 +116,6 @@ private:
 
     void updateTimePanel();
     void updateTimeColor();
-    void updateTimeCoords();
     void updateTimeType();
     void updateTimeSize();
 
@@ -151,6 +148,7 @@ private:
     bool             _animConnected;
 
     PGroup *_axisArrowGroup;
+    PGroup *_timeSlidersGroup;
 };
 
 #endif    // ANNOTATIONEVENTROUTER_H

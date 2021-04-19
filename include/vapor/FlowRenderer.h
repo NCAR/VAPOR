@@ -59,9 +59,8 @@ private:
     // A few variables to keep the current advection states.
     // Some of them are initialized to be at an illegal state.
     int _cache_refinementLevel = 0;
-    ;
     int _cache_compressionLevel = 0;
-    ;
+
     float              _cache_velocityMltp = 1.0f;
     bool               _cache_isSteady = false;
     long               _cache_steadyNumOfSteps = 0;

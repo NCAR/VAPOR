@@ -5,7 +5,6 @@ set (SRCS
 	GLWidget.cpp
 	ErrorReporter.cpp
 	Histo.cpp
-	SettingsEventRouter.cpp
 	VizSelectCombo.cpp
 	AnnotationEventRouter.cpp
 	AnimationEventRouter.cpp
@@ -237,8 +236,12 @@ set (SRCS
 	PFlowRakeRegionSelector.h
 	PMultiVarSelector.cpp
 	PMultiVarSelector.h
+	AppSettingsMenu.cpp
+	AppSettingsMenu.h
     PConstantColorWidget.cpp
     PConstantColorWidget.h
+    PCornerSelector.cpp
+    PCornerSelector.h
     RenderEventRouterGUI.cpp
     RenderEventRouterGUI.h
 
@@ -281,7 +284,6 @@ set (SRCS
 	RangeCombos.h
 	RenderEventRouter.h
 	RenderHolder.h
-	SettingsEventRouter.h
 	SettingsParams.h
 	StatisticsParams.h
 	TabManager.h
@@ -295,8 +297,6 @@ set (UIS
 	animationTab.ui
 	NavigationTab.ui
 	AnnotationGUI.ui
-	SettingsGUI.ui
-	appSettingsTab.ui
 	NewRendererDialog.ui
 	TransformTableGUI.ui
 	statsWindow.ui

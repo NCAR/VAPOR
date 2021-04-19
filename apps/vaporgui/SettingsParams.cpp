@@ -37,15 +37,12 @@ using namespace VAPoR;
 using namespace Wasp;
 
 const string SettingsParams::_classType = "SettingsParams";
-// const string SettingsParams::_classType = "Settings";
 
 const string SettingsParams::_shortName = "Settings";
 const string SettingsParams::_cacheMBTag = "CacheMBs";
 const string SettingsParams::_numThreadsTag = "NumThreads";
 const string SettingsParams::_texSizeTag = "TexSize";
 const string SettingsParams::_texSizeEnableTag = "TexSizeEnabled";
-const string SettingsParams::_winSizeTag = "WinSize";
-const string SettingsParams::_winSizeLockTag = "WinSizeLocked";
 const string SettingsParams::_sessionDirTag = "SessionDir";
 const string SettingsParams::_defaultSessionDirTag = "SessionDir";
 const string SettingsParams::_metadataDirTag = "MetadataDir";
@@ -68,6 +65,9 @@ const string SettingsParams::_sessionAutoSaveEnabledTag = "AutoSaveEnabled";
 const string SettingsParams::_fontFileTag = "FontFile";
 const string SettingsParams::_fontSizeTag = "FontSize";
 const string SettingsParams::_dontShowIntelDriverWarningTag = "DontShowIntelDriverWarning";
+const string SettingsParams::_settingsNeedsWriteTag = "SettingsNeedsWrite";
+
+const string SettingsParams::UseAllCoresTag = "UseAllCoresTag";
 
 //
 // Register class with object factory!!!
@@ -76,6 +76,7 @@ static ParamsRegistrar<SettingsParams> registrar(SettingsParams::GetClassType())
 
 namespace {
 string SettingsFile = ".vapor3_settings";
+const size_t defaultCacheSize = 0;
 }
 
 SettingsParams::SettingsParams(ParamsBase::StateSave *ssave, bool loadFromFile) : ParamsBase(ssave, _classType)
@@ -91,7 +92,7 @@ SettingsParams::SettingsParams(ParamsBase::StateSave *ssave, bool loadFromFile) 
         if (ok) return;
     }
 
-    _init();
+    Init();
 }
 
 SettingsParams::SettingsParams(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node)
@@ -112,7 +113,7 @@ SettingsParams::SettingsParams(ParamsBase::StateSave *ssave, XmlNode *node) : Pa
         if (ok)
             return;
         else
-            _init();
+            Init();
     }
 }
 
@@ -121,7 +122,7 @@ SettingsParams::SettingsParams(const SettingsParams &rhs) : ParamsBase(new Param
     _settingsPath = QDir::homePath().toStdString();
     _settingsPath += QDir::separator().toLatin1();
     _settingsPath += SettingsFile;
-    _init();
+    Init();
 }
 
 SettingsParams &SettingsParams::operator=(const SettingsParams &rhs)
@@ -135,20 +136,31 @@ SettingsParams &SettingsParams::operator=(const SettingsParams &rhs)
     return (*this);
 }
 
-void SettingsParams::Reinit() { _init(); }
+void SettingsParams::Reinit() { Init(); }
 
 SettingsParams::~SettingsParams() {}
 
+void SettingsParams::_swapTildeWithHome(std::string &file) const
+{
+    size_t pos = 0;
+    while ((pos = file.find("~", pos)) != std::string::npos) {
+        file.replace(pos, 1, QDir::homePath().toStdString());
+        pos += QDir::homePath().toStdString().length();
+    }
+}
+
 long SettingsParams::GetCacheMB() const
 {
-    long val = GetValueLong(_cacheMBTag, 8000);
-    if (val < 0) val = 8000;
+    long val = GetValueLong(_cacheMBTag, 0);
+    if (val < 0) val = defaultCacheSize;
+
     return (val);
 }
 
 void SettingsParams::SetCacheMB(long val)
 {
-    if (val < 0) val = 8000;
+    if (val < 0) val = defaultCacheSize;
+
     SetValueLong(_cacheMBTag, "Set cache size", val);
 }
 
@@ -169,10 +181,6 @@ void SettingsParams::SetTexSizeEnable(bool val) { SetValueLong(_texSizeEnableTag
 
 bool SettingsParams::GetTexSizeEnable() const { return (0 != GetValueLong(_texSizeEnableTag, (long)0)); }
 
-void SettingsParams::SetWinSizeLock(bool val) { SetValueLong(_winSizeLockTag, "toggle lock window size", (long)val); }
-
-bool SettingsParams::GetWinSizeLock() const { return (0 != GetValueLong(_winSizeLockTag, (long)false)); }
-
 bool SettingsParams::GetAutoStretchEnabled() const { return (0 != GetValueLong(_autoStretchTag, (long)true)); }
 
 void SettingsParams::SetAutoStretchEnabled(bool val) { SetValueLong(_autoStretchTag, "Enable Auto Stretch", val); }
@@ -191,7 +199,7 @@ void SettingsParams::SetJpegQuality(int quality)
 
 bool SettingsParams::GetSessionAutoSaveEnabled() const
 {
-    double enabled = GetValueDouble(_sessionAutoSaveEnabledTag, 1.f);
+    double enabled = GetValueLong(_sessionAutoSaveEnabledTag, 1);
     if (enabled > 0)
         return true;
     else
@@ -200,15 +208,13 @@ bool SettingsParams::GetSessionAutoSaveEnabled() const
 
 void SettingsParams::SetSessionAutoSaveEnabled(bool enabled)
 {
-    double val = 0.f;
-    if (enabled) val = 1.f;
     string description = "Enable/disable auto save of session files";
-    SetValueDouble(_sessionAutoSaveEnabledTag, description, val);
+    SetValueLong(_sessionAutoSaveEnabledTag, description, (long)enabled);
 }
 
 int SettingsParams::GetChangesPerAutoSave() const
 {
-    int changes = (int)GetValueDouble(_changesPerAutoSaveTag, 5.f);
+    int changes = (int)GetValueLong(_changesPerAutoSaveTag, 5);
     return changes;
 }
 
@@ -216,7 +222,7 @@ void SettingsParams::SetChangesPerAutoSave(int count)
 {
     if (count < 0) count = 5;
     string description = "User changes before auto saving session file";
-    SetValueDouble(_changesPerAutoSaveTag, description, count);
+    SetValueLong(_changesPerAutoSaveTag, description, count);
 }
 
 string SettingsParams::GetAutoSaveSessionFile() const
@@ -225,6 +231,9 @@ string SettingsParams::GetAutoSaveSessionFile() const
     string defaultFile = autoSaveDir + "/VaporAutoSave.vs3";
 
     string file = GetValueString(_autoSaveFileLocationTag, defaultFile);
+
+    _swapTildeWithHome(file);
+
     return file;
 }
 
@@ -238,7 +247,7 @@ string SettingsParams::GetSessionDir() const
 {
     string defaultDir = GetDefaultSessionDir();
     string dir = GetValueString(_sessionDirTag, defaultDir);
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -247,7 +256,7 @@ void SettingsParams::SetSessionDir(string name) { SetValueString(_sessionDirTag,
 string SettingsParams::GetDefaultSessionDir() const
 {
     string dir = GetValueString(_defaultSessionDirTag, string("."));
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -267,7 +276,7 @@ string SettingsParams::GetMetadataDir() const
 {
     string defaultDir = GetDefaultMetadataDir();
     string dir = GetValueString(_metadataDirTag, defaultDir);
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -276,7 +285,7 @@ void SettingsParams::SetMetadataDir(string dir) { SetValueString(_metadataDirTag
 string SettingsParams::GetDefaultMetadataDir() const
 {
     string dir = GetValueString(_defaultMetadataDirTag, string("."));
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -290,7 +299,7 @@ string SettingsParams::GetTFDir() const
 {
     string defaultDir = GetDefaultTFDir();
     string dir = GetValueString(_tfDirTag, defaultDir);
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -299,7 +308,7 @@ void SettingsParams::SetTFDir(string dir) { SetValueString(_tfDirTag, "set trans
 string SettingsParams::GetDefaultTFDir() const
 {
     string dir = GetValueString(_defaultTfDirTag, string(""));
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -313,7 +322,7 @@ string SettingsParams::GetFlowDir() const
 {
     string defaultDir = GetDefaultFlowDir();
     string dir = GetValueString(_flowDirTag, defaultDir);
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -322,7 +331,7 @@ void SettingsParams::SetFlowDir(string dir) { SetValueString(_flowDirTag, "set f
 string SettingsParams::GetDefaultFlowDir() const
 {
     string dir = GetValueString(_defaultFlowDirTag, string("."));
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -332,7 +341,7 @@ string SettingsParams::GetPythonDir() const
 {
     string defaultDir = GetDefaultPythonDir();
     string dir = GetValueString(_pythonDirTag, defaultDir);
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -341,7 +350,7 @@ void SettingsParams::SetPythonDir(string dir) { SetValueString(_pythonDirTag, "s
 string SettingsParams::GetDefaultPythonDir() const
 {
     string dir = GetValueString(_defaultPythonDirTag, string("."));
-    if (dir == "~") { dir = QDir::homePath().toStdString(); }
+    _swapTildeWithHome(dir);
     return (dir);
 }
 
@@ -357,6 +366,7 @@ void SettingsParams::SetCurrentPrefsPath(string pth) { SetValueString(_currentPr
 
 int SettingsParams::GetNumThreads() const
 {
+    if (GetValueLong(UseAllCoresTag, true)) { return 0; }
     long val = GetValueLong(_numThreadsTag, 0);
     val = val >= 0 ? val : 0;
     return ((int)val);
@@ -432,11 +442,22 @@ int SettingsParams::SaveSettings() const
 }
 
 // Reset settings settings to initial state
-void SettingsParams::_init()
+void SettingsParams::Init()
 {
-    SetDefaultSessionDir(string("~"));
-    SetDefaultMetadataDir(string("~"));
-    SetDefaultFlowDir(string("~"));
+    SetSessionAutoSaveEnabled(true);
+    SetChangesPerAutoSave(5);
+    std::string homeDir = QDir::homePath().toStdString();
+    SetAutoSaveSessionFile(homeDir + "/VaporAutoSave.vs3");
+
+    SetAutoStretchEnabled(true);
+    SetValueLong(UseAllCoresTag, "", true);
+    SetNumThreads(4);
+    SetCacheMB(defaultCacheSize);
+
+
+    SetDefaultSessionDir(string(homeDir));
+    SetDefaultMetadataDir(string(homeDir));
+    SetDefaultFlowDir(string(homeDir));
 
     string palettes = GetSharePath("palettes");
     SetDefaultTFDir(string(palettes));
@@ -445,25 +466,4 @@ void SettingsParams::_init()
     SetDefaultPythonDir(string(python));
 }
 
-void SettingsParams::SetWinSize(size_t width, size_t height)
-{
-    if (width < 400) width = 400;
-    if (height < 400) height = 400;
-
-    vector<long> val;
-    val.push_back(width);
-    val.push_back(height);
-    SetValueLongVec(_winSizeTag, "Set window size", val);
-}
-
-void SettingsParams::GetWinSize(size_t &width, size_t &height) const
-{
-    vector<long> defaultv;
-    defaultv.push_back(1280);
-    defaultv.push_back(1024);
-    vector<long> val = GetValueLongVec(_winSizeTag, defaultv);
-    if (val[0] < 400) val[0] = defaultv[0];
-    if (val[1] < 400) val[1] = defaultv[1];
-    width = val[0];
-    height = val[1];
-}
+std::string SettingsParams::GetSettingsPath() const { return _settingsPath; }

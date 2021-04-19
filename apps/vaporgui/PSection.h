@@ -20,6 +20,7 @@ public:
     PSection(const std::string &label = "", const PGroup::List &widgets = {});
     //! @copydoc PGroup::Add
     PSection *Add(PWidget *pw);
+    PSection *Add(const PGroup::List &widgets);
 
 protected:
     void updateGUI() const override;
