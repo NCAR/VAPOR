@@ -513,8 +513,8 @@ VAPoR::StretchedGrid *MakeStretchedGrid(const vector<size_t> &dims, const vector
 
 VAPoR::UnstructuredGrid2D *MakeUnstructuredGrid2D(const vector<size_t> &dims, const vector<size_t> &bs, const std::vector<double> &minu, const std::vector<double> &maxu)
 {
-    assert(dims.size() >= 2);
-    assert(bs.size() >= 2);
+    VAssert(dims.size() >= 2);
+    VAssert(bs.size() >= 2);
 
     vector<size_t>             bs1d = {bs[0] * bs[1]};
     vector<size_t>             dims1d = {dims[0] * dims[1]};
