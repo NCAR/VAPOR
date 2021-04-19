@@ -306,7 +306,6 @@ void PrintStats(double rms, size_t numMissingValues, size_t disagreements, doubl
     cout << "    Missing value count:                                 " << numMissingValues << endl;
     cout << "    GetValueAtIndex() vs GetValue() disagreement count:  " << disagreements << endl;
     cout << "    Time:                                                " << time << endl;
-    cout << endl;
 }
 
 bool RunTest(Grid *grid)
@@ -318,11 +317,6 @@ bool RunTest(Grid *grid)
     double t0 = Wasp::GetTime();
 
     rc = CompareIndexToCoords(grid, rms, numMissingValues, disagreements);
-    // if (CompareIndexToCoords(grid, rms, numMissingValues, disagreements) == false) {
-    // cerr << "       *** Error reported in " << grid->GetType() << " grid***" << endl;
-    //    cout << "       *** Error reported in " << grid->GetType() << " grid***" << endl;
-    //    rc = false;
-    //}
 
     if (grid->GetInterpolationOrder() == 0) {
         cout << "  Interpolation order: nearestNeighbor " << endl;
@@ -334,7 +328,12 @@ bool RunTest(Grid *grid)
 
     PrintStats(rms, numMissingValues, disagreements, time);
 
-    if (rc == false) { cout << "*** Error reported in " << grid->GetType() << " grid ***" << endl; }
+    if (rc == false) { 
+        cout << "*** Error reported in " << grid->GetType() << " grid ***" << endl << endl;
+    }
+    else { 
+        cout << endl; 
+    }
 
     return rc;
 }
