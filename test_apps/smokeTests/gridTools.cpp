@@ -328,11 +328,10 @@ bool RunTest(Grid *grid)
 
     PrintStats(rms, numMissingValues, disagreements, time);
 
-    if (rc == false) { 
+    if (rc == false) {
         cout << "*** Error reported in " << grid->GetType() << " grid ***" << endl << endl;
-    }
-    else { 
-        cout << endl; 
+    } else {
+        cout << endl;
     }
 
     return rc;
