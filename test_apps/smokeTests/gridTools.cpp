@@ -318,8 +318,8 @@ bool RunTest(Grid *grid)
     double t0 = Wasp::GetTime();
 
     rc = CompareIndexToCoords(grid, rms, numMissingValues, disagreements);
-    //if (CompareIndexToCoords(grid, rms, numMissingValues, disagreements) == false) {
-        // cerr << "       *** Error reported in " << grid->GetType() << " grid***" << endl;
+    // if (CompareIndexToCoords(grid, rms, numMissingValues, disagreements) == false) {
+    // cerr << "       *** Error reported in " << grid->GetType() << " grid***" << endl;
     //    cout << "       *** Error reported in " << grid->GetType() << " grid***" << endl;
     //    rc = false;
     //}
@@ -334,9 +334,7 @@ bool RunTest(Grid *grid)
 
     PrintStats(rms, numMissingValues, disagreements, time);
 
-    if (rc == false) {
-        cout << "*** Error reported in " << grid->GetType() << " grid ***" << endl;
-    }
+    if (rc == false) { cout << "*** Error reported in " << grid->GetType() << " grid ***" << endl; }
 
     return rc;
 }
