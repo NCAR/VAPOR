@@ -83,11 +83,10 @@ public:
 
 public slots:
     void emitCellClicked(int, int);
-    void emitValueChanged();
+    void emitValueChanged(int row = 0, int col = 0);
     void emitReturnPressed();
 
 signals:
-
     void valueChanged(int row, int col);
     void cellClicked(int row, int col);
     void returnPressed();
