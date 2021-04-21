@@ -148,7 +148,7 @@ private:
     bool             _animConnected;
 
     PGroup *_axisArrowGroup;
-    PGroup *_timeSlidersGroup;
+    PGroup *_timeAnnotationGroup;
 };
 
 #endif    // ANNOTATIONEVENTROUTER_H

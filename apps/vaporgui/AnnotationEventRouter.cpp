@@ -95,14 +95,24 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
     layout()->addWidget(_axisArrowGroup);
     
     
-    _timeSlidersGroup = new PGroup({
-        new PLabel("Lower-left coordinates:"),
-        new PDoubleSliderEdit(AnnotationParams::_timeLLXTag, "X"),
-        new PDoubleSliderEdit(AnnotationParams::_timeLLYTag, "Y"),
+    //aParams->SetTimeType(index);
+    layout()->addWidget(_axisArrowGroup);
+    _timeAnnotationGroup = new PGroup({
+        new PSection("Time Annotation", {
+            new PEnumDropdown(
+                AnnotationParams::_timeTypeTag, 
+                {"No annotation", "Time step number", "User time", "Formatted date/time"}, 
+                {0, 1, 2, 3}, 
+                "Annotation type" 
+            ),
+            new PDoubleSliderEdit(AnnotationParams::_timeLLXTag, "X Position"),
+            new PDoubleSliderEdit(AnnotationParams::_timeLLYTag, "Y Position"),
+        })
     });
-    auto l = (QVBoxLayout*)tab_4->layout();
-    l->insertWidget(l->indexOf(verticalLayout_9), _timeSlidersGroup);
-    verticalLayout_9->hide();
+    layout()->addWidget(_timeAnnotationGroup);
+    //auto l = (QVBoxLayout*)tab_4->layout();
+    //l->insertWidget(l->indexOf(verticalLayout_9), _timeAnnotationGroup);
+    //verticalLayout_9->hide();
     // clang-format on
 }
 
@@ -152,7 +162,7 @@ void AnnotationEventRouter::_updateTab()
     domainFrameCheckbox->setChecked(vParams->GetUseDomainFrame());
 
     _axisArrowGroup->Update(vParams);
-    _timeSlidersGroup->Update(vParams);
+    _timeAnnotationGroup->Update(vParams);
 
     return;
 }
