@@ -1267,6 +1267,8 @@ void MainForm::sessionOpenHelper(string fileName, bool loadDatasets)
         _controlExec->LoadState();
     }
 
+    GetSettingsParams()->LoadFromSettingsFile();
+
     // Ugh. Load state will of course set open data sets in database
     //
 
