@@ -1,7 +1,9 @@
 
 #pragma once
 
-#ifdef _OPENMP
+#include "VaporConfig.h"
+
+#ifdef USE_OMP
     #include <omp.h>
 #else
 

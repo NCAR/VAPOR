@@ -72,7 +72,16 @@ set (HEADERS
 
 add_library (vdc SHARED ${SRC} ${HEADERS})
 
-target_link_libraries (vdc PUBLIC common wasp ${UDUNITS2} ${PROJ})
+if( USE_OMP )
+  target_compile_options( vdc PUBLIC ${OpenMP_CXX_FLAGS} )
+endif()
+
+
+if( USE_OMP )
+  target_link_libraries (vdc PUBLIC common wasp ${UDUNITS2} ${PROJ} OpenMP::OpenMP_CXX)
+else()
+  target_link_libraries (vdc PUBLIC common wasp ${UDUNITS2} ${PROJ})
+endif()
 
 add_definitions (-DVDF_EXPORTS)
 

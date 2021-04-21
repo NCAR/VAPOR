@@ -4,10 +4,8 @@
 # 
 # libnetcdf-dev,  libudunits2-dev,  libproj-dev
 
-cmake_minimum_required (VERSION 3.1)
-set(CMAKE_C_COMPILER "/opt/local/bin/clang")
-set(CMAKE_CXX_COMPILER "/opt/local/bin/clang++")
-project (VAPOR3 LANGUAGES C CXX)
+cmake_minimum_required (VERSION 3.10)
+project (VAPOR3)
 
 include (buildutils/UtilityFunctions.cmake)
 include (buildutils/GetGitRevisionDescription.cmake)
@@ -22,7 +20,7 @@ endif()
 set (CMAKE_OSX_DEPLOYMENT_TARGET 10.9)
 
 set (VERSION_MAJOR 3)
-set (VERSION_MINOR 3)
+set (VERSION_MINOR 4)
 set (VERSION_MICRO 1)
 set (VERSION_RC )
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -50,8 +48,8 @@ endif()
 
 # compiler warning flags
 if (NOT WIN32)
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -Wall -Wno-sign-compare -Wno-overloaded-virtual -Wno-parentheses")
-  SET (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fopenmp -Wall -Wno-sign-compare")
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-sign-compare -Wno-overloaded-virtual -Wno-parentheses")
+  SET (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wall -Wno-sign-compare")
 else ()
   # Enable multithread compiling on Visual Studio
   # This feature is glitchy so you may need to re-run
@@ -72,6 +70,22 @@ option (BUILD_UTL "Build conversion and utility applications" ${DEFAULT_BUILD_UT
 option (BUILD_DOC "Build Vapor Doxygen documentation" ON)
 option (BUILD_TEST_APPS "Build test applications" OFF)
 option (DIST_INSTALLER "Generate installer for distributing vapor binaries. Will generate standard make install if off" OFF)
+option( USE_OMP "Use OpenMP on some calculations" OFF)
+
+if( USE_OMP )
+    find_package(OpenMP REQUIRED)
+    if( OpenMP_CXX_FOUND AND OpenMP_CXX_FLAGS )
+        message(STATUS "OpenMP found! (${OpenMP_CXX_LIB_NAMES})")
+    else()
+        message(STATUS "OpenMP NOT found!")
+    endif()
+endif()
+
+#
+# configure a header file to pass some of the CMake settings to the source code
+#
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/VaporConfig.h.in" "VaporConfig.h")
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set (GENERATE_FULL_INSTALLER ON)
 if (BUILD_GUI)
