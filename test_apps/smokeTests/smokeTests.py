@@ -58,13 +58,13 @@ args = parser.parse_args()
 #
 
 gridSizes = [
-    "1x1x1",
+#    "1x1x1",
     "2x2x2",
     "4x2x2",
     "8x2x2",
-    "1x8x8",
-    "8x1x8",
-    "8x8x1",
+#    "1x8x8",
+#    "8x1x8",
+#    "8x8x1",
     "7x7x7",
     "8x8x8"
 ]
