@@ -100,6 +100,7 @@ private:
 
     void _drawAxes(std::vector<double> min, std::vector<double> max, std::vector<double> origin, std::vector<double> color, double width);
     void _drawTic(double startPosn[], double endPosn[], double width, std::vector<double> color);
+    void _drawTimeAnnotation();
 
     void _makeTransformMatrix(const Transform *transform, glm::mat4 &transformMatrix) const;
 
