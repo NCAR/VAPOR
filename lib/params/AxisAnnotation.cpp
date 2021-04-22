@@ -54,14 +54,34 @@ static ParamsRegistrar<AxisAnnotation> registrar(AxisAnnotation::GetClassType())
 //----------------------------------------------------------------------------
 // Constructor
 //----------------------------------------------------------------------------
-AxisAnnotation::AxisAnnotation(ParamsBase::StateSave *ssave) : ParamsBase(ssave, AxisAnnotation::GetClassType()) {}
+AxisAnnotation::AxisAnnotation(ParamsBase::StateSave *ssave) : ParamsBase(ssave, AxisAnnotation::GetClassType()) {
 
-AxisAnnotation::AxisAnnotation(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node) {}
+}
+
+AxisAnnotation::AxisAnnotation(ParamsBase::StateSave *ssave, XmlNode *node) : ParamsBase(ssave, node) {
+
+}
 
 //----------------------------------------------------------------------------
 // Destructor
 //----------------------------------------------------------------------------
 AxisAnnotation::~AxisAnnotation() { MyBase::SetDiagMsg("AxisAnnotation::~AxisAnnotation() this=%p", this); }
+
+void AxisAnnotation::Initialize() {
+    vector<double> minExts(3, 0.0);
+    vector<double> maxExts(3, 1.0);
+
+    SetMinTics(minExts);
+    SetMaxTics(maxExts);
+    SetAxisOrigin(minExts);
+    SetValueDoubleVec(_backgroundColorTag, "Axis annotation background color", {0.0, 0.0, 0.0});
+    SetValueDoubleVec(_colorTag, "Axis annotation text color", {1.0, 1.0, 1.0});
+    SetValueLong(_fontSizeTag, "Axis annotation font size", 24);
+    SetValueLong(_digitsTag, "Set axis num digits", 2);
+    SetTicWidth( 1 );
+    SetAxisAnnotationInitialized(true);
+    //SetValueDoubleVec(_ticSizeTag, {.05, .05, .05});
+}
 
 void AxisAnnotation::SetAxisAnnotationEnabled(bool val)
 {
@@ -95,6 +115,7 @@ std::vector<double> AxisAnnotation::GetAxisColor() const
 
 void AxisAnnotation::SetAxisColor(std::vector<double> color)
 {
+    return;
     string msg = "Axis annotation text color";
     SetValueDoubleVec(_colorTag, msg, color);
 }
@@ -171,8 +192,39 @@ vector<double> AxisAnnotation::GetTicSize() const
     return GetValueDoubleVec(_ticSizeTag, defaultv);
 }
 
+void AxisAnnotation::SetXTicDir( double dir ) {
+    std::vector<double> v = GetTicDirs();
+    v[0] = dir;
+    SetTicDirs(v);
+}
+
+int AxisAnnotation::GetXTicDir() const {
+    return GetTicDirs()[0];
+}
+
+int AxisAnnotation::GetYTicDir() const {
+    return GetTicDirs()[1];
+}
+
+int AxisAnnotation::GetZTicDir() const {
+    return GetTicDirs()[2];
+}
+
+void AxisAnnotation::SetYTicDir( double dir ) {
+    std::vector<double> v = GetTicDirs();
+    v[2] = dir;
+    SetTicDirs(v);
+}
+
+void AxisAnnotation::SetZTicDir( double dir ) {
+    std::vector<double> v = GetTicDirs();
+    v[2] = dir;
+    SetTicDirs(v);
+}
+
 void AxisAnnotation::SetTicDirs(vector<double> ticDirs)
 {
+    std::cout << ticDirs[0] << " " << ticDirs[1] << " " << ticDirs[2] << std::endl;
     VAssert(ticDirs.size() == 3);
     SetValueDoubleVec(_ticDirsTag, "Set tic direction", ticDirs);
 }

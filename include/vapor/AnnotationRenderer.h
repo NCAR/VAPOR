@@ -78,8 +78,8 @@ protected:
 private:
     struct billboard {
         string text;
-        int    x;
-        int    y;
+        double    x;
+        double    y;
         float  xn;
         float  yn;
         int    size;

@@ -113,8 +113,12 @@ void AnnotationParams::_init()
     SetValueDouble(AxisArrowSizeTag, "Initializing AxisArrowSizeTag", .2);
     SetValueDouble(AxisArrowXPosTag, "Initializing AxisArrowXPosTag", .05);
     SetValueDouble(AxisArrowYPosTag, "Initializing AxisArrowYPosTag", .05);
-    SetValueDouble(_timeLLXTag, "", 0.01);
-    SetValueDouble(_timeLLYTag, "", 0.01);
+    SetValueDouble(_timeLLXTag, "Initializing timestep llx coordinate", 0.01);
+    SetValueDouble(_timeLLYTag, "Initializing timestep lly coordinate", 0.01);
+    SetValueLong(_timeSizeTag, "Initializing timestep font size", 24);
+    SetValueDoubleVec(_timeColorTag, "Initializing timestep color", {1., 1., 1.});
+    //SetValueLong(_annotationEnabledTag, "Initializing axis annotation enabled default", 0);
+    SetValueLong(_latLonAxesTag, "Initializing axis annotation enabled default", 0);
 }
 
 void AnnotationParams::_getColor(vector<double> &color, string tag) const

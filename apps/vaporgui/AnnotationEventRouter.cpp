@@ -45,7 +45,10 @@
 #include "AnnotationEventRouter.h"
 #include "vapor/ControlExecutive.h"
 #include "EventRouter.h"
+#include "VSection.h"
 #include "PWidgets.h"
+#include "PEnumDropdownHLI.h"
+#include "PSliderEditHLI.h"
 
 using namespace VAPoR;
 
@@ -77,13 +80,71 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
     _ticWidthCombo = new Combo(ticWidthEdit, ticWidthSlider);
     _annotationVaporTable = new VaporTable(axisAnnotationTable);
     _annotationVaporTable->Reinit((VaporTable::DOUBLE), (VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
+    AxisAnnotation* aa = _getCurrentAxisAnnotation();
+    std::vector<double> c = aa->GetAxisColor();
+    std::cout << c[0] << " " << c[1] << " " << c[2] << " " << c[3] << std::endl;
 
     connectAnnotationWidgets();
 
     _animConnected = false;
     _ap = NULL;
 
-    // clang-format off
+    _axisAnnotationGroup = new PGroup({
+        new PCheckbox( AxisAnnotation::_annotationEnabledTag,"Axis Annotations Enabled" ),
+        new PCheckbox( AxisAnnotation::_latLonAxesTag,"Annotate with lat/lon" ),
+        new PColorSelector(AxisAnnotation::_colorTag, "Axis Text Color"),
+        new PColorSelector(AxisAnnotation::_backgroundColorTag, "Text Background Color"),
+        (new PIntegerSliderEditHLI<AxisAnnotation>("Font Size", &AxisAnnotation::GetAxisFontSize, &AxisAnnotation::SetAxisFontSize))->SetRange(2, 48)->EnableDynamicUpdate(),
+        (new PIntegerSliderEdit(AxisAnnotation::_digitsTag, "Digits"))->SetRange(0, 8)->EnableDynamicUpdate(),
+        //(new PIntegerSliderEdit(AxisAnnotation::_ticWidthTag, "Tic Width"))->SetRange(0, 10)->EnableDynamicUpdate(), // Broken
+        new PEnumDropdownHLI<AxisAnnotation>(
+            "X Tickmark Orientation",
+            {"Y axis", "Z axis"},
+            {1, 2},
+            &AxisAnnotation::GetXTicDir,
+            &AxisAnnotation::SetXTicDir
+        ),
+        new PEnumDropdownHLI<AxisAnnotation>(
+            "Y Tickmark Orientation",
+            {"X axis", "Z axis"},
+            {0, 2},
+            &AxisAnnotation::GetYTicDir,
+            &AxisAnnotation::SetYTicDir
+        ),
+        new PEnumDropdownHLI<AxisAnnotation>(
+            "Z Tickmark Orientation",
+            {"X axis", "Y axis"},
+            {0, 1},
+            &AxisAnnotation::GetZTicDir,
+            &AxisAnnotation::SetZTicDir
+        ),
+    });
+
+    QTableWidget* annotationTable = new QTableWidget;
+    _annotationVaporTable2 = new VaporTable(annotationTable);
+    _annotationVaporTable2->Reinit((VaporTable::DOUBLE), (VaporTable::MUTABLE), (VaporTable::HighlightFlags)(0));
+    VSection* annotationTab = new VSection("Axis Annotations");
+    annotationTab->layout()->addWidget(annotationTable);
+    //layout()->addWidget(_axisAnnotationGroup);
+    annotationTab->layout()->addWidget(_axisAnnotationGroup);
+    layout()->addWidget(annotationTab);
+
+    _timeAnnotationGroup = new PGroup({
+        new PSection("Time Annotation", {
+            new PEnumDropdown(
+                AnnotationParams::_timeTypeTag, 
+                {"No annotation", "Time step number", "User time", "Formatted date/time"}, 
+                {0, 1, 2, 3}, 
+                "Annotation type" 
+            ),
+            new PIntegerInput(AnnotationParams::_timeSizeTag, "Font Size"),
+            (new PDoubleSliderEdit(AnnotationParams::_timeLLXTag, "X Position"))->EnableDynamicUpdate(),
+            (new PDoubleSliderEdit(AnnotationParams::_timeLLYTag, "Y Position"))->EnableDynamicUpdate(),
+            new PColorSelector(AnnotationParams::_timeColorTag, "Text Color")
+        })
+    });
+    layout()->addWidget(_timeAnnotationGroup);
+
     _axisArrowGroup = new PGroup({
         new PSection("Orientation Arrows", {
             (new PCheckbox(AnnotationParams::AxisArrowEnabledTag, "Show arrows (XYZ->RGB)")),
@@ -94,26 +155,15 @@ AnnotationEventRouter::AnnotationEventRouter(QWidget *parent, ControlExec *ce) :
     });
     layout()->addWidget(_axisArrowGroup);
     
-    
-    //aParams->SetTimeType(index);
-    layout()->addWidget(_axisArrowGroup);
-    _timeAnnotationGroup = new PGroup({
-        new PSection("Time Annotation", {
-            new PEnumDropdown(
-                AnnotationParams::_timeTypeTag, 
-                {"No annotation", "Time step number", "User time", "Formatted date/time"}, 
-                {0, 1, 2, 3}, 
-                "Annotation type" 
-            ),
-            new PDoubleSliderEdit(AnnotationParams::_timeLLXTag, "X Position"),
-            new PDoubleSliderEdit(AnnotationParams::_timeLLYTag, "Y Position"),
+    _3DGeometryGroup = new PGroup({
+        new PSection("3D Geometry", {
+            new PCheckbox(AnnotationParams::_domainFrameTag, "Display Domain Bounds"),
+            new PColorSelector(AnnotationParams::_domainColorTag, "Domain Frame Color"),
+            new PColorSelector(AnnotationParams::_backgroundColorTag, "Background Color"),
+            //new PColorSelector(AnnotationParams::_regionColorTag, "Region Frame Color")  Broken.  See #1742
         })
     });
-    layout()->addWidget(_timeAnnotationGroup);
-    //auto l = (QVBoxLayout*)tab_4->layout();
-    //l->insertWidget(l->indexOf(verticalLayout_9), _timeAnnotationGroup);
-    //verticalLayout_9->hide();
-    // clang-format on
+    layout()->addWidget(_3DGeometryGroup);
 }
 
 AnnotationEventRouter::~AnnotationEventRouter() {}
@@ -132,14 +182,6 @@ void AnnotationEventRouter::connectAnnotationWidgets()
     connect(yTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setYTicOrientation(int)));
     connect(zTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setZTicOrientation(int)));
     connect(copyRegionButton, SIGNAL(pressed()), this, SLOT(copyRegionFromRenderer()));
-    connect(_timeCombo, SIGNAL(activated(int)), this, SLOT(timeAnnotationChanged()));
-    connect(_timeSizeEdit, SIGNAL(returnPressed()), this, SLOT(timeSizeChanged()));
-    connect(_timeColorButton, SIGNAL(clicked()), this, SLOT(setTimeColor()));
-
-    connect(backgroundColorButton, SIGNAL(clicked()), this, SLOT(setBackgroundColor()));
-    connect(domainColorButton, SIGNAL(clicked()), this, SLOT(setDomainColor()));
-    connect(domainFrameCheckbox, SIGNAL(clicked()), this, SLOT(setDomainFrameEnabled()));
-    connect(regionColorButton, SIGNAL(clicked()), this, SLOT(setRegionColor()));
 }
 
 void AnnotationEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
@@ -151,18 +193,17 @@ void AnnotationEventRouter::GetWebHelp(vector<pair<string, string>> &help) const
 
 void AnnotationEventRouter::_updateTab()
 {
-    updateRegionColor();
-    updateDomainColor();
-    updateBackgroundColor();
-    updateTimePanel();
     updateAxisAnnotations();
+
+    AxisAnnotation* a = _getCurrentAxisAnnotation();
+    _axisAnnotationGroup->Update(a);
+    std::vector<double> c = a->GetAxisColor();
 
     AnnotationParams *vParams = (AnnotationParams *)GetActiveParams();
 
-    domainFrameCheckbox->setChecked(vParams->GetUseDomainFrame());
-
     _axisArrowGroup->Update(vParams);
     _timeAnnotationGroup->Update(vParams);
+    _3DGeometryGroup->Update(vParams);
 
     return;
 }
@@ -373,6 +414,7 @@ void AnnotationEventRouter::updateAxisTable()
     colHeaders.push_back("Z");
 
     _annotationVaporTable->Update(5, 3, tableValues, rowHeaders, colHeaders);
+    _annotationVaporTable2->Update(5, 3, tableValues, rowHeaders, colHeaders);
 }
 
 string AnnotationEventRouter::getProjString()
@@ -444,7 +486,12 @@ AxisAnnotation *AnnotationEventRouter::_getCurrentAxisAnnotation()
     AxisAnnotation *  aa = aParams->GetAxisAnnotation();
 
     bool initialized = aa->GetAxisAnnotationInitialized();
-    if (!initialized) initializeAnnotation(aa);
+    if (!initialized) {
+        ParamsMgr *paramsMgr = _controlExec->GetParamsMgr();
+        paramsMgr->BeginSaveStateGroup("Initialize axis annotation");
+        aa->Initialize();
+        paramsMgr->EndSaveStateGroup();
+    }
 
     return aa;
 }
@@ -577,75 +624,6 @@ void AnnotationEventRouter::setColorHelper(QWidget *w, vector<double> &rgb)
     rgb.push_back(newColor.blue() / 255.0);
 }
 
-void AnnotationEventRouter::updateColorHelper(const vector<double> &rgb, QWidget *w)
-{
-    QColor color((int)(rgb[0] * 255.0), (int)(rgb[1] * 255.0), (int)(rgb[2] * 255.0));
-
-    QPalette pal;
-    pal.setColor(QPalette::Base, color);
-    w->setPalette(pal);
-}
-
-void AnnotationEventRouter::setRegionColor()
-{
-    vector<double> rgb;
-
-    setColorHelper(regionColorEdit, rgb);
-    if (rgb.size() != 3) return;
-
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetRegionColor(rgb);
-}
-
-void AnnotationEventRouter::updateRegionColor()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    vector<double>    rgb;
-    aParams->GetRegionColor(rgb);
-
-    updateColorHelper(rgb, regionColorEdit);
-}
-
-void AnnotationEventRouter::setDomainColor()
-{
-    vector<double> rgb;
-
-    setColorHelper(domainColorEdit, rgb);
-    if (rgb.size() != 3) return;
-
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetDomainColor(rgb);
-}
-
-void AnnotationEventRouter::updateDomainColor()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    vector<double>    rgb;
-    aParams->GetDomainColor(rgb);
-
-    updateColorHelper(rgb, domainColorEdit);
-}
-
-void AnnotationEventRouter::setBackgroundColor()
-{
-    vector<double> rgb;
-
-    setColorHelper(backgroundColorEdit, rgb);
-    if (rgb.size() != 3) return;
-
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetBackgroundColor(rgb);
-}
-
-void AnnotationEventRouter::updateBackgroundColor()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    vector<double>    rgb;
-    aParams->GetBackgroundColor(rgb);
-
-    updateColorHelper(rgb, backgroundColorEdit);
-}
-
 void AnnotationEventRouter::setAxisColor()
 {
     vector<double> rgb;
@@ -677,6 +655,15 @@ void AnnotationEventRouter::updateAxisColor()
     updateColorHelper(rgb, axisColorEdit);
 }
 
+void AnnotationEventRouter::updateColorHelper(const vector<double> &rgb, QWidget *w)
+{
+    QColor color((int)(rgb[0] * 255.0), (int)(rgb[1] * 255.0), (int)(rgb[2] * 255.0));
+
+    QPalette pal;
+    pal.setColor(QPalette::Base, color);
+    w->setPalette(pal);
+}
+
 void AnnotationEventRouter::updateAxisBackgroundColor()
 {
     vector<double>  rgb;
@@ -684,104 +671,6 @@ void AnnotationEventRouter::updateAxisBackgroundColor()
     rgb = aa->GetAxisBackgroundColor();
 
     updateColorHelper(rgb, axisBackgroundColorEdit);
-}
-
-void AnnotationEventRouter::setTimeColor()
-{
-    vector<double> rgb;
-
-    setColorHelper(_timeColorEdit, rgb);
-    if (rgb.size() != 3) return;
-
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetTimeColor(rgb);
-}
-
-void AnnotationEventRouter::updateTimePanel()
-{
-    updateTimeColor();
-    updateTimeType();
-    updateTimeSize();
-    timeAnnotationChanged();
-}
-
-void AnnotationEventRouter::updateTimeColor()
-{
-    AnnotationParams *  aParams = (AnnotationParams *)GetActiveParams();
-    std::vector<double> rgb = aParams->GetTimeColor();
-
-    updateColorHelper(rgb, _timeColorEdit);
-}
-
-void AnnotationEventRouter::updateTimeType()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    int               type = aParams->GetTimeType();
-    _timeCombo->setCurrentIndex(type);
-}
-
-void AnnotationEventRouter::updateTimeSize()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    int               size = aParams->GetTimeSize();
-    _timeSizeEdit->setText(QString::number(size));
-}
-
-void AnnotationEventRouter::timeAnnotationChanged()
-{
-    int               index = _timeCombo->currentIndex();
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetTimeType(index);
-
-    switch (index) {
-    case 0: _controlExec->ClearText(); break;
-    case 1: drawTimeStep(); break;
-    case 2: drawTimeUser(); break;
-    case 3: drawTimeStamp(); break;
-    }
-}
-
-void AnnotationEventRouter::timeSizeChanged()
-{
-    float             size = _timeSizeEdit->text().toFloat();
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetTimeSize(size);
-}
-
-void AnnotationEventRouter::drawTimeStep(string myString)
-{
-    _controlExec->ClearText();
-
-    if (myString == "") { myString = "Timestep: " + std::to_string(GetCurrentTimeStep()); }
-
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    float             x = aParams->GetTimeLLX();
-    float             y = aParams->GetTimeLLY();
-    int               size = aParams->GetTimeSize();
-    float             color[] = {0., 0., 0.};
-    aParams->GetTimeColor(color);
-
-    _controlExec->DrawTextNormalizedCoords(myString, x, y, size, color, 1);
-}
-
-void AnnotationEventRouter::drawTimeUser()
-{
-    size_t         ts = GetCurrentTimeStep();
-    DataStatus *   ds = _controlExec->GetDataStatus();
-    vector<double> timeCoords = ds->GetTimeCoordinates();
-
-    double             myTime = timeCoords[ts];
-    std::ostringstream ss;
-    ss << myTime;
-    std::string myString = ss.str();
-    drawTimeStep(myString);
-}
-
-void AnnotationEventRouter::drawTimeStamp()
-{
-    size_t      ts = GetCurrentTimeStep();
-    DataStatus *ds = _controlExec->GetDataStatus();
-    drawTimeStep(ds->GetTimeCoordsFormatted()[ts]);
 }
 
 void AnnotationEventRouter::setAxisDigits(int digits)
@@ -822,12 +711,6 @@ void AnnotationEventRouter::setLatLonAnnot(bool val)
 {
     AxisAnnotation *aa = _getCurrentAxisAnnotation();
     aa->SetLatLonAxesEnabled(val);
-}
-
-void AnnotationEventRouter::setDomainFrameEnabled()
-{
-    AnnotationParams *aParams = (AnnotationParams *)GetActiveParams();
-    aParams->SetUseDomainFrame(domainFrameCheckbox->isChecked());
 }
 
 void AnnotationEventRouter::setAxisAnnotation(bool toggled)

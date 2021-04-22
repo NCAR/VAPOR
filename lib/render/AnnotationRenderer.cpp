@@ -200,8 +200,6 @@ void AnnotationRenderer::_drawTimeAnnotation() {
     std::string timeText;
     auto type = params->GetValueLong(AnnotationParams::_timeTypeTag, 0);
 
-std::cout << "Foo " << type << std::endl;
-   
     if (type == 0) {
         ClearText(1);
     } 
@@ -222,11 +220,11 @@ std::cout << "Foo " << type << std::endl;
  
     billboard board;
     board.text = timeText; //params->GetValueString(AnnotationParams::_timeAnnotationTag, "");
-    board.x = params->GetValueDouble(AnnotationParams::_timeLLXTag, 0);
-    board.y = params->GetValueDouble(AnnotationParams::_timeLLYTag, 0);
-    board.xn = 0;
-    board.yn = 0;
-    board.size = params->GetValueDouble(AnnotationParams::_timeSizeTag, 16);
+    board.xn = params->GetValueDouble(AnnotationParams::_timeLLXTag, 0.01);
+    board.yn = params->GetValueDouble(AnnotationParams::_timeLLYTag, 0.01);
+    board.x = 0;
+    board.y = 0;
+    board.size = params->GetValueLong(AnnotationParams::_timeSizeTag, 24.);
     std::vector<double> color = params->GetValueDoubleVec(AnnotationParams::_timeColorTag, {1.0,1.0,1.0});
     board.color[0] = color[0];
     board.color[1] = color[1];
@@ -743,7 +741,8 @@ void AnnotationRenderer::renderText(double text, double coord[], AxisAnnotation 
     label.VerticalAlignment = TextLabel::Top;
     label.Padding = fontSize / 4.f;
     label.ForegroundColor = glm::vec4(axisColor[0], axisColor[1], axisColor[2], axisColor[3]);
-    label.BackgroundColor = glm::vec4(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
+    //label.BackgroundColor = glm::vec4(backgroundColor[0], backgroundColor[1], backgroundColor[2], backgroundColor[3]);
+    label.BackgroundColor = glm::vec4(backgroundColor[0], backgroundColor[1], backgroundColor[2], 1.);
     label.DrawText(glm::vec3(coord[0], coord[1], coord[2]), textString);
 }
 

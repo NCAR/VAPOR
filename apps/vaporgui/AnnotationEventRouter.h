@@ -35,6 +35,7 @@ class ControlExec;
 }
 
 class PGroup;
+class PSection;
 
 class AnnotationEventRouter : public QWidget, public Ui_AnnotationGUI, public EventRouter {
     Q_OBJECT
@@ -71,14 +72,7 @@ protected slots:
     void setYTicOrientation(int);
     void setZTicOrientation(int);
 
-    void setDomainColor();
-    void setRegionColor();
-    void setBackgroundColor();
-    void setDomainFrameEnabled();
-    void setTimeColor();
     void setLatLonAnnot(bool);
-    void timeAnnotationChanged();
-    void timeSizeChanged();
     void copyRegionFromRenderer();
 
 private:
@@ -97,12 +91,7 @@ private:
     AnnotationEventRouter() {}
 
     void setColorHelper(QWidget *w, vector<double> &rgb);
-
     void updateColorHelper(const vector<double> &rgb, QWidget *w);
-
-    void updateRegionColor();
-    void updateDomainColor();
-    void updateBackgroundColor();
 
     void updateAxisAnnotations();
     void updateAxisColor();
@@ -113,11 +102,6 @@ private:
     void updateCopyRegionCombo();
     void updateTicOrientationCombos();
     void addRendererToCombo(string, string, string, string);
-
-    void updateTimePanel();
-    void updateTimeColor();
-    void updateTimeType();
-    void updateTimeSize();
 
     void   updateDataMgrCombo();
     string getProjString();
@@ -140,15 +124,15 @@ private:
 
     virtual void _updateTab();
 
-    void drawTimeStamp();
-    void drawTimeUser();
-    void drawTimeStep(string text = "");
-
     AnimationParams *_ap;
     bool             _animConnected;
 
-    PGroup *_axisArrowGroup;
-    PGroup *_timeAnnotationGroup;
+    VaporTable* _annotationVaporTable2;
+
+    PGroup   *_axisAnnotationGroup;
+    PGroup   *_axisArrowGroup;
+    PGroup   *_timeAnnotationGroup;
+    PGroup   *_3DGeometryGroup;
 };
 
 #endif    // ANNOTATIONEVENTROUTER_H
