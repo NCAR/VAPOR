@@ -15,7 +15,7 @@ using pType = UInt32_tArr2;
 namespace VAPoR {
 
 //
-//! \class QuadTreeRectanglePP
+//! \class QuadTreeRectangleP
 //! \brief This class wraps QuadTreeRectangleP with parallel
 //! tree construction
 //!
@@ -65,8 +65,12 @@ public:
     //!
     bool Insert(const Grid *grid, size_t ncells = 0);
 
+    //! \copydoc QuadTreeRectangle::GetPayloadContained()
+    //
     void GetPayloadContained(float x, float y, std::vector<Size_tArr3> &payloads) const;
 
+    //! \copydoc QuadTreeRectangle::GetStats()
+    //
     void GetStats(std::vector<size_t> &payload_histo, std::vector<size_t> &level_histo) const;
 
     friend std::ostream &operator<<(std::ostream &os, const QuadTreeRectangleP &q)

@@ -92,6 +92,27 @@ OptionParser::Option_T get_options[] = {{"nts", Wasp::CvtToInt, &opt.nts, sizeof
 const char *ProgName;
 
 void ErrMsgCBHandler(const char *msg, int) { cerr << ProgName << " : " << msg << endl; }
+
+// Handle command line -nthreads argument so that pthreads and OpenMP threads
+// are treated consistently.
+//
+int get_num_ompthreads() {
+
+    int nthreads = 0;
+    #pragma omp parallel
+    {
+        // use all available threads
+        //
+        if (opt.nthreads < 1) {
+            nthreads = omp_get_num_threads(); 
+        }
+        else {
+            nthreads = opt.nthreads;
+        }
+    }
+	return(nthreads);
+}
+
 void print_info(DataMgr &datamgr, bool verbose)
 {
     vector<string> dimnames;
@@ -164,7 +185,7 @@ void test_get_value(Grid *g)
     size_t n = VProduct(g->GetDimensions());
 
     size_t ecount = 0;
-#pragma omp parallel
+#pragma omp parallel num_threads(get_num_ompthreads())
     {
         size_t my_ecount = 0;
         size_t my_count = 0;

@@ -517,7 +517,7 @@ VAPoR::UnstructuredGrid2D *MakeUnstructuredGrid2D(const vector<size_t> &dims, co
     vector<size_t>             edgeDims;
     UnstructuredGrid::Location location = UnstructuredGrid2D::Location::NODE;
     size_t                     maxVertexPerFace = 3;    // each cell is a triangle
-    size_t                     maxFacePerVertex = 6;    // each interior vertex defines 4 triangles
+    size_t                     maxFacePerVertex = 6;    // each interior vertex defines 6 triangles
     long                       vertexOffset = 0;
     long                       faceOffset = 0;
 

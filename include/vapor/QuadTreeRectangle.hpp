@@ -140,8 +140,6 @@ public:
         return *this;
     }
 
-    ~QuadTreeRectangle() { _nodes.clear(); }
-
     //! Insert an element into the tree
     //!
     //! This method inserts a payload, \p payload, into the tree contained

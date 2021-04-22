@@ -285,4 +285,13 @@ void QuadTreeRectangleP::GetStats(std::vector<size_t> &payload_histo, std::vecto
 {
     payload_histo.clear();
     level_histo.clear();
+
+    for (int i = 0; i < _qtrs.size(); i++) {
+        std::vector<size_t> p;
+        std::vector<size_t> l;
+
+        _qtrs[i]->GetStats(p,l);
+       payload_histo.insert(payload_histo.end(), p.begin(), p.end());
+       level_histo.insert(level_histo.end(), l.begin(), l.end());
+    }
 }
