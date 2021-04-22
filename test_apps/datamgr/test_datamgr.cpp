@@ -184,7 +184,7 @@ void test_get_value(Grid *g)
     size_t n = VProduct(g->GetDimensions());
 
     size_t ecount = 0;
-    int requested_num_threads = get_num_ompthreads();
+    int    requested_num_threads = get_num_ompthreads();
 #pragma omp parallel num_threads(requested_num_threads);
     {
         size_t my_ecount = 0;
