@@ -177,7 +177,7 @@ void AnnotationEventRouter::connectAnnotationWidgets()
     connect(_ticWidthCombo, SIGNAL(valueChanged(double)), this, SLOT(setAxisTicWidth(double)));
     connect(axisColorButton, SIGNAL(pressed()), this, SLOT(setAxisColor()));
     connect(axisBackgroundColorButton, SIGNAL(pressed()), this, SLOT(setAxisBackgroundColor()));
-    connect(_annotationVaporTable, SIGNAL(returnPressed()), this, SLOT(axisAnnotationTableChanged()));
+    connect(_annotationVaporTable, SIGNAL(valueChanged(int, int)), this, SLOT(axisAnnotationTableChanged()));
     connect(xTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setXTicOrientation(int)));
     connect(yTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setYTicOrientation(int)));
     connect(zTicOrientationCombo, SIGNAL(activated(int)), this, SLOT(setZTicOrientation(int)));

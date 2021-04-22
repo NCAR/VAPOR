@@ -45,6 +45,7 @@ VaporTable::VaporTable(QTableWidget *table, bool lastRowIsCheckboxes, bool lastC
     SetVerticalHeaderWidth(100);
 
     connect(_table, &QTableWidget::cellClicked, this, &VaporTable::emitCellClicked);
+    connect(_table, &QTableWidget::cellChanged, this, &VaporTable::emitValueChanged);
 }
 
 // Clear current table, then generate table of rows x columns
@@ -68,6 +69,7 @@ void VaporTable::Update(int rows, int cols, std::vector<double> values, std::vec
 
 void VaporTable::Update(int rows, int cols, std::vector<std::string> values, std::vector<std::string> rowHeaders, std::vector<std::string> colHeaders)
 {
+    _table->blockSignals(true);
     _table->clearContents();
     _table->setRowCount(rows);
     _table->setColumnCount(cols);
@@ -88,6 +90,7 @@ void VaporTable::Update(int rows, int cols, std::vector<std::string> values, std
     resizeTableHeight();
 
     if (_mutabilityFlags & IMMUTABLE) { _correctImmutableCellText(); }
+    _table->blockSignals(false);
 }
 
 void VaporTable::SetVerticalHeaderWidth(int width) { _table->verticalHeader()->setMaximumWidth(width); }
@@ -247,15 +250,12 @@ void VaporTable::addCheckbox(int row, int column, bool checked)
     connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(emitValueChanged()));
 }
 
-void VaporTable::emitValueChanged()
+void VaporTable::emitValueChanged(int row, int col)
 {
-    int        row, col;
     QCheckBox *item = qobject_cast<QCheckBox *>(QObject::sender());
     if (item != nullptr) {
         row = item->property("row").toInt();
         col = item->property("col").toInt();
-    } else {
-        return;
     }
 
     _activeRow = row;
@@ -454,6 +454,7 @@ void VaporTable::GetValues(std::vector<double> &vec)
 
 void VaporTable::_correctImmutableCellText()
 {
+    _table->blockSignals(true);
     for (int i = 0; i < _table->rowCount(); i++) {
         if ((i == _activeRow) && (_highlightFlags == ROWS)) { continue; }
         for (int j = 0; j < _table->columnCount(); j++) {
@@ -463,11 +464,13 @@ void VaporTable::_correctImmutableCellText()
             _table->item(i, j)->setBackground(w);
         }
     }
+    _table->blockSignals(false);
 }
 
 void VaporTable::highlightActiveRow(int row)
 {
     if (row < 0) return;
+    _table->blockSignals(true);
 
     for (int i = 0; i < _table->rowCount(); i++) {
         for (int j = 0; j < _table->columnCount(); j++) {
@@ -484,6 +487,7 @@ void VaporTable::highlightActiveRow(int row)
             }
         }
     }
+    _table->blockSignals(false);
 }
 
 int VaporTable::GetActiveRow() const { return _activeRow; }
