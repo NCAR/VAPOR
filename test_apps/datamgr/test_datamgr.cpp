@@ -96,21 +96,20 @@ void ErrMsgCBHandler(const char *msg, int) { cerr << ProgName << " : " << msg <<
 // Handle command line -nthreads argument so that pthreads and OpenMP threads
 // are treated consistently.
 //
-int get_num_ompthreads() {
-
+int get_num_ompthreads()
+{
     int nthreads = 0;
-    #pragma omp parallel
+#pragma omp parallel
     {
         // use all available threads
         //
         if (opt.nthreads < 1) {
-            nthreads = omp_get_num_threads(); 
-        }
-        else {
+            nthreads = omp_get_num_threads();
+        } else {
             nthreads = opt.nthreads;
         }
     }
-	return(nthreads);
+    return (nthreads);
 }
 
 void print_info(DataMgr &datamgr, bool verbose)
